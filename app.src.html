@@ -9990,7 +9990,7 @@ function printRideReceipt(ids){
   </head><body>
     <div class="mm-banner">
       <span class="mm-co" style="display:flex;align-items:center;gap:14px">
-        <img src="${new URL('logo.png',location.href).href}" alt="Micromobility">
+        <img src="${new URL('/logo.png',location.origin).href}" alt="Micromobility">
         <span><strong>Micromobility Co.</strong></span>
       </span>
       <span class="mm-doc"><strong>${t('receiptTitle')}</strong><span>${esc(ref)}</span></span>
@@ -17676,7 +17676,7 @@ function _reportShell(o){
   // tiles (dark "Collected" variant via .total-item.dark), dark table heads with
   // zebra rows, optional total chip (o.chip) and signature row, fixed footer.
   const ar=_isRtl();
-  const logoUrl=new URL('logo.png',location.href).href; // white wordmark for the dark banner
+  const logoUrl=new URL('/logo.png',location.origin).href; // white wordmark for the dark banner
   const now=new Date();
   const refNo=o.refNo||('MM-RPT-'+now.toLocaleDateString('en-CA',{timeZone:KSA_TZ}).slice(2).replace(/-/g,''));
   const op=_opName();
@@ -25811,7 +25811,7 @@ function _ctPrintReceipt(rows,cust,at){
   if(!rows||!rows.length)return;
   rows=rows.filter(r=>r.category!=='__cardmeta__'); // drop payment-split metadata from the printed receipt
   const ar=_isRtl();
-  const logoUrl=new URL('logo.png',location.href).href;
+  const logoUrl=new URL('/logo.png',location.origin).href;
   const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
   const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td style="text-align:center">${esc(r.qty)}</td><td style="text-align:end">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</td></tr>`).join('');

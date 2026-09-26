@@ -47,6 +47,9 @@ test.describe('the three lists of addresses agree', () => {
     expect(html).not.toMatch(/(?:href|src)="\.\//);
     expect(html).toContain('href="/styles.css?v=');
     expect(html).toMatch(/register\(["']\/service-worker\.js["']\)/); // the minifier picks the quotes
+    // Addresses built at run time too: the printed reports' logo used to be new URL('logo.png', location.href),
+    // which from /bookings/riders asked for /bookings/logo.png.
+    expect(html).not.toMatch(/new URL\(["'][a-z][^"']*["'],\s*location/);
   });
 });
 
