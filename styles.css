@@ -5241,3 +5241,49 @@ body.view-staff .bd-sm-only{display:none;}
   body.view-staff .bd-wish-lbl{display:none;}
   body.view-staff .bd-wish-ic{opacity:.6;font-size:14px;}
 }
+
+/* Bikes catalog editor (2026-09-27): the Website section's look, plus what the catalogue needs -
+   a tree of categories, a photo grid and the specification rows. */
+body.view-staff .cat-pills{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;}
+body.view-staff .cat-pills .num{opacity:.7;font-weight:600;}
+body.view-staff .cat-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:space-between;margin-bottom:10px;}
+body.view-staff .cat-thumb{width:56px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--sf-line2);background:var(--sf-head);display:block;}
+body.view-staff .cat-thumb-empty{width:56px;height:40px;border-radius:6px;border:1px dashed var(--sf-line2);display:block;}
+body.view-staff .cat-slug{color:var(--muted);font-size:12px;direction:ltr;unicode-bidi:isolate;word-break:break-all;}
+body.view-staff .cat-pub{border-radius:999px;font-size:11.5px;font-weight:700;padding:4px 10px;border:1px solid var(--sf-line2);background:none;cursor:pointer;color:var(--muted);font-family:inherit;}
+body.view-staff .cat-pub.on{background:rgba(var(--green-rgb),.12);border-color:var(--green);color:var(--green);}
+body.view-staff .cat-tools{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center;}
+body.view-staff .cat-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;}
+body.view-staff .cat-grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px 10px;}
+body.view-staff .cat-grid2 .web-ed-field+.web-ed-field,body.view-staff .cat-grid4 .web-ed-field+.web-ed-field{margin-top:0;}
+body.view-staff #cat-editor .web-ed-field{margin-top:10px;}
+body.view-staff #cat-editor select,body.view-staff #cat-editor input[type="number"]{width:100%;min-width:0;box-sizing:border-box;}
+body.view-staff .cat-spec-group{margin:10px 0 2px;font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
+:is(html[lang="ar"],html[lang="ur"]) body.view-staff .cat-spec-group{letter-spacing:0;text-transform:none;font-size:12px;}
+body.view-staff .cat-spec{display:grid;grid-template-columns:minmax(120px,180px) 1fr 1fr;gap:8px;align-items:center;padding:4px 0;}
+body.view-staff .cat-spec-lbl{font-size:13px;font-weight:600;}
+body.view-staff .cat-spec-lbl small{color:var(--muted);font-weight:500;}
+body.view-staff .cat-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:6px 0;}
+body.view-staff .cat-row input[type="text"]{flex:1;min-width:120px;}
+body.view-staff .cat-row input[type="color"]{width:40px;height:38px;min-height:0;padding:2px;border-radius:6px;flex:none;}
+body.view-staff .cat-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin:8px 0;}
+body.view-staff .cat-photo{border:1px solid var(--sf-line2);border-radius:8px;padding:8px;background:var(--sf-zebra);display:flex;flex-direction:column;gap:6px;}
+body.view-staff .cat-photo img{width:100%;height:130px;object-fit:cover;border-radius:6px;background:var(--sf-head);}
+body.view-staff .cat-photo.cover{border-color:var(--green);box-shadow:0 0 0 1px var(--green);}
+body.view-staff .cat-photo-tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:space-between;}
+body.view-staff .cat-photo-tools select{flex:1;min-width:0;}
+body.view-staff .cat-photo input[type="text"]{width:100%;min-width:0;box-sizing:border-box;}
+body.view-staff .cat-tree{list-style:none;margin:0;padding:0;}
+body.view-staff .cat-tree li{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--sf-sep);}
+body.view-staff .cat-tree li.sub{padding-inline-start:28px;}
+body.view-staff .cat-tree li:last-child{border-bottom:0;}
+body.view-staff .cat-tree .cat-tools{margin-inline-start:auto;}
+body.view-staff .cat-tree .web-ed-item{flex:1;}
+body.view-staff .cat-err{color:var(--red);font-size:13px;font-weight:600;margin-top:8px;}
+body.view-staff .cat-err[hidden]{display:none;}
+@media(max-width:767px){
+  body.view-staff .cat-grid2,body.view-staff .cat-grid4{grid-template-columns:1fr;}
+  body.view-staff .cat-spec{grid-template-columns:1fr;gap:4px;}
+  body.view-staff .cat-tree .cat-tools{margin-inline-start:0;width:100%;}
+  body.view-staff .cat-bar>*{width:100%;}
+}

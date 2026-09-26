@@ -324,6 +324,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="ambassadors" onclick="setStaffTab('ambassadors')"><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
     <span class="snav-group" data-group="snavWebsite" aria-hidden="true">Website</span>
     <button class="tab-btn"        data-stab="website"   onclick="setStaffTab('website')"><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">micromobility.sa</span></button>
+    <button class="tab-btn"        data-stab="catalog"   onclick="setStaffTab('catalog')"><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bikes catalog</span></button>
     <button class="tab-btn"        data-stab="messages"  onclick="setStaffTab('messages')"><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Messages</span></button>
     <span class="snav-group" data-group="snavInsights" aria-hidden="true">Insights</span>
     <button class="tab-btn"        data-stab="analytics" onclick="setStaffTab('analytics')"><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Analytics</span></button>
@@ -340,6 +341,7 @@ window.mmLoading=(function(){
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-website"   class="tab-panel"></div>
+    <div id="tab-catalog"   class="tab-panel"></div>
     <div id="tab-workshop"  class="tab-panel"></div>
     <div id="tab-messages"  class="tab-panel"></div>
     <div id="tab-ambassadors" class="tab-panel"></div>
@@ -823,7 +825,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   receiptBtn:'Receipt',receiptPrintBtn:'Print / Save as PDF',receiptRefLabel:'Booking ref',receiptDateLabel:'Issued',receiptPaidLabel:'Payment',
   typeRoad:'Road',typeHybrid:'Hybrid',typeMountain:'Mountain',typeGravel:'Gravel',typeKids:'Kids',typeAny:'Any',typeRoadCarbon:'Road Carbon',typeOwn:'Bike owner',typeNone:'No bike',ridersNoBikeFree:'checked in without a bike - none free that fits',typeOwnPref:'I have my own bike',
   
-  liveLabel:'Live',bpSvcSince:'Rides since service',bpMarkServiced:'Mark serviced',bpLastServiced:'Last serviced',attnTitle:'Bikes needing attention',attnInMaint:'In maintenance',attnDue:'Service due · {0} rides',attnNever:'Never serviced',attnLow:'Low rating {0}/10',attnHide:'Hide',sendWorkshop:'Send to workshop',svcRecent:'Recent service log',svcKindService:'Serviced',svcKindWorkshop:'Sent to workshop',svcEveryN:'Service every {0} rides',gsOpenBtn:'Search',gsPh:'Search bookings, accounts, bikes…',gsNone:'Nothing found.',gsMin:'Type two or more letters or digits.',gsKindBooking:'Booking',gsKindAccount:'Account',gsKindBike:'Bike',gsKindItem:'Item',gsKindSession:'Session',gsKindWorkshop:'Workshop',ntOpen:'Notifications',ntMarkRead:'Mark all read',ntEmpty:'Nothing needs attention.',ntLong:'Rides past 2 hours: {0}',ntApps:'Membership applications waiting: {0}',ntMsgs:'New website messages: {0}',ntWs:'New workshop requests: {0}',ntAttn:'Bikes needing attention: {0}',ntStock:'Items low on stock: {0}',syncNowBtn:'Sync now',syncingLbl:'Syncing…',syncDone:'Up to date',syncLeft:'Changes still waiting to sync: {0}',tbMore:'More',daySheetBtn:'Print day sheet',daySheetTitle:'Day sheet',daySheetNone:'No session today.',daySheetRiders:'Riders',daySheetWs:'Workshop today',logPrintedDaySheet:'Printed the day sheet',tabTeam:'Team',teamPageSub:'Who works the desk: operator PINs, and what each sign-in account can open and change.',opsTitle:'Operators',opsSub:'The names at the operator gate. A name with a PIN asks for it.',opsPinSet:'PIN set',opsPinNone:'No PIN',opsSetPin:'Set PIN',opsClearPin:'Clear PIN',opsPinPrompt:'New 4-digit PIN for {0}',opsPinBad:'A PIN is 4 digits.',opsPinSaved:'PIN saved for {0}',opsPinCleared:'PIN cleared for {0}',opsAdd:'Add name',opsAddPh:'Name',acctTitle:'Sign-in accounts',acctSub:'Each account\'s role, and the sections it can open and change. Nobody changes their own.',acctYou:'You',acctView:'Can open',acctEdit:'Can change',acctSaved:'Access saved for {0}',dbPending:'Waiting for the database update.',opSwitch:'Switch operator',opPinTitle:'PIN for {0}',opPinWrong:'Wrong PIN. {0} tries left.',opPinLocked:'Too many tries. Wait {0} seconds.',roMode:'Read-only mode: no changes allowed',dashActivity:'Recent activity',dashQuick:'Quick actions',dashNoActivity:'Nothing logged yet today.',dashCollected:'Collected today',dashBookedToday:'Riders today',dashDoneToday:'Rides done today',dashSessionsToday:'Today\'s sessions',dashCheckinNext:'Check in next',calViewList:'List',calViewCal:'Calendar',calPrev:'Previous month',calNext:'Next month',calToday:'Today',calWs:'{0} workshop',calNewOn:'New session on {0}',errAddonsNotSaved:'Your booking is made, but the add-ons were not saved. Add them from My Bookings.',bkExportedToast:'{0} bike(s) exported',errTooManyTries:'Too many tries from this network. Please wait a few minutes and try again.',errPaidTypeDesk:'This booking is already paid. To change to a bike that costs more, ask at the booth.',addonHandedOver:'Add-ons already handed over cannot be removed here. Ask at the booth.',teamPinKept:'Only an admin can remove a name that has a PIN: {0}',acctOneSection:'Pick at least one section this account can open.',acctNoneOpen:'This account has no sections to open. Ask an admin to give it access on the Team page.',anPieces:'{0} pcs',drawerCountBtn:'Count the drawer',drawerCountTitle:'Drawer count',drawerCountBody:'Expected cash for this day: SAR {0}. Enter what the drawer actually holds:',drawerExpected:'expected',drawerCounted:'counted',drawerExactToast:'Drawer matches — recorded',drawerDiffToast:'Recorded — drawer is off by {0}',cnBtn:'Cancel the night',cnTitle:'Cancel the night',cnSub:'{0} live booking(s). Tell the riders first — then cancel. To MOVE the whole night, edit the session\u2019s date instead: bookings follow it.',cnMsgLabel:'Message to riders',cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.',cnCopyNumbers:'Copy all numbers',cnCopiedToast:'Numbers copied',cnConfirmBtn:'Cancel {0} booking(s)',cnDoneToast:'Night cancelled — {0} booking(s) cancelled, riders keep their history',wxTip:'Forecast: {0}\u00b0C high, wind up to {1} km/h',noShowHistChip:'{0}/{1} no-shows',noShowHistTip:'No-shows across this rider\u2019s last five decided bookings',bulkApproveBtn:'Approve all ({0})',bulkApproveTitle:'Approve every pending request',bulkApproveBody:'{0} pending request(s) will be approved. Waitlisted requests are left for you to pick individually. Riders see nothing until you publish.',bulkApprovedToast:'{0} request(s) approved',ciPrev:'Previous',ciNext:'Next',ciChainLabel:'Riders to check in',ciStepOf:'Rider {0} of {1}',ciPartyLabel:'Riders in this party',dupPhoneTip:'This phone number is on another live booking in this session',statSarDue:'SAR due',overdueRideTip:'On the bike for over two hours',fleetStripLbl:'Bikes free',wiStockHint:'{0} {1} free on the rack',wiNoStockHint:'No {0} left on the rack — riders on the waitlist may be counting on returns.',moreActionsLbl:'More actions',closeOutBtn:'Close out',closeOutHint:'Finish the night: checked-in riders become Completed, no-arrivals become No-show.',closeOutTitle:'Close out the night',closeOutBody:'{0} checked-in rider(s) will be marked Completed and {1} who never arrived will be marked No-show. Waitlisted riders are not touched. This can be undone from the bar at the top.',closeOutDoneToast:'Night closed out — {0} completed, {1} no-shows',closeOutBikes:'{0} bike(s) will be returned.',bookSyncPending:'Your booking has not reached the booth yet — it will keep trying while the app is open.',bookSyncRefused:'Your booking could not be sent. Please show this phone at the booth.',updateReadyToast:'A new version is ready — refresh the page to update.',justNow:'just now',secondsAgo:'s ago',minutesAgo:'m ago',offlineLabel:'Offline',offlineBanner:'You are offline - changes are saved and will sync when the connection returns.',unreachableBanner:'Connected to wifi but the server is not reachable - you may need to sign in to this network.',retryBtn:'Try again',errWritePerm:'That did not save - your staff session may have expired. Unlock again and retry.',errWriteDup:'That booking number was just taken by another device. Reload and try again.',
+  liveLabel:'Live',bpSvcSince:'Rides since service',bpMarkServiced:'Mark serviced',bpLastServiced:'Last serviced',attnTitle:'Bikes needing attention',attnInMaint:'In maintenance',attnDue:'Service due · {0} rides',attnNever:'Never serviced',attnLow:'Low rating {0}/10',attnHide:'Hide',sendWorkshop:'Send to workshop',svcRecent:'Recent service log',svcKindService:'Serviced',svcKindWorkshop:'Sent to workshop',svcEveryN:'Service every {0} rides',gsOpenBtn:'Search',gsPh:'Search bookings, accounts, bikes…',gsNone:'Nothing found.',gsMin:'Type two or more letters or digits.',gsKindBooking:'Booking',gsKindAccount:'Account',gsKindBike:'Bike',gsKindItem:'Item',gsKindSession:'Session',gsKindWorkshop:'Workshop',ntOpen:'Notifications',ntMarkRead:'Mark all read',ntEmpty:'Nothing needs attention.',ntLong:'Rides past 2 hours: {0}',ntApps:'Membership applications waiting: {0}',ntMsgs:'New website messages: {0}',ntWs:'New workshop requests: {0}',ntAttn:'Bikes needing attention: {0}',ntStock:'Items low on stock: {0}',syncNowBtn:'Sync now',syncingLbl:'Syncing…',syncDone:'Up to date',syncLeft:'Changes still waiting to sync: {0}',tbMore:'More',daySheetBtn:'Print day sheet',daySheetTitle:'Day sheet',daySheetNone:'No session today.',daySheetRiders:'Riders',daySheetWs:'Workshop today',logPrintedDaySheet:'Printed the day sheet',tabTeam:'Team',tabCatalog:'Bikes catalog',catSub:'What micromobility.sa/bikes shows: the categories, their sub-types, and every model with its specifications, colours and photos. A model shows on the site once it is published.',catOpenSite:'Open /bikes',catViewModels:'Models',catViewCats:'Categories',catViewFields:'Specification fields',catAddModel:'+ Add model',catAddCat:'+ Add category',catAddSub:'+ Add sub-type',catAddField:'+ Add field',catSearchPh:'Search brand or model',catNoMatch:'Nothing matches.',catColModel:'Model',catColCategory:'Category',catColRide:'Rides as',catColPhotos:'Photos',catColPublished:'On the site',catColUpdated:'Updated',catEmptyModels:'No models yet. Add the first one.',catNoCats:'Add a category first: every model belongs to one.',catBrand:'Brand',catName:'Model name',catSlug:'Address',catSlugHint:'The model’s address on the site: {0}. Lowercase letters, digits and hyphens.',catCategory:'Category',catSubtype:'Sub-type',catNoSubtype:'None',catYear:'Model year',catRideType:'Rides as',catRideTypeHint:'The rental bike type it counts as; it sets the ride price shown beside Book a ride. Leave it empty for a bike that is not rented.',catRideNone:'Not rented',catTagline:'Tagline',catDescription:'Description',catDescHint:'Plain text. A blank line starts a new paragraph.',catSpecs:'Specifications',catSpecsHint:'An empty field is not shown. The Arabic box may stay empty: the site then shows the English.',catColours:'Colours',catColourName:'Colour name',catColourHex:'Swatch',catAddColour:'+ Add colour',catPhotos:'Photos',catPhotosHint:'The cover is the photo shown in lists. A photo given a colour is shown when a visitor picks that colour; the others show for every colour.',catUploadPhotos:'Upload photos',catPhotoColour:'Colour',catAnyColour:'Every colour',catCover:'Cover',catAlt:'Description for screen readers',catSheet:'Spec sheet (PDF)',catUploadSheet:'Upload PDF',catPublished:'Published on the site',catPublishedShort:'Published',catDraft:'Draft',catHidden:'Hidden',catDeleteModelTitle:'Delete this model?',catDeleteModelBody:'Its photos, colours and specifications go with it, and the site stops showing it at once.',catDeleteCatTitle:'Delete this category?',catDeleteCatBody:'Only an empty one can go: its models and sub-types must be moved or deleted first.',catDeleteFieldTitle:'Delete this field?',catDeleteFieldBody:'Models keep the value they had; the site simply stops showing it.',catSaved:'Saved',catDeleted:'Deleted',catSaveErr:'Could not save. Try again.',catLoadErr:'Could not load the catalogue. Check your connection and try again.',catUploading:'Uploading…',catUploaded:'Uploaded',catUploadErr:'The upload failed. Try again.',catUploadType:'Photos only: JPEG, PNG, WebP or AVIF.',catUploadPdfType:'A PDF file only.',catUploadBig:'That file is too big: 10 MB at most.',catErrName:'Give the model a name.',catErrCategory:'Pick a category.',catErrSlug:'The address may only have lowercase letters, digits and hyphens, and it starts with a letter.',catErrSlugTaken:'Another model already uses this address.',catErrColour:'Every colour needs a name.',catCatName:'Name',catCatSlug:'Address',catCatBlurb:'Short description',catCatCover:'Cover photo',catCatPublished:'Shown on the site',catCatModels:'{0} models',catCatSubs:'{0} sub-types',catCatEmpty:'No categories yet.',catCatsSub:'Categories are the first level under /bikes; each can hold sub-types. A model belongs to one category and, if you like, one of its sub-types.',catErrCatName:'Give it a name.',catErrCatTaken:'Another one at this level already uses this address.',catCatInUse:'It still has models or sub-types. Move or delete them first.',catFieldKey:'Key',catFieldKeyHint:'How the value is stored: lowercase letters, digits and underscores. It cannot change later.',catFieldLabel:'Label',catFieldGroup:'Group',catFieldUnit:'Unit',catFieldSort:'Order',catFieldUsed:'Used by',catFieldsSub:'The specifications a model can carry, with their labels in English and Arabic. Every model offers these boxes; the site shows the ones that are filled in, grouped and in this order.',catErrFieldKey:'The key may only have lowercase letters, digits and underscores, and it starts with a letter.',catErrFieldLabel:'Give the field a label.',catErrFieldTaken:'A field with this key already exists.',catFieldsEmpty:'No fields yet.',catPreview:'View on the site',catUnsaved:'You have unsaved changes. Leave without saving?',teamPageSub:'Who works the desk: operator PINs, and what each sign-in account can open and change.',opsTitle:'Operators',opsSub:'The names at the operator gate. A name with a PIN asks for it.',opsPinSet:'PIN set',opsPinNone:'No PIN',opsSetPin:'Set PIN',opsClearPin:'Clear PIN',opsPinPrompt:'New 4-digit PIN for {0}',opsPinBad:'A PIN is 4 digits.',opsPinSaved:'PIN saved for {0}',opsPinCleared:'PIN cleared for {0}',opsAdd:'Add name',opsAddPh:'Name',acctTitle:'Sign-in accounts',acctSub:'Each account\'s role, and the sections it can open and change. Nobody changes their own.',acctYou:'You',acctView:'Can open',acctEdit:'Can change',acctSaved:'Access saved for {0}',dbPending:'Waiting for the database update.',opSwitch:'Switch operator',opPinTitle:'PIN for {0}',opPinWrong:'Wrong PIN. {0} tries left.',opPinLocked:'Too many tries. Wait {0} seconds.',roMode:'Read-only mode: no changes allowed',dashActivity:'Recent activity',dashQuick:'Quick actions',dashNoActivity:'Nothing logged yet today.',dashCollected:'Collected today',dashBookedToday:'Riders today',dashDoneToday:'Rides done today',dashSessionsToday:'Today\'s sessions',dashCheckinNext:'Check in next',calViewList:'List',calViewCal:'Calendar',calPrev:'Previous month',calNext:'Next month',calToday:'Today',calWs:'{0} workshop',calNewOn:'New session on {0}',errAddonsNotSaved:'Your booking is made, but the add-ons were not saved. Add them from My Bookings.',bkExportedToast:'{0} bike(s) exported',errTooManyTries:'Too many tries from this network. Please wait a few minutes and try again.',errPaidTypeDesk:'This booking is already paid. To change to a bike that costs more, ask at the booth.',addonHandedOver:'Add-ons already handed over cannot be removed here. Ask at the booth.',teamPinKept:'Only an admin can remove a name that has a PIN: {0}',acctOneSection:'Pick at least one section this account can open.',acctNoneOpen:'This account has no sections to open. Ask an admin to give it access on the Team page.',anPieces:'{0} pcs',drawerCountBtn:'Count the drawer',drawerCountTitle:'Drawer count',drawerCountBody:'Expected cash for this day: SAR {0}. Enter what the drawer actually holds:',drawerExpected:'expected',drawerCounted:'counted',drawerExactToast:'Drawer matches — recorded',drawerDiffToast:'Recorded — drawer is off by {0}',cnBtn:'Cancel the night',cnTitle:'Cancel the night',cnSub:'{0} live booking(s). Tell the riders first — then cancel. To MOVE the whole night, edit the session\u2019s date instead: bookings follow it.',cnMsgLabel:'Message to riders',cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.',cnCopyNumbers:'Copy all numbers',cnCopiedToast:'Numbers copied',cnConfirmBtn:'Cancel {0} booking(s)',cnDoneToast:'Night cancelled — {0} booking(s) cancelled, riders keep their history',wxTip:'Forecast: {0}\u00b0C high, wind up to {1} km/h',noShowHistChip:'{0}/{1} no-shows',noShowHistTip:'No-shows across this rider\u2019s last five decided bookings',bulkApproveBtn:'Approve all ({0})',bulkApproveTitle:'Approve every pending request',bulkApproveBody:'{0} pending request(s) will be approved. Waitlisted requests are left for you to pick individually. Riders see nothing until you publish.',bulkApprovedToast:'{0} request(s) approved',ciPrev:'Previous',ciNext:'Next',ciChainLabel:'Riders to check in',ciStepOf:'Rider {0} of {1}',ciPartyLabel:'Riders in this party',dupPhoneTip:'This phone number is on another live booking in this session',statSarDue:'SAR due',overdueRideTip:'On the bike for over two hours',fleetStripLbl:'Bikes free',wiStockHint:'{0} {1} free on the rack',wiNoStockHint:'No {0} left on the rack — riders on the waitlist may be counting on returns.',moreActionsLbl:'More actions',closeOutBtn:'Close out',closeOutHint:'Finish the night: checked-in riders become Completed, no-arrivals become No-show.',closeOutTitle:'Close out the night',closeOutBody:'{0} checked-in rider(s) will be marked Completed and {1} who never arrived will be marked No-show. Waitlisted riders are not touched. This can be undone from the bar at the top.',closeOutDoneToast:'Night closed out — {0} completed, {1} no-shows',closeOutBikes:'{0} bike(s) will be returned.',bookSyncPending:'Your booking has not reached the booth yet — it will keep trying while the app is open.',bookSyncRefused:'Your booking could not be sent. Please show this phone at the booth.',updateReadyToast:'A new version is ready — refresh the page to update.',justNow:'just now',secondsAgo:'s ago',minutesAgo:'m ago',offlineLabel:'Offline',offlineBanner:'You are offline - changes are saved and will sync when the connection returns.',unreachableBanner:'Connected to wifi but the server is not reachable - you may need to sign in to this network.',retryBtn:'Try again',errWritePerm:'That did not save - your staff session may have expired. Unlock again and retry.',errWriteDup:'That booking number was just taken by another device. Reload and try again.',
   selectSessionPrompt:'Select a session above',selectSessionSub:'Click a session chip to view and manage its queue independently.',
   undoBtn:'Undo',undoneMsg:'Undone.',undoFailed:'Undo failed.',errStorageFull:'Device storage is full — free some space; unsynced sales/bookings may not be saved.',errStockWrite:'Stock for {0} was not saved — the count on screen has been put back.',themeLight:'Sunlight mode',themeDark:'Night mode',
   fleetBadge:'Fleet',altBadge:'Alt',
@@ -1238,7 +1240,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   receiptSeeYou:'نأمل رؤيتك في حلبة الكورنيش مجدداً!',
   receiptBtn:'الإيصال',receiptPrintBtn:'طباعة / حفظ PDF',receiptRefLabel:'رقم الحجز',receiptDateLabel:'تاريخ الإصدار',receiptPaidLabel:'الدفع',
   typeRoad:'طريق',typeHybrid:'هجين',typeMountain:'جبلي',typeGravel:'حصى',typeKids:'أطفال',typeAny:'أي نوع',typeRoadCarbon:'طريق كربون',typeOwn:'صاحب دراجة',typeNone:'بدون دراجة',ridersNoBikeFree:'سُجّل وصوله بدون دراجة - لا توجد دراجة مناسبة متاحة',typeOwnPref:'لدي دراجتي الخاصة',
-  liveLabel:'مباشر',bpSvcSince:'رحلات منذ الصيانة',bpMarkServiced:'تسجيل صيانة',bpLastServiced:'آخر صيانة',attnTitle:'دراجات تحتاج انتباهاً',attnInMaint:'في الصيانة',attnDue:'موعد الصيانة · {0} رحلة',attnNever:'لم تُصان بعد',attnLow:'تقييم منخفض {0}/10',attnHide:'إخفاء',sendWorkshop:'إلى الورشة',svcRecent:'آخر سجلات الصيانة',svcKindService:'صيانة',svcKindWorkshop:'أُرسلت للورشة',svcEveryN:'صيانة كل {0} رحلة',gsOpenBtn:'بحث',gsPh:'ابحث في الحجوزات والحسابات والدراجات…',gsNone:'لا نتائج.',gsMin:'اكتب حرفين أو رقمين على الأقل.',gsKindBooking:'حجز',gsKindAccount:'حساب',gsKindBike:'دراجة',gsKindItem:'صنف',gsKindSession:'جلسة',gsKindWorkshop:'الورشة',ntOpen:'الإشعارات',ntMarkRead:'تعليم الكل كمقروء',ntEmpty:'لا شيء يحتاج انتباهاً.',ntLong:'رحلات تجاوزت ساعتين: {0}',ntApps:'طلبات عضوية بانتظار الرد: {0}',ntMsgs:'رسائل جديدة من الموقع: {0}',ntWs:'طلبات ورشة جديدة: {0}',ntAttn:'دراجات تحتاج انتباهاً: {0}',ntStock:'أصناف منخفضة المخزون: {0}',syncNowBtn:'زامن الآن',syncingLbl:'جارٍ المزامنة…',syncDone:'كل شيء محدّث',syncLeft:'تغييرات بانتظار المزامنة: {0}',tbMore:'المزيد',daySheetBtn:'طباعة كشف اليوم',daySheetTitle:'كشف اليوم',daySheetNone:'لا جلسة اليوم.',daySheetRiders:'الراكبون',daySheetWs:'الورشة اليوم',logPrintedDaySheet:'طُبع كشف اليوم',tabTeam:'الفريق',teamPageSub:'من يعمل على المكتب: الأرقام السرية للمشغّلين، وما يستطيع كل حساب فتحه وتعديله.',opsTitle:'المشغّلون',opsSub:'الأسماء في شاشة المشغّل. الاسم الذي له رقم سري يطلبه.',opsPinSet:'له رقم سري',opsPinNone:'بلا رقم سري',opsSetPin:'تعيين الرقم السري',opsClearPin:'حذف الرقم السري',opsPinPrompt:'رقم سري جديد من 4 أرقام لـ {0}',opsPinBad:'الرقم السري 4 أرقام.',opsPinSaved:'حُفظ الرقم السري لـ {0}',opsPinCleared:'حُذف الرقم السري لـ {0}',opsAdd:'إضافة اسم',opsAddPh:'الاسم',acctTitle:'حسابات الدخول',acctSub:'دور كل حساب، والأقسام التي يستطيع فتحها وتعديلها. لا أحد يغيّر حسابه بنفسه.',acctYou:'أنت',acctView:'يستطيع فتح',acctEdit:'يستطيع تعديل',acctSaved:'حُفظت الصلاحيات لـ {0}',dbPending:'بانتظار تحديث قاعدة البيانات.',opSwitch:'تبديل المشغّل',opPinTitle:'الرقم السري لـ {0}',opPinWrong:'رقم سري خاطئ. تبقّت {0} محاولات.',opPinLocked:'محاولات كثيرة. انتظر {0} ثانية.',roMode:'وضع القراءة فقط: لا يمكن التعديل',dashActivity:'آخر النشاطات',dashQuick:'إجراءات سريعة',dashNoActivity:'لا شيء مسجل اليوم بعد.',dashCollected:'المُحصّل اليوم',dashBookedToday:'راكبو اليوم',dashDoneToday:'رحلات منتهية اليوم',dashSessionsToday:'جلسات اليوم',dashCheckinNext:'تسجيل دخول التالي',calViewList:'قائمة',calViewCal:'تقويم',calPrev:'الشهر السابق',calNext:'الشهر التالي',calToday:'اليوم',calWs:'{0} ورشة',calNewOn:'جلسة جديدة في {0}',errAddonsNotSaved:'تم الحجز، لكن الإضافات لم تُحفظ. أضفها من حجوزاتي.',bkExportedToast:'تم تصدير {0} دراجة',errTooManyTries:'محاولات كثيرة من هذه الشبكة. انتظر بضع دقائق ثم حاول مجدداً.',errPaidTypeDesk:'هذا الحجز مدفوع. لتغييره إلى دراجة أغلى، اسأل عند الكشك.',addonHandedOver:'لا يمكن حذف الإضافات التي سُلّمت من هنا. اسأل عند الكشك.',teamPinKept:'لا يحذف الاسم الذي له رقم سري إلا المدير: {0}',acctOneSection:'اختر قسماً واحداً على الأقل يستطيع هذا الحساب فتحه.',acctNoneOpen:'لا توجد أقسام يستطيع هذا الحساب فتحها. اطلب من المدير منحه الصلاحية من صفحة الفريق.',anPieces:'{0} قطع',drawerCountBtn:'جرد الدرج',drawerCountTitle:'جرد الدرج',drawerCountBody:'النقد المتوقع لهذا اليوم: {0} ريال. أدخل ما في الدرج فعلياً:',drawerExpected:'المتوقع',drawerCounted:'المعدود',drawerExactToast:'الدرج مطابق — تم التسجيل',drawerDiffToast:'تم التسجيل — فرق الدرج {0}',cnBtn:'إلغاء الليلة',cnTitle:'إلغاء الليلة',cnSub:'{0} حجز قائم. أبلغ المشاركين أولاً ثم ألغِ. لنقل الليلة كاملة عدّل تاريخ الجلسة بدلاً من ذلك — الحجوزات تتبعه.',cnMsgLabel:'رسالة للمشاركين',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.',cnCopyNumbers:'نسخ جميع الأرقام',cnCopiedToast:'تم نسخ الأرقام',cnConfirmBtn:'إلغاء {0} حجز',cnDoneToast:'أُلغيت الليلة — {0} حجز أُلغي مع بقاء السجل',wxTip:'التوقعات: {0} درجة عظمى، رياح حتى {1} كم/س',noShowHistChip:'{0}/{1} غياب',noShowHistTip:'مرات الغياب في آخر خمسة حجوزات محسومة لهذا الراكب',bulkApproveBtn:'الموافقة على الكل ({0})',bulkApproveTitle:'الموافقة على جميع الطلبات المعلقة',bulkApproveBody:'سيتم قبول {0} من الطلبات المعلقة. تُترك طلبات قائمة الانتظار لتختارها بنفسك. لن يرى المشاركون شيئاً حتى تنشر النتائج.',bulkApprovedToast:'تمت الموافقة على {0} من الطلبات',ciPrev:'السابق',ciNext:'التالي',ciChainLabel:'الراكبون بانتظار تسجيل الحضور',ciStepOf:'الراكب {0} من {1}',ciPartyLabel:'ركّاب هذه المجموعة',dupPhoneTip:'رقم الجوال هذا موجود في حجز آخر قائم في هذه الجلسة',statSarDue:'ريال مستحق',overdueRideTip:'على الدراجة منذ أكثر من ساعتين',fleetStripLbl:'الدراجات المتاحة',wiStockHint:'{0} {1} متاحة على الرف',wiNoStockHint:'لا يوجد {0} متبقٍ على الرف — قد يعتمد منتظرو القائمة على المرتجعات.',moreActionsLbl:'مزيد من الإجراءات',closeOutBtn:'إنهاء الليلة',closeOutHint:'إنهاء الليلة: من سجّل حضوره يُعتبر مكتملاً، ومن لم يحضر يُسجّل كغياب.',closeOutTitle:'إنهاء الليلة',closeOutBody:'سيتم تسجيل {0} من الحاضرين كمكتملين و{1} ممن لم يحضروا كغياب. لن يتم المساس بقائمة الانتظار. يمكن التراجع من الشريط في الأعلى.',closeOutDoneToast:'تم إنهاء الليلة — {0} مكتمل، {1} غياب',closeOutBikes:'سيتم إرجاع {0} دراجة.',bookSyncPending:'لم يصل حجزك إلى الكشك بعد — سيستمر بالمحاولة ما دام التطبيق مفتوحاً.',bookSyncRefused:'تعذّر إرسال حجزك. يرجى إظهار هذا الهاتف عند الكشك.',updateReadyToast:'يتوفر إصدار جديد — حدّث الصفحة للتحديث.',justNow:'الآن',secondsAgo:'ث مضت',minutesAgo:'د مضت',offlineLabel:'غير متصل',offlineBanner:'أنت غير متصل - يتم حفظ التغييرات وستتم المزامنة عند عودة الاتصال.',unreachableBanner:'متصل بالشبكة لكن تعذّر الوصول إلى الخادم - قد تحتاج إلى تسجيل الدخول إلى هذه الشبكة.',retryBtn:'إعادة المحاولة',errWritePerm:'لم يتم الحفظ - ربما انتهت جلسة الموظف. أعد فتح القفل ثم حاول مجددًا.',errWriteDup:'تم أخذ رقم الحجز للتو من جهاز آخر. أعد التحميل وحاول مجددًا.',
+  liveLabel:'مباشر',bpSvcSince:'رحلات منذ الصيانة',bpMarkServiced:'تسجيل صيانة',bpLastServiced:'آخر صيانة',attnTitle:'دراجات تحتاج انتباهاً',attnInMaint:'في الصيانة',attnDue:'موعد الصيانة · {0} رحلة',attnNever:'لم تُصان بعد',attnLow:'تقييم منخفض {0}/10',attnHide:'إخفاء',sendWorkshop:'إلى الورشة',svcRecent:'آخر سجلات الصيانة',svcKindService:'صيانة',svcKindWorkshop:'أُرسلت للورشة',svcEveryN:'صيانة كل {0} رحلة',gsOpenBtn:'بحث',gsPh:'ابحث في الحجوزات والحسابات والدراجات…',gsNone:'لا نتائج.',gsMin:'اكتب حرفين أو رقمين على الأقل.',gsKindBooking:'حجز',gsKindAccount:'حساب',gsKindBike:'دراجة',gsKindItem:'صنف',gsKindSession:'جلسة',gsKindWorkshop:'الورشة',ntOpen:'الإشعارات',ntMarkRead:'تعليم الكل كمقروء',ntEmpty:'لا شيء يحتاج انتباهاً.',ntLong:'رحلات تجاوزت ساعتين: {0}',ntApps:'طلبات عضوية بانتظار الرد: {0}',ntMsgs:'رسائل جديدة من الموقع: {0}',ntWs:'طلبات ورشة جديدة: {0}',ntAttn:'دراجات تحتاج انتباهاً: {0}',ntStock:'أصناف منخفضة المخزون: {0}',syncNowBtn:'زامن الآن',syncingLbl:'جارٍ المزامنة…',syncDone:'كل شيء محدّث',syncLeft:'تغييرات بانتظار المزامنة: {0}',tbMore:'المزيد',daySheetBtn:'طباعة كشف اليوم',daySheetTitle:'كشف اليوم',daySheetNone:'لا جلسة اليوم.',daySheetRiders:'الراكبون',daySheetWs:'الورشة اليوم',logPrintedDaySheet:'طُبع كشف اليوم',tabTeam:'الفريق',tabCatalog:'كتالوج الدراجات',catSub:'ما يعرضه micromobility.sa/bikes: الفئات وأنواعها الفرعية، وكل موديل بمواصفاته وألوانه وصوره. يظهر الموديل على الموقع بعد نشره.',catOpenSite:'افتح /bikes',catViewModels:'الموديلات',catViewCats:'الفئات',catViewFields:'حقول المواصفات',catAddModel:'+ إضافة موديل',catAddCat:'+ إضافة فئة',catAddSub:'+ إضافة نوع فرعي',catAddField:'+ إضافة حقل',catSearchPh:'ابحث بالعلامة أو الموديل',catNoMatch:'لا توجد نتائج مطابقة.',catColModel:'الموديل',catColCategory:'الفئة',catColRide:'يُستأجر كـ',catColPhotos:'الصور',catColPublished:'على الموقع',catColUpdated:'آخر تعديل',catEmptyModels:'لا موديلات بعد. أضف الأول.',catNoCats:'أضف فئة أولاً: كل موديل ينتمي إلى فئة.',catBrand:'العلامة التجارية',catName:'اسم الموديل',catSlug:'العنوان',catSlugHint:'عنوان الموديل على الموقع: {0}. أحرف لاتينية صغيرة وأرقام وشرطات.',catCategory:'الفئة',catSubtype:'النوع الفرعي',catNoSubtype:'بدون',catYear:'سنة الموديل',catRideType:'يُستأجر كـ',catRideTypeHint:'نوع دراجة التأجير الذي يُحسب عليه؛ يحدد سعر الجولة الظاهر بجانب زر احجز جولة. اتركه فارغاً لدراجة لا تُستأجر.',catRideNone:'لا تُستأجر',catTagline:'العبارة التعريفية',catDescription:'الوصف',catDescHint:'نص عادي. السطر الفارغ يبدأ فقرة جديدة.',catSpecs:'المواصفات',catSpecsHint:'الحقل الفارغ لا يُعرض. يمكن ترك خانة العربية فارغة فيعرض الموقع الإنجليزية.',catColours:'الألوان',catColourName:'اسم اللون',catColourHex:'عيّنة اللون',catAddColour:'+ إضافة لون',catPhotos:'الصور',catPhotosHint:'صورة الغلاف هي التي تظهر في القوائم. الصورة المرتبطة بلون تظهر عند اختيار الزائر ذلك اللون؛ وبقية الصور تظهر مع كل لون.',catUploadPhotos:'رفع صور',catPhotoColour:'اللون',catAnyColour:'كل الألوان',catCover:'الغلاف',catAlt:'وصف لقارئات الشاشة',catSheet:'ورقة المواصفات (PDF)',catUploadSheet:'رفع PDF',catPublished:'منشور على الموقع',catPublishedShort:'منشور',catDraft:'مسودة',catHidden:'مخفي',catDeleteModelTitle:'حذف هذا الموديل؟',catDeleteModelBody:'تُحذف معه صوره وألوانه ومواصفاته، ويتوقف الموقع عن عرضه فوراً.',catDeleteCatTitle:'حذف هذه الفئة؟',catDeleteCatBody:'لا تُحذف إلا الفئة الفارغة: يجب نقل موديلاتها وأنواعها الفرعية أو حذفها أولاً.',catDeleteFieldTitle:'حذف هذا الحقل؟',catDeleteFieldBody:'تحتفظ الموديلات بالقيمة التي كانت لديها؛ ويتوقف الموقع عن عرضها فقط.',catSaved:'تم الحفظ',catDeleted:'تم الحذف',catSaveErr:'لم يتم الحفظ. حاول مرة أخرى.',catLoadErr:'لم يتم تحميل الكتالوج. تحقق من الاتصال وحاول مرة أخرى.',catUploading:'جارٍ الرفع…',catUploaded:'تم الرفع',catUploadErr:'فشل الرفع. حاول مرة أخرى.',catUploadType:'صور فقط: JPEG أو PNG أو WebP أو AVIF.',catUploadPdfType:'ملف PDF فقط.',catUploadBig:'الملف كبير جداً: 10 ميغابايت على الأكثر.',catErrName:'أدخل اسم الموديل.',catErrCategory:'اختر فئة.',catErrSlug:'العنوان يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات، ويبدأ بحرف.',catErrSlugTaken:'موديل آخر يستخدم هذا العنوان.',catErrColour:'كل لون يحتاج إلى اسم.',catCatName:'الاسم',catCatSlug:'العنوان',catCatBlurb:'وصف قصير',catCatCover:'صورة الغلاف',catCatPublished:'يظهر على الموقع',catCatModels:'{0} موديلات',catCatSubs:'{0} أنواع فرعية',catCatEmpty:'لا فئات بعد.',catCatsSub:'الفئات هي المستوى الأول تحت /bikes، ولكل فئة أنواع فرعية إن شئت. ينتمي الموديل إلى فئة واحدة، وإلى أحد أنواعها الفرعية إن أردت.',catErrCatName:'أدخل اسماً.',catErrCatTaken:'عنصر آخر في هذا المستوى يستخدم هذا العنوان.',catCatInUse:'ما زالت تحتوي على موديلات أو أنواع فرعية. انقلها أو احذفها أولاً.',catFieldKey:'المفتاح',catFieldKeyHint:'كيف تُخزَّن القيمة: أحرف لاتينية صغيرة وأرقام وشرطات سفلية. لا يمكن تغييره لاحقاً.',catFieldLabel:'التسمية',catFieldGroup:'المجموعة',catFieldUnit:'الوحدة',catFieldSort:'الترتيب',catFieldUsed:'مستخدم في',catFieldsSub:'المواصفات التي يمكن أن يحملها الموديل، بتسمياتها بالإنجليزية والعربية. تظهر هذه الخانات لكل موديل؛ ويعرض الموقع المملوءة منها مجمّعة وبهذا الترتيب.',catErrFieldKey:'المفتاح يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات سفلية، ويبدأ بحرف.',catErrFieldLabel:'أدخل تسمية للحقل.',catErrFieldTaken:'يوجد حقل بهذا المفتاح.',catFieldsEmpty:'لا حقول بعد.',catPreview:'عرض على الموقع',catUnsaved:'لديك تغييرات غير محفوظة. الخروج دون حفظ؟',teamPageSub:'من يعمل على المكتب: الأرقام السرية للمشغّلين، وما يستطيع كل حساب فتحه وتعديله.',opsTitle:'المشغّلون',opsSub:'الأسماء في شاشة المشغّل. الاسم الذي له رقم سري يطلبه.',opsPinSet:'له رقم سري',opsPinNone:'بلا رقم سري',opsSetPin:'تعيين الرقم السري',opsClearPin:'حذف الرقم السري',opsPinPrompt:'رقم سري جديد من 4 أرقام لـ {0}',opsPinBad:'الرقم السري 4 أرقام.',opsPinSaved:'حُفظ الرقم السري لـ {0}',opsPinCleared:'حُذف الرقم السري لـ {0}',opsAdd:'إضافة اسم',opsAddPh:'الاسم',acctTitle:'حسابات الدخول',acctSub:'دور كل حساب، والأقسام التي يستطيع فتحها وتعديلها. لا أحد يغيّر حسابه بنفسه.',acctYou:'أنت',acctView:'يستطيع فتح',acctEdit:'يستطيع تعديل',acctSaved:'حُفظت الصلاحيات لـ {0}',dbPending:'بانتظار تحديث قاعدة البيانات.',opSwitch:'تبديل المشغّل',opPinTitle:'الرقم السري لـ {0}',opPinWrong:'رقم سري خاطئ. تبقّت {0} محاولات.',opPinLocked:'محاولات كثيرة. انتظر {0} ثانية.',roMode:'وضع القراءة فقط: لا يمكن التعديل',dashActivity:'آخر النشاطات',dashQuick:'إجراءات سريعة',dashNoActivity:'لا شيء مسجل اليوم بعد.',dashCollected:'المُحصّل اليوم',dashBookedToday:'راكبو اليوم',dashDoneToday:'رحلات منتهية اليوم',dashSessionsToday:'جلسات اليوم',dashCheckinNext:'تسجيل دخول التالي',calViewList:'قائمة',calViewCal:'تقويم',calPrev:'الشهر السابق',calNext:'الشهر التالي',calToday:'اليوم',calWs:'{0} ورشة',calNewOn:'جلسة جديدة في {0}',errAddonsNotSaved:'تم الحجز، لكن الإضافات لم تُحفظ. أضفها من حجوزاتي.',bkExportedToast:'تم تصدير {0} دراجة',errTooManyTries:'محاولات كثيرة من هذه الشبكة. انتظر بضع دقائق ثم حاول مجدداً.',errPaidTypeDesk:'هذا الحجز مدفوع. لتغييره إلى دراجة أغلى، اسأل عند الكشك.',addonHandedOver:'لا يمكن حذف الإضافات التي سُلّمت من هنا. اسأل عند الكشك.',teamPinKept:'لا يحذف الاسم الذي له رقم سري إلا المدير: {0}',acctOneSection:'اختر قسماً واحداً على الأقل يستطيع هذا الحساب فتحه.',acctNoneOpen:'لا توجد أقسام يستطيع هذا الحساب فتحها. اطلب من المدير منحه الصلاحية من صفحة الفريق.',anPieces:'{0} قطع',drawerCountBtn:'جرد الدرج',drawerCountTitle:'جرد الدرج',drawerCountBody:'النقد المتوقع لهذا اليوم: {0} ريال. أدخل ما في الدرج فعلياً:',drawerExpected:'المتوقع',drawerCounted:'المعدود',drawerExactToast:'الدرج مطابق — تم التسجيل',drawerDiffToast:'تم التسجيل — فرق الدرج {0}',cnBtn:'إلغاء الليلة',cnTitle:'إلغاء الليلة',cnSub:'{0} حجز قائم. أبلغ المشاركين أولاً ثم ألغِ. لنقل الليلة كاملة عدّل تاريخ الجلسة بدلاً من ذلك — الحجوزات تتبعه.',cnMsgLabel:'رسالة للمشاركين',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.',cnCopyNumbers:'نسخ جميع الأرقام',cnCopiedToast:'تم نسخ الأرقام',cnConfirmBtn:'إلغاء {0} حجز',cnDoneToast:'أُلغيت الليلة — {0} حجز أُلغي مع بقاء السجل',wxTip:'التوقعات: {0} درجة عظمى، رياح حتى {1} كم/س',noShowHistChip:'{0}/{1} غياب',noShowHistTip:'مرات الغياب في آخر خمسة حجوزات محسومة لهذا الراكب',bulkApproveBtn:'الموافقة على الكل ({0})',bulkApproveTitle:'الموافقة على جميع الطلبات المعلقة',bulkApproveBody:'سيتم قبول {0} من الطلبات المعلقة. تُترك طلبات قائمة الانتظار لتختارها بنفسك. لن يرى المشاركون شيئاً حتى تنشر النتائج.',bulkApprovedToast:'تمت الموافقة على {0} من الطلبات',ciPrev:'السابق',ciNext:'التالي',ciChainLabel:'الراكبون بانتظار تسجيل الحضور',ciStepOf:'الراكب {0} من {1}',ciPartyLabel:'ركّاب هذه المجموعة',dupPhoneTip:'رقم الجوال هذا موجود في حجز آخر قائم في هذه الجلسة',statSarDue:'ريال مستحق',overdueRideTip:'على الدراجة منذ أكثر من ساعتين',fleetStripLbl:'الدراجات المتاحة',wiStockHint:'{0} {1} متاحة على الرف',wiNoStockHint:'لا يوجد {0} متبقٍ على الرف — قد يعتمد منتظرو القائمة على المرتجعات.',moreActionsLbl:'مزيد من الإجراءات',closeOutBtn:'إنهاء الليلة',closeOutHint:'إنهاء الليلة: من سجّل حضوره يُعتبر مكتملاً، ومن لم يحضر يُسجّل كغياب.',closeOutTitle:'إنهاء الليلة',closeOutBody:'سيتم تسجيل {0} من الحاضرين كمكتملين و{1} ممن لم يحضروا كغياب. لن يتم المساس بقائمة الانتظار. يمكن التراجع من الشريط في الأعلى.',closeOutDoneToast:'تم إنهاء الليلة — {0} مكتمل، {1} غياب',closeOutBikes:'سيتم إرجاع {0} دراجة.',bookSyncPending:'لم يصل حجزك إلى الكشك بعد — سيستمر بالمحاولة ما دام التطبيق مفتوحاً.',bookSyncRefused:'تعذّر إرسال حجزك. يرجى إظهار هذا الهاتف عند الكشك.',updateReadyToast:'يتوفر إصدار جديد — حدّث الصفحة للتحديث.',justNow:'الآن',secondsAgo:'ث مضت',minutesAgo:'د مضت',offlineLabel:'غير متصل',offlineBanner:'أنت غير متصل - يتم حفظ التغييرات وستتم المزامنة عند عودة الاتصال.',unreachableBanner:'متصل بالشبكة لكن تعذّر الوصول إلى الخادم - قد تحتاج إلى تسجيل الدخول إلى هذه الشبكة.',retryBtn:'إعادة المحاولة',errWritePerm:'لم يتم الحفظ - ربما انتهت جلسة الموظف. أعد فتح القفل ثم حاول مجددًا.',errWriteDup:'تم أخذ رقم الحجز للتو من جهاز آخر. أعد التحميل وحاول مجددًا.',
   selectSessionPrompt:'اختر جلسة من الأعلى',selectSessionSub:'انقر على إحدى الجلسات لعرض طابورها وإدارته بشكل مستقل.',
   undoBtn:'تراجع',undoneMsg:'تم التراجع.',undoFailed:'فشل التراجع.',errStorageFull:'ذاكرة الجهاز ممتلئة — أفرغ بعض المساحة؛ قد لا تُحفظ المبيعات/الحجوزات غير المتزامنة.',errStockWrite:'لم يتم حفظ مخزون {0} — تمت إعادة العدد الظاهر على الشاشة.',themeLight:'وضع النهار',themeDark:'الوضع الليلي',
   fleetBadge:'الأسطول',altBadge:'بديل',
@@ -6801,6 +6803,7 @@ function setStaffTab(tab){
   else if(tab==='cashier')renderCashier();
   else if(tab==='community')renderCommunity();
   else if(tab==='website')renderWebsite();
+  else if(tab==='catalog')renderCatalog();
   else if(tab==='workshop')renderWorkshop();
   else if(tab==='messages')renderMessages();
   else if(tab==='ambassadors')renderAmbassadors();
@@ -6834,7 +6837,7 @@ function renderCustomerTabs(){
   const al=document.getElementById('bnav-account-lbl');if(al)al.textContent=t('tabAccount');
 }
 
-const _SNAV_ICON={dashboard:'sun',team:'person',website:'globe',workshop:'wrench',messages:'contact',ambassadors:'star',queue:'bike',cashier:'cart',inventory:'box',community:'people',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={dashboard:'sun',team:'person',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',queue:'bike',cashier:'cart',inventory:'box',community:'people',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
@@ -6905,6 +6908,7 @@ function renderStaffTabs(){
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
+  document.getElementById('tab-catalog')   .classList.toggle('active',S.staffTab==='catalog');
   document.getElementById('tab-workshop')  .classList.toggle('active',S.staffTab==='workshop');
   document.getElementById('tab-messages')  .classList.toggle('active',S.staffTab==='messages');
   document.getElementById('tab-ambassadors').classList.toggle('active',S.staffTab==='ambassadors');
@@ -9091,6 +9095,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
   else if(tab==='ambassadors'){const a=document.activeElement;renderAmbassadors(!!(a&&a.id==='amb-search-input'));}
   else if(tab==='website'){} // its own loader and its own drafts: a repaint of the queue data has nothing for it
+  else if(tab==='catalog'){} // the same: the catalogue loads itself
   else if(tab==='team'){} // its own loader too
   else if(tab==='dashboard')renderDashboard();
   else renderStaffQueue();
@@ -15751,8 +15756,8 @@ function _opGatePick(n){if(!String(n||'').trim())return;setOpName(n);_opGateDone
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','community','ambassadors','website','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',community:'tabCommunity',ambassadors:'tabAmbassadors',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','community','ambassadors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',community:'tabCommunity',ambassadors:'tabAmbassadors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 function _editOk(tab){return !Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
@@ -23382,6 +23387,7 @@ const SITE_TEXTS=[
 const SITE_PAGES=[
   {key:'home',en:'Home',ar:'الرئيسية',built:true},
   {key:'experiences',en:'Experiences',ar:'التجارب',built:true},
+  {key:'bikes',en:'Bikes',ar:'الدراجات',built:true},
   {key:'workshop',en:'Workshop',ar:'الورشة',built:true},
   {key:'business',en:'Business',ar:'الأعمال',built:true},
   {key:'help',en:'Help',ar:'المساعدة',built:true},
@@ -23845,6 +23851,523 @@ function renderWebsite(){
   </div>`;
   el.innerHTML=head+status+texts+_webEditorHtml()+pages+history;
   _webSyncActions();
+}
+// ── Bikes catalog: what micromobility.sa/bikes shows ────────────────────────
+// The owner's rule (2026-09-26): the public bike catalogue - categories, their sub-types, the
+// models in them, each model's specifications, colours, photos and spec sheet - is edited here
+// and read by the website (mm-platform, /bikes) with the public key. Five tables
+// (20260927100000). A model stays hidden until it is published, so it can be filled in first;
+// a category is shown as soon as it exists. Photos are shrunk in the browser and uploaded to
+// the public 'site' bucket under catalog/<model>/, with 640 and 1280 px WebP copies beside each
+// one, which the site's /media route serves to small screens. Admin only, like the Website
+// section: DESK_TABS leaves it out and the tables' write policies want is_admin().
+const CAT_RIDE_TYPES=['Road','Mountain','Hybrid','Gravel','Kids','Road Carbon'];
+const CAT_SLUG=/^[a-z][a-z0-9-]{0,79}$/,CAT_KEY=/^[a-z][a-z0-9_]{0,39}$/;
+function _cat(){return S.cat||(S.cat={loaded:false,busy:false,err:null,view:'models',cats:[],fields:[],models:[],colors:[],photos:[],q:'',ed:null,ced:null,fed:null});}
+function _catUuid(){
+  if(window.crypto&&crypto.randomUUID)return crypto.randomUUID();
+  const h=[...crypto.getRandomValues(new Uint8Array(16))].map(b=>b.toString(16).padStart(2,'0')).join('');
+  return h.slice(0,8)+'-'+h.slice(8,12)+'-4'+h.slice(13,16)+'-a'+h.slice(17,20)+'-'+h.slice(20,32);
+}
+async function _catLoad(){
+  const C=_cat();if(C.busy)return;C.busy=true;C.err=null;
+  try{
+    const rs=await Promise.all([
+      sb.from('catalog_categories').select('*').order('sort').order('name_en'),
+      sb.from('catalog_spec_fields').select('*').order('sort').order('key'),
+      sb.from('catalog_models').select('*').order('sort').order('name'),
+      sb.from('catalog_colors').select('*').order('sort'),
+      sb.from('catalog_photos').select('*').order('sort')]);
+    const bad=rs.find(r=>r.error);if(bad)throw bad.error;
+    C.cats=rs[0].data||[];C.fields=rs[1].data||[];C.models=rs[2].data||[];C.colors=rs[3].data||[];C.photos=rs[4].data||[];
+    C.loaded=true;
+  }catch(e){C.err=e;if(e&&e.code!=='PGRST205'&&e.code!=='42P01')try{_logError('catalog load: '+((e&&e.message)||e),'catalog',true);}catch(_){}} // a database without the tables yet is shown, not logged
+  C.busy=false;
+  if(S.view==='staff'&&S.staffTab==='catalog')renderCatalog();
+}
+const _catBi=(en,ar)=>_isRtl()?(ar||en||''):(en||ar||'');
+const _catTop=()=>_cat().cats.filter(c=>!c.parent_id);
+const _catSubs=id=>_cat().cats.filter(c=>c.parent_id===id);
+const _catById=id=>_cat().cats.find(c=>c.id===id)||null;
+const _catModelsIn=id=>_cat().models.filter(m=>m.category_id===id||m.subtype_id===id);
+// The model's address on the site: /bikes/<category>/<sub-type>/<model>, the sub-type left out
+// when it has none. The site builds the same address from the same rows.
+function _catPath(m){const c=_catById(m.category_id),s=m.subtype_id?_catById(m.subtype_id):null;return'/bikes/'+(c?c.slug:'-')+(s?'/'+s.slug:'')+'/'+m.slug;}
+// "Trek Émonda SL 6" -> "trek-emonda-sl-6". Accents are stripped (their marks are the
+// U+0300 block), everything but letters and digits becomes a hyphen, and a name that starts
+// with a digit is prefixed, because /bikes/<number> is a fleet bike's NFC page.
+const _CAT_MARKS=new RegExp('['+String.fromCharCode(0x300)+'-'+String.fromCharCode(0x36f)+']','g');
+function _catSlugify(s){
+  let v=String(s||'').normalize('NFD').replace(_CAT_MARKS,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+  if(/^[0-9]/.test(v))v='bike-'+v;
+  return v.slice(0,80).replace(/-+$/,'');
+}
+function _catErrText(e){
+  const code=e&&e.code,msg=String((e&&e.message)||'');
+  if(code==='23505'&&/slug/.test(msg))return t('catErrSlugTaken');
+  if(code==='23503'||code==='23001'||/violates foreign key|restrict/i.test(msg))return t('catCatInUse');
+  return t('catSaveErr');
+}
+// ── Files: photos get 640 and 1280 px WebP copies, spec sheets are PDFs ─────
+function _catPick(accept,multiple,cb){
+  const inp=document.createElement('input');inp.type='file';inp.accept=accept;inp.multiple=!!multiple;
+  inp.onchange=()=>{const fs=[...(inp.files||[])];if(fs.length)cb(fs);};
+  inp.click();
+}
+async function _catDraw(bmp,max,type,q){
+  const sc=Math.min(1,max/Math.max(bmp.width,bmp.height));
+  const w=Math.max(1,Math.round(bmp.width*sc)),h=Math.max(1,Math.round(bmp.height*sc));
+  const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bmp,0,0,w,h);
+  return new Promise(r=>c.toBlob(r,type,q));
+}
+const _catStamp=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+async function _catUploadImage(file,folder){
+  if(!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('type');
+  const bmp=await createImageBitmap(file);
+  const png=file.type==='image/png',type=png?'image/png':'image/jpeg',ext=png?'png':'jpg'; // PNG keeps a cut-out background
+  const main=await _catDraw(bmp,2000,type,.85);
+  if(!main||main.size>10*1024*1024)throw new Error('big');
+  const base=folder+'/'+_catStamp();
+  const r=await sb.storage.from('site').upload(base+'.'+ext,main,{contentType:type,upsert:false,cacheControl:'31536000'});
+  if(r.error)throw r.error;
+  // The smaller copies the site serves to phones (<name>.w640.webp, <name>.w1280.webp). A
+  // browser that cannot write WebP answers toBlob with a PNG instead; those copies are skipped
+  // and the site serves the photo itself, as it does for a photo uploaded before this existed.
+  for(const w of[1280,640]){
+    try{const b=await _catDraw(bmp,w,'image/webp',.82);if(b&&b.type==='image/webp')await sb.storage.from('site').upload(base+'.w'+w+'.webp',b,{contentType:'image/webp',upsert:false,cacheControl:'31536000'});}catch(_){}
+  }
+  return'/media/'+base+'.'+ext;
+}
+async function _catUploadPdf(file,folder){
+  if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))throw new Error('type');
+  if(file.size>10*1024*1024)throw new Error('big');
+  const path=folder+'/'+_catStamp()+'.pdf';
+  const r=await sb.storage.from('site').upload(path,file,{contentType:'application/pdf',upsert:false,cacheControl:'31536000'});
+  if(r.error)throw r.error;
+  return'/media/'+path;
+}
+// Files the catalogue no longer points at go from the bucket too, copies included. Best effort:
+// a file left behind costs a little storage, a failed removal must never undo a saved edit.
+async function _catStorageRemove(urls){
+  const paths=[];
+  (urls||[]).forEach(u=>{const m=/^\/media\/(catalog\/.+)$/.exec(String(u||''));if(!m)return;paths.push(m[1]);const b=m[1].replace(/\.(jpe?g|png|webp)$/i,'');if(b!==m[1])paths.push(b+'.w640.webp',b+'.w1280.webp');});
+  if(!paths.length)return;
+  try{await sb.storage.from('site').remove(paths);}catch(_){}
+}
+function _catUploadToast(e){
+  const m=e&&e.message;
+  toast(m==='type'?t('catUploadType'):m==='pdf'?t('catUploadPdfType'):m==='big'?t('catUploadBig'):t('catUploadErr'),'error');
+  if(m!=='type'&&m!=='big'&&m!=='pdf')try{_logError('catalog upload: '+(m||e),'catalog',true);}catch(_){}
+}
+// ── The model editor ────────────────────────────────────────────────────────
+// One model, its colours and its photos, edited together and saved together. A new model gets
+// its id here, so its photos can be uploaded under catalog/<id>/ before the row exists.
+function _catEdit(id){
+  const C=_cat(),m=id?C.models.find(x=>x.id===id):null;
+  const top=_catTop();
+  C.ed={id:m?m.id:_catUuid(),isNew:!m,slugAuto:!m,busy:false,dirty:false,err:'',
+    d:m?JSON.parse(JSON.stringify(m)):{brand:'',name:'',slug:'',category_id:top.length?top[0].id:null,subtype_id:null,model_year:null,ride_type:null,tagline_en:'',tagline_ar:'',description_en:'',description_ar:'',specs:{},spec_sheet:null,sort:0,published:false},
+    colors:m?C.colors.filter(c=>c.model_id===m.id).map(c=>Object.assign({},c)):[],
+    photos:m?C.photos.filter(p=>p.model_id===m.id).map(p=>Object.assign({},p)):[],
+    gone:{colors:[],photos:[],files:[]}};
+  if(!C.ed.d.specs||typeof C.ed.d.specs!=='object'||Array.isArray(C.ed.d.specs))C.ed.d.specs={};
+  C.view='models';
+  renderCatalog();
+  setTimeout(()=>{const i=document.getElementById('ce-brand');if(i&&C.ed&&C.ed.isNew)i.focus();},60);
+}
+function _catEdClose(){const C=_cat();if(!C.ed)return;if(!C.ed.dirty){C.ed=null;renderCatalog();return;}confirmDialog({title:t('catUnsaved'),confirmLabel:t('closeBtn'),confirmClass:'btn-primary',onConfirm:()=>{_cat().ed=null;renderCatalog();}});}
+function _catDirty(){const C=_cat();if(!C.ed)return;C.ed.dirty=true;C.ed.err='';_catSyncSave();}
+function _catSyncSave(){
+  const C=_cat(),ed=C.ed,b=document.getElementById('ce-save'),e=document.getElementById('ce-err');
+  if(b&&ed)b.disabled=ed.busy||!ed.dirty;
+  if(e&&ed){e.textContent=ed.err||'';e.hidden=!ed.err;}
+}
+function _catErr(msg){const ed=_cat().ed;if(!ed)return;ed.err=msg;_catSyncSave();}
+// One keystroke: the draft changes, nothing is repainted (the caret stays), Save follows.
+function _catIn(field,v){
+  const ed=_cat().ed;if(!ed)return;
+  ed.d[field]=v;
+  if(field==='slug')ed.slugAuto=false;
+  if(ed.slugAuto&&(field==='brand'||field==='name')){ed.d.slug=_catSlugify((ed.d.brand||'')+' '+(ed.d.name||''));const s=document.getElementById('ce-slug');if(s)s.value=ed.d.slug;_catSlugHint();}
+  if(field==='slug'||field==='subtype_id')_catSlugHint(); // the address shows the sub-type too
+  _catDirty();
+}
+function _catSlugHint(){const ed=_cat().ed,h=document.getElementById('ce-slug-hint');if(ed&&h)h.textContent=t('catSlugHint').replace('{0}',_catPath(Object.assign({},ed.d,{slug:_catSlugify(ed.d.slug)||'…'})));}
+function _catCatIn(v){const ed=_cat().ed;if(!ed)return;ed.d.category_id=v||null;ed.d.subtype_id=null;_catDirty();renderCatalog();}
+function _catSpecIn(key,lang,v){
+  const ed=_cat().ed;if(!ed)return;
+  const cur=Object.assign({},ed.d.specs[key]||{});cur[lang]=v;
+  if(!(cur.en||'').trim()&&!(cur.ar||'').trim())delete ed.d.specs[key];else ed.d.specs[key]=cur;
+  _catDirty();
+}
+function _catColAdd(){const ed=_cat().ed;if(!ed)return;ed.colors.push({id:_catUuid(),_new:true,model_id:ed.id,name_en:'',name_ar:'',hex:'#1a1919',sort:ed.colors.length});_catDirty();renderCatalog();setTimeout(()=>{const i=document.getElementById('ce-col-'+(ed.colors.length-1)+'-en');if(i)i.focus();},60);}
+function _catColIn(i,field,v){const ed=_cat().ed;if(!ed||!ed.colors[i])return;ed.colors[i][field]=v;_catDirty();}
+function _catColDel(i){
+  const ed=_cat().ed;if(!ed||!ed.colors[i])return;
+  const c=ed.colors[i];if(!c._new)ed.gone.colors.push(c.id);
+  ed.photos.forEach(p=>{if(p.color_id===c.id)p.color_id=null;});
+  ed.colors.splice(i,1);_catDirty();renderCatalog();
+}
+function _catColMove(i,d){const ed=_cat().ed;if(!ed)return;const j=i+d;if(j<0||j>=ed.colors.length)return;[ed.colors[i],ed.colors[j]]=[ed.colors[j],ed.colors[i]];_catDirty();renderCatalog();}
+function _catPhotoIn(i,field,v){const ed=_cat().ed;if(!ed||!ed.photos[i])return;ed.photos[i][field]=field==='color_id'?(v||null):v;_catDirty();}
+function _catPhotoCover(i){const ed=_cat().ed;if(!ed||!ed.photos[i])return;ed.photos.forEach((p,k)=>{p.is_cover=k===i;});_catDirty();renderCatalog();}
+function _catPhotoDel(i){
+  const ed=_cat().ed;if(!ed||!ed.photos[i])return;
+  const p=ed.photos[i];if(!p._new)ed.gone.photos.push(p.id);ed.gone.files.push(p.url);
+  ed.photos.splice(i,1);if(ed.photos.length&&!ed.photos.some(x=>x.is_cover))ed.photos[0].is_cover=true;
+  _catDirty();renderCatalog();
+}
+function _catPhotoMove(i,d){const ed=_cat().ed;if(!ed)return;const j=i+d;if(j<0||j>=ed.photos.length)return;[ed.photos[i],ed.photos[j]]=[ed.photos[j],ed.photos[i]];_catDirty();renderCatalog();}
+function _catPhotosPick(){
+  _catPick('image/jpeg,image/png,image/webp,image/avif',true,async files=>{
+    const ed=_cat().ed;if(!ed)return;
+    ed.busy=true;_catSyncSave();toast(t('catUploading'));
+    let n=0;
+    for(const f of files){
+      try{const url=await _catUploadImage(f,'catalog/'+ed.id);ed.photos.push({id:_catUuid(),_new:true,model_id:ed.id,color_id:null,url,alt_en:'',alt_ar:'',sort:ed.photos.length,is_cover:!ed.photos.some(p=>p.is_cover)});n++;}
+      catch(e){_catUploadToast(e);}
+    }
+    ed.busy=false;if(n){ed.dirty=true;toast(t('catUploaded'),'success');}
+    renderCatalog();
+  });
+}
+function _catSheetPick(){
+  _catPick('application/pdf',false,async files=>{
+    const ed=_cat().ed;if(!ed)return;
+    ed.busy=true;_catSyncSave();toast(t('catUploading'));
+    try{const url=await _catUploadPdf(files[0],'catalog/'+ed.id);if(ed.d.spec_sheet)ed.gone.files.push(ed.d.spec_sheet);ed.d.spec_sheet=url;ed.dirty=true;toast(t('catUploaded'),'success');}
+    catch(e){_catUploadToast(e.message==='type'?new Error('pdf'):e);}
+    ed.busy=false;renderCatalog();
+  });
+}
+function _catSheetRemove(){const ed=_cat().ed;if(!ed||!ed.d.spec_sheet)return;ed.gone.files.push(ed.d.spec_sheet);ed.d.spec_sheet=null;_catDirty();renderCatalog();}
+async function _catSave(){
+  const C=_cat(),ed=C.ed;if(!ed||ed.busy)return;
+  const d=ed.d;
+  d.name=String(d.name||'').trim();d.brand=String(d.brand||'').trim();d.slug=_catSlugify(d.slug||'');
+  if(!d.name){_catErr(t('catErrName'));return;}
+  const cat=d.category_id?_catById(d.category_id):null;
+  if(!cat||cat.parent_id){_catErr(t('catErrCategory'));return;}
+  if(!CAT_SLUG.test(d.slug)){_catErr(t('catErrSlug'));return;}
+  if(C.models.some(m=>m.slug===d.slug&&m.id!==ed.id)){_catErr(t('catErrSlugTaken'));return;}
+  if(ed.colors.some(c=>!String(c.name_en||'').trim())){_catErr(t('catErrColour'));return;}
+  const st=d.subtype_id?_catById(d.subtype_id):null;
+  if(d.subtype_id&&(!st||st.parent_id!==d.category_id))d.subtype_id=null;
+  const year=d.model_year===''||d.model_year==null?null:Number(d.model_year);
+  ed.busy=true;ed.err='';_catSyncSave();
+  try{
+    const row={id:ed.id,category_id:d.category_id,subtype_id:d.subtype_id||null,slug:d.slug,brand:d.brand,name:d.name,
+      model_year:Number.isFinite(year)?year:null,ride_type:CAT_RIDE_TYPES.includes(d.ride_type)?d.ride_type:null,
+      tagline_en:String(d.tagline_en||'').trim(),tagline_ar:String(d.tagline_ar||'').trim(),
+      description_en:String(d.description_en||'').trim(),description_ar:String(d.description_ar||'').trim(),
+      specs:d.specs||{},spec_sheet:d.spec_sheet||null,sort:Number(d.sort)||0,published:!!d.published};
+    let r=await sb.from('catalog_models').upsert(row,{onConflict:'id'});if(r.error)throw r.error;
+    // Colours: the removed ones go, the kept ones are written with their order, the new ones are
+    // inserted and get their ids back in the order they were sent - which the photos need.
+    if(ed.gone.colors.length){r=await sb.from('catalog_colors').delete().in('id',ed.gone.colors);if(r.error)throw r.error;}
+    const colRow=(c,i)=>({model_id:ed.id,name_en:String(c.name_en||'').trim(),name_ar:String(c.name_ar||'').trim(),hex:/^#[0-9a-fA-F]{6}$/.test(c.hex||'')?c.hex.toLowerCase():null,sort:i});
+    const oldC=[],newC=[];ed.colors.forEach((c,i)=>{(c._new?newC:oldC).push([c,i]);});
+    if(oldC.length){r=await sb.from('catalog_colors').upsert(oldC.map(([c,i])=>Object.assign({id:c.id},colRow(c,i))),{onConflict:'id'});if(r.error)throw r.error;}
+    if(newC.length){
+      r=await sb.from('catalog_colors').insert(newC.map(([c,i])=>colRow(c,i))).select('id');if(r.error)throw r.error;
+      newC.forEach(([c],k)=>{const real=(r.data||[])[k];if(!real)return;ed.photos.forEach(p=>{if(p.color_id===c.id)p.color_id=real.id;});c.id=real.id;delete c._new;});
+    }
+    if(ed.gone.photos.length){r=await sb.from('catalog_photos').delete().in('id',ed.gone.photos);if(r.error)throw r.error;}
+    if(ed.photos.length&&!ed.photos.some(p=>p.is_cover))ed.photos[0].is_cover=true;
+    const phRow=(p,i)=>({model_id:ed.id,color_id:p.color_id||null,url:p.url,alt_en:String(p.alt_en||'').trim(),alt_ar:String(p.alt_ar||'').trim(),sort:i,is_cover:!!p.is_cover});
+    const oldP=[],newP=[];ed.photos.forEach((p,i)=>{(p._new?newP:oldP).push([p,i]);});
+    if(oldP.length){r=await sb.from('catalog_photos').upsert(oldP.map(([p,i])=>Object.assign({id:p.id},phRow(p,i))),{onConflict:'id'});if(r.error)throw r.error;}
+    if(newP.length){r=await sb.from('catalog_photos').insert(newP.map(([p,i])=>phRow(p,i)));if(r.error)throw r.error;}
+    _catStorageRemove(ed.gone.files);
+    toast(t('catSaved'),'success');
+    C.ed=null;C.loaded=false;renderCatalog();await _catLoad();
+  }catch(e){
+    ed.busy=false;_catErr(_catErrText(e));
+    try{_logError('catalog save: '+((e&&e.message)||e),'catalog',true);}catch(_){}
+  }
+}
+function _catDelete(id){
+  const C=_cat(),m=C.models.find(x=>x.id===id);if(!m)return;
+  confirmDialog({title:t('catDeleteModelTitle'),body:esc(t('catDeleteModelBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+    try{
+      const files=C.photos.filter(p=>p.model_id===id).map(p=>p.url).concat(m.spec_sheet?[m.spec_sheet]:[]);
+      const r=await sb.from('catalog_models').delete().eq('id',id);if(r.error)throw r.error;
+      _catStorageRemove(files);
+      if(C.ed&&C.ed.id===id)C.ed=null;
+      toast(t('catDeleted'),'success');C.loaded=false;renderCatalog();await _catLoad();
+    }catch(e){toast(_catErrText(e),'error');try{_logError('catalog delete: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+  }});
+}
+async function _catTogglePub(id){
+  const C=_cat(),m=C.models.find(x=>x.id===id);if(!m)return;
+  const on=!m.published;m.published=on;renderCatalog(); // shown at once, put back if refused
+  const r=await sb.from('catalog_models').update({published:on}).eq('id',id);
+  if(r.error){m.published=!on;renderCatalog();toast(t('catSaveErr'),'error');try{_logError('catalog publish: '+r.error.message,'catalog',true);}catch(_){}}
+}
+// ── Categories and sub-types ────────────────────────────────────────────────
+function _catCatEdit(id,parentId){
+  const C=_cat(),c=id?_catById(id):null;
+  C.ced={id:c?c.id:_catUuid(),isNew:!c,slugAuto:!c,busy:false,err:'',
+    d:c?JSON.parse(JSON.stringify(c)):{parent_id:parentId||null,slug:'',name_en:'',name_ar:'',blurb_en:'',blurb_ar:'',cover:null,sort:(parentId?_catSubs(parentId):_catTop()).length,published:true}};
+  C.view='categories';renderCatalog();
+  setTimeout(()=>{const i=document.getElementById('cc-name-en');if(i)i.focus();},60);
+}
+function _catCatClose(){_cat().ced=null;renderCatalog();}
+function _catCatIn2(field,v){
+  const E=_cat().ced;if(!E)return;
+  E.d[field]=v;E.err='';
+  if(field==='slug')E.slugAuto=false;
+  if(E.slugAuto&&field==='name_en'){E.d.slug=_catSlugify(v);const s=document.getElementById('cc-slug');if(s)s.value=E.d.slug;}
+  const e=document.getElementById('cc-err');if(e){e.hidden=true;}
+}
+function _catCatCoverPick(){
+  _catPick('image/jpeg,image/png,image/webp,image/avif',false,async files=>{
+    const E=_cat().ced;if(!E)return;
+    toast(t('catUploading'));
+    try{const url=await _catUploadImage(files[0],'catalog/categories/'+E.id);if(E.d.cover)_catStorageRemove([E.d.cover]);E.d.cover=url;toast(t('catUploaded'),'success');renderCatalog();}
+    catch(e){_catUploadToast(e);}
+  });
+}
+function _catCatCoverRemove(){const E=_cat().ced;if(!E||!E.d.cover)return;_catStorageRemove([E.d.cover]);E.d.cover=null;renderCatalog();}
+async function _catCatSave(){
+  const C=_cat(),E=C.ced;if(!E||E.busy)return;
+  const d=E.d;d.name_en=String(d.name_en||'').trim();d.name_ar=String(d.name_ar||'').trim();d.slug=_catSlugify(d.slug||d.name_en);
+  const err=m=>{E.err=m;const e=document.getElementById('cc-err');if(e){e.textContent=m;e.hidden=false;}};
+  if(!d.name_en){err(t('catErrCatName'));return;}
+  if(!CAT_SLUG.test(d.slug)||d.slug.length>60){err(t('catErrSlug'));return;}
+  if(C.cats.some(c=>c.slug===d.slug&&(c.parent_id||null)===(d.parent_id||null)&&c.id!==E.id)){err(t('catErrCatTaken'));return;}
+  E.busy=true;
+  try{
+    const row={id:E.id,parent_id:d.parent_id||null,slug:d.slug,name_en:d.name_en,name_ar:d.name_ar,blurb_en:String(d.blurb_en||'').trim(),blurb_ar:String(d.blurb_ar||'').trim(),cover:d.cover||null,sort:Number(d.sort)||0,published:d.published!==false};
+    const r=await sb.from('catalog_categories').upsert(row,{onConflict:'id'});if(r.error)throw r.error;
+    toast(t('catSaved'),'success');C.ced=null;C.loaded=false;renderCatalog();await _catLoad();
+  }catch(e){E.busy=false;err(e&&e.code==='23505'?t('catErrCatTaken'):t('catSaveErr'));try{_logError('catalog category save: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+}
+function _catCatDelete(id){
+  const C=_cat(),c=_catById(id);if(!c)return;
+  if(_catSubs(id).length||_catModelsIn(id).length){toast(t('catCatInUse'),'error');return;}
+  confirmDialog({title:t('catDeleteCatTitle'),body:esc(t('catDeleteCatBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+    try{const r=await sb.from('catalog_categories').delete().eq('id',id);if(r.error)throw r.error;_catStorageRemove(c.cover?[c.cover]:[]);toast(t('catDeleted'),'success');C.loaded=false;renderCatalog();await _catLoad();}
+    catch(e){toast(_catErrText(e),'error');try{_logError('catalog category delete: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+  }});
+}
+// Up or down among its siblings: the two rows swap their sort values.
+async function _catCatMove(id,dir){
+  const C=_cat(),c=_catById(id);if(!c)return;
+  const sib=(c.parent_id?_catSubs(c.parent_id):_catTop());
+  const i=sib.indexOf(c),j=i+dir;if(i<0||j<0||j>=sib.length)return;
+  const rows=sib.map((x,k)=>({id:x.id,sort:k}));rows[i].sort=j;rows[j].sort=i;
+  try{
+    for(const rw of[rows[i],rows[j]]){const r=await sb.from('catalog_categories').update({sort:rw.sort}).eq('id',rw.id);if(r.error)throw r.error;}
+    C.loaded=false;await _catLoad();
+  }catch(e){toast(t('catSaveErr'),'error');try{_logError('catalog category move: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+}
+async function _catCatTogglePub(id){
+  const C=_cat(),c=_catById(id);if(!c)return;
+  const on=!c.published;c.published=on;renderCatalog();
+  const r=await sb.from('catalog_categories').update({published:on}).eq('id',id);
+  if(r.error){c.published=!on;renderCatalog();toast(t('catSaveErr'),'error');}
+}
+// ── Specification fields ────────────────────────────────────────────────────
+function _catFldEdit(key){
+  const C=_cat(),f=key?C.fields.find(x=>x.key===key):null;
+  C.fed={isNew:!f,busy:false,err:'',d:f?JSON.parse(JSON.stringify(f)):{key:'',label_en:'',label_ar:'',group_en:'',group_ar:'',unit_en:'',unit_ar:'',sort:(C.fields.length+1)*10}};
+  C.view='fields';renderCatalog();
+  setTimeout(()=>{const i=document.getElementById(f?'cf-label-en':'cf-key');if(i)i.focus();},60);
+}
+function _catFldClose(){_cat().fed=null;renderCatalog();}
+function _catFldIn(field,v){const F=_cat().fed;if(!F)return;F.d[field]=v;const e=document.getElementById('cf-err');if(e)e.hidden=true;}
+async function _catFldSave(){
+  const C=_cat(),F=C.fed;if(!F||F.busy)return;
+  const d=F.d;d.key=String(d.key||'').trim().toLowerCase().replace(/[^a-z0-9_]+/g,'_').replace(/^_+|_+$/g,'');d.label_en=String(d.label_en||'').trim();
+  const err=m=>{F.err=m;const e=document.getElementById('cf-err');if(e){e.textContent=m;e.hidden=false;}};
+  if(!CAT_KEY.test(d.key)){err(t('catErrFieldKey'));return;}
+  if(!d.label_en){err(t('catErrFieldLabel'));return;}
+  if(F.isNew&&C.fields.some(f=>f.key===d.key)){err(t('catErrFieldTaken'));return;}
+  F.busy=true;
+  try{
+    const row={key:d.key,label_en:d.label_en,label_ar:String(d.label_ar||'').trim(),group_en:String(d.group_en||'').trim(),group_ar:String(d.group_ar||'').trim(),unit_en:String(d.unit_en||'').trim(),unit_ar:String(d.unit_ar||'').trim(),sort:Number(d.sort)||0};
+    const r=await sb.from('catalog_spec_fields').upsert(row,{onConflict:'key'});if(r.error)throw r.error;
+    toast(t('catSaved'),'success');C.fed=null;C.loaded=false;renderCatalog();await _catLoad();
+  }catch(e){F.busy=false;err(t('catSaveErr'));try{_logError('catalog field save: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+}
+function _catFldDelete(key){
+  const C=_cat();if(!C.fields.some(f=>f.key===key))return;
+  confirmDialog({title:t('catDeleteFieldTitle'),body:esc(t('catDeleteFieldBody')),confirmLabel:t('deleteBtn'),onConfirm:async()=>{
+    try{const r=await sb.from('catalog_spec_fields').delete().eq('key',key);if(r.error)throw r.error;toast(t('catDeleted'),'success');C.loaded=false;renderCatalog();await _catLoad();}
+    catch(e){toast(t('catSaveErr'),'error');try{_logError('catalog field delete: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
+  }});
+}
+// ── Rendering ───────────────────────────────────────────────────────────────
+const _catImg=(u,w)=>u?esc(_webAbs(u))+(/^\/media\//.test(u)?'?w='+(w||640):''):'';
+function _catBiField(id,label,enV,arV,onEn,onAr,opts){
+  opts=opts||{};const tag=opts.long?'textarea':'input',max=opts.max||140;
+  const one=(lang,dir,v,on,sfx)=>tag==='textarea'
+    ?`<textarea id="${id}${sfx}" dir="${dir}" lang="${lang}" rows="${opts.rows||4}" maxlength="${max}" placeholder="${lang==='en'?'English':'العربية'}" oninput="${on}">${esc(v||'')}</textarea>`
+    :`<input id="${id}${sfx}" type="text" dir="${dir}" lang="${lang}" maxlength="${max}" placeholder="${lang==='en'?'English':'العربية'}" value="${esc(v||'')}" oninput="${on}">`;
+  return`<div class="web-ed-field"><label class="web-ed-lbl" for="${id}">${esc(label)}</label>${opts.hint?`<div class="web-hint">${esc(opts.hint)}</div>`:''}<div class="web-ed-bi">${one('en','ltr',enV,onEn,'')}${one('ar','rtl',arV,onAr,'-ar')}</div></div>`;
+}
+function _catEditorHtml(){
+  const C=_cat(),ed=C.ed,d=ed.d;
+  const top=_catTop(),subs=d.category_id?_catSubs(d.category_id):[];
+  const sel=(id,opts,cur,on,extra)=>`<select id="${id}" onchange="${on}"${extra||''}>${opts.map(o=>`<option value="${esc(o.v)}"${o.v===(cur==null?'':String(cur))?' selected':''}>${esc(o.l)}</option>`).join('')}</select>`;
+  const catOpts=top.map(c=>({v:c.id,l:_catBi(c.name_en,c.name_ar)}));
+  const subOpts=[{v:'',l:t('catNoSubtype')}].concat(subs.map(c=>({v:c.id,l:_catBi(c.name_en,c.name_ar)})));
+  const rideOpts=[{v:'',l:t('catRideNone')}].concat(CAT_RIDE_TYPES.map(x=>({v:x,l:x})));
+  // The specification fields, by group, in their order.
+  const groups=[];C.fields.forEach(f=>{const g=_catBi(f.group_en,f.group_ar);let G=groups.find(x=>x.name===g);if(!G){G={name:g,fields:[]};groups.push(G);}G.fields.push(f);});
+  const specs=groups.map(G=>`${G.name?`<div class="cat-spec-group">${esc(G.name)}</div>`:''}${G.fields.map(f=>{const v=d.specs[f.key]||{};const unit=_catBi(f.unit_en,f.unit_ar);
+    return`<div class="cat-spec"><div class="cat-spec-lbl">${esc(_catBi(f.label_en,f.label_ar))}${unit?` <small>(${esc(unit)})</small>`:''}</div>
+      <input type="text" dir="ltr" lang="en" maxlength="200" placeholder="English" value="${esc(v.en||'')}" aria-label="${esc(f.label_en)} (English)" oninput="_catSpecIn(${_ja(f.key)},'en',this.value)">
+      <input type="text" dir="rtl" lang="ar" maxlength="200" placeholder="العربية" value="${esc(v.ar||'')}" aria-label="${esc(f.label_en)} (العربية)" oninput="_catSpecIn(${_ja(f.key)},'ar',this.value)"></div>`;}).join('')}`).join('');
+  const colours=ed.colors.map((c,i)=>`<div class="cat-row">
+      <input id="ce-col-${i}-en" type="text" dir="ltr" lang="en" maxlength="40" placeholder="${esc(t('catColourName'))} (English)" aria-label="${esc(t('catColourName'))} (English)" value="${esc(c.name_en||'')}" oninput="_catColIn(${i},'name_en',this.value)">
+      <input type="text" dir="rtl" lang="ar" maxlength="40" placeholder="${esc(t('catColourName'))} (العربية)" aria-label="${esc(t('catColourName'))} (العربية)" value="${esc(c.name_ar||'')}" oninput="_catColIn(${i},'name_ar',this.value)">
+      <input type="color" aria-label="${esc(t('catColourHex'))}" value="${esc(/^#[0-9a-fA-F]{6}$/.test(c.hex||'')?c.hex:'#1a1919')}" oninput="_catColIn(${i},'hex',this.value)">
+      <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdUp'))}" ${i===0?'disabled':''} onclick="_catColMove(${i},-1)">↑</button>
+      <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdDown'))}" ${i===ed.colors.length-1?'disabled':''} onclick="_catColMove(${i},1)">↓</button>
+      <button type="button" class="btn-sm btn-red" onclick="_catColDel(${i})">${t('removeBtn')}</button></div>`).join('');
+  const colOpts=[{v:'',l:t('catAnyColour')}].concat(ed.colors.map(c=>({v:c.id,l:c.name_en||'—'})));
+  const photos=ed.photos.map((p,i)=>`<div class="cat-photo${p.is_cover?' cover':''}">
+      <img src="${_catImg(p.url,640)}" alt="${esc(p.alt_en||'')}" loading="lazy">
+      <div class="cat-photo-tools">
+        <button type="button" class="cat-pub${p.is_cover?' on':''}" aria-pressed="${!!p.is_cover}" onclick="_catPhotoCover(${i})">${t('catCover')}</button>
+        ${sel('ce-ph-col-'+i,colOpts,p.color_id||'',`_catPhotoIn(${i},'color_id',this.value)`,` aria-label="${esc(t('catPhotoColour'))}"`)}
+      </div>
+      <input type="text" dir="ltr" lang="en" maxlength="140" placeholder="${esc(t('catAlt'))} (English)" aria-label="${esc(t('catAlt'))} (English)" value="${esc(p.alt_en||'')}" oninput="_catPhotoIn(${i},'alt_en',this.value)">
+      <input type="text" dir="rtl" lang="ar" maxlength="140" placeholder="${esc(t('catAlt'))} (العربية)" aria-label="${esc(t('catAlt'))} (العربية)" value="${esc(p.alt_ar||'')}" oninput="_catPhotoIn(${i},'alt_ar',this.value)">
+      <div class="cat-photo-tools">
+        <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdUp'))}" ${i===0?'disabled':''} onclick="_catPhotoMove(${i},-1)">↑</button>
+        <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdDown'))}" ${i===ed.photos.length-1?'disabled':''} onclick="_catPhotoMove(${i},1)">↓</button>
+        <button type="button" class="btn-sm btn-red" onclick="_catPhotoDel(${i})">${t('removeBtn')}</button></div>
+    </div>`).join('');
+  const sheet=d.spec_sheet?`<a href="${esc(_webAbs(d.spec_sheet))}" target="_blank" rel="noopener noreferrer" class="cat-slug">${esc(d.spec_sheet.split('/').pop())}</a> <button type="button" class="btn-sm btn-secondary" onclick="_catSheetPick()">${t('catUploadSheet')}</button> <button type="button" class="btn-sm btn-red" onclick="_catSheetRemove()">${t('removeBtn')}</button>`
+    :`<span class="web-muted">—</span> <button type="button" class="btn-sm btn-secondary" onclick="_catSheetPick()">${t('catUploadSheet')}</button>`;
+  return`<div class="card web-card" id="cat-editor">
+    <div class="section-label">${ed.isNew?t('catAddModel').replace(/^\+\s*/,''):esc((d.brand?d.brand+' ':'')+d.name)}</div>
+    <div class="cat-grid2">
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-brand">${t('catBrand')}</label><input id="ce-brand" type="text" dir="ltr" maxlength="60" value="${esc(d.brand||'')}" oninput="_catIn('brand',this.value)"></div>
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-name">${t('catName')}</label><input id="ce-name" type="text" dir="ltr" maxlength="80" value="${esc(d.name||'')}" oninput="_catIn('name',this.value)"></div>
+    </div>
+    <div class="web-ed-field"><label class="web-ed-lbl" for="ce-slug">${t('catSlug')}</label><input id="ce-slug" type="text" dir="ltr" maxlength="80" value="${esc(d.slug||'')}" oninput="_catIn('slug',this.value)"><div class="web-hint" id="ce-slug-hint">${esc(t('catSlugHint').replace('{0}',_catPath(Object.assign({},d,{slug:d.slug||'…'}))))}</div></div>
+    <div class="cat-grid4">
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-cat">${t('catCategory')}</label>${sel('ce-cat',catOpts,d.category_id,'_catCatIn(this.value)')}</div>
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-sub">${t('catSubtype')}</label>${sel('ce-sub',subOpts,d.subtype_id||'',`_catIn('subtype_id',this.value||null)`,subs.length?'':' disabled')}</div>
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-year">${t('catYear')}</label><input id="ce-year" type="number" inputmode="numeric" min="1990" max="2100" step="1" value="${d.model_year==null?'':esc(d.model_year)}" oninput="_catIn('model_year',this.value)"></div>
+      <div class="web-ed-field"><label class="web-ed-lbl" for="ce-ride">${t('catRideType')}</label>${sel('ce-ride',rideOpts,d.ride_type||'',`_catIn('ride_type',this.value||null)`)}<div class="web-hint">${t('catRideTypeHint')}</div></div>
+    </div>
+    ${_catBiField('ce-tag',t('catTagline'),d.tagline_en,d.tagline_ar,"_catIn('tagline_en',this.value)","_catIn('tagline_ar',this.value)",{max:140})}
+    ${_catBiField('ce-desc',t('catDescription'),d.description_en,d.description_ar,"_catIn('description_en',this.value)","_catIn('description_ar',this.value)",{long:true,rows:6,max:4000,hint:t('catDescHint')})}
+    <div class="web-ed-field"><div class="web-ed-lbl">${t('catSpecs')}</div><div class="web-hint">${t('catSpecsHint')}</div>${specs||`<div class="web-muted">${t('catFieldsEmpty')}</div>`}</div>
+    <div class="web-ed-field"><div class="web-ed-lbl">${t('catColours')}</div>${colours}<div class="web-ed-list-foot"><button type="button" class="btn-sm btn-secondary" onclick="_catColAdd()">${t('catAddColour')}</button></div></div>
+    <div class="web-ed-field"><div class="web-ed-lbl">${t('catPhotos')} <span class="web-muted num">${ed.photos.length}</span></div><div class="web-hint">${t('catPhotosHint')}</div>
+      ${ed.photos.length?`<div class="cat-photos">${photos}</div>`:''}
+      <div class="web-ed-list-foot"><button type="button" class="btn-sm btn-secondary" ${ed.busy?'disabled':''} onclick="_catPhotosPick()">${t('catUploadPhotos')}</button></div></div>
+    <div class="web-ed-field"><div class="web-ed-lbl">${t('catSheet')}</div><div class="cat-row">${sheet}</div></div>
+    <label class="web-switch"><input type="checkbox" class="web-toggle" role="switch" id="ce-pub" ${d.published?'checked':''} onchange="_catIn('published',this.checked)"><span>${t('catPublished')}</span></label>
+    <div class="cat-err" id="ce-err" role="alert" ${ed.err?'':'hidden'}>${esc(ed.err||'')}</div>
+    <div class="web-actions">
+      ${ed.isNew?'':`<button type="button" class="btn-red" onclick="_catDelete(${_ja(ed.id)})">${t('deleteBtn')}</button>`}
+      <button type="button" class="btn-secondary" onclick="_catEdClose()">${t('cancelBtn')}</button>
+      <button type="button" class="btn-primary" id="ce-save" onclick="_catSave()" ${ed.dirty&&!ed.busy?'':'disabled'}>${t('saveBtn')}</button>
+    </div>
+  </div>`;
+}
+function _catModelsHtml(){
+  const C=_cat();
+  const q=String(C.q||'').trim().toLowerCase();
+  const rows=C.models.filter(m=>!q||(m.brand+' '+m.name+' '+m.slug).toLowerCase().includes(q));
+  const bar=`<div class="cat-bar">
+    <div class="${_srchCls('cat',C.q)}" data-srch="cat">${_artIcon('search',13)}<input type="search" value="${esc(C.q||'')}" placeholder="${esc(t('catSearchPh'))}" aria-label="${esc(t('catSearchPh'))}" oninput="_cat().q=this.value;renderCatalog()">${_srchBtn()}</div>
+    <button type="button" class="btn-primary btn-sm" onclick="_catEdit(null)" ${_catTop().length?'':'disabled'}>${t('catAddModel')}</button></div>`;
+  const note=_catTop().length?'':`<div class="web-hint">${t('catNoCats')}</div>`;
+  const table=rows.length?`<div class="table-wrapper"><table class="web-table cat-table"><thead><tr><th></th><th>${t('catColModel')}</th><th>${t('catColCategory')}</th><th>${t('catColRide')}</th><th>${t('catColPhotos')}</th><th>${t('catColPublished')}</th><th>${t('catColUpdated')}</th><th></th></tr></thead><tbody>
+    ${rows.map(m=>{const c=_catById(m.category_id),s=m.subtype_id?_catById(m.subtype_id):null;const ph=C.photos.filter(p=>p.model_id===m.id);const cover=ph.find(p=>p.is_cover)||ph[0];
+      return`<tr data-model="${esc(m.slug)}"><td>${cover?`<img class="cat-thumb" src="${_catImg(cover.url,640)}" alt="" loading="lazy">`:'<span class="cat-thumb-empty" aria-hidden="true"></span>'}</td>
+      <td data-sort="${esc((m.brand+' '+m.name).trim())}"><strong>${esc((m.brand?m.brand+' ':'')+m.name)}</strong><div class="cat-slug">${esc(_catPath(m))}</div></td>
+      <td>${esc(c?_catBi(c.name_en,c.name_ar):'—')}${s?` › ${esc(_catBi(s.name_en,s.name_ar))}`:''}</td>
+      <td>${esc(m.ride_type||'—')}</td><td class="num">${ph.length}</td>
+      <td data-sort="${m.published?1:0}"><button type="button" class="cat-pub${m.published?' on':''}" aria-pressed="${!!m.published}" onclick="_catTogglePub(${_ja(m.id)})">${m.published?t('catPublishedShort'):t('catDraft')}</button></td>
+      <td class="num">${esc(fmtStamp(m.updated_at))}</td>
+      <td><span class="cat-tools"><button type="button" class="btn-sm btn-secondary" onclick="_catEdit(${_ja(m.id)})">${t('editBtn')}</button>${m.published?`<button type="button" class="btn-sm btn-secondary" onclick="_webPreview(${_ja(_catPath(m))})">${t('catPreview')}</button>`:''}</span></td></tr>`;}).join('')}
+    </tbody></table></div>`:`<div class="web-muted">${C.models.length?t('catNoMatch'):t('catEmptyModels')}</div>`;
+  return`${C.ed?_catEditorHtml():''}<div class="card web-card">${bar}${note}${table}</div>`;
+}
+function _catCatFormHtml(){
+  const E=_cat().ced,d=E.d,parent=d.parent_id?_catById(d.parent_id):null;
+  return`<div class="web-ed-item" id="cat-cat-editor">
+    <div class="web-ed-item-head"><strong>${parent?esc(_catBi(parent.name_en,parent.name_ar))+' › ':''}${E.isNew?t(parent?'catAddSub':'catAddCat').replace(/^\+\s*/,''):esc(_catBi(d.name_en,d.name_ar))}</strong></div>
+    <div class="web-ed-field"><label class="web-ed-lbl" for="cc-name-en">${t('catCatName')}</label><div class="web-ed-bi">
+      <input id="cc-name-en" type="text" dir="ltr" lang="en" maxlength="60" placeholder="English" value="${esc(d.name_en||'')}" oninput="_catCatIn2('name_en',this.value)">
+      <input id="cc-name-ar" type="text" dir="rtl" lang="ar" maxlength="60" placeholder="العربية" value="${esc(d.name_ar||'')}" oninput="_catCatIn2('name_ar',this.value)"></div></div>
+    <div class="web-ed-field"><label class="web-ed-lbl" for="cc-slug">${t('catCatSlug')}</label><input id="cc-slug" type="text" dir="ltr" maxlength="60" value="${esc(d.slug||'')}" oninput="_catCatIn2('slug',this.value)"><div class="web-hint">/bikes/${parent?esc(parent.slug)+'/':''}…</div></div>
+    ${_catBiField('cc-blurb',t('catCatBlurb'),d.blurb_en,d.blurb_ar,"_catCatIn2('blurb_en',this.value)","_catCatIn2('blurb_ar',this.value)",{long:true,rows:3,max:300})}
+    <div class="web-ed-field"><div class="web-ed-lbl">${t('catCatCover')}</div><div class="web-ed-img">${d.cover?`<img src="${_catImg(d.cover,640)}" alt="" loading="lazy">`:'<span class="web-muted">—</span>'}
+      <button type="button" class="btn-sm btn-secondary" onclick="_catCatCoverPick()">${t('webEdUpload')}</button>${d.cover?`<button type="button" class="btn-sm btn-red" onclick="_catCatCoverRemove()">${t('removeBtn')}</button>`:''}</div></div>
+    <label class="web-switch"><input type="checkbox" class="web-toggle" role="switch" ${d.published!==false?'checked':''} onchange="_catCatIn2('published',this.checked)"><span>${t('catCatPublished')}</span></label>
+    <div class="cat-err" id="cc-err" role="alert" ${E.err?'':'hidden'}>${esc(E.err||'')}</div>
+    <div class="web-actions"><button type="button" class="btn-secondary" onclick="_catCatClose()">${t('cancelBtn')}</button><button type="button" class="btn-primary" id="cc-save" onclick="_catCatSave()">${t('saveBtn')}</button></div>
+  </div>`;
+}
+function _catCatsHtml(){
+  const C=_cat(),E=C.ced;
+  const row=(c,sib,i)=>{const nM=_catModelsIn(c.id).length,nS=c.parent_id?0:_catSubs(c.id).length;
+    return`<li class="${c.parent_id?'sub':''}" data-cat="${esc(c.slug)}"><strong>${esc(_catBi(c.name_en,c.name_ar))}</strong><span class="cat-slug">/${esc(c.slug)}</span>
+      <span class="web-muted">${t('catCatModels').replace('{0}',nM)}${nS?' · '+t('catCatSubs').replace('{0}',nS):''}</span>
+      <button type="button" class="cat-pub${c.published?' on':''}" aria-pressed="${!!c.published}" onclick="_catCatTogglePub(${_ja(c.id)})">${c.published?t('catPublishedShort'):t('catHidden')}</button>
+      <span class="cat-tools">
+        <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdUp'))}" ${i===0?'disabled':''} onclick="_catCatMove(${_ja(c.id)},-1)">↑</button>
+        <button type="button" class="btn-sm btn-secondary" aria-label="${esc(t('webEdDown'))}" ${i===sib.length-1?'disabled':''} onclick="_catCatMove(${_ja(c.id)},1)">↓</button>
+        ${c.parent_id?'':`<button type="button" class="btn-sm btn-secondary" onclick="_catCatEdit(null,${_ja(c.id)})">${t('catAddSub')}</button>`}
+        <button type="button" class="btn-sm btn-secondary" onclick="_catCatEdit(${_ja(c.id)})">${t('editBtn')}</button>
+        <button type="button" class="btn-sm btn-red" ${nM||nS?'disabled':''} onclick="_catCatDelete(${_ja(c.id)})">${t('deleteBtn')}</button></span></li>
+      ${E&&!E.isNew&&E.id===c.id?`<li>${_catCatFormHtml()}</li>`:''}`;};
+  const top=_catTop();
+  const list=top.map((c,i)=>{const subs=_catSubs(c.id);return row(c,top,i)+subs.map((s,k)=>row(s,subs,k)).join('')+(E&&E.isNew&&E.d.parent_id===c.id?`<li class="sub">${_catCatFormHtml()}</li>`:'');}).join('');
+  return`<div class="card web-card"><div class="section-label">${t('catViewCats')}</div><div class="page-sub web-card-sub">${t('catCatsSub')}</div>
+    ${list?`<ul class="cat-tree">${list}</ul>`:`<div class="web-muted">${t('catCatEmpty')}</div>`}
+    ${E&&E.isNew&&!E.d.parent_id?_catCatFormHtml():''}
+    <div class="web-ed-list-foot"><button type="button" class="btn-sm btn-secondary" onclick="_catCatEdit(null,null)">${t('catAddCat')}</button></div></div>`;
+}
+function _catFldFormHtml(){
+  const F=_cat().fed,d=F.d;
+  return`<div class="web-ed-item" id="cat-field-editor">
+    <div class="cat-grid2">
+      <div class="web-ed-field"><label class="web-ed-lbl" for="cf-key">${t('catFieldKey')}</label><input id="cf-key" type="text" dir="ltr" maxlength="40" value="${esc(d.key||'')}" ${F.isNew?'':'readonly'} oninput="_catFldIn('key',this.value)"><div class="web-hint">${t('catFieldKeyHint')}</div></div>
+      <div class="web-ed-field"><label class="web-ed-lbl" for="cf-sort">${t('catFieldSort')}</label><input id="cf-sort" type="number" inputmode="numeric" step="1" value="${esc(d.sort==null?'':d.sort)}" oninput="_catFldIn('sort',this.value)"></div>
+    </div>
+    ${_catBiField('cf-label',t('catFieldLabel'),d.label_en,d.label_ar,"_catFldIn('label_en',this.value)","_catFldIn('label_ar',this.value)",{max:60})}
+    ${_catBiField('cf-group',t('catFieldGroup'),d.group_en,d.group_ar,"_catFldIn('group_en',this.value)","_catFldIn('group_ar',this.value)",{max:60})}
+    ${_catBiField('cf-unit',t('catFieldUnit'),d.unit_en,d.unit_ar,"_catFldIn('unit_en',this.value)","_catFldIn('unit_ar',this.value)",{max:12})}
+    <div class="cat-err" id="cf-err" role="alert" ${F.err?'':'hidden'}>${esc(F.err||'')}</div>
+    <div class="web-actions"><button type="button" class="btn-secondary" onclick="_catFldClose()">${t('cancelBtn')}</button><button type="button" class="btn-primary" id="cf-save" onclick="_catFldSave()">${t('saveBtn')}</button></div>
+  </div>`;
+}
+function _catFieldsHtml(){
+  const C=_cat(),F=C.fed;
+  const used=key=>C.models.filter(m=>m.specs&&m.specs[key]).length;
+  const table=C.fields.length?`<div class="table-wrapper"><table class="web-table"><thead><tr><th>${t('catFieldKey')}</th><th>${t('catFieldLabel')}</th><th>${t('catFieldGroup')}</th><th>${t('catFieldUnit')}</th><th>${t('catFieldSort')}</th><th>${t('catFieldUsed')}</th><th></th></tr></thead><tbody>
+    ${C.fields.map(f=>`<tr data-field="${esc(f.key)}"><td class="cat-slug">${esc(f.key)}</td><td>${esc(f.label_en)}${f.label_ar?` <span class="web-muted" lang="ar">${esc(f.label_ar)}</span>`:''}</td><td>${esc(_catBi(f.group_en,f.group_ar))}</td><td>${esc(_catBi(f.unit_en,f.unit_ar))}</td><td class="num">${f.sort}</td><td class="num">${used(f.key)}</td>
+      <td><span class="cat-tools"><button type="button" class="btn-sm btn-secondary" onclick="_catFldEdit(${_ja(f.key)})">${t('editBtn')}</button><button type="button" class="btn-sm btn-red" onclick="_catFldDelete(${_ja(f.key)})">${t('deleteBtn')}</button></span></td></tr>`).join('')}
+    </tbody></table></div>`:`<div class="web-muted">${t('catFieldsEmpty')}</div>`;
+  return`<div class="card web-card"><div class="section-label">${t('catViewFields')}</div><div class="page-sub web-card-sub">${t('catFieldsSub')}</div>${table}
+    ${F?_catFldFormHtml():''}
+    <div class="web-ed-list-foot"><button type="button" class="btn-sm btn-secondary" onclick="_catFldEdit(null)">${t('catAddField')}</button></div></div>`;
+}
+function renderCatalog(){
+  const el=document.getElementById('tab-catalog');if(!el)return;
+  const C=_cat();
+  if(!C.loaded&&!C.busy&&!C.err)_catLoad();
+  const head=`<div class="section-header"><div><div class="page-title">${t('tabCatalog')}</div><div class="page-sub">${t('catSub')}</div></div>
+    <div class="web-head-btns"><button type="button" class="btn-primary btn-sm" onclick="_webPreview('/bikes')">${t('catOpenSite')}</button></div></div>`;
+  if(!C.loaded&&!C.err){el.innerHTML=head+`<div class="card web-card" role="status">${t('loadingLabel')}…</div>`;return;}
+  if(C.err&&!C.loaded){
+    const missing=C.err.code==='PGRST205'||C.err.code==='42P01';
+    el.innerHTML=head+`<div class="card web-card web-note" role="alert">${missing?t('webNotSetUp'):t('catLoadErr')} <button type="button" class="btn-sm btn-secondary" onclick="_cat().err=null;renderCatalog()">${t('retryBtn')}</button></div>`;return;
+  }
+  const pill=(k,l,n)=>`<button type="button" class="filter-pill${C.view===k?' active':''}" aria-pressed="${C.view===k}" onclick="_cat().view=${_ja(k)};renderCatalog()">${l}${n!=null?` <span class="num">${n}</span>`:''}</button>`;
+  const pills=`<div class="cat-pills" role="group" aria-label="${esc(t('tabCatalog'))}">${pill('models',t('catViewModels'),C.models.length)}${pill('categories',t('catViewCats'),C.cats.length)}${pill('fields',t('catViewFields'),C.fields.length)}</div>`;
+  el.innerHTML=head+pills+(C.view==='categories'?_catCatsHtml():C.view==='fields'?_catFieldsHtml():_catModelsHtml());
 }
 function renderHistory(_resultsOnly){
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='hist-search-input'&&document.getElementById('hist-results'))_resultsOnly=true;
@@ -28339,7 +28862,7 @@ function _hasStoredAuth(){try{for(let i=0;i<localStorage.length;i++){if(/^sb-.*-
 function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
-  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','workshop','messages','ambassadors','dashboard','team'].includes(st)?st:'';
+  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','dashboard','team'].includes(st)?st:'';
 }
 (async()=>{
   S.loggedIn=getSession();
