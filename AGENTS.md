@@ -111,3 +111,21 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
 - `queue_entries.to_reserve` (migration 20260915120000) is a staff mark read straight off the
   table; `entryFromDB` maps it to `toReserve`. `reserveBike()` sends `to_reserve:false` only when
   the rider carries the mark, so a client from before the column never sends the field.
+
+## Addresses: every section and sub-view has its own path (2026-09-27)
+- The router lives beside `_pushNav` in `app.src.html`: `STAFF_PATHS` (staff tab → first
+  segment: `/bookings`, `/sales`, `/inventory`, `/website/bikes`…), `CUST_PATHS` (`/reserve`,
+  `/my-bookings`, `/account`; the event picker is `/`) and `SUB_PATHS` (a sub-view's second
+  segment: `/bookings/waitlist`, `/community/applications`, `/history/log`). `_pathFor`,
+  `_parsePath` and `_setSub` are the only places that know the mapping; state ↔ address goes
+  through them. Bookings stays date-less; a picked ride travels as `?session=<id>`.
+- The same list is repeated, deliberately, in `functions/_middleware.js` (`APP_ROUTE`: a 404 for
+  one of these addresses is answered with the app; `STAFF_ROUTE`: the live customer host sends a
+  staff address on to `staff.micromobility.sa`), in `service-worker.js` (the shell is served for
+  these paths, but only a fetch of `/` is ever stored under the shell key) and in
+  `scripts/serve.mjs` (the test server). `tests/paths.spec.ts` fails when the four disagree, so
+  a new section is added in all four, then in `tests/paths.spec.ts` if it has sub-views.
+- Asset addresses in the app are root-relative (`/styles.css`, `/vendor/…`, `/lang/…`): a page
+  at `/bookings/waitlist` must still find them. Never write `./x` in the source.
+- The suite runs on `node scripts/serve.mjs` (Cloudflare Pages + the middleware, stood in for),
+  not Python's http.server, which 404s a reload on `/bookings`. `npm run serve` is the same.

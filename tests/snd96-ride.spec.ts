@@ -32,7 +32,7 @@ test('the event picker carries the National Day card, with the official lockup',
   const card = page.locator('.landing-event-card.ev-snd96');
   await expect(card).toBeVisible();
   await expect(card).toContainText('Saudi National Day 96 Ride');
-  await expect(card.locator('img')).toHaveAttribute('src', 'assets/snd96-logo.svg');
+  await expect(card.locator('img')).toHaveAttribute('src', '/assets/snd96-logo.svg');
 });
 
 test('once the ride is over the card is gone, and the other two stay', async ({ page }) => {

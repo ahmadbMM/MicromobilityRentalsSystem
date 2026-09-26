@@ -22,7 +22,7 @@ export default defineConfig({
     { name: 'mobile', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
-    command: `python3 -m http.server ${PORT}`,
+    command: `node scripts/serve.mjs ${PORT}`, // Pages and its middleware, stood in for (the app's own addresses answer with the app)
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
   },

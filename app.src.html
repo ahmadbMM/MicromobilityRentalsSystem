@@ -33,15 +33,15 @@
        as on the script tag that runs it (end of body): Chromium only hands a preload to a
        request whose SRI metadata matches, so a bare preload was thrown away and the 200 KB
        file fetched twice. -->
-  <link rel="preload" as="script" href="./vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil">
+  <link rel="preload" as="script" href="/vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil">
   <!-- Preload the primary UI font weights (body + bold) so first paint has them, avoiding a text-swap flash -->
-  <link rel="preload" as="font" type="font/woff2" href="./fonts/Barlow-500-latin.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="./fonts/BarlowCond-800i-latin.woff2" crossorigin>
-  <link href="./fonts/fonts.css?v=7" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/Barlow-500-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/BarlowCond-800i-latin.woff2" crossorigin>
+  <link href="/fonts/fonts.css?v=7" rel="stylesheet">
   <!-- The tab wears the mark alone, square, the same 1 KB file every Micromobility site
        carries. logo.png is the wordmark lockup: 241x256, so a tab squashed it, and the
        word under the mark was a grey smudge at 16 px. -->
-  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <!-- Each language address names ITSELF as canonical. One static href="/" told search engines
        that /?lang=ar and every other alternate below was a copy of the English root, so they
        dropped those addresses and the hreflang set with them. It is written here, from ?lang
@@ -110,28 +110,28 @@
     }
   }
   </script>
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <!-- iOS PWA launch (splash) screens, per device. iOS shows one only when its pixel size is
        exactly the device's screen (width x height x pixel ratio, the size in the file name);
        the dark set was once exported at twice that, so every one was ignored. ?v= moves with
        the bytes, since /splash/ is cached as immutable. -->
-  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./splash/iphone-640x1136.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./splash/iphone-750x1334.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="./splash/iphone-828x1792.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1125x2436.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1170x2532.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1179x2556.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1206x2622.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1242x2688.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1284x2778.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1290x2796.png?v=2">
-  <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="./splash/iphone-1320x2868.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-640x1136.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-750x1334.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/iphone-828x1792.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1125x2436.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1170x2532.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1179x2556.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1206x2622.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1242x2688.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1284x2778.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1290x2796.png?v=2">
+  <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/iphone-1320x2868.png?v=2">
   <!-- crossorigin because the loading screen uses this file as a CSS mask, and masks are
        fetched in CORS mode: without it the preload's credentials mode differs, Chromium
        discards it and fetches the mark a second time. -->
-  <link rel="preload" as="image" type="image/svg+xml" href="./assets/brand-mark-white.svg" crossorigin>
-  <link rel="stylesheet" href="./styles.css?v=142">
+  <link rel="preload" as="image" type="image/svg+xml" href="/assets/brand-mark-white.svg" crossorigin>
+  <link rel="stylesheet" href="/styles.css?v=142">
 <script>try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');localStorage.removeItem('cq_staff_theme');if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
 <body>
@@ -145,7 +145,7 @@
   // set here because t() does not exist for another second or two. Same ten languages as
   // the picker; anything else falls through to English.
   var _ldL={en:'Loading',ar:'جارٍ التحميل',es:'Cargando',fr:'Chargement',pt:'Carregando',ur:'لوڈ ہو رہا ہے',hi:'लोड हो रहा है',tl:'Naglo-load',ne:'लोड हुँदैछ',bn:'লোড হচ্ছে'};
-  document.getElementById('loading-screen').setAttribute('aria-label',_ldL[_bl]||_ldL.en);}catch(e){}try{if(_bl&&_bl!=='en'){window.__langPackCode=_bl;window.__langPack=fetch('lang/'+_bl+'.json'+(window.__LANG_V&&window.__LANG_V[_bl]?'?v='+window.__LANG_V[_bl]:'')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});}}catch(e){}</script>
+  document.getElementById('loading-screen').setAttribute('aria-label',_ldL[_bl]||_ldL.en);}catch(e){}try{if(_bl&&_bl!=='en'){window.__langPackCode=_bl;window.__langPack=fetch('/lang/'+_bl+'.json'+(window.__LANG_V&&window.__LANG_V[_bl]?'?v='+window.__LANG_V[_bl]:'')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});}}catch(e){}</script>
 </div>
 <script>
 // ── The brand loading state ──────────────────────────────────────────────────
@@ -225,7 +225,7 @@ window.mmLoading=(function(){
 
 <header id="topbar">
   <button type="button" class="topbar-logo" onclick="goLanding()" style="cursor:pointer;background:none;border:none;padding:0" aria-label="MicroMobility home">
-    <img id="topbar-logo-img" src="logo.png" alt="MicroMobility">
+    <img id="topbar-logo-img" src="/logo.png" alt="MicroMobility">
   </button>
   <div style="display:flex;align-items:center;gap:10px">
     <span class="lang-wrap"><svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg><select class="lang-toggle" id="lang-btn" onchange="setLang(this.value)" title="Switch language" aria-label="Switch language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="tl">Tagalog</option><option value="ne">नेपाली</option><option value="bn">বাংলা</option></select></span>
@@ -251,7 +251,7 @@ window.mmLoading=(function(){
         <div id="land-auth-cta" class="landing-auth-cta"></div>
       </div>
       <button class="landing-hero-card" onclick="landHeroClick()" aria-label="Jeddah Corniche Circuit">
-        <img src="hero.webp" alt="Corniche Circuit" fetchpriority="high">
+        <img src="/hero.webp" alt="Corniche Circuit" fetchpriority="high">
         <div class="landing-hero-card-cta">
           <div class="landing-hero-cta-btn" id="land-cta-arrow">&#8594;</div>
         </div>
@@ -355,7 +355,7 @@ window.mmLoading=(function(){
 <footer id="app-footer" class="mini-footer">
   <div class="mf-inner">
     <div class="mf-brand">
-      <img src="logo.png" alt="MicroMobility" class="mf-logo">
+      <img src="/logo.png" alt="MicroMobility" class="mf-logo">
     </div>
     <div class="mf-info">
       <div class="mf-contact">
@@ -443,7 +443,7 @@ window.mmLoading=(function(){
 
 <!-- Self-hosted (byte-identical to the jsdelivr CDN builds; SRI kept). Serving from our
      own origin means ad-blockers / privacy extensions / CDN outages can't break boot. -->
-<script defer src="./vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil"></script>
+<script defer src="/vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil"></script>
 <!-- qrcode-generator is loaded on demand (only when a QR/ticket renders) — see _loadQrcode() -->
 <script>
 
@@ -1297,7 +1297,7 @@ function t(k){return(LANG[S&&S.lang?S.lang:'en']||LANG.en)[k]||LANG.en[k]||k;}
 // A pack that fails to load is not an error the rider should see: t() keeps answering in
 // English, which is exactly what it did before any of this existed.
 const LANG_PACKS={}; // build stamps {code:contentHash} for cache-busting
-function _langPackUrl(c){return 'lang/'+c+'.json'+(LANG_PACKS[c]?'?v='+LANG_PACKS[c]:'');}
+function _langPackUrl(c){return '/lang/'+c+'.json'+(LANG_PACKS[c]?'?v='+LANG_PACKS[c]:'');}
 function _langLoaded(c){return c==='en'||!!(LANG[c]&&Object.keys(LANG[c]).length);}
 const _langFetches={};
 async function loadLangPack(code){
@@ -1636,7 +1636,7 @@ async function staffAuthRestore(){
   S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(uid,row.role);_accessSet(row,uid);
   setupRefRealtime();
 }
-async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);await staffAuthSignOut();window.location.href='./';}
+async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);await staffAuthSignOut();window.location.href='/';}
 function _clearPinLock(){try{localStorage.removeItem('cq_pin_until');localStorage.removeItem('cq_pin_lockouts');localStorage.removeItem('cq_pin_attempts');}catch(e){}}
 function _fmtLock(ms){const s=Math.ceil(ms/1000);if(s<60)return`${s}s`;const m=Math.floor(s/60),r=s%60;if(m<60)return r?`${m}m ${r}s`:`${m}m`;const h=Math.floor(m/60),rm=m%60;return rm?`${h}h ${rm}m`:`${h}h`;}
 
@@ -1897,7 +1897,7 @@ function _loadCities(country){
   const code=_NAT_CODE[country];
   if(!code)return Promise.resolve(null);
   if(_cityLists[code])return Promise.resolve(_cityLists[code]);
-  return _cityLoads[code]||(_cityLoads[code]=fetch('cities/'+code.toLowerCase()+'.json'+(CITIES_V?'?v='+CITIES_V:''))
+  return _cityLoads[code]||(_cityLoads[code]=fetch('/cities/'+code.toLowerCase()+'.json'+(CITIES_V?'?v='+CITIES_V:''))
     .then(r=>r.ok?r.json():null).catch(()=>null).then(list=>{
       delete _cityLoads[code]; // a failed load is tried again the next time the country is chosen
       if(!Array.isArray(list))return null;
@@ -3092,7 +3092,7 @@ function _loadQrcode(){
   if(window.qrcode)return Promise.resolve();
   if(!_qrcodeP)_qrcodeP=new Promise(res=>{
     const s=document.createElement('script');
-    s.src='./vendor/qrcode-generator-1.4.4.js';
+    s.src='/vendor/qrcode-generator-1.4.4.js';
     s.integrity='sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k';
     s.onload=()=>res();s.onerror=()=>{_qrcodeP=null;res();};
     document.head.appendChild(s);
@@ -5427,10 +5427,12 @@ function _isStaffHost(){try{return /^staff\./i.test(location.hostname);}catch(e)
 // local runs and the suite keep the old entrances.
 const STAFF_ORIGIN='https://staff.micromobility.sa';
 function _isLiveCustomerHost(h){return(h||location.hostname).toLowerCase()==='micromobilityrentals.pages.dev';}
-function _staffRedirectFor(h,search,staffEntry){
+function _staffRedirectFor(h,search,staffEntry,pathname){
   if(!_isLiveCustomerHost(h))return'';
   const q=new URLSearchParams(search||'');
   if(q.has('bike')){const b=String(q.get('bike')||'').trim();return STAFF_ORIGIN+'/'+(/^[0-9A-Za-z-]{1,40}$/.test(b)?'?bike='+b:'');}
+  const pn=_parsePath(pathname||'/');
+  if(pn&&pn.view==='staff')return STAFF_ORIGIN+_pathFor(pn)+(search||''); // a staff section's own address (2026-09-27)
   return q.has('staff')||staffEntry?STAFF_ORIGIN+'/':'';
 }
 function _staffHostGate(){if(localStorage.getItem('cq_staff')==='1')goStaff();else{showView('landing');openPinModal();}}
@@ -5454,7 +5456,90 @@ function showView(v){
 let _navRestoring=false;
 // ev + step ride along so browser Back also walks the event picker choice and the
 // Reserve wizard's steps (3 → 2 → 1 → landing), not just view/tab changes.
-function _navState(){return {view:S.view,ctab:S.custTab,stab:S.staffTab,ev:S.selEvent,step:S.regStep};}
+// ── Addresses: every section and sub-view has its own path ──────────────────
+// The owner's rule (2026-09-27): every section and page of the app has an address of its own, so a
+// link can be shared and a reload comes back to the same place. The staff sections are the words
+// on the rail - /bookings, /dashboard, /sales, /inventory, /workshop, /community, /ambassadors,
+// /website, /messages, /analytics, /history, /team - with a sub-view as a second segment
+// (/bookings/waitlist, /community/applications, /website/bikes for the catalogue); the customer
+// pages are /reserve, /my-bookings and /account, and the event picker is /. The server
+// (functions/_middleware.js) answers these addresses with the app and the service worker serves
+// them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
+// Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
+// page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
+const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'community',ambassadors:'ambassadors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team'};
+const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account'};
+// A section's sub-views and their segments; '' is the section's own page. 'waitlist' is the old
+// name of the queue's 'managed' view (setStaffTab still takes it), so both read as /bookings/waitlist.
+const SUB_PATHS={
+  queue:{bookings:'',sessions:'sessions',managed:'waitlist',waitlist:'waitlist',petromin:'riders'},
+  history:{rides:'',log:'log'},
+  inventory:{bikes:'',supplements:'supplements',equipment:'equipment'},
+  community:{leaderboard:'',stats:'stats',accounts:'accounts',flagged:'flagged',applications:'applications',birthdays:'birthdays'},
+  catalog:{models:'',categories:'categories',fields:'fields'},
+};
+const _WEB_PAGE=/^[a-z][a-z0-9_-]{0,40}$/,_SESSION_ID=/^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6})?$/;
+function _subOf(tab){
+  const m=SUB_PATHS[tab];
+  if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
+  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'leaderboard'):((S.cat&&S.cat.view)||'models');
+  return m[v]||'';
+}
+// Opens the sub-view a segment names; a segment that names none opens the section's own page.
+function _setSub(tab,seg){
+  seg=String(seg||'');
+  if(tab==='website'){const mm=/^pages\/([a-z][a-z0-9_-]{0,40})$/.exec(seg);_webEd().page=mm?mm[1]:'home';return;}
+  const m=SUB_PATHS[tab];if(!m)return;
+  const key=Object.keys(m).find(k=>k!=='waitlist'&&m[k]===seg)||Object.keys(m).find(k=>m[k]==='');
+  if(tab==='queue'){
+    // This tab's memory of the queue (its status filter, the Petromin night) still applies; the
+    // address decides the view itself.
+    if(!S._qvRestored){S._qvRestored=true;_restoreQueueView();}
+    S.queueView=key;if(key==='petromin'&&(!S.ridersSession||S.ridersSession==='all'))S.ridersSession=_pmDefaultNight()||'all';
+  }
+  else if(tab==='history')S.histView=key;
+  else if(tab==='inventory')S.invSection=key;
+  else if(tab==='community')S.communityTab=key;
+  else if(tab==='catalog')_cat().view=key;
+}
+function _pathFor(st){
+  if(st.view==='staff'){const b=STAFF_PATHS[st.stab]||'bookings';return'/'+b+(st.sub?'/'+st.sub:'');}
+  if(st.view==='customer')return'/'+(CUST_PATHS[st.ctab]||'reserve');
+  return'/';
+}
+// What an address names: {root:true} for /, null for an address that is not one of the app's, else
+// the view and section, with the sub-view's segment. Case and a trailing slash are forgiven.
+function _parsePath(pathname){
+  const segs=String(pathname||'/').toLowerCase().split('/').filter(Boolean);
+  if(!segs.length)return{root:true};
+  const ctab=Object.keys(CUST_PATHS).find(k=>CUST_PATHS[k]===segs[0]);
+  if(ctab)return segs.length===1?{view:'customer',ctab}:null;
+  if(segs[0]==='website'&&segs[1]==='bikes')return segs.length<=3?{view:'staff',stab:'catalog',sub:segs[2]||''}:null;
+  const stab=Object.keys(STAFF_PATHS).find(k=>STAFF_PATHS[k]===segs[0]);
+  if(!stab||segs.length>3)return null;
+  return{view:'staff',stab,sub:segs.slice(1).join('/')};
+}
+function _pathState(pathname){const pn=_parsePath(pathname);return pn&&!pn.root?pn:null;}
+// The query stays as it is, but for ?session=, which is Bookings' own (see above).
+function _navSearch(st){
+  const q=new URLSearchParams(location.search);
+  const sid=st.view==='staff'&&st.stab==='queue'&&S._sfPicked?String(S.sfSession||''):'';
+  if(_SESSION_ID.test(sid))q.set('session',sid);else q.delete('session');
+  const qs=q.toString();return qs?'?'+qs:'';
+}
+function _navUrl(st){return _pathFor(st)+_navSearch(st)+location.hash;}
+// /bookings?session=<id>: the ride the link names, when it exists; else tonight's, as always. A
+// reload is not a link: it lands on tonight's ride whatever the address carried (the 2026-09-22
+// rule - a tab left open overnight must not come back on yesterday), and the address is cleaned.
+function _openSessionParam(){
+  try{
+    const nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
+    if(nav&&nav.type==='reload')return;
+    const sid=new URLSearchParams(location.search).get('session')||'';
+    if(S.view==='staff'&&S.staffTab==='queue'&&_SESSION_ID.test(sid)&&S.sfSession!==sid&&allSessions().some(x=>x.id===sid))setSfSession(sid);
+  }catch(e){}
+}
+function _navState(){return {view:S.view,ctab:S.custTab,stab:S.staffTab,sub:S.view==='staff'?_subOf(S.staffTab):'',ev:S.selEvent,step:S.regStep};}
 function _saveNav(){try{sessionStorage.setItem('cq_nav',JSON.stringify(_navState()));}catch(e){}}
 function _loadNav(){try{const r=sessionStorage.getItem('cq_nav');return r?JSON.parse(r):null;}catch(e){return null;}}
 function _pushNav(){
@@ -5463,17 +5548,19 @@ function _pushNav(){
   try{
     // Every render path calls this, so identical consecutive states used to STACK -
     // each browser Back then popped a clone and visibly did nothing. Replace when
-    // nothing changed; push only real transitions.
+    // nothing changed; push only real transitions (a sub-view is one). The address
+    // follows either way.
     const c=history.state;
-    if(c&&c.view===st.view&&c.ctab===st.ctab&&c.stab===st.stab&&c.ev===st.ev&&c.step===st.step)history.replaceState(st,'');
-    else history.pushState(st,'');
+    const same=c&&c.view===st.view&&c.ctab===st.ctab&&c.stab===st.stab&&(c.sub||'')===(st.sub||'')&&c.ev===st.ev&&c.step===st.step;
+    if(same)history.replaceState(st,'',_navUrl(st));
+    else history.pushState(st,'',_navUrl(st));
   }catch(e){}
   _saveNav();
 }
 function _applyNav(st){
   if(!st)return;
   _navRestoring=true;
-  if(st.view==='staff'&&localStorage.getItem('cq_staff')==='1'){goStaff();if(st.stab)setStaffTab(st.stab);}
+  if(st.view==='staff'&&localStorage.getItem('cq_staff')==='1'){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
   else if(st.view==='customer'&&getSession()){
     if(st.ev)S.selEvent=st.ev;
     if(st.step&&(st.ctab||'register')==='register')S.regStep=st.step;
@@ -5481,8 +5568,10 @@ function _applyNav(st){
   }
   else{goLanding();}
   _navRestoring=false;_saveNav();
+  try{const now=_navState();history.replaceState(now,'',_navUrl(now));}catch(e){} // the address names where this landed
 }
-window.addEventListener('popstate',function(e){_applyNav(e.state||_loadNav());});
+// Back and Forward: the entry's own state, else what its address names, else this tab's memory.
+window.addEventListener('popstate',function(e){_applyNav(e.state||_pathState(location.pathname)||_loadNav());});
 
 function goLanding(){if(_isStaffHost()){_staffHostGate();return;}showView('landing');renderLandingAvail();_pushNav();}
 // Which event a session belongs to: 'community' rows are private events (the customer only
@@ -5964,9 +6053,9 @@ async function _openEventLink(){
     if(await _handoffToSite(who))return;
   }
   let tab=null;try{tab=sessionStorage.getItem(_TABLINK_KEY);}catch(e){}
-  if(tab==='myrides'&&S.dataLoaded&&S.view==='landing'&&(S.loggedIn||getSession())){
+  if((tab==='myrides'||tab==='account')&&S.dataLoaded&&S.view==='landing'&&(S.loggedIn||getSession())){
     try{sessionStorage.removeItem(_TABLINK_KEY);}catch(e){}
-    setCustTab('myrides');
+    setCustTab(tab);
     return;
   }
   let dl=null;try{dl=JSON.parse(sessionStorage.getItem(_EVLINK_KEY)||'null');}catch(e){}
@@ -6514,20 +6603,20 @@ function renderLandingAvail(){
               <span class="lec-title">${t('landSnd96CardTitle')}</span>
               <span class="lec-meta">${t('landSnd96Meta')}</span>
             </span>
-            <span class="lec2-logo"><img src="assets/snd96-logo.svg" alt="${esc(t('evSnd96Name'))}" loading="lazy" decoding="async" onerror="this.remove()"></span>
+            <span class="lec2-logo"><img src="/assets/snd96-logo.svg" alt="${esc(t('evSnd96Name'))}" loading="lazy" decoding="async" onerror="this.remove()"></span>
           </button>`:''}
           <button class="landing-event-card lec2 ev-jcc" onclick="selectEvent('jcc')">
             <span class="lec2-copy">
               <span class="lec-title">${t('landJccCardTitle')}</span>
               <span class="lec-meta">${t('landJccMeta')}</span>
             </span>
-            <span class="lec2-logo"><img src="jcc.png" class="mm-on-light" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" onerror="this.remove()"><img src="jcc-white.png" class="mm-on-dark" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" onerror="this.remove()"></span>
+            <span class="lec2-logo"><img src="/jcc.png" class="mm-on-light" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" onerror="this.remove()"><img src="/jcc-white.png" class="mm-on-dark" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" onerror="this.remove()"></span>
           </button>
           <button class="landing-event-card community lec2 ev-community" onclick="selectEvent('community')">
             <span class="lec2-copy">
               <span class="lec-title">${t('landCommTitle')}</span>
             </span>
-            <span class="lec2-logo" aria-hidden="true"><img src="logo-dark.png" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="logo.png" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
+            <span class="lec2-logo" aria-hidden="true"><img src="/logo-dark.png" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="/logo.png" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
           </button>
         </div>`;
     }
@@ -8189,7 +8278,7 @@ function renderPinModal(){
   modal.style.display='flex';
   modal.innerHTML=`<div class="pin-backdrop" onclick="if(event.target===this)closePinModal()">
     <div class="pin-box" id="pin-box">
-      <img class="pin-logo" src="logo.png" alt="">
+      <img class="pin-logo" src="/logo.png" alt="">
       <div class="pin-title">${t('pinTitle')}</div>
       ${isLocked
         ?`<div class="pin-sub" style="color:var(--red);font-weight:700;text-align:center">${t('pinLocked').replace('{0}',_fmtLock(remaining))}</div>`
@@ -8779,7 +8868,7 @@ function renderRegister(){
   // skin is one class on <body> (styles.css owns the palette), the lockup one banner here.
   _syncSndTheme();
   const _sndHead=_sndOn()?`<div class="snd-flow-head">
-      <img src="assets/snd96-logo.svg" class="snd-flow-logo" alt="${esc(t('evSnd96Name'))}" decoding="async" onerror="this.remove()">
+      <img src="/assets/snd96-logo.svg" class="snd-flow-logo" alt="${esc(t('evSnd96Name'))}" decoding="async" onerror="this.remove()">
       <div class="snd-flow-name">${esc(t('evSnd96Name'))}</div>
     </div>`:'';
   document.getElementById('tab-register').innerHTML=_sndHead+body;
@@ -14328,7 +14417,7 @@ function _pmChipHtml(sid){
   const on=S.queueView==='petromin'&&S.ridersSession===sid;
   return`<div class="sess-summary-chip pm-chip community ev-petromin${on?' active-sess':''}" onclick="openPetrominPage(${_ja(sid)})" title="${esc(t('pmChipTitle'))} · ${dayLabel(s.day)} ${shortDate(_pmDate(s))} · ${esc(sessionTime(s))}">
     <div class="sess-chip-info">
-      <div class="pm-chip-head"><img class="pm-logo" src="assets/petromin-logo.png" alt="Petromin" width="58" height="24"><span class="pm-chip-lbl">${t('pmChipLabel')}</span></div>
+      <div class="pm-chip-head"><img class="pm-logo" src="/assets/petromin-logo.png" alt="Petromin" width="58" height="24"><span class="pm-chip-lbl">${t('pmChipLabel')}</span></div>
       <div class="sess-chip-date">${dayLabel(s.day)}, ${shortDate(_pmDate(s))} &nbsp;·&nbsp; ${sessionTime(s)}</div>
       <div class="sess-chip-counts">${S.ridersLoaded?`<span style="color:var(--green)">${regs.length} ${t('pmRegistered')}</span>${nIn?` &middot; <span style="color:var(--text)">${nIn} ${t('ridersFilterRiding').toLowerCase()}</span>`:''}${nOut?` &middot; <span style="color:var(--muted)">${nOut} ${t('ridersFilterReturned').toLowerCase()}</span>`:''}`:'&nbsp;'}</div>
     </div>
@@ -14402,6 +14491,7 @@ function _sessStripHtml(){
     </div></div>`;
 }
 function renderStaffQueue(_resultsOnly){
+  _pushNav(); // the address follows the view (Bookings / Sessions / Waitlist / Riders)
   try{_ahRefresh();}catch(_){} // a booking edited from Bookings & history lands here, whichever tab is open
   try{const tb=document.getElementById('topbar');if(tb)document.documentElement.style.setProperty('--topbar-h',tb.offsetHeight+'px');}catch(_){}
   S._qScrollY=window.scrollY; // a repaint replaces the whole tab; the page must not move under the staffer
@@ -16655,7 +16745,7 @@ async function pushNotify(customerId,title,message,url,tag){
     if(!tok)return; // staff-only endpoint; nothing to send with
     await fetch('/api/push-send',{
       method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({staffToken:tok,customerId,title,message,url:url||'./',tag:tag||'mm-general'}),
+      body:JSON.stringify({staffToken:tok,customerId,title,message,url:url||'/',tag:tag||'mm-general'}),
     });
   }catch(e){/* a failed notification must never block the booth */}
 }
@@ -16696,7 +16786,7 @@ async function _autoPromoteOldestWaitlist(sessionId){
     await _consumeAddonsOnEnter(e); // promoted booking now reserves its add-on stock
     // Auto-promotion happens without anyone watching, which is exactly when a banner on a
     // staff phone is least likely to be seen — so this path especially needs the push.
-    pushNotify(e.customerId,t('pushPromotedTitle'),t('pushPromotedBody').replace('{0}',e.queueNum),'./','booking-'+e.id);
+    pushNotify(e.customerId,t('pushPromotedTitle'),t('pushPromotedBody').replace('{0}',e.queueNum),'/','booking-'+e.id);
     return e; // truthy for existing callers; the entry lets them show the WhatsApp nudge
   }
   return false;
@@ -18843,7 +18933,7 @@ function _loadJsQR(){
   if(window.jsQR)return Promise.resolve(window.jsQR);
   if(!_jsqrPromise)_jsqrPromise=new Promise((res,rej)=>{
     const s=document.createElement('script');
-    s.src='./vendor/jsqr-1.4.0.js'; // self-hosted (see vendor/), same bytes + SRI as the CDN build
+    s.src='/vendor/jsqr-1.4.0.js'; // self-hosted (see vendor/), same bytes + SRI as the CDN build
     s.integrity='sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx';
     s.onload=()=>res(window.jsQR);
     s.onerror=()=>{_jsqrPromise=null;rej(new Error('jsQR load failed'));};
@@ -22371,7 +22461,7 @@ function renderRiders(_resultsOnly){
   const sessSel=sessIds.length?`<select class="filter-select" onchange="setRidersSession(this.value)" aria-label="${esc(t('colSession'))}"><option value="all"${S.ridersSession==='all'?' selected':''}>${t('ridersFilterAll')}</option>${sessIds.map(id=>`<option value="${esc(id)}"${S.ridersSession===id?' selected':''}>${shortDate(id.slice(0,10))} (${all.filter(r=>r.session_id===id).length})</option>`).join('')}</select>`:'';
   host.innerHTML=`
     <div class="section-header" style="margin-bottom:8px">
-      <div><div class="page-title pm-title"><img class="pm-logo-lg" src="assets/petromin-logo.png" alt="Petromin" width="87" height="36"><span>${t('ridersTitle')}</span></div><div class="page-sub" style="margin-bottom:0">${t('ridersSub')}</div></div>
+      <div><div class="page-title pm-title"><img class="pm-logo-lg" src="/assets/petromin-logo.png" alt="Petromin" width="87" height="36"><span>${t('ridersTitle')}</span></div><div class="page-sub" style="margin-bottom:0">${t('ridersSub')}</div></div>
       <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
         ${isAdmin()?`<button class="btn-sm btn-muted" onclick="openRidersReport()">${ICON_PRINT} ${t('ridersReport')}</button>`:''}
         <button class="btn-sm btn-muted" onclick="showRiderWalkin()">${_artIcon('person',12)} ${t('ridersWalkinBtn')}</button>
@@ -23796,6 +23886,7 @@ function _webEditorHtml(){
     <div class="web-ed-tabs" role="group" aria-label="${esc(t('webEditor'))}">${tabs}</div>${secs}</div>`;
 }
 function renderWebsite(){
+  _pushNav(); // the address follows the view (the page being edited)
   const el=document.getElementById('tab-website');if(!el)return;
   const W=_web();
   if(!W.loaded&&!W.busy)_webLoad();
@@ -24355,6 +24446,7 @@ function _catFieldsHtml(){
     <div class="web-ed-list-foot"><button type="button" class="btn-sm btn-secondary" onclick="_catFldEdit(null)">${t('catAddField')}</button></div></div>`;
 }
 function renderCatalog(){
+  _pushNav(); // the address follows the view (Models / Categories / Fields)
   const el=document.getElementById('tab-catalog');if(!el)return;
   const C=_cat();
   if(!C.loaded&&!C.busy&&!C.err)_catLoad();
@@ -24370,6 +24462,7 @@ function renderCatalog(){
   el.innerHTML=head+pills+(C.view==='categories'?_catCatsHtml():C.view==='fields'?_catFieldsHtml():_catModelsHtml());
 }
 function renderHistory(_resultsOnly){
+  _pushNav(); // the address follows the view (Rides / Log)
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='hist-search-input'&&document.getElementById('hist-results'))_resultsOnly=true;
   const _hvPills=`<div class="filter-row" style="margin-bottom:12px">
     <button class="filter-pill${(S.histView||'rides')==='rides'?' active':''}" onclick="S.histView='rides';renderHistory()">${t('histTabRides')}</button>
@@ -26098,6 +26191,7 @@ function _shareReorderList(){
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
 }
 function renderInventory(){
+  _pushNav(); // the address follows the view (Bikes / Supplements / Equipment)
   _keepScroll(); // keep scroll position across the in-place rebuild
   const el=document.getElementById('tab-inventory');if(!el)return;
   try{_sanitizeFlavours();}catch(e){}
@@ -26757,7 +26851,7 @@ const PHONE_RULES_RETRY_MS=10*60*1000;
 function _loadPhoneRules(){
   if(_phoneRules||_phoneRulesReq||typeof fetch!=='function')return;
   if(_phoneRulesFailAt&&Date.now()-_phoneRulesFailAt<PHONE_RULES_RETRY_MS)return;
-  _phoneRulesReq=fetch('assets/phone-rules.json?v='+PHONE_RULES_V).then(r=>r.ok?r.json():null).then(j=>{
+  _phoneRulesReq=fetch('/assets/phone-rules.json?v='+PHONE_RULES_V).then(r=>r.ok?r.json():null).then(j=>{
     if(!j||!j.codes){_phoneRulesFailAt=Date.now();return;}
     _phoneRules=j.codes;
     // Only what the checks feed is touched: the filter's count and, while it is on, the rows.
@@ -27289,6 +27383,7 @@ function _commBoard(){
   return{leaderboardView,statsView};
 }
 function renderCommunity(){
+  _pushNav(); // the address follows the view (its tabs)
   const el=document.getElementById('tab-community');if(!el)return;
   // The leaderboard and statistics, then accounts, the flagged list, the membership applications and birthdays.
   const sub=['stats','accounts','flagged','applications','birthdays'].includes(S.communityTab)?S.communityTab:'leaderboard';
@@ -28866,6 +28961,10 @@ function _bootStaffTab(nav){
 }
 (async()=>{
   S.loggedIn=getSession();
+  // The address as opened, read before anything here touches it; and nothing writes an address
+  // until the boot has chosen a view (the snapshot paint below draws the roster first).
+  const _bootPath=location.pathname;
+  _navRestoring=true;
   // A known staff device with a stored auth session paints the last snapshot NOW, before the
   // deferred supabase-js script and the auth round trip - the two waits that used to stand
   // between opening the app and seeing the roster. The auth verdict below only ever takes the
@@ -28938,20 +29037,30 @@ function _bootStaffTab(nav){
   
   const _staffEntry=sessionStorage.getItem('cq_staff_entry')==='1';
   if(_staffEntry)sessionStorage.removeItem('cq_staff_entry');
-  {const _to=_staffRedirectFor(location.hostname,location.search,_staffEntry);if(_to){location.replace(_to);return;}}
+  // The address names a section (2026-09-27: _pathFor and friends). One that is not one of the
+  // app's own is put back to /, and the app opens as it does there.
+  const _pathNav=_parsePath(_bootPath);
+  if(_pathNav===null){try{history.replaceState(history.state,'','/'+location.search+location.hash);}catch(e){}}
+  const _pathStaff=!!(_pathNav&&_pathNav.view==='staff');
+  {const _to=_staffRedirectFor(location.hostname,location.search,_staffEntry,_bootPath);if(_to){location.replace(_to);return;}}
   if(_isLiveCustomerHost()){document.body.classList.add('no-staff-entry');try{if(localStorage.getItem('cq_staff')==='1')_syncDrop();localStorage.removeItem('cq_staff');}catch(e){}} // a staff copy of the lists never stays on the customer address
   // /?bike=042 is what a bike's NFC tag holds (an NDEF URL record; iOS opens it in Safari on
   // tap). It is a staff URL and nothing else: the code comes off the address bar before any
   // view draws, is parked for goStaff() to consume once a staff session is confirmed, and a
   // device without one lands on the PIN screen with no bike on it anywhere.
   const _bikeCode=_readBikeParam();
-  const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||_isStaffHost();
+  const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
+  // /my-bookings and /account are parked the way ?tab=bookings is: they open once the rider is
+  // signed in and the sessions are in, through the same gates. /reserve is the event picker itself.
+  if(!_isStaffUrl&&_pathNav&&_pathNav.view==='customer'&&_pathNav.ctab!=='register'){try{sessionStorage.setItem(_TABLINK_KEY,_pathNav.ctab);sessionStorage.removeItem(_EVLINK_KEY);}catch(e){}}
+  // A staff link's ?staff has done its work: it comes off the address, as ?bike= does.
+  if(new URLSearchParams(location.search).has('staff')){try{const u=new URL(location.href);u.searchParams.delete('staff');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}catch(e){}}
   if(_isStaffHost())document.body.classList.add('staff-host');
 
   if(!S.loggedIn&&localStorage.getItem('cq_staff')!=='1'&&!_isStaffUrl){
     const g=await handleGoogleReturn();
-    if(g==='complete'){showView('customer');renderCustomerTabs();renderTopbarRight();openGoogleComplete();return;}
+    if(g==='complete'){_navRestoring=false;showView('customer');renderCustomerTabs();renderTopbarRight();openGoogleComplete();return;}
   }
   
   _navRestoring=true;
@@ -28979,8 +29088,10 @@ function _bootStaffTab(nav){
   try{
   if(target==='staff'){
     goStaff();
-    const stab=_bootStaffTab(nav);
+    const stab=_pathStaff?_pathNav.stab:_bootStaffTab(nav); // the address first, then this tab's memory
+    if(_pathStaff)_setSub(stab,_pathNav.sub);
     if(stab)setStaffTab(stab);
+    if(_pathStaff)_openSessionParam();
   } else if(target==='customer'){
     const ctab=(nav&&nav.ctab)||sessionStorage.getItem('cq_nav_ctab');
     goCustomer(ctab&&['register','myrides','account'].includes(ctab)?ctab:'register');
@@ -28998,7 +29109,7 @@ function _bootStaffTab(nav){
   }
   _navRestoring=false;
   _saveNav();
-  try{history.replaceState(_navState(),'');}catch(e){}
+  try{const _st=_navState();history.replaceState(_st,'',_navUrl(_st));}catch(e){} // the address names where the app opened
   if(new URLSearchParams(location.search).has('privacy'))try{showPrivacyNotice();}catch(e){} // the link people are sent
 })();
 
@@ -29651,7 +29762,7 @@ try{document.addEventListener('keydown',function(e){
 });}catch(e){}
 
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('service-worker.js').catch(e=>console.warn('SW registration failed:',e));});
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('/service-worker.js').catch(e=>console.warn('SW registration failed:',e));});
   // Self-updating shell: the SW messages us when a NEW deploy replaced the cached index.html.
   // If the page just opened and the user hasn't touched anything, reload silently so they run
   // the fresh build (stale builds caused 'Connection error' signups after fixes shipped).

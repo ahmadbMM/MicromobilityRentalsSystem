@@ -3,6 +3,17 @@
 // root; this blocks source, SQL, docs, configs, tests, dotfiles from the public.
 // App assets (.html/.css/.js/.png + manifest.json) pass through to next().
 const STAFF_ORIGIN = 'https://staff.micromobility.sa';
+// The app's own addresses (2026-09-27): one per section and sub-view - the same list as the
+// router in app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS) and service-worker.js (APP_ROUTE);
+// tests/paths.spec.ts checks the three agree. Pages has no file for /bookings/waitlist, so its
+// 404 is answered with the app itself, for a GET navigation only: the app then opens on that
+// section. Files always win, and anything else stays a 404.
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/|$)/;
+const isNavigation = (req) => {
+  const mode = req.headers.get('sec-fetch-mode');
+  return mode ? mode === 'navigate' : /text\/html/.test(req.headers.get('accept') || '');
+};
 
 export async function onRequest(context) {
   const raw = new URL(context.request.url).pathname;
@@ -53,8 +64,11 @@ export async function onRequest(context) {
   const reqUrl = new URL(context.request.url);
   if (reqUrl.hostname.toLowerCase() === 'micromobilityrentals.pages.dev') {
     const bike = (reqUrl.searchParams.get('bike') || '').trim();
-    if (path === '/staff' || path.startsWith('/staff/') || reqUrl.searchParams.has('staff') || reqUrl.searchParams.has('bike')) {
-      const to = STAFF_ORIGIN + '/' + (/^[0-9A-Za-z-]{1,40}$/.test(bike) ? '?bike=' + bike : '');
+    if (path === '/staff' || path.startsWith('/staff/') || STAFF_ROUTE.test(path) || reqUrl.searchParams.has('staff') || reqUrl.searchParams.has('bike')) {
+      // A staff section's own address keeps its path and query on the way over.
+      const to = STAFF_ROUTE.test(path) && !reqUrl.searchParams.has('bike')
+        ? STAFF_ORIGIN + path.replace(/\/+$/, '') + reqUrl.search
+        : STAFF_ORIGIN + '/' + (/^[0-9A-Za-z-]{1,40}$/.test(bike) ? '?bike=' + bike : '');
       return new Response(null, { status: 302, headers: { location: to, 'cache-control': 'no-store' } });
     }
   }
@@ -65,7 +79,11 @@ export async function onRequest(context) {
   if (staffHost && path === '/robots.txt') {
     return new Response('User-agent: *\nDisallow: /\n', { headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
-  const res = await context.next();
+  let res = await context.next();
+  if (res.status === 404 && context.request.method === 'GET' && APP_ROUTE.test(path) && isNavigation(context.request) && context.env && context.env.ASSETS) {
+    // The app shell, asked for as / (never /index.html, which Pages answers with a 308).
+    res = await context.env.ASSETS.fetch(new URL('/', context.request.url));
+  }
   if (!staffHost) return res;
   const out = new Response(res.body, res);
   out.headers.set('X-Robots-Tag', 'noindex, nofollow');

@@ -1,2 +1,4 @@
 # Internal files are hidden by functions/_middleware.js (runs before static serving).
 # 404.html is served automatically for unmatched paths.
+# The app's own addresses (/bookings, /sales, /my-bookings...) are answered with the app by
+# functions/_middleware.js, not here: a /* rule would shadow the real files.

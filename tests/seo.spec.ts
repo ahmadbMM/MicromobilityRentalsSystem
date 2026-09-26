@@ -126,7 +126,7 @@ test.describe('?lang addressing', () => {
 // favicon.png is the mark alone, square, and the same bytes on every Micromobility site.
 test.describe('the tab icon', () => {
   test('every page this site serves points at the shared square mark', async ({ page }) => {
-    for (const [file, href] of [['../index.html', 'favicon.png'], ['../404.html', '/favicon.png'], ['../staff/index.html', '/favicon.png']] as const) {
+    for (const [file, href] of [['../index.html', '/favicon.png'], ['../404.html', '/favicon.png'], ['../staff/index.html', '/favicon.png']] as const) {
       const html = await readFile(resolve(__dirname, file), 'utf8');
       expect(html, file).toContain(`<link rel="icon" type="image/png" href="${href}">`);
     }
@@ -155,8 +155,8 @@ test.describe('installed app chrome', () => {
   // was discarded and the library downloaded twice.
   test('the supabase-js preload carries the same integrity as its script tag', async () => {
     const html = await readFile(resolve(__dirname, '../index.html'), 'utf8');
-    const pre = html.match(/<link rel="preload" as="script" href="\.\/vendor\/supabase-js[^"]*"[^>]*integrity="([^"]+)"/)?.[1];
-    const tag = html.match(/<script[^>]* src="\.\/vendor\/supabase-js[^"]*"[^>]*integrity="([^"]+)"/)?.[1];
+    const pre = html.match(/<link rel="preload" as="script" href="\/vendor\/supabase-js[^"]*"[^>]*integrity="([^"]+)"/)?.[1];
+    const tag = html.match(/<script[^>]* src="\/vendor\/supabase-js[^"]*"[^>]*integrity="([^"]+)"/)?.[1];
     expect(pre).toBeTruthy();
     expect(pre).toBe(tag);
   });
@@ -182,7 +182,7 @@ test.describe('installed app chrome', () => {
     for (const [, media, href] of links) {
       const n = (k: string) => Number(media.match(new RegExp(`${k}:\\s*([\\d.]+)`))?.[1]);
       const ratio = n('-webkit-device-pixel-ratio');
-      const png = await readFile(resolve(__dirname, '..', href.replace(/\?.*$/, '')));
+      const png = await readFile(resolve(__dirname, '..', href.replace(/\?.*$/, '').replace(/^\//, '')));
       expect([png.readUInt32BE(16), png.readUInt32BE(20)], href).toEqual([n('device-width') * ratio, n('device-height') * ratio]);
     }
   });

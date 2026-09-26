@@ -30,8 +30,10 @@ async function startPagesMimic(): Promise<{ url: string; close: () => Promise<vo
     try { path = decodeURIComponent(new URL(req.url || '/', 'http://x').pathname); }
     catch { res.writeHead(400); res.end(); return; }
     if (path === '/index.html') { res.writeHead(308, { location: '/' }); res.end(); return; }
-    // Cloudflare serves <dir>/index.html for a trailing slash, which is how /staff/ works.
-    const file = join(root, path === '/' ? '/index.html' : (path.endsWith('/') ? path + 'index.html' : path));
+    // Cloudflare serves <dir>/index.html for a trailing slash, which is how /staff/ works; and
+    // functions/_middleware.js answers the app's own addresses (/bookings, /sales...) with the app.
+    const APP = /^\/(?:reserve|my-bookings|account|bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/[a-z0-9-]+){0,2}\/?$/;
+    const file = join(root, path === '/' || APP.test(path) ? '/index.html' : (path.endsWith('/') ? path + 'index.html' : path));
     if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
     // A stable ETag, as Cloudflare sends: without one the worker reports every shell as
     // changed and open pages reload themselves mid-navigation.
@@ -119,6 +121,40 @@ test('a page that is not the root is never answered from, or stored as, the shel
     // And a fresh visit to the root really does land on the app.
     await page.goto(site.url, { waitUntil: 'domcontentloaded' });
     expect(await page.evaluate(() => document.documentElement.innerHTML.length)).toBeGreaterThan(100000);
+  } finally {
+    await site.close();
+  }
+});
+
+test('a section\'s own address is answered from the shell, and never stored as it', async ({ page }) => {
+  // /sales and the other app addresses (2026-09-27) get the cached shell like the root, so a deep
+  // link opens offline too; what is written back under the shell key is a fetch of the root itself.
+  const site = await startPagesMimic();
+  await page.route(/supabase\.co|open-meteo\.com|cloudflareinsights\.com/, (r) => r.abort());
+  await stubRealtime(page);
+  try {
+    await page.goto(site.url, { waitUntil: 'load' });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });
+
+    const res = await page.goto(`${site.url}bookings/waitlist`, { waitUntil: 'domcontentloaded' });
+    expect(res?.status()).toBe(200);
+    expect(await page.evaluate(() => document.documentElement.innerHTML.length)).toBeGreaterThan(100000);
+    await page.waitForTimeout(1500);
+
+    const keys = await page.evaluate(async () => {
+      const out: string[] = [];
+      for (const n of await caches.keys()) for (const r of await (await caches.open(n)).keys()) out.push(new URL(r.url).pathname);
+      return out;
+    });
+    expect(keys).toContain('/');
+    expect(keys).not.toContain('/bookings/waitlist');
+    expect(keys).not.toContain('/index.html');
+    // The root shell is still the app, not the page that was asked for.
+    const shellLen = await page.evaluate(async () => {
+      for (const n of await caches.keys()) { const hit = await (await caches.open(n)).match('./'); if (hit) return (await hit.text()).length; }
+      return -1;
+    });
+    expect(shellLen).toBeGreaterThan(100000);
   } finally {
     await site.close();
   }

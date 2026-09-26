@@ -9,6 +9,16 @@ const CACHE = 'mmcq-bb885c78d5';
 // install time, every visit after the worker installed died on it, for good. './' is the
 // canonical shell URL and does not redirect.
 const SHELL_KEY = './';
+// The app's own addresses (2026-09-27): every section and sub-view has one (/bookings/waitlist,
+// /community/applications, /my-bookings...). They are answered with the shell like the root, so
+// a deep link opens offline too; the same list is in functions/_middleware.js (APP_ROUTE) and
+// app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS), and tests/paths.spec.ts checks they agree.
+// On the live customer host a staff address is not the shell's: the server sends it on to the
+// staff address, and the worker lets it through to the network so that it can.
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/|$)/;
+const LIVE_CUSTOMER_HOST = self.location.hostname === 'micromobilityrentals.pages.dev';
+const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
 const SHELL = [
   SHELL_KEY,
   './styles.css?v=c8592b97ac',
@@ -78,19 +88,20 @@ self.addEventListener('fetch', (e) => {
   // it in the background for next time (stale-while-revalidate). A new deploy therefore
   // applies on the next load rather than blocking this one. First-ever visit (nothing
   // cached) falls back to the network.
-  // ...but ONLY for the root. Every in-scope navigation used to be answered from this one
-  // cache entry and written back to it, so /staff/ - a real page whose whole job is to set the
-  // staff-entry flag and bounce to / - was served the customer app instead and never ran, and
-  // the background refresh then stored that stub UNDER the root key, handing the next visitor
-  // to / a page that bounces them into the staff entry. Anything that is not the root goes to
-  // the network and is never cached as the shell.
-  if (req.mode === 'navigate' && url.origin === self.location.origin && url.pathname !== '/' && url.pathname !== '/index.html') {
+  // ...but ONLY for the root and the app's own addresses (shellPage). Every in-scope navigation
+  // used to be answered from this one cache entry and written back to it, so /staff/ - a real
+  // page whose whole job is to set the staff-entry flag and bounce to / - was served the
+  // customer app instead and never ran, and the background refresh then stored that stub UNDER
+  // the root key, handing the next visitor to / a page that bounces them into the staff entry.
+  // Anything else goes to the network and is never cached as the shell; and what IS stored
+  // under the shell key is always a fetch of the root itself, never of the page asked for.
+  if (req.mode === 'navigate' && url.origin === self.location.origin && !shellPage(url.pathname)) {
     return;
   }
   if (req.mode === 'navigate') {
     e.respondWith(
       caches.match(SHELL_KEY).then((cached) => {
-        const refresh = fetch(req).then((res) => {
+        const refresh = fetch(new Request(SHELL_KEY, { cache: 'no-cache' })).then((res) => {
           const safe = navSafe(res); // never store redirect history under the shell key
           if (safe && safe.ok) {
             const copy = safe.clone();
