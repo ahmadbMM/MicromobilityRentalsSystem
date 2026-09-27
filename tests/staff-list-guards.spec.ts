@@ -56,12 +56,11 @@ test('a booking id that tries to break out of its handler stays an id', async ({
 });
 
 /** The first JSON string argument of an inline handler, e.g. showCheckinModal("…",event). */
+// The first real argument of a handler spec (data-on-*: JSON, the function's name first, then
+// the event and element placeholders a helper takes, then the arguments).
 function firstJsonArg(h: string): string | null {
-  const i = h.indexOf('("');
-  if (i < 0) return null;
-  let j = i + 2;
-  while (j < h.length && h[j] !== '"') j += h[j] === '\\' ? 2 : 1;
-  return JSON.parse(h.slice(i + 1, j + 1));
+  const args = (JSON.parse(h) as unknown[]).slice(1).filter((a) => !(a && typeof a === 'object' && '@' in (a as object)));
+  return args.length ? String(args[0]) : null;
 }
 
 test('every row action encodes the id, whatever the booking status', async ({ page }) => {
@@ -73,7 +72,7 @@ test('every row action encodes the id, whatever the booking status', async ({ pa
     const base={id,sessionId:'s0',queueNum:7,name:'Odd Id',status:'waiting',paid:false,price:75,typePreference:'Road'};
     ['waiting','waitlist','active','done','noshow','cancelled','other'].forEach(st=>{host.insertAdjacentHTML('beforeend',_entryActions({...base,status:st}));});
     host.insertAdjacentHTML('beforeend',_rowMenu('party:'+id,[{label:'x',run:'',act:()=>{}}]));
-    const hs=[];host.querySelectorAll('[onclick],[onchange]').forEach(b=>hs.push(b.getAttribute('onchange')||b.getAttribute('onclick')));
+    const hs=[];host.querySelectorAll('[data-on-click],[data-on-change]').forEach(b=>hs.push(b.getAttribute('data-on-change')||b.getAttribute('data-on-click')));
     return{imgs:host.querySelectorAll('img').length,hs};})()`) as { imgs: number; hs: string[] };
   expect(out.imgs).toBe(0);
   const got = out.hs.map(firstJsonArg).filter((x): x is string => x !== null);

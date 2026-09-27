@@ -167,3 +167,19 @@ Edit the source and rebuild; CI refuses a stale bundle, exactly as for `index.ht
 as PEM (`APPLE_PASS_CERT_PEM` + `APPLE_PASS_KEY_PEM`, preferred) or the Keychain `.p12`
 (`APPLE_PASS_P12_BASE64` + password); `GET /api/wallet-pass?selftest` signs a fixed manifest and
 names the certificate it used, which is how a deploy is checked without a booking.
+
+## Handlers live in attributes, not inline scripts (2026-09-27)
+
+The Content-Security-Policy in `_headers` allows no inline script: `onclick="..."` is dead on the
+page, and the build refuses it. Markup says what an event does in a `data-on-<event>` attribute
+holding JSON - `["togglePayment","q3",true]`, the name of a GLOBAL function and its arguments -
+and one document listener per event type runs it (`_onDispatch` at the top of the app script).
+From a template write `data-on-click="${_on('fn', id, 'lit')}"`; `_P('value')` (JSON `{"@":"value"}`) stands for
+`this.value` at the time of the event, `_EL` for the element, `_EV` for the event; several calls
+in a row are `_on(['a',1],['b'])`. Anything else (a guard on the key, a style flip, a state
+assignment) is a small named function `_on_<renderer>_<n>(event, el, ...)` placed right before
+the renderer, and the attribute names it. Static markup carries the JSON as written, in a
+single-quoted attribute. The inline `<script>` blocks are allowed by hash: the build writes the
+policy line into `_headers` from the built page (never edit that line by hand), and
+`tests/csp.spec.ts` walks every section under the real policy. Violations in production report
+to `/api/csp-report`.

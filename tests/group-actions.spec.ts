@@ -132,7 +132,7 @@ test('the Petromin registrations have their own page in Queue, opened from a log
   await expect(chip).toHaveCount(1);
   await expect(chip.locator('img.pm-logo')).toHaveAttribute('alt', 'Petromin');
   // Right after that night's own chip.
-  const order = await page.evaluate(`[...document.querySelectorAll('#tab-queue .sess-bar-desktop .sess-summary-chip')].map(c=>c.classList.contains('pm-chip')?'pm':c.getAttribute('onclick'))`) as string[];
+  const order = await page.evaluate(`[...document.querySelectorAll('#tab-queue .sess-bar-desktop .sess-summary-chip')].map(c=>c.classList.contains('pm-chip')?'pm':c.getAttribute('data-on-click'))`) as string[];
   expect(order.indexOf('pm')).toBe(order.findIndex(o => o && o.includes('2099-02-11-pw')) + 1);
   await expect(chip).toContainText('3 registered');
   await page.evaluate(`openPetrominPage('2099-02-11-pw')`);

@@ -30,7 +30,7 @@ async function openReport(page: Page) {
   await waitForSb(page);
   await page.evaluate(`setStaffTab('riders')`);
   await expect(page.locator('#pm-host tbody tr').first()).toBeVisible();
-  await page.locator('#pm-host button[onclick="openRidersReport()"]').click();
+  await page.locator('#pm-host button[data-on-click*="openRidersReport"]').click();
   await expect(page.locator('#rider-report-modal .modal-box')).toBeVisible();
 }
 

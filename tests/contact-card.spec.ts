@@ -49,7 +49,7 @@ test('the card carries what staff would otherwise come back for', async ({ page 
 test('the button is on every row and downloads a .vcf named for the rider', async ({ page }) => {
   await accounts(page);
   // The list is newest first, so pick the button by the id its handler carries.
-  const btn = page.locator(`.am-vcard[onclick*="c1"]`);
+  const btn = page.locator(`.am-vcard[data-on-click*="c1"]`);
   await expect(btn).toBeVisible();
   await expect(btn).toHaveAttribute('aria-label', 'Save contact');
   const [file] = await Promise.all([page.waitForEvent('download'), btn.click()]);
@@ -79,7 +79,7 @@ test('a phone hands the card to the share sheet instead of downloading it', asyn
     let got=null;
     navigator.canShare=(d)=>!!(d&&d.files&&d.files.length);
     navigator.share=(d)=>{got={name:d.files[0].name,type:d.files[0].type};return Promise.resolve();};
-    document.querySelector('.am-vcard[onclick*="c1"]').click();
+    document.querySelector('.am-vcard[data-on-click*="c1"]').click();
     return got;
   })()`) as { name: string; type: string } | null;
   expect(shared).not.toBeNull();
@@ -93,7 +93,7 @@ test('what is handed over starts at BEGIN:VCARD, with no byte-order mark in fron
     let text='';
     navigator.canShare=(d)=>!!(d&&d.files&&d.files.length);
     navigator.share=(d)=>{return d.files[0].text().then(t=>{text=t;});};
-    document.querySelector('.am-vcard[onclick*="c1"]').click();
+    document.querySelector('.am-vcard[data-on-click*="c1"]').click();
     return new Promise(r=>setTimeout(()=>r(text),120));
   })()`) as string;
   expect(first.startsWith('BEGIN:VCARD')).toBe(true);   // a BOM here is what broke the parse
@@ -116,7 +116,7 @@ test.describe('on an iPhone', () => {
     });
     const shared = await page.evaluate(`(()=>{window.__shared=false;navigator.share=()=>{window.__shared=true;return Promise.resolve();};navigator.canShare=()=>true;return 0;})()`);
     expect(shared).toBe(0);
-    const [tab] = await Promise.all([context.waitForEvent('page'), page.locator('.am-vcard[onclick*="c1"]').click()]);
+    const [tab] = await Promise.all([context.waitForEvent('page'), page.locator('.am-vcard[data-on-click*="c1"]').click()]);
     await tab.waitForLoadState();
     expect(tab.url()).toContain('/api/contact');
     const sent = new URLSearchParams(posted);

@@ -152,11 +152,11 @@ test('size labels come in the page language\'s unit, with no English words', asy
   expect(out[2]).toContain('سم');
 });
 
-test('inline handlers still work with their arguments encoded (social link sync, language menu)', async ({ page }) => {
+test('handlers still work with their arguments encoded (social link sync, language menu)', async ({ page }) => {
   await boot(page);
   const out = await page.evaluate(`(()=>{
     const host=document.createElement('div');host.innerHTML=_socFieldsHtml('pf',{instagram:'rider'},true);document.body.appendChild(host);
-    const inp=document.getElementById('pf-soc-instagram');inp.value='https://instagram.com/new.handle';inp.dispatchEvent(new Event('input'));
+    const inp=document.getElementById('pf-soc-instagram');inp.value='https://instagram.com/new.handle';inp.dispatchEvent(new Event('input',{bubbles:true}));
     const href=document.getElementById('pf-soc-instagram-open').getAttribute('href');host.remove();
     showLangMenu();const btn=[...document.querySelectorAll('.pay-menu-popup .pay-menu-opt')].find(b=>b.textContent==='Français');btn.click();
     const lang=S.lang;setLang('en');return {href,lang};

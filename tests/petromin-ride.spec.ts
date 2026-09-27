@@ -272,7 +272,7 @@ test.describe('staff side', () => {
     await page.evaluate(`setStaffTab('queue');S.sfSession='2099-01-13-pw';renderStaffQueue()`);
     const html = await page.evaluate(`document.getElementById('tab-queue').innerHTML`) as string;
     expect(html).toContain('#4');                       // the number is real, not hidden
-    expect(html).toContain('showPayMenu');             // and so is the fare (its pill holds Edit price too)
+    expect(html).toContain('class="pay-toggle');       // and so is the fare (its pill holds Edit price too)
     expect(html).not.toContain('apprPendingChip');      // nothing to approve
   });
 
@@ -287,11 +287,11 @@ test.describe('staff side', () => {
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    const carbon = page.locator(`#booking-edit-modal button[onclick*="S._beType='Road Carbon'"]`);
+    const carbon = page.locator(`#booking-edit-modal button[data-on-click*="Road Carbon"]`);
     await page.evaluate(`showBookingEditModal('p1')`);
     await expect(carbon).toHaveCount(1);
     await page.evaluate(`closeBookingEditModal();showBookingEditModal('s1b')`);
-    await expect(page.locator('#booking-edit-modal button[onclick*="S._beType="]').first()).toBeVisible();
+    await expect(page.locator('#booking-edit-modal button[data-on-click*="_on_showBookingEditModal_1"]').first()).toBeVisible();
     await expect(carbon).toHaveCount(0);
   });
 

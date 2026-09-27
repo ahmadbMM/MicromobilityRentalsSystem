@@ -656,8 +656,8 @@ test('Edit on a National Day booking opens the ride, and saving it is an edit, n
   expect(await page.evaluate(`document.body.classList.contains('snd96')`)).toBe(true);
   // the review step's button is the edit's own save, as the rider would press it
   await page.evaluate(`S.regStep=3;renderRegister();`);
-  const save = page.locator('.mm-reg-foot .btn-primary, button.btn-primary[onclick="submitModifyBooking()"]').first();
-  await expect(save).toHaveAttribute('onclick', 'submitModifyBooking()');
+  const save = page.locator('.mm-reg-foot .btn-primary, button.btn-primary[data-on-click*="submitModifyBooking"]').first();
+  await expect(save).toHaveAttribute('data-on-click', '["submitModifyBooking"]');
   await save.click();
   await page.waitForTimeout(800);
   expect(created).toEqual([]);                                                    // no new booking made

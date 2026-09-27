@@ -7,7 +7,7 @@
 //
 //   - the CUSTOMER half stays inline in index.html: every top-level statement a customer's page can
 //     reach, found by walking references from the roots - the statements that run at load, the
-//     on*="..." handlers in the page's own markup, the head's small scripts - through function
+//     on*="..." (now data-on-*) handlers in the page's own markup, the head's small scripts - through function
 //     bodies, template strings and handler strings (onclick="fn()" names a function by its name);
 //   - the STAFF half goes to staff.js, fetched the moment a staffer enters (goStaff, the sign-in,
 //     the staff address) and cached by the service worker like any versioned file.
@@ -91,6 +91,9 @@ export function splitStaff(html, staffUrl) {
   const outside = html.slice(0, open) + html.slice(close);
   const roots = new Set();
   for (const m of outside.matchAll(/\son[a-z]+="([^"]*)"/g)) wordsOf(m[1], roots);
+  // Handlers live in data-on-<event> attributes since 2026-09-27 (the CSP allows no inline script):
+  // JSON naming a global function - a word like any other to this walk.
+  for (const m of outside.matchAll(/\sdata-on-[a-z]+=(?:"([^"]*)"|'([^']*)')/g)) wordsOf(m[1] ?? m[2], roots);
   for (const m of outside.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)) wordsOf(m[1], roots);
   const bootStmts = stmts.filter((st) => st.node.type !== 'FunctionDeclaration'
     && !(st.node.type === 'VariableDeclaration' && st.node.declarations.every((d) => !d.init || PURE.has(d.init.type))));

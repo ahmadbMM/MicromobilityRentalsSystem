@@ -58,8 +58,8 @@ jobs:
         run: |
           npm run build:html
           npm run build:wallet
-          git diff --exit-code -- index.html service-worker.js staff.js functions/api/wallet-pass.js \
-            || { echo '::error::index.html/service-worker.js/staff.js/functions/api/wallet-pass.js are stale — run `npm run build:html && npm run build:wallet` and commit the result.'; exit 1; }
+          git diff --exit-code -- index.html service-worker.js staff.js _headers functions/api/wallet-pass.js \
+            || { echo '::error::index.html/service-worker.js/staff.js/_headers/functions/api/wallet-pass.js are stale — run `npm run build:html && npm run build:wallet` and commit the result.'; exit 1; }
       - name: Assemble dist/ (every referenced asset must be present)
         run: node scripts/assemble-dist.mjs
       - uses: actions/upload-artifact@v7

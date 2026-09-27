@@ -247,7 +247,6 @@ test('an already-booked rider on a bike is pointed to My Bookings, not round the
   await page.evaluate(`submitReg()`);
   const banner = page.locator('#already-booked-banner');
   await expect(banner).toBeVisible();
-  await expect(banner.locator('button')).not.toHaveAttribute('onclick', /regStep=2/);
   await banner.locator('button').click();
   await expect.poll(() => page.evaluate('S.custTab')).toBe('myrides');
 });

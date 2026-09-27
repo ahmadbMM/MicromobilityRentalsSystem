@@ -57,7 +57,7 @@ test('the CSV exports the rows the filters show', async ({ page }) => {
 test('a free ride is never offered for "mark paid", and a stale pick of one is ignored', async ({ page }) => {
   await boot(page, { queue_entries: [row('f1', 'Free Rider', S_FREE, TODAY, { price: 0 }), row('h2', 'Owing Rider', S_TODAY, TODAY, { price: 0 })] });
   await page.evaluate(`setStaffTab('history');renderHistory()`);
-  expect(await page.locator('#hist-results button[onclick*="toggleHistSelect"]').count()).toBe(1); // the owing one only
+  expect(await page.locator('#hist-results button[data-on-click*="toggleHistSelect"]').count()).toBe(1); // the owing one only
   const writes: { url: string; body: Record<string, unknown> }[] = [];
   page.on('request', (r) => { if (r.method() === 'PATCH' && /queue_entries/.test(r.url())) writes.push({ url: r.url(), body: r.postDataJSON() }); });
   await page.evaluate(`S.histSelected=['f1','h2'];bulkHistMarkPaid()`);

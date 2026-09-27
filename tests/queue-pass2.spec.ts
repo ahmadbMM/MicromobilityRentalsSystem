@@ -28,7 +28,7 @@ async function boot(page: import('@playwright/test').Page, rows: Record<string, 
 
 test('the payment pill opens one menu that also edits the price; the pencil is gone', async ({ page }) => {
   await boot(page, [row('q1')]);
-  await expect(page.locator(`button[onclick*="showEditPriceModal("]`)).toHaveCount(0);
+  await expect(page.locator(`button[data-on-click*="showEditPriceModal"]`)).toHaveCount(0);
   await page.locator('.pay-toggle:visible').first().click();
   const menu = page.locator('.pay-menu-popup');
   await expect(menu).toContainText('Pending');

@@ -100,7 +100,7 @@ test('the filter controls disappear with their columns', async ({ page }) => {
   await roster(page, SWIM);
   // the labels are display:none on mobile, so assert on the controls themselves
   const has = (fn: string) => page.evaluate(
-    `!!document.querySelector('#tab-queue [onchange*="${fn}"]')`) as Promise<boolean>;
+    `!!document.querySelector('#tab-queue [data-on-change*="${fn}"]')`) as Promise<boolean>;
   expect(await has('setSfPay'), 'payment filter').toBe(false);
   expect(await has('setSfBike'), 'bike type filter').toBe(false);
   expect(await has('setSfSize'), 'frame size filter').toBe(false);

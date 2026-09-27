@@ -879,7 +879,7 @@ test('staff edit a party: companions come filled in, one is changed, one removed
   await expect(modal.locator('#rw-r-type-1')).toHaveValue('Mountain');
 
   await page.fill('#rw-r-h-0', '152');                       // companion 2: taller than we thought
-  await modal.locator('button[onclick="_rwRemoveRider(1)"]').click(); // companion 3 is not coming
+  await modal.locator('button[data-on-click*="_rwRemoveRider"][data-on-click$=",1]"]').click(); // companion 3 is not coming
   await modal.locator('#rw-add-rider').click();                // a new companion
   await page.fill('#rw-r-name-1', 'Amal Niece');
   await page.fill('#rw-r-h-1', '140');

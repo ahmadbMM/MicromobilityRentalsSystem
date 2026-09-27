@@ -133,6 +133,6 @@ test('a parked booking still carries the roster controls', async ({ page }) => {
     desk_waitlist: [walkup('m1', 'Fully Settled', { kind: 'managed', sort_order: 1, booking_id: 'qb2' })],
   });
   const html = await page.evaluate(`document.getElementById('mw-host').innerHTML`) as string;
-  expect(html).toContain(`showCheckinModal(&quot;qb2&quot;)`);   // the booking's own check-in
-  expect(html).not.toContain(`giveDeskBike(&quot;m1&quot;)`);    // never the walk-up one: it would book them twice
+  expect(html).toContain(`[&quot;showCheckinModal&quot;,&quot;qb2&quot;]`);   // the booking's own check-in
+  expect(html).not.toContain(`&quot;giveDeskBike&quot;,&quot;m1&quot;`);       // never the walk-up one: it would book them twice
 });

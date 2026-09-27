@@ -19,6 +19,11 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${PORT}`,
     serviceWorkers: 'block',
     trace: 'on-first-retry',
+    // The server sends the site's real Content-Security-Policy (scripts/serve.mjs applies _headers),
+    // which allows no eval - and Playwright's string-form evaluate()/waitForFunction() run through
+    // eval inside the page. The suite therefore bypasses the policy in the browser; tests/csp.spec.ts
+    // turns it back on for itself and drives the page with function-form calls only.
+    bypassCSP: true,
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },

@@ -301,5 +301,38 @@ if (shrink < 0.05) {
   throw new Error(`build: output shrank only ${(shrink * 100).toFixed(1)}% — terser almost certainly failed to parse an inline script`);
 }
 
+// The Content-Security-Policy allows no inline script (2026-09-27): handlers live in data-on-*
+// attributes and the few inline <script> blocks are allowed by their SHA-256 hashes, which change
+// with their bytes, so the policy line in _headers is written here from the built page (and the
+// /staff/ stub). An on*="..." attribute anywhere in the shipped markup would be dead on the page
+// - the build refuses it instead.
+for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
+  const bad = text.match(/\son[a-z]+="[^"]{0,80}/);
+  if (bad) throw new Error(`build: ${name} still carries an inline handler, which the policy would block: ${bad[0]}`);
+  if (/javascript:/i.test(text)) throw new Error(`build: ${name} carries a javascript: URL, which the policy would block`);
+}
+const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
+  .filter((m) => !/\btype\s*=\s*["']?(?!(?:text\/javascript|module)["'\s>])/i.test(m[1]))
+  .map((m) => createHash('sha256').update(m[2]).digest('base64'));
+const staffStub = await readFile(new URL('../staff/index.html', import.meta.url), 'utf8');
+const hashes = [...new Set([...inlineHashes(out), ...inlineHashes(staffStub)])];
+const CSP = [
+  "default-src 'self'",
+  `script-src 'self' ${hashes.map((h) => `'sha256-${h}'`).join(' ')} https://static.cloudflareinsights.com`,
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob: https:",
+  "connect-src 'self' https://micromobility.sa https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com",
+  "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
+  'upgrade-insecure-requests', 'report-uri /api/csp-report', 'report-to csp',
+].join('; ');
+const headersUrl = new URL('../_headers', import.meta.url);
+let headers = await readFile(headersUrl, 'utf8');
+const headersBefore = headers;
+if (!/^  Content-Security-Policy: /m.test(headers)) throw new Error('build: _headers has no Content-Security-Policy line to rewrite');
+headers = headers.replace(/^  Content-Security-Policy: .*$/m, `  Content-Security-Policy: ${CSP}`);
+if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  Content-Security-Policy: .*)$/m, `$1\n  Reporting-Endpoints: csp="/api/csp-report"`);
+if (headers !== headersBefore) await writeFile(headersUrl, headers);
+
 await writeFile(new URL('../index.html', import.meta.url), out);
-console.log(`built index.html: ${src.length} -> ${out.length} bytes (${(shrink * 100).toFixed(1)}% smaller, assets v=${cssHash})`);
+console.log(`built index.html: ${src.length} -> ${out.length} bytes (${(shrink * 100).toFixed(1)}% smaller, assets v=${cssHash}, ${hashes.length} inline scripts in the policy)`);

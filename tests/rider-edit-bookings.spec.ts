@@ -83,7 +83,7 @@ test('moving a party moves every booking in it, books a new companion on the new
   const modal = page.locator('#rider-walkin-modal .modal-box');
   await expect(page.locator('#rw-session')).toBeEnabled();
   await page.selectOption('#rw-session', S2);
-  await modal.locator('button[onclick="_rwRemoveRider(1)"]').click();    // Amal Cousin is not coming
+  await modal.locator('button[data-on-click*="_rwRemoveRider"][data-on-click$=",1]"]').click();    // Amal Cousin is not coming
   await modal.locator('#rw-add-rider').click();
   await page.fill('#rw-r-name-1', 'Amal Niece');
   await page.fill('#rw-r-h-1', '140');

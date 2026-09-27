@@ -44,8 +44,8 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   await page.evaluate('setStaffTab("riders")');
   expect(await page.evaluate('[S.staffTab,S.queueView]')).toEqual(['queue', 'petromin']);
   const riders = page.locator('#pm-host');
-  await expect(riders.locator('button[onclick^="showRiderWalkin"]')).toBeVisible();
-  await expect(riders.locator('button[onclick^="openRidersReport"]')).toHaveCount(0);
+  await expect(riders.locator('button[data-on-click*="showRiderWalkin"]')).toBeVisible();
+  await expect(riders.locator('button[data-on-click*="openRidersReport"]')).toHaveCount(0);
   await page.evaluate('S.queueView="bookings";setStaffTab("queue")');
 
   // Front Desk: no Sessions pill, no Saturday rows, no Saturday option in the filter,

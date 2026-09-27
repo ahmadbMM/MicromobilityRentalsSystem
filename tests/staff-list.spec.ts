@@ -213,9 +213,9 @@ test.describe('a parked booking carries the roster controls', () => {
 
   test('a waitlisted one gets check-in, payment and the rest — and no Promote', async ({ page }) => {
     const html = await openList(page, [park('m1', 'Rider 2', 'e-wl')]);
-    expect(html).toContain(`showCheckinModal(&quot;e-wl&quot;)`);   // checks in THAT booking — stays large (ids reach handlers JSON-encoded: _ja)
-    expect(html).toContain(`showPayMenu(&quot;e-wl&quot;`);         // payment, as on the queue page
-    expect(html).toContain(`showEditPriceModal(&quot;e-wl&quot;)`);
+    expect(html).toContain(`[&quot;showCheckinModal&quot;,&quot;e-wl&quot;]`);   // checks in THAT booking — stays large (ids reach the handler specs JSON-encoded)
+    expect(html).toMatch(/pay-toggle[^>]*&quot;e-wl&quot;/);                      // payment, as on the queue page
+    // the price is edited from the payment pill's menu (queue-pass2.spec.ts), not a button of its own
     // no-show, edit and cancel folded into the ⋯ menu
     const menu = await page.evaluate(`((S._rowMenus||{})['e-wl']||[]).map(i=>i.run).join('|')`) as string;
     expect(menu).toContain(`confirmNoShow('e-wl')`);
@@ -228,8 +228,8 @@ test.describe('a parked booking carries the roster controls', () => {
 
   test('a queued one gets the same set', async ({ page }) => {
     const html = await openList(page, [park('m2', 'Rider 1', 'e-wait')]);
-    expect(html).toContain(`showCheckinModal(&quot;e-wait&quot;)`);
-    expect(html).toContain(`showPayMenu(&quot;e-wait&quot;`);
+    expect(html).toContain(`[&quot;showCheckinModal&quot;,&quot;e-wait&quot;]`);
+    expect(html).toMatch(/pay-toggle[^>]*&quot;e-wait&quot;/);
   });
 
   test('a spent booking keeps only the list-side Remove', async ({ page }) => {
@@ -300,7 +300,7 @@ test.describe('parties, not single riders', () => {
     await expect(card).toContainText('3 riders');
     await expect(card.locator('input[type="number"]')).toHaveCount(1); // ONE position, for the party
     const html = await card.innerHTML();
-    for (const id of ['g1', 'g2', 'g3']) expect(html).toContain(`showCheckinModal(&quot;${id}&quot;)`);
+    for (const id of ['g1', 'g2', 'g3']) expect(html).toContain(`[&quot;showCheckinModal&quot;,&quot;${id}&quot;]`);
   });
 
   test('a position typed against the party moves every rider in it', async ({ page }) => {

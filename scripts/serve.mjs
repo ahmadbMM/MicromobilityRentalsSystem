@@ -33,8 +33,25 @@ async function file(rel) {
   } catch { return null; }
 }
 
-const send = (res, status, body, type, extra = {}) => {
-  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-cache', ...extra });
+// _headers, as Pages applies it: every rule whose path matches adds its headers (values of one
+// header from several rules are joined), so the suite runs under the site's real policy - the
+// Content-Security-Policy above all, which since 2026-09-27 allows no inline script.
+const RULES = (await readFile(join(ROOT, '_headers'), 'utf8').catch(() => '')).split('\n').reduce((rules, raw) => {
+  const line = raw.replace(/#.*$/, '').trimEnd();
+  if (!line.trim()) return rules;
+  if (!/^\s/.test(raw)) rules.push({ path: line.trim(), headers: [] });
+  else if (rules.length) { const i = line.indexOf(':'); if (i > 0) rules[rules.length - 1].headers.push([line.slice(0, i).trim().toLowerCase(), line.slice(i + 1).trim()]); }
+  return rules;
+}, []);
+const matches = (pattern, path) => pattern === '/*' ? true : pattern.endsWith('/*') ? path.startsWith(pattern.slice(0, -1)) : pattern.startsWith('/*.') ? path.endsWith(pattern.slice(2)) : path === pattern;
+function siteHeaders(path) {
+  const h = {};
+  for (const r of RULES) if (matches(r.path, path)) for (const [k, v] of r.headers) h[k] = h[k] ? `${h[k]}, ${v}` : v;
+  return h;
+}
+
+const send = (res, status, body, type, extra = {}, path = '') => {
+  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-cache', ...siteHeaders(path), ...extra });
   res.end(body);
 };
 
@@ -46,7 +63,7 @@ createServer(async (req, res) => {
   let hit = await file(wanted);
   if (hit && hit.dir) { res.writeHead(301, { location: path + '/' }); res.end(); return; } // as Pages (and Python) do
   if (!hit && APP_ROUTE.test(path)) hit = await file('/index.html'); // the middleware's fallback
-  if (!hit) { const nf = await file('/404.html'); send(res, 404, nf ? nf.body : 'Not found', nf ? nf.type : 'text/plain'); return; }
+  if (!hit) { const nf = await file('/404.html'); send(res, 404, nf ? nf.body : 'Not found', nf ? nf.type : 'text/plain', {}, '/404.html'); return; }
   if (req.method === 'HEAD') { res.writeHead(200, { 'content-type': hit.type, 'content-length': hit.size }); res.end(); return; }
-  send(res, 200, hit.body, hit.type, { etag: `"${hit.size}-${Math.floor(hit.mtime)}"` });
+  send(res, 200, hit.body, hit.type, { etag: `"${hit.size}-${Math.floor(hit.mtime)}"` }, wanted);
 }).listen(PORT, '127.0.0.1', () => console.log(`serve: http://127.0.0.1:${PORT}/ (${ROOT})`));

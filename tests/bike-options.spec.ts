@@ -68,7 +68,7 @@ test('a new model typed in lands under the chosen brand, in the shared list', as
 test('the ✎ beside Brand edits the shared list: rename, remove, add', async ({ page }) => {
   await boot(page);
   const posts = upserts(page);
-  await page.locator('.opt-edit[onclick*="brands"]').click();
+  await page.locator('.opt-edit[data-on-click*="brands"]').click();
   const modal = page.locator('#optlist-modal');
   await expect(modal).toContainText('Edit Brand');
   await modal.locator('input[aria-label="Giant"]').fill('Giant Bicycles');
@@ -91,14 +91,14 @@ test('Models of a brand and frame types have their own editors', async ({ page }
   await boot(page);
   const posts = upserts(page);
   await page.selectOption('#bk-brand', 'Trek');
-  await page.locator('.opt-edit[onclick*="models"]').click();
+  await page.locator('.opt-edit[data-on-click*="models"]').click();
   await expect(page.locator('#optlist-modal')).toContainText('Edit Models of Trek');
   await page.locator('#optlist-modal button[aria-label$="Domane"]').click();
   await page.locator('#optlist-modal #optlist-save').click();
   await expect.poll(() => posts.length).toBe(1);
   expect((posts[0].items as { name: string; models: string[] }[]).find(b => b.name === 'Trek')!.models).toEqual(['Emonda']);
   expect(await page.evaluate(`[...document.querySelectorAll('#bk-frame option')].map(o=>o.value)`)).toEqual(['', 'Steel', 'Aluminum', 'Carbon', 'Titanium']);   // defaults while the list is empty
-  await page.locator('.opt-edit[onclick*="frames"]').click();
+  await page.locator('.opt-edit[data-on-click*="frames"]').click();
   await page.locator('#optlist-modal #optlist-add').fill('Bamboo');
   await page.locator('#optlist-modal #optlist-add').press('Enter');
   await page.locator('#optlist-modal #optlist-save').click();
@@ -154,6 +154,6 @@ test('wheel size, brakes and weight are on the form, saved with the bike, and li
   expect(posts[0]).toMatchObject({ wheel_size: '700c', brake_type: 'Disc — hydraulic', weight_kg: 8.8 });   // one decimal
   // ✎ beside Brakes edits its list too
   await page.evaluate(`S.showAddBike=true;renderBikes()`);
-  await page.locator('.opt-edit[onclick*="brakes"]').click();
+  await page.locator('.opt-edit[data-on-click*="brakes"]').click();
   await expect(page.locator('#optlist-modal')).toContainText('Edit Brakes');
 });
