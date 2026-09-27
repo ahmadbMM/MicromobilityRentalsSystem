@@ -243,5 +243,5 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   `functions/api/google-wallet.js` answers a save link (`_hasGWallet`, `addBookingToGWallet`),
   501 until `GOOGLE_WALLET_*` are set. `member_area` feeds the website's members' area.
 - **Staging.** `STAGING.md` and `scripts/seed-staging.mjs` (generated data only).
-- Migrations 20260928120000 … 20260928170000 (seven) carry the schema; each was dry-run against
+- Migrations 20260928120000 … 20260928170000 (six) carry the schema; each was dry-run against
   production inside a `DO … EXECUTE … RAISE` block before it was committed.
