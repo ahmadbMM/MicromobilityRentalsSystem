@@ -5341,3 +5341,7 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 .mg-dlg .mg-acct-main{display:flex;flex-direction:column;gap:2px;min-width:0;}
 .mg-dlg .mg-name{background:none;border:0;padding:0;color:var(--text);font-family:var(--font-body);font-weight:800;font-size:14px;text-align:start;}
 @media(max-width:767px){body.view-staff .mg-manual{grid-template-columns:1fr;}}
+
+/* A ride not yet inside the booking window (2026-09-28): shown, greyed, with the day it opens. */
+.sess-card-soon{opacity:.62;cursor:default;pointer-events:none;}
+.sess-card-spots.spots-soon{color:var(--muted);}
