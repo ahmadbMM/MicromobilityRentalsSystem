@@ -245,3 +245,10 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
 - **Staging.** `STAGING.md` and `scripts/seed-staging.mjs` (generated data only).
 - Migrations 20260928120000 … 20260928170000 (six) carry the schema; each was dry-run against
   production inside a `DO … EXECUTE … RAISE` block before it was committed.
+
+## One bar, not two (2026-09-27)
+
+An action that calls `pushUndo` shows the undo bar and nothing else: `toast()` stands down for a
+plain toast within 1.5 s of the bar, either order (`_undoBarAt`); errors and warnings always show.
+Do not add a success toast beside `pushUndo`; put what the desk should read in the undo label. A
+spec that checks the outcome of an undoable action reads `#undo-bar-el .undo-bar-text`, not `.toast`.
