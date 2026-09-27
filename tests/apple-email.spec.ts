@@ -104,7 +104,7 @@ async function signup(page: Page, email: string, fixtures: Record<string, unknow
   await stubSupabase(page, { 'rpc:customer_exists': false, ...fixtures });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`openAuthModal();S._pendingGoogle={email:${JSON.stringify(email)},name:"New Rider"};openGoogleComplete();setSignupGender("male")`);
+  await page.evaluate(`openAuthModal();S._pendingGoogle={email:${JSON.stringify(email)},name:"New Rider"};openGoogleComplete();setSignupGender("male");S.signupHeard='invited'`);
   await setVal(page, 'a-height', '175');
   await setVal(page, 'a-phone', '0508727012');
 }

@@ -89,7 +89,7 @@ test.describe('sign-up: the confirmation is required, ride news is not', () => {
     await page.evaluate('openAuthModal();switchAuthMode("signup")');
     await page.fill('#a-first', 'Faisal');
     await page.fill('#a-last', 'Babalghoum');
-    await page.evaluate('setSignupGender("male")');
+    await page.evaluate('setSignupGender("male");S.signupHeard="invited"');
     await page.fill('#a-email', 'faisal@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
