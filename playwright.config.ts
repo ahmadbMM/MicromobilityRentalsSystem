@@ -10,6 +10,9 @@ const PORT = process.env.PW_PORT || '4173';
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
+  // CI's runner has 4 CPUs; Playwright's default is half of them. Three workers per shard measured
+  // fastest for these browser-heavy specs (2026-09-27); local runs keep the default.
+  workers: process.env.CI ? 3 : undefined,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {

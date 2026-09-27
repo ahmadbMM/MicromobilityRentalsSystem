@@ -5,7 +5,8 @@
 // Run AFTER build:html (which regenerates index.html from app.src.html). Internal
 // files (app.src.html, *.sql, *.md, tests/, scripts/, configs) are deliberately
 // NOT copied, so the deployed artifact can't leak them even without the middleware.
-import { rm, mkdir, copyFile, cp, access } from 'node:fs/promises';
+import { rm, mkdir, copyFile, cp, access, readFile, writeFile } from 'node:fs/promises';
+import CleanCSS from 'clean-css';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -42,6 +43,14 @@ async function main() {
     if (!(await exists(src))) throw new Error(`assemble-dist: required file missing: ${f}`);
     await copyFile(src, join(dist, f));
   }
+  // The stylesheet ships minified: 396 KB in the repo, and it blocks the first paint. The source
+  // stays readable; only the copy in dist/ is squeezed (level 1: whitespace and comments, no rule
+  // merging, so what the browser applies is the same). Its ?v= hash is of the source, so a change
+  // still renames the URL (scripts/build-html.mjs).
+  const css = new CleanCSS({ level: 1 }).minify(await readFile(join(root, 'styles.css'), 'utf8'));
+  if (css.errors.length) throw new Error(`assemble-dist: styles.css did not minify: ${css.errors.join('; ')}`);
+  await writeFile(join(dist, 'styles.css'), css.styles);
+  console.log(`assemble-dist: styles.css ${css.stats.originalSize} -> ${css.stats.minifiedSize} bytes`);
   for (const d of DIRS) {
     const src = join(root, d);
     if (!(await exists(src))) { console.warn(`assemble-dist: skipping missing dir ${d}/`); continue; }

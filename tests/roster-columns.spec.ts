@@ -64,6 +64,7 @@ test('with sessions mixed, one bike ride keeps the columns for everybody', async
 });
 
 test('the rows lose the same cells as the header, so nothing shifts', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile', 'a phone builds the cards, not the table (2026-09-27): there are no cells to count');
   await roster(page, SWIM);
   const [headCells, bodyCells] = await page.evaluate(`[
     document.querySelectorAll('#tab-queue thead th').length,
@@ -81,7 +82,7 @@ test('a leftover paid filter does not empty a complimentary session', async ({ p
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`S.sfPay='paid';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SWIM}';renderStaffQueue()`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-queue tbody')).toContainText('Swimmer');
+  await expect(page.locator('#tab-queue .queue-mobile-view:visible, #tab-queue .queue-table-desktop-wrap:visible')).toContainText('Swimmer'); // the cards on a phone, the table elsewhere
 });
 
 test('a leftover bike-type filter does not empty a pool session either', async ({ page }) => {
@@ -92,7 +93,7 @@ test('a leftover bike-type filter does not empty a pool session either', async (
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`S.sfBike='Road';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SWIM}';renderStaffQueue()`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-queue tbody')).toContainText('Swimmer');
+  await expect(page.locator('#tab-queue .queue-mobile-view:visible, #tab-queue .queue-table-desktop-wrap:visible')).toContainText('Swimmer'); // the cards on a phone, the table elsewhere
 });
 
 test('the filter controls disappear with their columns', async ({ page }) => {

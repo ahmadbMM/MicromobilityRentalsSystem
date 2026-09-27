@@ -129,3 +129,17 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
   at `/bookings/waitlist` must still find them. Never write `./x` in the source.
 - The suite runs on `node scripts/serve.mjs` (Cloudflare Pages + the middleware, stood in for),
   not Python's http.server, which 404s a reload on `/bookings`. `npm run serve` is the same.
+
+## A refused write is said, never swallowed (2026-09-27)
+- supabase-js answers `{error}`; it does not throw. `try{await sb.from(...).update(...)}catch(e){}`
+  therefore never saw a refusal, and a Saved toast followed a failed save (53 such writes in the
+  2026-09-27 review). Every write goes through `_writeErr(res, ctx)` (aborts the action) or
+  `await _wr(promise, ctx)` (awaits, reports through the error bar, returns true when refused).
+  Only logging (`staff_actions`, `error_log`) and rollback compensations stay fire-and-forget.
+- Inventory saves write the item's extras (photo, price, cost, flavour, volume, nutrition) in
+  ONE checked update (`_invExtraCols`), not six "tolerant" ones: every column exists.
+- Bookings builds the phone cards only where a phone shows them (`_qPhone`); the table is still
+  built on phones because the phone specs read it - the table's turn is a follow-up.
+- The staff window is not widened, the live channel not opened, and inventory not fetched for a
+  signed-out visitor in secure mode (`_custOnly()`); they start when a page with live data opens
+  (`_rtStart` from `showView`, `_optionalFetch` from `goCustomer`).

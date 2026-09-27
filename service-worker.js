@@ -36,11 +36,15 @@ const SHELL = [
   './icon-512.png',
 ];
 
-// From the server, not the browser's HTTP cache: the images here are cached for a week without
-// a version in their names, so a new version's cache could be filled with the image the last
-// deploy replaced, and keep it until the next version.
+// Checked against the server, never taken from the browser's HTTP cache as it is: the images here
+// are cached for a week without a version in their names, so a new version's cache could be
+// filled with the image the last deploy replaced, and keep it until the next version. 'no-cache'
+// asks the server with the copy's ETag and takes the copy only when the server says it is still
+// right. It used to be 'reload', which ignored the copy the page had just downloaded and fetched
+// index.html, styles.css and every image a second time on every first visit - about 690 KB - and
+// again after every deploy that changed this file (2026-09-27 review).
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'no-cache' })))).then(() => self.skipWaiting()));
 });
 
 // Named by version (vendor/, fonts/, lang/, a ?v= hash): whatever the HTTP cache holds is right.

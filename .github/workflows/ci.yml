@@ -5,8 +5,8 @@
 # before a wrangler upload that sometimes sat for ten minutes. Typical push-to-live
 # was 12–20 minutes, worst cases 25 with a manual re-run. Now:
 #
-#   · the two Playwright projects run as PARALLEL shards, so the test wall time is
-#     one project's, not both's;
+#   · the two Playwright projects run as PARALLEL jobs, three shards each, so the test
+#     wall time is a third of one project's;
 #   · dist/ is built ONCE, in its own job running alongside the tests, and handed
 #     to deploy as an artifact — the deploy job never installs npm or rebuilds, and
 #     what ships is byte-for-byte what was assembled while the tests ran;
@@ -45,8 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -61,7 +61,7 @@ jobs:
             || { echo '::error::index.html/service-worker.js are stale — run `npm run build:html` and commit the result.'; exit 1; }
       - name: Assemble dist/ (every referenced asset must be present)
         run: node scripts/assemble-dist.mjs
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
@@ -74,25 +74,28 @@ jobs:
       fail-fast: false
       matrix:
         project: [chromium, mobile]
+        shard: [1, 2, 3]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
       - run: npm ci
       # Lint once, not once per shard — it is project-independent.
-      - if: matrix.project == 'chromium'
+      - if: matrix.project == 'chromium' && matrix.shard == 1
         name: Lint (eslint + tsc + i18n key parity)
         run: npm run lint
       # Browser binaries cached across runs; the install is a no-op download on a hit
       # and only the small apt step remains.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: pw-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test --project=${{ matrix.project }}
+      # Each project runs as three shards, so the suite's wall time is a third of one project's
+      # (about 9.5 minutes on two workers before, 2026-09-27); playwright.config.ts sets the workers.
+      - run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/3
 
   deploy:
     needs: [build, test]
@@ -107,12 +110,12 @@ jobs:
         name: Skip (no Cloudflare token — nothing deploys)
         run: echo "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set; skipping gated deploy."
       - if: steps.secrets.outputs.present == 'true'
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist
       - if: steps.secrets.outputs.present == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
       - if: steps.secrets.outputs.present == 'true'

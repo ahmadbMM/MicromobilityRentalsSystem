@@ -34,9 +34,10 @@
        request whose SRI metadata matches, so a bare preload was thrown away and the 200 KB
        file fetched twice. -->
   <link rel="preload" as="script" href="/vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil">
-  <!-- Preload the primary UI font weights (body + bold) so first paint has them, avoiding a text-swap flash -->
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/Barlow-500-latin.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/BarlowCond-800i-latin.woff2" crossorigin>
+  <!-- Preload the face the first screen is set in - the customer pages' Space Grotesk, one variable
+       file - so first paint has it without a text-swap flash. The staff panel's Barlow used to be
+       preloaded instead: 32 KB fetched early by every visitor for a page most never see. -->
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/SpaceGrotesk-var-latin.woff2" crossorigin>
   <link href="/fonts/fonts.css?v=7" rel="stylesheet">
   <!-- The tab wears the mark alone, square, the same 1 KB file every Micromobility site
        carries. logo.png is the wordmark lockup: 241x256, so a tab squashed it, and the
@@ -251,7 +252,7 @@ window.mmLoading=(function(){
         <div id="land-auth-cta" class="landing-auth-cta"></div>
       </div>
       <button class="landing-hero-card" onclick="landHeroClick()" aria-label="Jeddah Corniche Circuit">
-        <img src="/hero.webp" alt="Corniche Circuit" fetchpriority="high">
+        <img src="/hero.webp" alt="Corniche Circuit" loading="lazy" decoding="async">
         <div class="landing-hero-card-cta">
           <div class="landing-hero-cta-btn" id="land-cta-arrow">&#8594;</div>
         </div>
@@ -1636,7 +1637,7 @@ async function staffAuthRestore(){
   S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(uid,row.role);_accessSet(row,uid);
   setupRefRealtime();
 }
-async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);await staffAuthSignOut();window.location.href='/';}
+async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);try{await _syncDrop();}catch(e){}await staffAuthSignOut();window.location.href='/';} // the lists and the boot snapshot leave with the staff session (2026-09-27: they used to stay on the device)
 function _clearPinLock(){try{localStorage.removeItem('cq_pin_until');localStorage.removeItem('cq_pin_lockouts');localStorage.removeItem('cq_pin_attempts');}catch(e){}}
 function _fmtLock(ms){const s=Math.ceil(ms/1000);if(s<60)return`${s}s`;const m=Math.floor(s/60),r=s%60;if(m<60)return r?`${m}m ${r}s`:`${m}m`;const h=Math.floor(m/60),rm=m%60;return rm?`${h}h ${rm}m`:`${h}h`;}
 
@@ -2336,7 +2337,7 @@ const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36);
 
 
 function entryFromDB(e){
-  return{id:e.id,name:e.name,email:e.email,phone:e.phone,size:e.size,
+  return{id:e.id,updatedAt:e.updated_at||null,name:e.name,email:e.email,phone:e.phone,size:e.size, // updatedAt: the server's stamp (zz_sync_touch), what a reload compares (_fpRow)
     height:e.height||null,
     typePreference:e.type_preference,paid:Boolean(e.paid),price:e.price,
     assignedBikeId:e.assigned_bike_id,sessionId:e.session_id,
@@ -2717,6 +2718,7 @@ function _syncSave(kind){
 }
 function _syncDrop(){
   _sync={};Object.keys(_syncSaveT).forEach(k=>clearTimeout(_syncSaveT[k]));_syncSaveT={};
+  try{localStorage.removeItem('cq_snapshot');}catch(e){} // the boot snapshot holds the same rows (names, phones): it goes with the copy
   return _idbDo('readwrite',s=>s.clear());
 }
 // The list as this device now holds it ({data,error,whole}), or null when there is no sync to
@@ -2886,7 +2888,9 @@ async function _loadDataInner(showLoader){
   // copy of S.customers here and write it back after its own round trip, which undid every
   // staff-ref change (a signup, an edit) that arrived in between - for up to half an hour.
   const _refP=_refFetch();
-  const _optP=_optionalFetch();
+  // Inventory and promo codes serve the booking steps and the staff page: a signed-out visitor, who
+  // sees the sign-in alone, does not fetch them (goCustomer fetches them on the way in).
+  const _optP=(_custOnly()&&!getSession())?Promise.resolve():_optionalFetch();
   const _qs=_qSlice();
   try{
     [q,b,ses]=await Promise.all([
@@ -3721,6 +3725,10 @@ function _writeErr(res,ctx,retry){
   errorBar(_errMessage(bad.error),retry,bad.error.message||'');
   return true;
 }
+/** One write, awaited and reported: true when it was refused (or never reached the server). For the
+ *  writes that used to sit in an empty catch - supabase-js answers {error}, so a catch never saw a
+ *  refusal and a Saved toast followed it (53 of them in the 2026-09-27 review). */
+async function _wr(p,ctx){let r;try{r=await p;}catch(e){r={error:e||{message:'failed'}};}return _writeErr(r,ctx);}
 // Persistent error strip: stays until dismissed (or retried), unlike a toast. Errors that
 // cost money or lose a booking must not vanish while the staffer is looking at the rider.
 let _errBarRetry=null;
@@ -5439,6 +5447,7 @@ function _staffHostGate(){if(localStorage.getItem('cq_staff')==='1')goStaff();el
 function showView(v){
   if(_isStaffHost()&&v==='customer')v='landing'; // no customer pages here; landing is blank on this host
   S.view=v;
+  if(v!=='landing'||S.loggedIn||getSession()||!_custOnly())try{_rtStart();}catch(e){} // a page with live data on it - the panel, a customer's pages, or the event picker (which a signed-out visitor sees only in open mode): the channel joins, once
   if(S._pg){S._pg=null;renderProfileGate();} // leaving through the header drops the gate; the next event pick raises it again
   if(S._fix){S._fix=null;renderFixGate();} // same for a correction request
   document.getElementById('view-landing').classList.toggle('active',v==='landing');
@@ -6670,6 +6679,7 @@ function goCustomer(tab){
     return;
   }
   prefillFromAccount();
+  if(!(S.inventory&&S.inventory.length))_optionalFetch().then(()=>{if(S.view==='customer'&&S.custTab==='register')renderRegister();}).catch(()=>{}); // skipped at boot while signed out
   S.custTab=tab||'register';
   showView('customer');
   renderCustomerTabs();
@@ -6834,8 +6844,7 @@ function goStaff(){
   renderStaffQueue();
   renderSessions();
   renderBikes();
-  renderHistory();
-  _pushNav();
+  _pushNav(); // History paints when its tab opens (setStaffTab), not here
   // First-time staff (temp password from the admin) must set their own before using the
   // panel — the modal is blocking and re-appears on every entry until they change it.
   if(S._staffAuthed&&S._mustChangePwd)openStaffPwdModal(true);
@@ -7837,7 +7846,7 @@ async function _giveDeskBike(id){
     res=await sb.from('queue_entries').insert(entryToDB(entry));
   }
   if(_writeErr(res,'walk-in'))return;
-  if(w.pay_method)try{await sb.from('queue_entries').update({pay_method:w.pay_method,card_amount:w.card_amount??null}).eq('id',entry.id);}catch(e){} // tolerant, like togglePayment
+  if(w.pay_method)await _wr(sb.from('queue_entries').update({pay_method:w.pay_method,card_amount:w.card_amount??null}).eq('id',entry.id),'payment method'); // said when refused; the booking itself is already made
   // Checked, and the local row only follows if it succeeded. Marking it done regardless meant a
   // refused write (a lapsed staff Auth session is the usual one) showed the rider as served
   // while the database still had them waiting — so the next refresh put them back on the list
@@ -11369,6 +11378,7 @@ function selectSessionDetail(id){
   if(id&&window.matchMedia&&window.matchMedia('(max-width:767px)').matches){try{window.scrollTo({top:0,behavior:_sb()});}catch(_){window.scrollTo(0,0);}}
 }
 function renderSessions(){
+  if(!document.getElementById('sess-host')&&!document.getElementById('tab-sessions'))return; // the view is closed: goStaff and every repaint path call this whatever is open
   if(!S.dataLoaded){const _el=document.getElementById('sess-host')||document.getElementById('tab-sessions');if(_el)_el.innerHTML=skeletonList(5,true);return;}
   const sessions=allSessions();
   const allBikes=getBikes();
@@ -12155,8 +12165,8 @@ async function saveSessionEdit(){
       }
       // Cashier receipts follow too — leaving them on the deleted old id orphaned that
       // day's sales from the ledger, close-out and analytics (deleteSession already guards
-      // against exactly this). Tolerant: a failure here never blocks the date move.
-      try{await sb.from('cashier_sales').update({session_id:newId}).eq('session_id',oldId);(S.cashSales||[]).forEach(r=>{if(r.session_id===oldId)r.session_id=newId;});}catch(e){}
+      // against exactly this). Reported but never blocking: a refusal does not undo the date move.
+      if(!await _wr(sb.from('cashier_sales').update({session_id:newId}).eq('session_id',oldId),'move receipts'))(S.cashSales||[]).forEach(r=>{if(r.session_id===oldId)r.session_id=newId;});
       // Registrations from a ride's own form (the Petromin Riders list) follow as well. They are
       // the one table with a real foreign key to the session, ON DELETE SET NULL, so deleting
       // the old row below wiped their session and the Riders list lost that night's riders.
@@ -12175,8 +12185,8 @@ async function saveSessionEdit(){
         status:newStatus,bike_slots:JSON.stringify(slots)
       }).eq('id',oldId),'save session'))return;
     }
-    // Persist offered add-ons separately so a missing column can't block the save (always written so removals stick)
-    {try{await sb.from('sessions').update({addons:JSON.stringify(S.editSessAddons||[])}).eq('id',newId);}catch(e){}}
+    // Offered add-ons, written separately and always (so removals stick); a refusal is reported and does not undo the save
+    await _wr(sb.from('sessions').update({addons:JSON.stringify(S.editSessAddons||[])}).eq('id',newId),'save add-ons');
   if(isNamedEdit){
     // Named-ride extras (spot cap, meeting point, breakfast). Tolerant: missing columns never block the save.
     // On a DATE change the row is re-inserted fresh (above) WITHOUT the gate fields, so re-assert the full
@@ -12203,7 +12213,7 @@ async function saveSessionEdit(){
     // gate fields (see addSession). Tolerant on both paths: an existing ride already carries them.
     // open_to_all rides with the kind: it is what lets a non-member into the workshop, and a
     // date move would otherwise re-insert the row gated.
-    try{await sb.from('sessions').update({ride_kind:_kindEdit,paid_ride:_paidEdit,...((_wsEdit||_sndEdit)?{open_to_all:true}:{})}).eq('id',newId);}catch(e){}
+    await _wr(sb.from('sessions').update({ride_kind:_kindEdit,paid_ride:_paidEdit,...((_wsEdit||_sndEdit)?{open_to_all:true}:{})}).eq('id',newId),'save ride kind');
     if(_paidEdit||_swimEdit||_wsEdit){
       _ce.breakfast_name=null;_ce.breakfast_url=null; // neither ride has a breakfast stop
       // The pool session still meets somewhere, so it keeps the meeting point and must save
@@ -12215,7 +12225,7 @@ async function saveSessionEdit(){
       const _bn=(S.editSessBfName||'').trim().slice(0,80);_ce.breakfast_name=_bn||null;
       const _bu=_safeUrl(S.editSessBfUrl);_ce.breakfast_url=_bu||null;
     }
-    try{await sb.from('sessions').update(_ce).eq('id',newId);}catch(e){}
+    await _wr(sb.from('sessions').update(_ce).eq('id',newId),'save ride details');
   }
     await loadData();
     const displayDate=shortDate(newDate);
@@ -12238,7 +12248,7 @@ async function saveSessionEdit(){
           session_id:oldId,session_date:prevDate,session_day:prevDay
         }).eq('session_id',currentId);
         if(_writeErr(_mv,'undo date move')){await sb.from('sessions').delete().eq('id',oldId).catch(()=>{});await loadData();renderSessions();return false;}
-        try{await sb.from('cashier_sales').update({session_id:oldId}).eq('session_id',currentId);(S.cashSales||[]).forEach(r=>{if(r.session_id===currentId)r.session_id=oldId;});}catch(e){}
+        if(!await _wr(sb.from('cashier_sales').update({session_id:oldId}).eq('session_id',currentId),'undo date move'))(S.cashSales||[]).forEach(r=>{if(r.session_id===currentId)r.session_id=oldId;});
         const _rr=await sb.from('rider_registrations').update({session_id:oldId}).eq('session_id',currentId);
         if(_writeErr(_rr,'undo date move')){await loadData();renderSessions();return false;} // the moved row stays: deleting it would null them
         (S.riders||[]).forEach(r=>{if(r.session_id===currentId)r.session_id=oldId;});
@@ -12450,7 +12460,7 @@ async function toggleSession(id,newStatus){
     toast(lbl);
     pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${newStatus}`,async()=>{
       if(_writeErr(await sb.from('sessions').update({status:prevStatus}).eq('id',id),'undo session status'))return false;
-      for(const r of _doneIds)await sb.from('queue_entries').update({status:r.status,checked_out_at:null,...(r.status==='waiting'?{checked_in_at:null}:{})}).eq('id',r.id).then(()=>{},()=>{});
+      for(const r of _doneIds)await _wr(sb.from('queue_entries').update({status:r.status,checked_out_at:null,...(r.status==='waiting'?{checked_in_at:null}:{})}).eq('id',r.id),'undo session status');
       await loadData();renderSessions();renderStaffQueue();
     });
     renderSessions();renderStaffQueue();
@@ -13885,9 +13895,9 @@ async function saveCustForm(){
       const{error}=await sb.rpc('customer_signup',{p_id:newId,p_name:name,p_email:email,p_phone:fullPhone,p_pwd:pwd,p_height:height,p_type_preference:type,p_gender:d.gender});
       if(error){if(error.code==='23505'||/DUPLICATE/i.test(error.message||''))toast(t('errEmailExists'),'error');else toast(error.message||t('errConnection'),'error');return;}
       // birth_date / country / city / default_pay aren't customer_signup params — set them directly
-      // (staff hold is_staff() access to customers). Tolerant: a failure never undoes the account.
+      // (staff hold is_staff() access to customers). A refusal is reported and never undoes the account.
       const _dp=_cfDefPayVal(),_ht=_cfHiddenVal();
-      if(birth||country||city||nationality||soc.val||_dp||_ht){try{await sb.from('customers').update({birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_dp,hidden_types:_ht}).eq('id',newId);}catch(e){}}
+      if(birth||country||city||nationality||soc.val||_dp||_ht)await _wr(sb.from('customers').update({birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_dp,hidden_types:_ht}).eq('id',newId),'save account details');
       logAction(t('logAcctCreated')+name);
       await loadData();closeCustFormModal();toast(name+'! '+t('toastAccountCreated'));renderCommunity();
     }finally{S._cfBusy=false;}
@@ -13917,9 +13927,9 @@ async function saveCustForm(){
       // is deliberately NOT touched: it's the size the rider was booked at; profile height only affects
       // FUTURE bookings.
       if(name!==d.origName&&d.origName){
-        try{await sb.from('queue_entries').update({name,phone:fullPhone,email}).eq('customer_id',d.id).eq('name',d.origName).in('status',['waiting','waitlist','active']);}catch(e){}
+        await _wr(sb.from('queue_entries').update({name,phone:fullPhone,email}).eq('customer_id',d.id).eq('name',d.origName).in('status',['waiting','waitlist','active']),'update bookings');
       }else if(fullPhone||email){
-        try{await sb.from('queue_entries').update({phone:fullPhone,email}).eq('customer_id',d.id).eq('name',d.origName).in('status',['waiting','waitlist','active']);}catch(e){}
+        await _wr(sb.from('queue_entries').update({phone:fullPhone,email}).eq('customer_id',d.id).eq('name',d.origName).in('status',['waiting','waitlist','active']),'update bookings');
       }
       // A default-payment change applies IMMEDIATELY to the customer's LIVE bookings
       // (waiting/waitlist/active, JCC only, in their own name): newly covered rows become
@@ -14490,6 +14500,8 @@ function _sessStripHtml(){
       <select class="filter-select" aria-label="${esc(t('colSession'))}" style="width:100%;font-size:14px;height:44px" onchange="setSfSession(this.value)">${dropdownOpts}</select>
     </div></div>`;
 }
+function _qPhone(){try{return matchMedia('(max-width:767px)').matches;}catch(e){return false;}} // styles.css: the queue shows its cards up to 767px
+try{matchMedia('(max-width:767px)').addEventListener('change',()=>{if(S.view==='staff'&&S.staffTab==='queue')renderStaffQueue();});}catch(e){}
 function renderStaffQueue(_resultsOnly){
   _pushNav(); // the address follows the view (Bookings / Sessions / Waitlist / Riders)
   try{_ahRefresh();}catch(_){} // a booking edited from Bookings & history lands here, whichever tab is open
@@ -15122,6 +15134,11 @@ function renderQRow(e){
     const _rk=e=>_rank.has(e.sessionId)?_rank.get(e.sessionId):Infinity;
     _qShown=filtered.map((e,i)=>({e,i})).sort((a,b)=>(_rk(a.e)-_rk(b.e))||(a.i-b.i)).map(x=>x.e).slice(0,S.sfLimit||150);
   }else _qShown=filtered;
+  // The phone cards are built only where a phone shows them: hidden, they were 43% of the page's
+  // elements on an iPad, built and parsed on every repaint (2026-09-27 review). Crossing the
+  // breakpoint repaints (the matchMedia listener by _qPhone). A phone still builds the table too -
+  // the roster's phone specs read it - so the table's turn is a follow-up, not this change.
+  const _phoneQ=_qPhone(),_rowOf=renderGroupRow,_cardOf=_phoneQ?renderGroupCard:(()=>'');
   if(S.sfSession==='all'){
     rows=orderedSessions.map(sess=>{
       const sessFiltered=_qShown.filter(e=>e.sessionId===sess.id);
@@ -15137,7 +15154,7 @@ function renderQRow(e){
         ${nD?` &middot; <span style="color:var(--muted)">${nD} ${t('doneStat').toLowerCase()}</span>`:''}
         &nbsp;<span class="badge-${esc(sess.status)}" style="margin-left:8px">${{open:t('statusOpen'),closed:t('statusClosed'),full:t('statusFull')}[sess.status]||esc(sess.status)}</span>
       </td></tr>`;
-      return hdr+buildQueueGroups(sessFiltered).map(g=>renderGroupRow(g)).join('');
+      return hdr+buildQueueGroups(sessFiltered).map(g=>_rowOf(g)).join('');
     }).join('');
     if(!filtered.length)emptyRow=`<tr><td colspan="11"><div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div></td></tr>`;
     
@@ -15145,7 +15162,7 @@ function renderQRow(e){
       const sessFiltered=_qShown.filter(e=>e.sessionId===sess.id);
       if(!sessFiltered.length)return'';
       const hdr=`<div style="font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 4px;border-bottom:1px solid rgba(var(--tint-rgb),.06);margin-bottom:8px">${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))} &middot; ${esc(sessionTime(sess))}</div>`;
-      return hdr+buildQueueGroups(sessFiltered).map(g=>renderGroupCard(g)).join('');
+      return hdr+buildQueueGroups(sessFiltered).map(g=>_cardOf(g)).join('');
     }).join('');
     if(!filtered.length)mobileCards=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
   }else{
@@ -15164,12 +15181,12 @@ function renderQRow(e){
     // visible freeze on a booth tablet. The first 40 groups paint now; the rest go in on the
     // next frame, guarded by a generation counter so a re-render that has already replaced
     // the tbody is not appended to.
-    const _all=_fg.map(g=>renderGroupRow(g)).concat(_foldable?[_foldRow,...(S.sfShowFinished?_fgFin.map(g=>renderGroupRow(g)):[])]:[]);
+    const _all=_fg.map(g=>_rowOf(g)).concat(_foldable?[_foldRow,...(S.sfShowFinished?_fgFin.map(g=>_rowOf(g)):[])]:[]);
     const _CHUNK=40;
     rows=_all.slice(0,_CHUNK).join('');
     S._qRowsRest=_all.length>_CHUNK?_all.slice(_CHUNK).join(''):'';
     emptyRow=filtered.length===0?`<tr><td colspan="11"><div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div></td></tr>`:'';
-    mobileCards=_fg.map(g=>renderGroupCard(g)).join('')+(_foldable?_foldCard+(S.sfShowFinished?_fgFin.map(g=>renderGroupCard(g)).join(''):''):'');
+    mobileCards=_fg.map(g=>_cardOf(g)).join('')+(_foldable?_foldCard+(S.sfShowFinished?_fgFin.map(g=>_cardOf(g)).join(''):''):'');
     if(!filtered.length)mobileCards=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
   }
   if(!_resultsOnly)document.getElementById('tab-queue').innerHTML=_qvPills+_queueHeader+_sessSummaryBar+`${(()=>{
@@ -15389,7 +15406,7 @@ async function execCancelNight(){
   // off the rack, and setting it 'available' could free it from under whoever holds it now.
   const bikes=landed.filter(id=>was.get(id).status==='active').flatMap(id=>was.get(id).bikes);
   if(bikes.length)await Promise.all(bikes.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
-  await sb.from('sessions').update({status:'closed'}).eq('id',sid).then(()=>{},()=>{});
+  await _wr(sb.from('sessions').update({status:'closed'}).eq('id',sid),'close session');
   // A cancelled booking hands its add-ons back, exactly as a single cancel does (a waitlist row never held any).
   await _addonStockRows(landed.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),1);
   logAction(`${t('cnTitle')} · ${sid} · ${landed.length}`);
@@ -15414,7 +15431,7 @@ async function execCancelNight(){
       else if(claimed.length)await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
     }));
     await _addonStockRows(back.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),-1);
-    if(back.length)await sb.from('sessions').update({status:prevSess}).eq('id',sid).eq('status','closed').then(()=>{},()=>{});
+    if(back.length)await _wr(sb.from('sessions').update({status:prevSess}).eq('id',sid).eq('status','closed'),'undo cancel night');
     if(short)toast(t('errBikeUnavailable'),'warning');
     await loadDataLight();renderStaffQueue();
     if(_writeErr(res,'undo cancel night'))return false;
@@ -15695,7 +15712,7 @@ async function togglePayment(id,mode){
   toast(stateLabel,newPaid?'':'warning');
   const _pr=await sb.from('queue_entries').update({paid:newPaid,price:newPrice}).eq('id',id);
   if(_writeErr(_pr,'payment')){await loadDataLight();renderStaffQueue();renderHistory();return;} // surface failure and revert the optimistic toggle
-  try{await sb.from('queue_entries').update({pay_method:newMethod,card_amount:null}).eq('id',id);}catch(e){} // tolerant: columns may not exist yet
+  await _wr(sb.from('queue_entries').update({pay_method:newMethod,card_amount:null}).eq('id',id),'payment method');
   await _reloadRows([id]);renderHistory(); // only this row moved
   pushUndo(`${t('undoPayment')} #${entry.queueNum} ${entry.name}`,async()=>{
     const r=await sb.from('queue_entries').update({paid:prevPaid,price:prevPrice,pay_method:prevMethod,card_amount:prevCard}).eq('id',id);
@@ -16827,7 +16844,7 @@ async function _redoPromotion(p){
 async function _mwRetireLinked(bookingId,status){
   const rows=(S.deskWaitlist||[]).filter(w=>w.booking_id===bookingId&&w.status==='waiting');
   for(const w of rows){
-    try{await sb.from('desk_waitlist').update({status:status||'done',resolved_at:new Date().toISOString()}).eq('id',w.id);w.status=status||'done';}catch(_){}
+    if(!await _wr(sb.from('desk_waitlist').update({status:status||'done',resolved_at:new Date().toISOString()}).eq('id',w.id),'update staff list'))w.status=status||'done';
   }
 }
 async function doNoShow(id){
@@ -17262,7 +17279,7 @@ async function _returnWrite(id,markPaid,cond,notes){
       ...bikeIds.map(bid=>sb.from('bikes').update(cond==='damaged'?{status:'maintenance',retired_date:_todayISO()}:{status:'available'}).eq('id',bid)),
     ]);
     if(_rr.some(x=>x&&x.error))return{ok:false,writes:_rr};
-    try{await sb.from('queue_entries').update({checked_out_at:new Date().toISOString()}).eq('id',id);}catch(_){} // tolerant: exact check-out stamp
+    await _wr(sb.from('queue_entries').update({checked_out_at:new Date().toISOString()}).eq('id',id),'check-out time');
   }
   if(cond&&cond!=='ok')logAction(`${t('retTitle')}: #${entry.queueNum} ${entry.name} · ${cond}${notes?' · '+notes:''}`);
   entry.status='done';
@@ -17279,7 +17296,7 @@ async function _unreturnWrite(id,bikeIds,markPaid){
   if(claimed.length<bikeIds.length)u.assigned_bike_id=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
   const _u=await sb.from('queue_entries').update(u).eq('id',id);
   if(_writeErr(_u,'undo return')){await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});return false;}
-  try{await sb.from('queue_entries').update({checked_out_at:null}).eq('id',id);}catch(_){}
+  await _wr(sb.from('queue_entries').update({checked_out_at:null}).eq('id',id),'undo check-out');
   return true;
 }
 async function _finishReturn(id,markPaid,cond,notes){
@@ -17406,7 +17423,7 @@ async function _undoCheckinWrite(entry){
   if(_writeErr(_ur,'undo check-in'))return null;
   if(!_landed(_ur))return{lost:true};
   if(bikeIds.length)await Promise.all(bikeIds.map(bid=>sb.from('bikes').update({status:'available'}).eq('id',bid))).catch(()=>{});
-  try{await sb.from('queue_entries').update({checked_in_at:null}).eq('id',id);}catch(_){}
+  await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',id),'undo check-in');
   try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
   return{bikeIds};
 }
@@ -19604,7 +19621,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     if(_writeErr(_qa,'save',()=>applyCheckinChanges()))return;
     // a bike reserved for someone else and taken here ("assign anyway") moves, as Reserve bike does
     if(_bikeId&&_qa.data&&_qa.data.length)await _dropOtherReservations([_bikeId],e.id);
-    if(!comm&&_method!==undefined){try{await sb.from('queue_entries').update({pay_method:_method,card_amount:_card}).eq('id',e.id);}catch(_){}}
+    if(!comm&&_method!==undefined)await _wr(sb.from('queue_entries').update({pay_method:_method,card_amount:_card}).eq('id',e.id),'payment method');
     if(patch.paid!==undefined||patch.price!==undefined)logAction(`${t('colPayment')}: #${e.queueNum} ${e.name}`);
     _ciDropDraft(e.id);closeCheckinModal();
     await _reloadRows([e.id]);renderStaffQueue();
@@ -19668,8 +19685,8 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     if(_scanResume)_scanCount++;
     _ciCloseForNext(e);
   }
-  if(!comm&&_method!==undefined){try{await sb.from('queue_entries').update({pay_method:_method,card_amount:_card}).eq('id',e.id);}catch(_){}} // tolerant, like togglePayment
-  if(!_viaRpc){try{await sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',e.id);}catch(_){}} // the RPC stamps it itself
+  if(!comm&&_method!==undefined)await _wr(sb.from('queue_entries').update({pay_method:_method,card_amount:_card}).eq('id',e.id),'payment method');
+  if(!_viaRpc)await _wr(sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',e.id),'check-in time'); // the RPC stamps it itself
   Object.assign(e,{status:'active',typePreference:ty},patch.paid?{paid:true}:{},patch.price!==undefined?{price:patch.price}:{});
   S._flashId=e.id;S._flashColor='green';renderStaffQueue(); // the row moves now; the re-sync below confirms it
   await _addonsOnLeaveWaitlist(e,_wasWl);
@@ -20191,7 +20208,8 @@ async function confirmAssign(){
     if(error){
 
       assignedVal=S.modalBikes[0];
-      await sb.from('queue_entries').update({status:'active',assigned_bike_id:assignedVal,...priceUpdate}).eq('id',riderId);
+      // This fallback used to go unchecked, and a success toast followed a refused check-in.
+      if(await _wr(sb.from('queue_entries').update({status:'active',assigned_bike_id:assignedVal,...priceUpdate}).eq('id',riderId),'check in')){await _relClaimed();renderModal();return;}
 
       if(_multi){S._extraBikes=S._extraBikes||{};S._extraBikes[riderId]=S.modalBikes;}
     }else{
@@ -20201,7 +20219,7 @@ async function confirmAssign(){
   }
   // The exact check-in stamp, on a check-in only: a bike change reset it, and the ride's time on
   // the bike, the two-hour flag and the analytics minutes all started again from the swap.
-  if(!isReassign)try{await sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',riderId);}catch(_){}
+  if(!isReassign)await _wr(sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',riderId),'check-in time');
   // Release any bike the rider gave up (a bike change), now that the booking no longer names it:
   // freed before the booking write, a failed write left the rider's bike marked available under
   // them. Only while it is still in-use, so one sent to maintenance meanwhile stays out of service.
@@ -20209,7 +20227,7 @@ async function confirmAssign(){
   if(rider&&rider.status==='waitlist'){await _addonsOnLeaveWaitlist(rider,true);await _mwRetireLinked(riderId);} // handed a bike straight off the waitlist
   await _dropOtherReservations(selected.map(b=>b.id),riderId); // "assign anyway" moves the reservation, it does not share it
   if(rider&&rider.typePreference==='Any'&&selected.length>0){
-    await sb.from('queue_entries').update({type_preference:selected[0].type}).eq('id',riderId);
+    await _wr(sb.from('queue_entries').update({type_preference:selected[0].type}).eq('id',riderId),'save bike type');
   }
   await loadData();
   // apply the payment chosen back in the check-in modal (see _ciCarryPay)
@@ -20248,7 +20266,7 @@ async function confirmAssign(){
       if(!_landed(u)){await _lostRace();return false;}
       try{localStorage.removeItem('cq_ct_'+riderId);}catch(e){}
       await Promise.all(needsUpdate.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b.id))).catch(()=>{});
-      try{await sb.from('queue_entries').update({checked_in_at:null}).eq('id',riderId);}catch(_){}
+      await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',riderId),'undo check-in');
       await loadData();renderStaffQueue();
     });
   }
@@ -20863,8 +20881,8 @@ async function _addBikeNow(){
     if(dup){await loadData();renderBikes();toast(t('errBikeNumberDup'),'error');return;}
     _writeErr(ins,'add bike');return;
   }
-  // Photo saved separately so a missing 'photo' column can't block adding a bike
-  if(S._bkPhoto){try{await sb.from('bikes').update({photo:S._bkPhoto}).eq('id',bike.id);}catch(e){}}
+  // The photo is written separately; a refusal is said and never undoes the bike
+  if(S._bkPhoto)await _wr(sb.from('bikes').update({photo:S._bkPhoto}).eq('id',bike.id),'save bike photo');
   await loadData();
   _resetBikeForm();
   toast(`${bike.name} ${t('toastAddedToFleet')}`);
@@ -20955,14 +20973,14 @@ async function _saveBikeEditNow(){
   const bid=S.editBikeId;
   const{error}=await sb.from('bikes').update({name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:editColorNames,brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,wheel_size:S._bkWheel||null,brake_type:S._bkBrake||null,weight_kg:_bkWeightVal()}).eq('id',bid);
   if(error){toast(error.message||t('errSomethingWrong'),'error');return;}
-  try{await sb.from('bikes').update({photo:S._bkPhoto||null}).eq('id',bid);}catch(e){}
+  await _wr(sb.from('bikes').update({photo:S._bkPhoto||null}).eq('id',bid),'save bike photo');
   await loadData();
   _resetBikeForm();
   toast(t('toastBikeUpdated'));
   pushUndo(`${t('undoEditBike')} ${name}`,async()=>{
     const r=await sb.from('bikes').update(prev).eq('id',bid);
     if(_writeErr(r,'undo edit bike'))return false;
-    try{await sb.from('bikes').update({photo:prevPhoto}).eq('id',bid);}catch(e){}
+    await _wr(sb.from('bikes').update({photo:prevPhoto}).eq('id',bid),'undo edit bike');
     await loadData();renderBikes();
   });
   renderBikes();
@@ -25136,7 +25154,7 @@ let _flavCleaned=false;
 async function _sanitizeFlavours(){
   if(_flavCleaned)return;_flavCleaned=true;
   try{const m=S.invFlavoursByBrand||{};let ch=false;Object.keys(m).forEach(k=>{const c=(m[k]||[]).filter(f=>!_badFlav(f));if(c.length!==(m[k]||[]).length){m[k]=c;ch=true;}});if(ch){S.invFlavoursByBrand=m;try{localStorage.setItem('cq_inv_flavs_by_brand',JSON.stringify(m));}catch(e){}}}catch(e){}
-  try{const items=(S.inventory||[]).filter(it=>it.flavour&&_badFlav(it.flavour));if(items.length){items.forEach(it=>{it.flavour=null;});for(const it of items){try{await sb.from('inventory').update({flavour:null}).eq('id',it.id);}catch(e){}}renderInventory();}}catch(e){}
+  try{const items=(S.inventory||[]).filter(it=>it.flavour&&_badFlav(it.flavour));if(items.length){items.forEach(it=>{it.flavour=null;});for(const it of items)await _wr(sb.from('inventory').update({flavour:null}).eq('id',it.id),'clean flavours');renderInventory();}}catch(e){}
 }
 // ── Cashier: per-rental purchases (items sold at assignment / checkout), categorized like inventory ──
 function entryPurchases(e){
@@ -25205,10 +25223,10 @@ async function _teamRosterSyncDB(added,removed,renamed){
   try{
     // A rename changes the row in place, so the name keeps its operator PIN. Delete-and-insert
     // gave "Ahmed K" no PIN, and anyone could pick it at the operator gate.
-    for(const r of (renamed||[])){if(r&&r.from&&r.to&&r.from!==r.to)await sb.from('team_members').update({name:r.to}).eq('name',r.from);}
-    if(add.length)await sb.from('team_members').upsert(add.map(n=>({name:n})),{onConflict:'name'});
+    for(const r of (renamed||[])){if(r&&r.from&&r.to&&r.from!==r.to&&await _wr(sb.from('team_members').update({name:r.to}).eq('name',r.from),'rename team member'))return;}
+    if(add.length&&await _wr(sb.from('team_members').upsert(add.map(n=>({name:n})),{onConflict:'name'}),'add team member'))return;
     if(del.length){
-      await sb.from('team_members').delete().in('name',del);
+      if(await _wr(sb.from('team_members').delete().in('name',del),'remove team member'))return;
       const left=await sb.from('team_members').select('name').in('name',del);
       const kept=(left&&!left.error&&Array.isArray(left.data))?left.data.map(x=>x.name):[];
       if(kept.length){
@@ -26439,6 +26457,20 @@ function startInvEdit(id){
   if(S._invFlav){const _bk=S._invBrand||'';const _m=S.invFlavoursByBrand||{};if(!((_m[_bk]||[]).includes(S._invFlav))){_m[_bk]=[...(_m[_bk]||[]),S._invFlav];S.invFlavoursByBrand=_m;}}
   renderInventory();
 }
+// What the item form holds besides the row's own columns: the photo, the price (0 = free), the cost
+// (only when typed on a new item, so a blank box does not zero it; an edit writes what the box says),
+// the flavour (supplements only), the volume (drinks only) and the nutrition table.
+function _invExtraCols(id,cat,isNew){
+  const _p=parseFloat(S._invPrice),_c=parseFloat(S._invCost);
+  const _fv=(document.getElementById('inv-flav')?.value||S._invFlav||'').trim();
+  const more={photo:S._invPhoto||null,
+    price:S._invFree?0:(isNew?((!isNaN(_p)&&_p>0)?_p:null):(isNaN(_p)?null:_p)),
+    flavour:(S.invSection==='supplements'&&!_badFlav(_fv))?_fv:null,
+    volume_ml:_isDrinkCat(cat)?(parseInt(document.getElementById('inv-ml')?.value||S._invMl||'')||null):null,
+    nutrition:_invNutriJson()};
+  if(isNew){if(!isNaN(_c)&&_c>=0)more.cost=_c;}else more.cost=isNaN(_c)?null:_c;
+  return more;
+}
 async function addInvItem(){
   const name=(S._invName||'').trim();if(!name){toast(t('invItemName'),'error');return;}
   const brand=(document.getElementById('inv-brand')?.value||S._invBrand||'').trim();
@@ -26446,13 +26478,10 @@ async function addInvItem(){
   const item={id:uid(),name,brand:(brand&&brand!=='__add__')?brand:null,category:cat,qty:parseInt(S._invQty)||0,low_threshold:parseInt(S._invLow)||0,updated_at:new Date().toISOString()};
   const{error}=await sb.from('inventory').insert(item);
   if(error){toast(error.message,'error');return;}
-  // Photo and price saved separately (each tolerant) so a missing column can't block adding an item
-  if(S._invPhoto){try{await sb.from('inventory').update({photo:S._invPhoto}).eq('id',item.id);}catch(e){}}
-  {const _p=parseFloat(S._invPrice);const pv=S._invFree?0:((!isNaN(_p)&&_p>0)?_p:null);if(pv!=null){try{await sb.from('inventory').update({price:pv}).eq('id',item.id);}catch(e){}}}
-  {const _c=parseFloat(S._invCost);if(!isNaN(_c)&&_c>=0){try{await sb.from('inventory').update({cost:_c}).eq('id',item.id);}catch(e){}}} // tolerant: no-op if the column isn't there yet
-  if(S.invSection==='supplements'){const _fv=(document.getElementById('inv-flav')?.value||S._invFlav||'').trim();const _f=_badFlav(_fv)?null:_fv;try{await sb.from('inventory').update({flavour:_f}).eq('id',item.id);}catch(e){}}
-  {const _mlv=_isDrinkCat(cat)?(parseInt(document.getElementById('inv-ml')?.value||S._invMl||'')||null):null;try{await sb.from('inventory').update({volume_ml:_mlv}).eq('id',item.id);}catch(e){}}
-  {const _nu=_invNutriJson();try{await sb.from('inventory').update({nutrition:_nu}).eq('id',item.id);}catch(e){}}
+  // The rest of the item in ONE checked write. Photo, price, cost, flavour, volume and nutrition used
+  // to go in six separate writes whose refusals were swallowed behind the Saved toast (2026-09-27
+  // review); every column has existed since 20260922124000, so nothing is left to be tolerant of.
+  if(await _wr(sb.from('inventory').update(_invExtraCols(item.id,cat,true)).eq('id',item.id),'save item'))return;
   await loadData();S.showAddInv=false;toast(t('invSaved'));renderInventory();
 }
 async function saveInvEdit(){
@@ -26470,13 +26499,8 @@ async function saveInvEdit(){
   if(error){toast(error.message,'error');return;}
   {const q1=parseInt(S._invQty),q0=parseInt(S._invQty0);const d=(isNaN(q1)||isNaN(q0))?0:q1-q0; // no baseline, no guess
     if(d){const it=(S.inventory||[]).find(x=>x.id===id);if(await _invApplyDelta(id,d)!==null)logAction(t('logStockAdj').replace('{0}',it?it.name:name).replace('{1}',(d>0?'+':'')+d));}}
-  // Photo and price saved separately (each tolerant) so a missing column can't fail the whole edit
-  try{await sb.from('inventory').update({photo:S._invPhoto||null}).eq('id',id);}catch(e){}
-  {const _p=parseFloat(S._invPrice);const pv=S._invFree?0:(isNaN(_p)?null:_p);try{await sb.from('inventory').update({price:pv}).eq('id',id);}catch(e){}}
-  {const _c=parseFloat(S._invCost);const cv=isNaN(_c)?null:_c;try{await sb.from('inventory').update({cost:cv}).eq('id',id);}catch(e){}}
-  {const _fv=(document.getElementById('inv-flav')?.value||S._invFlav||'').trim();const _f=(S.invSection==='supplements'&&!_badFlav(_fv))?_fv:null;try{await sb.from('inventory').update({flavour:_f}).eq('id',id);}catch(e){}}
-  {const _mlv=_isDrinkCat(cat)?(parseInt(document.getElementById('inv-ml')?.value||S._invMl||'')||null):null;try{await sb.from('inventory').update({volume_ml:_mlv}).eq('id',id);}catch(e){}}
-  {const _nu=_invNutriJson();try{await sb.from('inventory').update({nutrition:_nu}).eq('id',id);}catch(e){}}
+  // The rest of the item in one checked write (see addInvItem).
+  if(await _wr(sb.from('inventory').update(_invExtraCols(id,cat,false)).eq('id',id),'save item'))return;
   await loadData();S.editInvId=null;toast(t('invSaved'));renderInventory();
 }
 let _invAdjPend={},_invAdjTimer=null;
@@ -29011,7 +29035,9 @@ function _bootStaffTab(nav){
     }
     // Widen to the full 12-month window once the first data is in. (Tests can disable
     // this background refresh via window.__noWiden so it can't clobber state they set up.)
-    if(!S._fullWindow&&!(typeof window!=='undefined'&&window.__noWiden)){S._fullWindow=true;setTimeout(async()=>{try{await loadDataLight();}catch(_){return;}try{_refreshView();}catch(e){}},1200);}
+    // A customer's device never needs the staff window - its own bookings come through
+    // my_bookings - so it is not widened there: three of a customer's seven boot reads were this.
+    if(!S._fullWindow&&!(typeof window!=='undefined'&&window.__noWiden)&&!_custOnly()){S._fullWindow=true;setTimeout(async()=>{try{await loadDataLight();}catch(_){return;}try{_refreshView();}catch(e){}},1200);}
   })();
   applyThemeIcon();
   // ?lang wins over the remembered choice: a shared or indexed link must open in the
@@ -29249,9 +29275,14 @@ async function _loadDataLightInner(){
 // objects only for what it fetched, so each row's hash is kept against the object and the print
 // costs a few hundred hashes, not thousands. (Photos are left out: they are big, and never the
 // only thing that changed.)
+// A row with the server's own stamp - a booking through zz_sync_touch, a bike through
+// bikes_touch_updated_at - is known by its id and that stamp; anything else by its content. A
+// reload builds new row objects for what it fetched, so the cache never helped those, and
+// serialising five thousand bookings after every reload froze a booth tablet for half a second.
 const _fpRowCache=new WeakMap();
 function _fpHash(str,h){for(let i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))|0;return h;}
-function _fpRow(x){if(!x||typeof x!=='object')return _fpHash(String(x),7);let h=_fpRowCache.get(x);if(h===undefined){h=_fpHash(JSON.stringify(x,(k,v)=>k==='photo'?undefined:v)||'',7);_fpRowCache.set(x,h);}return h;}
+function _fpKey(x){if(x.updatedAt!=null&&x.id!=null)return String(x.id)+'|'+x.updatedAt;if(x.updated_at!=null&&x.id!=null&&'bike_number' in x)return String(x.id)+'|'+x.updated_at;return null;}
+function _fpRow(x){if(!x||typeof x!=='object')return _fpHash(String(x),7);let h=_fpRowCache.get(x);if(h===undefined){const k=_fpKey(x);h=_fpHash(k!==null?k:(JSON.stringify(x,(kk,v)=>kk==='photo'?undefined:v)||''),7);_fpRowCache.set(x,h);}return h;}
 function _fpList(a){let h=(a||[]).length|0;(a||[]).forEach(x=>{h=(h*31+_fpRow(x))|0;});return h;}
 function _staffFingerprint(){
   return[S.queue,S.bikes,S.sessions,S.deskWaitlist,S.cashSales,S.inventory].map(_fpList).join('#');
@@ -29514,7 +29545,14 @@ function setupRealtime(){
       });
   }catch(e){console.warn('Realtime init failed:',e);}
 }
-_sbReady.then(()=>{try{setupRealtime();}catch(e){}});
+// The live channel starts once there is a page to show its changes on: a staff device or a
+// remembered customer at once, anyone else when they sign in or unlock (showView). A signed-out
+// visitor on the sign-in page used to hold a socket too, and every open socket keeps the database
+// polling its change log - realtime was the database's largest consumer of time in the 2026-09-27
+// review. `var`: showView can run from the boot's snapshot paint, before this line.
+var _rtStarted=false;
+function _rtStart(){if(_rtStarted)return;_rtStarted=true;_sbReady.then(()=>{try{setupRealtime();}catch(e){}});}
+try{if(localStorage.getItem('cq_staff')==='1'||getSession()||!_custOnly())_rtStart();}catch(e){_rtStart();} // in open mode the picker is live for everyone
 // ── Rider changes, the moment they happen, on a channel only staff can join ──
 // customers stays OUT of the postgres_changes publication on purpose: that sends the whole
 // row, and this one holds password_hash and a session_token rewritten on every login. A
@@ -29693,7 +29731,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // (Realtime is set up once above via setupRealtime(); the old second channel was removed to avoid double-fetching.)
-try{window.addEventListener('online',()=>{_updateConnUI();_outboxFlush();_bookOutboxFlush();try{if(!S._rtConnected)setupRealtime();}catch(_){}});}catch(e){} // sync queued work + re-subscribe when the connection returns (a channel still joined is left alone)
+try{window.addEventListener('online',()=>{_updateConnUI();_outboxFlush();_bookOutboxFlush();try{if(_rtStarted&&!S._rtConnected)setupRealtime();}catch(_){}});}catch(e){} // sync queued work + re-subscribe when the connection returns (a channel still joined is left alone)
 try{window.addEventListener('offline',()=>{S._rtConnected=false;_updateConnUI();});}catch(e){}
 // ── Pull-to-refresh: drag down at the top of the queue / sessions / dashboard / My Rides lists to refresh ──
 (function(){
