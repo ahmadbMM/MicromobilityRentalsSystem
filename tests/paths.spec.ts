@@ -116,6 +116,18 @@ test.describe('staff', () => {
     await page.waitForFunction(`S.staffTab==='history'`);
   });
 
+  test('the top-bar logo loads on a two-segment address: its path is root-relative', async ({ page }) => {
+    // The bare name logo-mark-dark.png resolved under /bookings/ or /website/ and 404ed, so the
+    // staff top bar had no logo on any sub-view (2026-09-27).
+    for (const path of ['/bookings/waitlist', '/website/bikes']) {
+      await staff(page, path);
+      const img = page.locator('#topbar-logo-img');
+      await expect(img).toBeVisible();
+      expect(await img.getAttribute('src'), path).toMatch(/^\/logo/);
+      await expect.poll(() => img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth > 0), { message: path }).toBe(true);
+    }
+  });
+
   test('a deep link opens on that section and sub-view', async ({ page }) => {
     await staff(page, '/website/bikes/categories');
     expect(await page.evaluate('S.staffTab')).toBe('catalog');
