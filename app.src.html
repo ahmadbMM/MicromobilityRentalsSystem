@@ -4381,9 +4381,14 @@ function fmtPhone(p){
   if(match)return match[0]+' '+p.slice(match[0].length);
   return p;
 }
+// An action that puts up its undo bar has said what it did: a plain toast beside it said it
+// twice (owner, 2026-09-27), so within 1.5 s of the bar the toast stands down whichever comes
+// first. Errors and warnings always show.
+let _undoBarAt=0;
 function toast(msg,type){
+  if(type!=='error'&&type!=='warning'&&Date.now()-_undoBarAt<1500)return;
   const el=document.createElement('div');
-  el.className='toast'+(type?' '+type:'');el.textContent=msg;
+  el.className='toast'+(type?' '+type:'');el.textContent=msg;el.dataset.at=String(Date.now());
   const container=document.getElementById('toast-container');
   container.appendChild(el);
   setTimeout(()=>el.remove(),2800);
@@ -4394,6 +4399,8 @@ function showUndoBar(label,fn){
   
   const old=document.getElementById('undo-bar-el');if(old)old.remove();
   clearInterval(_undoBarTimer);
+  _undoBarAt=Date.now();
+  document.querySelectorAll('#toast-container .toast').forEach(e=>{if(!/\b(error|warning)\b/.test(e.className)&&Date.now()-(+e.dataset.at||0)<1500)e.remove();}); // the toast the same action just showed
   const DURATION=5000;
   const bar=document.createElement('div');
   bar.id='undo-bar-el';bar.className='undo-bar';
@@ -4413,7 +4420,7 @@ function showUndoBar(label,fn){
     if(elapsed>=DURATION){clearInterval(_undoBarTimer);bar.remove();}
   },80);
   btn.onclick=async()=>{
-    clearInterval(_undoBarTimer);bar.remove();
+    clearInterval(_undoBarTimer);bar.remove();_undoBarAt=0; // the undo's own outcome is news
     try{await fn();toast(t('undoneMsg'));}catch(e){toast(t('undoFailed'),'error');}
     renderTopbarRight();renderStaffQueue();
   };
@@ -28528,10 +28535,13 @@ async function _mgRun(keepId,dropId){
   if(r&&r.error){if(_rpcAbsent(r.error)){toast(t('dbPending'),'error');return;}const m=String(r.error.message||'');toast(/ALREADY_MERGED/.test(m)?t('mgAlready'):_rpcMessage(r.error),'error');return;}
   const label=t('mgDone').replace('{0}',drop.name||'').replace('{1}',keep.name||'');
   const mid=r&&r.data&&r.data.id;
-  toast('✓ '+label);
   pushUndo(`${t('mgTitle')}: ${label}`,async()=>{if(!mid)return false;return _mgUndoWrite(mid);});
+  // The pair leaves the Duplicates list at once: the other account is marked here as the server
+  // marked it, and the customer list is read again - loadData alone keeps it for its TTL, so the
+  // merged account used to stay in the list until the next read.
+  S.customers=_custLiveRows((S.customers||[]).map(c=>c&&c.id===dropId?{...c,merged_into:keepId}:c));
   S._mgRows=null;S._mgA=null;S._mgB=null;
-  await loadData();renderCommunity();
+  refDirty();await loadData();renderCommunity();
 }
 async function _mgLoad(){
   if(!sb||S._mgBusy)return;S._mgBusy=true;
@@ -28550,7 +28560,7 @@ async function _mgUndoWrite(id){
   toast('✓ '+t('mgUndone').replace('{0}',nm||''));
   logAction(t('mgUndone').replace('{0}',nm||''));
   S._mgRows=null;
-  await loadData();if(S.staffTab==='community')renderCommunity();
+  refDirty();await loadData();if(S.staffTab==='community')renderCommunity(); // the account is a plain row again: read the list, do not rebuild it here
   return true;
 }
 async function _mgUndo(id){await _mgUndoWrite(id);}

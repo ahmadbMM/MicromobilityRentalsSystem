@@ -93,7 +93,7 @@ test('a bulk retire that is partly refused says so, counts what changed, and kee
   await page.evaluate(`S.bkSelected=['b1','b2'];bkBulkRetire()`);
   await page.evaluate(`_doConfirm()`);
   await expect(page.locator('#err-bar-el')).toBeVisible();
-  await expect(page.locator('.toast', { hasText: /\b1\b/ })).toBeVisible();
+  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText(/\b1\b/); // the undo bar carries the count; the plain toast stands down beside it
   expect(await page.evaluate(`S.bkSelected`)).toEqual(['b2']);
   expect(await page.evaluate(`S.undoStack[S.undoStack.length-1].label`)).toContain('(1)');
   expect(patches(writes)).toHaveLength(2);

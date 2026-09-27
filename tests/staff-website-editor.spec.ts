@@ -99,7 +99,7 @@ test('a text edit saves as one row, signed, and undo removes it again', async ({
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].method).toBe('POST');
   expect(writes[0].body).toEqual([{ key: 'home.hero.title', value: { en: 'Built for the corniche.', ar: 'سرعة الكربون، صُنعت لجدة.' }, updated_by: 'Spec Staff' }]);
-  await expect(page.locator('.toast').last()).toContainText('Saved');
+  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Website: changed'); // the undo bar says it; the plain toast stands down beside it
   await page.evaluate(`doUndo()`);
   await expect.poll(() => writes.length).toBe(2);
   expect(writes[1].method).toBe('DELETE');

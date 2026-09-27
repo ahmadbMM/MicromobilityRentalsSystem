@@ -82,7 +82,7 @@ test('a closed party returns everyone on a bike through one screen', async ({ pa
   expect(calls.find(c => c.id === 'p2')).toEqual({ id: 'p2', cond: 'damaged', notes: 'Rear wheel bent' });
   await expect.poll(() => writes.some(w => w.id === 'p2' && w.body.paid === true)).toBe(true);
   expect(writes.some(w => w.id === 'p1' && w.body.paid === true)).toBe(false); // already paid: untouched
-  await expect(page.locator('.toast').last()).toContainText('Bikes returned: 2');
+  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Bikes returned: 2'); // on the undo bar; the plain toast stands down beside it
 });
 
 test('return without payment leaves the unpaid rider unpaid', async ({ page }) => {
