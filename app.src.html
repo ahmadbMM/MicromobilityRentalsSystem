@@ -7853,7 +7853,9 @@ function showWlPayMenu(id,evt){
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:200px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
   menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" data-on-click="${_on("_on_showWlPayMenu_1",_EV,_EL,o.mode==='split'?['splitWlPayment',id]:['toggleWlPayment',id,o.mode])}">${o.label}</button>`).join('');
   document.body.appendChild(menu);
-  const r=evt.currentTarget.getBoundingClientRect();
+  // Under the delegated dispatcher (2026-09-27) currentTarget is the document: the element that was pressed is the target.
+  const _anc=(evt&&evt.currentTarget&&typeof evt.currentTarget.getBoundingClientRect==='function')?evt.currentTarget:(evt&&evt.target&&typeof evt.target.getBoundingClientRect==='function')?evt.target:null;
+  const r=_anc?_anc.getBoundingClientRect():{left:20,right:170,top:60,bottom:60};
   const mh=menu.offsetHeight||100;
   const top=(r.bottom+4+mh>window.innerHeight)?r.top-mh-4:r.bottom+4;
   menu.style.left=Math.min(r.left,window.innerWidth-210)+'px';
@@ -11235,8 +11237,11 @@ async function _routesLoad(){
   if(!sb||S._routes!==undefined||S._routesBusy)return;S._routesBusy=true;
   try{const r=await sb.from('site_content').select('value').eq('key','routes.routes.items').maybeSingle();S._routes=(r&&!r.error&&Array.isArray(r.data&&r.data.value))?r.data.value:[];}
   catch(e){S._routes=[];}finally{S._routesBusy=false;}
-  if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions')try{renderSessions();}catch(_){}
+  if(!S._routes.length)return; // no routes: the picker stays away, nothing to repaint
+  if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions'&&!_nsFormBusy())try{renderSessions();}catch(_){}
 }
+// A staffer in the middle of the session form: a background repaint would take their field away.
+function _nsFormBusy(){const a=document.activeElement;return !!(a&&a.closest&&a.closest('#sess-host, #tab-sessions')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}
 function _routeOf(s){const k=s&&s.route_slug;if(!k)return null;return _routes().find(r=>r.slug===k)||{slug:k,name:k};}
 function _on__nsRoute(event,el){S.newSessRoute=el.value}
 function _nsRouteHtml(){
@@ -11298,8 +11303,9 @@ async function _bwLoad(force){
   let v=null;try{const r=await sb.from('site_content').select('value').eq('key','booking.window').maybeSingle();v=(r&&!r.error&&r.data&&r.data.value)||null;}catch(e){v=null;}
   if(S._bw===undefined||force)S._bw=v; // a save that landed while this read was on the wire stands
   S._bwBusy=false;
+  if(v==null)return; // nothing to show differently: no repaint (a repaint would wipe a form's error marks)
   if(S.view==='customer'&&S.custTab==='register')try{renderRegister();}catch(_){}
-  if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions')try{renderSessions();}catch(_){}
+  if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions'&&!_nsFormBusy())try{renderSessions();}catch(_){}
 }
 // The day (and hour) a ride opens for booking, or null when it is open now or no window is set.
 function _bwOpensOn(s){
@@ -16207,7 +16213,9 @@ function showPayMenu(id,evt){
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:200px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
   menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" data-on-click="${_on("_on_showPayMenu_1",_EV,_EL,o.mode==='price'?['showEditPriceModal',id]:o.mode==='split'?['splitRentalPayment',id]:['togglePayment',id,o.mode])}">${o.label}</button>`).join('');
   document.body.appendChild(menu);
-  const r=evt.currentTarget.getBoundingClientRect();
+  // Under the delegated dispatcher (2026-09-27) currentTarget is the document: the element that was pressed is the target.
+  const _anc=(evt&&evt.currentTarget&&typeof evt.currentTarget.getBoundingClientRect==='function')?evt.currentTarget:(evt&&evt.target&&typeof evt.target.getBoundingClientRect==='function')?evt.target:null;
+  const r=_anc?_anc.getBoundingClientRect():{left:20,right:170,top:60,bottom:60};
   const mh=menu.offsetHeight||100;
   const top=(r.bottom+4+mh>window.innerHeight)?r.top-mh-4:r.bottom+4;
   menu.style.left=Math.min(r.left,window.innerWidth-210)+'px';

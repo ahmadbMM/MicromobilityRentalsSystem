@@ -5381,4 +5381,4 @@ body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wr
 .amb-mine-ev{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
 .amb-mine-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
 .amb-mine-row span:first-child{flex:1;min-width:0;}
-.btn-wallet.gwallet{background:#1a73e8;border-color:#1a73e8;}
+.btn-wallet.gwallet{background:#0b4aa2;border-color:#0b4aa2;color:#fff;} /* white on this blue reads at 8:1 */
