@@ -3155,10 +3155,11 @@ const QR=(function(){
     var dark=opts.dark||'#0b2018';          
     var light=opts.light||'#ffffff';
     var px=opts.size||96;
+    var pad=opts.pad||0;                 // white margin drawn INSIDE the svg, around the quiet zone
     var logoSrc=opts.logo===false?null:(opts.logo||'/logo.png'); // root-relative: the page may sit at /bookings/waitlist
-    var qr=encode(text),n=qr.size,total=n+2*q,cell=px/total,mods=qr.modules;
-    function fx(c){return (c+q)*cell;}
-    function fy(r){return (r+q)*cell;}
+    var qr=encode(text),n=qr.size,total=n+2*q,cell=(px-2*pad)/total,mods=qr.modules;
+    function fx(c){return pad+(c+q)*cell;}
+    function fy(r){return pad+(r+q)*cell;}
     function inFinder(r,c){return (r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);}
     
     var lMods=logoSrc?Math.round(n*0.22):0;if(logoSrc&&(n-lMods)%2!==0)lMods++;
@@ -3204,8 +3205,13 @@ function _loadQrcode(){
   return _qrcodeP;
 }
 function _qrBox(payload,px){
-  // v2 design: QR on a white 6px-padded tile, 1px hairline border, 8px radius (no glow).
-  return `<div style="background:#fff;padding:6px;border-radius:3px;display:inline-block;line-height:0;border:1px solid var(--border)">${QR.svg(payload,{size:px-12,margin:4,logo:false})}</div>`;
+  // v2 design: QR on a white 6px-padded tile, 1px hairline border, 3px radius (no glow).
+  // The white tile is part of the svg (its own background rect, the 6px as `pad`), not a CSS
+  // background on the box: a browser that darkens the page for the rider (Samsung Internet's
+  // dark mode, Chrome's auto dark) inverts CSS backgrounds and left the code in a black frame
+  // on every card, while the svg's own fills are kept - so the tile reads white on every card,
+  // whatever the browser does to the page around it (owner, 2026-09-27).
+  return `<div style="border-radius:3px;display:inline-block;line-height:0;border:1px solid var(--border);overflow:hidden">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}</div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
