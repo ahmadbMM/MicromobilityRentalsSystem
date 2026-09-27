@@ -33,7 +33,7 @@ test('the payment pill opens one menu that also edits the price; the pencil is g
   const menu = page.locator('.pay-menu-popup');
   await expect(menu).toContainText('Pending');
   await expect(menu).toContainText('Edit Price');
-  await menu.getByRole('button', { name: /Edit Price/ }).click();
+  await menu.getByRole('menuitem', { name: /Edit Price/ }).click();   // an action among the states (menuitemradio)
   await expect.poll(() => page.evaluate(`document.getElementById('edit-price-modal').style.display`)).toBe('flex');
 });
 

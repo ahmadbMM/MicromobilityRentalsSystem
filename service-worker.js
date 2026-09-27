@@ -19,8 +19,13 @@ const APP_ROUTE = /^\/(?:reserve|my-bookings|account|bookings|dashboard|sales|in
 const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team)(?:\/|$)/;
 const LIVE_CUSTOMER_HOST = self.location.hostname === 'micromobilityrentals.pages.dev';
 const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
+// The staff half of the app rides in the shell on every host but the live customer one, so the
+// desk opens offline and after a deploy the new file is already on the device; its own hash is in
+// the name (the build stamps it), so a new build is a new entry and the old one just ages out.
+const STAFF_JS = './staff.js?v=ec49429191';
 const SHELL = [
   SHELL_KEY,
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS]),
   './styles.css?v=a58f54b32c',
   './manifest.json',
   './logo.png',

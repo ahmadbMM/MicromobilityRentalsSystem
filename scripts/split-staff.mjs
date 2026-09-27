@@ -137,12 +137,25 @@ export function splitStaff(html, staffUrl) {
 // down, awaits _loadStaff before the script has finished running.
 var _staffP=null;
 var STAFF_JS=${JSON.stringify(staffUrl)}; // var, and this block leads the script: the boot calls _loadStaff before the script has finished running
-function _staffWanted(){try{if(S.view==='staff'||_isStaffHost()||localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1')return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike'))return true;const p=_parsePath(location.pathname);return !!(p&&p.view==='staff');}catch(e){return false;}}
+// The stored marks and the address first, S.view last: this runs at the top of the script too
+// (the early load below), before S exists, and the try answers false only when nothing else did.
+function _staffWanted(){try{if(localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||_isStaffHost())return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike'))return true;const p=_parsePath(location.pathname);if(p&&p.view==='staff')return true;return S.view==='staff';}catch(e){return false;}}
+// A script that neither loads nor errors (a proxy that swallows it, a tab frozen mid-download)
+// used to hold the boot forever: after 30 s the promise rejects and a later call may try again.
 function _loadStaff(){
   if(_staffP)return _staffP;
-  _staffP=new Promise((res,rej)=>{const s=document.createElement('script');s.src=STAFF_JS;s.onload=()=>res();s.onerror=()=>{_staffP=null;rej(new Error('staff.js did not load'));};document.head.appendChild(s);});
+  _staffP=new Promise((res,rej)=>{
+    const s=document.createElement('script');let done=false;
+    const fail=why=>{if(done)return;done=true;_staffP=null;try{s.remove();}catch(e){}rej(new Error(why));};
+    const tm=setTimeout(()=>fail('staff.js did not load in 30 s'),30000);
+    s.src=STAFF_JS;s.onload=()=>{if(done)return;done=true;clearTimeout(tm);res();};s.onerror=()=>{clearTimeout(tm);fail('staff.js did not load');};
+    document.head.appendChild(s);
+  });
   return _staffP;
 }
+// A staff device starts the download here, at the top of the script, instead of after the whole
+// customer half has parsed and run to the boot: the two files come down side by side.
+try{if(_staffWanted())_loadStaff().catch(()=>{});}catch(e){}
 ${stubs}
 `;
   const customerCode = loader + '\n' + text(customer); // the loader first: the boot, further down, awaits it before the script has finished

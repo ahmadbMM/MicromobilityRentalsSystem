@@ -229,12 +229,15 @@ if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(out)) throw new Error('buil
 const swUrl = new URL('../service-worker.js', import.meta.url);
 let sw = await readFile(swUrl, 'utf8');
 const swBefore = sw;
+// The staff half rides in the shell on staff hosts (service-worker.js, STAFF_JS) under its own
+// hash, stamped here before the precache list is checked below.
+sw = sw.replace(/staff\.js\?v=[A-Za-z0-9_]+/g, `staff.js?v=${staffHash}`);
 const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js']); // staff.js: asked for with its own hash (?v=), like the packs
 const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities']);
 const shipped = (rel) => DIST_FILES.includes(rel) || DIST_DIRS.some((d) => rel.startsWith(d + '/'));
 // Every file the worker precaches must also ship, or cache.addAll() rejects and the worker
 // never installs in production. Checked here so it fails at build time, not at "Assemble dist".
-const shellList = [...sw.matchAll(/'\.\/([^']+?)(?:\?v=[a-z0-9]+)?'/g)].map((m) => m[1]);
+const shellList = [...sw.matchAll(/'\.\/([^']+?)(?:\?v=[A-Za-z0-9_]+)?'/g)].map((m) => m[1]);
 for (const rel of new Set(shellList)) {
   if (rel === '') continue;
   if (!shipped(rel)) throw new Error(`build: service-worker.js precaches ${rel}, which scripts/assemble-dist.mjs does not ship`);
