@@ -511,7 +511,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
     errNoteRequired:'Write a note first.',errNoteCustomer:'Who is this note about?',
-  roleAdmin:'Admin',roleFrontDesk:'Front Desk',switchToFrontDesk:'Front Desk mode',switchToAdmin:'Admin',adminOnlyMsg:'Admin only.',
+  roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',switchToFrontDesk:'Front Desk mode',switchToAdmin:'Admin',adminOnlyMsg:'Admin only.',
   authWelcome:'Welcome to MicroMobility',authSub:'Sign in or create an account to track your rides.',
   authLogin:'Log In',authSignup:'Sign Up',authLoginBtn:'Log In',authSignupBtn:'Create Account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Please select your gender.',
   continueGoogle:'Continue with Google',continueApple:'Continue with Apple',addToWallet:'Add to Apple Wallet',walletAdding:'Preparing pass…',walletErr:'Could not create the Wallet pass.',authOr:'or',gCompleteTitle:'Complete your profile',gCompleteSub:'Just a couple more details to finish signing up.',finishBtn:'Finish',errHeightReq:'Please enter your height in cm.',
@@ -939,7 +939,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
     errNoteRequired:'اكتب الملاحظة أولاً.',errNoteCustomer:'عن مَن هذه الملاحظة؟',
-  roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',switchToFrontDesk:'وضع الاستقبال',switchToAdmin:'مدير',adminOnlyMsg:'للمدير فقط.',
+  roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',switchToFrontDesk:'وضع الاستقبال',switchToAdmin:'مدير',adminOnlyMsg:'للمدير فقط.',
   authWelcome:'مرحباً بك في مايكرو موبيليتي',authSub:'سجل دخولك أو أنشئ حساباً لتتبع رحلاتك.',
   authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء الحساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
   continueGoogle:'المتابعة عبر جوجل',continueApple:'المتابعة عبر Apple',addToWallet:'أضف إلى Apple Wallet',walletAdding:'جارٍ تجهيز البطاقة…',walletErr:'تعذّر إنشاء بطاقة Wallet.',authOr:'أو',gCompleteTitle:'أكمل ملفك الشخصي',gCompleteSub:'تفاصيل قليلة لإتمام إنشاء الحساب.',finishBtn:'إنهاء',errHeightReq:'الرجاء إدخال طولك بالسنتيمتر.',
@@ -1532,14 +1532,22 @@ function setLang(lang,_fromUrl){
 
 
 // Staff roles (UX-level scoping; the database's own policies are the security boundary)
-function isAdmin(){return S.staffRole!=='frontdesk';}
+// Six roles (2026-09-28): admin and front desk as before, and ride leader, mechanic, cashier and
+// owner (a read-only viewer). The database enforces admin alone (is_admin); a role's sections are
+// this page's, narrowed by the account's own lists. An unknown role reads as the smaller one asked.
+const STAFF_ROLES=['admin','frontdesk','leader','mechanic','cashier','owner'];
+function _roleNorm(v,dflt){return STAFF_ROLES.includes(v)?v:(dflt||'frontdesk');}
+function _roleLabel(r){return t({admin:'roleAdmin',frontdesk:'roleFrontDesk',leader:'roleLeader',mechanic:'roleMechanic',cashier:'roleCashier',owner:'roleOwner'}[r]||'roleFrontDesk');}
+function isAdmin(){return S.staffRole==='admin';}
 // Front Desk mode shows only the desk's own sections: Sales, Bookings and Riders (the partner
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-function _deskTabOk(tab){return (isAdmin()||DESK_TABS.includes(tab))&&_viewOk(tab);} // the role's sections, then the account's own list (#8)
+const ROLE_TABS={frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','community','analytics','history']};
+function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
+function _deskTabOk(tab){return _roleTabs(S.staffRole).includes(tab)&&_viewOk(tab);} // the role's sections, then the account's own list (#8)
 function setStaffRole(role){
-  S.staffRole=role==='frontdesk'?'frontdesk':'admin';
+  S.staffRole=_roleNorm(role,'admin');
   try{localStorage.setItem('cq_role',S.staffRole);}catch(e){}
   renderTopbarRight();
   if(S.view==='staff')setStaffTab(S.staffTab);
@@ -1575,12 +1583,12 @@ async function _staffLoginEmail(identifier){
 // failed lookup used to mean admin, and setStaffRole saved that guess to cq_role, where the
 // next boot kept it - a front-desk account kept every admin section.
 function _staffRoleGuess(uid){
-  try{if(uid&&localStorage.getItem('cq_role_uid')===String(uid))return localStorage.getItem('cq_role')==='frontdesk'?'frontdesk':'admin';}catch(e){}
+  try{if(uid&&localStorage.getItem('cq_role_uid')===String(uid))return _roleNorm(localStorage.getItem('cq_role'),'admin');}catch(e){}
   return'frontdesk';
 }
 // A role read from the staff row: applied, and remembered as belonging to this account.
 function _staffRoleConfirmed(uid,role){
-  setStaffRole(role==='frontdesk'?'frontdesk':'admin');
+  setStaffRole(_roleNorm(role,'frontdesk'));
   try{if(uid)localStorage.setItem('cq_role_uid',String(uid));}catch(e){}
 }
 // After a sign-in whose staff lookup failed, keep asking in the background so the guess is
@@ -2145,7 +2153,7 @@ const S={
   custTab:'register',
   staffTab:'queue',
   riders:[],ridersLoaded:false,ridersSearch:'',ridersFilter:'all',ridersSession:'all',
-  staffRole:(()=>{try{return localStorage.getItem('cq_role')==='frontdesk'?'frontdesk':'admin';}catch(e){return'admin';}})(),
+  staffRole:(()=>{try{return _roleNorm(localStorage.getItem('cq_role'),'admin');}catch(e){return'admin';}})(),
   custBranch:'all',newSessLocation:'',newSessRepeat:'1',newSessDays:[],sessBranchFilter:'all',newSessAddons:[],editSessAddons:[],regAddons:[],
   promoCodes:[],promoApplied:null,_promoMsg:'',
   _pcCode:'',_pcKind:'percent',_pcValue:'',_pcExpires:'',_pcMax:'',_pcCust:'',
@@ -12499,6 +12507,7 @@ async function toggleSession(id,newStatus){
 
 async function deleteSession(id){
   if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
+  if(!await _pinApprove(t('deleteBtn')))return;
   try{
     const bookings=getQueue().filter(e=>e.sessionId===id&&e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow').length;
     if(bookings>0){toast(t('errHasBookings'),'error');return;}
@@ -13896,6 +13905,7 @@ async function deleteCustomerAccount(id){
       <br><br>${esc(t('naDelBodyFinal').replace('{0}',String(past.length)))}`,
     confirmLabel:t('naDelBtn'),
     onConfirm:async()=>{
+      if(!await _pinApprove(t('naDelBtn')))return;
       if(S._cfBusy)return;S._cfBusy=true;
       try{
         const r=await sb.rpc('staff_delete_customer',{p_id:id});
@@ -16038,7 +16048,7 @@ function _opGateRender(){
   if(G.pick){
     const dots=[0,1,2,3].map(i=>`<span class="opg-dot${i<G.digits.length?' on':''}"></span>`).join('');
     const key=d=>d?`<button type="button" class="opg-key" data-key="${d}" data-on-click="${_on("_opgKey",d)}"${d==='del'?` aria-label="⌫"`:''}${G.busy?' disabled':''}>${d==='del'?'⌫':d}</button>`:'<span></span>';
-    body=`<div class="modal-title">${esc(t('opPinTitle').replace('{0}',G.pick))}</div>
+    body=`<div class="modal-title">${esc(G.approve?t('pinApproveTitle').replace('{0}',G.approve.what):t('opPinTitle').replace('{0}',G.pick))}</div>${G.approve?`<div style="font-size:13px;color:var(--muted);margin:4px 0 10px">${esc(G.pick)}</div>`:''}
       <div class="opg-dots${G.shake?' shake':''}" dir="ltr">${dots}</div>
       <div class="opg-msg" role="alert">${esc(G.msg||'')}</div>
       <div class="opg-pad" dir="ltr">${['1','2','3','4','5','6','7','8','9','','0','del'].map(key).join('')}</div>
@@ -16060,7 +16070,7 @@ function _opGateRender(){
   const inp=document.getElementById('op-gate-name');if(inp&&typedNow)inp.value=typedNow;
 }
 function _opgPick(name,pin){const G=S._opg;if(!G||G.busy||G.list===undefined)return;if(!pin){_opGatePick(name);return;}G.pick=name;G.digits='';G.msg='';G.shake=false;_opGateRender();}
-function _opgBack(){const G=S._opg;if(!G||G.busy)return;G.pick=null;G.digits='';G.msg='';_opGateRender();}
+function _opgBack(){const G=S._opg;if(!G||G.busy)return;if(G.approve){_opGateDone();return;}G.pick=null;G.digits='';G.msg='';_opGateRender();} // an approval cancelled is refused (done resolves it false)
 async function _opgKey(d){
   const G=S._opg;if(!G||!G.pick||G.busy)return;
   if(d==='del'){G.digits=G.digits.slice(0,-1);_opGateRender();return;}
@@ -16073,7 +16083,7 @@ async function _opgKey(d){
   let r;try{r=await sb.rpc('staff_check_operator_pin',{p_name:name,p_pin:pin});}catch(e){r={error:e};}
   G.busy=false;if(S._opg!==G||G.pick!==name)return;
   const v=r&&!r.error?r.data:null;
-  if(v&&(v.ok||v.reason==='no_pin')){setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
+  if(v&&(v.ok||v.reason==='no_pin')){if(G.approve){const ap=G.approve;G.approve=null;_pinOk={name,at:Date.now()};_opGateDone();ap.res(true);return;}setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
   G.digits='';G.shake=true;
   G.msg=!v?t('errConnection'):v.reason==='locked'?t('opPinLocked').replace('{0}',v.seconds||60):t('opPinWrong').replace('{0}',v.left);
   _opGateRender();
@@ -16087,6 +16097,27 @@ function _opChipHtml(){
   return `<button type="button" class="topbar-btn op-chip" data-on-click="${_on("showOpGate",true)}" title="${esc(t('opSwitch'))}" aria-label="${esc(t('opSwitch'))}${n?': '+esc(n):''}">${_artIcon('person',14)}<span class="op-chip-name">${esc(n)}</span></button>`;
 }
 function _opGatePick(n){if(!String(n||'').trim())return;setOpName(n);_opGateDone();}
+
+// ── PIN approval for sensitive actions (2026-09-28) ─────────────────────────────────────────
+// Refunds, voids, deletes, price changes (and, later, merges) ask the operator's PIN when the
+// operator has one - the gate's keypad and staff_check_operator_pin, with its five tries and its
+// lock - and a right answer holds for five minutes. An operator without a PIN, or a device with
+// no operator gate, is not held up. Resolves false when the keypad is cancelled.
+let _pinOk={name:'',at:0};
+async function _pinApprove(what){
+  const name=_opName();if(!name)return true;
+  let list=S._opPins;
+  if(!Array.isArray(list)||Date.now()-(S._opPinsAt||0)>60000){const x=await _opList();if(x.list){S._opPins=x.list;S._opPinsAt=Date.now();list=x.list;}else list=null;}
+  const me=list?list.find(o=>o.name===name):null;
+  if(!me||!me.has_pin)return true;
+  if(_pinOk.name===name&&Date.now()-_pinOk.at<5*60*1000)return true;
+  return new Promise(res=>{
+    const m=document.getElementById('op-gate-modal');if(!m){res(true);return;}
+    if(S._opg&&S._opg.approve)_opGateDone(); // one question at a time: an older one is refused
+    S._opg={switching:true,approve:{what:String(what||''),res},list:[me],missing:false,pick:name,digits:'',msg:'',busy:false,shake:false};
+    m.style.display='flex';_opGateRender();
+  });
+}
 
 // ── Who may open and change what (Claude Design #8, #9) ──
 // A sign-in account may be limited to some sections (staff.modules_view) and allowed to change
@@ -16178,13 +16209,13 @@ function renderTeam(){
   </div>`;
   const acct=a=>{
     const d=T.edit[a.user_id]||{role:a.role,view:a.modules_view,edit:a.modules_edit};
-    const secs=d.role==='frontdesk'?DESK_TABS:_staffSections();
+    const secs=_roleTabs(d.role);
     const inV=k=>!Array.isArray(d.view)||d.view.includes(k),inE=k=>!Array.isArray(d.edit)||d.edit.includes(k);
     const dis=a.is_me?' disabled':'';
     const chip=(kind,k,on)=>`<button type="button" class="toggle-btn tm-chip${on?' active':''}" aria-pressed="${on}" data-sec="${kind}:${k}"${dis} data-on-click="${_on("_tmToggle",a.user_id,kind,k)}">${esc(_sectionName(k))}</button>`;
     return`<div class="tm-acct" data-acct="${esc(a.user_id)}">
       <div class="tm-acct-head"><strong>${esc(a.email||a.user_id)}</strong>${a.is_me?`<span class="tm-me">${t('acctYou')}</span>`:''}
-        <select class="filter-select" aria-label="${esc(t('roleAdmin'))} / ${esc(t('roleFrontDesk'))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}"><option value="admin"${d.role==='admin'?' selected':''}>${t('roleAdmin')}</option><option value="frontdesk"${d.role==='frontdesk'?' selected':''}>${t('roleFrontDesk')}</option></select></div>
+        <select class="filter-select tm-role" aria-label="${esc(t('roleAdmin'))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}">${STAFF_ROLES.map(r=>`<option value="${r}"${d.role===r?' selected':''}>${_roleLabel(r)}</option>`).join('')}</select></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctView')}</span><div class="tm-chips">${secs.map(k=>chip('view',k,inV(k))).join('')}</div></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctEdit')}</span><div class="tm-chips">${secs.filter(inV).map(k=>chip('edit',k,inE(k))).join('')}</div></div>
       ${a.is_me?'':`<div class="tm-save"><button type="button" class="btn-sm btn-green" data-on-click="${_on("_tmSave",a.user_id)}"${T.edit[a.user_id]?'':' disabled'}>${t('saveBtn')}</button></div>`}
@@ -16200,18 +16231,18 @@ function _tmDraft(uid){
 }
 // A list that holds every section the role has is stored as null, "everything it allows".
 function _tmNorm(d){
-  const secs=d.role==='frontdesk'?DESK_TABS:_staffSections();
+  const secs=_roleTabs(d.role);
   if(Array.isArray(d.view)){d.view=d.view.filter(k=>secs.includes(k));if(secs.every(k=>d.view.includes(k)))d.view=null;}
   if(Array.isArray(d.edit)){d.edit=d.edit.filter(k=>secs.includes(k)&&(!Array.isArray(d.view)||d.view.includes(k)));if(secs.every(k=>d.edit.includes(k)))d.edit=null;}
 }
 function _tmToggle(uid,kind,k){
   const d=_tmDraft(uid);if(!d)return;
-  const secs=d.role==='frontdesk'?DESK_TABS:_staffSections();
+  const secs=_roleTabs(d.role);
   const list=Array.isArray(d[kind])?[...d[kind]]:(kind==='edit'&&Array.isArray(d.view)?[...d.view]:[...secs]);
   const i=list.indexOf(k);if(i>=0)list.splice(i,1);else list.push(k);
   d[kind]=list;_tmNorm(d);renderTeam();
 }
-function _tmRole(uid,v){const d=_tmDraft(uid);if(!d)return;d.role=v==='frontdesk'?'frontdesk':'admin';_tmNorm(d);renderTeam();}
+function _tmRole(uid,v){const d=_tmDraft(uid);if(!d)return;d.role=_roleNorm(v,'frontdesk');if(d.role==='owner')d.edit=[];_tmNorm(d);renderTeam();} // an owner reads everything and changes nothing, until the admin ticks a section
 async function _tmSave(uid){
   const T=_tm(),d=T.edit[uid],a=(T.accts||[]).find(x=>x.user_id===uid);if(!d||!a)return;
   if(Array.isArray(d.view)&&!d.view.length){toast(t('acctOneSection'),'error');return;}
@@ -16255,7 +16286,7 @@ function _opGateSave(){
   if(!v){if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
   setOpName(v);_opGateDone();
 }
-function _opGateDone(){S._opg=null;const m=document.getElementById('op-gate-modal');if(m){m.style.display='none';m.innerHTML='';}if(S.staffTab==='history'&&S.histView==='log')renderLogs();}
+function _opGateDone(){if(S._opg&&S._opg.approve){const ap=S._opg.approve;S._opg.approve=null;try{ap.res(false);}catch(_){}}S._opg=null;const m=document.getElementById('op-gate-modal');if(m){m.style.display='none';m.innerHTML='';}if(S.staffTab==='history'&&S.histView==='log')renderLogs();}
 function logAction(label){
   if(!label)return;
   const op=_opName();
@@ -17337,6 +17368,7 @@ function closeEditPriceModal(){const m=document.getElementById('edit-price-modal
 async function saveEditedPrice(id,newPrice){
   if(isNaN(newPrice)||newPrice<0){toast(t('errValidPrice'),'error');return;}
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
+  if(newPrice!==entry.price&&!await _pinApprove(t('pinWhatPrice')))return;
   const prevPrice=entry.price;
   entry.price=newPrice;
   closeEditPriceModal();
@@ -21954,6 +21986,7 @@ function delBike(id){
     confirmLabel:t('deleteBtn'),
     confirmClass:'btn-red',
     onConfirm:async()=>{
+      if(!await _pinApprove(t('deleteBtn')))return;
       // Undo brings back the bike as it was: the premium price, the service date, the specs and
       // the service record, and the status it had (a bike in maintenance comes back in
       // maintenance, not straight into the pool). Only the columns this device reads can be
@@ -26484,6 +26517,7 @@ function _ctVoidReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!rows.length)return;
   const cust=(rows.find(r=>r.customer_name)||{}).customer_name||t('cashWalkup');
   confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · <bdi>SAR ${_rcTotal(rows)}</bdi>`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
+    if(!await _pinApprove(t('cashVoid')))return;
     const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
     if(!_salesApply([],cur.map(r=>r.id))){renderCashier();return;} // not stored: nothing voided, nothing restocked
     _rcLog(t('cashVoid'),cur); // the void is stored: logged now, whatever the restock below does
@@ -26495,6 +26529,7 @@ function _ctVoidReceipt(key){
 async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
   confirmDialog({title:t('cashRefund'),body:t('cashRefundConfirm'),confirmLabel:t('cashRefund'),confirmClass:'btn-muted',onConfirm:async()=>{
+    if(!await _pinApprove(t('cashRefund')))return;
     const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
     if(!_salesApply(all.map(r=>({...r,pay:'refunded'})),[])){renderCashier();return;} // not stored: not refunded, not restocked
     _rcLog(t('cashRefund'),all); // the refund is stored: logged now, whatever the restock below does
