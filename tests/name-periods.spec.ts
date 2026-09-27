@@ -50,6 +50,7 @@ test('sign-up: "Md. Rahman" is sent as written; "A. Rahman" is an initial and ne
   await page.fill('#a-first', 'A.');
   await page.fill('#a-last', 'Rahman');
   await page.evaluate('setSignupGender("male")');
+  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.fill('#a-email', 'rahman@example.com');
   await page.fill('#a-phone', '0508566560');
   await page.fill('#a-pwd', 'Zq8xTselah');
@@ -76,6 +77,7 @@ test('the database refusing a name reads as the rule, periods included', async (
   await page.fill('#a-first', 'Mohd.');
   await page.fill('#a-last', 'Ali');
   await page.evaluate('setSignupGender("male")');
+  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.fill('#a-email', 'mohd@example.com');
   await page.fill('#a-phone', '0508566561');
   await page.fill('#a-pwd', 'Zq8xTselah');

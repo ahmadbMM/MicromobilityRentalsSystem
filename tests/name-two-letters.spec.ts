@@ -22,6 +22,7 @@ async function signupForm(page: Page, first: string, last: string) {
   await page.fill('#a-first', first);
   await page.fill('#a-last', last);
   await page.evaluate('setSignupGender("male")');
+  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.fill('#a-email', 'faisal@example.com');
   await page.fill('#a-phone', '0508566560');
   await page.fill('#a-pwd', 'Zq8xTselah');
@@ -61,6 +62,7 @@ test('Google or Apple: an initial from the provider has to be written out before
   await page.evaluate(`S._pendingGoogle={email:'j@x.com',name:'J Smith'};openGoogleComplete()`);
   await expect(page.locator('#a-first')).toHaveValue('J');
   await page.evaluate('setSignupGender("male")');
+  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.evaluate('doCompleteGoogle()');
   await expect(page.locator('#auth-err')).toContainText(SHORT);
   expect(calls).toHaveLength(0);
