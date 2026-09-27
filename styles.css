@@ -5149,7 +5149,11 @@ body.view-staff .staff-tabbar{display:none;}
    Walk-in/Scan pair, full width and taking taps: while one is up, the pair moves above it. The
    roster's selection bar (the fixed div _qLeaf stamps data-ck="bulk") carried bottom:22px inline,
    over the tab bar: on phones and tablets it stands above the bar, full width, its buttons
-   wrapping, and the floating pair and the toasts move above it in turn. */
+   wrapping, and the floating pair and the toasts move above it in turn. Its inline z-index (350)
+   put it above every dialog (200, the confirm 300): on a phone the wider bar covered the bottom
+   sheet's own button (Return (2) took no tap, 2026-09-28), and on a desk it floated over the
+   centre of a dialog's backdrop. It sits under the dialog layer now, dimmed with the page. */
+body.view-staff #tab-queue [data-ck="bulk"]{z-index:150!important;}
 @media(max-width:767px){
   body.view-staff:has(#toast-container .undo-bar) .fab-row{bottom:calc(140px + env(safe-area-inset-bottom));}
   body.view-staff #tab-queue:has([data-ck="bulk"]) .fab-row{bottom:calc(212px + env(safe-area-inset-bottom));}
