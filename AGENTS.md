@@ -244,7 +244,10 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   501 until `GOOGLE_WALLET_*` are set. `member_area` feeds the website's members' area.
 - **Staging.** `STAGING.md` and `scripts/seed-staging.mjs` (generated data only).
 - Migrations 20260928120000 … 20260928170000 (six) carry the schema; each was dry-run against
-  production inside a `DO … EXECUTE … RAISE` block before it was committed.
+  production inside a `DO … EXECUTE … RAISE` block before it was committed. 20260928190000 fixes
+  the merge's `filled` list: in PL/pgSQL, `arr || 'literal'` reads the untyped literal as an ARRAY
+  literal (`malformed array literal: "photo"`) - append a name with `array_append(arr, 'name')`, or
+  give the literal a type; `arr || some_text_variable` is fine.
 
 ## One bar, not two (2026-09-27)
 
