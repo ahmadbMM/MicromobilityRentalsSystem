@@ -1166,6 +1166,8 @@
   "scanBatchOnlyTickets": "Ticket lang ang napupunta sa listahan. I-check in muna ang mga rider na ito.",
   "ciBatchLabel": "Mga rider na sabay na nagche-check in",
   "ciBatchWord": "lahat",
+  "ciAddBooking": "Magdagdag ng booking",
+  "ciAddNone": "Wala nang ibang naghihintay sa biyaheng ito.",
   "confirmBtn": "Kumpirmahin",
   "filterSize": "Laki",
   "allSizes": "Lahat ng laki",

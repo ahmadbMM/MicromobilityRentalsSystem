@@ -1166,6 +1166,8 @@
   "scanBatchOnlyTickets": "सूचीमा टिकट मात्र थपिन्छ। पहिले यी राइडरको चेक-इन गर्नुहोस्।",
   "ciBatchLabel": "सँगै चेक-इन हुने राइडर",
   "ciBatchWord": "सबै",
+  "ciAddBooking": "बुकिङ थप्नुहोस्",
+  "ciAddNone": "यो राइडमा अरू कोही पर्खिरहेको छैन।",
   "confirmBtn": "पुष्टि",
   "filterSize": "साइज",
   "allSizes": "सबै साइज",

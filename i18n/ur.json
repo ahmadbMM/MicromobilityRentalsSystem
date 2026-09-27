@@ -1166,6 +1166,8 @@
   "scanBatchOnlyTickets": "فہرست میں صرف ٹکٹ شامل ہوتے ہیں۔ پہلے ان رائیڈرز کا چیک اِن کریں۔",
   "ciBatchLabel": "ایک ساتھ چیک اِن ہونے والے رائیڈرز",
   "ciBatchWord": "سب",
+  "ciAddBooking": "بکنگ شامل کریں",
+  "ciAddNone": "اس رائیڈ پر کوئی اور انتظار میں نہیں ہے۔",
   "confirmBtn": "تصدیق",
   "filterSize": "سائز",
   "allSizes": "تمام سائز",

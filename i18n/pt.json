@@ -1166,6 +1166,8 @@
   "scanBatchOnlyTickets": "Só ingressos entram na lista. Faça primeiro o check-in destes ciclistas.",
   "ciBatchLabel": "Ciclistas fazendo check-in juntos",
   "ciBatchWord": "todos",
+  "ciAddBooking": "Adicionar uma reserva",
+  "ciAddNone": "Ninguém mais está à espera neste passeio.",
   "confirmBtn": "Confirmar",
   "filterSize": "Tamanho",
   "allSizes": "Todos os tamanhos",

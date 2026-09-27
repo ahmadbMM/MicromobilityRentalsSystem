@@ -1166,6 +1166,8 @@
   "scanBatchOnlyTickets": "Solo las entradas van a la lista. Registra primero a estos ciclistas.",
   "ciBatchLabel": "Ciclistas que se registran juntos",
   "ciBatchWord": "todos",
+  "ciAddBooking": "Añadir una reserva",
+  "ciAddNone": "Nadie más está esperando en esta salida.",
   "confirmBtn": "Confirmar",
   "filterSize": "Talla",
   "allSizes": "Todas las tallas",
