@@ -43,10 +43,11 @@ test('no forecast, no problem — the strip renders bare', async ({ page }) => {
   await page.waitForTimeout(400);
   const chips = await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].map(c=>c.innerText).join('|')`) as string;
   expect(chips).not.toContain('°');
-  await expect(page.locator('#q-tbody')).toHaveCount(1);                // the roster survived (hidden on mobile, where cards render)
+  await expect(page.locator('#q-results .queue-table')).toHaveCount(1);  // the roster survived (hidden on mobile, where cards render)
 });
 
 test('a big roster still lists every rider after the second chunk lands', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile', 'the table is not built on a phone; its cards paint in one go');
   const riders = Array.from({ length: 120 }, (_, i) => rider(i + 1));
   await stubSupabase(page, { sessions, queue_entries: riders, bikes: [] });
   await unlockStaff(page);
@@ -55,14 +56,15 @@ test('a big roster still lists every rider after the second chunk lands', async 
   await page.waitForFunction(`getQueue().length>100`);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${D1}';renderStaffQueue()`);
   await page.waitForTimeout(400);                                       // both chunks by now
-  const count = await page.evaluate(`document.querySelectorAll('#q-tbody tr').length`);
+  const count = await page.evaluate(`document.querySelectorAll('#q-results .queue-table tbody tr').length`);
   expect(count).toBe(120);
-  const txt = await page.evaluate(`document.getElementById('q-tbody').innerText`) as string;
+  const txt = await page.evaluate(`document.querySelector('#q-results .queue-table').innerText`) as string;
   expect(txt).toContain('Rider 1');
   expect(txt).toContain('Rider 120');                                   // the deferred half arrived
 });
 
 test('a re-render between the chunks does not double-append', async ({ page }) => {
+  test.skip(test.info().project.name === 'mobile', 'the table is not built on a phone; its cards paint in one go');
   const riders = Array.from({ length: 90 }, (_, i) => rider(i + 1));
   await stubSupabase(page, { sessions, queue_entries: riders, bikes: [] });
   await unlockStaff(page);
@@ -72,6 +74,6 @@ test('a re-render between the chunks does not double-append', async ({ page }) =
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${D1}';
     renderStaffQueue();renderStaffQueue()`);                            // second render before the first rAF
   await page.waitForTimeout(400);
-  const count = await page.evaluate(`document.querySelectorAll('#q-tbody tr').length`);
+  const count = await page.evaluate(`document.querySelectorAll('#q-results .queue-table tbody tr').length`);
   expect(count).toBe(90);                                               // not 90 + 50 stale rows
 });

@@ -30,7 +30,7 @@ test('bikes out past two hours: a banner, and Show lists them longest first', as
   await expect(banner).toContainText('1 bike out over 2 h');
   await banner.getByRole('button', { name: 'Show' }).click();
   expect(await page.evaluate('S.sfStatus')).toBe('active');
-  const names = await page.evaluate(`[...document.querySelectorAll('.queue-table tbody tr .rider-name')].map(e=>e.textContent.trim())`) as string[];
+  const names = await page.evaluate(`[...document.querySelectorAll('#q-results .rider-name')].map(e=>e.textContent.trim())`) as string[];
   expect(names[0]).toContain('Rider late');                    // longest out first
   expect(names).toHaveLength(2);
   await page.evaluate(`setSfStatus('all')`);

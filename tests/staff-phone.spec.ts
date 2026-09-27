@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, waitForSb } from './helpers/supabase';
+import { stubSupabase, waitForSb, loadStaffHalf } from './helpers/supabase';
 
 // Staff can sign in with email OR phone; _staffPhoneE164 normalizes a raw phone entry
 // to E.164 (Saudi default) so it matches the phone stored on the Supabase Auth account.
@@ -24,6 +24,7 @@ test('_staffLoginEmail resolves every phone format (and email) to the account em
   await stubSupabase(page);
   await page.goto('/');
   await waitForSb(page);
+  await loadStaffHalf(page); // the sign-in helpers are the staff half's
   // The hardcoded phone map is gone -- three staff personal mobiles were riding in the public
   // bundle. Resolution now goes through the staff_email_for_phone RPC against the staff_phones
   // TABLE, so what the client owes is: normalize to E.164, ask, and pass the answer through.

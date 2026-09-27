@@ -163,8 +163,8 @@ test.describe('sales outbox order', () => {
   test('a later op for a sale replaces the one still waiting, so a refund cannot be replayed under "paid"', async ({ page }) => {
     await boot(page, {}, { table: 'cashier_sales' }); // the server refuses every sale write
     const ops = await page.evaluate(`(async () => {
-      _salesUpsert({ id: 'x1', session_id: 's1', name: 'Gel', category: 'EnergyGels', qty: 1, price: 12, pay: 'paid' });
-      _salesUpsert({ id: 'x1', session_id: 's1', name: 'Gel', category: 'EnergyGels', qty: 1, price: 12, pay: 'refunded' });
+      _salesApply([{ id: 'x1', session_id: 's1', name: 'Gel', category: 'EnergyGels', qty: 1, price: 12, pay: 'paid' }], []);
+      _salesApply([{ id: 'x1', session_id: 's1', name: 'Gel', category: 'EnergyGels', qty: 1, price: 12, pay: 'refunded' }], []);
       await _outboxFlush();
       return _outbox().map(o => o.kind + ':' + (o.data ? o.data.pay : ''));
     })()`);

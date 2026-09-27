@@ -70,8 +70,8 @@ test.describe('sales outbox', () => {
     await waitForSb(page);
 
     const pending = await page.evaluate(`(async () => {
-      _salesUpsert({ id: 'sale-1', session_id: '${D}', item_id: 'i1', name: 'Gel',
-        category: 'Supplements', qty: 1, price: 12, pay: 'paid' });
+      _salesApply([{ id: 'sale-1', session_id: '${D}', item_id: 'i1', name: 'Gel',
+        category: 'Supplements', qty: 1, price: 12, pay: 'paid' }], []);
       await _outboxFlush();
       return { queued: _outboxCount(), local: (S.cashSales || []).some(r => r.id === 'sale-1') };
     })()`) as { queued: number; local: boolean };
@@ -86,10 +86,10 @@ test.describe('sales outbox', () => {
     await page.goto('/');
     await waitForSb(page);
 
-    // _salesUpsert enqueues and kicks off a flush of its own, which the stub refuses once.
+    // _salesApply enqueues and kicks off a flush of its own, which the stub refuses once.
     const stuck = await page.evaluate(`(async () => {
-      _salesUpsert({ id: 'sale-2', session_id: '${D}', item_id: 'i1', name: 'Gel',
-        category: 'Supplements', qty: 1, price: 12, pay: 'paid' });
+      _salesApply([{ id: 'sale-2', session_id: '${D}', item_id: 'i1', name: 'Gel',
+        category: 'Supplements', qty: 1, price: 12, pay: 'paid' }], []);
       await _outboxFlush();
       return _outboxCount();
     })()`) as number;

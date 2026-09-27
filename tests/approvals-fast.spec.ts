@@ -35,7 +35,7 @@ test('two past no-shows put a chip on the request; one does not', async ({ page 
   const txt = await page.evaluate(`document.getElementById('tab-queue').innerText`) as string;
   expect(txt).toContain('2/3 no-shows');
   // and the clean rider carries nothing
-  const rows = await page.evaluate(`[...document.querySelectorAll('#tab-queue tbody tr')].map(r=>r.innerText)`) as string[];
+  const rows = await page.evaluate(`[...document.querySelectorAll('#q-results tbody tr, #q-results .q-card')].map(r=>r.innerText)`) as string[];
   const otherRow = rows.find((r) => r.includes('R other'))!;
   expect(otherRow).not.toContain('no-shows');
 });

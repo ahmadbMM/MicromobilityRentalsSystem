@@ -40,15 +40,15 @@ test('reserved is a status of its own: filter, badge, row colour', async ({ page
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='s1';renderStaffQueue()`);
   const opts = await page.evaluate(`[...document.querySelectorAll('#tab-queue .filter-select')].flatMap(s=>[...s.options].map(o=>o.value))`) as string[];
   expect(opts).toContain('reserved');
-  const held = page.locator('.queue-table tbody tr').filter({ hasText: 'Bike Held' });
+  const held = page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Bike Held' });
   await expect(held).toHaveClass(/row-reserved/);
   await expect(held.locator('.status-badge')).toHaveText('Reserved');
-  const plain = page.locator('.queue-table tbody tr').filter({ hasText: 'Plain Waiting' });
+  const plain = page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Plain Waiting' });
   await expect(plain).not.toHaveClass(/row-reserved/);
   await expect(plain.locator('.status-badge')).toHaveText('Waiting');
   await page.evaluate(`setSfStatus('reserved')`);
-  await expect(page.locator('.queue-table tbody tr').filter({ hasText: 'Plain Waiting' })).toHaveCount(0);
-  await expect(page.locator('.queue-table tbody tr').filter({ hasText: 'Bike Held' })).toHaveCount(1);
+  await expect(page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Plain Waiting' })).toHaveCount(0);
+  await expect(page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Bike Held' })).toHaveCount(1);
 });
 
 // To be reserved: a staff mark for a bike to be held, before one is chosen. Its own badge,
@@ -74,17 +74,17 @@ test('to be reserved: menu toggle, badge, filter, and a held bike clears it', as
   await page.goto('/');
   await waitForSb(page);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='s1';renderStaffQueue()`);
-  const marked = page.locator('.queue-table tbody tr').filter({ hasText: 'Marked One' });
+  const marked = page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Marked One' });
   await expect(marked).toHaveClass(/row-toreserve/);
   await expect(marked.locator('.status-badge')).toHaveText('To be reserved');
   expect(await page.evaluate(`((S._rowMenus||{})['q1']||[]).map(i=>i.run).join('|')`)).toContain("_toggleToReserve('q1')");
   expect(await page.evaluate(`[...document.querySelectorAll('#tab-queue .filter-select')].flatMap(s=>[...s.options].map(o=>o.value))`)).toContain('toreserve');
   // the plain rider gets marked from the menu
   await page.evaluate(`_toggleToReserve('q2')`);
-  await expect(page.locator('.queue-table tbody tr').filter({ hasText: 'Plain Two' }).locator('.status-badge')).toHaveText('To be reserved');
+  await expect(page.locator('.queue-table tbody tr, .q-card').filter({ hasText: 'Plain Two' }).locator('.status-badge')).toHaveText('To be reserved');
   // the filter shows only the marked ones
   await page.evaluate(`setSfStatus('toreserve')`);
-  await expect(page.locator('.queue-table tbody tr:has(.rider-name)')).toHaveCount(2);
+  await expect(page.locator('.queue-table tbody tr:has(.rider-name), .q-card:has(.rider-name)')).toHaveCount(2);
   await page.evaluate(`setSfStatus('all')`);
   // holding a bike for the marked rider answers the mark: Reserved now, the flag cleared
   const patches: string[] = [];

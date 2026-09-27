@@ -33,7 +33,7 @@
        as on the script tag that runs it (end of body): Chromium only hands a preload to a
        request whose SRI metadata matches, so a bare preload was thrown away and the 200 KB
        file fetched twice. -->
-  <link rel="preload" as="script" href="/vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil">
+  <link rel="preload" as="script" href="/vendor/supabase-js-2.117.2.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF">
   <!-- Preload the face the first screen is set in - the customer pages' Space Grotesk, one variable
        file - so first paint has it without a text-swap flash. The staff panel's Barlow used to be
        preloaded instead: 32 KB fetched early by every visitor for a page most never see. -->
@@ -444,7 +444,7 @@ window.mmLoading=(function(){
 
 <!-- Self-hosted (byte-identical to the jsdelivr CDN builds; SRI kept). Serving from our
      own origin means ad-blockers / privacy extensions / CDN outages can't break boot. -->
-<script defer src="/vendor/supabase-js-2.110.0.min.js" integrity="sha384-DjOvX/sJLsmbMrw4wTvf6l3kiGBjdxyOO6X2MTFwOOXGkjN/mE08BoDzrpaaIjil"></script>
+<script defer src="/vendor/supabase-js-2.117.2.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"></script>
 <!-- qrcode-generator is loaded on demand (only when a QR/ticket renders) — see _loadQrcode() -->
 <script>
 
@@ -627,7 +627,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   statusOpen:'Open',statusClosed:'Closed',statusFull:'Fully Booked',markFullBtn:'Mark Full',reopenBtn:'Re-open',noSessionsYet:'No sessions yet. Create one above.',
   editSessionTitle:'Edit Session',saveSessionBtn:'Save Changes',editBtn2:'Edit',dateWarning:'Changing the date will update all existing bookings for this session.',
   bikesTitle:'Fleet',addBike:'+ Add Bike',editBikeTitle:'Edit Bike',addBikeTitle:'Add New Bike',
-  bikeNameLabel:'Bike Name',frameSizeLabel:'Frame Size',bikeTypeLabel:'Bike Type',
+  frameSizeLabel:'Frame Size',bikeTypeLabel:'Bike Type',
   bikeLocationLabel:'Location',bikeFrameTypeLabel:'Frame Type',bikeNumberLabel:'Bike Number',bikeAutoName:'Auto Name',bikeStartDate:'In-Service Date',bikeEndDate:'Retired Date',lifespanLabel:'Lifespan',daysLabel:'days',frameSteel:'Steel',frameAluminum:'Aluminum',frameCarbon:'Carbon',frameTitanium:'Titanium',errBikeFrameReq:'Please select a frame type.',errBikeLocationReq:'Please select a location.',errBikeNumberReq:'Please enter a bike number.',errBikeNumberDup:'That bike number is already in use.',bkNumChangeTitle:'Change this bike\u2019s number?',bkNumChangeBody:'The sticker and NFC tag on the frame still read {0}. After this they will open the page for {1} instead, so change the number only if you are moving the sticker to that bike too.',bkNumChangeYes:'Change the number',addLocationLabel:'Add new location...',
   bikeColorsLabel:'Bike Color(s)',colorsHint:'1 required - up to 4',
   saveBikeBtn:'Save Changes',addBikeBtn:'Add Bike',
@@ -652,8 +652,6 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   spotsLeft:'left',
   sendReceipt:'Receipt',noHistory:'No riders match the current filters.',
   assignBikeTitle:'Assign Bike',assignedBikeLabel:'Assigned Bike',confirmCheckin:'Confirm & Check In',changeBikeTitle:'Change Assigned Bike',confirmBikeChange:'Confirm Change',
-  pinTitle:'Staff Access',pinSub:'Enter the 4-digit PIN to access the staff panel.',
-  pinLocked:'Too many wrong attempts. Try again in {0}.',pinAttemptsWarn:'{0} attempts remaining before lockout',
   tabAccount:'My Account',
   accountTitle:'Account Settings',accountSub:'Update your profile information and preferences.',
   saveAccountBtn:'Save Changes',accountSaved:'Profile updated successfully.',
@@ -814,7 +812,6 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   toastBookingCancelledSpot:'Booking cancelled. Your spot has been freed.',
   toastStatusChanged:'Status updated:',
   errNotEnoughSpots:'Not enough spots available.',
-  errPinWrong:'Incorrect PIN. Try again.',
   staffAuthTitle:'Staff sign-in',staffAuthHint:'Sign in with your staff account to unlock the panel',staffAuthEmailPh:'Email or phone number',staffAuthPwdPh:'Password',staffAuthBtn:'Sign in',errStaffNotAuthorized:'This account is not on the staff list.',
   staffPwdTitle:'Change my password',staffPwdHint:'Set a new password for your staff account.',staffPwdMustHint:'Welcome! For security, set your own password before using the panel.',staffPwdDone:'Password updated ✓',staffPwdLog:'Changed own staff password',
   errInvalidCredentials:'Incorrect credentials. Please try again.',
@@ -823,7 +820,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   receiptTitle:'Ride Receipt',receiptDear:'Dear',
   receiptThankYou:'Thank you for riding with us at the Jeddah Corniche Circuit!',
   receiptSeeYou:'We hope to see you at the Corniche Circuit again soon!',
-  receiptBtn:'Receipt',receiptPrintBtn:'Print / Save as PDF',receiptRefLabel:'Booking ref',receiptDateLabel:'Issued',receiptPaidLabel:'Payment',
+  receiptBtn:'Receipt',
   typeRoad:'Road',typeHybrid:'Hybrid',typeMountain:'Mountain',typeGravel:'Gravel',typeKids:'Kids',typeAny:'Any',typeRoadCarbon:'Road Carbon',typeOwn:'Bike owner',typeNone:'No bike',ridersNoBikeFree:'checked in without a bike - none free that fits',typeOwnPref:'I have my own bike',
   
   liveLabel:'Live',bpSvcSince:'Rides since service',bpMarkServiced:'Mark serviced',bpLastServiced:'Last serviced',attnTitle:'Bikes needing attention',attnInMaint:'In maintenance',attnDue:'Service due · {0} rides',attnNever:'Never serviced',attnLow:'Low rating {0}/10',attnHide:'Hide',sendWorkshop:'Send to workshop',svcRecent:'Recent service log',svcKindService:'Serviced',svcKindWorkshop:'Sent to workshop',svcEveryN:'Service every {0} rides',gsOpenBtn:'Search',gsPh:'Search bookings, accounts, bikes…',gsNone:'Nothing found.',gsMin:'Type two or more letters or digits.',gsKindBooking:'Booking',gsKindAccount:'Account',gsKindBike:'Bike',gsKindItem:'Item',gsKindSession:'Session',gsKindWorkshop:'Workshop',ntOpen:'Notifications',ntMarkRead:'Mark all read',ntEmpty:'Nothing needs attention.',ntLong:'Rides past 2 hours: {0}',ntApps:'Membership applications waiting: {0}',ntMsgs:'New website messages: {0}',ntWs:'New workshop requests: {0}',ntAttn:'Bikes needing attention: {0}',ntStock:'Items low on stock: {0}',syncNowBtn:'Sync now',syncingLbl:'Syncing…',syncDone:'Up to date',syncLeft:'Changes still waiting to sync: {0}',tbMore:'More',daySheetBtn:'Print day sheet',daySheetTitle:'Day sheet',daySheetNone:'No session today.',daySheetRiders:'Riders',daySheetWs:'Workshop today',logPrintedDaySheet:'Printed the day sheet',tabTeam:'Team',tabCatalog:'Bikes catalog',catSub:'What micromobility.sa/bikes shows: the categories, their sub-types, and every model with its specifications, colours and photos. A model shows on the site once it is published.',catOpenSite:'Open /bikes',catViewModels:'Models',catViewCats:'Categories',catViewFields:'Specification fields',catAddModel:'+ Add model',catAddCat:'+ Add category',catAddSub:'+ Add sub-type',catAddField:'+ Add field',catSearchPh:'Search brand or model',catNoMatch:'Nothing matches.',catColModel:'Model',catColCategory:'Category',catColRide:'Rides as',catColPhotos:'Photos',catColPublished:'On the site',catColUpdated:'Updated',catEmptyModels:'No models yet. Add the first one.',catNoCats:'Add a category first: every model belongs to one.',catBrand:'Brand',catName:'Model name',catSlug:'Address',catSlugHint:'The model’s address on the site: {0}. Lowercase letters, digits and hyphens.',catCategory:'Category',catSubtype:'Sub-type',catNoSubtype:'None',catYear:'Model year',catRideType:'Rides as',catRideTypeHint:'The rental bike type it counts as; it sets the ride price shown beside Book a ride. Leave it empty for a bike that is not rented.',catRideNone:'Not rented',catTagline:'Tagline',catDescription:'Description',catDescHint:'Plain text. A blank line starts a new paragraph.',catSpecs:'Specifications',catSpecsHint:'An empty field is not shown. The Arabic box may stay empty: the site then shows the English.',catColours:'Colours',catColourName:'Colour name',catColourHex:'Swatch',catAddColour:'+ Add colour',catPhotos:'Photos',catPhotosHint:'The cover is the photo shown in lists. A photo given a colour is shown when a visitor picks that colour; the others show for every colour.',catUploadPhotos:'Upload photos',catPhotoColour:'Colour',catAnyColour:'Every colour',catCover:'Cover',catAlt:'Description for screen readers',catSheet:'Spec sheet (PDF)',catUploadSheet:'Upload PDF',catPublished:'Published on the site',catPublishedShort:'Published',catDraft:'Draft',catHidden:'Hidden',catDeleteModelTitle:'Delete this model?',catDeleteModelBody:'Its photos, colours and specifications go with it, and the site stops showing it at once.',catDeleteCatTitle:'Delete this category?',catDeleteCatBody:'Only an empty one can go: its models and sub-types must be moved or deleted first.',catDeleteFieldTitle:'Delete this field?',catDeleteFieldBody:'Models keep the value they had; the site simply stops showing it.',catSaved:'Saved',catDeleted:'Deleted',catSaveErr:'Could not save. Try again.',catLoadErr:'Could not load the catalogue. Check your connection and try again.',catUploading:'Uploading…',catUploaded:'Uploaded',catUploadErr:'The upload failed. Try again.',catUploadType:'Photos only: JPEG, PNG, WebP or AVIF.',catUploadPdfType:'A PDF file only.',catUploadBig:'That file is too big: 10 MB at most.',catErrName:'Give the model a name.',catErrCategory:'Pick a category.',catErrSlug:'The address may only have lowercase letters, digits and hyphens, and it starts with a letter.',catErrSlugTaken:'Another model already uses this address.',catErrColour:'Every colour needs a name.',catCatName:'Name',catCatSlug:'Address',catCatBlurb:'Short description',catCatCover:'Cover photo',catCatPublished:'Shown on the site',catCatModels:'{0} models',catCatSubs:'{0} sub-types',catCatEmpty:'No categories yet.',catCatsSub:'Categories are the first level under /bikes; each can hold sub-types. A model belongs to one category and, if you like, one of its sub-types.',catErrCatName:'Give it a name.',catErrCatTaken:'Another one at this level already uses this address.',catCatInUse:'It still has models or sub-types. Move or delete them first.',catFieldKey:'Key',catFieldKeyHint:'How the value is stored: lowercase letters, digits and underscores. It cannot change later.',catFieldLabel:'Label',catFieldGroup:'Group',catFieldUnit:'Unit',catFieldSort:'Order',catFieldUsed:'Used by',catFieldsSub:'The specifications a model can carry, with their labels in English and Arabic. Every model offers these boxes; the site shows the ones that are filled in, grouped and in this order.',catErrFieldKey:'The key may only have lowercase letters, digits and underscores, and it starts with a letter.',catErrFieldLabel:'Give the field a label.',catErrFieldTaken:'A field with this key already exists.',catFieldsEmpty:'No fields yet.',catPreview:'View on the site',catUnsaved:'You have unsaved changes. Leave without saving?',teamPageSub:'Who works the desk: operator PINs, and what each sign-in account can open and change.',opsTitle:'Operators',opsSub:'The names at the operator gate. A name with a PIN asks for it.',opsPinSet:'PIN set',opsPinNone:'No PIN',opsSetPin:'Set PIN',opsClearPin:'Clear PIN',opsPinPrompt:'New 4-digit PIN for {0}',opsPinBad:'A PIN is 4 digits.',opsPinSaved:'PIN saved for {0}',opsPinCleared:'PIN cleared for {0}',opsAdd:'Add name',opsAddPh:'Name',acctTitle:'Sign-in accounts',acctSub:'Each account\'s role, and the sections it can open and change. Nobody changes their own.',acctYou:'You',acctView:'Can open',acctEdit:'Can change',acctSaved:'Access saved for {0}',dbPending:'Waiting for the database update.',opSwitch:'Switch operator',opPinTitle:'PIN for {0}',opPinWrong:'Wrong PIN. {0} tries left.',opPinLocked:'Too many tries. Wait {0} seconds.',roMode:'Read-only mode: no changes allowed',dashActivity:'Recent activity',dashQuick:'Quick actions',dashNoActivity:'Nothing logged yet today.',dashCollected:'Collected today',dashBookedToday:'Riders today',dashDoneToday:'Rides done today',dashSessionsToday:'Today\'s sessions',dashCheckinNext:'Check in next',calViewList:'List',calViewCal:'Calendar',calPrev:'Previous month',calNext:'Next month',calToday:'Today',calWs:'{0} workshop',calNewOn:'New session on {0}',errAddonsNotSaved:'Your booking is made, but the add-ons were not saved. Add them from My Bookings.',bkExportedToast:'{0} bike(s) exported',errTooManyTries:'Too many tries from this network. Please wait a few minutes and try again.',errPaidTypeDesk:'This booking is already paid. To change to a bike that costs more, ask at the booth.',addonHandedOver:'Add-ons already handed over cannot be removed here. Ask at the booth.',teamPinKept:'Only an admin can remove a name that has a PIN: {0}',acctOneSection:'Pick at least one section this account can open.',acctNoneOpen:'This account has no sections to open. Ask an admin to give it access on the Team page.',anPieces:'{0} pcs',drawerCountBtn:'Count the drawer',drawerCountTitle:'Drawer count',drawerCountBody:'Expected cash for this day: SAR {0}. Enter what the drawer actually holds:',drawerExpected:'expected',drawerCounted:'counted',drawerExactToast:'Drawer matches — recorded',drawerDiffToast:'Recorded — drawer is off by {0}',cnBtn:'Cancel the night',cnTitle:'Cancel the night',cnSub:'{0} live booking(s). Tell the riders first — then cancel. To MOVE the whole night, edit the session\u2019s date instead: bookings follow it.',cnMsgLabel:'Message to riders',cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.',cnCopyNumbers:'Copy all numbers',cnCopiedToast:'Numbers copied',cnConfirmBtn:'Cancel {0} booking(s)',cnDoneToast:'Night cancelled — {0} booking(s) cancelled, riders keep their history',wxTip:'Forecast: {0}\u00b0C high, wind up to {1} km/h',noShowHistChip:'{0}/{1} no-shows',noShowHistTip:'No-shows across this rider\u2019s last five decided bookings',bulkApproveBtn:'Approve all ({0})',bulkApproveTitle:'Approve every pending request',bulkApproveBody:'{0} pending request(s) will be approved. Waitlisted requests are left for you to pick individually. Riders see nothing until you publish.',bulkApprovedToast:'{0} request(s) approved',ciPrev:'Previous',ciNext:'Next',ciChainLabel:'Riders to check in',ciStepOf:'Rider {0} of {1}',ciPartyLabel:'Riders in this party',dupPhoneTip:'This phone number is on another live booking in this session',statSarDue:'SAR due',overdueRideTip:'On the bike for over two hours',fleetStripLbl:'Bikes free',wiStockHint:'{0} {1} free on the rack',wiNoStockHint:'No {0} left on the rack — riders on the waitlist may be counting on returns.',moreActionsLbl:'More actions',closeOutBtn:'Close out',closeOutHint:'Finish the night: checked-in riders become Completed, no-arrivals become No-show.',closeOutTitle:'Close out the night',closeOutBody:'{0} checked-in rider(s) will be marked Completed and {1} who never arrived will be marked No-show. Waitlisted riders are not touched. This can be undone from the bar at the top.',closeOutDoneToast:'Night closed out — {0} completed, {1} no-shows',closeOutBikes:'{0} bike(s) will be returned.',bookSyncPending:'Your booking has not reached the booth yet — it will keep trying while the app is open.',bookSyncRefused:'Your booking could not be sent. Please show this phone at the booth.',updateReadyToast:'A new version is ready — refresh the page to update.',justNow:'just now',secondsAgo:'s ago',minutesAgo:'m ago',offlineLabel:'Offline',offlineBanner:'You are offline - changes are saved and will sync when the connection returns.',unreachableBanner:'Connected to wifi but the server is not reachable - you may need to sign in to this network.',retryBtn:'Try again',errWritePerm:'That did not save - your staff session may have expired. Unlock again and retry.',errWriteDup:'That booking number was just taken by another device. Reload and try again.',
@@ -1053,7 +1050,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   editSessionTitle:'تعديل الجلسة',saveSessionBtn:'حفظ التغييرات',editBtn2:'تعديل',dateWarning:'تغيير التاريخ سيحدّث جميع الحجوزات الموجودة لهذه الجلسة.',
   sessionAddonsLabel:'الإضافات المتاحة',sessionAddonsHint:'عناصر من المخزون يمكن للعملاء إضافتها إلى الحجز',addonStepTitle:'أضف إلى حجزك',addonStepSub:'إضافات اختيارية متاحة لهذه الجلسة',addonNone:'لا توجد إضافات متاحة لهذه الجلسة.',addonsLabel:'الإضافات',addonsSelectedToast:'تم حفظ الإضافات مع حجزك',addonEditTitle:'تعديل الإضافات',addonAddBtn:'الإضافات',stockLeft:'متبقٍ',outOfStock:'نفد المخزون',dashAddonsToday:'إضافات اليوم',coReconOk:'البطاقة + النقد متوازنان',coReconOff:'غير محتسب',
   bikesTitle:'الأسطول',addBike:'+ إضافة دراجة',editBikeTitle:'تعديل الدراجة',addBikeTitle:'إضافة دراجة جديدة',
-  bikeNameLabel:'اسم الدراجة',frameSizeLabel:'مقاس الإطار',bikeTypeLabel:'نوع الدراجة',
+  frameSizeLabel:'مقاس الإطار',bikeTypeLabel:'نوع الدراجة',
   bikeLocationLabel:'الموقع',bikeFrameTypeLabel:'نوع الإطار',bikeNumberLabel:'رقم الدراجة',bikeAutoName:'الاسم التلقائي',bikeStartDate:'تاريخ بدء الاستخدام',bikeEndDate:'تاريخ التقاعد',lifespanLabel:'مدة الخدمة',daysLabel:'يوم',frameSteel:'فولاذ',frameAluminum:'ألمنيوم',frameCarbon:'كربون',frameTitanium:'تيتانيوم',errBikeFrameReq:'الرجاء اختيار نوع الإطار.',errBikeLocationReq:'الرجاء اختيار الموقع.',errBikeNumberReq:'الرجاء إدخال رقم الدراجة.',errBikeNumberDup:'رقم الدراجة مستخدم بالفعل.',bkNumChangeTitle:'تغيير رقم هذه الدراجة؟',bkNumChangeBody:'الملصق وشريحة NFC على الهيكل ما زالا يحملان الرقم {0}. بعد هذا التغيير سيفتحان صفحة {1} بدلاً منها، لذا غيّر الرقم فقط إذا كنت ستنقل الملصق إلى تلك الدراجة أيضاً.',bkNumChangeYes:'تغيير الرقم',addLocationLabel:'إضافة موقع جديد...',
   bikeColorsLabel:'لون الدراجة',colorsHint:'مطلوب 1 - حتى 4',
   saveBikeBtn:'حفظ التغييرات',addBikeBtn:'إضافة دراجة',
@@ -1078,8 +1075,6 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   spotsLeft:'متبقٍ',
   sendReceipt:'إيصال',noHistory:'لا يوجد راكبون يطابقون الفلتر الحالي.',
   assignBikeTitle:'تخصيص دراجة',assignedBikeLabel:'الدراجة المخصصة',confirmCheckin:'تأكيد وتسجيل الدخول',changeBikeTitle:'تغيير الدراجة المخصصة',confirmBikeChange:'تأكيد التغيير',
-  pinTitle:'دخول الموظفين',pinSub:'أدخل الرقم السري المكون من 4 أرقام للدخول إلى لوحة الموظفين.',
-  pinLocked:'محاولات خاطئة كثيرة. حاول مجدداً بعد {0}.',pinAttemptsWarn:'تبقّت {0} محاولات قبل القفل',
   tabAccount:'حسابي',
   accountTitle:'إعدادات الحساب',accountSub:'تحديث معلومات ملفك الشخصي.',
   saveAccountBtn:'حفظ التغييرات',accountSaved:'تم تحديث الملف الشخصي.',
@@ -1230,7 +1225,6 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   toastBookingCancelledSpot:'تم إلغاء الحجز. أُفرج عن دراجتك.',
   toastStatusChanged:'تم تحديث الحالة:',
   errNotEnoughSpots:'لا توجد مقاعد كافية.',
-  errPinWrong:'رمز PIN غير صحيح. حاول مجدداً.',
   staffAuthTitle:'تسجيل دخول الموظفين',staffAuthHint:'سجّل الدخول بحساب الموظف لفتح اللوحة',staffAuthEmailPh:'البريد الإلكتروني أو رقم الهاتف',staffAuthPwdPh:'كلمة المرور',staffAuthBtn:'تسجيل الدخول',errStaffNotAuthorized:'هذا الحساب ليس ضمن قائمة الموظفين.',
   staffPwdTitle:'تغيير كلمة المرور',staffPwdHint:'عيّن كلمة مرور جديدة لحساب الموظف.',staffPwdMustHint:'مرحباً! للأمان، عيّن كلمة المرور الخاصة بك قبل استخدام اللوحة.',staffPwdDone:'تم تحديث كلمة المرور ✓',staffPwdLog:'غيّر كلمة مرور حسابه',
   errInvalidCredentials:'بيانات الدخول غير صحيحة. حاول مجدداً.',
@@ -1239,7 +1233,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   receiptTitle:'إيصال الرحلة',receiptDear:'عزيزي',
   receiptThankYou:'شكراً لركوبك معنا في حلبة كورنيش جدة!',
   receiptSeeYou:'نأمل رؤيتك في حلبة الكورنيش مجدداً!',
-  receiptBtn:'الإيصال',receiptPrintBtn:'طباعة / حفظ PDF',receiptRefLabel:'رقم الحجز',receiptDateLabel:'تاريخ الإصدار',receiptPaidLabel:'الدفع',
+  receiptBtn:'الإيصال',
   typeRoad:'طريق',typeHybrid:'هجين',typeMountain:'جبلي',typeGravel:'حصى',typeKids:'أطفال',typeAny:'أي نوع',typeRoadCarbon:'طريق كربون',typeOwn:'صاحب دراجة',typeNone:'بدون دراجة',ridersNoBikeFree:'سُجّل وصوله بدون دراجة - لا توجد دراجة مناسبة متاحة',typeOwnPref:'لدي دراجتي الخاصة',
   liveLabel:'مباشر',bpSvcSince:'رحلات منذ الصيانة',bpMarkServiced:'تسجيل صيانة',bpLastServiced:'آخر صيانة',attnTitle:'دراجات تحتاج انتباهاً',attnInMaint:'في الصيانة',attnDue:'موعد الصيانة · {0} رحلة',attnNever:'لم تُصان بعد',attnLow:'تقييم منخفض {0}/10',attnHide:'إخفاء',sendWorkshop:'إلى الورشة',svcRecent:'آخر سجلات الصيانة',svcKindService:'صيانة',svcKindWorkshop:'أُرسلت للورشة',svcEveryN:'صيانة كل {0} رحلة',gsOpenBtn:'بحث',gsPh:'ابحث في الحجوزات والحسابات والدراجات…',gsNone:'لا نتائج.',gsMin:'اكتب حرفين أو رقمين على الأقل.',gsKindBooking:'حجز',gsKindAccount:'حساب',gsKindBike:'دراجة',gsKindItem:'صنف',gsKindSession:'جلسة',gsKindWorkshop:'الورشة',ntOpen:'الإشعارات',ntMarkRead:'تعليم الكل كمقروء',ntEmpty:'لا شيء يحتاج انتباهاً.',ntLong:'رحلات تجاوزت ساعتين: {0}',ntApps:'طلبات عضوية بانتظار الرد: {0}',ntMsgs:'رسائل جديدة من الموقع: {0}',ntWs:'طلبات ورشة جديدة: {0}',ntAttn:'دراجات تحتاج انتباهاً: {0}',ntStock:'أصناف منخفضة المخزون: {0}',syncNowBtn:'زامن الآن',syncingLbl:'جارٍ المزامنة…',syncDone:'كل شيء محدّث',syncLeft:'تغييرات بانتظار المزامنة: {0}',tbMore:'المزيد',daySheetBtn:'طباعة كشف اليوم',daySheetTitle:'كشف اليوم',daySheetNone:'لا جلسة اليوم.',daySheetRiders:'الراكبون',daySheetWs:'الورشة اليوم',logPrintedDaySheet:'طُبع كشف اليوم',tabTeam:'الفريق',tabCatalog:'كتالوج الدراجات',catSub:'ما يعرضه micromobility.sa/bikes: الفئات وأنواعها الفرعية، وكل موديل بمواصفاته وألوانه وصوره. يظهر الموديل على الموقع بعد نشره.',catOpenSite:'افتح /bikes',catViewModels:'الموديلات',catViewCats:'الفئات',catViewFields:'حقول المواصفات',catAddModel:'+ إضافة موديل',catAddCat:'+ إضافة فئة',catAddSub:'+ إضافة نوع فرعي',catAddField:'+ إضافة حقل',catSearchPh:'ابحث بالعلامة أو الموديل',catNoMatch:'لا توجد نتائج مطابقة.',catColModel:'الموديل',catColCategory:'الفئة',catColRide:'يُستأجر كـ',catColPhotos:'الصور',catColPublished:'على الموقع',catColUpdated:'آخر تعديل',catEmptyModels:'لا موديلات بعد. أضف الأول.',catNoCats:'أضف فئة أولاً: كل موديل ينتمي إلى فئة.',catBrand:'العلامة التجارية',catName:'اسم الموديل',catSlug:'العنوان',catSlugHint:'عنوان الموديل على الموقع: {0}. أحرف لاتينية صغيرة وأرقام وشرطات.',catCategory:'الفئة',catSubtype:'النوع الفرعي',catNoSubtype:'بدون',catYear:'سنة الموديل',catRideType:'يُستأجر كـ',catRideTypeHint:'نوع دراجة التأجير الذي يُحسب عليه؛ يحدد سعر الجولة الظاهر بجانب زر احجز جولة. اتركه فارغاً لدراجة لا تُستأجر.',catRideNone:'لا تُستأجر',catTagline:'العبارة التعريفية',catDescription:'الوصف',catDescHint:'نص عادي. السطر الفارغ يبدأ فقرة جديدة.',catSpecs:'المواصفات',catSpecsHint:'الحقل الفارغ لا يُعرض. يمكن ترك خانة العربية فارغة فيعرض الموقع الإنجليزية.',catColours:'الألوان',catColourName:'اسم اللون',catColourHex:'عيّنة اللون',catAddColour:'+ إضافة لون',catPhotos:'الصور',catPhotosHint:'صورة الغلاف هي التي تظهر في القوائم. الصورة المرتبطة بلون تظهر عند اختيار الزائر ذلك اللون؛ وبقية الصور تظهر مع كل لون.',catUploadPhotos:'رفع صور',catPhotoColour:'اللون',catAnyColour:'كل الألوان',catCover:'الغلاف',catAlt:'وصف لقارئات الشاشة',catSheet:'ورقة المواصفات (PDF)',catUploadSheet:'رفع PDF',catPublished:'منشور على الموقع',catPublishedShort:'منشور',catDraft:'مسودة',catHidden:'مخفي',catDeleteModelTitle:'حذف هذا الموديل؟',catDeleteModelBody:'تُحذف معه صوره وألوانه ومواصفاته، ويتوقف الموقع عن عرضه فوراً.',catDeleteCatTitle:'حذف هذه الفئة؟',catDeleteCatBody:'لا تُحذف إلا الفئة الفارغة: يجب نقل موديلاتها وأنواعها الفرعية أو حذفها أولاً.',catDeleteFieldTitle:'حذف هذا الحقل؟',catDeleteFieldBody:'تحتفظ الموديلات بالقيمة التي كانت لديها؛ ويتوقف الموقع عن عرضها فقط.',catSaved:'تم الحفظ',catDeleted:'تم الحذف',catSaveErr:'لم يتم الحفظ. حاول مرة أخرى.',catLoadErr:'لم يتم تحميل الكتالوج. تحقق من الاتصال وحاول مرة أخرى.',catUploading:'جارٍ الرفع…',catUploaded:'تم الرفع',catUploadErr:'فشل الرفع. حاول مرة أخرى.',catUploadType:'صور فقط: JPEG أو PNG أو WebP أو AVIF.',catUploadPdfType:'ملف PDF فقط.',catUploadBig:'الملف كبير جداً: 10 ميغابايت على الأكثر.',catErrName:'أدخل اسم الموديل.',catErrCategory:'اختر فئة.',catErrSlug:'العنوان يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات، ويبدأ بحرف.',catErrSlugTaken:'موديل آخر يستخدم هذا العنوان.',catErrColour:'كل لون يحتاج إلى اسم.',catCatName:'الاسم',catCatSlug:'العنوان',catCatBlurb:'وصف قصير',catCatCover:'صورة الغلاف',catCatPublished:'يظهر على الموقع',catCatModels:'{0} موديلات',catCatSubs:'{0} أنواع فرعية',catCatEmpty:'لا فئات بعد.',catCatsSub:'الفئات هي المستوى الأول تحت /bikes، ولكل فئة أنواع فرعية إن شئت. ينتمي الموديل إلى فئة واحدة، وإلى أحد أنواعها الفرعية إن أردت.',catErrCatName:'أدخل اسماً.',catErrCatTaken:'عنصر آخر في هذا المستوى يستخدم هذا العنوان.',catCatInUse:'ما زالت تحتوي على موديلات أو أنواع فرعية. انقلها أو احذفها أولاً.',catFieldKey:'المفتاح',catFieldKeyHint:'كيف تُخزَّن القيمة: أحرف لاتينية صغيرة وأرقام وشرطات سفلية. لا يمكن تغييره لاحقاً.',catFieldLabel:'التسمية',catFieldGroup:'المجموعة',catFieldUnit:'الوحدة',catFieldSort:'الترتيب',catFieldUsed:'مستخدم في',catFieldsSub:'المواصفات التي يمكن أن يحملها الموديل، بتسمياتها بالإنجليزية والعربية. تظهر هذه الخانات لكل موديل؛ ويعرض الموقع المملوءة منها مجمّعة وبهذا الترتيب.',catErrFieldKey:'المفتاح يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات سفلية، ويبدأ بحرف.',catErrFieldLabel:'أدخل تسمية للحقل.',catErrFieldTaken:'يوجد حقل بهذا المفتاح.',catFieldsEmpty:'لا حقول بعد.',catPreview:'عرض على الموقع',catUnsaved:'لديك تغييرات غير محفوظة. الخروج دون حفظ؟',teamPageSub:'من يعمل على المكتب: الأرقام السرية للمشغّلين، وما يستطيع كل حساب فتحه وتعديله.',opsTitle:'المشغّلون',opsSub:'الأسماء في شاشة المشغّل. الاسم الذي له رقم سري يطلبه.',opsPinSet:'له رقم سري',opsPinNone:'بلا رقم سري',opsSetPin:'تعيين الرقم السري',opsClearPin:'حذف الرقم السري',opsPinPrompt:'رقم سري جديد من 4 أرقام لـ {0}',opsPinBad:'الرقم السري 4 أرقام.',opsPinSaved:'حُفظ الرقم السري لـ {0}',opsPinCleared:'حُذف الرقم السري لـ {0}',opsAdd:'إضافة اسم',opsAddPh:'الاسم',acctTitle:'حسابات الدخول',acctSub:'دور كل حساب، والأقسام التي يستطيع فتحها وتعديلها. لا أحد يغيّر حسابه بنفسه.',acctYou:'أنت',acctView:'يستطيع فتح',acctEdit:'يستطيع تعديل',acctSaved:'حُفظت الصلاحيات لـ {0}',dbPending:'بانتظار تحديث قاعدة البيانات.',opSwitch:'تبديل المشغّل',opPinTitle:'الرقم السري لـ {0}',opPinWrong:'رقم سري خاطئ. تبقّت {0} محاولات.',opPinLocked:'محاولات كثيرة. انتظر {0} ثانية.',roMode:'وضع القراءة فقط: لا يمكن التعديل',dashActivity:'آخر النشاطات',dashQuick:'إجراءات سريعة',dashNoActivity:'لا شيء مسجل اليوم بعد.',dashCollected:'المُحصّل اليوم',dashBookedToday:'راكبو اليوم',dashDoneToday:'رحلات منتهية اليوم',dashSessionsToday:'جلسات اليوم',dashCheckinNext:'تسجيل دخول التالي',calViewList:'قائمة',calViewCal:'تقويم',calPrev:'الشهر السابق',calNext:'الشهر التالي',calToday:'اليوم',calWs:'{0} ورشة',calNewOn:'جلسة جديدة في {0}',errAddonsNotSaved:'تم الحجز، لكن الإضافات لم تُحفظ. أضفها من حجوزاتي.',bkExportedToast:'تم تصدير {0} دراجة',errTooManyTries:'محاولات كثيرة من هذه الشبكة. انتظر بضع دقائق ثم حاول مجدداً.',errPaidTypeDesk:'هذا الحجز مدفوع. لتغييره إلى دراجة أغلى، اسأل عند الكشك.',addonHandedOver:'لا يمكن حذف الإضافات التي سُلّمت من هنا. اسأل عند الكشك.',teamPinKept:'لا يحذف الاسم الذي له رقم سري إلا المدير: {0}',acctOneSection:'اختر قسماً واحداً على الأقل يستطيع هذا الحساب فتحه.',acctNoneOpen:'لا توجد أقسام يستطيع هذا الحساب فتحها. اطلب من المدير منحه الصلاحية من صفحة الفريق.',anPieces:'{0} قطع',drawerCountBtn:'جرد الدرج',drawerCountTitle:'جرد الدرج',drawerCountBody:'النقد المتوقع لهذا اليوم: {0} ريال. أدخل ما في الدرج فعلياً:',drawerExpected:'المتوقع',drawerCounted:'المعدود',drawerExactToast:'الدرج مطابق — تم التسجيل',drawerDiffToast:'تم التسجيل — فرق الدرج {0}',cnBtn:'إلغاء الليلة',cnTitle:'إلغاء الليلة',cnSub:'{0} حجز قائم. أبلغ المشاركين أولاً ثم ألغِ. لنقل الليلة كاملة عدّل تاريخ الجلسة بدلاً من ذلك — الحجوزات تتبعه.',cnMsgLabel:'رسالة للمشاركين',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.',cnCopyNumbers:'نسخ جميع الأرقام',cnCopiedToast:'تم نسخ الأرقام',cnConfirmBtn:'إلغاء {0} حجز',cnDoneToast:'أُلغيت الليلة — {0} حجز أُلغي مع بقاء السجل',wxTip:'التوقعات: {0} درجة عظمى، رياح حتى {1} كم/س',noShowHistChip:'{0}/{1} غياب',noShowHistTip:'مرات الغياب في آخر خمسة حجوزات محسومة لهذا الراكب',bulkApproveBtn:'الموافقة على الكل ({0})',bulkApproveTitle:'الموافقة على جميع الطلبات المعلقة',bulkApproveBody:'سيتم قبول {0} من الطلبات المعلقة. تُترك طلبات قائمة الانتظار لتختارها بنفسك. لن يرى المشاركون شيئاً حتى تنشر النتائج.',bulkApprovedToast:'تمت الموافقة على {0} من الطلبات',ciPrev:'السابق',ciNext:'التالي',ciChainLabel:'الراكبون بانتظار تسجيل الحضور',ciStepOf:'الراكب {0} من {1}',ciPartyLabel:'ركّاب هذه المجموعة',dupPhoneTip:'رقم الجوال هذا موجود في حجز آخر قائم في هذه الجلسة',statSarDue:'ريال مستحق',overdueRideTip:'على الدراجة منذ أكثر من ساعتين',fleetStripLbl:'الدراجات المتاحة',wiStockHint:'{0} {1} متاحة على الرف',wiNoStockHint:'لا يوجد {0} متبقٍ على الرف — قد يعتمد منتظرو القائمة على المرتجعات.',moreActionsLbl:'مزيد من الإجراءات',closeOutBtn:'إنهاء الليلة',closeOutHint:'إنهاء الليلة: من سجّل حضوره يُعتبر مكتملاً، ومن لم يحضر يُسجّل كغياب.',closeOutTitle:'إنهاء الليلة',closeOutBody:'سيتم تسجيل {0} من الحاضرين كمكتملين و{1} ممن لم يحضروا كغياب. لن يتم المساس بقائمة الانتظار. يمكن التراجع من الشريط في الأعلى.',closeOutDoneToast:'تم إنهاء الليلة — {0} مكتمل، {1} غياب',closeOutBikes:'سيتم إرجاع {0} دراجة.',bookSyncPending:'لم يصل حجزك إلى الكشك بعد — سيستمر بالمحاولة ما دام التطبيق مفتوحاً.',bookSyncRefused:'تعذّر إرسال حجزك. يرجى إظهار هذا الهاتف عند الكشك.',updateReadyToast:'يتوفر إصدار جديد — حدّث الصفحة للتحديث.',justNow:'الآن',secondsAgo:'ث مضت',minutesAgo:'د مضت',offlineLabel:'غير متصل',offlineBanner:'أنت غير متصل - يتم حفظ التغييرات وستتم المزامنة عند عودة الاتصال.',unreachableBanner:'متصل بالشبكة لكن تعذّر الوصول إلى الخادم - قد تحتاج إلى تسجيل الدخول إلى هذه الشبكة.',retryBtn:'إعادة المحاولة',errWritePerm:'لم يتم الحفظ - ربما انتهت جلسة الموظف. أعد فتح القفل ثم حاول مجددًا.',errWriteDup:'تم أخذ رقم الحجز للتو من جهاز آخر. أعد التحميل وحاول مجددًا.',
   selectSessionPrompt:'اختر جلسة من الأعلى',selectSessionSub:'انقر على إحدى الجلسات لعرض طابورها وإدارته بشكل مستقل.',
@@ -1372,7 +1366,6 @@ function _savedLang(){
     return v;
   }catch(e){return'';}
 }
-function toggleLang(){const i=LANGS.findIndex(l=>l.code===S.lang);setLang(LANGS[(i+1)%LANGS.length].code);}
 try{window.addEventListener('mm-lang',()=>{const v=localStorage.getItem('mm_lang');if(LANGS.some(l=>l.code===v))setLang(v);});}catch(e){}
 function showLangMenu(evt){
   document.querySelectorAll('.pay-menu-popup').forEach(m=>m.remove());
@@ -1477,9 +1470,7 @@ function setLang(lang,_fromUrl){
 
 
 
-const STAFF_PIN_HASH = 'd5f7cfd0e1604b2bc6edc49050b8388b48d2f82f6fb5293c72dd9707eae71d04';
-const PIN_LOCKOUT_MINS=[1,2,5,10,15,30,45,60,120];
-// Staff roles (UX-level scoping; not a security boundary since the PIN is client-side)
+// Staff roles (UX-level scoping; the database's own policies are the security boundary)
 function isAdmin(){return S.staffRole!=='frontdesk';}
 // Front Desk mode shows only the desk's own sections: Sales, Bookings and Riders (the partner
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
@@ -1492,7 +1483,6 @@ function setStaffRole(role){
   renderTopbarRight();
   if(S.view==='staff')setStaffTab(S.staffTab);
 }
-function _getPinLock(){try{return{until:parseInt(localStorage.getItem('cq_pin_until')||'0'),lockouts:parseInt(localStorage.getItem('cq_pin_lockouts')||'0'),attempts:parseInt(localStorage.getItem('cq_pin_attempts')||'0')};}catch(e){return{until:0,lockouts:0,attempts:0};}}
 // ── Staff Supabase Auth (SECURE_AUTH): the DB trusts the Auth session, not the client-side PIN ──
 // Normalize any phone entry to one canonical form (Saudi +966 default) so every format
 // a staffer might type — 0562989838, 562989838, 966…, 00966…, +966… — maps to one key.
@@ -1638,8 +1628,6 @@ async function staffAuthRestore(){
   setupRefRealtime();
 }
 async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);try{await _syncDrop();}catch(e){}await staffAuthSignOut();window.location.href='/';} // the lists and the boot snapshot leave with the staff session (2026-09-27: they used to stay on the device)
-function _clearPinLock(){try{localStorage.removeItem('cq_pin_until');localStorage.removeItem('cq_pin_lockouts');localStorage.removeItem('cq_pin_attempts');}catch(e){}}
-function _fmtLock(ms){const s=Math.ceil(ms/1000);if(s<60)return`${s}s`;const m=Math.floor(s/60),r=s%60;if(m<60)return r?`${m}m ${r}s`:`${m}m`;const h=Math.floor(m/60),rm=m%60;return rm?`${h}h ${rm}m`:`${h}h`;}
 
 const COUNTRY_CODES=[
   
@@ -2114,9 +2102,6 @@ const S={
   invBrandsSupp:(()=>{try{let l=JSON.parse(localStorage.getItem('cq_inv_brands_supp'))||[];if(!l.includes('SIS'))l=['SIS',...l];return l;}catch(e){return['SIS'];}})(),
   dataLoaded:false,
   communityTab:'leaderboard',lbWindow:'all',lbScope:'owner',lbMetric:'count',lbBranch:'all',lbSearch:'',_lbSearchFocused:false,selSessionDetail:null,selEvent:'jcc',newSessEvent:'jcc',newSessSpots:'',newSessTitle:'',
-  pinDigits:'',
-  pinError:false,
-  pinCountdownInterval:null,
   
   _rDate:'',newSessCollect:'',editSessCollect:'',selSession:null,regType:null,regQty:1,waiverOk:false,lastTickets:[],modifyEntryId:null,regSubmitting:false,_alreadyBookedSession:null,regStep:1,
   regRiderNames:[],  
@@ -2270,7 +2255,6 @@ const SECURE_AUTH=(()=>{try{const v=localStorage.getItem('cq_secure_auth');if(v=
 // Customer identity flows ALWAYS use the SECURITY DEFINER RPCs: the customers table stays
 // staff-only in the DB even with the queue lockdown (SECURE_AUTH) off, so direct reads/
 // writes on it would be rejected (broke Google signup with 'Connection error').
-const CUST_RPC=true; // privacy lockdown OFF by default: read rider names straight from queue_entries (run disable-privacy-lockdown.sql so the anon key can SELECT them). Set localStorage cq_secure_auth='1' to force secure mode on a device.
 
 
 const getQueue=()=>S.queue||[];
@@ -3143,7 +3127,7 @@ function getSession(){
     // Post-cutover: a session remembered from before SECURE_AUTH has no session_token
     // and can't drive the RPCs (My Rides / self-cancel), so drop it and let the
     // customer log in fresh. Google users are re-tokened by handleGoogleReturn on boot.
-    if(CUST_RPC&&c&&!c.session_token){
+    if(c&&!c.session_token){
       try{localStorage.removeItem('cq_session');sessionStorage.removeItem('cq_session');}catch(e){}
       return null;
     }
@@ -3656,23 +3640,6 @@ async function _ownEntryUpdate(entryId,patch){
   // database without the RPC) leaves it out rather than fail a cancel over a missing column.
   const direct={...patch};delete direct.cancel_reason;delete direct.cancel_note;
   return await sb.from('queue_entries').update(direct).eq('id',entryId);
-}
-// Pure: given the queue, plan the renumber of WAITING rows after a cancelled number.
-// Walks upward from the freed slot but SKIPS numbers still held by live non-waiting
-// rows (done/active/waitlist), because those sit in the same partial unique index —
-// a waiting row shifted onto a completed booking's number is what caused the
-// "duplicate key … session_qnum_uniq" crash. Returns [{id, to}] in apply order.
-function _shiftPlan(queue,sessionId,fromNum){
-  const q=(queue||[]).filter(e=>e.sessionId===sessionId);
-  const blocked=new Set(q.filter(e=>!['cancelled','removed','noshow','waiting'].includes(e.status)).map(e=>e.queueNum));
-  const behind=q.filter(e=>e.status==='waiting'&&e.queueNum>fromNum).sort((a,b)=>a.queueNum-b.queueNum);
-  const plan=[];let target=fromNum;
-  for(const e of behind){
-    while(blocked.has(target))target++;
-    if(target<e.queueNum){plan.push({id:e.id,to:target});target++;}
-    else target=e.queueNum+1; // no free slot below it; leave in place, keep the queue tight
-  }
-  return plan;
 }
 // Queue numbers are STABLE: once issued, a rider's number never changes. Cancelling #3 leaves a
 // gap (#1,#2,#4,…); riders behind keep their tickets. Gap-closing used to renumber live rows here,
@@ -4595,7 +4562,7 @@ async function toggleRideNews(){
 async function _consentCheck(cust){
   _pwdMustCheck(cust); // every place that checks consent also checks for a temporary password to replace
   _commAskCheck(cust); // and a community member's birth date and nationality
-  if(!CUST_RPC||!cust||!cust.session_token||S._rnFetchedFor===cust.id)return;
+  if(!cust||!cust.session_token||S._rnFetchedFor===cust.id)return;
   S._rnFetchedFor=cust.id;
   try{await _sbReady;}catch(e){}
   if(!sb)return;
@@ -4676,7 +4643,7 @@ async function _delRpc(id,tok,req){
   }catch(e){return null;}
 }
 async function _delCheck(cust){
-  if(!CUST_RPC||!cust||!cust.session_token||S._delFetchedFor===cust.id)return;
+  if(!cust||!cust.session_token||S._delFetchedFor===cust.id)return;
   S._delFetchedFor=cust.id;
   try{await _sbReady;}catch(e){}
   if(!sb)return;
@@ -4722,7 +4689,7 @@ async function doForgotVerify(){
   const phoneRaw=(document.getElementById('a-forgot-phone')?.value||'').trim();
   if(!email||!/^[^\s<>"'()]+@[^\s<>"'()]+\.[^\s<>"'()]+$/.test(email)){authErr(t('errValidEmail'));return;}
   if(!phoneRaw){authErr(t('errPhoneRequired'));return;}
-  if(CUST_RPC){
+  {
     // Can't pre-read the locked table; capture inputs and let customer_reset() validate at step 2.
     S.forgotEmail=email;S.forgotCc=cc;S.forgotPhoneRaw=phoneRaw;S.forgotVerified='pending';S.forgotStep=2;
     renderAuthModal();return;
@@ -4748,7 +4715,7 @@ async function doResetPassword(){
   // came back in the other order, the device kept a token the server had already replaced.
   if(S._authBusy)return;S._authBusy=true;_authBtnBusy(true);
   try{
-    if(CUST_RPC){
+    {
       const ph=_normPhone(S.forgotPhoneRaw||'',S.forgotCc||'+966'); // cc+raw kept the trunk 0 ("+9660…") and could never match
       const{data,error}=await _rpcResilient('customer_reset',{p_email:S.forgotEmail,p_phone:ph,p_new_pwd:pwd});
       const customer=(data&&data[0])||null;
@@ -5091,7 +5058,7 @@ async function doSignup(){
   if(isNaN(heightRaw)||heightRaw<100||heightRaw>250){authErr(t('errValidHeightCm'));_fieldErr(document.getElementById('a-height'),t('errValidHeightCm'));S._authBusy=false;_authBtnBusy(false);return;}
   const fullPhone=phone?_normPhone(phone,cc):'';
   try{
-    if(CUST_RPC){
+    {
       // Pre-check email and phone separately so the error says WHICH one is taken
       // (the signup RPC's DUPLICATE covers both and used to always read "email exists").
       try{
@@ -5180,7 +5147,7 @@ async function handleGoogleReturn(){
   const gname=_titleCaseName(meta.full_name||meta.name||'');
   const gphoto=meta.avatar_url||meta.picture||'';
   if(!email)return false;
-  if(CUST_RPC){
+  {
     // Locked table: the RPC verifies the caller's Google Auth session carries this email.
     // Only an ANSWER of "no account" means a new rider. A request that failed used to read the
     // same way, and sent an existing rider to the new-account form, where their own phone then
@@ -5245,7 +5212,7 @@ async function doCompleteGoogle(){
   if(!S.signupAck){authErr(t('privacyAckRequired'));document.getElementById('su-ack')?.focus();return;}
   if(S._authBusy)return;S._authBusy=true;_authBtnBusy(true);
   try{
-    if(CUST_RPC){
+    {
       let _phoneFree=false;
       try{const{data:ex,error:exErr}=await sb.rpc('customer_exists',{p_email:'',p_phone:fullPhone});if(ex===true){authErr(t('errPhoneExists'));return;}_phoneFree=!exErr&&ex===false;}catch(e){}
       const newId=uid();
@@ -5285,7 +5252,7 @@ async function doLogin(){
   if(!pwd){authErr(t('errPasswordRequired'));return;}
   if(S._authBusy)return;S._authBusy=true;_authBtnBusy(true);
   try{
-    if(CUST_RPC){
+    {
       // The DB matches phone digits EXACTLY, so "0508…" / "508…" must be normalized to the
       // stored +966… form or phone login always fails with "invalid credentials".
       const ident=identifier.includes('@')?identifier:(_normPhone(rawInput,'+966')||identifier);
@@ -6109,7 +6076,7 @@ async function selectEvent(ev){
 // is painted again with them.
 function _perksHydrate(){
   const cust=S.loggedIn||getSession();
-  if(!CUST_RPC||!cust||!cust.session_token||cust.default_pay!==undefined||S._perksAsked===cust.id)return;
+  if(!cust||!cust.session_token||cust.default_pay!==undefined||S._perksAsked===cust.id)return;
   S._perksAsked=cust.id;
   sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token}).then(({data,error})=>{
     const r=!error&&data&&data[0],cur=S.loggedIn||getSession();
@@ -6204,7 +6171,7 @@ async function _profileGate(next){
   if(_pgCount(cust)<PROFILE_GATE_AFTER)return false;
   // The login row carries no nationality; ask the profile once before deciding. If that
   // answer never comes (offline), the rider is not held up on a guess.
-  if(CUST_RPC&&cust.nationality===undefined&&cust.session_token){
+  if(cust.nationality===undefined&&cust.session_token){
     try{
       const{data}=await sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token});const r=data&&data[0];
       if(r&&r.id===cust.id){const cur=S.loggedIn||cust;S.loggedIn={...cur,nationality:r.nationality||null,birth_date:cur.birth_date||r.birth_date||null};setSession(S.loggedIn);}
@@ -6270,11 +6237,11 @@ async function _pgSave(){
     // The gate asks two things, and customer_set_birth_nat (20260922150000) writes those two and
     // nothing else. A database without it takes the whole-profile save below. A community
     // member's two go where the server asked for them (_pgSaveComm).
-    const two=!g.comm&&CUST_RPC?await sb.rpc('customer_set_birth_nat',{p_id:cust.id,p_token:cust.session_token,p_birth_date:g.birth,p_nationality:g.nat}):null;
+    const two=!g.comm?await sb.rpc('customer_set_birth_nat',{p_id:cust.id,p_token:cust.session_token,p_birth_date:g.birth,p_nationality:g.nat}):null;
     if(g.comm)await _pgSaveComm(cust,g);
     else if(two&&!two.error){if(two.data!==true)throw new Error('denied');}
     else if(two&&!_rpcAbsent(two.error))throw two.error;
-    else if(CUST_RPC){
+    else{
       // The whole-profile save: everything but the two answers is taken from the account as it
       // is NOW, never from the copy this device kept at sign-in. Staff correct names and phones
       // in Accounts, and writing that old copy back undid their fix without a trace. No fresh
@@ -6285,8 +6252,6 @@ async function _pgSave(){
       fresh={name:cur.name,email:cur.email??null,phone:cur.phone??null,height:cur.height??null,type_preference:cur.type_preference||'Any',country:cur.country??null,city:cur.city??null};
       const{data:ok,error}=await sb.rpc('customer_update_profile',{p_id:cust.id,p_token:cust.session_token,p_name:fresh.name,p_email:fresh.email,p_phone:fresh.phone,p_height:fresh.height,p_type_preference:fresh.type_preference,p_birth_date:g.birth,p_country:fresh.country,p_city:fresh.city,p_nationality:g.nat});
       if(error||!ok)throw(error||new Error('denied'));
-    }else{
-      const{error}=await sb.from('customers').update({birth_date:g.birth,nationality:g.nat}).eq('id',cust.id);if(error)throw error;
     }
     S.loggedIn={...cust,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
     const next=g.next;S._pg=null;renderProfileGate();
@@ -6356,7 +6321,7 @@ async function _fixGate(next){
 }
 // What is on file is shown above each box; the login row carries no nationality or gender.
 async function _fixProfile(cust){
-  if(CUST_RPC&&cust.session_token&&(cust.nationality===undefined||cust.gender===undefined)){
+  if(cust.session_token&&(cust.nationality===undefined||cust.gender===undefined)){
     try{
       const{data}=await sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token});const r=data&&data[0];
       if(r&&r.id===cust.id){const cur=S.loggedIn||cust;S.loggedIn={...cur,nationality:r.nationality||null,gender:cur.gender||r.gender||null,birth_date:cur.birth_date||r.birth_date||null};setSession(S.loggedIn);}
@@ -7107,18 +7072,6 @@ async function mwSetPos(id,val){
   groups.splice(to,0,groups.splice(from,1)[0]);
   await _mwApply(_mwFullOrder(groups.flat()));
 }
-// Move a walk-up row from the Waitlist page onto the staff list (same row, new kind).
-async function mwFromWalkup(id){
-  if(S._mwBusy)return;S._mwBusy=true;try{
-  const w=(S.deskWaitlist||[]).find(x=>x.id===id);if(!w)return;
-  const so=_wlManaged().reduce((m,x)=>Math.max(m,x.sort_order||0),0)+1;
-  const res=await sb.from('desk_waitlist').update({kind:'managed',sort_order:so}).eq('id',id);
-  if(_writeErr(res,'waitlist'))return;
-  w.kind='managed';w.sort_order=so;
-  toast(t('mwMovedToast').replace('{0}',w.name));
-  renderStaffQueue();
-  }finally{S._mwBusy=false;}
-}
 // Add a waitlisted BOOKING to the staff list: a linked managed row (shows the booking
 // number; its action is Promote). The booking itself stays where it is.
 async function mwFromBooking(entryId){
@@ -7634,7 +7587,6 @@ function payBtnMw(w){const isHouse=w.paid&&_wlRowPrice(w)===0;return`<button cla
 // List, which ask the same question next to the same decision.
 const availChip=avail=>avail>0?`<span style="font-size:10px;font-weight:800;color:var(--green);border:1px solid rgba(var(--green-rgb),.35);border-radius:2px;padding:1px 7px;white-space:nowrap">${t('wlAvailNow').replace('{0}',avail)}</span>`:`<span style="color:var(--muted)">—</span>`;
 function _wlAvail(ty){const base=PREMIUM_TIERS[ty]||ty;return(S.bikes||[]).filter(b=>b.status==='available'&&(!base||base==='Any'||b.type===base)).length;} // premium tiers count their fulfilling base type (Road Carbon -> Road)
-function _wlElapsed(iso){const m=Math.max(0,Math.round((Date.now()-new Date(iso||Date.now()))/60000));return m<60?m+' '+t('unitMin'):Math.floor(m/60)+' '+t('unitHour')+' '+(m%60)+' '+t('unitMin');}
 function _wlOpenSess(){return allSessions().filter(x=>_sessLive(x)&&!_isApprovalRide(x)).sort(_sessOrder);}
 // The view mirrors the Bookings queue page: same section header (live indicator, header
 // buttons, density toggle), stat cards, filter bar (session + search), desktop table and
@@ -7789,25 +7741,6 @@ async function wlSetPos(id,val){
   if(isNaN(to)){renderStaffQueue();return;}
   to=Math.max(0,Math.min(order.length-1,to));
   if(to===from){renderStaffQueue();return;}
-  order.splice(to,0,order.splice(from,1)[0]);
-  await _wlApplyOrder(order);
-}
-let _wlDragId=null;
-function _wlDragStart(ev,id){_wlDragId=id;ev.dataTransfer.effectAllowed='move';try{ev.dataTransfer.setData('text/plain',id);}catch(_){}}
-function _wlDragOver(ev,id){
-  const d=_wlDragId;if(!d||d===id)return;
-  const a=getQueue().find(x=>x.id===d),b=getQueue().find(x=>x.id===id);
-  if(a&&b&&a.sessionId===b.sessionId&&b.status==='waitlist')ev.preventDefault(); // only same-session waitlist rows accept the drop
-}
-async function _wlDrop(ev,id){
-  ev.preventDefault();
-  const d=_wlDragId;_wlDragId=null;
-  if(!d||d===id)return;
-  const a=getQueue().find(x=>x.id===d),b=getQueue().find(x=>x.id===id);
-  if(!a||!b||a.sessionId!==b.sessionId||a.status!=='waitlist'||b.status!=='waitlist')return;
-  const order=_wlSessList2(a.sessionId);
-  const from=order.findIndex(x=>x.id===d),to=order.findIndex(x=>x.id===id);
-  if(from<0||to<0)return;
   order.splice(to,0,order.splice(from,1)[0]);
   await _wlApplyOrder(order);
 }
@@ -8245,7 +8178,7 @@ async function _staffPwdSubmit(){
   try{logAction(t('staffPwdLog'));}catch(e){}
 }
 function openPinModal(upgrade){
-  S.pinDigits='';S.pinError=false;S._pinUpgrade=!!upgrade;
+  S._pinUpgrade=!!upgrade;
   // The staff gate is ALWAYS the email/password Auth login (the 4-digit PIN was removed;
   // it must not resurface when the queue lockdown flag is off). A real Auth session is also
   // what satisfies the DB's is_staff() write policies on inventory/sessions/bikes.
@@ -8254,63 +8187,21 @@ function openPinModal(upgrade){
 }
 
 function renderPinModal(){
-  // Secure-mode stage 2: PIN accepted, now the staff Auth account signs in.
-  if(S._pinStage==='auth'){
-    const modal=document.getElementById('pin-modal');
-    modal.style.display='flex';
-    modal.innerHTML=`<div class="pin-backdrop" onclick="if(event.target===this)closePinModal()">
-      <div class="pin-box" id="pin-box">
-        <div class="pin-title">${t('staffAuthTitle')}</div>
-        <div style="font-size:12px;color:var(--muted);font-weight:600;margin:-4px 0 14px">${t('staffAuthHint')}</div>
-        <input id="staff-auth-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="${t('staffAuthEmailPh')}" style="width:100%;margin-bottom:8px">
-        <input id="staff-auth-pwd" type="password" autocomplete="current-password" placeholder="${t('staffAuthPwdPh')}" style="width:100%;margin-bottom:10px" onkeydown="if(event.key==='Enter')_staffAuthSubmit()">
-        <div id="staff-auth-err" style="color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px"></div>
-        <button class="btn-primary" style="width:100%" onclick="_staffAuthSubmit()">${t('staffAuthBtn')}</button>
-        <button class="pin-cancel" onclick="closePinModal()">${t('cancelBtn')}</button>
-      </div>
-    </div>`;
-    setTimeout(()=>document.getElementById('staff-auth-email')?.focus(),50);
-    return;
-  }
-  const {until,lockouts,attempts}=_getPinLock();
-  const now=Date.now();
-  const isLocked=until>now;
-  const remaining=isLocked?until-now:0;
-  if(S.pinCountdownInterval){clearInterval(S.pinCountdownInterval);S.pinCountdownInterval=null;}
-  if(isLocked){
-    S.pinCountdownInterval=setInterval(()=>{
-      if(Date.now()>=until){clearInterval(S.pinCountdownInterval);S.pinCountdownInterval=null;}
-      renderPinModal();
-    },1000);
-  }
-  const dots=Array(4).fill(0).map((_,i)=>{
-    const cls=S.pinError?'pin-dot error':i<S.pinDigits.length?'pin-dot filled':'pin-dot';
-    return`<div class="${cls}"></div>`;
-  }).join('');
-  const attemptsLeft=5-attempts;
-  const warnMsg=(!isLocked&&attempts>0)?`<div style="font-size:11px;color:var(--muted-l);margin-top:6px">${t('pinAttemptsWarn').replace('{0}',attemptsLeft)}</div>`:'';
+  // The staff gate is the account sign-in; the 4-digit PIN it once asked for first is gone.
   const modal=document.getElementById('pin-modal');
   modal.style.display='flex';
   modal.innerHTML=`<div class="pin-backdrop" onclick="if(event.target===this)closePinModal()">
     <div class="pin-box" id="pin-box">
-      <img class="pin-logo" src="/logo.png" alt="">
-      <div class="pin-title">${t('pinTitle')}</div>
-      ${isLocked
-        ?`<div class="pin-sub" style="color:var(--red);font-weight:700;text-align:center">${t('pinLocked').replace('{0}',_fmtLock(remaining))}</div>`
-        :`<div class="pin-sub">${t('pinSub')}</div>`
-      }
-      ${isLocked?'':`<div class="pin-dots">${dots}</div>`}
-      <div class="pin-error">${!isLocked&&S.pinError?t('errPinWrong'):''}</div>
-      ${warnMsg}
-      ${isLocked?'':`<div class="pin-numpad">
-        ${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="pin-key" onclick="pinPress('${n}')">${n}</button>`).join('')}
-        <button class="pin-key empty"></button>
-        <button class="pin-key" onclick="pinPress('0')">0</button>
-        <button class="pin-key del" onclick="pinDel()">&#x232B;</button>
-      </div>`}
+      <div class="pin-title">${t('staffAuthTitle')}</div>
+      <div style="font-size:12px;color:var(--muted);font-weight:600;margin:-4px 0 14px">${t('staffAuthHint')}</div>
+      <input id="staff-auth-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="${t('staffAuthEmailPh')}" style="width:100%;margin-bottom:8px">
+      <input id="staff-auth-pwd" type="password" autocomplete="current-password" placeholder="${t('staffAuthPwdPh')}" style="width:100%;margin-bottom:10px" onkeydown="if(event.key==='Enter')_staffAuthSubmit()">
+      <div id="staff-auth-err" style="color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px"></div>
+      <button class="btn-primary" style="width:100%" onclick="_staffAuthSubmit()">${t('staffAuthBtn')}</button>
       <button class="pin-cancel" onclick="closePinModal()">${t('cancelBtn')}</button>
     </div>
   </div>`;
+  setTimeout(()=>document.getElementById('staff-auth-email')?.focus(),50);
 }
 
 async function _staffAuthSubmit(){
@@ -8334,83 +8225,15 @@ async function _staffAuthSubmit(){
     if(btn)btn.disabled=false;
   }
 }
-async function pinPress(d){
-  const {until,lockouts,attempts}=_getPinLock();
-  if(until>Date.now())return;
-  if(S.pinDigits.length>=4)return;
-  S.pinDigits+=d;
-  S.pinError=false;
-  if(S.pinDigits.length===4){
-    const pinOK=_cryptoOK()&&(await sha256Hex('mmpin:'+S.pinDigits))===STAFF_PIN_HASH;
-    if(pinOK){
-      _clearPinLock();
-      if(S.pinCountdownInterval){clearInterval(S.pinCountdownInterval);S.pinCountdownInterval=null;}
-      // Secure mode: the PIN alone no longer unlocks anything — the database only
-      // answers to a staff Auth session, so ask for the account after the PIN.
-      if(SECURE_AUTH&&!S._staffAuthed){S.pinDigits='';S._pinStage='auth';renderPinModal();return;}
-      const wasUpgrade=S._pinUpgrade;S._pinUpgrade=false;
-      closePinModal();
-      if(wasUpgrade&&S.view==='staff'){
-        setStaffRole('admin');
-        logAction(t('logSwitchedAdmin'));
-      } else {
-        goStaff();
-        logAction(t('logStaffUnlocked'));
-        toast(t('toastStaffPanel'));
-      }
-    } else {
-      S.pinError=true;
-      const newAttempts=attempts+1;
-      if(newAttempts>=5){
-        const durMin=PIN_LOCKOUT_MINS[Math.min(lockouts,PIN_LOCKOUT_MINS.length-1)];
-        try{
-          localStorage.setItem('cq_pin_until',Date.now()+durMin*60000);
-          localStorage.setItem('cq_pin_lockouts',lockouts+1);
-          localStorage.setItem('cq_pin_attempts','0');
-        }catch(e){}
-        S.pinDigits='';
-        renderPinModal();
-      } else {
-        try{localStorage.setItem('cq_pin_attempts',newAttempts);}catch(e){}
-        renderPinModal();
-        const box=document.getElementById('pin-box');
-        if(box){box.classList.add('shake');setTimeout(()=>{box.classList.remove('shake');S.pinDigits='';renderPinModal();},400);}
-      }
-    }
-  } else {
-    renderPinModal();
-  }
-}
-
-function pinDel(){
-  if(S.pinDigits.length===0)return;
-  S.pinDigits=S.pinDigits.slice(0,-1);
-  S.pinError=false;
-  renderPinModal();
-}
-
 function closePinModal(){
-  if(S.pinCountdownInterval){clearInterval(S.pinCountdownInterval);S.pinCountdownInterval=null;}
   document.getElementById('pin-modal').style.display='none';
-  S.pinDigits='';S.pinError=false;S._pinStage=null;
+  S._pinStage=null;
   // On the staff address there is nothing behind the sign-in: closing it without signing in
   // brings it straight back. A sign-in that succeeds has moved to the staff view by then.
   if(_isStaffHost())setTimeout(()=>{if(S.view!=='staff')openPinModal();},0);
 }
 
 
-document.addEventListener('keydown',e=>{
-  // Only drive the numeric keypad; ignore keys during the secure-mode staff
-  // sign-in stage (which reuses #pin-modal for an email/password form) and
-  // whenever focus is in a text field, so typing a password never feeds the PIN.
-  if(document.getElementById('pin-modal').style.display==='flex'&&S._pinStage!=='auth'){
-    const tag=(e.target&&e.target.tagName)||'';
-    if(tag==='INPUT'||tag==='TEXTAREA'){if(e.key==='Escape')closePinModal();return;}
-    if(e.key>='0'&&e.key<='9')pinPress(e.key);
-    else if(e.key==='Backspace')pinDel();
-    else if(e.key==='Escape')closePinModal();
-  }
-});
 
 
 function renderRegister(){
@@ -9942,95 +9765,6 @@ function bookAgain(ids){
   try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
 }
 
-// Customer-facing printable receipt for a completed booking (fully client-side; opens a print window)
-function printRideReceipt(ids){
-  const g=String(ids).split(',').map(id=>getQueue().find(e=>e.id===id)).filter(Boolean).sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
-  if(!g.length){toast(t('errConnection'),'error');return;}
-  const primary=g[0];
-  const sess=allSessions().find(s=>s.id===primary.sessionId);
-  const total=g.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
-  const ref=bookingRef(primary);
-  const ar=_isRtl();
-  const rows=g.map(e=>{
-    const bike=getAssignedBikes(e)[0]||null;
-    const paid=e.paid?(t('paidLabel')+' ✓'):(t('pendingLabel')+' ');
-    return`<tr>
-      <td>#${e.queueNum}</td>
-      <td>${esc(e.name)}</td>
-      <td>${typeLabel(resolvedType(e))}</td>
-      <td>${bike?esc(bike.name):'—'}</td>
-      <td>${e.rideDuration?fmtDur(e.rideDuration):'—'}</td>
-      <td style="text-align:${ar?'left':'right'};white-space:nowrap">SAR ${e.price??DEFAULT_PRICE}</td>
-      <td>${paid}</td>
-    </tr>`;
-  }).join('');
-  const _rcptAdd={};g.forEach(e=>entryAddons(e).forEach(a=>{_rcptAdd[a.id]=(_rcptAdd[a.id]||0)+a.qty;})); // aggregate every rider's add-ons, not just the first
-  const addonItems=addonLineItems(Object.entries(_rcptAdd).map(([id,qty])=>({id,qty})));
-  const addonTotal=addonItems.reduce((s,a)=>s+a.lineTotal,0);
-  const grandTotal=Math.round((total+addonTotal)*100)/100;
-  const addonsHtml=addonItems.length?`<div style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#666;font-weight:800;margin:14px 0 4px">${t('addonsLabel')}</div>
-    <table role="presentation"><tbody>${addonItems.map(a=>`<tr>
-      <td><div style="display:flex;align-items:center;gap:8px">${a.photo?`<img loading="lazy" decoding="async" src="${esc(a.photo)}" alt="" style="width:30px;height:30px;border-radius:2px;object-fit:contain;background:var(--photo-bg)">`:''}<span>${esc(a.name)}${a.brand?` · ${esc(a.brand)}`:''}</span></div></td>
-      <td style="text-align:center;white-space:nowrap">×${a.qty}</td>
-      <td style="text-align:${ar?'left':'right'};white-space:nowrap">SAR ${a.lineTotal}</td>
-    </tr>`).join('')}</tbody></table>`:'';
-  const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8">
-    <title>${t('receiptTitle')} ${esc(ref)}</title>
-    <link href="/fonts/fonts.css" rel="stylesheet">
-    <style>
-      /* Green Banner print family (Report Template B) — dark #123019 banner, neon doc label,
-         #03ff89→#0c7a3d gradient rule, dark table heads. Colors must survive printing. */
-      *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
-      body{font-family:${ar?"'IBM Plex Sans Arabic',":''}'Barlow',system-ui,sans-serif;padding:26px 30px;color:#111512;font-size:13px;max-width:680px;margin:0 auto;}
-      .mm-banner{background:#123019;color:#e9f4ec;border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;break-inside:avoid;}
-      .mm-banner img{height:52px;width:auto;}
-      .mm-co strong{font-size:15px;font-weight:800;display:block;}
-      .mm-doc{text-align:end;}
-      .mm-doc strong{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#03ff89;display:block;}
-      .mm-doc span{font-size:10.5px;color:#9fc4ab;}
-      .mm-rule{height:4px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:10px 0 14px;}
-      .meta{color:#5a635c;font-size:10.5px;margin:0 0 14px;display:flex;flex-wrap:wrap;gap:4px 22px;}
-      .meta b{color:#111512;}
-      .dear{font-size:13.5px;margin:2px 0 14px;line-height:1.6;}
-      table{width:100%;border-collapse:collapse;margin-bottom:6px;font-size:11px;}
-      th{background:#123019;color:#e9f4ec;padding:8px 10px;text-align:${ar?'right':'left'};font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700;}
-      td{padding:8px 10px;font-size:11.5px;font-weight:700;text-align:${ar?'right':'left'};}
-      tbody tr:nth-child(odd) td{background:#fafcfa;}
-      .total{display:flex;justify-content:flex-end;margin-top:10px;break-inside:avoid;}
-      .total-chip{background:#123019;color:#fff;border-radius:10px;padding:10px 18px;font-size:11px;display:flex;align-items:center;gap:14px;}
-      .total-chip .num{font-size:16px;font-weight:800;color:#03ff89;}
-      .foot{margin-top:22px;color:#5a635c;font-size:12px;line-height:1.7;}
-      @media print{body{padding:12mm;}button{display:none;}}
-    </style>
-  </head><body>
-    <div class="mm-banner">
-      <span class="mm-co" style="display:flex;align-items:center;gap:14px">
-        <img src="${new URL('/logo.png',location.origin).href}" alt="Micromobility">
-        <span><strong>Micromobility Co.</strong></span>
-      </span>
-      <span class="mm-doc"><strong>${t('receiptTitle')}</strong><span>${esc(ref)}</span></span>
-    </div>
-    <div class="mm-rule"></div>
-    <div class="meta">
-      <span><b>${t('receiptRefLabel')}:</b> ${esc(ref)}</span>
-      <span><b>${t('colSession')}:</b> ${dayLabel(primary.sessionDay)}, ${shortDate(primary.sessionDate)}</span>
-      <span><b>${t('timeLabel')}:</b> ${sessionTime(sess)}</span>
-      <span><b>${t('receiptDateLabel')}:</b> ${new Date().toLocaleString(_locale(),{timeZone:KSA_TZ})}</span>
-    </div>
-    <div class="dear">${t('receiptDear')} ${esc(primary.name)},<br>${t('receiptThankYou')}</div>
-    <table>
-      <thead><tr><th>#</th><th>${t('riderLabel')}</th><th>${t('bikeTypeLabel')}</th><th>${t('colBike')}</th><th>${t('colDuration')}</th><th style="text-align:${ar?'left':'right'}">SAR</th><th>${t('receiptPaidLabel')}</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-    ${addonsHtml}
-    <div class="total"><span class="total-chip"><span style="font-weight:800;text-transform:uppercase;font-size:10px;letter-spacing:1px">${t('reviewTotalLabel')}</span><span class="num">SAR ${grandTotal}</span></span></div>
-    <div class="foot">${t('receiptSeeYou')}<br><b>Micromobility Co.</b> · Corniche Circuit, Jeddah</div>
-    <button onclick="window.print()" style="display:block;margin:22px auto 0;min-height:44px;padding:0 26px;background:#077A4B;color:#FBF9F4;border:none;border-radius:999px;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">${t('receiptPrintBtn')}</button>
-  </body></html>`;
-  const w=window.open('','_blank','width=760,height=900');
-  if(!w){toast(t('errConnection'),'error');return;}
-  w.document.write(html);w.document.close();w.focus();
-}
 
 // ── Post-ride rating (bike + experience, 1-10, plus a note) ──
 function openRateModal(id,forced){
@@ -10299,7 +10033,7 @@ function renderAccount(){
   // page-life flag used to stay set after a sign-out or one failed call, the form then showed a
   // blank nationality, and saving erased the one on file.
   const _pf=S._profFresh;
-  if(CUST_RPC&&cust.session_token&&!(_pf&&_pf.id===cust.id&&Date.now()-_pf.at<60000)&&S._profHydrating!==cust.id){
+  if(cust.session_token&&!(_pf&&_pf.id===cust.id&&Date.now()-_pf.at<60000)&&S._profHydrating!==cust.id){
     S._profHydrating=cust.id;
     const _done=()=>{if(S._profHydrating===cust.id)S._profHydrating=null;};
     sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token}).then(({data,error})=>{
@@ -10414,7 +10148,7 @@ function renderAccount(){
       // Ride news: the rider's own yes or no (_consentCheck reads it once per page life). Not shown
       // until the server answers - a switch must never show a state that is not stored - and
       // hidden where it cannot answer (before the migration).
-      if(!CUST_RPC||!cust.session_token||S._rnUnavailable===cust.id)return'';
+      if(!cust.session_token||S._rnUnavailable===cust.id)return'';
       _consentCheck(cust);
       if(cust.ride_news===undefined)return'';
       const on=!!cust.ride_news;
@@ -10459,7 +10193,7 @@ function renderAccount(){
     })()}
     ${(()=>{
       // Delete my account: a request staff act on within 30 days, withdrawable until then.
-      if(!CUST_RPC||!cust.session_token||S._delUnavailable===cust.id)return'';
+      if(!cust.session_token||S._delUnavailable===cust.id)return'';
       _delCheck(cust);
       if(cust.deletion_requested_at===undefined)return'';
       const at=cust.deletion_requested_at;
@@ -10547,7 +10281,7 @@ async function saveAccount(){
   const soc=_socRead('acc');if(soc.err){setErr(t('socErr').replace('{0}',soc.err));return;}
   try{
     const type_preference=_accTypeFor(cust);
-    if(CUST_RPC){
+    {
       // The save writes every column, so it starts from the account as it is NOW. What the rider
       // changed on this form is sent as typed; every box they left alone takes the value on file,
       // not the one this device showed - a copy from sign-in, which undid staff corrections made
@@ -10644,25 +10378,15 @@ function pickImage(input,cb,max,square,onFail){
 function accUploadPhoto(input){pickImage(input,url=>_saveAccPhoto(url),256);}
 async function _saveAccPhoto(dataUrl){
   const cust=S.loggedIn;if(!cust)return;
-  if(CUST_RPC){
-    const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:dataUrl});
-    if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
-  }else{
-    const{error}=await sb.from('customers').update({photo:dataUrl}).eq('id',cust.id);
-    if(error){toast(error.message||t('photoErrToast'),'error');return;}
-  }
+  const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:dataUrl});
+  if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
   S.loggedIn={...cust,photo:dataUrl};setSession(S.loggedIn);
   toast(t('photoSavedToast'));renderAccount();renderTopbarRight();
 }
 async function accRemovePhoto(){
   const cust=S.loggedIn;if(!cust)return;
-  if(CUST_RPC){
-    const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:null});
-    if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
-  }else{
-    const{error}=await sb.from('customers').update({photo:null}).eq('id',cust.id);
-    if(error){toast(error.message,'error');return;}
-  }
+  const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:null});
+  if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
   S.loggedIn={...cust,photo:null};setSession(S.loggedIn);
   renderAccount();renderTopbarRight();
 }
@@ -13552,7 +13276,7 @@ async function _caMsgCopy(){
 // closes stands in front of the site. customer_set_own_password changes the password ONLY
 // while that mark is set, and hands back a new session token.
 async function _pwdMustCheck(cust){
-  if(!CUST_RPC||!cust||!cust.session_token||S._pwdCheckedFor===cust.id)return;
+  if(!cust||!cust.session_token||S._pwdCheckedFor===cust.id)return;
   S._pwdCheckedFor=cust.id;
   try{await _sbReady;}catch(e){}
   if(!sb)return;
@@ -13890,7 +13614,6 @@ async function saveCustForm(){
     if(pwd.length<8||!/[A-Z]/.test(pwd)||!/[0-9]/.test(pwd)){toast(t('errPasswordLen'),'error');return;}
     if(height==null){toast(t('errValidHeightCm'),'error');return;}
     if(!d.gender){toast(t('errSelectGender'),'error');return;}
-    if(!CUST_RPC){toast(t('errConnection'),'error');return;}
     S._cfBusy=true;
     try{
       try{
@@ -14797,10 +14520,10 @@ function renderQRow(e){
     const lp=livePosMap[e.id];
     const totalW=sessWaitCount[e.sessionId]||0;
     const posCell=e.status==='waiting'&&lp
-      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px">${lp} / ${totalW}</div>`
+      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
       :`<span style="color:var(--muted);font-size:12px">—</span>`;
     const _flashStyle=S._flashId===e.id?`animation:rowFlash_${S._flashColor||'green'} .75s ease forwards;`:''
-    return`<tr class="${rowCls}"${_flashStyle?` style="${_flashStyle}"`:''}>
+    return`<tr class="${rowCls}" data-id="${esc(e.id)}"${_flashStyle?` style="${_flashStyle}"`:''}>
       <td style="min-width:52px">
         ${(_apprSessIds.has(e.sessionId)&&!_commPublished(_rowSess(e)))?`<span style="font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div style="font-size:10px;font-weight:900;color:var(--orange);margin-top:2px;white-space:nowrap">W${e.waitlistNum}</div>`:''}`:`
         <span class="queue-num-cell" style="font-size:${e.status!=='waiting'?'18':'22'}px">#${e.queueNum}</span>
@@ -14851,7 +14574,7 @@ function renderQRow(e){
     const lp=livePosMap[primary.id];
     const totalW=sessWaitCount[primary.sessionId]||0;
     const posCell=primary.status==='waiting'&&lp
-      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px">${lp} / ${totalW}</div>`
+      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp} / ${totalW}`)}</div>`
       :`<span style="color:var(--muted);font-size:12px">—</span>`;
     const activeGroup=group.filter(e=>!['cancelled','noshow'].includes(e.status));
     const _r2g=n=>Math.round(n*100)/100;
@@ -14879,7 +14602,7 @@ function renderQRow(e){
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
         ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row" style="border-left:2px solid rgba(var(--green-rgb),.2)">
+      return`<tr class="${groupCls} party-row" data-id="${esc(primary.id)}" style="border-left:2px solid rgba(var(--green-rgb),.2)">
         <td style="min-width:52px;vertical-align:middle">
           <span class="queue-num-cell" style="font-size:15px;line-height:1.25">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group))}
@@ -14928,7 +14651,7 @@ function renderQRow(e){
       const trStyle=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(';');
 
       if(isFirst){
-        return`<tr class="${rowCls}" style="${trStyle}">
+        return`<tr class="${rowCls}" data-id="${esc(e.id)}" style="${trStyle}">
           <td rowspan="${n}" style="min-width:52px;vertical-align:middle">
             <span class="queue-num-cell" style="font-size:15px;line-height:1.25">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
             ${_bookedAt(_bookedAtOf(group))}
@@ -14957,7 +14680,7 @@ function renderQRow(e){
           <td style="vertical-align:middle"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
-        return`<tr class="${rowCls}" style="${trStyle}">
+        return`<tr class="${rowCls}" data-id="${esc(e.id)}" style="${trStyle}">
           <td style="vertical-align:middle">${riderCell}</td>
           ${_memberCell(e,' style="vertical-align:middle"')}
           ${_qc.bike?heightCell:''}
@@ -14984,9 +14707,9 @@ function renderQRow(e){
     const allSameQ=group.every(e=>e.queueNum===primary.queueNum);
     const isConsec=!allSameQ&&group.every((e,i)=>i===0||e.queueNum===group[i-1].queueNum+1);
     const qNumDisplay=allSameQ?`#${primary.queueNum}`:isConsec?`#${primary.queueNum}&ndash;#${group[n-1].queueNum}`:group.map(e=>`#${e.queueNum}`).join(', ');
-    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':'';
+    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':'';
     const lp=livePosMap[primary.id];const totalW=sessWaitCount[primary.sessionId]||0;
-    const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge" style="font-size:11px;padding:2px 7px">${lp}/${totalW}</span>`:'';
+    const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge" style="font-size:11px;padding:2px 7px" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp}/${totalW}`)}</span>`:'';
     const sessLabel=S.sfSession==='all'?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">${esc(dayLabel(primary.sessionDay)||'')} &middot; ${esc(shortDate(primary.sessionDate))}</div>`:'';
     const riderRows=group.map((e,i)=>{
       const assignedBikes=getAssignedBikes(e);
@@ -15000,7 +14723,7 @@ function renderQRow(e){
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
           <div style="display:flex;align-items:center;gap:6px;min-width:0">
             ${n>1?`<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--green);color:#000;font-size:9px;font-weight:900;flex-shrink:0">${i+1}</span>`:''}
-            <span style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">${esc(e.name)}</span>
+            <span class="rider-name" style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">${esc(e.name)}</span>${_dupMark(e)}
             ${e.height?`<span class="q-height" style="flex-shrink:0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${e.phone?_contactCell(e.phone,e):''}<span style="text-align:end">${statusCellHtml(e)}</span>${payBtn}</div>
@@ -15017,7 +14740,7 @@ function renderQRow(e){
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
       const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''}" style="border-left:2px solid rgba(var(--green-rgb),.25)">
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''}" data-id="${esc(primary.id)}" style="border-left:2px solid rgba(var(--green-rgb),.25)">
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:${sessLabel?'4':'6'}px">
           <span class="queue-num-cell" style="font-size:22px">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
@@ -15027,7 +14750,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div style="min-width:0"><div style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(primary.name)}</div>
+          <div style="min-width:0"><div class="rider-name" style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(primary.name)}</div>
             <div style="font-size:11px;color:var(--muted);margin-top:2px">${_partyCountsLine(group)}</div></div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
@@ -15041,9 +14764,10 @@ function renderQRow(e){
         </div>
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}" style="${n>1?'border-left:2px solid rgba(var(--green-rgb),.25)':''}">
+    return`<div class="q-card${groupCls?' '+groupCls:''}" data-id="${esc(primary.id)}" style="${n>1?'border-left:2px solid rgba(var(--green-rgb),.25)':''}">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:${sessLabel?'4':'6'}px">
         <span class="queue-num-cell" style="font-size:22px">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+        ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span style="font-size:10px;font-weight:900;color:var(--orange);white-space:nowrap">W${primary.waitlistNum}</span>`:''}
         ${_bookedAt(_bookedAtOf(group),'span')}
         ${n>1?`<span style="font-size:10px;color:var(--green);font-weight:800">${n} ${t('bike')||'Bikes'}</span>`:''}
         ${primary.groupName?`<span style="font-size:10px;font-weight:900;color:var(--green);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
@@ -15141,39 +14865,45 @@ function renderQRow(e){
     const _rk=e=>_rank.has(e.sessionId)?_rank.get(e.sessionId):Infinity;
     _qShown=filtered.map((e,i)=>({e,i})).sort((a,b)=>(_rk(a.e)-_rk(b.e))||(a.i-b.i)).map(x=>x.e).slice(0,S.sfLimit||150);
   }else _qShown=filtered;
-  // The phone cards are built only where a phone shows them: hidden, they were 43% of the page's
-  // elements on an iPad, built and parsed on every repaint (2026-09-27 review). Crossing the
-  // breakpoint repaints (the matchMedia listener by _qPhone). A phone still builds the table too -
-  // the roster's phone specs read it - so the table's turn is a follow-up, not this change.
-  const _phoneQ=_qPhone(),_rowOf=renderGroupRow,_cardOf=_phoneQ?renderGroupCard:(()=>'');
+  // Each layout is built only where it shows: the cards on a phone, the table everywhere else.
+  // Hidden, the cards were 43% of the page's elements on an iPad, built and parsed on every
+  // repaint (2026-09-27 review), and the table was the same dead weight on a phone. Crossing
+  // the breakpoint repaints (the matchMedia listener by _qPhone). Specs that read the roster
+  // take both: '.queue-table tbody tr, .q-card'.
+  // Every party is its own keyed piece - a tbody in the table, a card on a phone - so a repaint
+  // replaces the one that changed and leaves the others standing (_qLeaf and _qPatch, below).
+  _qPosText=new Map();
+  const _phoneQ=_qPhone(),_rowOf=_phoneQ?(()=>''):renderGroupRow,_cardOf=_phoneQ?renderGroupCard:(()=>'');
+  const _tb=(key,html)=>_qLeaf(key,html,'tbody'),_cd=(key,html)=>_qLeaf(key,html);
+  const _emptyHtml=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
+  const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="11">${_emptyHtml}</td></tr>`);
+  const rowChunks=[],cardChunks=[],list=_phoneQ?cardChunks:rowChunks;
+  const piece=_phoneQ?(g=>_cd('g:'+g[0].id,_cardOf(g))):(g=>_tb('g:'+g[0].id,_rowOf(g)));
   if(S.sfSession==='all'){
-    rows=orderedSessions.map(sess=>{
+    for(const sess of orderedSessions){
       const sessFiltered=_qShown.filter(e=>e.sessionId===sess.id);
-      if(!sessFiltered.length)return'';
-      const nW=sessFiltered.filter(e=>e.status==='waiting').length;
-      const nA=sessFiltered.filter(e=>e.status==='active').length;
-      const nD=sessFiltered.filter(e=>e.status==='done').length;
-      const hdr=`<tr class="sess-group-hdr"><td colspan="14">
+      if(!sessFiltered.length)continue;
+      const groups=buildQueueGroups(sessFiltered);
+      if(_phoneQ){
+        cardChunks.push(_cd('h:'+sess.id,`<div style="font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 4px;border-bottom:1px solid rgba(var(--tint-rgb),.06);margin-bottom:8px">${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))} &middot; ${esc(sessionTime(sess))}</div>`));
+      }else{
+        const nW=sessFiltered.filter(e=>e.status==='waiting').length;
+        const nA=sessFiltered.filter(e=>e.status==='active').length;
+        const nD=sessFiltered.filter(e=>e.status==='done').length;
+        rowChunks.push(_tb('h:'+sess.id,`<tr class="sess-group-hdr"><td colspan="14">
         ${esc(dayLabel(sess.day))} &nbsp;${esc(shortDate(sess.session_date||sess.id))} &nbsp;&middot;&nbsp; ${esc(sessionTime(sess))}
         &nbsp;&nbsp;
         <span style="color:var(--green)">${nW} ${t('waitingStat').toLowerCase()}</span>
         ${nA?` &middot; <span style="color:var(--text)">${nA} ${t('onBikeStat').toLowerCase()}</span>`:''}
         ${nD?` &middot; <span style="color:var(--muted)">${nD} ${t('doneStat').toLowerCase()}</span>`:''}
         &nbsp;<span class="badge-${esc(sess.status)}" style="margin-left:8px">${{open:t('statusOpen'),closed:t('statusClosed'),full:t('statusFull')}[sess.status]||esc(sess.status)}</span>
-      </td></tr>`;
-      return hdr+buildQueueGroups(sessFiltered).map(g=>_rowOf(g)).join('');
-    }).join('');
-    if(!filtered.length)emptyRow=`<tr><td colspan="11"><div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div></td></tr>`;
-    
-    mobileCards=orderedSessions.map(sess=>{
-      const sessFiltered=_qShown.filter(e=>e.sessionId===sess.id);
-      if(!sessFiltered.length)return'';
-      const hdr=`<div style="font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 4px;border-bottom:1px solid rgba(var(--tint-rgb),.06);margin-bottom:8px">${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))} &middot; ${esc(sessionTime(sess))}</div>`;
-      return hdr+buildQueueGroups(sessFiltered).map(g=>_cardOf(g)).join('');
-    }).join('');
-    if(!filtered.length)mobileCards=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
+      </td></tr>`));
+      }
+      for(const g of groups)list.push(piece(g));
+    }
+    if(!filtered.length)list.push(_emptyPiece());
   }else{
-    const _fgAll=buildQueueGroups(_qShown); // build once, reuse for the table + the mobile cards
+    const _fgAll=buildQueueGroups(_qShown);
     // Tonight's list is the riders who still need something. With no status filter and no
     // search, parties that are all done / no-show / cancelled fold to one line at the bottom,
     // opened on tap - and only when there is a live party to put first.
@@ -15182,21 +14912,15 @@ function renderQRow(e){
     const _fg=_foldable?_fgAll.filter(g=>!_fin(g)):_fgAll;
     const _fgFin=_foldable?_fgAll.filter(_fin):[];
     const _foldLbl=_foldable?_foldLine(_fgFin):'';
-    const _foldRow=_foldable?`<tr class="fold-row"><td colspan="11"><button type="button" class="fold-btn" aria-expanded="${S.sfShowFinished?'true':'false'}" onclick="S.sfShowFinished=!S.sfShowFinished;renderStaffQueue()">${S.sfShowFinished?`${t('foldHide')} ▴`:`${_foldLbl} — ${t('foldShow')} ▾`}</button></td></tr>`:'';
-    const _foldCard=_foldable?`<button type="button" class="fold-btn fold-card" aria-expanded="${S.sfShowFinished?'true':'false'}" onclick="S.sfShowFinished=!S.sfShowFinished;renderStaffQueue()">${S.sfShowFinished?`${t('foldHide')} ▴`:`${_foldLbl} — ${t('foldShow')} ▾`}</button>`:'';
-    // Chunked paint: on a 200-rider night the single innerHTML parse of every heavy row is a
-    // visible freeze on a booth tablet. The first 40 groups paint now; the rest go in on the
-    // next frame, guarded by a generation counter so a re-render that has already replaced
-    // the tbody is not appended to.
-    const _all=_fg.map(g=>_rowOf(g)).concat(_foldable?[_foldRow,...(S.sfShowFinished?_fgFin.map(g=>_rowOf(g)):[])]:[]);
-    const _CHUNK=40;
-    rows=_all.slice(0,_CHUNK).join('');
-    S._qRowsRest=_all.length>_CHUNK?_all.slice(_CHUNK).join(''):'';
-    emptyRow=filtered.length===0?`<tr><td colspan="11"><div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div></td></tr>`:'';
-    mobileCards=_fg.map(g=>_cardOf(g)).join('')+(_foldable?_foldCard+(S.sfShowFinished?_fgFin.map(g=>_cardOf(g)).join(''):''):'');
-    if(!filtered.length)mobileCards=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
+    const _foldBtn=cls=>`<button type="button" class="fold-btn${cls}" aria-expanded="${S.sfShowFinished?'true':'false'}" onclick="S.sfShowFinished=!S.sfShowFinished;renderStaffQueue()">${S.sfShowFinished?`${t('foldHide')} ▴`:`${_foldLbl} — ${t('foldShow')} ▾`}</button>`;
+    for(const g of _fg)list.push(piece(g));
+    if(_foldable){
+      list.push(_phoneQ?_cd('fold',_foldBtn(' fold-card')):_tb('fold',`<tr class="fold-row"><td colspan="11">${_foldBtn('')}</td></tr>`));
+      if(S.sfShowFinished)for(const g of _fgFin)list.push(piece(g));
+    }
+    if(!filtered.length)list.push(_emptyPiece());
   }
-  if(!_resultsOnly)document.getElementById('tab-queue').innerHTML=_qvPills+_queueHeader+_sessSummaryBar+`${(()=>{
+  const _shellHtml=_qvPills+_queueHeader+_sessSummaryBar+`${(()=>{
     // Saturday Social Ride (a single community session selected): the JCC stats (Expected / On Bike /
     // Completed) don't apply — show the approval funnel instead: total riders, approved, pending, waitlist.
     const _commStats=S.sfSession!=='all'&&_isApprovalRide(allSessions().find(s=>s.id===S.sfSession));
@@ -15275,11 +14999,10 @@ function renderQRow(e){
   // Results live in their own container so a search keystroke can refresh just this part.
   // Re-rendering the whole panel would destroy the focused search input, and on a phone a
   // destroyed input closes the soft keyboard (focus() can't reopen it without a gesture).
-  const _qResultsHtml=`
-    ${filtered.length>_qShown.length?`<div style="margin:10px 0;text-align:center"><button class="btn-secondary" onclick="S.sfLimit=(S.sfLimit||150)+200;renderStaffQueue()">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`:''}
-    <div class="queue-mobile-view">${mobileCards}</div>
-    <div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}">
-      <thead><tr>
+  const _results=[];
+  if(filtered.length>_qShown.length)_results.push(_qLeaf('more',`<div style="margin:10px 0;text-align:center"><button class="btn-secondary" onclick="S.sfLimit=(S.sfLimit||150)+200;renderStaffQueue()">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`));
+  _results.push(_qBox('cards','<div class="queue-mobile-view">','</div>',cardChunks));
+  _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}">`,'</table></div>',[_qLeaf('head',`<tr>
         ${thQSort('queue',t('colBookingNum'))}
         ${thQSort('name',t('colRider'))}
         ${_commQueueView()?thQSort('member',t('colMember')):''}
@@ -15292,48 +15015,150 @@ function renderQRow(e){
         ${thQSort('status',t('colStatus'))}
         ${thQSort('phone',t('colContact'))}
         <th>${t('colManageBooking')}</th>
-      </tr></thead>
-      <tbody id="q-tbody">${rows}${emptyRow}</tbody>
-    </table></div>
-    ${(()=>{
-      const sel=S.sfSelected.filter(id=>getQueue().some(e=>e.id===id&&(e.status==='waiting'||e.status==='active')));
-      if(sel.length!==S.sfSelected.length)S.sfSelected=sel;
-      if(!sel.length)return'';
+      </tr>`,'thead'),...rowChunks],'table'));
+  {
+    const sel=S.sfSelected.filter(id=>getQueue().some(e=>e.id===id&&(e.status==='waiting'||e.status==='active')));
+    if(sel.length!==S.sfSelected.length)S.sfSelected=sel;
+    if(sel.length){
       const anyWaiting=sel.some(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='waiting';});
-      return`<div style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:350;display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:10px 14px;box-shadow:0 10px 40px rgba(0,0,0,.5)">
+      const act=sel.filter(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='active';});
+      _results.push(_qLeaf('bulk',`<div style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:350;display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:10px 14px;box-shadow:0 10px 40px rgba(0,0,0,.5)">
         <span style="font-size:13px;font-weight:800;color:var(--green);white-space:nowrap">${sel.length} ${t('bulkSelectedLabel')}</span>
         <button class="btn-sm btn-green" onclick="bulkSfPaid()">✓ ${t('bulkPaidBtn')}</button>
         ${anyWaiting?`<button class="btn-sm btn-green" onclick="bulkSfCheckin()">${t('bulkCheckinBtn')}</button>`:''}
-        ${(()=>{const act=sel.filter(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='active';});return act.length?`<button class="btn-sm btn-green" onclick="showBulkReturn(S.sfSelected.slice())">${t('bulkReturnBtn')} (${act.length})</button>`:'';})()}
+        ${act.length?`<button class="btn-sm btn-green" onclick="showBulkReturn(S.sfSelected.slice())">${t('bulkReturnBtn')} (${act.length})</button>`:''}
         <button class="btn-sm btn-muted" onclick="clearSfSelect()">${t('bulkClearSel')}</button>
-      </div>`;
-    })()}`;
-  if(_resultsOnly){
-    const _rc=document.getElementById('q-results');
-    if(_rc){
-      _rc.innerHTML=_qResultsHtml;
-      const _cnt=document.getElementById('q-result-count');
-      if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';
-      _qPaintRest();
-      return;
+      </div>`));
     }
   }
-  document.getElementById('q-results').innerHTML=_qResultsHtml;
-  _qKeepScroll();
-  _qPaintRest();
+  const _tab=document.getElementById('tab-queue');
+  if(!_resultsOnly||!document.getElementById('q-results'))_qSyncShell(_tab,_shellHtml);
+  else{const _cnt=document.getElementById('q-result-count');if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';}
+  _qWrite(document.getElementById('q-results'),_results);
+  _qPosApply(document.getElementById('q-results'));
+  if(!_resultsOnly)_qKeepScroll();
 }
 function _qKeepScroll(){const y=S._qScrollY;if(y==null)return;if(Math.abs(window.scrollY-y)>1)try{window.scrollTo({top:y,behavior:'auto'});}catch(_){window.scrollTo(0,y);}}
-let _qPaintGen=0;
-function _qPaintRest(){
+// ── The roster as keyed pieces ──────────────────────────────────────────────────────────────
+// The roster is a list of pieces under keys - one tbody per party in the table, one card per
+// party on a phone, a session's header, the fold line, the empty state - each stamped with its
+// key (data-ck) and a hash of its own markup (data-cf). The first paint writes them in one go;
+// every paint after that compares stamps and replaces only the pieces whose markup changed,
+// builds the new ones, removes the gone ones and moves the rest into order (_qPatch). A
+// check-in that lands while a staffer reads the list touches one row, and the rest of the page
+// keeps its scroll, its focus and its open menus. The parts around the roster are compared
+// piece by piece too (_qSyncShell). A leaf is one piece; a box holds pieces of its own.
+function _qLeaf(key,html,wrap){
+  const fp=String(_fpHash(html,7)),stamp=` data-ck="${esc(key)}" data-cf="${fp}"`;
+  let out;
+  if(wrap)out=`<${wrap}${stamp}>${html}</${wrap}>`;
+  else if(/^\s*<[a-zA-Z][\w-]*[\s>]/.test(html))out=html.replace(/^\s*<[a-zA-Z][\w-]*/,m=>m+stamp);
+  else out=`<div${stamp}>${html}</div>`;
+  return{key,fp,html:out};
+}
+// A box: its opening (the first tag takes the stamp; the hash covers the opening and the closing,
+// not the pieces inside), the pieces it holds, and its closing. `inner` names the element inside
+// the opening that holds the pieces when that is not the outermost one.
+function _qBox(key,open,close,kids,inner){
+  const fp=String(_fpHash(open+close,7)),stamp=` data-ck="${esc(key)}" data-cf="${fp}"`;
+  return{key,fp,kids,inner:inner||null,open:open.replace(/^\s*<[a-zA-Z][\w-]*/,m=>m+stamp),close};
+}
+function _qHtml(c,limit){return c.kids?c.open+(limit==null?c.kids:c.kids.slice(0,limit)).map(k=>_qHtml(k)).join('')+c.close:c.html;}
+function _qNode(html){
+  const tpl=document.createElement('template'),inTable=/^\s*<(tbody|thead)[\s>]/.test(html);
+  tpl.innerHTML=inTable?`<table>${html}</table>`:html;
+  return inTable?tpl.content.querySelector('tbody,thead'):tpl.content.firstElementChild;
+}
+// Make the keyed children of parent exactly chunks, in order.
+function _qPatch(parent,chunks){
+  const have=new Map();
+  for(const el of parent.children){const k=el.getAttribute('data-ck');if(k!=null)have.set(k,el);}
+  let pos=0;
+  for(const c of chunks){
+    let el=have.get(c.key);
+    if(el&&el.getAttribute('data-cf')===c.fp){
+      if(c.kids){const box=c.inner?el.querySelector(c.inner):el;if(box)_qPatch(box,c.kids);}
+    }else{
+      const fresh=_qNode(_qHtml(c));
+      if(!fresh)continue;
+      if(el)el.replaceWith(fresh);
+      el=fresh;
+    }
+    have.delete(c.key);
+    const at=parent.children[pos]||null;
+    if(at!==el)parent.insertBefore(el,at);
+    pos++;
+  }
+  for(const el of have.values())el.remove();
+}
+// A waiting rider's live position ('3 / 45') moves with every check-in. It is kept OUT of a
+// piece's hashed markup - the badge is written empty, naming its booking (data-pos) - and filled in
+// after the pieces are placed, so a check-in leaves the other rows standing and moves their badges'
+// text alone. _qPos records the text while the pieces are built; _qPosApply writes it.
+let _qPosText=new Map();
+function _qPos(id,text){_qPosText.set(String(id),text);return'';}
+function _qPosApply(root){
+  if(!root)return;
+  for(const b of root.querySelectorAll('.pos-badge[data-pos]')){const txt=_qPosText.get(b.getAttribute('data-pos'))||'';if(b.textContent!==txt)b.textContent=txt;}
+}
+let _qPaintGen=0,_qRest=null;
+const _Q_FIRST=40;
+function _qWrite(rc,chunks){
+  if(!rc)return;
+  if(rc.childElementCount){_qFlushRest();_qPatch(rc,chunks);return;}
+  // The first paint goes in as one parse - except that on a 200-rider night every heavy row in
+  // one innerHTML is a visible freeze on a booth tablet, so the table takes its first 40 parties
+  // now and the rest on the next frame, guarded by a generation counter so a repaint that has
+  // replaced the table is not appended to (_qPaintRest).
+  const table=chunks.find(c=>c.key==='table');
+  const rest=table&&table.kids.length>_Q_FIRST+1?table.kids.slice(_Q_FIRST+1).map(k=>_qHtml(k)).join(''):'';
+  rc.innerHTML=chunks.map(c=>c===table&&rest?_qHtml(c,_Q_FIRST+1):_qHtml(c)).join('');
+  _qPaintRest(rest);
+}
+// Rows still owed to the table land now, before a patch compares the table with what it should hold.
+function _qFlushRest(){
+  const rest=_qRest;_qRest=null;_qPaintGen++;
+  if(!rest)return;
+  const tb=document.querySelector('#q-results .queue-table');
+  if(tb)tb.insertAdjacentHTML('beforeend',rest);
+}
+function _qPaintRest(rest){
   const gen=++_qPaintGen; // every paint, even one with nothing left over: an older paint's rows must not land in it
-  const rest=S._qRowsRest;S._qRowsRest='';
+  _qRest=rest||null;
   if(!rest)return;
   requestAnimationFrame(()=>{
     if(gen!==_qPaintGen)return;                 // a newer render owns the table now
-    const tb=document.getElementById('q-tbody');
-    if(tb)tb.insertAdjacentHTML('beforeend',rest);
+    _qRest=null;
+    const tb=document.querySelector('#q-results .queue-table');
+    if(tb){tb.insertAdjacentHTML('beforeend',rest);_qPosApply(tb);}
     _qKeepScroll();
   });
+}
+// The parts around the roster - the view pills, the header, the session strip, the filter bar,
+// the floating buttons - compared piece by piece with what is on screen; only a changed piece is
+// replaced. The roster's container (#q-results) is kept, never rebuilt, so the list inside it can
+// be patched, and the filter bar keeps its node, its focus and the phone's keyboard while nothing
+// in it changed.
+function _qSyncShell(tab,html){
+  const tpl=document.createElement('template');tpl.innerHTML=html;
+  const want=Array.from(tpl.content.children);
+  let results=document.getElementById('q-results');
+  if(results&&results.parentElement!==tab)results=null;
+  for(let i=0;i<want.length;i++){
+    const w=want[i],at=tab.children[i]||null;
+    if(w.id==='q-results'){
+      if(!results)results=w;
+      if(at!==results)tab.insertBefore(results,at);
+      continue;
+    }
+    if(at&&at!==results&&at.outerHTML===w.outerHTML)continue;
+    if(at&&at!==results)at.replaceWith(w);else tab.insertBefore(w,at);
+  }
+  while(tab.children.length>want.length){
+    const last=tab.children[tab.children.length-1];
+    if(last===results)break;
+    last.remove();
+  }
 }
 // Publish the Saturday results: approved riders start seeing their approval and their
 // queue number (exactly what the staff panel shows). Confirmed first — it is visible to
@@ -25528,7 +25353,6 @@ function _outboxCount(){return _outbox().length;}
 // never land in the wrong order: a refund replayed under an older "paid", or a void under the
 // sale it voided.
 function _outboxEnqueueMany(ops){const ids=new Set(ops.map(x=>x.id));const o=_outbox().filter(op=>!ids.has(op.id));ops.forEach(x=>o.push({oid:uid(),kind:x.kind,id:x.id,data:x.data||null}));const ok=_outboxSave(o);_outboxFlush();return ok;}
-function _outboxEnqueue(kind,id,data){return _outboxEnqueueMany([{kind,id,data}]);}
 let _outboxBusy=false;
 async function _outboxFlush(){
   if(_outboxBusy||!sb||(typeof navigator!=='undefined'&&navigator.onLine===false))return;
@@ -25578,7 +25402,6 @@ function _salesApply(upserts,deletes){
   del.forEach(id=>_voidedAdd(id));
   return true;
 }
-function _salesUpsert(row){return _salesApply([row],[]);}
 // A receipt's money, as the ledger shows it (the card/cash metadata line is not a sale).
 function _rcTotal(rows){return Math.round((rows||[]).filter(r=>r.category!=='__cardmeta__').reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;}
 // ── Offline-safe bookings: queue queue_entries inserts locally and sync when the connection returns ──

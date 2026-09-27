@@ -68,7 +68,7 @@ test.describe('the staff panel', () => {
     await stat.click();
     expect(await page.evaluate('S.sfStatus')).toBe('waitlist');
     // "Rider" is also a column heading, so count body rows naming a numbered rider
-    const rows = await page.evaluate(`Array.from(document.querySelectorAll('#q-results tr')).map(r=>r.textContent||'').filter(x=>/Rider \\d/.test(x)).length`);
+    const rows = await page.evaluate(`Array.from(document.querySelectorAll('#q-results tbody tr, #q-results .q-card')).map(r=>r.textContent||'').filter(x=>/Rider \\d/.test(x)).length`);
     expect(rows).toBe(2); // only the two waitlisted riders remain
   });
 

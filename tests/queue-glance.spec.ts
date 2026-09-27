@@ -44,7 +44,7 @@ test('the roster shows neither the bikes-free strip nor a SAR due tile', async (
 test('a rider out past two hours reads amber with a warning', async ({ page }) => {
   const threeHoursAgo = new Date(Date.now() - 3 * 3600 * 1000).toISOString();
   await boot(page, [e('a', { status: 'active', checked_in_at: threeHoursAgo, assigned_bike_id: 'b3' })]);
-  const cell = await page.evaluate(`document.querySelector('#tab-queue tbody').innerHTML`) as string;
+  const cell = await page.evaluate(`document.getElementById('q-results').innerHTML`) as string;
   expect(cell).toContain('⚠');
   expect(cell).toContain('over two hours');
 });
@@ -52,7 +52,7 @@ test('a rider out past two hours reads amber with a warning', async ({ page }) =
 test('a fresh check-in stays green', async ({ page }) => {
   const tenMinAgo = new Date(Date.now() - 10 * 60000).toISOString();
   await boot(page, [e('a', { status: 'active', checked_in_at: tenMinAgo, assigned_bike_id: 'b3' })]);
-  const cell = await page.evaluate(`document.querySelector('#tab-queue tbody').innerHTML`) as string;
+  const cell = await page.evaluate(`document.getElementById('q-results').innerHTML`) as string;
   expect(cell).not.toContain('⚠');
   expect(cell).toContain('min');
 });
@@ -64,7 +64,7 @@ test('one phone on two separate live bookings is flagged; a party sharing one is
     e('g1', { queue_num: 3, phone: '0553334444', group_id: 'grp' }),
     e('g2', { queue_num: 4, phone: '0553334444', group_id: 'grp' }),        // one party, shared contact
   ]);
-  const rows = await page.evaluate(`document.querySelector('#tab-queue tbody').innerText`) as string;
+  const rows = await page.evaluate(`document.getElementById('q-results').innerText`) as string;
   const flags = (rows.match(/⚠/g) || []).length;
   expect(flags).toBe(2);                    // both halves of the duplicate, neither of the party
 });

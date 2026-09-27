@@ -153,7 +153,6 @@ test('reports, exports and receipts build without throwing', async ({ page }) =>
     ['close-out', `printCloseout()`],
     ['session export', `S.sfSession='2099-11-01';exportSessionExcel()`],
     ['action-log CSV', `exportLogsCSV()`],
-    ['ride receipt', `printRideReceipt(['q3'])`],
   ];
   const broken: string[] = [];
   for (const [name, call] of ACTIONS) {

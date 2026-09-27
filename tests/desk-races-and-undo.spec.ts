@@ -304,14 +304,14 @@ test('the topbar Undo keeps a refused reversal undoable, and claims it before ru
 });
 
 test('a render with nothing left to add still retires an older render\'s pending rows', async ({ page }) => {
-  test.skip(test.info().project.name === 'mobile', '_qPaintRest fills the desktop roster table (#q-tbody), which a phone does not show');
+  test.skip(test.info().project.name === 'mobile', '_qPaintRest fills the desktop roster table, which a phone does not show');
   const q = [row('A', 'waiting')];
   await boot(page, q);
   await page.evaluate(`setStaffTab('queue');renderStaffQueue()`);
-  await page.waitForSelector('#q-tbody');
+  await page.waitForSelector('#q-results .queue-table tbody');
   const stale = await page.evaluate(`(async()=>{
-    S._qRowsRest='<tr id="stale-row"><td>old</td></tr>';_qPaintRest();  // an older, longer render
-    S._qRowsRest='';_qPaintRest();                                        // a newer one, before the frame
+    _qPaintRest('<tbody><tr id="stale-row"><td>old</td></tr></tbody>');  // an older, longer render
+    _qPaintRest('');                                                       // a newer one, before the frame
     await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
     return !!document.getElementById('stale-row');
   })()`);

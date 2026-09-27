@@ -160,7 +160,7 @@ test('All sessions puts tonight first under the cap, not a year-old night', asyn
     queue_entries: [...oldRows, row('tonight', { name: 'Tonight Rider' })] });
   await page.waitForFunction('getQueue().length>200');
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='all';renderStaffQueue()`);
-  await expect(page.locator('#tab-queue .queue-table')).toContainText('Tonight Rider');
+  await expect(page.locator('#q-results')).toContainText('Tonight Rider');
 });
 
 // ── the forms save what they show ────────────────────────────────────────────
@@ -244,8 +244,8 @@ test('Front Desk does not see cancelled Saturday-ride bookings on All sessions',
       row('s1', { session_id: COMM, session_date: COMM, status: 'cancelled', name: 'Saturday Cancel' })] });
   await page.waitForFunction('getQueue().length===2');
   await page.evaluate(`S.staffRole='frontdesk';setStaffTab('queue');S.queueView='bookings';S.sfSession='all';S.sfStatus='cancelled';renderStaffQueue()`);
-  await expect(page.locator('#tab-queue .queue-table')).toContainText('Circuit Cancel');
-  await expect(page.locator('#tab-queue .queue-table')).not.toContainText('Saturday Cancel');
+  await expect(page.locator('#q-results')).toContainText('Circuit Cancel');
+  await expect(page.locator('#q-results')).not.toContainText('Saturday Cancel');
 });
 
 test('a party row names the riders who ride on the house', async ({ page }) => {
@@ -254,7 +254,7 @@ test('a party row names the riders who ride on the house', async ({ page }) => {
   ] });
   await page.waitForFunction('getQueue().length===2');
   await page.evaluate(`setStaffTab('queue');S.sfSession=${JSON.stringify(LIVE)};S._partyExpandAll=true;renderStaffQueue()`);
-  await expect(page.locator('#q-tbody')).toContainText(/1 On the house/);
+  await expect(page.locator('#q-results')).toContainText(/On the house/); // the row's party line counts them; a card says it on the rider
 });
 
 // Which session the desk opens on is the queue's own rule now (_currentSessId, 575fd6c), with

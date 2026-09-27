@@ -53,7 +53,7 @@ test('before publish: reservation time, and a W-number for the waitlisted', asyn
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='sat-1';renderStaffQueue()`);
   await page.waitForTimeout(250);
-  const txt = await page.evaluate(`document.querySelector('#tab-queue tbody').innerText`) as string;
+  const txt = await page.evaluate(`document.getElementById('q-results').innerText`) as string;
   expect(txt).not.toContain('#7');            // numbers stay hidden pre-publish
   expect(txt).toContain('W2');                // but the line position shows
 });
@@ -67,7 +67,7 @@ test('after publish the numbers are public, so the roster shows them too', async
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='sat-1';renderStaffQueue()`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-queue tbody')).toContainText('#7');
+  await expect(page.locator('#q-results')).toContainText('#7');
 });
 
 // The row menu: a booking used to carry up to seven buttons over two lines. The two the desk
