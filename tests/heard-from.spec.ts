@@ -27,7 +27,7 @@ test('the sign-up form asks how they heard of us, with every source and Invited,
   const sel = page.locator('#a-heard');
   await expect(sel).toBeVisible();
   expect(await sel.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).toEqual(['', ...OPTS]);
-  await expect(sel.locator('option[value="invited"]')).toHaveText('Invited');
+  await expect(sel.locator('option[value="invited"]')).toHaveText('Invited by MicroMobility');
   const calls: unknown[] = [];
   await page.route(/\/rest\/v1\/rpc\/customer_signup/, async (r) => { calls.push(r.request().postDataJSON()); await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([{ session_token: 'tok-h' }]) }); });
   await page.evaluate('S.signupAck=true;doSignup()');
