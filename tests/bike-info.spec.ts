@@ -38,18 +38,31 @@ test.describe('bike type info', () => {
     const dlg = page.locator('#bike-info-modal [role="dialog"]');
     await expect(dlg).toBeVisible();
     await expect(dlg.locator('#bike-info-title')).toHaveText('Hybrid');
-    await expect(dlg.locator('.bike-info-kicker')).toHaveText('Alvas Brumby');
+    await expect(dlg.locator('.bike-info-kicker')).toHaveText('Alvas Cross');
     await expect(dlg.locator('.bike-info-level')).toHaveClass(/easy/);
     await expect(dlg.locator('.bike-info-level')).toContainText('Beginner friendly');
     await expect(dlg).toContainText('flat handlebar');
     await expect(dlg).toContainText('Best for:');
-    // No picture is shipped yet: the request fails and the sheet draws the bike glyph instead.
-    await expect(dlg.locator('.bike-info-fallback')).toBeVisible();
-    await expect(dlg.locator('img')).toBeHidden();
+    // The picture is a 16:10 WebP under assets/bikes/, asked for with the build's stamp.
+    const img = dlg.locator('img');
+    await expect(img).toBeVisible();
+    expect(await img.getAttribute('src')).toMatch(/^\/assets\/bikes\/hybrid\.webp\?v=[0-9a-f]{10}$/);
+    expect(await img.evaluate((e: HTMLImageElement) => e.complete && e.naturalWidth)).toBe(1280);
+    await expect(dlg.locator('.bike-info-fallback')).toBeHidden();
     await dlg.locator('button', { hasText: 'Choose this bike' }).click();
     await expect(dlg).toBeHidden();
     await expect(page.locator('[data-type-slot="0"][data-type="Hybrid"]')).toHaveClass(/active/);
     expect(await page.evaluate('S.regBikeTypes[0]')).toBe('Hybrid');
+  });
+
+  test('a picture that cannot be fetched gives way to the bike glyph', async ({ page }) => {
+    await toRiderStep(page);
+    await page.route('**/assets/bikes/*.webp*', (r) => r.abort());
+    await page.locator('.type-info-btn[aria-label="About Kids bikes"]').click();
+    const dlg = page.locator('#bike-info-modal [role="dialog"]');
+    await expect(dlg.locator('.bike-info-fallback')).toBeVisible();
+    await expect(dlg.locator('img')).toBeHidden();
+    await expect(dlg.locator('.bike-info-kicker')).toHaveText('Alvas Beta');
   });
 
   test('Road Carbon is marked for experienced riders, and no sheet exists for Any', async ({ page }) => {

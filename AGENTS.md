@@ -193,7 +193,8 @@ Every real bike type on the booking form and the account page carries an "i" bes
 `assets/bikes/<name>.webp` (road, road-carbon, hybrid, mountain, kids). Drop a picture in and run
 `npm run build:html` - the build stamps `BIKE_IMG_V` from the folder so a replaced picture gets a
 new address past the cache-first worker; with no picture the sheet draws the bike glyph
-(`data-on-error`). The fleet is Alvas bikes: each brief was written from the specs of the Alvas line
-named in `model` (alvas.bike has specs, no prose), shown untranslated as the kicker, and `level`
+(`data-on-error`). The fleet is Alvas bikes: the pictures are studio shots from the distributor's catalogue on the
+owner's Desktop (Climax, DA54, Cross 21S, Strom M50, Beta), the line named in `model` and shown
+untranslated as the kicker, and each brief was written from alvas.bike specs (specs, no prose), and `level`
 (with `easy` on Hybrid, the beginner pick) is the rider-level chip; the form says under the pills
 that Hybrid is the easiest choice (`bikeInfoHint`).
