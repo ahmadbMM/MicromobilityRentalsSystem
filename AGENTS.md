@@ -198,3 +198,12 @@ owner's Desktop (Climax, DA54, Cross 21S, Strom M50, Beta), the line named in `m
 untranslated as the kicker, and each brief was written from alvas.bike specs (specs, no prose), and `level`
 (with `easy` on Hybrid, the beginner pick) is the rider-level chip; the form says under the pills
 that Hybrid is the easiest choice (`bikeInfoHint`).
+
+## The blacklist tag (2026-09-27)
+
+`tags` row `tag_blacklist` (slug `blacklist`, locked; migration 20260927170000) marks an account
+that is not fit to be in the community. `TAG_BRANDS.blacklist` draws it black with the white mark
+struck through (`_tagLogo`, `.tag-banned`) and the name beside it. `_isBlacklisted(cid)` is read in
+two places: the Community grant dialog shows the warning, and `_caApprove` adds it to the confirm
+and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
+tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
