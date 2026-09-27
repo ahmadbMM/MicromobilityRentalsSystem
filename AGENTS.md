@@ -203,7 +203,7 @@ that Hybrid is the easiest choice (`bikeInfoHint`).
 
 `tags` row `tag_blacklist` (slug `blacklist`, locked; migration 20260927170000) marks an account
 that is not fit to be in the community. `TAG_BRANDS.blacklist` draws it black with the white mark
-struck through (`_tagLogo`, `.tag-banned`) and the name beside it. `_isBlacklisted(cid)` is read in
+struck through (`_tagLogo`, `.tag-banned`), the mark alone like the other brand chips. `_isBlacklisted(cid)` is read in
 two places: the Community grant dialog shows the warning, and `_caApprove` adds it to the confirm
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.

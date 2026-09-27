@@ -28000,7 +28000,7 @@ function _tagChip(tg,ct){
     else if(ct.expires_at!=null)suffix=' · '+t('tagUntil').replace('{0}',_tagDateFmt(ct.expires_at));
   }
   const b=_tagBrand(tg);
-  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''}" style="${dim}background:${b.color};border-color:${b.color}" title="${esc(tg.name)}">${_tagLogo(tg)}${b.ban?`<span>${esc(tg.name)}</span>`:''}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
+  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''}" style="${dim}background:${b.color};border-color:${b.color}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
   return `<span class="am-chip" style="${dim}background:${col}22;border-color:${col}66;color:${col}">${esc(tg.name)}${suffix}</span>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
