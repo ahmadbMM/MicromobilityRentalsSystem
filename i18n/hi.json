@@ -2202,6 +2202,7 @@
   "ridersNoBikeFree": "बिना साइकिल के चेक-इन हुआ - कोई उपयुक्त साइकिल खाली नहीं",
   "typeOwnPref": "मेरे पास अपनी साइकिल है",
   "liveLabel": "लाइव",
+  "savedCopyLabel": "सहेजी गई प्रति",
   "bpSvcSince": "सर्विस के बाद राइड",
   "bpMarkServiced": "सर्विस हुई चिह्नित करें",
   "bpLastServiced": "अंतिम सर्विस",

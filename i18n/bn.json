@@ -2311,6 +2311,7 @@
   "ridersNoBikeFree": "সাইকেল ছাড়াই চেক ইন হয়েছে - মানানসই কোনো সাইকেল খালি নেই",
   "typeOwnPref": "আমার নিজের সাইকেল আছে",
   "liveLabel": "সরাসরি",
+  "savedCopyLabel": "সংরক্ষিত কপি",
   "bpSvcSince": "সার্ভিসের পর থেকে রাইড",
   "bpMarkServiced": "সার্ভিস হয়েছে চিহ্নিত করুন",
   "bpLastServiced": "শেষ সার্ভিস",

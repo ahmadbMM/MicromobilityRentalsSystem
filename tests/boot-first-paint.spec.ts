@@ -24,11 +24,11 @@ test('the roster paints before the customer list and the sales history arrive', 
   await expect.poll(() => page.evaluate('(S.cashSales||[]).length'), { timeout: 8000 }).toBe(1);
 });
 
-test('the poll backs off while realtime is connected', async ({ page }) => {
+test('the poll backs off while realtime is connected: the light set every fifth minute, the full one every fifteenth', async ({ page }) => {
   await stubSupabase(page, { sessions, queue_entries });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  expect(await page.evaluate("[_pollPlan(1,true),_pollPlan(9,true),_pollPlan(10,true),_pollPlan(1,false),_pollPlan(10,false)]"))
-    .toEqual(['skip', 'skip', 'full', 'light', 'full']);
+  expect(await page.evaluate("[_pollPlan(1,true),_pollPlan(9,true),_pollPlan(10,true),_pollPlan(20,true),_pollPlan(30,true),_pollPlan(1,false),_pollPlan(10,false),_pollPlan(30,false)]"))
+    .toEqual(['skip', 'skip', 'light', 'light', 'full', 'light', 'full', 'full']);
 });

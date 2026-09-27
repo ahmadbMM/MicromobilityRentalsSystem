@@ -91,7 +91,7 @@ test('a staff phone lookup that fails is a connection problem, not a wrong passw
   expect(await page.evaluate(`staffAuthSignIn('0501234567','x').then(r=>r.msg===t('errConnection'))`)).toBe(true);
 });
 
-test('a snapshot that no longer fits is trimmed, and dropped rather than left stale', async ({ page }) => {
+test('the snapshot holds the boot window, is dropped rather than left stale when even that does not fit, and is not rewritten unchanged', async ({ page }) => {
   await boot(page);
   const out = await page.evaluate(`(()=>{
     const real=Storage.prototype.setItem;
@@ -103,7 +103,9 @@ test('a snapshot that no longer fits is trimmed, and dropped rather than left st
       const full=JSON.stringify({q:S.queue,ses:S.sessions,bk:S.bikes,inv:S.inventory,cs:S.cashSales}).length;
       limit=full-1;_cacheSave();
       const trimmed=JSON.parse(localStorage.getItem('cq_snapshot')).q.map(e=>e.id);
-      localStorage.setItem('cq_snapshot','OLD');limit=5;_cacheSave();
+      // A save with nothing changed writes nothing (the copy on disk is the one just written), so the
+      // queue changes before the write that cannot fit.
+      localStorage.setItem('cq_snapshot','OLD');S.queue=[...S.queue,{id:'newer',sessionDate:'2099-01-02'}];limit=5;_cacheSave();
       return {trimmed,gone:localStorage.getItem('cq_snapshot')===null};
     }finally{Storage.prototype.setItem=real;}
   })()`);
