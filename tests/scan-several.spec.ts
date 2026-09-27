@@ -1,12 +1,13 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }); // the camera takes today's tickets (KSA day)
 
 // "Scan several": riders who booked apart but turn up together. Their tickets go on a list in
 // the scanner, then "Check in N" runs them through the check-in modal as one group - steps, a
 // shared total, the next rider opening by itself - the way a party already works. It stays a
 // list in this tab: nothing is written to group_id and the bookings stay separate.
 const row = (id: string, qn: number, name: string, groupId: string | null, status = 'waiting'): Record<string, unknown> => ({
-  id, session_id: 's0', session_day: 'Friday', session_date: '2099-02-10', queue_num: qn,
+  id, session_id: 's0', session_day: 'Friday', session_date: today, queue_num: qn,
   name, phone: '', customer_id: null, group_id: groupId, status, paid: false,
   price: 30, walk_in: true, registered_at: '2099-01-01T10:00:00Z',
 });
@@ -17,7 +18,7 @@ const q = [
   row('d4d4d4d4-0000-4000-8000-000000000004', 4, 'Party Dina', 'g1'),
   row('e5e5e5e5-0000-4000-8000-000000000005', 5, 'Solo Eid', null),
 ];
-const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
+const sessions = [{ id: 's0', day: 'Friday', session_date: today, capacity: 12, status: 'open', created_at: 1 }];
 
 // The stub serves its fixture rows as given, so a rider re-read after Confirm would come back
 // 'waiting' and the run would loop back to them. Keep the writes, as the database would, on a

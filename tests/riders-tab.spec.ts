@@ -635,6 +635,8 @@ test('scanning a rider QR opens the booking pop-up with a Check in button, and t
 
   // The QR on the rider's phone holds MMP-<booking number>, the same shape as a rentals ticket.
   await page.evaluate(`_onScanPayload('MMP-P-001')`);
+  // The night in the fixture is not today: the camera names it and waits for Make an exception (2026-09-28); take it.
+  await page.evaluate('_scanExceptionGo()');
   // The toast names the rider and their number and nothing else. It used to borrow the
   // queue's message and cut the '#' off the front of the placeholder, which only worked in
   // the languages that write a number sign - Spanish, French and Portuguese print 'N.º', so
@@ -729,6 +731,8 @@ test.describe('editing a registration', () => {
     page.on('request', (r) => { if (r.method() === 'PATCH' && /rest\/v1\/rider_registrations/.test(r.url())) writes.push({ url: r.url(), body: r.postDataJSON() }); });
 
     await page.evaluate(`_onScanPayload('MMP-P-001')`);
+    // The night in the fixture is not today: the camera names it and waits for Make an exception (2026-09-28); take it.
+    await page.evaluate('_scanExceptionGo()');
     await page.locator('#rider-modal .modal-box').getByRole('button', { name: 'Edit' }).click();
     const modal = page.locator('#rider-walkin-modal .modal-box');
     await expect(modal).toBeVisible();
@@ -799,6 +803,8 @@ test.describe('a party under one booking number', () => {
   test('scanning the number opens the employee; a companion cannot change the shared badge', async ({ page }) => {
     await boot(page);
     await page.evaluate(`_scanRider('P-005', ()=>{})`);
+    // The night in the fixture is not today: the camera names it and waits for Make an exception (2026-09-28); take it.
+    await page.evaluate('_scanExceptionGo()');
     expect(await page.evaluate(`S._riderModalId`)).toBe('5');
     await expect(page.locator('#rider-modal .modal-box')).toContainText('Rider 1 of 3');
     await page.evaluate(`showRiderEdit(6)`);
@@ -837,6 +843,8 @@ test('one QR opens the whole party: every rider listed with their own Check in, 
   page.on('request', (r) => { if (r.method() === 'PATCH' && /rest\/v1\/rider_registrations/.test(r.url())) writes.push({ url: r.url(), body: r.postDataJSON() }); });
 
   await page.evaluate(`_onScanPayload('MMP-P-003')`);
+  // The night in the fixture is not today: the camera names it and waits for Make an exception (2026-09-28); take it.
+  await page.evaluate('_scanExceptionGo()');
   const modal = page.locator('#rider-modal .modal-box');
   await expect(modal).toBeVisible();
   const rows3 = modal.locator('#rider-party .rider-party-row');

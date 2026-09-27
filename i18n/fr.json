@@ -1127,6 +1127,8 @@
   "scanContBtn": "Continuer à scanner",
   "scanTally": "{0} enregistré(s)",
   "scanMultiBtn": "Scanner plusieurs",
+  "scanOtherDay": "Ce billet est pour {0} ({1}), pas pour aujourd’hui.",
+  "scanExceptionBtn": "Faire une exception",
   "scanExpressBtn": "Express",
   "scanExpressHint": "Express : un cycliste qui a payé est enregistré dès que son billet est scanné, sans fenêtre. Ceux qui doivent encore payer ouvrent l'enregistrement habituel.",
   "scanExpressDone": "✓ #{0} {1} enregistré",

@@ -1127,6 +1127,8 @@
   "scanContBtn": "Continuar escaneando",
   "scanTally": "{0} com check-in",
   "scanMultiBtn": "Escanear vários",
+  "scanOtherDay": "Este bilhete é para {0} ({1}), não para hoje.",
+  "scanExceptionBtn": "Abrir uma exceção",
   "scanExpressBtn": "Expresso",
   "scanExpressHint": "Expresso: um ciclista que já pagou é registrado assim que seu ingresso é escaneado, sem janela. Quem ainda deve pagar abre o registro normal.",
   "scanExpressDone": "✓ #{0} {1} registrado",

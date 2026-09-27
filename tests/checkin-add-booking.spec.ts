@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }); // the camera takes today's tickets (KSA day)
 
 // Two more things the check-in modal's Status section can do (2026-09-28). "Add a booking" opens
 // the scanner on this check-in: each ticket scanned joins the run the way Scan several builds one
@@ -10,7 +11,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 const A1 = 'a1a1a1a1-0000-4000-8000-000000000001', B2 = 'b2b2b2b2-0000-4000-8000-000000000002';
 const E5 = 'e5e5e5e5-0000-4000-8000-000000000005';
 const row = (id: string, qn: number, name: string, groupId: string | null, status = 'waiting'): Record<string, unknown> => ({
-  id, session_id: 's0', session_day: 'Friday', session_date: '2099-02-10', queue_num: qn,
+  id, session_id: 's0', session_day: 'Friday', session_date: today, queue_num: qn,
   name, phone: '', customer_id: null, group_id: groupId, status, paid: false,
   price: 30, walk_in: true, registered_at: '2099-01-01T10:00:00Z',
 });
@@ -21,7 +22,7 @@ const q = [
   row('d4d4d4d4-0000-4000-8000-000000000004', 4, 'Party Dina', 'g1'),
   row(E5, 5, 'Solo Eid', null),
 ];
-const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
+const sessions = [{ id: 's0', day: 'Friday', session_date: today, capacity: 12, status: 'open', created_at: 1 }];
 
 // The stub serves its fixture rows as given, so a rider re-read after Confirm would come back
 // 'waiting' and the run would loop back to them: keep the writes on a fresh copy per test.

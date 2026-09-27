@@ -1127,6 +1127,8 @@
   "scanContBtn": "Magpatuloy sa pag-scan",
   "scanTally": "{0} na-check in",
   "scanMultiBtn": "Mag-scan ng ilan",
+  "scanOtherDay": "Ang ticket na ito ay para sa {0} ({1}), hindi para ngayon.",
+  "scanExceptionBtn": "Gumawa ng eksepsiyon",
   "scanExpressBtn": "Express",
   "scanExpressHint": "Express: ang rider na nakabayad na ay naka-check in sa sandaling ma-scan ang ticket, walang window. Ang may bayad pa ay bubukas sa karaniwang check-in.",
   "scanExpressDone": "✓ #{0} {1} naka-check in",

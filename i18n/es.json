@@ -1127,6 +1127,8 @@
   "scanContBtn": "Seguir escaneando",
   "scanTally": "{0} registrados",
   "scanMultiBtn": "Escanear varios",
+  "scanOtherDay": "Esta entrada es para {0} ({1}), no para hoy.",
+  "scanExceptionBtn": "Hacer una excepción",
   "scanExpressBtn": "Exprés",
   "scanExpressHint": "Exprés: un ciclista que ya pagó queda registrado al escanear su boleto, sin ventana. Quien aún deba pagar abre el registro habitual.",
   "scanExpressDone": "✓ #{0} {1} registrado",
