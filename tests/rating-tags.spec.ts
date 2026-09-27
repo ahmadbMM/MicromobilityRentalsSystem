@@ -38,7 +38,7 @@ test('a rider adds tags to a rating, and they travel with the scores', async ({ 
   await m.locator('button', { hasText: 'Submit rating' }).click();
   await expect.poll(() => calls.length).toBe(1);
   expect((calls[0] as { p_patch: Record<string, unknown> }).p_patch).toMatchObject({ rating_exp: 8, rating_tags: ['route', 'staff'] });
-  await expect(m.locator('.rate-tag')).toHaveCount(0); // the modal closed on the thanks
+  await expect.poll(() => page.evaluate(`document.getElementById('rate-modal').style.display`)).toBe('none'); // the modal closed on the thanks (its markup stays behind, hidden)
 });
 
 test.describe('staff', () => {
