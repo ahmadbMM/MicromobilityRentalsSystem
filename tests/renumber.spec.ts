@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase } from './helpers/supabase';
+import { stubSupabase, loadStaffHalf } from './helpers/supabase';
 
 // Regression for the "duplicate key value violates unique constraint
 // queue_entries_session_qnum_uniq" crash on cancel: closing the number gap must
@@ -9,6 +9,7 @@ import { stubSupabase } from './helpers/supabase';
 test('_shiftPlan skips numbers held by completed bookings when closing a gap', async ({ page }) => {
   await stubSupabase(page);
   await page.goto('/');
+  await loadStaffHalf(page); // _shiftPlan is the desk's
 
   // Mirrors the reported session: #34 and #37 are COMPLETE (done); the rest waiting.
   // #29 was just cancelled → fromNum = 29.

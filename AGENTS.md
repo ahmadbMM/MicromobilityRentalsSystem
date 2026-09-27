@@ -143,3 +143,18 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
 - The staff window is not widened, the live channel not opened, and inventory not fetched for a
   signed-out visitor in secure mode (`_custOnly()`); they start when a page with live data opens
   (`_rtStart` from `showView`, `_optionalFetch` from `goCustomer`).
+
+## The staff half is a separate file (2026-09-27)
+- `npm run build:html` now writes TWO generated files: `index.html` (the customer half, inline)
+  and `staff.js` (everything only staff reach, fetched when a staffer enters). Both are committed;
+  CI's stale-build check covers both. `scripts/split-staff.mjs` does the cut by walking references
+  from what a customer's page can reach; `STAFF_ENTRY` there lists the functions the customer half
+  calls into staff through (goStaff, the sign-in, the section renderers) - each gets a stub that
+  fetches staff.js and runs the real function, or does nothing on a customer's page.
+- The build FAILS when customer code reaches staff code through a name that is not an entry point.
+  Add the name to `STAFF_ENTRY` only if the function is called for its effect (a stub answers a
+  promise); otherwise move the reference. An entry point must be a plain `function` declaration.
+- The boot awaits `_loadStaff()` before the snapshot paint on a staff device, so staff code runs as
+  itself. In the source nothing is split: `_loadStaff` exists only in the built page.
+- Specs run against the built page: a customer-context call of a staff function is a no-op there,
+  and `page.evaluate('goStaff()')` waits for the half to load (the stub returns a promise).

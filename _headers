@@ -19,6 +19,8 @@
   Cache-Control: public, max-age=31536000, immutable
 /styles.css
   Cache-Control: public, max-age=31536000, immutable
+/staff.js
+  Cache-Control: public, max-age=31536000, immutable
 /lang/*
   Cache-Control: public, max-age=31536000, immutable
 /assets/*

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase } from './helpers/supabase';
+import { stubSupabase, loadStaffHalf } from './helpers/supabase';
 
 // Guards the first extracted module (src/js/ticket-calendar.js): the directions link
 // helper and the .ics calendar export. These run in the app's global scope after the
@@ -8,6 +8,7 @@ import { stubSupabase } from './helpers/supabase';
 test.beforeEach(async ({ page }) => {
   await stubSupabase(page);
   await page.goto('/');
+  await loadStaffHalf(page); // nothing on the customer pages calls these yet, so they sit in the staff half
 });
 
 test('_mapUrl builds Google Maps links for known branches and unknown locations', async ({ page }) => {

@@ -313,3 +313,10 @@ export async function goStaffTab(page: Page, tab: string) {
   if (await burger.isVisible()) await burger.click();
   await page.locator(`#staff-tab-nav .tab-btn[data-stab="${tab}"]`).click();
 }
+
+/** The staff half of the app (staff.js, split off at build time - scripts/split-staff.mjs) is
+ *  fetched only when a staffer enters. A spec that calls a staff-side helper straight from the page
+ *  context on a customer's page asks for it first; on a staff device the boot already did. */
+export async function loadStaffHalf(page: Page) {
+  await page.evaluate(`typeof _loadStaff==='function'?_loadStaff():null`);
+}

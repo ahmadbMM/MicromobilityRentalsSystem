@@ -8,6 +8,8 @@ import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
+import { minify as terserMinify } from 'terser';
+import { splitStaff } from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
 // at build time via `<!--include:path/to/file.js-->` markers. Inlining (not ES-module
@@ -120,6 +122,20 @@ for (const f of (await readdir(citiesDir)).filter((n) => /^[a-z]{2}\.json$/.test
 if (!src.includes("const CITIES_V=''")) throw new Error('build: CITIES_V placeholder missing');
 src = src.replace("const CITIES_V=''", `const CITIES_V='${citiesHasher.digest('hex').slice(0, 10)}'`);
 
+// ── The staff half, split off into staff.js (scripts/split-staff.mjs) ──────────
+// A customer's phone used to download the whole app, two thirds of it staff-only. The main
+// script is cut by what a customer's page can reach; the rest becomes staff.js, minified the same
+// way (no compression, no top-level renaming: onclick="fn()" strings name functions), named by
+// its own hash in the URL so a change is a new file, fetched by the loader the split writes into
+// the customer half when a staffer enters.
+const split = splitStaff(src, '/staff.js?v=__STAFF_V__');
+const staffMin = await terserMinify(split.staff, { compress: false, mangle: { toplevel: false }, format: { comments: false } });
+if (!staffMin.code) throw new Error('build: staff.js did not minify');
+const staffHash = createHash('sha256').update(staffMin.code).digest('hex').slice(0, 10);
+src = split.html.replace('/staff.js?v=__STAFF_V__', `/staff.js?v=${staffHash}`);
+await writeFile(new URL('../staff.js', import.meta.url), staffMin.code);
+console.log(`build: staff half -> staff.js ${split.report.staffBytes} -> ${staffMin.code.length} bytes (${split.report.staffStmts} statements, ${split.report.stubs.length} entry points); customer half ${split.report.customerBytes} bytes (${split.report.customerStmts} statements)`);
+
 let out = await minify(src, {
   collapseWhitespace: true,
   conservativeCollapse: true, // keep a single space where text nodes need it (layout-safe)
@@ -188,7 +204,7 @@ if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(out)) throw new Error('buil
 const swUrl = new URL('../service-worker.js', import.meta.url);
 let sw = await readFile(swUrl, 'utf8');
 const swBefore = sw;
-const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css']);
+const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js']); // staff.js: asked for with its own hash (?v=), like the packs
 const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities']);
 const shipped = (rel) => DIST_FILES.includes(rel) || DIST_DIRS.some((d) => rel.startsWith(d + '/'));
 // Every file the worker precaches must also ship, or cache.addAll() rejects and the worker

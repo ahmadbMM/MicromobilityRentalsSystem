@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, loginCustomer, waitForSb, loadStaffHalf } from './helpers/supabase';
 
 // The small shared helpers every screen leans on: labels that go straight into markup, dates,
 // the bike suggestion, language packs, the staff role, the snapshot and signing out.
@@ -11,6 +11,7 @@ async function boot(page: import('@playwright/test').Page, fixtures: Record<stri
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [], ...fixtures });
   await page.goto('/');
   await waitForSb(page);
+  await loadStaffHalf(page); // _bestFreeBike, sizeLabel and friends live in the staff half
 }
 
 test('an unknown stored type, day or time cannot put markup on the page', async ({ page }) => {

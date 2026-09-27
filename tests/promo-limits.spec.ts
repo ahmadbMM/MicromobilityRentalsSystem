@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, loginCustomer, waitForSb, loadStaffHalf } from './helpers/supabase';
 
 // Codes used to be active-or-not, so any of them could be shared once and used forever.
 // Expiry, a usage cap and a customer binding are enforced by the price trigger in the DB;
@@ -35,6 +35,7 @@ async function boot(page: import('@playwright/test').Page, promo_codes: unknown[
   await loginCustomer(page, cust ?? { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
+  await loadStaffHalf(page); // _promoSpent and the other limit checks are the staff page's (the wizard asks the database)
 }
 
 test.describe('promo code limits', () => {

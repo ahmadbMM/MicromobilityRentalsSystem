@@ -17,7 +17,7 @@ const dist = join(root, 'dist');
 // worker serves cache-first into its cache name from these same two lists, so the site that
 // ships and the files the worker's cache name covers cannot drift apart.
 export const FILES = [
-  'index.html', 'styles.css', 'service-worker.js', 'manifest.json', '404.html',
+  'index.html', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html',
   '_headers', '_redirects',
   'robots.txt', 'sitemap.xml',
   'brand.png', 'hero.webp', 'icon-192.png', 'icon-512.png', 'logo.png', 'apple-touch-icon.png',

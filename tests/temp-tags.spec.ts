@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, loginCustomer, waitForSb, loadStaffHalf } from './helpers/supabase';
 
 // Temporary customer tags: staff grant a tag permanently or with a validity window
 // (a duration, or explicit start/end dates with a "Today" shortcut). _tagActive()
@@ -28,6 +28,7 @@ test('the grant dialog offers permanent/temporary, duration or dates, and a Toda
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
   await page.goto('/');
   await waitForSb(page);
+  await loadStaffHalf(page); // tags are staff-only: the dialog lives in the staff half
 
   await page.evaluate(`
     S.tags=[{id:'tag_x',name:'VIP',color:'#4aa8f8'}];

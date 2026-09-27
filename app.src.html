@@ -5532,7 +5532,7 @@ function _pathState(pathname){const pn=_parsePath(pathname);return pn&&!pn.root?
 // The query stays as it is, but for ?session=, which is Bookings' own (see above).
 function _navSearch(st){
   const q=new URLSearchParams(location.search);
-  const sid=st.view==='staff'&&st.stab==='queue'&&S._sfPicked?String(S.sfSession||''):'';
+  const sid=st.view==='staff'&&st.stab==='queue'?(S._sfPicked?String(S.sfSession||''):String(S._sessionParamPending||'')):''; // a picked ride, or one a link named that the sessions have yet to confirm
   if(_SESSION_ID.test(sid))q.set('session',sid);else q.delete('session');
   const qs=q.toString();return qs?'?'+qs:'';
 }
@@ -5540,12 +5540,18 @@ function _navUrl(st){return _pathFor(st)+_navSearch(st)+location.hash;}
 // /bookings?session=<id>: the ride the link names, when it exists; else tonight's, as always. A
 // reload is not a link: it lands on tonight's ride whatever the address carried (the 2026-09-22
 // rule - a tab left open overnight must not come back on yesterday), and the address is cleaned.
-function _openSessionParam(){
+function _openSessionParam(sid){
   try{
     const nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
     if(nav&&nav.type==='reload')return;
-    const sid=new URLSearchParams(location.search).get('session')||'';
-    if(S.view==='staff'&&S.staffTab==='queue'&&_SESSION_ID.test(sid)&&S.sfSession!==sid&&allSessions().some(x=>x.id===sid))setSfSession(sid);
+    sid=sid||new URLSearchParams(location.search).get('session')||'';
+    if(!(S.view==='staff'&&S.staffTab==='queue'&&_SESSION_ID.test(sid)))return;
+    // No sessions to check it against yet: the id is kept (the address may be rewritten meanwhile)
+    // and the first paint from real data asks again (_sfDefaultToToday).
+    if(!S.dataLoaded||S._cacheOnly){S._sessionParamPending=sid;return;}
+    S._sessionParamPending=null;
+    if(S.sfSession!==sid&&allSessions().some(x=>x.id===sid))setSfSession(sid);
+    else _pushNav(); // a ride that does not exist: the address reads as it would without it
   }catch(e){}
 }
 function _navState(){return {view:S.view,ctab:S.custTab,stab:S.staffTab,sub:S.view==='staff'?_subOf(S.staffTab):'',ev:S.selEvent,step:S.regStep};}
@@ -14343,6 +14349,7 @@ function _restoreQueueView(){
 // picked before that (no data yet, or only the snapshot) is picked again, unless the staffer
 // has chosen one since.
 function _sfDefaultToToday(){
+  if(S._sessionParamPending&&S.dataLoaded&&!S._cacheOnly){const _sid=S._sessionParamPending;S._sessionParamPending=null;_openSessionParam(_sid);} // a link's ride, waiting for the sessions
   if(S._sfDefaulted||!S.dataLoaded||S._cacheOnly)return;
   if(S._sfPicked){S._sfDefaulted=true;return;}
   _autoSelectSession();
@@ -28989,6 +28996,10 @@ function _bootStaffTab(nav){
   // until the boot has chosen a view (the snapshot paint below draws the roster first).
   const _bootPath=location.pathname;
   _navRestoring=true;
+  // The staff half of the app is a separate file in the built page (scripts/split-staff.mjs): a
+  // staff device fetches it before the roster is painted, so the snapshot paint and the staff
+  // boot below run against real functions. In the source, where nothing is split, this is nothing.
+  if(typeof _loadStaff==='function'&&_staffWanted())await _loadStaff().catch(()=>{});
   // A known staff device with a stored auth session paints the last snapshot NOW, before the
   // deferred supabase-js script and the auth round trip - the two waits that used to stand
   // between opening the app and seeing the roster. The auth verdict below only ever takes the
