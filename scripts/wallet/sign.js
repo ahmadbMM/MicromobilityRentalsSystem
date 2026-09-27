@@ -238,7 +238,9 @@ async function pbkdf2(pw, salt, iterations, hash, len) {
   return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations, hash }, k, len * 8));
 }
 // RFC 7292 appendix B, with SHA-1 (u = 20, v = 64): the key (id 1) and the IV (id 2) a PKCS#12
-// cipher takes from the password and the salt.
+// cipher takes from the password and the salt. The 2048 hashes a round asks for are done by the
+// SHA-1 below rather than crypto.subtle: awaiting the platform 8,000 times per .p12 took most
+// of a second on a cold start; in plain JavaScript the whole derivation takes a few milliseconds.
 async function pkcs12kdf(pw, salt, iterations, id, n) {
   const u = 20, v = 64;
   const D = new Uint8Array(v).fill(id);
@@ -246,8 +248,8 @@ async function pkcs12kdf(pw, salt, iterations, id, n) {
   let I = concat(fill(salt), fill(pw));
   const c = Math.ceil(n / u); const parts = [];
   for (let i = 0; i < c; i++) {
-    let A = await digest('SHA-1', concat(D, I));
-    for (let r = 1; r < iterations; r++) A = await digest('SHA-1', A);
+    let A = sha1(concat(D, I));
+    for (let r = 1; r < iterations; r++) A = sha1(A);
     parts.push(A);
     if (i === c - 1) break;
     const B = new Uint8Array(v); for (let k = 0; k < v; k++) B[k] = A[k % u];
@@ -257,6 +259,31 @@ async function pkcs12kdf(pw, salt, iterations, id, n) {
     }
   }
   return concat(...parts).subarray(0, n);
+}
+
+// ── SHA-1 (FIPS 180-4), for the PKCS#12 key derivation above ───────────────────────────────
+export function sha1(bytes) {
+  const len = bytes.length, words = new Int32Array(((len + 8 >> 6) + 1) * 16);
+  for (let i = 0; i < len; i++) words[i >> 2] |= bytes[i] << (24 - (i & 3) * 8);
+  words[len >> 2] |= 0x80 << (24 - (len & 3) * 8);
+  words[words.length - 1] = len * 8;
+  let h0 = 0x67452301, h1 = 0xEFCDAB89 | 0, h2 = 0x98BADCFE | 0, h3 = 0x10325476, h4 = 0xC3D2E1F0 | 0;
+  const w = new Int32Array(80);
+  for (let off = 0; off < words.length; off += 16) {
+    for (let t = 0; t < 16; t++) w[t] = words[off + t];
+    for (let t = 16; t < 80; t++) { const x = w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16]; w[t] = (x << 1) | (x >>> 31); }
+    let a = h0, b = h1, c = h2, d = h3, e = h4;
+    for (let t = 0; t < 80; t++) {
+      const f = t < 20 ? (b & c) | (~b & d) : t < 40 ? b ^ c ^ d : t < 60 ? (b & c) | (b & d) | (c & d) : b ^ c ^ d;
+      const k = t < 20 ? 0x5A827999 : t < 40 ? 0x6ED9EBA1 : t < 60 ? 0x8F1BBCDC | 0 : 0xCA62C1D6 | 0;
+      const tmp = (((a << 5) | (a >>> 27)) + f + e + k + w[t]) | 0;
+      e = d; d = c; c = (b << 30) | (b >>> 2); b = a; a = tmp;
+    }
+    h0 = (h0 + a) | 0; h1 = (h1 + b) | 0; h2 = (h2 + c) | 0; h3 = (h3 + d) | 0; h4 = (h4 + e) | 0;
+  }
+  const out = new Uint8Array(20);
+  [h0, h1, h2, h3, h4].forEach((h, i) => { out[i * 4] = h >>> 24; out[i * 4 + 1] = (h >>> 16) & 0xff; out[i * 4 + 2] = (h >>> 8) & 0xff; out[i * 4 + 3] = h & 0xff; });
+  return out;
 }
 
 // ── DES / 3DES (FIPS 46-3), decryption only ─────────────────────────────────────────────────

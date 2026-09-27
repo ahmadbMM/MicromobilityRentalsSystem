@@ -1059,8 +1059,8 @@ async function pkcs12kdf(pw, salt, iterations, id, n) {
   const c = Math.ceil(n / u);
   const parts = [];
   for (let i = 0; i < c; i++) {
-    let A = await digest("SHA-1", concat(D, I));
-    for (let r = 1; r < iterations; r++) A = await digest("SHA-1", A);
+    let A = sha1(concat(D, I));
+    for (let r = 1; r < iterations; r++) A = sha1(A);
     parts.push(A);
     if (i === c - 1) break;
     const B = new Uint8Array(v);
@@ -1075,6 +1075,45 @@ async function pkcs12kdf(pw, salt, iterations, id, n) {
     }
   }
   return concat(...parts).subarray(0, n);
+}
+function sha1(bytes) {
+  const len = bytes.length, words = new Int32Array(((len + 8 >> 6) + 1) * 16);
+  for (let i = 0; i < len; i++) words[i >> 2] |= bytes[i] << 24 - (i & 3) * 8;
+  words[len >> 2] |= 128 << 24 - (len & 3) * 8;
+  words[words.length - 1] = len * 8;
+  let h0 = 1732584193, h1 = 4023233417 | 0, h2 = 2562383102 | 0, h3 = 271733878, h4 = 3285377520 | 0;
+  const w = new Int32Array(80);
+  for (let off = 0; off < words.length; off += 16) {
+    for (let t = 0; t < 16; t++) w[t] = words[off + t];
+    for (let t = 16; t < 80; t++) {
+      const x = w[t - 3] ^ w[t - 8] ^ w[t - 14] ^ w[t - 16];
+      w[t] = x << 1 | x >>> 31;
+    }
+    let a = h0, b = h1, c = h2, d = h3, e = h4;
+    for (let t = 0; t < 80; t++) {
+      const f = t < 20 ? b & c | ~b & d : t < 40 ? b ^ c ^ d : t < 60 ? b & c | b & d | c & d : b ^ c ^ d;
+      const k = t < 20 ? 1518500249 : t < 40 ? 1859775393 : t < 60 ? 2400959708 | 0 : 3395469782 | 0;
+      const tmp = (a << 5 | a >>> 27) + f + e + k + w[t] | 0;
+      e = d;
+      d = c;
+      c = b << 30 | b >>> 2;
+      b = a;
+      a = tmp;
+    }
+    h0 = h0 + a | 0;
+    h1 = h1 + b | 0;
+    h2 = h2 + c | 0;
+    h3 = h3 + d | 0;
+    h4 = h4 + e | 0;
+  }
+  const out = new Uint8Array(20);
+  [h0, h1, h2, h3, h4].forEach((h, i) => {
+    out[i * 4] = h >>> 24;
+    out[i * 4 + 1] = h >>> 16 & 255;
+    out[i * 4 + 2] = h >>> 8 & 255;
+    out[i * 4 + 3] = h & 255;
+  });
+  return out;
 }
 var IP = [58, 50, 42, 34, 26, 18, 10, 2, 60, 52, 44, 36, 28, 20, 12, 4, 62, 54, 46, 38, 30, 22, 14, 6, 64, 56, 48, 40, 32, 24, 16, 8, 57, 49, 41, 33, 25, 17, 9, 1, 59, 51, 43, 35, 27, 19, 11, 3, 61, 53, 45, 37, 29, 21, 13, 5, 63, 55, 47, 39, 31, 23, 15, 7];
 var FP = [40, 8, 48, 16, 56, 24, 64, 32, 39, 7, 47, 15, 55, 23, 63, 31, 38, 6, 46, 14, 54, 22, 62, 30, 37, 5, 45, 13, 53, 21, 61, 29, 36, 4, 44, 12, 52, 20, 60, 28, 35, 3, 43, 11, 51, 19, 59, 27, 34, 2, 42, 10, 50, 18, 58, 26, 33, 1, 41, 9, 49, 17, 57, 25];

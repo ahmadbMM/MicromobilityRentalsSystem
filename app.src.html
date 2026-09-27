@@ -407,6 +407,7 @@ window.mmLoading=(function(){
 <div id="return-modal" style="display:none"></div>
 <div id="confirm-modal"    style="display:none"></div>
 <div id="rate-modal"       style="display:none"></div>
+<div id="bike-info-modal"  style="display:none"></div>
 <div id="cust-modal"       style="display:none"></div>
 <div id="bike-profile-modal" style="display:none"></div>
 <div id="cashier-modal"    style="display:none"></div>
@@ -638,6 +639,12 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   myCurrentRides:'Current & upcoming',myPastRides:'Past rides',noPastRides:'No completed rides yet.',noCurrentRides:'No upcoming bookings. Reserve a ride to get started.',
   bookAgainBtn:'Book again',bookUsualBtn:'Book my usual',bookUsualToast:'Pre-filled your usual booking - just confirm.',rateRideBtn:'Rate your ride',rateBikeLabel:'Bike',rateExpLabel:'Experience',rateNoteLabel:'Comments (optional)',rateReasonLabel:'What could be better?',rateReasonHint:'You rated below 10 - please tell us why.',rateReasonRequired:'Please tell us what could be better before submitting.',rateLaterBtn:'Later',rateForcedHint:'Please rate your ride to help us improve.',rateRequiredScore:'Please give a rating before submitting.',rateSubmitBtn:'Submit rating',rateThanks:'Thanks for the feedback!',ratedLabel:'Rated',rateTitle:'How was your ride?',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:',
   typePrefHint:'We\'ll pre-select this each time you book.',
+  bikeInfoAria:'About {0} bikes',bikeInfoKicker:'Our Alvas fleet',bikeInfoGoodFor:'Best for:',bikeInfoPick:'Choose this bike',
+  bikeInfoRoad:'A light, quick bike with drop handlebars and narrow tyres, made for speed on the smooth tarmac of the circuit. Lean and efficient over long laps.',bikeInfoRoadFor:'Fast laps, fitness riding and riders happy in a lower, forward position.',
+  bikeInfoRoadCarbon:'Our top road bike: a carbon frame that is lighter and stiffer than aluminium, so it climbs, sprints and holds speed with less effort.',bikeInfoRoadCarbonFor:'Experienced road riders and anyone who wants the fastest bike on the circuit.',
+  bikeInfoHybrid:'The easy all-rounder: flat handlebars, an upright position and medium tyres that roll smoothly and feel stable. The bike most riders pick for a relaxed lap.',bikeInfoHybridFor:'Beginners, casual and social rides, and anyone who prefers comfort over speed.',
+  bikeInfoMountain:'A sturdy bike with wide, grippy tyres and flat handlebars. Slower on tarmac, but the most stable and forgiving to handle.',bikeInfoMountainFor:'Riders who want a solid, confidence-giving bike, or who are used to mountain bikes.',
+  bikeInfoKids:'A smaller, lighter bike with a low frame and easy brakes, sized for young riders. Our team fits the right size at the stand.',bikeInfoKidsFor:'Young riders from 5 years old, riding with their family.',
   typePrefSaved:'Type preference saved.',
   pricePerBike:'Price per bike',bikesWord:'bikes',totalWord:'Total',
   myRidesTitle:'My Bookings',myRidesSub:'Your complete rental history.',
@@ -1060,6 +1067,12 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   myCurrentRides:'الحالية والقادمة',myPastRides:'الرحلات السابقة',noPastRides:'لا توجد رحلات مكتملة بعد.',noCurrentRides:'لا حجوزات قادمة. احجز رحلة للبدء.',
   bookAgainBtn:'احجز مجدداً',bookUsualBtn:'احجز المعتاد',bookUsualToast:'تم تجهيز حجزك المعتاد - أكّد فقط.',rateRideBtn:'قيّم رحلتك',rateBikeLabel:'الدراجة',rateExpLabel:'التجربة',rateNoteLabel:'ملاحظات (اختياري)',rateReasonLabel:'ما الذي يمكن تحسينه؟',rateReasonHint:'قيّمت أقل من 10 - يرجى إخبارنا بالسبب.',rateReasonRequired:'يرجى إخبارنا بما يمكن تحسينه قبل الإرسال.',rateLaterBtn:'لاحقاً',rateForcedHint:'يرجى تقييم رحلتك لمساعدتنا على التحسين.',rateRequiredScore:'يرجى إعطاء تقييم قبل الإرسال.',rateSubmitBtn:'إرسال التقييم',rateThanks:'شكراً لتقييمك!',ratedLabel:'تم التقييم',rateTitle:'كيف كانت رحلتك؟',waRateMsg:'Thanks for riding with MicroMobility! How was your ride? Rate it here:\n\nشكراً لركوبك مع مايكروموبيليتي! كيف كانت رحلتك؟ قيّمها هنا:',
   typePrefHint:'سيتم اختياره تلقائياً عند كل حجز.',
+  bikeInfoAria:'عن دراجات {0}',bikeInfoKicker:'أسطولنا من دراجات ألفاس',bikeInfoGoodFor:'تناسب:',bikeInfoPick:'اختر هذه الدراجة',
+  bikeInfoRoad:'دراجة خفيفة وسريعة بمقود منحنٍ وإطارات رفيعة، مصممة للسرعة على أسفلت الحلبة الأملس. رشيقة وفعّالة في اللفات الطويلة.',bikeInfoRoadFor:'اللفات السريعة، ركوب اللياقة، ومن يرتاح لوضعية منخفضة مائلة إلى الأمام.',
+  bikeInfoRoadCarbon:'أفضل دراجة طريق لدينا: هيكل كربون أخف وأكثر صلابة من الألمنيوم، فتتسلق وتنطلق وتحافظ على السرعة بجهد أقل.',bikeInfoRoadCarbonFor:'راكبو الطريق ذوو الخبرة وكل من يريد أسرع دراجة على الحلبة.',
+  bikeInfoHybrid:'الخيار السهل لكل الأغراض: مقود مستقيم، وضعية جلوس منتصبة، وإطارات متوسطة تنساب بسلاسة وتمنح ثباتاً. الدراجة التي يختارها معظم الراكبين للفة مريحة.',bikeInfoHybridFor:'المبتدئون، الجولات الاجتماعية الهادئة، وكل من يفضّل الراحة على السرعة.',
+  bikeInfoMountain:'دراجة متينة بإطارات عريضة قوية التماسك ومقود مستقيم. أبطأ على الأسفلت، لكنها الأكثر ثباتاً وسهولة في التحكم.',bikeInfoMountainFor:'من يريد دراجة قوية تمنح الثقة، أو من اعتاد الدراجات الجبلية.',
+  bikeInfoKids:'دراجة أصغر وأخف بهيكل منخفض ومكابح سهلة، بمقاسات تناسب الصغار. فريقنا يختار المقاس المناسب عند المنصة.',bikeInfoKidsFor:'الصغار من عمر 5 سنوات، للركوب مع العائلة.',
   typePrefSaved:'تم حفظ تفضيل النوع.',
   pricePerBike:'السعر للدراجة',bikesWord:'دراجات',totalWord:'الإجمالي',
   myRidesTitle:'حجوزاتي',myRidesSub:'سجلك الكامل للإيجار.',
@@ -3128,8 +3141,8 @@ function _loadQrcode(){
   if(window.qrcode)return Promise.resolve();
   if(!_qrcodeP)_qrcodeP=new Promise(res=>{
     const s=document.createElement('script');
-    s.src='/vendor/qrcode-generator-1.4.4.js';
-    s.integrity='sha384-8FWZA6BGMXhsfO+BLtrJK0We6gg5o1JyO8xQm6peWDEUs17ACA5ziE/NIAkl9z2k';
+    s.src='/vendor/qrcode-generator-2.0.4.js';
+    s.integrity='sha384-e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA';
     s.onload=()=>res();s.onerror=()=>{_qrcodeP=null;res();};
     document.head.appendChild(s);
   });
@@ -3888,6 +3901,27 @@ const CUST_TYPES=['Any','Road','Hybrid','Mountain','Kids','Road Carbon','Own'];
 // The database holds the same rule in _comm_no_carbon (20260921210000).
 function bikeTypeOpts(allowOwn,noCarbon){return CUST_TYPES.filter(ty=>(ty!=='Own'||allowOwn)&&(ty!=='Road Carbon'||!noCarbon));}
 function _noCarbon(s){return _isCommunity(s)&&_rideKind(s)!=='petromin';}
+// The "i" beside a type pill (2026-09-27): a sheet with a picture of the bike and a short brief, so
+// a customer knows what they are choosing. The fleet is Alvas bikes. Each type's picture is
+// assets/bikes/<img>.webp - drop the file in and rebuild: the build stamps BIKE_IMG_V from the folder,
+// so a replaced picture gets a new address past the service worker's cache-first store. Until the
+// file exists the sheet draws the bike glyph instead. 'Any' and 'Own' are choices, not bikes: no sheet.
+const BIKE_IMG_V=''; // build stamps a hash of assets/bikes/
+const BIKE_INFO={
+  Road:{img:'road',brief:'bikeInfoRoad',good:'bikeInfoRoadFor'},
+  'Road Carbon':{img:'road-carbon',brief:'bikeInfoRoadCarbon',good:'bikeInfoRoadCarbonFor'},
+  Hybrid:{img:'hybrid',brief:'bikeInfoHybrid',good:'bikeInfoHybridFor'},
+  Mountain:{img:'mountain',brief:'bikeInfoMountain',good:'bikeInfoMountainFor'},
+  Kids:{img:'kids',brief:'bikeInfoKids',good:'bikeInfoKidsFor'},
+};
+function _bikeInfoImg(info){return`/assets/bikes/${info.img}.webp${BIKE_IMG_V?'?v='+BIKE_IMG_V:''}`;}
+// A pill and its "i" as one chip. The pill keeps its own hooks (data-type-slot, data-type: the specs
+// and setBikeType read them); the "i" carries none, so nothing that counts pills counts it.
+function _typeInfoBtn(ty,slot){
+  if(!_own(BIKE_INFO,ty))return'';
+  return`<button type="button" class="type-info-btn" aria-label="${esc(t('bikeInfoAria').replace('{0}',typeLabel(ty)))}" aria-haspopup="dialog" data-on-click="${_on('showBikeInfo',ty,slot)}">${_artIcon('info',15)}</button>`;
+}
+function _typePick(btn,ty,slot){const i=_typeInfoBtn(ty,slot);return i?`<span class="type-pick">${btn}${i}</span>`:btn;}
 // Single venue: tickets link straight to the circuit pin (locations/branches removed from the UI).
 const DIRECTIONS_URL='https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7';
 // Haptic tap on key confirmations. iOS Safari has no Vibration API; since 17.4 a hidden
@@ -8533,8 +8567,9 @@ function renderRegister(){
     // if staff somehow hid everything).
     let _tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel).filter(ty=>!_regTypeHidden(ty));
     if(!_tyOpts.length)_tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel);
-    const typeBtns=_tyOpts.map(ty=>
-      `<button class="toggle-btn${selTy===ty?' active':''}" data-type-slot="${i}" data-type="${ty}" data-on-click="${_on("setBikeType",i,ty)}">${typePillLabel(ty)}</button>`
+    // Every real bike carries an "i" beside its pill (_typePick): its picture and brief, with a Choose.
+    const typeBtns=_tyOpts.map(ty=>_typePick(
+      `<button class="toggle-btn${selTy===ty?' active':''}" data-type-slot="${i}" data-type="${ty}" data-on-click="${_on("setBikeType",i,ty)}">${typePillLabel(ty)}</button>`,ty,i)
     ).join('');
 
     const divider=(S.regQty>1&&i<S.regQty-1)?`<div style="border-top:1px solid var(--border);margin:20px 0"></div>`:'';
@@ -9050,6 +9085,47 @@ function onBikeHeightInput(idx,value){
   S.regBikeHeights[idx]=value;
 }
 
+// ── The bike info sheet behind the "i" beside a type pill (2026-09-27) ──────────────────────────
+// slot is the rider's index on the booking form or 'acc' on the account page, and names where
+// "Choose this bike" lands; null opens the picture and the brief alone.
+let _bikeInfoFrom=null; // the "i" that opened the sheet, to give focus back to
+function showBikeInfo(ty,slot){
+  if(!_own(BIKE_INFO,ty))return;
+  const info=BIKE_INFO[ty],m=document.getElementById('bike-info-modal');if(!m)return;
+  S._bikeInfo={ty,slot:slot==null?null:slot};_bikeInfoFrom=document.activeElement;
+  const label=typeLabel(ty);
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_backdropOnly',_EV,_EL,'closeBikeInfo')}">
+    <div class="modal-box bike-info-box" role="dialog" aria-modal="true" aria-labelledby="bike-info-title">
+      <div class="bike-info-media">
+        <img src="${esc(_bikeInfoImg(info))}" alt="Alvas · ${esc(label)}" decoding="async" data-on-error="${_on('_bikeInfoImgErr',_EL)}">
+        <div class="bike-info-fallback" hidden>${_artIcon('bike',72)}</div>
+      </div>
+      <div class="bike-info-body">
+        <div class="bike-info-kicker">${t('bikeInfoKicker')}</div>
+        <div class="modal-title" id="bike-info-title">${label}</div>
+        <p class="bike-info-brief">${t(info.brief)}</p>
+        <p class="bike-info-for"><b>${t('bikeInfoGoodFor')}</b> ${t(info.good)}</p>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-on-click="${_on('closeBikeInfo')}">${t('closeBtn')}</button>
+          ${slot==null?'':`<button type="button" class="btn-primary" data-on-click="${_on('pickBikeInfo')}">${t('bikeInfoPick')}</button>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+  m.style.display='block';
+}
+// No picture for this type yet (or none reachable): the bike glyph stands in.
+function _bikeInfoImgErr(el){el.hidden=true;const f=el.nextElementSibling;if(f)f.hidden=false;}
+function closeBikeInfo(){
+  const m=document.getElementById('bike-info-modal');if(m){m.style.display='none';m.innerHTML='';}
+  S._bikeInfo=null;
+  const from=_bikeInfoFrom;_bikeInfoFrom=null;
+  try{if(from&&from.isConnected&&from.classList.contains('type-info-btn'))from.focus();}catch(e){}
+}
+function pickBikeInfo(){
+  const b=S._bikeInfo;closeBikeInfo();if(!b||b.slot==null)return;
+  if(b.slot==='acc')_accPickType(b.ty);else setBikeType(b.slot,b.ty);
+}
 function setBikeType(idx,type){
   S.regBikeTypes[idx]=type;
   document.querySelectorAll(`[data-type-slot="${idx}"]`).forEach(btn=>{
@@ -10274,11 +10350,10 @@ function renderAccount(){
       <div class="form-group" style="margin-top:4px">
         <label>${t('bikeTypePref')}</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
-          ${bikeTypeOpts(false).map(ty=>`
-            <button id="atp-${ty}" type="button"
+          ${bikeTypeOpts(false).map(ty=>_typePick(`<button id="atp-${ty}" type="button"
               class="toggle-btn${accTy===ty?' active':''}"
               data-on-click="${_on("_accPickType",ty)}"
-              >${typePillLabel(ty)}</button>`).join('')}
+              >${typePillLabel(ty)}</button>`,ty,'acc')).join('')}
         </div>
         <div style="font-size:11px;color:var(--muted);margin-top:6px;font-weight:600">${t('typePrefHint')}</div>
       </div>
@@ -10969,6 +11044,7 @@ function customerNoShows(e){
 // every piece adapts to its surface — ink on paper, white/neon on dark.
 // Same art language as _salesArt's product illustrations.
 const _ART={
+  info:'<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Z"/><path d="M10.9 10.2h2.2V17h-2.2v-6.8Zm0-3.7h2.2v2.2h-2.2V6.5Z"/>',
   globe:'<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.93 6h-2.95a15.65 15.65 0 0 0-1.38-3.56A8.03 8.03 0 0 1 18.93 8ZM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96ZM4.26 14a8.25 8.25 0 0 1 0-4h3.38a16.5 16.5 0 0 0 0 4H4.26Zm.81 2h2.95c.32 1.25.78 2.45 1.38 3.56A7.99 7.99 0 0 1 5.07 16Zm2.95-8H5.07a7.99 7.99 0 0 1 4.33-3.56A15.65 15.65 0 0 0 8.02 8ZM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96ZM14.34 14H9.66a14.7 14.7 0 0 1 0-4h4.68a14.7 14.7 0 0 1 0 4Zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95a8.03 8.03 0 0 1-4.33 3.56ZM16.36 14a16.5 16.5 0 0 0 0-4h3.38a8.25 8.25 0 0 1 0 4h-3.38Z"/>',
   pencil:'<path opacity=".35" d="M3.6 17.2 2.5 21.5l4.3-1.1-3.2-3.2Z"/><path d="M4.7 16.1 15.9 4.9l3.2 3.2L7.9 19.3l-3.2-3.2Zm12.3-12.3 1.4-1.4a1.6 1.6 0 0 1 2.3 0l.9.9a1.6 1.6 0 0 1 0 2.3l-1.4 1.4-3.2-3.2Z"/>',
   print:'<path opacity=".35" d="M7 2.5h10v5H7z"/><path d="M4 8.5h16a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-2v-4H6v4H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2Zm14.5 3.4a1.1 1.1 0 1 0 0-2.2 1.1 1.1 0 0 0 0 2.2Z"/><path opacity=".35" d="M7.5 16h9v5.5h-9z"/>',
@@ -14505,6 +14581,7 @@ function _on_renderStaffQueue_14(event,el){if(event.key==='Enter'){event.prevent
 function _on_renderStaffQueue_15(event,el){S.sfMember=el.value;renderStaffQueue()}
 function _on_renderStaffQueue_16(event,el){S.sfLimit=(S.sfLimit||150)+200;renderStaffQueue()}
 function _on_renderStaffQueue_17(event,el){showBulkReturn(S.sfSelected.slice())}
+const _resTimeMemo=new Map(); // registeredAt|locale -> the label _resTimeShort shows
 function renderStaffQueue(_resultsOnly){
   _pushNav(); // the address follows the view (Bookings / Sessions / Waitlist / Riders)
   try{_ahRefresh();}catch(_){} // a booking edited from Bookings & history lands here, whichever tab is open
@@ -14756,11 +14833,19 @@ function renderStaffQueue(_resultsOnly){
   }
 
   function _resTimeShort(e){
-    // Community rows show WHEN the spot was reserved; the list is ordered by this.
+    // Community rows show WHEN the spot was reserved; the list is ordered by this. Every row shows
+    // it, and Intl formatting was the dearest work of a repaint (13 of 35 ms on 160 rows); a
+    // booking's time never changes, so the label is kept per booking and language (_resTimeMemo).
     if(!e.registeredAt)return'—';
-    const d=new Date(e.registeredAt);
-    if(isNaN(d))return'—';
-    return d.toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ})+' · '+d.toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});
+    const k=e.registeredAt+'|'+_locale();
+    let out=_resTimeMemo.get(k);
+    if(out===undefined){
+      const d=new Date(e.registeredAt);
+      out=isNaN(d)?'—':d.toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ})+' · '+d.toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});
+      if(_resTimeMemo.size>4000)_resTimeMemo.clear();
+      _resTimeMemo.set(k,out);
+    }
+    return out;
   }
   // Every ride shows when each booking was made, under its number, in the Saturday ride's
   // style. A party shows when its booking was made: the earliest of its riders.
@@ -15315,54 +15400,62 @@ function _qKeepScroll(){const y=S._qScrollY;if(y==null)return;if(Math.abs(window
 // ── The roster as keyed pieces ──────────────────────────────────────────────────────────────
 // The roster is a list of pieces under keys - one tbody per party in the table, one card per
 // party on a phone, a session's header, the fold line, the empty state - each stamped with its
-// key (data-ck) and a hash of its own markup (data-cf). The first paint writes them in one go;
-// every paint after that compares stamps and replaces only the pieces whose markup changed,
-// builds the new ones, removes the gone ones and moves the rest into order (_qPatch). A
-// check-in that lands while a staffer reads the list touches one row, and the rest of the page
-// keeps its scroll, its focus and its open menus. The parts around the roster are compared
-// piece by piece too (_qSyncShell). A leaf is one piece; a box holds pieces of its own.
+// key (data-ck). The first paint writes them in one go; every paint after that compares each
+// piece's markup with the string that built what is on screen (_qPrev, by the piece's path) and
+// replaces only the pieces whose markup changed, builds the new ones, removes the gone ones and
+// moves the rest into order (_qPatch). A check-in that lands while a staffer reads the list
+// touches one row, and the rest of the page keeps its scroll, its focus and its open menus. The
+// parts around the roster are compared piece by piece too (_qSyncShell). A leaf is one piece; a
+// box holds pieces of its own. Strings are compared, not hashed: hashing every row's markup in
+// JavaScript cost 9 ms of a 35 ms repaint; V8 compares two strings in a fraction of that.
 function _qLeaf(key,html,wrap){
-  const fp=String(_fpHash(html,7)),stamp=` data-ck="${esc(key)}" data-cf="${fp}"`;
+  const stamp=` data-ck="${esc(key)}"`;
   let out;
   if(wrap)out=`<${wrap}${stamp}>${html}</${wrap}>`;
   else if(/^\s*<[a-zA-Z][\w-]*[\s>]/.test(html))out=html.replace(/^\s*<[a-zA-Z][\w-]*/,m=>m+stamp);
   else out=`<div${stamp}>${html}</div>`;
-  return{key,fp,html:out};
+  return{key,html:out};
 }
-// A box: its opening (the first tag takes the stamp; the hash covers the opening and the closing,
-// not the pieces inside), the pieces it holds, and its closing. `inner` names the element inside
-// the opening that holds the pieces when that is not the outermost one.
+// A box: its opening (the first tag takes the stamp), the pieces it holds, and its closing; a
+// box is compared by its opening and closing alone, its pieces by themselves. `inner` names the
+// element inside the opening that holds the pieces when that is not the outermost one.
 function _qBox(key,open,close,kids,inner){
-  const fp=String(_fpHash(open+close,7)),stamp=` data-ck="${esc(key)}" data-cf="${fp}"`;
-  return{key,fp,kids,inner:inner||null,open:open.replace(/^\s*<[a-zA-Z][\w-]*/,m=>m+stamp),close};
+  return{key,kids,inner:inner||null,open:open.replace(/^\s*<[a-zA-Z][\w-]*/,m=>m+` data-ck="${esc(key)}"`),close};
 }
 function _qHtml(c,limit){return c.kids?c.open+(limit==null?c.kids:c.kids.slice(0,limit)).map(k=>_qHtml(k)).join('')+c.close:c.html;}
+// What built the pieces on screen, by path (a container's key, then the piece's own).
+let _qPrev=new Map();
+const _qSelf=c=>c.kids?c.open+c.close:c.html;
+function _qRemember(chunks,path){for(const c of chunks){const p=path+'/'+c.key;_qPrev.set(p,_qSelf(c));if(c.kids)_qRemember(c.kids,p);}}
+function _qForget(prefix){for(const k of _qPrev.keys())if(k===prefix||k.startsWith(prefix+'/'))_qPrev.delete(k);}
 function _qNode(html){
   const tpl=document.createElement('template'),inTable=/^\s*<(tbody|thead)[\s>]/.test(html);
   tpl.innerHTML=inTable?`<table>${html}</table>`:html;
   return inTable?tpl.content.querySelector('tbody,thead'):tpl.content.firstElementChild;
 }
 // Make the keyed children of parent exactly chunks, in order.
-function _qPatch(parent,chunks){
+function _qPatch(parent,chunks,path){
   const have=new Map();
   for(const el of parent.children){const k=el.getAttribute('data-ck');if(k!=null)have.set(k,el);}
   let pos=0;
   for(const c of chunks){
+    const p=path+'/'+c.key;
     let el=have.get(c.key);
-    if(el&&el.getAttribute('data-cf')===c.fp){
-      if(c.kids){const box=c.inner?el.querySelector(c.inner):el;if(box)_qPatch(box,c.kids);}
+    if(el&&_qPrev.get(p)===_qSelf(c)){
+      if(c.kids){const box=c.inner?el.querySelector(c.inner):el;if(box)_qPatch(box,c.kids,p);}
     }else{
       const fresh=_qNode(_qHtml(c));
       if(!fresh)continue;
       if(el)el.replaceWith(fresh);
       el=fresh;
+      _qForget(p);_qPrev.set(p,_qSelf(c));if(c.kids)_qRemember(c.kids,p);
     }
     have.delete(c.key);
     const at=parent.children[pos]||null;
     if(at!==el)parent.insertBefore(el,at);
     pos++;
   }
-  for(const el of have.values())el.remove();
+  for(const [k,el] of have){el.remove();_qForget(path+'/'+k);}
 }
 // A waiting rider's live position ('3 / 45') moves with every check-in. It is kept OUT of a
 // piece's hashed markup - the badge is written empty, naming its booking (data-pos) - and filled in
@@ -15378,7 +15471,7 @@ let _qPaintGen=0,_qRest=null;
 const _Q_FIRST=40;
 function _qWrite(rc,chunks){
   if(!rc)return;
-  if(rc.childElementCount){_qFlushRest();_qPatch(rc,chunks);return;}
+  if(rc.childElementCount){_qFlushRest();_qPatch(rc,chunks,'');return;}
   // The first paint goes in as one parse - except that on a 200-rider night every heavy row in
   // one innerHTML is a visible freeze on a booth tablet, so the table takes its first 40 parties
   // now and the rest on the next frame, guarded by a generation counter so a repaint that has
@@ -15386,6 +15479,7 @@ function _qWrite(rc,chunks){
   const table=chunks.find(c=>c.key==='table');
   const rest=table&&table.kids.length>_Q_FIRST+1?table.kids.slice(_Q_FIRST+1).map(k=>_qHtml(k)).join(''):'';
   rc.innerHTML=chunks.map(c=>c===table&&rest?_qHtml(c,_Q_FIRST+1):_qHtml(c)).join('');
+  _qPrev=new Map();_qRemember(chunks,'');
   _qPaintRest(rest);
 }
 // Rows still owed to the table land now, before a patch compares the table with what it should hold.
