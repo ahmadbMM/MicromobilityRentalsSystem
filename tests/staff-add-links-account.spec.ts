@@ -28,7 +28,7 @@ async function walkIn(page: import('@playwright/test').Page, name: string, phone
       const sent = r.postDataJSON(); posts.push(...(Array.isArray(sent) ? sent : [sent]));
     }
   });
-  await modal.locator('button.btn-primary', { hasText: 'Add Walk-in' }).click();
+  await modal.locator('button', { hasText: 'Add Walk-in' }).click();   // beside Add & check in, the desk's primary
   await expect(modal).toBeHidden();
   await expect.poll(() => posts.length).toBe(1);
   return posts[0];

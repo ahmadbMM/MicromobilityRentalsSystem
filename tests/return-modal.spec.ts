@@ -72,9 +72,10 @@ test('a database without the RPC: the classic writes run, and damaged still goes
   await expect(m).toBeHidden();
 });
 
-test('an unpaid rider still meets the payment gate first', async ({ page }) => {
+test('an unpaid rider meets the payment on the return sheet itself, not in a dialog before it', async ({ page }) => {
   await openStaff(page, { ...base, queue_entries: [{ ...ENTRY, paid: false }] });
   await page.evaluate("doReturn('e1')");
-  await expect(page.locator('#return-pay-modal')).toHaveCSS('display', 'flex');
-  await expect(page.locator('#return-modal')).toBeHidden();
+  await expect(page.locator('#return-modal .modal-box')).toBeVisible();
+  await expect(page.locator('#return-modal #ret-pay-lbl')).toBeVisible();     // what is owed, with Paid / Pending beside the condition
+  await expect(page.locator('#return-pay-modal')).toBeHidden();
 });
