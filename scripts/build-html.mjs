@@ -123,6 +123,17 @@ for (const f of (await readdir(citiesDir)).filter((n) => /^[a-z]{2}\.json$/.test
 if (!src.includes("const CITIES_V=''")) throw new Error('build: CITIES_V placeholder missing');
 src = src.replace("const CITIES_V=''", `const CITIES_V='${citiesHasher.digest('hex').slice(0, 10)}'`);
 
+// The bike pictures behind the "i" beside a type pill (assets/bikes/<type>.webp) are served
+// cache-first too, so the app asks for them with one hash of the folder: a replaced picture moves.
+// No folder, or no picture yet, stamps nothing and the sheet draws the bike glyph.
+const bikesDir = new URL('../assets/bikes/', import.meta.url);
+const bikesHasher = createHash('sha256');
+let bikeFiles = [];
+try { bikeFiles = (await readdir(bikesDir)).filter((n) => /^[a-z-]+\.webp$/.test(n)).sort(); } catch (e) { if (e.code !== 'ENOENT') throw e; }
+for (const f of bikeFiles) bikesHasher.update(f).update(await readFile(new URL(f, bikesDir)));
+if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
+src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
+
 // ── The staff half, split off into staff.js (scripts/split-staff.mjs) ──────────
 // A customer's phone used to download the whole app, two thirds of it staff-only. The main
 // script is cut by what a customer's page can reach; the rest becomes staff.js, minified the same

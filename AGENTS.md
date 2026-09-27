@@ -183,3 +183,17 @@ single-quoted attribute. The inline `<script>` blocks are allowed by hash: the b
 policy line into `_headers` from the built page (never edit that line by hand), and
 `tests/csp.spec.ts` walks every section under the real policy. Violations in production report
 to `/api/csp-report`.
+
+## The "i" beside a bike type (2026-09-27)
+
+Every real bike type on the booking form and the account page carries an "i" beside its pill
+(`_typePick` wraps the pill; the pill alone keeps `data-type-slot`/`data-type`). It opens
+`showBikeInfo`: the type's picture and a brief in every language (`bikeInfo<Type>` and
+`bikeInfo<Type>For` keys), with "Choose this bike". `BIKE_INFO` names the picture:
+`assets/bikes/<name>.webp` (road, road-carbon, hybrid, mountain, kids). Drop a picture in and run
+`npm run build:html` - the build stamps `BIKE_IMG_V` from the folder so a replaced picture gets a
+new address past the cache-first worker; with no picture the sheet draws the bike glyph
+(`data-on-error`). The fleet is Alvas bikes: each brief was written from the specs of the Alvas line
+named in `model` (alvas.bike has specs, no prose), shown untranslated as the kicker, and `level`
+(with `easy` on Hybrid, the beginner pick) is the rider-level chip; the form says under the pills
+that Hybrid is the easiest choice (`bikeInfoHint`).
