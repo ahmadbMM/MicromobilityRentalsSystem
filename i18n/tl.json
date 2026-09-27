@@ -1167,7 +1167,7 @@
   "ciBatchLabel": "Mga rider na sabay na nagche-check in",
   "ciBatchWord": "lahat",
   "ciAddBooking": "Magdagdag ng booking",
-  "ciAddNone": "Wala nang ibang naghihintay sa biyaheng ito.",
+  "ciAddScanHint": "I-scan ang ticket ng bawat rider na nagche-check in kasama ni #{0} {1}.",
   "confirmBtn": "Kumpirmahin",
   "filterSize": "Laki",
   "allSizes": "Lahat ng laki",

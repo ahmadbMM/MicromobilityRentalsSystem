@@ -1167,7 +1167,7 @@
   "ciBatchLabel": "Ciclistas fazendo check-in juntos",
   "ciBatchWord": "todos",
   "ciAddBooking": "Adicionar uma reserva",
-  "ciAddNone": "Ninguém mais está à espera neste passeio.",
+  "ciAddScanHint": "Digitalize o bilhete de cada ciclista que faz check-in com #{0} {1}.",
   "confirmBtn": "Confirmar",
   "filterSize": "Tamanho",
   "allSizes": "Todos os tamanhos",

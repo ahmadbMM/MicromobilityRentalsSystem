@@ -1167,7 +1167,7 @@
   "ciBatchLabel": "Ciclistas que se registran juntos",
   "ciBatchWord": "todos",
   "ciAddBooking": "Añadir una reserva",
-  "ciAddNone": "Nadie más está esperando en esta salida.",
+  "ciAddScanHint": "Escanea la entrada de cada ciclista que se registra con #{0} {1}.",
   "confirmBtn": "Confirmar",
   "filterSize": "Talla",
   "allSizes": "Todas las tallas",

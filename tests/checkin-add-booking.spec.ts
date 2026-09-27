@@ -1,11 +1,12 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Two more things the check-in modal's Status section can do (2026-09-28). "Add a booking" chains
-// another ticket into this check-in the way Scan several does - one run, steps, the next rider
-// opening by itself - as a list held in this tab: nothing is written to group_id, each rider keeps
-// their own payment and bike. "To staff list" parks the rider on the Staff Managed Waitlist instead
-// of a bike (the row menu's button, from inside the modal) and the run moves on without them.
+// Two more things the check-in modal's Status section can do (2026-09-28). "Add a booking" opens
+// the scanner on this check-in: each ticket scanned joins the run the way Scan several builds one
+// - steps, the next rider opening by itself - and the camera stays up for the next; it is a list
+// held in this tab, so nothing is written to group_id and each rider keeps their own payment and
+// bike. "To staff list" parks the rider on the Staff Managed Waitlist instead of a bike (the row
+// menu's button, from inside the modal) and the run moves on without them.
 const A1 = 'a1a1a1a1-0000-4000-8000-000000000001', B2 = 'b2b2b2b2-0000-4000-8000-000000000002';
 const E5 = 'e5e5e5e5-0000-4000-8000-000000000005';
 const row = (id: string, qn: number, name: string, groupId: string | null, status = 'waiting'): Record<string, unknown> => ({
@@ -45,6 +46,9 @@ async function boot(page: Page, fixtures: Record<string, unknown> = {}) {
 }
 const openCheckin = (page: Page, id: string) =>
   page.evaluate(`S.staffTab='queue';renderStaffQueue();showCheckinModal(${JSON.stringify(id)})`);
+const scan = (page: Page, code: string) => page.evaluate(`_onScanPayload(${JSON.stringify(code)})`);
+// Headless has no camera: let its error land first so it cannot overwrite what a scan says.
+const cameraSettled = (page: Page) => expect(page.locator('#scan-msg')).toContainText(/camera/i, { timeout: 15000 });
 
 function watchWrites(page: Page) {
   const patches: Array<{ id: string; body: Record<string, unknown> }> = [];
@@ -65,7 +69,7 @@ function watchWrites(page: Page) {
   return { patches, parks };
 }
 
-test('Add a booking chains other tickets into the run - a party as one line - and the data never learns of a group', async ({ page }) => {
+test('Add a booking opens the scanner on this check-in: each ticket joins the run, the camera stays up, and the data never learns of a group', async ({ page }) => {
   await boot(page);
   const { patches } = watchWrites(page);
   await openCheckin(page, A1);
@@ -73,37 +77,40 @@ test('Add a booking chains other tickets into the run - a party as one line - an
   await expect(modal).toContainText('Solo Amal');
   await expect(modal.getByRole('list')).toHaveCount(0); // a solo rider: no steps yet
 
-  const add = modal.getByRole('button', { name: /Add a booking/ });
-  await add.click();
-  await expect(add).toHaveAttribute('aria-expanded', 'true');
-  const rows = modal.locator('#ci-add-list .mw-sug');
-  // Nothing typed: everyone still expected on this ride, in queue order, a party as one line.
-  await expect(rows).toHaveCount(3);
-  await expect(rows.nth(0)).toContainText('#2');
-  await expect(rows.nth(1)).toContainText('Party Cala');
-  await expect(rows.nth(1)).toContainText('+1');
-  await expect(rows.nth(2)).toContainText('Solo Eid');
+  await modal.getByRole('button', { name: /Add a booking/ }).click();
+  const scanner = page.locator('#scan-modal [role="dialog"]');
+  await expect(scanner).toBeVisible();
+  await expect(scanner).toContainText('Scan the ticket of each rider checking in with #1 Solo Amal.');
+  // Not the scanner's own modes: the list is this check-in's run, and Done is the way back.
+  await expect(scanner.getByRole('button', { name: 'Scan several' })).toHaveCount(0);
+  await expect(scanner.getByRole('button', { name: 'Keep scanning' })).toHaveCount(0);
+  await expect(scanner.getByRole('button', { name: 'Express' })).toHaveCount(0);
+  await cameraSettled(page);
 
-  await modal.locator('#ci-add-q').fill('badr');
-  await expect(rows).toHaveCount(1);
-  await rows.first().click();
-  // One run of two, under the label Scan several uses; the picker stays for the next, Badr gone from it.
+  await scan(page, 'MMC-2-b2b2b2');
+  await expect(page.locator('#scan-msg')).toHaveText('Added #2 Solo Badr.');
+  const chips = scanner.getByRole('list', { name: 'Riders checking in together' }).getByRole('listitem');
+  await expect(chips).toHaveCount(2);
+  await expect(chips.first()).toContainText('#1 Solo'); // the rider in the modal leads the run
+  await scan(page, 'MMC-3-c3c3c3'); // a party ticket brings its other rider along
+  await expect(chips).toHaveCount(4);
+  await scan(page, 'MMC-4-d4d4d4');
+  await expect(page.locator('#scan-msg')).toHaveText('#4 Party Dina is already on the list.');
+  await scan(page, 'MMC-1-a1a1a1');
+  await expect(page.locator('#scan-msg')).toHaveText('#1 Solo Amal is already on the list.');
+  await expect(scanner).toBeVisible(); // the camera stays up for the next ticket
+
+  await scanner.getByRole('button', { name: 'Done' }).click();
+  await expect(scanner).toBeHidden();
+  // Back on the modal: one run of four under the label Scan several uses, a shared total.
   const steps = modal.getByRole('list', { name: 'Riders checking in together' }).getByRole('button');
-  await expect(steps).toHaveCount(2);
-  await expect(modal).toContainText('Rider 1 of 2');
-  await expect(rows).toHaveCount(2);
-  // Enter takes the first match; the party ticket brings its other rider along.
-  await modal.locator('#ci-add-q').fill('3');
-  await modal.locator('#ci-add-q').press('Enter');
   await expect(steps).toHaveCount(4);
   await expect(modal).toContainText('Rider 1 of 4');
   await expect(modal.locator('#ci-money')).toContainText('all SAR 120');
 
-  // Confirm runs them through, the next opening by itself with the picker closed.
   await modal.locator('#ci-confirm').click();
   await expect(modal).toContainText('Solo Badr');
   await expect(modal).toContainText('Rider 2 of 4');
-  await expect(modal.locator('#ci-add-box')).toHaveCount(0);
   for (const next of ['Party Cala', 'Party Dina']) {
     await modal.locator('#ci-confirm').click();
     await expect(modal).toContainText(next);
@@ -114,8 +121,23 @@ test('Add a booking chains other tickets into the run - a party as one line - an
   await expect.poll(() => patches.filter((w) => w.body.status === 'active').map((w) => w.id.slice(0, 2)))
     .toEqual(['a1', 'b2', 'c3', 'd4']);
   expect(patches.some((w) => 'group_id' in w.body)).toBe(false); // never grouped in the data
-  expect(patches.some((w) => w.id.startsWith('e5'))).toBe(false); // never added, untouched
+  expect(patches.some((w) => w.id.startsWith('e5'))).toBe(false); // never scanned, untouched
   await expect.poll(() => page.evaluate('S._ciBatch')).toBeNull(); // the run is over
+  expect(await page.evaluate('_scanAddTo')).toBeNull();
+});
+
+test('a bike sticker scanned there still goes to this check-in, and the camera comes down', async ({ page }) => {
+  await boot(page);
+  await openCheckin(page, A1);
+  const modal = page.locator('#checkin-modal [role="dialog"]');
+  await modal.getByRole('button', { name: /Add a booking/ }).click();
+  const scanner = page.locator('#scan-modal [role="dialog"]');
+  await cameraSettled(page);
+  await scan(page, 'https://micromobilityrentals.pages.dev/?bike=42');
+  await expect(scanner).toBeHidden();
+  await expect(modal).toContainText('Solo Amal'); // still this rider's check-in
+  expect(await page.evaluate('_scanAddTo')).toBeNull();
+  await expect(modal.getByRole('list')).toHaveCount(0); // nobody was added
 });
 
 test('To staff list parks the rider from the modal and the run moves on without them', async ({ page }) => {
@@ -124,8 +146,9 @@ test('To staff list parks the rider from the modal and the run moves on without 
   await openCheckin(page, A1);
   const modal = page.locator('#checkin-modal [role="dialog"]');
   await modal.getByRole('button', { name: /Add a booking/ }).click();
-  await modal.locator('#ci-add-q').fill('badr');
-  await modal.locator('#ci-add-list .mw-sug').first().click();
+  await cameraSettled(page);
+  await scan(page, 'MMC-2-b2b2b2');
+  await page.locator('#scan-modal [role="dialog"]').getByRole('button', { name: 'Done' }).click();
   await expect(modal.getByRole('list', { name: 'Riders checking in together' }).getByRole('button')).toHaveCount(2);
 
   await modal.getByRole('button', { name: 'To staff list' }).click();
