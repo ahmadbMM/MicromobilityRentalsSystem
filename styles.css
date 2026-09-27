@@ -4448,8 +4448,9 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body .ticket-card.ev-snd96 .ticket-cols,
     body .ticket-card.ev-snd96 .ticket-col{border-color:rgba(255,255,255,.18);}
     body .ticket-card.ev-snd96 .qr-hold{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);color:var(--snd-mut);}
-    /* The QR keeps its white tile: a scanner needs the contrast, whatever the skin. */
-    body .ticket-card.ev-snd96 .ticket-qr-wrap{background:#fff;border-radius:8px;}
+    /* The QR keeps the white tile it draws for itself (a scanner needs the contrast, whatever
+       the skin) - the same compact tile as on paper. Nothing is painted on the wrap around it:
+       a white background there ran a band across the whole card (owner, 2026-09-27). */
 
     /* ── The green field is a dark surface wherever it is met ─────────────────
        The card paints itself teal on any page, but the ink inside it came from
