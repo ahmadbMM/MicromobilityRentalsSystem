@@ -6,3 +6,4 @@ dist/
 micromobility.db
 .env.deploy
 supabase/.temp/
+tests/.results/

@@ -10,7 +10,10 @@ import { fileURLToPath } from 'node:url';
 import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
 import { minify as terserMinify } from 'terser';
 import CleanCSS from 'clean-css';
-import { splitStaff } from './split-staff.mjs';
+import {
+  splitStaff, resolveIncludes,
+  checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
+} from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
 // at build time via `<!--include:path/to/file.js-->` markers. Inlining (not ES-module
@@ -18,20 +21,7 @@ import { splitStaff } from './split-staff.mjs';
 // name-by-string pattern in the templates keeps working — no runtime change, files
 // just become editable in isolation. Extraction stays incremental and test-guarded
 //. Only the built index.html is ever served, so the markers
-// never reach a browser.
-async function resolveIncludes(text) {
-  const RE = /<!--\s*include:\s*([^\s]+?)\s*-->/g;
-  const parts = [];
-  let last = 0, m;
-  while ((m = RE.exec(text))) {
-    parts.push(text.slice(last, m.index));
-    const body = await readFile(new URL('../' + m[1], import.meta.url), 'utf8');
-    parts.push(body.replace(/^\s*\/\/\s*@ts-check\s*$/m, '')); // strip the dev-only type-check pragma
-    last = m.index + m[0].length;
-  }
-  parts.push(text.slice(last));
-  return parts.join('');
-}
+// never reach a browser. (resolveIncludes lives in split-staff.mjs, shared with the checks.)
 
 const raw = await readFile(new URL('../app.src.html', import.meta.url), 'utf8');
 let src = await resolveIncludes(raw);
@@ -50,6 +40,25 @@ for (const m of src.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>
     throw new Error(`build: inline <script> starting at app.src.html:${line} has a syntax error — ${e.message}`);
   }
 }
+
+// ── Every handler names a global function ────────────────────────────────────
+// data-on-<event> attributes carry ["name", ...args] and _onDispatch looks the name up as
+// window[name] when the event fires; a misspelt name is a console warning at tap time, not
+// an error at load. Read every static attribute, every _on('name', ...) call and every list in
+// _on([...],[...]) against the top-level function declarations (see checkHandlerNames).
+{
+  const h = checkHandlerNames(raw, src);
+  if (h.offenders.length) {
+    throw new Error(`build: ${h.offenders.length} handler(s) name something that is not a top-level function (the dispatcher reads window[name]):\n${formatHandlerOffenders(h)}`);
+  }
+  console.log(`build: ${h.checked} handler names checked against ${h.declared} top-level functions (${h.dynamic} dynamic, left alone)`);
+}
+
+// ── A refused write is said, never swallowed (a WARNING for now) ─────────────
+// Every sb.from('<table>').insert|update|delete|upsert(...) goes through _wr(...) or hands its
+// result to _writeErr(...); a deliberately unchecked write carries `// fire-and-forget` on its
+// line, and the logging tables are exempt. See checkBareWrites for the classification.
+console.log(formatBareWrites(checkBareWrites(raw)));
 
 // ── Translation packs: ship the language a visitor reads, not all three ──────
 // LANG carries ~1,700 keys in two languages. Inline, that is ~190 KB gzipped of the
@@ -344,6 +353,17 @@ if (!/^  Content-Security-Policy: /m.test(headers)) throw new Error('build: _hea
 headers = headers.replace(/^  Content-Security-Policy: .*$/m, `  Content-Security-Policy: ${CSP}`);
 if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  Content-Security-Policy: .*)$/m, `$1\n  Reporting-Endpoints: csp="/api/csp-report"`);
 if (headers !== headersBefore) await writeFile(headersUrl, headers);
+
+// ── The download budget ──────────────────────────────────────────────────────
+// What a customer's phone fetches (index.html) and what a staffer's adds (staff.js), gzipped as
+// the edge sends them. A creeping regression fails the build here, with the numbers; the limits
+// are SIZE_BUDGET_CUSTOMER_KB / SIZE_BUDGET_STAFF_KB in the environment or the defaults in
+// scripts/split-staff.mjs (checked again by tests/build-checks.spec.ts against the committed files).
+const budget = checkSizeBudget({ customer: gzipBytes(out), staff: gzipBytes(staffMin.code) });
+console.log(`build: ${budget.text}`);
+if (budget.over.length) {
+  throw new Error(`build: over the size budget - ${budget.over.map((r) => `${r.half} half ${r.kb.toFixed(1)} KB gzipped > ${r.limitKb} KB`).join(', ')}. Trim what grew, or raise the budget deliberately (SIZE_BUDGET_*_KB, or the defaults in scripts/split-staff.mjs) and say why in the commit.`);
+}
 
 await writeFile(new URL('../index.html', import.meta.url), out);
 console.log(`built index.html: ${src.length} -> ${out.length} bytes (${(shrink * 100).toFixed(1)}% smaller, assets v=${cssHash}, ${hashes.length} inline scripts in the policy)`);

@@ -97,6 +97,40 @@ jobs:
       # Each project runs as three shards, so the suite's wall time is a third of one project's
       # (about 9.5 minutes on two workers before, 2026-09-27); playwright.config.ts sets the workers.
       - run: npx playwright test --project=${{ matrix.project }} --shard=${{ matrix.shard }}/3
+      # A test that failed and passed on a retry is green above and invisible. playwright.config.ts
+      # also writes a JSON record of the run; list its "flaky" tests here (and in the job summary),
+      # and keep the file as an artifact so a pattern across runs can be read later.
+      - if: always()
+        name: Flaky tests (passed only on a retry)
+        env:
+          SHARD_LABEL: ${{ matrix.project }} shard ${{ matrix.shard }}
+        run: |
+          node - <<'EOF'
+          const fs = require('fs');
+          const p = 'tests/.results/last-run.json';
+          if (!fs.existsSync(p)) { console.log('no results file - the run did not get as far as the reporter'); process.exit(0); }
+          const run = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const flaky = [];
+          (function walk(suite) {
+            for (const s of suite.suites || []) walk(s);
+            for (const spec of suite.specs || []) for (const t of spec.tests || []) {
+              if (t.status === 'flaky') flaky.push(`${spec.file}:${spec.line}  ${spec.title}  [${t.projectName}, ${t.results.length} attempts]`);
+            }
+          })(run);
+          const head = `${flaky.length} flaky test(s) in ${process.env.SHARD_LABEL}`;
+          console.log(head);
+          for (const f of flaky) console.log(`::warning::flaky: ${f}`);
+          if (process.env.GITHUB_STEP_SUMMARY) {
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, `### ${head}\n${flaky.length ? flaky.map((f) => `- \`${f}\``).join('\n') : 'none'}\n\n`);
+          }
+          EOF
+      - if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-results-${{ matrix.project }}-${{ matrix.shard }}
+          path: tests/.results/last-run.json
+          retention-days: 14
+          if-no-files-found: ignore
 
   deploy:
     needs: [build, test]

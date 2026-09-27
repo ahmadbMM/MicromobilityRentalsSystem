@@ -3,30 +3,20 @@
 These are the items from the enhancement plan that can't be done in the repo.
 Delete each section when done.
 
-## 0. queue_entries PII — STAGE 1 DONE (2026-08-24), stage 2 pending
-`public read` is **dropped**. Verified by impersonating the anon role straight after:
-`queue_entries` → 0 rows (was ~2,743 with names, emails and phones), `queue_public` → 2,743
-rows, so the app is unaffected. Reads had already moved to that view plus the token-checked
-`my_bookings()` RPC.
+## 0. queue_entries PII — DONE (stage 1 2026-08-24, stage 2 2026-08-26)
+Stage 1 dropped `public read` (verified as the anon role: `queue_entries` → 0 rows, `queue_public`
+→ 2,743 rows, the app unaffected; reads had moved to that view plus the token-checked
+`my_bookings()` RPC). Stage 2, `supabase/migrations/20260826130000_close_public_insert_booking.sql`,
+dropped `public insert booking`, the last thing the anon key could do to the table directly:
+customers book through `customer_create_booking` (SECURITY DEFINER), staff under `staff insert`.
+Rollback and reasoning live in the two migration files.
 
-**Stage 2, still open:** `public insert booking` is deliberately left in place. It is not a PII
-leak (price, paid and status are trigger-enforced), and a client older than 2026-08-24 still
-flushes OFFLINE bookings by inserting directly. Once the current client has been live a few
-days, run:
-
-```sql
-drop policy if exists "public insert booking" on public.queue_entries;
-```
-
-then make one real booking as a signed-out visitor. Rollback and full reasoning live in
-`supabase/migrations/20260820120000_close_queue_entries_public_read.sql`.
-
-## 1. Make CI actually gate deploys (15 min, highest value)
-1. Cloudflare dashboard → My Profile → API Tokens → create token ("Edit Cloudflare Workers" template).
-2. GitHub repo → Settings → Secrets → add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
-3. Cloudflare → Workers & Pages → micromobilityrentals → Settings → Builds & deployments → disable automatic production deploys.
-The existing deploy job in `.github/workflows/ci.yml` detects the secrets and takes over.
-Lint + the full Playwright suite then block every deploy.
+## 1. CI gates deploys — DONE
+The `deploy` job in `.github/workflows/ci.yml` is the only deployer: it runs after lint, the
+build-freshness check and the full Playwright suite, uploads the `dist/` built alongside the tests,
+and skips itself (saying so) when `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` are absent.
+Cloudflare Pages' own Git integration is disabled, so a red run ships nothing. AGENTS.md says the
+same under Workflow.
 
 ## 2. Verify booking-confirmation emails are live
 Cloudflare Pages → Settings → Environment variables: confirm `BREVO_API_KEY` and

@@ -25,8 +25,8 @@ The served `index.html` is a **minified build artifact**. The editable source of
 - `supabase/checks/security-attributes.sql` — run it after any migration that touches a function; it prints one row per drift and nothing when clean.
 - `SECURITY-RUNBOOK.md` — the production security model (RLS, RPCs) and staging-first procedure.
 - `tests/` — Playwright suite (`npm test`); all Supabase traffic is stubbed, tests never touch prod. `tests/a11y.spec.ts` is a report-only axe-core audit (flip `STRICT` once clean).
-- `scripts/build-html.mjs` — the minify build. `scripts/check-i18n.mjs` — CI gate: every language in `LANGS` carries every English key (no missing, no extra, no empty, same `{n}` placeholders).
-- **Languages (9):** English and Arabic live inline in `app.src.html` (`const LANG={en:{…},ar:{…}}`); French, Spanish, Portuguese, Urdu, Hindi, Tagalog and Nepali are `i18n/<code>.json` (pretty JSON, one key per line) that the build merges and extracts to `lang/<code>.json` like Arabic. To add a string: add it to `en` and `ar` inline **and** to every `i18n/*.json`, or `npm run lint` fails. To add a language: a `LANGS` entry (native `label`, `locale`, `rtl`), its `i18n/<code>.json`, an `<option>` in `#lang-btn`, a `hreflang` link, `site.config.json` `languages`, and the `_ok` list in the head script. RTL styling is `:is(html[lang="ar"],html[lang="ur"])`; Devanagari (hi/ne) uses the self-hosted Noto Sans Devanagari. Country of residence and nationality share one list (`NATIONALITIES`, every country except Israel, deliberately) and one label function: `nationalityLabel` uses the browser's own region names (`Intl.DisplayNames`) in every language, with the curated Arabic names (`COUNTRY_AR`) taking precedence. City of residence offers every city of the chosen country from `cities/<iso2>.json` (fetched when the country is picked, versioned by `CITIES_V`, which the build stamps); city names are translated for Arabic only. Those files are generated from GeoNames by `node scripts/build-cities.mjs <folder>` (see its header), which is not part of `build:html`; names riders saved before it existed are kept verbatim by its `LEGACY` list.
+- `scripts/build-html.mjs` — the minify build, with the build checks below. `scripts/check-i18n.mjs` — CI gate: every language in `LANGS` carries every English key (no missing, no extra, no empty, same `{n}` placeholders); every key the code asks `t('…')` for is defined in `en`; and it lists, as a warning, the `en` keys nothing references.
+- **Languages (10):** English and Arabic live inline in `app.src.html` (`const LANG={en:{…},ar:{…}}`); French, Spanish, Portuguese, Urdu, Hindi, Tagalog, Nepali and Bengali are `i18n/<code>.json` (pretty JSON, one key per line) that the build merges and extracts to `lang/<code>.json` like Arabic. To add a string: add it to `en` and `ar` inline **and** to every `i18n/*.json`, or `npm run lint` fails. To add a language: a `LANGS` entry (native `label`, `locale`, `rtl`), its `i18n/<code>.json`, an `<option>` in `#lang-btn`, a `hreflang` link, `site.config.json` `languages`, and the `_ok` list in the head script. RTL styling is `:is(html[lang="ar"],html[lang="ur"])`; Devanagari (hi/ne) uses the self-hosted Noto Sans Devanagari. Country of residence and nationality share one list (`NATIONALITIES`, every country except Israel, deliberately) and one label function: `nationalityLabel` uses the browser's own region names (`Intl.DisplayNames`) in every language, with the curated Arabic names (`COUNTRY_AR`) taking precedence. City of residence offers every city of the chosen country from `cities/<iso2>.json` (fetched when the country is picked, versioned by `CITIES_V`, which the build stamps); city names are translated for Arabic only. Those files are generated from GeoNames by `node scripts/build-cities.mjs <folder>` (see its header), which is not part of `build:html`; names riders saved before it existed are kept verbatim by its `LEGACY` list.
 
 ## Backend / Supabase
 
@@ -40,8 +40,35 @@ The served `index.html` is a **minified build artifact**. The editable source of
 
 ## Workflow
 
-- **Deploy** = push to `main` (Cloudflare Pages auto-builds). CI runs the Playwright suite on every push.
-- Before committing app changes: `npm run build:html` then `npm test`. `npm run lint` = eslint + tsc + i18n key parity. CI runs lint, a build-freshness check and the suite — but it does NOT gate the deploy: Cloudflare Pages auto-deploys `main` on push regardless (OPERATIONS-TODO.md §1).
+- **Deploy** = push to `main`, and CI is the only deployer: `.github/workflows/ci.yml` runs lint, the build-freshness check and the Playwright suite, and its `deploy` job uploads `dist/` to Cloudflare Pages only when all of them are green (Cloudflare's own Git integration is disabled; the job skips itself, and says so, when the `CLOUDFLARE_*` secrets are absent). A red run ships nothing (OPERATIONS-TODO.md §1).
+- Before committing app changes: `npm run build:html` then `npm test` (`pretest` runs the build for you). `npm run lint` = eslint + tsc + i18n key checks.
+- **Spec tags.** Name a new `describe` with a tag so a slice runs alone: `test.describe('@staff:bookings …')`, `'@customer:reserve …'`, `'@build …'`, then `npx playwright test --grep @staff:bookings`. Existing specs keep their names; add the tag when you touch one. Every run also writes `tests/.results/last-run.json` (gitignored): a test that passed only on a retry is `"status": "flaky"` there, CI uploads the file per shard and prints those tests in the job summary.
+
+## Build checks (2026-09-28)
+
+`npm run build:html` fails, or warns, on what the suite cannot see; `tests/build-checks.spec.ts` runs the same
+functions (exported by `scripts/split-staff.mjs`) so CI catches a regression even when nobody ran the build.
+
+- **Handler names (fails).** Every static `data-on-<event>='["name",…]'`, every `_on('name', …)` (a ternary of
+  literals is read; a variable or spread is left alone) and every `['name', …]` in `_on([…],[…])` must name a
+  top-level `function name(` declaration - `_onDispatch` reads `window[name]`, so a misspelling is a warning at
+  tap time, not an error at load. The event type must be in `_ON_TYPES`. Names in `STAFF_ENTRY` must exist as
+  plain function declarations too.
+- **Bare writes (warns, with counts and the first 20).** Every `sb.from('<table>').insert|update|delete|upsert(`
+  is `await _wr(promise, ctx)` or hands its result to `_writeErr(res, ctx)` (a bound name, `res.push(u)`, a
+  `Promise.all(calls)` alias and `for (const r of results)` are followed one hop). A write that is deliberately
+  unchecked - a rollback, a best-effort touch - carries the marker comment **`// fire-and-forget`** on its line
+  (or on the first line of its statement); `staff_actions` and `error_log` need no marker. Writes that read
+  `.error` themselves or return the write to a caller are reported apart. It is a warning while the tail is
+  worked down; do not add to it.
+- **Size budget (fails).** `index.html` gzipped ≤ 260 KB and `staff.js` gzipped ≤ 250 KB (KB = 1000 bytes,
+  zlib default level); the build prints both numbers. `SIZE_BUDGET_CUSTOMER_KB` / `SIZE_BUDGET_STAFF_KB` in the
+  environment move a limit for one run; a deliberate step up edits `SIZE_BUDGET_DEFAULT_KB` with the reason in
+  the commit.
+- **Translation keys (`npm run lint`).** `check-i18n` fails on a `t('key')` whose key `en` does not define and
+  warns with the sorted list of `en` keys nothing references (no `t('key')`, no string literal equal to the key
+  such as a `SECTION_KEY` map value, no dynamic prefix read off `t('rateTag'+…)` and template-literal calls, or
+  `DYNAMIC_KEYS` in the script). Prune from `en`, `ar` and every `i18n/*.json` together.
 - The service worker serves navigations stale-while-revalidate (NOT network-first): a new `index.html` applies on the next load. Other same-origin assets are cache-FIRST with no revalidation, so `styles.css` is busted by a content hash that `scripts/build-html.mjs` writes into both `index.html` and `service-worker.js`. Never hand-edit those version tags.
 
 ## Do not expose internal files publicly
@@ -138,8 +165,9 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
   Only logging (`staff_actions`, `error_log`) and rollback compensations stay fire-and-forget.
 - Inventory saves write the item's extras (photo, price, cost, flavour, volume, nutrition) in
   ONE checked update (`_invExtraCols`), not six "tolerant" ones: every column exists.
-- Bookings builds the phone cards only where a phone shows them (`_qPhone`); the table is still
-  built on phones because the phone specs read it - the table's turn is a follow-up.
+- Bookings builds each roster layout only where it shows (`_qPhone`): the cards on a phone, the
+  table everywhere else; crossing the breakpoint repaints. Specs that read the roster take both
+  selectors, `.queue-table tbody tr, .q-card`.
 - The staff window is not widened, the live channel not opened, and inventory not fetched for a
   signed-out visitor in secure mode (`_custOnly()`); they start when a page with live data opens
   (`_rtStart` from `showView`, `_optionalFetch` from `goCustomer`).
