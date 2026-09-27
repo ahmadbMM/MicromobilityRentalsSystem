@@ -1033,6 +1033,13 @@
     .tag-logo-jcc{width:21px;-webkit-mask-image:url('assets/tag-jcc.svg');mask-image:url('assets/tag-jcc.svg');}
     .tag-logo-mm{width:16px;-webkit-mask-image:url('assets/tag-mm.svg');mask-image:url('assets/tag-mm.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
+    /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
+    .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
+    .tag-banned .tag-logo{width:12px;height:10px;vertical-align:0;}
+    .tag-ban-sign{position:absolute;inset:0;width:20px;height:20px;color:currentColor;}
+    .tag-ban-warn{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;border-radius:6px;background:#0b0b0b;color:#fff;font-size:12px;font-weight:700;line-height:1.4;}
+    .confirm-box .tag-ban-opt{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
+    .tag-ban-opt input{width:16px;height:16px;accent-color:var(--green);margin:0;}
     
     .filter-select{
       height:34px;padding:0 28px 0 10px;
@@ -5356,3 +5363,21 @@ body .landing-event-card.ev-event::before{background:var(--ev);}
 body .landing-event-card.ev-event:hover{border-color:rgba(var(--ev-rgb),.5);}
 body .landing-event-card.ev-event .lec-kicker,body .landing-event-card.ev-event .lec-arrow{color:var(--ev);}
 body.view-staff .dash-dot.ev-event,body.view-staff .cal-sess.ev-event{--ev:#7c3aed;}
+
+/* Hand-over: the ride leader's live location switch (2026-09-28) */
+body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
+/* The ambassador's card on the account page (2026-09-28) */
+.amb-mine{border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px;background:var(--s1);}
+.amb-mine-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.amb-mine-title{font-weight:900;font-size:15px;}
+.amb-mine-paused{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.4px;color:var(--orange);background:rgba(var(--warn-rgb),.12);border-radius:4px;padding:3px 8px;}
+.amb-mine-code{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap;}
+.amb-mine-code strong{font-size:22px;letter-spacing:1px;font-weight:900;color:var(--green);}
+.amb-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.amb-kpi{background:var(--s3);border-radius:8px;padding:10px;text-align:center;}
+.amb-kpi-v{font-size:20px;font-weight:900;}
+.amb-kpi-l{font-size:11px;font-weight:700;color:var(--muted);}
+.amb-mine-ev{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+.amb-mine-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
+.amb-mine-row span:first-child{flex:1;min-width:0;}
+.btn-wallet.gwallet{background:#1a73e8;border-color:#1a73e8;}
