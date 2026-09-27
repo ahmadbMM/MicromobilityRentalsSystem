@@ -134,7 +134,16 @@ with expected(fname, want_definer, note) as (values
   ('customer_update_profile',true,  'writes the caller''s own customers row; token-checked, a new phone or email metered'),
   ('customer_oauth_signup',  true,  'writes customers for a Google/Apple sign-in; metered'),
   ('staff_set_customer_password', true, 'writes customers.password_hash, which no client can select; staff only'),
-  ('_error_log_gate',        true,  'trigger: meters error_log inserts per network through _ip_gate')
+  ('_error_log_gate',        true,  'trigger: meters error_log inserts per network through _ip_gate'),
+  -- The 2026-09-27 feature round (20260928120000 … 20260928170000)
+  ('staff_merge_customers',  true,  'moves every row of one account onto another across twelve tables; admins only'),
+  ('staff_unmerge_customers',true,  'puts a merge back within thirty days; admins only'),
+  ('_booking_window_guard',  false, 'trigger: reads site_content, which everyone may; is_staff() does its own privileged read'),
+  ('staff_live_position',    true,  'writes live_positions, which no client can write; staff only'),
+  ('staff_live_stop',        true,  'deletes from live_positions; staff only'),
+  ('live_positions_for',     true,  'reads live_positions for a rider with a booking on the ride; token-checked'),
+  ('member_area',            true,  'one member''s own area: reads customers, bookings, tags and site_content; token-checked'),
+  ('ambassador_mine',        true,  'the signed-in account''s own ambassador card; token-checked')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
