@@ -54,11 +54,12 @@ jobs:
       # The stale-build check lives here, next to the artifact it protects: editing
       # app.src.html and forgetting `npm run build:html` must fail the run, or a green
       # suite ships stale code.
-      - name: index.html is up to date with app.src.html
+      - name: index.html and the wallet function are up to date with their sources
         run: |
           npm run build:html
-          git diff --exit-code -- index.html service-worker.js staff.js \
-            || { echo '::error::index.html/service-worker.js/staff.js are stale — run `npm run build:html` and commit the result.'; exit 1; }
+          npm run build:wallet
+          git diff --exit-code -- index.html service-worker.js staff.js functions/api/wallet-pass.js \
+            || { echo '::error::index.html/service-worker.js/staff.js/functions/api/wallet-pass.js are stale — run `npm run build:html && npm run build:wallet` and commit the result.'; exit 1; }
       - name: Assemble dist/ (every referenced asset must be present)
         run: node scripts/assemble-dist.mjs
       - uses: actions/upload-artifact@v7

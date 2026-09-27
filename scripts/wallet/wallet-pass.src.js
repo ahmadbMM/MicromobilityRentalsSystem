@@ -1,348 +1,515 @@
-// Generates a signed Apple Wallet pass (.pkpass) for a booking.
+// Generates a signed Apple Wallet pass (.pkpass) for a booking: POST /api/wallet-pass.
 //
-// Activates only when the Pass Type certificate is configured as Cloudflare Pages env vars
-// (see below); until then it returns 501 and the client hides the "Add to Apple Wallet"
-// button. Safe to deploy before the cert exists.
+// THE SOURCE. functions/api/wallet-pass.js is built from this file, pass-images.js and sign.js by
+// `npm run build:wallet` (esbuild) and committed; CI refuses a stale build. Until 2026-09-27 the
+// bundle had been hand-edited for months and this file was behind it; the bundle's own code was
+// brought back here, and node-forge (1.1 MB of it, with three open advisories) went: WebCrypto
+// signs and hashes, sign.js reads the credentials and writes the CMS signature.
 //
-// Required env vars (Cloudflare Pages -> Settings -> Environment variables, encrypted):
-//   APPLE_PASS_P12_BASE64   - the Pass Type ID cert exported from Keychain as .p12, base64-encoded
-//   APPLE_PASS_P12_PASSWORD - the password you set on that .p12 export
+// Activates only when the Pass Type certificate is configured as Cloudflare Pages env vars;
+// until then it returns 501 and the client hides the "Add to Apple Wallet" button.
+//
+// Credentials, either form (encrypted env vars):
+//   APPLE_PASS_CERT_PEM + APPLE_PASS_KEY_PEM   - the certificate and its PKCS#8 (or PKCS#1) key as
+//                                               PEM (APPLE_PASS_KEY_PASSWORD if the key PEM is
+//                                               encrypted). Opens in a millisecond; preferred.
+//   APPLE_PASS_P12_BASE64 + APPLE_PASS_P12_PASSWORD - the .p12 as Keychain Access exports it,
+//                                               base64. Keychain's ciphers (3DES, RC2-40, the
+//                                               SHA-1 KDF) take ~1 s to open on a cold start.
+//   To convert:  openssl pkcs12 -in pass.p12 -nokeys -clcerts | openssl x509        (the cert PEM)
+//                openssl pkcs12 -in pass.p12 -nocerts -nodes | openssl pkcs8 -topk8 -nocrypt  (the key PEM)
 //   APPLE_PASS_TYPE_ID      - e.g. pass.sa.micromobility.booking
-//   APPLE_TEAM_ID           - 72HK45WB4A
-//   SUPABASE_ANON_KEY       - already set for the other functions
+//   APPLE_TEAM_ID           - the Apple team id
+//   SUPABASE_URL / SUPABASE_ANON_KEY - already set for the other functions
+//
+// GET /api/wallet-pass?selftest signs a fixed manifest and reports the certificate it used, so a
+// deploy can be checked without a booking (nothing secret is in the answer: a signature is public
+// in every pass, and the certificate's name and expiry are what Wallet shows).
 //
 // Security: never trusts client-supplied booking data. It re-reads the booking through the
 // token-checked my_bookings RPC using the caller's own customer id + session token, so a user
 // can only ever mint a pass for a booking they actually own.
 
-import forge from 'node-forge';
 import { zipSync } from 'fflate';
-import { PASS_IMAGES } from './pass-images.js';
+import { PASS_IMAGES, RIDE_IMAGES } from './pass-images.js';
+import { b64ToBytes, bytesToB64, certPemToDer, importSigner, keyPemToPkcs8, openP12, sha1hex, signDetached } from './sign.js';
 
-const SUPA_DEFAULT = 'https://amyqxovbnlreassrqihr.supabase.co';
-const DIRECTIONS = 'https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7';
-
+const SUPA_DEFAULT = "https://amyqxovbnlreassrqihr.supabase.co";
+const DIRECTIONS = "https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7";
 export async function onRequestPost(context) {
   const { request, env } = context;
-
-  const p12b64 = env.APPLE_PASS_P12_BASE64;
-  const p12pw = env.APPLE_PASS_P12_PASSWORD || '';
   const passTypeId = env.APPLE_PASS_TYPE_ID;
   const teamId = env.APPLE_TEAM_ID;
-  if (!p12b64 || !passTypeId || !teamId) {
-    return json({ ok: false, skipped: 'wallet not configured' }, 501);
+  if (!configured(env) || !passTypeId || !teamId) {
+    return json({ ok: false, skipped: "wallet not configured" }, 501);
   }
-
   let body;
-  try { body = await request.json(); } catch { return json({ ok: false, error: 'bad body' }, 400); }
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: "bad body" }, 400);
+  }
   const { customerId, token, bookingId } = body || {};
-  if (!customerId || !token || !bookingId) return json({ ok: false, error: 'missing fields' }, 400);
-  // Client-resolved add-ons (display only — ownership is still verified below via the token).
+  if (!customerId || !token || !bookingId) return json({ ok: false, error: "missing fields" }, 400);
   const addons = _cleanAddons(body && body.addons);
-  // Booking group: all rider ids on this booking. Filtered against my_bookings below, so a
-  // caller can only ever group their OWN bookings.
-  const groupIds = Array.isArray(body && body.groupIds)
-    ? body.groupIds.filter((x) => typeof x === 'string').slice(0, 50)
-    : [];
-
+  const groupIds = Array.isArray(body && body.groupIds) ? body.groupIds.filter((x2) => typeof x2 === "string").slice(0, 50) : [];
   const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
   const ANON = env.SUPABASE_ANON_KEY;
-  if (!ANON) return json({ ok: false, error: 'no anon key' }, 500);
-
-  // Verify ownership + fetch the real booking (token-checked RPC).
+  if (!ANON) return json({ ok: false, error: "no anon key" }, 500);
   const rpc = await fetch(`${SUPA}/rest/v1/rpc/my_bookings`, {
-    method: 'POST',
-    headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ p_id: customerId, p_token: token }),
+    method: "POST",
+    headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ p_id: customerId, p_token: token })
   });
-  if (!rpc.ok) return json({ ok: false, error: 'lookup failed' }, 502);
+  if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
   const rows = await rpc.json();
   const b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
-  if (!b) return json({ ok: false, error: 'not found' }, 404);
-
-  // The riders on this booking = the rows the client named, kept only if actually owned.
-  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id)) : [b];
+  if (!b) return json({ ok: false, error: "not found" }, 404);
+  // The party is the rider's own bookings on THIS ride that are still live: the ids come from the
+  // device, and a stale or edited list put another night's booking, or a cancelled one, on the
+  // pass - in its rider count, its bike types and its price.
+  const _off = (r) => ["cancelled", "noshow", "removed"].includes(String(r.status || ""));
+  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || !_off(r))) : [b];
   if (!group.some((r) => r.id === b.id)) group = [b];
-
+  // The booking rows carry no session times - queue_entries holds the date and the day, not
+  // the clock - so the pass had none, and every pass expired at midnight. Read the session
+  // itself, through the same door the rider's own app uses: list_sessions answers with what
+  // THIS customer may see, so a tag-gated ride still resolves and nothing else leaks.
+  // PostgREST filters a set-returning RPC like a table, so asking for the one id brings back
+  // that row alone instead of every session ever run - egress is metered, and a pass needs one.
+  // The find() below still picks by id, so the answer is right even if the filter were ignored.
+  let sess = null;
+  if (b.session_id != null) {
+    try {
+      const sr = await fetch(`${SUPA}/rest/v1/rpc/list_sessions?id=eq.${encodeURIComponent(b.session_id)}`, {
+        method: "POST",
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_id: customerId, p_token: token })
+      });
+      if (sr.ok) {
+        const all = await sr.json();
+        if (Array.isArray(all)) sess = all.find((x) => x && x.id === b.session_id) || null;
+      }
+    } catch (e) { /* the pass is still worth issuing without it */ }
+  }
+  // A ride staff approve: the app offers the pass only once the rider is approved AND the list
+  // is published (_walletOk), and its QR carries no queue number (bookingRef). The server has to
+  // hold the same line, or a rider asking here directly gets a signed ticket - queue number and
+  // all - for a place they have not been given. A booking that carries an approval state but
+  // whose session could not be read cannot be checked, so it is not issued either.
+  const approvalRide = sess ? _isApprovalRide(sess) : b.approval != null;
+  if (approvalRide) {
+    if (!sess) return json({ ok: false, error: "session unavailable" }, 503);
+    if (b.approval !== "approved" || !_commPublished(sess)) return json({ ok: false, error: "not confirmed" }, 409);
+    group = group.filter((r) => r.approval === "approved");
+  }
   try {
-    const pkpass = await buildPkpass(b, { p12b64, p12pw, passTypeId, teamId, addons, group });
+    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, group, sess, approvalRide });
     return new Response(pkpass, {
       headers: {
-        'Content-Type': 'application/vnd.apple.pkpass',
-        'Content-Disposition': `attachment; filename="booking-${b.queue_num}.pkpass"`,
-        'Cache-Control': 'no-store',
-      },
+        "Content-Type": "application/vnd.apple.pkpass",
+        // Named by the booking ref, not the queue number: on a ride staff approve the number is
+        // never the rider's to see, and a file name is somewhere they would see it.
+        "Content-Disposition": `attachment; filename="booking-${String(b.id || "").slice(0, 6)}.pkpass"`,
+        "Cache-Control": "no-store"
+      }
     });
   } catch (e) {
-    return json({ ok: false, error: 'sign failed: ' + (e && e.message) }, 500);
+    // The detail (a p12 password, a failed certificate fetch) is for the logs, not the rider's toast.
+    console.error("wallet-pass: sign failed", (e && e.stack) || e);
+    return json({ ok: false, error: "sign failed" }, 500);
   }
 }
-
 async function buildPkpass(b, cfg) {
-  const group = (Array.isArray(cfg.group) && cfg.group.length) ? cfg.group : [b];
+  const group = Array.isArray(cfg.group) && cfg.group.length ? cfg.group : [b];
   const single = group.length === 1;
-  const ref6 = b.id ? String(b.id).slice(0, 6) : '';
-  const primaryNum = b.queue_num != null ? String(b.queue_num) : '';
-  const barcodeMsg = ['MMC', primaryNum, ref6].filter(Boolean).join('-'); // matches the app scanner
-
-  // All queue numbers on the booking, e.g. "#6" | "#6-#8" | "#6, #7, #9".
-  const nums = group.map((r) => (r.queue_num != null ? Number(r.queue_num) : null))
-    .filter((n) => n != null).sort((a, c) => a - c);
-  const numsDisplay = _numsDisplay(nums) || `#${primaryNum}`;
-
-  const when = `${b.session_day || ''} ${b.session_date || ''}`.trim();
-  const shortWhen = _shortWhen(b.session_day, b.session_date); // "Sun 19 Jul" for the header (glance value)
-  const time = b.session_time || '';                            // "9 PM - 11 PM"
-  const dates = _sessionDates(b); // { start, end } ISO-8601 (Jeddah +03:00), or null if unparseable
-
-  // Riders: a name for a solo booking, a count for a group.
-  const ridersValue = single ? (b.name || '') : `${group.length} riders`;
-  // Bike type: show it if everyone picked the same, else "Mixed".
+  const ref6 = b.id ? String(b.id).slice(0, 6) : "";
+  const sess = cfg.sess || null;
+  const ride = _rideOf(sess);
+  const skin = RIDES[ride] || RIDES.jcc;
+  // A ride staff approve never shows a rider their place in the order - not on the app's card,
+  // not in its QR code - and the pass is the same ticket. It names the ride where the number
+  // goes, and its code carries the ref alone (the desk scanner reads both forms, like the app's
+  // bookingRef). Without the session to ask, a booking that carries an approval verdict is
+  // taken to be one of those rides: hiding a number wrongly costs less than showing one.
+  // onRequestPost has already decided (cfg.approvalRide, from _isApprovalRide) when it could.
+  const hideNum = cfg.approvalRide != null ? !!cfg.approvalRide : sess
+    ? sess.event_kind === "community" && sess.ride_kind !== "snd96" && sess.needs_approval !== false
+    : b.approval != null && b.approval !== "";
+  const primaryNum = !hideNum && b.queue_num != null ? String(b.queue_num) : "";
+  const barcodeMsg = ["MMC", primaryNum, ref6].filter(Boolean).join("-");
+  const nums = group.map((r) => r.queue_num != null ? Number(r.queue_num) : null).filter((n) => n != null).sort((a, c) => a - c);
+  const when = `${b.session_day || ""} ${b.session_date || ""}`.trim();
+  const shortWhen = _shortWhen(b.session_day, b.session_date);
+  const clock = _sessTimes(sess);
+  const collectStr = clock ? _hhmm(clock.collectMin) : "";
+  const startStr = clock ? _hhmm(clock.startMin) : "";
+  const rideName = (sess && sess.title) || skin.venue;
+  const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || `#${primaryNum}`;
+  const time = _sessClock(sess) || b.session_time || "";
+  const dates = _sessionDates(b, clock);
+  // A booking that is over, or was called off, must not read as a live ticket. Apple cannot
+  // take a pass off a phone - only the rider can delete one - but a pass built for a booking
+  // that is no longer live is marked void, so it shows as void rather than as a ticket.
+  const dead = ["done", "cancelled", "noshow", "removed"].includes(String(b.status || ""));
+  const ridersValue = single ? b.name || "" : `${group.length} riders`;
   const types = [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter(Boolean))];
-  const bikeType = types.length === 1 ? types[0] : (types.length > 1 ? 'Mixed' : '');
-
-  // Total = every rider's rental (from the trusted rows) + all add-ons (client-resolved).
+  const bikeType = types.length === 1 ? types[0] : types.length > 1 ? "Mixed" : "";
   const addons = Array.isArray(cfg.addons) ? cfg.addons : [];
-  const rentalSum = group.reduce((s, r) =>
-    s + ((r.price != null && r.price !== '' && !Number.isNaN(+r.price)) ? +r.price : 0), 0);
+  const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
   const addonSum = addons.reduce((s, a) => s + (Number(a.p) || 0), 0);
   const grand = Math.round((rentalSum + addonSum) * 100) / 100;
-  const priceStr = (rentalSum || addonSum) ? `SAR ${grand}` : '';
-
-  // Best practice: keep secondary + auxiliary to ~4 fields total on an event ticket with a QR.
+  const priceStr = rentalSum || addonSum ? `SAR ${grand}` : "";
+  // The queue number leads. It is what the desk asks for and what the rider has to read out,
+  // so it takes the biggest line on the pass, and the name it belongs to keeps the other half:
+  // the desk reads a number and a person off one line. The two clock times sit together below,
+  // where collection followed by departure reads as one sequence rather than as two starts.
+  const primary = [];
+  primary.push({ key: "queue", label: hideNum ? "RIDE" : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
+  if (ridersValue) primary.push({ key: "riders", label: single ? "RIDER" : "RIDERS", value: ridersValue });
   const secondary = [];
-  if (time) secondary.push({ key: 'time', label: 'TIME', value: time });
-  if (ridersValue) secondary.push({ key: 'riders', label: single ? 'RIDER' : 'RIDERS', value: ridersValue });
-
+  // A ride that gathers has no bikes to collect: that time is when to turn up.
+  if (collectStr) secondary.push({
+    key: "collect",
+    label: _gathersTime(sess) ? "GATHERING TIME" : "BIKE COLLECTION",
+    value: collectStr,
+  });
+  if (startStr) secondary.push({ key: "start", label: "RIDE STARTS", value: startStr });
   const auxiliary = [];
-  if (bikeType) auxiliary.push({ key: 'bike', label: 'BIKE', value: bikeType });
-  if (priceStr) auxiliary.push({ key: 'total', label: 'TOTAL', value: priceStr });
-
-  // Back-of-pass rider list (only for a group) and add-on list.
+  if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
+  if (priceStr) auxiliary.push({ key: "total", label: "TOTAL", value: priceStr });
   const ridersBack = single ? [] : [{
-    key: 'riders_list', label: 'Riders',
-    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0))
-      .map((r) => `#${r.queue_num} ${r.name || ''}${_bikeLabel(r.type_preference) ? ' - ' + _bikeLabel(r.type_preference) : ''}`.trim())
-      .join('\n'),
+    key: "riders_list",
+    label: "Riders",
+    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
-  const addonsBack = addons.length
-    ? [{ key: 'addons', label: 'Add-ons', value: addons.map((a) => `${a.n}${a.q > 1 ? ' x' + a.q : ''} - SAR ${a.p}`).join('\n') }]
-    : [];
-
+  const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
+  const meetUrl = _meetUrl(sess);
+  const place = _meetPlace(sess);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
     teamIdentifier: cfg.teamId,
     serialNumber: String(b.id),
-    organizationName: 'MicroMobility Rentals',
-    description: `Booking ${numsDisplay} - Jeddah Corniche Circuit`,
-    foregroundColor: 'rgb(242,245,242)',
-    backgroundColor: 'rgb(7,9,11)',
-    labelColor: 'rgb(0,229,133)',
+    organizationName: "MicroMobility Rentals",
+    description: hideNum ? `Booking - ${rideName}` : `Booking ${numsDisplay} - ${rideName}`,
+    foregroundColor: "rgb(242,245,242)",
+    backgroundColor: skin.bg,
+    labelColor: skin.label,
     sharingProhibited: true,
-    // Surface on the lock screen around the ride time, and grey out after it ends.
-    ...(dates ? { relevantDate: dates.start, expirationDate: dates.end } : {}),
-    barcodes: [{ format: 'PKBarcodeFormatQR', message: barcodeMsg, messageEncoding: 'iso-8859-1', altText: numsDisplay }],
+    // Surface on the lock screen when bikes start going out, and expire when the night ends:
+    // an expired pass leaves the stack and files itself away on its own.
+    ...dates ? { relevantDate: dates.collect || dates.start, expirationDate: dates.end } : {},
+    ...dead ? { voided: true } : {},
+    barcodes: [{ format: "PKBarcodeFormatQR", message: barcodeMsg, messageEncoding: "iso-8859-1", altText: numsDisplay }],
     // keep the legacy single-barcode field too for older iOS
-    barcode: { format: 'PKBarcodeFormatQR', message: barcodeMsg, messageEncoding: 'iso-8859-1', altText: numsDisplay },
-    locations: [{ latitude: 21.6266, longitude: 39.1099, relevantText: 'Your ride is nearby - the Circuit is just ahead' }],
+    barcode: { format: "PKBarcodeFormatQR", message: barcodeMsg, messageEncoding: "iso-8859-1", altText: numsDisplay },
+    // Lock-screen relevance at the place the ride actually meets. Only the circuit's own meeting
+    // point, or a custom one whose link carries coordinates, can be placed; a ride that meets
+    // somewhere the pass cannot pin gets no location rather than the circuit's.
+    ...place ? { locations: [{ latitude: place.lat, longitude: place.lng, relevantText: place.text }] } : {},
     // Semantic tags let iOS drive Live Activities, lock-screen relevance and the event guide.
     semantics: {
-      eventName: 'Jeddah Corniche Circuit ride',
-      venueName: 'Jeddah Corniche Circuit',
-      venueLocation: { latitude: 21.6266, longitude: 39.1099 },
-      eventType: 'PKEventTypeGeneric',
-      ...(dates ? { eventStartDate: dates.start, eventEndDate: dates.end } : {}),
+      eventName: rideName,
+      venueName: skin.venue,
+      ...place ? { venueLocation: { latitude: place.lat, longitude: place.lng } } : {},
+      eventType: "PKEventTypeGeneric",
+      ...dates ? { eventStartDate: dates.start, eventEndDate: dates.end } : {}
     },
     eventTicket: {
       // Header is the ONLY field visible when the pass is collapsed in the stack — put the
       // most useful glance value (the date) here so a rider can find this pass among others.
-      headerFields: [{ key: 'date', label: 'SESSION', value: shortWhen || 'Circuit' }],
-      primaryFields: [{ key: 'queue', label: single ? 'QUEUE' : 'QUEUE NUMBERS', value: numsDisplay }],
+      headerFields: [{ key: "date", label: "SESSION", value: shortWhen || "Circuit" }],
+      primaryFields: primary,
       secondaryFields: secondary,
       auxiliaryFields: auxiliary,
       backFields: [
-        { key: 'when', label: 'Session', value: `${when}${time ? ' · ' + time : ''}`.trim() },
-        { key: 'venue', label: 'Venue', value: 'Jeddah Corniche Circuit' },
-        { key: 'directions', label: 'Directions', value: `<a href="${DIRECTIONS}">Open in Maps</a>` },
+        { key: "when", label: "Session", value: `${when}${time ? " \xB7 " + time : ""}`.trim() },
+        ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
+        { key: "venue", label: "Venue", value: skin.venue },
+        // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
+        { key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` },
         ...ridersBack,
         ...addonsBack,
-        { key: 'pay', label: 'Payment', value: 'Pay at the booth — cash, mada or STC Pay.' },
-        { key: 'help', label: 'Good to know', value: 'Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked.' },
-        { key: 'ref', label: 'Reference', value: barcodeMsg },
-      ],
-    },
+        { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },
+        { key: "help", label: "Good to know", value: "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." },
+        { key: "ref", label: "Reference", value: barcodeMsg }
+      ]
+    }
   };
-
-  // Assemble the bundle: pass.json + images, then manifest (SHA-1 of each), then signature.
   const files = {};
-  files['pass.json'] = strBytes(JSON.stringify(pass));
-  for (const [name, b64] of Object.entries(PASS_IMAGES)) files[name] = b64Bytes(b64);
-
+  files["pass.json"] = strBytes(JSON.stringify(pass));
+  // A ride with art of its own replaces only the files it names; the icon stays MicroMobility.
+  const art = { ...PASS_IMAGES, ...(RIDE_IMAGES[ride] || {}) };
+  for (const [name, b64] of Object.entries(art)) files[name] = b64Bytes(b64);
   const manifest = {};
-  for (const [name, bytes] of Object.entries(files)) manifest[name] = sha1hex(bytes);
+  for (const [name, bytes] of Object.entries(files)) manifest[name] = await sha1hex(bytes);
   const manifestStr = JSON.stringify(manifest);
-  files['manifest.json'] = strBytes(manifestStr);
-
-  const wwdrPem = await getWWDR(); // Apple intermediate, fetched + cached
-  files['signature'] = signManifest(manifestStr, cfg.p12b64, cfg.p12pw, wwdrPem);
-
+  files["manifest.json"] = strBytes(manifestStr);
+  files["signature"] = await signDetached(cfg.signer, strBytes(manifestStr), [await getWWDR()]);
   return zipSync(files, { level: 6 });
 }
-
-// Render a sorted list of queue numbers compactly: [6] -> "#6", [6,7,8] -> "#6-#8"
-// (consecutive), otherwise "#6, #7, #9".
 function _numsDisplay(nums) {
-  if (!nums || !nums.length) return '';
+  if (!nums || !nums.length) return "";
   if (nums.length === 1) return `#${nums[0]}`;
-  const consecutive = nums.every((n, i) => i === 0 || n === nums[i - 1] + 1);
+  const consecutive = nums.every((n, i2) => i2 === 0 || n === nums[i2 - 1] + 1);
   if (consecutive) return `#${nums[0]}-#${nums[nums.length - 1]}`;
-  return nums.map((n) => `#${n}`).join(', ');
+  return nums.map((n) => `#${n}`).join(", ");
 }
-
-// Short glance date for the header, e.g. "Sunday" + "19 Jul 2026" -> "Sun 19 Jul".
 function _shortWhen(day, date) {
-  const d = String(day || '').trim().slice(0, 3);
-  const dt = String(date || '').trim().replace(/\s*\d{4}\s*$/, ''); // drop the year
+  const d = String(day || "").trim().slice(0, 3);
+  const dt = String(date || "").trim().replace(/\s*\d{4}\s*$/, "");
   return `${d} ${dt}`.trim();
 }
-
-// Parse the booking's date + time strings into ISO-8601 datetimes in Jeddah time (+03:00,
-// Arabia Standard Time, no DST). Returns { start, end } or null if the strings can't be read.
-// Built by hand (no Date parsing) so a locale quirk can never throw and break the pass.
 const _MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
-function _sessionDates(b) {
+function _meetUrl(sess) {
+  const u = sess && sess.meet_url ? String(sess.meet_url) : "";
+  return /^https:\/\//.test(u) ? u : DIRECTIONS;
+}
+const CIRCUIT = { lat: 21.6266, lng: 39.1099, text: "Your ride is nearby - the Circuit is just ahead" };
+// Where the ride meets, as coordinates. No link of its own means the circuit (the directions
+// link is the circuit's too). A link of its own is placed only when it spells out coordinates
+// (".../@21.5,39.1,17z", "?q=21.5,39.1", "?query=..." and the like); a short maps.app.goo.gl
+// link does not, and then there is no place rather than the wrong one.
+function _meetPlace(sess) {
+  const u = _meetUrl(sess);
+  if (u === DIRECTIONS) return CIRCUIT;
+  let s = u;
+  try { s = decodeURIComponent(u); } catch (e) { /* keep the raw link */ }
+  const m = s.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/) || s.match(/[?&](?:q|query|ll|destination|daddr)=(?:loc:)?(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/);
+  if (!m) return null;
+  const lat = +m[1], lng = +m[2];
+  if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) return null;
+  return { lat, lng, text: "Your ride's meeting point is nearby" };
+}
+function _attr(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+// The app's own tests (_isCommunity, _isApprovalRide, _commPublished), read off the same row.
+function _isCommunity(s) {
+  return !!s && s.event_kind === "community" && s.ride_kind !== "snd96";
+}
+function _isApprovalRide(s) {
+  return _isCommunity(s) && s.needs_approval !== false;
+}
+function _commPublished(s) {
+  return _isCommunity(s) && s.hide_queue === false;
+}
+function _sessionDates(b, clock) {
   try {
-    const md = String(b.session_date || '').match(/(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})/);
-    if (!md) return null;
-    const mo = _MONTHS[md[2].slice(0, 3).toLowerCase()];
+    // queue_entries stores the date as plain ISO, so that is the form to read first. The
+    // long form ("23 Sep 2026") is still accepted for anything that hands one over. Matching
+    // only the long form meant no date ever parsed: every pass was built without a
+    // relevantDate and without an expirationDate, so none of them surfaced on the lock screen
+    // when the ride came round, and none of them ever went stale.
+    const _raw = String(b.session_date || "");
+    const _iso = _raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    const md = _iso ? null : _raw.match(/(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})/);
+    if (!_iso && !md) return null;
+    const mo = _iso ? +_iso[2] : _MONTHS[md[2].slice(0, 3).toLowerCase()];
     if (!mo) return null;
-    const day = +md[1], year = +md[3];
-    const p2 = (n) => String(n).padStart(2, '0');
-    const iso = (h, min) => `${year}-${p2(mo)}-${p2(day)}T${p2(h)}:${p2(min)}:00+03:00`;
+    const day = _iso ? +_iso[3] : +md[1], year = _iso ? +_iso[1] : +md[3];
+    const p2 = (n) => String(n).padStart(2, "0");
+    // Minutes from the start of the session's own day, as a Jeddah timestamp. Counting past 24:00
+    // rolls into the next day, so a ride that ends at or after midnight ends the day after.
+    const at = (min) => {
+      const t = new Date(Date.UTC(year, mo - 1, day) + min * 6e4);
+      return `${t.getUTCFullYear()}-${p2(t.getUTCMonth() + 1)}-${p2(t.getUTCDate())}T${p2(t.getUTCHours())}:${p2(t.getUTCMinutes())}:00+03:00`;
+    };
+    const endOfDay = (min) => Math.floor(min / 1440) * 1440 + 23 * 60 + 59;
     const parseT = (s) => {
       const t = s.match(/(\d{1,2})(?::(\d{2}))?\s*([AaPp])/);
-      let h = +t[1]; const min = t[2] ? +t[2] : 0; const pm = /p/i.test(t[3]);
+      let h = +t[1];
+      const min = t[2] ? +t[2] : 0;
+      const pm = /p/i.test(t[3]);
       if (pm && h !== 12) h += 12;
       if (!pm && h === 12) h = 0;
-      return iso(h, min);
+      return h * 60 + min;
     };
-    const times = String(b.session_time || '').match(/\d{1,2}(?::\d{2})?\s*[AaPp][Mm]/g) || [];
-    const start = times.length ? parseT(times[0]) : iso(0, 0);
-    const end = times.length >= 2 ? parseT(times[times.length - 1]) : iso(23, 59);
-    return { start, end };
+    if (clock) {
+      return {
+        collect: clock.collectMin != null ? at(clock.collectMin) : null,
+        start: at(clock.startMin),
+        // A ride with no end on its clock (the ones staff approve) runs out at the end of its day.
+        end: at(clock.endMin != null ? clock.endMin : endOfDay(clock.startMin))
+      };
+    }
+    const times = String(b.session_time || "").match(/\d{1,2}(?::\d{2})?\s*[AaPp][Mm]/g) || [];
+    const startMin = times.length ? parseT(times[0]) : 0;
+    let endMin = times.length >= 2 ? parseT(times[times.length - 1]) : endOfDay(startMin);
+    if (times.length >= 2 && endMin <= startMin) endMin += 1440; // "9:00 PM - 12:30 AM"
+    return { collect: null, start: at(startMin), end: at(endMin) };
   } catch (e) {
     return null;
   }
 }
-
-// Sanitize the client-supplied add-on list: cap count and lengths, coerce types. This is
-// display-only text (ownership is verified separately), so we just keep it sane and bounded.
 function _cleanAddons(a) {
   if (!Array.isArray(a)) return [];
-  return a.slice(0, 20).map((x) => ({
-    n: String((x && x.n) || '').replace(/\s+/g, ' ').trim().slice(0, 60),
-    q: Math.max(1, Math.min(99, parseInt(x && x.q, 10) || 1)),
-    p: Math.max(0, Math.min(100000, Math.round((Number(x && x.p) || 0) * 100) / 100)),
-  })).filter((x) => x.n);
+  return a.slice(0, 20).map((x2) => ({
+    n: String(x2 && x2.n || "").replace(/\s+/g, " ").trim().slice(0, 60),
+    q: Math.max(1, Math.min(99, parseInt(x2 && x2.q, 10) || 1)),
+    p: Math.max(0, Math.min(1e5, Math.round((Number(x2 && x2.p) || 0) * 100) / 100))
+  })).filter((x2) => x2.n);
 }
-
-// Friendly bike-type label for the pass (matches the app's wording).
+// What the rider needs to know about when: the moment bikes start going out, and the moment
+// the ride leaves. A ride staff approve stores its clock as "gathering - start", so both
+// numbers are already there and both are read straight off it. Every other ride stores
+// "start - end": the ride leaves at the first, and bikes go out 45 minutes before it, which
+// is a quarter past eight for the nine o'clock circuit sessions.
+const COLLECT_BEFORE_MIN = 45;
+function _sessTimes(sess) {
+  const raw = _sessClock(sess);
+  const parts = String(raw).split("-").map((x) => x.trim()).filter(Boolean);
+  if (parts.length < 1) return null;
+  const approval = _gathersTime(sess);
+  const toMin = (t) => { const m = /^(\d{1,2}):(\d{2})$/.exec(t); return m ? (+m[1]) * 60 + (+m[2]) : null; };
+  let startMin = toMin(approval ? parts[1] || parts[0] : parts[0]);
+  if (startMin == null) return null;
+  // Staff set the collection time on the session itself. A ride they approve keeps its
+  // gathering time as that moment; anything with no time set falls back to three quarters
+  // of an hour before the ride leaves.
+  const set = toMin(_sessSlot(sess, "_collect"));
+  const collectMin = approval ? toMin(parts[0]) : (set != null ? set : Math.max(0, startMin - COLLECT_BEFORE_MIN));
+  // Gathering before midnight for a ride that leaves after it: the ride leaves the next day.
+  if (approval && collectMin != null && startMin < collectMin) startMin += 1440;
+  let endMin = approval ? null : toMin(parts[1] || "");
+  // A ride that runs past midnight ("21:00 - 00:30") ends the next day. Read as the same day,
+  // its end fell before its start, and the pass expired on the morning of the ride.
+  if (endMin != null && endMin <= startMin) endMin += 1440;
+  return { collectMin, startMin, endMin };
+}
+function _sessSlot(sess, key) {
+  try {
+    const slots = sess && sess.bike_slots ? JSON.parse(sess.bike_slots) : null;
+    return (slots && slots[key]) || "";
+  } catch (e) { return ""; }
+}
+function _sessClock(sess) {
+  try {
+    const slots = sess && sess.bike_slots ? JSON.parse(sess.bike_slots) : null;
+    return (slots && slots._time) || "";
+  } catch (e) { return ""; }
+}
+// Does this ride's _time read as "gather, then set off", or as a plain "starts - ends"?
+// It used to be inferred from community + needs_approval, which is true of the pool session
+// and the T100 prep as well - and those do NOT gather. Their _time is an ordinary start-end
+// window, so the pass printed the session's END as the moment the ride leaves, and dropped
+// the end time entirely, leaving the pass live for hours after the session was over.
+// The app keys this off KIND_TRAITS.gathering; this is the same table.
+const GATHERS = { saturday: true, snd96: true, petromin: false, swim: false, workshop: false, jcc: false };
+function _gathersTime(sess) {
+  // Needing staff approval is NOT what makes a ride gather: the National Day ride gathers
+  // and is open to all. The ride kind decides, exactly as KIND_TRAITS does in the app — and
+  // the kind alone, because the National Day ride is no longer under the community umbrella.
+  return !!sess && GATHERS[_rideOf(sess)] === true;
+}
+// Each ride is told apart in a crowded Wallet by its own colour, and named by its own words.
+const RIDES = {
+  saturday: { bg: "rgb(9,40,26)", label: "rgb(61,220,150)", venue: "Saturday Social Ride" },
+  // The one ride that does not take the near-black field the others use: a dark maroon read
+  // as muddy brown rather than as a colour, and the salmon labels on it looked washed out.
+  // Petromin commits to its red instead - the same rgb(163,59,46) the app tints this ride
+  // with everywhere else - with a pale warm tint for the labels. Both clear AA against the
+  // near-white foreground (5.9:1) and the field (4.9:1); do not darken the label towards
+  // salmon again, it drops to 2.7:1.
+  petromin: { bg: "rgb(163,59,46)", label: "rgb(255,214,203)", venue: "Petromin Wednesday Ride" },
+  swim:     { bg: "rgb(10,30,46)", label: "rgb(122,190,240)", venue: "Triathlon Pool Session" },
+  workshop: { bg: "rgb(30,22,48)", label: "rgb(183,162,240)", venue: "T100 Triathlon Prep" },
+  // Saudi National Day 96 - the guideline's deep green field, with the lime tint on labels.
+  snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },
+  // The circuit's own card colours: the navy field it is drawn on, with the pale cyan its
+  // meta line uses. Both clear AA on the near-white foreground.
+  jcc:      { bg: "rgb(6,52,111)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
+};
+function _rideOf(sess) {
+  if (!sess) return "jcc";
+  // The National Day ride is a circuit night that is still itself: it left the umbrella, so
+  // asking the umbrella first answered "jcc" and the pass came out in the circuit's black,
+  // printed the gathering time as RIDE STARTS and invented a bike collection 45 minutes
+  // before it. Its kind is read first, exactly as _rideKind does in the app.
+  if (sess.ride_kind === "snd96") return "snd96";
+  if (sess.event_kind !== "community") return "jcc";
+  const k = sess.ride_kind;
+  return k === "petromin" || k === "swim" || k === "workshop" ? k : "saturday";
+}
+function _hhmm(min) {
+  if (min == null) return "";
+  const h24 = Math.floor(min / 60) % 24, m = min % 60;
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${h}:${String(m).padStart(2, "0")} ${h24 < 12 ? "AM" : "PM"}`;
+}
 function _bikeLabel(t) {
-  const k = String(t || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+  const k = String(t || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
   const map = {
-    road: 'Road', hybrid: 'Hybrid', mountain: 'Mountain', gravel: 'Gravel',
-    any: 'Any', roadcarbon: 'Road Carbon',
+    road: "Road",
+    hybrid: "Hybrid",
+    mountain: "Mountain",
+    gravel: "Gravel",
+    any: "Any",
+    roadcarbon: "Road Carbon"
   };
   if (map[k]) return map[k];
-  const s = String(t || '').trim();
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  const s = String(t || "").trim();
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : "";
 }
-
-// ── crypto helpers (node-forge, pure JS — works in the Workers runtime) ──
-function sha1hex(bytes) {
-  const md = forge.md.sha1.create();
-  md.update(forge.util.createBuffer(bytes).getBytes());
-  return md.digest().toHex();
-}
-
-function _seedForge() {
-  try {
-    const src = (typeof globalThis !== 'undefined' && globalThis.crypto) ? globalThis.crypto : (typeof crypto !== 'undefined' ? crypto : null);
-    if (!src || !src.getRandomValues) return;
-    const seedSync = (needed) => {
-      const b = new Uint8Array(needed || 32); src.getRandomValues(b);
-      let out = ''; for (let i = 0; i < b.length; i++) out += String.fromCharCode(b[i]); return out;
-    };
-    forge.random.seedFileSync = seedSync;
-    forge.random.seedFile = (needed, cb) => cb(null, seedSync(needed));
-    // top up the entropy pools immediately so the first sign never blocks on a seed file
-    forge.random.collect(seedSync(32));
-  } catch (e) { /* best-effort */ }
-}
-function signManifest(manifestStr, p12b64, pw, wwdrPem) {
-  _seedForge();
-  const der = forge.util.decode64(p12b64);
-  const p12 = forge.pkcs12.pkcs12FromAsn1(forge.asn1.fromDer(der), false, pw);
-  let key = null, cert = null;
-  for (const sc of p12.safeContents) for (const bag of sc.safeBags) {
-    if (bag.key) key = bag.key;
-    if (bag.cert && !cert) cert = bag.cert;
-  }
-  if (!key || !cert) throw new Error('p12 missing key or cert');
-  const wwdr = forge.pki.certificateFromPem(wwdrPem);
-  const p7 = forge.pkcs7.createSignedData();
-  p7.content = forge.util.createBuffer(manifestStr, 'utf8');
-  p7.addCertificate(cert);
-  p7.addCertificate(wwdr);
-  p7.addSigner({
-    key,
-    certificate: cert,
-    digestAlgorithm: forge.pki.oids.sha256,
-    authenticatedAttributes: [
-      { type: forge.pki.oids.contentType, value: forge.pki.oids.data },
-      { type: forge.pki.oids.messageDigest },
-      { type: forge.pki.oids.signingTime },
-    ],
-  });
-  p7.sign({ detached: true });
-  const derSig = forge.asn1.toDer(p7.toAsn1()).getBytes();
-  return binStrToBytes(derSig);
-}
-
-// Apple WWDR G4 intermediate — required in the signature chain. Fetched from Apple's CA
-// (DER) and cached for the isolate's lifetime; converted to PEM for forge.
-let _wwdrPem = null;
+// Apple's WWDR intermediate (G4), the second certificate in every pass signature. Fetched once per
+// isolate, as DER, from Apple.
+let _wwdr = null;
 async function getWWDR() {
-  if (_wwdrPem) return _wwdrPem;
-  const res = await fetch('https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer');
-  if (!res.ok) throw new Error('WWDR fetch failed');
-  const der = new Uint8Array(await res.arrayBuffer());
-  const asn1 = forge.asn1.fromDer(forge.util.createBuffer(binFromBytes(der)));
-  const cert = forge.pki.certificateFromAsn1(asn1);
-  _wwdrPem = forge.pki.certificateToPem(cert);
-  return _wwdrPem;
+  if (_wwdr) return _wwdr;
+  const res = await fetch("https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer");
+  if (!res.ok) throw new Error("WWDR fetch failed");
+  _wwdr = new Uint8Array(await res.arrayBuffer());
+  return _wwdr;
 }
-
-// ── byte helpers ──
-function strBytes(s) { return new TextEncoder().encode(s); }
+const configured = (env) => !!((env.APPLE_PASS_CERT_PEM && env.APPLE_PASS_KEY_PEM) || env.APPLE_PASS_P12_BASE64);
+// The signing key and certificate, opened once per isolate for a given set of credentials (a
+// failure is not kept, so a corrected secret takes effect on the next request).
+const _signers = new Map();
+function getSigner(env) {
+  const key = env.APPLE_PASS_CERT_PEM && env.APPLE_PASS_KEY_PEM
+    ? `pem:${env.APPLE_PASS_CERT_PEM}\n${env.APPLE_PASS_KEY_PEM}\n${env.APPLE_PASS_KEY_PASSWORD || ""}`
+    : `p12:${env.APPLE_PASS_P12_BASE64}\n${env.APPLE_PASS_P12_PASSWORD || ""}`;
+  let p = _signers.get(key);
+  if (!p) { p = loadSigner(env).catch((e) => { _signers.delete(key); throw e; }); _signers.set(key, p); }
+  return p;
+}
+async function loadSigner(env) {
+  if (env.APPLE_PASS_CERT_PEM && env.APPLE_PASS_KEY_PEM) {
+    const s = await importSigner(certPemToDer(env.APPLE_PASS_CERT_PEM), await keyPemToPkcs8(env.APPLE_PASS_KEY_PEM, env.APPLE_PASS_KEY_PASSWORD || ""));
+    s.source = "pem";
+    return s;
+  }
+  const p12 = await openP12(b64ToBytes(env.APPLE_PASS_P12_BASE64), env.APPLE_PASS_P12_PASSWORD || "");
+  const s = await importSigner(p12.cert, p12.keyPkcs8);
+  s.source = "p12 (" + p12.how + ")";
+  return s;
+}
+// GET ?selftest: the signature over a fixed manifest, and the certificate that made it.
+const SELFTEST_MANIFEST = '{"pass.json":"da39a3ee5e6b4b0d3255bfef95601890afd80709"}';
+export async function onRequestGet(context) {
+  const { request, env } = context;
+  if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
+  if (!configured(env) || !env.APPLE_PASS_TYPE_ID || !env.APPLE_TEAM_ID) return json({ ok: false, skipped: "wallet not configured" }, 501);
+  try {
+    const signer = await getSigner(env);
+    const wwdr = await getWWDR();
+    const signature = await signDetached(signer, strBytes(SELFTEST_MANIFEST), [wwdr]);
+    return json({ ok: true, source: signer.source, certificate: { subject: signer.info.subject, issuer: signer.info.issuerName, notAfter: signer.info.notAfter }, manifest: SELFTEST_MANIFEST, signature: bytesToB64(signature) });
+  } catch (e) {
+    console.error("wallet-pass: selftest failed", (e && e.stack) || e);
+    return json({ ok: false, error: String((e && e.message) || e) }, 500);
+  }
+}
+function strBytes(s) {
+  return new TextEncoder().encode(s);
+}
 function b64Bytes(b64) {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  for (let i2 = 0; i2 < bin.length; i2++) out[i2] = bin.charCodeAt(i2);
   return out;
 }
-function binStrToBytes(bin) {
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i) & 0xff;
-  return out;
-}
-function binFromBytes(bytes) {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
-  return s;
-}
-
 function json(obj, status = 200) {
-  return new Response(JSON.stringify(obj), { status, headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
 }

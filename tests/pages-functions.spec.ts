@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { unzipSync, strFromU8 } from 'fflate';
@@ -94,24 +95,14 @@ test.describe('the error ping to Discord', () => {
 });
 
 test.describe('the Apple Wallet pass', () => {
-  // A throwaway signing identity: node-forge (a dev dependency) makes a key, a self-signed
-  // certificate standing in for both the pass certificate and Apple's WWDR one, and the .p12.
-  let p12b64 = '', wwdrDer = new Uint8Array();
-  test.beforeAll(async () => {
-    const forge = (await import('node-forge' as string)).default;
-    const keys = forge.pki.rsa.generateKeyPair(1024);
-    const cert = forge.pki.createCertificate();
-    cert.publicKey = keys.publicKey;
-    cert.serialNumber = '01';
-    cert.validity.notBefore = new Date(Date.now() - 864e5);
-    cert.validity.notAfter = new Date(Date.now() + 864e5);
-    const attrs = [{ name: 'commonName', value: 'Pass Test' }];
-    cert.setSubject(attrs); cert.setIssuer(attrs);
-    cert.sign(keys.privateKey, forge.md.sha256.create());
-    const p12 = forge.pkcs12.toPkcs12Asn1(keys.privateKey, [cert], 'pw', { algorithm: '3des' });
-    p12b64 = forge.util.encode64(forge.asn1.toDer(p12).getBytes());
-    wwdrDer = Uint8Array.from(forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes(), (c: string) => c.charCodeAt(0));
-  });
+  // A throwaway signing identity, made with OpenSSL (tests/fixtures/wallet, password secret123): a
+  // self-signed test CA standing in for Apple's WWDR certificate, a "Pass Type ID" certificate under
+  // it, and the .p12 in the encoding Keychain Access still exports (3DES key, RC2-40 certificates,
+  // SHA-1 MAC) - the one the signer has to open in production.
+  const FIX = resolve(__dirname, 'fixtures', 'wallet');
+  const p12b64 = readFileSync(resolve(FIX, 'test-pass.p12')).toString('base64');
+  const wwdrDer = new Uint8Array(readFileSync(resolve(FIX, 'test-ca.der')));
+  const PW = 'secret123';
 
   const booking = { id: 'abcdef123456', session_id: 's1', session_date: '2026-09-23', session_day: 'Wednesday', queue_num: 7, name: 'Rider', status: 'waiting', approval: null as string | null, price: 50 };
   const circuit = { id: 's1', event_kind: 'rental', ride_kind: null as string | null, bike_slots: JSON.stringify({ _time: '21:00 - 23:00' }), meet_url: null as string | null, needs_approval: false, hide_queue: false };
@@ -119,7 +110,7 @@ test.describe('the Apple Wallet pass', () => {
   let sessionUrls: string[] = [];
   test.afterEach(() => { globalThis.fetch = realFetch; });
 
-  async function pass(b: typeof booking, sess: Record<string, unknown> | null, pw = 'pw', party: { rows?: (typeof booking)[]; groupIds?: string[] } = {}) {
+  async function pass(b: typeof booking, sess: Record<string, unknown> | null, pw = PW, party: { rows?: (typeof booking)[]; groupIds?: string[] } = {}) {
     sessionUrls = [];
     globalThis.fetch = (async (u: string | URL | Request) => {
       const url = String(u);
@@ -151,7 +142,7 @@ test.describe('the Apple Wallet pass', () => {
     const mate = { ...booking, id: 'mate01', queue_num: 8, name: 'Mate' };
     const gone = { ...booking, id: 'gone01', queue_num: 9, name: 'Gone', status: 'cancelled' };
     const other = { ...booking, id: 'othr01', session_id: 's2', queue_num: 3, name: 'Other night' };
-    const { json } = await pass(booking, circuit, 'pw', { rows: [mate, gone, other], groupIds: [booking.id, mate.id, gone.id, other.id] });
+    const { json } = await pass(booking, circuit, PW, { rows: [mate, gone, other], groupIds: [booking.id, mate.id, gone.id, other.id] });
     const riders = json.eventTicket.primaryFields.find((f: { key: string }) => f.key === 'riders');
     expect(riders.value).toBe('2 riders');
   });
@@ -190,6 +181,58 @@ test.describe('the Apple Wallet pass', () => {
     const res = await pass(booking, circuit, 'wrong password');
     expect(res.status).toBe(500);
     expect(res.body).toEqual({ ok: false, error: 'sign failed' });
+  });
+
+  test('the signature is a detached CMS SignedData over manifest.json that the certificate verifies, carrying the WWDR one too', async () => {
+    const W = await import('../scripts/wallet/sign.js' as string);
+    globalThis.fetch = (async (u: string | URL | Request) => {
+      const url = String(u);
+      if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([booking]));
+      if (url.includes('/rpc/list_sessions')) return new Response(JSON.stringify([circuit]));
+      return new Response(wwdrDer);
+    }) as typeof fetch;
+    const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+    const res = await post({
+      request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: booking.id }) }),
+      env: { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+    });
+    const files = unzipSync(new Uint8Array(await res.arrayBuffer()));
+    const manifest = JSON.parse(strFromU8(files['manifest.json']));
+    for (const [name, sha] of Object.entries(manifest)) expect(await W.sha1hex(files[name])).toBe(sha); // every file is hashed
+    const sig = files['signature'];
+    const info = W.read(sig, 0), [ctOid, wrap] = W.kids(sig, info);
+    expect(W.oidOf(sig, ctOid)).toBe('1.2.840.113549.1.7.2'); // signedData
+    const sd = W.kids(sig, wrap)[0], [ver, algs, encap, certs, signers] = W.kids(sig, sd);
+    expect(W.content(sig, ver)[0]).toBe(1);
+    expect(W.oidOf(sig, W.kids(sig, W.kids(sig, algs)[0])[0])).toBe('2.16.840.1.101.3.4.2.1'); // sha256
+    expect(W.kids(sig, encap)).toHaveLength(1); // detached: no eContent
+    expect(W.kids(sig, certs)).toHaveLength(2); // the signer's certificate and the WWDR one
+    const si = W.kids(sig, W.kids(sig, signers)[0]);
+    const attrs = W.kids(sig, si[3]);
+    const digestAttr = attrs.find((a: unknown) => W.oidOf(sig, W.kids(sig, a)[0]) === '1.2.840.113549.1.9.4');
+    const carried = W.content(sig, W.kids(sig, W.kids(sig, digestAttr)[1])[0]); // Attribute { type, SET { OCTET STRING } }
+    expect(W.hex(carried)).toBe(W.hex(await W.digest('SHA-256', files['manifest.json']))); // messageDigest is the manifest's
+    // The RSA signature is over the attributes as a SET; the pass certificate's own key verifies it.
+    const set = new Uint8Array(W.whole(sig, si[3])); set[0] = 0x31;
+    const p12 = await W.openP12(new Uint8Array(Buffer.from(p12b64, 'base64')), PW);
+    const tbs = W.kids(p12.cert, W.kids(p12.cert, W.read(p12.cert, 0))[0]);
+    const spki = W.whole(p12.cert, tbs[tbs[0].tag === 0xa0 ? 6 : 5]);
+    const pub = await crypto.subtle.importKey('spki', spki, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
+    expect(await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, pub, W.content(sig, si[5]), set)).toBe(true);
+  });
+
+  test('PEM credentials sign the same pass, and ?selftest names the certificate without a booking', async () => {
+    const env = { APPLE_PASS_CERT_PEM: readFileSync(resolve(FIX, 'test-pass-cert.pem'), 'utf8'), APPLE_PASS_KEY_PEM: readFileSync(resolve(FIX, 'test-pass-key.pem'), 'utf8'), APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' };
+    globalThis.fetch = (async () => new Response(wwdrDer)) as typeof fetch;
+    const get = await load('functions/api/wallet-pass.js', 'onRequestGet');
+    const res = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env });
+    expect(res.status).toBe(200);
+    const j = await res.json();
+    expect(j).toMatchObject({ ok: true, source: 'pem', certificate: { subject: 'Pass Type ID: pass.test.wallet', issuer: 'Test Root CA' } });
+    expect(j.signature.length).toBeGreaterThan(1000);
+    expect((await get({ request: new Request('https://site.test/api/wallet-pass'), env })).status).toBe(405); // a plain GET is not a pass
+    const off = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env: {} });
+    expect(off.status).toBe(501); // unconfigured says so
   });
 });
 

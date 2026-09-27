@@ -158,3 +158,12 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
   itself. In the source nothing is split: `_loadStaff` exists only in the built page.
 - Specs run against the built page: a customer-context call of a staff function is a no-op there,
   and `page.evaluate('goStaff()')` waits for the half to load (the stub returns a promise).
+
+## The wallet pass function is built, not hand-edited (2026-09-27)
+
+`functions/api/wallet-pass.js` is GENERATED: `npm run build:wallet` bundles `scripts/wallet/wallet-pass.src.js`
+with `sign.js` (WebCrypto RSA + hand-written DER, PKCS#12 and CMS; no node-forge) and `pass-images.js`.
+Edit the source and rebuild; CI refuses a stale bundle, exactly as for `index.html`. Credentials come
+as PEM (`APPLE_PASS_CERT_PEM` + `APPLE_PASS_KEY_PEM`, preferred) or the Keychain `.p12`
+(`APPLE_PASS_P12_BASE64` + password); `GET /api/wallet-pass?selftest` signs a fixed manifest and
+names the certificate it used, which is how a deploy is checked without a booking.
