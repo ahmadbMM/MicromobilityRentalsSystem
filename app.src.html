@@ -11728,7 +11728,7 @@ function renderSessions(){
             const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':'dot-red';
             const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('');
             return`<div class="bike-assign-card${sel?' selected':''}${busy?' busy':''}"
-              ${!busy?`onclick="toggleNewSessBike(${_ja(b.id)})"`:`title="${t('inUseLabel')}"`}>
+              ${!busy?`data-on-click="${_on("toggleNewSessBike",b.id)}"`:`title="${t('inUseLabel')}"`}>
               <div style="display:flex;gap:3px;align-items:center;margin-bottom:7px">${colorDots}</div>
               <div class="bike-assign-name">${esc(b.name)}</div>
               <div style="font-size:11px;color:var(--muted)"><span class="avail-dot ${dot}" aria-hidden="true" style="display:inline-block;vertical-align:middle"></span> ${esc(b.size)}</div>
@@ -11905,7 +11905,7 @@ function renderSessions(){
             const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':'dot-red';
             const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('');
             return`<div class="bike-assign-card${sel?' selected':''}${busy?' busy':''}"
-              ${!busy?`onclick="toggleAssignBike(${_ja(b.id)})"`:`title="${t('inUseElse')}"`}>
+              ${!busy?`data-on-click="${_on("toggleAssignBike",b.id)}"`:`title="${t('inUseElse')}"`}>
               <div style="display:flex;gap:3px;align-items:center;margin-bottom:7px">${colorDots}</div>
               <div class="bike-assign-name">${esc(b.name)}</div>
               <div style="font-size:11px;color:var(--muted)"><span class="avail-dot ${dot}" aria-hidden="true" style="display:inline-block;vertical-align:middle"></span> ${esc(b.size)} &middot; ${b.status==='available'?t('availLabel'):b.status==='in-use'?t('inUseLabel'):t('maintLabel')}</div>
@@ -20673,7 +20673,7 @@ function renderModal(){
       :`<div style="width:22px;height:22px;border-radius:50%;border:2px solid rgba(var(--tint-rgb),.15);flex-shrink:0"></div>`;
     const specs=[b.groupset,b.speeds?`${b.speeds}sp`:'',b.wheel_size,b.brake_type,b.weight_kg!=null?`${b.weight_kg} kg`:''].filter(Boolean).map(x=>esc(String(x))).join(' · ')||'—'; // free text from the bike form
     return`<tr style="border-bottom:1px solid rgba(var(--tint-rgb),.05);background:${sel?'rgba(var(--green-rgb),.05)':'transparent'};${unavail?'opacity:.32':'cursor:pointer'};transition:background .12s"
-      ${!unavail?`onclick="pickBike(${_ja(b.id)})" data-on-mouseover="${_on("_on_renderModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_3",_EV,_EL)}"`:''}>
+      ${!unavail?`data-on-click="${_on("pickBike",b.id)}" data-on-mouseover="${_on("_on_renderModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_3",_EV,_EL)}"`:''}>
       <td style="padding:10px 14px;text-align:center;width:44px">${selCell}</td>
       <td style="padding:10px 14px">
         <div style="font-weight:800;font-size:13px">${esc(b.name)}</div>
@@ -21362,7 +21362,7 @@ function renderBikes(_resultsOnly){
         <button class="btn-sm btn-muted" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
         ${b.status==='available'?`<button class="btn-sm btn-muted" data-on-click="${_on("setMaintenance",b.id)}">${t('maintBtn')}</button>`:''}${b.status==='available'?`<button class="btn-sm btn-muted" data-on-click="${_on("setMissing",b.id)}">${t('missingBtn')}</button>`:b.status==='missing'?`<button class="btn-sm btn-green" data-on-click="${_on("setMissing",b.id)}">${t('foundBtn')}</button>`:''}
         ${orphaned?`<button class="btn-sm btn-muted" data-on-click="${_on("releaseBike",b.id)}">${t('releaseBikeBtn')}</button>`:`<button class="btn-sm btn-${isRetired?'green':'muted'}" data-on-click="${_on(isMaint?'setMaintenance':'toggleRetire',b.id)}">${isRetired?t('restoreBtn'):t('retireBtn')}</button>`}
-        <button class="btn-sm btn-red" ${b.status!=='in-use'&&!isRetired?`onclick="delBike(${_ja(b.id)})"`:' disabled'}>${t('deleteBtn')}</button>
+        <button class="btn-sm btn-red" ${b.status!=='in-use'&&!isRetired?`data-on-click="${_on("delBike",b.id)}"`:' disabled'}>${t('deleteBtn')}</button>
       </div></td>
     </tr>`;
   }
@@ -21408,7 +21408,7 @@ function renderBikes(_resultsOnly){
           <div style="display:flex;gap:4px">
             <button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
             <button class="btn-sm btn-muted" style="flex:1" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
-            <button class="btn-sm btn-red" style="flex:1" ${b.status!=='in-use'&&!isRetiredG?`onclick="delBike(${_ja(b.id)})"`:' disabled'}>${t('deleteBtn')}</button>
+            <button class="btn-sm btn-red" style="flex:1" ${b.status!=='in-use'&&!isRetiredG?`data-on-click="${_on("delBike",b.id)}"`:' disabled'}>${t('deleteBtn')}</button>
           </div>
           ${orphaned?`<button class="btn-sm btn-muted" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("releaseBike",b.id)}">${t('releaseBikeBtn')}</button>`:`<button class="btn-sm btn-${isRetiredG?'green':'muted'}" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("toggleRetire",b.id)}">${isRetiredG?t('restoreBtn'):t('retireBtn')}</button>`}
           ${b.status==='available'||b.status==='missing'?`<button class="btn-sm btn-${b.status==='missing'?'green':'muted'}" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("setMissing",b.id)}">${b.status==='missing'?t('foundBtn'):t('missingBtn')}</button>`:''}
@@ -25035,7 +25035,7 @@ function renderWebsite(){
         const on=p.built&&(home?!cs:_webPageOn(p.key));
         const st=!p.built?`<span class="web-muted">${t('webPageNotBuilt')}</span>`:home?(cs?esc(t('webCsSwitch')):t('webPageLive')):on?(cs?t('webPageReady'):t('webPageLive')):t('webPageHidden');
         return`<tr><td>${esc(nm)}</td><td>${st}</td>
-        <td><input type="checkbox" class="web-toggle" role="switch" data-web-page="${esc(p.key)}" ${on?'checked':''} ${p.built&&!home?`onchange="_webSetPage(${_ja(p.key)},this.checked)"`:'disabled'} aria-label="${esc(nm+' · '+t('webColVisible'))}"></td>
+        <td><input type="checkbox" class="web-toggle" role="switch" data-web-page="${esc(p.key)}" ${on?'checked':''} ${p.built&&!home?`data-on-change="${_on("_webSetPage",p.key,_P("checked"))}"`:'disabled'} aria-label="${esc(nm+' · '+t('webColVisible'))}"></td>
         <td>${p.built?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_webPreview",home?'':'/'+p.key)}" aria-label="${esc(t('webPreviewPage')+' · '+nm)}">${t('webPreviewPage')}</button>`:''}</td></tr>`;}).join('')}
     </tbody></table></div>
   </div>`;

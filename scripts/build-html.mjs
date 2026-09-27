@@ -318,7 +318,7 @@ if (shrink < 0.05) {
 // /staff/ stub). An on*="..." attribute anywhere in the shipped markup would be dead on the page
 // - the build refuses it instead.
 for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
-  const bad = text.match(/\son[a-z]+="[^"]{0,80}/);
+  const bad = text.match(/[\s`'"]on[a-z]+=["'][^"']{0,80}/); // any quote or backtick before it too: five handlers hid behind a template literal's backtick until 2026-09-28
   if (bad) throw new Error(`build: ${name} still carries an inline handler, which the policy would block: ${bad[0]}`);
   if (/javascript:/i.test(text)) throw new Error(`build: ${name} carries a javascript: URL, which the policy would block`);
 }
