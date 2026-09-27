@@ -13045,11 +13045,14 @@ function renderCommAddModal(){
     +'<div class="form-group" style="margin:14px 0 10px"><label>'+t('colSession')+'</label>'
     +'<select data-on-change="'+_on('_on_caSess',_P('value'))+'">'+sess.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===S._caSess?' selected':'')+'>'+esc(dayLabel(s.day))+' '+esc(shortDate(s.session_date||s.id))+' · '+esc(_evName(s))+(s.status==='closed'?' ('+t('statusClosed')+')':'')+'</option>').join('')+'</select>'
     +(cur?'<div style="font-size:11px;color:'+(left>0?'var(--muted)':'var(--orange)')+';margin-top:5px;font-weight:700">'+left+' '+t('spotsLeft')+'</div>':'')+'</div>'
-    +'<div class="form-group" style="margin-bottom:10px"><label>'+t('commAddDestLbl')+'</label>'
+    // On an approval ride the second destination is Waiting: the rider holds a place and a number
+    // like any waiting rider and still awaits selection (approval pending). It used to be the
+    // waitlist (owner, 2026-09-27). A ride without approval has one list, so no toggle.
+    +((cur&&_isApprovalRide(cur))?('<div class="form-group" style="margin-bottom:10px"><label>'+t('commAddDestLbl')+'</label>'
     +'<div style="display:flex;gap:6px;margin-top:4px">'
-    +'<button type="button" class="toggle-btn'+(S._caDest==='list'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','list')+'">'+t('commAddDestList')+'</button>'
-    +'<button type="button" class="toggle-btn'+(S._caDest==='waitlist'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','waitlist')+'">'+t('waitlistLabel')+'</button>'
-    +'</div></div>'
+    +'<button type="button" class="toggle-btn'+(S._caDest!=='waiting'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','list')+'">'+t('commAddDestList')+'</button>'
+    +'<button type="button" class="toggle-btn'+(S._caDest==='waiting'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','waiting')+'">'+t('statusWaiting')+'</button>'
+    +'</div></div>'):'')
     +(_ownOk?('<label style="display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--green)">'
     +'<input type="checkbox"'+(S._caOwn?' checked':'')+' data-on-change="'+_on('_on_caOwn',_P('checked'))+'" style="width:16px;height:16px;accent-color:#0c7a3d">'
     +t('commAddOwnBike')+'</label>'):'') // nobody brings their own bike to a pool session
@@ -13081,19 +13084,19 @@ async function _saveCommAdd(){
   const fresh=picks.filter(c=>!_taken.has(c.id)&&!getQueue().some(e=>e.sessionId===sess.id&&e.customerId===c.id&&_live.includes(e.status)));
   if(fresh.length<picks.length)toast(t('commAddDup'),'warning');
   if(!fresh.length)return;
-  const toWaitlist=S._caDest==='waitlist';
   const comm=_isApprovalRide(sess),free=_isFreeRide(sess); // a seat-based ride: real prices, no approval flow
+  const pending=comm&&S._caDest==='waiting'; // Waiting on an approval ride: a place and a number now, the selection still to come
   const groupId=S._caGroup?uid():null; // one shared id = one roster group (buildQueueGroups keys on it)
   const own=S._caOwn&&_needsBike(sess)&&_ownOffered(sess);
-  const mkEntries=()=>{const base=nextQNum(sess.id);const wlBase=toWaitlist?nextWlNum(sess.id):0;return fresh.map((c,i)=>{
+  const mkEntries=()=>{const base=nextQNum(sess.id);return fresh.map((c,i)=>{
     const ty=own?'Own':((c.type_preference==='Own'||(c.type_preference==='Road Carbon'&&_noCarbon(sess)))?'Any':(c.type_preference||'Any')); // Own is comm-only pref; Road Carbon only where the ride offers it
-    return{id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:toWaitlist?wlBase+i:null,
+    return{id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:null,
     size:c.height?heightToSize(Number(c.height)):'',height:c.height||null,
     typePreference:ty,paid:false,assignedBikeId:null,
     sessionId:sess.id,sessionDay:sess.day,sessionDate:sess.session_date||sess.id,
-    queueNum:base+i,status:toWaitlist?'waitlist':'waiting',
+    queueNum:base+i,status:'waiting',
     registeredAt:new Date().toISOString(),walkIn:false,customerId:c.id,price:free?0:priceForType(ty),groupId,
-    approval:comm?(toWaitlist?'pending':'approved'):null};});}; // community: final list = selected, waitlist = awaiting selection
+    approval:comm?(pending?'pending':'approved'):null};});}; // community: final list = selected, waiting = awaiting selection
   let entries=mkEntries();
   let res=await sb.from('queue_entries').insert(entries.map(entryToDB));
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
@@ -13102,7 +13105,7 @@ async function _saveCommAdd(){
   }
   if(_writeErr(res,'add rider'))return;
   const names=entries.map(e=>e.name).join(', ');
-  logAction((S._caGroup?t('commAddGroupBtn'):t('commAddBtn'))+': '+names+' ('+(toWaitlist?t('waitlistLabel'):t('commAddDestList'))+')');
+  logAction((S._caGroup?t('commAddGroupBtn'):t('commAddBtn'))+': '+names+' ('+(pending?t('statusWaiting'):t('commAddDestList'))+')');
   await loadDataLight();
   toast((S._caGroup?t('commGroupAddedToast'):t('commAddedToast')).replace('{0}',names));
   S._caSel=null;S._caSelArr=[];
