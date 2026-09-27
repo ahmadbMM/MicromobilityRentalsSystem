@@ -2093,6 +2093,8 @@
   "errBikeName": "Introduce un nombre de bici.",
   "errBikeTypeReq": "Selecciona un tipo de bici.",
   "errBikeInUse": "No se puede cambiar el estado mientras está en uso.",
+  "errBikeHasHistory": "Esta bici ya se ha entregado antes, así que su historial se conserva: retírala en vez de eliminarla.",
+  "pinRequiredMsg": "La aprobación por PIN ha caducado. Introduce el PIN de nuevo.",
   "toastAccountCreated": "Cuenta creada.",
   "toastWelcomeBack": "Bienvenido de nuevo",
   "toastLoggedOut": "Sesión cerrada correctamente.",

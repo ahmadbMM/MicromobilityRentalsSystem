@@ -2093,6 +2093,8 @@
   "errBikeName": "Veuillez saisir un nom de vélo.",
   "errBikeTypeReq": "Veuillez sélectionner un type de vélo.",
   "errBikeInUse": "Impossible de changer le statut pendant l'utilisation.",
+  "errBikeHasHistory": "Ce vélo a déjà été remis, son historique reste : retirez-le du service au lieu de le supprimer.",
+  "pinRequiredMsg": "L’approbation par code PIN a expiré. Saisissez le code à nouveau.",
   "toastAccountCreated": "Compte créé.",
   "toastWelcomeBack": "Bon retour",
   "toastLoggedOut": "Déconnexion réussie.",

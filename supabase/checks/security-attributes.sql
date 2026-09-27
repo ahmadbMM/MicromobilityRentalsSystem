@@ -143,7 +143,22 @@ with expected(fname, want_definer, note) as (values
   ('staff_live_stop',        true,  'deletes from live_positions; staff only'),
   ('live_positions_for',     true,  'reads live_positions for a rider with a booking on the ride; token-checked'),
   ('member_area',            true,  'one member''s own area: reads customers, bookings, tags and site_content; token-checked'),
-  ('ambassador_mine',        true,  'the signed-in account''s own ambassador card; token-checked')
+  ('ambassador_mine',        true,  'the signed-in account''s own ambassador card; token-checked'),
+  -- Staff guardrails (20260928200000)
+  ('_audit_row',             true,  'trigger: writes audit_log, which has no write policy for anyone'),
+  ('staff_pin_approve',      true,  'reads team_members.pin_hash through staff_check_operator_pin, writes pin_approvals; staff only'),
+  ('_pin_ok',                true,  'reads team_members.pin_hash and pin_approvals, which no client can select; internal only'),
+  ('staff_void_receipt',     true,  'marks a receipt''s rows voided whoever the staffer is; PIN-checked'),
+  ('staff_refund_receipt',   true,  'marks a receipt''s rows refunded; PIN-checked'),
+  ('staff_set_price',        true,  'writes queue_entries.price; PIN-checked'),
+  ('staff_delete_session',   true,  'sets a ride deleted past the admin-only column trigger; admins only, PIN-checked'),
+  ('staff_delete_bike',      true,  'deletes a bike row; admins only, PIN-checked'),
+  ('_sessions_admin_cols',   false, 'inspects NEW/OLD only; is_admin() does its own privileged read'),
+  ('_bikes_admin_cols',      false, 'same, for rental_price'),
+  ('_customers_admin_cols',  false, 'same, for default_pay and hidden_types'),
+  ('_close_assignments_on_reassign', true, 'trigger: closes bike_assignments rows whoever changed the booking, like _close_assignments_on_leave_active'),
+  ('_bike_ids',              false, 'pure parse of assigned_bike_id, no read'),
+  ('_queue_stamps',          false, 'sets the four timestamps on NEW only')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

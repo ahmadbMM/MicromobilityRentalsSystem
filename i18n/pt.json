@@ -2093,6 +2093,8 @@
   "errBikeName": "Informe um nome para a bicicleta.",
   "errBikeTypeReq": "Selecione um tipo de bicicleta.",
   "errBikeInUse": "Não é possível mudar o status enquanto está em uso.",
+  "errBikeHasHistory": "Esta bicicleta já foi entregue antes, por isso o seu registo fica: retire-a de serviço em vez de a eliminar.",
+  "pinRequiredMsg": "A aprovação por PIN expirou. Introduza o PIN novamente.",
   "toastAccountCreated": "Conta criada.",
   "toastWelcomeBack": "Bem-vindo de volta",
   "toastLoggedOut": "Você saiu com sucesso.",

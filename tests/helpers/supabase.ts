@@ -17,7 +17,10 @@ export type FailWrite = {
 };
 
 /** RPCs a spec must opt into: see the stub's answer for them below. */
-const NOT_YET_IN_DB = new Set(['staff_delete_customer', 'customer_set_height', 'customer_set_birth_nat']);
+const NOT_YET_IN_DB = new Set(['staff_delete_customer', 'customer_set_height', 'customer_set_birth_nat',
+  // The staff guardrails of 20260928200000: the page takes the plain writes when these are absent,
+  // which is what most specs exercise; tests/staff-guardrails.spec.ts stubs them by name.
+  'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

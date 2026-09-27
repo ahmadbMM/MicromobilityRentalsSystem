@@ -2093,6 +2093,8 @@
   "errBikeName": "Pakilagay ang pangalan ng bisikleta.",
   "errBikeTypeReq": "Pakipili ang uri ng bisikleta.",
   "errBikeInUse": "Hindi mababago ang status habang ginagamit.",
+  "errBikeHasHistory": "Naipagamit na ang bisikletang ito dati, kaya mananatili ang tala nito: iretiro ito sa halip na burahin.",
+  "pinRequiredMsg": "Nag-expire na ang pag-apruba ng PIN. Ilagay muli ang PIN.",
   "toastAccountCreated": "Nagawa ang account.",
   "toastWelcomeBack": "Maligayang pagbabalik",
   "toastLoggedOut": "Matagumpay na nag-log out.",

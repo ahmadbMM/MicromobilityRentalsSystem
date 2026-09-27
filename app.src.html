@@ -829,7 +829,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errCheckinRejected:'Check-in could not be saved. The server rejected the change, sign out and sign back in as staff, then try again.',
   errBikeName:'Please enter a bike name.',
   errBikeTypeReq:'Please select a bike type.',
-  errBikeInUse:'Cannot change status while in use.',
+  errBikeInUse:'Cannot change status while in use.',errBikeHasHistory:'This bike has been handed out before, so its record stays: retire it instead of deleting it.',pinRequiredMsg:'The PIN approval has expired. Enter the PIN again.',
   
   toastAccountCreated:'Account created.',
   toastWelcomeBack:'Welcome back',
@@ -1251,7 +1251,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errCheckinRejected:'تعذّر حفظ تسجيل الدخول. رفض الخادم التغيير، سجّل الخروج ثم الدخول كموظف وحاول مجدداً.',
   errBikeName:'الرجاء إدخال اسم الدراجة.',
   errBikeTypeReq:'الرجاء اختيار نوع الدراجة.',
-  errBikeInUse:'لا يمكن التغيير والدراجة قيد الاستخدام.',
+  errBikeInUse:'لا يمكن التغيير والدراجة قيد الاستخدام.',errBikeHasHistory:'سُلّمت هذه الدراجة من قبل، فسجلها يبقى: أوقفها عن الخدمة بدلاً من حذفها.',pinRequiredMsg:'انتهت صلاحية موافقة الرمز السري. أدخل الرمز مرة أخرى.',
   toastAccountCreated:'تم إنشاء الحساب.',
   toastWelcomeBack:'مرحباً بعودتك',
   toastLoggedOut:'تم تسجيل الخروج بنجاح.',
@@ -2736,7 +2736,7 @@ async function _optionalFetch(){
     (async()=>{if(_custOnly())return;try{const wl=await _pagedAll(()=>sb.from('desk_waitlist').select('*').order('id'),'id');if(!wl.error)S.deskWaitlist=wl.data||[];}catch(e){}})(),
     (async()=>{if(_custOnly())return;try{const pc=await sb.from('promo_codes').select('*');if(!pc.error)S.promoCodes=pc.data||[];}catch(e){}})(),
     // cashier_sales grows one row per POS sale forever - page it or revenue reports silently under-count past 1000.
-    (async()=>{if(_custOnly())return;try{const cs=await _pagedAll(()=>sb.from('cashier_sales').select('*').gte('created_at',_qWindowCut(QUEUE_WINDOW_DAYS)).order('id'),'id');if(!cs.error)S.cashSales=cs.data||[];}catch(e){}})(), // the year, like the bookings: every report reads at most twelve months, and the whole table grew with every night
+    (async()=>{if(_custOnly())return;try{const cs=await _pagedAll(()=>sb.from('cashier_sales').select('*').gte('created_at',_qWindowCut(QUEUE_WINDOW_DAYS)).order('id'),'id');if(!cs.error)S.cashSales=(cs.data||[]).filter(_saleLive);}catch(e){}})(), // the year, like the bookings: every report reads at most twelve months, and the whole table grew with every night
   ]);
 }
 const REF_TABLES=['customers','tags','customer_tags','breakfast_spots','staff_options'];
@@ -3057,7 +3057,7 @@ async function _loadDataInner(showLoader){
 // What the optional lists need once they are in: queued sales applied, voided ones dropped,
 // the MM Team roster merged. Called after the optional fetch on every load.
 async function _afterOptional(){
-  try{_outbox().forEach(op=>{if(op.kind==='delete')S.cashSales=(S.cashSales||[]).filter(r=>r.id!==op.id);else{const i=(S.cashSales||[]).findIndex(r=>r.id===op.id);if(i>=0)S.cashSales[i]=op.data;else S.cashSales.push(op.data);}});}catch(e){} // keep unsynced offline sales visible
+  try{_outboxReplay();}catch(e){} // keep unsynced offline sales visible
   try{const _v=_voidedIds();if(_v.length)S.cashSales=(S.cashSales||[]).filter(r=>_v.indexOf(r.id)<0);}catch(e){} // never resurrect a voided sale
   _outboxFlush();
   try{const _tm=localStorage.getItem('cq_team');if(_tm!==null){S.teamMembers=JSON.parse(_tm)||[];}else{S.teamMembers=[...new Set((S.cashSales||[]).map(r=>r.team_name).filter(Boolean))].sort();localStorage.setItem('cq_team',JSON.stringify(S.teamMembers));}}catch(e){}
@@ -3795,6 +3795,7 @@ function _errKind(err){
   return'unknown';
 }
 function _errMessage(err){
+  if(err&&err.said)return err.said; // a guardrail RPC's code, already put in the desk's words (_gatedRpc)
   switch(_errKind(err)){
     case'perm':return t('errWritePerm');
     case'dup':return t('errWriteDup');
@@ -12915,7 +12916,12 @@ async function deleteSession(id){
     const sales=(S.cashSales||[]).filter(r=>r.session_id===id&&r.pay!=='refunded'&&r.category!=='__cardmeta__'&&r.category!=='__discount__').length;
     if(sales>0){toast(t('errHasSales'),'error');return;}
 
-    if(_writeErr(await sb.from('sessions').update({status:'deleted'}).eq('id',id),'delete session',()=>deleteSession(id)))return;
+    // staff_delete_session: admin and PIN checked where they cannot be skipped, the bookings and
+    // the sales counted on the server too; a database before it takes the plain update.
+    let _dr=await _gatedRpc(t('deleteBtn'),a=>sb.rpc('staff_delete_session',{p_id:id,...a}));
+    if(_dr===null)return;
+    if(_dr.error&&_rpcAbsent(_dr.error))_dr=await sb.from('sessions').update({status:'deleted'}).eq('id',id);
+    if(_writeErr(_dr,'delete session',()=>deleteSession(id)))return;
     await loadData();
     toast(t('sessDeleted'));
     renderSessions();
@@ -16484,10 +16490,15 @@ async function _opgKey(d){
   // the name and the PIN as sent: an answer counts only for the name it was asked about
   const name=G.pick,pin=G.digits;
   G.busy=true;_opGateRender();
-  let r;try{r=await sb.rpc('staff_check_operator_pin',{p_name:name,p_pin:pin});}catch(e){r={error:e};}
+  // An approval (a void, a delete...) asks staff_pin_approve, which checks the PIN the same way
+  // and hands back the token the RPC then takes; switching operators keeps the plain check.
+  const approving=!!G.approve;
+  let r;try{r=approving?await sb.rpc('staff_pin_approve',{p_name:name,p_pin:pin}):await sb.rpc('staff_check_operator_pin',{p_name:name,p_pin:pin});}catch(e){r={error:e};}
+  const _shaped=x=>!!(x&&!x.error&&x.data&&typeof x.data==='object'&&typeof x.data.ok==='boolean');
+  if(approving&&((r&&r.error&&_rpcAbsent(r.error))||(r&&!r.error&&!_shaped(r)))){try{r=await sb.rpc('staff_check_operator_pin',{p_name:name,p_pin:pin});}catch(e){r={error:e};}} // a database before the tokens (or an answer that is not one): the check alone
   G.busy=false;if(S._opg!==G||G.pick!==name)return;
   const v=r&&!r.error?r.data:null;
-  if(v&&(v.ok||v.reason==='no_pin')){if(G.approve){const ap=G.approve;G.approve=null;_pinOk={name,at:Date.now()};_opGateDone();ap.res(true);return;}setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
+  if(v&&(v.ok||v.reason==='no_pin')){if(G.approve){const ap=G.approve;G.approve=null;_pinOk={name,at:Date.now(),token:(v&&v.token)||null};_opGateDone();ap.res(true);return;}setOpName(name);_opGateDone();return;} // no_pin: cleared while the keypad was open
   G.digits='';G.shake=true;
   G.msg=!v?t('errConnection'):v.reason==='locked'?t('opPinLocked').replace('{0}',v.seconds||60):t('opPinWrong').replace('{0}',v.left);
   _opGateRender();
@@ -16507,14 +16518,37 @@ function _opGatePick(n){if(!String(n||'').trim())return;setOpName(n);_opGateDone
 // operator has one - the gate's keypad and staff_check_operator_pin, with its five tries and its
 // lock - and a right answer holds for five minutes. An operator without a PIN, or a device with
 // no operator gate, is not held up. Resolves false when the keypad is cancelled.
-let _pinOk={name:'',at:0};
+// The keypad's right answer is an APPROVAL the server issued (staff_pin_approve: a token good
+// for five minutes, bound to this sign-in and the operator's name), and the RPCs that void,
+// refund, reprice and delete take it as p_approval with p_op: the PIN stops being a promise the
+// page makes to itself. Held here for four and a half minutes so the client never offers one
+// the server has just let expire; PIN_REQUIRED from the server asks once more (_gatedRpc). On a
+// database before the tokens, staff_check_operator_pin answers as before and the token is null.
+const PIN_HOLD_MS=270*1000;
+let _pinOk={name:'',at:0,token:null};
+function _pinArgs(){return{p_op:_opName()||null,p_approval:(_pinOk.token&&Date.now()-_pinOk.at<PIN_HOLD_MS)?_pinOk.token:null};}
+async function _gatedRpc(what,fn){
+  if(!await _pinApprove(what))return null;
+  let r;try{r=await fn(_pinArgs());}catch(e){r={error:e};}
+  if(r&&r.error&&/PIN_REQUIRED/.test(String(r.error.message||''))){
+    _pinOk={name:'',at:0,token:null};
+    if(!await _pinApprove(what))return null;
+    try{r=await fn(_pinArgs());}catch(e){r={error:e};}
+  }
+  if(r&&r.error)r.error.said=_rpcSay(r.error);
+  return r;
+}
+// The codes the guardrail RPCs raise, in the desk's words; anything else is the sentence the
+// function wrote (_rpcMessage).
+const RPC_SAY={HAS_BOOKINGS:'errHasBookings',HAS_SALES:'errHasSales',BIKE_IN_USE:'errBikeInUse',BIKE_ASSIGNED:'errBikeInUse',BIKE_HAS_HISTORY:'errBikeHasHistory',PRICE_RANGE:'errValidPrice',ADMIN_ONLY:'adminOnlyMsg',PIN_REQUIRED:'pinRequiredMsg',STAFF_ONLY:'errWritePerm',NOT_FOUND:'errSomethingWrong'};
+function _rpcSay(err){const m=String((err&&err.message)||'');const k=Object.keys(RPC_SAY).find(c=>m.indexOf(c)===0);return k?t(RPC_SAY[k]):_rpcMessage(err);}
 async function _pinApprove(what){
   const name=_opName();if(!name)return true;
   let list=S._opPins;
   if(!Array.isArray(list)||Date.now()-(S._opPinsAt||0)>60000){const x=await _opList();if(x.list){S._opPins=x.list;S._opPinsAt=Date.now();list=x.list;}else list=null;}
   const me=list?list.find(o=>o.name===name):null;
   if(!me||!me.has_pin)return true;
-  if(_pinOk.name===name&&Date.now()-_pinOk.at<5*60*1000)return true;
+  if(_pinOk.name===name&&Date.now()-_pinOk.at<PIN_HOLD_MS)return true;
   return new Promise(res=>{
     const m=document.getElementById('op-gate-modal');if(!m){res(true);return;}
     if(S._opg&&S._opg.approve)_opGateDone(); // one question at a time: an older one is refused
@@ -17769,6 +17803,14 @@ function showEditPriceModal(id){
   </div>`;
 }
 function closeEditPriceModal(){const m=document.getElementById('edit-price-modal');if(m)m.style.display='none';}
+// The price through staff_set_price, which records the operator and the approval and refuses a
+// figure outside 0..1000; a database before it takes the plain update. null: keypad cancelled.
+async function _priceWrite(id,price,what){
+  const r=await _gatedRpc(what,a=>sb.rpc('staff_set_price',{p_booking_id:id,p_price:price,...a}));
+  if(r===null)return null;
+  if(r&&r.error&&_rpcAbsent(r.error))return sb.from('queue_entries').update({price}).eq('id',id);
+  return r;
+}
 async function saveEditedPrice(id,newPrice){
   if(isNaN(newPrice)||newPrice<0){toast(t('errValidPrice'),'error');return;}
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
@@ -17778,7 +17820,8 @@ async function saveEditedPrice(id,newPrice){
   closeEditPriceModal();
   // Checked like every other money write: a refused price used to toast the new amount and push
   // an undo while the reload quietly put the old price back.
-  const _pr=await sb.from('queue_entries').update({price:newPrice}).eq('id',id);
+  const _pr=await _priceWrite(id,newPrice,t('pinWhatPrice'));
+  if(_pr===null){entry.price=prevPrice;renderStaffQueue();return;} // the keypad was cancelled on the second ask
   if(_writeErr(_pr,'edit price',()=>saveEditedPrice(id,newPrice))){entry.price=prevPrice;await loadDataLight();renderStaffQueue();renderHistory();return;}
   await loadData();renderStaffQueue();renderHistory();
   // Who changed the price, from what to what, in the action log (Claude Design #4).
@@ -22479,7 +22522,11 @@ function delBike(id){
       // bike_assignments references bikes(id) with no ON DELETE, so any bike that has been
       // handed out since the assignments table shipped cannot be deleted. Unchecked, the toast
       // claimed it was removed and the fleet list quietly showed it still there.
-      const _db=await sb.from('bikes').delete().eq('id',id);
+      // staff_delete_bike says, by name, why a bike cannot go (in use, handed out, or ever handed
+      // out - retire that one instead); a database before it takes the plain delete.
+      let _db=await _gatedRpc(t('deleteBtn'),a=>sb.rpc('staff_delete_bike',{p_id:id,...a}));
+      if(_db===null)return;
+      if(_db.error&&_rpcAbsent(_db.error))_db=await sb.from('bikes').delete().eq('id',id);
       if(_writeErr(_db,'delete bike',()=>delBike(id))){await loadData();renderBikes();return;}
       await loadData();toast(`${bike.name} ${t('toastBikeRemoved')}`);
       pushUndo(`${t('undoDeleteBike')} ${bike.name}`,async()=>{
@@ -24622,7 +24669,7 @@ async function _ambSet(id,status,code){
   W.working=false;
   const d=res&&!res.error?res.data:null;
   if(!d||!d.ok){
-    const k=d&&d.error==='code_taken'?'amCodeTaken':d&&d.error==='code'?'amCodeBad':'wsSaveErr';
+    const k=d&&d.error==='code_taken'?'amCodeTaken':d&&d.error==='code'?'amCodeBad':d&&d.error==='admin_only'?'adminOnlyMsg':'wsSaveErr';
     if(k==='wsSaveErr'){toast(t(k),'error');try{_logError('ambassadors set: '+((res&&res.error&&res.error.message)||(d&&d.error)||'no answer'),'ambassadors',true);}catch(_){}}
     return{error:k};
   }
@@ -26816,8 +26863,13 @@ async function _outboxFlush(){
     // one is retried.
     if(stuck.has(op.id))continue;
     try{
-      const res=op.kind==='delete'?await _roFree(()=>sb.from('cashier_sales').delete().eq('id',op.id)):await _roFree(()=>sb.from('cashier_sales').upsert(op.data));
-      if(!(res&&res.error))doneIds.push(op.oid);else stuck.add(op.id);
+      const res=op.kind==='delete'?await _roFree(()=>sb.from('cashier_sales').delete().eq('id',op.id))
+        :op.kind==='void'?await _roFree(()=>sb.rpc('staff_void_receipt',op.data))
+        :op.kind==='refund'?await _roFree(()=>sb.rpc('staff_refund_receipt',op.data))
+        :await _roFree(()=>sb.from('cashier_sales').upsert(op.data));
+      // A void or refund the server already holds (another device sent it first) is done, not stuck.
+      const settled=!(res&&res.error)||((op.kind==='void'||op.kind==='refund')&&/NOT_FOUND/.test(String((res.error&&res.error.message)||'')));
+      if(settled)doneIds.push(op.oid);else stuck.add(op.id);
     }catch(_){stuck.add(op.id);/* keep op for retry */}
   }
   // Re-read the live outbox (ops may have been queued during the awaits) and drop only the ones we actually completed
@@ -26843,6 +26895,53 @@ async function _outboxRetryOrClear(){
 }
 // Local + queued upsert/delete of sale rows (never lost on refresh; syncs to the DB when online).
 // All-or-nothing: when the device cannot store the ops, the ledger on screen is put back too.
+// A voided or refunded receipt goes through its RPC (the rows are kept, stamped voided_at /
+// refunded_at with who and why - the reports and the audit read them; the DELETE the front
+// desk used to send is admin-only now). This device's ledger drops the voided rows and marks
+// the refunded ones at once; offline, the call waits in the sales outbox with the sales and is
+// sent when the connection returns; a database before the RPCs takes the old path. false when
+// nothing was stored (read-only, a refusal, or the keypad cancelled).
+async function _salesVoid(key,rows,what){
+  if(_roNow()){_roRefusal();return false;}
+  const ids=rows.map(r=>r.id);
+  const r=await _gatedRpc(what,a=>sb.rpc('staff_void_receipt',{p_receipt_id:key,p_reason:null,...a}));
+  if(r===null)return false;
+  if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids);
+  const had=(S.cashSales||[]).slice();
+  S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
+  if(r.error&&_errKind(r.error)==='net'){
+    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs()}}])){S.cashSales=had;return false;}
+    ids.forEach(_voidedAdd);return true;
+  }
+  if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
+  ids.forEach(_voidedAdd);return true;
+}
+async function _salesRefund(key,rows,what){
+  if(_roNow()){_roRefusal();return false;}
+  const r=await _gatedRpc(what,a=>sb.rpc('staff_refund_receipt',{p_receipt_id:key,p_reason:null,...a}));
+  if(r===null)return false;
+  if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[]);
+  const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
+  S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
+  if(r.error&&_errKind(r.error)==='net'){
+    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs()}}])){S.cashSales=had;return false;}
+    return true;
+  }
+  if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
+  return true;
+}
+// A sale the server holds as voided is not a sale: kept out of the ledger wherever it is read.
+const _saleLive=r=>!(r&&r.voided_at);
+// The outbox's ops laid over the ledger just read, so a sale, void or refund still waiting to be
+// sent stays on screen as it will be.
+function _outboxReplay(){
+  _outbox().forEach(op=>{
+    if(op.kind==='delete')S.cashSales=(S.cashSales||[]).filter(r=>r.id!==op.id);
+    else if(op.kind==='void')S.cashSales=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)!==op.id);
+    else if(op.kind==='refund')S.cashSales=(S.cashSales||[]).map(r=>(r.receipt_id||r.id)===op.id?{...r,pay:'refunded'}:r);
+    else{const i=(S.cashSales||[]).findIndex(r=>r.id===op.id);if(i>=0)S.cashSales[i]=op.data;else S.cashSales.push(op.data);}
+  });
+}
 function _salesApply(upserts,deletes){
   if(_roNow()){_roRefusal();return false;} // queued, a write would skip the read-only guard
   const had=(S.cashSales||[]).slice(),del=new Set(deletes||[]);
@@ -27001,9 +27100,8 @@ function _ctVoidReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!rows.length)return;
   const cust=(rows.find(r=>r.customer_name)||{}).customer_name||t('cashWalkup');
   confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · <bdi>SAR ${_rcTotal(rows)}</bdi>`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
-    if(!await _pinApprove(t('cashVoid')))return;
     const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
-    if(!_salesApply([],cur.map(r=>r.id))){renderCashier();return;} // not stored: nothing voided, nothing restocked
+    if(!await _salesVoid(key,cur,t('cashVoid'))){renderCashier();return;} // not stored: nothing voided, nothing restocked
     _rcLog(t('cashVoid'),cur); // the void is stored: logged now, whatever the restock below does
     await _addonStockBatch(cur.filter(r=>r.pay!=='refunded'),1); // restock (refunded items were already restocked)
     toast(t('cashVoidedToast'));renderCashier();
@@ -27013,9 +27111,8 @@ function _ctVoidReceipt(key){
 async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
   confirmDialog({title:t('cashRefund'),body:t('cashRefundConfirm'),confirmLabel:t('cashRefund'),confirmClass:'btn-muted',onConfirm:async()=>{
-    if(!await _pinApprove(t('cashRefund')))return;
     const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
-    if(!_salesApply(all.map(r=>({...r,pay:'refunded'})),[])){renderCashier();return;} // not stored: not refunded, not restocked
+    if(!await _salesRefund(key,all,t('cashRefund'))){renderCashier();return;} // not stored: not refunded, not restocked
     _rcLog(t('cashRefund'),all); // the refund is stored: logged now, whatever the restock below does
     await _addonStockBatch(rows,1); // restock refunded items (summed per item — no concurrent-write race)
     toast(t('cashRefundedToast'));renderCashier();
@@ -30762,9 +30859,10 @@ async function _loadDataLightInner(){
   _rtReplaySince(_t0); // realtime rows that arrived while this was in flight are newer than its answer
   if(wl&&!wl.error)S.deskWaitlist=wl.data||[];
   if(cs&&!cs.error){
-    if(_cut){const ids=new Set((cs.data||[]).map(r=>r.id));S.cashSales=(S.cashSales||[]).filter(r=>String(r.created_at||'')<_cut&&!ids.has(r.id)).concat(cs.data||[]);}
-    else S.cashSales=cs.data||[];
-    try{_outbox().forEach(op=>{if(op.kind==='delete')S.cashSales=(S.cashSales||[]).filter(r=>r.id!==op.id);else{const i=(S.cashSales||[]).findIndex(r=>r.id===op.id);if(i>=0)S.cashSales[i]=op.data;else S.cashSales.push(op.data);}});}catch(_){}
+    const _live=(cs.data||[]).filter(_saleLive);
+    if(_cut){const ids=new Set((cs.data||[]).map(r=>r.id));S.cashSales=(S.cashSales||[]).filter(r=>String(r.created_at||'')<_cut&&!ids.has(r.id)).concat(_live);}
+    else S.cashSales=_live;
+    try{_outboxReplay();}catch(_){}
     try{const _v=_voidedIds();if(_v.length)S.cashSales=(S.cashSales||[]).filter(r=>_v.indexOf(r.id)<0);}catch(_){}}
   _outboxFlush();
   return !(q&&q.error)&&!(ses&&ses.error);
