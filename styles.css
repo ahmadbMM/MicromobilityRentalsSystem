@@ -5345,3 +5345,7 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 /* A ride not yet inside the booking window (2026-09-28): shown, greyed, with the day it opens. */
 .sess-card-soon{opacity:.62;cursor:default;pointer-events:none;}
 .sess-card-spots.spots-soon{color:var(--muted);}
+
+/* Quick tags on the post-ride rating (2026-09-28) */
+.rate-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.rate-tags .rate-tag{padding:6px 12px;font-size:12px;}
