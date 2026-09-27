@@ -12700,8 +12700,11 @@ async function _addSession(){
     }
     if(created===0&&otherErr)throw otherErr;
     // Set offered add-ons separately so missing columns can never block session creation
+    // The add-ons are checked (a refused write is said, and the error bar offers a retry); the template
+    // and route marks go in a second, tolerant write of their own, so a database without those columns,
+    // or a blip on that write, never costs the ride its add-ons.
+    if((S.newSessAddons||[]).length&&createdIds.length)for(const id of createdIds)await _wr(sb.from('sessions').update({addons:JSON.stringify(S.newSessAddons)}).eq('id',id),'session add-ons');
     const _sessUpd={};
-    if((S.newSessAddons||[]).length)_sessUpd.addons=JSON.stringify(S.newSessAddons);
     if(S._nsTplId&&_nsTpls().some(x=>x.id===S._nsTplId))_sessUpd.template_id=S._nsTplId; // made from a template: its later edits reach this ride
     if(S.newSessRoute&&_routes().some(r=>r.slug===S.newSessRoute))_sessUpd.route_slug=S.newSessRoute; // the route the ride follows, any kind (20260928170000)
     if(Object.keys(_sessUpd).length&&createdIds.length){try{await Promise.all(createdIds.map(id=>sb.from('sessions').update(_sessUpd).eq('id',id)));}catch(e){}}
