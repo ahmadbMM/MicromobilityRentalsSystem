@@ -30,7 +30,7 @@ test('Community opens on the Leaderboard, with Statistics, Accounts, Flagged, Ap
   await page.evaluate(`setStaffTab('community')`);
   const tab = page.locator('#tab-community');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Leaderboard', 'Statistics', 'Accounts', 'Flagged', /^Applications/, /^Birthdays/]); // Applications carries the pending count, Birthdays today's
+  await expect(pills).toHaveText(['Leaderboard', 'Statistics', 'Accounts', 'Flagged', /^Applications/, /^Birthdays/, /^Duplicates/]); // Applications carries the pending count, Birthdays today's, Duplicates (admins) the likely pairs
   await expect(pills.first()).toHaveClass(/active/);
   await expect(tab.locator('.form-title', { hasText: 'Leaderboard' })).toHaveCount(1);
   await expect(tab.getByText('Amal Top').first()).toBeVisible();
