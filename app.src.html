@@ -8605,7 +8605,7 @@ function renderRegister(){
     ${hSection}
     <div id="reg-type-wrap-${i}" class="form-group" style="margin-bottom:8px">
       <label>${t('bikeTypePref')}</label>
-      <div class="toggle-group">${typeBtns}</div>
+      <div class="toggle-group type-grid">${typeBtns}</div>
       ${_tyOpts.includes('Hybrid')?`<div class="bike-info-hint">${t('bikeInfoHint')}</div>`:''}
     </div>
     ${divider}`;
@@ -10364,7 +10364,7 @@ function renderAccount(){
       <div class="form-group"><label>${t('socialsLabel')}</label>${_socFieldsHtml('acc',cust.socials)}</div>
       <div class="form-group" style="margin-top:4px">
         <label>${t('bikeTypePref')}</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+        <div class="toggle-group type-grid" style="margin-top:6px">
           ${bikeTypeOpts(false).map(ty=>_typePick(`<button id="atp-${ty}" type="button"
               class="toggle-btn${accTy===ty?' active':''}"
               data-on-click="${_on("_accPickType",ty)}"

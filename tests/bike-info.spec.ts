@@ -30,6 +30,14 @@ test.describe('bike type info', () => {
     await expect(page.locator('#reg-type-wrap-0 .type-info-btn').first()).toHaveAttribute('aria-label', 'About Road bikes');
     // The form says which type is the easy choice.
     await expect(page.locator('#reg-type-wrap-0 .bike-info-hint')).toContainText('Hybrid is the easiest choice');
+    // The picker is an even grid: every cell the same width and height, in two or three columns.
+    const boxes: number[][] = await page.locator('#reg-type-wrap-0 .type-grid > *').evaluateAll((els) =>
+      els.map((e) => { const r = e.getBoundingClientRect(); return [r.width, r.height, Math.round(r.left)]; }));
+    expect(boxes.length).toBe(types.length);
+    const spread = (i: number) => Math.max(...boxes.map((b) => b[i])) - Math.min(...boxes.map((b) => b[i]));
+    expect(spread(0)).toBeLessThan(1.5);
+    expect(spread(1)).toBeLessThan(1.5);
+    expect([2, 3]).toContain(new Set(boxes.map((b) => b[2])).size);
   });
 
   test('the sheet shows the brief and the level, draws the glyph without a picture, and Choose picks the type', async ({ page }) => {

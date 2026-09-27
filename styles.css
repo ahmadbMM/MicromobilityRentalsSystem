@@ -919,6 +919,15 @@
     .type-info-btn{display:inline-flex;align-items:center;justify-content:center;width:36px;min-height:40px;padding:0;margin-inline-start:-1px;background:var(--s3);border:1px solid var(--border);border-radius:5px;border-start-start-radius:0;border-end-start-radius:0;color:var(--muted);cursor:pointer;transition:background .2s,color .2s,border-color .2s;}
     .type-info-btn:hover{color:var(--text);border-color:rgba(var(--tint-rgb),.2);}
     .type-pick:has(.toggle-btn.active) .type-info-btn{border-color:var(--green);color:var(--green);}
+    /* The bike-type picker is an even grid: two columns on a phone, three from 480px, every cell
+       the same size; the pill fills its cell and the "i" keeps its width at the end. */
+    .type-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+    @media(min-width:480px){.type-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    .type-grid>.toggle-btn,.type-grid>.type-pick{width:100%;min-width:0;}
+    .type-grid .type-pick{display:flex;}
+    .type-grid .type-pick>.toggle-btn{flex:1 1 0;min-width:0;}
+    .type-grid .toggle-btn{padding-inline:8px;overflow:hidden;text-overflow:ellipsis;}
+    .type-grid .type-info-btn{flex:0 0 36px;}
     .size-toggle{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 16px;min-width:76px;border-radius:6px;line-height:1;}
     .size-toggle .size-name{font-size:16px;font-weight:700;}
     .size-toggle .size-range{font-size:10px;font-weight:600;opacity:.55;transition:opacity .2s;}
