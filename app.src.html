@@ -1437,7 +1437,8 @@ function showLangMenu(evt){
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:150px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
   menu.innerHTML=LANGS.map(l=>`<button class="pay-menu-opt${S.lang===l.code?' active':''}" role="option" aria-selected="${S.lang===l.code}" data-on-click="${_on("_on_showLangMenu_1",_EV,_EL,l.code)}">${esc(l.label)}</button>`).join('');
   document.body.appendChild(menu);
-  const r=(evt&&evt.currentTarget&&evt.currentTarget.getBoundingClientRect)?evt.currentTarget.getBoundingClientRect():{left:20,bottom:60,right:170};
+  const _anc=(evt&&evt.target&&evt.target.closest)?evt.target.closest('button'):null; // under the delegated dispatcher currentTarget is the document
+  const r=_anc?_anc.getBoundingClientRect():{left:20,bottom:60,right:170};
   const w=menu.offsetWidth||150;
   let x=Math.min(Math.max(8,r.left),window.innerWidth-w-8);
   menu.style.left=x+'px';menu.style.top=Math.min(r.bottom+6,window.innerHeight-menu.offsetHeight-8)+'px';
@@ -7540,28 +7541,37 @@ function _rowMenu(id,items){
     return`<button class="btn-sm btn-muted" data-on-click="${_on("confirmRemove",e.id)}">${t('removeBtn')}</button>`;
   }
 
+  // The row's ⋯ menu is a side sheet (2026-09-27): a panel from the end edge on a desk, a bottom
+  // sheet on a phone, headed by the rider and their number, the actions as full-width rows and the
+  // dangerous one last. It used to be a popup anchored on evt.currentTarget, which under the
+  // delegated dispatcher is the document, so it landed at the page's top-left. The outer element
+  // keeps the pay-menu-popup class: opening any other popup removes it, and the specs count it.
   function showRowMenu(id,evt){
     document.querySelectorAll('.pay-menu-popup').forEach(m=>m.remove());
     const items=(S._rowMenus||{})[id];if(!items||!items.length)return;
-    const menu=document.createElement('div');
-    menu.className='pay-menu-popup';menu.setAttribute('role','menu');
-    menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:170px;box-shadow:0 6px 24px rgba(0,0,0,.35)';
+    const e=getQueue().find(x=>x.id===String(id).replace(/^party(?:card)?:/,''));
+    const name=(e&&e.name)||t('moreActionsLbl');
+    const bg=document.createElement('div');bg.className='modal-backdrop row-sheet-bg pay-menu-popup';
+    const panel=document.createElement('div');panel.className='row-sheet';
+    panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label',name);
+    const head=document.createElement('div');head.className='row-sheet-head';
+    head.innerHTML=`<div><div class="row-sheet-title">${esc(name)}</div>${e?`<div class="row-sheet-sub">#${esc(String(e.queueNum||''))}${e.sessionDate?' · '+esc(shortDate(e.sessionDate)):''}</div>`:''}</div>`;
+    const x=document.createElement('button');x.type='button';x.className='row-sheet-close';x.setAttribute('aria-label',t('closeBtn'));x.innerHTML='&times;';
+    x.addEventListener('click',ev=>{ev.stopPropagation();bg.remove();});
+    head.appendChild(x);
+    const list=document.createElement('div');list.className='row-sheet-list';list.setAttribute('role','menu');
     // Real listeners, not JS strings in onclick attributes: the closure is what runs, and the
     // run string stays on the item as metadata (the registry is how tests see what a row offers).
     items.forEach(it=>{
-      const btn=document.createElement('button');
-      btn.className='pay-menu-opt';btn.setAttribute('role','menuitem');
-      if(it.danger)btn.style.color='var(--red)';
+      const btn=document.createElement('button');btn.type='button';
+      btn.className='pay-menu-opt'+(it.danger?' danger':'');btn.setAttribute('role','menuitem');
       btn.innerHTML=it.label;
-      btn.addEventListener('click',ev=>{ev.stopPropagation();menu.remove();it.act();});
-      menu.appendChild(btn);
+      btn.addEventListener('click',ev=>{ev.stopPropagation();bg.remove();it.act();});
+      list.appendChild(btn);
     });
-    document.body.appendChild(menu);
-    const r=(evt&&evt.currentTarget&&evt.currentTarget.getBoundingClientRect)?evt.currentTarget.getBoundingClientRect():{left:20,bottom:60};
-    const w=menu.offsetWidth||170,h=menu.offsetHeight||10;
-    menu.style.left=Math.min(Math.max(8,r.left),window.innerWidth-w-8)+'px';
-    menu.style.top=Math.min(r.bottom+6,window.innerHeight-h-8)+'px';
-    setTimeout(()=>{const close=ev=>{if(!menu.contains(ev.target)){menu.remove();document.removeEventListener('click',close);}};document.addEventListener('click',close);},0);
+    panel.appendChild(head);panel.appendChild(list);bg.appendChild(panel);
+    bg.addEventListener('click',ev=>{if(ev.target===bg)bg.remove();}); // the backdrop, and Escape through it
+    document.body.appendChild(bg);
   }
   function _bulkChk(e){
     if(e.status!=='waiting'&&e.status!=='active')return'';

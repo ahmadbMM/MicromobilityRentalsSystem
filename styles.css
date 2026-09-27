@@ -1160,6 +1160,29 @@
     .pay-menu-opt{display:block;width:100%;padding:8px 12px;text-align:start;background:none;border:none;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;border-radius:3px;transition:background .1s;}
     .pay-menu-opt:hover{background:rgba(var(--tint-rgb),.08);}
     .pay-menu-opt.active{color:var(--green);background:rgba(var(--green-rgb),.08);}
+    /* The roster row's ⋯ menu as a side sheet (2026-09-27): from the end edge on a desk, from the
+       bottom on a phone; the rider on top, one full row per action, the dangerous one last. */
+    .modal-backdrop.row-sheet-bg{justify-content:flex-end;align-items:stretch;padding:0;z-index:9001;animation:modalFadeIn .18s ease both;transform:none;}
+    html[dir="rtl"] .modal-backdrop.row-sheet-bg{justify-content:flex-start;}
+    .row-sheet{width:min(360px,100vw);height:100%;background:var(--s1);border-inline-start:1px solid var(--border);box-shadow:var(--sh-3);display:flex;flex-direction:column;overflow-y:auto;animation:rowSheetIn .22s cubic-bezier(.2,.8,.2,1) both;}
+    html[dir="rtl"] .row-sheet{animation-name:rowSheetInRtl;}
+    @keyframes rowSheetIn{from{transform:translateX(24px);opacity:.6}to{transform:none;opacity:1}}
+    @keyframes rowSheetInRtl{from{transform:translateX(-24px);opacity:.6}to{transform:none;opacity:1}}
+    .row-sheet-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:18px 18px 14px;border-bottom:1px solid var(--border);}
+    .row-sheet-title{font-size:16px;font-weight:800;line-height:1.3;color:var(--text);}
+    .row-sheet-sub{font-size:12px;font-weight:700;color:var(--muted);margin-top:3px;}
+    .row-sheet-close{background:none;border:none;color:var(--muted);cursor:pointer;font-size:26px;line-height:1;padding:0 4px;min-height:0;min-width:0;}
+    .row-sheet-list{display:flex;flex-direction:column;flex:1;padding:6px 0;}
+    .row-sheet .pay-menu-opt{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:12px 18px;font-size:14px;font-weight:700;color:var(--text);background:none;border:none;border-bottom:1px solid var(--border);border-radius:0;text-align:start;}
+    .row-sheet .pay-menu-opt:hover{background:var(--s2);}
+    .row-sheet .pay-menu-opt.danger{color:var(--red);margin-top:auto;border-top:1px solid var(--border);border-bottom:none;}
+    @media(max-width:767px){
+      .modal-backdrop.row-sheet-bg{align-items:flex-end;justify-content:center;}
+      .row-sheet{width:100%;height:auto;max-height:85svh;border-radius:16px 16px 0 0;border-inline-start:none;animation-name:rowSheetUp;}
+      .row-sheet .pay-menu-opt.danger{margin-top:0;}
+    }
+    @keyframes rowSheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
+    @media(prefers-reduced-motion:reduce){.row-sheet,.modal-backdrop.row-sheet-bg{animation:none;}}
     .pay-label{font-size:12px;font-weight:700;white-space:nowrap;}
 
     
