@@ -5349,3 +5349,10 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 /* Quick tags on the post-ride rating (2026-09-28) */
 .rate-tags{display:flex;gap:6px;flex-wrap:wrap;}
 .rate-tags .rate-tag{padding:6px 12px;font-size:12px;}
+
+/* A ticketed event (ride kind 'event', 2026-09-28): its own colour wherever a kind wears one. */
+.ev-event{--ev:#7c3aed;--ev-rgb:124,58,237;}
+body .landing-event-card.ev-event::before{background:var(--ev);}
+body .landing-event-card.ev-event:hover{border-color:rgba(var(--ev-rgb),.5);}
+body .landing-event-card.ev-event .lec-kicker,body .landing-event-card.ev-event .lec-arrow{color:var(--ev);}
+body.view-staff .dash-dot.ev-event,body.view-staff .cal-sess.ev-event{--ev:#7c3aed;}
