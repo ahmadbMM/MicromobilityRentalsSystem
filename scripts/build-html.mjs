@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
 import { minify as terserMinify } from 'terser';
+import CleanCSS from 'clean-css';
 import { splitStaff } from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
@@ -164,7 +165,11 @@ let out = await minify(src, {
 // old CSS. The tag is now the stylesheet's own content hash, so it moves automatically
 // whenever the file changes, and the SW cache name moves with it.
 const cssUrl = new URL('../styles.css', import.meta.url);
-const cssHash = createHash('sha256').update(await readFile(cssUrl)).digest('hex').slice(0, 10);
+// The tag is the hash of the bytes that SHIP - the minified copy scripts/assemble-dist.mjs writes into
+// dist/ (the same clean-css call, so the same bytes) - not of the source. Hashing the source left the
+// tag unchanged when minification arrived (2026-09-27), and the edge, which keeps /styles.css for a
+// year, went on serving the old copy under the same address.
+const cssHash = createHash('sha256').update(new CleanCSS({ level: 1 }).minify(await readFile(cssUrl, 'utf8')).styles).digest('hex').slice(0, 10);
 const beforeCss = out;
 out = out.replace(/styles\.css\?v=[a-z0-9]+/g, `styles.css?v=${cssHash}`);
 if (out === beforeCss && /styles\.css\?v=/.test(beforeCss)) {
