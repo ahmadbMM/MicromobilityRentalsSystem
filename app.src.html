@@ -665,7 +665,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   walkinSession:'Session',walkinSize:'Frame Size',walkinType:'Bike Type Preference',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
   editBookingBtn:'Edit',editBookingTitle:'Edit Booking',editBookingSub:'Change the rider details or move the booking, the same fields the customer can edit.',undoEditBooking:'Edit booking',saveChangesBtn:'Save Changes',
-  beAddRidersLabel:'Add riders',beAddRiderBtn:'Add rider',beRiderPh:'Rider name',beRemoveRider:'Remove rider',beRidersAdded:'rider(s) added',
+  beAddRidersLabel:'Add riders',beMoveActiveNote:'Moving a checked-in rider takes them off their bike and puts them back in line on the new ride. What they paid stays paid.',beMovePaidNote:'What they paid stays paid on the new ride.',beAddRiderBtn:'Add rider',beRiderPh:'Rider name',beRemoveRider:'Remove rider',beRidersAdded:'rider(s) added',
   checkInBtn:'Check In',returnBikeBtn:'Return Bike',removeBtn:'Remove',noShowBtn:'No-Show',customerShowedBtn:'Customer Showed',undoCheckinBtn:'Undo Check-in',toastUndoCheckin:'Check-in reversed - rider moved back to waiting.',
   footerCopy:'© 2026 MicroMobility. All Rights Reserved',footAddr:'Thu Al-Nurayn St, Al Sharafeyah, Jeddah 23218',footHours:'Sat\u2060–\u2060Thu\u00a014:00\u2060–\u206022:00 · Fri\u00a017:00\u2060–\u206021:00',footVat:'VAT No. 312555068900003',sessDeletedGroup:'Deleted Sessions',histLogBtn:'Log',
   anPayTitle:'Payments',anCashCollected:'Cash collected',anCardCollected:'Card collected',anCardShare:'card share',anDiscountsGiven:'Discounts given',
@@ -1095,7 +1095,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   walkinSession:'الجلسة',walkinSize:'مقاس الإطار',walkinType:'تفضيل نوع الدراجة',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
   editBookingBtn:'تعديل',editBookingTitle:'تعديل الحجز',editBookingSub:'عدّل بيانات الراكب أو انقل الحجز، نفس الحقول التي يمكن للعميل تعديلها.',undoEditBooking:'تعديل الحجز',saveChangesBtn:'حفظ التغييرات',
-  beAddRidersLabel:'إضافة رُكّاب',beAddRiderBtn:'إضافة راكب',beRiderPh:'اسم الراكب',beRemoveRider:'إزالة الراكب',beRidersAdded:'رُكّاب أُضيفوا',
+  beAddRidersLabel:'إضافة رُكّاب',beMoveActiveNote:'نقل راكب مسجّل الدخول يُنزله عن دراجته ويعيده إلى الانتظار في الرحلة الجديدة. ما دفعه يبقى مدفوعاً.',beMovePaidNote:'ما دفعه يبقى مدفوعاً في الرحلة الجديدة.',beAddRiderBtn:'إضافة راكب',beRiderPh:'اسم الراكب',beRemoveRider:'إزالة الراكب',beRidersAdded:'رُكّاب أُضيفوا',
   checkInBtn:'تسجيل الدخول',returnBikeBtn:'إرجاع الدراجة',removeBtn:'حذف',noShowBtn:'لم يحضر',customerShowedBtn:'العميل حضر',undoCheckinBtn:'تراجع عن تسجيل الدخول',toastUndoCheckin:'تم التراجع عن تسجيل الدخول - الراكب عاد إلى قائمة الانتظار.',
   footerCopy:'© 2026 مايكروموبيليتي. جميع الحقوق محفوظة.',footAddr:'شارع ذي النورين، الشرفية، جدة 23218',footHours:'السبت\u2060–\u2060الخميس\u00a014:00\u2060–\u206022:00 · الجمعة\u00a017:00\u2060–\u206021:00',footVat:'الرقم الضريبي: 312555068900003',sessDeletedGroup:'الجلسات المحذوفة',histLogBtn:'السجل',
   anPayTitle:'المدفوعات',anCashCollected:'المحصّل نقداً',anCardCollected:'المحصّل بالبطاقة',anCardShare:'نسبة البطاقة',anDiscountsGiven:'الخصومات الممنوحة',
@@ -7609,6 +7609,7 @@ function _rowMenu(id,items){
     // them no-show, edit, note and cancel them exactly the same way. What says they are
     // waitlisted is the badge and the W position, not a different set of buttons.
     const _mEdit={label:`${ICON_PENCIL} ${t('editBookingBtn')}`,run:`showBookingEditModal('${e.id}')`,act:()=>showBookingEditModal(e.id)};
+    const _mResched={label:t('rescheduleBtn'),run:`showRescheduleEdit('${e.id}')`,act:()=>showRescheduleEdit(e.id)}; // the editor on its Session field: waiting, waitlisted or checked in, paid or not
     const _mCust=_custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null;
     if(e.status==='waiting'||e.status==='waitlist')return`${_apprChip}${e.status==='waitlist'?_noShowChip(e):''}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("showCheckinModal",e.id)}">${t('checkInBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       {label:t('noShowBtn'),run:`confirmNoShow('${e.id}')`,act:()=>confirmNoShow(e.id)},
@@ -7616,12 +7617,12 @@ function _rowMenu(id,items){
         :(resolvedType(e)==='Own'?null:{label:t('menuReserveBike'),run:`_reserveFromMenu('${e.id}')`,act:()=>_reserveFromMenu(e.id)}),
       (_isReserved(e)||resolvedType(e)==='Own'||e.status!=='waiting')?null:{label:e.toReserve?t('menuClearToReserve'):t('menuToReserve'),run:`_toggleToReserve('${e.id}')`,act:()=>_toggleToReserve(e.id)},
       (_opt&&_opt.noPark)?null:{label:t('mwMoveBtn'),run:`mwFromBooking('${e.id}')`,act:()=>mwFromBooking(e.id)},
-      _mEdit,_mCust,
+      _mEdit,_mResched,_mCust,
       {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
     if(e.status==='active')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("doReturn",e.id)}">${t('returnBikeBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       {label:t('changeBikeBtn'),run:`openModal('${e.id}')`,act:()=>openModal(e.id)},
       {label:t('cashierAddBtn'),run:`showCashierModal('${e.id}')`,act:()=>showCashierModal(e.id)},
-      _mEdit,_mCust,
+      _mEdit,_mResched,_mCust,
       {label:t('undoCheckinBtn'),run:`doUndoCheckin('${e.id}')`,act:()=>doUndoCheckin(e.id)},
       {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
     if(e.status==='done')return`<button class="btn-sm btn-green" data-on-click="${_on("doReopen",e.id)}">${t('reopenBookingBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mCust,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}])}`;
@@ -14654,9 +14655,11 @@ function showBookingEditModal(entryId){
   const keep=id=>{const el=document.getElementById(id);return el!=null&&el.value!==''?el.value:null;};
   const _n=keep('be-name')??e.name??'',_p=keep('be-phone')??e.phone??'',_h=keep('be-height')??(e.height?String(e.height):''),_s=keep('be-sess')??e.sessionId;
   const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._beType===ty?'var(--green)':'var(--border)'};background:${S._beType===ty?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._beType===ty?'var(--green)':'var(--muted)'};font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">${typeLabel(ty)}</button>`;
-  // Session move only before check-in; capacity-checked like the customer reschedule.
+  // Session move for any open booking (2026-09-28): a checked-in rider is taken off their bike
+  // and put back in line on the new ride (the Undo check-in write, then the move); what was
+  // paid stays paid, at its price. Capacity-checked like the customer reschedule.
   const today=_todayISO();
-  const canMove=e.status!=='active';
+  const moveNote=e.status==='active'?t('beMoveActiveNote'):e.paid?t('beMovePaidNote'):'';
   const sessOpts=allSessions()
     .filter(s=>s.id===e.sessionId||(s.status==='open'&&(s.session_date||s.id)>=today&&!_isApprovalRide(s)))
     .sort(_sessOrder) // targets stay open-and-upcoming only (a move is not a retro-entry); the order is the staff one
@@ -14679,8 +14682,8 @@ function showBookingEditModal(entryId){
       </div>
       <div class="form-group" style="margin-bottom:10px"><label>${t('bikeTypeLabel')}</label>
         <div style="display:flex;gap:6px">${bikeTypeOpts(_beOwn,_beNoCarbon).map(tyBtn).join('')}</div></div>
-      ${canMove?`<div class="form-group" style="margin-bottom:14px"><label>${t('colSession')}</label>
-        <select id="be-sess">${sessOpts}</select></div>`:''}
+      <div class="form-group" style="margin-bottom:14px"><label for="be-sess">${t('colSession')}</label>
+        <select id="be-sess">${sessOpts}</select>${moveNote?`<div id="be-move-note" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--muted)">${moveNote}</div>`:''}</div>
       ${_beComm?'':`<div class="form-group" style="margin-bottom:14px"><label>${t('beAddRidersLabel')}</label>
         ${(S._beNewRiders||[]).map((r,i)=>`<div style="display:flex;gap:6px;margin-top:8px;align-items:center">
           <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0">
@@ -14697,6 +14700,9 @@ function showBookingEditModal(entryId){
     </div></div>`;
 }
 function closeBookingEditModal(){const m=document.getElementById('booking-edit-modal');if(m){m.style.display='none';m.innerHTML='';}S._beId=null;S._beRender=null;S._beType=null;S._beNewRiders=null;}
+// Reschedule (2026-09-28): the booking editor opened on its Session field - for a waiting,
+// waitlisted or checked-in rider alike, paid or not.
+function showRescheduleEdit(id){showBookingEditModal(id);setTimeout(()=>{const s=document.getElementById('be-sess');if(s)s.focus();},120);}
 // New-rider rows survive the modal's re-renders (type clicks, add/remove) by syncing DOM -> state first.
 function _beSyncNewRiders(){(S._beNewRiders||[]).forEach((r,i)=>{
   const n=document.getElementById('be-nr-name-'+i),h=document.getElementById('be-nr-height-'+i),ty=document.getElementById('be-nr-type-'+i);
@@ -14722,7 +14728,7 @@ async function _saveBookingEdit(){
     // only when unpaid and still on the old type's default.
     if(!e.paid&&(e.price??DEFAULT_PRICE)===priceForEntryType(e,e.typePreference||'Any'))patch.price=priceForEntryType(e,ty);
   }
-  const moving=toSessionId!==e.sessionId;
+  const moving=toSessionId!==e.sessionId;let offBike=null;
   if(moving){
     const newSess=allSessions().find(s=>s.id===toSessionId);if(!newSess)return;
     // spotsLeft, not a hand-rolled count: a place is held right through the ride and is still
@@ -14732,6 +14738,15 @@ async function _saveBookingEdit(){
     patch.session_id=toSessionId;patch.session_day=newSess.day;patch.session_date=newSess.session_date||toSessionId;
     patch.queue_num=nextQNum(toSessionId); // fresh number in the target session; the old number's gap stays (numbers are never shifted)
     if(e.status==='waitlist')patch.status='waiting';
+    // A checked-in rider leaves their bike first - the Undo check-in write: the row guarded on
+    // still being on the bike, the bike back on the rack, the assignment closed by the database
+    // - and moves as a waiting rider. What they paid stays paid: the patch carries no price.
+    if(e.status==='active'){
+      const w=await _undoCheckinWrite(e);
+      if(!w){await loadDataLight();renderStaffQueue();return;}
+      if(w.lost){closeBookingEditModal();await _lostRace();return;}
+      patch.status='waiting';offBike=w.bikeIds;
+    }
   }
   // Added riders — computed before the parent update so an account-less parent can be
   // stamped with a group_id in that same write.
@@ -14792,7 +14807,10 @@ async function _saveBookingEdit(){
   }
   const id=e.id;
   pushUndo(`${t('undoEditBooking')} #${prev.queue_num} ${prev.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update(prev).eq('id',id),'undo edit')){await loadDataLight();renderStaffQueue();return false;} // nothing below may run over a booking still as edited
+    // A rider taken off their bike goes back to the old ride in line first, then back on the bike (the Undo check-in's own redo).
+    const back=offBike?{...prev,status:'waiting'}:prev;
+    if(_writeErr(await sb.from('queue_entries').update(back).eq('id',id),'undo edit')){await loadDataLight();renderStaffQueue();return false;} // nothing below may run over a booking still as edited
+    if(offBike&&!(await _redoCheckinWrite(id,offBike))){await loadDataLight();renderStaffQueue();return false;}
     if(moving&&prev.status==='waitlist')await _addonStockQ(entryAddons(e),1); // back to waitlist = release what the move reserved above
     if(inserted.length)await Promise.all(inserted.map(x=>sb.from('queue_entries').delete().eq('id',x))).catch(()=>{});
     if(parkedRows.length)await Promise.all(parkedRows.map(x=>sb.from('desk_waitlist').delete().eq('id',x))).catch(()=>{}); // ...and off the Staff List with them

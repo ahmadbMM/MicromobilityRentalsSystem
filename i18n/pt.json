@@ -1010,6 +1010,8 @@
   "undoEditBooking": "Editar reserva",
   "saveChangesBtn": "Salvar alterações",
   "beAddRidersLabel": "Adicionar ciclistas",
+  "beMoveActiveNote": "Mover um ciclista já registado tira-o da bicicleta e volta a pô-lo na fila do novo passeio. O que pagou continua pago.",
+  "beMovePaidNote": "O que pagou continua pago no novo passeio.",
   "beAddRiderBtn": "Adicionar ciclista",
   "beRiderPh": "Nome do ciclista",
   "beRemoveRider": "Remover ciclista",

@@ -1010,6 +1010,8 @@
   "undoEditBooking": "Modifier la réservation",
   "saveChangesBtn": "Enregistrer les modifications",
   "beAddRidersLabel": "Ajouter des cyclistes",
+  "beMoveActiveNote": "Déplacer un cycliste déjà enregistré le fait descendre de son vélo et le remet en file sur la nouvelle sortie. Ce qu’il a payé reste payé.",
+  "beMovePaidNote": "Ce qu’il a payé reste payé sur la nouvelle sortie.",
   "beAddRiderBtn": "Ajouter un cycliste",
   "beRiderPh": "Nom du cycliste",
   "beRemoveRider": "Retirer le cycliste",

@@ -1010,6 +1010,8 @@
   "undoEditBooking": "I-edit ang booking",
   "saveChangesBtn": "I-save ang mga Pagbabago",
   "beAddRidersLabel": "Magdagdag ng mga rider",
+  "beMoveActiveNote": "Ang paglipat ng naka-check in na rider ay nagbababa sa kanya sa bike at ibinabalik sa pila sa bagong biyahe. Ang binayaran ay mananatiling bayad.",
+  "beMovePaidNote": "Ang binayaran ay mananatiling bayad sa bagong biyahe.",
   "beAddRiderBtn": "Magdagdag ng rider",
   "beRiderPh": "Pangalan ng rider",
   "beRemoveRider": "Alisin ang rider",
