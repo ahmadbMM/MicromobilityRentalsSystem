@@ -207,3 +207,41 @@ struck through (`_tagLogo`, `.tag-banned`) and the name beside it. `_isBlacklist
 two places: the Community grant dialog shows the warning, and `_caApprove` adds it to the confirm
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
+
+## The 2026-09-27 feature round (blocks 1-13)
+
+Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
+
+- **Express and Hand-over.** The scanner's Express switch (`_scanExpress`, `cq_scan_express`) checks a
+  paid rider in on the scan, the party with them, one Undo (`_expressCheckin`). Bookings > Hand-over
+  (`/bookings/handover`, `renderHandover`) lists riders checked in without a bike; a typed number, a
+  tag or a sticker goes to the picked rider through `staff_swap_bike` (`_hoAssign`); the pick is kept
+  in `localStorage.cq_ho` for the tab iOS opens for a tag (`_hoTarget`). A tag on a bike that is out
+  offers its return (`_rtTapSheet`).
+- **Fleet.** `_bkOut(b)` is the one predicate for a bike out of the pool (retired, maintenance,
+  missing); `setMissing` toggles missing. CSV import: `_bkCsvRows` checks every row, `_bkCsvPreview`
+  shows them, `_bkCsvImport` inserts in chunks with one Undo; `BK_CSV_COLS` is the template.
+- **Roles.** `STAFF_ROLES` (admin, frontdesk, leader, mechanic, cashier, owner), `ROLE_TABS`,
+  `_roleTabs`, `_roleNorm`; `isAdmin()` is `role==='admin'`. `_pinApprove(what)` asks the operator's
+  PIN (the gate's keypad, `staff_check_operator_pin`) before refunds, voids, deletes, price changes
+  and merges; a right answer holds five minutes (`_pinOk`).
+- **Duplicates.** Community > Duplicates (`/community/duplicates`, admins): `_dupGroups`
+  (same phone, or same name + birth date), `_mgOpen`/`_mgRun` → `staff_merge_customers`,
+  `_mgUndoWrite` → `staff_unmerge_customers` (30 days). A row with `merged_into` is off every list
+  (`_custLiveRows`); `customer_login`/`customer_oauth_login` follow it to the keeper.
+- **Templates and the booking window.** A template keeps its id on re-save and `_nsTplPush`
+  rewrites its future rides (`sessions.template_id`); `_nsSlots` is the form's capacity builder.
+  `site_content booking.window` = {days, at}: `_bwOpensOn(s)`; a ride not open yet is greyed for
+  riders; `_booking_window_guard` refuses the insert server-side.
+- **Ratings.** `RATE_TAGS` chips on the rating (`queue_entries.rating_tags`); Analytics > Ratings
+  (`anView 'ratings'`, `bikeHealthSection`); the bell's `lowrate` kind.
+- **Events.** `ride_kind 'event'` (community, seats, `sessions.description`, `sessions.price`,
+  `open_to_all` per event); `_evSeatPrice`, `_eventsLive`, the landing card, `?ev=event`.
+- **Routes, live, ambassador, Google Wallet.** `_routes()` reads `site_content routes.routes.items`
+  (`sessions.route_slug`); `_liveToggle` shares the leader's position (`staff_live_position`);
+  `_ambMineEnsure` paints the ambassador's card on Account (`ambassador_mine`);
+  `functions/api/google-wallet.js` answers a save link (`_hasGWallet`, `addBookingToGWallet`),
+  501 until `GOOGLE_WALLET_*` are set. `member_area` feeds the website's members' area.
+- **Staging.** `STAGING.md` and `scripts/seed-staging.mjs` (generated data only).
+- Migrations 20260928120000 … 20260928170000 (seven) carry the schema; each was dry-run against
+  production inside a `DO … EXECUTE … RAISE` block before it was committed.
