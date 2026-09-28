@@ -5476,3 +5476,17 @@ body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wr
 .amb-mine-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-top:1px solid var(--border);}
 .amb-mine-row span:first-child{flex:1;min-width:0;}
 .btn-wallet.gwallet{background:#0b4aa2;border-color:#0b4aa2;color:#fff;} /* white on this blue reads at 8:1 */
+
+/* Fleet: a bike's page (its sticker's link and QR) and its private details (2026-09-28) */
+.bk-page{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:0 0 16px;padding:12px 14px;border:1px solid var(--border);border-radius:8px;background:var(--s2)}
+.bk-page-qr{line-height:0;border:1px solid var(--border);border-radius:3px;overflow:hidden;flex-shrink:0;width:112px;height:112px;background:#fff}
+.bk-page-info{flex:1 1 220px;min-width:0}
+.bk-page-h{font-weight:800;font-size:14px}
+.bk-page-sub{font-size:12.5px;color:var(--muted);line-height:1.45;margin:2px 0 6px}
+.bk-page-url{display:inline-block;font-weight:800;color:var(--green);text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.bk-page-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.bk-priv{margin:0 0 16px;padding:12px 14px;border:1px dashed var(--border);border-radius:8px}
+.bk-priv-h{font-weight:800;font-size:13px;margin-bottom:8px}
+.bk-priv-note{font-size:12.5px;color:var(--muted);margin-bottom:8px}
+.bk-priv-err{color:var(--red)}
+.bk-priv textarea{width:100%;box-sizing:border-box}
