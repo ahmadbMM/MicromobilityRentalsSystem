@@ -5,7 +5,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // Setting the lesson's day and time runs staff_learn_schedule, which (the first time) makes the
 // account or finds the one the person has, and the message then carries the lesson's day, time
 // and place: with the temporary password for a new account, the sign-in line for an existing one,
-// and only the new time when a lesson moves. Done and Cancel leave an undo.
+// and only the new time when a lesson moves. Done and Cancel can be undone from the topbar.
 
 const customers = [
   { id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', height: 165, created_at: '2026-01-05T10:00:00Z' },
@@ -27,7 +27,7 @@ const learners = [
 // A day two days from now, in Riyadh, as the date input gives it.
 const soon = () => new Date(Date.now() + 2 * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 
-async function learnTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<void>) {
+async function learnTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<unknown>) {
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], community_applications: [], learn_applications: learners, ...extra });
   if (routes) await routes(); // after the stub, so they are asked first
   await unlockStaff(page);
@@ -197,16 +197,16 @@ test.describe('@staff:community learn to ride', () => {
     expect(asked.some((x) => !x.includes('heard_from'))).toBe(true);
   });
 
-  test('Done and Cancel each leave an undo; a cancelled sign-up goes back to New', async ({ page }) => {
+  test('Done and Cancel can be undone from the topbar; a cancelled sign-up goes back to New', async ({ page }) => {
     await learnTab(page, { 'rpc:staff_learn_decide': { ok: true } });
     const calls = rpcCalls(page, 'staff_learn_decide');
     await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
     await row(page, 'l3').locator('.la-done').click();
     await expect.poll(() => calls.length).toBe(1);
     expect(calls[0]).toEqual({ p_id: 'l3', p_status: 'done', p_by: 'Spec Staff' });
-    await expect(page.locator('#undo-bar-el')).toContainText('Omar Farouk: lesson done');
+    await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Omar Farouk: lesson done/);
     await expect(page.locator('.filter-pill[data-la-filter="done"]')).toHaveText('Done (1)');
-    await page.locator('#undo-bar-btn').click();
+    await page.locator('#topbar-right .undo-btn').click();
     await expect.poll(() => calls.length).toBe(2);
     expect(calls[1]).toEqual({ p_id: 'l3', p_status: 'scheduled', p_by: 'Spec Staff' });
     await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (1)');
@@ -217,7 +217,7 @@ test.describe('@staff:community learn to ride', () => {
     await page.locator('#confirm-modal button', { hasText: 'Cancel sign-up' }).last().click();
     await expect.poll(() => calls.length).toBe(3);
     expect(calls[2]).toEqual({ p_id: 'l1', p_status: 'cancelled', p_by: 'Spec Staff' });
-    await expect(page.locator('#undo-bar-el')).toContainText('Nadia Omar’s sign-up cancelled');
+    await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Nadia Omar’s sign-up cancelled/);
     await expect(page.locator('.filter-pill[data-la-filter="cancelled"]')).toHaveText('Cancelled (2)');
 
     await page.locator('.filter-pill[data-la-filter="cancelled"]').click();

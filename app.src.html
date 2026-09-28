@@ -14190,14 +14190,14 @@ async function _laDecide(a,status){
   Object.assign(a,{status,decided_at:new Date().toISOString(),decided_by:_opName()||null},status==='pending'?{lesson_at:null}:{});
   return true;
 }
-// Done and Cancel each leave an undo that puts the sign-up back where it was; a cancelled one
-// that had no lesson yet goes back to New.
+// Done and Cancel can be undone (the topbar's Undo, or History > Log): the sign-up goes back where it
+// was, and a cancelled one that had no lesson yet goes back to New.
 function _laUndoTo(a,prev){return async()=>{if(await _laDecide(a,prev))renderCommunity();};}
 async function _laDone(id){
   const a=_laFind(id);if(!a||a.status!=='scheduled'||S._laWorking)return;
   if(!(await _laDecide(a,'done')))return;
   const msg=t('laDoneToast').replace('{0}',_laWho(a));
-  logAction(msg);renderCommunity();showUndoBar(msg,_laUndoTo(a,'scheduled'));
+  pushUndo(msg,_laUndoTo(a,'scheduled'));toast(msg,'success');renderCommunity();
 }
 async function _laCancel(id){
   const a=_laFind(id);if(!a||(a.status!=='pending'&&a.status!=='scheduled')||S._laWorking)return;
@@ -14206,7 +14206,7 @@ async function _laCancel(id){
   const prev=a.status;
   if(!(await _laDecide(a,'cancelled')))return;
   const msg=t('laCancelledToast').replace('{0}',_laWho(a));
-  logAction(msg);renderCommunity();showUndoBar(msg,_laUndoTo(a,prev));
+  pushUndo(msg,_laUndoTo(a,prev));toast(msg);renderCommunity();
 }
 async function _laReopen(id){
   const a=_laFind(id);if(!a||a.status!=='cancelled'||S._laWorking)return;
