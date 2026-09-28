@@ -713,7 +713,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
   bike:'Bike',
-  sessOpened:'Session opened.',sessClosed:'Session closed.',sessDeleted:'Session deleted.',sessRestored:'Session restored.',
+  sessOpened:'Session opened.',sessClosed:'Session closed.',sessDeleted:'Session deleted.',sessRestored:'Session restored.',sessPurgeBtn:'Delete permanently',sessPurgeAllBtn:'Delete all permanently',sessPurgeTitle:'Delete permanently?',sessPurgeBody:'The session is removed for good and cannot be restored.',sessPurgeAllBody:'All {0} deleted sessions are removed for good and cannot be restored.',sessPurged:'Session deleted permanently.',sessPurgedN:'Sessions deleted permanently: {0}.',sessPurgeKept:'Kept in Deleted Sessions: it has bookings, sales or registrations on record.',sessPurgeKeptN:'Kept in Deleted Sessions: {0} (they have bookings, sales or registrations on record).',
   totalStat:'Total',waitingStat:'Waiting',onBikeStat:'On Bike',doneStat:'Done',ridersStat:'Riders',
   statNumRiders:'# of Riders',statExpected:'Expected',statCompleted:'Completed',
   noShowFlagTip:'{0} past no-shows',cloneSessBtn:'Clone',cloneBtn:'Clone',
@@ -1106,7 +1106,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
   bike:'دراجة',
-  sessOpened:'تم فتح الجلسة.',sessClosed:'تم إغلاق الجلسة.',sessDeleted:'تم حذف الجلسة.',sessRestored:'تم استعادة الجلسة.',
+  sessOpened:'تم فتح الجلسة.',sessClosed:'تم إغلاق الجلسة.',sessDeleted:'تم حذف الجلسة.',sessRestored:'تم استعادة الجلسة.',sessPurgeBtn:'حذف نهائي',sessPurgeAllBtn:'حذف الكل نهائياً',sessPurgeTitle:'حذف نهائي؟',sessPurgeBody:'ستُحذف الجلسة نهائياً ولا يمكن استعادتها.',sessPurgeAllBody:'ستُحذف كل الجلسات المحذوفة ({0}) نهائياً ولا يمكن استعادتها.',sessPurged:'تم حذف الجلسة نهائياً.',sessPurgedN:'الجلسات المحذوفة نهائياً: {0}.',sessPurgeKept:'بقيت في الجلسات المحذوفة: عليها حجوزات أو مبيعات أو تسجيلات مسجلة.',sessPurgeKeptN:'بقي في الجلسات المحذوفة: {0} (عليها حجوزات أو مبيعات أو تسجيلات مسجلة).',
   totalStat:'الكل',waitingStat:'بانتظار',onBikeStat:'على الدراجة',doneStat:'منتهٍ',ridersStat:'الراكبون',
   statNumRiders:'عدد الركّاب',statExpected:'متوقّع',statCompleted:'مكتمل',
   noShowFlagTip:'{0} حالات عدم حضور سابقة',cloneSessBtn:'نسخ',cloneBtn:'نسخ',
@@ -12187,6 +12187,7 @@ function renderSessions(){
           <span style="font-size:16px">${S.showDeletedSess?'▾':'▸'}</span>
           ${t('sessDeletedGroup')} (${deleted.length})
         </button>
+        ${S.showDeletedSess&&isAdmin()&&deleted.length>1?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn-sm btn-red" data-on-click="${_on("purgeDeletedSessions")}">${t('sessPurgeAllBtn')}</button></div>`:''}
         ${S.showDeletedSess?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="sess-admin-table">
           <thead><tr>
             <th>${t('colDate')}</th><th>${t('colDay')}</th><th>${t('colCapacity')}</th><th>${t('colBookings')}</th><th></th>
@@ -12202,7 +12203,10 @@ function renderSessions(){
               <td data-label="${t('colDay')}" style="color:var(--muted)">${dayLabel(s.day)||''}</td>
               <td data-label="${t('colCapacity')}"><div style="font-weight:800">${cap}</div><div style="font-size:11px;color:var(--muted)">${fleetInfo}</div></td>
               <td data-label="${t('colBookings')}">${bk} / ${cap}</td>
-              <td class="cell-actions"><button class="btn-sm btn-green" data-on-click="${_on("restoreSession",s.id)}">${t('restoreBtn')}</button></td>
+              <td class="cell-actions"><div class="actions-cell">
+                <button class="btn-sm btn-green" data-on-click="${_on("restoreSession",s.id)}">${t('restoreBtn')}</button>
+                ${isAdmin()?`<button class="btn-sm btn-red" data-on-click="${_on("purgeSession",s.id)}">${t('sessPurgeBtn')}</button>`:''}
+              </div></td>
             </tr>`;
           }).join('')}</tbody>
         </table></div>`:''}
@@ -12847,6 +12851,58 @@ async function restoreSession(id){
     toast(t('sessRestored'));
     renderSessions();
   }catch(e){toast(t('errConnection'),'error');}
+}
+
+// Permanently delete a session that is already in Deleted Sessions (the owner, 2026-09-28). Only
+// one nothing points at: queue_entries and cashier_sales carry session_id with no foreign key, and
+// rider_registrations' is ON DELETE SET NULL, so a session with any booking, sale or registration
+// on record - cancelled ones included - would leave rows naming a session that no longer exists.
+// Those stay in Deleted Sessions. Admins only: the sessions DELETE policy is is_admin(), and the
+// write asks for status 'deleted' itself, so a session restored meanwhile is left alone.
+async function _sessPurge(ids){
+  const out={gone:[],kept:[],err:null};
+  const uses=(tb,id)=>sb.from(tb).select('id',{count:'exact',head:true}).eq('session_id',id);
+  for(const id of ids){
+    const c=await Promise.all(['queue_entries','cashier_sales','rider_registrations'].map(tb=>uses(tb,id)));
+    const bad=c.find(r=>r.error);if(bad){out.err=bad;break;}
+    if(c.some(r=>r.count>0)){out.kept.push(id);continue;}
+    const r=await sb.from('sessions').delete().eq('id',id).eq('status','deleted').select('id');
+    if(r.error){out.err=r;break;}
+    if(r.data&&r.data.length)out.gone.push(id); // none: restored or gone meanwhile, and the reload shows which
+  }
+  return out;
+}
+async function _sessPurgeRun(ids){
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
+  if(!await _pinApprove(t('sessPurgeBtn')))return;
+  let r;try{r=await _sessPurge(ids);}catch(e){r={gone:[],kept:[],err:{error:e}};}
+  if(r.gone.length){
+    const byId=new Map(allSessions().map(x=>[x.id,x]));
+    r.gone.forEach(id=>{const x=byId.get(id);logAction(`${t('sessPurgeBtn')}: ${shortDate((x&&x.session_date)||id)}${x&&x.title?' - '+x.title:''}`);});
+    await loadData();
+    toast(ids.length===1?t('sessPurged'):t('sessPurgedN').replace('{0}',String(r.gone.length)),'success');
+  }
+  if(r.kept.length)toast(ids.length===1?t('sessPurgeKept'):t('sessPurgeKeptN').replace('{0}',String(r.kept.length)),'warning');
+  if(r.err)_writeErr(r.err,'purge session',()=>_sessPurgeRun(ids.filter(id=>!r.gone.includes(id))));
+  renderSessions();
+}
+function purgeSession(id){
+  const x=allSessions().find(s=>s.id===id);if(!x)return;
+  confirmDialog({
+    title:t('sessPurgeTitle'),
+    body:`<strong>${esc(shortDate(x.session_date||x.id))}${x.title?' - '+esc(x.title):''}</strong><br>${esc(t('sessPurgeBody'))}`, // confirmDialog's body is HTML
+    confirmLabel:t('sessPurgeBtn'),confirmClass:'btn-red',
+    onConfirm:()=>_sessPurgeRun([id]),
+  });
+}
+function purgeDeletedSessions(){
+  const ids=allSessions().filter(s=>s.status==='deleted').map(s=>s.id);if(!ids.length)return;
+  confirmDialog({
+    title:t('sessPurgeTitle'),
+    body:esc(t('sessPurgeAllBody').replace('{0}',String(ids.length))),
+    confirmLabel:t('sessPurgeAllBtn'),confirmClass:'btn-red',
+    onConfirm:()=>_sessPurgeRun(ids),
+  });
 }
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
