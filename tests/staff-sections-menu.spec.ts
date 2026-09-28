@@ -32,7 +32,7 @@ test.describe('small screens', () => {
     await expect(burger).toHaveAttribute('aria-expanded', 'true');
 
     // Every section is reachable without dragging anything sideways, group headings included.
-    for (const name of ['Queue', 'Sales', 'Inventory', 'Community', 'Analytics', 'History']) { // Riders is a page in Queue now
+    for (const name of ['Bookings', 'Sales', 'Inventory', 'Community', 'Analytics', 'History']) { // Riders is a page in Bookings now
       await expect(nav.locator('.tab-btn', { hasText: name })).toBeVisible();
     }
     await expect(nav.locator('.snav-group', { hasText: 'Insights' })).toBeVisible();

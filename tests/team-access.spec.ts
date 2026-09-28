@@ -103,9 +103,9 @@ test('the Team page sets PINs and what another account can open and change, neve
   await expect(mine.getByRole('button', { name: 'Save' })).toHaveCount(0);
   // the front desk account: its role's sections only; take Sales off what it can open
   const desk = tab.locator(`.tm-acct[data-acct="${DESK}"]`);
-  await expect(desk.locator('.tm-chip[data-sec^="view:"]')).toHaveText(['Queue', 'Sales', 'Workshop']);
+  await expect(desk.locator('.tm-chip[data-sec^="view:"]')).toHaveText(['Bookings', 'Sales', 'Workshop']);
   await desk.locator('.tm-chip[data-sec="view:cashier"]').click();
-  await expect(desk.locator('.tm-chip[data-sec^="edit:"]')).toHaveText(['Queue', 'Workshop']);
+  await expect(desk.locator('.tm-chip[data-sec^="edit:"]')).toHaveText(['Bookings', 'Workshop']);
   await desk.locator('.tm-chip[data-sec="edit:workshop"]').click();
   await desk.getByRole('button', { name: 'Save' }).click();
   await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'workshop'], p_edit: ['queue'] }]);
@@ -116,7 +116,7 @@ test('an account sees only its sections, and a section it may not change is read
   await page.evaluate(`_accessSet({modules_view:['queue','cashier','community'],modules_edit:['cashier']},'u1')`);
   // the sections the rail offers (on a phone the rail sits behind the menu, so not "visible")
   const offered = () => page.evaluate(`[...document.querySelectorAll('#staff-tab-nav .tab-btn')].filter(b=>b.style.display!=='none').map(b=>b.querySelector('.snav-lbl').textContent.trim())`);
-  await expect.poll(offered).toEqual(['Queue', 'Sales', 'Community']);
+  await expect.poll(offered).toEqual(['Bookings', 'Sales', 'Community']);
   await page.evaluate(`setStaffTab('queue')`);
   await expect(page.locator('#ro-banner')).toHaveText('Read-only mode: no changes allowed');
   const refused = await page.evaluate(`sb.from('queue_entries').update({paid:true}).eq('id','x').select().then(r=>r.error&&r.error.code)`);

@@ -158,14 +158,14 @@ test('phones and tablets get a bottom bar with the most used sections and More',
   await staff(page);
   const bar = page.locator('#staff-tabbar');
   await expect(bar).toBeVisible();
-  await expect(bar.locator('.tb-btn')).toHaveText(['Queue', 'Sales', 'Inventory', 'Workshop', 'More']);
+  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Sales', 'Inventory', 'Workshop', 'More']);
   await bar.locator('.tb-btn', { hasText: 'Sales' }).click();
   expect(await page.evaluate('S.staffTab')).toBe('cashier');
   await expect(bar.locator('.tb-btn.active')).toHaveText('Sales');
   await bar.locator('.tb-more').click();
   await expect(page.locator('body')).toHaveClass(/snav-open/);
   await page.evaluate(`setStaffRole('frontdesk')`);
-  await expect(bar.locator('.tb-btn')).toHaveText(['Queue', 'Sales', 'Workshop']);
+  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Sales', 'Workshop']);
 });
 
 test('the desktop keeps the rail and has no bottom bar', async ({ page }) => {
