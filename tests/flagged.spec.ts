@@ -108,7 +108,6 @@ test('sign-up: signs are dropped as they are typed, and a name that still carrie
   await expect(page.locator('.toast').last()).toContainText('letters, spaces and periods');
   await page.fill('#a-last', 'Babalghoum');
   await page.evaluate('setSignupGender("male")');
-  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.fill('#a-email', 'faisal@example.com');
   await page.fill('#a-phone', '0508566560');
   await page.fill('#a-pwd', 'Zq8xTselah');
@@ -132,7 +131,6 @@ test('sign-up: the server refusing the name reads as the same message', async ({
   await page.fill('#a-first', 'Faisal');
   await page.fill('#a-last', 'Babalghoum');
   await page.evaluate('setSignupGender("male")');
-  await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
   await page.fill('#a-email', 'faisal@example.com');
   await page.fill('#a-phone', '0508566560');
   await page.fill('#a-pwd', 'Zq8xTselah');

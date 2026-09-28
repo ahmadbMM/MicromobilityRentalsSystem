@@ -67,7 +67,6 @@ test.describe('signup', () => {
     await page.fill('#a-first', 'Faisal');
     await page.fill('#a-last', 'Babalghoum');
     await page.evaluate('setSignupGender("male")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     await page.fill('#a-email', 'faisal@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
@@ -87,7 +86,6 @@ test.describe('signup', () => {
     await page.fill('#a-last', 'Babalghoum');
     expect(await errAfter()).toBeTruthy();                       // gender
     await page.evaluate('setSignupGender("male")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     expect(await errAfter()).toBeTruthy();                       // email
     await page.fill('#a-email', 'bad-email');
     expect(await errAfter()).toBeTruthy();                       // email format
@@ -109,7 +107,7 @@ test.describe('signup', () => {
     expect(calls.length).toBe(1);
     expect(calls[0].p_phone).toBe('+966508566560');
     expect(calls[0].p_gender).toBe('male');
-    expect(calls[0].p_heard_from).toBe('invited');
+    expect(calls[0]).not.toHaveProperty('p_heard_from'); // the app's sign-up no longer asks how they heard of us (2026-09-28)
     expect(await page.evaluate('S.loggedIn.session_token')).toBe('tok-new');
   });
 
@@ -206,7 +204,6 @@ test.describe('google complete-profile', () => {
     await page.evaluate('S.signupAck=true;doCompleteGoogle()');
     await expect(page.locator('#auth-err')).not.toBeEmpty(); // gender required
     await page.evaluate('setSignupGender("female")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     await page.fill('#a-height', '156');
     await page.fill('#a-phone', '0508727012');
     await page.evaluate('S.signupAck=true;doCompleteGoogle();doCompleteGoogle()');
@@ -214,7 +211,7 @@ test.describe('google complete-profile', () => {
     expect(calls.length).toBe(1); // double-tap guard
     expect(calls[0].p_phone).toBe('+966508727012');
     expect(await page.evaluate('S.loggedIn.session_token')).toBe('gtok');
-    expect(heard).toEqual([{ p_id: expect.any(String), p_token: 'gtok', p_value: 'invited' }]); // written onto the account it just made
+    expect(heard).toEqual([]); // the question is on the website's forms, not here (2026-09-28)
   });
 });
 
@@ -267,7 +264,6 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-first', 'Faisal');
     await page.fill('#a-last', 'Babalghoum');
     await page.evaluate('setSignupGender("male")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     await page.fill('#a-email', 'new@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
@@ -286,7 +282,6 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-first', 'Faisal');
     await page.fill('#a-last', 'Babalghoum');
     await page.evaluate('setSignupGender("male")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     await page.fill('#a-email', 'new@example.com');
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
@@ -392,7 +387,6 @@ test.describe('round 4: invisible characters & post-login flow', () => {
     await page.fill('#a-first', 'Faisal');
     await page.fill('#a-last', 'Babalghoum');
     await page.evaluate('setSignupGender("male")');
-    await page.selectOption('#a-heard', 'invited'); // how they heard of us is obligatory too
     await page.evaluate(`document.getElementById('a-email').value='Faisal\u200F@Example.com\u200E'`);
     await page.fill('#a-phone', '0508566560');
     await page.fill('#a-pwd', 'Zq8xTselah');
