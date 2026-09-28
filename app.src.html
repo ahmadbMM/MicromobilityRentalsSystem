@@ -14027,7 +14027,11 @@ const LA_LEVEL={never:'laLvlNever',tried:'laLvlTried',refresh:'laLvlRefresh'};
 async function _laLoad(){
   if(S._laBusy||!sb)return;S._laBusy=true;
   try{
-    const{data,error}=await sb.from('learn_applications').select(LA_COLS).order('created_at',{ascending:false}).limit(1000);
+    const q=cols=>sb.from('learn_applications').select(cols).order('created_at',{ascending:false}).limit(1000);
+    // heard_from (how they heard of us) comes with migration 20260928230000, after the table's own
+    // 20260928210000: until the database has it, the list loads without it.
+    let{data,error}=await q(LA_COLS+',heard_from');
+    if(error&&/heard_from/.test(String(error.message||'')))({data,error}=await q(LA_COLS));
     if(error)S._laErr=true;else{S._laApps=data||[];S._laErr=false;}
   }catch(e){S._laErr=true;}
   finally{S._laBusy=false;S._laAt=Date.now();}
@@ -14092,6 +14096,7 @@ function _laRow(a){
       ${kv(t('caLblGender'),esc(a.learner_gender==='female'?t('genderFemale'):t('genderMale')))}
       ${kv(t('caLblHeight'),esc(t('caHeightCm').replace('{0}',a.learner_height)))}
       ${kv(t('laLblLevel'),esc(t(LA_LEVEL[a.level]||'')||a.level))}
+      ${a.heard_from?kv(t('heardLabel'),heardLabel(a.heard_from)):''}
       ${kv(t('caLblLang'),esc(lang))}
     </div>
     ${a.notes?`<div class="la-notes"><span>${t('laLblNotes')}</span>${esc(a.notes)}</div>`:''}

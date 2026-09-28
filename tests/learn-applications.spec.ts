@@ -27,8 +27,9 @@ const learners = [
 // A day two days from now, in Riyadh, as the date input gives it.
 const soon = () => new Date(Date.now() + 2 * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 
-async function learnTab(page: Page, extra: Record<string, unknown> = {}) {
+async function learnTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<void>) {
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], community_applications: [], learn_applications: learners, ...extra });
+  if (routes) await routes(); // after the stub, so they are asked first
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -172,6 +173,28 @@ test.describe('@staff:community learn to ride', () => {
     for (const txt of ['Your lesson is booked:', 'Your account is ready', 'Email: omar.farouk@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
     expect(msg).not.toContain('Temporary password');
     await expect(row(page, 'l3').locator('.la-newpwd')).toBeVisible(); // the account this sign-up made
+  });
+
+  // How they heard of us (the owner, 2026-09-28: asked by this form and the community one, no longer
+  // by the booking app's sign-up), in the staff member's language; nothing when there is no answer.
+  test('the card shows how the applicant heard of us', async ({ page }) => {
+    await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l1' ? { ...l, heard_from: 'friend' } : l)) });
+    await expect(row(page, 'l1')).toContainText('How did you hear about us?');
+    await expect(row(page, 'l1')).toContainText('A friend or family');
+    await expect(row(page, 'l2')).not.toContainText('How did you hear about us?');
+  });
+
+  test('before the database has heard_from, the list loads without it', async ({ page }) => {
+    const asked: string[] = [];
+    await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, async (r) => {
+      const sel = new URL(r.request().url()).searchParams.get('select') || '';
+      asked.push(sel);
+      if (sel.includes('heard_from')) return r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column learn_applications.heard_from does not exist' }) });
+      return r.fallback();
+    }));
+    await expect(row(page, 'l1')).toContainText('Nadia Omar');
+    expect(asked.some((x) => x.includes('heard_from'))).toBe(true);
+    expect(asked.some((x) => !x.includes('heard_from'))).toBe(true);
   });
 
   test('Done and Cancel each leave an undo; a cancelled sign-up goes back to New', async ({ page }) => {
