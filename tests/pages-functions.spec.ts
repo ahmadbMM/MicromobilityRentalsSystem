@@ -36,6 +36,7 @@ test.describe('the middleware', () => {
     for (const hidden of [
       '/assets/other.json', '/package.json', '/AGENTS.md', '/app.src.html', '/tests/x.png', '/scripts/deploy-now.sh',
       '/functions/api/wallet-pass.js', '/design_handoff_erp_reskin/a.html', '/.gitignore',
+      '/visual/analytics.visual.ts', '/visual/x.png', '/playwright.visual.config.ts',
       // wrangler's dev state is tracked in git: the dotfile rule only read the LAST segment.
       '/.wrangler/state/v3/cache/miniflare-CacheObject/metadata.sqlite',
       '/.wrangler/state/v3/observability/x/metadata.sqlite-wal',

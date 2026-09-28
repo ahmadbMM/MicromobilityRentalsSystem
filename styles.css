@@ -1743,6 +1743,155 @@
     .occ-gauge-svg{overflow:visible;}
     @media(max-width:767px){.insights-grid{grid-template-columns:1fr;}}
 
+    /* ── Analytics without inline styles (2026-09-28) ─────────────────────────────────────────
+       What the Analytics templates wrote in style="…" attributes, as classes, so the policy can
+       drop style-src 'unsafe-inline' (see _cssv/_cssvApply in app.src.html). Every rule is scoped by
+       #tab-analytics: an inline style outranked every rule without !important, and the id keeps
+       that - no class rule, the body.view-staff layer included, can overrule these, while the
+       !important rules that beat the inline styles (the KPI and highlight numbers' ink) still win.
+       A value only known at render time is a custom property (--an-w, --an-bg, --an-fg). */
+    /* Run-time values: custom properties set from data-cssv by _cssvApply (app.src.html) */
+    #tab-analytics .an-fill{width:var(--an-w);background:var(--an-bg);}
+    #tab-analytics .an-pfill{height:100%;width:var(--an-w);background:var(--an-bg);border-radius:3px;}
+    #tab-analytics .an-bgv{background:var(--an-bg);}
+    #tab-analytics .an-fg{color:var(--an-fg);}
+    #tab-analytics .an-heat-cell{width:26px;height:22px;border-radius:4px;background:var(--an-bg);margin:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--an-fg);}
+    #tab-analytics .an-gauge-pct{font-size:26px;font-weight:900;color:var(--an-fg);margin-top:-28px;line-height:1;}
+    #tab-analytics .an-occ-pct{font-size:12px;font-weight:800;color:var(--an-fg);}
+    #tab-analytics .an-live-num{font-size:30px;font-weight:900;color:var(--an-fg);line-height:1;}
+    #tab-analytics .an-rfm-title{font-size:12px;font-weight:900;color:var(--an-fg);text-transform:uppercase;letter-spacing:.4px;}
+    /* Colour, weight, size and spacing that recur */
+    #tab-analytics .an-c-green{color:var(--green);}
+    #tab-analytics .an-c-orange{color:var(--orange);}
+    #tab-analytics .an-c-blue{color:var(--blue);}
+    #tab-analytics .an-c-red{color:var(--red);}
+    #tab-analytics .an-c-purple{color:var(--purple);}
+    #tab-analytics .an-c-muted{color:var(--muted);}
+    #tab-analytics .an-c-mutedl{color:var(--muted-l);}
+    #tab-analytics .an-c-text{color:var(--text);}
+    #tab-analytics .an-b700{font-weight:700;}
+    #tab-analytics .an-b800{font-weight:800;}
+    #tab-analytics .an-b900{font-weight:900;}
+    #tab-analytics .an-fs10{font-size:10px;}
+    #tab-analytics .an-fs11{font-size:11px;}
+    #tab-analytics .an-fs12{font-size:12px;}
+    #tab-analytics .an-fs16{font-size:16px;}
+    #tab-analytics .an-muted-10{color:var(--muted);font-size:10px;}
+    #tab-analytics .an-muted-12{color:var(--muted);font-size:12px;}
+    #tab-analytics .an-muted-600{color:var(--muted);font-weight:600;}
+    #tab-analytics .an-muted-700{color:var(--muted);font-weight:700;}
+    #tab-analytics .an-sub11{font-size:11px;color:var(--muted);font-weight:600;}
+    #tab-analytics .an-mt6{margin-top:6px;}
+    #tab-analytics .an-mt8{margin-top:8px;}
+    #tab-analytics .an-mt10{margin-top:10px;}
+    #tab-analytics .an-mt14{margin-top:14px;}
+    #tab-analytics .an-mb0{margin-bottom:0;}
+    #tab-analytics .an-mb6{margin-bottom:6px;}
+    #tab-analytics .an-mb8{margin-bottom:8px;}
+    #tab-analytics .an-mb10{margin-bottom:10px;}
+    #tab-analytics .an-ml4{margin-left:4px;}
+    #tab-analytics .an-minw0{min-width:0;}
+    #tab-analytics .an-minw66{min-width:66px;}
+    #tab-analytics .an-minw80{min-width:80px;}
+    #tab-analytics .an-minw96{min-width:96px;}
+    #tab-analytics .an-minw120{min-width:120px;}
+    #tab-analytics .an-minw150{min-width:150px;}
+    #tab-analytics .an-block{display:block;}
+    #tab-analytics .an-tc{text-align:center;}
+    #tab-analytics .an-tr{text-align:right;}
+    #tab-analytics .an-p0{padding:0;}
+    #tab-analytics .an-grow{flex:1;min-width:0;}
+    #tab-analytics .an-nodeco{text-decoration:none;}
+    #tab-analytics .an-collapse{border-collapse:collapse;}
+    #tab-analytics .an-scroll-x{overflow-x:auto;}
+    #tab-analytics .an-scroll-x-touch{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    #tab-analytics .an-w100{width:100%;}
+    #tab-analytics .an-w100-240{width:100%;min-width:240px;}
+    #tab-analytics .an-w100-280{width:100%;min-width:280px;}
+    /* The page head and the range bar */
+    #tab-analytics .an-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    #tab-analytics .an-title-btns{display:flex;gap:8px;}
+    #tab-analytics .an-btn-sm{font-size:12px;padding:6px 12px;}
+    #tab-analytics .an-range-txt{font-size:12px;font-weight:700;color:var(--muted);}
+    #tab-analytics .an-range-txt-ml{font-size:12px;font-weight:700;color:var(--muted);margin-left:8px;}
+    #tab-analytics .an-date{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer;}
+    /* Charts, legends and empty states */
+    #tab-analytics .an-area-svg{width:100%;display:block;overflow:visible;}
+    #tab-analytics .an-bars-svg{width:100%;display:block;}
+    #tab-analytics .an-donut-svg{display:block;flex-shrink:0;}
+    #tab-analytics .an-donut-total{fill:var(--text);}
+    #tab-analytics .an-nodata{color:var(--muted);font-size:13px;padding-top:8px;}
+    #tab-analytics .an-nodata-chart{padding:28px 0;text-align:center;color:var(--muted);font-size:12px;}
+    #tab-analytics .an-nodata-donut{padding:16px;text-align:center;color:var(--muted);font-size:12px;}
+    #tab-analytics .an-nodata-bars{padding:20px;text-align:center;color:var(--muted);font-size:12px;}
+    #tab-analytics .an-dot-pend{background:#e08828;}
+    #tab-analytics .an-dot-total{background:rgba(var(--green-rgb),.4);}
+    #tab-analytics .an-dot-riders{background:#0c7a3d;}
+    #tab-analytics .an-dot-cap{background:rgba(var(--tint-rgb),.25);}
+    #tab-analytics .an-pay-total{margin-top:8px;font-size:20px;font-weight:900;color:var(--green);}
+    #tab-analytics .an-vat{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px;}
+    #tab-analytics .an-gauge-card{display:flex;flex-direction:column;gap:16px;}
+    #tab-analytics .an-gauge-lbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    #tab-analytics .an-lbl-flex{display:flex;align-items:center;gap:5px;}
+    #tab-analytics .an-chip{font-size:10px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:5px;padding:1px 5px;color:var(--muted-l);font-weight:700;}
+    #tab-analytics .an-ht-head{display:flex;gap:8px;align-items:baseline;margin:4px 0 8px;}
+    #tab-analytics .an-ht-avg{font-size:22px;font-weight:900;color:var(--green);}
+    /* Tables, highlights and the live board */
+    #tab-analytics .an-td-date{font-weight:800;white-space:nowrap;}
+    #tab-analytics .an-td-riders{font-weight:900;font-size:16px;}
+    #tab-analytics .an-td-rev{color:var(--green);font-weight:800;}
+    #tab-analytics .an-td-pend{color:var(--muted-l);font-weight:700;}
+    #tab-analytics .an-hl-note{font-size:13px;color:var(--muted);font-weight:600;margin-left:8px;}
+    #tab-analytics .an-hl-note6{font-size:13px;color:var(--muted);font-weight:600;margin-left:6px;}
+    #tab-analytics .an-hl-date{font-size:13px;font-weight:600;color:var(--muted);}
+    #tab-analytics .an-idle-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
+    #tab-analytics .an-idle-name{font-weight:700;font-size:13px;}
+    #tab-analytics .an-idle-note{font-size:11px;color:var(--muted-l);font-weight:700;}
+    #tab-analytics .an-idle-none{padding:12px 0;color:var(--green);font-weight:700;font-size:13px;}
+    #tab-analytics .an-live-card{background:linear-gradient(180deg,rgba(var(--green-rgb),.06),transparent);}
+    #tab-analytics .an-live-row{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+    #tab-analytics .an-live-stat{flex:1;min-width:120px;text-align:center;}
+    #tab-analytics .an-live-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:5px;}
+    /* Ratings */
+    #tab-analytics .an-stack8{display:flex;flex-direction:column;gap:8px;}
+    #tab-analytics .an-attn{display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(var(--warn-rgb),.06);border:1px solid rgba(var(--warn-rgb),.25);border-radius:6px;}
+    #tab-analytics .an-name13{font-weight:800;font-size:13px;}
+    #tab-analytics .an-attn-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+    #tab-analytics .an-attn-why{font-size:10px;font-weight:800;color:var(--orange);}
+    #tab-analytics .an-attn-title{font-size:13px;font-weight:800;color:var(--muted);margin:14px 0 8px;}
+    #tab-analytics .an-rate-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:520px;overflow-y:auto;}
+    #tab-analytics .an-rate-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px 13px;}
+    #tab-analytics .an-row-between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    #tab-analytics .an-rate-meta{font-size:10px;color:var(--muted);}
+    #tab-analytics .an-rate-scores{display:flex;gap:14px;flex-shrink:0;}
+    #tab-analytics .an-rate-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.3px;}
+    #tab-analytics .an-rate-tagrow{display:flex;gap:4px;flex-wrap:wrap;margin-top:7px;}
+    #tab-analytics .an-rate-tag{font-size:10px;font-weight:800;background:var(--s3);border-radius:4px;padding:2px 7px;}
+    #tab-analytics .an-rate-note{font-size:12px;color:var(--text);margin-top:7px;padding-top:7px;border-top:1px solid var(--border);line-height:1.5;}
+    #tab-analytics .an-low{font-size:10px;color:var(--red);font-weight:800;}
+    /* Growth */
+    #tab-analytics .an-funnel-head{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:3px;}
+    #tab-analytics .an-funnel-track{height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}
+    #tab-analytics .an-funnel-foot{font-size:12px;color:var(--muted);margin-top:8px;}
+    #tab-analytics .an-heat-th{font-size:9px;font-weight:700;color:var(--muted);padding:2px;}
+    #tab-analytics .an-heat-day{font-size:10px;font-weight:800;color:var(--muted);padding-inline-end:6px;white-space:nowrap;}
+    #tab-analytics .an-spark{flex:1;min-width:100px;}
+    #tab-analytics .an-spark-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;}
+    #tab-analytics .an-spark-lbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+    #tab-analytics .an-spark-val{font-size:18px;font-weight:900;margin:2px 0 4px;}
+    #tab-analytics .an-fc-note{font-size:11px;color:var(--muted);margin:-4px 0 4px 2px;}
+    #tab-analytics .an-target-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+    #tab-analytics .an-btn-sm-fixed{font-size:12px;padding:6px 12px;flex-shrink:0;}
+    #tab-analytics .an-target-nums{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:4px;}
+    #tab-analytics .an-target-track{height:16px;background:var(--s3);border-radius:3px;overflow:hidden;}
+    #tab-analytics .an-rfm-chips{display:flex;flex-wrap:wrap;margin-top:4px;}
+    #tab-analytics .an-rfm-chip{text-decoration:none;background:var(--s3);border:1px solid var(--border);color:var(--text);font-weight:700;font-size:11px;margin:2px;padding:4px 9px;border-radius:3px;display:inline-block;}
+    #tab-analytics .an-rfm-chip-off{background:var(--s3);border:1px solid var(--border);color:var(--muted);font-weight:700;font-size:11px;margin:2px;padding:4px 9px;border-radius:3px;display:inline-block;}
+    #tab-analytics .an-rfm-desc{color:var(--muted);font-weight:600;text-transform:none;}
+    #tab-analytics .an-rfm-more{font-size:11px;color:var(--muted);align-self:center;margin-inline-start:6px;}
+    #tab-analytics .an-rfm-none{font-size:11px;color:var(--muted);}
+    #tab-analytics .an-wx-line{font-size:12px;margin:2px 0 8px;}
+
     
     .search-wrap{position:relative;flex-shrink:0;}
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.4;}

@@ -10,5 +10,5 @@
     "checkJs": true,
     "types": ["node"]
   },
-  "include": ["tests/**/*.ts", "src/**/*.js", "src/**/*.d.ts"]
+  "include": ["tests/**/*.ts", "src/**/*.js", "src/**/*.d.ts", "visual/**/*.ts", "playwright.visual.config.ts"]
 }

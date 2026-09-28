@@ -26756,11 +26756,27 @@ function closeBoothPopup(){
 
 
 function _uid(){return Math.random().toString(36).slice(2,7);}
+// ── Style values known only at run time (2026-09-28) ─────────────────────────────────────────
+// The markup moves off inline style attributes so the Content-Security-Policy can drop style-src
+// 'unsafe-inline' (a style attribute in parsed markup is refused under it; a value set through the
+// CSSOM is not). A value the template computes - a bar's width, a colour from the data - travels as
+// custom properties in data-cssv (data-cssv="${_cssv({'--an-w':'42%'})}"), the rule in styles.css reads them
+// (width:var(--an-w)), and _cssvApply(root) copies them onto each element once the markup is in place,
+// in the same task, before anything is drawn.
+function _cssv(o){return esc(JSON.stringify(o));}
+function _cssvApply(root){
+  if(!root)return;
+  root.querySelectorAll('[data-cssv]').forEach(el=>{
+    let o=null;try{o=JSON.parse(el.getAttribute('data-cssv'));}catch(_){}
+    if(o)for(const k in o)el.style.setProperty(k,o[k]);
+    el.removeAttribute('data-cssv');
+  });
+}
 
 function _areaChart(series,labels,opts={}){
   const {W=460,H=148,unitPfx=''}=opts;
   const n=labels.length;
-  if(!n)return`<div style="padding:28px 0;text-align:center;color:var(--muted);font-size:12px">${t('anNoData2')}</div>`;
+  if(!n)return`<div class="an-nodata-chart">${t('anNoData2')}</div>`;
   const pL=44,pR=14,pT=14,pB=28,cW=W-pL-pR,cH=H-pT-pB;
   const maxV=Math.max(...series.flatMap(s=>s.vals),1);
   const xOf=i=>pL+(n===1?cW/2:i/(n-1)*cW);
@@ -26794,12 +26810,12 @@ function _areaChart(series,labels,opts={}){
     const tip=l+'\n'+series.map(s=>`${s.label}: ${opts.unitPfx||''}${Math.round(s.vals[i])}`).join('\n');
     return`<rect class="an-hit" x="${(xOf(i)-bandW/2).toFixed(1)}" y="${pT}" width="${bandW.toFixed(1)}" height="${cH}" fill="transparent"><title>${tip}</title></rect>`;
   }).join('');
-  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block;overflow:visible"><defs>${defs}</defs>${grid}${paths}${xlbls}${hover}</svg>`;
+  return`<svg class="an-area-svg" viewBox="0 0 ${W} ${H}" height="${H}"><defs>${defs}</defs>${grid}${paths}${xlbls}${hover}</svg>`;
 }
 
 function _donut(segs,size=110){
   const total=segs.reduce((s,d)=>s+d.v,0);
-  if(!total)return`<div style="padding:16px;text-align:center;color:var(--muted);font-size:12px">${t('anNoData2')}</div>`;
+  if(!total)return`<div class="an-nodata-donut">${t('anNoData2')}</div>`;
   const r=34,cx=size/2,cy=size/2,sw=13,C=2*Math.PI*r;
   let off=-0.25;
   const arcs=segs.filter(d=>d.v>0).map(d=>{
@@ -26807,13 +26823,13 @@ function _donut(segs,size=110){
     off+=pct;
     return`<circle class="an-hit" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${d.c}" stroke-width="${sw}" stroke-dasharray="${(C*pct).toFixed(2)} ${(C*(1-pct)).toFixed(2)}" transform="rotate(${rot} ${cx} ${cy})"><title>${d.label?d.label+': ':''}${d.v} (${Math.round(pct*100)}%)</title></circle>`;
   }).join('');
-  return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" style="display:block;flex-shrink:0"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(var(--tint-rgb),.07)" stroke-width="${sw}"/>${arcs}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="900" style="fill:var(--text)">${total}</text></svg>`; // the theme's ink: a white total vanished on the white card of the light theme
+  return`<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="an-donut-svg"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="rgba(var(--tint-rgb),.07)" stroke-width="${sw}"/>${arcs}<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="900" class="an-donut-total">${total}</text></svg>`; // the theme's ink: a white total vanished on the white card of the light theme
 }
 
 function _vbars(data,opts={}){
   const {W=320,H=130,color='#6ee89a',refVal=null}=opts;
   const n=data.length;
-  if(!n)return`<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px">${t('anNoData2')}</div>`;
+  if(!n)return`<div class="an-nodata-bars">${t('anNoData2')}</div>`;
   const pL=8,pR=8,pT=10,pB=22,cW=W-pL-pR,cH=H-pT-pB;
   const maxV=Math.max(...data.map(d=>d.v),refVal||0,1);
   const bW=Math.max(5,cW/n-4);
@@ -26825,7 +26841,7 @@ function _vbars(data,opts={}){
     return`<rect class="an-hit" x="${(xOf(i)-bW/2).toFixed(1)}" y="${(pT+cH-bH).toFixed(1)}" width="${bW.toFixed(1)}" height="${bH.toFixed(1)}" rx="2" fill="${d.c||color}" opacity=".85"><title>${d.label}: ${d.v}%</title></rect>${(i%nth===0||i===n-1)?`<text x="${xOf(i).toFixed(1)}" y="${H-4}" font-size="8" text-anchor="middle" fill="rgba(var(--tint-rgb),.3)">${d.label}</text>`:''}`;
   }).join('');
   const refLine=refVal!==null?`<line x1="${pL}" y1="${yOf(refVal).toFixed(1)}" x2="${pL+cW}" y2="${yOf(refVal).toFixed(1)}" stroke="rgba(var(--tint-rgb),.2)" stroke-width="1" stroke-dasharray="4 3"/>`:'' ;
-  return`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:${H}px;display:block">${refLine}${barsHtml}</svg>`;
+  return`<svg class="an-bars-svg" viewBox="0 0 ${W} ${H}" height="${H}">${refLine}${barsHtml}</svg>`;
 }
 
 
@@ -29649,49 +29665,49 @@ function bikeHealthSection(){
   done.forEach(e=>{if(!e.ratingBike)return;getAssignedBikeIds(e).forEach(id=>{const bk=allBk.find(x=>x.id===id);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;rbSumM[mk]=(rbSumM[mk]||0)+e.ratingBike;rbCntM[mk]=(rbCntM[mk]||0)+1;});});
   const modelRows=Object.keys(rbSumM).map(k=>({k,avg:rbSumM[k]/rbCntM[k],n:rbCntM[k]})).sort((a,b)=>b.avg-a.avg);
   const _ratingColor=v=>v>=7?_thc('--green','#03ff89'):v>=5?_thc('--orange','#e08828'):_thc('--red','#f87171');
-  const modelCard=modelRows.length?`<div class="chart-card" style="margin-top:14px">
+  const modelCard=modelRows.length?`<div class="chart-card an-mt14">
     <div class="chart-card-title">${t('anRatingByModel')}</div>
     <div class="chart-card-sub">${t('anRatingByModelSub')}</div>
     ${modelRows.map(r=>`<div class="analytics-bar-row">
-      <div class="analytics-bar-label" style="display:flex;align-items:center;gap:5px">${esc(r.k)}<span style="font-size:10px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:5px;padding:1px 5px;color:var(--muted-l);font-weight:700">${r.n} ${t('anRatedRidesUnit')}</span></div>
-      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(r.avg/10*100)}%;background:${_ratingColor(r.avg)}"></div></div>
+      <div class="analytics-bar-label an-lbl-flex">${esc(r.k)}<span class="an-chip">${r.n} ${t('anRatedRidesUnit')}</span></div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(r.avg/10*100))+'%','--an-bg':_ratingColor(r.avg)})}"></div></div>
       <div class="analytics-bar-value">${r.avg.toFixed(1)}${t('anOutOf10')}</div>
     </div>`).join('')}
   </div>`:'';
   const kpis=`<div class="analytics-kpi-grid">
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${avgBike?avgBike+t('anOutOf10'):'—'}</div><div class="analytics-kpi-label">${t('anAvgBikeRating')}</div><div class="analytics-kpi-sub">${rated.length} ${t('anRatedRidesUnit')}</div></div>
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${avgExp?avgExp+t('anOutOf10'):'—'}</div><div class="analytics-kpi-label">${t('anAvgExpRating')}</div><div class="analytics-kpi-sub">${rated.length} ${t('anRatedRidesUnit')}</div></div>
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${avgBike?avgBike+t('anOutOf10'):'—'}</div><div class="analytics-kpi-label">${t('anAvgBikeRating')}</div><div class="analytics-kpi-sub">${rated.length} ${t('anRatedRidesUnit')}</div></div>
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${avgExp?avgExp+t('anOutOf10'):'—'}</div><div class="analytics-kpi-label">${t('anAvgExpRating')}</div><div class="analytics-kpi-sub">${rated.length} ${t('anRatedRidesUnit')}</div></div>
   </div>`;
   const attnHtml=!rated.length&&!attn.length
     ? `<div class="empty-state">${t('noRatingsYet')}</div>`
     : (attn.length
-        ? `<div style="display:flex;flex-direction:column;gap:8px">${attn.map(x=>`
-            <div style="display:flex;align-items:center;gap:10px;padding:11px 14px;background:rgba(var(--warn-rgb),.06);border:1px solid rgba(var(--warn-rgb),.25);border-radius:6px">
-              <span style="font-size:16px"></span>
-              <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px">${esc(x.b.name)}</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:1px">${t('anRidesShortN').replace('{0}',x.rides)}${x.days!=null?` · ${t('anDaysInServiceShort').replace('{0}',x.days)}`:''}</div></div>
-              <div style="text-align:right">
-                <div style="font-weight:900;color:${x.lowRated?'var(--red)':'var(--green)'}">${x.avgR?x.avgR+t('anOutOf10'):'—'}</div>
-                <div style="font-size:10px;font-weight:800;color:var(--orange)">${x.lowRated?t('anAttnLowRated'):t('anAttnHeavyUse')}</div>
+        ? `<div class="an-stack8">${attn.map(x=>`
+            <div class="an-attn">
+              <span class="an-fs16"></span>
+              <div class="an-grow"><div class="an-name13">${esc(x.b.name)}</div>
+                <div class="an-attn-sub">${t('anRidesShortN').replace('{0}',x.rides)}${x.days!=null?` · ${t('anDaysInServiceShort').replace('{0}',x.days)}`:''}</div></div>
+              <div class="an-tr">
+                <div class="an-b900 ${x.lowRated?'an-c-red':'an-c-green'}">${x.avgR?x.avgR+t('anOutOf10'):'—'}</div>
+                <div class="an-attn-why">${x.lowRated?t('anAttnLowRated'):t('anAttnHeavyUse')}</div>
               </div>
             </div>`).join('')}</div>`
         : `<div class="empty-state">${t('anNoAttention')}</div>`);
   // Full list of every rated ride: rider, bike + experience scores, and the reason/feedback text, newest first.
-  const allRatingsCard=rated.length?`<div class="chart-card" style="margin-top:14px">
+  const allRatingsCard=rated.length?`<div class="chart-card an-mt14">
     <div class="chart-card-title">${t('anAllRatings')}</div>
     <div class="chart-card-sub">${t('anAllRatingsSub').replace('{0}',rated.length)}</div>
-    <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:520px;overflow-y:auto">
+    <div class="an-rate-list">
       ${rated.slice().sort((a,b)=>new Date(b.registeredAt||0)-new Date(a.registeredAt||0)).map(e=>{
         const bk=getAssignedBikes(e).map(b=>b.name).join(', ');
-        const cell=(lbl,v)=>`<div style="text-align:center"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.3px">${lbl}</div><div style="font-weight:900;color:${v?_ratingColor(v):'var(--muted)'}">${v?v+t('anOutOf10'):'—'}</div></div>`;
-        return`<div style="background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px 13px">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-            <div style="min-width:0"><div style="font-weight:800;font-size:13px">${esc(e.name||t('cashWalkup'))}</div>
-              <div style="font-size:10px;color:var(--muted)">${e.sessionDate?esc(shortDate(e.sessionDate)):''}${bk?' · '+esc(bk):''}</div></div>
-            <div style="display:flex;gap:14px;flex-shrink:0">${cell(t('rateBikeLabel'),e.ratingBike)}${cell(t('rateExpLabel'),e.ratingExp)}</div>
+        const cell=(lbl,v)=>`<div class="an-tc"><div class="an-rate-lbl">${lbl}</div><div class="an-b900 an-fg" data-cssv="${_cssv({'--an-fg':v?_ratingColor(v):'var(--muted)'})}">${v?v+t('anOutOf10'):'—'}</div></div>`;
+        return`<div class="an-rate-card">
+          <div class="an-row-between">
+            <div class="an-minw0"><div class="an-name13">${esc(e.name||t('cashWalkup'))}</div>
+              <div class="an-rate-meta">${e.sessionDate?esc(shortDate(e.sessionDate)):''}${bk?' · '+esc(bk):''}</div></div>
+            <div class="an-rate-scores">${cell(t('rateBikeLabel'),e.ratingBike)}${cell(t('rateExpLabel'),e.ratingExp)}</div>
           </div>
-          ${(Array.isArray(e.ratingTags)&&e.ratingTags.length)?`<div class="an-rate-tags" style="display:flex;gap:4px;flex-wrap:wrap;margin-top:7px">${e.ratingTags.map(k=>`<span style="font-size:10px;font-weight:800;background:var(--s3);border-radius:4px;padding:2px 7px">${esc(RATE_TAGS.includes(k)?_rateTagLabel(k):k)}</span>`).join('')}</div>`:''}
-          ${e.feedback?`<div style="font-size:12px;color:var(--text);margin-top:7px;padding-top:7px;border-top:1px solid var(--border);line-height:1.5">${esc(e.feedback)}</div>`:''}
+          ${(Array.isArray(e.ratingTags)&&e.ratingTags.length)?`<div class="an-rate-tags an-rate-tagrow">${e.ratingTags.map(k=>`<span class="an-rate-tag">${esc(RATE_TAGS.includes(k)?_rateTagLabel(k):k)}</span>`).join('')}</div>`:''}
+          ${e.feedback?`<div class="an-rate-note">${esc(e.feedback)}</div>`:''}
         </div>`;
       }).join('')}
     </div>
@@ -29700,25 +29716,25 @@ function bikeHealthSection(){
   const tagN={};rated.forEach(e=>(Array.isArray(e.ratingTags)?e.ratingTags:[]).forEach(k=>{tagN[k]=(tagN[k]||0)+1;}));
   const tagRows=Object.keys(tagN).sort((a,b)=>tagN[b]-tagN[a]);
   const tagMax=tagRows.length?tagN[tagRows[0]]:0;
-  const tagsCard=tagRows.length?`<div class="chart-card an-tags-card" style="margin-top:14px">
+  const tagsCard=tagRows.length?`<div class="chart-card an-tags-card an-mt14">
     <div class="chart-card-title">${t('anTagsTitle')}</div><div class="chart-card-sub">${t('anTagsSub')}</div>
     ${tagRows.map(k=>`<div class="analytics-bar-row"><div class="analytics-bar-label">${esc(RATE_TAGS.includes(k)?_rateTagLabel(k):k)}</div>
-      <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(tagN[k]/tagMax*100)}%;background:var(--green)"></div></div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(tagN[k]/tagMax*100))+'%','--an-bg':'var(--green)'})}"></div></div>
       <div class="analytics-bar-value">${tagN[k]}</div></div>`).join('')}</div>`:'';
   const bySess=new Map();
   done.forEach(e=>{const k=String(e.sessionDate||e.sessionId||'').slice(0,10);if(!k)return;let r=bySess.get(k);if(!r)bySess.set(k,r={k,n:0,rated:0,exp:0,expN:0,bike:0,bikeN:0,low:0});r.n++;
     if(e.ratingExp||e.ratingBike)r.rated++;if(e.ratingExp){r.exp+=e.ratingExp;r.expN++;if(e.ratingExp<=4)r.low++;}if(e.ratingBike){r.bike+=e.ratingBike;r.bikeN++;}});
   const sessRows=[...bySess.values()].filter(r=>r.rated).sort((a,b)=>b.k.localeCompare(a.k)).slice(0,40);
-  const bySessCard=sessRows.length?`<div class="chart-card an-bysess-card" style="margin-top:14px">
+  const bySessCard=sessRows.length?`<div class="chart-card an-bysess-card an-mt14">
     <div class="chart-card-title">${t('anBySessionTitle')}</div><div class="chart-card-sub">${t('anBySessionSub')}</div>
-    <div class="table-wrapper" style="margin-top:8px"><table class="queue-table" style="font-size:12px"><thead><tr><th>${t('colDate')}</th><th>${t('anRatedShort')}</th><th>${t('rateExpLabel')}</th><th>${t('rateBikeLabel')}</th></tr></thead>
+    <div class="table-wrapper an-mt8"><table class="queue-table an-fs12"><thead><tr><th>${t('colDate')}</th><th>${t('anRatedShort')}</th><th>${t('rateExpLabel')}</th><th>${t('rateBikeLabel')}</th></tr></thead>
     <tbody>${sessRows.map(r=>{const ex=r.expN?Math.round(r.exp/r.expN*10)/10:null,bk=r.bikeN?Math.round(r.bike/r.bikeN*10)/10:null;
-      return`<tr data-day="${esc(r.k)}"><td>${esc(shortDate(r.k))}</td><td>${r.rated}/${r.n}</td><td style="font-weight:800;color:${ex==null?'var(--muted)':_ratingColor(ex)}">${ex==null?'—':ex+t('anOutOf10')}${r.low?` <span style="font-size:10px;color:var(--red);font-weight:800">▼${r.low}</span>`:''}</td><td style="font-weight:800;color:${bk==null?'var(--muted)':_ratingColor(bk)}">${bk==null?'—':bk+t('anOutOf10')}</td></tr>`;}).join('')}</tbody></table></div></div>`:'';
+      return`<tr data-day="${esc(r.k)}"><td>${esc(shortDate(r.k))}</td><td>${r.rated}/${r.n}</td><td class="an-b800 an-fg" data-cssv="${_cssv({'--an-fg':ex==null?'var(--muted)':_ratingColor(ex)})}">${ex==null?'—':ex+t('anOutOf10')}${r.low?` <span class="an-low">▼${r.low}</span>`:''}</td><td class="an-b800 an-fg" data-cssv="${_cssv({'--an-fg':bk==null?'var(--muted)':_ratingColor(bk)})}">${bk==null?'—':bk+t('anOutOf10')}</td></tr>`;}).join('')}</tbody></table></div></div>`:'';
   return`<div class="analytics-section-title">${t('anRatingsSection')}</div>
     ${kpis}
     ${tagsCard}
     ${bySessCard}
-    <div style="font-size:13px;font-weight:800;color:var(--muted);margin:14px 0 8px">${t('anNeedsAttention')}</div>
+    <div class="an-attn-title">${t('anNeedsAttention')}</div>
     ${attnHtml}
     ${modelCard}
     ${allRatingsCard}`;
@@ -29825,7 +29841,7 @@ function _anSparkline(values,color,w,h){
   const mn=Math.min(...v),mx=Math.max(...v),rng=(mx-mn)||1;
   const y=val=>(h-2-((val-mn)/rng)*(h-4));
   const pts=v.map((val,i)=>((i/(v.length-1))*w).toFixed(1)+','+y(val).toFixed(1)).join(' ');
-  return`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="display:block"><polyline points="${pts}" fill="none" stroke="${color||'var(--green)'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${w}" cy="${y(v[v.length-1]).toFixed(1)}" r="2.4" fill="${color||'var(--green)'}"/></svg>`;
+  return`<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" class="an-block"><polyline points="${pts}" fill="none" stroke="${color||'var(--green)'}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${w}" cy="${y(v[v.length-1]).toFixed(1)}" r="2.4" fill="${color||'var(--green)'}"/></svg>`;
 }
 // Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost.
 function _anMargin(lines,costById){
@@ -30005,7 +30021,7 @@ function renderAnalytics(){
   const _htBk=[['<160',0],['160-169',0],['170-179',0],['180+',0]];
   _htVals.forEach(h=>{if(h<160)_htBk[0][1]++;else if(h<170)_htBk[1][1]++;else if(h<180)_htBk[2][1]++;else _htBk[3][1]++;});
   const _htMax=Math.max(1,..._htBk.map(b=>b[1]));
-  const heightCard=`<div class="chart-card"><div class="chart-card-title">${t('anHeightTitle')}</div><div class="chart-card-sub">${t('anHeightSub')}</div><div style="display:flex;gap:8px;align-items:baseline;margin:4px 0 8px"><span style="font-size:22px;font-weight:900;color:var(--green)">${_htAvg||'\u2014'}${_htAvg?' cm':''}</span><span style="font-size:12px;color:var(--muted)">${t('anHeightAvg')} \u00b7 ${_htVals.length} ${t('anRiders').toLowerCase()}</span></div>${_htBk.map(([l,n])=>`<div class="analytics-bar-row"><div class="analytics-bar-label" style="min-width:66px">${l} cm</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(n/_htMax*100)}%;background:var(--blue)"></div></div><div class="analytics-bar-value">${n}</div></div>`).join('')}</div>`;
+  const heightCard=`<div class="chart-card"><div class="chart-card-title">${t('anHeightTitle')}</div><div class="chart-card-sub">${t('anHeightSub')}</div><div class="an-ht-head"><span class="an-ht-avg">${_htAvg||'\u2014'}${_htAvg?' cm':''}</span><span class="an-muted-12">${t('anHeightAvg')} \u00b7 ${_htVals.length} ${t('anRiders').toLowerCase()}</span></div>${_htBk.map(([l,n])=>`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw66">${l} cm</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(n/_htMax*100))+'%','--an-bg':'var(--blue)'})}"></div></div><div class="analytics-bar-value">${n}</div></div>`).join('')}</div>`;
 
   function _rangeBar(){
     const _sh=sessions.filter(s=>doneBySess.has(s.id)).length;
@@ -30017,21 +30033,21 @@ function renderAnalytics(){
         `<button class="filter-pill${S.analyticsRange===r?' active':''}" data-on-click="${_on("setAnRange",r)}">${rangeLabels[r]}</button>`
       ).join('')}
       ${S.analyticsRange==='daterange'?`
-        <span style="font-size:12px;font-weight:700;color:var(--muted)">${t('anFromDate')||'From'}:</span>
+        <span class="an-range-txt">${t('anFromDate')||'From'}:</span>
         <input type="date" value="${esc(S.analyticsDateFrom||'')}"
-          style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer"
+          class="an-date"
           data-on-change="${_on("_on_renderAnalytics_1",_EV,_EL)}">
-        <span style="font-size:12px;font-weight:700;color:var(--muted)">${t('anToDate')||'To'}:</span>
+        <span class="an-range-txt">${t('anToDate')||'To'}:</span>
         <input type="date" value="${esc(S.analyticsDateTo||'')}"
-          style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer"
+          class="an-date"
           data-on-change="${_on("_on_renderAnalytics_2",_EV,_EL)}">
       `:''}
-      <span style="font-size:12px;font-weight:700;color:var(--muted);margin-left:8px">${t('anSessionLabel')}:</span>
+      <span class="an-range-txt-ml">${t('anSessionLabel')}:</span>
       <select class="filter-select" aria-label="${esc(t('colSession'))}" data-on-change="${_on("_on_renderAnalytics_3",_EV,_EL)}">
         <option value="all"${(S.anSession==='all'||!S.anSession)?' selected':''}>${t('anSessionAll')}</option>
         ${_anRangeList.slice().sort(_sessOrder).map(s=>`<option value="${esc(s.id)}"${S.anSession===s.id?' selected':''}>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.location?' · '+esc(s.location):''}</option>`).join('')}
       </select>
-      <span class="result-count" style="margin-left:4px">${_sh} ${t('anSessionsHeld').toLowerCase()} · ${_td} ${t('anRidesLabel')}</span>
+      <span class="result-count an-ml4">${_sh} ${t('anSessionsHeld').toLowerCase()} · ${_td} ${t('anRidesLabel')}</span>
     </div>
 `;
   }
@@ -30045,7 +30061,7 @@ function renderAnalytics(){
   
   function excVAT(v){return v/1.15;}
   function sarBoth(v,precision=0){
-    return`SAR ${v.toFixed(precision)}<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:1px">SAR ${excVAT(v).toFixed(precision)} <span style="font-size:10px">${t('vatExcl')}</span></div>`;
+    return`SAR ${v.toFixed(precision)}<div class="an-vat">SAR ${excVAT(v).toFixed(precision)} <span class="an-fs10">${t('vatExcl')}</span></div>`;
   }
   const sessionsWithDone=sessions.filter(s=>doneBySess.has(s.id));
   const sessionsHeld=sessionsWithDone.length;
@@ -30273,8 +30289,8 @@ function renderAnalytics(){
         <path d="M ${cx-r} ${cy} A ${r} ${r} 0 0 1 ${cx+r} ${cy}" fill="none" stroke="${c}" stroke-width="${sw}" stroke-linecap="round"
           stroke-dasharray="${filled} ${arc}" stroke-dashoffset="0"/>
       </svg>
-      <div style="font-size:26px;font-weight:900;color:${c};margin-top:-28px;line-height:1">${pct}%</div>
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t('anAvgOccupancy')}</div>
+      <div class="an-gauge-pct" data-cssv="${_cssv({'--an-fg':c})}">${pct}%</div>
+      <div class="an-gauge-lbl">${t('anAvgOccupancy')}</div>
     </div>`;
   }
 
@@ -30287,7 +30303,7 @@ function renderAnalytics(){
       const lbl=isType?_tl(k):esc(k);
       return`<div class="analytics-bar-row" title="${esc(String(lbl).replace(/<[^>]*>/g,''))}: ${valueFmt?esc(String(valueFmt(v)).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()):v}">
         <div class="analytics-bar-label">${lbl}</div>
-        <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(v/max*100)}%;background:${colorFn(k)}"></div></div>
+        <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/max*100))+'%','--an-bg':colorFn(k)})}"></div></div>
         <div class="analytics-bar-value">${valueFmt?valueFmt(v):v}</div>
       </div>`;}).join('');
   }
@@ -30311,17 +30327,17 @@ function renderAnalytics(){
   const trendRows=sortedTrend.map(({s,sDone,sNo,cap,rev,pend,occ,topT,riders,noShows})=>{
     const occColor=occ>=50?'var(--green)':'var(--muted-l)';
     return`<tr>
-      <td style="font-weight:800;white-space:nowrap">${esc(shortDate(s.session_date||s.id))}</td>
-      <td style="color:var(--muted);font-size:12px">${esc(dayLabel(s.day)||'')}</td>
-      <td style="font-weight:900;font-size:16px">${riders}<span style="font-size:11px;color:var(--muted);font-weight:600"> / ${cap}</span></td>
-      <td style="color:var(--green);font-weight:800">${sarBoth(rev)}</td>
-      <td style="color:var(--muted-l);font-weight:700">${pend>0?sarBoth(pend):'<span style="color:var(--muted)">—</span>'}</td>
-      <td style="color:${noShows>0?'var(--red)':'var(--muted)'};font-weight:700">${noShows||'—'}</td>
+      <td class="an-td-date">${esc(shortDate(s.session_date||s.id))}</td>
+      <td class="an-muted-12">${esc(dayLabel(s.day)||'')}</td>
+      <td class="an-td-riders">${riders}<span class="an-sub11"> / ${cap}</span></td>
+      <td class="an-td-rev">${sarBoth(rev)}</td>
+      <td class="an-td-pend">${pend>0?sarBoth(pend):'<span class="an-c-muted">—</span>'}</td>
+      <td class="an-b700 ${noShows>0?'an-c-red':'an-c-muted'}">${noShows||'—'}</td>
       <td><div class="analytics-occ-bar">
-        <div class="analytics-occ-track"><div class="analytics-occ-fill" style="width:${occ}%;background:${occColor}"></div></div>
-        <span style="font-size:12px;font-weight:800;color:${occColor}">${occ}%</span>
+        <div class="analytics-occ-track"><div class="analytics-occ-fill an-fill" data-cssv="${_cssv({'--an-w':(occ)+'%','--an-bg':occColor})}"></div></div>
+        <span class="an-occ-pct" data-cssv="${_cssv({'--an-fg':occColor})}">${occ}%</span>
       </div></td>
-      <td>${topT!=='—'?`<span class="type-badge ${_tcls(topT)}">${_tl(topT)}</span>`:'<span style="color:var(--muted)">—</span>'}</td>
+      <td>${topT!=='—'?`<span class="type-badge ${_tcls(topT)}">${_tl(topT)}</span>`:'<span class="an-c-muted">—</span>'}</td>
     </tr>`;
   });
 
@@ -30351,17 +30367,17 @@ function renderAnalytics(){
     {v:done.filter(e=>!e.paid).length, c:'#8a5c14',label:t('pendingLabel')},
   ]);
   const payLegend=`<div class="donut-legend">
-    <div class="donut-legend-item"><span class="donut-dot" style="background:${_thc('--green','#03ff89')}"></span>${t('paidLabel')} - ${done.filter(e=>e.paid).length} (${collectionRate}%)</div>
-    <div class="donut-legend-item"><span class="donut-dot" style="background:#e08828"></span>${t('pendingLabel')} - ${done.filter(e=>!e.paid).length}</div>
-    <div style="margin-top:8px;font-size:20px;font-weight:900;color:var(--green)">${sarBoth(revCollected)}</div>
-    <div style="font-size:11px;color:var(--muted);font-weight:600">${t('anCollected')}</div>
+    <div class="donut-legend-item"><span class="donut-dot an-bgv" data-cssv="${_cssv({'--an-bg':_thc('--green','#03ff89')})}"></span>${t('paidLabel')} - ${done.filter(e=>e.paid).length} (${collectionRate}%)</div>
+    <div class="donut-legend-item"><span class="donut-dot an-dot-pend"></span>${t('pendingLabel')} - ${done.filter(e=>!e.paid).length}</div>
+    <div class="an-pay-total">${sarBoth(revCollected)}</div>
+    <div class="an-sub11">${t('anCollected')}</div>
   </div>`;
 
   const typeSegs=Object.entries(typeBreak).map(([k,v])=>({v,c:typeColorHex[k]||'#777',label:_tl(k),key:k})); // label lands in the donut's SVG tooltip as markup
   const typeDonut=_donut(typeSegs);
   const typeLegend=`<div class="donut-legend">${typeSegs.sort((a,b)=>b.v-a.v).map(d=>{
     const pct=Math.round(d.v/totalDone*100);
-    return`<div class="donut-legend-item"><span class="donut-dot" style="background:${d.c}"></span>${_tl(d.key)} - ${d.v} (${pct}%)</div>`;
+    return`<div class="donut-legend-item"><span class="donut-dot an-bgv" data-cssv="${_cssv({'--an-bg':d.c})}"></span>${_tl(d.key)} - ${d.v} (${pct}%)</div>`;
   }).join('')}</div>`;
 
   
@@ -30373,7 +30389,7 @@ function renderAnalytics(){
       .map(k=>[k,typeRevPerRide[k]])
   );
 
-  const noDataStr=`<div style="color:var(--muted);font-size:13px;padding-top:8px">${t('anNoData2')}</div>`;
+  const noDataStr=`<div class="an-nodata">${t('anNoData2')}</div>`;
 
   // ── Add-on sales (within the selected range) ──
   // One group per account per session (a party's add-ons are counted together), built in one
@@ -30408,7 +30424,7 @@ function renderAnalytics(){
   // design). _waDigits, not bare digits: a number kept as 05xx made the link point at wa.me/05….
   const _custPhone=id=>{const c=custAll[id];return c&&c.phone?_waDigits(c.phone):'';};
   const _waReengage=id=>{const ph=_custPhone(id);if(!ph)return'';
-    return`<a class="btn-sm btn-green" style="text-decoration:none" href="https://wa.me/${ph}?text=${encodeURIComponent(t('waMissYouMsg'))}" target="_blank" rel="noopener">WhatsApp</a>`;};
+    return`<a class="btn-sm btn-green an-nodeco" href="https://wa.me/${ph}?text=${encodeURIComponent(t('waMissYouMsg'))}" target="_blank" rel="noopener">WhatsApp</a>`;};
   const _cohorts={};
   // String(): created_at is text in the schema and every writer sends an ISO string, but a row
   // hand-inserted through the dashboard can hold a number — and .slice on one throws, taking
@@ -30481,13 +30497,13 @@ function renderAnalytics(){
     if(prevM===null||curM===null)return'';
     const cur=curM[key],prevVal=prevM[key];
     if((prevVal||0)===0&&(cur||0)===0)return'';
-    if((prevVal||0)===0)return`<span class="an-delta" style="color:${invert?'var(--red)':'var(--green)'}" title="${t('anVsPrev')}">▲ ${t('lbNewLabel')}</span>`;
+    if((prevVal||0)===0)return`<span class="an-delta ${invert?'an-c-red':'an-c-green'}" title="${t('anVsPrev')}">▲ ${t('lbNewLabel')}</span>`;
     const pct=Math.round((cur-prevVal)/Math.abs(prevVal)*100);
     const flat=cur===prevVal;
     const up=cur>prevVal,good=invert?!up:up;
     const col=flat?'var(--muted)':good?'var(--green)':'var(--red)';
     const arrow=flat?'•':up?'▲':'▼';
-    return`<span class="an-delta" style="color:${col}" title="${t('anVsPrev')}">${arrow} ${pct>0?'+':''}${pct}%</span>`;
+    return`<span class="an-delta an-fg" data-cssv="${_cssv({'--an-fg':col})}" title="${t('anVsPrev')}">${arrow} ${pct>0?'+':''}${pct}%</span>`;
   }
 
   function liveBoard(){
@@ -30506,8 +30522,8 @@ function renderAnalytics(){
     const _tsById=new Map(todaySess.map(s=>[s.id,s]));
     const cap=todaySess.reduce((a,s)=>a+((_isApprovalRide(s)&&s.spots)||s.capacity||12),0);
     const booked=tq.filter(e=>e.status!=='waitlist'&&_holdsSpot(e,_tsById.get(e.sessionId))).length;
-    const stat=(v,l,col)=>`<div style="flex:1;min-width:120px;text-align:center"><div style="font-size:30px;font-weight:900;color:${col};line-height:1"><bdi>${v}</bdi></div><div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-top:5px">${l}</div></div>`;
-    return`<div class="chart-card" style="background:linear-gradient(180deg,rgba(var(--green-rgb),.06),transparent)"><div class="chart-card-title">${t('anLiveTitle')}</div><div class="chart-card-sub">${t('anLiveSub')}</div><div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">${stat(tDone.length,t('anLiveRides'),'var(--green)')}${stat('SAR '+Math.round(rev),t('anLiveRev'),'var(--green)')}${stat(tActive,t('anLiveActive'),'var(--blue)')}${stat(booked+'/'+cap,t('anLiveFill'),'var(--orange)')}</div></div>`;
+    const stat=(v,l,col)=>`<div class="an-live-stat"><div class="an-live-num" data-cssv="${_cssv({'--an-fg':col})}"><bdi>${v}</bdi></div><div class="an-live-lbl">${l}</div></div>`;
+    return`<div class="chart-card an-live-card"><div class="chart-card-title">${t('anLiveTitle')}</div><div class="chart-card-sub">${t('anLiveSub')}</div><div class="an-live-row">${stat(tDone.length,t('anLiveRides'),'var(--green)')}${stat('SAR '+Math.round(rev),t('anLiveRev'),'var(--green)')}${stat(tActive,t('anLiveActive'),'var(--blue)')}${stat(booked+'/'+cap,t('anLiveFill'),'var(--orange)')}</div></div>`;
   }
   function growthSection(){
     const _JSDOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -30516,34 +30532,34 @@ function renderAnalytics(){
     // A stacked row of its own (label line over a full-width bar). It used to borrow
     // .analytics-bar-row, whose flex row put the bar BESIDE the label with no width of its own, so
     // every funnel bar rendered zero pixels wide.
-    const frow=(lbl,v,prev)=>{const pct=Math.round(v/fmax*100),drop=prev!=null?prev-v:0;return`<div class="an-funnel-row" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:3px"><span>${lbl}</span><span>${v}${drop>0?` <span style="color:var(--muted);font-weight:600">−${drop}</span>`:''}</span></div><div style="height:15px;background:var(--s3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);border-radius:3px"></div></div></div>`;};
-    const funnel=`<div class="chart-card"><div class="chart-card-title">${t('anFunnelTitle')}</div><div class="chart-card-sub">${t('anFunnelSub')}</div>${frow(t('anFunnelBooked'),fn.booked,null)}${frow(t('anFunnelCheckedIn'),fn.checkedIn,fn.booked)}${frow(t('anFunnelCompleted'),fn.completed,fn.checkedIn)}<div style="font-size:12px;color:var(--muted);margin-top:8px">${t('anCompletionRate')}: <b style="color:var(--green)">${completionRate}%</b> · ${t('anNoShowRate')}: <b style="color:var(--orange)">${noShowRate}%</b></div></div>`;
+    const frow=(lbl,v,prev)=>{const pct=Math.round(v/fmax*100),drop=prev!=null?prev-v:0;return`<div class="an-funnel-row an-mb10"><div class="an-funnel-head"><span>${lbl}</span><span>${v}${drop>0?` <span class="an-muted-600">−${drop}</span>`:''}</span></div><div class="an-funnel-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':pct+'%','--an-bg':'var(--green)'})}"></div></div></div>`;};
+    const funnel=`<div class="chart-card"><div class="chart-card-title">${t('anFunnelTitle')}</div><div class="chart-card-sub">${t('anFunnelSub')}</div>${frow(t('anFunnelBooked'),fn.booked,null)}${frow(t('anFunnelCheckedIn'),fn.checkedIn,fn.booked)}${frow(t('anFunnelCompleted'),fn.completed,fn.checkedIn)}<div class="an-funnel-foot">${t('anCompletionRate')}: <b class="an-c-green">${completionRate}%</b> · ${t('anNoShowRate')}: <b class="an-c-orange">${noShowRate}%</b></div></div>`;
     // Heatmap (day × 2-hour slot)
     const heat=_anHeatGrid(done);let heatCard='';
     if(heat.hours.length){
       const hLabel=h=>{try{return new Date(Date.UTC(2024,0,7,h)).toLocaleTimeString(_locale(),{hour:'numeric',hour12:true,timeZone:'UTC'}).replace(/\s/g,'');}catch(e){return`${((h+11)%12)+1}${h<12?'a':'p'}`;}};
       const dow=d=>_dayShort(d);
-      const cell=(d,h)=>{const v=(heat.grid[d]&&heat.grid[d][h])||0,a=heat.max?v/heat.max:0,bg=v?`rgba(var(--green-rgb),${(0.15+a*0.75).toFixed(2)})`:'var(--s3)';return`<td style="padding:0"><div title="${v}" style="width:26px;height:22px;border-radius:4px;background:${bg};margin:2px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:${a>0.55?'#04150c':'var(--muted-l)'}">${v||''}</div></td>`;};
-      heatCard=`<div class="chart-card"><div class="chart-card-title">${t('anHeatTitle')}</div><div class="chart-card-sub">${t('anHeatSub')}</div><div style="overflow-x:auto"><table style="border-collapse:collapse"><thead><tr><th></th>${heat.hours.map(h=>`<th style="font-size:9px;font-weight:700;color:var(--muted);padding:2px">${hLabel(h)}</th>`).join('')}</tr></thead><tbody>${_JSDOW.map((_,d)=>heat.grid[d]?`<tr><td style="font-size:10px;font-weight:800;color:var(--muted);padding-inline-end:6px;white-space:nowrap">${dow(d)}</td>${heat.hours.map(h=>cell(d,h)).join('')}</tr>`:'').join('')}</tbody></table></div></div>`;
+      const cell=(d,h)=>{const v=(heat.grid[d]&&heat.grid[d][h])||0,a=heat.max?v/heat.max:0,bg=v?`rgba(var(--green-rgb),${(0.15+a*0.75).toFixed(2)})`:'var(--s3)';return`<td class="an-p0"><div title="${v}" class="an-heat-cell" data-cssv="${_cssv({'--an-bg':bg,'--an-fg':a>0.55?'#04150c':'var(--muted-l)'})}">${v||''}</div></td>`;};
+      heatCard=`<div class="chart-card"><div class="chart-card-title">${t('anHeatTitle')}</div><div class="chart-card-sub">${t('anHeatSub')}</div><div class="an-scroll-x"><table class="an-collapse"><thead><tr><th></th>${heat.hours.map(h=>`<th class="an-heat-th">${hLabel(h)}</th>`).join('')}</tr></thead><tbody>${_JSDOW.map((_,d)=>heat.grid[d]?`<tr><td class="an-heat-day">${dow(d)}</td>${heat.hours.map(h=>cell(d,h)).join('')}</tr>`:'').join('')}</tbody></table></div></div>`;
     }
     // Trend sparklines across recent in-range sessions (oldest → newest)
     const chron=sessions.slice().sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
     const sRev=chron.map(s=>Math.round(_paidRows(_qs(s.id)).reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0)));
     const sRides=chron.map(s=>_dn(s.id).length);
     const sOcc=chron.map(s=>{const c=s.capacity||12;return Math.round(_dn(s.id).length/c*100);});
-    const _spark=(label,series,fmt,color)=>`<div style="flex:1;min-width:100px"><div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">${label}</div><div style="font-size:18px;font-weight:900;margin:2px 0 4px">${series.length?fmt(series[series.length-1]):'—'}</div>${_anSparkline(series,color)}</div>`;
-    const trends=chron.length>=2?`<div class="chart-card"><div class="chart-card-title">${t('anTrendsTitle')}</div><div class="chart-card-sub">${t('anTrendsSub')}</div><div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:6px">${_spark(t('anRevCollected'),sRev,v=>'SAR '+v,'var(--green)')}${_spark(t('anRidership'),sRides,v=>String(v),'var(--blue)')}${_spark(t('anAvgOccupancy'),sOcc,v=>v+'%','var(--orange)')}</div></div>`:'';
+    const _spark=(label,series,fmt,color)=>`<div class="an-spark"><div class="an-spark-lbl">${label}</div><div class="an-spark-val">${series.length?fmt(series[series.length-1]):'—'}</div>${_anSparkline(series,color)}</div>`;
+    const trends=chron.length>=2?`<div class="chart-card"><div class="chart-card-title">${t('anTrendsTitle')}</div><div class="chart-card-sub">${t('anTrendsSub')}</div><div class="an-spark-row">${_spark(t('anRevCollected'),sRev,v=>'SAR '+v,'var(--green)')}${_spark(t('anRidership'),sRides,v=>String(v),'var(--blue)')}${_spark(t('anAvgOccupancy'),sOcc,v=>v+'%','var(--orange)')}</div></div>`:'';
     // Retail attach + this-month forecast
     const at=_anAttachStats(done),fc=_anMonthForecast(allSess,allQ);
     const kpis=`<div class="analytics-kpi-grid">
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${at.attachPct}%</div><div class="analytics-kpi-label">${t('anAttachRate')}</div><div class="analytics-kpi-sub">${at.withAddon} ${t('anAttachRateSub')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)"><bdi>SAR ${at.addonRevPerRide}</bdi></div><div class="analytics-kpi-label">${t('anAddonRevRide')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--blue)">${fc.projRides}</div><div class="analytics-kpi-label">${t('anProjRides')}</div><div class="analytics-kpi-sub">${fc.rides} ${t('anForecastSoFar')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--blue)"><bdi>SAR ${fc.projRev}</bdi></div><div class="analytics-kpi-label">${t('anProjRev')}</div><div class="analytics-kpi-sub"><bdi>SAR ${fc.rev}</bdi> ${t('anForecastSoFar')}</div></div>
-    </div><div style="font-size:11px;color:var(--muted);margin:-4px 0 4px 2px">${t('anForecastSub').replace('{0}',fc.elapsed).replace('{1}',fc.days)}</div>`;
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${at.attachPct}%</div><div class="analytics-kpi-label">${t('anAttachRate')}</div><div class="analytics-kpi-sub">${at.withAddon} ${t('anAttachRateSub')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${at.addonRevPerRide}</bdi></div><div class="analytics-kpi-label">${t('anAddonRevRide')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${fc.projRides}</div><div class="analytics-kpi-label">${t('anProjRides')}</div><div class="analytics-kpi-sub">${fc.rides} ${t('anForecastSoFar')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue"><bdi>SAR ${fc.projRev}</bdi></div><div class="analytics-kpi-label">${t('anProjRev')}</div><div class="analytics-kpi-sub"><bdi>SAR ${fc.rev}</bdi> ${t('anForecastSoFar')}</div></div>
+    </div><div class="an-fc-note">${t('anForecastSub').replace('{0}',fc.elapsed).replace('{1}',fc.days)}</div>`;
     // Monthly revenue target & pace
     const tgt=S.anRevTarget||0;
-    const targetCard=`<div class="chart-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="min-width:0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b style="color:var(--green)">${t('anTargetOnPace')}</b>`:`<b style="color:var(--orange)">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div><button class="btn-secondary" style="font-size:12px;padding:6px 12px;flex-shrink:0" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button></div>${tgt?`<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:4px"><span><bdi>SAR ${fc.rev}</bdi></span><span style="color:var(--muted)"><bdi>SAR ${tgt}</bdi></span></div><div style="height:16px;background:var(--s3);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(100,Math.round(fc.rev/tgt*100))}%;background:${fc.rev>=tgt?'var(--green)':'var(--blue)'};border-radius:3px"></div></div></div>`:''}</div>`;
+    const targetCard=`<div class="chart-card"><div class="an-target-head"><div class="an-minw0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b class="an-c-green">${t('anTargetOnPace')}</b>`:`<b class="an-c-orange">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div><button class="btn-secondary an-btn-sm-fixed" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button></div>${tgt?`<div class="an-mt10"><div class="an-target-nums"><span><bdi>SAR ${fc.rev}</bdi></span><span class="an-c-muted"><bdi>SAR ${tgt}</bdi></span></div><div class="an-target-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':Math.min(100,Math.round(fc.rev/tgt*100))+'%','--an-bg':fc.rev>=tgt?'var(--green)':'var(--blue)'})}"></div></div></div>`:''}</div>`;
     // RFM segments (all-time recency/frequency/money)
     const cust={};
     allQ.filter(e=>e.status==='done'&&e.customerId).forEach(e=>{const id=e.customerId;const c=cust[id]||(cust[id]={sess:new Set(),spend:0,last:0,name:'',phone:''});c.sess.add(e.sessionId);if(e.paid)c.spend+=(e.price??DEFAULT_PRICE);try{c.spend+=addonsCost(entryAddons(e));}catch(_){}const ts=new Date(e.checkedInAt||e.registeredAt||0).getTime();if(ts>=c.last){c.last=ts;if(e.name)c.name=e.name;if(e.phone)c.phone=e.phone;}});
@@ -30554,23 +30570,23 @@ function renderAnalytics(){
     // anRfmAtrisk, keys that exist in no language, so two headings showed the raw key.
     const _rfmStem={champions:'Champions',loyal:'Loyal',newbie:'New',atrisk:'AtRisk',lost:'Lost'};
     const cap=k=>_rfmStem[k];
-    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides}🚲 · SAR ${r.spend}`;return ph?`<a style="text-decoration:none;background:var(--s3);border:1px solid var(--border);color:var(--text);font-weight:700;font-size:11px;margin:2px;padding:4px 9px;border-radius:3px;display:inline-block" href="https://wa.me/${ph}?text=${encodeURIComponent(t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||''))}" target="_blank" rel="noopener">${lbl}</a>`:`<span style="background:var(--s3);border:1px solid var(--border);color:var(--muted);font-weight:700;font-size:11px;margin:2px;padding:4px 9px;border-radius:3px;display:inline-block">${lbl}</span>`;};
+    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides}🚲 · SAR ${r.spend}`;return ph?`<a class="an-rfm-chip" href="https://wa.me/${ph}?text=${encodeURIComponent(t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||''))}" target="_blank" rel="noopener">${lbl}</a>`:`<span class="an-rfm-chip-off">${lbl}</span>`;};
     const segMeta=[['champions','var(--green)'],['loyal','var(--blue)'],['newbie','var(--green)'],['atrisk','var(--orange)'],['lost','var(--muted-l)']];
-    const rfm=`<div class="chart-card"><div class="chart-card-title">${t('anRfmTitle')}</div><div class="chart-card-sub">${t('anRfmSub')}</div>${segMeta.map(([k,col])=>{const list=segs[k];return`<div style="margin-top:10px"><div style="font-size:12px;font-weight:900;color:${col};text-transform:uppercase;letter-spacing:.4px">${t('anRfm'+cap(k))} <span style="color:var(--muted);font-weight:700">${list.length}</span> <span style="color:var(--muted);font-weight:600;text-transform:none">· ${t('anRfm'+cap(k)+'D')}</span></div><div style="display:flex;flex-wrap:wrap;margin-top:4px">${list.length?list.slice(0,10).map(rfmChip).join('')+(list.length>10?`<span style="font-size:11px;color:var(--muted);align-self:center;margin-inline-start:6px">${t('anRfmMore').replace('{0}',list.length-10)}</span>`:''):`<span style="font-size:11px;color:var(--muted)">${t('anRfmNone')}</span>`}</div></div>`;}).join('')}</div>`;
+    const rfm=`<div class="chart-card"><div class="chart-card-title">${t('anRfmTitle')}</div><div class="chart-card-sub">${t('anRfmSub')}</div>${segMeta.map(([k,col])=>{const list=segs[k];return`<div class="an-mt10"><div class="an-rfm-title" data-cssv="${_cssv({'--an-fg':col})}">${t('anRfm'+cap(k))} <span class="an-muted-700">${list.length}</span> <span class="an-rfm-desc">· ${t('anRfm'+cap(k)+'D')}</span></div><div class="an-rfm-chips">${list.length?list.slice(0,10).map(rfmChip).join('')+(list.length>10?`<span class="an-rfm-more">${t('anRfmMore').replace('{0}',list.length-10)}</span>`:''):`<span class="an-rfm-none">${t('anRfmNone')}</span>`}</div></div>`;}).join('')}</div>`;
     // Market-basket: product pairs sharing a receipt (cashier sales in range)
     const rcpt={};(S.cashSales||[]).filter(r=>sessIds.has(r.session_id)&&r.pay!=='refunded'&&r.category!=='__cardmeta__'&&r.category!=='__discount__'&&(Number(r.qty)||0)>0).forEach(r=>{const k=r.receipt_id||r.id;(rcpt[k]=rcpt[k]||[]).push(r.name||'—');});
     const pairs=_anBasketPairs(Object.values(rcpt)),pmax=pairs.length?pairs[0].count:1;
-    const basket=`<div class="chart-card"><div class="chart-card-title">${t('anBasketTitle')}</div><div class="chart-card-sub">${t('anBasketSub')}</div>${pairs.length?pairs.map(p=>`<div class="analytics-bar-row"><div class="analytics-bar-label" style="min-width:150px">${esc(p.pair)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(p.count/pmax*100)}%;background:var(--blue)"></div></div><div class="analytics-bar-value">${p.count}×</div></div>`).join(''):`<div class="empty-state">${t('anBasketNone')}</div>`}</div>`;
+    const basket=`<div class="chart-card"><div class="chart-card-title">${t('anBasketTitle')}</div><div class="chart-card-sub">${t('anBasketSub')}</div>${pairs.length?pairs.map(p=>`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw150">${esc(p.pair)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(p.count/pmax*100))+'%','--an-bg':'var(--blue)'})}"></div></div><div class="analytics-bar-value">${p.count}×</div></div>`).join(''):`<div class="empty-state">${t('anBasketNone')}</div>`}</div>`;
     // Retention curve (all-time first-ride cohorts)
     const ret=_anRetentionCurve(allQ.filter(e=>e.status==='done'));
-    const retCard=`<div class="chart-card"><div class="chart-card-title">${t('anRetCurveTitle')}</div><div class="chart-card-sub">${t('anRetCurveSub')}</div>${[7,30,90].map(w=>{const r=ret[w];const col=r.pct>=40?'var(--green)':r.pct>=20?'var(--blue)':'var(--orange)';return`<div class="analytics-bar-row"><div class="analytics-bar-label" style="min-width:80px">${t('anRetWindow').replace('{0}',w)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${r.pct}%;background:${col}"></div></div><div class="analytics-bar-value">${r.pct}% <span style="color:var(--muted);font-weight:600">· ${t('anRetElig').replace('{0}',r.returned).replace('{1}',r.eligible)}</span></div></div>`;}).join('')}</div>`;
+    const retCard=`<div class="chart-card"><div class="chart-card-title">${t('anRetCurveTitle')}</div><div class="chart-card-sub">${t('anRetCurveSub')}</div>${[7,30,90].map(w=>{const r=ret[w];const col=r.pct>=40?'var(--green)':r.pct>=20?'var(--blue)':'var(--orange)';return`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw80">${t('anRetWindow').replace('{0}',w)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(r.pct)+'%','--an-bg':col})}"></div></div><div class="analytics-bar-value">${r.pct}% <span class="an-muted-600">· ${t('anRetElig').replace('{0}',r.returned).replace('{1}',r.eligible)}</span></div></div>`;}).join('')}</div>`;
     // LTV by first-ride cohort
     const ltv=_anLTVByCohort(allQ.filter(e=>e.status==='done'));
-    const ltvCard=ltv.length?`<div class="chart-card"><div class="chart-card-title">${t('anLtvTitle')}</div><div class="chart-card-sub">${t('anLtvSub')}</div><div style="overflow-x:auto"><table class="analytics-trend-table" style="width:100%"><thead><tr><th>${t('anLtvCohort')}</th><th>${t('anLtvRiders')}</th><th>${t('anLtvAvg')}</th></tr></thead><tbody>${ltv.map(r=>`<tr><td>${r.month}</td><td>${r.customers}</td><td><bdi>SAR ${r.avgLtv}</bdi></td></tr>`).join('')}</tbody></table></div></div>`:'';
+    const ltvCard=ltv.length?`<div class="chart-card"><div class="chart-card-title">${t('anLtvTitle')}</div><div class="chart-card-sub">${t('anLtvSub')}</div><div class="an-scroll-x"><table class="analytics-trend-table an-w100"><thead><tr><th>${t('anLtvCohort')}</th><th>${t('anLtvRiders')}</th><th>${t('anLtvAvg')}</th></tr></thead><tbody>${ltv.map(r=>`<tr><td>${r.month}</td><td>${r.customers}</td><td><bdi>SAR ${r.avgLtv}</bdi></td></tr>`).join('')}</tbody></table></div></div>`:'';
     // Gross margin (needs item costs; card hidden until at least one sold item has a cost)
     const costById={};(S.inventory||[]).forEach(i=>{if(i.cost!=null&&!isNaN(Number(i.cost)))costById[i.id]=Number(i.cost);});
     const mg=_anMargin(anSalesLines,costById);
-    const marginCard=mg.haveCost?`<div class="chart-card"><div class="chart-card-title">${t('anMarginTitle')}</div><div class="chart-card-sub">${t('anMarginSub')}</div><div class="analytics-kpi-grid" style="margin-top:6px"><div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${mg.marginPct}%</div><div class="analytics-kpi-label">${t('anMargin')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)"><bdi>SAR ${mg.profit}</bdi></div><div class="analytics-kpi-label">${t('anGrossProfit')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--orange)"><bdi>SAR ${mg.cogs}</bdi></div><div class="analytics-kpi-label">${t('anCogs')}</div></div></div></div>`:'';
+    const marginCard=mg.haveCost?`<div class="chart-card"><div class="chart-card-title">${t('anMarginTitle')}</div><div class="chart-card-sub">${t('anMarginSub')}</div><div class="analytics-kpi-grid an-mt6"><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${mg.marginPct}%</div><div class="analytics-kpi-label">${t('anMargin')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${mg.profit}</bdi></div><div class="analytics-kpi-label">${t('anGrossProfit')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${mg.cogs}</bdi></div><div class="analytics-kpi-label">${t('anCogs')}</div></div></div></div>`:'';
     // Weather & demand: rides vs daily-high temperature (Open-Meteo)
     const wx=S.anWeather||{};
     const wrows=chron.map(sx=>({date:sx.session_date||sx.id,rides:_dn(sx.id).length,temp:wx[sx.session_date]})).filter(r=>r.temp!=null);
@@ -30579,7 +30595,7 @@ function renderAnalytics(){
       const corr=_anCorrelation(wrows.map(r=>r.temp),wrows.map(r=>r.rides));
       const takeaway=corr>0.3?t('anWeatherWarmMore'):corr<-0.3?t('anWeatherWarmLess'):t('anWeatherFlat');
       const rmax=Math.max(1,...wrows.map(r=>r.rides));
-      weatherCard=`<div class="chart-card"><div class="chart-card-title">${t('anWeatherTitle')}</div><div class="chart-card-sub">${t('anWeatherSub')}</div><div style="font-size:12px;margin:2px 0 8px"><b>${takeaway}</b> <span style="color:var(--muted)">· r=${corr.toFixed(2)}</span></div>${wrows.slice(-8).map(r=>`<div class="analytics-bar-row"><div class="analytics-bar-label" style="min-width:96px">${esc(shortDate(r.date))} · ${Math.round(r.temp)}°</div><div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(r.rides/rmax*100)}%;background:var(--blue)"></div></div><div class="analytics-bar-value">${r.rides} 🚲</div></div>`).join('')}</div>`;
+      weatherCard=`<div class="chart-card"><div class="chart-card-title">${t('anWeatherTitle')}</div><div class="chart-card-sub">${t('anWeatherSub')}</div><div class="an-wx-line"><b>${takeaway}</b> <span class="an-c-muted">· r=${corr.toFixed(2)}</span></div>${wrows.slice(-8).map(r=>`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw96">${esc(shortDate(r.date))} · ${Math.round(r.temp)}°</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(r.rides/rmax*100))+'%','--an-bg':'var(--blue)'})}"></div></div><div class="analytics-bar-value">${r.rides} 🚲</div></div>`).join('')}</div>`;
     }
     return`<div class="an-anchor" data-anview="growth"></div>
     <div class="analytics-section-title">${t('anNavGrowth')}</div>
@@ -30591,7 +30607,7 @@ function renderAnalytics(){
   // Text behind the "Share digest" button (WhatsApp-friendly summary of the current range).
   S._anDigestText=`MicroMobility — ${t('tabAnalytics')}\n🚲 ${t('anTotalRides')}: ${done.length}\n💰 ${t('anRevCollected')}: SAR ${Math.round(revCollected)}${revPending>0?` (+SAR ${Math.round(revPending)} ${t('printPending').toLowerCase()})`:''}\n📊 ${t('anAvgOccupancy')}: ${avgOccupancy}%${anTopItems.length?`\n🏆 ${t('anTopSellers')}: ${anTopItems[0].name}`:''}${noshow.length?`\n⚠️ ${t('anNoShowRate')}: ${noShowRate}% (${noshow.length})`:''}`;
   document.getElementById('tab-analytics').innerHTML=`
-    <div class="page-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><span>${t('tabAnalytics')}</span><span style="display:flex;gap:8px"><button class="btn-secondary" style="font-size:12px;padding:6px 12px" data-on-click="${_on("_anShareDigest")}">${_artIcon('share',12)} ${t('anDigestShare')}</button><button class="btn-secondary" style="font-size:12px;padding:6px 12px" data-on-click="${_on("_anExportCSV")}">${_artIcon('download',12)} ${t('anExportCsv')}</button><button class="btn-secondary" style="font-size:12px;padding:6px 12px" data-on-click="${_on("printHeightBikeReport")}" title="${t('anHeightReportSub')}">${_artIcon('print',12)} ${t('anHeightReport')}</button><button class="btn-secondary" style="font-size:12px;padding:6px 12px" data-on-click="${_on("exportHeightBikeCsv")}">${_artIcon('download',12)} ${t('anHeightReport')} CSV</button></span></div>
+    <div class="page-title an-title-row"><span>${t('tabAnalytics')}</span><span class="an-title-btns"><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anShareDigest")}">${_artIcon('share',12)} ${t('anDigestShare')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anExportCSV")}">${_artIcon('download',12)} ${t('anExportCsv')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("printHeightBikeReport")}" title="${t('anHeightReportSub')}">${_artIcon('print',12)} ${t('anHeightReport')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("exportHeightBikeCsv")}">${_artIcon('download',12)} ${t('anHeightReport')} CSV</button></span></div>
     <div class="page-sub">${t('anPageSub')}</div>
     <div class="an-sticky">
       ${_rangeBar()}
@@ -30613,17 +30629,17 @@ function renderAnalytics(){
     <div class="analytics-section-title">${t('anRevenue')}</div>
     <div class="analytics-kpi-grid">
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${sarBoth(revCollected)}</div>
+        <div class="analytics-kpi-value an-c-green">${sarBoth(revCollected)}</div>
         <div class="analytics-kpi-label">${t('anCollected')} ${deltaBadge('revCollected')}</div>
         <div class="analytics-kpi-sub">${collectionRate}% ${t('anCollRateLabel')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--muted-l)">${sarBoth(revPending)}</div>
+        <div class="analytics-kpi-value an-c-mutedl">${sarBoth(revPending)}</div>
         <div class="analytics-kpi-label">${t('pendingLabel')}</div>
         <div class="analytics-kpi-sub">${done.filter(e=>!e.paid).length} ${t('anUnpaidRides')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${sarBoth(revPAS,2)}</div>
+        <div class="analytics-kpi-value an-c-green">${sarBoth(revPAS,2)}</div>
         <div class="analytics-kpi-label">${t('anRevPAS')}</div>
         <div class="analytics-kpi-sub">${totalSeatsOffered} ${t('anTotalSeats').toLowerCase()}</div>
       </div>
@@ -30639,8 +30655,8 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anChartRevSub')}</div>
         ${revenueChart}
         <div class="chart-legend">
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:${_thc('--green','#03ff89')}"></span>${t('anCollected')}</div>
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:rgba(var(--green-rgb),.4)"></span>${t('anTotal')}</div>
+          <div class="chart-legend-item"><span class="chart-legend-dot an-bgv" data-cssv="${_cssv({'--an-bg':_thc('--green','#03ff89')})}"></span>${t('anCollected')}</div>
+          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-total"></span>${t('anTotal')}</div>
         </div>
       </div>
       <div class="chart-card">
@@ -30672,7 +30688,7 @@ function renderAnalytics(){
         const _min=_rides.reduce((s,e)=>s+_rideMinutes(e),0);
         const _measured=_rides.filter(e=>_rideMinutes(e)>0).length;
         return`<div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${_riderCnt}</div>
+        <div class="analytics-kpi-value an-c-green">${_riderCnt}</div>
         <div class="analytics-kpi-label">${t('anCntRiders')}</div>
         <div class="analytics-kpi-sub">${t('anCntRidersSub')}</div>
       </div>
@@ -30682,7 +30698,7 @@ function renderAnalytics(){
         <div class="analytics-kpi-sub">${t('anRideDefSub')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--blue)">${_min>0?fmtDur(_min):'0 '+t('unitMin')}</div>
+        <div class="analytics-kpi-value an-c-blue">${_min>0?fmtDur(_min):'0 '+t('unitMin')}</div>
         <div class="analytics-kpi-label">${t('anRideMinutes')}</div>
         <div class="analytics-kpi-sub">${_measured} ${t('anMeasuredRides')}</div>
       </div>`;})()}
@@ -30692,17 +30708,17 @@ function renderAnalytics(){
         <div class="analytics-kpi-sub">${noshow.length} ${t('filterNoshow').toLowerCase()} · ${cancelCount} ${t('anCancellations')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${completionRate>=70?'var(--green)':'var(--red)'}">${completionRate}%</div>
+        <div class="analytics-kpi-value ${completionRate>=70?'an-c-green':'an-c-red'}">${completionRate}%</div>
         <div class="analytics-kpi-label">${t('anCompletionRate')} ${deltaBadge('comp')}</div>
         <div class="analytics-kpi-sub">${done.length} ${t('anOf')} ${totalAttempted} ${t('anAttempts')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${uniqueCustIds.length}</div>
+        <div class="analytics-kpi-value an-c-green">${uniqueCustIds.length}</div>
         <div class="analytics-kpi-label">${t('anUniqueCustomers')} ${deltaBadge('uniq')}</div>
         <div class="analytics-kpi-sub">${sarBoth(revPerCustomer,1)} ${t('anAvgSpend')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${uniqueCustIds.length>0?Math.round(repeatCustomers/uniqueCustIds.length*100):0}%</div>
+        <div class="analytics-kpi-value an-c-green">${uniqueCustIds.length>0?Math.round(repeatCustomers/uniqueCustIds.length*100):0}%</div>
         <div class="analytics-kpi-label">${t('anCustRetention')}</div>
         <div class="analytics-kpi-sub">${repeatCustomers} ${t('anOf')} ${uniqueCustIds.length} ${t('anReturned')}</div>
       </div>
@@ -30714,8 +30730,8 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anChartRidersSub')}</div>
         ${ridersChart}
         <div class="chart-legend">
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:#0c7a3d"></span>${t('anRiders')}</div>
-          <div class="chart-legend-item"><span class="chart-legend-dot" style="background:rgba(var(--tint-rgb),.25)"></span>${t('anCapacity')}</div>
+          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-riders"></span>${t('anRiders')}</div>
+          <div class="chart-legend-item"><span class="chart-legend-dot an-dot-cap"></span>${t('anCapacity')}</div>
         </div>
       </div>
       <div class="chart-card">
@@ -30735,17 +30751,17 @@ function renderAnalytics(){
         <div class="analytics-kpi-sub">${totalSeatsOffered} ${t('anTotalSeats').toLowerCase()}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${avgOccupancy>=50?'var(--green)':'var(--red)'}">${avgOccupancy}%</div>
+        <div class="analytics-kpi-value ${avgOccupancy>=50?'an-c-green':'an-c-red'}">${avgOccupancy}%</div>
         <div class="analytics-kpi-label">${t('anAvgOccupancy')} ${deltaBadge('occ')}</div>
         <div class="analytics-kpi-sub">${t('anRidersCapacity')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${noShowRate>15?'var(--red)':'var(--green)'}">${noShowRate}%</div>
+        <div class="analytics-kpi-value ${noShowRate>15?'an-c-red':'an-c-green'}">${noShowRate}%</div>
         <div class="analytics-kpi-label">${t('anNoShowRate')} ${deltaBadge('nsr',true)}</div>
         <div class="analytics-kpi-sub">${noshow.length} ${t('anOf')} ${totalAttempted} ${t('anAttempts')} · ~<bdi>SAR ${noShowLost}</bdi> ${t('anNoShowLost')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${cancelRate>10?'var(--red)':'var(--muted-l)'}">${cancelRate}%</div>
+        <div class="analytics-kpi-value ${cancelRate>10?'an-c-red':'an-c-mutedl'}">${cancelRate}%</div>
         <div class="analytics-kpi-label">${t('anCancellationRate')} ${deltaBadge('cr',true)}</div>
         <div class="analytics-kpi-sub">${cancelCount} ${t('anCancellations')}</div>
       </div>
@@ -30756,7 +30772,7 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anChartOccSub')}</div>
         ${occChart}
       </div>
-      <div class="chart-card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="chart-card an-gauge-card">
         ${occGauge(avgOccupancy)}
       </div>
       <div class="chart-card">
@@ -30765,7 +30781,7 @@ function renderAnalytics(){
         ${Object.keys(dayBreakOrdered).length?bars(dayBreakOrdered,()=>_thc('--green','#03ff89')):noDataStr}
       </div>
     </div>
-    ${Object.keys(noShowByDay).length?`<div class="chart-card" style="margin-top:14px">
+    ${Object.keys(noShowByDay).length?`<div class="chart-card an-mt14">
       <div class="chart-card-title">${t('anNoShowByDay')}</div>
       <div class="chart-card-sub">${t('anNoShowByDaySub')}</div>
       ${bars(noShowByDay,()=>_thc('--red','#d90909'))}
@@ -30797,7 +30813,7 @@ function renderAnalytics(){
         ${_brandKeys.length
           ? _brandKeys.filter(k=>brandRentals[k]>0).map(k=>`<div class="analytics-bar-row">
               <div class="analytics-bar-label">${esc(k)}</div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(brandRentals[k]/Math.max(...Object.values(brandRentals),1)*100)}%;background:${brandColorMap[k]}"></div></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(brandRentals[k]/Math.max(...Object.values(brandRentals),1)*100))+'%','--an-bg':brandColorMap[k]})}"></div></div>
               <div class="analytics-bar-value">${brandRentals[k]}</div>
             </div>`).join('')
           : noDataStr}
@@ -30808,7 +30824,7 @@ function renderAnalytics(){
         ${_modelKeys.length
           ? _modelKeys.filter(k=>modelRentals[k]>0).map(k=>`<div class="analytics-bar-row">
               <div class="analytics-bar-label">${esc(k)}</div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(modelRentals[k]/Math.max(...Object.values(modelRentals),1)*100)}%;background:${modelColorMap[k]}"></div></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(modelRentals[k]/Math.max(...Object.values(modelRentals),1)*100))+'%','--an-bg':modelColorMap[k]})}"></div></div>
               <div class="analytics-bar-value">${modelRentals[k]}</div>
             </div>`).join('')
           : noDataStr}
@@ -30819,7 +30835,7 @@ function renderAnalytics(){
         ${Object.keys(modelRevenue).length
           ? Object.entries(modelRevenue).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="analytics-bar-row">
               <div class="analytics-bar-label">${esc(k)}</div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(v/Math.max(...Object.values(modelRevenue),1)*100)}%;background:${modelColorMap[k]||'#0c7a3d'}"></div></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/Math.max(...Object.values(modelRevenue),1)*100))+'%','--an-bg':modelColorMap[k]||'#0c7a3d'})}"></div></div>
               <div class="analytics-bar-value">SAR ${v}</div>
             </div>`).join('')
           : noDataStr}
@@ -30829,11 +30845,11 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anAvgPerPieceSub')}</div>
         ${Object.keys(modelAvgPerPiece).length
           ? Object.entries(modelAvgPerPiece).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="analytics-bar-row">
-              <div class="analytics-bar-label" style="display:flex;align-items:center;gap:5px">
+              <div class="analytics-bar-label an-lbl-flex">
                 ${esc(k)}
-                ${(modelPieces[k]||1)>1?`<span style="font-size:10px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:5px;padding:1px 5px;color:var(--muted-l);font-weight:700">${t('anPieces').replace('{0}',modelPieces[k])}</span>`:''}
+                ${(modelPieces[k]||1)>1?`<span class="an-chip">${t('anPieces').replace('{0}',modelPieces[k])}</span>`:''}
               </div>
-              <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(v/Math.max(...Object.values(modelAvgPerPiece),1)*100)}%;background:${modelColorMap[k]||'#0c7a3d'}"></div></div>
+              <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/Math.max(...Object.values(modelAvgPerPiece),1)*100))+'%','--an-bg':modelColorMap[k]||'#0c7a3d'})}"></div></div>
               <div class="analytics-bar-value">${v%1===0?v:v.toFixed(1)}x</div>
             </div>`).join('')
           : noDataStr}
@@ -30850,7 +30866,7 @@ function renderAnalytics(){
       const used=rows.filter(r=>r.n>0);const idle=rows.filter(r=>r.n===0);
       const barRows=(used.length?used:rows.slice(0,8)).map(r=>`<div class="analytics-bar-row">
           <div class="analytics-bar-label">${esc(r.b.name)}</div>
-          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(r.n/maxN*100)}%;background:${_thc('--green','#03ff89')}"></div></div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(r.n/maxN*100))+'%','--an-bg':_thc('--green','#03ff89')})}"></div></div>
           <div class="analytics-bar-value">${r.n} ${t('anRidesUnit')}</div>
         </div>`).join('');
       return`<div class="analytics-section-title">${t('anBikeUtilTitle')}</div>
@@ -30863,10 +30879,10 @@ function renderAnalytics(){
           <div class="chart-card">
             <div class="chart-card-title">${t('anIdleBikesTitle')}</div>
             <div class="chart-card-sub">${idle.length} / ${allBikes.length}</div>
-            ${idle.length?idle.map(r=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
-                <span style="font-weight:700;font-size:13px">${esc(r.b.name)}</span>
-                <span style="font-size:11px;color:var(--muted-l);font-weight:700">${t('anNeverUsed')}</span>
-              </div>`).join(''):`<div style="padding:12px 0;color:var(--green);font-weight:700;font-size:13px">✓</div>`}
+            ${idle.length?idle.map(r=>`<div class="an-idle-row">
+                <span class="an-idle-name">${esc(r.b.name)}</span>
+                <span class="an-idle-note">${t('anNeverUsed')}</span>
+              </div>`).join(''):`<div class="an-idle-none">✓</div>`}
           </div>
         </div>`;
     })()}
@@ -30876,17 +30892,17 @@ function renderAnalytics(){
     <div class="analytics-section-title">${t('anDurationSection')}</div>
     <div class="analytics-kpi-grid">
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--blue)">${fmtDur(avgDurOverall)}</div>
+        <div class="analytics-kpi-value an-c-blue">${fmtDur(avgDurOverall)}</div>
         <div class="analytics-kpi-label">${t('anAvgDuration')}</div>
         <div class="analytics-kpi-sub">${ridesWithDur.length} ${t('anDurRidesTracked')}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--green)">${fmtDur(maxDurEntry?.rideDuration)}</div>
+        <div class="analytics-kpi-value an-c-green">${fmtDur(maxDurEntry?.rideDuration)}</div>
         <div class="analytics-kpi-label">${t('anLongestRide')}</div>
         <div class="analytics-kpi-sub">${maxDurEntry?esc(maxDurEntry.name):''}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:var(--muted-l)">${fmtDur(minDurEntry?.rideDuration)}</div>
+        <div class="analytics-kpi-value an-c-mutedl">${fmtDur(minDurEntry?.rideDuration)}</div>
         <div class="analytics-kpi-label">${t('anShortestRide')}</div>
         <div class="analytics-kpi-sub">${minDurEntry?esc(minDurEntry.name):''}</div>
       </div>
@@ -30897,7 +30913,7 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anDurByTypeSub')}</div>
         ${Object.keys(avgDurByType).length?Object.entries(avgDurByType).sort((a,b)=>b[1]-a[1]).map(([ty,avg])=>`<div class="analytics-bar-row">
             <div class="analytics-bar-label">${_tl(ty)}</div>
-            <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(avg/Math.max(...Object.values(avgDurByType),1)*100)}%;background:${typeColorHex[ty]||'#777'}"></div></div>
+            <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(avg/Math.max(...Object.values(avgDurByType),1)*100))+'%','--an-bg':typeColorHex[ty]||'#777'})}"></div></div>
             <div class="analytics-bar-value">${fmtDur(avg)}</div>
           </div>`).join(''):noDataStr}
       </div>
@@ -30906,7 +30922,7 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anDurByModelSub')}</div>
         ${Object.keys(avgDurByModel).length?Object.entries(avgDurByModel).sort((a,b)=>b[1]-a[1]).map(([mk,avg])=>`<div class="analytics-bar-row">
             <div class="analytics-bar-label">${esc(mk)}</div>
-            <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(avg/Math.max(...Object.values(avgDurByModel),1)*100)}%;background:${modelColorMap[mk]||'#0c7a3d'}"></div></div>
+            <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(avg/Math.max(...Object.values(avgDurByModel),1)*100))+'%','--an-bg':modelColorMap[mk]||'#0c7a3d'})}"></div></div>
             <div class="analytics-bar-value">${fmtDur(avg)}</div>
           </div>`).join(''):noDataStr}
       </div>
@@ -30917,16 +30933,16 @@ function renderAnalytics(){
         <div class="chart-card-sub">${t('anDurDistribSub')}</div>
         ${Object.entries(durBuckets).map(([label,cnt])=>`<div class="analytics-bar-row">
             <div class="analytics-bar-label">${({'<15 min':'<15 '+t('unitMin'),'15-30 min':'15-30 '+t('unitMin'),'30-60 min':'30-60 '+t('unitMin'),'1h+':'1 '+t('unitHour')+'+'})[label]||label}</div>
-            <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${ridesWithDur.length?Math.round(cnt/ridesWithDur.length*100):0}%;background:var(--blue)"></div></div>
-            <div class="analytics-bar-value">${cnt} <span style="color:var(--muted);font-size:10px">(${ridesWithDur.length?Math.round(cnt/ridesWithDur.length*100):0}%)</span></div>
+            <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(ridesWithDur.length?Math.round(cnt/ridesWithDur.length*100):0)+'%','--an-bg':'var(--blue)'})}"></div></div>
+            <div class="analytics-bar-value">${cnt} <span class="an-muted-10">(${ridesWithDur.length?Math.round(cnt/ridesWithDur.length*100):0}%)</span></div>
           </div>`).join('')}
       </div>
       <div class="chart-card">
         <div class="chart-card-title">${t('anDurBySession')}</div>
         <div class="chart-card-sub">${t('anDurBySessionSub')}</div>
         ${Object.keys(avgDurBySession).length?Object.entries(avgDurBySession).map(([label,avg])=>`<div class="analytics-bar-row">
-            <div class="analytics-bar-label" style="font-size:11px">${esc(label)}</div>
-            <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(avg/Math.max(...Object.values(avgDurBySession),1)*100)}%;background:var(--purple)"></div></div>
+            <div class="analytics-bar-label an-fs11">${esc(label)}</div>
+            <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(avg/Math.max(...Object.values(avgDurBySession),1)*100))+'%','--an-bg':'var(--purple)'})}"></div></div>
             <div class="analytics-bar-value">${fmtDur(avg)}</div>
           </div>`).join(''):noDataStr}
       </div>
@@ -30940,32 +30956,32 @@ function renderAnalytics(){
         <div class="hl-item">
           <div class="hl-label">${t('anMostPopType')}</div>
           <div class="hl-value">${topType!=='—'?`<span class="type-badge ${_tcls(topType)}">${_tl(topType)}</span>`:topType}
-            ${topType!=='—'?`<span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:8px">${typeBreak[topType]} ${t('anRidesLabel')}</span>`:''}
+            ${topType!=='—'?`<span class="an-hl-note">${typeBreak[topType]} ${t('anRidesLabel')}</span>`:''}
           </div>
         </div>
         <div class="hl-item">
           <div class="hl-label">${t('anBusiestDayLabel')}</div>
           <div class="hl-value">${esc(dayLabel(topDay)||topDay)}
-            ${topDay!=='—'?`<span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:8px">${dayBreak[topDay]} ${t('anRidesLabel')}</span>`:''}
+            ${topDay!=='—'?`<span class="an-hl-note">${dayBreak[topDay]} ${t('anRidesLabel')}</span>`:''}
           </div>
         </div>
-        <div class="hl-item" style="margin-bottom:0">
+        <div class="hl-item an-mb0">
           <div class="hl-label">${t('anBestSession')}</div>
-          <div class="hl-value" style="color:var(--green)">${bestSession.s?`${sarBoth(bestSession.r)} <span style="font-size:13px;font-weight:600;color:var(--muted)">${esc(shortDate(bestSession.s.session_date||bestSession.s.id))}</span>`:'—'}</div>
+          <div class="hl-value an-c-green">${bestSession.s?`${sarBoth(bestSession.r)} <span class="an-hl-date">${esc(shortDate(bestSession.s.session_date||bestSession.s.id))}</span>`:'—'}</div>
         </div>
       </div>
       ${_apprRangeIds.size?`<div class="analytics-highlight-card ev-saturday">
         <div class="hl-item">
           <div class="hl-label">${t('anApprovedUnique')}</div>
           <div class="hl-value">${apprUnique}
-            <span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:8px">${esc(t('evSatName'))}</span>
+            <span class="an-hl-note">${esc(t('evSatName'))}</span>
           </div>
         </div>
         <div class="hl-item">
           <div class="hl-label">${t('anApprovedTotal')}</div>
           <div class="hl-value">${apprTotal}</div>
         </div>
-        <div class="hl-item" style="margin-bottom:0">
+        <div class="hl-item an-mb0">
           <div class="hl-label">${t('anApprovedAvg')}</div>
           <div class="hl-value">${apprAvg||'—'}</div>
         </div>
@@ -30973,15 +30989,15 @@ function renderAnalytics(){
       <div class="analytics-highlight-card">
         <div class="hl-item">
           <div class="hl-label">${t('anRevPerRide')}</div>
-          <div class="hl-value" style="color:var(--green)">${sarBoth(revPerRide,2)}</div>
+          <div class="hl-value an-c-green">${sarBoth(revPerRide,2)}</div>
         </div>
         <div class="hl-item">
           <div class="hl-label">${t('anRevPAS')}</div>
-          <div class="hl-value" style="color:var(--green)">${sarBoth(revPAS,2)}</div>
+          <div class="hl-value an-c-green">${sarBoth(revPAS,2)}</div>
         </div>
-        <div class="hl-item" style="margin-bottom:0">
+        <div class="hl-item an-mb0">
           <div class="hl-label">${t('anRevPerCust')}</div>
-          <div class="hl-value" style="color:var(--green)">${sarBoth(revPerCustomer,2)}</div>
+          <div class="hl-value an-c-green">${sarBoth(revPerCustomer,2)}</div>
         </div>
       </div>
     </div>
@@ -31011,9 +31027,9 @@ function renderAnalytics(){
       <div class="chart-card-title">${t('anAddonsTitle')}</div>
       <div class="chart-card-sub">${t('anAddonsSub')}</div>
       ${anAddons.items.length?anAddons.items.map(a=>`<div class="analytics-bar-row">
-          <div class="analytics-bar-label">${esc(a.name)}${a.brand?` <span style="color:var(--muted);font-size:10px">${esc(a.brand)}</span>`:''}</div>
-          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.round(a.units/anAddonMax*100)}%;background:var(--green)"></div></div>
-          <div class="analytics-bar-value">${a.units}${a.value>0?` <span style="color:var(--muted);font-size:10px">SAR ${a.value}</span>`:''}</div>
+          <div class="analytics-bar-label">${esc(a.name)}${a.brand?` <span class="an-muted-10">${esc(a.brand)}</span>`:''}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(a.units/anAddonMax*100))+'%','--an-bg':'var(--green)'})}"></div></div>
+          <div class="analytics-bar-value">${a.units}${a.value>0?` <span class="an-muted-10">SAR ${a.value}</span>`:''}</div>
         </div>`).join(''):`<div class="empty-state">${t('anNoAddons')}</div>`}
     </div>
 
@@ -31033,8 +31049,8 @@ function renderAnalytics(){
         <div class="chart-card-title">${t('anCancelWhy')}</div>
         <div class="chart-card-sub">${esc(t('anCancelWhySub').replace('{0}',given.length).replace('{1}',given.filter(e=>e.cancelledBy==='staff').length))}</div>
         ${rows.length?rows.map(([code,n])=>`<div class="analytics-bar-row">
-          <div class="analytics-bar-label" style="min-width:150px">${esc(_cancelReasonText({cancelReason:code}))}</div>
-          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.min(100,Math.round(n/mx*100))}%;background:var(--orange)"></div></div>
+          <div class="analytics-bar-label an-minw150">${esc(_cancelReasonText({cancelReason:code}))}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.min(100,Math.round(n/mx*100)))+'%','--an-bg':'var(--orange)'})}"></div></div>
           <div class="analytics-bar-value"><bdi>${n}</bdi> · ${Math.round(n/given.length*100)}%</div>
         </div>`).join(''):`<div class="empty-state">${t('anCancelWhyNone')}</div>`}
         ${words.length?`<div class="cx-words-title">${t('anCancelNotes')}</div>${words.map(e=>`<div class="cx-word">“${esc(e.cancelNote)}” <span>${esc(shortDate(e.sessionDate))}</span></div>`).join('')}`:''}
@@ -31045,34 +31061,34 @@ function renderAnalytics(){
       <div class="analytics-highlight-card">
         <div class="hl-item">
           <div class="hl-label">${t('anRepeatRate')}</div>
-          <div class="hl-value" style="color:var(--green)">${retRepeatPct}%
-            <span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:6px">${retRepeatRiders}/${retTotalRiders} ${t('anRepeatRateSub')}</span>
+          <div class="hl-value an-c-green">${retRepeatPct}%
+            <span class="an-hl-note6">${retRepeatRiders}/${retTotalRiders} ${t('anRepeatRateSub')}</span>
           </div>
         </div>
-        <div class="hl-item" style="margin-bottom:0">
+        <div class="hl-item an-mb0">
           <div class="hl-label">${t('anLapsedTitle')}</div>
-          <div class="hl-value" style="color:${retLapsed.length?'var(--orange)':'var(--green)'}">${retLapsed.length}
-            <span style="font-size:13px;color:var(--muted);font-weight:600;margin-left:6px">${t('anLapsedSub')}</span>
+          <div class="hl-value ${retLapsed.length?'an-c-orange':'an-c-green'}">${retLapsed.length}
+            <span class="an-hl-note6">${t('anLapsedSub')}</span>
           </div>
         </div>
       </div>
       <div class="analytics-highlight-card">
-        <div class="hl-label" style="margin-bottom:8px">${t('anCohortTitle')} <span style="color:var(--muted);font-weight:600">· ${t('anCohortSub')}</span></div>
-        ${cohortRows.length?`<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table class="analytics-trend-table" style="width:100%;min-width:280px">
+        <div class="hl-label an-mb8">${t('anCohortTitle')} <span class="an-muted-600">· ${t('anCohortSub')}</span></div>
+        ${cohortRows.length?`<div class="an-scroll-x-touch"><table class="analytics-trend-table an-w100-280">
           <thead><tr><th>${t('anCohortColMonth')}</th><th>${t('anCohortColNew')}</th><th>${t('anCohortColRode')}</th><th>${t('anCohortColRepeat')}</th></tr></thead>
           <tbody>${cohortRows.map(c=>`<tr><td>${c.month}</td><td>${c.signups}</td><td>${c.rode} (${c.signups?Math.round(c.rode/c.signups*100):0}%)</td><td>${c.repeat} (${c.signups?Math.round(c.repeat/c.signups*100):0}%)</td></tr>`).join('')}</tbody>
         </table></div>`:`<div class="empty-state">${t('anNoData2')}</div>`}
       </div>
     </div>
-    ${topCustomers.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper" style="margin-top:8px">
-      <div class="chart-card-title" style="margin-bottom:6px">${t('anTopCustomers')} <span style="color:var(--muted);font-size:11px;font-weight:600">· ${t('anTopCustomersSub')}</span></div>
+    ${topCustomers.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper an-mt8">
+      <div class="chart-card-title an-mb6">${t('anTopCustomers')} <span class="an-sub11">· ${t('anTopCustomersSub')}</span></div>
       <table class="analytics-trend-table">
         <thead><tr><th>${t('anLapsedColRider')}</th><th>${t('anLapsedColRides')}</th><th>${t('anSpentCol')}</th><th>${t('anLapsedColLast')}</th></tr></thead>
         <tbody>${topCustomers.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.rides}</td><td><bdi>SAR ${Math.round(r.spent)}</bdi></td><td>${esc(shortDate(r.last))}</td></tr>`).join('')}</tbody>
       </table>
     </div>`:''}
-    ${retLapsed.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper" style="margin-top:8px">
-      <div class="chart-card-title" style="margin-bottom:6px">${t('anLapsedTitle')} <span style="color:var(--muted);font-size:11px;font-weight:600">· ${t('anLapsedSub')}</span></div>
+    ${retLapsed.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper an-mt8">
+      <div class="chart-card-title an-mb6">${t('anLapsedTitle')} <span class="an-sub11">· ${t('anLapsedSub')}</span></div>
       <table class="analytics-trend-table">
         <thead><tr><th>${t('anLapsedColRider')}</th><th>${t('anLapsedColLast')}</th><th>${t('anLapsedColRides')}</th><th></th></tr></thead>
         <tbody>${retLapsed.slice(0,12).map(r=>`<tr><td>${esc(r.name)}</td><td>${esc(shortDate(r.last))}</td><td>${r.count}</td><td>${_waReengage(r.id)}</td></tr>`).join('')}</tbody>
@@ -31083,12 +31099,12 @@ function renderAnalytics(){
     <div class="analytics-section-title">${t('anDemandTitle')}</div>
     <div class="analytics-kpi-grid">
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${demandAvgFill>=80?'var(--green)':'var(--text)'}">${demandAvgFill}%</div>
+        <div class="analytics-kpi-value ${demandAvgFill>=80?'an-c-green':'an-c-text'}">${demandAvgFill}%</div>
         <div class="analytics-kpi-label">${t('anAvgFill')}</div>
         <div class="analytics-kpi-sub">${demandRows.length} ${t('anSessionsHeld').toLowerCase()}</div>
       </div>
       <div class="analytics-kpi-card">
-        <div class="analytics-kpi-value" style="color:${demandSoldOut>0?'var(--orange)':'var(--muted-l)'}">${demandSoldOut}</div>
+        <div class="analytics-kpi-value ${demandSoldOut>0?'an-c-orange':'an-c-mutedl'}">${demandSoldOut}</div>
         <div class="analytics-kpi-label">${t('anSoldOut')}</div>
         <div class="analytics-kpi-sub">${demandSoldOut>0?t('anAddCapacityHint'):t('anSoldOutNone')}</div>
       </div>
@@ -31097,8 +31113,8 @@ function renderAnalytics(){
       <div class="chart-card-title">${t('anFillBySession')}</div>
       <div class="chart-card-sub">${t('anFillBySessionSub')}</div>
       ${demandRows.length?demandRows.slice(0,12).map(r=>`<div class="analytics-bar-row">
-          <div class="analytics-bar-label" style="min-width:120px">${esc(dayLabel(r.s.day))} ${esc(shortDate(r.s.session_date||r.s.id))}</div>
-          <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.min(100,r.fill)}%;background:${r.soldOut?'var(--orange)':'var(--green)'}"></div></div>
+          <div class="analytics-bar-label an-minw120">${esc(dayLabel(r.s.day))} ${esc(shortDate(r.s.session_date||r.s.id))}</div>
+          <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.min(100,r.fill))+'%','--an-bg':r.soldOut?'var(--orange)':'var(--green)'})}"></div></div>
           <div class="analytics-bar-value"><bdi>${r.booked}/${r.cap}</bdi> · ${r.fill}%</div>
         </div>`).join(''):noDataStr}
     </div>
@@ -31108,25 +31124,25 @@ function renderAnalytics(){
     <div class="chart-card">
       <div class="chart-card-title">${t('anPromoTitle')}</div>
       <div class="chart-card-sub">${t('anPromoSub')}</div>
-      ${promoRows.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="analytics-trend-table" style="width:100%;min-width:240px">
+      ${promoRows.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="analytics-trend-table an-w100-240">
         <thead><tr><th>${t('anPromoCol')}</th><th>${t('anPromoUses')}</th></tr></thead>
-        <tbody>${promoRows.map(([code,n])=>`<tr><td style="font-weight:800">${esc(code)}</td><td>${n}</td></tr>`).join('')}</tbody>
+        <tbody>${promoRows.map(([code,n])=>`<tr><td class="an-b800">${esc(code)}</td><td>${n}</td></tr>`).join('')}</tbody>
       </table></div>`:`<div class="empty-state">${t('anNoPromo')}</div>`}
     </div>
 
     <div class="an-anchor" data-anview="revenue"></div>
     <div class="analytics-section-title">${t('coSales')}</div>
     <div class="analytics-kpi-grid">
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)"><bdi>SAR ${anSales.collected}</bdi></div><div class="analytics-kpi-label">${t('cashValue')} ${deltaBadge('sales')}</div><div class="analytics-kpi-sub">${anSales.units} ${t('cashQtyCol').toLowerCase()}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--orange)"><bdi>SAR ${anSales.pending}</bdi></div><div class="analytics-kpi-label">${t('printPending')}</div></div>
-      ${anSales.team>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--purple)"><bdi>SAR ${anSales.team}</bdi></div><div class="analytics-kpi-label">${t('payTeam')}</div></div>`:''}
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${anSales.collected}</bdi></div><div class="analytics-kpi-label">${t('cashValue')} ${deltaBadge('sales')}</div><div class="analytics-kpi-sub">${anSales.units} ${t('cashQtyCol').toLowerCase()}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${anSales.pending}</bdi></div><div class="analytics-kpi-label">${t('printPending')}</div></div>
+      ${anSales.team>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-purple"><bdi>SAR ${anSales.team}</bdi></div><div class="analytics-kpi-label">${t('payTeam')}</div></div>`:''}
     </div>
     <div class="analytics-section-title">${t('anPayTitle')}</div>
     <div class="analytics-kpi-grid">
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)"><bdi>SAR ${payMix.cash}</bdi></div><div class="analytics-kpi-label">${t('anCashCollected')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--blue)"><bdi>SAR ${payMix.card}</bdi></div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMix.card+payMix.cash>0?Math.round(payMix.card/(payMix.card+payMix.cash)*100):0}% ${t('anCardShare')}</div></div>
-      ${anSales.discount>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--orange)"><bdi>SAR ${anSales.discount}</bdi></div><div class="analytics-kpi-label">${t('anDiscountsGiven')}</div></div>`:''}
-      ${anSales.refunded>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--red)"><bdi>SAR ${anSales.refunded}</bdi></div><div class="analytics-kpi-label">${t('cashRefunds')}</div></div>`:''}
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${payMix.cash}</bdi></div><div class="analytics-kpi-label">${t('anCashCollected')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue"><bdi>SAR ${payMix.card}</bdi></div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMix.card+payMix.cash>0?Math.round(payMix.card/(payMix.card+payMix.cash)*100):0}% ${t('anCardShare')}</div></div>
+      ${anSales.discount>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${anSales.discount}</bdi></div><div class="analytics-kpi-label">${t('anDiscountsGiven')}</div></div>`:''}
+      ${anSales.refunded>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-red"><bdi>SAR ${anSales.refunded}</bdi></div><div class="analytics-kpi-label">${t('cashRefunds')}</div></div>`:''}
     </div>
     ${Object.keys(teamByMember).length?`<div class="chart-card">
       <div class="chart-card-title">${t('anTeamConsumption')}</div>
@@ -31137,12 +31153,13 @@ function renderAnalytics(){
       <div class="chart-card-title">${t('anTopSellers')}</div>
       <div class="chart-card-sub">${t('anTopSellersSub')}</div>
       ${anTopItems.length?anTopItems.map(it=>{const mx=anTopItems[0].qty||1;return`<div class="analytics-bar-row">
-        <div class="analytics-bar-label" style="min-width:120px">${esc(it.name)}</div>
-        <div class="analytics-bar-track"><div class="analytics-bar-fill" style="width:${Math.min(100,Math.round(it.qty/mx*100))}%;background:var(--green)"></div></div>
+        <div class="analytics-bar-label an-minw120">${esc(it.name)}</div>
+        <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.min(100,Math.round(it.qty/mx*100)))+'%','--an-bg':'var(--green)'})}"></div></div>
         <div class="analytics-bar-value"><bdi>${it.qty}</bdi> · SAR ${Math.round(it.value*100)/100}</div>
       </div>`;}).join(''):`<div class="empty-state">${t('cashNoSalesSession')}</div>`}
     </div>
     ${growthSection()}`;
+  _cssvApply(document.getElementById('tab-analytics')); // the bars' widths and the colours from the data (data-cssv)
   // show only the active sub-tab's sections; a view that has left Analytics lands on Overview
   _applyAnView(document.querySelector(`#tab-analytics .an-nav-btn[data-anview="${S.anView}"]`)?S.anView:'overview');
 }

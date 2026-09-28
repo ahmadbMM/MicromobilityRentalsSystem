@@ -159,7 +159,7 @@ test('the growth funnel bars have width', async ({ page }) => {
   const rows = page.locator('#tab-analytics .an-funnel-row');
   await expect(rows).toHaveCount(3);
   // Booked is the whole funnel (100%): its bar spans the card, not zero pixels beside the label.
-  const w = await rows.first().evaluate((el) => (el.querySelector('div[style*="height:100%"]') as HTMLElement).getBoundingClientRect().width);
+  const w = await rows.first().evaluate((el) => (el.querySelector('.an-pfill') as HTMLElement).getBoundingClientRect().width);
   expect(w).toBeGreaterThan(40);
 });
 

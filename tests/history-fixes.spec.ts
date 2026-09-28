@@ -92,6 +92,11 @@ test('durations are written in the reader\'s units, and the donut total uses the
   expect(await page.evaluate(`fmtDur(95)`)).toBe('1 h 35 min');
   expect(await page.evaluate(`fmtDur(12.4)`)).toBe('12 min');
   const svg = await page.evaluate(`_donut([{v:3,c:'#000',label:'x'}])`) as string;
-  expect(svg).toContain('fill:var(--text)');
+  expect(svg).toContain('class="an-donut-total"');
   expect(svg).not.toContain('fill="white"');
+  // The total's ink comes from styles.css (#tab-analytics .an-donut-total), not a style attribute:
+  // drawn where Analytics draws it, it is the theme's text colour.
+  const ink = await page.evaluate(`(()=>{const box=document.createElement('div');box.innerHTML=_donut([{v:3,c:'#000',label:'x'}])+'<span style="color:var(--text)"></span>';document.getElementById('tab-analytics').appendChild(box);
+    const r={fill:getComputedStyle(box.querySelector('text')).fill,text:getComputedStyle(box.querySelector('span')).color};box.remove();return r;})()`) as { fill: string; text: string };
+  expect(ink.fill).toBe(ink.text);
 });

@@ -42,6 +42,7 @@ export async function onRequest(context) {
       !/^\/lang\/[a-z-]{2,8}\.json$/.test(path) && !/^\/cities\/[a-z]{2}\.json$/.test(path)) ||
     path === '/app.src' || /\/app\.src\.html$/.test(path) ||            // the readable app source
     path.startsWith('/tests/') ||
+    path.startsWith('/visual/') ||                                     // the local screenshot harness (playwright.visual.config.ts)
     path.startsWith('/scripts/') ||
     path.startsWith('/functions/') ||
     // The ERP design bundle is 1.8 MB of internal reference and one of its files carries a
