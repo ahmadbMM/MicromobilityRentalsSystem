@@ -57,10 +57,8 @@
   "pinApproveTitle": "اپنے PIN سے تصدیق کریں: {0}",
   "pinWhatPrice": "قیمت کی تبدیلی",
   "adminOnlyMsg": "صرف ایڈمن کے لیے۔",
-  "authWelcome": "مائیکرو موبیلیٹی میں خوش آمدید",
-  "authSub": "اپنی رائیڈز کا ریکارڈ رکھنے کے لیے لاگ اِن کریں یا اکاؤنٹ بنائیں۔",
   "authLogin": "لاگ اِن",
-  "authSignup": "سائن اپ",
+  "authSignup": "اکاؤنٹ بنائیں",
   "authLoginBtn": "لاگ اِن کریں",
   "authSignupBtn": "اکاؤنٹ بنائیں",
   "genderLabel": "جنس",
@@ -2796,5 +2794,11 @@
   "heard_school": "اسکول یا یونیورسٹی",
   "heard_work": "کام یا میری کمپنی",
   "heard_community": "کمیونٹی رائیڈ",
-  "heard_other": "دیگر"
+  "heard_other": "دیگر",
+  "authBack": "دوبارہ خوش آمدید۔",
+  "authSignupSub": "اپنی رائیڈز بک کریں اور اپنے ٹکٹ ایک جگہ رکھیں۔",
+  "authNewTitle": "مائیکرو موبیلیٹی پر نئے ہیں؟",
+  "authNewSub": "رائیڈز بک کرنے کے لیے اکاؤنٹ بنائیں۔",
+  "authHaveTitle": "پہلے سے اکاؤنٹ ہے؟",
+  "authHaveSub": "اپنی بکنگز دیکھنے کے لیے لاگ اِن کریں۔"
 }

@@ -57,10 +57,8 @@
   "pinApproveTitle": "Kumpirmahin gamit ang iyong PIN: {0}",
   "pinWhatPrice": "Pagbabago ng presyo",
   "adminOnlyMsg": "Para sa admin lang.",
-  "authWelcome": "Maligayang pagdating sa MicroMobility",
-  "authSub": "Mag-log in o gumawa ng account para masubaybayan ang iyong mga ride.",
   "authLogin": "Mag-log in",
-  "authSignup": "Mag-sign up",
+  "authSignup": "Gumawa ng account",
   "authLoginBtn": "Mag-log in",
   "authSignupBtn": "Gumawa ng account",
   "genderLabel": "Kasarian",
@@ -2796,5 +2794,11 @@
   "heard_school": "Paaralan o unibersidad",
   "heard_work": "Trabaho o ang kumpanya ko",
   "heard_community": "Isang community ride",
-  "heard_other": "Iba pa"
+  "heard_other": "Iba pa",
+  "authBack": "Maligayang pagbabalik.",
+  "authSignupSub": "I-book ang mga ride mo at itago ang mga ticket mo sa iisang lugar.",
+  "authNewTitle": "Bago sa MicroMobility?",
+  "authNewSub": "Gumawa ng account para makapag-book ng ride.",
+  "authHaveTitle": "May account ka na?",
+  "authHaveSub": "Mag-log in para makita ang mga booking mo."
 }

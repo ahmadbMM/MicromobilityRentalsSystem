@@ -32,7 +32,8 @@ test.describe('the three lists of addresses agree', () => {
     const app = read('app.src.html');
     const staffPaths = [...app.match(/const STAFF_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z/-]+)'/g)].map((m) => m[1].split('/')[0]);
     const custPaths = [...app.match(/const CUST_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z-]+)'/g)].map((m) => m[1]);
-    const router = [...new Set([...staffPaths, ...custPaths])].sort();
+    const signupPath = app.match(/const SIGNUP_PATH='([a-z-]+)'/)![1]; // Create account, a signed-out visitor's second page
+    const router = [...new Set([...staffPaths, ...custPaths, signupPath])].sort();
     const mw = names(read('functions/_middleware.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     const sw = names(read('service-worker.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     expect(mw).toEqual(router);

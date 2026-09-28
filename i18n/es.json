@@ -57,10 +57,8 @@
   "pinApproveTitle": "Confirma con tu PIN: {0}",
   "pinWhatPrice": "Cambio de precio",
   "adminOnlyMsg": "Solo para administradores.",
-  "authWelcome": "Bienvenido a MicroMobility",
-  "authSub": "Inicia sesión o crea una cuenta para seguir tus recorridos.",
   "authLogin": "Iniciar sesión",
-  "authSignup": "Registrarse",
+  "authSignup": "Crear cuenta",
   "authLoginBtn": "Iniciar sesión",
   "authSignupBtn": "Crear cuenta",
   "genderLabel": "Género",
@@ -2796,5 +2794,11 @@
   "heard_school": "Colegio o universidad",
   "heard_work": "El trabajo o mi empresa",
   "heard_community": "Una salida comunitaria",
-  "heard_other": "Otro"
+  "heard_other": "Otro",
+  "authBack": "¡Qué bueno verte de nuevo!",
+  "authSignupSub": "Reserva tus recorridos y guarda tus entradas en un solo lugar.",
+  "authNewTitle": "¿Nuevo en MicroMobility?",
+  "authNewSub": "Crea una cuenta para reservar tus recorridos.",
+  "authHaveTitle": "¿Ya tienes una cuenta?",
+  "authHaveSub": "Inicia sesión para ver tus reservas."
 }

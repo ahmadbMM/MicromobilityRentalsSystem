@@ -509,13 +509,13 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
   roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',adminOnlyMsg:'Admin only.',
-  authWelcome:'Welcome to MicroMobility',authSub:'Sign in or create an account to track your rides.',
-  authLogin:'Log In',authSignup:'Sign Up',authLoginBtn:'Log In',authSignupBtn:'Create Account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Please select your gender.',
+  authBack:'Welcome back.',authSignupSub:'Book your rides and keep your tickets in one place.',authNewTitle:'New to MicroMobility?',authNewSub:'Create an account to book your rides.',authHaveTitle:'Already have an account?',authHaveSub:'Sign in to see your bookings.',
+  authLogin:'Sign in',authSignup:'Create account',authLoginBtn:'Sign in',authSignupBtn:'Create account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Please select your gender.',
   continueGoogle:'Continue with Google',continueApple:'Continue with Apple',addToWallet:'Add to Apple Wallet',addToGWallet:'Add to Google Wallet',walletAdding:'Preparing pass…',walletErr:'Could not create the Wallet pass.',authOr:'or',gCompleteTitle:'Complete your profile',gCompleteSub:'Just a couple more details to finish signing up.',finishBtn:'Finish',
   authCancel:'Cancel - Go Home',authIdentifier:'Email or Phone',
   enterEmailOrPhone:'Enter your email or phone number',enterEmail:'Enter your email address',enterPhone:'Enter your phone number',
   authEmail:'Email Address',
-  resetBtn:'Set New Password',backToLogin:'Back to login',
+  resetBtn:'Set New Password',backToLogin:'Back to sign in',
   forgotPwLink:'Forgot password?',rememberMe:'Remember me',
   forgotStep1Title:'Reset Your Password',
   forgotStep1Sub:'Verify your identity with your registered email and phone number, then set a new password.',
@@ -523,7 +523,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   forgotVerifyBtn:'Verify Identity',verifying:'Verifying...',
   forgotVerifiedMsg:'Identity verified for',forgotPendingMsg:'Resetting the password for',
   errResetNoMatch:'That email and phone number do not match an account.',
-  errGoogleNoPw:'This account uses Google or Apple sign-in. Use that button to log in.',errNoInternet:'You appear to be offline — check your connection and try again.',iabGoogleBlocked:'Google sign-in is blocked inside this app\'s browser (Instagram/WhatsApp). Tap ⋯ and choose "Open in browser", or sign up with email below.',
+  errGoogleNoPw:'This account uses Google or Apple sign-in. Use that button to sign in.',errNoInternet:'You appear to be offline — check your connection and try again.',iabGoogleBlocked:'Google sign-in is blocked inside this app\'s browser (Instagram/WhatsApp). Tap ⋯ and choose "Open in browser", or sign up with email below.',
   toastPwReset:'Password reset successfully!',
   errAccountNotFound:'No account found with that email.',
   staffResetTool:'Reset Customer Password',staffResetDesc:'Set a new password for a customer who is locked out.',
@@ -773,7 +773,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errEmailExists:'An account with this email already exists.',
   errPhoneExists:'An account with this phone number already exists.',
   errConnection:'Connection error. Check your network.',errSomethingWrong:'Something went wrong - it was logged.',errQNumTaken:'That number is already taken by another booking.',
-  errLoginFirst:'Please log in first.',
+  errLoginFirst:'Please sign in first.',
   errSelectSession:'Please select a session above.',
   errSessionClosed:'That session is no longer open.',
   errValidHeightCm:'Enter a height between 100 and 250 cm.',
@@ -901,8 +901,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
   roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',adminOnlyMsg:'للمدير فقط.',
-  authWelcome:'مرحباً بك في مايكرو موبيليتي',authSub:'سجل دخولك أو أنشئ حساباً لتتبع رحلاتك.',
-  authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء الحساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
+  authBack:'مرحباً بعودتك.',authSignupSub:'احجز رحلاتك واحتفظ بتذاكرك في مكان واحد.',authNewTitle:'جديد في مايكرو موبيليتي؟',authNewSub:'أنشئ حساباً لتحجز رحلاتك.',authHaveTitle:'لديك حساب بالفعل؟',authHaveSub:'سجّل دخولك لترى حجوزاتك.',
+  authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء حساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
   continueGoogle:'المتابعة عبر جوجل',continueApple:'المتابعة عبر Apple',addToWallet:'أضف إلى Apple Wallet',addToGWallet:'أضف إلى Google Wallet',walletAdding:'جارٍ تجهيز البطاقة…',walletErr:'تعذّر إنشاء بطاقة Wallet.',authOr:'أو',gCompleteTitle:'أكمل ملفك الشخصي',gCompleteSub:'تفاصيل قليلة لإتمام إنشاء الحساب.',finishBtn:'إنهاء',
   authCancel:'إلغاء - الرئيسية',authIdentifier:'البريد الإلكتروني أو الهاتف',
   enterEmailOrPhone:'أدخل بريدك الإلكتروني أو رقم هاتفك',enterEmail:'أدخل بريدك الإلكتروني',enterPhone:'أدخل رقم هاتفك',
@@ -4417,7 +4417,11 @@ function renderAuthModal(){
   const ccOpts=COUNTRY_CODES.map(([code,iso])=>`<option value="${code}"${code==='+966'?' selected':''}>${code}</option>`).join('');
   // Same theme-aware pick as the topbar (dark shows logo.png, light shows logo-dark.png)
   const logoSrc='/logo-dark.png'; // auth box is always the white paper surface — customer side is light-only; root-relative, the page may sit at /bookings/waitlist
-  let title=t('authWelcome'),subtitle=t('authSub'),tabs='',body='';
+  let title='',subtitle='',sw='',body='';
+  // Sign in and Create account are two pages (the owner, 2026-09-28), each named by its title, with a
+  // bar at the very top for the visitor on the wrong one: "New to MicroMobility?" goes to Create
+  // account (its own address, /signup), "Already have an account?" back to Sign in.
+  const _switchBar=(head,sub,to,label)=>`<div class="auth-switch" role="note"><div class="auth-switch-text"><b>${head}</b><span>${sub}</span></div><button type="button" class="auth-switch-btn" data-auth-to="${to}" data-on-click="${_on("switchAuthMode",to)}">${label}</button></div>`;
   const googleBlock=_isInAppBrowser()?`
     <div style="background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.35);border-radius:4px;padding:10px 14px;font-size:12px;font-weight:600;line-height:1.6;color:var(--text)">${t('iabGoogleBlocked')}</div>
     <div class="auth-or">${t('authOr')}</div>`:`
@@ -4466,10 +4470,8 @@ function renderAuthModal(){
         </div>`;
     }
   } else if(isLogin){
-    tabs=`<div class="auth-tabs">
-      <button class="auth-tab active" data-on-click="${_on("switchAuthMode","login")}">${t('authLogin')}</button>
-      <button class="auth-tab" data-on-click="${_on("switchAuthMode","signup")}">${t('authSignup')}</button>
-    </div>`;
+    title=t('authLogin');subtitle=t('authBack');
+    sw=_switchBar(t('authNewTitle'),t('authNewSub'),'signup',t('authSignup'));
     body=`
       ${googleBlock}
       <div class="auth-field"><label for="a-identifier">${t('authIdentifier')}</label>
@@ -4515,10 +4517,8 @@ function renderAuthModal(){
       ${_signupConsentHtml()}
       <button class="btn-primary auth-submit" data-on-click="${_on("doCompleteGoogle")}">${t('finishBtn')}</button>`;
   } else {
-    tabs=`<div class="auth-tabs">
-      <button class="auth-tab" data-on-click="${_on("switchAuthMode","login")}">${t('authLogin')}</button>
-      <button class="auth-tab active" data-on-click="${_on("switchAuthMode","signup")}">${t('authSignup')}</button>
-    </div>`;
+    title=t('authSignup');subtitle=t('authSignupSub');
+    sw=_switchBar(t('authHaveTitle'),t('authHaveSub'),'login',t('authLogin'));
     body=`
       ${googleBlock}
       <div class="auth-namerow">
@@ -4551,10 +4551,10 @@ function renderAuthModal(){
   document.getElementById('auth-modal').innerHTML=`
   <div class="auth-backdrop">
     <div class="auth-box">
+      ${sw}
       <img class="auth-logo" src="${logoSrc}" alt="logo">
       <div class="auth-title">${title}</div>
       ${subtitle?`<div class="auth-sub">${subtitle}</div>`:''}
-      ${tabs}
       <div class="auth-err" id="auth-err"></div>
       ${body}
       ${!isForgot?`<button class="btn-secondary auth-cancel-btn${mode==='gcomplete'?' auth-keep':''}" style="width:100%;margin-top:10px" data-on-click="${_on(mode==='gcomplete'?'cancelGoogleComplete':'_on_authCancelHome')}">${t('authCancel')}</button>`:''}
@@ -4573,7 +4573,7 @@ function renderAuthModal(){
 // took it off). 'desk' is what the desk's own additions carry. The label is the code's string in every language.
 const HEARD_OPTS=['instagram','tiktok','snapchat','x','facebook','youtube','whatsapp','google','friend','invited','passed_by','event','hotel','school','work','community','other'];
 function heardLabel(code){return code==='desk'?t('heardDesk'):HEARD_OPTS.includes(code)?t('heard_'+code):(code?esc(String(code)):'');}
-function switchAuthMode(mode){S.authMode=mode;if(mode!=='forgot'){S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;}if(mode==='signup'){S.signupGender=null;S.signupRideNews=false;S.signupAck=false;}renderAuthModal();}
+function switchAuthMode(mode){S.authMode=mode;if(mode!=='forgot'){S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;}if(mode==='signup'){S.signupGender=null;S.signupRideNews=false;S.signupAck=false;}renderAuthModal();if(S.view==='landing')_pushNav();}
 // Gender pills: male turns blue, female turns pink when selected.
 function _genderBtnStyle(which,sel){
   if(which==='male'&&sel==='male')return 'flex:1;background:rgba(var(--blue-rgb),.18);border-color:#4aa8f8;color:#4aa8f8;';
@@ -5527,6 +5527,9 @@ let _navRestoring=false;
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
 const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'community',ambassadors:'ambassadors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account'};
+// A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
+// so a link can open the sign-up itself. Signed in, /signup is just /.
+const SIGNUP_PATH='signup';
 // A section's sub-views and their segments; '' is the section's own page. 'waitlist' is the old
 // name of the queue's 'managed' view (setStaffTab still takes it), so both read as /bookings/waitlist.
 const SUB_PATHS={
@@ -5563,13 +5566,14 @@ function _setSub(tab,seg){
 function _pathFor(st){
   if(st.view==='staff'){const b=STAFF_PATHS[st.stab]||'bookings';return'/'+b+(st.sub?'/'+st.sub:'');}
   if(st.view==='customer')return'/'+(CUST_PATHS[st.ctab]||'reserve');
-  return'/';
+  return st.auth==='signup'?'/'+SIGNUP_PATH:'/';
 }
 // What an address names: {root:true} for /, null for an address that is not one of the app's, else
 // the view and section, with the sub-view's segment. Case and a trailing slash are forgiven.
 function _parsePath(pathname){
   const segs=String(pathname||'/').toLowerCase().split('/').filter(Boolean);
   if(!segs.length)return{root:true};
+  if(segs[0]===SIGNUP_PATH)return segs.length===1?{root:true,signup:true}:null;
   const ctab=Object.keys(CUST_PATHS).find(k=>CUST_PATHS[k]===segs[0]);
   if(ctab)return segs.length===1?{view:'customer',ctab}:null;
   if(segs[0]==='website'&&segs[1]==='bikes')return segs.length<=3?{view:'staff',stab:'catalog',sub:segs[2]||''}:null;
@@ -5603,7 +5607,7 @@ function _openSessionParam(sid){
     else _pushNav(); // a ride that does not exist: the address reads as it would without it
   }catch(e){}
 }
-function _navState(){return {view:S.view,ctab:S.custTab,stab:S.staffTab,sub:S.view==='staff'?_subOf(S.staffTab):'',ev:S.selEvent,step:S.regStep};}
+function _navState(){return {view:S.view,ctab:S.custTab,stab:S.staffTab,sub:S.view==='staff'?_subOf(S.staffTab):'',ev:S.selEvent,step:S.regStep,auth:S.view==='landing'&&!S.loggedIn&&S.authMode==='signup'?'signup':''};}
 function _saveNav(){try{sessionStorage.setItem('cq_nav',JSON.stringify(_navState()));}catch(e){}}
 function _loadNav(){try{const r=sessionStorage.getItem('cq_nav');return r?JSON.parse(r):null;}catch(e){return null;}}
 function _pushNav(){
@@ -5615,7 +5619,7 @@ function _pushNav(){
     // nothing changed; push only real transitions (a sub-view is one). The address
     // follows either way.
     const c=history.state;
-    const same=c&&c.view===st.view&&c.ctab===st.ctab&&c.stab===st.stab&&(c.sub||'')===(st.sub||'')&&c.ev===st.ev&&c.step===st.step;
+    const same=c&&c.view===st.view&&c.ctab===st.ctab&&c.stab===st.stab&&(c.sub||'')===(st.sub||'')&&c.ev===st.ev&&c.step===st.step&&(c.auth||'')===(st.auth||'');
     if(same)history.replaceState(st,'',_navUrl(st));
     else history.pushState(st,'',_navUrl(st));
   }catch(e){}
@@ -5630,7 +5634,13 @@ function _applyNav(st){
     if(st.step&&(st.ctab||'register')==='register')S.regStep=st.step;
     goCustomer(st.ctab||'register');
   }
-  else{goLanding();}
+  else{
+    // Back and Forward between Sign in and Create account (a signed-out visitor's two pages).
+    const m=st.auth==='signup'?'signup':'login',flip=!S.loggedIn&&!getSession()&&(S.authMode==='login'||S.authMode==='signup')&&S.authMode!==m;
+    if(flip)S.authMode=m;
+    goLanding();
+    if(flip){const am=document.getElementById('auth-modal');if(am&&am.style.display==='flex')renderAuthModal();}
+  }
   _navRestoring=false;_saveNav();
   try{const now=_navState();history.replaceState(now,'',_navUrl(now));}catch(e){} // the address names where this landed
 }
@@ -30736,6 +30746,9 @@ function _bootStaffTab(nav){
   const _bikeCode=_readBikeParam();
   const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
+  if(!_isStaffUrl&&_pathNav&&_pathNav.signup)S.authMode='signup'; // /signup opens Create account
+  // The sign-in page may already be drawn by now; a mode the address or a link asked for redraws it.
+  {const am=document.getElementById('auth-modal');if(am&&am.style.display==='flex'&&S._authRenderMode!==S.authMode)renderAuthModal();}
   // /my-bookings and /account are parked the way ?tab=bookings is: they open once the rider is
   // signed in and the sessions are in, through the same gates. /reserve is the event picker itself.
   if(!_isStaffUrl&&_pathNav&&_pathNav.view==='customer'&&_pathNav.ctab!=='register'){try{sessionStorage.setItem(_TABLINK_KEY,_pathNav.ctab);sessionStorage.removeItem(_EVLINK_KEY);}catch(e){}}
@@ -31383,7 +31396,10 @@ function _syncModalFocus(){
     // Confirm or the bike field; a person may already be typing). This pass is debounced
     // behind every DOM mutation, so under load it used to land late and pull focus back to
     // the first control, dropping keystrokes into the wrong field.
-    if(ae&&modal.contains(ae)){_preModalFocus=null;}
+    // The sign-in page (the auth box shown as the page, not over one) is left alone too: focus
+    // on its first control ringed the "Create account" bar on arrival, as if it were picked. Tab
+    // still starts there.
+    if((ae&&modal.contains(ae))||(modal.parentElement&&modal.parentElement.classList.contains('as-page'))){_preModalFocus=null;}
     else{
       _preModalFocus=ae&&ae!==document.body?ae:null;
       const f=_modalFocusables(modal);

@@ -57,10 +57,8 @@
   "pinApproveTitle": "अपने PIN से पुष्टि करें: {0}",
   "pinWhatPrice": "कीमत बदलाव",
   "adminOnlyMsg": "केवल एडमिन के लिए।",
-  "authWelcome": "माइक्रोमोबिलिटी में आपका स्वागत है",
-  "authSub": "अपनी राइड ट्रैक करने के लिए लॉग इन करें या खाता बनाएँ।",
   "authLogin": "लॉग इन",
-  "authSignup": "साइन अप",
+  "authSignup": "खाता बनाएँ",
   "authLoginBtn": "लॉग इन करें",
   "authSignupBtn": "खाता बनाएँ",
   "genderLabel": "लिंग",
@@ -2796,5 +2794,11 @@
   "heard_school": "स्कूल या विश्वविद्यालय",
   "heard_work": "काम या मेरी कंपनी",
   "heard_community": "कम्युनिटी राइड",
-  "heard_other": "अन्य"
+  "heard_other": "अन्य",
+  "authBack": "फिर से स्वागत है।",
+  "authSignupSub": "अपनी राइड बुक करें और अपने टिकट एक ही जगह रखें।",
+  "authNewTitle": "माइक्रोमोबिलिटी पर नए हैं?",
+  "authNewSub": "राइड बुक करने के लिए खाता बनाएँ।",
+  "authHaveTitle": "क्या आपका पहले से खाता है?",
+  "authHaveSub": "अपनी बुकिंग देखने के लिए लॉग इन करें।"
 }
