@@ -294,6 +294,7 @@ test('the topbar Undo keeps a refused reversal undoable, and claims it before ru
     window.__runs=0;
     pushUndo('Slow', async()=>{window.__runs++;await new Promise(r=>setTimeout(r,150));});
     const p=doUndo();
+    const t0=Date.now();while(!window.__runs&&Date.now()-t0<2000)await new Promise(r=>setTimeout(r,5)); // past the code check, the reversal running
     const claimed=S.actionLog[0].undone;
     confirmLogUndo(S.actionLog[0].id);                     // the Logs view's Undo while the topbar's is still running
     const asked=document.getElementById('confirm-modal').style.display==='block';

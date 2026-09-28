@@ -508,7 +508,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
   
-  roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',adminOnlyMsg:'Admin only.',
+  roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',adminOnlyMsg:'Admin only.',ucSetTitle:'Choose your undo code',ucSetSub:'Admins confirm every undo with a 6-digit code of their own. Pick one only you know.',ucAskTitle:'Enter your undo code',ucCodeLbl:'6-digit code',ucAgainLbl:'Type it again',ucSaveBtn:'Save code',ucLaterBtn:'Not now',ucFormat:'The code is 6 digits.',ucMismatch:'The two codes are not the same.',ucSaved:'Undo code saved',ucWrong:'Wrong code. {0} tries left.',ucLocked:'Too many tries. Try again in {0} s.',
   authBack:'Welcome back.',authSignupSub:'Book your rides and keep your tickets in one place.',authNewTitle:'New to MicroMobility?',authNewSub:'Create an account to book your rides.',authHaveTitle:'Already have an account?',authHaveSub:'Sign in to see your bookings.',
   authLogin:'Sign in',authSignup:'Create account',authLoginBtn:'Sign in',authSignupBtn:'Create account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Please select your gender.',
   continueGoogle:'Continue with Google',continueApple:'Continue with Apple',addToWallet:'Add to Apple Wallet',addToGWallet:'Add to Google Wallet',walletAdding:'Preparing pass…',walletErr:'Could not create the Wallet pass.',authOr:'or',gCompleteTitle:'Complete your profile',gCompleteSub:'Just a couple more details to finish signing up.',finishBtn:'Finish',
@@ -900,7 +900,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
   
-  roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',adminOnlyMsg:'للمدير فقط.',
+  roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',adminOnlyMsg:'للمدير فقط.',ucSetTitle:'اختر رمز التراجع',ucSetSub:'يؤكد المديرون كل تراجع برمز خاص بهم من 6 أرقام. اختر رمزاً لا يعرفه غيرك.',ucAskTitle:'أدخل رمز التراجع',ucCodeLbl:'رمز من 6 أرقام',ucAgainLbl:'أعد كتابته',ucSaveBtn:'حفظ الرمز',ucLaterBtn:'ليس الآن',ucFormat:'الرمز من 6 أرقام.',ucMismatch:'الرمزان غير متطابقين.',ucSaved:'تم حفظ رمز التراجع',ucWrong:'رمز خاطئ. تبقّت {0} محاولات.',ucLocked:'محاولات كثيرة. حاول مجدداً بعد {0} ث.',
   authBack:'مرحباً بعودتك.',authSignupSub:'احجز رحلاتك واحتفظ بتذاكرك في مكان واحد.',authNewTitle:'جديد في مايكرو موبيليتي؟',authNewSub:'أنشئ حساباً لتحجز رحلاتك.',authHaveTitle:'لديك حساب بالفعل؟',authHaveSub:'سجّل دخولك لترى حجوزاتك.',
   authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء حساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
   continueGoogle:'المتابعة عبر جوجل',continueApple:'المتابعة عبر Apple',addToWallet:'أضف إلى Apple Wallet',addToGWallet:'أضف إلى Google Wallet',walletAdding:'جارٍ تجهيز البطاقة…',walletErr:'تعذّر إنشاء بطاقة Wallet.',authOr:'أو',gCompleteTitle:'أكمل ملفك الشخصي',gCompleteSub:'تفاصيل قليلة لإتمام إنشاء الحساب.',finishBtn:'إنهاء',
@@ -1527,6 +1527,7 @@ function _staffRoleGuess(uid){
 function _staffRoleConfirmed(uid,role){
   setStaffRole(_roleNorm(role,'frontdesk'));
   try{if(uid)localStorage.setItem('cq_role_uid',String(uid));}catch(e){}
+  if(S.staffRole==='admin')_ucPrompt(); // an admin without an undo code is asked to choose one
 }
 // After a sign-in whose staff lookup failed, keep asking in the background so the guess is
 // replaced by the real role once the network answers.
@@ -8100,7 +8101,7 @@ function renderTopbarRight(){
     // No Admin / Front Desk switch: the role is the signed-in account's own (set on the Team page)
     el.innerHTML=`
       ${_gsBtnHtml()}${_ntBtnHtml()}${_opChipHtml()}
-      ${last?`<button class="topbar-btn undo-btn" data-on-click="${_on("doUndo")}" title="${esc(last.label)}" style="animation:undoPulse 2s ease-in-out infinite">${_artIcon('undo',13)} ${t('undoBtn')}</button>`:''}
+      ${last&&isAdmin()?`<button class="topbar-btn undo-btn" data-on-click="${_on("doUndo")}" title="${esc(last.label)}" style="animation:undoPulse 2s ease-in-out infinite">${_artIcon('undo',13)} ${t('undoBtn')}</button>`:''}
       ${S._staffAuthed?`<button class="topbar-btn icon" data-on-click="${_on("openStaffPwdModal")}" title="${t('staffPwdTitle')}" aria-label="${t('staffPwdTitle')}">${_artIcon('key',14)}</button>`:''}
       <button class="topbar-btn danger icon" data-on-click="${_on("lockStaff")}" title="${t('lockBtn')}" aria-label="${t('lockBtn')}">${_artIcon('lock',15)}</button>`;
   } else {
@@ -16762,6 +16763,107 @@ function logAction(label){
   try{if(sb&&S.view==='staff')sb.from('staff_actions').insert({at:new Date().toISOString(),action:String(label).slice(0,300),who:op.slice(0,40)||null,device:_deviceId(),view:S.view||''}).then(()=>{},()=>{});}catch(_){}
   if(S.view==='staff'&&S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
+// ── Undo codes (the owner, 2026-09-28) ─────────────────────────────────────────────────────
+// Only an admin undoes (the topbar's Undo and History > Log), and every undo is confirmed with a
+// 6-digit code the admin chose: staff_check_undo_code, five tries then a minute's lock, as the
+// operator PINs. An admin without a code is asked for one when they sign in or next open the
+// staff page (_ucPrompt), and Not now asks again on the next open; an undo asked for before there
+// is a code chooses it first, and choosing it is the confirmation. The other roles are never asked
+// and see no Undo. On a database before 20260928234500 there are no codes to ask: an admin's undo
+// goes through as it used to.
+let _ucRes=null;
+async function _ucState(){
+  let r;try{r=await sb.rpc('staff_undo_code_state');}catch(e){r={error:e};}
+  if(r&&r.error)return _rpcAbsent(r.error)?{absent:true}:{error:true};
+  const d=r&&r.data;
+  if(!d||typeof d!=='object'||Array.isArray(d))return{absent:true}; // an answer that is not one
+  return{admin:!!d.admin,has:!!d.has_code};
+}
+// Waits for the staff page with no other dialog up (the operator gate, a forced password change),
+// for up to two minutes, then asks once per page load.
+async function _ucPrompt(){
+  if(S._ucAsked)return;S._ucAsked=true;
+  for(let i=0;;i++){
+    let busy=false;try{busy=_visibleModals().length>0;}catch(_){}
+    if(S.view==='staff'&&!busy)break;
+    if(i>=80)return;
+    await new Promise(r=>setTimeout(r,1500));
+  }
+  if(!isAdmin())return;
+  const st=await _ucState();
+  if(st.admin&&!st.has&&!st.absent&&!st.error)_ucDialog('set','');
+}
+// Undo only after the code (or, before the database has codes, as before: the Log's Undo asks yes
+// or no, the topbar's does not). Resolves true to go ahead.
+async function _undoAuth(label,confirmFirst){
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'warning');return false;}
+  const st=await _ucState();
+  if(st.absent)return confirmFirst?new Promise(res=>confirmDialog({title:t('confirmUndoTitle'),body:`<strong>${esc(label)}</strong><br><span style="color:var(--muted);font-size:12px">${t('undoRevBody')}</span>`,confirmLabel:t('confirmUndoYes'),confirmClass:'btn-muted',onConfirm:()=>res(true)})):true;
+  if(st.error){toast(t('errConnection'),'error');return false;}
+  if(!st.admin){toast(t('adminOnlyMsg'),'warning');return false;} // the database's word on the role
+  return _ucDialog(st.has?'ask':'set',label);
+}
+function _ucDialog(mode,label){
+  return new Promise(res=>{
+    if(_ucRes){const p=_ucRes;_ucRes=null;p(false);} // one question at a time: an older one is refused
+    _ucRes=res;S._ucd={mode,label:String(label||''),busy:false};
+    _ucRender();
+  });
+}
+function _ucRender(){
+  const d=S._ucd;if(!d)return;const set=d.mode==='set';
+  const m=document.getElementById('confirm-modal');if(!m){_ucDone(false);return;}
+  m.style.display='block';
+  const inp=(id,lbl)=>`<div class="form-group" style="margin-bottom:10px"><label for="${id}">${lbl}</label><input id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" style="letter-spacing:6px;font-size:18px;text-align:center" data-on-input="${_on("_ucInput",_EV,_EL)}" data-on-keydown="${_on("_ucKey",_EV,_EL)}"></div>`;
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_ucBackdrop",_EV,_EL)}">
+    <div class="confirm-box uc-box" role="dialog" aria-modal="true" aria-labelledby="uc-title">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div id="uc-title" style="font-size:18px;font-weight:900">${t(set?'ucSetTitle':'ucAskTitle')}</div>
+        <button data-on-click="${_on("_ucDone",false)}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">&times;</button>
+      </div>
+      ${d.label?`<div style="font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:14px;padding:10px 14px;background:var(--s3);border-radius:4px"><strong>${esc(d.label)}</strong><br><span style="color:var(--muted);font-size:12px">${t('undoRevBody')}</span></div>`:''}
+      ${set?`<div class="ca-sub" style="margin-bottom:12px">${t('ucSetSub')}</div>`:''}
+      ${inp('uc-code',t('ucCodeLbl'))}${set?inp('uc-code2',t('ucAgainLbl')):''}
+      <div id="uc-msg" role="alert" style="min-height:18px;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn-secondary" data-on-click="${_on("_ucDone",false)}">${t(set&&!d.label?'ucLaterBtn':'cancelBtn')}</button>
+        <button id="uc-go" class="btn-primary" data-on-click="${_on("_ucGo")}" style="min-width:100px">${t(set?'ucSaveBtn':'undoBtn')}</button>
+      </div>
+    </div></div>`;
+  const f=document.getElementById('uc-code');if(f)f.focus();
+}
+function _ucInput(event,el){const v=_asciiDigits(el.value).replace(/\D/g,'').slice(0,6);if(v!==el.value)el.value=v;}
+function _ucKey(event,el){if(event.key==='Enter'){event.preventDefault();_ucGo();}else if(event.key==='Escape'){event.preventDefault();_ucDone(false);}}
+function _ucBackdrop(event,el){if(event.target===el)_ucDone(false);}
+function _ucMsg(s){const e=document.getElementById('uc-msg');if(e)e.textContent=s||'';}
+function _ucDone(ok){
+  const m=document.getElementById('confirm-modal');if(m&&S._ucd){m.style.display='none';m.innerHTML='';}
+  S._ucd=null;const r=_ucRes;_ucRes=null;if(r)r(!!ok);
+}
+async function _ucGo(){
+  const d=S._ucd;if(!d||d.busy)return;
+  const val=id=>_asciiDigits((document.getElementById(id)||{}).value||'').replace(/\D/g,'');
+  const a=val('uc-code');
+  if(!/^\d{6}$/.test(a)){_ucMsg(t('ucFormat'));return;}
+  if(d.mode==='set'&&a!==val('uc-code2')){_ucMsg(t('ucMismatch'));return;}
+  d.busy=true;const btn=document.getElementById('uc-go');if(btn)btn.disabled=true;
+  let r;try{r=await sb.rpc(d.mode==='set'?'staff_set_undo_code':'staff_check_undo_code',{p_code:a});}catch(e){r={error:e};}
+  if(S._ucd!==d)return; // closed while it was checked
+  d.busy=false;if(btn)btn.disabled=false;
+  const err=r&&r.error,msg=String((err&&err.message)||''),res=r&&r.data;
+  if(/ADMIN_ONLY/.test(msg)){toast(t('adminOnlyMsg'),'warning');_ucDone(false);return;}
+  if(d.mode==='set'){
+    if(!err){toast('✓ '+t('ucSaved'));_ucDone(true);return;}
+    if(/CODE_EXISTS/.test(msg)){d.mode='ask';_ucRender();return;} // chosen on another device meanwhile: ask for it
+    _ucMsg(t('errConnection'));return;
+  }
+  if(err||!res){_ucMsg(t('errConnection'));return;}
+  if(res.ok===true){_ucDone(true);return;}
+  if(res.reason==='no_code'){d.mode='set';_ucRender();return;} // cleared since: choose one
+  if(res.reason==='locked'){_ucMsg(t('ucLocked').replace('{0}',res.seconds));return;}
+  _ucMsg(t('ucWrong').replace('{0}',res.left));
+  const f=document.getElementById('uc-code');if(f){f.value='';f.focus();}
+}
 // No bar pops up after an undoable action (owner, 2026-09-28): the action's own toast says what
 // it did, and it is undone from the topbar's Undo or the History log.
 function pushUndo(label,fn){
@@ -16776,8 +16878,12 @@ function pushUndo(label,fn){
   if(S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
 async function doUndo(){
-  const item=S.undoStack.pop();
+  const item=S.undoStack[S.undoStack.length-1];
   if(!item)return;
+  if(!await _undoAuth(item.label))return;
+  // The code was given for THIS action: taken off the stack where it now is.
+  const at=S.undoStack.indexOf(item);if(at<0){renderTopbarRight();return;}
+  S.undoStack.splice(at,1);
   // The topbar button and the logs view both reverse via the same logEntry, guarded by .undone,
   // so neither can reverse the SAME action a second time (double restock / double renumber).
   const logEntry=(S.actionLog||[]).find(l=>l.fn===item.fn);
@@ -17255,7 +17361,7 @@ function renderLogs(){
       ${catChip(_logCatOf(i.label))}
       <span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.label)}</span>
       <span style="font-size:11px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0">${esc(i.by==='Staff'?t('byStaff'):i.by==='Guest'?t('byGuest'):(i.by||''))}</span>
-      ${_u?`<button class="btn-sm btn-muted" style="flex-shrink:0;font-size:11px;padding:3px 10px" data-on-click="${_on("confirmLogUndo",_u.id)}">${_artIcon('undo',12)} ${t('undoBtn')}</button>`:''}
+      ${_u&&isAdmin()?`<button class="btn-sm btn-muted" style="flex-shrink:0;font-size:11px;padding:3px 10px" data-on-click="${_on("confirmLogUndo",_u.id)}">${_artIcon('undo',12)} ${t('undoBtn')}</button>`:''}
     </div>`;
   });
   const hadFocus=document.activeElement&&document.activeElement.id==='log-search';
@@ -17280,27 +17386,21 @@ function exportLogsCSV(){
   const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='action_log.csv';a.click();URL.revokeObjectURL(url);
 }
 
-function confirmLogUndo(logId){
+async function confirmLogUndo(logId){
   const item=S.actionLog.find(i=>i.id===logId);if(!item||item.undone)return;
-  confirmDialog({
-    title:t('confirmUndoTitle'),
-    body:`<strong>${esc(item.label)}</strong><br><span style="color:var(--muted);font-size:12px">${t('undoRevBody')}</span>`,
-    confirmLabel:t('confirmUndoYes'),
-    confirmClass:'btn-muted',
-    onConfirm:async()=>{
-      item.undone=true; // claim synchronously so the topbar's Undo can't also fire the same reversal
-      S.undoStack=(S.undoStack||[]).filter(u=>u.fn!==item.fn); // and take it off the topbar Undo so that button can't re-run it either
-      try{
-        // Claimed above so two buttons cannot run one reversal; hand it back if it was refused.
-        if(await item.fn()===false){item.undone=false;toast(t('undoFailed'),'error');if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;}
-        toast(t('toastActionUndone')+item.label);
-      }catch(e){
-        item.undone=false; // reversal failed — allow a retry
-        toast(t('toastUndoFailedData'),'error');
-      }
-      renderTopbarRight();renderLogs();renderStaffQueue();
-    }
-  });
+  if(!await _undoAuth(item.label,true))return;
+  if(item.undone)return; // reversed another way while the code was typed
+  item.undone=true; // claim synchronously so the topbar's Undo can't also fire the same reversal
+  S.undoStack=(S.undoStack||[]).filter(u=>u.fn!==item.fn); // and take it off the topbar Undo so that button can't re-run it either
+  try{
+    // Claimed above so two buttons cannot run one reversal; hand it back if it was refused.
+    if(await item.fn()===false){item.undone=false;toast(t('undoFailed'),'error');if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;}
+    toast(t('toastActionUndone')+item.label);
+  }catch(e){
+    item.undone=false; // reversal failed — allow a retry
+    toast(t('toastUndoFailedData'),'error');
+  }
+  renderTopbarRight();renderLogs();renderStaffQueue();
 }
 
 // ── Community-event approval (staff hand-pick who rides) ─────────────────────

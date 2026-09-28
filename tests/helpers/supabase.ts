@@ -20,7 +20,10 @@ export type FailWrite = {
 const NOT_YET_IN_DB = new Set(['staff_delete_customer', 'customer_set_height', 'customer_set_birth_nat',
   // The staff guardrails of 20260928200000: the page takes the plain writes when these are absent,
   // which is what most specs exercise; tests/staff-guardrails.spec.ts stubs them by name.
-  'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike']);
+  'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike',
+  // The undo codes of 20260928234500: without them an admin's undo goes through as it used to;
+  // tests/undo-codes.spec.ts stubs them by name.
+  'staff_undo_code_state', 'staff_set_undo_code', 'staff_check_undo_code']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

@@ -40,6 +40,7 @@ export const STAFF_ENTRY = [
   'renderCashier', 'renderCommunity', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
   'renderAmbassadors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
+  'doUndo', '_ucPrompt', // the topbar's Undo and the admin's undo-code question (2026-09-28)
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
