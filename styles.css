@@ -428,9 +428,10 @@
     /* v2: underline tabs on a hairline rule (no pill toggle) */
     /* Sign in and Create account are two pages (2026-09-28): one plain line under the title is for the
        visitor on the wrong one - "New to MicroMobility? Create account" / "Already have an account?
-       Sign in" - a sentence with a link, as other sites do it, not a box (the owner, 2026-09-28). */
-    .auth-sub.has-switch{margin-bottom:6px;}
-    .auth-switch{margin:0 0 18px;font-size:13px;line-height:1.5;color:var(--muted);}
+       Sign in" - a sentence with a link, as other sites do it, not a box (the owner, 2026-09-28); all
+       of it green and 16px, the link bold (the owner, 2026-09-28). */
+    .auth-sub.has-switch{margin-bottom:8px;}
+    .auth-switch{margin:0 0 18px;font-size:16px;font-weight:600;line-height:1.5;color:var(--green-d);}
     .auth-switch-link{background:none;border:none;padding:0;color:var(--green-d);font:inherit;font-weight:700;cursor:pointer;text-underline-offset:2px;}
     .auth-switch-link:hover{text-decoration:underline;}
     .auth-switch-link:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:2px;}
@@ -678,7 +679,7 @@
     
     :is(html[lang="ar"],html[lang="ur"]) .auth-title{font-size:22px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-sub{font-size:14px;font-weight:400;}
-    :is(html[lang="ar"],html[lang="ur"]) .auth-switch{font-size:14px;}
+    :is(html[lang="ar"],html[lang="ur"]) .auth-switch{font-size:16px;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-field input{font-size:15px;font-weight:500;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-submit{font-size:15px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-err{font-size:13px;font-weight:700;}

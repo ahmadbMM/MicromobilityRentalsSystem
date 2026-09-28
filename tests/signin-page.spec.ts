@@ -27,6 +27,8 @@ test('Sign in is the first page: its title, and the line under it that leads to 
   // the line sits right under the title and its subtitle, plain text: no border, no background
   expect(await page.evaluate(`document.querySelector('#auth-modal .auth-sub').nextElementSibling.classList.contains('auth-switch')`)).toBe(true);
   expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopWidth, c.backgroundColor]; })).toEqual(['0px', 'rgba(0, 0, 0, 0)']);
+  // the whole sentence is green (the link's own ink), and 16px
+  expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.color === getComputedStyle(el.querySelector('button')!).color, c.fontSize]; })).toEqual([true, '16px']);
   // arriving does not ring the link as if it were picked
   expect(await page.evaluate('document.activeElement === document.body')).toBe(true);
 });
