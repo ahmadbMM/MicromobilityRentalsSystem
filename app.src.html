@@ -31166,7 +31166,6 @@ const ILLUS_CALENDAR=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none
 const ILLUS_BIKE_OK=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="var(--muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><circle cx="18" cy="50" r="14"/><circle cx="54" cy="50" r="14"/><path d="M18 50L30 24 40 36 50 24"/><path d="M54 50L50 24"/><path d="M30 24L26 16h10"/></svg>`;
 const ILLUS_PEOPLE=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="var(--muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><circle cx="36" cy="20" r="10"/><path d="M14 62Q14 42 36 42Q58 42 58 62"/><path d="M52 18a10 10 0 0 1 0 12"/><path d="M58 40Q66 44 66 54"/><path d="M20 18a10 10 0 0 0 0 12"/><path d="M14 40Q6 44 6 54"/></svg>`;
 const ILLUS_HISTORY=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="var(--muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><circle cx="36" cy="36" r="26"/><polyline points="36,18 36,36 46,42"/><path d="M10 36C10 22 22 10 36 10"/><path d="M10 26L10 36L20 36"/></svg>`;
-const ILLUS_RIDES=`<svg width="72" height="72" viewBox="0 0 72 72" fill="none" stroke="var(--muted)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"><circle cx="18" cy="50" r="14"/><circle cx="54" cy="50" r="14"/><path d="M18 50L30 24 40 36 50 24"/><path d="M54 50L50 24"/><path d="M30 24L26 16h10"/><circle cx="36" cy="18" r="7"/><path d="M24 62Q24 54 36 54Q48 54 48 62"/></svg>`;
 
 
 // Re-render whatever view is currently active (used after a background data refresh).
@@ -31366,7 +31365,6 @@ function _bootStaffTab(nav){
 
 let _lastRefresh=Date.now();
 const RT_LIVE_STALE_MS=16*60*1000; // the safety-net reload runs every five minutes while realtime is up: none for three of them means the copy is old, whatever the socket says
-let _refreshTimer=null;
 // navigator.onLine only says a network interface is up. On the booth's captive-portal wifi
 // it stays true while every request dies, which is exactly when staff need to be told. The
 // 30s poll is a real reachability heartbeat, so its outcome drives S._netDown as well.

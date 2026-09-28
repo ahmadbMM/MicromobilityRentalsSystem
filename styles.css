@@ -70,9 +70,6 @@
     .topbar-logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
     .topbar-logo img{height:44px;width:auto;max-width:160px;object-fit:contain;}
     @media(max-width:767px){.topbar-logo img{height:32px;max-width:110px;}}
-    .topbar-brand{display:flex;flex-direction:column;line-height:1.25;}
-    .topbar-brand-name{font-size:16px;font-weight:700;color:var(--green);letter-spacing:-.2px;}
-    .topbar-brand-sub{font-size:14px;font-weight:700;color:var(--text);letter-spacing:.2px;}
     .topbar-right{display:flex;align-items:center;gap:10px;}
     .view-badge{font-size:11px;font-weight:700;padding:5px 12px;border-radius:3px;text-transform:uppercase;letter-spacing:.7px;}
     .view-badge.staff{background:rgba(var(--green-rgb),.15);color:var(--green);border:1px solid rgba(var(--green-rgb),.35);}
@@ -174,31 +171,10 @@
     .landing-event-card:hover{border-color:rgba(var(--green-rgb),.5);transform:translateY(-2px);box-shadow:0 10px 26px rgba(0,0,0,.25);}
     .landing-event-card.community:hover{border-color:rgba(74,168,248,.55);}
     .landing-event-card:active{transform:translateY(0);}
-    .lec-kicker{font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
-    .landing-event-card.community .lec-kicker{color:#4aa8f8;}
     .lec-title{font-family:var(--font-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:22px;letter-spacing:.4px;line-height:1.1;}
     .lec-meta{font-size:12px;font-weight:700;color:var(--muted);margin-top:7px;}
-    .lec-arrow{position:absolute;bottom:14px;inset-inline-end:16px;font-size:18px;font-weight:900;color:var(--green);opacity:.8;}
-    /* Event artwork: once loaded it becomes the whole card, styled exactly like the JCC
-       hero card - image, bottom gradient, and the circular green arrow CTA. */
-    .lec-art{display:none;}
-    .landing-event-card.has-art{padding:0;aspect-ratio:6/5;max-height:360px;overflow:hidden;}
-    .landing-event-card.has-art .lec-art{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-    .landing-event-card.has-art .lec-kicker,.landing-event-card.has-art .lec-title,
-    .landing-event-card.has-art .lec-meta{visibility:hidden;}
-    .landing-event-card.has-art::before{display:none;}
-    .landing-event-card.has-art .lec-arrow{
-      visibility:visible;position:absolute;bottom:20px;inset-inline-end:22px;opacity:1;
-      width:44px;height:44px;border-radius:50%;background:var(--ac-fill);color:var(--acink);
-      display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;
-      transition:transform .28s cubic-bezier(.2,.8,.2,1);}
-    .landing-event-card.has-art:hover .lec-arrow{transform:scale(1.1) translateX(3px);}
-    html[dir="rtl"] .landing-event-card.has-art:hover .lec-arrow{transform:scale(1.1) translateX(-3px);}
-    .landing-event-card.has-art::after{content:'';position:absolute;bottom:0;left:0;right:0;height:80px;
-      background:linear-gradient(to top,rgba(0,0,0,.6) 0%,transparent 100%);pointer-events:none;}
     .landing-events-grid{align-items:stretch;}
     .landing-event-card{display:flex;flex-direction:column;justify-content:center;}
-    .landing-event-card.community .lec-arrow{color:#4aa8f8;}
     :is(html[lang="ar"],html[lang="ur"]) .landing-event-card{font-family:'IBM Plex Sans Arabic',sans-serif;}
     :is(html[lang="ar"],html[lang="ur"]) .lec-title{font-family:'IBM Plex Sans Arabic',sans-serif;font-style:normal;font-size:19px;}
     /* Signed-in landing = ONLY the event picker: hero, ghost, stripes and strip hide. */
@@ -295,14 +271,6 @@
     .sess-summary-chip.community.active-sess{border-color:#4aa8f8;box-shadow:0 0 0 1px rgba(74,168,248,.35);}
     .sess-chip-event{font-size:10px;font-weight:900;color:#4aa8f8;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     @media(max-width:767px){.sess-summary-bar{gap:6px;}.sess-summary-chip{min-width:140px;padding:8px 10px;}}
-
-    
-    .account-stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:28px;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;background:var(--s1);}
-    .account-stat{background:none;border:none;border-radius:0;padding:16px;text-align:center;}
-    .account-stat:not(:first-child){border-inline-start:1px solid var(--border);}
-    .account-stat-val{font-size:24px;font-weight:700;line-height:1;margin-bottom:4px;font-family:var(--font-body);}
-    .account-stat-lbl{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-    @media(max-width:767px){.account-stats-strip{grid-template-columns:repeat(2,1fr);gap:8px;}}
 
     
     .undo-bar{
@@ -503,7 +471,6 @@
     .rides-stat-card:not(:first-child){border-inline-start:1px solid var(--border);}
     .rides-stat-num{font-size:24px;font-weight:700;margin-bottom:3px;letter-spacing:-.5px;font-family:var(--font-body);}
     .rides-stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
-    .rides-empty{background:var(--s1);border:1px dashed var(--border);border-radius:7px;padding:48px;text-align:center;color:var(--muted);font-size:14px;font-weight:600;}
     /* v2: whole-page empty state for a customer with no rides at all */
     .rides-zero{text-align:center;padding:56px 20px 64px;border-top:1px solid var(--line2);margin-top:8px;}
     .rides-zero-num{font-family:var(--font-body);font-weight:700;font-size:96px;line-height:1;color:var(--s2);}
@@ -542,12 +509,6 @@
     
     .lang-toggle{background:rgba(var(--tint-rgb),.04);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;line-height:1;padding:7px 12px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
     .lang-toggle:hover{border-color:rgba(var(--green-rgb),.45);color:var(--green);background:rgba(var(--green-rgb),.06);}
-    .topbar-left{display:flex;align-items:center;gap:14px;}
-    .topbar-social{display:flex;align-items:center;gap:5px;}
-    .social-link{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:3px;color:var(--green);background:rgba(var(--green-rgb),.07);border:1px solid rgba(var(--green-rgb),.18);transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;text-decoration:none;flex-shrink:0;}
-    .social-link svg{width:15px;height:15px;}
-    .social-link:hover{background:rgba(var(--green-rgb),.14);border-color:rgba(var(--green-rgb),.4);transform:translateY(-2px);box-shadow:var(--sh-2);}
-    @media(max-width:767px){.topbar-social{gap:4px;}.social-link{width:28px;height:28px;}.social-link svg{width:13px;height:13px;}}
     
     html[dir="rtl"] .phone-row{flex-direction:row-reverse;}
     html[dir="rtl"] .auth-cc-row{flex-direction:row-reverse;}
@@ -563,12 +524,9 @@
     html[dir="rtl"] .section-header{flex-direction:row;}
     html[dir="rtl"] .actions-cell{flex-direction:row-reverse;}
     html[dir="rtl"] .stats-row{direction:rtl;}
-    html[dir="rtl"] .next-up-banner{flex-direction:row-reverse;}
     html[dir="rtl"] .modal-footer{flex-direction:row-reverse;}
     
     html[dir="rtl"] .filter-bar{direction:rtl;}
-    html[dir="rtl"] .filter-bar-row{direction:rtl;}
-    html[dir="rtl"] .sort-bar{direction:rtl;}
     html[dir="rtl"] .section-header>div{text-align:right;}
     html[dir="rtl"] .inline-form{direction:rtl;}
     html[dir="rtl"] .form-section{direction:rtl;}
@@ -579,11 +537,9 @@
     html[dir="rtl"] .donut-legend{text-align:right;}
     html[dir="rtl"] .donut-legend-item{flex-direction:row-reverse;}
     html[dir="rtl"] .chart-legend{direction:rtl;}
-    html[dir="rtl"] .next-up-details{direction:rtl;}
     html[dir="rtl"] .search-wrap svg{left:auto;right:10px;}
     html[dir="rtl"] .search-input{padding-left:12px;padding-right:32px;}
     html[dir="rtl"] .price-preview{direction:rtl;}
-    html[dir="rtl"] .ticket-grid{direction:rtl;}
     html[dir="rtl"] .bike-list-row{direction:rtl;}
     html[dir="rtl"] .bike-list-actions{direction:ltr;}
     html[dir="rtl"] .modal-box{direction:rtl;}
@@ -597,7 +553,6 @@
     html[dir="rtl"] .stat-card{direction:rtl;}
     html[dir="rtl"] .analytics-kpi-card{direction:rtl;}
     html[dir="rtl"] .analytics-highlight-card{direction:rtl;}
-    html[dir="rtl"] .analytics-bars-card{direction:rtl;}
     html[dir="rtl"] .chart-card{direction:rtl;}
     /* direction alone mirrors a flex row; row-reverse on top of it flipped the row back to
        label-left / value-right while the fill still grew from the right. */
@@ -606,7 +561,6 @@
     html[dir="rtl"] .receipt-box{direction:ltr;text-align:left;}
     html[dir="rtl"] .color-slots{direction:ltr;}
     html[dir="rtl"] .modal-bikes-grid{direction:rtl;}
-    html[dir="rtl"] .next-up-banner>div{direction:rtl;}
     html[dir="rtl"] .topbar-right{flex-direction:row-reverse;}
     html[dir="rtl"] .view-badge{letter-spacing:0;}
 
@@ -624,29 +578,18 @@
     
     :is(html[lang="ar"],html[lang="ur"]) .view-badge,
     :is(html[lang="ar"],html[lang="ur"]) label,
-    :is(html[lang="ar"],html[lang="ur"]) .filter-group-label,
-    :is(html[lang="ar"],html[lang="ur"]) .sort-label,
     :is(html[lang="ar"],html[lang="ur"]) .analytics-section-title,
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-bars-title,
     :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-label,
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-insight-title,
     :is(html[lang="ar"],html[lang="ur"]) .chart-card-title,
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-bars-title,
     :is(html[lang="ar"],html[lang="ur"]) .an-range-label,
-    :is(html[lang="ar"],html[lang="ur"]) .sess-card-day,
     :is(html[lang="ar"],html[lang="ur"]) .rides-stat-label,
     :is(html[lang="ar"],html[lang="ur"]) .stat-label,
-    :is(html[lang="ar"],html[lang="ur"]) .filter-group-label,
     :is(html[lang="ar"],html[lang="ur"]) .auth-field label,
-    :is(html[lang="ar"],html[lang="ur"]) .session-picker-label,
-    :is(html[lang="ar"],html[lang="ur"]) .sort-label,
     :is(html[lang="ar"],html[lang="ur"]) .hl-label{
       text-transform:none!important;
     }
 
     
-    :is(html[lang="ar"],html[lang="ur"]) .topbar-brand-name{font-size:16px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .topbar-brand-sub{font-size:12px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .topbar-btn{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .lang-toggle{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .view-badge{font-size:12px;font-weight:700;padding:4px 12px;}
@@ -666,8 +609,6 @@
     
     :is(html[lang="ar"],html[lang="ur"]) label{font-size:13px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .label-hint{font-size:11px;}
-    :is(html[lang="ar"],html[lang="ur"]) .filter-label{font-size:11px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .session-picker-label{font-size:13px;font-weight:700;}
 
     
     :is(html[lang="ar"],html[lang="ur"]) input,
@@ -695,7 +636,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .status-badge{font-size:11px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .type-badge{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .walk-in-badge{font-size:11px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .filter-label{font-weight:700;}
 
     
     :is(html[lang="ar"],html[lang="ur"]) .stat-num{font-size:28px;font-weight:700;}
@@ -708,10 +648,8 @@
 
     
     :is(html[lang="ar"],html[lang="ur"]) .analytics-section-title{font-size:14px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-bars-title{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-bar-label{font-size:12px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-bar-value{font-size:12px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-insight-title{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .hl-label{font-size:11px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .hl-value{font-size:18px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .chart-card-title{font-size:13px;font-weight:700;}
@@ -722,7 +660,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .result-count{font-size:12px;font-weight:600;}
 
     
-    :is(html[lang="ar"],html[lang="ur"]) .sess-card-day{font-size:10px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-card-date{font-size:17px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-card-spots{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-admin-table th{font-size:12px;font-weight:700;text-transform:none;}
@@ -731,11 +668,6 @@
     
     :is(html[lang="ar"],html[lang="ur"]) .bike-name,:is(html[lang="ar"],html[lang="ur"]) .bike-list-name{font-size:14px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .bike-meta,:is(html[lang="ar"],html[lang="ur"]) .bike-list-meta{font-size:12px;font-weight:500;}
-
-    
-    :is(html[lang="ar"],html[lang="ur"]) .next-up-label{font-size:12px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .next-up-name{font-size:20px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .next-up-details{font-size:13px;font-weight:600;}
 
     
     :is(html[lang="ar"],html[lang="ur"]) .price-preview-breakdown{font-size:13px;font-weight:600;}
@@ -766,11 +698,6 @@
 
     
     :is(html[lang="ar"],html[lang="ur"]) .empty-state{font-size:14.5px;font-weight:600;}
-    :is(html[lang="ar"],html[lang="ur"]) .no-sessions-msg{font-size:14.5px;font-weight:600;}
-
-    
-    :is(html[lang="ar"],html[lang="ur"]) .size-chip{font-size:16px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .size-chip-label{font-size:11px;font-weight:700;}
 
     
     :is(html[lang="ar"],html[lang="ur"]) .analytics-trend-table th{font-size:12px;font-weight:700;}
@@ -781,7 +708,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .cust-topbar-email{font-size:12px;font-weight:600;}
 
     
-    :is(html[lang="ar"],html[lang="ur"]) .filter-bar-row{gap:8px;}
     :is(html[lang="ar"],html[lang="ur"]) .an-range-bar{gap:8px;}
 
     
@@ -806,8 +732,6 @@
     .qty-btn:hover{border-color:var(--green-d);color:var(--green-d);}
     .qty-val{font-size:16px;font-weight:600;min-width:18px;text-align:center;}
 
-    .reg-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:40px;align-items:start;}
-    .reg-grid-side{position:sticky;top:88px;}
     .reg-summary-panel{border:1px solid var(--line2);border-radius:var(--r-lg);padding:22px 24px;}
     .reg-summary-row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:8px 0;}
     .reg-summary-row span:first-child{color:var(--muted);}
@@ -815,10 +739,8 @@
     .reg-summary-total{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line2);margin-top:10px;padding-top:14px;}
     .reg-summary-total span:first-child{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
     .reg-summary-total span:last-child{font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--text);}
-    @media(max-width:900px){.reg-grid{grid-template-columns:1fr;}.reg-grid-side{position:static;}}
 
     .session-picker-wrap{margin-bottom:24px;}
-    .session-picker-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.6px;margin-bottom:6px;padding-bottom:10px;border-bottom:1px solid var(--line2);}
     /* Every session in a list is the same card: same height, same margins, the same
        things in the same places. Two rules hold that:
          - the list is a one-column GRID with 1fr rows, so every card takes the height of
@@ -836,7 +758,6 @@
       min-height:64px;text-align:start;font-family:var(--font-body);color:var(--text);}
     .sess-card:hover:not(.sess-full){background:var(--s2);}
     .sess-card.sess-selected{background:var(--acsoft);}
-    .sess-card.sess-full{opacity:.6;}
     .sess-card-head{display:flex;align-items:center;gap:10px;min-width:0;}
     .sess-card-dot{width:9px;height:9px;border-radius:50%;flex:none;border:1.5px solid var(--muted-l);
       margin-inline-start:calc(-1 * var(--sc-gut));}
@@ -862,9 +783,7 @@
     .sess-card-comm:hover:not(.sess-full){background:rgba(74,168,248,.06);}
     .sess-comm-chip{font-size:10px;font-weight:900;color:#4aa8f8;border:1px solid rgba(74,168,248,.45);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0;}
     .spots-green{color:var(--green-d);}
-    .spots-orange{color:var(--muted-l);}
     .spots-red{color:var(--red);}
-    .no-sessions-msg{background:var(--s1);border:1px dashed var(--border);border-radius:7px;padding:32px;text-align:center;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:.1px;}
     
     .sess-admin-table{width:100%;border-collapse:collapse;background:var(--s1);}
     .sess-admin-table th,.sess-admin-table td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(var(--tint-rgb),.04);font-size:13px;}
@@ -907,8 +826,6 @@
     .phone-num{flex:1;}
     .height-row{display:flex;align-items:center;gap:10px;}
     .height-row input{flex:1;}
-    .size-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;padding:9px 16px;border-radius:5px;font-size:15px;font-weight:700;background:rgba(var(--green-rgb),.08);color:var(--green);border:1px solid rgba(var(--green-rgb),.3);white-space:nowrap;min-width:82px;}
-    .size-chip-label{font-size:10px;color:var(--green-d);font-weight:700;margin-top:2px;opacity:.85;}
 
     
     .toggle-group{display:flex;gap:8px;flex-wrap:wrap;}
@@ -931,11 +848,6 @@
     .type-grid .type-pick>.toggle-btn{flex:1 1 0;min-width:0;}
     .type-grid .toggle-btn{padding-inline:8px;overflow:hidden;text-overflow:ellipsis;}
     .type-grid .type-info-btn{flex:0 0 36px;}
-    .size-toggle{display:flex;flex-direction:column;align-items:center;gap:4px;padding:11px 16px;min-width:76px;border-radius:6px;line-height:1;}
-    .size-toggle .size-name{font-size:16px;font-weight:700;}
-    .size-toggle .size-range{font-size:10px;font-weight:600;opacity:.55;transition:opacity .2s;}
-    .size-toggle:hover .size-range{opacity:.8;}
-    .size-toggle.active .size-range{opacity:1;color:rgba(var(--green-rgb),.85);}
 
     
     .btn-primary{background:var(--ac-fill);color:var(--acink);border:none;border-radius:3px;padding:12px 24px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);letter-spacing:-.1px;}
@@ -987,7 +899,6 @@
     .ticket-num-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.8px;}
     .ticket-num{font-family:var(--font-body);font-size:84px;font-weight:700;color:var(--green-d);line-height:1;margin-top:8px;}
     .ticket-qr-wrap{margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:8px;}
-    .ticket-qr-caption{font-size:11px;font-weight:600;color:var(--muted-l);}
     .ticket-cols{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:20px 28px 22px;text-align:center;}
     .ticket-col{min-width:0;}
     .ticket-label{font-size:10px;font-weight:600;color:var(--muted-l);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;}
@@ -997,12 +908,6 @@
     .ticket-header{padding:24px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px dashed var(--line2);position:relative;}
     .ticket-num-block{display:flex;flex-direction:column;gap:4px;}
     .ticket-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
-    .ticket-body{padding:22px 24px 20px;}
-    .ticket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
-    .ticket-cell{padding:12px 14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
-    .ticket-cell:nth-child(3n){border-right:none;}
-    .ticket-cell:nth-last-child(-n+3){border-bottom:none;}
-    .ticket-notice{margin:0 24px 20px;padding:10px 14px;background:var(--s1);border:1px solid var(--border);border-radius:4px;font-size:11px;font-weight:700;color:var(--muted-l);line-height:1.6;text-align:center;}
 
     
     .stats-row{display:flex;gap:0;margin-bottom:22px;flex-wrap:wrap;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;background:var(--s1);}
@@ -1060,18 +965,7 @@
     .filter-row{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;margin-bottom:10px;overflow-x:auto;padding-bottom:2px;}
     .filter-row::-webkit-scrollbar{height:3px;}
     .filter-row::-webkit-scrollbar-thumb{background:rgba(var(--tint-rgb),.1);border-radius:2px;}
-    .filter-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;flex-shrink:0;}
     @media(max-width:767px){.filter-select{font-size:12px;height:36px;}}
-    .filter-spacer{flex:1;}
-
-    
-    .next-up-banner{
-      background:rgba(var(--green-rgb),.06);
-      border:1px solid rgba(var(--green-rgb),.2);border-radius:7px;padding:18px 22px;margin-bottom:20px;
-      display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
-    .next-up-label{font-size:10px;font-weight:700;color:var(--green-d);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
-    .next-up-name{font-size:20px;font-weight:700;color:var(--green);letter-spacing:-.3px;}
-    .next-up-details{font-size:13px;color:var(--muted);margin-top:3px;}
 
     
     .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:7px;border:1px solid var(--border);}
@@ -1149,8 +1043,6 @@
     .actions-cell{display:flex;gap:6px;flex-wrap:wrap;align-items:stretch;}
     .actions-cell .btn-sm{flex:1;min-width:72px;text-align:center;justify-content:center;}
     .walk-in-badge{font-size:10px;font-weight:700;background:rgba(var(--tint-rgb),.09);color:var(--muted-l);padding:1px 7px;border-radius:3px;margin-inline-start:5px;}
-    .pay-cell{display:flex;align-items:center;gap:7px;cursor:pointer;}
-    .pay-cb{display:none;}
     .pay-toggle{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;min-height:26px;border-radius:3px;border:1.5px solid transparent;
       font-size:12px;font-weight:700;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;background:none;font-family:var(--font-body);
       white-space:nowrap;}
@@ -1188,7 +1080,6 @@
     }
     @keyframes rowSheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
     @media(prefers-reduced-motion:reduce){.row-sheet,.modal-backdrop.row-sheet-bg{animation:none;}}
-    .pay-label{font-size:12px;font-weight:700;white-space:nowrap;}
 
     
     .status-badge{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;white-space:nowrap;background:none;border:none;padding:0;}
@@ -1210,9 +1101,6 @@
     
     @keyframes ticketIn{from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
     .ticket-card{animation:ticketIn .45s cubic-bezier(.2,.8,.2,1) both;}
-    .ticket-qr{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;width:56px;}
-    .ticket-qr-cell{height:11px;border-radius:2px;background:rgba(var(--green-rgb),.18);}
-    .ticket-qr-cell.solid{background:rgba(var(--green-rgb),.65);}
 
     
     .density-toggle{display:flex;gap:3px;align-items:center;}
@@ -1253,9 +1141,7 @@
     }
 
     
-    .session-spots{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:3px;font-size:12px;font-weight:700;}
     .spots-green{background:rgba(var(--green-rgb),.15);color:var(--green);}
-    .spots-orange{background:rgba(var(--tint-rgb),.07);color:var(--muted-l);}
     .spots-red{background:rgba(var(--red-rgb),.15);color:var(--red);}
 
     
@@ -1275,12 +1161,6 @@
     .bike-list-status{grid-column:4;font-size:11px;font-weight:700;white-space:nowrap;}
     .bike-list-actions{grid-column:5/8;display:flex;gap:6px;flex-shrink:0;}
     .bike-list-actions .btn-sm{flex:1;text-align:center;white-space:nowrap;}
-    .sort-bar{display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-    .sort-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
-    .sort-pill{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font-body);font-size:12px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
-    .sort-pill:hover{border-color:rgba(var(--tint-rgb),.2);color:var(--text);}
-    .sort-pill.active{background:var(--ac-fill);border-color:var(--ac-fill);color:var(--acink);}
-    .sort-pill .sort-arrow{font-size:10px;margin-inline-start:4px;opacity:.7;}
     .bike-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:16px;display:flex;flex-direction:column;gap:7px;transition:border-color .2s,transform .2s;}
     
     .bike-assign-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px;}
@@ -1378,16 +1258,7 @@
     ::-webkit-scrollbar-thumb{background:rgba(var(--green-rgb),.25);border-radius:4px;}
     ::-webkit-scrollbar-thumb:hover{background:rgba(var(--green-rgb),.45);}
     @keyframes tabFadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
-    @keyframes heroFloat{0%,100%{transform:translateY(0) rotate(0deg);}33%{transform:translateY(-9px) rotate(.3deg);}66%{transform:translateY(-4px) rotate(-.2deg);}}
     .tab-panel.active{animation:tabFadeIn .22s ease;}
-
-    
-    .sess-dashboard{background:var(--s2);border:1px solid rgba(var(--tint-rgb),.08);border-radius:6px;padding:14px 16px 12px;margin-bottom:16px;}
-    .sess-dash-header{display:flex;align-items:baseline;gap:12px;margin-bottom:10px;flex-wrap:wrap;}
-    .sess-dash-stats{display:flex;gap:8px;flex-wrap:wrap;}
-    .sess-dash-chip{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:4px;padding:9px 14px;min-width:80px;flex:1;}
-    .sess-dash-num{font-size:20px;font-weight:700;line-height:1.1;white-space:nowrap;}
-    .sess-dash-lbl{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.5px;margin-top:3px;text-transform:uppercase;}
 
     
     .queue-mobile-view{display:none;}
@@ -1468,8 +1339,6 @@
       #topbar{height:52px;gap:6px;}
       .topbar-logo{gap:8px;flex-shrink:0;}
       .topbar-logo img{height:28px;max-width:96px;}
-      .topbar-brand-name{font-size:13px;}
-      .topbar-brand-sub{display:none;}
       .cust-topbar-email{display:none;}
       .cust-topbar-name{font-size:12px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
       .lang-toggle{padding:6px 9px;font-size:11px;flex-shrink:0;}
@@ -1570,9 +1439,6 @@
       
       .toggle-group{gap:6px;flex-wrap:wrap;}
       .toggle-btn{padding:8px 12px;font-size:13px;min-height:40px;min-width:0;}
-      .size-toggle{min-width:60px;padding:8px;border-radius:4px;}
-      .size-toggle .size-name{font-size:14px;}
-      .size-toggle .size-range{font-size:9px;}
 
       
       .qty-stepper{gap:12px;}
@@ -1586,15 +1452,8 @@
       
       .filter-row{gap:6px;margin-bottom:10px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
       .filter-row::-webkit-scrollbar{display:none;}
-      .filter-label{font-size:10px;}
       .search-input{width:110px!important;}
       .search-wrap{flex-shrink:0;}
-
-      
-      .next-up-banner{padding:12px 14px;flex-direction:column;align-items:flex-start;gap:10px;}
-      .next-up-banner .btn-primary{width:100%;text-align:center;}
-      .next-up-name{font-size:16px;}
-      .next-up-details{font-size:12px;}
 
       
       .price-preview{flex-direction:column;gap:4px;align-items:flex-start;padding:12px 14px;}
@@ -1604,18 +1463,6 @@
       
       .ticket-card{margin-top:20px;}
       .ticket-header{padding:16px 14px 14px;}
-      .ticket-body{padding:14px;}
-      .ticket-grid{grid-template-columns:repeat(2,1fr);}
-      .ticket-cell{padding:10px 11px;}
-      .ticket-notice{margin:0 14px 16px;font-size:11px;}
-
-      
-      .account-stats-strip{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;}
-      .account-stat{padding:12px;}
-      .account-stat-val{font-size:18px;}
-
-      
-      .size-chip{min-width:60px;padding:7px 10px;font-size:14px;}
 
       
       .bike-assign-grid{grid-template-columns:repeat(2,1fr);}
@@ -1659,16 +1506,12 @@
       .queue-mobile-view{display:block;}
       .queue-table-desktop-wrap{display:none;}
       .q-card .btn-sm{flex:1;padding:10px 12px;font-size:12px;min-height:40px;text-align:center;justify-content:center;}
-      .sess-dash-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
-      .sess-dash-chip{min-width:0;padding:8px 10px;}
-      .sess-dash-num{font-size:15px;}
 
       
       .undo-bar{min-width:0;width:calc(100vw - 28px);}
 
       
       .empty-state{padding:28px 16px;font-size:13px;}
-      .rides-empty{padding:28px 16px;}
 
       
       .toast{font-size:12px;padding:10px 14px;white-space:normal;
@@ -1685,16 +1528,11 @@
       .view-main{padding:10px 12px 20px;}
       .landing-main-title{font-size:22px;}
       .stats-row{grid-template-columns:repeat(2,1fr);}
-      .account-stats-strip{grid-template-columns:repeat(2,1fr);}
       .bikes-grid{grid-template-columns:1fr 1fr;}
       .toggle-btn{padding:6px 9px;font-size:12px;}
-      .size-toggle{min-width:52px;padding:7px 6px;}
-      .size-toggle .size-name{font-size:13px;}
       .tab-btn{padding:10px 8px;font-size:10px;flex:1;}
       .ticket-num{font-size:48px;}
-      .ticket-grid{grid-template-columns:1fr 1fr;}
       .topbar-right{gap:4px;}
-      .topbar-brand-name{display:none;}
       .lang-toggle{padding:5px 6px;font-size:10px;}
       #topbar{gap:4px;}
       .queue-table{min-width:620px;}
@@ -1738,28 +1576,9 @@
     }
 
     /* ── Staff Dashboard ── */
-    .dash-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
     .dash-kpi{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:linear-gradient(155deg,rgba(var(--tint-rgb),.045),var(--s1) 62%);border:1px solid var(--border);border-radius:6px;padding:18px 20px;cursor:pointer;font-family:var(--font-body);box-shadow:0 1px 3px rgba(16,19,18,.06);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;}
     .dash-kpi:hover{transform:translateY(-3px);border-color:rgba(var(--green-rgb),.28);box-shadow:0 12px 28px rgba(16,19,18,.12);}
-    .dash-kpi-num{font-size:32px;font-weight:700;line-height:1.05;letter-spacing:-1px;}
-    .dash-kpi-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
-    .dash-kpi-sub{font-size:11px;color:var(--muted-l);font-weight:700;margin-top:2px;}
-    .dash-section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:6px 0 12px;display:flex;align-items:center;gap:8px;}
-    .dash-alert-count{background:var(--ac-fill);color:#04130b;border-radius:3px;font-size:11px;font-weight:700;padding:1px 8px;}
-    .dash-alerts{display:flex;flex-direction:column;gap:8px;}
-    .dash-alert{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--s1);border:1px solid var(--border);border-inline-start-width:3px;border-radius:6px;padding:12px 14px;cursor:pointer;font-family:var(--font-body);transition:background .15s,transform .15s;}
-    .dash-alert:hover{background:var(--s2);transform:translateX(2px);}
-    .dash-alert .dash-alert-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-    .dash-alert.tone-red{border-inline-start-color:var(--red);} .dash-alert.tone-red .dash-alert-dot{background:var(--red);}
-    .dash-alert.tone-orange{border-inline-start-color:var(--orange);} .dash-alert.tone-orange .dash-alert-dot{background:var(--orange);}
-    .dash-alert.tone-blue{border-inline-start-color:var(--blue);} .dash-alert.tone-blue .dash-alert-dot{background:var(--blue);}
-    .dash-alert-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
-    .dash-alert-title{font-size:14px;font-weight:700;color:var(--text);}
-    .dash-alert-sub{font-size:12px;color:var(--muted);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-    .dash-alert-go{color:var(--muted);font-size:20px;font-weight:700;flex-shrink:0;}
-    .dash-allclear{background:rgba(var(--green-rgb),.05);border:1px solid rgba(var(--green-rgb),.2);border-radius:6px;padding:20px;text-align:center;color:var(--green);font-size:14px;font-weight:700;}
-    @media(max-width:1023px){.dash-kpi-grid{grid-template-columns:repeat(2,1fr);}}
-    @media(max-width:480px){.dash-kpi-grid{gap:8px;}.dash-kpi{padding:14px 16px;}.dash-kpi-num{font-size:26px;}}
+    @media(max-width:480px){.dash-kpi{padding:14px 16px;}}
 
     /* ── Sessions two-pane (iPad/desktop list+detail) + master-detail (phone) ── */
     .sess-twopane{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:start;}
@@ -1920,11 +1739,6 @@
     .insight-card.info .insight-title{color:var(--green);}
     .insight-card.purple .insight-title{color:var(--green);}
     
-    .kpi-delta{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;margin-top:4px;}
-    .kpi-delta.up{background:rgba(var(--green-rgb),.12);color:var(--green);}
-    .kpi-delta.down{background:rgba(217,9,9,.1);color:var(--red);}
-    .kpi-delta.flat{background:rgba(var(--tint-rgb),.06);color:var(--muted);}
-    
     .occ-gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0;}
     .occ-gauge-svg{overflow:visible;}
     @media(max-width:767px){.insights-grid{grid-template-columns:1fr;}}
@@ -1940,18 +1754,7 @@
     @media(max-width:767px){.search-input{width:130px;font-size:12px;}}
 
     
-    .filter-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-    .filter-group-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;}
-
-    
     .filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
-    .filter-bar-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-    @media(max-width:767px){.filter-bar-row{gap:5px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;}
-      .filter-bar-row::-webkit-scrollbar{display:none;}}
-
-    
-    .sort-pill .asc::after{content:' ↑';}
-    .sort-pill .desc::after{content:' ↓';}
 
     
     .result-count{font-size:11px;font-weight:700;color:var(--muted);padding:0 4px;}
@@ -1961,7 +1764,6 @@
     .booth-popup-box{background:var(--s2);border:1px solid rgba(var(--green-rgb),.3);border-radius:7px;padding:32px;max-width:380px;width:100%;text-align:center;position:relative;}
     .booth-popup-close{position:absolute;top:14px;inset-inline-end:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;font-family:var(--font-body);}
     .booth-popup-close:hover{color:var(--text);}
-    .booth-popup-icon{font-size:48px;margin-bottom:16px;}
     .booth-popup-title{font-size:20px;font-weight:700;margin-bottom:10px;}
     .booth-popup-msg{font-size:14px;font-weight:600;color:var(--muted-l);line-height:1.7;}
 
@@ -2013,19 +1815,19 @@
     }
 
     /* ── Display numerals: Chakra Petch (race-timing numerals), tabular so digits align ── */
-    .landing-main-title span,.topbar-brand-sub,.queue-num-cell,.pos-badge,.ticket-num,.ticket-dial-num,
-    .stat-num,.rides-stat-num,.account-stat-val,.analytics-kpi-value,.dash-kpi-num,.sess-dash-num,
-    .sess-ds-num,.hl-value,.price-preview-total,.type-count-input,.size-toggle .size-name,.size-chip,
-    .next-up-name,.sess-lc-date,.sess-detail-date{
+    .landing-main-title span,.queue-num-cell,.pos-badge,.ticket-num,
+    .stat-num,.rides-stat-num,.analytics-kpi-value,
+    .sess-ds-num,.hl-value,.price-preview-total,.type-count-input,
+    .sess-lc-date,.sess-detail-date{
       font-family:var(--font-mono);font-weight:700;font-variant-numeric:tabular-nums;
     }
-    :is(html[lang="ar"],html[lang="ur"]) .landing-main-title span,:is(html[lang="ar"],html[lang="ur"]) .topbar-brand-sub,:is(html[lang="ar"],html[lang="ur"]) .queue-num-cell,
-    :is(html[lang="ar"],html[lang="ur"]) .pos-badge,:is(html[lang="ar"],html[lang="ur"]) .ticket-num,:is(html[lang="ar"],html[lang="ur"]) .ticket-dial-num,
-    :is(html[lang="ar"],html[lang="ur"]) .stat-num,:is(html[lang="ar"],html[lang="ur"]) .rides-stat-num,:is(html[lang="ar"],html[lang="ur"]) .account-stat-val,
-    :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-value,:is(html[lang="ar"],html[lang="ur"]) .dash-kpi-num,:is(html[lang="ar"],html[lang="ur"]) .sess-dash-num,
+    :is(html[lang="ar"],html[lang="ur"]) .landing-main-title span,:is(html[lang="ar"],html[lang="ur"]) .queue-num-cell,
+    :is(html[lang="ar"],html[lang="ur"]) .pos-badge,:is(html[lang="ar"],html[lang="ur"]) .ticket-num,
+    :is(html[lang="ar"],html[lang="ur"]) .stat-num,:is(html[lang="ar"],html[lang="ur"]) .rides-stat-num,
+    :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-value,
     :is(html[lang="ar"],html[lang="ur"]) .sess-ds-num,:is(html[lang="ar"],html[lang="ur"]) .hl-value,:is(html[lang="ar"],html[lang="ur"]) .price-preview-total,
-    :is(html[lang="ar"],html[lang="ur"]) .type-count-input,:is(html[lang="ar"],html[lang="ur"]) .size-toggle .size-name,:is(html[lang="ar"],html[lang="ur"]) .size-chip,
-    :is(html[lang="ar"],html[lang="ur"]) .next-up-name,:is(html[lang="ar"],html[lang="ur"]) .sess-lc-date,
+    :is(html[lang="ar"],html[lang="ur"]) .type-count-input,
+    :is(html[lang="ar"],html[lang="ur"]) .sess-lc-date,
     :is(html[lang="ar"],html[lang="ur"]) .sess-detail-date{
       font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;
     }
@@ -2048,8 +1850,6 @@
     .auth-title{font-size:26px;}
     .modal-title{font-size:22px;}
     .form-title{font-size:19px;}
-    .topbar-brand-name{font-family:var(--font-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:18px;letter-spacing:.5px;}
-    @media(max-width:1100px){.topbar-brand-name{font-size:16px;}}
     /* Section eyebrows: Chakra Petch, wide tracking (timing-tower labels) */
     .section-label{font-family:var(--font-mono);letter-spacing:3px;}
 
@@ -2082,7 +1882,7 @@
       border-radius:0;
     }
     .landing-avail-row{margin-bottom:10px;}
-    .sess-card.sess-full,.landing-avail-row.full{border-inline-start-color:var(--border);}
+    .landing-avail-row.full{border-inline-start-color:var(--border);}
     .sess-card.sess-selected{background:var(--acsoft);border-color:var(--accent2);border-inline-start-color:var(--green);}
     .landing-avail-rows{border-top:none;}
     /* Status lamps glow like start lights */
@@ -2096,7 +1896,7 @@
     /* ── Arabic guards: IBM Plex, upright, no uppercase games ── */
     :is(html[lang="ar"],html[lang="ur"]) .landing-main-title,:is(html[lang="ar"],html[lang="ur"]) .page-title,:is(html[lang="ar"],html[lang="ur"]) .auth-title,
     :is(html[lang="ar"],html[lang="ur"]) .modal-title,:is(html[lang="ar"],html[lang="ur"]) .form-title,:is(html[lang="ar"],html[lang="ur"]) .rides-zero-num,
-    :is(html[lang="ar"],html[lang="ur"]) .topbar-brand-name,:is(html[lang="ar"],html[lang="ur"]) .section-label,
+    :is(html[lang="ar"],html[lang="ur"]) .section-label,
     :is(html[lang="ar"],html[lang="ur"]) .btn-primary,:is(html[lang="ar"],html[lang="ur"]) .btn-secondary{
       font-family:'IBM Plex Sans Arabic',sans-serif;font-style:normal;text-transform:none;
     }
@@ -2110,9 +1910,9 @@
        includes IBM Plex Sans Arabic so Arabic glyphs fall through cleanly. */
 
     /* Micro-labels and table headers: race-timing capitals */
-    .queue-table th,.filter-label,.filter-group-label,.sort-label,.stat-label,.rides-stat-label,
+    .queue-table th,.stat-label,.rides-stat-label,
     .ticket-num-label,.view-badge,.analytics-kpi-label,.an-range-label,.hl-label,
-    .session-picker-label,.chart-card-title,.analytics-section-title,.analytics-bars-title{
+    .chart-card-title,.analytics-section-title{
       font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;letter-spacing:1.6px;
     }
     .queue-table th{letter-spacing:1.2px;}
@@ -2281,18 +2081,10 @@
     :root:not([data-theme="dark"]) #topbar .view-badge{color:#c4ccc7;border-color:rgba(255,255,255,.2);}
     :root:not([data-theme="dark"]) #topbar .cust-topbar-name{color:#f2f5f2;}
     :root:not([data-theme="dark"]) #topbar .cust-topbar-email{color:#9aa39d;}
-    :root:not([data-theme="dark"]) #topbar .topbar-brand-name{color:#00e585;}
     :root:not([data-theme="dark"]) #topbar .staff-access-btn{color:#9aa39d;}
     :root:not([data-theme="dark"]) #topbar .btn-primary.topbar-reserve{background:#00cf78;color:#04140c;}
 
     /* ── Light theme, more black (round 2): the staff panel's hero moments go asphalt ── */
-    /* Next Up banner: dark panel with the timing-green name - the eye lands here first */
-    :root:not([data-theme="dark"]) .next-up-banner{background:var(--foot);border-color:rgba(0,229,133,.35);}
-    :root:not([data-theme="dark"]) .next-up-label{color:#8b939b;}
-    :root:not([data-theme="dark"]) .next-up-label span{color:#8b939b!important;}
-    :root:not([data-theme="dark"]) .next-up-name{color:#00e585;}
-    :root:not([data-theme="dark"]) .next-up-details{color:#9aa39d;}
-    :root:not([data-theme="dark"]) .next-up-banner .btn-primary{background:#00cf78;color:#04140c;}
     /* Table headers: dark timing strips over white rows (all staff tables) */
     :root:not([data-theme="dark"]) .queue-table thead th{background:var(--foot);color:#9aa39d;border-bottom-color:rgba(255,255,255,.12);}
     :root:not([data-theme="dark"]) .queue-table thead th.an-sort-active{color:#00e585;}
@@ -2344,8 +2136,8 @@
     /* Hover-lift transforms are desktop-only: taps fire :hover on touch and the lift
        sticks until the next tap, so gate them to real pointers */
     @media (hover: none){
-      .undo-bar-action:hover,.social-link:hover,.btn-primary:hover,.btn-sm:hover,
-      .bike-card:hover,.dash-kpi:hover,.dash-alert:hover,.analytics-kpi-card:hover,
+      .undo-bar-action:hover,.btn-primary:hover,.btn-sm:hover,
+      .bike-card:hover,.dash-kpi:hover,.analytics-kpi-card:hover,
       .addon-thumb:hover{transform:none;}
     }
 
@@ -2444,11 +2236,6 @@
     body .landing-event-card:hover{transform:none;border-color:rgba(26,25,25,.25);box-shadow:0 1px 3px rgba(26,25,25,.06);}
     /* Event-card titles: Space Grotesk has no italic — upright 700, uppercase stays */
     body .lec-title{font-style:normal;font-weight:700;letter-spacing:.4px;}
-    /* Kickers: 11px/800 uppercase 1.4px #077a4b (AR overrides below) */
-    body .lec-kicker,body .landing-kicker{
-      color:#077a4b;font-size:11px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;}
-    :is(html[lang="ar"],html[lang="ur"]) body .lec-kicker,:is(html[lang="ar"],html[lang="ur"]) body .landing-kicker{
-      font-size:12px;letter-spacing:0;text-transform:none;}
     /* Arabic type rules: taller lines, no letter-spacing, Plex first */
     :is(html[lang="ar"],html[lang="ur"]) body{
       --font-body:'IBM Plex Sans Arabic','Space Grotesk',sans-serif;
@@ -2480,7 +2267,6 @@
     body .form-title{font-size:17px;font-weight:700;text-transform:none;letter-spacing:0;}
     body h2,body h3,body h4{
       font-family:var(--font-body);font-style:normal;text-transform:none;letter-spacing:0;}
-    body .topbar-brand-name{font-family:var(--font-body);font-style:normal;font-weight:700;letter-spacing:0;text-transform:none;}
     body .landing-ghost{display:none;} /* racing ghost numerals are staff-era */
     body .section-label{font-family:var(--font-body);letter-spacing:1.4px;font-weight:800;font-size:11px;text-transform:uppercase;color:#4f565c;}
     :is(html[lang="ar"],html[lang="ur"]) body .section-label{letter-spacing:0;text-transform:none;font-size:13px;}
@@ -2501,14 +2287,9 @@
       background:#ffffff;border:1px solid rgba(26,25,25,.16);border-radius:8px;padding:12px 14px;min-height:46px;font-size:16px;}
     body .auth-box .auth-field input:focus{border-color:#077a4b;box-shadow:inset 0 0 0 1px #077a4b;}
     body .btn-google{border-radius:6px;background:#ffffff;min-height:48px;}
-    /* Card kickers restored (reference frames): venue name above the title —
-       JCC green, community/Micromobility blue. lec2 copy is a flex column. */
-    body .lec2-copy .lec-kicker{display:block;margin-bottom:0;}
-    body .landing-event-card.community .lec-kicker{color:#2f63ad;}
     /* ── Customer side is LIGHT-ONLY: no theme toggle, and theme-swapped image pairs
        always resolve to their on-light art regardless of the html data-theme attr
        (a staff device toggled dark must not leak white-wordmark art onto paper). ── */
-    body #theme-toggle-btn{display:none;}
     html[data-theme="dark"] body .mm-on-light{display:inline;}
     html body .mm-on-dark{display:none;}
 
@@ -2752,16 +2533,12 @@
       background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:7px;font-size:12.5px;min-height:34px;
     }
     body.view-staff .search-input:focus{border-color:var(--sf-green-ink);background:var(--sf-card);}
-    body.view-staff .filter-label,body.view-staff .filter-group-label,body.view-staff .sort-label{
-      font-family:var(--font-body);font-size:var(--staff-fs-sm);font-weight:700;letter-spacing:1px;color:var(--muted-l);
-    }
-    :is(html[lang="ar"],html[lang="ur"]) body.view-staff .filter-label,:is(html[lang="ar"],html[lang="ur"]) body.view-staff .filter-group-label,:is(html[lang="ar"],html[lang="ur"]) body.view-staff .sort-label{letter-spacing:0;}
-    body.view-staff .filter-pill,body.view-staff .sort-pill,body.view-staff .an-nav-btn{
+    body.view-staff .filter-pill,body.view-staff .an-nav-btn{
       background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:999px;color:var(--text);
       font-size:12px;font-weight:600;text-transform:none;letter-spacing:0;padding:7px 15px;min-height:34px;
     }
-    body.view-staff .filter-pill:hover,body.view-staff .sort-pill:hover,body.view-staff .an-nav-btn:hover{border-color:var(--muted-l);color:var(--text);transform:none;}
-    body.view-staff .filter-pill.active,body.view-staff .sort-pill.active,body.view-staff .an-nav-btn.active{
+    body.view-staff .filter-pill:hover,body.view-staff .an-nav-btn:hover{border-color:var(--muted-l);color:var(--text);transform:none;}
+    body.view-staff .filter-pill.active,body.view-staff .an-nav-btn.active{
       background:#123019;border-color:#123019;color:#03ff89;font-weight:700;
     }
     body.view-staff .density-btn{background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:7px;text-transform:none;letter-spacing:0;color:var(--muted);}
@@ -2789,8 +2566,8 @@
     /* KPI numbers are ink — never amber/blue/green (status colors are for status only).
        !important intentionally beats the per-tile inline color styles in the JS templates. */
     body.view-staff .stat-num,body.view-staff .stat-num.green,body.view-staff .rides-stat-num,
-    body.view-staff .dash-kpi-num,body.view-staff .analytics-kpi-value,body.view-staff .hl-value,
-    body.view-staff .sess-dash-num,body.view-staff .sess-ds-num{color:var(--text)!important;}
+    body.view-staff .analytics-kpi-value,body.view-staff .hl-value,
+    body.view-staff .sess-ds-num{color:var(--text)!important;}
     body.view-staff .stat-label,body.view-staff .rides-stat-label{
       font-family:var(--font-body);font-size:var(--staff-fs-sm);font-weight:700;letter-spacing:1px;color:var(--muted);margin-top:5px;
     }
@@ -2861,7 +2638,6 @@
     body.view-staff .dot-orange{background:#8a5c14;}
     body.view-staff .dot-red{background:#a33b2e;}
     body.view-staff .dot-blue{background:#8a5c14;box-shadow:none;} /* bike out/in-use reads as warn, not blue */
-    body.view-staff .session-spots{border-radius:999px;font-weight:700;}
     body.view-staff .spots-green{background:rgba(12,122,61,.1);color:var(--sf-green-ink);}
     body.view-staff .spots-red{background:rgba(163,59,46,.1);color:#a33b2e;}
     /* session open/closed/full: status = small dot + 700 text, not a filled pill */
@@ -2888,9 +2664,6 @@
     body.view-staff .sess-summary-chip:hover{background:var(--sf-card);border-color:var(--sf-ctl-h);}
     body.view-staff .sess-summary-chip.active-sess{border-color:var(--sf-green-ink);box-shadow:0 0 0 1px rgba(12,122,61,.35);}
     body.view-staff .sess-chip-fill{background:#0c7a3d;box-shadow:none;}
-    body.view-staff .sess-dashboard{background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:10px;}
-    body.view-staff .sess-dash-chip{background:var(--sf-head);border:1px solid var(--sf-sep);border-radius:8px;}
-    body.view-staff .sess-dash-num{font-family:var(--font-body);font-variant-numeric:tabular-nums;}
     body.view-staff .sess-card,body.view-staff .sess-lc{
       background:var(--sf-card);border:1px solid var(--sf-line2);border-inline-start:1px solid var(--sf-line2);border-radius:10px;box-shadow:none;
     }
@@ -2902,29 +2675,17 @@
     body.view-staff .sess-rider{background:var(--sf-zebra);border:1px solid var(--sf-sep);border-radius:8px;}
     body.view-staff .sess-card-date,body.view-staff .sess-lc-date,body.view-staff .sess-detail-date{font-family:var(--font-body);}
 
-    /* ── Next-up banner: the one dark-green hero surface in content ── */
-    body.view-staff .next-up-banner{background:#123019;border:none;border-radius:10px;}
-    body.view-staff .next-up-label{color:#9fc4ab;}
-    body.view-staff .next-up-label span{color:#9fc4ab!important;}
-    body.view-staff .next-up-name{color:#03ff89;font-family:var(--font-body);letter-spacing:-.2px;}
-    body.view-staff .next-up-details{color:#9fc4ab;}
-    body.view-staff .next-up-banner .btn-primary{background:#0c7a3d;color:#fff;}
-    body.view-staff .next-up-banner .btn-primary:hover{background:#0e8c46;}
-
     /* ── Dashboard KPI + alerts ── */
     body.view-staff .dash-kpi,body.view-staff .analytics-kpi-card{
       background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:10px;box-shadow:none;padding:14px 16px;
     }
     body.view-staff .dash-kpi:hover,body.view-staff .analytics-kpi-card:hover{transform:none;border-color:var(--sf-ctl-h);box-shadow:none;}
     body.view-staff .analytics-kpi-card::before{display:none;}
-    body.view-staff .dash-kpi-num,body.view-staff .analytics-kpi-value{
+    body.view-staff .analytics-kpi-value{
       font-family:var(--font-body);font-size:24px;font-weight:700;letter-spacing:-.4px;font-variant-numeric:tabular-nums;
     }
-    body.view-staff .dash-kpi-lbl,body.view-staff .analytics-kpi-label{font-size:var(--staff-fs-sm);letter-spacing:1px;color:var(--muted);}
-    :is(html[lang="ar"],html[lang="ur"]) body.view-staff .dash-kpi-lbl,:is(html[lang="ar"],html[lang="ur"]) body.view-staff .analytics-kpi-label{letter-spacing:0;}
-    body.view-staff .dash-alert{background:var(--sf-card);border:1px solid var(--sf-line2);border-inline-start-width:3px;border-radius:8px;}
-    body.view-staff .dash-alert:hover{background:var(--sf-zebra);transform:none;}
-    body.view-staff .dash-allclear{background:rgba(12,122,61,.06);border:1px solid rgba(12,122,61,.2);border-radius:8px;color:var(--sf-green-ink);}
+    body.view-staff .analytics-kpi-label{font-size:var(--staff-fs-sm);letter-spacing:1px;color:var(--muted);}
+    :is(html[lang="ar"],html[lang="ur"]) body.view-staff .analytics-kpi-label{letter-spacing:0;}
     body.view-staff .an-range-bar{background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:10px;box-shadow:none;}
     body.view-staff .an-sticky{background:linear-gradient(180deg,var(--bg) 72%,transparent);}
     /* Sticky bars stop under the ink bar (and under the sections bar on phones and tablets).
@@ -3015,7 +2776,6 @@
     body.view-staff .q-card.row-active{background:rgba(12,122,61,.04);border-color:rgba(12,122,61,.25);}
 
     /* ── Empty states ── */
-    body.view-staff .rides-empty,body.view-staff .no-sessions-msg{background:var(--sf-card);border:1px dashed var(--sf-ctl);border-radius:10px;}
     body.view-staff .empty-illus-title,body.view-staff .empty-illus-sub{color:var(--muted);}
 
     /* ── Scrollbars & selection: quiet, professional ── */
@@ -3034,10 +2794,10 @@
 
     /* ── Numbers: Barlow tabular everywhere (race numerals retired in staff) ── */
     body.view-staff .queue-num-cell,body.view-staff .pos-badge,body.view-staff .stat-num,
-    body.view-staff .rides-stat-num,body.view-staff .analytics-kpi-value,body.view-staff .dash-kpi-num,
-    body.view-staff .sess-dash-num,body.view-staff .sess-ds-num,body.view-staff .hl-value,
+    body.view-staff .rides-stat-num,body.view-staff .analytics-kpi-value,
+    body.view-staff .sess-ds-num,body.view-staff .hl-value,
     body.view-staff .price-preview-total,body.view-staff .type-count-input,
-    body.view-staff .sess-lc-date,body.view-staff .sess-detail-date,body.view-staff .next-up-name{
+    body.view-staff .sess-lc-date,body.view-staff .sess-detail-date{
       font-family:var(--font-body);font-variant-numeric:tabular-nums;
     }
 
@@ -3051,10 +2811,8 @@
       body.view-staff #staff-tab-nav .tab-btn{padding:8px 11px;min-height:36px;font-size:var(--staff-fs-sm);}
       /* header action rows wrap; filter rows wrap instead of clipping mid-control */
       body.view-staff .section-header>div{flex-wrap:wrap;}
-      body.view-staff .filter-row,body.view-staff .filter-bar-row{flex-wrap:wrap;overflow-x:visible;padding-bottom:0;}
-      body.view-staff .filter-row .filter-label,body.view-staff .filter-bar-row .filter-label,
-      body.view-staff .filter-row .filter-group-label{display:none;} /* labels orphan from their selects when wrapping; the dense ERP filter row is unlabeled */
-      body.view-staff .filter-row .filter-select,body.view-staff .filter-bar-row .filter-select{flex:1 1 44%;min-width:0;}
+      body.view-staff .filter-row{flex-wrap:wrap;overflow-x:visible;padding-bottom:0;}
+      body.view-staff .filter-row .filter-select{flex:1 1 44%;min-width:0;}
       body.view-staff .filter-row .search-wrap{flex:1 1 100%;}
       body.view-staff .filter-row .search-input{width:100%!important;}
       body.view-staff .density-btn{min-height:34px;}
@@ -3231,7 +2989,6 @@
     html[data-staff-theme="dark"] body.view-staff .type-badge svg{color:#25d184;}
     /* selected pills already sit on #123019 — lift the neon so they read as active */
     html[data-staff-theme="dark"] body.view-staff .filter-pill.active,
-    html[data-staff-theme="dark"] body.view-staff .sort-pill.active,
     html[data-staff-theme="dark"] body.view-staff .an-nav-btn.active,
     html[data-staff-theme="dark"] body.view-staff .toggle-btn.active,
     html[data-staff-theme="dark"] body.view-staff .inv-navbtn.active,
@@ -3241,8 +2998,6 @@
     html[data-staff-theme="dark"] body.view-staff #staff-tab-nav{border-inline-end-color:rgba(255,255,255,.12);}
     /* the rail column's dark paint is the ::before in #view-staff's grid (above): one colour,
        both themes, either direction */
-    /* the toggle itself: hidden app-wide by the customer light-only rule, shown for staff */
-    body.view-staff #theme-toggle-btn{display:inline-flex;align-items:center;justify-content:center;}
 
     /* ── Sidebar rail: pinned or hover ──────────────────────────────────────
        #rail-pin switches between the pinned 232px sidebar and a 64px art rail
@@ -3370,9 +3125,7 @@
     body.view-staff .section-header,
     body.view-staff .section-header > div,
     body.view-staff .filter-row,
-    body.view-staff .filter-bar-row,
     body.view-staff .actions-cell,
-    body.view-staff .sort-bar,
     body.view-staff .an-subnav,
     body.view-staff .an-range-bar,
     body.view-staff .toggle-group,
@@ -3386,7 +3139,6 @@
     body.view-staff .btn-sm,
     body.view-staff .toggle-btn,
     body.view-staff .filter-pill,
-    body.view-staff .sort-pill,
     body.view-staff .an-nav-btn,
     body.view-staff .density-btn,
     body.view-staff .view-toggle-btn,
@@ -3410,7 +3162,6 @@
       body.view-staff .btn-sm,
       body.view-staff .toggle-btn,
       body.view-staff .filter-pill,
-      body.view-staff .sort-pill,
       body.view-staff .an-nav-btn,
       body.view-staff .density-btn,
       body.view-staff .filter-select,
@@ -3424,8 +3175,7 @@
     /* customer side: keep neighbouring buttons the same height too */
     body:not(.view-staff) .section-header,
     body:not(.view-staff) .filter-row,
-    body:not(.view-staff) .toggle-group,
-    body:not(.view-staff) .sort-bar{align-items:center;}
+    body:not(.view-staff) .toggle-group{align-items:center;}
 
     /* ── Accessibility corrections (measured against WCAG AA) ────────────────
        Verified ratios before/after: the rail's suite labels and pin were 3.20:1 on
@@ -3445,8 +3195,7 @@
        Inline margin-left/border-left on staff rows put the gap and the accent stripe
        on the trailing edge in Arabic. Neutralise the physical property and re-apply it
        as a logical one so both directions are correct. */
-    html[dir="rtl"] body.view-staff .filter-row > span[style*="margin-left"],
-    html[dir="rtl"] body.view-staff .filter-bar-row > span[style*="margin-left"]{
+    html[dir="rtl"] body.view-staff .filter-row > span[style*="margin-left"]{
       margin-left:0!important;margin-inline-start:8px;
     }
 
@@ -3497,10 +3246,8 @@
        ride and a red one — so its stripe carries both rather than picking a side. */
     body .landing-event-card.ev-jcc::before{background:var(--blue);}
     body .landing-event-card.ev-jcc:hover{border-color:rgba(var(--blue-rgb),.55);}
-    body .landing-event-card.ev-jcc .lec-kicker,body .landing-event-card.ev-jcc .lec-arrow{color:var(--blue);}
     body .landing-event-card.ev-community::before{background:linear-gradient(90deg,var(--green),var(--red));}
     body .landing-event-card.ev-community:hover{border-color:rgba(var(--green-rgb),.5);}
-    body .landing-event-card.ev-community .lec-kicker,body .landing-event-card.ev-community .lec-arrow{color:var(--green);}
 
     /* ── The Apple button had gone white-on-white ─────────────────────────────
        It is a .btn-google too (same shape, same layout), and the customer reskin
@@ -3574,11 +3321,6 @@
          · Modals: 18px desktop, bottom-sheet under 767px
          · The Sunlight/Night toggle is gone customer-side (light only)
        ════════════════════════════════════════════════════════════════════════ */
-
-    /* Light only. The token layer above already forces it (body-level custom
-       properties beat :root[data-theme]), so this just removes the control that
-       implies a choice the customer no longer has. */
-    body:not(.view-staff) #theme-toggle-btn{display:none;}
 
     /* ── Buttons: pills ─────────────────────────────────────────────────── */
     body:not(.view-staff) .btn-primary{
@@ -3723,14 +3465,10 @@
     .ev-workshop{--ev:#c2410c;--ev-rgb:194,65,12;}
     body .landing-event-card.ev-workshop::before{background:var(--ev);}
     body .landing-event-card.ev-workshop:hover{border-color:rgba(var(--ev-rgb),.5);}
-    body .landing-event-card.ev-workshop .lec-kicker,body .landing-event-card.ev-workshop .lec-arrow{color:var(--ev);}
     /* "In partnership with …": a quieter line under the name, on the landing card and on the
-       session card. The partner's mark is a circle, so its square photo is clipped to one. */
-    .lec2 .lec-partner{font-size:12px;font-weight:600;font-style:italic;letter-spacing:.2px;color:var(--muted);margin-top:6px;}
+       session card. */
     .sess-partner,.ev-partner{display:block;font-size:11px;font-weight:600;font-style:italic;color:var(--muted);margin-top:2px;}
-    :is(html[lang="ar"],html[lang="ur"]) .lec2 .lec-partner,:is(html[lang="ar"],html[lang="ur"]) .sess-partner,:is(html[lang="ar"],html[lang="ur"]) .ev-partner{font-style:normal;letter-spacing:0;}
-    .lec2-mm img.lec-partner-logo{border-radius:50%;}
-        @media (max-width:560px){.lec2 .lec-partner{font-size:11px;}}
+    :is(html[lang="ar"],html[lang="ur"]) .sess-partner,:is(html[lang="ar"],html[lang="ur"]) .ev-partner{font-style:normal;letter-spacing:0;}
 
     /* ── The customer header is white paper, in both themes ──────────────────
        The art already assumed this: the logo is forced to logo-mark-dark.png in
@@ -3762,7 +3500,6 @@
     /* The light-on-dark block that came with the green bar, undone. */
     body:not(.view-staff) #topbar#topbar .cust-topbar-name{color:#12150f;}
     body:not(.view-staff) #topbar#topbar .cust-topbar-email{color:#6e7468;}
-    body:not(.view-staff) #topbar#topbar .topbar-brand-name{color:var(--green);}
     body:not(.view-staff) #topbar#topbar .staff-access-btn{color:#6e7468;}
 
     /* Ghost buttons: text until you point at one, then a soft tint behind it.
@@ -3827,8 +3564,6 @@
   .page-title{font-size:20px;}
 }
 .section-header>div:last-child{flex-wrap:wrap;justify-content:flex-end;}
-@media (max-width:767px){
-}
 .row-select{display:inline-flex;align-items:center;padding:0 2px;cursor:pointer;}
 .row-select input{width:18px;height:18px;margin:0;accent-color:var(--green);cursor:pointer;}
 @media (max-width:767px){
@@ -4322,8 +4057,6 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body .landing-event-card.ev-snd96::before{display:none;}
     body .landing-event-card.ev-snd96 .lec-title{color:var(--snd-ink);}
     body .landing-event-card.ev-snd96 .lec-meta{color:var(--snd-lime-lt);font-weight:700;}
-    body .landing-event-card.ev-snd96 .lec-kicker,
-    body .landing-event-card.ev-snd96 .lec-arrow{color:var(--snd-lime-lt);}
     /* The lockup takes the shared band like the other two marks, so nothing here sizes it.
        The weave tightens on a phone, where the card is shorter than the tile. */
     @media(max-width:640px){
@@ -4370,7 +4103,6 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
       --s1:var(--snd-deep);--s2:#00343A;--s3:#00343A;}
     body.snd96:not(.view-staff) #topbar#topbar .cust-topbar-name{color:#FFFFFF;}
     body.snd96:not(.view-staff) #topbar#topbar .cust-topbar-email{color:var(--snd-mut);}
-    body.snd96:not(.view-staff) #topbar#topbar .topbar-brand-name{color:var(--snd-lime-lt);}
     body.snd96:not(.view-staff) #topbar#topbar .staff-access-btn{color:var(--snd-mut);}
     body.snd96:not(.view-staff) #topbar#topbar .topbar-btn,
     body.snd96:not(.view-staff) #topbar#topbar .lang-toggle{color:#DCEFE4;}
@@ -4593,8 +4325,6 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     :is(html[lang="ar"],html[lang="ur"]) body .landing-event-card.ev-jcc .lec-title{
       font-family:'IBM Plex Sans Arabic',sans-serif;letter-spacing:0;}
     body .landing-event-card.ev-jcc .lec-meta{color:var(--jcc-cyan-lt);font-weight:700;}
-    body .landing-event-card.ev-jcc .lec-kicker,
-    body .landing-event-card.ev-jcc .lec-arrow{color:var(--jcc-cyan-lt);}
     /* The mark with the white wordmark. The house rules always pick the dark-ink
        variant because the customer surface is always paper; this card is not. */
     body .landing-event-card.ev-jcc .mm-on-light{display:none;}
@@ -4646,8 +4376,6 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body .landing-event-card.ev-community::before{display:none;}
     body .landing-event-card.ev-community .lec-title{color:var(--mm-ink);}
     body .landing-event-card.ev-community .lec-meta{color:var(--mm-green);font-weight:700;}
-    body .landing-event-card.ev-community .lec-kicker,
-    body .landing-event-card.ev-community .lec-arrow{color:var(--mm-green);}
 
     /* ════════════════════════════════════════════════════════════════════════
        STAFF — the icon-only controls lose their boxes
@@ -5456,7 +5184,6 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 .ev-event{--ev:#7c3aed;--ev-rgb:124,58,237;}
 body .landing-event-card.ev-event::before{background:var(--ev);}
 body .landing-event-card.ev-event:hover{border-color:rgba(var(--ev-rgb),.5);}
-body .landing-event-card.ev-event .lec-kicker,body .landing-event-card.ev-event .lec-arrow{color:var(--ev);}
 body.view-staff .dash-dot.ev-event,body.view-staff .cal-sess.ev-event{--ev:#7c3aed;}
 
 /* Hand-over: the ride leader's live location switch (2026-09-28) */
