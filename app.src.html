@@ -19282,6 +19282,30 @@ function statusCellHtml(e){
 // logo header with a green rule, stat chips, zebra tables, and a footer with the
 // generation timestamp. Body markup uses the shell's h2/.totals/table classes.
 // Customer receipts keep their own receipt layout on purpose.
+// The stylesheets are files (report.css, receipt.css), not a <style> in the window (2026-09-29): a
+// window written into about:blank runs under this page's Content-Security-Policy, which is dropping
+// style-src 'unsafe-inline', so a <style> block or a style attribute there would be refused. They are linked
+// by location.origin (the window has no address of its own) with their content hash, which
+// scripts/build-html.mjs stamps here, and _headers keeps them a year.
+const REPORT_CSS_V='';
+const RECEIPT_CSS_V='';
+// Print a window once what it draws with has arrived - its style sheets, then the fonts and the
+// pictures they call for - and never sooner than `floor` ms after it opened (the wait it always
+// had). A sheet that fails still prints, as it would have before; a bare stand-in window (the
+// specs') prints after the floor.
+function _printWhenReady(win,floor){
+  let ready=Promise.resolve();
+  try{
+    const d=win.document;
+    const done=el=>new Promise(r=>{el.addEventListener('load',r,{once:true});el.addEventListener('error',r,{once:true});});
+    const sheets=[...d.querySelectorAll('link[rel="stylesheet"]')].filter(l=>!l.sheet).map(done);
+    ready=Promise.all(sheets).then(()=>{
+      void d.body.offsetHeight; // the styles now apply: the fonts they name start loading
+      return Promise.all([d.fonts.ready,...[...d.images].filter(i=>!i.complete).map(done)]);
+    });
+  }catch(e){}
+  Promise.all([ready.catch(()=>{}),new Promise(r=>setTimeout(r,floor))]).then(()=>{try{win.print();}catch(e){}});
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _reportShell(o){
   // "Report Template B — Green banner": the one visual family for every generated
@@ -19297,42 +19321,8 @@ function _reportShell(o){
   return`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8">
   <title>${o.docTitle||o.title}</title>
   <link href="/fonts/fonts.css" rel="stylesheet">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    @page{margin:0} /* no margin box = nowhere for the browser to print about:blank/date furniture; the inset moves to body padding below */
-    body{font-family:${ar?"'IBM Plex Sans Arabic',":''}'Barlow',system-ui,sans-serif;color:#111512;font-size:13px;padding:26px 30px;max-width:${o.maxWidth||'940px'};margin:0 auto}
-    .mm-banner{background:#123019;color:#e9f4ec;border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;break-inside:avoid}
-    .mm-banner img{height:52px;width:auto}
-    .mm-co{display:flex;align-items:center;gap:14px}
-    .mm-co strong{font-size:15px;font-weight:800;display:block}
-    .mm-co small{font-size:10px;color:#9fc4ab}
-    .mm-doc{text-align:end}
-    .mm-doc strong{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#03ff89;display:block}
-    .mm-doc span{font-size:10.5px;color:#9fc4ab}
-    .mm-rule{height:4px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:10px 0 14px}
-    .totals{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;break-inside:avoid}
-    .total-item{flex:1;min-width:96px;display:flex;flex-direction:column;background:#f2f6f2;border-radius:10px;padding:12px 14px}
-    .total-num{font-size:19px;font-weight:800;color:#111512}
-    .total-lbl{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#5a635c;margin-top:2px}
-    .total-item.dark{background:#123019}
-    .total-item.dark .total-num{color:#03ff89}
-    .total-item.dark .total-lbl{color:#9fc4ab}
-    h2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin:22px 0 7px;padding-inline-start:8px;border-inline-start:4px solid #0c7a3d}
-    table{width:100%;border-collapse:collapse;font-size:11px}
-    th{background:#123019;color:#e9f4ec;padding:8px 10px;text-align:start;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
-    [dir="rtl"] :is(.mm-doc strong,h2,th,.total-lbl){letter-spacing:0} /* Arabic and Urdu letters join: spaced, they fall apart */
-    td{padding:8px 10px;text-align:start;font-size:11px;font-weight:700} /* bold rows: readable at a glance on the printed sheet */
-    tbody tr:nth-child(odd) td{background:#fafcfa}
-    a{color:inherit;text-decoration:none}
-    section{break-inside:avoid}
-    .mm-chip-row{display:flex;justify-content:flex-end;margin-top:12px;break-inside:avoid}
-    .mm-chip{background:#123019;color:#fff;border-radius:10px;padding:10px 18px;font-size:11px}
-    .mm-chip strong{color:#03ff89;font-size:13.5px}
-    .mm-sign{display:flex;gap:40px;margin-top:32px;font-size:10.5px;color:#5a635c}
-    .mm-sign span{flex:1;border-top:1px solid #b9c1ba;padding-top:6px}
-    .rep-print{display:block;margin:22px auto 0;padding:9px 26px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
-    @media print{body{padding:12mm;box-decoration-break:clone;-webkit-box-decoration-break:clone}.rep-print{display:none}} /* clone: the 12mm top and bottom inset repeats on every page; a sliced body padded only the first page's top and the last one's bottom, and a long roster ran into the paper edge from page 2 on */
-  </style></head><body>
+  <link href="${location.origin}/report.css?v=${REPORT_CSS_V}" rel="stylesheet">
+  </head><body data-cssv="${_cssv({'--rp-mw':o.maxWidth||'940px'})}">
   <div class="mm-banner">
     <span class="mm-co">
       <img src="${logoUrl}" alt="Micromobility">
@@ -19352,9 +19342,12 @@ function _openReport(html,w,h){
   if(!win)return;
   win.document.write(html);win.document.close();win.focus();
   // The report is its own document under the page's policy: no inline script runs in it and no
-  // handler dispatcher listens there, so its Print button is wired here, from the opener.
+  // handler dispatcher listens there, so its Print button is wired here, from the opener, and its
+  // run-time values (data-cssv: the sheet's width, a chart swatch's colour) are set from here too,
+  // through the CSSOM, before it first draws.
+  try{_cssvApply(win.document);}catch(e){}
   try{win.document.querySelectorAll('.rep-print').forEach(b=>b.addEventListener('click',()=>{try{win.print();}catch(e){}}));}catch(e){} // specs stand in a bare window
-  setTimeout(()=>{try{win.print();}catch(e){}},400);
+  _printWhenReady(win,400);
 }
 // ── Report builder ─────────────────────────────────────────────────────────
 // Every printed report is customizable: pick the columns and sections it carries,
@@ -19790,22 +19783,22 @@ function _accSvg(type,items){
   const max=Math.max(1,...items.map(x=>x.value));
   const total=items.reduce((s,x)=>s+x.value,0);
   const trunc=(str,n)=>{str=String(str);return str.length>n?str.slice(0,n-1)+'…':str;};
-  const font='font-family:inherit;font-size:9px;fill:#52514e';
+  // the labels' type and ink are report.css's: rp-ax, and rp-axv for a value (dark, bold)
   if(type==='table'||!items.length)return '';
   if(type==='bar'){
     const iw=W-PAD.l-PAD.r,ih=H-PAD.t-PAD.b,n=items.length,slot=iw/n,bw=Math.min(24,slot*0.6);
     const ticks=[0,0.5,1].map(f=>Math.round(max*f));
-    const grid=ticks.map(v=>{const y=PAD.t+ih-(v/max)*ih;return `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y}" y2="${y}" stroke="#e4e7e4" stroke-width="1"/><text x="${PAD.l-6}" y="${y+3}" text-anchor="end" style="${font}">${v}</text>`;}).join('');
+    const grid=ticks.map(v=>{const y=PAD.t+ih-(v/max)*ih;return `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y}" y2="${y}" stroke="#e4e7e4" stroke-width="1"/><text x="${PAD.l-6}" y="${y+3}" text-anchor="end" class="rp-ax">${v}</text>`;}).join('');
     const bars=items.map((x,i)=>{const h=(x.value/max)*ih,cx=PAD.l+slot*i+slot/2,x0=cx-bw/2,y0=PAD.t+ih-h,r=Math.min(4,h/2);
       const path=h<=0?'':`<path d="M${x0},${PAD.t+ih} V${y0+r} a${r},${r} 0 0 1 ${r},-${r} H${x0+bw-r} a${r},${r} 0 0 1 ${r},${r} V${PAD.t+ih} Z" fill="${_ACC_GREEN}"/>`;
-      return `${path}<text x="${cx}" y="${H-PAD.b+13}" text-anchor="middle" style="${font}">${esc(trunc(x.label,n>6?7:11))}</text>`;}).join('');
+      return `${path}<text x="${cx}" y="${H-PAD.b+13}" text-anchor="middle" class="rp-ax">${esc(trunc(x.label,n>6?7:11))}</text>`;}).join('');
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${grid}<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${PAD.t+ih}" y2="${PAD.t+ih}" stroke="#b9c1ba"/>${bars}</svg>`;
   }
   if(type==='hbar'){
     const rowH=22,n=items.length,h=PAD.t+n*rowH+8,lw=110,iw=W-lw-40;
     const bars=items.map((x,i)=>{const y=PAD.t+i*rowH,w=(x.value/max)*iw,r=Math.min(4,w/2);
       const path=w<=0?'':`<path d="M${lw},${y+2} H${lw+w-r} a${r},${r} 0 0 1 ${r},${r} V${y+16-r} a${r},${r} 0 0 1 -${r},${r} H${lw} Z" fill="${_ACC_GREEN}"/>`;
-      return `<text x="${lw-8}" y="${y+13}" text-anchor="end" style="${font}">${esc(trunc(x.label,18))}</text>${path}<text x="${lw+w+6}" y="${y+13}" style="${font};fill:#111512;font-weight:700">${x.value}</text>`;}).join('');
+      return `<text x="${lw-8}" y="${y+13}" text-anchor="end" class="rp-ax">${esc(trunc(x.label,18))}</text>${path}<text x="${lw+w+6}" y="${y+13}" class="rp-axv">${x.value}</text>`;}).join('');
     return `<svg viewBox="0 0 ${W} ${h}" width="${W}" height="${h}" role="img">${bars}</svg>`;
   }
   if(type==='donut'){
@@ -19817,7 +19810,7 @@ function _accSvg(type,items){
       const d=items.length===1?`<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${_accHue(0)}" stroke-width="${R-r}"/>`
         :`<path d="M${x0},${y0} A${R},${R} 0 ${big} 1 ${x1},${y1} L${x2},${y2} A${r},${r} 0 ${big} 0 ${x3},${y3} Z" fill="${_accHue(i)}" stroke="#ffffff" stroke-width="2"/>`;
       a0=a1;return d;}).join('');
-    return `<svg viewBox="0 0 190 190" width="190" height="190" role="img">${arcs}<text x="${cx}" y="${cy+6}" text-anchor="middle" style="font-family:inherit;font-size:18px;font-weight:800;fill:#111512">${total}</text></svg>`;
+    return `<svg viewBox="0 0 190 190" width="190" height="190" role="img">${arcs}<text x="${cx}" y="${cy+6}" text-anchor="middle" class="rp-axt">${total}</text></svg>`;
   }
   if(type==='pie'){
     // The donut without the hole: a whole that is one thing divided, which is what a
@@ -19838,12 +19831,12 @@ function _accSvg(type,items){
     const pt=(x,i)=>[PAD.l+step*i,PAD.t+ih-(x.value/max)*ih];
     const pts=items.map(pt);
     const ticks=[0,0.5,1].map(f=>Math.round(max*f));
-    const grid=ticks.map(v=>{const y=PAD.t+ih-(v/max)*ih;return `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y}" y2="${y}" stroke="#e4e7e4"/><text x="${PAD.l-6}" y="${y+3}" text-anchor="end" style="${font}">${v}</text>`;}).join('');
+    const grid=ticks.map(v=>{const y=PAD.t+ih-(v/max)*ih;return `<line x1="${PAD.l}" x2="${W-PAD.r}" y1="${y}" y2="${y}" stroke="#e4e7e4"/><text x="${PAD.l-6}" y="${y+3}" text-anchor="end" class="rp-ax">${v}</text>`;}).join('');
     const path=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="none" stroke="${_ACC_GREEN}" stroke-width="2" stroke-linejoin="round"/>`;
     const dots=pts.map(p=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4" fill="${_ACC_GREEN}" stroke="#ffffff" stroke-width="2"/>`).join('');
     const last=pts[pts.length-1];
-    const endLbl=last?`<text x="${(last[0]-6).toFixed(1)}" y="${(last[1]-8).toFixed(1)}" text-anchor="end" style="${font};fill:#111512;font-weight:700">${items[n-1].value}</text>`:'';
-    const xl=items.map((x,i)=>(n<=6||i%2===0||i===n-1)?`<text x="${pts[i][0].toFixed(1)}" y="${H-PAD.b+13}" text-anchor="middle" style="${font}">${esc(trunc(x.label,7))}</text>`:'').join('');
+    const endLbl=last?`<text x="${(last[0]-6).toFixed(1)}" y="${(last[1]-8).toFixed(1)}" text-anchor="end" class="rp-axv">${items[n-1].value}</text>`:'';
+    const xl=items.map((x,i)=>(n<=6||i%2===0||i===n-1)?`<text x="${pts[i][0].toFixed(1)}" y="${H-PAD.b+13}" text-anchor="middle" class="rp-ax">${esc(trunc(x.label,7))}</text>`:'').join('');
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img">${grid}${path}${dots}${endLbl}${xl}</svg>`;
   }
   return '';
@@ -19853,9 +19846,10 @@ function _accSvg(type,items){
 function _accFigure(k,items,type){
   const total=items.reduce((s,x)=>s+x.value,0)||1;
   const _sw=type==='donut'||type==='pie';
-  const table=`<table style="width:auto;min-width:150px"><thead><tr><th>${esc(_accBdTitle(k))}</th><th>#</th><th>${t('acrShare')}</th></tr></thead><tbody>${items.map((x,i)=>`<tr><td>${_sw?`<span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:${_accHue(i)};margin-inline-end:6px;vertical-align:middle"></span>`:''}${esc(x.label)}</td><td>${x.value}</td><td>${Math.round(x.value/total*100)}%</td></tr>`).join('')}</tbody></table>`;
+  // a swatch's colour is the slice's, set through the CSSOM (data-cssv) when the window opens
+  const table=`<table class="rp-figtable"><thead><tr><th>${esc(_accBdTitle(k))}</th><th>#</th><th>${t('acrShare')}</th></tr></thead><tbody>${items.map((x,i)=>`<tr><td>${_sw?`<span class="rp-sw" data-cssv="${_cssv({'--rp-sw':_accHue(i)})}"></span>`:''}${esc(x.label)}</td><td>${x.value}</td><td>${Math.round(x.value/total*100)}%</td></tr>`).join('')}</tbody></table>`;
   const svg=_accSvg(type,items);
-  return `<section style="break-inside:avoid;margin-bottom:8px"><h2>${esc(_accBdTitle(k))}</h2><div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">${svg?`<div style="flex:0 0 auto">${svg}</div>`:''}<div style="flex:1 1 150px">${table}</div></div></section>`;
+  return `<section class="rp-fig"><h2>${esc(_accBdTitle(k))}</h2><div class="rp-figrow">${svg?`<div class="rp-figsvg">${svg}</div>`:''}<div class="rp-figtbl">${table}</div></div></section>`;
 }
 function _accSelCols(){const o=_accOpts();const sel=_ACC_COLS.filter(c=>o.cols[c.k]);return sel.length?sel:_ACC_COLS.filter(c=>c.k==='name');}
 // Every filter the builder offers, in the order the dialog shows them: the option it sets, its
@@ -19976,7 +19970,7 @@ function _accReportHtml(){
   const head=cols.map(c=>`<th>${t(c.key)}</th>`).join('');
   const _socCol=k=>SOCIAL_NETS.some(n=>n[0]===k);
   const body=rows.map(r=>`<tr>${cols.map(c=>`<td>${_socCol(c.k)&&r.cells[c.k]?`<a href="${_socUrl(c.k,r.cells[c.k])}" target="_blank" rel="noopener noreferrer">${esc(r.cells[c.k])}</a>`:(esc(r.cells[c.k])||'—')}</td>`).join('')}</tr>`).join('')
-    ||`<tr><td colspan="${cols.length}" style="text-align:center;color:#777;padding:18px">—</td></tr>`;
+    ||`<tr><td colspan="${cols.length}" class="rp-empty">—</td></tr>`;
   // Tag breakdown: holders overall, and how many of them are on this list.
   const onList=new Set(rows.map(r=>r.c.id));
   const tagRows=(S.tags||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
@@ -19995,7 +19989,7 @@ function _accReportHtml(){
   if(o.sections.natCount)tiles.push([nNats,t('acrStatNats'),o.sections.summary?'':' dark']);
   const html=`
     ${tiles.length?`<div class="totals">${tiles.map(([n,lbl,cls])=>`<div class="total-item${cls}"><span class="total-num">${n}</span><span class="total-lbl">${esc(lbl)}</span></div>`).join('')}</div>`:''}
-    ${filterLine?`<div style="font-size:11px;color:#5a635c;margin-bottom:10px">${esc(filterLine)}</div>`:''}
+    ${filterLine?`<div class="rp-filter">${esc(filterLine)}</div>`:''}
     ${_ACC_BREAKDOWNS.filter(k=>o.chartsOn[k]).map(k=>{const items=_accBreakdown(k,rows,o);return items.length?_accFigure(k,items,o.charts[k]):'';}).join('')}
     <h2>${t('amCustomersTitle')} · ${rows.length}</h2>
     <table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>
@@ -20164,16 +20158,17 @@ function printCloseout(){
   const grandCard=r2(rentCard+coCard),grandCash=r2(rentCash+coCash); // add-on money already sits inside rentCard/rentCash by pay method
   const reconDelta=r2(grandCollected-(grandCard+grandCash));
   // money rows print "SAR n"; a count (the riders) prints the bare number - it read "SAR 45"
-  const row=(label,val,color,count)=>`<div style="display:flex;justify-content:space-between;padding:4px 0"><span>${label}</span><strong${color?` style="color:${color}"`:''}>${count?'':'SAR '}${val}</strong></div>`;
-  const catRows=st.cats.map(c=>`<tr><td>${esc(_invCatLabel(c.cat))}</td><td style="text-align:center">${c.qty}</td><td style="text-align:end">SAR ${c.value}</td></tr>`).join('');
+  // (its ink is one of report.css's rp- colours: green collected, blue card, amber pending, violet team, grey free)
+  const row=(label,val,ink,count)=>`<div class="rp-row"><span>${label}</span><strong${ink?` class="${ink}"`:''}>${count?'':'SAR '}${val}</strong></div>`;
+  const catRows=st.cats.map(c=>`<tr><td>${esc(_invCatLabel(c.cat))}</td><td class="rp-tc">${c.qty}</td><td class="rp-te">SAR ${c.value}</td></tr>`).join('');
   const body=`
     <h2>${t('coRentals')}</h2>
-    ${row(t('printTotalRiders'),rentEntries.length,'',true)}${row(t('printCollected'),rentCollected,'#16a34a')}${rentCard>0?row('&nbsp;&nbsp;'+t('cashCard'),rentCard,'#2563eb')+row('&nbsp;&nbsp;'+t('cashCash'),rentCash,'#16a34a'):''}${row(t('printPending'),rentPending,'#b45309')}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected,'#16a34a')+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,'#b45309'):''):''}
+    ${row(t('printTotalRiders'),rentEntries.length,'',true)}${row(t('printCollected'),rentCollected,'rp-green')}${rentCard>0?row('&nbsp;&nbsp;'+t('cashCard'),rentCard,'rp-blue')+row('&nbsp;&nbsp;'+t('cashCash'),rentCash,'rp-green'):''}${row(t('printPending'),rentPending,'rp-amber')}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected,'rp-green')+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,'rp-amber'):''):''}
     <h2>${t('coSales')}</h2>
-    ${st.cats.length?`<table><thead><tr><th style="text-align:start">${t('invCategory')}</th><th style="text-align:center">${t('cashQtyCol')}</th><th style="text-align:end">${t('repValueSar')}</th></tr></thead><tbody>${catRows}</tbody></table>`:''}
-    <div style="margin-top:8px">${row(t('printCollected'),st.collected,'#16a34a')}${(coCard>0||coCash>0)?row('&nbsp;&nbsp;'+t('cashCard'),coCard,'#2563eb')+row('&nbsp;&nbsp;'+t('cashCash'),coCash,'#16a34a'):''}${row(t('printPending'),st.pending,'#b45309')}${st.team>0?row(t('payTeam'),st.team,'#7c3aed'):''}${st.free>0?row(t('onTheHouseLabel'),st.free,'#666'):''}${st.discount>0?row(t('cashDiscount'),st.discount,'#666'):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,'#b45309'):''}</div>
-    <div style="margin-top:14px;border-top:2px solid #0f1215;padding-top:10px;font-size:15px">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected,'#16a34a')}${grandCollected>0?row('&nbsp;&nbsp;'+t('cashCard'),grandCard,'#2563eb')+row('&nbsp;&nbsp;'+t('cashCash'),grandCash,'#16a34a'):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,'#b45309')}
-    ${Math.abs(reconDelta)>=0.01?`<div style="margin-top:9px;padding:8px 11px;border-radius:3px;background:#fdeaea;color:#b42318;font-weight:800;display:flex;justify-content:space-between;font-size:13px"><span>${t('coReconOff')}</span><span>SAR ${reconDelta}</span></div>`:`<div style="margin-top:9px;padding:8px 11px;border-radius:3px;background:#e7f6ec;color:#157347;font-weight:800;text-align:center;font-size:13px">${t('coReconOk')} &#x2713;</div>`}</div>`;
+    ${st.cats.length?`<table><thead><tr><th class="rp-ts">${t('invCategory')}</th><th class="rp-tc">${t('cashQtyCol')}</th><th class="rp-te">${t('repValueSar')}</th></tr></thead><tbody>${catRows}</tbody></table>`:''}
+    <div class="rp-mt8">${row(t('printCollected'),st.collected,'rp-green')}${(coCard>0||coCash>0)?row('&nbsp;&nbsp;'+t('cashCard'),coCard,'rp-blue')+row('&nbsp;&nbsp;'+t('cashCash'),coCash,'rp-green'):''}${row(t('printPending'),st.pending,'rp-amber')}${st.team>0?row(t('payTeam'),st.team,'rp-violet'):''}${st.free>0?row(t('onTheHouseLabel'),st.free,'rp-grey'):''}${st.discount>0?row(t('cashDiscount'),st.discount,'rp-grey'):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,'rp-amber'):''}</div>
+    <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected,'rp-green')}${grandCollected>0?row('&nbsp;&nbsp;'+t('cashCard'),grandCard,'rp-blue')+row('&nbsp;&nbsp;'+t('cashCash'),grandCash,'rp-green'):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,'rp-amber')}
+    ${Math.abs(reconDelta)>=0.01?`<div class="rp-recon-off"><span>${t('coReconOff')}</span><span>SAR ${reconDelta}</span></div>`:`<div class="rp-recon-ok">${t('coReconOk')} &#x2713;</div>`}</div>`;
   const html=_reportShell({kind:t('closeoutTitle'),title:t('closeoutTitle'),subtitle:`${dayLabel(sel.day)} &middot; ${shortDate(date)}`,body,maxWidth:'560px'});
   _openReport(html,620,800);
 }
@@ -20203,12 +20198,12 @@ function printCommunityRoster(sess){
       ${_bike?`<td>${esc(typeLabel(resolvedType(e)))}</td>`:''}
       <td>${esc(statusOf(e))}</td>
     </tr>`;
-  }).join('')||`<tr><td colspan="${(_showMem?7:6)-(_bike?0:2)}" style="text-align:center;color:#777;padding:18px">—</td></tr>`;
+  }).join('')||`<tr><td colspan="${(_showMem?7:6)-(_bike?0:2)}" class="rp-empty">—</td></tr>`;
   const body=`
     <div class="totals">
       <div class="total-item"><span class="total-num">${riders.length}</span><span class="total-lbl">${t('statNumRiders')}</span></div>
-      <div class="total-item"><span class="total-num" style="color:#16a34a">${nApproved}</span><span class="total-lbl">${t('apprApprovedChip')}</span></div>
-      <div class="total-item"><span class="total-num" style="color:#b45309">${nPending}</span><span class="total-lbl">${t('apprPendingChip')}</span></div>
+      <div class="total-item"><span class="total-num rp-green">${nApproved}</span><span class="total-lbl">${t('apprApprovedChip')}</span></div>
+      <div class="total-item"><span class="total-num rp-amber">${nPending}</span><span class="total-lbl">${t('apprPendingChip')}</span></div>
       <div class="total-item"><span class="total-num">${nWaitlist}</span><span class="total-lbl">${t('waitlistLabel')}</span></div>
     </div>
     <table>
@@ -20265,7 +20260,7 @@ function printSessionReport(){
   }
   const addonSales=addonSalesFromGroups(groups);
   const sessPurch=_salesTotals(_cashSessionLines(sessId));
-  const _stColor={done:'#0c7a3d',active:'#077a4b',waiting:'#8a5c14',noshow:'#a33b2e'};
+  const _stCls={done:'rp-st-done',active:'rp-st-active',waiting:'rp-st-waiting',noshow:'rp-st-noshow'}; // each status's ink (report.css)
   const _payCell=e=>{
     const price=e.price??DEFAULT_PRICE;
     if(!price)return t('freeLabel');
@@ -20278,8 +20273,8 @@ function printSessionReport(){
   // Columns follow the report builder's picks (falls back to # + name if none are on).
   const _ro=_repOpts();
   const _cell={
-    seq:    (e,i)=>`<td style="color:#6b736d">${i+1}</td>`,
-    qnum:   e=>`<td style="font-weight:700">${e.queueNum}</td>`,
+    seq:    (e,i)=>`<td class="rp-seq">${i+1}</td>`,
+    qnum:   e=>`<td class="rp-b7">${e.queueNum}</td>`,
     name:   e=>`<td>${esc(e.name)}</td>`,
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     phone:  e=>`<td>${esc(fmtPhone(e.phone))||'—'}</td>`,
@@ -20287,13 +20282,13 @@ function printSessionReport(){
     bike:   e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');
                 return`<td>${esc(typeLabel(resolvedType(e)))}${e.size?' '+esc(e.size):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},
     payment:e=>`<td>${_payCell(e)}</td>`,
-    status: e=>`<td style="font-weight:700;color:${_stColor[e.status]||'#111512'}">${reportStatusLabel(e.status)}</td>`,
+    status: e=>`<td class="${_stCls[e.status]||'rp-st'}">${reportStatusLabel(e.status)}</td>`,
   };
   const _sel=_REP_COLS.filter(c=>c.k!=='member'&&_ro.cols[c.k]); // membership is Saturday-only
   const _cols=_sel.length?_sel:_REP_COLS.filter(c=>c.k==='qnum'||c.k==='name');
   const _head=_cols.map(c=>`<th>${t(c.key)}</th>`).join('');
   const rows=entries.map((e,i)=>`<tr>${_cols.map(c=>_cell[c.k](e,i)).join('')}</tr>`).join('')
-    ||`<tr><td colspan="${_cols.length}" style="text-align:center;color:#777;padding:18px">—</td></tr>`;
+    ||`<tr><td colspan="${_cols.length}" class="rp-empty">—</td></tr>`;
   const vatIncl=Math.round(paidSAR*0.15/1.15*100)/100;
   const body=`
     ${_ro.sections.summary?`<div class="totals">
@@ -20311,7 +20306,7 @@ function printSessionReport(){
     <table>
       <thead><tr><th>${t('repAddon')}</th><th>${t('repBrand')}</th><th>${t('repBookings')}</th><th>${t('repValueSar')}</th></tr></thead>
       <tbody>${addonSales.items.map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.brand||'—')}</td><td>${a.units}</td><td>SAR ${a.value}</td></tr>`).join('')}
-        <tr style="font-weight:800"><td>${t('repTotal')}</td><td></td><td>${addonSales.totalUnits}</td><td>SAR ${addonSales.totalValue}</td></tr>
+        <tr class="rp-b8"><td>${t('repTotal')}</td><td></td><td>${addonSales.totalUnits}</td><td>SAR ${addonSales.totalValue}</td></tr>
       </tbody>
     </table>`:''}
     ${(_ro.sections.sales&&sessPurch.units>0)?`
@@ -20320,10 +20315,10 @@ function printSessionReport(){
       <thead><tr><th>${t('invCategory')}</th><th>${t('cashQtyCol')}</th><th>${t('repValueSar')}</th></tr></thead>
       <tbody>${sessPurch.cats.map(c=>`<tr><td>${esc(_invCatLabel(c.cat))}</td><td>${c.qty}</td><td>SAR ${c.value}</td></tr>`).join('')}
         ${sessPurch.discount>0?`<tr><td>${t('cashDiscount')}</td><td></td><td>SAR -${sessPurch.discount}</td></tr>`:''}
-        <tr style="font-weight:800"><td>${t('repTotal')}</td><td>${sessPurch.units}</td><td>SAR ${sessPurch.value}</td></tr>
+        <tr class="rp-b8"><td>${t('repTotal')}</td><td>${sessPurch.units}</td><td>SAR ${sessPurch.value}</td></tr>
       </tbody>
     </table>
-    <div style="margin-top:8px;font-size:12px;color:#444">${t('printCollected')}: <strong style="color:#16a34a">SAR ${sessPurch.collected}</strong> &nbsp;·&nbsp; ${t('printPending')}: <strong style="color:#b45309">SAR ${sessPurch.pending}</strong>${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong style="color:#7c3aed">SAR ${sessPurch.team}</strong>`:''}</div>`:''}`;
+    <div class="rp-salesline">${t('printCollected')}: <strong class="rp-green">SAR ${sessPurch.collected}</strong> &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">SAR ${sessPurch.pending}</strong>${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong class="rp-violet">SAR ${sessPurch.team}</strong>`:''}</div>`:''}`;
   const _sTime=(()=>{try{return sessionTime(sess);}catch(_){return'';}})();
   const html=_reportShell({
     kind:t('printReportTitle'),
@@ -24192,20 +24187,20 @@ function _renderRidersReport(){
   const m=document.getElementById('rider-report-modal');if(!m||!S._ridersRepOpen)return;
   const coRow=co=>{
     const rows=_riderReportRows(co),n=rows.length,total=rows.reduce((a,r)=>a+_riderPrice(r),0);
-    return`<div class="rider-rep-co" data-co="${co}" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
-      <div style="min-width:0"><b>${co}</b><div style="font-size:12px;color:var(--muted)">${esc(t('ridersRepRides'))}: ${n} · <bdi>SAR ${total.toFixed(2)}</bdi></div></div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
+    return`<div class="rider-rep-co rp-co" data-co="${co}">
+      <div class="rp-co-l"><b>${co}</b><div class="rp-co-sub">${esc(t('ridersRepRides'))}: ${n} · <bdi>SAR ${total.toFixed(2)}</bdi></div></div>
+      <div class="rp-co-acts">
         <button class="btn-sm btn-muted"${n?'':' disabled'} data-on-click="${_on("printRidersReport",co)}">${ICON_PRINT} ${t('repPrintNow')}</button>
         <button class="btn-sm btn-muted"${n?'':' disabled'} data-on-click="${_on("exportRidersReportCsv",co)}">${ICON_EXPORT} CSV</button>
       </div></div>`;
   };
   const none=_riderReportRows('');
   const html=`<div class="modal-backdrop" data-on-click="${_on("_on__renderRidersReport_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-label="${esc(t('ridersReport'))}" style="max-width:460px">
+    <div class="modal-box rp-box" role="dialog" aria-modal="true" aria-label="${esc(t('ridersReport'))}">
       <div class="modal-title">${esc(t('ridersReport'))} · ${esc(_ridersRepScope())}</div>
-      <div style="margin-top:4px">${RIDER_COMPANIES.map(coRow).join('')}</div>
-      ${none.length?`<div id="rider-rep-noco" style="margin-top:12px;padding:10px 12px;border:1px solid var(--orange);border-radius:6px;font-size:13px">${esc(t('ridersRepNoCo').replace('{0}',none.length))}
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${none.map(r=>`<button class="btn-sm btn-muted" data-on-click="${_on("_on__renderRidersReport_2",_EV,_EL,r.id)}">${esc(r.booking_no||r.name||'')}</button>`).join('')}</div></div>`:''}
+      <div class="rp-cos">${RIDER_COMPANIES.map(coRow).join('')}</div>
+      ${none.length?`<div id="rider-rep-noco" class="rp-noco">${esc(t('ridersRepNoCo').replace('{0}',none.length))}
+        <div class="rp-noco-list">${none.map(r=>`<button class="btn-sm btn-muted" data-on-click="${_on("_on__renderRidersReport_2",_EV,_EL,r.id)}">${esc(r.booking_no||r.name||'')}</button>`).join('')}</div></div>`:''}
       <div class="modal-footer"><button class="btn-secondary" data-on-click="${_on("closeRidersReport")}">${t('closeBtn')}</button></div>
     </div></div>`;
   // renderRiders repaints an open report whenever the list changes: one opened before the list
@@ -24241,9 +24236,9 @@ function printRidersReport(co){
       <div class="total-item dark"><span class="total-num">SAR ${total.toFixed(2)}</span><span class="total-lbl">${esc(t('ridersRepTotal'))}</span></div>
     </div>
     <h2>${esc(t('ridersReport'))} · ${esc(co)} · ${esc(sessLabel)}</h2>
-    <table><thead><tr><th>${t('colBookingNo')}</th><th>${t('colSession')}</th><th>${t('colBadge')}</th><th>${t('colRider')}</th><th>${t('bikeTypeLabel')}</th><th>${t('ridersCheckIn')}</th><th>${t('ridersReturn')}</th><th style="text-align:end">SAR</th></tr></thead>
-    <tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(shortDate(String(r.session_id||'').slice(0,10)))}</td><td>${esc(r.badge)}</td><td>${esc(r.name)}</td><td>${esc(typeLabel(r.type_preference))}</td><td dir="ltr">${esc(_riderClock(r.checked_in_at))}</td><td dir="ltr">${esc(_riderClock(r.checked_out_at))}</td><td style="text-align:end">${_riderPrice(r).toFixed(2)}</td></tr>`).join('')}
-    <tr><td colspan="7" style="text-align:end;background:#f2f6f2">${esc(t('ridersRepTotal'))}</td><td style="text-align:end;background:#f2f6f2">${total.toFixed(2)}</td></tr></tbody></table>`;
+    <table><thead><tr><th>${t('colBookingNo')}</th><th>${t('colSession')}</th><th>${t('colBadge')}</th><th>${t('colRider')}</th><th>${t('bikeTypeLabel')}</th><th>${t('ridersCheckIn')}</th><th>${t('ridersReturn')}</th><th class="rp-te">SAR</th></tr></thead>
+    <tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(shortDate(String(r.session_id||'').slice(0,10)))}</td><td>${esc(r.badge)}</td><td>${esc(r.name)}</td><td>${esc(typeLabel(r.type_preference))}</td><td dir="ltr">${esc(_riderClock(r.checked_in_at))}</td><td dir="ltr">${esc(_riderClock(r.checked_out_at))}</td><td class="rp-te">${_riderPrice(r).toFixed(2)}</td></tr>`).join('')}
+    <tr><td colspan="7" class="rp-tot">${esc(t('ridersRepTotal'))}</td><td class="rp-tot">${total.toFixed(2)}</td></tr></tbody></table>`;
   _openReport(_reportShell({kind:t('ridersReport')+' · '+co,docTitle:co+' '+sessLabel,body,chip:`${esc(t('ridersRepTotal'))}: <strong>SAR ${total.toFixed(2)}</strong>`}));
 }
 
@@ -28240,17 +28235,17 @@ function _ctPrintReceipt(rows,cust,at){
   const logoUrl=new URL('/logo.png',location.origin).href;
   const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
-  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td style="text-align:center">${esc(r.qty)}</td><td style="text-align:end">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</td></tr>`).join('');
-  const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8"><title>${t('cashReceiptWord')}</title><link href="/fonts/fonts.css" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font-family:${ar?"'IBM Plex Sans Arabic',":''}'Barlow',system-ui,sans-serif;color:#111512;padding:14px;max-width:320px;margin:0 auto;font-size:13px}.mm-banner{background:#123019;color:#e9f4ec;border-radius:10px;padding:12px 14px;text-align:center}.mm-banner img{height:36px;display:block;margin:0 auto 4px;object-fit:contain}.mm-banner strong{font-size:12.5px;font-weight:800;display:block}.mm-banner .doc{font-size:9.5px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#03ff89;display:block;margin-top:3px}.mm-rule{height:4px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:8px 0 10px}.sub{text-align:center;color:#5a635c;font-size:10.5px;margin-bottom:8px;line-height:1.5}table{width:100%;border-collapse:collapse;margin-top:6px;font-size:11px}td{padding:6px 5px;border-bottom:1px dashed #cfd6c9;text-align:start;font-weight:700}.tot{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:14px;margin-top:10px;background:#123019;color:#fff;border-radius:8px;padding:9px 12px}.tot span:last-child{color:#03ff89}@media print{button{display:none}}</style></head><body>
+  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</td></tr>`).join('');
+  const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8"><title>${t('cashReceiptWord')}</title><link href="/fonts/fonts.css" rel="stylesheet"><link href="${location.origin}/receipt.css?v=${RECEIPT_CSS_V}" rel="stylesheet"></head><body>
     <div class="mm-banner"><img src="${logoUrl}" alt="Micromobility"><strong>Micromobility Co.</strong><span class="doc">${t('cashReceiptWord')}</span></div>
     <div class="mm-rule"></div>
     <div class="sub">${new Date(at).toLocaleString(_locale(),{timeZone:KSA_TZ})}${cust?`<br>${esc(cust)}`:''}${sess?`<br>${esc(dayLabel(sess.day))} ${esc(shortDate(sess.session_date||sess.id))}`:''}</div>
     <table role="presentation"><tbody>${body}</tbody></table>
     <div class="tot"><span>${t('repTotal')}</span><span>SAR ${total}</span></div>
-    <br><button class="rcpt-print" style="display:block;margin:0 auto;padding:8px 20px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-family:inherit">${t('repPrintNow')}</button>
+    <br><button class="rcpt-print rp-rbtn">${t('repPrintNow')}</button>
   </body></html>`;
   const w=window.open('','_blank','width=380,height=620');if(!w)return;w.document.write(html);w.document.close();w.focus();try{w.document.querySelectorAll('.rcpt-print').forEach(b=>b.addEventListener('click',()=>w.print()));}catch(e){} // the receipt is its own document under the page's policy: its button is wired from here
-  setTimeout(()=>w.print(),300);
+  _printWhenReady(w,300); // once receipt.css, the fonts and the logo are in (no sooner than it always waited)
 }
 // Themed SVG clip-art for the Sales tiles (replaces product photos): detailed two-tone green illustrations on the dark card, chosen by product category so the type is easy to recognize.
 function _salesArt(cat,h){
@@ -30536,9 +30531,9 @@ function printHeightBikeReport(){
   if(!data.length){toast(t('anCsvEmpty'));return;}
   const blocks=data.map(d=>{
     const title=`${esc(dayLabel(d.sess.day))} · ${esc(shortDate(d.sess.session_date||d.sess.id))}${d.sess.location?' · '+esc(d.sess.location):''}`;
-    const hRows=d.people.length?d.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(String(p.height))}</td><td>${esc(typeLabel(p.type)||p.type)}</td></tr>`).join(''):`<tr><td colspan="3" style="color:#888">${t('repNoHeight')}</td></tr>`;
-    const tc=d.typeCounts;const tRows=[['Road',tc.Road],['Hybrid',tc.Hybrid],['Mountain',tc.Mountain]].concat(d.other?[['Other',d.other]]:[]).map(([ty,n])=>`<tr><td>${esc(typeLabel(ty)||ty)}</td><td style="text-align:end;font-weight:800">${n}</td></tr>`).join('');
-    return`<section style="margin-bottom:26px"><h2 style="margin-top:0">${title}</h2><div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start"><div style="flex:2 1 320px"><h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#666;margin:0 0 5px">${t('repRiderHeights')} (${d.people.length})</h3>${d.hSummary.count?`<div style="font-size:12px;margin:0 0 8px;color:#333">${t('repHeightSummary')}: <b>${t('anHeightAvg')} ${d.hSummary.avg} cm</b> &nbsp;\u00b7&nbsp; ${t('repMin')} ${d.hSummary.min} &nbsp;\u00b7&nbsp; ${t('repMax')} ${d.hSummary.max}</div><h4 style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#888;margin:0 0 3px">${t('repHeightRanges')}</h4><table style="max-width:260px;margin-bottom:10px"><tbody>${d.hRanges.map(([l,n])=>`<tr><td>${l} cm</td><td style="text-align:end;font-weight:800">${n}</td></tr>`).join('')}</tbody></table>`:''}<h4 style="font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#888;margin:0 0 3px">${t('repHeightIndividual')}</h4><table><thead><tr><th>${t('nameLabel')}</th><th>${t('repHeightCol')}</th><th>${t('colBike')}</th></tr></thead><tbody>${hRows}</tbody></table></div><div style="flex:1 1 190px"><h3 style="font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#666;margin:0 0 5px">${t('repBikesRented')} (${d.rented})</h3><table><tbody>${tRows}</tbody></table></div></div></section>`;
+    const hRows=d.people.length?d.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(String(p.height))}</td><td>${esc(typeLabel(p.type)||p.type)}</td></tr>`).join(''):`<tr><td colspan="3" class="rp-c888">${t('repNoHeight')}</td></tr>`;
+    const tc=d.typeCounts;const tRows=[['Road',tc.Road],['Hybrid',tc.Hybrid],['Mountain',tc.Mountain]].concat(d.other?[['Other',d.other]]:[]).map(([ty,n])=>`<tr><td>${esc(typeLabel(ty)||ty)}</td><td class="rp-num">${n}</td></tr>`).join('');
+    return`<section class="rp-hsec"><h2 class="rp-h2top">${title}</h2><div class="rp-hrow"><div class="rp-hmain"><h3 class="rp-h3">${t('repRiderHeights')} (${d.people.length})</h3>${d.hSummary.count?`<div class="rp-hsum">${t('repHeightSummary')}: <b>${t('anHeightAvg')} ${d.hSummary.avg} cm</b> &nbsp;\u00b7&nbsp; ${t('repMin')} ${d.hSummary.min} &nbsp;\u00b7&nbsp; ${t('repMax')} ${d.hSummary.max}</div><h4 class="rp-h4">${t('repHeightRanges')}</h4><table class="rp-hrange"><tbody>${d.hRanges.map(([l,n])=>`<tr><td>${l} cm</td><td class="rp-num">${n}</td></tr>`).join('')}</tbody></table>`:''}<h4 class="rp-h4">${t('repHeightIndividual')}</h4><table><thead><tr><th>${t('nameLabel')}</th><th>${t('repHeightCol')}</th><th>${t('colBike')}</th></tr></thead><tbody>${hRows}</tbody></table></div><div class="rp-hside"><h3 class="rp-h3">${t('repBikesRented')} (${d.rented})</h3><table><tbody>${tRows}</tbody></table></div></div></section>`;
   }).join('');
   const html=_reportShell({kind:t('anHeightReport'),title:t('anHeightReport'),subtitle:esc(_anHeightRangeLabel()),body:blocks,maxWidth:'900px'});
   _openReport(html,940,840);
@@ -32753,7 +32748,7 @@ if('serviceWorker' in navigator){
     if(document.getElementById('upd-bar'))return;
     const b=document.createElement('div');b.id='upd-bar';
     b.style.cssText='position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:9500;display:flex;align-items:center;gap:12px;background:var(--s1,#111);border:1px solid rgba(3,255,137,.45);border-radius:8px;padding:10px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5);font-family:inherit';
-    b.innerHTML='<span style="font-size:13px;font-weight:700">'+t('updateReadyToast')+'</span><button style="background:var(--green,#03ff89);color:#000;border:none;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit">'+t('updReloadBtn')+'</button>';
+    b.innerHTML='<span class="rp-upd-t">'+t('updateReadyToast')+'</span><button class="rp-upd-b">'+t('updReloadBtn')+'</button>'; // styles.css, #upd-bar
     b.querySelector('button').onclick=_updReload;
     document.body.appendChild(b);
   };

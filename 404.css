@@ -1,0 +1,6 @@
+/* The 404 page (404.html). Its style attributes moved here (2026-09-29): it is served under the same
+   Content-Security-Policy as the app, which is dropping style-src 'unsafe-inline'. */
+.rp-nf{font-family:system-ui,sans-serif;background:#03060a;color:#9aa;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}
+.rp-nf-box{text-align:center}
+.rp-nf-h{color:#03ff89;margin:0 0 8px}
+.rp-nf-a{color:#03ff89}

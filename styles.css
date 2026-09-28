@@ -1679,6 +1679,21 @@
     #print-opts-modal .rpt-pair{display:flex;gap:10px;}
     #print-opts-modal .rpt-w100{width:100%;}
     #print-opts-modal .rpt-flex1{flex:1;}
+    /* The billing report dialog (_renderRidersReport, drawn in #rider-report-modal) and the new-build
+       bar (#upd-bar, the service worker's "a new version is ready"), without inline styles (2026-09-29;
+       the printed reports themselves draw with report.css and receipt.css). Scoped by the id each is
+       drawn under, so each rule outranks the .modal-box widths, the Arabic buttons' font and the
+       :focus-visible radius exactly as the style attribute did. */
+    #rider-report-modal .rp-box{max-width:460px;}
+    #rider-report-modal .rp-cos{margin-top:4px;}
+    #rider-report-modal .rp-co{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+    #rider-report-modal .rp-co-l{min-width:0;}
+    #rider-report-modal .rp-co-sub{font-size:12px;color:var(--muted);}
+    #rider-report-modal .rp-co-acts{display:flex;gap:6px;flex-shrink:0;}
+    #rider-report-modal .rp-noco{margin-top:12px;padding:10px 12px;border:1px solid var(--orange);border-radius:6px;font-size:13px;}
+    #rider-report-modal .rp-noco-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+    #upd-bar .rp-upd-t{font-size:13px;font-weight:700;}
+    #upd-bar .rp-upd-b{background:var(--green,#03ff89);color:#000;border:none;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;}
 
     .empty-state{text-align:center;padding:52px 24px;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:.1px;}
     .cashier-grid{display:grid;}

@@ -18,6 +18,8 @@ const dist = join(root, 'dist');
 // ships and the files the worker's cache name covers cannot drift apart.
 export const FILES = [
   'index.html', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html',
+  'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
+  '404.css', // the 404 page's
   '_headers', '_redirects',
   'robots.txt', 'sitemap.xml',
   'brand.png', 'hero.webp', 'icon-192.png', 'icon-512.png', 'logo.png', 'apple-touch-icon.png',

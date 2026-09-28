@@ -143,6 +143,18 @@ for (const f of bikeFiles) bikesHasher.update(f).update(await readFile(new URL(f
 if (!src.includes("const BIKE_IMG_V=''")) throw new Error('build: BIKE_IMG_V placeholder missing');
 src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ? bikesHasher.digest('hex').slice(0, 10) : ''}'`);
 
+// The print windows' stylesheets (report.css for every report _openReport writes, receipt.css for
+// the till's receipt) are linked from windows written into about:blank, which run under the page's
+// policy - no <style> there once style-src drops 'unsafe-inline'. They are asked for with their own
+// content hash, so _headers can keep them a year and a change is a new URL. Stamped here, before
+// the split, so whichever half a link lands in carries it (the receipt is in staff.js).
+for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'RECEIPT_CSS_V']]) {
+  const ph = `const ${name}=''`;
+  if (!src.includes(ph)) throw new Error(`build: ${name} placeholder missing`);
+  if (!DIST_FILES.includes(file)) throw new Error(`build: ${file} is linked by the print windows but scripts/assemble-dist.mjs does not ship it`);
+  src = src.replace(ph, `const ${name}='${createHash('sha256').update(await readFile(new URL(`../${file}`, import.meta.url))).digest('hex').slice(0, 10)}'`);
+}
+
 // ── The staff half, split off into staff.js (scripts/split-staff.mjs) ──────────
 // A customer's phone used to download the whole app, two thirds of it staff-only. The main
 // script is cut by what a customer's page can reach; the rest becomes staff.js, minified the same
@@ -222,6 +234,7 @@ if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(out)) throw new Error('buil
 //   styles.css      - already in, through cssHash
 //   functions/      - not static files
 //   lang/, cities/  - asked for with their own content hash (?v=), so a change is a new URL
+//   report.css, receipt.css - the same (and read by the print windows, which no worker controls)
 // The list is read from disk, exactly what assemble-dist would copy, so a new asset counts the
 // moment it is there - build, then commit, the usual order here. Dotfiles (.DS_Store and the
 // like) and anything .gitignore'd are left out: they are on this machine only, and CI, whose
@@ -232,7 +245,7 @@ const swBefore = sw;
 // The staff half rides in the shell on staff hosts (service-worker.js, STAFF_JS) under its own
 // hash, stamped here before the precache list is checked below.
 sw = sw.replace(/staff\.js\?v=[A-Za-z0-9_]+/g, `staff.js?v=${staffHash}`);
-const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js']); // staff.js: asked for with its own hash (?v=), like the packs
+const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js', 'report.css', 'receipt.css']); // staff.js, report.css, receipt.css: asked for with their own hash (?v=), like the packs
 const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities']);
 const shipped = (rel) => DIST_FILES.includes(rel) || DIST_DIRS.some((d) => rel.startsWith(d + '/'));
 // Every file the worker precaches must also ship, or cache.addAll() rejects and the worker
@@ -338,7 +351,7 @@ for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
 // markup and templates write becomes a class, or a data-cssv value set through the CSSOM. The
 // ceiling only comes down: a new inline style fails the build, so the count the move started from
 // never grows back while it runs. At 0 the policy drops 'unsafe-inline'.
-const STYLE_ATTRS_MAX = 654;
+const STYLE_ATTRS_MAX = 583;
 const styleAttrs = [out, staffMin.code].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
 if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline styles, more than the ${STYLE_ATTRS_MAX} it may while the policy drops them - write a class (or data-cssv="\${_cssv({...})}" for a run-time value) instead of style="..."`);
 const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
