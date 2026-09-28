@@ -22897,20 +22897,20 @@ function _showCustomPriceModal(){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__showCustomPriceModal_1",_EV,_EL)}">
     <div class="confirm-box" role="dialog" aria-modal="true">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-        <div style="font-size:18px;font-weight:900">${t('bikeCustomPrice')}</div>
-        <button data-on-click="${_on("_on__showCustomPriceModal_2",_EV,_EL)}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px" data-on-mouseover="${_on("_on__showCustomPriceModal_3",_EV,_EL)}" data-on-mouseout="${_on("_on__showCustomPriceModal_4",_EV,_EL)}">&times;</button>
+      <div class="iv-cp-head">
+        <div class="chrome-dt">${t('bikeCustomPrice')}</div>
+        <button data-on-click="${_on("_on__showCustomPriceModal_2",_EV,_EL)}" aria-label="${t('closeBtn')}" class="chrome-x" data-on-mouseover="${_on("_on__showCustomPriceModal_3",_EV,_EL)}" data-on-mouseout="${_on("_on__showCustomPriceModal_4",_EV,_EL)}">&times;</button>
       </div>
-      <div style="margin-bottom:20px">
-        <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px" for="custom-price-inp">${t('repPriceSar')}</label>
+      <div class="iv-mb20">
+        <label class="iv-cp-lbl" for="custom-price-inp">${t('repPriceSar')}</label>
         <input id="custom-price-inp" type="number" min="1" step="0.5" placeholder="${t('phHeightEg')}"
-          style="width:100%;background:var(--s2);border:1px solid rgba(var(--tint-rgb),.12);border-radius:6px;padding:12px 14px;font-size:16px;font-weight:700;color:var(--text);font-family:var(--font-body);outline:none"
+          class="iv-cp-inp"
           data-on-focus="${_on("_on__showCustomPriceModal_5",_EV,_EL)}" data-on-blur="${_on("_on__showCustomPriceModal_6",_EV,_EL)}"
           data-on-keydown="${_on("_on__showCustomPriceModal_7",_EV,_EL)}">
       </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
+      <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("_on__showCustomPriceModal_8",_EV,_EL)}">${t('cancelBtn')}</button>
-        <button class="btn-primary" data-on-click="${_on("_submitCustomPrice")}" style="min-width:100px">${t('setPriceBtn')}</button>
+        <button class="btn-primary chrome-mw100" data-on-click="${_on("_submitCustomPrice")}">${t('setPriceBtn')}</button>
       </div>
     </div>
   </div>`;
@@ -24128,21 +24128,21 @@ function _renderRiderModal(){
   const r=(S.riders||[]).find(x=>String(x.id)===S._riderModalId);if(!r){closeRiderModal();return;}
   const sess=r.session_id?allSessions().find(x=>x.id===r.session_id):null;
   const state=r.checked_out_at?t('ridersFilterReturned'):r.checked_in_at?t('ridersFilterRiding'):t('ridersFilterWaiting');
-  const stateClr=r.checked_out_at?'var(--muted)':r.checked_in_at?'var(--green)':'var(--orange)';
+  const stateCls=r.checked_out_at?'iv-back':r.checked_in_at?'iv-riding':'iv-wait';
   const dur=r.checked_out_at?_riderDur(r.checked_in_at,r.checked_out_at):'';
-  const by=who=>who?` <span style="color:var(--muted);font-weight:600">${esc(t('ridersBy').replace('{0}',who))}</span>`:'';
-  const row=(k,v)=>v?`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--muted);font-weight:700;flex-shrink:0">${k}</span><span style="font-weight:800;text-align:end">${v}</span></div>`:'';
+  const by=who=>who?` <span class="iv-by">${esc(t('ridersBy').replace('{0}',who))}</span>`:'';
+  const row=(k,v)=>v?`<div class="iv-mrow"><span class="iv-mkey">${k}</span><span class="iv-mval">${v}</span></div>`:'';
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__renderRiderModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-label="${esc(r.booking_no||'')} ${esc(r.name)}" style="max-width:440px">
-      <div class="modal-title"><span class="status-badge badge-active" style="font-variant-numeric:tabular-nums">${esc(r.booking_no||'')}</span> ${esc(r.name)}</div>
-      ${Number(r.submissions)>1?`<div class="rider-sent" style="margin-top:6px;font-size:12px;font-weight:700;color:var(--orange)">${esc(t('ridersResub').replace('{0}',String(r.submissions)))}</div>`:''}
-      <div id="rider-state" style="margin-top:6px;font-size:13px;font-weight:800;color:${stateClr}">${state}${r.checked_in_at?` · <bdi>${esc(_riderClock(r.checked_in_at))}</bdi>`:''}${r.checked_out_at?` · <bdi>${esc(_riderClock(r.checked_out_at))}</bdi>`:''}${dur?` · ${esc(t('ridersRideTime').replace('{0}',dur))}`:''}</div>
-      <div style="margin-top:10px">
+    <div class="modal-box iv-mw440" role="dialog" aria-modal="true" aria-label="${esc(r.booking_no||'')} ${esc(r.name)}">
+      <div class="modal-title"><span class="status-badge badge-active iv-tnum">${esc(r.booking_no||'')}</span> ${esc(r.name)}</div>
+      ${Number(r.submissions)>1?`<div class="rider-sent iv-sent">${esc(t('ridersResub').replace('{0}',String(r.submissions)))}</div>`:''}
+      <div id="rider-state" class="iv-state ${stateCls}">${state}${r.checked_in_at?` · <bdi>${esc(_riderClock(r.checked_in_at))}</bdi>`:''}${r.checked_out_at?` · <bdi>${esc(_riderClock(r.checked_out_at))}</bdi>`:''}${dur?` · ${esc(t('ridersRideTime').replace('{0}',dur))}`:''}</div>
+      <div class="iv-mt10">
         ${row(t('colBadge'),esc(r.badge))}
         ${(()=>{const pl=_riderParty(r);return pl.length>1?row(t('ridersParty'),esc(t('ridersPartyOf').replace('{0}',_riderPartyNo(r)).replace('{1}',pl.length))+(_riderPartyNo(r)>1?` · ${esc(t('ridersWith').replace('{0}',pl[0].name||''))}`:'')):'';})()}
         ${row(t('ridersCompany'),esc(r.company||''))}
-        ${row(t('authPhone'),r.phone?`<a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" style="color:var(--green)">${esc(r.phone)}</a>`:'')}
+        ${row(t('authPhone'),r.phone?`<a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" class="iv-link">${esc(r.phone)}</a>`:'')}
         ${row(t('colHeight'),r.height?`<span class="q-height">${esc(String(r.height))} ${t('cmUnit')}</span>`:'')}
         ${row(t('bikeTypeLabel'),`<span class="ci-type">${typeBadge(r.type_preference)}</span>`)}
         ${row(t('colSession'),r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?' · '+esc(sessionTime(sess)):''}`:'')}
@@ -24150,16 +24150,16 @@ function _renderRiderModal(){
         ${row(t('colCheckedOut'),r.checked_out_at?`<bdi>${esc(_riderClock(r.checked_out_at))}</bdi>${by(r.checked_out_by)}`:'')}
       </div>
       ${(()=>{const pl=_riderParty(r);if(pl.length<2)return'';
-        const st=x=>x.checked_out_at?[t('ridersFilterReturned'),'var(--muted)']:x.checked_in_at?[t('ridersFilterRiding'),'var(--green)']:[t('ridersFilterWaiting'),'var(--orange)'];
+        const st=x=>x.checked_out_at?[t('ridersFilterReturned'),'iv-back']:x.checked_in_at?[t('ridersFilterRiding'),'iv-riding']:[t('ridersFilterWaiting'),'iv-wait'];
         const act=x=>!x.checked_in_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderCheckin",x.id)}">${t('ridersCheckIn')}</button>`
           :!x.checked_out_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderReturn",x.id)}">${t('ridersReturn')}</button><button class="btn-sm btn-muted" data-on-click="${_on("riderUndoCheckin",x.id)}">${t('ridersUndoCheckin')}</button>`
           :`<button class="btn-sm btn-muted" data-on-click="${_on("riderUndoReturn",x.id)}">${t('ridersUndoReturn')}</button>`;
-        return`<div id="rider-party" style="margin-top:14px"><div style="font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)">${esc(t('ciPartyLabel'))} · ${pl.length}</div>
-        ${pl.map(x=>`<div class="rider-party-row" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-          <div style="min-width:0"><b>${esc(x.name)}</b>${x.id===r.id?` <span style="color:var(--muted);font-size:11px">· ${esc(t('ridersPartyOf').replace('{0}',_riderPartyNo(x)).replace('{1}',pl.length))}</span>`:''}
-            <div style="font-size:12px;color:var(--muted)">${x.height?`${esc(String(x.height))} ${t('cmUnit')} · `:''}${esc(typeLabel(x.type_preference)||'')}</div>
-            <div style="font-size:12px;font-weight:700;color:${st(x)[1]}">${st(x)[0]}${x.checked_in_at?` · <bdi>${esc(_riderClock(x.checked_in_at))}</bdi>`:''}${x.checked_out_at?` · <bdi>${esc(_riderClock(x.checked_out_at))}</bdi>`:''}</div></div>
-          <div style="display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end">${act(x)}</div></div>`).join('')}</div>`;})()}
+        return`<div id="rider-party" class="iv-mt14"><div class="iv-plbl">${esc(t('ciPartyLabel'))} · ${pl.length}</div>
+        ${pl.map(x=>`<div class="rider-party-row iv-prow">
+          <div class="iv-minw0"><b>${esc(x.name)}</b>${x.id===r.id?` <span class="iv-pno">· ${esc(t('ridersPartyOf').replace('{0}',_riderPartyNo(x)).replace('{1}',pl.length))}</span>`:''}
+            <div class="iv-pmeta">${x.height?`${esc(String(x.height))} ${t('cmUnit')} · `:''}${esc(typeLabel(x.type_preference)||'')}</div>
+            <div class="iv-pst ${st(x)[1]}">${st(x)[0]}${x.checked_in_at?` · <bdi>${esc(_riderClock(x.checked_in_at))}</bdi>`:''}${x.checked_out_at?` · <bdi>${esc(_riderClock(x.checked_out_at))}</bdi>`:''}</div></div>
+          <div class="iv-pact">${act(x)}</div></div>`).join('')}</div>`;})()}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeRiderModal")}">${t('closeBtn')}</button>
         ${_riderParty(r).some(x=>!x.checked_in_at)&&_riderParty(r).length>1?`<button id="rider-checkin-all" class="btn-primary" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')}</button>`:''}
@@ -24328,25 +24328,25 @@ function renderRiderWalkin(){
   const typeBtns=['Road','Hybrid','Mountain'].map(ty=>`<button type="button" class="toggle-btn${d.type===ty?' active':''}" aria-pressed="${(d.type===ty)?'true':'false'}" data-on-click="${_on("_on_renderRiderWalkin_1",_EV,_EL,ty)}">${typeLabel(ty)}</button>`).join('');
   const coBtns=['Petromin','Petrolube'].map(c=>`<button type="button" class="toggle-btn${d.company===c?' active':''}" aria-pressed="${(d.company===c)?'true':'false'}" data-on-click="${_on("_on_renderRiderWalkin_2",_EV,_EL,c,c)}">${c}</button>`).join('');
   m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderRiderWalkin_3",_EV,_EL)}"><div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="rw-title" style="max-width:460px">
-    <div class="modal-title" id="rw-title">${edit?`${t('ridersEditTitle')}${d.bookingNo?` · <span style="font-variant-numeric:tabular-nums">${esc(d.bookingNo)}</span>`:''}`:t('ridersWalkinTitle')}</div>
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderRiderWalkin_3",_EV,_EL)}"><div class="modal-box iv-mw460" role="dialog" aria-modal="true" aria-labelledby="rw-title">
+    <div class="modal-title" id="rw-title">${edit?`${t('ridersEditTitle')}${d.bookingNo?` · <span class="iv-tnum">${esc(d.bookingNo)}</span>`:''}`:t('ridersWalkinTitle')}</div>
     <div class="modal-sub">${edit?t('ridersEditSub'):t('ridersWalkinSub')}</div>
     ${sess.length||noSess?`<div class="form-group"><label for="rw-session">${t('colSession')}</label><select id="rw-session" data-on-change="${_on("_rwInput","session",_P("value"))}"${d.locked?' disabled':''}>${sessOpts}</select></div>`:`<div class="pg-msg" role="alert">${t('ridersWalkinNoSess')}</div>`}
-    <div class="form-group"><label>${t('ridersCompany')} <span class="label-hint">(${t('optionalLabel')})</span></label><div style="display:flex;gap:6px">${coBtns}</div></div>
+    <div class="form-group"><label>${t('ridersCompany')} <span class="label-hint">(${t('optionalLabel')})</span></label><div class="iv-row6">${coBtns}</div></div>
     <div class="form-group"><label for="rw-badge">${t('colBadge')}</label><input id="rw-badge" value="${esc(d.badge)}" data-on-input="${_on("_rwInput","badge",_P("value"))}" autocomplete="off" maxlength="40"${d.badgeLocked?' disabled':''}></div>
     <div class="form-group"><label for="rw-name">${t('ridersWalkinName')}</label><input id="rw-name" value="${esc(d.name)}" data-on-input="${_on("_on_renderRiderWalkin_4",_EV,_EL)}" autocomplete="off" maxlength="120"></div>
-    <div class="form-group"><label for="rw-phone">${t('phoneNum')} <span class="label-hint">(${t('optionalLabel')})</span></label><div style="display:flex;gap:6px"><select id="rw-cc" style="width:92px;flex-shrink:0" data-on-change="${_on("_rwInput","cc",_P("value"))}">${ccOpts}</select><input id="rw-phone" type="tel" value="${esc(d.phone)}" style="flex:1" data-on-input="${_on("_rwInput","phone",_P("value"))}" autocomplete="off"></div></div>
+    <div class="form-group"><label for="rw-phone">${t('phoneNum')} <span class="label-hint">(${t('optionalLabel')})</span></label><div class="iv-row6"><select id="rw-cc" class="iv-cc" data-on-change="${_on("_rwInput","cc",_P("value"))}">${ccOpts}</select><input id="rw-phone" type="tel" value="${esc(d.phone)}" class="iv-f1" data-on-input="${_on("_rwInput","phone",_P("value"))}" autocomplete="off"></div></div>
     <div class="form-group"><label for="rw-height">${t('colHeight')} (${t('cmUnit')})</label><input id="rw-height" type="number" inputmode="numeric" min="100" max="250" value="${esc(d.height)}" data-on-input="${_on("_rwInput","height",_P("value"))}"></div>
-    <div class="form-group"><label>${t('bikeTypeLabel')}</label><div style="display:flex;gap:6px">${typeBtns}</div></div>
+    <div class="form-group"><label>${t('bikeTypeLabel')}</label><div class="iv-row6">${typeBtns}</div></div>
     <div class="form-group"><label>${t('ridersWalkinRiders')} <span class="label-hint">(${t('optionalLabel')})</span></label>
-      ${(d.riders||[]).map((r,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-        <input id="rw-r-name-${i}" type="text" placeholder="${esc(t('nameLabel'))} ${i+2}" value="${esc(r.name||'')}" maxlength="120" style="flex:1;min-width:0" data-on-input="${_on("_on_renderRiderWalkin_5",_EV,_EL,i)}" autocomplete="off">
-        <input id="rw-r-h-${i}" type="number" inputmode="numeric" min="100" max="250" placeholder="${esc(t('cmUnit'))}" value="${esc(r.height||'')}" style="width:72px;flex-shrink:0" data-on-input="${_on("_rwRider",i,"height",_P("value"))}">
-        <select id="rw-r-type-${i}" aria-label="${esc(t('bikeTypeLabel'))}" style="width:110px;flex-shrink:0" data-on-change="${_on("_rwRider",i,"type",_P("value"))}"><option value="">${esc(t('bikeTypeLabel'))}</option>${['Road','Hybrid','Mountain'].map(ty=>`<option value="${ty}"${r.type===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
-        <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_rwRemoveRider",i)}" title="${esc(t('removeBtn'))}" style="flex-shrink:0"${r.locked?' disabled':''}>${_artIcon('close',11)}</button>
+      ${(d.riders||[]).map((r,i)=>`<div class="iv-rw-row">
+        <input id="rw-r-name-${i}" type="text" placeholder="${esc(t('nameLabel'))} ${i+2}" value="${esc(r.name||'')}" maxlength="120" class="iv-rw-name" data-on-input="${_on("_on_renderRiderWalkin_5",_EV,_EL,i)}" autocomplete="off">
+        <input id="rw-r-h-${i}" type="number" inputmode="numeric" min="100" max="250" placeholder="${esc(t('cmUnit'))}" value="${esc(r.height||'')}" class="iv-rw-h" data-on-input="${_on("_rwRider",i,"height",_P("value"))}">
+        <select id="rw-r-type-${i}" aria-label="${esc(t('bikeTypeLabel'))}" class="iv-rw-t" data-on-change="${_on("_rwRider",i,"type",_P("value"))}"><option value="">${esc(t('bikeTypeLabel'))}</option>${['Road','Hybrid','Mountain'].map(ty=>`<option value="${ty}"${r.type===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        <button type="button" class="btn-sm btn-muted iv-fs0" data-on-click="${_on("_rwRemoveRider",i)}" title="${esc(t('removeBtn'))}"${r.locked?' disabled':''}>${_artIcon('close',11)}</button>
       </div>`).join('')}
-      ${(d.riders||[]).length<4?`<button type="button" id="rw-add-rider" class="btn-secondary" style="width:100%" data-on-click="${_on("_rwAddRider")}">+ ${t('beAddRiderBtn')}</button>`:''}</div>
-    ${edit?'':`<label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-weight:600;cursor:pointer"><input id="rw-checkin" type="checkbox"${d.checkin?' checked':''} data-on-change="${_on("_rwInput","checkin",_P("checked"))}"> ${t('ridersWalkinCheckinNow')}</label>`}
+      ${(d.riders||[]).length<4?`<button type="button" id="rw-add-rider" class="btn-secondary iv-w100" data-on-click="${_on("_rwAddRider")}">+ ${t('beAddRiderBtn')}</button>`:''}</div>
+    ${edit?'':`<label class="iv-rw-ci"><input id="rw-checkin" type="checkbox"${d.checkin?' checked':''} data-on-change="${_on("_rwInput","checkin",_P("checked"))}"> ${t('ridersWalkinCheckinNow')}</label>`}
     ${d.err?`<div class="pg-msg" role="alert" id="rw-err">${esc(d.err)}</div>`:''}
     ${d.dup?`<div class="rw-dup" role="alert" id="rw-dup">
       <div>${esc(t('ridersWalkinDup').replace('{0}',d.dup.queueNum).replace('{1}',d.dup.name))}</div>
@@ -24707,16 +24707,16 @@ function renderRiders(_resultsOnly){
   const _rowHtml=(r,ctx)=>{
     const sess=r.session_id?(_sessById.get(r.session_id)||null):null;
     const _pl=_riderParty(r),_ps=_pl.length,_pn=_riderPartyNo(r),_lead=_pn>1?_pl[0]:null;
-    return`<tr${ctx.party?' class="party-row" style="border-left:2px solid rgba(var(--green-rgb),.2)"':''}>
-      <td><button type="button" class="status-badge badge-active" style="font-variant-numeric:tabular-nums;font:inherit;font-weight:800;cursor:pointer;border:0" data-on-click="${_on("openRiderModal",r.id)}">${esc(r.booking_no||'')}</button>${_ps>1?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${esc(t('ridersPartyOf').replace('{0}',_pn).replace('{1}',_ps))}</div>`:''}${(ctx.party&&ctx.first)?`${ctx.party.some(x=>!x.checked_in_at)?`<div><button class="btn-sm btn-green" style="margin-top:4px;white-space:nowrap" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')} (${ctx.party.filter(x=>!x.checked_in_at).length})</button></div>`:''}${ctx.party.some(x=>x.checked_in_at&&!x.checked_out_at)?`<div><button class="btn-sm btn-green" style="margin-top:4px;white-space:nowrap" data-on-click="${_on("riderReturnParty",r.id)}">${t('returnAllBtn')} (${ctx.party.filter(x=>x.checked_in_at&&!x.checked_out_at).length})</button></div>`:''}<div><button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_toggleRiderParty",_riderKey(r))}">${t('partyHideRiders')} ▴</button></div>`:''}</td>
-      <td><strong>${esc(r.badge)}</strong>${r.company?`<div style="font-size:11px;color:var(--muted)">${esc(r.company)}</div>`:''}</td>
-      <td>${esc(r.name)}${r.phone?`<div style="font-size:12px"><a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" style="color:var(--green)">${esc(r.phone)}</a></div>`:''}${_lead?`<div style="font-size:11px;color:var(--muted)">${esc(t('ridersWith').replace('{0}',_lead.name||''))}</div>`:''}${Number(r.submissions)>1?`<div style="font-size:11px;color:var(--muted)">${esc(t('ridersResub').replace('{0}',r.submissions))}</div>`:''}</td>
-      <td>${r.height?`${esc(String(r.height))} ${t('cmUnit')}`:`<span style="color:var(--muted)">·</span>`}</td>
+    return`<tr${ctx.party?' class="party-row iv-party"':''}>
+      <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("openRiderModal",r.id)}">${esc(r.booking_no||'')}</button>${_ps>1?`<div class="iv-pof">${esc(t('ridersPartyOf').replace('{0}',_pn).replace('{1}',_ps))}</div>`:''}${(ctx.party&&ctx.first)?`${ctx.party.some(x=>!x.checked_in_at)?`<div><button class="btn-sm btn-green iv-pbtn" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')} (${ctx.party.filter(x=>!x.checked_in_at).length})</button></div>`:''}${ctx.party.some(x=>x.checked_in_at&&!x.checked_out_at)?`<div><button class="btn-sm btn-green iv-pbtn" data-on-click="${_on("riderReturnParty",r.id)}">${t('returnAllBtn')} (${ctx.party.filter(x=>x.checked_in_at&&!x.checked_out_at).length})</button></div>`:''}<div><button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_toggleRiderParty",_riderKey(r))}">${t('partyHideRiders')} ▴</button></div>`:''}</td>
+      <td><strong>${esc(r.badge)}</strong>${r.company?`<div class="iv-sub">${esc(r.company)}</div>`:''}</td>
+      <td>${esc(r.name)}${r.phone?`<div class="iv-fs12"><a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" class="iv-link">${esc(r.phone)}</a></div>`:''}${_lead?`<div class="iv-sub">${esc(t('ridersWith').replace('{0}',_lead.name||''))}</div>`:''}${Number(r.submissions)>1?`<div class="iv-sub">${esc(t('ridersResub').replace('{0}',r.submissions))}</div>`:''}</td>
+      <td>${r.height?`${esc(String(r.height))} ${t('cmUnit')}`:`<span class="iv-muted">·</span>`}</td>
       <td>${typeBadge(r.type_preference)}</td>
-      <td>${r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?`<div style="font-size:11px;color:var(--muted)">${esc(sessionTime(sess))}</div>`:''}`:`<span style="color:var(--muted)">·</span>`}</td>
-      <td class="rider-time" style="white-space:nowrap">${r.checked_in_at?`<strong dir="ltr">${esc(_riderClock(r.checked_in_at))}</strong>${r.checked_in_by?`<div style="font-size:11px;color:var(--muted)">${esc(t('ridersBy').replace('{0}',r.checked_in_by))}</div>`:''}`:`<span style="color:var(--muted)">·</span>`}</td>
-      <td class="rider-time" style="white-space:nowrap">${r.checked_out_at?`<strong dir="ltr">${esc(_riderClock(r.checked_out_at))}</strong>${_riderDur(r.checked_in_at,r.checked_out_at)?`<div style="font-size:11px;color:var(--muted)">${esc(t('ridersRideTime').replace('{0}',_riderDur(r.checked_in_at,r.checked_out_at)))}</div>`:''}${r.checked_out_by?`<div style="font-size:11px;color:var(--muted)">${esc(t('ridersBy').replace('{0}',r.checked_out_by))}</div>`:''}`:`<span style="color:var(--muted)">·</span>`}</td>
-      <td style="white-space:nowrap">${!r.checked_in_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderCheckin",r.id)}">${t('ridersCheckIn')}</button>`:!r.checked_out_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderReturn",r.id)}">${t('ridersReturn')}</button> <button class="btn-sm btn-muted" data-on-click="${_on("riderUndoCheckin",r.id)}">${t('ridersUndoCheckin')}</button>`:`<button class="btn-sm btn-muted" data-on-click="${_on("riderUndoReturn",r.id)}">${t('ridersUndoReturn')}</button>`}
+      <td>${r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?`<div class="iv-sub">${esc(sessionTime(sess))}</div>`:''}`:`<span class="iv-muted">·</span>`}</td>
+      <td class="rider-time iv-nowrap">${r.checked_in_at?`<strong dir="ltr">${esc(_riderClock(r.checked_in_at))}</strong>${r.checked_in_by?`<div class="iv-sub">${esc(t('ridersBy').replace('{0}',r.checked_in_by))}</div>`:''}`:`<span class="iv-muted">·</span>`}</td>
+      <td class="rider-time iv-nowrap">${r.checked_out_at?`<strong dir="ltr">${esc(_riderClock(r.checked_out_at))}</strong>${_riderDur(r.checked_in_at,r.checked_out_at)?`<div class="iv-sub">${esc(t('ridersRideTime').replace('{0}',_riderDur(r.checked_in_at,r.checked_out_at)))}</div>`:''}${r.checked_out_by?`<div class="iv-sub">${esc(t('ridersBy').replace('{0}',r.checked_out_by))}</div>`:''}`:`<span class="iv-muted">·</span>`}</td>
+      <td class="iv-nowrap">${!r.checked_in_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderCheckin",r.id)}">${t('ridersCheckIn')}</button>`:!r.checked_out_at?`<button class="btn-sm btn-green" data-on-click="${_on("riderReturn",r.id)}">${t('ridersReturn')}</button> <button class="btn-sm btn-muted" data-on-click="${_on("riderUndoCheckin",r.id)}">${t('ridersUndoCheckin')}</button>`:`<button class="btn-sm btn-muted" data-on-click="${_on("riderUndoReturn",r.id)}">${t('ridersUndoReturn')}</button>`}
         <button class="btn-sm btn-muted" data-on-click="${_on("showRiderEdit",r.id)}">${t('editBtn')}</button> <button class="btn-sm btn-muted" data-on-click="${_on("confirmRiderRemove",r.id)}">${t('ridersRemove')}</button></td>
     </tr>`;
   };
@@ -24727,16 +24727,16 @@ function renderRiders(_resultsOnly){
     const nIn=g.filter(x=>x.checked_in_at&&!x.checked_out_at).length,nOut=g.filter(x=>x.checked_out_at).length,nWait=g.filter(x=>!x.checked_in_at).length;
     const counts=[[nWait,'ridersFilterWaiting'],[nIn,'ridersFilterRiding'],[nOut,'ridersFilterReturned']].filter(([c])=>c>0).map(([c,k])=>`${c} ${t(k).toLowerCase()}`).join(' · ');
     const types=[...new Set(g.map(x=>x.type_preference).filter(Boolean))];
-    return`<tr class="party-row" style="border-left:2px solid rgba(var(--green-rgb),.2)">
-      <td><button type="button" class="status-badge badge-active" style="font-variant-numeric:tabular-nums;font:inherit;font-weight:800;cursor:pointer;border:0" data-on-click="${_on("openRiderModal",r.id)}">${esc(r.booking_no||'')}</button><div style="font-size:10px;color:var(--green);font-weight:800;margin-top:3px">${esc(t('ridersPartyCount').replace('{0}',n))}</div></td>
-      <td><strong>${esc(r.badge)}</strong>${r.company?`<div style="font-size:11px;color:var(--muted)">${esc(r.company)}</div>`:''}</td>
-      <td>${esc(r.name)}${r.phone?`<div style="font-size:12px"><a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" style="color:var(--green)">${esc(r.phone)}</a></div>`:''}<div style="font-size:11px;color:var(--muted)">${esc(counts)}</div><button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_toggleRiderParty",_riderKey(r))}">${t('partyShowRiders')} ▾</button></td>
-      <td>${r.height?`${esc(String(r.height))} ${t('cmUnit')}`:`<span style="color:var(--muted)">·</span>`}</td>
-      <td><div style="display:flex;gap:4px;flex-wrap:wrap">${types.map(ty=>typeBadge(ty)).join('')}</div></td>
-      <td>${r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?`<div style="font-size:11px;color:var(--muted)">${esc(sessionTime(sess))}</div>`:''}`:`<span style="color:var(--muted)">·</span>`}</td>
-      <td class="rider-time" style="white-space:nowrap"><strong>${n-nWait}/${n}</strong></td>
-      <td class="rider-time" style="white-space:nowrap"><strong>${nOut}/${n}</strong></td>
-      <td style="white-space:nowrap">${nWait?`<button class="btn-sm btn-green" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')}</button> `:''}${nIn?`<button class="btn-sm btn-green" data-on-click="${_on("riderReturnParty",r.id)}">${t('returnAllBtn')} (${nIn})</button> <button class="btn-sm btn-muted" data-on-click="${_on("riderUndoCheckinParty",r.id)}">${t('undoCheckinBtn')} (${nIn})</button> `:''}<button class="btn-sm btn-muted" data-on-click="${_on("showRiderEdit",r.id)}">${t('editBtn')}</button></td>
+    return`<tr class="party-row iv-party">
+      <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("openRiderModal",r.id)}">${esc(r.booking_no||'')}</button><div class="iv-pcount">${esc(t('ridersPartyCount').replace('{0}',n))}</div></td>
+      <td><strong>${esc(r.badge)}</strong>${r.company?`<div class="iv-sub">${esc(r.company)}</div>`:''}</td>
+      <td>${esc(r.name)}${r.phone?`<div class="iv-fs12"><a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" class="iv-link">${esc(r.phone)}</a></div>`:''}<div class="iv-sub">${esc(counts)}</div><button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_toggleRiderParty",_riderKey(r))}">${t('partyShowRiders')} ▾</button></td>
+      <td>${r.height?`${esc(String(r.height))} ${t('cmUnit')}`:`<span class="iv-muted">·</span>`}</td>
+      <td><div class="iv-types">${types.map(ty=>typeBadge(ty)).join('')}</div></td>
+      <td>${r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?`<div class="iv-sub">${esc(sessionTime(sess))}</div>`:''}`:`<span class="iv-muted">·</span>`}</td>
+      <td class="rider-time iv-nowrap"><strong>${n-nWait}/${n}</strong></td>
+      <td class="rider-time iv-nowrap"><strong>${nOut}/${n}</strong></td>
+      <td class="iv-nowrap">${nWait?`<button class="btn-sm btn-green" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')}</button> `:''}${nIn?`<button class="btn-sm btn-green" data-on-click="${_on("riderReturnParty",r.id)}">${t('returnAllBtn')} (${nIn})</button> <button class="btn-sm btn-muted" data-on-click="${_on("riderUndoCheckinParty",r.id)}">${t('undoCheckinBtn')} (${nIn})</button> `:''}<button class="btn-sm btn-muted" data-on-click="${_on("showRiderEdit",r.id)}">${t('editBtn')}</button></td>
     </tr>`;
   };
   // Group the filtered rows by booking number, in the order they appear.
@@ -24747,21 +24747,21 @@ function renderRiders(_resultsOnly){
     if(!_riderPartyIsOpen(_riderKey(g[0])))return _foldedHtml(g);
     return g.map((r,i)=>_rowHtml(r,{party:g,first:i===0})).join('');
   }).join('');
-  const emptyRow=rows.length?'':`<tr><td colspan="9"><div style="padding:8px">${emptyIllustration(ILLUS_HISTORY,t('ridersEmpty'))}</div></td></tr>`;
+  const emptyRow=rows.length?'':`<tr><td colspan="9"><div class="iv-p8">${emptyIllustration(ILLUS_HISTORY,t('ridersEmpty'))}</div></td></tr>`;
   const results=`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="queue-table">
     <thead><tr>${[['no','colBookingNo'],['badge','colBadge'],['name','colRider'],['height','colHeight'],['type','bikeTypeLabel'],['session','colSession'],['in','colCheckedIn'],['out','colCheckedOut']].map(([c,k])=>{
       const on=(S.ridersSort||'no')===c,arrow=on?((S.ridersSortDir||1)===1?' ↑':' ↓'):'';
       return`<th class="an-sort-th${on?' an-sort-active':''}" data-on-click="${_on("setRidersSort",c)}">${t(k)}${arrow}</th>`;}).join('')}<th></th></tr></thead>
     <tbody>${body}${emptyRow}</tbody></table></div>`;
   if(_resultsOnly){const el=document.getElementById('riders-results');if(el){el.innerHTML=results;return;}}
-  const pill=(v,label,n)=>`<button class="filter-pill${S.ridersFilter===v?' active':''}" data-on-click="${_on("setRidersFilter",v)}">${label} <span style="opacity:.7">${n}</span></button>`;
+  const pill=(v,label,n)=>`<button class="filter-pill${S.ridersFilter===v?' active':''}" data-on-click="${_on("setRidersFilter",v)}">${label} <span class="iv-o7">${n}</span></button>`;
   // Every night with registrations, plus the open Petromin nights (tonight's page exists before anyone registers).
   const sessIds=[...new Set([...all.map(r=>r.session_id).filter(Boolean),..._pmNights().filter(_sessLive).map(x=>x.id),...(S.ridersSession&&S.ridersSession!=='all'?[S.ridersSession]:[])])].sort().reverse();
   const sessSel=sessIds.length?`<select class="filter-select" data-on-change="${_on("setRidersSession",_P("value"))}" aria-label="${esc(t('colSession'))}"><option value="all"${S.ridersSession==='all'?' selected':''}>${t('ridersFilterAll')}</option>${sessIds.map(id=>`<option value="${esc(id)}"${S.ridersSession===id?' selected':''}>${shortDate(id.slice(0,10))} (${all.filter(r=>r.session_id===id).length})</option>`).join('')}</select>`:'';
   host.innerHTML=`
-    <div class="section-header" style="margin-bottom:8px">
-      <div><div class="page-title pm-title"><img class="pm-logo-lg" src="/assets/petromin-logo.png" alt="Petromin" width="87" height="36"><span>${t('ridersTitle')}</span></div><div class="page-sub" style="margin-bottom:0">${t('ridersSub')}</div></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+    <div class="section-header iv-mb8">
+      <div><div class="page-title pm-title"><img class="pm-logo-lg" src="/assets/petromin-logo.png" alt="Petromin" width="87" height="36"><span>${t('ridersTitle')}</span></div><div class="page-sub iv-mb0">${t('ridersSub')}</div></div>
+      <div class="iv-pm-btns">
         ${(isAdmin()||S.staffRole==='owner')?`<button class="btn-sm btn-muted" data-on-click="${_on("openRidersReport")}">${ICON_PRINT} ${t('ridersReport')}</button>`:''}
         <button class="btn-sm btn-muted" data-on-click="${_on("showRiderWalkin")}">${_artIcon('person',12)} ${t('ridersWalkinBtn')}</button>
         <button class="btn-sm btn-muted" data-on-click="${_on("openScanModal")}" title="${esc(t('scanTitle'))}">${_artIcon('camera',12)} ${t('ridersScan')}</button>
@@ -28569,11 +28569,11 @@ function renderCashier(){
 function _on__invSelHtml_1(event,el,a0){if(event.key==='Enter'){event.preventDefault();_invOptSave(a0)}}
 function _invSelHtml(id,value,addMode,options,addLabel){
   if(addMode){
-    return`<div style="display:flex;gap:6px">
-      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" style="flex:1"
+    return`<div class="iv-row6">
+      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" class="iv-f1"
         data-on-keydown="${_on("_on__invSelHtml_1",_EV,_EL,id)}">
-      <button class="btn-primary" style="padding:8px 12px;flex-shrink:0" data-on-click="${_on("_invOptSave",id)}">✓</button>
-      <button class="btn-secondary" style="padding:8px 10px;flex-shrink:0" data-on-click="${_on("_invOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
+      <button class="btn-primary iv-ok" data-on-click="${_on("_invOptSave",id)}">✓</button>
+      <button class="btn-secondary iv-no" data-on-click="${_on("_invOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
     </div>`;
   }
   return`<select id="${id}" data-on-change="${_on("_invSelChange",id,_P("value"))}">
@@ -28694,63 +28694,62 @@ function renderInventory(){
     ${showSubtype?`<div class="form-row"><div class="form-group full"><label>${t('invProteinType')}</label>${subtypeField}</div></div>`:''}
     <div class="form-row">
       <div class="form-group"><label>${t('invLowAt')}</label><input id="inv-low" type="number" min="0" value="${esc(S._invLow)}" data-on-input="${_on("_on_renderInventory_4",_EV,_EL)}" placeholder="0"></div>
-      <div class="form-group"><label>${t('invPrice')}</label><div style="display:flex;gap:6px"><input id="inv-price" type="number" min="0" step="0.5" value="${esc(S._invPrice)}" data-on-input="${_on("_on_renderInventory_5",_EV,_EL)}" placeholder="${S._invFree?t('invFree'):'0'}" ${S._invFree?'disabled':''} style="flex:1${S._invFree?';opacity:.45':''}"><button type="button" data-on-click="${_on("_on_renderInventory_6",_EV,_EL)}" aria-pressed="${S._invFree}" style="flex-shrink:0;padding:0 13px;border-radius:4px;border:1.5px solid ${S._invFree?'var(--green)':'var(--border)'};background:${S._invFree?'rgba(var(--green-rgb),.12)':'var(--s2)'};color:${S._invFree?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${t('invFree')}</button></div></div>
+      <div class="form-group"><label>${t('invPrice')}</label><div class="iv-row6"><input id="inv-price" type="number" min="0" step="0.5" value="${esc(S._invPrice)}" data-on-input="${_on("_on_renderInventory_5",_EV,_EL)}" placeholder="${S._invFree?t('invFree'):'0'}" ${S._invFree?'disabled':''} class="${S._invFree?'iv-f1-dim':'iv-f1'}"><button type="button" data-on-click="${_on("_on_renderInventory_6",_EV,_EL)}" aria-pressed="${S._invFree}" class="${S._invFree?'iv-free-on':'iv-free'}">${t('invFree')}</button></div></div>
     </div>
-    <div class="form-row"><div class="form-group full"><label>${t('invCost')} <span style="color:var(--muted);font-weight:600;font-size:11px">${t('invCostHint')}</span></label><input id="inv-cost" type="number" min="0" step="0.5" value="${esc(S._invCost)}" data-on-input="${_on("_on_renderInventory_7",_EV,_EL)}" placeholder="0"></div></div>
+    <div class="form-row"><div class="form-group full"><label>${t('invCost')} <span class="iv-hint">${t('invCostHint')}</span></label><input id="inv-cost" type="number" min="0" step="0.5" value="${esc(S._invCost)}" data-on-input="${_on("_on_renderInventory_7",_EV,_EL)}" placeholder="0"></div></div>
     <div class="form-row">
       <div class="form-group"><label>${t('profilePhotoLabel')}</label>
-        <div style="display:flex;align-items:center;gap:10px">
-          ${S._invPhoto?`<img loading="lazy" decoding="async" src="${esc(S._invPhoto)}" alt="" style="width:48px;height:48px;border-radius:3px;object-fit:contain;border:1px solid var(--border)">`:''}
-          <label class="btn-secondary" style="font-size:12px;padding:7px 14px;cursor:pointer;margin:0">${t('uploadPhotoBtn')}<input type="file" accept="image/*" style="display:none" data-on-change="${_on("_on_renderInventory_8",_EV,_EL)}"></label>
-          ${S._invPhoto?`<button class="btn-secondary" style="font-size:12px;padding:7px 12px" data-on-click="${_on("_on_renderInventory_9",_EV,_EL)}">${t('removePhotoBtn')}</button>`:''}
+        <div class="iv-ac10">
+          ${S._invPhoto?`<img loading="lazy" decoding="async" src="${esc(S._invPhoto)}" alt="" class="iv-photo">`:''}
+          <label class="btn-secondary iv-upload">${t('uploadPhotoBtn')}<input type="file" accept="image/*" class="iv-none" data-on-change="${_on("_on_renderInventory_8",_EV,_EL)}"></label>
+          ${S._invPhoto?`<button class="btn-secondary iv-rmphoto" data-on-click="${_on("_on_renderInventory_9",_EV,_EL)}">${t('removePhotoBtn')}</button>`:''}
         </div>
       </div>
     </div>
-    ${isSupp?`<div style="border-top:1px solid var(--border);padding-top:10px">
-      <button type="button" data-on-click="${_on("_on_renderInventory_10",_EV,_EL)}" style="background:none;border:none;color:var(--green);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0"><span style="font-size:11px">${S._invNutriOpen?'▾':'▸'}</span> ${t('nuTitle')} <span style="color:var(--muted);font-weight:600">(${t('nuOptional')})</span></button>
-      ${S._invNutriOpen?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+    ${isSupp?`<div class="iv-nu">
+      <button type="button" data-on-click="${_on("_on_renderInventory_10",_EV,_EL)}" class="iv-nu-btn"><span class="iv-fs11">${S._invNutriOpen?'▾':'▸'}</span> ${t('nuTitle')} <span class="iv-m600">(${t('nuOptional')})</span></button>
+      ${S._invNutriOpen?`<div class="iv-nu-body">
         <div class="form-group"><label>${t('servingSize')}</label><input type="text" value="${esc(S._invNutri.serving||'')}" data-on-input="${_on("_on_renderInventory_11",_EV,_EL)}" placeholder="${t('nuServingPh')}"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="iv-nu-grid">
           ${NUTRI_FIELDS.map(([k,lbl,unit])=>`<div class="form-group"><label>${t(lbl)} (${unit})</label><input type="number" min="0" step="any" value="${esc(S._invNutri[k]==null?'':S._invNutri[k])}" data-on-input="${_on("_on_renderInventory_12",_EV,_EL,k)}"></div>`).join('')}
         </div>
         <div>
-          <label style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">${t('nuMicros')}</label>
-          ${(Array.isArray(S._invNutri.micros)?S._invNutri.micros:[]).map((mc,i)=>`<div style="display:flex;gap:5px;margin-bottom:5px;align-items:center">
-            <input type="text" value="${esc(mc.n||'')}" data-on-input="${_on("_nuMicroSet",i,"n",_P("value"))}" placeholder="${t('nuMicroName')}" style="flex:2;min-width:0;padding:7px 8px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:inherit;font-size:12px">
-            <input type="number" step="any" value="${esc(mc.a==null?'':mc.a)}" data-on-input="${_on("_nuMicroSet",i,"a",_P("value"))}" placeholder="0" style="width:54px;padding:7px 6px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:inherit;font-size:12px">
-            <input type="text" value="${esc(mc.u||'')}" data-on-input="${_on("_nuMicroSet",i,"u",_P("value"))}" placeholder="mg" style="width:44px;padding:7px 5px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:inherit;font-size:12px">
-            <input type="number" step="any" value="${esc(mc.nrv==null?'':mc.nrv)}" data-on-input="${_on("_nuMicroSet",i,"nrv",_P("value"))}" placeholder="${t('nuNrv')}" style="width:52px;padding:7px 5px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:inherit;font-size:12px">
-            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="Remove" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;flex-shrink:0;padding:0 2px">&times;</button>
+          <label class="iv-mc-lbl">${t('nuMicros')}</label>
+          ${(Array.isArray(S._invNutri.micros)?S._invNutri.micros:[]).map((mc,i)=>`<div class="iv-mc-row">
+            <input type="text" value="${esc(mc.n||'')}" data-on-input="${_on("_nuMicroSet",i,"n",_P("value"))}" placeholder="${t('nuMicroName')}" class="iv-mc-n">
+            <input type="number" step="any" value="${esc(mc.a==null?'':mc.a)}" data-on-input="${_on("_nuMicroSet",i,"a",_P("value"))}" placeholder="0" class="iv-mc-a">
+            <input type="text" value="${esc(mc.u||'')}" data-on-input="${_on("_nuMicroSet",i,"u",_P("value"))}" placeholder="mg" class="iv-mc-u">
+            <input type="number" step="any" value="${esc(mc.nrv==null?'':mc.nrv)}" data-on-input="${_on("_nuMicroSet",i,"nrv",_P("value"))}" placeholder="${t('nuNrv')}" class="iv-mc-nrv">
+            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="Remove" class="iv-mc-del">&times;</button>
           </div>`).join('')}
-          <button type="button" class="btn-secondary" style="font-size:12px;padding:6px 12px;margin-top:2px" data-on-click="${_on("_nuMicroAdd")}">+ ${t('nuAddMicro')}</button>
+          <button type="button" class="btn-secondary iv-mc-add" data-on-click="${_on("_nuMicroAdd")}">+ ${t('nuAddMicro')}</button>
         </div>
-        <div class="form-group"><label>${t('nuIngredients')}</label><textarea data-on-input="${_on("_on_renderInventory_13",_EV,_EL)}" rows="2" style="padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%;resize:vertical">${esc(S._invNutri.ingredients||'')}</textarea></div>
+        <div class="form-group"><label>${t('nuIngredients')}</label><textarea data-on-input="${_on("_on_renderInventory_13",_EV,_EL)}" rows="2" class="iv-nu-ing">${esc(S._invNutri.ingredients||'')}</textarea></div>
       </div>`:''}
     </div>`:''}
-    <div style="display:flex;gap:8px">
+    <div class="iv-row8">
       <button class="btn-primary" data-on-click="${_on(isEdit?'saveInvEdit':'addInvItem')}">${isEdit?t('saveBtn'):t('invAddBtn')}</button>
       <button class="btn-secondary" data-on-click="${_on("cancelInvForm")}">${t('cancelBtn')}</button>
     </div>
   </div>`:'';
-  const stInput=(it,qty)=>{const v=(S.invCounts||{})[it.id];const diff=v!==undefined&&v!==''&&Math.max(0,parseInt(v)||0)!==qty;return`<input type="number" min="0" inputmode="numeric" value="${v!=null?esc(String(v)):''}" placeholder="${qty}" data-on-input="${_on("_on_renderInventory_14",_EV,_EL,it.id)}" data-on-change="${_on("renderInventory")}" style="width:84px;text-align:center;font-weight:700;background:${diff?'rgba(var(--warn-rgb),.15)':'var(--s2)'};border:1.5px solid ${diff?'var(--orange)':'var(--border)'};border-radius:4px;padding:7px 6px;color:var(--text);font-family:var(--font-body);font-size:14px;outline:none">`;};
+  const stInput=(it,qty)=>{const v=(S.invCounts||{})[it.id];const diff=v!==undefined&&v!==''&&Math.max(0,parseInt(v)||0)!==qty;return`<input type="number" min="0" inputmode="numeric" value="${v!=null?esc(String(v)):''}" placeholder="${qty}" data-on-input="${_on("_on_renderInventory_14",_EV,_EL,it.id)}" data-on-change="${_on("renderInventory")}" class="${diff?'iv-st-diff':'iv-st'}">`;};
   const invRow=it=>{
     const qty=Number(it.qty)||0,low=Number(it.low_threshold)||0;
     const state=qty<=0?'out':qty<=low?'low':'in';
-    const stClr=state==='out'?'var(--red)':state==='low'?'var(--orange)':'var(--green)';
     const stTxt=state==='out'?t('invOutStock'):state==='low'?t('invLowStock'):t('invInStock');
     return`<tr>
-      <td><div style="display:flex;align-items:center;gap:10px">
-        ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" style="width:38px;height:38px;border-radius:3px;object-fit:contain;border:1px solid var(--border);flex-shrink:0">`:''}
-        <div><div class="rider-name">${esc(it.name)}</div>${it.volume_ml?`<div style="font-size:11px;color:var(--muted-l);font-weight:600;margin-top:1px">${esc(it.volume_ml)} ml</div>`:''}${_priceLabel(it.price)?`<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:1px">${_priceLabel(it.price)}</div>`:''}</div>
+      <td><div class="iv-ac10">
+        ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" class="iv-thumb">`:''}
+        <div><div class="rider-name">${esc(it.name)}</div>${it.volume_ml?`<div class="iv-ml">${esc(it.volume_ml)} ml</div>`:''}${_priceLabel(it.price)?`<div class="iv-price">${_priceLabel(it.price)}</div>`:''}</div>
       </div></td>
-      <td style="font-size:13px;font-weight:600">${it.brand?esc(it.brand):'<span style="color:var(--muted)">—</span>'}</td>
-      ${isSupp?`<td style="font-size:13px;font-weight:600">${(it.flavour&&!_badFlav(it.flavour))?esc(it.flavour):'<span style="color:var(--muted)">—</span>'}</td>`:''}
-      <td data-sort="${qty}"><div style="display:flex;align-items:center;gap:8px">
+      <td class="iv-td">${it.brand?esc(it.brand):'<span class="iv-muted">—</span>'}</td>
+      ${isSupp?`<td class="iv-td">${(it.flavour&&!_badFlav(it.flavour))?esc(it.flavour):'<span class="iv-muted">—</span>'}</td>`:''}
+      <td data-sort="${qty}"><div class="iv-ac8">
         ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
-        <span style="font-weight:900;font-size:15px;min-width:28px;text-align:center">${qty}</span>
+        <span class="iv-qty">${qty}</span>
         <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
       </div></td>
-      <td><span style="color:${stClr};font-weight:800;font-size:12px">${stTxt}</span></td>
+      <td><span class="iv-stat iv-${state}">${stTxt}</span></td>
       <td><div class="actions-cell">
         ${_hasNutri(it)?`<button class="btn-sm btn-muted" data-on-click="${_on("showNutrition",it.id)}">${t('nuButton')}</button>`:''}
         <button class="btn-sm btn-green" data-on-click="${_on("startInvEdit",it.id)}">${t('editBtn')}</button>
@@ -28758,34 +28757,32 @@ function renderInventory(){
       </div></td>
     </tr>`;
   };
-  const invTable=list=>`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper" style="margin-top:10px;overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table class="queue-table"><thead><tr>
+  const invTable=list=>`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper iv-tw"><table class="queue-table"><thead><tr>
       <th>${t('invItemName')}</th><th>${t('invBrand')}</th>${isSupp?`<th>${t('invFlavour')}</th>`:''}<th>${t('invQty')}</th><th>${t('colStatus')}</th><th></th>
-    </tr></thead><tbody>${list.length?list.map(invRow).join(''):`<tr><td colspan="${isSupp?6:5}" style="padding:18px;text-align:center;color:var(--muted)">${t('invNoItems')}</td></tr>`}</tbody></table></div>`;
+    </tr></thead><tbody>${list.length?list.map(invRow).join(''):`<tr><td colspan="${isSupp?6:5}" class="iv-empty">${t('invNoItems')}</td></tr>`}</tbody></table></div>`;
   const invCard=it=>{
     const qty=Number(it.qty)||0,low=Number(it.low_threshold)||0;
     const state=qty<=0?'out':qty<=low?'low':'in';
-    const stClr=state==='out'?'var(--red)':state==='low'?'var(--orange)':'var(--green)';
     const stTxt=state==='out'?t('invOutStock'):state==='low'?t('invLowStock'):t('invInStock');
-    const borderClr=state==='out'?'rgba(var(--red-rgb),.4)':state==='low'?'rgba(var(--warn-rgb),.45)':'rgba(var(--green-rgb),.3)';
-    return`<div class="bike-grid-card" style="border-color:${borderClr};display:flex;flex-direction:column;gap:8px">
-      ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" style="width:100%;aspect-ratio:1/1;border-radius:4px;object-fit:contain;background:var(--photo-bg);border:1px solid var(--border)">`:`<div style="width:100%;aspect-ratio:1/1;border-radius:4px;background:var(--s3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:30px;opacity:.5">${_itemIcon(it)}</div>`}
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
-        <div style="min-width:0"><div style="font-weight:900;font-size:13px;line-height:1.3">${esc(it.name)}</div>${it.brand?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:1px">${esc(it.brand)}</div>`:''}${it.volume_ml?`<div style="font-size:11px;color:var(--muted-l);font-weight:600;margin-top:1px">${esc(it.volume_ml)} ml</div>`:''}${_priceLabel(it.price)?`<div style="font-size:11px;color:var(--green);font-weight:700;margin-top:1px">${_priceLabel(it.price)}</div>`:''}</div>
-        <span style="font-size:10px;font-weight:800;color:${stClr};white-space:nowrap;flex-shrink:0">${stTxt}</span>
+    return`<div class="bike-grid-card iv-card iv-card-${state}">
+      ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" class="iv-cimg">`:`<div class="iv-cph">${_itemIcon(it)}</div>`}
+      <div class="iv-chead">
+        <div class="iv-minw0"><div class="iv-cname">${esc(it.name)}</div>${it.brand?`<div class="iv-cbrand">${esc(it.brand)}</div>`:''}${it.volume_ml?`<div class="iv-ml">${esc(it.volume_ml)} ml</div>`:''}${_priceLabel(it.price)?`<div class="iv-price">${_priceLabel(it.price)}</div>`:''}</div>
+        <span class="iv-cstat iv-${state}">${stTxt}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:auto">
+      <div class="iv-cqty">
         ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
-        <span style="font-weight:900;font-size:16px;min-width:28px;text-align:center">${qty}</span>
+        <span class="iv-cqn">${qty}</span>
         <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
       </div>
-      ${_hasNutri(it)?`<button class="btn-sm btn-muted" style="width:100%" data-on-click="${_on("showNutrition",it.id)}">${t('nuButton')}</button>`:''}
-      <div style="display:flex;gap:4px">
-        <button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("startInvEdit",it.id)}">${t('editBtn')}</button>
-        ${isAdmin()?`<button class="btn-sm btn-red" style="flex:1" data-on-click="${_on("delInvItem",it.id)}">${t('deleteBtn')}</button>`:''}
+      ${_hasNutri(it)?`<button class="btn-sm btn-muted iv-w100" data-on-click="${_on("showNutrition",it.id)}">${t('nuButton')}</button>`:''}
+      <div class="iv-row4">
+        <button class="btn-sm btn-green iv-f1" data-on-click="${_on("startInvEdit",it.id)}">${t('editBtn')}</button>
+        ${isAdmin()?`<button class="btn-sm btn-red iv-f1" data-on-click="${_on("delInvItem",it.id)}">${t('deleteBtn')}</button>`:''}
       </div>
     </div>`;
   };
-  const invGrid=list=>list.length?`<div class="bike-grid" style="margin-top:10px">${list.map(invCard).join('')}</div>`:`<div class="empty-state" style="margin-top:10px">${t('invNoItems')}</div>`;
+  const invGrid=list=>list.length?`<div class="bike-grid iv-mt10">${list.map(invCard).join('')}</div>`:`<div class="empty-state iv-mt10">${t('invNoItems')}</div>`;
   const invItems=list=>S.invView==='grid'?invGrid(list):invTable(list);
   const viewToggle=`<div class="view-toggle">
     <button class="view-toggle-btn${S.invView==='grid'?' active':''}" data-on-click="${_on("setInvView","grid")}" title="${t('gridViewBtn')}">${_artIcon('grid',13)}</button>
@@ -28795,26 +28792,26 @@ function renderInventory(){
   const equipItems=items.filter(it=>!_isSuppCat(it.category));
   const navbtn=(k,label)=>`<button class="inv-navbtn${sec===k?' active':''}" data-on-click="${_on("setInvSection",k)}">${label}</button>`;
   const addBtn=`<button class="btn-primary" data-on-click="${_on("toggleAddInv")}">${t('invAddBtn')}</button>`;
-  const secHead=(title,withAdd,withToggle)=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px"><div class="page-title" style="font-size:18px;margin:0">${title}</div><div style="display:flex;align-items:center;gap:8px">${withToggle?viewToggle:''}${withAdd?addBtn:''}</div></div>`;
+  const secHead=(title,withAdd,withToggle)=>`<div class="iv-sechead"><div class="page-title iv-sectitle">${title}</div><div class="iv-ac8">${withToggle?viewToggle:''}${withAdd?addBtn:''}</div></div>`;
   // Split a section's items into sub-sections by category (presets first, then any custom categories), each with its own heading.
   // Protein sub-types (ProteinCookies…) collapse under one "Protein Snacks" umbrella, then nest by sub-category.
   const invGroupedByCat=(list)=>{
-    if(!list.length)return`<div class="empty-state" style="margin-top:10px">${t('invNoItems')}</div>`;
+    if(!list.length)return`<div class="empty-state iv-mt10">${t('invNoItems')}</div>`;
     const presets=sec==='supplements'?SUPP_CATS:EQUIP_CATS;
     // Roll each present category up to its top-level group (a protein leaf → 'ProteinSnacks')
     const groups=[...new Set(list.map(it=>_catGroup(it.category||'Other')||(it.category||'Other')))];
     const ordered=[...presets.filter(g=>groups.includes(g)),...groups.filter(g=>!presets.includes(g)).sort((a,b)=>_invCatLabel(a).localeCompare(_invCatLabel(b)))];
-    const heading=(label,count,sub)=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;font-size:${sub?12:13}px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)${sub?';padding-inline-start:12px':''}">${esc(label)} <span style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:9px;padding:1px 9px;font-size:11px;font-weight:800;color:var(--muted-l)">${count}</span></div>`; // a custom category is stored as typed: escaped, or "<img onerror>" ran on every staff device
+    const heading=(label,count,sub)=>`<div class="${sub?'iv-subcat':'iv-cat'}">${esc(label)} <span class="iv-count">${count}</span></div>`; // a custom category is stored as typed: escaped, or "<img onerror>" ran on every staff device
     return ordered.map(g=>{
       const gItems=list.filter(it=>(_catGroup(it.category||'Other')||(it.category||'Other'))===g);
       if(!gItems.length)return'';
       if(g==='ProteinSnacks'){
         // Umbrella: one Protein Snacks heading, then a nested sub-section per protein sub-type
         const leaves=[...new Set(gItems.map(it=>it.category||'Other'))].sort((a,b)=>_invCatLabel(a).localeCompare(_invCatLabel(b)));
-        const subs=leaves.map(lc=>{const its=gItems.filter(it=>(it.category||'Other')===lc);return`<div style="margin-top:12px">${heading(_invCatLabel(lc),its.length,true)}${invItems(its)}</div>`;}).join('');
-        return`<div style="margin-top:18px">${heading(_invCatLabel('ProteinSnacks'),gItems.length,false)}${subs}</div>`;
+        const subs=leaves.map(lc=>{const its=gItems.filter(it=>(it.category||'Other')===lc);return`<div class="iv-mt12">${heading(_invCatLabel(lc),its.length,true)}${invItems(its)}</div>`;}).join('');
+        return`<div class="iv-mt18">${heading(_invCatLabel('ProteinSnacks'),gItems.length,false)}${subs}</div>`;
       }
-      return`<div style="margin-top:18px">${heading(_invCatLabel(g),gItems.length,false)}${invItems(gItems)}</div>`;
+      return`<div class="iv-mt18">${heading(_invCatLabel(g),gItems.length,false)}${invItems(gItems)}</div>`;
     }).join('');
   };
   const _sold2=_itemSoldUnits();
@@ -28829,22 +28826,22 @@ function renderInventory(){
     else if(m==='sales')l.sort((a,b)=>((_sold2[b.id]||0)-(_sold2[a.id]||0))||(a.name||'').localeCompare(b.name||''));
     return l;};
   // Search shows a flat result list (grouping is noise for 1-2 hits); the default category sort keeps the grouped view
-  const invBody=list=>{const fl=_invSorted(list.filter(_invMatch));if(!fl.length)return`<div class="empty-state" style="margin-top:10px">${t('invNoItems')}</div>`;return ((S.invSort||'cat')==='cat'&&!_invQ)?invGroupedByCat(fl):invItems(fl);};
+  const invBody=list=>{const fl=_invSorted(list.filter(_invMatch));if(!fl.length)return`<div class="empty-state iv-mt10">${t('invNoItems')}</div>`;return ((S.invSort||'cat')==='cat'&&!_invQ)?invGroupedByCat(fl):invItems(fl);};
   const _stD=_stockTakeDiffs();
-  const ctlBar=`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0 2px">
-      <div class="${_srchCls('inv',S.invSearch)}" data-srch="inv" style="flex:1;min-width:160px">
+  const ctlBar=`<div class="iv-ctl">
+      <div class="${_srchCls('inv',S.invSearch)} iv-srch" data-srch="inv">
         ${_artIcon('search',13)}
-        <input id="inv-search" type="text" class="search-input" style="width:100%" aria-label="${esc(t('invSearchPh'))}" value="${esc(S.invSearch||'')}" placeholder="${esc(t('invSearchPh'))}" data-on-input="${_on("_on_renderInventory_15",_EV,_EL)}">
+        <input id="inv-search" type="text" class="search-input iv-w100" aria-label="${esc(t('invSearchPh'))}" value="${esc(S.invSearch||'')}" placeholder="${esc(t('invSearchPh'))}" data-on-input="${_on("_on_renderInventory_15",_EV,_EL)}">
         ${_srchBtn()}
       </div>
       ${_fBtn('inv',[_invStock,_invBrand].filter(v=>v!=='all').length)}
       <select class="filter-select" aria-label="${esc(t('sortBy'))}" data-on-change="${_on("_on_renderInventory_16",_EV,_EL)}">${[['cat',t('invSortCat')],['name',t('sortName')],['stock',t('invSortStock')],['sales',t('invSortSales')]].map(([v,l])=>`<option value="${v}"${(S.invSort||'cat')===v?' selected':''}>${l}</option>`).join('')}</select>
-      <button class="btn-secondary" data-on-click="${_on("toggleStockTake")}" style="white-space:nowrap;${S.invCount?'border-color:var(--green);color:var(--green)':''}">${S.invCount?t('stCancelBtn'):t('stStartBtn')}</button>
+      <button class="btn-secondary ${S.invCount?'iv-stbtn-on':'iv-stbtn'}" data-on-click="${_on("toggleStockTake")}">${S.invCount?t('stCancelBtn'):t('stStartBtn')}</button>
     </div>
     ${_fPanel('inv',_fField(t('colStatus'),`<select class="filter-select" aria-label="${esc(t('colStatus'))}" data-on-change="${_on("_on_renderInventory_17",_EV,_EL)}">${[['all',t('filterAll')],['in',t('invInStock')],['low',t('invLowStock')],['out',t('invOutStock')]].map(([v,l])=>`<option value="${v}"${_invStock===v?' selected':''}>${l}</option>`).join('')}</select>`)
       +_fField(t('invBrand'),`<select class="filter-select" aria-label="${esc(t('invBrand'))}" data-on-change="${_on("_on_renderInventory_18",_EV,_EL)}">${['all',...new Set((sec==='supplements'?suppItems:equipItems).map(it=>String(it.brand||'').trim()).filter(Boolean))].sort((a,b)=>a==='all'?-1:b==='all'?1:a.localeCompare(b)).map(v=>`<option value="${esc(v)}"${_invBrand===v?' selected':''}>${v==='all'?t('filterAll'):esc(v)}</option>`).join('')}</select>`))}
-    ${S.invCount?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.25);border-radius:4px;padding:9px 12px;margin-top:6px">
-      <span style="flex:1;min-width:160px;font-size:12px;color:var(--muted)">${t('stHint')}</span>
+    ${S.invCount?`<div class="iv-stbar">
+      <span class="iv-sthint">${t('stHint')}</span>
       <button class="btn-sm btn-green" data-on-click="${_on("applyStockTake")}" ${_stD.length?'':'disabled'}>${t('stApplyBtn').replace('{0}',_stD.length)}</button>
     </div>`:''}`;
   const _invHadFocus=document.activeElement&&document.activeElement.id==='inv-search';
@@ -28856,16 +28853,16 @@ function renderInventory(){
       .map(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0,s=_sold[i.id]||0;const need=Math.max(1,Math.ceil(Math.max(lo*2,s,4)-q));return{i,q,s,need};})
       .sort((a,b)=>b.s-a.s||a.q-b.q);
     if(!ro.length)return'';
-    return`<div class="card" style="margin-bottom:14px;padding:14px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
-        <div style="font-weight:800;font-size:14px">${t('reorderTitle')}</div>
-        <button class="btn-sm btn-muted" data-on-click="${_on("_shareReorderList")}" style="font-size:12px;white-space:nowrap">${_artIcon('share',12)} ${t('reorderShareBtn')}</button>
+    return`<div class="card iv-ro">
+      <div class="iv-ro-head">
+        <div class="iv-ro-title">${t('reorderTitle')}</div>
+        <button class="btn-sm btn-muted iv-ro-share" data-on-click="${_on("_shareReorderList")}">${_artIcon('share',12)} ${t('reorderShareBtn')}</button>
       </div>
-      ${ro.map(({i,q,s,need})=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border)">
+      ${ro.map(({i,q,s,need})=>`<div class="iv-ro-row">
         ${_itemThumb(i.id,32)}
-        <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:13px">${esc(i.name)}</div>
-          <div style="font-size:11px;color:var(--muted)"><span style="color:${q<=0?'var(--red)':'var(--orange)'};font-weight:700">${q<=0?t('invOutStock'):t('invLowStock')}</span> · ${t('invQty')}: ${q}${s>0?` · ${s} ${t('reorderSold')}`:''}</div></div>
-        <div style="text-align:end;flex-shrink:0"><div style="font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:800;letter-spacing:.4px">${t('reorderSuggest')}</div><div style="font-weight:900;color:var(--green);font-size:17px">+${need}</div></div>
+        <div class="iv-ro-main"><div class="iv-ro-name">${esc(i.name)}</div>
+          <div class="iv-ro-sub"><span class="iv-ro-st iv-${q<=0?'out':'low'}">${q<=0?t('invOutStock'):t('invLowStock')}</span> · ${t('invQty')}: ${q}${s>0?` · ${s} ${t('reorderSold')}`:''}</div></div>
+        <div class="iv-ro-end"><div class="iv-ro-sug">${t('reorderSuggest')}</div><div class="iv-ro-need">+${need}</div></div>
       </div>`).join('')}
     </div>`;
   };
