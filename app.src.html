@@ -11478,33 +11478,33 @@ function renderAddonPicker(){
   const total=addonsCost(cur);
   let m=document.getElementById('addon-picker-backdrop');
   if(!m){m=document.createElement('div');m.id='addon-picker-backdrop';m.className='modal-backdrop';m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';m.onclick=ev=>{if(ev.target===m)closeAddonPicker();};document.body.appendChild(m);}
-  m.innerHTML=`<div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px">
-      <div class="modal-title" style="margin:0">${t('addonEditTitle')}</div>
-      <button data-on-click="${_on("closeAddonPicker")}" aria-label="${t('cashDone')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px">&times;</button>
+  m.innerHTML=`<div class="modal-box dk-ap-box" role="dialog" aria-modal="true">
+    <div class="dk-ap-head">
+      <div class="modal-title dk-m0">${t('addonEditTitle')}</div>
+      <button data-on-click="${_on("closeAddonPicker")}" aria-label="${t('cashDone')}" class="dk-x">&times;</button>
     </div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${e.status==='waitlist'?t('waitlistLabel'):'#'+e.queueNum} ${esc(e.name)}</div>
-    ${items.length?`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
-      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;return`<div style="position:relative;border:1.5px solid ${qn>0?'var(--green)':'var(--border)'};border-radius:7px;overflow:hidden;background:var(--s1);${out&&qn<=0?'opacity:.55':''}">
+    <div class="dk-sub12">${e.status==='waitlist'?t('waitlistLabel'):'#'+e.queueNum} ${esc(e.name)}</div>
+    ${items.length?`<div class="dk-ap-grid">
+      ${items.map(it=>{const qn=_q(it.id);const stock=Number(it.qty)||0;const out=stock<=0;const low=stock>0&&stock<=5;return`<div class="${qn>0?'dk-ap-card-on':out?'dk-ap-card-out':'dk-ap-card'}">
         ${_macroBadge(it,38)}
-        ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" style="width:100%;height:120px;object-fit:contain;background:var(--photo-bg);display:block">`:`<div style="width:100%;height:120px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:12px;text-align:center;padding:8px">${esc(it.name)}</div>`}
-        <div style="padding:10px 12px">
-          <div style="font-weight:800;font-size:14px;line-height:1.2">${esc(it.name)}</div>
-          ${stock<=10?`<div style="margin-top:4px;font-size:11px;font-weight:800;color:${out?'#e5484d':low?'var(--orange)':'var(--muted)'}">${out?t('outOfStock'):stock+' '+t('stockLeft')}</div>`:''}
-          ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" style="margin-top:7px;background:rgba(var(--green-rgb),.08);border:1px solid rgba(var(--green-rgb),.22);color:var(--green);font-family:inherit;font-size:11px;font-weight:800;padding:4px 10px;border-radius:3px;cursor:pointer">${t('nuButton')}</button>`:''}
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px">
-            <span style="font-weight:800;color:var(--green);font-size:14px">${_priceLabel(it.price)}</span>
-            <div style="display:flex;align-items:center;gap:6px">
-              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,-1)}" ${qn<=0?'disabled':''} aria-label="−" style="width:30px;height:30px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:${qn<=0?'default':'pointer'};line-height:1;${qn<=0?'opacity:.4':''}">−</button>
-              <span style="min-width:18px;text-align:center;font-weight:800">${qn}</span>
-              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,1)}" ${out?'disabled':''} aria-label="+" style="width:30px;height:30px;border-radius:3px;border:1px solid ${out?'var(--border)':'var(--green)'};background:${out?'var(--s2)':'rgba(var(--green-rgb),.12)'};color:${out?'var(--muted)':'var(--green)'};font-size:18px;font-weight:800;cursor:${out?'default':'pointer'};line-height:1;${out?'opacity:.5':''}">+</button>
+        ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="dk-ap-img">`:`<div class="dk-ap-noimg">${esc(it.name)}</div>`}
+        <div class="dk-ap-body">
+          <div class="dk-ap-name">${esc(it.name)}</div>
+          ${stock<=10?`<div class="${out?'dk-ap-stock-out':low?'dk-ap-stock-low':'dk-ap-stock'}">${out?t('outOfStock'):stock+' '+t('stockLeft')}</div>`:''}
+          ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" class="dk-ap-nu">${t('nuButton')}</button>`:''}
+          <div class="dk-ap-row">
+            <span class="dk-ap-price">${_priceLabel(it.price)}</span>
+            <div class="dk-ap-step">
+              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,-1)}" ${qn<=0?'disabled':''} aria-label="−" class="${qn<=0?'dk-ap-minus-off':'dk-ap-minus'}">−</button>
+              <span class="dk-ap-qty">${qn}</span>
+              <button type="button" data-on-click="${_on("_addonPickerStep",it.id,1)}" ${out?'disabled':''} aria-label="+" class="${out?'dk-ap-plus-off':'dk-ap-plus'}">+</button>
             </div>
           </div>
         </div>
       </div>`;}).join('')}
-    </div>`:`<div class="empty-state" style="padding:24px">${t('addonNone')}</div>`}
-    <div style="display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border);margin-top:14px;padding-top:10px;font-weight:900"><span>${t('reviewTotalLabel')}</span><span style="color:var(--green)">SAR ${total}</span></div>
-    <button class="btn-primary" style="width:100%;margin-top:12px" data-on-click="${_on("closeAddonPicker")}">${t('cashDone')}</button>
+    </div>`:`<div class="empty-state dk-p24">${t('addonNone')}</div>`}
+    <div class="dk-ap-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green">SAR ${total}</span></div>
+    <button class="btn-primary dk-w100-mt12" data-on-click="${_on("closeAddonPicker")}">${t('cashDone')}</button>
   </div>`;
 }
 // Core: add (+1) or remove (−1) one unit of an add-on on a booking; updates stock + DB. No render.
@@ -15166,7 +15166,7 @@ function showWalkinModal(){
   // the button destroyed itself mid-click. A second quick tap then landed on a detached
   // node and did nothing. Restyle the buttons in place instead; nothing else here depends
   // on the selected type at render time.
-  const tyBtn=ty=>`<button type="button" data-wi-type="${esc(ty)}" data-on-click="${_on("_wiSetType",ty)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._wiType===ty?'var(--green)':'var(--border)'};background:${S._wiType===ty?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._wiType===ty?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${typeLabel(ty)}</button>`;
+  const tyBtn=ty=>`<button type="button" data-wi-type="${esc(ty)}" data-on-click="${_on("_wiSetType",ty)}" class="${S._wiType===ty?'dk-wi-ty-on':'dk-wi-ty'}">${typeLabel(ty)}</button>`;
   const keep=id=>{const el=document.getElementById(id);return el?el.value:'';} // preserve typed values across type-pill re-renders
   const _n=keep('wi-name'),_p=keep('wi-phone'),_h=keep('wi-height'),_s=keep('wi-sess')||selId;
   // The type menu follows the picked session: 'Own' only where that ride takes owners, so
@@ -15175,26 +15175,26 @@ function showWalkinModal(){
   if(!_wiOwn){if(S._wiType==='Own')S._wiType='Any';S._wiRiders.forEach(r=>{if(r.type==='Own')r.type='Any';});}
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showWalkinModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:420px">
+    <div class="modal-box dk-mw420" role="dialog" aria-modal="true">
       <div class="modal-title">${t('addWalkinBtn')}</div>
-      <div class="form-group" style="margin:14px 0 10px"><label for="wi-name">${t('nameLabel')} *</label><input id="wi-name" type="text" value="${esc(_n)}" maxlength="60" placeholder="${esc(t('wiPickCustPh'))}" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="wi-suggest" data-on-input="${_on("_wiNameInput",_P("value"))}" data-on-keydown="${_on("_wiNameKey",_EV)}" data-on-focus="${_on("_wiRenderSuggest",_P("value"))}" data-on-blur="${_on("_on_showWalkinModal_2",_EV,_EL)}">
-        <div id="wi-suggest" class="mw-suggest" role="listbox" style="display:none"></div>
+      <div class="form-group dk-fg-top"><label for="wi-name">${t('nameLabel')} *</label><input id="wi-name" type="text" value="${esc(_n)}" maxlength="60" placeholder="${esc(t('wiPickCustPh'))}" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="wi-suggest" data-on-input="${_on("_wiNameInput",_P("value"))}" data-on-keydown="${_on("_wiNameKey",_EV)}" data-on-focus="${_on("_wiRenderSuggest",_P("value"))}" data-on-blur="${_on("_on_showWalkinModal_2",_EV,_EL)}">
+        <div id="wi-suggest" class="mw-suggest dk-none" role="listbox"></div>
         <datalist id="wi-cust-list"></datalist></div>
-      <div style="display:flex;gap:10px">
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="wi-phone">${t('authPhone')}</label><input id="wi-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
-        <div class="form-group" style="width:110px;margin-bottom:10px"><label for="wi-height">${t('colHeight')} (${t('cmUnit')})</label><input id="wi-height" type="number" min="80" max="230" data-on-input="${_on("_wiStockHint")}" value="${esc(_h)}"></div>
+      <div class="dk-flex10">
+        <div class="form-group dk-fg-f1"><label for="wi-phone">${t('authPhone')}</label><input id="wi-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
+        <div class="form-group dk-fg-w110"><label for="wi-height">${t('colHeight')} (${t('cmUnit')})</label><input id="wi-height" type="number" min="80" max="230" data-on-input="${_on("_wiStockHint")}" value="${esc(_h)}"></div>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label>${t('bikeTypeLabel')}</label>
-        <div style="display:flex;gap:6px">${bikeTypeOpts(_wiOwn).map(tyBtn).join('')}</div>
-        <div id="wi-stock-hint" style="min-height:15px;margin-top:5px;font-size:11px;font-weight:700"></div></div>
-      ${S._wiRiders.map((r,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-        <input id="wi-r-name-${i}" type="text" list="wi-cust-list" data-on-focus="${_on("_dlFill","wi-cust-list")}" placeholder="${t('nameLabel')} ${i+2}" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0" data-on-input="${_on("_nameInput",_EL)}">
-        <input id="wi-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" style="width:72px;flex-shrink:0">
-        <select id="wi-r-type-${i}" aria-label="${t('bikeTypeLabel')}" style="width:110px;flex-shrink:0">${bikeTypeOpts(_wiOwn).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
-        <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_wiRemoveRider",i)}" title="${t('removeBtn')}" style="flex-shrink:0">${_artIcon('close',11)}</button>
+      <div class="form-group dk-mb10"><label>${t('bikeTypeLabel')}</label>
+        <div class="dk-flex6">${bikeTypeOpts(_wiOwn).map(tyBtn).join('')}</div>
+        <div id="wi-stock-hint" class="dk-wi-hint"></div></div>
+      ${S._wiRiders.map((r,i)=>`<div class="dk-wi-rrow">
+        <input id="wi-r-name-${i}" type="text" list="wi-cust-list" data-on-focus="${_on("_dlFill","wi-cust-list")}" placeholder="${t('nameLabel')} ${i+2}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0" data-on-input="${_on("_nameInput",_EL)}">
+        <input id="wi-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-wi-rh">
+        <select id="wi-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="dk-wi-rt">${bikeTypeOpts(_wiOwn).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        <button type="button" class="btn-sm btn-muted dk-fs0" data-on-click="${_on("_wiRemoveRider",i)}" title="${t('removeBtn')}">${_artIcon('close',11)}</button>
       </div>`).join('')}
-      <button type="button" class="btn-secondary" style="width:100%;margin:2px 0 12px" data-on-click="${_on("_wiAddRider")}">+ ${t('beAddRiderBtn')}</button>
-      <div class="form-group" style="margin-bottom:14px"><label>${t('colSession')}</label>
+      <button type="button" class="btn-secondary dk-wi-add" data-on-click="${_on("_wiAddRider")}">+ ${t('beAddRiderBtn')}</button>
+      <div class="form-group dk-mb14"><label>${t('colSession')}</label>
         <select id="wi-sess" data-on-change="${_on("_on_showWalkinModal_3",_EV,_EL)}">${open.map(x=>`<option value="${esc(x.id)}"${_s===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeWalkinModal")}">${t('cancelBtn')}</button>
@@ -15371,7 +15371,7 @@ function showBookingEditModal(entryId){
   S._beRender=entryId;
   const keep=id=>{const el=document.getElementById(id);return el!=null&&el.value!==''?el.value:null;};
   const _n=keep('be-name')??e.name??'',_p=keep('be-phone')??e.phone??'',_h=keep('be-height')??(e.height?String(e.height):''),_s=keep('be-sess')??e.sessionId;
-  const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._beType===ty?'var(--green)':'var(--border)'};background:${S._beType===ty?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._beType===ty?'var(--green)':'var(--muted)'};font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">${typeLabel(ty)}</button>`;
+  const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" class="${S._beType===ty?'dk-be-ty-on':'dk-be-ty'}">${typeLabel(ty)}</button>`;
   // Session move for any open booking (2026-09-28): a checked-in rider is taken off their bike
   // and put back in line on the new ride (the Undo check-in write, then the move); what was
   // paid stays paid, at its price. Capacity-checked like the customer reschedule.
@@ -15389,26 +15389,26 @@ function showBookingEditModal(entryId){
   const m=document.getElementById('booking-edit-modal');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showBookingEditModal_2",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:420px">
+    <div class="modal-box dk-mw420" role="dialog" aria-modal="true">
       <div class="modal-title">${t('editBookingTitle')} · #${e.queueNum}</div>
       <div class="modal-sub">${t('editBookingSub')}</div>
-      <div class="form-group" style="margin:14px 0 10px"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60"></div>
-      <div style="display:flex;gap:10px">
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="be-phone">${t('authPhone')}</label><input id="be-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
-        <div class="form-group" style="width:110px;margin-bottom:10px"><label for="be-height">${t('colHeight')} (${t('cmUnit')})</label><input id="be-height" type="number" min="80" max="230" value="${esc(_h)}"></div>
+      <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60"></div>
+      <div class="dk-flex10">
+        <div class="form-group dk-fg-f1"><label for="be-phone">${t('authPhone')}</label><input id="be-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
+        <div class="form-group dk-fg-w110"><label for="be-height">${t('colHeight')} (${t('cmUnit')})</label><input id="be-height" type="number" min="80" max="230" value="${esc(_h)}"></div>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label>${t('bikeTypeLabel')}</label>
-        <div style="display:flex;gap:6px">${bikeTypeOpts(_beOwn,_beNoCarbon).map(tyBtn).join('')}</div></div>
-      <div class="form-group" style="margin-bottom:14px"><label for="be-sess">${t('colSession')}</label>
-        <select id="be-sess">${sessOpts}</select>${moveNote?`<div id="be-move-note" style="margin-top:6px;font-size:12px;font-weight:600;color:var(--muted)">${moveNote}</div>`:''}</div>
-      ${_beComm?'':`<div class="form-group" style="margin-bottom:14px"><label>${t('beAddRidersLabel')}</label>
-        ${(S._beNewRiders||[]).map((r,i)=>`<div style="display:flex;gap:6px;margin-top:8px;align-items:center">
-          <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0">
-          <input id="be-nr-height-${i}" type="number" min="80" max="230" aria-label="${t('colHeight')}" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" style="width:70px;flex-shrink:0">
-          <select id="be-nr-type-${i}" aria-label="${t('bikeTypeLabel')}" data-on-change="${_on("_beSyncNewRiders")}" style="width:100px;flex-shrink:0">${bikeTypeOpts(_beOwn,_beNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
-          <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_beRemoveRider",i)}" aria-label="${t('beRemoveRider')}" style="flex-shrink:0">&#x2715;</button>
+      <div class="form-group dk-mb10"><label>${t('bikeTypeLabel')}</label>
+        <div class="dk-flex6">${bikeTypeOpts(_beOwn,_beNoCarbon).map(tyBtn).join('')}</div></div>
+      <div class="form-group dk-mb14"><label for="be-sess">${t('colSession')}</label>
+        <select id="be-sess">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
+      ${_beComm?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
+        ${(S._beNewRiders||[]).map((r,i)=>`<div class="dk-be-rrow">
+          <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0">
+          <input id="be-nr-height-${i}" type="number" min="80" max="230" aria-label="${t('colHeight')}" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-be-rh">
+          <select id="be-nr-type-${i}" aria-label="${t('bikeTypeLabel')}" data-on-change="${_on("_beSyncNewRiders")}" class="dk-be-rt">${bikeTypeOpts(_beOwn,_beNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+          <button type="button" class="btn-sm btn-muted dk-fs0" data-on-click="${_on("_beRemoveRider",i)}" aria-label="${t('beRemoveRider')}">&#x2715;</button>
         </div>`).join('')}
-        <button type="button" class="btn-secondary" style="width:100%;margin-top:8px" data-on-click="${_on("_beAddRider")}">+ ${t('beAddRiderBtn')}</button>
+        <button type="button" class="btn-secondary dk-w100-mt8" data-on-click="${_on("_beAddRider")}">+ ${t('beAddRiderBtn')}</button>
       </div>`}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeBookingEditModal")}">${t('cancelBtn')}</button>
@@ -16736,18 +16736,18 @@ function showCancelNight(sid){
   m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';
   const seen=new Set();
   const list=rows.filter(e=>{const k=e.phone||e.id;if(seen.has(k))return false;seen.add(k);return true;});
-  m.innerHTML=`<div class="modal-box" role="dialog" aria-modal="true" style="max-width:520px;max-height:88vh;overflow-y:auto" data-on-click="${_on("_on_showCancelNight_1",_EV,_EL)}">
-    <div class="modal-title" style="color:var(--red)">${t('cnTitle')} · ${esc(when)}</div>
-    <div class="modal-sub" style="margin-bottom:12px">${t('cnSub').replace('{0}',String(rows.length))}</div>
-    <div class="form-group" style="margin-bottom:10px"><label>${t('cnMsgLabel')}</label>
-      <textarea id="cn-msg" rows="3" style="width:100%" data-on-input="${_on("_on_showCancelNight_2",_EV,_EL)}">${esc(S._cnMsg)}</textarea></div>
-    <div style="display:flex;gap:6px;margin-bottom:10px">
-      <button class="btn-sm btn-muted" style="flex:1" data-on-click="${_on("_cnCopyNumbers")}">${t('cnCopyNumbers')}</button>
+  m.innerHTML=`<div class="modal-box dk-cn-box" role="dialog" aria-modal="true" data-on-click="${_on("_on_showCancelNight_1",_EV,_EL)}">
+    <div class="modal-title dk-c-red">${t('cnTitle')} · ${esc(when)}</div>
+    <div class="modal-sub dk-mb12">${t('cnSub').replace('{0}',String(rows.length))}</div>
+    <div class="form-group dk-mb10"><label>${t('cnMsgLabel')}</label>
+      <textarea id="cn-msg" rows="3" class="dk-w100" data-on-input="${_on("_on_showCancelNight_2",_EV,_EL)}">${esc(S._cnMsg)}</textarea></div>
+    <div class="dk-cn-acts">
+      <button class="btn-sm btn-muted dk-f1" data-on-click="${_on("_cnCopyNumbers")}">${t('cnCopyNumbers')}</button>
     </div>
-    <div style="max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;padding:6px 10px;margin-bottom:12px">
-      ${list.map(e=>`<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px">
-        <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>${esc(e.name)}</b> <span style="color:var(--muted)">${esc(fmtPhone(e.phone)||'—')}</span></span>
-        ${e.phone?`<a class="btn-sm btn-green" style="text-decoration:none;white-space:nowrap" target="_blank" rel="noopener" data-wa="${esc(_waDigits(e.phone))}"
+    <div class="dk-cn-list">
+      ${list.map(e=>`<div class="dk-cn-row">
+        <span class="dk-cn-who"><b>${esc(e.name)}</b> <span class="dk-c-muted">${esc(fmtPhone(e.phone)||'—')}</span></span>
+        ${e.phone?`<a class="btn-sm btn-green dk-cn-wa" target="_blank" rel="noopener" data-wa="${esc(_waDigits(e.phone))}"
           href="https://wa.me/${esc(_waDigits(e.phone))}?text=${esc(encodeURIComponent(S._cnMsg))}">WhatsApp</a>`:''}
       </div>`).join('')}
     </div>
@@ -17046,7 +17046,7 @@ async function staffResetPassword(){
   const email=(document.getElementById('staff-reset-email')?.value||'').trim().toLowerCase();
   const pw=(document.getElementById('staff-reset-pw')?.value||'');
   const el=document.getElementById('staff-reset-result');if(!el)return;
-  const err=m=>{el.innerHTML=`<div style="color:var(--red);font-size:13px;font-weight:700">${m}</div>`;};
+  const err=m=>{el.innerHTML=`<div class="dk-sr-err">${m}</div>`;};
   if(!email||!/^[^\s<>"'()]+@[^\s<>"'()]+\.[^\s<>"'()]+$/.test(email))return err(t('errValidEmail'));
   if(pw.length<8||!/[A-Z]/.test(pw)||!/[0-9]/.test(pw))return err(t('errPasswordLen'));
   // Any capitals in the stored address still match (ilike, with its wildcards escaped).
@@ -17057,9 +17057,9 @@ async function staffResetPassword(){
   const{data:pwok,error}=await sb.rpc('staff_set_customer_password',{p_customer_id:cust.id,p_new_pwd:pw});
   if(error||pwok!==true)return err((error&&error.message)||t('errConnection'));
   logAction(t('logStaffResetPwd')+cust.name);
-  el.innerHTML=`<div style="background:rgba(var(--green-rgb),.07);border:1px solid rgba(var(--green-rgb),.25);border-radius:6px;padding:16px 20px">
-    <div style="font-size:13px;font-weight:800;color:var(--green);margin-bottom:6px">✓ ${t('staffResetDone').replace('{0}',esc(cust.name))}</div>
-    <div style="font-size:12px;color:var(--muted-l);font-weight:600">${t('staffResetGiveMsg')} <strong style="color:var(--text);font-family:monospace">${esc(pw)}</strong></div>
+  el.innerHTML=`<div class="dk-sr-ok">
+    <div class="dk-sr-t">✓ ${t('staffResetDone').replace('{0}',esc(cust.name))}</div>
+    <div class="dk-sr-msg">${t('staffResetGiveMsg')} <strong class="dk-sr-pw">${esc(pw)}</strong></div>
   </div>`;
   document.getElementById('staff-reset-pw').value='';
 }
@@ -17658,22 +17658,21 @@ function showCancelReasonModal(id){
   const m=document.getElementById('cancel-reason-modal');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showCancelReasonModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:380px">
+    <div class="modal-box dk-mw380" role="dialog" aria-modal="true">
       <div class="modal-title">${t('cancelReasonTitle')}</div>
-      <div style="display:flex;flex-direction:column;gap:8px;margin:16px 0">
+      <div class="dk-cr-list">
         ${reasons.map((r,i)=>`
-          <button class="cancel-reason-opt" data-idx="${i}"
-            style="padding:10px 14px;border-radius:4px;border:1.5px solid rgba(var(--tint-rgb),.1);background:rgba(var(--tint-rgb),.04);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;text-align:start;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s"
+          <button class="cancel-reason-opt dk-cr-opt" data-idx="${i}"
             data-on-mouseover="${_on("_on_showCancelReasonModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCancelReasonModal_3",_EV,_EL)}">${r}</button>`).join('')}
-        <div id="cancel-other-wrap" style="display:none;margin-top:2px">
+        <div id="cancel-other-wrap" class="dk-cr-other">
           <textarea id="cancel-other-text" placeholder="${t('cancelOtherPlaceholder')||'Please describe your reason...'}"
-            style="width:100%;padding:10px 14px;background:rgba(var(--tint-rgb),.05);border:1.5px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;resize:vertical;min-height:80px;outline:none"
+            class="dk-cr-ta"
             data-on-input="${_on("_on_showCancelReasonModal_4",_EV,_EL)}"></textarea>
         </div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-secondary" style="flex:1" data-on-click="${_on("closeCancelReasonModal")}">${t('cancelBtn')}</button>
-        <button class="btn-primary" style="flex:2;background:var(--red);border-color:var(--red)" data-on-click="${_on("confirmCancelWithReason",id)}">${t('cancelConfirmBtn')}</button>
+      <div class="dk-flex8">
+        <button class="btn-secondary dk-f1" data-on-click="${_on("closeCancelReasonModal")}">${t('cancelBtn')}</button>
+        <button class="btn-primary dk-cr-go" data-on-click="${_on("confirmCancelWithReason",id)}">${t('cancelConfirmBtn')}</button>
       </div>
     </div>
   </div>`;
@@ -17725,19 +17724,19 @@ function showRescheduleModal(fromSessionId){
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   const list=opts.length?opts.map(s=>{
     const full=spotsLeft(s.id)<moving.length; // same yardstick as booking + rescheduleBooking
-    return`<button ${full?'disabled':''} data-on-click="${_on("rescheduleBooking",fromSessionId,s.id)}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:start;padding:12px 14px;border-radius:4px;border:1px solid var(--border);background:${full?'rgba(var(--tint-rgb),.02)':'var(--s2)'};color:var(--text);font-family:var(--font-body);cursor:${full?'not-allowed':'pointer'};opacity:${full?'.5':'1'};margin-bottom:8px">
-      <span style="font-weight:800;font-size:13px">${dayLabel(s.day)} · ${shortDate(s.session_date||s.id)}</span>
-      <span style="font-size:11px;font-weight:700;color:${full?'var(--red)':'var(--green)'}">${full?t('statusFull'):t('availLabel')}</span>
+    return`<button ${full?'disabled':''} data-on-click="${_on("rescheduleBooking",fromSessionId,s.id)}" class="${full?'dk-rs-opt-full':'dk-rs-opt'}">
+      <span class="dk-rs-day">${dayLabel(s.day)} · ${shortDate(s.session_date||s.id)}</span>
+      <span class="${full?'dk-rs-st-full':'dk-rs-st'}">${full?t('statusFull'):t('availLabel')}</span>
     </button>`;
   }).join(''):`<div class="empty-state">${t('rescheduleNoSessions')}</div>`;
   const m=document.getElementById('reschedule-modal');m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showRescheduleModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:380px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px">
-        <div class="modal-title" style="margin-bottom:0">${t('rescheduleTitle')}</div>
-        <button data-on-click="${_on("closeRescheduleModal")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px">&times;</button>
+    <div class="modal-box dk-mw380" role="dialog" aria-modal="true">
+      <div class="dk-rs-head">
+        <div class="modal-title dk-mb0">${t('rescheduleTitle')}</div>
+        <button data-on-click="${_on("closeRescheduleModal")}" aria-label="${t('closeBtn')}" class="dk-x">&times;</button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${t('rescheduleSub')}</div>
+      <div class="dk-sub12">${t('rescheduleSub')}</div>
       ${list}
     </div></div>`;
 }
@@ -17912,11 +17911,14 @@ function _staffCancelConfirm(entry,onConfirm){
     title:`${t('cancelBookingLabel')} #${entry.queueNum}`,
     body:`<strong>${esc(entry.name)}</strong> (${statusLabel})<br>${t('cancelEntryBody')}
       <div class="cx-pick" role="group" aria-label="${esc(t('staffCancelWhy'))}"><div class="cx-pick-lbl">${t('staffCancelWhy')}</div><div class="cx-chips">${chips}</div>
-      <input id="cx-note" class="cx-note" type="text" maxlength="300" aria-label="${esc(t('cancelReason3'))}" placeholder="${esc(t('cancelOtherPlaceholder'))}" style="display:none" data-on-input="${_on("_on__staffCancelConfirm_1",_EV,_EL)}"></div>`,
+      <input id="cx-note" class="cx-note" type="text" maxlength="300" aria-label="${esc(t('cancelReason3'))}" placeholder="${esc(t('cancelOtherPlaceholder'))}" data-on-input="${_on("_on__staffCancelConfirm_1",_EV,_EL)}"></div>`,
     confirmLabel:t('cancelBookingLabel'),
     confirmClass:'btn-red',
     onConfirm:()=>{const why=_cxPatch();S._cxWhy=null;return onConfirm(why);},
   });
+  // The note starts hidden and _cxPick shows it with style.display='' (the CSSOM, which a strict
+  // style-src allows), so the hidden start is set the same way, not as a style attribute.
+  const _cxn=document.getElementById('cx-note');if(_cxn)_cxn.style.display='none';
 }
 // The write behind a staff cancel (waitlist, waiting or active), shared by the roster's
 // Cancel and the check-in modal's Cancel booking.
@@ -18323,9 +18325,9 @@ function _promoNudge(e){
     const b=document.createElement('div');b.id='promo-nudge';
     b.style.cssText='position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:9400;display:flex;align-items:center;gap:12px;background:var(--s1,#111);border:1px solid rgba(3,255,137,.45);border-radius:8px;padding:10px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5);font-family:inherit;max-width:92vw';
     const wa='https://wa.me/'+String(e.phone).replace(/\D/g,'')+'?text='+encodeURIComponent(t('waYourTurnMsg'));
-    b.innerHTML='<span style="font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+t('promoNudgeMsg').replace('{0}',esc(e.name||''))+'</span>'
-      +'<a href="'+wa+'" target="_blank" rel="noopener" style="flex-shrink:0;background:#25D366;color:#fff;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;text-decoration:none">WhatsApp</a>'
-      +'<button style="flex-shrink:0;background:none;border:none;color:var(--muted,#888);font-size:16px;cursor:pointer;padding:2px" aria-label="close">\u2715</button>';
+    b.innerHTML='<span class="dk-pn-msg">'+t('promoNudgeMsg').replace('{0}',esc(e.name||''))+'</span>'
+      +'<a href="'+wa+'" target="_blank" rel="noopener" class="dk-pn-wa">WhatsApp</a>'
+      +'<button class="dk-pn-x" aria-label="close">\u2715</button>';
     b.querySelector('button').onclick=()=>b.remove();
     b.querySelector('a').addEventListener('click',()=>setTimeout(()=>b.remove(),400));
     document.body.appendChild(b);
@@ -18545,18 +18547,18 @@ function showReturnPayModal(id){
   const m=document.getElementById('return-pay-modal');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showReturnPayModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:400px;text-align:center">
+    <div class="modal-box dk-rp-box" role="dialog" aria-modal="true">
       <div class="modal-title">${t('returnPayTitle')}</div>
-      <div class="modal-sub" style="margin-bottom:24px">${t('returnPayMsg')}</div>
-      <div style="font-size:16px;font-weight:900;margin-bottom:24px">
+      <div class="modal-sub dk-mb24">${t('returnPayMsg')}</div>
+      <div class="dk-rp-who">
         #${entry.queueNum} - ${esc(entry.name)}<br>
-        <span style="color:var(--muted-l);font-size:14px"><bdi>${_fmtSar(_owed)}</bdi> ${t('pendingLabel')}</span>
+        <span class="dk-rp-owed"><bdi>${_fmtSar(_owed)}</bdi> ${t('pendingLabel')}</span>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-secondary" style="width:100%" data-on-click="${_on("showCashierModal",id)}">${t('cashierAddBtn')}</button>
-        <button class="btn-primary" style="width:100%" data-on-click="${_on("_on_showReturnPayModal_2",_EV,_EL,id)}">✓ ${t('returnMarkPaidBtn')}</button>
-        <button style="width:100%;padding:10px 16px;border-radius:6px;background:rgba(var(--warn-rgb),.12);border:1.5px solid rgba(var(--warn-rgb),.4);color:var(--orange);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer" data-on-click="${_on("_on_showReturnPayModal_3",_EV,_EL,id)}"> ${t('returnPendingBtn')}</button>
-        <button style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-body)" data-on-click="${_on("closeReturnPayModal")}">${t('cancelBtn')}</button>
+      <div class="dk-col10">
+        <button class="btn-secondary dk-w100" data-on-click="${_on("showCashierModal",id)}">${t('cashierAddBtn')}</button>
+        <button class="btn-primary dk-w100" data-on-click="${_on("_on_showReturnPayModal_2",_EV,_EL,id)}">✓ ${t('returnMarkPaidBtn')}</button>
+        <button class="dk-rp-pend" data-on-click="${_on("_on_showReturnPayModal_3",_EV,_EL,id)}"> ${t('returnPendingBtn')}</button>
+        <button class="dk-link" data-on-click="${_on("closeReturnPayModal")}">${t('cancelBtn')}</button>
       </div>
     </div>
   </div>`;
@@ -18584,10 +18586,10 @@ function showEditPriceModal(id){
   const presetBtns=uniquePrices.map(p=>{
     const isCur=cur===p;
     const lbl=_priceTypes(p);
-    return`<button style="padding:11px 16px;border-radius:6px;border:1.5px solid ${isCur?'var(--green)':'rgba(var(--tint-rgb),.12)'};background:${isCur?'rgba(var(--green-rgb),.08)':'rgba(var(--tint-rgb),.03)'};color:${isCur?'var(--green)':'var(--text)'};font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%"
+    return`<button class="${isCur?'dk-ep-pre-on':'dk-ep-pre'}"
       data-on-click="${_on("saveEditedPrice",id,p)}">
-      <span>SAR ${p%1===0?p:p.toFixed(2)}${lbl?`<span style="font-size:11px;font-weight:600;color:var(--muted);margin-inline-start:8px">${esc(lbl)}</span>`:''}</span>
-      ${isCur?'<span style="font-size:11px">✓</span>':''}
+      <span>SAR ${p%1===0?p:p.toFixed(2)}${lbl?`<span class="dk-ep-lbl">${esc(lbl)}</span>`:''}</span>
+      ${isCur?'<span class="dk-fs11">✓</span>':''}
     </button>`;
   }).join('');
   // Add-on breakdown so the amount shown is the FULL total (rental + add-ons), with per-add-on
@@ -18596,45 +18598,45 @@ function showEditPriceModal(id){
   const _adTotal=addonsCost(entryAddons(entry));
   const _grand=Math.round((cur+_adTotal)*100)/100;
   const _fmtSar=v=>v%1===0?v:v.toFixed(2);
-  const breakdown=`<div style="border:1px solid var(--border);border-radius:6px;padding:12px 12px 10px;margin-bottom:16px;background:var(--s1)">
-    <div style="display:flex;justify-content:space-between;align-items:baseline;font-weight:900;font-size:16px;margin-bottom:8px"><span>${t('reviewTotalLabel')}</span><span style="color:var(--green)"><bdi>SAR ${_fmtSar(_grand)}</bdi></span></div>
-    <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted)"><span>${t('reviewRentalLabel')}</span><span style="font-weight:700;color:var(--text)"><bdi>SAR ${_fmtSar(cur)}</bdi></span></div>
-    ${_ad.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px">
-      <span style="flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(a.name)}</span>
-      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
-        <button data-on-click="${_on("_epAddonStep",id,a.id,-1)}" aria-label="−" style="width:26px;height:26px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:16px;font-weight:800;cursor:pointer;line-height:1">−</button>
-        <span style="min-width:16px;text-align:center;font-weight:800">${a.qty}</span>
-        <button data-on-click="${_on("_epAddonStep",id,a.id,1)}" aria-label="+" style="width:26px;height:26px;border-radius:3px;border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-size:16px;font-weight:800;cursor:pointer;line-height:1">+</button>
+  const breakdown=`<div class="dk-ep-bd">
+    <div class="dk-ep-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green"><bdi>SAR ${_fmtSar(_grand)}</bdi></span></div>
+    <div class="dk-ep-rent"><span>${t('reviewRentalLabel')}</span><span class="dk-ep-rentv"><bdi>SAR ${_fmtSar(cur)}</bdi></span></div>
+    ${_ad.map(a=>`<div class="dk-ep-ad">
+      <span class="dk-ep-adn">${esc(a.name)}</span>
+      <div class="dk-ep-step">
+        <button data-on-click="${_on("_epAddonStep",id,a.id,-1)}" aria-label="−" class="dk-ep-minus">−</button>
+        <span class="dk-ep-qty">${a.qty}</span>
+        <button data-on-click="${_on("_epAddonStep",id,a.id,1)}" aria-label="+" class="dk-ep-plus">+</button>
       </div>
-      <span style="min-width:58px;text-align:end;font-weight:700;color:var(--green);flex-shrink:0"><bdi>SAR ${a.lineTotal}</bdi></span>
+      <span class="dk-ep-lt"><bdi>SAR ${a.lineTotal}</bdi></span>
     </div>`).join('')}
-    <button class="btn-secondary" style="width:100%;margin-top:9px;font-size:12px;padding:8px" data-on-click="${_on("_epOpenAddons",id)}">+ ${t('addonAddBtn')}</button>
+    <button class="btn-secondary dk-ep-addbtn" data-on-click="${_on("_epOpenAddons",id)}">+ ${t('addonAddBtn')}</button>
   </div>`;
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showEditPriceModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:380px">
+    <div class="modal-box dk-mw380" role="dialog" aria-modal="true">
       <div class="modal-title">${t('editPriceTitle')}</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px">#${entry.queueNum} - ${esc(entry.name)}</div>
+      <div class="dk-ep-who">#${entry.queueNum} - ${esc(entry.name)}</div>
       ${breakdown}
-      <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">${t('reviewRentalLabel')}</label>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:220px;overflow-y:auto;padding-right:2px">
+      <label class="dk-lbl8">${t('reviewRentalLabel')}</label>
+      <div class="dk-ep-pres">
         ${presetBtns}
       </div>
-      <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px">
-        <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">${t('rentDiscountLabel')} <span style="font-weight:600;text-transform:none;letter-spacing:0">(${t('reviewTotalLabel')} SAR ${_fmtSar(_grand)})</span></label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          ${[10,20,30,40,50].map(p=>`<button style="flex:1;min-width:50px;padding:9px 4px;border-radius:4px;border:1.5px solid rgba(var(--tint-rgb),.12);background:rgba(var(--tint-rgb),.03);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer" data-on-click="${_on("saveEditedPrice",id,Math.max(0,Math.round((_grand*(1-p/100)-_adTotal)*100)/100))}">-${p}%</button>`).join('')}
+      <div class="dk-ep-sec14">
+        <label class="dk-lbl6">${t('rentDiscountLabel')} <span class="dk-ep-lbln">(${t('reviewTotalLabel')} SAR ${_fmtSar(_grand)})</span></label>
+        <div class="dk-ep-disc">
+          ${[10,20,30,40,50].map(p=>`<button class="dk-ep-dbtn" data-on-click="${_on("saveEditedPrice",id,Math.max(0,Math.round((_grand*(1-p/100)-_adTotal)*100)/100))}">-${p}%</button>`).join('')}
         </div>
       </div>
-      <div style="border-top:1px solid var(--border);padding-top:12px;margin-bottom:16px">
-        <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px">${t('editPriceCustom')}${_adTotal>0?` <span style="font-weight:600;text-transform:none;letter-spacing:0">(${t('reviewTotalLabel')})</span>`:''}</label>
-        <div style="display:flex;gap:8px">
+      <div class="dk-ep-sec16">
+        <label class="dk-lbl6">${t('editPriceCustom')}${_adTotal>0?` <span class="dk-ep-lbln">(${t('reviewTotalLabel')})</span>`:''}</label>
+        <div class="dk-flex8">
           <input id="ep-custom" type="number" min="0" step="0.01" value="${_fmtSar(_grand)}"
-            style="flex:1;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.12);border-radius:4px;padding:10px 12px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:700;outline:none"
+            class="dk-ep-in"
             data-on-keydown="${_on("_on_showEditPriceModal_2",_EV,_EL,id,_adTotal)}">
-          <button class="btn-primary" style="padding:10px 16px" data-on-click="${_on("_on_showEditPriceModal_3",_EV,_EL,id,_adTotal)}">✓</button>
+          <button class="btn-primary dk-ep-ok" data-on-click="${_on("_on_showEditPriceModal_3",_EV,_EL,id,_adTotal)}">✓</button>
         </div>
       </div>
-      <button style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-body);width:100%" data-on-click="${_on("closeEditPriceModal")}">${t('cancelBtn')}</button>
+      <button class="dk-link-w" data-on-click="${_on("closeEditPriceModal")}">${t('cancelBtn')}</button>
     </div>
   </div>`;
 }
@@ -18685,22 +18687,22 @@ function showEditQNumModal(entryId){
   m.style.display='flex';
   const n=group.length;
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showEditQNumModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:320px">
+    <div class="modal-box dk-mw320" role="dialog" aria-modal="true">
       <div class="modal-title">${t('eqnTitle')}</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:20px">
+      <div class="dk-qn-who">
         ${n>1?t('eqnGroup').replace('{0}',n):`#${entry.queueNum} — ${esc(entry.name)}`}
-        ${n>1?`<br><span style="font-size:12px">#${entry.queueNum} · ${group.map(e=>esc(e.name)).join(', ')}</span>`:''}
+        ${n>1?`<br><span class="dk-fs12">#${entry.queueNum} · ${group.map(e=>esc(e.name)).join(', ')}</span>`:''}
       </div>
-      <div style="margin-bottom:20px">
-        <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">${t('eqnNewNum')}</label>
+      <div class="dk-mb20">
+        <label class="dk-lbl8">${t('eqnNewNum')}</label>
         <input id="qnum-inp" type="number" min="1" step="1" value="${entry.queueNum}"
-          style="width:100%;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:4px;padding:12px 14px;font-size:20px;font-weight:700;color:var(--green);font-family:var(--font-body);outline:none;text-align:center"
+          class="dk-qn-in"
           data-on-focus="${_on("_on_showEditQNumModal_2",_EV,_EL)}" data-on-blur="${_on("_on_showEditQNumModal_3",_EV,_EL)}"
           data-on-keydown="${_on("_on_showEditQNumModal_4",_EV,_EL,entryId)}">
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-primary" style="flex:1" data-on-click="${_on("saveEditedQNum",entryId)}">${t('saveBtn')}</button>
-        <button class="btn-secondary" style="flex:1" data-on-click="${_on("closeEditQNumModal")}">${t('cancelBtn')}</button>
+      <div class="dk-flex8">
+        <button class="btn-primary dk-f1" data-on-click="${_on("saveEditedQNum",entryId)}">${t('saveBtn')}</button>
+        <button class="btn-secondary dk-f1" data-on-click="${_on("closeEditQNumModal")}">${t('cancelBtn')}</button>
       </div>
     </div>
   </div>`;
@@ -18790,26 +18792,26 @@ function _on_renderReturnModal_1(event,el){if(event.target===el)closeReturnModal
 function renderReturnModal(){
   const e=getQueue().find(x=>x.id===S._retId);const m=document.getElementById('return-modal');if(!e||!m)return;
   const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');
-  const btn=(v,lbl)=>`<button type="button" class="toggle-btn${S._retCond===v?' active':''}" aria-pressed="${S._retCond===v}" style="flex:1" data-on-click="${_on("_retSetCond",v)}">${lbl}</button>`;
+  const btn=(v,lbl)=>`<button type="button" class="toggle-btn dk-f1${S._retCond===v?' active':''}" aria-pressed="${S._retCond===v}" data-on-click="${_on("_retSetCond",v)}">${lbl}</button>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderReturnModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="ret-title" style="max-width:420px">
+    <div class="modal-box dk-mw420" role="dialog" aria-modal="true" aria-labelledby="ret-title">
       <div class="modal-title" id="ret-title">${t('retTitle')} · #${e.queueNum} ${esc(e.name)}</div>
       ${bikes?`<div class="modal-sub">${esc(bikes)}</div>`:''}
-      ${S._retAsk?`<div class="form-group" style="margin:14px 0 4px"><label id="ret-pay-lbl">${t('returnPayTitle')} · <bdi>${_fmtSar(Math.round(((e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)))*100)/100)}</bdi></label>
-        <div role="group" aria-labelledby="ret-pay-lbl" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
-          <button type="button" class="toggle-btn${S._retPaid?' active':''}" aria-pressed="${S._retPaid?'true':'false'}" style="flex:1" data-on-click="${_on("_retSetPaid",true)}">✓ ${t('paidLabel')}</button>
-          <button type="button" class="toggle-btn${!S._retPaid?' active':''}" aria-pressed="${!S._retPaid?'true':'false'}" style="flex:1" data-on-click="${_on("_retSetPaid",false)}">${t('pendingLabel')}</button>
+      ${S._retAsk?`<div class="form-group dk-rt-fgpay"><label id="ret-pay-lbl">${t('returnPayTitle')} · <bdi>${_fmtSar(Math.round(((e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)))*100)/100)}</bdi></label>
+        <div role="group" aria-labelledby="ret-pay-lbl" class="dk-rt-grp">
+          <button type="button" class="toggle-btn dk-f1${S._retPaid?' active':''}" aria-pressed="${S._retPaid?'true':'false'}" data-on-click="${_on("_retSetPaid",true)}">✓ ${t('paidLabel')}</button>
+          <button type="button" class="toggle-btn dk-f1${!S._retPaid?' active':''}" aria-pressed="${!S._retPaid?'true':'false'}" data-on-click="${_on("_retSetPaid",false)}">${t('pendingLabel')}</button>
           <button type="button" class="btn-secondary" data-on-click="${_on("_retToTill",e.id)}">${t('cashierAddBtn')}</button>
         </div></div>`:''}
-      <div class="form-group" style="margin:14px 0 10px"><label id="ret-cond-lbl">${t('retCondLabel')}</label>
-        <div role="group" aria-labelledby="ret-cond-lbl" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">
+      <div class="form-group dk-fg-top"><label id="ret-cond-lbl">${t('retCondLabel')}</label>
+        <div role="group" aria-labelledby="ret-cond-lbl" class="dk-rt-grp">
           ${btn('ok','✓ '+t('retCondOk'))}${btn('needs_check',t('retCondCheck'))}${btn('damaged',t('retCondDamaged'))}
         </div>
-        <div id="ret-hint" aria-live="polite" style="margin-top:6px;font-size:12.5px;font-weight:700;color:var(--orange);min-height:0">${S._retCond==='damaged'?t('retDamagedHint'):''}</div>
+        <div id="ret-hint" aria-live="polite" class="dk-rt-hint">${S._retCond==='damaged'?t('retDamagedHint'):''}</div>
       </div>
       <div class="form-group"><label for="ret-notes">${t('retNotesLabel')}</label>
-        <textarea id="ret-notes" rows="2" placeholder="${t('retNotesPh')}" style="margin-top:4px">${esc(S._retNotes||'')}</textarea></div>
+        <textarea id="ret-notes" rows="2" placeholder="${t('retNotesPh')}" class="dk-mt4">${esc(S._retNotes||'')}</textarea></div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeReturnModal")}">${t('cancelBtn')}</button>
         <button id="ret-confirm" class="btn-primary" data-on-click="${_on("_confirmReturnModal")}">${t('retConfirmBtn')}</button>
@@ -18939,18 +18941,18 @@ function renderBulkReturn(){
       ${needs?`<div class="br-segs" role="group" aria-label="${esc(t('retCondLabel'))} · #${esc(e.queueNum)}">${seg(e,'ok','✓ '+t('retCondOk'))}${seg(e,'needs_check',t('retCondCheck'))}${seg(e,'damaged',t('retCondDamaged'))}</div>`:''}
     </div>`;
   }).join('');
-  const payBtn=(v,lbl)=>`<button type="button" class="toggle-btn${b.pay===v?' active':''}" aria-pressed="${b.pay===v}" style="flex:1" data-on-click="${_on("_brSetPay",v)}">${lbl}</button>`;
+  const payBtn=(v,lbl)=>`<button type="button" class="toggle-btn dk-f1${b.pay===v?' active':''}" aria-pressed="${b.pay===v}" data-on-click="${_on("_brSetPay",v)}">${lbl}</button>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderBulkReturn_1",_EV,_EL)}">
     <div class="modal-box br-box" role="dialog" aria-modal="true" aria-labelledby="br-title">
       <div class="modal-title" id="br-title">${esc(t('bulkReturnTitle').replace('{0}',es.length))}</div>
       <div class="modal-sub">${t('bulkReturnSub')}</div>
       <div class="br-list">${rows}</div>
-      ${anyOff?`<div class="form-group" style="margin-top:12px"><label for="br-notes">${t('bulkReturnNotes')}</label>
-        <textarea id="br-notes" rows="2" placeholder="${esc(t('retNotesPh'))}" style="margin-top:4px">${esc(b.notes||'')}</textarea></div>`:''}
+      ${anyOff?`<div class="form-group dk-mt12"><label for="br-notes">${t('bulkReturnNotes')}</label>
+        <textarea id="br-notes" rows="2" placeholder="${esc(t('retNotesPh'))}" class="dk-mt4">${esc(b.notes||'')}</textarea></div>`:''}
       ${owe.length?`<div class="br-pay">
         <div class="br-pay-q">${esc(t('bulkReturnUnpaid').replace('{0}',owe.length))} · <bdi>${_fmtSar(oweAmt)}</bdi></div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${payBtn('paid','✓ '+t('bulkReturnMarkPaid'))}${payBtn('unpaid',t('bulkReturnNoPay'))}</div>
+        <div class="dk-br-grp">${payBtn('paid','✓ '+t('bulkReturnMarkPaid'))}${payBtn('unpaid',t('bulkReturnNoPay'))}</div>
       </div>`:''}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeBulkReturn")}">${t('cancelBtn')}</button>

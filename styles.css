@@ -4873,6 +4873,163 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 /* walk-in name: the "use as typed" row reads as an action, not an account */
 .wi-sug-new .mw-sug-tag{background:rgba(var(--green-rgb),.12);color:var(--green);}
 #walkin-modal .mw-suggest{margin-top:6px;}
+/* ── The desk's dialogs without inline styles (2026-09-28, moving style="..." into classes so the
+   policy can drop style-src 'unsafe-inline'): the walk-in form (#walkin-modal), the booking editor
+   (#booking-edit-modal), calling off a night (#cancel-night-modal), the rider's cancel reason
+   (#cancel-reason-modal) and reschedule (#reschedule-modal), the return sheet for one rider or
+   several (#return-modal) and its payment question (#return-pay-modal), the price editor
+   (#edit-price-modal), the booking number (#qnum-edit-modal), the add-on picker
+   (#addon-picker-backdrop), the reset-a-password result (#staff-reset-result) and the waitlist
+   promotion nudge (#promo-nudge). Each rule is scoped by the id its markup is drawn under, so it
+   outranks every class rule (the body.view-staff layer included) as the inline style did; a class
+   several dialogs share names each of their hosts. A state - a picked type pill, the fare in
+   force, an add-on held or sold out, a full ride - is one of two or three classes. The walk-in's
+   account list and the cancel reason's text box start hidden by a class and are shown by
+   el.style.display, as before. background:none (and a bare transparent) written in a template is
+   background:transparent none here, and outline:none is outline:medium none: the same values,
+   which the build's minifier keeps (it writes the short forms as 0 0 and 0). */
+#walkin-modal .dk-mw420,#booking-edit-modal .dk-mw420,#return-modal .dk-mw420{max-width:420px;}
+#edit-price-modal .dk-mw380,#cancel-reason-modal .dk-mw380,#reschedule-modal .dk-mw380{max-width:380px;}
+#walkin-modal .dk-fg-top,#booking-edit-modal .dk-fg-top,#return-modal .dk-fg-top{margin:14px 0 10px;}
+#walkin-modal .dk-flex10,#booking-edit-modal .dk-flex10{display:flex;gap:10px;}
+#walkin-modal .dk-fg-f1,#booking-edit-modal .dk-fg-f1{flex:1;margin-bottom:10px;}
+#walkin-modal .dk-fg-w110,#booking-edit-modal .dk-fg-w110{width:110px;margin-bottom:10px;}
+#walkin-modal .dk-mb10,#booking-edit-modal .dk-mb10,#cancel-night-modal .dk-mb10{margin-bottom:10px;}
+#walkin-modal .dk-mb14,#booking-edit-modal .dk-mb14{margin-bottom:14px;}
+#walkin-modal .dk-flex6,#booking-edit-modal .dk-flex6{display:flex;gap:6px;}
+#walkin-modal .dk-f1-m0,#booking-edit-modal .dk-f1-m0{flex:1;min-width:0;}
+#walkin-modal .dk-fs0,#booking-edit-modal .dk-fs0{flex-shrink:0;}
+#cancel-night-modal .dk-f1,#return-modal .dk-f1,#qnum-edit-modal .dk-f1,#cancel-reason-modal .dk-f1{flex:1;}
+#edit-price-modal .dk-flex8,#qnum-edit-modal .dk-flex8,#cancel-reason-modal .dk-flex8{display:flex;gap:8px;}
+#edit-price-modal .dk-lbl8,#qnum-edit-modal .dk-lbl8{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px;}
+#return-pay-modal .dk-w100,#cancel-night-modal .dk-w100{width:100%;}
+#addon-picker-backdrop .dk-x,#reschedule-modal .dk-x{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px;}
+#addon-picker-backdrop .dk-sub12,#reschedule-modal .dk-sub12{font-size:12px;color:var(--muted);margin-bottom:14px;}
+#edit-price-modal .dk-c-green,#addon-picker-backdrop .dk-c-green{color:var(--green);}
+/* the walk-in form */
+#walkin-modal .dk-wi-ty{flex:1;padding:9px;border-radius:4px;border:1.5px solid var(--border);background:transparent none;color:var(--muted);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}
+#walkin-modal .dk-wi-ty-on{flex:1;padding:9px;border-radius:4px;border:1.5px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}
+#walkin-modal .dk-none{display:none;}
+#walkin-modal .dk-wi-hint{min-height:15px;margin-top:5px;font-size:11px;font-weight:700;}
+#walkin-modal .dk-wi-rrow{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+#walkin-modal .dk-wi-rh{width:72px;flex-shrink:0;}
+#walkin-modal .dk-wi-rt{width:110px;flex-shrink:0;}
+#walkin-modal .dk-wi-add{width:100%;margin:2px 0 12px;}
+/* the booking editor */
+#booking-edit-modal .dk-be-ty{flex:1;padding:9px;border-radius:4px;border:1.5px solid var(--border);background:transparent none;color:var(--muted);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;}
+#booking-edit-modal .dk-be-ty-on{flex:1;padding:9px;border-radius:4px;border:1.5px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;}
+#booking-edit-modal .dk-be-note{margin-top:6px;font-size:12px;font-weight:600;color:var(--muted);}
+#booking-edit-modal .dk-be-rrow{display:flex;gap:6px;margin-top:8px;align-items:center;}
+#booking-edit-modal .dk-be-rh{width:70px;flex-shrink:0;}
+#booking-edit-modal .dk-be-rt{width:100px;flex-shrink:0;}
+#booking-edit-modal .dk-w100-mt8{width:100%;margin-top:8px;}
+/* calling off a night */
+#cancel-night-modal .dk-cn-box{max-width:520px;max-height:88vh;overflow-y:auto;}
+#cancel-night-modal .dk-c-red{color:var(--red);}
+#cancel-night-modal .dk-mb12{margin-bottom:12px;}
+#cancel-night-modal .dk-cn-acts{display:flex;gap:6px;margin-bottom:10px;}
+#cancel-night-modal .dk-cn-list{max-height:220px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;padding:6px 10px;margin-bottom:12px;}
+#cancel-night-modal .dk-cn-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+#cancel-night-modal .dk-cn-who{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#cancel-night-modal .dk-c-muted{color:var(--muted);}
+#cancel-night-modal .dk-cn-wa{text-decoration:none;white-space:nowrap;}
+/* the rider's cancel reason and reschedule */
+#cancel-reason-modal .dk-cr-list{display:flex;flex-direction:column;gap:8px;margin:16px 0;}
+#cancel-reason-modal .dk-cr-opt{padding:10px 14px;border-radius:4px;border:1.5px solid rgba(var(--tint-rgb),.1);background:rgba(var(--tint-rgb),.04);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;text-align:start;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;}
+#cancel-reason-modal .dk-cr-other{display:none;margin-top:2px;}
+#cancel-reason-modal .dk-cr-ta{width:100%;padding:10px 14px;background:rgba(var(--tint-rgb),.05);border:1.5px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;resize:vertical;min-height:80px;outline:medium none;}
+#cancel-reason-modal .dk-cr-go{flex:2;background:var(--red);border-color:var(--red);}
+#reschedule-modal .dk-rs-opt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:start;padding:12px 14px;border-radius:4px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-family:var(--font-body);cursor:pointer;opacity:1;margin-bottom:8px;}
+#reschedule-modal .dk-rs-opt-full{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:start;padding:12px 14px;border-radius:4px;border:1px solid var(--border);background:rgba(var(--tint-rgb),.02);color:var(--text);font-family:var(--font-body);cursor:not-allowed;opacity:.5;margin-bottom:8px;}
+#reschedule-modal .dk-rs-day{font-weight:800;font-size:13px;}
+#reschedule-modal .dk-rs-st{font-size:11px;font-weight:700;color:var(--green);}
+#reschedule-modal .dk-rs-st-full{font-size:11px;font-weight:700;color:var(--red);}
+#reschedule-modal .dk-rs-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+#reschedule-modal .dk-mb0{margin-bottom:0;}
+/* the return sheet (one rider, several) and its payment question */
+#return-modal .dk-rt-fgpay{margin:14px 0 4px;}
+#return-modal .dk-rt-grp{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+#return-modal .dk-rt-hint{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--orange);min-height:0;}
+#return-modal .dk-mt4{margin-top:4px;}
+#return-modal .dk-mt12{margin-top:12px;}
+#return-modal .dk-br-grp{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+#return-pay-modal .dk-rp-box{max-width:400px;text-align:center;}
+#return-pay-modal .dk-mb24{margin-bottom:24px;}
+#return-pay-modal .dk-rp-who{font-size:16px;font-weight:900;margin-bottom:24px;}
+#return-pay-modal .dk-rp-owed{color:var(--muted-l);font-size:14px;}
+#return-pay-modal .dk-col10{display:flex;flex-direction:column;gap:10px;}
+#return-pay-modal .dk-rp-pend{width:100%;padding:10px 16px;border-radius:6px;background:rgba(var(--warn-rgb),.12);border:1.5px solid rgba(var(--warn-rgb),.4);color:var(--orange);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;}
+#return-pay-modal .dk-link{background:transparent none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-body);}
+/* the price editor */
+#edit-price-modal .dk-ep-pre{padding:11px 16px;border-radius:6px;border:1.5px solid rgba(var(--tint-rgb),.12);background:rgba(var(--tint-rgb),.03);color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;}
+#edit-price-modal .dk-ep-pre-on{padding:11px 16px;border-radius:6px;border:1.5px solid var(--green);background:rgba(var(--green-rgb),.08);color:var(--green);font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;}
+#edit-price-modal .dk-ep-lbl{font-size:11px;font-weight:600;color:var(--muted);margin-inline-start:8px;}
+#edit-price-modal .dk-fs11{font-size:11px;}
+#edit-price-modal .dk-ep-bd{border:1px solid var(--border);border-radius:6px;padding:12px 12px 10px;margin-bottom:16px;background:var(--s1);}
+#edit-price-modal .dk-ep-tot{display:flex;justify-content:space-between;align-items:baseline;font-weight:900;font-size:16px;margin-bottom:8px;}
+#edit-price-modal .dk-ep-rent{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;color:var(--muted);}
+#edit-price-modal .dk-ep-rentv{font-weight:700;color:var(--text);}
+#edit-price-modal .dk-ep-ad{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;}
+#edit-price-modal .dk-ep-adn{flex:1;min-width:0;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#edit-price-modal .dk-ep-step{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+#edit-price-modal .dk-ep-minus{width:26px;height:26px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:16px;font-weight:800;cursor:pointer;line-height:1;}
+#edit-price-modal .dk-ep-qty{min-width:16px;text-align:center;font-weight:800;}
+#edit-price-modal .dk-ep-plus{width:26px;height:26px;border-radius:3px;border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-size:16px;font-weight:800;cursor:pointer;line-height:1;}
+#edit-price-modal .dk-ep-lt{min-width:58px;text-align:end;font-weight:700;color:var(--green);flex-shrink:0;}
+#edit-price-modal .dk-ep-addbtn{width:100%;margin-top:9px;font-size:12px;padding:8px;}
+#edit-price-modal .dk-ep-who{font-size:13px;color:var(--muted);margin-bottom:14px;}
+#edit-price-modal .dk-ep-pres{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:220px;overflow-y:auto;padding-right:2px;}
+#edit-price-modal .dk-ep-sec14{border-top:1px solid var(--border);padding-top:12px;margin-bottom:14px;}
+#edit-price-modal .dk-ep-sec16{border-top:1px solid var(--border);padding-top:12px;margin-bottom:16px;}
+#edit-price-modal .dk-lbl6{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:6px;}
+#edit-price-modal .dk-ep-lbln{font-weight:600;text-transform:none;letter-spacing:0;}
+#edit-price-modal .dk-ep-disc{display:flex;gap:6px;flex-wrap:wrap;}
+#edit-price-modal .dk-ep-dbtn{flex:1;min-width:50px;padding:9px 4px;border-radius:4px;border:1.5px solid rgba(var(--tint-rgb),.12);background:rgba(var(--tint-rgb),.03);color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;}
+#edit-price-modal .dk-ep-in{flex:1;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.12);border-radius:4px;padding:10px 12px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:700;outline:medium none;}
+#edit-price-modal .dk-ep-ok{padding:10px 16px;}
+#edit-price-modal .dk-link-w{background:transparent none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:var(--font-body);width:100%;}
+/* the booking number */
+#qnum-edit-modal .dk-mw320{max-width:320px;}
+#qnum-edit-modal .dk-qn-who{font-size:13px;color:var(--muted);margin-bottom:20px;}
+#qnum-edit-modal .dk-fs12{font-size:12px;}
+#qnum-edit-modal .dk-mb20{margin-bottom:20px;}
+#qnum-edit-modal .dk-qn-in{width:100%;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:4px;padding:12px 14px;font-size:20px;font-weight:700;color:var(--green);font-family:var(--font-body);outline:medium none;text-align:center;}
+/* the add-on picker: a card held, not held, or sold out and not held; the stock line plenty, low or out */
+#addon-picker-backdrop .dk-ap-box{max-width:440px;max-height:85vh;overflow-y:auto;}
+#addon-picker-backdrop .dk-ap-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px;}
+#addon-picker-backdrop .dk-m0{margin:0;}
+#addon-picker-backdrop .dk-ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
+#addon-picker-backdrop .dk-ap-card{position:relative;border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:var(--s1);}
+#addon-picker-backdrop .dk-ap-card-on{position:relative;border:1.5px solid var(--green);border-radius:7px;overflow:hidden;background:var(--s1);}
+#addon-picker-backdrop .dk-ap-card-out{position:relative;border:1.5px solid var(--border);border-radius:7px;overflow:hidden;background:var(--s1);opacity:.55;}
+#addon-picker-backdrop .dk-ap-img{width:100%;height:120px;object-fit:contain;background:var(--photo-bg);display:block;}
+#addon-picker-backdrop .dk-ap-noimg{width:100%;height:120px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:12px;text-align:center;padding:8px;}
+#addon-picker-backdrop .dk-ap-body{padding:10px 12px;}
+#addon-picker-backdrop .dk-ap-name{font-weight:800;font-size:14px;line-height:1.2;}
+#addon-picker-backdrop .dk-ap-stock{margin-top:4px;font-size:11px;font-weight:800;color:var(--muted);}
+#addon-picker-backdrop .dk-ap-stock-low{margin-top:4px;font-size:11px;font-weight:800;color:var(--orange);}
+#addon-picker-backdrop .dk-ap-stock-out{margin-top:4px;font-size:11px;font-weight:800;color:#e5484d;}
+#addon-picker-backdrop .dk-ap-nu{margin-top:7px;background:rgba(var(--green-rgb),.08);border:1px solid rgba(var(--green-rgb),.22);color:var(--green);font-family:inherit;font-size:11px;font-weight:800;padding:4px 10px;border-radius:3px;cursor:pointer;}
+#addon-picker-backdrop .dk-ap-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:9px;}
+#addon-picker-backdrop .dk-ap-price{font-weight:800;color:var(--green);font-size:14px;}
+#addon-picker-backdrop .dk-ap-step{display:flex;align-items:center;gap:6px;}
+#addon-picker-backdrop .dk-ap-minus{width:30px;height:30px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:pointer;line-height:1;}
+#addon-picker-backdrop .dk-ap-minus-off{width:30px;height:30px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:default;line-height:1;opacity:.4;}
+#addon-picker-backdrop .dk-ap-qty{min-width:18px;text-align:center;font-weight:800;}
+#addon-picker-backdrop .dk-ap-plus{width:30px;height:30px;border-radius:3px;border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-size:18px;font-weight:800;cursor:pointer;line-height:1;}
+#addon-picker-backdrop .dk-ap-plus-off{width:30px;height:30px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--muted);font-size:18px;font-weight:800;cursor:default;line-height:1;opacity:.5;}
+#addon-picker-backdrop .dk-p24{padding:24px;}
+#addon-picker-backdrop .dk-ap-tot{display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border);margin-top:14px;padding-top:10px;font-weight:900;}
+#addon-picker-backdrop .dk-w100-mt12{width:100%;margin-top:12px;}
+/* the reset-a-password result (Bookings' key tool) and the waitlist promotion nudge */
+#staff-reset-result .dk-sr-err{color:var(--red);font-size:13px;font-weight:700;}
+#staff-reset-result .dk-sr-ok{background:rgba(var(--green-rgb),.07);border:1px solid rgba(var(--green-rgb),.25);border-radius:6px;padding:16px 20px;}
+#staff-reset-result .dk-sr-t{font-size:13px;font-weight:800;color:var(--green);margin-bottom:6px;}
+#staff-reset-result .dk-sr-msg{font-size:12px;color:var(--muted-l);font-weight:600;}
+#staff-reset-result .dk-sr-pw{color:var(--text);font-family:monospace;}
+#promo-nudge .dk-pn-msg{font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#promo-nudge .dk-pn-wa{flex-shrink:0;background:#25D366;color:#fff;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;text-decoration:none;}
+#promo-nudge .dk-pn-x{flex-shrink:0;background:transparent none;border:none;color:var(--muted,#888);font-size:16px;cursor:pointer;padding:2px;}
 
     /* ── Ten languages ───────────────────────────────────────────────────────
        The header control is a native <select> (the phone's own picker on touch), styled
