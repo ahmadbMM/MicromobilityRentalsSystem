@@ -6,6 +6,8 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // account or finds the one the person has, and the message then carries the lesson's day, time
 // and place: with the temporary password for a new account, the sign-in line for an existing one,
 // and only the new time when a lesson moves. Done and Cancel can be undone from the topbar.
+// A sign-up carries one or more learners (the applicant, their children, other adults); rows from
+// before the learners column read as their one learner.
 
 const customers = [
   { id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', height: 165, created_at: '2026-01-05T10:00:00Z' },
@@ -59,16 +61,18 @@ test.describe('@staff:community learn to ride', () => {
     const n = row(page, 'l1');
     await expect(n.locator('.ca-name')).toHaveText('Nadia Omar');
     for (const txt of ['+966552220001', 'nadia.omar@gmail.com', '34 years', 'Female', '162 cm', 'Never ridden', 'English']) await expect(n).toContainText(txt);
+    await expect(n.locator('.la-learners-h')).toHaveText('Learners (1)');
+    await expect(n.locator('.la-learner')).toHaveText(/Nadia Omar\s+Applicant/);
     // the form does not ask when suits them: staff pick the time
     await expect(n.locator('.ca-kv span', { hasText: /best/i })).toHaveCount(0);
     await expect(n.locator('.la-notes')).toContainText('A bit nervous around traffic');
 
-    // a child: the child's name with the tag, the parent beside, and the parent's account on file
+    // a child: the parent is the sign-up, the child its learner, and the parent's account on file
     const s = row(page, 'l2');
-    await expect(s.locator('.ca-name')).toContainText('Sara');
+    await expect(s.locator('.ca-name')).toHaveText('Huda Al Saleh');
+    await expect(s.locator('.la-learner[data-who="child"]')).toContainText('Sara');
     await expect(s.locator('.la-kid')).toHaveText('Child');
-    await expect(s.locator('.ca-grid')).toContainText('ParentHuda Al Saleh');
-    await expect(s.locator('.ca-grid')).toContainText('Tried, can’t ride yet');
+    await expect(s.locator('.la-learners')).toContainText('7 years · Female · 120 cm · Tried, can’t ride yet');
     await expect(s.locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
 
     // the scheduled list shows the lesson; the community list is one tap away and back
@@ -95,7 +99,7 @@ test.describe('@staff:community learn to ride', () => {
     await row(page, 'l1').locator('.la-schedule').click();
     const dlg = page.locator('#confirm-modal .ws-dlg');
     await expect(dlg).toContainText('Lesson for Nadia Omar');
-    await expect(dlg).toContainText('Nadia Omar · 34 years · Never ridden');
+    await expect(dlg).toContainText('Nadia Omar (Applicant) · 34 years · Never ridden');
     // nothing picked yet: it asks
     await dlg.locator('.la-sched-save').click();
     await expect(dlg.locator('#ws-dlg-err')).toHaveText('Pick both the day and the time.');
@@ -173,6 +177,44 @@ test.describe('@staff:community learn to ride', () => {
     for (const txt of ['Your lesson is booked:', 'Your account is ready', 'Email: omar.farouk@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
     expect(msg).not.toContain('Temporary password');
     await expect(row(page, 'l3').locator('.la-newpwd')).toBeVisible(); // the account this sign-up made
+  });
+
+  // Several learners on one sign-up (the owner, 2026-09-28): the card lists each, the lesson window
+  // names each, and the message books the lesson for all of them by name.
+  test('a sign-up with several learners lists them, and the message books the lesson for all of them', async ({ page }) => {
+    const family = { ...learners[0], name: 'Rania Haddad', email: 'rania.haddad@gmail.com', phone: '+966556660004', notes: '',
+      learners: [
+        { who: 'self', name: null, age: 36, gender: 'female', height: 160, level: 'never' },
+        { who: 'child', name: 'Yousef', age: 8, gender: 'male', height: 128, level: 'tried' },
+        { who: 'other', name: 'Karim Haddad', age: 40, gender: 'male', height: 182, level: 'refresh' },
+      ] };
+    await learnTab(page, {
+      learn_applications: learners.map((l) => (l.id === 'l1' ? family : l)),
+      'rpc:staff_learn_schedule': { ok: true, existing: false, first: true, customer_id: 'la05', name: 'Rania Haddad', email: 'rania.haddad@gmail.com', phone: '+966556660004', password: 'Hm4pWq7Rtz', lang: 'en', oauth: false, lesson_at: null, lesson_place: 'JCC', must_change: true },
+    });
+    const r = row(page, 'l1');
+    await expect(r.locator('.ca-name')).toHaveText('Rania Haddad');
+    await expect(r.locator('.la-learners-h')).toHaveText('Learners (3)');
+    await expect(r.locator('.la-learner')).toHaveCount(3);
+    await expect(r.locator('.la-learner[data-who="self"]')).toContainText('Rania Haddad');
+    await expect(r.locator('.la-learner[data-who="self"] .la-kid')).toHaveText('Applicant');
+    await expect(r.locator('.la-learner[data-who="child"]')).toContainText('Yousef');
+    await expect(r.locator('.la-learner[data-who="child"]')).toContainText('8 years · Male · 128 cm · Tried, can’t ride yet');
+    await expect(r.locator('.la-learner[data-who="other"] .la-kid')).toHaveText('Adult');
+
+    await r.locator('.la-schedule').click();
+    const dlg = page.locator('#confirm-modal .ws-dlg');
+    await expect(dlg).toContainText('Lesson for Rania Haddad');
+    for (const line of ['Rania Haddad (Applicant) · 36 years · Never ridden', 'Yousef (Child) · 8 years · Tried, can’t ride yet', 'Karim Haddad (Adult) · 40 years · Needs a refresher']) await expect(dlg).toContainText(line);
+    await dlg.locator('#ws-d').fill(soon());
+    await dlg.locator('#ws-t').fill('17:00');
+    await dlg.locator('.la-sched-save').click();
+    const box = page.locator('#confirm-modal .ca-msg-box');
+    await expect(box).toBeVisible();
+    const msg = await box.locator('#la-msg-text').inputValue();
+    for (const txt of ['Hi Rania,', 'The lesson for Rania, Yousef and Karim Haddad is booked:', '🕕 5:00 pm', 'Temporary password: Hm4pWq7Rtz']) expect(msg).toContain(txt);
+    await box.locator('#la-msg-lang').selectOption('ar');
+    expect(await box.locator('#la-msg-text').inputValue()).toContain('تم حجز الدرس لكلٍّ من Rania');
   });
 
   // How they heard of us (the owner, 2026-09-28: asked by this form and the community one, no longer

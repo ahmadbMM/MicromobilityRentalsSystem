@@ -4744,6 +4744,14 @@ body .ca-msg-box textarea.ca-msg{width:100%;min-height:300px;height:300px;box-si
 .la-lesson{margin-top:8px;padding:8px 12px;border-radius:8px;border-inline-start:3px solid var(--green);background:rgba(var(--green-rgb),.08);font-size:13px;font-weight:800}
 .la-notes{margin-top:8px;font-size:13px;line-height:1.5;padding:8px 12px;border-radius:8px;background:var(--s3);white-space:pre-wrap;overflow-wrap:anywhere}
 .la-notes span{display:block;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.la-learners{margin-top:10px}
+.la-learners-h{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.la-learners ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.la-learner{font-size:13px;line-height:1.5;padding:6px 10px;border-radius:8px;background:var(--s3);overflow-wrap:anywhere}
+.la-learner .la-kid{margin-inline-start:4px}
+.la-learner-d{color:var(--muted);font-weight:600;margin-inline-start:6px}
+.la-learner[data-who="child"] .la-kid{background:rgba(var(--green-rgb),.12);color:var(--green)}
+.la-learner[data-who="self"] .la-kid,.la-learner[data-who="other"] .la-kid{background:rgba(var(--tint-rgb),.08);color:var(--text)}
 
 /* Workshop requests (renderWorkshop): the Applications card (ca-*) plus these. */
 .ws-ref{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;color:var(--green);margin-inline-end:4px}
