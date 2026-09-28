@@ -2872,7 +2872,5 @@
   "authBack": "Que bom ter você de volta.",
   "authSignupSub": "Reserve seus passeios e guarde seus ingressos em um só lugar.",
   "authNewTitle": "Novo na MicroMobility?",
-  "authNewSub": "Crie uma conta para reservar seus passeios.",
-  "authHaveTitle": "Já tem uma conta?",
-  "authHaveSub": "Entre para ver suas reservas."
+  "authHaveTitle": "Já tem uma conta?"
 }

@@ -2872,7 +2872,5 @@
   "authBack": "Maligayang pagbabalik.",
   "authSignupSub": "I-book ang mga ride mo at itago ang mga ticket mo sa iisang lugar.",
   "authNewTitle": "Bago sa MicroMobility?",
-  "authNewSub": "Gumawa ng account para makapag-book ng ride.",
-  "authHaveTitle": "May account ka na?",
-  "authHaveSub": "Mag-log in para makita ang mga booking mo."
+  "authHaveTitle": "May account ka na?"
 }

@@ -2,9 +2,9 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
 // A signed-out visitor's two pages (the owner, 2026-09-28): Sign in at / and Create account at
-// /signup, each named by its title, with a bar at the very top for the visitor on the wrong one -
-// "New to MicroMobility?" with Create account, "Already have an account?" with Sign in. The old
-// Log In / Sign Up tabs are gone. All Supabase traffic is stubbed.
+// /signup, each named by its title, with a plain line under the title for the visitor on the wrong
+// one - "New to MicroMobility? Create account", "Already have an account? Sign in" - a sentence with
+// a link, not a box. The old Log In / Sign Up tabs are gone. All Supabase traffic is stubbed.
 
 const at = (page: Page) => { const u = new URL(page.url()); return u.pathname + u.search; };
 const bar = (page: Page) => page.locator('#auth-modal .auth-switch');
@@ -16,28 +16,28 @@ async function open(page: Page, path = '/') {
   await expect(page.locator('#auth-modal.as-page .auth-title')).toBeVisible();
 }
 
-test('Sign in is the first page: its title, and the bar at the top that leads to Create account', async ({ page }) => {
+test('Sign in is the first page: its title, and the line under it that leads to Create account', async ({ page }) => {
   await open(page);
   await expect(page.locator('.auth-title')).toHaveText('Sign in');
   await expect(page.locator('.auth-sub')).toHaveText('Welcome back.');
   await expect(page.locator('.auth-tab')).toHaveCount(0);
-  await expect(bar(page)).toContainText('New to MicroMobility?');
-  await expect(bar(page)).toContainText('Create an account to book your rides.');
+  await expect(bar(page)).toHaveText('New to MicroMobility? Create account');
   await expect(bar(page).locator('button')).toHaveText('Create account');
   await expect(page.locator('.auth-submit')).toHaveText('Sign in');
-  // the bar is the first thing in the box, above the logo and the title
-  expect(await page.evaluate(`document.querySelector('#auth-modal .auth-box').firstElementChild.classList.contains('auth-switch')`)).toBe(true);
-  // arriving does not ring the bar's button as if it were picked
+  // the line sits right under the title and its subtitle, plain text: no border, no background
+  expect(await page.evaluate(`document.querySelector('#auth-modal .auth-sub').nextElementSibling.classList.contains('auth-switch')`)).toBe(true);
+  expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopWidth, c.backgroundColor]; })).toEqual(['0px', 'rgba(0, 0, 0, 0)']);
+  // arriving does not ring the link as if it were picked
   expect(await page.evaluate('document.activeElement === document.body')).toBe(true);
 });
 
-test('Create account has its own address; Back returns to Sign in, and the bar there leads back', async ({ page }) => {
+test('Create account has its own address; Back returns to Sign in, and the line there leads back', async ({ page }) => {
   await open(page);
   await bar(page).locator('button').click();
   await expect(page.locator('.auth-title')).toHaveText('Create account');
   await expect(page.locator('.auth-sub')).toHaveText('Book your rides and keep your tickets in one place.');
   expect(at(page)).toBe('/signup');
-  await expect(bar(page)).toContainText('Already have an account?');
+  await expect(bar(page)).toHaveText('Already have an account? Sign in');
   await expect(bar(page).locator('button')).toHaveText('Sign in');
   await expect(page.locator('.auth-submit')).toHaveText('Create account');
   await expect(page.locator('#a-first')).toBeVisible();

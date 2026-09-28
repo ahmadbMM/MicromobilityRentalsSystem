@@ -515,7 +515,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
   roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',adminOnlyMsg:'Admin only.',ucSetTitle:'Choose your undo code',ucSetSub:'Admins confirm every undo with a 6-digit code of their own. Pick one only you know.',ucAskTitle:'Enter your undo code',ucCodeLbl:'6-digit code',ucAgainLbl:'Type it again',ucSaveBtn:'Save code',ucLaterBtn:'Not now',ucFormat:'The code is 6 digits.',ucMismatch:'The two codes are not the same.',ucSaved:'Undo code saved',ucWrong:'Wrong code. {0} tries left.',ucLocked:'Too many tries. Try again in {0} s.',
-  authBack:'Welcome back.',authSignupSub:'Book your rides and keep your tickets in one place.',authNewTitle:'New to MicroMobility?',authNewSub:'Create an account to book your rides.',authHaveTitle:'Already have an account?',authHaveSub:'Sign in to see your bookings.',
+  authBack:'Welcome back.',authSignupSub:'Book your rides and keep your tickets in one place.',authNewTitle:'New to MicroMobility?',authHaveTitle:'Already have an account?',
   authLogin:'Sign in',authSignup:'Create account',authLoginBtn:'Sign in',authSignupBtn:'Create account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Please select your gender.',
   continueGoogle:'Continue with Google',continueApple:'Continue with Apple',addToWallet:'Add to Apple Wallet',addToGWallet:'Add to Google Wallet',walletAdding:'Preparing pass…',walletErr:'Could not create the Wallet pass.',authOr:'or',gCompleteTitle:'Complete your profile',gCompleteSub:'Just a couple more details to finish signing up.',finishBtn:'Finish',
   authCancel:'Cancel - Go Home',authIdentifier:'Email or Phone',
@@ -907,7 +907,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
   roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',adminOnlyMsg:'للمدير فقط.',ucSetTitle:'اختر رمز التراجع',ucSetSub:'يؤكد المديرون كل تراجع برمز خاص بهم من 6 أرقام. اختر رمزاً لا يعرفه غيرك.',ucAskTitle:'أدخل رمز التراجع',ucCodeLbl:'رمز من 6 أرقام',ucAgainLbl:'أعد كتابته',ucSaveBtn:'حفظ الرمز',ucLaterBtn:'ليس الآن',ucFormat:'الرمز من 6 أرقام.',ucMismatch:'الرمزان غير متطابقين.',ucSaved:'تم حفظ رمز التراجع',ucWrong:'رمز خاطئ. تبقّت {0} محاولات.',ucLocked:'محاولات كثيرة. حاول مجدداً بعد {0} ث.',
-  authBack:'مرحباً بعودتك.',authSignupSub:'احجز رحلاتك واحتفظ بتذاكرك في مكان واحد.',authNewTitle:'جديد في مايكرو موبيليتي؟',authNewSub:'أنشئ حساباً لتحجز رحلاتك.',authHaveTitle:'لديك حساب بالفعل؟',authHaveSub:'سجّل دخولك لترى حجوزاتك.',
+  authBack:'مرحباً بعودتك.',authSignupSub:'احجز رحلاتك واحتفظ بتذاكرك في مكان واحد.',authNewTitle:'جديد في مايكرو موبيليتي؟',authHaveTitle:'لديك حساب بالفعل؟',
   authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء حساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
   continueGoogle:'المتابعة عبر جوجل',continueApple:'المتابعة عبر Apple',addToWallet:'أضف إلى Apple Wallet',addToGWallet:'أضف إلى Google Wallet',walletAdding:'جارٍ تجهيز البطاقة…',walletErr:'تعذّر إنشاء بطاقة Wallet.',authOr:'أو',gCompleteTitle:'أكمل ملفك الشخصي',gCompleteSub:'تفاصيل قليلة لإتمام إنشاء الحساب.',finishBtn:'إنهاء',
   authCancel:'إلغاء - الرئيسية',authIdentifier:'البريد الإلكتروني أو الهاتف',
@@ -4438,9 +4438,9 @@ function renderAuthModal(){
   const logoSrc='/logo-dark.png'; // auth box is always the white paper surface — customer side is light-only; root-relative, the page may sit at /bookings/waitlist
   let title='',subtitle='',sw='',body='';
   // Sign in and Create account are two pages (the owner, 2026-09-28), each named by its title, with a
-  // bar at the very top for the visitor on the wrong one: "New to MicroMobility?" goes to Create
-  // account (its own address, /signup), "Already have an account?" back to Sign in.
-  const _switchBar=(head,sub,to,label)=>`<div class="auth-switch" role="note"><div class="auth-switch-text"><b>${head}</b><span>${sub}</span></div><button type="button" class="auth-switch-btn" data-auth-to="${to}" data-on-click="${_on("switchAuthMode",to)}">${label}</button></div>`;
+  // plain line under the title for the visitor on the wrong one, as other sites do it (no box, 2026-09-28):
+  // "New to MicroMobility? Create account" (its own address, /signup), "Already have an account? Sign in".
+  const _switchBar=(head,to,label)=>`<p class="auth-switch">${head} <button type="button" class="auth-switch-link" data-auth-to="${to}" data-on-click="${_on("switchAuthMode",to)}">${label}</button></p>`;
   const googleBlock=_isInAppBrowser()?`
     <div style="background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.35);border-radius:4px;padding:10px 14px;font-size:12px;font-weight:600;line-height:1.6;color:var(--text)">${t('iabGoogleBlocked')}</div>
     <div class="auth-or">${t('authOr')}</div>`:`
@@ -4490,7 +4490,7 @@ function renderAuthModal(){
     }
   } else if(isLogin){
     title=t('authLogin');subtitle=t('authBack');
-    sw=_switchBar(t('authNewTitle'),t('authNewSub'),'signup',t('authSignup'));
+    sw=_switchBar(t('authNewTitle'),'signup',t('authSignup'));
     body=`
       ${googleBlock}
       <div class="auth-field"><label for="a-identifier">${t('authIdentifier')}</label>
@@ -4537,7 +4537,7 @@ function renderAuthModal(){
       <button class="btn-primary auth-submit" data-on-click="${_on("doCompleteGoogle")}">${t('finishBtn')}</button>`;
   } else {
     title=t('authSignup');subtitle=t('authSignupSub');
-    sw=_switchBar(t('authHaveTitle'),t('authHaveSub'),'login',t('authLogin'));
+    sw=_switchBar(t('authHaveTitle'),'login',t('authLogin'));
     body=`
       ${googleBlock}
       <div class="auth-namerow">
@@ -4570,10 +4570,10 @@ function renderAuthModal(){
   document.getElementById('auth-modal').innerHTML=`
   <div class="auth-backdrop">
     <div class="auth-box">
-      ${sw}
       <img class="auth-logo" src="${logoSrc}" alt="logo">
       <div class="auth-title">${title}</div>
-      ${subtitle?`<div class="auth-sub">${subtitle}</div>`:''}
+      ${subtitle?`<div class="auth-sub${sw?' has-switch':''}">${subtitle}</div>`:''}
+      ${sw}
       <div class="auth-err" id="auth-err"></div>
       ${body}
       ${!isForgot?`<button class="btn-secondary auth-cancel-btn${mode==='gcomplete'?' auth-keep':''}" style="width:100%;margin-top:10px" data-on-click="${_on(mode==='gcomplete'?'cancelGoogleComplete':'_on_authCancelHome')}">${t('authCancel')}</button>`:''}

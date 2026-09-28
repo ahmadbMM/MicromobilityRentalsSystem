@@ -426,16 +426,14 @@
     .auth-title{font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px;}
     .auth-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
     /* v2: underline tabs on a hairline rule (no pill toggle) */
-    /* Sign in and Create account are two pages (2026-09-28): the bar at the very top is for the
-       visitor on the wrong one - "New to MicroMobility?" / "Already have an account?" - with the way
-       to the other page. Outlined, so the page's own green button stays the main action. */
-    .auth-switch{display:flex;align-items:center;gap:12px;margin:0 0 22px;padding:12px 14px;border:1px solid rgba(var(--green-rgb),.35);border-radius:6px;background:rgba(var(--green-rgb),.07);}
-    .auth-switch-text{flex:1;min-width:0;font-size:13px;line-height:1.45;color:var(--muted);}
-    .auth-switch-text b{display:block;color:var(--text);font-size:14px;font-weight:700;}
-    .auth-switch-btn{flex:0 0 auto;min-height:40px;padding:8px 16px;border-radius:999px;border:1.5px solid var(--green);background:none;color:var(--green-d);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;transition:background .15s;}
-    .auth-switch-btn:hover{background:rgba(var(--green-rgb),.14);}
-    .auth-switch-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
-    @media (max-width:360px){.auth-switch{flex-wrap:wrap;}.auth-switch-btn{width:100%;}}
+    /* Sign in and Create account are two pages (2026-09-28): one plain line under the title is for the
+       visitor on the wrong one - "New to MicroMobility? Create account" / "Already have an account?
+       Sign in" - a sentence with a link, as other sites do it, not a box (the owner, 2026-09-28). */
+    .auth-sub.has-switch{margin-bottom:6px;}
+    .auth-switch{margin:0 0 18px;font-size:13px;line-height:1.5;color:var(--muted);}
+    .auth-switch-link{background:none;border:none;padding:0;color:var(--green-d);font:inherit;font-weight:700;cursor:pointer;text-underline-offset:2px;}
+    .auth-switch-link:hover{text-decoration:underline;}
+    .auth-switch-link:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:2px;}
     .auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
     /* First name + last name side by side; stack them on very narrow phones. */
     .auth-namerow{display:flex;gap:10px;}
@@ -618,7 +616,7 @@
     :is(html[lang="ar"],html[lang="ur"]) .btn-secondary,
     :is(html[lang="ar"],html[lang="ur"]) .btn-sm,
     :is(html[lang="ar"],html[lang="ur"]) .toggle-btn,
-    :is(html[lang="ar"],html[lang="ur"]) .auth-switch-btn,
+    :is(html[lang="ar"],html[lang="ur"]) .auth-switch-link,
     :is(html[lang="ar"],html[lang="ur"]) .filter-select,
     :is(html[lang="ar"],html[lang="ur"]) .pay-toggle{font-family:'IBM Plex Sans Arabic',sans-serif;}
     :is(html[lang="ar"],html[lang="ur"]) .toggle-btn{font-size:13px;font-weight:700;}
@@ -680,6 +678,7 @@
     
     :is(html[lang="ar"],html[lang="ur"]) .auth-title{font-size:22px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-sub{font-size:14px;font-weight:400;}
+    :is(html[lang="ar"],html[lang="ur"]) .auth-switch{font-size:14px;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-field input{font-size:15px;font-weight:500;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-submit{font-size:15px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-err{font-size:13px;font-weight:700;}
@@ -1566,7 +1565,7 @@
       .auth-logo{max-height:44px;}
       .auth-title{font-size:18px;}
       .auth-sub{font-size:12px;margin-bottom:14px;}
-      .auth-switch{margin-bottom:14px;padding:10px 12px;}
+      .auth-switch{margin-bottom:14px;}
       .auth-field{margin-bottom:10px;}
       .auth-submit{min-height:50px;font-size:16px;}
 
