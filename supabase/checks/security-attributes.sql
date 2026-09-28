@@ -158,7 +158,13 @@ with expected(fname, want_definer, note) as (values
   ('_customers_admin_cols',  false, 'same, for default_pay and hidden_types'),
   ('_close_assignments_on_reassign', true, 'trigger: closes bike_assignments rows whoever changed the booking, like _close_assignments_on_leave_active'),
   ('_bike_ids',              false, 'pure parse of assigned_bike_id, no read'),
-  ('_queue_stamps',          false, 'sets the four timestamps on NEW only')
+  ('_queue_stamps',          false, 'sets the four timestamps on NEW only'),
+  -- Learn to ride (20260928210000, 20260928230000)
+  ('learn_apply',            true,  'the website form writes learn_applications, which anon cannot touch; metered'),
+  ('staff_learn_schedule',   true,  'finds or makes the account and records the lesson; checks is_staff() itself'),
+  ('staff_learn_new_password', true, 'writes customers.password_hash, which no client can select; staff only'),
+  ('staff_learn_decide',     true,  'moves a sign-up between its states; checks is_staff() itself'),
+  ('_learn_heard_to_account',true,  'trigger: writes customers.heard_from whoever set the sign-up''s account; internal only')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
