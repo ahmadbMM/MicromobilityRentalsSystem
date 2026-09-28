@@ -32471,6 +32471,22 @@ function _logError(msg,src,silent){
 }
 try{window.addEventListener('error',e=>{_logError((e&&e.message)||(e&&e.error&&e.error.message)||'error',((e&&e.filename)||'')+':'+((e&&e.lineno)||''));});}catch(e){}
 try{window.addEventListener('unhandledrejection',e=>{const r=e&&e.reason;_logError((r&&(r.message||r))||'unhandledrejection','promise');});}catch(e){}
+// A Content-Security-Policy violation on a rider's or staff member's own screen goes into error_log
+// with the element it came from (tag#id.class inside #nearest-id), so a style or handler the policy
+// refuses on some path no test walks is found from the log, not from a complaint. Silent (no toast),
+// once per kind per page load, at most 10; a browser extension's own injections are not the page's.
+let _cspSeen=null;
+try{document.addEventListener('securitypolicyviolation',e=>{
+  try{
+    const f=String(e.sourceFile||'')+' '+String(e.blockedURI||'');
+    if(/(chrome|moz|safari(-web)?)-extension:/.test(f))return;
+    const el=e.target&&e.target.nodeType===1?e.target:null;
+    const at=el?el.tagName.toLowerCase()+(el.id?'#'+el.id:'')+(typeof el.className==='string'&&el.className?'.'+el.className.trim().split(/\s+/)[0]:'')+((el.parentElement&&el.parentElement.closest('[id]'))?' in #'+el.parentElement.closest('[id]').id:''):'';
+    const key=(e.effectiveDirective||e.violatedDirective||'?')+'|'+(e.sample||e.blockedURI||'')+'|'+at;
+    _cspSeen=_cspSeen||new Set();if(_cspSeen.has(key)||_cspSeen.size>=10)return;_cspSeen.add(key);
+    _logError('CSP '+(e.disposition==='report'?'report ':'')+(e.effectiveDirective||e.violatedDirective||'?')+': '+(e.sample||e.blockedURI||'(inline)')+(at?' at '+at:''),'csp '+(e.sourceFile||'')+':'+(e.lineNumber||''),true);
+  }catch(_){}
+});}catch(e){}
 try{window._mmErrors=()=>{try{return JSON.parse(localStorage.getItem('cq_errors')||'[]');}catch(e){return[];}};}catch(e){}
 // Accessibility: Escape closes the topmost open modal (z-order: team mgr / receipt edit on top, then the rest)
 // Not cust-modal: the handler above already closes it when it is on top, and when a booking is
