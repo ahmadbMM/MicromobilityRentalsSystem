@@ -185,7 +185,7 @@ window.mmLoading=(function(){
      static description of the business: who, where, what, in English and Arabic. It is
      removed the moment scripts run, so it never competes with the app's own UI. -->
 <noscript>
-  <div id="static-intro" style="max-width:760px;margin:0 auto;padding:32px 20px;font-family:system-ui,sans-serif;line-height:1.7">
+  <div id="static-intro">
     <h1>MicroMobility Rentals — bicycle rentals at the Jeddah Corniche</h1>
     <p>MicroMobility rents bicycles at the <strong>Jeddah Corniche Circuit</strong> in Jeddah,
     Saudi Arabia. Reserve a bike online, choose the session you want to ride, and collect it at
@@ -225,10 +225,10 @@ window.mmLoading=(function(){
 </noscript>
 
 <header id="topbar">
-  <button type="button" class="topbar-logo" data-on-click='["goLanding"]' style="cursor:pointer;background:none;border:none;padding:0" aria-label="MicroMobility home">
+  <button type="button" class="topbar-logo chrome-logo-btn" data-on-click='["goLanding"]' aria-label="MicroMobility home">
     <img id="topbar-logo-img" src="/logo.png" alt="MicroMobility">
   </button>
-  <div style="display:flex;align-items:center;gap:10px">
+  <div class="chrome-tb-end">
     <span class="lang-wrap"><svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg><select class="lang-toggle" id="lang-btn" data-on-change='["setLang",{"@":"value"}]' title="Switch language" aria-label="Switch language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="tl">Tagalog</option><option value="ne">नेपाली</option><option value="bn">বাংলা</option></select></span>
     <div class="topbar-right" id="topbar-right"></div>
   </div>
@@ -394,42 +394,42 @@ window.mmLoading=(function(){
 </footer>
 
 
-<div id="pin-modal"        style="display:none"></div>
-<div id="bike-modal"       style="display:none"></div>
-<div id="checkin-modal"    style="display:none"></div>
-<div id="edit-price-modal"  style="display:none"></div>
-<div id="optlist-modal"     style="display:none"></div>
-<div id="receipt-modal"    style="display:none"></div>
-<div id="auth-modal"       style="display:none"></div>
-<div id="profile-gate"     style="display:none"></div>
-<div id="fix-gate"         style="display:none"></div>
-<div id="return-pay-modal" style="display:none"></div>
-<div id="return-modal" style="display:none"></div>
-<div id="confirm-modal"    style="display:none"></div>
-<div id="rate-modal"       style="display:none"></div>
-<div id="bike-info-modal"  style="display:none"></div>
-<div id="cust-modal"       style="display:none"></div>
-<div id="bike-profile-modal" style="display:none"></div>
-<div id="cashier-modal"    style="display:none"></div>
-<div id="receipt-edit-modal" style="display:none"></div>
-<div id="team-mgr-modal"   style="display:none"></div>
-<div id="cancel-reason-modal" style="display:none"></div>
-<div id="walkin-modal" style="display:none"></div>
-<div id="op-gate-modal" style="display:none"></div>
-<div id="wl-add-modal" style="display:none"></div>
-<div id="comm-add-modal" style="display:none"></div>
-<div id="rider-walkin-modal" style="display:none"></div>
-<div id="jcc-group-modal" style="display:none"></div>
-<div id="group-edit-modal" style="display:none"></div>
-<div id="new-acct-modal" style="display:none"></div>
-<div id="booking-edit-modal" style="display:none"></div>
-<div id="booking-note-modal" style="display:none"></div>
-<div id="print-opts-modal"   style="display:none"></div>
-<div id="qnum-edit-modal"    style="display:none"></div>
-<div id="reschedule-modal"   style="display:none"></div>
-<div id="scan-modal"         style="display:none"></div>
-<div id="rider-modal"        style="display:none"></div>
-<div id="rider-report-modal" style="display:none"></div>
+<div id="pin-modal"        data-host></div>
+<div id="bike-modal"       data-host></div>
+<div id="checkin-modal"    data-host></div>
+<div id="edit-price-modal"  data-host></div>
+<div id="optlist-modal"     data-host></div>
+<div id="receipt-modal"    data-host></div>
+<div id="auth-modal"       data-host></div>
+<div id="profile-gate"     data-host></div>
+<div id="fix-gate"         data-host></div>
+<div id="return-pay-modal" data-host></div>
+<div id="return-modal" data-host></div>
+<div id="confirm-modal"    data-host></div>
+<div id="rate-modal"       data-host></div>
+<div id="bike-info-modal"  data-host></div>
+<div id="cust-modal"       data-host></div>
+<div id="bike-profile-modal" data-host></div>
+<div id="cashier-modal"    data-host></div>
+<div id="receipt-edit-modal" data-host></div>
+<div id="team-mgr-modal"   data-host></div>
+<div id="cancel-reason-modal" data-host></div>
+<div id="walkin-modal" data-host></div>
+<div id="op-gate-modal" data-host></div>
+<div id="wl-add-modal" data-host></div>
+<div id="comm-add-modal" data-host></div>
+<div id="rider-walkin-modal" data-host></div>
+<div id="jcc-group-modal" data-host></div>
+<div id="group-edit-modal" data-host></div>
+<div id="new-acct-modal" data-host></div>
+<div id="booking-edit-modal" data-host></div>
+<div id="booking-note-modal" data-host></div>
+<div id="print-opts-modal"   data-host></div>
+<div id="qnum-edit-modal"    data-host></div>
+<div id="reschedule-modal"   data-host></div>
+<div id="scan-modal"         data-host></div>
+<div id="rider-modal"        data-host></div>
+<div id="rider-report-modal" data-host></div>
 
 
 <div id="booth-popup">
@@ -437,7 +437,7 @@ window.mmLoading=(function(){
     <button class="booth-popup-close" data-on-click='["closeBoothPopup"]'>&#x2715;</button>
     <div class="booth-popup-title" id="booth-popup-title"></div>
     <div class="booth-popup-msg" id="booth-popup-msg"></div>
-    <div id="booth-popup-extra" style="margin-top:14px;font-size:12px;font-weight:700;color:var(--muted);line-height:1.6;background:rgba(var(--tint-rgb),.04);border-radius:4px;padding:10px 14px;text-align:left"></div>
+    <div id="booth-popup-extra"></div>
   </div>
 </div>
 
@@ -448,6 +448,12 @@ window.mmLoading=(function(){
 <script defer src="/vendor/supabase-js-2.117.2.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF"></script>
 <!-- qrcode-generator is loaded on demand (only when a QR/ticket renders) — see _loadQrcode() -->
 <script>
+// ── The dialog hosts start hidden (2026-09-28) ───────────────────────────────────────────────────
+// Every host below the footer (#confirm-modal, #pin-modal...) carried an inline display:none in the
+// markup, which a strict style-src refuses; a value set through the CSSOM is allowed. A host is
+// data-host, styles.css hides it until it has a style of its own, and here, before any other code,
+// each one gets display:none through the CSSOM, so el.style.display reads 'none' as it always did.
+document.querySelectorAll('[data-host]').forEach(el=>{el.style.display='none';});
 // ── Handlers live in attributes, not in the markup's script (2026-09-27) ────────────────────────
 // The page's Content-Security-Policy allows no inline script: an onclick=... attribute would not run.
 // Markup says what an event does in a data-on-<event> attribute holding JSON - the name of a
@@ -8058,7 +8064,7 @@ function applyThemeIcon(){
 }
 function renderTopbarRight(){
   // Bike shortcut straight to My Rides, shown beside the signed-in customer's avatar.
-  const _ridesBtn=`<button class="topbar-btn" data-on-click="${_on("goCustomer","myrides")}" title="${t('myRidesTitle')}" aria-label="${t('myRidesTitle')}" style="display:inline-flex;align-items:center;justify-content:center;padding:7px 10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.2"/><circle cx="18.5" cy="17.5" r="3.2"/><path d="M15 5.5a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/><path d="M5.5 17.5 9 10h6.5"/><path d="m12.5 17.5 2.5-7.5 2 4h2.5"/></svg></button>`;
+  const _ridesBtn=`<button class="topbar-btn chrome-rides" data-on-click="${_on("goCustomer","myrides")}" title="${t('myRidesTitle')}" aria-label="${t('myRidesTitle')}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.2"/><circle cx="18.5" cy="17.5" r="3.2"/><path d="M15 5.5a1.2 1.2 0 1 0 0-2.4 1.2 1.2 0 0 0 0 2.4z"/><path d="M5.5 17.5 9 10h6.5"/><path d="m12.5 17.5 2.5-7.5 2 4h2.5"/></svg></button>`;
   const el=document.getElementById('topbar-right');
   if(S.view==='customer'){
     const cust=S.loggedIn||getSession();
@@ -8066,13 +8072,13 @@ function renderTopbarRight(){
       _consentCheck(cust); // once per page life: fills both answers, asks for any missing
       const initials=cust.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const avatar=cust.photo
-        ?`<img loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(var(--green-rgb),.4)">`
-        :`<div style="width:32px;height:32px;border-radius:50%;background:rgba(var(--green-rgb),.2);border:1px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--green)">${esc(initials)}</div>`;
+        ?`<img loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="chrome-av-img">`
+        :`<div class="chrome-av">${esc(initials)}</div>`;
       el.innerHTML=`
         ${_ridesBtn}
         <button type="button" class="cust-topbar-link" data-on-click="${_on("goCustomer","account")}" title="${t('tabAccount')}" aria-label="${t('tabAccount')}">
           ${avatar}
-          <span style="min-width:0;display:block">
+          <span class="chrome-av-txt">
             <span class="cust-topbar-name">${esc(cust.name.split(' ')[0])}</span>
             <span class="cust-topbar-email">${esc(cust.email||cust.phone||'')}</span>
           </span>
@@ -8091,13 +8097,13 @@ function renderTopbarRight(){
       _consentCheck(cust); // a signed-in customer usually arrives here, on the landing page
       const initials=(cust.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
       const avatar=cust.photo
-        ?`<img loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(var(--green-rgb),.4)">`
-        :`<div style="width:32px;height:32px;border-radius:50%;background:rgba(var(--green-rgb),.2);border:1px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--green)">${esc(initials)}</div>`;
+        ?`<img loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="chrome-av-img">`
+        :`<div class="chrome-av">${esc(initials)}</div>`;
       el.innerHTML=`
         ${_ridesBtn}
         <button type="button" class="cust-topbar-link" data-on-click="${_on("goCustomer","account")}" title="${t('tabAccount')}" aria-label="${t('tabAccount')}">
           ${avatar}
-          <span style="min-width:0;display:block">
+          <span class="chrome-av-txt">
             <span class="cust-topbar-name">${esc((cust.name||'').split(' ')[0])}</span>
             <span class="cust-topbar-email">${esc(cust.email||cust.phone||'')}</span>
           </span>
@@ -8113,7 +8119,7 @@ function renderTopbarRight(){
     // No Admin / Front Desk switch: the role is the signed-in account's own (set on the Team page)
     el.innerHTML=`
       ${_gsBtnHtml()}${_ntBtnHtml()}${_opChipHtml()}
-      ${last&&isAdmin()?`<button class="topbar-btn undo-btn" data-on-click="${_on("doUndo")}" title="${esc(last.label)}" style="animation:undoPulse 2s ease-in-out infinite">${_artIcon('undo',13)} ${t('undoBtn')}</button>`:''}
+      ${last&&isAdmin()?`<button class="topbar-btn undo-btn chrome-pulse" data-on-click="${_on("doUndo")}" title="${esc(last.label)}">${_artIcon('undo',13)} ${t('undoBtn')}</button>`:''}
       ${S._staffAuthed?`<button class="topbar-btn icon" data-on-click="${_on("openStaffPwdModal")}" title="${t('staffPwdTitle')}" aria-label="${t('staffPwdTitle')}">${_artIcon('key',14)}</button>`:''}
       <button class="topbar-btn danger icon" data-on-click="${_on("lockStaff")}" title="${t('lockBtn')}" aria-label="${t('lockBtn')}">${_artIcon('lock',15)}</button>`;
   } else {
@@ -8384,11 +8390,11 @@ function openStaffPwdModal(mandatory){
   m.style.cssText='position:fixed;inset:0;z-index:9600;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';
   m.innerHTML=`<div class="pin-box" data-on-click="${_on("_on_openStaffPwdModal_1",_EV,_EL)}">
       <div class="pin-title">${t('staffPwdTitle')}</div>
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin:-4px 0 14px">${mandatory?t('staffPwdMustHint'):t('authPasswordHint')}</div>
-      <input id="staff-newpwd" type="password" autocomplete="new-password" placeholder="${t('authPassword')}" style="width:100%;margin-bottom:8px">
-      <input id="staff-newpwd2" type="password" autocomplete="new-password" placeholder="${t('authConfirmPassword')}" style="width:100%;margin-bottom:10px" data-on-keydown="${_on("_on_openStaffPwdModal_2",_EV,_EL)}">
-      <div id="staff-pwd-err" style="color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px"></div>
-      <button class="btn-primary" style="width:100%" data-on-click="${_on("_staffPwdSubmit")}">${t('saveBtn')}</button>
+      <div class="pin-hint">${mandatory?t('staffPwdMustHint'):t('authPasswordHint')}</div>
+      <input id="staff-newpwd" type="password" autocomplete="new-password" placeholder="${t('authPassword')}" class="pin-in8">
+      <input id="staff-newpwd2" type="password" autocomplete="new-password" placeholder="${t('authConfirmPassword')}" class="pin-in10" data-on-keydown="${_on("_on_openStaffPwdModal_2",_EV,_EL)}">
+      <div id="staff-pwd-err" class="pin-err"></div>
+      <button class="btn-primary pin-w100" data-on-click="${_on("_staffPwdSubmit")}">${t('saveBtn')}</button>
       ${mandatory?'':`<button class="pin-cancel" data-on-click="${_on("_on_openStaffPwdModal_3",_EV,_EL)}">${t('cancelBtn')}</button>`}
     </div>`;
   if(!mandatory)m.onclick=e=>{if(e.target===m)m.remove();}; // mandatory: backdrop click does nothing
@@ -8431,11 +8437,11 @@ function renderPinModal(){
   modal.innerHTML=`<div class="pin-backdrop" data-on-click="${_on("_on_renderPinModal_1",_EV,_EL)}">
     <div class="pin-box" id="pin-box">
       <div class="pin-title">${t('staffAuthTitle')}</div>
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin:-4px 0 14px">${t('staffAuthHint')}</div>
-      <input id="staff-auth-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="${t('staffAuthEmailPh')}" style="width:100%;margin-bottom:8px">
-      <input id="staff-auth-pwd" type="password" autocomplete="current-password" placeholder="${t('staffAuthPwdPh')}" style="width:100%;margin-bottom:10px" data-on-keydown="${_on("_on_renderPinModal_2",_EV,_EL)}">
-      <div id="staff-auth-err" style="color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px"></div>
-      <button class="btn-primary" style="width:100%" data-on-click="${_on("_staffAuthSubmit")}">${t('staffAuthBtn')}</button>
+      <div class="pin-hint">${t('staffAuthHint')}</div>
+      <input id="staff-auth-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="${t('staffAuthEmailPh')}" class="pin-in8">
+      <input id="staff-auth-pwd" type="password" autocomplete="current-password" placeholder="${t('staffAuthPwdPh')}" class="pin-in10" data-on-keydown="${_on("_on_renderPinModal_2",_EV,_EL)}">
+      <div id="staff-auth-err" class="pin-err"></div>
+      <button class="btn-primary pin-w100" data-on-click="${_on("_staffAuthSubmit")}">${t('staffAuthBtn')}</button>
       <button class="pin-cancel" data-on-click="${_on("closePinModal")}">${t('cancelBtn')}</button>
     </div>
   </div>`;
@@ -11252,7 +11258,7 @@ const _ART={
 };
 function _artIcon(kind,px){
   px=px||14;
-  return`<svg aria-hidden="true" width="${px}" height="${px}" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:middle;flex-shrink:0">${_ART[kind]||''}</svg>`;
+  return`<svg aria-hidden="true" width="${px}" height="${px}" viewBox="0 0 24 24" fill="currentColor" class="art-ic">${_ART[kind]||''}</svg>`;
 }
 const ICON_PENCIL=_artIcon('pencil',12);
 const ICON_PRINT=_artIcon('print');
@@ -16842,25 +16848,25 @@ function _opGateRender(){
   if(G.pick){
     const dots=[0,1,2,3].map(i=>`<span class="opg-dot${i<G.digits.length?' on':''}"></span>`).join('');
     const key=d=>d?`<button type="button" class="opg-key" data-key="${d}" data-on-click="${_on("_opgKey",d)}"${d==='del'?` aria-label="⌫"`:''}${G.busy?' disabled':''}>${d==='del'?'⌫':d}</button>`:'<span></span>';
-    body=`<div class="modal-title">${esc(G.approve?t('pinApproveTitle').replace('{0}',G.approve.what):t('opPinTitle').replace('{0}',G.pick))}</div>${G.approve?`<div style="font-size:13px;color:var(--muted);margin:4px 0 10px">${esc(G.pick)}</div>`:''}
+    body=`<div class="modal-title">${esc(G.approve?t('pinApproveTitle').replace('{0}',G.approve.what):t('opPinTitle').replace('{0}',G.pick))}</div>${G.approve?`<div class="opg-who">${esc(G.pick)}</div>`:''}
       <div class="opg-dots${G.shake?' shake':''}" dir="ltr">${dots}</div>
       <div class="opg-msg" role="alert">${esc(G.msg||'')}</div>
       <div class="opg-pad" dir="ltr">${['1','2','3','4','5','6','7','8','9','','0','del'].map(key).join('')}</div>
-      <button type="button" class="btn-secondary" style="width:100%;margin-top:10px" data-on-click="${_on("_opgBack")}"${G.busy?' disabled':''}>${t('cancelBtn')}</button>`;
+      <button type="button" class="btn-secondary opg-back" data-on-click="${_on("_opgBack")}"${G.busy?' disabled':''}>${t('cancelBtn')}</button>`;
   }else{
     body=`<div class="modal-title">${G.switching?t('opSwitch'):t('opGateTitle')}</div>
-      <div style="font-size:13px;color:var(--muted);margin:6px 0 14px">${t('opGateMsg')}</div>
-      ${loading?skeletonList():G.err?`<div class="empty-state">${t('errConnection')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_opGateLoad")}">${t('retryBtn')}</button></div></div>`
+      <div class="opg-sub">${t('opGateMsg')}</div>
+      ${loading?skeletonList():G.err?`<div class="empty-state">${t('errConnection')}<div class="opg-mt10"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_opGateLoad")}">${t('retryBtn')}</button></div></div>`
         :list.length?`<div class="opg-names">${list.map(o=>`<button type="button" class="btn-secondary opg-name" data-on-click="${_on("_opgPick",o.name,o.has_pin?1:0)}">${esc(o.name)}${o.has_pin?' <span class="opg-lock" aria-hidden="true">•••</span>':''}</button>`).join('')}</div>`:''}
-      ${typed?`<div class="form-group" style="margin-bottom:12px"><label for="op-gate-name">${t('logsOperator')}</label>
+      ${typed?`<div class="form-group opg-mb12"><label for="op-gate-name">${t('logsOperator')}</label>
         <input id="op-gate-name" type="text" maxlength="40" placeholder="${esc(t('logsOperatorPh'))}" data-on-keydown="${_on("_on__opGateRender_1",_EV,_EL)}"></div>
-      <div class="modal-footer"><button class="btn-primary" style="width:100%" data-on-click="${_on("_opGateSave")}">${t('opGateBtn')}</button></div>`:''}
-      ${G.switching?`<button type="button" class="btn-secondary" style="width:100%;margin-top:8px" data-on-click="${_on("_opGateDone")}">${t('cancelBtn')}</button>`:''}`;
+      <div class="modal-footer"><button class="btn-primary opg-w100" data-on-click="${_on("_opGateSave")}">${t('opGateBtn')}</button></div>`:''}
+      ${G.switching?`<button type="button" class="btn-secondary opg-cancel" data-on-click="${_on("_opGateDone")}">${t('cancelBtn')}</button>`:''}`;
   }
   // A name half-typed in the box survives the redraw that brings the list.
   const typedNow=(document.getElementById('op-gate-name')||{}).value||'';
   // No backdrop-close and, on a first gate, no cancel: anonymous staff actions are what this prevents.
-  m.innerHTML=`<div class="modal-backdrop" style="z-index:290"><div class="modal-box op-gate" role="dialog" aria-modal="true" style="max-width:380px">${body}</div></div>`;
+  m.innerHTML=`<div class="modal-backdrop opg-z290"><div class="modal-box op-gate opg-w380" role="dialog" aria-modal="true">${body}</div></div>`;
   const inp=document.getElementById('op-gate-name');if(inp&&typedNow)inp.value=typedNow;
 }
 function _opgPick(name,pin){const G=S._opg;if(!G||G.busy||G.list===undefined)return;if(!pin){_opGatePick(name);return;}G.pick=name;G.digits='';G.msg='';G.shake=false;_opGateRender();}
@@ -17017,7 +17023,7 @@ function renderTeam(){
   const el=document.getElementById('tab-team');if(!el)return;
   const T=_tm(),head=`<div class="page-title">${t('tabTeam')}</div><div class="page-sub">${t('teamPageSub')}</div>`;
   if(T.ops===null){if(!T.busy)_tmLoad();el.innerHTML=head+skeletonList();return;}
-  const ops=`<div class="form-section tm-sec" style="margin-top:0">
+  const ops=`<div class="form-section tm-sec tm-mt0">
     <div class="form-title">${t('opsTitle')}</div><div class="ca-sub">${t('opsSub')}</div>
     ${T.opsMissing?`<div class="tm-note">${t('dbPending')}</div>`:''}
     <div class="tm-ops">${(T.ops||[]).map(o=>`<div class="tm-op" data-op="${esc(o.name)}">
@@ -18794,14 +18800,14 @@ function confirmDialog({title,body,confirmLabel,confirmClass,onConfirm}){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_confirmDialog_1",_EV,_EL)}">
     <div class="confirm-box" role="dialog" aria-modal="true">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${body?'10':'18'}px">
-        <div style="font-size:18px;font-weight:900">${esc(title)}</div>
-        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;transition:color .15s" data-on-mouseover="${_on("_on_confirmDialog_2",_EV,_EL)}" data-on-mouseout="${_on("_on_confirmDialog_3",_EV,_EL)}">&times;</button>
+      <div class="${body?'chrome-dh10':'chrome-dh18'}">
+        <div class="chrome-dt">${esc(title)}</div>
+        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" class="chrome-xt" data-on-mouseover="${_on("_on_confirmDialog_2",_EV,_EL)}" data-on-mouseout="${_on("_on_confirmDialog_3",_EV,_EL)}">&times;</button>
       </div>
-      ${body?`<div style="font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:20px;padding:10px 14px;background:var(--s3);border-radius:4px">${body}</div>`:''}
-      <div style="display:flex;gap:8px;justify-content:flex-end">
+      ${body?`<div class="chrome-dbody">${body}</div>`:''}
+      <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button>
-        <button class="${confirmClass||'btn-red'}" data-on-click="${_on("_doConfirm")}" style="min-width:100px">${confirmLabel}</button>
+        <button class="${confirmClass||'btn-red'} chrome-mw100" data-on-click="${_on("_doConfirm")}">${confirmLabel}</button>
       </div>
     </div>
   </div>`;
@@ -18826,17 +18832,17 @@ function promptDialog({title,body,value,placeholder,numeric,confirmLabel}){
     m.style.display='block';
     m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_promptDialog_1",_EV,_EL)}">
       <div class="confirm-box" role="dialog" aria-modal="true">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="font-size:18px;font-weight:900">${esc(title||'')}</div>
-          <button data-on-click="${_on("_promptDone",null)}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">&times;</button>
+        <div class="chrome-dh12">
+          <div class="chrome-dt">${esc(title||'')}</div>
+          <button data-on-click="${_on("_promptDone",null)}" aria-label="${t('closeBtn')}" class="chrome-x">&times;</button>
         </div>
-        ${body?`<div style="font-size:13px;color:var(--muted-l);font-weight:700;margin-bottom:12px">${esc(body)}</div>`:''}
-        <input id="prompt-input" class="filter-select" style="width:100%" ${numeric?'type="number" inputmode="decimal" step="0.01" min="0"':'type="text"'}
+        ${body?`<div class="chrome-pbody">${esc(body)}</div>`:''}
+        <input id="prompt-input" class="filter-select chrome-w100" ${numeric?'type="number" inputmode="decimal" step="0.01" min="0"':'type="text"'}
           value="${esc(value==null?'':String(value))}" placeholder="${esc(placeholder||'')}" aria-label="${esc(title||'')}"
           data-on-keydown="${_on("_on_promptDialog_2",_EV,_EL)}">
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <div class="chrome-pact">
           <button class="btn-secondary" data-on-click="${_on("_promptDone",null)}">${t('cancelBtn')}</button>
-          <button class="btn-primary" style="min-width:100px" data-on-click="${_on("_on_promptDialog_3",_EV,_EL)}">${confirmLabel||t('saveBtn')||'OK'}</button>
+          <button class="btn-primary chrome-mw100" data-on-click="${_on("_on_promptDialog_3",_EV,_EL)}">${confirmLabel||t('saveBtn')||'OK'}</button>
         </div>
       </div>
     </div>`;
@@ -19059,44 +19065,44 @@ function showPrintReportOptions(){
   const m=document.getElementById('print-opts-modal');
   const o=_repOpts();
   const chk=(on)=>on?_artIcon('boxOn',15):_artIcon('boxOff',15);
-  const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text);text-align:start">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
+  const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" class="rpt-row">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
   const _types=['Road','Hybrid','Mountain','Gravel','Road Carbon'];
-  const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select" aria-label="${esc(lbl||id)}" style="width:100%" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
+  const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select rpt-w100" aria-label="${esc(lbl||id)}" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showPrintReportOptions_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:520px">
+    <div class="modal-box rpt-w520" role="dialog" aria-modal="true">
       <div class="modal-title">${t('expTitle')}</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${t('expChoose')}</div>
+      <div class="rpt-sub">${t('expChoose')}</div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${t('repOptCols')}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:14px">
+      <div class="rpt-lbl4">${t('repOptCols')}</div>
+      <div class="rpt-grid2">
         ${_REP_COLS.map(c=>row('cols',c.k,t(c.key))).join('')}
       </div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${t('repOptSections')}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:14px">
+      <div class="rpt-lbl4">${t('repOptSections')}</div>
+      <div class="rpt-grid2">
         ${_REP_SECTIONS.map(c=>row('sections',c.k,t(c.key))).join('')}
       </div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${t('repOptFilters')}</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px">
-        <label style="display:flex;flex-direction:column;gap:4px">${t('bikeTypeLabel')}
+      <div class="rpt-lbl6">${t('repOptFilters')}</div>
+      <div class="rpt-grid2f">
+        <label class="rpt-fld">${t('bikeTypeLabel')}
           ${sel('rep-f-type',o.fType,[['all',t('filterAll')],..._types.map(x=>[x,typeLabel(x)])],['_repSetFilter','fType',_P('value')],t('bikeTypeLabel'))}</label>
-        <label style="display:flex;flex-direction:column;gap:4px">${t('filterStatus')}
+        <label class="rpt-fld">${t('filterStatus')}
           ${sel('rep-f-status',o.fStatus,[['all',t('filterAll')],...['waiting','active','done','noshow'].map(x=>[x,t(STATUS_KEY[x])])],['_repSetFilter','fStatus',_P('value')],t('filterStatus'))}</label>
-        <label style="display:flex;flex-direction:column;gap:4px">${t('filterPay')}
+        <label class="rpt-fld">${t('filterPay')}
           ${sel('rep-f-pay',o.fPay,[['all',t('filterAll')],['paid',t('filterPaid')],['pending',t('pendingLabel')]],['_repSetFilter','fPay',_P('value')],t('filterPay'))}</label>
-        <label style="display:flex;flex-direction:column;gap:4px">${t('colMember')}
+        <label class="rpt-fld">${t('colMember')}
           ${sel('rep-f-member',o.fMember,[['all',t('filterAll')],['member',t('memberYes')],['nonmember',t('memberNo')]],['_repSetFilter','fMember',_P('value')],t('colMember'))}</label>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-primary" style="width:100%" data-on-click="${_on("_on_showPrintReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
-        <button class="btn-secondary" style="width:100%" data-on-click="${_on("_on_showPrintReportOptions_3",_EV,_EL)}">${ICON_PRINT} ${t('daySheetBtn')}</button>
-        <button class="btn-secondary" style="width:100%" data-on-click="${_on("_on_showPrintReportOptions_4",_EV,_EL)}">${ICON_EXPORT} ${t('expExcel')}</button>
-        <div style="display:flex;gap:10px">
-          <button class="btn-secondary" style="flex:1" data-on-click="${_on("_repReset")}">${t('repOptReset')}</button>
-          <button class="btn-secondary" style="flex:1" data-on-click="${_on("_closePrintOpts")}">${t('cancelBtn')}</button>
+      <div class="rpt-acts">
+        <button class="btn-primary rpt-w100" data-on-click="${_on("_on_showPrintReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
+        <button class="btn-secondary rpt-w100" data-on-click="${_on("_on_showPrintReportOptions_3",_EV,_EL)}">${ICON_PRINT} ${t('daySheetBtn')}</button>
+        <button class="btn-secondary rpt-w100" data-on-click="${_on("_on_showPrintReportOptions_4",_EV,_EL)}">${ICON_EXPORT} ${t('expExcel')}</button>
+        <div class="rpt-pair">
+          <button class="btn-secondary rpt-flex1" data-on-click="${_on("_repReset")}">${t('repOptReset')}</button>
+          <button class="btn-secondary rpt-flex1" data-on-click="${_on("_closePrintOpts")}">${t('cancelBtn')}</button>
         </div>
       </div>
     </div>
@@ -19178,7 +19184,7 @@ function _accSet(k,v){_accOpts()[k]=v;_accSave();_accPaintCount();}
 function _accSetChart(k,v){_accOpts().charts[k]=v;_accSave();}
 function _accSetNatTop(v){_accOpts().natTop=Number(v)||0;_accSave();}
 // The one thing a filter pick changes on the dialog: how many accounts are on the list.
-function _accPaintCount(){const el=document.getElementById('acr-count');if(!el)return;el.innerHTML=`${t('acrOnList')}: <span style="color:var(--text)">${_accRows().length}</span> / ${getCustomers().length}`;}
+function _accPaintCount(){const el=document.getElementById('acr-count');if(!el)return;el.innerHTML=`${t('acrOnList')}: <span class="rpt-c-text">${_accRows().length}</span> / ${getCustomers().length}`;}
 function _accReset(){S._accOpts=_accDefaults();_accSave();showAccountReportOptions();}
 // KSA calendar days for the report's windows. Session dates are KSA days, so every cutoff and
 // every timestamp compared with them has to be one too: a UTC day made the 14/30/90/365-day
@@ -19538,53 +19544,53 @@ function showAccountReportOptions(){
   const defs=_accFilterDefs();
   _accDropStale(o,defs);
   const chk=(on)=>on?_artIcon('boxOn',15):_artIcon('boxOff',15);
-  const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_accToggle",kind,k)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text);text-align:start">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
-  const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select" aria-label="${esc(lbl||id)}" style="width:100%" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
-  const fld=(lbl,html)=>`<label style="display:flex;flex-direction:column;gap:4px">${esc(lbl)}${html}</label>`;
+  const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_accToggle",kind,k)}" class="rpt-row-b">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
+  const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select rpt-w100" aria-label="${esc(lbl||id)}" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
+  const fld=(lbl,html)=>`<label class="rpt-fld">${esc(lbl)}${html}</label>`;
   const rows=_accRows();
   const _keep=m.querySelector('.modal-box');const _scroll=_keep?_keep.scrollTop:0; // a tap must not send the list back to the top
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showAccountReportOptions_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:640px">
+    <div class="modal-box rpt-w640" role="dialog" aria-modal="true">
       <div class="modal-title">${t('acrTitle')}</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:16px">${t('acrSub')}</div>
+      <div class="rpt-sub">${t('acrSub')}</div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${t('repOptCols')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;margin-bottom:14px">
+      <div class="rpt-lbl4">${t('repOptCols')}</div>
+      <div class="rpt-gridf2">
         ${_ACC_COLS.map(c=>row('cols',c.k,t(c.key))).join('')}
       </div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${t('repOptSections')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;margin-bottom:14px">
+      <div class="rpt-lbl4">${t('repOptSections')}</div>
+      <div class="rpt-gridf2">
         ${_ACC_SECTIONS.map(c=>row('sections',c.k,t(c.key))).join('')}
       </div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px">${t('acrSectCharts')}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${t('acrSectChartsHint')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 10px;margin-bottom:14px">
-        ${_ACC_BREAKDOWNS.map(k=>`<div style="display:flex;align-items:center;gap:6px">
-          <button type="button" data-rep="chartsOn:${k}" aria-pressed="${o.chartsOn[k]?'true':'false'}" data-on-click="${_on("_accToggle","chartsOn",k)}" style="display:flex;align-items:center;gap:9px;flex:1;min-width:0;padding:8px 10px;border:none;background:none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text);text-align:start">${chk(o.chartsOn[k])}<span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(_accBdTitle(k))}</span></button>
-          <select class="filter-select" aria-label="${esc(_accBdTitle(k))}" style="width:104px;flex:none" data-on-change="${_on("_accSetChart",k,_P("value"))}"${o.chartsOn[k]?'':' disabled'}>${_ACC_CHART_TYPES.map(([v,key])=>`<option value="${v}"${o.charts[k]===v?' selected':''}>${t(key)}</option>`).join('')}</select>
+      <div class="rpt-lbl2">${t('acrSectCharts')}</div>
+      <div class="rpt-hint">${t('acrSectChartsHint')}</div>
+      <div class="rpt-gridc">
+        ${_ACC_BREAKDOWNS.map(k=>`<div class="rpt-crow">
+          <button type="button" data-rep="chartsOn:${k}" aria-pressed="${o.chartsOn[k]?'true':'false'}" data-on-click="${_on("_accToggle","chartsOn",k)}" class="rpt-row-c">${chk(o.chartsOn[k])}<span class="rpt-ell">${esc(_accBdTitle(k))}</span></button>
+          <select class="filter-select rpt-csel" aria-label="${esc(_accBdTitle(k))}" data-on-change="${_on("_accSetChart",k,_P("value"))}"${o.chartsOn[k]?'':' disabled'}>${_ACC_CHART_TYPES.map(([v,key])=>`<option value="${v}"${o.charts[k]===v?' selected':''}>${t(key)}</option>`).join('')}</select>
         </div>`).join('')}
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 14px;font-size:12px;font-weight:700;color:var(--muted)">
+      <div class="rpt-nat">
         <label for="acr-nat-top">${esc(t('acrNatDepth'))}</label>
-        <select id="acr-nat-top" class="filter-select" style="width:auto;flex:none" data-on-change="${_on("_accSetNatTop",_P("value"))}"${o.chartsOn.nationality?'':' disabled'}>${_ACC_NAT_TOPS.map(n=>`<option value="${n}"${Number(o.natTop)===n?' selected':''}>${esc(n?t('acrNatTop').replace('{0}',n):t('filterAll'))}</option>`).join('')}</select>
+        <select id="acr-nat-top" class="filter-select rpt-auto" data-on-change="${_on("_accSetNatTop",_P("value"))}"${o.chartsOn.nationality?'':' disabled'}>${_ACC_NAT_TOPS.map(n=>`<option value="${n}"${Number(o.natTop)===n?' selected':''}>${esc(n?t('acrNatTop').replace('{0}',n):t('filterAll'))}</option>`).join('')}</select>
       </div>
 
-      <div style="font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">${t('repOptFilters')}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px">
+      <div class="rpt-lbl6">${t('repOptFilters')}</div>
+      <div class="rpt-gridf8">
         ${defs.map(([k,lbl,opts])=>fld(lbl,sel(k,o[k],opts,['_accSet',k,_P('value')],lbl))).join('')}
         ${fld(t('acrSortLabel'),sel('sort',o.sort,_accSortOpts(),['_accSet','sort',_P('value')],t('acrSortLabel')))}
       </div>
-      <div id="acr-count" style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px">${t('acrOnList')}: <span style="color:var(--text)">${rows.length}</span> / ${getCustomers().length}</div>
+      <div id="acr-count" class="rpt-count">${t('acrOnList')}: <span class="rpt-c-text">${rows.length}</span> / ${getCustomers().length}</div>
 
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn-primary" style="width:100%" data-on-click="${_on("_on_showAccountReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
-        <button class="btn-secondary" style="width:100%" data-on-click="${_on("_on_showAccountReportOptions_3",_EV,_EL)}">${ICON_EXPORT} ${t('expExcel')}</button>
-        <div style="display:flex;gap:10px">
-          <button class="btn-secondary" style="flex:1" data-on-click="${_on("_accReset")}">${t('repOptReset')}</button>
-          <button class="btn-secondary" style="flex:1" data-on-click="${_on("_closePrintOpts")}">${t('cancelBtn')}</button>
+      <div class="rpt-acts">
+        <button class="btn-primary rpt-w100" data-on-click="${_on("_on_showAccountReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
+        <button class="btn-secondary rpt-w100" data-on-click="${_on("_on_showAccountReportOptions_3",_EV,_EL)}">${ICON_EXPORT} ${t('expExcel')}</button>
+        <div class="rpt-pair">
+          <button class="btn-secondary rpt-flex1" data-on-click="${_on("_accReset")}">${t('repOptReset')}</button>
+          <button class="btn-secondary rpt-flex1" data-on-click="${_on("_closePrintOpts")}">${t('cancelBtn')}</button>
         </div>
       </div>
     </div>
@@ -24464,6 +24470,9 @@ const WS_COLS='id,created_at,customer_id,name,phone,email,service,service_label,
 const WS_GROUPS={new:['new'],booked:['confirmed'],shop:['in_workshop','awaiting_parts'],ready:['ready'],done:['completed','cancelled']};
 const WS_STAGE_KEY={new:'wsStNew',confirmed:'wsStConfirmed',in_workshop:'wsStIn',awaiting_parts:'wsStParts',ready:'wsStReady',completed:'wsStDone',cancelled:'wsStCancelled'};
 const WS_STAGE_COL={new:'var(--orange)',confirmed:'var(--green)',in_workshop:'var(--green)',awaiting_parts:'var(--orange)',ready:'var(--green)',completed:'var(--muted)',cancelled:'var(--muted)'};
+// A stage colour as the classes that draw it (styles.css): the word's ink and its dot. Shared by the
+// Workshop, Messages and Ambassadors rows, whose colours are these three.
+const WS_ST_CLS={'var(--orange)':['ws-c-orange','ws-bg-orange'],'var(--green)':['ws-c-green','ws-bg-green'],'var(--muted)':['ws-c-muted','ws-bg-muted']};
 // The message staff send, in the language the customer used on the website (staff can switch).
 // Not UI: the customer reads it, so it follows the request, not the staff member's language.
 const WS_MSG={
@@ -24591,8 +24600,8 @@ function _wsRow(j){
   const open=!!W.hist[j.id];
   return`<div class="ca-row ws-row" data-ws-id="${esc(j.id)}" data-status="${esc(j.status)}">
     <div class="ca-head">
-      <div style="flex:1;min-width:0"><div class="ca-name"><bdi dir="ltr" class="ws-ref">${esc(_wsRef(j))}</bdi> ${esc(j.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
-      <span class="ca-status" style="color:${col}"><span class="ca-dot" style="background:${col}"></span>${esc(_wsStage(j.status))}</span>
+      <div class="ws-grow"><div class="ca-name"><bdi dir="ltr" class="ws-ref">${esc(_wsRef(j))}</bdi> ${esc(j.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
+      <span class="ca-status ${WS_ST_CLS[col][0]}"><span class="ca-dot ${WS_ST_CLS[col][1]}"></span>${esc(_wsStage(j.status))}</span>
     </div>
     <div class="ca-grid">
       ${kv(t('wsLblService'),esc(j.service_label||j.service))}
@@ -24631,16 +24640,16 @@ function renderWorkshop(listOnly){
   if(!W.jobs){
     let body;
     if(W.missing)body=`<div class="empty-state ws-not-set-up">${t('wsNotSetUp')}</div>`;
-    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('wsLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary ws-retry" data-on-click="${_on("_on_renderWorkshop_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('wsLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary ws-retry" data-on-click="${_on("_on_renderWorkshop_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
     else{if(!W.busy)_wsLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section" style="margin-top:0">${head}${body}</div>`;
+    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_wsLoad(); // a minute old: read again, the list stays meanwhile
   if(W.filter!=='all'&&!WS_GROUPS[W.filter])W.filter='new';
   const n=k=>k==='all'?W.jobs.length:W.jobs.filter(j=>WS_GROUPS[k].includes(j.status)).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" data-ws-filter="${k}" data-on-click="${_on("_wsSetFilter",k)}">${label} (${n(k)})</button>`;
-  el.innerHTML=`<div class="form-section" style="margin-top:0">${head}
+  el.innerHTML=`<div class="form-section ws-mt0">${head}
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('ws',W.q)}" data-srch="ws">${_artIcon('search',13)}
         <input id="ws-search-input" class="search-input" aria-label="${esc(t('wsSearch'))}" placeholder="${esc(t('wsSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_wsSearch",_P("value"))}">
@@ -24693,7 +24702,7 @@ function _wsDlg(title,sub,fields,actions){
   host.style.display='block';
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__wsDlg_1",_EV,_EL)}">
     <div class="modal-box ws-dlg" role="dialog" aria-modal="true" aria-labelledby="ws-dlg-title">
-      <div class="ca-msg-head"><div class="modal-title" id="ws-dlg-title" style="margin:0">${esc(title)}</div><button type="button" class="ca-x" data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}">&times;</button></div>
+      <div class="ca-msg-head"><div class="modal-title ws-m0" id="ws-dlg-title">${esc(title)}</div><button type="button" class="ca-x" data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}">&times;</button></div>
       ${sub?`<div class="ca-msg-sub">${sub}</div>`:''}
       ${fields}
       <div id="ws-dlg-err" class="ws-err" role="alert"></div>
@@ -24756,7 +24765,7 @@ function _wsEdit(id){
     ${_wsWhenFields(cur?cur.date:'',cur?cur.time:'')}
     <div class="form-group"><label for="ws-p">${t('wsLblPrice')}</label><input type="number" id="ws-p" inputmode="decimal" min="0" max="100000" step="0.01" value="${esc(j.price_final==null?'':j.price_final)}"></div>
     <div class="form-group"><label for="ws-n">${t('wsLblStaffNotes')} <span class="label-hint">${t('wsNotesHint')}</span></label><textarea id="ws-n" rows="3" maxlength="1000">${esc(j.staff_notes||'')}</textarea></div>`,
-    `${isAdmin()?`<button type="button" class="btn-secondary ws-delete" data-on-click="${_on("_wsDelete",j.id)}">${t('wsDeleteBtn')}</button>`:''}<span style="flex:1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_wsEditSave",j.id)}">${t('saveBtn')}</button>`);
+    `${isAdmin()?`<button type="button" class="btn-secondary ws-delete" data-on-click="${_on("_wsDelete",j.id)}">${t('wsDeleteBtn')}</button>`:''}<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_wsEditSave",j.id)}">${t('saveBtn')}</button>`);
 }
 async function _wsEditSave(id){
   const j=_wsFind(id);if(!j)return;
@@ -24841,7 +24850,7 @@ function _wsMsgRender(){
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__wsMsgRender_1",_EV,_EL)}">
     <div class="modal-box ca-msg-box" role="dialog" aria-modal="true" aria-labelledby="ws-msg-title">
       <div class="ca-msg-head">
-        <div class="modal-title" id="ws-msg-title" style="margin:0">${esc(t('wsMsgTitle').replace('{0}',j.name||''))}</div>
+        <div class="modal-title ws-m0" id="ws-msg-title">${esc(t('wsMsgTitle').replace('{0}',j.name||''))}</div>
         <button type="button" class="ca-x" data-on-click="${_on("_wsMsgClose")}" aria-label="${t('closeBtn')}">&times;</button>
       </div>
       <div class="ca-msg-sub">${t('wsMsgSub')}</div>
@@ -24961,8 +24970,8 @@ function _smRow(m){
   }[m.status]||'';
   return`<div class="ca-row sm-row" data-sm-id="${esc(m.id)}" data-status="${esc(m.status)}">
     <div class="ca-head">
-      <div style="flex:1;min-width:0"><div class="ca-name"><bdi dir="ltr" class="ws-ref">${esc(_smRef(m))}</bdi> ${esc(m.name)}${m.company?` <span class="sm-company">· ${esc(m.company)}</span>`:''}</div><div class="ca-when">${when.join(' · ')}</div></div>
-      <span class="ca-status" style="color:${col}"><span class="ca-dot" style="background:${col}"></span>${esc(t(SM_STAGE_KEY[m.status]||'smStNew'))}</span>
+      <div class="ws-grow"><div class="ca-name"><bdi dir="ltr" class="ws-ref">${esc(_smRef(m))}</bdi> ${esc(m.name)}${m.company?` <span class="sm-company">· ${esc(m.company)}</span>`:''}</div><div class="ca-when">${when.join(' · ')}</div></div>
+      <span class="ca-status ${WS_ST_CLS[col][0]}"><span class="ca-dot ${WS_ST_CLS[col][1]}"></span>${esc(t(SM_STAGE_KEY[m.status]||'smStNew'))}</span>
     </div>
     <div class="sm-text" dir="auto">${esc(m.message)}</div>
     <div class="ca-grid">
@@ -24997,9 +25006,9 @@ function renderMessages(listOnly){
   if(!W.rows){
     let body;
     if(W.missing)body=`<div class="empty-state sm-not-set-up">${t('smNotSetUp')}</div>`;
-    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('smLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary sm-retry" data-on-click="${_on("_on_renderMessages_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('smLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary sm-retry" data-on-click="${_on("_on_renderMessages_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
     else{if(!W.busy)_smLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section" style="margin-top:0">${head}${body}</div>`;
+    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_smLoad(); // a minute old: read again, the list stays meanwhile
@@ -25007,7 +25016,7 @@ function renderMessages(listOnly){
   const n=k=>k==='all'?inKind.length:inKind.filter(m=>m.status===k).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" data-sm-filter="${k}" data-on-click="${_on("_smSetFilter",k)}">${label} (${n(k)})</button>`;
   const kindSel=`<select id="sm-kind" class="filter-select" data-on-change="${_on("_smSetKind",_P("value"))}">${[['all',t('filterAll')],...Object.entries(SM_KIND_KEY).map(([k,key])=>[k,t(key)])].map(([v,l])=>`<option value="${v}"${W.kind===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
-  el.innerHTML=`<div class="form-section" style="margin-top:0">${head}
+  el.innerHTML=`<div class="form-section ws-mt0">${head}
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('sm',W.q)}" data-srch="sm">${_artIcon('search',13)}
         <input id="sm-search-input" class="search-input" aria-label="${esc(t('smSearch'))}" placeholder="${esc(t('smSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_smSearch",_P("value"))}">
@@ -25071,7 +25080,7 @@ function _smReplyRender(){
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__smReplyRender_1",_EV,_EL)}">
     <div class="modal-box ca-msg-box" role="dialog" aria-modal="true" aria-labelledby="sm-reply-title">
       <div class="ca-msg-head">
-        <div class="modal-title" id="sm-reply-title" style="margin:0">${esc(t('smReplyTitle').replace('{0}',m.name||''))}</div>
+        <div class="modal-title ws-m0" id="sm-reply-title">${esc(t('smReplyTitle').replace('{0}',m.name||''))}</div>
         <button type="button" class="ca-x" data-on-click="${_on("_smReplyClose")}" aria-label="${t('closeBtn')}">&times;</button>
       </div>
       <div class="ca-msg-sub">${t('smReplySub')}</div>
@@ -25113,7 +25122,7 @@ function _smNotes(id){
   const m=_smFind(id);if(!m)return;
   _wsDlg(t('smNotesTitle').replace('{0}',_smRef(m)),`${esc(m.name)}${m.company?' · '+esc(m.company):''}`,
     `<div class="form-group"><label for="sm-n">${t('wsLblStaffNotes')} <span class="label-hint">${t('wsNotesHint')}</span></label><textarea id="sm-n" rows="4" maxlength="1000">${esc(m.staff_notes||'')}</textarea></div>`,
-    `${isAdmin()?`<button type="button" class="btn-secondary sm-delete" data-on-click="${_on("_smDelete",m.id)}">${t('smDeleteBtn')}</button>`:''}<span style="flex:1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_smNotesSave",m.id)}">${t('saveBtn')}</button>`);
+    `${isAdmin()?`<button type="button" class="btn-secondary sm-delete" data-on-click="${_on("_smDelete",m.id)}">${t('smDeleteBtn')}</button>`:''}<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_smNotesSave",m.id)}">${t('saveBtn')}</button>`);
 }
 async function _smNotesSave(id){
   const m=_smFind(id);if(!m)return;
@@ -25237,8 +25246,8 @@ function _ambRow(a){
   const pts=st?`${esc(t('amPts').replace('{0}',st.balance))}`:'';
   return`<div class="ca-row amb-row" data-amb-id="${esc(a.id)}" data-status="${esc(a.status)}">
     <div class="ca-head">
-      <div style="flex:1;min-width:0"><div class="ca-name">${a.code?`<bdi dir="ltr" class="ws-ref">${esc(a.code)}</bdi> `:''}${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
-      <span class="ca-status" style="color:${col}"><span class="ca-dot" style="background:${col}"></span>${esc(t(AMB_STAGE_KEY[a.status]||'amStPending'))}</span>
+      <div class="ws-grow"><div class="ca-name">${a.code?`<bdi dir="ltr" class="ws-ref">${esc(a.code)}</bdi> `:''}${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
+      <span class="ca-status ${WS_ST_CLS[col][0]}"><span class="ca-dot ${WS_ST_CLS[col][1]}"></span>${esc(t(AMB_STAGE_KEY[a.status]||'amStPending'))}</span>
     </div>
     ${a.why?`<div class="sm-text" dir="auto">${esc(a.why)}</div>`:''}
     <div class="ca-grid">
@@ -25277,15 +25286,15 @@ function renderAmbassadors(listOnly){
   if(!W.rows){
     let body;
     if(W.missing)body=`<div class="empty-state amb-not-set-up">${t('amNotSetUp')}</div>`;
-    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('amLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary amb-retry" data-on-click="${_on("_on_renderAmbassadors_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('amLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary amb-retry" data-on-click="${_on("_on_renderAmbassadors_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
     else{if(!W.busy)_ambLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section" style="margin-top:0">${head}${body}</div>`;
+    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_ambLoad();
   const n=k=>k==='all'?W.rows.length:k==='rewards'?W.rows.filter(a=>_ambReds(a.id).some(r=>r.status==='requested')).length:W.rows.filter(a=>a.status===k).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" data-amb-filter="${k}" data-on-click="${_on("_ambSetFilter",k)}">${label} (${n(k)})</button>`;
-  el.innerHTML=`<div class="form-section" style="margin-top:0">${head}
+  el.innerHTML=`<div class="form-section ws-mt0">${head}
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('amb',W.q)}" data-srch="amb">${_artIcon('search',13)}
         <input id="amb-search-input" class="search-input" aria-label="${esc(t('amSearch'))}" placeholder="${esc(t('amSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_ambSearch",_P("value"))}">
@@ -25348,7 +25357,7 @@ function _ambNotes(id){
   const a=_ambFind(id);if(!a)return;
   _wsDlg(t('smNotesTitle').replace('{0}',a.name),'',
     `<div class="form-group"><label for="amb-n">${t('wsLblStaffNotes')} <span class="label-hint">${t('wsNotesHint')}</span></label><textarea id="amb-n" rows="4" maxlength="1000">${esc(a.staff_notes||'')}</textarea></div>`,
-    `<span style="flex:1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_ambNotesSave",a.id)}">${t('saveBtn')}</button>`);
+    `<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary ws-dlg-save" data-on-click="${_on("_ambNotesSave",a.id)}">${t('saveBtn')}</button>`);
 }
 async function _ambNotesSave(id){
   const a=_ambFind(id),W=_amb();if(!a||W.working)return;
@@ -25380,7 +25389,7 @@ function _ambMsgRender(){
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__ambMsgRender_1",_EV,_EL)}">
     <div class="modal-box ca-msg-box" role="dialog" aria-modal="true" aria-labelledby="amb-msg-title">
       <div class="ca-msg-head">
-        <div class="modal-title" id="amb-msg-title" style="margin:0">${esc(t('wsMsgTitle').replace('{0}',a.name||''))}</div>
+        <div class="modal-title ws-m0" id="amb-msg-title">${esc(t('wsMsgTitle').replace('{0}',a.name||''))}</div>
         <button type="button" class="ca-x" data-on-click="${_on("_ambMsgClose")}" aria-label="${t('closeBtn')}">&times;</button>
       </div>
       <div class="ca-msg-sub">${t('wsMsgSub')}</div>
@@ -27233,22 +27242,21 @@ function _on_renderTeamManager_2(event,el,a0){S._teamDraft[a0]=el.value}
 function renderTeamManager(){
   const m=document.getElementById('team-mgr-modal');if(!m)return;
   const draft=S._teamDraft||[];
-  const _inp='padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%';
   m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop" style="z-index:260" data-on-click="${_on("_on_renderTeamManager_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:400px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="modal-title" style="margin-bottom:0">${t('teamMgrTitle')}</div>
-        <button data-on-click="${_on("closeTeamManager")}" aria-label="${t('cancelBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1">&times;</button>
+  m.innerHTML=`<div class="modal-backdrop tm-z260" data-on-click="${_on("_on_renderTeamManager_1",_EV,_EL)}">
+    <div class="modal-box tm-w400" role="dialog" aria-modal="true">
+      <div class="tm-head">
+        <div class="modal-title tm-mb0">${t('teamMgrTitle')}</div>
+        <button data-on-click="${_on("closeTeamManager")}" aria-label="${t('cancelBtn')}" class="tm-x">&times;</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto">
-        ${draft.length?draft.map((n,i)=>`<div style="display:flex;gap:8px;align-items:center">
-          <input type="text" value="${esc(n)}" data-on-input="${_on("_on_renderTeamManager_2",_EV,_EL,i)}" placeholder="${t('teamCustomPrompt')}" style="${_inp}">
-          <button class="btn-sm btn-muted" data-on-click="${_on("_teamDel",i)}" aria-label="${t('removeBtn')}" style="flex-shrink:0">${t('removeBtn')}</button>
-        </div>`).join(''):`<div class="empty-state" style="padding:16px">${t('teamEmpty')}</div>`}
+      <div class="tm-list">
+        ${draft.length?draft.map((n,i)=>`<div class="tm-mrow">
+          <input type="text" value="${esc(n)}" data-on-input="${_on("_on_renderTeamManager_2",_EV,_EL,i)}" placeholder="${t('teamCustomPrompt')}" class="tm-in">
+          <button class="btn-sm btn-muted tm-noshrink" data-on-click="${_on("_teamDel",i)}" aria-label="${t('removeBtn')}">${t('removeBtn')}</button>
+        </div>`).join(''):`<div class="empty-state tm-p16">${t('teamEmpty')}</div>`}
       </div>
-      <button class="btn-secondary" style="width:100%;margin-top:10px" data-on-click="${_on("_teamAddRow")}">+ ${t('teamAddMember')}</button>
-      <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn-secondary" data-on-click="${_on("closeTeamManager")}">${t('cancelBtn')}</button><button class="btn-primary" data-on-click="${_on("saveTeamManager")}">${t('saveBtn')}</button></div>
+      <button class="btn-secondary tm-addrow" data-on-click="${_on("_teamAddRow")}">+ ${t('teamAddMember')}</button>
+      <div class="modal-footer tm-foot"><button class="btn-secondary" data-on-click="${_on("closeTeamManager")}">${t('cancelBtn')}</button><button class="btn-primary" data-on-click="${_on("saveTeamManager")}">${t('saveBtn')}</button></div>
     </div>
   </div>`;
 }

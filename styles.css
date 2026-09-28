@@ -1244,6 +1244,74 @@
     .view-toggle-btn.active{background:rgba(var(--green-rgb),.12);color:var(--green);}
     .confirm-box{background:var(--s2);border:1px solid rgba(var(--tint-rgb),.1);border-radius:6px;padding:24px;width:min(92vw,420px);animation:modalSlideUp .18s ease;}
 
+    /* ── The shared chrome without inline styles (2026-09-28, pass 2 of moving style="..." into
+       classes, so the policy can drop style-src 'unsafe-inline'): the markup in the page itself,
+       the top bar, the confirm and prompt dialogs, and the icons of _artIcon. Each rule is scoped
+       by the id the markup lives under, so it outranks every class rule as the inline style did.
+       A background:none that was written in a template is background:transparent none here: the
+       same value, but one that dist/styles.css keeps (clean-css shortens none to 0 0, which moves
+       background-position from 0% to 0px; the inline style in a template was never minified). */
+    /* A dialog host (data-host) is hidden until the script gives it a style of its own - at once,
+       display:none through the CSSOM, the first thing the app script does - so a page that has not
+       run it yet, or runs no script, draws them hidden as the style="display:none" did. */
+    [data-host]:not([style]){display:none;}
+    #static-intro{max-width:760px;margin:0 auto;padding:32px 20px;font-family:system-ui,sans-serif;line-height:1.7;}
+    #booth-popup-extra{margin-top:14px;font-size:12px;font-weight:700;color:var(--muted);line-height:1.6;background:rgba(var(--tint-rgb),.04);border-radius:4px;padding:10px 14px;text-align:left;}
+    /* background:0 0 is what the page carried: the build's minifier writes none as 0 0 (clean-css),
+       in the page's own markup and in dist/styles.css alike. */
+    #topbar .chrome-logo-btn{cursor:pointer;background:0 0;border:none;padding:0;}
+    /* Two ids: #topbar > div:last-child and body.view-staff #topbar > div also set the gap. */
+    #topbar#topbar > .chrome-tb-end{display:flex;align-items:center;gap:10px;}
+    #topbar .chrome-rides{display:inline-flex;align-items:center;justify-content:center;padding:7px 10px;}
+    #topbar .chrome-av-img{width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid rgba(var(--green-rgb),.4);}
+    #topbar .chrome-av{width:32px;height:32px;border-radius:50%;background:rgba(var(--green-rgb),.2);border:1px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--green);}
+    #topbar .chrome-av-txt{min-width:0;display:block;}
+    #topbar .chrome-pulse{animation:undoPulse 2s ease-in-out infinite;}
+    #confirm-modal .chrome-dh10{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+    #confirm-modal .chrome-dh12{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    #confirm-modal .chrome-dh18{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+    #confirm-modal .chrome-dt{font-size:18px;font-weight:900;}
+    #confirm-modal .chrome-x{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;}
+    #confirm-modal .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;transition:color .15s;}
+    #confirm-modal .chrome-dbody{font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:20px;padding:10px 14px;background:var(--s3);border-radius:4px;}
+    #confirm-modal .chrome-pbody{font-size:13px;color:var(--muted-l);font-weight:700;margin-bottom:12px;}
+    #confirm-modal .chrome-dact{display:flex;gap:8px;justify-content:flex-end;}
+    #confirm-modal .chrome-pact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+    #confirm-modal .chrome-mw100{min-width:100px;}
+    #confirm-modal .chrome-w100{width:100%;}
+    /* _artIcon's svg, in every section and on the customer pages. No one id holds them all, so the
+       two values are !important: like the inline style, they beat every rule that is not (and no
+       rule that sets either of them for an svg is). */
+    .art-ic{vertical-align:middle!important;flex-shrink:0!important;}
+    /* The report builders (showPrintReportOptions, showAccountReportOptions), drawn in #print-opts-modal. */
+    #print-opts-modal .rpt-w520{max-width:520px;}
+    #print-opts-modal .rpt-w640{max-width:640px;}
+    #print-opts-modal .rpt-sub{font-size:13px;color:var(--muted);margin-bottom:16px;}
+    #print-opts-modal .rpt-hint{font-size:11px;color:var(--muted);margin-bottom:6px;}
+    #print-opts-modal .rpt-lbl2{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;}
+    #print-opts-modal .rpt-lbl4{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+    #print-opts-modal .rpt-lbl6{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+    #print-opts-modal .rpt-grid2{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:14px;}
+    #print-opts-modal .rpt-grid2f{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px;}
+    #print-opts-modal .rpt-gridf2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px;margin-bottom:14px;}
+    #print-opts-modal .rpt-gridf8{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px;}
+    #print-opts-modal .rpt-gridc{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:2px 10px;margin-bottom:14px;}
+    #print-opts-modal .rpt-row{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border:none;background:transparent none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:600;color:var(--text);text-align:start;}
+    #print-opts-modal .rpt-row-b{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;background:transparent none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text);text-align:start;}
+    #print-opts-modal .rpt-row-c{display:flex;align-items:center;gap:9px;flex:1;min-width:0;padding:8px 10px;border:none;background:transparent none;border-radius:7px;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--text);text-align:start;}
+    #print-opts-modal .rpt-crow{display:flex;align-items:center;gap:6px;}
+    #print-opts-modal .rpt-ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #print-opts-modal .rpt-csel{width:104px;flex:none;}
+    #print-opts-modal .rpt-nat{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 14px;font-size:12px;font-weight:700;color:var(--muted);}
+    #print-opts-modal .rpt-auto{width:auto;flex:none;}
+    #print-opts-modal .rpt-fld{display:flex;flex-direction:column;gap:4px;}
+    #print-opts-modal .rpt-count{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px;}
+    #print-opts-modal .rpt-c-text{color:var(--text);}
+    #print-opts-modal .rpt-acts{display:flex;flex-direction:column;gap:10px;}
+    #print-opts-modal .rpt-pair{display:flex;gap:10px;}
+    #print-opts-modal .rpt-w100{width:100%;}
+    #print-opts-modal .rpt-flex1{flex:1;}
+
     .empty-state{text-align:center;padding:52px 24px;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:.1px;}
     .cashier-grid{display:grid;}
     @media(max-width:820px){.cashier-grid{grid-template-columns:1fr!important;}}
@@ -4658,6 +4726,22 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 .amb-red{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .amb-red small{color:var(--muted);font-weight:600}
 .amb-red-btns{display:inline-flex;gap:6px;margin-inline-start:auto}
+/* Workshop, Messages and Ambassadors without inline styles (2026-09-28, pass 2 of moving the
+   style="..." attributes into classes, so the policy can drop style-src 'unsafe-inline'). The three
+   lists share one card, so they share these; each rule is scoped by the section's id (or by
+   #confirm-modal for their dialogs) and so outranks every class rule, as the inline style did.
+   A stage colour is one of three (WS_ST_CLS in app.src.html): the word's ink and its dot. */
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-grow{flex:1;min-width:0;}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-mt0{margin-top:0;}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-mt10{margin-top:10px;}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-c-orange{color:var(--orange);}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-c-green{color:var(--green);}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-c-muted{color:var(--muted);}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-bg-orange{background:var(--orange);}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-bg-green{background:var(--green);}
+:is(#tab-workshop,#tab-messages,#tab-ambassadors) .ws-bg-muted{background:var(--muted);}
+#confirm-modal .ws-m0{margin:0;}
+#confirm-modal .ws-flex1{flex:1;}
 
 /* A temporary password must be replaced before anything else (_pwdMustShow). */
 #pwd-gate .auth-backdrop{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;z-index:9580;align-items:flex-start;padding:16px;overflow:auto}
@@ -5108,6 +5192,37 @@ body.view-staff .tm-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;min-width:0
 body.view-staff .tm-chip{min-height:34px;font-size:12px;}
 body.view-staff .tm-chip[disabled]{opacity:.55;cursor:default;}
 body.view-staff .tm-save{display:flex;justify-content:flex-end;}
+/* Team, the team roster, the staff sign-in and password change, and the operator gate without
+   inline styles (2026-09-28, pass 2 of moving style="..." into classes for the policy). Each rule is
+   scoped by the id of the section or dialog host the markup is drawn into, so it outranks every
+   class rule (the body.view-staff layer included), exactly as the inline style did. */
+#tab-team .tm-mt0{margin-top:0;}
+#team-mgr-modal .tm-z260{z-index:260;}
+#team-mgr-modal .tm-w400{max-width:400px;}
+#team-mgr-modal .tm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+#team-mgr-modal .tm-mb0{margin-bottom:0;}
+#team-mgr-modal .tm-x{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;}
+#team-mgr-modal .tm-list{display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;}
+#team-mgr-modal .tm-mrow{display:flex;gap:8px;align-items:center;}
+#team-mgr-modal .tm-in{padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%;}
+#team-mgr-modal .tm-noshrink{flex-shrink:0;}
+#team-mgr-modal .tm-p16{padding:16px;}
+#team-mgr-modal .tm-addrow{width:100%;margin-top:10px;}
+#team-mgr-modal .tm-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:12px;}
+:is(#pin-modal,#staff-pwd-modal) .pin-hint{font-size:12px;color:var(--muted);font-weight:600;margin:-4px 0 14px;}
+:is(#pin-modal,#staff-pwd-modal) .pin-in8{width:100%;margin-bottom:8px;}
+:is(#pin-modal,#staff-pwd-modal) .pin-in10{width:100%;margin-bottom:10px;}
+:is(#pin-modal,#staff-pwd-modal) .pin-err{color:var(--red);font-size:12px;font-weight:700;min-height:16px;margin-bottom:6px;}
+:is(#pin-modal,#staff-pwd-modal) .pin-w100{width:100%;}
+#op-gate-modal .opg-z290{z-index:290;}
+#op-gate-modal .opg-w380{max-width:380px;}
+#op-gate-modal .opg-who{font-size:13px;color:var(--muted);margin:4px 0 10px;}
+#op-gate-modal .opg-sub{font-size:13px;color:var(--muted);margin:6px 0 14px;}
+#op-gate-modal .opg-back{width:100%;margin-top:10px;}
+#op-gate-modal .opg-cancel{width:100%;margin-top:8px;}
+#op-gate-modal .opg-mt10{margin-top:10px;}
+#op-gate-modal .opg-mb12{margin-bottom:12px;}
+#op-gate-modal .opg-w100{width:100%;}
 
 /* ── Dashboard (Claude Design #22) ── */
 body.view-staff .dash-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0 0 16px;}
