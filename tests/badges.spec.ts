@@ -184,12 +184,15 @@ test.describe('@customer:account badges', () => {
     await pop.getByRole('button', { name: 'Close' }).click();
 
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
-    await expect(chips).toHaveCount(11); // the two given, then the nine ride badges
+    await expect(chips).toHaveCount(15); // the two given, Race Ready, then the twelve ride badges always shown (the rest wait: a surprise, a tier, a season)
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
-    await expect(chips.nth(2)).toContainText('First Lap');
-    await expect(chips.nth(2)).not.toHaveClass(/locked/); // a done, paid ride
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(11);
+    await expect(chips.nth(2)).toContainText('Race Ready');
+    await expect(chips.nth(2)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
+    await expect(chips.nth(2)).toContainText('33%');
+    await expect(chips.nth(3)).toContainText('First Lap');
+    await expect(chips.nth(3)).not.toHaveClass(/locked/); // a done, paid ride
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(15);
     expect(EMOJI.test(await page.locator('#tab-account .mr-badges').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -205,10 +208,208 @@ test.describe('@customer:account badges', () => {
   test('a database without customer_my_badges still shows the ride badges', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
-    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(9);
+    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(13);
     await expect(page.locator('#badge-pop')).toHaveCount(0);
-    await page.locator('#tab-account .mr-badge').first().click();
+    await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
+    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('Every rider\'s story starts with one lap');
     await expect(page.locator('#badge-pop')).toContainText('Earned');
+  });
+});
+
+// The ride badges added 2026-09-29, read straight off _mrBadges with made-up rides dated from today.
+test.describe('@customer:account ride badges from the research', () => {
+  const setup = `(()=>{
+    const day=n=>new Date(Date.now()+n*864e5).toLocaleDateString('en-CA',{timeZone:'Asia/Riyadh'});
+    window.__ses=(id,d,kind)=>({id,session_date:d,day:'Friday',status:'closed',event_kind:kind&&kind!=='jcc'?'community':null,ride_kind:kind==='jcc'?null:kind});
+    window.__e=(sid,d,status,extra)=>Object.assign({id:sid+Math.random(),sessionId:sid,sessionDate:d,status:status||'done',paid:true,customerId:'c1',queueNum:5},extra||{});
+    window.__day=day;
+    window.__run=(entries,sessions,seasons)=>{S.sessions=sessions;const L=_mrBadges(entries,entries.filter(_rideCompleted),seasons||[]);return Object.fromEntries(L.map(r=>[r.s,{on:!!r.on,p:r.p||null,hide:!!r.hide}]));};
+  })()`;
+  type Got = Record<string, { on: boolean; p: string | null; hide: boolean }>;
+  const ev = (page: Page, expr: string) => page.evaluate(expr) as Promise<Got>;
+  async function page0(page: Page) {
+    await stubSupabase(page, { sessions: [], queue_entries: [] });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(setup);
+  }
+  const nights = (spec: [number, string, string?][]) => `(()=>{const S_=[],E=[];${JSON.stringify(spec)}.forEach(([n,kind,st],i)=>{const d=__day(n),id='s'+i;S_.push(__ses(id,d,kind));E.push(__e(id,d,st));});return [E,S_];})()`;
+
+  test('Back on Track is a surprise: hidden until a ride two months after the last', async ({ page }) => {
+    await page0(page);
+    const near = await ev(page, `(()=>{const[E,S_]=${nights([[-40, 'jcc'], [-10, 'jcc']])};return __run(E,S_);})()`);
+    expect(near.back_on_track).toEqual({ on: false, p: null, hide: true });
+    const back = await ev(page, `(()=>{const[E,S_]=${nights([[-100, 'jcc'], [-20, 'jcc']])};return __run(E,S_);})()`);
+    expect(back.back_on_track.on).toBe(true);
+  });
+
+  test('Safety Car forgives one quiet week in four; Hot Streak keeps a run that has ended', async ({ page }) => {
+    await page0(page);
+    // Five weeks with a quiet one inside: forgiven, but five is not six.
+    const five = await ev(page, `(()=>{const[E,S_]=${nights([[-28, 'jcc'], [-21, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
+    expect(five.safety_car).toEqual({ on: false, p: '5/6', hide: false });
+    // Six weeks, the fourth quiet: forgiven, so the run spans six.
+    const six = await ev(page, `(()=>{const[E,S_]=${nights([[-35, 'jcc'], [-28, 'jcc'], [-21, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
+    expect(six.safety_car.on).toBe(true);
+    const six2 = await ev(page, `(()=>{const[E,S_]=${nights([[-42, 'jcc'], [-35, 'jcc'], [-28, 'jcc'], [-14, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
+    expect(six2.safety_car.on).toBe(true);
+    expect(six2.endurance.hide).toBe(false); // the next tier shows once this one is earned
+    // Two quiet weeks inside four end it.
+    const broken = await ev(page, `(()=>{const[E,S_]=${nights([[-49, 'jcc'], [-42, 'jcc'], [-28, 'jcc'], [-14, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
+    expect(broken.safety_car.on).toBe(false);
+    expect(broken.endurance.hide).toBe(true);
+    // Three weeks running, half a year ago and nothing since: Hot Streak stays earned.
+    const old = await ev(page, `(()=>{const[E,S_]=${nights([[-200, 'jcc'], [-193, 'jcc'], [-186, 'jcc']])};return __run(E,S_);})()`);
+    expect(old.streak.on).toBe(true);
+    expect(old.streak.p).toBe('0/3');
+  });
+
+  test('Triple Crown, Slipstream and its tiers, Works Team, counted in ride nights', async ({ page }) => {
+    await page0(page);
+    const r = await ev(page, `(()=>{const[E,S_]=${nights([[-60, 'jcc'], [-50, 'saturday'], [-43, 'saturday'], [-36, 'saturday'], [-29, 'saturday'], [-22, 'saturday'], [-15, 'petromin'], [-8, 'petromin']])};
+      E.push(__e('s1',__day(-50),'done'),__e('s1',__day(-50),'done'),__e('s1',__day(-50),'done')); // a party of four on one night
+      return __run(E,S_);})()`);
+    expect(r.triple_crown.on).toBe(true);
+    expect(r.slipstream).toEqual({ on: true, p: '5/5', hide: false });
+    expect(r.paceline).toEqual({ on: false, p: '5/15', hide: false });
+    expect(r.peloton.hide).toBe(true);
+    expect(r.works_team).toEqual({ on: false, p: '2/3', hide: false });
+    const none = await ev(page, `(()=>{const[E,S_]=${nights([[-10, 'jcc']])};return __run(E,S_);})()`);
+    expect(none.slipstream.hide).toBe(true);
+    expect(none.works_team.hide).toBe(true);
+    expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
+  });
+
+  test('Clean Sheet is ten nights in a row with no no-show, and stays earned', async ({ page }) => {
+    await page0(page);
+    const spec: [number, string, string?][] = [];
+    for (let i = 0; i < 10; i++) spec.push([-100 + i * 7, 'jcc']);
+    spec.push([-20, 'jcc', 'noshow'], [-10, 'jcc'], [-5, 'jcc', 'cancelled']);
+    const r = await ev(page, `(()=>{const[E,S_]=${nights(spec)};return __run(E,S_);})()`);
+    expect(r.clean_sheet).toEqual({ on: true, p: '1/10', hide: false });
+    const short = await ev(page, `(()=>{const[E,S_]=${nights([[-30, 'jcc'], [-20, 'jcc', 'noshow'], [-10, 'jcc']])};return __run(E,S_);})()`);
+    expect(short.clean_sheet.on).toBe(false);
+  });
+
+  test('a dated badge counts the nights inside one window, and shows only near its season', async ({ page }) => {
+    await page0(page);
+    const rule = (from: string, to: string, rides: number) => `{slug:'bd_cx',system:false,icon:'moon',color:'purple',name:'Late Loop',rule:{rides:${rides},windows:[{from:${from},to:${to}}]}}`;
+    const open = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc'], [-40, 'jcc']])};return __run(E,S_,[${rule("__day(-5)", "__day(5)", 2)}]);})()`);
+    expect(open.bd_cx).toEqual({ on: false, p: '1/2', hide: false });
+    const done = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc'], [-4, 'jcc']])};return __run(E,S_,[${rule("__day(-5)", "__day(5)", 2)}]);})()`);
+    expect(done.bd_cx.on).toBe(true);
+    const far = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc']])};return __run(E,S_,[${rule("__day(90)", "__day(99)", 1)}]);})()`);
+    expect(far.bd_cx.hide).toBe(true);
+    // Every year, across New Year: a ride on 3 January counts for the window 12-15 to 01-15.
+    const yearly = await page.evaluate(`(()=>{const y=+__day(0).slice(0,4)-1,d=y+'-01-03';S.sessions=[__ses('w',d,'jcc')];const E=[__e('w',d)];
+      const L=_mrBadges(E,E.filter(_rideCompleted),[{slug:'bd_cy',system:false,rule:{rides:1,windows:[{from:'12-15',to:'01-15'}]}}]);return L.find(r=>r.s==='bd_cy').on;})()`);
+    expect(yearly).toBe(true);
+  });
+
+  test('the rider sees a dated badge that is open, with its window in the popup', async ({ page }) => {
+    const now = new Date();
+    const d = (n: number) => new Date(now.getTime() + n * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
+    await stubSupabase(page, {
+      sessions, queue_entries: [row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true)],
+      'rpc:badge_seasons': [{ slug: 'bd_cloop', icon: 'moon', color: 'purple', name: 'Late Loop', description: 'Two late rides', system: false, rule: { rides: 2, windows: [{ from: d(-5), to: d(5) }] } }],
+    });
+    await loginCustomer(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+    const chip = page.locator('#tab-account .mr-badge', { hasText: 'Late Loop' });
+    await expect(chip).toContainText('1/2');
+    await expect(chip).toHaveClass(/locked/);
+    await chip.click();
+    await expect(page.locator('#badge-pop')).toContainText('On now, until');
+    await expect(page.locator('#badge-pop')).toContainText('Two late rides');
+  });
+});
+
+test.describe('@staff:community dated badges', () => {
+  const dated = [...badges, { id: 'bd_winter_series', slug: 'winter_series', icon: 'snow', color: 'blue', name: 'Winter Series', system: true, auto: true, retired: false, sort: 280, rule: { rides: 6, windows: [{ from: '12-01', to: '02-29' }] } }];
+  test('an admin moves a season\'s dates; a date that is not one is refused before any write', async ({ page }) => {
+    await staff(page, { badges: dated });
+    await community(page, 'badges');
+    const tab = page.locator('#tab-community');
+    const row = tab.locator('.bdg-row[data-badge="bd_winter_series"]');
+    await expect(row.locator('.bdg-dated')).toContainText('12-01 – 02-29');
+    await row.getByRole('button', { name: 'Edit' }).click();
+    const form = tab.locator('.bdg-form');
+    await expect(form.locator('.bdg-ico')).toHaveCount(0); // the app's own badge: its dates alone
+    await expect(form.locator('#bdg-f-name')).toHaveCount(0);
+    const sent = writes(page, 'badges');
+    await form.getByRole('button', { name: '+ Add dates' }).click();
+    await form.locator('#bdg-w-f-1').fill('2027-13-01');
+    await form.locator('#bdg-w-t-1').fill('2027-01-10');
+    await form.getByRole('button', { name: 'Save' }).click();
+    await expect(page.locator('.toast').last()).toContainText('Check the dates');
+    expect(sent.length).toBe(0);
+    await form.locator('#bdg-w-f-1').fill('11-20');
+    await form.locator('#bdg-w-t-1').fill('11-30');
+    await form.locator('#bdg-f-rides').fill('5');
+    await form.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].method()).toBe('PATCH');
+    expect(sent[0].postDataJSON()).toEqual({ rule: { rides: 5, windows: [{ from: '12-01', to: '02-29' }, { from: '11-20', to: '11-30' }] } });
+    await expect(row.locator('.bdg-dated')).toContainText('11-20 – 11-30');
+  });
+
+  test('an admin\'s own badge given dates is earned by riding', async ({ page }) => {
+    await staff(page);
+    await community(page, 'badges');
+    const tab = page.locator('#tab-community');
+    const made = writes(page, 'badges');
+    await tab.getByRole('button', { name: '+ New badge' }).click();
+    const form = tab.locator('.bdg-form');
+    await form.locator('#bdg-f-name').fill('National Day Ride');
+    await form.getByRole('button', { name: '+ Add dates' }).click();
+    await form.locator('#bdg-w-f-0').fill('2027-09-20');
+    await form.locator('#bdg-w-t-0').fill('2027-09-26');
+    await form.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => made.length).toBe(1);
+    expect(made[0].postDataJSON()).toMatchObject({ name: 'National Day Ride', auto: true, rule: { rides: 1, windows: [{ from: '2027-09-20', to: '2027-09-26' }] } });
+  });
+});
+
+test.describe('@customer:account Race Ready and the about lines', () => {
+  const full = { name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', height: 176, birth_date: '1995-04-02', country: 'Saudi Arabia', city: 'Jeddah', photo: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', type_preference: 'Road' };
+  async function rider(page: Page, cust: Record<string, unknown>) {
+    await stubSupabase(page, { sessions, queue_entries: [row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true)] });
+    await loginCustomer(page, cust);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+
+  test('a whole profile earns Race Ready: drawn special, and it pops up once', async ({ page }) => {
+    await rider(page, full);
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('New badge!');
+    await expect(pop).toContainText('Race Ready');
+    await expect(pop.locator('.badge-pop-box.special')).toHaveCount(1);
+    await expect(pop.locator('svg.bdg-sp')).toHaveCount(1);
+    await expect(pop.locator('.badge-pop-about')).toContainText('A complete profile helps us fit your bike');
+    await pop.getByRole('button', { name: 'Close' }).click();
+    const chip = page.locator('#tab-account .mr-badge', { hasText: 'Race Ready' });
+    await expect(chip).toHaveClass(/special/);
+    await expect(chip).not.toHaveClass(/locked/);
+    await expect(chip.locator('svg.bdg-sp linearGradient')).toHaveCount(1);
+    // Seen: a repaint does not pop it again.
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(200);
+    await expect(pop).toHaveCount(0);
+  });
+
+  test('every app badge explains itself, and Grid Regular says what the grid is', async ({ page }) => {
+    await rider(page, {});
+    await page.locator('#tab-account .mr-badge', { hasText: 'Grid Regular' }).click();
+    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('the grid is where the cars line up to start');
+    await expect(page.locator('#badge-pop .badge-pop-d')).toHaveText('Completed 5 rides');
+    // Every badge the app knows has a name, a how-to line and an about line (check-i18n holds the
+    // other nine languages to the same keys).
+    const missing = await page.evaluate(`Object.values(BD_SYS).flatMap(([,,k])=>[k,k+'D',k+'A']).filter(k=>!LANG.en[k])`);
+    expect(missing).toEqual([]);
   });
 });

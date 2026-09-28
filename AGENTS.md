@@ -263,6 +263,25 @@ into theirs counts) on the account page, given ones first; the newest pops up on
 (`_bdgCelebrate`, `cq_bdg_seen_<id>`). Without the tables the Badges button is hidden and the tab says
 so; without the function riders see the ride badges only. `tests/badges.spec.ts`.
 
+More ride badges (migration 20260929010000, the research shortlist): Back on Track (hidden until
+earned), Safety Car / Endurance (6 / 12 weeks, one quiet week in four forgiven, `_bdgRuns`), Triple
+Crown (three `_rideKind`s), Slipstream / Paceline / Peloton (5 / 15 / 30 `saturday` nights, each tier
+shown once the one before is earned), Clean Sheet (10 nights in a row with no no-show), Works Team
+(3 `petromin` nights) - counted in ride NIGHTS, not rows. Dated badges keep `badges.rule`
+`{rides, windows:[{from,to}]}` (YYYY-MM-DD once, MM-DD every year, may cross New Year; checked by
+`_badge_rule_ok`), edited in Community > Badges (the app's seasonal ones: dates only); riders read
+them through `badge_seasons()` and see one while its window is open or opens within 30 days
+(`_bdgSeason`). Winter Series, Ramadan Nights (Umm al-Qura windows to 2028 - move a day after the
+sighting) and Founding Day ship dated. A badge once earned stays: Hot Streak reads the best run.
+`list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
+their past members-only rides.
+Race Ready (`complete_profile`) is earned at 100% on the account page's profile meter (`_profPct`,
+shared with the meter) and drawn `special`: gold into green, an inner ring, a shine on the chip and a
+glow in the popup (`.bdg-sp`, `.mr-badge.special`; the table holds 'gold', `_bdgCol` maps app badges
+to the app's colour). It pops up once per device when first seen earned (`_bdgProfCheer`). Every app
+badge's popup has an about line under its name (`key+'A'`, `_bdgAbout`) saying what it means, above
+How to earn (`key+'D'`).
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
