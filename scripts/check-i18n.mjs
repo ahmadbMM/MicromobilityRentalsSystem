@@ -142,6 +142,7 @@ try {
 /** Keys built away from the t() call (a variable or a map filled by code holds the name). Regexes on the key. */
 const DYNAMIC_KEYS = [
   /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
+  /^bdg?[A-Z0-9]\w*D$/, // bdFirstLapD, bdgMarshalD, ...: a badge's how-to line, read as t(BD_SYS[slug][2]+'D')
 ];
 
 const used = new Map(); // key -> number of t('key') calls

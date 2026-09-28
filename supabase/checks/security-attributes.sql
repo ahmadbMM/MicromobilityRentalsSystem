@@ -51,6 +51,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_ride_news',     true,  'reads and sets the caller''s own ride-news consent; token-checked'),
   ('customer_consents',      true,  'reads and records the caller''s own privacy confirmation and ride-news answer; token-checked'),
   ('customer_deletion_request', true, 'reads, makes or withdraws the caller''s own deletion request; token-checked'),
+  ('customer_my_badges',    true,  'reads the caller''s own badges from customer_badges, which is staff-only; token-checked'),
   -- Invoker on purpose: pure logic, no privileged read.
   ('_name_chars_ok',         false, 'pure regex test, no read'),
   ('_name_parts_ok',         false, 'pure word-length test, no read'),

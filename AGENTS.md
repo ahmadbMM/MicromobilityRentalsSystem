@@ -236,6 +236,21 @@ two places: the Community grant dialog shows the warning, and `_caApprove` adds 
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
 
+## Badges staff give (2026-09-29)
+
+Migration 20260929000000: `badges` (the catalogue) and `customer_badges` (who holds which, with a note
+the rider reads, the ride and who gave it), both staff-only; admins change the catalogue (RLS
+`is_admin()`), any staffer gives and takes back. A badge is DRAWN, never an emoji (the owner):
+`badges.icon` names a glyph in `BDG_GLYPH` and `color` one of `BDG_COLORS`; `_bdgMedal` puts it on
+the hexagon. `BD_SYS` maps the app's sixteen slugs to icon, colour and translation key (`t(key)` the
+name, `t(key+'D')` how it is earned); the first nine are also earned by riding (`_mrBadges`). Staff
+give from a rider's Badges button in Community > Accounts (`_bdgOpen`) or to everyone checked in on a
+ride from Community > Badges (`/community/badges`, `_commBadges`); take-back and delete ask on a second
+tap (`_bdgArm`). The rider reads theirs through `customer_my_badges` (token-checked; an account merged
+into theirs counts) on the account page, given ones first; the newest pops up once per device
+(`_bdgCelebrate`, `cq_bdg_seen_<id>`). Without the tables the Badges button is hidden and the tab says
+so; without the function riders see the ride badges only. `tests/badges.spec.ts`.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.

@@ -948,6 +948,50 @@
     .confirm-box .tag-ban-opt{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
     /* Inputs are appearance:none site-wide and the staff skin draws no checkbox of its own: ask for the native box. */
     .confirm-box .tag-ban-opt input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green);}
+    /* ── Badges staff give (2026-09-29): a rider's Badges dialog and Community > Badges. Scoped by the
+       id each is drawn under, so the body.view-staff layer does not restyle their buttons. ── */
+    #tab-community .am-bdg{display:inline-flex;line-height:0;}
+    #tab-community .am-bdg .bdg-m{width:22px;height:22px;}
+    .bdg-item{display:flex;align-items:center;gap:10px;}
+    .bdg-item>.bdg-m{width:36px;height:36px;}
+    .bdg-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
+    .bdg-txt b{font-size:13.5px;font-weight:800;}
+    .bdg-note{font-size:12px;font-style:italic;color:var(--text);overflow-wrap:anywhere;}
+    .bdg-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+    #confirm-modal .bdg-dlg{width:min(94vw,520px);max-height:88vh;overflow-y:auto;}
+    #confirm-modal .bdg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+    #confirm-modal .bdg-title{font-size:18px;font-weight:900;min-width:0;overflow-wrap:anywhere;}
+    #confirm-modal .bdg-x{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;}
+    #confirm-modal .bdg-list{display:flex;flex-direction:column;gap:10px;}
+    #confirm-modal .bdg-sec{margin:18px 0 10px;}
+    #confirm-modal .bdg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;}
+    #confirm-modal .bdg-pick{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:transparent none;color:var(--text);font:inherit;font-size:12.5px;font-weight:700;text-align:start;cursor:pointer;}
+    #confirm-modal .bdg-pick .bdg-m{width:28px;height:28px;}
+    #confirm-modal .bdg-pick.on{border-color:var(--green);background:rgba(var(--green-rgb),.1);}
+    #confirm-modal .bdg-desc{margin-top:10px;}
+    #confirm-modal .bdg-notef{margin:10px 0 0;}
+    #tab-community .bdg-sub{margin:0 0 12px;}
+    #tab-community .bdg-top{margin-bottom:10px;}
+    #tab-community .bdg-row{padding:10px 0;border-bottom:1px solid var(--border);}
+    #tab-community .bdg-row.retired>.bdg-item>.bdg-m,#tab-community .bdg-row.retired>.bdg-item>.bdg-txt{opacity:.55;}
+    #tab-community .bdg-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;flex-shrink:0;}
+    #tab-community .bdg-panel{margin:10px 0 0;margin-inline-start:46px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;display:flex;flex-direction:column;gap:10px;}
+    #tab-community .bdg-hold{display:flex;align-items:center;gap:10px;}
+    #tab-community .bdg-go{align-self:flex-start;}
+    #tab-community .bdg-form{margin:10px 0;}
+    #tab-community .bdg-preview{margin-bottom:10px;line-height:0;}
+    #tab-community .bdg-preview .bdg-m{width:64px;height:64px;}
+    #tab-community .bdg-icons,#tab-community .bdg-colors{display:flex;flex-wrap:wrap;gap:6px;}
+    #tab-community .bdg-ico{padding:3px;border:1px solid transparent;border-radius:6px;background:transparent none;cursor:pointer;line-height:0;}
+    #tab-community .bdg-ico .bdg-m{width:34px;height:34px;}
+    #tab-community .bdg-ico.on{border-color:var(--green);background:rgba(var(--green-rgb),.1);}
+    #tab-community .bdg-sw{width:30px;height:30px;padding:0;border-radius:50%;background:var(--bc);border:2px solid transparent;cursor:pointer;}
+    #tab-community .bdg-sw.on{border-color:var(--text);box-shadow:inset 0 0 0 2px var(--s1);}
+    @media(max-width:600px){
+      #tab-community .bdg-row>.bdg-item{flex-wrap:wrap;}
+      #tab-community .bdg-acts{width:100%;justify-content:flex-start;padding-inline-start:46px;}
+      #tab-community .bdg-panel{margin-inline-start:0;}
+    }
     
     .filter-select{
       height:34px;padding:0 28px 0 10px;
@@ -2520,15 +2564,26 @@
     .mr-tierbar i{display:block;height:100%;background:var(--green);transition:width .25s;}
     .mr-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
     .mr-badge{display:inline-flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:default;}
-    .mr-badge-ic{font-size:15px;line-height:1;}
+    .mr-badge .bdg-m{width:26px;height:26px;margin:-4px 0;}
+    .mr-badge.given{border-color:rgba(var(--green-rgb),.45);}
+    /* Badge medallion (2026-09-29): drawn glyph on a hexagon, one of eight colours. */
+    .bdg-m{width:26px;height:26px;flex:none;display:inline-block;vertical-align:middle;color:var(--bc,var(--green));}
+    .bdg-m .bdg-hex{fill:currentColor;fill-opacity:.16;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;}
+    .bdg-m g{fill:currentColor;}
+    .bdg-m .o{opacity:.4;}
+    .bdg-m .s{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .bdc-green{--bc:var(--green);}.bdc-gold{--bc:#e0a414;}.bdc-blue{--bc:#3d8bfd;}.bdc-red{--bc:#f0525f;}
+    .bdc-purple{--bc:#9d6cff;}.bdc-orange{--bc:#f98a3c;}.bdc-teal{--bc:#17b4ac;}.bdc-silver{--bc:#98a2b3;}
+    .bdg-m.locked{opacity:.45;filter:grayscale(1);}
     .mr-badge.locked{opacity:.45;filter:grayscale(1);}
     .mr-badge-p{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
 
     /* ── Badge info card ── */
     .badge-pop{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s ease;}
     .badge-pop-box{background:var(--s1);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:7px;padding:26px 24px;width:min(92vw,320px);text-align:center;}
-    .badge-pop-ic{font-size:44px;line-height:1;margin-bottom:10px;}
-    .badge-pop-ic.locked{opacity:.45;filter:grayscale(1);}
+    .badge-pop-ic{width:84px;height:84px;display:block;margin:0 auto 12px;}
+    .badge-pop-new{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+    .badge-pop-note{margin-top:12px;padding:9px 11px;border-radius:4px;background:rgba(var(--tint-rgb),.06);font-size:13px;font-style:italic;color:var(--text);overflow-wrap:anywhere;}
     .badge-pop-nm{font-family:var(--font-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:22px;margin-bottom:12px;}
     .badge-pop-how{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
     .badge-pop-d{font-size:13.5px;font-weight:600;color:var(--text);}
