@@ -22396,7 +22396,21 @@ async function _bkPrivLoad(id){
     const orig={};Object.keys(BK_PRIV).forEach(k=>{const v=row[BK_PRIV[k]];orig[k]=v==null?'':String(v);});
     S._bkPriv={...orig,...was.typed,forId:id,orig,typed:was.typed};
   }
-  renderBikes();
+  _bkPrivPaint();
+}
+// The answer lands while staff may already be in the form: only the private box is redrawn - a
+// whole redraw would take the caret out of whatever field they are in - and, while the caret is
+// in the box itself, only the fields nobody has typed in are filled.
+function _bkPrivPaint(){
+  const box=document.querySelector('#bk-add-form .bk-priv');if(!box)return;
+  const act=document.activeElement,P=S._bkPriv||{};
+  if(!box.contains(act)){box.outerHTML=_bkPrivHtml(true);return;}
+  Object.keys(BK_PRIV).forEach(k=>{
+    if(P.typed&&k in P.typed)return;
+    const el=document.getElementById('bk-'+k);if(el&&el!==act)el.value=P[k]||'';
+  });
+  const note=box.querySelector('.bk-priv-note');
+  if(note)note.outerHTML=P.err?`<div class="bk-priv-note bk-priv-err" role="alert">${t('bkPrivLoadErr')}</div>`:'';
 }
 function _bkPrivSet(k,v){const P=S._bkPriv||(S._bkPriv={typed:{}});P[k]=v;(P.typed||(P.typed={}))[k]=v;}
 function _bkPrivHtml(isEdit){
