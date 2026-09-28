@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { generateKeyPairSync, createVerify } from 'node:crypto';
 import { unzipSync, strFromU8 } from 'fflate';
 
 // The Pages Functions never run under the suite's test server (python -m http.server), so a
@@ -234,6 +235,83 @@ test.describe('the Apple Wallet pass', () => {
     expect((await get({ request: new Request('https://site.test/api/wallet-pass'), env })).status).toBe(405); // a plain GET is not a pass
     const off = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env: {} });
     expect(off.status).toBe(501); // unconfigured says so
+  });
+});
+
+test.describe('the Google Wallet pass', () => {
+  // A throwaway service-account key, made fresh for each run; the signature is checked with its
+  // public half. In production the key comes from the JSON file Google Cloud downloads, pasted whole
+  // as GOOGLE_WALLET_SA_JSON, or as its two fields.
+  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs8', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } });
+  const EMAIL = 'wallet@mm-test.iam.gserviceaccount.com';
+  const keyFile = JSON.stringify({ type: 'service_account', project_id: 'mm-test', private_key_id: 'k1', private_key: privateKey, client_email: EMAIL });
+  const booking = { id: 'abcdef123456', session_id: 's1', session_date: '2026-09-23', session_day: 'Wednesday', queue_num: 7, name: 'Rider', status: 'waiting', approval: null as string | null, type_preference: 'Road' };
+  const circuit = { id: 's1', event_kind: 'rental', ride_kind: null, bike_slots: JSON.stringify({ _time: '21:00 - 23:00' }), needs_approval: false };
+  const realFetch = globalThis.fetch;
+  test.afterEach(() => { globalThis.fetch = realFetch; });
+
+  const part = (s: string) => JSON.parse(Buffer.from(s, 'base64url').toString('utf8'));
+  function verified(jwt: string) {
+    const [h, p, sig] = jwt.split('.');
+    const ok = createVerify('RSA-SHA256').update(`${h}.${p}`).verify(publicKey, Buffer.from(sig, 'base64url'));
+    return { ok, header: part(h), payload: part(p) };
+  }
+  async function selftest(env: Record<string, string>) {
+    const get = await load('functions/api/google-wallet.js', 'onRequestGet');
+    const res = await get({ request: new Request('https://site.test/api/google-wallet?selftest'), env });
+    return { status: res.status, body: await res.json() };
+  }
+
+  test('?selftest signs with the whole key file, or with its two fields, escaped line breaks and all', async () => {
+    const whole = await selftest({ GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_JSON: keyFile });
+    expect(whole.status).toBe(200);
+    expect(whole.body).toMatchObject({ ok: true, issuer: '3388000000000000001', account: EMAIL });
+    // the key as it reads inside the file: one line with \n in it, even with its quotes
+    const escaped = JSON.stringify(privateKey);
+    for (const pem of [privateKey, escaped, escaped.slice(1, -1)]) {
+      const r = await selftest({ GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_EMAIL: EMAIL, GOOGLE_WALLET_SA_KEY_PEM: pem });
+      expect(r.body).toMatchObject({ ok: true, account: EMAIL });
+    }
+  });
+
+  test('?selftest names what is missing, and a broken key says so without the key', async () => {
+    const none = await selftest({});
+    expect(none.status).toBe(501);
+    expect(none.body.missing).toEqual(['GOOGLE_WALLET_ISSUER_ID', 'GOOGLE_WALLET_SA_JSON (or GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM)']);
+    const noIssuer = await selftest({ GOOGLE_WALLET_SA_JSON: keyFile });
+    expect(noIssuer.body.missing).toEqual(['GOOGLE_WALLET_ISSUER_ID']);
+    const notAFile = await selftest({ GOOGLE_WALLET_ISSUER_ID: '1', GOOGLE_WALLET_SA_JSON: 'not json' });
+    expect(notAFile.body.missing).toEqual(['GOOGLE_WALLET_SA_JSON (client_email and private_key)']);
+    const bad = await selftest({ GOOGLE_WALLET_ISSUER_ID: '1', GOOGLE_WALLET_SA_EMAIL: EMAIL, GOOGLE_WALLET_SA_KEY_PEM: '-----BEGIN PRIVATE KEY-----\nAAAA\n-----END PRIVATE KEY-----' });
+    expect(bad.status).toBe(500);
+    expect(JSON.stringify(bad.body)).not.toContain('AAAA');
+  });
+
+  test('a booking becomes a signed save link carrying its ticket', async () => {
+    globalThis.fetch = (async (u: string | URL | Request) => {
+      const url = String(u);
+      if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([booking, { ...booking, id: 'mate01', queue_num: 8, name: 'Mate' }]));
+      if (url.includes('/rpc/list_sessions')) return new Response(JSON.stringify([circuit]));
+      return new Response('', { status: 404 });
+    }) as typeof fetch;
+    const post = await load('functions/api/google-wallet.js', 'onRequestPost');
+    const res = await post({
+      request: new Request('https://site.test/api/google-wallet', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: booking.id, groupIds: [booking.id, 'mate01'] }) }),
+      env: { GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_JSON: keyFile, SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+    });
+    expect(res.status).toBe(200);
+    const { url } = await res.json();
+    expect(url).toMatch(/^https:\/\/pay\.google\.com\/gp\/v\/save\//);
+    const jwt = verified(url.split('/save/')[1]);
+    expect(jwt.ok).toBe(true);
+    expect(jwt.header).toMatchObject({ alg: 'RS256', typ: 'JWT' });
+    expect(jwt.payload).toMatchObject({ iss: EMAIL, aud: 'google', typ: 'savetowallet', origins: ['https://site.test'] });
+    const obj = jwt.payload.payload.genericObjects[0];
+    expect(obj.id).toBe('3388000000000000001.mm_abcdef123456');
+    expect(obj.classId).toBe('3388000000000000001.mm_ride');
+    expect(obj.barcode).toMatchObject({ type: 'QR_CODE', value: 'MMC-7-abcdef' });
+    expect(obj.textModulesData.find((m: { id: string }) => m.id === 'riders')).toMatchObject({ header: 'Riders (2)', body: 'Rider, Mate' });
+    expect(obj.logo.sourceUri.uri).toBe('https://site.test/logo.png');
   });
 });
 

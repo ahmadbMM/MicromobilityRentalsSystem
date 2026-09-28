@@ -6,9 +6,11 @@
 // carries the class and the object inline - Google creates both on save, so no REST call and no
 // pre-made class are needed. The QR carries the same MMC- reference the desk scanner reads.
 // GET /api/google-wallet?selftest signs a fixed payload and names the issuer, so a deploy is checked
-// without a booking. Configuration (Pages env): GOOGLE_WALLET_ISSUER_ID, GOOGLE_WALLET_SA_EMAIL,
-// GOOGLE_WALLET_SA_KEY_PEM (the service account's PKCS#8 private key), optional SUPABASE_URL,
-// SUPABASE_ANON_KEY (required). Without them the function answers 501 and the app hides its button.
+// without a booking. Configuration (Pages env): GOOGLE_WALLET_ISSUER_ID, and the service account as
+// either GOOGLE_WALLET_SA_JSON (the key file Google Cloud downloads, pasted whole) or
+// GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM (its client_email and PKCS#8 private_key; the key
+// may keep the file's escaped "\n" line breaks); optional SUPABASE_URL, SUPABASE_ANON_KEY (required).
+// Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://amyqxovbnlreassrqihr.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
 const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", event: "Event" };
@@ -16,7 +18,21 @@ const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday So
 function json(o, status = 200) {
   return new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 }
-function configured(env) { return !!(env.GOOGLE_WALLET_ISSUER_ID && env.GOOGLE_WALLET_SA_EMAIL && env.GOOGLE_WALLET_SA_KEY_PEM); }
+// The service account: the two separate settings win; otherwise they are read out of the key file.
+function account(env) {
+  let email = env.GOOGLE_WALLET_SA_EMAIL, pem = env.GOOGLE_WALLET_SA_KEY_PEM;
+  if ((!email || !pem) && env.GOOGLE_WALLET_SA_JSON) {
+    try { const j = JSON.parse(env.GOOGLE_WALLET_SA_JSON); email = email || j.client_email; pem = pem || j.private_key; } catch { /* not the key file */ }
+  }
+  return { email: email ? String(email).trim() : "", pem: pem || "" };
+}
+function configured(env) { const a = account(env); return !!(env.GOOGLE_WALLET_ISSUER_ID && a.email && a.pem); }
+function missing(env) {
+  const a = account(env), out = [];
+  if (!env.GOOGLE_WALLET_ISSUER_ID) out.push("GOOGLE_WALLET_ISSUER_ID");
+  if (!a.email || !a.pem) out.push(env.GOOGLE_WALLET_SA_JSON ? "GOOGLE_WALLET_SA_JSON (client_email and private_key)" : "GOOGLE_WALLET_SA_JSON (or GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM)");
+  return out;
+}
 function b64url(bytes) {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
@@ -24,12 +40,13 @@ function b64url(bytes) {
 }
 const enc = (o) => b64url(new TextEncoder().encode(JSON.stringify(o)));
 async function importKey(pem) {
-  const body = String(pem || "").replace(/-----(BEGIN|END)[A-Z ]*-----/g, "").replace(/\s+/g, "");
+  // A key copied out of the JSON file keeps its escaped line breaks ("\n") and maybe its quotes.
+  const body = String(pem || "").replace(/\\n/g, "\n").replace(/^\s*"|"\s*$/g, "").replace(/-----(BEGIN|END)[A-Z ]*-----/g, "").replace(/\s+/g, "");
   const der = Uint8Array.from(atob(body), (c) => c.charCodeAt(0));
   return crypto.subtle.importKey("pkcs8", der, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
 }
 async function signJwt(env, payload) {
-  const key = await importKey(env.GOOGLE_WALLET_SA_KEY_PEM);
+  const key = await importKey(account(env).pem);
   const data = `${enc({ alg: "RS256", typ: "JWT" })}.${enc(payload)}`;
   const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(data));
   return `${data}.${b64url(new Uint8Array(sig))}`;
@@ -121,7 +138,7 @@ export async function onRequestPost(context) {
   const origin = new URL(request.url).origin;
   try {
     const now = Math.floor(Date.now() / 1000);
-    const jwt = await signJwt(env, { iss: env.GOOGLE_WALLET_SA_EMAIL, aud: "google", typ: "savetowallet", iat: now, origins: [origin], payload: passPayload(env, b, group, sess, approvalRide, origin) });
+    const jwt = await signJwt(env, { iss: account(env).email, aud: "google", typ: "savetowallet", iat: now, origins: [origin], payload: passPayload(env, b, group, sess, approvalRide, origin) });
     return json({ ok: true, url: SAVE_URL + jwt });
   } catch (e) {
     console.error("google-wallet: sign failed", (e && e.stack) || e);
@@ -132,10 +149,10 @@ export async function onRequestPost(context) {
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
-  if (!configured(env)) return json({ ok: false, skipped: "google wallet not configured", missing: ["GOOGLE_WALLET_ISSUER_ID", "GOOGLE_WALLET_SA_EMAIL", "GOOGLE_WALLET_SA_KEY_PEM"].filter((k) => !env[k]) }, 501);
+  if (!configured(env)) return json({ ok: false, skipped: "google wallet not configured", missing: missing(env) }, 501);
   try {
-    const jwt = await signJwt(env, { iss: env.GOOGLE_WALLET_SA_EMAIL, aud: "google", typ: "savetowallet", iat: Math.floor(Date.now() / 1000), payload: { genericObjects: [] } });
-    return json({ ok: true, issuer: env.GOOGLE_WALLET_ISSUER_ID, account: env.GOOGLE_WALLET_SA_EMAIL, jwtLength: jwt.length });
+    const jwt = await signJwt(env, { iss: account(env).email, aud: "google", typ: "savetowallet", iat: Math.floor(Date.now() / 1000), payload: { genericObjects: [] } });
+    return json({ ok: true, issuer: env.GOOGLE_WALLET_ISSUER_ID, account: account(env).email, jwtLength: jwt.length });
   } catch (e) {
     console.error("google-wallet: selftest failed", (e && e.stack) || e);
     return json({ ok: false, error: "sign failed: " + String((e && e.message) || e) }, 500);
