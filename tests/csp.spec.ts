@@ -126,6 +126,21 @@ test('a staffer trips nothing: every section and sub-view by its address, the ro
   expect(await violations(page)).toEqual([]);
 });
 
+test('the receipt\'s Print button stays off the paper, and the report\'s does too', async ({ page }) => {
+  // Both windows' looks live in their own sheets (a strict style-src refuses <style> and style= in a
+  // window the page writes). The receipt's button rule outranked its print rule and printed on the slip.
+  await page.goto('/404.html');
+  await page.setContent('<link rel="stylesheet" href="/receipt.css"><button class="rcpt-print rp-rbtn">Print</button>', { waitUntil: 'load' });
+  await expect(page.locator('button')).toBeVisible();
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('button')).toBeHidden();
+  await page.emulateMedia({ media: 'screen' });
+  await page.setContent('<link rel="stylesheet" href="/report.css"><button class="rep-print">Print</button>', { waitUntil: 'load' });
+  await expect(page.locator('button')).toBeVisible();
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('button')).toBeHidden();
+});
+
 test('the dispatcher: one call with the element and its value, several calls in a row, stopPropagation, no eval', async ({ page }) => {
   await stubSupabase(page);
   await page.goto('/');

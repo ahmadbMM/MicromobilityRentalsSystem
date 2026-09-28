@@ -164,6 +164,12 @@ for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'REC
 const split = splitStaff(src, '/staff.js?v=__STAFF_V__');
 const staffMin = await terserMinify(split.staff, { compress: false, mangle: { toplevel: false }, format: { comments: false } });
 if (!staffMin.code) throw new Error('build: staff.js did not minify');
+// fonts.css is asked for with its own hash (see below, for index.html); the print windows that link
+// it (the reports and the till's receipt) are drawn by the staff half, so staff.js is stamped here,
+// before its own hash is taken.
+const fontsHash = createHash('sha256').update(await readFile(new URL('../fonts/fonts.css', import.meta.url))).digest('hex').slice(0, 10);
+staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
+if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(staffMin.code)) throw new Error('build: a fonts.css reference in staff.js was left without its hash');
 const staffHash = createHash('sha256').update(staffMin.code).digest('hex').slice(0, 10);
 src = split.html.replace('/staff.js?v=__STAFF_V__', `/staff.js?v=${staffHash}`);
 await writeFile(new URL('../staff.js', import.meta.url), staffMin.code);
@@ -210,7 +216,6 @@ if (out === beforeCss && /styles\.css\?v=/.test(beforeCss)) {
 // fonts.css the same way. Its ?v= was bumped by hand, and the print windows (receipt, day sheet,
 // billing report) asked for it with none: /fonts/ is cached as immutable for a year, so those
 // windows could keep an old copy that long. Every reference now carries the file's own hash.
-const fontsHash = createHash('sha256').update(await readFile(new URL('../fonts/fonts.css', import.meta.url))).digest('hex').slice(0, 10);
 out = out.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
 if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(out)) throw new Error('build: a fonts.css reference was left without its hash');
 

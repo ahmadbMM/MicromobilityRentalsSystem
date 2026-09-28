@@ -137,3 +137,13 @@ test.describe('@build build checks', () => {
     expect(() => checkSizeBudget(big, { SIZE_BUDGET_STAFF_KB: 'lots' })).toThrow(/SIZE_BUDGET_STAFF_KB/);
   });
 });
+
+test('every fonts.css the built halves ask for carries the file\'s hash: the print windows are drawn by staff.js', () => {
+  // /fonts/ is cached as immutable for a year, so a link without the hash could keep an old copy that
+  // long; the report and receipt windows' links live in the staff half, which the build once skipped.
+  for (const rel of ['index.html', 'staff.js']) {
+    const refs = read(rel).match(/fonts\/fonts\.css[^"'`\s)]*/g) || [];
+    expect(refs.length, rel).toBeGreaterThan(0);
+    for (const r of refs) expect(r, rel).toMatch(/^fonts\/fonts\.css\?v=[a-f0-9]{10}$/);
+  }
+});

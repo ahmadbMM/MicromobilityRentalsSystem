@@ -4,8 +4,8 @@
    Content-Security-Policy, which is dropping style-src 'unsafe-inline'. The page links this file by
    location.origin with its content hash (RECEIPT_CSS_V, stamped by scripts/build-html.mjs) and prints
    once it has loaded. The rp- rules are :root-scoped (0,2,0) so that, like the style attributes they
-   replace, they outrank td and button: the Print button's display:block outranks the print rule's
-   display:none, as its style attribute did, so the button prints with the slip, as it always has. */
+   replace, they outrank td and button; the Print button's own print rule sits after its rule, at
+   the same weight, so it stays off the paper (its style attribute used to print it on the slip). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{font-family:'Barlow',system-ui,sans-serif;color:#111512;padding:14px;max-width:320px;margin:0 auto;font-size:13px}
 [dir="rtl"] body{font-family:'IBM Plex Sans Arabic','Barlow',system-ui,sans-serif} /* Arabic and Urdu */
@@ -23,3 +23,4 @@ td{padding:6px 5px;border-bottom:1px dashed #cfd6c9;text-align:start;font-weight
 :root .rp-tc{text-align:center}
 :root .rp-te{text-align:end}
 :root .rp-rbtn{display:block;margin:0 auto;padding:8px 20px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-family:inherit}
+@media print{:root .rp-rbtn{display:none}}
