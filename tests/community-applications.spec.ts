@@ -22,7 +22,7 @@ const apps = [
   { ...base, id: 'a3', status: 'rejected', name: 'Old Applicant', email: 'old.applicant@gmail.com', phone: '+966553579024', instagram: 'old.a', linkedin: 'old-a', bike_type: 'Mountain', decided_at: '2026-09-20T08:00:00Z', decided_by: 'Desk B' },
 ];
 
-async function applicationsTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<void>) {
+async function applicationsTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<unknown>) {
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], community_applications: apps, ...extra });
   if (routes) await routes(); // after the stub, so they are asked first
   await unlockStaff(page);
