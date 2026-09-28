@@ -6196,19 +6196,19 @@ function showCommMembersModal(){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop cm-backdrop" data-on-click="${_on("_on_showCommMembersModal_1",_EV,_EL)}">
     <div class="confirm-box cm-box" role="dialog" aria-modal="true">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(74,168,248,.12);border:1px solid rgba(74,168,248,.4);color:#4aa8f8;flex-shrink:0">${lock}</span>
-          <div style="min-width:0">
-            <div style="font-size:18px;font-weight:900">${t('commMembersTitle')}</div>
+      <div class="chrome-dh10">
+        <div class="cmy-cm-head">
+          <span class="cmy-cm-lock">${lock}</span>
+          <div class="cmy-minw0">
+            <div class="chrome-dt">${t('commMembersTitle')}</div>
           </div>
         </div>
-        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;transition:color .15s" data-on-mouseover="${_on("_on_showCommMembersModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCommMembersModal_3",_EV,_EL)}">&times;</button>
+        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" class="chrome-xt" data-on-mouseover="${_on("_on_showCommMembersModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCommMembersModal_3",_EV,_EL)}">&times;</button>
       </div>
-      <div style="font-size:14px;color:var(--muted-l);font-weight:700;line-height:1.6;margin-bottom:20px;padding:10px 14px;background:var(--s3);border-radius:4px">${t('commMembersMsg')}</div>
+      <div class="cmy-cm-msg">${t('commMembersMsg')}</div>
       <div class="cm-actions">
-        <a href="https://wa.me/966534423513" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp${t('opensNewTab')}" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#25d366">${wa} <bdi dir="ltr">+966 53 442 3513</bdi></a>
-        <a href="https://www.instagram.com/MicroMobilitySA/" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="display:inline-flex;align-items:center;gap:6px;text-decoration:none">${ig} ${t('commMembersIg')}</a>
+        <a href="https://wa.me/966534423513" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp${t('opensNewTab')}" class="btn-secondary cmy-cm-wa">${wa} <bdi dir="ltr">+966 53 442 3513</bdi></a>
+        <a href="https://www.instagram.com/MicroMobilitySA/" target="_blank" rel="noopener noreferrer" class="btn-secondary cmy-cm-ig">${ig} ${t('commMembersIg')}</a>
         <button class="btn-primary" data-on-click="${_on("closeConfirm")}">${t('commMembersOk')}</button>
       </div>
     </div>
@@ -6231,17 +6231,17 @@ function showRejectedModal(sess){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showRejectedModal_1",_EV,_EL)}">
     <div class="confirm-box" role="dialog" aria-modal="true" aria-labelledby="rej-title">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px">
-        <div style="min-width:0">
-          <div id="rej-title" style="font-size:18px;font-weight:900">${t('rejTitle')}</div>
+      <div class="cmy-rej-head">
+        <div class="cmy-minw0">
+          <div id="rej-title" class="chrome-dt">${t('rejTitle')}</div>
           ${sess?`<div class="ev-name ${_evClass(sess)}">${esc(_evName(sess))}</div>`:''}
         </div>
-        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">&times;</button>
+        <button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" class="chrome-x">&times;</button>
       </div>
-      <div style="font-size:14px;font-weight:600;line-height:1.65;color:var(--text)">${t('rejMsg')}</div>
-      <div style="font-size:14px;font-weight:800;line-height:1.65;margin-top:10px">${t('rejNext')}</div>
-      <div style="display:flex;justify-content:flex-end;margin-top:20px">
-        <button class="btn-primary" id="rej-ok" data-on-click="${_on("closeConfirm")}" style="min-width:110px">${t('rejOk')}</button>
+      <div class="cmy-rej-msg">${t('rejMsg')}</div>
+      <div class="cmy-rej-next">${t('rejNext')}</div>
+      <div class="cmy-rej-act">
+        <button class="btn-primary cmy-mw110" id="rej-ok" data-on-click="${_on("closeConfirm")}">${t('rejOk')}</button>
       </div>
     </div></div>`;
 }
@@ -6830,13 +6830,13 @@ function _commInfoHtml(sess){
   // Breakfast only - the meeting point lives in the card's action row (in place of
   // Get Directions). Label reads "Breakfast spot" with the venue's name beside it,
   // linking to its maps location exactly as staff pasted it.
-  const _b='class="btn-secondary" style="width:100%;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none"';
+  const _b='class="btn-secondary cmy-bf"';
   const cup='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>';
   const bn=(sess.breakfast_name||'').trim();
   const bu=_safeUrl(sess.breakfast_url);
-  const inner=`${cup}${t('breakfastSpotLbl')}${bn?`<bdi style="color:var(--text);font-weight:800">· ${esc(bn)}</bdi>`:''}`;
-  if(bu)return `<div style="margin-top:12px"><a href="${esc(bu)}" target="_blank" rel="noopener" ${_b} aria-label="${t('breakfastSpotLbl')}${t('opensNewTab')}">${inner}</a></div>`;
-  if(bn)return `<div style="margin-top:12px"><span ${_b}>${inner}</span></div>`;
+  const inner=`${cup}${t('breakfastSpotLbl')}${bn?`<bdi class="cmy-bf-name">· ${esc(bn)}</bdi>`:''}`;
+  if(bu)return `<div class="cmy-mt12"><a href="${esc(bu)}" target="_blank" rel="noopener" ${_b} aria-label="${t('breakfastSpotLbl')}${t('opensNewTab')}">${inner}</a></div>`;
+  if(bn)return `<div class="cmy-mt12"><span ${_b}>${inner}</span></div>`;
   return'';
 }
 function landHeroClick(){const c=getSession();if(!c){goCustomer('register');return;}selectEvent('jcc');}
@@ -13367,13 +13367,13 @@ function _caRows(){
   return list.map(c=>{
     const sel=S._caGroup?(S._caSelArr||[]).includes(c.id):S._caSel===c.id;
     const tagged=satTag&&(S.customerTags||[]).some(ct=>ct.customer_id===c.id&&ct.tag_id===satTag.id&&_tagActive(ct));
-    const contact=[c.email,c.phone].filter(Boolean).map(v=>'<bdi>'+esc(v)+'</bdi>').join(' <span style="opacity:.5">·</span> ');
-    return '<button type="button" data-on-click="'+(S._caGroup?_on('_caToggleSel',c.id):_on('_on_caPick',c.id))+'" style="width:100%;text-align:start;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:4px;border:1.5px solid '+(sel?'var(--green)':'var(--border)')+';background:'+(sel?'rgba(var(--green-rgb),.07)':'transparent')+';cursor:pointer;font-family:inherit;color:var(--text)">'
-      +'<div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(c.name||'—')+'</div>'
-      +(contact?'<div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+contact+'</div>':'')+'</div>'
-      +(tagged?'<span style="flex-shrink:0;font-size:9px;font-weight:900;color:var(--green);border:1px solid rgba(var(--green-rgb),.4);border-radius:2px;padding:1px 6px;text-transform:uppercase;letter-spacing:.4px">'+esc(satTag.name)+'</span>':'')
+    const contact=[c.email,c.phone].filter(Boolean).map(v=>'<bdi>'+esc(v)+'</bdi>').join(' <span class="cmy-sep">·</span> ');
+    return '<button type="button" data-on-click="'+(S._caGroup?_on('_caToggleSel',c.id):_on('_on_caPick',c.id))+'" class="cmy-ca-row '+(sel?'cmy-ca-on':'cmy-ca-off')+'">'
+      +'<div class="cmy-f1m0"><div class="cmy-ca-name">'+esc(c.name||'—')+'</div>'
+      +(contact?'<div class="cmy-ca-contact">'+contact+'</div>':'')+'</div>'
+      +(tagged?'<span class="cmy-ca-tag">'+esc(satTag.name)+'</span>':'')
       +'</button>';
-  }).join('')||'<div class="empty-state" style="padding:14px;font-size:12.5px">'+t('commAddNoMatch')+'</div>';
+  }).join('')||'<div class="empty-state cmy-ca-empty">'+t('commAddNoMatch')+'</div>';
 }
 function _caSearchInput(v){
   S._caSearch=v;
@@ -13392,34 +13392,34 @@ function renderCommAddModal(){
   const keep=document.getElementById('ca-search');const _q=keep?keep.value:(S._caSearch||'');S._caSearch=_q;
   m.style.display='flex';
   m.innerHTML='<div class="modal-backdrop" data-on-click="'+_on('_on_backdropOnly',_EV,_EL,'closeCommAddModal')+'">'
-    +'<div class="modal-box" role="dialog" aria-modal="true" style="max-width:460px">'
+    +'<div class="modal-box cmy-mw460" role="dialog" aria-modal="true">'
     +'<div class="modal-title">'+t('commAddTitle')+'</div>'
-    +'<div style="display:flex;gap:6px;margin-top:12px">'
-    +'<button type="button" class="toggle-btn'+(S._caGroup?'':' active')+'" style="flex:1" data-on-click="'+_on('_on_caGroup',false)+'">'+t('commAddRiderBtn')+'</button>'
-    +'<button type="button" class="toggle-btn'+(S._caGroup?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caGroup',true)+'">'+t('commAddGroupBtn')+'</button>'
+    +'<div class="cmy-ca-toggles">'
+    +'<button type="button" class="toggle-btn'+(S._caGroup?'':' active')+' cmy-f1" data-on-click="'+_on('_on_caGroup',false)+'">'+t('commAddRiderBtn')+'</button>'
+    +'<button type="button" class="toggle-btn'+(S._caGroup?' active':'')+' cmy-f1" data-on-click="'+_on('_on_caGroup',true)+'">'+t('commAddGroupBtn')+'</button>'
     +'</div>'
-    +(S._caGroup?'<div style="font-size:12px;color:var(--muted);margin-top:8px">'+t('commAddGroupHint')+'</div>':'')
-    +'<div class="form-group" style="margin:14px 0 10px"><label>'+t('colSession')+'</label>'
+    +(S._caGroup?'<div class="cmy-ca-hint">'+t('commAddGroupHint')+'</div>':'')
+    +'<div class="form-group cmy-fg-top"><label>'+t('colSession')+'</label>'
     +'<select data-on-change="'+_on('_on_caSess',_P('value'))+'">'+sess.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===S._caSess?' selected':'')+'>'+esc(dayLabel(s.day))+' '+esc(shortDate(s.session_date||s.id))+' · '+esc(_evName(s))+(s.status==='closed'?' ('+t('statusClosed')+')':'')+'</option>').join('')+'</select>'
-    +(cur?'<div style="font-size:11px;color:'+(left>0?'var(--muted)':'var(--orange)')+';margin-top:5px;font-weight:700">'+left+' '+t('spotsLeft')+'</div>':'')+'</div>'
+    +(cur?'<div class="'+(left>0?'cmy-ca-left':'cmy-ca-left0')+'">'+left+' '+t('spotsLeft')+'</div>':'')+'</div>'
     // On an approval ride the second destination is Waiting: the rider holds a place and a number
     // like any waiting rider and still awaits selection (approval pending). It used to be the
     // waitlist (owner, 2026-09-27). A ride without approval has one list, so no toggle.
-    +((cur&&_isApprovalRide(cur))?('<div class="form-group" style="margin-bottom:10px"><label>'+t('commAddDestLbl')+'</label>'
-    +'<div style="display:flex;gap:6px;margin-top:4px">'
-    +'<button type="button" class="toggle-btn'+(S._caDest!=='waiting'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','list')+'">'+t('commAddDestList')+'</button>'
-    +'<button type="button" class="toggle-btn'+(S._caDest==='waiting'?' active':'')+'" style="flex:1" data-on-click="'+_on('_on_caDest','waiting')+'">'+t('statusWaiting')+'</button>'
+    +((cur&&_isApprovalRide(cur))?('<div class="form-group cmy-mb10"><label>'+t('commAddDestLbl')+'</label>'
+    +'<div class="cmy-row6">'
+    +'<button type="button" class="toggle-btn'+(S._caDest!=='waiting'?' active':'')+' cmy-f1" data-on-click="'+_on('_on_caDest','list')+'">'+t('commAddDestList')+'</button>'
+    +'<button type="button" class="toggle-btn'+(S._caDest==='waiting'?' active':'')+' cmy-f1" data-on-click="'+_on('_on_caDest','waiting')+'">'+t('statusWaiting')+'</button>'
     +'</div></div>'):'')
-    +(_ownOk?('<label style="display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--green)">'
-    +'<input type="checkbox"'+(S._caOwn?' checked':'')+' data-on-change="'+_on('_on_caOwn',_P('checked'))+'" style="width:16px;height:16px;accent-color:#0c7a3d">'
+    +(_ownOk?('<label class="cmy-ca-own">'
+    +'<input type="checkbox"'+(S._caOwn?' checked':'')+' data-on-change="'+_on('_on_caOwn',_P('checked'))+'" class="cmy-ca-own-cb">'
     +t('commAddOwnBike')+'</label>'):'') // nobody brings their own bike to a pool session
-    +'<div class="form-group" style="margin-bottom:8px"><label for="ca-search">'+t('commAddSearchLbl')+'</label>'
+    +'<div class="form-group cmy-mb8"><label for="ca-search">'+t('commAddSearchLbl')+'</label>'
     +'<input id="ca-search" type="text" value="'+esc(_q)+'" placeholder="'+esc(t('commAddSearchPh'))+'" data-on-input="'+_on('_caSearchInput',_P('value'))+'" autocomplete="off"></div>'
-    +'<div id="ca-rows" style="display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto">'+_caRows()+'</div>'
+    +'<div id="ca-rows" class="cmy-ca-rows">'+_caRows()+'</div>'
     +'<div class="modal-footer">'
     +'<button class="btn-secondary" data-on-click="'+_on('closeCommAddModal')+'">'+t('cancelBtn')+'</button>'
     +(()=>{const nSel=(S._caSelArr||[]).length;const ok=S._caGroup?nSel>=2:!!S._caSel;
-      return '<button class="btn-primary" data-on-click="'+_on('saveCommAdd')+'"'+(ok?'':' disabled style="opacity:.5"')+'>+ '+(S._caGroup?t('commAddGroupBtn')+(nSel?' ('+nSel+')':''):t('commAddBtn'))+'</button>';})()
+      return '<button class="btn-primary'+(ok?'':' cmy-o50')+'" data-on-click="'+_on('saveCommAdd')+'"'+(ok?'':' disabled')+'>+ '+(S._caGroup?t('commAddGroupBtn')+(nSel?' ('+nSel+')':''):t('commAddBtn'))+'</button>';})()
     +'</div></div></div>';
   if(document.activeElement&&document.activeElement.id!=='ca-search'){const i=document.getElementById('ca-search');if(i&&S._caSearch)i.focus();}
 }
@@ -13487,26 +13487,26 @@ function showJccGroupModal(){
   if(!_jgOwn)S._jgRiders.forEach(r=>{if(r.type==='Own')r.type='Any';});
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showJccGroupModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:540px">
+    <div class="modal-box cmy-mw540" role="dialog" aria-modal="true">
       <div class="modal-title">${t('commAddGroupTitle')}</div>
-      <div class="form-group" style="margin:14px 0 10px"><label for="jg-name">${t('groupNameLabel')} *</label>
+      <div class="form-group cmy-fg-top"><label for="jg-name">${t('groupNameLabel')} *</label>
         <input id="jg-name" type="text" value="${esc(_g)}" maxlength="60" placeholder="${esc(t('groupNamePh'))}"></div>
-      <div style="display:flex;gap:10px">
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="jg-cname">${t('contactNameLabel')}</label><input id="jg-cname" type="text" value="${esc(_c)}" maxlength="60" placeholder="${esc(t('nameLabel'))}"></div>
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="jg-phone">${t('authPhone')}</label><input id="jg-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
+      <div class="cmy-row10">
+        <div class="form-group cmy-fg-half"><label for="jg-cname">${t('contactNameLabel')}</label><input id="jg-cname" type="text" value="${esc(_c)}" maxlength="60" placeholder="${esc(t('nameLabel'))}"></div>
+        <div class="form-group cmy-fg-half"><label for="jg-phone">${t('authPhone')}</label><input id="jg-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
       </div>
-      <div class="form-group" style="margin-bottom:10px"><label for="jg-sess">${t('colSession')}</label>
+      <div class="form-group cmy-mb10"><label for="jg-sess">${t('colSession')}</label>
         <select id="jg-sess" data-on-change="${_on("_on_showJccGroupModal_2",_EV,_EL)}">${open.map(x=>`<option value="${esc(x.id)}"${_s===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>
-      <div class="form-group" style="margin-bottom:6px"><label>${t('colRider')} × ${S._jgRiders.length}</label></div>
-      ${S._jgRiders.map((r,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-        <input id="jg-r-name-${i}" type="text" list="jg-cust-list" data-on-focus="${_on("_dlFill","jg-cust-list")}" placeholder="${t('nameLabel')} ${i+1}" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0">
-        <input id="jg-r-ph-${i}" type="tel" placeholder="05…" value="${esc(r.phone||'')}" style="width:104px;flex-shrink:0">
-        <input id="jg-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" style="width:66px;flex-shrink:0">
-        <select id="jg-r-type-${i}" aria-label="${t('bikeTypeLabel')}" style="width:104px;flex-shrink:0">${bikeTypeOpts(_jgOwn,_jgNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
-        ${S._jgRiders.length>1?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_jgRemoveRider",i)}" title="${t('removeBtn')}" style="flex-shrink:0">${_artIcon('close',11)}</button>`:''}
+      <div class="form-group cmy-mb6"><label>${t('colRider')} × ${S._jgRiders.length}</label></div>
+      ${S._jgRiders.map((r,i)=>`<div class="cmy-rider-row">
+        <input id="jg-r-name-${i}" type="text" list="jg-cust-list" data-on-focus="${_on("_dlFill","jg-cust-list")}" placeholder="${t('nameLabel')} ${i+1}" value="${esc(r.name||'')}" maxlength="60" class="cmy-f1m0">
+        <input id="jg-r-ph-${i}" type="tel" placeholder="05…" value="${esc(r.phone||'')}" class="cmy-w104">
+        <input id="jg-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="cmy-w66">
+        <select id="jg-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="cmy-w104">${bikeTypeOpts(_jgOwn,_jgNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        ${S._jgRiders.length>1?`<button type="button" class="btn-sm btn-muted cmy-fs0" data-on-click="${_on("_jgRemoveRider",i)}" title="${t('removeBtn')}">${_artIcon('close',11)}</button>`:''}
       </div>`).join('')}
       <datalist id="jg-cust-list"></datalist>
-      <button type="button" class="btn-secondary" style="width:100%;margin-top:8px" data-on-click="${_on("_jgAddRider")}">+ ${t('beAddRiderBtn')}</button>
+      <button type="button" class="btn-secondary cmy-jg-add" data-on-click="${_on("_jgAddRider")}">+ ${t('beAddRiderBtn')}</button>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeJccGroupModal")}">${t('cancelBtn')}</button>
         <button class="btn-primary" data-on-click="${_on("saveJccGroup")}">+ ${t('commAddGroupBtn')} (${S._jgRiders.length})</button>
@@ -13588,23 +13588,23 @@ function showGroupEditModal(entryId){
   const m=document.getElementById('group-edit-modal');if(!m)return;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showGroupEditModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:540px">
+    <div class="modal-box cmy-mw540" role="dialog" aria-modal="true">
       <div class="modal-title">${t('groupEditTitle')}</div>
-      <div class="form-group" style="margin:14px 0 10px"><label for="ge-gname">${t('groupNameLabel')}</label>
+      <div class="form-group cmy-fg-top"><label for="ge-gname">${t('groupNameLabel')}</label>
         <input id="ge-gname" type="text" value="${esc(primary.groupName||'')}" maxlength="60" placeholder="${esc(t('groupNamePh'))}"></div>
-      <div style="display:flex;gap:10px">
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="ge-cname">${t('contactNameLabel')}</label><input id="ge-cname" type="text" value="${esc(primary.groupContact||'')}" maxlength="60"></div>
-        <div class="form-group" style="flex:1;margin-bottom:10px"><label for="ge-phone">${t('authPhone')}</label><input id="ge-phone" type="tel" value="${esc(mainPhone)}" placeholder="05…"></div>
+      <div class="cmy-row10">
+        <div class="form-group cmy-fg-half"><label for="ge-cname">${t('contactNameLabel')}</label><input id="ge-cname" type="text" value="${esc(primary.groupContact||'')}" maxlength="60"></div>
+        <div class="form-group cmy-fg-half"><label for="ge-phone">${t('authPhone')}</label><input id="ge-phone" type="tel" value="${esc(mainPhone)}" placeholder="05…"></div>
       </div>
-      ${comm?'':onBike?`<div class="ge-no-move" style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px">${t('geMoveOnBike')}</div>`:`<div class="form-group" style="margin-bottom:10px"><label for="ge-sess">${t('colSession')}</label>
+      ${comm?'':onBike?`<div class="ge-no-move cmy-ge-nomove">${t('geMoveOnBike')}</div>`:`<div class="form-group cmy-mb10"><label for="ge-sess">${t('colSession')}</label>
         <select id="ge-sess">${open.map(x=>`<option value="${esc(x.id)}"${primary.sessionId===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>`}
-      <div class="form-group" style="margin-bottom:6px"><label>${t('colRider')} × ${members.length}</label></div>
-      ${members.map((r,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-        <span style="flex-shrink:0;font-size:11px;font-weight:900;color:var(--muted);min-width:26px">#${r.queueNum||''}</span>
-        <input id="ge-r-name-${i}" type="text" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0">
-        <input id="ge-r-ph-${i}" type="tel" placeholder="05…" value="${esc((r.phone||'').trim()===mainPhone?'':(r.phone||''))}" style="width:104px;flex-shrink:0">
-        <input id="ge-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" style="width:66px;flex-shrink:0">
-        <select id="ge-r-type-${i}" aria-label="${t('bikeTypeLabel')}" style="width:104px;flex-shrink:0">${bikeTypeOpts(own,noCarbon).map(ty=>`<option value="${ty}"${(r.typePreference||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+      <div class="form-group cmy-mb6"><label>${t('colRider')} × ${members.length}</label></div>
+      ${members.map((r,i)=>`<div class="cmy-rider-row">
+        <span class="cmy-ge-num">#${r.queueNum||''}</span>
+        <input id="ge-r-name-${i}" type="text" value="${esc(r.name||'')}" maxlength="60" class="cmy-f1m0">
+        <input id="ge-r-ph-${i}" type="tel" placeholder="05…" value="${esc((r.phone||'').trim()===mainPhone?'':(r.phone||''))}" class="cmy-w104">
+        <input id="ge-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="cmy-w66">
+        <select id="ge-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="cmy-w104">${bikeTypeOpts(own,noCarbon).map(ty=>`<option value="${ty}"${(r.typePreference||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
       </div>`).join('')}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeGroupEditModal")}">${t('cancelBtn')}</button>
@@ -13756,7 +13756,7 @@ function showEditCustomerModal(id){
 // away - when a rider replies STOP - and never switch it on for them.
 function _cfRideNewsHtml(d){
   const at=d.rideNewsAt?shortDate(fmtDate(new Date(d.rideNewsAt))):'';
-  return`<span style="font-size:13px;font-weight:700;color:${d.rideNews?'var(--green)':'var(--muted)'}">${d.rideNews?t('rideNewsAgreed').replace('{0}',at):t('rideNewsNotAgreed')}</span>${d.rideNews?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_cfRideNewsOff")}">${t('rideNewsTurnOff')}</button>`:''}`;
+  return`<span class="${d.rideNews?'cmy-rn-on':'cmy-rn-off'}">${d.rideNews?t('rideNewsAgreed').replace('{0}',at):t('rideNewsNotAgreed')}</span>${d.rideNews?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_cfRideNewsOff")}">${t('rideNewsTurnOff')}</button>`:''}`;
 }
 async function _cfRideNewsOff(){
   const d=S._cf;if(!d||d.mode!=='edit'||!d.rideNews)return;
@@ -13817,8 +13817,8 @@ async function _loadFlags(){
 }
 function _flagsRetry(){S._flagsErr=false;S._flagsAt=0;renderCommunity();}
 function _flagShow(k,v){
-  if(v==null||v==='')return'<span style="color:var(--muted)">—</span>';
-  if(k==='photo')return /^https:\/\//.test(String(v))?`<img src="${esc(v)}" alt="" loading="lazy" style="width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle">`:'—';
+  if(v==null||v==='')return'<span class="cmy-c-muted">—</span>';
+  if(k==='photo')return /^https:\/\//.test(String(v))?`<img src="${esc(v)}" alt="" loading="lazy" class="cmy-flg-img">`:'—';
   return `<bdi>${esc(_flagVal({[k]:v},k)||String(v))}</bdi>`;
 }
 function _flagRow(r){
@@ -13829,35 +13829,35 @@ function _flagRow(r){
   const waiting=(r.fields||[]).filter(k=>!ch[k]);
   const when=[t('flgFlaggedOn').replace('{0}',esc(fmtStamp(r.flagged_at)))+(r.flagged_by?' · '+t('flgBy').replace('{0}',esc(r.flagged_by)):'')];
   if(r.answered_at)when.push((r.status==='withdrawn'?t('flgWithdrawnOn'):t('flgRepliedOn')).replace('{0}',esc(fmtStamp(r.answered_at))));
-  const contact=[c.email,c.phone].filter(Boolean).map(v=>'<bdi>'+esc(v)+'</bdi>').join(' <span style="opacity:.5">·</span> ');
-  return `<div class="flg-row" data-flag-id="${esc(r.id)}" data-status="${esc(r.status)}" style="padding:12px 4px;border-bottom:1px solid var(--border)">
-    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:14px">${esc(c.name||'—')}</div>
-        ${contact?`<div style="font-size:11.5px;color:var(--muted)">${contact}</div>`:''}
+  const contact=[c.email,c.phone].filter(Boolean).map(v=>'<bdi>'+esc(v)+'</bdi>').join(' <span class="cmy-sep">·</span> ');
+  return `<div class="flg-row cmy-flg-row" data-flag-id="${esc(r.id)}" data-status="${esc(r.status)}">
+    <div class="cmy-flg-head">
+      <div class="cmy-f1m0">
+        <div class="cmy-flg-name">${esc(c.name||'—')}</div>
+        ${contact?`<div class="cmy-flg-contact">${contact}</div>`:''}
       </div>
-      <span class="flg-status" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:${st.col};white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:${st.col}"></span>${st.l}</span>
+      <span class="flg-status cmy-flg-st" data-cssv="${_cssv({'--cmy-st':st.col})}"><span class="cmy-flg-dot"></span>${st.l}</span>
     </div>
-    <div class="flg-asked" style="font-size:12.5px;font-weight:700;margin-top:6px">${esc(t('fixPendingLine').replace('{0}',(r.fields||[]).map(_fixLabel).join(', ')))}</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:2px">${when.join(' · ')}</div>
-    ${done.length?`<div class="flg-changes" style="margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px">
-      <div style="font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">${t('flgChanged')}</div>
-      ${done.map(k=>`<div class="flg-change" data-field="${esc(k)}" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;padding:3px 0">
-        <span style="font-weight:800;min-width:90px">${esc(_fixLabel(k))}</span>
-        <span class="flg-before" style="color:var(--muted);text-decoration:line-through">${_flagShow(k,ch[k]&&ch[k].before)}</span>
-        <span aria-hidden="true" style="color:var(--muted)">→</span>
-        <span class="flg-after" style="font-weight:700">${_flagShow(k,ch[k]&&ch[k].after)}</span>
+    <div class="flg-asked cmy-flg-asked">${esc(t('fixPendingLine').replace('{0}',(r.fields||[]).map(_fixLabel).join(', ')))}</div>
+    <div class="cmy-flg-when">${when.join(' · ')}</div>
+    ${done.length?`<div class="flg-changes cmy-flg-changes">
+      <div class="cmy-flg-chh">${t('flgChanged')}</div>
+      ${done.map(k=>`<div class="flg-change cmy-flg-change" data-field="${esc(k)}">
+        <span class="cmy-flg-field">${esc(_fixLabel(k))}</span>
+        <span class="flg-before cmy-flg-before">${_flagShow(k,ch[k]&&ch[k].before)}</span>
+        <span aria-hidden="true" class="cmy-c-muted">→</span>
+        <span class="flg-after cmy-b700">${_flagShow(k,ch[k]&&ch[k].after)}</span>
       </div>`).join('')}
     </div>`:''}
-    ${r.status==='pending'&&waiting.length?`<div class="flg-waiting" style="font-size:12px;color:var(--orange);font-weight:700;margin-top:6px">${esc(t('flgWaitingFor').replace('{0}',waiting.map(_fixLabel).join(', ')))}</div>`:''}
-    ${r.status!=='pending'&&c.id?`<div style="margin-top:8px"><button type="button" class="btn-sm btn-secondary flg-again" data-on-click="${_on("showFlagFieldsModal",c.id,r.fields||[])}">${t('flgFlagAgain')}</button></div>`:''}
+    ${r.status==='pending'&&waiting.length?`<div class="flg-waiting cmy-flg-waiting">${esc(t('flgWaitingFor').replace('{0}',waiting.map(_fixLabel).join(', ')))}</div>`:''}
+    ${r.status!=='pending'&&c.id?`<div class="cmy-mt8"><button type="button" class="btn-sm btn-secondary flg-again" data-on-click="${_on("showFlagFieldsModal",c.id,r.fields||[])}">${t('flgFlagAgain')}</button></div>`:''}
   </div>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__commFlagged_1(event,el,a0){S._flagFilter=a0;renderCommunity()}
 function _commFlagged(){
   if(!S._flags){
-    if(S._flagsErr&&!S._flagsBusy)return`<div class="empty-state">${t('flgLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary flg-retry" data-on-click="${_on("_flagsRetry")}">${t('retryBtn')}</button></div></div>`;
+    if(S._flagsErr&&!S._flagsBusy)return`<div class="empty-state">${t('flgLoadErr')}<div class="cmy-mt10"><button type="button" class="btn-sm btn-secondary flg-retry" data-on-click="${_on("_flagsRetry")}">${t('retryBtn')}</button></div></div>`;
     _loadFlags();return skeletonList();
   }
   // Re-read in the background when a rider's request changed or the list is a minute old; the
@@ -13869,9 +13869,9 @@ function _commFlagged(){
   const n=k=>k==='all'?S._flags.length:S._flags.filter(r=>r.status===k).length;
   const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" data-on-click="${_on("_on__commFlagged_1",_EV,_EL,k)}">${label} (${n(k)})</button>`;
   const rows=S._flags.filter(r=>f==='all'||r.status===f).map(_flagRow).join('');
-  return`<div class="form-section" style="margin-top:0">
+  return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('commTabFlagged')}</div>
-    <div class="filter-row" style="margin-bottom:8px">${pill('all',t('filterAll'))}${pill('pending',t('flgPending'))}${pill('answered',t('flgAnswered'))}${pill('withdrawn',t('flgWithdrawn'))}</div>
+    <div class="filter-row cmy-mb8">${pill('all',t('filterAll'))}${pill('pending',t('flgPending'))}${pill('answered',t('flgAnswered'))}${pill('withdrawn',t('flgWithdrawn'))}</div>
     <div class="flg-list">${rows||`<div class="empty-state">${t('flgEmpty')}</div>`}</div>
   </div>`;
 }
@@ -14009,7 +14009,7 @@ function _bdListHtml(){
   if(!B.rows.length)return`<div class="empty-state">${t(B.tag===BD_TAG?'bdNone':'bdNoneAll')}</div>`;
   if(!all.length)return`<div class="empty-state">${t('bdEmpty')}</div>`;
   const rows=all.slice(0,Math.max(BD_PAGE,+S._bdShow||0)),rest=all.length-rows.length;
-  const more=rest>0?`<div style="padding:14px 0;text-align:center"><button type="button" class="btn-secondary" data-on-click="${_on("_bdMore")}">${t('amShowMore').replace('{0}',Math.min(rest,BD_PAGE))}</button><div class="am-meta" style="margin-top:6px">${esc(t('amShowingOf').replace('{0}',rows.length).replace('{1}',all.length))}</div></div>`:'';
+  const more=rest>0?`<div class="cmy-more"><button type="button" class="btn-secondary" data-on-click="${_on("_bdMore")}">${t('amShowMore').replace('{0}',Math.min(rest,BD_PAGE))}</button><div class="am-meta cmy-mt6">${esc(t('amShowingOf').replace('{0}',rows.length).replace('{1}',all.length))}</div></div>`:'';
   const rides=_bdNextRides(B.today);
   return`<div class="table-wrapper"><table class="bd-table">
     <thead><tr><th>${t('bdColMember')}</th><th class="bd-hide-sm">${t('bdColBirthday')}</th><th>${t('bdColWhen')}</th><th class="bd-hide-sm">${t('bdColAge')}</th><th class="bd-hide-sm">${t('bdColRide')}</th><th>${t('bdColWish')}</th></tr></thead>
@@ -14045,7 +14045,7 @@ function _commBirthdays(){
   const avg=ages.length?Math.round(ages.reduce((a,b)=>a+b,0)/ages.length):0;
   const kpi=(v,l,sub)=>`<div class="analytics-kpi-card"><div class="analytics-kpi-value">${v}</div><div class="analytics-kpi-label">${l}</div>${sub?`<div class="analytics-kpi-sub">${sub}</div>`:''}</div>`;
   // Today: a card of its own, with a little confetti (none for reduced motion).
-  const conf=Array.from({length:14},(_,i)=>`<i style="--x:${(i*7.3)%100}%;--d:${(i%5)*0.6}s;--c:${['var(--green)','#f5b301','#ff6b8b','#4aa8ff'][i%4]}"></i>`).join('');
+  const conf=Array.from({length:14},(_,i)=>`<i data-cssv="${_cssv({'--x':`${(i*7.3)%100}%`,'--d':`${(i%5)*0.6}s`,'--c':['var(--green)','#f5b301','#ff6b8b','#4aa8ff'][i%4]})}"></i>`).join('');
   const hero=todays.length?`<div class="bd-hero" role="region" aria-label="${esc(t('bdTodayTitle'))}">
     <div class="bd-confetti" aria-hidden="true">${conf}</div>
     <div class="bd-hero-title">🎂 ${t('bdTodayTitle')}</div>
@@ -14063,7 +14063,7 @@ function _commBirthdays(){
     <div class="chart-card-title">${t('bdByMonth')}</div>
     <div class="chart-card-sub">${t('bdByMonthSub')}</div>
     <div class="bd-months" role="group" aria-label="${esc(t('bdByMonth'))}">${per.slice(1).map((n,i)=>{const m=i+1;const lbl=_bdDate(`2000-${String(m).padStart(2,'0')}-15`,{month:'short'});
-      return`<button type="button" class="bd-mon${m===curM?' now':''}${m===selM?' sel':''}" aria-pressed="${m===selM}" data-on-click="${_on("_bdSetMonth",m)}" title="${esc(lbl)}: ${n}"><span class="bd-mon-n">${n||''}</span><span class="bd-mon-track"><span class="bd-mon-bar" style="height:${Math.round(n/max*100)}%"></span></span><span class="bd-mon-l">${esc(lbl)}</span></button>`;}).join('')}</div>
+      return`<button type="button" class="bd-mon${m===curM?' now':''}${m===selM?' sel':''}" aria-pressed="${m===selM}" data-on-click="${_on("_bdSetMonth",m)}" title="${esc(lbl)}: ${n}"><span class="bd-mon-n">${n||''}</span><span class="bd-mon-track"><span class="bd-mon-bar cmy-bd-bar" data-cssv="${_cssv({'--cmy-h':Math.round(n/max*100)+'%'})}"></span></span><span class="bd-mon-l">${esc(lbl)}</span></button>`;}).join('')}</div>
   </div>`;
   const rng=S._bdRange||'all';
   const pill=(k,l)=>`<button class="filter-pill${rng===k?' active':''}" data-on-click="${_on("_bdSetRange",k)}">${l}</button>`;
@@ -14075,8 +14075,8 @@ function _commBirthdays(){
   const tagSel=`<select class="filter-select" aria-label="${esc(t('acrFilterTag'))}" data-on-change="${_on("_bdSetTag",_P("value"))}">${tagOpts.map(([v,l])=>`<option value="${esc(v)}"${B.tag===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
   const langs=['auto',...Object.keys(BD_MSG)];
   const langSel=`<label class="filter-field bd-lang"><span class="filter-field-lbl">${t('bdMsgLang')}</span><select class="filter-select" data-on-change="${_on("_bdSetLang",_P("value"))}">${langs.map(l=>`<option value="${l}"${(S._bdLang||'auto')===l?' selected':''}>${l==='auto'?esc(t('bdMsgAuto')):esc(_langOf(l).label||l)}</option>`).join('')}</select></label>`;
-  return`<div class="form-section" style="margin-top:0">
-    <div class="bd-head"><div><div class="form-title">${t('commTabBirthdays')}</div><div class="page-sub" style="margin:2px 0 0">${t(comm?'bdSub':'bdSubAll')}</div></div>
+  return`<div class="form-section cmy-mt0">
+    <div class="bd-head"><div><div class="form-title">${t('commTabBirthdays')}</div><div class="page-sub cmy-bd-sub">${t(comm?'bdSub':'bdSubAll')}</div></div>
       ${rows.length?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdIcs")}">${_artIcon('download',13)} ${t('bdCalendar')}</button>`:''}</div>
     ${B.missing?`<div class="bd-missing">${t(comm?'bdMissing':'bdMissingAll').replace('{0}',B.missing)}</div>`:''}
     ${hero}
@@ -14202,8 +14202,8 @@ function _caRow(a){
           :`<button type="button" class="btn-secondary btn-sm ca-newpwd" data-on-click="${_on("_caNewPwd",id)}">${t('caNewPwdBtn')}</button>`;
   return `<div class="ca-row" data-app-id="${esc(a.id)}" data-status="${esc(a.status)}">
     <div class="ca-head">
-      <div style="flex:1;min-width:0"><div class="ca-name">${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
-      <span class="ca-status" style="color:${st.col}"><span class="ca-dot" style="background:${st.col}"></span>${st.l}</span>
+      <div class="cmy-f1m0"><div class="ca-name">${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
+      <span class="ca-status cmy-st" data-cssv="${_cssv({'--cmy-st':st.col})}"><span class="ca-dot cmy-st-dot"></span>${st.l}</span>
     </div>
     <div class="ca-grid">
       ${kv(t('caLblPhone'),`<bdi dir="ltr">${esc(a.phone)}</bdi>`)}
@@ -14229,7 +14229,7 @@ function _on__commApplications_1(event,el){S._caErr=false;_caLoad()}
 function _on__commApplications_2(event,el,a0){S._caFilter=a0;renderCommunity()}
 function _commApplications(){
   if(!S._caApps){
-    if(S._caErr&&!S._caBusy)return`<div class="empty-state">${t('caLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary ca-retry" data-on-click="${_on("_on__commApplications_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    if(S._caErr&&!S._caBusy)return`<div class="empty-state">${t('caLoadErr')}<div class="cmy-mt10"><button type="button" class="btn-sm btn-secondary ca-retry" data-on-click="${_on("_on__commApplications_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
     _caLoad();return skeletonList();
   }
   if(!S._caBusy&&Date.now()-(S._caAt||0)>60000)_caLoad(); // a minute old: read again, the list stays meanwhile
@@ -14238,10 +14238,10 @@ function _commApplications(){
   const n=k=>S._caApps.filter(a=>a.status===k).length;
   const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" data-ca-filter="${k}" data-on-click="${_on("_on__commApplications_2",_EV,_EL,k)}">${label} (${n(k)})</button>`;
   const rows=S._caApps.filter(a=>a.status===f).map(_caRow).join('');
-  return`<div class="form-section" style="margin-top:0">
+  return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('caTitle')}</div>
     <div class="ca-sub">${t('caSub')}</div>
-    <div class="filter-row" style="margin-bottom:8px">${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
+    <div class="filter-row cmy-mb8">${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
     <div class="ca-list">${rows||`<div class="empty-state">${t('caEmpty')}</div>`}</div>
   </div>`;
 }
@@ -14357,7 +14357,7 @@ function _caMsgRender(){
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__caMsgRender_1",_EV,_EL)}">
     <div class="modal-box ca-msg-box" role="dialog" aria-modal="true" aria-labelledby="ca-msg-title">
       <div class="ca-msg-head">
-        <div class="modal-title" id="ca-msg-title" style="margin:0">${esc(t('caMsgTitle').replace('{0}',m.d.name||''))}</div>
+        <div class="modal-title cmy-m0" id="ca-msg-title">${esc(t('caMsgTitle').replace('{0}',m.d.name||''))}</div>
         <button type="button" class="ca-x" data-on-click="${_on("_caMsgClose")}" aria-label="${t('closeBtn')}">&times;</button>
       </div>
       <div class="ca-msg-sub">${t(m.kind==='new'?'caMsgNew':m.kind==='existing'?'caMsgExisting':'caMsgReject')}</div>
@@ -14480,8 +14480,8 @@ function _laRow(a){
         ?`<button type="button" class="btn-secondary btn-sm la-reopen" data-on-click="${_on("_laReopen",id)}">${t('laReopenBtn')}</button>`:'';
   return `<div class="ca-row la-row" data-learn-id="${esc(a.id)}" data-status="${esc(a.status)}">
     <div class="ca-head">
-      <div style="flex:1;min-width:0"><div class="ca-name">${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
-      <span class="ca-status" style="color:${st.col}"><span class="ca-dot" style="background:${st.col}"></span>${st.k?t(st.k):esc(a.status)}</span>
+      <div class="cmy-f1m0"><div class="ca-name">${esc(a.name)}</div><div class="ca-when">${when.join(' · ')}</div></div>
+      <span class="ca-status cmy-st" data-cssv="${_cssv({'--cmy-st':st.col})}"><span class="ca-dot cmy-st-dot"></span>${st.k?t(st.k):esc(a.status)}</span>
     </div>
     ${lesson}
     <div class="la-learners">
@@ -14512,7 +14512,7 @@ function _on__learnApplications_1(event,el){S._laErr=false;_laLoad()}
 function _on__learnApplications_2(event,el,a0){S._laFilter=a0;renderCommunity()}
 function _learnApplications(){
   if(!S._laApps){
-    if(S._laErr&&!S._laBusy)return`<div class="empty-state">${t('laLoadErr')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary la-retry" data-on-click="${_on("_on__learnApplications_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    if(S._laErr&&!S._laBusy)return`<div class="empty-state">${t('laLoadErr')}<div class="cmy-mt10"><button type="button" class="btn-sm btn-secondary la-retry" data-on-click="${_on("_on__learnApplications_1",_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
     _laLoad();return skeletonList();
   }
   if(!S._laBusy&&Date.now()-(S._laAt||0)>60000)_laLoad(); // a minute old: read again, the list stays meanwhile
@@ -14523,10 +14523,10 @@ function _learnApplications(){
   // The scheduled ones by their lesson, the soonest first; every other list newest first.
   let list=S._laApps.filter(a=>a.status===f);
   if(f==='scheduled')list=list.slice().sort((x,y)=>String(x.lesson_at||'').localeCompare(String(y.lesson_at||'')));
-  return`<div class="form-section" style="margin-top:0">
+  return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('laTitle')}</div>
     <div class="ca-sub">${t('laSub')}</div>
-    <div class="filter-row" style="margin-bottom:8px">${pill('pending',t('laNew'))}${pill('scheduled',t('laScheduled'))}${pill('done',t('laDone'))}${pill('cancelled',t('laCancelled'))}<button type="button" class="filter-pill la-refresh" data-on-click="${_on("_laLoad")}">${t('ridersRefresh')}</button></div>
+    <div class="filter-row cmy-mb8">${pill('pending',t('laNew'))}${pill('scheduled',t('laScheduled'))}${pill('done',t('laDone'))}${pill('cancelled',t('laCancelled'))}<button type="button" class="filter-pill la-refresh" data-on-click="${_on("_laLoad")}">${t('ridersRefresh')}</button></div>
     <div class="ca-list">${list.map(_laRow).join('')||`<div class="empty-state">${t('laEmpty')}</div>`}</div>
   </div>`;
 }
@@ -14556,7 +14556,7 @@ function _laSchedule(id){
   _wsDlg(t(cur?'laReschedTitle':'laSchedTitle').replace('{0}',who),sub,
     `${_wsWhenFields(cur?cur.date:'',cur?cur.time:'')}
     <div class="form-group"><label for="la-place">${t('laLblPlace')} <span class="label-hint">${t('laPlaceHint')}</span></label><input type="text" id="la-place" maxlength="120" value="${esc(place)}"></div>`,
-    `<span style="flex:1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary la-sched-save" data-on-click="${_on("_laScheduleSave",a.id)}">${t('laSchedSave')}</button>`);
+    `<span class="cmy-f1"></span><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${t('cancelBtn')}</button><button type="button" class="btn-primary la-sched-save" data-on-click="${_on("_laScheduleSave",a.id)}">${t('laSchedSave')}</button>`);
 }
 async function _laScheduleSave(id){
   const a=_laFind(id);if(!a||S._laWorking)return;
@@ -14700,7 +14700,7 @@ function _laMsgRender(){
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__laMsgRender_1",_EV,_EL)}">
     <div class="modal-box ca-msg-box" role="dialog" aria-modal="true" aria-labelledby="la-msg-title">
       <div class="ca-msg-head">
-        <div class="modal-title" id="la-msg-title" style="margin:0">${esc(t('caMsgTitle').replace('{0}',a.name||''))}</div>
+        <div class="modal-title cmy-m0" id="la-msg-title">${esc(t('caMsgTitle').replace('{0}',a.name||''))}</div>
         <button type="button" class="ca-x" data-on-click="${_on("_laMsgClose")}" aria-label="${t('closeBtn')}">&times;</button>
       </div>
       <div class="ca-msg-sub">${t(sub)}</div>
@@ -14800,10 +14800,10 @@ function _renderFlagModal(){
       <div class="fl-sec">${t('fixDlgFields')}</div>
       <div class="fl-grid">${FIX_FIELDS.filter(x=>x.staff!==false).map(x=>_flagRowHtml(c,x.k)).join('')}</div>
       <div class="fl-actions">
-        <button class="btn-primary" id="fl-send" style="width:100%" data-on-click="${_on("_flagSave")}"${f.sel.size?'':' disabled'}>${_artIcon('flag',14)} ${_flagSendLabel()}</button>
-        <div style="display:flex;gap:10px">
-          ${f.had?`<button class="btn-secondary" style="flex:1" data-on-click="${_on("_flagSave",true)}">${t('fixDlgClear')}</button>`:''}
-          <button class="btn-secondary" style="flex:1" data-on-click="${_on("_flagClose")}">${t('cancelBtn')}</button>
+        <button class="btn-primary cmy-w100" id="fl-send" data-on-click="${_on("_flagSave")}"${f.sel.size?'':' disabled'}>${_artIcon('flag',14)} ${_flagSendLabel()}</button>
+        <div class="cmy-row10">
+          ${f.had?`<button class="btn-secondary cmy-f1" data-on-click="${_on("_flagSave",true)}">${t('fixDlgClear')}</button>`:''}
+          <button class="btn-secondary cmy-f1" data-on-click="${_on("_flagClose")}">${t('cancelBtn')}</button>
         </div>
       </div>
     </div></div>`;
@@ -14916,53 +14916,56 @@ function renderCustFormModal(){
   // A saved nationality that is not on today's list is offered as it is, as countryOpts does
   // for the country; without it the select fell back to "Select" and any save wiped the value.
   const ccOpts=COUNTRY_CODES.map(([code])=>`<option value="${code}"${d.cc===code?' selected':''}>${code}</option>`).join('');
-  const gBtn=(g,lbl)=>`<button type="button" class="toggle-btn${d.gender===g?' active':''}" aria-pressed="${(d.gender===g)?'true':'false'}" style="flex:1" data-on-click="${_on("_cfSet","gender",g,_EL)}">${lbl}</button>`;
+  const gBtn=(g,lbl)=>`<button type="button" class="toggle-btn${d.gender===g?' active':''} cmy-f1" aria-pressed="${(d.gender===g)?'true':'false'}" data-on-click="${_on("_cfSet","gender",g,_EL)}">${lbl}</button>`;
   const tBtn=ty=>`<button type="button" class="toggle-btn${d.type===ty?' active':''}" aria-pressed="${(d.type===ty)?'true':'false'}" data-on-click="${_on("_cfSet","type",ty,_EL)}">${typeLabel(ty)}</button>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderCustFormModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:470px;max-height:88vh;overflow-y:auto">
+    <div class="modal-box cmy-cf-box" role="dialog" aria-modal="true">
       ${isCreate?`<div class="modal-title">${t('naTitle')}</div>`:(()=>{const c=(S.customers||[]).find(x=>String(x.id)===String(d.id))||{id:d.id};
         return `<div class="modal-title fl-cf-head"><span>${t('naEditTitle')}</span><span class="cf-head-btns"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("openAccountHistory",c.id,true)}">${_artIcon('clock',13)} ${t('ahBtn')}</button><span id="cf-flag-wrap">${_cfFlagHtml(c)}</span></span></div><div id="cf-fix-line">${_fixPendingLine(c)}</div>`;})()}
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <div class="form-group" style="flex:1"><label for="cf-first">${t('firstName')}</label><input id="cf-first" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.first)}" autocomplete="off"></div>
-        <div class="form-group" style="flex:1"><label for="cf-middle">${t('middleName')}</label><input id="cf-middle" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.middle)}" autocomplete="off"></div>
-        <div class="form-group" style="flex:1"><label for="cf-last">${t('lastName')}</label><input id="cf-last" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.last)}" autocomplete="off"></div>
+      <div class="cmy-cf-names">
+        <div class="form-group cmy-f1"><label for="cf-first">${t('firstName')}</label><input id="cf-first" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.first)}" autocomplete="off"></div>
+        <div class="form-group cmy-f1"><label for="cf-middle">${t('middleName')}</label><input id="cf-middle" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.middle)}" autocomplete="off"></div>
+        <div class="form-group cmy-f1"><label for="cf-last">${t('lastName')}</label><input id="cf-last" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.last)}" autocomplete="off"></div>
       </div>
-      <div class="form-group" style="margin-top:8px"><label for="cf-email">${t('emailAddr')}</label><input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">${isCreate?'':_cfAppleLine(d.id)}</div>
-      <div class="form-group" style="margin-top:8px"><label for="cf-phone">${t('phoneNum')}</label>
-        <div style="display:flex;gap:6px"><select id="cf-cc" style="width:92px;flex-shrink:0">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" style="flex:1" autocomplete="off"></div></div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <div class="form-group" style="flex:1"><label for="cf-pwd">${t('authPassword')}${isCreate?'':` <span class="label-hint">(${t('naPwdKeepHint')})</span>`}</label><input id="cf-pwd" type="text" value="${esc(d.pwd)}" placeholder="${isCreate?esc(t('authPasswordHint')):esc(t('naPwdKeepHint'))}" autocomplete="off"></div>
-        <div class="form-group" style="width:120px;flex-shrink:0"><label for="cf-height">${t('heightLabel')} (${t('cmUnit')})</label><input id="cf-height" type="number" min="100" max="250" value="${esc(d.height)}"></div>
+      <div class="form-group cmy-mt8"><label for="cf-email">${t('emailAddr')}</label><input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">${isCreate?'':_cfAppleLine(d.id)}</div>
+      <div class="form-group cmy-mt8"><label for="cf-phone">${t('phoneNum')}</label>
+        <div class="cmy-flex6"><select id="cf-cc" class="cmy-w92">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" class="cmy-f1" autocomplete="off"></div></div>
+      <div class="cmy-cf-row8">
+        <div class="form-group cmy-f1"><label for="cf-pwd">${t('authPassword')}${isCreate?'':` <span class="label-hint">(${t('naPwdKeepHint')})</span>`}</label><input id="cf-pwd" type="text" value="${esc(d.pwd)}" placeholder="${isCreate?esc(t('authPasswordHint')):esc(t('naPwdKeepHint'))}" autocomplete="off"></div>
+        <div class="form-group cmy-w120"><label for="cf-height">${t('heightLabel')} (${t('cmUnit')})</label><input id="cf-height" type="number" min="100" max="250" value="${esc(d.height)}"></div>
       </div>
-      <div class="form-group" style="margin-top:8px"><label>${t('genderLabel')}${!isCreate&&!d.gender?` <span class="label-hint" style="color:var(--orange)">(${t('amGenderAsk')})</span>`:''}</label><div style="display:flex;gap:6px;margin-top:4px">${gBtn('male',t('genderMale'))}${gBtn('female',t('genderFemale'))}</div></div>
-      ${isCreate?'':`<div class="form-group" style="margin-top:8px"><label>${t('heardLabel')}</label><div style="font-size:13px;font-weight:700;padding:6px 0">${d.heard?heardLabel(d.heard):'—'}</div></div>`}
-      <div class="form-group" style="margin-top:8px"><label for="cf-birth-d">${t('birthDateLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${dobFieldHtml('cf-birth',d.birth)}</div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <div class="form-group" style="flex:1"><label for="cf-country">${t('countryLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-country" data-on-change="${_on("_cfCountry",_P("value"))}">${countryOpts(d.country)}</select></div>
-        <div class="form-group" style="flex:1"><label for="cf-nationality">${t('nationalityLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-nationality"><option value="">${t('selectNationalityOpt')}</option>${d.nationality&&!_NAT_CODE[d.nationality]?`<option value="${esc(d.nationality)}" selected>${esc(d.nationality)}</option>`:''}${nationalityOpts(d.nationality)}</select></div>
-        <div class="form-group" style="flex:1"><label for="cf-city">${t('cityLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-city" data-country="${esc(d.country)}" data-on-change="${_on("_on_renderCustFormModal_2",_EV,_EL)}" ${d.country?'':'disabled'}>${cityOpts(d.country,d.city,'cf-city')}</select></div>
+      <div class="form-group cmy-mt8"><label>${t('genderLabel')}${!isCreate&&!d.gender?` <span class="label-hint cmy-c-orange">(${t('amGenderAsk')})</span>`:''}</label><div class="cmy-row6">${gBtn('male',t('genderMale'))}${gBtn('female',t('genderFemale'))}</div></div>
+      ${isCreate?'':`<div class="form-group cmy-mt8"><label>${t('heardLabel')}</label><div class="cmy-cf-heard">${d.heard?heardLabel(d.heard):'—'}</div></div>`}
+      <div class="form-group cmy-mt8"><label for="cf-birth-d">${t('birthDateLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${dobFieldHtml('cf-birth',d.birth)}</div>
+      <div class="cmy-cf-row8">
+        <div class="form-group cmy-f1"><label for="cf-country">${t('countryLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-country" data-on-change="${_on("_cfCountry",_P("value"))}">${countryOpts(d.country)}</select></div>
+        <div class="form-group cmy-f1"><label for="cf-nationality">${t('nationalityLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-nationality"><option value="">${t('selectNationalityOpt')}</option>${d.nationality&&!_NAT_CODE[d.nationality]?`<option value="${esc(d.nationality)}" selected>${esc(d.nationality)}</option>`:''}${nationalityOpts(d.nationality)}</select></div>
+        <div class="form-group cmy-f1"><label for="cf-city">${t('cityLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-city" data-country="${esc(d.country)}" data-on-change="${_on("_on_renderCustFormModal_2",_EV,_EL)}" ${d.country?'':'disabled'}>${cityOpts(d.country,d.city,'cf-city')}</select></div>
       </div>
-      <div class="form-group" style="margin-top:8px"><label>${t('socialsLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${_socFieldsHtml('cf',d.socials,true)}</div>
-      ${d.mode==='edit'?`<div class="form-group" style="margin-top:8px"><label>${t('rideNewsTitle')}</label><div id="cf-rn" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px">${_cfRideNewsHtml(d)}</div></div>`:''}
-      <div class="form-group" style="margin-top:8px"><label>${t('bikeTypePref')}</label><div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${bikeTypeOpts(false).map(tBtn).join('')}</div></div>
-      <div class="form-group" style="margin-top:8px"><label for="cf-defpay">${t('defaultPayLabel')}</label>
+      <div class="form-group cmy-mt8"><label>${t('socialsLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${_socFieldsHtml('cf',d.socials,true)}</div>
+      ${d.mode==='edit'?`<div class="form-group cmy-mt8"><label>${t('rideNewsTitle')}</label><div id="cf-rn" class="cmy-cf-rn">${_cfRideNewsHtml(d)}</div></div>`:''}
+      <div class="form-group cmy-mt8"><label>${t('bikeTypePref')}</label><div class="cmy-row6w">${bikeTypeOpts(false).map(tBtn).join('')}</div></div>
+      <div class="form-group cmy-mt8"><label for="cf-defpay">${t('defaultPayLabel')}</label>
         <select id="cf-defpay" data-on-change="${_on("_on_renderCustFormModal_3",_EV,_EL)}"><option value=""${d.defpay?'':' selected'}>${t('defPayNormal')}</option><option value="house"${d.defpay==='house'?' selected':''}> ${t('onTheHouseLabel')}</option></select></div>
-      <div class="form-group" id="cf-defpay-types" style="margin-top:8px${d.defpay==='house'?'':';display:none'}"><label>${t('housePayTypesLabel')}</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.defpayTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.defpayTypes||[]).includes(ty))?'true':'false'}" data-on-click="${_on("_cfDefTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
-      <div class="form-group" style="margin-top:8px"><label>${t('hiddenTypesLabel')}</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.hiddenTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.hiddenTypes||[]).includes(ty))?'true':'false'}" data-on-click="${_on("_cfHidTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
-      ${isCreate?'':`<div class="form-group" style="margin-top:8px"><label>${t('amEditTags')}</label>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px">
+      <div class="form-group cmy-mt8" id="cf-defpay-types"><label>${t('housePayTypesLabel')}</label>
+        <div class="cmy-row6w">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.defpayTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.defpayTypes||[]).includes(ty))?'true':'false'}" data-on-click="${_on("_cfDefTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
+      <div class="form-group cmy-mt8"><label>${t('hiddenTypesLabel')}</label>
+        <div class="cmy-row6w">${bikeTypeOpts(false).map(ty=>`<button type="button" class="toggle-btn${(d.hiddenTypes||[]).includes(ty)?' active':''}" aria-pressed="${((d.hiddenTypes||[]).includes(ty))?'true':'false'}" data-on-click="${_on("_cfHidTy",ty,_EL)}">${typeLabel(ty)}</button>`).join('')}</div></div>
+      ${isCreate?'':`<div class="form-group cmy-mt8"><label>${t('amEditTags')}</label>
+        <div class="cmy-cf-tags">
           ${(()=>{const _tm=_tagsById();const myCT=(S.customerTags||[]).filter(ct=>ct.customer_id===d.id&&_tm[ct.tag_id]);return myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;})()}
           <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_custJumpTags",d.id)}">${t('amEditTags')}</button>
         </div></div>`}
       <div class="modal-footer">
-        ${(!isCreate&&isAdmin())?`<button class="btn-red" style="margin-inline-end:auto" data-on-click="${_on("deleteCustomerAccount",d.id)}">${t('naDelBtn')}</button>`:''}
+        ${(!isCreate&&isAdmin())?`<button class="btn-red cmy-mie-auto" data-on-click="${_on("deleteCustomerAccount",d.id)}">${t('naDelBtn')}</button>`:''}
         <button class="btn-secondary" data-on-click="${_on("closeCustFormModal")}">${t('cancelBtn')}</button>
         <button class="btn-primary" data-on-click="${_on("saveCustForm")}">${isCreate?t('naCreateBtn'):t('naSaveBtn')}</button>
       </div>
     </div></div>`;
+  // Not on the house: the bike types it covers start hidden. Set through the CSSOM (the policy
+  // refuses a style attribute), so the Default payment select's el.style.display flip shows them.
+  if(d.defpay!=='house'){const _r=document.getElementById('cf-defpay-types');if(_r)_r.style.display='none';}
 }
 // ── Delete a customer account ────────────────────────────────────────────────
 // What goes: the login and everything personal attached to it — the customers row, tags,
@@ -15017,7 +15020,7 @@ async function deleteCustomerAccount(id){
   const past=getQueue().filter(e=>String(e.customerId||'')===String(id));
   confirmDialog({
     title:t('naDelTitle'),
-    body:`<strong>${esc(c.name||'')}</strong>${c.email?`<br><span style="color:var(--muted)">${esc(c.email)}</span>`:''}
+    body:`<strong>${esc(c.name||'')}</strong>${c.email?`<br><span class="cmy-c-muted">${esc(c.email)}</span>`:''}
       <br><br>${esc(t('naDelBodyFinal').replace('{0}',String(past.length)))}`,
     confirmLabel:t('naDelBtn'),
     onConfirm:async()=>{
@@ -29178,44 +29181,44 @@ function renderTagGrantModal(){
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderTagGrantModal_1",_EV,_EL)}">
     <div class="confirm-box" role="dialog" aria-modal="true">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:18px;font-weight:900">${t('tagAddTitle')}</div>
-        <button data-on-click="${_on("_on_renderTagGrantModal_2",_EV,_EL)}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">&times;</button>
+      <div class="chrome-dh10">
+        <div class="chrome-dt">${t('tagAddTitle')}</div>
+        <button data-on-click="${_on("_on_renderTagGrantModal_2",_EV,_EL)}" aria-label="${t('closeBtn')}" class="chrome-x">&times;</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <div class="cmy-tg-who">
         ${_tagChip(tg)}
-        <span style="font-size:13px;font-weight:800">${esc(cust.name||'')}</span>
+        <span class="cmy-tg-name">${esc(cust.name||'')}</span>
       </div>
       ${st.tid===TAG_COMMUNITY&&_isBlacklisted(st.cid)?_tagBanWarn():''}
       ${st.tid===TAG_BLACKLIST&&_hasTagNow(st.cid,TAG_COMMUNITY)?`<label class="tag-ban-opt"><input type="checkbox"${st.dropComm?' checked':''} data-on-change="${_on("_tgSet","dropComm",_P("checked"))}">${esc(t('tagBlacklistDropComm'))}</label>`:''}
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <button type="button" class="toggle-btn${!temp?' active':''}" aria-pressed="${(!temp)?'true':'false'}" style="flex:1" data-on-click="${_on("_tgSet","kind","perm")}">${t('tagPermLabel')}</button>
-        <button type="button" class="toggle-btn${temp?' active':''}" aria-pressed="${(temp)?'true':'false'}" style="flex:1" data-on-click="${_on("_tgSet","kind","temp")}">${t('tagTempLabel')}</button>
+      <div class="cmy-tg-toggles">
+        <button type="button" class="toggle-btn${!temp?' active':''} cmy-f1" aria-pressed="${(!temp)?'true':'false'}" data-on-click="${_on("_tgSet","kind","perm")}">${t('tagPermLabel')}</button>
+        <button type="button" class="toggle-btn${temp?' active':''} cmy-f1" aria-pressed="${(temp)?'true':'false'}" data-on-click="${_on("_tgSet","kind","temp")}">${t('tagTempLabel')}</button>
       </div>
       ${temp?`
-      <div style="display:flex;gap:6px;margin-bottom:12px">
-        <button type="button" class="toggle-btn${st.mode==='dur'?' active':''}" aria-pressed="${(st.mode==='dur')?'true':'false'}" style="flex:1" data-on-click="${_on("_tgSet","mode","dur")}">${t('tagDurationLabel')}</button>
-        <button type="button" class="toggle-btn${st.mode==='dates'?' active':''}" aria-pressed="${(st.mode==='dates')?'true':'false'}" style="flex:1" data-on-click="${_on("_tgSet","mode","dates")}">${t('tagDatesLabel')}</button>
+      <div class="cmy-tg-toggles">
+        <button type="button" class="toggle-btn${st.mode==='dur'?' active':''} cmy-f1" aria-pressed="${(st.mode==='dur')?'true':'false'}" data-on-click="${_on("_tgSet","mode","dur")}">${t('tagDurationLabel')}</button>
+        <button type="button" class="toggle-btn${st.mode==='dates'?' active':''} cmy-f1" aria-pressed="${(st.mode==='dates')?'true':'false'}" data-on-click="${_on("_tgSet","mode","dates")}">${t('tagDatesLabel')}</button>
       </div>
       ${st.mode==='dur'?`
-      <div class="form-group" style="margin-bottom:14px">
+      <div class="form-group cmy-mb14">
         <label>${t('tagDurationLabel')}</label>
         <select data-on-change="${_on("_on_renderTagGrantModal_3",_EV,_EL)}">${DURS.map(d=>`<option value="${d}"${st.dur===d?' selected':''}>${t('tagDur'+d)}</option>`).join('')}</select>
       </div>`:`
-      <div class="form-group" style="margin-bottom:12px">
+      <div class="form-group cmy-mb12">
         <label>${t('tagStartDate')}</label>
-        <input type="date" value="${esc(st.today?todayStr():st.start)}"${st.today?' disabled style="opacity:.55"':''} data-on-change="${_on("_on_renderTagGrantModal_4",_EV,_EL)}">
-        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:700;cursor:pointer">
-          <input type="checkbox"${st.today?' checked':''} data-on-change="${_on("_tgSet","today",_P("checked"))}" style="width:16px;height:16px;accent-color:var(--green)">${t('tagTodayLabel')}
+        <input type="date" value="${esc(st.today?todayStr():st.start)}"${st.today?' disabled class="cmy-o55"':''} data-on-change="${_on("_on_renderTagGrantModal_4",_EV,_EL)}">
+        <label class="cmy-tg-today">
+          <input type="checkbox"${st.today?' checked':''} data-on-change="${_on("_tgSet","today",_P("checked"))}" class="cmy-tg-cb">${t('tagTodayLabel')}
         </label>
       </div>
-      <div class="form-group" style="margin-bottom:14px">
+      <div class="form-group cmy-mb14">
         <label>${t('tagEndDate')}</label>
         <input type="date" value="${esc(st.end)}" min="${esc(st.today?todayStr():(st.start||todayStr()))}" data-on-change="${_on("_on_renderTagGrantModal_5",_EV,_EL)}">
       </div>`}`:''}
-      <div style="display:flex;gap:8px;justify-content:flex-end">
+      <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("_on_renderTagGrantModal_6",_EV,_EL)}">${t('cancelBtn')}</button>
-        <button class="btn-primary" data-on-click="${_on("saveTagGrant")}" style="min-width:100px">${t('tagAddTitle')}</button>
+        <button class="btn-primary chrome-mw100" data-on-click="${_on("saveTagGrant")}">${t('tagAddTitle')}</button>
       </div>
     </div>
   </div>`;
@@ -29279,30 +29282,32 @@ function _tagLogo(tg){
 // A tag's face on a button (picker, filter): its logo, or its name when it has none.
 function _tagFace(tg){return _tagLogo(tg)||esc(tg.name);}
 function _tagChip(tg,ct){
-  const col=esc(tg.color||'#00e585');
+  const col=tg.color||'#00e585';
   let suffix='',dim='';
   if(ct&&(ct.starts_at!=null||ct.expires_at!=null)){
     const n=Date.now();
-    if(ct.expires_at!=null&&ct.expires_at<=n){suffix=' · '+t('tagExpired');dim='opacity:.5;';}
+    if(ct.expires_at!=null&&ct.expires_at<=n){suffix=' · '+t('tagExpired');dim=' cmy-dim';}
     else if(ct.starts_at!=null&&ct.starts_at>n)suffix=' · '+t('tagFrom').replace('{0}',_tagDateFmt(ct.starts_at));
     else if(ct.expires_at!=null)suffix=' · '+t('tagUntil').replace('{0}',_tagDateFmt(ct.expires_at));
   }
   const b=_tagBrand(tg);
-  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''}" style="${dim}background:${b.color};border-color:${b.color}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
-  return `<span class="am-chip" style="${dim}background:${col}22;border-color:${col}66;color:${col}">${esc(tg.name)}${suffix}</span>`;
+  // Its colours come from the tag (data-cssv, set through the CSSOM): the fill and the edge, and a
+  // tag staff made also takes its colour as the ink.
+  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''} cmy-tc${dim}" data-cssv="${_cssv({'--cmy-tbg':b.color,'--cmy-tbd':b.color})}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
+  return `<span class="am-chip cmy-tc cmy-tcf${dim}" data-cssv="${_cssv({'--cmy-tbg':col+'22','--cmy-tbd':col+'66','--cmy-tfg':col})}">${esc(tg.name)}${suffix}</span>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__tagEditForm_1(event,el){S.tagEdit=null;renderCommunity()}
 function _tagEditForm(){
   const tg=S.tagEdit||{};
-  return `<div class="inline-form" style="margin-top:12px">
+  return `<div class="inline-form cmy-mt12">
     <div class="form-title">${tg.id?t('amEditTag'):t('amNewTag')}</div>
     <div class="form-group"><label>${t('amTagName')}</label><input id="tag-name" type="text" maxlength="40" value="${esc(tg.name||'')}" placeholder="${esc(t('amTagNamePh'))}"></div>
     <div class="form-row">
-      <div class="form-group"><label>${t('amTagColor')}</label><input id="tag-color" type="color" value="${esc(tg.color||'#00e585')}" style="height:40px;padding:2px;cursor:pointer"></div>
+      <div class="form-group"><label>${t('amTagColor')}</label><input id="tag-color" type="color" value="${esc(tg.color||'#00e585')}" class="cmy-tag-color"></div>
       <div class="form-group"><label>${t('amTagDesc')} &nbsp;<span class="label-hint">(${t('optionalLabel')})</span></label><input id="tag-desc" type="text" maxlength="120" value="${esc(tg.description||'')}" placeholder="${esc(t('amTagDescPh'))}"></div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:4px">
+    <div class="cmy-tag-acts">
       <button class="btn-primary" data-on-click="${_on("saveTag")}">${t('saveBtn')}</button>
       <button class="btn-secondary" data-on-click="${_on("_on__tagEditForm_1",_EV,_EL)}">${t('cancelBtn')}</button>
     </div>
@@ -29609,7 +29614,7 @@ function _amCustRows(){
   const cap=Math.max(AM_PAGE,S.amShow||AM_PAGE);
   const page=shown.slice(0,cap);
   const rest=shown.length-page.length;
-  const more=rest>0?`<div style="padding:14px 0;text-align:center"><button type="button" class="btn-secondary" data-on-click="${_on("_amMore")}">${t('amShowMore').replace('{0}',Math.min(rest,AM_PAGE))}</button><div class="am-meta" style="margin-top:6px">${esc(t('amShowingOf').replace('{0}',page.length).replace('{1}',shown.length))}</div></div>`:'';
+  const more=rest>0?`<div class="cmy-more"><button type="button" class="btn-secondary" data-on-click="${_on("_amMore")}">${t('amShowMore').replace('{0}',Math.min(rest,AM_PAGE))}</button><div class="am-meta cmy-mt6">${esc(t('amShowingOf').replace('{0}',page.length).replace('{1}',shown.length))}</div></div>`:'';
   return (page.map(_amRowHtml).join('')||`<div class="empty-state">${(S.amSearch||'').trim()?t('commNoMatch'):t('amNoCustomers')}</div>`)+more;
 }
 // A rider's deletion request on their row: when they asked, and the two ways staff answer it -
@@ -29618,7 +29623,7 @@ function _amCustRows(){
 function _delReqLine(c){
   if(!c||!c.deletion_requested_at)return'';
   const at=shortDate(fmtDate(new Date(c.deletion_requested_at)));
-  return`<div class="am-meta am-delreq" style="color:var(--red);font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px">${esc(t('amDelReqLine').replace('{0}',at))}
+  return`<div class="am-meta am-delreq cmy-delreq">${esc(t('amDelReqLine').replace('{0}',at))}
     <button type="button" class="btn-sm btn-muted" data-on-click="${_on("deleteCustomerAccount",c.id)}">${t('naDelBtn')}</button>
     <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_amClearDelReq",c.id)}">${t('amDelReqClear')}</button></div>`;
 }
@@ -29637,9 +29642,9 @@ function _amRowInner(c){
     const myCT=_ctRowsFor(c.id).filter(ct=>_tm[ct.tag_id]);
     const chips=myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;
     const picking=S.tagCustId===c.id;
-    const picker=picking?`<div class="am-picker">${(S.tags||[]).map(tg=>{const on=myTags.some(x=>x.id===tg.id);return `<button class="am-pick${on?' on':''}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" style="--tc:${esc(_tagColor(tg))}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
+    const picker=picking?`<div class="am-picker">${(S.tags||[]).map(tg=>{const on=myTags.some(x=>x.id===tg.id);return `<button class="am-pick${on?' on':''}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
     const contact=[c.email,c.phone,c.heard_from?heardLabel(c.heard_from):''].filter(Boolean)
-      .map(v=>`<bdi>${esc(v)}</bdi>`).join(' <span style="opacity:.5">·</span> ');
+      .map(v=>`<bdi>${esc(v)}</bdi>`).join(' <span class="cmy-sep">·</span> ');
     // Accounts made before signup asked for a gender have none; offer it on the row, one tap.
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"male")}">${t('genderMale')}</button><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"female")}">${t('genderFemale')}</button></div>`;
     return `<div class="am-cust">
@@ -29686,46 +29691,46 @@ function _commAccounts(){
     return `<div class="am-tag-row">
       ${_tagChip(tg)}
       <span class="am-meta">${tg.auto_grant?t('amAutoTag')+' · ':''}${t('amHolders').replace('{0}',cnt)}</span>
-      <div style="margin-left:auto;display:flex;gap:6px;flex-shrink:0">
+      <div class="cmy-am-tacts">
         <button class="btn-sm btn-secondary" data-on-click="${_on("openTagEdit",tg.id)}">${t('editBtn')}</button>
         ${tg.locked?'':`<button class="btn-sm btn-red" data-on-click="${_on("deleteTag",tg.id)}">${t('deleteBtn')}</button>`}
       </div>
     </div>`;
   }).join('')||`<div class="empty-state">${t('amNoTags')}</div>`;
-  const tagPanel=`<div class="form-section" style="margin-top:0">
+  const tagPanel=`<div class="form-section cmy-mt0">
     <div class="form-title">${t('amTagsTitle')}</div>
-    <div style="font-size:11px;color:var(--muted);margin:-6px 0 12px">${t('amTagsSub')}</div>
+    <div class="cmy-am-sub">${t('amTagsSub')}</div>
     ${tagRows}
-    ${S.tagEdit!==null?_tagEditForm():`<button class="btn-secondary" style="margin-top:12px" data-on-click="${_on("openTagEdit","")}">+ ${t('amNewTag')}</button>`}
+    ${S.tagEdit!==null?_tagEditForm():`<button class="btn-secondary cmy-mt12" data-on-click="${_on("openTagEdit","")}">+ ${t('amNewTag')}</button>`}
   </div>`;
   const rows=_amCustRows();
   // Tag filter pills: All + one per tag (in the tag's colour), with live holder counts.
   const _nMissing=(S.customers||[]).filter(c=>_amMissingOf(c).length).length;
-  const missingPill=`<button class="am-pick${S.amMissing?' on':''}" style="--tc:var(--orange)" aria-pressed="${S.amMissing?'true':'false'}" data-on-click="${_on("_on__commAccounts_1",_EV,_EL)}">${t('amMissingBtn')} (${_nMissing})</button>`;
+  const missingPill=`<button class="am-pick${S.amMissing?' on':''} cmy-tc-orange" aria-pressed="${S.amMissing?'true':'false'}" data-on-click="${_on("_on__commAccounts_1",_EV,_EL)}">${t('amMissingBtn')} (${_nMissing})</button>`;
   const _nFixing=(S.customers||[]).filter(c=>_flagFieldsOf(c).length).length;
   _loadPhoneRules();
   const _nSx=(S.customers||[]).filter(c=>_sxOf(c)).length;
-  const sxPill=`<button id="am-sx-pill" class="am-pick${S.amSuspect?' on':''}" style="--tc:var(--red)" aria-pressed="${S.amSuspect?'true':'false'}" data-on-click="${_on("_on__commAccounts_2",_EV,_EL)}">${t('sxFilterBtn')} (${_nSx})</button>`;
+  const sxPill=`<button id="am-sx-pill" class="am-pick${S.amSuspect?' on':''} cmy-tc-red" aria-pressed="${S.amSuspect?'true':'false'}" data-on-click="${_on("_on__commAccounts_2",_EV,_EL)}">${t('sxFilterBtn')} (${_nSx})</button>`;
   // Deletion requests: shown only while there is one to act on (or the filter is on).
   const _nDelReq=(S.customers||[]).filter(c=>c.deletion_requested_at).length;
-  const delReqPill=(_nDelReq||S.amDelReq)?`<button class="am-pick${S.amDelReq?' on':''}" style="--tc:var(--red)" aria-pressed="${S.amDelReq?'true':'false'}" data-on-click="${_on("_on__commAccounts_3",_EV,_EL)}">${t('amDelReqFilter')} (${_nDelReq})</button>`:'';
-  const fixingPill=(_nFixing||S.amFixing)?`<button class="am-pick${S.amFixing?' on':''}" style="--tc:var(--orange)" aria-pressed="${S.amFixing?'true':'false'}" data-on-click="${_on("_on__commAccounts_4",_EV,_EL)}">${t('fixFilterBtn')} (${_nFixing})</button>`:'';
-  const filterPills=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-    ${(S.tags||[]).length?`<button class="am-pick${S.amTagFilter?'':' on'}" style="--tc:var(--green)" data-on-click="${_on("_amFilter","amTagFilter","")}">${t('amFilterAll')}</button>`:''}
+  const delReqPill=(_nDelReq||S.amDelReq)?`<button class="am-pick${S.amDelReq?' on':''} cmy-tc-red" aria-pressed="${S.amDelReq?'true':'false'}" data-on-click="${_on("_on__commAccounts_3",_EV,_EL)}">${t('amDelReqFilter')} (${_nDelReq})</button>`:'';
+  const fixingPill=(_nFixing||S.amFixing)?`<button class="am-pick${S.amFixing?' on':''} cmy-tc-orange" aria-pressed="${S.amFixing?'true':'false'}" data-on-click="${_on("_on__commAccounts_4",_EV,_EL)}">${t('fixFilterBtn')} (${_nFixing})</button>`:'';
+  const filterPills=`<div class="cmy-am-pills">
+    ${(S.tags||[]).length?`<button class="am-pick${S.amTagFilter?'':' on'} cmy-tc-green" data-on-click="${_on("_amFilter","amTagFilter","")}">${t('amFilterAll')}</button>`:''}
     ${(S.tags||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
       const cnt=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct)).length;
       const on=S.amTagFilter===tg.id;
-      return `<button class="am-pick${on?' on':''}" style="--tc:${esc(_tagColor(tg))}" title="${esc(tg.name)}" data-on-click="${_on("_amFilter","amTagFilter",on?'':tg.id)}">${_tagFace(tg)} (${cnt})</button>`;
+      return `<button class="am-pick${on?' on':''}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}" data-on-click="${_on("_amFilter","amTagFilter",on?'':tg.id)}">${_tagFace(tg)} (${cnt})</button>`;
     }).join('')}
     ${delReqPill}${missingPill}${fixingPill}${sxPill}
   </div>`;
   const custPanel=`<div class="form-section">
-    <div class="form-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">${t('amCustomersTitle')} <span id="am-cust-count" style="color:var(--muted);font-weight:600;font-size:13px">(${S._amShownCount||0})</span><button type="button" class="btn-sm btn-secondary" style="margin-inline-start:auto" data-on-click="${_on("showNewAcctModal")}">+ ${t('naBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showAccountReportOptions")}">${ICON_EXPORT} ${t('acrTitle')}</button></div>
+    <div class="form-title cmy-am-title">${t('amCustomersTitle')} <span id="am-cust-count" class="cmy-am-count">(${S._amShownCount||0})</span><button type="button" class="btn-sm btn-secondary cmy-mis-auto" data-on-click="${_on("showNewAcctModal")}">+ ${t('naBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showAccountReportOptions")}">${ICON_EXPORT} ${t('acrTitle')}</button></div>
     ${filterPills}
-    <div class="filter-row" style="flex-wrap:wrap;margin-bottom:8px">
-      <div class="${_srchCls('am',S.amSearch)}" data-srch="am" style="flex:1;min-width:200px">
+    <div class="filter-row cmy-am-frow">
+      <div class="${_srchCls('am',S.amSearch)} cmy-am-srch" data-srch="am">
         ${_artIcon('search',13)}
-        <input id="am-search" type="text" class="search-input" style="width:100%;box-sizing:border-box" aria-label="${esc(t('amSearchPh'))}" value="${esc(S.amSearch||'')}" placeholder="${esc(t('amSearchPh'))}" data-on-input="${_on("_amSearchInput",_P("value"))}" data-on-focus="${_on("_on__commAccounts_5",_EV,_EL)}" data-on-blur="${_on("_on__commAccounts_6",_EV,_EL)}">
+        <input id="am-search" type="text" class="search-input cmy-am-in" aria-label="${esc(t('amSearchPh'))}" value="${esc(S.amSearch||'')}" placeholder="${esc(t('amSearchPh'))}" data-on-input="${_on("_amSearchInput",_P("value"))}" data-on-focus="${_on("_on__commAccounts_5",_EV,_EL)}" data-on-blur="${_on("_on__commAccounts_6",_EV,_EL)}">
         ${_srchBtn()}
       </div>
       ${_fBtn('am',[S.amGender,S.amNat].filter(Boolean).length)}
@@ -29783,11 +29788,11 @@ function _commDuplicates(){
   const recent=S._mgMissing?`<div class="tm-note">${t('dbPending')}</div>`:!S._mgRows?skeletonList():!S._mgRows.length?`<div class="empty-state">${t('mgNone')}</div>`
     :`<div class="mg-recent">${S._mgRows.map(r=>`<div class="mg-row"><div><strong>${esc(r.drop_name||r.drop_id)}</strong> → <strong>${esc(r.keep_name||r.keep_id)}</strong><div class="am-meta">${esc(fmtStamp(r.merged_at))}${r.merged_by?' · '+esc(r.merged_by):''}</div></div>
       <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_mgUndo",r.id)}">${t('mgUndoBtn')}</button></div>`).join('')}</div>`;
-  return `<div class="form-section" style="margin-top:0"><div class="form-title">${t('mgTitle')}</div><div class="ca-sub">${t('mgSub')}</div>
+  return `<div class="form-section cmy-mt0"><div class="form-title">${t('mgTitle')}</div><div class="ca-sub">${t('mgSub')}</div>
       ${groups.length?groups.map(groupHtml).join(''):`<div class="empty-state">${t('mgNoDups')}</div>`}</div>
     <div class="form-section"><div class="form-title">${t('mgManualTitle')}</div>
       <div class="mg-manual">${pick('a',S._mgQa,S._mgA)}${pick('b',S._mgQb,S._mgB)}</div>
-      <button type="button" class="btn-primary" style="margin-top:10px" data-on-click="${_on("_mgManualGo")}"${S._mgA&&S._mgB?'':' disabled'}>${t('mgMergeBtn')}</button></div>
+      <button type="button" class="btn-primary cmy-mt10" data-on-click="${_on("_mgManualGo")}"${S._mgA&&S._mgB?'':' disabled'}>${t('mgMergeBtn')}</button></div>
     <div class="form-section"><div class="form-title">${t('mgRecentTitle')}</div>${recent}</div>`;
 }
 // The merge dialog: who stays (the one with more bookings, unless the admin keeps the other), who moves.
@@ -29797,7 +29802,7 @@ function _mgOpen(aId,bId,keepId){
   confirmDialog({title:t('mgTitle'),
     body:`<div class="mg-dlg"><div class="mg-dlg-side"><div class="mg-tag">${t('mgKeepLbl')}</div>${_mgAcctHtml(keep)}</div>
       <div class="mg-dlg-side"><div class="mg-tag muted">${t('mgGoesLbl')}</div>${_mgAcctHtml(drop)}</div>
-      <button type="button" class="btn-sm btn-secondary" style="margin-top:8px" data-on-click="${_on("_mgOpen",a.id,b.id,drop.id)}">${t('mgSwapBtn')}</button></div>`,
+      <button type="button" class="btn-sm btn-secondary cmy-mt8" data-on-click="${_on("_mgOpen",a.id,b.id,drop.id)}">${t('mgSwapBtn')}</button></div>`,
     confirmLabel:t('mgConfirmBtn'),confirmClass:'btn-red',onConfirm:()=>_mgRun(keep.id,drop.id)});
 }
 async function _mgRun(keepId,dropId){
@@ -29866,27 +29871,27 @@ function _commBoard(){
     const tier=_riderTier(allAgg[m.key]?allAgg[m.key].count:m.count);
     let move='';
     if(win!=='all'){const pr=prevRank[m.key];
-      if(pr===undefined)move=`<span style="color:var(--green);font-size:10px;font-weight:800">▲${t('lbNewLabel')}</span>`;
-      else if(pr>i)move=`<span style="color:var(--green);font-size:11px;font-weight:800">▲${pr-i}</span>`;
-      else if(pr<i)move=`<span style="color:var(--red);font-size:11px;font-weight:800">▼${i-pr}</span>`;
-      else move=`<span style="color:var(--muted);font-size:11px">–</span>`;}
-    return`<span style="width:24px;text-align:center;font-size:${i<3?'16px':'12px'};font-weight:900;color:${i<3?'var(--green)':'var(--muted)'};flex-shrink:0">${medals[i]||(i+1)}</span>
-      <span style="width:30px;height:30px;border-radius:50%;background:rgba(var(--green-rgb),.14);border:1px solid rgba(var(--green-rgb),.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--green);flex-shrink:0">${esc(initials)}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.name)}</div>
-        <div style="font-size:10px;color:var(--muted);font-weight:700">${tier}${streak>=2?` ·  ${t('lbStreakTip').replace('{0}',streak)}`:''}</div>
+      if(pr===undefined)move=`<span class="cmy-lb-new">▲${t('lbNewLabel')}</span>`;
+      else if(pr>i)move=`<span class="cmy-lb-up">▲${pr-i}</span>`;
+      else if(pr<i)move=`<span class="cmy-lb-down">▼${i-pr}</span>`;
+      else move=`<span class="cmy-lb-same">–</span>`;}
+    return`<span class="${i<3?'cmy-lb-rank-top':'cmy-lb-rank'}">${medals[i]||(i+1)}</span>
+      <span class="cmy-lb-av">${esc(initials)}</span>
+      <div class="cmy-f1m0">
+        <div class="cmy-lb-name">${esc(m.name)}</div>
+        <div class="cmy-lb-tier">${tier}${streak>=2?` ·  ${t('lbStreakTip').replace('{0}',streak)}`:''}</div>
       </div>
-      ${move?`<span style="width:34px;text-align:center;flex-shrink:0">${move}</span>`:''}
-      <div style="text-align:right;min-width:50px;flex-shrink:0"><span style="font-weight:900;color:var(--green);font-size:15px">${fmtVal(m)}</span>${valUnit?`<div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase">${valUnit}</div>`:''}</div>`;
+      ${move?`<span class="cmy-lb-mv">${move}</span>`:''}
+      <div class="cmy-lb-valw"><span class="cmy-lb-val">${fmtVal(m)}</span>${valUnit?`<div class="cmy-lb-unit">${valUnit}</div>`:''}</div>`;
   }
-  const podium=list.slice(0,3).map((m,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:12px;background:rgba(var(--green-rgb),${i===0?'.08':'.04'});border:1px solid rgba(var(--green-rgb),${i===0?'.3':'.15'});border-radius:7px;margin-bottom:8px">${rowInner(m,i)}</div>`).join('');
-  const rest=list.slice(3).map((m,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border)">${rowInner(m,i+3)}</div>`).join('');
+  const podium=list.slice(0,3).map((m,i)=>`<div class="${i===0?'cmy-lb-pod1':'cmy-lb-pod'}">${rowInner(m,i)}</div>`).join('');
+  const rest=list.slice(3).map((m,i)=>`<div class="cmy-lb-row">${rowInner(m,i+3)}</div>`).join('');
   // Search filter (keeps each rider's real rank); falls back to podium+rest when there is no query
   const _q=(S.lbSearch||'').trim().toLowerCase();
   const lb=_q
-    ?(()=>{const shown=list.map((m,i)=>({m,i})).filter(o=>(o.m.name||'').toLowerCase().includes(_q));return shown.length?shown.map(o=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border)">${rowInner(o.m,o.i)}</div>`).join(''):`<div class="empty-state">${t('commNoMatch')}</div>`;})()
+    ?(()=>{const shown=list.map((m,i)=>({m,i})).filter(o=>(o.m.name||'').toLowerCase().includes(_q));return shown.length?shown.map(o=>`<div class="cmy-lb-row">${rowInner(o.m,o.i)}</div>`).join(''):`<div class="empty-state">${t('commNoMatch')}</div>`;})()
     :(list.length?(podium+rest):`<div class="empty-state">${t('commNoLeaders')}</div>`);
-  const searchBox=(list.length>=6||_q)?`<div style="margin-bottom:12px"><input id="lb-search" type="text" value="${esc(S.lbSearch||'')}" placeholder="${esc(t('commSearchPh'))}" data-on-input="${_on("_on__commBoard_1",_EV,_EL)}" data-on-focus="${_on("_on__commBoard_2",_EV,_EL)}" data-on-blur="${_on("_on__commBoard_3",_EV,_EL)}" style="width:100%;box-sizing:border-box;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:4px;padding:9px 12px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;outline:none"></div>`:'';
+  const searchBox=(list.length>=6||_q)?`<div class="cmy-mb12"><input id="lb-search" type="text" value="${esc(S.lbSearch||'')}" placeholder="${esc(t('commSearchPh'))}" data-on-input="${_on("_on__commBoard_1",_EV,_EL)}" data-on-focus="${_on("_on__commBoard_2",_EV,_EL)}" data-on-blur="${_on("_on__commBoard_3",_EV,_EL)}" class="cmy-lb-search"></div>`:'';
   // Stash top-10 (first names only, no PII) for the Share button
   S._lbShareTxt=list.length?`${t('commLeaderboard')} · ${({week:t('lbWindowWeek'),month:t('lbWindowMonth'),all:t('lbWindowAll')}[win]||'')}\n`+list.slice(0,10).map((m,i)=>`${i+1}. ${(m.name||'?').split(/\s+/)[0]} - ${fmtVal(m)}`).join('\n'):'';
   const pill=(stateKey,val,label)=>`<button class="filter-pill${S[stateKey]===val?' active':''}" data-on-click="${_on("setLb",stateKey,val)}">${label}</button>`;
@@ -29900,11 +29905,11 @@ function _commBoard(){
   const kRides=list.reduce((s,m)=>s+(m.count||0),0);
   const kMin=list.reduce((s,m)=>s+(m.duration||0),0);
   const kAvg=kRiders?Math.round(kRides/kRiders*10)/10:0;
-  const commKpis=`<div class="analytics-kpi-grid" style="margin-bottom:14px">
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${kRiders}</div><div class="analytics-kpi-label">${t('commStatRiders')}</div></div>
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${kRides}</div><div class="analytics-kpi-label">${t('commStatRides')}</div></div>
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--blue)">${fmtDur(kMin)}</div><div class="analytics-kpi-label">${t('commStatMinutes')}</div></div>
-    <div class="analytics-kpi-card"><div class="analytics-kpi-value" style="color:var(--green)">${kAvg||'—'}</div><div class="analytics-kpi-label">${t('commStatAvg')}</div></div>
+  const commKpis=`<div class="analytics-kpi-grid cmy-mb14">
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value cmy-c-green">${kRiders}</div><div class="analytics-kpi-label">${t('commStatRiders')}</div></div>
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value cmy-c-green">${kRides}</div><div class="analytics-kpi-label">${t('commStatRides')}</div></div>
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value cmy-c-blue">${fmtDur(kMin)}</div><div class="analytics-kpi-label">${t('commStatMinutes')}</div></div>
+    <div class="analytics-kpi-card"><div class="analytics-kpi-value cmy-c-green">${kAvg||'—'}</div><div class="analytics-kpi-label">${t('commStatAvg')}</div></div>
   </div>`;
   // Upcoming rides: future-dated sessions, soonest first, with live spots-left
   const _today=_todayISO();
@@ -29912,13 +29917,13 @@ function _commBoard(){
     .sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id))).slice(0,6);
   const upcomingHtml=upcoming.length?upcoming.map(s=>{
     const sl=spotsLeft(s.id);
-    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border)">
-      <span style="width:8px;height:8px;border-radius:50%;background:${sl>0?'var(--green)':'var(--orange)'};flex-shrink:0"></span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(dayLabel(s.day)||'')}</div>
-        <div style="font-size:11px;color:var(--muted);font-weight:700">${esc(shortDate(s.session_date||s.id)||'')}${_own(SESS_STATUS_KEY,s.status)?` · ${t(SESS_STATUS_KEY[s.status])}`:''}</div>
+    return`<div class="cmy-lb-row">
+      <span class="${sl>0?'cmy-up-dot':'cmy-up-dot0'}"></span>
+      <div class="cmy-f1m0">
+        <div class="cmy-up-day">${esc(dayLabel(s.day)||'')}</div>
+        <div class="cmy-up-date">${esc(shortDate(s.session_date||s.id)||'')}${_own(SESS_STATUS_KEY,s.status)?` · ${t(SESS_STATUS_KEY[s.status])}`:''}</div>
       </div>
-      <div style="text-align:right;flex-shrink:0;font-size:12px;font-weight:800;color:${sl>0?'var(--green)':'var(--orange)'}">${spotsLeftLabel(sl)}</div>
+      <div class="${sl>0?'cmy-up-left':'cmy-up-left0'}">${spotsLeftLabel(sl)}</div>
     </div>`;
   }).join(''):`<div class="empty-state">${t('commNoEvents')}</div>`;
   // Rider spotlight: #1 rider with all-time tier and progress toward the next tier
@@ -29930,50 +29935,50 @@ function _commBoard(){
     const tp=_tierProg(topAll);
     const tInit=(top.name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
     const prog=tp?Math.max(5,Math.min(100,Math.round((topAll-tp.prev)/(tp.th-tp.prev)*100))):100;
-    spotlightHtml=`<div class="form-section" style="margin-bottom:14px;border:1px solid rgba(var(--green-rgb),.3);background:rgba(var(--green-rgb),.05)">
+    spotlightHtml=`<div class="form-section cmy-sp-card">
       <div class="form-title">${t('commSpotlight')}</div>
-      <div style="display:flex;align-items:center;gap:14px;${tp?'margin-bottom:12px':''}">
-        <span style="width:48px;height:48px;border-radius:50%;background:rgba(var(--green-rgb),.16);border:1px solid rgba(var(--green-rgb),.35);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--green);flex-shrink:0">${esc(tInit)}</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:900;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(top.name)}</div>
-          <div style="font-size:12px;color:var(--muted);font-weight:700">${_riderTier(topAll)} · ${topAll} ${t('commRides')}</div>
+      <div class="cmy-sp-row${tp?' cmy-mb12':''}">
+        <span class="cmy-sp-av">${esc(tInit)}</span>
+        <div class="cmy-f1m0">
+          <div class="cmy-sp-name">${esc(top.name)}</div>
+          <div class="cmy-sp-sub">${_riderTier(topAll)} · ${topAll} ${t('commRides')}</div>
         </div>
-        <div style="text-align:right;flex-shrink:0"><span style="font-weight:900;color:var(--green);font-size:20px">${fmtVal(top)}</span></div>
+        <div class="cmy-valw"><span class="cmy-sp-val">${fmtVal(top)}</span></div>
       </div>
-      ${tp?`<div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">${t('commToNext').replace('{0}',tp.away).replace('{1}',t(tp.k))}</div>
-        <div style="height:7px;background:rgba(var(--tint-rgb),.08);border-radius:2px;overflow:hidden"><div style="height:100%;width:${prog}%;background:var(--green)"></div></div>`
-      :`<div style="font-size:11px;font-weight:800;color:var(--green)">${t('commMaxTier')}</div>`}
+      ${tp?`<div class="cmy-sp-next">${t('commToNext').replace('{0}',tp.away).replace('{1}',t(tp.k))}</div>
+        <div class="cmy-sp-track"><div class="cmy-sp-fill" data-cssv="${_cssv({'--cmy-w':prog+'%'})}"></div></div>`
+      :`<div class="cmy-sp-max">${t('commMaxTier')}</div>`}
     </div>`;
   }
   // Milestone watch: riders within 2 rides of their next milestone (all-time counts)
   const _MILE=[3,10,25,50,100];
   const _nextMile=n=>_MILE.find(x=>x>n)||null;
   const _watch=Object.values(allAgg).map(m=>{const nm=_nextMile(m.count);return nm&&(nm-m.count)<=2?{m,next:nm,away:nm-m.count}:null;}).filter(Boolean).sort((a,b)=>a.away-b.away||b.m.count-a.m.count).slice(0,5);
-  const milestoneHtml=_watch.length?`<div class="form-section" style="margin-top:0">
+  const milestoneHtml=_watch.length?`<div class="form-section cmy-mt0">
     <div class="form-title">${t('commMilestones')}</div>
-    <div style="font-size:11px;color:var(--muted);margin:-6px 0 10px">${t('commMilestonesSub')}</div>
-    ${_watch.map(o=>{const mi=(o.m.name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();return`<div style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border)">
-      <span style="width:30px;height:30px;border-radius:50%;background:rgba(var(--warn-rgb),.14);border:1px solid rgba(var(--warn-rgb),.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--orange);flex-shrink:0">${esc(mi)}</span>
-      <div style="flex:1;min-width:0;font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(o.m.name)}</div>
-      <div style="text-align:right;flex-shrink:0"><span style="font-weight:900;color:var(--orange);font-size:13px">${t('commMileAway').replace('{0}',o.away)}</span><div style="font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase">${o.next} ${t('commRides')}</div></div>
+    <div class="cmy-ms-sub">${t('commMilestonesSub')}</div>
+    ${_watch.map(o=>{const mi=(o.m.name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();return`<div class="cmy-ms-row">
+      <span class="cmy-ms-av">${esc(mi)}</span>
+      <div class="cmy-ms-name">${esc(o.m.name)}</div>
+      <div class="cmy-valw"><span class="cmy-ms-away">${t('commMileAway').replace('{0}',o.away)}</span><div class="cmy-lb-unit">${o.next} ${t('commRides')}</div></div>
     </div>`;}).join('')}
   </div>`:'';
   const leaderboardView=`
     ${spotlightHtml}
-    <div class="form-section" style="margin-top:0">
-      <div class="form-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>${t('commLeaderboard')}</span>${list.length?`<button data-on-click="${_on("shareLeaderboard")}" style="background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);font-family:var(--font-body);font-size:11px;font-weight:700;padding:5px 12px;border-radius:3px;cursor:pointer">${t('commShareBtn')}</button>`:''}</div>
-      <div class="filter-row" style="margin-bottom:6px">${pill('lbScope','owner',t('lbScopeOwner'))}${pill('lbScope','rider',t('lbScopeRider'))}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px">${scope==='owner'?t('lbScopeOwnerSub'):t('lbScopeRiderSub')}</div>
-      <div class="filter-row" style="margin-bottom:6px">${pill('lbWindow','week',t('lbWindowWeek'))}${pill('lbWindow','month',t('lbWindowMonth'))}${pill('lbWindow','all',t('lbWindowAll'))}</div>
-      <div class="filter-row" style="margin-bottom:14px;align-items:center"><span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-inline-end:2px">${t('lbRankByLabel')}</span>${metricPills.map(([v,l])=>pill('lbMetric',v,l)).join('')}</div>
+    <div class="form-section cmy-mt0">
+      <div class="form-title cmy-lb-title"><span>${t('commLeaderboard')}</span>${list.length?`<button data-on-click="${_on("shareLeaderboard")}" class="cmy-lb-share">${t('commShareBtn')}</button>`:''}</div>
+      <div class="filter-row cmy-mb6">${pill('lbScope','owner',t('lbScopeOwner'))}${pill('lbScope','rider',t('lbScopeRider'))}</div>
+      <div class="cmy-lb-scope">${scope==='owner'?t('lbScopeOwnerSub'):t('lbScopeRiderSub')}</div>
+      <div class="filter-row cmy-mb6">${pill('lbWindow','week',t('lbWindowWeek'))}${pill('lbWindow','month',t('lbWindowMonth'))}${pill('lbWindow','all',t('lbWindowAll'))}</div>
+      <div class="filter-row cmy-lb-rankrow"><span class="cmy-lb-rankby">${t('lbRankByLabel')}</span>${metricPills.map(([v,l])=>pill('lbMetric',v,l)).join('')}</div>
       ${searchBox}
       ${lb}
     </div>`;
   const statsView=`
     ${commKpis}
-    <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start">
-      <div style="flex:1 1 300px;min-width:0"><div class="form-section" style="margin-top:0"><div class="form-title">${t('commEvents')}</div>${upcomingHtml}</div></div>
-      <div style="flex:1 1 300px;min-width:0">${milestoneHtml||`<div class="form-section" style="margin-top:0"><div class="form-title">${t('commMilestones')}</div><div class="empty-state">${t('commNoLeaders')}</div></div>`}</div>
+    <div class="cmy-st-grid">
+      <div class="cmy-st-col"><div class="form-section cmy-mt0"><div class="form-title">${t('commEvents')}</div>${upcomingHtml}</div></div>
+      <div class="cmy-st-col">${milestoneHtml||`<div class="form-section cmy-mt0"><div class="form-title">${t('commMilestones')}</div><div class="empty-state">${t('commNoLeaders')}</div></div>`}</div>
     </div>`;
   return{leaderboardView,statsView};
 }
@@ -30232,8 +30237,8 @@ function renderCommunity(){
   el.innerHTML=`
     <div class="page-title">${t('commTitle')}</div>
     <div class="page-sub">${t('commSub')}</div>
-    <div class="filter-row" style="margin:14px 0 6px">${navBtn('leaderboard',t('commTabLeaderboard'))}${navBtn('stats',t('commTabStats'))}${navBtn('accounts',t('commTabAccounts'))}${navBtn('badges',t('mrBadgesTitle'))}${navBtn('flagged',t('commTabFlagged'))}${navBtn('applications',t('commTabApplications')+`<span id="ca-pill-n">${_appsPendingN()?` (${_appsPendingN()})`:''}</span>`)}${navBtn('birthdays',t('commTabBirthdays')+(bdN?` 🎂 ${bdN}`:''))}${isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):''}</div>
-    <div style="margin-top:14px">${sub==='leaderboard'?_commBoard().leaderboardView:sub==='stats'?_commBoard().statsView:sub==='flagged'?_commFlagged():sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='badges'?_commBadges():_commAccounts()}</div>`;
+    <div class="filter-row cmy-nav">${navBtn('leaderboard',t('commTabLeaderboard'))}${navBtn('stats',t('commTabStats'))}${navBtn('accounts',t('commTabAccounts'))}${navBtn('badges',t('mrBadgesTitle'))}${navBtn('flagged',t('commTabFlagged'))}${navBtn('applications',t('commTabApplications')+`<span id="ca-pill-n">${_appsPendingN()?` (${_appsPendingN()})`:''}</span>`)}${navBtn('birthdays',t('commTabBirthdays')+(bdN?` 🎂 ${bdN}`:''))}${isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):''}</div>
+    <div class="cmy-mt14">${sub==='leaderboard'?_commBoard().leaderboardView:sub==='stats'?_commBoard().statsView:sub==='flagged'?_commFlagged():sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='badges'?_commBadges():_commAccounts()}</div>`;
   // Re-focus whichever search box was active so typing is not interrupted by the re-render
   if(S._lbSearchFocused){const _si=document.getElementById('lb-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(S._amFocused){const _si=document.getElementById('am-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}

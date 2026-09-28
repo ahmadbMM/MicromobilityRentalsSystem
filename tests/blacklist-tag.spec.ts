@@ -42,7 +42,7 @@ test('the chip is black and wears the white mark struck through, and nothing els
   await accounts(page);
   const chip = page.locator('#am-cust-rows .am-chip.tag-ban').first();
   await expect(chip).toBeVisible();
-  await expect(chip).toHaveAttribute('style', /background:#0b0b0b/);
+  await expect(chip).toHaveCSS('background-color', 'rgb(11, 11, 11)'); // #0b0b0b
   await expect(chip).toHaveCSS('color', 'rgb(255, 255, 255)');
   await expect(chip.locator('.tag-banned .tag-logo-mm')).toHaveCount(1);
   await expect(chip.locator('.tag-banned .tag-ban-sign')).toHaveCount(1);

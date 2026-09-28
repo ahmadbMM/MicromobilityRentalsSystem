@@ -1315,6 +1315,182 @@
     .confirm-box .tag-ban-opt{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
     /* Inputs are appearance:none site-wide and the staff skin draws no checkbox of its own: ask for the native box. */
     .confirm-box .tag-ban-opt input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green);}
+    /* ── Community without inline styles (2026-09-28, the move of style="..." into classes, so the
+       policy can drop style-src 'unsafe-inline'): the leaderboard and statistics, Accounts (its tag
+       manager, filter pills, rows and tag editor), Flagged, Birthdays, Applications and learning to
+       ride, Duplicates, all drawn into #tab-community; the account editor (#new-acct-modal); the tag
+       grant, flag, message, lesson and merge dialogs (#confirm-modal); the add-to-a-ride dialog
+       (#comm-add-modal); the JCC group and group edit dialogs (#jcc-group-modal, #group-edit-modal);
+       and a tag chip wherever one is drawn (the account history is #cust-modal). Each rule is scoped
+       by the id its markup is drawn under, so it outranks every class rule (the body.view-staff
+       layer included) as the inline style did. A value known only at run time rides in data-cssv:
+       a tag's colours (--cmy-tbg, --cmy-tbd, --cmy-tfg; --tc on the picker and filter buttons, as
+       before), a status's colour (--cmy-st, which the dot inherits), a month's bar (--cmy-h) and the
+       top rider's progress (--cmy-w). background:none and transparent written in a template are
+       background:transparent none here, and outline:none is outline:medium none: the same values,
+       which the build's minifier keeps (it writes outline:none as outline:0, a narrower outline). */
+    #tab-community .cmy-mt0{margin-top:0;}
+    #tab-community .cmy-mt6{margin-top:6px;}
+    #tab-community .cmy-mt8,#new-acct-modal .cmy-mt8,#confirm-modal .cmy-mt8{margin-top:8px;}
+    #tab-community .cmy-mt10{margin-top:10px;}
+    #tab-community .cmy-mt12{margin-top:12px;}
+    #tab-community .cmy-mt14{margin-top:14px;}
+    #tab-community .cmy-mb6,#jcc-group-modal .cmy-mb6,#group-edit-modal .cmy-mb6{margin-bottom:6px;}
+    #tab-community .cmy-mb8,#comm-add-modal .cmy-mb8{margin-bottom:8px;}
+    #comm-add-modal .cmy-mb10,#jcc-group-modal .cmy-mb10,#group-edit-modal .cmy-mb10{margin-bottom:10px;}
+    #tab-community .cmy-mb12,#confirm-modal .cmy-mb12{margin-bottom:12px;}
+    #tab-community .cmy-mb14,#confirm-modal .cmy-mb14{margin-bottom:14px;}
+    #comm-add-modal .cmy-f1,#confirm-modal .cmy-f1,#new-acct-modal .cmy-f1{flex:1;}
+    #tab-community .cmy-f1m0,#comm-add-modal .cmy-f1m0,#jcc-group-modal .cmy-f1m0,#group-edit-modal .cmy-f1m0{flex:1;min-width:0;}
+    #tab-community .cmy-sep,#comm-add-modal .cmy-sep{opacity:.5;}
+    #tab-community .cmy-c-muted,#confirm-modal .cmy-c-muted{color:var(--muted);}
+    #tab-community .cmy-c-green{color:var(--green);}
+    #tab-community .cmy-c-blue{color:var(--blue);}
+    #new-acct-modal .cmy-c-orange{color:var(--orange);}
+    #tab-community .cmy-b700{font-weight:700;}
+    #tab-community .cmy-valw{text-align:right;flex-shrink:0;}
+    #tab-community .cmy-more{padding:14px 0;text-align:center;}
+    #tab-community .cmy-nav{margin:14px 0 6px;}
+    /* a tag's chip (_tagChip), in every place it is drawn */
+    #tab-community .cmy-tc,#new-acct-modal .cmy-tc,#confirm-modal .cmy-tc,#cust-modal .cmy-tc{background:var(--cmy-tbg);border-color:var(--cmy-tbd);}
+    #tab-community .cmy-tcf,#new-acct-modal .cmy-tcf,#confirm-modal .cmy-tcf,#cust-modal .cmy-tcf{color:var(--cmy-tfg);}
+    #tab-community .cmy-dim,#new-acct-modal .cmy-dim,#confirm-modal .cmy-dim,#cust-modal .cmy-dim{opacity:.5;}
+    /* the leaderboard and the statistics */
+    #tab-community .cmy-lb-new{color:var(--green);font-size:10px;font-weight:800;}
+    #tab-community .cmy-lb-up{color:var(--green);font-size:11px;font-weight:800;}
+    #tab-community .cmy-lb-down{color:var(--red);font-size:11px;font-weight:800;}
+    #tab-community .cmy-lb-same{color:var(--muted);font-size:11px;}
+    #tab-community .cmy-lb-rank-top{width:24px;text-align:center;font-size:16px;font-weight:900;color:var(--green);flex-shrink:0;}
+    #tab-community .cmy-lb-rank{width:24px;text-align:center;font-size:12px;font-weight:900;color:var(--muted);flex-shrink:0;}
+    #tab-community .cmy-lb-av{width:30px;height:30px;border-radius:50%;background:rgba(var(--green-rgb),.14);border:1px solid rgba(var(--green-rgb),.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--green);flex-shrink:0;}
+    #tab-community .cmy-lb-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #tab-community .cmy-lb-tier{font-size:10px;color:var(--muted);font-weight:700;}
+    #tab-community .cmy-lb-mv{width:34px;text-align:center;flex-shrink:0;}
+    #tab-community .cmy-lb-valw{text-align:right;min-width:50px;flex-shrink:0;}
+    #tab-community .cmy-lb-val{font-weight:900;color:var(--green);font-size:15px;}
+    #tab-community .cmy-lb-unit{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase;}
+    #tab-community .cmy-lb-pod1{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(var(--green-rgb),.08);border:1px solid rgba(var(--green-rgb),.3);border-radius:7px;margin-bottom:8px;}
+    #tab-community .cmy-lb-pod{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(var(--green-rgb),.04);border:1px solid rgba(var(--green-rgb),.15);border-radius:7px;margin-bottom:8px;}
+    #tab-community .cmy-lb-row{display:flex;align-items:center;gap:10px;padding:10px 4px;border-bottom:1px solid var(--border);}
+    #tab-community .cmy-lb-search{width:100%;box-sizing:border-box;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:4px;padding:9px 12px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;outline:medium none;}
+    #tab-community .cmy-lb-title{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    #tab-community .cmy-lb-share{background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);font-family:var(--font-body);font-size:11px;font-weight:700;padding:5px 12px;border-radius:3px;cursor:pointer;}
+    #tab-community .cmy-lb-scope{font-size:11px;color:var(--muted);margin-bottom:10px;}
+    #tab-community .cmy-lb-rankrow{margin-bottom:14px;align-items:center;}
+    #tab-community .cmy-lb-rankby{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;margin-inline-end:2px;}
+    #tab-community .cmy-up-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+    #tab-community .cmy-up-dot0{width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+    #tab-community .cmy-up-day{font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #tab-community .cmy-up-date{font-size:11px;color:var(--muted);font-weight:700;}
+    #tab-community .cmy-up-left{text-align:right;flex-shrink:0;font-size:12px;font-weight:800;color:var(--green);}
+    #tab-community .cmy-up-left0{text-align:right;flex-shrink:0;font-size:12px;font-weight:800;color:var(--orange);}
+    #tab-community .cmy-sp-card{margin-bottom:14px;border:1px solid rgba(var(--green-rgb),.3);background:rgba(var(--green-rgb),.05);}
+    #tab-community .cmy-sp-row{display:flex;align-items:center;gap:14px;}
+    #tab-community .cmy-sp-av{width:48px;height:48px;border-radius:50%;background:rgba(var(--green-rgb),.16);border:1px solid rgba(var(--green-rgb),.35);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;color:var(--green);flex-shrink:0;}
+    #tab-community .cmy-sp-name{font-weight:900;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #tab-community .cmy-sp-sub{font-size:12px;color:var(--muted);font-weight:700;}
+    #tab-community .cmy-sp-val{font-weight:900;color:var(--green);font-size:20px;}
+    #tab-community .cmy-sp-next{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;}
+    #tab-community .cmy-sp-track{height:7px;background:rgba(var(--tint-rgb),.08);border-radius:2px;overflow:hidden;}
+    #tab-community .cmy-sp-fill{height:100%;width:var(--cmy-w);background:var(--green);}
+    #tab-community .cmy-sp-max{font-size:11px;font-weight:800;color:var(--green);}
+    #tab-community .cmy-ms-sub{font-size:11px;color:var(--muted);margin:-6px 0 10px;}
+    #tab-community .cmy-ms-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--border);}
+    #tab-community .cmy-ms-av{width:30px;height:30px;border-radius:50%;background:rgba(var(--warn-rgb),.14);border:1px solid rgba(var(--warn-rgb),.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:var(--orange);flex-shrink:0;}
+    #tab-community .cmy-ms-name{flex:1;min-width:0;font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #tab-community .cmy-ms-away{font-weight:900;color:var(--orange);font-size:13px;}
+    #tab-community .cmy-st-grid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+    #tab-community .cmy-st-col{flex:1 1 300px;min-width:0;}
+    /* Accounts: the tag manager, the filter pills and the rows */
+    #tab-community .cmy-am-tacts{margin-left:auto;display:flex;gap:6px;flex-shrink:0;}
+    #tab-community .cmy-am-sub{font-size:11px;color:var(--muted);margin:-6px 0 12px;}
+    #tab-community .cmy-tc-orange{--tc:var(--orange);}
+    #tab-community .cmy-tc-red{--tc:var(--red);}
+    #tab-community .cmy-tc-green{--tc:var(--green);}
+    #tab-community .cmy-am-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+    #tab-community .cmy-am-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    #tab-community .cmy-am-count{color:var(--muted);font-weight:600;font-size:13px;}
+    #tab-community .cmy-mis-auto{margin-inline-start:auto;}
+    #tab-community .cmy-am-frow{flex-wrap:wrap;margin-bottom:8px;}
+    #tab-community .cmy-am-srch{flex:1;min-width:200px;}
+    #tab-community .cmy-am-in{width:100%;box-sizing:border-box;}
+    #tab-community .cmy-delreq{color:var(--red);font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:4px;}
+    #tab-community .cmy-tag-color{height:40px;padding:2px;cursor:pointer;}
+    #tab-community .cmy-tag-acts{display:flex;gap:8px;margin-top:4px;}
+    /* Flagged */
+    #tab-community .cmy-flg-row{padding:12px 4px;border-bottom:1px solid var(--border);}
+    #tab-community .cmy-flg-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+    #tab-community .cmy-flg-name{font-weight:800;font-size:14px;}
+    #tab-community .cmy-flg-contact{font-size:11.5px;color:var(--muted);}
+    #tab-community .cmy-flg-st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:var(--cmy-st);white-space:nowrap;}
+    #tab-community .cmy-flg-dot{width:7px;height:7px;border-radius:50%;background:var(--cmy-st);}
+    #tab-community .cmy-flg-asked{font-size:12.5px;font-weight:700;margin-top:6px;}
+    #tab-community .cmy-flg-when{font-size:11px;color:var(--muted);margin-top:2px;}
+    #tab-community .cmy-flg-changes{margin-top:8px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;}
+    #tab-community .cmy-flg-chh{font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+    #tab-community .cmy-flg-change{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;padding:3px 0;}
+    #tab-community .cmy-flg-field{font-weight:800;min-width:90px;}
+    #tab-community .cmy-flg-before{color:var(--muted);text-decoration:line-through;}
+    #tab-community .cmy-flg-img{width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;}
+    #tab-community .cmy-flg-waiting{font-size:12px;color:var(--orange);font-weight:700;margin-top:6px;}
+    /* Birthdays, Applications and learning to ride */
+    #tab-community .cmy-bd-sub{margin:2px 0 0;}
+    #tab-community .cmy-bd-bar{height:var(--cmy-h);}
+    #tab-community .cmy-st{color:var(--cmy-st);}
+    #tab-community .cmy-st-dot{background:var(--cmy-st);}
+    /* the account editor */
+    #new-acct-modal .cmy-cf-box{max-width:470px;max-height:88vh;overflow-y:auto;}
+    #new-acct-modal .cmy-cf-names{display:flex;gap:8px;margin-top:12px;}
+    #new-acct-modal .cmy-flex6{display:flex;gap:6px;}
+    #new-acct-modal .cmy-w92{width:92px;flex-shrink:0;}
+    #new-acct-modal .cmy-cf-row8{display:flex;gap:8px;margin-top:8px;}
+    #new-acct-modal .cmy-w120{width:120px;flex-shrink:0;}
+    #new-acct-modal .cmy-row6,#comm-add-modal .cmy-row6{display:flex;gap:6px;margin-top:4px;}
+    #new-acct-modal .cmy-cf-heard{font-size:13px;font-weight:700;padding:6px 0;}
+    #new-acct-modal .cmy-cf-rn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;}
+    #new-acct-modal .cmy-rn-on{font-size:13px;font-weight:700;color:var(--green);}
+    #new-acct-modal .cmy-rn-off{font-size:13px;font-weight:700;color:var(--muted);}
+    #new-acct-modal .cmy-row6w{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+    #new-acct-modal .cmy-cf-tags{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:4px;}
+    #new-acct-modal .cmy-mie-auto{margin-inline-end:auto;}
+    /* the tag grant, flag fields, message, lesson and merge dialogs (their heading, close button,
+       actions and Add button are the confirm dialog's own chrome- rules) */
+    #confirm-modal .cmy-tg-who{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+    #confirm-modal .cmy-tg-name{font-size:13px;font-weight:800;}
+    #confirm-modal .cmy-tg-toggles{display:flex;gap:6px;margin-bottom:12px;}
+    #confirm-modal .cmy-o55{opacity:.55;}
+    #confirm-modal .cmy-tg-today{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:700;cursor:pointer;}
+    #confirm-modal .cmy-tg-cb{width:16px;height:16px;accent-color:var(--green);}
+    #confirm-modal .cmy-w100{width:100%;}
+    #confirm-modal .cmy-row10,#jcc-group-modal .cmy-row10,#group-edit-modal .cmy-row10{display:flex;gap:10px;}
+    #confirm-modal .cmy-m0{margin:0;}
+    /* adding riders to a ride, and the two group dialogs */
+    #comm-add-modal .cmy-mw460{max-width:460px;}
+    #comm-add-modal .cmy-ca-toggles{display:flex;gap:6px;margin-top:12px;}
+    #comm-add-modal .cmy-ca-hint{font-size:12px;color:var(--muted);margin-top:8px;}
+    #comm-add-modal .cmy-fg-top,#jcc-group-modal .cmy-fg-top,#group-edit-modal .cmy-fg-top{margin:14px 0 10px;}
+    #comm-add-modal .cmy-ca-left{font-size:11px;color:var(--muted);margin-top:5px;font-weight:700;}
+    #comm-add-modal .cmy-ca-left0{font-size:11px;color:var(--orange);margin-top:5px;font-weight:700;}
+    #comm-add-modal .cmy-ca-own{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;cursor:pointer;color:var(--green);}
+    #comm-add-modal .cmy-ca-own-cb{width:16px;height:16px;accent-color:#0c7a3d;}
+    #comm-add-modal .cmy-ca-rows{display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto;}
+    #comm-add-modal .cmy-ca-row{width:100%;text-align:start;display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:4px;cursor:pointer;font-family:inherit;color:var(--text);}
+    #comm-add-modal .cmy-ca-off{border:1.5px solid var(--border);background:transparent none;}
+    #comm-add-modal .cmy-ca-on{border:1.5px solid var(--green);background:rgba(var(--green-rgb),.07);}
+    #comm-add-modal .cmy-ca-name{font-weight:800;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #comm-add-modal .cmy-ca-contact{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #comm-add-modal .cmy-ca-tag{flex-shrink:0;font-size:9px;font-weight:900;color:var(--green);border:1px solid rgba(var(--green-rgb),.4);border-radius:2px;padding:1px 6px;text-transform:uppercase;letter-spacing:.4px;}
+    #comm-add-modal .cmy-ca-empty{padding:14px;font-size:12.5px;}
+    #comm-add-modal .cmy-o50{opacity:.5;}
+    #jcc-group-modal .cmy-mw540,#group-edit-modal .cmy-mw540{max-width:540px;}
+    #jcc-group-modal .cmy-fg-half,#group-edit-modal .cmy-fg-half{flex:1;margin-bottom:10px;}
+    #jcc-group-modal .cmy-rider-row,#group-edit-modal .cmy-rider-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
+    #jcc-group-modal .cmy-w104,#group-edit-modal .cmy-w104{width:104px;flex-shrink:0;}
+    #jcc-group-modal .cmy-w66,#group-edit-modal .cmy-w66{width:66px;flex-shrink:0;}
+    #jcc-group-modal .cmy-fs0{flex-shrink:0;}
+    #jcc-group-modal .cmy-jg-add{width:100%;margin-top:8px;}
+    #group-edit-modal .cmy-ge-nomove{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:10px;}
+    #group-edit-modal .cmy-ge-num{flex-shrink:0;font-size:11px;font-weight:900;color:var(--muted);min-width:26px;}
     /* ── Badges staff give (2026-09-29): a rider's Badges dialog and Community > Badges. Scoped by the
        id each is drawn under, so the body.view-staff layer does not restyle their buttons. ── */
     #tab-community .am-bdg{display:inline-flex;line-height:0;}
@@ -6320,6 +6496,25 @@ html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
    desktop — it is a message, not one of the sheets that slide up from the bottom edge. */
 .cm-backdrop{align-items:center;padding:16px;}
 .cm-box{border-radius:20px;width:min(92vw,430px);max-width:430px;max-height:86dvh;overflow-y:auto;margin:0;}
+
+/* The members-only and turned-down dialogs (#confirm-modal) and a community ride's breakfast spot on
+   My Bookings (#tab-myrides), without inline styles (2026-09-28, the move of style="..." into classes,
+   so the policy can drop style-src 'unsafe-inline'). Scoped by those ids, as the inline style outranked
+   every class rule; the heading row, title and close buttons are the confirm dialog's chrome- rules. */
+#confirm-modal .cmy-cm-head{display:flex;align-items:center;gap:10px;min-width:0;}
+#confirm-modal .cmy-cm-lock{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(74,168,248,.12);border:1px solid rgba(74,168,248,.4);color:#4aa8f8;flex-shrink:0;}
+#confirm-modal .cmy-minw0{min-width:0;}
+#confirm-modal .cmy-cm-msg{font-size:14px;color:var(--muted-l);font-weight:700;line-height:1.6;margin-bottom:20px;padding:10px 14px;background:var(--s3);border-radius:4px;}
+#confirm-modal .cmy-cm-wa{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#25d366;}
+#confirm-modal .cmy-cm-ig{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+#confirm-modal .cmy-rej-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
+#confirm-modal .cmy-rej-msg{font-size:14px;font-weight:600;line-height:1.65;color:var(--text);}
+#confirm-modal .cmy-rej-next{font-size:14px;font-weight:800;line-height:1.65;margin-top:10px;}
+#confirm-modal .cmy-rej-act{display:flex;justify-content:flex-end;margin-top:20px;}
+#confirm-modal .cmy-mw110{min-width:110px;}
+#tab-myrides .cmy-mt12{margin-top:12px;}
+#tab-myrides .cmy-bf{width:100%;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;}
+#tab-myrides .cmy-bf-name{color:var(--text);font-weight:800;}
 
 /* ── The sign in / sign up screen reads as one page ──
    For a signed-out visitor this screen IS the page (as-page): the whole thing scrolls under the
