@@ -6102,8 +6102,8 @@ const _freeSessIds={has:sid=>_isFreeRide((S.sessions||[]).find(s=>s.id===sid))};
 function _rowSess(e){return (S.sessions||[]).find(x=>x.id===(e&&e.sessionId));}
 // Height gets its own column in the staff queue, big and bold: staff pick the frame size
 // from it at a glance while the rider walks up. A rider without one shows a dash.
-function _qHeightCell(e,attrs){
-  return`<td class="q-height-cell"${attrs||''}>${e.height?`<span class="q-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}</bdi></span>`:'<span style="color:var(--muted)">—</span>'}</td>`;
+function _qHeightCell(e,cls){
+  return`<td class="q-height-cell${cls?' '+cls:''}">${e.height?`<span class="q-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}</bdi></span>`:'<span class="rq-mut">—</span>'}</td>`;
 }
 function _listCols(rows){
   const r=rows||[];
@@ -7635,7 +7635,7 @@ function _rowMenu(id,items){
     const live=items.filter(Boolean);
     if(!live.length)return'';
     (S._rowMenus=S._rowMenus||{})[id]=live;
-    return`<button class="btn-sm btn-muted" aria-haspopup="menu" aria-label="${t('moreActionsLbl')}" title="${t('moreActionsLbl')}" data-on-click="${_on("_on__rowMenu_1",_EV,_EL,id)}" style="min-width:34px;font-weight:900;letter-spacing:1px">⋯</button>`;
+    return`<button class="btn-sm btn-muted rq-more" aria-haspopup="menu" aria-label="${t('moreActionsLbl')}" title="${t('moreActionsLbl')}" data-on-click="${_on("_on__rowMenu_1",_EV,_EL,id)}">⋯</button>`;
   }
   // "2 no-shows in the last 5" — the history is all in the data, surfaced at the moment
   // staff choose who gets a freed spot. Counted per PERSON (account id when linked, phone
@@ -7647,7 +7647,7 @@ function _rowMenu(id,items){
     const past=(_decidedByPerson().get(k)||[]).filter(x=>x.id!==e.id).slice(0,5);
     const ns=past.filter(x=>x.status==='noshow').length;
     if(ns<2)return'';
-    return `<span title="${t('noShowHistTip')}" style="font-size:10px;font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:2px 6px;white-space:nowrap">${t('noShowHistChip').replace('{0}',String(ns)).replace('{1}',String(past.length))}</span>`;
+    return `<span title="${t('noShowHistTip')}" class="rq-nschip">${t('noShowHistChip').replace('{0}',String(ns)).replace('{1}',String(past.length))}</span>`;
   }
   // An unlinked booking's account, by name. The roster asked this of every walk-in row on every
   // repaint by scanning all customers (thousands) - one map per customers array instead, rebuilt
@@ -7673,13 +7673,13 @@ function _rowMenu(id,items){
     const _comm=_apprSessIds.has(e.sessionId);
     if(_comm&&['pending','rejected'].includes(_apprOf(e))&&(e.status==='waiting'||e.status==='waitlist')){
       const _rej=_apprOf(e)==='rejected';
-      const chip=`<span style="font-size:10px;font-weight:900;color:${_rej?'var(--red)':'var(--orange)'};border:1px solid rgba(var(${_rej?'--red-rgb':'--warn-rgb'}),.4);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">${_rej?t('filterRejected'):t('apprPendingChip')}</span>`;
+      const chip=`<span class="${_rej?'rq-apchip-rej':'rq-apchip'}">${_rej?t('filterRejected'):t('apprPendingChip')}</span>`;
       const wlBtn=e.status==='waiting'?`<button class="btn-sm btn-muted" data-on-click="${_on("commToWaitlist",e.id)}" title="${t('waitlistLabel')}">${_artIcon('clock',12)} ${t('waitlistLabel')}</button>`:'';
       return`${chip}${_noShowChip(e)}<button class="btn-sm btn-green" data-on-click="${_on("approveEntry",e.id)}">✓ ${t('apprApproveBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("rejectEntry",e.id)}">${t('apprRejectBtn')}</button>${wlBtn}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
         {label:`${ICON_PENCIL} ${t('editBookingBtn')}`,run:`showBookingEditModal('${e.id}')`,act:()=>showBookingEditModal(e.id)},
         _custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null])}`;
     }
-    const _apprChip=(_comm&&e.approval==='approved')?`<span style="font-size:10px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap">✓ ${t('apprApprovedChip')}</span><button class="btn-sm btn-muted" title="${t('apprUndoBtn')}" data-on-click="${_on("unapproveEntry",e.id)}">${_artIcon('undo',11)} ${t('apprUndoBtn')}</button>`:'';
+    const _apprChip=(_comm&&e.approval==='approved')?`<span class="rq-apok">✓ ${t('apprApprovedChip')}</span><button class="btn-sm btn-muted" title="${t('apprUndoBtn')}" data-on-click="${_on("unapproveEntry",e.id)}">${_artIcon('undo',11)} ${t('apprUndoBtn')}</button>`:'';
     // Waitlisted and waiting rows carry the SAME controls. A waitlisted rider is a rider
     // whose place is not held yet, not a different kind of booking: staff check them in, mark
     // them no-show, edit, note and cancel them exactly the same way. What says they are
@@ -7754,7 +7754,7 @@ function _bkPayCell(e){
   if(_freeSessIds.has(e.sessionId))return'';
   const isHouse=e.paid&&(e.price??DEFAULT_PRICE)===0;
   return`<button class="pay-toggle ${isHouse?'house':e.paid?'paid':'pending'}" data-on-click="${_on("_on__bkPayCell_1",_EV,_EL,e.id)}">${isHouse?' '+t('onTheHouseLabel'):e.paid?'\u2713 '+t('paidLabel'):' '+t('pendingLabel')}</button>`
-    +`<button data-on-click="${_on("_on__bkPayCell_2",_EV,_EL,e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px;min-width:24px;min-height:24px;line-height:1">${ICON_PENCIL}</button>`;
+    +`<button data-on-click="${_on("_on__bkPayCell_2",_EV,_EL,e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" class="rq-pen">${ICON_PENCIL}</button>`;
 }
 /** The party's live bookings, in list order. */
 function _mwPartyBookings(rowId){
@@ -7861,7 +7861,7 @@ function renderManagedWl(listOnly){
         // One card per party. The position box, the drag handle and the card belong to the
         // PARTY; each rider inside keeps their own booking's controls, because staff still
         // check riders in one at a time even when they arrived together.
-        const _posBox=id=>`<input type="number" min="1" value="${i+1}" aria-label="#" data-on-click="${_on("_on_renderManagedWl_1",_EV,_EL)}" data-on-change="${_on("mwSetPos",id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_2",_EV,_EL)}" style="width:52px;padding:6px 4px;text-align:center;font-weight:900;font-size:14px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--green)">`;
+        const _posBox=id=>`<input type="number" min="1" value="${i+1}" aria-label="#" data-on-click="${_on("_on_renderManagedWl_1",_EV,_EL)}" data-on-change="${_on("mwSetPos",id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_2",_EV,_EL)}" class="rq-mwpos">`;
         const _row=w=>{
           const bk=w.booking_id?getQueue().find(x=>x.id===w.booking_id):null;
           // A parked booking is still a booking: it gets the roster's own controls — check in,
@@ -7873,16 +7873,16 @@ function renderManagedWl(listOnly){
           const action=w.booking_id
             ?(_bkLive?_entryActions(bk,{noBulk:true,noPark:true}):'')
             :`<button class="btn-sm btn-green" data-on-click="${_on("giveDeskBike",w.id)}">${t('checkInBtn')}</button>`;
-          return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap${_party?';padding-top:7px':''}">
-            <div style="display:flex;align-items:center;gap:9px;min-width:0;flex-wrap:wrap">
+          return`<div class="rq-mwrow${_party?' rq-pt7':''}">
+            <div class="rq-mwl">
               ${(_party||w._virtual)?'':_posBox(w.id)}
-              <span style="font-weight:800;font-size:13.5px">${esc(w.name)}</span>
-              ${bk?`<span style="font-size:10px;font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:1px 7px;white-space:nowrap">#${bk.queueNum}${bk.waitlistNum?` \u00b7 W${bk.waitlistNum}`:''}</span>`:''}
-              ${(bk&&bk.status==='waitlist'&&bk.waitlistNum)?`<input type="number" min="1" value="${bk.waitlistNum}" aria-label="W" data-on-click="${_on("_on_renderManagedWl_3",_EV,_EL)}" data-on-change="${_on("wlSetPos",bk.id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_4",_EV,_EL)}" style="width:46px;padding:4px 2px;text-align:center;font-weight:900;font-size:12px;background:var(--s3);border:1px solid rgba(var(--warn-rgb),.4);border-radius:3px;color:var(--orange)">`:''}
-              ${(!_party&&w.phone)?`<span style="font-size:11px;color:var(--muted)"><bdi>${esc(fmtPhone(w.phone))}</bdi></span>`:''}
+              <span class="rq-mwname">${esc(w.name)}</span>
+              ${bk?`<span class="rq-mwnum">#${bk.queueNum}${bk.waitlistNum?` \u00b7 W${bk.waitlistNum}`:''}</span>`:''}
+              ${(bk&&bk.status==='waitlist'&&bk.waitlistNum)?`<input type="number" min="1" value="${bk.waitlistNum}" aria-label="W" data-on-click="${_on("_on_renderManagedWl_3",_EV,_EL)}" data-on-change="${_on("wlSetPos",bk.id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_4",_EV,_EL)}" class="rq-mwwl">`:''}
+              ${(!_party&&w.phone)?`<span class="rq-mwph"><bdi>${esc(fmtPhone(w.phone))}</bdi></span>`:''}
               ${_mwTypeCell(w,bk)}
             </div>
-            <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;flex-wrap:wrap">
+            <div class="rq-mwr">
               ${bk?_bkPayCell(bk):payBtnMw(w)}${w.phone?_contactCell(w.phone,{status:'waiting'}):''}
               ${(_bkLive&&!_isApprovalRide(allSessions().find(x=>x.id===bk.sessionId)))
                 ?`<button class="btn-sm btn-muted" data-on-click="${_on("mwAddRider",bk.id)}" title="${esc(t('beAddRidersLabel'))}">+ ${t('beAddRiderBtn')}</button>`:''}
@@ -7894,20 +7894,20 @@ function renderManagedWl(listOnly){
         // Dragging rewrites sort_order on desk rows. A card of folded-in bookings has none,
         // so it is not draggable — its order is the W order, editable in the W box on the row.
         const _drag=!g.some(w=>w._virtual);
-        return`<div class="q-card" style="margin:0;cursor:${_drag?'grab':'default'}" draggable="${_drag?'true':'false'}"${_drag?` data-on-dragstart="${_on("_mwDragStart",_EV,g[0].id)}" data-on-dragover="${_on("_mwDragOver",_EV,g[0].id)}" data-on-drop="${_on("_mwDrop",_EV,g[0].id)}"`:''}>
-        ${_party?`<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:7px;border-bottom:1px solid rgba(var(--tint-rgb),.08)">
+        return`<div class="q-card ${_drag?'rq-mwcard-g':'rq-mwcard'}" draggable="${_drag?'true':'false'}"${_drag?` data-on-dragstart="${_on("_mwDragStart",_EV,g[0].id)}" data-on-dragover="${_on("_mwDragOver",_EV,g[0].id)}" data-on-drop="${_on("_mwDrop",_EV,g[0].id)}"`:''}>
+        ${_party?`<div class="rq-mwhead">
           ${_drag?_posBox(g[0].id):''}
-          <span style="font-weight:900;font-size:13.5px">${esc(_mwGroupName(g))}</span>
+          <span class="rq-mwgname">${esc(_mwGroupName(g))}</span>
           <span class="mw-party-chip">${t('mwRidersN').replace('{0}',String(g.length))}</span>
           ${(()=>{const _bk=g.map(w=>w.booking_id&&getQueue().find(x=>x.id===w.booking_id)).filter(Boolean);
             const _in=_bk.filter(e=>e.status==='waiting'||e.status==='waitlist').length;
             const _owed=_bk.filter(e=>!e.paid&&!_freeSessIds.has(e.sessionId)&&['waiting','waitlist','active'].includes(e.status)).length;
             return`${_owed?`<button class="btn-sm btn-muted" data-on-click="${_on("mwPartyPaid",g[0].id)}">\u2713 ${t('bulkPaidBtn')} (${_owed})</button>`:''}
               ${_in?`<button class="btn-sm btn-green" data-on-click="${_on("mwPartyCheckin",g[0].id)}">${t('bulkCheckinBtn')} (${_in})</button>`:''}`;})()}
-          ${g.some(w=>!w._virtual)?`<button class="btn-sm btn-muted" style="margin-inline-start:auto" data-on-click="${_on("mwRemoveParty",g[0].id)}">${t('wlRemoveBtn')}</button>`:''}
+          ${g.some(w=>!w._virtual)?`<button class="btn-sm btn-muted rq-msa" data-on-click="${_on("mwRemoveParty",g[0].id)}">${t('wlRemoveBtn')}</button>`:''}
         </div>`:''}
         ${g.map(_row).join('')}
-      </div>`;}).join(''):`<div class="empty-state" style="padding:12px;font-size:12.5px">${(S._mwSess&&S._mwSess!=='all')?t('mwEmptyForSess'):t('wlEmpty')}</div>`;
+      </div>`;}).join(''):`<div class="empty-state rq-mwempty">${(S._mwSess&&S._mwSess!=='all')?t('mwEmptyForSess'):t('wlEmpty')}</div>`;
   const _lh=listOnly&&document.getElementById('mw-list');
   if(_lh){_lh.innerHTML=listHtml;_mwRenderSuggest();return;}
   el.innerHTML=`
@@ -7917,29 +7917,29 @@ function renderManagedWl(listOnly){
         <div class="page-sub">${t('mwSub')}</div>
       </div>
     </div>
-    <div style="display:flex;gap:6px;margin-top:10px;max-width:760px;flex-wrap:wrap;align-items:center">
+    <div class="rq-mwbar">
       <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span>
         <select id="mw-sess" class="filter-select" aria-label="${esc(t('colSession'))}"
           data-on-change="${_on("mwSetSess",_P("value"))}">
           <option value="all"${(S._mwSess||'all')==='all'?' selected':''}>${t('allSessions')}</option>
           ${_mwSessOpts().map(x=>`<option value="${esc(x.id)}"${S._mwSess===x.id?' selected':''}>${esc(_evNamed(x)?_evName(x)+' \u00b7 ':'')}${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))}</option>`).join('')}
         </select></label>
-      <input id="mw-name" type="text" maxlength="60" placeholder="${esc(t('mwSearchPh'))}" value="${esc(S._mwQ||'')}" style="flex:1;min-width:160px"
+      <input id="mw-name" type="text" maxlength="60" placeholder="${esc(t('mwSearchPh'))}" value="${esc(S._mwQ||'')}" class="rq-mwq"
         data-on-input="${_on("mwSearch",_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_5",_EV,_EL)}"
         data-on-focus="${_on("_on_renderManagedWl_6",_EV,_EL)}" data-on-blur="${_on("_on_renderManagedWl_7",_EV,_EL)}">
-      <input id="mw-phone" type="tel" placeholder="05\u2026" value="${esc(S._mwPh||'')}" style="width:130px;flex-shrink:0" data-on-input="${_on("_on_renderManagedWl_8",_EV,_EL)}" data-on-keydown="${_on("_on_renderManagedWl_9",_EV,_EL)}">
-      <button id="mw-browse" class="btn-secondary" style="flex-shrink:0" aria-controls="mw-suggest" aria-expanded="${S._mwShowAll?'true':'false'}" data-on-click="${_on("mwToggleAll")}">${S._mwShowAll?t('mwHideBtn'):t('mwBrowseBtn')}</button>
-      <button class="btn-primary" style="flex-shrink:0" data-on-click="${_on("addManagedWl")}">+ ${t('mwAddBtn')}</button>
-      <button class="btn-secondary" style="flex-shrink:0" data-on-click="${_on("showWlAddModal")}" title="${esc(t('wlAddBtn'))}">${_artIcon('person',12)} ${t('wlAddBtn')}</button>
+      <input id="mw-phone" type="tel" placeholder="05\u2026" value="${esc(S._mwPh||'')}" class="rq-mwtel" data-on-input="${_on("_on_renderManagedWl_8",_EV,_EL)}" data-on-keydown="${_on("_on_renderManagedWl_9",_EV,_EL)}">
+      <button id="mw-browse" class="btn-secondary rq-fs0" aria-controls="mw-suggest" aria-expanded="${S._mwShowAll?'true':'false'}" data-on-click="${_on("mwToggleAll")}">${S._mwShowAll?t('mwHideBtn'):t('mwBrowseBtn')}</button>
+      <button class="btn-primary rq-fs0" data-on-click="${_on("addManagedWl")}">+ ${t('mwAddBtn')}</button>
+      <button class="btn-secondary rq-fs0" data-on-click="${_on("showWlAddModal")}" title="${esc(t('wlAddBtn'))}">${_artIcon('person',12)} ${t('wlAddBtn')}</button>
     </div>
-    <div id="mw-suggest" class="mw-suggest" style="display:none"></div>
-    <div id="mw-list" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;max-width:900px">${listHtml}</div>`;
+    <div id="mw-suggest" class="mw-suggest rq-none"></div>
+    <div id="mw-list" class="rq-mwlist">${listHtml}</div>`;
   _mwRenderSuggest(); // a background refresh rebuilds this host: put the open picker back
 }
 function payBtnMw(w){const isHouse=w.paid&&_wlRowPrice(w)===0;return`<button class="pay-toggle ${isHouse?'house':w.paid?'paid':'pending'}" data-on-click="${_on("showWlPayMenu",w.id,_EV)}">${isHouse?' '+t('onTheHouseLabel'):w.paid?'\u2713 '+t('paidLabel'):' '+t('pendingLabel')}</button>`;}
 // How many of a type are free right now, as a chip. Shared by the Waitlist page and the Staff
 // List, which ask the same question next to the same decision.
-const availChip=avail=>avail>0?`<span style="font-size:10px;font-weight:800;color:var(--green);border:1px solid rgba(var(--green-rgb),.35);border-radius:2px;padding:1px 7px;white-space:nowrap">${t('wlAvailNow').replace('{0}',avail)}</span>`:`<span style="color:var(--muted)">—</span>`;
+const availChip=avail=>avail>0?`<span class="rq-avail">${t('wlAvailNow').replace('{0}',avail)}</span>`:`<span class="rq-mut">—</span>`;
 function _wlAvail(ty){const base=PREMIUM_TIERS[ty]||ty;return(S.bikes||[]).filter(b=>b.status==='available'&&(!base||base==='Any'||b.type===base)).length;} // premium tiers count their fulfilling base type (Road Carbon -> Road)
 function _wlOpenSess(){return allSessions().filter(x=>_sessLive(x)&&!_isApprovalRide(x)).sort(_sessOrder);}
 // The view mirrors the Bookings queue page: same section header (live indicator, header
@@ -7954,24 +7954,24 @@ function showWlAddModal(){
   S._wlType=S._wlType||'Any';
   S._wlExtra=S._wlExtra||[]; // riders beyond the first
   const m=document.getElementById('wl-add-modal');if(!m)return;
-  const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showWlAddModal_1",_EV,_EL,ty)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._wlType===ty?'var(--green)':'var(--border)'};background:${S._wlType===ty?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._wlType===ty?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${typeLabel(ty)}</button>`;
+  const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showWlAddModal_1",_EV,_EL,ty)}" class="${S._wlType===ty?'rq-wlty-on':'rq-wlty'}">${typeLabel(ty)}</button>`;
   const keep=id=>{const el=document.getElementById(id);return el?el.value:'';} // preserve typed values across type-pill re-renders
   const _n=keep('wl-name'),_p=keep('wl-phone');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showWlAddModal_2",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px">
+    <div class="modal-box rq-wlbox" role="dialog" aria-modal="true">
       <div class="modal-title">${t('wlAddBtn')}</div>
-      <div class="form-group" style="margin:14px 0 10px"><label for="wl-name">${t('nameLabel')} *</label><input id="wl-name" type="text" list="wl-cust-list" data-on-focus="${_on("_dlFill","wl-cust-list")}" value="${esc(_n)}" maxlength="60" placeholder="${esc(t('wiPickCustPh'))}">
+      <div class="form-group rq-wlg1"><label for="wl-name">${t('nameLabel')} *</label><input id="wl-name" type="text" list="wl-cust-list" data-on-focus="${_on("_dlFill","wl-cust-list")}" value="${esc(_n)}" maxlength="60" placeholder="${esc(t('wiPickCustPh'))}">
         <datalist id="wl-cust-list"></datalist></div>
-      <div class="form-group" style="margin-bottom:10px"><label for="wl-phone">${t('authPhone')} *</label><input id="wl-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
-      <div class="form-group" style="margin-bottom:10px"><label>${t('bikeTypeLabel')}</label>
-        <div style="display:flex;gap:6px">${bikeTypeOpts(false).map(tyBtn).join('')}</div></div>
-      ${S._wlExtra.map((r,i)=>`<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">
-        <input id="wlx-name-${i}" type="text" list="wl-cust-list" data-on-focus="${_on("_dlFill","wl-cust-list")}" placeholder="${t('nameLabel')} ${i+2}" value="${esc(r.name||'')}" maxlength="60" style="flex:1;min-width:0">
-        <select id="wlx-type-${i}" aria-label="${t('bikeTypeLabel')}" style="width:110px;flex-shrink:0">${bikeTypeOpts(false).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
-        <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_wlxRemove",i)}" title="${t('removeBtn')}" style="flex-shrink:0">${_artIcon('close',11)}</button>
+      <div class="form-group rq-mb10"><label for="wl-phone">${t('authPhone')} *</label><input id="wl-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
+      <div class="form-group rq-mb10"><label>${t('bikeTypeLabel')}</label>
+        <div class="rq-wltys">${bikeTypeOpts(false).map(tyBtn).join('')}</div></div>
+      ${S._wlExtra.map((r,i)=>`<div class="rq-wlx">
+        <input id="wlx-name-${i}" type="text" list="wl-cust-list" data-on-focus="${_on("_dlFill","wl-cust-list")}" placeholder="${t('nameLabel')} ${i+2}" value="${esc(r.name||'')}" maxlength="60" class="rq-f1m0">
+        <select id="wlx-type-${i}" aria-label="${t('bikeTypeLabel')}" class="rq-wlxsel">${bikeTypeOpts(false).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        <button type="button" class="btn-sm btn-muted rq-fs0" data-on-click="${_on("_wlxRemove",i)}" title="${t('removeBtn')}">${_artIcon('close',11)}</button>
       </div>`).join('')}
-      <button type="button" class="btn-secondary" style="width:100%;margin:2px 0 12px" data-on-click="${_on("_wlxAdd")}">+ ${t('beAddRiderBtn')}</button>
+      <button type="button" class="btn-secondary rq-wladd" data-on-click="${_on("_wlxAdd")}">+ ${t('beAddRiderBtn')}</button>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeWlAddModal")}">${t('cancelBtn')}</button>
         <button class="btn-primary" data-on-click="${_on("addDeskWaitlist")}">+ ${t('wlAddBtn')}${S._wlExtra.length?` (${S._wlExtra.length+1})`:''}</button>
@@ -11627,7 +11627,7 @@ const ICON_EXPORT=_artIcon('download');
 const ICON_RESCHEDULE=_artIcon('cycle');
 function noShowFlag(e){
   const n=customerNoShows(e);
-  return n>=3?`<span title="${t('noShowFlagTip').replace('{0}',n)}" style="margin-left:5px;font-size:10px;color:var(--orange);font-weight:800;white-space:nowrap;border:1px solid var(--orange);border-radius:2px;padding:1px 5px">${n}</span>`:'';
+  return n>=3?`<span title="${t('noShowFlagTip').replace('{0}',n)}" class="rq-nsflag">${n}</span>`:'';
 }
 // ── Routes on a ride (2026-09-28) ─────────────────────────────────────────────────────────────
 // The Routes page's list (site_content routes.routes.items, edited in Website) names the routes; a
@@ -13304,17 +13304,17 @@ function _on__contactCell_2(event,el){el.style.background='rgba(var(--green-rgb)
 function _on__contactCell_3(event,el){el.style.background='rgba(var(--green-rgb),.22)'}
 function _on__contactCell_4(event,el){el.style.background='rgba(var(--green-rgb),.1)'}
 function _contactCell(phone,entry){
-  if(!phone)return'<span style="color:var(--muted)">—</span>';
+  if(!phone)return'<span class="rq-mut">—</span>';
   let _wa='';
   if(entry){
     if(entry.status==='waiting'||entry.status==='waitlist')_wa='?text='+encodeURIComponent(t('waYourTurnMsg')); // one-tap bilingual "your turn" nudge for waiting riders
     else if(entry.status==='done'&&!(entry.ratingExp||entry.ratingBike))_wa='?text='+encodeURIComponent(t('waRateMsg')+' '+CA_SITE); // "rate your ride" link for finished, unrated riders: the customer site (this page is the staff one)
   }
-  return`<div style="display:flex;gap:5px;align-items:center">
-    <a href="tel:${esc(phone)}" title="${t('callLabel')||'Call'}" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);text-decoration:none;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s" data-on-mouseover="${_on("_on__contactCell_1",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_2",_EV,_EL)}">
+  return`<div class="rq-cc">
+    <a href="tel:${esc(phone)}" title="${t('callLabel')||'Call'}" class="rq-ccl" data-on-mouseover="${_on("_on__contactCell_1",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_2",_EV,_EL)}">
       ${_artIcon('phone',12)}
     </a>
-    <a href="https://wa.me/${_waDigits(phone)}${_wa}" target="_blank" rel="noopener" title="WhatsApp" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);text-decoration:none;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s" data-on-mouseover="${_on("_on__contactCell_3",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_4",_EV,_EL)}">
+    <a href="https://wa.me/${_waDigits(phone)}${_wa}" target="_blank" rel="noopener" title="WhatsApp" class="rq-ccl" data-on-mouseover="${_on("_on__contactCell_3",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_4",_EV,_EL)}">
       ${_artIcon('whatsapp',12)}
     </a>
   </div>`;
@@ -15609,7 +15609,7 @@ function _wxChip(dateStr){
   if(!w)return'';
   const hot=w.t>=42,windy=w.w>=30;
   const warn=hot||windy;
-  return` <span title="${t('wxTip').replace('{0}',String(w.t)).replace('{1}',String(w.w))}" style="font-weight:800;color:${warn?'var(--orange)':'var(--muted)'}">· ${w.t}°${windy?' ᯓ'+w.w:''}</span>`;
+  return` <span title="${t('wxTip').replace('{0}',String(w.t)).replace('{1}',String(w.w))}" class="${warn?'rq-wx-warn':'rq-wx'}">· ${w.t}°${windy?' ᯓ'+w.w:''}</span>`;
 }
 // One line above the roster: what is actually free, by type and size. Check-in ends with
 // picking a bike, and "is there a Road M left?" lived on another tab. Shown only where the
@@ -15618,7 +15618,7 @@ function _wxChip(dateStr){
 // that applies the matching filter. Six cards used to say this across two screens of phone.
 function _statChip(n,lbl,color,onclick,delta,tip){
   const d=(delta==null||isNaN(delta))?'':`<i class="stat-delta${delta>0?' up':delta<0?' down':''}" title="${esc(tip||'')}">${delta>0?'+':''}${delta}</i>`;
-  const inner=`<b${color?` style="color:${color}"`:''}>${esc(String(n))}</b>${esc(lbl)}${d}`;
+  const inner=`<b${!color?'':color==='var(--green)'?' class="rq-c-green"':color==='var(--orange)'?' class="rq-c-orange"':` class="rq-sc" data-cssv="${_cssv({'--rq-c':color})}"`}>${esc(String(n))}</b>${esc(lbl)}${d}`;
   return onclick?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on(...onclick)}">${inner}</button>`:`<span class="stat-chip">${inner}</span>`;
 }
 // ── The Petromin page inside Queue ─────────────────────────────────────────────
@@ -15661,7 +15661,7 @@ function _pmChipHtml(sid){
     <div class="sess-chip-info">
       <div class="pm-chip-head"><img class="pm-logo" src="/assets/petromin-logo.png" alt="Petromin" width="58" height="24"><span class="pm-chip-lbl">${t('pmChipLabel')}</span></div>
       <div class="sess-chip-date">${dayLabel(s.day)}, ${shortDate(_pmDate(s))} &nbsp;·&nbsp; ${sessionTime(s)}</div>
-      <div class="sess-chip-counts">${S.ridersLoaded?`<span style="color:var(--green)">${regs.length} ${t('pmRegistered')}</span>${nIn?` &middot; <span style="color:var(--text)">${nIn} ${t('ridersFilterRiding').toLowerCase()}</span>`:''}${nOut?` &middot; <span style="color:var(--muted)">${nOut} ${t('ridersFilterReturned').toLowerCase()}</span>`:''}`:'&nbsp;'}</div>
+      <div class="sess-chip-counts">${S.ridersLoaded?`<span class="rq-c-green">${regs.length} ${t('pmRegistered')}</span>${nIn?` &middot; <span class="rq-c-text">${nIn} ${t('ridersFilterRiding').toLowerCase()}</span>`:''}${nOut?` &middot; <span class="rq-mut">${nOut} ${t('ridersFilterReturned').toLowerCase()}</span>`:''}`:'&nbsp;'}</div>
     </div>
   </div>`;
 }
@@ -15695,7 +15695,7 @@ function _sessStripHtml(){
     // community rides and the National Day ride alike. The circuit has no owners to leave out.
     const _fillN=q.filter(e=>['waiting','active','done'].includes(e.status)&&(!_isOwnBike(e)||_ownTakesPlace(s))).length;
     const fillPct=Math.round(Math.min(_fillN/cap*100,100));
-    const fillClr=fillPct>=100?'#a33b2e':fillPct>80?'#8a5c14':'#0c7a3d'; // red only when truly full, amber above 80%
+    const fillCls=fillPct>=100?'rq-fill-full':fillPct>80?'rq-fill-high':'rq-fill-ok'; // red only when truly full, amber above 80%
     const isCurrent=S.queueView!=='petromin'&&S.sfSession===s.id;
     const isToday=(s.session_date||s.id)===todayStr(); // tonight's ride leads the strip and takes more room
     // Every named ride says its name here — the label is how staff pick it out of a strip
@@ -15707,11 +15707,11 @@ function _sessStripHtml(){
         ${_cm?`<div class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</div>`:''}
         <div class="sess-chip-date">${esc(dayLabel(s.day))}, ${esc(shortDate(s.session_date||s.id))} &nbsp;·&nbsp; ${esc(sessionTime(s))}${_wxChip(s.session_date||s.id)}</div>
         <div class="sess-chip-counts">
-          <span style="color:var(--green)">${sWait} ${t('waitingStat').toLowerCase()}</span>
-          ${sActive?` &middot; <span style="color:var(--text)">${sActive} ${t('activeSessChip')}</span>`:''}
-          ${sDone?` &middot; <span style="color:var(--muted)">${sDone} ${t('doneSessChip')}</span>`:''}
+          <span class="rq-c-green">${sWait} ${t('waitingStat').toLowerCase()}</span>
+          ${sActive?` &middot; <span class="rq-c-text">${sActive} ${t('activeSessChip')}</span>`:''}
+          ${sDone?` &middot; <span class="rq-mut">${sDone} ${t('doneSessChip')}</span>`:''}
         </div>
-        <div class="sess-chip-bar"><div class="sess-chip-fill" style="width:${fillPct}%;background:${fillClr}"></div></div>
+        <div class="sess-chip-bar"><div class="sess-chip-fill ${fillCls}" data-cssv="${_cssv({'--rq-w':fillPct+'%'})}"></div></div>
       </div>
       <div class="sess-chip-badge"><span class="badge-${esc(s.status)}">${t(SESS_STATUS_KEY[s.status])}</span></div>
     </div>${_rideKind(s)==='petromin'?_pmChipHtml(s.id):''}`;
@@ -15728,8 +15728,8 @@ function _sessStripHtml(){
 
   return`<div id="sess-strip">
     <div class="sess-summary-bar sess-bar-desktop">${chips}</div>
-    <div class="sess-bar-mobile" style="margin-bottom:14px">
-      <select class="filter-select" aria-label="${esc(t('colSession'))}" style="width:100%;font-size:14px;height:44px" data-on-change="${_on("setSfSession",_P("value"))}">${dropdownOpts}</select>
+    <div class="sess-bar-mobile rq-mb14">
+      <select class="filter-select rq-sesssel" aria-label="${esc(t('colSession'))}" data-on-change="${_on("setSfSession",_P("value"))}">${dropdownOpts}</select>
     </div></div>`;
 }
 function _qPhone(){try{return matchMedia('(max-width:767px)').matches;}catch(e){return false;}} // styles.css: the queue shows its cards up to 767px
@@ -15781,7 +15781,7 @@ function renderStaffQueue(_resultsOnly){
   if(!S.dataLoaded){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=skeletonList(7);return;}
   if(!_deskTabOk('queue')&&!_staffSections().some(_deskTabOk)){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=`<div class="empty-state">${t('acctNoneOpen')}</div>`;return;}
   if(!isAdmin()&&S.queueView==='sessions')S.queueView='bookings'; // Front Desk has no Sessions view
-  const _qvPills=`<div class="filter-row" style="margin-bottom:12px">
+  const _qvPills=`<div class="filter-row rq-mb12">
     <button class="filter-pill${(S.queueView||'bookings')==='bookings'?' active':''}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>
     ${isAdmin()?`<button class="filter-pill${S.queueView==='sessions'?' active':''}" data-on-click="${_on("_on_renderStaffQueue_2",_EV,_EL)}">${t('tabSessions')}</button>`:''}
     <button class="filter-pill${S.queueView==='managed'?' active':''}" data-on-click="${_on("_on_renderStaffQueue_3",_EV,_EL)}">${t('wlTitle')}</button>
@@ -15900,7 +15900,7 @@ function renderStaffQueue(_resultsOnly){
     return dup;
   })();
   const _dupMark=e=>_dupPhones.has(e.sessionId+'|'+e.phone)
-    ?`<span title="${t('dupPhoneTip')}" style="color:var(--orange);font-weight:900;cursor:help"> ⚠</span>`:'';
+    ?`<span title="${t('dupPhoneTip')}" class="rq-dup"> ⚠</span>`:'';
   if(_qc.money){
     if(S.sfPay==='paid')  filtered=filtered.filter(e=>e.paid);
     if(S.sfPay==='pending')filtered=filtered.filter(e=>!e.paid);
@@ -16030,15 +16030,15 @@ function renderStaffQueue(_resultsOnly){
   // Every ride shows when each booking was made, under its number, in the Saturday ride's
   // style. A party shows when its booking was made: the earliest of its riders.
   const _bookedAtOf=g=>g.map(e=>e.registeredAt).filter(Boolean).sort((a,b)=>new Date(a)-new Date(b))[0]||null;
-  const _bookedAt=(ra,tag='div')=>`<${tag} class="q-booked-at" style="font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap${tag==='div'?';margin-top:2px':''}" title="${t('reservedAtLabel')}">${_resTimeShort({registeredAt:ra})}</${tag}>`;
+  const _bookedAt=(ra,tag='div')=>`<${tag} class="q-booked-at rq-bkat${tag==='div'?' rq-mt2':''}" title="${t('reservedAtLabel')}">${_resTimeShort({registeredAt:ra})}</${tag}>`;
   const _adChips=e=>{
     if(_freeSessIds.has(e.sessionId))return''; // free community rides have no add-ons
     const ad=addonLineItems(entryAddons(e));
     const canEdit=['waiting','active','waitlist'].includes(e.status);
     if(!ad.length&&!canEdit)return'';
-    return`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center">
-      ${ad.map(a=>`<span style="font-size:10px;font-weight:700;background:rgba(var(--green-rgb),.08);border:1px solid rgba(var(--green-rgb),.2);border-radius:2px;padding:1px 6px;white-space:nowrap">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''} · <bdi>SAR ${a.lineTotal}</bdi></span>`).join('')}
-      ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${t('addonEditTitle')}" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:10px;font-weight:800;padding:5px 9px;border-radius:2px;cursor:pointer;line-height:1.4;min-height:24px">+ ${t('addonAddBtn')}</button>`:''}
+    return`<div class="rq-adw">
+      ${ad.map(a=>`<span class="rq-adchip">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''} · <bdi>SAR ${a.lineTotal}</bdi></span>`).join('')}
+      ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${t('addonEditTitle')}" class="rq-adbtn">+ ${t('addonAddBtn')}</button>`:''}
     </div>`;
   };
   function _commQueueView(){
@@ -16054,37 +16054,37 @@ function renderQRow(e){
     const rowCls=e.status==='active'?'row-active':(e.status==='noshow'||e.status==='cancelled')?'row-noshow-cancel':(e.status==='done'&&e.paid)?'row-done-paid':(e.status==='done')?'row-done':_isReserved(e)?'row-reserved':_isToReserve(e)?'row-toreserve':'';
     const wiTag=e.walkIn?`<span class="walk-in-badge">${t('addWalkin').replace(/^\+ /,'')}</span>`:'';
     const allColors=assignedBikes.flatMap(b=>b.colors&&b.colors.length?b.colors:[]);
-    const colorSwatches=allColors.length?allColors.map(c=>`<span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join(''):'<span style="color:var(--muted)">—</span>';
+    const colorSwatches=allColors.length?allColors.map(c=>`<span class="rq-sw" data-cssv="${_cssv({'--rq-bg':c})}"></span>`).join(''):'<span class="rq-mut">—</span>';
     const lp=livePosMap[e.id];
     const totalW=sessWaitCount[e.sessionId]||0;
     const posCell=e.status==='waiting'&&lp
-      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
-      :`<span style="color:var(--muted);font-size:12px">—</span>`;
-    const _flashStyle=S._flashId===e.id?`animation:rowFlash_${S._flashColor||'green'} .75s ease forwards;`:''
-    return`<tr class="${rowCls}" data-id="${esc(e.id)}"${_flashStyle?` style="${_flashStyle}"`:''}>
-      <td style="min-width:52px">
-        ${(_apprSessIds.has(e.sessionId)&&!_commPublished(_rowSess(e)))?`<span style="font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div style="font-size:10px;font-weight:900;color:var(--orange);margin-top:2px;white-space:nowrap">W${e.waitlistNum}</div>`:''}`:`
-        <span class="queue-num-cell" style="font-size:${e.status!=='waiting'?'18':'22'}px">#${e.queueNum}</span>
+      ?`<div class="pos-badge rq-pos" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
+      :`<span class="rq-mut12">—</span>`;
+    const _flashCls=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:''
+    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}" data-id="${esc(e.id)}">
+      <td class="rq-w52">
+        ${(_apprSessIds.has(e.sessionId)&&!_commPublished(_rowSess(e)))?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}`:`
+        <span class="queue-num-cell ${e.status!=='waiting'?'rq-fs18':'rq-fs22'}">#${e.queueNum}</span>
         ${_bookedAt(e.registeredAt)}
-        ${e.status==='waitlist'&&e.waitlistNum?`<div style="font-size:10px;font-weight:900;color:var(--orange);margin-top:2px;white-space:nowrap">W${e.waitlistNum}</div>`:''}
-        ${e.status==='waiting'&&lp?`<div style="margin-top:4px">${posCell}</div>`:''}
+        ${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}
+        ${e.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
 `}
       </td>
-      <td><div class="rider-name" style="display:flex;align-items:baseline;gap:6px;min-width:0"><span style="min-width:0">${esc(e.name)}${wiTag}${noShowFlag(e)}</span></div><div class="rider-sub"><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi>${_dupMark(e)}</div>${_adChips(e)}</td>
+      <td><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${wiTag}${noShowFlag(e)}</span></div><div class="rider-sub"><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi>${_dupMark(e)}</div>${_adChips(e)}</td>
       ${_memberCell(e)}
       ${_qc.bike?_qHeightCell(e):''}
       ${_qc.bike?`<td class="q-type-cell">${typeBadge(resolvedType(e))}</td>`:''}
-      ${S.sfSession==='all'?`<td class="hide-mobile">${esc(dayLabel(e.sessionDay)||'')} ${esc(shortDate(e.sessionDate))}</td>`:'<td class="hide-mobile" style="display:none"></td>'}
+      ${S.sfSession==='all'?`<td class="hide-mobile">${esc(dayLabel(e.sessionDay)||'')} ${esc(shortDate(e.sessionDate))}</td>`:'<td class="hide-mobile rq-none"></td>'}
       ${_qc.bike?`<td>${assignedBikes.length>0
-        ?assignedBikes.map((b,i)=>`<div style="display:flex;align-items:center;gap:5px;${i>0?'margin-top:3px':''}">
-            <span style="font-size:9px;font-weight:900;color:var(--muted);min-width:12px">${i+1}.</span>
-            <span style="font-weight:700;font-size:13px">${esc(b.name)}</span>
+        ?assignedBikes.map((b,i)=>`<div class="rq-bk${i>0?' rq-mt3':''}">
+            <span class="rq-bkn">${i+1}.</span>
+            <span class="rq-bkname">${esc(b.name)}</span>
           </div>`).join('')
-        :'<span style="color:var(--muted)">—</span>'}${assignedBikes.some(b=>b.colors&&b.colors.length)?`<div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:4px">${colorSwatches}</div>`:''}</td>`:''}
-      ${_qc.money?`<td style="font-weight:800;white-space:nowrap">${_freeSessIds.has(e.sessionId)?`<span style="color:var(--muted)">—</span>`:_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));return _a>0?`SAR ${Math.round((_p+_a)*100)/100}<div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px">${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}</div>`:`SAR ${_p}`;})()}</td>
+        :'<span class="rq-mut">—</span>'}${assignedBikes.some(b=>b.colors&&b.colors.length)?`<div class="rq-swrow">${colorSwatches}</div>`:''}</td>`:''}
+      ${_qc.money?`<td class="rq-price">${_freeSessIds.has(e.sessionId)?`<span class="rq-mut">—</span>`:_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));return _a>0?`SAR ${Math.round((_p+_a)*100)/100}<div class="rq-adline">${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}</div>`:`SAR ${_p}`;})()}</td>
       <td data-on-click="${_on("_on_renderStaffQueue_5",_EV,_EL)}">
-        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-          ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span style="color:var(--muted)">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
+        <div class="rq-payw">
+          ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
         </div>
       </td>`:''}
       <td>${statusCellHtml(e)}</td>
@@ -16112,8 +16112,8 @@ function renderQRow(e){
     const lp=livePosMap[primary.id];
     const totalW=sessWaitCount[primary.sessionId]||0;
     const posCell=primary.status==='waiting'&&lp
-      ?`<div class="pos-badge" style="font-size:12px;padding:3px 8px" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp} / ${totalW}`)}</div>`
-      :`<span style="color:var(--muted);font-size:12px">—</span>`;
+      ?`<div class="pos-badge rq-pos" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp} / ${totalW}`)}</div>`
+      :`<span class="rq-mut12">—</span>`;
     const activeGroup=group.filter(e=>!['cancelled','noshow'].includes(e.status));
     const _r2g=n=>Math.round(n*100)/100;
     const adTotal=_r2g(activeGroup.reduce((s,e)=>s+addonsCost(entryAddons(e)),0));
@@ -16126,9 +16126,9 @@ function renderQRow(e){
     const _ciN=_partyCheckinRows(group).length; // riders a one-tap party check-in would take
     const _pk=_partyKey(primary)||primary.id;
     const _open=_partyIsOpen(_pk)||_apprSessIds.has(primary.sessionId); // approvals are per rider: those parties never fold
-    const priceSpan=_freeSessIds.has(primary.sessionId)?`<span style="color:var(--muted)">—</span>`:`<span style="font-weight:800;white-space:nowrap">SAR ${totalPrice}</span>
-      ${adTotal>0?`<div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:2px">${t('addonsLabel')}: SAR ${adTotal}</div>`:''}
-      <div style="font-size:11px;font-weight:700;margin-top:3px;color:${remaining>0?'var(--orange)':'var(--green)'}">${paidCount}/${activeGroup.length} ${t('paidLabel')}${houseAmt>0?` · ${houseAmt} ${t('onTheHouseLabel')}`:''} · ${remaining>0?`SAR ${remaining} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</div>`;
+    const priceSpan=_freeSessIds.has(primary.sessionId)?`<span class="rq-mut">—</span>`:`<span class="rq-price">SAR ${totalPrice}</span>
+      ${adTotal>0?`<div class="rq-adline">${t('addonsLabel')}: SAR ${adTotal}</div>`:''}
+      <div class="${remaining>0?'rq-due':'rq-due-ok'}">${paidCount}/${activeGroup.length} ${t('paidLabel')}${houseAmt>0?` · ${houseAmt} ${t('onTheHouseLabel')}`:''} · ${remaining>0?`SAR ${remaining} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</div>`;
 
     if(!_open){
       // One row for the whole party: the holder, the shape of the party, the money, the
@@ -16140,29 +16140,29 @@ function renderQRow(e){
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
         ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row" data-id="${esc(primary.id)}" style="border-left:2px solid rgba(var(--green-rgb),.2)">
-        <td style="min-width:52px;vertical-align:middle">
-          <span class="queue-num-cell" style="font-size:15px;line-height:1.25">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+      return`<tr class="${groupCls} party-row rq-gleft" data-id="${esc(primary.id)}">
+        <td class="rq-w52 rq-vm">
+          <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group))}
-          ${primary.status==='waiting'&&lp?`<div style="margin-top:4px">${posCell}</div>`:''}
-          <div style="font-size:10px;color:var(--green);font-weight:800;margin-top:3px">${n} ${t('bike')||'Bikes'}</div>
-          ${primary.groupName?`<div style="font-size:10px;font-weight:900;color:var(--green);margin-top:2px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
+          ${primary.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
+          <div class="rq-nbk">${n} ${t('bike')||'Bikes'}</div>
+          ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
-        <td style="vertical-align:middle">
+        <td class="rq-vm">
           <div class="rider-name">${esc(primary.name)}${noShowFlag(primary)} ${_noShowChip(primary)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
         </td>
-        ${_memberCell(primary,' style="vertical-align:middle"')}
-        ${_qc.bike?`<td class="q-height-cell" style="vertical-align:middle">${[...new Set(group.map(x=>x.height).filter(Boolean))].map(h=>`<span class="q-height"><bdi>${esc(String(h))} ${t('cmUnit')}</bdi></span>`).join('<br>')||'<span style="color:var(--muted)">—</span>'}</td>`:''}
-        ${_qc.bike?`<td style="vertical-align:middle"><div style="display:flex;gap:4px;flex-wrap:wrap">${types.map(ty=>typeBadge(ty)).join('')}</div></td>`:''}
-        ${S.sfSession==='all'?`<td class="hide-mobile" style="vertical-align:middle">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile" style="display:none"></td>'}
-        ${_qc.bike?`<td style="vertical-align:middle">${bikesHeld.length?bikesHeld.map(b=>`<span style="font-weight:700;font-size:13px">${esc(b)}</span>`).join('<br>'):'<span style="color:var(--muted)">—</span>'}</td>`:''}
-        ${_qc.money?`<td style="vertical-align:middle">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green" style="margin-top:6px;white-space:nowrap;font-size:11px;padding:4px 9px" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
-        ${_qc.money?`<td style="vertical-align:middle;font-size:12px;font-weight:700;white-space:nowrap">${_freeSessIds.has(primary.sessionId)?'<span style="color:var(--muted)">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
-        <td style="vertical-align:middle;font-size:12px;font-weight:700">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
-        <td style="vertical-align:middle">${_contactCell(primary.groupPhone||primary.phone,primary)}</td>
-        <td style="vertical-align:middle"><div class="actions-cell">${_ciN>0?`<button class="btn-sm btn-green" style="white-space:nowrap" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
+        ${_memberCell(primary,' class="rq-vm"')}
+        ${_qc.bike?`<td class="q-height-cell rq-vm">${[...new Set(group.map(x=>x.height).filter(Boolean))].map(h=>`<span class="q-height"><bdi>${esc(String(h))} ${t('cmUnit')}</bdi></span>`).join('<br>')||'<span class="rq-mut">—</span>'}</td>`:''}
+        ${_qc.bike?`<td class="rq-vm"><div class="rq-types">${types.map(ty=>typeBadge(ty)).join('')}</div></td>`:''}
+        ${S.sfSession==='all'?`<td class="hide-mobile rq-vm">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile rq-none"></td>'}
+        ${_qc.bike?`<td class="rq-vm">${bikesHeld.length?bikesHeld.map(b=>`<span class="rq-bkname">${esc(b)}</span>`).join('<br>'):'<span class="rq-mut">—</span>'}</td>`:''}
+        ${_qc.money?`<td class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
+        ${_qc.money?`<td class="rq-vm rq-pcnt">${_freeSessIds.has(primary.sessionId)?'<span class="rq-mut">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
+        <td class="rq-vm rq-st">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
+        <td class="rq-vm">${_contactCell(primary.groupPhone||primary.phone,primary)}</td>
+        <td class="rq-vm"><div class="actions-cell">${_ciN>0?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
       </tr>`;
     }
     return group.map((e,i)=>{
@@ -16172,67 +16172,67 @@ function renderQRow(e){
       const assignedBikes=getAssignedBikes(e);
       const allColors=assignedBikes.flatMap(b=>b.colors&&b.colors.length?b.colors:[]);
       const colorSwatches=allColors.length
-        ?allColors.map(c=>`<span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('')
-        :'<span style="color:var(--muted)">—</span>';
+        ?allColors.map(c=>`<span class="rq-sw" data-cssv="${_cssv({'--rq-bg':c})}"></span>`).join('')
+        :'<span class="rq-mut">—</span>';
       const bikeNames=assignedBikes.length
-        ?assignedBikes.map(b=>`<span style="font-weight:700;font-size:13px">${esc(b.name)}</span>`).join('<br>')
-        :'<span style="color:var(--muted)">—</span>';
-      const riderCell=`<div style="display:flex;align-items:baseline;gap:5px">
-        <span style="display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--green);color:#000;font-size:10px;font-weight:900;flex-shrink:0">${i+1}</span>
-        <span class="rider-name" style="margin:0;font-weight:${isFirst?'900':'600'}">${esc(e.name)}${isFirst?noShowFlag(e):''}</span>
-      </div>${e.phone?`<div class="rider-sub" style="margin-top:3px;padding-inline-start:22px"><bdi>${esc(fmtPhone(e.phone))}</bdi>${_dupMark(e)}</div>`:''}${_adChips(e)}`;
-      const heightCell=_qHeightCell(e,' style="vertical-align:middle"');
-      const groupLine=isFirst?'border-top:2px solid rgba(var(--green-rgb),.15)':'';
-      const bottomLine=isLast?'border-bottom:2px solid rgba(var(--green-rgb),.15)':'';
-      const leftLine='border-left:2px solid rgba(var(--green-rgb),.2)';
-      const flashAnim=S._flashId===e.id?`animation:rowFlash_${S._flashColor||'green'} .75s ease forwards;`:'';
-      const trStyle=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(';');
+        ?assignedBikes.map(b=>`<span class="rq-bkname">${esc(b.name)}</span>`).join('<br>')
+        :'<span class="rq-mut">—</span>';
+      const riderCell=`<div class="rq-rc">
+        <span class="rq-num17">${i+1}</span>
+        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${isFirst?noShowFlag(e):''}</span>
+      </div>${e.phone?`<div class="rider-sub rq-rsub"><bdi>${esc(fmtPhone(e.phone))}</bdi>${_dupMark(e)}</div>`:''}${_adChips(e)}`;
+      const heightCell=_qHeightCell(e,'rq-vm');
+      const groupLine=isFirst?'rq-gtop':'';
+      const bottomLine=isLast?'rq-gbot':'';
+      const leftLine='rq-gleft';
+      const flashAnim=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:'';
+      const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ');
 
       if(isFirst){
-        return`<tr class="${rowCls}" data-id="${esc(e.id)}" style="${trStyle}">
-          <td rowspan="${n}" style="min-width:52px;vertical-align:middle">
-            <span class="queue-num-cell" style="font-size:15px;line-height:1.25">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+        return`<tr class="${rowCls} ${trCls}" data-id="${esc(e.id)}">
+          <td rowspan="${n}" class="rq-w52 rq-vm">
+            <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
             ${_bookedAt(_bookedAtOf(group))}
-            ${primary.status==='waiting'&&lp?`<div style="margin-top:4px">${posCell}</div>`:''}
-            <div style="font-size:10px;color:var(--green);font-weight:800;margin-top:3px">${n} ${t('bike')||'Bikes'}</div>
-            ${(n>1&&_ciN>0)?`<button class="btn-sm btn-green" style="margin-top:4px;white-space:nowrap" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}
-            ${n>1?`<div style="margin-top:4px">${_partyReturnBtn(group)}</div>`:''}
+            ${primary.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
+            <div class="rq-nbk">${n} ${t('bike')||'Bikes'}</div>
+            ${(n>1&&_ciN>0)?`<button class="btn-sm btn-green rq-ci4" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}
+            ${n>1?`<div class="rq-mt4">${_partyReturnBtn(group)}</div>`:''}
             ${(n>1&&!S._partyExpandAll)?`<button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyHideRiders')} ▴</button>`:''}
-            ${primary.groupName?`<div style="font-size:10px;font-weight:900;color:var(--green);margin-top:2px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
-            ${(primary.groupContact||primary.groupPhone)?`${primary.groupContact?`<div style="font-size:10px;color:var(--muted);font-weight:700;margin-top:3px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupContact)}">${esc(primary.groupContact)}</div>`:''}${primary.groupPhone||entryPhone(primary)?`<div style="margin-top:3px">${_contactCell(primary.groupPhone||entryPhone(primary),primary)}</div>`:''}`:''}
+            ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
+            ${(primary.groupContact||primary.groupPhone)?`${primary.groupContact?`<div class="rq-gcont" title="${esc(primary.groupContact)}">${esc(primary.groupContact)}</div>`:''}${primary.groupPhone||entryPhone(primary)?`<div class="rq-mt3">${_contactCell(primary.groupPhone||entryPhone(primary),primary)}</div>`:''}`:''}
           </td>
-          <td style="vertical-align:middle">${riderCell}</td>
-          ${_memberCell(e,' style="vertical-align:middle"')}
+          <td class="rq-vm">${riderCell}</td>
+          ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?heightCell:''}
-          ${_qc.bike?`<td class="q-type-cell" style="vertical-align:middle">${typeBadge(resolvedType(e))}</td>`:''}
-          ${S.sfSession==='all'?`<td class="hide-mobile" rowspan="${n}" style="vertical-align:middle">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile" style="display:none"></td>'}
-          ${_qc.bike?`<td style="vertical-align:middle"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${bikeNames}${allColors.length?colorSwatches:''}</div></td>`:''}
-          ${_qc.money?`<td rowspan="${n}" style="vertical-align:middle">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green" style="margin-top:6px;white-space:nowrap;font-size:11px;padding:4px 9px" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
-          ${_qc.money?`<td style="vertical-align:middle" data-on-click="${_on("_on_renderStaffQueue_6",_EV,_EL)}">
-            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-              ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span style="color:var(--muted)">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
+          ${_qc.bike?`<td class="q-type-cell rq-vm">${typeBadge(resolvedType(e))}</td>`:''}
+          ${S.sfSession==='all'?`<td class="hide-mobile rq-vm" rowspan="${n}">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile rq-none"></td>'}
+          ${_qc.bike?`<td class="rq-vm"><div class="rq-bkrow">${bikeNames}${allColors.length?colorSwatches:''}</div></td>`:''}
+          ${_qc.money?`<td rowspan="${n}" class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
+          ${_qc.money?`<td class="rq-vm" data-on-click="${_on("_on_renderStaffQueue_6",_EV,_EL)}">
+            <div class="rq-payw">
+              ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
             </div>
           </td>`:''}
-          <td style="vertical-align:middle">${statusCellHtml(e)}</td>
-          <td style="vertical-align:middle">${_contactCell(e.phone,e)}</td>
-          <td style="vertical-align:middle"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
+          <td class="rq-vm">${statusCellHtml(e)}</td>
+          <td class="rq-vm">${_contactCell(e.phone,e)}</td>
+          <td class="rq-vm"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
-        return`<tr class="${rowCls}" data-id="${esc(e.id)}" style="${trStyle}">
-          <td style="vertical-align:middle">${riderCell}</td>
-          ${_memberCell(e,' style="vertical-align:middle"')}
+        return`<tr class="${rowCls} ${trCls}" data-id="${esc(e.id)}">
+          <td class="rq-vm">${riderCell}</td>
+          ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?heightCell:''}
-          ${_qc.bike?`<td class="q-type-cell" style="vertical-align:middle">${typeBadge(resolvedType(e))}</td>`:''}
-          ${S.sfSession!=='all'?'<td class="hide-mobile" style="display:none"></td>':''}
-          ${_qc.bike?`<td style="vertical-align:middle"><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${bikeNames}${allColors.length?colorSwatches:''}</div></td>`:''}
-          ${_qc.money?`<td style="vertical-align:middle" data-on-click="${_on("_on_renderStaffQueue_7",_EV,_EL)}">
-            <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-              ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span style="color:var(--muted)">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
+          ${_qc.bike?`<td class="q-type-cell rq-vm">${typeBadge(resolvedType(e))}</td>`:''}
+          ${S.sfSession!=='all'?'<td class="hide-mobile rq-none"></td>':''}
+          ${_qc.bike?`<td class="rq-vm"><div class="rq-bkrow">${bikeNames}${allColors.length?colorSwatches:''}</div></td>`:''}
+          ${_qc.money?`<td class="rq-vm" data-on-click="${_on("_on_renderStaffQueue_7",_EV,_EL)}">
+            <div class="rq-payw">
+              ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
             </div>
           </td>`:''}
-          <td style="vertical-align:middle">${statusCellHtml(e)}</td>
-          <td style="vertical-align:middle">${_contactCell(e.phone,e)}</td>
-          <td style="vertical-align:middle"><div class="actions-cell">${_entryActions(e)}</div></td>
+          <td class="rq-vm">${statusCellHtml(e)}</td>
+          <td class="rq-vm">${_contactCell(e.phone,e)}</td>
+          <td class="rq-vm"><div class="actions-cell">${_entryActions(e)}</div></td>
         </tr>`;
       }
     }).join('');
@@ -16247,53 +16247,53 @@ function renderQRow(e){
     const qNumDisplay=allSameQ?`#${primary.queueNum}`:isConsec?`#${primary.queueNum}&ndash;#${group[n-1].queueNum}`:group.map(e=>`#${e.queueNum}`).join(', ');
     const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':'';
     const lp=livePosMap[primary.id];const totalW=sessWaitCount[primary.sessionId]||0;
-    const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge" style="font-size:11px;padding:2px 7px" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp}/${totalW}`)}</span>`:'';
-    const sessLabel=S.sfSession==='all'?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:6px">${esc(dayLabel(primary.sessionDay)||'')} &middot; ${esc(shortDate(primary.sessionDate))}</div>`:'';
+    const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge rq-pos11" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp}/${totalW}`)}</span>`:'';
+    const sessLabel=S.sfSession==='all'?`<div class="rq-slbl">${esc(dayLabel(primary.sessionDay)||'')} &middot; ${esc(shortDate(primary.sessionDate))}</div>`:'';
     const riderRows=group.map((e,i)=>{
       const assignedBikes=getAssignedBikes(e);
       const bikeInfo=assignedBikes.length?assignedBikes.map(b=>b.name).join(', '):'';
       const isHouse=e.paid&&(e.price??DEFAULT_PRICE)===0;
       // Same tappable payment control the desktop table has: shows the state, opens the
       // Pending / Paid (cash·card·split) / On-the-house menu.
-      const payBtn=(_freeSessIds.has(e.sessionId)||_ownFree(e))?'':`<button class="pay-toggle ${isHouse?'house':e.paid?'paid':'pending'}" style="font-size:10px;padding:5px 9px;min-height:26px" data-on-click="${_on("_on_renderStaffQueue_8",_EV,_EL,e.id)}">${isHouse?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`;
-      const indent=n>1?'padding-inline-start:22px':'';
-      return`<div style="padding:6px 0;${i>0?'border-top:1px solid rgba(var(--tint-rgb),.05)':''}">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div style="display:flex;align-items:center;gap:6px;min-width:0">
-            ${n>1?`<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--green);color:#000;font-size:9px;font-weight:900;flex-shrink:0">${i+1}</span>`:''}
-            <span class="rider-name" style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px">${esc(e.name)}</span>${_dupMark(e)}
-            ${e.height?`<span class="q-height" style="flex-shrink:0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
+      const payBtn=(_freeSessIds.has(e.sessionId)||_ownFree(e))?'':`<button class="pay-toggle ${isHouse?'house':e.paid?'paid':'pending'} rq-cpay" data-on-click="${_on("_on_renderStaffQueue_8",_EV,_EL,e.id)}">${isHouse?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`;
+      const indent=n>1?' rq-ind22':'';
+      return`<div class="rq-crow${i>0?' rq-ctop':''}">
+        <div class="rq-sb8">
+          <div class="rq-cl">
+            ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${_dupMark(e)}
+            ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${e.phone?_contactCell(e.phone,e):''}<span style="text-align:end">${statusCellHtml(e)}</span>${payBtn}</div>
+          <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px;${indent}">
-          ${esc(typeLabel(e.typePreference))}${bikeInfo?` &middot; <span style="color:var(--muted-l)">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi style="font-weight:800;color:var(--text)">SAR ${e.price??DEFAULT_PRICE}</bdi>`}
+        <div class="rq-csub${indent}">
+          ${esc(typeLabel(e.typePreference))}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">SAR ${e.price??DEFAULT_PRICE}</bdi>`}
         </div>
       </div>`;
     }).join('');
-    const actionsHtml=group.map((e,i)=>`<div style="${n>1&&i>0?'border-top:1px solid rgba(var(--tint-rgb),.05);padding-top:6px;margin-top:2px':''}">
-      ${n>1?`<div style="font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px">${esc(e.name)}</div>`:''}
-      <div style="display:flex;gap:6px;flex-wrap:wrap">${_entryActions(e,i===0?{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]}:undefined)}</div>
+    const actionsHtml=group.map((e,i)=>`<div${n>1&&i>0?' class="rq-cact"':''}>
+      ${n>1?`<div class="rq-cactn">${esc(e.name)}</div>`:''}
+      <div class="rq-flw6">${_entryActions(e,i===0?{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]}:undefined)}</div>
     </div>`).join('');
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
       const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''}" data-id="${esc(primary.id)}" style="border-left:2px solid rgba(var(--green-rgb),.25)">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:${sessLabel?'4':'6'}px">
-          <span class="queue-num-cell" style="font-size:22px">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft" data-id="${esc(primary.id)}">
+        <div class="rq-chw ${sessLabel?'rq-mb4':'rq-mb6'}">
+          <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
-          <span style="font-size:10px;color:var(--green);font-weight:800">${n} ${t('bike')||'Bikes'}</span>
-          ${primary.groupName?`<span style="font-size:10px;font-weight:900;color:var(--green);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
+          <span class="rq-nbk2">${n} ${t('bike')||'Bikes'}</span>
+          ${primary.groupName?`<span class="rq-gname2" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
           ${posTag}
         </div>
         ${sessLabel}
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-          <div style="min-width:0"><div class="rider-name" style="font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(primary.name)}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">${_partyCountsLine(group)}</div></div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
+        <div class="rq-sb8">
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}</div>
+            <div class="rq-csub">${_partyCountsLine(group)}</div></div>
+          <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
-        ${_freeSessIds.has(primary.sessionId)?'':`<div style="font-size:12px;font-weight:700;margin-top:6px;display:flex;justify-content:space-between;gap:8px"><span><bdi>${_fmtSar(pm.total)}</bdi> · ${pm.paidCount}/${pm.count} ${t('paidLabel')}</span><span style="color:${pm.due>0?'var(--orange)':'var(--green)'}">${pm.due>0?`<bdi>${_fmtSar(pm.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span></div>`}
-        <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+        ${_freeSessIds.has(primary.sessionId)?'':`<div class="rq-cmoney"><span><bdi>${_fmtSar(pm.total)}</bdi> · ${pm.paidCount}/${pm.count} ${t('paidLabel')}</span><span class="${pm.due>0?'rq-c-orange':'rq-c-green'}">${pm.due>0?`<bdi>${_fmtSar(pm.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span></div>`}
+        <div class="rq-pbtns">
           ${(()=>{const _ciN=_partyCheckinRows(group).length;return _ciN?`<button class="btn-sm btn-green" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
           ${_partyReturnBtn(group)}
           ${(!_freeSessIds.has(primary.sessionId)&&pm.due>0)?`<button class="btn-sm btn-green" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
@@ -16302,18 +16302,18 @@ function renderQRow(e){
         </div>
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}" data-id="${esc(primary.id)}" style="${n>1?'border-left:2px solid rgba(var(--green-rgb),.25)':''}">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:${sessLabel?'4':'6'}px">
-        <span class="queue-num-cell" style="font-size:22px">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
-        ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span style="font-size:10px;font-weight:900;color:var(--orange);white-space:nowrap">W${primary.waitlistNum}</span>`:''}
+    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}" data-id="${esc(primary.id)}">
+      <div class="rq-ch ${sessLabel?'rq-mb4':'rq-mb6'}">
+        <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+        ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span class="rq-wnum2">W${primary.waitlistNum}</span>`:''}
         ${_bookedAt(_bookedAtOf(group),'span')}
-        ${n>1?`<span style="font-size:10px;color:var(--green);font-weight:800">${n} ${t('bike')||'Bikes'}</span>`:''}
-        ${primary.groupName?`<span style="font-size:10px;font-weight:900;color:var(--green);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
+        ${n>1?`<span class="rq-nbk2">${n} ${t('bike')||'Bikes'}</span>`:''}
+        ${primary.groupName?`<span class="rq-gname2" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
         ${posTag}
-        ${(()=>{const _ciN=n>1?_partyCheckinRows(group).length:0;return _ciN?`<button class="btn-sm btn-green" style="font-size:10px;padding:4px 8px" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
+        ${(()=>{const _ciN=n>1?_partyCheckinRows(group).length:0;return _ciN?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
         ${n>1?_partyReturnBtn(group,true):''}
         ${(n>1&&!S._partyExpandAll)?`<button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyHideRiders')} ▴</button>`:''}
-        ${(n>1&&!_freeSessIds.has(primary.sessionId)&&group.some(e=>!e.paid&&!['cancelled','noshow'].includes(e.status)))?`<button class="btn-sm btn-green" style="font-size:10px;padding:4px 8px" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
+        ${(n>1&&!_freeSessIds.has(primary.sessionId)&&group.some(e=>!e.paid&&!['cancelled','noshow'].includes(e.status)))?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
       </div>
       ${sessLabel}
       <div>${riderRows}</div>
@@ -16322,17 +16322,17 @@ function renderQRow(e){
         return group.map(e=>{
           const ad=addonLineItems(entryAddons(e));
           if(!ad.length&&!canEdit)return'';
-          return`<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(var(--tint-rgb),.06)">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-              <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${n>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
-              ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_9",_EV,_EL,e.id)}" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:11px;font-weight:800;padding:6px 10px;min-height:24px;border-radius:3px;cursor:pointer">+ ${t('addonAddBtn')}</button>`:''}
+          return`<div class="rq-cad">
+            <div class="rq-sb8">
+              <span class="rq-cadl">${n>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
+              ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_9",_EV,_EL,e.id)}" class="rq-cadbtn">+ ${t('addonAddBtn')}</button>`:''}
             </div>
-            ${ad.map(a=>`<div style="display:flex;align-items:center;gap:7px;margin-top:5px;font-size:12px"><span style="flex:1;min-width:0;font-weight:700">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''}</span><bdi style="font-weight:800">SAR ${a.lineTotal}</bdi></div>`).join('')}
+            ${ad.map(a=>`<div class="rq-cadi"><span class="rq-cadn">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''}</span><bdi class="rq-b800">SAR ${a.lineTotal}</bdi></div>`).join('')}
           </div>`;
         }).join('');
       })()}
-      ${(()=>{const ph=primary.groupPhone||entryPhone(primary);if(n===1&&ph&&primary.phone)return'';return ph?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(var(--tint-rgb),.06);display:flex;align-items:center;gap:8px">${_contactCell(ph,primary)}${primary.groupContact?`<span style="font-size:11px;color:var(--muted);font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(primary.groupContact)} · <bdi>${esc(fmtPhone(ph))}</bdi></span>`:''}</div>`:''})()}
-      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">${actionsHtml}</div>
+      ${(()=>{const ph=primary.groupPhone||entryPhone(primary);if(n===1&&ph&&primary.phone)return'';return ph?`<div class="rq-ccb">${_contactCell(ph,primary)}${primary.groupContact?`<span class="rq-ccn">${esc(primary.groupContact)} · <bdi>${esc(fmtPhone(ph))}</bdi></span>`:''}</div>`:''})()}
+      <div class="rq-cacts">${actionsHtml}</div>
     </div>`;
   }
 
@@ -16341,39 +16341,39 @@ function renderQRow(e){
     <div class="section-header">
       <div>
         <div class="page-title">${t('staffQueueTitle')}</div>
-        <div class="refresh-indicator" style="margin-top:3px">
+        <div class="refresh-indicator rq-mt3">
           <span class="refresh-dot"></span>
           <span>${t('liveLabel')} &nbsp;·&nbsp; </span>
           <span id="staff-refresh-label">${t('justNow')}</span>
           <span aria-hidden="true">&nbsp;·&nbsp;</span>${_syncBtnHtml()}
         </div>
       </div>
-      <div class="sf-head-actions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+      <div class="sf-head-actions rq-hacts">
         ${_commQueueView()?(()=>{
           const nPend=getQueue().filter(e=>e.sessionId===S.sfSession&&_apprOf(e)==='pending'&&e.status==='waiting').length;
-          return `${nPend?`<button class="btn-sm btn-green" data-on-click="${_on("bulkApprovePending")}" style="white-space:nowrap">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'}" data-on-click="${_on("publishCommResults")}" style="white-space:nowrap">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
+          return `${nPend?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("bulkApprovePending")}">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'} rq-nw" data-on-click="${_on("publishCommResults")}">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
         })():''}
-        <button class="btn-sm btn-green walkin-head" data-on-click="${_on("showWalkinModal")}" style="white-space:nowrap">${t('addWalkin')}</button><button class="btn-sm btn-muted" data-on-click="${_on("showJccGroupModal")}" style="white-space:nowrap">${t('commAddGroupBtn')}</button>${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted" data-on-click="${_on("showCommAddModal")}" style="white-space:nowrap">${t('commAddRiderBtn')}</button>`:''}
-        ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" style="background:rgba(var(--tint-rgb),.05);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);font-family:var(--font-body);transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;line-height:1" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn" data-on-click="${_on("printDaySheet")}" style="white-space:nowrap">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
+        <button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button><button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
+        ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" class="rq-print" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn rq-nw" data-on-click="${_on("printDaySheet")}">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
         <div class="density-toggle hide-mobile">
           <button class="density-btn${S.queueDensity==='comfortable'?' active':''}" data-on-click="${_on("setQueueDensity","comfortable")}" title="${t('comfortableTip')}">${_artIcon('grid',13)}</button>
           <button class="density-btn${S.queueDensity==='compact'?' active':''}" data-on-click="${_on("setQueueDensity","compact")}" title="${t('compactTip')}">${_artIcon('rows',13)}</button>
         </div>
-        <button class="sf-icon-btn" data-on-click="${_on("toggleResetTool")}" title="${t('staffResetTool')}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="8" cy="15" r="5"/><path d="M11.5 11.5 21 2"/><path d="M17 6l3 3"/></svg></button>
+        <button class="sf-icon-btn" data-on-click="${_on("toggleResetTool")}" title="${t('staffResetTool')}"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rq-vm"><circle cx="8" cy="15" r="5"/><path d="M11.5 11.5 21 2"/><path d="M17 6l3 3"/></svg></button>
       </div>
     </div>
-    ${S.showResetTool?`<div class="inline-form" style="max-width:420px">
-      <div class="form-title" style="display:flex;align-items:center;gap:8px"> ${t('staffResetTool')}</div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">${t('staffResetDesc')}</div>
-      <div class="form-group" style="margin-bottom:10px">
+    ${S.showResetTool?`<div class="inline-form rq-rt">
+      <div class="form-title rq-rtt"> ${t('staffResetTool')}</div>
+      <div class="rq-rtd">${t('staffResetDesc')}</div>
+      <div class="form-group rq-mb10">
         <label>${t('staffResetEmailLabel')}</label>
         <input type="email" id="staff-reset-email" placeholder="${t('phCustEmail')}">
       </div>
-      <div class="form-group" style="margin-bottom:12px">
+      <div class="form-group rq-mb12">
         <label>${t('staffResetNewPw')}</label>
-        <div style="display:flex;gap:8px">
-          <input type="text" id="staff-reset-pw" placeholder="${t('authPasswordHint')}" style="flex:1">
-          <button class="btn-primary" data-on-click="${_on("staffResetPassword")}" style="white-space:nowrap">${t('staffResetSet')}</button>
+        <div class="rq-flex8">
+          <input type="text" id="staff-reset-pw" placeholder="${t('authPasswordHint')}" class="rq-f1">
+          <button class="btn-primary rq-nw" data-on-click="${_on("staffResetPassword")}">${t('staffResetSet')}</button>
         </div>
       </div>
       <div id="staff-reset-result"></div>
@@ -16413,7 +16413,7 @@ function renderQRow(e){
   _qPosText=new Map();
   const _phoneQ=_qPhone(),_rowOf=_phoneQ?(()=>''):renderGroupRow,_cardOf=_phoneQ?renderGroupCard:(()=>'');
   const _tb=(key,html)=>_qLeaf(key,html,'tbody'),_cd=(key,html)=>_qLeaf(key,html);
-  const _emptyHtml=`<div style="padding:8px">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
+  const _emptyHtml=`<div class="rq-p8">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
   const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="11">${_emptyHtml}</td></tr>`);
   const rowChunks=[],cardChunks=[],list=_phoneQ?cardChunks:rowChunks;
   const piece=_phoneQ?(g=>_cd('g:'+g[0].id,_cardOf(g))):(g=>_tb('g:'+g[0].id,_rowOf(g)));
@@ -16423,7 +16423,7 @@ function renderQRow(e){
       if(!sessFiltered.length)continue;
       const groups=buildQueueGroups(sessFiltered);
       if(_phoneQ){
-        cardChunks.push(_cd('h:'+sess.id,`<div style="font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:6px 0 4px;border-bottom:1px solid rgba(var(--tint-rgb),.06);margin-bottom:8px">${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))} &middot; ${esc(sessionTime(sess))}</div>`));
+        cardChunks.push(_cd('h:'+sess.id,`<div class="rq-shdr">${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))} &middot; ${esc(sessionTime(sess))}</div>`));
       }else{
         const nW=sessFiltered.filter(e=>e.status==='waiting').length;
         const nA=sessFiltered.filter(e=>e.status==='active').length;
@@ -16431,10 +16431,10 @@ function renderQRow(e){
         rowChunks.push(_tb('h:'+sess.id,`<tr class="sess-group-hdr"><td colspan="14">
         ${esc(dayLabel(sess.day))} &nbsp;${esc(shortDate(sess.session_date||sess.id))} &nbsp;&middot;&nbsp; ${esc(sessionTime(sess))}
         &nbsp;&nbsp;
-        <span style="color:var(--green)">${nW} ${t('waitingStat').toLowerCase()}</span>
-        ${nA?` &middot; <span style="color:var(--text)">${nA} ${t('onBikeStat').toLowerCase()}</span>`:''}
-        ${nD?` &middot; <span style="color:var(--muted)">${nD} ${t('doneStat').toLowerCase()}</span>`:''}
-        &nbsp;<span class="badge-${esc(sess.status)}" style="margin-left:8px">${_own(SESS_STATUS_KEY,sess.status)?t(SESS_STATUS_KEY[sess.status]):esc(sess.status)}</span>
+        <span class="rq-c-green">${nW} ${t('waitingStat').toLowerCase()}</span>
+        ${nA?` &middot; <span class="rq-c-text">${nA} ${t('onBikeStat').toLowerCase()}</span>`:''}
+        ${nD?` &middot; <span class="rq-mut">${nD} ${t('doneStat').toLowerCase()}</span>`:''}
+        &nbsp;<span class="badge-${esc(sess.status)} rq-ml8">${_own(SESS_STATUS_KEY,sess.status)?t(SESS_STATUS_KEY[sess.status]):esc(sess.status)}</span>
       </td></tr>`));
       }
       for(const g of groups)list.push(piece(g));
@@ -16490,13 +16490,13 @@ function renderQRow(e){
         (c.timestamp!=null?c.timestamp:Date.now())>=cutoff
       ).slice(0,3);
       if(!recent.length)return'';
-      return`<div style="margin-bottom:14px">
-        ${recent.map(c=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:6px;background:rgba(var(--red-rgb),.07);border:1px solid rgba(var(--red-rgb),.2);border-radius:4px;font-size:12px">
-          <span style="font-weight:800;color:var(--red)">${t('filterCancelled')}</span>
-          <span style="font-weight:700">#${esc(c.queueNum)} ${esc(c.name)}</span>
-          <span style="color:var(--muted)">${esc(c.session)}</span>
-          ${c.reason?`<span style="margin-left:auto;background:rgba(var(--tint-rgb),.07);padding:2px 8px;border-radius:2px;color:var(--muted-l);font-size:11px">${esc(c.reason)}</span>`:''}
-          <button data-on-click="${_on("_on_renderStaffQueue_13",_EV,_EL,c.entryId)}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:auto;flex-shrink:0">&#x2715;</button>
+      return`<div class="rq-mb14">
+        ${recent.map(c=>`<div class="rq-cx">
+          <span class="rq-cxh">${t('filterCancelled')}</span>
+          <span class="rq-b700">#${esc(c.queueNum)} ${esc(c.name)}</span>
+          <span class="rq-mut">${esc(c.session)}</span>
+          ${c.reason?`<span class="rq-cxr">${esc(c.reason)}</span>`:''}
+          <button data-on-click="${_on("_on_renderStaffQueue_13",_EV,_EL,c.entryId)}" class="rq-cxx">&#x2715;</button>
         </div>`).join('')}
       </div>`;
     })()}
@@ -16538,7 +16538,7 @@ function renderQRow(e){
   // Re-rendering the whole panel would destroy the focused search input, and on a phone a
   // destroyed input closes the soft keyboard (focus() can't reopen it without a gesture).
   const _results=[];
-  if(filtered.length>_qShown.length)_results.push(_qLeaf('more',`<div style="margin:10px 0;text-align:center"><button class="btn-secondary" data-on-click="${_on("_on_renderStaffQueue_16",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`));
+  if(filtered.length>_qShown.length)_results.push(_qLeaf('more',`<div class="rq-showmore"><button class="btn-secondary" data-on-click="${_on("_on_renderStaffQueue_16",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`));
   _results.push(_qBox('cards','<div class="queue-mobile-view">','</div>',cardChunks));
   _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}">`,'</table></div>',[_qLeaf('head',`<tr>
         ${thQSort('queue',t('colBookingNum'))}
@@ -16546,7 +16546,7 @@ function renderQRow(e){
         ${_commQueueView()?thQSort('member',t('colMember')):''}
         ${_qc.bike?thQSort('height',t('colHeight')):''}
         ${_qc.bike?thQSort('type',t('bikeTypeLabel')):''}
-        ${S.sfSession==='all'?thQSort('session',t('colSession'),'hide-mobile'):'<th class="hide-mobile" style="display:none"></th>'}
+        ${S.sfSession==='all'?thQSort('session',t('colSession'),'hide-mobile'):'<th class="hide-mobile rq-none"></th>'}
         ${_qc.bike?thQSort('bike',t('colBike')):''}
         ${_qc.money?thQSort('price',t('colPrice')||'Price'):''}
         ${_qc.money?thQSort('paid',t('colPayment')):''}
@@ -16560,8 +16560,8 @@ function renderQRow(e){
     if(sel.length){
       const anyWaiting=sel.some(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='waiting';});
       const act=sel.filter(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='active';});
-      _results.push(_qLeaf('bulk',`<div style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:350;display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:10px 14px;box-shadow:0 10px 40px rgba(0,0,0,.5)">
-        <span style="font-size:13px;font-weight:800;color:var(--green);white-space:nowrap">${sel.length} ${t('bulkSelectedLabel')}</span>
+      _results.push(_qLeaf('bulk',`<div class="rq-bulk">
+        <span class="rq-bulkn">${sel.length} ${t('bulkSelectedLabel')}</span>
         <button class="btn-sm btn-green" data-on-click="${_on("bulkSfPaid")}">✓ ${t('bulkPaidBtn')}</button>
         ${anyWaiting?`<button class="btn-sm btn-green" data-on-click="${_on("bulkSfCheckin")}">${t('bulkCheckinBtn')}</button>`:''}
         ${act.length?`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderStaffQueue_17",_EV,_EL)}">${t('bulkReturnBtn')} (${act.length})</button>`:''}
@@ -16687,7 +16687,7 @@ function _qPaintRest(rest){
 // be patched, and the filter bar keeps its node, its focus and the phone's keyboard while nothing
 // in it changed.
 function _qSyncShell(tab,html){
-  const tpl=document.createElement('template');tpl.innerHTML=html;
+  const tpl=document.createElement('template');tpl.innerHTML=html;_cssvApply(tpl.content); // data-cssv values set as on screen, so an unchanged piece compares equal
   const want=Array.from(tpl.content.children);
   let results=document.getElementById('q-results');
   if(results&&results.parentElement!==tab)results=null;
@@ -19048,7 +19048,7 @@ function _idsArg(ids){return '['+ids.map(_ja).join(',')+']';} // the menu items'
 function _liveOf(ids,st){return(ids||[]).map(id=>getQueue().find(e=>e.id===id)).filter(e=>e&&e.status===st);}
 function _partyReturnBtn(group,small){
   const ids=group.filter(e=>e.status==='active').map(e=>e.id);
-  return ids.length?`<button class="btn-sm btn-green party-return"${small?' style="font-size:10px;padding:4px 8px"':''} data-on-click="${_on("showBulkReturn",ids)}">${t('returnAllBtn')} (${ids.length})</button>`:'';
+  return ids.length?`<button class="btn-sm btn-green party-return${small?' rq-sbtn':''}" data-on-click="${_on("showBulkReturn",ids)}">${t('returnAllBtn')} (${ids.length})</button>`:'';
 }
 function _partyMenuExtra(group){
   const a=group.filter(e=>e.status==='active').map(e=>e.id),w=group.filter(e=>e.status==='waiting').map(e=>e.id);
@@ -19271,8 +19271,8 @@ function statusCellHtml(e){
   // found still "active" weeks after their sessions ended.)
   const late=min!=null&&min>=OVERDUE_RIDE_MIN;
   const held=_isReserved(e)?getAssignedBikes(e).map(b=>b.name).join(', '):'';
-  return badge+(el?`<div style="font-size:10px;color:${late?'var(--orange)':'var(--green)'};font-weight:${late?'900':'700'};margin-top:3px;white-space:nowrap" ${late?`title="${t('overdueRideTip')}"`:''}>${late?'⚠ ':''}${el}</div>`:'')
-    +(held?`<div style="font-size:10px;color:#1d4ed8;font-weight:700;margin-top:3px;white-space:nowrap">${esc(held)}</div>`:'');
+  return badge+(el?`<div class="${late?'rq-el-late':'rq-el'}" ${late?`title="${t('overdueRideTip')}"`:''}>${late?'⚠ ':''}${el}</div>`:'')
+    +(held?`<div class="rq-held">${esc(held)}</div>`:'');
 }
 
 
