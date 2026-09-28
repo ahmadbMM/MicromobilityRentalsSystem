@@ -47,6 +47,8 @@ test('in Arabic the menu hangs off the pill\'s right edge', async ({ page }) => 
   await p.click();
   const menu = page.locator('.pay-menu-popup[role="menu"]');
   await expect(menu).toBeVisible();
+  // the menu scales in (payMenuIn, .15s): measured mid-animation its box is a few pixels off
+  await menu.evaluate((el) => Promise.all(el.getAnimations().map((a) => a.finished)));
   // both measured once the menu is up: a background repaint between a measure and the click would move the pill
   const pr = (await p.boundingBox())!;
   const mr = (await menu.boundingBox())!;
