@@ -155,6 +155,13 @@
 
     /* Inline field validation: icon + message under the field (never color-only) */
     .field-err{display:flex;align-items:center;gap:5px;color:var(--red);font-size:11.5px;font-weight:600;margin-top:6px;line-height:1.4;}
+    /* ── The field and group error messages (_fieldErr, _groupErr): their icon, wherever a message lands:
+       without inline styles (2026-09-29, the customer pages' pass of moving style="..." into classes, so the
+       policy can drop style-src 'unsafe-inline'; the other blocks of that pass sit beside their own areas'
+       rules, each scoped by the id its markup is drawn under, so it outranks the class rules as the inline
+       style did). No one id holds these messages; the rule is scoped by .field-err, and no other rule sets the
+       icon's flex-shrink. */
+    .field-err .cu-shrink0{flex-shrink:0;}
     input.field-invalid,select.field-invalid{border-color:var(--red)!important;}
     .auth-box .auth-field input.field-invalid{border-bottom-color:var(--red)!important;}
 
@@ -339,6 +346,9 @@
     .pv-t th{font-weight:800;background:rgba(var(--tint-rgb),.05);}
     .pv-body a{color:var(--green);font-weight:700;}
     .pv-link{background:none;border:none;padding:0;font:inherit;color:var(--green);font-weight:700;text-decoration:underline;cursor:pointer;}
+    /* ── The Privacy Notice (showPrivacyNotice), drawn into #privacy-backdrop: without inline styles
+       (2026-09-29, the customer pages' pass; scoped by that id). */
+    #privacy-backdrop .cu-m0{margin:0;}
     /* On a phone three columns leave the longest one - what the data is for - a word wide.
        Each row becomes a small card instead: the first cell as its title, the others under
        their column's name. */
@@ -457,6 +467,45 @@
     .auth-cc-row select{background:var(--in-bg);border:1px solid var(--border);border-radius:3px;padding:11px 10px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;outline:none;width:110px;flex-shrink:0;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;}
     .auth-cc-row input{flex:1;background:var(--in-bg);border:1px solid var(--border);border-radius:3px;padding:11px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;outline:none;transition:border-color .2s;}
     .auth-cc-row input:focus{border-color:var(--green);}
+    /* ── The Sign in, Create account, Google completion and forgotten-password pages (renderAuthModal,
+       #auth-modal), the consent ticks (_tickHtml, there and in #rn-ask) and the consent popup (_consentAsk,
+       #rn-ask): without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #rn-ask .cu-ask-btns{display:flex;flex-direction:column;gap:8px;}
+    #rn-ask .cu-ask-news-sub{font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+    #rn-ask .cu-ask-news-title{font-size:15px;font-weight:800;margin:14px 0 4px;}
+    #rn-ask .cu-ask-notice{font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:4px;}
+    #rn-ask .cu-ask-title{margin:0 0 8px;}
+    #auth-modal .cu-back-btn{background:transparent none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body);}
+    #auth-modal .cu-back-row{text-align:center;margin-top:12px;}
+    #auth-modal .cu-c-mutedl,#rn-ask .cu-c-mutedl{color:var(--muted-l);}
+    #auth-modal .cu-c-text,#rn-ask .cu-c-text{color:var(--text);}
+    #rn-ask .cu-err-mt6{color:var(--red);font-size:12.5px;font-weight:700;margin-top:6px;}
+    #rn-ask .cu-err-mt8{color:var(--red);font-size:12.5px;font-weight:700;margin-top:8px;}
+    #auth-modal .cu-f1{flex:1;}
+    #auth-modal .cu-fg-head{text-align:center;padding:4px 0 12px;}
+    #auth-modal .cu-fg-ok{background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:16px;}
+    #auth-modal .cu-fg-pending{background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:16px;color:var(--muted-l);}
+    #auth-modal .cu-fg-sub{font-size:13px;color:var(--muted-l);line-height:1.7;}
+    #auth-modal .cu-forgot-link{background:transparent none;border:none;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);padding:0;}
+    #auth-modal .cu-g-female{background:rgba(255,126,182,.18);border-color:#ff7eb6;color:#ff7eb6;}
+    #auth-modal .cu-g-male{background:rgba(var(--blue-rgb),.18);border-color:#4aa8f8;color:#4aa8f8;}
+    #auth-modal .cu-gender-row{display:flex;gap:8px;margin-top:4px;}
+    #auth-modal .cu-iab-note{background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.35);border-radius:4px;padding:10px 14px;font-size:12px;font-weight:600;line-height:1.6;color:var(--text);}
+    #auth-modal .cu-lbl13{font-size:13px;font-weight:600;}
+    #rn-ask .cu-mw420{max-width:420px;}
+    #auth-modal .cu-pwd-lbl{display:flex;justify-content:space-between;align-items:center;}
+    #auth-modal .cu-req,#rn-ask .cu-req{color:var(--red);font-size:11px;}
+    #auth-modal .cu-rm-box{width:20px;height:20px;border-radius:5px;border:2px solid rgba(var(--tint-rgb),.2);background:transparent none;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;}
+    #auth-modal .cu-rm-row{display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:16px;margin-top:4px;user-select:none;}
+    #auth-modal .cu-tick-box,#rn-ask .cu-tick-box{width:20px;height:20px;flex:none;border-radius:5px;border:2px solid rgba(var(--tint-rgb),.2);background:transparent none;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+    #auth-modal .cu-tick-lbl,#rn-ask .cu-tick-lbl{font-size:13px;font-weight:600;line-height:1.45;}
+    #auth-modal .cu-tick-row,#rn-ask .cu-tick-row{display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:6px 0 10px;user-select:none;}
+    #rn-ask .cu-w100{width:100%;}
+    #auth-modal .cu-w100-mt10{width:100%;margin-top:10px;}
+    #auth-modal .cu-w100-mt14{width:100%;margin-top:14px;}
+    #rn-ask .cu-w100-mt6{width:100%;margin-top:6px;}
+    #auth-modal .cu-rm-on{border-color:var(--green);background:var(--green);}
+    #auth-modal .cu-tick-on,#rn-ask .cu-tick-on{border-color:var(--green);background:var(--green);}
 
     
     .cust-topbar-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
@@ -481,6 +530,51 @@
       font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text);cursor:pointer;text-align:left;transition:background .15s;}
     .acc-set-row:hover{background:var(--s2);}
     .acc-set-val{font-size:13px;color:var(--muted);font-weight:600;}
+    /* ── The account page (renderAccount, _seasonDashboard, _mrBadgesRow), drawn into #tab-account: without
+       inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #tab-account .cu-acc-err{color:var(--red);font-size:13px;font-weight:700;min-height:18px;margin-bottom:10px;margin-top:14px;}
+    #tab-account .cu-book-next{font-size:12px;padding:10px 12px;}
+    #tab-account .cu-c-green{color:var(--green);}
+    #tab-account .cu-c-muted{color:var(--muted);}
+    #tab-account .cu-c-mutedl{color:var(--muted-l);}
+    #tab-account .cu-c-red{color:var(--red);}
+    #tab-account .cu-card-foot{font-size:12px;color:var(--muted);margin-top:12px;}
+    #tab-account .cu-card-sub12{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+    #tab-account .cu-card-sub6{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:6px;}
+    #tab-account .cu-card640{max-width:640px;margin:16px auto 0;}
+    #tab-account .cu-card640-0{max-width:640px;margin:0 auto;}
+    #tab-account .cu-del-state{font-size:13px;font-weight:700;color:var(--orange);line-height:1.6;margin-bottom:12px;}
+    #tab-account .cu-fs17{font-size:17px;}
+    #tab-account .cu-hidden{display:none;}
+    #tab-account .cu-initials{width:72px;height:72px;border-radius:50%;background:rgba(var(--green-rgb),.16);border:2px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--green);flex-shrink:0;}
+    #tab-account .cu-mb12{margin-bottom:12px;}
+    #tab-account .cu-mb6{margin-bottom:6px;}
+    #tab-account .cu-meter{height:8px;border-radius:2px;background:rgba(var(--tint-rgb),.07);overflow:hidden;}
+    #tab-account .cu-meter-card{max-width:640px;margin:22px auto 16px;}
+    #tab-account .cu-meter-fill{height:100%;width:var(--cu-w);background:var(--green);border-radius:2px;transition:width .4s;}
+    #tab-account .cu-meter-k{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px;}
+    #tab-account .cu-mt22{margin-top:22px;}
+    #tab-account .cu-mt4{margin-top:4px;}
+    #tab-account .cu-mt6{margin-top:6px;}
+    #tab-account .cu-next-when{font-size:12px;font-weight:800;color:var(--green);margin-top:2px;}
+    #tab-account .cu-photo{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(var(--green-rgb),.4);flex-shrink:0;}
+    #tab-account .cu-photo-btn{font-size:12px;padding:7px 14px;}
+    #tab-account .cu-photo-col{display:flex;flex-direction:column;gap:6px;}
+    #tab-account .cu-photo-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    #tab-account .cu-photo-row{display:flex;align-items:center;gap:16px;margin-bottom:20px;}
+    #tab-account .cu-purch-amt{font-weight:800;font-size:13px;white-space:nowrap;}
+    #tab-account .cu-purch-date{font-size:11px;color:var(--muted);white-space:nowrap;}
+    #tab-account .cu-purch-list{max-height:260px;overflow-y:auto;}
+    #tab-account .cu-purch-name{flex:1;min-width:0;font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    #tab-account .cu-purch-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    #tab-account .cu-push-blocked{font-size:12.5px;color:var(--red);font-weight:700;}
+    #tab-account .cu-rn-state{font-size:13px;font-weight:700;margin-bottom:12px;}
+    #tab-account .cu-stat-center{display:flex;align-items:center;justify-content:center;}
+    #tab-account .cu-tier{font-size:18px;color:var(--green);}
+    #tab-account .cu-tier-fill{width:var(--cu-w);}
+    #tab-account .cu-type-hint{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600;}
+    #tab-account .cu-upload{font-size:12px;padding:7px 14px;cursor:pointer;margin:0;}
+    #tab-account .cu-wrap8{display:flex;gap:8px;flex-wrap:wrap;}
     html[dir="rtl"] .acc-set-row{text-align:right;}
 
     /* v2: booking add-ons as hairline checkbox rows */
@@ -847,6 +941,115 @@
     .reg-summary-total{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line2);margin-top:10px;padding-top:14px;}
     .reg-summary-total span:first-child{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
     .reg-summary-total span:last-child{font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--text);}
+    /* ── The booking wizard (renderRegister, _soleSessHtml, _promoBoxHtml, _promoDiscLine), drawn into
+       #tab-register: without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #tab-register .cu-ad-brand{font-size:11.5px;color:var(--muted);font-weight:600;}
+    #tab-register .cu-ad-cat{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px;}
+    #tab-register .cu-ad-list{display:flex;flex-direction:column;}
+    #tab-register .cu-ad-name{font-weight:600;font-size:14px;line-height:1.25;}
+    #tab-register .cu-ad-nutri{margin-top:2px;background:transparent none;border:none;padding:0;color:var(--green-d);font-family:inherit;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+    #tab-register .cu-ad-price{font-weight:700;color:var(--green-d);font-size:13.5px;white-space:nowrap;}
+    #tab-register .cu-ad-sub{font-size:12px;color:var(--muted);margin-bottom:12px;}
+    #tab-register .cu-already{margin-top:16px;padding:16px 18px;}
+    #tab-register .cu-already-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+    #tab-register .cu-already-title{font-size:14px;font-weight:800;color:var(--orange);}
+    #tab-register .cu-c-green{color:var(--green);}
+    #tab-register .cu-c-muted{color:var(--muted);}
+    #tab-register .cu-c-orange{color:var(--orange);}
+    #tab-register .cu-c-text{color:var(--text);}
+    #tab-register .cu-card640-0{max-width:640px;margin:0 auto;}
+    #tab-register .cu-dim{opacity:.4;}
+    #tab-register .cu-divider{border-top:1px solid var(--border);margin:20px 0;}
+    #tab-register .cu-done-head{text-align:center;margin-bottom:18px;}
+    #tab-register .cu-empty{text-align:center;padding:28px 20px 20px;}
+    #tab-register .cu-empty-sub{font-size:13px;color:var(--muted-l);font-weight:600;margin-bottom:18px;}
+    #tab-register .cu-empty-title{font-size:16px;font-weight:900;margin-bottom:8px;}
+    #tab-register .cu-f1{flex:1;}
+    #tab-register .cu-f1-min0{flex:1;min-width:0;}
+    #tab-register .cu-foot{display:flex;gap:10px;margin-top:16px;}
+    #tab-register .cu-full-dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:4px;}
+    #tab-register .cu-full-msg{font-size:12.5px;font-weight:700;color:var(--orange);line-height:1.5;}
+    #tab-register .cu-full-note{display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:12px 14px;}
+    #tab-register .cu-fw700{font-weight:700;}
+    #tab-register .cu-hint-mt3{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px;}
+    #tab-register .cu-ig-link{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--s1);border:1px solid var(--line2);color:var(--text);font-size:13px;font-weight:700;text-decoration:none;}
+    #tab-register .cu-k10{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+    #tab-register .cu-locked{opacity:.7;}
+    #tab-register .cu-mb0{margin-bottom:0;}
+    #tab-register .cu-mb14{margin-bottom:14px;}
+    #tab-register .cu-mb16{margin-bottom:16px;}
+    #tab-register .cu-mb18{margin-bottom:18px;}
+    #tab-register .cu-mb4{margin-bottom:4px;}
+    #tab-register .cu-mb8{margin-bottom:8px;}
+    #tab-register .cu-mod-bike{color:var(--muted);font-size:10px;display:block;margin-bottom:2px;}
+    #tab-register .cu-mod-chip{background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;flex-shrink:0;}
+    #tab-register .cu-mod-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+    #tab-register .cu-mod-hint{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
+    #tab-register .cu-mod-ic{display:inline-flex;align-items:center;color:var(--green);}
+    #tab-register .cu-mod-note{padding:16px 18px;margin-bottom:20px;}
+    #tab-register .cu-mod-qn{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);}
+    #tab-register .cu-mod-title{font-size:14px;font-weight:800;color:var(--green);}
+    #tab-register .cu-mt10{margin-top:10px;}
+    #tab-register .cu-mt14{margin-top:14px;}
+    #tab-register .cu-mt16{margin-top:16px;}
+    #tab-register .cu-off{opacity:.4;cursor:not-allowed;}
+    #tab-register .cu-promo-disc{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--green);margin-top:8px;}
+    #tab-register .cu-promo-err{font-size:11px;color:var(--red);font-weight:700;margin-top:5px;}
+    #tab-register .cu-promo-in{flex:1;text-transform:uppercase;}
+    #tab-register .cu-promo-row{display:flex;gap:8px;margin-top:5px;}
+    #tab-register .cu-qty-col{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+    #tab-register .cu-rider-head{font-size:11px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    #tab-register .cu-rider-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--green);color:var(--on-green,#000);font-size:12px;font-weight:900;}
+    #tab-register .cu-rv-addon{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+    #tab-register .cu-rv-brand{font-size:11px;color:var(--muted);}
+    #tab-register .cu-rv-by{font-weight:700;font-size:13px;}
+    #tab-register .cu-rv-date{font-weight:800;font-size:15px;}
+    #tab-register .cu-rv-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    #tab-register .cu-rv-k{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px;}
+    #tab-register .cu-rv-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    #tab-register .cu-rv-name{font-weight:800;font-size:14px;}
+    #tab-register .cu-rv-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--green);color:var(--on-green,#000);font-size:12px;font-weight:900;flex-shrink:0;}
+    #tab-register .cu-rv-price{font-weight:800;font-size:13px;color:var(--green);white-space:nowrap;}
+    #tab-register .cu-rv-qty{color:var(--muted);font-weight:700;}
+    #tab-register .cu-rv-rider{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);}
+    #tab-register .cu-rv-sec{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 0;}
+    #tab-register .cu-shrink0{flex-shrink:0;}
+    #tab-register .cu-sole-card{border:1px solid var(--border);border-inline-start:3px solid var(--ev,var(--green));border-radius:6px;padding:16px 18px;background:rgba(var(--tint-rgb),.03);}
+    #tab-register .cu-sole-k{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    #tab-register .cu-sole-name{font-size:17px;font-weight:900;letter-spacing:-.3px;}
+    #tab-register .cu-sole-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border);}
+    #tab-register .cu-sole-v{font-size:14px;font-weight:800;text-align:end;}
+    #tab-register .cu-step{display:flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0;}
+    #tab-register .cu-step-c{width:24px;height:24px;flex-shrink:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;transition:none;}
+    #tab-register .cu-step-lbl{font-size:12px;font-weight:800;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;}
+    #tab-register .cu-step-ln{flex:1 1 auto;min-width:10px;height:2px;border-radius:2px;background:var(--border);}
+    #tab-register .cu-step-off{background:var(--s3);color:var(--muted);border:1px solid var(--border);}
+    #tab-register .cu-step-on{background:var(--green);color:var(--on-green,#04150c);}
+    #tab-register .cu-stepper{display:flex;align-items:center;gap:6px;margin-bottom:16px;}
+    #tab-register .cu-sub12{font-size:12px;color:var(--muted);margin-top:2px;}
+    #tab-register .cu-sum-lbl{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+    #tab-register .cu-sum-row{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+    #tab-register .cu-sum-sep{border-top:1px solid var(--border);margin-top:6px;padding-top:8px;}
+    #tab-register .cu-sum-tot{display:flex;align-items:center;justify-content:space-between;}
+    #tab-register .cu-sum-total{font-size:22px;font-weight:900;color:var(--green);}
+    #tab-register .cu-ta-right{text-align:right;}
+    #tab-register .cu-tk-acts{padding:0 24px 18px;display:flex;gap:8px;}
+    #tab-register .cu-tk-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;}
+    #tab-register .cu-tk-cue{font-size:15px;font-weight:800;color:var(--orange);margin-top:10px;}
+    #tab-register .cu-tk-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:14px 24px 0;text-align:center;}
+    #tab-register .cu-tk-link{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;text-decoration:none;}
+    #tab-register .cu-tk-top1{grid-template-columns:1fr;}
+    #tab-register .cu-tk-wallet{padding:0 24px 18px;}
+    #tab-register .cu-usual{width:100%;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px;}
+    #tab-register .cu-w100{width:100%;}
+    #tab-register .cu-w100-mt18{width:100%;margin-top:18px;}
+    #tab-register .cu-waiver{display:flex;align-items:center;gap:12px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:15px 18px;margin-top:12px;cursor:pointer;min-height:52px;box-sizing:border-box;}
+    #tab-register .cu-waiver-cb{width:20px;height:20px;flex:none;}
+    #tab-register .cu-waiver-lbl{font-size:13.5px;font-weight:600;}
+    #tab-register .cu-waiver-text{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 20px;max-height:260px;overflow-y:auto;font-size:13.5px;line-height:1.65;color:var(--muted);}
+    #tab-register .cu-wrap8{display:flex;gap:8px;flex-wrap:wrap;}
+    #tab-register .cu-step-ln-on{background:var(--green);}
+    #tab-register .cu-waiver-ok{border-color:var(--green);}
 
     .session-picker-wrap{margin-bottom:24px;}
     /* Every session in a list is the same card: same height, same margins, the same
@@ -1016,6 +1219,61 @@
     .ticket-header{padding:24px;display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px dashed var(--line2);position:relative;}
     .ticket-num-block{display:flex;flex-direction:column;gap:4px;}
     .ticket-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+    /* ── My Bookings and its cards (renderMyRides, renderBookingTicket), drawn into #tab-myrides: without
+       inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #tab-myrides .cu-act110{flex:1;min-width:110px;}
+    #tab-myrides .cu-act88{flex:1;min-width:88px;}
+    #tab-myrides .cu-bg-green{background:var(--green);}
+    #tab-myrides .cu-bg-orange{background:var(--orange);}
+    #tab-myrides .cu-c-green{color:var(--green);}
+    #tab-myrides .cu-c-muted{color:var(--muted);}
+    #tab-myrides .cu-c-mutedl{color:var(--muted-l);}
+    #tab-myrides .cu-c-orange{color:var(--orange);}
+    #tab-myrides .cu-c-text{color:var(--text);}
+    #tab-myrides .cu-cue{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:9px 12px;}
+    #tab-myrides .cu-cue-txt{font-size:12px;font-weight:800;}
+    #tab-myrides .cu-dot7-due{width:7px;height:7px;border-radius:50%;background:var(--orange);flex:none;}
+    #tab-myrides .cu-dot7-ok{width:7px;height:7px;border-radius:50%;background:var(--green-h);flex:none;}
+    #tab-myrides .cu-dot8{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    #tab-myrides .cu-f1{flex:1;}
+    #tab-myrides .cu-fs14{font-size:14px;}
+    #tab-myrides .cu-fw800-13{font-weight:800;font-size:13px;}
+    #tab-myrides .cu-hint-mt3{font-size:11px;color:var(--muted);font-weight:600;margin-top:3px;}
+    #tab-myrides .cu-k10{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+    #tab-myrides .cu-mt0{margin-top:0;}
+    #tab-myrides .cu-mt24{margin-top:24px;}
+    #tab-myrides .cu-mt30{margin-top:30px;}
+    #tab-myrides .cu-num-l{font-size:72px;letter-spacing:-3px;}
+    #tab-myrides .cu-num-m{font-size:40px;letter-spacing:-1px;}
+    #tab-myrides .cu-num-s{font-size:24px;letter-spacing:-1px;}
+    #tab-myrides .cu-pay-due{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--orange);white-space:nowrap;}
+    #tab-myrides .cu-pay-ok{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--green-h);white-space:nowrap;}
+    #tab-myrides .cu-span-all{grid-column:1/-1;}
+    #tab-myrides .cu-tk-actions{display:flex;gap:8px;padding:14px 18px 16px;flex-wrap:wrap;}
+    #tab-myrides .cu-tk-ad{display:flex;align-items:center;gap:8px;margin-top:6px;}
+    #tab-myrides .cu-tk-ad-name{flex:1;min-width:0;font-size:13px;font-weight:700;}
+    #tab-myrides .cu-tk-addons{padding:9px 0;border-top:1px dashed var(--border);}
+    #tab-myrides .cu-tk-body{padding:2px 18px 0;}
+    #tab-myrides .cu-tk-btns{padding:0 18px 16px;display:flex;gap:8px;}
+    #tab-myrides .cu-tk-cal{flex:1;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    #tab-myrides .cu-tk-dir{flex:1;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;}
+    #tab-myrides .cu-tk-sec{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:10px 0 0;}
+    #tab-myrides .cu-tk-total{display:flex;align-items:center;justify-content:space-between;padding:12px 0;}
+    #tab-myrides .cu-tk-total-k{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+    #tab-myrides .cu-tk-total-v{font-weight:900;font-size:18px;color:var(--green);}
+    #tab-myrides .cu-tk-wal{padding:0 18px 14px;}
+    #tab-myrides .cu-tk-when{font-size:10px;color:var(--muted);font-weight:700;text-align:right;line-height:1.4;}
+    #tab-myrides .cu-tr-dur{font-size:11px;color:var(--blue);font-weight:700;margin-top:3px;}
+    #tab-myrides .cu-tr-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    #tab-myrides .cu-tr-in{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px;}
+    #tab-myrides .cu-tr-money{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+    #tab-myrides .cu-tr-name{font-weight:800;font-size:13px;flex:1;min-width:0;}
+    #tab-myrides .cu-tr-noshow{font-size:11px;color:var(--red);font-weight:600;line-height:1.5;padding:8px 0 0;}
+    #tab-myrides .cu-tr-num{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 8px;border-radius:999px;background:var(--s1);border:1px solid var(--line2);color:var(--text);font-size:11px;font-weight:800;}
+    #tab-myrides .cu-tr-out{font-size:11px;color:var(--muted);font-weight:600;}
+    #tab-myrides .cu-tr-row{padding:11px 0;border-bottom:1px solid var(--border);}
+    #tab-myrides .cu-tr-wl{display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:10px;font-weight:800;white-space:nowrap;}
+    #tab-myrides .cu-w132{width:132px;}
 
     
     .stats-row{display:flex;gap:0;margin-bottom:22px;flex-wrap:wrap;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;background:var(--s1);}
@@ -2919,6 +3177,12 @@
     .booth-popup-close:hover{color:var(--text);}
     .booth-popup-title{font-size:20px;font-weight:700;margin-bottom:10px;}
     .booth-popup-msg{font-size:14px;font-weight:600;color:var(--muted-l);line-height:1.7;}
+    /* ── The booth and National Day popups (showBoothPopup, showSnd96FormPopup), drawn into #booth-popup:
+       without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #booth-popup .cu-c-orange{color:var(--orange);}
+    #booth-popup .cu-fs16{font-size:16px;}
+    #booth-popup .cu-mt16{margin-top:16px;}
+    #booth-popup .cu-snd-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:11px 18px;}
 
     /* Accessibility: visible keyboard focus (mouse clicks stay clean via :focus-visible) */
     :focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:4px;}
@@ -3300,6 +3564,9 @@
     .badge-pop-about{font-size:13px;line-height:1.5;color:var(--muted);margin:-4px 0 14px;}
     .badge-pop-earned{margin-top:12px;font-weight:800;color:var(--green);font-size:13px;}
     .badge-pop-prog{margin-top:12px;font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--green);letter-spacing:1px;}
+    /* ── A badge's popup (_mrBadgeInfo), #badge-pop: without inline styles (2026-09-29, the customer pages'
+       pass; scoped by that id). */
+    #badge-pop .cu-w100-mt14{width:100%;margin-top:14px;}
     :is(html[lang="ar"],html[lang="ur"]) .badge-pop-nm{font-family:'IBM Plex Sans Arabic',sans-serif;font-style:normal;text-transform:none;}
 
     /* ── Emil Kowalski animation pass ── */
@@ -4555,7 +4822,7 @@
     body:not(.view-staff) .mm-note{
       background:#FBF9F4;border:1px solid rgba(26,25,25,.10);border-radius:10px;
       color:#57605a;box-shadow:none;}
-    body:not(.view-staff) .mm-note span[style*="color:var(--orange)"]{color:#7a5a10!important;}
+    body:not(.view-staff) .mm-note span.cu-full-msg,body:not(.view-staff) .mm-note span.cu-c-orange{color:#7a5a10!important;}
     /* The one exception the brief keeps: a confirmed cue reads as an action. */
     body:not(.view-staff) .mm-note-go{border-color:rgba(7,122,75,.45);color:#06603b;}
 
@@ -4785,6 +5052,9 @@ html[dir="rtl"] .pg-field select{background-position:left 14px center;}
 .pg-field input:focus,.pg-field select:focus{border-color:#008f52;box-shadow:none;}
 .pg-field.err input,.pg-field.err select{border-color:#b42318;}
 .pg-msg{font-weight:500;font-size:13px;line-height:1.4;color:#b42318;}
+    /* ── The forced password change (_pwdMustShow), #pwd-gate: without inline styles (2026-09-29, the customer
+       pages' pass; scoped by that id). */
+    #pwd-gate .cu-mt10{margin-top:10px;}
 .pg-note{font-weight:500;font-size:13px;line-height:1.45;color:#767e85;margin:14px 0 0;text-wrap:pretty;}
 .pg-net{margin-top:14px;padding:10px 12px;background:#eceff0;border-radius:8px;font-weight:600;font-size:13px;line-height:1.4;color:#b42318;}
 .pg-btn{margin-top:20px;width:100%;height:48px;border-radius:999px;border:none;background:#008f52;color:#fff;font-family:var(--font-body);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;padding:0;}
@@ -4845,6 +5115,11 @@ body.fix-open{overflow:hidden;}
 .soc-field input{flex:1;min-width:0;}
 .soc-open{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--green);text-decoration:none;white-space:nowrap;padding:6px 4px;}
 .soc-open:hover{text-decoration:underline;}
+    /* ── The social fields (_socFieldsHtml) on the account page and in the staff customer form
+       (#new-acct-modal): without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #new-acct-modal .cu-fs11,#tab-account .cu-fs11{font-size:11px;}
+    #new-acct-modal .cu-m0,#tab-account .cu-m0{margin:0;}
+    #new-acct-modal .cu-soc-grid,#tab-account .cu-soc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
 /* the sentence by the + / - when a JCC party would pass the account's three */
 .qty-cap-note{font-size:12px;font-weight:700;color:var(--orange);text-align:end;max-width:220px;line-height:1.35;}
 /* the signed-in avatar + name in the header is the way to My Account */
@@ -5305,6 +5580,10 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
       border:1px dashed var(--line2);border-radius:10px;
     }
     .qr-hold span{font-size:10px;font-weight:700;color:var(--muted);line-height:1.45;}
+    /* ── A booking's QR tile and its placeholder (_qrBox, ticketQR) on the wizard's tickets and in My
+       Bookings: without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #tab-myrides .cu-qr-box,#tab-register .cu-qr-box{border-radius:3px;display:inline-block;line-height:0;border:1px solid var(--border);overflow:hidden;}
+    #tab-myrides .cu-qr-lazy,#tab-register .cu-qr-lazy{display:inline-block;width:var(--cu-qr);height:var(--cu-qr);}
     :is(html[lang="ar"],html[lang="ur"]) .appr-ok-txt strong{font-size:20px;letter-spacing:0;}
     @media (max-width:767px){
       .appr-ok{gap:12px;padding:14px;}
@@ -5618,7 +5897,7 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body .ticket-card.ev-snd96 .mm-note{
       background:var(--snd-surface);border-color:rgba(255,255,255,.14);color:#fff;}
     body .ticket-card.ev-snd96 .mm-note-go{border-color:rgba(140,220,70,.45);color:var(--snd-lime-lt);}
-    body .ticket-card.ev-snd96 .mm-note span[style*="color:var(--orange)"]{color:var(--orange)!important;}
+    body .ticket-card.ev-snd96 .mm-note span.cu-full-msg,body .ticket-card.ev-snd96 .mm-note span.cu-c-orange{color:var(--orange)!important;}
     /* Status inks are literals on the paper skin too ("On Bike" #06603b, "Complete"
        #57605a), so they were being written on the green field at 2.1:1 and 2.47:1,
        and the waitlist cue at 2.52. The reskin names them again for its own field;
@@ -5647,9 +5926,9 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body.snd96 .wl-loud{color:var(--orange);}
     body.snd96 .wl-loud::before{background:var(--orange);}
     body.snd96 .mm-note-go{border-color:rgba(140,220,70,.45);color:var(--snd-lime-lt);}
-    /* The reskin forces every inline amber inside a notice to its paper value with
+    /* The reskin forces every amber ink inside a notice to its paper value with
        !important; only an equal weight, later, brings it back. */
-    body.snd96 .mm-note span[style*="color:var(--orange)"]{color:var(--orange)!important;}
+    body.snd96 .mm-note span.cu-full-msg,body.snd96 .mm-note span.cu-c-orange{color:var(--orange)!important;}
     /* The error bar fills with --red and writes on it in white, which the lighter
        red above no longer carries. The fill is the light half now, so the ink is
        the dark one. */
@@ -6795,6 +7074,18 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 /* Quick tags on the post-ride rating (2026-09-28) */
 .rate-tags{display:flex;gap:6px;flex-wrap:wrap;}
 .rate-tags .rate-tag{padding:6px 12px;font-size:12px;}
+    /* ── The rating dialog (renderRateModal, _rateTagsHtml), #rate-modal: without inline styles (2026-09-29,
+       the customer pages' pass; scoped by that id). */
+    #rate-modal .cu-m16{margin:16px 0;}
+    #rate-modal .cu-mw440{max-width:440px;}
+    #rate-modal .cu-rate-b{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent none;color:var(--muted);font-weight:800;font-size:11px;cursor:pointer;}
+    #rate-modal .cu-rate-hint{font-size:12px;color:var(--muted);margin-top:4px;}
+    #rate-modal .cu-rate-k{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+    #rate-modal .cu-rate-meta{font-size:12px;color:var(--green);font-weight:700;margin-top:4px;}
+    #rate-modal .cu-rate-note{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:10px;color:var(--text);font-family:var(--font-body);resize:vertical;}
+    #rate-modal .cu-rate-scale{display:flex;gap:5px;flex-wrap:wrap;}
+    #rate-modal .cu-w100{width:100%;}
+    #rate-modal .cu-rate-on{border-color:var(--green);background:rgba(var(--green-rgb),.18);color:var(--green);}
 
 /* A ticketed event (ride kind 'event', 2026-09-28): its own colour wherever a kind wears one. */
 .ev-event{--ev:#7c3aed;--ev-rgb:124,58,237;}

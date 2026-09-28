@@ -2227,10 +2227,10 @@ function _socRead(prefix){
 // while the handle is typed.
 function _socFieldsHtml(prefix,vals,open){
   const v=vals&&typeof vals==='object'?vals:{};
-  return `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">${SOCIAL_NETS.map(([net,lbl])=>{
+  return `<div class="cu-soc-grid">${SOCIAL_NETS.map(([net,lbl])=>{
     const h=_socNorm(v[net]||'');
     const link=open?`<a id="${prefix}-soc-${net}-open" class="soc-open" href="${h?_socUrl(net,h):'#'}" target="_blank" rel="noopener noreferrer"${h?'':' hidden'} aria-label="${esc(t(lbl))}: ${esc(t('socOpenBtn'))}${t('opensNewTab')}">${t('socOpenBtn')} ↗</a>`:'';
-    return `<div class="form-group" style="margin:0"><label for="${prefix}-soc-${net}" style="font-size:11px">${t(lbl)}</label><div class="soc-field"><input id="${prefix}-soc-${net}" type="text" value="${esc(v[net]||'')}" placeholder="${esc(net==='linkedin'?t('socPhLinkedin'):t('socPh'))}" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"${open?` data-on-input="${_on("_socOpenSync",prefix,net,_P("value"))}"`:''}>${link}</div></div>`;}).join('')}</div>`;
+    return `<div class="form-group cu-m0"><label for="${prefix}-soc-${net}" class="cu-fs11">${t(lbl)}</label><div class="soc-field"><input id="${prefix}-soc-${net}" type="text" value="${esc(v[net]||'')}" placeholder="${esc(net==='linkedin'?t('socPhLinkedin'):t('socPh'))}" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr"${open?` data-on-input="${_on("_socOpenSync",prefix,net,_P("value"))}"`:''}>${link}</div></div>`;}).join('')}</div>`;
 }
 function _socOpenSync(prefix,net,raw){
   const a=document.getElementById(`${prefix}-soc-${net}-open`);if(!a)return;
@@ -3304,7 +3304,7 @@ function _qrBox(payload,px){
   // dark mode, Chrome's auto dark) inverts CSS backgrounds and left the code in a black frame
   // on every card, while the svg's own fills are kept - so the tile reads white on every card,
   // whatever the browser does to the page around it (owner, 2026-09-27).
-  return `<div style="border-radius:3px;display:inline-block;line-height:0;border:1px solid var(--border);overflow:hidden">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}</div>`;
+  return `<div class="cu-qr-box">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}</div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
@@ -3318,7 +3318,7 @@ function ticketQR(payload,px){
   if(window.qrcode){try{return _qrBox(payload,px);}catch(e){return '';}}
   // Library not loaded yet: emit a placeholder and fill it in once it loads.
   _loadQrcode().then(_fillLazyQR);
-  return `<span class="qr-lazy" data-qr="${esc(String(payload))}" data-px="${px}" style="display:inline-block;width:${px}px;height:${px}px"></span>`;
+  return `<span class="qr-lazy cu-qr-lazy" data-qr="${esc(String(payload))}" data-px="${px}" data-cssv="${_cssv({'--cu-qr':px+'px'})}"></span>`;
 }
 
 function bookingRef(e){
@@ -3596,7 +3596,7 @@ function showPrivacyNotice(){
   }
   m.innerHTML=`<div class="modal-box pv-box" role="dialog" aria-modal="true" aria-labelledby="pv-title">
     <div class="pv-head">
-      <div><div class="modal-title" id="pv-title" style="margin:0">${t('privacyNotice')}</div>
+      <div><div class="modal-title cu-m0" id="pv-title">${t('privacyNotice')}</div>
         <div class="pv-upd">${t('privacyUpdated').replace('{0}',shortDate(PRIVACY_VERSION))}</div></div>
       <button type="button" class="pv-x" data-on-click="${_on("closePrivacyNotice")}" aria-label="${t('closeBtn')}">&times;</button>
     </div>
@@ -4605,7 +4605,7 @@ function renderAuthModal(){
   // "New to MicroMobility? Create account" (its own address, /signup), "Already have an account? Sign in".
   const _switchBar=(head,to,label)=>`<p class="auth-switch">${head} <button type="button" class="auth-switch-link" data-auth-to="${to}" data-on-click="${_on("switchAuthMode",to)}">${label}</button></p>`;
   const googleBlock=_isInAppBrowser()?`
-    <div style="background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.35);border-radius:4px;padding:10px 14px;font-size:12px;font-weight:600;line-height:1.6;color:var(--text)">${t('iabGoogleBlocked')}</div>
+    <div class="cu-iab-note">${t('iabGoogleBlocked')}</div>
     <div class="auth-or">${t('authOr')}</div>`:`
     <button type="button" class="btn-google" data-on-click="${_on("signInGoogle")}">
       <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
@@ -4622,24 +4622,24 @@ function renderAuthModal(){
     subtitle='';
     if(S.forgotStep===1){
       body=`
-        <div style="text-align:center;padding:4px 0 12px">
-              <div style="font-size:13px;color:var(--muted-l);line-height:1.7">${t('forgotStep1Sub')}</div>
+        <div class="cu-fg-head">
+              <div class="cu-fg-sub">${t('forgotStep1Sub')}</div>
         </div>
         <div class="auth-field"><label for="a-forgot-email">${t('authEmail')}</label>
           <input id="a-forgot-email" type="email" placeholder="${t('enterEmail')}" autocomplete="email" value="${esc(S.forgotEmail||'')}"></div>
-        <div class="auth-field"><label for="a-forgot-phone">${t('authPhone')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+        <div class="auth-field"><label for="a-forgot-phone">${t('authPhone')} &nbsp;<span class="cu-req">*</span></label>
           <div class="auth-cc-row"><select id="a-forgot-cc">${ccOpts}</select><input id="a-forgot-phone" type="tel" placeholder="${t('enterPhone')}" data-on-keydown="${_on("_on_renderAuthModal_1",_EV,_EL)}"></div></div>
         <button class="btn-primary auth-submit" data-on-click="${_on("doForgotVerify")}">${t('forgotVerifyBtn')}</button>
-        <div style="text-align:center;margin-top:12px">
-          <button style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body)" data-on-click="${_on("switchAuthMode","login")}">&#8592; ${t('backToLogin')}</button>
+        <div class="cu-back-row">
+          <button class="cu-back-btn" data-on-click="${_on("switchAuthMode","login")}">&#8592; ${t('backToLogin')}</button>
         </div>`;
     }else{
       body=`
         ${S.forgotVerified==='pending'
-          ?`<div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:16px;color:var(--muted-l)">
-              ${t('forgotPendingMsg')} <strong style="color:var(--text)">${esc(S.forgotEmail)}</strong>
+          ?`<div class="cu-fg-pending">
+              ${t('forgotPendingMsg')} <strong class="cu-c-text">${esc(S.forgotEmail)}</strong>
             </div>`
-          :`<div style="background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:16px">
+          :`<div class="cu-fg-ok">
               ✓ ${t('forgotVerifiedMsg')} <strong>${esc(S.forgotEmail)}</strong>
             </div>`}
         <div class="auth-field"><label for="a-reset-pwd">${t('authPassword')}</label>
@@ -4647,8 +4647,8 @@ function renderAuthModal(){
         <div class="auth-field"><label for="a-reset-pwd2">${t('authConfirmPassword')}</label>
           <input id="a-reset-pwd2" type="password" placeholder="${t('authConfirmPassword')}" data-on-keydown="${_on("_on_renderAuthModal_2",_EV,_EL)}"></div>
         <button class="btn-primary auth-submit" data-on-click="${_on("doResetPassword")}">${t('resetBtn')}</button>
-        <div style="text-align:center;margin-top:12px">
-          <button style="background:none;border:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-body)" data-on-click="${_on("_on_renderAuthModal_3",_EV,_EL)}">&#8592; ${t('backToLogin')}</button>
+        <div class="cu-back-row">
+          <button class="cu-back-btn" data-on-click="${_on("_on_renderAuthModal_3",_EV,_EL)}">&#8592; ${t('backToLogin')}</button>
         </div>`;
     }
   } else if(isLogin){
@@ -4659,17 +4659,17 @@ function renderAuthModal(){
       <div class="auth-field"><label for="a-identifier">${t('authIdentifier')}</label>
         <input id="a-identifier" type="text" autocapitalize="none" spellcheck="false" placeholder="${t('enterEmailOrPhone')}" autocomplete="username" data-on-keydown="${_on("_on_renderAuthModal_4",_EV,_EL)}"></div>
       <div class="auth-field">
-        <label for="a-pwd" style="display:flex;justify-content:space-between;align-items:center">
+        <label for="a-pwd" class="cu-pwd-lbl">
           <span>${t('authPassword')}</span>
-          <button style="background:none;border:none;color:var(--green);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-body);padding:0" data-on-click="${_on("switchAuthMode","forgot")}">${t('forgotPwLink')}</button>
+          <button class="cu-forgot-link" data-on-click="${_on("switchAuthMode","forgot")}">${t('forgotPwLink')}</button>
         </label>
         <input id="a-pwd" type="password" autocomplete="current-password" placeholder="${t('authPassword')}" data-on-keydown="${_on("_on_renderAuthModal_5",_EV,_EL)}">
       </div>
-      <label id="rm-row" role="checkbox" tabindex="0" aria-checked="${S.rememberMe?'true':'false'}" aria-labelledby="rm-lbl" style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:16px;margin-top:4px;user-select:none" data-on-click="${_on("toggleRememberMe")}" data-on-keydown="${_on("_on_renderAuthModal_6",_EV,_EL)}">
-        <div id="rm-box" style="width:20px;height:20px;border-radius:5px;border:2px solid ${S.rememberMe?'var(--green)':'rgba(var(--tint-rgb),.2)'};background:${S.rememberMe?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s">
+      <label id="rm-row" role="checkbox" tabindex="0" aria-checked="${S.rememberMe?'true':'false'}" aria-labelledby="rm-lbl" class="cu-rm-row" data-on-click="${_on("toggleRememberMe")}" data-on-keydown="${_on("_on_renderAuthModal_6",_EV,_EL)}">
+        <div id="rm-box" class="cu-rm-box${S.rememberMe?' cu-rm-on':''}">
           ${S.rememberMe?`<svg aria-hidden="true" width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4l3.5 3.5L11 1" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`:''}
         </div>
-        <span id="rm-lbl" style="font-size:13px;font-weight:600;color:${S.rememberMe?'var(--text)':'var(--muted-l)'}">${t('rememberMe')||'Remember me'}</span>
+        <span id="rm-lbl" class="cu-lbl13 ${S.rememberMe?'cu-c-text':'cu-c-mutedl'}">${t('rememberMe')||'Remember me'}</span>
       </label>
       <button class="btn-primary auth-submit" data-on-click="${_on("doLogin")}">${t('authLoginBtn')}</button>`;
   } else if(mode==='gcomplete'){
@@ -4681,17 +4681,17 @@ function renderAuthModal(){
         <div class="auth-field"><label for="a-first">${t('firstName')}</label><input id="a-first" data-on-input="${_on("_nameInput",_EL)}" type="text" autocapitalize="words" autocomplete="given-name" value="${esc(_n.first)}" placeholder="${t('phFirstName')}"></div>
         <div class="auth-field"><label for="a-last">${t('lastName')}</label><input id="a-last" data-on-input="${_on("_nameInput",_EL)}" type="text" autocapitalize="words" autocomplete="family-name" value="${esc(_n.last)}" placeholder="${t('phLastName')}"></div>
       </div>`;})()}
-      <div class="auth-field"><label>${t('genderLabel')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <button id="sgn-male" type="button" aria-pressed="${S.signupGender==='male'}" class="toggle-btn${S.signupGender==='male'?' active':''}" aria-pressed="${(S.signupGender==='male')?'true':'false'}" style="${_genderBtnStyle('male',S.signupGender)}"
+      <div class="auth-field"><label>${t('genderLabel')} &nbsp;<span class="cu-req">*</span></label>
+        <div class="cu-gender-row">
+          <button id="sgn-male" type="button" aria-pressed="${S.signupGender==='male'}" class="toggle-btn ${_genderBtnCls('male',S.signupGender)}${S.signupGender==='male'?' active':''}" aria-pressed="${(S.signupGender==='male')?'true':'false'}"
             data-on-click="${_on("setSignupGender","male")}">${t('genderMale')}</button>
-          <button id="sgn-female" type="button" aria-pressed="${S.signupGender==='female'}" class="toggle-btn${S.signupGender==='female'?' active':''}" aria-pressed="${(S.signupGender==='female')?'true':'false'}" style="${_genderBtnStyle('female',S.signupGender)}"
+          <button id="sgn-female" type="button" aria-pressed="${S.signupGender==='female'}" class="toggle-btn ${_genderBtnCls('female',S.signupGender)}${S.signupGender==='female'?' active':''}" aria-pressed="${(S.signupGender==='female')?'true':'false'}"
             data-on-click="${_on("setSignupGender","female")}">${t('genderFemale')}</button>
         </div>
       </div>
-      <div class="auth-field"><label for="a-height">${t('heightLabel')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+      <div class="auth-field"><label for="a-height">${t('heightLabel')} &nbsp;<span class="cu-req">*</span></label>
         <input id="a-height" type="number" placeholder="${t('heightPlaceholder')}" min="100" max="250" data-on-keydown="${_on("_on_renderAuthModal_7",_EV,_EL)}" data-on-blur="${_on("_vBlur",_EL,"height")}"></div>
-      <div class="auth-field"><label for="a-phone">${t('authPhone')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+      <div class="auth-field"><label for="a-phone">${t('authPhone')} &nbsp;<span class="cu-req">*</span></label>
         <div class="auth-cc-row">
           <select id="a-cc">${ccOpts}</select>
           <input id="a-phone" type="tel" inputmode="tel" autocomplete="tel" data-on-input="${_on("fmtPhoneInput",_EL)}" placeholder="${t('enterPhone')}" data-on-blur="${_on("_vBlur",_EL,"phone")}">
@@ -4707,24 +4707,24 @@ function renderAuthModal(){
         <div class="auth-field"><label for="a-first">${t('firstName')}</label><input id="a-first" data-on-input="${_on("_nameInput",_EL)}" type="text" autocapitalize="words" autocomplete="given-name" placeholder="${t('phFirstName')}"></div>
         <div class="auth-field"><label for="a-last">${t('lastName')}</label><input id="a-last" data-on-input="${_on("_nameInput",_EL)}" type="text" autocapitalize="words" autocomplete="family-name" placeholder="${t('phLastName')}"></div>
       </div>
-      <div class="auth-field"><label>${t('genderLabel')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <button id="sgn-male" type="button" aria-pressed="${S.signupGender==='male'}" class="toggle-btn${S.signupGender==='male'?' active':''}" aria-pressed="${(S.signupGender==='male')?'true':'false'}" style="${_genderBtnStyle('male',S.signupGender)}"
+      <div class="auth-field"><label>${t('genderLabel')} &nbsp;<span class="cu-req">*</span></label>
+        <div class="cu-gender-row">
+          <button id="sgn-male" type="button" aria-pressed="${S.signupGender==='male'}" class="toggle-btn ${_genderBtnCls('male',S.signupGender)}${S.signupGender==='male'?' active':''}" aria-pressed="${(S.signupGender==='male')?'true':'false'}"
             data-on-click="${_on("setSignupGender","male")}">${t('genderMale')}</button>
-          <button id="sgn-female" type="button" aria-pressed="${S.signupGender==='female'}" class="toggle-btn${S.signupGender==='female'?' active':''}" aria-pressed="${(S.signupGender==='female')?'true':'false'}" style="${_genderBtnStyle('female',S.signupGender)}"
+          <button id="sgn-female" type="button" aria-pressed="${S.signupGender==='female'}" class="toggle-btn ${_genderBtnCls('female',S.signupGender)}${S.signupGender==='female'?' active':''}" aria-pressed="${(S.signupGender==='female')?'true':'false'}"
             data-on-click="${_on("setSignupGender","female")}">${t('genderFemale')}</button>
         </div>
       </div>
-      <div class="auth-field"><label for="a-email">${t('authEmail')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+      <div class="auth-field"><label for="a-email">${t('authEmail')} &nbsp;<span class="cu-req">*</span></label>
         <input id="a-email" type="email" inputmode="email" autocomplete="email" autocapitalize="none" spellcheck="false" placeholder="${t('enterEmail')}" data-on-blur="${_on("_vBlur",_EL,"email")}"></div>
-      <div class="auth-field"><label for="a-phone">${t('authPhone')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+      <div class="auth-field"><label for="a-phone">${t('authPhone')} &nbsp;<span class="cu-req">*</span></label>
         <div class="auth-cc-row">
           <select id="a-cc">${ccOpts}</select>
           <input id="a-phone" type="tel" inputmode="tel" autocomplete="tel" data-on-input="${_on("fmtPhoneInput",_EL)}" placeholder="${t('enterPhone')}" data-on-blur="${_on("_vBlur",_EL,"phone")}">
         </div></div>
-      <div class="auth-field"><label for="a-pwd">${t('authPassword')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label><input id="a-pwd" type="password" autocomplete="new-password" placeholder="${t('authPasswordHint')}" data-on-blur="${_on("_vBlur",_EL,"pwd")}"></div>
-      <div class="auth-field"><label for="a-pwd2">${t('authConfirmPassword')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label><input id="a-pwd2" type="password" autocomplete="new-password" placeholder="${t('authConfirmPassword')}"></div>
-      <div class="auth-field"><label for="a-height">${t('heightLabel')} &nbsp;<span style="color:var(--red);font-size:11px">*</span></label>
+      <div class="auth-field"><label for="a-pwd">${t('authPassword')} &nbsp;<span class="cu-req">*</span></label><input id="a-pwd" type="password" autocomplete="new-password" placeholder="${t('authPasswordHint')}" data-on-blur="${_on("_vBlur",_EL,"pwd")}"></div>
+      <div class="auth-field"><label for="a-pwd2">${t('authConfirmPassword')} &nbsp;<span class="cu-req">*</span></label><input id="a-pwd2" type="password" autocomplete="new-password" placeholder="${t('authConfirmPassword')}"></div>
+      <div class="auth-field"><label for="a-height">${t('heightLabel')} &nbsp;<span class="cu-req">*</span></label>
         <input id="a-height" type="number" inputmode="numeric" placeholder="${t('heightPlaceholder')}" min="100" max="250" data-on-keydown="${_on("_on_renderAuthModal_8",_EV,_EL)}" data-on-blur="${_on("_vBlur",_EL,"height")}"></div>
       ${_signupConsentHtml()}
       <button class="btn-primary auth-submit" data-on-click="${_on("doSignup")}">${t('authSignupBtn')}</button>`;
@@ -4739,8 +4739,8 @@ function renderAuthModal(){
       <div class="auth-err" id="auth-err"></div>
       ${sw}
       ${body}
-      ${!isForgot?`<button class="btn-secondary auth-cancel-btn${mode==='gcomplete'?' auth-keep':''}" style="width:100%;margin-top:10px" data-on-click="${_on(mode==='gcomplete'?'cancelGoogleComplete':'_on_authCancelHome')}">${t('authCancel')}</button>`:''}
-      ${mode==='gcomplete'||isForgot?'':`<button type="button" class="staff-access-btn" style="width:100%;margin-top:14px" data-on-click="${_on("staffAccessClick")}">${t('staffAccess')}</button>`}
+      ${!isForgot?`<button class="btn-secondary auth-cancel-btn${mode==='gcomplete'?' auth-keep':''} cu-w100-mt10" data-on-click="${_on(mode==='gcomplete'?'cancelGoogleComplete':'_on_authCancelHome')}">${t('authCancel')}</button>`:''}
+      ${mode==='gcomplete'||isForgot?'':`<button type="button" class="staff-access-btn cu-w100-mt14" data-on-click="${_on("staffAccessClick")}">${t('staffAccess')}</button>`}
     </div>
   </div>`;
   // A country-code select is never empty (+966 comes pre-selected), so "only fill an empty box"
@@ -4756,37 +4756,33 @@ function renderAuthModal(){
 const HEARD_OPTS=['instagram','tiktok','snapchat','x','facebook','youtube','whatsapp','google','friend','invited','passed_by','event','hotel','school','work','community','other'];
 function heardLabel(code){return code==='desk'?t('heardDesk'):HEARD_OPTS.includes(code)?t('heard_'+code):(code?esc(String(code)):'');}
 function switchAuthMode(mode){S.authMode=mode;if(mode!=='forgot'){S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;}if(mode==='signup'){S.signupGender=null;S.signupRideNews=false;S.signupAck=false;}renderAuthModal();if(S.view==='landing')_pushNav();}
-// Gender pills: male turns blue, female turns pink when selected.
-function _genderBtnStyle(which,sel){
-  if(which==='male'&&sel==='male')return 'flex:1;background:rgba(var(--blue-rgb),.18);border-color:#4aa8f8;color:#4aa8f8;';
-  if(which==='female'&&sel==='female')return 'flex:1;background:rgba(255,126,182,.18);border-color:#ff7eb6;color:#ff7eb6;';
-  return 'flex:1;';
-}
+// Gender pills: male turns blue, female turns pink when selected (cu-g-male / cu-g-female in styles.css).
+function _genderBtnCls(which,sel){return which==='male'&&sel==='male'?'cu-f1 cu-g-male':which==='female'&&sel==='female'?'cu-f1 cu-g-female':'cu-f1';}
 function setSignupGender(g){
   S.signupGender=g;
   const m=document.getElementById('sgn-male'),f=document.getElementById('sgn-female');
-  if(m){m.classList.toggle('active',g==='male');m.style.cssText=_genderBtnStyle('male',g);m.setAttribute('aria-pressed',String(g==='male'));}
-  if(f){f.classList.toggle('active',g==='female');f.style.cssText=_genderBtnStyle('female',g);f.setAttribute('aria-pressed',String(g==='female'));}
+  if(m){m.classList.toggle('active',g==='male');m.classList.toggle('cu-g-male',g==='male');m.setAttribute('aria-pressed',String(g==='male'));}
+  if(f){f.classList.toggle('active',g==='female');f.classList.toggle('cu-g-female',g==='female');f.setAttribute('aria-pressed',String(g==='female'));}
 }
 // Consent at sign-up. Two separate boxes, never one: "I have read the Privacy Notice" is
 // REQUIRED - the account is not made without it - and is a confirmation, not consent. Ride
 // news (Personal Data Protection Law, Art. 25: promotional and awareness messages) is
 // OPTIONAL and starts empty, because consent cannot be a condition of the service (Art. 7).
 const _SU_TICK='<svg aria-hidden="true" width="12" height="9" viewBox="0 0 12 9" fill="none"><path d="M1 4l3.5 3.5L11 1" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-function _tickBoxStyle(on){return`width:20px;height:20px;flex:none;border-radius:5px;border:2px solid ${on?'var(--green)':'rgba(var(--tint-rgb),.2)'};background:${on?'var(--green)':'transparent'};display:flex;align-items:center;justify-content:center;margin-top:1px`;}
+function _tickBoxCls(on){return on?'cu-tick-box cu-tick-on':'cu-tick-box';}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__tickHtml_1(event,el,a0){if(event.key===' '||event.key==='Enter'){event.preventDefault();window[a0]();}}
 function _tickHtml(id,on,label,toggle,required){
-  return`<div id="${id}" role="checkbox" aria-checked="${on}"${required?' aria-required="true"':''} tabindex="0" data-on-click="${_on(toggle)}" data-on-keydown="${_on("_on__tickHtml_1",_EV,_EL,toggle)}" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:6px 0 10px;user-select:none">
-      <div id="${id}-box" style="${_tickBoxStyle(on)}">${on?_SU_TICK:''}</div>
-      <span id="${id}-lbl" style="font-size:13px;font-weight:600;line-height:1.45;color:${on?'var(--text)':'var(--muted-l)'}">${label}${required?' <span style="color:var(--red);font-size:11px">*</span>':''}</span>
+  return`<div id="${id}" role="checkbox" aria-checked="${on}"${required?' aria-required="true"':''} tabindex="0" data-on-click="${_on(toggle)}" data-on-keydown="${_on("_on__tickHtml_1",_EV,_EL,toggle)}" class="cu-tick-row">
+      <div id="${id}-box" class="${_tickBoxCls(on)}">${on?_SU_TICK:''}</div>
+      <span id="${id}-lbl" class="cu-tick-lbl ${on?'cu-c-text':'cu-c-mutedl'}">${label}${required?' <span class="cu-req">*</span>':''}</span>
     </div>`;
 }
 function _tickSet(id,on){
   const w=document.getElementById(id),b=document.getElementById(id+'-box'),l=document.getElementById(id+'-lbl');
   if(w)w.setAttribute('aria-checked',String(on));
-  if(b){b.setAttribute('style',_tickBoxStyle(on));b.innerHTML=on?_SU_TICK:'';}
-  if(l)l.style.color=on?'var(--text)':'var(--muted-l)';
+  if(b){b.className=_tickBoxCls(on);b.innerHTML=on?_SU_TICK:'';}
+  if(l){l.classList.toggle('cu-c-text',on);l.classList.toggle('cu-c-mutedl',!on);}
 }
 function _signupConsentHtml(){
   return _tickHtml('su-ack',!!S.signupAck,t('privacyAckOpt').replace('{0}',_privacyLink()),'toggleSignupAck',true)
@@ -4847,20 +4843,20 @@ function _consentAsk(needAck,needNews){
   S._csNeed={ack:!!needAck,news:!!needNews};S._csAck=false;
   const m=document.createElement('div');m.id='rn-ask';m.className='modal-backdrop';
   m.style.zIndex='9550'; // under the Privacy Notice it links to, over everything else
-  const newsBlock=needNews?`${needAck?`<div style="font-size:15px;font-weight:800;margin:14px 0 4px">${t('rideNewsAskTitle')}</div>`:''}
-    <div style="font-size:13.5px;color:var(--muted);line-height:1.6;margin-bottom:14px">${t('rideNewsSub')}</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button type="button" class="btn-primary rn-ans" style="width:100%" data-on-click="${_on("_consentAnswer",true)}">${t('rideNewsYesBtn')}</button>
-      <button type="button" class="btn-secondary rn-ans" style="width:100%" data-on-click="${_on("_consentAnswer",false)}">${t('rideNewsNoBtn')}</button>
+  const newsBlock=needNews?`${needAck?`<div class="cu-ask-news-title">${t('rideNewsAskTitle')}</div>`:''}
+    <div class="cu-ask-news-sub">${t('rideNewsSub')}</div>
+    <div class="cu-ask-btns">
+      <button type="button" class="btn-primary rn-ans cu-w100" data-on-click="${_on("_consentAnswer",true)}">${t('rideNewsYesBtn')}</button>
+      <button type="button" class="btn-secondary rn-ans cu-w100" data-on-click="${_on("_consentAnswer",false)}">${t('rideNewsNoBtn')}</button>
     </div>`
-    :`<button type="button" class="btn-primary rn-ans" style="width:100%;margin-top:6px" data-on-click="${_on("_consentAnswer",null)}">${t('consentContinueBtn')}</button>`;
-  m.innerHTML=`<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="rn-ask-title" style="max-width:420px">
-    <div class="modal-title" id="rn-ask-title" style="margin:0 0 8px">${t(needAck?'consentAskTitle':'rideNewsAskTitle')}</div>
-    ${needAck?`<div style="font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:4px">${t('rideNewsAskNotice').replace('{0}',_privacyLink())}</div>
+    :`<button type="button" class="btn-primary rn-ans cu-w100-mt6" data-on-click="${_on("_consentAnswer",null)}">${t('consentContinueBtn')}</button>`;
+  m.innerHTML=`<div class="modal-box cu-mw420" role="dialog" aria-modal="true" aria-labelledby="rn-ask-title">
+    <div class="modal-title cu-ask-title" id="rn-ask-title">${t(needAck?'consentAskTitle':'rideNewsAskTitle')}</div>
+    ${needAck?`<div class="cu-ask-notice">${t('rideNewsAskNotice').replace('{0}',_privacyLink())}</div>
     ${_tickHtml('cs-ack',false,t('privacyAckOpt').replace('{0}',esc(t('privacyNotice'))),'_consentToggleAck',true)}
-    <div id="rn-ask-ackerr" role="alert" style="color:var(--red);font-size:12.5px;font-weight:700;margin-top:6px"></div>`:''}
+    <div id="rn-ask-ackerr" role="alert" class="cu-err-mt6"></div>`:''}
     ${newsBlock}
-    <div id="rn-ask-err" role="alert" style="color:var(--red);font-size:12.5px;font-weight:700;margin-top:8px"></div>
+    <div id="rn-ask-err" role="alert" class="cu-err-mt8"></div>
   </div>`;
   document.body.appendChild(m);
   const f=m.querySelector(needAck?'#cs-ack':'.rn-ans');if(f)f.focus();
@@ -5032,7 +5028,7 @@ function _fieldErr(el,msg){
     const host=el.closest('.phone-row,.auth-cc-row,.height-row')||el;
     host.insertAdjacentElement('afterend',e);
   }
-  e.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>'+esc(msg)+'</span>';
+  e.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" class="cu-shrink0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>'+esc(msg)+'</span>';
   if(!el._feBound){el._feBound=true;el.addEventListener('input',()=>_fieldOk(el));}
 }
 function _fieldOk(el){
@@ -5049,7 +5045,7 @@ function _groupErr(el,msg){
   const e=document.createElement('div');
   e.className='field-err';e.dataset.groupErr='1';
   e.setAttribute('role','alert');
-  e.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>'+esc(msg)+'</span>';
+  e.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" class="cu-shrink0"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg><span>'+esc(msg)+'</span>';
   el.appendChild(e);
 }
 function _groupOk(el){
@@ -5980,15 +5976,15 @@ function _soleSessionFor(ev){
 // ride's own name and colour, the date, its times, and whether places are left.
 function _soleSessHtml(s){
   const full=_sessFull(s);
-  const row=(k,v,cls)=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--border)">
-    <span style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${esc(k)}</span>
-    <span style="font-size:14px;font-weight:800;text-align:end${cls||''}">${esc(v)}</span></div>`;
-  return `<div class="sess-solo ${_evClass(s)}" style="border:1px solid var(--border);border-inline-start:3px solid var(--ev,var(--green));border-radius:6px;padding:16px 18px;background:rgba(var(--tint-rgb),.03)">
-    <div style="font-size:17px;font-weight:900;letter-spacing:-.3px">${esc(_evName(s))}</div>
+  const row=(k,v,cls)=>`<div class="cu-sole-row">
+    <span class="cu-sole-k">${esc(k)}</span>
+    <span class="cu-sole-v${cls?' '+cls:''}">${esc(v)}</span></div>`;
+  return `<div class="sess-solo ${_evClass(s)} cu-sole-card">
+    <div class="cu-sole-name">${esc(_evName(s))}</div>
     ${_partnerHtml(s,'ev-partner')}
     ${row(t('colSession'),`${dayLabel(s.day)} \u00b7 ${shortDate(s.session_date||s.id)}`)}
     ${row(t('timeLabel'),sessionTime(s))}
-    ${row(t('colStatus'),full?t('waitlistLabel'):t('availLabel'),`;color:var(--${full?'orange':'green'})`)}
+    ${row(t('colStatus'),full?t('waitlistLabel'):t('availLabel'),full?'cu-c-orange':'cu-c-green')}
   </div>`;
 }
 // The workshop runs with a partner, and says so in a quieter line wherever a customer sees its name.
@@ -8712,12 +8708,12 @@ function renderRegister(){
         </button>`;
       }).join('')
     : _sessLoadFailed()
-    ? `<div class="empty-state sess-load-err">${t('errConnection')}<div style="margin-top:10px"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_sessRetry")}">${t('retryBtn')}</button></div></div>`
-    : `<div style="text-align:center;padding:28px 20px 20px">
-        <div style="font-size:16px;font-weight:900;margin-bottom:8px">${t('noSessionsAvail')}</div>
-        <div style="font-size:13px;color:var(--muted-l);font-weight:600;margin-bottom:18px">${t('noSessionsSocial')}</div>
+    ? `<div class="empty-state sess-load-err">${t('errConnection')}<div class="cu-mt10"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_sessRetry")}">${t('retryBtn')}</button></div></div>`
+    : `<div class="cu-empty">
+        <div class="cu-empty-title">${t('noSessionsAvail')}</div>
+        <div class="cu-empty-sub">${t('noSessionsSocial')}</div>
         <a href="https://www.instagram.com/MicroMobilitySA/" target="_blank" rel="noopener noreferrer"
-          style="display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 20px;border-radius:999px;background:var(--s1);border:1px solid var(--line2);color:var(--text);font-size:13px;font-weight:700;text-decoration:none">
+          class="cu-ig-link">
           <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
           @MicroMobilitySA
         </a>
@@ -8762,21 +8758,21 @@ function renderRegister(){
   
   const qNums=existingEntries.map(e=>`#${e.queueNum}`).join(', ');
   const modifyBannerHtml=isModifyMode?`
-    <div class="mm-note mm-note-go" style="padding:16px 18px;margin-bottom:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-        <span style="display:inline-flex;align-items:center;color:var(--green)">${ICON_PENCIL}</span>
-        <div style="font-size:14px;font-weight:800;color:var(--green)">${t('modifyBookingBtn')}</div>
-        <div style="margin-left:auto;font-size:11px;font-weight:700;color:var(--muted)">${t('queueNumLabel')}: <span style="color:var(--text)">${qNums}</span></div>
+    <div class="mm-note mm-note-go cu-mod-note">
+      <div class="cu-mod-head">
+        <span class="cu-mod-ic">${ICON_PENCIL}</span>
+        <div class="cu-mod-title">${t('modifyBookingBtn')}</div>
+        <div class="cu-mod-qn">${t('queueNumLabel')}: <span class="cu-c-text">${qNums}</span></div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <div class="cu-wrap8">
         ${existingEntries.map((e,i)=>`
-          <div style="background:var(--s1);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;flex-shrink:0">
-            ${existingEntries.length>1?`<span style="color:var(--muted);font-size:10px;display:block;margin-bottom:2px">${t('bike')} ${i+1}</span>`:''}
-            <span style="color:var(--muted)">#${e.queueNum}</span>
+          <div class="cu-mod-chip">
+            ${existingEntries.length>1?`<span class="cu-mod-bike">${t('bike')} ${i+1}</span>`:''}
+            <span class="cu-c-muted">#${e.queueNum}</span>
             &nbsp;·&nbsp;${typeBadge(resolvedType(e))}
           </div>`).join('')}
       </div>
-      <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">${t('modifyBanner')}</div>
+      <div class="cu-mod-hint">${t('modifyBanner')}</div>
     </div>`:'';
 
   
@@ -8793,7 +8789,7 @@ function renderRegister(){
   const qtyStepper=(_commSel&&!_grpSel)?'':`
     <div class="reg-row">
       <span class="reg-row-label">${t('numBikes')}${_grpSel?` <span class="label-hint">${t('groupCapHint').replace('{0}',String(_maxRiders(_selSessObj)))}</span>`:''}</span>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+      <div class="cu-qty-col">
         <div class="qty-stepper">
           <button class="qty-btn" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">-</button>
           <span class="qty-val">${S.regQty}</span>
@@ -8811,7 +8807,7 @@ function renderRegister(){
     const selTy=S.regBikeTypes[i]||null;
 
     
-    const hSection=`<div class="form-group" style="margin-bottom:14px">
+    const hSection=`<div class="form-group cu-mb14">
       <label>${t('heightLabel')} &nbsp;<span class="label-hint">${t('heightHint')}</span></label>
       <div class="height-row">
         <input type="number" id="reg-height-${i}" aria-label="${t('heightLabel')}" placeholder="${t('heightPlaceholder')}" min="100" max="250"
@@ -8829,25 +8825,25 @@ function renderRegister(){
       `<button class="toggle-btn${selTy===ty?' active':''}" aria-pressed="${(selTy===ty)?'true':'false'}" data-type-slot="${i}" data-type="${ty}" data-on-click="${_on("setBikeType",i,ty)}">${typePillLabel(ty)}</button>`,ty,i)
     ).join('');
 
-    const divider=(S.regQty>1&&i<S.regQty-1)?`<div style="border-top:1px solid var(--border);margin:20px 0"></div>`:'';
+    const divider=(S.regQty>1&&i<S.regQty-1)?`<div class="cu-divider"></div>`:'';
 
     
     const riderDefaultName=isFirst&&cust?cust.name:'';
-    const riderNameSection=S.regQty>1?`<div class="form-group" style="margin-bottom:14px">
+    const riderNameSection=S.regQty>1?`<div class="form-group cu-mb14">
       <label>${t('riderName')||'Rider\'s Full Name'}</label>
       <input type="text" id="reg-rider-name-${i}" placeholder="${t('riderNamePlaceholder')||'Enter rider\'s full name'}"
         autocapitalize="words" autocomplete="name" enterkeyhint="done"
         value="${esc(S.regRiderNames[i]!==undefined?S.regRiderNames[i]:riderDefaultName)}"
-        data-on-input="${_on("_on_renderRegister_1",_EV,_EL,i)}" data-on-blur="${_on("_vBlur",_EL,"name")}"${_modNameLocked(i)?' readonly aria-readonly="true" style="opacity:.7"':''}>
+        data-on-input="${_on("_on_renderRegister_1",_EV,_EL,i)}" data-on-blur="${_on("_vBlur",_EL,"name")}"${_modNameLocked(i)?' readonly aria-readonly="true" class="cu-locked"':''}>
     </div>`:'';
 
-    return`${S.regQty>1?`<div style="font-size:11px;font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.7px;margin-bottom:14px;display:flex;align-items:center;gap:8px">
-      <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--green);color:var(--on-green,#000);font-size:12px;font-weight:900">${i+1}</span>
+    return`${S.regQty>1?`<div class="cu-rider-head">
+      <span class="cu-rider-num">${i+1}</span>
       ${t('bike')+' '+(i+1)+' — '+(t('riderLabel')||'Rider')}
     </div>`:''}
     ${riderNameSection}
     ${hSection}
-    <div id="reg-type-wrap-${i}" class="form-group" style="margin-bottom:8px">
+    <div id="reg-type-wrap-${i}" class="form-group cu-mb8">
       <label>${t('bikeTypePref')}</label>
       <div class="toggle-group type-grid">${typeBtns}</div>
       ${_tyOpts.includes('Hybrid')?`<div class="bike-info-hint">${t('bikeInfoHint')}</div>`:''}
@@ -8903,13 +8899,13 @@ function renderRegister(){
     const _collect=(_needsBike(_sess)||_gth)?fmt12h(sessionCollectTime(_sess)):'';
     const _collectLbl=_gth?t('sessGatherTime'):t('sessCollectTime');
     const label=total>1?`${t('bike')} ${idx+1} / ${total}`:'';
-    return`<div class="ticket-card ${_evClass(_sess)}" style="${idx>0?'margin-top:16px':''}">
-      ${label?`<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;padding:14px 24px 0;text-align:center">${label}</div>`:''}
+    return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}">
+      ${label?`<div class="cu-tk-label">${label}</div>`:''}
       ${_commT?`
-      <div class="ticket-top" style="grid-template-columns:1fr">
+      <div class="ticket-top cu-tk-top1">
         <div>
           <div class="ticket-num-label">${esc((_sess&&_sess.title)||t('landCommTitle'))}</div>
-          <div style="font-size:15px;font-weight:800;color:var(--orange);margin-top:10px">${tkt.status==='waitlist'?t('commCueWaitlist'):t('commCuePending')}</div>
+          <div class="cu-tk-cue">${tkt.status==='waitlist'?t('commCueWaitlist'):t('commCuePending')}</div>
         </div>
       </div>`:tkt.status==='waitlist'?`
       <div class="ticket-top">
@@ -8928,17 +8924,17 @@ function renderRegister(){
         <div class="ticket-col"><div class="ticket-label">${t('timeLabel')}</div><div class="ticket-value">${sessTime}</div></div>
         <div class="ticket-col"><div class="ticket-label">${t('nameLabel')}</div><div class="ticket-value">${esc(tkt.name)}</div></div>
       </div>
-      <div style="padding:0 24px 18px;display:flex;gap:8px">
-        <button type="button" data-on-click="${_on("downloadBookingICS",tkt.sessionId)}" class="btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px" aria-label="${t('ticketAddCal')}">
+      <div class="cu-tk-acts">
+        <button type="button" data-on-click="${_on("downloadBookingICS",tkt.sessionId)}" class="btn-secondary cu-tk-btn" aria-label="${t('ticketAddCal')}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
           ${t('ticketAddCal')}
         </button>
-        <a href="${(_commT&&_safeUrl(_sess&&_sess.meet_url))||DIRECTIONS_URL}" target="_blank" rel="noopener" class="btn-secondary" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;text-decoration:none" aria-label="${_commT?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}">
+        <a href="${(_commT&&_safeUrl(_sess&&_sess.meet_url))||DIRECTIONS_URL}" target="_blank" rel="noopener" class="btn-secondary cu-tk-link" aria-label="${_commT?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
           ${_commT?t('meetPointLbl'):t('ticketDirections')}
         </a>
       </div>
-      ${(_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot" style="padding:0 24px 18px"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot" style="padding:0 24px 18px"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
+      ${(_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
     </div>`;
   }
   const tickets=S.lastTickets||[];
@@ -8952,16 +8948,16 @@ function renderRegister(){
   const _stepLabels=_needsBike(_selSessObj)?[t('regProg1'),t('regProg2'),t('regProg3')]
     :_needsWaiver(_selSessObj)?[t('regProg1'),_waiverCopy(_selSessObj).title,t('regProg3')]
     :[t('regProg1'),t('regProg3')]; // the workshop: pick a day, confirm
-  const stepper=cur=>{const _n=_stepLabels.length;let c=Math.min(Math.max(Math.floor(Number(cur)||1),1),3);c=c>=3?_n:Math.min(c,_n-1);return `<div class="reg-stepper" role="group" aria-label="${c} / ${_n}" style="display:flex;align-items:center;gap:6px;margin-bottom:16px">${_stepLabels.map((lbl,i)=>{const n=i+1,done=n<c,on=n===c;const circ=`<span aria-current="${on?'step':'false'}" style="width:24px;height:24px;flex-shrink:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;transition:none;${done||on?'background:var(--green);color:var(--on-green,#04150c)':'background:var(--s3);color:var(--muted);border:1px solid var(--border)'}">${done?'✓':n}</span>`;const label=on?`<span style="font-size:12px;font-weight:800;color:var(--green);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px">${lbl}</span>`:'';return `<div style="display:flex;align-items:center;gap:7px;flex:0 1 auto;min-width:0">${circ}${label}</div>${n<3?`<span aria-hidden="true" style="flex:1 1 auto;min-width:10px;height:2px;border-radius:2px;background:${n<c?'var(--green)':'var(--border)'}"></span>`:''}`;}).join('')}</div>`;};
-  const stepHeader=(title,msg)=>`<div style="margin-bottom:18px">
+  const stepper=cur=>{const _n=_stepLabels.length;let c=Math.min(Math.max(Math.floor(Number(cur)||1),1),3);c=c>=3?_n:Math.min(c,_n-1);return `<div class="reg-stepper cu-stepper" role="group" aria-label="${c} / ${_n}">${_stepLabels.map((lbl,i)=>{const n=i+1,done=n<c,on=n===c;const circ=`<span aria-current="${on?'step':'false'}" class="cu-step-c ${done||on?'cu-step-on':'cu-step-off'}">${done?'✓':n}</span>`;const label=on?`<span class="cu-step-lbl">${lbl}</span>`:'';return `<div class="cu-step">${circ}${label}</div>${n<3?`<span aria-hidden="true" class="cu-step-ln${n<c?' cu-step-ln-on':''}"></span>`:''}`;}).join('')}</div>`;};
+  const stepHeader=(title,msg)=>`<div class="cu-mb18">
     ${stepper(S.regStep)}
-    <div class="page-title" style="margin-bottom:4px">${title}</div>
-    <div class="page-sub" style="margin-bottom:0">${msg}</div>
+    <div class="page-title cu-mb4">${title}</div>
+    <div class="page-sub cu-mb0">${msg}</div>
   </div>`;
 
   
   const _isReturning=cust&&cust.id&&(cust.height||cust.type_preference)&&getQueue().some(e=>e.customerId===cust.id&&(e.status==='done'||e.status==='waiting'||e.status==='active'));
-  const usualBtn=(_isReturning&&available.some(s=>s.status==='open'))?`<button class="btn-secondary" style="width:100%;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px" data-on-click="${_on("bookMyUsual")}">↻ ${t('bookUsualBtn')}</button>`:'';
+  const usualBtn=(_isReturning&&available.some(s=>s.status==='open'))?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">↻ ${t('bookUsualBtn')}</button>`:'';
   const panel1=`
     ${_soleSess?stepHeader(t('regStep1TitleOne'),t('regStep1MsgOne'))
                :stepHeader(t('regStep1Title'),t((S.selEvent==='community'||S.selEvent==='workshop')?'regStep1MsgJoin':'regStep1Msg'))}
@@ -8974,13 +8970,13 @@ function renderRegister(){
         const _cs=allSessions().find(s=>s.id===S.selSession);
         if(!_isCommunity(_cs))return'';
         if(_cs.status!=='full')return''; // computed spots never surface to customers
-        return`<div class="mm-note" style="display:flex;align-items:flex-start;gap:10px;margin-top:12px;padding:12px 14px">
-          <span style="width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;margin-top:4px"></span>
-          <span style="font-size:12.5px;font-weight:700;color:var(--orange);line-height:1.5">${t('commFullWaitlistMsg')}</span>
+        return`<div class="mm-note cu-full-note">
+          <span class="cu-full-dot"></span>
+          <span class="cu-full-msg">${t('commFullWaitlistMsg')}</span>
         </div>`;
       })()}
     </div>
-    ${available.length?`<div class="mm-reg-foot"><button class="btn-primary" style="width:100%;${S.selSession?'':'opacity:.4;cursor:not-allowed'}" ${S.selSession?'':'disabled'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
+    ${available.length?`<div class="mm-reg-foot"><button class="btn-primary cu-w100${S.selSession?'':' cu-off'}" ${S.selSession?'':'disabled'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
 
   
   const panel2=`
@@ -8989,12 +8985,12 @@ function renderRegister(){
       ${modifyBannerHtml}
       ${qtyStepper}
       ${bikeSections}
-      <div id="price-preview-wrap" style="margin-top:16px">${pricePreview}</div>
+      <div id="price-preview-wrap" class="cu-mt16">${pricePreview}</div>
       ${_promoBoxHtml('step2',_promoDisc,_freeSel||(isModifyMode&&S.regQty<=existingEntries.length),isModifyMode)}
     </div>
-    <div class="mm-reg-foot" style="display:flex;gap:10px;margin-top:16px">
+    <div class="mm-reg-foot cu-foot">
       <button class="btn-secondary" data-on-click="${_on("regGoStep",1)}">${t('regBackBtn')}</button>
-      <button class="btn-primary" style="flex:1" data-on-click="${_on("regNextToReview")}">${t('regReviewBtn')}</button>
+      <button class="btn-primary cu-f1" data-on-click="${_on("regNextToReview")}">${t('regReviewBtn')}</button>
     </div>`;
 
 
@@ -9002,52 +8998,52 @@ function renderRegister(){
     const nm=_titleCaseName((S.regRiderNames[i]!==undefined&&String(S.regRiderNames[i]).trim())?String(S.regRiderNames[i]):(i===0&&cust?cust.name:''));
     const ty=S.regBikeTypes[i]||'Any';
     const h=S.regBikeHeights[i]||'';
-    return`<div style="display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">
-      <span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--green);color:var(--on-green,#000);font-size:12px;font-weight:900;flex-shrink:0">${i+1}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:14px">${esc(nm||(t('riderLabel')+' '+(i+1)))}</div>
-        ${_needsBike(_selSessObj)?`<div style="font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">${typeBadge(ty)}${h?`<span><bdi>${h} ${t('cmUnit')}</bdi></span>`:''}</div>`:''}
+    return`<div class="cu-rv-rider">
+      <span class="cu-rv-num">${i+1}</span>
+      <div class="cu-f1-min0">
+        <div class="cu-rv-name">${esc(nm||(t('riderLabel')+' '+(i+1)))}</div>
+        ${_needsBike(_selSessObj)?`<div class="cu-rv-meta">${typeBadge(ty)}${h?`<span><bdi>${h} ${t('cmUnit')}</bdi></span>`:''}</div>`:''}
       </div>
-      <div style="font-weight:800;font-size:13px;color:var(--green);white-space:nowrap">${(_freeSel||ty==='Own')?t('freeLabel'):_hFree(i)?t('onTheHouseLabel'):_evSeatPrice(allSessions().find(x=>x.id===S.selSession))!=null?`SAR ${_evSeatPrice(allSessions().find(x=>x.id===S.selSession))}`:priceDisplay(ty)}</div>
+      <div class="cu-rv-price">${(_freeSel||ty==='Own')?t('freeLabel'):_hFree(i)?t('onTheHouseLabel'):_evSeatPrice(allSessions().find(x=>x.id===S.selSession))!=null?`SAR ${_evSeatPrice(allSessions().find(x=>x.id===S.selSession))}`:priceDisplay(ty)}</div>
     </div>`;
   }).join(''); // a rider on the house reads as such here too - the total below already counts them at 0
   // Chosen add-ons summary shown before confirming
   const _raItems=addonLineItems(S.regAddons||[]);
-  const reviewAddons=_raItems.length?`<div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 0">${t('addonsLabel')} (${_raItems.reduce((s,a)=>s+(a.qty||0),0)})</div>${_raItems.map(a=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">${a.photo?`<img loading="lazy" decoding="async" src="${esc(a.photo)}" alt="${esc(a.name)}" class="addon-thumb addon-thumb-sm" role="button" tabindex="0" aria-label="${esc(a.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_2",_EV,_EL)}">`:''}<div style="flex:1;min-width:0"><span style="font-weight:800;font-size:14px">${esc(a.name)}</span>${a.qty>1?` <span style="color:var(--muted);font-weight:700">×${a.qty}</span>`:''}${a.brand?`<div style="font-size:11px;color:var(--muted)">${esc(a.brand)}</div>`:''}</div><div style="font-weight:800;font-size:13px;color:var(--green);white-space:nowrap">SAR ${a.lineTotal}</div></div>`).join('')}`:'';
+  const reviewAddons=_raItems.length?`<div class="cu-rv-sec">${t('addonsLabel')} (${_raItems.reduce((s,a)=>s+(a.qty||0),0)})</div>${_raItems.map(a=>`<div class="cu-rv-addon">${a.photo?`<img loading="lazy" decoding="async" src="${esc(a.photo)}" alt="${esc(a.name)}" class="addon-thumb addon-thumb-sm" role="button" tabindex="0" aria-label="${esc(a.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_2",_EV,_EL)}">`:''}<div class="cu-f1-min0"><span class="cu-rv-name">${esc(a.name)}</span>${a.qty>1?` <span class="cu-rv-qty">×${a.qty}</span>`:''}${a.brand?`<div class="cu-rv-brand">${esc(a.brand)}</div>`:''}</div><div class="cu-rv-price">SAR ${a.lineTotal}</div></div>`).join('')}`:'';
   // The banner offers Modify only when there is something to modify. A booking already on a bike,
   // or one on a ride staff approve, loads no edit form, so Modify led straight back to this same
   // banner, over and over; such a booking is looked after from My Bookings instead.
   const alreadyHere=S._alreadyBookedSession===S.selSession&&S.selSession;
   const alreadyBanner=alreadyHere?`
-    <div id="already-booked-banner" class="mm-note" style="margin-top:16px;padding:16px 18px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+    <div id="already-booked-banner" class="mm-note cu-already">
+      <div class="cu-already-head">
         <div>
-          <div style="font-size:14px;font-weight:800;color:var(--orange)">${t('errAlreadyBooked')}</div>
-          ${isModifyMode?`<div style="font-size:12px;color:var(--muted);margin-top:2px">${t('errAlreadyBookedSub')}</div>`:''}
+          <div class="cu-already-title">${t('errAlreadyBooked')}</div>
+          ${isModifyMode?`<div class="cu-sub12">${t('errAlreadyBookedSub')}</div>`:''}
         </div>
       </div>
       ${isModifyMode
-        ?`<button class="btn-primary" style="width:100%" data-on-click="${_on("_on_renderRegister_3",_EV,_EL)}"> ${t('modifyExistingBtn')}</button>`
-        :`<button class="btn-primary" style="width:100%" data-on-click="${_on("_on_renderRegister_4",_EV,_EL)}">${t('myRidesTitle')}</button>`}
+        ?`<button class="btn-primary cu-w100" data-on-click="${_on("_on_renderRegister_3",_EV,_EL)}"> ${t('modifyExistingBtn')}</button>`
+        :`<button class="btn-primary cu-w100" data-on-click="${_on("_on_renderRegister_4",_EV,_EL)}">${t('myRidesTitle')}</button>`}
     </div>`:'';
   const confirmBtns=alreadyHere?'':`
-    <div class="mm-reg-foot" style="display:flex;gap:10px;margin-top:16px">
+    <div class="mm-reg-foot cu-foot">
       <button class="btn-secondary" data-on-click="${_on("regGoStep",_regPrevStep(_selSessObj,3))}" ${S.regSubmitting?'disabled':''}>${t('regBackBtn')}</button>
-      <button class="btn-primary" style="flex:1" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting?'disabled':''}>${S.regSubmitting?' ...':(isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn'))}</button>
+      <button class="btn-primary cu-f1" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting?'disabled':''}>${S.regSubmitting?' ...':(isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn'))}</button>
     </div>`;
   const detailsCard=`<div class="form-section">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+      <div class="cu-rv-head">
         <div>
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">${t('reviewSessionLabel')}</div>
-          <div style="font-weight:800;font-size:15px">${selSess?esc(dayLabel(selSess.day)):''} · ${selSess?esc(shortDate(selSess.session_date||selSess.id)):''}</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px">${sessionTime(selSess)}</div>
+          <div class="cu-rv-k">${t('reviewSessionLabel')}</div>
+          <div class="cu-rv-date">${selSess?esc(dayLabel(selSess.day)):''} · ${selSess?esc(shortDate(selSess.session_date||selSess.id)):''}</div>
+          <div class="cu-sub12">${sessionTime(selSess)}</div>
         </div>
-        ${cust?`<div style="text-align:right">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px">${t('bookedByLabel')}</div>
-          <div style="font-weight:700;font-size:13px">${esc(cust.name)}</div>
+        ${cust?`<div class="cu-ta-right">
+          <div class="cu-rv-k">${t('bookedByLabel')}</div>
+          <div class="cu-rv-by">${esc(cust.name)}</div>
         </div>`:''}
       </div>
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 0">${t(_needsBike(_selSessObj)?'reviewRidersLabel':'reviewPartLabel')} (${S.regQty})</div>
+      <div class="cu-rv-sec">${t(_needsBike(_selSessObj)?'reviewRidersLabel':'reviewPartLabel')} (${S.regQty})</div>
       ${reviewRiders}
       ${reviewAddons}
       ${_promoBoxHtml('review',_promoDisc,_freeSel||(isModifyMode&&S.regQty<=existingEntries.length),isModifyMode)}
@@ -9055,15 +9051,15 @@ function renderRegister(){
   const panelWaiver=`
     ${stepHeader(_waiverCopy(_selSessObj).title,t('waiverSub'))}
     <div class="form-section">
-      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 20px;max-height:260px;overflow-y:auto;font-size:13.5px;line-height:1.65;color:var(--muted)" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
-      <label class="mm-waiver-agree" style="display:flex;align-items:center;gap:12px;background:var(--s1);border:1.5px solid ${S.waiverOk?'var(--green)':'var(--border)'};border-radius:12px;padding:15px 18px;margin-top:12px;cursor:pointer;min-height:52px;box-sizing:border-box">
-        <input type="checkbox" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" style="width:20px;height:20px;flex:none">
-        <span style="font-size:13.5px;font-weight:600">${_waiverCopy(_selSessObj).agree}</span>
+      <div class="cu-waiver-text" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
+      <label class="mm-waiver-agree cu-waiver${S.waiverOk?' cu-waiver-ok':''}">
+        <input type="checkbox" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
+        <span class="cu-waiver-lbl">${_waiverCopy(_selSessObj).agree}</span>
       </label>
     </div>
-    <div class="mm-reg-foot" style="display:flex;gap:10px;margin-top:16px">
+    <div class="mm-reg-foot cu-foot">
       <button class="btn-secondary" data-on-click="${_on("regGoStep",_regPrevStep(_selSessObj,2.5))}">${t('regBackBtn')}</button>
-      <button class="btn-primary" style="flex:1;${S.waiverOk?'':'opacity:.4'}" ${S.waiverOk?'':'disabled'} data-on-click="${_on("regWaiverContinue")}">${t('regContinueBtn')}</button>
+      <button class="btn-primary cu-f1${S.waiverOk?'':' cu-dim'}" ${S.waiverOk?'':'disabled'} data-on-click="${_on("regWaiverContinue")}">${t('regContinueBtn')}</button>
     </div>`;
 
   const panel3=`
@@ -9077,38 +9073,38 @@ function renderRegister(){
       const _aCard=it=>{const qn=_regAddonQty(it.id);const stock=Number(it.qty)||0;const cap=stock>0?stock:10;const sel=qn>0;return`<div class="addon-row${sel?' sel':''}">
             <button type="button" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?'✓':''}</button>
             ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="addon-thumb" role="button" tabindex="0" aria-label="${esc(it.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_5",_EV,_EL)}">`:''}
-            <div style="flex:1;min-width:0">
-              <div style="font-weight:600;font-size:14px;line-height:1.25">${esc(it.name)}${it.brand?` <span style="font-size:11.5px;color:var(--muted);font-weight:600">· ${esc(it.brand)}</span>`:''}</div>
-              ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" style="margin-top:2px;background:none;border:none;padding:0;color:var(--green-d);font-family:inherit;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer">${t('nuButton')}</button>`:''}
+            <div class="cu-f1-min0">
+              <div class="cu-ad-name">${esc(it.name)}${it.brand?` <span class="cu-ad-brand">· ${esc(it.brand)}</span>`:''}</div>
+              ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" class="cu-ad-nutri">${t('nuButton')}</button>`:''}
             </div>
             ${sel&&cap>1?`<span class="addon-qty">
               <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,-1)}" aria-label="−">−</button>
               <span>${qn}</span>
               <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,1)}" ${qn>=cap?'disabled':''} aria-label="+">+</button>
             </span>`:''}
-            <span style="font-weight:700;color:var(--green-d);font-size:13.5px;white-space:nowrap">${_priceLabel(it.price)}</span>
+            <span class="cu-ad-price">${_priceLabel(it.price)}</span>
           </div>`;};
-      const _aGrid=its=>`<div style="display:flex;flex-direction:column">${its.map(_aCard).join('')}</div>`;
+      const _aGrid=its=>`<div class="cu-ad-list">${its.map(_aCard).join('')}</div>`;
       const _aCatRank=c=>_isDrinkCat(c)?2:(_isSuppCat(c)?1:0); // Equipment first, then Supplements, then Beverages
       const _aCats=[...new Set(items.map(it=>it.category||'Other'))].sort((a,b)=>(_aCatRank(a)-_aCatRank(b))||_invCatLabel(a).localeCompare(_invCatLabel(b)));
       const _aGrouped=_aCats.length>1
-        ?_aCats.map(cat=>`<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:10px">${esc(_invCatLabel(cat))}</div>${_aGrid(items.filter(it=>(it.category||'Other')===cat))}</div>`).join('')
+        ?_aCats.map(cat=>`<div class="cu-mb16"><div class="cu-ad-cat">${esc(_invCatLabel(cat))}</div>${_aGrid(items.filter(it=>(it.category||'Other')===cat))}</div>`).join('')
         :_aGrid(items);
-      return`<div class="form-section" style="margin-top:16px">
+      return`<div class="form-section cu-mt16">
         <div class="form-title">${t('addonStepTitle')}</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${t('addonStepSub')}</div>
+        <div class="cu-ad-sub">${t('addonStepSub')}</div>
         ${_aGrouped}
       </div>`;
     })()}
     ${detailsCard}
-    <div class="form-section" style="margin-top:16px">${(()=>{
+    <div class="form-section cu-mt16">${(()=>{
       const rentalStr=_promoAf!=null?`SAR ${_promoAf}`:totalDisplay;
       const grandStr=grandTotalStr;
-      return`${addonTotal>0?`<div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0"><span style="color:var(--muted)">${t('reviewRentalLabel')}</span><span style="font-weight:700">${rentalStr}</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;padding:3px 0"><span style="color:var(--muted)">${t('addonsLabel')}</span><span style="font-weight:700">SAR ${addonTotal}</span></div>`:''}
-      <div style="display:flex;align-items:center;justify-content:space-between;${addonTotal>0?'border-top:1px solid var(--border);margin-top:6px;padding-top:8px':''}">
-        <div style="font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">${t('reviewTotalLabel')}</div>
-        <div style="font-size:22px;font-weight:900;color:var(--green)">${grandStr}</div>
+      return`${addonTotal>0?`<div class="cu-sum-row"><span class="cu-c-muted">${t('reviewRentalLabel')}</span><span class="cu-fw700">${rentalStr}</span></div>
+      <div class="cu-sum-row"><span class="cu-c-muted">${t('addonsLabel')}</span><span class="cu-fw700">SAR ${addonTotal}</span></div>`:''}
+      <div class="cu-sum-tot${addonTotal>0?' cu-sum-sep':''}">
+        <div class="cu-sum-lbl">${t('reviewTotalLabel')}</div>
+        <div class="cu-sum-total">${grandStr}</div>
       </div>`;
     })()}</div>
     ${alreadyBanner}
@@ -9117,12 +9113,12 @@ function renderRegister(){
   
   const _tktAllWl=hasTickets&&tickets.every(x=>x.status==='waitlist'); // capacity-coerced: no confirmed spot yet
   const panelDone=hasTickets?`
-    <div style="max-width:640px;margin:0 auto">
-      <div style="text-align:center;margin-bottom:18px">
-        <div class="page-title" style="margin-bottom:4px">${_tktAllWl?t('toastWaitlisted'):t('toastRegistered')}</div>
+    <div class="cu-card640-0">
+      <div class="cu-done-head">
+        <div class="page-title cu-mb4">${_tktAllWl?t('toastWaitlisted'):t('toastRegistered')}</div>
       </div>
       ${tickets.map((tkt,i)=>renderOneTicket(tkt,i,tickets.length)).join('')}
-      <button class="btn-primary" style="width:100%;margin-top:18px" data-on-click="${_on("regBookAnother")}">${t('regBookAnotherBtn')}</button>
+      <button class="btn-primary cu-w100-mt18" data-on-click="${_on("regBookAnother")}">${t('regBookAnotherBtn')}</button>
     </div>`:'';
 
   const body=hasTickets?panelDone:curStep===1?panel1:curStep===2?panel2:curStep===2.5?panelWaiver:panel3;
@@ -9204,24 +9200,24 @@ function _promoDiscount(total,from){
 function _on__promoBoxHtml_1(event,el){if(event.key==='Enter'){event.preventDefault();applyPromoCode();}}
 function _promoBoxHtml(slot,disc,hide,isModify){
   if(hide)return'';
-  return`<div style="margin-top:14px">
-    <label for="reg-promo-${slot}" style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">${t('promoLabel')}</label>
-    ${isModify?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:3px">${t('promoAddedOnly')}</div>`:''}
-    <div style="display:flex;gap:8px;margin-top:5px">
-      <input id="reg-promo-${slot}" class="reg-promo" type="text" value="${esc(S.promoApplied?S.promoApplied.code:'')}" placeholder="${t('promoLabel')}" style="flex:1;text-transform:uppercase" ${S.promoApplied?'disabled':''}
+  return`<div class="cu-mt14">
+    <label for="reg-promo-${slot}" class="cu-k10">${t('promoLabel')}</label>
+    ${isModify?`<div class="cu-hint-mt3">${t('promoAddedOnly')}</div>`:''}
+    <div class="cu-promo-row">
+      <input id="reg-promo-${slot}" class="reg-promo cu-promo-in" type="text" value="${esc(S.promoApplied?S.promoApplied.code:'')}" placeholder="${t('promoLabel')}" ${S.promoApplied?'disabled':''}
         data-on-keydown="${_on("_on__promoBoxHtml_1",_EV,_EL)}">
       ${S.promoApplied
-        ?`<button class="btn-secondary" style="flex-shrink:0" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
-        :`<button class="btn-secondary" style="flex-shrink:0" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
+        ?`<button class="btn-secondary cu-shrink0" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
+        :`<button class="btn-secondary cu-shrink0" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
     </div>
-    ${S._promoMsg?`<div style="font-size:11px;color:var(--red);font-weight:700;margin-top:5px">${S._promoMsg}</div>`:''}
+    ${S._promoMsg?`<div class="cu-promo-err">${S._promoMsg}</div>`:''}
     <div id="reg-promo-disc-${slot}">${_promoDiscLine(disc)}</div>
   </div>`;
 }
 // The discount line under the box, alone, so a bike-type change (setBikeType, which repaints in
 // place) can bring it up to date: it used to keep promising the old type's discount.
 function _promoDiscLine(disc){
-  return(disc>0&&S.promoApplied)?`<div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--green);margin-top:8px"><span>${t('promoDiscountLabel')} (${esc(S.promoApplied.code)})</span><span>- SAR ${disc}</span></div>`:'';
+  return(disc>0&&S.promoApplied)?`<div class="cu-promo-disc"><span>${t('promoDiscountLabel')} (${esc(S.promoApplied.code)})</span><span>- SAR ${disc}</span></div>`:'';
 }
 // What the applied code takes off the booking on screen: every rider on a new booking, only the
 // riders being added on an edit (the ones _applyPromoToEntries will actually discount).
@@ -10034,76 +10030,76 @@ function renderBookingTicket(entries,opts){
     // "pending" to someone who was in fact rejected (or approved) pre-announces the result.
     const confirmed=_pub&&allApproved&&stForBadge!=='waitlist';
     const k=!_pub?'commCueUnderReview':(stForBadge==='waitlist'?'commCueWaitlist':(allApproved?'commCueConfirmed':'commCuePending'));
-    const col=confirmed?'var(--green)':'var(--orange)';
+    const colCls=confirmed?'cu-c-green':'cu-c-orange',colBg=confirmed?'cu-bg-green':'cu-bg-orange';
     cueHtml=confirmed
       ? `<div class="appr-ok" role="status"><span class="appr-ok-tick" aria-hidden="true">\u2713</span><span class="appr-ok-txt"><strong>${t('commCueConfirmed')}</strong><small>${t('commConfirmedSub')}</small></span></div>`
-      : `<div class="mm-note" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:9px 12px"><span style="width:8px;height:8px;border-radius:50%;background:${col};flex-shrink:0"></span><span style="font-size:12px;font-weight:800;color:${col}">${t(k)}</span></div>`;
+      : `<div class="mm-note cu-cue"><span class="cu-dot8 ${colBg}"></span><span class="cu-cue-txt ${colCls}">${t(k)}</span></div>`;
   } else if(stForBadge==='active'){
-    cueHtml=`<div class="mm-note mm-note-go" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:9px 12px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0"></span><span style="font-size:12px;font-weight:800;color:var(--green)">${t('onBikeNow')}</span></div>`;
+    cueHtml=`<div class="mm-note mm-note-go cu-cue"><span class="cu-dot8 cu-bg-green"></span><span class="cu-cue-txt cu-c-green">${t('onBikeNow')}</span></div>`;
   } else if(stForBadge==='waiting'&&!_noNum){
     // Only riders still WAITING are ahead: one already on a bike has been served, and counting
     // them kept the rider after a checked-in batch on "in queue" until those riders came back.
     const isNext=getQueue().filter(o=>o.sessionId===primary.sessionId&&o.status==='waiting'&&o.queueNum<primary.queueNum).length<=0;
     const txt=isNext?t('youreNext'):t('inQueueMsg');
-    cueHtml=`<div class="mm-note" style="display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:9px 12px"><span style="font-size:14px">${isNext?'':''}</span><span style="font-size:12px;font-weight:800;color:${isNext?'var(--green)':'var(--text)'}">${txt}</span></div>`;
+    cueHtml=`<div class="mm-note cu-cue"><span class="cu-fs14">${isNext?'':''}</span><span class="cu-cue-txt ${isNext?'cu-c-green':'cu-c-text'}">${txt}</span></div>`;
   }
   const riderRows=g.map((e,i)=>{
     const bike=getAssignedBikes(e)[0]||null;
     const payBadge=e.paid
-      ?`<span style="display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--green-h);white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:var(--green-h);flex:none"></span>${(e.price??DEFAULT_PRICE)===0?t('onTheHouseLabel'):t('paidLabel')}</span>`
-      :`<span style="display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800;color:var(--orange);white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex:none"></span>${t('pendingLabel')}</span>`;
+      ?`<span class="cu-pay-ok"><span class="cu-dot7-ok"></span>${(e.price??DEFAULT_PRICE)===0?t('onTheHouseLabel'):t('paidLabel')}</span>`
+      :`<span class="cu-pay-due"><span class="cu-dot7-due"></span>${t('pendingLabel')}</span>`;
     const bikeLine=bike
-      ?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:3px">${esc(bike.name)}${bike.brand?' · '+esc(bike.brand):''}${bike.model?' '+esc(bike.model):''}${bike.groupset?' · '+esc(bike.groupset):''}${bike.speeds?' · '+bike.speeds+'sp':''}</div>`
+      ?`<div class="cu-hint-mt3">${esc(bike.name)}${bike.brand?' · '+esc(bike.brand):''}${bike.model?' '+esc(bike.model):''}${bike.groupset?' · '+esc(bike.groupset):''}${bike.speeds?' · '+bike.speeds+'sp':''}</div>`
       :'';
-    return`<div style="padding:11px 0;border-bottom:1px solid var(--border)">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        ${_noNum?'':e.status==='waitlist'?`<span style="display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:10px;font-weight:800;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:var(--orange);flex:none"></span>W${e.waitlistNum||''}</span>`:`<span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;padding:0 8px;border-radius:999px;background:var(--s1);border:1px solid var(--line2);color:var(--text);font-size:11px;font-weight:800">#${e.queueNum}</span>`}
-        <span style="font-weight:800;font-size:13px;flex:1;min-width:0">${esc(e.name)}</span>
+    return`<div class="cu-tr-row">
+      <div class="cu-tr-head">
+        ${_noNum?'':e.status==='waitlist'?`<span class="cu-tr-wl"><span class="cu-dot7-due"></span>W${e.waitlistNum||''}</span>`:`<span class="cu-tr-num">#${e.queueNum}</span>`}
+        <span class="cu-tr-name">${esc(e.name)}</span>
         ${_needsBike(sess)?typeBadge(resolvedType(e)):''}
       </div>
       ${bikeLine}
-      ${(e.status==='done'&&e.rideDuration)?`<div style="font-size:11px;color:var(--blue);font-weight:700;margin-top:3px"> ${t('colDuration')}: ${fmtDur(e.rideDuration)}</div>`:''}
-      ${(e.status==='done'&&e.checkedInAt)?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
-      ${(e.status==='done'&&e.checkedOutAt)?`<div style="font-size:11px;color:var(--muted);font-weight:600">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
-      ${_comm?'':`<div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-        <span style="font-weight:800;font-size:13px;color:${e.paid?'var(--green)':'var(--muted-l)'}">SAR ${e.price??DEFAULT_PRICE}</span>
+      ${(e.status==='done'&&e.rideDuration)?`<div class="cu-tr-dur"> ${t('colDuration')}: ${fmtDur(e.rideDuration)}</div>`:''}
+      ${(e.status==='done'&&e.checkedInAt)?`<div class="cu-tr-in">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
+      ${(e.status==='done'&&e.checkedOutAt)?`<div class="cu-tr-out">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
+      ${_comm?'':`<div class="cu-tr-money">
+        <span class="cu-fw800-13 ${e.paid?'cu-c-green':'cu-c-mutedl'}">SAR ${e.price??DEFAULT_PRICE}</span>
         ${payBadge}
       </div>`}
     </div>`;
   }).join('');
-  const noShowMsg=g.some(e=>e.status==='noshow')?`<div style="font-size:11px;color:var(--red);font-weight:600;line-height:1.5;padding:8px 0 0">${t('noShowCustomerMsg')}</div>`:'';
+  const noShowMsg=g.some(e=>e.status==='noshow')?`<div class="cu-tr-noshow">${t('noShowCustomerMsg')}</div>`:'';
   const _ids=g.map(e=>e.id).join(',');
   const rated=!!(primary.ratingExp||primary.ratingBike);
-  const rateBtn=(opts.bookAgain&&!rated)?`<button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("openRateModal",primary.id)}">★ ${t('rateRideBtn')}</button>`:'';
+  const rateBtn=(opts.bookAgain&&!rated)?`<button class="btn-sm btn-green cu-f1" data-on-click="${_on("openRateModal",primary.id)}">★ ${t('rateRideBtn')}</button>`:'';
   // Community rides: a fixed solo reservation - nothing to edit or reschedule, only cancel.
-  const actionsHtml=canEdit?`<div style="display:flex;gap:8px;padding:14px 18px 16px;flex-wrap:wrap">
-      ${_comm?'':`<button class="btn-sm btn-green-solid" style="flex:1;min-width:88px" data-on-click="${_on("_on_renderBookingTicket_1",_EV,_EL,_evOf(sess),primary.sessionId)}">${t('editBtn')}</button>
-      ${_rideKind(sess)==='snd96'?'':`<button class="btn-sm btn-secondary" style="flex:1;min-width:88px" data-on-click="${_on("showRescheduleModal",primary.sessionId)}">${ICON_RESCHEDULE} ${t('rescheduleBtn')}</button>`}`}
-      <button class="btn-sm btn-red" style="flex:1;min-width:88px" data-on-click="${_on("showCancelReasonModal",primary.id)}">${t('cancelBooking')}</button>
-    </div>`:(opts.bookAgain?`<div style="display:flex;gap:8px;padding:14px 18px 16px;flex-wrap:wrap">
+  const actionsHtml=canEdit?`<div class="cu-tk-actions">
+      ${_comm?'':`<button class="btn-sm btn-green-solid cu-act88" data-on-click="${_on("_on_renderBookingTicket_1",_EV,_EL,_evOf(sess),primary.sessionId)}">${t('editBtn')}</button>
+      ${_rideKind(sess)==='snd96'?'':`<button class="btn-sm btn-secondary cu-act88" data-on-click="${_on("showRescheduleModal",primary.sessionId)}">${ICON_RESCHEDULE} ${t('rescheduleBtn')}</button>`}`}
+      <button class="btn-sm btn-red cu-act88" data-on-click="${_on("showCancelReasonModal",primary.id)}">${t('cancelBooking')}</button>
+    </div>`:(opts.bookAgain?`<div class="cu-tk-actions">
       ${rateBtn}
-      <button class="btn-sm btn-green" style="flex:1;min-width:110px" data-on-click="${_on("bookAgain",_ids)}">↻ ${t('bookAgainBtn')}</button>
+      <button class="btn-sm btn-green cu-act110" data-on-click="${_on("bookAgain",_ids)}">↻ ${t('bookAgainBtn')}</button>
     </div>`:'');
-  const numFont=numDisplay.length<=4?'72px':numDisplay.length<=9?'40px':'24px';
-  return`<div class="ticket-card ${_evClass(sess)}" style="margin-top:0">
+  const numCls=numDisplay.length<=4?'cu-num-l':numDisplay.length<=9?'cu-num-m':'cu-num-s';
+  return`<div class="ticket-card ${_evClass(sess)} cu-mt0">
     <div class="ticket-header">
       <div class="ticket-num-block">
         ${_noNum?'':_allWl
           ?`<div class="ticket-num-label wl-loud">${t('waitlistLabel')}${primary.waitlistNum?` \u00b7 W${primary.waitlistNum}`:''}</div>`
           :`<div class="ticket-num-label">${n>1?n+' '+(t('bike')||'bikes'):t('queueNumLabel')}</div>`}
-        <div class="ticket-num" style="font-size:${numFont};letter-spacing:${numDisplay.length<=4?'-3px':'-1px'}">${numDisplay}</div>
+        <div class="ticket-num ${numCls}">${numDisplay}</div>
         ${wlNote}
       </div>
       <div class="ticket-right">
         ${(stForBadge==='waiting'||(_comm&&!_commPublished(sess)))?'':(stForBadge==='cancelled'?statusBadgeFor(primary):statusBadge(stForBadge))}
-        ${_qrReady?ticketQR(bookingRef(primary),132):`<div class="qr-hold" style="width:132px"><span>${t('ticketQrHold')}</span></div>`}
-        <div style="font-size:10px;color:var(--muted);font-weight:700;text-align:right;line-height:1.4">${dayLabel(primary.sessionDay)}<br>${shortDate(primary.sessionDate)}<br>${sessTime}${(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)?fmt12h(sessionCollectTime(sess)):'';return c?`<br><span style="color:var(--green)">${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</span>`:'';})()}</div>
+        ${_qrReady?ticketQR(bookingRef(primary),132):`<div class="qr-hold cu-w132"><span>${t('ticketQrHold')}</span></div>`}
+        <div class="cu-tk-when">${dayLabel(primary.sessionDay)}<br>${shortDate(primary.sessionDate)}<br>${sessTime}${(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)?fmt12h(sessionCollectTime(sess)):'';return c?`<br><span class="cu-c-green">${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</span>`:'';})()}</div>
       </div>
     </div>
-    <div style="padding:2px 18px 0">
+    <div class="cu-tk-body">
       ${cueHtml}
       ${_comm?_commInfoHtml(sess):''}
-      <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:10px 0 0">${t(_needsBike(sess)?'reviewRidersLabel':'reviewPartLabel')} · ${numDisplay}</div>
+      <div class="cu-tk-sec">${t(_needsBike(sess)?'reviewRidersLabel':'reviewPartLabel')} · ${numDisplay}</div>
       ${riderRows}
       ${noShowMsg}
       ${(()=>{
@@ -10113,26 +10109,26 @@ function renderBookingTicket(entries,opts){
         return g.map(e=>{
           const ad=addonLineItems(entryAddons(e));
           if(!ad.length)return'';
-          return`<div style="padding:9px 0;border-top:1px dashed var(--border)">
-            <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">${g.length>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
-            ${ad.map(a=>`<div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          return`<div class="cu-tk-addons">
+            <span class="cu-k10">${g.length>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
+            ${ad.map(a=>`<div class="cu-tk-ad">
               ${a.photo?`<img loading="lazy" decoding="async" src="${esc(a.photo)}" alt="${esc(a.name)}" class="addon-thumb addon-thumb-sm" role="button" tabindex="0" aria-label="${esc(a.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderBookingTicket_2",_EV,_EL)}">`:''}
-              <span style="flex:1;min-width:0;font-size:13px;font-weight:700">${esc(a.name)}${a.qty>1?` <span style="color:var(--muted)">×${a.qty}</span>`:''}</span>
-              <bdi style="font-weight:800;font-size:13px">SAR ${a.lineTotal}</bdi>
+              <span class="cu-tk-ad-name">${esc(a.name)}${a.qty>1?` <span class="cu-c-muted">×${a.qty}</span>`:''}</span>
+              <bdi class="cu-fw800-13">SAR ${a.lineTotal}</bdi>
             </div>`).join('')}
           </div>`;
         }).join('');
       })()}
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0">
-        <span style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px">${t('reviewTotalLabel')}</span>
-        <span style="font-weight:900;font-size:18px;color:var(--green)">${_comm?t('freeLabel'):`SAR ${Math.round((total+g.reduce((s,e)=>s+addonsCost(entryAddons(e)),0))*100)/100}`}</span>
+      <div class="cu-tk-total">
+        <span class="cu-tk-total-k">${t('reviewTotalLabel')}</span>
+        <span class="cu-tk-total-v">${_comm?t('freeLabel'):`SAR ${Math.round((total+g.reduce((s,e)=>s+addonsCost(entryAddons(e)),0))*100)/100}`}</span>
       </div>
     </div>
-    <div style="padding:0 18px 16px;display:flex;gap:8px">
-      <button class="btn-secondary" style="flex:1;font-size:12px;display:flex;align-items:center;justify-content:center;gap:8px" data-on-click="${_on("downloadBookingICS",primary.sessionId)}" aria-label="${t('addToCalendarBtn')}"> ${t('addToCalendarBtn')}</button>
-      <a href="${esc((_comm&&_safeUrl(sess&&sess.meet_url))||DIRECTIONS_URL)}" target="_blank" rel="noopener" class="btn-secondary" style="flex:1;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none" aria-label="${_comm?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${_comm?t('meetPointLbl'):t('ticketDirections')}</a>
+    <div class="cu-tk-btns">
+      <button class="btn-secondary cu-tk-cal" data-on-click="${_on("downloadBookingICS",primary.sessionId)}" aria-label="${t('addToCalendarBtn')}"> ${t('addToCalendarBtn')}</button>
+      <a href="${esc((_comm&&_safeUrl(sess&&sess.meet_url))||DIRECTIONS_URL)}" target="_blank" rel="noopener" class="btn-secondary cu-tk-dir" aria-label="${_comm?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${_comm?t('meetPointLbl'):t('ticketDirections')}</a>
     </div>
-    ${(_hasWallet()&&isLive)?`<div class="wallet-slot" style="padding:0 18px 14px"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",primary.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&isLive)?`<div class="wallet-slot" style="padding:0 18px 14px"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",primary.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
+    ${(_hasWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",primary.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",primary.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
     ${actionsHtml}
   </div>`;
 }
@@ -10246,7 +10242,7 @@ function _rateTagLabel(k){return t('rateTag'+k.charAt(0).toUpperCase()+k.slice(1
 function _rateTag(k){if(!RATE_TAGS.includes(k))return;const st=S._rateTags||(S._rateTags=new Set());if(st.has(k))st.delete(k);else st.add(k);renderRateModal();}
 function _rateTagsHtml(){
   const st=S._rateTags||new Set();
-  return `<div style="margin:16px 0"><div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${t('rateTagsLabel')}</div>
+  return `<div class="cu-m16"><div class="cu-rate-k">${t('rateTagsLabel')}</div>
     <div class="rate-tags" role="group" aria-label="${esc(t('rateTagsLabel'))}">${RATE_TAGS.map(k=>`<button type="button" class="toggle-btn rate-tag${st.has(k)?' active':''}" aria-pressed="${st.has(k)?'true':'false'}" data-tag="${k}" data-on-click="${_on("_rateTag",k)}">${esc(_rateTagLabel(k))}</button>`).join('')}</div></div>`;
 }
 // ── The ambassador's own card (2026-09-28) ──────────────────────────────────────────────────
@@ -10351,31 +10347,31 @@ function setRate(kind,v){if(kind==='bike')S._rateBike=v;else S._rateExp=v;render
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderRateModal_1(event,el){S._rateNote=el.value}
 function renderRateModal(){
-  const scale=n=>{const cur=n==='bike'?S._rateBike:S._rateExp;return Array.from({length:10},(_,i)=>i+1).map(v=>`<button data-on-click="${_on("setRate",n,v)}" aria-label="${v}" style="width:28px;height:28px;border-radius:50%;border:1px solid ${cur>=v?'var(--green)':'var(--border)'};background:${cur>=v?'rgba(var(--green-rgb),.18)':'transparent'};color:${cur>=v?'var(--green)':'var(--muted)'};font-weight:800;font-size:11px;cursor:pointer">${v}</button>`).join('');};
+  const scale=n=>{const cur=n==='bike'?S._rateBike:S._rateExp;return Array.from({length:10},(_,i)=>i+1).map(v=>`<button data-on-click="${_on("setRate",n,v)}" aria-label="${v}" class="cu-rate-b${cur>=v?' cu-rate-on':''}">${v}</button>`).join('');};
   const _re=getQueue().find(x=>x.id===S._rateId);
   const _rs=_re?allSessions().find(s=>s.id===_re.sessionId):null;
   const _rmeta=_re?`${_rs&&_rs.day?dayLabel(_rs.day)+' · ':''}${shortDate(_re.sessionDate||_re.sessionId)}`:'';
   document.getElementById('rate-modal').innerHTML=`<div class="modal-backdrop"${S._rateForced?'':` data-on-click="${_on('_on_backdropOnly',_EV,_EL,'closeRateModal')}"`}>
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px">
+    <div class="modal-box cu-mw440" role="dialog" aria-modal="true">
       <div class="modal-title">${t('rateTitle')}</div>
-      ${_rmeta?`<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:4px">${_rmeta}</div>`:''}
-      ${S._rateForced?`<div style="font-size:12px;color:var(--muted);margin-top:4px">${t('rateForcedHint')}</div>`:''}
-      ${(_rs&&!_needsBike(_rs))?'':`<div style="margin:16px 0">
-        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${t('rateBikeLabel')}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">${scale('bike')}</div>
+      ${_rmeta?`<div class="cu-rate-meta">${_rmeta}</div>`:''}
+      ${S._rateForced?`<div class="cu-rate-hint">${t('rateForcedHint')}</div>`:''}
+      ${(_rs&&!_needsBike(_rs))?'':`<div class="cu-m16">
+        <div class="cu-rate-k">${t('rateBikeLabel')}</div>
+        <div class="cu-rate-scale">${scale('bike')}</div>
       </div>`}
-      <div style="margin:16px 0">
-        <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">${t('rateExpLabel')}</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">${scale('exp')}</div>
+      <div class="cu-m16">
+        <div class="cu-rate-k">${t('rateExpLabel')}</div>
+        <div class="cu-rate-scale">${scale('exp')}</div>
       </div>
       ${_rateTagsHtml()}
-      <div class="form-group" style="margin:16px 0">
+      <div class="form-group cu-m16">
         <label>${t('rateNoteLabel')}</label>
-        <textarea id="rate-note" rows="3" data-on-input="${_on("_on_renderRateModal_1",_EV,_EL)}" style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:10px;color:var(--text);font-family:var(--font-body);resize:vertical">${esc(S._rateNote||'')}</textarea>
+        <textarea id="rate-note" rows="3" data-on-input="${_on("_on_renderRateModal_1",_EV,_EL)}" class="cu-rate-note">${esc(S._rateNote||'')}</textarea>
       </div>
       <div class="modal-footer">
         ${S._rateForced?'':`<button class="btn-secondary" data-on-click="${_on("closeRateModal")}">${t('cancelBtn')}</button>`}
-        <button class="btn-primary" style="${S._rateForced?'width:100%':''}" data-on-click="${_on("submitRating")}">${t('rateSubmitBtn')}</button>
+        <button class="btn-primary${S._rateForced?' cu-w100':''}" data-on-click="${_on("submitRating")}">${t('rateSubmitBtn')}</button>
       </div>
     </div>
   </div>`;
@@ -10606,7 +10602,7 @@ function _mrBadgeList(cust){
 }
 function _mrBadgesRow(cust){
   const L=_mrBadgeList(cust);
-  return`<div id="mr-badges-host"><div class="analytics-section-title" style="margin-top:22px">${t('mrBadgesTitle')}</div>
+  return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22">${t('mrBadgesTitle')}</div>
   <div class="mr-badges">${L.map((x,i)=>{const nm=_bdgName(x.b);return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
     ${_bdgMedal(x.b.icon,_bdgCol(x.b))}
     <span class="mr-badge-nm">${esc(nm)}</span>
@@ -10634,7 +10630,7 @@ function _mrBadgeInfo(i,fresh){
     ${!x.on&&x.sn&&(x.sn.cur||x.sn.next)?`<div class="badge-pop-how">${esc(x.sn.cur?t('bdgSeasonOpen').replace('{0}',_bdgDay(x.sn.cur.to)):t('bdgSeasonSoon').replace('{0}',_bdgDay(x.sn.next)))}</div>`:''}
     ${g&&g.note?`<div class="badge-pop-note"><bdi>${esc(g.note)}</bdi></div>`:''}
     ${g?`<div class="badge-pop-earned">✓ ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.on?`<div class="badge-pop-earned">✓ ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
-    <button type="button" class="btn-secondary" style="width:100%;margin-top:14px" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
+    <button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
   </div>`;
   el.addEventListener('click',e=>{if(e.target===el)el.remove();});
   document.body.appendChild(el);
@@ -10692,16 +10688,16 @@ function _seasonDashboard(cust){
   const prog=tier.next?Math.max(4,Math.min(100,Math.round((rides-tier.next.from)/(tier.next.to-tier.next.from)*100))):100;
   return`
     <div class="rides-stat-row">
-      <div class="rides-stat-card"><div class="rides-stat-num" style="color:var(--green)">${rides}</div><div class="rides-stat-label">${t('statTotalRides')}</div></div>
+      <div class="rides-stat-card"><div class="rides-stat-num cu-c-green">${rides}</div><div class="rides-stat-label">${t('statTotalRides')}</div></div>
       <div class="rides-stat-card">
-        <div class="rides-stat-num" style="font-size:18px;color:var(--green)">${tier.name}</div>
-        <div class="mr-tierbar"><i style="width:${prog}%"></i></div>
+        <div class="rides-stat-num cu-tier">${tier.name}</div>
+        <div class="mr-tierbar"><i class="cu-tier-fill" data-cssv="${_cssv({'--cu-w':prog+'%'})}"></i></div>
         <div class="rides-stat-label">${tier.next?t('ridesToNext').replace('{0}',tier.next.need).replace('{1}',tier.next.name):t('rideTierLabel')}</div>
       </div>
-      <div class="rides-stat-card"><div class="rides-stat-num"${streak>=2?' style="color:var(--green)"':''}>${streak>=2?'🔥 ':''}${streak}</div><div class="rides-stat-label">${t('statStreak')}</div></div>
+      <div class="rides-stat-card"><div class="rides-stat-num${streak>=2?' cu-c-green':''}">${streak>=2?'🔥 ':''}${streak}</div><div class="rides-stat-label">${t('statStreak')}</div></div>
       ${nextGroup
-        ?`<div class="rides-stat-card"><div class="rides-stat-num" style="font-size:17px">${dayLabel(nextGroup[0].sessionDay)||shortDate(nextGroup[0].sessionDate)}</div><div style="font-size:12px;font-weight:800;color:var(--green);margin-top:2px">${nextTxt}</div><div class="rides-stat-label">${t('statNextRide')}</div></div>`
-        :`<div class="rides-stat-card" style="display:flex;align-items:center;justify-content:center"><button type="button" class="btn-primary" style="font-size:12px;padding:10px 12px" data-on-click="${_on("setCustTab","register")}">${t('mrBookNext')}</button></div>`}
+        ?`<div class="rides-stat-card"><div class="rides-stat-num cu-fs17">${dayLabel(nextGroup[0].sessionDay)||shortDate(nextGroup[0].sessionDate)}</div><div class="cu-next-when">${nextTxt}</div><div class="rides-stat-label">${t('statNextRide')}</div></div>`
+        :`<div class="rides-stat-card cu-stat-center"><button type="button" class="btn-primary cu-book-next" data-on-click="${_on("setCustTab","register")}">${t('mrBookNext')}</button></div>`}
     </div>
     ${_mrBadgesRow(cust)}`;
 }
@@ -10728,10 +10724,10 @@ function renderMyRides(){
   const completed=allEntries.filter(_rideCompleted);
   const currentCards=currentGroups.length
     ?currentGroups.map(g=>renderBookingTicket(g,{actions:true})).join('')
-    :`<div class="empty-state" style="grid-column:1/-1">${t('noCurrentRides')}</div>`;
+    :`<div class="empty-state cu-span-all">${t('noCurrentRides')}</div>`;
   const pastCards=pastGroups.length
     ?pastGroups.map(g=>renderBookingTicket(g,{bookAgain:true})).join('')
-    :`<div class="empty-state" style="grid-column:1/-1">${t('noPastRides')}</div>`;
+    :`<div class="empty-state cu-span-all">${t('noPastRides')}</div>`;
   // v2 empty state: no rides at all -> big gray 0 with a booking prompt instead of two empty sections
   if(!currentGroups.length&&!pastGroups.length){
     document.getElementById('tab-myrides').innerHTML=`
@@ -10748,9 +10744,9 @@ function renderMyRides(){
   document.getElementById('tab-myrides').innerHTML=`
     <div class="page-title">${t('myRidesTitle')}</div>
     <div class="page-sub">${t('myRidesSub')}</div>
-    <div class="analytics-section-title" style="margin-top:24px">${t('myCurrentRides')}</div>
+    <div class="analytics-section-title cu-mt24">${t('myCurrentRides')}</div>
     <div class="myrides-grid">${currentCards}</div>
-    <div class="analytics-section-title" style="margin-top:30px">${t('myPastRides')}</div>
+    <div class="analytics-section-title cu-mt30">${t('myPastRides')}</div>
     <div class="myrides-grid">${pastCards}</div>`;
   try{_forceRatingPrompt();}catch(e){} // force the rating the moment a ride is marked completed (realtime fires this)
 }
@@ -10822,23 +10818,23 @@ function renderAccount(){
       // Tier + total rides now live in the season dashboard above; keep only the unique
       // profile-completeness meter here.
       const pct=_profPct(cust);
-      return`<div class="form-section" style="max-width:640px;margin:22px auto 16px">
-        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:5px">${t('profileCompleteLabel').replace('{0}',pct)}</div>
-        <div style="height:8px;border-radius:2px;background:rgba(var(--tint-rgb),.07);overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--green);border-radius:2px;transition:width .4s"></div></div>
+      return`<div class="form-section cu-meter-card">
+        <div class="cu-meter-k">${t('profileCompleteLabel').replace('{0}',pct)}</div>
+        <div class="cu-meter"><div class="cu-meter-fill" data-cssv="${_cssv({'--cu-w':pct+'%'})}"></div></div>
       </div>`;
     })()}
-    <div class="form-section" style="max-width:640px;margin:0 auto">
+    <div class="form-section cu-card640-0">
       <div class="form-title">${t('profileInfo')}</div>
-      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div class="cu-photo-row">
         ${cust.photo
-          ?`<img id="acc-photo-img" loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(var(--green-rgb),.4);flex-shrink:0">`
-          :`<div id="acc-photo-img" style="width:72px;height:72px;border-radius:50%;background:rgba(var(--green-rgb),.16);border:2px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--green);flex-shrink:0">${esc(cust.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t('profilePhotoLabel')}</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <label class="btn-secondary" style="font-size:12px;padding:7px 14px;cursor:pointer;margin:0">${t('uploadPhotoBtn')}
-              <input type="file" accept="image/*" style="display:none" data-on-change="${_on("accUploadPhoto",_EL)}"></label>
-            ${cust.photo?`<button class="btn-secondary" style="font-size:12px;padding:7px 14px" data-on-click="${_on("accRemovePhoto")}">${t('removePhotoBtn')}</button>`:''}
+          ?`<img id="acc-photo-img" loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="cu-photo">`
+          :`<div id="acc-photo-img" class="cu-initials">${esc(cust.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
+        <div class="cu-photo-col">
+          <div class="cu-photo-k">${t('profilePhotoLabel')}</div>
+          <div class="cu-wrap8">
+            <label class="btn-secondary cu-upload">${t('uploadPhotoBtn')}
+              <input type="file" accept="image/*" class="cu-hidden" data-on-change="${_on("accUploadPhoto",_EL)}"></label>
+            ${cust.photo?`<button class="btn-secondary cu-photo-btn" data-on-click="${_on("accRemovePhoto")}">${t('removePhotoBtn')}</button>`:''}
           </div>
         </div>
       </div>
@@ -10879,17 +10875,17 @@ function renderAccount(){
           <select id="acc-nationality">${natOpts}</select></div>
       </div>
       <div class="form-group"><label>${t('socialsLabel')}</label>${_socFieldsHtml('acc',cust.socials)}</div>
-      <div class="form-group" style="margin-top:4px">
+      <div class="form-group cu-mt4">
         <label>${t('bikeTypePref')}</label>
-        <div class="toggle-group type-grid" style="margin-top:6px">
+        <div class="toggle-group type-grid cu-mt6">
           ${bikeTypeOpts(false).map(ty=>_typePick(`<button id="atp-${ty}" type="button"
               class="toggle-btn${accTy===ty?' active':''}" aria-pressed="${(accTy===ty)?'true':'false'}"
               data-on-click="${_on("_accPickType",ty)}"
               >${typePillLabel(ty)}</button>`,ty,'acc')).join('')}
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px;font-weight:600">${t('typePrefHint')}</div>
+        <div class="cu-type-hint">${t('typePrefHint')}</div>
       </div>
-      <div id="acc-err" style="color:var(--red);font-size:13px;font-weight:700;min-height:18px;margin-bottom:10px;margin-top:14px"></div>
+      <div id="acc-err" class="cu-acc-err"></div>
       <button class="btn-primary" data-on-click="${_on("saveAccount")}">${t('saveAccountBtn')}</button>
     </div>
     ${(()=>{
@@ -10900,12 +10896,12 @@ function renderAccount(){
       _consentCheck(cust);
       if(cust.ride_news===undefined)return'';
       const on=!!cust.ride_news;
-      return`<div class="form-section" id="acc-ride-news" style="max-width:640px;margin:16px auto 0">
-        <div class="form-title" style="margin-bottom:6px">${t('rideNewsTitle')}</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:6px">${t('rideNewsSub')}</div>
-        <div id="acc-rn-state" style="font-size:13px;font-weight:700;margin-bottom:12px;color:${on?'var(--green)':'var(--muted-l)'}">${t(on?'rideNewsOnState':'rideNewsOffState')}</div>
+      return`<div class="form-section cu-card640" id="acc-ride-news">
+        <div class="form-title cu-mb6">${t('rideNewsTitle')}</div>
+        <div class="cu-card-sub6">${t('rideNewsSub')}</div>
+        <div id="acc-rn-state" class="cu-rn-state ${on?'cu-c-green':'cu-c-mutedl'}">${t(on?'rideNewsOnState':'rideNewsOffState')}</div>
         <button class="${on?'btn-secondary':'btn-primary'}" id="acc-rn-btn" data-on-click="${_on("toggleRideNews")}">${t(on?'rideNewsOffBtn':'rideNewsOnBtn')}</button>
-        <div style="font-size:12px;color:var(--muted);margin-top:12px">${_privacyLink()}</div>
+        <div class="cu-card-foot">${_privacyLink()}</div>
       </div>`;
     })()}
     ${(()=>{
@@ -10913,11 +10909,11 @@ function renderAccount(){
       // without push — an inert toggle is worse than none.
       if(!pushSupported())return'';
       const on=pushEnabled(),blocked=pushPermission()==='denied';
-      return`<div class="form-section" style="max-width:640px;margin:16px auto 0">
-        <div class="form-title" style="margin-bottom:6px">${t('pushTitle')}</div>
-        <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">${t('pushSub')}</div>
+      return`<div class="form-section cu-card640">
+        <div class="form-title cu-mb6">${t('pushTitle')}</div>
+        <div class="cu-card-sub12">${t('pushSub')}</div>
         ${blocked
-          ?`<div style="font-size:12.5px;color:var(--red);font-weight:700">${t('pushBlockedMsg')}</div>`
+          ?`<div class="cu-push-blocked">${t('pushBlockedMsg')}</div>`
           :`<button class="${on?'btn-secondary':'btn-primary'}" data-on-click="${_on("togglePush")}">${on?t('pushDisableBtn'):t('pushEnableBtn')}</button>`}
       </div>`;
     })()}
@@ -10928,13 +10924,13 @@ function renderAccount(){
       if(!purch.length)return'';
       const ptot=Math.round(purch.reduce((sm,r)=>sm+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
       const ar=_isRtl();
-      return`<div class="form-section" style="max-width:640px;margin:16px auto 0">
-        <div class="form-title" style="margin-bottom:12px">${t('custPurchTitle')} · <bdi style="color:var(--green)">SAR ${ptot}</bdi></div>
-        <div style="max-height:260px;overflow-y:auto">
-          ${purch.map(r=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
-            <div style="flex:1;min-width:0;font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name||'')}${Number(r.qty)>1?` <span style="color:var(--muted)">×${r.qty}</span>`:''}</div>
-            <span style="font-size:11px;color:var(--muted);white-space:nowrap">${r.created_at?new Date(r.created_at).toLocaleDateString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',year:'numeric'}):''}</span>
-            <bdi style="font-weight:800;font-size:13px;white-space:nowrap">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</bdi>
+      return`<div class="form-section cu-card640">
+        <div class="form-title cu-mb12">${t('custPurchTitle')} · <bdi class="cu-c-green">SAR ${ptot}</bdi></div>
+        <div class="cu-purch-list">
+          ${purch.map(r=>`<div class="cu-purch-row">
+            <div class="cu-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="cu-c-muted">×${r.qty}</span>`:''}</div>
+            <span class="cu-purch-date">${r.created_at?new Date(r.created_at).toLocaleDateString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',year:'numeric'}):''}</span>
+            <bdi class="cu-purch-amt">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</bdi>
           </div>`).join('')}
         </div>
       </div>`;
@@ -10945,23 +10941,23 @@ function renderAccount(){
       _delCheck(cust);
       if(cust.deletion_requested_at===undefined)return'';
       const at=cust.deletion_requested_at;
-      return`<div class="form-section" id="acc-delete" style="max-width:640px;margin:16px auto 0">
-        <div class="form-title" style="margin-bottom:6px">${t('delTitle')}</div>
+      return`<div class="form-section cu-card640" id="acc-delete">
+        <div class="form-title cu-mb6">${t('delTitle')}</div>
         ${at
-          ?`<div id="acc-del-state" style="font-size:13px;font-weight:700;color:var(--orange);line-height:1.6;margin-bottom:12px">${esc(t('delRequested').replace('{0}',shortDate(fmtDate(new Date(at)))))}</div>
+          ?`<div id="acc-del-state" class="cu-del-state">${esc(t('delRequested').replace('{0}',shortDate(fmtDate(new Date(at)))))}</div>
             <button class="btn-secondary" id="acc-del-btn" data-on-click="${_on("withdrawAccountDeletion")}">${t('delWithdrawBtn')}</button>`
-          :`<div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">${t('delSub')}</div>
-            <button class="btn-secondary" id="acc-del-btn" style="color:var(--red)" data-on-click="${_on("requestAccountDeletion")}">${t('delBtn')}</button>`}
+          :`<div class="cu-card-sub12">${t('delSub')}</div>
+            <button class="btn-secondary cu-c-red" id="acc-del-btn" data-on-click="${_on("requestAccountDeletion")}">${t('delBtn')}</button>`}
       </div>`;
     })()}
     ${(()=>{
       // v2: settings as hairline rows below the profile card (Language / Sign out)
-      return`<div class="acc-settings" style="max-width:640px;margin:16px auto 0">
+      return`<div class="acc-settings cu-card640">
         <button type="button" class="acc-set-row" data-on-click="${_on("showLangMenu",_EV)}">
           <span>${t('settingsLanguage')}</span><span class="acc-set-val">${(LANGS.find(x=>x.code===S.lang)||LANGS[0]).label}</span>
         </button>
         <button type="button" class="acc-set-row" data-on-click="${_on("doLogout")}">
-          <span style="color:var(--red)">${t('logOut')}</span><span class="acc-set-val"></span>
+          <span class="cu-c-red">${t('logOut')}</span><span class="acc-set-val"></span>
         </button>
       </div>`;
     })()}`;
@@ -14752,7 +14748,7 @@ function _pwdMustShow(){
     <p class="pg-sub">${t('pwdMustSub')}</p>
     <div class="pg-field pg-first"><label for="pm-new">${t('pwdMustNew')}</label><input id="pm-new" type="password" autocomplete="new-password"></div>
     <div class="pg-field"><label for="pm-new2">${t('pwdMustConfirm')}</label><input id="pm-new2" type="password" autocomplete="new-password"></div>
-    <div id="pm-err" class="pg-msg" role="alert" style="margin-top:10px"></div>
+    <div id="pm-err" class="pg-msg cu-mt10" role="alert"></div>
     <button id="pm-save" type="submit" class="pg-btn">${t('pwdMustSave')}</button>
     <button type="button" class="pm-out" data-on-click="${_on("_pwdMustSignOut")}">${t('logOut')}</button>
   </form></div>`;
@@ -27093,12 +27089,12 @@ const SND96_FORM_URL='https://sacf.sa/?page_id=11138';
 const POPUP_HOLD_SEC=5;
 function showBoothPopup(){
   _showPopup(t('payAtBoothTitle')||'Payment at the Booth',esc(t('payAtBoothMsg')||t('payAtBooth')),
-    `<span style="font-size:16px"></span> ${esc(t('payAtBoothFCFS'))}`);
+    `<span class="cu-fs16"></span> ${esc(t('payAtBoothFCFS'))}`);
 }
 function showSnd96FormPopup(ownOnly){
   _showPopup(t('snd96FormTitle'),
-    `${esc(t(ownOnly?'snd96FormMsgOwn':'snd96FormMsg'))}<div style="margin-top:16px"><a href="${SND96_FORM_URL}" target="_blank" rel="noopener" class="btn-primary" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:11px 18px">${esc(t('snd96FormLink'))}</a></div>`,
-    `<strong style="color:var(--orange)">${esc(t('snd96FormWarn'))}</strong>`,
+    `${esc(t(ownOnly?'snd96FormMsgOwn':'snd96FormMsg'))}<div class="cu-mt16"><a href="${SND96_FORM_URL}" target="_blank" rel="noopener" class="btn-primary cu-snd-link">${esc(t('snd96FormLink'))}</a></div>`,
+    `<strong class="cu-c-orange">${esc(t('snd96FormWarn'))}</strong>`,
     POPUP_HOLD_SEC);
 }
 // holdSec > 0 keeps the close button out of reach until the seconds are up. It dims rather
