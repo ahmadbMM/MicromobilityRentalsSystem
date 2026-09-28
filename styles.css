@@ -2581,23 +2581,25 @@
     .bdc-green{--bc:var(--green);}.bdc-gold{--bc:#e0a414;}.bdc-blue{--bc:#3d8bfd;}.bdc-red{--bc:#f0525f;}
     .bdc-purple{--bc:#9d6cff;}.bdc-orange{--bc:#f98a3c;}.bdc-teal{--bc:#17b4ac;}.bdc-silver{--bc:#98a2b3;}
     .bdg-m.locked{opacity:.45;filter:grayscale(1);}
-    /* Race Ready (special): gold into green, an inner ring, the glyph white; the chip's border runs
+    /* Race Ready (special) and National Day 96 (sp-national): a gradient, an inner ring, the glyph white; the chip's border runs
        the same colours and a light sweeps across it now and then. */
     .bdg-m.bdg-sp{color:#fff;}
-    .bdg-sp .bdg-hexsp{stroke:#b87d00;stroke-width:1.6;stroke-linejoin:round;}
+    .bdg-sp .bdg-hexsp{stroke-width:1.6;stroke-linejoin:round;}
     .bdg-sp .bdg-hexin{fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:1.1;stroke-linejoin:round;}
     .bdg-sp .o{opacity:.45;}
-    .mr-badge.special{position:relative;overflow:hidden;border:1.5px solid transparent;background:linear-gradient(var(--s1),var(--s1)) padding-box,linear-gradient(135deg,#ffe58a,#f0a500 45%,#00b86b) border-box;}
+    .mr-badge.special,.badge-pop-box.special{--sp1:#ffe58a;--sp2:#f0a500;--sp3:#00b86b;--spg:240,165,0;--sph:255,226,140;}
+    .mr-badge.sp-national,.badge-pop-box.sp-national{--sp1:#5fd99a;--sp2:#159a57;--sp3:#0a5c33;--spg:21,154,87;--sph:235,255,244;}
+    .mr-badge.special{position:relative;overflow:hidden;border:1.5px solid transparent;background:linear-gradient(var(--s1),var(--s1)) padding-box,linear-gradient(135deg,var(--sp1),var(--sp2) 45%,var(--sp3)) border-box;}
     .mr-badge.special.locked{background:var(--s1);border:1px solid var(--border);}
-    .mr-badge.special:not(.locked)::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,226,140,.55) 50%,transparent 65%);transform:translateX(-120%);}
+    .mr-badge.special:not(.locked)::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(var(--sph),.55) 50%,transparent 65%);transform:translateX(-120%);}
     @media (prefers-reduced-motion:no-preference){
       .mr-badge.special:not(.locked)::after{animation:bdgShine 3.4s ease-in-out infinite;}
       .badge-pop-box.special .badge-pop-ic.bdg-sp:not(.locked){animation:bdgGlow 2.4s ease-in-out infinite alternate;}
     }
     @keyframes bdgShine{0%,55%{transform:translateX(-120%);}100%{transform:translateX(120%);}}
-    @keyframes bdgGlow{from{filter:drop-shadow(0 0 5px rgba(240,165,0,.35));}to{filter:drop-shadow(0 0 16px rgba(240,165,0,.7));}}
-    .badge-pop-box.special{border-top-color:#f0a500;box-shadow:0 0 0 1px rgba(240,165,0,.35),0 12px 40px rgba(240,165,0,.22);}
-    .badge-pop-box.special .badge-pop-ic.bdg-sp:not(.locked){filter:drop-shadow(0 0 12px rgba(240,165,0,.55));}
+    @keyframes bdgGlow{from{filter:drop-shadow(0 0 5px rgba(var(--spg),.35));}to{filter:drop-shadow(0 0 16px rgba(var(--spg),.7));}}
+    .badge-pop-box.special{border-top-color:var(--sp2);box-shadow:0 0 0 1px rgba(var(--spg),.35),0 12px 40px rgba(var(--spg),.22);}
+    .badge-pop-box.special .badge-pop-ic.bdg-sp:not(.locked){filter:drop-shadow(0 0 12px rgba(var(--spg),.55));}
     .mr-badge.locked{opacity:.45;filter:grayscale(1);}
     .mr-badge-p{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
 

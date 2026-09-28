@@ -413,3 +413,35 @@ test.describe('@customer:account Race Ready and the about lines', () => {
     expect(missing).toEqual([]);
   });
 });
+
+test.describe('@customer:account National Day 96', () => {
+  const nd = { id: '2026-09-23-nd', day: 'Wednesday', session_date: '2026-09-23', capacity: 80, status: 'closed', created_at: 5, bike_slots: slots, ride_kind: 'snd96', event_kind: null };
+  async function rider(page: Page, status: string) {
+    await stubSupabase(page, { sessions: [...sessions, nd], queue_entries: [row('n1', nd.id, 7, 'Spec Rider', 'c1', status, false)] });
+    await loginCustomer(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+  test('a rider checked in on the National Day ride gets it, drawn in the greens, and it pops up once', async ({ page }) => {
+    await rider(page, 'done'); // unpaid: it is attendance
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('New badge!');
+    await expect(pop).toContainText('National Day 96');
+    await expect(pop.locator('.badge-pop-about')).toContainText('filled the Corniche in green');
+    await expect(pop.locator('.badge-pop-box.special.sp-national')).toHaveCount(1);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    const chip = page.locator('#tab-account .mr-badge', { hasText: 'National Day 96' });
+    await expect(chip).toHaveClass(/special sp-national/);
+    await expect(chip.locator('svg.bdg-sp stop').first()).toHaveAttribute('stop-color', '#5fd99a');
+    await page.evaluate(`renderAccount()`);
+    await page.waitForTimeout(200);
+    await expect(pop).toHaveCount(0);
+  });
+  test('a no-show on it never sees it', async ({ page }) => {
+    await rider(page, 'noshow');
+    await expect(page.locator('#tab-account .mr-badges')).toBeVisible();
+    await expect(page.locator('#tab-account .mr-badge', { hasText: 'National Day 96' })).toHaveCount(0);
+    await expect(page.locator('#badge-pop')).toHaveCount(0);
+  });
+});

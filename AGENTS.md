@@ -281,6 +281,10 @@ glow in the popup (`.bdg-sp`, `.mr-badge.special`; the table holds 'gold', `_bdg
 to the app's colour). It pops up once per device when first seen earned (`_bdgProfCheer`). Every app
 badge's popup has an about line under its name (`key+'A'`, `_bdgAbout`) saying what it means, above
 How to earn (`key+'D'`).
+National Day 96 (`national_day_96`, migration 20260929020000) is earned by a check-in (done or on the
+bike, paid or not) on the `snd96` ride, shown only to those who rode it, drawn `national` (the
+greens, `BDG_SPECIAL`; `_bdgSpCls` gives a special chip `special sp-<colour>`, whose colours are CSS
+variables) and popped once (`BDG_CHEER`).
 
 ## The 2026-09-27 feature round (blocks 1-13)
 
