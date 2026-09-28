@@ -12,13 +12,13 @@ const customers = [
 ];
 const base = {
   created_at: '2026-09-27T08:00:00Z', updated_at: '2026-09-27T08:00:00Z', submissions: 1, for_whom: 'self', learner_name: null,
-  learner_gender: 'female', learner_height: 162, level: 'never', days: [] as string[], times: [] as string[], notes: '', lang: 'en',
+  learner_gender: 'female', learner_height: 162, level: 'never', notes: '', lang: 'en',
   lesson_at: null as string | null, lesson_place: null as string | null, decided_at: null as string | null, decided_by: null as string | null,
   customer_id: null as string | null, existing_account: null as boolean | null, account_oauth: null as boolean | null,
 };
 const learners = [
-  { ...base, id: 'l1', status: 'pending', name: 'Nadia Omar', email: 'nadia.omar@gmail.com', phone: '+966552220001', learner_age: 34, days: ['weekends'], times: ['evening'], notes: 'A bit nervous around traffic' },
-  { ...base, id: 'l2', status: 'pending', for_whom: 'child', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', learner_name: 'Sara', learner_age: 7, learner_height: 120, level: 'tried', times: ['morning', 'afternoon'], lang: 'ar', created_at: '2026-09-26T08:00:00Z' },
+  { ...base, id: 'l1', status: 'pending', name: 'Nadia Omar', email: 'nadia.omar@gmail.com', phone: '+966552220001', learner_age: 34, notes: 'A bit nervous around traffic' },
+  { ...base, id: 'l2', status: 'pending', for_whom: 'child', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', learner_name: 'Sara', learner_age: 7, learner_height: 120, level: 'tried', lang: 'ar', created_at: '2026-09-26T08:00:00Z' },
   { ...base, id: 'l3', status: 'scheduled', name: 'Omar Farouk', email: 'omar.farouk@gmail.com', phone: '+966553330002', learner_age: 41, learner_gender: 'male', learner_height: 180, level: 'refresh',
     lesson_at: '2026-10-04T15:00:00Z', lesson_place: 'JCC', decided_at: '2026-09-27T09:00:00Z', decided_by: 'Desk A', customer_id: 'la01', existing_account: false, account_oauth: false },
   { ...base, id: 'l4', status: 'cancelled', name: 'Old Learner', email: 'old.learner@gmail.com', phone: '+966554440003', learner_age: 29, decided_at: '2026-09-25T09:00:00Z', decided_by: 'Desk B' },
@@ -57,7 +57,9 @@ test.describe('@staff:community learn to ride', () => {
 
     const n = row(page, 'l1');
     await expect(n.locator('.ca-name')).toHaveText('Nadia Omar');
-    for (const txt of ['+966552220001', 'nadia.omar@gmail.com', '34 years', 'Female', '162 cm', 'Never ridden', 'Weekends', 'Evening', 'English']) await expect(n).toContainText(txt);
+    for (const txt of ['+966552220001', 'nadia.omar@gmail.com', '34 years', 'Female', '162 cm', 'Never ridden', 'English']) await expect(n).toContainText(txt);
+    // the form does not ask when suits them: staff pick the time
+    await expect(n.locator('.ca-kv span', { hasText: /best/i })).toHaveCount(0);
     await expect(n.locator('.la-notes')).toContainText('A bit nervous around traffic');
 
     // a child: the child's name with the tag, the parent beside, and the parent's account on file
@@ -66,7 +68,6 @@ test.describe('@staff:community learn to ride', () => {
     await expect(s.locator('.la-kid')).toHaveText('Child');
     await expect(s.locator('.ca-grid')).toContainText('ParentHuda Al Saleh');
     await expect(s.locator('.ca-grid')).toContainText('Tried, can’t ride yet');
-    await expect(s.locator('.ca-grid')).toContainText('Any'); // no days picked
     await expect(s.locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
 
     // the scheduled list shows the lesson; the community list is one tap away and back
@@ -93,7 +94,7 @@ test.describe('@staff:community learn to ride', () => {
     await row(page, 'l1').locator('.la-schedule').click();
     const dlg = page.locator('#confirm-modal .ws-dlg');
     await expect(dlg).toContainText('Lesson for Nadia Omar');
-    await expect(dlg).toContainText('Best days: Weekends · Best time: Evening');
+    await expect(dlg).toContainText('Nadia Omar · 34 years · Never ridden');
     // nothing picked yet: it asks
     await dlg.locator('.la-sched-save').click();
     await expect(dlg.locator('#ws-dlg-err')).toHaveText('Pick both the day and the time.');

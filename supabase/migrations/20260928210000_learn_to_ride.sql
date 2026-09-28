@@ -1,8 +1,9 @@
 -- ============================================================================
 -- Learn to ride (micromobility.sa/experiences/learn), 2026-09-28.
 --
--- Someone who cannot ride yet (or a parent, for a child) signs up on the website. Staff read the
--- sign-ups in Community > Applications > Learn to ride, pick the lesson's date and time, and send
+-- Someone who cannot ride yet (or a parent, for a child) signs up on the website. The form does not
+-- ask when suits them (owner, 2026-09-28): staff read the sign-ups in Community > Applications >
+-- Learn to ride, pick the lesson's date and time themselves, and send
 -- the message the staff page writes - the same way as a community application: an applicant who
 -- already has an account is told to sign in with it; anyone else gets an account made from the
 -- sign-up, with a temporary password they must change at first sign-in (must_change_pwd, from
@@ -53,8 +54,6 @@ create table if not exists public.learn_applications (
   learner_gender   text not null check (learner_gender in ('male','female')),
   learner_height   integer not null check (learner_height between 80 and 250),
   level            text not null check (level in ('never','tried','refresh')),
-  days             text[] not null default '{}' check (days <@ array['weekdays','weekends']),
-  times            text[] not null default '{}' check (times <@ array['morning','afternoon','evening']),
   notes            text not null default '' check (length(notes) <= 600),
   lang             text not null default 'en',
   privacy_version  text not null,
@@ -95,8 +94,6 @@ declare
   v_height int;
   v_gender text := coalesce(p->>'learner_gender','');
   v_level  text := coalesce(p->>'level','');
-  v_days   text[] := '{}';
-  v_times  text[] := '{}';
   v_notes  text := trim(coalesce(p->>'notes',''));
   v_lang   text := lower(coalesce(nullif(p->>'lang',''), 'en'));
   v_pv     text := coalesce(p->>'privacy_version','');
@@ -109,14 +106,6 @@ begin
   exception when others then v_age := null; end;
   begin v_height := nullif(regexp_replace(coalesce(p->>'learner_height',''), '\D', '', 'g'), '')::int;
   exception when others then v_height := null; end;
-  if jsonb_typeof(p->'days') = 'array' then
-    select coalesce(array_agg(distinct x order by x), '{}') into v_days
-      from jsonb_array_elements_text(p->'days') x where x in ('weekdays','weekends');
-  end if;
-  if jsonb_typeof(p->'times') = 'array' then
-    select coalesce(array_agg(distinct x order by x), '{}') into v_times
-      from jsonb_array_elements_text(p->'times') x where x in ('morning','afternoon','evening');
-  end if;
 
   if v_for not in ('self','child') then return jsonb_build_object('ok', false, 'error', 'for_whom'); end if;
   -- The applicant's name becomes an account's name: the booking app's rules (first and last name,
@@ -154,15 +143,14 @@ begin
   if v_prev.id is not null then
     update learn_applications set
       name = v_name, email = v_email, phone = v_phone, learner_name = v_lname, learner_age = v_age,
-      learner_gender = v_gender, learner_height = v_height, level = v_level, days = v_days, times = v_times,
+      learner_gender = v_gender, learner_height = v_height, level = v_level,
       notes = v_notes, lang = v_lang, privacy_version = v_pv,
       submissions = submissions + 1, updated_at = now()
      where id = v_prev.id;
   else
     insert into learn_applications (for_whom, name, email, phone, learner_name, learner_age, learner_gender,
-      learner_height, level, days, times, notes, lang, privacy_version)
-    values (v_for, v_name, v_email, v_phone, v_lname, v_age, v_gender, v_height, v_level, v_days, v_times,
-      v_notes, v_lang, v_pv);
+      learner_height, level, notes, lang, privacy_version)
+    values (v_for, v_name, v_email, v_phone, v_lname, v_age, v_gender, v_height, v_level, v_notes, v_lang, v_pv);
   end if;
   -- The form learns nothing about accounts or earlier sign-ups.
   return jsonb_build_object('ok', true);
