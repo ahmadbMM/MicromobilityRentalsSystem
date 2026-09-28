@@ -454,6 +454,13 @@ window.mmLoading=(function(){
 // data-host, styles.css hides it until it has a style of its own, and here, before any other code,
 // each one gets display:none through the CSSOM, so el.style.display reads 'none' as it always did.
 document.querySelectorAll('[data-host]').forEach(el=>{el.style.display='none';});
+// ── Run-time style values land wherever the markup lands (2026-09-28) ───────────────────────────
+// A template that needs a value only known at run time (a bar's width, a colour from the data)
+// writes data-cssv="${_cssv({'--w':'40%'})}" where it once wrote style="width:40%", and the value is
+// set through the CSSOM, which the policy allows. _cssvApply(root) does that at once, for a write
+// that is measured straight away; this observer does it for every element the page adds, in the
+// microtask after the write (before the next paint), so no repaint path can leave one unset.
+new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&(n.firstElementChild||n.hasAttribute('data-cssv')))_cssvApply(n);}).observe(document.documentElement,{childList:true,subtree:true});
 // ── Handlers live in attributes, not in the markup's script (2026-09-27) ────────────────────────
 // The page's Content-Security-Policy allows no inline script: an onclick=... attribute would not run.
 // Markup says what an event does in a data-on-<event> attribute holding JSON - the name of a
@@ -26936,7 +26943,8 @@ function _uid(){return Math.random().toString(36).slice(2,7);}
 function _cssv(o){return esc(JSON.stringify(o));}
 function _cssvApply(root){
   if(!root)return;
-  root.querySelectorAll('[data-cssv]').forEach(el=>{
+  const els=[...root.querySelectorAll('[data-cssv]')];if(root.nodeType===1&&root.hasAttribute('data-cssv'))els.push(root);
+  els.forEach(el=>{
     let o=null;try{o=JSON.parse(el.getAttribute('data-cssv'));}catch(_){}
     if(o)for(const k in o)el.style.setProperty(k,o[k]);
     el.removeAttribute('data-cssv');

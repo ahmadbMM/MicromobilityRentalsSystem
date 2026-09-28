@@ -334,6 +334,13 @@ for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
   if (bad) throw new Error(`build: ${name} still carries an inline handler, which the policy would block: ${bad[0]}`);
   if (/javascript:/i.test(text)) throw new Error(`build: ${name} carries a javascript: URL, which the policy would block`);
 }
+// The policy is losing style-src 'unsafe-inline' area by area (2026-09-28): every style="..." the
+// markup and templates write becomes a class, or a data-cssv value set through the CSSOM. The
+// ceiling only comes down: a new inline style fails the build, so the count the move started from
+// never grows back while it runs. At 0 the policy drops 'unsafe-inline'.
+const STYLE_ATTRS_MAX = 1834;
+const styleAttrs = [out, staffMin.code].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
+if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline styles, more than the ${STYLE_ATTRS_MAX} it may while the policy drops them - write a class (or data-cssv="\${_cssv({...})}" for a run-time value) instead of style="..."`);
 const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
   .filter((m) => !/\btype\s*=\s*["']?(?!(?:text\/javascript|module)["'\s>])/i.test(m[1]))
   .map((m) => createHash('sha256').update(m[2]).digest('base64'));
