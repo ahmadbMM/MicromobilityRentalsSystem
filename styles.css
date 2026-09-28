@@ -1575,6 +1575,190 @@
     .empty-state{text-align:center;padding:52px 24px;color:var(--muted);font-size:14px;font-weight:600;letter-spacing:.1px;}
     .cashier-grid{display:grid;}
     @media(max-width:820px){.cashier-grid{grid-template-columns:1fr!important;}}
+    /* ── Sales (the till) without inline styles (2026-09-28, moving style="..." into classes so the
+       policy can drop style-src 'unsafe-inline'): renderCashier in #tab-cashier (the item picker,
+       the tiles, the cart, the totals and the ledger, and _ctCustSuggest's list in #ct-cust-sug),
+       the booking's cashier dialog (#cashier-modal), the receipt editor (#receipt-edit-modal), the
+       nutrition sheet (#nutrition-modal-backdrop, staff and customer pages), and the helpers the
+       till lends out: _cashPayBadge, _itemThumb and _CAT_ICON_SVG's helmet (also in Inventory and
+       the session form's add-ons, #tab-inventory and #sess-host), _salesArt, and _macroBadge on the
+       add-on picker's cards (#addon-picker-backdrop). Each rule is scoped by the id the markup is
+       drawn under, so it outranks every class rule (the body.view-staff layer included) as the
+       inline style did; the !important rules that beat those styles (inputs' and selects' size on
+       phones, the Arabic labels' case and letter-spacing, .cashier-grid's one column under 820px)
+       still win. A modifier comes after its base (the same specificity, so the later one decides).
+       Run-time sizes ride in data-cssv: a thumbnail's (--sl-th), the grams badge's (--sl-mb-d,
+       --sl-mb-fs) and a category art's height when it is not 62px (--sl-art-h). background:none or
+       transparent written in a template is background:transparent none here: the same value, which
+       the build's minifier keeps (it writes both of the others as 0 0). */
+    #tab-cashier .sl-wrap{padding:18px 20px;}
+    #tab-cashier .sl-p48{padding:48px;}
+    #tab-cashier .sl-p24{padding:24px;}
+    #tab-cashier .sl-p16{padding:16px;}
+    #tab-cashier .sl-mb5{margin-bottom:5px;}
+    #tab-cashier .sl-mb8{margin-bottom:8px;}
+    #tab-cashier .sl-mb12{margin-bottom:12px;}
+    #tab-cashier .sl-rel{position:relative;}
+    #tab-cashier .sl-nowrap{white-space:nowrap;}
+    #tab-cashier .sl-o60{opacity:.6;}
+    #tab-cashier .sl-o65{opacity:.65;}
+    #tab-cashier .sl-orange{color:var(--orange);}
+    #tab-cashier .sl-blue{color:var(--blue);}
+    #tab-cashier .sl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
+    #tab-cashier .sl-h2{font-size:20px;font-weight:900;}
+    #tab-cashier .sl-sub{font-size:13px;color:var(--muted);}
+    #tab-cashier .sl-sync{cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:800;color:var(--orange);background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.4);border-radius:3px;padding:3px 9px;}
+    #tab-cashier .sl-head-r{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;}
+    #tab-cashier .sl-sess{max-width:240px;margin-top:3px;}
+    #tab-cashier .sl-low{background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.4);color:var(--orange);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:700;margin-top:12px;}
+    #tab-cashier .sl-cgrid{grid-template-columns:1fr;gap:16px;margin-top:14px;}
+    #tab-cashier .sl-new-h{font-weight:800;font-size:14px;margin-bottom:12px;}
+    #tab-cashier .sl-col10{display:flex;flex-direction:column;gap:10px;}
+    /* the customer: suggestions, the linked account */
+    #tab-cashier .sl-sug-host{position:absolute;top:100%;left:0;right:0;z-index:40;}
+    #tab-cashier .sl-sug{background:var(--s1);border:1px solid var(--border);border-radius:4px;box-shadow:var(--sh-2);overflow:hidden;margin-top:4px;}
+    #tab-cashier .sl-sug-b{display:block;width:100%;text-align:start;background:transparent none;border:none;border-bottom:1px solid var(--border);padding:8px 11px;cursor:pointer;font-family:inherit;color:var(--text);}
+    #tab-cashier .sl-sug-nm{font-weight:800;font-size:13px;}
+    #tab-cashier .sl-linked{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.3);border-radius:3px;padding:3px 9px;}
+    #tab-cashier .sl-unlink{background:transparent none;border:none;color:var(--green);cursor:pointer;font-size:13px;line-height:1;padding:0;}
+    /* the item picker: category cards, tiles, the custom item, Back */
+    #tab-cashier .sl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:248px;overflow-y:auto;margin-top:4px;padding:2px;}
+    #tab-cashier .sl-flat{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:2px;}
+    #tab-cashier .sl-scroll{max-height:248px;overflow-y:auto;margin-top:4px;}
+    #tab-cashier .sl-sec-h{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:6px 0 6px 2px;}
+    #tab-cashier .sl-card{text-align:start;border:1.5px solid var(--border);background:var(--s2);border-radius:4px;padding:0;overflow:hidden;cursor:pointer;font-family:inherit;}
+    #tab-cashier .sl-tile{position:relative;text-align:start;border:1.5px solid var(--border);background:var(--s2);border-radius:4px;padding:0;overflow:hidden;cursor:pointer;font-family:inherit;}
+    #tab-cashier .sl-tile-on{border:1.5px solid var(--green);background:rgba(var(--green-rgb),.08);}
+    #tab-cashier .sl-stock{position:absolute;top:4px;z-index:1;color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:2px;line-height:1.5;}
+    #tab-cashier .sl-stock-l{left:4px;}
+    #tab-cashier .sl-stock-r{right:4px;}
+    #tab-cashier .sl-stock-out{background:var(--red);}
+    #tab-cashier .sl-stock-low{background:var(--orange);}
+    #tab-cashier .sl-tile-img{width:100%;height:62px;object-fit:contain;background:var(--photo-bg);display:block;}
+    #tab-cashier .sl-tile-ph{width:100%;height:62px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:10px;text-align:center;padding:4px;}
+    #tab-cashier .sl-art{width:100%;height:var(--sl-art-h,62px);background:var(--s3);display:flex;align-items:center;justify-content:center;}
+    #tab-cashier .sl-all-art{width:100%;height:62px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:20px;font-weight:900;}
+    #tab-cashier .sl-tile-b{padding:5px 7px;}
+    #tab-cashier .sl-tile-nm{font-weight:700;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    #tab-cashier .sl-all-nm{font-weight:700;font-size:11px;color:var(--text);}
+    #tab-cashier .sl-tile-pr{font-size:11px;color:var(--green);font-weight:700;}
+    #tab-cashier .sl-tile-n{font-size:11px;color:var(--muted);font-weight:700;}
+    #tab-cashier .sl-cust{border:1.5px dashed var(--border);background:transparent none;border-radius:4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:96px;color:var(--muted);}
+    #tab-cashier .sl-cust-on{border:1.5px dashed var(--green);background:rgba(var(--green-rgb),.08);color:var(--green);}
+    #tab-cashier .sl-plus{font-size:20px;line-height:1;}
+    #tab-cashier .sl-cust-lb{font-size:10px;font-weight:700;text-align:center;padding:0 4px;}
+    #tab-cashier .sl-back{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--green);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;padding:6px 12px 6px 10px;}
+    #tab-cashier .sl-back-ic{flex-shrink:0;}
+    #tab-cashier .sl-flip{transform:scaleX(-1);}
+    /* the cart */
+    #tab-cashier .sl-cart{border-top:1px solid var(--border);margin-top:4px;padding-top:8px;}
+    #tab-cashier .sl-cl{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;}
+    #tab-cashier .sl-x16{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;}
+    #tab-cashier .sl-disc{display:flex;align-items:center;gap:8px;margin-top:8px;}
+    #tab-cashier .sl-card7{display:flex;align-items:center;gap:8px;margin-top:7px;}
+    #tab-cashier .sl-tgl{padding:8px 10px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0;min-width:46px;}
+    #tab-cashier .sl-grand{display:flex;justify-content:space-between;font-weight:900;border-top:1px solid var(--border);margin-top:8px;padding-top:6px;}
+    #tab-cashier .sl-split{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px;}
+    #tab-cashier .sl-full10{width:100%;margin-top:10px;}
+    /* the totals and the ledger */
+    #tab-cashier .sl-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+    #tab-cashier .sl-kpi{font-size:22px;font-weight:900;}
+    #tab-cashier .sl-cc{display:flex;gap:14px;font-size:12px;font-weight:700;margin-bottom:8px;}
+    #tab-cashier .sl-tteam{font-size:12px;color:var(--purple);font-weight:800;margin-bottom:8px;}
+    #tab-cashier .sl-tdisc{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px;}
+    #tab-cashier .sl-tref{font-size:12px;color:var(--orange);font-weight:800;margin-bottom:10px;}
+    #tab-cashier .sl-cats{background:var(--s2);border-radius:4px;padding:10px 12px;margin-bottom:12px;}
+    #tab-cashier .sl-cat{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;}
+    #tab-cashier .sl-led-h{font-weight:800;font-size:13px;margin-bottom:2px;}
+    #tab-cashier .sl-rc{border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px;}
+    #tab-cashier .sl-rc-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
+    #tab-cashier .sl-refd{color:var(--orange);font-weight:800;}
+    #tab-cashier .sl-rc-acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+    #tab-cashier .sl-rc-line{display:flex;align-items:center;gap:7px;font-size:12px;padding:2px 0;}
+    #tab-cashier .sl-amt{font-weight:700;white-space:nowrap;}
+    #tab-cashier .sl-rc-tot{display:flex;justify-content:space-between;font-weight:800;border-top:1px solid var(--border);margin-top:5px;padding-top:5px;font-size:12px;}
+    #tab-cashier .sl-rent{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);flex-wrap:wrap;}
+    #tab-cashier .sl-rent-b{flex:1;min-width:120px;}
+    #tab-cashier .sl-acts6{display:flex;gap:6px;}
+    /* the till and the booking's cashier dialog alike: the form, a sale's line */
+    #tab-cashier .sl-in,#cashier-modal .sl-in{padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%;}
+    #tab-cashier .sl-w88{width:88px;}
+    #tab-cashier .sl-lbl,#cashier-modal .sl-lbl,#receipt-edit-modal .sl-lbl{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+    #tab-cashier .sl-f1,#cashier-modal .sl-f1,#receipt-edit-modal .sl-f1{flex:1;}
+    #tab-cashier .sl-f2,#cashier-modal .sl-f2{flex:2;}
+    #tab-cashier .sl-tac,#cashier-modal .sl-tac{text-align:center;}
+    #tab-cashier .sl-row9,#cashier-modal .sl-row9{display:flex;gap:9px;}
+    #tab-cashier .sl-qty,#cashier-modal .sl-qty{display:flex;align-items:center;gap:6px;}
+    #tab-cashier .sl-step,#cashier-modal .sl-step{width:38px;height:38px;flex-shrink:0;border-radius:4px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:pointer;line-height:1;}
+    #tab-cashier .sl-step-up,#cashier-modal .sl-step-up{border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);}
+    #tab-cashier .sl-pays,#cashier-modal .sl-pays{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px;}
+    #tab-cashier .sl-pay,#cashier-modal .sl-pay{flex:1;padding:9px;border-radius:4px;border:1.5px solid var(--border);background:transparent none;color:var(--muted);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;}
+    #tab-cashier .sl-pay-on,#cashier-modal .sl-pay-on{border:1.5px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);}
+    #tab-cashier .sl-team,#cashier-modal .sl-team{display:flex;gap:7px;margin-top:7px;}
+    #tab-cashier .sl-nw0,#cashier-modal .sl-nw0{white-space:nowrap;flex-shrink:0;}
+    #tab-cashier .sl-pencil,#cashier-modal .sl-pencil{flex-shrink:0;padding:7px 9px;}
+    #tab-cashier .sl-full2,#cashier-modal .sl-full2{width:100%;margin-top:2px;}
+    #tab-cashier .sl-f1m0,#cashier-modal .sl-f1m0{flex:1;min-width:0;}
+    #tab-cashier .sl-muted,#cashier-modal .sl-muted{color:var(--muted);}
+    #tab-cashier .sl-green,#cashier-modal .sl-green{color:var(--green);}
+    #tab-cashier .sl-f11m,#cashier-modal .sl-f11m{font-size:11px;color:var(--muted);}
+    #tab-cashier .sl-nm13,#cashier-modal .sl-nm13{font-weight:700;font-size:13px;}
+    #tab-cashier .sl-amt8,#cashier-modal .sl-amt8{font-weight:800;white-space:nowrap;}
+    #tab-cashier .sl-b700,#nutrition-modal-backdrop .sl-b700{font-weight:700;}
+    #tab-cashier .sl-m600,#nutrition-modal-backdrop .sl-m600{color:var(--muted);font-weight:600;}
+    /* _cashPayBadge: a sale's payment in its ink */
+    #tab-cashier .sl-pb-team,#cashier-modal .sl-pb-team{color:var(--purple);font-weight:700;}
+    #tab-cashier .sl-pb-house,#cashier-modal .sl-pb-house{color:var(--muted-l);font-weight:700;}
+    #tab-cashier .sl-pb-pend,#cashier-modal .sl-pb-pend{color:var(--orange);font-weight:700;}
+    #tab-cashier .sl-pb-paid,#cashier-modal .sl-pb-paid{color:var(--green);font-weight:700;}
+    /* _itemThumb (a photo, or the helmet on a tile) and _CAT_ICON_SVG's helmet, wherever they are drawn */
+    #tab-cashier .sl-th,#cashier-modal .sl-th,#receipt-edit-modal .sl-th,#tab-inventory .sl-th{width:var(--sl-th);height:var(--sl-th);border-radius:2px;object-fit:contain;flex-shrink:0;}
+    #tab-cashier .sl-thi,#cashier-modal .sl-thi,#receipt-edit-modal .sl-thi,#tab-inventory .sl-thi{display:inline-flex;align-items:center;justify-content:center;width:var(--sl-th);height:var(--sl-th);border-radius:2px;background:var(--s3);color:var(--muted-l);flex-shrink:0;}
+    #tab-cashier .sl-cic,#cashier-modal .sl-cic,#receipt-edit-modal .sl-cic,#tab-inventory .sl-cic,#sess-host .sl-cic{width:66%;height:66%;opacity:.6;}
+    /* the cashier and receipt dialogs */
+    #cashier-modal .sl-z250,#receipt-edit-modal .sl-z250{z-index:250;}
+    #cashier-modal .sl-mb0,#receipt-edit-modal .sl-mb0{margin-bottom:0;}
+    #cashier-modal .sl-close,#nutrition-modal-backdrop .sl-close{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px;}
+    #cashier-modal .sl-w440{max-width:440px;}
+    #cashier-modal .sl-mh{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px;}
+    #cashier-modal .sl-msub{font-size:12px;color:var(--muted);margin-bottom:12px;}
+    #cashier-modal .sl-text{color:var(--text);}
+    #cashier-modal .sl-mb14{margin-bottom:14px;}
+    #cashier-modal .sl-ml{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);}
+    #cashier-modal .sl-p18{padding:18px;}
+    #cashier-modal .sl-mtot{display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:2px solid var(--border);margin-top:4px;font-weight:900;}
+    #cashier-modal .sl-mform{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:13px;display:flex;flex-direction:column;gap:9px;}
+    #receipt-edit-modal .sl-w460{max-width:460px;}
+    #receipt-edit-modal .sl-reh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+    #receipt-edit-modal .sl-close0{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;}
+    #receipt-edit-modal .sl-relist{display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto;}
+    #receipt-edit-modal .sl-rebox{border:1px solid var(--border);border-radius:4px;padding:10px 12px;}
+    #receipt-edit-modal .sl-rehd{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+    #receipt-edit-modal .sl-renm{font-weight:700;font-size:13px;flex:1;min-width:0;}
+    #receipt-edit-modal .sl-rerow{display:flex;gap:8px;align-items:flex-end;}
+    #receipt-edit-modal .sl-rin{padding:8px 10px;border-radius:3px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%;}
+    #receipt-edit-modal .sl-mt8{margin-top:8px;}
+    #receipt-edit-modal .sl-refoot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;}
+    /* the nutrition sheet (showNutrition; its backdrop is placed through the CSSOM) */
+    #nutrition-modal-backdrop .sl-nbox{max-width:340px;max-height:85vh;overflow-y:auto;}
+    #nutrition-modal-backdrop .sl-nh{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px;}
+    #nutrition-modal-backdrop .sl-m0{margin:0;}
+    #nutrition-modal-backdrop .sl-nlab{border:2px solid var(--text);border-radius:3px;padding:12px 14px;}
+    #nutrition-modal-backdrop .sl-ntitle{font-size:20px;font-weight:900;letter-spacing:-.5px;border-bottom:6px solid var(--text);padding-bottom:3px;margin-bottom:5px;}
+    #nutrition-modal-backdrop .sl-nserv{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px;}
+    #nutrition-modal-backdrop .sl-ncal{display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--text);padding:3px 0;margin-bottom:3px;}
+    #nutrition-modal-backdrop .sl-ncal-l{font-size:16px;font-weight:900;}
+    #nutrition-modal-backdrop .sl-ncal-v{font-size:24px;font-weight:900;}
+    #nutrition-modal-backdrop .sl-nrow{display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:6px 0;font-size:13px;}
+    #nutrition-modal-backdrop .sl-nmic{display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:5px 0;font-size:12px;}
+    #nutrition-modal-backdrop .sl-b800{font-weight:800;}
+    #nutrition-modal-backdrop .sl-ndbl{border-bottom:4px double var(--text);margin:5px 0 3px;}
+    #nutrition-modal-backdrop .sl-ning{margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5;}
+    #nutrition-modal-backdrop .sl-ning-l{font-weight:800;color:var(--text);}
+    /* _macroBadge: a card's grams of protein or carbs, on the add-on picker */
+    #addon-picker-backdrop .sl-mb{position:absolute;top:6px;z-index:2;width:var(--sl-mb-d);height:var(--sl-mb-d);border-radius:50%;background:#000;color:var(--green);font-size:var(--sl-mb-fs);font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.45);}
+    #addon-picker-backdrop .sl-mb-l{left:6px;}
+    #addon-picker-backdrop .sl-mb-r{right:6px;}
 
     
     *{-webkit-tap-highlight-color:transparent;}

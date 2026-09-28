@@ -214,7 +214,7 @@ test.describe('nutrition library', () => {
   });
 
   test('the corner macro badge shows protein for snacks and carbs for gels', async ({ page }) => {
-    const out = await page.evaluate(() => {
+    const out = await page.evaluate(async () => {
       // @ts-expect-error app globals
       const bar = _macroBadge({ category: 'ProteinCookies', name: 'Caramel Choco Protein Bar', brand: 'Barebells' }, 38);
       // @ts-expect-error app globals
@@ -223,13 +223,23 @@ test.describe('nutrition library', () => {
       const drink = _macroBadge({ category: 'Drinks', name: 'VOSS Water', brand: 'Voss' }, 38);
       // @ts-expect-error app globals
       const noFacts = _macroBadge({ category: 'ProteinBars', name: 'Mystery Bar', brand: 'Nobody' }, 38);
-      return { bar, gel, drink, noFacts };
+      // The badge is drawn by classes scoped to the add-on picker, its size carried in data-cssv
+      // (no inline style since 2026-09-28): draw it there and read what it looks like.
+      const host = document.createElement('div'); host.id = 'addon-picker-backdrop'; host.innerHTML = bar;
+      const green = document.createElement('span'); green.style.color = 'var(--green)';
+      document.body.append(host, green);
+      await new Promise((r) => requestAnimationFrame(r));
+      const cs = getComputedStyle(host.firstElementChild as Element);
+      const look = { radius: cs.borderRadius, bg: cs.backgroundColor, color: cs.color, green: getComputedStyle(green).color, size: [cs.width, cs.height, cs.fontSize] };
+      host.remove(); green.remove();
+      return { bar, gel, drink, noFacts, look };
     });
-    // protein snack → its protein grams, in green on a black circle
+    // protein snack → its protein grams, in green on a black circle, 38px across
     expect(out.bar).toContain('16g');
-    expect(out.bar).toContain('border-radius:50%');
-    expect(out.bar).toContain('var(--green)');
-    expect(out.bar).toContain('background:#000');
+    expect(out.look.radius).toBe('50%');
+    expect(out.look.color).toBe(out.look.green);
+    expect(out.look.bg).toBe('rgb(0, 0, 0)');
+    expect(out.look.size).toEqual(['38px', '38px', '12px']);
     // energy gel → its carb grams
     expect(out.gel).toContain('22g');
     // neither category, or no nutrition facts → no badge

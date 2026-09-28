@@ -27398,7 +27398,7 @@ function _macroBadge(it,size){
   else if(cat==='EnergyGels'){const nu=_itemNutri(it);g=nu&&nu.carbs_g;}
   if(g==null||g==='')return '';
   const ar=_isRtl(),d=size||36,fs=Math.round(d*.31);
-  return`<span title="${esc(String(g))}g" style="position:absolute;top:6px;${ar?'left':'right'}:6px;z-index:2;width:${d}px;height:${d}px;border-radius:50%;background:#000;color:var(--green);font-size:${fs}px;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.45)">${esc(String(g))}g</span>`;
+  return`<span title="${esc(String(g))}g" class="sl-mb ${ar?'sl-mb-l':'sl-mb-r'}" data-cssv="${_cssv({'--sl-mb-d':d+'px','--sl-mb-fs':fs+'px'})}">${esc(String(g))}g</span>`;
 }
 function _invNutriJson(){
   const src=S._invNutri||{};const nu={};
@@ -27423,28 +27423,28 @@ function showNutrition(id){
   const it=(S.inventory||[]).find(x=>x.id===id);if(!it)return;
   const nu=_itemNutri(it)||{};
   const serv=nu.serving||(it.volume_ml?(it.volume_ml+' ml'):'');
-  const row=(lbl,val,unit)=>(val!=null&&val!=='')?`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:6px 0;font-size:13px"><span style="font-weight:700">${t(lbl)}</span><span style="font-weight:800">${esc(val)}${unit?' '+unit:''}</span></div>`:'';
+  const row=(lbl,val,unit)=>(val!=null&&val!=='')?`<div class="sl-nrow"><span class="sl-b700">${t(lbl)}</span><span class="sl-b800">${esc(val)}${unit?' '+unit:''}</span></div>`:'';
   const rows=NUTRI_FIELDS.filter(([k])=>k!=='kcal').map(([k,lbl,unit])=>row(lbl,nu[k],unit)).join('');
   const micros=Array.isArray(nu.micros)?nu.micros:[];
-  const microRows=micros.map(mc=>`<div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding:5px 0;font-size:12px"><span style="font-weight:700">${esc(mc.n)}</span><span style="font-weight:700">${esc(mc.a)}${mc.u?' '+esc(mc.u):''}${mc.nrv?` <span style="color:var(--muted);font-weight:600">${esc(mc.nrv)}%</span>`:''}</span></div>`).join('');
+  const microRows=micros.map(mc=>`<div class="sl-nmic"><span class="sl-b700">${esc(mc.n)}</span><span class="sl-b700">${esc(mc.a)}${mc.u?' '+esc(mc.u):''}${mc.nrv?` <span class="sl-m600">${esc(mc.nrv)}%</span>`:''}</span></div>`).join('');
   const m=document.createElement('div');m.className='modal-backdrop';m.id='nutrition-modal-backdrop';
   m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';
   m.onclick=e=>{if(e.target===m)closeNutrition();};
-  m.innerHTML=`<div class="modal-box" role="dialog" aria-modal="true" style="max-width:340px;max-height:85vh;overflow-y:auto">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px">
-      <div class="modal-title" style="margin:0">${esc(it.name)}</div>
-      <button data-on-click="${_on("closeNutrition")}" aria-label="${t('cancelBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px">&times;</button>
+  m.innerHTML=`<div class="modal-box sl-nbox" role="dialog" aria-modal="true">
+    <div class="sl-nh">
+      <div class="modal-title sl-m0">${esc(it.name)}</div>
+      <button data-on-click="${_on("closeNutrition")}" aria-label="${t('cancelBtn')}" class="sl-close">&times;</button>
     </div>
-    <div style="border:2px solid var(--text);border-radius:3px;padding:12px 14px">
-      <div style="font-size:20px;font-weight:900;letter-spacing:-.5px;border-bottom:6px solid var(--text);padding-bottom:3px;margin-bottom:5px">${t('nuTitle')}</div>
-      ${serv?`<div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:5px">${t('servingSize')}: ${esc(serv)}</div>`:''}
-      <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:4px solid var(--text);padding:3px 0;margin-bottom:3px">
-        <span style="font-size:16px;font-weight:900">${t('nuCalories')}</span>
-        <span style="font-size:24px;font-weight:900">${(nu.kcal!=null&&nu.kcal!=='')?esc(nu.kcal):'—'}</span>
+    <div class="sl-nlab">
+      <div class="sl-ntitle">${t('nuTitle')}</div>
+      ${serv?`<div class="sl-nserv">${t('servingSize')}: ${esc(serv)}</div>`:''}
+      <div class="sl-ncal">
+        <span class="sl-ncal-l">${t('nuCalories')}</span>
+        <span class="sl-ncal-v">${(nu.kcal!=null&&nu.kcal!=='')?esc(nu.kcal):'—'}</span>
       </div>
       ${rows}
-      ${microRows?`<div style="border-bottom:4px double var(--text);margin:5px 0 3px"></div>${microRows}`:''}
-      ${nu.ingredients?`<div style="margin-top:8px;font-size:11px;color:var(--muted);line-height:1.5"><span style="font-weight:800;color:var(--text)">${t('nuIngredients')}:</span> ${esc(nu.ingredients)}</div>`:''}
+      ${microRows?`<div class="sl-ndbl"></div>${microRows}`:''}
+      ${nu.ingredients?`<div class="sl-ning"><span class="sl-ning-l">${t('nuIngredients')}:</span> ${esc(nu.ingredients)}</div>`:''}
     </div>
   </div>`;
   document.body.appendChild(m);
@@ -27481,7 +27481,7 @@ function _rememberSubtype(s){s=String(s||'').trim();if(!s)return;if(!PROTEIN_SUB
 // Built-in clip-art (inline SVG) shown for an item that has no photo. A bike helmet:
 // aerodynamic dome with three vents, a front brim, and a padded bottom rim.
 const _CAT_ICON_SVG={
-  Helmet:'<svg viewBox="0 0 24 24" fill="currentColor" style="width:66%;height:66%;opacity:.6"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 3.1 8.3 2.8 13c0 .5.4.9.9.9h16.6c.5 0 .9-.4.9-.9C20.9 8.3 17 4.5 12 4.5zm-3.6 8.3H6.2c.3-1.8 1.1-3.3 2.2-4.4-.3 1.4-.4 2.9-.1 4.4zm3.9 0h-2c-.3-1.6-.2-3.1.2-4.6.9 1.4 1.5 2.9 1.8 4.6zm3.9 0h-2.1c-.3-1.6-.8-3-1.6-4.3 1.8 1 3.2 2.5 3.7 4.3z"/><path d="M3.1 15.3h17.8a5 5 0 0 1-4.8 3.6H7.9a5 5 0 0 1-4.8-3.6z"/></svg>',
+  Helmet:'<svg viewBox="0 0 24 24" fill="currentColor" class="sl-cic"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 4.5C7 4.5 3.1 8.3 2.8 13c0 .5.4.9.9.9h16.6c.5 0 .9-.4.9-.9C20.9 8.3 17 4.5 12 4.5zm-3.6 8.3H6.2c.3-1.8 1.1-3.3 2.2-4.4-.3 1.4-.4 2.9-.1 4.4zm3.9 0h-2c-.3-1.6-.2-3.1.2-4.6.9 1.4 1.5 2.9 1.8 4.6zm3.9 0h-2.1c-.3-1.6-.8-3-1.6-4.3 1.8 1 3.2 2.5 3.7 4.3z"/><path d="M3.1 15.3h17.8a5 5 0 0 1-4.8 3.6H7.9a5 5 0 0 1-4.8-3.6z"/></svg>',
 };
 // Icon for a specific item: match a helmet by category OR name (so it works even if the
 // item was filed under Accessory/Other), else fall back to its category icon.
@@ -27547,10 +27547,10 @@ function _itemSoldUnits(){
   return m;
 }
 function _cashPayBadge(pay,team){
-  if(pay==='team')return`<span style="color:var(--purple);font-weight:700">${t('payTeam')}${team?`: ${esc(team)}`:''}</span>`;
-  if(pay==='house')return`<span style="color:var(--muted-l);font-weight:700">${t('onTheHouseLabel')}</span>`;
-  if(pay==='pending')return`<span style="color:var(--orange);font-weight:700">${t('pendingLabel')}</span>`;
-  return`<span style="color:var(--green);font-weight:700">${t('paidLabel')}</span>`;
+  if(pay==='team')return`<span class="sl-pb-team">${t('payTeam')}${team?`: ${esc(team)}`:''}</span>`;
+  if(pay==='house')return`<span class="sl-pb-house">${t('onTheHouseLabel')}</span>`;
+  if(pay==='pending')return`<span class="sl-pb-pend">${t('pendingLabel')}</span>`;
+  return`<span class="sl-pb-paid">${t('paidLabel')}</span>`;
 }
 // MM Team roster (editable, persisted in localStorage; seeded once from past sales in loadData)
 function teamNames(){return[...new Set((S.teamMembers||[]).filter(Boolean))].sort();}
@@ -27624,7 +27624,7 @@ function renderTeamManager(){
 }
 // Product image helpers (inventory items carry an optional data-URL photo)
 function _itemPhoto(id){const it=id&&(S.inventory||[]).find(x=>x.id===id);return(it&&it.photo)?it.photo:'';}
-function _itemThumb(id,size){const p=_itemPhoto(id);if(p)return`<img loading="lazy" decoding="async" src="${esc(p)}" alt="" style="width:${size}px;height:${size}px;border-radius:2px;object-fit:contain;flex-shrink:0">`;const ic=_itemIcon((S.inventory||[]).find(x=>x.id===id));return ic?`<span style="display:inline-flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;border-radius:2px;background:var(--s3);color:var(--muted-l);flex-shrink:0">${ic}</span>`:'';}
+function _itemThumb(id,size){const p=_itemPhoto(id);if(p)return`<img loading="lazy" decoding="async" src="${esc(p)}" alt="" class="sl-th" data-cssv="${_cssv({'--sl-th':size+'px'})}">`;const ic=_itemIcon((S.inventory||[]).find(x=>x.id===id));return ic?`<span class="sl-thi" data-cssv="${_cssv({'--sl-th':size+'px'})}">${ic}</span>`:'';}
 // Units sold per inventory item (cashier sales + rental add-ons) -> drives top-seller ordering
 function _itemSalesCount(){const c={};(S.cashSales||[]).forEach(r=>{if(r.item_id&&r.pay!=='refunded')c[r.item_id]=(c[r.item_id]||0)+(Number(r.qty)||0);});getQueue().forEach(e=>entryPurchases(e).forEach(p=>{if(p.id)c[p.id]=(c[p.id]||0)+(Number(p.qty)||0);}));return c;}
 function showCashierModal(id){
@@ -27724,55 +27724,54 @@ function renderCashierModal(){
   const tot=Math.round(purchases.reduce((s,p)=>s+(Number(p.qty)||0)*(Number(p.price)||0),0)*100)/100;
   const invItems=(S.inventory||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   const isCustom=S._cashItem==='__custom__';
-  const _inp='padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%';
-  const lines=purchases.length?purchases.map((p,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border)">
-      ${_itemThumb(p.id,30)}<div style="flex:1;min-width:0">
-        <div style="font-weight:700;font-size:13px">${esc(p.name)}${Number(p.qty)>1?` <span style="color:var(--muted)">×${esc(p.qty)}</span>`:''}</div>
-        <div style="font-size:11px;color:var(--muted)">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)}</div>
+  const lines=purchases.length?purchases.map((p,i)=>`<div class="sl-ml">
+      ${_itemThumb(p.id,30)}<div class="sl-f1m0">
+        <div class="sl-nm13">${esc(p.name)}${Number(p.qty)>1?` <span class="sl-muted">×${esc(p.qty)}</span>`:''}</div>
+        <div class="sl-f11m">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)}</div>
       </div>
-      <div style="font-weight:800;white-space:nowrap"><bdi>SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi></div>
+      <div class="sl-amt8"><bdi>SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi></div>
       <button class="btn-sm btn-muted" data-on-click="${_on("_cashVoid",i)}" aria-label="${t('cashVoid')}">${t('cashVoid')}</button>
-    </div>`).join(''):`<div class="empty-state" style="padding:18px">${t('cashNoSales')}</div>`;
-  const payBtn=(val,label)=>`<button data-on-click="${_on("_cashSet","_cashPay",val)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._cashPay===val?'var(--green)':'var(--border)'};background:${S._cashPay===val?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._cashPay===val?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${label}</button>`;
+    </div>`).join(''):`<div class="empty-state sl-p18">${t('cashNoSales')}</div>`;
+  const payBtn=(val,label)=>`<button data-on-click="${_on("_cashSet","_cashPay",val)}" class="sl-pay${S._cashPay===val?' sl-pay-on':''}">${label}</button>`;
   const m=document.getElementById('cashier-modal');m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop" style="z-index:250" data-on-click="${_on("_on_renderCashierModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">
-        <div class="modal-title" style="margin-bottom:0">${t('cashierTitle')}</div>
-        <button data-on-click="${_on("closeCashierModal")}" aria-label="${t('cashDone')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px">&times;</button>
+  m.innerHTML=`<div class="modal-backdrop sl-z250" data-on-click="${_on("_on_renderCashierModal_1",_EV,_EL)}">
+    <div class="modal-box sl-w440" role="dialog" aria-modal="true">
+      <div class="sl-mh">
+        <div class="modal-title sl-mb0">${t('cashierTitle')}</div>
+        <button data-on-click="${_on("closeCashierModal")}" aria-label="${t('cashDone')}" class="sl-close">&times;</button>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">${t('cashierSub')} · <strong style="color:var(--text)">#${e.queueNum} ${esc(e.name)}</strong></div>
-      <div style="margin-bottom:14px">${lines}
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:2px solid var(--border);margin-top:4px;font-weight:900">
-          <span>${t('repTotal')}</span><span style="color:var(--green)"><bdi>SAR ${tot}</bdi></span>
+      <div class="sl-msub">${t('cashierSub')} · <strong class="sl-text">#${e.queueNum} ${esc(e.name)}</strong></div>
+      <div class="sl-mb14">${lines}
+        <div class="sl-mtot">
+          <span>${t('repTotal')}</span><span class="sl-green"><bdi>SAR ${tot}</bdi></span>
         </div>
       </div>
-      <div style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:13px;display:flex;flex-direction:column;gap:9px">
-        <select data-on-change="${_on("_cashSet","_cashItem",_P("value"))}" style="${_inp}">
+      <div class="sl-mform">
+        <select data-on-change="${_on("_cashSet","_cashItem",_P("value"))}" class="sl-in">
           <option value="">${t('cashSelectItem')}</option>
           ${invItems.map(it=>`<option value="${esc(it.id)}"${S._cashItem===it.id?' selected':''}>${esc(it.name)} (${esc(_invCatLabel(it.category))}${_priceLabel(it.price)?`, ${_priceLabel(it.price)}`:''})</option>`).join('')}
           <option value="__custom__"${isCustom?' selected':''}>${t('cashCustomOpt')}</option>
         </select>
-        ${isCustom?`<input type="text" value="${esc(S._cashName)}" data-on-input="${_on("_on_renderCashierModal_2",_EV,_EL)}" placeholder="${t('cashNameLabel')}" style="${_inp}">
-        <select data-on-change="${_on("_cashSet","_cashCat",_P("value"))}" style="${_inp}">${INV_CATS.map(c=>`<option value="${esc(c)}"${S._cashCat===c?' selected':''}>${esc(_invCatLabel(c))}</option>`).join('')}</select>`:''}
-        <div style="display:flex;gap:9px">
-          <div style="flex:1"><label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t('cashQtyLabel')}</label>
-            <div style="display:flex;align-items:center;gap:6px">
-              <button type="button" data-on-click="${_on("_cashQtyStep",-1)}" aria-label="−" style="width:38px;height:38px;flex-shrink:0;border-radius:4px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:pointer;line-height:1">−</button>
-              <input type="number" min="1" value="${esc(S._cashQty)}" data-on-input="${_on("_on_renderCashierModal_3",_EV,_EL)}" style="${_inp};text-align:center">
-              <button type="button" data-on-click="${_on("_cashQtyStep",1)}" aria-label="+" style="width:38px;height:38px;flex-shrink:0;border-radius:4px;border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-size:18px;font-weight:800;cursor:pointer;line-height:1">+</button>
+        ${isCustom?`<input type="text" value="${esc(S._cashName)}" data-on-input="${_on("_on_renderCashierModal_2",_EV,_EL)}" placeholder="${t('cashNameLabel')}" class="sl-in">
+        <select data-on-change="${_on("_cashSet","_cashCat",_P("value"))}" class="sl-in">${INV_CATS.map(c=>`<option value="${esc(c)}"${S._cashCat===c?' selected':''}>${esc(_invCatLabel(c))}</option>`).join('')}</select>`:''}
+        <div class="sl-row9">
+          <div class="sl-f1"><label class="sl-lbl">${t('cashQtyLabel')}</label>
+            <div class="sl-qty">
+              <button type="button" data-on-click="${_on("_cashQtyStep",-1)}" aria-label="−" class="sl-step">−</button>
+              <input type="number" min="1" value="${esc(S._cashQty)}" data-on-input="${_on("_on_renderCashierModal_3",_EV,_EL)}" class="sl-in sl-tac">
+              <button type="button" data-on-click="${_on("_cashQtyStep",1)}" aria-label="+" class="sl-step sl-step-up">+</button>
             </div></div>
-          <div style="flex:2"><label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t('cashAmtLabel')}</label>
-            <input type="number" min="0" step="0.5" value="${esc(S._cashAmt)}" data-on-input="${_on("_on_renderCashierModal_4",_EV,_EL)}" placeholder="0" style="${_inp}"></div>
+          <div class="sl-f2"><label class="sl-lbl">${t('cashAmtLabel')}</label>
+            <input type="number" min="0" step="0.5" value="${esc(S._cashAmt)}" data-on-input="${_on("_on_renderCashierModal_4",_EV,_EL)}" placeholder="0" class="sl-in"></div>
         </div>
-        <div><label style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${t('cashPayLabel')}</label>
-          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px">${payBtn('paid',t('paidLabel'))}${payBtn('pending',t('pendingLabel'))}${payBtn('house',t('onTheHouseLabel'))}${payBtn('team',t('payTeam'))}</div>
-          ${S._cashPay==='team'?`<div style="display:flex;gap:7px;margin-top:7px">
-            <select data-on-change="${_on("_on_renderCashierModal_5",_EV,_EL)}" style="${_inp};flex:1">${(S._cashTeam&&!teamNames().includes(S._cashTeam))?`<option value="${esc(S._cashTeam)}" selected>${esc(S._cashTeam)}</option>`:''}<option value=""${!S._cashTeam?' selected':''}>${t('teamChoose')}</option>${teamNames().map(n=>`<option value="${esc(n)}"${S._cashTeam===n?' selected':''}>${esc(n)}</option>`).join('')}</select>
-            <button type="button" class="btn-secondary" style="white-space:nowrap;flex-shrink:0" data-on-click="${_on("_cashTeamCustom")}">+ ${t('teamCustom')}</button>
-            <button type="button" class="btn-secondary" data-on-click="${_on("showTeamManager")}" aria-label="${t('teamManage')}" title="${t('teamManage')}" style="flex-shrink:0;padding:7px 9px">${ICON_PENCIL}</button>
+        <div><label class="sl-lbl">${t('cashPayLabel')}</label>
+          <div class="sl-pays">${payBtn('paid',t('paidLabel'))}${payBtn('pending',t('pendingLabel'))}${payBtn('house',t('onTheHouseLabel'))}${payBtn('team',t('payTeam'))}</div>
+          ${S._cashPay==='team'?`<div class="sl-team">
+            <select data-on-change="${_on("_on_renderCashierModal_5",_EV,_EL)}" class="sl-in sl-f1">${(S._cashTeam&&!teamNames().includes(S._cashTeam))?`<option value="${esc(S._cashTeam)}" selected>${esc(S._cashTeam)}</option>`:''}<option value=""${!S._cashTeam?' selected':''}>${t('teamChoose')}</option>${teamNames().map(n=>`<option value="${esc(n)}"${S._cashTeam===n?' selected':''}>${esc(n)}</option>`).join('')}</select>
+            <button type="button" class="btn-secondary sl-nw0" data-on-click="${_on("_cashTeamCustom")}">+ ${t('teamCustom')}</button>
+            <button type="button" class="btn-secondary sl-pencil" data-on-click="${_on("showTeamManager")}" aria-label="${t('teamManage')}" title="${t('teamManage')}">${ICON_PENCIL}</button>
           </div>`:''}</div>
-        <button class="btn-primary" style="width:100%;margin-top:2px" data-on-click="${_on("_cashAddLine")}">${t('cashRingUp')}</button>
+        <button class="btn-primary sl-full2" data-on-click="${_on("_cashAddLine")}">${t('cashRingUp')}</button>
       </div>
       <div class="modal-footer"><button class="btn-secondary" data-on-click="${_on("closeCashierModal")}">${t('cashDone')}</button></div>
     </div>
@@ -27792,7 +27791,7 @@ function _ctCustSuggest(focus){
   const hits=(q.length<2
     ?(S.customers||[]).slice().sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0))
     :(S.customers||[]).filter(c=>(c.name||'').toLowerCase().includes(q)||_phoneHit(c.phone,q)||(c.email||'').toLowerCase().includes(q))).slice(0,6);
-  box.innerHTML=hits.length?`<div data-on-mousedown="${_on("_on__ctCustSuggest_1",_EV,_EL)}" style="background:var(--s1);border:1px solid var(--border);border-radius:4px;box-shadow:var(--sh-2);overflow:hidden;margin-top:4px">${hits.map(c=>`<button type="button" data-on-click="${_on("_ctCustPick",c.id)}" style="display:block;width:100%;text-align:start;background:none;border:none;border-bottom:1px solid var(--border);padding:8px 11px;cursor:pointer;font-family:inherit;color:var(--text)"><div style="font-weight:800;font-size:13px">${esc(c.name||'')}</div><div style="font-size:11px;color:var(--muted)">${esc([c.phone,c.email].filter(Boolean).join(' · '))}</div></button>`).join('')}</div>`:'';
+  box.innerHTML=hits.length?`<div data-on-mousedown="${_on("_on__ctCustSuggest_1",_EV,_EL)}" class="sl-sug">${hits.map(c=>`<button type="button" data-on-click="${_on("_ctCustPick",c.id)}" class="sl-sug-b"><div class="sl-sug-nm">${esc(c.name||'')}</div><div class="sl-f11m">${esc([c.phone,c.email].filter(Boolean).join(' · '))}</div></button>`).join('')}</div>`:'';
 }
 function _ctCustSugClose(){const b=document.getElementById('ct-cust-sug');if(!b||!b.innerHTML)return false;b.innerHTML='';return true;}
 function _ctCustPick(id){
@@ -28206,27 +28205,25 @@ function _on_renderReceiptEdit_1(event,el){if(event.target===el)closeReceiptEdit
 function renderReceiptEdit(){
   const m=document.getElementById('receipt-edit-modal');if(!m)return;
   const lines=S._reEdit||[];
-  const _inp='padding:8px 10px;border-radius:3px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%';
-  const _lb='font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px';
   const payOpts=[['paid',t('paidLabel')],['pending',t('pendingLabel')],['house',t('onTheHouseLabel')],['team',t('payTeam')]];
   m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop" style="z-index:250" data-on-click="${_on("_on_renderReceiptEdit_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:460px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div class="modal-title" style="margin-bottom:0">${t('receiptEditTitle')}</div>
-        <button data-on-click="${_on("closeReceiptEdit")}" aria-label="${t('cancelBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1">&times;</button>
+  m.innerHTML=`<div class="modal-backdrop sl-z250" data-on-click="${_on("_on_renderReceiptEdit_1",_EV,_EL)}">
+    <div class="modal-box sl-w460" role="dialog" aria-modal="true">
+      <div class="sl-reh">
+        <div class="modal-title sl-mb0">${t('receiptEditTitle')}</div>
+        <button data-on-click="${_on("closeReceiptEdit")}" aria-label="${t('cancelBtn')}" class="sl-close0">&times;</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:12px;max-height:60vh;overflow-y:auto">
-        ${lines.map((l,i)=>`<div style="border:1px solid var(--border);border-radius:4px;padding:10px 12px">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">${_itemThumb(l.item_id,24)}<span style="font-weight:700;font-size:13px;flex:1;min-width:0">${esc(l.name)}${Number(l.qty)>1?` ×${esc(l.qty)}`:''}</span></div>
-          <div style="display:flex;gap:8px;align-items:flex-end">
-            <div style="flex:1"><label style="${_lb}">${t('cashAmtLabel')}</label><input type="number" min="0" step="0.5" value="${esc(l.price)}" data-on-input="${_on("_reSetSilent",i,"price",_P("value"))}" ${l.pay==='house'?'disabled':''} style="${_inp}"></div>
-            <div style="flex:1"><label style="${_lb}">${t('cashPayLabel')}</label><select data-on-change="${_on("_reSet",i,"pay",_P("value"))}" style="${_inp}">${payOpts.map(([v,lab])=>`<option value="${v}"${l.pay===v?' selected':''}>${lab}</option>`).join('')}</select></div>
+      <div class="sl-relist">
+        ${lines.map((l,i)=>`<div class="sl-rebox">
+          <div class="sl-rehd">${_itemThumb(l.item_id,24)}<span class="sl-renm">${esc(l.name)}${Number(l.qty)>1?` ×${esc(l.qty)}`:''}</span></div>
+          <div class="sl-rerow">
+            <div class="sl-f1"><label class="sl-lbl">${t('cashAmtLabel')}</label><input type="number" min="0" step="0.5" value="${esc(l.price)}" data-on-input="${_on("_reSetSilent",i,"price",_P("value"))}" ${l.pay==='house'?'disabled':''} class="sl-rin"></div>
+            <div class="sl-f1"><label class="sl-lbl">${t('cashPayLabel')}</label><select data-on-change="${_on("_reSet",i,"pay",_P("value"))}" class="sl-rin">${payOpts.map(([v,lab])=>`<option value="${v}"${l.pay===v?' selected':''}>${lab}</option>`).join('')}</select></div>
           </div>
-          ${l.pay==='team'?`<input type="text" value="${esc(l.team_name||'')}" data-on-input="${_on("_reSetSilent",i,"team_name",_P("value"))}" placeholder="${t('teamCustomPrompt')}" style="${_inp};margin-top:8px">`:''}
+          ${l.pay==='team'?`<input type="text" value="${esc(l.team_name||'')}" data-on-input="${_on("_reSetSilent",i,"team_name",_P("value"))}" placeholder="${t('teamCustomPrompt')}" class="sl-rin sl-mt8">`:''}
         </div>`).join('')}
       </div>
-      <div class="modal-footer" style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px"><button class="btn-secondary" data-on-click="${_on("closeReceiptEdit")}">${t('cancelBtn')}</button><button class="btn-primary" data-on-click="${_on("saveReceiptEdit")}">${t('saveBtn')}</button></div>
+      <div class="modal-footer sl-refoot"><button class="btn-secondary" data-on-click="${_on("closeReceiptEdit")}">${t('cancelBtn')}</button><button class="btn-primary" data-on-click="${_on("saveReceiptEdit")}">${t('saveBtn')}</button></div>
     </div>
   </div>`;
 }
@@ -28285,7 +28282,7 @@ function _salesArt(cat,h){
     a=`<rect x="8.1" y="4.6" width="7.8" height="3.2" rx="1" fill="rgba(var(--green-rgb),.34)" stroke="none"/><path d="M8.1 7.8h7.8v10.4a2.4 2.4 0 0 1-2.4 2.4h-3a2.4 2.4 0 0 1-2.4-2.4z" fill="rgba(var(--green-rgb),.12)"/><rect x="8.1" y="4.6" width="7.8" height="3.2" rx="1"/><path d="M9.5 11.5h5M9.5 13.9h5M9.5 16.3h5" stroke-width="1"/>`;
   else // generic 3D package
     a=`<path d="M12 2.7l8.4 4.2-8.4 4.2-8.4-4.2z" fill="rgba(var(--green-rgb),.3)"/><path d="M3.6 6.9v10.4l8.4 4.2V11.1z" fill="rgba(var(--green-rgb),.14)"/><path d="M20.4 6.9v10.4l-8.4 4.2V11.1z" fill="rgba(var(--green-rgb),.07)"/>`;
-  return`<div style="width:100%;height:${h}px;background:var(--s3);display:flex;align-items:center;justify-content:center"><svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${a}</svg></div>`;
+  return`<div class="sl-art"${h!==62?` data-cssv="${_cssv({'--sl-art-h':h+'px'})}"`:''}><svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">${a}</svg></div>`;
 }
 // The service clock: rides on the bike since it was last marked serviced. Thirty rides is
 // the flag threshold until the admin sets another in the Bikes tab (staff_options
@@ -28381,7 +28378,7 @@ function renderCashier(){
   const el=document.getElementById('tab-cashier');if(!el)return;
   if(!S.dataLoaded){el.innerHTML=skeletonList(5);return;}
   const sessions=allSessions().filter(s=>s.status!=='deleted').sort(_sessOrder);
-  if(!sessions.length){el.innerHTML=`<div class="empty-state" style="padding:48px">${t('cashNoSessions')}</div>`;return;}
+  if(!sessions.length){el.innerHTML=`<div class="empty-state sl-p48">${t('cashNoSessions')}</div>`;return;}
   // Tonight's ride, as Bookings opens on. The first open session in date order was often last
   // week's (nothing closes a night) or next week's (tonight full), and every sale, the close-out
   // and the drawer count went there.
@@ -28398,35 +28395,33 @@ function renderCashier(){
   const ar=_isRtl();
   const cart=S._ctCart||[];
   const{paidNum:cartPaidNum,after:cartAfterDisc,card:cartCardSAR,cash:cartCashSAR}=_ctCartTotals(cart); // the same figures _ctPreview shows and _ctRecord books
-  const _tgl='padding:8px 10px;border-radius:3px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-weight:800;font-size:12px;cursor:pointer;font-family:inherit;flex-shrink:0;min-width:46px';
-  const _inp='padding:9px 11px;border-radius:4px;border:1px solid var(--border);background:var(--in-bg);color:var(--text);font-family:inherit;font-size:13px;width:100%';
   // Category-first item picker for Sales: pick a category, then see the items inside it
-  const _ctItemBtn=it=>{const sel=S._ctItem===it.id;const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;const lowB=(q<=0||(lo>0&&q<=lo));return`<button type="button" data-on-click="${_on("_ctTile",it.id)}" title="${esc(it.name)}" style="position:relative;text-align:start;border:1.5px solid ${sel?'var(--green)':'var(--border)'};background:${sel?'rgba(var(--green-rgb),.08)':'var(--s2)'};border-radius:4px;padding:0;overflow:hidden;cursor:pointer;font-family:inherit">${lowB?`<span title="${q<=0?t('invOutStock'):t('invLowStock')}" style="position:absolute;top:4px;${ar?'left':'right'}:4px;z-index:1;background:${q<=0?'var(--red)':'var(--orange)'};color:#fff;font-size:9px;font-weight:800;padding:1px 5px;border-radius:2px;line-height:1.5">${q}</span>`:''}${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" style="width:100%;height:62px;object-fit:contain;background:var(--photo-bg);display:block">`:`<div style="width:100%;height:62px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:10px;text-align:center;padding:4px">${esc(_invCatLabel(it.category))}</div>`}<div style="padding:5px 7px"><div style="font-weight:700;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.name)}</div><div style="font-size:11px;color:var(--green);font-weight:700">${_priceLabel(it.price)||'—'}</div></div></button>`;};
-  const _ctCustomBtn=`<button type="button" data-on-click="${_on("_ctSet","_ctItem","__custom__")}" style="border:1.5px dashed ${isCustom?'var(--green)':'var(--border)'};background:${isCustom?'rgba(var(--green-rgb),.08)':'transparent'};border-radius:4px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:96px;color:${isCustom?'var(--green)':'var(--muted)'}"><span style="font-size:20px;line-height:1">+</span><span style="font-size:10px;font-weight:700;text-align:center;padding:0 4px">${t('cashCustomOpt')}</span></button>`;
-  const _ctGrid=inner=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-height:248px;overflow-y:auto;margin-top:4px;padding:2px">${inner}</div>`;
+  const _ctItemBtn=it=>{const sel=S._ctItem===it.id;const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;const lowB=(q<=0||(lo>0&&q<=lo));return`<button type="button" data-on-click="${_on("_ctTile",it.id)}" title="${esc(it.name)}" class="sl-tile${sel?' sl-tile-on':''}">${lowB?`<span title="${q<=0?t('invOutStock'):t('invLowStock')}" class="sl-stock ${ar?'sl-stock-l':'sl-stock-r'} ${q<=0?'sl-stock-out':'sl-stock-low'}">${q}</span>`:''}${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" class="sl-tile-img">`:`<div class="sl-tile-ph">${esc(_invCatLabel(it.category))}</div>`}<div class="sl-tile-b"><div class="sl-tile-nm">${esc(it.name)}</div><div class="sl-tile-pr">${_priceLabel(it.price)||'—'}</div></div></button>`;};
+  const _ctCustomBtn=`<button type="button" data-on-click="${_on("_ctSet","_ctItem","__custom__")}" class="sl-cust${isCustom?' sl-cust-on':''}"><span class="sl-plus">+</span><span class="sl-cust-lb">${t('cashCustomOpt')}</span></button>`;
+  const _ctGrid=inner=>`<div class="sl-grid">${inner}</div>`;
   const _ctCats=[...new Set(invItems.map(it=>it.category||'Other'))].sort((a,b)=>_invCatLabel(a).localeCompare(_invCatLabel(b)));
   let _ctItemPicker;
   // A tappable card in the picker: a leaf category, a sub-category, or a parent group. artCat drives the _salesArt icon.
-  const _ctCatCard=(dataKey,artCat,label,n)=>`<button type="button" data-cat="${esc(dataKey)}" data-on-click="${_on("_on_renderCashier_1",_EV,_EL)}" style="text-align:start;border:1.5px solid var(--border);background:var(--s2);border-radius:4px;padding:0;overflow:hidden;cursor:pointer;font-family:inherit">${_salesArt(artCat)}<div style="padding:5px 7px"><div style="font-weight:700;font-size:11px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(label)}</div><div style="font-size:11px;color:var(--muted);font-weight:700">${n} ${t('cashItemsWord')}</div></div></button>`;
+  const _ctCatCard=(dataKey,artCat,label,n)=>`<button type="button" data-cat="${esc(dataKey)}" data-on-click="${_on("_on_renderCashier_1",_EV,_EL)}" class="sl-card">${_salesArt(artCat)}<div class="sl-tile-b"><div class="sl-tile-nm">${esc(label)}</div><div class="sl-tile-n">${n} ${t('cashItemsWord')}</div></div></button>`;
   // Back button: a clip-art back-arrow (with shaft) + "Back", pinned to the start (left in EN,
   // right in AR — the arrow flips). Shown at every drill-in level of the item picker. The
   // destination stays as a tooltip so context isn't lost.
-  const _ctBack=(target,label)=>`<div style="margin-bottom:8px"><button type="button" data-on-click="${_on("_ctSet","_ctPickCat",target)}" title="${esc(label)}" aria-label="${t('regBackBtn')}" style="display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--green);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;padding:6px 12px 6px 10px"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;${ar?'transform:scaleX(-1)':''}"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>${t('regBackBtn')}</button></div>`;
+  const _ctBack=(target,label)=>`<div class="sl-mb8"><button type="button" data-on-click="${_on("_ctSet","_ctPickCat",target)}" title="${esc(label)}" aria-label="${t('regBackBtn')}" class="sl-back"><svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" class="sl-back-ic${ar?' sl-flip':''}"><path d="M19 12H5M11 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>${t('regBackBtn')}</button></div>`;
   // Sectioned flat layout (the "All items" style): category headers with the items inline,
   // same top-seller ordering everywhere - no per-category buttons to drill through.
-  const _flatGrid=inner=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;padding:2px">${inner}</div>`;
+  const _flatGrid=inner=>`<div class="sl-flat">${inner}</div>`;
   const _ctSections=cats=>cats.map(cat=>{
     const its=invItems.filter(it=>(it.category||'Other')===cat);
     if(!its.length)return'';
-    return`<div style="margin-bottom:12px"><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:6px 0 6px 2px">${esc(_invCatLabel(cat))}</div>${_flatGrid(its.map(_ctItemBtn).join(''))}</div>`;
+    return`<div class="sl-mb12"><div class="sl-sec-h">${esc(_invCatLabel(cat))}</div>${_flatGrid(its.map(_ctItemBtn).join(''))}</div>`;
   }).join('');
   if(S._ctPickCat==='__all__'){
-    _ctItemPicker=`${_ctBack('',t('cashAllItems'))}<div style="max-height:248px;overflow-y:auto;margin-top:4px">${_ctSections(_ctCats)}${_flatGrid(_ctCustomBtn)}</div>`;
+    _ctItemPicker=`${_ctBack('',t('cashAllItems'))}<div class="sl-scroll">${_ctSections(_ctCats)}${_flatGrid(_ctCustomBtn)}</div>`;
   }else if(S._ctPickCat==='__sec__supp'||S._ctPickCat==='__sec__equip'){
     // A department (Supplements & Beverages / Equipment): its items laid out exactly like
     // All items (protein snacks included) - sections, not category cards.
     const isSup=S._ctPickCat==='__sec__supp';
-    _ctItemPicker=`${_ctBack('',isSup?t('invSecSupplements'):t('invSecEquipment'))}<div style="max-height:248px;overflow-y:auto;margin-top:4px">${_ctSections(_ctCats.filter(c=>_isSuppCat(c)===isSup))}${_flatGrid(_ctCustomBtn)}</div>`;
+    _ctItemPicker=`${_ctBack('',isSup?t('invSecSupplements'):t('invSecEquipment'))}<div class="sl-scroll">${_ctSections(_ctCats.filter(c=>_isSuppCat(c)===isSup))}${_flatGrid(_ctCustomBtn)}</div>`;
   }else if(S._ctPickCat.slice(0,7)==='__grp__'){
     // A parent group (e.g. Protein Snacks): show its sub-category cards; drilling one shows its items.
     const g=S._ctPickCat.slice(7);
@@ -28441,13 +28436,12 @@ function renderCashier(){
   }else{
     // Top level: All items, then the two departments as tappable cards (drill in like Protein Snacks).
     const suppN=invItems.filter(it=>_isSuppCat(it.category||'Other')).length,equipN=invItems.length-suppN;
-    const _allCard=invItems.length?`<button type="button" data-cat="__all__" data-on-click="${_on("_on_renderCashier_2",_EV,_EL)}" style="text-align:start;border:1.5px solid var(--border);background:var(--s2);border-radius:4px;padding:0;overflow:hidden;cursor:pointer;font-family:inherit"><div style="width:100%;height:62px;background:var(--s3);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:20px;font-weight:900">★</div><div style="padding:5px 7px"><div style="font-weight:700;font-size:11px;color:var(--text)">${t('cashAllItems')}</div><div style="font-size:11px;color:var(--muted);font-weight:700">${invItems.length} ${t('cashItemsWord')}</div></div></button>`:'';
+    const _allCard=invItems.length?`<button type="button" data-cat="__all__" data-on-click="${_on("_on_renderCashier_2",_EV,_EL)}" class="sl-card"><div class="sl-all-art">★</div><div class="sl-tile-b"><div class="sl-all-nm">${t('cashAllItems')}</div><div class="sl-tile-n">${invItems.length} ${t('cashItemsWord')}</div></div></button>`:'';
     const _suppCard=suppN?_ctCatCard('__sec__supp','nutrition',t('invSecSupplements'),suppN):'';
     const _equipCard=equipN?_ctCatCard('__sec__equip','equipment',t('invSecEquipment'),equipN):'';
     _ctItemPicker=_ctGrid(_allCard+_suppCard+_equipCard+_ctCustomBtn);
   }
-  const _lbl='font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px';
-  const payBtn=(val,label)=>`<button data-on-click="${_on("_ctSet","_ctPay",val)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._ctPay===val?'var(--green)':'var(--border)'};background:${S._ctPay===val?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._ctPay===val?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${label}</button>`;
+  const payBtn=(val,label)=>`<button data-on-click="${_on("_ctSet","_ctPay",val)}" class="sl-pay${S._ctPay===val?' sl-pay-on':''}">${label}</button>`;
   const sessOpts=sessions.map(s=>`<option value="${esc(s.id)}"${sessId===s.id?' selected':''}>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.status&&s.status!=='open'?` (${_own(SESS_STATUS_KEY,s.status)?t(SESS_STATUS_KEY[s.status]):esc(s.status)})`:''}</option>`).join('');
   // Ledger: cashier-tab sales grouped into receipts (printable/voidable) + rental add-ons shown individually
   const csRows=(S.cashSales||[]).filter(r=>r.session_id===sessId);
@@ -28463,108 +28457,108 @@ function renderCashier(){
     const rt=Math.round(disp.reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
     const paidNet=Math.round(disp.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
     const cardShown=Math.min(cardAmt,paidNet),cashShown=Math.max(0,Math.round((paidNet-cardShown)*100)/100);
-    return`<div style="border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px${refunded?';opacity:.6':''}">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
-        <div style="font-size:11px;color:var(--muted)">${esc(rc.cust||t('cashWalkup'))}${rc.at?` · ${new Date(rc.at).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ})}`:''}${refunded?` · <span style="color:var(--orange);font-weight:800">${t('cashRefunded')}</span>`:''}</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+    return`<div class="sl-rc${refunded?' sl-o60':''}">
+      <div class="sl-rc-head">
+        <div class="sl-f11m">${esc(rc.cust||t('cashWalkup'))}${rc.at?` · ${new Date(rc.at).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ})}`:''}${refunded?` · <span class="sl-refd">${t('cashRefunded')}</span>`:''}</div>
+        <div class="sl-rc-acts">
           ${refunded?'':`${disp.some(l=>l.pay==='pending')?`<button class="btn-sm btn-green" data-on-click="${_on("_ctMarkReceiptPaid",rc.key)}">${t('cashMarkPaid')}</button>`:''}<button class="btn-sm btn-muted" data-on-click="${_on("showReceiptEdit",rc.key)}">${t('cashEditBtn')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_ctReprint",rc.key)}">${t('repPrintNow')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_ctShareReceipt",rc.key)}">${t('cashShare')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_ctRefundReceipt",rc.key)}">${t('cashRefund')}</button>`}
           <button class="btn-sm btn-muted" data-on-click="${_on("_ctVoidReceipt",rc.key)}" aria-label="${t('cashVoid')}">${t('cashVoid')}</button>
         </div>
       </div>
-      ${disp.map(l=>`<div style="display:flex;align-items:center;gap:7px;font-size:12px;padding:2px 0">${_itemThumb(l.item_id,22)}<span style="flex:1;min-width:0">${esc(l.name)}${Number(l.qty)>1?` <span style="color:var(--muted)">×${esc(l.qty)}</span>`:''}${l.category==='__discount__'?'':` <span style="color:var(--muted)">· ${_cashPayBadge(l.pay,l.team_name)}</span>`}</span><bdi style="font-weight:700;white-space:nowrap">SAR ${Math.round((Number(l.qty)||0)*(Number(l.price)||0)*100)/100}</bdi></div>`).join('')}
-      <div style="display:flex;justify-content:space-between;font-weight:800;border-top:1px solid var(--border);margin-top:5px;padding-top:5px;font-size:12px"><span>${t('repTotal')}</span><bdi>SAR ${rt}</bdi></div>
-      ${(cardAmt>0&&!refunded)?`<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px"><span>${t('cashCard')} SAR ${cardShown}</span><span>${t('cashCash')} SAR ${cashShown}</span></div>`:''}
+      ${disp.map(l=>`<div class="sl-rc-line">${_itemThumb(l.item_id,22)}<span class="sl-f1m0">${esc(l.name)}${Number(l.qty)>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''}${l.category==='__discount__'?'':` <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team_name)}</span>`}</span><bdi class="sl-amt">SAR ${Math.round((Number(l.qty)||0)*(Number(l.price)||0)*100)/100}</bdi></div>`).join('')}
+      <div class="sl-rc-tot"><span>${t('repTotal')}</span><bdi>SAR ${rt}</bdi></div>
+      ${(cardAmt>0&&!refunded)?`<div class="sl-split"><span>${t('cashCard')} SAR ${cardShown}</span><span>${t('cashCash')} SAR ${cashShown}</span></div>`:''}
     </div>`;}).join('');
-  const rentalRows=rentalLines.map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);flex-wrap:wrap">
-      ${_itemThumb(p.id,28)}<div style="flex:1;min-width:120px"><div style="font-weight:700;font-size:13px">${esc(p.name)}${Number(p.qty)>1?` <span style="color:var(--muted)">×${esc(p.qty)}</span>`:''}</div>
-      <div style="font-size:11px;color:var(--muted)">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)} · ${esc(p.who)} <span style="opacity:.65">(${t('cashRentalTag')})</span></div></div>
-      <bdi style="font-weight:800;white-space:nowrap">SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi>
-      <div style="display:flex;gap:6px"><button class="btn-sm btn-muted" data-on-click="${_on("showCashierModal",p.entryId)}">${t('cashEditBtn')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_rentalSaleDelete",p.entryId,Number(p.pidx))}">${t('cashVoid')}</button></div>
+  const rentalRows=rentalLines.map(p=>`<div class="sl-rent">
+      ${_itemThumb(p.id,28)}<div class="sl-rent-b"><div class="sl-nm13">${esc(p.name)}${Number(p.qty)>1?` <span class="sl-muted">×${esc(p.qty)}</span>`:''}</div>
+      <div class="sl-f11m">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)} · ${esc(p.who)} <span class="sl-o65">(${t('cashRentalTag')})</span></div></div>
+      <bdi class="sl-amt8">SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi>
+      <div class="sl-acts6"><button class="btn-sm btn-muted" data-on-click="${_on("showCashierModal",p.entryId)}">${t('cashEditBtn')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_rentalSaleDelete",p.entryId,Number(p.pidx))}">${t('cashVoid')}</button></div>
     </div>`).join('');
-  const ledger=(receipts.length||rentalLines.length)?`${receiptCards}${rentalRows}`:`<div class="empty-state" style="padding:24px">${t('cashNoSalesSession')}</div>`;
-  const catRows=tot.cats.map(c=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0"><span style="color:var(--muted)">${esc(_invCatLabel(c.cat))} <span style="opacity:.6">×${c.qty}</span></span><span style="font-weight:700"><bdi>SAR ${c.value}</bdi></span></div>`).join('');
-  el.innerHTML=`<div style="padding:18px 20px">
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px">
-      <div><h2 style="font-size:20px;font-weight:900">${t('cashierTitle')}</h2>
-        <div style="font-size:13px;color:var(--muted)">${t('cashTabSub')}</div>
-        ${_outboxCount()?`<div role="button" tabindex="0" data-on-click="${_on("_outboxRetryOrClear")}" data-on-keydown="${_on("_on_renderCashier_3",_EV,_EL)}" title="${t('cashPendingSync').replace('{0}',_outboxCount())}" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:11px;font-weight:800;color:var(--orange);background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.4);border-radius:3px;padding:3px 9px">↻ ${t('cashPendingSync').replace('{0}',_outboxCount())}</div>`:''}</div>
-      <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap">
-        <div><label style="${_lbl}">${t('colSession')}</label><br><select data-on-change="${_on("_ctSet","_ctSession",_P("value"))}" style="${_inp};max-width:240px;margin-top:3px">${sessOpts}</select></div>
-        <button class="btn-secondary" data-on-click="${_on("printCloseout")}" style="white-space:nowrap">${t('closeoutBtn')}</button>
-        <button class="btn-secondary" data-on-click="${_on("recordDrawerCount")}" style="white-space:nowrap">${t('drawerCountBtn')}</button>
+  const ledger=(receipts.length||rentalLines.length)?`${receiptCards}${rentalRows}`:`<div class="empty-state sl-p24">${t('cashNoSalesSession')}</div>`;
+  const catRows=tot.cats.map(c=>`<div class="sl-cat"><span class="sl-muted">${esc(_invCatLabel(c.cat))} <span class="sl-o60">×${c.qty}</span></span><span class="sl-b700"><bdi>SAR ${c.value}</bdi></span></div>`).join('');
+  el.innerHTML=`<div class="sl-wrap">
+    <div class="sl-head">
+      <div><h2 class="sl-h2">${t('cashierTitle')}</h2>
+        <div class="sl-sub">${t('cashTabSub')}</div>
+        ${_outboxCount()?`<div role="button" tabindex="0" data-on-click="${_on("_outboxRetryOrClear")}" data-on-keydown="${_on("_on_renderCashier_3",_EV,_EL)}" title="${t('cashPendingSync').replace('{0}',_outboxCount())}" class="sl-sync">↻ ${t('cashPendingSync').replace('{0}',_outboxCount())}</div>`:''}</div>
+      <div class="sl-head-r">
+        <div><label class="sl-lbl">${t('colSession')}</label><br><select data-on-change="${_on("_ctSet","_ctSession",_P("value"))}" class="sl-in sl-sess">${sessOpts}</select></div>
+        <button class="btn-secondary sl-nowrap" data-on-click="${_on("printCloseout")}">${t('closeoutBtn')}</button>
+        <button class="btn-secondary sl-nowrap" data-on-click="${_on("recordDrawerCount")}">${t('drawerCountBtn')}</button>
       </div>
     </div>
-    ${lowItems.length?`<div style="background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.4);color:var(--orange);border-radius:4px;padding:8px 12px;font-size:12px;font-weight:700;margin-top:12px">${t('invLowAlert').replace('{0}',lowItems.length)}</div>`:''}
-    <div class="cashier-grid" style="grid-template-columns:1fr;gap:16px;margin-top:14px">
-      <div class="card" style="padding:16px">
-        <div style="font-weight:800;font-size:14px;margin-bottom:12px">${t('cashNewSale')}</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div><label style="${_lbl}">${t('cashCustomerLabel')}</label>
-            <div style="position:relative">
-              <input type="text" value="${esc(S._ctCust)}" data-on-input="${_on("_on_renderCashier_4",_EV,_EL)}" data-on-focus="${_on("_ctCustSuggest",true)}" data-on-blur="${_on("_on_renderCashier_5",_EV,_EL)}" data-on-keydown="${_on("_on_renderCashier_6",_EV,_EL)}" placeholder="${t('cashCustomerPh')}" style="${_inp}" autocomplete="off">
-              <div id="ct-cust-sug" style="position:absolute;top:100%;left:0;right:0;z-index:40"></div>
+    ${lowItems.length?`<div class="sl-low">${t('invLowAlert').replace('{0}',lowItems.length)}</div>`:''}
+    <div class="cashier-grid sl-cgrid">
+      <div class="card sl-p16">
+        <div class="sl-new-h">${t('cashNewSale')}</div>
+        <div class="sl-col10">
+          <div><label class="sl-lbl">${t('cashCustomerLabel')}</label>
+            <div class="sl-rel">
+              <input type="text" value="${esc(S._ctCust)}" data-on-input="${_on("_on_renderCashier_4",_EV,_EL)}" data-on-focus="${_on("_ctCustSuggest",true)}" data-on-blur="${_on("_on_renderCashier_5",_EV,_EL)}" data-on-keydown="${_on("_on_renderCashier_6",_EV,_EL)}" placeholder="${t('cashCustomerPh')}" class="sl-in" autocomplete="off">
+              <div id="ct-cust-sug" class="sl-sug-host"></div>
             </div>
-            ${S._ctCustId?`<div style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.3);border-radius:3px;padding:3px 9px">✓ ${t('cashAcctLinked')}<button data-on-click="${_on("_on_renderCashier_7",_EV,_EL)}" aria-label="×" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;line-height:1;padding:0">×</button></div>`:''}</div>
-          <div><label style="${_lbl}">${t('invItemName')}</label>
+            ${S._ctCustId?`<div class="sl-linked">✓ ${t('cashAcctLinked')}<button data-on-click="${_on("_on_renderCashier_7",_EV,_EL)}" aria-label="×" class="sl-unlink">×</button></div>`:''}</div>
+          <div><label class="sl-lbl">${t('invItemName')}</label>
             ${_ctItemPicker}
           </div>
-          ${isCustom?`<div><label style="${_lbl}">${t('cashNameLabel')}</label><input type="text" value="${esc(S._ctName)}" data-on-input="${_on("_on_renderCashier_8",_EV,_EL)}" style="${_inp}"></div>
-          <div><label style="${_lbl}">${t('invCategory')}</label><select data-on-change="${_on("_ctSet","_ctCat",_P("value"))}" style="${_inp}">${INV_CATS.map(c=>`<option value="${esc(c)}"${S._ctCat===c?' selected':''}>${esc(_invCatLabel(c))}</option>`).join('')}</select></div>`:''}
-          <div style="display:flex;gap:9px">
-            <div style="flex:1"><label style="${_lbl}">${t('cashQtyLabel')}</label>
-              <div style="display:flex;align-items:center;gap:6px">
-                <button type="button" data-on-click="${_on("_ctQtyStep",-1)}" aria-label="−" style="width:38px;height:38px;flex-shrink:0;border-radius:4px;border:1px solid var(--border);background:var(--s2);color:var(--text);font-size:18px;font-weight:800;cursor:pointer;line-height:1">−</button>
-                <input type="number" min="1" value="${esc(S._ctQty)}" data-on-input="${_on("_on_renderCashier_9",_EV,_EL)}" style="${_inp};text-align:center">
-                <button type="button" data-on-click="${_on("_ctQtyStep",1)}" aria-label="+" style="width:38px;height:38px;flex-shrink:0;border-radius:4px;border:1px solid var(--green);background:rgba(var(--green-rgb),.12);color:var(--green);font-size:18px;font-weight:800;cursor:pointer;line-height:1">+</button>
+          ${isCustom?`<div><label class="sl-lbl">${t('cashNameLabel')}</label><input type="text" value="${esc(S._ctName)}" data-on-input="${_on("_on_renderCashier_8",_EV,_EL)}" class="sl-in"></div>
+          <div><label class="sl-lbl">${t('invCategory')}</label><select data-on-change="${_on("_ctSet","_ctCat",_P("value"))}" class="sl-in">${INV_CATS.map(c=>`<option value="${esc(c)}"${S._ctCat===c?' selected':''}>${esc(_invCatLabel(c))}</option>`).join('')}</select></div>`:''}
+          <div class="sl-row9">
+            <div class="sl-f1"><label class="sl-lbl">${t('cashQtyLabel')}</label>
+              <div class="sl-qty">
+                <button type="button" data-on-click="${_on("_ctQtyStep",-1)}" aria-label="−" class="sl-step">−</button>
+                <input type="number" min="1" value="${esc(S._ctQty)}" data-on-input="${_on("_on_renderCashier_9",_EV,_EL)}" class="sl-in sl-tac">
+                <button type="button" data-on-click="${_on("_ctQtyStep",1)}" aria-label="+" class="sl-step sl-step-up">+</button>
               </div></div>
-            <div style="flex:2"><label style="${_lbl}">${t('cashAmtLabel')}</label><input type="number" min="0" step="0.5" value="${esc(S._ctAmt)}" data-on-input="${_on("_on_renderCashier_10",_EV,_EL)}" placeholder="0" style="${_inp}"></div>
+            <div class="sl-f2"><label class="sl-lbl">${t('cashAmtLabel')}</label><input type="number" min="0" step="0.5" value="${esc(S._ctAmt)}" data-on-input="${_on("_on_renderCashier_10",_EV,_EL)}" placeholder="0" class="sl-in"></div>
           </div>
-          <div><label style="${_lbl}">${t('cashPayLabel')}</label>
-            <div style="display:flex;flex-wrap:wrap;gap:7px;margin-top:4px">${payBtn('paid',t('paidLabel'))}${payBtn('pending',t('pendingLabel'))}${payBtn('house',t('onTheHouseLabel'))}${payBtn('team',t('payTeam'))}</div>
-            ${S._ctPay==='team'?`<div style="display:flex;gap:7px;margin-top:7px">
-              <select data-on-change="${_on("_on_renderCashier_11",_EV,_EL)}" style="${_inp};flex:1">${(S._ctTeam&&!teamNames().includes(S._ctTeam))?`<option value="${esc(S._ctTeam)}" selected>${esc(S._ctTeam)}</option>`:''}<option value=""${!S._ctTeam?' selected':''}>${t('teamChoose')}</option>${teamNames().map(n=>`<option value="${esc(n)}"${S._ctTeam===n?' selected':''}>${esc(n)}</option>`).join('')}</select>
-              <button type="button" class="btn-secondary" style="white-space:nowrap;flex-shrink:0" data-on-click="${_on("_ctTeamCustom")}">+ ${t('teamCustom')}</button>
-              <button type="button" class="btn-secondary" data-on-click="${_on("showTeamManager")}" aria-label="${t('teamManage')}" title="${t('teamManage')}" style="flex-shrink:0;padding:7px 9px">${ICON_PENCIL}</button>
+          <div><label class="sl-lbl">${t('cashPayLabel')}</label>
+            <div class="sl-pays">${payBtn('paid',t('paidLabel'))}${payBtn('pending',t('pendingLabel'))}${payBtn('house',t('onTheHouseLabel'))}${payBtn('team',t('payTeam'))}</div>
+            ${S._ctPay==='team'?`<div class="sl-team">
+              <select data-on-change="${_on("_on_renderCashier_11",_EV,_EL)}" class="sl-in sl-f1">${(S._ctTeam&&!teamNames().includes(S._ctTeam))?`<option value="${esc(S._ctTeam)}" selected>${esc(S._ctTeam)}</option>`:''}<option value=""${!S._ctTeam?' selected':''}>${t('teamChoose')}</option>${teamNames().map(n=>`<option value="${esc(n)}"${S._ctTeam===n?' selected':''}>${esc(n)}</option>`).join('')}</select>
+              <button type="button" class="btn-secondary sl-nw0" data-on-click="${_on("_ctTeamCustom")}">+ ${t('teamCustom')}</button>
+              <button type="button" class="btn-secondary sl-pencil" data-on-click="${_on("showTeamManager")}" aria-label="${t('teamManage')}" title="${t('teamManage')}">${ICON_PENCIL}</button>
             </div>`:''}
           </div>
-          <button class="btn-secondary" style="width:100%;margin-top:2px" data-on-click="${_on("_ctCartAdd")}">+ ${t('cashAddItemBtn')}</button>
-          ${cart.length?`<div style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px">
-            <div style="${_lbl};margin-bottom:5px">${t('cashCartTitle')}</div>
-            ${cart.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px">
-              ${_itemThumb(l.item_id,24)}<div style="flex:1;min-width:0"><span style="font-weight:700">${esc(l.name)}</span>${l.qty>1?` <span style="color:var(--muted)">×${esc(l.qty)}</span>`:''} <span style="color:var(--muted)">· ${_cashPayBadge(l.pay,l.team)}</span></div>
-              <bdi style="font-weight:700;white-space:nowrap">SAR ${Math.round(l.qty*l.price*100)/100}</bdi>
-              <button data-on-click="${_on("_ctCartRemove",i)}" aria-label="${t('cashVoid')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px">&times;</button>
+          <button class="btn-secondary sl-full2" data-on-click="${_on("_ctCartAdd")}">+ ${t('cashAddItemBtn')}</button>
+          ${cart.length?`<div class="sl-cart">
+            <div class="sl-lbl sl-mb5">${t('cashCartTitle')}</div>
+            ${cart.map((l,i)=>`<div class="sl-cl">
+              ${_itemThumb(l.item_id,24)}<div class="sl-f1m0"><span class="sl-b700">${esc(l.name)}</span>${l.qty>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''} <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team)}</span></div>
+              <bdi class="sl-amt">SAR ${Math.round(l.qty*l.price*100)/100}</bdi>
+              <button data-on-click="${_on("_ctCartRemove",i)}" aria-label="${t('cashVoid')}" class="sl-x16">&times;</button>
             </div>`).join('')}
-            <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-              <label style="${_lbl};flex:1">${t('cashDiscount')}</label>
-              <input type="number" min="0" step="0.5" value="${esc(S._ctDisc)}" data-on-input="${_on("_on_renderCashier_12",_EV,_EL)}" placeholder="0" style="${_inp};width:88px">
-              <button type="button" data-on-click="${_on("_on_renderCashier_13",_EV,_EL)}" style="${_tgl}">${S._ctDiscPct?'%':'SAR'}</button>
+            <div class="sl-disc">
+              <label class="sl-lbl sl-f1">${t('cashDiscount')}</label>
+              <input type="number" min="0" step="0.5" value="${esc(S._ctDisc)}" data-on-input="${_on("_on_renderCashier_12",_EV,_EL)}" placeholder="0" class="sl-in sl-w88">
+              <button type="button" data-on-click="${_on("_on_renderCashier_13",_EV,_EL)}" class="sl-tgl">${S._ctDiscPct?'%':'SAR'}</button>
             </div>
-            ${cartPaidNum>0?`<div style="display:flex;align-items:center;gap:8px;margin-top:7px">
-              <label style="${_lbl};flex:1">${t('cashSplitLabel')}</label>
-              <input type="number" min="0" step="0.5" value="${esc(S._ctCard)}" data-on-input="${_on("_on_renderCashier_14",_EV,_EL)}" placeholder="0" style="${_inp};width:88px">
-              <button type="button" data-on-click="${_on("_on_renderCashier_15",_EV,_EL)}" style="${_tgl}">${S._ctCardPct?'%':'SAR'}</button>
+            ${cartPaidNum>0?`<div class="sl-card7">
+              <label class="sl-lbl sl-f1">${t('cashSplitLabel')}</label>
+              <input type="number" min="0" step="0.5" value="${esc(S._ctCard)}" data-on-input="${_on("_on_renderCashier_14",_EV,_EL)}" placeholder="0" class="sl-in sl-w88">
+              <button type="button" data-on-click="${_on("_on_renderCashier_15",_EV,_EL)}" class="sl-tgl">${S._ctCardPct?'%':'SAR'}</button>
             </div>`:''}
             <div class="mm-cart-foot">
-            <div style="display:flex;justify-content:space-between;font-weight:900;border-top:1px solid var(--border);margin-top:8px;padding-top:6px"><span>${t('repTotal')}</span><bdi id="ct-grand" style="color:var(--green)">SAR ${cartAfterDisc}</bdi></div>
-            <div id="ct-split" style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:2px">${cartCardSAR>0?`<span>${t('cashCard')} SAR ${cartCardSAR}</span><span>${t('cashCash')} SAR ${cartCashSAR}</span>`:''}</div>
-            <button class="btn-primary" style="width:100%;margin-top:10px" data-on-click="${_on("_ctRecord")}">${t('cashRecordReceiptBtn')}</button>
+            <div class="sl-grand"><span>${t('repTotal')}</span><bdi id="ct-grand" class="sl-green">SAR ${cartAfterDisc}</bdi></div>
+            <div id="ct-split" class="sl-split">${cartCardSAR>0?`<span>${t('cashCard')} SAR ${cartCardSAR}</span><span>${t('cashCash')} SAR ${cartCashSAR}</span>`:''}</div>
+            <button class="btn-primary sl-full10" data-on-click="${_on("_ctRecord")}">${t('cashRecordReceiptBtn')}</button>
             </div>
           </div>`:''}
         </div>
       </div>
-      <div class="card" style="padding:16px">
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
-          <div><div style="font-size:22px;font-weight:900"><bdi>SAR ${tot.value}</bdi></div><div style="${_lbl}">${t('cashValue')}</div></div>
-          <div><div style="font-size:22px;font-weight:900;color:var(--green)"><bdi>SAR ${tot.collected}</bdi></div><div style="${_lbl}">${t('printCollected')}</div></div>
-          <div><div style="font-size:22px;font-weight:900;color:var(--orange)"><bdi>SAR ${tot.pending}</bdi></div><div style="${_lbl}">${t('printPending')}</div></div>
+      <div class="card sl-p16">
+        <div class="sl-kpis">
+          <div><div class="sl-kpi"><bdi>SAR ${tot.value}</bdi></div><div class="sl-lbl">${t('cashValue')}</div></div>
+          <div><div class="sl-kpi sl-green"><bdi>SAR ${tot.collected}</bdi></div><div class="sl-lbl">${t('printCollected')}</div></div>
+          <div><div class="sl-kpi sl-orange"><bdi>SAR ${tot.pending}</bdi></div><div class="sl-lbl">${t('printPending')}</div></div>
         </div>
-        ${(cc.card>0||cc.cash>0)?`<div style="display:flex;gap:14px;font-size:12px;font-weight:700;margin-bottom:8px"><span>${t('cashCard')}: <bdi style="color:var(--blue)">SAR ${cc.card}</bdi></span><span>${t('cashCash')}: <bdi style="color:var(--green)">SAR ${cc.cash}</bdi></span></div>`:''}
-        ${tot.team>0?`<div style="font-size:12px;color:var(--purple);font-weight:800;margin-bottom:8px">${t('payTeam')}: <bdi>SAR ${tot.team}</bdi></div>`:''}
-        ${tot.discount>0?`<div style="font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px">${t('cashDiscount')}: <bdi>SAR ${tot.discount}</bdi></div>`:''}
-        ${tot.refunded>0?`<div style="font-size:12px;color:var(--orange);font-weight:800;margin-bottom:10px">${t('cashRefunds')}: <bdi>SAR ${tot.refunded}</bdi></div>`:''}
-        ${catRows?`<div style="background:var(--s2);border-radius:4px;padding:10px 12px;margin-bottom:12px">${catRows}</div>`:''}
-        <div style="font-weight:800;font-size:13px;margin-bottom:2px">${t('cashLedgerTitle')} <span style="color:var(--muted);font-weight:600">(${lines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__').length})</span></div>
+        ${(cc.card>0||cc.cash>0)?`<div class="sl-cc"><span>${t('cashCard')}: <bdi class="sl-blue">SAR ${cc.card}</bdi></span><span>${t('cashCash')}: <bdi class="sl-green">SAR ${cc.cash}</bdi></span></div>`:''}
+        ${tot.team>0?`<div class="sl-tteam">${t('payTeam')}: <bdi>SAR ${tot.team}</bdi></div>`:''}
+        ${tot.discount>0?`<div class="sl-tdisc">${t('cashDiscount')}: <bdi>SAR ${tot.discount}</bdi></div>`:''}
+        ${tot.refunded>0?`<div class="sl-tref">${t('cashRefunds')}: <bdi>SAR ${tot.refunded}</bdi></div>`:''}
+        ${catRows?`<div class="sl-cats">${catRows}</div>`:''}
+        <div class="sl-led-h">${t('cashLedgerTitle')} <span class="sl-m600">(${lines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__').length})</span></div>
         ${ledger}
       </div>
     </div>
