@@ -3219,7 +3219,7 @@ function _waiverCopy(s){return _needsBike(s)
 // their rights. The footer link, the sign-up forms and /?privacy all open it. English and
 // Arabic carry the full text; every other language shows the English one under a line that
 // says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice.
-const PRIVACY_VERSION='2026-09-25';
+const PRIVACY_VERSION='2026-09-28';
 const _PV_MAIL='<a href="mailto:info@micromobility.sa">info@micromobility.sa</a>';
 const PRIVACY_NOTICE={
 en:[
@@ -3238,6 +3238,8 @@ en:[
     ['Country and city','Optional','Totals of where our riders come from'],
     ['Social media handles','Optional; required on a community membership application. Seen only by our staff.','So our staff can get to know riders who may be invited to join our riding community. We never post, tag or share them.'],
     ['Profession','Asked only on a community membership application. Seen only by our staff.','So our staff can get to know the riders who apply to join our riding community. We never share it.'],
+    ['Learn-to-ride sign-up: each learner’s name (for a child or another adult), age, gender, height and riding experience','Asked only on a learn-to-ride sign-up. Seen only by our staff.','Arranging the lesson, having a bike of the right size ready and teaching at the right level'],
+    ['How you heard about us','Asked on a community membership application and a learn-to-ride sign-up','Knowing how riders find us, in totals only'],
     ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
     ['Your choice about ride news, and when you made it','Recorded when you choose','Knowing whether we may send you ride news'],
   ]}},
@@ -3246,6 +3248,7 @@ en:[
     '<strong>From you,</strong> when you sign up, edit your profile, book or give feedback.',
     '<strong>From the person who booked you,</strong> if someone booked you as part of their party. They give us your name and height.',
     '<strong>From our community membership application</strong> at micromobility.sa/community/registration, if you apply to join our riding community. Our staff read it and reply. If you are accepted and have no account yet, we create one from those details with a temporary password, which you must change the first time you sign in.',
+    '<strong>From our learn-to-ride sign-up</strong> at micromobility.sa/experiences/learn, if you sign up for a riding lesson for yourself, your children or other adults. Our staff contact you to arrange the lesson. If you have no account yet, we create one from your details with a temporary password, which you must change the first time you sign in. If you sign up another adult, tell them first and make sure they agree.',
     '<strong>From Apple or Google,</strong> if you sign in with them. They give us your name and email address, or an Apple relay address.',
     '<strong>From your device:</strong> a short technical report if the website hits an error (the error, the page and your browser type), and anonymous visit counts through Cloudflare Web Analytics, which uses no cookies.',
   ]},
@@ -3303,7 +3306,7 @@ en:[
   ]},
   {p:'To use any of these rights, email '+_PV_MAIL+'. We will reply within 30 days. You can also complain to the Saudi Data & AI Authority (SDAIA).'},
   {h:'Children'},
-  {p:'Riders under 18 must be booked by a parent or guardian, who provides their details and agrees to the waiver on their behalf.'},
+  {p:'Riders under 18 must be booked by a parent or guardian, who provides their details and agrees to the waiver on their behalf. A child is signed up for a riding lesson by a parent or guardian, who provides the child’s details.'},
   {h:'Data breaches'},
   {p:'If your data is leaked, lost or accessed without permission, we will inform SDAIA. We will also tell you if it could harm you or your rights.'},
   {h:'Changes'},
@@ -3325,6 +3328,8 @@ ar:[
     ['الدولة والمدينة','اختياري','إحصاءات مجمّعة عن أماكن قدوم راكبينا'],
     ['حسابات التواصل الاجتماعي','اختياري؛ وإلزامي في طلب عضوية المجتمع. لا يطّلع عليها إلا موظفونا.','ليتعرّف موظفونا على الراكبين الذين قد تتم دعوتهم للانضمام إلى مجتمع الركوب لدينا. لا ننشرها ولا نشير إليها ولا نشاركها إطلاقًا.'],
     ['المهنة','تُطلب في طلب عضوية المجتمع فقط، ولا يطّلع عليها إلا موظفونا.','ليتعرّف موظفونا على الراكبين المتقدّمين للانضمام إلى مجتمع الركوب لدينا. لا نشاركها إطلاقًا.'],
+    ['التسجيل في دروس تعلّم الركوب: اسم كل متعلّم (للطفل أو لشخص بالغ آخر) وعمره وجنسه وطوله وخبرته في الركوب','يُطلب في التسجيل في دروس تعلّم الركوب فقط، ولا يطّلع عليه إلا موظفونا.','ترتيب الدرس، وتجهيز دراجة بالمقاس المناسب، والتعليم بالمستوى المناسب'],
+    ['كيف عرفت عنا','يُسأل في طلب عضوية المجتمع وفي التسجيل في دروس تعلّم الركوب','معرفة كيف يصل إلينا الراكبون، في صورة أعداد إجمالية فقط'],
     ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
     ['اختيارك بشأن أخبار الرحلات ووقت اختيارك','يُسجَّل عند اختيارك','معرفة ما إذا كان يحق لنا إرسال أخبار الرحلات إليك'],
   ]}},
@@ -3333,6 +3338,7 @@ ar:[
     '<strong>منك مباشرة،</strong> عند التسجيل أو تعديل ملفك الشخصي أو الحجز أو تقديم ملاحظاتك.',
     '<strong>من الشخص الذي حجز لك،</strong> إذا حجز لك أحدهم ضمن مجموعته، فيزوّدنا باسمك وطولك.',
     '<strong>من طلب عضوية المجتمع</strong> عبر micromobility.sa/community/registration، إذا تقدّمت للانضمام إلى مجتمع الركوب لدينا. يطّلع موظفونا على طلبك ويردّون عليك. وإذا قُبلت ولم يكن لديك حساب، ننشئ لك حسابًا من تلك البيانات بكلمة مرور مؤقتة، يجب عليك تغييرها عند أول تسجيل دخول.',
+    '<strong>من التسجيل في دروس تعلّم الركوب</strong> عبر micromobility.sa/experiences/learn، إذا سجّلت في درس ركوب لنفسك أو لأطفالك أو لبالغين آخرين. يتواصل معك موظفونا لترتيب الدرس. وإذا لم يكن لديك حساب، ننشئ لك حسابًا من بياناتك بكلمة مرور مؤقتة يجب تغييرها عند أول تسجيل دخول. وإذا سجّلت شخصًا بالغًا آخر، فأبلغه أولًا وتأكد من موافقته.',
     '<strong>من Apple أو Google،</strong> إذا سجّلت الدخول عبرهما، فيزوّداننا باسمك وبريدك الإلكتروني أو عنوان بريد Apple البديل.',
     '<strong>من جهازك:</strong> تقرير تقني مختصر إذا واجه الموقع خطأً (الخطأ والصفحة ونوع المتصفح)، وأعداد زيارات مجهولة الهوية عبر Cloudflare Web Analytics الذي لا يستخدم ملفات تعريف الارتباط.',
   ]},
@@ -3390,7 +3396,7 @@ ar:[
   ]},
   {p:'لممارسة أي من هذه الحقوق، راسلنا على '+_PV_MAIL+'، وسنرد خلال 30 يومًا. ويحق لك أيضًا تقديم شكوى إلى الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا).'},
   {h:'الأطفال'},
-  {p:'يجب أن يتم حجز الراكبين دون 18 عامًا عبر أحد الوالدين أو الولي، الذي يقدّم بياناتهم ويوافق على الإقرار نيابةً عنهم.'},
+  {p:'يجب أن يتم حجز الراكبين دون 18 عامًا عبر أحد الوالدين أو الولي، الذي يقدّم بياناتهم ويوافق على الإقرار نيابةً عنهم. ويسجّل الطفلَ في درس الركوب أحدُ والديه أو وليّ أمره، ويقدّم بيانات الطفل.'},
   {h:'تسرّب البيانات'},
   {p:'إذا تسرّبت بياناتك أو فُقدت أو تم الوصول إليها دون إذن، فسنُبلغ سدايا، وسنُبلغك أيضًا إذا كان ذلك قد يضر بك أو بحقوقك.'},
   {h:'التعديلات'},
