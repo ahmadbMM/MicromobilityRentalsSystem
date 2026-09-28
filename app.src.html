@@ -22236,7 +22236,7 @@ async function confirmAssign(){
 }
 
 
-function updateColorPreview(){const p=document.getElementById('color-prev');if(p)p.innerHTML=S.addBikeColors.map(c=>`<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${_bkHex(c)};border:2px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('');}
+function updateColorPreview(){const p=document.getElementById('color-prev');if(p)p.innerHTML=S.addBikeColors.map(c=>`<span class="flt-cdot" data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>`).join('');}
 function addColorSlot(){if(S.addBikeColors.length>=4)return;S.addBikeColors.push('#ffffff');S.addBikeColorNames.push('');renderBikes();}
 function removeColor(i){if(S.addBikeColors.length<=1)return;S.addBikeColors.splice(i,1);S.addBikeColorNames.splice(i,1);renderBikes();}
 
@@ -22298,11 +22298,11 @@ function renderBikes(_resultsOnly){
   const bkTypeBtns=['Road','Hybrid','Mountain','Kids','Gravel'].map(ty=>
     `<button class="toggle-btn${S.addBikeType===ty?' active':''}" aria-pressed="${(S.addBikeType===ty)?'true':'false'}" data-on-click="${_on("_on_renderBikes_1",_EV,_EL,ty)}">${typeLabel(ty)}</button>`).join('');
   const colorSlots=S.addBikeColors.map((c,i)=>`
-    <div class="color-slot" style="display:flex;flex-direction:column;gap:4px;align-items:center">
+    <div class="color-slot flt-cslot">
       <input type="color" value="${_bkHex(c)}" data-on-input="${_on("_on_renderBikes_2",_EV,_EL,i)}">
       <input type="text" placeholder="${t('colorNameLabel')}" value="${esc(S.addBikeColorNames[i]||'')}"
         data-on-input="${_on("_on_renderBikes_3",_EV,_EL,i)}"
-        style="width:72px;padding:3px 6px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:11px;font-weight:600;text-align:center">
+        class="flt-cname">
       ${S.addBikeColors.length>1?`<button class="color-del" data-on-click="${_on("removeColor",i)}" type="button" aria-label="${esc(t('removeBtn'))}">&#x2715;</button>`:''}</div>`).join('');
   const addColorBtn=S.addBikeColors.length<4?`<button class="add-color-slot" data-on-click="${_on("addColorSlot")}" type="button">+<br>${t('colorWord')}</button>`:'';
   const frameField=`<select id="bk-frame" data-on-change="${_on("_on_renderBikes_4",_EV,_EL)}">
@@ -22315,22 +22315,22 @@ function renderBikes(_resultsOnly){
   const formNum=isEdit?(S._bkNumber||''):(S._bkNumber||_nextBikeNumber());
   S._bkNumber=String(Number(formNum)||'');
   const _numTaken=_bkNumberTaken(formNum,isEdit?S.editBikeId:null);
-  const numField=`<input id="bk-number" type="number" inputmode="numeric" min="1" max="9999" step="1" value="${Number(formNum)||''}" data-on-input="${_on("_on_renderBikes_5",_EV,_EL)}" style="${_numTaken?'border-color:var(--red)':''}"><div id="bk-number-hint" style="font-size:11px;font-weight:700;margin-top:4px;color:${_numTaken?'var(--red)':'var(--muted)'}">${_numTaken?esc(t('bikeNumberTaken').replace('{0}',_numTaken.name)):t('bikeNumberEditHint')}</div>`;
+  const numField=`<input id="bk-number" type="number" inputmode="numeric" min="1" max="9999" step="1" value="${Number(formNum)||''}" data-on-input="${_on("_on_renderBikes_5",_EV,_EL)}"${_numTaken?` data-cssv="${_cssv({'border-color':'var(--red)'})}"`:''}><div id="bk-number-hint" class="${_numTaken?'flt-nhint-bad':'flt-nhint'}">${_numTaken?esc(t('bikeNumberTaken').replace('{0}',_numTaken.name)):t('bikeNumberEditHint')}</div>`;
   const _autoNm=genBikeName(S.addBikeType,S._bkFrame,formNum,curSize);
   const _nameVal=(S._bkNameCustom&&S._bkName)?S._bkName:_autoNm;
-  const autoNamePreview=`<div class="form-group full" style="margin-bottom:16px"><label>${t('bikeNameLabel')} <span class="label-hint">${t('bikeNameHint')}</span></label>
-    <div style="display:flex;gap:8px;align-items:stretch">
+  const autoNamePreview=`<div class="form-group full flt-mb16"><label>${t('bikeNameLabel')} <span class="label-hint">${t('bikeNameHint')}</span></label>
+    <div class="flt-namerow">
       <input id="bk-name" type="text" value="${esc(_nameVal)}" placeholder="${esc(_autoNm)}" maxlength="60"
-        style="flex:1;min-width:0;font-size:20px;font-weight:900;letter-spacing:-.4px;color:var(--green);padding:10px 14px;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px"
+        class="flt-name"
         data-on-input="${_on("_on_renderBikes_6",_EV,_EL)}">
-      <button type="button" id="bk-name-auto" class="btn-secondary" style="flex-shrink:0;padding:8px 14px;font-size:12px;white-space:nowrap" data-on-click="${_on("_bkNameResetAuto")}"${S._bkNameCustom?'':' disabled'}>${_artIcon('undo',12)} ${t('bikeNameAuto')}</button>
+      <button type="button" id="bk-name-auto" class="btn-secondary flt-nameauto" data-on-click="${_on("_bkNameResetAuto")}"${S._bkNameCustom?'':' disabled'}>${_artIcon('undo',12)} ${t('bikeNameAuto')}</button>
     </div></div>`;
   const addForm=(S.showAddBike||isEdit)?`<div class="inline-form" id="bk-add-form">
     <div class="form-title">${isEdit?t('editBikeTitle'):t('addBikeTitle')}</div>
     <div class="form-row">
-      <div class="form-group" style="flex:2 1 260px"><label>${t('bikeCategoryLabel')}</label><div class="toggle-group">${bkTypeBtns}</div></div>
+      <div class="form-group flt-fgtype"><label>${t('bikeCategoryLabel')}</label><div class="toggle-group">${bkTypeBtns}</div></div>
       <div class="form-group"><label>${t('bikeFrameTypeLabel')} ${_optEditBtn('frames')}</label>${frameField}</div>
-      <div class="form-group" style="flex:0 1 120px"><label>${t('walkinSize')}</label><select id="bk-size" data-on-change="${_on("_on_renderBikes_7",_EV,_EL)}">${sizeOpts}</select></div>
+      <div class="form-group flt-fgsize"><label>${t('walkinSize')}</label><select id="bk-size" data-on-change="${_on("_on_renderBikes_7",_EV,_EL)}">${sizeOpts}</select></div>
     </div>
     <div class="form-row">
       <div class="form-group"><label>${t('bikeNumberLabel')}</label>${numField}</div>
@@ -22338,7 +22338,7 @@ function renderBikes(_resultsOnly){
     ${autoNamePreview}
     <div class="form-row">
       <div class="form-group"><label>${t('bikeStartDate')}</label><input id="bk-start" type="date" value="${esc(S._bkStartDate||'')}" data-on-change="${_on("_on_renderBikes_8",_EV,_EL)}"></div>
-      ${isEdit&&editBike&&(_bkOut(editBike))&&editBike.retired_date?`<div class="form-group"><label>${t('bikeEndDate')}</label><input type="date" value="${esc(editBike.retired_date)}" readonly style="background:var(--s2);color:var(--muted);cursor:not-allowed"></div>`:''}
+      ${isEdit&&editBike&&(_bkOut(editBike))&&editBike.retired_date?`<div class="form-group"><label>${t('bikeEndDate')}</label><input type="date" value="${esc(editBike.retired_date)}" readonly class="flt-ro"></div>`:''}
     </div>
     <div class="form-row">
       <div class="form-group"><label>${t('bikeBrand')} ${_optEditBtn('brands')}</label>${_bkFieldHtml('bk-brand',S._bkBrand,S._bkBrandAdd,_bkBrandNames())}</div>
@@ -22350,13 +22350,13 @@ function renderBikes(_resultsOnly){
     <div class="form-row">
       <div class="form-group"><label>${t('bikeWheelSize')} ${_optEditBtn('wheels')}</label>${_bkFieldHtml('bk-wheel',S._bkWheel,S._bkWheelAdd,_bkWheelList())}</div>
       <div class="form-group"><label>${t('bikeBrakes')} ${_optEditBtn('brakes')}</label>${_bkFieldHtml('bk-brake',S._bkBrake,S._bkBrakeAdd,_bkBrakeList())}</div>
-      <div class="form-group"><label>${t('bikeWeight')}</label><input id="bk-weight" type="number" inputmode="decimal" min="0" step="0.1" value="${esc(S._bkWeight)}" placeholder="—" data-on-input="${_on("_on_renderBikes_9",_EV,_EL)}" style="max-width:120px"></div>
-      <div class="form-group"><label>${t('bikeSpeeds')}</label><select id="bk-speeds" style="max-width:140px" data-on-change="${_on("_on_renderBikes_10",_EV,_EL)}"><option value="">—</option>${Array.from({length:50},(_,i)=>i+1).map(n=>`<option value="${n}"${S._bkSpeeds===String(n)?' selected':''}>${n}</option>`).join('')}</select></div>
+      <div class="form-group"><label>${t('bikeWeight')}</label><input id="bk-weight" type="number" inputmode="decimal" min="0" step="0.1" value="${esc(S._bkWeight)}" placeholder="—" data-on-input="${_on("_on_renderBikes_9",_EV,_EL)}" class="flt-mw120"></div>
+      <div class="form-group"><label>${t('bikeSpeeds')}</label><select id="bk-speeds" class="flt-mw140" data-on-change="${_on("_on_renderBikes_10",_EV,_EL)}"><option value="">—</option>${Array.from({length:50},(_,i)=>i+1).map(n=>`<option value="${n}"${S._bkSpeeds===String(n)?' selected':''}>${n}</option>`).join('')}</select></div>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>${t('bikeRentalPrice')} (SAR)</label>
-        ${!isAdmin()?`<div style="padding:11px 14px;background:var(--s2);border:1px solid var(--border);border-radius:4px;color:var(--muted);font-weight:700">${S._bkRentalPrice?`SAR ${esc(S._bkRentalPrice)}`:'—'} <span style="font-size:11px">(${t('adminOnlyMsg')})</span></div>`:(()=>{
+        ${!isAdmin()?`<div class="flt-pricero">${S._bkRentalPrice?`SAR ${esc(S._bkRentalPrice)}`:'—'} <span class="flt-fs11">(${t('adminOnlyMsg')})</span></div>`:(()=>{
           const presets=['57.5','75','95','105','175','250'];
           const isCustom=S._bkRentalPrice&&!presets.includes(S._bkRentalPrice);
           const sel=isCustom?'custom':S._bkRentalPrice;
@@ -22371,28 +22371,28 @@ function renderBikes(_resultsOnly){
             `<option value="custom"${sel==='custom'?' selected':''}>${t('priceCustomOpt')}</option>`,
           ].join('');
           return`<select id="bk-rental-price" data-on-change="${_on("setBkRentalPrice",_P("value"))}">${opts}</select>`
-            +(isCustom?`<div style="font-size:12px;color:var(--green);font-weight:700;margin-top:5px">${t('customWord')}: SAR ${esc(S._bkRentalPrice)}</div>`:'');
+            +(isCustom?`<div class="flt-pricecus">${t('customWord')}: SAR ${esc(S._bkRentalPrice)}</div>`:'');
         })()}
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:16px">
+    <div class="form-group flt-mb16">
       <label>${t('bikeColorsLabel')} &nbsp;<span class="label-hint">${t('colorsHint')}</span></label>
       <div class="color-builder">
-        <div id="color-prev" style="display:flex;gap:8px;align-items:center;padding:6px 0">${S.addBikeColors.map(c=>`<span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:${_bkHex(c)};border:2px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('')}</div>
+        <div id="color-prev" class="flt-cprev">${S.addBikeColors.map(c=>`<span class="flt-cdot" data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>`).join('')}</div>
         <div class="color-slots">${colorSlots}${addColorBtn}</div>
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:16px">
+    <div class="form-group flt-mb16">
       <label>${t('bikePhotoLabel')}</label>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        ${S._bkPhoto?`<img loading="lazy" decoding="async" src="${esc(S._bkPhoto)}" alt="" style="width:54px;height:54px;border-radius:4px;object-fit:cover;border:1px solid var(--border)">`:''}
-        <label class="btn-secondary" style="font-size:12px;padding:8px 14px;cursor:pointer;margin:0">${t('uploadPhotoBtn')}<input type="file" accept="image/*" style="display:none" data-on-change="${_on("_on_renderBikes_11",_EV,_EL)}"></label>
-        ${S._bkPhoto?`<button class="btn-secondary" style="font-size:12px;padding:8px 12px" data-on-click="${_on("_on_renderBikes_12",_EV,_EL)}">${t('removePhotoBtn')}</button>`:''}
+      <div class="flt-photorow">
+        ${S._bkPhoto?`<img loading="lazy" decoding="async" src="${esc(S._bkPhoto)}" alt="" class="flt-photo54">`:''}
+        <label class="btn-secondary flt-upload">${t('uploadPhotoBtn')}<input type="file" accept="image/*" class="flt-hide" data-on-change="${_on("_on_renderBikes_11",_EV,_EL)}"></label>
+        ${S._bkPhoto?`<button class="btn-secondary flt-rmphoto" data-on-click="${_on("_on_renderBikes_12",_EV,_EL)}">${t('removePhotoBtn')}</button>`:''}
       </div>
     </div>
     ${_bkPrivHtml(isEdit)}
     ${isEdit&&editBike?_bkPageHtml(editBike):''}
-    <div style="display:flex;gap:8px">
+    <div class="flt-g8">
       <button class="btn-primary" data-on-click="${_on(isEdit?'saveBikeEdit':'addBike')}"> ${isEdit?t('saveBikeBtn'):t('addBikeBtn')}</button>
       <button class="btn-secondary" data-on-click="${_on("cancelBikeForm")}">${t('cancelBtn')}</button>
     </div>
@@ -22413,13 +22413,13 @@ function renderBikes(_resultsOnly){
     const sel=(S.bkSelected||[]).includes(b.id);
     const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':isMaint?'dot-orange':'dot-red';
     const slbl=_bkStatusLabel(b);
-    const sclr=b.status==='available'?'var(--green)':b.status==='in-use'?'var(--orange)':isMaint?'var(--orange)':'var(--red)';
+    const scls=b.status==='available'?'flt-st-green':b.status==='in-use'?'flt-st-orange':isMaint?'flt-st-orange':'flt-st-red';
     const colors=b.colors&&b.colors.length?b.colors:['#03ff89'];
     const colorSwatches=colors.map((c,ci)=>{
       const cn=b.color_names&&b.color_names[ci]?b.color_names[ci]:'';
-      return`<div style="display:flex;flex-direction:column;align-items:center;gap:3px">
-        <span title="${esc(cn)}" style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${_bkHex(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>
-        ${cn?`<span style="font-size:9px;font-weight:700;color:var(--muted-l);white-space:nowrap;max-width:40px;overflow:hidden;text-overflow:ellipsis">${esc(cn)}</span>`:''}
+      return`<div class="flt-sw">
+        <span title="${esc(cn)}" class="flt-sw13" data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>
+        ${cn?`<span class="flt-swname">${esc(cn)}</span>`:''}
       </div>`;
     }).join('');
     
@@ -22427,28 +22427,28 @@ function renderBikes(_resultsOnly){
     const orphaned=b.status==='in-use'&&!user;
     const el=b.status==='in-use'&&user?rideElapsed(user.id):null;
     const riderCell=user
-      ?`<div style="font-size:12px;font-weight:800;color:var(--text)">${esc(user.name)}</div>
-        <div style="font-size:11px;color:var(--green);font-weight:700">#${user.queueNum}${el?` &nbsp;·&nbsp; <span style="color:var(--muted-l)">${el}</span>`:''}</div>`
+      ?`<div class="flt-rider">${esc(user.name)}</div>
+        <div class="flt-riderq">#${user.queueNum}${el?` &nbsp;·&nbsp; <span class="flt-ml">${el}</span>`:''}</div>`
       :orphaned
-        ?`<div style="font-size:11px;font-weight:700;color:var(--orange)">${t('noRiderAssigned')}</div>`
-        :`<span style="color:var(--muted)">—</span>`;
-    const rowBorderClr=orphaned?'rgba(var(--warn-rgb),.7)':b.status==='available'?'rgba(var(--green-rgb),.45)':b.status==='in-use'?'rgba(var(--blue-rgb),.45)':'rgba(var(--red-rgb),.45)';
-    const rowBg=orphaned?'background:rgba(var(--warn-rgb),.06);':b.status==='in-use'?'background:rgba(var(--blue-rgb),.025);':isRetired?'background:rgba(var(--red-rgb),.025);opacity:.75;':'';
-    return`<tr style="border-left:3px solid ${rowBorderClr};${rowBg}${sel?'background:rgba(var(--green-rgb),.07);':''}">
-      <td class="bk-cell-sel" style="text-align:center"><input type="checkbox" aria-label="${esc(b.name)}" ${sel?'checked':''} data-on-click="${_on("_bkToggleSel",b.id)}"></td>
-      <td class="bk-cell-name"><div style="display:flex;align-items:center;gap:10px">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" style="width:38px;height:38px;border-radius:3px;object-fit:cover;border:1px solid var(--border);flex-shrink:0">`:''}<button type="button" data-on-click="${_on("openBikeProfile",b.id)}" title="${esc(b.name)}" style="background:none;border:none;padding:8px 6px;margin:-8px -6px;cursor:pointer;text-align:start;font:inherit;color:var(--text)"><span class="rider-name" style="text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px">${esc(b.name)}</span></button></div></td>
-      <td data-label="${esc(t('bikeBrand'))}" style="font-weight:700;font-size:13px">${b.brand?esc(b.brand):`<span style="color:var(--muted)">—</span>`}</td>
-      <td data-label="${esc(t('bikeModel'))}" style="font-weight:700;font-size:13px">${b.model?esc(b.model):`<span style="color:var(--muted)">—</span>`}</td>
-      <td data-label="${esc(t('bikeGroupset'))}" style="font-weight:700;font-size:13px">${b.groupset?esc(b.groupset):`<span style="color:var(--muted)">—</span>`}${_bkSpecsLine(b)?`<div style="font-size:11px;color:var(--muted);font-weight:600;margin-top:2px">${_bkSpecsLine(b)}</div>`:''}</td>
-      <td data-label="${esc(t('bikeSpeeds'))}" style="font-weight:700;font-size:13px;text-align:center">${b.speeds?`${esc(b.speeds)}`:`<span style="color:var(--muted)">—</span>`}</td>
+        ?`<div class="flt-norider">${t('noRiderAssigned')}</div>`
+        :`<span class="flt-mu">—</span>`;
+    const rowBorderCls=orphaned?'flt-trb-warn':b.status==='available'?'flt-trb-green':b.status==='in-use'?'flt-trb-blue':'flt-trb-red';
+    const rowBgCls=orphaned?' flt-bg-warn':b.status==='in-use'?' flt-bg-blue':isRetired?' flt-bg-out':'';
+    return`<tr class="${rowBorderCls}${rowBgCls}${sel?' flt-bg-sel':''}">
+      <td class="bk-cell-sel flt-tc"><input type="checkbox" aria-label="${esc(b.name)}" ${sel?'checked':''} data-on-click="${_on("_bkToggleSel",b.id)}"></td>
+      <td class="bk-cell-name"><div class="flt-ac10">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" class="flt-photo38">`:''}<button type="button" data-on-click="${_on("openBikeProfile",b.id)}" title="${esc(b.name)}" class="flt-namebtn"><span class="rider-name flt-ul">${esc(b.name)}</span></button></div></td>
+      <td data-label="${esc(t('bikeBrand'))}" class="flt-w7s13">${b.brand?esc(b.brand):`<span class="flt-mu">—</span>`}</td>
+      <td data-label="${esc(t('bikeModel'))}" class="flt-w7s13">${b.model?esc(b.model):`<span class="flt-mu">—</span>`}</td>
+      <td data-label="${esc(t('bikeGroupset'))}" class="flt-w7s13">${b.groupset?esc(b.groupset):`<span class="flt-mu">—</span>`}${_bkSpecsLine(b)?`<div class="flt-specs">${_bkSpecsLine(b)}</div>`:''}</td>
+      <td data-label="${esc(t('bikeSpeeds'))}" class="flt-w7s13c">${b.speeds?`${esc(b.speeds)}`:`<span class="flt-mu">—</span>`}</td>
       <td data-label="${esc(t('bikeTypeLabel'))}">${typeBadge(b.type)}</td>
-      <td data-label="${esc(t('frameSizeLabel'))}" style="font-weight:800">${esc(b.size)}</td>
-      <td data-label="${esc(t('bikeRentalPrice'))}" style="font-weight:700;white-space:nowrap">${b.rental_price!=null?`SAR ${esc(b.rental_price)}`:`<span style="color:var(--muted)">—</span>`}</td>
-      <td data-label="${esc(t('colColor'))}"><div style="display:flex;gap:4px;align-items:center">${colorSwatches}</div></td>
+      <td data-label="${esc(t('frameSizeLabel'))}" class="flt-w8">${esc(b.size)}</td>
+      <td data-label="${esc(t('bikeRentalPrice'))}" class="flt-w7nw">${b.rental_price!=null?`SAR ${esc(b.rental_price)}`:`<span class="flt-mu">—</span>`}</td>
+      <td data-label="${esc(t('colColor'))}"><div class="flt-g4c">${colorSwatches}</div></td>
       <td data-label="${esc(t('colStatus'))}">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span class="avail-dot ${dot}" style="display:inline-block;flex-shrink:0"></span>
-          <span style="color:${sclr};font-weight:700;font-size:12px">${slbl}</span>
+        <div class="flt-ac6">
+          <span class="avail-dot ${dot} flt-ib"></span>
+          <span class="${scls}">${slbl}</span>
         </div>
       </td>
       <td data-label="${esc(t('colRider'))}">${riderCell}</td>
@@ -22466,7 +22466,7 @@ function renderBikes(_resultsOnly){
   function sortHdr(col,label){
     const d=sortDir(col);
     const arrow=d===1?' ↑':d===-1?' ↓':'';
-    return`<th style="cursor:pointer;user-select:none;white-space:nowrap${d?';color:var(--green)':''}" data-on-click="${_on("_on_renderBikes_13",_EV,_EL,col,col)}">${label}${arrow}</th>`;
+    return`<th class="flt-sh${d?' flt-sh-on':''}" data-on-click="${_on("_on_renderBikes_13",_EV,_EL,col,col)}">${label}${arrow}</th>`;
   }
 
   function renderBikeGrid(typeBikes){
@@ -22476,37 +22476,37 @@ function renderBikes(_resultsOnly){
       const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':isMaintG?'dot-orange':'dot-red';
       const user=bikeUserMap[b.id];
       const orphaned=b.status==='in-use'&&!user;
-      const sclr=b.status==='available'?'var(--green)':b.status==='in-use'?'var(--orange)':isMaintG?'var(--orange)':'var(--red)';
-      const borderClr=orphaned?'rgba(var(--warn-rgb),.7)':b.status==='available'?'rgba(var(--green-rgb),.4)':b.status==='in-use'?'rgba(var(--blue-rgb),.4)':'rgba(var(--red-rgb),.4)';
+      const scls=b.status==='available'?'flt-st-green':b.status==='in-use'?'flt-st-orange':isMaintG?'flt-st-orange':'flt-st-red';
+      const borderCls=orphaned?'flt-gcb-warn':b.status==='available'?'flt-gcb-green':b.status==='in-use'?'flt-gcb-blue':'flt-gcb-red';
       const isRetiredG=_bkOut(b);
-      const bgStyle=orphaned?'background:rgba(var(--warn-rgb),.06);':b.status==='in-use'?'background:rgba(var(--blue-rgb),.025);':isRetiredG?'background:rgba(var(--red-rgb),.025);opacity:.75;':'';
+      const bgCls=orphaned?' flt-bg-warn':b.status==='in-use'?' flt-bg-blue':isRetiredG?' flt-bg-out':'';
       const colors=b.colors&&b.colors.length?b.colors:['#03ff89'];
-      const dots=colors.map(c=>`<span style="width:11px;height:11px;border-radius:50%;background:${_bkHex(c)};border:1.5px solid rgba(0,0,0,.3);display:inline-block;flex-shrink:0"></span>`).join('');
+      const dots=colors.map(c=>`<span class="flt-dot11" data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>`).join('');
       const el=b.status==='in-use'&&user?rideElapsed(user.id):null;
-      return`<div class="bike-grid-card" style="border-color:${borderClr};${bgStyle}">
-        ${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" style="width:100%;height:110px;border-radius:4px;object-fit:cover;border:1px solid var(--border);margin-bottom:8px">`:''}
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:6px">
-          <button type="button" data-on-click="${_on("openBikeProfile",b.id)}" style="background:none;border:none;padding:8px 6px;margin:-8px -6px;cursor:pointer;text-align:start;font-weight:900;font-size:13px;line-height:1.3;color:var(--text)"><span style="text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px">${esc(b.name)}</span></button>
-          <div style="display:flex;gap:3px;flex-shrink:0">${dots}</div>
+      return`<div class="bike-grid-card ${borderCls}${bgCls}">
+        ${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" class="flt-gphoto">`:''}
+        <div class="flt-ghead">
+          <button type="button" data-on-click="${_on("openBikeProfile",b.id)}" class="flt-gname"><span class="flt-ul">${esc(b.name)}</span></button>
+          <div class="flt-gdots">${dots}</div>
         </div>
-        <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+        <div class="flt-gtags">
           ${typeBadge(b.type)}
-          <span style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:2px;padding:2px 8px;font-size:10px;font-weight:800;color:var(--muted-l)">${esc(b.size)}</span>
+          <span class="flt-gsize">${esc(b.size)}</span>
         </div>
-        <div style="display:flex;align-items:center;gap:5px${(user||orphaned)?';margin-bottom:5px':''}">
-          <span class="avail-dot ${dot}" style="display:inline-block;flex-shrink:0"></span>
-          <span style="color:${sclr};font-weight:700;font-size:12px">${_bkStatusLabel(b)}</span>
-          ${el?`<span style="font-size:10px;color:var(--green);font-weight:700;margin-left:2px"> ${el}</span>`:''}
+        <div class="flt-gst${(user||orphaned)?' flt-gst-mb':''}">
+          <span class="avail-dot ${dot} flt-ib"></span>
+          <span class="${scls}">${_bkStatusLabel(b)}</span>
+          ${el?`<span class="flt-gel"> ${el}</span>`:''}
         </div>
-        ${user?`<div style="font-size:11px;font-weight:700;color:var(--green)">#${user.queueNum} ${esc(user.name)}</div>`:orphaned?`<div style="font-size:11px;font-weight:700;color:var(--orange)">${t('noRiderAssigned')}</div>`:''}
-        <div style="display:flex;flex-direction:column;gap:4px;margin-top:10px">
-          <div style="display:flex;gap:4px">
-            <button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
-            <button class="btn-sm btn-muted" style="flex:1" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
-            <button class="btn-sm btn-red" style="flex:1" ${b.status!=='in-use'&&!isRetiredG?`data-on-click="${_on("delBike",b.id)}"`:' disabled'}>${t('deleteBtn')}</button>
+        ${user?`<div class="flt-grider">#${user.queueNum} ${esc(user.name)}</div>`:orphaned?`<div class="flt-norider">${t('noRiderAssigned')}</div>`:''}
+        <div class="flt-gacts">
+          <div class="flt-g4">
+            <button class="btn-sm btn-green flt-f1" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
+            <button class="btn-sm btn-muted flt-f1" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
+            <button class="btn-sm btn-red flt-f1" ${b.status!=='in-use'&&!isRetiredG?`data-on-click="${_on("delBike",b.id)}"`:' disabled'}>${t('deleteBtn')}</button>
           </div>
-          ${orphaned?`<button class="btn-sm btn-muted" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("releaseBike",b.id)}">${t('releaseBikeBtn')}</button>`:`<button class="btn-sm btn-${isRetiredG?'green':'muted'}" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("toggleRetire",b.id)}">${isRetiredG?t('restoreBtn'):t('retireBtn')}</button>`}
-          ${b.status==='available'||b.status==='missing'?`<button class="btn-sm btn-${b.status==='missing'?'green':'muted'}" style="width:100%;justify-content:center;text-align:center" data-on-click="${_on("setMissing",b.id)}">${b.status==='missing'?t('foundBtn'):t('missingBtn')}</button>`:''}
+          ${orphaned?`<button class="btn-sm btn-muted flt-wbtn" data-on-click="${_on("releaseBike",b.id)}">${t('releaseBikeBtn')}</button>`:`<button class="btn-sm btn-${isRetiredG?'green':'muted'} flt-wbtn" data-on-click="${_on("toggleRetire",b.id)}">${isRetiredG?t('restoreBtn'):t('retireBtn')}</button>`}
+          ${b.status==='available'||b.status==='missing'?`<button class="btn-sm btn-${b.status==='missing'?'green':'muted'} flt-wbtn" data-on-click="${_on("setMissing",b.id)}">${b.status==='missing'?t('foundBtn'):t('missingBtn')}</button>`:''}
         </div>
       </div>`;
     }).join('')}</div>`;
@@ -22517,13 +22517,13 @@ function renderBikes(_resultsOnly){
     // A type with zero bikes ever added gets a compact one-line prompt instead of a full
     // empty header+table, so a fresh fleet doesn't force scrolling past several blank tables.
     if(!bkSearch&&S.bkStatus==='all'&&S.bkSize==='all'&&_bkBrand==='all'&&!bikes.some(b=>b.type===ty)){
-      return`<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:4px;height:20px;border-radius:3px;background:${color};flex-shrink:0"></div>
-          <div style="font-size:14px;font-weight:800">${typeLabel(ty)}</div>
-          <div style="font-size:12px;color:var(--muted)">${t('noBikes')}</div>
+      return`<div class="flt-tp">
+        <div class="flt-ac10">
+          <div class="flt-tbar20" data-cssv="${_cssv({'--flt-type':color})}"></div>
+          <div class="flt-tpname">${typeLabel(ty)}</div>
+          <div class="flt-s12mu">${t('noBikes')}</div>
         </div>
-        <button class="btn-secondary" style="font-size:12px;padding:6px 12px"
+        <button class="btn-secondary flt-addty"
           data-on-click="${_on("_on_renderBikes_14",_EV,_EL,ty)}">
           + ${typeLabel(ty)}
         </button>
@@ -22562,10 +22562,10 @@ function renderBikes(_resultsOnly){
     const headCount=S.bkStatus==='all'?all.length:typeBikes.length;
     const _vis=typeBikes.map(b=>b.id);
     const _allSel=_vis.length>0&&_vis.every(id=>(S.bkSelected||[]).includes(id));
-    const _selHdr=`<th style="width:34px;text-align:center"><input type="checkbox" aria-label="${t('bkSelectAll')}" title="${t('bkSelectAll')}" ${_allSel?'checked':''} data-on-click="${_on("_bkSelectMany",_vis,_P("checked"))}"></th>`;
+    const _selHdr=`<th class="flt-selth"><input type="checkbox" aria-label="${t('bkSelectAll')}" title="${t('bkSelectAll')}" ${_allSel?'checked':''} data-on-click="${_on("_bkSelectMany",_vis,_P("checked"))}"></th>`;
     const typeContent=S.bkView==='grid'
       ?renderBikeGrid(typeBikes)
-      :`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper" style="overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch"><table class="queue-table bk-table" style="min-width:560px">
+      :`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper flt-tw"><table class="queue-table bk-table flt-tmin">
         <thead><tr>
           ${_selHdr}
           ${sortHdr('name',t('bikeNameLabel'))}
@@ -22581,22 +22581,22 @@ function renderBikes(_resultsOnly){
           ${sortHdr('rider',t('colRider'))}
           <th>${t('colManageBike')}</th>
         </tr></thead>
-        <tbody>${typeBikes.length?typeBikes.map(renderBikeRow).join(''):`<tr><td colspan="13" style="padding:16px 0">${emptyIllustration(ILLUS_BIKE_OK,t('noBikes'))}</td></tr>`}</tbody>
+        <tbody>${typeBikes.length?typeBikes.map(renderBikeRow).join(''):`<tr><td colspan="13" class="flt-tnone">${emptyIllustration(ILLUS_BIKE_OK,t('noBikes'))}</td></tr>`}</tbody>
       </table></div>`;
-    return`<div style="margin-bottom:28px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:4px;height:32px;border-radius:3px;background:${color};flex-shrink:0"></div>
+    return`<div class="flt-sec">
+      <div class="flt-sechead">
+        <div class="flt-ac10">
+          <div class="flt-tbar32" data-cssv="${_cssv({'--flt-type':color})}"></div>
           <div>
-            <div style="font-size:17px;font-weight:900">${typeLabel(ty)}</div>
-            <div style="font-size:12px;color:var(--muted);margin-top:2px;font-weight:600">
+            <div class="flt-secname">${typeLabel(ty)}</div>
+            <div class="flt-secsub">
               <bdi>${all.length} ${t('bikesWord')}</bdi> &nbsp;·&nbsp;
-              <bdi style="color:var(--green)">${tyAvail} ${t('availLabel').toLowerCase()}</bdi>
-              ${tyUse>0?` &nbsp;·&nbsp; <bdi style="color:var(--muted-l)">${tyUse} ${t('inUseLabel').toLowerCase()}</bdi>`:''}
+              <bdi class="flt-gr">${tyAvail} ${t('availLabel').toLowerCase()}</bdi>
+              ${tyUse>0?` &nbsp;·&nbsp; <bdi class="flt-ml">${tyUse} ${t('inUseLabel').toLowerCase()}</bdi>`:''}
             </div>
           </div>
         </div>
-        <button class="btn-secondary" style="font-size:12px;padding:6px 12px"
+        <button class="btn-secondary flt-addty"
           data-on-click="${_on("_on_renderBikes_15",_EV,_EL,ty)}">
           + ${typeLabel(ty)}
         </button>
@@ -22612,55 +22612,55 @@ function renderBikes(_resultsOnly){
   // and every one of them read "Retired".
   const _bkOutLabel=_bkStatusLabel;
   // Only show the collapsed graveyard in the default 'all' view — a specific status filter shows those bikes inline instead
-  const retiredSection=(retiredBikes.length&&S.bkStatus==='all')?`<div style="margin-bottom:28px">
-    <button data-on-click="${_on("_on_renderBikes_16",_EV,_EL)}" style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(var(--tint-rgb),.02);border:1.5px solid rgba(var(--tint-rgb),.07);border-radius:6px;cursor:pointer;font-family:var(--font-body);transition:border-color .2s" data-on-mouseover="${_on("_on_renderBikes_17",_EV,_EL)}" data-on-mouseout="${_on("_on_renderBikes_18",_EV,_EL)}">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:4px;height:24px;border-radius:3px;background:rgba(160,160,160,.4);flex-shrink:0"></div>
-        <div style="font-size:15px;font-weight:900;color:var(--muted-l)">${t('retiredLabel')} &amp; ${t('maintLabel')} &amp; ${t('missingLabel')}</div>
-        <div style="background:rgba(var(--tint-rgb),.07);border-radius:2px;padding:2px 8px;font-size:11px;font-weight:800;color:var(--muted)">${retiredBikes.length}</div>
+  const retiredSection=(retiredBikes.length&&S.bkStatus==='all')?`<div class="flt-sec">
+    <button data-on-click="${_on("_on_renderBikes_16",_EV,_EL)}" class="flt-outbtn" data-on-mouseover="${_on("_on_renderBikes_17",_EV,_EL)}" data-on-mouseout="${_on("_on_renderBikes_18",_EV,_EL)}">
+      <div class="flt-ac10">
+        <div class="flt-outbar"></div>
+        <div class="flt-outname">${t('retiredLabel')} &amp; ${t('maintLabel')} &amp; ${t('missingLabel')}</div>
+        <div class="flt-outn">${retiredBikes.length}</div>
       </div>
-      <span style="font-size:16px;color:var(--muted)">${S.bkShowRetired?'▲':'▼'}</span>
+      <span class="flt-outarr">${S.bkShowRetired?'▲':'▼'}</span>
     </button>
-    ${S.bkShowRetired?`<div style="margin-top:10px">
+    ${S.bkShowRetired?`<div class="flt-mt10">
       ${S.bkView==='grid'
-        ?`<div class="bike-grid" style="opacity:.75">${retiredBikes.map(b=>{
+        ?`<div class="bike-grid flt-op75">${retiredBikes.map(b=>{
           const colors=b.colors&&b.colors.length?b.colors:['#03ff89'];
-          const dots=colors.map(c=>`<span style="width:11px;height:11px;border-radius:50%;background:${_bkHex(c)};border:1.5px solid rgba(0,0,0,.3);display:inline-block;flex-shrink:0"></span>`).join('');
-          return`<div class="bike-grid-card" style="border-color:rgba(160,160,160,.2)">
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;gap:6px">
-              <div style="font-weight:900;font-size:13px;line-height:1.3;color:var(--muted-l)">${esc(b.name)}</div>
-              <div style="display:flex;gap:3px;flex-shrink:0">${dots}</div>
+          const dots=colors.map(c=>`<span class="flt-dot11" data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>`).join('');
+          return`<div class="bike-grid-card flt-obc">
+            <div class="flt-ghead">
+              <div class="flt-oname">${esc(b.name)}</div>
+              <div class="flt-gdots">${dots}</div>
             </div>
-            <div style="display:flex;gap:5px;align-items:center;margin-bottom:8px;flex-wrap:wrap">
+            <div class="flt-gtags">
               ${typeBadge(b.type)}
-              <span style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:2px;padding:2px 8px;font-size:10px;font-weight:800;color:var(--muted-l)">${esc(b.size)}</span>
+              <span class="flt-gsize">${esc(b.size)}</span>
             </div>
-            <div style="display:flex;align-items:center;gap:5px;margin-bottom:8px">
-              <span class="avail-dot ${b.status==='maintenance'?'dot-orange':'dot-red'}" style="display:inline-block;flex-shrink:0"></span>
-              <span style="color:var(--muted);font-weight:700;font-size:12px">${_bkOutLabel(b)}</span>
+            <div class="flt-ost">
+              <span class="avail-dot ${b.status==='maintenance'?'dot-orange':'dot-red'} flt-ib"></span>
+              <span class="flt-ostl">${_bkOutLabel(b)}</span>
             </div>
-            <div style="margin-bottom:10px">
-              <div style="font-size:9px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">${t('lifespanLabel')}</div>
-              <div style="font-size:11px;font-weight:700;color:var(--muted-l)">${esc(_bikeLifespan(b))}</div>
+            <div class="flt-mb10">
+              <div class="flt-olbl">${t('lifespanLabel')}</div>
+              <div class="flt-olife">${esc(_bikeLifespan(b))}</div>
             </div>
-            <div style="display:flex;gap:4px">
-              <button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
-              <button class="btn-sm btn-green" style="flex:1" data-on-click="${_on("toggleRetire",b.id)}">${t('restoreBtn')}</button>
-              <button class="btn-sm btn-muted" style="flex:1" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
+            <div class="flt-g4">
+              <button class="btn-sm btn-green flt-f1" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
+              <button class="btn-sm btn-green flt-f1" data-on-click="${_on("toggleRetire",b.id)}">${t('restoreBtn')}</button>
+              <button class="btn-sm btn-muted flt-f1" data-on-click="${_on("startClone",b.id)}">${t('cloneBtn')}</button>
             </div>
           </div>`;
         }).join('')}</div>`
         :`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="queue-table bk-table"><thead><tr>
           <th>${t('bikeNameLabel')}</th><th>${t('bikeBrand')}</th><th>${t('bikeModel')}</th>
           <th>${t('bikeTypeLabel')}</th><th>${t('frameSizeLabel')}</th><th>${t('lifespanLabel')}</th><th>${t('colStatus')}</th><th>${t('colManageBike')}</th>
-        </tr></thead><tbody>${retiredBikes.map(b=>`<tr style="opacity:.7">
-          <td class="bk-cell-name"><div style="display:flex;align-items:center;gap:10px">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" style="width:38px;height:38px;border-radius:3px;object-fit:cover;border:1px solid var(--border);flex-shrink:0">`:''}<div class="rider-name">${esc(b.name)}</div></div></td>
-          <td data-label="${esc(t('bikeBrand'))}" style="font-weight:700;font-size:13px">${b.brand?esc(b.brand):`<span style="color:var(--muted)">—</span>`}</td>
-          <td data-label="${esc(t('bikeModel'))}" style="font-weight:700;font-size:13px">${b.model?esc(b.model):`<span style="color:var(--muted)">—</span>`}</td>
+        </tr></thead><tbody>${retiredBikes.map(b=>`<tr class="flt-op7">
+          <td class="bk-cell-name"><div class="flt-ac10">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" class="flt-photo38">`:''}<div class="rider-name">${esc(b.name)}</div></div></td>
+          <td data-label="${esc(t('bikeBrand'))}" class="flt-w7s13">${b.brand?esc(b.brand):`<span class="flt-mu">—</span>`}</td>
+          <td data-label="${esc(t('bikeModel'))}" class="flt-w7s13">${b.model?esc(b.model):`<span class="flt-mu">—</span>`}</td>
           <td data-label="${esc(t('bikeTypeLabel'))}">${typeBadge(b.type)}</td>
-          <td data-label="${esc(t('frameSizeLabel'))}" style="font-weight:800">${esc(b.size)}</td>
-          <td data-label="${esc(t('lifespanLabel'))}" style="font-weight:700;font-size:12px;color:var(--muted-l);white-space:nowrap">${esc(_bikeLifespan(b))}</td>
-          <td data-label="${esc(t('colStatus'))}"><span style="color:var(--muted);font-weight:700;font-size:12px">${_bkOutLabel(b)}</span></td>
+          <td data-label="${esc(t('frameSizeLabel'))}" class="flt-w8">${esc(b.size)}</td>
+          <td data-label="${esc(t('lifespanLabel'))}" class="flt-olifec">${esc(_bikeLifespan(b))}</td>
+          <td data-label="${esc(t('colStatus'))}"><span class="flt-ostl">${_bkOutLabel(b)}</span></td>
           <td><div class="actions-cell">
             <button class="btn-sm btn-green" data-on-click="${_on("startEdit",b.id)}">${t('editBtn')}</button>
             <button class="btn-sm btn-green" data-on-click="${_on("toggleRetire",b.id)}">${t('restoreBtn')}</button>
@@ -22679,7 +22679,7 @@ function renderBikes(_resultsOnly){
       <span class="bk-bulk-group">
       </span>
       ${isAdmin()?`<span class="bk-bulk-group">
-        <input id="bk-bulk-price" type="number" min="0" step="0.5" aria-label="${esc(t('bkBulkPricePh'))}" placeholder="${t('bkBulkPricePh')}" class="filter-select" style="height:32px;width:84px">
+        <input id="bk-bulk-price" type="number" min="0" step="0.5" aria-label="${esc(t('bkBulkPricePh'))}" placeholder="${t('bkBulkPricePh')}" class="filter-select flt-bulkprice">
         <button class="btn-sm btn-green" data-on-click="${_on("bkBulkPrice")}">${t('bkBulkSetPrice')}</button>
       </span>`:''}
       <button class="btn-sm btn-green" data-on-click="${_on("bkBulkExport")}">${t('bkBulkExport')}</button>
@@ -22687,30 +22687,30 @@ function renderBikes(_resultsOnly){
     </div>`:'';
 
   if(!_resultsOnly)document.getElementById('tab-bikes').innerHTML=`
-    <div class="section-header" style="flex-wrap:wrap;gap:10px;max-width:100%">
-      <div style="min-width:0">
+    <div class="section-header flt-head">
+      <div class="flt-mw0">
         <div class="page-title">${t('bikesTitle')}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;max-width:100%;min-width:0">
+      <div class="flt-headr">
         ${_bkSvcEveryHtml()}
-        <div class="view-toggle" style="flex:0 0 auto">
+        <div class="view-toggle flt-f00">
           <button class="view-toggle-btn${S.bkView==='grid'?' active':''}" data-on-click="${_on("_on_renderBikes_19",_EV,_EL)}" title="${t('gridViewBtn')}">${_artIcon('grid',13)}</button>
           <button class="view-toggle-btn${S.bkView==='table'?' active':''}" data-on-click="${_on("_on_renderBikes_20",_EV,_EL)}" title="${t('tableViewBtn')}">${_artIcon('rows',13)}</button>
         </div>
-        <button class="btn-primary" data-on-click="${_on("toggleAddBike")}" style="white-space:nowrap;flex:0 1 auto;max-width:100%">${t('addBike')}</button>
-        ${isAdmin()?`<label class="btn-secondary" style="white-space:nowrap;flex:0 1 auto;cursor:pointer;margin:0">${t('bkImportBtn')}<input type="file" accept=".csv,text/csv" style="display:none" data-on-change="${_on("_bkCsvPicked",_EL)}"></label>
-        <button class="btn-secondary" data-on-click="${_on("_bkCsvTemplate")}" style="white-space:nowrap;flex:0 1 auto">${t('bkTemplateBtn')}</button>`:''}
+        <button class="btn-primary flt-addbtn" data-on-click="${_on("toggleAddBike")}">${t('addBike')}</button>
+        ${isAdmin()?`<label class="btn-secondary flt-import">${t('bkImportBtn')}<input type="file" accept=".csv,text/csv" class="flt-hide" data-on-change="${_on("_bkCsvPicked",_EL)}"></label>
+        <button class="btn-secondary flt-tplbtn" data-on-click="${_on("_bkCsvTemplate")}">${t('bkTemplateBtn')}</button>`:''}
       </div>
     </div>
     ${addForm}
     ${_bkAttnHtml(bikes)}
-    <div class="stats-row" style="margin-bottom:20px">
+    <div class="stats-row flt-mb20">
       <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">${t('totalStat')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nAvail}</div><div class="stat-label">${t('availLabel')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--text)">${nUse}</div><div class="stat-label">${t('inUseLabel')}</div></div>
-      <div class="stat-card${nMaint>0?' stat-card-clickable':''}"${nMaint>0?` role="button" tabindex="0" data-on-click="${_on("setBkStatus","maintenance")}" data-on-keydown="${_on("_on_renderBikes_21",_EV,_EL)}" style="cursor:pointer"`:''}><div class="stat-num" style="color:var(--orange)">${nMaint}</div><div class="stat-label">${t('maintLabel')}</div></div>
+      <div class="stat-card"><div class="stat-num flt-gr">${nAvail}</div><div class="stat-label">${t('availLabel')}</div></div>
+      <div class="stat-card"><div class="stat-num flt-tx">${nUse}</div><div class="stat-label">${t('inUseLabel')}</div></div>
+      <div class="stat-card${nMaint>0?' stat-card-clickable flt-cp':''}"${nMaint>0?` role="button" tabindex="0" data-on-click="${_on("setBkStatus","maintenance")}" data-on-keydown="${_on("_on_renderBikes_21",_EV,_EL)}"`:''}><div class="stat-num flt-or">${nMaint}</div><div class="stat-label">${t('maintLabel')}</div></div>
     </div>
-    <div class="filter-bar" style="margin-bottom:20px">
+    <div class="filter-bar flt-mb20">
       <div class="filter-row">
         <div class="${_srchCls('bk',bkSearch)}" data-srch="bk">
           ${_artIcon('search',13)}
@@ -22718,7 +22718,7 @@ function renderBikes(_resultsOnly){
           ${_srchBtn()}
         </div>
         ${_fBtn('bk',[S.bkTypeFilter!=='all',S.bkStatus!=='all',S.bkSize!=='all',_bkBrand!=='all',_bkModel!=='all'].filter(Boolean).length)}
-        ${bkSearch||S.bkTypeFilter!=='all'||S.bkStatus!=='all'||S.bkSize!=='all'||_bkBrand!=='all'||_bkModel!=='all'?`<button class="btn-secondary" style="font-size:12px;padding:5px 10px" data-on-click="${_on("_on_renderBikes_22",_EV,_EL)}">${_artIcon('close',11)} ${t('clearWord')}</button>`:''}
+        ${bkSearch||S.bkTypeFilter!=='all'||S.bkStatus!=='all'||S.bkSize!=='all'||_bkBrand!=='all'||_bkModel!=='all'?`<button class="btn-secondary flt-clear" data-on-click="${_on("_on_renderBikes_22",_EV,_EL)}">${_artIcon('close',11)} ${t('clearWord')}</button>`:''}
       </div>
       ${_fPanel('bk',_fField(t('filterType'),`<select class="filter-select" aria-label="${esc(t('filterType'))}" data-on-change="${_on("_on_renderBikes_23",_EV,_EL)}">${bkTypeOpts}</select>`)
         +_fField(t('filterStatus'),`<select class="filter-select" aria-label="${esc(t('filterStatus'))}" data-on-change="${_on("setBkStatus",_P("value"))}">${bkStatusOpts}</select>`)
@@ -23039,9 +23039,9 @@ function _bkCsvPreview(text){
   if(err||!rows.length){toast(err==='head'?t('bkImportHead'):t('bkImportNone'),'error');return;}
   const ok=rows.filter(r=>!r.errs.length),bad=rows.filter(r=>r.errs.length);
   _bkCsvPending=ok.map(r=>r.bike);
-  const li=r=>`<tr${r.errs.length?' style="color:var(--red)"':''}><td>${r.line}</td><td>${esc(r.bike.bike_number??'')}</td><td>${esc(r.bike.name)}</td><td>${esc(r.bike.type)} · ${esc(r.bike.size)}</td><td>${esc([r.bike.brand,r.bike.model].filter(Boolean).join(' '))}</td><td>${r.errs.length?r.errs.map(k=>esc(t(k))).join(', '):esc(t('bkImportOk'))}</td></tr>`;
+  const li=r=>`<tr${r.errs.length?' class="flt-rd"':''}><td>${r.line}</td><td>${esc(r.bike.bike_number??'')}</td><td>${esc(r.bike.name)}</td><td>${esc(r.bike.type)} · ${esc(r.bike.size)}</td><td>${esc([r.bike.brand,r.bike.model].filter(Boolean).join(' '))}</td><td>${r.errs.length?r.errs.map(k=>esc(t(k))).join(', '):esc(t('bkImportOk'))}</td></tr>`;
   confirmDialog({title:t('bkImportTitle'),
-    body:`<div id="bk-import-sum">${esc(t('bkImportReady').replace('{0}',ok.length).replace('{1}',bad.length))}</div><div class="table-wrapper" style="max-height:50vh;overflow:auto;margin-top:8px"><table class="queue-table bk-import-table" style="font-size:12px"><thead><tr><th>#</th><th>${t('bikeNumberLabel')}</th><th>${t('bikeNameLabel')}</th><th>${t('bikeTypeLabel')}</th><th>${t('bikeBrand')}</th><th></th></tr></thead><tbody>${rows.map(li).join('')}</tbody></table></div>`,
+    body:`<div id="bk-import-sum">${esc(t('bkImportReady').replace('{0}',ok.length).replace('{1}',bad.length))}</div><div class="table-wrapper flt-csvwrap"><table class="queue-table bk-import-table flt-fs12"><thead><tr><th>#</th><th>${t('bikeNumberLabel')}</th><th>${t('bikeNameLabel')}</th><th>${t('bikeTypeLabel')}</th><th>${t('bikeBrand')}</th><th></th></tr></thead><tbody>${rows.map(li).join('')}</tbody></table></div>`,
     confirmLabel:t('bkImportGo').replace('{0}',ok.length),confirmClass:'btn-green',onConfirm:()=>_bkCsvImport()});
   if(!ok.length){const b=document.querySelector('#confirm-modal .btn-green');if(b)b.disabled=true;}
 }
@@ -23441,57 +23441,57 @@ function openBikeProfile(id){
   const fb=done.filter(e=>e.feedback&&e.feedback.trim()).sort((a,b)=>new Date(b.registeredAt||0)-new Date(a.registeredAt||0)).slice(0,5);
   const recent=[...done].sort((a,b)=>new Date(b.registeredAt||0)-new Date(a.registeredAt||0)).slice(0,8);
   const statusLbl=_bkStatusLabel(bike);
-  const statusClr=bike.status==='available'?'var(--green)':bike.status==='in-use'?'var(--orange)':bike.status==='maintenance'?'var(--orange)':'var(--red)';
+  const statusK=bike.status==='available'?'green':bike.status==='in-use'?'orange':bike.status==='maintenance'?'orange':'red';
   const colors=bike.colors&&bike.colors.length?bike.colors:['#03ff89'];
-  const kpi=(v,l)=>`<div style="flex:1;min-width:84px;background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:11px 13px"><div style="font-size:19px;font-weight:900">${v}</div><div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px">${l}</div></div>`;
-  const spec=(l,v)=>v?`<div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted);font-size:12px">${l}</span><span style="font-weight:700;font-size:12px">${esc(String(v))}</span></div>`:'';
-  const histRows=recent.length?recent.map(e=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-      <span class="queue-num-cell" style="font-size:13px;min-width:34px">#${e.queueNum}</span>
-      <div style="flex:1;min-width:0"><div style="font-weight:700;font-size:12px">${dayLabel(e.sessionDay)||''} · ${shortDate(e.sessionDate)}</div>
-        <div style="font-size:11px;color:var(--muted)">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>
-      <span style="font-weight:800;font-size:12px;color:${e.paid?'var(--green)':'var(--muted-l)'}">SAR ${e.price??DEFAULT_PRICE}</span>
+  const kpi=(v,l)=>`<div class="flt-kpi"><div class="flt-kpiv">${v}</div><div class="flt-kpil">${l}</div></div>`;
+  const spec=(l,v)=>v?`<div class="flt-spec"><span class="flt-specl">${l}</span><span class="flt-w7s12">${esc(String(v))}</span></div>`:'';
+  const histRows=recent.length?recent.map(e=>`<div class="flt-hrow">
+      <span class="queue-num-cell flt-hnum">#${e.queueNum}</span>
+      <div class="flt-f1mw0"><div class="flt-w7s12">${dayLabel(e.sessionDay)||''} · ${shortDate(e.sessionDate)}</div>
+        <div class="flt-hsub">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>
+      <span class="${e.paid?'flt-hpay':'flt-hpay-no'}">SAR ${e.price??DEFAULT_PRICE}</span>
     </div>`).join(''):`<div class="empty-state">${t('bpNoRides')}</div>`;
-  const fbHtml=fb.length?`<div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px">${t('bpFeedbackTitle')}</div>
-    ${fb.map(e=>`<div style="background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:9px 11px;margin-bottom:6px"><div style="font-size:12px">${esc(e.feedback)}</div><div style="font-size:10px;color:var(--muted);margin-top:3px">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>`).join('')}`:'';
+  const fbHtml=fb.length?`<div class="flt-phfb">${t('bpFeedbackTitle')}</div>
+    ${fb.map(e=>`<div class="flt-fb"><div class="flt-fs12">${esc(e.feedback)}</div><div class="flt-fbw">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>`).join('')}`:'';
   document.getElementById('bike-profile-modal').innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_openBikeProfile_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:600px">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px">
-        <div style="display:flex;align-items:center;gap:12px;min-width:0">
-          ${bike.photo?`<img loading="lazy" decoding="async" src="${esc(bike.photo)}" alt="" style="width:48px;height:48px;border-radius:4px;object-fit:cover;border:1px solid var(--border);flex-shrink:0">`:''}
-          <div style="min-width:0"><div class="modal-title" style="margin-bottom:0">${esc(bike.name)}</div>
-            <div style="font-size:12px;color:var(--muted)">${typeLabel(bike.type)} · ${esc(bike.size||'')}</div></div>
+    <div class="modal-box flt-pbox" role="dialog" aria-modal="true">
+      <div class="flt-phead">
+        <div class="flt-pid">
+          ${bike.photo?`<img loading="lazy" decoding="async" src="${esc(bike.photo)}" alt="" class="flt-pphoto">`:''}
+          <div class="flt-mw0"><div class="modal-title flt-mb0">${esc(bike.name)}</div>
+            <div class="flt-s12mu">${typeLabel(bike.type)} · ${esc(bike.size||'')}</div></div>
         </div>
-        <button data-on-click="${_on("closeBikeProfile")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px">&times;</button>
+        <button data-on-click="${_on("closeBikeProfile")}" aria-label="${t('closeBtn')}" class="flt-px">&times;</button>
       </div>
-      <div style="margin:8px 0 12px"><span style="display:inline-flex;align-items:center;gap:6px;background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:3px 11px"><span class="avail-dot" style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${statusClr}"></span><span style="font-size:12px;font-weight:800;color:${statusClr}">${statusLbl}</span></span></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <div class="flt-pst"><span class="flt-ppill"><span class="avail-dot flt-pdot-${statusK}"></span><span class="flt-ptx-${statusK}">${statusLbl}</span></span></div>
+      <div class="flt-pkpis">
         ${kpi(ridesCount,t('bpRides'))}
         ${kpi('SAR '+revenue,t('bpRevenue'))}
         ${kpi(avgBike?avgBike+'/10':'—',t('bpAvgRating'))}
         ${kpi(lastUsed?shortDate(lastUsed):t('bpNever'),t('bpLastUsed'))}
         ${(()=>{ // rides since the last recorded service, amber past the threshold
           const n=_ridesSinceSvc(bike,done),due=n>=_svcEvery();
-          return `<div style="flex:1;min-width:90px;background:${due?'rgba(var(--warn-rgb),.12)':'var(--s1)'};border:1px solid ${due?'rgba(var(--warn-rgb),.5)':'var(--border)'};border-radius:5px;padding:8px 10px;text-align:center">
-            <div style="font-size:16px;font-weight:900;color:${due?'var(--orange)':'var(--text)'}">${due?'⚠ ':''}${n}</div>
-            <div style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">${t('bpSvcSince')}</div>
-            ${bike.last_serviced_at?'':`<div class="bp-svc-never" style="font-size:10.5px;color:var(--muted);margin-top:2px">${t('attnNever')}</div>`}
+          return `<div class="${due?'flt-svc-due':'flt-svc'}">
+            <div class="${due?'flt-svcn-due':'flt-svcn'}">${due?'⚠ ':''}${n}</div>
+            <div class="flt-svcl">${t('bpSvcSince')}</div>
+            ${bike.last_serviced_at?'':`<div class="bp-svc-never flt-svcnever">${t('attnNever')}</div>`}
           </div>`;})()}
       </div>
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+      <div class="flt-pserv">
         <button class="btn-sm btn-muted" data-on-click="${_on("markBikeServiced",bike.id)}">${t('bpMarkServiced')}</button>
-        ${bike.last_serviced_at?`<span style="font-size:11px;color:var(--muted);font-weight:700">${t('bpLastServiced')} ${shortDate(bike.last_serviced_at)}</span>`:''}
+        ${bike.last_serviced_at?`<span class="flt-plast">${t('bpLastServiced')} ${shortDate(bike.last_serviced_at)}</span>`:''}
       </div>
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 4px">${t('bpSpecsTitle')}</div>
+      <div class="flt-phspec">${t('bpSpecsTitle')}</div>
       <div>
         ${spec(t('bikeBrand'),bike.brand)}${spec(t('bikeModel'),bike.model)}${spec(t('bikeGroupset'),bike.groupset)}
         ${spec(t('bikeSpeeds'),bike.speeds)}${spec(t('bikeRentalPrice'),bike.rental_price!=null?'SAR '+bike.rental_price:'')}
         ${spec(t('lifespanLabel'),_bikeLifespan(bike)!=='—'?_bikeLifespan(bike):(bike.in_service_date?t('bpInServiceLabel')+' '+shortDate(bike.in_service_date):''))}
-        <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0"><span style="color:var(--muted);font-size:12px">${t('bpColorsLabel')}</span><span style="display:flex;gap:4px">${colors.map(c=>`<span style="width:14px;height:14px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3)"></span>`).join('')}</span></div>
+        <div class="flt-spec0"><span class="flt-specl">${t('bpColorsLabel')}</span><span class="flt-g4">${colors.map(c=>`<span class="flt-pc14" data-cssv="${_cssv({'--flt-bg':c})}"></span>`).join('')}</span></div>
       </div>
-      <div style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 4px">${t('bpHistoryTitle')}</div>
-      <div style="max-height:260px;overflow-y:auto">${histRows}</div>
+      <div class="flt-phhist">${t('bpHistoryTitle')}</div>
+      <div class="flt-phist">${histRows}</div>
       ${fbHtml}
-      <div style="display:flex;gap:8px;margin-top:16px">
+      <div class="flt-pacts">
         ${(()=>{const h=bike.status==='in-use'?getQueue().find(e=>e.status==='active'&&getAssignedBikeIds(e).includes(bike.id)):null;return h?`<button class="btn-primary" data-on-click="${_on("_on_openBikeProfile_2",_EV,_EL,h.id)}">${t('returnBikeBtn')} · #${h.queueNum} ${esc(h.name)}</button>`:'';})()}
         <button class="btn-secondary" data-on-click="${_on("_on_openBikeProfile_3",_EV,_EL,bike.id)}">${t('editBtn')}</button>
         <button class="btn-secondary" data-on-click="${_on("_on_openBikeProfile_4",_EV,_EL,bike.id)}">${t('cloneBtn')}</button>
@@ -23543,12 +23543,12 @@ function delBike(id){
 function _on__bkFieldHtml_1(event,el,a0){if(event.key==='Enter'){event.preventDefault();_bkOptSave(a0);}}
 function _bkFieldHtml(id,val,addMode,list){
   if(addMode){
-    return`<div style="display:flex;gap:6px">
+    return`<div class="flt-g6">
       <input id="${id}" type="text" value="${esc(val)}" placeholder="${t('typeNewLabel')||'Type new...'}"
-        style="flex:1"
+        class="flt-f1"
         data-on-keydown="${_on("_on__bkFieldHtml_1",_EV,_EL,id)}">
-      <button class="btn-primary" style="padding:8px 14px;flex-shrink:0;white-space:nowrap" data-on-click="${_on("_bkOptSave",id)}">✓ ${t('saveBtn')||'Save'}</button>
-      <button class="btn-secondary" style="padding:8px 10px;flex-shrink:0" data-on-click="${_on("_bkOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
+      <button class="btn-primary flt-optsave" data-on-click="${_on("_bkOptSave",id)}">✓ ${t('saveBtn')||'Save'}</button>
+      <button class="btn-secondary flt-optx" data-on-click="${_on("_bkOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
     </div>`;
   }
   // A value the list does not hold still has to be selectable, or the field silently empties
@@ -23609,13 +23609,13 @@ function renderOptListModal(){
   const title=o.kind==='brands'?t('bikeBrand'):o.kind==='models'?t('optModelsOf').replace('{0}',S._bkBrand):o.kind==='groupsets'?t('bikeGroupset'):o.kind==='wheels'?t('bikeWheelSize'):o.kind==='brakes'?t('bikeBrakes'):t('bikeFrameTypeLabel');
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderOptListModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:440px">
+    <div class="modal-box flt-obox" role="dialog" aria-modal="true">
       <div class="modal-title">${t('optListTitle').replace('{0}',esc(title))}</div>
-      <div style="font-size:12px;color:var(--muted);font-weight:600;margin:4px 0 12px">${t('optNote')}</div>
-      <div id="optlist-rows" style="display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow:auto">
-        ${o.items.length?o.items.map((it,i)=>`<div style="display:flex;gap:6px;align-items:center"><input type="text" value="${esc(o.kind==='frames'?_frameLabel(it.v):it.v)}" aria-label="${esc(it.orig||it.v)}" style="flex:1" data-on-input="${_on("_on_renderOptListModal_2",_EV,_EL,i)}"><button type="button" class="btn-sm btn-muted" aria-label="${t('deleteBtn')||'Delete'} ${esc(it.orig||it.v)}" data-on-click="${_on("_on_renderOptListModal_3",_EV,_EL,i)}">✕</button></div>`).join(''):`<div style="font-size:13px;color:var(--muted)">${t('optEmpty')}</div>`}
+      <div class="flt-onote">${t('optNote')}</div>
+      <div id="optlist-rows" class="flt-orows">
+        ${o.items.length?o.items.map((it,i)=>`<div class="flt-orow"><input type="text" value="${esc(o.kind==='frames'?_frameLabel(it.v):it.v)}" aria-label="${esc(it.orig||it.v)}" class="flt-f1" data-on-input="${_on("_on_renderOptListModal_2",_EV,_EL,i)}"><button type="button" class="btn-sm btn-muted" aria-label="${t('deleteBtn')||'Delete'} ${esc(it.orig||it.v)}" data-on-click="${_on("_on_renderOptListModal_3",_EV,_EL,i)}">✕</button></div>`).join(''):`<div class="flt-oempty">${t('optEmpty')}</div>`}
       </div>
-      <div style="display:flex;gap:6px;margin-top:10px"><input id="optlist-add" type="text" placeholder="${esc(t('optAddItem'))}" value="${esc(o.add)}" style="flex:1" data-on-input="${_on("_on_renderOptListModal_4",_EV,_EL)}" data-on-keydown="${_on("_on_renderOptListModal_5",_EV,_EL)}"><button type="button" class="btn-secondary" data-on-click="${_on("_optListAdd")}">+</button></div>
+      <div class="flt-oadd"><input id="optlist-add" type="text" placeholder="${esc(t('optAddItem'))}" value="${esc(o.add)}" class="flt-f1" data-on-input="${_on("_on_renderOptListModal_4",_EV,_EL)}" data-on-keydown="${_on("_on_renderOptListModal_5",_EV,_EL)}"><button type="button" class="btn-secondary" data-on-click="${_on("_optListAdd")}">+</button></div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeOptListModal")}">${t('cancelBtn')}</button>
         <button id="optlist-save" class="btn-primary" data-on-click="${_on("_optListSave")}">${t('saveBtn')}</button>
