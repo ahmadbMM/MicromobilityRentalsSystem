@@ -1278,6 +1278,15 @@
     #confirm-modal .chrome-pact{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
     #confirm-modal .chrome-mw100{min-width:100px;}
     #confirm-modal .chrome-w100{width:100%;}
+    /* The undo-code dialog (_ucRender, and _undoAuth's plain confirm before the database has codes),
+       drawn in #confirm-modal: pass 3. Its heading, close button, actions and Undo button are the
+       confirm dialog's own chrome- rules above; these are the rest. */
+    #confirm-modal .uc-lbl{font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:14px;padding:10px 14px;background:var(--s3);border-radius:4px;}
+    #confirm-modal .uc-note{color:var(--muted);font-size:12px;}
+    #confirm-modal .uc-mb10{margin-bottom:10px;}
+    #confirm-modal .uc-mb12{margin-bottom:12px;}
+    #confirm-modal .uc-in{letter-spacing:6px;font-size:18px;text-align:center;}
+    #confirm-modal .uc-err{min-height:18px;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px;}
     /* _artIcon's svg, in every section and on the customer pages. No one id holds them all, so the
        two values are !important: like the inline style, they beat every rule that is not (and no
        rule that sets either of them for an svg is). */
@@ -1688,6 +1697,199 @@
       .sess-back-btn{display:inline-flex;}
       .sess-detail-pane{padding:16px;}
     }
+
+    /* ── Sessions, the booking window and the promo codes without inline styles (2026-09-28, pass 3
+       of moving style="..." into classes, so the policy can drop style-src 'unsafe-inline'): the
+       list and its detail, the deleted group, the new- and edit-session forms (the bike pickers,
+       the fleet counts, the add-ons, the waitlist cap, the breakfast stop, the route), the booking
+       window card and the promo codes, all drawn into #sess-host. Each rule is scoped by that id,
+       so it outranks every class rule (the body.view-staff layer included) as the inline style did.
+       Three name it twice: #sess-host .sess-admin-table td (and td[colspan]) on phones, and
+       body.view-staff #tab-queue .page-title, also set what the promo code table's limits and
+       empty cells and its title set. A value known only at run time rides in data-cssv
+       (_cssvApply): a bike's colour (--ss-bg) and how full a session is (--ss-w); the bar's colour
+       is one of three by how full it is. The pickers' type labels are one quiet colour (no
+       per-type accents), as they were. background:none written in a template is
+       background:transparent none here: the same value, which the build's minifier keeps. */
+    #sess-host .ss-mb10{margin-bottom:10px;}
+    #sess-host .ss-mb14{margin-bottom:14px;}
+    #sess-host .ss-mb16{margin-bottom:16px;}
+    #sess-host .ss-mb18{margin-bottom:18px;}
+    #sess-host .ss-mb20{margin-bottom:20px;}
+    #sess-host .ss-mb24{margin-bottom:24px;}
+    #sess-host .ss-mt4{margin-top:4px;}
+    #sess-host .ss-mt6{margin-top:6px;}
+    #sess-host .ss-mt18{margin-top:18px;}
+    #sess-host .ss-mt28{margin-top:28px;}
+    #sess-host .ss-minw0{min-width:0;}
+    #sess-host .ss-fs12{font-size:12px;}
+    #sess-host .ss-fs16{font-size:16px;}
+    #sess-host .ss-b800{font-weight:800;}
+    #sess-host .ss-c-green{color:var(--green);}
+    #sess-host .ss-c-muted{color:var(--muted);}
+    #sess-host .ss-c-red{color:var(--red);}
+    #sess-host .ss-c-text{color:var(--text);}
+    #sess-host .ss-head-btns{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    #sess-host .ss-fill{width:var(--ss-w);}
+    #sess-host .ss-fill-ok{background:#0c7a3d;}
+    #sess-host .ss-fill-high{background:#8a5c14;}
+    #sess-host .ss-fill-full{background:#a33b2e;}
+    #sess-host .ss-noriders{padding:18px;font-size:13px;}
+    #sess-host .ss-p8{padding:8px;}
+    #sess-host .ss-dash{color:var(--muted);font-weight:700;}
+    #sess-host .ss-left{color:var(--muted);font-size:11px;}
+    #sess-host .ss-fleet{font-size:11px;color:var(--muted);margin-top:2px;}
+    #sess-host .ss-meta{font-size:11px;color:var(--muted);}
+    #sess-host .ss-del-toggle{display:flex;align-items:center;gap:8px;background:transparent none;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--muted);padding:0;margin-bottom:12px;}
+    #sess-host .ss-purge-row{display:flex;justify-content:flex-end;margin-bottom:10px;}
+    #sess-host .ss-del-row{opacity:.65;}
+    /* the forms */
+    #sess-host .ss-edit{margin-bottom:24px;border-color:rgba(var(--green-rgb),.25);}
+    #sess-host .ss-mw110{max-width:110px;}
+    #sess-host .ss-mw140{max-width:140px;}
+    #sess-host .ss-mw240{max-width:240px;}
+    #sess-host .ss-mw340{max-width:340px;}
+    #sess-host .ss-datewarn{font-size:11px;color:var(--muted-l);margin-top:5px;font-weight:600;}
+    #sess-host .ss-times{display:flex;align-items:center;gap:8px;margin-top:4px;}
+    #sess-host .ss-time{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;}
+    #sess-host .ss-time2{margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;max-width:140px;display:block;}
+    #sess-host .ss-collect{margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);padding:8px 10px;font-family:var(--font-body);font-size:13px;}
+    #sess-host .ss-kinds{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
+    #sess-host .ss-hint{font-size:11px;color:var(--muted);margin-top:6px;}
+    #sess-host .ss-desc{width:100%;box-sizing:border-box;}
+    #sess-host .ss-f140{flex:0 1 140px;}
+    #sess-host .ss-f180{flex:0 1 180px;}
+    #sess-host .ss-modes{display:flex;gap:6px;margin-bottom:16px;}
+    #sess-host .ss-fleet-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:block;}
+    #sess-host .ss-wl-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
+    #sess-host .ss-wl-unit{font-size:12px;color:var(--muted);font-weight:700;}
+    #sess-host .ss-bf-new{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+    #sess-host .ss-form-acts{display:flex;gap:8px;margin-top:16px;}
+    /* the bike pickers */
+    #sess-host .ss-nobikes{color:var(--muted);font-size:13px;margin-bottom:12px;}
+    #sess-host .ss-type-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+    #sess-host .ss-type{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);}
+    #sess-host .ss-type-mb{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:8px;}
+    #sess-host .ss-type-btn{font-size:11px;padding:4px 10px;}
+    #sess-host .ss-dots{display:flex;gap:3px;align-items:center;margin-bottom:7px;}
+    #sess-host .ss-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ss-bg);border:1.5px solid rgba(0,0,0,.3);flex-shrink:0;}
+    #sess-host .ss-adot{display:inline-block;vertical-align:middle;}
+    #sess-host .ss-busy{font-size:10px;color:var(--muted);margin-top:4px;}
+    /* the fleet counts */
+    #sess-host .ss-counts-wrap{overflow-x:auto;margin-bottom:4px;}
+    #sess-host .ss-counts{width:100%;border-collapse:collapse;}
+    #sess-host .ss-th-s{text-align:start;padding:6px 10px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;}
+    #sess-host .ss-th-c{padding:6px 8px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;text-align:center;}
+    #sess-host .ss-bt1{border-top:1px solid var(--border);}
+    #sess-host .ss-bt2{border-top:2px solid var(--border);}
+    #sess-host .ss-type-td{padding:8px 10px;font-weight:800;font-size:13px;}
+    #sess-host .ss-cnt-td{padding:5px 3px;text-align:center;}
+    #sess-host .ss-cnt-in{width:40px;padding:5px 2px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;text-align:center;}
+    #sess-host .ss-rtot{padding:8px 10px;text-align:center;font-weight:900;font-size:15px;}
+    #sess-host .ss-tf-lbl{padding:8px 10px;font-size:12px;color:var(--muted);font-weight:700;}
+    #sess-host .ss-tf-tot{padding:8px 10px;text-align:center;font-size:20px;font-weight:900;color:var(--green);}
+    /* the add-ons (_sessAddonGroups) */
+    #sess-host .ss-ad-all{font-size:11px;margin-bottom:10px;}
+    #sess-host .ss-ad-cat{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;}
+    #sess-host .ss-ad-list{display:flex;flex-wrap:wrap;gap:8px;}
+    #sess-host .ss-ad{display:flex;align-items:center;gap:8px;border-radius:4px;padding:6px 11px 6px 6px;cursor:pointer;font-family:inherit;text-align:start;}
+    #sess-host .ss-ad-on{border:1.5px solid var(--green);background:rgba(var(--green-rgb),.08);}
+    #sess-host .ss-ad-off{border:1.5px solid var(--border);background:var(--s2);}
+    #sess-host .ss-ad-img{width:34px;height:34px;border-radius:3px;object-fit:contain;background:var(--photo-bg);flex-shrink:0;}
+    #sess-host .ss-ad-ic{width:34px;height:34px;border-radius:3px;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:11px;font-weight:800;}
+    #sess-host .ss-ad-nm{font-size:12px;font-weight:800;white-space:nowrap;}
+    #sess-host .ss-ad-sub{font-size:10px;color:var(--muted);white-space:nowrap;}
+    /* the booking window card (_bwCardHtml) */
+    #sess-host .ss-bw-row{align-items:flex-end;gap:10px;flex-wrap:wrap;}
+    /* the promo codes (renderPromoManager) */
+    #sess-host .pc-wrap{margin-top:32px;}
+    #sess-host#sess-host .pc-title{font-size:18px;margin-bottom:10px;}
+    #sess-host .pc-form{margin-bottom:14px;}
+    #sess-host .pc-upper{text-transform:uppercase;}
+    #sess-host .pc-cust-fld{flex:1.4;}
+    #sess-host .pc-off{opacity:.5;}
+    #sess-host .pc-code-td{font-weight:900;font-family:monospace;}
+    #sess-host#sess-host .pc-lim{font-size:12px;color:var(--muted);}
+    #sess-host#sess-host .pc-none{padding:16px;text-align:center;color:var(--muted);}
+
+    /* ── History and its Log without inline styles (2026-09-28, pass 3): renderHistory (the rides
+       list, the figures, the header's buttons and its own activity log) and renderLogs, both drawn
+       into #tab-history, and the receipt dialog it opens (#receipt-modal). Scoped by those ids, so
+       each rule outranks every class rule as the inline style did, while the !important rules that
+       beat those styles (the figures' ink, the price pencil's size on phones) still win. A bike's
+       colour rides in data-cssv (--hist-bg); a price's ink, a selection box, an activity line and a
+       log chip are one of two or three classes. The price pencil's hover ink is still set on the
+       element by its handler, as before. */
+    #tab-history .hist-mb0{margin-bottom:0;}
+    #tab-history .hist-mb8{margin-bottom:8px;}
+    #tab-history .hist-mb12{margin-bottom:12px;}
+    #tab-history .hist-mt3{margin-top:3px;}
+    #tab-history .hist-p8{padding:8px;}
+    #tab-history .hist-nowrap{white-space:nowrap;}
+    #tab-history .hist-btns{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+    #tab-history .hist-c-green{color:var(--green);}
+    #tab-history .hist-c-mutedl{color:var(--muted-l);}
+    #tab-history .hist-c-muted{color:var(--muted);}
+    #tab-history .hist-c-red{color:var(--red);}
+    #tab-history .hist-sar-green{color:var(--green);font-size:19px;}
+    #tab-history .hist-sar-orange{color:var(--orange);font-size:19px;}
+    #tab-history .hist-lg{margin-bottom:20px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:7px;padding:16px;max-height:240px;overflow-y:auto;}
+    #tab-history .hist-lg-title{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+    #tab-history .hist-lg-none{color:var(--muted);font-size:13px;}
+    #tab-history .hist-lg-row{display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(var(--tint-rgb),.05);font-size:13px;}
+    #tab-history .hist-lg-time{color:var(--muted);font-size:10px;white-space:nowrap;flex-shrink:0;}
+    #tab-history .hist-lg-act{font-weight:800;}
+    #tab-history .hist-lg-off{text-decoration:line-through;opacity:.5;}
+    #tab-history .hist-lg-name{font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    #tab-history .hist-lg-sess{color:var(--muted);font-size:11px;white-space:nowrap;}
+    #tab-history .hist-lg-undo{flex-shrink:0;padding:3px 8px;border-radius:2px;border:1px solid rgba(var(--green-rgb),.3);background:rgba(var(--green-rgb),.08);color:var(--green);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+    #tab-history .hist-lg-undone{font-size:10px;color:var(--muted);}
+    #tab-history .hist-sub{font-size:10px;color:var(--muted);font-weight:600;}
+    #tab-history .hist-sub3{font-size:10px;color:var(--muted);font-weight:600;margin-top:3px;}
+    #tab-history .hist-name{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px;}
+    #tab-history .hist-noemail{font-style:italic;color:var(--muted);}
+    #tab-history .hist-ht{font-size:12px;font-weight:700;color:var(--green);white-space:nowrap;}
+    #tab-history .hist-day{font-weight:800;font-size:13px;}
+    #tab-history .hist-sdate{color:var(--muted);font-size:12px;margin-top:1px;}
+    #tab-history .hist-stime{font-size:11px;color:var(--muted);margin-top:2px;}
+    #tab-history .hist-bike{font-weight:700;font-size:13px;}
+    #tab-history .hist-row4{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+    #tab-history .hist-dot{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--hist-bg);border:1.5px solid rgba(0,0,0,.3);flex-shrink:0;}
+    #tab-history .hist-price{font-weight:900;font-size:15px;white-space:nowrap;}
+    #tab-history .hist-sel{padding:4px 8px;}
+    #tab-history .hist-sel-on{background:rgba(var(--green-rgb),.18);border:1px solid var(--green);color:var(--green);}
+    #tab-history .hist-sel-off{background:rgba(var(--tint-rgb),.04);border:1px solid rgba(var(--tint-rgb),.14);color:var(--muted);}
+    #tab-history .hist-pen{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px;min-width:24px;min-height:24px;line-height:1;}
+    #tab-history .hist-dur{font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap;}
+    #tab-history .hist-acts{display:flex;gap:5px;flex-wrap:nowrap;align-items:center;}
+    #tab-history .hist-more{margin-top:12px;text-align:center;}
+    #receipt-modal .hist-rc-box{max-width:520px;}
+    #receipt-modal .hist-rc-mail{text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+    /* the Log view (renderLogs, in #hist-log-host); a chip's ink is one of three */
+    #tab-history .lg-wrap{padding:16px 20px;}
+    #tab-history .lg-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+    #tab-history .lg-h3{font-size:16px;font-weight:700;color:var(--text);}
+    #tab-history .lg-count{font-size:12px;font-weight:700;color:var(--muted);}
+    #tab-history .lg-note{font-size:11px;color:var(--muted);margin-bottom:16px;}
+    #tab-history .lg-op{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+    #tab-history .lg-op-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+    #tab-history .lg-fs12{font-size:12px;}
+    #tab-history .lg-mb8{margin-bottom:8px;}
+    #tab-history .lg-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:center;}
+    #tab-history .lg-srch{flex:1;min-width:170px;}
+    #tab-history .lg-w100{width:100%;}
+    #tab-history .lg-nowrap{white-space:nowrap;}
+    #tab-history .lg-day{font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 6px;}
+    #tab-history .lg-row{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border);}
+    #tab-history .lg-time{color:var(--muted);font-size:11px;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums;}
+    #tab-history .lg-chip{flex-shrink:0;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;border:1px solid currentColor;border-radius:2px;padding:1px 6px;opacity:.85;}
+    #tab-history .lg-c-green{color:var(--green);}
+    #tab-history .lg-c-muted{color:var(--muted);}
+    #tab-history .lg-c-red{color:var(--red);}
+    #tab-history .lg-label{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    #tab-history .lg-who{font-size:11px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0;}
+    #tab-history .lg-undo{flex-shrink:0;font-size:11px;padding:3px 10px;}
+    #tab-history .lg-empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
 
     /* Pull-to-refresh indicator */
     #ptr-ind{position:fixed;top:env(safe-area-inset-top,0);left:50%;transform:translateX(-50%) translateY(-64px);z-index:9998;width:38px;height:38px;border-radius:50%;background:var(--s2);border:1px solid var(--border);box-shadow:0 4px 14px rgba(16,19,18,.1);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;pointer-events:none;}

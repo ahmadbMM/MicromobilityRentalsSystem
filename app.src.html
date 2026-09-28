@@ -3638,17 +3638,17 @@ function _wlCapFieldHtml(pfx){
   const mode=(isNew?S.newSessWlMode:S.editSessWlMode)||'count';
   const val=(isNew?S.newSessWlVal:S.editSessWlVal);
   const mk=(m,lbl)=>`<button type="button" class="toggle-btn${mode===m?' active':''}" aria-pressed="${(mode===m)?'true':'false'}" data-on-click="${_on("_on__wlCapFieldHtml_1",_EV,_EL,isNew?'newSessWlMode':'editSessWlMode',m)}">${lbl}</button>`;
-  return `<div class="form-group" style="margin-bottom:16px">
+  return `<div class="form-group ss-mb16">
     <label>${t('wlCapLabel')}</label>
-    <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
+    <div class="ss-wl-row">
       ${mk('count',t('wlCapCount'))}${mk('pct',t('wlCapPct'))}
       <input type="number" id="${pfx}-wl" min="0" max="${mode==='pct'?100:500}" step="1"
         value="${esc(val==null?'':String(val))}" placeholder="0"
         data-on-input="${_on("_on__wlCapFieldHtml_2",_EV,_EL,isNew?'newSessWlVal':'editSessWlVal')}"
-        aria-label="${esc(t('wlCapLabel'))}" style="max-width:110px">
-      <span style="font-size:12px;color:var(--muted);font-weight:700">${mode==='pct'?'%':t('ridersStat')}</span>
+        aria-label="${esc(t('wlCapLabel'))}" class="ss-mw110">
+      <span class="ss-wl-unit">${mode==='pct'?'%':t('ridersStat')}</span>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px">${t('wlCapHint')}</div>
+    <div class="ss-hint">${t('wlCapHint')}</div>
   </div>`;
 }
 function _readWlCap(pfx){
@@ -5989,7 +5989,7 @@ function _bfPickerHtml(selVar,nameVar,urlVar,rerender){
       ${spots.map(sp=>`<option value="${esc(sp.id)}"${sel===sp.id?' selected':''}>${esc(sp.name)}</option>`).join('')}
       <option value="__new"${isNew?' selected':''}>${t('bfNewOpt')}</option>
     </select>
-    ${isNew?`<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+    ${isNew?`<div class="ss-bf-new">
       <input type="text" maxlength="80" value="${esc(S[nameVar]||'')}" placeholder="${esc(t('sessBfNamePh'))}" data-on-input="${_on("_on__bfPickerHtml_2",_EV,_EL,nameVar)}">
       <input type="url" inputmode="url" value="${esc(S[urlVar]||'')}" placeholder="${esc(t('sessMapPh'))}" data-on-input="${_on("_on__bfPickerHtml_3",_EV,_EL,urlVar)}">
     </div>`:''}
@@ -10925,11 +10925,11 @@ function _on__sessAddonGroups_1(event,el,a0,a1){window[a0](a1);}
 function _sessAddonGroups(items,selIds,toggleFn){
   const cats=[...new Set(items.map(it=>it.category||'Other'))].sort((a,b)=>_invCatLabel(a).localeCompare(_invCatLabel(b)));
   const card=it=>{const sel=(selIds||[]).includes(it.id);const _pl=_priceLabel(it.price);const sub=`${it.brand?esc(it.brand):''}${(it.brand&&_pl)?' · ':''}${_pl}`;
-    return`<button type="button" data-on-click="${_on("_on__sessAddonGroups_1",_EV,_EL,toggleFn,it.id)}" title="${esc(it.name)}" style="display:flex;align-items:center;gap:8px;border:1.5px solid ${sel?'var(--green)':'var(--border)'};background:${sel?'rgba(var(--green-rgb),.08)':'var(--s2)'};border-radius:4px;padding:6px 11px 6px 6px;cursor:pointer;font-family:inherit;text-align:start">${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" style="width:34px;height:34px;border-radius:3px;object-fit:contain;background:var(--photo-bg);flex-shrink:0">`:`<div style="width:34px;height:34px;border-radius:3px;background:var(--s3);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--muted-l);font-size:11px;font-weight:800">${_itemIcon(it)||esc((it.name||'?').charAt(0))}</div>`}<div style="min-width:0"><div style="font-size:12px;font-weight:800;color:${sel?'var(--green)':'var(--text)'};white-space:nowrap">${esc(it.name)}</div>${sub?`<div style="font-size:10px;color:var(--muted);white-space:nowrap">${sub}</div>`:''}</div></button>`;};
+    return`<button type="button" data-on-click="${_on("_on__sessAddonGroups_1",_EV,_EL,toggleFn,it.id)}" title="${esc(it.name)}" class="ss-ad ${sel?'ss-ad-on':'ss-ad-off'}">${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" class="ss-ad-img">`:`<div class="ss-ad-ic">${_itemIcon(it)||esc((it.name||'?').charAt(0))}</div>`}<div class="ss-minw0"><div class="ss-ad-nm ${sel?'ss-c-green':'ss-c-text'}">${esc(it.name)}</div>${sub?`<div class="ss-ad-sub">${sub}</div>`:''}</div></button>`;};
   const _saWhich=toggleFn.indexOf('Edit')>=0?'edit':'new';
   const _saAll=items.length>0&&items.every(it=>(selIds||[]).includes(it.id));
-  const _saBtn=items.length>1?`<button type="button" class="btn-sm btn-muted" style="font-size:11px;margin-bottom:10px" data-on-click="${_on("_sessAddonSelectAll",_saWhich)}">${_saAll?t('nsClear'):t('nsSelectAll')}</button>`:'';
-  return _saBtn+cats.map(cat=>`<div style="margin-bottom:10px"><div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px">${esc(_invCatLabel(cat))}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${items.filter(it=>(it.category||'Other')===cat).map(card).join('')}</div></div>`).join('');
+  const _saBtn=items.length>1?`<button type="button" class="btn-sm btn-muted ss-ad-all" data-on-click="${_on("_sessAddonSelectAll",_saWhich)}">${_saAll?t('nsClear'):t('nsSelectAll')}</button>`:'';
+  return _saBtn+cats.map(cat=>`<div class="ss-mb10"><div class="ss-ad-cat">${esc(_invCatLabel(cat))}</div><div class="ss-ad-list">${items.filter(it=>(it.category||'Other')===cat).map(card).join('')}</div></div>`).join('');
 }
 // Select-all / clear-all toggle for the session add-on offer list (shared by the new + edit session forms)
 function _sessAddonSelectAll(which){
@@ -11288,7 +11288,7 @@ function _on__nsRoute(event,el){S.newSessRoute=el.value}
 function _nsRouteHtml(){
   if(S._routes===undefined)_routesLoad();
   const list=_routes();if(!list.length)return'';
-  return `<div class="form-group" style="margin-bottom:16px"><label for="ns-route">${t('sessRouteLabel')}</label>
+  return `<div class="form-group ss-mb16"><label for="ns-route">${t('sessRouteLabel')}</label>
     <select id="ns-route" data-on-change="${_on("_on__nsRoute",_EV,_EL)}"><option value=""${S.newSessRoute?'':' selected'}>${t('sessRouteNone')}</option>${list.map(r=>`<option value="${esc(r.slug)}"${S.newSessRoute===r.slug?' selected':''}>${esc(r.name)}${r.km?` · ${esc(r.km)} km`:''}</option>`).join('')}</select></div>`;
 }
 
@@ -11366,10 +11366,10 @@ function _on__bwCard_2(event,el){S._bwAt=el.value}
 function _bwCardHtml(){
   if(S._bw===undefined)_bwLoad();
   const w=_bwGet();const days=S._bwDays!==undefined?S._bwDays:(w.days==null?'':String(w.days)),at=S._bwAt!==undefined?S._bwAt:(w.at||'');
-  return `<div class="form-section bw-card" style="margin-top:28px"><div class="form-title">${t('bwTitle')}</div><div class="ca-sub">${t('bwSub')}</div>
-    <div class="form-row" style="align-items:flex-end;gap:10px;flex-wrap:wrap">
-      <div class="form-group" style="flex:0 1 140px"><label for="bw-days">${t('bwDays')}</label><input id="bw-days" type="number" inputmode="numeric" min="0" max="365" step="1" value="${esc(days)}" data-on-input="${_on("_on__bwCard_1",_EV,_EL)}"></div>
-      <div class="form-group" style="flex:0 1 140px"><label for="bw-at">${t('bwAt')}</label><input id="bw-at" type="time" value="${esc(at)}" data-on-input="${_on("_on__bwCard_2",_EV,_EL)}"></div>
+  return `<div class="form-section bw-card ss-mt28"><div class="form-title">${t('bwTitle')}</div><div class="ca-sub">${t('bwSub')}</div>
+    <div class="form-row ss-bw-row">
+      <div class="form-group ss-f140"><label for="bw-days">${t('bwDays')}</label><input id="bw-days" type="number" inputmode="numeric" min="0" max="365" step="1" value="${esc(days)}" data-on-input="${_on("_on__bwCard_1",_EV,_EL)}"></div>
+      <div class="form-group ss-f140"><label for="bw-at">${t('bwAt')}</label><input id="bw-at" type="time" value="${esc(at)}" data-on-input="${_on("_on__bwCard_2",_EV,_EL)}"></div>
       <button type="button" class="btn-secondary" data-on-click="${_on("_bwSave")}">${t('saveBtn')}</button>
     </div></div>`;
 }
@@ -11500,7 +11500,7 @@ function _nsTplHtml(){
 }
 function _nsDaysHtml(){
   const on=new Set(S.newSessDays||[]);
-  return `<div class="form-group ns-days" style="margin-bottom:16px">
+  return `<div class="form-group ns-days ss-mb16">
     <label>${t('tplDays')}</label>
     <div class="ns-days-row">${DAY_NAMES.map((_,i)=>`<button type="button" class="toggle-btn ns-day${on.has(i)?' active':''}" aria-pressed="${on.has(i)}" data-on-click="${_on("_nsToggleDay",i)}">${esc(_dayShort(i))}</button>`).join('')}</div>
     <div id="ns-fill" class="ns-fill">${_nsFillText()}</div>
@@ -11722,7 +11722,6 @@ function renderSessions(){
   const sessions=allSessions();
   const allBikes=getBikes();
   const types=['Road','Hybrid','Mountain','Kids'];
-  const typeColorHex={Road:'var(--muted)',Hybrid:'var(--muted)',Mountain:'var(--muted)',Kids:'var(--muted)'}; // micro-labels: one quiet color, no per-type accents
 
   
   const nsAssigned=S.newSessAssignedIds;
@@ -11735,28 +11734,28 @@ function renderSessions(){
     );
     const allSelectable=allBikes.filter(b=>!_bkOut(b)&&(!busyIds.has(b.id)||nsAssigned.includes(b.id)));
     const allSelAll=allSelectable.length&&allSelectable.every(b=>nsAssigned.includes(b.id));
-    const topBtn=allSelectable.length?`<div style="margin-bottom:14px"><button type="button" class="btn-secondary" style="font-size:12px" data-on-click="${_on("selectAllNewSessAll")}">${allSelAll?t('nsClear'):t('nsSelectAllBikes')}</button></div>`:'';
+    const topBtn=allSelectable.length?`<div class="ss-mb14"><button type="button" class="btn-secondary ss-fs12" data-on-click="${_on("selectAllNewSessAll")}">${allSelAll?t('nsClear'):t('nsSelectAllBikes')}</button></div>`:'';
     return topBtn+types.map(ty=>{
       const typeBikes=allBikes.filter(b=>b.type===ty&&!_bkOut(b));
-      if(!typeBikes.length)return`<div style="color:var(--muted);font-size:13px;margin-bottom:12px">${typeLabel(ty)}: ${t('noBikes')}</div>`;
+      if(!typeBikes.length)return`<div class="ss-nobikes">${typeLabel(ty)}: ${t('noBikes')}</div>`;
       const selectableTy=typeBikes.filter(b=>!busyIds.has(b.id)||nsAssigned.includes(b.id));
       const allSelTy=selectableTy.length&&selectableTy.every(b=>nsAssigned.includes(b.id));
-      return`<div style="margin-bottom:18px">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">
-          <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${typeColorHex[ty]}">${typeLabel(ty)} (${typeBikes.filter(b=>nsAssigned.includes(b.id)).length} ${t('anOf')} ${typeBikes.length})</div>
-          ${selectableTy.length?`<button type="button" class="btn-sm btn-muted" style="font-size:11px;padding:4px 10px" data-on-click="${_on("selectAllNewSessType",ty)}">${allSelTy?t('nsClear'):t('nsSelectAll')}</button>`:''}
+      return`<div class="ss-mb18">
+        <div class="ss-type-head">
+          <div class="ss-type">${typeLabel(ty)} (${typeBikes.filter(b=>nsAssigned.includes(b.id)).length} ${t('anOf')} ${typeBikes.length})</div>
+          ${selectableTy.length?`<button type="button" class="btn-sm btn-muted ss-type-btn" data-on-click="${_on("selectAllNewSessType",ty)}">${allSelTy?t('nsClear'):t('nsSelectAll')}</button>`:''}
         </div>
         <div class="bike-assign-grid">
           ${typeBikes.map(b=>{
             const sel=nsAssigned.includes(b.id);
             const busy=busyIds.has(b.id)&&!sel;
             const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':'dot-red';
-            const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('');
+            const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span class="ss-dot" data-cssv="${_cssv({'--ss-bg':c})}"></span>`).join('');
             return`<div class="bike-assign-card${sel?' selected':''}${busy?' busy':''}"
               ${!busy?`data-on-click="${_on("toggleNewSessBike",b.id)}"`:`title="${t('inUseLabel')}"`}>
-              <div style="display:flex;gap:3px;align-items:center;margin-bottom:7px">${colorDots}</div>
+              <div class="ss-dots">${colorDots}</div>
               <div class="bike-assign-name">${esc(b.name)}</div>
-              <div style="font-size:11px;color:var(--muted)"><span class="avail-dot ${dot}" aria-hidden="true" style="display:inline-block;vertical-align:middle"></span> ${esc(b.size)}</div>
+              <div class="ss-meta"><span class="avail-dot ${dot} ss-adot" aria-hidden="true"></span> ${esc(b.size)}</div>
               ${sel?`<div class="bike-assign-check">&#x2713; ${t('assignBikeTitle')}</div>`:''}
             </div>`;
           }).join('')}
@@ -11765,18 +11764,18 @@ function renderSessions(){
     }).join('');
   }
   const addForm=S.showAddSession?`
-    <div class="inline-form" style="margin-bottom:24px" id="sess-add-form">
+    <div class="inline-form ss-mb24" id="sess-add-form">
       <div class="form-title">${t('newSessionTitle')}</div>
       ${_nsTplHtml()}
-      <div class="form-row" style="margin-bottom:20px">
+      <div class="form-row ss-mb20">
         <div class="form-group">
           <label>${t('dateLabel')}</label>
           <input type="date" id="ns-date" value="${esc(S.newSessDate)}" min="${todayStr()}"
-            data-on-input="${_on("_on_renderSessions_1",_EV,_EL)}" style="max-width:240px">
+            data-on-input="${_on("_on_renderSessions_1",_EV,_EL)}" class="ss-mw240">
         </div>
         <div class="form-group">
           <label>${t('repeatWeeksLabel')} &nbsp;<span class="label-hint">${t('repeatWeeksHint')}</span></label>
-          <select id="ns-repeat" style="max-width:240px" data-on-change="${_on("_on_renderSessions_2",_EV,_EL)}">
+          <select id="ns-repeat" class="ss-mw240" data-on-change="${_on("_on_renderSessions_2",_EV,_EL)}">
             <option value="1"${(S.newSessRepeat||'1')==='1'?' selected':''}>${(S.newSessDays||[]).length?t('repeatOneWeekOpt'):t('repeatOnceOpt')}</option>
             ${[2,3,4,6,8,12].map(n=>`<option value="${n}"${String(S.newSessRepeat)===String(n)?' selected':''}>${t('repeatWeeksOpt').replace('{0}',n)}</option>`).join('')}
           </select>
@@ -11784,32 +11783,32 @@ function renderSessions(){
         ${_nsTwoTimes()?`
         <div class="form-group">
           <label>${_kindHas(S.newSessEvent,'gathering')?t('sessGatherTime'):t('sessStartTime')}</label>
-          <input type="time" id="ns-start" value="${S.newSessStartTime||'06:30'}" data-on-input="${_on("_on_renderSessions_3",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;max-width:140px;display:block">
+          <input type="time" id="ns-start" value="${S.newSessStartTime||'06:30'}" data-on-input="${_on("_on_renderSessions_3",_EV,_EL)}" class="ss-time2">
         </div>
         <div class="form-group">
           <label>${_kindHas(S.newSessEvent,'gathering')?t('sessStartTime'):t('sessEndTime')}</label>
-          <input type="time" id="ns-end" value="${S.newSessEndTime||'07:00'}" data-on-input="${_on("_on_renderSessions_4",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;max-width:140px;display:block">
+          <input type="time" id="ns-end" value="${S.newSessEndTime||'07:00'}" data-on-input="${_on("_on_renderSessions_4",_EV,_EL)}" class="ss-time2">
         </div>`:`
         <div class="form-group">
           <label>${t('timeLabel')}</label>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-            <input type="time" id="ns-start" value="${S.newSessStartTime||'21:00'}" data-on-input="${_on("_on_renderSessions_5",_EV,_EL)}" style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer">
-            <span style="color:var(--muted);font-weight:700">-</span>
-            <input type="time" id="ns-end" value="${S.newSessEndTime||'23:00'}" data-on-input="${_on("_on_renderSessions_6",_EV,_EL)}" style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer">
+          <div class="ss-times">
+            <input type="time" id="ns-start" value="${S.newSessStartTime||'21:00'}" data-on-input="${_on("_on_renderSessions_5",_EV,_EL)}" class="ss-time">
+            <span class="ss-dash">-</span>
+            <input type="time" id="ns-end" value="${S.newSessEndTime||'23:00'}" data-on-input="${_on("_on_renderSessions_6",_EV,_EL)}" class="ss-time">
           </div>
         </div>
         <div class="form-group">
           <label for="ns-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.newSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);padding:8px 10px;font-family:var(--font-body);font-size:13px">
+          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.newSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       ${_nsDaysHtml()}
 
       ${_wlCapFieldHtml('ns')}
       ${_nsRouteHtml()}
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label>${t('sessEventLabel')}</label>
-        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+        <div class="ss-kinds">
           <button class="toggle-btn ev-pick ev-jcc${(S.newSessEvent||'jcc')==='jcc'?' active':''}" data-on-click="${_on("_on_renderSessions_8",_EV,_EL)}">${t('evJccName')}</button>
           <button class="toggle-btn ev-pick ev-saturday${S.newSessEvent==='community'?' active':''}" data-on-click="${_on("_on_renderSessions_9",_EV,_EL)}">${t('evSatName')}</button>
           <button class="toggle-btn ev-pick ev-petromin${S.newSessEvent==='petromin'?' active':''}" data-on-click="${_on("_on_renderSessions_10",_EV,_EL)}">${t('evPetroName')}</button>
@@ -11818,20 +11817,20 @@ function renderSessions(){
           <button class="toggle-btn ev-pick ev-snd96${S.newSessEvent==='snd96'?' active':''}" data-on-click="${_on("_on_renderSessions_13",_EV,_EL)}">${t('evSnd96Name')}</button>
           <button class="toggle-btn ev-pick ev-event${S.newSessEvent==='event'?' active':''}" data-on-click="${_on("_on_renderSessions_ev",_EV,_EL)}">${t('evEventName')}</button>
         </div>
-        ${_nsComm()?`<div style="font-size:11px;color:var(--muted);margin-top:6px">${S.newSessEvent==='petromin'?t('sessEventPaidHint'):S.newSessEvent==='workshop'?t('sessEventOpenHint'):S.newSessEvent==='snd96'?t('sessEventSndHint'):S.newSessEvent==='event'?t('sessEventEventHint'):t('sessEventCommHint')}</div>`:''}
+        ${_nsComm()?`<div class="ss-hint">${S.newSessEvent==='petromin'?t('sessEventPaidHint'):S.newSessEvent==='workshop'?t('sessEventOpenHint'):S.newSessEvent==='snd96'?t('sessEventSndHint'):S.newSessEvent==='event'?t('sessEventEventHint'):t('sessEventCommHint')}</div>`:''}
       </div>
       ${(S.newSessEvent==='petromin'||S.newSessEvent==='swim'||S.newSessEvent==='workshop'||S.newSessEvent==='snd96'||S.newSessEvent==='event')?`
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label>${t(_kindHas(S.newSessEvent,'bike')?'sessRideNameLabel':'sessSessNameLabel')} &nbsp;<span class="label-hint">${t(_kindHas(S.newSessEvent,'bike')?'sessRideNameHint':'sessSessNameHint')}</span></label>
-        <input type="text" id="ns-title" maxlength="60" value="${esc(S.newSessTitle||(S.newSessEvent==='swim'?t('evSwimName'):S.newSessEvent==='workshop'?t('evWorkshopName'):S.newSessEvent==='snd96'?t('evSnd96Name'):S.newSessEvent==='event'?t('evEventName'):t('evPetroName')))}" data-on-input="${_on("_on_renderSessions_14",_EV,_EL)}" style="max-width:340px">
+        <input type="text" id="ns-title" maxlength="60" value="${esc(S.newSessTitle||(S.newSessEvent==='swim'?t('evSwimName'):S.newSessEvent==='workshop'?t('evWorkshopName'):S.newSessEvent==='snd96'?t('evSnd96Name'):S.newSessEvent==='event'?t('evEventName'):t('evPetroName')))}" data-on-input="${_on("_on_renderSessions_14",_EV,_EL)}" class="ss-mw340">
       </div>`:''}
       ${S.newSessEvent==='event'?`
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label for="ns-desc">${t('sessDescLabel')} <span class="label-hint">${t('sessDescHint')}</span></label>
-        <textarea id="ns-desc" rows="3" maxlength="2000" data-on-input="${_on("_on_renderSessions_evd",_EV,_EL)}" style="width:100%;box-sizing:border-box">${esc(S.newSessDesc||'')}</textarea>
+        <textarea id="ns-desc" rows="3" maxlength="2000" data-on-input="${_on("_on_renderSessions_evd",_EV,_EL)}" class="ss-desc">${esc(S.newSessDesc||'')}</textarea>
       </div>
       <div class="form-row">
-        <div class="form-group" style="flex:0 1 180px"><label for="ns-price">${t('sessPriceLabel')} <span class="label-hint">${t('sessPriceHint')}</span></label>
+        <div class="form-group ss-f180"><label for="ns-price">${t('sessPriceLabel')} <span class="label-hint">${t('sessPriceHint')}</span></label>
           <input type="number" id="ns-price" inputmode="decimal" min="0" max="5000" step="0.5" value="${esc(String(S.newSessPrice??''))}" data-on-input="${_on("_on_renderSessions_evp",_EV,_EL)}"></div>
         <div class="form-group"><label>${t('sessWhoLabel')}</label>
           <div class="toggle-group" role="group" aria-label="${esc(t('sessWhoLabel'))}">
@@ -11840,9 +11839,9 @@ function renderSessions(){
           </div></div>
       </div>`:''}
       ${_nsSeats()?`
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label>${t('sessSpotsLabel')}</label>
-        <input type="number" id="ns-spots" min="1" max="500" value="${esc(String(S.newSessSpots||20))}" data-on-input="${_on("_on_renderSessions_15",_EV,_EL)}" style="max-width:140px">
+        <input type="number" id="ns-spots" min="1" max="500" value="${esc(String(S.newSessSpots||20))}" data-on-input="${_on("_on_renderSessions_15",_EV,_EL)}" class="ss-mw140">
       </div>`:''}
       ${_nsSeats()?`
       <div class="form-row">
@@ -11851,55 +11850,55 @@ function renderSessions(){
         ${_kindHasBf(S.newSessEvent)?_bfPickerHtml('newSessBfSel','newSessBfName','newSessBfUrl','renderSessions'):''}
       </div>`:''}
       ${_nsSeats()?'':`
-      <div style="display:flex;gap:6px;margin-bottom:16px">
+      <div class="ss-modes">
         <button class="toggle-btn${S.newSessMode==='total'?' active':''}" aria-pressed="${(S.newSessMode==='total')?'true':'false'}" data-on-click="${_on("_on_renderSessions_17",_EV,_EL)}">${t('sessModeTotal')}</button>
         <button class="toggle-btn${S.newSessMode==='counts'?' active':''}" aria-pressed="${(S.newSessMode==='counts')?'true':'false'}" data-on-click="${_on("_on_renderSessions_18",_EV,_EL)}">${t('sessModeCounts')}</button>
         <button class="toggle-btn${S.newSessMode==='fleet'?' active':''}" aria-pressed="${(S.newSessMode==='fleet')?'true':'false'}" data-on-click="${_on("_on_renderSessions_19",_EV,_EL)}">${t('sessModeFleet')}</button>
       </div>
-      <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:block">
+      <label class="ss-fleet-lbl">
         ${t('bikeFleetComp')}
       </label>`}
       ${_nsSeats()?'':S.newSessMode==='counts'?`
-        <div style="overflow-x:auto;margin-bottom:4px">
-          <table style="width:100%;border-collapse:collapse">
+        <div class="ss-counts-wrap">
+          <table class="ss-counts">
             <thead><tr>
-              <th style="text-align:start;padding:6px 10px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase">${t('bikeTypeLabel')}</th>
-              ${BIKE_SIZES.map(sz=>`<th style="padding:6px 8px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;text-align:center">${sz}</th>`).join('')}
-              <th style="padding:6px 8px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;text-align:center">${t('totalStat')}</th>
+              <th class="ss-th-s">${t('bikeTypeLabel')}</th>
+              ${BIKE_SIZES.map(sz=>`<th class="ss-th-c">${sz}</th>`).join('')}
+              <th class="ss-th-c">${t('totalStat')}</th>
             </tr></thead>
             <tbody>${types.map(ty=>{
               if(!S.newSessTypeSizes)S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
               const rowTot=BIKE_SIZES.reduce((s,sz)=>s+(S.newSessTypeSizes[ty]?.[sz]||0),0);
-              return`<tr style="border-top:1px solid var(--border)">
-                <td style="padding:8px 10px;font-weight:800;font-size:13px">${typeLabel(ty)}</td>
-                ${BIKE_SIZES.map(sz=>`<td style="padding:5px 3px;text-align:center">
+              return`<tr class="ss-bt1">
+                <td class="ss-type-td">${typeLabel(ty)}</td>
+                ${BIKE_SIZES.map(sz=>`<td class="ss-cnt-td">
                   <input type="number" min="0" max="99" value="${S.newSessTypeSizes[ty]?.[sz]||0}"
-                    style="width:40px;padding:5px 2px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;text-align:center"
+                    class="ss-cnt-in"
                     data-on-input="${_on("_on_renderSessions_20",_EV,_EL,ty,sz)}">
                 </td>`).join('')}
-                <td style="padding:8px 10px;text-align:center;font-weight:900;font-size:15px;color:${rowTot>0?'var(--green)':'var(--muted)'}">${rowTot}</td>
+                <td class="ss-rtot ${rowTot>0?'ss-c-green':'ss-c-muted'}">${rowTot}</td>
               </tr>`;
             }).join('')}</tbody>
-            <tfoot><tr style="border-top:2px solid var(--border)">
-              <td colspan="${BIKE_SIZES.length+1}" style="padding:8px 10px;font-size:12px;color:var(--muted);font-weight:700">${t('totalBikesSession')}</td>
-              <td style="padding:8px 10px;text-align:center;font-size:20px;font-weight:900;color:var(--green)">${types.reduce((sum,ty)=>sum+BIKE_SIZES.reduce((s,sz)=>s+(S.newSessTypeSizes?.[ty]?.[sz]||0),0),0)}</td>
+            <tfoot><tr class="ss-bt2">
+              <td colspan="${BIKE_SIZES.length+1}" class="ss-tf-lbl">${t('totalBikesSession')}</td>
+              <td class="ss-tf-tot">${types.reduce((sum,ty)=>sum+BIKE_SIZES.reduce((s,sz)=>s+(S.newSessTypeSizes?.[ty]?.[sz]||0),0),0)}</td>
             </tr></tfoot>
           </table>
         </div>`:S.newSessMode==='total'?`
-        <div class="form-group" style="margin-bottom:16px">
+        <div class="form-group ss-mb16">
           <label>${t('totalBikesSession')}</label>
-          <input type="number" id="ns-total" min="1" max="500" value="${esc(String(S.newSessTotal||10))}" data-on-input="${_on("_on_renderSessions_21",_EV,_EL)}" style="max-width:140px">
+          <input type="number" id="ns-total" min="1" max="500" value="${esc(String(S.newSessTotal||10))}" data-on-input="${_on("_on_renderSessions_21",_EV,_EL)}" class="ss-mw140">
         </div>`:newBikePicker()}
       ${(()=>{
         if(_nsSeats())return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
         if(!items.length)return'';
-        return`<div class="form-group" style="margin-top:18px">
+        return`<div class="form-group ss-mt18">
           <label>${t('sessionAddonsLabel')} &nbsp;<span class="label-hint">${t('sessionAddonsHint')}</span></label>
-          <div style="margin-top:6px">${_sessAddonGroups(items,S.newSessAddons,'_toggleNewSessAddon')}</div>
+          <div class="ss-mt6">${_sessAddonGroups(items,S.newSessAddons,'_toggleNewSessAddon')}</div>
         </div>`;
       })()}
-      <div style="display:flex;gap:8px;margin-top:16px">
+      <div class="ss-form-acts">
         <button class="btn-primary" data-on-click="${_on("addSession")}">${t('createSession')}</button>
         <button class="btn-secondary" data-on-click="${_on("_on_renderSessions_22",_EV,_EL)}">${t('cancelBtn')}</button>
       </div>
@@ -11920,22 +11919,22 @@ function renderSessions(){
     );
     return types.map(ty=>{
       const typeBikes=allBikes.filter(b=>b.type===ty&&!_bkOut(b));
-      if(!typeBikes.length)return`<div style="color:var(--muted);font-size:13px;margin-bottom:12px">${typeLabel(ty)}: ${t('noBikes')}</div>`;
-      return`<div style="margin-bottom:18px">
-        <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;color:${typeColorHex[ty]};margin-bottom:8px">${typeLabel(ty)} (${typeBikes.filter(b=>esAssigned.includes(b.id)).length} ${t('anOf')} ${typeBikes.length})</div>
+      if(!typeBikes.length)return`<div class="ss-nobikes">${typeLabel(ty)}: ${t('noBikes')}</div>`;
+      return`<div class="ss-mb18">
+        <div class="ss-type-mb">${typeLabel(ty)} (${typeBikes.filter(b=>esAssigned.includes(b.id)).length} ${t('anOf')} ${typeBikes.length})</div>
         <div class="bike-assign-grid">
           ${typeBikes.map(b=>{
             const sel=esAssigned.includes(b.id);
             const busy=busyIds.has(b.id)&&!sel;
             const dot=b.status==='available'?'dot-green':b.status==='in-use'?'dot-blue':'dot-red';
-            const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join('');
+            const colorDots=(b.colors||['#0c7a3d']).map(c=>`<span class="ss-dot" data-cssv="${_cssv({'--ss-bg':c})}"></span>`).join('');
             return`<div class="bike-assign-card${sel?' selected':''}${busy?' busy':''}"
               ${!busy?`data-on-click="${_on("toggleAssignBike",b.id)}"`:`title="${t('inUseElse')}"`}>
-              <div style="display:flex;gap:3px;align-items:center;margin-bottom:7px">${colorDots}</div>
+              <div class="ss-dots">${colorDots}</div>
               <div class="bike-assign-name">${esc(b.name)}</div>
-              <div style="font-size:11px;color:var(--muted)"><span class="avail-dot ${dot}" aria-hidden="true" style="display:inline-block;vertical-align:middle"></span> ${esc(b.size)} &middot; ${b.status==='available'?t('availLabel'):b.status==='in-use'?t('inUseLabel'):t('maintLabel')}</div>
+              <div class="ss-meta"><span class="avail-dot ${dot} ss-adot" aria-hidden="true"></span> ${esc(b.size)} &middot; ${b.status==='available'?t('availLabel'):b.status==='in-use'?t('inUseLabel'):t('maintLabel')}</div>
               ${sel?`<div class="bike-assign-check">✓ ${t('assignBikeTitle')}</div>`:''}
-              ${busy?`<div style="font-size:10px;color:var(--muted);margin-top:4px">${t('inUseLabel')}</div>`:''}
+              ${busy?`<div class="ss-busy">${t('inUseLabel')}</div>`:''}
             </div>`;
           }).join('')}
         </div>
@@ -11944,18 +11943,18 @@ function renderSessions(){
   }
 
   const editForm=editSess?`
-    <div class="inline-form" style="margin-bottom:24px;border-color:rgba(var(--green-rgb),.25)" id="sess-edit-form">
-      <div class="form-title" style="color:var(--green)">${t('editSessionTitle')}: ${shortDate(editSess.session_date||editSess.id)}</div>
-      <div class="form-row" style="margin-bottom:20px">
+    <div class="inline-form ss-edit" id="sess-edit-form">
+      <div class="form-title ss-c-green">${t('editSessionTitle')}: ${shortDate(editSess.session_date||editSess.id)}</div>
+      <div class="form-row ss-mb20">
         <div class="form-group">
           <label>${t('dateLabel')}</label>
           <input type="date" id="es-date" value="${esc(S.editSessDate)}"
-            data-on-input="${_on("_on_renderSessions_23",_EV,_EL)}" style="max-width:240px">
-          <div style="font-size:11px;color:var(--muted-l);margin-top:5px;font-weight:600">${t('dateWarning')}</div>
+            data-on-input="${_on("_on_renderSessions_23",_EV,_EL)}" class="ss-mw240">
+          <div class="ss-datewarn">${t('dateWarning')}</div>
         </div>
         <div class="form-group">
           <label>${t('colStatus')}</label>
-          <div class="toggle-group" style="margin-top:4px">
+          <div class="toggle-group ss-mt4">
             ${['closed','open','full'].map(st=>`<button class="toggle-btn${S.editSessStatus===st?' active':''}" aria-pressed="${(S.editSessStatus===st)?'true':'false'}"
               data-on-click="${_on("_on_renderSessions_24",_EV,_EL,st)}">${t(SESS_STATUS_KEY[st])}</button>`).join('')}
           </div>
@@ -11963,11 +11962,11 @@ function renderSessions(){
         ${_twoTimesSess(editSess)?`
         <div class="form-group">
           <label>${_gathers(editSess)?t('sessGatherTime'):t('sessStartTime')}</label>
-          <input type="time" id="es-start" value="${esc(S.editSessStartTime||'06:30')}" data-on-input="${_on("_on_renderSessions_25",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;max-width:140px;display:block">
+          <input type="time" id="es-start" value="${esc(S.editSessStartTime||'06:30')}" data-on-input="${_on("_on_renderSessions_25",_EV,_EL)}" class="ss-time2">
         </div>
         <div class="form-group">
           <label>${_gathers(editSess)?t('sessStartTime'):t('sessEndTime')}</label>
-          <input type="time" id="es-end" value="${esc(S.editSessEndTime||'07:00')}" data-on-input="${_on("_on_renderSessions_26",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer;max-width:140px;display:block">
+          <input type="time" id="es-end" value="${esc(S.editSessEndTime||'07:00')}" data-on-input="${_on("_on_renderSessions_26",_EV,_EL)}" class="ss-time2">
         </div>
         ${_rideKind(editSess)==='snd96'?'':`<div class="form-group"><label>${t('sessMapLabel')}</label>
           <input type="url" id="es-map" inputmode="url" value="${esc(S.editSessMapUrl||'')}" placeholder="${esc(t('sessMapPh'))}" data-on-input="${_on("_on_renderSessions_27",_EV,_EL)}"></div>`}
@@ -11975,78 +11974,78 @@ function renderSessions(){
         ${''}`:`
         <div class="form-group">
           <label>${t('timeLabel')}</label>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
-            <input type="time" id="es-start" value="${esc(S.editSessStartTime||'21:00')}" data-on-input="${_on("_on_renderSessions_28",_EV,_EL)}" style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer">
-            <span style="color:var(--muted);font-weight:700">-</span>
-            <input type="time" id="es-end" value="${esc(S.editSessEndTime||'23:00')}" data-on-input="${_on("_on_renderSessions_29",_EV,_EL)}" style="background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;padding:6px 10px;cursor:pointer">
+          <div class="ss-times">
+            <input type="time" id="es-start" value="${esc(S.editSessStartTime||'21:00')}" data-on-input="${_on("_on_renderSessions_28",_EV,_EL)}" class="ss-time">
+            <span class="ss-dash">-</span>
+            <input type="time" id="es-end" value="${esc(S.editSessEndTime||'23:00')}" data-on-input="${_on("_on_renderSessions_29",_EV,_EL)}" class="ss-time">
           </div>
         </div>
         <div class="form-group">
           <label for="es-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.editSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" style="margin-top:4px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);padding:8px 10px;font-family:var(--font-body);font-size:13px">
+          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.editSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       
       ${['petromin','swim','workshop'].includes(_rideKind(editSess))?`
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label>${t(_needsBike(editSess)?'sessRideNameLabel':'sessSessNameLabel')} &nbsp;<span class="label-hint">${t(_needsBike(editSess)?'sessRideNameHint':'sessSessNameHint')}</span></label>
-        <input type="text" id="es-title" maxlength="60" value="${esc(_stockEvName(S.editSessTitle)?'':(S.editSessTitle||''))}" placeholder="${esc(_evName({...editSess,title:null}))}" data-on-input="${_on("_on_renderSessions_31",_EV,_EL)}" style="max-width:340px">
+        <input type="text" id="es-title" maxlength="60" value="${esc(_stockEvName(S.editSessTitle)?'':(S.editSessTitle||''))}" placeholder="${esc(_evName({...editSess,title:null}))}" data-on-input="${_on("_on_renderSessions_31",_EV,_EL)}" class="ss-mw340">
       </div>`:''}
       ${_isApprovalRide(editSess)?`
-      <div class="form-group" style="margin-bottom:16px">
+      <div class="form-group ss-mb16">
         <label>${t('sessSpotsLabel')}</label>
-        <input type="number" id="es-spots" min="1" max="500" value="${esc(String(S.editSessSpots||editSess.spots||20))}" data-on-input="${_on("_on_renderSessions_32",_EV,_EL)}" style="max-width:140px">
+        <input type="number" id="es-spots" min="1" max="500" value="${esc(String(S.editSessSpots||editSess.spots||20))}" data-on-input="${_on("_on_renderSessions_32",_EV,_EL)}" class="ss-mw140">
       </div>`:`
-      <div style="display:flex;gap:6px;margin-bottom:16px">
+      <div class="ss-modes">
         <button class="toggle-btn${S.editSessMode==='total'?' active':''}" aria-pressed="${(S.editSessMode==='total')?'true':'false'}" data-on-click="${_on("_on_renderSessions_33",_EV,_EL)}">${t('sessModeTotal')}</button>
         <button class="toggle-btn${S.editSessMode==='counts'?' active':''}" aria-pressed="${(S.editSessMode==='counts')?'true':'false'}" data-on-click="${_on("_on_renderSessions_34",_EV,_EL)}">${t('sessModeCounts')}</button>
         <button class="toggle-btn${S.editSessMode==='fleet'?' active':''}" aria-pressed="${(S.editSessMode==='fleet')?'true':'false'}" data-on-click="${_on("_on_renderSessions_35",_EV,_EL)}">${t('sessModeFleet')}</button>
       </div>
-      <label style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:block">
-        ${t('bikeFleetComp')}${S.editSessMode==='fleet'?` &nbsp;·&nbsp; <span style="color:var(--green)"><bdi>${esTotal} ${t('bikesWord')}</bdi> ${t('assignBikeTitle').toLowerCase()}</span>`:''}
+      <label class="ss-fleet-lbl">
+        ${t('bikeFleetComp')}${S.editSessMode==='fleet'?` &nbsp;·&nbsp; <span class="ss-c-green"><bdi>${esTotal} ${t('bikesWord')}</bdi> ${t('assignBikeTitle').toLowerCase()}</span>`:''}
       </label>`}
       ${_wlCapFieldHtml('es')}
       ${_isApprovalRide(editSess)?'':S.editSessMode==='counts'?`
-        <div style="overflow-x:auto;margin-bottom:4px">
-          <table style="width:100%;border-collapse:collapse">
+        <div class="ss-counts-wrap">
+          <table class="ss-counts">
             <thead><tr>
-              <th style="text-align:start;padding:6px 10px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase">${t('bikeTypeLabel')}</th>
-              ${BIKE_SIZES.map(sz=>`<th style="padding:6px 8px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;text-align:center">${sz}</th>`).join('')}
-              <th style="padding:6px 8px;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;text-align:center">${t('totalStat')}</th>
+              <th class="ss-th-s">${t('bikeTypeLabel')}</th>
+              ${BIKE_SIZES.map(sz=>`<th class="ss-th-c">${sz}</th>`).join('')}
+              <th class="ss-th-c">${t('totalStat')}</th>
             </tr></thead>
             <tbody>${['Road','Hybrid','Mountain','Kids'].map(ty=>{
               if(!S.editSessTypeSizes)S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
               const rowTot=BIKE_SIZES.reduce((s,sz)=>s+(S.editSessTypeSizes[ty]?.[sz]||0),0);
-              return`<tr style="border-top:1px solid var(--border)">
-                <td style="padding:8px 10px;font-weight:800;font-size:13px">${typeLabel(ty)}</td>
-                ${BIKE_SIZES.map(sz=>`<td style="padding:5px 3px;text-align:center">
+              return`<tr class="ss-bt1">
+                <td class="ss-type-td">${typeLabel(ty)}</td>
+                ${BIKE_SIZES.map(sz=>`<td class="ss-cnt-td">
                   <input type="number" min="0" max="99" value="${S.editSessTypeSizes[ty]?.[sz]||0}"
-                    style="width:40px;padding:5px 2px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;text-align:center"
+                    class="ss-cnt-in"
                     data-on-input="${_on("_on_renderSessions_36",_EV,_EL,ty,sz)}">
                 </td>`).join('')}
-                <td style="padding:8px 10px;text-align:center;font-weight:900;font-size:15px;color:${rowTot>0?'var(--green)':'var(--muted)'}">${rowTot}</td>
+                <td class="ss-rtot ${rowTot>0?'ss-c-green':'ss-c-muted'}">${rowTot}</td>
               </tr>`;
             }).join('')}</tbody>
-            <tfoot><tr style="border-top:2px solid var(--border)">
-              <td colspan="${BIKE_SIZES.length+1}" style="padding:8px 10px;font-size:12px;color:var(--muted);font-weight:700">${t('totalBikesSession')}</td>
-              <td style="padding:8px 10px;text-align:center;font-size:20px;font-weight:900;color:var(--green)">${['Road','Hybrid','Mountain','Kids'].reduce((sum,ty)=>sum+BIKE_SIZES.reduce((s,sz)=>s+(S.editSessTypeSizes?.[ty]?.[sz]||0),0),0)}</td>
+            <tfoot><tr class="ss-bt2">
+              <td colspan="${BIKE_SIZES.length+1}" class="ss-tf-lbl">${t('totalBikesSession')}</td>
+              <td class="ss-tf-tot">${['Road','Hybrid','Mountain','Kids'].reduce((sum,ty)=>sum+BIKE_SIZES.reduce((s,sz)=>s+(S.editSessTypeSizes?.[ty]?.[sz]||0),0),0)}</td>
             </tr></tfoot>
           </table>
         </div>`:S.editSessMode==='total'?`
-        <div class="form-group" style="margin-bottom:16px">
+        <div class="form-group ss-mb16">
           <label>${t('totalBikesSession')}</label>
-          <input type="number" id="es-total" min="1" max="500" value="${esc(String(S.editSessTotal||10))}" data-on-input="${_on("_on_renderSessions_37",_EV,_EL)}" style="max-width:140px">
+          <input type="number" id="es-total" min="1" max="500" value="${esc(String(S.editSessTotal||10))}" data-on-input="${_on("_on_renderSessions_37",_EV,_EL)}" class="ss-mw140">
         </div>`:bikePicker()}
       ${(()=>{
         if(_isFreeRide(editSess))return''; // a complimentary ride sells nothing - no add-ons
         const items=(S.inventory||[]).filter(it=>(Number(it.qty)||0)>0);
         if(!items.length)return'';
-        return`<div class="form-group" style="margin-top:18px">
+        return`<div class="form-group ss-mt18">
           <label>${t('sessionAddonsLabel')} &nbsp;<span class="label-hint">${t('sessionAddonsHint')}</span></label>
-          <div style="margin-top:6px">${_sessAddonGroups(items,S.editSessAddons,'_toggleEditSessAddon')}</div>
+          <div class="ss-mt6">${_sessAddonGroups(items,S.editSessAddons,'_toggleEditSessAddon')}</div>
         </div>`;
       })()}
-      <div style="display:flex;gap:8px;margin-top:16px">
+      <div class="ss-form-acts">
         <button class="btn-primary" data-on-click="${_on("saveSessionEdit")}">${t('saveSessionBtn')}</button>
         <button class="btn-secondary" data-on-click="${_on("_on_renderSessions_38",_EV,_EL)}">${t('cancelBtn')}</button>
       </div>
@@ -12111,13 +12110,13 @@ function renderSessions(){
       actionBtns=`<button class="btn-sm btn-green" data-on-click="${_on("toggleSession",s.id,"open")}">${t('openBtn')}</button>`;
     }
     return`<tr>
-      <td data-label="${t('colDate')}" style="font-weight:800">${shortDate(s.session_date||s.id)}</td>
-      <td data-label="${t('colDay')}" style="color:var(--muted)">${dayLabel(s.day)||''}</td>
+      <td data-label="${t('colDate')}" class="ss-b800">${shortDate(s.session_date||s.id)}</td>
+      <td data-label="${t('colDay')}" class="ss-c-muted">${dayLabel(s.day)||''}</td>
       <td data-label="${t('colCapacity')}">
-        <div style="font-weight:800">${cap}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${fleetInfo}</div>
+        <div class="ss-b800">${cap}</div>
+        <div class="ss-fleet">${fleetInfo}</div>
       </td>
-      <td data-label="${t('colBookings')}">${booked} / ${cap} &nbsp;<span style="color:var(--muted);font-size:11px">(${left} ${t('spotsLeft')})</span></td>
+      <td data-label="${t('colBookings')}">${booked} / ${cap} &nbsp;<span class="ss-left">(${left} ${t('spotsLeft')})</span></td>
       <td data-label="${t('colStatus')}">${statusBadgeHtml}</td>
       <td class="cell-actions">
         <div class="actions-cell">
@@ -12128,7 +12127,7 @@ function renderSessions(){
         </div>
       </td>
     </tr>`;
-  }).join(''):`<tr><td colspan="6"><div style="padding:8px">${emptyIllustration(ILLUS_CALENDAR,t('noSessionsYet'),'',`<button class="btn-primary" data-on-click="${_on("_on_renderSessions_39",_EV,_EL)}">${t('newSession')}</button>`)}</div></td></tr>`;
+  }).join(''):`<tr><td colspan="6"><div class="ss-p8">${emptyIllustration(ILLUS_CALENDAR,t('noSessionsYet'),'',`<button class="btn-primary" data-on-click="${_on("_on_renderSessions_39",_EV,_EL)}">${t('newSession')}</button>`)}</div></td></tr>`;
 
   // ── Two-pane session browser: list (left) + detail (right) on iPad/desktop; master-detail on phone ──
   const _sessD=(s)=>{
@@ -12146,7 +12145,7 @@ function renderSessions(){
     // The opposite case: the night is still AHEAD and has to be called off (weather, venue).
     // Cancelling used to mean closing the session and every rider finding out at the gate.
     const _cnLive=(!_nightOver&&s.status!=='closed')?(_qBySession().get(s.id)||[]).filter(e=>['waiting','waitlist','active'].includes(e.status)).length:0;
-    const _cancelNightBtn=_cnLive?`<button class="btn-sm btn-muted" style="color:var(--red)" data-on-click="${_on("_on_renderSessions_41",_EV,_EL,s.id)}">${t('cnBtn')} (${_cnLive})</button>`:'';
+    const _cancelNightBtn=_cnLive?`<button class="btn-sm btn-muted ss-c-red" data-on-click="${_on("_on_renderSessions_41",_EV,_EL,s.id)}">${t('cnBtn')} (${_cnLive})</button>`:'';
     let badge,actions;
     if(s.status==='open'){badge=`<span class="badge-open">${t('statusOpen')}</span>`;actions=`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_42",_EV,_EL,s.id)}">${t('markFullBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_43",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
     else if(s.status==='full'){badge=`<span class="badge-full">${t('statusFull')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_44",_EV,_EL,s.id)}">${t('reopenBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_45",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
@@ -12158,7 +12157,7 @@ function renderSessions(){
     return`<button class="sess-lc ${_evClass(s)}${sel?' selected':''}" data-on-click="${_on("selectSessionDetail",s.id)}" aria-label="${esc(shortDate(s.session_date||s.id))}">
       <div class="sess-lc-top"><span class="sess-lc-date">${shortDate(s.session_date||s.id)}</span>${_cChip}${d.badge}</div>
       <div class="sess-lc-meta">${dayLabel(s.day)||''} · ${sessionTime(s)}</div>
-      <div class="sess-lc-bar"><div style="width:${pct}%;background:${pct>=100?'#a33b2e':pct>80?'#8a5c14':'#0c7a3d'}"></div></div>
+      <div class="sess-lc-bar"><div class="ss-fill ${pct>=100?'ss-fill-full':pct>80?'ss-fill-high':'ss-fill-ok'}" data-cssv="${_cssv({'--ss-w':pct+'%'})}"></div></div>
       <div class="sess-lc-count">${d.booked}/${d.cap} · ${d.left} ${t('spotsLeft')}</div>
     </button>`;};
   const _selSess=S.selSessionDetail?sessions.find(s=>s.id===S.selSessionDetail&&s.status!=='deleted'):null;
@@ -12167,15 +12166,15 @@ function renderSessions(){
     const riders=(_bySession.get(_selSess.id)||[]).filter(e=>e.status!=='removed').sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
     const rr=riders.length?riders.map(e=>{const bk=getAssignedBikes(e).map(b=>esc(b.name)).join(', ');
       return`<div class="sess-rider"><span class="sess-rider-q">#${e.queueNum}</span><div class="sess-rider-info"><div class="sess-rider-name">${esc(e.name)}</div>${bk?`<div class="sess-rider-bike">${bk}</div>`:''}</div>${statusBadge(e.status)}</div>`;
-    }).join(''):`<div class="empty-state" style="padding:18px;font-size:13px">${t('sessNoRiders')}</div>`;
+    }).join(''):`<div class="empty-state ss-noriders">${t('sessNoRiders')}</div>`;
     return`<button class="sess-back-btn" data-on-click="${_on("selectSessionDetail",null)}">‹ ${t('sessBackList')}</button>
-      <div class="sess-detail-head"><div style="min-width:0"><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · ${sessionTime(_selSess)}</div></div>${d.badge}</div>
+      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · ${sessionTime(_selSess)}</div></div>${d.badge}</div>
       <div class="sess-detail-stats">
       ${(()=>{const _c=waitlistCap(_selSess);if(_c==null)return'';
         const _u=waitlistUsed(_selSess.id);
         return `<div><div class="sess-ds-num">${_u}/${_c}</div><div class="sess-ds-lbl">${t('wlCapLabel')}</div></div>`;})()}<div><div class="sess-ds-num">${d.booked}/${d.cap}</div><div class="sess-ds-lbl">${t('colBookings')}</div></div><div><div class="sess-ds-num">${d.left}</div><div class="sess-ds-lbl">${t('spotsLeft')}</div></div>${d.fleetInfo?`<div class="sess-ds-fleet"><div class="sess-ds-fleetval">${d.fleetInfo}</div><div class="sess-ds-lbl">${t('bikeFleetComp')}</div></div>`:''}</div>
       <div class="sess-detail-actions"><button class="btn-sm btn-green" data-on-click="${_on("startEditSession",_selSess.id)}">${t('editBtn2')}</button><button class="btn-sm btn-muted" data-on-click="${_on("cloneSession",_selSess.id)}">${t('cloneSessBtn')}</button>${d.actions}${isAdmin()?`<button class="btn-sm btn-red" data-on-click="${_on("deleteSession",_selSess.id)}" ${d.booked>0?`disabled title="${t('hasBookingsTitle')}"`:''}>${t('deleteBtn')}</button>`:''}</div>
-      <div class="sess-detail-rtitle">${t('sessRidersTitle')} <span style="color:var(--muted)">(${riders.length})</span></div>
+      <div class="sess-detail-rtitle">${t('sessRidersTitle')} <span class="ss-c-muted">(${riders.length})</span></div>
       <div class="sess-detail-riders">${rr}</div>`;
   })():`<div class="sess-detail-empty">${emptyIllustration(ILLUS_CALENDAR,t('sessSelectMsg'))}</div>`;
   const sessTwoPane=`<div class="sess-twopane${(S.selSessionDetail&&_selSess)?' has-detail':''}">
@@ -12185,13 +12184,14 @@ function renderSessions(){
     <div class="sess-detail-pane">${_detailHtml}</div>
   </div>`;
 
-  (document.getElementById('sess-host')||document.getElementById('tab-sessions')||{}).innerHTML=`
+  const _sessEl=document.getElementById('sess-host')||document.getElementById('tab-sessions')||{};
+  _sessEl.innerHTML=`
     <div class="section-header">
       <div>
         <div class="page-title">${t('sessionsTitle')}</div>
         <div class="page-sub">${t('sessionsSub')}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="ss-head-btns">
         <div class="view-toggle sess-view-toggle" role="group">
           <button type="button" class="view-toggle-btn${S.sessView!=='cal'?' active':''}" aria-pressed="${S.sessView!=='cal'}" data-on-click="${_on("_on_renderSessions_48",_EV,_EL)}">${t('calViewList')}</button>
           <button type="button" class="view-toggle-btn${S.sessView==='cal'?' active':''}" aria-pressed="${S.sessView==='cal'}" data-on-click="${_on("_on_renderSessions_49",_EV,_EL)}">${t('calViewCal')}</button>
@@ -12212,13 +12212,13 @@ function renderSessions(){
     ${(()=>{
       const deleted=sessions.filter(s=>s.status==='deleted').sort((a,b)=>new Date(b.session_date||b.id)-new Date(a.session_date||a.id));
       if(!deleted.length)return'';
-      return`<div style="margin-top:28px">
+      return`<div class="ss-mt28">
         <button data-on-click="${_on("_on_renderSessions_52",_EV,_EL)}"
-          style="display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;font-weight:700;color:var(--muted);padding:0;margin-bottom:12px">
-          <span style="font-size:16px">${S.showDeletedSess?'▾':'▸'}</span>
+          class="ss-del-toggle">
+          <span class="ss-fs16">${S.showDeletedSess?'▾':'▸'}</span>
           ${t('sessDeletedGroup')} (${deleted.length})
         </button>
-        ${S.showDeletedSess&&isAdmin()&&deleted.length>1?`<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn-sm btn-red" data-on-click="${_on("purgeDeletedSessions")}">${t('sessPurgeAllBtn')}</button></div>`:''}
+        ${S.showDeletedSess&&isAdmin()&&deleted.length>1?`<div class="ss-purge-row"><button class="btn-sm btn-red" data-on-click="${_on("purgeDeletedSessions")}">${t('sessPurgeAllBtn')}</button></div>`:''}
         ${S.showDeletedSess?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="sess-admin-table">
           <thead><tr>
             <th>${t('colDate')}</th><th>${t('colDay')}</th><th>${t('colCapacity')}</th><th>${t('colBookings')}</th><th></th>
@@ -12229,10 +12229,10 @@ function renderSessions(){
             const cap=s.capacity||12;
             const slots=parseSlots(s.bike_slots);
             const fleetInfo=slots?esc(slotsLabel(slots)):''; // per-size counts are objects: printing them gave "Roa×[object Object]"
-            return`<tr style="opacity:.65">
-              <td data-label="${t('colDate')}" style="font-weight:800">${shortDate(s.session_date||s.id)}</td>
-              <td data-label="${t('colDay')}" style="color:var(--muted)">${dayLabel(s.day)||''}</td>
-              <td data-label="${t('colCapacity')}"><div style="font-weight:800">${cap}</div><div style="font-size:11px;color:var(--muted)">${fleetInfo}</div></td>
+            return`<tr class="ss-del-row">
+              <td data-label="${t('colDate')}" class="ss-b800">${shortDate(s.session_date||s.id)}</td>
+              <td data-label="${t('colDay')}" class="ss-c-muted">${dayLabel(s.day)||''}</td>
+              <td data-label="${t('colCapacity')}"><div class="ss-b800">${cap}</div><div class="ss-meta">${fleetInfo}</div></td>
               <td data-label="${t('colBookings')}">${bk} / ${cap}</td>
               <td class="cell-actions"><div class="actions-cell">
                 <button class="btn-sm btn-green" data-on-click="${_on("restoreSession",s.id)}">${t('restoreBtn')}</button>
@@ -12245,6 +12245,7 @@ function renderSessions(){
     })()}
     ${isAdmin()?_bwCardHtml():''}
     ${renderPromoManager()}`;
+  if(_sessEl.nodeType)_cssvApply(_sessEl); // the bikes' colour dots and the bars' widths (data-cssv)
 }
 
 // ── Promo code limits ─────────────────────────────────────────────────────
@@ -12295,18 +12296,18 @@ function renderPromoManager(){
   const codes=[...(S.promoCodes||[])].sort((a,b)=>String(a.code).localeCompare(String(b.code)));
   const rows=codes.length?codes.map(c=>{
     const spent=_promoSpent(c);
-    return`<tr${c.active&&!spent?'':' style="opacity:.5"'}>
-    <td data-label="${t('promoCodeLabel')}" style="font-weight:900;font-family:monospace">${esc(c.code)}</td>
+    return`<tr${c.active&&!spent?'':' class="pc-off"'}>
+    <td data-label="${t('promoCodeLabel')}" class="pc-code-td">${esc(c.code)}</td>
     <td data-label="${t('promoValueLabel')}">${c.kind==='flat'?`SAR ${c.value}`:`${c.value}%`}${c.applies_to?` · ${typeLabel(c.applies_to)}`:''}</td>
-    <td data-label="${t('promoLimitsLabel')}" style="font-size:12px;color:var(--muted)">${_promoLimitsText(c)||'—'}</td>
+    <td data-label="${t('promoLimitsLabel')}" class="pc-lim">${_promoLimitsText(c)||'—'}</td>
     <td data-label="${t('promoActiveLabel')}"><button class="btn-sm ${c.active&&!spent?'btn-green':'btn-muted'}" data-on-click="${_on("togglePromoActive",c.id)}">${spent?t(_promoExpired(c)?'promoExpiredLabel':'promoUsedUpLabel'):c.active?t('promoActiveLabel'):t('promoInactiveLabel')}</button></td>
     <td class="cell-actions"><button class="btn-sm btn-red" data-on-click="${_on("delPromo",c.id)}">${t('deleteBtn')}</button></td>
-  </tr>`;}).join(''):`<tr><td colspan="5" style="padding:16px;text-align:center;color:var(--muted)">${t('promoNoCodes')}</td></tr>`;
-  return`<div style="margin-top:32px">
-    <div class="page-title" style="font-size:18px;margin-bottom:10px">${t('promoMgrTitle')}</div>
-    <div class="inline-form" style="margin-bottom:14px">
+  </tr>`;}).join(''):`<tr><td colspan="5" class="pc-none">${t('promoNoCodes')}</td></tr>`;
+  return`<div class="pc-wrap">
+    <div class="page-title pc-title">${t('promoMgrTitle')}</div>
+    <div class="inline-form pc-form">
       <div class="form-row">
-        <div class="form-group"><label>${t('promoCodeLabel')}</label><input id="pc-code" value="${esc(S._pcCode)}" data-on-input="${_on("_on_renderPromoManager_1",_EV,_EL)}" placeholder="SUMMER10" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>${t('promoCodeLabel')}</label><input id="pc-code" value="${esc(S._pcCode)}" data-on-input="${_on("_on_renderPromoManager_1",_EV,_EL)}" placeholder="SUMMER10" class="pc-upper"></div>
         <div class="form-group"><label>${t('promoKindLabel')}</label><select id="pc-kind" data-on-change="${_on("_on_renderPromoManager_2",_EV,_EL)}"><option value="percent"${S._pcKind==='percent'?' selected':''}>${t('promoPercentOpt')}</option><option value="flat"${S._pcKind==='flat'?' selected':''}>${t('promoFlatOpt')}</option></select></div>
         <div class="form-group"><label>${t('promoValueLabel')}</label><input id="pc-value" type="number" min="0" step="0.5" value="${esc(S._pcValue)}" data-on-input="${_on("_on_renderPromoManager_3",_EV,_EL)}"></div>
         <div class="form-group"><label>${t('promoAppliesLabel')}</label><select id="pc-type" data-on-change="${_on("_on_renderPromoManager_4",_EV,_EL)}">
@@ -12319,7 +12320,7 @@ function renderPromoManager(){
           <input id="pc-expires" type="date" value="${esc(S._pcExpires||'')}" data-on-input="${_on("_on_renderPromoManager_5",_EV,_EL)}"></div>
         <div class="form-group"><label for="pc-max">${t('promoMaxUsesLabel')}</label>
           <input id="pc-max" type="number" min="1" step="1" value="${esc(S._pcMax||'')}" data-on-input="${_on("_on_renderPromoManager_6",_EV,_EL)}" placeholder="${t('promoUnlimited')}"></div>
-        <div class="form-group" style="flex:1.4"><label for="pc-cust">${t('promoCustomerLabel')}</label>
+        <div class="form-group pc-cust-fld"><label for="pc-cust">${t('promoCustomerLabel')}</label>
           <input id="pc-cust" type="text" list="pc-cust-list" data-on-focus="${_on("_dlFill","pc-cust-list")}" value="${esc(S._pcCust||'')}" data-on-input="${_on("_on_renderPromoManager_7",_EV,_EL)}" placeholder="${t('promoAnyone')}">
           <datalist id="pc-cust-list"></datalist></div>
       </div>
@@ -17161,7 +17162,7 @@ async function _ucPrompt(){
 async function _undoAuth(label,confirmFirst){
   if(!isAdmin()){toast(t('adminOnlyMsg'),'warning');return false;}
   const st=await _ucState();
-  if(st.absent)return confirmFirst?new Promise(res=>confirmDialog({title:t('confirmUndoTitle'),body:`<strong>${esc(label)}</strong><br><span style="color:var(--muted);font-size:12px">${t('undoRevBody')}</span>`,confirmLabel:t('confirmUndoYes'),confirmClass:'btn-muted',onConfirm:()=>res(true)})):true;
+  if(st.absent)return confirmFirst?new Promise(res=>confirmDialog({title:t('confirmUndoTitle'),body:`<strong>${esc(label)}</strong><br><span class="uc-note">${t('undoRevBody')}</span>`,confirmLabel:t('confirmUndoYes'),confirmClass:'btn-muted',onConfirm:()=>res(true)})):true;
   if(st.error){toast(t('errConnection'),'error');return false;}
   if(!st.admin){toast(t('adminOnlyMsg'),'warning');return false;} // the database's word on the role
   return _ucDialog(st.has?'ask':'set',label);
@@ -17177,20 +17178,20 @@ function _ucRender(){
   const d=S._ucd;if(!d)return;const set=d.mode==='set';
   const m=document.getElementById('confirm-modal');if(!m){_ucDone(false);return;}
   m.style.display='block';
-  const inp=(id,lbl)=>`<div class="form-group" style="margin-bottom:10px"><label for="${id}">${lbl}</label><input id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" style="letter-spacing:6px;font-size:18px;text-align:center" data-on-input="${_on("_ucInput",_EV,_EL)}" data-on-keydown="${_on("_ucKey",_EV,_EL)}"></div>`;
+  const inp=(id,lbl)=>`<div class="form-group uc-mb10"><label for="${id}">${lbl}</label><input id="${id}" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" class="uc-in" data-on-input="${_on("_ucInput",_EV,_EL)}" data-on-keydown="${_on("_ucKey",_EV,_EL)}"></div>`;
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_ucBackdrop",_EV,_EL)}">
     <div class="confirm-box uc-box" role="dialog" aria-modal="true" aria-labelledby="uc-title">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div id="uc-title" style="font-size:18px;font-weight:900">${t(set?'ucSetTitle':'ucAskTitle')}</div>
-        <button data-on-click="${_on("_ucDone",false)}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">&times;</button>
+      <div class="chrome-dh10">
+        <div id="uc-title" class="chrome-dt">${t(set?'ucSetTitle':'ucAskTitle')}</div>
+        <button data-on-click="${_on("_ucDone",false)}" aria-label="${t('closeBtn')}" class="chrome-x">&times;</button>
       </div>
-      ${d.label?`<div style="font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:14px;padding:10px 14px;background:var(--s3);border-radius:4px"><strong>${esc(d.label)}</strong><br><span style="color:var(--muted);font-size:12px">${t('undoRevBody')}</span></div>`:''}
-      ${set?`<div class="ca-sub" style="margin-bottom:12px">${t('ucSetSub')}</div>`:''}
+      ${d.label?`<div class="uc-lbl"><strong>${esc(d.label)}</strong><br><span class="uc-note">${t('undoRevBody')}</span></div>`:''}
+      ${set?`<div class="ca-sub uc-mb12">${t('ucSetSub')}</div>`:''}
       ${inp('uc-code',t('ucCodeLbl'))}${set?inp('uc-code2',t('ucAgainLbl')):''}
-      <div id="uc-msg" role="alert" style="min-height:18px;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px"></div>
-      <div style="display:flex;gap:8px;justify-content:flex-end">
+      <div id="uc-msg" role="alert" class="uc-err"></div>
+      <div class="chrome-dact">
         <button class="btn-secondary" data-on-click="${_on("_ucDone",false)}">${t(set&&!d.label?'ucLaterBtn':'cancelBtn')}</button>
-        <button id="uc-go" class="btn-primary" data-on-click="${_on("_ucGo")}" style="min-width:100px">${t(set?'ucSaveBtn':'undoBtn')}</button>
+        <button id="uc-go" class="btn-primary chrome-mw100" data-on-click="${_on("_ucGo")}">${t(set?'ucSaveBtn':'undoBtn')}</button>
       </div>
     </div></div>`;
   const f=document.getElementById('uc-code');if(f)f.focus();
@@ -17679,10 +17680,10 @@ function renderLogs(){
   };
   const all=[...(S._dbLog||[]),...(S.fullLog||[]).map(i=>({ts:i.ts,label:i.label,by:i.by||''})).filter(i=>!_mirrored(i))]
     .sort((a,b)=>(b.ts||0)-(a.ts||0));
-  const opBar=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
-      <span style="font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px">${t('logsOperator')}</span>
+  const opBar=`<div class="lg-op">
+      <span class="lg-op-lbl">${t('logsOperator')}</span>
       <strong class="op-cur">${esc(_opName())||'—'}</strong><button type="button" class="btn-sm btn-muted" data-on-click="${_on("showOpGate",true)}">${t('opSwitch')}</button>
-      ${isAdmin()?`<button class="btn-sm btn-muted" data-on-click="${_on("fixDuplicateQNums")}" style="font-size:12px">${t('fixDupBtn')}</button>`:''}
+      ${isAdmin()?`<button class="btn-sm btn-muted lg-fs12" data-on-click="${_on("fixDuplicateQNums")}">${t('fixDupBtn')}</button>`:''}
     </div>`;
   const ops=[...new Set(all.map(i=>i.by).filter(Boolean))].sort();
   const q=(S._logSearch||'').trim().toLowerCase();
@@ -17698,45 +17699,45 @@ function renderLogs(){
   S._logExport=list; // stash for CSV export (respects current filters)
   const catPill=(v,l)=>`<button class="filter-pill${(S._logCat||'all')===v?' active':''}" data-on-click="${_on("_on_renderLogs_1",_EV,_EL,v)}">${l}</button>`;
   const filterBar=`
-    <div class="filter-row" style="margin-bottom:8px">${catPill('all',t('filterAll'))}${_LOG_CATS.map(([v,k])=>catPill(v,t(k))).join('')}</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;align-items:center">
-      <div class="${_srchCls('log',S._logSearch)}" data-srch="log" style="flex:1;min-width:170px">
+    <div class="filter-row lg-mb8">${catPill('all',t('filterAll'))}${_LOG_CATS.map(([v,k])=>catPill(v,t(k))).join('')}</div>
+    <div class="lg-bar">
+      <div class="${_srchCls('log',S._logSearch)} lg-srch" data-srch="log">
         ${_artIcon('search',13)}
-        <input id="log-search" type="text" class="search-input" style="width:100%" aria-label="${esc(t('logsSearchPh'))}" value="${esc(S._logSearch||'')}" placeholder="${esc(t('logsSearchPh'))}" data-on-input="${_on("_on_renderLogs_2",_EV,_EL)}">
+        <input id="log-search" type="text" class="search-input lg-w100" aria-label="${esc(t('logsSearchPh'))}" value="${esc(S._logSearch||'')}" placeholder="${esc(t('logsSearchPh'))}" data-on-input="${_on("_on_renderLogs_2",_EV,_EL)}">
         ${_srchBtn()}
       </div>
       ${_fBtn('log',[S._logOp,S._logDay].filter(v=>v&&v!=='all').length)}
-      <button class="btn-secondary" data-on-click="${_on("exportLogsCSV")}" style="white-space:nowrap">${t('logsExportBtn')}</button>
+      <button class="btn-secondary lg-nowrap" data-on-click="${_on("exportLogsCSV")}">${t('logsExportBtn')}</button>
     </div>
     ${_fPanel('log',_fField(t('colDate'),`<select class="filter-select" aria-label="${esc(t('colDate'))}" data-on-change="${_on("_on_renderLogs_3",_EV,_EL)}">${[['all',t('filterAll')],['today',t('logToday')],['yesterday',t('logYesterday')]].map(([v,l])=>`<option value="${v}"${(S._logDay||'all')===v?' selected':''}>${l}</option>`).join('')}</select>`)
       +(ops.length>1?_fField(t('logsOperator'),`<select class="filter-select" aria-label="${esc(t('logsOperator'))}" data-on-change="${_on("_on_renderLogs_4",_EV,_EL)}"><option value="all"${(S._logOp||'all')==='all'?' selected':''}>${t('filterAll')}</option>${ops.map(o=>`<option value="${esc(o)}"${S._logOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select>`):''))}`;
   const dayKey=ts=>new Date(ts).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
   const todayK=todayStr(),yestK=fmtDate(new Date(Date.now()-864e5));
-  const catColors={pay:'var(--green)',book:'var(--muted)',bike:'var(--muted)',inv:'var(--muted)',auth:'var(--red)',other:'var(--muted)'};
-  const catChip=c=>{const k=_LOG_CATS.find(x=>x[0]===c);return`<span style="flex-shrink:0;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:${catColors[c]||'var(--muted)'};border:1px solid currentColor;border-radius:2px;padding:1px 6px;opacity:.85">${t(k?k[1]:'logCatOther')}</span>`;};
+  const catCls={pay:'lg-c-green',book:'lg-c-muted',bike:'lg-c-muted',inv:'lg-c-muted',auth:'lg-c-red',other:'lg-c-muted'}; // the chip's ink (styles.css)
+  const catChip=c=>{const k=_LOG_CATS.find(x=>x[0]===c);return`<span class="lg-chip ${catCls[c]||'lg-c-muted'}">${t(k?k[1]:'logCatOther')}</span>`;};
   let out='',curDay=null;
   list.slice(0,500).forEach(i=>{
     const dk=dayKey(i.ts||0);
-    if(dk!==curDay){curDay=dk;out+=`<div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:16px 0 6px">${dk===todayK?t('logToday'):dk===yestK?t('logYesterday'):dk}</div>`;}
+    if(dk!==curDay){curDay=dk;out+=`<div class="lg-day">${dk===todayK?t('logToday'):dk===yestK?t('logYesterday'):dk}</div>`;}
     const _u=_undoableFor(i);
-    out+=`<div style="display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--border)">
-      <span style="color:var(--muted);font-size:11px;white-space:nowrap;flex-shrink:0;font-variant-numeric:tabular-nums">${fmtT(i.ts||0)}</span>
+    out+=`<div class="lg-row">
+      <span class="lg-time">${fmtT(i.ts||0)}</span>
       ${catChip(_logCatOf(i.label))}
-      <span style="flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(i.label)}</span>
-      <span style="font-size:11px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0">${esc(i.by==='Staff'?t('byStaff'):i.by==='Guest'?t('byGuest'):(i.by||''))}</span>
-      ${_u&&isAdmin()?`<button class="btn-sm btn-muted" style="flex-shrink:0;font-size:11px;padding:3px 10px" data-on-click="${_on("confirmLogUndo",_u.id)}">${_artIcon('undo',12)} ${t('undoBtn')}</button>`:''}
+      <span class="lg-label">${esc(i.label)}</span>
+      <span class="lg-who">${esc(i.by==='Staff'?t('byStaff'):i.by==='Guest'?t('byGuest'):(i.by||''))}</span>
+      ${_u&&isAdmin()?`<button class="btn-sm btn-muted lg-undo" data-on-click="${_on("confirmLogUndo",_u.id)}">${_artIcon('undo',12)} ${t('undoBtn')}</button>`:''}
     </div>`;
   });
   const hadFocus=document.activeElement&&document.activeElement.id==='log-search';
-  el.innerHTML=`<div style="padding:16px 20px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <h3 style="font-size:16px;font-weight:700;color:var(--text)">${t('logsTitle')}</h3>
-      <span style="font-size:12px;font-weight:700;color:var(--muted)">${list.length}</span>
+  el.innerHTML=`<div class="lg-wrap">
+    <div class="lg-head">
+      <h3 class="lg-h3">${t('logsTitle')}</h3>
+      <span class="lg-count">${list.length}</span>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">${t('logsPermanentNote')}</div>
+    <div class="lg-note">${t('logsPermanentNote')}</div>
     ${opBar}
     ${all.length?filterBar:''}
-    ${list.length?out:`<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px">${t('logsEmpty')}</div>`}
+    ${list.length?out:`<div class="lg-empty">${t('logsEmpty')}</div>`}
   </div>`;
   if(hadFocus){const inp=document.getElementById('log-search');if(inp){inp.focus();const v=inp.value;inp.value='';inp.value=v;}}
 }
@@ -26443,13 +26444,13 @@ function _on_renderHistory_8(event,el){S.histLimit=(S.histLimit||60)+100;renderH
 function renderHistory(_resultsOnly){
   _pushNav(); // the address follows the view (Rides / Log)
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='hist-search-input'&&document.getElementById('hist-results'))_resultsOnly=true;
-  const _hvPills=`<div class="filter-row" style="margin-bottom:12px">
+  const _hvPills=`<div class="filter-row hist-mb12">
     <button class="filter-pill${(S.histView||'rides')==='rides'?' active':''}" data-on-click="${_on("_on_renderHistory_1",_EV,_EL)}">${t('histTabRides')}</button>
     <button class="filter-pill${S.histView==='log'?' active':''}" data-on-click="${_on("_on_renderHistory_2",_EV,_EL)}">${t('logsTitle')}</button>
   </div>`;
   if(S.histView==='log'){ // the Action Log lives inside the History tab now
     const _hl=document.getElementById('tab-history');
-    if(_hl){_hl.innerHTML=`<div class="section-header" style="margin-bottom:8px"><div><div class="page-title">${t('historyTitle')}</div></div></div>${_hvPills}<div id="hist-log-host"></div>`;renderLogs();}
+    if(_hl){_hl.innerHTML=`<div class="section-header hist-mb8"><div><div class="page-title">${t('historyTitle')}</div></div></div>${_hvPills}<div id="hist-log-host"></div>`;renderLogs();}
     return;
   }
   const sessions=allSessions();
@@ -26483,90 +26484,89 @@ function renderHistory(_resultsOnly){
   const rows=_histShown.map(e=>{
     const bike=getAssignedBikes(e)[0]||null;
     const grad=bike&&bike.colors?bikeGradient(bike.colors):null;
-    const payColor=e.paid?'var(--green)':'var(--muted-l)';
     const em=_bookEmail(e),hasEmail=!!em;
     const wiTag=e.walkIn?`<span class="walk-in-badge">${t('addWalkin').replace(/^\+ /,'')}</span>`:'';
     const regDate=e.registeredAt?new Date(e.registeredAt).toLocaleDateString('en-CA',{timeZone:KSA_TZ}):'';
     return`<tr>
       <td>
         <span class="queue-num-cell">#${e.queueNum}</span>
-        ${regDate?`<div style="font-size:10px;color:var(--muted);margin-top:3px;font-weight:600">${regDate}</div>`:''}
+        ${regDate?`<div class="hist-sub3">${regDate}</div>`:''}
       </td>
       <td>
-        <div class="rider-name" role="button" tabindex="0" data-on-click="${_on("openCustomerProfile",e.id)}" data-on-keydown="${_on("_on_renderHistory_3",_EV,_EL,e.id)}" style="cursor:pointer;text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px" title="${t('custProfileTitle')}">${esc(e.name)}${wiTag}${noShowFlag(e)}</div>
-        <div class="rider-sub" style="margin-top:3px"><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi></div>
-        <div class="rider-sub">${hasEmail?esc(em):`<span style="font-style:italic;color:var(--muted)">${t('noEmailLabel')}</span>`}</div>
+        <div class="rider-name hist-name" role="button" tabindex="0" data-on-click="${_on("openCustomerProfile",e.id)}" data-on-keydown="${_on("_on_renderHistory_3",_EV,_EL,e.id)}" title="${t('custProfileTitle')}">${esc(e.name)}${wiTag}${noShowFlag(e)}</div>
+        <div class="rider-sub hist-mt3"><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi></div>
+        <div class="rider-sub">${hasEmail?esc(em):`<span class="hist-noemail">${t('noEmailLabel')}</span>`}</div>
       </td>
-      ${_hc.bike?`<td style="font-size:12px;font-weight:700;color:var(--green);white-space:nowrap">${e.height?e.height+' '+t('cmUnit'):'<span style="color:var(--muted)">—</span>'}</td>`:''}
+      ${_hc.bike?`<td class="hist-ht">${e.height?e.height+' '+t('cmUnit'):'<span class="hist-c-muted">—</span>'}</td>`:''}
       ${_hc.bike?`<td>${typeBadge(resolvedType(e))}</td>`:''}
       <td class="hide-mobile">
-        <div style="font-weight:800;font-size:13px">${dayLabel(e.sessionDay)||''}</div>
-        <div style="color:var(--muted);font-size:12px;margin-top:1px">${shortDate(e.sessionDate)}</div>
-        <div style="font-size:11px;color:var(--muted);margin-top:2px">${sessionTime(allSessions().find(s=>s.id===e.sessionId))}</div>
+        <div class="hist-day">${dayLabel(e.sessionDay)||''}</div>
+        <div class="hist-sdate">${shortDate(e.sessionDate)}</div>
+        <div class="hist-stime">${sessionTime(allSessions().find(s=>s.id===e.sessionId))}</div>
       </td>
-      ${_hc.bike?`<td style="font-weight:700;font-size:13px">${bike?esc(bike.name):`<span style="color:var(--muted)">—</span>`}</td>`:''}
-      ${_hc.bike?`<td><div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap">
-        ${bike&&bike.colors&&bike.colors.length?bike.colors.map(c=>`<span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${esc(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`).join(''):'<span style="color:var(--muted)">—</span>'}
+      ${_hc.bike?`<td class="hist-bike">${bike?esc(bike.name):`<span class="hist-c-muted">—</span>`}</td>`:''}
+      ${_hc.bike?`<td><div class="hist-row4">
+        ${bike&&bike.colors&&bike.colors.length?bike.colors.map(c=>`<span class="hist-dot" data-cssv="${_cssv({'--hist-bg':c})}"></span>`).join(''):'<span class="hist-c-muted">—</span>'}
       </div></td>`:''}
-      ${_hc.money?`<td style="font-weight:900;font-size:15px;white-space:nowrap;color:${payColor}">SAR ${e.price??DEFAULT_PRICE}</td>`:''}
+      ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">SAR ${e.price??DEFAULT_PRICE}</td>`:''}
       ${_hc.money?`<td data-on-click="${_on("_on_renderHistory_4",_EV,_EL)}">
-        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">
-          ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}" style="padding:4px 8px;background:${S.histSelected.includes(e.id)?'rgba(var(--green-rgb),.18)':'rgba(var(--tint-rgb),.04)'};border:1px solid ${S.histSelected.includes(e.id)?'var(--green)':'rgba(var(--tint-rgb),.14)'};color:${S.histSelected.includes(e.id)?'var(--green)':'var(--muted)'}">${S.histSelected.includes(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
-          ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span style="color:var(--muted)">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
-          <button data-on-click="${_on("showEditPriceModal",e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:6px;min-width:24px;min-height:24px;line-height:1" data-on-mouseover="${_on("_on_renderHistory_5",_EV,_EL)}" data-on-mouseout="${_on("_on_renderHistory_6",_EV,_EL)}">${ICON_PENCIL}</button>
+        <div class="hist-row4">
+          ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm hist-sel ${S.histSelected.includes(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${S.histSelected.includes(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
+          ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="hist-c-muted">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
+          <button data-on-click="${_on("showEditPriceModal",e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" class="hist-pen" data-on-mouseover="${_on("_on_renderHistory_5",_EV,_EL)}" data-on-mouseout="${_on("_on_renderHistory_6",_EV,_EL)}">${ICON_PENCIL}</button>
         </div>
       </td>`:''}
       <td>${statusBadgeFor(e)}</td>
-      <td style="font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap">${fmtDur(e.rideDuration)}
-        ${e.checkedInAt?`<div style="font-size:10px;color:var(--muted);font-weight:600;margin-top:3px">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
-        ${e.checkedOutAt?`<div style="font-size:10px;color:var(--muted);font-weight:600">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
+      <td class="hist-dur">${fmtDur(e.rideDuration)}
+        ${e.checkedInAt?`<div class="hist-sub3">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
+        ${e.checkedOutAt?`<div class="hist-sub">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
       </td>
       <td>${_contactCell(e.phone,e)}</td>
       <td><div class="actions-cell">
         ${e.status==='removed'
           ?`<button class="btn-sm btn-green" data-on-click="${_on("doRestoreEntry",e.id)}">${t('restoreEntryBtn')||'Restore'}</button>`
-          :`<div style="display:flex;gap:5px;flex-wrap:nowrap;align-items:center">
+          :`<div class="hist-acts">
               ${hasEmail&&e.status==='done'?`<button class="btn-sm btn-green" data-on-click="${_on("showReceipt",e.id)}">${t('sendReceipt')}</button>`:''}
               <button class="btn-sm btn-muted" data-on-click="${_on("confirmHistRemove",e.id)}">${t('removeBtn')}</button>
             </div>`}
       </div></td>
     </tr>`;
   }).join('');
-  const emptyRow=filtered.length===0?`<tr><td colspan="${13-(_hc.bike?0:4)-(_hc.money?0:2)}"><div style="padding:8px">${emptyIllustration(ILLUS_HISTORY,t('noHistory'))}</div></td></tr>`:'';
+  const emptyRow=filtered.length===0?`<tr><td colspan="${13-(_hc.bike?0:4)-(_hc.money?0:2)}"><div class="hist-p8">${emptyIllustration(ILLUS_HISTORY,t('noHistory'))}</div></td></tr>`:'';
   if(!_resultsOnly)document.getElementById('tab-history').innerHTML=`
-    <div class="section-header" style="margin-bottom:8px">
+    <div class="section-header hist-mb8">
       <div>
         <div class="page-title">${t('historyTitle')}</div>
-        <div class="page-sub" style="margin-bottom:0">${t('historySub')} <span>· ${t('histWindowNote')}</span></div>
+        <div class="page-sub hist-mb0">${t('historySub')} <span>· ${t('histWindowNote')}</span></div>
       </div>
-      <div class="hist-action-btns" style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-        ${(S.histSelected||[]).length?`<button class="btn-sm btn-green" data-on-click="${_on("bulkHistMarkPaid")}" style="white-space:nowrap">${t('histMarkSelPaid').replace('{0}',S.histSelected.length)}</button>`:''}
-        <button class="btn-secondary" data-on-click="${_on("_on_renderHistory_7",_EV,_EL)}" style="white-space:nowrap">${t('histLogBtn')}${S.histLog.length>0?` (${S.histLog.length})`:''}</button>
-        <button class="btn-secondary" data-on-click="${_on("exportHistoryCSV")}" style="white-space:nowrap">${ICON_EXPORT} ${t('exportBtn')||'Export CSV'}</button>
+      <div class="hist-action-btns hist-btns">
+        ${(S.histSelected||[]).length?`<button class="btn-sm btn-green hist-nowrap" data-on-click="${_on("bulkHistMarkPaid")}">${t('histMarkSelPaid').replace('{0}',S.histSelected.length)}</button>`:''}
+        <button class="btn-secondary hist-nowrap" data-on-click="${_on("_on_renderHistory_7",_EV,_EL)}">${t('histLogBtn')}${S.histLog.length>0?` (${S.histLog.length})`:''}</button>
+        <button class="btn-secondary hist-nowrap" data-on-click="${_on("exportHistoryCSV")}">${ICON_EXPORT} ${t('exportBtn')||'Export CSV'}</button>
       </div>
     </div>
     ${_hvPills}
-    ${S.showHistLog?`<div style="margin-bottom:20px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.08);border-radius:7px;padding:16px;max-height:240px;overflow-y:auto">
-      <div style="font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">${t('logsActivity')}</div>
+    ${S.showHistLog?`<div class="hist-lg">
+      <div class="hist-lg-title">${t('logsActivity')}</div>
       ${S.histLog.length===0
-        ?`<div style="color:var(--muted);font-size:13px">${t('logsEmpty')}</div>`
-        :S.histLog.map(l=>`<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid rgba(var(--tint-rgb),.05);font-size:13px">
-            <span style="color:var(--muted);font-size:10px;white-space:nowrap;flex-shrink:0">${l.time}</span>
-            <span style="font-weight:800;color:${l.action===t('histRemoved')?'var(--red)':'var(--green)'}${l.undone?';text-decoration:line-through;opacity:.5':''}">${l.action}</span>
-            <span style="font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">#${l.queueNum} ${esc(l.name)}</span>
-            <span style="color:var(--muted);font-size:11px;white-space:nowrap">${l.session}</span>
+        ?`<div class="hist-lg-none">${t('logsEmpty')}</div>`
+        :S.histLog.map(l=>`<div class="hist-lg-row">
+            <span class="hist-lg-time">${l.time}</span>
+            <span class="hist-lg-act ${l.action===t('histRemoved')?'hist-c-red':'hist-c-green'}${l.undone?' hist-lg-off':''}">${l.action}</span>
+            <span class="hist-lg-name">#${l.queueNum} ${esc(l.name)}</span>
+            <span class="hist-lg-sess">${l.session}</span>
             ${l.undoFn&&!l.undone
-              ?`<button data-on-click="${_on("undoHistLog",l.id)}" style="flex-shrink:0;padding:3px 8px;border-radius:2px;border:1px solid rgba(var(--green-rgb),.3);background:rgba(var(--green-rgb),.08);color:var(--green);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">${_artIcon('undo',12)} ${t('undoBtn')||'Undo'}</button>`
-              :l.undone?`<span style="font-size:10px;color:var(--muted)">${t('undoneTag')}</span>`:''}
+              ?`<button data-on-click="${_on("undoHistLog",l.id)}" class="hist-lg-undo">${_artIcon('undo',12)} ${t('undoBtn')||'Undo'}</button>`
+              :l.undone?`<span class="hist-lg-undone">${t('undoneTag')}</span>`:''}
           </div>`).join('')}
     </div>`:''}
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num">${nDone}</div><div class="stat-label">${t('completedLabel')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green)">${nPaid}</div><div class="stat-label">${t('filterPaid')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--muted-l)">${nPend}</div><div class="stat-label">${t('pendingLabel')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--red)">${nNoShow}</div><div class="stat-label">${t('filterNoshow')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--green);font-size:19px">SAR ${sarCollected}</div><div class="stat-label">${t('printCollected')}</div></div>
-      <div class="stat-card"><div class="stat-num" style="color:var(--orange);font-size:19px">SAR ${sarPending}</div><div class="stat-label">${t('printPending')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-c-green">${nPaid}</div><div class="stat-label">${t('filterPaid')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-c-mutedl">${nPend}</div><div class="stat-label">${t('pendingLabel')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-c-red">${nNoShow}</div><div class="stat-label">${t('filterNoshow')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-sar-green">SAR ${sarCollected}</div><div class="stat-label">${t('printCollected')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-sar-orange">SAR ${sarPending}</div><div class="stat-label">${t('printPending')}</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-row">
@@ -26608,9 +26608,9 @@ function renderHistory(_resultsOnly){
       </tr></thead>
       <tbody>${rows}${emptyRow}</tbody>
     </table></div>
-    ${filtered.length>_histShown.length?`<div style="margin-top:12px;text-align:center"><button class="btn-secondary" data-on-click="${_on("_on_renderHistory_8",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_histShown.length)}</button></div>`:''}`;
+    ${filtered.length>_histShown.length?`<div class="hist-more"><button class="btn-secondary" data-on-click="${_on("_on_renderHistory_8",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_histShown.length)}</button></div>`:''}`;
   const _histHost=document.getElementById('hist-results');
-  if(_histHost)_histHost.innerHTML=_histResults;
+  if(_histHost){_histHost.innerHTML=_histResults;_cssvApply(_histHost);} // the bikes' colour dots (data-cssv)
 }
 
 function setHistStatus(v){S.histStatus=v;renderHistory();}
@@ -26718,13 +26718,13 @@ function showReceipt(id){
   const modal=document.getElementById('receipt-modal');
   modal.style.display='flex';
   modal.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showReceipt_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:520px">
+    <div class="modal-box hist-rc-box" role="dialog" aria-modal="true">
       <div class="modal-title">${t('sendReceipt')}</div>
       <div class="modal-sub">${t('authEmail')}: ${esc(_bookEmail(e))}</div>
       <div class="receipt-box">${esc(lines)}</div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeReceipt")}">${t('cancelBtn')}</button>
-        <a href="${mailtoLink}" class="btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px"
+        <a href="${mailtoLink}" class="btn-primary hist-rc-mail"
            data-on-click="${_on("_on_showReceipt_2",_EV,_EL)}">${t('openEmailApp')}</a>
       </div>
     </div>

@@ -142,8 +142,15 @@ export function cascadeAudit(arg: AuditArg): AuditRow[] {
 
 // Every element under `roots`, its computed style as one hash (FNV-1a over the values), keyed by
 // its place in the tree: two builds that draw the same page give the same map, and a property that
-// no screenshot shows (cursor, transition, a colour under the pointer) still counts.
-export function styleHashes(roots: string[]): Record<string, string> {
+// no screenshot shows (cursor, transition, a colour under the pointer) still counts. `ignore` (a
+// pattern) leaves out the custom properties a pass adds to carry run-time values (data-cssv): the
+// build before it has none, and what they decide - a width, a colour - is hashed where it lands.
+// `stripOrigin` drops the page's origin from the values (a mask or background url() resolves to
+// http://127.0.0.1:<VIS_PORT>/...), so a baseline does not hold only on the port it was taken on.
+export function styleHashes(arg: string[] | { roots: string[]; ignore?: string; stripOrigin?: boolean }): Record<string, string> {
+  const roots = Array.isArray(arg) ? arg : arg.roots;
+  const ign = !Array.isArray(arg) && arg.ignore ? new RegExp(arg.ignore) : null;
+  const origin = !Array.isArray(arg) && arg.stripOrigin ? location.origin : '';
   const out: Record<string, string> = {};
   document.getAnimations().forEach((a) => a.cancel()); // an animation's current frame is not the page
   for (const root of roots) for (const top of Array.from(document.querySelectorAll(root))) {
@@ -152,7 +159,9 @@ export function styleHashes(roots: string[]): Record<string, string> {
       for (let k = 0; k < cs.length; k++) names.push(cs[k]);
       let h = 0x811c9dc5;
       for (const n of names.sort()) { // custom properties come in no fixed order
-        const s = n + ':' + cs.getPropertyValue(n) + ';';
+        if (ign && ign.test(n)) continue;
+        const v = cs.getPropertyValue(n);
+        const s = n + ':' + (origin ? v.split(origin).join('') : v) + ';';
         for (let j = 0; j < s.length; j++) { h ^= s.charCodeAt(j); h = Math.imul(h, 0x01000193) >>> 0; }
       }
       out[key] = h.toString(16).padStart(8, '0');
