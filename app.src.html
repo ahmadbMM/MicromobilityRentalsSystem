@@ -4059,6 +4059,10 @@ function genBikeName(type,frame,num,size){
 const typeBadge=ty=>{const k=_own(TYPE_CLS,ty)?ty:'Any';return`<span class="type-badge ${TYPE_CLS[k]}">${bikeTypeIcon(k,12)} ${typeLabel(ty)}</span>`;}; // typeLabel escapes an unknown type
 const STATUS_CLS={waiting:'badge-waiting',waitlist:'badge-waitlist',active:'badge-active',done:'badge-done',noshow:'badge-noshow',cancelled:'badge-noshow',removed:'badge-noshow'};
 const STATUS_KEY={waiting:'statusWaiting',waitlist:'statusWaitlist',active:'statusActive',done:'statusDone',noshow:'statusNoshow',cancelled:'statusCancelled',removed:'removedLabel'};
+// A session's status says the same word everywhere it shows: the Sessions list, its filter and
+// editor, the Dashboard, the Bookings strip and roster, the Sales ride picker and the Community
+// board. Each used to spell out its own copy of this map. A deleted session has no word.
+const SESS_STATUS_KEY={open:'statusOpen',full:'statusFull',closed:'statusClosed'};
 const statusBadge=s=>`<span class="status-badge ${_own(STATUS_CLS,s)?STATUS_CLS[s]:'badge-done'}">${t(_own(STATUS_KEY,s)?STATUS_KEY[s]:'statusDone')}</span>`;
 // The same badge, but able to say WHO cancelled. Every cancellation used to read "by
 // Customer" because the label hung off the status word alone — including the ones staff
@@ -4086,7 +4090,9 @@ function _partyOpenAll(){S._partyExpandAll=true;renderStaffQueue();}
 function _partyCountsLine(group){
   const c={waiting:0,reserved:0,waitlist:0,active:0,done:0,noshow:0,cancelled:0};
   group.forEach(e=>{if(_isReserved(e))c.reserved++;else if(c[e.status]!=null)c[e.status]++;});
-  const parts=[[c.waiting,t('statusWaiting')],[c.reserved,t('statusReserved')],[c.waitlist,t('statusWaitlist')],[c.active,t('statusActive')],[c.done,t('statusDone')],[c.noshow,t('statusNoshow')],[c.cancelled,t('statusCancelled')]]
+  // In the order counted above. Reserved is not a status (a waiting rider with a bike held), so
+  // its word is not in the status map.
+  const parts=Object.keys(c).map(k=>[c[k],t(k==='reserved'?'statusReserved':STATUS_KEY[k])])
     .filter(([n])=>n>0).map(([n,l])=>`${n} ${String(l).toLowerCase()}`);
   return `${t('partyRidersLine').replace('{0}',String(group.length))}${parts.length?' · '+parts.join(' · '):''}`;
 }
@@ -8341,16 +8347,16 @@ function printDaySheet(){
   const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today)
     .sort((a,b)=>String(sessionTime(a)||'').localeCompare(String(sessionTime(b)||'')));
   if(!sess.length){toast(t('daySheetNone'),'info');return;}
-  const ST={waiting:'statusWaiting',waitlist:'statusWaitlist',active:'statusActive'};
+  const LIVE=['waiting','waitlist','active']; // the riders still to ride; each one's word comes from STATUS_KEY
   let riders=0;
   const blocks=sess.map(x=>{
-    const rows=getQueue().filter(e=>e.sessionId===x.id&&ST[e.status]).sort((a,b)=>(a.status==='waitlist')-(b.status==='waitlist')||a.queueNum-b.queueNum);
+    const rows=getQueue().filter(e=>e.sessionId===x.id&&LIVE.includes(e.status)).sort((a,b)=>(a.status==='waitlist')-(b.status==='waitlist')||a.queueNum-b.queueNum);
     riders+=rows.length;
     const _t=(()=>{try{return sessionTime(x);}catch(_){return'';}})();
     return `<section><h2>${esc(_evName(x))}${_t?` &middot; ${esc(_t)}`:''} &middot; ${rows.length}</h2>
       <table><thead><tr><th>#</th><th>${t('colRider')}</th><th>${t('bikeTypeLabel')}</th><th>${t('colStatus')}</th><th>${t('filterPay')}</th></tr></thead><tbody>
       ${rows.map(e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');const price=e.price??DEFAULT_PRICE;
-        return`<tr><td>#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td>${esc(e.name||'')}</td><td>${esc(typeLabel(resolvedType(e)))}${e.size?' '+esc(e.size):''}${bikes?' &middot; '+esc(bikes):''}</td><td>${t(ST[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`SAR ${price} &#10003;`:`SAR ${price} &middot; ${t('pendingLabel')}`}</td></tr>`;}).join('')
+        return`<tr><td>#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td>${esc(e.name||'')}</td><td>${esc(typeLabel(resolvedType(e)))}${e.size?' '+esc(e.size):''}${bikes?' &middot; '+esc(bikes):''}</td><td>${t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`SAR ${price} &#10003;`:`SAR ${price} &middot; ${t('pendingLabel')}`}</td></tr>`;}).join('')
         ||`<tr><td colspan="5">—</td></tr>`}
       </tbody></table></section>`;
   }).join('');
@@ -11519,7 +11525,7 @@ function renderDashboard(){
   const sessHtml=sess.length?sess.map(x=>{
     const n=getQueue().filter(e=>e.sessionId===x.id&&['waiting','active','done'].includes(e.status)).length;
     return`<button type="button" class="dash-row" data-on-click="${_on("_on_renderDashboard_1",_EV,_EL,x.id)}"><span class="dash-dot ev-${_evOf(x)}" aria-hidden="true"></span>
-      <span class="dash-row-main"><strong>${esc(_evName(x))}</strong><small>${esc(_sessStart(x))} · ${esc(t({open:'statusOpen',full:'statusFull',closed:'statusClosed'}[x.status]||'statusClosed'))}</small></span>
+      <span class="dash-row-main"><strong>${esc(_evName(x))}</strong><small>${esc(_sessStart(x))} · ${esc(t(_own(SESS_STATUS_KEY,x.status)?SESS_STATUS_KEY[x.status]:'statusClosed'))}</small></span>
       <em>${n}/${x.capacity||0}</em></button>`;}).join(''):`<div class="empty-state">${t('daySheetNone')}</div>`;
   const alerts=_ntRows();
   const alertHtml=alerts.length?alerts.map(r=>`<button type="button" class="dash-row" data-on-click="${_on(...r.go)}"><span class="nt-dot-inline ${r.c}" aria-hidden="true"></span><span class="dash-row-main">${esc(r.txt)}</span></button>`).join(''):`<div class="empty-state">${t('dashAllClear')}</div>`;
@@ -11945,7 +11951,7 @@ function renderSessions(){
           <label>${t('colStatus')}</label>
           <div class="toggle-group" style="margin-top:4px">
             ${['closed','open','full'].map(st=>`<button class="toggle-btn${S.editSessStatus===st?' active':''}" aria-pressed="${(S.editSessStatus===st)?'true':'false'}"
-              data-on-click="${_on("_on_renderSessions_24",_EV,_EL,st)}">${{closed:t('statusClosed'),open:t('statusOpen'),full:t('statusFull')}[st]}</button>`).join('')}
+              data-on-click="${_on("_on_renderSessions_24",_EV,_EL,st)}">${t(SESS_STATUS_KEY[st])}</button>`).join('')}
           </div>
         </div>
         ${_twoTimesSess(editSess)?`
@@ -12066,7 +12072,7 @@ function renderSessions(){
   }
 
   const sessStatusOpts=['all','open','full','closed'].map(s=>{
-    const l={all:t('filterAll'),open:t('statusOpen'),full:t('statusFull'),closed:t('statusClosed')}[s];
+    const l=s==='all'?t('filterAll'):t(SESS_STATUS_KEY[s]);
     return`<option value="${s}"${S.sessStatusFilter===s?' selected':''}>${l}</option>`;}).join('');
   const sessSortOpts=[['date',t('colDate')],['day',t('colDay')],['capacity',t('colCapacity')],['bookings',t('colBookings')],['status',t('colStatus')]].map(([v,l])=>
     `<option value="${v}"${S.sessSort===v?' selected':''}>${l}</option>`).join('');
@@ -13803,8 +13809,11 @@ function _caSx(a){
   try{_sxName(c.name,out);_sxEmail(c.email,out);_sxPhone(c,out,null);_sxBody(c,out);}catch(e){}
   return out;
 }
+// An application's status: its word and the colour of its dot. The row and the filter pills
+// above the list read it, so the pill and the row always say the same thing.
+const CA_STATUS={pending:{k:'caPending',col:'var(--orange)'},approved:{k:'caApproved',col:'var(--green)'},rejected:{k:'caRejected',col:'var(--muted)'}};
 function _caRow(a){
-  const st={pending:{l:t('caPending'),col:'var(--orange)'},approved:{l:t('caApproved'),col:'var(--green)'},rejected:{l:t('caRejected'),col:'var(--muted)'}}[a.status]||{l:a.status,col:'var(--muted)'};
+  const st=_own(CA_STATUS,a.status)?{l:t(CA_STATUS[a.status].k),col:CA_STATUS[a.status].col}:{l:a.status,col:'var(--muted)'};
   let age=null;try{age=a.birth_date?_sxAgeAt(a.birth_date):null;}catch(e){}
   const kv=(k,v)=>`<div class="ca-kv"><span>${k}</span><b>${v}</b></div>`;
   const when=[t('caAppliedOn').replace('{0}',esc(fmtStamp(a.created_at)))];
@@ -13868,7 +13877,7 @@ function _commApplications(){
   return`<div class="form-section" style="margin-top:0">
     <div class="form-title">${t('caTitle')}</div>
     <div class="ca-sub">${t('caSub')}</div>
-    <div class="filter-row" style="margin-bottom:8px">${pill('pending',t('caPending'))}${pill('approved',t('caApproved'))}${pill('rejected',t('caRejected'))}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
+    <div class="filter-row" style="margin-bottom:8px">${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
     <div class="ca-list">${rows||`<div class="empty-state">${t('caEmpty')}</div>`}</div>
   </div>`;
 }
@@ -15323,7 +15332,7 @@ function _sessStripHtml(){
         </div>
         <div class="sess-chip-bar"><div class="sess-chip-fill" style="width:${fillPct}%;background:${fillClr}"></div></div>
       </div>
-      <div class="sess-chip-badge"><span class="badge-${esc(s.status)}">${{open:t('statusOpen'),full:t('statusFull'),closed:t('statusClosed')}[s.status]}</span></div>
+      <div class="sess-chip-badge"><span class="badge-${esc(s.status)}">${t(SESS_STATUS_KEY[s.status])}</span></div>
     </div>${_rideKind(s)==='petromin'?_pmChipHtml(s.id):''}`;
   }).join('')+(_pmSid&&!openSess.some(s=>s.id===_pmSid)?_pmChipHtml(_pmSid):'');
 
@@ -16044,7 +16053,7 @@ function renderQRow(e){
         <span style="color:var(--green)">${nW} ${t('waitingStat').toLowerCase()}</span>
         ${nA?` &middot; <span style="color:var(--text)">${nA} ${t('onBikeStat').toLowerCase()}</span>`:''}
         ${nD?` &middot; <span style="color:var(--muted)">${nD} ${t('doneStat').toLowerCase()}</span>`:''}
-        &nbsp;<span class="badge-${esc(sess.status)}" style="margin-left:8px">${{open:t('statusOpen'),closed:t('statusClosed'),full:t('statusFull')}[sess.status]||esc(sess.status)}</span>
+        &nbsp;<span class="badge-${esc(sess.status)}" style="margin-left:8px">${_own(SESS_STATUS_KEY,sess.status)?t(SESS_STATUS_KEY[sess.status]):esc(sess.status)}</span>
       </td></tr>`));
       }
       for(const g of groups)list.push(piece(g));
@@ -19061,7 +19070,7 @@ function showPrintReportOptions(){
         <label style="display:flex;flex-direction:column;gap:4px">${t('bikeTypeLabel')}
           ${sel('rep-f-type',o.fType,[['all',t('filterAll')],..._types.map(x=>[x,typeLabel(x)])],['_repSetFilter','fType',_P('value')],t('bikeTypeLabel'))}</label>
         <label style="display:flex;flex-direction:column;gap:4px">${t('filterStatus')}
-          ${sel('rep-f-status',o.fStatus,[['all',t('filterAll')],['waiting',t('statusWaiting')],['active',t('statusActive')],['done',t('statusDone')],['noshow',t('statusNoshow')]],['_repSetFilter','fStatus',_P('value')],t('filterStatus'))}</label>
+          ${sel('rep-f-status',o.fStatus,[['all',t('filterAll')],...['waiting','active','done','noshow'].map(x=>[x,t(STATUS_KEY[x])])],['_repSetFilter','fStatus',_P('value')],t('filterStatus'))}</label>
         <label style="display:flex;flex-direction:column;gap:4px">${t('filterPay')}
           ${sel('rep-f-pay',o.fPay,[['all',t('filterAll')],['paid',t('filterPaid')],['pending',t('pendingLabel')]],['_repSetFilter','fPay',_P('value')],t('filterPay'))}</label>
         <label style="display:flex;flex-direction:column;gap:4px">${t('colMember')}
@@ -28040,7 +28049,7 @@ function renderCashier(){
   }
   const _lbl='font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px';
   const payBtn=(val,label)=>`<button data-on-click="${_on("_ctSet","_ctPay",val)}" style="flex:1;padding:9px;border-radius:4px;border:1.5px solid ${S._ctPay===val?'var(--green)':'var(--border)'};background:${S._ctPay===val?'rgba(var(--green-rgb),.12)':'transparent'};color:${S._ctPay===val?'var(--green)':'var(--muted)'};font-weight:800;font-size:12px;cursor:pointer;font-family:inherit">${label}</button>`;
-  const sessOpts=sessions.map(s=>`<option value="${esc(s.id)}"${sessId===s.id?' selected':''}>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.status&&s.status!=='open'?` (${{full:t('statusFull'),closed:t('statusClosed')}[s.status]||esc(s.status)})`:''}</option>`).join('');
+  const sessOpts=sessions.map(s=>`<option value="${esc(s.id)}"${sessId===s.id?' selected':''}>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.status&&s.status!=='open'?` (${_own(SESS_STATUS_KEY,s.status)?t(SESS_STATUS_KEY[s.status]):esc(s.status)})`:''}</option>`).join('');
   // Ledger: cashier-tab sales grouped into receipts (printable/voidable) + rental add-ons shown individually
   const csRows=(S.cashSales||[]).filter(r=>r.session_id===sessId);
   const byR={};const rOrder=[];
@@ -29520,7 +29529,6 @@ function _commBoard(){
   </div>`;
   // Upcoming rides: future-dated sessions, soonest first, with live spots-left
   const _today=_todayISO();
-  const _sessStatusLbl={open:t('statusOpen'),full:t('statusFull'),closed:t('statusClosed')};
   const upcoming=(S.sessions||[]).filter(s=>s.status!=='deleted'&&String(s.session_date||s.id||'')>=_today)
     .sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id))).slice(0,6);
   const upcomingHtml=upcoming.length?upcoming.map(s=>{
@@ -29529,7 +29537,7 @@ function _commBoard(){
       <span style="width:8px;height:8px;border-radius:50%;background:${sl>0?'var(--green)':'var(--orange)'};flex-shrink:0"></span>
       <div style="flex:1;min-width:0">
         <div style="font-weight:800;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(dayLabel(s.day)||'')}</div>
-        <div style="font-size:11px;color:var(--muted);font-weight:700">${esc(shortDate(s.session_date||s.id)||'')}${s.status&&_sessStatusLbl[s.status]?` · ${_sessStatusLbl[s.status]}`:''}</div>
+        <div style="font-size:11px;color:var(--muted);font-weight:700">${esc(shortDate(s.session_date||s.id)||'')}${_own(SESS_STATUS_KEY,s.status)?` · ${t(SESS_STATUS_KEY[s.status])}`:''}</div>
       </div>
       <div style="text-align:right;flex-shrink:0;font-size:12px;font-weight:800;color:${sl>0?'var(--green)':'var(--orange)'}">${spotsLeftLabel(sl)}</div>
     </div>`;
