@@ -13736,7 +13736,11 @@ const CA_COLS='id,created_at,updated_at,submissions,status,name,email,phone,heig
 async function _caLoad(){
   if(S._caBusy||!sb)return;S._caBusy=true;
   try{
-    const{data,error}=await sb.from('community_applications').select(CA_COLS).order('created_at',{ascending:false}).limit(1000);
+    const q=cols=>sb.from('community_applications').select(cols).order('created_at',{ascending:false}).limit(1000);
+    // heard_from (how they heard of us, asked by the form since 2026-09-28) comes with migration
+    // 20260928220000: until the database has it, the list loads without it.
+    let{data,error}=await q(CA_COLS+',heard_from');
+    if(error&&/heard_from/.test(String(error.message||'')))({data,error}=await q(CA_COLS));
     if(error)S._caErr=true;else{S._caApps=data||[];S._caErr=false;}
   }catch(e){S._caErr=true;}
   finally{S._caBusy=false;S._caAt=Date.now();}
@@ -13802,6 +13806,7 @@ function _caRow(a){
       ${kv(t('caLblHeight'),esc(t('caHeightCm').replace('{0}',a.height)))}
       ${kv(t('caLblBike'),typeLabel(a.bike_type))}
       ${kv(t('caLblProf'),esc(a.profession))}
+      ${a.heard_from?kv(t('heardLabel'),heardLabel(a.heard_from)):''}
       ${kv(t('caLblNews'),a.ride_news?t('caYes'):t('caNo'))}
       ${kv(t('caLblLang'),esc(lang))}
     </div>

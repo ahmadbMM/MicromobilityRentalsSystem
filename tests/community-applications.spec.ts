@@ -22,8 +22,9 @@ const apps = [
   { ...base, id: 'a3', status: 'rejected', name: 'Old Applicant', email: 'old.applicant@gmail.com', phone: '+966553579024', instagram: 'old.a', linkedin: 'old-a', bike_type: 'Mountain', decided_at: '2026-09-20T08:00:00Z', decided_by: 'Desk B' },
 ];
 
-async function applicationsTab(page: Page, extra: Record<string, unknown> = {}) {
+async function applicationsTab(page: Page, extra: Record<string, unknown> = {}, routes?: () => Promise<void>) {
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], community_applications: apps, ...extra });
+  if (routes) await routes(); // after the stub, so they are asked first
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -54,6 +55,28 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(row(page, 'a3')).toContainText('by Desk B');
   await expect(row(page, 'a3').locator('.ca-grid')).toContainText('Mountain');
   await expect(row(page, 'a3').locator('.ca-reopen')).toBeVisible();
+});
+
+// How they heard of us: the community form asks it since 2026-09-28 (the booking app's sign-up no
+// longer does), and the card shows the answer in the staff member's language.
+test('the card shows how the applicant heard of us, and nothing when the form did not ask', async ({ page }) => {
+  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a1' ? { ...a, heard_from: 'invited' } : a)) });
+  await expect(row(page, 'a1').locator('.ca-grid')).toContainText('How did you hear about us?');
+  await expect(row(page, 'a1').locator('.ca-grid')).toContainText('Invited by MicroMobility');
+  await expect(row(page, 'a2').locator('.ca-grid')).not.toContainText('How did you hear about us?');
+});
+
+test('before the database has heard_from, the list loads without it', async ({ page }) => {
+  const asked: string[] = [];
+  await applicationsTab(page, {}, () => page.route(/\/rest\/v1\/community_applications\?/, async (r) => {
+    const sel = new URL(r.request().url()).searchParams.get('select') || '';
+    asked.push(sel);
+    if (sel.includes('heard_from')) return r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column community_applications.heard_from does not exist' }) });
+    return r.fallback();
+  }));
+  await expect(row(page, 'a1').locator('.ca-name')).toHaveText('Karim Mansour');
+  expect(asked.some((x) => x.includes('heard_from'))).toBe(true);
+  expect(asked.some((x) => !x.includes('heard_from'))).toBe(true);
 });
 
 test('Approve makes the account and shows the welcome message with the temporary password once', async ({ page }) => {
