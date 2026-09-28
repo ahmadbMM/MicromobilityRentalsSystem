@@ -20554,10 +20554,10 @@ function _scanBatchHtml(){
   const chips=_scanBatch.map(id=>{
     const e=q.find(x=>x.id===id);if(!e)return '';
     const more=_partyOf(e).filter(x=>x.id!==e.id&&_ciExpected(x)).length; // the party that comes with this ticket
-    return `<li style="display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 3px 3px 9px;font-size:12px;font-weight:700"><bdi>#${e.queueNum} ${esc(String(e.name||'').split(' ')[0])}</bdi>${more?`<span style="color:var(--muted)">+${more}</span>`:''}<button type="button" data-on-click="${_on("_scanBatchDrop",e.id)}" aria-label="${esc(t('removeBtn')+' #'+e.queueNum+' '+(e.name||''))}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px">×</button></li>`;
+    return `<li class="bkm-chip"><bdi>#${e.queueNum} ${esc(String(e.name||'').split(' ')[0])}</bdi>${more?`<span class="bkm-cmuted">+${more}</span>`:''}<button type="button" data-on-click="${_on("_scanBatchDrop",e.id)}" aria-label="${esc(t('removeBtn')+' #'+e.queueNum+' '+(e.name||''))}" class="bkm-chipx">×</button></li>`;
   }).join('');
-  return `<ul aria-label="${esc(t('ciBatchLabel'))}" style="display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:6px 0 8px">${chips}</ul>
-    <button type="button" id="scan-batch-go" class="btn-primary" style="width:100%;margin-bottom:8px" data-on-click="${_on("_scanBatchGo")}"${pend?'':' disabled'}>${t('scanBatchGo').replace('{0}',pend)}</button>`;
+  return `<ul aria-label="${esc(t('ciBatchLabel'))}" class="bkm-chips">${chips}</ul>
+    <button type="button" id="scan-batch-go" class="btn-primary bkm-sgo" data-on-click="${_on("_scanBatchGo")}"${pend?'':' disabled'}>${t('scanBatchGo').replace('{0}',pend)}</button>`;
 }
 function _renderScanBatch(){const el=document.getElementById('scan-batch');if(el)el.innerHTML=_scanAddTo?_ciAddRunHtml():_scanBatchHtml();}
 function _scanBatchGo(){
@@ -20587,26 +20587,26 @@ function openScanModal(){
   const m=document.getElementById('scan-modal');
   m.style.display='flex';
   m.innerHTML=`<div class="pin-backdrop scan-backdrop" data-on-click="${_on("_on_openScanModal_1",_EV,_EL)}">
-    <div class="pin-box" role="dialog" aria-modal="true" aria-label="${esc(t('scanTitle'))}" style="max-width:380px;width:92vw">
+    <div class="pin-box bkm-sbox" role="dialog" aria-modal="true" aria-label="${esc(t('scanTitle'))}">
       <div class="pin-title">${t('scanTitle')}</div>
       <div class="pin-sub">${_scanAddTo?_ciAddScanHint():t('scanHint')}</div>
-      <div style="position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;aspect-ratio:1/1">
-        <video id="scan-video" playsinline muted style="width:100%;height:100%;object-fit:cover"></video>
-        <div style="position:absolute;inset:14%;border:2px solid rgba(var(--green-rgb),.65);border-radius:8px;pointer-events:none"></div>
+      <div class="bkm-svw">
+        <video id="scan-video" playsinline muted class="bkm-svid"></video>
+        <div class="bkm-sframe"></div>
       </div>
-      <div id="scan-msg" style="min-height:18px;font-size:12px;color:var(--muted);margin-top:10px;text-align:center;font-weight:600"></div>
+      <div id="scan-msg" class="bkm-smsg"></div>
       <div id="scan-except"></div>
       <div id="scan-batch">${_scanAddTo?_ciAddRunHtml():_scanBatchHtml()}</div>
-      ${_scanAddTo?'':`<div style="display:flex;gap:6px;margin-top:4px">
-        <button type="button" id="scan-cont-btn" class="toggle-btn${_scanCont?' active':''}" aria-pressed="${_scanCont?'true':'false'}"
-          style="flex:1;min-width:0;white-space:normal" data-on-click="${_on("toggleScanCont")}">${t('scanContBtn')}</button>
-        ${S._ciId?'':`<button type="button" id="scan-multi-btn" class="toggle-btn${_scanMulti?' active':''}" aria-pressed="${_scanMulti?'true':'false'}"
-          style="flex:1;min-width:0;white-space:normal" data-on-click="${_on("toggleScanMulti")}">${t('scanMultiBtn')}</button>`}
+      ${_scanAddTo?'':`<div class="bkm-srow">
+        <button type="button" id="scan-cont-btn" class="toggle-btn bkm-stog${_scanCont?' active':''}" aria-pressed="${_scanCont?'true':'false'}"
+          data-on-click="${_on("toggleScanCont")}">${t('scanContBtn')}</button>
+        ${S._ciId?'':`<button type="button" id="scan-multi-btn" class="toggle-btn bkm-stog${_scanMulti?' active':''}" aria-pressed="${_scanMulti?'true':'false'}"
+          data-on-click="${_on("toggleScanMulti")}">${t('scanMultiBtn')}</button>`}
       </div>`}
-      ${S._ciId?'':`<div style="display:flex;gap:6px;margin-top:6px"><button type="button" id="scan-express-btn" class="toggle-btn${_scanExpress?' active':''}" aria-pressed="${_scanExpress?'true':'false'}"
-          style="flex:1;min-width:0;white-space:normal" data-on-click="${_on("toggleScanExpress")}">⚡ ${t('scanExpressBtn')}</button></div>
-      <div id="scan-express-hint" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;font-weight:600">${_scanExpress?t('scanExpressHint'):''}</div>`}
-      <div id="scan-tally" style="min-height:16px;font-size:11px;color:var(--muted);margin-top:8px;text-align:center;font-weight:700">${_scanCount?esc(t('scanTally').replace('{0}',_scanCount)):''}</div>
+      ${S._ciId?'':`<div class="bkm-srow6"><button type="button" id="scan-express-btn" class="toggle-btn bkm-stog${_scanExpress?' active':''}" aria-pressed="${_scanExpress?'true':'false'}"
+          data-on-click="${_on("toggleScanExpress")}">⚡ ${t('scanExpressBtn')}</button></div>
+      <div id="scan-express-hint" class="bkm-shint">${_scanExpress?t('scanExpressHint'):''}</div>`}
+      <div id="scan-tally" class="bkm-stally">${_scanCount?esc(t('scanTally').replace('{0}',_scanCount)):''}</div>
       <button class="pin-cancel" data-on-click="${_on("closeScanModal")}">${_scanAddTo?t('doneBtn'):t('cancelBtn')}</button>
     </div>
   </div>`;
@@ -20715,7 +20715,7 @@ function _scanDayOk(sessionId,fallbackDate,fallbackDay,say,go){
 }
 function _scanExceptRender(){
   const el=document.getElementById('scan-except');if(!el)return;
-  el.innerHTML=_scanExcept?`<button type="button" id="scan-exception-btn" class="btn-secondary" style="width:100%;margin-top:6px" data-on-click="${_on("_scanExceptionGo")}">${t('scanExceptionBtn')}</button>`:'';
+  el.innerHTML=_scanExcept?`<button type="button" id="scan-exception-btn" class="btn-secondary bkm-sexc" data-on-click="${_on("_scanExceptionGo")}">${t('scanExceptionBtn')}</button>`:'';
 }
 function _scanExceptionGo(){const x=_scanExcept;_scanExcept=null;_scanExceptRender();if(x)x.go();}
 function _onScanPayload(raw){
@@ -20888,9 +20888,9 @@ function renderHandover(){
     <div class="ho-give"><input id="ho-bike" type="text" inputmode="numeric" autocomplete="off" placeholder="${esc(t('hoGive'))}" aria-label="${esc(t('hoGive'))}" data-on-keydown="${_on("_on_renderHandover_1",_EV,_EL)}"${sel?'':' disabled'}>
       <button type="button" class="btn-primary" data-on-click="${_on("_hoGiveField")}"${sel?'':' disabled'}>${t('hoGiveBtn')}</button>
       <button type="button" class="btn-secondary" data-on-click="${_on("openScanModal")}"${sel?'':' disabled'}>${t('ciScanBtn')}</button></div>
-    <div class="form-title" style="margin-top:14px">${t('hoWaitingN').replace('{0}',rows.length)}</div>
+    <div class="form-title bkm-ho14">${t('hoWaitingN').replace('{0}',rows.length)}</div>
     ${rows.length?`<div class="ho-list">${rows.map(card).join('')}</div>`:`<div class="empty-state">${t('hoEmpty')}</div>`}
-    ${out.length?`<div class="form-title" style="margin-top:18px">${t('hoOnBikesN').replace('{0}',out.length)}</div><div class="ho-out">${out.slice(0,40).map(e=>`<div class="ho-out-row"><span class="ho-num">#${esc(e.queueNum??'')}</span><span class="ho-name">${esc(e.name||'')}</span><span class="ho-spec">${esc(getAssignedBikes(e).map(b=>b.name).join(', '))}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("doReturn",e.id)}">${t('returnBikeBtn')}</button></div>`).join('')}</div>`:''}`;
+    ${out.length?`<div class="form-title bkm-ho18">${t('hoOnBikesN').replace('{0}',out.length)}</div><div class="ho-out">${out.slice(0,40).map(e=>`<div class="ho-out-row"><span class="ho-num">#${esc(e.queueNum??'')}</span><span class="ho-name">${esc(e.name||'')}</span><span class="ho-spec">${esc(getAssignedBikes(e).map(b=>b.name).join(', '))}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("doReturn",e.id)}">${t('returnBikeBtn')}</button></div>`).join('')}</div>`:''}`;
 }
 function _hoGiveField(){const i=document.getElementById('ho-bike');if(!i)return;const v=i.value;i.value='';_hoGive(v);}
 async function _hoGive(code){
@@ -20942,7 +20942,7 @@ async function _hoAssign(entryId,d){
 function _rtTapSheet(d,e){
   const b=d.bike;
   confirmDialog({title:t('rtTapTitle').replace('{0}',_ciBikeNum(b)),
-    body:`${esc(t('rtTapWith').replace('{0}',e.queueNum??'').replace('{1}',e.name||''))}<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on(['closeConfirm'],['_rtTapNote',e.id])}">${t('rtTapNote')}</button><button type="button" class="btn-sm btn-muted" data-on-click="${_on(['closeConfirm'],['openBikeProfile',b.id])}">${t('rtTapOpen')}</button></div>`,
+    body:`${esc(t('rtTapWith').replace('{0}',e.queueNum??'').replace('{1}',e.name||''))}<div class="bkm-rtrow"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on(['closeConfirm'],['_rtTapNote',e.id])}">${t('rtTapNote')}</button><button type="button" class="btn-sm btn-muted" data-on-click="${_on(['closeConfirm'],['openBikeProfile',b.id])}">${t('rtTapOpen')}</button></div>`,
     confirmLabel:t('rtTapReturn'),confirmClass:'btn-green',onConfirm:()=>_rtTapReturn(e.id)});
 }
 async function _rtTapReturn(id){
@@ -21118,7 +21118,7 @@ function _ciRunDone(){
 function _ciParkedIds(){return new Set((S.deskWaitlist||[]).filter(w=>w.status==='waiting'&&w.booking_id).map(w=>w.booking_id));}
 function _ciExtraHtml(e){
   const canPark=typeof mwFromBooking==='function'&&(e.status==='waiting'||e.status==='waitlist')&&!_ciParkedIds().has(e.id);
-  return `<div class="ci-extra" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+  return `<div class="ci-extra bkm-cix">
       ${canPark?`<button type="button" id="ci-to-staff" class="btn-sm btn-secondary" data-on-click="${_on("_ciToStaffList")}">${t('mwMoveBtn')}</button>`:''}
       <button type="button" id="ci-add-booking" class="btn-sm btn-secondary" data-on-click="${_on("_ciAddOpenScanner")}">+ ${t('ciAddBooking')}</button>
     </div>`;
@@ -21130,7 +21130,7 @@ function _ciAddScanHint(){const e=getQueue().find(x=>x.id===_scanAddTo);return e
 function _ciAddRunHtml(){
   const e=getQueue().find(x=>x.id===_scanAddTo);if(!e)return'';
   const run=_ciPartyAll(e);if(run.length<2)return'';
-  return `<ul aria-label="${esc(t('ciBatchLabel'))}" style="display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:6px 0 8px">${run.map(m=>`<li style="display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-size:12px;font-weight:700${_ciExpected(m)?'':';opacity:.6'}"><bdi>#${m.queueNum} ${esc(String(m.name||'').split(' ')[0])}</bdi></li>`).join('')}</ul>`;
+  return `<ul aria-label="${esc(t('ciBatchLabel'))}" class="bkm-chips">${run.map(m=>`<li class="bkm-chipr${_ciExpected(m)?'':' bkm-dim'}"><bdi>#${m.queueNum} ${esc(String(m.name||'').split(' ')[0])}</bdi></li>`).join('')}</ul>`;
 }
 function _ciAddToRun(x){
   const e=getQueue().find(y=>y.id===S._ciId);if(!e||!x)return false;
@@ -21175,13 +21175,13 @@ let _ciBikeTimer=null;
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ciBikeFieldHtml_1(event,el){if(event.key==='Enter'){event.preventDefault();_ciBikeInput(el.value,true);}}
 function _ciBikeFieldHtml(e){
-  return `<div class="form-group" style="margin:12px 0 10px">
+  return `<div class="form-group bkm-cbf">
     <label for="ci-bike">${t('colBike')}</label>
-    <div style="display:flex;gap:6px;margin-top:4px">
-      <input id="ci-bike" type="text" inputmode="numeric" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${t('ciBikePh')}" value="${esc(String(S._ciBikeCode||''))}" data-on-input="${_on("_ciBikeInput",_P("value"))}" data-on-keydown="${_on("_on__ciBikeFieldHtml_1",_EV,_EL)}" style="flex:1;font-size:18px;letter-spacing:.06em">
-      <button type="button" class="btn-secondary" style="white-space:nowrap" data-on-click="${_on("openScanModal")}">${t('ciScanBtn')}</button>
+    <div class="bkm-cbrow">
+      <input id="ci-bike" type="text" inputmode="numeric" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${t('ciBikePh')}" value="${esc(String(S._ciBikeCode||''))}" data-on-input="${_on("_ciBikeInput",_P("value"))}" data-on-keydown="${_on("_on__ciBikeFieldHtml_1",_EV,_EL)}" class="bkm-cbin">
+      <button type="button" class="btn-secondary bkm-nowrap" data-on-click="${_on("openScanModal")}">${t('ciScanBtn')}</button>
     </div>
-    <div id="ci-bike-spec" aria-live="polite" style="margin-top:6px;font-size:12.5px;min-height:18px">${_ciSpecHtml()}</div>
+    <div id="ci-bike-spec" aria-live="polite" class="bkm-cbspec">${_ciSpecHtml()}</div>
   </div>`;
 }
 function _ciBikeInput(v,now){
@@ -21261,8 +21261,8 @@ function _ciBikeBlocked(){return !!(S._ciBike&&S._ciBike.bike&&S._ciBike.bike.st
 function _ciSpecHtml(){
   if(!S._ciBike||!S._ciBike.bike){
     if(!S._ciBikeMsg)return '';
-    const offer=S._ciLinkOffer?`<button type="button" class="btn-secondary" style="margin-top:6px" data-on-click="${_on("_ciLinkTag")}">${t('ciLinkTag').replace('{0}',esc(_ciBikeNum(S._ciLinkOffer.bike)))}</button>`:'';
-    return `<span style="color:${S._ciBikeMsg===t('ciBikeLooking')?'var(--muted)':'var(--orange)'}">${esc(S._ciBikeMsg)}</span>${offer}`;
+    const offer=S._ciLinkOffer?`<button type="button" class="btn-secondary bkm-mt6" data-on-click="${_on("_ciLinkTag")}">${t('ciLinkTag').replace('{0}',esc(_ciBikeNum(S._ciLinkOffer.bike)))}</button>`:'';
+    return `<span class="${S._ciBikeMsg===t('ciBikeLooking')?'bkm-cmuted':'bkm-corange'}">${esc(S._ciBikeMsg)}</span>${offer}`;
   }
   const b=S._ciBike.bike;
   const color=(Array.isArray(b.color_names)&&b.color_names[0])||'';
@@ -21273,7 +21273,7 @@ function _ciSpecHtml(){
   // Held for another waiting rider: said here as the bike picker says it, and asked about on
   // Confirm, which then moves the reservation to this rider rather than leaving both on it.
   const rsv=_rsvHolder(b.id,S._ciId);
-  return `<div style="font-weight:800;color:var(--text)">${line}</div><div style="color:${ok?'var(--green)':'var(--orange)'};font-weight:700">${esc(_ciBikeStatusText(S._ciBike))}</div>${dupName?`<div style="color:var(--orange);font-weight:700">${t('ciBikeAlsoFor').replace('{0}',()=>esc(dupName))}</div>`:''}${rsv?`<div style="color:var(--orange);font-weight:700">${esc(t('reservedChip'))} · ${esc(('#'+(rsv.queueNum||'')+' '+(rsv.name||'')).trim())}</div>`:''}`;
+  return `<div class="bkm-csline">${line}</div><div class="${ok?'bkm-cok':'bkm-cwarn'}">${esc(_ciBikeStatusText(S._ciBike))}</div>${dupName?`<div class="bkm-cwarn">${t('ciBikeAlsoFor').replace('{0}',()=>esc(dupName))}</div>`:''}${rsv?`<div class="bkm-cwarn">${esc(t('reservedChip'))} · ${esc(('#'+(rsv.queueNum||'')+' '+(rsv.name||'')).trim())}</div>`:''}`;
 }
 function _ciRenderBikeSpec(){
   const el=document.getElementById('ci-bike-spec');if(el)el.innerHTML=_ciSpecHtml();
@@ -21293,24 +21293,24 @@ function renderCheckinModal(){
   if(!e){if(S._ciId)closeCheckinModal(true);return;}
   const _party=_ciPartyAll(e),_batch=!!_ciBatchOf(e);
   const _idx=Math.max(0,_party.findIndex(m=>m.id===e.id));
-  const _stepsHtml=_party.length>1?`<ol aria-label="${esc(t(_batch?'ciBatchLabel':'ciPartyLabel'))}" style="display:flex;gap:6px;flex-wrap:wrap;list-style:none;padding:0;margin:8px 0 0">${_party.map((m,i)=>{
+  const _stepsHtml=_party.length>1?`<ol aria-label="${esc(t(_batch?'ciBatchLabel':'ciPartyLabel'))}" class="bkm-steps">${_party.map((m,i)=>{
         const cur=m.id===e.id,done=m.status==='active'||m.status==='done',out=['noshow','cancelled','removed'].includes(m.status),pend=!cur&&!done&&!out;
         const tap=!cur&&(pend||m.status==='noshow'); // a no-show can be opened again and brought back
         const mark=done?'✓':out?'✕':String(i+1);
-        return `<li><button type="button" class="toggle-btn${cur?' active':''}"${cur?' aria-current="step"':''}${tap?` data-on-click="${_on("showCheckinModal",m.id)}"`:' disabled'} style="font-size:12px;padding:5px 9px;${out?'text-decoration:line-through;opacity:.6':''}"><b style="margin-inline-end:4px">${mark}</b>${esc(String(m.name||'').split(' ')[0])}</button></li>`;}).join('')}</ol>`:'';
+        return `<li><button type="button" class="toggle-btn bkm-step${out?' bkm-stepout':''}${cur?' active':''}"${cur?' aria-current="step"':''}${tap?` data-on-click="${_on("showCheckinModal",m.id)}"`:' disabled'}><b class="bkm-stepn">${mark}</b>${esc(String(m.name||'').split(' ')[0])}</button></li>`;}).join('')}</ol>`:'';
   // The rider's height (and the size it maps to) sits under the title: on the phone this modal
   // is where the bike gets picked, so the number staff size a bike by has to be on it.
   // Height, size and the bike type sit together, big and bold: the bike is picked off them.
   const _ciTy=resolvedType(e),_ciTyLbl=_ciTy&&_ciTy!=='Any'?_ciTy:'';
-  const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row" style="margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">${e.height?`<span class="ci-height" style="display:inline-flex;align-items:center;gap:4px;background:rgba(110,232,154,.12);border:1px solid rgba(110,232,154,.3);border-radius:3px;padding:6px 12px;font-size:20px;font-weight:900;letter-spacing:-.3px;color:var(--green)"><bdi>${esc(String(e.height))} ${t('cmUnit')}${e.size?' · '+esc(String(e.size)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
+  const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row bkm-hrow">${e.height?`<span class="ci-height bkm-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}${e.size?' · '+esc(String(e.size)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
   if(e.status==='noshow'){
     m.style.display='flex';
     m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:420px">
-      <div class="modal-title">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span style="font-size:12px;font-weight:700;color:var(--muted)">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+    <div class="modal-box bkm-cbox" role="dialog" aria-modal="true">
+      <div class="modal-title">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
-      <div role="status" style="margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--orange)">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
+      <div role="status" class="bkm-nsnote">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeCheckinModal")}">${t('closeBtn')}</button>
         <button id="ci-showed" class="btn-primary" data-on-click="${_on("_ciCustomerShowed")}">${t('customerShowedBtn')}</button>
@@ -21324,41 +21324,41 @@ function renderCheckinModal(){
   // No bike to choose and none to hand over: a swim check-in is just "they are here".
   const _bikeless=!_needsBike(allSessions().find(x=>x.id===e.sessionId));
   const tyBtn=ty=>`<button type="button" class="toggle-btn${S._ciType===ty?' active':''}" aria-pressed="${(S._ciType===ty)?'true':'false'}" data-on-click="${_on("_on_renderCheckinModal_2",_EV,_EL,ty)}">${typeLabel(ty)}</button>`;
-  const payBtn=(v,lbl)=>`<button type="button" class="toggle-btn${S._ciPaid===v?' active':''}" aria-pressed="${(S._ciPaid===v)?'true':'false'}" style="flex:1" data-on-click="${_on("_on_renderCheckinModal_3",_EV,_EL,v)}">${lbl}</button>`;
+  const payBtn=(v,lbl)=>`<button type="button" class="toggle-btn bkm-flex1${S._ciPaid===v?' active':''}" aria-pressed="${(S._ciPaid===v)?'true':'false'}" data-on-click="${_on("_on_renderCheckinModal_3",_EV,_EL,v)}">${lbl}</button>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:420px">
-      <div class="modal-title">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span style="font-size:12px;font-weight:700;color:var(--muted)">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+    <div class="modal-box bkm-cbox" role="dialog" aria-modal="true">
+      <div class="modal-title">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
       ${_ciChainHtml(e)}
       ${_ciNfcReceiptHtml(e)}
       ${_bikeless?'':_ciBikeFieldHtml(e)}
-      ${_bikeless?'':`<button type="button" style="background:none;border:none;padding:0;margin:-4px 0 6px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline;font-family:var(--font-body)" data-on-click="${_on("_on_renderCheckinModal_5",_EV,_EL,e.id)}">${t('assignBikeTitle')}…</button>`}
-      ${free?'':ownFree?`<div id="ci-money" style="margin:8px 0 0;font-size:14px;font-weight:800"><span class="own-free">${t('invFree')}</span></div>`:(()=>{
+      ${_bikeless?'':`<button type="button" class="bkm-alink" data-on-click="${_on("_on_renderCheckinModal_5",_EV,_EL,e.id)}">${t('assignBikeTitle')}…</button>`}
+      ${free?'':ownFree?`<div id="ci-money" class="bkm-money0"><span class="own-free">${t('invFree')}</span></div>`:(()=>{
         // every rider as the modal would confirm them: the picked type's price, the picked payment
         const _pend=_ciAsConfirmed(e);
         const mine=_partyMoney([_pend]),all=_party.length>1?_partyMoney(_party.map(m=>_ciAsConfirmed(m))):null;
         // One line: this rider's amount; for a party, the party's total and what is still due.
-        return `<div id="ci-money" style="margin:8px 0 0;font-size:12.5px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline">
-          <b style="font-size:14px"><bdi>${_fmtSar(mine.total)}</bdi></b>${mine.paidCount?`<span style="color:var(--green)">✓ ${t('paidLabel')}</span>`:''}
-          ${all?`<span style="color:var(--muted-l)">·</span><span style="color:var(--muted)">${t(_batch?'ciBatchWord':'ciPartyWord')} <bdi>${_fmtSar(all.total)}</bdi></span><span style="color:${all.due>0?'var(--orange)':'var(--green)'}">${all.due>0?`<bdi>${_fmtSar(all.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span>`:''}
+        return `<div id="ci-money" class="bkm-money">
+          <b class="bkm-fs14"><bdi>${_fmtSar(mine.total)}</bdi></b>${mine.paidCount?`<span class="bkm-cgreen">✓ ${t('paidLabel')}</span>`:''}
+          ${all?`<span class="bkm-cmutedl">·</span><span class="bkm-cmuted">${t(_batch?'ciBatchWord':'ciPartyWord')} <bdi>${_fmtSar(all.total)}</bdi></span><span class="${all.due>0?'bkm-corange':'bkm-cgreen'}">${all.due>0?`<bdi>${_fmtSar(all.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span>`:''}
         </div>`;})()}
-      ${(free||ownFree)?'':`<div class="form-group" style="margin:8px 0 10px"><label>${t('colPayment')}${!e.paid?` · ${_fmtSar(_ciPendingPrice(e))}`:''}</label>
+      ${(free||ownFree)?'':`<div class="form-group bkm-fg810"><label>${t('colPayment')}${!e.paid?` · ${_fmtSar(_ciPendingPrice(e))}`:''}</label>
         <div class="ci-opts">
           ${payBtn('pending',' '+t('pendingLabel'))}
           ${payBtn('card','✓ '+t('paidLabel'))}
           ${payBtn('house',' '+t('onTheHouseLabel'))}
         </div></div>`}
-      ${(_bikeless||(S._ciBike&&S._ciBike.bike))?'':`<div class="form-group" style="margin:8px 0 12px"><label>${t('bikeTypeLabel')}</label>
+      ${(_bikeless||(S._ciBike&&S._ciBike.bike))?'':`<div class="form-group bkm-fg812"><label>${t('bikeTypeLabel')}</label>
         <div class="ci-opts">${bikeTypeOpts(_ownOffered(allSessions().find(x=>x.id===e.sessionId)),_noCarbonSessIds.has(e.sessionId)).map(tyBtn).join('')}</div></div>`}
-      <div class="form-group" style="margin:8px 0 0"><label id="ci-out-lbl">${t('colStatus')}</label>
+      <div class="form-group bkm-fg80"><label id="ci-out-lbl">${t('colStatus')}</label>
         <div class="ci-outcomes" role="radiogroup" aria-labelledby="ci-out-lbl">
           ${[['checkin',t('checkInBtn')],['waiting',t('statusWaiting')],['noshow',t('noShowBtn')],['cancel',t('cancelBookingLabel')]].map(([v,l])=>{
             const on=(S._ciOutcome||'checkin')===v;
             return`<button type="button" id="ci-out-${v}" class="toggle-btn ci-out ci-out-${v}${on?' active':''}" role="radio" aria-checked="${on}" data-on-click="${_on("_ciPickOutcome",v)}">${l}</button>`;}).join('')}
         </div>${_ciExtraHtml(e)}</div>
-      <div id="ci-error" role="alert" style="color:var(--red);font-size:12.5px;font-weight:700;min-height:0;margin-top:8px">${S._ciErr?esc(S._ciErr):''}</div>
+      <div id="ci-error" role="alert" class="bkm-cierr">${S._ciErr?esc(S._ciErr):''}</div>
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeCheckinModal")}">${t('closeBtn')}</button>
         <button id="ci-confirm" class="btn-primary" data-on-click="${_on("confirmCheckinOutcome")}"${(_ciConfirmBlocked()||_ciBusy.has(S._ciId))?' disabled':''}>${_ciConfirmLabel()}</button>
@@ -21738,8 +21738,7 @@ function renderModal(){
   const allBrands=[...new Set(allBikes.map(b=>b.brand).filter(Boolean))].sort();
   const brandModels=[...new Set(allBikes.filter(b=>S.modalFilterBrand==='all'||(b.brand||'')===S.modalFilterBrand).map(b=>b.model).filter(Boolean))].sort();
 
-  const thS='padding:7px 14px;text-align:start;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid rgba(var(--tint-rgb),.08)';
-  const thSort=(col,label,extra='')=>{const act=S.modalSort===col;const arr=act?(S.modalSortDir===1?' ▲':' ▼'):'';return`<th style="${thS}${extra};cursor:pointer;user-select:none${act?';color:var(--green)':''}" data-on-click="${_on("_on_renderModal_1",_EV,_EL,col,col)}">${label}${arr}</th>`;};
+  const thSort=(col,label,extra='')=>{const act=S.modalSort===col;const arr=act?(S.modalSortDir===1?' ▲':' ▼'):'';return`<th class="bkm-th bkm-ths${extra}${act?' bkm-thon':''}" data-on-click="${_on("_on_renderModal_1",_EV,_EL,col,col)}">${label}${arr}</th>`;};
   // Bikes pre-reserved for OTHER waiting riders (reservation = assigned_bike_id on a
   // waiting/waitlist row; the bike itself stays 'available' until real check-in).
   const _rsvBy={};
@@ -21750,55 +21749,55 @@ function renderModal(){
     const sel=selIdx>=0;
     const unavail=!free&&!sel;
     const dotCls=free?'dot-green':b.status==='in-use'?'dot-orange':'dot-red';
-    const statusColor=free?'var(--green)':b.status==='in-use'?'var(--orange)':'var(--red)';
+    const statusCls=free?'bkm-cgreen':b.status==='in-use'?'bkm-corange':'bkm-cred';
     const slbl=free?t('availLabel'):b.status==='in-use'?t('inUseLabel'):t('maintLabel');
     const bikeColors=b.colors&&b.colors.length?b.colors:['#03ff89'];
     const colorDots=bikeColors.map((c,ci)=>{
       const cn=b.color_names&&b.color_names[ci]?b.color_names[ci]:'';
-      return`<span title="${esc(cn)}" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${_bkHex(c)};border:1.5px solid rgba(0,0,0,.3);flex-shrink:0"></span>`;
+      return`<span title="${esc(cn)}" class="bkm-dot" data-cssv="${_cssv({'--bkm-dot':_bkHex(c)})}"></span>`;
     }).join('');
     const sizeMatch=b.size===rider.size;
     const badges=[];
-    if(sizeMatch)badges.push(`<span style="font-size:10px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.15);padding:2px 6px;border-radius:2px;white-space:nowrap">${t('sizeMatchLabel')}</span>`);
-    if(inFleet(b)&&slots)badges.push(`<span style="font-size:10px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.1);padding:2px 6px;border-radius:2px;white-space:nowrap">${t('fleetBadge')}</span>`);
-    if(altType)badges.push(`<span style="font-size:10px;font-weight:800;color:var(--muted-l);background:rgba(var(--tint-rgb),.07);padding:2px 6px;border-radius:2px;white-space:nowrap">${t('altBadge')}</span>`);
-    if(_rsvBy[b.id])badges.push(`<span style="font-size:10px;font-weight:800;color:var(--orange);background:rgba(var(--warn-rgb),.12);padding:2px 6px;border-radius:2px;white-space:nowrap">${t('reservedChip')} · ${esc(_rsvBy[b.id].name)}</span>`);
+    if(sizeMatch)badges.push(`<span class="bkm-bsz">${t('sizeMatchLabel')}</span>`);
+    if(inFleet(b)&&slots)badges.push(`<span class="bkm-bfl">${t('fleetBadge')}</span>`);
+    if(altType)badges.push(`<span class="bkm-balt">${t('altBadge')}</span>`);
+    if(_rsvBy[b.id])badges.push(`<span class="bkm-brsv">${t('reservedChip')} · ${esc(_rsvBy[b.id].name)}</span>`);
     const selCell=sel
-      ?`<div style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#000;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0">${selIdx+1}</div>`
-      :`<div style="width:22px;height:22px;border-radius:50%;border:2px solid rgba(var(--tint-rgb),.15);flex-shrink:0"></div>`;
+      ?`<div class="bkm-selon">${selIdx+1}</div>`
+      :`<div class="bkm-seloff"></div>`;
     const specs=[b.groupset,b.speeds?`${b.speeds}sp`:'',b.wheel_size,b.brake_type,b.weight_kg!=null?`${b.weight_kg} kg`:''].filter(Boolean).map(x=>esc(String(x))).join(' · ')||'—'; // free text from the bike form
-    return`<tr style="border-bottom:1px solid rgba(var(--tint-rgb),.05);background:${sel?'rgba(var(--green-rgb),.05)':'transparent'};${unavail?'opacity:.32':'cursor:pointer'};transition:background .12s"
+    return`<tr class="bkm-tr ${sel?'bkm-trsel':'bkm-trbg'} ${unavail?'bkm-troff':'bkm-tron'}"
       ${!unavail?`data-on-click="${_on("pickBike",b.id)}" data-on-mouseover="${_on("_on_renderModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_3",_EV,_EL)}"`:''}>
-      <td style="padding:10px 14px;text-align:center;width:44px">${selCell}</td>
-      <td style="padding:10px 14px">
-        <div style="font-weight:800;font-size:13px">${esc(b.name)}</div>
-        ${badges.length?`<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">${badges.join('')}</div>`:''}
+      <td class="bkm-td0">${selCell}</td>
+      <td class="bkm-td">
+        <div class="bkm-bname">${esc(b.name)}</div>
+        ${badges.length?`<div class="bkm-badges">${badges.join('')}</div>`:''}
       </td>
-      <td style="padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted-l)">
-        ${b.brand?`<div style="font-weight:700;color:var(--text);font-size:12px">${esc(b.brand)}</div>${b.model?`<div style="margin-top:1px">${esc(b.model)}</div>`:''}` :`<span style="color:var(--muted)">—</span>`}
+      <td class="bkm-tdbr">
+        ${b.brand?`<div class="bkm-brand">${esc(b.brand)}</div>${b.model?`<div class="bkm-mt1">${esc(b.model)}</div>`:''}` :`<span class="bkm-cmuted">—</span>`}
       </td>
-      <td style="padding:10px 14px">${typeBadge(b.type)}</td>
-      <td style="padding:10px 14px;font-weight:800;font-size:13px;text-align:center">${esc(b.size)}</td>
-      <td style="padding:10px 14px"><div style="display:flex;gap:3px;align-items:center">${colorDots}</div></td>
-      <td style="padding:10px 14px;font-size:12px;color:var(--muted-l);font-weight:600;white-space:nowrap">${specs}</td>
-      <td style="padding:10px 14px">
-        <div style="display:flex;align-items:center;gap:6px;white-space:nowrap">
-          <span class="avail-dot ${dotCls}" style="flex-shrink:0"></span>
-          <span style="font-size:12px;font-weight:700;color:${statusColor}">${slbl}</span>
+      <td class="bkm-td">${typeBadge(b.type)}</td>
+      <td class="bkm-tdsz">${esc(b.size)}</td>
+      <td class="bkm-td"><div class="bkm-dots">${colorDots}</div></td>
+      <td class="bkm-tdsp">${specs}</td>
+      <td class="bkm-td">
+        <div class="bkm-st">
+          <span class="avail-dot ${dotCls} bkm-fs0"></span>
+          <span class="bkm-stl ${statusCls}">${slbl}</span>
         </div>
       </td>
     </tr>`;
   }
   function bikeTable(bikes,altType){
     if(!bikes.length)return'';
-    return`<div style="overflow-x:auto;border-radius:4px;border:1px solid rgba(var(--tint-rgb),.07);margin-bottom:8px">
-      <table style="width:100%;border-collapse:collapse;min-width:620px">
-        <thead><tr style="background:rgba(var(--tint-rgb),.025)">
-          <th style="${thS}"></th>
+    return`<div class="bkm-twrap">
+      <table class="bkm-table">
+        <thead><tr class="bkm-thead">
+          <th class="bkm-th"></th>
           ${thSort('name',t('bikeNameLabel'))}
           ${thSort('brand',t('bikeBrand')+' / '+t('bikeModel'))}
           ${thSort('type',t('bikeTypeLabel'))}
-          ${thSort('size',t('frameSizeLabel'),';text-align:center')}
+          ${thSort('size',t('frameSizeLabel'),' bkm-thc')}
           ${thSort('color',t('colColor'))}
           ${thSort('groupset',t('bikeGroupset')+' / '+t('bikeSpeeds'))}
           ${thSort('status',t('colStatus'))}
@@ -21811,132 +21810,128 @@ function renderModal(){
   const prefEmpty=prefBikes.length===0;
   const prefSection=prefBikes.length
     ?bikeTable(prefBikes,false)
-    :`<div style="color:var(--muted);font-size:13px;font-weight:700;padding:16px 0;text-align:center">${t('noBikesForType').replace('{0}',typeLabel(prefType))}</div>`;
+    :`<div class="bkm-noty">${t('noBikesForType').replace('{0}',typeLabel(prefType))}</div>`;
 
   const otherToggle=otherAvail>0||S.modalShowAll?`
-    <div style="margin-top:12px">
+    <div class="bkm-mt12">
       <button data-on-click="${_on("_on_renderModal_4",_EV,_EL)}"
-        style="width:100%;padding:10px;border-radius:4px;border:1.5px dashed rgba(var(--tint-rgb),.15);
-          background:rgba(var(--tint-rgb),.03);cursor:pointer;font-family:var(--font-body);
-          font-size:12px;font-weight:800;color:var(--muted);transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s"
+        class="bkm-otog"
         data-on-mouseover="${_on("_on_renderModal_5",_EV,_EL)}"
         data-on-mouseout="${_on("_on_renderModal_6",_EV,_EL)}">
         ${S.modalShowAll?t('hideOtherTypes'):`${t('showOtherTypes')} (${otherAvail} ${t('available2')})`}
       </button>
       ${S.modalShowAll?`
-        <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px">
-          <div style="flex:1;height:1px;background:var(--border)"></div>
-          <span style="font-size:10px;font-weight:900;color:var(--muted-l);text-transform:uppercase;letter-spacing:.6px">${t('showOtherTypes').replace(/^[↓↑]\s*/,'')}</span>
-          <div style="flex:1;height:1px;background:var(--border)"></div>
+        <div class="bkm-sep">
+          <div class="bkm-sepl"></div>
+          <span class="bkm-sept">${t('showOtherTypes').replace(/^[↓↑]\s*/,'')}</span>
+          <div class="bkm-sepl"></div>
         </div>
         ${bikeTable(otherBikes,true)}`:''}
     </div>`:
-    (prefEmpty?`<div style="margin-top:10px;font-size:12px;color:var(--muted);font-weight:600;text-align:center">${t('noOtherTypes')}</div>`:'');
+    (prefEmpty?`<div class="bkm-nooth">${t('noOtherTypes')}</div>`:'');
 
   // How many bikes are free right now - available, and not held for another waiting rider (Claude Design #3).
   const _freeN=allBikes.filter(b=>b.status==='available'&&!_rsvBy[b.id]).length;
-  const fleetLine=`<div style="font-size:12px;color:var(--muted);margin-bottom:16px">${slots?`${t('sessionFleetLabel')}: ${slotsLabel(slots)} · `:''}<b class="num" style="color:${_freeN?'var(--green)':'var(--red)'}">${t('bikesFreeNow').replace('{0}',String(_freeN))}</b></div>`;
-  const searchBar=`<div style="position:relative;margin-bottom:10px">
-    <span style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+  const fleetLine=`<div class="bkm-fleet">${slots?`${t('sessionFleetLabel')}: ${slotsLabel(slots)} · `:''}<b class="num ${_freeN?'bkm-cgreen':'bkm-cred'}">${t('bikesFreeNow').replace('{0}',String(_freeN))}</b></div>`;
+  const searchBar=`<div class="bkm-sbar">
+    <span class="bkm-sico"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="bkm-vam"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
     <input id="modal-search-input" type="text" value="${esc(S.modalSearch)}"
       placeholder="${esc(t('searchLabel'))}"
       data-on-input="${_on("_on_renderModal_7",_EV,_EL)}"
-      style="width:100%;padding:9px 12px 9px 34px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;outline:none;transition:border-color .15s"
+      class="bkm-sin"
       data-on-focus="${_on("_on_renderModal_8",_EV,_EL)}" data-on-blur="${_on("_on_renderModal_9",_EV,_EL)}">
-    ${S.modalSearch?`<button data-on-click="${_on("_on_renderModal_10",_EV,_EL)}" aria-label="${esc(t('clearWord'))}" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px" data-on-mouseover="${_on("_on_renderModal_11",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_12",_EV,_EL)}">&times;</button>`:''}
+    ${S.modalSearch?`<button data-on-click="${_on("_on_renderModal_10",_EV,_EL)}" aria-label="${esc(t('clearWord'))}" class="bkm-sclr" data-on-mouseover="${_on("_on_renderModal_11",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_12",_EV,_EL)}">&times;</button>`:''}
   </div>`;
-  const selStyle=`background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer;outline:none;height:30px`;
   const anyFilterActive=S.modalFilterSize!=='all'||S.modalFilterBrand!=='all'||S.modalFilterModel!=='all'||S.modalSort!=='default';
-  const filterBar=`<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px;padding:8px 10px;background:rgba(var(--tint-rgb),.02);border:1px solid rgba(var(--tint-rgb),.06);border-radius:4px">
-    <span style="font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0">${t('mfSize')}</span>
-    ${['all',...BIKE_SIZES].map(sz=>`<button data-on-click="${_on("_on_renderModal_13",_EV,_EL,sz)}" style="padding:3px 9px;border-radius:3px;border:1.5px solid ${S.modalFilterSize===sz?'rgba(var(--green-rgb),.6)':'rgba(var(--tint-rgb),.1)'};background:${S.modalFilterSize===sz?'rgba(var(--green-rgb),.12)':'transparent'};color:${S.modalFilterSize===sz?'var(--green)':'var(--muted-l)'};font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer">${sz==='all'?t('filterAll'):esc(sz)}</button>`).join('')}
+  const filterBar=`<div class="bkm-fbar">
+    <span class="bkm-fsz">${t('mfSize')}</span>
+    ${['all',...BIKE_SIZES].map(sz=>`<button data-on-click="${_on("_on_renderModal_13",_EV,_EL,sz)}" class="${S.modalFilterSize===sz?'bkm-fpon':'bkm-fpoff'}">${sz==='all'?t('filterAll'):esc(sz)}</button>`).join('')}
     ${_fBtn('mf',(S.modalFilterBrand!=='all'?1:0)+(S.modalFilterModel!=='all'?1:0))}
-    ${anyFilterActive?`<button data-on-click="${_on("_on_renderModal_14",_EV,_EL)}" style="margin-left:auto;padding:3px 10px;border-radius:3px;border:1px solid rgba(255,100,100,.3);background:rgba(255,100,100,.06);color:var(--red);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer">${t('resetFiltersBtn')}</button>`:''}
+    ${anyFilterActive?`<button data-on-click="${_on("_on_renderModal_14",_EV,_EL)}" class="bkm-freset">${t('resetFiltersBtn')}</button>`:''}
   </div>
-  ${_fPanel('mf',_fField(t('mfBrand'),`<select style="${selStyle}" data-on-change="${_on("_on_renderModal_15",_EV,_EL)}">
+  ${_fPanel('mf',_fField(t('mfBrand'),`<select class="bkm-sel" data-on-change="${_on("_on_renderModal_15",_EV,_EL)}">
       <option value="all"${S.modalFilterBrand==='all'?' selected':''}>${t('filterAll')}</option>
       ${allBrands.map(br=>`<option value="${esc(br)}"${S.modalFilterBrand===br?' selected':''}>${esc(br)}</option>`).join('')}
-    </select>`)+(brandModels.length?_fField(t('mfModel'),`<select style="${selStyle}" data-on-change="${_on("_on_renderModal_16",_EV,_EL)}">
+    </select>`)+(brandModels.length?_fField(t('mfModel'),`<select class="bkm-sel" data-on-change="${_on("_on_renderModal_16",_EV,_EL)}">
       <option value="all"${S.modalFilterModel==='all'?' selected':''}>${t('filterAll')}</option>
       ${brandModels.map(m=>`<option value="${esc(m)}"${S.modalFilterModel===m?' selected':''}>${esc(m)}</option>`).join('')}
     </select>`):''))}`;
-  const noResults=(!prefBikes.length&&!otherBikes.length)&&(mq||S.modalFilterSize!=='all'||S.modalFilterBrand!=='all'||S.modalFilterModel!=='all')?`<div style="text-align:center;padding:28px 16px;color:var(--muted);font-size:13px;font-weight:700">${t('noResultsLabel')}</div>`:'';
+  const noResults=(!prefBikes.length&&!otherBikes.length)&&(mq||S.modalFilterSize!=='all'||S.modalFilterBrand!=='all'||S.modalFilterModel!=='all')?`<div class="bkm-nores">${t('noResultsLabel')}</div>`:'';
   const cards=`${searchBar}${filterBar}${prefSection}${noResults}${otherToggle}`;
 
   const isHouseRider=rider.paid&&(rider.price??DEFAULT_PRICE)===0;
-  const _pbs='padding:4px 10px;border-radius:3px;border:1.5px solid;display:inline-flex;align-items:center;gap:4px;font-family:\'Barlow\',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent';
   const priceWidget=S.modalPriceEdit
-    ?`<span style="display:inline-flex;align-items:center;gap:4px">SAR&nbsp;<input id="modal-price-inp" type="number" min="0" step="0.5" value="${rider.price??DEFAULT_PRICE}" style="width:68px;padding:3px 8px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.2);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;outline:none" data-on-keydown="${_on("_on_renderModal_17",_EV,_EL,rider.id)}"><button data-on-click="${_on("saveModalPrice",rider.id)}" style="${_pbs};color:var(--green);border-color:rgba(var(--green-rgb),.4)">${t('setBtnShort')}</button><button data-on-click="${_on("_on_renderModal_18",_EV,_EL)}" aria-label="${t('cancelBtn')}" style="${_pbs};color:var(--muted);border-color:rgba(var(--tint-rgb),.15)">${_artIcon('close',11)}</button></span>`
-    :`<span role="button" tabindex="0" data-on-click="${_on("_on_renderModal_19",_EV,_EL)}" data-on-keydown="${_on("_on_renderModal_20",_EV,_EL)}" title="${t('editPriceTip')}" style="cursor:pointer;font-size:12px;font-weight:800;color:var(--muted-l);border-bottom:1px dashed rgba(var(--tint-rgb),.25);padding-bottom:1px">SAR ${rider.price??DEFAULT_PRICE} </span>`;
+    ?`<span class="bkm-pw">SAR&nbsp;<input id="modal-price-inp" type="number" min="0" step="0.5" value="${rider.price??DEFAULT_PRICE}" class="bkm-pin" data-on-keydown="${_on("_on_renderModal_17",_EV,_EL,rider.id)}"><button data-on-click="${_on("saveModalPrice",rider.id)}" class="bkm-pbset">${t('setBtnShort')}</button><button data-on-click="${_on("_on_renderModal_18",_EV,_EL)}" aria-label="${t('cancelBtn')}" class="bkm-pbx">${_artIcon('close',11)}</button></span>`
+    :`<span role="button" tabindex="0" data-on-click="${_on("_on_renderModal_19",_EV,_EL)}" data-on-keydown="${_on("_on_renderModal_20",_EV,_EL)}" title="${t('editPriceTip')}" class="bkm-price">SAR ${rider.price??DEFAULT_PRICE} </span>`;
   const paySection=!rider.paid
-    ?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--warn-rgb),.1);border:1px solid rgba(var(--warn-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px">
-        <span style="font-size:16px"></span>
-        <span style="font-size:12px;font-weight:800;color:var(--muted-l)">${t('payPendingWarning')} –</span>
+    ?`<div class="bkm-paywarn">
+        <span class="bkm-fs16"></span>
+        <span class="bkm-paylbl">${t('payPendingWarning')} –</span>
         ${priceWidget}
-        <button class="pay-toggle pending" style="font-size:11px" data-on-click="${_on("_on_renderModal_21",_EV,_EL,rider.id)}"> ${t('paidLabel')}?</button>
-        <button class="pay-toggle house" style="font-size:11px" data-on-click="${_on("_on_renderModal_22",_EV,_EL,rider.id)}"> ${t('onTheHouseLabel')}</button>
+        <button class="pay-toggle pending bkm-fs11" data-on-click="${_on("_on_renderModal_21",_EV,_EL,rider.id)}"> ${t('paidLabel')}?</button>
+        <button class="pay-toggle house bkm-fs11" data-on-click="${_on("_on_renderModal_22",_EV,_EL,rider.id)}"> ${t('onTheHouseLabel')}</button>
       </div>`
     :isHouseRider
-      ?`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--purple-rgb),.08);border:1px solid rgba(var(--purple-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px">
-          <span style="font-size:16px"></span>
-          <span style="font-size:12px;font-weight:800;color:var(--purple)">${t('onTheHouseLabel')}</span>
-          <button class="pay-toggle pending" style="font-size:11px" data-on-click="${_on("_on_renderModal_23",_EV,_EL,rider.id)}">${_artIcon('undo',11)} ${t('pendingLabel')}</button>
-          <button class="pay-toggle paid" style="font-size:11px" data-on-click="${_on("_on_renderModal_24",_EV,_EL,rider.id)}">✓ ${t('paidLabel')}</button>
+      ?`<div class="bkm-payhouse">
+          <span class="bkm-fs16"></span>
+          <span class="bkm-paypur">${t('onTheHouseLabel')}</span>
+          <button class="pay-toggle pending bkm-fs11" data-on-click="${_on("_on_renderModal_23",_EV,_EL,rider.id)}">${_artIcon('undo',11)} ${t('pendingLabel')}</button>
+          <button class="pay-toggle paid bkm-fs11" data-on-click="${_on("_on_renderModal_24",_EV,_EL,rider.id)}">✓ ${t('paidLabel')}</button>
         </div>`
-      :`<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px;padding:10px 14px;margin-bottom:14px">
-          <span style="font-size:13px;font-weight:800;color:var(--green)">✓ ${t('paidLabel')} –</span>
+      :`<div class="bkm-paygreen">
+          <span class="bkm-payok">✓ ${t('paidLabel')} –</span>
           ${priceWidget}
-          <button class="pay-toggle pending" style="font-size:11px" data-on-click="${_on("_on_renderModal_25",_EV,_EL,rider.id)}">${_artIcon('undo',11)} ${t('pendingLabel')}</button>
-          <button class="pay-toggle house" style="font-size:11px" data-on-click="${_on("_on_renderModal_26",_EV,_EL,rider.id)}"> ${t('onTheHouseLabel')}</button>
+          <button class="pay-toggle pending bkm-fs11" data-on-click="${_on("_on_renderModal_25",_EV,_EL,rider.id)}">${_artIcon('undo',11)} ${t('pendingLabel')}</button>
+          <button class="pay-toggle house bkm-fs11" data-on-click="${_on("_on_renderModal_26",_EV,_EL,rider.id)}"> ${t('onTheHouseLabel')}</button>
         </div>`;
-  const heightBadge=rider.height?`<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(110,232,154,.12);border:1px solid rgba(110,232,154,.3);border-radius:2px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--green)"><bdi>${rider.height} ${t('cmUnit')}</bdi></span>`:'';
+  const heightBadge=rider.height?`<span class="bkm-mh"><bdi>${rider.height} ${t('cmUnit')}</bdi></span>`:'';
 
   
   if(S.modalShowAddBike&&!S.modalAddBikeNumber)S.modalAddBikeNumber=String(_nextBikeNumber());
   const addBikeTypeBtns=['Road','Hybrid','Mountain','Kids','Gravel'].map(ty=>
-    `<button type="button" class="toggle-btn${S.modalAddBikeType===ty?' active':''}" aria-pressed="${(S.modalAddBikeType===ty)?'true':'false'}" style="font-size:11px;padding:5px 10px"
+    `<button type="button" class="toggle-btn bkm-tb${S.modalAddBikeType===ty?' active':''}" aria-pressed="${(S.modalAddBikeType===ty)?'true':'false'}"
       data-on-click="${_on("_on_renderModal_27",_EV,_EL,ty)}">${typeLabel(ty)}</button>`).join('');
   const addBikeSizeBtns=BIKE_SIZES.map(sz=>
-    `<button type="button" class="toggle-btn${S.modalAddBikeSize===sz?' active':''}" aria-pressed="${(S.modalAddBikeSize===sz)?'true':'false'}" style="font-size:11px;padding:5px 10px"
+    `<button type="button" class="toggle-btn bkm-tb${S.modalAddBikeSize===sz?' active':''}" aria-pressed="${(S.modalAddBikeSize===sz)?'true':'false'}"
       data-on-click="${_on("_on_renderModal_28",_EV,_EL,sz)}">${sz}</button>`).join('');
   const modalFrameOpts=FRAME_TYPES.map(f=>`<option value="${f}"${S.modalAddBikeFrame===f?' selected':''}>${t('frame'+f)}</option>`).join('');
   const modalAutoName=genBikeName(S.modalAddBikeType,S.modalAddBikeFrame,S.modalAddBikeNumber||0,S.modalAddBikeSize);
   const quickAddForm=S.modalShowAddBike?`
-    <div style="margin-top:16px;padding:16px;background:rgba(var(--tint-rgb),.03);border:1.5px solid rgba(var(--tint-rgb),.1);border-radius:7px">
-      <div style="font-size:13px;font-weight:800;margin-bottom:12px">${t('quickAddBikeTitle')}</div>
-      <div class="form-group" style="margin-bottom:10px">
-        <label style="font-size:11px">${t('bikeTypeLabel')}</label>
-        <div class="toggle-group" style="margin-top:4px">${addBikeTypeBtns}</div>
+    <div class="bkm-qa">
+      <div class="bkm-qat">${t('quickAddBikeTitle')}</div>
+      <div class="form-group bkm-mb10">
+        <label class="bkm-fs11">${t('bikeTypeLabel')}</label>
+        <div class="toggle-group bkm-mt4">${addBikeTypeBtns}</div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
-        <div class="form-group" style="flex:1;min-width:130px">
-          <label style="font-size:11px">${t('bikeFrameTypeLabel')}</label>
+      <div class="bkm-qar1">
+        <div class="form-group bkm-qaf130">
+          <label class="bkm-fs11">${t('bikeFrameTypeLabel')}</label>
           <select data-on-change="${_on("_on_renderModal_29",_EV,_EL)}"><option value=""${!S.modalAddBikeFrame?' selected':''}>—</option>${modalFrameOpts}</select>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end">
-        <div class="form-group" style="flex:1;min-width:110px">
-          <label style="font-size:11px">${t('bikeNumberLabel')} &nbsp;<span class="label-hint">(${t('autoLabel')||'auto'})</span></label>
-          <input type="text" value="${String(Number(S.modalAddBikeNumber)||0).padStart(4,'0')}" readonly style="background:var(--s2);color:var(--muted);cursor:not-allowed">
+      <div class="bkm-qar2">
+        <div class="form-group bkm-qaf110">
+          <label class="bkm-fs11">${t('bikeNumberLabel')} &nbsp;<span class="label-hint">(${t('autoLabel')||'auto'})</span></label>
+          <input type="text" value="${String(Number(S.modalAddBikeNumber)||0).padStart(4,'0')}" readonly class="bkm-qaro">
         </div>
-        <div class="form-group" style="flex:1;min-width:110px">
-          <label style="font-size:11px">${t('frameSizeLabel')}</label>
-          <div class="toggle-group" style="margin-top:4px">${addBikeSizeBtns}</div>
+        <div class="form-group bkm-qaf110">
+          <label class="bkm-fs11">${t('frameSizeLabel')}</label>
+          <div class="toggle-group bkm-mt4">${addBikeSizeBtns}</div>
         </div>
       </div>
-      <div style="margin-bottom:12px">
-        <label style="font-size:11px">${t('bikeAutoName')}</label>
-        <div id="modal-auto-name" style="font-size:18px;font-weight:900;color:var(--green);padding:8px 12px;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:3px;margin-top:4px">${modalAutoName}</div>
+      <div class="bkm-mb12">
+        <label class="bkm-fs11">${t('bikeAutoName')}</label>
+        <div id="modal-auto-name" class="bkm-qaname">${modalAutoName}</div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-primary" style="font-size:12px;padding:8px 14px" data-on-click="${_on("modalQuickAddBike")}">${t('quickAddBikeSubmit')}</button>
-        <button class="btn-secondary" style="font-size:12px;padding:8px 14px" data-on-click="${_on("_on_renderModal_30",_EV,_EL)}">${t('cancelBtn')}</button>
+      <div class="bkm-qab">
+        <button class="btn-primary bkm-qabtn" data-on-click="${_on("modalQuickAddBike")}">${t('quickAddBikeSubmit')}</button>
+        <button class="btn-secondary bkm-qabtn" data-on-click="${_on("_on_renderModal_30",_EV,_EL)}">${t('cancelBtn')}</button>
       </div>
     </div>`:'';
 
-  const addBikeToggle=`<div style="margin-top:12px">
+  const addBikeToggle=`<div class="bkm-mt12">
     <button data-on-click="${_on("_on_renderModal_31",_EV,_EL)}"
-      style="width:100%;padding:9px;border-radius:4px;border:1.5px dashed rgba(var(--tint-rgb),.15);background:rgba(var(--tint-rgb),.02);cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--muted);transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s"
+      class="bkm-atog"
       data-on-mouseover="${_on("_on_renderModal_32",_EV,_EL)}"
       data-on-mouseout="${_on("_on_renderModal_33",_EV,_EL)}">
       + ${t('addBikeToFleetBtn')}
@@ -21947,26 +21942,26 @@ function renderModal(){
   const modal=document.getElementById('bike-modal');
   modal.style.display='flex';
   modal.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderModal_34",_EV,_EL)}">
-    <div class="modal-box" role="dialog" aria-modal="true" style="max-width:min(96vw,940px)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
-        <div class="modal-title" style="margin-bottom:0">${rider.status==='active'?t('changeBikeTitle'):t('assignBikeTitle')}</div>
-        <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
-          ${rider.status==='waiting'||rider.status==='waitlist'?`<button class="btn-secondary" data-on-click="${_on("reserveBike")}" style="padding:8px 14px;font-size:13px" title="${t('reserveBikeBtn')}">${t('reserveBikeBtn')}</button>`:''}
-          <button class="btn-primary" data-on-click="${_on("confirmAssign")}" style="padding:8px 18px;font-size:13px">${rider.status==='active'?t('confirmBikeChange'):t('confirmCheckin')}${S.modalBikes.length>0?` (${S.modalBikes.length})`:''}</button>
-          <button data-on-click="${_on("closeModal")}" aria-label="${t('closeBtn')}" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px;transition:color .15s" data-on-mouseover="${_on("_on_renderModal_35",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_36",_EV,_EL)}">&times;</button>
+    <div class="modal-box bkm-mbox" role="dialog" aria-modal="true">
+      <div class="bkm-mhead">
+        <div class="modal-title bkm-mb0">${rider.status==='active'?t('changeBikeTitle'):t('assignBikeTitle')}</div>
+        <div class="bkm-mact">
+          ${rider.status==='waiting'||rider.status==='waitlist'?`<button class="btn-secondary bkm-mrsv" data-on-click="${_on("reserveBike")}" title="${t('reserveBikeBtn')}">${t('reserveBikeBtn')}</button>`:''}
+          <button class="btn-primary bkm-mok" data-on-click="${_on("confirmAssign")}">${rider.status==='active'?t('confirmBikeChange'):t('confirmCheckin')}${S.modalBikes.length>0?` (${S.modalBikes.length})`:''}</button>
+          <button data-on-click="${_on("closeModal")}" aria-label="${t('closeBtn')}" class="bkm-mx" data-on-mouseover="${_on("_on_renderModal_35",_EV,_EL)}" data-on-mouseout="${_on("_on_renderModal_36",_EV,_EL)}">&times;</button>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;margin-top:10px">
-        <span style="font-size:17px;font-weight:800;color:var(--text)">${esc(rider.name)}</span>
-        <span style="font-size:12px;color:var(--muted);font-weight:600">#${rider.queueNum}</span>
+      <div class="bkm-mrider">
+        <span class="bkm-mname">${esc(rider.name)}</span>
+        <span class="bkm-mnum">#${rider.queueNum}</span>
         ${heightBadge}
       </div>
-      <div class="modal-sub" style="margin-bottom:12px">${typeBadge(rider.typePreference)}</div>
+      <div class="modal-sub bkm-mb12">${typeBadge(rider.typePreference)}</div>
       ${paySection}
       ${fleetLine}
       ${cards}
       ${addBikeToggle}
-      <div class="modal-footer" style="display:flex;gap:10px;justify-content:space-between"><button class="btn-secondary" data-on-click="${_on("showCashierModal",rider.id)}">${t('cashierAddBtn')}</button><button class="btn-secondary" data-on-click="${_on("closeModal")}">${t('cancelBtn')}</button></div>
+      <div class="modal-footer bkm-mfoot"><button class="btn-secondary" data-on-click="${_on("showCashierModal",rider.id)}">${t('cashierAddBtn')}</button><button class="btn-secondary" data-on-click="${_on("closeModal")}">${t('cancelBtn')}</button></div>
     </div>
   </div>`;
 }

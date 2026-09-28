@@ -5898,6 +5898,165 @@ html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
 html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 @media (max-width:560px){#checkin-modal .ci-outcomes{grid-template-columns:repeat(2,minmax(0,1fr));}}
 
+/* ── The desk's dialogs without inline styles (2026-09-28) ─────────────────────────────────────
+   What the check-in modal (#checkin-modal: renderCheckinModal, its Bike field and the bike's spec
+   line, the To staff list / Add a booking row), the scanner (#scan-modal: openScanModal, the Scan
+   several list, the run Add a booking builds, Make an exception) and the classic bike picker
+   (#bike-modal: renderModal) wrote in style="…" attributes, as classes, so the policy can drop
+   style-src 'unsafe-inline'. Each rule is scoped by its dialog's id, so it outranks every class
+   rule (the body.view-staff layer included) as the inline style did, while the !important rules
+   that beat those styles (the check-in drawer's width on a desktop, an input's and a select's
+   font size on phones) still win. A payment button's flex names #checkin-modal twice:
+   #checkin-modal .ci-opts .toggle-btn sets flex too. A bike's colour dot rides in data-cssv
+   (--bkm-dot); a colour picked by state is one of two or three classes. The hover and focus
+   handlers still write their colours through el.style, over these. background:none and
+   background:transparent written in a template are background:transparent none here, and
+   outline:none is outline:none medium: the same values, which the build's minifier keeps (it
+   writes 0 0 and 0 for the short forms, and those differ). */
+#checkin-modal .bkm-cbox{max-width:420px;}
+#checkin-modal .bkm-stepof{font-size:12px;font-weight:700;color:var(--muted);}
+#checkin-modal .bkm-hrow{margin-top:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+#checkin-modal .bkm-height{display:inline-flex;align-items:center;gap:4px;background:rgba(110,232,154,.12);border:1px solid rgba(110,232,154,.3);border-radius:3px;padding:6px 12px;font-size:20px;font-weight:900;letter-spacing:-.3px;color:var(--green);}
+#checkin-modal .bkm-steps{display:flex;gap:6px;flex-wrap:wrap;list-style:none;padding:0;margin:8px 0 0;}
+#checkin-modal .bkm-step{font-size:12px;padding:5px 9px;}
+#checkin-modal .bkm-stepout{text-decoration:line-through;opacity:.6;}
+#checkin-modal .bkm-stepn{margin-inline-end:4px;}
+#checkin-modal .bkm-nsnote{margin:14px 0 6px;font-size:13px;font-weight:700;color:var(--orange);}
+#checkin-modal .bkm-cbf{margin:12px 0 10px;}
+#checkin-modal .bkm-cbrow{display:flex;gap:6px;margin-top:4px;}
+#checkin-modal .bkm-cbin{flex:1;font-size:18px;letter-spacing:.06em;}
+#checkin-modal .bkm-nowrap{white-space:nowrap;}
+#checkin-modal .bkm-cbspec{margin-top:6px;font-size:12.5px;min-height:18px;}
+#checkin-modal .bkm-mt6{margin-top:6px;}
+#checkin-modal .bkm-csline{font-weight:800;color:var(--text);}
+#checkin-modal .bkm-cok{color:var(--green);font-weight:700;}
+#checkin-modal .bkm-cwarn{color:var(--orange);font-weight:700;}
+#checkin-modal .bkm-alink{background:transparent none;border:none;padding:0;margin:-4px 0 6px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;text-decoration:underline;font-family:var(--font-body);}
+#checkin-modal .bkm-money0{margin:8px 0 0;font-size:14px;font-weight:800;}
+#checkin-modal .bkm-money{margin:8px 0 0;font-size:12.5px;font-weight:700;display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;}
+#checkin-modal .bkm-fs14{font-size:14px;}
+#checkin-modal .bkm-fg810{margin:8px 0 10px;}
+#checkin-modal .bkm-fg812{margin:8px 0 12px;}
+#checkin-modal .bkm-fg80{margin:8px 0 0;}
+#checkin-modal#checkin-modal .bkm-flex1{flex:1;}
+#checkin-modal .bkm-cix{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+#checkin-modal .bkm-cierr{color:var(--red);font-size:12.5px;font-weight:700;min-height:0;margin-top:8px;}
+#checkin-modal .bkm-cmuted,#scan-modal .bkm-cmuted,#bike-modal .bkm-cmuted{color:var(--muted);}
+#checkin-modal .bkm-cmutedl{color:var(--muted-l);}
+#checkin-modal .bkm-corange,#bike-modal .bkm-corange{color:var(--orange);}
+#checkin-modal .bkm-cgreen,#bike-modal .bkm-cgreen{color:var(--green);}
+#bike-modal .bkm-cred{color:var(--red);}
+#scan-modal .bkm-sbox{max-width:380px;width:92vw;}
+#scan-modal .bkm-svw{position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;aspect-ratio:1/1;}
+#scan-modal .bkm-svid{width:100%;height:100%;object-fit:cover;}
+#scan-modal .bkm-sframe{position:absolute;inset:14%;border:2px solid rgba(var(--green-rgb),.65);border-radius:8px;pointer-events:none;}
+#scan-modal .bkm-smsg{min-height:18px;font-size:12px;color:var(--muted);margin-top:10px;text-align:center;font-weight:600;}
+#scan-modal .bkm-sexc{width:100%;margin-top:6px;}
+#scan-modal .bkm-chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:6px 0 8px;}
+#scan-modal .bkm-chip{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 3px 3px 9px;font-size:12px;font-weight:700;}
+#scan-modal .bkm-chipr{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-size:12px;font-weight:700;}
+#scan-modal .bkm-dim{opacity:.6;}
+#scan-modal .bkm-chipx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;}
+#scan-modal .bkm-sgo{width:100%;margin-bottom:8px;}
+#scan-modal .bkm-srow{display:flex;gap:6px;margin-top:4px;}
+#scan-modal .bkm-srow6{display:flex;gap:6px;margin-top:6px;}
+#scan-modal .bkm-stog{flex:1;min-width:0;white-space:normal;}
+#scan-modal .bkm-shint{font-size:11px;color:var(--muted);margin-top:6px;text-align:center;font-weight:600;}
+#scan-modal .bkm-stally{min-height:16px;font-size:11px;color:var(--muted);margin-top:8px;text-align:center;font-weight:700;}
+#bike-modal .bkm-mbox{max-width:min(96vw,940px);}
+#bike-modal .bkm-mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:0;}
+#bike-modal .bkm-mb0{margin-bottom:0;}
+#bike-modal .bkm-mact{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#bike-modal .bkm-mrsv{padding:8px 14px;font-size:13px;}
+#bike-modal .bkm-mok{padding:8px 18px;font-size:13px;}
+#bike-modal .bkm-mx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 2px;transition:color .15s;}
+#bike-modal .bkm-mrider{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;margin-top:10px;}
+#bike-modal .bkm-mname{font-size:17px;font-weight:800;color:var(--text);}
+#bike-modal .bkm-mnum{font-size:12px;color:var(--muted);font-weight:600;}
+#bike-modal .bkm-mh{display:inline-flex;align-items:center;gap:4px;background:rgba(110,232,154,.12);border:1px solid rgba(110,232,154,.3);border-radius:2px;padding:3px 8px;font-size:11px;font-weight:700;color:var(--green);}
+#bike-modal .bkm-mb12{margin-bottom:12px;}
+#bike-modal .bkm-mfoot{display:flex;gap:10px;justify-content:space-between;}
+#bike-modal .bkm-paywarn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--warn-rgb),.1);border:1px solid rgba(var(--warn-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
+#bike-modal .bkm-payhouse{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--purple-rgb),.08);border:1px solid rgba(var(--purple-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
+#bike-modal .bkm-paygreen{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
+#bike-modal .bkm-fs16{font-size:16px;}
+#bike-modal .bkm-paylbl{font-size:12px;font-weight:800;color:var(--muted-l);}
+#bike-modal .bkm-paypur{font-size:12px;font-weight:800;color:var(--purple);}
+#bike-modal .bkm-payok{font-size:13px;font-weight:800;color:var(--green);}
+#bike-modal .bkm-fs11{font-size:11px;}
+#bike-modal .bkm-pw{display:inline-flex;align-items:center;gap:4px;}
+#bike-modal .bkm-pin{width:68px;padding:3px 8px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.2);border-radius:2px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;outline:none medium;}
+#bike-modal .bkm-pbset{padding:4px 10px;border-radius:3px;border:1.5px solid;display:inline-flex;align-items:center;gap:4px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent none;color:var(--green);border-color:rgba(var(--green-rgb),.4);}
+#bike-modal .bkm-pbx{padding:4px 10px;border-radius:3px;border:1.5px solid;display:inline-flex;align-items:center;gap:4px;font-family:'Barlow',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:transparent none;color:var(--muted);border-color:rgba(var(--tint-rgb),.15);}
+#bike-modal .bkm-price{cursor:pointer;font-size:12px;font-weight:800;color:var(--muted-l);border-bottom:1px dashed rgba(var(--tint-rgb),.25);padding-bottom:1px;}
+#bike-modal .bkm-fleet{font-size:12px;color:var(--muted);margin-bottom:16px;}
+#bike-modal .bkm-sbar{position:relative;margin-bottom:10px;}
+#bike-modal .bkm-sico{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--muted);pointer-events:none;}
+#bike-modal .bkm-vam{vertical-align:middle;}
+#bike-modal .bkm-sin{width:100%;padding:9px 12px 9px 34px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;outline:none medium;transition:border-color .15s;}
+#bike-modal .bkm-sclr{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px;}
+#bike-modal .bkm-fbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px;padding:8px 10px;background:rgba(var(--tint-rgb),.02);border:1px solid rgba(var(--tint-rgb),.06);border-radius:4px;}
+#bike-modal .bkm-fsz{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
+#bike-modal .bkm-fpoff{padding:3px 9px;border-radius:3px;border:1.5px solid rgba(var(--tint-rgb),.1);background:transparent none;color:var(--muted-l);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;}
+#bike-modal .bkm-fpon{padding:3px 9px;border-radius:3px;border:1.5px solid rgba(var(--green-rgb),.6);background:rgba(var(--green-rgb),.12);color:var(--green);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;}
+#bike-modal .bkm-freset{margin-left:auto;padding:3px 10px;border-radius:3px;border:1px solid rgba(255,100,100,.3);background:rgba(255,100,100,.06);color:var(--red);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;}
+#bike-modal .bkm-sel{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer;outline:none medium;height:30px;}
+#bike-modal .bkm-nores{text-align:center;padding:28px 16px;color:var(--muted);font-size:13px;font-weight:700;}
+#bike-modal .bkm-noty{color:var(--muted);font-size:13px;font-weight:700;padding:16px 0;text-align:center;}
+#bike-modal .bkm-twrap{overflow-x:auto;border-radius:4px;border:1px solid rgba(var(--tint-rgb),.07);margin-bottom:8px;}
+#bike-modal .bkm-table{width:100%;border-collapse:collapse;min-width:620px;}
+#bike-modal .bkm-thead{background:rgba(var(--tint-rgb),.025);}
+#bike-modal .bkm-th{padding:7px 14px;text-align:start;font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;border-bottom:1px solid rgba(var(--tint-rgb),.08);}
+#bike-modal .bkm-thc{text-align:center;}
+#bike-modal .bkm-ths{cursor:pointer;user-select:none;}
+#bike-modal .bkm-thon{color:var(--green);}
+#bike-modal .bkm-tr{border-bottom:1px solid rgba(var(--tint-rgb),.05);transition:background .12s;}
+#bike-modal .bkm-trbg{background:transparent none;}
+#bike-modal .bkm-trsel{background:rgba(var(--green-rgb),.05);}
+#bike-modal .bkm-troff{opacity:.32;}
+#bike-modal .bkm-tron{cursor:pointer;}
+#bike-modal .bkm-td0{padding:10px 14px;text-align:center;width:44px;}
+#bike-modal .bkm-td{padding:10px 14px;}
+#bike-modal .bkm-tdbr{padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted-l);}
+#bike-modal .bkm-tdsz{padding:10px 14px;font-weight:800;font-size:13px;text-align:center;}
+#bike-modal .bkm-tdsp{padding:10px 14px;font-size:12px;color:var(--muted-l);font-weight:600;white-space:nowrap;}
+#bike-modal .bkm-selon{width:22px;height:22px;border-radius:50%;background:var(--green);color:#000;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#bike-modal .bkm-seloff{width:22px;height:22px;border-radius:50%;border:2px solid rgba(var(--tint-rgb),.15);flex-shrink:0;}
+#bike-modal .bkm-bname{font-weight:800;font-size:13px;}
+#bike-modal .bkm-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;}
+#bike-modal .bkm-bsz{font-size:10px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.15);padding:2px 6px;border-radius:2px;white-space:nowrap;}
+#bike-modal .bkm-bfl{font-size:10px;font-weight:800;color:var(--green);background:rgba(var(--green-rgb),.1);padding:2px 6px;border-radius:2px;white-space:nowrap;}
+#bike-modal .bkm-balt{font-size:10px;font-weight:800;color:var(--muted-l);background:rgba(var(--tint-rgb),.07);padding:2px 6px;border-radius:2px;white-space:nowrap;}
+#bike-modal .bkm-brsv{font-size:10px;font-weight:800;color:var(--orange);background:rgba(var(--warn-rgb),.12);padding:2px 6px;border-radius:2px;white-space:nowrap;}
+#bike-modal .bkm-brand{font-weight:700;color:var(--text);font-size:12px;}
+#bike-modal .bkm-mt1{margin-top:1px;}
+#bike-modal .bkm-dots{display:flex;gap:3px;align-items:center;}
+/* Run-time value: a bike's colour, set from data-cssv by _cssvApply (app.src.html) */
+#bike-modal .bkm-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--bkm-dot);border:1.5px solid rgba(0,0,0,.3);flex-shrink:0;}
+#bike-modal .bkm-st{display:flex;align-items:center;gap:6px;white-space:nowrap;}
+#bike-modal .bkm-fs0{flex-shrink:0;}
+#bike-modal .bkm-stl{font-size:12px;font-weight:700;}
+#bike-modal .bkm-mt12{margin-top:12px;}
+#bike-modal .bkm-otog{width:100%;padding:10px;border-radius:4px;border:1.5px dashed rgba(var(--tint-rgb),.15);background:rgba(var(--tint-rgb),.03);cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:800;color:var(--muted);transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
+#bike-modal .bkm-sep{display:flex;align-items:center;gap:8px;margin:12px 0 8px;}
+#bike-modal .bkm-sepl{flex:1;height:1px;background:var(--border);}
+#bike-modal .bkm-sept{font-size:10px;font-weight:900;color:var(--muted-l);text-transform:uppercase;letter-spacing:.6px;}
+#bike-modal .bkm-nooth{margin-top:10px;font-size:12px;color:var(--muted);font-weight:600;text-align:center;}
+#bike-modal .bkm-atog{width:100%;padding:9px;border-radius:4px;border:1.5px dashed rgba(var(--tint-rgb),.15);background:rgba(var(--tint-rgb),.02);cursor:pointer;font-family:var(--font-body);font-size:12px;font-weight:700;color:var(--muted);transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
+#bike-modal .bkm-tb{font-size:11px;padding:5px 10px;}
+#bike-modal .bkm-qa{margin-top:16px;padding:16px;background:rgba(var(--tint-rgb),.03);border:1.5px solid rgba(var(--tint-rgb),.1);border-radius:7px;}
+#bike-modal .bkm-qat{font-size:13px;font-weight:800;margin-bottom:12px;}
+#bike-modal .bkm-mb10{margin-bottom:10px;}
+#bike-modal .bkm-mt4{margin-top:4px;}
+#bike-modal .bkm-qar1{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+#bike-modal .bkm-qaf130{flex:1;min-width:130px;}
+#bike-modal .bkm-qar2{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:flex-end;}
+#bike-modal .bkm-qaf110{flex:1;min-width:110px;}
+#bike-modal .bkm-qaro{background:var(--s2);color:var(--muted);cursor:not-allowed;}
+#bike-modal .bkm-qaname{font-size:18px;font-weight:900;color:var(--green);padding:8px 12px;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:3px;margin-top:4px;}
+#bike-modal .bkm-qab{display:flex;gap:8px;}
+#bike-modal .bkm-qabtn{font-size:12px;padding:8px 14px;}
+
 /* A bike owner's ride costs nothing: the word Free stands where the amount would. */
 .own-free{color:var(--sf-green-ink,var(--green));font-weight:800;}
 
@@ -6407,6 +6566,12 @@ body.view-staff .ho-out-row{display:grid;grid-template-columns:auto 1fr auto aut
   body.view-staff .ho-row,body.view-staff .ho-out-row{grid-template-columns:auto 1fr;}
   body.view-staff .ho-spec,body.view-staff .ho-since,body.view-staff .ho-out-row .btn-sm{grid-column:2;}
 }
+
+/* Hand-over's two headings, and the sheet a tag tapped on a bike that is out opens (in the
+   confirm dialog), without inline styles (2026-09-28; see the desk's dialogs above). */
+#ho-host .bkm-ho14{margin-top:14px;}
+#ho-host .bkm-ho18{margin-top:18px;}
+#confirm-modal .bkm-rtrow{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
 
 /* ── Community > Duplicates: merging two accounts for one person (2026-09-28) ── */
 body.view-staff .mg-group{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;background:var(--s1);}
