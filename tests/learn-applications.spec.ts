@@ -239,6 +239,19 @@ test.describe('@staff:community learn to ride', () => {
     expect(asked.some((x) => !x.includes('heard_from'))).toBe(true);
   });
 
+  test('before the database has the learners column, a sign-up reads as its one learner', async ({ page }) => {
+    const asked: string[] = [];
+    await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, async (r) => {
+      const sel = new URL(r.request().url()).searchParams.get('select') || '';
+      asked.push(sel);
+      if (sel.includes('learners')) return r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column learn_applications.learners does not exist' }) });
+      return r.fallback();
+    }));
+    await expect(row(page, 'l2').locator('.la-learner[data-who="child"]')).toContainText('Sara');
+    expect(asked.some((x) => x.includes('learners'))).toBe(true);
+    expect(asked.some((x) => x.includes('heard_from') && !x.includes('learners'))).toBe(true);
+  });
+
   test('Done and Cancel can be undone from the topbar; a cancelled sign-up goes back to New', async ({ page }) => {
     await learnTab(page, { 'rpc:staff_learn_decide': { ok: true } });
     const calls = rpcCalls(page, 'staff_learn_decide');
