@@ -1,0 +1,205 @@
+import { test, expect, type Page } from '@playwright/test';
+import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+
+// Community > Applications > Learn to ride: the sign-ups from micromobility.sa/experiences/learn.
+// Setting the lesson's day and time runs staff_learn_schedule, which (the first time) makes the
+// account or finds the one the person has, and the message then carries the lesson's day, time
+// and place: with the temporary password for a new account, the sign-in line for an existing one,
+// and only the new time when a lesson moves. Done and Cancel leave an undo.
+
+const customers = [
+  { id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', height: 165, created_at: '2026-01-05T10:00:00Z' },
+];
+const base = {
+  created_at: '2026-09-27T08:00:00Z', updated_at: '2026-09-27T08:00:00Z', submissions: 1, for_whom: 'self', learner_name: null,
+  learner_gender: 'female', learner_height: 162, level: 'never', days: [] as string[], times: [] as string[], notes: '', lang: 'en',
+  lesson_at: null as string | null, lesson_place: null as string | null, decided_at: null as string | null, decided_by: null as string | null,
+  customer_id: null as string | null, existing_account: null as boolean | null, account_oauth: null as boolean | null,
+};
+const learners = [
+  { ...base, id: 'l1', status: 'pending', name: 'Nadia Omar', email: 'nadia.omar@gmail.com', phone: '+966552220001', learner_age: 34, days: ['weekends'], times: ['evening'], notes: 'A bit nervous around traffic' },
+  { ...base, id: 'l2', status: 'pending', for_whom: 'child', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', learner_name: 'Sara', learner_age: 7, learner_height: 120, level: 'tried', times: ['morning', 'afternoon'], lang: 'ar', created_at: '2026-09-26T08:00:00Z' },
+  { ...base, id: 'l3', status: 'scheduled', name: 'Omar Farouk', email: 'omar.farouk@gmail.com', phone: '+966553330002', learner_age: 41, learner_gender: 'male', learner_height: 180, level: 'refresh',
+    lesson_at: '2026-10-04T15:00:00Z', lesson_place: 'JCC', decided_at: '2026-09-27T09:00:00Z', decided_by: 'Desk A', customer_id: 'la01', existing_account: false, account_oauth: false },
+  { ...base, id: 'l4', status: 'cancelled', name: 'Old Learner', email: 'old.learner@gmail.com', phone: '+966554440003', learner_age: 29, decided_at: '2026-09-25T09:00:00Z', decided_by: 'Desk B' },
+];
+
+// A day two days from now, in Riyadh, as the date input gives it.
+const soon = () => new Date(Date.now() + 2 * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
+
+async function learnTab(page: Page, extra: Record<string, unknown> = {}) {
+  await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], community_applications: [], learn_applications: learners, ...extra });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`setStaffTab('community');setCommTab('learning')`);
+  await expect(page.locator('.la-row')).toHaveCount(2);
+}
+const row = (page: Page, id: string) => page.locator(`.la-row[data-learn-id="${id}"]`);
+const rpcCalls = (page: Page, name: string) => {
+  const calls: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && new RegExp(`rpc/${name}$`).test(r.url().split('?')[0])) calls.push(JSON.parse(r.postData() || '{}')); });
+  return calls;
+};
+
+test.describe('@staff:community learn to ride', () => {
+  test('Applications holds two lists; the learn-to-ride one shows who is learning and what they asked for', async ({ page }) => {
+    await learnTab(page);
+    // one pill for both lists, the pending ones of both counted; its own address
+    await expect(page.locator('.filter-pill', { hasText: /^Applications \(2\)$/ })).toHaveClass(/active/);
+    await expect(page.locator('.apps-kind[data-apps-kind="learning"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.apps-kind[data-apps-kind="learning"] .apps-kind-n')).toHaveText('2');
+    expect(new URL(page.url()).pathname).toBe('/community/applications/learning');
+    await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
+    await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (1)');
+    await expect(page.locator('.filter-pill[data-la-filter="cancelled"]')).toHaveText('Cancelled (1)');
+
+    const n = row(page, 'l1');
+    await expect(n.locator('.ca-name')).toHaveText('Nadia Omar');
+    for (const txt of ['+966552220001', 'nadia.omar@gmail.com', '34 years', 'Female', '162 cm', 'Never ridden', 'Weekends', 'Evening', 'English']) await expect(n).toContainText(txt);
+    await expect(n.locator('.la-notes')).toContainText('A bit nervous around traffic');
+
+    // a child: the child's name with the tag, the parent beside, and the parent's account on file
+    const s = row(page, 'l2');
+    await expect(s.locator('.ca-name')).toContainText('Sara');
+    await expect(s.locator('.la-kid')).toHaveText('Child');
+    await expect(s.locator('.ca-grid')).toContainText('ParentHuda Al Saleh');
+    await expect(s.locator('.ca-grid')).toContainText('Tried, can’t ride yet');
+    await expect(s.locator('.ca-grid')).toContainText('Any'); // no days picked
+    await expect(s.locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
+
+    // the scheduled list shows the lesson; the community list is one tap away and back
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await expect(row(page, 'l3').locator('.la-lesson')).toContainText('JCC');
+    await expect(row(page, 'l3')).toContainText('by Desk A');
+    await page.locator('.apps-kind[data-apps-kind="applications"]').click();
+    expect(new URL(page.url()).pathname).toBe('/community/applications');
+    await expect(page.locator('.la-row')).toHaveCount(0);
+    await page.locator('.apps-kind[data-apps-kind="learning"]').click();
+    await expect(page.locator('.la-row')).toHaveCount(1);
+    // and the address opens the list
+    expect(await page.evaluate(`JSON.stringify(_parsePath('/community/applications/learning'))`)).toBe(JSON.stringify({ view: 'staff', stab: 'community', sub: 'applications/learning' }));
+    expect(await page.evaluate(`_setSub('community','applications/learning'),S.communityTab`)).toBe('learning');
+    // the bell counts them
+    expect(await page.evaluate(`(_ntKinds().find(k=>k.k==='learn')||{ids:[]}).ids.length`)).toBe(2);
+  });
+
+  test('Setting the lesson for someone new makes the account and writes the message with the time, the place and the password', async ({ page }) => {
+    await learnTab(page, {
+      'rpc:staff_learn_schedule': { ok: true, existing: false, first: true, customer_id: 'la02', name: 'Nadia Omar', email: 'nadia.omar@gmail.com', phone: '+966552220001', password: 'Tq8mZr3Kpw', lang: 'en', oauth: false, lesson_at: null, lesson_place: 'JCC Gate 3', must_change: true },
+    });
+    const calls = rpcCalls(page, 'staff_learn_schedule');
+    await row(page, 'l1').locator('.la-schedule').click();
+    const dlg = page.locator('#confirm-modal .ws-dlg');
+    await expect(dlg).toContainText('Lesson for Nadia Omar');
+    await expect(dlg).toContainText('Best days: Weekends · Best time: Evening');
+    // nothing picked yet: it asks
+    await dlg.locator('.la-sched-save').click();
+    await expect(dlg.locator('#ws-dlg-err')).toHaveText('Pick both the day and the time.');
+    const d = soon();
+    await dlg.locator('#ws-d').fill(d);
+    await dlg.locator('#ws-t').fill('18:30');
+    await dlg.locator('#la-place').fill('JCC Gate 3');
+    await dlg.locator('.la-sched-save').click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toEqual({ p_id: 'l1', p_at: `${d}T18:30:00+03:00`, p_place: 'JCC Gate 3', p_by: 'Spec Staff' });
+
+    const box = page.locator('#confirm-modal .ca-msg-box');
+    await expect(box).toBeVisible();
+    await expect(box.locator('.ca-pwd')).toHaveText('Tq8mZr3Kpw');
+    const msg = await box.locator('#la-msg-text').inputValue();
+    const day = new Intl.DateTimeFormat('en-GB-u-ca-gregory', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }).format(new Date(`${d}T18:30:00+03:00`));
+    for (const txt of ['Hi Nadia,', 'learn-to-ride lesson', 'Your lesson is booked:', `📅 ${day}`, '🕕 6:30 pm', '📍 JCC Gate 3', 'https://micromobilityrentals.pages.dev',
+      'Email: nadia.omar@gmail.com', 'Mobile: 0552220001', 'Temporary password: Tq8mZr3Kpw', 'choose your own password', 'reply to this message']) expect(msg).toContain(txt);
+    const wa = await box.locator('a.la-wa').getAttribute('href');
+    expect(wa).toMatch(/^https:\/\/wa\.me\/966552220001\?text=/);
+    expect(decodeURIComponent(wa!.split('text=')[1])).toBe(msg);
+    await box.locator('#la-msg-lang').selectOption('ar');
+    await expect(box.locator('#la-msg-text')).toHaveAttribute('dir', 'rtl');
+    expect(await box.locator('#la-msg-text').inputValue()).toContain('تم حجز درسك');
+    await box.locator('.ca-x').click();
+
+    // the row moved to Scheduled, with its account; the place is remembered for the next lesson
+    await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (2)');
+    await row(page, 'l2').locator('.la-schedule').click();
+    await expect(page.locator('#la-place')).toHaveValue('JCC Gate 3');
+  });
+
+  test('A child whose parent already has an account: the child is named, the parent signs in with their own', async ({ page }) => {
+    await learnTab(page, {
+      'rpc:staff_learn_schedule': { ok: true, existing: true, first: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false, lesson_at: null, lesson_place: null, must_change: false },
+    });
+    await row(page, 'l2').locator('.la-schedule').click();
+    await page.locator('#ws-d').fill(soon());
+    await page.locator('#ws-t').fill('09:00');
+    await page.locator('#la-place').fill('');
+    await page.locator('.la-sched-save').click();
+    const box = page.locator('#confirm-modal .ca-msg-box');
+    await expect(box).toBeVisible();
+    await expect(box.locator('.ca-pwd')).toHaveCount(0);
+    await expect(box.locator('#la-msg-lang')).toHaveValue('ar'); // the language of the sign-up
+    await box.locator('#la-msg-lang').selectOption('en');
+    const msg = await box.locator('#la-msg-text').inputValue();
+    for (const txt of ['Hi Huda,', 'Sara’s lesson is booked:', '🕕 9:00 am', 'You already have a Micromobility account', 'Email: huda.saleh@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
+    expect(msg).not.toContain('📍');
+    expect(msg).not.toContain('Temporary password');
+  });
+
+  test('A lesson moved to another time sends only the new time; the message again carries the sign-in lines', async ({ page }) => {
+    await learnTab(page, {
+      'rpc:staff_learn_schedule': { ok: true, existing: false, first: false, customer_id: 'la01', name: 'Omar Farouk', email: 'omar.farouk@gmail.com', phone: '+966553330002', password: null, lang: 'en', oauth: false, lesson_at: null, lesson_place: 'JCC', must_change: true },
+    });
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await row(page, 'l3').locator('.la-reschedule').click();
+    // the current lesson, in Riyadh time
+    await expect(page.locator('#ws-d')).toHaveValue('2026-10-04');
+    await expect(page.locator('#ws-t')).toHaveValue('18:00');
+    await expect(page.locator('#la-place')).toHaveValue('JCC');
+    await page.locator('#ws-d').fill(soon());
+    await page.locator('.la-sched-save').click();
+    const box = page.locator('#confirm-modal .ca-msg-box');
+    await expect(box).toBeVisible();
+    let msg = await box.locator('#la-msg-text').inputValue();
+    expect(msg).toContain('Your lesson has a new time:');
+    expect(msg).toContain('🕕 6:00 pm');
+    expect(msg).not.toContain('Sign in here');
+    await box.locator('.ca-x').click();
+
+    await row(page, 'l3').locator('.la-msg').click();
+    msg = await page.locator('#la-msg-text').inputValue();
+    for (const txt of ['Your lesson is booked:', 'Your account is ready', 'Email: omar.farouk@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
+    expect(msg).not.toContain('Temporary password');
+    await expect(row(page, 'l3').locator('.la-newpwd')).toBeVisible(); // the account this sign-up made
+  });
+
+  test('Done and Cancel each leave an undo; a cancelled sign-up goes back to New', async ({ page }) => {
+    await learnTab(page, { 'rpc:staff_learn_decide': { ok: true } });
+    const calls = rpcCalls(page, 'staff_learn_decide');
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await row(page, 'l3').locator('.la-done').click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toEqual({ p_id: 'l3', p_status: 'done', p_by: 'Spec Staff' });
+    await expect(page.locator('#undo-bar-el')).toContainText('Omar Farouk: lesson done');
+    await expect(page.locator('.filter-pill[data-la-filter="done"]')).toHaveText('Done (1)');
+    await page.locator('#undo-bar-btn').click();
+    await expect.poll(() => calls.length).toBe(2);
+    expect(calls[1]).toEqual({ p_id: 'l3', p_status: 'scheduled', p_by: 'Spec Staff' });
+    await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (1)');
+
+    await page.locator('.filter-pill[data-la-filter="pending"]').click();
+    await row(page, 'l1').locator('.la-cancel').click();
+    await expect(page.locator('#confirm-modal')).toContainText('Cancel Nadia Omar’s sign-up?');
+    await page.locator('#confirm-modal button', { hasText: 'Cancel sign-up' }).last().click();
+    await expect.poll(() => calls.length).toBe(3);
+    expect(calls[2]).toEqual({ p_id: 'l1', p_status: 'cancelled', p_by: 'Spec Staff' });
+    await expect(page.locator('#undo-bar-el')).toContainText('Nadia Omar’s sign-up cancelled');
+    await expect(page.locator('.filter-pill[data-la-filter="cancelled"]')).toHaveText('Cancelled (2)');
+
+    await page.locator('.filter-pill[data-la-filter="cancelled"]').click();
+    await row(page, 'l4').locator('.la-reopen').click();
+    await expect.poll(() => calls.length).toBe(4);
+    expect(calls[3]).toEqual({ p_id: 'l4', p_status: 'pending', p_by: 'Spec Staff' });
+    await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
+  });
+});

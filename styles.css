@@ -4734,6 +4734,16 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-msg-lang{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
 .ca-msg-lang select{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font:inherit;font-weight:700}
 body .ca-msg-box textarea.ca-msg{width:100%;min-height:300px;height:300px;box-sizing:border-box;resize:vertical;background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-family:var(--font-body);font-size:13.5px;line-height:1.5}
+/* Applications' two lists (community membership, learning to ride) and the learn-to-ride rows */
+.apps-kinds{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--s2);margin:0 0 14px}
+.apps-kind{display:inline-flex;align-items:center;gap:8px;background:none;border:0;border-radius:7px;padding:8px 14px;font:inherit;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer}
+.apps-kind:hover{color:var(--text)}
+.apps-kind.active{background:var(--s1);color:var(--text);box-shadow:0 1px 2px rgba(var(--tint-rgb),.14)}
+.apps-kind-n{min-width:18px;height:18px;padding:0 6px;border-radius:9px;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.la-kid{display:inline-block;vertical-align:2px;margin-inline-start:6px;padding:1px 7px;border-radius:9px;background:rgba(var(--green-rgb),.12);color:var(--green);font-size:11px;font-weight:800}
+.la-lesson{margin-top:8px;padding:8px 12px;border-radius:8px;border-inline-start:3px solid var(--green);background:rgba(var(--green-rgb),.08);font-size:13px;font-weight:800}
+.la-notes{margin-top:8px;font-size:13px;line-height:1.5;padding:8px 12px;border-radius:8px;background:var(--s3);white-space:pre-wrap;overflow-wrap:anywhere}
+.la-notes span{display:block;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 
 /* Workshop requests (renderWorkshop): the Applications card (ca-*) plus these. */
 .ws-ref{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;color:var(--green);margin-inline-end:4px}
