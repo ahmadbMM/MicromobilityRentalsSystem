@@ -2,9 +2,10 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
 // A signed-out visitor's two pages (the owner, 2026-09-28): Sign in at / and Create account at
-// /signup, each named by its title, with a plain line under the title for the visitor on the wrong
-// one - "New to MicroMobility? Create account", "Already have an account? Sign in" - a sentence with
-// a link, not a box. The old Log In / Sign Up tabs are gone. All Supabase traffic is stubbed.
+// /signup, each named by its title, with a plain line right above the Google and Apple buttons for
+// the visitor on the wrong one - "New to MicroMobility? Create account", "Already have an account?
+// Sign in" - a sentence with a link, not a box. The old Log In / Sign Up tabs are gone. All Supabase
+// traffic is stubbed.
 
 const at = (page: Page) => { const u = new URL(page.url()); return u.pathname + u.search; };
 const bar = (page: Page) => page.locator('#auth-modal .auth-switch');
@@ -16,7 +17,7 @@ async function open(page: Page, path = '/') {
   await expect(page.locator('#auth-modal.as-page .auth-title')).toBeVisible();
 }
 
-test('Sign in is the first page: its title, and the line under it that leads to Create account', async ({ page }) => {
+test('Sign in is the first page: its title, and the line above Google and Apple that leads to Create account', async ({ page }) => {
   await open(page);
   await expect(page.locator('.auth-title')).toHaveText('Sign in');
   await expect(page.locator('.auth-sub')).toHaveText('Welcome back.');
@@ -24,11 +25,11 @@ test('Sign in is the first page: its title, and the line under it that leads to 
   await expect(bar(page)).toHaveText('New to MicroMobility? Create account');
   await expect(bar(page).locator('button')).toHaveText('Create account');
   await expect(page.locator('.auth-submit')).toHaveText('Sign in');
-  // the line sits right under the title and its subtitle, plain text: no border, no background
-  expect(await page.evaluate(`document.querySelector('#auth-modal .auth-sub').nextElementSibling.classList.contains('auth-switch')`)).toBe(true);
+  // the line sits right on top of the Google and Apple buttons, plain text: no border, no background
+  expect(await page.evaluate(`document.querySelector('#auth-modal .auth-switch').nextElementSibling.classList.contains('btn-google')`)).toBe(true);
   expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopWidth, c.backgroundColor]; })).toEqual(['0px', 'rgba(0, 0, 0, 0)']);
-  // the whole sentence is green (the link's own ink), and 16px
-  expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.color === getComputedStyle(el.querySelector('button')!).color, c.fontSize]; })).toEqual([true, '16px']);
+  // the whole sentence is green (the link's own ink), 16px and centred
+  expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.color === getComputedStyle(el.querySelector('button')!).color, c.fontSize, c.textAlign]; })).toEqual([true, '16px', 'center']);
   // arriving does not ring the link as if it were picked
   expect(await page.evaluate('document.activeElement === document.body')).toBe(true);
 });

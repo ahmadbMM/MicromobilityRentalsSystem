@@ -4497,7 +4497,7 @@ function renderAuthModal(){
   const logoSrc='/logo-dark.png'; // auth box is always the white paper surface — customer side is light-only; root-relative, the page may sit at /bookings/waitlist
   let title='',subtitle='',sw='',body='';
   // Sign in and Create account are two pages (the owner, 2026-09-28), each named by its title, with a
-  // plain line under the title for the visitor on the wrong one, as other sites do it (no box, 2026-09-28):
+  // plain line, centred right above the Google and Apple buttons, for the visitor on the wrong one (no box, 2026-09-28):
   // "New to MicroMobility? Create account" (its own address, /signup), "Already have an account? Sign in".
   const _switchBar=(head,to,label)=>`<p class="auth-switch">${head} <button type="button" class="auth-switch-link" data-auth-to="${to}" data-on-click="${_on("switchAuthMode",to)}">${label}</button></p>`;
   const googleBlock=_isInAppBrowser()?`
@@ -4632,8 +4632,8 @@ function renderAuthModal(){
       <img class="auth-logo" src="${logoSrc}" alt="logo">
       <div class="auth-title">${title}</div>
       ${subtitle?`<div class="auth-sub${sw?' has-switch':''}">${subtitle}</div>`:''}
-      ${sw}
       <div class="auth-err" id="auth-err"></div>
+      ${sw}
       ${body}
       ${!isForgot?`<button class="btn-secondary auth-cancel-btn${mode==='gcomplete'?' auth-keep':''}" style="width:100%;margin-top:10px" data-on-click="${_on(mode==='gcomplete'?'cancelGoogleComplete':'_on_authCancelHome')}">${t('authCancel')}</button>`:''}
       ${mode==='gcomplete'||isForgot?'':`<button type="button" class="staff-access-btn" style="width:100%;margin-top:14px" data-on-click="${_on("staffAccessClick")}">${t('staffAccess')}</button>`}

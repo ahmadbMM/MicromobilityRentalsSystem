@@ -426,12 +426,12 @@
     .auth-title{font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px;}
     .auth-sub{font-size:13px;color:var(--muted);margin-bottom:28px;line-height:1.5;}
     /* v2: underline tabs on a hairline rule (no pill toggle) */
-    /* Sign in and Create account are two pages (2026-09-28): one plain line under the title is for the
+    /* Sign in and Create account are two pages (2026-09-28): one plain line above the Google and Apple buttons is for the
        visitor on the wrong one - "New to MicroMobility? Create account" / "Already have an account?
        Sign in" - a sentence with a link, as other sites do it, not a box (the owner, 2026-09-28); all
-       of it green and 16px, the link bold (the owner, 2026-09-28). */
+       of it green and 16px, the link bold, centred over the Google and Apple buttons (the owner, 2026-09-28). */
     .auth-sub.has-switch{margin-bottom:8px;}
-    .auth-switch{margin:0 0 18px;font-size:16px;font-weight:600;line-height:1.5;color:var(--green-d);}
+    .auth-switch{margin:0 0 18px;font-size:16px;font-weight:600;line-height:1.5;color:var(--green-d);text-align:center;}
     .auth-switch-link{background:none;border:none;padding:0;color:var(--green-d);font:inherit;font-weight:700;cursor:pointer;text-underline-offset:2px;}
     .auth-switch-link:hover{text-decoration:underline;}
     .auth-switch-link:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:2px;}
