@@ -85,7 +85,7 @@ test('a template saves the setup, fills the form but not its date, and can be re
   await expect.poll(() => saved.length).toBe(2);
   expect(saved[1]).toEqual([]);
   await expect(form.locator('.ns-tpl-use')).toHaveCount(0);
-  await page.locator('#undo-bar-btn').click();
+  await page.locator('#topbar-right .undo-btn').click();
   await expect.poll(() => saved.length).toBe(3);
   await expect(form.locator('.ns-tpl-use', { hasText: 'Saturday social' })).toBeVisible();
 });

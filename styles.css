@@ -316,8 +316,6 @@
       padding:6px 14px;font-family:var(--font-body);font-size:12px;font-weight:700;
       cursor:pointer;flex-shrink:0;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;letter-spacing:.2px;}
     .undo-bar-action:hover{background:var(--ac-fill-h);transform:scale(1.04);}
-    .undo-bar-progress{position:absolute;bottom:0;inset-inline-start:0;height:3px;background:rgba(var(--green-rgb),.4);
-      border-end-start-radius:7px;transition:width linear;}
     /* Write failures: same strip, red, and it stays until dismissed or retried. */
     .err-bar{border-color:rgba(var(--red-rgb),.55);background:#2a1414;}
     .err-bar .undo-bar-action{background:var(--red);color:#fff;}
@@ -3003,7 +3001,6 @@
     body.view-staff .undo-bar-text{color:#e9edee;}
     body.view-staff .undo-bar-action{background:#03ff89;color:#06130c;border-radius:7px;}
     body.view-staff .undo-bar-action:hover{background:#2effa0;transform:none;}
-    body.view-staff .undo-bar-progress{background:rgba(3,255,137,.35);}
     body.view-staff .receipt-box{
       background:var(--sf-head);color:var(--text);border:1px dashed var(--sf-ctl);border-radius:8px;box-shadow:none;
     }
@@ -5145,8 +5142,8 @@ body.view-staff .staff-tabbar{display:none;}
   body.view-staff .fab-row{bottom:calc(76px + env(safe-area-inset-bottom));}
   body.view-staff #tab-queue{padding-bottom:84px;}
 }
-/* The bars that share the bottom of a phone screen keep out of each other's way. The undo bar
-   (and the error bar, an .undo-bar too) sits in #toast-container at the same 76px as the floating
+/* The bars that share the bottom of a phone screen keep out of each other's way. The error bar
+   (an .undo-bar, the look of the old undo bar) sits in #toast-container at the same 76px as the floating
    Walk-in/Scan pair, full width and taking taps: while one is up, the pair moves above it. The
    roster's selection bar (the fixed div _qLeaf stamps data-ck="bulk") carried bottom:22px inline,
    over the tab bar: on phones and tablets it stands above the bar, full width, its buttons

@@ -89,7 +89,7 @@ test('offers no undo, and the dialog says so', async ({ page }) => {
   await page.locator('#confirm-modal').getByRole('button', { name: /Delete account/i }).click();
   await expect(page.locator('.toast').last()).toContainText(/deleted/i);
   await page.waitForTimeout(300);
-  await expect(page.locator('#undo-bar-btn')).toHaveCount(0);
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveCount(0);
 });
 
 // A refused delete must not leave the rider half-deleted: their bookings get their link back,

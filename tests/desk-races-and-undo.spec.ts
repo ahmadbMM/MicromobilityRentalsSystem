@@ -294,13 +294,17 @@ test('the topbar Undo keeps a refused reversal undoable, and claims it before ru
     window.__runs=0;
     pushUndo('Slow', async()=>{window.__runs++;await new Promise(r=>setTimeout(r,150));});
     const p=doUndo();
-    document.getElementById('undo-bar-btn').click();       // the bar's Undo while the topbar's is still running
+    const claimed=S.actionLog[0].undone;
+    confirmLogUndo(S.actionLog[0].id);                     // the Logs view's Undo while the topbar's is still running
+    const asked=document.getElementById('confirm-modal').style.display==='block';
     await p;await new Promise(r=>setTimeout(r,250));
-    return {afterRefused,runs:window.__runs};
-  })()`) as { afterRefused: { undone: boolean; stack: number }; runs: number };
+    return {afterRefused,runs:window.__runs,claimed,asked};
+  })()`) as { afterRefused: { undone: boolean; stack: number }; runs: number; claimed: boolean; asked: boolean };
   expect(r.afterRefused.undone).toBe(false);
   expect(r.afterRefused.stack).toBe(1);
   expect(r.runs).toBe(1);
+  expect(r.claimed).toBe(true);
+  expect(r.asked).toBe(false);
 });
 
 test('a render with nothing left to add still retires an older render\'s pending rows', async ({ page }) => {

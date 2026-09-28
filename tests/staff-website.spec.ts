@@ -84,7 +84,7 @@ test('an edit is saved as one upsert, signed with the operator, and can be undon
   expect(writes[0].method).toBe('POST');
   expect(writes[0].prefer).toContain('merge-duplicates');
   expect(writes[0].body).toEqual([{ key: 'coming_soon.sub', value: { en: 'Launching this autumn.', ar: 'موقعنا الجديد قيد التجهيز.' }, updated_by: 'Spec Staff' }]);
-  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Website: changed'); // the undo bar says it; the plain toast stands down beside it
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Website: changed/); // the topbar's Undo names it
   // Undo: the key did not exist before, so it is removed and the site shows the original words.
   await page.evaluate(`doUndo()`);
   await expect.poll(() => writes.length).toBe(2);
@@ -154,7 +154,7 @@ test('a built page is switched on from the Pages list at once, with undo', async
   await sw.click();
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].body).toEqual([{ key: 'page.experiences.visible', value: true, updated_by: 'Spec Staff' }]);
-  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Page switched on: Experiences');
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Page switched on: Experiences/);
   // Undo: the key did not exist before, so it is removed and the page is off again.
   await page.evaluate(`doUndo()`);
   await expect.poll(() => writes.length).toBe(2);
@@ -170,7 +170,7 @@ test('a page that is on waits for Coming Soon, then is live; off writes false', 
   await club.locator('input.web-toggle').click();
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].body).toEqual([{ key: 'page.club.visible', value: false, updated_by: 'Spec Staff' }]);
-  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Page switched off: Club');
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Page switched off: Club/);
 });
 
 test('with the site open, a page that is on is Live', async ({ page }) => {

@@ -65,7 +65,7 @@ test('a checked-in, paid rider is moved: off the bike, in line on the new ride, 
   await expect(modal.locator('#be-sess')).toBeVisible(); // used to be hidden for a checked-in rider
   await expect(modal.locator('#be-move-note')).toContainText('takes them off their bike');
   await page.evaluate(`document.getElementById('be-sess').value='s1';saveBookingEdit()`);
-  await expect(page.locator('#undo-bar-el')).toBeVisible(); // one bar, not two: an undoable edit shows the undo bar
+  await expect(page.locator('#topbar-right .undo-btn')).toBeVisible(); // an undoable edit: the topbar's Undo, no bar
 
   const q = writes.filter((w) => w.table === 'queue_entries');
   // Off the bike first, guarded on still being on it; the bike back on the rack; the stamp
@@ -81,7 +81,7 @@ test('a checked-in, paid rider is moved: off the bike, in line on the new ride, 
   const after = await page.evaluate(`(()=>{const e=getQueue().find(x=>x.id==='${MOVER}');return {s:e.sessionId,st:e.status,p:e.paid,pr:e.price};})()`);
   expect(after).toEqual({ s: 's1', st: 'waiting', p: true, pr: 30 });
 
-  await page.locator('#undo-bar-el').getByRole('button', { name: /undo/i }).click();
+  await page.locator('#topbar-right .undo-btn').click();
   const qe = () => writes.filter((w) => w.table === 'queue_entries');
   await expect.poll(() => qe().some((w) => w.body.session_id === 's0' && w.body.status === 'waiting')).toBe(true); // back on the old ride, in line
   await expect.poll(() => qe().some((w) => w.body.status === 'active' && w.body.assigned_bike_id === 'b1')).toBe(true); // then back on the bike

@@ -92,7 +92,7 @@ test('Mark serviced on a bike in maintenance stamps it, puts it back in the pool
   await row(page, 'b-maint').getByRole('button', { name: 'Mark serviced' }).click();
   await expect.poll(() => patches.find((b) => b.includes('last_serviced_at')) || '').toContain('"status":"available"');
   await expect(row(page, 'b-maint')).toHaveCount(0);
-  await page.locator('#undo-bar-btn').click();
+  await page.locator('#topbar-right .undo-btn').click();
   await expect.poll(() => patches.some((b) => b.includes('"status":"maintenance"'))).toBe(true);
   await expect(row(page, 'b-maint')).toContainText('In maintenance');
 });

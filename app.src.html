@@ -4367,49 +4367,12 @@ function fmtPhone(p){
   if(match)return match[0]+' '+p.slice(match[0].length);
   return p;
 }
-// An action that puts up its undo bar has said what it did: a plain toast beside it said it
-// twice (owner, 2026-09-27), so within 1.5 s of the bar the toast stands down whichever comes
-// first. Errors and warnings always show.
-let _undoBarAt=0;
 function toast(msg,type){
-  if(type!=='error'&&type!=='warning'&&Date.now()-_undoBarAt<1500)return;
   const el=document.createElement('div');
-  el.className='toast'+(type?' '+type:'');el.textContent=msg;el.dataset.at=String(Date.now());
+  el.className='toast'+(type?' '+type:'');el.textContent=msg;
   const container=document.getElementById('toast-container');
   container.appendChild(el);
   setTimeout(()=>el.remove(),2800);
-}
-
-let _undoBarTimer=null;
-function showUndoBar(label,fn){
-  
-  const old=document.getElementById('undo-bar-el');if(old)old.remove();
-  clearInterval(_undoBarTimer);
-  _undoBarAt=Date.now();
-  document.querySelectorAll('#toast-container .toast').forEach(e=>{if(!/\b(error|warning)\b/.test(e.className)&&Date.now()-(+e.dataset.at||0)<1500)e.remove();}); // the toast the same action just showed
-  const DURATION=5000;
-  const bar=document.createElement('div');
-  bar.id='undo-bar-el';bar.className='undo-bar';
-  bar.innerHTML=`
-    <div class="undo-bar-text">${esc(label)}</div>
-    <button class="undo-bar-action" id="undo-bar-btn">${t('undoBtn')}</button>
-    <div class="undo-bar-progress" id="undo-bar-prog" style="width:100%"></div>`;
-  document.getElementById('toast-container').appendChild(bar);
-  const prog=document.getElementById('undo-bar-prog');
-  const btn=document.getElementById('undo-bar-btn');
-  const start=Date.now();
-  
-  _undoBarTimer=setInterval(()=>{
-    const elapsed=Date.now()-start;
-    const pct=Math.max(0,100-elapsed/DURATION*100);
-    if(prog)prog.style.width=pct+'%';
-    if(elapsed>=DURATION){clearInterval(_undoBarTimer);bar.remove();}
-  },80);
-  btn.onclick=async()=>{
-    clearInterval(_undoBarTimer);bar.remove();_undoBarAt=0; // the undo's own outcome is news
-    try{await fn();toast(t('undoneMsg'));}catch(e){toast(t('undoFailed'),'error');}
-    renderTopbarRight();renderStaffQueue();
-  };
 }
 
 
@@ -11368,10 +11331,11 @@ function _bwOpen(s){return !_bwOpensOn(s);}
 function _bwOpensText(s){const o=_bwOpensOn(s);if(!o)return'';return t('bwOpensOn').replace('{0}',shortDate(o.day)+(o.at?' '+o.at:''));}
 function _on__bwCard_1(event,el){S._bwDays=el.value}
 function _on__bwCard_2(event,el){S._bwAt=el.value}
+// On the Sessions page it sits under the sessions list, above the promo codes (owner, 2026-09-28).
 function _bwCardHtml(){
   if(S._bw===undefined)_bwLoad();
   const w=_bwGet();const days=S._bwDays!==undefined?S._bwDays:(w.days==null?'':String(w.days)),at=S._bwAt!==undefined?S._bwAt:(w.at||'');
-  return `<div class="form-section bw-card" style="margin-top:12px"><div class="form-title">${t('bwTitle')}</div><div class="ca-sub">${t('bwSub')}</div>
+  return `<div class="form-section bw-card" style="margin-top:28px"><div class="form-title">${t('bwTitle')}</div><div class="ca-sub">${t('bwSub')}</div>
     <div class="form-row" style="align-items:flex-end;gap:10px;flex-wrap:wrap">
       <div class="form-group" style="flex:0 1 140px"><label for="bw-days">${t('bwDays')}</label><input id="bw-days" type="number" inputmode="numeric" min="0" max="365" step="1" value="${esc(days)}" data-on-input="${_on("_on__bwCard_1",_EV,_EL)}"></div>
       <div class="form-group" style="flex:0 1 140px"><label for="bw-at">${t('bwAt')}</label><input id="bw-at" type="time" value="${esc(at)}" data-on-input="${_on("_on__bwCard_2",_EV,_EL)}"></div>
@@ -12204,7 +12168,6 @@ function renderSessions(){
         <button class="btn-primary" data-on-click="${_on("_on_renderSessions_50",_EV,_EL)}">${t('newSession')}</button>
       </div>
     </div>
-    ${isAdmin()?_bwCardHtml():''}
     ${addForm}
     ${editForm}
     <div class="filter-bar">
@@ -12245,6 +12208,7 @@ function renderSessions(){
         </table></div>`:''}
       </div>`;
     })()}
+    ${isAdmin()?_bwCardHtml():''}
     ${renderPromoManager()}`;
 }
 
@@ -16732,6 +16696,8 @@ function logAction(label){
   try{if(sb&&S.view==='staff')sb.from('staff_actions').insert({at:new Date().toISOString(),action:String(label).slice(0,300),who:op.slice(0,40)||null,device:_deviceId(),view:S.view||''}).then(()=>{},()=>{});}catch(_){}
   if(S.view==='staff'&&S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
+// No bar pops up after an undoable action (owner, 2026-09-28): the action's own toast says what
+// it did, and it is undone from the topbar's Undo or the History log.
 function pushUndo(label,fn){
   logAction(label);
   const logId='alog-'+Date.now()+'-'+Math.random().toString(36).slice(2);
@@ -16740,39 +16706,22 @@ function pushUndo(label,fn){
   if(S.actionLog.length>100)S.actionLog.pop();
   S.undoStack.push({label,fn});
   if(S.undoStack.length>20)S.undoStack.shift();
-  showUndoBar(label,async()=>{
-    if(logEntry.undone)return; // already reversed (e.g. via the logs view) — never run the reversal twice
-    const had=S.undoStack.some(i=>i.fn===fn);
-    S.undoStack=S.undoStack.filter(i=>i.label!==label||i.fn!==fn);
-    logEntry.undone=true;
-    let ok=false;
-    try{ok=(await fn())!==false;}finally{
-      if(!ok){logEntry.undone=false;if(had)S.undoStack.push({label,fn});} // refused: hand the entry back (bar, topbar and logs) rather than striking it through
-      if(S.staffTab==='history'&&S.histView==='log')renderLogs();
-    }
-    // Thrown, not toasted here: the bar reports the outcome, and it used to say "Undone" right
-    // after this said the undo had failed.
-    if(!ok)throw new Error('undo refused');
-  });
   renderTopbarRight();
   if(S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
 async function doUndo(){
   const item=S.undoStack.pop();
   if(!item)return;
-  // The undo BAR and the logs view both reverse via the same logEntry, guarded by .undone.
-  // The topbar button ran the raw fn without setting that flag, so the bar/logs could reverse
-  // the SAME action a second time (double restock / double renumber). Mark it undone and drop
-  // the bar so no other entry point can re-run it.
+  // The topbar button and the logs view both reverse via the same logEntry, guarded by .undone,
+  // so neither can reverse the SAME action a second time (double restock / double renumber).
   const logEntry=(S.actionLog||[]).find(l=>l.fn===item.fn);
   if(logEntry&&logEntry.undone){renderTopbarRight();return;} // already reversed from the Logs view
-  // Claimed BEFORE the await, as the bar and the Logs view do: marked only once the reversal had
-  // finished, the second or so it takes left the bar's own Undo free to run it again.
+  // Claimed BEFORE the await, as the Logs view does: marked only once the reversal had finished,
+  // the second or so it takes left the Logs view free to run it again.
   if(logEntry)logEntry.undone=true;
   let ok=false;
   try{ok=(await item.fn())!==false;}catch(e){ok=false;}
   if(ok){
-    const bar=document.getElementById('undo-bar-el');if(bar){try{clearInterval(_undoBarTimer);}catch(_){}bar.remove();}
     toast(t('undoneMsg'));
   }else{
     // Refused (a reversal answers false when its write fails) or threw: nothing was reversed,
@@ -17273,8 +17222,7 @@ function confirmLogUndo(logId){
     confirmLabel:t('confirmUndoYes'),
     confirmClass:'btn-muted',
     onConfirm:async()=>{
-      item.undone=true; // claim synchronously so the 5s undo bar can't also fire the same reversal
-      const bar=document.getElementById('undo-bar-el');if(bar)bar.remove();
+      item.undone=true; // claim synchronously so the topbar's Undo can't also fire the same reversal
       S.undoStack=(S.undoStack||[]).filter(u=>u.fn!==item.fn); // and take it off the topbar Undo so that button can't re-run it either
       try{
         // Claimed above so two buttons cannot run one reversal; hand it back if it was refused.
@@ -28791,7 +28739,7 @@ function _commAccounts(){
 // other - and staff_merge_customers moves every booking, sale, tag, note, flag and registration
 // onto it, fills what the keeper lacked from the other, and marks the other merged_into the keeper,
 // whose holder then signs in to the keeper. Nothing is deleted. Undo for thirty days, from the
-// undo bar or the list of recent merges (customer_merges), through staff_unmerge_customers.
+// topbar's Undo or the list of recent merges (customer_merges), through staff_unmerge_customers.
 function _custBookingsN(id){let n=0;getQueue().forEach(e=>{if(String(e.customerId||'')===String(id)&&e.status!=='removed')n++;});return n;}
 function _dupGroups(){
   const cs=(S.customers||[]).filter(c=>c&&!c.merged_into),out=[],seen=new Set();

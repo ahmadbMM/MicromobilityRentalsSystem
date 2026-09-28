@@ -64,6 +64,9 @@ test.describe('booking window', () => {
     page.on('request', (r) => { if (r.url().includes('/rest/v1/site_content')) { if (r.method() === 'POST') { try { posts.push(r.postDataJSON()); } catch { /* */ } } if (r.method() === 'DELETE') dels++; } });
     await page.evaluate(`setStaffTab('sessions')`);
     await expect(page.locator('.bw-card')).toBeVisible();
+    // Under the sessions list, above the promo codes (owner, 2026-09-28).
+    expect(await page.evaluate(`(()=>{const f=(a,b)=>!!(document.querySelector(a).compareDocumentPosition(document.querySelector(b))&Node.DOCUMENT_POSITION_FOLLOWING);
+      return [f('.sess-twopane','.bw-card'),f('.bw-card','#pc-code')];})()`)).toEqual([true, true]);
     await page.locator('#bw-days').fill('7');
     await page.locator('#bw-at').fill('20:00');
     await page.locator('.bw-card button', { hasText: 'Save' }).click();

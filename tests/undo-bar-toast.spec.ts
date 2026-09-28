@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// An action that puts up its undo bar has said what it did: the plain toast beside it stands
-// down (owner, 2026-09-27); errors and warnings still show, and so does a toast that comes later.
+// An undoable action puts up no undo bar (owner, 2026-09-28): its own toast says what it did, and
+// the topbar's Undo, named after the action, takes it back.
 // Merging two accounts takes the pair off the Duplicates list at once and asks for the customer
 // list again, instead of keeping the stale list for its five-minute window.
 
@@ -19,22 +19,17 @@ async function boot(page: Page) {
 }
 const toasts = (page: Page) => page.locator('#toast-container .toast');
 
-test('the undo bar replaces the toast the same action shows, either order; errors and later toasts stay', async ({ page }) => {
+test('an undoable action shows its own toast and no bar; the topbar Undo takes it back', async ({ page }) => {
   await boot(page);
   await page.evaluate(`toast('Saved');pushUndo('Did a thing',async()=>true)`);
-  await expect(page.locator('#undo-bar-el .undo-bar-text')).toHaveText('Did a thing');
-  await expect(toasts(page)).toHaveCount(0);
+  await expect(toasts(page).filter({ hasText: 'Saved' })).toHaveCount(1);
+  await expect(page.locator('#undo-bar-el')).toHaveCount(0);
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', 'Did a thing');
   await page.evaluate(`toast('Saved again')`);
-  await expect(toasts(page)).toHaveCount(0);
-  await page.evaluate(`toast('Oh no','error');toast('Careful','warning')`);
-  await expect(toasts(page)).toHaveCount(2);
-  await page.waitForTimeout(1600);
-  await page.evaluate(`toast('Later news')`);
-  await expect(toasts(page).filter({ hasText: 'Later news' })).toHaveCount(1);
-  // The undo's own outcome is news, even right after the bar.
-  await page.evaluate(`pushUndo('Second thing',async()=>true)`);
-  await page.locator('#undo-bar-btn').click();
+  await expect(toasts(page).filter({ hasText: 'Saved again' })).toHaveCount(1);
+  await page.locator('#topbar-right .undo-btn').click();
   await expect(toasts(page).filter({ hasText: 'Undone' })).toHaveCount(1);
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveCount(0);
 });
 
 test('a merge takes the pair off the Duplicates list at once and asks for the customer list again', async ({ page }) => {
@@ -45,8 +40,8 @@ test('a merge takes the pair off the Duplicates list at once and asks for the cu
   // of the merge, so what is asserted is the desk's own bookkeeping.
   await page.evaluate(`window._pinApprove=async()=>true;window.__loads=0;window.loadData=async()=>{window.__loads++;};window.__dirty=null;window.refDirty=()=>{window.__dirty=true;}`);
   await page.evaluate(`_mgRun('c1','c2')`);
-  await expect(page.locator('#undo-bar-el .undo-bar-text')).toContainText('Maan Barnawi');
-  await expect(toasts(page)).toHaveCount(0);
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Maan Barnawi/);
+  await expect(page.locator('#undo-bar-el')).toHaveCount(0);
   expect(await page.evaluate(`S.customers.map(c=>c.id).sort()`)).toEqual(['c1', 'c3']);
   expect(await page.evaluate(`[window.__dirty, window.__loads]`)).toEqual([true, 1]);
   await expect(page.locator('#tab-community')).not.toContainText('b@icloud.com');

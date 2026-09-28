@@ -115,11 +115,11 @@ test('bulk payment and bulk check-in leave an undo', async ({ page }) => {
   await queue(page, { 'rpc:staff_checkin': { ok: true } });
   const writes = patches(page);
   await page.evaluate(`S.sfSelected=['w1'];bulkSfPaid()`);
-  await expect(page.locator('#undo-bar-el')).toContainText('Payment · 1');
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Payment · 1/);
   await page.evaluate(`doUndo()`);
   await expect.poll(() => writes.some((w) => w.id === 'w1' && w.body.paid === false)).toBe(true);
   await page.evaluate(`S.sfSelected=['w1'];bulkSfCheckin()`);
-  await expect(page.locator('#undo-bar-el')).toContainText('Undo Check-in · 1');
+  await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Undo Check-in · 1/);
 });
 
 test('On the house asks the operator PIN, like a void', async ({ page }) => {
