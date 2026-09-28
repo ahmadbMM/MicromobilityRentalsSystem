@@ -186,6 +186,27 @@ test('the list never shows a price; the billing report CSV carries per-ride pric
 });
 
 test.describe('walk-in at the desk', () => {
+  test('the form draws its boxes, its tick box and its buttons like every other dialog', async ({ page }) => {
+    // Badge and Full name had no type, so no input rule reached them (bare browser boxes); "Check
+    // in now" had no box to see (inputs are appearance:none); the footer's buttons had no padding.
+    await stubSupabase(page, { sessions, queue_entries, rider_registrations });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('riders')`);
+    await page.locator('#pm-host button', { hasText: 'Walk-in' }).click();
+    await expect(page.locator('#rider-walkin-modal .modal-box')).toBeVisible();
+    const look = await page.evaluate(() => {
+      const st = (id: string) => getComputedStyle(document.getElementById(id)!);
+      return { h: ['rw-badge', 'rw-name', 'rw-height'].map((id) => st(id).height), border: ['rw-name', 'rw-height'].map((id) => st(id).borderTopStyle + ' ' + st(id).borderTopWidth), tick: st('rw-checkin').appearance };
+    });
+    expect(new Set(look.h).size).toBe(1);
+    expect(look.border[0]).toBe(look.border[1]);
+    expect(look.tick).toBe('checkbox');
+    await expect(page.locator('#rider-walkin-modal .modal-footer button').first()).toHaveClass('btn-secondary');
+    await expect(page.locator('#rw-submit')).toHaveClass('btn-primary');
+  });
+
   test('staff type the form\'s fields; it goes through rider_register, becomes an ordinary booking too, and is checked in', async ({ page }) => {
     await stubSupabase(page, {
       sessions, queue_entries, rider_registrations,
