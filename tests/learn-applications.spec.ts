@@ -226,6 +226,38 @@ test.describe('@staff:community learn to ride', () => {
     await expect(row(page, 'l2')).not.toContainText('How did you hear about us?');
   });
 
+  // The person signing up gives what the community form asks (owner, 2026-09-28): the card shows it.
+  test('the card shows the person\'s own details, as a community application does', async ({ page }) => {
+    const person = { birth_date: '1992-03-04', gender: 'female', nationality: 'Egypt', height: 162, profession: 'Architect', instagram: 'nadia.o', linkedin: 'nadia-omar', ride_news: true };
+    await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l1' ? { ...l, ...person } : l)) });
+    const r = row(page, 'l1');
+    await expect(r).toContainText('Born');
+    await expect(r).toContainText(/\b3[0-9] years\b/);
+    await expect(r).toContainText('Nationality');
+    await expect(r).toContainText('Egypt');
+    await expect(r).toContainText('Architect');
+    await expect(r.locator('.ca-kv', { hasText: 'Ride news' })).toContainText('Yes');
+    await expect(r.locator('.soc-links a[href*="instagram.com/nadia.o"]')).toHaveCount(1);
+    await expect(r.locator('.soc-links a[href*="nadia-omar"]')).toHaveCount(1);
+    // A sign-up from before those details shows none of them.
+    await expect(row(page, 'l2')).not.toContainText('Born');
+    await expect(row(page, 'l2')).not.toContainText('Ride news');
+    await expect(row(page, 'l2').locator('.soc-links')).toHaveCount(0);
+  });
+
+  test('before the database has the person\'s details, the list loads without them', async ({ page }) => {
+    const asked: string[] = [];
+    await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, async (r) => {
+      const sel = new URL(r.request().url()).searchParams.get('select') || '';
+      asked.push(sel);
+      if (sel.includes('birth_date')) return r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column learn_applications.birth_date does not exist' }) });
+      return r.fallback();
+    }));
+    await expect(row(page, 'l1')).toContainText('Nadia Omar');
+    expect(asked.some((x) => x.includes('birth_date'))).toBe(true);
+    expect(asked.some((x) => x.includes('learners') && !x.includes('birth_date'))).toBe(true);
+  });
+
   test('before the database has heard_from, the list loads without it', async ({ page }) => {
     const asked: string[] = [];
     await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, async (r) => {
