@@ -258,7 +258,8 @@ the hexagon. `BD_SYS` maps the app's sixteen slugs to icon, colour and translati
 name, `t(key+'D')` how it is earned); the first nine are also earned by riding (`_mrBadges`). Staff
 give from a rider's Badges button in Community > Accounts (`_bdgOpen`) or to everyone checked in on a
 ride from Community > Badges (`/community/badges`, `_commBadges`); take-back and delete ask on a second
-tap (`_bdgArm`). The rider reads theirs through `customer_my_badges` (token-checked; an account merged
+tap (`_bdgArm`); every badge in that dialog has an "i" (`_bdgInfoBtn`, the bike type's `type-info-btn`) opening
+what it means, how it is earned and its dates under it (`_bdgInfoPanel`). The rider reads theirs through `customer_my_badges` (token-checked; an account merged
 into theirs counts) on the account page, given ones first; the newest pops up once per device
 (`_bdgCelebrate`, `cq_bdg_seen_<id>`). Without the tables the Badges button is hidden and the tab says
 so; without the function riders see the ride badges only. `tests/badges.spec.ts`.

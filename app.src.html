@@ -799,6 +799,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgNationalDay96:'National Day 96',
   bdgNationalDay96D:'Rode in the Saudi National Day 96 Ride',
   bdgNationalDay96A:'On 23 September 2026 riders filled the Corniche in green for Saudi National Day 96. A keepsake for everyone who rode in the parade.',
+  bdgInfoAria:'About the {0} badge',
   
   
   
@@ -1269,6 +1270,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgNationalDay96:'اليوم الوطني 96',
   bdgNationalDay96D:'شاركت في جولة اليوم الوطني السعودي 96',
   bdgNationalDay96A:'في 23 سبتمبر 2026 ملأ الراكبون الكورنيش بالأخضر احتفالاً باليوم الوطني السعودي 96. تذكار لكل من شارك في المسيرة.',
+  bdgInfoAria:'عن وسام {0}',
   
   
   
@@ -30040,6 +30042,14 @@ function _bdgTakeBtn(cid,bid){const on=S._bdgSure===cid+'|'+bid;return`<button t
 function _bdgOpen(cid){S._bdgDlg={cid,pick:null,note:''};S._bdgSure=null;_bdgDlgPaint(true);_bdgLoad();}
 function _bdgDlgClose(){S._bdgDlg=null;S._bdgSure=null;closeConfirm();}
 function _bdgPick(id){const d=S._bdgDlg;if(!d)return;d.pick=d.pick===id?null:id;_bdgDlgPaint();}
+// Each badge's "i" (the owner, 2026-09-29), as beside a bike type: it opens, under the badge, what it
+// means, how it is earned and a dated badge's windows; a second tap closes it.
+function _bdgInfoTog(id){const d=S._bdgDlg;if(!d)return;d.info=d.info===id?null:id;_bdgDlgPaint();}
+function _bdgInfoBtn(b){const on=!!S._bdgDlg&&S._bdgDlg.info===b.id;return`<button type="button" class="type-info-btn bdg-i${on?' on':''}" aria-expanded="${on}" aria-label="${esc(t('bdgInfoAria').replace('{0}',_bdgName(b)))}" data-on-click="${_on("_bdgInfoTog",b.id)}">${_artIcon('info',15)}</button>`;}
+function _bdgInfoPanel(b){
+  if(!S._bdgDlg||S._bdgDlg.info!==b.id)return'';const ab=_bdgAbout(b),how=_bdgDesc(b);
+  return`<div class="bdg-info">${ab?`<div class="bdg-info-about">${esc(ab)}</div>`:''}${how?`<div class="bdg-info-how"><span>${t('bdHowTo')}</span>${esc(how)}</div>`:''}${b.rule?`<div class="am-meta">${esc(t('bdgSeasonal'))}: ${esc(_bdgRuleLine(b.rule))}</div>`:''}</div>`;
+}
 // Handlers of the markup below.
 function _on__bdgDlg_1(event,el){if(event.target===el)_bdgDlgClose();}
 function _on__bdgDlg_2(event,el){if(S._bdgDlg)S._bdgDlg.note=el.value;}
@@ -30050,8 +30060,8 @@ function _bdgDlgPaint(open){
   if(!open&&!m.querySelector('.bdg-dlg')){S._bdgDlg=null;return;}
   const c=_custById(d.cid)||{},held=_bdgHeld(d.cid),has=new Set(held.map(x=>x.badge_id)),ride=_bdgRideOn(d.cid);
   const item=(b,meta,end)=>`<div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b>${meta}</div>${end||''}</div>`;
-  const rows=held.map(x=>{const b=_bdgById(x.badge_id);return b?item(b,`<span class="am-meta">${esc(_bdgLine(x))}</span>${x.note?`<span class="bdg-note"><bdi>${esc(x.note)}</bdi></span>`:''}`,_bdgTakeBtn(d.cid,b.id)):'';}).join('')
-    +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`)).join('');
+  const rows=held.map(x=>{const b=_bdgById(x.badge_id);return b?item(b,`<span class="am-meta">${esc(_bdgLine(x))}</span>${x.note?`<span class="bdg-note"><bdi>${esc(x.note)}</bdi></span>`:''}`,_bdgInfoBtn(b)+_bdgTakeBtn(d.cid,b.id))+_bdgInfoPanel(b):'';}).join('')
+    +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('');
   const give=_bdgSorted().filter(b=>!b.retired&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug)));
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__bdgDlg_1",_EV,_EL)}"><div class="confirm-box bdg-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">
@@ -30059,7 +30069,7 @@ function _bdgDlgPaint(open){
     ${!_bdgOk()?`<div class="am-meta">${t(S._bdgBusy?'loadingLabel':'bdgNoDb')}</div>`:`
     <div class="bdg-list">${rows||`<div class="am-meta">${t('bdgNone')}</div>`}</div>
     <div class="form-title bdg-sec">${t('bdgGiveTitle')}</div>
-    ${give.length?`<div class="bdg-grid">${give.map(b=>`<button type="button" class="bdg-pick${d.pick===b.id?' on':''}" aria-pressed="${d.pick===b.id}" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgPick",b.id)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>`).join('')}</div>`:`<div class="am-meta">${t('bdgAllHeld')}</div>`}
+    ${give.length?`<div class="bdg-grid">${give.map(b=>`<div class="bdg-pickw"><button type="button" class="bdg-pick${d.pick===b.id?' on':''}" aria-pressed="${d.pick===b.id}" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgPick",b.id)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>${_bdgInfoBtn(b)}</div>${_bdgInfoPanel(b)}`).join('')}</div>`:`<div class="am-meta">${t('bdgAllHeld')}</div>`}
     ${d.pick?`<div class="bdg-desc am-meta">${esc(_bdgDesc(_bdgById(d.pick)))}</div><div class="form-group bdg-notef"><label for="bdg-note">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdg-note" type="text" maxlength="140" value="${esc(d.note)}" placeholder="${esc(t('bdgNotePh'))}" data-on-input="${_on("_on__bdgDlg_2",_EV,_EL)}"></div>`:''}`}
     <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on("_bdgDlgClose")}">${t('closeBtn')}</button>${d.pick?`<button type="button" class="btn-primary" data-on-click="${_on("_bdgGive")}">${t('bdgGiveBtn')}</button>`:''}</div>
   </div></div>`;

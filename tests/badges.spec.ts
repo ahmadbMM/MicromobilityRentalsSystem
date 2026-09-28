@@ -73,6 +73,17 @@ test.describe('@staff:community badges', () => {
     await expect(modal(page).locator('.bdg-pick')).toHaveText(['Marshal', 'Champion', 'Night Owl']);
     await expect(modal(page).locator('.bdg-pick svg.bdg-m')).toHaveCount(3);
 
+    // Each badge's "i" opens what it means and how it is earned under it; a second tap closes it.
+    const info = modal(page).locator('.bdg-pickw', { hasText: 'Marshal' }).getByRole('button', { name: 'About the Marshal badge' });
+    await info.click();
+    await expect(modal(page).locator('.bdg-info')).toContainText('Marshals keep a race safe and running');
+    await expect(modal(page).locator('.bdg-info .bdg-info-how')).toContainText('Led or swept a group ride');
+    await expect(modal(page).getByRole('button', { name: 'About the Marshal badge' })).toHaveAttribute('aria-expanded', 'true');
+    await modal(page).getByRole('button', { name: 'About the First Lap badge' }).click(); // a held one has its own
+    await expect(modal(page).locator('.bdg-info')).toHaveCount(1);
+    await expect(modal(page).locator('.bdg-info')).toContainText('Every rider\'s story starts with one lap');
+    await modal(page).getByRole('button', { name: 'About the First Lap badge' }).click();
+    await expect(modal(page).locator('.bdg-info')).toHaveCount(0);
     await modal(page).locator('.bdg-pick', { hasText: 'Marshal' }).click();
     await expect(modal(page).locator('.bdg-pick.on')).toHaveText('Marshal');
     await modal(page).locator('#bdg-note').fill('Swept the Friday ride');
@@ -85,7 +96,7 @@ test.describe('@staff:community badges', () => {
     expect(await page.evaluate('(S.undoStack.at(-1)||{}).label')).toBe('Badge given: Marshal to Lina Haddad');
 
     // Take back asks once more on the same button; only the second tap writes.
-    const take = modal(page).locator('.bdg-item', { hasText: 'Marshal' }).getByRole('button');
+    const take = modal(page).locator('.bdg-item', { hasText: 'Marshal' }).getByRole('button', { name: 'Take back' });
     await take.click();
     await expect(modal(page).locator('.bdg-item', { hasText: 'Marshal' }).locator('.btn-red')).toHaveText('Take it back?');
     expect(sent.length).toBe(1);
