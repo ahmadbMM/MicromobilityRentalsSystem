@@ -212,17 +212,19 @@ policy line into `_headers` from the built page (never edit that line by hand), 
 `tests/csp.spec.ts` walks every section under the real policy. Violations in production report
 to `/api/csp-report`.
 
-**No inline styles either (2026-09-28).** The policy is dropping style-src `'unsafe-inline'`, so a
-`style="..."` attribute will be refused like a handler. Write a class: rules go in `styles.css`
+**No inline styles either (since 2026-09-29).** The policy has no style-src `'unsafe-inline'`: a
+`style="..."` attribute (or `setAttribute('style', ...)`) is refused by the browser like a handler,
+and the build refuses it first. Write a class: rules go in `styles.css`
 beside their area's rules, scoped by the id the markup is drawn under (`#tab-x .xx-row`) so they
 keep an inline style's precedence over the `body.view-staff` layer. A value known only at run
 time goes in `data-cssv="${_cssv({'--w': pct + '%'})}"` and the rule reads `var(--w)`: a document
 observer sets it through the CSSOM (allowed) on every element the page adds, and
 `_cssvApply(root)` does it at once where a write is measured straight away. `el.style.x = ...`
-and `style.cssText` are CSSOM and allowed; `setAttribute('style', ...)` is not. The build fails
-when the page writes more inline styles than `STYLE_ATTRS_MAX` in `scripts/build-html.mjs`, a
-ceiling that only comes down. `background:none` minifies to `0 0` (clean-css): write
-`background:transparent none`.
+and `style.cssText` are CSSOM and allowed; `setAttribute('style', ...)` is not. A window the page
+writes (the reports, the receipt) runs under the same policy: its look lives in `report.css` /
+`receipt.css`, linked with their hashes. `background:none` minifies to `0 0` and `outline:none` to
+`0` (clean-css): write `background:transparent none` and `outline:medium none`. A refused style on
+a real screen lands in error_log as `CSP style-src-attr: <the style> at <element> in #<host>`.
 
 ## The "i" beside a bike type (2026-09-27)
 

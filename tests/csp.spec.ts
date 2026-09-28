@@ -1,7 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff } from './helpers/supabase';
 
-// Since 2026-09-27 the page's Content-Security-Policy allows no inline script: handlers live in
+// Since 2026-09-27 the page's Content-Security-Policy allows no inline script, and since 2026-09-29
+// no inline style (every look is a class; run-time values go through the CSSOM): handlers live in
 // data-on-<event> attributes (one listener per event type on the document runs them, app.src.html
 // _onDispatch) and the few inline <script> blocks are allowed by their hashes, written into
 // _headers by the build. These checks hold that line: the policy the server sends is the strict
@@ -49,7 +50,7 @@ const violations = (page: Page) => page.evaluate(() => (window as unknown as Fns
 const ready = (page: Page) => page.waitForFunction(() => typeof sb !== 'undefined' && !!sb && typeof S !== 'undefined' && !!S.dataLoaded
   && (typeof _lastLoadOk === 'undefined' || _lastLoadOk === true) && (typeof _refsLoaded === 'undefined' || _refsLoaded === true), undefined, { timeout: 10000 });
 
-test('the server sends a policy without unsafe-inline for scripts, naming every inline script the page carries', async ({ page }) => {
+test('the server sends a policy without unsafe-inline for scripts or styles, naming every inline script the page carries', async ({ page }) => {
   await stubSupabase(page);
   const res = await page.goto('/');
   const csp = res!.headers()['content-security-policy'] || '';
@@ -69,6 +70,8 @@ test('the server sends a policy without unsafe-inline for scripts, naming every 
   });
   expect(inline.length).toBeGreaterThanOrEqual(4);
   for (const h of inline) expect(named).toContain(h);
+  const style = csp.split(';').map((s) => s.trim()).find((s) => s.startsWith('style-src')) || '';
+  expect(style).toBe("style-src 'self' 'report-sample'");
   expect(csp).toContain('report-uri /api/csp-report');
   expect(res!.headers()['reporting-endpoints']).toContain('/api/csp-report');
   expect(await page.evaluate(() => document.querySelectorAll('[onclick],[oninput],[onchange],[onkeydown],[onsubmit]').length)).toBe(0);
@@ -139,6 +142,38 @@ test('the receipt\'s Print button stays off the paper, and the report\'s does to
   await expect(page.locator('button')).toBeVisible();
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('button')).toBeHidden();
+});
+
+test('a violation the page meets goes into error_log with the element it came from, once, silently', async ({ page }) => {
+  const logged: string[] = [];
+  await stubSupabase(page);
+  await page.route(/\/rest\/v1\/error_log/, async (route) => {
+    if (route.request().method() === 'POST') { try { const b = route.request().postDataJSON(); logged.push(...(Array.isArray(b) ? b : [b]).map((r: { msg: string; src: string }) => `${r.msg} | ${r.src}`)); } catch { /* not JSON */ } }
+    return route.fulfill({ status: 201, headers: { 'access-control-allow-origin': '*' }, body: '' });
+  });
+  // The policy as it is once styles are strict, with 'report-sample' so the style's own text is
+  // reported (a no-op when the server already sends it).
+  await page.route((u) => u.pathname === '/', async (route) => {
+    const res = await route.fetch();
+    const headers = { ...res.headers(), 'content-security-policy': (res.headers()['content-security-policy'] || '').replace(/style-src [^;]*/, "style-src 'self' 'report-sample'") };
+    await route.fulfill({ response: res, headers });
+  });
+  await page.goto('/');
+  await ready(page);
+  await page.waitForTimeout(150);
+  const before = logged.length;
+  await page.evaluate(() => {
+    const host = document.createElement('section'); host.id = 'csp-probe-host'; document.body.appendChild(host);
+    host.innerHTML = '<div class="probe x" style="color:red">a</div><div class="probe x" style="color:red">b</div>';
+    host.insertAdjacentHTML('beforeend', '<i style="color:blue"></i>');
+  });
+  await expect.poll(() => logged.length - before).toBeGreaterThanOrEqual(2);
+  await page.waitForTimeout(300);
+  const mine = logged.slice(before);
+  expect(mine.filter((m) => m.includes('div.probe in #csp-probe-host'))).toHaveLength(1); // the same kind twice is logged once
+  expect(mine.find((m) => m.includes('div.probe'))).toMatch(/^CSP style-src-attr: color:red at div\.probe in #csp-probe-host \| csp /);
+  expect(mine.some((m) => m.includes('i in #csp-probe-host'))).toBe(true);
+  await expect(page.locator('.toast')).toHaveCount(0); // silent: the rider sees nothing
 });
 
 test('the dispatcher: one call with the element and its value, several calls in a row, stopPropagation, no eval', async ({ page }) => {

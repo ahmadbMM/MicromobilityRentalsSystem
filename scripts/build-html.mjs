@@ -352,13 +352,14 @@ for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
   if (bad) throw new Error(`build: ${name} still carries an inline handler, which the policy would block: ${bad[0]}`);
   if (/javascript:/i.test(text)) throw new Error(`build: ${name} carries a javascript: URL, which the policy would block`);
 }
-// The policy is losing style-src 'unsafe-inline' area by area (2026-09-28): every style="..." the
-// markup and templates write becomes a class, or a data-cssv value set through the CSSOM. The
-// ceiling only comes down: a new inline style fails the build, so the count the move started from
-// never grows back while it runs. At 0 the policy drops 'unsafe-inline'.
+// Since 2026-09-29 the policy has no style-src 'unsafe-inline' either: a style="..." in the markup or
+// a template, or setAttribute('style'), is refused by the browser and would leave its element
+// unstyled. Every look is a class (or a data-cssv value set through the CSSOM), and the build
+// refuses an inline style the way it refuses an inline handler. The move there went area by area
+// under a ceiling that only came down (1834 on 2026-09-28).
 const STYLE_ATTRS_MAX = 0;
 const styleAttrs = [out, staffMin.code].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
-if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline styles, more than the ${STYLE_ATTRS_MAX} it may while the policy drops them - write a class (or data-cssv="\${_cssv({...})}" for a run-time value) instead of style="..."`);
+if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline style(s), which the policy (style-src without 'unsafe-inline') would refuse - write a class, or data-cssv for a run-time value, instead of style="..." or setAttribute('style')`);
 const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
   .filter((m) => !/\btype\s*=\s*["']?(?!(?:text\/javascript|module)["'\s>])/i.test(m[1]))
   .map((m) => createHash('sha256').update(m[2]).digest('base64'));
@@ -367,7 +368,7 @@ const hashes = [...new Set([...inlineHashes(out), ...inlineHashes(staffStub)])];
 const CSP = [
   "default-src 'self'",
   `script-src 'self' ${hashes.map((h) => `'sha256-${h}'`).join(' ')} https://static.cloudflareinsights.com`,
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'report-sample'", // 'report-sample': a refused style's first 40 characters come with its report
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
   "connect-src 'self' https://micromobility.sa https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com",
