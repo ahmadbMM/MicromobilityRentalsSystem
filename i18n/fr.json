@@ -2585,6 +2585,8 @@
   "caApproveTitle": "Approuver {0} ?",
   "caApproveBody": "Un compte est créé à partir de ces informations avec un mot de passe temporaire, et le tag Community est ajouté. Vous recevez ensuite un message de bienvenue à envoyer.",
   "caApproveBodyExisting": "Ce cycliste a déjà un compte ({0}). Ce compte reçoit le tag Community, et vous recevez un message de bienvenue lui indiquant de se connecter avec.",
+  "caApproveBodyNoComm": "Un compte est créé à partir de ces informations avec un mot de passe temporaire, sans le tag Community. Vous recevez ensuite un message de bienvenue à envoyer.",
+  "caApproveBodyExistingNoComm": "Ce cycliste a déjà un compte ({0}). Ce compte ne reçoit pas le tag Community, et vous recevez un message de bienvenue lui indiquant de se connecter avec.",
   "caRideLbl": "Ajouter à la liste finale d’une Sortie sociale du samedi",
   "caRideNone": "Pas maintenant",
   "caRideNoOpen": "Aucune Sortie sociale du samedi n’est ouverte pour le moment.",

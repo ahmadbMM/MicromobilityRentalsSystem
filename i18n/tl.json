@@ -2585,6 +2585,8 @@
   "caApproveTitle": "Aprubahan si {0}?",
   "caApproveBody": "Gagawa ng account mula sa mga detalyeng ito na may pansamantalang password, at idadagdag ang tag na Community. Pagkatapos ay makakakuha ka ng mensahe ng pagtanggap na ipapadala.",
   "caApproveBodyExisting": "May account na ang rider na ito ({0}). Lalagyan ito ng tag na Community, at makakakuha ka ng mensahe ng pagtanggap na nagsasabing mag-sign in sila gamit ito.",
+  "caApproveBodyNoComm": "Gagawa ng account mula sa mga detalyeng ito na may pansamantalang password, nang walang tag na Community. Pagkatapos ay makakakuha ka ng mensahe ng pagtanggap na ipapadala.",
+  "caApproveBodyExistingNoComm": "May account na ang rider na ito ({0}). Hindi ito lalagyan ng tag na Community, at makakakuha ka ng mensahe ng pagtanggap na nagsasabing mag-sign in sila gamit ito.",
   "caRideLbl": "Idagdag sa Final na listahan ng isang Saturday Social Ride",
   "caRideNone": "Hindi muna",
   "caRideNoOpen": "Walang bukas na Saturday Social Ride ngayon.",

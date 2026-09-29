@@ -175,8 +175,9 @@ test('An applicant who already has an account is told to sign in with it, and ge
 });
 
 // Approving can also give more tags and put the rider on the Final list of a Saturday Social Ride
-// that is still open (the owner, 2026-09-29). The Community tag is the approval's own and the
-// blacklist is not offered; a tag the account holds is shown ticked and cannot be picked.
+// that is still open (the owner, 2026-09-29). The Community tag starts ticked and can be unticked
+// (the owner, 2026-09-29, later); the blacklist is not offered; a tag the account holds is shown
+// ticked and cannot be picked.
 const TAGS = [
   { id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#4aa8f8', locked: true, auto_grant: false },
   { id: 'tag_blacklist', slug: 'blacklist', name: 'Blacklist', color: '#0b0b0b', locked: true, auto_grant: false },
@@ -214,8 +215,8 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   const dlg = page.locator('#confirm-modal .ca-ap-box');
   await expect(dlg).toContainText('Approve Karim Mansour?');
 
-  // Community comes with the approval, ticked and fixed; the blacklist is not there
-  await expect(chip(page, 'tag_saturday')).toBeDisabled();
+  // Community comes with the approval, ticked to start with but free to untick; the blacklist is not there
+  await expect(chip(page, 'tag_saturday')).toBeEnabled();
   await expect(chip(page, 'tag_saturday')).toHaveAttribute('aria-pressed', 'true');
   await expect(chip(page, 'tag_blacklist')).toHaveCount(0);
   await expect(chip(page, 'tag_vip')).toHaveAttribute('aria-pressed', 'false');
@@ -248,6 +249,82 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', name: 'Karim Mansour', status: 'waiting', approval: 'approved', type_preference: 'Road', height: 178, price: 0 });
   expect(typeof bookings[0].queue_num).toBe('number');
   expect(await page.evaluate(`_hasTagNow('ca01','tag_vip')&&_hasTagNow('ca01','tag_saturday')`)).toBe(true);
+});
+
+// The owner, 2026-09-29: "dont force the community tag selection when approving a community form
+// registration, pre select it but give the staff the choice to unselect it".
+test('Community can be unticked: the approval then asks the server for no Community tag', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS, sessions: RIDES,
+    'rpc:staff_community_approve': { ok: true, existing: false, customer_id: 'ca01', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', password: 'Kp7wXr4Mnq', lang: 'en', oauth: false },
+  });
+  const calls: Record<string, unknown>[] = [], dels: string[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && /rpc\/staff_community_approve/.test(r.url())) calls.push(JSON.parse(r.postData() || '{}'));
+    if (r.method() === 'DELETE' && /\/rest\/v1\/customer_tags\?/.test(r.url())) dels.push(r.url());
+  });
+  await row(page, 'a1').locator('.ca-approve').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('and the Community tag is added');
+  await chip(page, 'tag_saturday').click();
+  await expect(chip(page, 'tag_saturday')).toHaveAttribute('aria-pressed', 'false');
+  await expect(dlg).toContainText('without the Community tag');
+  await chip(page, 'tag_saturday').click(); // back on, and off again
+  await expect(dlg).toContainText('and the Community tag is added');
+  await chip(page, 'tag_saturday').click();
+  await dlg.locator('.ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box .ca-pwd')).toHaveText('Kp7wXr4Mnq');
+  expect(calls).toEqual([{ p_id: 'a1', p_by: 'Spec Staff', p_community: false }]);
+  await page.waitForTimeout(300);
+  expect(dels).toEqual([]); // the server left it out; nothing to take off
+  expect(await page.evaluate(`_hasTagNow('ca01','tag_saturday')`)).toBe(false);
+});
+
+test('unticked on a database from before p_community: approved the old way, then the tag it gave comes off', async ({ page }) => {
+  const calls: Record<string, unknown>[] = [];
+  await applicationsTab(page, { tags: TAGS }, () => page.route(/\/rest\/v1\/rpc\/staff_community_approve/, async (r) => {
+    const body = JSON.parse(r.request().postData() || '{}');
+    calls.push(body);
+    if ('p_community' in body) return r.fulfill({ status: 404, contentType: 'application/json', body: JSON.stringify({ code: 'PGRST202', message: 'Could not find the function public.staff_community_approve(p_by, p_community, p_id) in the schema cache' }) });
+    return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, existing: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false }) });
+  }));
+  const dels: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'DELETE' && /\/rest\/v1\/customer_tags\?/.test(r.url())) dels.push(decodeURIComponent(r.url())); });
+  await row(page, 'a2').locator('.ca-approve').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('It gets the Community tag');
+  await chip(page, 'tag_saturday').click();
+  await expect(dlg).toContainText('It does not get the Community tag');
+  await dlg.locator('.ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  expect(calls).toEqual([{ p_id: 'a2', p_by: 'Spec Staff', p_community: false }, { p_id: 'a2', p_by: 'Spec Staff' }]);
+  await expect.poll(() => dels.some((u) => u.includes('customer_id=eq.c1') && u.includes('tag_id=eq.tag_saturday'))).toBe(true);
+  expect(await page.evaluate(`_hasTagNow('c1','tag_saturday')`)).toBe(false);
+  // the approved card does not claim it tagged the account
+  await page.evaluate(`_caMsgClose()`);
+  await page.locator('.filter-pill[data-ca-filter="approved"]').click();
+  await expect(row(page, 'a2').locator('.ca-acct')).toContainText('Uses their existing account');
+});
+
+test('an account that already holds Community shows it ticked and fixed, and approving leaves its grant alone', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS,
+    customer_tags: [{ customer_id: 'c1', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 }],
+    'rpc:staff_community_approve': { ok: true, existing: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false },
+  });
+  const calls: Record<string, unknown>[] = [], dels: string[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'POST' && /rpc\/staff_community_approve/.test(r.url())) calls.push(JSON.parse(r.postData() || '{}'));
+    if (r.method() === 'DELETE' && /\/rest\/v1\/customer_tags\?/.test(r.url())) dels.push(r.url());
+  });
+  await row(page, 'a2').locator('.ca-approve').click();
+  await expect(chip(page, 'tag_saturday')).toBeDisabled();
+  await expect(chip(page, 'tag_saturday')).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#confirm-modal .ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  expect(calls).toEqual([{ p_id: 'a2', p_by: 'Spec Staff' }]);
+  await page.waitForTimeout(300);
+  expect(dels).toEqual([]);
 });
 
 test('Approve with nothing picked writes no tags and no booking; held tags and booked rides cannot be picked', async ({ page }) => {

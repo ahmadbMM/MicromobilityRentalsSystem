@@ -2585,6 +2585,8 @@
   "caApproveTitle": "¿Aprobar a {0}?",
   "caApproveBody": "Se crea una cuenta con estos datos y una contraseña temporal, y se añade la etiqueta Community. Después recibes un mensaje de bienvenida para enviar.",
   "caApproveBodyExisting": "Este ciclista ya tiene una cuenta ({0}). Esa cuenta recibe la etiqueta Community, y tú recibes un mensaje de bienvenida que le indica que inicie sesión con ella.",
+  "caApproveBodyNoComm": "Se crea una cuenta con estos datos y una contraseña temporal, sin la etiqueta Community. Después recibes un mensaje de bienvenida para enviar.",
+  "caApproveBodyExistingNoComm": "Este ciclista ya tiene una cuenta ({0}). Esa cuenta no recibe la etiqueta Community, y tú recibes un mensaje de bienvenida que le indica que inicie sesión con ella.",
   "caRideLbl": "Añadir a la lista final de un Recorrido social del sábado",
   "caRideNone": "Ahora no",
   "caRideNoOpen": "No hay ningún Recorrido social del sábado abierto ahora.",
