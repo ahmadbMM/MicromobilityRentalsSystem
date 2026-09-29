@@ -141,6 +141,157 @@ test('An applicant who already has an account is told to sign in with it, and ge
   expect(msg).not.toContain('Temporary password');
 });
 
+// Approving can also give more tags and put the rider on the Final list of a Saturday Social Ride
+// that is still open (the owner, 2026-09-29). The Community tag is the approval's own and the
+// blacklist is not offered; a tag the account holds is shown ticked and cannot be picked.
+const TAGS = [
+  { id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#4aa8f8', locked: true, auto_grant: false },
+  { id: 'tag_blacklist', slug: 'blacklist', name: 'Blacklist', color: '#0b0b0b', locked: true, auto_grant: false },
+  { id: 'tag_vip', slug: 'vip', name: 'VIP', color: '#e0a100', locked: false, auto_grant: false },
+  { id: 'tag_lead', slug: 'lead', name: 'Ride Lead', color: '#7a3dd8', locked: false, auto_grant: false },
+];
+const SAT = '2099-03-07', SAT2 = '2099-03-14';
+const ride = (id: string, extra: Record<string, unknown> = {}) => ({
+  id, day: 'Saturday', session_date: id, status: 'open', capacity: 20, spots: 20, created_at: 1,
+  event_kind: 'community', ride_kind: 'saturday', needs_approval: true, bike_slots: '{"_time":"06:00 - 08:00","_total":20}', ...extra,
+});
+const RIDES = [
+  ride(SAT), ride(SAT2),
+  ride('2099-03-21', { status: 'closed' }), // closed: not offered
+  ride('2020-01-04'), // past: not offered
+  ride('2099-03-11', { day: 'Wednesday', ride_kind: 'petromin', needs_approval: false }), // not a Saturday ride
+];
+function writes(page: Page, table: string) {
+  const out: Record<string, unknown>[] = [];
+  page.on('request', (r) => {
+    if (r.method() !== 'POST' || !new RegExp(`/rest/v1/${table}(\\?|$)`).test(r.url())) return;
+    try { const b = r.postDataJSON(); out.push(...(Array.isArray(b) ? b : [b])); } catch { /* not json */ }
+  });
+  return out;
+}
+const chip = (page: Page, id: string) => page.locator(`#confirm-modal .ca-ap-tags [data-ca-tag="${id}"]`);
+
+test('Approve can give more tags and put the rider on a Saturday ride’s final list', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS, sessions: RIDES,
+    'rpc:staff_community_approve': { ok: true, existing: false, customer_id: 'ca01', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', password: 'Kp7wXr4Mnq', lang: 'en', oauth: false },
+  });
+  const tagRows = writes(page, 'customer_tags'), bookings = writes(page, 'queue_entries');
+  await row(page, 'a1').locator('.ca-approve').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('Approve Karim Mansour?');
+
+  // Community comes with the approval, ticked and fixed; the blacklist is not there
+  await expect(chip(page, 'tag_saturday')).toBeDisabled();
+  await expect(chip(page, 'tag_saturday')).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip(page, 'tag_blacklist')).toHaveCount(0);
+  await expect(chip(page, 'tag_vip')).toHaveAttribute('aria-pressed', 'false');
+  await chip(page, 'tag_vip').click();
+  await expect(chip(page, 'tag_vip')).toHaveAttribute('aria-pressed', 'true');
+  await chip(page, 'tag_lead').click();
+  await chip(page, 'tag_lead').click(); // and off again
+  await expect(chip(page, 'tag_lead')).toHaveAttribute('aria-pressed', 'false');
+
+  // Only the open Saturday rides, soonest first, after "Not now"
+  const sel = dlg.locator('#ca-ap-ride');
+  await expect(sel).toHaveValue('');
+  expect(await sel.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).toEqual(['', SAT, SAT2]);
+  await expect(sel.locator(`option[value="${SAT}"]`)).toContainText('20 spots left');
+  await sel.selectOption(SAT2);
+  await chip(page, 'tag_lead').click(); // a redraw keeps the ride picked
+  await chip(page, 'tag_lead').click();
+  await expect(sel).toHaveValue(SAT2);
+
+  await dlg.locator('.ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box .ca-pwd')).toHaveText('Kp7wXr4Mnq'); // the welcome message still comes
+  await expect.poll(() => tagRows.length).toBe(1);
+  expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip', added_by: 'staff' });
+  expect(tagRows[0].expires_at ?? null).toBeNull(); // permanent
+  await expect.poll(() => bookings.length).toBe(1);
+  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', name: 'Karim Mansour', status: 'waiting', approval: 'approved', type_preference: 'Road', height: 178, price: 0 });
+  expect(typeof bookings[0].queue_num).toBe('number');
+  expect(await page.evaluate(`_hasTagNow('ca01','tag_vip')&&_hasTagNow('ca01','tag_saturday')`)).toBe(true);
+});
+
+test('Approve with nothing picked writes no tags and no booking; held tags and booked rides cannot be picked', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS, sessions: RIDES,
+    customer_tags: [{ customer_id: 'c1', tag_id: 'tag_vip', added_by: 'staff', added_at: 1 }],
+    queue_entries: [{ id: 'q1', session_id: SAT, customer_id: 'c1', name: 'Huda Al Saleh', status: 'waiting', approval: 'pending', queue_num: 1, session_day: 'Saturday', session_date: SAT, type_preference: 'Hybrid', registered_at: '2026-09-22T08:00:00Z' }],
+    'rpc:staff_community_approve': { ok: true, existing: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false },
+  });
+  const tagRows = writes(page, 'customer_tags'), bookings = writes(page, 'queue_entries');
+  await row(page, 'a2').locator('.ca-approve').click();
+  await expect(chip(page, 'tag_vip')).toBeDisabled(); // she holds it already
+  await expect(chip(page, 'tag_vip')).toHaveAttribute('aria-pressed', 'true');
+  await expect(chip(page, 'tag_lead')).toBeEnabled();
+  const booked = page.locator(`#ca-ap-ride option[value="${SAT}"]`);
+  await expect(booked).toBeDisabled();
+  await expect(booked).toContainText('already booked');
+  await expect(page.locator(`#ca-ap-ride option[value="${SAT2}"]`)).toBeEnabled();
+  await page.locator('#confirm-modal .ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(tagRows).toEqual([]);
+  expect(bookings).toEqual([]);
+});
+
+test('with no Saturday ride open the approval says so, and Cancel approves nothing', async ({ page }) => {
+  await applicationsTab(page, { tags: TAGS, sessions: [RIDES[2], RIDES[3], RIDES[4]] });
+  const calls: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/staff_community_approve/.test(r.url())) calls.push(r.url()); });
+  await row(page, 'a1').locator('.ca-approve').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('No Saturday Social Ride is open right now.');
+  await expect(dlg.locator('#ca-ap-ride')).toHaveCount(0);
+  await dlg.locator('button', { hasText: 'Cancel' }).click();
+  await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
+  await page.waitForTimeout(200);
+  expect(calls).toEqual([]);
+  await expect(row(page, 'a1')).toHaveAttribute('data-status', 'pending');
+});
+
+// Rejecting can tag too (the owner, 2026-09-29), but only an account the applicant already has: a
+// rejection makes none. Community is not offered there; the blacklist is, and takes the Community tag away.
+test('Reject can tag an applicant’s existing account, the blacklist included; without an account there is nothing to tag', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS,
+    customer_tags: [{ customer_id: 'c1', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 }],
+    'rpc:staff_community_decide': { ok: true, status: 'rejected' },
+  });
+  const tagRows = writes(page, 'customer_tags'), dels: string[] = [], decided: Record<string, unknown>[] = [];
+  page.on('request', (r) => {
+    if (r.method() === 'DELETE' && /\/rest\/v1\/customer_tags\?/.test(r.url())) dels.push(decodeURIComponent(r.url()));
+    if (r.method() === 'POST' && /rpc\/staff_community_decide/.test(r.url())) decided.push(JSON.parse(r.postData() || '{}'));
+  });
+
+  // No account: the dialog says so and offers no tags
+  await row(page, 'a1').locator('.ca-reject').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('Reject Karim Mansour’s application?');
+  await expect(dlg).toContainText('There is no account with this email or phone');
+  await expect(dlg.locator('.ca-ap-tags')).toHaveCount(0);
+  await expect(dlg.locator('#ca-ap-ride')).toHaveCount(0); // no ride on a rejection
+  await dlg.locator('button', { hasText: 'Cancel' }).click();
+
+  // Huda has an account, and it holds Community
+  await row(page, 'a2').locator('.ca-reject').click();
+  await expect(chip(page, 'tag_saturday')).toHaveCount(0);
+  await expect(dlg.locator('.tag-ban-opt')).toHaveCount(0);
+  await chip(page, 'tag_blacklist').click();
+  await expect(chip(page, 'tag_blacklist')).toHaveAttribute('aria-pressed', 'true');
+  await expect(dlg.locator('.tag-ban-opt input')).toBeChecked(); // takes Community away unless unticked
+  await chip(page, 'tag_vip').click();
+  await dlg.locator('.ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible(); // the polite reply still comes
+  expect(decided).toEqual([{ p_id: 'a2', p_status: 'rejected', p_by: 'Spec Staff' }]);
+  await expect.poll(() => tagRows.length).toBe(2);
+  expect(tagRows.map((r) => r.tag_id).sort()).toEqual(['tag_blacklist', 'tag_vip']);
+  expect(tagRows.every((r) => r.customer_id === 'c1')).toBe(true);
+  await expect.poll(() => dels.some((u) => u.includes('customer_id=eq.c1') && u.includes('tag_id=eq.tag_saturday'))).toBe(true);
+  expect(await page.evaluate(`_isBlacklisted('c1')&&!_hasTagNow('c1','tag_saturday')`)).toBe(true);
+});
+
 test('Reject asks first, then offers the polite reply; a rejected application can go back to pending', async ({ page }) => {
   await applicationsTab(page, { 'rpc:staff_community_decide': { ok: true, status: 'rejected' } });
   const calls: Record<string, unknown>[] = [];
