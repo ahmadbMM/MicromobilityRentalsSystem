@@ -58,3 +58,32 @@ test('Final list approves at once; a ride without approval shows no destination 
   await expect(dest(page, 'Final list')).toHaveCount(0);
   await expect(dest(page, 'Waiting')).toHaveCount(0);
 });
+
+test('a rider staff put on the house is added on the house to a paid ride, as from every other add; the others pay', async ({ page }) => {
+  // Rozana Albanawi, on the house, added to Petromin Wednesday from this dialog on 2026-09-29, owed 57.50.
+  const PW = '2099-03-04';
+  const petromin = sess(PW, { day: 'Wednesday', event_kind: 'community', ride_kind: 'petromin', paid_ride: true, needs_approval: false });
+  await boot(page, {
+    sessions: [sess(LIVE), saturday, petromin],
+    customers: [
+      { id: 'h1', name: 'House Rider', default_pay: 'house', type_preference: 'Any', created_at: '2026-01-01T00:00:00Z' },
+      { id: 'p1', name: 'Paying Rider', default_pay: null, type_preference: 'Road', created_at: '2026-01-01T00:00:00Z' },
+      { id: 'r1', name: 'Road Only', default_pay: 'house:Road', type_preference: 'Hybrid', created_at: '2026-01-01T00:00:00Z' },
+    ],
+  });
+  const rows = inserts(page);
+  await page.evaluate(`S.sfSession=${JSON.stringify(PW)};showCommAddModal()`);
+  for (const id of ['h1', 'p1', 'r1']) await page.evaluate(`S._caSel='${id}';_saveCommAdd()`);
+  await expect.poll(() => rows.length).toBe(3);
+  const by = (id: string) => rows.find((r) => r.customer_id === id)!;
+  expect(by('h1')).toMatchObject({ session_id: PW, paid: true, price: 0 });
+  expect(by('p1').paid).toBe(false);
+  expect(Number(by('p1').price)).toBeGreaterThan(0);
+  expect(by('r1').paid).toBe(false); // on the house for Road only; booked as a Hybrid
+  // A group: each member on their own account's terms.
+  rows.length = 0;
+  await page.evaluate(`S._caGroup=true;S._caSelArr=['h1','p1'];_saveCommAdd()`);
+  await expect.poll(() => rows.length).toBe(2);
+  expect(by('h1')).toMatchObject({ paid: true, price: 0 });
+  expect(by('p1').paid).toBe(false);
+});

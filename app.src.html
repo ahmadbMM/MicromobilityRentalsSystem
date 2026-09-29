@@ -13590,13 +13590,16 @@ async function _saveCommAdd(){
   const own=S._caOwn&&_needsBike(sess)&&_ownOffered(sess);
   const mkEntries=()=>{const base=nextQNum(sess.id);return fresh.map((c,i)=>{
     const ty=own?'Own':((c.type_preference==='Own'||(c.type_preference==='Road Carbon'&&_noCarbon(sess)))?'Any':(c.type_preference||'Any')); // Own is comm-only pref; Road Carbon only where the ride offers it
-    return{id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:null,
+    // Each rider is added on their own account, so a rider staff put on the house rides on the house
+    // here too (_applyDefaultPay), as from every other add. This dialog was the one path without it:
+    // Rozana Albanawi, on the house, added to Petromin Wednesday on 2026-09-29, owed 57.50.
+    return _applyDefaultPay({id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:null,
     size:c.height?heightToSize(c.height,ty):'',height:c.height||null,
     typePreference:ty,paid:false,assignedBikeId:null,
     sessionId:sess.id,sessionDay:sess.day,sessionDate:sess.session_date||sess.id,
     queueNum:base+i,status:'waiting',
     registeredAt:new Date().toISOString(),walkIn:false,customerId:c.id,price:free?0:priceForType(ty),groupId,
-    approval:comm?(pending?'pending':'approved'):null};});}; // community: final list = selected, waiting = awaiting selection
+    approval:comm?(pending?'pending':'approved'):null});});}; // community: final list = selected, waiting = awaiting selection
   let entries=mkEntries();
   let res=await sb.from('queue_entries').insert(entries.map(entryToDB));
   if(res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
