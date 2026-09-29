@@ -4638,9 +4638,17 @@ function fmtPhone(p){
   if(match)return match[0]+' '+p.slice(match[0].length);
   return p;
 }
+// A finished action puts no bar on the screen (the owner, 2026-09-29: "remove the bar that appears at
+// the bottom of the page when an action is done", after the undo bar went on 2026-09-28): what
+// changed shows where it happened, and History > Log keeps the line. A plain or 'success' toast is
+// quiet - still in the toast area, a polite live region, so a screen reader says it, but not drawn
+// (.toast.quiet). A bar is still drawn for what the person has to know: 'error', 'warning', and
+// 'info' - that nothing was done (nothing to export, no rider waiting), text to copy by hand when the
+// clipboard refused, an upload under way.
 function toast(msg,type){
   const el=document.createElement('div');
-  el.className='toast'+(type?' '+type:'');el.textContent=msg;
+  const drawn=type==='error'||type==='warning'||type==='info';
+  el.className='toast'+(type?' '+type:'')+(drawn?'':' quiet');el.textContent=msg;
   const container=document.getElementById('toast-container');
   container.appendChild(el);
   setTimeout(()=>el.remove(),2800);
@@ -8187,7 +8195,7 @@ async function toggleWlPayment(id,mode){
   Object.assign(w,patch);
   renderStaffQueue(); // routes to whichever view is live (Waitlist page OR Staff List)
   haptic();
-  toast(paid&&price===0?' '+t('onTheHouseLabel'):paid?'✓ '+t('paidLabel'):t('pendingLabel'),paid?'':'warning');
+  toast(paid&&price===0?' '+t('onTheHouseLabel'):paid?'✓ '+t('paidLabel'):t('pendingLabel'));
   const res=await sb.from('desk_waitlist').update(patch).eq('id',id);
   if(_writeErr(res,'payment')){Object.assign(w,prev);renderStaffQueue();return;}
   pushUndo(`${t('undoPayment')} ${w.name}`,async()=>{
@@ -17226,7 +17234,7 @@ async function togglePayment(id,mode){
   renderStaffQueue();renderHistory();
   const stateLabel=newPaid&&newPrice===0?' '+t('onTheHouseLabel'):newPaid?'✓ '+t('paidLabel'):t('pendingLabel');
   haptic();
-  toast(stateLabel,newPaid?'':'warning');
+  toast(stateLabel);
   const _pr=await sb.from('queue_entries').update({paid:newPaid,price:newPrice}).eq('id',id);
   if(_writeErr(_pr,'payment')){await loadDataLight();renderStaffQueue();renderHistory();return;} // surface failure and revert the optimistic toggle
   await _wr(sb.from('queue_entries').update({pay_method:newMethod,card_amount:null}).eq('id',id),'payment method');
@@ -18875,7 +18883,7 @@ async function fixDuplicateQNums(){
       g.slice(1).forEach(e=>{maxN+=1;toFix.push({id:e.id,newNum:maxN});}); // earliest keeps its number; the rest move above the session max
     });
   });
-  if(!toFix.length){toast(t('fixDupNone'));return;}
+  if(!toFix.length){toast(t('fixDupNone'),'info');return;}
   confirmDialog({
     title:t('fixDupTitle'),
     body:t('fixDupBody').replace('{0}',toFix.length),
@@ -22858,7 +22866,7 @@ function _bkPageHtml(b){
 }
 async function _bkCopyPageUrl(n){
   const u=_bkPageUrl(n);
-  try{await navigator.clipboard.writeText(u);toast(t('bkPageCopied'),'success');}catch(e){toast(u);}
+  try{await navigator.clipboard.writeText(u);toast(t('bkPageCopied'),'success');}catch(e){toast(u,'info');}
 }
 // The QR as a file to print on the sticker: a large svg with its own white margin.
 async function _bkDownloadQr(n){
@@ -24321,7 +24329,7 @@ function _renderRidersReport(){
   S._ridersRepHtml=html;m.style.display='flex';m.innerHTML=html;
 }
 function exportRidersReportCsv(co){
-  const rows=_riderReportRows(co);if(!rows.length){toast(t('ridersReportEmpty'));return;}
+  const rows=_riderReportRows(co);if(!rows.length){toast(t('ridersReportEmpty'),'info');return;}
   const head=['booking_no','session','company','badge','name','phone','bike_type','checked_in','checked_out','price_sar'];
   const lines=[head.join(',')].concat(rows.map(r=>[r.booking_no||'',r.session_id||'',co,r.badge,r.name,r.phone||'',r.type_preference,_riderClock(r.checked_in_at),_riderClock(r.checked_out_at),_riderPrice(r).toFixed(2)].map(_csvCell).join(',')));
   const total=rows.reduce((s,r)=>s+_riderPrice(r),0);
@@ -24330,7 +24338,7 @@ function exportRidersReportCsv(co){
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=co.toLowerCase()+'-report-'+(S.ridersSession!=='all'?S.ridersSession:todayStr())+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
 }
 function printRidersReport(co){
-  const rows=_riderReportRows(co);if(!rows.length){toast(t('ridersReportEmpty'));return;}
+  const rows=_riderReportRows(co);if(!rows.length){toast(t('ridersReportEmpty'),'info');return;}
   const total=rows.reduce((s,r)=>s+_riderPrice(r),0);
   const sessLabel=_ridersRepScope();
   // One tile per fare actually charged: the fare has changed over time, so a type does not
@@ -26210,7 +26218,7 @@ async function _webVariant(bmp,w){
 async function _webEdUpload(file,k,i,fid){
   const E=_webEd(),page=k.split('.')[0];
   if(!/^image\/(jpeg|png|webp|avif)$/.test(file.type)){toast(t('webEdUploadType'),'error');return;}
-  E.busy[k]=true;toast(t('webEdUploading'));
+  E.busy[k]=true;toast(t('webEdUploading'),'info');
   try{
     const{blob,type,ext,bmp}=await _webShrink(file);
     if(!blob||blob.size>5*1024*1024){toast(t('webEdUploadBig'),'error');E.busy[k]=false;return;}
@@ -26543,7 +26551,7 @@ function _catPhotoMove(i,d){const ed=_cat().ed;if(!ed)return;const j=i+d;if(j<0|
 function _catPhotosPick(){
   _catPick('image/jpeg,image/png,image/webp,image/avif',true,async files=>{
     const ed=_cat().ed;if(!ed)return;
-    ed.busy=true;_catSyncSave();toast(t('catUploading'));
+    ed.busy=true;_catSyncSave();toast(t('catUploading'),'info');
     let n=0;
     for(const f of files){
       try{const url=await _catUploadImage(f,'catalog/'+ed.id);ed.photos.push({id:_catUuid(),_new:true,model_id:ed.id,color_id:null,url,alt_en:'',alt_ar:'',sort:ed.photos.length,is_cover:!ed.photos.some(p=>p.is_cover)});n++;}
@@ -26556,7 +26564,7 @@ function _catPhotosPick(){
 function _catSheetPick(){
   _catPick('application/pdf',false,async files=>{
     const ed=_cat().ed;if(!ed)return;
-    ed.busy=true;_catSyncSave();toast(t('catUploading'));
+    ed.busy=true;_catSyncSave();toast(t('catUploading'),'info');
     try{const url=await _catUploadPdf(files[0],'catalog/'+ed.id);if(ed.d.spec_sheet)ed.gone.files.push(ed.d.spec_sheet);ed.d.spec_sheet=url;ed.dirty=true;toast(t('catUploaded'),'success');}
     catch(e){_catUploadToast(e.message==='type'?new Error('pdf'):e);}
     ed.busy=false;renderCatalog();
@@ -26645,7 +26653,7 @@ function _catCatIn2(field,v){
 function _catCatCoverPick(){
   _catPick('image/jpeg,image/png,image/webp,image/avif',false,async files=>{
     const E=_cat().ced;if(!E)return;
-    toast(t('catUploading'));
+    toast(t('catUploading'),'info');
     try{const url=await _catUploadImage(files[0],'catalog/categories/'+E.id);if(E.d.cover)_catStorageRemove([E.d.cover]);E.d.cover=url;toast(t('catUploaded'),'success');renderCatalog();}
     catch(e){_catUploadToast(e);}
   });
@@ -28735,7 +28743,7 @@ function _shareReorderList(){
   const ro=(S.inventory||[]).filter(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0;return q<=0||(lo>0&&q<=lo);})
     .map(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0,s=sold[i.id]||0;const need=Math.max(1,Math.ceil(Math.max(lo*2,s,4)-q));return{i,q,need};})
     .sort((a,b)=>b.need-a.need);
-  if(!ro.length){toast(t('reorderNone'));return;}
+  if(!ro.length){toast(t('reorderNone'),'info');return;}
   const lines=ro.map(({i,q,need})=>`- ${i.name}${i.brand?' ('+i.brand+')':''}: ${t('invQty')} ${q} → +${need}`);
   const txt=t('reorderShareTitle')+'\n\n'+lines.join('\n');
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
@@ -30589,7 +30597,7 @@ function _csvCell(v){if(typeof v==='number'&&isFinite(v))return String(v);let s=
 const _anCsvCell=_csvCell; // back-compat alias
 function _anShareDigest(){
   const txt=(S&&S._anDigestText)||'';
-  if(!txt){toast(t('anCsvEmpty'));return;}
+  if(!txt){toast(t('anCsvEmpty'),'info');return;}
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
 }
 async function _anSetTarget(){
@@ -30643,7 +30651,7 @@ function _anHeightBikeData(){
 function _anHeightRangeLabel(){const m={all:t('anAllTime'),month:t('anThisMonth'),year:t('anThisYear')||'This Year',daterange:t('anDateRange')||'Date Range'}[S.analyticsRange]||'';let s='';if(S.anSession&&S.anSession!=='all'){const ss=allSessions().find(x=>x.id===S.anSession);if(ss)s=' · '+dayLabel(ss.day)+' '+shortDate(ss.session_date||ss.id);}return m+s;}
 function printHeightBikeReport(){
   const data=_anHeightBikeData();
-  if(!data.length){toast(t('anCsvEmpty'));return;}
+  if(!data.length){toast(t('anCsvEmpty'),'info');return;}
   const blocks=data.map(d=>{
     const title=`${esc(dayLabel(d.sess.day))} · ${esc(shortDate(d.sess.session_date||d.sess.id))}${d.sess.location?' · '+esc(d.sess.location):''}`;
     const hRows=d.people.length?d.people.map(p=>`<tr><td>${esc(p.name)}</td><td>${esc(String(p.height))}</td><td>${esc(typeLabel(p.type)||p.type)}</td></tr>`).join(''):`<tr><td colspan="3" class="rp-c888">${t('repNoHeight')}</td></tr>`;
@@ -30654,7 +30662,7 @@ function printHeightBikeReport(){
   _openReport(html,940,840);
 }
 function exportHeightBikeCsv(){
-  const data=_anHeightBikeData();if(!data.length){toast(t('anCsvEmpty'));return;}
+  const data=_anHeightBikeData();if(!data.length){toast(t('anCsvEmpty'),'info');return;}
   const rows=[];
   data.forEach(d=>{
     rows.push([dayLabel(d.sess.day)+' '+shortDate(d.sess.session_date||d.sess.id)+(d.sess.location?' - '+d.sess.location:'')]);
@@ -30670,7 +30678,7 @@ function exportHeightBikeCsv(){
 }
 function _anExportCSV(){
   const rows=(S&&S._anCsvRows)||[];
-  if(!rows.length){toast(t('anCsvEmpty'));return;}
+  if(!rows.length){toast(t('anCsvEmpty'),'info');return;}
   const head=Object.keys(rows[0]);
   const csv=[head.join(','),...rows.map(r=>head.map(k=>_anCsvCell(r[k])).join(','))].join('\n');
   try{

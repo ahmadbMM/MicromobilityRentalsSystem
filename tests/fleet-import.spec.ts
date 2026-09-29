@@ -118,7 +118,7 @@ test.describe('CSV import', () => {
     expect(rows.map((b) => b.bike_number)).toEqual([42, 43]);
     expect(rows[0]).toMatchObject({ type: 'Hybrid', size: 'M', status: 'available', frame_type: 'Aluminum', colors: ['#03ff89'] });
     expect(typeof rows[0].id).toBe('string');
-    await expect(page.locator('.toast, #toast, [role="status"]').filter({ hasText: '2 bikes imported' }).first()).toBeVisible();
+    await expect(page.locator('.toast, #toast, [role="status"]').filter({ hasText: '2 bikes imported' }).first()).toBeAttached(); // quiet: said, not drawn
     await page.evaluate(`doUndo()`);
     await expect.poll(() => dels.length).toBe(1);
     expect(dels[0].url).toContain('id=in.');

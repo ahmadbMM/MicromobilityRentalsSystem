@@ -341,9 +341,15 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   literal (`malformed array literal: "photo"`) - append a name with `array_append(arr, 'name')`, or
   give the literal a type; `arr || some_text_variable` is fine.
 
-## One bar, not two (2026-09-27)
+## No bar when an action is done (2026-09-27 → 2026-09-29)
 
-An action that calls `pushUndo` shows the undo bar and nothing else: `toast()` stands down for a
-plain toast within 1.5 s of the bar, either order (`_undoBarAt`); errors and warnings always show.
-Do not add a success toast beside `pushUndo`; put what the desk should read in the undo label. A
-spec that checks the outcome of an undoable action reads `#undo-bar-el .undo-bar-text`, not `.toast`.
+The undo bar is gone (2026-09-28): `pushUndo` only logs and fills the topbar Undo (`#topbar-right
+.undo-btn`) and History > Log. Since 2026-09-29 the confirmation toast is gone from the screen too
+(the owner: "remove the bar that appears at the bottom of the page when an action is done", staff
+and customer side). `toast(msg)` and `toast(msg,'success')` are QUIET: the element still goes into
+`#toast-container` (a polite live region, so screen readers say it) with class `quiet`, drawn as
+nothing. A bar is drawn only for `'error'`, `'warning'` and `'info'` - use 'info' for what the person
+must read although nothing failed: nothing was done ("nothing to export", "no rider waiting"), text
+to copy by hand when the clipboard refused, an upload under way. Never type a confirmation as a
+warning to make it show. Specs may still read a quiet toast's text; tests/quiet-toasts.spec.ts
+checks what is drawn.

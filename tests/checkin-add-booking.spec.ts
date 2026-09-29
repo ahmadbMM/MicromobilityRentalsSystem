@@ -157,7 +157,7 @@ test('To staff list parks the rider from the modal and the run moves on without 
   await expect.poll(() => parks.length).toBe(1);
   expect(parks[0].booking_id).toBe(A1);
   expect(parks[0].kind).toBe('managed');
-  await expect(page.getByText('Solo Amal moved to the staff list')).toBeVisible();
+  await expect(page.getByText('Solo Amal moved to the staff list')).toBeAttached(); // a quiet toast: said, not drawn (2026-09-29)
   await expect(modal).toContainText('Solo Badr');
   await expect(modal).not.toContainText('Solo Amal');
   await expect(modal.getByRole('list')).toHaveCount(0);

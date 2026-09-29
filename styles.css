@@ -1826,6 +1826,10 @@
     .toast{background:var(--s2);border:1px solid var(--border);border-inline-start:3px solid var(--green);border-radius:6px;padding:12px 22px;font-size:13px;font-weight:700;white-space:nowrap;pointer-events:all;box-shadow:0 4px 24px rgba(16,19,18,.14);animation:toastIn .28s cubic-bezier(.2,.8,.2,1);backdrop-filter:blur(12px);}
     .toast.error{border-inline-start-color:var(--red);}
     .toast.warning{border-inline-start-color:var(--muted-l);}
+    /* A finished action's toast is quiet (owner, 2026-09-29): said by screen readers from the live
+       region, never drawn - no bar at the bottom. toast() in app.src.html decides which are. */
+    #toast-container .toast.quiet{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap;background:none;box-shadow:none;animation:none;}
+    #toast-container .toast.quiet::before{content:none;}
     @keyframes toastIn{from{transform:translateY(20px);opacity:0;scale:.96;}to{transform:none;opacity:1;scale:1;}}
     @keyframes rowFlash_green{0%{background:rgba(var(--green-rgb),.16);}100%{background:transparent;}}
     @keyframes rowFlash_blue{0%{background:rgba(var(--blue-rgb),.16);}100%{background:transparent;}}

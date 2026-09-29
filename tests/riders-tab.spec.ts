@@ -664,7 +664,7 @@ test('scanning a rider QR opens the booking pop-up with a Check in button, and t
   // the languages that write a number sign - Spanish, French and Portuguese print 'N.º', so
   // the substitution missed and the toast read a literal {0}.
   const toast = page.locator('.toast', { hasText: 'P-001' });
-  await expect(toast).toBeVisible();
+  await expect(toast).toBeAttached(); // a quiet toast since 2026-09-29: said, not drawn
   await expect(toast).toContainText('Amal Booked');
   await expect(toast).not.toContainText('{0}');
   const modal = page.locator('#rider-modal .modal-box'); // the container has no size of its own
