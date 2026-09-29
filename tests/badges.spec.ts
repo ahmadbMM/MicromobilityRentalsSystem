@@ -195,10 +195,10 @@ test.describe('@customer:account badges', () => {
     await pop.getByRole('button', { name: 'Close' }).click();
 
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
-    // Every badge (2026-09-29): the two given and First Lap earned, then the eighteen to earn by riding
+    // Every badge (2026-09-29): the two given and First Lap earned, then the twenty to earn by riding
     // (National Day 96 and Back on Track wait until earned), then the six other ones staff give.
-    await expect(chips).toHaveCount(26);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/26');
+    await expect(chips).toHaveCount(28);
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/28');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -206,9 +206,9 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(3)).toContainText('Race Ready');
     await expect(chips.nth(3)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
     await expect(chips.nth(3)).toContainText('33%');
-    await expect(chips.nth(25)).toContainText('Race Spirit');
-    await expect(chips.nth(25)).toHaveClass(/locked/);
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(26);
+    await expect(chips.nth(27)).toContainText('Race Spirit');
+    await expect(chips.nth(27)).toHaveClass(/locked/);
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(28);
     expect(EMOJI.test(await page.locator('#tab-account .mr-badges').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -224,7 +224,7 @@ test.describe('@customer:account badges', () => {
   test('a database without customer_my_badges still shows the ride badges', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
-    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(25); // the eighteen ride badges and the seven staff give
+    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(27); // the twenty ride badges and the seven staff give
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
@@ -329,6 +329,33 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(none.slipstream).toEqual({ on: false, p: '0/5', hide: false });
     expect(none.works_team).toEqual({ on: false, p: '0/3', hide: false });
     expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
+  });
+
+  test('Perfect Week is every session of a week ridden; Perfect Month is four in a row, a thin week skipped', async ({ page }) => {
+    await page0(page);
+    // Weeks run Sunday to Saturday. w5..w1 are past weeks, w0 this one.
+    const plan = (missW2: boolean, weeks = true) => `(()=>{
+      const add=(d,n)=>{const x=new Date(d+'T00:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10);};
+      const t=todayStr(),w0=add(t,-new Date(t+'T00:00:00Z').getUTCDay()),w=n=>add(w0,-7*n);
+      S._bdgWeeks=${weeks}?[
+        {w:w(5),ids:['a5','b5']},              // ridden both
+        {w:w(4),ids:['a4']},                   // one session: left out, breaks nothing
+        {w:w(3),ids:['a3','b3']},              // ridden both
+        {w:w(2),ids:['a2','b2','swim2']},      // a swim counts too
+        {w:w(1),ids:['a1','b1']},              // ridden both
+        {w:w0,ids:['a0','b0','c0']},           // this week: one of three so far
+      ]:undefined;
+      const E=[['a5',w(5)],['b5',add(w(5),2)],['a3',w(3)],['b3',add(w(3),2)],['a2',w(2)],['b2',add(w(2),2)],${missW2 ? '' : "['swim2',add(w(2),4)],"}['a1',w(1)],['b1',add(w(1),2)],['a0',w0]].map(([id,d])=>__e(id,d));
+      return __run(E,[]);})()`;
+    const all = await ev(page, plan(false));
+    expect(all.perfect_week).toEqual({ on: true, p: '1/3', hide: false });
+    expect(all.perfect_month).toEqual({ on: true, p: '4/4', hide: false }); // this week under way breaks nothing
+    const missed = await ev(page, plan(true));
+    expect(missed.perfect_week.on).toBe(true);
+    expect(missed.perfect_month).toEqual({ on: false, p: '1/4', hide: false }); // the missed swim ended the run
+    const unknown = await ev(page, plan(false, false));
+    expect(unknown.perfect_week).toEqual({ on: false, p: null, hide: false }); // no badge_weeks: nothing can be told
+    expect(unknown.perfect_month).toEqual({ on: false, p: null, hide: false });
   });
 
   test('Clean Sheet is ten nights in a row with no no-show, and stays earned', async ({ page }) => {

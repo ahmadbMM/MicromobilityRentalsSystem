@@ -54,6 +54,7 @@ with expected(fname, want_definer, note) as (values
   ('customer_my_badges',    true,  'reads the caller''s own badges from customer_badges, which is staff-only; token-checked'),
   ('badge_seasons',         true,  'reads the dated badges from badges, which is staff-only; no rider data'),
   ('badge_catalog',         true,  'reads every badge not retired from badges, which is staff-only; no rider data'),
+  ('badge_weeks',           true,  'reads the sessions of each week for Perfect Week/Month; the schedule only, no rider data'),
   ('_apply_default_pay',    true,  'reads customers.default_pay for a booking any caller inserts (staff screens, customer_create_booking)'),
   ('_badge_rule_ok',        false, 'pure shape test of a badge rule, for the check constraint'),
   -- Invoker on purpose: pure logic, no privileged read.

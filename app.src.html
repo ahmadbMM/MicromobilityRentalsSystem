@@ -843,7 +843,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgSlipstreamA:'Riding behind others saves effort: that\'s the slipstream. For riders who join our community rides.',
   bdgPacelineA:'A paceline is a group taking turns at the front. Fifteen community rides make you part of it.',
   bdgPelotonA:'The peloton is the main pack of a race. Thirty community rides put you at its heart.',
-  bdgCleanSheetA:'Turning up when you book keeps places fair for everyone: ten rides in a row, none missed.',
+  bdgCleanSheetA:'Turning up when you book keeps places fair for everyone: ten rides in a row, none missed.',bdgPerfectWeek:'Perfect Week',bdgPerfectWeekD:'Every session in one week, Sunday to Saturday',bdgPerfectWeekA:'Every ride, swim and workshop the week held, and you were at all of them. A week with fewer than two sessions does not count.',bdgPerfectMonth:'Perfect Month',bdgPerfectMonthD:'A Perfect Week four weeks in a row',bdgPerfectMonthA:'Four Perfect Weeks back to back. A week with fewer than two sessions is skipped and does not break the run.',
   bdgWorksTeamA:'A works team races for a company: for riders who come to their company\'s ride nights.',
   bdgWinterSeriesA:'Jeddah\'s winter is the best time to ride. A seasonal badge for riding December to February.',
   bdgRamadanNightsA:'Ramadan evenings are lovely for a ride. A seasonal badge for riding with us through the month.',
@@ -1314,7 +1314,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgSlipstreamA:'الركوب خلف الآخرين يوفّر الجهد، وهذا هو التيار الهوائي. لمن ينضم إلى رحلات المجتمع.',
   bdgPacelineA:'خط الإيقاع مجموعة تتناوب على المقدمة. خمس عشرة رحلة مجتمعية تجعلك جزءاً منه.',
   bdgPelotonA:'البيلوتون هو المجموعة الرئيسية في السباق. ثلاثون رحلة مجتمعية تضعك في قلبه.',
-  bdgCleanSheetA:'الحضور حين تحجز يُبقي الأماكن عادلة للجميع: عشر رحلات متتالية دون تفويت أي منها.',
+  bdgCleanSheetA:'الحضور حين تحجز يُبقي الأماكن عادلة للجميع: عشر رحلات متتالية دون تفويت أي منها.',bdgPerfectWeek:'الأسبوع المثالي',bdgPerfectWeekD:'كل جلسات الأسبوع، من الأحد إلى السبت',bdgPerfectWeekA:'كل رحلة وسباحة وورشة في الأسبوع، وكنت حاضرًا فيها كلها. لا يُحتسب أسبوع فيه أقل من جلستين.',bdgPerfectMonth:'الشهر المثالي',bdgPerfectMonthD:'أسبوع مثالي أربعة أسابيع متتالية',bdgPerfectMonthA:'أربعة أسابيع مثالية متتالية. الأسبوع الذي فيه أقل من جلستين يُتخطّى ولا يقطع السلسلة.',
   bdgWorksTeamA:'فريق المصنع يتسابق باسم شركة: لمن يحضر ليالي الرحلات الخاصة بشركته.',
   bdgWinterSeriesA:'شتاء جدة أجمل وقت للركوب. وسام موسمي لمن يركب من ديسمبر إلى فبراير.',
   bdgRamadanNightsA:'أمسيات رمضان لطيفة للركوب. وسام موسمي لمن يركب معنا خلال الشهر.',
@@ -10592,6 +10592,9 @@ const BDG_GLYPH={
   snow:'<path class="s" d="M12 2.5v19M3.8 7.25l16.4 9.5M3.8 16.75l16.4-9.5M9.6 3.9 12 6.3l2.4-2.4M9.6 20.1l2.4-2.4 2.4 2.4M3.5 10.4l3.3.9-.9 3.3M20.5 13.6l-3.3-.9.9-3.3M5.9 9.7l.9-3.3-3.3-.9M18.1 14.3l-.9 3.3 3.3.9"/>',
   lantern:'<path class="s" d="M12 1.6v2.2"/><path d="M8.4 4.6h7.2l-1.1 2.2H9.5z"/><path class="o" d="M8 7.4h8l1.6 4-1.6 7.2H8l-1.6-7.2z"/><path d="M10.6 9.2h2.8v7.6h-2.8z"/><path d="M7.4 19h9.2l-1.2 2.8H8.6z"/>',
   fort:'<path class="o" d="M9.5 3h5v5h-5z"/><path d="M3.5 21.5V9.5h2.3v2h2.3v-2h2.3v2h3.2v-2h2.3v2h2.3v-2h2.3v12h-6.5v-4.3a2 2 0 0 0-4 0v4.3z"/>',
+  // Perfect Week and Perfect Month (2026-09-29): the week's calendar with a star, and with a crown.
+  calstar:'<rect class="o" x="3" y="4.5" width="18" height="16.5" rx="2.2"/><path d="M3 8.5h18v2H3z"/><path class="s" d="M8 2.5v4M16 2.5v4"/><path d="M12 11.5 13.03 14.18 15.9 14.33 13.66 16.14 14.41 18.92 12 17.35 9.59 18.92 10.34 16.14 8.1 14.33 10.97 14.18Z"/>',
+  calcrown:'<rect class="o" x="3" y="4.5" width="18" height="16.5" rx="2.2"/><path d="M3 8.5h18v2H3z"/><path class="s" d="M8 2.5v4M16 2.5v4"/><path transform="translate(5.64 9.94) scale(.53)" d="M3 7.5l4.6 4.2L12 4.5l4.4 7.2L21 7.5l-1.8 10.5H4.8z"/>',
 };
 const BDG_COLORS=['green','gold','blue','red','purple','orange','teal','silver'];
 // The drawn-special medallions: 'special' (Race Ready, the owner 2026-09-29) gold running into
@@ -10611,7 +10614,7 @@ function _bdgMedal(icon,color,cls){
 // when staff give them. The badges table seeds the same slugs (migrations 20260929000000, 010000).
 const BD_SYS={first_lap:['flag','green','bdFirstLap'],regular:['wheel','teal','bdRegular'],podium:['podium','purple','bdPodium'],front_row:['one','gold','bdFrontRow'],carbon:['bike','silver','bdCarbon'],streak:['flame','orange','bdStreak'],squad:['people','blue','bdSquad'],fuel:['bottle','red','bdFuel'],corniche25:['wave','blue','bd25'],
   marshal:['shield','orange','bdgMarshal'],pit_crew:['wrench','silver','bdgPitCrew'],green_flag:['wflag','green','bdgGreenFlag'],super_licence:['card','purple','bdgSuperLicence'],scrutineer:['search','teal','bdgScrutineer'],champion:['trophy','gold','bdgChampion'],spirit:['heart','red','bdgSpirit'],complete_profile:['profile','special','bdgRaceReady'],national_day_96:['n96','national','bdgNationalDay96'],
-  back_on_track:['return','teal','bdgBackOnTrack'],safety_car:['beacon','orange','bdgSafetyCar'],endurance:['clock','purple','bdgEndurance'],triple_crown:['crown','gold','bdgTripleCrown'],slipstream:['wind','green','bdgSlipstream'],paceline:['wind','blue','bdgPaceline'],peloton:['wind','gold','bdgPeloton'],clean_sheet:['calcheck','green','bdgCleanSheet'],works_team:['briefcase','teal','bdgWorksTeam'],winter_series:['snow','blue','bdgWinterSeries'],ramadan_nights:['lantern','purple','bdgRamadanNights'],founding_day:['fort','orange','bdgFoundingDay']};
+  back_on_track:['return','teal','bdgBackOnTrack'],safety_car:['beacon','orange','bdgSafetyCar'],endurance:['clock','purple','bdgEndurance'],triple_crown:['crown','gold','bdgTripleCrown'],slipstream:['wind','green','bdgSlipstream'],paceline:['wind','blue','bdgPaceline'],peloton:['wind','gold','bdgPeloton'],clean_sheet:['calcheck','green','bdgCleanSheet'],works_team:['briefcase','teal','bdgWorksTeam'],perfect_week:['calstar','purple','bdgPerfectWeek'],perfect_month:['calcrown','gold','bdgPerfectMonth'],winter_series:['snow','blue','bdgWinterSeries'],ramadan_nights:['lantern','purple','bdgRamadanNights'],founding_day:['fort','orange','bdgFoundingDay']};
 // A badge's name and how-to line in the reader's language: the app's own from its translations, one
 // an admin made from its English or Arabic words.
 function _bdgName(b){const s=b&&b.system&&BD_SYS[b.slug];return s?t(s[2]):String((b&&((S.lang==='ar'&&b.name_ar)||b.name))||'');}
@@ -10653,6 +10656,26 @@ function _bdgSeason(rule,dates){
     if(today>=f&&today<=to)cur={n,to};else if(f>today&&(!next||f<next))next=f;});
   return{on:best>=rides,rides,cur,next};
 }
+// Perfect Week and Perfect Month (the owner, 2026-09-29): every session a week held - Sunday to
+// Saturday, every kind: circuit nights, the Petromin night, the Saturday ride, swims, workshops -
+// ridden (_rideCompleted). A week of fewer than two sessions is left out: it neither earns one nor
+// breaks a run. Perfect Month is four Perfect Weeks in a row; the week under way breaks nothing
+// until it is over. The weeks come from badge_weeks (S._bdgWeeks), since a rider's own list of
+// sessions knows only the nights they rode; without it neither badge can be told, so both stay
+// unearned. {known, any: a Perfect Week ever, run: the Perfect Weeks running now, best, cur: this
+// week's {n ridden, of}}.
+function _bdgPerfect(completed){
+  const W=Array.isArray(S._bdgWeeks)?S._bdgWeeks.filter(w=>w&&w.w&&Array.isArray(w.ids)&&w.ids.length>=2):null;
+  if(!W)return{known:false,any:false,run:0,best:0,cur:null};
+  const rode=new Set(completed.map(e=>e.sessionId)),now=_bdgWk(todayStr());
+  let run=0,best=0,any=false,cur=null;
+  W.map(w=>({k:_bdgWk(w.w),ids:w.ids})).filter(w=>w.k<=now).sort((a,b)=>a.k-b.k).forEach(w=>{
+    const n=w.ids.filter(id=>rode.has(id)).length,full=n===w.ids.length;
+    if(w.k===now)cur={n,of:w.ids.length};
+    if(full){any=true;run++;best=Math.max(best,run);}else if(w.k<now)run=0;
+  });
+  return{known:true,any,run,best,cur};
+}
 // seasons: the dated badges (badge_seasons for a rider, the catalogue for staff). Rides are counted
 // as ride nights, not rows: a party of four on one night is one night for the badges added
 // 2026-09-29. A badge once earned stays: Hot Streak reads the best run, not the one going now.
@@ -10673,7 +10696,7 @@ function _mrBadges(all,completed,seasons,cust){
   doneN.forEach(([id])=>{const x=ses.get(id);if(!x)return;const k=_rideKind(x);kinds.add(k);if(k==='saturday')comm++;if(k==='petromin')corp++;});
   for(let i=1;i<dates.length;i++)if(Date.parse(dates[i])-Date.parse(dates[i-1])>=60*864e5)gap=true;
   nights.forEach(([,n])=>{if(n.done)cleanBest=Math.max(cleanBest,++clean);else if(n.noshow)clean=0;});
-  const R=_bdgRuns(dates),P=(n,of)=>Math.min(n,of)+'/'+of,pct=cust?_profPct(cust):0;
+  const R=_bdgRuns(dates),P=(n,of)=>Math.min(n,of)+'/'+of,pct=cust?_profPct(cust):0,PW=_bdgPerfect(completed);
   const nd96=all.some(e=>(e.status==='done'||e.status==='active')&&(ses.get(e.sessionId)||{}).ride_kind==='snd96');
   return[
     ...(cust?[{s:'complete_profile',on:pct>=100,p:pct+'%'}]:[]), // Race Ready: only the rider's own page holds the whole profile
@@ -10695,6 +10718,8 @@ function _mrBadges(all,completed,seasons,cust){
     {s:'paceline',on:comm>=15,p:P(comm,15)},
     {s:'peloton',on:comm>=30,p:P(comm,30)},
     {s:'works_team',on:corp>=3,p:P(corp,3)},
+    {s:'perfect_week',on:PW.any,p:PW.cur?P(PW.cur.n,PW.cur.of):null},
+    {s:'perfect_month',on:PW.best>=4,p:PW.known?P(PW.run,4):null},
     {s:'back_on_track',on:gap,hide:true}, // a surprise, earned by staying away: never shown before it is earned
     // Dated badges carry their windows: the popup says whether one is open, or when the next opens.
     ...(seasons||[]).filter(b=>b&&b.slug&&b.rule).map(b=>{const r=_bdgSeason(b.rule,dates);
@@ -10713,6 +10738,11 @@ function _bdgMineLoad(cust){
   Promise.resolve(sb.rpc('badge_catalog')).then(({data,error})=>{
     if(error||!Array.isArray(data)||JSON.stringify(data)===JSON.stringify(S._bdgCat||null))return;
     S._bdgCat=data;_mrBadgesPaint();
+  },()=>{});
+  // Each week's sessions (badge_weeks), for Perfect Week and Perfect Month.
+  Promise.resolve(sb.rpc('badge_weeks')).then(({data,error})=>{
+    if(error||!Array.isArray(data)||!data.length||JSON.stringify(data)===JSON.stringify(S._bdgWeeks||null))return;
+    S._bdgWeeks=data;_mrBadgesPaint();
   },()=>{});
   // The dated badges (badge_seasons) come with them: their windows are edited in Community > Badges.
   Promise.resolve(sb.rpc('badge_seasons')).then(({data,error})=>{
@@ -30272,8 +30302,10 @@ async function _bdgLoad(force){
   S._bdgBusy=true;S._bdgAt=Date.now();
   const was=_bdgSig();
   try{
-    const[b,h]=await Promise.all([sb.from('badges').select('*'),_pagedAll(()=>sb.from('customer_badges').select('*').order('customer_id').order('badge_id'))]);
+    const[b,h,wk]=await Promise.all([sb.from('badges').select('*'),_pagedAll(()=>sb.from('customer_badges').select('*').order('customer_id').order('badge_id')),
+      Promise.resolve(sb.rpc('badge_weeks')).catch(()=>null)]); // each week's sessions, for Perfect Week and Month
     if(b&&!b.error&&Array.isArray(b.data)&&h&&!h.error&&Array.isArray(h.data)){S.badges=b.data;S.custBadges=h.data;}
+    if(wk&&!wk.error&&Array.isArray(wk.data)&&wk.data.length)S._bdgWeeks=wk.data;
   }catch(e){}finally{S._bdgBusy=false;}
   // The Badges tab leaves its Loading line; Accounts is repainted only when what its rows show has
   // changed (2,600 rows, and a staffer may be in the middle of one).
