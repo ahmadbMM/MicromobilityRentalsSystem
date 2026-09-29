@@ -181,7 +181,10 @@ with expected(fname, want_definer, note) as (values
   ('community_apply',        true,  'the website form writes community_applications, which anon cannot touch; metered'),
   ('staff_community_approve',true,  'finds or makes the account; checks is_staff() itself'),
   ('customer_about',         true,  'reads the signed-in rider''s own customers row; token-checked'),
-  ('customer_set_about',     true,  'writes the signed-in rider''s own customers row; token-checked')
+  ('customer_set_about',     true,  'writes the signed-in rider''s own customers row; token-checked'),
+  -- Google / Apple marks beside the email (20260929140000)
+  ('_sign_in_methods',       true,  'reads auth.identities and customers.password_hash, which no client may; internal only'),
+  ('staff_sign_in_methods',  true,  'every account''s sign-in methods; checks is_staff() itself')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

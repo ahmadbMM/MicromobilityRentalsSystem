@@ -1980,6 +1980,8 @@
   "nameLabel": "Nome",
   "timeLabel": "Horário",
   "profileInfo": "Informações do perfil",
+  "siGoogle": "Início de sessão com Google",
+  "siApple": "Início de sessão com Apple",
   "accProfession": "Profissão",
   "accProfessionPh": "ex.: Engenheiro",
   "accWorkplace": "Empresa",

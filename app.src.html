@@ -902,6 +902,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   payAtBooth:' Payment is collected at the booth at the Corniche Circuit. Please have your queue number ready.',
   nameLabel:'Name',timeLabel:'Time',
   profileInfo:'Profile Information',
+  siGoogle:'Google sign-in',siApple:'Apple sign-in',
   accProfession:'Profession',accProfessionPh:'e.g. Engineer',accWorkplace:'Company',accWorkplacePh:'The company you work for',accHeardPick:'Choose one',errProfession:'Enter your profession: 2 to 80 characters.',errWorkplace:'Enter your company: 2 to 120 characters.',caLblWork:'Company',
   birthDateLabel:'Birth date',dobDay:'Day',dobMonth:'Month',dobYear:'Year',dobErrYoung:'Riders must be at least 5 years old. Check the birth date.',dobErrFuture:'A birth date can\'t be in the future.',countryLabel:'Country of residence',nationalityLabel:'Nationality',selectNationalityOpt:'Select nationality',acrBdNationality:'Nationality',cityLabel:'City of residence',optionalLabel:'optional',selectCountryOpt:'Select country of residence',selectCityOpt:'Select city of residence',selectCountryFirst:'Select a country first',
   bikeFleetComp:'Bike Fleet Composition',totalBikesSession:'Total bikes in session',
@@ -1372,6 +1373,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   payAtBooth:' الدفع يتم عند الكشك في دوار الكورنيش. يرجى إحضار رقم طابورك.',
   nameLabel:'الاسم',timeLabel:'الوقت',
   profileInfo:'معلومات الملف الشخصي',
+  siGoogle:'تسجيل الدخول عبر Google',siApple:'تسجيل الدخول عبر Apple',
   accProfession:'المهنة',accProfessionPh:'مثال: مهندس',accWorkplace:'الشركة',accWorkplacePh:'الشركة التي تعمل فيها',accHeardPick:'اختر واحداً',errProfession:'أدخل مهنتك: من 2 إلى 80 حرفاً.',errWorkplace:'أدخل اسم شركتك: من 2 إلى 120 حرفاً.',caLblWork:'الشركة',
   birthDateLabel:'تاريخ الميلاد',dobDay:'اليوم',dobMonth:'الشهر',dobYear:'السنة',dobErrYoung:'يجب ألا يقل عمر الراكب عن 5 سنوات. تحقّق من تاريخ الميلاد.',dobErrFuture:'لا يمكن أن يكون تاريخ الميلاد في المستقبل.',countryLabel:'بلد الإقامة',nationalityLabel:'الجنسية',selectNationalityOpt:'اختر الجنسية',acrBdNationality:'الجنسية',cityLabel:'مدينة الإقامة',optionalLabel:'اختياري',selectCountryOpt:'اختر بلد الإقامة',selectCityOpt:'اختر مدينة الإقامة',selectCountryFirst:'اختر الدولة أولاً',
   bikeFleetComp:'تركيبة أسطول الدراجات',totalBikesSession:'إجمالي الدراجات في الجلسة',
@@ -4744,11 +4746,11 @@ function renderAuthModal(){
     <div class="cu-iab-note">${t('iabGoogleBlocked')}</div>
     <div class="auth-or">${t('authOr')}</div>`:`
     <button type="button" class="btn-google" data-on-click="${_on("signInGoogle")}">
-      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+      ${SI_LOGO.google(18)}
       ${t('continueGoogle')}
     </button>
     <button type="button" class="btn-google btn-apple" data-on-click="${_on("signInApple")}">
-      <svg aria-hidden="true" width="17" height="17" viewBox="0 0 17 17" fill="currentColor"><path d="M14.06 8.98c-.02-2.02 1.65-2.99 1.72-3.04-0.94-1.37-2.4-1.56-2.92-1.58-1.24-.13-2.42.73-3.05.73-.63 0-1.6-.71-2.63-.69-1.35.02-2.6.79-3.3 2-1.4 2.44-.36 6.05 1.01 8.03.67.97 1.47 2.06 2.52 2.02 1.01-.04 1.39-.65 2.61-.65 1.22 0 1.56.65 2.63.63 1.09-.02 1.78-.99 2.44-1.96.77-1.12 1.09-2.21 1.11-2.27-.02-.01-2.12-.81-2.14-3.22zM12.05 3.03c.56-.68.93-1.62.83-2.56-.8.03-1.77.53-2.35 1.21-.51.6-.96 1.56-.84 2.48.9.07 1.8-.45 2.36-1.13z"/></svg>
+      ${SI_LOGO.apple(17)}
       ${t('continueApple')}
     </button>
     <div class="auth-or">${t('authOr')}</div>`;
@@ -4890,6 +4892,31 @@ function renderAuthModal(){
 // answer on the account; the app's own sign-up asked it only from 2026-09-27 to 2026-09-28 (the owner
 // took it off). 'desk' is what the desk's own additions carry. The label is the code's string in every language.
 const HEARD_OPTS=['instagram','tiktok','snapchat','x','facebook','youtube','whatsapp','google','friend','invited','passed_by','event','hotel','school','work','community','other'];
+// The Google and Apple marks: the sign-in buttons, and beside an account's email where the account
+// signs in with one of them (the owner, 2026-09-29).
+const SI_LOGO={
+  google:s=>`<svg aria-hidden="true" width="${s}" height="${s}" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.82.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A9 9 0 0 0 9 0 9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>`,
+  apple:s=>`<svg aria-hidden="true" width="${s}" height="${s}" viewBox="0 0 17 17" fill="currentColor"><path d="M14.06 8.98c-.02-2.02 1.65-2.99 1.72-3.04-0.94-1.37-2.4-1.56-2.92-1.58-1.24-.13-2.42.73-3.05.73-.63 0-1.6-.71-2.63-.69-1.35.02-2.6.79-3.3 2-1.4 2.44-.36 6.05 1.01 8.03.67.97 1.47 2.06 2.52 2.02 1.01-.04 1.39-.65 2.61-.65 1.22 0 1.56.65 2.63.63 1.09-.02 1.78-.99 2.44-1.96.77-1.12 1.09-2.21 1.11-2.27-.02-.01-2.12-.81-2.14-3.22zM12.05 3.03c.56-.68.93-1.62.83-2.56-.8.03-1.77.53-2.35 1.21-.51.6-.96 1.56-.84 2.48.9.07 1.8-.45 2.36-1.13z"/></svg>`,
+};
+// 'google', 'apple' or 'google,apple' as the two marks, each named for a screen reader.
+function _siHtml(v){const on=String(v||'').split(',');return ['google','apple'].filter(p=>on.includes(p)).map(p=>{const l=esc(t(p==='google'?'siGoogle':'siApple'));return `<span class="si-ico si-${p}" role="img" title="${l}" aria-label="${l}">${SI_LOGO[p](14)}</span>`;}).join('');}
+// Staff: which accounts sign in with Google or Apple (staff_sign_in_methods, 20260929140000). Read
+// on its own rather than through staff_sync, so no device's cached copy of the customers is thrown
+// away; at most every ten minutes, when Accounts or the account editor is drawn. The marks sit in
+// slots (data-si) filled in place when the answer comes, so nothing is redrawn for them. A database
+// without the function shows none, once asked.
+function _siEnsure(){
+  if(!sb||S._siBusy||S._siGone||(S._siAt&&Date.now()-S._siAt<600000))return;
+  S._siBusy=true;
+  sb.rpc('staff_sign_in_methods').then(({data,error})=>{
+    S._siBusy=false;S._siAt=Date.now();
+    if(error){if(/PGRST202|Could not find/.test(String(error.code||'')+String(error.message||'')))S._siGone=true;return;}
+    const m={};(data||[]).forEach(r=>{const v=[r.google&&'google',r.apple&&'apple'].filter(Boolean).join(',');if(v)m[r.id]=v;});
+    S._siMap=m;
+    document.querySelectorAll('[data-si]').forEach(el=>{el.innerHTML=_siHtml(m[el.getAttribute('data-si')]);});
+  },()=>{S._siBusy=false;S._siAt=Date.now();});
+}
+function _siSlot(id){return `<span class="si-slot" data-si="${esc(id)}">${_siHtml(S._siMap&&S._siMap[id])}</span>`;}
 function heardLabel(code){return code==='desk'?t('heardDesk'):HEARD_OPTS.includes(code)?t('heard_'+code):(code?esc(String(code)):'');}
 function switchAuthMode(mode){S.authMode=mode;if(mode!=='forgot'){S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;}if(mode==='signup'){S.signupGender=null;S.signupRideNews=false;S.signupAck=false;}renderAuthModal();if(S.view==='landing')_pushNav();}
 // Gender pills: male turns blue, female turns pink when selected (cu-g-male / cu-g-female in styles.css).
@@ -11251,7 +11278,7 @@ function renderAccount(){
       </div>`;})()}
       <div class="form-row">
         <div class="form-group"><label>${t('emailAddr')}</label>
-          <input type="email" id="acc-email" value="${esc(cust.email||'')}" placeholder="your@email.com"></div>
+          <div class="si-field"><input type="email" id="acc-email" value="${esc(cust.email||'')}" placeholder="your@email.com">${cust.sign_in?`<span class="si-slot">${_siHtml(cust.sign_in)}</span>`:''}</div></div>
         <div class="form-group"><label>${t('phoneNum')}</label>
           <div class="phone-row">
             <select class="phone-cc" id="acc-cc">${ccOpts}</select>
@@ -11375,9 +11402,10 @@ function renderAccount(){
     })()}`;
   S._accBase={id:cust.id,v:_accFormVals()}; // what the form showed, to tell a rider's edit from a stale box
 }
-// The profile columns customer_profile answers with, laid over a signed-in copy; and the three
-// customer_about answers with (the account page reads both).
-const PROFILE_COLS=['name','email','phone','height','type_preference','birth_date','country','city','photo','gender','nationality','socials','hidden_types','default_pay','profession','workplace','heard_from'];
+// The profile columns customer_profile answers with, laid over a signed-in copy; and the ones
+// customer_about answers with (the account page reads both): profession, workplace, how they heard
+// of us and how the account signs in (sign_in, 20260929140000: 'google', 'apple' or both).
+const PROFILE_COLS=['name','email','phone','height','type_preference','birth_date','country','city','photo','gender','nationality','socials','hidden_types','default_pay','profession','workplace','heard_from','sign_in'];
 // The signed-in rider's profession, workplace and how they heard of us (customer_about,
 // 20260929110000), or null: no answer, or a database without it.
 function _aboutRead(c){return sb.rpc('customer_about',{p_id:c.id,p_token:c.session_token}).then(({data,error})=>!error&&Array.isArray(data)&&data[0]||null,()=>null);}
@@ -15675,7 +15703,7 @@ function renderCustFormModal(){
         <div class="form-group cmy-f1"><label for="cf-middle">${t('middleName')}</label><input id="cf-middle" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.middle)}" autocomplete="off"></div>
         <div class="form-group cmy-f1"><label for="cf-last">${t('lastName')}</label><input id="cf-last" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.last)}" autocomplete="off"></div>
       </div>
-      <div class="form-group cmy-mt8"><label for="cf-email">${t('emailAddr')}</label><input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">${isCreate?'':_cfAppleLine(d.id)}</div>
+      <div class="form-group cmy-mt8"><label for="cf-email">${t('emailAddr')}</label>${isCreate?`<input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">`:`<div class="si-field"><input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">${(_siEnsure(),_siSlot(d.id))}</div>${_cfAppleLine(d.id)}`}</div>
       <div class="form-group cmy-mt8"><label for="cf-phone">${t('phoneNum')}</label>
         <div class="cmy-flex6"><select id="cf-cc" class="cmy-w92">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" class="cmy-f1" autocomplete="off"></div></div>
       <div class="cmy-cf-row8">
@@ -18075,7 +18103,7 @@ function _accessSet(row,uid){
 // var and functions: the client is wrapped at boot, before this part of the script has run.
 var _roAllowN=0,_roToastAt=0;
 function _roOkTable(tbl){return tbl==='staff_actions'||tbl==='error_log';}
-function _roOkRpc(fn){return ['customer_profile','customer_exists','staff_resolve_bike','staff_sync','staff_email_for_phone','staff_inventory_costs','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed'].indexOf(fn)>=0;}
+function _roOkRpc(fn){return ['customer_profile','customer_exists','staff_resolve_bike','staff_sync','staff_email_for_phone','staff_inventory_costs','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed','staff_sign_in_methods'].indexOf(fn)>=0;}
 function _roNow(){try{return !_roAllowN&&S.view==='staff'&&!_editOk(S.staffTab);}catch(_){return false;}}
 // Builds one call the guard lets through (queued work sent from elsewhere, the page's own
 // housekeeping). The guard looks at the moment a write is built, so only that moment is exempt:
@@ -30357,6 +30385,7 @@ function _amPickTags(cid){
   if(!ok)renderCommunity(); // the row is not on screen (filtered or past the cap): fall back
 }
 function _amCustRows(){
+  _siEnsure();
   const shown=_amFiltered();
   S._amShownCount=shown.length;
   const cap=Math.max(AM_PAGE,S.amShow||AM_PAGE);
@@ -30391,8 +30420,8 @@ function _amRowInner(c){
     const chips=myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;
     const picking=S.tagCustId===c.id;
     const picker=picking?`<div class="am-picker">${(S.tags||[]).map(tg=>{const on=myTags.some(x=>x.id===tg.id);return `<button class="am-pick${on?' on':''}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
-    const contact=[c.email,c.phone,c.heard_from?heardLabel(c.heard_from):''].filter(Boolean)
-      .map(v=>`<bdi>${esc(v)}</bdi>`).join(' <span class="cmy-sep">·</span> ');
+    const contact=[c.email?`<bdi>${esc(c.email)}</bdi>${_siSlot(c.id)}`:'',c.phone?`<bdi>${esc(c.phone)}</bdi>`:'',c.heard_from?`<bdi>${esc(heardLabel(c.heard_from))}</bdi>`:''].filter(Boolean)
+      .join(' <span class="cmy-sep">·</span> ');
     // Accounts made before signup asked for a gender have none; offer it on the row, one tap.
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"male")}">${t('genderMale')}</button><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"female")}">${t('genderFemale')}</button></div>`;
     return `<div class="am-cust">

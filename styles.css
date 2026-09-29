@@ -532,6 +532,15 @@
     .acc-set-val{font-size:13px;color:var(--muted);font-weight:600;}
     /* ── The account page (renderAccount, _seasonDashboard, _mrBadgesRow), drawn into #tab-account: without
        inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    /* Google / Apple marks beside an account's email (_siHtml, _siSlot): after the email in the
+       Accounts list, at the end of the email box in the account editor and on My Account. */
+    .si-slot{display:inline-flex;align-items:center;gap:4px;vertical-align:-2px;margin-inline-start:5px;}
+    .si-slot:empty{display:none;}
+    .si-ico{display:inline-flex;line-height:0;}
+    .si-apple{color:var(--text);}
+    #tab-account .si-field,#new-acct-modal .si-field{position:relative;}
+    #tab-account .si-field .si-slot,#new-acct-modal .si-field .si-slot{position:absolute;inset-inline-end:12px;top:50%;transform:translateY(-50%);margin:0;}
+    #tab-account .si-field:has(.si-ico) input,#new-acct-modal .si-field:has(.si-ico) input{padding-inline-end:52px;}
     #tab-account .cu-gender-row{display:flex;gap:8px;}
     #tab-account .cu-heard{margin-top:18px;}
     #tab-account .cu-f1{flex:1;}
