@@ -2579,6 +2579,7 @@
   "caRideNoOpen": "No hay ningún Recorrido social del sábado abierto ahora.",
   "caRideOn": "ya reservado",
   "caRejNoAcct": "No hay ninguna cuenta con este correo o teléfono, así que no hay nada que etiquetar.",
+  "vipTermsNote": "Siempre por cuenta de la casa, con cualquier tipo de bici, y la Road Carbon se oculta en sus propias reservas, sea cual sea el ajuste de abajo.",
   "caRejectTitle": "¿Rechazar la solicitud de {0}?",
   "caRejectBody": "No se envía nada automáticamente. Recibes una respuesta cordial para enviar si quieres.",
   "caNewPwdTitle": "¿Crear una nueva contraseña temporal?",

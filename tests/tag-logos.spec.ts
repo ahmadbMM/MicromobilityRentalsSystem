@@ -8,13 +8,13 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 const tags = [
   { id: 'tag_jcc', name: 'Jeddah Corniche Circuit', slug: 'jcc', color: '#00e585', locked: true, auto_grant: true },
   { id: 'tag_saturday', name: 'Community', slug: 'saturday', color: '#4aa8f8', locked: true },
-  { id: 'tag_vip', name: 'VIP', slug: 'vip', color: '#e5a100' },
+  { id: 'tag_lead', name: 'Ride Lead', slug: 'lead', color: '#e5a100' }, // a tag staff made (VIP is a system tag since 2026-09-29)
 ];
 const customers = [{ id: 'c1', name: 'Sara Khalid', email: 'sara@gmail.com', phone: '+966551876215', gender: 'female', created_at: '2026-09-20T10:00:00Z' }];
 const customer_tags = [
   { customer_id: 'c1', tag_id: 'tag_jcc' },
   { customer_id: 'c1', tag_id: 'tag_saturday', expires_at: Date.now() + 20 * 864e5 },
-  { customer_id: 'c1', tag_id: 'tag_vip' },
+  { customer_id: 'c1', tag_id: 'tag_lead' },
 ];
 
 test('the circuit and community tags show their logos; other tags keep their names', async ({ page }) => {
@@ -39,7 +39,7 @@ test('the circuit and community tags show their logos; other tags keep their nam
   await expect(comm).toContainText('until');                                    // the window still reads
   expect(await comm.evaluate(el => getComputedStyle(el).backgroundColor)).toBe('rgb(12, 122, 61)');  // green
 
-  await expect(chips.filter({ hasText: 'VIP' })).toHaveCount(1);                 // a staff tag keeps its name
+  await expect(chips.filter({ hasText: 'Ride Lead' })).toHaveCount(1);                 // a staff tag keeps its name
   await expect(page.locator('.am-row[data-cust="c1"] .tag-logo')).toHaveCount(2);
 
   // Filter pills and the picker wear the same faces.
@@ -47,5 +47,5 @@ test('the circuit and community tags show their logos; other tags keep their nam
   await expect(page.locator('.am-pick[title="Community"] .tag-logo-mm')).toHaveCount(1);
   await page.evaluate(`_amPickTags('c1')`);
   await expect(page.locator('.am-picker .am-pick .tag-logo')).toHaveCount(2);
-  await expect(page.locator('.am-picker .am-pick', { hasText: 'VIP' })).toHaveCount(1);
+  await expect(page.locator('.am-picker .am-pick', { hasText: 'Ride Lead' })).toHaveCount(1);
 });

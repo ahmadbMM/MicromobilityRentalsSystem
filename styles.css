@@ -1306,6 +1306,7 @@
       -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;}
     .tag-logo-jcc{width:21px;-webkit-mask-image:url('assets/tag-jcc.svg');mask-image:url('assets/tag-jcc.svg');}
     .tag-logo-mm{width:16px;-webkit-mask-image:url('assets/tag-mm.svg');mask-image:url('assets/tag-mm.svg');}
+    .tag-logo-vip{width:38px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
@@ -1447,6 +1448,7 @@
     #new-acct-modal .cmy-w120{width:120px;flex-shrink:0;}
     #new-acct-modal .cmy-row6,#comm-add-modal .cmy-row6{display:flex;gap:6px;margin-top:4px;}
     #new-acct-modal .cmy-cf-heard{font-size:13px;font-weight:700;padding:6px 0;}
+    #new-acct-modal .cmy-cf-vip{display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 12px;border-radius:6px;background:#a67c00;color:#fff;font-size:12px;font-weight:700;line-height:1.4;}
     #new-acct-modal .cmy-cf-rn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;}
     #new-acct-modal .cmy-rn-on{font-size:13px;font-weight:700;color:var(--green);}
     #new-acct-modal .cmy-rn-off{font-size:13px;font-weight:700;color:var(--muted);}

@@ -46,6 +46,10 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(k.locator('a.soc-link[href="https://www.instagram.com/karim.rides"]')).toBeVisible();
   await expect(k.locator('a.soc-link[href="https://www.linkedin.com/in/karim-mansour-arch"]')).toBeVisible();
   await expect(k.locator('.ca-acct')).toHaveCount(0);
+  // Staff can reach a pending applicant before deciding: a call, or a WhatsApp chat on their number
+  await expect(k.locator('a.ca-call')).toHaveAttribute('href', 'tel:+966552468013');
+  await expect(k.locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966552468013');
+  await expect(k.locator('a.ca-chat')).toHaveAttribute('target', '_blank');
 
   // Same email as an account on file: staff are told before approving
   await expect(row(page, 'a2').locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
@@ -55,6 +59,7 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(row(page, 'a3')).toContainText('by Desk B');
   await expect(row(page, 'a3').locator('.ca-grid')).toContainText('Mountain');
   await expect(row(page, 'a3').locator('.ca-reopen')).toBeVisible();
+  await expect(row(page, 'a3').locator('a.ca-call, a.ca-chat')).toHaveCount(0); // decided: the reply carries its own WhatsApp
 });
 
 // How they heard of us: the community form asks it since 2026-09-28 (the booking app's sign-up no
