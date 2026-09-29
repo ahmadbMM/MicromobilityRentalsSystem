@@ -68,22 +68,42 @@ test('nothing flagged: the event opens straight away', async ({ page }) => {
   expect(await page.evaluate('S.selEvent')).toBe('jcc');
 });
 
-test('"Not now" backs out, the next pick asks again, and Confirm cannot book past it', async ({ page }) => {
+// The owner, 2026-09-29: riders must answer it; there is no "Not now". Moving about the site
+// leaves it up, and Log out, the one other button, leaves the account.
+test('there is no way past it: no "Not now", and moving about the site leaves it up', async ({ page }) => {
+  await rider(page, ['gender']);
+  await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
+  const box = page.locator('#fix-gate .fx-box');
+  await expect(box).toBeVisible();
+  await expect(box).not.toContainText('Not now');
+  await expect(page.locator('#fix-gate button:not(.fx-opt)')).toHaveText(['Save and continue', 'Log Out']);
+  await page.keyboard.press('Escape');
+  await expect(box).toBeVisible();
+  for (const go of [`goCustomer('myrides')`, `goCustomer('account')`, `goLanding()`, `showView('customer')`]) {
+    await page.evaluate(go);
+    await expect(box).toBeVisible();
+  }
+  expect(await page.evaluate('S.selEvent')).toBe('none');
+  expect(await page.evaluate(`document.body.classList.contains('fix-open')`)).toBe(true);
+});
+
+test('however the wizard was reached, Confirm raises the same request and books nothing', async ({ page }) => {
   await rider(page, ['gender']);
   const bookings: string[] = [];
   page.on('request', r => { if (/rpc\/customer_create_booking|rest\/v1\/queue_entries/.test(r.url()) && r.method() === 'POST') bookings.push(r.url()); });
-  await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
-  await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
-  await page.click('#fix-gate .fx-later');
-  await expect(page.locator('#fix-gate')).toBeHidden();
-  expect(await page.evaluate('S.selEvent')).toBe('none');
-  await page.evaluate(`selectEvent('jcc')`);
-  await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
-  await page.click('#fix-gate .fx-later');
-  // However the wizard was reached, submitting raises the same request and books nothing.
   await page.evaluate(`S.selEvent='jcc';S.selSession='${S1}';S.regQty=1;S.waiverOk=true;submitReg()`);
   await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
   expect(bookings).toHaveLength(0);
+});
+
+test('Log out leaves the account and takes the request with it', async ({ page }) => {
+  await rider(page, ['gender']);
+  await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
+  await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
+  await page.click('#fix-gate .gate-out');
+  await expect(page.locator('#fix-gate')).toBeHidden();
+  expect(await page.evaluate('[!!S.loggedIn,!!getSession(),!!S._fix]')).toEqual([false, false, false]);
+  expect(await page.evaluate(`document.body.classList.contains('fix-open')`)).toBe(false);
 });
 
 test('what the server refuses stays asked; what it took is the account now', async ({ page }) => {

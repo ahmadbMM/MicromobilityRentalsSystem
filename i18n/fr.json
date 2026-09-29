@@ -2518,7 +2518,6 @@
   "fixWas": "Sur votre compte : {0}",
   "fixWasEmpty": "Rien sur votre compte pour l’instant",
   "fixNote": "Vous pourrez réserver dès que ces informations seront enregistrées.",
-  "fixLater": "Plus tard",
   "fixErrPick": "Choisissez une option pour continuer.",
   "fixErrHeight": "Indiquez votre taille en cm, entre 100 et 250.",
   "fixErrPhoto": "Ajoutez une photo pour continuer.",

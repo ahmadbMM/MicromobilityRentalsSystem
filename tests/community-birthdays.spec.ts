@@ -55,16 +55,33 @@ test.describe('a community member who has not given both', () => {
     expect(await page.evaluate('[S.loggedIn.birth_date,S.loggedIn.nationality,S._fixCache.fields]')).toEqual(['1996-03-14', 'Egypt', []]);
   });
 
-  test('leaving through the header drops the page; the next event pick raises it again and the event stays shut', async ({ page }) => {
+  // The owner, 2026-09-29: no way past it. The header's links, an event pick and Escape leave it
+  // up; Log out is the one way off it, and it leaves the account.
+  test('the page stays up however the rider moves, and the event stays shut', async ({ page }) => {
     await rider(page, ['nationality'], { birth_date: '1990-05-05' });
-    await expect(page.locator('#profile-gate .pg-box')).toBeVisible();
-    await page.evaluate(`showView('customer')`);
-    await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
+    const box = page.locator('#profile-gate .pg-box');
+    await expect(box).toBeVisible();
+    await page.keyboard.press('Escape');
+    for (const go of [`showView('customer')`, `goCustomer('myrides')`, `goCustomer('account')`, `goLanding()`]) {
+      await page.evaluate(go);
+      await expect(box).toBeVisible();
+    }
+    expect(await page.evaluate(`document.body.classList.contains('gate-page')`)).toBe(true);
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
-    await expect(page.locator('#profile-gate .pg-box')).toContainText('Two details for your community profile');
+    await expect(box).toContainText('Two details for your community profile');
     expect(await page.evaluate('S.selEvent')).toBe('none');
     // what the account already holds is filled in; only the missing one is left to answer
     await expect(page.locator('#pg-birth')).toHaveValue('1990-05-05');
+    await expect(page.locator('#profile-gate button')).toHaveText(['Save and continue', 'Log Out']);
+  });
+
+  test('Log out leaves the account and takes the page with it', async ({ page }) => {
+    await rider(page, ['birth_date', 'nationality']);
+    await expect(page.locator('#profile-gate .pg-box')).toBeVisible();
+    await page.click('#profile-gate .gate-out');
+    await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
+    expect(await page.evaluate('[!!S.loggedIn,!!getSession(),!!S._pg]')).toEqual([false, false, false]);
+    expect(await page.evaluate(`document.body.classList.contains('gate-page')`)).toBe(false);
   });
 
   test('nothing asked: the site opens with no page', async ({ page }) => {

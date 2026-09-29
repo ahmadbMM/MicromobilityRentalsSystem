@@ -5220,7 +5220,7 @@ body.view-staff #view-staff .view-main{margin:0;width:auto;justify-self:stretch;
 /* ── Rider profile gate: the sign-in page's clean frame, the box from the design handoff ── */
 #profile-gate .auth-backdrop{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;z-index:90;top:var(--topbar-h,56px);align-items:flex-start;padding:16px;overflow:auto;}
 @media (min-width:768px){#profile-gate .auth-backdrop{padding-top:88px;}}
-body.gate-page #app-footer,body.gate-page #cust-bottom-nav{display:none !important;} /* the header is the only way out */
+body.gate-page #app-footer,body.gate-page #cust-bottom-nav{display:none !important;} /* no way past the page: the header's links leave it up (showView) */
 .pg-box{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(15,18,21,.06),0 6px 20px rgba(15,18,21,.05);padding:24px 20px;width:100%;max-width:420px;box-sizing:border-box;margin:0;font-family:var(--font-body);color:#0f1215;}
 @media (min-width:768px){.pg-box{padding:32px 28px;}}
 .pg-kicker{font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#4f565c;}
@@ -5288,9 +5288,11 @@ body.fix-open{overflow:hidden;}
 .fx-upload:focus-within{outline:2px solid #008f52;outline-offset:2px;}
 .fx-upload.dis{opacity:.55;pointer-events:none;}
 .fx-hint{font-weight:500;font-size:12.5px;line-height:1.4;color:#767e85;}
-.fx-later{display:block;margin:10px auto 0;background:none;border:none;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:14px;color:#4f565c;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-.fx-later:hover{color:#0f1215;}
-.fx-later:disabled{opacity:.5;cursor:default;}
+/* Log out under the profile page's and the correction request's Save: the one way off either
+   page, and it leaves the account (there is no "Not now", 2026-09-29) */
+.gate-out{display:block;margin:10px auto 0;background:none;border:none;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:14px;color:#4f565c;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.gate-out:hover{color:#0f1215;}
+.gate-out:disabled{opacity:.5;cursor:default;}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
 .soc-link{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:var(--staff-fs-sm,12px);font-weight:700;}
