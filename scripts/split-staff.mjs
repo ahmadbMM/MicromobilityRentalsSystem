@@ -42,6 +42,11 @@ export const STAFF_ENTRY = [
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
   'doUndo', '_ucPrompt', // the topbar's Undo and the admin's undo-code question (2026-09-28)
   '_tpMsgOpen', // the account editor's temporary-password message (2026-09-29): its save is customer-half code
+  // The staff top bar's search (2026-09-29): Ctrl/Cmd+K is listened for at load, and through the
+  // search every account's history and the whole account editor were reached from the customer
+  // half - about 116 statements a customer's page carried and could never run (the listener
+  // answers only in the staff view, where staff.js is loaded).
+  '_gsOpen',
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -590,7 +595,11 @@ export function formatBareWrites(r, limit = 20) {
 // SIZE_BUDGET_CUSTOMER_KB and SIZE_BUDGET_STAFF_KB in the environment move the limits (a deliberate
 // step up is a one-line change to the defaults below, with the reason in the commit).
 
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 260, staff: 250 };
+// 2026-09-29: customer 260 -> 250, staff 250 -> 270. Making _gsOpen an entry point moved the account
+// history and the account editor (about 19 KB) out of the customer half into staff.js; a staff device
+// downloads the same total as before, a customer's phone 19 KB less, and the customer budget comes
+// down so that saving is kept.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 250, staff: 270 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

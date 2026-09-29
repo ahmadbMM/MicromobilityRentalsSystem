@@ -61,7 +61,7 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
   (or on the first line of its statement); `staff_actions` and `error_log` need no marker. Writes that read
   `.error` themselves or return the write to a caller are reported apart. It is a warning while the tail is
   worked down; do not add to it.
-- **Size budget (fails).** `index.html` gzipped ≤ 260 KB and `staff.js` gzipped ≤ 250 KB (KB = 1000 bytes,
+- **Size budget (fails).** `index.html` gzipped ≤ 250 KB and `staff.js` gzipped ≤ 270 KB (KB = 1000 bytes,
   zlib default level); the build prints both numbers. `SIZE_BUDGET_CUSTOMER_KB` / `SIZE_BUDGET_STAFF_KB` in the
   environment move a limit for one run; a deliberate step up edits `SIZE_BUDGET_DEFAULT_KB` with the reason in
   the commit.
