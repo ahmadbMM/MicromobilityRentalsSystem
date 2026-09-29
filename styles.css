@@ -5254,10 +5254,10 @@ html[dir="rtl"] .pg-field select{background-position:left 14px center;}
 @media (prefers-reduced-motion:reduce){.pg-spin{animation:none;}}
 /* Correction request (#fix-gate): staff asked the rider to fix some account fields. A pop-up
    over the page, the profile gate's card inside, one item per flagged field. */
-#fix-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;}
+#fix-gate .auth-backdrop,#app-fix .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;}
 body.fix-open{overflow:hidden;}
 .fx-box{margin:auto;animation:fxIn .22s ease-out;}
-#fix-gate .fx-box:focus,#fix-gate .fx-box:focus-visible{outline:none;} /* the card takes focus on open; it is not a control */
+#fix-gate .fx-box:focus,#fix-gate .fx-box:focus-visible,#app-fix .fx-box:focus,#app-fix .fx-box:focus-visible{outline:none;} /* the card takes focus on open; it is not a control */
 @keyframes fxIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.fx-box{animation:none;}}
 .fx-kicker{display:flex;align-items:center;gap:8px;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b54708;}
@@ -6339,6 +6339,19 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-pwd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px;letter-spacing:1.5px}
 .ca-msg-lang{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
 .ca-msg-lang select{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font:inherit;font-weight:700}
+/* Asking an applicant for changes (2026-09-29): the card's line, and the staff dialog's note */
+.ca-fix{margin-top:8px;font-size:12.5px;font-weight:700;line-height:1.45;padding:7px 10px;border-radius:8px}
+.ca-fix-wait{background:rgba(var(--warn-rgb),.1);color:rgb(var(--warn-rgb))}
+.ca-fix-done{background:rgba(var(--green-rgb),.08)}
+.ca-fix-was{font-weight:600;color:var(--muted)}
+.ca-fix-q{font-weight:600;font-style:italic;margin-top:3px;overflow-wrap:anywhere}
+.ca-fx-fields{margin-bottom:14px}
+.ca-fx-note textarea{width:100%;min-height:64px;resize:vertical;box-sizing:border-box;font:inherit}
+/* The applicant's page (#app-fix) wears the correction request's card; the staff note is a quote */
+.afx-note{margin:14px 0 16px;padding:10px 12px;border-radius:8px;background:#f4f5f2;border-inline-start:3px solid #e08a00;font-size:13.5px;line-height:1.5;color:#1c2126;overflow-wrap:anywhere}
+.afx-note span{display:block;font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#6b7278;margin-bottom:2px}
+.afx-end .pg-btn{margin-top:14px}
+.afx-link{display:block;margin:12px auto 0;background:none;border:0;padding:6px;color:#4f565c;font:inherit;font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 /* Approve: more tags, and a Saturday ride's final list (2026-09-29) */
 .ca-ap-box{width:min(92vw,480px);max-height:calc(100dvh - 32px);overflow-y:auto}
 .ca-ap-sec{margin:0 0 16px}

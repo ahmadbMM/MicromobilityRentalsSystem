@@ -58,6 +58,9 @@ with expected(fname, want_definer, note) as (values
   ('_apply_default_pay',    true,  'reads customers.default_pay for a booking any caller inserts (staff screens, customer_create_booking)'),
   ('_is_vip',                true,  'reads customer_tags (staff-only) for the VIP perk; revoked from anon+authenticated'),
   ('_vip_no_carbon',         true,  'calls _is_vip for a booking any caller inserts or changes'),
+  ('staff_community_ask_changes', true, 'writes community_applications (staff-only); is_staff()-gated'),
+  ('community_fix_get',      true,  'reads one application by its change token for the applicant; anon'),
+  ('community_fix_submit',   true,  'writes the asked fields of one application by its token; anon, _ip_gate-metered'),
   ('_badge_rule_ok',        false, 'pure shape test of a badge rule, for the check constraint'),
   -- Invoker on purpose: pure logic, no privileged read.
   ('_name_chars_ok',         false, 'pure regex test, no read'),
