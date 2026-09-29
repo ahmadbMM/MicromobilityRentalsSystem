@@ -7236,7 +7236,6 @@ body.view-staff .ho-out-row{display:grid;grid-template-columns:auto 1fr auto aut
    confirm dialog), without inline styles (2026-09-28; see the desk's dialogs above). */
 #ho-host .bkm-ho14{margin-top:14px;}
 #ho-host .bkm-ho18{margin-top:18px;}
-#confirm-modal .bkm-rtrow{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;}
 
 /* ── Community > Duplicates: merging two accounts for one person (2026-09-28) ── */
 body.view-staff .mg-group{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;background:var(--s1);}

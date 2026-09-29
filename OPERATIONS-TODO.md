@@ -93,10 +93,16 @@ the old client's `select('*')` on bikes fails the moment they land:
 
 **Provisioning a tag** (one per bike, once; Safari cannot write tags):
 - iPhone, free "NFC Tools" app → Write → Add a record → URL/URI →
-  `https://micromobilityrentals.pages.dev/?bike=042` (the bike's three-digit number, the
-  same one on its sticker) → Write → hold the tag to the top of the phone.
-- Tap it once to check: Safari opens the site; signed-in staff see the bike's card, anyone
-  else sees the staff sign-in and nothing more.
+  `https://micromobility.sa/bikes/42` (the bike's number as the Fleet list saves it, no leading
+  zeros; the bike's edit form shows this exact link with Copy link and Download QR) → Write →
+  hold the tag to the top of the phone.
+- A rider's phone opens the bike's page. A staff phone - one that has opened the staff app in
+  Safari in the last 7 days - is sent on to `staff.micromobility.sa/?bike=42` instead: the
+  staff app writes an `mm_staff_tap` cookie for micromobility.sa each time its panel opens
+  (Safari keeps it 7 days at most) and removes it on sign-out; the website's proxy reads it.
+  Tags already written with `/b/42` or `/?bike=042` still work.
+- Tap it once to check: on a staff phone with no check-in open, the bike's card opens; on a
+  rider's phone, the bike's page.
 - Place the tag on the head tube or top tube under a clear sticker, away from the frame's
   metal where the phone can rest flat; the QR sticker (same URL) goes beside it for iPads.
 - Only URL records trigger iOS; a text record does nothing.
@@ -105,7 +111,10 @@ the old client's `select('*')` on bikes fails the moment they land:
 has its own storage, so the tab iOS opens for a tag would see neither the login nor the
 open check-in. Flow: Scan the booking QR (or tap the booking) → the check-in modal opens →
 tap the bike's tag with the same phone → the new tab shows the modal with the bike filled
-and Confirm focused → Confirm in either tab (the second is a harmless no-op). The open
+and Confirm focused → Confirm in either tab (the second is a harmless no-op). At the return,
+tap the bike's tag: a bike out with a rider on the ride opens that rider's Return sheet -
+condition (OK / Needs a check / Damaged), notes, the payment for a rider who still owes, and
+Return bike. The open
 check-in expires after 15 minutes or on sign-out. Bluetooth HID readers type the tag UID
 into the Bike field; an unknown UID typed right after a bike number offers "Link this tag".
 

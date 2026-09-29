@@ -402,8 +402,9 @@ expected, never a community request awaiting Approve) and **Mark paid** (`groupM
 Payment and check-in stay separate taps — marking a party paid does not check it in.
 
 **Check-in modal, Bike field** (`#ci-bike`, `inputmode="numeric"`): one input, four ways in — a
-bike number on the keypad, the NFC tab (`/?bike=042`), a QR sticker through the in-app scanner
-(same URL), or a tag UID typed by a Bluetooth HID reader. Resolved through `staff_resolve_bike`
+bike number on the keypad, the NFC tab (`micromobility.sa/bikes/42`, which sends a staff phone on to
+`staff.micromobility.sa/?bike=42`), a QR sticker through the in-app scanner (same URL; `/b/42` and
+`/?bike=042` too), or a tag UID typed by a Bluetooth HID reader. Resolved through `staff_resolve_bike`
 (or the loaded fleet where the RPC is absent) into the spec line `042 · Road · Carbon · M · Black ·
 Shimano 105` plus status; a bike that is out (`ciBikeRented`, naming the rider) or in maintenance
 disables Confirm. An unknown UID typed right after a bike number offers **Link this tag to bike

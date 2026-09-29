@@ -8,7 +8,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 //  - Hand-over: Bookings > Hand-over (/bookings/handover) lists the riders checked in and still
 //    without a bike. A bike number typed, a tag tapped or a sticker scanned goes to the picked rider
 //    (next in line by default) through staff_swap_bike, or the classic writes where it is missing.
-//  - A tag tapped on a bike that is out offers its return in one tap.
+//  - A tag tapped on a bike that is out opens its rider's return: the condition, notes and Return.
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const row = (id: string, qn: number, name: string, extra: Record<string, unknown> = {}): Record<string, unknown> => ({
   id, session_id: 's0', session_day: 'Friday', session_date: today, queue_num: qn, name, phone: '', customer_id: null,
@@ -196,17 +196,22 @@ test.describe('Hand-over', () => {
     expect(await page.evaluate(`_hoTarget()`)).toBeNull();
   });
 
-  test('a tag tapped on a bike that is out offers its return in one tap', async ({ page }) => {
+  test("a tag tapped on a bike that is out opens its rider's return: the condition, notes and Return", async ({ page }) => {
     await boot(page, { 'rpc:staff_resolve_bike': { found: true, bike: bikes[2], rented_to: { name: 'Riding Eid', since: '2026-01-01T18:00:00Z' } }, 'rpc:staff_return': { ok: true } });
     const rets = rpcs(page, 'staff_return');
     await page.evaluate(`S.staffTab='queue';S.queueView='bookings';renderStaffQueue();_bikeArrived('9','nfc')`);
-    const m = page.locator('#confirm-modal');
-    await expect(m).toContainText('Bike 009 is out');
-    await expect(m).toContainText('With #5 Riding Eid');
-    await expect(m).toContainText('Return with a note');
-    await m.locator('button', { hasText: 'Return bike' }).click();
+    const m = page.locator('#return-modal');
+    await expect(m).toHaveCSS('display', 'flex');
+    await expect(m.locator('#ret-title')).toContainText('#5 Riding Eid');
+    await expect(m).toContainText('Road S 009');
+    await expect(m.getByRole('button', { name: '✓ OK' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#confirm-modal')).toBeHidden(); // no chooser in front of it any more
+    await m.getByRole('button', { name: 'Needs a check' }).click();
+    await m.locator('#ret-notes').fill('Rear brake rubs');
+    await m.locator('#ret-confirm').click();
     await expect.poll(() => rets.length).toBe(1);
-    expect(rets[0]).toMatchObject({ p_booking_id: E, p_return_condition: 'ok' });
+    expect(rets[0]).toMatchObject({ p_booking_id: E, p_return_condition: 'needs_check', p_notes: 'Rear brake rubs' });
+    await expect(m).toBeHidden();
   });
 
   test('/bookings/handover opens the view straight from the address', async ({ page }) => {

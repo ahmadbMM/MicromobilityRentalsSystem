@@ -2,11 +2,14 @@ import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// A bike's NFC tag (and its QR sticker) holds https://<origin>/?bike=042. iOS opens it in
+// A bike's NFC tag (and its QR sticker) holds its page, https://micromobility.sa/bikes/42, which
+// the website sends a staff phone on from to https://staff.micromobility.sa/?bike=42 (the phone
+// carries the mm_staff_tap cookie this app writes). iOS opens it in
 // Safari on tap; the app treats that URL as the "a bike arrived" event. Everything about it
 // is staff-only: a device without a staff session lands on the sign-in with no bike on the
 // page, in the URL or in a request. With a session and an open check-in the bike goes into
-// that modal; with no open check-in the bike's own card opens.
+// that modal; with no open check-in the bike's own card opens; a bike out with a rider on the
+// ride opens that rider's return.
 
 const BIKE = {
   id: 'b1', name: 'Road 042', bike_number: 42, type: 'Road', size: 'M', status: 'available',
@@ -163,6 +166,13 @@ test('the in-app scanner reads a bike sticker into the open modal, and an expire
   await expect(modal.locator('#ci-bike')).toHaveValue('42');
   await expect(modal.locator('#ci-bike-spec')).toContainText('Shimano 105');
   expect(await page.evaluate('S._ciPaid')).toBe('card');
+  // The QR the bike's edit form gives holds its page, micromobility.sa/bikes/42; older ones /b/42.
+  for (const url of ['https://micromobility.sa/bikes/42', 'https://micromobility.sa/b/42/']) {
+    await modal.locator('#ci-bike').fill('');
+    // @ts-expect-error app globals
+    await page.evaluate((u) => _onScanPayload(u), url);
+    await expect(modal.locator('#ci-bike')).toHaveValue('42');
+  }
   // A sticker that holds only the number works too, and the field has its own Scan button.
   await modal.locator('#ci-bike').fill('');
   // @ts-expect-error app globals
@@ -200,4 +210,64 @@ test('a bike that matches the booking says so', async ({ page }) => {
   await page.goto('/?bike=42');
   await waitForSb(page);
   await expect(page.locator('#checkin-modal .ci-nfc-rcpt')).toContainText('Matches the booking');
+});
+
+test("a tag on a bike out with a rider on the ride opens that rider's return, ahead of a check-in open in another tab", async ({ page }) => {
+  const RIDING = { ...ENTRY, id: 'e2', queue_num: 3, name: 'Riding Rana', status: 'active', assigned_bike_id: 'b1', paid: false, checked_in_at: '2099-02-10T09:00:00Z' };
+  await stubSupabase(page, fixtures({
+    queue_entries: [ENTRY, RIDING],
+    bikes: [{ ...BIKE, status: 'in-use' }],
+    'rpc:staff_resolve_bike': { found: true, bike: { ...BIKE, status: 'in-use' }, rented_to: { name: 'Riding Rana', since: '2099-02-10T09:00:00Z' } },
+    'rpc:staff_return': { ok: true },
+  }));
+  await unlockStaff(page);
+  await page.addInitScript(() => {
+    localStorage.setItem('mm_active_checkin', JSON.stringify({ entryId: 'e1', ref: '#7', openedAt: Date.now() }));
+  });
+  const rpcs = watchRpcs(page);
+  await page.goto('/?bike=42');
+  await waitForSb(page);
+
+  const m = page.locator('#return-modal');
+  await expect(m).toHaveCSS('display', 'flex');
+  await expect(m.locator('#ret-title')).toContainText('#3 Riding Rana');
+  await expect(m).toContainText('Road 042');
+  await expect(page.locator('#checkin-modal')).toBeHidden(); // the bike is not given to #7 while it is still out
+  // The rider still owes: the payment is asked on the same sheet, with the condition and the notes.
+  await expect(m).toContainText('Pending');
+  await m.getByRole('button', { name: 'Damaged' }).click();
+  await expect(m).toContainText('Goes to maintenance.');
+  await m.locator('#ret-notes').fill('Chain snapped');
+  await m.locator('#ret-confirm').click();
+  await expect.poll(() => rpcs.find((c) => c.name === 'staff_return')?.body).toEqual({ p_booking_id: 'e2', p_return_condition: 'damaged', p_notes: 'Chain snapped' });
+  await expect(m).toBeHidden();
+});
+
+test('the staff app marks this phone for the website on the live staff address, and signing out unmarks it', async ({ page }) => {
+  await stubSupabase(page, fixtures());
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  // What it writes, by address: only staff.micromobility.sa can set a cookie the website reads.
+  const cookieFor = (host: string, on: boolean) => page.evaluate(([h, o]) => {
+    // @ts-expect-error app global
+    return _staffTapCookieStr(h, o);
+  }, [host, on] as const);
+  expect(await cookieFor('staff.micromobility.sa', true)).toBe('mm_staff_tap=1; Domain=micromobility.sa; Path=/; Max-Age=2592000; Secure; SameSite=Lax');
+  expect(await cookieFor('STAFF.micromobility.sa', false)).toBe('mm_staff_tap=; Domain=micromobility.sa; Path=/; Max-Age=0; Secure; SameSite=Lax');
+  for (const host of ['localhost', 'staff.localhost', 'micromobilityrentals.pages.dev', 'micromobility.sa', 'staff.micromobility.sa.example.com', 'evilstaff.micromobility.sa']) {
+    expect(await cookieFor(host, true)).toBe('');
+  }
+  // When it writes: each time the panel opens, and away on sign-out. This host cannot hold the
+  // live cookie, so the spec stands in a local one to watch the two calls land.
+  await page.evaluate(() => {
+    // @ts-expect-error app global
+    window._staffTapCookieStr = (_h: string, on: boolean) => `mm_staff_tap=${on ? '1' : ''}; Path=/; Max-Age=${on ? 60 : 0}`;
+  });
+  await page.evaluate('goStaff()');
+  const tap = async () => (await page.context().cookies()).find((c) => c.name === 'mm_staff_tap')?.value;
+  await expect.poll(tap).toBe('1');
+  // lockStaff() ends on a navigation, which takes the evaluate's page with it.
+  await page.evaluate('lockStaff()').catch(() => {});
+  await expect.poll(tap).toBeUndefined();
 });
