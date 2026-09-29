@@ -67,11 +67,36 @@ test('the Applications tab shows every answer, the handles as links, and an acco
 
 // How they heard of us: the community form asks it since 2026-09-28 (the booking app's sign-up no
 // longer does), and the card shows the answer in the staff member's language.
-test('the card shows how the applicant heard of us, and nothing when the form did not ask', async ({ page }) => {
+test('the card shows how the applicant heard of us, and Not answered when it is empty', async ({ page }) => {
   await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a1' ? { ...a, heard_from: 'invited' } : a)) });
   await expect(row(page, 'a1').locator('.ca-grid')).toContainText('How did you hear about us?');
   await expect(row(page, 'a1').locator('.ca-grid')).toContainText('Invited by MicroMobility');
-  await expect(row(page, 'a2').locator('.ca-grid')).not.toContainText('How did you hear about us?');
+  await expect(row(page, 'a2').locator('.ca-kv', { hasText: 'How did you hear about us?' })).toContainText('Not answered');
+});
+
+// Every question the form asks keeps its line on the card, answered or not (the owner,
+// 2026-09-29: "show the unanswered/filled fields, don't hide them").
+test('every question has its line, an empty answer reading Not answered', async ({ page }) => {
+  const blank = { instagram: '', linkedin: '', workplace: null, heard_from: null, profession: '' };
+  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a2' ? { ...a, ...blank } : a.id === 'a1' ? { ...a, workplace: 'Aramco', heard_from: 'friend' } : a)) });
+  const labels = ['Mobile', 'Email', 'Born', 'Gender', 'Nationality', 'Height', 'Bike', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news', 'Form language'];
+  for (const id of ['a1', 'a2']) expect(await row(page, id).locator('.ca-kv > span').allTextContents()).toEqual(labels);
+  const k = row(page, 'a1');
+  await expect(k.locator('.ca-kv-none')).toHaveCount(0);
+  await expect(k.locator('.ca-kv', { hasText: 'Company' })).toContainText('Aramco');
+  await expect(k.locator('.ca-kv', { hasText: 'Instagram' }).locator('a.soc-link')).toHaveAttribute('href', 'https://www.instagram.com/karim.rides');
+  // the handle reads as typed, not in the labels' capitals
+  await expect(k.locator('.ca-kv', { hasText: 'Instagram' }).locator('.soc-link span')).toHaveCSS('text-transform', 'none');
+  const h = row(page, 'a2');
+  const empty = ['Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn'];
+  await expect(h.locator('.ca-kv-none')).toHaveCount(empty.length);
+  for (const k2 of empty) await expect(h.locator('.ca-kv', { hasText: k2 }).locator('b')).toHaveText('Not answered');
+  await expect(h.locator('.soc-link')).toHaveCount(0);
+  await expect(h.locator('.ca-kv', { hasText: 'Ride news' })).toContainText('Yes');
+
+  // in Arabic too
+  await page.evaluate(`setLang('ar')`);
+  await expect(row(page, 'a2').locator('.ca-kv-none b').first()).toHaveText('لم تتم الإجابة');
 });
 
 test('before the database has heard_from, the list loads without it', async ({ page }) => {

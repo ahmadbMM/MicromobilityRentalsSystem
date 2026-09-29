@@ -2572,6 +2572,7 @@
   "caLblLang": "Langue du formulaire",
   "caYes": "Oui",
   "caNo": "Non",
+  "caNoAnswer": "Sans réponse",
   "caHasAccount": "A déjà un compte : {0}",
   "caMadeNew": "Nouveau compte créé",
   "caUsedExisting": "Tag ajouté à son compte existant",

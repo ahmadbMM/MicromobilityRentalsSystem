@@ -2572,6 +2572,7 @@
   "caLblLang": "Idioma del formulario",
   "caYes": "Sí",
   "caNo": "No",
+  "caNoAnswer": "Sin respuesta",
   "caHasAccount": "Ya tiene una cuenta: {0}",
   "caMadeNew": "Cuenta nueva creada",
   "caUsedExisting": "Etiqueta añadida a su cuenta existente",

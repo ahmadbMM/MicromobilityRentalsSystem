@@ -6335,8 +6335,11 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-dot{width:7px;height:7px;border-radius:50%}
 .ca-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px 16px;margin:10px 0 6px}
 .ca-kv{display:flex;flex-direction:column;min-width:0;font-size:13px}
-.ca-kv span{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.ca-kv>span{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
 .ca-kv b{font-weight:700;overflow-wrap:anywhere}
+/* A question the applicant left empty keeps its line (2026-09-29), in a quieter voice. */
+.ca-kv-none b,.ca-none{font-weight:600;font-style:italic;color:var(--muted)}
+.ca-kv .soc-link{margin-top:2px}
 .ca-acct,.ca-sx{margin-top:8px;font-size:12.5px;font-weight:700;line-height:1.45;padding:7px 10px;border-radius:8px}
 .ca-acct{background:rgba(var(--green-rgb),.08)}
 .ca-sx{background:rgba(var(--warn-rgb),.1);color:rgb(var(--warn-rgb))}
@@ -6395,7 +6398,8 @@ body .ca-msg-box textarea.ca-msg{width:100%;min-height:300px;height:300px;box-si
 .la-kid{display:inline-block;vertical-align:2px;margin-inline-start:6px;padding:1px 7px;border-radius:9px;background:rgba(var(--green-rgb),.12);color:var(--green);font-size:11px;font-weight:800}
 .la-lesson{margin-top:8px;padding:8px 12px;border-radius:8px;border-inline-start:3px solid var(--green);background:rgba(var(--green-rgb),.08);font-size:13px;font-weight:800}
 .la-notes{margin-top:8px;font-size:13px;line-height:1.5;padding:8px 12px;border-radius:8px;background:var(--s3);white-space:pre-wrap;overflow-wrap:anywhere}
-.la-notes span{display:block;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.la-notes-none{font-style:italic;color:var(--muted)}
+.la-notes span{display:block;font-style:normal;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 .la-learners{margin-top:10px}
 .la-learners-h{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .la-learners ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}

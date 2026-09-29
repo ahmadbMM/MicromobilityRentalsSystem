@@ -223,7 +223,8 @@ test.describe('@staff:community learn to ride', () => {
     await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l1' ? { ...l, heard_from: 'friend' } : l)) });
     await expect(row(page, 'l1')).toContainText('How did you hear about us?');
     await expect(row(page, 'l1')).toContainText('A friend or family');
-    await expect(row(page, 'l2')).not.toContainText('How did you hear about us?');
+    // not answered: the line stays, and says so (the owner, 2026-09-29)
+    await expect(row(page, 'l2').locator('.ca-kv', { hasText: 'How did you hear about us?' })).toContainText('Not answered');
   });
 
   // The person signing up gives what the community form asks (owner, 2026-09-28): the card shows it.
@@ -237,12 +238,20 @@ test.describe('@staff:community learn to ride', () => {
     await expect(r).toContainText('Egypt');
     await expect(r).toContainText('Architect');
     await expect(r.locator('.ca-kv', { hasText: 'Ride news' })).toContainText('Yes');
-    await expect(r.locator('.soc-links a[href*="instagram.com/nadia.o"]')).toHaveCount(1);
-    await expect(r.locator('.soc-links a[href*="nadia-omar"]')).toHaveCount(1);
-    // A sign-up from before those details shows none of them.
-    await expect(row(page, 'l2')).not.toContainText('Born');
-    await expect(row(page, 'l2')).not.toContainText('Ride news');
-    await expect(row(page, 'l2').locator('.soc-links')).toHaveCount(0);
+    await expect(r.locator('.ca-kv', { hasText: 'Instagram' }).locator('a.soc-link[href*="instagram.com/nadia.o"]')).toHaveCount(1);
+    await expect(r.locator('.ca-kv', { hasText: 'LinkedIn' }).locator('a.soc-link[href*="nadia-omar"]')).toHaveCount(1);
+    await expect(r.locator('.ca-kv-none')).toHaveCount(2); // Company and How did you hear about us?
+    // A sign-up without those details keeps every line, each saying Not answered (the owner,
+    // 2026-09-29: "show the unanswered/filled fields, don't hide them").
+    const l2 = row(page, 'l2');
+    for (const k of ['Born', 'Gender', 'Nationality', 'Height', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news']) {
+      await expect(l2.locator('.ca-kv', { hasText: k })).toHaveClass(/ca-kv-none/);
+      await expect(l2.locator('.ca-kv', { hasText: k }).locator('b')).toHaveText('Not answered');
+    }
+    await expect(l2.locator('.soc-link')).toHaveCount(0);
+    await expect(l2.locator('.la-notes')).toHaveClass(/la-notes-none/);
+    await expect(l2.locator('.la-notes')).toContainText('Not answered');
+    await expect(r.locator('.la-notes')).not.toHaveClass(/la-notes-none/);
   });
 
   test('before the database has the person\'s details, the list loads without them', async ({ page }) => {
