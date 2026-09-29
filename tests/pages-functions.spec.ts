@@ -315,6 +315,28 @@ test.describe('the Google Wallet pass', () => {
   });
 });
 
+test.describe('the CSP report endpoint', () => {
+  const realFetch = globalThis.fetch;
+  test.afterEach(() => { globalThis.fetch = realFetch; });
+  const report = (r: Record<string, string>) => new Request('https://site.test/api/csp-report', { method: 'POST', headers: { 'content-type': 'application/csp-report', 'cf-connecting-ip': String(Math.random()) }, body: JSON.stringify({ 'csp-report': { 'document-uri': 'https://site.test/', ...r } }) });
+
+  test('pings for the page\'s own violations, never for what an extension or an in-app browser injects', async () => {
+    const pings: string[] = [];
+    globalThis.fetch = (async (_u: unknown, init?: RequestInit) => { pings.push(JSON.parse(String(init?.body)).content); return new Response('{}'); }) as typeof fetch;
+    const post = await load('functions/api/csp-report.js', 'onRequestPost');
+    const env = { DISCORD_WEBHOOK: 'https://discord.test/hook' };
+    for (const r of [
+      { 'effective-directive': 'script-src-elem', 'blocked-uri': 'https://connect.facebook.net/en_US/pcm.js', 'source-file': 'https://site.test/' },
+      { 'effective-directive': 'script-src-elem', 'blocked-uri': 'https://connect.facebook.net/en_US/promo.v2.js', 'source-file': 'iabjs' },
+      { 'effective-directive': 'style-src-attr', 'blocked-uri': 'inline', 'source-file': 'chrome-extension://abc/content.js' },
+    ]) expect((await post({ request: report(r), env })).status).toBe(204);
+    expect(pings).toEqual([]);
+    await post({ request: report({ 'effective-directive': 'style-src-attr', 'blocked-uri': 'inline', 'script-sample': 'color:red' }), env });
+    expect(pings).toHaveLength(1);
+    expect(pings[0]).toContain('style-src-attr blocked inline sample: color:red');
+  });
+});
+
 test.describe('the contact card endpoint', () => {
   // An iPhone opens a vCard in Contacts only when the site serves it (functions/api/contact.js);
   // the staff page posts the card it built and gets the same bytes back as text/vcard.

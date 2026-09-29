@@ -32709,6 +32709,10 @@ try{document.addEventListener('securitypolicyviolation',e=>{
   try{
     const f=String(e.sourceFile||'')+' '+String(e.blockedURI||'');
     if(/(chrome|moz|safari(-web)?)-extension:/.test(f))return;
+    // Instagram's and Facebook's in-app browsers inject Meta's own scripts (pcm.js, promo.v2.js from
+    // connect.facebook.net, run from "iabjs") into every page they open; the policy blocks them, as it
+    // should, and they are the browser's, not the page's - twenty a night from ad and bio links.
+    if(/connect\.facebook\.net\//.test(f)||/^iabjs/.test(String(e.sourceFile||'')))return;
     const el=e.target&&e.target.nodeType===1?e.target:null;
     const at=el?el.tagName.toLowerCase()+(el.id?'#'+el.id:'')+(typeof el.className==='string'&&el.className?'.'+el.className.trim().split(/\s+/)[0]:'')+((el.parentElement&&el.parentElement.closest('[id]'))?' in #'+el.parentElement.closest('[id]').id:''):'';
     const key=(e.effectiveDirective||e.violatedDirective||'?')+'|'+(e.sample||e.blockedURI||'')+'|'+at;

@@ -29,6 +29,7 @@ export async function onRequestPost(context) {
     const page = get('documentURL', 'document-uri');
     if (!directive && !blocked) continue;
     if (/^(chrome|moz|safari(-web)?)-extension:/.test(at) || /^(chrome|moz|safari(-web)?)-extension:/.test(blocked)) continue; // a browser extension's own injection, not the page's
+    if (/connect\.facebook\.net\//.test(blocked) || /^iabjs/.test(at)) continue; // Instagram's / Facebook's in-app browser injecting Meta's scripts, not the page's
     lines.push(`${directive || '?'} blocked ${blocked || '(inline)'}${at ? ` at ${at}:${line}` : ''}${sample ? ` sample: ${sample}` : ''}${page ? ` on ${page}` : ''}`);
   }
   if (!lines.length) return new Response(null, { status: 204 });

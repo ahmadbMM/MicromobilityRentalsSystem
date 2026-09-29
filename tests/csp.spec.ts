@@ -174,6 +174,20 @@ test('a violation the page meets goes into error_log with the element it came fr
   expect(mine.find((m) => m.includes('div.probe'))).toMatch(/^CSP style-src-attr: color:red at div\.probe in #csp-probe-host \| csp /);
   expect(mine.some((m) => m.includes('i in #csp-probe-host'))).toBe(true);
   await expect(page.locator('.toast')).toHaveCount(0); // silent: the rider sees nothing
+  // What a browser injects is not the page's: an extension's styles, and the scripts Instagram's and
+  // Facebook's in-app browsers add to every page (blocked by the policy, as they should be).
+  const n = logged.length;
+  await page.evaluate(() => {
+    const fire = (o: Record<string, string>) => document.dispatchEvent(new SecurityPolicyViolationEvent('securitypolicyviolation', { effectiveDirective: 'script-src-elem', violatedDirective: 'script-src-elem', originalPolicy: '', disposition: 'enforce', documentURI: location.href, statusCode: 200, blockedURI: '', sourceFile: '', ...o }));
+    fire({ blockedURI: 'https://connect.facebook.net/en_US/pcm.js', sourceFile: location.href });
+    fire({ blockedURI: 'https://connect.facebook.net/en_US/promo.v2.js', sourceFile: 'iabjs' });
+    fire({ effectiveDirective: 'style-src-attr', violatedDirective: 'style-src-attr', blockedURI: 'inline', sourceFile: 'chrome-extension://abc/content.js' });
+    fire({ blockedURI: 'https://evil.example/x.js', sourceFile: location.href }); // anything else still counts
+  });
+  await expect.poll(() => logged.length - n).toBe(1);
+  await page.waitForTimeout(300);
+  expect(logged.slice(n)).toHaveLength(1);
+  expect(logged[n]).toContain('evil.example');
 });
 
 test('the dispatcher: one call with the element and its value, several calls in a row, stopPropagation, no eval', async ({ page }) => {
