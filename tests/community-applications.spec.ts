@@ -198,14 +198,18 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   await expect(chip(page, 'tag_lead')).toHaveAttribute('aria-pressed', 'false');
 
   // Only the open Saturday rides, soonest first, after "Not now"
-  const sel = dlg.locator('#ca-ap-ride');
-  await expect(sel).toHaveValue('');
-  expect(await sel.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value))).toEqual(['', SAT, SAT2]);
-  await expect(sel.locator(`option[value="${SAT}"]`)).toContainText('20 spots left');
-  await sel.selectOption(SAT2);
+  // Every available Saturday session is a choice on screen, "Not now" first and picked
+  const ride = (id: string) => dlg.locator(`.ca-ap-rides [data-ca-ride="${id}"]`);
+  expect(await dlg.locator('.ca-ap-rides .ca-ap-ride').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-ca-ride')))).toEqual(['', SAT, SAT2]);
+  await expect(ride('')).toHaveAttribute('aria-checked', 'true');
+  await expect(ride(SAT)).toContainText('20 spots left');
+  await expect(ride(SAT)).toContainText('Sat');
+  await ride(SAT2).click();
+  await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
+  await expect(ride('')).toHaveAttribute('aria-checked', 'false');
   await chip(page, 'tag_lead').click(); // a redraw keeps the ride picked
   await chip(page, 'tag_lead').click();
-  await expect(sel).toHaveValue(SAT2);
+  await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
 
   await dlg.locator('.ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box .ca-pwd')).toHaveText('Kp7wXr4Mnq'); // the welcome message still comes
@@ -230,10 +234,10 @@ test('Approve with nothing picked writes no tags and no booking; held tags and b
   await expect(chip(page, 'tag_vip')).toBeDisabled(); // she holds it already
   await expect(chip(page, 'tag_vip')).toHaveAttribute('aria-pressed', 'true');
   await expect(chip(page, 'tag_lead')).toBeEnabled();
-  const booked = page.locator(`#ca-ap-ride option[value="${SAT}"]`);
+  const booked = page.locator(`.ca-ap-rides [data-ca-ride="${SAT}"]`);
   await expect(booked).toBeDisabled();
   await expect(booked).toContainText('already booked');
-  await expect(page.locator(`#ca-ap-ride option[value="${SAT2}"]`)).toBeEnabled();
+  await expect(page.locator(`.ca-ap-rides [data-ca-ride="${SAT2}"]`)).toBeEnabled();
   await page.locator('#confirm-modal .ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
   await page.waitForTimeout(300);
@@ -248,7 +252,7 @@ test('with no Saturday ride open the approval says so, and Cancel approves nothi
   await row(page, 'a1').locator('.ca-approve').click();
   const dlg = page.locator('#confirm-modal .ca-ap-box');
   await expect(dlg).toContainText('No Saturday Social Ride is open right now.');
-  await expect(dlg.locator('#ca-ap-ride')).toHaveCount(0);
+  await expect(dlg.locator('.ca-ap-rides')).toHaveCount(0);
   await dlg.locator('button', { hasText: 'Cancel' }).click();
   await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
   await page.waitForTimeout(200);
@@ -276,7 +280,7 @@ test('Reject can tag an applicant’s existing account, the blacklist included; 
   await expect(dlg).toContainText('Reject Karim Mansour’s application?');
   await expect(dlg).toContainText('There is no account with this email or phone');
   await expect(dlg.locator('.ca-ap-tags')).toHaveCount(0);
-  await expect(dlg.locator('#ca-ap-ride')).toHaveCount(0); // no ride on a rejection
+  await expect(dlg.locator('.ca-ap-rides')).toHaveCount(0); // no ride on a rejection
   await dlg.locator('button', { hasText: 'Cancel' }).click();
 
   // Huda has an account, and it holds Community

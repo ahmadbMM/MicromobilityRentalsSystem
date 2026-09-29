@@ -14715,7 +14715,7 @@ function _caApTag(tid){
   const i=st.tags.indexOf(tid);if(i>=0)st.tags.splice(i,1);else st.tags.push(tid);
   _caApRender();
 }
-function _caApRide(sid){if(S._caAp)S._caAp.ride=sid||'';}
+function _caApRide(sid){if(!S._caAp)return;S._caAp.ride=sid||'';_caApRender();}
 function _caApSet(k,v){if(S._caAp)S._caAp[k]=v;}
 function _caApClose(){S._caAp=null;closeConfirm();}
 function _caApRender(){
@@ -14735,11 +14735,16 @@ function _caApRender(){
   if(!rej){
     const rides=_caRides();
     if(st.ride&&!rides.some(s=>s.id===st.ride&&!_caBooked(cid,s.id)))st.ride='';
-    // The label says Saturday Social Ride already: an option names a ride only when it has a title of its own.
-    const opt=s=>{const on=_caBooked(cid,s.id);
-      return `<option value="${esc(s.id)}"${st.ride===s.id?' selected':''}${on?' disabled':''}>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.title?' · '+esc(s.title):''} · ${esc(on?t('caRideOn'):spotsLeftLabel(spotsLeft(s.id)))}</option>`;};
-    rideSec=`<div class="form-group ca-ap-sec"><label for="ca-ap-ride">${t('caRideLbl')}</label>
-        ${rides.length?`<select id="ca-ap-ride" data-on-change="${_on("_caApRide",_P("value"))}"><option value="">${t('caRideNone')}</option>${rides.map(opt).join('')}</select>`
+    // Every available Saturday session is a choice on screen, with "Not now" first (the owner,
+    // 2026-09-29: "give the staff the option to choose from the available saturday sessions"; it was
+    // a select). A session names itself only when it has a title of its own: the label says
+    // Saturday Social Ride already. One the account is booked on is shown, not pickable.
+    const opt=s=>{
+      const id=s?s.id:'',on=!!s&&_caBooked(cid,s.id),pick=st.ride===id;
+      const face=s?`<b>${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))}${s.title?' · '+esc(s.title):''}</b><span class="ca-ap-rt">${esc(sessionTime(s))}</span><span class="ca-ap-rl${on?'':spotsLeft(s.id)>0?'':' full'}">${esc(on?t('caRideOn'):spotsLeftLabel(spotsLeft(s.id)))}</span>`:`<b>${t('caRideNone')}</b>`;
+      return `<button type="button" role="radio" class="ca-ap-ride${pick?' on':''}" data-ca-ride="${esc(id)}" aria-checked="${pick?'true':'false'}"${on?' disabled':` data-on-click="${_on("_caApRide",id)}"`}>${face}</button>`;};
+    rideSec=`<div class="form-group ca-ap-sec"><label id="ca-ap-ride-l">${t('caRideLbl')}</label>
+        ${rides.length?`<div class="ca-ap-rides" role="radiogroup" aria-labelledby="ca-ap-ride-l">${[null,...rides].map(opt).join('')}</div>`
           :`<div class="ca-ap-none">${t('caRideNoOpen')}</div>`}</div>`;
   }
   const body=rej?t('caRejectBody'):acct?t('caApproveBodyExisting').replace('{0}',acct.name||acct.email||''):t('caApproveBody');
@@ -29896,8 +29901,8 @@ async function saveTagGrant(){
 // The blacklist tag (2026-09-27) is the third: black, the white mark struck through by a no-entry
 // ring (ban), for an account that is not fit to be in the community. Where the community is joined
 // its holder is pointed out: the Community grant and an application's approval (_isBlacklisted).
-// The VIP tag (2026-09-29) is the fourth: gold, a crown and the letters VIP drawn in white
-// (assets/tag-vip.svg), for a rider who always rides on the house (_isVip).
+// The VIP tag (2026-09-29) is the fourth: gold, the letters VIP drawn in white (assets/tag-vip.svg;
+// the crown beside them came off the same day), for a rider who always rides on the house (_isVip).
 const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'}};
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip';
 function _hasTagNow(cid,tid){return (S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===tid&&_tagActive(ct));}

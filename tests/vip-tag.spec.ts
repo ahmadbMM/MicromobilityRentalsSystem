@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
-// The VIP tag (the owner, 2026-09-29): gold, a crown and the letters VIP drawn in white. Its holder
+// The VIP tag (the owner, 2026-09-29): gold, the letters VIP drawn in white (no crown). Its holder
 // always rides on the house, every bike type, in their own name, and never sees Road Carbon in their
 // own booking picker. The database enforces both (20260929090000: _apply_default_pay,
 // customer_create_booking, customer_profile, _vip_no_carbon); these specs cover the app's side.
@@ -39,7 +39,7 @@ function patches(page: Page) {
   return out;
 }
 
-test('the VIP chip is gold and wears the crown and the letters, not its name', async ({ page }) => {
+test('the VIP chip is gold and wears the drawn letters, not its name as text', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
   const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-logo-vip') }).first();
@@ -49,7 +49,8 @@ test('the VIP chip is gold and wears the crown and the letters, not its name', a
   await expect(chip).not.toContainText('VIP'); // drawn, as the other brand chips; the name is the title
   await expect(chip).toHaveAttribute('title', 'VIP');
   const box = await chip.locator('.tag-logo-vip').boundingBox();
-  expect(box && box.width).toBeGreaterThan(30);
+  expect(box && box.width).toBeGreaterThan(20);
+  expect(box && box.width).toBeLessThan(32); // the letters alone, no crown beside them
 });
 
 test('a VIP is on the house on every bike type, in their own name only; nobody else is', async ({ page }) => {

@@ -1306,7 +1306,7 @@
       -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;}
     .tag-logo-jcc{width:21px;-webkit-mask-image:url('assets/tag-jcc.svg');mask-image:url('assets/tag-jcc.svg');}
     .tag-logo-mm{width:16px;-webkit-mask-image:url('assets/tag-mm.svg');mask-image:url('assets/tag-mm.svg');}
-    .tag-logo-vip{width:38px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
+    .tag-logo-vip{width:26px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
@@ -6358,6 +6358,15 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-ap-tags{display:flex;flex-wrap:wrap;gap:8px}
 .ca-ap-tags .am-pick:disabled{cursor:default}
 .ca-ap-none{font-size:12.5px;color:var(--muted);line-height:1.5}
+.ca-ap-rides{display:flex;flex-direction:column;gap:6px}
+.ca-ap-ride{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;text-align:start;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer}
+.ca-ap-ride b{font-weight:800}
+.ca-ap-ride .ca-ap-rt{color:var(--muted);font-weight:600}
+.ca-ap-ride .ca-ap-rl{margin-inline-start:auto;font-weight:700;color:var(--green)}
+.ca-ap-ride .ca-ap-rl.full{color:var(--orange)}
+.ca-ap-ride.on{border-color:var(--green);background:rgba(var(--green-rgb),.08)}
+.ca-ap-ride:disabled{cursor:default;opacity:.55}
+.ca-ap-ride:disabled .ca-ap-rl{color:var(--muted)}
 body .ca-msg-box textarea.ca-msg{width:100%;min-height:300px;height:300px;box-sizing:border-box;resize:vertical;background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-family:var(--font-body);font-size:13.5px;line-height:1.5}
 /* Applications' two lists (community membership, learning to ride) and the learn-to-ride rows */
 .apps-kinds{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;border:1px solid var(--border);border-radius:10px;background:var(--s2);margin:0 0 14px}
