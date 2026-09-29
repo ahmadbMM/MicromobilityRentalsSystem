@@ -13982,7 +13982,11 @@ function _commFlagged(){
   const f=S._flagFilter||'all';
   const n=k=>k==='all'?S._flags.length:S._flags.filter(r=>r.status===k).length;
   const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" data-on-click="${_on("_on__commFlagged_1",_EV,_EL,k)}">${label} (${n(k)})</button>`;
-  const rows=S._flags.filter(r=>f==='all'||r.status===f).map(_flagRow).join('');
+  const list=S._flags.filter(r=>f==='all'||r.status===f);
+  // Replied: the latest reply first (the owner, 2026-09-29), so an old request answered today is at
+  // the top. The other lists keep the newest request first, as read; a tie keeps that order too.
+  if(f==='answered'){const at=r=>Date.parse(r.answered_at||'')||0;list.sort((a,b)=>at(b)-at(a));}
+  const rows=list.map(_flagRow).join('');
   return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('commTabFlagged')}</div>
     <div class="filter-row cmy-mb8">${pill('all',t('filterAll'))}${pill('pending',t('flgPending'))}${pill('answered',t('flgAnswered'))}${pill('withdrawn',t('flgWithdrawn'))}</div>

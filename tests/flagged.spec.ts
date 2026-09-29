@@ -61,6 +61,33 @@ test('the Flagged tab lists every request: what was asked, where it stands, what
   await expect(page.locator('.flg-row')).toHaveAttribute('data-flag-id', 'f1');
 });
 
+test('Replied lists the latest reply first; All keeps the newest request first', async ({ page }) => {
+  // Read newest request first: g1 (asked 09-25, answered 09-26), g2 (asked 09-20, answered 09-21),
+  // g3 (asked 09-10, answered today-ish, 09-28), and the pending f1.
+  const answered = (id: string, cid: string, asked: string, replied: string) => ({
+    id, customer_id: cid, fields: ['height'], status: 'answered', flagged_by: 'Desk A', flagged_at: asked, answered_at: replied,
+    changes: { height: { before: 170, after: 181, at: replied } },
+  });
+  const rows = [
+    answered('g1', 'c1', '2026-09-25T10:00:00Z', '2026-09-26T08:00:00Z'),
+    { ...flags[0], flagged_at: '2026-09-22T10:00:00Z' },
+    answered('g2', 'c3', '2026-09-20T10:00:00Z', '2026-09-21T08:00:00Z'),
+    answered('g3', 'c2', '2026-09-10T10:00:00Z', '2026-09-28T19:30:00Z'),
+  ];
+  await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers, customer_flags: rows, tags: [], customer_tags: [] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+  const ids = () => page.locator('.flg-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-flag-id')));
+  await expect.poll(ids).toEqual(['g1', 'f1', 'g2', 'g3']);
+  await page.locator('.filter-pill', { hasText: 'Replied (3)' }).click();
+  await expect.poll(ids).toEqual(['g3', 'g1', 'g2']);
+  await page.locator('.filter-pill', { hasText: 'All (4)' }).click();
+  await expect.poll(ids).toEqual(['g1', 'f1', 'g2', 'g3']); // sorting Replied did not reorder the list itself
+});
+
 test('Flag again reopens the dialog with the same fields and asks through staff_flag_customer', async ({ page }) => {
   await flaggedTab(page);
   const calls: Record<string, unknown>[] = [];
