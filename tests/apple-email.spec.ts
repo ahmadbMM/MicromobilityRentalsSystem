@@ -86,6 +86,45 @@ test('with a staff flag as well, the general message covers all of it', async ({
   expect(await page.locator('#fix-gate .fx-item').evaluateAll(els => els.map(e => (e as HTMLElement).dataset.fx))).toEqual(['email', 'height', 'password']);
 });
 
+// An Apple account that is also a community member owing a birth date or a nationality: nothing
+// on it was flagged by staff, so "Our team noticed" would be untrue (2026-09-29).
+const profile = (email: string, x: Record<string, unknown>) =>
+  ({ 'rpc:customer_profile': [{ id: 'c1', name: 'Sara Khalid', email, phone: '0500000001', gender: 'female', nationality: 'Jordan', birth_date: '1990-01-01', ...x }] });
+
+test('a password and a missing birth date read as the account’s own check-up, not a staff flag', async ({ page }) => {
+  await rider(page, 'sara@example.com', ['password', 'birth_date'], profile('sara@example.com', { birth_date: null }));
+  await page.evaluate(`selectEvent('jcc')`);
+  const box = page.locator('#fix-gate .fx-box');
+  await expect(box.locator('.fx-kicker')).toHaveText('Account check-up');
+  await expect(box.locator('.pg-title')).toHaveText('A few details for your account');
+  await expect(box.locator('.pg-sub')).toHaveText('Your account signs in with Apple and still needs a few details. Add them once and you can book. It only takes a minute.');
+  await expect(box.locator('.pg-note')).toHaveText('Continue with Apple keeps working exactly as before. You can book as soon as these are saved.');
+  await expect(box).not.toContainText('Our team noticed');
+  expect(await page.locator('#fix-gate .fx-item').evaluateAll(els => els.map(e => (e as HTMLElement).dataset.fx))).toEqual(['birth_date', 'password']);
+});
+
+test('a hidden email, a password and both community details read the same way', async ({ page }) => {
+  await rider(page, RELAY, ['email', 'password', 'birth_date', 'nationality'], profile(RELAY, { birth_date: null, nationality: null }));
+  await page.evaluate(`selectEvent('jcc')`);
+  await expect(page.locator('#fix-gate .pg-title')).toHaveText('A few details for your account');
+  await expect(page.locator('#fix-gate .fx-item')).toHaveCount(4);
+});
+
+test('a staff flag on a birth date already held keeps the general message', async ({ page }) => {
+  await rider(page, 'sara@example.com', ['password', 'birth_date'], profile('sara@example.com', {}));
+  await page.evaluate(`selectEvent('jcc')`);
+  await expect(page.locator('#fix-gate .pg-title')).toHaveText('Let’s get your details right');
+  await expect(page.locator('#fix-gate .pg-sub')).toContainText('Our team noticed');
+});
+
+test('in Arabic, the account’s own check-up reads the same', async ({ page }) => {
+  await page.addInitScript(() => { try { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); } catch { /* storage off */ } });
+  await rider(page, 'sara@example.com', ['password', 'birth_date'], profile('sara@example.com', { birth_date: null }));
+  await page.evaluate(`selectEvent('jcc')`);
+  await expect(page.locator('#fix-gate .pg-title')).toHaveText('بعض التفاصيل لحسابك');
+  await expect(page.locator('#fix-gate .fx-box')).not.toContainText('لاحظ فريقنا');
+});
+
 test('an email already on another account is named, and nothing else is lost', async ({ page }) => {
   await rider(page, RELAY, ['email', 'password'], { 'rpc:customer_fix_save': { __rpcError: { status: 409, code: '23505', message: 'email_taken' } } });
   await page.evaluate(`selectEvent('jcc')`);
