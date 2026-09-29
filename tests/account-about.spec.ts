@@ -5,7 +5,8 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/s
 // name, contacts, height, birth date, nationality, handles and bike type it already had, the
 // gender, profession, workplace and how they heard of us. An approved application or a
 // learn-to-ride sign-up fills them on the server; customer_about reads them, customer_set_about
-// saves them (20260929110000). Workplace is also on the staff application cards.
+// saves them (20260929110000). The workplace, labelled Company (the owner, 2026-09-29), is also on the
+// staff application cards.
 
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 const profile = { id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', gender: 'male', nationality: 'Egypt', socials: null };
@@ -73,7 +74,7 @@ test('a workplace or profession the forms would refuse is refused before anythin
   page.on('request', (r) => { if (/rpc\/customer_(update_profile|set_about)/.test(r.url())) calls.push(r.url()); });
   await page.fill('#acc-workplace', 'x');
   await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText('Enter your workplace: 2 to 120 characters.');
+  await expect(page.locator('#acc-err')).toHaveText('Enter your company: 2 to 120 characters.');
   await page.fill('#acc-workplace', 'Almarai');
   await page.fill('#acc-profession', '<b>');
   await page.evaluate(`saveAccount()`);
@@ -88,7 +89,7 @@ test('the server refusing a workplace says so on the form', async ({ page }) => 
   });
   await page.fill('#acc-workplace', 'Saudia');
   await page.evaluate(`saveAccount()`);
-  await expect(page.locator('#acc-err')).toHaveText('Enter your workplace: 2 to 120 characters.');
+  await expect(page.locator('#acc-err')).toHaveText('Enter your company: 2 to 120 characters.');
 });
 
 test('before the database has customer_about the page keeps its old form', async ({ page }) => {
@@ -115,6 +116,6 @@ test('the application cards show the workplace', async ({ page }) => {
   await page.waitForFunction('(S.customers||[]).length>0');
   await page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
   const card = page.locator('.ca-row[data-app-id="a1"]');
-  await expect(card).toContainText('Workplace');
+  await expect(card).toContainText('Company');
   await expect(card).toContainText('Saudi Aramco');
 });
