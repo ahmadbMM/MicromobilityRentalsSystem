@@ -175,7 +175,12 @@ with expected(fname, want_definer, note) as (values
   ('staff_learn_schedule',   true,  'finds or makes the account and records the lesson; checks is_staff() itself'),
   ('staff_learn_new_password', true, 'writes customers.password_hash, which no client can select; staff only'),
   ('staff_learn_decide',     true,  'moves a sign-up between its states; checks is_staff() itself'),
-  ('_learn_heard_to_account',true,  'trigger: writes customers.heard_from whoever set the sign-up''s account; internal only')
+  ('_learn_heard_to_account',true,  'trigger: writes customers.heard_from whoever set the sign-up''s account; internal only'),
+  -- Workplace and the account page's "about" fields (20260929110000)
+  ('community_apply',        true,  'the website form writes community_applications, which anon cannot touch; metered'),
+  ('staff_community_approve',true,  'finds or makes the account; checks is_staff() itself'),
+  ('customer_about',         true,  'reads the signed-in rider''s own customers row; token-checked'),
+  ('customer_set_about',     true,  'writes the signed-in rider''s own customers row; token-checked')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

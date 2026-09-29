@@ -532,6 +532,11 @@
     .acc-set-val{font-size:13px;color:var(--muted);font-weight:600;}
     /* ── The account page (renderAccount, _seasonDashboard, _mrBadgesRow), drawn into #tab-account: without
        inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
+    #tab-account .cu-gender-row{display:flex;gap:8px;}
+    #tab-account .cu-heard{margin-top:18px;}
+    #tab-account .cu-f1{flex:1;}
+    #tab-account .cu-g-female{background:rgba(255,126,182,.18);border-color:#ff7eb6;color:#ff7eb6;}
+    #tab-account .cu-g-male{background:rgba(var(--blue-rgb),.18);border-color:#4aa8f8;color:#4aa8f8;}
     #tab-account .cu-acc-err{color:var(--red);font-size:13px;font-weight:700;min-height:18px;margin-bottom:10px;margin-top:14px;}
     #tab-account .cu-book-next{font-size:12px;padding:10px 12px;}
     #tab-account .cu-c-green{color:var(--green);}
