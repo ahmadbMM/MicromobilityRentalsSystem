@@ -3697,9 +3697,15 @@
     /* ── My Rides rider profile: tier bar, badges, member card, share ── */
     .mr-tierbar{height:4px;background:var(--s2);border-radius:2px;margin:7px auto 5px;max-width:130px;overflow:hidden;}
     .mr-tierbar i{display:block;height:100%;background:var(--green);transition:width .25s;}
-    .mr-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-    .mr-badge{display:inline-flex;align-items:center;gap:7px;background:var(--s1);border:1px solid var(--border);border-radius:4px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:default;}
-    .mr-badge .bdg-m{width:26px;height:26px;margin:-4px 0;}
+    /* The account page's badges (owner, 2026-09-29): all of them, in a grid of equal tiles - the medal,
+       the name on up to two lines, and on one not earned its progress in the corner. Every row is as
+       tall as the tallest tile (grid-auto-rows:1fr), so the tiles match in any script's line height. */
+    .mr-badges-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+    .mr-badges-n{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
+    .mr-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));grid-auto-rows:1fr;gap:6px;margin-top:10px;}
+    .mr-badge{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:8px 3px 6px;background:var(--s1);border:1px solid var(--border);border-radius:6px;font-size:10.5px;font-weight:700;line-height:1.2;text-align:center;cursor:pointer;}
+    .mr-badge .bdg-m{width:30px;height:30px;margin:0;flex:none;}
+    .mr-badge-nm{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:100%;overflow-wrap:break-word;}
     .mr-badge.given{border-color:rgba(var(--green-rgb),.45);}
     /* Badge medallion (2026-09-29): drawn glyph on a hexagon, one of eight colours. */
     .bdg-m{width:26px;height:26px;flex:none;display:inline-block;vertical-align:middle;color:var(--bc,var(--green));}
@@ -3730,7 +3736,7 @@
     .badge-pop-box.special{border-top-color:var(--sp2);box-shadow:0 0 0 1px rgba(var(--spg),.35),0 12px 40px rgba(var(--spg),.22);}
     .badge-pop-box.special .badge-pop-ic.bdg-sp:not(.locked){filter:drop-shadow(0 0 12px rgba(var(--spg),.55));}
     .mr-badge.locked{opacity:.45;filter:grayscale(1);}
-    .mr-badge-p{font-family:var(--font-mono);font-size:10px;color:var(--muted);letter-spacing:1px;}
+    .mr-badge-p{position:absolute;top:3px;inset-inline-end:4px;display:flex;align-items:center;font-family:var(--font-mono);font-size:9px;line-height:1;color:var(--muted);letter-spacing:.5px;}
 
     /* ── Badge info card ── */
     .badge-pop{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .15s ease;}

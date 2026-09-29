@@ -10679,17 +10679,17 @@ function _mrBadges(all,completed,seasons,cust){
     {s:'fuel',on:fuel},
     {s:'corniche25',on:rides>=25,p:P(rides,25)},
     {s:'safety_car',on:R.bestS>=6,p:P(R.curS,6)},
-    {s:'endurance',on:R.bestS>=12,p:P(R.curS,12),hide:R.bestS<6},
+    {s:'endurance',on:R.bestS>=12,p:P(R.curS,12)},
     {s:'triple_crown',on:kinds.size>=3,p:P(kinds.size,3)},
     {s:'clean_sheet',on:cleanBest>=10,p:P(clean,10)},
-    {s:'slipstream',on:comm>=5,p:P(comm,5),hide:!comm},
-    {s:'paceline',on:comm>=15,p:P(comm,15),hide:comm<5},
-    {s:'peloton',on:comm>=30,p:P(comm,30),hide:comm<15},
-    {s:'works_team',on:corp>=3,p:P(corp,3),hide:!corp},
-    {s:'back_on_track',on:gap,hide:true}, // a surprise: never shown before it is earned
-    // Dated badges show while a window is open or opens within 30 days, and once earned.
+    {s:'slipstream',on:comm>=5,p:P(comm,5)},
+    {s:'paceline',on:comm>=15,p:P(comm,15)},
+    {s:'peloton',on:comm>=30,p:P(comm,30)},
+    {s:'works_team',on:corp>=3,p:P(corp,3)},
+    {s:'back_on_track',on:gap,hide:true}, // a surprise, earned by staying away: never shown before it is earned
+    // Dated badges carry their windows: the popup says whether one is open, or when the next opens.
     ...(seasons||[]).filter(b=>b&&b.slug&&b.rule).map(b=>{const r=_bdgSeason(b.rule,dates);
-      return{s:b.slug,b:b.system&&BD_SYS[b.slug]?null:b,on:r.on,p:P(r.cur?r.cur.n:0,r.rides),sn:r,hide:!r.cur&&!(r.next&&Date.parse(r.next)-Date.now()<30*864e5)};}),
+      return{s:b.slug,b:b.system&&BD_SYS[b.slug]?null:b,on:r.on,p:P(r.cur?r.cur.n:0,r.rides),sn:r};}),
   ];
 }
 // The badges staff gave this account (customer_my_badges), asked when the account page paints and
@@ -10699,6 +10699,12 @@ function _bdgMineLoad(cust){
   if(!cust||!cust.session_token||!sb)return;
   const m=S._bdgMine;if(m&&m.id===cust.id&&(m.busy||Date.now()-m.at<3e5))return;
   const cur={id:cust.id,at:Date.now(),busy:true,list:(m&&m.id===cust.id&&m.list)||[]};S._bdgMine=cur;
+  // The catalogue (badge_catalog): every badge not retired, the ones staff give and an admin's own
+  // among them. Missing or empty (a database from before it): the app's own badges stand in.
+  Promise.resolve(sb.rpc('badge_catalog')).then(({data,error})=>{
+    if(error||!Array.isArray(data)||JSON.stringify(data)===JSON.stringify(S._bdgCat||null))return;
+    S._bdgCat=data;_mrBadgesPaint();
+  },()=>{});
   // The dated badges (badge_seasons) come with them: their windows are edited in Community > Badges.
   Promise.resolve(sb.rpc('badge_seasons')).then(({data,error})=>{
     if(error||!Array.isArray(data)||JSON.stringify(data)===JSON.stringify(S._bdgSeasons||[]))return;
@@ -10713,22 +10719,37 @@ function _bdgMineLoad(cust){
   },()=>{cur.busy=false;});
 }
 function _bdgMineList(cust){const m=S._bdgMine;return(cust&&m&&m.id===cust.id&&Array.isArray(m.list))?m.list:[];}
-// The account's badges as its page shows them: the ones staff gave (oldest first), then the ride
-// badges, each earned by riding or given; one still hidden (a surprise, a season not near) is left
-// out. {b: the badge, on, p: the progress, g: the gift, sn: a dated badge's windows}.
+// The badges staff give by hand that the app knows itself: shown where the database has no badge_catalog.
+const BDG_GIVEN_SYS=['marshal','pit_crew','green_flag','super_licence','scrutineer','champion','spirit'];
+// The account's badges as its page shows them (the owner, 2026-09-29: all of them, sorted, the same
+// size): every badge in the catalogue - earned ones first, then those to earn by riding, the dated
+// ones and the ones staff give, each group in the catalogue's order. One not earned is greyed, with
+// how to earn it and the progress in its popup. Two stay out until earned (_mrBadges marks them hide):
+// National Day 96, since that ride is over, and Back on Track, earned by staying away. A retired
+// badge shows only to a rider who holds it. The catalogue is badge_catalog; a database without it
+// leaves the app's own badges. {b: the badge, on, p: the progress, g: the gift, sn: a dated
+// badge's windows, m: one staff give}.
 function _mrBadgeList(cust){
   const all=getQueue().filter(e=>e.customerId===cust.id),given=new Map(_bdgMineList(cust).map(g=>[g.slug,g]));
+  const cat=Array.isArray(S._bdgCat)&&S._bdgCat.length?new Map(S._bdgCat.map(b=>[b.slug,b])):null;
   const ride=_mrBadges(all,all.filter(_rideCompleted),S._bdgSeasons,cust).map(r=>{const g=given.get(r.s),x=BD_SYS[r.s]||[];given.delete(r.s);
-    return{b:g||r.b||{slug:r.s,system:true,icon:x[0],color:x[1]},on:r.on||!!g,p:r.p,g,sn:r.sn,hide:r.hide&&!r.on&&!g};}).filter(x=>!x.hide);
-  return[...[...given.values()].map(g=>({b:g,on:true,g})),...ride];
+    return{b:g||r.b||{slug:r.s,system:true,icon:x[0],color:x[1]},on:r.on||!!g,p:r.p,g,sn:r.sn,hide:r.hide&&!r.on&&!g};});
+  const manual=(cat?[...cat.values()].filter(b=>!b.auto):BDG_GIVEN_SYS.map(s=>({slug:s,system:true,icon:BD_SYS[s][0],color:BD_SYS[s][1]}))).map(b=>({b,on:false,m:true}));
+  const seen=new Set(),L=[];
+  [...[...given.values()].map(g=>({b:g,on:true,g})),...ride,...manual].forEach(x=>{
+    const s=x.b&&x.b.slug;if(!s||seen.has(s)||x.hide||(!x.on&&cat&&!cat.has(s)))return;
+    seen.add(s);L.push(x);
+  });
+  const rank=x=>x.on?0:x.m?3:x.sn?2:1;
+  return L.map((x,i)=>[x,i]).sort((a,z)=>rank(a[0])-rank(z[0])||a[1]-z[1]).map(a=>a[0]);
 }
 function _mrBadgesRow(cust){
-  const L=_mrBadgeList(cust);
-  return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22">${t('mrBadgesTitle')}</div>
+  const L=_mrBadgeList(cust),won=L.filter(x=>x.on).length;
+  return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22 mr-badges-h">${t('mrBadgesTitle')}<span class="mr-badges-n">${won}/${L.length}</span></div>
   <div class="mr-badges">${L.map((x,i)=>{const nm=_bdgName(x.b);return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
+    ${x.on?'':`<span class="mr-badge-p">${x.p||_artIcon('lock',10)}</span>`}
     ${_bdgMedal(x.b.icon,_bdgCol(x.b))}
     <span class="mr-badge-nm">${esc(nm)}</span>
-    ${x.on?'':`<span class="mr-badge-p">${x.p||_artIcon('lock',11)}</span>`}
   </button>`;}).join('')}</div></div>`;
 }
 function _mrBadgesPaint(){const h=document.getElementById('mr-badges-host'),c=S.loggedIn;if(h&&c)h.outerHTML=_mrBadgesRow(c);}

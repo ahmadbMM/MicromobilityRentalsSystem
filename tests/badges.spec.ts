@@ -184,7 +184,7 @@ test.describe('@customer:account badges', () => {
     await page.evaluate(`setCustTab('account')`);
   }
 
-  test('the badges staff gave come first, drawn, and the newest pops up once', async ({ page }) => {
+  test('the badges staff gave come first among the earned, drawn, and the newest pops up once', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': mine });
     const pop = page.locator('#badge-pop');
     await expect(pop).toContainText('New badge!');
@@ -195,15 +195,20 @@ test.describe('@customer:account badges', () => {
     await pop.getByRole('button', { name: 'Close' }).click();
 
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
-    await expect(chips).toHaveCount(15); // the two given, Race Ready, then the twelve ride badges always shown (the rest wait: a surprise, a tier, a season)
+    // Every badge (2026-09-29): the two given and First Lap earned, then the eighteen to earn by riding
+    // (National Day 96 and Back on Track wait until earned), then the six other ones staff give.
+    await expect(chips).toHaveCount(26);
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/26');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
-    await expect(chips.nth(2)).toContainText('Race Ready');
-    await expect(chips.nth(2)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
-    await expect(chips.nth(2)).toContainText('33%');
-    await expect(chips.nth(3)).toContainText('First Lap');
-    await expect(chips.nth(3)).not.toHaveClass(/locked/); // a done, paid ride
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(15);
+    await expect(chips.nth(2)).toContainText('First Lap');
+    await expect(chips.nth(2)).not.toHaveClass(/locked/); // a done, paid ride
+    await expect(chips.nth(3)).toContainText('Race Ready');
+    await expect(chips.nth(3)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
+    await expect(chips.nth(3)).toContainText('33%');
+    await expect(chips.nth(25)).toContainText('Race Spirit');
+    await expect(chips.nth(25)).toHaveClass(/locked/);
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(26);
     expect(EMOJI.test(await page.locator('#tab-account .mr-badges').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -219,12 +224,46 @@ test.describe('@customer:account badges', () => {
   test('a database without customer_my_badges still shows the ride badges', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
-    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(13);
+    await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(25); // the eighteen ride badges and the seven staff give
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
     await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('Every rider\'s story starts with one lap');
     await expect(page.locator('#badge-pop')).toContainText('Earned');
+  });
+
+  test('the whole catalogue in order, in equal tiles: a retired badge only for a rider who holds it, an admin\'s own greyed until given', async ({ page }) => {
+    const sys = (slug: string, sort: number, auto = true) => ({ slug, icon: 'flag', color: 'green', name: slug, system: true, auto, sort });
+    const catalog = [
+      ...['marshal', 'pit_crew', 'green_flag', 'super_licence', 'scrutineer', 'champion', 'spirit'].map((x, i) => sys(x, 10 + i * 10, false)),
+      ...['national_day_96', 'complete_profile', 'first_lap', 'regular', 'podium', 'front_row', 'carbon', 'streak', 'squad', 'corniche25', 'back_on_track', 'safety_car',
+        'endurance', 'triple_crown', 'slipstream', 'paceline', 'peloton', 'clean_sheet', 'works_team', 'winter_series'].map((x, i) => sys(x, 90 + i * 10)),
+      // 'fuel' is not here: retired. Night Owl is an admin's own, not given to this rider.
+      { slug: 'bd_cnight', icon: 'moon', color: 'purple', name: 'Night Owl', description: 'Rode a late ride', system: false, auto: false, sort: 500 },
+    ];
+    await rider(page, {
+      'rpc:customer_my_badges': [mine[1]],
+      'rpc:badge_catalog': catalog,
+      'rpc:badge_seasons': [{ slug: 'winter_series', icon: 'snow', color: 'blue', name: 'Winter Series', system: true, rule: { rides: 6, windows: [{ from: '12-01', to: '02-28' }] } }],
+    });
+    await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0');
+    const chips = page.locator('#tab-account .mr-badges .mr-badge');
+    const names = () => chips.evaluateAll((els) => els.map((e) => e.querySelector('.mr-badge-nm')!.textContent));
+    await expect.poll(names).toEqual([
+      'Marshal', 'First Lap', // earned: the given one, then by riding
+      'Race Ready', 'Grid Regular', 'Podium Pace', 'Front Row', 'Carbon Club', 'Hot Streak', 'Squad Captain', 'Corniche 25', 'Safety Car',
+      'Endurance', 'Triple Crown', 'Clean Sheet', 'Slipstream', 'Paceline', 'Peloton', 'Works Team', // to earn by riding (no Fuel Stop: retired)
+      'Winter Series', // dated, shown out of season
+      'Pit Crew', 'Green Flag', 'Super Licence', 'Scrutineer', 'Champion', 'Race Spirit', 'Night Owl', // staff give them
+    ]);
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/26');
+    // Every tile the same size.
+    const sizes = await chips.evaluateAll((els) => [...new Set(els.map((e) => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }))]);
+    expect(sizes).toHaveLength(1);
+    // Out of season, its popup says when it opens (after the new Marshal's own popup is closed).
+    await page.locator('#badge-pop').getByRole('button', { name: 'Close' }).click();
+    await chips.filter({ hasText: 'Winter Series' }).click();
+    await expect(page.locator('#badge-pop')).toContainText('Opens');
   });
 });
 
@@ -265,11 +304,11 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(six.safety_car.on).toBe(true);
     const six2 = await ev(page, `(()=>{const[E,S_]=${nights([[-42, 'jcc'], [-35, 'jcc'], [-28, 'jcc'], [-14, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
     expect(six2.safety_car.on).toBe(true);
-    expect(six2.endurance.hide).toBe(false); // the next tier shows once this one is earned
+    expect(six2.endurance.hide).toBe(false);
     // Two quiet weeks inside four end it.
     const broken = await ev(page, `(()=>{const[E,S_]=${nights([[-49, 'jcc'], [-42, 'jcc'], [-28, 'jcc'], [-14, 'jcc'], [-7, 'jcc'], [0, 'jcc']])};return __run(E,S_);})()`);
     expect(broken.safety_car.on).toBe(false);
-    expect(broken.endurance.hide).toBe(true);
+    expect(broken.endurance.hide).toBe(false); // every tier shows from the start since 2026-09-29
     // Three weeks running, half a year ago and nothing since: Hot Streak stays earned.
     const old = await ev(page, `(()=>{const[E,S_]=${nights([[-200, 'jcc'], [-193, 'jcc'], [-186, 'jcc']])};return __run(E,S_);})()`);
     expect(old.streak.on).toBe(true);
@@ -284,11 +323,11 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(r.triple_crown.on).toBe(true);
     expect(r.slipstream).toEqual({ on: true, p: '5/5', hide: false });
     expect(r.paceline).toEqual({ on: false, p: '5/15', hide: false });
-    expect(r.peloton.hide).toBe(true);
+    expect(r.peloton).toEqual({ on: false, p: '5/30', hide: false }); // shown before its tier since 2026-09-29
     expect(r.works_team).toEqual({ on: false, p: '2/3', hide: false });
     const none = await ev(page, `(()=>{const[E,S_]=${nights([[-10, 'jcc']])};return __run(E,S_);})()`);
-    expect(none.slipstream.hide).toBe(true);
-    expect(none.works_team.hide).toBe(true);
+    expect(none.slipstream).toEqual({ on: false, p: '0/5', hide: false });
+    expect(none.works_team).toEqual({ on: false, p: '0/3', hide: false });
     expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
   });
 
@@ -303,7 +342,7 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(short.clean_sheet.on).toBe(false);
   });
 
-  test('a dated badge counts the nights inside one window, and shows only near its season', async ({ page }) => {
+  test('a dated badge counts the nights inside one window, and shows all year with its next window', async ({ page }) => {
     await page0(page);
     const rule = (from: string, to: string, rides: number) => `{slug:'bd_cx',system:false,icon:'moon',color:'purple',name:'Late Loop',rule:{rides:${rides},windows:[{from:${from},to:${to}}]}}`;
     const open = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc'], [-40, 'jcc']])};return __run(E,S_,[${rule("__day(-5)", "__day(5)", 2)}]);})()`);
@@ -311,7 +350,7 @@ test.describe('@customer:account ride badges from the research', () => {
     const done = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc'], [-4, 'jcc']])};return __run(E,S_,[${rule("__day(-5)", "__day(5)", 2)}]);})()`);
     expect(done.bd_cx.on).toBe(true);
     const far = await ev(page, `(()=>{const[E,S_]=${nights([[-3, 'jcc']])};return __run(E,S_,[${rule("__day(90)", "__day(99)", 1)}]);})()`);
-    expect(far.bd_cx.hide).toBe(true);
+    expect(far.bd_cx).toEqual({ on: false, p: '0/1', hide: false });
     // Every year, across New Year: a ride on 3 January counts for the window 12-15 to 01-15.
     const yearly = await page.evaluate(`(()=>{const y=+__day(0).slice(0,4)-1,d=y+'-01-03';S.sessions=[__ses('w',d,'jcc')];const E=[__e('w',d)];
       const L=_mrBadges(E,E.filter(_rideCompleted),[{slug:'bd_cy',system:false,rule:{rides:1,windows:[{from:'12-15',to:'01-15'}]}}]);return L.find(r=>r.s==='bd_cy').on;})()`);
