@@ -2674,6 +2674,9 @@ function entryToDB(e){
 // Applied when a NEW booking row is created for that person — matched by account AND name,
 // so co-riders booked under the same account still pay. Never touches rows that are already
 // paid (e.g. a waitlist payment being carried over).
+// The database applies the same rule to every new booking however it is made (trigger
+// trg_apply_default_pay, 2026-09-29), so a screen that forgets this cannot charge a rider who is
+// on the house; applying it here as well keeps the row right on screen before the reload.
 function _housePayTypes(c){
   const v=c&&c.default_pay;
   if(!v||typeof v!=='string'||!v.startsWith('house'))return null;
