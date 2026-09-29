@@ -461,6 +461,59 @@ document.querySelectorAll('[data-host]').forEach(el=>{el.style.display='none';})
 // that is measured straight away; this observer does it for every element the page adds, in the
 // microtask after the write (before the next paint), so no repaint path can leave one unset.
 new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&(n.firstElementChild||n.hasAttribute('data-cssv')))_cssvApply(n);}).observe(document.documentElement,{childList:true,subtree:true});
+// ── A popup redrawn in place stays put (owner, 2026-09-29) ──────────────────────────────────────
+// Most popups redraw by writing their whole markup again: a badge or its "i" tapped in the badges
+// dialog, a condition on the Return sheet, a payment in the check-in. The new copy is new elements,
+// so it played the popup's entry animation again (the backdrop fading in, the box sliding up), came
+// back scrolled to the top and dropped the focus - the popup looked closed and opened again. When
+// one write takes a popup out of its host and puts another in while the host is showing, this
+// finishes the new copy's entry animations before anything is drawn and, when it is the same popup
+// (the same title), gives it the old one's scroll positions and focused control back. A popup that
+// opens - into an empty host, a hidden one, or one the same write hid first - animates as before.
+// Only the entry animations are finished: a wrong PIN's shake, a badge's glow and spinners play.
+const _POP_ROOT='.modal-backdrop,.auth-backdrop,.badge-pop,.photo-lightbox,[role="dialog"]';
+const _POP_IN=new Set(['modalFadeIn','modalSlideUp','modalSheetUp','rowSheetIn','rowSheetInRtl','rowSheetUp','fadeIn','popIn','fxIn','ciDrawerIn','ciDrawerInRtl','payMenuIn','tabFadeIn']);
+let _popFocus=null;
+document.addEventListener('focusin',e=>{_popFocus=e.target;},true);
+document.addEventListener('scroll',e=>{const el=e.target;if(el&&el.nodeType===1)el._popTop=el.scrollTop;},true);
+const _popRoot=n=>n.nodeType===1&&(n.matches(_POP_ROOT)||!!n.querySelector(_POP_ROOT));
+// The popup's name: its dialog's label, or the text of the title the label points to.
+function _popName(root){
+  const d=root.matches('[role="dialog"]')?root:root.querySelector('[role="dialog"]');if(!d)return'';
+  const lb=d.getAttribute('aria-labelledby'),ti=lb&&root.querySelector('#'+CSS.escape(lb));
+  return String(d.getAttribute('aria-label')||(ti&&ti.textContent)||'').trim();
+}
+// Where an element sits in its popup - a selector, and which of its matches - to find it in the copy.
+function _popKey(root,el){
+  const on=el.getAttribute('data-on-click');
+  const sel=el.id?'#'+CSS.escape(el.id):on?'[data-on-click="'+CSS.escape(on)+'"]':el.tagName.toLowerCase()+[...el.classList].map(c=>'.'+CSS.escape(c)).join('');
+  return[sel,[root,...root.querySelectorAll(sel)].filter(x=>x.matches(sel)).indexOf(el)];
+}
+function _popFind(root,k){return k[1]<0?null:[root,...root.querySelectorAll(k[0])].filter(x=>x.matches(k[0]))[k[1]]||null;}
+function _popStill(old,nu){
+  if(!nu.isConnected||!nu.getClientRects().length)return; // drawn while hidden: nothing is on screen
+  try{nu.getAnimations({subtree:true}).forEach(a=>{if(_POP_IN.has(a.animationName))a.finish();});}catch(e){}
+  const name=_popName(nu);if(!name||name!==_popName(old))return; // another popup: it starts at its top
+  [old,...old.querySelectorAll('*')].forEach(el=>{if(el._popTop>0){const n=_popFind(nu,_popKey(old,el));if(n)n.scrollTop=el._popTop;}});
+  const f=_popFocus,ae=document.activeElement;
+  if(f&&old.contains(f)&&(!ae||ae===document.body)){ // the focused control went with the old copy, and nothing has taken the focus since
+    const n=_popFind(nu,_popKey(old,f));
+    if(n)try{n.focus({preventScroll:true});if(f.selectionStart!=null&&n.value===f.value)n.setSelectionRange(f.selectionStart,f.selectionEnd);}catch(e){}
+  }
+}
+const _POP_HIDE={attributes:true,attributeFilter:['style'],attributeOldValue:true};
+const _popMo=new MutationObserver(ms=>{
+  const opened=new Set(ms.filter(m=>m.type==='attributes'&&/display:\s*none/.test(m.oldValue||'')).map(m=>m.target)); // shown by this write
+  for(const m of ms){
+    const h=m.target;
+    if(m.type!=='childList'||opened.has(h)||!(h===document.body||h.hasAttribute('data-host')||h.parentElement===document.body))continue;
+    const nu=[...m.addedNodes].find(_popRoot);if(!nu)continue;
+    if(h!==document.body&&!h.hasAttribute('data-host'))_popMo.observe(h,_POP_HIDE); // a host made on demand: watch it being hidden too
+    const gone=[...m.removedNodes].find(_popRoot);if(gone)_popStill(gone,nu);
+  }
+});
+_popMo.observe(document.documentElement,{childList:true,subtree:true});
+document.querySelectorAll('[data-host]').forEach(h=>_popMo.observe(h,_POP_HIDE));
 // ── Handlers live in attributes, not in the markup's script (2026-09-27) ────────────────────────
 // The page's Content-Security-Policy allows no inline script: an onclick=... attribute would not run.
 // Markup says what an event does in a data-on-<event> attribute holding JSON - the name of a

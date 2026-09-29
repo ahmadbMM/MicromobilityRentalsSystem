@@ -75,7 +75,7 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
 
 Cloudflare Pages serves the repo root, so internal files must be blocked from public serving. The live gate is `functions/_middleware.js` (a **denylist** by extension and path prefix); `_redirects` no longer carries rules. The denylist passes `.html`/`.js`, so a committed prototype directory stays publicly reachable unless its prefix is added — `design_handoff_erp_reskin/` is blocked by prefix for exactly this reason (it contains a real staff mobile number). If you add a new served asset, also add it to `FILES` in `scripts/assemble-dist.mjs` — that script now fails the build when a listed file is missing.
 
-## Three traps in the one-file app (learned 2026-09-11, NFC bike check-in)
+## Traps in the one-file app (learned from 2026-09-11, NFC bike check-in)
 
 - **The dialog focus manager refocuses 40 ms after a modal renders.** `_syncModalFocus` watches
   the DOM and, when a `.modal-backdrop` newly appears, focuses its first control 40 ms after the
@@ -83,6 +83,17 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
   alone when it is already inside the new modal (the check-in modal's own 120 ms focus, or a
   person already typing); before that, it pulled focus back to the first pay toggle and specs
   that typed into a fresh modal lost keystrokes to the wrong field.
+- **A popup redrawn in place stays put (2026-09-29).** Popups redraw by writing their whole markup
+  again (`m.innerHTML=...` with the backdrop), which replayed the entry animation, scrolled them to
+  the top and dropped the focus ("why does the popup refresh" - the owner, on the badges dialog). A
+  document observer (`_popMo`, next to the data-cssv one) now finishes the new copy's ENTRY
+  animations (`_POP_IN`: modalSlideUp, popIn, ciDrawerIn...) whenever one write swaps a popup root
+  (`_POP_ROOT`) in a `[data-host]`, on `<body>`, or in a host made on demand under it, while the host
+  is showing; when the title (the dialog's aria-label / aria-labelledby) is the same it also puts
+  back each scroller's position and the focused control (by id, else its `data-on-click`, else
+  tag and classes). A host shown by the same write (its style went from display:none) animates as
+  an opening. So: redrawing a whole popup is fine; give it a stable title, and a new animation
+  that is an entrance must join `_POP_IN`. tests/popup-redraw.spec.ts.
 - **Boot-time actions must wait for the first data load.** At boot the staff panel opens before
   `loadData()` has filled `S.bikes` / `S.queue`. Anything triggered from the URL or a parked value
   must `await (_loadInFlight || loadData())` when `!S.dataLoaded`, or it acts on an empty fleet and
