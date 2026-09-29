@@ -148,10 +148,51 @@ test('a booking on a session this device cannot see carries no queue number in i
 
 test('size labels come in the page language\'s unit, with no English words', async ({ page }) => {
   await boot(page);
-  const out = await page.evaluate(`(async()=>{const r=[sizeLabel('XS'),sizeLabel('XL')];await loadLangPack('ar');S.lang='ar';r.push(sizeLabel('XS'));S.lang='en';return r;})()`) as string[];
-  expect(out[0]).toBe('XS (≤ 166 cm)');
-  expect(out[1]).toBe('XL (≥ 187 cm)');
+  const out = await page.evaluate(`(async()=>{const r=[sizeLabel('XS'),sizeLabel('Kids')];await loadLangPack('ar');S.lang='ar';r.push(sizeLabel('Kids'));S.lang='en';return r;})()`) as string[];
+  expect(out[0]).toBe('XS');
+  expect(out[1]).toBe('Kids (≤ 144 cm)');
   expect(out[2]).toContain('سم');
+  expect(out[2]).toContain('أطفال');
+});
+
+// The owner's chart (2026-09-29): Road XS 145-159, S 160-172, M 173-179, L 180-189, XL 190+;
+// Hybrid and Mountain XS 145-159, S 160-170, M 171-185, L 186+; 144 and under is a Kids bike.
+test('@staff:bookings the frame size follows the owner\'s chart for each bike type', async ({ page }) => {
+  await boot(page);
+  const out = await page.evaluate(`(()=>{
+    const hs=[100,144,145,159,160,170,171,172,173,179,180,185,186,189,190,210];
+    const row=ty=>hs.map(h=>bikeFit(h,ty)).join(' ');
+    return {road:row('Road'),carbon:row('Road Carbon'),hybrid:row('Hybrid'),mountain:row('Mountain'),kids:row('Kids'),
+      saved:[heightToSize(140,'Road'),heightToSize(182,'Hybrid'),heightToSize(182,'Road')],none:bikeFit(null,'Road')};
+  })()`) as Record<string, unknown>;
+  expect(out.road).toBe('Kids Kids XS XS S S S S M M L L L L XL XL');
+  expect(out.carbon).toBe(out.road);
+  expect(out.hybrid).toBe('Kids Kids XS XS S S M M M M M M L L L L');
+  expect(out.mountain).toBe(out.hybrid);
+  expect(out.kids).toBe('Kids Kids XS XS S S S S M M L L L L XL XL'); // above 144 a Kids booking reads Road's chart
+  expect(out.saved).toEqual(['', 'M', 'L']); // queue_entries.size takes frame sizes only
+  expect(out.none).toBe('');
+});
+
+test('@staff:bookings staff see the size on the booked type, both charts for an Any booking, and a bike fits by its own type', async ({ page }) => {
+  await boot(page);
+  const out = await page.evaluate(`(()=>{
+    S.bikes=[{id:'rl',type:'Road',size:'L',status:'available'},{id:'hm',type:'Hybrid',size:'M',status:'available'},{id:'hl',type:'Hybrid',size:'L',status:'available'},{id:'k1',type:'Kids',size:'XS',status:'available'}];
+    const e=(o)=>({id:'x',status:'waiting',size:'',...o});
+    const any182=e({typePreference:'Any',height:182}),road182=e({typePreference:'Road',height:182}),hyb182=e({typePreference:'Hybrid',height:182});
+    const kid=e({typePreference:'Road',height:130}),tall=e({typePreference:'Kids',height:150}),own=e({typePreference:'Own',height:180}),legacy=e({typePreference:'Road',size:'M'});
+    const fits=x=>S.bikes.filter(b=>_bikeFits(x,b)).map(b=>b.id).join(',');
+    return {
+      text:[_entryFitText(road182),_entryFitText(hyb182),_entryFitText(any182),_entryFitText(e({typePreference:'Any',height:175})),_entryFitText(kid),_entryFitText(own),_entryFitText(legacy)],
+      fits:[fits(any182),fits(e({typePreference:'Any',height:175})),fits(e({typePreference:'Any',height:188})),fits(kid),fits(tall)],
+      best:[_bestFreeBike(hyb182).id,_bestFreeBike(road182).id,_bestFreeBike(any182).id],
+      filter:[_entryFits(any182).includes('L'),_entryFits(any182).includes('M'),_entryFits(kid).includes('Kids')],
+    };
+  })()`) as Record<string, string[] | boolean[]>;
+  expect(out.text).toEqual(['L', 'M', 'Road L · Hybrid/Mountain M', 'M', 'Kids', '', 'M']);
+  expect(out.fits).toEqual(['rl,hm', 'hm', 'rl,hl', 'k1', '']); // a Kids bike fits no one over 144
+  expect(out.best).toEqual(['hm', 'rl', 'rl']);
+  expect(out.filter).toEqual([true, true, true]);
 });
 
 test('handlers still work with their arguments encoded (social link sync, language menu)', async ({ page }) => {

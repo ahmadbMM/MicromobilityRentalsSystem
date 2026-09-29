@@ -4021,13 +4021,50 @@ function resolvedType(entry){
   const bikes=getAssignedBikes(entry);
   return(bikes.length>0&&bikes[0].type&&bikes[0].type!=='Any')?bikes[0].type:'Any';
 }
-// L and XL split at 186/187 cm, the usual frame-chart boundary. Size is advisory: it earns a
-// bike the check-in 'Size match' badge and never refuses a booking, so an XL rider with no
-// XL bike free simply gets no badge, exactly as an L rider does when every L is out.
-function heightToSize(h){if(h<=166)return'XS';if(h<=172)return'S';if(h<=178)return'M';if(h<=186)return'L';return'XL';}
-// The bands in numbers and signs, the unit from the language pack: 'cm & under' was English
-// on every staff screen whatever language it was set to.
-function sizeLabel(sz){const cm=t('cmUnit'),m={XS:`XS (≤ 166 ${cm})`,S:`S (167-172 ${cm})`,M:`M (173-178 ${cm})`,L:`L (179-186 ${cm})`,XL:`XL (≥ 187 ${cm})`};return _own(m,sz)?m[sz]:sz;}
+// The frame size that suits a rider, by height and bike type (the owner's chart, 2026-09-29):
+//   Road (Road Carbon is ridden on one): XS 145-159, S 160-172, M 173-179, L 180-189, XL 190+
+//   Hybrid, and Mountain the same:       XS 145-159, S 160-170, M 171-185, L 186+ (no XL)
+// 144 cm and under is a Kids bike, whatever was booked. A type with no chart of its own (Gravel,
+// Kids above 144, Any before a bike is on it) reads Road's. Size is advisory - it earns a bike the
+// check-in 'Size match' badge and never refuses a booking - and it is for staff only: a rider is
+// shown the bike they were given, never the size that suits them.
+const SIZE_CHART={Road:[[159,'XS'],[172,'S'],[179,'M'],[189,'L'],[Infinity,'XL']],Hybrid:[[159,'XS'],[170,'S'],[185,'M'],[Infinity,'L']]};
+SIZE_CHART.Mountain=SIZE_CHART.Hybrid;
+const KIDS_MAX_CM=144;
+function bikeFit(h,ty){
+  h=Number(h);if(!(h>0))return'';
+  if(h<=KIDS_MAX_CM)return'Kids';
+  const base=PREMIUM_TIERS[ty]||ty;
+  return(_own(SIZE_CHART,base)?SIZE_CHART[base]:SIZE_CHART.Road).find(([max])=>h<=max)[1];
+}
+// What queue_entries.size keeps: XS-XL, or '' for a Kids fit (the column takes frame sizes only).
+function heightToSize(h,ty){const z=bikeFit(h,ty);return z==='Kids'?'':z;}
+// The sizes that suit a booking's rider: one for a typed booking; for an Any booking with no bike
+// on it yet, Road's and Hybrid/Mountain's, which part at 171-172 cm and from 180 cm. None for
+// their own bike or no bike. A row without a height keeps the size it was saved with.
+function _entryFits(e){
+  const ty=resolvedType(e);if(!e||ty==='Own'||ty==='None')return[];
+  if(!(Number(e.height)>0))return e.size?[e.size]:[];
+  return ty==='Any'?[...new Set([bikeFit(e.height,'Road'),bikeFit(e.height,'Hybrid')])]:[bikeFit(e.height,ty)];
+}
+function sizeName(z){return z==='Kids'?t('typeKids'):z;}
+// Staff wording: "M", "Kids", or "Road S · Hybrid/Mountain M" where an Any booking's charts disagree.
+function _entryFitText(e){
+  const f=_entryFits(e);
+  return f.length>1?`${typeLabel('Road')} ${sizeName(f[0])} · ${typeLabel('Hybrid')}/${typeLabel('Mountain')} ${sizeName(f[1])}`:f.length?sizeName(f[0]):'';
+}
+// Whether a bike is the size that suits a booking's rider, judged by the bike's own type, so an
+// Any booking fits a Road M and a Hybrid M alike. A Kids fit is any Kids bike, and a Kids bike
+// fits no one taller than 144 cm. False with nothing to go by.
+function _bikeFits(e,b){
+  if(!e||!b)return false;
+  const z=Number(e.height)>0?bikeFit(e.height,b.type):(e.size||'');
+  if(z==='Kids'||b.type==='Kids')return z==='Kids'&&b.type==='Kids';
+  return!!z&&b.size===z;
+}
+// A size filter's option. S, M and L cover different heights on a Road and a Hybrid bike, so the
+// letter stands alone; Kids carries its limit, in the page language's unit.
+function sizeLabel(sz){return sz==='Kids'?`${t('typeKids')} (≤ ${KIDS_MAX_CM} ${t('cmUnit')})`:sz;}
 function bikeGradient(c){if(!c||!c.length)return'var(--green)';if(c.length===1)return c[0];return`linear-gradient(135deg,${c.join(',')})`;}
 const DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const DAY_NAMES_AR={Sunday:'الأحد',Monday:'الاثنين',Tuesday:'الثلاثاء',Wednesday:'الأربعاء',Thursday:'الخميس',Friday:'الجمعة',Saturday:'السبت'};
@@ -4277,10 +4314,9 @@ function _bestFreeBike(e){
   // A premium tier has no fleet type of its own: Road Carbon is ridden on a Road bike, a carbon
   // frame first. Matching the tier's name against bike types found nothing, every time.
   const base=PREMIUM_TIERS[ty]||ty,carbon=ty==='Road Carbon';
-  const sz=e.size||(e.height?heightToSize(Number(e.height)):null);
   const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&['waiting','waitlist','active'].includes(x.status))getAssignedBikeIds(x).forEach(b=>held.add(b));});
   const free=(S.bikes||[]).filter(b=>b.status==='available'&&!held.has(b.id)&&(!base||base==='Any'||b.type===base));
-  const pick=list=>list.find(b=>sz&&b.size===sz)||list[0]||null;
+  const pick=list=>list.find(b=>_bikeFits(e,b))||list[0]||null;
   return (carbon&&pick(free.filter(b=>b.frame_type==='Carbon')))||pick(free);
 }
 // From the row's menu: the bike picker opens with the best free bike already selected, so
@@ -6096,10 +6132,12 @@ const _freeSessIds={has:sid=>_isFreeRide((S.sessions||[]).find(s=>s.id===sid))};
 // height, bike type, bike and colour where there is no bike to size or hand over, price and
 // payment where the ride is complimentary. An empty list keeps the full layout.
 function _rowSess(e){return (S.sessions||[]).find(x=>x.id===(e&&e.sessionId));}
-// Height gets its own column in the staff queue, big and bold: staff pick the frame size
-// from it at a glance while the rider walks up. A rider without one shows a dash.
+// Height gets its own column in the staff queue, big and bold, with the frame size it maps to
+// on the booked type's chart (_entryFitText): staff pick the bike from it at a glance while the
+// rider walks up. A rider without one shows a dash. Staff only - the rider never sees the size.
 function _qHeightCell(e,cls){
-  return`<td class="q-height-cell${cls?' '+cls:''}">${e.height?`<span class="q-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}</bdi></span>`:'<span class="rq-mut">—</span>'}</td>`;
+  const fit=e.height?_entryFitText(e):'';
+  return`<td class="q-height-cell${cls?' '+cls:''}">${e.height?`<span class="q-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}</bdi></span>${fit?` <span class="q-size">${esc(fit)}</span>`:''}`:'<span class="rq-mut">—</span>'}</td>`;
 }
 function _listCols(rows){
   const r=rows||[];
@@ -7056,9 +7094,9 @@ function _staffBusListen(){
 function _ciNfcReceiptHtml(e){
   const b=S._ciNfc&&S._ciBike&&S._ciBike.bike;if(!b)return'';
   const want=resolvedType(e)||'Any',base=PREMIUM_TIERS[want]||want; // what was BOOKED - the type buttons follow the bike
-  const size=e.size||(e.height?heightToSize(Number(e.height)):'');
-  const match=(base==='Any'||b.type===base)&&(!size||!b.size||b.size===size);
-  const line=match?t('nfcRcptMatch'):t('nfcRcptMismatch').replace('{0}',[typeLabel(want),size].filter(Boolean).join(' · ')).replace('{1}',[typeLabel(b.type),b.size].filter(Boolean).join(' · '));
+  const size=Number(e.height)>0?bikeFit(e.height,base==='Any'?b.type:base):(e.size||''); // on the chart of the type booked
+  const match=(base==='Any'||b.type===base)&&(!size||_bikeFits(e,b)||(!b.size&&size!=='Kids'&&b.type!=='Kids'));
+  const line=match?t('nfcRcptMatch'):t('nfcRcptMismatch').replace('{0}',[typeLabel(want),sizeName(size)].filter(Boolean).join(' · ')).replace('{1}',[typeLabel(b.type),b.size].filter(Boolean).join(' · '));
   return`<div class="ci-nfc-rcpt${match?'':' warn'}" role="status">
     <div class="ci-nfc-rcpt-top"><strong>${esc(b.name||'')}${b.bike_number!=null?` <span class="num">#${esc(String(b.bike_number))}</span>`:''}</strong> <span aria-hidden="true">→</span> <span class="num">#${esc(String(e.queueNum??''))}</span> ${esc(e.name||'')}</div>
     <div class="ci-nfc-rcpt-line">${esc(line)}</div>
@@ -8180,7 +8218,7 @@ async function _giveDeskBike(id){
   const _match=_linkCustomer(w.name,w.phone,w.email);
   const ty=CUST_TYPES.includes(w.bike_type)?w.bike_type:'Any';
   const entry=_applyDefaultPay({id:uid(),name:w.name,email:(_match&&_match.email)||'',phone:w.phone||(_match&&_match.phone)||'',
-    size:(_match&&_match.height)?heightToSize(Number(_match.height)):'',height:(_match&&_match.height)||null,
+    size:(_match&&_match.height)?heightToSize(_match.height,ty):'',height:(_match&&_match.height)||null,
     typePreference:ty,paid:!!w.paid,assignedBikeId:null,sessionId:sess.id,sessionDay:sess.day,
     sessionDate:sess.session_date||sess.id,queueNum:nextQNum(sess.id),status:'waiting',
     registeredAt:new Date().toISOString(),walkIn:!_match,customerId:(_match&&_match.id)||null,
@@ -8542,8 +8580,8 @@ function printDaySheet(){
     const _t=(()=>{try{return sessionTime(x);}catch(_){return'';}})();
     return `<section><h2>${esc(_evName(x))}${_t?` &middot; ${esc(_t)}`:''} &middot; ${rows.length}</h2>
       <table><thead><tr><th>#</th><th>${t('colRider')}</th><th>${t('bikeTypeLabel')}</th><th>${t('colStatus')}</th><th>${t('filterPay')}</th></tr></thead><tbody>
-      ${rows.map(e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');const price=e.price??DEFAULT_PRICE;
-        return`<tr><td>#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td>${esc(e.name||'')}</td><td>${esc(typeLabel(resolvedType(e)))}${e.size?' '+esc(e.size):''}${bikes?' &middot; '+esc(bikes):''}</td><td>${t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`SAR ${price} &#10003;`:`SAR ${price} &middot; ${t('pendingLabel')}`}</td></tr>`;}).join('')
+      ${rows.map(e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');const price=e.price??DEFAULT_PRICE,fit=_entryFitText(e);
+        return`<tr><td>#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td>${esc(e.name||'')}</td><td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bikes?' &middot; '+esc(bikes):''}</td><td>${t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`SAR ${price} &#10003;`:`SAR ${price} &middot; ${t('pendingLabel')}`}</td></tr>`;}).join('')
         ||`<tr><td colspan="5">—</td></tr>`}
       </tbody></table></section>`;
   }).join('');
@@ -9705,7 +9743,7 @@ async function _submitReg(){
     const entries=Array.from({length:qty},(_,i)=>_applyDefaultPay({
       waitlistNum:bookingStatus==='waitlist'?_wlBase+i:null,
       id:uid(),name:riderNames[i],email,phone,
-      size:(_needsBike(sess)&&heights[i])?heightToSize(heights[i]):'',height:_needsBike(sess)?(heights[i]||null):null,
+      size:(_needsBike(sess)&&heights[i])?heightToSize(heights[i],S.regBikeTypes[i]):'',height:_needsBike(sess)?(heights[i]||null):null,
       typePreference:!_needsBike(sess)?'None':(_noCarbon(sess)&&S.regBikeTypes[i]==='Road Carbon'?'Any':S.regBikeTypes[i]),paid:false,
       assignedBikeId:null,sessionId:S.selSession,sessionDay:sess.day,sessionDate:sess.session_date||S.selSession,
       queueNum:baseQNum+i,status:bookingStatus,registeredAt:new Date().toISOString(),walkIn:false,
@@ -9907,7 +9945,8 @@ async function submitModifyBooking(){
     // so a customer's rename was dropped while the toast said "updated" (the form now shows
     // those names read-only - _modNameLocked).
     const modH=parseInt(S.regBikeHeights[i])||null;
-    if(modH&&modH!==entry.height){patch.height=modH;patch.size=heightToSize(modH);}
+    if(modH&&modH!==entry.height)patch.height=modH;
+    if(modH&&(modH!==entry.height||newType!==entry.typePreference)&&heightToSize(modH,newType)!==(entry.size||''))patch.size=heightToSize(modH,newType);
     if(i>0&&!_modNameLocked(i)){const nm=_titleCaseName((S.regRiderNames[i]||'').trim());if(nm&&nm!==entry.name)patch.name=nm;}
     if(entry.typePreference!==newType){
       // Reprice only a plain unpaid row. A PAID row keeps its recorded amount (money is in the
@@ -9941,7 +9980,7 @@ async function submitModifyBooking(){
       const modHeight=parseInt(S.regBikeHeights[i])||null;
       const entry=_applyDefaultPay({
         id:uid(),name:modRiderName,email:cust.email||'',phone:cust.phone||'',
-        size:modHeight?heightToSize(modHeight):'',height:modHeight,typePreference:S.regBikeTypes[i],
+        size:modHeight?heightToSize(modHeight,S.regBikeTypes[i]):'',height:modHeight,typePreference:S.regBikeTypes[i],
         paid:false,assignedBikeId:null,
         sessionId:S.selSession,sessionDay:sess.day,sessionDate:sess.session_date||S.selSession,
         queueNum:nextNum++,status:'waiting',
@@ -13470,7 +13509,7 @@ async function _saveCommAdd(){
   const mkEntries=()=>{const base=nextQNum(sess.id);return fresh.map((c,i)=>{
     const ty=own?'Own':((c.type_preference==='Own'||(c.type_preference==='Road Carbon'&&_noCarbon(sess)))?'Any':(c.type_preference||'Any')); // Own is comm-only pref; Road Carbon only where the ride offers it
     return{id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:null,
-    size:c.height?heightToSize(Number(c.height)):'',height:c.height||null,
+    size:c.height?heightToSize(c.height,ty):'',height:c.height||null,
     typePreference:ty,paid:false,assignedBikeId:null,
     sessionId:sess.id,sessionDay:sess.day,sessionDate:sess.session_date||sess.id,
     queueNum:base+i,status:'waiting',
@@ -13562,7 +13601,7 @@ async function _saveJccGroup(){
     // The party's main phone belongs to the named contact; it links only the rider of that name.
     const _match=_linkCustomer(r.name,r.phone||((cname&&r.name&&r.name.trim().toLowerCase()===cname.trim().toLowerCase())?phone:''),null);
     return _applyDefaultPay({id:uid(),name:r.name||gname+' '+(i+1),email:(_match&&_match.email)||'',phone:r.phone||phone||(_match&&_match.phone)||'',
-      size:r.height?heightToSize(r.height):'',height:r.height,
+      size:r.height?heightToSize(r.height,r.type):'',height:r.height,
       typePreference:r.type,paid:false,assignedBikeId:null,sessionId:sess.id,sessionDay:sess.day,
       sessionDate:sess.session_date||sess.id,queueNum:base+i,status:'waiting',
       registeredAt:new Date().toISOString(),walkIn:!_match,customerId:(_match&&_match.id)||null,
@@ -13668,7 +13707,7 @@ async function _saveGroupEdit(){
     const ownPhone=(document.getElementById('ge-r-ph-'+i)?.value||'').trim();
     const height=parseInt(document.getElementById('ge-r-h-'+i)?.value)||null;
     const ty=document.getElementById('ge-r-type-'+i)?.value||m.typePreference;
-    const patch={name,height,size:height?heightToSize(height):(m.size||''),group_name:gname||null,group_contact:cname||null,group_phone:mainPhone||null};
+    const patch={name,height,size:height?heightToSize(height,ty):(m.size||''),group_name:gname||null,group_contact:cname||null,group_phone:mainPhone||null};
     // Own phone wins; members who were on the (old) main phone follow the new main phone.
     patch.phone=ownPhone||((m.phone||'').trim()===oldMain?mainPhone:m.phone||'');
     if(CUST_TYPES.includes(ty)&&ty!==m.typePreference){
@@ -15297,9 +15336,9 @@ function _wiStockHint(){
   const ty=S._wiType;
   if(!ty||ty==='Any'||ty==='Own'){el.textContent='';return;}
   const h=parseInt(document.getElementById('wi-height')?.value);
-  const size=h?heightToSize(h):null;
-  const free=(S.bikes||[]).filter(b=>b.status==='available'&&b.type===ty&&(!size||b.size===size));
-  const what=`${typeLabel(ty)}${size?' '+size:''}`;
+  const fit=h>0?bikeFit(h,ty):'',kids=fit==='Kids',fty=kids?'Kids':(PREMIUM_TIERS[ty]||ty); // 144 cm and under: the Kids bikes on the rack
+  const free=(S.bikes||[]).filter(b=>b.status==='available'&&b.type===fty&&(kids||!fit||b.size===fit));
+  const what=kids?typeLabel('Kids'):`${typeLabel(ty)}${fit?' '+fit:''}`;
   if(!free.length){el.style.color='var(--orange)';el.textContent=t('wiNoStockHint').replace('{0}',what);}
   else{el.style.color='var(--muted)';el.textContent=t('wiStockHint').replace('{0}',String(free.length)).replace('{1}',what);}
 }
@@ -15330,7 +15369,7 @@ async function _wiInsertRiders(sessId,riders,phone,custId,retry){
   const groupId=riders.length>1?uid():null;
   const mk=()=>{const base=nextQNum(sessId);return riders.map((r,i)=>{
     const _match=(i===0&&custId)?((S.customers||[]).find(c=>c.id===custId)||_linkCustomer(r.name,phone,null)):_linkCustomer(r.name,i===0?phone:'',null);
-    return _applyDefaultPay({id:uid(),name:r.name,email:(_match&&_match.email)||'',phone:phone||(_match&&_match.phone)||'',size:r.height?heightToSize(r.height):'',height:r.height,
+    return _applyDefaultPay({id:uid(),name:r.name,email:(_match&&_match.email)||'',phone:phone||(_match&&_match.phone)||'',size:r.height?heightToSize(r.height,r.type):'',height:r.height,
       typePreference:r.type,paid:false,assignedBikeId:null,sessionId:sessId,sessionDay:sess.day,
       sessionDate:sess.session_date||sessId,queueNum:base+i,status:'waiting',
       registeredAt:new Date().toISOString(),walkIn:!_match,customerId:(_match&&_match.id)||null,price:_isFreeRide(sess)?0:priceForType(r.type),
@@ -15459,7 +15498,7 @@ async function _saveBookingEdit(){
   const toSessionId=document.getElementById('be-sess')?.value||e.sessionId;
   const prev={name:e.name,phone:e.phone||'',height:e.height||null,size:e.size||'',type_preference:e.typePreference,price:e.price??DEFAULT_PRICE,
     session_id:e.sessionId,session_day:e.sessionDay,session_date:e.sessionDate,queue_num:e.queueNum,status:e.status};
-  const patch={name,phone,height,size:height?heightToSize(height):(e.size||'')};
+  const patch={name,phone,height,size:height?heightToSize(height,ty):(e.size||'')};
   if(ty!==e.typePreference){
     patch.type_preference=ty;
     // Reprice on type change like the customer flow, but never stomp a manual/promo price:
@@ -15514,7 +15553,7 @@ async function _saveBookingEdit(){
     let qn=nextQNum(toSessionId)+(moving?1:0); // when moving, the edited entry already took the next number
     let _wln=rStatus==='waitlist'?nextWlNum(toSessionId):0;
     for(const r of newRiders){
-      const ent=_applyDefaultPay({id:uid(),name:r.name,email:e.email||'',phone,size:r.height?heightToSize(r.height):'',height:r.height,waitlistNum:rStatus==='waitlist'?_wln++:null,
+      const ent=_applyDefaultPay({id:uid(),name:r.name,email:e.email||'',phone,size:r.height?heightToSize(r.height,r.type):'',height:r.height,waitlistNum:rStatus==='waitlist'?_wln++:null,
         typePreference:_noCarbon(sessT)&&r.type==='Road Carbon'?'Any':r.type,paid:false,assignedBikeId:null,sessionId:toSessionId,
         sessionDay:moving?patch.session_day:e.sessionDay,sessionDate:moving?patch.session_date:e.sessionDate,
         queueNum:qn,status:rStatus,registeredAt:new Date().toISOString(),walkIn:!!e.walkIn,
@@ -15927,7 +15966,7 @@ function renderStaffQueue(_resultsOnly){
     if(S.sfPay==='pending')filtered=filtered.filter(e=>!e.paid);
   }
   if(_qc.bike){
-    if(S.sfSize!=='all')  filtered=filtered.filter(e=>e.size===S.sfSize);
+    if(S.sfSize!=='all')  filtered=filtered.filter(e=>_entryFits(e).includes(S.sfSize));
     if(S.sfBike==='own')   filtered=filtered.filter(e=>_isOwnBike(e));
     if(S.sfBike==='rental')filtered=filtered.filter(e=>!_isOwnBike(e));
     if(['Road','Mountain','Hybrid','Kids'].includes(S.sfBike))filtered=filtered.filter(e=>(e.typePreference||'Any')===S.sfBike);
@@ -15985,7 +16024,7 @@ function renderStaffQueue(_resultsOnly){
     return`<option value="${b}"${S.sfBike===b?' selected':''}>${l}</option>`;}).join('');
   // Frame size. The filter branch below has always existed but nothing rendered a control
   // for it, so S.sfSize was permanently pinned to 'all' — this is that missing control.
-  const qSizeOpts=['all',...BIKE_SIZES].map(z=>
+  const qSizeOpts=['all',...BIKE_SIZES,'Kids'].map(z=>
     `<option value="${z}"${S.sfSize===z?' selected':''}>${z==='all'?t('allSizes'):esc(sizeLabel(z))}</option>`).join('');
   const livePosMap={};
   const allWaiting=getQueue().filter(e=>e.status==='waiting').sort((a,b)=>a.sessionId.localeCompare(b.sessionId)||a.queueNum-b.queueNum);
@@ -16288,7 +16327,7 @@ function renderQRow(e){
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
         </div>
         <div class="rq-csub${indent}">
-          ${esc(typeLabel(e.typePreference))}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">SAR ${e.price??DEFAULT_PRICE}</bdi>`}
+          ${esc(typeLabel(e.typePreference))}${e.height&&_entryFitText(e)?` <span class="q-size">${esc(_entryFitText(e))}</span>`:''}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">SAR ${e.price??DEFAULT_PRICE}</bdi>`}
         </div>
       </div>`;
     }).join('');
@@ -20301,7 +20340,7 @@ function printSessionReport(){
     phone:  e=>`<td>${esc(fmtPhone(e.phone))||'—'}</td>`,
     height: e=>`<td>${e.height?esc(e.height)+' '+t('cmUnit'):'—'}</td>`,
     bike:   e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');
-                return`<td>${esc(typeLabel(resolvedType(e)))}${e.size?' '+esc(e.size):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},
+                const fit=_entryFitText(e);return`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},
     payment:e=>`<td>${_payCell(e)}</td>`,
     status: e=>`<td class="${_stCls[e.status]||'rp-st'}">${reportStatusLabel(e.status)}</td>`,
   };
@@ -20896,7 +20935,7 @@ function renderHandover(){
   const host=document.getElementById('ho-host');if(!host)return;
   const rows=_hoRows(),sel=_hoSelected(),out=_hoOut();
   _hoRemember();
-  const card=e=>{const sz=e.size||(e.height?heightToSize(Number(e.height)):'');const on=!!(sel&&sel.id===e.id);
+  const card=e=>{const sz=_entryFitText(e);const on=!!(sel&&sel.id===e.id);
     return `<button type="button" class="ho-row${on?' sel':''}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
       <span class="ho-num">#${esc(e.queueNum??'')}</span>
       <span class="ho-name">${esc(e.name||'')}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
@@ -21309,7 +21348,7 @@ function renderCheckinModal(){
   // is where the bike gets picked, so the number staff size a bike by has to be on it.
   // Height, size and the bike type sit together, big and bold: the bike is picked off them.
   const _ciTy=resolvedType(e),_ciTyLbl=_ciTy&&_ciTy!=='Any'?_ciTy:'';
-  const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row bkm-hrow">${e.height?`<span class="ci-height bkm-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}${e.size?' · '+esc(String(e.size)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
+  const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row bkm-hrow">${e.height?`<span class="ci-height bkm-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}${_entryFitText(e)?' · '+esc(_entryFitText(e)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
   if(e.status==='noshow'){
     m.style.display='flex';
     m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
@@ -21723,7 +21762,7 @@ function renderModal(){
 
   
   const prefType=PREMIUM_TIERS[rider.typePreference]||rider.typePreference; // premium tiers are fulfilled by their base fleet type
-  const sizeOrd={XS:0,S:1,M:2,L:3};
+  const sizeOrd={XS:0,S:1,M:2,L:3,XL:4};
   const statusOrd={'available':0,'in-use':1,'maintenance':2,'missing':3,'retired':4};
   const sortBikes=arr=>{
     const d=S.modalSortDir;
@@ -21734,7 +21773,7 @@ function renderModal(){
     if(S.modalSort==='color')return[...arr].sort((a,b)=>d*String(((a.color_names||[]).filter(Boolean).length?a.color_names:a.colors||[]).join(' ')).localeCompare(String(((b.color_names||[]).filter(Boolean).length?b.color_names:b.colors||[]).join(' '))));
     if(S.modalSort==='groupset')return[...arr].sort((a,b)=>d*(String(a.groupset||'').localeCompare(String(b.groupset||''))||((Number(a.speeds)||0)-(Number(b.speeds)||0))));
     if(S.modalSort==='status')return[...arr].sort((a,b)=>d*((statusOrd[a.status]??99)-(statusOrd[b.status]??99)));
-    return[...arr].sort((a,b)=>{const aFree=a.status==='available'?0:1,bFree=b.status==='available'?0:1;const aSz=a.size===rider.size?0:1,bSz=b.size===rider.size?0:1;const aFleet=inFleet(a)?0:1,bFleet=inFleet(b)?0:1;return aFree-bFree||aSz-bSz||aFleet-bFleet||a.name.localeCompare(b.name);});
+    return[...arr].sort((a,b)=>{const aFree=a.status==='available'?0:1,bFree=b.status==='available'?0:1;const aSz=_bikeFits(rider,a)?0:1,bSz=_bikeFits(rider,b)?0:1;const aFleet=inFleet(a)?0:1,bFleet=inFleet(b)?0:1;return aFree-bFree||aSz-bSz||aFleet-bFleet||a.name.localeCompare(b.name);});
   };
   const mq=(S.modalSearch||'').trim().toLowerCase();
   const matchSearch=b=>!mq||[b.name,b.brand,b.model,b.type,b.size,b.groupset].some(v=>v&&String(v).toLowerCase().includes(mq));
@@ -21763,7 +21802,7 @@ function renderModal(){
       const cn=b.color_names&&b.color_names[ci]?b.color_names[ci]:'';
       return`<span title="${esc(cn)}" class="bkm-dot" data-cssv="${_cssv({'--bkm-dot':_bkHex(c)})}"></span>`;
     }).join('');
-    const sizeMatch=b.size===rider.size;
+    const sizeMatch=_bikeFits(rider,b);
     const badges=[];
     if(sizeMatch)badges.push(`<span class="bkm-bsz">${t('sizeMatchLabel')}</span>`);
     if(inFleet(b)&&slots)badges.push(`<span class="bkm-bfl">${t('fleetBadge')}</span>`);
@@ -24009,8 +24048,11 @@ function _riderBestBike(r,e){
   if(ty0==='Own'||ty0==='None')return null; // their own bike, or no bike at all
   const ty=PREMIUM_TIERS[ty0]||ty0,carbon=ty0==='Road Carbon';
   const held=new Set();getQueue().forEach(x=>{if(x.id!==e.id&&(x.status==='waiting'||x.status==='waitlist'))getAssignedBikeIds(x).forEach(b=>held.add(b));});
-  const ord=['XS','S','M','L','XL'],want=ord.indexOf(Number(r.height)>0?heightToSize(Number(r.height)):(e.size||''));
-  const gap=b=>{const i=ord.indexOf(b.size);return i<0||want<0?9:Math.abs(i-want);};
+  // How far a bike is from the size that suits the rider, on that bike's own chart (an Any
+  // booking weighs a Road and a Hybrid by their own bands). A Kids fit is a Kids bike or nothing.
+  const gap=b=>{const z=Number(r.height)>0?bikeFit(r.height,b.type):(e.size||'');
+    if(z==='Kids'||b.type==='Kids')return z==='Kids'&&b.type==='Kids'?0:9;
+    const i=BIKE_SIZES.indexOf(b.size),w=BIKE_SIZES.indexOf(z);return i<0||w<0?9:Math.abs(i-w);};
   const sess=(S.sessions||[]).find(x=>x.id===e.sessionId),slots=sess?parseSlots(sess.bike_slots):null,fmt=slotsFormat(slots);
   const inFleet=b=>!slots||fmt==='total'||(fmt==='ids'?(slots._bikes||[]).includes(b.id):(slots[b.type]||0)!==0);
   const rank=b=>[carbon&&!/carbon/i.test(b.frame_type||'')?1:0,gap(b),inFleet(b)?0:1];
@@ -24410,7 +24452,9 @@ function _rwBookingPatch(e,want){
   const p={};
   if(want.name&&want.name!==e.name)p.name=want.name;
   if(want.phone!==undefined&&(want.phone||'')!==(e.phone||''))p.phone=want.phone||'';
-  if(want.height!=null&&want.height!==e.height){p.height=want.height;p.size=heightToSize(want.height);}
+  if(want.height!=null&&want.height!==e.height)p.height=want.height;
+  const _h=want.height!=null?want.height:e.height,_ty=want.type||e.typePreference;
+  if(_h&&heightToSize(_h,_ty)!==(e.size||'')&&(p.height||(want.type&&want.type!==e.typePreference)))p.size=heightToSize(_h,_ty);
   if(want.type&&want.type!==e.typePreference){
     p.type_preference=want.type;
     if(!e.paid&&(e.price??DEFAULT_PRICE)===priceForEntryType(e,e.typePreference||'Any'))p.price=priceForEntryType(e,want.type);
@@ -24801,7 +24845,7 @@ function _histRows(){
   if(S.histPay==='paid')   filtered=filtered.filter(e=>e.paid);
   if(S.histPay==='pending')filtered=filtered.filter(e=>!e.paid&&e.status==='done');
   if(S.histType!=='all')   filtered=filtered.filter(e=>resolvedType(e)===S.histType);
-  if(S.histSize!=='all')   filtered=filtered.filter(e=>e.size===S.histSize);
+  if(S.histSize!=='all')   filtered=filtered.filter(e=>_entryFits(e).includes(S.histSize));
   if((S.histSearch||'').trim()){const q=S.histSearch.trim().toLowerCase().replace(/^#/,'');filtered=filtered.filter(e=>String(e.name||'').toLowerCase().includes(q)||_phoneHit(e.phone,q)||(e.email||'').toLowerCase().includes(q)||String(e.queueNum)===q||_matchesRef(e,q));}
   const _hd=S.histSortDir;
   filtered.sort((a,b)=>{
@@ -26948,7 +26992,7 @@ function renderHistory(_resultsOnly){
       ${_fPanel('hist',_fField(t('filterStatus'),`<select class="filter-select" data-on-change="${_on("setHistStatus",_P("value"))}" aria-label="${esc(t('filterStatus'))}">${hStatusOpts}</select>`)
         +_fField(t('filterPay'),`<select class="filter-select" data-on-change="${_on("setHistPay",_P("value"))}" aria-label="${esc(t('filterPay'))}">${hPayOpts}</select>`)
         +_fField(t('filterType'),`<select class="filter-select" data-on-change="${_on("setHistType",_P("value"))}" aria-label="${esc(t('filterType'))}">${hTypeOpts}</select>`)
-        +_fField(t('filterSize'),`<select class="filter-select" data-on-change="${_on("setHistSize",_P("value"))}" aria-label="${esc(t('filterSize'))}">${['all',...BIKE_SIZES].map(z=>`<option value="${z}"${S.histSize===z?' selected':''}>${z==='all'?t('allSizes'):esc(sizeLabel(z))}</option>`).join('')}</select>`)
+        +_fField(t('filterSize'),`<select class="filter-select" data-on-change="${_on("setHistSize",_P("value"))}" aria-label="${esc(t('filterSize'))}">${['all',...BIKE_SIZES,'Kids'].map(z=>`<option value="${z}"${S.histSize===z?' selected':''}>${z==='all'?t('allSizes'):esc(sizeLabel(z))}</option>`).join('')}</select>`)
         +_fField(t('histRangeLabel'),`<select class="filter-select" data-on-change="${_on("setHistRange",_P("value"))}" aria-label="${esc(t('histRangeLabel'))}">${hRangeOpts}</select>`))}
       ${filtered.length!==hist.length?`<div class="result-count">${filtered.length} ${t('resultOf')} ${hist.length} ${t('resultRecords')}</div>`:''}
     </div>

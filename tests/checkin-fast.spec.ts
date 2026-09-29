@@ -146,6 +146,24 @@ test("the modal shows the rider's height and size", async ({ page }) => {
   await expect(page.locator('#checkin-modal .ci-height')).toHaveText('178 cm · M');
 });
 
+// The size is read off the owner's chart for the booked type (2026-09-29), not the size saved
+// with the row: 182 cm is a Road L and a Hybrid M, and 140 cm is a Kids bike whatever was booked.
+test('@staff:bookings the modal and the Bookings table show the size for the booked type', async ({ page }) => {
+  await boot(page, [
+    e('road', { name: 'Road Rider', height: 182, size: 'M' }),
+    e('hyb', { name: 'Hybrid Rider', height: 182, size: 'M', type_preference: 'Hybrid', queue_num: 2 }),
+    e('kid', { name: 'Kid Rider', height: 140, size: 'XS', queue_num: 3 }),
+    e('any', { name: 'Any Rider', height: 182, size: 'M', type_preference: 'Any', queue_num: 4 }),
+  ]);
+  const sizeOf = (name: string) => page.locator('tr, .q-card, [class*="card"]').filter({ hasText: name }).locator('.q-size').first();
+  await expect(sizeOf('Road Rider')).toHaveText('L');
+  await expect(sizeOf('Hybrid Rider')).toHaveText('M');
+  await expect(sizeOf('Kid Rider')).toHaveText('Kids');
+  await expect(sizeOf('Any Rider')).toHaveText('Road L · Hybrid/Mountain M');
+  await page.evaluate(`showCheckinModal('road')`);
+  await expect(page.locator('#checkin-modal .ci-height')).toHaveText('182 cm · L');
+});
+
 test("the modal shows the rider's bike type beside the height, in the same big badge row", async ({ page }) => {
   await boot(page, [e('typed', { name: 'Typed', height: 178, size: 'M', type_preference: 'Hybrid' })]);
   await page.evaluate(`showCheckinModal('typed')`);

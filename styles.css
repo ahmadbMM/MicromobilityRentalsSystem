@@ -5721,6 +5721,11 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
     .queue-table.compact .q-height{font-size:16px;}
     .queue-table.compact .q-type-cell .type-badge,body.view-staff .queue-table.compact .q-type-cell .type-badge{font-size:13px;padding:4px 9px;}
     .q-card .q-height{font-size:16px;}
+    /* The frame size that height maps to (_entryFitText): under it in the table, after the bike type on a card. */
+    .q-size{display:inline-block;font-size:14px;font-weight:900;color:var(--text);line-height:1.2;}
+    .q-height-cell .q-size{display:block;margin-top:2px;white-space:normal;max-width:14em;}
+    .q-card .q-size{font-size:11px;}
+    .queue-table.compact .q-height-cell .q-size{font-size:12.5px;}
 
 /* Check-in modal and the Petromin booking pop-up: the bike type reads as big as the height. */
 .ci-type .type-badge,body.view-staff .ci-type .type-badge{font-size:18px;font-weight:900;padding:6px 12px;letter-spacing:0;}

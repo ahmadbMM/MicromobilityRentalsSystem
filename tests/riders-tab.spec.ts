@@ -243,10 +243,11 @@ test.describe('walk-in at the desk', () => {
       p_badge: 'D-78', p_name: 'Dana Walkin', p_height: 172, p_type: 'Hybrid', p_source: 'petromin',
       p_phone: '+966500000004', p_session_id: SESS, p_company: 'Petromin',
     });
-    // The same rider as an ordinary booking on the night: next number after Amal's #7.
+    // The same rider as an ordinary booking on the night: next number after Amal's #7. 172 cm is
+    // a Hybrid M on the owner's chart (Hybrid M runs 171-185; it would be a Road S).
     await expect.poll(() => booked.length).toBe(1);
     expect(booked[0]).toMatchObject({
-      session_id: SESS, name: 'Dana Walkin', phone: '+966500000004', height: 172, size: 'S',
+      session_id: SESS, name: 'Dana Walkin', phone: '+966500000004', height: 172, size: 'M',
       type_preference: 'Hybrid', status: 'waiting', queue_num: 8, walk_in: true,
     });
     // One PATCH on the registration row: linked to that booking, and checked in.
