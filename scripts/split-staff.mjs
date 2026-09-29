@@ -41,6 +41,7 @@ export const STAFF_ENTRY = [
   'renderAmbassadors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
   'doUndo', '_ucPrompt', // the topbar's Undo and the admin's undo-code question (2026-09-28)
+  '_tpMsgOpen', // the account editor's temporary-password message (2026-09-29): its save is customer-half code
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);

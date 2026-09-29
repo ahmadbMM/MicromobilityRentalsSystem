@@ -6334,6 +6334,10 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-link{background:none;border:0;padding:0;color:var(--green);font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ca-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .ca-actions a{text-decoration:none;display:inline-flex;align-items:center}
+.ca-actions .ca-ic{justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);flex:none;transition:background .18s}
+.ca-actions .ca-ic:hover{background:rgba(var(--green-rgb),.22)}
+.cf-pwd-temp{margin-top:6px;font-size:12px;font-weight:700;line-height:1.45;color:rgb(var(--warn-rgb))}
+.cf-pwd-temp[hidden]{display:none}
 .ca-msg-box{max-width:560px;width:100%}
 .ca-msg-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ca-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:24px;line-height:1;padding:0 4px}

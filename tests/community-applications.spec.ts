@@ -50,6 +50,9 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(k.locator('a.ca-call')).toHaveAttribute('href', 'tel:+966552468013');
   await expect(k.locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966552468013');
   await expect(k.locator('a.ca-chat')).toHaveAttribute('target', '_blank');
+  await expect(k.locator('a.ca-call')).toHaveAttribute('aria-label', 'Call'); // icons, the words are their labels
+  await expect(k.locator('a.ca-call svg, a.ca-chat svg')).toHaveCount(2);
+  expect((await k.locator('a.ca-call').innerText()).trim()).toBe('');
 
   // Same email as an account on file: staff are told before approving
   await expect(row(page, 'a2').locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
@@ -327,6 +330,7 @@ test('A rider signed in with a temporary password must choose their own before a
   const gate = page.locator('#pwd-gate .pg-box');
   await expect(gate).toBeVisible();
   await expect(gate).toContainText('Choose your own password');
+  await expect(gate.locator('.pg-kicker')).toHaveText('Password'); // any account may be here, not only a new member
   await page.fill('#pm-new', 'short');
   await page.fill('#pm-new2', 'short');
   await page.click('#pm-save');

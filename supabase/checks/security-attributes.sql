@@ -61,6 +61,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_community_ask_changes', true, 'writes community_applications (staff-only); is_staff()-gated'),
   ('community_fix_get',      true,  'reads one application by its change token for the applicant; anon'),
   ('community_fix_submit',   true,  'writes the asked fields of one application by its token; anon, _ip_gate-metered'),
+  ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd; is_staff()-gated'),
   ('_badge_rule_ok',        false, 'pure shape test of a badge rule, for the check constraint'),
   -- Invoker on purpose: pure logic, no privileged read.
   ('_name_chars_ok',         false, 'pure regex test, no read'),
