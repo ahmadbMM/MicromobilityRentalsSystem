@@ -271,3 +271,21 @@ test('the staff app marks this phone for the website on the live staff address, 
   await page.evaluate('lockStaff()').catch(() => {});
   await expect.poll(tap).toBeUndefined();
 });
+
+test('the check-in header shows the type it gives beside the height and size: Any as booked, then the picked type, then the scanned bike\'s', async ({ page }) => {
+  await stubSupabase(page, fixtures({ queue_entries: [{ ...ENTRY, type_preference: 'Any', size: null, height: 162 }] }));
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  // @ts-expect-error app globals
+  await page.evaluate(() => { S.staffTab = 'queue'; renderStaffQueue(); showCheckinModal('e1'); });
+  const head = page.locator('#checkin-modal .bkm-hrow');
+  await expect(head.locator('.bkm-height')).toHaveText('162 cm · S');
+  await expect(head.locator('.ci-type')).toHaveText('Any');
+  await page.locator('#checkin-modal').getByRole('button', { name: 'Hybrid', exact: true }).click();
+  await expect(head.locator('.ci-type')).toHaveText('Hybrid');
+  // @ts-expect-error app globals
+  await page.evaluate(() => _onScanPayload('42'));
+  await expect(page.locator('#checkin-modal #ci-bike')).toHaveValue('42');
+  await expect(head.locator('.ci-type')).toHaveText('Road'); // the bike in hand is a Road
+});

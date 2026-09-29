@@ -21432,8 +21432,11 @@ function renderCheckinModal(){
         return `<li><button type="button" class="toggle-btn bkm-step${out?' bkm-stepout':''}${cur?' active':''}"${cur?' aria-current="step"':''}${tap?` data-on-click="${_on("showCheckinModal",m.id)}"`:' disabled'}><b class="bkm-stepn">${mark}</b>${esc(String(m.name||'').split(' ')[0])}</button></li>`;}).join('')}</ol>`:'';
   // The rider's height (and the size it maps to) sits under the title: on the phone this modal
   // is where the bike gets picked, so the number staff size a bike by has to be on it.
-  // Height, size and the bike type sit together, big and bold: the bike is picked off them.
-  const _ciTy=resolvedType(e),_ciTyLbl=_ciTy&&_ciTy!=='Any'?_ciTy:'';
+  // Height, size and the bike type sit together, big and bold: the bike is picked off them. The type
+  // is the one this check-in gives (the owner, 2026-09-29, beside "162 cm · S"): what was booked to
+  // begin with, "Any" included, then the type staff pick below or the scanned bike's. A ride without
+  // bikes (a swim) shows none.
+  const _ciTyLbl=_needsBike(allSessions().find(x=>x.id===e.sessionId))?(S._ciType||resolvedType(e)||'Any'):'';
   const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row bkm-hrow">${e.height?`<span class="ci-height bkm-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}${_entryFitText(e)?' · '+esc(_entryFitText(e)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
   if(e.status==='noshow'){
     m.style.display='flex';
