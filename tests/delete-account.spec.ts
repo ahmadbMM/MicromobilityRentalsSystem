@@ -32,6 +32,7 @@ function watchWrites(page: import('@playwright/test').Page) {
     const m = r.url().match(/\/rest\/v1\/([^/?]+)/);
     if (!m || !['POST', 'PATCH', 'DELETE'].includes(r.method())) return;
     if (/\/rpc\/staff_sign_in_methods\b/.test(r.url())) return; // a read (the editor's Google/Apple marks), sent as a POST
+    if (/\/rpc\/staff_sign_in_lock\b/.test(r.url())) return; // a read (the editor's sign-in tries), sent as a POST
     calls.push({ method: r.method(), table: m[1], body: r.postData() || '', url: r.url() });
   });
   return calls;

@@ -184,7 +184,11 @@ with expected(fname, want_definer, note) as (values
   ('customer_set_about',     true,  'writes the signed-in rider''s own customers row; token-checked'),
   -- Google / Apple marks beside the email (20260929140000)
   ('_sign_in_methods',       true,  'reads auth.identities and customers.password_hash, which no client may; internal only'),
-  ('staff_sign_in_methods',  true,  'every account''s sign-in methods; checks is_staff() itself')
+  ('staff_sign_in_methods',  true,  'every account''s sign-in methods; checks is_staff() itself'),
+  -- Staff reset an account's sign-in wait (20260930110000)
+  ('_sign_in_lock_rows',     true,  'reads login_throttle (RLS on, no policy) and audit_log; internal only'),
+  ('staff_sign_in_lock',     true,  'one account''s failed tries and lock; checks is_staff() itself'),
+  ('staff_clear_sign_in_lock', true, 'deletes one account''s login_throttle rows; is_staff()-gated')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
