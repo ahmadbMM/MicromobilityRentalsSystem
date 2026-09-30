@@ -2731,7 +2731,7 @@
   "errNameShort": "Escribe cada nombre completo: cada nombre necesita al menos dos letras.",
   "fixFilterBtn": "Corrección pedida",
   "fixDlgTitle": "Pedir que corrija sus datos",
-  "fixDlgSub": "Marca lo que podría estar mal. La próxima vez que {0} elija un evento, verá el mensaje de abajo y no podrá reservar hasta corregirlo.",
+  "fixDlgSub": "Marca lo que podría estar mal. La próxima vez que {0} inicie sesión o abra el sitio, verá el mensaje de abajo y no podrá continuar hasta corregirlo.",
   "fixDlgPreview": "Lo que ve el ciclista",
   "fixDlgFields": "Campos a corregir",
   "fixDlgSend": "Pedir corrección ({0})",

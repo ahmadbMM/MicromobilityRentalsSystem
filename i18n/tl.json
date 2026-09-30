@@ -2731,7 +2731,7 @@
   "errNameShort": "Isulat nang buo ang bawat pangalan: kailangang may hindi bababa sa dalawang titik ang bawat pangalan.",
   "fixFilterBtn": "Pinaaayos",
   "fixDlgTitle": "Ipaayos ang mga detalye",
-  "fixDlgSub": "Lagyan ng tsek ang maaaring mali. Sa susunod na pumili si {0} ng event, makikita niya ang mensahe sa ibaba at hindi siya makakapag-book hangga’t hindi ito naaayos.",
+  "fixDlgSub": "Lagyan ng tsek ang maaaring mali. Sa susunod na mag-sign in si {0} o buksan ang site, makikita niya ang mensahe sa ibaba at hindi siya makakapagpatuloy hangga’t hindi ito naaayos.",
   "fixDlgPreview": "Ang makikita ng rider",
   "fixDlgFields": "Mga field na aayusin",
   "fixDlgSend": "Ipaayos ({0})",

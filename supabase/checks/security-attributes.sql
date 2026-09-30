@@ -64,6 +64,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd; is_staff()-gated'),
   ('customer_community_apply', true, 'writes community_applications (staff-only) for the signed-in applicant; token-checked, _ip_gate-metered'),
   ('customer_community_me',  true,  'reads the caller''s own account, application and tags for the form; token-checked'),
+  ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),
   ('_badge_rule_ok',        false, 'pure shape test of a badge rule, for the check constraint'),
   -- Invoker on purpose: pure logic, no privileged read.
   ('_name_chars_ok',         false, 'pure regex test, no read'),

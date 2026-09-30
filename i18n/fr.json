@@ -2731,7 +2731,7 @@
   "errNameShort": "Écrivez chaque nom en entier : chaque nom doit compter au moins deux lettres.",
   "fixFilterBtn": "Correction demandée",
   "fixDlgTitle": "Demander une correction",
-  "fixDlgSub": "Cochez ce qui est peut-être faux. La prochaine fois que {0} choisira un événement, le message ci-dessous s’affichera et la réservation restera bloquée jusqu’à la correction.",
+  "fixDlgSub": "Cochez ce qui est peut-être faux. La prochaine fois que {0} se connectera ou ouvrira le site, le message ci-dessous s’affichera et il ne pourra pas continuer avant la correction.",
   "fixDlgPreview": "Ce que voit le cycliste",
   "fixDlgFields": "Champs à corriger",
   "fixDlgSend": "Demander la correction ({0})",

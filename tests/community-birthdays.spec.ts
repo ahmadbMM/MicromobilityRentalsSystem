@@ -90,13 +90,12 @@ test.describe('a community member who has not given both', () => {
     await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
   });
 
-  test('a staff flag on a nationality the account already holds waits for the event pick, as a correction', async ({ page }) => {
+  // Every page that asks for details opens at sign-in, not at the event pick (the owner, 2026-09-30):
+  // a staff flag on a nationality the account already holds opens as a correction, at once.
+  test('a staff flag on a nationality the account already holds opens as a correction when the site opens', async ({ page }) => {
     await rider(page, ['nationality'], { birth_date: '1990-05-05', nationality: 'Jordan' });
-    await page.waitForTimeout(400);
-    await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
-    await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
-    await page.evaluate(`selectEvent('jcc')`);
     await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
+    await expect(page.locator('#fix-gate .pg-title')).toHaveText('Let’s get your details right');
     await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
   });
 });

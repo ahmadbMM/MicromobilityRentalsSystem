@@ -34,6 +34,38 @@ async function boot(page: import('@playwright/test').Page, bookings: Record<stri
   await waitForSb(page);
 }
 
+// Every page that asks for details opens at sign-in and whenever the site opens on the account, not
+// at the next event pick, and nothing but saving (or Log out) takes it away (the owner, 2026-09-30:
+// "force them with no way to escape it from when they sign in directly ... not when they try to book").
+test('eight bookings and a bare profile: the page opens when the site opens, and Escape or moving about leaves it up', async ({ page }) => {
+  await boot(page, eight, { nationality: null, birth_date: null });
+  const box = page.locator('#profile-gate .pg-box');
+  await expect(box).toBeVisible();                                    // no event picked
+  await page.keyboard.press('Escape');
+  await expect(box).toBeVisible();
+  await page.evaluate(`goCustomer('myrides')`);
+  await expect(box).toBeVisible();
+  await page.evaluate(`goLanding()`);
+  await expect(box).toBeVisible();
+  await expect(box.locator('button', { hasText: /not now|later|skip|close/i })).toHaveCount(0);
+  await pickBirth(page, 'pg-birth', '1996-03-14');
+  await page.selectOption('#pg-nat', 'Egypt');
+  await page.click('#pg-save');
+  await expect(box).toBeHidden();
+});
+
+test('what staff asked to correct opens when the site opens, then the profile page if it is due too', async ({ page }) => {
+  await boot(page, eight, { nationality: null, birth_date: null, phone: '0500000001' }, { 'rpc:customer_fix_fields': ['phone'], 'rpc:customer_fix_save': [] });
+  const fix = page.locator('#fix-gate .fx-box');
+  await expect(fix).toBeVisible();                                    // no event picked
+  await page.keyboard.press('Escape');
+  await expect(fix).toBeVisible();
+  await page.fill('#fx-phone', '0551234567');
+  await page.click('#fx-save');
+  await expect(fix).toBeHidden();
+  await expect(page.locator('#profile-gate .pg-box')).toBeVisible();  // the eighth-booking page follows
+});
+
 test('eight bookings and a bare profile: the gate takes the event pick, saves both, then continues', async ({ page }) => {
   await boot(page, eight, { nationality: null, birth_date: null });
   const calls: string[] = [];

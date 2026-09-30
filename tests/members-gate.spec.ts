@@ -83,6 +83,17 @@ test('without a code (a database from before it), Apply opens the form at its fi
   expect(page.url()).toBe(`${FORM}?lang=ar`);
 });
 
+// The learn-to-ride sign-up's "sign in on the booking site" comes here with ?handoff=learn.
+test('?handoff=learn sends a signed-in rider back to the learn-to-ride sign-up, signed in there', async ({ page }) => {
+  const code = 'cd34'.repeat(12);
+  await stubSupabase(page, { ...fixtures, 'rpc:customer_handoff_create': code });
+  await page.route('https://micromobility.sa/experiences/learn**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>learn</title>' }));
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+  await page.goto('/?handoff=learn&lang=ar');
+  await page.waitForURL('https://micromobility.sa/experiences/learn**');
+  expect(page.url()).toBe(`https://micromobility.sa/experiences/learn?lang=ar&code=${code}`);
+});
+
 // The form's "Already have an account? Sign in" comes here with ?handoff=community: once signed in,
 // the rider goes back to the form's second step.
 test('?handoff=community sends a signed-in rider back to the form, signed in there', async ({ page }) => {
