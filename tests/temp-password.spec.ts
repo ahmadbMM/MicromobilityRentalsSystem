@@ -57,6 +57,7 @@ test('Generate makes a random temporary password; saving it marks it temporary a
   // (the owner, 2026-09-30).
   expect(txt).toBe(['Hi Huda,', '', 'We’ve set a temporary password for your MicroMobility account:', pwd2, '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
     'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The MicroMobility team'].join('\n'));
+  expect(txt).not.toContain('instagram'); // not about an application: no Instagram line (2026-09-30)
   for (const none of ['huda.saleh@gmail.com', '0551239876']) expect(txt).not.toContain(none);
   // in the staff member's language to begin with, any of the ten
   await msg.locator('#ca-msg-lang').selectOption('ar');

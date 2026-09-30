@@ -599,7 +599,10 @@ export function formatBareWrites(r, limit = 20) {
 // history and the account editor (about 19 KB) out of the customer half into staff.js; a staff device
 // downloads the same total as before, a customer's phone 19 KB less, and the customer budget comes
 // down so that saving is kept.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 250, staff: 270 };
+// 2026-09-30: staff 270 -> 275. The application messages in ten languages (the ride list, the
+// Instagram line) took the staff half to 270.3 KB; only staff devices download it, and the customer
+// budget stays where it was.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 250, staff: 275 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

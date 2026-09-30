@@ -141,7 +141,9 @@ test('Approve (an application from before the form made accounts): a welcome wit
   const msg = await dlg.locator('#ca-msg-text').inputValue();
   expect(msg).toBe(['Hi Karim,', '', 'Welcome to the MicroMobility community!', '',
     'We’re delighted to let you know that your membership application has been approved. You’re now part of a community of riders who love riding together, and we can’t wait to ride with you.', '',
-    'You can now book our community rides, which are open to members only.', '', 'See you on the road!', 'The MicroMobility team'].join('\n'));
+    'You can now book our community rides, which are open to members only.', '',
+    'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '', // every application message (2026-09-30)
+    'See you on the road!', 'The MicroMobility team'].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'sign in', 'Google', 'Apple']) expect(msg).not.toContain(none);
   const wa = await dlg.locator('a.ca-wa').getAttribute('href');
   expect(wa).toMatch(/^https:\/\/wa\.me\/966552468013\?text=/);
@@ -159,7 +161,8 @@ test('Approve (an application from before the form made accounts): a welcome wit
   await dlg.locator('.ca-tp-go').click();
   const pw = await dlg.locator('#ca-msg-text').inputValue();
   expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
-    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The MicroMobility team'].join('\n'));
+    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '',
+    'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '', 'The MicroMobility team'].join('\n'));
   await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
 
   await dlg.locator('.ca-x').click();
@@ -260,7 +263,7 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   const welcome = await page.locator('#confirm-modal #ca-msg-text').inputValue();
   expect(welcome).toContain('We’ve also saved you a place on this Saturday Social Ride:');
   expect(welcome).toContain('Before the ride:\n• Your booking and its QR code are waiting in “My Bookings”.');
-  expect(welcome).toContain('please cancel from “My Bookings” so someone else can take your place.\n\nSee you on the road!');
+  expect(welcome).toContain('please cancel from “My Bookings” so someone else can take your place.\n\nFollow us on Instagram for ride photos and news:\nhttps://www.instagram.com/MicroMobilitySA/\n\nSee you on the road!');
   await expect.poll(() => tagRows.length).toBe(1);
   expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip', added_by: 'staff' });
   expect(tagRows[0].expires_at ?? null).toBeNull(); // permanent
@@ -577,6 +580,7 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
     '• Your booking and its QR code are waiting in “My Bookings”.',
     '• Have your QR code ready when you arrive; we scan it to check you in.',
     '• If you can’t make it, please cancel from “My Bookings” so someone else can take your place.', '',
+    'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '',
     'See you on the road!', 'The MicroMobility team',
   ].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
@@ -585,7 +589,7 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   await expect(msgBox.locator('.ca-wa-opt')).toContainText('Include the WhatsApp group link');
   await wa.check();
   msg = await text();
-  expect(msg).toContain('Join our WhatsApp group for ride updates:\n' + WA_GROUP + '\n\nSee you on the road!');
+  expect(msg).toContain('Join our WhatsApp group for ride updates:\n' + WA_GROUP + '\n\nFollow us on Instagram');
   const href = await msgBox.locator('a.ca-wa').getAttribute('href');
   expect(decodeURIComponent(href!.split('text=')[1])).toBe(msg); // what WhatsApp opens with is the text shown
   // another language keeps the tick
