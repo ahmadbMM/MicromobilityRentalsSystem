@@ -483,3 +483,200 @@ test('the server saying there is no account is not reported as a connection faul
   await expect(toast).toContainText('is gone');
   await expect(toast).not.toContainText('connection');
 });
+
+// Invite to ride (the owner, 2026-09-30): an approval without the Community tag that puts the
+// rider on a Saturday Social Ride staff must pick, with no tag ticked to start with, and an
+// invitation to send, the community's WhatsApp group link added when staff tick it. The invitation
+// carries no account details: no reply to a community application does (the owner, 2026-09-30).
+const WA_GROUP = 'https://chat.whatsapp.com/DEWPeDbRwb503PHu0R9qax?s=cl&p=i&mlu=0&ilr=4';
+const MEET = 'https://maps.app.goo.gl/meetHere';
+const INV_RIDES = [RIDES[0], { ...RIDES[1], meet_url: MEET, title: 'Sunrise Loop' }, ...RIDES.slice(2)];
+function patches(page: Page, table: string) {
+  const out: { url: string; body: Record<string, unknown> }[] = [];
+  page.on('request', (r) => {
+    if (r.method() !== 'PATCH' || !new RegExp(`/rest/v1/${table}\\?`).test(r.url())) return;
+    try { out.push({ url: decodeURIComponent(r.url()), body: r.postDataJSON() }); } catch { /* not json */ }
+  });
+  return out;
+}
+
+test('Invite to ride: no tag ticked, a ride to pick, then the approval without Community, the booking and the invitation', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS, sessions: INV_RIDES,
+    'rpc:staff_community_approve': { ok: true, existing: false, customer_id: 'ca01', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', password: 'Kp7wXr4Mnq', lang: 'en', oauth: false },
+  });
+  const calls: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/staff_community_approve/.test(r.url())) calls.push(JSON.parse(r.postData() || '{}')); });
+  const tagRows = writes(page, 'customer_tags'), bookings = writes(page, 'queue_entries'), marks = patches(page, 'community_applications');
+
+  await expect(row(page, 'a1').locator('.ca-invite')).toHaveText('Invite to ride');
+  await row(page, 'a1').locator('.ca-invite').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toHaveAttribute('data-ca-kind', 'invite');
+  await expect(dlg).toContainText('Invite Karim Mansour to ride?');
+  await expect(dlg).toContainText('No tag is added unless you pick one');
+  // every tag offered but the blacklist, none ticked, Community included
+  for (const id of ['tag_saturday', 'tag_vip', 'tag_lead']) {
+    await expect(chip(page, id)).toBeEnabled();
+    await expect(chip(page, id)).toHaveAttribute('aria-pressed', 'false');
+  }
+  await expect(chip(page, 'tag_blacklist')).toHaveCount(0);
+  // the live Saturday rides and nothing else: no "Not now", none picked, and Invite waits for one
+  const ride = (id: string) => dlg.locator(`.ca-ap-rides [data-ca-ride="${id}"]`);
+  expect(await dlg.locator('.ca-ap-rides .ca-ap-ride').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-ca-ride')))).toEqual([SAT, SAT2]);
+  await expect(dlg.locator('.ca-ap-rides [aria-checked="true"]')).toHaveCount(0);
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled();
+  await expect(dlg.locator('.ca-ap-go')).toHaveText('Invite to ride');
+  await chip(page, 'tag_vip').click();
+  await ride(SAT2).click();
+  await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
+  await expect(dlg.locator('.ca-ap-go')).toBeEnabled();
+  await dlg.locator('.ca-ap-go').click();
+
+  const msgBox = page.locator('#confirm-modal .ca-msg-box');
+  await expect(msgBox.locator('.ca-pwd')).toHaveText('Kp7wXr4Mnq'); // to staff, once; never in the message
+  expect(calls).toEqual([{ p_id: 'a1', p_by: 'Spec Staff', p_community: false }]);
+  await expect.poll(() => marks.length).toBe(1);
+  expect(marks[0].url).toContain('id=eq.a1');
+  expect(marks[0].body).toEqual({ invited_session: SAT2 });
+  await expect.poll(() => tagRows.length).toBe(1);
+  expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip' });
+  await expect.poll(() => bookings.length).toBe(1);
+  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', status: 'waiting', approval: 'approved' });
+  expect(await page.evaluate(`_hasTagNow('ca01','tag_saturday')`)).toBe(false);
+
+  // the invitation: the ride's title, day, times and meeting point, and nothing about the account
+  await expect(msgBox.locator('.ca-msg-sub')).toHaveText('Send this to the rider. They are already on the final list of this ride.');
+  const text = () => msgBox.locator('#ca-msg-text').inputValue();
+  let msg = await text();
+  expect(msg).toBe([
+    'Hi Karim,', '',
+    'You’re invited to our Saturday Social Ride! 🚴', '',
+    'Thank you for applying to join the Micromobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',
+    '🚴 Sunrise Loop', '📅 Saturday, 14 March 2099', '🕕 Gathering 6:00 am · Ride starts 8:00 am', '📍 Meeting point: ' + MEET, '',
+    'See you on the road!', 'The Micromobility team',
+  ].join('\n'));
+  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
+  const wa = msgBox.locator('#ca-msg-wa');
+  await expect(wa).not.toBeChecked();
+  await expect(msgBox.locator('.ca-wa-opt')).toContainText('Include the WhatsApp group link');
+  await wa.check();
+  msg = await text();
+  expect(msg).toContain('Join our WhatsApp group for ride updates:\n' + WA_GROUP + '\n\nSee you on the road!');
+  const href = await msgBox.locator('a.ca-wa').getAttribute('href');
+  expect(decodeURIComponent(href!.split('text=')[1])).toBe(msg); // what WhatsApp opens with is the text shown
+  // another language keeps the tick
+  await msgBox.locator('#ca-msg-lang').selectOption('ar');
+  msg = await text();
+  expect(msg).toContain('ندعوك إلى جولة السبت الاجتماعية');
+  expect(msg).toContain(WA_GROUP);
+  await expect(msgBox.locator('#ca-msg-wa')).toBeChecked();
+  await msgBox.locator('#ca-msg-wa').uncheck();
+  expect(await text()).not.toContain(WA_GROUP);
+
+  // the card: Invited, a list of its own, naming the ride
+  await msgBox.locator('.ca-x').click();
+  await expect(page.locator('.filter-pill[data-ca-filter="invited"]')).toHaveText('Invited (1)');
+  await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (1)');
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  const k = row(page, 'a1');
+  await expect(k).toHaveAttribute('data-status', 'invited');
+  await expect(k.locator('.ca-status')).toHaveText('Invited');
+  const day = await page.evaluate(`dayLabel('Saturday')+' '+shortDate('${SAT2}')`);
+  await expect(k.locator('.ca-acct')).toContainText(`Invited to the Saturday Social Ride on ${day} · New account made`);
+  await expect(k.locator('.ca-inv-msg')).toHaveText('Invitation message');
+  await expect(k.locator('.ca-newpwd')).toBeVisible();
+});
+
+test('an invited application reads Invited and writes its invitation again; a new password goes in the account message', async ({ page }) => {
+  const invited = [
+    { ...base, id: 'a5', status: 'approved', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', gender: 'female', instagram: '', linkedin: '', lang: 'ar', decided_at: '2026-09-29T08:00:00Z', decided_by: 'Desk A', customer_id: 'c1', existing_account: true, account_oauth: false, invited_session: SAT },
+    { ...base, id: 'a6', status: 'approved', name: 'Sami Haddad', email: 'sami.haddad@gmail.com', phone: '+966557771122', instagram: '', linkedin: '', decided_at: '2026-09-29T08:00:00Z', decided_by: 'Desk A', customer_id: 'ca06', existing_account: false, account_oauth: false, invited_session: SAT2 },
+  ];
+  await applicationsTab(page, {
+    sessions: INV_RIDES, community_applications: [...apps, ...invited],
+    'rpc:staff_community_new_password': { ok: true, existing: false, customer_id: 'ca06', name: 'Sami Haddad', email: 'sami.haddad@gmail.com', phone: '+966557771122', password: 'Nw4pQx8Lrt', lang: 'en' },
+  });
+  await expect(page.locator('.filter-pill[data-ca-filter="invited"]')).toHaveText('Invited (2)');
+  await expect(page.locator('.filter-pill[data-ca-filter="approved"]')).toHaveText('Approved (1)'); // the plain approval only
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  await expect(page.locator('.ca-row')).toHaveCount(2);
+  const h = row(page, 'a5');
+  await expect(h.locator('.ca-acct')).toContainText('Invited to the Saturday Social Ride on');
+  await expect(h.locator('.ca-acct')).toContainText('Uses their existing account');
+  await expect(h.locator('.ca-newpwd')).toHaveCount(0); // her own account: no password to give
+
+  await h.locator('.ca-inv-msg').click();
+  const msgBox = page.locator('#confirm-modal .ca-msg-box');
+  await expect(msgBox.locator('#ca-msg-lang')).toHaveValue('ar'); // the language she applied in
+  await expect(msgBox.locator('.ca-msg-sub')).toContainText('already on the final list');
+  await expect(msgBox.locator('.ca-pwd')).toHaveCount(0);
+  await msgBox.locator('#ca-msg-lang').selectOption('en');
+  const msg = await msgBox.locator('#ca-msg-text').inputValue();
+  expect(msg).toContain('Hi Huda,');
+  expect(msg).toContain('You’re invited to our Saturday Social Ride!');
+  expect(msg).toContain('📅 Saturday, 7 March 2099');
+  expect(msg).not.toContain('📍'); // this ride has no meeting point link
+  for (const none of ['huda.saleh@gmail.com', '0551239876', 'micromobilityrentals.pages.dev', 'password']) expect(msg).not.toContain(none);
+  await msgBox.locator('.ca-x').click();
+
+  // an account the invitation made: a new temporary password goes in the account message, not the invitation
+  await row(page, 'a6').locator('.ca-newpwd').click();
+  await page.locator('#confirm-modal .btn-primary').click();
+  await expect(msgBox.locator('.ca-pwd')).toHaveText('Nw4pQx8Lrt');
+  const again = await msgBox.locator('#ca-msg-text').inputValue();
+  expect(again).toContain('We’ve set a temporary password for your Micromobility account');
+  expect(again).toContain('Temporary password: Nw4pQx8Lrt');
+  expect(again).not.toContain('invited');
+  await msgBox.locator('.ca-x').click();
+  // its invitation again carries only the ride
+  await row(page, 'a6').locator('.ca-inv-msg').click();
+  await expect(msgBox.locator('.ca-pwd')).toHaveCount(0);
+  const inv = await msgBox.locator('#ca-msg-text').inputValue();
+  expect(inv).toContain('📅 Saturday, 14 March 2099');
+  expect(inv).not.toContain('password');
+});
+
+test('with no Saturday ride open, Invite to ride cannot go ahead', async ({ page }) => {
+  await applicationsTab(page, { tags: TAGS, sessions: [RIDES[2], RIDES[3], RIDES[4]] });
+  const calls: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/staff_community_approve/.test(r.url())) calls.push(r.url()); });
+  await row(page, 'a1').locator('.ca-invite').click();
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toContainText('No Saturday Social Ride is open right now.');
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled();
+  await page.evaluate(`_caApGo()`); // even called directly, nothing is approved
+  await page.waitForTimeout(200);
+  expect(calls).toEqual([]);
+  await expect(row(page, 'a1')).toHaveAttribute('data-status', 'pending');
+});
+
+test('before the database has invited_session, the list loads and an invitation still goes out', async ({ page }) => {
+  const asked: string[] = [];
+  await applicationsTab(page, {
+    tags: TAGS, sessions: INV_RIDES,
+    'rpc:staff_community_approve': { ok: true, existing: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false },
+  }, async () => {
+    await page.route(/\/rest\/v1\/community_applications\?/, async (r) => {
+      const req = r.request();
+      const hdr = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+      if (req.method() === 'GET') {
+        const sel = new URL(req.url()).searchParams.get('select') || '';
+        asked.push(sel);
+        if (sel.includes('invited_session')) return r.fulfill({ status: 400, headers: hdr, body: JSON.stringify({ code: '42703', message: 'column community_applications.invited_session does not exist' }) });
+      }
+      if (req.method() === 'PATCH') return r.fulfill({ status: 400, headers: hdr, body: JSON.stringify({ code: 'PGRST204', message: "Could not find the 'invited_session' column of 'community_applications' in the schema cache" }) });
+      return r.fallback();
+    });
+  });
+  await expect(row(page, 'a2').locator('.ca-name')).toHaveText('Huda Al Saleh');
+  expect(asked.some((x) => x.includes('invited_session'))).toBe(true);
+  expect(asked.some((x) => !x.includes('invited_session') && x.includes('workplace'))).toBe(true); // only that column is dropped
+  await row(page, 'a2').locator('.ca-invite').click();
+  await page.locator(`#confirm-modal .ca-ap-rides [data-ca-ride="${SAT}"]`).click();
+  await page.locator('#confirm-modal .ca-ap-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  await expect(page.locator('#err-bar-el')).toHaveCount(0); // a column still to come is not an error for staff
+  await page.locator('#confirm-modal #ca-msg-lang').selectOption('en');
+  expect(await page.locator('#ca-msg-text').inputValue()).toContain('📅 Saturday, 7 March 2099');
+});

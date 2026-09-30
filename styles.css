@@ -6364,6 +6364,8 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-pwd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px;letter-spacing:1.5px}
 .ca-msg-lang{display:flex;align-items:center;gap:10px;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:8px}
 .ca-msg-lang select{background:var(--s3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 8px;font:inherit;font-weight:700}
+.ca-msg-box .ca-wa-opt{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer}
+.ca-msg-box .ca-wa-opt input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green)}
 /* Asking an applicant for changes (2026-09-29): the card's line, and the staff dialog's note */
 .ca-fix{margin-top:8px;font-size:12.5px;font-weight:700;line-height:1.45;padding:7px 10px;border-radius:8px}
 .ca-fix-wait{background:rgba(var(--warn-rgb),.1);color:rgb(var(--warn-rgb))}
@@ -6379,6 +6381,7 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .afx-link{display:block;margin:12px auto 0;background:none;border:0;padding:6px;color:#4f565c;font:inherit;font-size:14px;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 /* Approve: more tags, and a Saturday ride's final list (2026-09-29) */
 .ca-ap-box{width:min(92vw,480px);max-height:calc(100dvh - 32px);overflow-y:auto}
+.ca-ap-box .chrome-dact button:disabled{opacity:.45;cursor:not-allowed}
 .ca-ap-sec{margin:0 0 16px}
 .ca-ap-tags{display:flex;flex-wrap:wrap;gap:8px}
 .ca-ap-tags .am-pick:disabled{cursor:default}
