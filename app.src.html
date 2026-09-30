@@ -11525,7 +11525,8 @@ async function saveAccount(){
         about={profession:a.profession||null,workplace:a.workplace||null,heard_from:hf||ab.heard_from||null,gender:gd||cur.gender||null};
       }
       S.loggedIn={..._withProfile(cust,cur),...v,socials,...about};
-      setSession(S.loggedIn);S._accType=null;S._accGender=null;S._profFresh={id:cust.id,at:Date.now()};
+      // A new email can change how the account signs in: not fresh, so the page asks customer_about again.
+      setSession(S.loggedIn);S._accType=null;S._accGender=null;S._profFresh=v.email!==(cur.email??'')?null:{id:cust.id,at:Date.now()};
       if(v.height){S._rHeight=String(v.height);}
       if(v.type_preference&&S.regBikeTypes.length===0)S.regBikeTypes=[v.type_preference];
       toast(t('accountSaved'));renderAccount();renderTopbarRight();return;
@@ -15953,6 +15954,8 @@ async function saveCustForm(){
       }}
       logAction(t('naEditTitle')+': '+name);
       if(tempPwd)logAction(t('pwdGenLog').replace('{0}',name)); // never the password itself
+      // A new email can change how the account signs in (20260930100000): the marks are asked again.
+      if(email!==(d.origEmail||''))S._siAt=0;
       await loadData();closeCustFormModal();toast(t('accountSaved'));renderCommunity();renderStaffQueue();
       if(tempPwd)_tpMsgOpen(name,email,fullPhone,newPwd);
     }finally{S._cfBusy=false;}

@@ -113,3 +113,61 @@ test('a password account has no mark on My Account', async ({ page }) => {
   await expect(page.locator('#acc-workplace')).toBeVisible(); // customer_about has answered
   await expect(page.locator('#tab-account .si-ico')).toHaveCount(0);
 });
+
+// An account's email changed (the owner, 2026-09-30: Shrooq Iqbal signed up with Apple, staff gave
+// her account another email, and the mark said Google). The server now answers from the new email
+// (20260930100000); the page asks it again at once rather than showing the old mark for ten minutes.
+test('the editor asks for the marks again when it saves a new email, and not otherwise', async ({ page }) => {
+  await accounts(page);
+  await expect(row(page, 'Adam Apple').locator('.si-apple')).toHaveCount(1);
+  let saved = false;
+  page.on('request', (r) => { if (r.method() === 'PATCH' && /\/rest\/v1\/customers/.test(r.url())) saved = true; });
+  // no other account holds the new address; after the save the server has no mark for it
+  await page.route(/\/rest\/v1\/customers\?.*email=eq\./, (r) => r.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: [] }));
+  await page.route(/\/rest\/v1\/rpc\/staff_sign_in_methods/, (r) => saved
+    ? r.fulfill({ headers: { 'access-control-allow-origin': '*' }, json: methods.filter((m) => m.id !== 'a1') })
+    : r.fallback());
+  const calls: string[] = [];
+  page.on('request', (r) => { if (r.url().includes('/rpc/staff_sign_in_methods')) calls.push(r.url()); });
+
+  await page.evaluate(`showEditCustomerModal('a1')`);
+  await page.evaluate('saveCustForm()');
+  await expect.poll(() => saved).toBe(true);
+  await expect(page.locator('#new-acct-modal #cf-email')).toHaveCount(0);
+  await page.waitForTimeout(300);
+  expect(calls).toHaveLength(0); // same email: the marks stand
+  await expect(row(page, 'Adam Apple').locator('.si-apple')).toHaveCount(1);
+
+  await page.evaluate(`showEditCustomerModal('a1')`);
+  await page.locator('#cf-email').fill('adam@example.org');
+  await page.evaluate('saveCustForm()');
+  await expect.poll(() => calls.length).toBe(1);
+  await expect(row(page, 'Adam Apple').locator('.si-ico')).toHaveCount(0);
+  await expect(row(page, 'Gina Google').locator('.si-google')).toHaveCount(1);
+});
+
+test('a rider who changes their email has the mark read again', async ({ page }) => {
+  const profile = { id: 'c1', name: 'Spec Rider', email: 'spec@icloud.com', phone: '0500000001', gender: 'male', nationality: 'Egypt', socials: null };
+  await stubSupabase(page, {
+    sessions: [], queue_entries: [],
+    'rpc:customer_profile': [profile],
+    'rpc:customer_about': [{ profession: null, workplace: null, heard_from: null, sign_in: 'apple' }],
+    'rpc:customer_update_profile': true,
+  });
+  await loginCustomer(page, { id: 'c1', email: 'spec@icloud.com' });
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setCustTab('account')`);
+  await expect(page.locator('#tab-account .si-field .si-apple')).toBeVisible();
+  let saved = false;
+  page.on('request', (r) => { if (r.url().includes('/rpc/customer_update_profile')) saved = true; });
+  const cors = { 'access-control-allow-origin': '*' };
+  await page.route(/\/rest\/v1\/rpc\/customer_profile/, (r) => saved ? r.fulfill({ headers: cors, json: [{ ...profile, email: 'spec@example.org' }] }) : r.fallback());
+  await page.route(/\/rest\/v1\/rpc\/customer_about/, (r) => saved ? r.fulfill({ headers: cors, json: [{ profession: null, workplace: null, heard_from: null, sign_in: null }] }) : r.fallback());
+
+  await page.locator('#acc-email').fill('spec@example.org');
+  await page.evaluate('saveAccount()');
+  await expect.poll(() => saved).toBe(true);
+  await expect(page.locator('#tab-account .si-ico')).toHaveCount(0);
+  await expect(page.locator('#acc-email')).toHaveValue('spec@example.org');
+});
