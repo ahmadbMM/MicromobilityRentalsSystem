@@ -3102,5 +3102,12 @@
   "tickWaiverFirst": "Cochez la case ci-dessus pour continuer.",
   "tkHelmetBring": "Le casque est obligatoire : apportez le vôtre.",
   "bdCalSummary": "{0} : anniversaire",
-  "regSummary": "Votre réservation"
+  "regSummary": "Votre réservation",
+  "lfxKicker": "Votre inscription pour apprendre à faire du vélo",
+  "lfxTitle": "Mettez à jour votre inscription",
+  "lfxSub": "Bonjour {0}, avant votre cours, notre équipe vous demande de mettre à jour les informations ci-dessous.",
+  "lfxThanksSub": "Votre inscription est à jour. Nous vous recontacterons bientôt.",
+  "lfxGoneSub": "Votre inscription est peut-être déjà close, ou nous vous avons envoyé un lien plus récent. Besoin d’aide ? Écrivez-nous sur WhatsApp.",
+  "lfxErrHeight": "Indiquez votre taille en cm, entre 80 et 250.",
+  "laMsgFix": "Envoyez ceci à la personne inscrite. Le lien ne demande que ce que vous avez choisi ; il cesse de fonctionner si vous redemandez, ou quand l’inscription est terminée ou annulée."
 }

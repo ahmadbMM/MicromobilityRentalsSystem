@@ -3102,5 +3102,12 @@
   "tickWaiverFirst": "Marque a caixa acima para continuar.",
   "tkHelmetBring": "O capacete é obrigatório: traga o seu.",
   "bdCalSummary": "{0}: aniversário",
-  "regSummary": "Sua reserva"
+  "regSummary": "Sua reserva",
+  "lfxKicker": "Sua inscrição para aprender a andar de bicicleta",
+  "lfxTitle": "Atualize sua inscrição",
+  "lfxSub": "Olá {0}, antes da sua aula, nossa equipe pediu que você atualize os dados abaixo.",
+  "lfxThanksSub": "Sua inscrição foi atualizada. Entraremos em contato em breve.",
+  "lfxGoneSub": "Sua inscrição pode já estar encerrada, ou enviamos um link mais recente. Se precisar de ajuda, fale com a gente no WhatsApp.",
+  "lfxErrHeight": "Informe sua altura em cm, entre 80 e 250.",
+  "laMsgFix": "Envie isto para a pessoa inscrita. O link pede só o que você escolheu; ele deixa de funcionar se você pedir de novo, ou quando a inscrição for concluída ou cancelada."
 }

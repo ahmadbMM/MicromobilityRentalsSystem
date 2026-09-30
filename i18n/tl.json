@@ -3102,5 +3102,12 @@
   "tickWaiverFirst": "Lagyan ng tsek ang kahon sa itaas para magpatuloy.",
   "tkHelmetBring": "Kailangan ang helmet: magdala ng sarili.",
   "bdCalSummary": "{0}: kaarawan",
-  "regSummary": "Ang booking mo"
+  "regSummary": "Ang booking mo",
+  "lfxKicker": "Ang iyong sign-up para matutong magbisikleta",
+  "lfxTitle": "I-update ang iyong sign-up",
+  "lfxSub": "Hi {0}, bago ang iyong klase, hiniling ng aming team na i-update mo ang mga detalye sa ibaba.",
+  "lfxThanksSub": "Na-update na ang iyong sign-up. Makikipag-ugnayan kami sa lalong madaling panahon.",
+  "lfxGoneSub": "Maaaring sarado na ang iyong sign-up, o nagpadala kami ng mas bagong link. Kung kailangan mo ng tulong, mag-message sa amin sa WhatsApp.",
+  "lfxErrHeight": "Ilagay ang iyong taas sa cm, mula 80 hanggang 250.",
+  "laMsgFix": "Ipadala ito sa taong nag-sign up. Ang link ay humihingi lang ng pinili mo; titigil itong gumana kapag humingi ka ulit, o kapag tapos na o kinansela ang sign-up."
 }

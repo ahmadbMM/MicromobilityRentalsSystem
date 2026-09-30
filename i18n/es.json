@@ -3102,5 +3102,12 @@
   "tickWaiverFirst": "Marca la casilla de arriba para continuar.",
   "tkHelmetBring": "El casco es obligatorio: trae el tuyo.",
   "bdCalSummary": "{0}: cumpleaños",
-  "regSummary": "Tu reserva"
+  "regSummary": "Tu reserva",
+  "lfxKicker": "Tu inscripción para aprender a montar en bici",
+  "lfxTitle": "Actualiza tu inscripción",
+  "lfxSub": "Hola {0}, antes de tu clase, nuestro equipo te pide que actualices los datos de abajo.",
+  "lfxThanksSub": "Tu inscripción está actualizada. Nos pondremos en contacto pronto.",
+  "lfxGoneSub": "Puede que tu inscripción ya esté cerrada, o que te hayamos enviado un enlace más reciente. Si necesitas ayuda, escríbenos por WhatsApp.",
+  "lfxErrHeight": "Introduce tu altura en cm, entre 80 y 250.",
+  "laMsgFix": "Envía esto a la persona inscrita. El enlace solo pide lo que elegiste; deja de funcionar si vuelves a pedirlo, o cuando la inscripción se termina o se cancela."
 }
