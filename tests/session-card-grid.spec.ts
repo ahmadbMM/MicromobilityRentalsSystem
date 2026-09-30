@@ -114,7 +114,7 @@ test('a long list keeps its cards at their own height, before and after scrollin
 
   const before = await cards(page);
   expect(same(before, (r) => r.height)).toBe(1);
-  expect(before[0].height).toBeLessThan(100); // a card is its own height, not a placeholder's
+  expect(before[0].height).toBeLessThan(140); // a card is its own height (about 100px since it carries the price line), not twice it
   for (let y = 0; y <= 3200; y += 400) { await page.evaluate((v) => window.scrollTo(0, v), y); await page.waitForTimeout(60); }
   await page.evaluate(() => window.scrollTo(0, 0));
   const after = await cards(page);

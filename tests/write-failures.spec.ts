@@ -185,7 +185,7 @@ test.describe('connection state', () => {
 
     expect(state.online).toBe(true);
     expect(state.offline).toBe(true);
-    expect(state.banner).toContain('not reachable');
+    expect(state.banner).toContain('can’t be reached');
   });
 });
 

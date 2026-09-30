@@ -31,7 +31,7 @@ async function boot(page: import('@playwright/test').Page, outbox: Record<string
 test('a booking pending past the grace period is announced', async ({ page }) => {
   await boot(page, [row()]);
   await page.evaluate(`_updateConnUI()`);
-  await expect(page.locator('#conn-banner')).toContainText('has not reached the booth');
+  await expect(page.locator('#conn-banner')).toContainText('hasn’t reached the booth');
 });
 
 test('a fresh booking gets its grace period — no flash of warning per normal insert', async ({ page }) => {

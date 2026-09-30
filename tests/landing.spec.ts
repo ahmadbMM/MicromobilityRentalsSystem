@@ -7,7 +7,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('landing page renders with the customer app name', async ({ page }) => {
-  await expect(page).toHaveTitle('Micromobility Experiences');
+  await expect(page).toHaveTitle('MicroMobility Experiences');
   await expect(page.locator('#land-main-title')).toContainText('Reserve Your');
   await expect(page.locator('#land-sub')).toHaveText('Bicycle rentals & community rides in Jeddah');
 });

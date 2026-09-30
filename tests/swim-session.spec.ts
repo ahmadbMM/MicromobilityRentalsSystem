@@ -221,9 +221,9 @@ test('the session step does not tell a swimmer to pick a day to ride', async ({ 
   await asMember(page);
   const panel = page.locator('#tab-register');
   await expect(panel).toContainText('Pick the day you would like to join.');
-  await expect(panel).not.toContainText('would like to ride');
+  await expect(panel).not.toContainText('want to ride');
   await page.evaluate(`S.selEvent='jcc';renderRegister()`);
-  await expect(panel).toContainText('would like to ride');   // the circuit is still a ride
+  await expect(panel).toContainText('want to ride');   // the circuit is still a ride
 });
 
 test('the staff form calls it a session name, not a ride name', async ({ page }) => {

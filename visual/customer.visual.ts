@@ -17,7 +17,7 @@ declare const _langLoaded: (l: string) => boolean; // app global
 // approve before and after the verdict, the National Day ride, past rides to rate); the rating
 // dialog; the account page (the season figures, badges, profile, ride news, notifications,
 // purchases, deletion) and a badge's popup; the Privacy Notice; the consent and forced-password
-// popups; the booth and National Day popups; and the staff customer form's social fields. Every
+// popups; the National Day popups; and the staff customer form's social fields. Every
 // state is a screenshot and a hash of the computed style of every element on the page but the
 // hidden staff half (the staff form: of its dialog) (cascade-audit.ts), in English and Arabic, at
 // 1280x900 and 390x844, from fixed data on a frozen clock. The switches are pass3.visual.ts's:
@@ -300,12 +300,17 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         await shot(page, `${P}-pwd-must`, { full: false });
         await page.evaluate(`document.getElementById('pm-err').textContent=t('errPasswordLen')`);
         await shot(page, `${P}-pwd-must-err`, { full: false });
-        await page.evaluate(`document.getElementById('pwd-gate').remove();showBoothPopup()`);
-        await shot(page, `${P}-booth`, { full: false });
-        await page.evaluate(`S._popupHold&&clearTimeout(S._popupHold);S._popupHold=null;document.querySelector('#booth-popup .booth-popup-close').disabled=false;closeBoothPopup();showSnd96FormPopup(false)`);
+        await page.evaluate(`document.getElementById('pwd-gate').remove();showSnd96FormPopup(false)`);
         await shot(page, `${P}-snd96-popup`, { full: false });
         await page.evaluate(`S._popupHold&&clearTimeout(S._popupHold);S._popupHold=null;showSnd96FormPopup(true)`);
         await shot(page, `${P}-snd96-popup-own`, { full: false });
+      });
+
+      test(`landing ${lang}`, async ({ page }) => {
+        // The signed-in first page: today's ride on top (the rider is on a bike tonight), then the event tiles.
+        await open(page, { lang });
+        await page.waitForSelector('#land-events .landing-event-card');
+        await shot(page, `${P}-landing`);
       });
 
       test(`wizard sessions ${lang}`, async ({ page }) => {

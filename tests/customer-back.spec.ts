@@ -70,10 +70,13 @@ test('Back walks the Reserve wizard steps (button and browser alike)', async ({ 
   await page.goBack();
   await page.waitForFunction('S.regStep===1');
 
-  // forward again, then the visible Back button does the same
+  // forward again, then the visible Back button does the same. From step two it is the wizard's
+  // own, in its footer; the page's Back hides there so the screen carries one Back (2026-09-30).
   await page.locator('#tab-register .mm-reg-foot button', { hasText: 'Continue' }).click();
   await page.waitForFunction('S.regStep===2');
-  await page.locator('#cust-back-btn').click();
+  await expect(page.locator('#cust-back-btn')).toBeHidden();
+  await page.locator('#tab-register .mm-reg-foot button', { hasText: 'Back' }).click();
   await page.waitForFunction('S.regStep===1');
   expect(await page.evaluate('S.view')).toBe('customer');
+  await expect(page.locator('#cust-back-btn')).toBeVisible(); // step one leads back to the event picker
 });

@@ -373,20 +373,17 @@ test('booking it asks for the sign-up form, and will not be dismissed at once', 
   await expect(box).toBeHidden();
 });
 
-test('a circuit booking still gets the pay-at-the-booth cue, closable straight away', async ({ page }) => {
+// Since 2026-09-30 the circuit's pay-at-the-booth cue is on the riders step, the review and the
+// ticket itself, before and after the booking; no popup repeats it (the National Day one stays).
+test('a circuit booking gets no popup: the ticket says what is paid at the booth', async ({ page }) => {
   await stubSupabase(page, { sessions: [jcc], bikes: [], queue_entries: [] });
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider', session_token: 'tok' });
   await page.goto('/');
   await waitForSb(page);
   await bookInto(page, 'jcc', 's1');
 
-  const box = page.locator('#booth-popup');
-  await expect(box).toBeVisible();
-  await expect(page.locator('#booth-popup-msg a')).toHaveCount(0);
-  const close = page.locator('.booth-popup-close');
-  await expect(close).toBeEnabled();
-  await close.click();
-  await expect(box).toBeHidden();
+  await expect(page.locator('#tab-register .ticket-card')).toContainText('at the booth when you arrive');
+  await expect(page.locator('#booth-popup')).toBeHidden();
 });
 
 // ── One date, so nothing to pick ─────────────────────────────────────────────
@@ -533,14 +530,13 @@ test('it reads the same whether or not the takeover is up', async ({ page }) => 
     card.querySelectorAll('*').forEach((el) => {
       const own = [...el.childNodes].filter((n) => n.nodeType === 3 && n.textContent.trim())
         .map((n) => n.textContent.trim()).join(' ');
-      if (/^(Road|Riders · #1|Total|SAR 75|Pending)$/.test(own) && !out[own]) {
-        out[own] = getComputedStyle(el).color;
-      }
+      const key = /^(Road|Riders ·|Total|Pay at the booth)$/.test(own) ? own : /^\u2066\u20C1\u00A075\u2069$/.test(own) ? 'price' : '';
+      if (key && !out[key]) out[key] = getComputedStyle(el).color;
     });
     return out;
   })()`) as Promise<Record<string, string>>;
   const onPaper = await inks();
-  expect(Object.keys(onPaper).sort()).toEqual(['Pending', 'Riders · #1', 'Road', 'SAR 75', 'Total']);
+  expect(Object.keys(onPaper).sort()).toEqual(['Pay at the booth', 'Riders ·', 'Road', 'Total', 'price']);
   await page.evaluate(`document.body.classList.add('snd96');renderMyRides();`);
   expect(await inks()).toEqual(onPaper);
 });

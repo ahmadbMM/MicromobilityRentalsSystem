@@ -625,3 +625,45 @@ export function checkSizeBudget(bytes, env = process.env) {
   const text = rows.map((r) => `${label[r.half]} ${r.kb.toFixed(1)} KB gzipped, budget ${r.limitKb} KB${r.over ? ' - OVER' : ''}`).join('; ');
   return { rows, over: rows.filter((r) => r.over), text };
 }
+
+// ── The customer system's colours (2026-09-30) ─────────────────────────────────────────────────
+// styles.css ends with the CUSTOMER SYSTEM block, the one set of rules every rider screen answers to.
+// Its colours live in its token list. A raw #hex, rgb() or hsl() in any other declaration inside the
+// block is how the sprawl came back last time (five stacked reskins, 22 text colours on nine
+// screens), so the build refuses it. Custom properties (--name: #hex) are the tokens and may hold
+// raw values; everything else says var(--name).
+export const CUSTOMER_SYSTEM_START = 'CUSTOMER SYSTEM (2026-09-30)';
+export const CUSTOMER_SYSTEM_END = 'END CUSTOMER SYSTEM';
+export function checkCustomerColors(css) {
+  const a = css.indexOf(CUSTOMER_SYSTEM_START);
+  const b = a < 0 ? -1 : css.indexOf(CUSTOMER_SYSTEM_END, a);
+  if (a < 0 || b < 0) return { found: false, offenders: [] };
+  const firstLine = css.slice(0, a).split('\n').length;
+  // comments keep their line breaks so the line numbers stay true
+  const block = css.slice(a, b).replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, ' '));
+  const offenders = [];
+  const re = /([-\w]+)\s*:\s*([^;{}]+)/g;
+  let m;
+  while ((m = re.exec(block))) {
+    const [, prop, value] = m;
+    if (prop.startsWith('--')) continue;
+    if (/#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/.test(value)) {
+      offenders.push({ prop, value: value.trim(), line: firstLine + block.slice(0, m.index).split('\n').length - 1 });
+    }
+  }
+  return { found: true, offenders };
+}
+
+// ── No emoji (the owner, 2026-09-30: "use no emojis always create your own icons") ─────────────
+// An icon is drawn (the rider's _CU set, the staff's _ART set); an emoji or a pictograph standing
+// in for one is refused anywhere in the source, message templates and comments included.
+export const EMOJI_RE = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{2B50}\u{2B55}\u{FE0F}]/u;
+// typographic marks that are not emoji and are allowed: ✓ ✕ ✎ ★ (staff tables still print them)
+const EMOJI_OK = new Set(['\u2713', '\u2715', '\u270E', '\u2605']);
+export function checkNoEmoji(text) {
+  const out = [];
+  text.split('\n').forEach((l, i) => {
+    for (const ch of l.match(new RegExp(EMOJI_RE.source, 'gu')) || []) if (!EMOJI_OK.has(ch)) { out.push({ line: i + 1, ch, text: l.trim().slice(0, 120) }); break; }
+  });
+  return out;
+}

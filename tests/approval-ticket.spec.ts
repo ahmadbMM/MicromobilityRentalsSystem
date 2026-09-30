@@ -54,7 +54,7 @@ test('published and approved: a loud confirmation, and the code appears', async 
   const card = await myBookings(page, [satur({ hide_queue: false })], [row({ approval: 'approved' })]);
   const banner = card.locator('.appr-ok');
   await expect(banner).toBeVisible();
-  await expect(banner).toContainText('Your spot is confirmed!');
+  await expect(banner).toContainText('Your place is confirmed');
   await expect(banner).toContainText(/Show this code at the gathering point/i);
   await expect(banner.locator('.appr-ok-tick')).toBeVisible();
   const box = await banner.locator('.appr-ok-tick').boundingBox();

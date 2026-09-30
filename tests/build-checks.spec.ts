@@ -28,6 +28,8 @@ type Checks = {
     bytes: { customer: number; staff: number },
     env?: Record<string, string | undefined>,
   ): { rows: { half: string; bytes: number; kb: number; limitKb: number; over: boolean }[]; over: unknown[]; text: string };
+  checkCustomerColors(css: string): { found: boolean; offenders: { prop: string; value: string; line: number }[] };
+  checkNoEmoji(text: string): { line: number; ch: string; text: string }[];
 };
 const load = () => import('../scripts/split-staff.mjs' as string) as Promise<Checks>;
 
@@ -113,6 +115,32 @@ test.describe('@build build checks', () => {
     expect(r.total).toBeGreaterThan(100);
     expect(r.checked).toBeGreaterThan(50);
     test.info().annotations.push({ type: 'bare writes', description: formatBareWrites(r, 0).split('\n')[0] });
+  });
+
+  test('the customer system keeps its colours in its tokens', async () => {
+    const { checkCustomerColors } = await load();
+    const r = checkCustomerColors(read('styles.css'));
+    expect(r.found).toBe(true);
+    expect(r.offenders).toEqual([]);
+    const css = [
+      '/* CUSTOMER SYSTEM (2026-09-30) - a raw #abc in a comment is fine */',
+      'body:not(.view-staff){--ink:#1A1919;--scrim:rgba(0,0,0,.5);}',
+      'body:not(.view-staff) .x{color:#123456;background:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.2);}',
+      '/* END CUSTOMER SYSTEM */',
+      '.after{color:#fff;}',
+    ].join('\n');
+    const bad = checkCustomerColors(css);
+    expect(bad.offenders.map((o) => o.prop)).toEqual(['color', 'box-shadow']);
+    expect(bad.offenders.every((o) => o.line === 3)).toBe(true);
+    expect(checkCustomerColors('.no-block{color:#fff}').found).toBe(false);
+  });
+
+  test('no emoji anywhere in the source: icons are drawn', async () => {
+    const { checkNoEmoji } = await load();
+    expect(checkNoEmoji(read('app.src.html'))).toEqual([]);
+    const found = checkNoEmoji(['const a = "Paid \u2713";', "toast('Happy birthday \u{1F382}');", '// a comment \u{1F6B2}', 'ok \u2605 \u2715']
+      .join('\n'));
+    expect(found.map((f) => f.line)).toEqual([2, 3]);
   });
 
   test('the two halves stay within the gzip budget', async () => {

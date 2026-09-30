@@ -76,7 +76,7 @@ test('a sessions read that failed says so and offers a retry, not "no sessions a
   await page.waitForFunction(`S.view==='customer'`);
   const err = page.locator('.sess-load-err');
   await expect(err).toBeVisible();
-  await expect(page.locator('#tab-register')).not.toContainText('No sessions are available right now.');
+  await expect(page.locator('#tab-register')).not.toContainText('No rides are open for booking right now.');
 
   fail = false;
   await err.getByRole('button').click();

@@ -78,10 +78,10 @@ test('a customer without the tag goes straight to the review; the Saturday ride 
   await page.evaluate(`regNextFromSession()`);
   expect(await page.evaluate('S.regStep')).toBe(3);            // no riders step, no waiver: day, then confirm
   const panel = page.locator('#tab-register');
-  await expect(panel).toContainText('Review & confirm');
+  await expect(panel).toContainText('Review and confirm');
   await expect(panel).not.toContainText('waiver');
   await expect(panel).not.toContainText('Bike Type');
-  await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', '2 / 2');
+  await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 2');
   // Back from the review returns to the day list, not to an empty riders panel
   await page.locator('#tab-register .mm-reg-foot .btn-secondary').click();
   expect(await page.evaluate('S.regStep')).toBe(1);
@@ -102,7 +102,7 @@ test('nothing about cycling on the review: no bike type, no height, participants
   await expect(panel).not.toContainText('Riders');
   await expect(panel).not.toContainText('Road');
   await expect(panel).not.toContainText('177');
-  await expect(panel).toContainText('Complimentary');
+  await expect(panel).toContainText('Free');
 });
 
 test('the booking is one person, no bike, free, and carries no waiver', async ({ page }) => {

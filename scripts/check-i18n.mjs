@@ -93,7 +93,11 @@ for (const code of codes) {
   const missing = enKeys.filter((k) => !(k in pack));
   const extra = Object.keys(pack).filter((k) => !(k in en));
   const empty = enKeys.filter((k) => k in pack && String(pack[k]).trim() === '' && String(en[k]).trim() !== '');
-  const badHoles = enKeys.filter((k) => k in pack && holes(pack[k]) !== holes(en[k]));
+  // A plural form may leave out the count where the language says it in the word instead
+  // (Arabic "رحلتان", two rides): for base_one/_two/... only a hole English lacks is an error.
+  const plural = (k) => /_(zero|one|two|few|many|other)$/.test(k);
+  const subset = (a, b) => { const B = String(b).split(' '); return !a || String(a).split(' ').every((h) => B.includes(h)); };
+  const badHoles = enKeys.filter((k) => k in pack && (plural(k) ? !subset(holes(pack[k]), holes(en[k])) : holes(pack[k]) !== holes(en[k])));
   const report = (label, list) => {
     if (!list.length) return;
     failed = true;
@@ -103,6 +107,9 @@ for (const code of codes) {
   report('has extra', extra);
   report('has empty values for', empty);
   report('has different {n} placeholders from English in', badHoles);
+  // no emoji in any string (the owner, 2026-09-30): icons are drawn, messages are plain text
+  const emoji = Object.keys(pack).filter((k) => /[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE0F}]/u.test(String(pack[k]).replace(/[\u2713\u2715\u270E\u2605]/g, '')));
+  report('has an emoji in', emoji);
 }
 
 // Two strings are used with their first character stripped by a regex, because the same key
@@ -143,6 +150,7 @@ try {
 const DYNAMIC_KEYS = [
   /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
   /^bdg?[A-Z0-9]\w*[DA]$/, // bdFirstLapD, bdgMarshalA, ...: a badge's how-to and about lines, read as t(BD_SYS[slug][2]+'D'|'A')
+  /^\w+_(zero|one|two|few|many|other)$/, // mrRides_one, ...: a count's plural forms, read by _tn(base, n) through Intl.PluralRules
 ];
 
 const used = new Map(); // key -> number of t('key') calls

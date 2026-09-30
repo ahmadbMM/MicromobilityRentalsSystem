@@ -41,7 +41,7 @@ test.describe('unlocked staff panel', () => {
   });
 
   test('staff view loads with the staff app name', async ({ page }) => {
-    await expect(page).toHaveTitle('Micromobility Experiences'); // one name on the tab, staff side and rider side
+    await expect(page).toHaveTitle('MicroMobility Experiences'); // one name on the tab, staff side and rider side
     await staffReady(page);
   });
 

@@ -184,7 +184,7 @@ test.describe('ride news in the profile', () => {
 });
 
 // Every account made before the notice and ride news existed answers both on its next
-// visit, in a popup only an answer closes; "No thanks" is as easy as yes.
+// visit, in a popup only an answer closes; "No ride news" is as easy as yes.
 test.describe('the popup for existing accounts', () => {
   async function arrive(page: Page, answer: (b: Record<string, unknown>) => unknown) {
     await stubSupabase(page, {});
@@ -202,7 +202,7 @@ test.describe('the popup for existing accounts', () => {
     await page.keyboard.press('Escape');
     await page.mouse.click(5, 5); // the backdrop
     await expect(ask).toBeVisible();
-    await ask.getByRole('button', { name: 'No thanks' }).click(); // not confirmed yet
+    await ask.getByRole('button', { name: 'No ride news' }).click(); // not confirmed yet
     // the reminder sits right under the box, which is outlined - not at the foot of the sheet
     await expect(page.locator('#rn-ask-ackerr')).toHaveText('Please confirm you’ve read the Privacy Notice.');
     expect(await page.evaluate(`document.getElementById('cs-ack').nextElementSibling.id`)).toBe('rn-ask-ackerr');
@@ -214,7 +214,7 @@ test.describe('the popup for existing accounts', () => {
     await expect(page.locator('#cs-ack')).toHaveAttribute('aria-checked', 'true');
     await expect(page.locator('#rn-ask-ackerr')).toHaveText('');
     await expect(page.locator('#privacy-backdrop')).toHaveCount(0);
-    await ask.getByRole('button', { name: 'No thanks' }).click();
+    await ask.getByRole('button', { name: 'No ride news' }).click();
     await expect(ask).toHaveCount(0);
     expect(calls[1]).toMatchObject({ p_privacy: VERSION, p_ride_news: false });
 
@@ -237,7 +237,7 @@ test.describe('the popup for existing accounts', () => {
   test('a newer notice asks only for the confirmation, with Continue', async ({ page }) => {
     const calls = await arrive(page, consentsServer({ privacy_version: '2026-01-01', ride_news_at: '2026-09-01T10:00:00Z' }));
     const ask = page.locator('#rn-ask');
-    await expect(ask.getByRole('button', { name: 'No thanks' })).toHaveCount(0);
+    await expect(ask.getByRole('button', { name: 'No ride news' })).toHaveCount(0);
     await page.locator('#cs-ack-box').click();
     await ask.getByRole('button', { name: 'Continue' }).click();
     await expect(ask).toHaveCount(0);
@@ -249,7 +249,7 @@ test.describe('the popup for existing accounts', () => {
     const ask = page.locator('#rn-ask');
     await expect(ask.locator('#rn-ask-title')).toHaveText('Ride news?');
     await expect(page.locator('#cs-ack')).toHaveCount(0);
-    await ask.getByRole('button', { name: 'No thanks' }).click();
+    await ask.getByRole('button', { name: 'No ride news' }).click();
     await expect(ask).toHaveCount(0);
     expect(calls[1]).toMatchObject({ p_privacy: null, p_ride_news: false });
   });
@@ -275,10 +275,10 @@ test.describe('the popup for existing accounts', () => {
     await arrive(page, (b) => (b.p_ride_news === null && b.p_privacy === null ? { privacy_version: null, privacy_at: null, ride_news: false, ride_news_at: null } : null));
     const ask = page.locator('#rn-ask');
     await page.locator('#cs-ack-box').click();
-    await ask.getByRole('button', { name: 'No thanks' }).click();
+    await ask.getByRole('button', { name: 'No ride news' }).click();
     await expect(page.locator('#rn-ask-err')).not.toBeEmpty(); // first failure: asked to try again
     await expect(ask).toBeVisible();
-    await ask.getByRole('button', { name: 'No thanks' }).click();
+    await ask.getByRole('button', { name: 'No ride news' }).click();
     await expect(ask).toHaveCount(0); // second: let through, asked again next visit
   });
 });

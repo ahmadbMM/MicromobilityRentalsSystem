@@ -72,7 +72,7 @@ test.describe('a community member who has not given both', () => {
     expect(await page.evaluate('S.selEvent')).toBe('none');
     // what the account already holds is filled in; only the missing one is left to answer
     await expect(page.locator('#pg-birth')).toHaveValue('1990-05-05');
-    await expect(page.locator('#profile-gate button')).toHaveText(['Save and continue', 'Log Out']);
+    await expect(page.locator('#profile-gate button')).toHaveText(['Save and continue', 'Log out']);
   });
 
   test('Log out leaves the account and takes the page with it', async ({ page }) => {
@@ -138,7 +138,7 @@ test.describe('Community > Birthdays', () => {
   test('lists the members soonest first, with how far off, the age they turn and who rides that week', async ({ page }) => {
     await staff(page);
     const pill = page.locator('#tab-community .filter-pill', { hasText: 'Birthdays' });
-    await expect(pill).toHaveText('Birthdays 🎂 1');
+    await expect(pill).toHaveText('Birthdays 1');
     await pill.click();
     const tab = page.locator('#tab-community');
     await expect(names(page)).toHaveText(['Amal Today', 'Badr Tomorrow', 'Omar Soon', 'Dana Leap', 'Faisal Recent']); // expired tags and non-members stay out
@@ -168,7 +168,7 @@ test.describe('Community > Birthdays', () => {
     await page.evaluate(`setCommTab('birthdays')`);
     const amal = page.locator('#bd-list .bd-row', { hasText: 'Amal Today' });
     const wa = amal.locator('a.bd-wa');
-    expect(await wa.getAttribute('href')).toBe('https://wa.me/966551112222?text=' + encodeURIComponent('Happy birthday, Amal! 🎂 Everyone at Micromobility wishes you a wonderful year ahead, full of great rides. See you on the road! 🚴'));
+    expect(await wa.getAttribute('href')).toBe('https://wa.me/966551112222?text=' + encodeURIComponent('Happy birthday, Amal! Everyone at MicroMobility wishes you a wonderful year ahead, full of great rides. See you on the road!'));
     // a birthday greeting does not wait for ride news (owner, 2026-09-25): Badr said no and still gets the button
     await expect(page.locator('#bd-list .bd-row', { hasText: 'Badr Tomorrow' }).locator('a.bd-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966553334444\?text=/);
     // only an account with no mobile number has nothing to open
@@ -270,7 +270,7 @@ test.describe('Community > Birthdays', () => {
     const file = await (await dl).path();
     const ics = readFileSync(file!, 'utf8');
     expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(5);
-    expect(ics).toContain('SUMMARY:🎂 Amal Today');
+    expect(ics).toContain('SUMMARY:Amal Today: birthday');
     expect(ics).toContain('DTSTART;VALUE=DATE:20261004');
     expect(ics).toContain('RRULE:FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=-1');                    // the leap-day birthday
     expect(ics).not.toContain('1995');                                                      // no birth year leaves the page

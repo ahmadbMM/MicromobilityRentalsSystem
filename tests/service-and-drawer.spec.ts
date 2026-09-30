@@ -27,7 +27,8 @@ test('rides-since counts from the service stamp, and flags past the threshold', 
   const m = page.locator('#bike-profile-modal');
   await expect(m).toContainText('Rides since service');
   // all 31 rides registered after 10:30 → over the 30-ride threshold → amber flag
-  await expect(m).toContainText('⚠ 31');
+  await expect(m.locator('.flt-svcn-due')).toHaveText('31');
+  await expect(m.locator('.flt-svcn-due .art-warn')).toHaveCount(1); // the drawn warning mark
   await expect(m).toContainText('Mark serviced');
 });
 
@@ -45,7 +46,7 @@ test('never-serviced counts every ride and says so, flagged only past the thresh
   const tile = m.getByText('Rides since service').locator('..');
   await expect(tile).toContainText('1');
   await expect(tile).toContainText('Never serviced');
-  await expect(m).not.toContainText('⚠');
+  await expect(m.locator('.art-warn')).toHaveCount(0);
 });
 
 test('Mark serviced writes the stamp', async ({ page }) => {

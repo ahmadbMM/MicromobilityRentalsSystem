@@ -7,7 +7,7 @@ const fixtures = {
   queue_entries: [],
 };
 
-test('booking flow shows a 1-2-3 progress stepper that advances', async ({ page }) => {
+test('booking flow shows a progress stepper, the waiver a step of its own, that advances', async ({ page }) => {
   await stubSupabase(page, fixtures);
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
   await page.goto('/');
@@ -16,13 +16,13 @@ test('booking flow shows a 1-2-3 progress stepper that advances', async ({ page 
 
   const stepper = page.locator('#tab-register .reg-stepper');
   await expect(stepper).toBeVisible();
-  await expect(stepper).toHaveAttribute('aria-label', '1 / 3'); // on step 1
-  await expect(stepper).toContainText('Session');               // active label
+  await expect(stepper).toHaveAttribute('aria-label', 'Step 1 of 4'); // ride, riders, waiver, confirm
+  await expect(stepper).toContainText('Ride');                         // active label
 
   // advance to step 2
   await page.locator('.sess-card').first().click();
   await page.locator('#tab-register .mm-reg-foot button', { hasText: 'Continue' }).click();
-  await expect(page.locator('#tab-register .reg-stepper')).toHaveAttribute('aria-label', '2 / 3');
+  await expect(page.locator('#tab-register .reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 4');
   await expect(page.locator('#tab-register .reg-stepper')).toContainText('Riders');
 });
 

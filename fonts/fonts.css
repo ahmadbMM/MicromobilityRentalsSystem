@@ -314,3 +314,50 @@
   src: url(./NotoSansBengali-var-bengali.woff2) format('woff2');
   unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 }
+/* The Saudi riyal sign (U+20C1, Unicode 17). Neither Space Grotesk nor IBM Plex Sans Arabic draws
+   it yet, so both families borrow Noto Naskh Arabic's, subset to that one character (SIL OFL 1.1,
+   fonts/OFL-NotoNaskhArabic.txt). Each face repeats the weight descriptor of a face the family
+   already has (Space Grotesk 300 700; Plex 400, 500, 600, 700): a browser composes faces by
+   unicode-range only among faces with the same descriptors, and a face with a range of its own
+   would win the weight match and send every other character to the next font in the stack.
+   SAMA places the sign left of the amount in every language (_sar in app.src.html). */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url(./Riyal-400.woff2) format('woff2');
+  unicode-range: U+20C1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./Riyal-400.woff2) format('woff2');
+  unicode-range: U+20C1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url(./Riyal-400.woff2) format('woff2');
+  unicode-range: U+20C1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(./Riyal-700.woff2) format('woff2');
+  unicode-range: U+20C1;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(./Riyal-700.woff2) format('woff2');
+  unicode-range: U+20C1;
+}

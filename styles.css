@@ -7198,6 +7198,7 @@ body.view-staff .cal-cell:hover .cal-add,body.view-staff .cal-add:focus-visible{
 }
 
 /* ── Community > Birthdays: today's card, month chart, countdown list, wishes ── */
+    body.view-staff .bd-tab-n{display:inline-flex;align-items:center;gap:3px;}
 body.view-staff .bd-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
 body.view-staff .bd-missing{font-size:12.5px;color:var(--muted);background:var(--s1);border:1px dashed var(--border);border-radius:8px;padding:9px 12px;margin:0 0 12px;line-height:1.5;}
 body.view-staff .bd-hero{position:relative;overflow:hidden;border-radius:12px;padding:16px 16px 12px;margin:0 0 14px;
@@ -7415,3 +7416,318 @@ body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wr
 .bk-priv-note{font-size:12.5px;color:var(--muted);margin-bottom:8px}
 .bk-priv-err{color:var(--red)}
 .bk-priv textarea{width:100%;box-sizing:border-box}
+
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   CUSTOMER SYSTEM (2026-09-30) - the last word on every rider screen.
+   The customer look had grown as five identity layers stacked in this file (the Jeddah Corniche
+   Circuit motorsport base, "light theme more black", reskins #1 and #2, the white header), each
+   overriding the last, so a rider screen carried 22 text colours, 24 font sizes, 14 radii, the
+   motorsport face on labels, Arial in buttons and capitals by accident. The rules below are the
+   one system for body:not(.view-staff): the mm-platform tokens (packages/design-tokens) and
+   nothing else. The staff ERP layer never matches here, and staff screens are unchanged.
+   Rules of the system:
+     · colour: paper, ink, one action green; neon only on the night surface (the ticket), as the
+       brand tokens say ("dark surfaces + fills only, never small text on light")
+     · type: one family per script, one scale (12 · 13 · 15 · 17 · 20 · 26 · 34), sentence case,
+       no letter-spacing on labels, fixed-width figures wherever numbers line up
+     · shape: 10px on controls, 14px on cards, 18px on sheets; a pill is the primary action or a chip
+     · depth: declared once - cards are a hairline, only what floats (a sheet) casts a shadow
+     · motion: none on arrival; one designed moment, on today's ticket
+   Values live in the tokens; the build checks refuse a raw colour between these two banners
+   (scripts/split-staff.mjs, customerSystemCheck).
+   ════════════════════════════════════════════════════════════════════════════════════════════════ */
+body:not(.view-staff){
+  --paper:#FBF9F4; --card:#FFFFFF; --card-2:#F4F1EA; --card-3:#ECE8DF;
+  --ink:#1A1919; --ink-2:#4A4843; --ink-3:#6E6B63; --ink-4:#A7A399;
+  --line:rgba(26,25,25,.12); --line-2:rgba(26,25,25,.24);
+  --go:#077A4B; --go-2:#06603B; --go-wash:rgba(7,122,75,.08);
+  --neon:#03FF89; --night:#1A1919; --night-2:#262524; --night-ink:#FBF9F4;
+  --night-ink-2:rgba(251,249,244,.66); --night-line:rgba(251,249,244,.16);
+  --amber:#8A5C14; --amber-2:#B98A1A; --amber-wash:rgba(185,138,26,.10); --red:#A33B2E; --red-line:rgba(163,59,46,.4);
+  --night-amber:#F2C66D; --night-red:#FF9A8C; --night-red-line:rgba(255,154,140,.4);
+  --wallet:#000000; --wallet-ink:#FFFFFF; --scrim:rgba(26,25,25,.5);
+  --fs-12:12px; --fs-13:13px; --fs-15:15px; --fs-17:17px; --fs-20:20px; --fs-26:26px; --fs-34:34px;
+  --r-ctl:10px; --r-card:14px; --r-sheet:18px;
+  --sh-float:0 24px 60px rgba(26,25,25,.18);
+  /* the older layers read these names: point them at the system */
+  --bg:var(--paper); --s1:var(--card); --s2:var(--card-2); --s3:var(--card-3); --in-bg:var(--card);
+  --text:var(--ink); --muted:var(--ink-2); --muted-l:var(--ink-3); --border:var(--line); --line2:var(--line-2);
+  --green:var(--go); --green-h:var(--go-2); --green-d:var(--go-2); --ac-fill:var(--go); --ac-fill-h:var(--go-2);
+  --orange:var(--amber); --acsoft:var(--go-wash); --accent2:rgba(7,122,75,.4);
+  background:var(--paper); color:var(--ink);
+}
+/* The National Day card carries the takeover's palette on itself wherever it is met (see its
+   section above); the system's names point at that palette inside it too. */
+body:not(.view-staff) .ticket-card.ev-snd96{
+  --ink:var(--snd-ink); --ink-2:var(--snd-mut); --ink-3:#8FBFA8; --ink-4:#6E9E88;
+  --go:var(--snd-lime-lt); --go-wash:rgba(140,220,70,.12);
+  --card:var(--snd-surface); --card-2:#003C41; --card-3:#004449;
+  --line:rgba(255,255,255,.18); --line-2:rgba(255,255,255,.3);
+  --amber:#D8B36A; --amber-2:#D8B36A; --red:#FF7BA3; --red-line:rgba(255,123,163,.4);
+}
+/* The page behind the page: the root carries the old dark theme for the staff side; a rider's
+   canvas (overscroll, a phone's forced-dark heuristics) is paper and light-only. */
+html:has(> body:not(.view-staff)){--root-paper:#FBF9F4;background:var(--root-paper);color-scheme:only light;}
+
+/* ── One family, inherited everywhere: no motorsport face on labels, no Arial in buttons ── */
+body:not(.view-staff) *{font-family:inherit;}
+body:not(.view-staff) :is(button,input,select,textarea){font:inherit;}
+body:not(.view-staff) :is(.ticket-num,.qty-val,.sess-card-time,.price-preview-total,.cu-sum-total,.cu-tk-total-v,.mr-season-n,.cu-rv-price,.tp-price,.land-today-t,.cu-tr-num,.cu-tr-money){font-variant-numeric:tabular-nums;}
+body:not(.view-staff) ::selection{background:var(--neon);color:var(--ink);}
+body:not(.view-staff) :focus-visible{outline:2px solid var(--go);outline-offset:2px;box-shadow:none;}
+
+/* ── Sentence case, no tracking: every heading, label, kicker and chip ───────────────────────────
+   :is(#cu,*) matches anything but weighs as an id, so this outranks the older id-scoped rules
+   (#tab-myrides .cu-tk-sec and the like) that uppercased these one screen at a time. */
+body:not(.view-staff) :is(#cu,*):is(.page-title,.form-title,.modal-title,.auth-title,label,.section-label,.analytics-section-title,
+  .landing-events-title,.lec-title,.tab-btn,.cust-bnav-btn,.status-badge,.type-badge,.toggle-btn,.btn-sm,.btn-primary,.btn-secondary,
+  .ticket-num-label,.ticket-label,.cu-tk-sec,.cu-tk-total-k,.cu-k10,.cu-rv-k,.cu-rv-sec,.cu-rate-k,.cu-meter-k,.cu-photo-k,
+  .rides-stat-label,.sess-comm-chip,.landing-eyebrow,.cu-tk-label,.wl-loud,.cu-tr-wl,.cu-ad-cat,.reg-row-label,.cust-back-btn){
+  text-transform:none;letter-spacing:0;font-style:normal;}
+body:not(.view-staff) .page-title{font-size:var(--fs-26);font-weight:700;letter-spacing:-.5px;line-height:1.15;color:var(--ink);margin:0;}
+body:not(.view-staff) .page-sub{font-size:var(--fs-15);color:var(--ink-2);line-height:1.5;}
+body:not(.view-staff) .form-title{font-size:var(--fs-17);font-weight:700;}
+body:not(.view-staff) .modal-title{font-size:var(--fs-20);font-weight:700;}
+body:not(.view-staff) label{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .label-hint{font-size:var(--fs-13);font-weight:400;color:var(--ink-3);}
+body:not(.view-staff) .analytics-section-title{font-size:var(--fs-17);font-weight:700;color:var(--ink);margin:30px 0 12px;}
+body:not(.view-staff) .analytics-section-title::before,
+body:not(.view-staff) .analytics-section-title::after{display:none;}
+body:not(.view-staff) .section-label,
+body:not(.view-staff) .landing-events-title{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+:is(html[lang="ar"],html[lang="ur"]) body:not(.view-staff) .page-title{letter-spacing:0;line-height:1.35;}
+
+/* ── Surfaces: a hairline, never a float shadow; nothing frosted ─────────────────────────────────── */
+body:not(.view-staff) :is(.form-section,.sess-card,.q-card,.reg-summary-panel,.acc-settings){
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:none;}
+body:not(.view-staff) .ticket-card{border-radius:var(--r-card);box-shadow:none;animation:none;}
+body:not(.view-staff) .ticket-card:not(.ev-snd96){background:var(--card);border:1px solid var(--line);}
+body:not(.view-staff) .ticket-card::before{display:none;}
+body:not(.view-staff) :is(.modal-box,.auth-box){border:1px solid var(--line);box-shadow:var(--sh-float);}
+body:not(.view-staff) :is(.modal-backdrop,.pin-backdrop,.auth-backdrop,.badge-pop){backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--scrim);}
+body:not(.view-staff) #auth-modal.as-page .auth-backdrop{background:var(--paper);}
+body:not(.view-staff) #cust-bottom-nav{background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:1px solid var(--line);box-shadow:none;}
+body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border-top:1px solid var(--line);}
+body:not(.view-staff) .mm-note{background:var(--card-2);border:1px solid var(--line);border-radius:var(--r-ctl);}
+
+/* ── Buttons: the primary is the one pill; everything else a 10px control; all 44px+ ───────────── */
+body:not(.view-staff) .btn-primary{background:var(--go);color:var(--paper);border:0;border-radius:999px;min-height:48px;font-size:var(--fs-15);font-weight:700;box-shadow:none;}
+body:not(.view-staff) .btn-primary:hover{background:var(--go-2);color:var(--paper);}
+body:not(.view-staff) :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid,.btn-muted){
+  background:var(--card);color:var(--ink);border:1px solid var(--line-2);border-radius:var(--r-ctl);min-height:44px;
+  font-size:var(--fs-15);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:none;}
+body:not(.view-staff) :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid,.btn-muted):hover{background:var(--card-2);border-color:var(--ink-3);color:var(--ink);}
+body:not(.view-staff) .btn-red{background:var(--card);color:var(--red);border:1px solid var(--red-line);border-radius:var(--r-ctl);}
+body:not(.view-staff) .btn-red:hover{background:var(--red);border-color:var(--red);color:var(--paper);}
+body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-sm):disabled{opacity:.45;}
+body:not(.view-staff) .cu-ic{flex:none;vertical-align:-3px;}
+:is(html[dir="rtl"]) body:not(.view-staff) .cu-ic-flip{transform:scaleX(-1);}
+body:not(.view-staff) .cust-back-btn{min-height:44px;color:var(--ink-2);font-size:var(--fs-15);font-weight:600;gap:4px;}
+/* the wizard's own Back sits in its footer from step two; the page Back would be a second one */
+body:not(.view-staff):has(#tab-register .cu-foot) #cust-back-btn{display:none;}
+
+/* ── Chips: neutral; picked is ink with the neon dot (neon on the dark fill, as the brand says) ─── */
+body:not(.view-staff) .toggle-btn{background:var(--card);border:1px solid var(--line-2);border-radius:var(--r-ctl);color:var(--ink);font-weight:600;min-height:44px;}
+body:not(.view-staff) .toggle-btn.active,
+body:not(.view-staff) :is(.cu-g-male,.cu-g-female){background:var(--ink);border-color:var(--ink);color:var(--paper);}
+body:not(.view-staff) .toggle-btn.active::before{background:var(--neon);}
+body:not(.view-staff) .type-pick:has(.toggle-btn.active) .type-info-btn{border-color:var(--ink);color:var(--ink);}
+body:not(.view-staff) .tp-price{margin-inline-start:6px;font-size:var(--fs-13);font-weight:500;opacity:.7;}
+body:not(.view-staff) .type-badge{border-radius:6px;font-weight:600;}
+/* Ride kinds wear the brand's colours, not a framework's defaults (violet-600, orange-700) */
+body:not(.view-staff) .ev-event{--ev:#8C3B6E;--ev-rgb:140,59,110;}
+body:not(.view-staff) .ev-workshop{--ev:#B4581E;--ev-rgb:180,88,30;}
+
+/* ── Inputs ─────────────────────────────────────────────────────────────────────────────────────── */
+body:not(.view-staff) :is(input[type="text"],input[type="tel"],input[type="number"],input[type="email"],input[type="date"],input[type="password"],select,textarea){
+  border-color:var(--line-2);border-radius:var(--r-ctl);background-color:var(--card);color:var(--ink);font-size:16px;}
+body:not(.view-staff) :is(input,select,textarea):focus{border-color:var(--go);box-shadow:inset 0 0 0 1px var(--go);}
+/* phone numbers and their codes read left to right in Arabic too ("966+" otherwise) */
+html[dir="rtl"] body:not(.view-staff) :is(.phone-cc,input[type="tel"],input[type="email"],.auth-cc-row select){direction:ltr;}
+body:not(.view-staff) .qty-btn{width:44px;height:44px;border-radius:var(--r-ctl);border:1px solid var(--line-2);background:var(--card);color:var(--ink);}
+body:not(.view-staff) .qty-val{min-width:32px;text-align:center;font-size:var(--fs-17);font-weight:700;}
+body:not(.view-staff) #auth-modal .cu-forgot-link{min-height:44px;padding:0 4px;font-size:var(--fs-13);font-weight:600;color:var(--go);}
+
+/* ── Wizard: stepper, footer hint, price box ────────────────────────────────────────────────────── */
+body:not(.view-staff) #tab-register .cu-stepper{gap:8px;margin-bottom:18px;}
+body:not(.view-staff) #tab-register .cu-step-c{width:28px;height:28px;font-size:var(--fs-13);font-weight:700;box-shadow:none;}
+body:not(.view-staff) #tab-register .cu-step-on{background:var(--ink);color:var(--paper);border:0;}
+body:not(.view-staff) #tab-register .cu-step-off{background:var(--card);color:var(--ink-3);border:1px solid var(--line-2);}
+body:not(.view-staff) #tab-register .cu-step-lbl{font-size:var(--fs-13);font-weight:700;color:var(--ink);}
+body:not(.view-staff) #tab-register .cu-step-ln{height:1px;background:var(--line-2);}
+body:not(.view-staff) #tab-register .cu-step-ln-on{background:var(--ink);}
+body:not(.view-staff) :is(#cu,*).cu-k10{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .reg-foot-why{flex-basis:100%;margin:0 0 8px;font-size:var(--fs-13);color:var(--ink-3);text-align:center;}
+body:not(.view-staff) .mm-reg-foot.cu-foot{flex-wrap:wrap;}
+body:not(.view-staff) .price-preview{background:var(--card-2);border:0;border-radius:12px;padding:14px 16px;}
+body:not(.view-staff) .price-preview-breakdown{font-size:var(--fs-13);color:var(--ink-2);font-weight:500;}
+body:not(.view-staff) .price-preview-total{font-size:var(--fs-20);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .price-note{margin-top:8px;font-size:var(--fs-13);line-height:1.5;color:var(--ink-3);}
+body:not(.view-staff) #tab-myrides .cu-tk-body>.price-note:last-child{margin-bottom:14px;}
+
+/* ── Session cards: the time is the headline; today says so ──────────────────────────────────────── */
+body:not(.view-staff) .sess-card{padding:14px 16px;padding-inline-start:calc(16px + var(--sc-gut));gap:4px;border-inline-start:1px solid var(--line);}
+body:not(.view-staff) .sess-card:hover{background:var(--card-2);}
+body:not(.view-staff) .sess-card.sess-selected{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--card);}
+body:not(.view-staff) .sess-card-dot{border-color:var(--ink-4);}
+body:not(.view-staff) .sess-card-dot.on{background:var(--ink);border-color:var(--ink);box-shadow:none;}
+body:not(.view-staff) .sess-card-date{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .sess-card-dw{color:var(--go);font-weight:700;}
+body:not(.view-staff) .sess-card-time{font-size:var(--fs-20);font-weight:700;color:var(--ink);direction:inherit;unicode-bidi:normal;letter-spacing:-.2px;}
+body:not(.view-staff) .sess-card-meta{display:block;font-size:var(--fs-13);color:var(--ink-3);}
+body:not(.view-staff) .spots-low{color:var(--amber);}
+body:not(.view-staff) .sess-comm-chip.has-ic{gap:6px;font-size:var(--fs-13);font-weight:700;}
+body:not(.view-staff) .sess-comm-chip.has-ic::before{display:none;}
+
+/* ── Tickets ────────────────────────────────────────────────────────────────────────────────────── */
+body:not(.view-staff) .ticket-num-label{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .ticket-num{color:var(--ink);font-weight:700;letter-spacing:-2px;}
+body:not(.view-staff) .ticket-label{font-size:var(--fs-12);font-weight:600;color:var(--ink-3);}
+body:not(.view-staff) .ticket-value{font-size:var(--fs-15);font-weight:600;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .cu-tk-when{font-size:var(--fs-13);font-weight:500;color:var(--ink-2);line-height:1.55;}
+body:not(.view-staff) .tk-dw{color:var(--go);font-weight:700;}
+body:not(.view-staff) .tk-venue{color:var(--ink);font-weight:600;}
+body:not(.view-staff) #tab-myrides .cu-tk-sec{font-size:var(--fs-13);font-weight:600;color:var(--ink-3);}
+body:not(.view-staff) #tab-myrides .cu-tk-total-k{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) #tab-myrides .cu-tk-total-v{font-size:var(--fs-20);font-weight:700;color:var(--ink);}
+body:not(.view-staff) #tab-myrides .cu-tr-num{background:var(--card-2);border:0;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-cols::before,
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-cols::after{background:var(--paper);border-color:var(--line);}
+/* The night ticket: a place is held. Near-black with neon, the brand's own pairing, and the one
+   surface in the app that is not paper. The QR's white tile is drawn inside the SVG, so a phone's
+   forced dark mode cannot invert it. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live{background:var(--night);border-color:var(--night);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-num{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-num-label,.ticket-label,.cu-tk-when,.cu-tk-sec,.cu-tk-total-k,.price-note,.cu-hint-mt3,.cu-tr-in,.cu-tr-out,.cu-tk-label,.cu-k10){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-value,.tk-venue,.cu-tr-name,.cu-tk-total-v,.cu-tk-ad-name,.cu-rv-name){color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.tk-dw,.tk-collect,.cu-c-green,.cu-pay-ok){color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-pay-due{color:var(--night-amber);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-tk-total-v{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-header,.ticket-cols,.cu-tr-row,.cu-tk-addons){border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-cols::before,
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-cols::after{border-color:var(--night);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid){background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid):hover{background:var(--night-2);border-color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .btn-red{background:transparent;color:var(--night-red);border-color:var(--night-red-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.type-badge,.cu-tr-num){background:var(--night-2);color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .mm-note{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .mm-note :is(.cu-c-green,.cu-c-text){color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .status-badge{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .appr-ok{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :focus-visible{outline-color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-qr-wrap svg,
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-right svg{border-radius:10px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-c-mutedl,.cu-c-muted){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-c-text{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-dot7-ok,.cu-dot8){background:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-dot7-due{background:var(--night-amber);}
+/* Today's ticket: its one designed moment - a neon line drawn across the top, once. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-today{position:relative;overflow:hidden;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-today::after{content:'';position:absolute;top:0;inset-inline:0;height:3px;background:var(--neon);
+  transform-origin:left;animation:tkDraw .7s cubic-bezier(.2,.8,.2,1) .15s both;}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-today::after{transform-origin:right;}
+@keyframes tkDraw{from{transform:scaleX(0);}to{transform:scaleX(1);}}
+/* A waitlist place is not a ticket yet: paper, a dashed edge, the number quiet. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-wl{background:var(--card);border:1.5px dashed var(--amber-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-wl .ticket-num{color:var(--ink-3);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-wl .ticket-num:is(.cu-num-l,:not([class*="cu-num"])){font-size:48px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-wl .wl-note{color:var(--amber);font-size:var(--fs-13);font-weight:500;max-width:40ch;}
+body:not(.view-staff) .wl-loud{font-size:var(--fs-15);font-weight:700;color:var(--amber);}
+/* A past ride is a record: smaller, quieter */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-past .ticket-num{color:var(--ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-past .ticket-num.cu-num-l{font-size:40px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-past{background:var(--card);}
+
+/* Wallet buttons follow the platforms' own look: black, white type, no neon hairline or glow */
+body:not(.view-staff) .btn-wallet,
+body:not(.view-staff) .btn-wallet.gwallet{background:var(--wallet);color:var(--wallet-ink);border:1px solid var(--wallet);border-radius:var(--r-ctl);box-shadow:none;min-height:48px;}
+body:not(.view-staff) .btn-wallet::before{display:none;}
+body:not(.view-staff) .btn-wallet:hover{background:var(--wallet);border-color:var(--wallet);box-shadow:none;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .btn-wallet{border-color:var(--night-line);}
+
+/* ── Landing: the day's ride first ─────────────────────────────────────────────────────────────── */
+body:not(.view-staff) .land-today{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 16px;width:100%;text-align:start;
+  margin:6px 0 22px;padding:18px 20px;border:0;border-radius:var(--r-card);background:var(--night);color:var(--night-ink);cursor:pointer;}
+body:not(.view-staff) .land-today-k{grid-column:1/-1;font-size:var(--fs-13);font-weight:700;color:var(--neon);}
+body:not(.view-staff) .land-today-t{font-size:var(--fs-26);font-weight:700;letter-spacing:-.4px;}
+body:not(.view-staff) .land-today-n{color:var(--neon);margin-inline-start:6px;}
+body:not(.view-staff) .land-today-v{grid-column:1;font-size:var(--fs-13);color:var(--night-ink-2);}
+body:not(.view-staff) .land-today-go{grid-column:2;grid-row:2/4;align-self:center;display:inline-flex;align-items:center;gap:6px;
+  min-height:44px;padding:0 16px;border:1px solid var(--night-line);border-radius:999px;font-size:var(--fs-13);font-weight:700;}
+body:not(.view-staff) .land-today:hover .land-today-go{border-color:var(--neon);}
+body:not(.view-staff) .land-today.wl{background:var(--card);color:var(--ink);border:1.5px dashed var(--amber-2);}
+body:not(.view-staff) .land-today.wl :is(.land-today-k,.land-today-n){color:var(--amber);}
+body:not(.view-staff) .land-today.wl .land-today-v{color:var(--ink-3);}
+body:not(.view-staff) .land-today.wl .land-today-go{border-color:var(--line-2);}
+body:not(.view-staff) .lec2 .lec-title{font-size:var(--fs-20);font-weight:700;}
+body:not(.view-staff) .lec2 .lec-meta{font-size:var(--fs-13);font-weight:500;line-height:1.5;}
+/* the paper tiles take the quiet ink; the partner and seasonal tiles keep their own colours */
+body:not(.view-staff) .lec2:not(.ev-jcc):not(.ev-snd96):not(.ev-community) .lec-meta{color:var(--ink-3);}
+
+/* A tile with a photograph: the picture on top, the card's own identity under it (the circuit
+   keeps its partner navy, the events tile the paper). Real Jeddah riding, not a blank card. */
+/* each row is as tall as its own tallest tile (1fr made every tile as tall as the tallest photo tile) */
+body:not(.view-staff) .landing-events-grid{grid-auto-rows:auto;}
+body:not(.view-staff) .landing-event-card{border-radius:var(--r-card);}
+body:not(.view-staff) .landing-event-card.ev-event{background:var(--card);border:1px solid var(--line);box-shadow:none;}
+body:not(.view-staff) .lec2.has-photo{padding:0;gap:0;overflow:hidden;}
+body:not(.view-staff) .lec2.has-photo .lec2-photo{order:-2;display:block;width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--card-3);}
+body:not(.view-staff) .lec2.ev-jcc.has-photo .lec2-photo{aspect-ratio:4/3;}
+body:not(.view-staff) .lec2.has-photo .lec2-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 45%;}
+body:not(.view-staff) .lec2.has-photo .lec2-logo{order:0;height:36px;margin:16px 20px 0;}
+body:not(.view-staff) .lec2.has-photo .lec2-copy{padding:14px 20px 18px;}
+body:not(.view-staff) .lec2.has-photo:not(:has(.lec2-logo)) .lec2-copy{padding-top:16px;}
+body:not(.view-staff) .landing-event-card.ev-jcc.has-photo{background-position:right 20px bottom 14px,0 0;}
+body:not(.view-staff) .landing-event-card.ev-event.has-photo{background:var(--card);}
+/* ── Account: the season in sentences ───────────────────────────────────────────────────────────── */
+body:not(.view-staff) .mr-season{display:grid;gap:10px;margin:18px 0 8px;padding:18px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
+body:not(.view-staff) .mr-season-rides{display:flex;align-items:baseline;gap:8px;}
+body:not(.view-staff) .mr-season-n{font-size:var(--fs-34);font-weight:700;letter-spacing:-1px;line-height:1;}
+body:not(.view-staff) .mr-season-w{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .mr-season-tier{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .mr-season-tier strong{color:var(--ink);}
+body:not(.view-staff) .mr-season .mr-tierbar{height:4px;margin:8px 0 0;max-width:none;border-radius:2px;background:var(--card-3);overflow:hidden;}
+body:not(.view-staff) .mr-season .cu-tier-fill{display:block;height:100%;width:var(--cu-w);background:var(--go);}
+body:not(.view-staff) .mr-season-line{display:flex;align-items:center;gap:8px;font-size:var(--fs-15);color:var(--ink);}
+body:not(.view-staff) .mr-season-line .cu-ic{color:var(--go);}
+body:not(.view-staff) .mr-season-next{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;text-align:start;
+  background:var(--card-2);border:0;border-radius:var(--r-ctl);color:var(--ink);font-size:var(--fs-15);font-weight:600;cursor:pointer;}
+body:not(.view-staff) .mr-season-next span{flex:1;min-width:0;}
+body:not(.view-staff) .mr-season-next:hover{background:var(--card-3);}
+/* a badge's name holds exactly two lines, so every tile is the same size whatever the name */
+body:not(.view-staff) .mr-badge{font-size:var(--fs-12);border-radius:10px;}
+body:not(.view-staff) .mr-badge-nm{line-height:1.2;height:2.4em;min-height:0;}
+body:not(.view-staff) .rides-zero-num{color:var(--ink-4);}
+body:not(.view-staff) .cu-meter{background:var(--card-3);}
+
+/* ── Rating: ten 44px targets in two rows of five ───────────────────────────────────────────────── */
+body:not(.view-staff) #rate-modal .cu-rate-scale{display:grid;grid-template-columns:repeat(5,44px);gap:8px;justify-content:start;}
+body:not(.view-staff) #rate-modal .cu-rate-b{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);color:var(--ink-2);font-size:var(--fs-15);font-weight:700;}
+body:not(.view-staff) #rate-modal .cu-rate-on{background:var(--ink);border-color:var(--ink);color:var(--paper);}
+body:not(.view-staff) #rate-modal .cu-rate-b[aria-pressed="true"]{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--go);}
+body:not(.view-staff) #rate-modal .cu-rate-k{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) #rate-modal .cu-rate-meta{color:var(--ink-3);}
+/* ── Wide screens: the page is not a stretched phone ──────────────────────────────────────────── */
+body:not(.view-staff) .reg-side{display:none;}
+@media (min-width:1024px){
+  body:not(.view-staff) .reg-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:32px;align-items:start;}
+  body:not(.view-staff) .reg-main{min-width:0;}
+  body:not(.view-staff) .reg-side{display:grid;gap:6px;position:sticky;top:calc(var(--topbar-h,64px) + 24px);
+    padding:20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
+  body:not(.view-staff) .reg-side-h{font-size:var(--fs-13);font-weight:600;color:var(--ink-3);margin:0 0 4px;}
+  body:not(.view-staff) .reg-side-k{font-size:var(--fs-15);font-weight:700;color:var(--ink);}
+  body:not(.view-staff) .reg-side-when{font-size:var(--fs-15);color:var(--ink-2);}
+  body:not(.view-staff) .reg-side-when strong{color:var(--go);}
+  body:not(.view-staff) .reg-side-time{font-size:var(--fs-26);font-weight:700;letter-spacing:-.4px;color:var(--ink);font-variant-numeric:tabular-nums;}
+  body:not(.view-staff) .reg-side-where{font-size:var(--fs-15);color:var(--ink);font-weight:600;}
+  body:not(.view-staff) .reg-side-row,
+  body:not(.view-staff) .reg-side-total{display:flex;justify-content:space-between;gap:12px;font-size:var(--fs-15);color:var(--ink-2);padding-top:10px;border-top:1px solid var(--line);margin-top:6px;}
+  body:not(.view-staff) .reg-side-total bdi{font-size:var(--fs-20);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+  /* one readable column, not rows 1100px wide */
+  body:not(.view-staff) #tab-register .session-picker-wrap,
+  body:not(.view-staff) #tab-register .cu-usual{max-width:720px;}
+  body:not(.view-staff) #tab-register .mm-reg-foot:not(.cu-foot){max-width:720px;}
+  /* My Bookings: one column of tickets, soonest first, not a ragged three-up grid */
+  body:not(.view-staff) #tab-myrides .myrides-grid{display:grid;grid-template-columns:minmax(0,760px);gap:16px;}
+}
+/* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */

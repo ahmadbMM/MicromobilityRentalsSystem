@@ -24,7 +24,7 @@ async function open(page: Page, staff: boolean) {
 test('a signed-out device gets the staff sign-in alone', async ({ page }) => {
   await open(page, false);
   await expect(page.locator('#pin-modal .pin-box')).toBeVisible();
-  await expect(page).toHaveTitle('Micromobility Staff');
+  await expect(page).toHaveTitle('MicroMobility Staff');
   await expect(page.locator('#view-landing')).toBeHidden();
   await expect(page.locator('#auth-modal')).toBeHidden(); // never the customer sign-in
   await expect(page.locator('#customer-tab-nav')).toBeHidden();
@@ -40,7 +40,7 @@ test('closing the sign-in brings it back: there is nothing behind it', async ({ 
 test('an unlocked device opens on the staff panel, and customer routes lead back to it', async ({ page }) => {
   await open(page, true);
   await expect(page.locator('#view-staff')).toHaveClass(/active/);
-  await expect(page).toHaveTitle('Micromobility Staff');
+  await expect(page).toHaveTitle('MicroMobility Staff');
   await page.evaluate(`goLanding()`);
   expect(await page.evaluate('S.view')).toBe('staff');
   await page.evaluate(`goCustomer('register')`);
@@ -51,7 +51,7 @@ test('the customer address is unchanged', async ({ page }) => {
   await stubSupabase(page, { sessions, queue_entries: [], bikes: [] });
   await page.goto('/');
   await waitForSb(page);
-  await expect(page).toHaveTitle('Micromobility Experiences');
+  await expect(page).toHaveTitle('MicroMobility Experiences');
   await expect(page.locator('#pin-modal .pin-box')).toHaveCount(0);
   expect(await page.evaluate(`document.body.classList.contains('staff-host')`)).toBe(false);
 });

@@ -139,9 +139,9 @@ test('Approve (an application from before the form made accounts): a welcome wit
   await expect(dlg).toBeVisible();
   await expect(dlg.locator('.ca-pwd')).toHaveText('Kp7wXr4Mnq');
   const msg = await dlg.locator('#ca-msg-text').inputValue();
-  expect(msg).toBe(['Hi Karim,', '', 'Welcome to the Micromobility community! 🚴', '',
+  expect(msg).toBe(['Hi Karim,', '', 'Welcome to the MicroMobility community!', '',
     'We’re delighted to let you know that your membership application has been approved. You’re now part of a community of riders who love riding together, and we can’t wait to ride with you.', '',
-    'You can now book our community rides, which are open to members only.', '', 'See you on the road!', 'The Micromobility team'].join('\n'));
+    'You can now book our community rides, which are open to members only.', '', 'See you on the road!', 'The MicroMobility team'].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'sign in', 'Google', 'Apple']) expect(msg).not.toContain(none);
   const wa = await dlg.locator('a.ca-wa').getAttribute('href');
   expect(wa).toMatch(/^https:\/\/wa\.me\/966552468013\?text=/);
@@ -158,8 +158,8 @@ test('Approve (an application from before the form made accounts): a welcome wit
   await dlg.locator('#ca-msg-lang').selectOption('en');
   await dlg.locator('.ca-tp-go').click();
   const pw = await dlg.locator('#ca-msg-text').inputValue();
-  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your Micromobility account:', 'Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
-    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The Micromobility team'].join('\n'));
+  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
+    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The MicroMobility team'].join('\n'));
   await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
 
   await dlg.locator('.ca-x').click();
@@ -565,10 +565,10 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   let msg = await text();
   expect(msg).toBe([
     'Hi Karim,', '',
-    'You’re invited to our Saturday Social Ride! 🚴', '',
-    'Thank you for applying to join the Micromobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',
-    '🚴 Sunrise Loop', '📅 Saturday, 14 March 2099', '🕕 Gathering 6:00 am · Ride starts 8:00 am', '📍 Meeting point: ' + MEET, '',
-    'See you on the road!', 'The Micromobility team',
+    'You’re invited to our Saturday Social Ride!', '',
+    'Thank you for applying to join the MicroMobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',
+    'Sunrise Loop', 'Saturday, 14 March 2099', 'Gathering 6:00 am · Ride starts 8:00 am', 'Meeting point: ' + MEET, '',
+    'See you on the road!', 'The MicroMobility team',
   ].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
   const wa = msgBox.locator('#ca-msg-wa');
@@ -629,8 +629,8 @@ test('an invited application reads Invited and writes its invitation again; a ne
   const msg = await msgBox.locator('#ca-msg-text').inputValue();
   expect(msg).toContain('Hi Huda,');
   expect(msg).toContain('You’re invited to our Saturday Social Ride!');
-  expect(msg).toContain('📅 Saturday, 7 March 2099');
-  expect(msg).not.toContain('📍'); // this ride has no meeting point link
+  expect(msg).toContain('Saturday, 7 March 2099');
+  expect(msg).not.toContain('Meeting point'); // this ride has no meeting point link
   for (const none of ['huda.saleh@gmail.com', '0551239876', 'micromobilityrentals.pages.dev', 'password']) expect(msg).not.toContain(none);
   await msgBox.locator('.ca-x').click();
 
@@ -639,7 +639,7 @@ test('an invited application reads Invited and writes its invitation again; a ne
   await page.locator('#confirm-modal .btn-primary').click();
   await expect(msgBox.locator('.ca-pwd')).toHaveText('Nw4pQx8Lrt');
   const again = await msgBox.locator('#ca-msg-text').inputValue();
-  expect(again).toContain('We’ve set a temporary password for your Micromobility account:\nNw4pQx8Lrt');
+  expect(again).toContain('We’ve set a temporary password for your MicroMobility account:\nNw4pQx8Lrt');
   expect(again).toContain('As soon as you sign in with it, you’ll be asked to change it to a password of your own.');
   for (const none of ['sami.haddad@gmail.com', '0557771122']) expect(again).not.toContain(none);
   expect(again).not.toContain('invited');
@@ -648,7 +648,7 @@ test('an invited application reads Invited and writes its invitation again; a ne
   await row(page, 'a6').locator('.ca-inv-msg').click();
   await expect(msgBox.locator('.ca-pwd')).toHaveCount(0);
   const inv = await msgBox.locator('#ca-msg-text').inputValue();
-  expect(inv).toContain('📅 Saturday, 14 March 2099');
+  expect(inv).toContain('Saturday, 14 March 2099');
   expect(inv).not.toContain('password');
 });
 
@@ -693,7 +693,7 @@ test('before the database has invited_session, the list loads and an invitation 
   await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
   await expect(page.locator('#err-bar-el')).toHaveCount(0); // a column still to come is not an error for staff
   await page.locator('#confirm-modal #ca-msg-lang').selectOption('en');
-  expect(await page.locator('#ca-msg-text').inputValue()).toContain('📅 Saturday, 7 March 2099');
+  expect(await page.locator('#ca-msg-text').inputValue()).toContain('Saturday, 7 March 2099');
 });
 
 // A phone folds the search into a button: open it first

@@ -30,7 +30,7 @@ test('a fresh account can add up to three; the fourth is refused with the senten
   await expect(page.locator('.qty-cap-note')).toHaveCount(0);
   await page.evaluate('changeRegQty(1)');
   expect(await page.evaluate('S.regQty')).toBe(3);
-  await expect(page.locator('.qty-cap-note')).toHaveText('The limit per one account is 3 riders.');
+  await expect(page.locator('.qty-cap-note')).toHaveText('One account can book up to 3 riders.');
   await page.evaluate('changeRegQty(-1)');
   await expect(page.locator('.qty-cap-note')).toHaveCount(0);            // only while + is refused
 });

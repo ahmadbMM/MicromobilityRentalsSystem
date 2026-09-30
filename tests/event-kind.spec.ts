@@ -24,7 +24,7 @@ test('a rider sees the Events card while one is on the books, and the review pri
   await waitForSb(page);
   await expect(page.locator('.landing-event-card.ev-event')).toContainText('Events');
   await page.evaluate(`S.selEvent='event';S.selSession=${JSON.stringify(ev.id)};S.regStep=3;setCustTab('register')`);
-  await expect(page.locator('#tab-register')).toContainText('SAR 40');
+  await expect(page.locator('#tab-register')).toContainText(await page.evaluate('_sar(40)') as string); // the riyal sign, left of the amount
   // no event, no card
   await page.evaluate(`S.sessions=S.sessions.filter(s=>s.ride_kind!=='event');goLanding&&goLanding()`).catch(() => {});
 });

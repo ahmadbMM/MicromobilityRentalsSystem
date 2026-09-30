@@ -33,10 +33,13 @@ test.describe('a rider on the waitlist', () => {
     const card = page.locator('#tab-myrides').first();
     await expect(card).toContainText('#3');                    // the number, not the word in its place
     await expect(page.locator('.ticket-num-label.wl-loud').first()).toContainText(/waitlist/i);
-    await expect(page.locator('#tab-myrides .badge-waitlist').first()).toBeVisible();
-    // and they are told what it means, with the number staff can quote back to them
-    await expect(page.locator('.ticket-num-label.wl-loud').first()).toContainText('W1');
-    await expect(page.locator('.wl-note').first()).toContainText(/W1 in line/i);
+    // the label says it (a status badge beside it only repeated the word, 2026-09-30) ...
+    await expect(page.locator('#tab-myrides .badge-waitlist')).toHaveCount(0);
+    // ... and they are told what it means, their place in words (not the internal "W1"), and
+    // that nothing is held yet
+    await expect(page.locator('.ticket-num-label.wl-loud').first()).toContainText('number 1 in line');
+    await expect(page.locator('.wl-note').first()).toContainText(/number 1 in line/i);
+    await expect(page.locator('.wl-note').first()).toContainText('Nothing is held for you yet');
   });
 });
 

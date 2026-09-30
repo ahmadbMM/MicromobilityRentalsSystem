@@ -73,8 +73,8 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await pickRide(page, 'ev-petromin', '2099-01-13-pw');
     await page.evaluate(`S.regStep=2;renderRegister();setBikeType(0,'Road')`); // riders step: stepper + fare
     await expect(page.locator('.qty-stepper')).toBeVisible();
-    await expect(page.locator('#price-preview-wrap')).toContainText('SAR 75');
-    await expect(page.locator('#price-preview-wrap')).not.toContainText('Complimentary');
+    await expect(page.locator('#price-preview-wrap')).toContainText(await page.evaluate('_sar(75)') as string);
+    await expect(page.locator('#price-preview-wrap')).not.toContainText('Free');
   });
 
   test('the Saturday ride shows no stepper and no fare', async ({ page }) => {
@@ -82,7 +82,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await pickRide(page, 'ev-saturday', '2099-01-10');
     await page.evaluate(`S.regStep=2;renderRegister();setBikeType(0,'Road')`);
     await expect(page.locator('.qty-stepper')).toHaveCount(0);
-    await expect(page.locator('#price-preview-wrap')).toContainText('Complimentary');
+    await expect(page.locator('#price-preview-wrap')).toContainText('Free');
   });
 
   test('the Saturday ride still books one rider at a time', async ({ page }) => {
@@ -431,7 +431,7 @@ test('the landing card is an umbrella: the shared name, no per-ride blurb', asyn
   await page.evaluate('goLanding()');
   const card = page.locator('#land-events .landing-event-card.ev-community');
   // renamed 2026-08-26: the umbrella now covers activities that are not rides at all
-  await expect(card).toContainText('Micromobility Experiences');
+  await expect(card).toContainText('MicroMobility Experiences');
   await expect(card.locator('.lec-meta')).toHaveCount(0); // the description is gone; the logo stays
   await expect(card.locator('img')).not.toHaveCount(0);
 });

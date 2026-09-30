@@ -116,7 +116,7 @@ test.describe('@staff:community learn to ride', () => {
     await expect(box.locator('.ca-pwd')).toHaveText('Tq8mZr3Kpw');
     const msg = await box.locator('#la-msg-text').inputValue();
     const day = new Intl.DateTimeFormat('en-GB-u-ca-gregory', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Riyadh' }).format(new Date(`${d}T18:30:00+03:00`));
-    for (const txt of ['Hi Nadia,', 'learn-to-ride lesson', 'Your lesson is booked:', `📅 ${day}`, '🕕 6:30 pm', '📍 JCC Gate 3', 'https://micromobilityrentals.pages.dev',
+    for (const txt of ['Hi Nadia,', 'learn-to-ride lesson', 'Your lesson is booked:', day, '6:30 pm', 'JCC Gate 3', 'https://micromobilityrentals.pages.dev',
       'Email: nadia.omar@gmail.com', 'Mobile: 0552220001', 'Temporary password: Tq8mZr3Kpw', 'choose your own password', 'reply to this message']) expect(msg).toContain(txt);
     const wa = await box.locator('a.la-wa').getAttribute('href');
     expect(wa).toMatch(/^https:\/\/wa\.me\/966552220001\?text=/);
@@ -147,8 +147,8 @@ test.describe('@staff:community learn to ride', () => {
     await expect(box.locator('#la-msg-lang')).toHaveValue('ar'); // the language of the sign-up
     await box.locator('#la-msg-lang').selectOption('en');
     const msg = await box.locator('#la-msg-text').inputValue();
-    for (const txt of ['Hi Huda,', 'Sara’s lesson is booked:', '🕕 9:00 am', 'You already have a Micromobility account', 'Email: huda.saleh@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
-    expect(msg).not.toContain('📍');
+    for (const txt of ['Hi Huda,', 'Sara’s lesson is booked:', '9:00 am', 'You already have a MicroMobility account', 'Email: huda.saleh@gmail.com', 'Forgot password?']) expect(msg).toContain(txt);
+    expect(msg).not.toContain('Gate');
     expect(msg).not.toContain('Temporary password');
   });
 
@@ -168,7 +168,7 @@ test.describe('@staff:community learn to ride', () => {
     await expect(box).toBeVisible();
     let msg = await box.locator('#la-msg-text').inputValue();
     expect(msg).toContain('Your lesson has a new time:');
-    expect(msg).toContain('🕕 6:00 pm');
+    expect(msg).toContain('6:00 pm');
     expect(msg).not.toContain('Sign in here');
     await box.locator('.ca-x').click();
 
@@ -212,7 +212,7 @@ test.describe('@staff:community learn to ride', () => {
     const box = page.locator('#confirm-modal .ca-msg-box');
     await expect(box).toBeVisible();
     const msg = await box.locator('#la-msg-text').inputValue();
-    for (const txt of ['Hi Rania,', 'The lesson for Rania, Yousef and Karim Haddad is booked:', '🕕 5:00 pm', 'Temporary password: Hm4pWq7Rtz']) expect(msg).toContain(txt);
+    for (const txt of ['Hi Rania,', 'The lesson for Rania, Yousef and Karim Haddad is booked:', '5:00 pm', 'Temporary password: Hm4pWq7Rtz']) expect(msg).toContain(txt);
     await box.locator('#la-msg-lang').selectOption('ar');
     expect(await box.locator('#la-msg-text').inputValue()).toContain('تم حجز الدرس لكلٍّ من Rania');
   });

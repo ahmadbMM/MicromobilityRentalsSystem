@@ -20,7 +20,7 @@ async function open(page: Page, path = '/') {
 test('Sign in is the first page: its title, and the line above Google and Apple that leads to Create account', async ({ page }) => {
   await open(page);
   await expect(page.locator('.auth-title')).toHaveText('Sign in');
-  await expect(page.locator('.auth-sub')).toHaveText('Welcome back.');
+  await expect(page.locator('.auth-sub')).toHaveText('Sign in to book a ride and see your tickets.') // not "Welcome back": most who land here are new;
   await expect(page.locator('.auth-tab')).toHaveCount(0);
   await expect(bar(page)).toHaveText('New to MicroMobility? Create account');
   await expect(bar(page).locator('button')).toHaveText('Create account');

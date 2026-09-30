@@ -373,3 +373,48 @@ must read although nothing failed: nothing was done ("nothing to export", "no ri
 to copy by hand when the clipboard refused, an upload under way. Never type a confirmation as a
 warning to make it show. Specs may still read a quiet toast's text; tests/quiet-toasts.spec.ts
 checks what is drawn.
+
+## The customer system (2026-09-30)
+
+A research pass (the owner: "how can we enhance the ui/ux of the booking app ... i dont want it to look
+AIsh", then "fix them all") found the rider screens reading as a template rather than as MicroMobility:
+five identity layers stacked in `styles.css` (the Jeddah Corniche Circuit motorsport base, "light theme
+more black", two customer reskins, the white header) gave nine screens 22 text colours, 24 font sizes and
+14 radii, the motorsport face on labels, Arial in buttons and capitals by accident; and the flow held back
+price, payment, venue and the bike rule until after booking.
+
+- **One layer, last in the file.** Everything a rider sees answers to the `CUSTOMER SYSTEM (2026-09-30)`
+  block at the end of `styles.css`, scoped to `body:not(.view-staff)` (staff screens never match it; their
+  styling is unchanged, though English strings the two sides share read in sentence case there too). Its token list is the mm-platform tokens: paper, ink, one action green (`--go`), neon
+  only on the night surface. Outside the token list the block says `var(--name)`: **the build refuses a
+  raw #hex, rgb() or hsl() between its banners** (`checkCustomerColors`, scripts/split-staff.mjs,
+  tests/build-checks.spec.ts). Sentence case and no tracking on every label (`:is(#cu,*)` weighs as an id
+  so it outranks the older id-scoped rules); 10px controls, 14px cards, 18px sheets; the primary action
+  is the one pill; cards are a hairline, only a sheet casts a shadow; nothing is frosted.
+- **The night ticket.** A booking that holds a place is drawn dark (`tk-live`: near-black, neon number);
+  today's gets `tk-today` and the one designed motion (a neon line drawn across its top). A waitlist
+  place (`tk-wl`, paper, dashed amber), a reservation staff have not confirmed and a past ride (`tk-past`,
+  no code, calendar, directions or Wallet) stay paper, so dark always means a place is held. Waitlisted
+  riders keep their QR: checking in at the booth is how they leave the waitlist.
+- **Icons are drawn; no emoji anywhere.** The owner, 2026-09-30: "use no emojis always create your own
+  icons". Rider screens use `_CU` / `_cuIc(name, px, flip)`: one monoline stroke (1.75 on 24, round ends,
+  like the ML mark); `flip` mirrors it in Arabic and Urdu. Staff keep `_ART` / `_artIcon`. Message and
+  share templates are plain text. **The build refuses an emoji in app.src.html and check-i18n in any
+  language pack** (`checkNoEmoji`); ✓ ✕ ✎ ★ are typographic marks the desk still prints.
+- **Money on rider screens is `_sar(n)`**: the Saudi riyal sign U+20C1 left of the amount in every
+  language (SAMA), LRI/PDI-isolated so Arabic cannot flip it; `_sarRange`, `_cuPrice` for add-ons. The
+  glyph comes from `fonts/Riyal-*.woff2` (Noto Naskh Arabic subset, OFL, `fonts/OFL-NotoNaskhArabic.txt`),
+  declared in `fonts/fonts.css` under Space Grotesk and IBM Plex Sans Arabic **with the same weight
+  descriptors as their existing faces** (a face with a range of its own wins the weight match and sends
+  every other character to the next font). The desk keeps "SAR".
+- **Counts** use `_tn(base, n)`: keys `base_zero|one|two|few|many|other` in every language, chosen by
+  `Intl.PluralRules` (Arabic's dual and 3-10 forms). check-i18n reads the suffixes as dynamic and lets a
+  plural form drop `{0}` (Arabic "رحلتان"). Arabic strings use Western digits only.
+- **What a rider is told, and when.** Session cards show Today/Tomorrow, the time as the headline, bike
+  collection time, "from" price and places left under four; the riders step shows the running total from
+  the start (`_regPriceBox`), prices on the type pills, how it is paid and that the type is a preference
+  (the post-booking Payment Info popup is gone; the National Day popup stays). Tickets name the venue
+  (`_venueName`: one name, the Jeddah Corniche Circuit) and what is owed. My Bookings runs soonest first;
+  on a ride day the landing opens with that ride (`_todayCardHtml`). Tiles take their subtitle from the
+  next live ride (`_nextRideMeta`). On a wide screen the wizard's later steps sit beside a sticky summary
+  (`_regSideHtml`). Photos on tiles live in `assets/tiles/` (from the website's own library).

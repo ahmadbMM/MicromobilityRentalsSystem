@@ -307,14 +307,25 @@ test('N on All sessions opens tonight\'s next rider, not one left waiting on a p
 
 // ── You're next ──────────────────────────────────────────────────────────────
 test("riders already on a bike are not ahead: the next waiting rider is told they are next", async ({ page }) => {
-  const s = jcc('s1', dayOff(1));
+  const s = jcc('s1', dayOff(0));
   await customer(page, { sessions: [s], queue_entries: [
-    booking({ id: 'o1', customer_id: 'c9', session_id: 's1', session_date: dayOff(1), queue_num: 1, status: 'active' }),
-    booking({ id: 'o2', customer_id: 'c9', session_id: 's1', session_date: dayOff(1), queue_num: 2, status: 'active' }),
-    booking({ id: 'me', session_id: 's1', session_date: dayOff(1), queue_num: 3 }),
+    booking({ id: 'o1', customer_id: 'c9', session_id: 's1', session_date: dayOff(0), queue_num: 1, status: 'active' }),
+    booking({ id: 'o2', customer_id: 'c9', session_id: 's1', session_date: dayOff(0), queue_num: 2, status: 'active' }),
+    booking({ id: 'me', session_id: 's1', session_date: dayOff(0), queue_num: 3 }),
   ] });
   await page.evaluate(`setCustTab('myrides')`);
-  await expect(page.locator('#tab-myrides .ticket-card')).toContainText("You're next");
+  await expect(page.locator('#tab-myrides .ticket-card')).toContainText('You’re next');
+});
+
+// Said on the ride's day only (2026-09-30): "You're next" on a ride days away counted a queue nobody
+// is standing in yet.
+test("a ride on another day carries no queue cue", async ({ page }) => {
+  const s = jcc('s1', dayOff(1));
+  await customer(page, { sessions: [s], queue_entries: [booking({ id: 'me', session_id: 's1', session_date: dayOff(1), queue_num: 1 })] });
+  await page.evaluate(`setCustTab('myrides')`);
+  await expect(page.locator('#tab-myrides .ticket-card')).toHaveCount(1);
+  await expect(page.locator('#tab-myrides .ticket-card')).not.toContainText('You’re next');
+  await expect(page.locator('#tab-myrides .ticket-card')).not.toContainText('in the queue');
 });
 
 // ── Calendar file across midnight ─────────────────────────────────────────────

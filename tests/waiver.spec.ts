@@ -71,11 +71,14 @@ test('going back from review lands on the waiver, not past it', async ({ page })
   expect(await page.evaluate('S.regStep')).toBe(2.5);
 });
 
-test('the stepper still reads as three steps, with the waiver inside step 2', async ({ page }) => {
+// Since 2026-09-30 the waiver is a step of its own in the stepper (it hid inside "Riders", so the
+// rider met a step the stepper never announced).
+test('the stepper shows the waiver as its own step', async ({ page }) => {
   await toRiders(page);
   await page.evaluate(`regNextToReview()`);
   const label = await page.getAttribute('#tab-register .reg-stepper', 'aria-label');
-  expect(label).toBe('2 / 3');
+  expect(label).toBe('Step 3 of 4');
+  await expect(page.locator('#tab-register .reg-stepper [aria-current="step"]')).toHaveCount(1);
 });
 
 test('what reaches the server is the version, and the booking carries it', async ({ page }) => {

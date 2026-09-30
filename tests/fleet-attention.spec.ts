@@ -131,7 +131,8 @@ test('the admin sets how many rides a service lasts, and the list follows', asyn
   await expect(row(page, 'b-ok')).toContainText('Service due · 5 rides');
   // the bike profile reads the same threshold
   await page.evaluate(`openBikeProfile('b-ok')`);
-  await expect(page.locator('#bike-profile-modal')).toContainText('⚠ 5');
+  await expect(page.locator('#bike-profile-modal .flt-svcn-due')).toHaveText('5');
+  await expect(page.locator('#bike-profile-modal .flt-svcn-due .art-warn')).toHaveCount(1);
   await page.evaluate(`closeBikeProfile()`);
   // the front desk sees the list, not the setting
   await page.evaluate(`S.staffRole='frontdesk';renderBikes()`);

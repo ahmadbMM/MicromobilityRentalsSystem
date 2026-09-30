@@ -13,6 +13,7 @@ import CleanCSS from 'clean-css';
 import {
   splitStaff, resolveIncludes,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
+  checkCustomerColors, checkNoEmoji,
 } from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
@@ -382,6 +383,21 @@ if (!/^  Content-Security-Policy: /m.test(headers)) throw new Error('build: _hea
 headers = headers.replace(/^  Content-Security-Policy: .*$/m, `  Content-Security-Policy: ${CSP}`);
 if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  Content-Security-Policy: .*)$/m, `$1\n  Reporting-Endpoints: csp="/api/csp-report"`);
 if (headers !== headersBefore) await writeFile(headersUrl, headers);
+
+// ── The customer system keeps its colours in its tokens (scripts/split-staff.mjs) ─────────────
+{
+  const cs = checkCustomerColors(await readFile(new URL('../styles.css', import.meta.url), 'utf8'));
+  if (!cs.found) throw new Error('build: styles.css has no CUSTOMER SYSTEM block (its start and end banners are read by checkCustomerColors)');
+  if (cs.offenders.length) {
+    throw new Error(`build: a raw colour in the customer system (styles.css) - name it in the token list at the top of the block and use var(--name):\n${cs.offenders.map((o) => `  line ${o.line}: ${o.prop}: ${o.value}`).join('\n')}`);
+  }
+}
+
+// ── No emoji anywhere in the source: icons are drawn (scripts/split-staff.mjs) ───────────────
+{
+  const em = checkNoEmoji(raw);
+  if (em.length) throw new Error(`build: an emoji in app.src.html - draw the icon instead (_cuIc for rider screens, _artIcon for staff) and keep message text plain:\n${em.slice(0, 20).map((e) => `  line ${e.line}: ${e.ch}  ${e.text}`).join('\n')}`);
+}
 
 // ── The download budget ──────────────────────────────────────────────────────
 // What a customer's phone fetches (index.html) and what a staffer's adds (staff.js), gzipped as

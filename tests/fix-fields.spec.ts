@@ -76,7 +76,7 @@ test('there is no way past it: no "Not now", and moving about the site leaves it
   const box = page.locator('#fix-gate .fx-box');
   await expect(box).toBeVisible();
   await expect(box).not.toContainText('Not now');
-  await expect(page.locator('#fix-gate button:not(.fx-opt)')).toHaveText(['Save and continue', 'Log Out']);
+  await expect(page.locator('#fix-gate button:not(.fx-opt)')).toHaveText(['Save and continue', 'Log out']);
   await page.keyboard.press('Escape');
   await expect(box).toBeVisible();
   for (const go of [`goCustomer('myrides')`, `goCustomer('account')`, `goLanding()`, `showView('customer')`]) {
