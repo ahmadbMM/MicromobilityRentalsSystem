@@ -1052,6 +1052,15 @@
     #tab-register .cu-tk-link{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;text-decoration:none;}
     #tab-register .cu-tk-top1{grid-template-columns:1fr;}
     #tab-register .cu-tk-wallet{padding:0 24px 18px;}
+    /* The ticket's lines sit inside the card like its buttons, not against its edge. */
+    #tab-register .ticket-card>.price-note{margin:0;padding:0 24px 10px;text-align:center;}
+    #tab-register .ticket-card>.price-note:has(+.cu-tk-acts){padding-bottom:16px;}
+    /* Five fields (a ride that hands out bikes) go three and two, never four and one left alone. */
+    .ticket-cols:has(>.ticket-col:nth-child(5)){grid-template-columns:repeat(3,1fr);row-gap:16px;}
+    @media(max-width:560px){
+      .ticket-cols:has(>.ticket-col:nth-child(5)){grid-template-columns:repeat(2,1fr);}
+      .ticket-cols>.ticket-col:last-child:nth-child(odd){grid-column:1/-1;}
+    }
     #tab-register .cu-usual{width:100%;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:6px;}
     #tab-register .cu-w100{width:100%;}
     #tab-register .cu-w100-mt18{width:100%;margin-top:18px;}
