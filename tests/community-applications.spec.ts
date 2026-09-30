@@ -568,6 +568,7 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
     'You’re invited to our Saturday Social Ride!', '',
     'Thank you for applying to join the MicroMobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',
     'Sunrise Loop', 'Saturday, 14 March 2099', 'Gathering 6:00 am · Ride starts 8:00 am', 'Meeting point: ' + MEET, '',
+    '• You can see your booking on the “My Bookings” page.', '• Please have your QR code ready when you arrive.', '• Please cancel your booking if you can’t attend.', '',
     'See you on the road!', 'The MicroMobility team',
   ].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
