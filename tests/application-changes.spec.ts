@@ -32,7 +32,7 @@ test('an application sent from an account asks only for its own answers, not the
   await staff(page, { community_applications: [{ ...karim, customer_id: 'c1' }] });
   await card(page).locator('.ca-fix-btn').click();
   const dlg = page.locator('#confirm-modal .ca-fx-box');
-  expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix))).toEqual(['birth_date', 'nationality', 'bike_type', 'profession', 'instagram', 'linkedin']);
+  expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix))).toEqual(['birth_date', 'nationality', 'bike_type', 'profession', 'workplace', 'instagram', 'linkedin']);
 });
 
 test('staff pick the fields, get the link and a message in the applicant’s language, and the card says it is waiting', async ({ page }) => {
@@ -141,4 +141,31 @@ test('a decided application or a replaced request opens on "This link no longer 
   await expect(page.locator('#app-fix [data-afx-state="gone"]')).toContainText('This link no longer works');
   await page.locator('#app-fix .afx-close').click();
   await expect(page.locator('#app-fix')).toBeHidden();
+});
+
+// The company (20260930200000): staff can ask for it, the message names it, the page asks it.
+test('the company can be asked for: the message names it and the page sends it', async ({ page }) => {
+  await staff(page, { 'rpc:staff_community_ask_changes': { ok: true, token: TOKEN, fields: ['workplace'], note: null } });
+  await card(page).locator('.ca-fix-btn').click();
+  await page.locator('#confirm-modal .ca-fx-box [data-ca-fix="workplace"]').click();
+  await page.locator('#confirm-modal .ca-fx-go').click();
+  const msg = page.locator('#confirm-modal .ca-msg-box');
+  expect(await msg.locator('#ca-msg-text').inputValue()).toContain('• Company');
+  await msg.locator('#ca-msg-lang').selectOption('ar');
+  expect(await msg.locator('#ca-msg-text').inputValue()).toContain('• الشركة');
+});
+
+test('the applicant’s page asks for the company and sends it tidied', async ({ page }) => {
+  await applicant(page, { ...ASK, fields: ['workplace'], values: { workplace: null } }, { 'rpc:community_fix_submit': { ok: true } });
+  const sent: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/community_fix_submit/.test(r.url())) sent.push(JSON.parse(r.postData() || '{}')); });
+  const box = page.locator('#app-fix .afx-box');
+  await expect(box.locator('#afx-title')).toHaveText('Update your application');
+  await expect(box.locator('.fx-item[data-afx="workplace"] .fx-was')).toContainText('You left this empty');
+  await box.locator('#afx-save').click();
+  await expect(box.locator('.fx-item[data-afx="workplace"] .pg-msg')).toBeVisible();
+  await box.locator('#afx-work').fill('  Saudi   Aramco ');
+  await box.locator('#afx-save').click();
+  await expect.poll(() => sent.length).toBe(1);
+  expect(sent[0]).toEqual({ p_token: TOKEN, p: { workplace: 'Saudi Aramco' } });
 });

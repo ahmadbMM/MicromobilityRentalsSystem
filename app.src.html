@@ -14953,7 +14953,7 @@ const CA_TP_MSG={
 // CA_SITE/?appfix=<token>&lang=<the message's language>, opens a page asking for those fields
 // only (renderAppFix); what the applicant sends replaces them, and the card says what changed
 // and what it was. A new request replaces the old one and its link; so does a decision.
-const CA_FIX_FIELDS=['name','email','phone','birth_date','gender','nationality','height','bike_type','profession','instagram','linkedin'];
+const CA_FIX_FIELDS=['name','email','phone','birth_date','gender','nationality','height','bike_type','profession','workplace','instagram','linkedin']; // workplace: 20260930200000
 const CA_FIX_LBL={name:'nameLabel',email:'emailAddr',phone:'phoneNum',birth_date:'birthDateLabel',gender:'genderLabel',nationality:'nationalityLabel',height:'heightLabel',bike_type:'bikeTypeLabel',profession:'caLblProf',workplace:'accWorkplace',instagram:'socInstagram',linkedin:'socLinkedin'};
 const CA_FIX_COLS='fix_token,fix_fields,fix_note,fix_asked_at,fix_asked_by,fix_done_at,fix_prev';
 // The message's own sentences and the fields' names, in the applicant's language; the greeting
@@ -15404,7 +15404,7 @@ function _caMsgBuild(kind,lang,d){
   L.push(m.hi.replace('{name}',first),'');
   if(kind==='fix'){
     const f=CA_FIX_MSG[lang]||CA_FIX_MSG.en,x=d.fix||{};
-    L.push(f.thanks,'',f.ask,...(x.fields||[]).map(k=>'• '+(f[k]||k)),'');
+    L.push(f.thanks,'',f.ask,...(x.fields||[]).map(k=>'• '+(f[k]||(LA_FIX_MSG[lang]||LA_FIX_MSG.en)[k]||k)),''); // the company's name is LA_FIX_MSG's
     if(x.note)L.push(f.note+' '+x.note,'');
     L.push(f.open,_caFixLink(x.token,lang),'',m.team);
     return L.join('\n');
