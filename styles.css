@@ -4726,6 +4726,12 @@
     html[dir="rtl"] input.search-input.has-clear{padding-left:34px;}
     /* One × per search: the browser drew its own beside ours in type=search fields */
     input.search-input::-webkit-search-cancel-button,#gs-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none;}
+    /* A search keeps room for its icon and its × (the owner, 2026-09-30: "the name or text typed in
+       the search bar overlaps with the search icon"). The staff form-field padding (9px 13px) reached
+       the searches written type="text" (Accounts, Bikes, both Applications lists) and the text ran
+       under the icon, and under the × at the other end. Logical sides, so Arabic and Urdu match. */
+    body.view-staff .search-wrap>input.search-input{padding-inline-start:32px;}
+    body.view-staff .search-wrap>input.search-input.has-clear{padding-inline-end:34px;}
 
     /* ── Staff topbar on small phones ───────────────────────────────────────
        The role switch + undo + password + Lock could overflow the bar in portrait,

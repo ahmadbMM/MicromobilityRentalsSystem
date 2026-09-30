@@ -134,3 +134,38 @@ test.describe('on a phone', () => {
     expect(await page.evaluate(`S.histSearch`)).toBe('');
   });
 });
+
+// What is typed starts clear of the search icon and stops short of the × (the owner, 2026-09-30:
+// "the name or text typed in the search bar overlaps with the search icon"): the staff form-field
+// padding reached the searches written type="text" and the text ran under the icon.
+const searchGaps = (id: string) => {
+  const inp = document.getElementById(id) as HTMLInputElement, w = inp.parentElement as HTMLElement;
+  const cs = getComputedStyle(inp), r = inp.getBoundingClientRect();
+  const ic = (w.querySelector(':scope>svg') as Element).getBoundingClientRect();
+  const x = (w.querySelector('.search-clear') as Element).getBoundingClientRect();
+  const start = r.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft);
+  const end = r.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight);
+  return cs.direction === 'rtl' ? { icon: ic.left - end, x: start - x.right } : { icon: start - ic.right, x: x.left - end };
+};
+for (const lang of ['en', 'ar']) {
+  test(`a search's text keeps clear of its icon and its × (${lang})`, async ({ page }) => {
+    if (lang === 'ar') await page.addInitScript(() => { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); });
+    await boot(page, { customers: [{ id: 'c1', name: 'Intl Rider', email: 'i@x.sa', phone: '+966564221234', created_at: '2026-09-01T00:00:00Z' }], community_applications: [] });
+    for (const [open, id] of [
+      [`setStaffTab('community');setCommTab('accounts')`, 'am-search'],
+      [`setStaffTab('community');setCommTab('applications')`, 'ca-q'],
+      [`setStaffTab('inventory')`, 'bk-search-input'],
+      [`setStaffTab('queue')`, 'sf-search-input'],
+    ]) {
+      await page.evaluate(open);
+      const wrap = page.locator(`#${id}`).locator('xpath=..');
+      const fold = wrap.locator('.srch-btn');
+      if (await fold.isVisible()) await fold.click(); // a phone folds the search into a button
+      await page.locator(`#${id}`).fill('Mohammed Abdulrahman');
+      await expect(wrap.locator('.search-clear')).toBeVisible();
+      const g = await page.evaluate(searchGaps, id);
+      expect(g.icon, id).toBeGreaterThanOrEqual(4);
+      expect(g.x, id).toBeGreaterThanOrEqual(0);
+    }
+  });
+}

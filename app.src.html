@@ -27642,7 +27642,7 @@ function _catModelsHtml(){
   const q=String(C.q||'').trim().toLowerCase();
   const rows=C.models.filter(m=>!q||(m.brand+' '+m.name+' '+m.slug).toLowerCase().includes(q));
   const bar=`<div class="cat-bar">
-    <div class="${_srchCls('cat',C.q)}" data-srch="cat">${_artIcon('search',13)}<input type="search" value="${esc(C.q||'')}" placeholder="${esc(t('catSearchPh'))}" aria-label="${esc(t('catSearchPh'))}" data-on-input="${_on("_on__catModelsHtml_1",_EV,_EL)}">${_srchBtn()}</div>
+    <div class="${_srchCls('cat',C.q)}" data-srch="cat">${_artIcon('search',13)}<input class="search-input" type="search" value="${esc(C.q||'')}" placeholder="${esc(t('catSearchPh'))}" aria-label="${esc(t('catSearchPh'))}" data-on-input="${_on("_on__catModelsHtml_1",_EV,_EL)}">${_srchBtn()}</div>
     <button type="button" class="btn-primary btn-sm" data-on-click="${_on("_catEdit",null)}" ${_catTop().length?'':'disabled'}>${t('catAddModel')}</button></div>`;
   const note=_catTop().length?'':`<div class="web-hint">${t('catNoCats')}</div>`;
   const table=rows.length?`<div class="table-wrapper"><table class="web-table cat-table"><thead><tr><th></th><th>${t('catColModel')}</th><th>${t('catColCategory')}</th><th>${t('catColRide')}</th><th>${t('catColPhotos')}</th><th>${t('catColPublished')}</th><th>${t('catColUpdated')}</th><th></th></tr></thead><tbody>

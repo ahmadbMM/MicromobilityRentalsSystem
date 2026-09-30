@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-c8d8b78e8a';
+const CACHE = 'mmcq-03c7e50ce4';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,11 +22,11 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=ffc1155ace';
+const STAFF_JS = './staff.js?v=50a1ad2988';
 const SHELL = [
   SHELL_KEY,
   ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS]),
-  './styles.css?v=9c5ccd75bb',
+  './styles.css?v=10ea4c2e61',
   './manifest.json',
   './logo.png',
   './logo-dark.png',
