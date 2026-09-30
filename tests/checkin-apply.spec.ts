@@ -115,17 +115,15 @@ test('a bike owner has no payment to choose: Free in the modal, Free on the rost
   await expect(modal.getByRole('button', { name: '✓ Paid', exact: true })).toBeVisible();
 });
 
-test('the members-only dialog gives its three buttons one size', async ({ page }) => {
+test('the members-only dialog has one button, Apply, that fits its text', async ({ page }) => {
   await stubSupabase(page, { sessions: [{ ...sessions[0], id: 'comm1', event_kind: 'community', needs_approval: true, hide_queue: true, title: 'Saturday Social Ride' }], queue_entries: [] });
   await page.addInitScript(() => localStorage.setItem('cq_session', JSON.stringify({ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', session_token: 'tok-spec' })));
   await page.goto('/');
   await waitForSb(page);
   await page.evaluate(`selectEvent('community')`);
   const row = page.locator('#confirm-modal .cm-actions');
-  await expect(row.locator('a, button')).toHaveCount(3);
-  const box = await row.locator('a, button').evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height), x: Math.round(r.x) }; }));
-  expect(Math.max(...box.map((b) => b.w)) - Math.min(...box.map((b) => b.w))).toBeLessThanOrEqual(1);
-  expect(Math.max(...box.map((b) => b.h)) - Math.min(...box.map((b) => b.h))).toBeLessThanOrEqual(1);
+  await expect(row.locator('a, button')).toHaveCount(1); // the owner, 2026-09-30: only Apply
+  await expect(row.locator('button')).toHaveText('Apply for MicroMobility’s Community Membership');
   for (const b of await row.locator('a, button').all()) {
     expect(await b.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
   }

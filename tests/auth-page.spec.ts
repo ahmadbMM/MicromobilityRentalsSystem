@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { stubSupabase, waitForSb } from './helpers/supabase';
 
 // Deep coverage of the customer sign-in / sign-up modal: validation, Enter-to-submit,
-// phone normalization into the RPCs, double-submit guards, and the Google-complete flow.
+// phone normalization into the RPCs, double-submit guards, and Google/Apple being sign-in only.
 
 const customer = { id: 'c9', name: 'Test User', email: 'x@y.com', phone: '+966508727012', height: 170, type_preference: 'Any', created_at: '2026-01-01', session_token: 'tok9' };
 
@@ -184,34 +184,66 @@ test.describe('forgot password', () => {
   });
 });
 
-test.describe('google complete-profile', () => {
-  test('cancel signs out the pending Google session so the modal stops reappearing', async ({ page }) => {
+// Google and Apple no longer make accounts (the owner, 2026-09-30): Create account has neither
+// button, and a Google or Apple sign-in that finds no account lands on Create account instead of a
+// Google-only profile form.
+test.describe('Google and Apple: sign-in only', () => {
+  test('Create account has no Google or Apple button; Sign in keeps both', async ({ page }) => {
     await boot(page);
-    await page.evaluate('S._pendingGoogle={email:"g@x.com",name:"Gee User"};openGoogleComplete()');
-    await expect(page.locator('#a-height')).toBeVisible();
-    await page.locator('#auth-modal .btn-secondary').click(); // Cancel - Go Home
-    // Auth-first: a signed-out visitor's landing IS the sign-in page, so the modal stays
-    // open — but back in plain login mode, with the pending Google session discarded.
-    await page.waitForFunction('S.authMode==="login" && !document.getElementById("a-height")');
-    expect(await page.evaluate('S._pendingGoogle')).toBeNull();
+    await expect(page.locator('#auth-modal .btn-google:not(.btn-apple)')).toHaveCount(1);
+    await expect(page.locator('#auth-modal .btn-apple')).toHaveCount(1);
+    await page.evaluate('switchAuthMode("signup")');
+    await expect(page.locator('#a-email')).toBeVisible();
+    await expect(page.locator('#auth-modal .btn-google')).toHaveCount(0);
+    await expect(page.locator('#auth-modal .btn-apple')).toHaveCount(0);
+    await expect(page.locator('#auth-modal .auth-or')).toHaveCount(0);
+    await expect(page.locator('#auth-modal')).not.toContainText(/Continue with (Google|Apple)/);
   });
 
-  test('finish validates then signs up once with the normalized phone', async ({ page }) => {
+  test('a sign-in with no account lands on Create account with its name and email, says why, and makes nothing', async ({ page }) => {
     await boot(page);
-    const calls = await captureRpc(page, 'customer_oauth_signup', [{ session_token: 'gtok' }]);
-    const heard = await captureRpc(page, 'customer_set_heard_from', true);
-    await page.evaluate('S._pendingGoogle={email:"g@x.com",name:"Gee User"};openGoogleComplete()');
-    await page.evaluate('S.signupAck=true;doCompleteGoogle()');
-    await expect(page.locator('#auth-err')).not.toBeEmpty(); // gender required
+    const made = await captureRpc(page, 'customer_oauth_signup', [{ session_token: 'gtok' }]);
+    const signup = await captureRpc(page, 'customer_signup', [{ id: 'n1', session_token: 'ntok' }]);
+    await page.evaluate('S._pendingGoogle={email:"gee.user@gmail.com",name:"Gee User",photo:""};_oauthNoAccount()');
+    await expect(page.locator('.auth-title')).toHaveText('Create account');
+    await expect(page.locator('#auth-modal .auth-note')).toHaveText('No account is linked to this Google or Apple sign-in, and new accounts are no longer made with Google or Apple. Create your account below with your email and a password.');
+    await expect(page.locator('#a-first')).toHaveValue('Gee');
+    await expect(page.locator('#a-last')).toHaveValue('User');
+    await expect(page.locator('#a-email')).toHaveValue('gee.user@gmail.com');
+    await expect(page.locator('#a-pwd')).toBeVisible();
+    expect(await page.evaluate('S._pendingGoogle')).toBeNull();
+    // the sign-up is the ordinary one, with a password
     await page.evaluate('setSignupGender("female")');
-    await page.fill('#a-height', '156');
     await page.fill('#a-phone', '0508727012');
-    await page.evaluate('S.signupAck=true;doCompleteGoogle();doCompleteGoogle()');
+    await page.fill('#a-pwd', 'Ride2Work');
+    await page.fill('#a-pwd2', 'Ride2Work');
+    await page.fill('#a-height', '156');
+    await page.evaluate('S.signupAck=true;doSignup()');
     await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
-    expect(calls.length).toBe(1); // double-tap guard
-    expect(calls[0].p_phone).toBe('+966508727012');
-    expect(await page.evaluate('S.loggedIn.session_token')).toBe('gtok');
-    expect(heard).toEqual([]); // the question is on the website's forms, not here (2026-09-28)
+    expect(made).toEqual([]);
+    expect(signup).toHaveLength(1);
+    expect(signup[0]).toMatchObject({ p_email: 'gee.user@gmail.com', p_name: 'Gee User', p_pwd: 'Ride2Work', p_phone: '+966508727012' });
+    expect(await page.evaluate('S._oauthMiss')).toBeNull();
+  });
+
+  test('the details show even when Create account is already open', async ({ page }) => {
+    await boot(page);
+    await page.evaluate('switchAuthMode("signup")');
+    await page.evaluate('S._pendingGoogle={email:"gee.user@gmail.com",name:"Gee User"};_oauthNoAccount()');
+    await expect(page.locator('#a-first')).toHaveValue('Gee');
+    await expect(page.locator('#a-email')).toHaveValue('gee.user@gmail.com');
+  });
+
+  test('a hidden Apple address is not put in the email box; going to Sign in forgets the details', async ({ page }) => {
+    await boot(page);
+    await page.evaluate('S._pendingGoogle={email:"abc123@privaterelay.appleid.com",name:"Apple Rider"};_oauthNoAccount()');
+    await expect(page.locator('#auth-modal .auth-note')).toBeVisible();
+    await expect(page.locator('#a-email')).toHaveValue('');
+    await expect(page.locator('#a-first')).toHaveValue('Apple');
+    await page.evaluate('switchAuthMode("login")');
+    await page.evaluate('switchAuthMode("signup")');
+    await expect(page.locator('#auth-modal .auth-note')).toHaveCount(0);
+    await expect(page.locator('#a-first')).toHaveValue('');
   });
 });
 
@@ -228,7 +260,7 @@ test('the auth modal renders every mode in Arabic with zero console errors', asy
     switchAuthMode('signup');
     switchAuthMode('forgot');
     S.forgotStep=2; renderAuthModal();
-    S._pendingGoogle={email:'g@x.com',name:'Gee'}; openGoogleComplete(); S.signupAck=true;
+    S._pendingGoogle={email:'g@x.com',name:'Gee'}; _oauthNoAccount(); S.signupAck=true; renderAuthModal();
   `);
   expect(errs, errs.join('\n')).toEqual([]);
 });

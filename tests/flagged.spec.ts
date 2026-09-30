@@ -191,7 +191,8 @@ test('a name from Google or Apple arrives with its dashes turned into spaces', a
   await stubSupabase(page, {});
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`S._pendingGoogle={email:'k@x.com',name:'Kerry-Ann Al–Stander'};openGoogleComplete()`);
+  // (no account for it: Create account opens with the provider's name, 2026-09-30)
+  await page.evaluate(`openAuthModal();S._pendingGoogle={email:'k@x.com',name:'Kerry-Ann Al–Stander'};_oauthNoAccount()`);
   const both = await page.evaluate(`[document.getElementById('a-first').value, document.getElementById('a-last').value].join(' ')`) as string;
   expect(both).not.toMatch(/[-–—]/);
   expect(both.replace(/\s+/g, ' ')).toBe('Kerry Ann Al Stander');

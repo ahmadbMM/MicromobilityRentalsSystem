@@ -32,26 +32,6 @@ test('the sign-up form does not ask how they heard of us, and signs up without i
   expect(calls[0]).not.toHaveProperty('p_heard_from');
 });
 
-test('the Google completion does not ask either, and writes nothing about it', async ({ page }) => {
-  await stubSupabase(page, {});
-  await page.goto('/');
-  await waitForSb(page);
-  const made: unknown[] = [];
-  await page.route(/\/rest\/v1\/rpc\/customer_oauth_signup/, async (r) => { made.push(1); await r.fulfill({ status: 200, headers: JSON_OK, body: JSON.stringify([{ session_token: 'gtok' }]) }); });
-  const heard: unknown[] = [];
-  await page.route(/\/rest\/v1\/rpc\/customer_set_heard_from/, async (r) => { heard.push(1); await r.fulfill({ status: 200, headers: JSON_OK, body: 'true' }); });
-  await page.evaluate(`S._pendingGoogle={email:'g@x.com',name:'Gee User'};openGoogleComplete()`);
-  await expect(page.locator('#a-height')).toBeVisible();
-  await expect(page.locator('#a-heard')).toHaveCount(0);
-  await page.evaluate('setSignupGender("female")');
-  await page.fill('#a-height', '156');
-  await page.fill('#a-phone', '0508727012');
-  await page.evaluate('S.signupAck=true;doCompleteGoogle()');
-  await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
-  expect(made).toHaveLength(1);
-  expect(heard).toHaveLength(0);
-});
-
 test('the desk reads it on the account row and in the editor', async ({ page }) => {
   const customers = [
     { id: 'c1', name: 'Invited Rider', email: 'inv@gmail.com', phone: '+966551876500', gender: 'male', created_at: '2026-09-01T10:00:00Z', heard_from: 'invited' },

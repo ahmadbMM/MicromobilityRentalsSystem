@@ -26,6 +26,15 @@ async function staff(page: Page, extra: Fixtures = {}) {
 }
 const card = (page: Page) => page.locator('.ca-row[data-app-id="a1"]');
 
+// Sent from an account (the form makes it first, 2026-09-30): the name, email, mobile, gender and
+// height are the account's, so the link asks only for the rest.
+test('an application sent from an account asks only for its own answers, not the account’s', async ({ page }) => {
+  await staff(page, { community_applications: [{ ...karim, customer_id: 'c1' }] });
+  await card(page).locator('.ca-fix-btn').click();
+  const dlg = page.locator('#confirm-modal .ca-fx-box');
+  expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix))).toEqual(['birth_date', 'nationality', 'bike_type', 'profession', 'instagram', 'linkedin']);
+});
+
 test('staff pick the fields, get the link and a message in the applicant’s language, and the card says it is waiting', async ({ page }) => {
   await staff(page, { 'rpc:staff_community_ask_changes': { ok: true, token: TOKEN, fields: ['phone', 'instagram'], note: 'We could not find this Instagram account' } });
   const calls: Record<string, unknown>[] = [];

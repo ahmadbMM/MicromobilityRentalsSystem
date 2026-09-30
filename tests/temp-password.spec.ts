@@ -53,13 +53,17 @@ test('Generate makes a random temporary password; saving it marks it temporary a
   await expect(msg.locator('.ca-pwd')).toHaveText(pwd2);
   await expect(msg).toContainText('Their old password no longer works');
   const txt = await msg.locator('#ca-msg-text').inputValue();
-  expect(txt).toContain('Hi Huda,');
-  expect(txt).toContain('We’ve set a temporary password for your Micromobility account.');
-  expect(txt).toContain('https://micromobilityrentals.pages.dev');
-  expect(txt).toContain('Email: huda.saleh@gmail.com');
-  expect(txt).toContain('Mobile: 0551239876');
-  expect(txt).toContain(`Temporary password: ${pwd2}`);
-  expect(txt).toContain('choose your own password');
+  // The password, where to sign in, and that it is changed at once - nothing else about the account
+  // (the owner, 2026-09-30).
+  expect(txt).toBe(['Hi Huda,', '', 'We’ve set a temporary password for your Micromobility account:', pwd2, '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
+    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The Micromobility team'].join('\n'));
+  for (const none of ['huda.saleh@gmail.com', '0551239876']) expect(txt).not.toContain(none);
+  // in the staff member's language to begin with, any of the ten
+  await msg.locator('#ca-msg-lang').selectOption('ar');
+  const ar = await msg.locator('#ca-msg-text').inputValue();
+  expect(ar).toContain('أنشأنا كلمة مرور مؤقتة لحسابك في Micromobility:\n' + pwd2);
+  expect(ar).toContain('سيُطلب منك تغييرها إلى كلمة مرور خاصة بك');
+  await msg.locator('#ca-msg-lang').selectOption('en');
   expect(await msg.locator('a.ca-wa').getAttribute('href')).toMatch(/^https:\/\/wa\.me\/966551239876\?text=/);
   // The log keeps that it was made, never the password
   const log = await page.evaluate(`JSON.stringify(S.actionLog||S.log||[])`);

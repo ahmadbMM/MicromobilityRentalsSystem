@@ -33,14 +33,66 @@ test('non-member clicking the Saturday card in Reserve gets the members-only dia
   // the ride itself is never named to somebody who is not a member
   await expect(modal).not.toContainText('Saturday Social Ride');
   await expect(modal.locator('.ev-name')).toHaveCount(0);
-  // WhatsApp contact: number shown, wa.me link
-  await expect(modal.locator('a[href="https://wa.me/966534423513"]')).toContainText('+966 53 442 3513');
+  // One way on: Apply (the owner, 2026-09-30); no WhatsApp number, no Instagram, no "Got it"
+  await expect(modal.locator('.cm-actions button')).toHaveText(['Apply for MicroMobility’s Community Membership']);
+  await expect(modal.locator('.cmy-cm-msg')).toHaveText('Our community rides are for our community members. Apply for membership, and our team will review your application.');
+  await expect(modal.locator('a')).toHaveCount(0);
+  await expect(modal).not.toContainText(/WhatsApp|Instagram|534423513/);
   // the session was NOT selected
   expect(await page.evaluate('S.selSession')).toBeNull();
 
-  // dialog dismisses cleanly
-  await modal.locator('button', { hasText: 'Got it' }).click();
+  // the × still dismisses it
+  await modal.locator('.chrome-xt').click();
   await expect(modal).toBeHidden();
+});
+
+// Apply takes the signed-in rider to the community application's second step on the website: a
+// one-time code (customer_handoff_create) signs them in there, so the account step is skipped.
+const FORM = 'https://micromobility.sa/community/registration';
+async function formStub(page: import('@playwright/test').Page) {
+  await page.route(FORM + '**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>form</title>' }));
+}
+test('Apply hands the signed-in rider to the application form with a one-time code', async ({ page }) => {
+  const code = 'c0de'.repeat(12);
+  await stubSupabase(page, { ...fixtures, 'rpc:customer_handoff_create': code });
+  const asked: unknown[] = [];
+  page.on('request', (r) => { if (/rpc\/customer_handoff_create/.test(r.url())) asked.push(r.postDataJSON()); });
+  await formStub(page);
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate('goLanding()');
+  await page.locator('#land-events .landing-event-card.community').click();
+  await page.locator('#confirm-modal .cm-apply').click();
+  await page.waitForURL(FORM + '**');
+  expect(page.url()).toBe(`${FORM}?lang=en&code=${code}`);
+  expect(asked).toEqual([{ p_id: 'c1', p_token: 'tok-spec' }]);
+});
+
+test('without a code (a database from before it), Apply opens the form at its first step', async ({ page }) => {
+  await stubSupabase(page, { ...fixtures, 'rpc:customer_handoff_create': null });
+  await formStub(page);
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+  await page.addInitScript(() => localStorage.setItem('cq_lang', 'ar'));
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate('goLanding()');
+  await page.locator('#land-events .landing-event-card.community').click();
+  await page.locator('#confirm-modal .cm-apply').click();
+  await page.waitForURL(FORM + '**');
+  expect(page.url()).toBe(`${FORM}?lang=ar`);
+});
+
+// The form's "Already have an account? Sign in" comes here with ?handoff=community: once signed in,
+// the rider goes back to the form's second step.
+test('?handoff=community sends a signed-in rider back to the form, signed in there', async ({ page }) => {
+  const code = 'ab12'.repeat(12);
+  await stubSupabase(page, { ...fixtures, 'rpc:customer_handoff_create': code });
+  await formStub(page);
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+  await page.goto('/?handoff=community&lang=en');
+  await page.waitForURL(FORM + '**');
+  expect(page.url()).toBe(`${FORM}?lang=en&code=${code}`);
 });
 
 test('non-member clicking the landing Saturday event card gets the dialog and stays on landing', async ({ page }) => {

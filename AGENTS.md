@@ -237,6 +237,26 @@ writes (the reports, the receipt) runs under the same policy: its look lives in 
 `0` (clean-css): write `background:transparent none` and `outline:medium none`. A refused style on
 a real screen lands in error_log as `CSP style-src-attr: <the style> at <element> in #<host>`.
 
+## Google and Apple sign accounts in; they no longer make them (2026-09-30)
+
+The owner: "remove the apple sign up and google sign up ... only keep them in the sign in page". Create
+account has no Google or Apple button, and `customer_oauth_signup` is not callable by visitors
+(migration 20260930160000). A Google or Apple sign-in that finds no account lands on Create account
+with the provider's name and email (never a hidden Apple address) and says why (`_oauthNoAccount`,
+`S._oauthMiss`). Every account without a password (`password_hash` 'oauth:google' / 'oauth:apple') is
+asked for one by the check-up (`_customer_asks`), which opens at sign-in and at the next event pick
+(`_commAskCheck`, `_fixGate`), and `customer_create_booking` refuses its bookings until it is saved.
+A password chosen there is the owner's (`customer_owner_pwd`): `customer_oauth_login` keeps it; a
+password account that signs in with Google for the first time still has its password ended.
+
+The community application (micromobility.sa/community/registration, mm-platform forms/community) makes
+the account first with the same sign-up, then sends the community questions from it
+(`customer_community_apply`). The members-only popup's one button, "Apply for MicroMobility's
+Community Membership" (`_commApply`), and the form's "Sign in" (`?handoff=community`) hand a signed-in
+rider to its second step with a one-time code (`customer_handoff_create`). No application reply
+(approve, reject, invite, changes) carries account details; a temporary password goes only in the
+password message (`CA_TP_MSG`: the password, where to sign in, and that it is changed at once).
+
 ## The "i" beside a bike type (2026-09-27)
 
 Every real bike type on the booking form and the account page carries an "i" beside its pill

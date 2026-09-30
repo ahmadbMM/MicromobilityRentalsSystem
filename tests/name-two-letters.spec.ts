@@ -52,16 +52,16 @@ test('sign-up: the server refusing a short name reads as the same message', asyn
   await expect(page.locator('#auth-err')).toContainText(SHORT);
 });
 
-test('Google or Apple: an initial from the provider has to be written out before the account is made', async ({ page }) => {
+test('Google or Apple with no account: an initial from the provider has to be written out before the account is made', async ({ page }) => {
   const calls: unknown[] = [];
   await stubSupabase(page, {});
-  await page.route(/\/rest\/v1\/rpc\/customer_oauth_signup/, async r => { calls.push(1); await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '[]' }); });
+  await page.route(/\/rest\/v1\/rpc\/customer_signup/, async r => { calls.push(1); await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '[]' }); });
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`S._pendingGoogle={email:'j@x.com',name:'J Smith'};openGoogleComplete()`);
+  await page.evaluate(`openAuthModal();S._pendingGoogle={email:'j@x.com',name:'J Smith'};_oauthNoAccount()`);
   await expect(page.locator('#a-first')).toHaveValue('J');
   await page.evaluate('setSignupGender("male")');
-  await page.evaluate('doCompleteGoogle()');
+  await page.evaluate('S.signupAck=true;doSignup()');
   await expect(page.locator('#auth-err')).toContainText(SHORT);
   expect(calls).toHaveLength(0);
 });

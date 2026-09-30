@@ -463,6 +463,8 @@
     .auth-or::before{left:0;}.auth-or::after{right:0;}
     .auth-submit{width:100%;margin-top:6px;}
     .auth-err{font-size:13px;color:var(--red);font-weight:700;margin-bottom:10px;min-height:18px;text-align:center;}
+    .auth-note{font-size:13.5px;font-weight:600;line-height:1.5;color:var(--text);background:var(--s3);border-left:3px solid var(--green);border-radius:4px;padding:10px 12px;margin:0 0 14px;}
+    :is(html[lang="ar"],html[lang="ur"]) .auth-note{border-left:0;border-right:3px solid var(--green);}
     .auth-cc-row{display:flex;gap:8px;}
     .auth-cc-row select{background:var(--in-bg);border:1px solid var(--border);border-radius:3px;padding:11px 10px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;outline:none;width:110px;flex-shrink:0;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;}
     .auth-cc-row input{flex:1;background:var(--in-bg);border:1px solid var(--border);border-radius:3px;padding:11px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:500;outline:none;transition:border-color .2s;}
@@ -6581,8 +6583,6 @@ html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
 #confirm-modal .cmy-cm-lock{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(74,168,248,.12);border:1px solid rgba(74,168,248,.4);color:#4aa8f8;flex-shrink:0;}
 #confirm-modal .cmy-minw0{min-width:0;}
 #confirm-modal .cmy-cm-msg{font-size:14px;color:var(--muted-l);font-weight:700;line-height:1.6;margin-bottom:20px;padding:10px 14px;background:var(--s3);border-radius:4px;}
-#confirm-modal .cmy-cm-wa{display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:#25d366;}
-#confirm-modal .cmy-cm-ig{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
 #confirm-modal .cmy-rej-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px;}
 #confirm-modal .cmy-rej-msg{font-size:14px;font-weight:600;line-height:1.65;color:var(--text);}
 #confirm-modal .cmy-rej-next{font-size:14px;font-weight:800;line-height:1.65;margin-top:10px;}

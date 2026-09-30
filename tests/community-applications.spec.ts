@@ -99,6 +99,13 @@ test('every question has its line, an empty answer reading Not answered', async 
   await expect(row(page, 'a2').locator('.ca-kv-none b').first()).toHaveText('لم تتم الإجابة');
 });
 
+// Since 2026-09-30 the form makes the applicant's account first and the application carries it
+// (customer_id): the card names that account, whatever its email or mobile is now.
+test('an application sent from an account names that account', async ({ page }) => {
+  await applicationsTab(page, { community_applications: [{ ...apps[0], customer_id: 'c1', email: 'karim.new@gmail.com', phone: '+966559990000' }, ...apps.slice(1)] });
+  await expect(row(page, 'a1').locator('.ca-acct')).toContainText('Already has an account: Huda Al Saleh');
+});
+
 test('before the database has heard_from, the list loads without it', async ({ page }) => {
   const asked: string[] = [];
   await applicationsTab(page, {}, () => page.route(/\/rest\/v1\/community_applications\?/, async (r) => {
@@ -112,7 +119,10 @@ test('before the database has heard_from, the list loads without it', async ({ p
   expect(asked.some((x) => !x.includes('heard_from'))).toBe(true);
 });
 
-test('Approve makes the account and shows the welcome message with the temporary password once', async ({ page }) => {
+// No application reply carries account details (the owner, 2026-09-30): the welcome is the welcome.
+// An application from before the form made accounts gets one made by its approval; its temporary
+// password is shown once, and goes to the rider in the password message.
+test('Approve (an application from before the form made accounts): a welcome without account details, the password in its own message', async ({ page }) => {
   await applicationsTab(page, {
     'rpc:staff_community_approve': { ok: true, existing: false, customer_id: 'ca01', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', password: 'Kp7wXr4Mnq', lang: 'en', oauth: false },
   });
@@ -129,14 +139,10 @@ test('Approve makes the account and shows the welcome message with the temporary
   await expect(dlg).toBeVisible();
   await expect(dlg.locator('.ca-pwd')).toHaveText('Kp7wXr4Mnq');
   const msg = await dlg.locator('#ca-msg-text').inputValue();
-  expect(msg).toContain('Hi Karim,');
-  expect(msg).toContain('Welcome to the Micromobility community!');
-  expect(msg).toContain('https://micromobilityrentals.pages.dev');
-  expect(msg).toContain('Email: karim.mansour@gmail.com');
-  expect(msg).toContain('Mobile: 0552468013');
-  expect(msg).toContain('Temporary password: Kp7wXr4Mnq');
-  expect(msg).toContain('either your email or your mobile number');
-  expect(msg).toContain('choose your own password');
+  expect(msg).toBe(['Hi Karim,', '', 'Welcome to the Micromobility community! 🚴', '',
+    'We’re delighted to let you know that your membership application has been approved. You’re now part of a community of riders who love riding together, and we can’t wait to ride with you.', '',
+    'You can now book our community rides, which are open to members only.', '', 'See you on the road!', 'The Micromobility team'].join('\n'));
+  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'sign in', 'Google', 'Apple']) expect(msg).not.toContain(none);
   const wa = await dlg.locator('a.ca-wa').getAttribute('href');
   expect(wa).toMatch(/^https:\/\/wa\.me\/966552468013\?text=/);
   expect(decodeURIComponent(wa!.split('text=')[1])).toBe(msg);
@@ -144,9 +150,17 @@ test('Approve makes the account and shows the welcome message with the temporary
   // The message follows the rider's language; staff can switch it
   await dlg.locator('#ca-msg-lang').selectOption('ar');
   const ar = await dlg.locator('#ca-msg-text').inputValue();
-  expect(ar).toContain('Kp7wXr4Mnq');
-  expect(ar).not.toContain('Welcome to the Micromobility community');
+  expect(ar).toContain('يمكنك الآن حجز جولات المجتمع');
+  expect(ar).not.toContain('Kp7wXr4Mnq');
   await expect(dlg.locator('#ca-msg-text')).toHaveAttribute('dir', 'rtl');
+
+  // The password message: the password, where to sign in, and that it is changed at once.
+  await dlg.locator('#ca-msg-lang').selectOption('en');
+  await dlg.locator('.ca-tp-go').click();
+  const pw = await dlg.locator('#ca-msg-text').inputValue();
+  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your Micromobility account:', 'Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
+    'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The Micromobility team'].join('\n'));
+  await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
 
   await dlg.locator('.ca-x').click();
   await page.locator('.filter-pill[data-ca-filter="approved"]').click();
@@ -154,7 +168,7 @@ test('Approve makes the account and shows the welcome message with the temporary
   await expect(row(page, 'a1').locator('.ca-newpwd')).toBeVisible();
 });
 
-test('An applicant who already has an account is told to sign in with it, and gets no password', async ({ page }) => {
+test('An applicant with an account gets the welcome, with no account details and no password', async ({ page }) => {
   await applicationsTab(page, {
     'rpc:staff_community_approve': { ok: true, existing: true, customer_id: 'c1', name: 'Huda Al Saleh', email: 'huda.saleh@gmail.com', phone: '+966551239876', password: null, lang: 'ar', oauth: false },
   });
@@ -165,13 +179,13 @@ test('An applicant who already has an account is told to sign in with it, and ge
   await expect(dlg).toBeVisible();
   await expect(dlg.locator('.ca-pwd')).toHaveCount(0);
   await expect(dlg.locator('#ca-msg-lang')).toHaveValue('ar'); // the language the rider applied in
+  await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
   await dlg.locator('#ca-msg-lang').selectOption('en');
   const msg = await dlg.locator('#ca-msg-text').inputValue();
-  expect(msg).toContain('You already have an account with us');
-  expect(msg).toContain('Email: huda.saleh@gmail.com');
-  expect(msg).toContain('Mobile: 0551239876');
-  expect(msg).toContain('Forgot password?');
-  expect(msg).not.toContain('Temporary password');
+  expect(msg).toContain('Hi Huda,');
+  expect(msg).toContain('your membership application has been approved');
+  expect(msg).toContain('You can now book our community rides');
+  for (const none of ['huda.saleh@gmail.com', '0551239876', 'micromobilityrentals.pages.dev', 'password', 'Forgot', 'sign in', 'Google']) expect(msg).not.toContain(none);
 });
 
 // Approving can also give more tags and put the rider on the Final list of a Saturday Social Ride
@@ -625,8 +639,9 @@ test('an invited application reads Invited and writes its invitation again; a ne
   await page.locator('#confirm-modal .btn-primary').click();
   await expect(msgBox.locator('.ca-pwd')).toHaveText('Nw4pQx8Lrt');
   const again = await msgBox.locator('#ca-msg-text').inputValue();
-  expect(again).toContain('We’ve set a temporary password for your Micromobility account');
-  expect(again).toContain('Temporary password: Nw4pQx8Lrt');
+  expect(again).toContain('We’ve set a temporary password for your Micromobility account:\nNw4pQx8Lrt');
+  expect(again).toContain('As soon as you sign in with it, you’ll be asked to change it to a password of your own.');
+  for (const none of ['sami.haddad@gmail.com', '0557771122']) expect(again).not.toContain(none);
   expect(again).not.toContain('invited');
   await msgBox.locator('.ca-x').click();
   // its invitation again carries only the ride
