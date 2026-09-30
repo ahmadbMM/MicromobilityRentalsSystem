@@ -2024,6 +2024,8 @@
   "errPasswordMatch": "Hindi magkatugma ang mga password.",
   "errEmailExists": "May account na sa email na ito.",
   "errPhoneExists": "May account na sa numero ng teleponong ito.",
+  "cfPhSharedThis": "Nasa mga account din na ito: {0}. Ang pag-sign in gamit ang numerong ito ay nagbubukas ng account na ito.",
+  "cfPhSharedOther": "Nasa mga account din na ito: {0}. Ang pag-sign in gamit ang numerong ito ay nagbubukas ng account ni {1}; ang account na ito ay nagsa-sign in gamit ang email nito.",
   "errConnection": "Error sa koneksyon. Suriin ang iyong network.",
   "errSomethingWrong": "May nangyaring mali - naitala ito.",
   "errQNumTaken": "Ginagamit na ang numerong iyon ng ibang booking.",

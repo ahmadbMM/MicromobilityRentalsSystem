@@ -23,7 +23,10 @@ const NOT_YET_IN_DB = new Set(['staff_delete_customer', 'customer_set_height', '
   'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike',
   // The undo codes of 20260928234500: without them an admin's undo goes through as it used to;
   // tests/undo-codes.spec.ts stubs them by name.
-  'staff_undo_code_state', 'staff_set_undo_code', 'staff_check_undo_code']);
+  'staff_undo_code_state', 'staff_set_undo_code', 'staff_check_undo_code',
+  // One number on several accounts (20260930180000): without it the account editor refuses a
+  // number another account has, as it used to; tests/shared-phone.spec.ts stubs it by name.
+  'staff_phone_accounts']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

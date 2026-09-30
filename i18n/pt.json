@@ -2024,6 +2024,8 @@
   "errPasswordMatch": "As senhas não coincidem.",
   "errEmailExists": "Já existe uma conta com este e-mail.",
   "errPhoneExists": "Já existe uma conta com este número de telefone.",
+  "cfPhSharedThis": "Também em: {0}. Entrar com este número abre esta conta.",
+  "cfPhSharedOther": "Também em: {0}. Entrar com este número abre a conta de {1}; esta conta entra com o seu e-mail.",
   "errConnection": "Erro de conexão. Verifique sua rede.",
   "errSomethingWrong": "Algo deu errado - foi registrado.",
   "errQNumTaken": "Esse número já está em outra reserva.",

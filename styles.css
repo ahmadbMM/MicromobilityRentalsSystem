@@ -6374,6 +6374,9 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-actions .ca-ic:hover{background:rgba(var(--green-rgb),.22)}
 .cf-pwd-temp{margin-top:6px;font-size:12px;font-weight:700;line-height:1.45;color:rgb(var(--warn-rgb))}
 .cf-pwd-temp[hidden]{display:none}
+/* A number on other accounts too: which one it signs in (_cfPhHtml) */
+.cf-ph-share{margin-top:6px;font-size:12px;font-weight:600;line-height:1.45;color:var(--muted)}
+.cf-ph-share:empty{display:none}
 .ca-msg-box{max-width:560px;width:100%}
 .ca-msg-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ca-x{background:none;border:none;color:var(--muted);cursor:pointer;font-size:24px;line-height:1;padding:0 4px}

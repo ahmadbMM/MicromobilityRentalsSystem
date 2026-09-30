@@ -919,6 +919,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errPasswordMatch:'Passwords do not match.',
   errEmailExists:'An account with this email already exists.',
   errPhoneExists:'An account with this phone number already exists.',
+  cfPhSharedThis:'Also on: {0}. Signing in with this number opens this account.',
+  cfPhSharedOther:'Also on: {0}. Signing in with this number opens {1}’s account; this account signs in with its email.',
   errConnection:'Connection error. Check your network.',errSomethingWrong:'Something went wrong - it was logged.',errQNumTaken:'That number is already taken by another booking.',
   errLoginFirst:'Please sign in first.',
   errSelectSession:'Please select a session above.',
@@ -1389,6 +1391,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errPasswordMatch:'كلمتا المرور غير متطابقتين.',
   errEmailExists:'يوجد حساب بهذا البريد الإلكتروني مسبقاً.',
   errPhoneExists:'يوجد حساب بهذا الرقم مسبقاً.',
+  cfPhSharedThis:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح هذا الحساب.',
+  cfPhSharedOther:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح حساب {1}، وهذا الحساب يسجّل الدخول ببريده الإلكتروني.',
   errConnection:'خطأ في الاتصال. تحقق من شبكتك.',errSomethingWrong:'حدث خطأ ما - تم تسجيله.',errQNumTaken:'هذا الرقم مستخدم بالفعل لحجز آخر.',
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
@@ -15860,6 +15864,46 @@ async function _cfSlReset(){
     d.sl={fails:0,locked_until:null};_cfSlPaint(d);
   }finally{S._slBusy=false;}
 }
+// One number on several accounts (the owner, 2026-09-30: "make the staff able to add the phone
+// number on more than one account", "but only let the main account or first account that has it
+// to be able to sign with it"). Staff may save a number another account has; the account that had
+// it first keeps signing in with it, the others with their email (customer_login, 20260930180000).
+// Under the field the editor says so, from staff_phone_accounts: which accounts hold the number
+// and which one it signs in. A database without that function refuses the number as before.
+function _cfPhFull(){
+  const raw=String((document.getElementById('cf-phone')||{}).value||'').replace(/\D/g,'');
+  return raw?_normPhone(raw,(document.getElementById('cf-cc')||{}).value||'+966'):'';
+}
+function _cfPhHtml(d){
+  const rows=d&&d.ph&&d.ph.rows,others=(rows||[]).filter(r=>String(r.id)!==String(d.id));
+  if(!others.length)return'';
+  const main=rows.find(r=>r.signs_in),names=others.map(r=>esc(r.name||'')).join(', ');
+  return main&&String(main.id)===String(d.id)?esc(t('cfPhSharedThis')).replace('{0}',names)
+    :esc(t('cfPhSharedOther')).replace('{0}',names).replace('{1}',esc((main||others[0]).name||''));
+}
+function _cfPhPaint(d){const el=document.getElementById('cf-ph-share');if(el&&S._cf===d)el.innerHTML=_cfPhHtml(d);}
+function _cfPhCheck(){
+  const d=S._cf;if(!d)return;
+  _debRender('cfph',()=>{
+    if(S._cf!==d)return;
+    const full=_cfPhFull(),dg=full.replace(/\D/g,'');
+    // Only a number some other account on this device holds is asked about
+    const shared=!!dg&&(S.customers||[]).some(c=>c&&!c.merged_into&&String(c.id)!==String(d.id)&&String(c.phone||'').replace(/\D/g,'')===dg);
+    if(!shared||!sb){d.ph=null;_cfPhPaint(d);return;}
+    if(d.ph&&d.ph.phone===full)return;
+    d.ph={phone:full,rows:null};
+    sb.rpc('staff_phone_accounts',{p_phone:full}).then(({data,error})=>{
+      if(S._cf!==d||!d.ph||d.ph.phone!==full)return;
+      d.ph=error?{phone:full,rows:null,gone:_slGone(error)}:{phone:full,rows:Array.isArray(data)?data:[]};
+      _cfPhPaint(d);
+    },()=>{});
+  },d.ph===undefined?0:250);
+}
+// May this number go on this account though another has it? Only once the database says who
+// signs in with it; without staff_phone_accounts it may not, as before.
+async function _cfPhShareOk(full){
+  try{const{error}=await sb.rpc('staff_phone_accounts',{p_phone:full});return !(error&&_slGone(error));}catch(e){return true;}
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderCustFormModal_1(event,el){if(event.target===el)closeCustFormModal()}
 function _on_renderCustFormModal_2(event,el){S._cf&&(S._cf.city=el.value)}
@@ -15884,7 +15928,8 @@ function renderCustFormModal(){
       </div>
       <div class="form-group cmy-mt8"><label for="cf-email">${t('emailAddr')}</label>${isCreate?`<input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">`:`<div class="si-field"><input id="cf-email" type="email" value="${esc(d.email)}" autocomplete="off">${(_siEnsure(),_siSlot(d.id))}</div>${_cfAppleLine(d.id)}`}</div>
       <div class="form-group cmy-mt8"><label for="cf-phone">${t('phoneNum')}</label>
-        <div class="cmy-flex6"><select id="cf-cc" class="cmy-w92">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" class="cmy-f1" autocomplete="off"></div></div>
+        <div class="cmy-flex6"><select id="cf-cc" class="cmy-w92" data-on-change="${_on("_cfPhCheck")}">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" class="cmy-f1" autocomplete="off" data-on-input="${_on("_cfPhCheck")}"></div>
+        <div id="cf-ph-share" class="cf-ph-share" role="status">${_cfPhHtml(d)}</div></div>
       <div class="cmy-cf-row8">
         <div class="form-group cmy-f1"><label for="cf-pwd">${t('authPassword')}${isCreate?'':` <span class="label-hint">(${t('naPwdKeepHint')})</span>`}</label><div class="cmy-flex6"><input id="cf-pwd" class="cmy-f1" type="text" data-on-input="${_on("_cfPwdTyped",_P("value"))}" value="${esc(d.pwd)}" placeholder="${isCreate?esc(t('authPasswordHint')):esc(t('naPwdKeepHint'))}" autocomplete="off">${isCreate?'':`<button type="button" class="btn-secondary btn-sm cf-pwd-gen" data-on-click="${_on("_cfPwdGen")}" title="${esc(t('pwdGenHint'))}">${t('pwdGenBtn')}</button>`}</div>
           ${isCreate?'':`<div id="cf-pwd-temp" class="cf-pwd-temp"${d.tempPwd&&d.tempPwd===d.pwd?'':' hidden'}>${t('pwdGenHint')}</div>`}</div>
@@ -15924,6 +15969,7 @@ function renderCustFormModal(){
   // refuses a style attribute), so the Default payment select's el.style.display flip shows them.
   if(d.defpay!=='house'){const _r=document.getElementById('cf-defpay-types');if(_r)_r.style.display='none';}
   if(!isCreate)_cfSlLoad(d);
+  if(d.ph===undefined)_cfPhCheck();
 }
 // ── Delete a customer account ────────────────────────────────────────────────
 // What goes: the login and everything personal attached to it — the customers row, tags,
@@ -16041,7 +16087,7 @@ async function saveCustForm(){
     try{
       try{
         const{data:exE}=await sb.rpc('customer_exists',{p_email:email,p_phone:''});if(exE===true){toast(t('errEmailExists'),'error');return;}
-        const{data:exP}=await sb.rpc('customer_exists',{p_email:'',p_phone:fullPhone});if(exP===true){toast(t('errPhoneExists'),'error');return;}
+        const{data:exP}=await sb.rpc('customer_exists',{p_email:'',p_phone:fullPhone});if(exP===true&&!(await _cfPhShareOk(fullPhone))){toast(t('errPhoneExists'),'error');return;}
       }catch(e){}
       const newId=uid();
       const{error}=await sb.rpc('customer_signup',{p_id:newId,p_name:name,p_email:email,p_phone:fullPhone,p_pwd:pwd,p_height:height,p_type_preference:type,p_gender:d.gender,p_heard_from:'desk'});
@@ -16061,7 +16107,7 @@ async function saveCustForm(){
       // phones (family members, walk-in-created rows), and an unchanged phone/email must
       // never block saving unrelated edits like bike type or the payment option.
       if(email&&email!==(d.origEmail||'')){const{data:dup}=await sb.from('customers').select('id').eq('email',email).neq('id',d.id).limit(1);if(dup&&dup.length){toast(t('errEmailExists'),'error');return;}}
-      if(fullPhone&&fullPhone!==(d.origPhone||'')){const{data:dup}=await sb.from('customers').select('id').eq('phone',fullPhone).neq('id',d.id).limit(1);if(dup&&dup.length){toast(t('errPhoneExists'),'error');return;}}
+      if(fullPhone&&fullPhone!==(d.origPhone||'')){const{data:dup}=await sb.from('customers').select('id').eq('phone',fullPhone).neq('id',d.id).limit(1);if(dup&&dup.length&&!(await _cfPhShareOk(fullPhone))){toast(t('errPhoneExists'),'error');return;}}
       // Optional password change: only if staff typed one. Validated then set SERVER-SIDE (bcrypt) via
       // the is_staff()-guarded RPC, which also rotates the session token so old logins are invalidated.
       const newPwd=val('cf-pwd');
@@ -18286,7 +18332,7 @@ function _accessSet(row,uid){
 // var and functions: the client is wrapped at boot, before this part of the script has run.
 var _roAllowN=0,_roToastAt=0;
 function _roOkTable(tbl){return tbl==='staff_actions'||tbl==='error_log';}
-function _roOkRpc(fn){return ['customer_profile','customer_exists','staff_resolve_bike','staff_sync','staff_email_for_phone','staff_inventory_costs','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed','staff_sign_in_methods','staff_sign_in_lock'].indexOf(fn)>=0;}
+function _roOkRpc(fn){return ['customer_profile','customer_exists','staff_phone_accounts','staff_resolve_bike','staff_sync','staff_email_for_phone','staff_inventory_costs','staff_ambassador_stats','promo_lookup','my_bookings','list_sessions','customer_token_ok','customer_pwd_state','customer_consents','customer_addon_stock','community_member','customer_fix_fields','staff_team_list','staff_operator_list','staff_check_operator_pin','staff_mark_pwd_changed','staff_sign_in_methods','staff_sign_in_lock'].indexOf(fn)>=0;}
 function _roNow(){try{return !_roAllowN&&S.view==='staff'&&!_editOk(S.staffTab);}catch(_){return false;}}
 // Builds one call the guard lets through (queued work sent from elsewhere, the page's own
 // housekeeping). The guard looks at the moment a write is built, so only that moment is exempt:

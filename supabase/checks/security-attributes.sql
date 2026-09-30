@@ -191,7 +191,10 @@ with expected(fname, want_definer, note) as (values
   -- Staff reset an account's sign-in wait (20260930110000)
   ('_sign_in_lock_rows',     true,  'reads login_throttle (RLS on, no policy) and audit_log; internal only'),
   ('staff_sign_in_lock',     true,  'one account''s failed tries and lock; checks is_staff() itself'),
-  ('staff_clear_sign_in_lock', true, 'deletes one account''s login_throttle rows; is_staff()-gated')
+  ('staff_clear_sign_in_lock', true, 'deletes one account''s login_throttle rows; is_staff()-gated'),
+  -- One number on several accounts, the first holder signs in with it (20260930180000)
+  ('_phone_main',            true,  'reads every account on a number; internal only (customer_login, staff_phone_accounts)'),
+  ('staff_phone_accounts',   true,  'the accounts on a number and which signs in; checks is_staff() itself')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
