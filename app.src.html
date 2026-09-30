@@ -10537,7 +10537,9 @@ function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key==
 // The MicroMobility logo in the booking card's top corner (the owner, 2026-09-30: "make the booking
 // card include micromobility's logo in the top corner"): the start corner, away from the QR code the
 // My Bookings card keeps at its end. Both colourings are drawn; styles.css shows the one that reads on
-// the card (white lettering on a dark card, dark on a light one).
+// the card (white lettering on a dark card, dark on a light one). On the My Bookings card it heads the
+// number's column, in the flow, so it never lies over the label (it did on a past or waitlist card,
+// which has no code to push the column down; the owner, same day).
 function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.png" alt="" decoding="async"><img class="tk-logo-d" src="/logo.png" alt="" decoding="async"></span>`;}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
@@ -10661,9 +10663,9 @@ function renderBookingTicket(entries,opts){
   const _mod=_rideKind(sess)==='snd96'?'':past?' tk-past':_allWl?' tk-wl':_held?' tk-live'+(_today?' tk-today':''):'';
   const _dw=!past?_dayWord(primary.sessionDate):'';
   return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}">
-    ${_tkLogo()}
     <div class="ticket-header">
       <div class="ticket-num-block">
+        ${_tkLogo()}
         ${_noNum?'':_allWl
           ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${primary.waitlistNum?` \u00b7 ${esc(t('wlLinePos').replace('{0}',primary.waitlistNum))}`:''}</div>`
           :`<div class="ticket-num-label">${n>1?esc(_nBikes(n)):t('queueNumLabel')}</div>`}

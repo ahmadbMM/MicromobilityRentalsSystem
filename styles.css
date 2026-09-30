@@ -7735,7 +7735,13 @@ body:not(.view-staff) .reg-side{display:none;}
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
    The QR code sits at the end on the My Bookings card, so the start corner is the free one. The
    dark-lettered logo on a light card, the white-lettered one on a dark card. */
-.ticket-card .tk-logo{position:absolute;top:14px;inset-inline-start:16px;z-index:1;line-height:0;pointer-events:none;}
+.ticket-card>.tk-logo{position:absolute;top:14px;inset-inline-start:16px;z-index:1;line-height:0;pointer-events:none;}
+/* My Bookings: the logo heads the number's column, in the flow, and the header starts at the top. */
+.ticket-num-block>.tk-logo{display:block;line-height:0;margin-bottom:10px;}
+/* The card after booking centres its top line: it starts below the logo, so a long one (the waitlist's)
+   never runs under it. A "Bike 2 / 2" label above it is short and sits beside the logo. */
+.ticket-card>.tk-logo+.ticket-top{padding-top:68px;}
+.ticket-header:has(>.ticket-num-block>.tk-logo){align-items:flex-start;}
 .ticket-card .tk-logo img{height:44px;width:auto;}
 .ticket-card .tk-logo-d{display:none;}
 :is(.ticket-card.tk-live,.ticket-card.ev-snd96,html[data-theme="dark"] body.view-staff .ticket-card) .tk-logo-l{display:none;}
