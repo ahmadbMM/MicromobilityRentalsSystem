@@ -3074,7 +3074,6 @@
   "bikesN": "{0} bicis",
   "custOnHouse": "Cortesía",
   "payDueLabel": "Pago en el puesto",
-  "landNextRide": "Próxima: {0}",
   "cancelPartyNote": "Esto cancela la reserva de los {0} ciclistas.",
   "keepBookingBtn": "Mantener reserva",
   "cancelAllBtn": "Cancelar para los {0}",
@@ -3109,5 +3108,6 @@
   "lfxThanksSub": "Tu inscripción está actualizada. Nos pondremos en contacto pronto.",
   "lfxGoneSub": "Puede que tu inscripción ya esté cerrada, o que te hayamos enviado un enlace más reciente. Si necesitas ayuda, escríbenos por WhatsApp.",
   "lfxErrHeight": "Introduce tu altura en cm, entre 80 y 250.",
-  "laMsgFix": "Envía esto a la persona inscrita. El enlace solo pide lo que elegiste; deja de funcionar si vuelves a pedirlo, o cuando la inscripción se termina o se cancela."
+  "laMsgFix": "Envía esto a la persona inscrita. El enlace solo pide lo que elegiste; deja de funcionar si vuelves a pedirlo, o cuando la inscripción se termina o se cancela.",
+  "landJccMeta": "Dom. y mar. · 21:00-23:00"
 }

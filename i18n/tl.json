@@ -3074,7 +3074,6 @@
   "bikesN": "{0} bisikleta",
   "custOnHouse": "Libre",
   "payDueLabel": "Bayaran sa booth",
-  "landNextRide": "Susunod: {0}",
   "cancelPartyNote": "Kakanselahin nito ang booking ng lahat ng {0} rider.",
   "keepBookingBtn": "Panatilihin ang booking",
   "cancelAllBtn": "Kanselahin para sa lahat ng {0}",
@@ -3109,5 +3108,6 @@
   "lfxThanksSub": "Na-update na ang iyong sign-up. Makikipag-ugnayan kami sa lalong madaling panahon.",
   "lfxGoneSub": "Maaaring sarado na ang iyong sign-up, o nagpadala kami ng mas bagong link. Kung kailangan mo ng tulong, mag-message sa amin sa WhatsApp.",
   "lfxErrHeight": "Ilagay ang iyong taas sa cm, mula 80 hanggang 250.",
-  "laMsgFix": "Ipadala ito sa taong nag-sign up. Ang link ay humihingi lang ng pinili mo; titigil itong gumana kapag humingi ka ulit, o kapag tapos na o kinansela ang sign-up."
+  "laMsgFix": "Ipadala ito sa taong nag-sign up. Ang link ay humihingi lang ng pinili mo; titigil itong gumana kapag humingi ka ulit, o kapag tapos na o kinansela ang sign-up.",
+  "landJccMeta": "Linggo at Martes · 9-11 ng gabi"
 }

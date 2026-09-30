@@ -311,6 +311,7 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         await open(page, { lang });
         await page.waitForSelector('#land-events .landing-event-card');
         await shot(page, `${P}-landing`);
+        await shot(page, `${P}-landing-cards`, { el: page.locator('#land-events .landing-events-grid') }); // the event tiles alone
       });
 
       test(`wizard sessions ${lang}`, async ({ page }) => {

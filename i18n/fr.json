@@ -3074,7 +3074,6 @@
   "bikesN": "{0} vélos",
   "custOnHouse": "Offert",
   "payDueLabel": "À payer au stand",
-  "landNextRide": "Prochaine : {0}",
   "cancelPartyNote": "Cela annule la réservation des {0} participants.",
   "keepBookingBtn": "Garder la réservation",
   "cancelAllBtn": "Annuler pour les {0}",
@@ -3109,5 +3108,6 @@
   "lfxThanksSub": "Votre inscription est à jour. Nous vous recontacterons bientôt.",
   "lfxGoneSub": "Votre inscription est peut-être déjà close, ou nous vous avons envoyé un lien plus récent. Besoin d’aide ? Écrivez-nous sur WhatsApp.",
   "lfxErrHeight": "Indiquez votre taille en cm, entre 80 et 250.",
-  "laMsgFix": "Envoyez ceci à la personne inscrite. Le lien ne demande que ce que vous avez choisi ; il cesse de fonctionner si vous redemandez, ou quand l’inscription est terminée ou annulée."
+  "laMsgFix": "Envoyez ceci à la personne inscrite. Le lien ne demande que ce que vous avez choisi ; il cesse de fonctionner si vous redemandez, ou quand l’inscription est terminée ou annulée.",
+  "landJccMeta": "Dim. et mar. · 21 h – 23 h"
 }

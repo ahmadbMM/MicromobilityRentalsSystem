@@ -415,6 +415,10 @@ price, payment, venue and the bike rule until after booking.
   the start (`_regPriceBox`), prices on the type pills, how it is paid and that the type is a preference
   (the post-booking Payment Info popup is gone; the National Day popup stays). Tickets name the venue
   (`_venueName`: one name, the Jeddah Corniche Circuit) and what is owed. My Bookings runs soonest first;
-  on a ride day the landing opens with that ride (`_todayCardHtml`). Tiles take their subtitle from the
-  next live ride (`_nextRideMeta`). On a wide screen the wizard's later steps sit beside a sticky summary
-  (`_regSideHtml`). Photos on tiles live in `assets/tiles/` (from the website's own library).
+  on a ride day the landing opens with that ride (`_todayCardHtml`). On a wide screen the wizard's
+  later steps sit beside a sticky summary (`_regSideHtml`).
+- **The event tiles are out of the system.** The owner, 2026-09-30: "return the event cards to how they
+  looked before this commit, no images". The tiles (`.landing-event-card`) are drawn by the older layers
+  as they were: the system's all-element rules pass them by (`:not(:where(.landing-event-card, ...))`),
+  the old token values are held on them, their subtitles are the hand-written ones, and they carry no
+  photographs.

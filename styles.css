@@ -7479,8 +7479,8 @@ body:not(.view-staff) .ticket-card.ev-snd96{
 html:has(> body:not(.view-staff)){--root-paper:#FBF9F4;background:var(--root-paper);color-scheme:only light;}
 
 /* ── One family, inherited everywhere: no motorsport face on labels, no Arial in buttons ── */
-body:not(.view-staff) *{font-family:inherit;}
-body:not(.view-staff) :is(button,input,select,textarea){font:inherit;}
+body:not(.view-staff) *:not(:where(.landing-event-card,.landing-event-card *)){font-family:inherit;}
+body:not(.view-staff) :is(button,input,select,textarea):not(:where(.landing-event-card)){font:inherit;}
 body:not(.view-staff) :is(.ticket-num,.qty-val,.sess-card-time,.price-preview-total,.cu-sum-total,.cu-tk-total-v,.mr-season-n,.cu-rv-price,.tp-price,.land-today-t,.cu-tr-num,.cu-tr-money){font-variant-numeric:tabular-nums;}
 body:not(.view-staff) ::selection{background:var(--neon);color:var(--ink);}
 body:not(.view-staff) :focus-visible{outline:2px solid var(--go);outline-offset:2px;box-shadow:none;}
@@ -7489,7 +7489,7 @@ body:not(.view-staff) :focus-visible{outline:2px solid var(--go);outline-offset:
    :is(#cu,*) matches anything but weighs as an id, so this outranks the older id-scoped rules
    (#tab-myrides .cu-tk-sec and the like) that uppercased these one screen at a time. */
 body:not(.view-staff) :is(#cu,*):is(.page-title,.form-title,.modal-title,.auth-title,label,.section-label,.analytics-section-title,
-  .landing-events-title,.lec-title,.tab-btn,.cust-bnav-btn,.status-badge,.type-badge,.toggle-btn,.btn-sm,.btn-primary,.btn-secondary,
+  .landing-events-title,.tab-btn,.cust-bnav-btn,.status-badge,.type-badge,.toggle-btn,.btn-sm,.btn-primary,.btn-secondary,
   .ticket-num-label,.ticket-label,.cu-tk-sec,.cu-tk-total-k,.cu-k10,.cu-rv-k,.cu-rv-sec,.cu-rate-k,.cu-meter-k,.cu-photo-k,
   .rides-stat-label,.sess-comm-chip,.landing-eyebrow,.cu-tk-label,.wl-loud,.cu-tr-wl,.cu-ad-cat,.reg-row-label,.cust-back-btn){
   text-transform:none;letter-spacing:0;font-style:normal;}
@@ -7544,8 +7544,8 @@ body:not(.view-staff) .type-pick:has(.toggle-btn.active) .type-info-btn{border-c
 body:not(.view-staff) .tp-price{margin-inline-start:6px;font-size:var(--fs-13);font-weight:500;opacity:.7;}
 body:not(.view-staff) .type-badge{border-radius:6px;font-weight:600;}
 /* Ride kinds wear the brand's colours, not a framework's defaults (violet-600, orange-700) */
-body:not(.view-staff) .ev-event{--ev:#8C3B6E;--ev-rgb:140,59,110;}
-body:not(.view-staff) .ev-workshop{--ev:#B4581E;--ev-rgb:180,88,30;}
+body:not(.view-staff) .ev-event:not(.landing-event-card){--ev:#8C3B6E;--ev-rgb:140,59,110;}
+body:not(.view-staff) .ev-workshop:not(.landing-event-card){--ev:#B4581E;--ev-rgb:180,88,30;}
 
 /* ── Inputs ─────────────────────────────────────────────────────────────────────────────────────── */
 body:not(.view-staff) :is(input[type="text"],input[type="tel"],input[type="number"],input[type="email"],input[type="date"],input[type="password"],select,textarea){
@@ -7668,26 +7668,14 @@ body:not(.view-staff) .land-today.wl{background:var(--card);color:var(--ink);bor
 body:not(.view-staff) .land-today.wl :is(.land-today-k,.land-today-n){color:var(--amber);}
 body:not(.view-staff) .land-today.wl .land-today-v{color:var(--ink-3);}
 body:not(.view-staff) .land-today.wl .land-today-go{border-color:var(--line-2);}
-body:not(.view-staff) .lec2 .lec-title{font-size:var(--fs-20);font-weight:700;}
-body:not(.view-staff) .lec2 .lec-meta{font-size:var(--fs-13);font-weight:500;line-height:1.5;}
-/* the paper tiles take the quiet ink; the partner and seasonal tiles keep their own colours */
-body:not(.view-staff) .lec2:not(.ev-jcc):not(.ev-snd96):not(.ev-community) .lec-meta{color:var(--ink-3);}
-
-/* A tile with a photograph: the picture on top, the card's own identity under it (the circuit
-   keeps its partner navy, the events tile the paper). Real Jeddah riding, not a blank card. */
-/* each row is as tall as its own tallest tile (1fr made every tile as tall as the tallest photo tile) */
-body:not(.view-staff) .landing-events-grid{grid-auto-rows:auto;}
-body:not(.view-staff) .landing-event-card{border-radius:var(--r-card);}
-body:not(.view-staff) .landing-event-card.ev-event{background:var(--card);border:1px solid var(--line);box-shadow:none;}
-body:not(.view-staff) .lec2.has-photo{padding:0;gap:0;overflow:hidden;}
-body:not(.view-staff) .lec2.has-photo .lec2-photo{order:-2;display:block;width:100%;aspect-ratio:16/9;overflow:hidden;background:var(--card-3);}
-body:not(.view-staff) .lec2.ev-jcc.has-photo .lec2-photo{aspect-ratio:4/3;}
-body:not(.view-staff) .lec2.has-photo .lec2-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 45%;}
-body:not(.view-staff) .lec2.has-photo .lec2-logo{order:0;height:36px;margin:16px 20px 0;}
-body:not(.view-staff) .lec2.has-photo .lec2-copy{padding:14px 20px 18px;}
-body:not(.view-staff) .lec2.has-photo:not(:has(.lec2-logo)) .lec2-copy{padding-top:16px;}
-body:not(.view-staff) .landing-event-card.ev-jcc.has-photo{background-position:right 20px bottom 14px,0 0;}
-body:not(.view-staff) .landing-event-card.ev-event.has-photo{background:var(--card);}
+/* The event tiles keep the look they had before this layer (the owner, 2026-09-30: "return the
+   event cards to how they looked before this commit, no images"). The older layers draw them; the
+   rules above that reach every element (the one family, sentence case, the ride-kind colours) pass
+   them by, and the names those layers read are held on the tiles at their earlier values. */
+body:not(.view-staff) .landing-event-card{
+  --s2:#ffffff; --s3:#f2efe8; --ac-fill:#00b467; --ac-fill-h:#00a25d;
+  --muted:#4f565c; --muted-l:#6f6d63; --border:rgba(26,25,25,.14); --line2:rgba(26,25,25,.16);
+}
 /* ── Account: the season in sentences ───────────────────────────────────────────────────────────── */
 body:not(.view-staff) .mr-season{display:grid;gap:10px;margin:18px 0 8px;padding:18px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
 body:not(.view-staff) .mr-season-rides{display:flex;align-items:baseline;gap:8px;}
