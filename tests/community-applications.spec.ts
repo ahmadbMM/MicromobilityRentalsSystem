@@ -782,3 +782,48 @@ test.describe('on a phone', () => {
     await expect(page.locator('.ca-row')).toHaveCount(2);
   });
 });
+
+// The owner, 2026-09-30: an invited rider is taken into the community (the Community tag) or
+// blacklisted (the blacklist tag), with buttons on the Invited card.
+test('Invited: Add to Community gives the Community tag; Blacklist gives the blacklist tag and takes Community off', async ({ page }) => {
+  const people = [...customers, { id: 'c2', name: 'Omar Hadi', email: 'omar.hadi@gmail.com', phone: '+966557778899', height: 180, created_at: '2026-01-05T10:00:00Z' }];
+  const inv = (id: string, name: string, cid: string) => ({ ...base, id, status: 'approved', name, email: `${cid}@example.test`, phone: '+966550000000',
+    instagram: '', linkedin: '', existing_account: true, customer_id: cid, decided_at: '2026-09-23T08:00:00Z', invited_session: SAT });
+  const dels: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'DELETE' && /\/rest\/v1\/customer_tags\?/.test(r.url())) dels.push(decodeURIComponent(r.url())); });
+  await stubSupabase(page, { sessions: [ride(SAT)], queue_entries: [], bikes: [], customers: people, tags: TAGS,
+    customer_tags: [{ customer_id: 'c2', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 }],
+    community_applications: [apps[0], inv('i1', 'Huda Al Saleh', 'c1'), inv('i2', 'Omar Hadi', 'c2')] });
+  const tagRows = writes(page, 'customer_tags');
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>1');
+  await page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  // not yet in the community: both buttons; a member already: Blacklist only
+  await expect(row(page, 'i1').locator('.ca-inv-comm')).toHaveText('Add to Community');
+  await expect(row(page, 'i1').locator('.ca-inv-ban')).toHaveText('Blacklist');
+  await expect(row(page, 'i2').locator('.ca-inv-comm')).toHaveCount(0);
+  await expect(row(page, 'i2').locator('.ca-inv-out[data-out="comm"]')).toContainText('In the community');
+  await expect(row(page, 'i1').locator('.ca-inv-out')).toHaveCount(0);
+
+  await row(page, 'i1').locator('.ca-inv-comm').click();
+  await expect(page.locator('#confirm-modal')).toContainText('Add Huda Al Saleh to the community?');
+  await page.locator('#confirm-modal .btn-primary').click();
+  await expect.poll(() => tagRows.length).toBe(1);
+  expect(tagRows[0]).toMatchObject({ customer_id: 'c1', tag_id: 'tag_saturday', added_by: 'staff' });
+  await expect(row(page, 'i1').locator('.ca-inv-out[data-out="comm"]')).toContainText('In the community');
+  await expect(row(page, 'i1').locator('.ca-inv-comm')).toHaveCount(0);
+  expect(await page.evaluate(`_hasTagNow('c1','tag_saturday')`)).toBe(true);
+
+  await row(page, 'i2').locator('.ca-inv-ban').click();
+  await expect(page.locator('#confirm-modal')).toContainText('Blacklist Omar Hadi?');
+  await page.locator('#confirm-modal .btn-red').click();
+  await expect.poll(() => tagRows.length).toBe(2);
+  expect(tagRows[1]).toMatchObject({ customer_id: 'c2', tag_id: 'tag_blacklist', added_by: 'staff' });
+  await expect.poll(() => dels.some((u) => /customer_id=eq\.c2/.test(u) && /tag_id=eq\.tag_saturday/.test(u))).toBe(true);
+  await expect(row(page, 'i2').locator('.ca-inv-out[data-out="ban"]')).toContainText('Blacklisted');
+  await expect(row(page, 'i2').locator('.ca-inv-ban, .ca-inv-comm')).toHaveCount(0);
+  expect(await page.evaluate(`_isBlacklisted('c2')&&!_hasTagNow('c2','tag_saturday')`)).toBe(true);
+});
