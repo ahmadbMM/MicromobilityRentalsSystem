@@ -766,7 +766,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   saveAccountBtn:'Save Changes',accountSaved:'Profile updated successfully.',
   statTotalRides:'Total Rides',
   statStreak:'Week Streak',statNextRide:'Next Ride',mrBookNext:'Book your next ride',mrToday:'Today!',mrTomorrow:'Tomorrow',mrInDays:'in {0} days',
-  mrBadgesTitle:'Badges',bdHowTo:'How to earn',bdEarned:'Earned',closeWord:'Close',
+  mrBadgesTitle:'Badges',bdToEarn:'Badges to earn',bdHowTo:'How to earn',bdEarned:'Earned',closeWord:'Close',
   bdFirstLap:'First Lap',bdFirstLapD:'Completed your first circuit ride',
   bdRegular:'Grid Regular',bdRegularD:'Completed 5 rides',
   bdPodium:'Podium Pace',bdPodiumD:'Completed 10 rides',
@@ -1239,7 +1239,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   saveAccountBtn:'حفظ التغييرات',accountSaved:'تم تحديث الملف الشخصي.',
   statTotalRides:'مجموع الرحلات',
   statStreak:'أسابيع متتالية',statNextRide:'الرحلة القادمة',mrBookNext:'احجز رحلتك القادمة',mrToday:'اليوم!',mrTomorrow:'غداً',mrInDays:'بعد {0} أيام',
-  mrBadgesTitle:'الأوسمة',bdHowTo:'كيف تحصل عليه',bdEarned:'حصلت عليه',closeWord:'إغلاق',
+  mrBadgesTitle:'الأوسمة',bdToEarn:'أوسمة بانتظارك',bdHowTo:'كيف تحصل عليه',bdEarned:'حصلت عليه',closeWord:'إغلاق',
   bdFirstLap:'اللفة الأولى',bdFirstLapD:'أكملت أول رحلة لك في الحلبة',
   bdRegular:'منتظم الحلبة',bdRegularD:'أكملت ٥ رحلات',
   bdPodium:'إيقاع المنصة',bdPodiumD:'أكملت ١٠ رحلات',
@@ -10980,16 +10980,27 @@ function _mrBadgeList(cust){
   const rank=x=>x.on?0:x.m?3:x.sn?2:1;
   return L.map((x,i)=>[x,i]).sort((a,z)=>rank(a[0])-rank(z[0])||a[1]-z[1]).map(a=>a[0]);
 }
+// Only the earned badges take room on the page (the owner, 2026-09-30); the ones still to earn fold
+// under a button that says how many there are and shows a few of them greyed, so the rider knows
+// they are there. Open, it stays open through repaints until the page reloads (S._bdgMore). Each
+// tile keeps its place in _mrBadgeList, which the popup reads.
 function _mrBadgesRow(cust){
-  const L=_mrBadgeList(cust),won=L.filter(x=>x.on).length;
-  return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22 mr-badges-h">${t('mrBadgesTitle')}<span class="mr-badges-n">${won}/${L.length}</span></div>
-  <div class="mr-badges">${L.map((x,i)=>{const nm=_bdgName(x.b);return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
+  const L=_mrBadgeList(cust).map((x,i)=>[x,i]),on=L.filter(a=>a[0].on),lk=L.filter(a=>!a[0].on),open=!!S._bdgMore;
+  const tiles=A=>A.map(([x,i])=>{const nm=_bdgName(x.b);return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
     ${x.on?'':`<span class="mr-badge-p">${x.p||_artIcon('lock',10)}</span>`}
     ${_bdgMedal(x.b.icon,_bdgCol(x.b))}
     <span class="mr-badge-nm">${esc(nm)}</span>
-  </button>`;}).join('')}</div></div>`;
+  </button>`;}).join('');
+  return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22 mr-badges-h">${t('mrBadgesTitle')}<span class="mr-badges-n">${on.length}/${L.length}</span></div>
+  ${on.length?`<div class="mr-badges">${tiles(on)}</div>`:''}
+  ${lk.length?`<button type="button" id="mr-badges-more" class="mr-badges-more" aria-expanded="${open}"${open?' aria-controls="mr-badges-lk"':''} data-on-click="${_on("_mrBadgesMore")}">
+    ${open?'':`<span class="mr-bm-peek">${lk.slice(0,4).map(([x])=>_bdgMedal(x.b.icon,_bdgCol(x.b))).join('')}</span>`}
+    <span class="mr-bm-t">${t('bdToEarn')}<span class="mr-bm-n">${lk.length}</span></span>
+    <span class="mr-bm-a">${open?t('attnHide')+' ▴':t('foldShow')+' ▾'}</span>
+  </button>${open?`<div class="mr-badges" id="mr-badges-lk">${tiles(lk)}</div>`:''}`:''}</div>`;
 }
 function _mrBadgesPaint(){const h=document.getElementById('mr-badges-host'),c=S.loggedIn;if(h&&c)h.outerHTML=_mrBadgesRow(c);}
+function _mrBadgesMore(){S._bdgMore=!S._bdgMore;_mrBadgesPaint();const b=document.getElementById('mr-badges-more');if(b)b.focus();}
 // Tapping a badge explains how to earn it (and shows progress on locked ones); a given one says who
 // gave it and when, with the note staff wrote. fresh: it pops up because it is new.
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
