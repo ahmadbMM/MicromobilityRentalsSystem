@@ -38,6 +38,26 @@ test('a merged account is off the lists, and the likely pairs are found by phone
   expect(g).toEqual([{ why: 'phone', ids: ['c-amal-2', 'c-amal-1'] }, { why: 'name', ids: ['c-badr-1', 'c-badr-2'] }]); // the one with more bookings first
 });
 
+// A number staff put on a family's accounts is not a duplicate (the owner, 2026-09-30: "leave them
+// out only the ones that staff put them"; riders cannot take a number in use): on one number only
+// accounts with the same first name pair, a spelling of it included.
+test('a family on one number is not a pair; the same first name on it, however spelt, still is', async ({ page }) => {
+  const FAM = '+966500000077';
+  const fam = [
+    { id: 'c-huda', name: 'Huda Al Saleh', email: 'huda@x.sa', phone: FAM, created_at: '2025-01-01T10:00:00Z', birth_date: '1985-03-03' },
+    { id: 'c-sara', name: 'Sara Al Saleh', email: 'sara@x.sa', phone: FAM, created_at: '2025-02-01T10:00:00Z', birth_date: '2014-04-04' },
+    { id: 'c-lina', name: 'Lina Al Saleh', email: 'lina@x.sa', phone: FAM, created_at: '2025-03-01T10:00:00Z', birth_date: '2016-05-05' },
+  ];
+  await boot(page, { customers: [...customers, ...fam] });
+  expect(await page.evaluate(`_dupGroups().map(g=>g.accts.map(c=>c.id).sort().join(','))`)).toEqual(['c-amal-1,c-amal-2', 'c-badr-1,c-badr-2']);
+  // Huda made again as Hoda on the same number: that pair is offered, her children are not
+  await page.evaluate(`S.customers.push({id:'c-hoda',name:'Hoda Saleh',email:'hoda@y.sa',phone:'${FAM}',created_at:'2026-05-01T10:00:00Z',birth_date:null})`);
+  expect(await page.evaluate(`_dupGroups().filter(g=>g.why==='phone').map(g=>g.accts.map(c=>c.id).sort().join(','))`)).toEqual(['c-amal-1,c-amal-2', 'c-hoda,c-huda']);
+  await page.evaluate(`setStaffTab('community');setCommTab('duplicates')`);
+  await expect(page.locator('#tab-community .filter-pill.active')).toContainText('Duplicates (3)');
+  await expect(page.locator('#tab-community .mg-group', { hasText: 'Sara Al Saleh' })).toHaveCount(0);
+});
+
 test('the tab has its own address, lists the pairs, opens the merge dialog with the keeper chosen, lets the admin keep the other, and calls the function', async ({ page }) => {
   await boot(page, { 'rpc:staff_merge_customers': { ok: true, id: 8, keep_name: 'Amal Saleh', drop_name: 'Amal Saleh' } });
   const calls = rpcs(page, 'staff_merge_customers');

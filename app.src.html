@@ -30755,6 +30755,16 @@ function _commAccounts(){
 // whose holder then signs in to the keeper. Nothing is deleted. Undo for thirty days, from the
 // topbar's Undo or the list of recent merges (customer_merges), through staff_unmerge_customers.
 function _custBookingsN(id){let n=0;getQueue().forEach(e=>{if(String(e.customerId||'')===String(id)&&e.status!=='removed')n++;});return n;}
+// A number on several accounts is one staff put there on purpose (a family's, 20260930180000;
+// riders cannot take a number in use), so the same phone alone no longer makes a pair: only
+// accounts on it with the same first name are offered (the owner, 2026-09-30: "leave them out
+// only the ones that staff put them"). The first name is compared by its consonants, so a
+// spelling of one name still pairs (Mohamed, Mohammed, Muhammad; Sara, Sarah) and Huda's number
+// on Sara's and Lina's accounts does not.
+function _dupFirst(name){
+  const w=String(name||'').trim().toLowerCase().split(/\s+/)[0]||'';
+  return w.replace(/[^\p{L}]/gu,'').replace(/[aeiouy]/g,'').replace(/(.)\1+/g,'$1').replace(/h$/,'')||w;
+}
 function _dupGroups(){
   const cs=(S.customers||[]).filter(c=>c&&!c.merged_into),out=[],seen=new Set();
   const byPhone=new Map(),byName=new Map();
@@ -30764,7 +30774,8 @@ function _dupGroups(){
     if(nk&&c.birth_date){const k=nk+'|'+c.birth_date;if(!byName.has(k))byName.set(k,[]);byName.get(k).push(c);}
   });
   const add=(list,why)=>{if(list.length<2)return;const key=list.map(c=>c.id).sort().join('|');if(seen.has(key))return;seen.add(key);out.push({key,why,accts:list.slice().sort((a,b)=>_custBookingsN(b.id)-_custBookingsN(a.id)||String(a.created_at||'').localeCompare(String(b.created_at||'')))});};
-  byPhone.forEach(l=>add(l,'phone'));byName.forEach(l=>add(l,'name'));
+  byPhone.forEach(l=>{const by=new Map();l.forEach(c=>{const k=_dupFirst(c.name);if(!by.has(k))by.set(k,[]);by.get(k).push(c);});by.forEach(g=>add(g,'phone'));});
+  byName.forEach(l=>add(l,'name'));
   return out.sort((a,b)=>b.accts.length-a.accts.length||String(a.accts[0].name||'').localeCompare(String(b.accts[0].name||'')));
 }
 function _mgAcctHtml(c,extra){
