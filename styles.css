@@ -7729,3 +7729,12 @@ body:not(.view-staff) .reg-side{display:none;}
   body:not(.view-staff) #tab-myrides .myrides-grid{display:grid;grid-template-columns:minmax(0,760px);gap:16px;}
 }
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
+
+/* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
+   The QR code sits at the end on the My Bookings card, so the start corner is the free one. The
+   dark-lettered logo on a light card, the white-lettered one on a dark card. */
+.ticket-card .tk-logo{position:absolute;top:14px;inset-inline-start:16px;z-index:1;line-height:0;pointer-events:none;}
+.ticket-card .tk-logo img{height:44px;width:auto;}
+.ticket-card .tk-logo-d{display:none;}
+:is(.ticket-card.tk-live,.ticket-card.ev-snd96,html[data-theme="dark"] body.view-staff .ticket-card) .tk-logo-l{display:none;}
+:is(.ticket-card.tk-live,.ticket-card.ev-snd96,html[data-theme="dark"] body.view-staff .ticket-card) .tk-logo-d{display:inline;}

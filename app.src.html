@@ -9420,6 +9420,7 @@ function renderRegister(){
     const _mod=_rideKind(_sess)==='snd96'?'':_wl?' tk-wl':_commT?'':' tk-live'+(String(tkt.sessionDate||'').slice(0,10)===todayStr()?' tk-today':'');
     const _owe=(!_commT&&!_wl&&!tkt.paid)?(Number(tkt.price??DEFAULT_PRICE)||0)+addonsCost(entryAddons(tkt)):0;
     return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}">
+      ${_tkLogo()}
       ${label?`<div class="cu-tk-label">${label}</div>`:''}
       ${_commT?`
       <div class="ticket-top cu-tk-top1">
@@ -10533,6 +10534,11 @@ async function submitModifyBooking(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderBookingTicket_1(event,el,a0,a1){S.lastTickets=[];S.selEvent=a0;S.selSession=a1;S.regStep=2;setCustTab('register')}
 function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();_photoZoom(el);}}
+// The MicroMobility logo in the booking card's top corner (the owner, 2026-09-30: "make the booking
+// card include micromobility's logo in the top corner"): the start corner, away from the QR code the
+// My Bookings card keeps at its end. Both colourings are drawn; styles.css shows the one that reads on
+// the card (white lettering on a dark card, dark on a light one).
+function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.png" alt="" decoding="async"><img class="tk-logo-d" src="/logo.png" alt="" decoding="async"></span>`;}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -10655,6 +10661,7 @@ function renderBookingTicket(entries,opts){
   const _mod=_rideKind(sess)==='snd96'?'':past?' tk-past':_allWl?' tk-wl':_held?' tk-live'+(_today?' tk-today':''):'';
   const _dw=!past?_dayWord(primary.sessionDate):'';
   return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}">
+    ${_tkLogo()}
     <div class="ticket-header">
       <div class="ticket-num-block">
         ${_noNum?'':_allWl
