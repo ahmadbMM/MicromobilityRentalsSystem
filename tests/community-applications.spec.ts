@@ -256,6 +256,11 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
 
   await dlg.locator('.ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box .ca-pwd')).toHaveText('Kp7wXr4Mnq'); // the welcome message still comes
+  // the welcome names the ride picked and what to do before it (the owner, 2026-09-30)
+  const welcome = await page.locator('#confirm-modal #ca-msg-text').inputValue();
+  expect(welcome).toContain('We’ve also saved you a place on this Saturday Social Ride:');
+  expect(welcome).toContain('Before the ride:\n• Your booking and its QR code are waiting in “My Bookings”.');
+  expect(welcome).toContain('please cancel from “My Bookings” so someone else can take your place.\n\nSee you on the road!');
   await expect.poll(() => tagRows.length).toBe(1);
   expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip', added_by: 'staff' });
   expect(tagRows[0].expires_at ?? null).toBeNull(); // permanent
@@ -568,7 +573,10 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
     'You’re invited to our Saturday Social Ride!', '',
     'Thank you for applying to join the MicroMobility community. We’d love to ride with you, so we’ve saved you a place on this ride:',
     'Sunrise Loop', 'Saturday, 14 March 2099', 'Gathering 6:00 am · Ride starts 8:00 am', 'Meeting point: ' + MEET, '',
-    '• You can see your booking on the “My Bookings” page.', '• Please have your QR code ready when you arrive.', '• Please cancel your booking if you can’t attend.', '',
+    'Before the ride:',
+    '• Your booking and its QR code are waiting in “My Bookings”.',
+    '• Have your QR code ready when you arrive; we scan it to check you in.',
+    '• If you can’t make it, please cancel from “My Bookings” so someone else can take your place.', '',
     'See you on the road!', 'The MicroMobility team',
   ].join('\n'));
   for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
