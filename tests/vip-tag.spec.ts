@@ -49,8 +49,8 @@ test('the VIP chip is gold and wears the drawn letters, not its name as text', a
   await expect(chip).not.toContainText('VIP'); // drawn, as the other brand chips; the name is the title
   await expect(chip).toHaveAttribute('title', 'VIP');
   const box = await chip.locator('.tag-logo-vip').boundingBox();
-  expect(box && box.width).toBeGreaterThan(20);
-  expect(box && box.width).toBeLessThan(32); // the letters alone, no crown beside them
+  expect(box && box.width).toBeGreaterThan(16);
+  expect(box && box.width).toBeLessThan(22); // the letters alone, no crown beside them, drawn small (2026-09-30)
 });
 
 test('a VIP is on the house on every bike type, in their own name only; nobody else is', async ({ page }) => {

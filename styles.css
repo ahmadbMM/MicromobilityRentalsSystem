@@ -1327,7 +1327,8 @@
       -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;}
     .tag-logo-jcc{width:21px;-webkit-mask-image:url('assets/tag-jcc.svg');mask-image:url('assets/tag-jcc.svg');}
     .tag-logo-mm{width:16px;-webkit-mask-image:url('assets/tag-mm.svg');mask-image:url('assets/tag-mm.svg');}
-    .tag-logo-vip{width:26px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
+    /* VIP's letters sit smaller than the other marks (the owner, 2026-09-30: "make the vip font smaller"). */
+    .tag-logo-vip{width:20px;height:10px;vertical-align:-1px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
