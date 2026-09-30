@@ -239,12 +239,8 @@
     
     @keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
     @keyframes modalSlideUp{from{transform:translateY(28px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-    @keyframes modalSheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
     .modal-backdrop{animation:modalFadeIn .22s ease both;}
     .modal-box{animation:modalSlideUp .28s cubic-bezier(.2,.8,.2,1) both;}
-    @media(max-width:767px){
-      .modal-box{animation:modalSheetUp .4s cubic-bezier(.32,.72,0,1) both;} /* iOS drawer curve (Ionic) - sheets should glide, not pop */
-    }
 
     
     .sess-summary-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
@@ -1697,8 +1693,8 @@
     .row-sheet .pay-menu-opt:hover{background:var(--s2);}
     .row-sheet .pay-menu-opt.danger{color:var(--red);margin-top:auto;border-top:1px solid var(--border);border-bottom:none;}
     @media(max-width:767px){
-      .modal-backdrop.row-sheet-bg{align-items:flex-end;justify-content:center;}
-      .row-sheet{width:100%;height:auto;max-height:85svh;border-radius:16px 16px 0 0;border-inline-start:none;animation-name:rowSheetUp;}
+      .modal-backdrop.row-sheet-bg{align-items:center;justify-content:center;padding:12px;}
+      .row-sheet{width:100%;height:auto;max-height:85svh;border-radius:16px;border:1px solid var(--border);animation-name:rowSheetUp;}
       .row-sheet .pay-menu-opt.danger{margin-top:0;}
     }
     @keyframes rowSheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
@@ -2739,11 +2735,12 @@
       .bike-assign-grid{grid-template-columns:repeat(2,1fr);}
 
       
-      .modal-backdrop{padding:0;align-items:flex-end;}
+      /* Every pop-up sits in the middle of the screen on a phone as on a desk (the owner, 2026-09-30:
+         "always center pages that pop up"), not as a sheet stuck to the bottom edge. */
+      .modal-backdrop{padding:12px;align-items:center;}
       .modal-box{
-        padding:20px 16px;border-radius:9px 9px 0 0;
-        max-height:92dvh;width:100%;max-width:100%;
-        padding-bottom:max(20px,env(safe-area-inset-bottom));
+        padding:20px 16px;border-radius:var(--r-xl);
+        max-height:88dvh;width:100%;max-width:100%;
       }
       .modal-bikes-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
       .modal-title{font-size:16px;margin-bottom:4px;}
@@ -2754,16 +2751,16 @@
       
       .pin-box{padding:24px 18px;border-radius:7px;}
       .auth-backdrop{
-        align-items:flex-end;padding:0;
+        align-items:center;padding:12px;
         overflow:hidden; 
       }
       .auth-box{
-        padding:20px 16px max(28px,env(safe-area-inset-bottom));
-        border-radius:9px 9px 0 0;width:100%;max-width:100%;margin:0;
+        padding:20px 16px 24px;
+        border-radius:var(--r-xl);width:100%;max-width:100%;margin:0;
         overflow-y:auto;          
         -webkit-overflow-scrolling:touch;
         overscroll-behavior:contain;
-        max-height:92dvh;
+        max-height:88dvh;
         height:auto;
       }
       .auth-logo{max-height:44px;}
@@ -4995,7 +4992,7 @@
          · Notices lose their coloured wash; white/off-white + hairline instead
          · Ride identity moves from a coloured left edge to a dot + kicker
          · Toasts become a dark pill with a status dot
-         · Modals: 18px desktop, bottom-sheet under 767px
+         · Modals: 18px, centred at every width
          · The Sunlight/Night toggle is gone customer-side (light only)
        ════════════════════════════════════════════════════════════════════════ */
 
@@ -5091,7 +5088,7 @@
     body:not(.view-staff) .toast.error::before{background:#ff6f66;}
     body:not(.view-staff) .toast.warning::before{background:#f2b43f;}
 
-    /* ── Modals: 18px, bottom-sheet on a phone ──────────────────────────── */
+    /* ── Modals: 18px, in the middle of the screen on a phone too ─────────── */
     body:not(.view-staff) .modal-backdrop,
     body:not(.view-staff) .auth-backdrop,
     body:not(.view-staff) .pin-backdrop{background:rgba(26,25,25,.45);}
@@ -5100,7 +5097,7 @@
     @media(max-width:767px){
       body:not(.view-staff) .modal-box,
       body:not(.view-staff) .auth-box{
-        border-radius:18px 18px 0 0;align-self:flex-end;width:100%;max-width:none;max-height:88svh;}
+        border-radius:18px;width:100%;max-width:none;max-height:88svh;}
     }
 
     /* ── Type ───────────────────────────────────────────────────────────── */

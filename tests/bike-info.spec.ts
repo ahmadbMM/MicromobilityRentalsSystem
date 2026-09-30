@@ -63,6 +63,21 @@ test.describe('bike type info', () => {
     expect(await page.evaluate('S.regBikeTypes[0]')).toBe('Hybrid');
   });
 
+  // Pop-ups sit in the middle of the screen at every width (the owner, 2026-09-30: "always center
+  // pages that pop up in the website why is it always at the bottom of the page").
+  test('the sheet opens in the middle of the screen, not at the bottom', async ({ page }) => {
+    await toRiderStep(page);
+    await page.locator('.type-info-btn[aria-label="About Hybrid bikes"]').click();
+    const box = page.locator('#bike-info-modal .modal-box');
+    await expect(box).toBeVisible();
+    await box.evaluate((e) => Promise.all(e.getAnimations().map((a) => a.finished)));
+    const r = (await box.boundingBox())!;
+    const vp = page.viewportSize()!;
+    expect(Math.abs(r.x + r.width / 2 - vp.width / 2)).toBeLessThanOrEqual(1);
+    expect(Math.abs(r.y + r.height / 2 - vp.height / 2)).toBeLessThanOrEqual(1);
+    expect(r.y).toBeGreaterThan(0);
+  });
+
   test('a picture that cannot be fetched gives way to the bike glyph', async ({ page }) => {
     await toRiderStep(page);
     await page.route('**/assets/bikes/*.webp*', (r) => r.abort());

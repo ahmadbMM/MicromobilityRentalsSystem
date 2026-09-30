@@ -26,7 +26,9 @@ const MONKEY = (clicks: number, seed: number) => `(async()=>{
   let t=${seed}; const rnd=()=>{t|=0;t=t+0x6D2B79F5|0;let r=Math.imul(t^t>>>15,1|t);r=r+Math.imul(r^r>>>7,61|r)^r;return((r^r>>>14)>>>0)/4294967296;};
   const junk=['','0','-1','٩٩٩','<b>x</b>','\\u200Fمرحبا','999999999999','a@b','  spaces  ','\\'"; drop--'];
   for(let i=0;i<${clicks};i++){
-    const inputs=[...document.querySelectorAll('input:not([disabled]),select:not([disabled])')].filter(e=>e.offsetParent!==null);
+    // #lang-btn is left out: picking a language that loads a pack reloads the page on purpose
+    // (/?lang=pt), which ends the run the way window.open or a sign-out would.
+    const inputs=[...document.querySelectorAll('input:not([disabled]),select:not([disabled]):not(#lang-btn)')].filter(e=>e.offsetParent!==null);
     if(inputs.length&&rnd()<0.35){
       const el=inputs[Math.floor(rnd()*inputs.length)];
       try{ if(el.tagName==='SELECT'){const o=el.options[Math.floor(rnd()*el.options.length)];if(o){el.value=o.value;el.dispatchEvent(new Event('change',{bubbles:true}));}}
@@ -51,7 +53,7 @@ for (const lang of ['en', 'ar']) {
     await page.goto('/');
     await waitForSb(page);
     page.on('dialog', (d) => d.dismiss().catch(() => {}));
-    await page.evaluate(`window.open=()=>null;window.print=()=>{};doLogout=()=>{};signInGoogle=()=>{};signInApple=()=>{};`);
+    await page.evaluate(`window.open=()=>null;window.print=()=>{};doLogout=()=>{};signInGoogle=()=>{};signInApple=()=>{};_formHandoff=async()=>{};`); // _formHandoff leaves for the website's forms
     await page.evaluate(MONKEY(120, lang === 'ar' ? 4242 : 1717));
     expect(errs, errs.join('\n')).toEqual([]);
   });

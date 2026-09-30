@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
-// The roster row's ⋯ menu is a side sheet: from the end edge on a desk, from the bottom on a phone,
+// The roster row's ⋯ menu is a side sheet: from the end edge on a desk, in the middle of the screen on a phone,
 // headed by the rider and their number, one full row per action. It used to be a popup anchored on
 // evt.currentTarget, which under the delegated dispatcher is the document, so it opened at the
 // page's top-left, far from the row. All Supabase traffic is stubbed.
@@ -36,8 +36,9 @@ test('the menu opens as a sheet at the edge, headed by the rider, with every act
   const box = (await sheet(page).boundingBox())!;
   const vp = page.viewportSize()!;
   if (test.info().project.name === 'mobile') {
-    expect(Math.round(box.width)).toBe(vp.width);
-    expect(Math.round(box.y + box.height)).toBe(vp.height);
+    // centred on a phone (the owner, 2026-09-30: "always center pages that pop up")
+    expect(Math.abs(box.x + box.width / 2 - vp.width / 2)).toBeLessThanOrEqual(1);
+    expect(Math.abs(box.y + box.height / 2 - vp.height / 2)).toBeLessThanOrEqual(1);
   } else {
     expect(Math.round(box.x + box.width)).toBe(vp.width);
     expect(Math.round(box.y)).toBe(0);
