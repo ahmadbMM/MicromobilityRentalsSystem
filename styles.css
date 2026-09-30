@@ -4724,6 +4724,8 @@
     /* The RTL search recipe pins padding-left to 12px (the icon moved to the right) and it
        outranks the line above, so in Arabic and Urdu the text ran under the × at the left. */
     html[dir="rtl"] input.search-input.has-clear{padding-left:34px;}
+    /* One × per search: the browser drew its own beside ours in type=search fields */
+    input.search-input::-webkit-search-cancel-button,#gs-input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none;}
 
     /* ── Staff topbar on small phones ───────────────────────────────────────
        The role switch + undo + password + Lock could overflow the bar in portrait,
@@ -6414,6 +6416,8 @@ body .ca-msg-box textarea.ca-msg{width:100%;min-height:300px;height:300px;box-si
 .apps-kind:hover{color:var(--text)}
 .apps-kind.active{background:var(--s1);color:var(--text);box-shadow:0 1px 2px rgba(var(--tint-rgb),.14)}
 .apps-kind-n{min-width:18px;height:18px;padding:0 6px;border-radius:9px;background:var(--orange);color:#fff;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+body.view-staff .filter-row .apps-srch{flex:0 1 280px;min-width:200px;}
+body.view-staff .apps-srch .search-input{width:100%;box-sizing:border-box;}
 .la-kid{display:inline-block;vertical-align:2px;margin-inline-start:6px;padding:1px 7px;border-radius:9px;background:rgba(var(--green-rgb),.12);color:var(--green);font-size:11px;font-weight:800}
 .la-lesson{margin-top:8px;padding:8px 12px;border-radius:8px;border-inline-start:3px solid var(--green);background:rgba(var(--green-rgb),.08);font-size:13px;font-weight:800}
 .la-notes{margin-top:8px;font-size:13px;line-height:1.5;padding:8px 12px;border-radius:8px;background:var(--s3);white-space:pre-wrap;overflow-wrap:anywhere}
@@ -7236,6 +7240,7 @@ body.view-staff .bd-mon-l{font-size:var(--staff-fs-sm);font-weight:700;white-spa
 body.view-staff .bd-mon.now .bd-mon-l,body.view-staff .bd-mon.sel .bd-mon-l{color:var(--text);}
 body.view-staff .bd-tools{align-items:flex-end;margin:14px 0 10px;gap:8px;flex-wrap:wrap;}
 body.view-staff .bd-tools .search-wrap{flex:1;min-width:180px;}
+body.view-staff .bd-tools .search-input{width:100%;} /* the field fills its box, so the × sits inside it */
 body.view-staff .bd-lang{min-width:150px;}
 body.view-staff .bd-table{width:100%;border-collapse:collapse;}
 body.view-staff .bd-table th{padding:9px 12px;text-align:start;font-size:var(--staff-fs-sm);font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--sf-line2,var(--border));white-space:nowrap;}

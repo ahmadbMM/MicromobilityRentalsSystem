@@ -75,6 +75,29 @@ test('the staff bar searches bookings, accounts, bikes and items, phones in any 
   await expect(page.locator('#bike-profile-modal')).toContainText('Road 9001');
 });
 
+// The bar's × empties it, as every search's does, and closes the search once it is empty (the
+// owner, 2026-09-30: "when the x button is clicked in the search bar it doesn't always empty the
+// bar"). It used to close with the text kept, beside the browser's own × that did empty it.
+test('the × in the search bar empties it, then closes the search', async ({ page }) => {
+  await staff(page);
+  await page.locator('#topbar .gs-btn').click();
+  const input = page.locator('#gs-input'), x = page.locator('#gs-panel .gs-x');
+  await expect(x).toHaveAttribute('aria-label', 'Close');
+  await input.fill('dana');
+  await expect(page.locator('#gs-panel .gs-item').first()).toContainText('Dana Faisal');
+  await expect(x).toHaveAttribute('aria-label', 'Clear');
+  await x.click();
+  await expect(input).toHaveValue('');
+  await expect(input).toBeFocused();
+  await expect(page.locator('#gs-panel .gs-box')).toContainText('Type two or more letters or digits.');
+  expect(await page.evaluate(`S._gsQ`)).toBe('');
+  await expect(x).toHaveAttribute('aria-label', 'Close');
+  await x.click();
+  await expect(page.locator('#gs-panel .gs-box')).toHaveCount(0);
+  await page.locator('#topbar .gs-btn').click();
+  await expect(page.locator('#gs-input')).toHaveValue('');
+});
+
 test('Front Desk searches only what its own sections hold', async ({ page }) => {
   await staff(page);
   await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();_gsOpen()`);

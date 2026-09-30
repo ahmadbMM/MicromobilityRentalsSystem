@@ -323,3 +323,30 @@ test.describe('@staff:community learn to ride', () => {
     await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
   });
 });
+
+// The search (the owner, 2026-09-30: "add a search button for the applications sections") also
+// finds a sign-up by one of its learners.
+test.describe('@staff:community learn to ride search', () => {
+  test('the search finds a sign-up by a learner\'s name or a phone, and the pills count the matches', async ({ page }) => {
+    await learnTab(page);
+    const q = page.locator('#la-q');
+    const fold = page.locator('[data-srch="laq"] .srch-btn');
+    if (await fold.isVisible()) await fold.click(); // a phone folds the search into a button
+    await q.fill('sara'); // Huda's child
+    await expect(page.locator('.la-row')).toHaveCount(1);
+    await expect(page.locator('.la-row[data-learn-id="l2"]')).toBeVisible();
+    await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (1)');
+    await expect(q).toBeFocused();
+    // Omar's +966553330002 the Saudi way: his lesson is scheduled
+    await q.fill('055 333 0002');
+    await expect(page.locator('#la-list')).toContainText('Nothing found.');
+    await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (1)');
+    await expect(page.locator('.filter-pill[data-la-filter="cancelled"]')).toHaveText('Cancelled (0)');
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await expect(page.locator('.la-row')).toHaveCount(1);
+    await expect(page.locator('.la-row[data-learn-id="l3"]')).toBeVisible();
+    await page.locator('[data-srch="laq"] .search-clear').click();
+    await expect(page.locator('#la-q')).toHaveValue('');
+    await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
+  });
+});

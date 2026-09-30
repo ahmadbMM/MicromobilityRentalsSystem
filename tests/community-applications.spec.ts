@@ -695,3 +695,76 @@ test('before the database has invited_session, the list loads and an invitation 
   await page.locator('#confirm-modal #ca-msg-lang').selectOption('en');
   expect(await page.locator('#ca-msg-text').inputValue()).toContain('📅 Saturday, 7 March 2099');
 });
+
+// A phone folds the search into a button: open it first
+const openSearch = async (page: Page, key: string) => {
+  const b = page.locator(`[data-srch="${key}"] .srch-btn`);
+  if (await b.isVisible()) await b.click();
+};
+
+// Both Applications lists have a search (the owner, 2026-09-30: "add a search button for the
+// applications sections"): a name, an email, a phone in any format, a company or a handle. It
+// narrows the list the status pill picks, each pill counting its matches.
+test('the search narrows the list, finds a phone typed the Saudi way and a handle, and the pills count the matches', async ({ page }) => {
+  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a1' ? { ...a, workplace: 'Red Sea Global' } : a)) });
+  const q = page.locator('#ca-q');
+  await expect(q).toHaveAttribute('placeholder', 'Search name, email or phone');
+  await openSearch(page, 'caq');
+  await q.fill('huda');
+  await expect(page.locator('.ca-row')).toHaveCount(1);
+  await expect(row(page, 'a2')).toBeVisible();
+  await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (1)');
+  await expect(page.locator('.filter-pill[data-ca-filter="rejected"]')).toHaveText('Rejected (0)');
+  await expect(q).toBeFocused(); // typing repaints the list and the counts, not the box
+  // Old Applicant's +966553579024 typed the Saudi way: not pending, the Rejected pill counts it
+  await q.fill('0553579024');
+  await expect(page.locator('.ca-list')).toContainText('Nothing found.');
+  await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (0)');
+  await expect(page.locator('.filter-pill[data-ca-filter="rejected"]')).toHaveText('Rejected (1)');
+  await page.locator('.filter-pill[data-ca-filter="rejected"]').click();
+  await expect(page.locator('.ca-row')).toHaveCount(1);
+  await expect(row(page, 'a3')).toBeVisible();
+  await expect(page.locator('#ca-q')).toHaveValue('0553579024'); // the search stays across the pills
+  await page.locator('.filter-pill[data-ca-filter="pending"]').click();
+  for (const [text, id] of [['@karim.rides', 'a1'], ['red sea', 'a1'], ['HUDA.SALEH@', 'a2']]) {
+    await page.locator('#ca-q').fill(text);
+    await expect(page.locator('.ca-row')).toHaveCount(1);
+    await expect(row(page, id)).toBeVisible();
+  }
+  // × empties it and brings the whole list back
+  await page.locator('[data-srch="caq"] .search-clear').click();
+  await expect(page.locator('#ca-q')).toHaveValue('');
+  await expect(page.locator('.ca-row')).toHaveCount(2);
+  await expect(page.locator('.filter-pill[data-ca-filter="rejected"]')).toHaveText('Rejected (1)');
+});
+
+test('a redraw of Community while staff type keeps the search, its text and its focus', async ({ page }) => {
+  await applicationsTab(page);
+  await openSearch(page, 'caq');
+  await page.locator('#ca-q').fill('karim');
+  await expect(page.locator('.ca-row')).toHaveCount(1);
+  await page.evaluate(`renderCommunity()`); // what a list reload or a realtime change does
+  await expect(page.locator('#ca-q')).toBeFocused();
+  await expect(page.locator('#ca-q')).toHaveValue('karim');
+  await expect(page.locator('.ca-row')).toHaveCount(1);
+  await page.keyboard.type('x');
+  await expect(page.locator('.ca-list')).toContainText('Nothing found.');
+});
+
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test('the Applications search is a search button that opens where it stands and folds back on ×', async ({ page }) => {
+    await applicationsTab(page);
+    const wrap = page.locator('[data-srch="caq"]');
+    await expect(page.locator('#ca-q')).toBeHidden();
+    await wrap.locator('.srch-btn').click();
+    await expect(page.locator('#ca-q')).toBeFocused();
+    await page.locator('#ca-q').fill('huda');
+    await expect(page.locator('.ca-row')).toHaveCount(1);
+    await wrap.locator('.search-clear').click();
+    await expect(page.locator('#ca-q')).toBeHidden();
+    await expect(wrap.locator('.srch-btn')).toBeVisible();
+    await expect(page.locator('.ca-row')).toHaveCount(2);
+  });
+});

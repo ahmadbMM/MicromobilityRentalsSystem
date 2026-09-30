@@ -8648,7 +8648,7 @@ function _gsHits(q){
   return out;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on__gsOpen_1(event,el){S._gsQ=el.value;_debRender('gs',_gsPaint)}
+function _on__gsOpen_1(event,el){S._gsQ=el.value;_gsXLbl();_debRender('gs',_gsPaint)}
 function _gsOpen(){
   _ntClose();
   let p=document.getElementById('gs-panel');
@@ -8656,14 +8656,24 @@ function _gsOpen(){
   p.innerHTML=`<div class="gs-scrim" data-on-click="${_on("_gsClose")}"></div>
     <div class="gs-box" role="dialog" aria-modal="true" aria-label="${esc(t('gsOpenBtn'))}">
       <div class="gs-field">${_artIcon('search',15)}<input id="gs-input" type="search" autocomplete="off" enterkeyhint="go" placeholder="${esc(t('gsPh'))}" aria-label="${esc(t('gsPh'))}" value="${esc(S._gsQ||'')}" data-on-input="${_on("_on__gsOpen_1",_EV,_EL)}" data-on-keydown="${_on("_gsKey",_EV)}">
-        <button type="button" class="gs-x" data-on-click="${_on("_gsClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
+        <button type="button" class="gs-x" data-on-click="${_on("_gsX")}">&times;</button></div>
       <div id="gs-results" class="gs-results" role="listbox" aria-label="${esc(t('gsOpenBtn'))}"></div>
     </div>`;
   p.style.display='block';
-  _gsPaint();
+  _gsXLbl();_gsPaint();
   setTimeout(()=>{const i=document.getElementById('gs-input');if(i){i.focus();try{i.select();}catch(_){}}},20);
 }
 function _gsClose(){const p=document.getElementById('gs-panel');if(p){p.style.display='none';p.innerHTML='';}}
+// The × in the bar empties it, as every search's × does, and closes the search once it is empty
+// (the owner, 2026-09-30: "when the x button is clicked in the search bar it doesn't always empty
+// the bar"). It closed the search with the text kept, back on the next open, while the browser's
+// own × beside it (the field is type=search; that one is hidden now) did empty it.
+function _gsX(){
+  const i=document.getElementById('gs-input');
+  if(!i||!i.value){_gsClose();return;}
+  i.value='';S._gsQ='';_gsXLbl();_gsPaint();i.focus();
+}
+function _gsXLbl(){const x=document.querySelector('#gs-panel .gs-x'),l=t(S._gsQ?'clearWord':'closeBtn');if(x){x.setAttribute('aria-label',l);x.title=l;}}
 function _gsPaint(){
   const el=document.getElementById('gs-results');if(!el)return;
   S._gsPainted=S._gsQ;
@@ -14815,15 +14825,45 @@ function _commApplications(){
   if(!S._caBusy&&Date.now()-(S._caAt||0)>60000)_caLoad(); // a minute old: read again, the list stays meanwhile
   _loadPhoneRules();
   const f=S._caFilter||'pending';
-  const n=k=>S._caApps.filter(a=>_caSt(a)===k).length;
-  const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" data-ca-filter="${k}" data-on-click="${_on("_on__commApplications_2",_EV,_EL,k)}">${label} (${n(k)})</button>`;
-  const rows=S._caApps.filter(a=>_caSt(a)===f).map(_caRow).join('');
+  const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" data-ca-filter="${k}" data-on-click="${_on("_on__commApplications_2",_EV,_EL,k)}">${label} (${_appN('ca',k)})</button>`;
   return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('caTitle')}</div>
     <div class="ca-sub">${t('caSub')}</div>
-    <div class="filter-row cmy-mb8">${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
-    <div class="ca-list">${rows||`<div class="empty-state">${t('caEmpty')}</div>`}</div>
+    <div class="filter-row cmy-mb8">${_appSrch('ca')}${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button></div>
+    <div class="ca-list" id="ca-list">${_appList('ca')}</div>
   </div>`;
+}
+// A search in both Applications lists (the owner, 2026-09-30: "add a search button for the
+// applications sections"): a name, an email, a phone in any format, a company, a profession, an
+// Instagram or LinkedIn handle, and a learn-to-ride sign-up's learners. It narrows the list the
+// status pill picks, and each pill counts its matches, so one found under another status shows.
+function _appHit(a,q){
+  q=String(q||'').trim();if(!q)return true;
+  const ql=q.toLowerCase(),h=ql.replace(/^@/,'');
+  return[a.name,a.email,a.workplace,a.profession,a.learner_name,...(Array.isArray(a.learners)?a.learners.map(l=>l&&l.name):[])].some(v=>String(v||'').toLowerCase().includes(ql))
+    ||[a.instagram,a.linkedin].some(v=>String(v||'').toLowerCase().includes(h))||_phoneHit(a.phone,q);
+}
+function _appQv(k){return S[k==='la'?'_laQ':'_caQ']||'';}
+function _appIn(k,a){return _appHit(a,_appQv(k))&&(k==='la'?a.status:_caSt(a))===(S[k==='la'?'_laFilter':'_caFilter']||'pending');}
+function _appN(k,st){const q=_appQv(k);return(k==='la'?S._laApps:S._caApps).filter(a=>(k==='la'?a.status:_caSt(a))===st&&_appHit(a,q)).length;}
+function _appList(k){
+  let list=(k==='la'?S._laApps:S._caApps).filter(a=>_appIn(k,a));
+  // Learn to ride: the scheduled ones by their lesson, the soonest first; every other list newest first.
+  if(k==='la'&&S._laFilter==='scheduled')list.sort((x,y)=>String(x.lesson_at||'').localeCompare(String(y.lesson_at||'')));
+  return list.map(k==='la'?_laRow:_caRow).join('')||`<div class="empty-state">${t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty')}</div>`;
+}
+function _appSrch(k){
+  const v=_appQv(k);
+  return`<div class="${_srchCls(k+'q',v)} apps-srch" data-srch="${k}q">${_artIcon('search',13)}<input class="search-input" id="${k}-q" type="text" autocomplete="off" value="${esc(v)}" placeholder="${esc(t('amSearchPh'))}" aria-label="${esc(t('amSearchPh'))}" data-on-input="${_on("_appQ",k,_P("value"))}">${_srchBtn()}</div>`;
+}
+// Typing repaints the counts and the list only: the box keeps its focus and a phone its keyboard.
+function _appQ(k,v){
+  S[k==='la'?'_laQ':'_caQ']=v;
+  _debRender('appq',()=>{
+    const l=document.getElementById(k+'-list');if(!l)return;
+    l.innerHTML=_appList(k);
+    document.querySelectorAll(`[data-${k}-filter]`).forEach(b=>{const st=b.getAttribute(`data-${k}-filter`);b.textContent=`${t((k==='la'?LA_STATUS:CA_STATUS)[st].k)} (${_appN(k,st)})`;});
+  });
 }
 function _caRpcErr(res){return !!(res&&res.error)||!res||!res.data;}
 // Approving and rejecting ask first, and on the way let staff tag the rider (the owner, 2026-09-29).
@@ -15366,16 +15406,12 @@ function _learnApplications(){
   if(!S._laBusy&&Date.now()-(S._laAt||0)>60000)_laLoad(); // a minute old: read again, the list stays meanwhile
   _loadPhoneRules();
   const f=S._laFilter||'pending';
-  const n=k=>S._laApps.filter(a=>a.status===k).length;
-  const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" aria-pressed="${f===k}" data-la-filter="${k}" data-on-click="${_on("_on__learnApplications_2",_EV,_EL,k)}">${label} (${n(k)})</button>`;
-  // The scheduled ones by their lesson, the soonest first; every other list newest first.
-  let list=S._laApps.filter(a=>a.status===f);
-  if(f==='scheduled')list=list.slice().sort((x,y)=>String(x.lesson_at||'').localeCompare(String(y.lesson_at||'')));
+  const pill=(k,label)=>`<button class="filter-pill${f===k?' active':''}" aria-pressed="${f===k}" data-la-filter="${k}" data-on-click="${_on("_on__learnApplications_2",_EV,_EL,k)}">${label} (${_appN('la',k)})</button>`;
   return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('laTitle')}</div>
     <div class="ca-sub">${t('laSub')}</div>
-    <div class="filter-row cmy-mb8">${pill('pending',t('laNew'))}${pill('scheduled',t('laScheduled'))}${pill('done',t('laDone'))}${pill('cancelled',t('laCancelled'))}<button type="button" class="filter-pill la-refresh" data-on-click="${_on("_laLoad")}">${t('ridersRefresh')}</button></div>
-    <div class="ca-list">${list.map(_laRow).join('')||`<div class="empty-state">${t('laEmpty')}</div>`}</div>
+    <div class="filter-row cmy-mb8">${_appSrch('la')}${pill('pending',t('laNew'))}${pill('scheduled',t('laScheduled'))}${pill('done',t('laDone'))}${pill('cancelled',t('laCancelled'))}<button type="button" class="filter-pill la-refresh" data-on-click="${_on("_laLoad")}">${t('ridersRefresh')}</button></div>
+    <div class="ca-list" id="la-list">${_appList('la')}</div>
   </div>`;
 }
 // Applications holds two lists: community membership and learning to ride.
@@ -31151,6 +31187,7 @@ function renderCommunity(){
   if(!S._laApps&&!S._laBusy&&!S._laErr&&sub!=='learning')_laLoad();
   // Applications opens on the list it was last on (community or learning to ride).
   const navBtn=(k,label)=>{const on=sub===k||(k==='applications'&&sub==='learning'),go=k==='applications'&&S._appsKind==='learning'?'learning':k;return`<button class="filter-pill${on?' active':''}" data-on-click="${_on("setCommTab",go)}">${label}</button>`;};
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q')?_ae.id:''; // an Applications search in use
   el.innerHTML=`
     <div class="page-title">${t('commTitle')}</div>
     <div class="page-sub">${t('commSub')}</div>
@@ -31160,6 +31197,7 @@ function renderCommunity(){
   if(S._lbSearchFocused){const _si=document.getElementById('lb-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(S._amFocused){const _si=document.getElementById('am-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(S._bdFocused){const _si=document.getElementById('bd-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
+  if(_appF){const _si=document.getElementById(_appF);if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
 }
 function shareLeaderboard(){
   const txt=S._lbShareTxt||'';if(!txt)return;
