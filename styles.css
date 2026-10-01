@@ -7574,6 +7574,69 @@ body:not(.view-staff) .reg-side{display:none;}
   /* My Bookings: one column of tickets, soonest first, not a ragged three-up grid */
   body:not(.view-staff) #tab-myrides .myrides-grid{display:grid;grid-template-columns:minmax(0,760px);gap:16px;}
 }
+/* ── The ticket through the night, the countdown, the route, Your rides, the closest badges (2026-10-01) ──
+   Stages: four dots on one line, the ones reached filled, the current one ringed; on the night
+   ticket they are neon. The route draws the circuit as one stroke with the start as a dot. */
+body:not(.view-staff) .tk-stages{display:flex;list-style:none;margin:12px 0 4px;padding:0;gap:0;}
+body:not(.view-staff) .tk-stages li{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;padding-top:14px;font-size:var(--fs-12);color:var(--ink-4);}
+body:not(.view-staff) .tk-stages li::before{content:'';position:absolute;top:4px;inset-inline:0;height:2px;background:var(--line);}
+body:not(.view-staff) .tk-stages li.on::before{background:var(--go);}
+body:not(.view-staff) .tk-stages li:last-child::before{inset-inline-end:auto;width:10px;}
+body:not(.view-staff) .tk-st-dot{position:absolute;top:0;inset-inline-start:0;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--line-2);box-sizing:border-box;}
+body:not(.view-staff) .tk-stages li.on .tk-st-dot{background:var(--go);border-color:var(--go);}
+body:not(.view-staff) .tk-stages li.cur .tk-st-dot{box-shadow:0 0 0 3px var(--go-wash);}
+body:not(.view-staff) .tk-stages li.on{color:var(--ink-2);}
+body:not(.view-staff) .tk-stages li.cur .tk-st-l{color:var(--ink);font-weight:700;}
+body:not(.view-staff) .tk-st-l{line-height:1.25;padding-inline-end:6px;}
+body:not(.view-staff) .tk-st-s{font-size:var(--fs-12);color:var(--ink-3);font-variant-numeric:tabular-nums;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-inline-end:6px;}
+body:not(.view-staff) .tk-cd{display:flex;align-items:center;gap:7px;margin:0 0 10px;font-size:var(--fs-15);font-weight:600;color:var(--go);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .land-today .tk-cd.land-today-cd{margin:4px 0 0;font-size:var(--fs-13);}
+body:not(.view-staff) .tk-route{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:12px 0;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r-ctl);}
+body:not(.view-staff) .tk-rt-txt{min-width:0;display:grid;gap:2px;}
+body:not(.view-staff) .tk-rt-k{font-size:var(--fs-12);color:var(--ink-3);}
+body:not(.view-staff) .tk-rt-n{font-size:var(--fs-15);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .tk-rt-m{font-size:var(--fs-13);color:var(--ink-2);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .tk-rt-done{display:flex;align-items:center;gap:5px;font-size:var(--fs-13);font-weight:600;color:var(--go);}
+body:not(.view-staff) .tk-rt-a{font-size:var(--fs-13);font-weight:600;color:var(--go);}
+body:not(.view-staff) .tk-rt-osm{font-size:var(--fs-12);color:var(--ink-4);margin-top:2px;}
+body:not(.view-staff) .tk-rt-map{flex:none;width:30px;height:118px;overflow:visible;}
+body:not(.view-staff) .tk-rt-map path{fill:none;stroke:var(--go);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;}
+body:not(.view-staff) .tk-rt-map circle{fill:var(--card);stroke:var(--ink);stroke-width:1.6;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li::before{background:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.on::before{background:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-st-dot{background:var(--night);border-color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.on .tk-st-dot{background:var(--neon);border-color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.cur .tk-st-dot{box-shadow:0 0 0 3px var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.cur .tk-st-l{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-st-s{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-cd{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-route{border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.tk-rt-k,.tk-rt-m,.tk-rt-osm){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-n{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-a{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-map path{stroke:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
+body:not(.view-staff) .myr{margin:0 0 8px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
+body:not(.view-staff) .myr-h{font-size:var(--fs-15);font-weight:700;color:var(--ink);margin-bottom:10px;}
+body:not(.view-staff) .myr-weeks{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:3px;}
+body:not(.view-staff) .myr-weeks i{display:block;aspect-ratio:1;max-height:14px;border-radius:3px;background:var(--card-3);}
+body:not(.view-staff) .myr-weeks i.on{background:var(--go);}
+body:not(.view-staff) .myr-wl{font-size:var(--fs-12);color:var(--ink-3);margin-top:6px;}
+body:not(.view-staff) .myr-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px;margin:14px 0 0;}
+body:not(.view-staff) .myr-f dt{font-size:var(--fs-12);color:var(--ink-3);}
+body:not(.view-staff) .myr-f dd{margin:2px 0 0;font-size:var(--fs-15);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .bd-next{display:grid;gap:8px;margin:10px 0 12px;}
+body:not(.view-staff) .bd-next-h{font-size:var(--fs-13);color:var(--ink-3);}
+body:not(.view-staff) .bd-next-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-ctl);text-align:start;color:var(--ink);cursor:pointer;}
+body:not(.view-staff) .bd-next-row:hover{border-color:var(--line-2);}
+body:not(.view-staff) .bd-next-row .bdg-m.bd-next-ic{width:34px;height:34px;}
+body:not(.view-staff) .bd-next-t{flex:1;min-width:0;display:grid;gap:2px;}
+body:not(.view-staff) .bd-next-t strong{font-size:var(--fs-15);}
+body:not(.view-staff) .bd-next-t small{font-size:var(--fs-12);color:var(--ink-3);}
+body:not(.view-staff) .bd-next-bar{display:block;height:4px;margin-top:4px;background:var(--card-3);border-radius:2px;overflow:hidden;}
+body:not(.view-staff) .bd-next-bar i{display:block;height:100%;width:var(--cu-w);background:var(--go);}
+body:not(.view-staff) .bd-next-n{flex:none;font-size:var(--fs-13);font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).

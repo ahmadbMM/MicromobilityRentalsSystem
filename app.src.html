@@ -1086,7 +1086,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mrStreak_few:'{0} weeks in a row',
   mrStreak_many:'{0} weeks in a row',
   mrStreak_other:'{0} weeks in a row',
-  mrNextLine:'Next ride: {0} ({1})',
+  mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',bdNextTitle:'Closest badges',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
   regStepOf:'Step {0} of {1}',
   pickRideFirst:'Choose a ride above to continue.',
   tickWaiverFirst:'Tick the box above to continue.',
@@ -1606,7 +1606,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mrStreak_few:'{0} أسابيع متتالية',
   mrStreak_many:'{0} أسبوعاً متتالياً',
   mrStreak_other:'{0} أسبوعاً متتالياً',
-  mrNextLine:'رحلتك القادمة: {0} ({1})',
+  mrNextLine:'رحلتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت رحلتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت رحلتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'رحلاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها رحلة',myrFav:'دراجتك المفضلة',myrFirst:'أول رحلة',myrTime:'الوقت على الدراجة',myrYear:'رحلات هذا العام',bdNextTitle:'أقرب الأوسمة',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
   regStepOf:'الخطوة {0} من {1}',
   pickRideFirst:'اختر رحلة من الأعلى للمتابعة.',
   tickWaiverFirst:'ضع علامة في المربع أعلاه للمتابعة.',
@@ -7260,6 +7260,7 @@ function _todayCardHtml(cust){
     <span class="land-today-k">${esc(on?t('onBikeNow'):wl?t('wlOnList'):t('mrToday'))}</span>
     <span class="land-today-t"><bdi>${sessionTime(sess)}</bdi>${num?` <bdi dir="ltr" class="land-today-n">${esc(num)}</bdi>`:''}</span>
     <span class="land-today-v">${esc(_venueName(sess))}</span>
+    ${(!on&&!wl)?_cdHtml(sess,td,'land-today-cd'):''}
     <span class="land-today-go">${t('tkShowTicket')}</span>
   </button>`;
 }
@@ -9979,6 +9980,7 @@ function _regSideHtml(sess){
     <div class="reg-side-when">${_dayWord(sess.session_date||sess.id)?`<strong>${esc(_dayWord(sess.session_date||sess.id))}</strong> &middot; `:''}${esc(dayLabel(sess.day))} &middot; ${esc(shortDate(sess.session_date||sess.id))}</div>
     <div class="reg-side-time"><bdi>${sessionTime(sess)}</bdi></div>
     <div class="reg-side-where">${esc(_venueName(sess))}</div>
+    ${(()=>{const r=_rideRoute(sess);return r&&r.km?`<div class="reg-side-row"><span>${t('rtTitle')}</span><span>${esc(t(r.lap?'rtLap':'rtKm').replace('{0}',_kmTxt(r.km)))}</span></div>`:'';})()}
     ${_needsBike(sess)?`<div class="reg-side-row"><span>${t('numBikes')}</span><span>${S.regQty}</span></div>`:''}
     <div class="reg-side-total"><span>${t('reviewTotalLabel')}</span><bdi id="reg-side-sum">${esc(_regGrandStr(sess))}</bdi></div>
     ${(!_isFreeRide(sess)&&_needsBike(sess))?`<div class="price-note">${t('payAtBoothLine')}</div>`:''}
@@ -10562,6 +10564,79 @@ function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key==
 // number's column, in the flow, so it never lies over the label (it did on a past or waitlist card,
 // which has no code to push the column down; the owner, same day).
 function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.webp" alt="" decoding="async"><img class="tk-logo-d" src="/logo.webp" alt="" decoding="async"></span>`;}
+// ── The ticket through the night (the owner, 2026-10-01: "do 1 2 5 6 10") ─────────────────────
+// On the ride's day a held ticket says where the rider is: Booked, Checked in, On the bike, Done
+// (no bike step where the activity has no bike). Read off the rows as the desk wrote them: active
+// is checked in, a bike assigned is on the bike, every row done is done. A rider's phone hears of
+// it when the fleet moves (the bikes table is on its live channel), which on a ride night is all
+// the time; nothing polls for it.
+function _tkHm(iso){if(!iso)return'';try{return new Date(iso).toLocaleTimeString(_locale(),{timeZone:KSA_TZ,hour:'numeric',minute:'2-digit'});}catch(_){return'';}}
+function _tkBike(g){for(const e of g){const b=getAssignedBikes(e)[0];if(b)return b;}return null;}
+function _tkStages(g,sess){
+  const inn=g.some(e=>e.status==='active'||e.status==='done'),done=g.every(e=>e.status==='done'),bk=_tkBike(g);
+  const at=k=>g.map(e=>e[k]).filter(Boolean).sort(),ins=at('checkedInAt'),outs=at('checkedOutAt');
+  const st=[[t('tkStBooked'),true,''],[t('tkStIn'),inn,inn?_tkHm(ins[0]):''],
+    ...(_needsBike(sess)?[[t('tkStBike'),done||(inn&&!!bk),bk&&!done?bk.name:'']]:[]),
+    [t('tkStDone'),done,done?_tkHm(outs[outs.length-1]):'']];
+  const cur=st.reduce((c,x,i)=>x[1]?i:c,0);
+  return`<ol class="tk-stages">${st.map((x,i)=>`<li class="${x[1]?'on':''}${i===cur?' cur':''}"${i===cur?' aria-current="step"':''}><span class="tk-st-dot" aria-hidden="true"></span><span class="tk-st-l">${esc(x[0])}</span>${x[2]?`<bdi class="tk-st-s">${esc(x[2])}</bdi>`:''}</li>`).join('')}</ol>`;
+}
+// The countdown on a ride-day ticket and the landing's today card: to bike collection (or the
+// gathering), then to the start; gone once the start has passed. The moments ride in data-cd as
+// "epoch:key|epoch:key" and one ticker rewrites the line every 30 seconds without a repaint.
+function _ksaAt(ds,hhmm){const m=_hhmmToMin(hhmm),d=String(ds||'').slice(0,10);return(m==null||!d)?NaN:Date.parse(d+'T00:00:00+03:00')+m*6e4;}
+function _cdAttr(sess,ds){
+  if(!sess)return'';
+  const parts=_timeText((parseSlots(sess.bike_slots)||{})._time).split('-').map(x=>x.trim()),gat=_gathersTime(sess),L=[];
+  if(gat)L.push([_ksaAt(ds,parts[0]),'tkCdGather'],[_ksaAt(ds,parts[1]),'tkCdStart']);
+  else{if(_needsBike(sess))L.push([_ksaAt(ds,sessionCollectTime(sess)),'tkCdCollect']);L.push([_ksaAt(ds,parts[0]),'tkCdStart']);}
+  return L.filter(x=>Number.isFinite(x[0])).map(x=>x[0]+':'+x[1]).join('|');
+}
+function _cdDur(min){const h=Math.floor(min/60),m=min%60;return h?(m?`${h} ${t('unitHour')} ${m} ${t('unitMin')}`:`${h} ${t('unitHour')}`):`${m} ${t('unitMin')}`;}
+function _cdLine(a){
+  const now=Date.now();
+  for(const x of String(a||'').split('|')){const i=x.indexOf(':'),at=+x.slice(0,i),k=x.slice(i+1);
+    if(at>now&&_own(LANG.en,k))return t(k).replace('{0}',_cdDur(Math.max(1,Math.ceil((at-now)/6e4))));}
+  return'';
+}
+function _cdHtml(sess,ds,cls){const a=_cdAttr(sess,ds),l=_cdLine(a);return l?`<div class="tk-cd ${cls||''}" data-cd="${esc(a)}">${_cuIc('clock',15)}<span>${esc(l)}</span></div>`:'';}
+function _cdTick(){document.querySelectorAll('[data-cd]').forEach(el=>{const l=_cdLine(el.dataset.cd),sp=el.querySelector('span');if(!l){el.remove();return;}if(sp&&sp.textContent!==l)sp.textContent=l;});}
+try{setInterval(_cdTick,30000);}catch(_){}
+// ── The route a ride follows (2026-10-01) ─────────────────────────────────────────────────────
+// A ride staff tied to a route (sessions.route_slug, the website's Routes list) names it, with its
+// distance, level and surface and the map link. A bike ride at the circuit with no route of its own
+// is the circuit: the Formula 1 layout drawn from OpenStreetMap (© OpenStreetMap contributors,
+// ODbL; the race-track ways chained into one loop, 6.19 km measured against the official 6.174 km,
+// simplified, north up) with the start marked. Nothing is drawn for a ride that is not on a bike or
+// that meets elsewhere without a route.
+const JCC_TRACK='M12.9 71.4 11 69.3 10.4 66.7 10.7 64.5 12.7 60.9 12.9 58.7 11.7 54.8 8.5 51.6 8.4 45.7 9.8 43.1 12.8 41.8 14 40.4 16.6 30.6 16.8 24.8 15.8 6.2 14.7 4.7 13.1 4 10.8 4.7 9.7 6.1 9.4 9.9 13.1 17.2 13.5 23.5 10.6 31 9.8 36.1 5.4 38.7 4.3 41.1 4.3 48 8.3 59.2 9.2 70.6 13.7 79.4 15 84.7 15.1 90.6 14.1 96.6 15 98.4 17.9 101.4 19.2 106.6 18.7 108.9 14.4 117.5 13.4 121.9 13.7 127.1 16.5 136.6 21.3 144.7 25.9 148.9 33.2 153.9 35 153.7 36.1 151.9 31.3 130.1 20.3 97.5 19.3 96.6 17.3 97.2 16.2 96.1 17.7 90 17.8 87.5 15.5 72.6Z';
+function _rideRoute(sess){
+  if(!sess||!_needsBike(sess))return null;
+  if(sess.route_slug){
+    if(S._routes===undefined)_routesLoad();
+    const r=_routeOf(sess),raw=(Array.isArray(S._routes)?S._routes:[]).find(x=>(x.slug||_routeSlug(_routeName(x)))===r.slug)||{};
+    const L=v=>String((v&&typeof v==='object')?(v[S.lang]||v.en||''):(v||''));
+    return{name:r.name,km:+r.km||0,note:[L(raw.level),L(raw.surface)].filter(Boolean).join(' · '),href:_safeUrl(raw.href&&typeof raw.href==='object'?raw.href.href:raw.href)};
+  }
+  if(_isApprovalRide(sess)&&_safeUrl(sess.meet_url))return null;
+  const loc=String(sess.location||'').trim();if(loc&&!_own(VENUE_KEY,loc))return null;
+  return{name:t('evJccName'),km:6.174,lap:true,note:t('rtCircuitNote'),track:true};
+}
+function _kmTxt(km){return String(Math.round(km*100)/100);}
+function _routeHtml(sess,past){
+  const r=_rideRoute(sess);if(!r)return'';
+  return`<div class="tk-route${r.track?' has-map':''}">
+    <div class="tk-rt-txt">
+      <div class="tk-rt-k">${t('rtTitle')}</div>
+      <div class="tk-rt-n">${esc(r.name)}</div>
+      ${(r.km||r.note)?`<div class="tk-rt-m">${r.km?esc(t(r.lap?'rtLap':'rtKm').replace('{0}',_kmTxt(r.km))):''}${r.km&&r.note?' · ':''}${esc(r.note||'')}</div>`:''}
+      ${past?`<div class="tk-rt-done">${_cuIc('tick',14)}<span>${t('rtRidden')}</span></div>`:''}
+      ${r.href?`<a class="tk-rt-a" href="${esc(r.href)}" target="_blank" rel="noopener">${t('rtMapLink')}</a>`:''}
+      ${r.track?`<div class="tk-rt-osm">${t('rtOsm')}</div>`:''}
+    </div>
+    ${r.track?`<svg class="tk-rt-map" viewBox="0 0 40 158" aria-hidden="true" focusable="false"><path d="${JCC_TRACK}"/><circle cx="12.9" cy="71.4" r="3.2"/></svg>`:''}
+  </div>`;
+}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -10624,7 +10699,13 @@ function renderBookingTicket(entries,opts){
       ? `<div class="appr-ok" role="status"><span class="appr-ok-tick" aria-hidden="true">${_cuIc('tick',16)}</span><span class="appr-ok-txt"><strong>${t('commCueConfirmed')}</strong><small>${t('commConfirmedSub')}</small></span></div>`
       : `<div class="mm-note cu-cue"><span class="cu-dot8 ${colBg}"></span><span class="cu-cue-txt ${colCls}">${t(k)}</span></div>`;
   } else if(stForBadge==='active'){
-    cueHtml=`<div class="mm-note mm-note-go cu-cue"><span class="cu-dot8 cu-bg-green"></span><span class="cu-cue-txt cu-c-green">${t('onBikeNow')}</span></div>`;
+    // Checked in is not yet on a bike: the hand-over gives it out after the check-in, and the
+    // card said "On the bike now" to a rider still standing at the rack.
+    const _bk=_tkBike(g),_ct=!_needsBike(sess)?t('tkStIn'):_bk?t('tkCueBike').replace('{0}',_bk.name):t('tkCueNoBike');
+    cueHtml=`<div class="mm-note mm-note-go cu-cue"><span class="cu-dot8 cu-bg-green"></span><span class="cu-cue-txt cu-c-green">${esc(_ct)}</span></div>`;
+  } else if(past&&_today&&allDone){
+    const _min=g.reduce((m,e)=>Math.max(m,Number(e.rideDuration)||0),0);
+    cueHtml=`<div class="mm-note mm-note-go cu-cue"><span class="cu-dot8 cu-bg-green"></span><span class="cu-cue-txt cu-c-green">${esc(_min>=1?t('tkCueDone').replace('{0}',fmtDur(_min)):t('tkCueDoneNoDur'))}</span></div>`;
   } else if(stForBadge==='waiting'&&!_noNum&&_today){
     // Only riders still WAITING are ahead: one already on a bike has been served, and counting
     // them kept the rider after a checked-in batch on "in queue" until those riders came back.
@@ -10700,8 +10781,11 @@ function renderBookingTicket(entries,opts){
       </div>
     </div>
     <div class="cu-tk-body">
+      ${(_held&&_today&&stForBadge==='waiting')?_cdHtml(sess,primary.sessionDate||primary.sessionId):''}
       ${cueHtml}
+      ${(_today&&(_held||(past&&allDone)))?_tkStages(g,sess):''}
       ${_comm?_commInfoHtml(sess):''}
+      ${_routeHtml(sess,past)}
       <div class="cu-tk-sec">${t(_needsBike(sess)?'reviewRidersLabel':'reviewPartLabel')} · ${_noNum?numDisplay:`<bdi dir="ltr">${numDisplay}</bdi>`}</div>
       ${riderRows}
       ${noShowMsg}
@@ -11269,7 +11353,18 @@ function _mrBadgesRow(cust){
     ${_bdgMedal(x.b.icon,_bdgCol(x.b))}
     <span class="mr-badge-nm">${esc(nm)}</span>
   </button>`;}).join('');
+  // The closest badges still to earn (2026-10-01): the two with the least left among those already
+  // begun (a count n/of above zero), each with its bar; a tap opens it as the tile does.
+  const near=lk.map(a=>{const m=/^(\d+)\/(\d+)$/.exec(a[0].p||'');return m&&+m[1]>0&&+m[1]<+m[2]?{a,n:+m[1],of:+m[2]}:null;}).filter(Boolean)
+    .sort((x,y)=>(x.of-x.n)-(y.of-y.n)||y.n/y.of-x.n/x.of).slice(0,2);
+  const nextH=near.length?`<div class="bd-next"><div class="bd-next-h">${t('bdNextTitle')}</div>${near.map(({a:[x,i],n,of})=>`<button type="button" class="bd-next-row" data-on-click="${_on("_mrBadgeInfo",i)}">
+    ${_bdgMedal(x.b.icon,_bdgCol(x.b),'bd-next-ic')}
+    <span class="bd-next-t"><strong>${esc(_bdgName(x.b))}</strong><small>${esc(_bdgDesc(x.b))}</small>
+      <span class="bd-next-bar" role="progressbar" aria-label="${esc(_bdgName(x.b))}" aria-valuemin="0" aria-valuemax="${of}" aria-valuenow="${n}"><i data-cssv="${_cssv({'--cu-w':Math.round(n/of*100)+'%'})}"></i></span></span>
+    <bdi class="bd-next-n">${n}/${of}</bdi>
+  </button>`).join('')}</div>`:'';
   return`<div id="mr-badges-host"><div class="analytics-section-title cu-mt22 mr-badges-h">${t('mrBadgesTitle')}<span class="mr-badges-n">${on.length}/${L.length}</span></div>
+  ${nextH}
   ${on.length?`<div class="mr-badges">${tiles(on)}</div>`:''}
   ${lk.length?`<button type="button" id="mr-badges-more" class="mr-badges-more" aria-expanded="${open}"${open?' aria-controls="mr-badges-lk"':''} data-on-click="${_on("_mrBadgesMore")}">
     ${open?'':`<span class="mr-bm-peek">${lk.slice(0,4).map(([x])=>_bdgMedal(x.b.icon,_bdgCol(x.b))).join('')}</span>`}
@@ -11369,7 +11464,28 @@ function _seasonDashboard(cust){
         ?`<button type="button" class="mr-season-next" data-on-click="${_on("setCustTab","myrides")}">${_cuIc('ticket',18)}<span>${esc(t('mrNextLine').replace('{0}',nd).replace('{1}',nextTxt))}</span>${_cuIc('go',16,1)}</button>`
         :`<button type="button" class="btn-primary cu-book-next" data-on-click="${_on("setCustTab","register")}">${t('mrBookNext')}</button>`}
     </div>
+    ${_myrStats(allEntries)}
     ${_mrBadgesRow(cust)}`;
+}
+// Your rides (2026-10-01): the last 26 weeks as a strip, one mark per week (filled: a ride that
+// week), then what the record holds - rides this year, the bike type ridden most, the time on the
+// bike staff timed, the first ride. Counted in ride NIGHTS, as the badges are: a party of four is
+// one night, read off the rider's own row (the lowest number). No distance: nobody measures it.
+function _myrStats(all){
+  const nights={};all.filter(_rideCompleted).forEach(e=>{const c=nights[e.sessionId];if(!c||(e.queueNum||0)<(c.queueNum||0))nights[e.sessionId]=e;});
+  const N=Object.values(nights);if(!N.length)return'';
+  const day=e=>String(e.sessionDate||e.sessionId||'').slice(0,10),wk=new Set(N.map(e=>_bdgWk(day(e)))),now=_bdgWk(todayStr());
+  const W=Array.from({length:26},(_,i)=>now-25+i),nW=W.filter(w=>wk.has(w)).length;
+  const tc={};N.forEach(e=>{const ty=resolvedType(e);if(ty&&!['Any','None','Own'].includes(ty))tc[ty]=(tc[ty]||0)+1;});
+  const fav=Object.keys(tc).sort((a,b)=>tc[b]-tc[a])[0],first=N.map(day).filter(Boolean).sort()[0];
+  const mins=N.reduce((m,e)=>m+(Number(e.rideDuration)||0),0),yr=todayStr().slice(0,4);
+  const F=[[t('myrYear'),String(N.filter(e=>day(e).startsWith(yr)).length)],fav?[t('myrFav'),typeLabel(fav)]:null,mins>=1?[t('myrTime'),esc(fmtDur(mins))]:null,first?[t('myrFirst'),esc(_bdgDay(first))]:null].filter(Boolean);
+  return`<div class="myr">
+    <div class="myr-h">${t('myrTitle')}</div>
+    <div class="myr-weeks" role="img" aria-label="${esc(t('myrWeeks').replace('{0}',nW))}">${W.map(w=>`<i${wk.has(w)?' class="on"':''}></i>`).join('')}</div>
+    <div class="myr-wl">${esc(t('myrWeeks').replace('{0}',nW))}</div>
+    <dl class="myr-f">${F.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+  </div>`;
 }
 function renderMyRides(){
   const cust=S.loggedIn;
@@ -12399,6 +12515,7 @@ async function _routesLoad(){
   catch(e){S._routes=[];}finally{S._routesBusy=false;}
   if(!S._routes.length)return; // no routes: the picker stays away, nothing to repaint
   if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions'&&!_nsFormBusy())try{renderSessions();}catch(_){}
+  if(S.view==='customer'&&S.custTab==='myrides')try{renderMyRides();}catch(_){} // a ticket's route names itself once the list is in
 }
 // A staffer in the middle of the session form: a background repaint would take their field away.
 function _nsFormBusy(){const a=document.activeElement;return !!(a&&a.closest&&a.closest('#sess-host, #tab-sessions')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}

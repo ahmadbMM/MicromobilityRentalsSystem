@@ -422,3 +422,23 @@ price, payment, venue and the bike rule until after booking.
   as they were: the system's all-element rules pass them by (`:not(:where(.landing-event-card, ...))`),
   the old token values are held on them, their subtitles are the hand-written ones, and they carry no
   photographs.
+
+## The ride night on the ticket, the route, Your rides (2026-10-01)
+
+The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data the app already holds; no migration.
+
+- **Stages.** On the ride's day a held ticket (and today's done card) carries `_tkStages`: Booked, Checked in,
+  On the bike (only where `_needsBike`), Done, read off the rows (active = checked in, `_tkBike(g)` = a bike
+  assigned, every row done = done). The active cue says "Checked in. Your bike is being handed over." until a
+  bike is assigned; it no longer says "On the bike now" at the rack. A rider's phone learns of it through the
+  bikes table on its live channel; nothing polls (egress).
+- **Countdown.** `_cdHtml(sess, day)` writes `data-cd="epoch:key|epoch:key"` (collection or gathering, then the
+  start, Riyadh time via `_ksaAt`); `_cdTick` rewrites the line every 30 s and removes it after the start. Specs
+  hold the clock (`page.clock.setFixedTime`) and call `_cdTick()`.
+- **Route.** `_rideRoute(sess)`: a ride with `route_slug` names the website's route (`site_content
+  routes.routes.items`, loaded on demand); a bike ride at the circuit with none is the circuit, drawn from
+  OpenStreetMap (`JCC_TRACK`, ODbL, so the card credits "© OpenStreetMap contributors" - keep it). Rides that
+  meet elsewhere without a route, and rides with no bike, show nothing.
+- **Your rides / closest badges.** `_myrStats` on Account (26-week strip, rides this year, favourite type, timed
+  minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
+  with least left (`bd-next`). `tests/ride-night.spec.ts`.
