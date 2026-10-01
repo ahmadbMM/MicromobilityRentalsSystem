@@ -23,7 +23,10 @@ export default defineConfig({
   retries: 0,
   reporter: [['list']],
   outputDir: join(SNAPS, '_results'),
-  snapshotPathTemplate: join(SNAPS, '{arg}{ext}'),
+  // One folder per file (2026-10-01): customer.visual.ts and pass2.visual.ts both name shots like
+  // `${P}-landing`, and in one shared folder the second file's baseline overwrote the first's, so
+  // each always failed against the other's picture.
+  snapshotPathTemplate: join(SNAPS, '{testFileName}', '{arg}{ext}'),
   expect: { toHaveScreenshot: { maxDiffPixels: 0, animations: 'disabled', caret: 'hide', scale: 'device' } },
   use: {
     baseURL: `http://127.0.0.1:${PORT}`,

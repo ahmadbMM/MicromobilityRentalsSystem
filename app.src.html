@@ -27788,6 +27788,19 @@ function _catUploadToast(e){
 // ── The model editor ────────────────────────────────────────────────────────
 // One model, its colours and its photos, edited together and saved together. A new model gets
 // its id here, so its photos can be uploaded under catalog/<id>/ before the row exists.
+// Focus a field of an editor just drawn, a moment later (the phone's keyboard and the scroll settle
+// first) - unless the staffer has already gone on into another field. The bare timer pulled the
+// caret back mid-word: Brand "Alvas", then "Sprint 2" typed into Name landed in Brand, and the
+// address came out alvassprint-2 (2026-10-01, the catalogue spec failing one run in thirty).
+function _catFocusLater(id){
+  const was=document.activeElement;
+  setTimeout(()=>{
+    const i=document.getElementById(id);if(!i)return;
+    const a=document.activeElement;
+    if(a&&a!==was&&a!==document.body&&a.matches('input,textarea,select'))return;
+    i.focus();
+  },60);
+}
 function _catEdit(id){
   const C=_cat(),m=id?C.models.find(x=>x.id===id):null;
   const top=_catTop();
@@ -27799,7 +27812,7 @@ function _catEdit(id){
   if(!C.ed.d.specs||typeof C.ed.d.specs!=='object'||Array.isArray(C.ed.d.specs))C.ed.d.specs={};
   C.view='models';
   renderCatalog();
-  setTimeout(()=>{const i=document.getElementById('ce-brand');if(i&&C.ed&&C.ed.isNew)i.focus();},60);
+  if(C.ed.isNew)_catFocusLater('ce-brand');
 }
 function _catEdClose(){const C=_cat();if(!C.ed)return;if(!C.ed.dirty){C.ed=null;renderCatalog();return;}confirmDialog({title:t('catUnsaved'),confirmLabel:t('closeBtn'),confirmClass:'btn-primary',onConfirm:()=>{_cat().ed=null;renderCatalog();}});}
 function _catDirty(){const C=_cat();if(!C.ed)return;C.ed.dirty=true;C.ed.err='';_catSyncSave();}
@@ -27826,7 +27839,7 @@ function _catSpecIn(key,lang,v){
   if(!(cur.en||'').trim()&&!(cur.ar||'').trim())delete ed.d.specs[key];else ed.d.specs[key]=cur;
   _catDirty();
 }
-function _catColAdd(){const ed=_cat().ed;if(!ed)return;ed.colors.push({id:_catUuid(),_new:true,model_id:ed.id,name_en:'',name_ar:'',hex:'#1a1919',sort:ed.colors.length});_catDirty();renderCatalog();setTimeout(()=>{const i=document.getElementById('ce-col-'+(ed.colors.length-1)+'-en');if(i)i.focus();},60);}
+function _catColAdd(){const ed=_cat().ed;if(!ed)return;ed.colors.push({id:_catUuid(),_new:true,model_id:ed.id,name_en:'',name_ar:'',hex:'#1a1919',sort:ed.colors.length});_catDirty();renderCatalog();_catFocusLater('ce-col-'+(ed.colors.length-1)+'-en');}
 function _catColIn(i,field,v){const ed=_cat().ed;if(!ed||!ed.colors[i])return;ed.colors[i][field]=v;_catDirty();}
 function _catColDel(i){
   const ed=_cat().ed;if(!ed||!ed.colors[i])return;
@@ -27936,7 +27949,7 @@ function _catCatEdit(id,parentId){
   C.ced={id:c?c.id:_catUuid(),isNew:!c,slugAuto:!c,busy:false,err:'',
     d:c?JSON.parse(JSON.stringify(c)):{parent_id:parentId||null,slug:'',name_en:'',name_ar:'',blurb_en:'',blurb_ar:'',cover:null,sort:(parentId?_catSubs(parentId):_catTop()).length,published:true}};
   C.view='categories';renderCatalog();
-  setTimeout(()=>{const i=document.getElementById('cc-name-en');if(i)i.focus();},60);
+  _catFocusLater('cc-name-en');
 }
 function _catCatClose(){_cat().ced=null;renderCatalog();}
 function _catCatIn2(field,v){
@@ -27999,7 +28012,7 @@ function _catFldEdit(key){
   const C=_cat(),f=key?C.fields.find(x=>x.key===key):null;
   C.fed={isNew:!f,busy:false,err:'',d:f?JSON.parse(JSON.stringify(f)):{key:'',label_en:'',label_ar:'',group_en:'',group_ar:'',unit_en:'',unit_ar:'',sort:(C.fields.length+1)*10}};
   C.view='fields';renderCatalog();
-  setTimeout(()=>{const i=document.getElementById(f?'cf-label-en':'cf-key');if(i)i.focus();},60);
+  _catFocusLater(f?'cf-label-en':'cf-key');
 }
 function _catFldClose(){_cat().fed=null;renderCatalog();}
 function _catFldIn(field,v){const F=_cat().fed;if(!F)return;F.d[field]=v;const e=document.getElementById('cf-err');if(e)e.hidden=true;}

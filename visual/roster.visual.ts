@@ -368,7 +368,7 @@ test.describe('@visual:roster strict policy', () => {
       const res = await r.fetch();
       const h = { ...res.headers() };
       const csp = h['content-security-policy'] || '';
-      expect(csp).toContain("style-src 'self' 'unsafe-inline'");
+      expect(csp).toMatch(/style-src 'self'/); expect(csp).not.toMatch(/style-src[^;]*'unsafe-inline'/); // Served this way since 2026-09-29: the page's own style-src has no 'unsafe-inline' left to take away.
       h['content-security-policy'] = csp.replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'report-sample'");
       await r.fulfill({ response: res, headers: h });
     });

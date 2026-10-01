@@ -485,7 +485,7 @@ async function strictPolicy(page: Page) {
     const res = await route.fetch();
     const h = res.headers();
     const csp = h['content-security-policy'] || '';
-    if (!csp.includes("style-src 'self' 'unsafe-inline'")) throw new Error('the served policy has changed: ' + csp);
+    if (!/style-src 'self'/.test(csp) || /style-src[^;]*'unsafe-inline'/.test(csp)) throw new Error('the served policy has changed: ' + csp); // Served this way since 2026-09-29: the page's own style-src has no 'unsafe-inline' left to take away.
     h['content-security-policy'] = csp.replace("style-src 'self' 'unsafe-inline'", "style-src 'self' 'report-sample'");
     await route.fulfill({ response: res, headers: h });
   });

@@ -366,7 +366,7 @@ test.describe('@visual:inventory strict policy', () => {
       const res = await r.fetch();
       const h = { ...res.headers() };
       h['content-security-policy'] = (h['content-security-policy'] || '').replace("style-src 'self' 'unsafe-inline'", "style-src 'self'");
-      expect(h['content-security-policy']).toContain("style-src 'self';");
+      expect(h['content-security-policy']).toMatch(/style-src 'self'/); expect(h['content-security-policy']).not.toMatch(/style-src[^;]*'unsafe-inline'/); // Served this way since 2026-09-29 ('report-sample' names a refused style in its report).
       await r.fulfill({ response: res, headers: h });
     });
     await stubSupabase(page, FIX);
@@ -438,11 +438,15 @@ test.describe('@visual:inventory strict policy', () => {
     await step('walk-in dup', () => page.evaluate(() => { Object.assign(S._rw as object, { err: '', dup: { queueNum: 2, name: 'B' } }); renderRiderWalkin(); }));
     await page.evaluate(() => closeRiderWalkin());
     await step('edit a party', () => page.evaluate(() => showRiderEdit(4)));
+    // Proof the page runs under the stricter policy: a style written on purpose, outside these screens,
+    // is refused. (It used to be proved by the page's own leftovers; since 2026-09-29 there are none.)
+    await page.evaluate(() => { const p = document.createElement('div'); p.setAttribute('style', 'color:red'); document.body.appendChild(p); });
+    await page.waitForTimeout(150);
     const v = await page.evaluate(() => (window as unknown as { __cspv: Cspv[] }).__cspv);
     const mine = v.filter((x) => x.roots.length && !x.foreign);
     mkdirSync(join(SNAPS, '_strict'), { recursive: true });
     writeFileSync(join(SNAPS, '_strict', 'violations.json'), JSON.stringify({ refused: [...seen], foreign: [...foreign], events: v }, null, 1));
-    // The page does run under the stricter policy: something outside these screens is still refused.
+    // The page does run under the stricter policy: the probe above was refused.
     expect(v.some((x) => /style-src/.test(x.dir))).toBe(true);
     expect.soft(mine.map((x) => x.el)).toEqual([]);
     expect.soft([...seen]).toEqual([]);

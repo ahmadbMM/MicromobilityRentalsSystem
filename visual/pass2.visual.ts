@@ -186,7 +186,9 @@ async function shot(page: Page, name: string, o: { full?: boolean; el?: Locator;
   await settle(page);
   if (o.el) await expect.soft(o.el).toHaveScreenshot(name + '.png');
   else await expect.soft(page).toHaveScreenshot(name + '.png', { fullPage: o.full !== false });
-  const hashes = await page.evaluate(styleHashes, ['body']);
+  // stripOrigin: the loading mark's mask-image resolves to http://127.0.0.1:<VIS_PORT>/..., and a
+  // baseline taken on another port failed on every shot (2026-10-01).
+  const hashes = await page.evaluate(styleHashes, { roots: ['body'], stripOrigin: true });
   if (process.env.CSS_DUMP) { // one element's computed style in full, to read when its hash differs
     mkdirSync(join(SNAPS, '_dump'), { recursive: true });
     writeFileSync(join(SNAPS, '_dump', `${name}-${Date.now()}.json`), JSON.stringify(await page.evaluate(styleOf, process.env.CSS_DUMP), null, 1));

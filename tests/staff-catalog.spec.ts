@@ -170,3 +170,20 @@ test('before the database update it says so, instead of failing', async ({ page 
   await page.evaluate(`setStaffTab('catalog')`);
   await expect(panel(page)).toContainText("isn't set up yet");
 });
+
+// The editor puts the caret in Brand a moment after it opens (the phone's keyboard settles first). A
+// staffer - or a test - already typing in another field by then kept losing the rest of the word to
+// Brand: "Sprint 2" typed into Name landed in Brand, and the address came out alvassprint-2
+// (2026-10-01; _catFocusLater).
+test('the editor does not pull the caret back to Brand once another field has it', async ({ page }) => {
+  await open(page);
+  await panel(page).getByRole('button', { name: '+ Add model' }).click();
+  // straight into Name, before the editor's own focus lands
+  await page.evaluate(`(()=>{const n=document.getElementById('ce-name');n.focus();})()`);
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(`document.activeElement&&document.activeElement.id`)).toBe('ce-name');
+  await page.keyboard.type('Sprint 2');
+  await page.locator('#ce-brand').fill('Alvas');
+  await expect(page.locator('#ce-name')).toHaveValue('Sprint 2');
+  await expect(page.locator('#ce-slug')).toHaveValue('alvas-sprint-2');
+});

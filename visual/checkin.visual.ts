@@ -32,7 +32,7 @@ const TODAY = '2026-09-24';
 const TOMORROW = '2026-09-25';
 const SNAPS = process.env.VISUAL_SNAPS || join(tmpdir(), 'mm-visual-snaps');
 const CLASSES = process.env.AUDIT_CLASSES ? readFileSync(process.env.AUDIT_CLASSES, 'utf8').split(/\s+/).filter(Boolean) : [];
-const ROOTS = ['#bike-modal', '#checkin-modal', '#scan-modal', '#ho-host', '#confirm-modal'];
+const ROOTS = ['#bike-modal', '#checkin-modal', '#scan-modal', '#ho-host', '#confirm-modal', '#return-modal'];
 
 type Row = Record<string, unknown>;
 const js = (o: unknown) => JSON.stringify(o);
@@ -335,10 +335,12 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
 
       test(`tag tapped on a bike that is out ${lang}`, async ({ page }) => {
         await open(page, lang);
-        await draw(page, `_rtTapSheet({found:true,bike:getBikes().find(b=>b.id==='b01')},getQueue().find(e=>e.id==='${R.r6}'))`);
-        await page.waitForSelector('#confirm-modal .confirm-box');
-        await shot(page, `${P}-rt-sheet`);
-        await draw(page, `closeConfirm()`);
+        // A tag on a bike that is out opens its rider's Return sheet (d127262, 2026-09-29: the one-tap
+        // chooser, _rtTapSheet, is gone) - the sheet the roster's Return opens.
+        await draw(page, `doReturn('${R.r6}')`);
+        await page.waitForSelector('#return-modal .modal-box');
+        await shot(page, `${P}-rt-return`);
+        await draw(page, `closeReturnModal()`);
       });
     }
   });
@@ -355,7 +357,6 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
 type G = Record<string, unknown>;
 declare const S: G & { view: string; dataLoaded: boolean };
 declare const sb: unknown;
-declare function getQueue(): G[];
 declare function getBikes(): G[];
 declare function renderStaffQueue(): void;
 declare function openModal(id: string): void;
@@ -370,7 +371,8 @@ declare function closeScanModal(keep?: boolean): void;
 declare function _renderScanBatch(): void;
 declare function _onScanPayload(raw: string): void;
 declare function _ciAddOpenScanner(): void;
-declare function _rtTapSheet(d: G, e: G): void;
+declare function doReturn(id: string): void;
+declare function closeReturnModal(): void;
 declare function closeConfirm(): void;
 declare function t(k: string): string;
 // the scanner's switches and list: let bindings of the app, set from the page below
@@ -389,7 +391,9 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         const headers = { ...res.headers() };
         const csp = headers['content-security-policy'] || '';
         headers['content-security-policy'] = csp.replace(/style-src 'self' 'unsafe-inline'/, "style-src 'self' 'report-sample'");
-        rewritten = headers['content-security-policy'] !== csp;
+        // the policy the page runs under: served strict since 2026-09-29, the replace above a no-op now
+        const run = headers['content-security-policy'];
+        rewritten = /style-src 'self'/.test(run) && !/style-src[^;]*'unsafe-inline'/.test(run);
         await route.fulfill({ response: res, headers });
       });
       await stubSupabase(page, FIX);
@@ -408,7 +412,7 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         ['cq_scan_cont', 'cq_scan_multi', 'cq_scan_express'].forEach((k) => localStorage.setItem(k, '0'));
       }, ROOTS);
       await page.goto('/');
-      expect(rewritten, 'the page came with the policy to tighten').toBe(true);
+      expect(rewritten, 'the page runs under style-src without unsafe-inline').toBe(true);
       await page.waitForFunction(() => typeof sb !== 'undefined' && !!sb && typeof S !== 'undefined' && S.view === 'staff' && !!S.dataLoaded);
       await page.evaluate(() => { S.staffTab = 'queue'; S.queueView = 'bookings'; renderStaffQueue(); });
       const steps: [string, (r: Record<string, string>) => void][] = [
@@ -433,8 +437,8 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         ['scanner other day', () => { closeScanModal(); _scanMulti = false; openScanModal(); _onScanPayload('MMC-16-16abcd'); }],
         ['scanner from a check-in, adding', (r) => { closeScanModal(); showCheckinModal(r.r2); _ciAddOpenScanner(); }],
         ['hand-over', () => { closeScanModal(); closeCheckinModal(true); S.queueView = 'handover'; renderStaffQueue(); }],
-        ['tag on a bike that is out', (r) => { _rtTapSheet({ found: true, bike: getBikes().find((b) => b.id === 'b01') }, getQueue().find((e) => e.id === r.r6)!); }],
-        ['closed', () => { closeConfirm(); }],
+        ['tag on a bike that is out', (r) => { doReturn(r.r6); }],
+        ['closed', () => { closeReturnModal(); closeConfirm(); }],
       ];
       const seen: Record<string, Cspv[]> = {};
       for (const [label, step] of steps) {

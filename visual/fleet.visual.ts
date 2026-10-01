@@ -305,7 +305,7 @@ test.describe('@visual:fleet strict style policy', () => {
       const res = await r.fetch();
       const headers = { ...res.headers() };
       headers['content-security-policy'] = (headers['content-security-policy'] || '').replace("style-src 'self' 'unsafe-inline'", "style-src 'self'");
-      expect(headers['content-security-policy']).toContain("style-src 'self';");
+      expect(headers['content-security-policy']).toMatch(/style-src 'self'/); expect(headers['content-security-policy']).not.toMatch(/style-src[^;]*'unsafe-inline'/); // Served this way since 2026-09-29 ('report-sample' names a refused style in its report).
       await r.fulfill({ response: res, headers });
     });
     await page.addInitScript(() => {
