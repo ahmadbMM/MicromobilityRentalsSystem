@@ -29,6 +29,8 @@ test('reserve bike holds a specific bike for a waiting rider without check-in or
   await modal.getByRole('button', { name: /Reserve bike/ }).click();
   await expect(modal).toBeHidden(); // reservation saved and modal closed
 
+  // The dialog closes as the save leaves; under a loaded machine the request is seen a moment later.
+  await expect.poll(() => patches.filter((p) => p.url.includes('queue_entries')).length).toBe(1);
   const queuePatches = patches.filter((p) => p.url.includes('queue_entries'));
   expect(queuePatches).toHaveLength(1);
   expect(queuePatches[0].body).toEqual({ assigned_bike_id: 'b1' }); // no status change, no payment

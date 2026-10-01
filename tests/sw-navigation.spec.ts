@@ -107,20 +107,21 @@ test('a page that is not the root is never answered from, or stored as, the shel
     // Give the worker's background refresh time to write whatever it is going to write.
     await page.waitForTimeout(1500);
 
-    // The root shell must still be the app. The stub is a few hundred bytes; the built app
-    // is over a megabyte, so the size alone tells them apart with no ambiguity.
-    const shellLen = await page.evaluate(async () => {
+    // The root shell must still be the app: the page that loads app.js (2026-10-01: the app's
+    // script is its own file, so the page alone is no longer told apart by its size). The stub
+    // loads no app.js.
+    const shellIsApp = await page.evaluate(async () => {
       for (const n of await caches.keys()) {
         const hit = await (await caches.open(n)).match('./');
-        if (hit) return (await hit.text()).length;
+        if (hit) return (await hit.text()).includes('<script src="/app.js?v=');
       }
-      return -1;
+      return null;
     });
-    expect(shellLen).toBeGreaterThan(100000);
+    expect(shellIsApp).toBe(true);
 
     // And a fresh visit to the root really does land on the app.
     await page.goto(site.url, { waitUntil: 'domcontentloaded' });
-    expect(await page.evaluate(() => document.documentElement.innerHTML.length)).toBeGreaterThan(100000);
+    expect(await page.locator('script[src^="/app.js?v="]').count()).toBe(1);
   } finally {
     await site.close();
   }
@@ -138,7 +139,7 @@ test('a section\'s own address is answered from the shell, and never stored as i
 
     const res = await page.goto(`${site.url}bookings/waitlist`, { waitUntil: 'domcontentloaded' });
     expect(res?.status()).toBe(200);
-    expect(await page.evaluate(() => document.documentElement.innerHTML.length)).toBeGreaterThan(100000);
+    expect(await page.locator('script[src^="/app.js?v="]').count()).toBe(1); // the app's page, not a stub
     await page.waitForTimeout(1500);
 
     const keys = await page.evaluate(async () => {
@@ -148,13 +149,16 @@ test('a section\'s own address is answered from the shell, and never stored as i
     });
     expect(keys).toContain('/');
     expect(keys).not.toContain('/bookings/waitlist');
+    // The page's script and stylesheet ride in the shell, so it opens offline (2026-10-01).
+    expect(keys).toContain('/app.js');
+    expect(keys).toContain('/app.css');
     expect(keys).not.toContain('/index.html');
     // The root shell is still the app, not the page that was asked for.
-    const shellLen = await page.evaluate(async () => {
-      for (const n of await caches.keys()) { const hit = await (await caches.open(n)).match('./'); if (hit) return (await hit.text()).length; }
-      return -1;
+    const shellIsApp = await page.evaluate(async () => {
+      for (const n of await caches.keys()) { const hit = await (await caches.open(n)).match('./'); if (hit) return (await hit.text()).includes('<script src="/app.js?v='); }
+      return null;
     });
-    expect(shellLen).toBeGreaterThan(100000);
+    expect(shellIsApp).toBe(true);
   } finally {
     await site.close();
   }

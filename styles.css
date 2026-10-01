@@ -61,7 +61,6 @@
       *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
     }
 
-    
     #topbar{position:sticky;top:0;z-index:100;
       background:var(--bg);
       border-bottom:1px solid var(--border);
@@ -82,7 +81,6 @@
     .topbar-btn.undo-btn:hover{border-color:rgba(var(--green-rgb),.55);background:rgba(var(--green-rgb),.08);color:var(--green);}
     @keyframes undoPulse{0%,100%{opacity:1;}60%{opacity:.72;}} /* opacity-only: stays on the compositor */
 
-    
     .tab-nav{background:var(--s1);
       border-bottom:1px solid var(--border);
       padding:0 16px;display:flex;justify-content:center;gap:2px;overflow-x:auto;scrollbar-width:none;}
@@ -94,11 +92,9 @@
     .tab-btn:hover{color:rgba(var(--tint-rgb),.75);}
     .tab-btn.active{color:var(--green);border-bottom-color:var(--green);}
 
-    
     #view-landing,#view-customer,#view-staff{display:none;}
     #view-landing.active,#view-customer.active,#view-staff.active{display:block;}
 
-    
     #landing-body{
       display:block;width:100%;max-width:1100px;margin:0 auto;
       padding:56px 40px 64px;
@@ -236,13 +232,11 @@
 
     .spots-low{color:var(--orange);}
 
-    
     @keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
     @keyframes modalSlideUp{from{transform:translateY(28px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
     .modal-backdrop{animation:modalFadeIn .22s ease both;}
     .modal-box{animation:modalSlideUp .28s cubic-bezier(.2,.8,.2,1) both;}
 
-    
     .sess-summary-bar{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
     .sess-bar-mobile{display:none;}  
     .sess-summary-chip{
@@ -275,7 +269,6 @@
     .sess-chip-event{font-size:10px;font-weight:900;color:#4aa8f8;text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     @media(max-width:767px){.sess-summary-bar{gap:6px;}.sess-summary-chip{min-width:140px;padding:8px 10px;}}
 
-    
     .undo-bar{
       display:flex;align-items:center;gap:12px;
       background:#1e1e1e;border:1px solid rgba(var(--green-rgb),.3);border-radius:7px;
@@ -294,15 +287,12 @@
     .err-bar-detail{display:block;margin-top:4px;font-size:11px;font-weight:600;color:var(--muted-l);
       word-break:break-word;}
 
-    
     .refresh-indicator{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.2px;}
     .refresh-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
 
-    
     .view-main{max-width:1160px;margin:0 auto;padding:28px 28px;}
     #view-staff .view-main{max-width:min(1600px,96vw);}
-    
     body.view-staff #app-footer{display:none;}
     /* ── Mini footer ─────────────────────────────────────────────────────────
        The rentals pages carry only what a rider booking a session needs: brand,
@@ -403,7 +393,6 @@
     .label-hint{font-size:11px;font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0;}
     .card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;box-shadow:var(--sh-1);}
 
-    
     .pin-backdrop{position:fixed;inset:0;background:rgba(16,19,18,.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;}
     .pin-box{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:36px 32px;width:100%;max-width:340px;text-align:center;box-shadow:0 1px 3px rgba(16,19,18,.06);}
     .pin-title{font-size:20px;font-weight:700;margin-bottom:4px;}
@@ -411,7 +400,6 @@
     .pin-cancel{background:none;border:none;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;padding:8px;transition:color .2s;}
     .pin-cancel:hover{color:var(--text);}
 
-    
     .auth-backdrop{position:fixed;inset:0;background:rgba(16,19,18,.5);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;}
     /* Auth-first: for signed-out visitors the sign in / sign up screen IS the first page,
        separate from the event picker behind it. The landing hides its content and the auth
@@ -426,7 +414,6 @@
     #auth-modal.as-page .auth-box{max-height:calc(100dvh - var(--topbar-h,56px) - 40px);}
     body.auth-page #app-footer{display:none;}
     #auth-modal.as-page .auth-cancel-btn{display:none;}
-    #auth-modal.as-page .auth-cancel-btn.auth-keep{display:block;}
     .auth-box{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:36px 32px;width:100%;max-width:420px;max-height:92dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;box-shadow:0 1px 3px rgba(16,19,18,.06);margin:auto;}
     .auth-logo{height:80px;width:auto;object-fit:contain;margin-bottom:20px;display:block;margin-left:auto;margin-right:auto;}
     .auth-title{font-size:22px;font-weight:700;margin-bottom:4px;letter-spacing:-.3px;}
@@ -505,18 +492,10 @@
     #auth-modal .cu-rm-on{border-color:var(--green);background:var(--green);}
     #auth-modal .cu-tick-on,#rn-ask .cu-tick-on{border-color:var(--green);background:var(--green);}
 
-    
     .cust-topbar-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
     .cust-topbar-email{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px;}
     .topbar-btn{white-space:nowrap;}
 
-    
-    .rides-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-bottom:24px;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;background:var(--s1);}
-    @media(max-width:560px){.rides-stat-row{grid-template-columns:repeat(2,1fr);}}
-    .rides-stat-card{background:none;border:none;border-radius:0;padding:16px;min-width:0;}
-    .rides-stat-card:not(:first-child){border-inline-start:1px solid var(--border);}
-    .rides-stat-num{font-size:24px;font-weight:700;margin-bottom:3px;letter-spacing:-.5px;font-family:var(--font-body);}
-    .rides-stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
     /* v2: whole-page empty state for a customer with no rides at all */
     .rides-zero{text-align:center;padding:56px 20px 64px;border-top:1px solid var(--line2);margin-top:8px;}
     .rides-zero-num{font-family:var(--font-body);font-weight:700;font-size:96px;line-height:1;color:var(--s2);}
@@ -556,7 +535,6 @@
     #tab-account .cu-card640{max-width:640px;margin:16px auto 0;}
     #tab-account .cu-card640-0{max-width:640px;margin:0 auto;}
     #tab-account .cu-del-state{font-size:13px;font-weight:700;color:var(--orange);line-height:1.6;margin-bottom:12px;}
-    #tab-account .cu-fs17{font-size:17px;}
     #tab-account .cu-hidden{display:none;}
     #tab-account .cu-initials{width:72px;height:72px;border-radius:50%;background:rgba(var(--green-rgb),.16);border:2px solid rgba(var(--green-rgb),.4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:var(--green);flex-shrink:0;}
     #tab-account .cu-mb12{margin-bottom:12px;}
@@ -568,7 +546,6 @@
     #tab-account .cu-mt22{margin-top:22px;}
     #tab-account .cu-mt4{margin-top:4px;}
     #tab-account .cu-mt6{margin-top:6px;}
-    #tab-account .cu-next-when{font-size:12px;font-weight:800;color:var(--green);margin-top:2px;}
     #tab-account .cu-photo{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(var(--green-rgb),.4);flex-shrink:0;}
     #tab-account .cu-photo-btn{font-size:12px;padding:7px 14px;}
     #tab-account .cu-photo-col{display:flex;flex-direction:column;gap:6px;}
@@ -581,8 +558,6 @@
     #tab-account .cu-purch-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
     #tab-account .cu-push-blocked{font-size:12.5px;color:var(--red);font-weight:700;}
     #tab-account .cu-rn-state{font-size:13px;font-weight:700;margin-bottom:12px;}
-    #tab-account .cu-stat-center{display:flex;align-items:center;justify-content:center;}
-    #tab-account .cu-tier{font-size:18px;color:var(--green);}
     #tab-account .cu-tier-fill{width:var(--cu-w);}
     #tab-account .cu-type-hint{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600;}
     #tab-account .cu-upload{font-size:12px;padding:7px 14px;cursor:pointer;margin:0;}
@@ -719,10 +694,8 @@
     #confirm-modal .iv-cp-inp{width:100%;background:var(--s2);border:1px solid rgba(var(--tint-rgb),.12);border-radius:6px;padding:12px 14px;font-size:16px;font-weight:700;color:var(--text);font-family:var(--font-body);outline:medium none;}
     @media(max-width:560px){.myrides-grid{grid-template-columns:1fr;}}
 
-    
     .lang-toggle{background:rgba(var(--tint-rgb),.04);border:1px solid rgba(var(--tint-rgb),.1);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:700;line-height:1;padding:7px 12px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
     .lang-toggle:hover{border-color:rgba(var(--green-rgb),.45);color:var(--green);background:rgba(var(--green-rgb),.06);}
-    
     html[dir="rtl"] .phone-row{flex-direction:row-reverse;}
     html[dir="rtl"] .auth-cc-row{flex-direction:row-reverse;}
     html[dir="rtl"] .height-row{flex-direction:row-reverse;}
@@ -738,13 +711,11 @@
     html[dir="rtl"] .actions-cell{flex-direction:row-reverse;}
     html[dir="rtl"] .stats-row{direction:rtl;}
     html[dir="rtl"] .modal-footer{flex-direction:row-reverse;}
-    
     html[dir="rtl"] .filter-bar{direction:rtl;}
     html[dir="rtl"] .section-header>div{text-align:right;}
     html[dir="rtl"] .inline-form{direction:rtl;}
     html[dir="rtl"] .form-section{direction:rtl;}
     html[dir="rtl"] .analytics-kpi-grid{direction:rtl;}
-    html[dir="rtl"] .rides-stat-row{direction:rtl;}
     html[dir="rtl"] .chart-grid-wide,html[dir="rtl"] .chart-grid-2,html[dir="rtl"] .chart-grid-3{direction:rtl;}
     html[dir="rtl"] .donut-wrap{flex-direction:row-reverse;}
     html[dir="rtl"] .donut-legend{text-align:right;}
@@ -773,22 +744,17 @@
     html[dir="rtl"] .sess-card{direction:rtl;}
     html[dir="rtl"] .receipt-box{direction:ltr;text-align:left;}
     html[dir="rtl"] .color-slots{direction:ltr;}
-    html[dir="rtl"] .modal-bikes-grid{direction:rtl;}
     html[dir="rtl"] .topbar-right{flex-direction:row-reverse;}
     html[dir="rtl"] .view-badge{letter-spacing:0;}
 
-    
 
-    
     :is(html[lang="ar"],html[lang="ur"]) body{
       font-family:'IBM Plex Sans Arabic',sans-serif;
       font-size:16px;
       font-weight:500;
       line-height:1.75;
     }
-    
     :is(html[lang="ar"],html[lang="ur"],html[lang="hi"],html[lang="ne"],html[lang="bn"]) *{letter-spacing:0!important;} /* tracking breaks the joined Arabic script and the conjuncts and matras of Devanagari and Bengali */
-    
     :is(html[lang="ar"],html[lang="ur"]) .view-badge,
     :is(html[lang="ar"],html[lang="ur"]) label,
     :is(html[lang="ar"],html[lang="ur"]) .analytics-section-title,
@@ -802,28 +768,22 @@
       text-transform:none!important;
     }
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .topbar-btn{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .lang-toggle{font-size:13px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .view-badge{font-size:12px;font-weight:700;padding:4px 12px;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .tab-btn{font-size:14px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .landing-main-title{font-size:38px;font-weight:700;line-height:1.3;text-transform:none;}
     :is(html[lang="ar"],html[lang="ur"]) .staff-access-btn{font-size:13px;font-weight:600;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .page-title{font-size:22px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .page-sub{font-size:13px;font-weight:400;line-height:1.7;}
     :is(html[lang="ar"],html[lang="ur"]) .form-title{font-size:16px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) label{font-size:13px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .label-hint{font-size:11px;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) input,
     :is(html[lang="ar"],html[lang="ur"]) select,
     :is(html[lang="ar"],html[lang="ur"]) button,
@@ -840,7 +800,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .btn-sm{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .filter-select{font-size:13px;font-weight:600;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .queue-table th{font-size:11px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .queue-table td{font-size:14px;font-weight:500;}
     :is(html[lang="ar"],html[lang="ur"]) .rider-name{font-size:14px;font-weight:700;}
@@ -850,16 +809,12 @@
     :is(html[lang="ar"],html[lang="ur"]) .type-badge{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .walk-in-badge{font-size:11px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .stat-num{font-size:28px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .stat-label{font-size:11px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .rides-stat-num{font-size:24px;font-weight:700;}
-    :is(html[lang="ar"],html[lang="ur"]) .rides-stat-label{font-size:11px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-value{font-size:26px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-label{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-kpi-sub{font-size:12px;font-weight:500;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .analytics-section-title{font-size:14px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-bar-label{font-size:12px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-bar-value{font-size:12px;font-weight:700;}
@@ -872,17 +827,14 @@
     :is(html[lang="ar"],html[lang="ur"]) .an-range-label{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .result-count{font-size:12px;font-weight:600;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .sess-card-date{font-size:17px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-card-spots{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-admin-table th{font-size:12px;font-weight:700;text-transform:none;}
     :is(html[lang="ar"],html[lang="ur"]) .sess-admin-table td{font-size:14px;font-weight:500;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .bike-name,:is(html[lang="ar"],html[lang="ur"]) .bike-list-name{font-size:14px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .bike-meta,:is(html[lang="ar"],html[lang="ur"]) .bike-list-meta{font-size:12px;font-weight:500;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .price-preview-breakdown{font-size:13px;font-weight:600;}
     :is(html[lang="ar"],html[lang="ur"]) .price-preview-total{font-size:20px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .ticket-num-label{font-size:10px;font-weight:700;}
@@ -890,7 +842,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .ticket-label{font-size:10px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .ticket-value{font-size:13px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .auth-title{font-size:22px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-sub{font-size:14px;font-weight:400;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-switch{font-size:16px;}
@@ -898,33 +849,25 @@
     :is(html[lang="ar"],html[lang="ur"]) .auth-submit{font-size:15px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-err{font-size:13px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .pin-title{font-size:22px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .pin-sub{font-size:14.5px;font-weight:500;}
     :is(html[lang="ar"],html[lang="ur"]) .pin-cancel{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:14px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .modal-title{font-size:20px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .modal-sub{font-size:14.5px;font-weight:500;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .toast{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:14.5px;font-weight:700;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .empty-state{font-size:14.5px;font-weight:600;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .analytics-trend-table th{font-size:12px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .analytics-trend-table td{font-size:14px;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .cust-topbar-name{font-size:13.5px;font-weight:700;}
     :is(html[lang="ar"],html[lang="ur"]) .cust-topbar-email{font-size:12px;font-weight:600;}
 
-    
     :is(html[lang="ar"],html[lang="ur"]) .an-range-bar{gap:8px;}
 
-    
     @media(max-width:767px){
       :is(html[lang="ar"],html[lang="ur"]) body{font-size:15px;font-weight:500;}
       :is(html[lang="ar"],html[lang="ur"]) .page-title{font-size:19px;font-weight:700;}
@@ -933,7 +876,6 @@
       :is(html[lang="ar"],html[lang="ur"]) .queue-table td{font-size:13px;}
       :is(html[lang="ar"],html[lang="ur"]) .rider-name{font-size:13px;font-weight:700;}
     }
-    
     .price-preview{display:flex;align-items:center;justify-content:space-between;
       background:rgba(var(--green-rgb),.05);
       border:1px solid rgba(var(--green-rgb),.2);border-radius:6px;padding:16px 20px;margin-bottom:14px;}
@@ -946,13 +888,6 @@
     .qty-btn:hover{border-color:var(--green-d);color:var(--green-d);}
     .qty-val{font-size:16px;font-weight:600;min-width:18px;text-align:center;}
 
-    .reg-summary-panel{border:1px solid var(--line2);border-radius:var(--r-lg);padding:22px 24px;}
-    .reg-summary-row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:8px 0;}
-    .reg-summary-row span:first-child{color:var(--muted);}
-    .reg-summary-row span:last-child{font-weight:600;text-align:end;}
-    .reg-summary-total{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line2);margin-top:10px;padding-top:14px;}
-    .reg-summary-total span:first-child{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
-    .reg-summary-total span:last-child{font-size:22px;font-weight:600;letter-spacing:-.5px;color:var(--text);}
     /* ── The booking wizard (renderRegister, _soleSessHtml, _promoBoxHtml, _promoDiscLine), drawn into
        #tab-register: without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
     #tab-register .cu-ad-brand{font-size:11.5px;color:var(--muted);font-weight:600;}
@@ -1116,7 +1051,6 @@
     .sess-comm-chip{font-size:10px;font-weight:900;color:#4aa8f8;border:1px solid rgba(74,168,248,.45);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;flex-shrink:0;}
     .spots-green{color:var(--green-d);}
     .spots-red{color:var(--red);}
-    
     .sess-admin-table{width:100%;border-collapse:collapse;background:var(--s1);}
     .sess-admin-table th,.sess-admin-table td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(var(--tint-rgb),.04);font-size:13px;}
     .sess-admin-table th{font-weight:700;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px;background:none;border-bottom:1px solid var(--line2);}
@@ -1128,7 +1062,6 @@
     .badge-closed{background:rgba(var(--tint-rgb),.05);color:var(--muted-l);border:1px solid rgba(var(--tint-rgb),.1);padding:4px 12px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.3px;}
     .badge-full{background:rgba(var(--tint-rgb),.05);color:var(--muted-l);border:1px solid rgba(var(--tint-rgb),.1);padding:4px 12px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.3px;}
 
-    
     .form-section{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px;box-shadow:var(--sh-1);}
     .form-title{font-size:16px;font-weight:700;margin-bottom:22px;letter-spacing:-.2px;}
     .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
@@ -1159,7 +1092,6 @@
     .height-row{display:flex;align-items:center;gap:10px;}
     .height-row input{flex:1;}
 
-    
     .toggle-group{display:flex;gap:8px;flex-wrap:wrap;}
     .toggle-btn{padding:8px 18px;background:var(--s3);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;white-space:nowrap;}
     .toggle-btn:hover{border-color:rgba(var(--tint-rgb),.2);color:var(--text);}
@@ -1181,7 +1113,6 @@
     .type-grid .toggle-btn{padding-inline:8px;overflow:hidden;text-overflow:ellipsis;}
     .type-grid .type-info-btn{flex:0 0 36px;}
 
-    
     .btn-primary{background:var(--ac-fill);color:var(--acink);border:none;border-radius:3px;padding:12px 24px;font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);letter-spacing:-.1px;}
     .btn-primary:hover{background:var(--ac-fill-h);color:var(--acink);transform:translateY(-1px);box-shadow:var(--sh-2);}
     .btn-primary:active{transform:translateY(0);}
@@ -1203,9 +1134,7 @@
     .btn-muted{background:rgba(var(--tint-rgb),.04);color:var(--muted);border:1px solid rgba(var(--tint-rgb),.08);}
     .btn-muted:hover{background:rgba(var(--tint-rgb),.1);}
 
-    
     .color-builder{display:flex;flex-direction:column;gap:10px;}
-    .color-preview-bar{height:40px;border-radius:4px;border:1px solid rgba(var(--tint-rgb),.08);transition:background .2s;box-shadow:0 2px 12px rgba(16,19,18,.06);}
     .color-slots{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
     .color-slot{position:relative;}
     .color-slot input[type="color"]{width:52px;height:52px;border-radius:4px;border:2px solid rgba(var(--tint-rgb),.1);cursor:pointer;padding:3px;background:var(--s3);transition:border-color .2s;}
@@ -1215,8 +1144,6 @@
     .add-color-slot:hover{border-color:rgba(var(--green-rgb),.45);color:var(--green);background:rgba(var(--green-rgb),.05);}
     .bike-color-strip{height:6px;border-radius:4px;margin-bottom:4px;box-shadow:0 1px 6px rgba(16,19,18,.06);}
 
-    
-    
     .ticket-card{
       background:var(--bg);
       border:1px solid var(--line2);
@@ -1296,7 +1223,6 @@
     #tab-myrides .cu-tr-wl{display:inline-flex;align-items:center;gap:6px;color:var(--orange);font-size:10px;font-weight:800;white-space:nowrap;}
     #tab-myrides .cu-w132{width:132px;}
 
-    
     .stats-row{display:flex;gap:0;margin-bottom:22px;flex-wrap:wrap;border:1px solid var(--line2);border-radius:var(--r-lg);overflow:hidden;background:var(--s1);}
     .stat-card{background:none;border:none;border-radius:0;padding:18px 20px;flex:1;min-width:0;}
     .stat-card:not(:first-child){border-inline-start:1px solid var(--border);}
@@ -1304,7 +1230,6 @@
     .stat-num.green{color:var(--green-d);}
     .stat-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-top:8px;}
 
-    
     .filter-pill{padding:7px 16px;background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--muted);font-family:var(--font-body);font-size:12.5px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
     .filter-pill:hover{border-color:rgba(var(--tint-rgb),.2);color:var(--text);}
     .filter-pill.active{background:var(--ac-fill);border-color:var(--ac-fill);color:var(--acink);}
@@ -1578,7 +1503,6 @@
       #tab-community .bdg-acts{width:100%;justify-content:flex-start;padding-inline-start:46px;}
       #tab-community .bdg-panel{margin-inline-start:0;}
     }
-    
     .filter-select{
       height:34px;padding:0 28px 0 10px;
       background:var(--in-bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E") no-repeat right 8px center;
@@ -1596,7 +1520,6 @@
     .filter-row::-webkit-scrollbar-thumb{background:rgba(var(--tint-rgb),.1);border-radius:2px;}
     @media(max-width:767px){.filter-select{font-size:12px;height:36px;}}
 
-    
     .table-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:7px;border:1px solid var(--border);}
     .queue-table{width:100%;border-collapse:collapse;background:var(--s1);}
     @media(min-width:1024px){
@@ -1608,7 +1531,13 @@
     }
     .queue-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;text-align:left;padding:12px 16px;border-bottom:1px solid var(--line2);white-space:nowrap;background:none;}
     .queue-table td{padding:14px 16px;border-bottom:1px solid rgba(var(--tint-rgb),.04);vertical-align:top;}
-    .queue-table tbody:last-of-type tr:last-child td{border-bottom:none;}
+    /* :last-child, not :last-of-type (2026-10-01): each party is its own <tbody>, and Chrome counts
+       :last-of-type as a backward positional rule - one party repainted by a realtime event restyled
+       every cell of every other party (5,200 elements, ~55 ms on a booth tablet). :last-child only
+       touches the party that stops or starts being last. The only tables that end in a <tfoot>, the
+       session sheets, lose nothing: their foot row's 2px top border wins the collapsed border. (A
+       :has(+tfoot) for them put the cost straight back: 3,144 elements - tests/roster-repaint-budget.) */
+    .queue-table tbody:last-child tr:last-child td{border-bottom:none;}
     .queue-table tbody tr:hover td{background:rgba(var(--tint-rgb),.018);}
     .queue-table tbody tr.row-active{background:rgba(var(--green-rgb),.04);}
     .queue-table tbody tr.row-active:hover td{background:rgba(var(--green-rgb),.06);}
@@ -1710,7 +1639,6 @@
     @keyframes rowSheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
     @media(prefers-reduced-motion:reduce){.row-sheet,.modal-backdrop.row-sheet-bg{animation:none;}}
 
-    
     .status-badge{display:inline-flex;align-items:center;font-size:12.5px;font-weight:600;white-space:nowrap;background:none;border:none;padding:0;}
     .badge-waiting{color:var(--muted);}
     .badge-active{color:var(--green-d);}
@@ -1725,13 +1653,10 @@
     .type-any{background:rgba(var(--tint-rgb),.05);color:var(--muted-l);border:1px solid rgba(var(--tint-rgb),.09);}
     .type-badge{display:inline-flex;align-items:center;gap:5px;}
 
-    
 
-    
     @keyframes ticketIn{from{opacity:0;transform:translateY(20px) scale(.97);}to{opacity:1;transform:translateY(0) scale(1);}}
     .ticket-card{animation:ticketIn .45s cubic-bezier(.2,.8,.2,1) both;}
 
-    
     .density-toggle{display:flex;gap:3px;align-items:center;}
     .density-btn{background:var(--s3);border:1px solid var(--border);border-radius:2px;padding:5px 9px;cursor:pointer;color:var(--muted);font-size:11px;font-weight:700;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;font-family:var(--font-body);letter-spacing:.3px;}
     .density-btn.active{border-color:rgba(var(--green-rgb),.4);color:var(--green);background:rgba(var(--green-rgb),.07);}
@@ -1741,14 +1666,12 @@
     .queue-table.compact .pos-badge{font-size:9px;}
     .queue-table.compact .pay-toggle{font-size:10px;padding:3px 8px;}
 
-    
     .empty-illustration{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;text-align:center;}
     .empty-illus-icon{margin-bottom:16px;opacity:.45;}
     .empty-illus-title{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:6px;}
     .empty-illus-sub{font-size:12px;color:var(--muted);opacity:.7;max-width:260px;line-height:1.6;font-weight:600;}
     .empty-illus-action{margin-top:18px;}
 
-    
     #cust-bottom-nav{
       position:fixed;bottom:0;left:0;right:0;z-index:106;
       background:rgba(25,25,25,.97);border-top:1px solid rgba(252,249,244,.07);
@@ -1769,16 +1692,11 @@
       #view-customer .view-main{padding-bottom:calc(70px + env(safe-area-inset-bottom));}
     }
 
-    
     .spots-green{background:rgba(var(--green-rgb),.15);color:var(--green);}
     .spots-red{background:rgba(var(--red-rgb),.15);color:var(--red);}
 
-    
     .inline-form{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:22px;margin-bottom:20px;}
 
-    
-    .bikes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:14px;}
-    
     .bikes-list{display:flex;flex-direction:column;gap:10px;}
     .bike-list-row{display:grid;grid-template-columns:4px 40px 1fr auto auto auto auto;align-items:center;gap:0 16px;padding:14px 18px;background:var(--s1);border:1px solid var(--border);border-radius:7px;transition:background .15s,border-color .15s;position:relative;overflow:hidden;}
     .bike-list-row:hover{background:var(--s2);border-color:rgba(var(--tint-rgb),.14);}
@@ -1791,7 +1709,6 @@
     .bike-list-actions{grid-column:5/8;display:flex;gap:6px;flex-shrink:0;}
     .bike-list-actions .btn-sm{flex:1;text-align:center;white-space:nowrap;}
     .bike-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:16px;display:flex;flex-direction:column;gap:7px;transition:border-color .2s,transform .2s;}
-    
     .bike-assign-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px;}
     .bike-assign-card{background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:11px 13px;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;user-select:none;}
     .bike-assign-card:hover:not(.busy){border-color:rgba(var(--green-rgb),.5);background:rgba(var(--green-rgb),.05);}
@@ -1799,9 +1716,6 @@
     .bike-assign-card.busy{opacity:.45;cursor:not-allowed;}
     .bike-assign-name{font-size:13px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .bike-assign-check{font-size:11px;font-weight:700;color:var(--green);margin-top:5px;}
-    .type-count-box{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:16px 14px;text-align:center;}
-    .type-count-input{width:80px;padding:10px 4px;text-align:center;font-size:28px;font-weight:700;background:var(--in-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:var(--font-body);outline:none;display:block;margin:10px auto 6px;}
-    .type-count-input:focus{border-color:rgba(var(--green-rgb),.5);}
     @media(max-width:767px){.bike-assign-grid{grid-template-columns:repeat(2,1fr);}}
     .bike-card:hover{border-color:rgba(var(--tint-rgb),.2);transform:translateY(-2px);}
     .bike-card-top{display:flex;align-items:center;justify-content:space-between;}
@@ -1816,7 +1730,6 @@
     .bike-meta{font-size:12px;color:var(--muted);}
     .bike-actions{display:flex;gap:6px;margin-top:2px;flex-wrap:wrap;}
 
-    
     .modal-backdrop{position:fixed;inset:0;background:rgba(16,19,18,.5);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
     /* No dark-theme scrims here any more. The head script sets data-theme="dark" on every load
        (it is the name of the one look, not a choice), so the near-black :root[data-theme="dark"]
@@ -1824,11 +1737,6 @@
     .modal-box{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-xl);padding:28px;width:100%;max-width:580px;max-height:82vh;overflow-y:auto;box-shadow:var(--sh-3);}
     .modal-title{font-size:18px;font-weight:700;margin-bottom:6px;}
     .modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;}
-    .modal-bikes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;margin-bottom:20px;}
-    .modal-bike-card{background:var(--s2);border:1.5px solid var(--border);border-radius:6px;padding:14px;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
-    .modal-bike-card:hover:not(.unavailable){border-color:rgba(var(--green-rgb),.35);}
-    .modal-bike-card.selected{border-color:var(--green);background:rgba(var(--green-rgb),.07);}
-    .modal-bike-card.unavailable{opacity:.32;cursor:not-allowed;}
     .modal-footer{display:flex;justify-content:flex-end;gap:10px;padding-top:4px;border-top:1px solid rgba(var(--tint-rgb),.05);margin-top:4px;}
     /* The bike info sheet (showBikeInfo): the picture flush to the top, the brief under it. */
     .modal-box.bike-info-box{padding:0;max-width:520px;}
@@ -1847,7 +1755,6 @@
     :is(html[lang="ar"],html[lang="ur"]) .bike-info-kicker{text-transform:none;letter-spacing:0;font-size:12.5px;}
     .receipt-box{background:#111;border-radius:6px;padding:20px;font-family:monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;margin-bottom:20px;color:rgba(var(--green-rgb),.85);border:1px solid rgba(var(--green-rgb),.12);box-shadow:0 0 20px rgba(var(--green-rgb),.05) inset;}
 
-    
     /* z-index above the 9500/9600 inline overlays (add-on picker, nutrition, cancel night, staff
        password): a toast or error bar raised from inside one of them used to land under its scrim. */
     #toast-container{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:9700;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
@@ -2349,7 +2256,6 @@
     #addon-picker-backdrop .sl-mb-l{left:6px;}
     #addon-picker-backdrop .sl-mb-r{right:6px;}
 
-    
     *{-webkit-tap-highlight-color:transparent;}
     button{touch-action:manipulation;}
     .table-wrapper{-webkit-overflow-scrolling:touch;}
@@ -2361,7 +2267,6 @@
     @keyframes tabFadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
     .tab-panel.active{animation:tabFadeIn .22s ease;}
 
-    
     .queue-mobile-view{display:none;}
     .q-card{background:var(--s2);border:1px solid rgba(var(--tint-rgb),.08);border-radius:6px;padding:12px 14px;margin-bottom:8px;}
     .q-card.row-active{background:rgba(var(--green-rgb),.04);border-color:rgba(var(--green-rgb),.15);}
@@ -2559,44 +2464,29 @@
     #wl-add-modal .rq-wlxsel{width:110px;flex-shrink:0;}
     #wl-add-modal .rq-wladd{width:100%;margin:2px 0 12px;}
 
-    
-    
     @media(min-width:768px) and (max-width:1023px){
-      
       .view-main{padding:20px 20px 36px;}
 
-      
       #landing-body{padding:40px 24px;}
 
-      
       .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
-      .rides-stat-row{grid-template-columns:repeat(4,1fr);}
 
-      
-      .bikes-grid{grid-template-columns:repeat(3,1fr);}
-      .modal-bikes-grid{grid-template-columns:repeat(3,1fr);}
 
-      
       .hide-mobile{display:table-cell!important;}
       .queue-table th,.queue-table td{padding:11px 12px;}
       .sess-admin-table th,.sess-admin-table td{padding:10px 12px;}
 
-      
       .modal-box{max-width:560px;padding:24px;}
       .auth-box{max-width:400px;}
 
-      
       .form-section{padding:22px;}
     }
 
-    
     @media(max-width:767px){
-      
       html,body{overflow-x:clip;}
       #view-landing,#view-customer,#view-staff{overflow-x:clip;}
       *{-webkit-tap-highlight-color:transparent;}
 
-      
       #topbar{
         padding-left:max(16px,env(safe-area-inset-left));
         padding-right:max(16px,env(safe-area-inset-right));
@@ -2612,7 +2502,6 @@
         padding-right:max(0px,env(safe-area-inset-right));
       }
 
-      
       #topbar{height:52px;gap:6px;}
       .topbar-logo{gap:8px;flex-shrink:0;}
       .topbar-logo img{height:28px;max-width:96px;}
@@ -2623,18 +2512,14 @@
       .topbar-right{gap:5px;flex-shrink:0;}
       .view-badge{font-size:10px;padding:4px 8px;letter-spacing:.3px;}
 
-      
       .tab-nav{padding:0 4px;justify-content:stretch;}
       .tab-btn{padding:12px 10px;font-size:11px;min-height:44px;flex:1;text-align:center;white-space:nowrap;}
 
-      
       #customer-tab-nav{display:none;}
 
-      
       .view-main{padding:12px 14px 24px;}
       .page-title{font-size:20px;margin-bottom:3px;}
       .page-sub{font-size:12px;margin-bottom:12px;line-height:1.4;}
-      
       .section-header{flex-direction:column;align-items:stretch;gap:10px;margin-bottom:14px;}
       .section-header > div:first-child{width:100%;}
       .section-header > button,
@@ -2644,12 +2529,10 @@
       .page-title{font-size:20px;}
       .page-sub{font-size:12px;line-height:1.4;margin-bottom:4px;}
 
-      
       #view-customer .view-main{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
       #view-staff .view-main{padding-bottom:24px;}
       #app-footer{padding-bottom:calc(70px + env(safe-area-inset-bottom));}
 
-      
       #landing-body{padding:28px 16px 48px;text-align:center;}
       .landing-hero-grid{grid-template-columns:1fr;gap:28px;}
       .landing-hero-copy{align-items:center;text-align:center;}
@@ -2661,7 +2544,6 @@
       .landing-avail-rows{margin-top:32px;}
       .landing-footer{margin-top:20px;}
 
-      
       .form-section{padding:16px;border-radius:7px;}
       .form-title{font-size:15px;margin-bottom:14px;}
       .form-row{grid-template-columns:1fr;gap:10px;margin-bottom:10px;}
@@ -2674,29 +2556,21 @@
       select{padding-right:34px;} /* the shorthand above took back the room the chevron sits in */
       .filter-select{height:40px;font-size:13px;min-height:40px;}
 
-      
       .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;flex-wrap:unset;}
       .stats-row{gap:6px;margin-bottom:10px;}
       .stat-card{padding:10px 12px;min-width:0;border-radius:4px;}
       .stat-num{font-size:22px;line-height:1.1;}
       .stat-label{font-size:9px;letter-spacing:.3px;margin-top:2px;}
-      .rides-stat-row{grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:12px;}
-      .rides-stat-card{padding:10px 12px;}
-      .rides-stat-num{font-size:18px;}
-      .rides-stat-label{font-size:9px;}
 
-      
       .session-picker-wrap{margin-bottom:16px;}
       .session-cards-grid{gap:8px;}
       .sess-card{padding:12px;padding-inline-start:calc(12px + var(--sc-gut));min-height:58px;}
       .sess-card-date{font-size:15px;}
       .sess-card-spots{font-size:11px;}
 
-      
       .sess-bar-desktop{display:none!important;}  
       .sess-bar-mobile{display:block;}             
 
-      
       .hide-mobile{display:none!important;}
       .table-wrapper{border-radius:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
       .queue-table{min-width:680px;}
@@ -2710,41 +2584,32 @@
       .actions-cell{display:flex;gap:4px;flex-wrap:nowrap;align-items:stretch;}
       .btn-sm{padding:6px 10px;font-size:11px;min-height:34px;white-space:nowrap;}
 
-      
       .btn-primary,.btn-secondary{min-height:46px;font-size:14px;}
 
-      
       .toggle-group{gap:6px;flex-wrap:wrap;}
       .toggle-btn{padding:8px 12px;font-size:13px;min-height:40px;min-width:0;}
 
-      
       .qty-stepper{gap:12px;}
       .qty-btn{width:36px;height:36px;font-size:20px;}
       .qty-val{font-size:20px;}
 
-      
       .hist-action-btns{width:100%;flex-shrink:unset;}
       .hist-action-btns .btn-secondary{flex:1;text-align:center;padding:9px 10px;font-size:12px;}
 
-      
       .filter-row{gap:6px;margin-bottom:10px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
       .filter-row::-webkit-scrollbar{display:none;}
       .search-input{width:110px!important;}
       .search-wrap{flex-shrink:0;}
 
-      
       .price-preview{flex-direction:column;gap:4px;align-items:flex-start;padding:12px 14px;}
       .price-preview-total{font-size:18px;}
       .price-preview-breakdown{font-size:12px;line-height:1.5;}
 
-      
       .ticket-card{margin-top:20px;}
       .ticket-header{padding:16px 14px 14px;}
 
-      
       .bike-assign-grid{grid-template-columns:repeat(2,1fr);}
 
-      
       /* Every pop-up sits in the middle of the screen on a phone as on a desk (the owner, 2026-09-30:
          "always center pages that pop up"), not as a sheet stuck to the bottom edge. */
       .modal-backdrop{padding:12px;align-items:center;}
@@ -2752,13 +2617,11 @@
         padding:20px 16px;border-radius:var(--r-xl);
         max-height:88dvh;width:100%;max-width:100%;
       }
-      .modal-bikes-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
       .modal-title{font-size:16px;margin-bottom:4px;}
       .modal-sub{font-size:12px;margin-bottom:12px;}
       .modal-footer{flex-direction:column-reverse;gap:8px;}
       .modal-footer .btn-primary,.modal-footer .btn-secondary{width:100%;text-align:center;padding:13px;}
 
-      
       .pin-box{padding:24px 18px;border-radius:7px;}
       .auth-backdrop{
         align-items:center;padding:12px;
@@ -2780,18 +2643,14 @@
       .auth-field{margin-bottom:10px;}
       .auth-submit{min-height:50px;font-size:16px;}
 
-      
       .queue-mobile-view{display:block;}
       .queue-table-desktop-wrap{display:none;}
       .q-card .btn-sm{flex:1;padding:10px 12px;font-size:12px;min-height:40px;text-align:center;justify-content:center;}
 
-      
       .undo-bar{min-width:0;width:calc(100vw - 28px);}
 
-      
       .empty-state{padding:28px 16px;font-size:13px;}
 
-      
       .toast{font-size:12px;padding:10px 14px;white-space:normal;
         max-width:calc(100vw - 28px);text-align:center;}
       #toast-container{
@@ -2801,12 +2660,10 @@
       }
     }
 
-    
     @media(max-width:390px){
       .view-main{padding:10px 12px 20px;}
       .landing-main-title{font-size:22px;}
       .stats-row{grid-template-columns:repeat(2,1fr);}
-      .bikes-grid{grid-template-columns:1fr 1fr;}
       .toggle-btn{padding:6px 9px;font-size:12px;}
       .tab-btn{padding:10px 8px;font-size:10px;flex:1;}
       .ticket-num{font-size:48px;}
@@ -3120,7 +2977,6 @@
     /* Wide tables scroll inside their own wrapper instead of widening the whole page */
     .table-wrapper{max-width:100%;}
 
-    
     .analytics-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
     @media(max-width:1023px){.analytics-kpi-grid{grid-template-columns:repeat(2,1fr);}}
     @media(max-width:480px){.analytics-kpi-grid{grid-template-columns:1fr 1fr;gap:8px;}}
@@ -3146,7 +3002,6 @@
     .analytics-occ-bar{display:flex;align-items:center;gap:8px;}
     .analytics-occ-track{width:60px;height:5px;background:rgba(var(--tint-rgb),.08);border-radius:3px;overflow:hidden;flex-shrink:0;}
     .analytics-occ-fill{height:100%;border-radius:3px;}
-    
     .chart-card{background:linear-gradient(160deg,rgba(var(--tint-rgb),.028),var(--s1) 58%);border:1px solid var(--border);border-radius:6px;padding:20px;box-shadow:0 1px 3px rgba(16,19,18,.06);transition:border-color .18s ease,box-shadow .18s ease;}
     .chart-card:hover{border-color:rgba(var(--tint-rgb),.16);box-shadow:0 8px 24px rgba(16,19,18,.1);}
     .chart-card-title{font-size:12px;font-weight:700;letter-spacing:-.1px;margin-bottom:2px;}
@@ -3193,7 +3048,6 @@
     .hl-item{margin-bottom:14px;}
     .hl-label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
     .hl-value{font-size:19px;font-weight:700;}
-    
     .insights-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:24px;}
     .insight-card{display:flex;gap:12px;align-items:flex-start;border-radius:6px;padding:13px 15px;border:1px solid;}
     .insight-card.good{background:rgba(var(--green-rgb),.06);border-color:rgba(var(--green-rgb),.22);}
@@ -3209,7 +3063,6 @@
     .insight-card.alert .insight-title{color:var(--red);}
     .insight-card.info .insight-title{color:var(--green);}
     .insight-card.purple .insight-title{color:var(--green);}
-    
     .occ-gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0;}
     .occ-gauge-svg{overflow:visible;}
     @media(max-width:767px){.insights-grid{grid-template-columns:1fr;}}
@@ -3363,7 +3216,6 @@
     #tab-analytics .an-rfm-none{font-size:11px;color:var(--muted);}
     #tab-analytics .an-wx-line{font-size:12px;margin:2px 0 8px;}
 
-    
     .search-wrap{position:relative;flex-shrink:0;}
     .search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none;opacity:.4;}
     .search-input{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.09);border-radius:3px;
@@ -3373,13 +3225,10 @@
     .search-input::placeholder{color:var(--muted);}
     @media(max-width:767px){.search-input{width:130px;font-size:12px;}}
 
-    
     .filter-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
 
-    
     .result-count{font-size:11px;font-weight:700;color:var(--muted);padding:0 4px;}
 
-    
     #booth-popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;align-items:center;justify-content:center;padding:24px;}
     .booth-popup-box{background:var(--s2);border:1px solid rgba(var(--green-rgb),.3);border-radius:7px;padding:32px;max-width:380px;width:100%;text-align:center;position:relative;}
     .booth-popup-close{position:absolute;top:14px;inset-inline-end:14px;background:none;border:none;color:var(--muted);font-size:22px;cursor:pointer;line-height:1;font-family:var(--font-body);}
@@ -3389,7 +3238,6 @@
     /* ── The booth and National Day popups (showBoothPopup, showSnd96FormPopup), drawn into #booth-popup:
        without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
     #booth-popup .cu-c-orange{color:var(--orange);}
-    #booth-popup .cu-fs16{font-size:16px;}
     #booth-popup .cu-mt16{margin-top:16px;}
     #booth-popup .cu-snd-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;padding:11px 18px;}
 
@@ -4409,8 +4257,6 @@
     body.view-staff .inline-form{background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:10px;}
     body.view-staff .form-section{background:var(--sf-card);border:1px solid var(--sf-line2);border-radius:10px;box-shadow:none;}
     body.view-staff .form-title{font-size:15px;font-weight:700;letter-spacing:0;text-transform:none;font-style:normal;font-family:var(--font-body);}
-    body.view-staff .type-count-box{background:var(--sf-head);border:1px solid var(--sf-sep);border-radius:8px;}
-    body.view-staff .type-count-input{font-family:var(--font-body);background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:7px;}
 
     /* ── Modals & overlays ── */
     /* class doubled: outranks the :root[data-theme="dark"] modal/backdrop recipes */
@@ -4423,8 +4269,6 @@
     }
     body.view-staff .modal-title{font-family:var(--font-body);font-size:17px;font-weight:700;text-transform:none;letter-spacing:0;font-style:normal;}
     body.view-staff .modal-footer{border-top:1px solid var(--sf-sep);}
-    body.view-staff .modal-bike-card{background:var(--sf-card);border:1.5px solid var(--sf-line2);border-radius:8px;}
-    body.view-staff .modal-bike-card.selected{border-color:var(--sf-green-ink);background:rgba(12,122,61,.06);}
     body.view-staff .pay-menu-opt{font-family:var(--font-body);}
     body.view-staff .pay-menu-opt.active{color:var(--sf-green-ink);background:rgba(12,122,61,.07);}
     body.view-staff .toast{
@@ -7065,7 +6909,7 @@ body.view-staff .staff-tabbar{display:none;}
 body.view-staff #tab-queue [data-ck="bulk"]{z-index:150!important;}
 @media(max-width:767px){
   body.view-staff:has(#toast-container .undo-bar) .fab-row{bottom:calc(140px + env(safe-area-inset-bottom));}
-  body.view-staff #tab-queue:has([data-ck="bulk"]) .fab-row{bottom:calc(212px + env(safe-area-inset-bottom));}
+  body.view-staff.q-bulk #tab-queue .fab-row{bottom:calc(212px + env(safe-area-inset-bottom));} /* q-bulk: _qBulkSync, not :has() - see there */
 }
 @media(max-width:1023px){
   body.view-staff #tab-queue [data-ck="bulk"]{
@@ -7074,7 +6918,7 @@ body.view-staff #tab-queue [data-ck="bulk"]{z-index:150!important;}
     flex-wrap:wrap;justify-content:center;row-gap:6px;
   }
   body.view-staff #tab-queue [data-ck="bulk"] .btn-sm{flex:0 1 auto;}
-  body.view-staff:has(#tab-queue.active [data-ck="bulk"]) #toast-container{bottom:calc(212px + env(safe-area-inset-bottom));}
+  body.view-staff.q-bulk #toast-container{bottom:calc(212px + env(safe-area-inset-bottom));}
 }
 
 /* ── Read-only sections, the operator chip and PIN keypad, and the Team page (Claude Design #7–#9) ── */

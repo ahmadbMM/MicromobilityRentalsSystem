@@ -132,7 +132,10 @@
        fetched in CORS mode: without it the preload's credentials mode differs, Chromium
        discards it and fetches the mark a second time. -->
   <link rel="preload" as="image" type="image/svg+xml" href="/assets/brand-mark-white.svg" crossorigin>
-  <link rel="stylesheet" href="/styles.css?v=142">
+  <!-- The customer stylesheet: styles.css less the rules that can only match staff screens, written
+       by scripts/build-html.mjs as app.css (2026-10-01). A staff device adds the whole styles.css on
+       top when it loads staff.js, so the staff screens keep the cascade they were written against. -->
+  <link rel="stylesheet" href="/app.css?v=0">
 <script>try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');localStorage.removeItem('cq_staff_theme');if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
 <body>
@@ -226,7 +229,7 @@ window.mmLoading=(function(){
 
 <header id="topbar">
   <button type="button" class="topbar-logo chrome-logo-btn" data-on-click='["goLanding"]' aria-label="MicroMobility home">
-    <img id="topbar-logo-img" src="/logo.png" alt="MicroMobility">
+    <img id="topbar-logo-img" src="/logo-mark-dark.webp" alt="MicroMobility">
   </button>
   <div class="chrome-tb-end">
     <span class="lang-wrap"><svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></svg><select class="lang-toggle" id="lang-btn" data-on-change='["setLang",{"@":"value"}]' title="Switch language" aria-label="Switch language"><option value="en">English</option><option value="ar">العربية</option><option value="fr">Français</option><option value="es">Español</option><option value="pt">Português</option><option value="ur">اردو</option><option value="hi">हिन्दी</option><option value="tl">Tagalog</option><option value="ne">नेपाली</option><option value="bn">বাংলা</option></select></span>
@@ -357,7 +360,7 @@ window.mmLoading=(function(){
 <footer id="app-footer" class="mini-footer">
   <div class="mf-inner">
     <div class="mf-brand">
-      <img src="/logo.png" alt="MicroMobility" class="mf-logo">
+      <img src="/logo.webp" alt="MicroMobility" class="mf-logo">
     </div>
     <div class="mf-info">
       <div class="mf-contact">
@@ -541,7 +544,13 @@ function _onRun(spec,el,ev){
 function _onExec(steps,el,ev){
   for(const st of (Array.isArray(steps[0])?steps:[steps])){
     const fn=typeof st[0]==='string'?window[st[0]]:null;
-    if(typeof fn!=='function'){console.warn('no handler named',st[0]);return;}
+    if(typeof fn!=='function'){
+      // A staff section's code that has not arrived yet (staff-parts, 2026-10-01; they load right after
+      // the desk's first paint): fetch them all and make the call when they land. A name built at run
+      // time is the only way a section's function can be asked for before its part is here.
+      if(typeof _staffPartsReady==='function'&&!_staffPartsReady()){_loadStaffParts().then(()=>_onExec([st],el,ev),()=>{});return;}
+      console.warn('no handler named',st[0]);return;
+    }
     const args=st.slice(1).map(a=>a&&typeof a==='object'&&'@'in a?(a['@']==='this'?el:a['@']==='event'?ev:el[a['@']]):a);
     const r=fn.apply(el,args);
     if(r===false)ev.preventDefault();
@@ -1606,7 +1615,11 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   regSummary:'حجزك',
   landJccMeta:'الأحد والثلاثاء · 9-11 مساءً',
 }};
-function t(k){return(LANG[S&&S.lang?S.lang:'en']||LANG.en)[k]||LANG.en[k]||k;}
+// The staff screens' strings are not in LANG on a customer's phone (2026-10-01): the build moves
+// every key only staff code names into staff.js (English) and lang/staff-<code>.json (the rest,
+// LANG_STAFF, filled by the loader scripts/split-staff.mjs writes). Looked up after the customer
+// pack, so a rider's page never pays for the second lookup.
+function t(k){const l=S&&S.lang?S.lang:'en';return(LANG[l]||LANG.en)[k]||(typeof LANG_STAFF!=='undefined'&&LANG_STAFF[l]&&LANG_STAFF[l][k])||LANG.en[k]||k;}
 // ── Translation packs ────────────────────────────────────────────────────────
 // English ships inline because t() falls through to it; the other languages are files the
 // build extracts (see scripts/build-html.mjs) and this fetches on demand, so a visitor
@@ -1616,10 +1629,13 @@ function t(k){return(LANG[S&&S.lang?S.lang:'en']||LANG.en)[k]||LANG.en[k]||k;}
 // English, which is exactly what it did before any of this existed.
 const LANG_PACKS={}; // build stamps {code:contentHash} for cache-busting
 function _langPackUrl(c){return '/lang/'+c+'.json'+(LANG_PACKS[c]?'?v='+LANG_PACKS[c]:'');}
-function _langLoaded(c){return c==='en'||!!(LANG[c]&&Object.keys(LANG[c]).length);}
+function _langLoaded(c){return c==='en'||(!!(LANG[c]&&Object.keys(LANG[c]).length)&&!_staffLangNeeded(c));}
+// A staff device that has not yet got this language's staff strings (see t()).
+function _staffLangNeeded(c){return typeof _staffLangReady==='function'&&typeof _staffP!=='undefined'&&!!_staffP&&!_staffLangReady(c);}
 const _langFetches={};
 async function loadLangPack(code){
   if(_langLoaded(code))return true;
+  if(LANG[code]&&Object.keys(LANG[code]).length){await _loadStaffLang(code);return true;} // the customer pack is here, only the staff strings were missing
   if(!LANG[code])return false; // unknown language: nothing to fetch
   try{
     if(!_langFetches[code]){
@@ -1630,7 +1646,11 @@ async function loadLangPack(code){
         :fetch(_langPackUrl(code)).then(r=>r.ok?r.json():null).catch(()=>null);
     }
     const p=_langFetches[code];
+    // On a staff device the staff strings of that language come alongside (the loader in the
+    // generated staff block; a no-op anywhere else and in the unbuilt source).
+    const sp=_staffLangNeeded(code)?_loadStaffLang(code):null;
     const data=await p;
+    if(sp)await sp;
     if(!data||typeof data!=='object'){_langPackForget(code,p);return false;}
     LANG[code]=data;
     return true;
@@ -4877,7 +4897,7 @@ function renderAuthModal(){
   const isForgot=mode==='forgot';
   const ccOpts=COUNTRY_CODES.map(([code,iso])=>`<option value="${code}"${code==='+966'?' selected':''}>${code}</option>`).join('');
   // Same theme-aware pick as the topbar (dark shows logo.png, light shows logo-dark.png)
-  const logoSrc='/logo-dark.png'; // auth box is always the white paper surface — customer side is light-only; root-relative, the page may sit at /bookings/waitlist
+  const logoSrc='/logo-dark.webp'; // auth box is always the white paper surface — customer side is light-only; root-relative, the page may sit at /bookings/waitlist
   let title='',subtitle='',sw='',body='';
   // Sign in and Create account are two pages (the owner, 2026-09-28), each named by its title, with a
   // plain line, centred right above the Google and Apple buttons, for the visitor on the wrong one (no box, 2026-09-28):
@@ -7185,13 +7205,13 @@ function renderLandingAvail(){
               <span class="lec-title">${t('landJccCardTitle')}</span>
               <span class="lec-meta">${t('landJccMeta')}</span>
             </span>
-            <span class="lec2-logo"><img src="/jcc.png" class="mm-on-light" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_2",_EV,_EL)}"><img src="/jcc-white.png" class="mm-on-dark" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_3",_EV,_EL)}"></span>
+            <span class="lec2-logo"><img src="/jcc.webp" class="mm-on-light" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_2",_EV,_EL)}"><img src="/jcc-white.webp" class="mm-on-dark" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_3",_EV,_EL)}"></span>
           </button>
           <button class="landing-event-card community lec2 ev-community" data-on-click="${_on("selectEvent","community")}">
             <span class="lec2-copy">
               <span class="lec-title">${t('landCommTitle')}</span>
             </span>
-            <span class="lec2-logo" aria-hidden="true"><img src="/logo-dark.png" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="/logo.png" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
+            <span class="lec2-logo" aria-hidden="true"><img src="/logo-dark.webp" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="/logo.webp" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
           </button>
         </div>`;
     }
@@ -8725,7 +8745,7 @@ function applyThemeIcon(){
   const lg=document.getElementById('topbar-logo-img');
   // Root-relative: a page at /bookings/waitlist or /website/bikes resolved the bare name under its
   // own folder, a 404, and the staff top bar showed no logo (2026-09-27).
-  const _want='/logo-mark-dark.png';
+  const _want='/logo-mark-dark.webp'; // the page's own <img> starts on it too: it used to start on logo.png, a download thrown away at boot
   if(lg&&!lg.src.endsWith(_want))lg.src=_want;
 }
 function renderTopbarRight(){
@@ -10044,6 +10064,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='team'){} // its own loader too
   else if(tab==='dashboard')renderDashboard();
   else renderStaffQueue();
+  _qBulkSync(); // another tab on screen: the Bookings selection bar is not
   try{_ahRefresh();}catch(_){} // an open Bookings & history window follows the data too
   try{_ntSync();}catch(_){} // and the bell's counts
 }
@@ -10540,7 +10561,7 @@ function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key==
 // the card (white lettering on a dark card, dark on a light one). On the My Bookings card it heads the
 // number's column, in the flow, so it never lies over the label (it did on a past or waitlist card,
 // which has no code to push the column down; the owner, same day).
-function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.png" alt="" decoding="async"><img class="tk-logo-d" src="/logo.png" alt="" decoding="async"></span>`;}
+function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.webp" alt="" decoding="async"><img class="tk-logo-d" src="/logo.webp" alt="" decoding="async"></span>`;}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -17160,7 +17181,7 @@ function renderStaffQueue(_resultsOnly){
   </div>`;
   if(S.queueView==='sessions'){ // Sessions view lives inside the Bookings tab now
     const _qh=document.getElementById('tab-queue');
-    if(_qh){_qh.innerHTML=_qvPills+'<div id="sess-host"></div>';renderSessions();}
+    if(_qh){_qh.innerHTML=_qvPills+'<div id="sess-host"></div>';renderSessions();_qBulkSync();}
     return;
   }
   // The separate Waitlist page is gone; anything still pointing at it (a saved view, a device
@@ -17170,18 +17191,18 @@ function renderStaffQueue(_resultsOnly){
   if(S.queueView==='handover'){ // the bikes side of the desk: who is checked in and still without a bike
     const _qh=document.getElementById('tab-queue');
     if(_qh&&_hoTyping())return; // never rebuild the number field while it is being typed in
-    if(_qh){_qh.innerHTML=_qvPills+_sessStripHtml()+'<div id="ho-host"></div>';renderHandover();}
+    if(_qh){_qh.innerHTML=_qvPills+_sessStripHtml()+'<div id="ho-host"></div>';renderHandover();_qBulkSync();}
     return;
   }
   if(S.queueView==='petromin'){ // the Petromin form's registrations: their own page, under the chips
     const _qh=document.getElementById('tab-queue');
-    if(_qh){_qh.innerHTML=_qvPills+_sessStripHtml()+'<div id="pm-host"></div>';renderRiders();}
+    if(_qh){_qh.innerHTML=_qvPills+_sessStripHtml()+'<div id="pm-host"></div>';renderRiders();_qBulkSync();}
     return;
   }
   if(S.queueView==='managed'){ // Staff Managed Waitlist: its own section beside Waitlist
     const _qh=document.getElementById('tab-queue');
     if(_qh&&_mwTyping()){renderManagedWl(true);return;} // never rebuild the inputs staff are typing in
-    if(_qh){_qh.innerHTML=_qvPills+'<div id="mw-host"></div>';renderManagedWl();}
+    if(_qh){_qh.innerHTML=_qvPills+'<div id="mw-host"></div>';renderManagedWl();_qBulkSync();}
     return;
   }
   reconcileOrphanBikes();
@@ -17945,7 +17966,20 @@ function renderQRow(e){
   else{const _cnt=document.getElementById('q-result-count');if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';}
   _qWrite(document.getElementById('q-results'),_results);
   _qPosApply(document.getElementById('q-results'));
+  _qBulkSync();
   if(!_resultsOnly)_qKeepScroll();
+}
+// The roster's selection bar is up on the Bookings tab: the floating pair and the toasts stand above
+// it (styles.css, body.q-bulk). It was body:has(#tab-queue.active [data-ck="bulk"]) and
+// #tab-queue:has([data-ck="bulk"]): every piece of the roster carries data-ck, so each piece a
+// realtime event replaced sent Chrome back over the page to check those two. On a phone-sized
+// roster of 250 bookings, style work across a run of check-in repaints fell by about a quarter
+// without them (2026-10-01, CPU slowed 4x).
+function _qBulkSync(){
+  try{
+    const on=S.view==='staff'&&S.staffTab==='queue'&&!!document.querySelector('#tab-queue [data-ck="bulk"]');
+    if(document.body.classList.contains('q-bulk')!==on)document.body.classList.toggle('q-bulk',on);
+  }catch(_){}
 }
 function _qKeepScroll(){const y=S._qScrollY;if(y==null)return;if(Math.abs(window.scrollY-y)>1)try{window.scrollTo({top:y,behavior:'auto'});}catch(_){window.scrollTo(0,y);}}
 // ── The roster as keyed pieces ──────────────────────────────────────────────────────────────
@@ -20264,9 +20298,16 @@ async function _unreturnWrite(id,bikeIds,markPaid){
 async function _finishReturn(id,markPaid,cond,notes){
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
   const name=entry.name;const qn=entry.queueNum;
-  const w=await _returnWrite(id,markPaid,cond,notes);
+  // The row shows returned at once (2026-10-01), as a payment toggle does: the write leaves first -
+  // it reads the row's bikes before this paint changes it - and a refused one puts the row back.
+  const wp=_returnWrite(id,markPaid,cond,notes);
+  const _prev={status:entry.status,paid:entry.paid,pay_method:entry.pay_method};
+  entry.status='done';if(markPaid){entry.paid=true;entry.pay_method='card';}
+  S._flashId=id;S._flashColor='blue';renderStaffQueue();
+  const w=await wp;
   if(!w.ok){
     if(w.handled)return;
+    Object.assign(entry,_prev);
     if(w.rpcError)errorBar(_rpcMessage(w.rpcError),()=>_finishReturn(id,markPaid,cond,notes),(w.rpcError&&w.rpcError.message)||'');
     else if(w.writes)_writeErr(w.writes,'return bike');
     await loadData();renderStaffQueue();return;
@@ -28171,6 +28212,10 @@ function _on_renderHistory_6(event,el){el.style.color='var(--muted)'}
 function _on_renderHistory_7(event,el){S.showHistLog=!S.showHistLog;renderHistory()}
 function _on_renderHistory_8(event,el){S.histLimit=(S.histLimit||60)+100;renderHistory()}
 function renderHistory(_resultsOnly){
+  // History off screen is not rebuilt (2026-10-01): 42 paths call this after a write - every payment
+  // toggle, every return - and on a busy night the hidden rebuild cost 22 ms a time on a booth tablet.
+  // Opening the tab draws it fresh (setStaffTab -> _renderStaffTab).
+  if(S.view!=='staff'||S.staffTab!=='history')return;
   _pushNav(); // the address follows the view (Rides / Log)
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='hist-search-input'&&document.getElementById('hist-results'))_resultsOnly=true;
   const _hvPills=`<div class="filter-row hist-mb12">

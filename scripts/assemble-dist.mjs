@@ -17,7 +17,7 @@ const dist = join(root, 'dist');
 // worker serves cache-first into its cache name from these same two lists, so the site that
 // ships and the files the worker's cache name covers cannot drift apart.
 export const FILES = [
-  'index.html', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html',
+  'index.html', 'app.js', 'app.css', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html', // app.js, app.css: the customer half and its stylesheet, written minified by build-html
   'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
   '404.css', // the 404 page's
   '_headers', '_redirects',
@@ -26,13 +26,15 @@ export const FILES = [
   'favicon.png', // the tab icon, shared with the partner form and the new site
   // referenced by the app + service-worker SHELL — missing any of these breaks cache.addAll on install
   'jcc.png', 'jcc-white.png', 'logo-dark.png', 'logo-mark-dark.png', 'og-image.png',
+  // the same logos as lossless WebP, which the page itself uses (2026-10-01); the PNGs stay for links from elsewhere
+  'logo.webp', 'logo-dark.webp', 'logo-mark-dark.webp', 'jcc.webp', 'jcc-white.webp',
 ];
 // Directories copied recursively (functions/ MUST be inside dist for Pages Functions;
 // vendor/ holds the self-hosted libraries; splash/ holds the iOS PWA launch screens).
 // lang/ holds the build-generated translation packs the app fetches at runtime.
 // assets/ holds the brand mark the loading state masks. cities/ holds one city list per
 // country for the city-of-residence picker (scripts/build-cities.mjs).
-export const DIRS = ['functions', 'staff', 'vendor', 'splash', 'fonts', 'lang', 'assets', 'cities'];
+export const DIRS = ['functions', 'staff', 'staff-parts', 'vendor', 'splash', 'fonts', 'lang', 'assets', 'cities']; // staff-parts: the staff half's sections, written by build-html
 
 const exists = async (p) => { try { await access(p); return true; } catch { return false; } };
 

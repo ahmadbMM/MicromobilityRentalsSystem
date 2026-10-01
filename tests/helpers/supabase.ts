@@ -39,6 +39,9 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
   await page.addInitScript(() => localStorage.setItem('cq_secure_auth', '0'));
   // Disable the boot's background "widen" refresh so it can't overwrite state a test sets.
   await page.addInitScript(() => { (window as unknown as { __noWiden?: boolean }).__noWiden = true; });
+  // The staff half's sections (staff-parts/) load with it, so a spec may call their functions at once;
+  // tests/staff-parts.spec.ts covers the way they arrive on a real device (after the first paint).
+  await page.addInitScript(() => { (window as unknown as { __staffPartsNow?: boolean }).__staffPartsNow = true; });
   // Nothing in the app should FETCH these: wa.me and maps links are places a person is sent,
   // not resources a page loads. Chromium preconnects to them anyway when it renders the
   // links, and wa.me answers 429 once a machine has run the suite enough times in a day —

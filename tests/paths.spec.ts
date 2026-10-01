@@ -44,9 +44,10 @@ test.describe('the three lists of addresses agree', () => {
     expect(names(read('service-worker.js'), /const STAFF_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/)).toEqual(staffOnly);
   });
   test('the built page loads its files from the root, so a deep address still finds them', () => {
-    const html = read('index.html');
+    const html = read('index.html') + read('app.js'); // the page's script is a file since 2026-10-01
     expect(html).not.toMatch(/(?:href|src)="\.\//);
-    expect(html).toContain('href="/styles.css?v=');
+    expect(html).toContain('href="/app.css?v=');
+    expect(html).toContain('src="/app.js?v=');
     expect(html).toMatch(/register\(["']\/service-worker\.js["']\)/); // the minifier picks the quotes
     // Addresses built at run time too: the printed reports' logo used to be new URL('logo.png', location.href),
     // which from /bookings/riders asked for /bookings/logo.png.

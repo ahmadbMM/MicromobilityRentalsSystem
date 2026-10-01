@@ -44,14 +44,16 @@ const RULES = (await readFile(join(ROOT, '_headers'), 'utf8').catch(() => '')).s
   return rules;
 }, []);
 const matches = (pattern, path) => pattern === '/*' ? true : pattern.endsWith('/*') ? path.startsWith(pattern.slice(0, -1)) : pattern.startsWith('/*.') ? path.endsWith(pattern.slice(2)) : path === pattern;
-function siteHeaders(path) {
+// Pages matches a rule against the address asked for; the file behind it (/ answers with index.html)
+// is matched too, so the /index.html rules keep applying here as they did.
+function siteHeaders(path, asked) {
   const h = {};
-  for (const r of RULES) if (matches(r.path, path)) for (const [k, v] of r.headers) h[k] = h[k] ? `${h[k]}, ${v}` : v;
+  for (const r of RULES) if (matches(r.path, path) || (asked && asked !== path && matches(r.path, asked))) for (const [k, v] of r.headers) h[k] = h[k] ? `${h[k]}, ${v}` : v;
   return h;
 }
 
-const send = (res, status, body, type, extra = {}, path = '') => {
-  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-cache', ...siteHeaders(path), ...extra });
+const send = (res, status, body, type, extra = {}, path = '', asked = '') => {
+  res.writeHead(status, { 'content-type': type, 'cache-control': 'no-cache', ...siteHeaders(path, asked), ...extra });
   res.end(body);
 };
 
@@ -65,5 +67,5 @@ createServer(async (req, res) => {
   if (!hit && APP_ROUTE.test(path)) hit = await file('/index.html'); // the middleware's fallback
   if (!hit) { const nf = await file('/404.html'); send(res, 404, nf ? nf.body : 'Not found', nf ? nf.type : 'text/plain', {}, '/404.html'); return; }
   if (req.method === 'HEAD') { res.writeHead(200, { 'content-type': hit.type, 'content-length': hit.size }); res.end(); return; }
-  send(res, 200, hit.body, hit.type, { etag: `"${hit.size}-${Math.floor(hit.mtime)}"` }, wanted);
+  send(res, 200, hit.body, hit.type, { etag: `"${hit.size}-${Math.floor(hit.mtime)}"` }, wanted, path);
 }).listen(PORT, '127.0.0.1', () => console.log(`serve: http://127.0.0.1:${PORT}/ (${ROOT})`));

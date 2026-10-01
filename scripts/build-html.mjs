@@ -3,7 +3,7 @@
 // NOT mangle or compress — the app references global function names as strings
 // inside onclick="fn()" template literals, so renaming identifiers would break it.
 import { minify } from 'html-minifier-terser';
-import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,7 @@ import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
 import { minify as terserMinify } from 'terser';
 import CleanCSS from 'clean-css';
 import {
-  splitStaff, resolveIncludes,
+  splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, customerCss, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
   checkCustomerColors, checkNoEmoji,
 } from './split-staff.mjs';
@@ -97,30 +97,13 @@ for (const f of (await readdir(i18nDir)).filter((n) => /^[a-z]{2}\.json$/.test(n
   LANG_ALL[code] = JSON.parse(await readFile(new URL(f, i18nDir), 'utf8'));
 }
 const packCodes = Object.keys(LANG_ALL).filter((c) => c !== INLINE_LANG);
-const langDir = new URL('../lang/', import.meta.url);
-await mkdir(langDir, { recursive: true });
-const packHash = {};
-for (const code of packCodes) {
-  const json = JSON.stringify(LANG_ALL[code]);
-  packHash[code] = createHash('sha256').update(json).digest('hex').slice(0, 10);
-  await writeFile(new URL(`${code}.json`, langDir), json);
-}
-// Rebuild the object with the fetched languages emptied — the runtime fills them in.
-const trimmedLang = `{${Object.keys(LANG_ALL)
-  .map((c) => (c === INLINE_LANG ? `${c}:${JSON.stringify(LANG_ALL[c])}` : `${c}:{}`))
+// Rebuild the object with the fetched languages emptied — the runtime fills them in. English stays
+// whole for the split below, which reads the page as it will run; the staff half's strings leave it
+// after the split (see "Staff-only strings" further down), when it is known which code names what.
+const langText = (en) => `{${Object.keys(LANG_ALL)
+  .map((c) => (c === INLINE_LANG ? `${c}:${JSON.stringify(en)}` : `${c}:{}`))
   .join(',')}}`;
-src = src.slice(0, langSpan.start) + trimmedLang + src.slice(langSpan.end);
-// Each pack is versioned by its own content, so a translation change busts exactly that
-// file. Two places need it: the loader, and the <head> prefetch that starts before the
-// loader exists.
-const packMap = JSON.stringify(packHash);
-if (!src.includes('const LANG_PACKS={}')) throw new Error('build: LANG_PACKS placeholder missing');
-src = src.replace('const LANG_PACKS={}', `const LANG_PACKS=${packMap}`);
-// Without the stamp the prefetch asks for lang/<code>.json with no version, which the service
-// worker then serves cache-first for as long as its cache lives: a stale pack, silently.
-if (!src.includes('<script>try{var _ql=')) throw new Error('build: the <head> language prefetch (__LANG_V) was not found');
-src = src.replace('<script>try{var _ql=', `<script>window.__LANG_V=${packMap};try{var _ql=`);
-console.log(`build: extracted ${packCodes.join(', ')} to lang/ (${packCodes.length} packs)`);
+src = src.slice(0, langSpan.start) + langText(LANG_ALL[INLINE_LANG]) + src.slice(langSpan.end);
 
 // The city-of-residence files (cities/, from scripts/build-cities.mjs) are served cache-first
 // by the service worker like the packs, so the app asks for them with one hash of the whole
@@ -162,8 +145,63 @@ for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'REC
 // way (no compression, no top-level renaming: onclick="fn()" strings name functions), named by
 // its own hash in the URL so a change is a new file, fetched by the loader the split writes into
 // the customer half when a staffer enters.
-const split = splitStaff(src, '/staff.js?v=__STAFF_V__');
-const staffMin = await terserMinify(split.staff, { compress: false, mangle: { toplevel: false }, format: { comments: false } });
+// styles.css's own tag: the hash of the bytes that SHIP (see "Cache busting" below for why). It is
+// taken here because the staff loader the split writes asks for the whole stylesheet by it.
+const cssUrl = new URL('../styles.css', import.meta.url);
+const cssSource = await readFile(cssUrl, 'utf8');
+const cssHash = createHash('sha256').update(new CleanCSS({ level: 1 }).minify(cssSource).styles).digest('hex').slice(0, 10);
+const split = splitStaff(src, '/staff.js?v=__STAFF_V__', `/styles.css?v=${cssHash}`);
+
+// ── Staff-only strings leave the customer's page (2026-10-01) ─────────────────
+// About two thirds of LANG's keys are words only staff screens say. A key that staff code names and
+// the customer's page cannot (staffOnlyLangKeys in scripts/split-staff.mjs) goes: in English to the
+// head of staff.js, in every other language to lang/staff-<code>.json, which the staff loader fetches
+// beside staff.js. Everything else stays where it was: English inline, the rest in lang/<code>.json.
+let custHtml = split.html;
+const custLangSpan = langObjectText(custHtml);
+const allKeys = [...new Set(Object.values(LANG_ALL).flatMap((o) => Object.keys(o)))];
+const staffKeys = staffOnlyLangKeys(allKeys, custHtml.slice(0, custLangSpan.start) + custHtml.slice(custLangSpan.end), split.staff);
+const langPart = (o, staff) => Object.fromEntries(Object.entries(o).filter(([k]) => staffKeys.has(k) === staff));
+custHtml = custHtml.slice(0, custLangSpan.start) + langText(langPart(LANG_ALL[INLINE_LANG], false)) + custHtml.slice(custLangSpan.end);
+const staffEn = langPart(LANG_ALL[INLINE_LANG], true);
+split.staff = split.staff.replace(/^(\/\/[^\n]*\n)/, `$1Object.assign(LANG.en,${JSON.stringify(staffEn)}); // the staff screens' English (scripts/build-html.mjs)\n`);
+if (!split.staff.includes('Object.assign(LANG.en,')) throw new Error('build: the staff English strings were not written into staff.js');
+const langDir = new URL('../lang/', import.meta.url);
+await mkdir(langDir, { recursive: true });
+const packHash = {}, staffPackHash = {};
+const writePack = async (name, obj) => {
+  const json = JSON.stringify(obj);
+  await writeFile(new URL(`${name}.json`, langDir), json);
+  return createHash('sha256').update(json).digest('hex').slice(0, 10);
+};
+for (const code of packCodes) {
+  packHash[code] = await writePack(code, langPart(LANG_ALL[code], false));
+  const st = langPart(LANG_ALL[code], true);
+  if (Object.keys(st).length) staffPackHash[code] = await writePack(`staff-${code}`, st); // staff-<code>: the middleware lets /lang/[a-z-]{2,8}.json through
+}
+// Each pack is versioned by its own content, so a translation change busts exactly that
+// file. Three places need it: the loader, the <head> prefetch that starts before the
+// loader exists, and the staff loader (its own packs).
+const packMap = JSON.stringify(packHash);
+if (!custHtml.includes('const LANG_PACKS={}')) throw new Error('build: LANG_PACKS placeholder missing');
+custHtml = custHtml.replace('const LANG_PACKS={}', `const LANG_PACKS=${packMap}`);
+// Without the stamp the prefetch asks for lang/<code>.json with no version, which the service
+// worker then serves cache-first for as long as its cache lives: a stale pack, silently.
+if (!custHtml.includes('<script>try{var _ql=')) throw new Error('build: the <head> language prefetch (__LANG_V) was not found');
+custHtml = custHtml.replace('<script>try{var _ql=', `<script>window.__LANG_V=${packMap};try{var _ql=`);
+if (!custHtml.includes('var STAFF_LANG_V={};')) throw new Error('build: the staff loader\'s STAFF_LANG_V placeholder is missing (scripts/split-staff.mjs)');
+custHtml = custHtml.replace('var STAFF_LANG_V={};', `var STAFF_LANG_V=${JSON.stringify(staffPackHash)};`);
+split.html = custHtml;
+console.log(`build: extracted ${packCodes.join(', ')} to lang/ (${packCodes.length} packs); ${staffKeys.size} of ${allKeys.length} keys are staff-only (staff.js + lang/staff-<code>.json)`);
+// compress stays off (2026-10-01, measured): with it on, app.js and staff.js shrank by under 1% once
+// gzipped - the compressor's rewrites are mostly what gzip and brotli already fold away - so it buys
+// nothing for the risk of its transforms.
+const TERSER_OPTS = { compress: false, mangle: { toplevel: false }, format: { comments: false } };
+// The staff half in parts (splitSections in scripts/split-staff.mjs): the desk's core stays staff.js,
+// each section goes to staff-parts/<name>.js under its own hash, stamped into the core before the
+// core's own hash is taken.
+const sections = splitSections(split.staff);
+const staffMin = await terserMinify(sections.core, TERSER_OPTS);
 if (!staffMin.code) throw new Error('build: staff.js did not minify');
 // fonts.css is asked for with its own hash (see below, for index.html); the print windows that link
 // it (the reports and the till's receipt) are drawn by the staff half, so staff.js is stamped here,
@@ -171,10 +209,54 @@ if (!staffMin.code) throw new Error('build: staff.js did not minify');
 const fontsHash = createHash('sha256').update(await readFile(new URL('../fonts/fonts.css', import.meta.url))).digest('hex').slice(0, 10);
 staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
 if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(staffMin.code)) throw new Error('build: a fonts.css reference in staff.js was left without its hash');
+const partsDir = new URL('../staff-parts/', import.meta.url);
+await rm(partsDir, { recursive: true, force: true });
+await mkdir(partsDir, { recursive: true });
+const staffParts = {}, staffPartsV = {};
+for (const [name, code] of Object.entries(sections.parts)) {
+  const min = await terserMinify(code, TERSER_OPTS);
+  if (!min.code) throw new Error(`build: staff-parts/${name}.js did not minify`);
+  const c = min.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
+  if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(c)) throw new Error(`build: a fonts.css reference in staff-parts/${name}.js was left without its hash`);
+  staffParts[name] = c;
+  staffPartsV[name] = createHash('sha256').update(c).digest('hex').slice(0, 10);
+  await writeFile(new URL(`${name}.js`, partsDir), c);
+}
+if (!staffMin.code.includes('var STAFF_PARTS_V={};')) throw new Error('build: the staff parts loader placeholder (STAFF_PARTS_V) is missing');
+staffMin.code = staffMin.code.replace('var STAFF_PARTS_V={};', `var STAFF_PARTS_V=${JSON.stringify(staffPartsV)};`);
+// Everything a staff device runs, for the checks below that read the staff half's text.
+const staffAll = staffMin.code + '\n' + Object.values(staffParts).join('\n');
 const staffHash = createHash('sha256').update(staffMin.code).digest('hex').slice(0, 10);
 src = split.html.replace('/staff.js?v=__STAFF_V__', `/staff.js?v=${staffHash}`);
 await writeFile(new URL('../staff.js', import.meta.url), staffMin.code);
+console.log(`build: staff parts -> ${Object.entries(staffParts).map(([n, c]) => `${n} ${Math.round(gzipBytes(c) / 1000)}`).join(', ')} KB gzipped; staff.js (the desk's core) ${Math.round(gzipBytes(staffMin.code) / 1000)} KB`);
 console.log(`build: staff half -> staff.js ${split.report.staffBytes} -> ${staffMin.code.length} bytes (${split.report.staffStmts} statements, ${split.report.stubs.length} entry points); customer half ${split.report.customerBytes} bytes (${split.report.customerStmts} statements)`);
+
+const site = JSON.parse(await readFile(new URL('../site.config.json', import.meta.url), 'utf8'));
+const origin = String(site.origin || '').replace(/\/+$/, '');
+if (!/^https?:\/\/[^/]+$/.test(origin)) {
+  throw new Error(`build: site.config.json origin must be a bare origin, got ${JSON.stringify(site.origin)}`);
+}
+
+// ── The customer half, out of the page into app.js (2026-10-01) ─────────────
+// It was inline: ~190 KB gzipped inside index.html, which is served max-age=0, so every deploy (several
+// a day) sent every phone the whole script again, and an inline script gets none of the browser's
+// compiled-code cache. As its own file, named by its hash, it is kept a year like staff.js and the
+// page shrinks to its markup. A plain <script src> in the same place runs at the same moment the
+// inline one did: before the deferred supabase-js, with the markup above it parsed.
+const srcWithMain = src;
+const main = mainScript(src);
+const appMin = await terserMinify(main.code, TERSER_OPTS);
+if (!appMin.code) throw new Error('build: app.js did not minify');
+let appCode = appMin.code
+  .replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`)
+  .split('__SITE_ORIGIN__').join(origin);
+if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(appCode)) throw new Error('build: a fonts.css reference in app.js was left without its hash');
+const appHash = createHash('sha256').update(appCode).digest('hex').slice(0, 10);
+await writeFile(new URL('../app.js', import.meta.url), appCode); // written here, as staff.js is: the service worker's precache list is checked against the tree below
+const tagAt = main.open - '<script>'.length;
+if (src.slice(tagAt, main.open) !== '<script>') throw new Error('build: the main script does not open with a bare <script>');
+src = src.slice(0, tagAt) + `<script src="/app.js?v=${appHash}"></script>` + src.slice(main.close + '</script>'.length);
 
 let out = await minify(src, {
   collapseWhitespace: true,
@@ -203,17 +285,24 @@ let out = await minify(src, {
 // PWAs kept an old stylesheet forever while the HTML updated around it — new markup,
 // old CSS. The tag is now the stylesheet's own content hash, so it moves automatically
 // whenever the file changes, and the SW cache name moves with it.
-const cssUrl = new URL('../styles.css', import.meta.url);
 // The tag is the hash of the bytes that SHIP - the minified copy scripts/assemble-dist.mjs writes into
 // dist/ (the same clean-css call, so the same bytes) - not of the source. Hashing the source left the
 // tag unchanged when minification arrived (2026-09-27), and the edge, which keeps /styles.css for a
-// year, went on serving the old copy under the same address.
-const cssHash = createHash('sha256').update(new CleanCSS({ level: 1 }).minify(await readFile(cssUrl, 'utf8')).styles).digest('hex').slice(0, 10);
+// year, went on serving the old copy under the same address. (cssHash is taken above the split.)
+//
+// Since 2026-10-01 the page links app.css, styles.css less every rule only the staff screens can
+// match (customerCss in scripts/split-staff.mjs, read against the page and app.js as they ship), and
+// the staff loader adds styles.css itself. app.css is written minified here, so the file in the repo
+// is the file that ships and its tag is the hash of those bytes.
+const appCssRes = customerCss(cssSource, out + '\n' + appCode, staffAll);
+const appCss = new CleanCSS({ level: 1 }).minify(appCssRes.css);
+if (appCss.errors.length) throw new Error(`build: app.css did not minify: ${appCss.errors.join('; ')}`);
+const appCssHash = createHash('sha256').update(appCss.styles).digest('hex').slice(0, 10);
+await writeFile(new URL('../app.css', import.meta.url), appCss.styles);
+console.log(`build: app.css ${appCss.styles.length} bytes (${appCssRes.dropped} staff-only rules, ${appCssRes.droppedBytes} bytes of styles.css, left to the staff loader)`);
 const beforeCss = out;
-out = out.replace(/styles\.css\?v=[a-z0-9]+/g, `styles.css?v=${cssHash}`);
-if (out === beforeCss && /styles\.css\?v=/.test(beforeCss)) {
-  throw new Error('build: styles.css cache tag present but not rewritten');
-}
+out = out.replace(/app\.css\?v=[a-z0-9]+/g, `app.css?v=${appCssHash}`);
+if (out === beforeCss) throw new Error('build: the page links no app.css?v= to tag');
 // fonts.css the same way. Its ?v= was bumped by hand, and the print windows (receipt, day sheet,
 // billing report) asked for it with none: /fonts/ is cached as immutable for a year, so those
 // windows could keep an old copy that long. Every reference now carries the file's own hash.
@@ -250,9 +339,12 @@ let sw = await readFile(swUrl, 'utf8');
 const swBefore = sw;
 // The staff half rides in the shell on staff hosts (service-worker.js, STAFF_JS) under its own
 // hash, stamped here before the precache list is checked below.
-sw = sw.replace(/staff\.js\?v=[A-Za-z0-9_]+/g, `staff.js?v=${staffHash}`);
-const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js', 'report.css', 'receipt.css']); // staff.js, report.css, receipt.css: asked for with their own hash (?v=), like the packs
-const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities']);
+sw = sw.replace(/const STAFF_PARTS = \[[^\]]*\];/, `const STAFF_PARTS = ${JSON.stringify(Object.keys(staffPartsV).map((n) => `./staff-parts/${n}.js?v=${staffPartsV[n]}`))};`)
+  .replace(/staff\.js\?v=[A-Za-z0-9_]+/g, `staff.js?v=${staffHash}`)
+  .replace(/app\.js\?v=[A-Za-z0-9_]+/g, `app.js?v=${appHash}`)
+  .replace(/app\.css\?v=[A-Za-z0-9_]+/g, `app.css?v=${appCssHash}`);
+const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js', 'app.js', 'app.css', 'report.css', 'receipt.css']); // staff.js, app.js, app.css, report.css, receipt.css: asked for with their own hash (?v=), like the packs
+const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities', 'staff-parts']);
 const shipped = (rel) => DIST_FILES.includes(rel) || DIST_DIRS.some((d) => rel.startsWith(d + '/'));
 // Every file the worker precaches must also ship, or cache.addAll() rejects and the worker
 // never installs in production. Checked here so it fails at build time, not at "Assemble dist".
@@ -281,7 +373,9 @@ for (const dir of DIST_DIRS) if (!VERSIONED_DIRS.has(dir)) onDisk.push(...(await
 const ign = spawnSync('git', ['check-ignore', '--stdin', '-z'], { cwd: rootDir, input: onDisk.join('\0'), encoding: 'utf8' });
 if (ign.status === 0) { const ignored = new Set(ign.stdout.split('\0').filter(Boolean)); onDisk = onDisk.filter((rel) => !ignored.has(rel)); }
 const cacheFirst = onDisk.filter((rel) => !NOT_CACHE_FIRST.has(rel)).sort();
-const shellHasher = createHash('sha256').update(cssHash);
+// The versioned halves go into the name too: a deploy that changes only app.js still gets a fresh
+// cache, and the copies of the last version go with the old one instead of piling up.
+const shellHasher = createHash('sha256').update(cssHash).update(appHash).update(appCssHash).update(staffHash).update(JSON.stringify(staffPartsV));
 for (const rel of cacheFirst) {
   let bytes;
   try { bytes = await readFile(new URL(`../${rel}`, import.meta.url)); }
@@ -300,11 +394,6 @@ if (sw !== swBefore) await writeFile(swUrl, sw);
 // JSON-LD, the sitemap and robots.txt independently, so moving to the custom domain meant
 // finding every copy. app.src.html carries __SITE_ORIGIN__ and the two SEO files are
 // rewritten here, all from site.config.json.
-const site = JSON.parse(await readFile(new URL('../site.config.json', import.meta.url), 'utf8'));
-const origin = String(site.origin || '').replace(/\/+$/, '');
-if (!/^https?:\/\/[^/]+$/.test(origin)) {
-  throw new Error(`build: site.config.json origin must be a bare origin, got ${JSON.stringify(site.origin)}`);
-}
 if (out.includes('__SITE_ORIGIN__')) out = out.split('__SITE_ORIGIN__').join(origin);
 if (out.includes('__SITE_ORIGIN__')) throw new Error('build: site origin placeholder survived substitution');
 
@@ -338,7 +427,7 @@ if (robots !== robotsBefore) await writeFile(robotsUrl, robots);
 // so the "edit app.src.html, not index.html" rule lives in AGENTS.md / CLAUDE.md instead.
 // Second guard, in case a future parser quirk slips past the check above: a real minify
 // pass removes ~18% of this file. Anything under 5% means terser bailed out silently.
-const shrink = 1 - out.length / src.length;
+const shrink = 1 - (out.length + appCode.length) / srcWithMain.length;
 if (shrink < 0.05) {
   throw new Error(`build: output shrank only ${(shrink * 100).toFixed(1)}% — terser almost certainly failed to parse an inline script`);
 }
@@ -348,7 +437,7 @@ if (shrink < 0.05) {
 // with their bytes, so the policy line in _headers is written here from the built page (and the
 // /staff/ stub). An on*="..." attribute anywhere in the shipped markup would be dead on the page
 // - the build refuses it instead.
-for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
+for (const [name, text] of [['index.html', out], ['app.js', appCode], ['staff.js', staffMin.code], ...Object.entries(staffParts).map(([n, c]) => [`staff-parts/${n}.js`, c])]) {
   const bad = text.match(/[\s`'"]on[a-z]+=["'][^"']{0,80}/); // any quote or backtick before it too: five handlers hid behind a template literal's backtick until 2026-09-28
   if (bad) throw new Error(`build: ${name} still carries an inline handler, which the policy would block: ${bad[0]}`);
   if (/javascript:/i.test(text)) throw new Error(`build: ${name} carries a javascript: URL, which the policy would block`);
@@ -359,7 +448,7 @@ for (const [name, text] of [['index.html', out], ['staff.js', staffMin.code]]) {
 // refuses an inline style the way it refuses an inline handler. The move there went area by area
 // under a ceiling that only came down (1834 on 2026-09-28).
 const STYLE_ATTRS_MAX = 0;
-const styleAttrs = [out, staffMin.code].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
+const styleAttrs = [out, appCode, staffAll].reduce((n, text) => n + (text.match(/[\s`'"(+]style=/g) || []).length + (text.match(/setAttribute\(\s*['"]style['"]/g) || []).length, 0);
 if (styleAttrs > STYLE_ATTRS_MAX) throw new Error(`build: the page writes ${styleAttrs} inline style(s), which the policy (style-src without 'unsafe-inline') would refuse - write a class, or data-cssv for a run-time value, instead of style="..." or setAttribute('style')`);
 const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/g)]
   .filter((m) => !/\btype\s*=\s*["']?(?!(?:text\/javascript|module)["'\s>])/i.test(m[1]))
@@ -382,6 +471,16 @@ const headersBefore = headers;
 if (!/^  Content-Security-Policy: /m.test(headers)) throw new Error('build: _headers has no Content-Security-Policy line to rewrite');
 headers = headers.replace(/^  Content-Security-Policy: .*$/m, `  Content-Security-Policy: ${CSP}`);
 if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  Content-Security-Policy: .*)$/m, `$1\n  Reporting-Endpoints: csp="/api/csp-report"`);
+// Early Hints (2026-10-01). Cloudflare Pages sends a page's Link headers as a 103 before the page
+// itself, so the phone starts on the stylesheet, the script and the first font while the HTML is still
+// on its way. It builds them from <link rel=preload> only when the tag carries nothing else, and ours
+// need crossorigin or integrity, so the root's are written here, by hash, like the policy above.
+const EARLY_FONT = '/fonts/SpaceGrotesk-var-latin.woff2';
+if (!out.includes(`href="${EARLY_FONT}"`)) throw new Error(`build: the page no longer preloads ${EARLY_FONT} - update the Early Hints list`);
+const early = `/\n  Link: </app.css?v=${appCssHash}>; rel=preload; as=style, </app.js?v=${appHash}>; rel=preload; as=script, <${EARLY_FONT}>; rel=preload; as=font; type="font/woff2"; crossorigin\n`;
+const EARLY_RE = /^\/\n  Link: [^\n]*\n/m;
+headers = EARLY_RE.test(headers) ? headers.replace(EARLY_RE, early) : headers.replace(/^(\/vendor\/\*\n)/m, `# The root page's Early Hints: written by scripts/build-html.mjs (the files' hashes change every build).\n${early}$1`);
+if (!headers.includes(early)) throw new Error('build: could not write the Early Hints block into _headers');
 if (headers !== headersBefore) await writeFile(headersUrl, headers);
 
 // ── The customer system keeps its colours in its tokens (scripts/split-staff.mjs) ─────────────
@@ -404,11 +503,11 @@ if (headers !== headersBefore) await writeFile(headersUrl, headers);
 // the edge sends them. A creeping regression fails the build here, with the numbers; the limits
 // are SIZE_BUDGET_CUSTOMER_KB / SIZE_BUDGET_STAFF_KB in the environment or the defaults in
 // scripts/split-staff.mjs (checked again by tests/build-checks.spec.ts against the committed files).
-const budget = checkSizeBudget({ customer: gzipBytes(out), staff: gzipBytes(staffMin.code) });
+const budget = checkSizeBudget({ customer: gzipBytes(out) + gzipBytes(appCode), staff: gzipBytes(staffMin.code) + Object.values(staffParts).reduce((n, c) => n + gzipBytes(c), 0), core: gzipBytes(staffMin.code) });
 console.log(`build: ${budget.text}`);
 if (budget.over.length) {
   throw new Error(`build: over the size budget - ${budget.over.map((r) => `${r.half} half ${r.kb.toFixed(1)} KB gzipped > ${r.limitKb} KB`).join(', ')}. Trim what grew, or raise the budget deliberately (SIZE_BUDGET_*_KB, or the defaults in scripts/split-staff.mjs) and say why in the commit.`);
 }
 
 await writeFile(new URL('../index.html', import.meta.url), out);
-console.log(`built index.html: ${src.length} -> ${out.length} bytes (${(shrink * 100).toFixed(1)}% smaller, assets v=${cssHash}, ${hashes.length} inline scripts in the policy)`);
+console.log(`built index.html: ${out.length} bytes + app.js ${appCode.length} bytes (${(shrink * 100).toFixed(1)}% smaller than the source, app.js v=${appHash}, app.css v=${appCssHash}, ${hashes.length} inline scripts in the policy)`);

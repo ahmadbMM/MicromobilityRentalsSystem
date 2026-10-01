@@ -60,9 +60,10 @@ const WORD = /[A-Za-z_$][\w$]*/g;
  * </script> alone on its line (the report templates carry </script> inside strings).
  * Returns the page with the customer half (plus the stubs and loader) and the staff half's code.
  * `staffUrl` is what the loader fetches; the caller knows the hash only after minifying, so it
- * passes a placeholder and replaces it.
+ * passes a placeholder and replaces it. `staffCssUrl` is the whole stylesheet a staff device adds
+ * (empty: none).
  */
-export function splitStaff(html, staffUrl) {
+export function splitStaff(html, staffUrl, staffCssUrl = '') {
   const { code, open, close } = mainScript(html);
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
 
@@ -142,36 +143,357 @@ export function splitStaff(html, staffUrl) {
 // like any versioned file. The names below stand in for it until then: the real declarations
 // replace them when the file has loaded. This block leads the script because the boot, further
 // down, awaits _loadStaff before the script has finished running.
-var _staffP=null;
+// Three things come down side by side (2026-10-01): the code, the whole stylesheet (the customer
+// page links app.css, styles.css less every rule only staff screens can match; the staff screens
+// get the file they were written against, and app.css is switched off under it), and the staff
+// strings of the language on screen (lang/staff-<code>.json into LANG_STAFF; English ships inside
+// staff.js). Each is kept once it has arrived, so a retry never runs staff.js a second time.
+var _staffP=null,_staffJsP=null,_staffCssP=null;
 var STAFF_JS=${JSON.stringify(staffUrl)}; // var, and this block leads the script: the boot calls _loadStaff before the script has finished running
+var STAFF_CSS=${JSON.stringify(staffCssUrl || '')};
+var STAFF_LANG_V={}; // the build stamps {code:contentHash} of lang/staff-<code>.json
+var LANG_STAFF={},_staffLangP={};
 // The stored marks and the address first, S.view last: this runs at the top of the script too
 // (the early load below), before S exists, and the try answers false only when nothing else did.
 function _staffWanted(){try{if(localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||_isStaffHost())return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike'))return true;const p=_parsePath(location.pathname);if(p&&p.view==='staff')return true;return S.view==='staff';}catch(e){return false;}}
 // A script that neither loads nor errors (a proxy that swallows it, a tab frozen mid-download)
 // used to hold the boot forever: after 30 s the promise rejects and a later call may try again.
-function _loadStaff(){
-  if(_staffP)return _staffP;
-  _staffP=new Promise((res,rej)=>{
+function _loadStaffJs(){
+  if(_staffJsP)return _staffJsP;
+  _staffJsP=new Promise((res,rej)=>{
     const s=document.createElement('script');let done=false;
-    const fail=why=>{if(done)return;done=true;_staffP=null;try{s.remove();}catch(e){}rej(new Error(why));};
+    const fail=why=>{if(done)return;done=true;_staffJsP=null;try{s.remove();}catch(e){}rej(new Error(why));};
     const tm=setTimeout(()=>fail('staff.js did not load in 30 s'),30000);
     s.src=STAFF_JS;s.onload=()=>{if(done)return;done=true;clearTimeout(tm);res();};s.onerror=()=>{clearTimeout(tm);fail('staff.js did not load');};
     document.head.appendChild(s);
   });
+  return _staffJsP;
+}
+function _loadStaffCss(){
+  if(_staffCssP)return _staffCssP;
+  if(!STAFF_CSS)return(_staffCssP=Promise.resolve());
+  _staffCssP=new Promise((res,rej)=>{
+    const l=document.createElement('link');let done=false;
+    const fail=why=>{if(done)return;done=true;_staffCssP=null;try{l.remove();}catch(e){}rej(new Error(why));};
+    const tm=setTimeout(()=>fail('styles.css did not load in 30 s'),30000);
+    l.rel='stylesheet';l.href=STAFF_CSS;l.setAttribute('data-staff-css','');
+    // styles.css holds every rule app.css does, in the same order: switching app.css off leaves the
+    // cascade exactly as it was when one file served both, and spares matching each rule twice.
+    l.onload=()=>{if(done)return;done=true;clearTimeout(tm);try{document.querySelectorAll('link[rel="stylesheet"][href^="/app.css"]').forEach(c=>{c.disabled=true;});}catch(e){}res();};
+    l.onerror=()=>{clearTimeout(tm);fail('styles.css did not load');};
+    document.head.appendChild(l);
+  });
+  return _staffCssP;
+}
+// The language on screen: S when it exists, else what the head's early script chose (S is still in
+// its temporal dead zone at the top of the script, where typeof throws too - hence the try).
+function _staffLangCode(){try{if(S&&S.lang)return S.lang;}catch(e){}return window.__langPackCode||'en';}
+function _staffLangReady(c){return !c||c==='en'||!STAFF_LANG_V[c]||!!LANG_STAFF[c];}
+// Never rejects: a pack that did not arrive leaves t() answering in English, as the customer packs do.
+function _loadStaffLang(c){
+  if(_staffLangReady(c))return Promise.resolve();
+  if(!_staffLangP[c])_staffLangP[c]=fetch('/lang/staff-'+c+'.json?v='+STAFF_LANG_V[c]).then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object')LANG_STAFF[c]=d;else delete _staffLangP[c];}).catch(()=>{delete _staffLangP[c];});
+  return _staffLangP[c];
+}
+function _loadStaff(){
+  if(_staffP)return _staffP;
+  // window.__staffPartsNow (set by the test suite's stubs): the staff half's parts come before the
+  // promise resolves, so a spec may call a section's functions at once. Anywhere else they follow the
+  // desk's first paint on their own (splitSections).
+  _staffP=Promise.all([_loadStaffJs(),_loadStaffCss(),_loadStaffLang(_staffLangCode())]).then(()=>{if(window.__staffPartsNow&&typeof _loadStaffParts==='function')return _loadStaffParts();},e=>{_staffP=null;throw e;});
   return _staffP;
 }
 // A staff device starts the download here, at the top of the script, instead of after the whole
-// customer half has parsed and run to the boot: the two files come down side by side.
+// customer half has parsed and run to the boot: the files come down side by side.
 try{if(_staffWanted())_loadStaff().catch(()=>{});}catch(e){}
 ${stubs}
 `;
   const customerCode = loader + '\n' + text(customer); // the loader first: the boot, further down, awaits it before the script has finished
   const staffCode = '// The staff half of the booking app: generated by scripts/split-staff.mjs from app.src.html, never edited by hand.\n' + text(staff) + '\n';
   return {
-    html: html.slice(0, open) + '\n' + customerCode + html.slice(close),
+    html: html.slice(0, open) + '\n' + customerCode + '\n' + html.slice(close), // the </script> alone on its line again: mainScript finds it (build-html moves it to app.js)
     staff: staffCode,
     report: { customerBytes: customerCode.length, staffBytes: staffCode.length, customerStmts: customer.length, staffStmts: staff.length, stubs: stubbed },
   };
+}
+
+// ── Which translation keys a customer's page needs (2026-10-01) ────────────────────────────────
+// Two thirds of LANG's ~3,100 keys are words only the staff screens say, and every rider downloaded
+// them: in the inline English and again in each language pack. A key goes to the staff half only
+// when staff code names it and nothing on the customer's page can: the customer page names it
+// nowhere as a word, and no key the page builds at run time can be it - a plural form (base_one,
+// base_other: _tn), a literal prefix the page concatenates ('heard_'+x, \`rateTag\${x}\`) or a
+// literal suffix it appends to a word it does name (n[2]+'D'). A key no code names at all stays
+// with the customer: nothing proves it is staff's. Too little moved is a few bytes; too much is a
+// raw key on a rider's screen.
+export const PLURAL_RE = /^(.+)_(?:zero|one|two|few|many|other)$/;
+const IDENT_WORD = /[A-Za-z_$][\w$]*/g;
+export function langKeyParts(text) {
+  const words = new Set(text.match(IDENT_WORD) || []);
+  const prefixes = new Set(), suffixes = new Set();
+  for (const m of text.matchAll(/(['"`])([A-Za-z_$][\w$]*)\1\s*\+/g)) prefixes.add(m[2]);
+  for (const m of text.matchAll(/`([A-Za-z_$][\w$]*)\$\{/g)) prefixes.add(m[1]);
+  for (const m of text.matchAll(/\+\s*(['"`])([A-Za-z_$][\w$]*)\1/g)) suffixes.add(m[2]);
+  for (const m of text.matchAll(/\}([A-Za-z_$][\w$]*)`/g)) suffixes.add(m[1]);
+  return { words, prefixes: [...prefixes], suffixes: [...suffixes] };
+}
+/** Could the page whose text gave `parts` ask for `key`? */
+export function namesKey(parts, key) {
+  if (parts.words.has(key)) return true;
+  const pl = key.match(PLURAL_RE);
+  if (pl && parts.words.has(pl[1])) return true;
+  if (parts.prefixes.some((p) => key.length > p.length && key.startsWith(p))) return true;
+  if (parts.suffixes.some((x) => key.length > x.length && key.endsWith(x) && parts.words.has(key.slice(0, -x.length)))) return true;
+  return false;
+}
+/**
+ * @param keys every key of LANG (English's are the full set)
+ * @param customerText the customer's page as it ships, the LANG object itself left out
+ * @param staffText the staff half's code
+ * @returns {Set<string>} the keys that go to the staff half
+ */
+export function staffOnlyLangKeys(keys, customerText, staffText) {
+  const cust = langKeyParts(customerText), staff = langKeyParts(staffText);
+  const out = new Set();
+  for (const k of keys) if (!namesKey(cust, k) && namesKey(staff, k)) out.add(k);
+  return out;
+}
+
+// ── The customer's stylesheet (2026-10-01) ─────────────────────────────────────────────────────
+// styles.css serves both halves, and it blocks a rider's first paint: about half of it is the staff
+// screens'. app.css is styles.css less every rule no customer page can match - a rule goes when each
+// of its selectors needs an element carrying a class or id that staff code writes and the customer's
+// page never does (not as a word anywhere on it, not through a prefix or suffix it concatenates).
+// Tokens under :not()/:is()/:where() and inside [attribute] brackets do not count: they do not make
+// an element necessary. Everything else keeps its place, so the order of what stays is the order
+// of styles.css, and a staff device loads the whole styles.css over it (see the loader above).
+
+/** Top-level CSS tokens: rules, at-rules (with their body, or none), comments and whitespace. Joined, they give the input back. */
+export function cssTokens(s) {
+  const out = []; let i = 0;
+  const skipComment = (j) => { const e = s.indexOf('*/', j + 2); return e < 0 ? s.length : e + 2; };
+  while (i < s.length) {
+    const st = i;
+    if (/\s/.test(s[i])) { while (i < s.length && /\s/.test(s[i])) i++; out.push({ kind: 'ws', text: s.slice(st, i) }); continue; }
+    if (s.startsWith('/*', i)) { i = skipComment(i); out.push({ kind: 'comment', text: s.slice(st, i) }); continue; }
+    let q = null;
+    while (i < s.length) {
+      const c = s[i];
+      if (q) { if (c === '\\') i++; else if (c === q) q = null; i++; continue; }
+      if (c === '"' || c === "'") { q = c; i++; continue; }
+      if (s.startsWith('/*', i)) { i = skipComment(i); continue; }
+      if (c === '{' || c === ';' || c === '}') break;
+      i++;
+    }
+    if (i >= s.length || s[i] === '}') { if (s[i] === '}') i++; out.push({ kind: 'junk', text: s.slice(st, i) }); continue; }
+    if (s[i] === ';') { i++; out.push({ kind: 'at', text: s.slice(st, i), prelude: s.slice(st, i - 1).trim(), body: null }); continue; }
+    const prelude = s.slice(st, i).trim(); const bodyStart = i + 1; let d = 0; q = null;
+    for (; i < s.length; i++) {
+      const c = s[i];
+      if (q) { if (c === '\\') i++; else if (c === q) q = null; continue; }
+      if (c === '"' || c === "'") { q = c; continue; }
+      if (s.startsWith('/*', i)) { i = skipComment(i) - 1; continue; }
+      if (c === '{') d++;
+      else if (c === '}' && --d === 0) { i++; break; }
+    }
+    out.push({ kind: prelude.startsWith('@') ? 'at' : 'rule', text: s.slice(st, i), prelude, body: s.slice(bodyStart, i - 1), open: s.slice(st, bodyStart) });
+  }
+  return out;
+}
+/** A selector list's selectors (commas inside brackets or parentheses do not split). */
+export function splitSelectors(p) {
+  const r = []; let d = 0, cur = '';
+  for (const c of p.replace(/\/\*[\s\S]*?\*\//g, '')) { if (c === '(' || c === '[') d++; else if (c === ')' || c === ']') d--; if (c === ',' && !d) { r.push(cur.trim()); cur = ''; } else cur += c; }
+  r.push(cur.trim());
+  return r;
+}
+/** The classes and ids an element must carry for `sel` to match (brackets and :not/:is/:where left out). */
+export function requiredNames(sel) {
+  let s = sel.replace(/\[[^\]]*\]/g, '');
+  for (let k = 0; k < 20 && /:(?:not|is|where|matches|-webkit-any)\(/.test(s); k++) s = s.replace(/:(?:not|is|where|matches|-webkit-any)\((?:[^()]|\([^()]*\))*\)/g, '');
+  return [...s.matchAll(/[.#](-?[A-Za-z_][\w-]*)/g)].map((m) => m[1]);
+}
+// A class prefix is one that ends in a dash or underscore (c-, cu-g-) or runs four letters or more:
+// shorter ones are the minified page's own variable names in front of a template's \${ (f\${, d\${).
+const classPrefix = (p) => /[-_]$/.test(p) ? p.length >= 2 : p.length >= 4;
+function classParts(text) {
+  const words = new Set(text.match(/-?[A-Za-z_][\w-]*/g) || []);
+  const prefixes = new Set(), suffixes = new Set();
+  for (const m of text.matchAll(/(-?[A-Za-z_][\w-]*)\$\{/g)) if (classPrefix(m[1])) prefixes.add(m[1]); // `bdg-m c-${colour}`
+  for (const m of text.matchAll(/(-?[A-Za-z_][\w-]*)(['"`])\s*\+/g)) if (classPrefix(m[1])) prefixes.add(m[1]); // 'cu-g-'+g
+  for (const m of text.matchAll(/\}(-?[\w-]+)/g)) suffixes.add(m[1]); // `${state}-chip`
+  for (const m of text.matchAll(/\+\s*(['"`])(-?[\w-]+)/g)) suffixes.add(m[2]); // x+'-chip'
+  return { words, prefixes: [...prefixes], suffixes: [...suffixes] };
+}
+function classOnPage(parts, n) {
+  if (parts.words.has(n)) return true;
+  if (parts.prefixes.some((p) => n.length > p.length && n.startsWith(p))) return true;
+  if (parts.suffixes.some((x) => n.length > x.length && n.endsWith(x) && parts.words.has(n.slice(0, -x.length)))) return true;
+  return false;
+}
+/**
+ * @param css styles.css as written
+ * @param customerText everything a customer's page carries (index.html and app.js)
+ * @param staffText staff.js
+ * @param scope classes to treat as staff-only however the page names them (STAFF_SCOPE)
+ * @returns {{ css: string, kept: number, dropped: number, droppedBytes: number, droppedSelectors: string[] }}
+ */
+// Classes the customer's page does write, but only once staff.js and styles.css are there: showView
+// puts view-staff on <body> in the staff view, which is entered through goStaff (staff code) or by
+// the boot after it has awaited _loadStaff.
+export const STAFF_SCOPE = new Set(['view-staff']);
+export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
+  const cust = classParts(customerText), staffWords = new Set(staffText.match(/-?[A-Za-z_][\w-]*/g) || []);
+  const staffOnly = (n) => scope.has(n) || (staffWords.has(n) && !classOnPage(cust, n));
+  const staffSel = (sel) => requiredNames(sel).some(staffOnly);
+  let kept = 0, dropped = 0, droppedBytes = 0;
+  const droppedSelectors = [];
+  const GROUP = /^@(?:media|supports|layer|container|document)\b/i;
+  function filter(text) {
+    let out = '';
+    for (const t of cssTokens(text)) {
+      if (t.kind === 'rule') {
+        const sels = splitSelectors(t.prelude);
+        if (sels.every(staffSel)) { dropped++; droppedBytes += t.text.length; droppedSelectors.push(...sels); continue; }
+        kept++; out += t.text;
+      } else if (t.kind === 'at' && t.body !== null && GROUP.test(t.prelude)) {
+        const inner = filter(t.body);
+        if (!inner.trim() || /^\s*(?:\/\*[\s\S]*?\*\/\s*)*$/.test(inner)) continue; // nothing left inside
+        out += t.open + inner + '}';
+      } else out += t.text;
+    }
+    return out;
+  }
+  return { css: filter(css), kept, dropped, droppedBytes, droppedSelectors };
+}
+
+// ── The staff half in parts (2026-10-01) ────────────────────────────────────────────────────────
+// A booth tablet parsed all of staff.js (297 KB gzipped) before it could draw the Bookings screen,
+// though about half of it is sections the desk does not open at boot: Analytics, Community, the
+// inventory and the bikes, the till, the website editor... Each section's renderer is cut here the
+// way the customer half is cut from the staff half: what is reachable from it and from nothing else
+// goes to staff-parts/<name>.js, and staff.js keeps a stand-in that fetches the part and runs the
+// real function. A statement two parts share goes back to staff.js (and with it, until nothing
+// changes, whatever it reaches), so staff.js never calls into a part except through a stand-in.
+// Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
+export const STAFF_PARTS = {
+  analytics: ['renderAnalytics'], community: ['renderCommunity'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
+  workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
+};
+function refsOf(code) {
+  const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
+  const decl = new Map(); const stmts = [];
+  ast.body.forEach((node, idx) => {
+    let names = [];
+    if (node.type === 'FunctionDeclaration') names = [node.id.name];
+    else if (node.type === 'VariableDeclaration') names = node.declarations.flatMap((d) => (d.id.type === 'Identifier' ? [d.id.name] : []));
+    const st = { idx, node, names, refs: new Set() };
+    stmts.push(st); for (const n of names) decl.set(n, st);
+  });
+  const top = new Set(decl.keys());
+  const words = (t, out) => { for (const w of t.match(WORD) || []) if (top.has(w)) out.add(w); };
+  function walk(node, parent, key, out) {
+    if (!node || typeof node.type !== 'string') return;
+    if (node.type === 'Identifier') {
+      const isProp = parent && ((parent.type === 'MemberExpression' && key === 'property' && !parent.computed)
+        || (parent.type === 'Property' && key === 'key' && !parent.computed && !parent.shorthand) || (parent.type === 'MethodDefinition' && key === 'key'));
+      if (!isProp && top.has(node.name)) out.add(node.name);
+      return;
+    }
+    if (node.type === 'Literal' && typeof node.value === 'string') { words(node.value, out); return; }
+    if (node.type === 'TemplateElement') { words(node.value.cooked || node.value.raw || '', out); return; }
+    for (const k of Object.keys(node)) {
+      if (k === 'type' || k === 'start' || k === 'end' || k === 'loc') continue;
+      const v = node[k];
+      if (Array.isArray(v)) v.forEach((c) => c && typeof c.type === 'string' && walk(c, node, k, out));
+      else if (v && typeof v.type === 'string') walk(v, node, k, out);
+    }
+  }
+  for (const st of stmts) walk(st.node, null, null, st.refs);
+  return { stmts, decl };
+}
+/**
+ * @param code the staff half's source (before minifying)
+ * @returns {{ core: string, parts: Record<string,string>, report: Record<string, number> }}
+ */
+export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
+  const { stmts, decl } = refsOf(code);
+  const entries = new Map();
+  for (const [p, fns] of Object.entries(parts)) for (const f of fns) {
+    const st = decl.get(f);
+    if (!st) throw new Error(`split-staff: staff part ${p} names ${f}, which is not in the staff half`);
+    if (st.node.type !== 'FunctionDeclaration') throw new Error(`split-staff: ${f} must be a plain function declaration to start a staff part`);
+    entries.set(f, p);
+  }
+  const reach = (from, core, cut) => {
+    const seen = new Set(); const q = [];
+    const add = (n) => { if (cut.has(n)) return; const st = decl.get(n); if (st && !seen.has(st) && !(core && core.has(st))) { seen.add(st); q.push(st); } };
+    from.forEach(add);
+    while (q.length) { const st = q.pop(); for (const r of st.refs) add(r); }
+    return seen;
+  };
+  const boot = stmts.filter((st) => st.node.type !== 'FunctionDeclaration'
+    && !(st.node.type === 'VariableDeclaration' && st.node.declarations.every((d) => !d.init || PURE.has(d.init.type))));
+  const allEntries = new Set(entries.keys());
+  // What the desk reaches without opening a section: the ways in from the customer half (less the
+  // sections' own renderers) and every statement that runs when the file loads.
+  let coreRoots = [...roots.filter((n) => decl.has(n) && !allEntries.has(n)), ...boot.flatMap((st) => st.names)];
+  let core = reach(coreRoots, null, allEntries);
+  boot.forEach((st) => core.add(st));
+  let own = {};
+  for (let round = 0; round < 50; round++) {
+    own = {};
+    const count = new Map();
+    for (const [p, fns] of Object.entries(parts)) {
+      own[p] = reach(fns, core, new Set([...allEntries].filter((f) => entries.get(f) !== p)));
+      for (const st of own[p]) count.set(st, (count.get(st) || 0) + 1);
+    }
+    const shared = [...count].filter(([, c]) => c > 1).map(([st]) => st);
+    if (!shared.length) break;
+    // shared statements join the core, with everything they reach that is not a section's way in
+    const more = reach(shared.flatMap((st) => st.names), core, allEntries);
+    shared.forEach((st) => core.add(st)); more.forEach((st) => core.add(st));
+  }
+  const inPart = new Map();
+  for (const [p, set] of Object.entries(own)) for (const st of set) inPart.set(st, p);
+  const text = (arr) => arr.map((st) => code.slice(st.node.start, st.node.end)).join('\n');
+  const stubs = [...entries].map(([f, p]) => `function ${f}(...a){return _loadStaffPart(${JSON.stringify(p)}).then(()=>${f}(...a));}`).join('\n');
+  const loader = `
+// ── The staff half's parts (generated by scripts/split-staff.mjs; do not edit here) ──────────────
+// A section's code is in staff-parts/<name>.js; the stand-ins below fetch it and run the real function,
+// whose declaration replaces the stand-in. Every part is fetched once the desk has painted.
+var STAFF_PARTS_V={}; // the build stamps {name:contentHash}
+var _staffPartP={},_staffPartsAll=null,_staffPartsDone=false;
+function _loadStaffPart(n){
+  if(_staffPartP[n])return _staffPartP[n];
+  _staffPartP[n]=new Promise((res,rej)=>{
+    const s=document.createElement('script');let done=false;
+    const fail=why=>{if(done)return;done=true;delete _staffPartP[n];try{s.remove();}catch(e){}rej(new Error(why));};
+    const tm=setTimeout(()=>fail('staff part '+n+' did not load in 30 s'),30000);
+    s.src='/staff-parts/'+n+'.js?v='+STAFF_PARTS_V[n];s.onload=()=>{if(done)return;done=true;clearTimeout(tm);res();};s.onerror=()=>{clearTimeout(tm);fail('staff part '+n+' did not load');};
+    document.head.appendChild(s);
+  });
+  return _staffPartP[n];
+}
+function _loadStaffParts(){
+  if(_staffPartsAll)return _staffPartsAll;
+  _staffPartsAll=Promise.all(Object.keys(STAFF_PARTS_V).map(_loadStaffPart)).then(()=>{_staffPartsDone=true;},e=>{_staffPartsAll=null;throw e;});
+  return _staffPartsAll;
+}
+function _staffPartsReady(){return _staffPartsDone;}
+try{(window.requestIdleCallback||(f=>setTimeout(f,1200)))(()=>{_loadStaffParts().catch(()=>{});},{timeout:3000});}catch(e){}
+${stubs}
+`;
+  const coreStmts = stmts.filter((st) => !inPart.has(st));
+  const head = code.match(/^(\/\/[^\n]*\n)?/)[0];
+  const out = { core: head + loader + '\n' + text(coreStmts) + '\n', parts: {}, report: { core: coreStmts.length } };
+  for (const p of Object.keys(parts)) {
+    const list = stmts.filter((st) => inPart.get(st) === p);
+    out.parts[p] = `// A part of the staff half (${p}): generated by scripts/split-staff.mjs from app.src.html, never edited by hand.\n` + text(list) + '\n';
+    out.report[p] = list.length;
+  }
+  return out;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
@@ -602,8 +924,16 @@ export function formatBareWrites(r, limit = 20) {
 // 2026-09-30: staff 270 -> 275. The application messages in ten languages (the ride list, the
 // Instagram line) took the staff half to 270.3 KB; only staff devices download it, and the customer
 // budget stays where it was.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 250, staff: 275 };
-export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB' };
+// 2026-10-01: customer 250 -> 225, staff 275 -> 300. The strings only staff screens say (1,913 of 3,122
+// keys) left the customer's page: their English now heads staff.js (+26.5 KB there), the rest went to
+// lang/staff-<code>.json. The customer half (now index.html + app.js, the script having moved out of
+// the page) fell from 243.5 to 219.3 KB; a staff device downloads what it did.
+// Later on 2026-10-01: staff 300 -> 315, and a third row, core 165. The staff half became staff.js (the
+// desk's core, what a booth tablet parses before it draws) and twelve section parts fetched after the
+// first paint: the same code, but thirteen gzip streams instead of one cost ~15 KB more in all. The
+// core, 158 KB where the whole half was 297, keeps its own budget so the saving stays.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 225, staff: 315, core: 165 };
+export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
 export function gzipBytes(text) {
@@ -616,7 +946,7 @@ export function gzipBytes(text) {
  * @returns {{ rows: {half:string,bytes:number,kb:number,limitKb:number,over:boolean}[], over: {}[], text: string }}
  */
 export function checkSizeBudget(bytes, env = process.env) {
-  const rows = ['customer', 'staff'].map((half) => {
+  const rows = ['customer', 'staff', 'core'].filter((half) => half !== 'core' || bytes.core !== undefined).map((half) => {
     const raw = env[SIZE_BUDGET_ENV[half]];
     const limitKb = raw === undefined || raw === '' ? SIZE_BUDGET_DEFAULT_KB[half] : Number(raw);
     if (!Number.isFinite(limitKb) || limitKb <= 0) throw new Error(`build: ${SIZE_BUDGET_ENV[half]}=${JSON.stringify(raw)} is not a size in KB`);
@@ -624,7 +954,7 @@ export function checkSizeBudget(bytes, env = process.env) {
     if (!Number.isFinite(b)) throw new Error(`build: no byte count for the ${half} half`);
     return { half, bytes: b, kb: b / 1000, limitKb, over: b > limitKb * 1000 };
   });
-  const label = { customer: 'customer half (index.html)', staff: 'staff half (staff.js)' };
+  const label = { customer: 'customer half (index.html + app.js)', staff: 'staff half (staff.js + staff-parts)', core: 'desk core (staff.js)' };
   const text = rows.map((r) => `${label[r.half]} ${r.kb.toFixed(1)} KB gzipped, budget ${r.limitKb} KB${r.over ? ' - OVER' : ''}`).join('; ');
   return { rows, over: rows.filter((r) => r.over), text };
 }

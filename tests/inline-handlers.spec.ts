@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 
 // The Content-Security-Policy allows no inline script, so an on<event>="…" attribute in the built page
 // is a control that does nothing in production - and the suite runs with the policy bypassed, so a
@@ -9,7 +9,7 @@ import { readFileSync } from 'node:fs';
 // does, so the class of mistake cannot come back unnoticed.
 const INLINE = /[\s`'"]on[a-z]+=["'][^"']{0,80}/g;
 
-for (const file of ['index.html', 'staff.js']) {
+for (const file of ['index.html', 'app.js', 'staff.js', ...readdirSync('staff-parts').filter((f) => f.endsWith('.js')).map((f) => `staff-parts/${f}`)]) {
   test(`${file} carries no inline event handler`, () => {
     const text = readFileSync(file, 'utf8');
     const hits = [...text.matchAll(INLINE)].map((m) => m[0].trim()).filter((h) => !/^[`'"]?data-on-/.test(h));
