@@ -2207,6 +2207,8 @@
   "daySheetNone": "Nenhuma sessão hoje.",
   "daySheetRiders": "Ciclistas",
   "daySheetWs": "Oficina hoje",
+  "repPageOf": "Página {0} de {1}",
+  "coNoSales": "Sem vendas",
   "logPrintedDaySheet": "Folha do dia impressa",
   "tabTeam": "Equipe",
   "teamPageSub": "Quem atende o balcão: PIN dos operadores e o que cada conta pode abrir e alterar.",

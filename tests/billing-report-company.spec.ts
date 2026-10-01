@@ -63,10 +63,11 @@ test('each printed report holds only its own company\'s rides', async ({ page })
   expect(min).not.toContain('No Company');
   expect(min).not.toContain('Still Riding');
   expect(min).toContain('182.50');
-  expect(min).toMatch(/Billing report · Petromin/);
+  expect(min).toMatch(/Billing report/);
+  expect(min).toMatch(/<div class="mm-title"><strong>Petromin &middot; /); // the company heads the title line
   // one tile per fare actually charged, not a fixed price per type
-  expect(min).toMatch(/Hybrid · 57\.5/);
-  expect(min).toMatch(/Hybrid · 50</);
+  expect(min).toMatch(/Hybrid · <bdi>SAR 57\.50</);
+  expect(min).toMatch(/Hybrid · <bdi>SAR 50\.00</);
   const lube = await reportHtml(page, 'Petrolube');
   expect(lube).toContain('Lube Hybrid');
   expect(lube).not.toContain('Min Road');

@@ -15,11 +15,20 @@
    rule above that sets the same property on its element (td, th, h2, table, section, .total-num,
    tbody tr:nth-child(odd) td). */
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-@page{margin:0} /* no margin box = nowhere for the browser to print about:blank/date furniture; the inset moves to body padding below */
+/* Page 1 has no margin, so Chrome offers no header and footer of its own (no about:blank, no date):
+   it decides that from the FIRST page's margins alone. Pages 2 on have a thin margin with our own
+   words in it - the title line at the top, "Page 2 of 3" at the bottom - carried in --rp-run and
+   --rp-pg on <html>, which the page context inherits (_reportShell, 2026-10-01). A browser without
+   page margin boxes keeps the margin and prints nothing in it. */
+@page{margin:9mm 0;
+  @top-center{content:var(--rp-run);font:600 8pt 'Barlow','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}
+  @bottom-center{content:var(--rp-pg);font:600 8pt 'Barlow','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}}
+@page :first{margin:0;@top-center{content:none}@bottom-center{content:none}} /* page 1 has the banner and title line itself */
 body{font-family:'Barlow',system-ui,sans-serif;color:#111512;font-size:13px;padding:26px 30px;max-width:var(--rp-mw);margin:0 auto}
 [dir="rtl"] body{font-family:'IBM Plex Sans Arabic','Barlow',system-ui,sans-serif} /* Arabic and Urdu */
 .mm-banner{background:#123019;color:#e9f4ec;border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;break-inside:avoid}
 .mm-banner img{height:52px;width:auto}
+.mm-logo-on-light{display:none}
 .mm-co{display:flex;align-items:center;gap:14px}
 .mm-co strong{font-size:15px;font-weight:800;display:block}
 .mm-co small{font-size:10px;color:#9fc4ab}
@@ -27,28 +36,61 @@ body{font-family:'Barlow',system-ui,sans-serif;color:#111512;font-size:13px;padd
 .mm-doc strong{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#03ff89;display:block}
 .mm-doc span{font-size:10.5px;color:#9fc4ab}
 .mm-rule{height:4px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:10px 0 14px}
+/* which ride, which day: the first thing read under the banner */
+.mm-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 14px;font-size:15px;break-after:avoid}
+.mm-title strong{font-weight:800}
+.mm-title span{font-size:13px;font-weight:600;color:#5a635c}
 .totals{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;break-inside:avoid}
 .total-item{flex:1;min-width:96px;display:flex;flex-direction:column;background:#f2f6f2;border-radius:10px;padding:12px 14px}
-.total-num{font-size:19px;font-weight:800;color:#111512}
+.total-num{font-size:19px;font-weight:800;color:#111512;font-variant-numeric:tabular-nums;white-space:nowrap} /* "SAR" never on a line of its own */
 .total-lbl{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#5a635c;margin-top:2px}
 .total-item.dark{background:#123019}
 .total-item.dark .total-num{color:#03ff89}
 .total-item.dark .total-lbl{color:#9fc4ab}
 h2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin:22px 0 7px;padding-inline-start:8px;border-inline-start:4px solid #0c7a3d}
-table{width:100%;border-collapse:collapse;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
 th{background:#123019;color:#e9f4ec;padding:8px 10px;text-align:start;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
 [dir="rtl"] :is(.mm-doc strong,h2,th,.total-lbl){letter-spacing:0} /* Arabic and Urdu letters join: spaced, they fall apart */
-td{padding:8px 10px;text-align:start;font-size:11px;font-weight:700} /* bold rows: readable at a glance on the printed sheet */
+td{padding:8px 10px;text-align:start;font-size:11px;font-weight:500}
+/* The rider's name and the money carry the weight; the rest is medium. Every cell was bold, so
+   nothing on a row stood out from the rest of it (2026-10-01). */
+:root .rp-name{font-weight:700}
+/* an amount in a cell: right-aligned to the others in its column, digits of one width */
+.rp-amt{display:inline-block;min-width:10ch;text-align:end;font-weight:700;font-variant-numeric:tabular-nums}
+.rp-pm{color:#5a635c;margin-inline-start:6px}
+:root th.rp-te,:root td.rp-te{text-align:end}
 tbody tr:nth-child(odd) td{background:#fafcfa}
 a{color:inherit;text-decoration:none}
 section{break-inside:avoid}
 .mm-chip-row{display:flex;justify-content:flex-end;margin-top:12px;break-inside:avoid}
 .mm-chip{background:#123019;color:#fff;border-radius:10px;padding:10px 18px;font-size:11px}
 .mm-chip strong{color:#03ff89;font-size:13.5px}
+.mm-note{text-align:end;margin-top:10px;font-size:11px;color:#5a635c;break-inside:avoid}
+.mm-note strong{color:#111512}
 .mm-sign{display:flex;gap:40px;margin-top:32px;font-size:10.5px;color:#5a635c}
 .mm-sign span{flex:1;border-top:1px solid #b9c1ba;padding-top:6px}
 .rep-print{display:block;margin:22px auto 0;padding:9px 26px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
-@media print{body{padding:12mm;box-decoration-break:clone;-webkit-box-decoration-break:clone}.rep-print{display:none}} /* clone: the 12mm top and bottom inset repeats on every page; a sliced body padded only the first page's top and the last one's bottom, and a long roster ran into the paper edge from page 2 on */
+/* clone: the inset repeats on every page; a sliced body padded only the first page's top and the last
+   one's bottom, and a long roster ran into the paper edge from page 2 on. Pages 2 on add the 9mm
+   @page margin above, where their running title and page number sit. */
+@media print{body{padding:9mm 12mm;box-decoration-break:clone;-webkit-box-decoration-break:clone}.rep-print{display:none}
+  /* On paper the dark fills go: a white banner ruled in the dark green, outlined tiles, pale table
+     heads. The screen keeps Template B as it is; a printed page spends far less ink (2026-10-01). */
+  .mm-banner{background:#fff;color:#111512;border:1.5px solid #123019}
+  .mm-logo-on-dark{display:none}
+  .mm-logo-on-light{display:inline}
+  .mm-co small,.mm-doc span{color:#5a635c}
+  .mm-doc strong{color:#0c7a3d}
+  .mm-rule{height:2px;margin:8px 0 12px}
+  .totals{gap:8px}
+  .total-item{background:#fff;border:1px solid #cfd8d1;padding:10px 12px}
+  .total-num{font-size:16px}
+  .total-item.dark{background:#fff;border:1.5px solid #123019}
+  .total-item.dark .total-num{color:#0c7a3d}
+  .total-item.dark .total-lbl{color:#5a635c}
+  th{background:#e7f0e9;color:#123019;border-bottom:1.5px solid #123019}
+  .mm-chip{background:#fff;color:#111512;border:1.5px solid #123019}
+  .mm-chip strong{color:#0c7a3d}}
 
 /* ── The report bodies (rp-) ── */
 /* shared: ink, alignment, the empty row, a bold row */
@@ -63,8 +105,8 @@ section{break-inside:avoid}
 :root .rp-empty{text-align:center;color:#777;padding:18px}
 :root .rp-b8{font-weight:800}
 /* the session report (printSessionReport): the row's number, the booking number, the status's ink */
-:root .rp-seq{color:#6b736d}
-:root .rp-b7{font-weight:700}
+:root .rp-seq{color:#9aa39c;font-weight:500;width:1%;white-space:nowrap} /* a counter, not a booking number: faint beside it */
+:root .rp-b7{font-weight:600}
 :root .rp-st{font-weight:700;color:#111512}
 :root .rp-st-done{font-weight:700;color:#0c7a3d}
 :root .rp-st-active{font-weight:700;color:#077a4b}
@@ -72,7 +114,14 @@ section{break-inside:avoid}
 :root .rp-st-noshow{font-weight:700;color:#a33b2e}
 :root .rp-salesline{margin-top:8px;font-size:12px;color:#444}
 /* the close-out (printCloseout) */
-:root .rp-row{display:flex;justify-content:space-between;padding:4px 0}
+:root .rp-row{display:flex;justify-content:space-between;padding:4px 0;font-variant-numeric:tabular-nums}
+:root .rp-row strong{color:#111512}
+:root .rp-row.rp-sub{padding-inline-start:16px;color:#5a635c}
+:root .rp-row.rp-sub strong{font-weight:600;color:#3d4540}
+:root .rp-row.rp-warn strong{color:#b45309}
+:root .rp-none{color:#777;padding:4px 0}
+/* the day sheet: a ride's rider count at the end of its heading */
+:root .rp-h2n{float:inline-end;font-weight:700;color:#5a635c;text-transform:none;letter-spacing:0}
 :root .rp-mt8{margin-top:8px}
 :root .rp-grand{margin-top:14px;border-top:2px solid #0f1215;padding-top:10px;font-size:15px}
 :root .rp-recon-off{margin-top:9px;padding:8px 11px;border-radius:3px;background:#fdeaea;color:#b42318;font-weight:800;display:flex;justify-content:space-between;font-size:13px}

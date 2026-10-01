@@ -183,7 +183,7 @@ test('the billing report\'s fare tiles are the fares it bills', async ({ page })
   // One report per company now (0a271de); these riders are Petromin's.
   const html = await page.evaluate(`(()=>{let h='';_openReport=x=>{h=x;};printRidersReport('Petromin');return h;})()`) as string;
   expect(html).not.toContain('57.5');
-  expect(html).toMatch(/Hybrid\/Mountain · 50</);
-  expect(html).toMatch(/Road · 75</);
+  expect(html).toMatch(/Hybrid\/Mountain · <bdi>SAR 50\.00</);
+  expect(html).toMatch(/Road · <bdi>SAR 75\.00</);
   expect(html).toContain('SAR 175.00');
 });

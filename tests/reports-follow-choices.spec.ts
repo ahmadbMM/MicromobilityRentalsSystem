@@ -121,8 +121,10 @@ test.describe('the session exports', () => {
   test('an old split whose card slice also paid add-ons does not print a negative cash figure', async ({ page }) => {
     await boot(page, { queue_entries: [rows[3]] });
     const html = await page.evaluate(printed(`S._repOpts=null;S.sfSession='s0';printSessionReport()`)) as string;
-    expect(html).toContain('57.5 / 0');
-    expect(html).not.toMatch(/\/ -\d/);
+    // Card and Cash are tiles of their own since 2026-10-01
+    expect(html).toMatch(/SAR 57\.50<\/bdi><\/span><span class="total-lbl">Card</);
+    expect(html).toMatch(/SAR 0\.00<\/bdi><\/span><span class="total-lbl">Cash</);
+    expect(html).not.toMatch(/SAR -\d/);
   });
 
   test('a printed sheet is titled with the ride\'s own name', async ({ page }) => {

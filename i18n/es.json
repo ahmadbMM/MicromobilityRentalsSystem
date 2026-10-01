@@ -2207,6 +2207,8 @@
   "daySheetNone": "No hay sesión hoy.",
   "daySheetRiders": "Ciclistas",
   "daySheetWs": "Taller hoy",
+  "repPageOf": "Página {0} de {1}",
+  "coNoSales": "Sin ventas",
   "logPrintedDaySheet": "Hoja del día impresa",
   "tabTeam": "Equipo",
   "teamPageSub": "Quién atiende el mostrador: PIN de operador y qué puede abrir y cambiar cada cuenta.",

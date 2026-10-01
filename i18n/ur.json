@@ -2207,6 +2207,8 @@
   "daySheetNone": "آج کوئی سیشن نہیں۔",
   "daySheetRiders": "رائیڈرز",
   "daySheetWs": "آج ورکشاپ",
+  "repPageOf": "صفحہ {0} از {1}",
+  "coNoSales": "کوئی فروخت نہیں",
   "logPrintedDaySheet": "دن کی شیٹ پرنٹ ہوئی",
   "tabTeam": "ٹیم",
   "teamPageSub": "ڈیسک پر کون کام کرتا ہے: آپریٹر PIN، اور ہر اکاؤنٹ کیا کھول اور بدل سکتا ہے۔",

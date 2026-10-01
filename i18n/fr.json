@@ -2207,6 +2207,8 @@
   "daySheetNone": "Aucune session aujourd'hui.",
   "daySheetRiders": "Cyclistes",
   "daySheetWs": "Atelier aujourd'hui",
+  "repPageOf": "Page {0} sur {1}",
+  "coNoSales": "Aucune vente",
   "logPrintedDaySheet": "Feuille du jour imprimée",
   "tabTeam": "Équipe",
   "teamPageSub": "Qui tient le comptoir : les codes PIN des opérateurs et ce que chaque compte peut ouvrir et modifier.",

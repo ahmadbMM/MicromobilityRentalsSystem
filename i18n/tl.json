@@ -2207,6 +2207,8 @@
   "daySheetNone": "Walang sesyon ngayon.",
   "daySheetRiders": "Mga rider",
   "daySheetWs": "Workshop ngayon",
+  "repPageOf": "Pahina {0} ng {1}",
+  "coNoSales": "Walang nabenta",
   "logPrintedDaySheet": "Na-print ang day sheet",
   "tabTeam": "Team",
   "teamPageSub": "Sino ang nasa desk: mga PIN ng operator, at kung ano ang mabubuksan at mababago ng bawat account.",

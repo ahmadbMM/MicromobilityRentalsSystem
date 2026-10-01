@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-804e3c9037';
+const CACHE = 'mmcq-c8502a0e35';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,13 +22,13 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=b972788b32';
+const STAFF_JS = './staff.js?v=64f5e89a4a';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=52b310321d","./staff-parts/community.js?v=a5e86023cd","./staff-parts/bikes.js?v=09c5ede7a2","./staff-parts/cashier.js?v=34cb689fff","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=5694cbb460","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=8965d87e4b","./staff-parts/workshop.js?v=e9d68c718d","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=535b3dd893","./staff-parts/messages.js?v=26b925d9b3"];
-const APP_JS = './app.js?v=8355174e7d';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=19fc884c43","./staff-parts/community.js?v=413b0666e7","./staff-parts/bikes.js?v=09c5ede7a2","./staff-parts/cashier.js?v=ab9a73b42c","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=5694cbb460","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=8965d87e4b","./staff-parts/workshop.js?v=e9d68c718d","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=535b3dd893","./staff-parts/messages.js?v=26b925d9b3"];
+const APP_JS = './app.js?v=cb15f7cead';
 const APP_CSS = './app.css?v=e6fb60f631';
 const SHELL = [
   SHELL_KEY,

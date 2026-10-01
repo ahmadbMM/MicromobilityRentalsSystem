@@ -2313,6 +2313,8 @@
   "daySheetNone": "আজ কোনো সেশন নেই।",
   "daySheetRiders": "রাইডার",
   "daySheetWs": "আজ ওয়ার্কশপ",
+  "repPageOf": "পৃষ্ঠা {0} / {1}",
+  "coNoSales": "কোনো বিক্রি নেই",
   "logPrintedDaySheet": "দিনের শিট প্রিন্ট হয়েছে",
   "tabTeam": "টিম",
   "teamPageSub": "ডেস্কে কে কাজ করে: অপারেটরের PIN, আর প্রতিটি অ্যাকাউন্ট কী খুলতে ও বদলাতে পারে।",

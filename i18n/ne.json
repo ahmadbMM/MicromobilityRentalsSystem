@@ -2207,6 +2207,8 @@
   "daySheetNone": "आज कुनै सेसन छैन।",
   "daySheetRiders": "राइडर",
   "daySheetWs": "आज वर्कशप",
+  "repPageOf": "पृष्ठ {0} / {1}",
+  "coNoSales": "कुनै बिक्री भएन",
   "logPrintedDaySheet": "दिनको पाना प्रिन्ट भयो",
   "tabTeam": "टिम",
   "teamPageSub": "डेस्कमा को काम गर्छ: अपरेटरका PIN, र हरेक खाताले के खोल्न र बदल्न सक्छ।",
