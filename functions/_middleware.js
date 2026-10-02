@@ -60,6 +60,19 @@ export async function onRequest(context) {
 
   if (blocked) return notFound();
 
+  // The hold (2026-10-02, for the database move): with MM_HOLD=on among the Pages variables,
+  // every page answers a short "back soon" page and every /api call a 503, so nobody books into a
+  // database that is being copied. Files still load. A variable reaches the site with its next
+  // deploy, so the hold goes up with one deploy and comes down with the next one without it.
+  if (context.env && context.env.MM_HOLD === 'on') {
+    if (path.startsWith('/api/')) {
+      return new Response(JSON.stringify({ ok: false, error: 'hold' }), {
+        status: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'retry-after': '900' },
+      });
+    }
+    if (isNavigation(context.request)) return holdPage();
+  }
+
   // The live customer address keeps no way into staff: the /staff/ stub, /?staff and an NFC
   // tag's /?bike= all go on to the staff address. Previews and other hosts are untouched.
   const reqUrl = new URL(context.request.url);
@@ -93,4 +106,32 @@ export async function onRequest(context) {
 
 function notFound() {
   return new Response('Not found', { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+}
+
+function holdPage() {
+  const html = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><meta http-equiv="refresh" content="60">
+<title>MicroMobility - back soon</title>
+<style>
+:root{color-scheme:light dark;--bg:#f6f5f2;--fg:#16181d;--mute:#5d6470;--card:#fff;--line:#e3e1dc}
+@media (prefers-color-scheme:dark){:root{--bg:#121417;--fg:#eef0f3;--mute:#a3aab5;--card:#1b1e23;--line:#2c3038}}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--fg);
+font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Arabic",sans-serif;padding:16px;box-sizing:border-box}
+main{box-sizing:border-box;max-width:440px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:28px 24px}
+h1{font-size:20px;margin:0 0 8px}p{margin:0;color:var(--mute)}
+section+section{margin-top:22px;padding-top:22px;border-top:1px solid var(--line)}
+</style></head><body><main>
+<section><h1>We'll be back in a few minutes</h1>
+<p>We're moving MicroMobility to a new home, so booking is paused for a short while. Your bookings are safe. This page opens the site again by itself when it's ready.</p></section>
+<section dir="rtl" lang="ar"><h1>سنعود خلال دقائق</h1>
+<p>ننقل MicroMobility إلى مكان جديد، لذا توقّف الحجز لفترة قصيرة. حجوزاتك محفوظة، وستفتح هذه الصفحة الموقع من جديد تلقائياً حين يجهز.</p></section>
+</main></body></html>`;
+  return new Response(html, {
+    status: 503,
+    headers: {
+      'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '900',
+      'x-robots-tag': 'noindex', 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+    },
+  });
 }

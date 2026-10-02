@@ -20,6 +20,24 @@ async function load(rel: string, name: string): Promise<Fn> {
 }
 
 test.describe('the middleware', () => {
+  test('MM_HOLD=on answers pages with the hold page and /api with a 503; files and an unset hold pass', async () => {
+    const onRequest = await load('functions/_middleware.js', 'onRequest');
+    const req = (path: string, html = true) => new Request('https://site.test' + path, { headers: html ? { 'sec-fetch-mode': 'navigate' } : {} });
+    const on = { MM_HOLD: 'on' };
+    const page = await onRequest({ request: req('/bookings'), env: on, next: () => new Response('asset') });
+    expect(page.status).toBe(503);
+    expect(page.headers.get('cache-control')).toBe('no-store');
+    const body = await page.text();
+    expect(body).toContain("We'll be back in a few minutes");
+    expect(body).toContain('سنعود خلال دقائق');
+    const api = await onRequest({ request: req('/api/booking-confirm', false), env: on, next: () => new Response('asset') });
+    expect(api.status).toBe(503);
+    const file = await onRequest({ request: req('/app.js', false), env: on, next: () => new Response('asset') });
+    expect(await file.text()).toBe('asset');
+    const off = await onRequest({ request: req('/'), env: {}, next: () => new Response('asset') });
+    expect(await off.text()).toBe('asset');
+  });
+
   const status = async (path: string) => {
     const onRequest = await load('functions/_middleware.js', 'onRequest');
     const res = await onRequest({ request: new Request('https://site.test' + path), next: () => new Response('asset') });
