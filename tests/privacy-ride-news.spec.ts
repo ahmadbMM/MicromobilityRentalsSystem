@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-09-28';
+const VERSION = '2026-10-02';
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
@@ -42,7 +42,7 @@ test.describe('the Privacy Notice', () => {
     await expect(box).toBeVisible();
     await expect(box.locator('#pv-title')).toHaveText('Privacy Notice');
     await expect(box).toContainText('What we collect, and whether you must give it');
-    await expect(box).toContainText('Mumbai, India');
+    await expect(box).toContainText('Frankfurt, Germany');
     await expect(box).toContainText('We will reply within 30 days');
     // Birth date and nationality: optional until the eighth booking, and before any booking for community members
     const nat = box.locator('tr', { hasText: 'Nationality' });
@@ -70,7 +70,7 @@ test.describe('the Privacy Notice', () => {
     await page.evaluate('showPrivacyNotice()');
     await expect(page.locator('#pv-title')).toHaveText('إشعار الخصوصية');
     await expect(page.locator('.pv-body')).toContainText('من نحن');
-    await expect(page.locator('.pv-body')).toContainText('مومباي، الهند');
+    await expect(page.locator('.pv-body')).toContainText('فرانكفورت، ألمانيا');
     await expect(page.locator('.pv-body')).toContainText('أعضاء المجتمع: إلزامي قبل الحجز');
     await page.evaluate('closePrivacyNotice()');
 
