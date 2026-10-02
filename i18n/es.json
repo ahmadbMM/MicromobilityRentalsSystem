@@ -3258,5 +3258,6 @@
   "tplWaTurn": "Se acerca tu turno",
   "tplWaMiss": "Te echamos de menos",
   "tplAnRfm": "Vuelve a pedalear",
-  "tplCnCancel": "Sesión cancelada"
+  "tplCnCancel": "Sesión cancelada",
+  "bdgEarnedRide": "Ganada rodando"
 }

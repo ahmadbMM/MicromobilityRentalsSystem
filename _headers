@@ -19,7 +19,7 @@
 # "max-age=31536000, immutable, public, max-age=604800". The splash PNGs take /*.png.
 # The root page's Early Hints: written by scripts/build-html.mjs (the files' hashes change every build).
 /
-  Link: </app.css?v=f58492cf38>; rel=preload; as=style, </app.js?v=9af63ef97c>; rel=preload; as=script, </fonts/SpaceGrotesk-var-latin.woff2>; rel=preload; as=font; type="font/woff2"; crossorigin
+  Link: </app.css?v=f58492cf38>; rel=preload; as=style, </app.js?v=d960f88705>; rel=preload; as=script, </fonts/SpaceGrotesk-var-latin.woff2>; rel=preload; as=font; type="font/woff2"; crossorigin
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
 /fonts/*

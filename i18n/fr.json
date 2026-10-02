@@ -3258,5 +3258,6 @@
   "tplWaTurn": "Votre tour approche",
   "tplWaMiss": "Vous nous manquez",
   "tplAnRfm": "Revenez rouler",
-  "tplCnCancel": "Session annulée"
+  "tplCnCancel": "Session annulée",
+  "bdgEarnedRide": "Obtenu en roulant"
 }

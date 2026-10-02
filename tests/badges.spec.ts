@@ -570,3 +570,22 @@ test.describe('@customer:account National Day 96', () => {
     await expect(page.locator('#badge-pop')).toHaveCount(0);
   });
 });
+
+// Badges earned by riding are worked out from the bookings, never stored, so the Badges page counted
+// none of them: Carbon Club read 0 holders with 16 riders who had ridden carbon (the owner, 2026-10-02:
+// "road carbon badge isnt awarded to anyone"). Their holders are the riders who earned them.
+test('a badge earned by riding counts and lists the riders who earned it', async ({ page }) => {
+  const carbon = { id: 'bd_carbon', slug: 'carbon', icon: 'bike', color: 'silver', name: 'Carbon Club', description: 'Rode a carbon road bike', system: true, auto: true, retired: false, sort: 110 };
+  const rides = [...queue_entries,
+    { ...row('q6', P1, 6, 'Lina Haddad', 'c1', 'done', true), type_preference: 'Road Carbon' },
+    { ...row('q7', OLD, 3, 'Omar Saleh', 'c2', 'done', false), type_preference: 'Road Carbon' }]; // unpaid: not earned
+  await staff(page, { badges: [...badges, carbon], queue_entries: rides });
+  await page.waitForFunction(`getQueue().some(e=>e.id==='q6')`);
+  await community(page, 'badges');
+  const row_ = page.locator('#tab-community .bdg-row[data-badge="bd_carbon"]');
+  await expect(row_).toContainText('1 holders');
+  await row_.getByRole('button', { name: 'Holders' }).click();
+  await expect(row_.locator('.bdg-hold')).toHaveText([/Lina Haddad\s*Earned by riding/]);
+  // First Lap: everyone who has ridden and paid (Lina, Omar, and Sara on the older ride), none of them stored
+  await expect(page.locator('#tab-community .bdg-row[data-badge="bd_first_lap"]')).toContainText('3 holders');
+});

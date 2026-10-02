@@ -3258,5 +3258,6 @@
   "tplWaTurn": "Sua vez está chegando",
   "tplWaMiss": "Sentimos sua falta",
   "tplAnRfm": "Volte a pedalar",
-  "tplCnCancel": "Sessão cancelada"
+  "tplCnCancel": "Sessão cancelada",
+  "bdgEarnedRide": "Conquistada pedalando"
 }
