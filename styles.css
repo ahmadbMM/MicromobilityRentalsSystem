@@ -7712,3 +7712,33 @@ body:not(.view-staff) .bd-next-n{flex:none;font-size:var(--fs-13);font-weight:70
 .rm-langs .toggle-btn{flex:1;}
 .tpl-fills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px;}
 .tpl-fill{border:1px solid var(--border);background:var(--s3);color:var(--text);border-radius:6px;padding:3px 8px;font:inherit;font-size:12px;font-family:ui-monospace,Menlo,monospace;cursor:pointer;}
+
+/* ── Manage booking (the owner, 2026-10-02: "fix the approved button ... to have a bordered button like the
+   other buttons ... make them all have the same size and to be aligned perfectly"): every item in a
+   booking's action cell, the status words included, is one equal bordered tile on a three-column grid,
+   in the table and on the phone's cards alike. ── */
+body.view-staff #tab-queue .queue-table .actions-cell,
+body.view-staff #tab-queue .q-card .rq-flw6{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch;justify-items:stretch;
+}
+body.view-staff #tab-queue .queue-table .actions-cell{min-width:348px;}
+body.view-staff #tab-queue .queue-table .actions-cell>*,
+body.view-staff #tab-queue .q-card .rq-flw6>*{
+  width:100%;min-width:0;height:36px;min-height:36px;box-sizing:border-box;margin:0;padding:0 8px;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;
+  border-radius:8px;font-size:12px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;
+}
+/* the status words, as tiles with their colour's border */
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>:is(.rq-apok,.rq-apchip,.rq-apchip-rej,.rq-nschip){
+  font-size:11px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid;
+}
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apok{color:var(--green);border-color:rgba(var(--green-rgb),.45);background:rgba(var(--green-rgb),.08);}
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.08);}
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip-rej{color:var(--red);border-color:rgba(var(--red-rgb),.45);background:rgba(var(--red-rgb),.06);}
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-nschip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);}
+/* the row's select box, as a tile like the rest */
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select{border:1px solid var(--border);cursor:pointer;}
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;accent-color:var(--green);}
+/* the ⋯ menu is a tile like the envelope beside it (it was a bare glyph) */
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{border:1px solid var(--border);background:var(--s1,#fff);color:var(--text);}
+html[data-theme="dark"] body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{background:transparent;}
