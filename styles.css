@@ -7744,3 +7744,11 @@ body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row
 /* the ⋯ menu is a tile like the envelope beside it (it was a bare glyph) */
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{border:1px solid var(--border);background:var(--s1,#fff);color:var(--text);}
 html[data-theme="dark"] body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{background:transparent;}
+/* On the phone's cards (the owner, 2026-10-02: "align the buttons properly and make them all have the same
+   size ... put the approval and check in buttons on top and 3 dots and envelope button on the bottom"):
+   two equal columns; the decisions first (the status tile, Approve / Reject / Waitlist, Check In or
+   Return Bike), then the ⋯ menu and the envelope side by side on a row of their own. */
+body.view-staff #tab-queue .q-card .rq-flw6{grid-template-columns:repeat(2,minmax(0,1fr));}
+body.view-staff #tab-queue .q-card .rq-flw6>*{height:42px;min-height:42px;font-size:13px;}
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-more{order:98;grid-column-start:1;}
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-msg{order:99;}
