@@ -3273,5 +3273,17 @@
   "bdgGrandTourA": "Les grands tours sont les courses cyclistes de trois semaines. Cinquante sorties communautaires font votre propre grand tour.",
   "bdgHallOfFame": "Panthéon",
   "bdgHallOfFameD": "100 sorties communautaires",
-  "bdgHallOfFameA": "Cent sorties communautaires : une place parmi les grands de MicroMobility."
+  "bdgHallOfFameA": "Cent sorties communautaires : une place parmi les grands de MicroMobility.",
+  "accPwdBtn": "Modifier",
+  "accPwdTitle": "Modifiez votre mot de passe",
+  "accPwdSso": "Vous vous êtes toujours connecté uniquement avec Google ou Apple ? Laissez le mot de passe actuel vide pour en définir un.",
+  "accPwdCurReq": "Saisissez votre mot de passe actuel.",
+  "accPwdBad": "Ce n’est pas votre mot de passe actuel.",
+  "accPwdLocked": "Trop de tentatives erronées. Réessayez dans 15 minutes.",
+  "accPwdSame": "Choisissez un mot de passe différent de l’actuel.",
+  "accPwdSaved": "Votre mot de passe est modifié. Vous restez connecté ici ; tout autre téléphone ou ordinateur connecté à votre compte a été déconnecté.",
+  "accPwdShow": "Afficher le mot de passe",
+  "accPwdHide": "Masquer le mot de passe",
+  "custPurchEmpty": "Aucun achat pour l’instant. Ce que vous achetez à notre comptoir s’affichera ici.",
+  "custPurchVoided": "Annulé"
 }

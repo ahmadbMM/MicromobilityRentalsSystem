@@ -3273,5 +3273,17 @@
   "bdgGrandTourA": "Ang Grand Tours ay tatlong-linggong karera sa cycling. Ang limampung community ride ay sarili mong grand tour.",
   "bdgHallOfFame": "Hall of Fame",
   "bdgHallOfFameD": "100 community ride",
-  "bdgHallOfFameA": "Sandaang community ride: may puwesto ka na sa mga pinakamahusay ng MicroMobility."
+  "bdgHallOfFameA": "Sandaang community ride: may puwesto ka na sa mga pinakamahusay ng MicroMobility.",
+  "accPwdBtn": "Palitan",
+  "accPwdTitle": "Palitan ang iyong password",
+  "accPwdSso": "Palagi ka bang nag-sign in gamit lang ang Google o Apple? Iwanang blangko ang kasalukuyang password para gumawa ng isa.",
+  "accPwdCurReq": "Ilagay ang iyong kasalukuyang password.",
+  "accPwdBad": "Hindi iyan ang iyong kasalukuyang password.",
+  "accPwdLocked": "Masyadong maraming maling subok. Subukang muli pagkalipas ng 15 minuto.",
+  "accPwdSame": "Pumili ng password na iba sa kasalukuyan.",
+  "accPwdSaved": "Napalitan na ang iyong password. Mananatili kang naka-sign in dito; na-sign out na ang anumang ibang phone o computer na naka-sign in sa iyong account.",
+  "accPwdShow": "Ipakita ang password",
+  "accPwdHide": "Itago ang password",
+  "custPurchEmpty": "Wala pang binili. Dito lalabas ang mga binili mo sa aming desk.",
+  "custPurchVoided": "Kinansela"
 }

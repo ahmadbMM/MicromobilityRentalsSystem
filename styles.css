@@ -556,6 +556,12 @@
     #tab-account .cu-purch-list{max-height:260px;overflow-y:auto;}
     #tab-account .cu-purch-name{flex:1;min-width:0;font-weight:700;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
     #tab-account .cu-purch-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    #tab-account .cu-purch-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    #tab-account .cu-purch-end{display:flex;flex-direction:column;align-items:flex-end;gap:2px;}
+    #tab-account .cu-purch-pay{font-size:11px;color:var(--muted);white-space:nowrap;}
+    #tab-account .cu-purch-row.off :is(.cu-purch-name,.cu-purch-amt){text-decoration:line-through;color:var(--muted);}
+    #tab-account .cu-purch-empty{font-size:13px;color:var(--muted);}
+    #tab-account .cu-purch-main .cu-purch-date{overflow:hidden;text-overflow:ellipsis;}
     #tab-account .cu-push-blocked{font-size:12.5px;color:var(--red);font-weight:700;}
     #tab-account .cu-rn-state{font-size:13px;font-weight:700;margin-bottom:12px;}
     #tab-account .cu-tier-fill{width:var(--cu-w);}
@@ -6364,6 +6370,18 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 #pwd-gate .auth-backdrop{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;z-index:9580;align-items:flex-start;padding:16px;overflow:auto}
 @media (min-width:768px){#pwd-gate .auth-backdrop{padding-top:88px}}
 #pwd-gate .pm-out{display:block;margin:14px auto 0;background:none;border:0;color:#4f565c;font-family:var(--font-body);font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer}
+/* Change password from My Account (_accPwdOpen, 2026-10-03): the forced change's box, centred, with a
+   close button and show/hide on each password box. */
+#acc-pwd-modal .pg-box{position:relative;max-height:calc(100vh - 24px);overflow-y:auto;}
+#acc-pwd-modal .ap-x{position:absolute;top:10px;inset-inline-end:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:999px;color:#4f565c;cursor:pointer;padding:0;}
+#acc-pwd-modal .pg-kicker{padding-inline-end:40px;}
+#acc-pwd-modal .pw-wrap{position:relative;}
+#acc-pwd-modal .pw-wrap input{padding-inline-end:48px;}
+#acc-pwd-modal .pw-eye{position:absolute;top:4px;inset-inline-end:4px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:8px;color:#4f565c;cursor:pointer;padding:0;}
+#acc-pwd-modal .ap-hint{margin-top:8px;font-size:12.5px;color:#4f565c;}
+#acc-pwd-modal .pg-msg:not(:empty){margin-top:10px;}
+#acc-pwd-modal .ap-done{display:flex;gap:8px;align-items:flex-start;color:#0f1215;}
+#acc-pwd-modal .ap-done .cu-ic{flex:none;margin-top:2px;color:#008f52;}
 
 /* ── Filter button and folded search, 2026-09-22 ──
    A view's filter dropdowns open under its Filter button (_fBtn/_fPanel), each with its name

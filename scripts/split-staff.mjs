@@ -948,7 +948,10 @@ export function formatBareWrites(r, limit = 20) {
 // 2 KB here) and the runner's larger gzip readings.
 // Core 170 -> 174, staff 326 -> 330 (2026-10-02): the Saturday ride's three messages in Arabic (~3 KB
 // gzipped), which the bookings rows' envelope opens, so they belong to the core.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 330, core: 174 };
+// Customer 228 -> 231 (2026-10-03): My Account's change-password dialog and the rider's own purchases
+// (customer_change_password, customer_purchases; ~2 KB gzipped, the owner's request) are the rider's
+// own page. 227.6 KB here is ~228.9 on the runner, over 228: leave the runner's margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 330, core: 174 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

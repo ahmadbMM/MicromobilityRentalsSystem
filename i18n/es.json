@@ -3273,5 +3273,17 @@
   "bdgGrandTourA": "Las grandes vueltas son las carreras de tres semanas del ciclismo. Cincuenta salidas de la comunidad son tu propia gran vuelta.",
   "bdgHallOfFame": "Salón de la Fama",
   "bdgHallOfFameD": "100 salidas de la comunidad",
-  "bdgHallOfFameA": "Cien salidas de la comunidad: un lugar entre los grandes de MicroMobility."
+  "bdgHallOfFameA": "Cien salidas de la comunidad: un lugar entre los grandes de MicroMobility.",
+  "accPwdBtn": "Cambiar",
+  "accPwdTitle": "Cambia tu contraseña",
+  "accPwdSso": "¿Siempre has iniciado sesión solo con Google o Apple? Deja vacía la contraseña actual para crear una.",
+  "accPwdCurReq": "Introduce tu contraseña actual.",
+  "accPwdBad": "Esa no es tu contraseña actual.",
+  "accPwdLocked": "Demasiados intentos fallidos. Vuelve a intentarlo dentro de 15 minutos.",
+  "accPwdSame": "Elige una contraseña distinta de la actual.",
+  "accPwdSaved": "Tu contraseña se ha cambiado. Sigues con la sesión iniciada aquí; se ha cerrado la sesión en cualquier otro teléfono u ordenador conectado a tu cuenta.",
+  "accPwdShow": "Mostrar contraseña",
+  "accPwdHide": "Ocultar contraseña",
+  "custPurchEmpty": "Aún no hay compras. Lo que compres en nuestro mostrador aparecerá aquí.",
+  "custPurchVoided": "Anulada"
 }

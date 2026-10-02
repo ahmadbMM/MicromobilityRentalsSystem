@@ -8,7 +8,7 @@
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Permissions-Policy: camera=(self), microphone=(), geolocation=(self), payment=(self)
   Cross-Origin-Opener-Policy: same-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-FPttNqKT4vxF8YOCyDOK/1QRSh5DPY3VDtnOdtlIjAM=' 'sha256-vnQ70ktCoJqDhFZpf0LxfFQmZhSX6XIw+jH/p/hgsxo=' 'sha256-GMWGXoTgzVerQTP8GfRCl431NoWZqXoqryd8k0JtWzg=' 'sha256-1E+Wm6tjxYgugaeC52pKURcV0bGSKSLNGIMafSNnAAk=' 'sha256-G+Jl6lGMPPc9+wKhNDAAwf8eUSXJLYIVU98RR4ubra8=' https://static.cloudflareinsights.com; style-src 'self' 'report-sample'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://micromobility.sa https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests; report-uri /api/csp-report; report-to csp
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-FPttNqKT4vxF8YOCyDOK/1QRSh5DPY3VDtnOdtlIjAM=' 'sha256-vnQ70ktCoJqDhFZpf0LxfFQmZhSX6XIw+jH/p/hgsxo=' 'sha256-rSbjMWXmWzZ3U9byYXKkoi4NI40wncBxxJZTUKiDS3A=' 'sha256-1E+Wm6tjxYgugaeC52pKURcV0bGSKSLNGIMafSNnAAk=' 'sha256-G+Jl6lGMPPc9+wKhNDAAwf8eUSXJLYIVU98RR4ubra8=' https://static.cloudflareinsights.com; style-src 'self' 'report-sample'; font-src 'self' data:; img-src 'self' data: blob: https:; connect-src 'self' https://micromobility.sa https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com; media-src 'self' blob:; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'; upgrade-insecure-requests; report-uri /api/csp-report; report-to csp
   Reporting-Endpoints: csp="/api/csp-report"
 
 # Version-pinned assets: filenames (vendor/, fonts/) or a content-hash query
@@ -19,7 +19,7 @@
 # "max-age=31536000, immutable, public, max-age=604800". The splash PNGs take /*.png.
 # The root page's Early Hints: written by scripts/build-html.mjs (the files' hashes change every build).
 /
-  Link: </app.css?v=fc3627e351>; rel=preload; as=style, </app.js?v=5d42650bb8>; rel=preload; as=script, </fonts/SpaceGrotesk-var-latin.woff2>; rel=preload; as=font; type="font/woff2"; crossorigin
+  Link: </app.css?v=e5cd61fbbe>; rel=preload; as=style, </app.js?v=541fe0c431>; rel=preload; as=script, </fonts/SpaceGrotesk-var-latin.woff2>; rel=preload; as=font; type="font/woff2"; crossorigin
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
 /fonts/*

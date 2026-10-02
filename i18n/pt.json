@@ -3273,5 +3273,17 @@
   "bdgGrandTourA": "As grandes voltas são as corridas de três semanas do ciclismo. Cinquenta passeios da comunidade são a sua própria grande volta.",
   "bdgHallOfFame": "Hall da Fama",
   "bdgHallOfFameD": "100 passeios da comunidade",
-  "bdgHallOfFameA": "Cem passeios da comunidade: um lugar entre os grandes da MicroMobility."
+  "bdgHallOfFameA": "Cem passeios da comunidade: um lugar entre os grandes da MicroMobility.",
+  "accPwdBtn": "Alterar",
+  "accPwdTitle": "Altere a sua senha",
+  "accPwdSso": "Sempre entrou apenas com o Google ou a Apple? Deixe a senha atual em branco para definir uma.",
+  "accPwdCurReq": "Digite a sua senha atual.",
+  "accPwdBad": "Essa não é a sua senha atual.",
+  "accPwdLocked": "Muitas tentativas erradas. Tente novamente daqui a 15 minutos.",
+  "accPwdSame": "Escolha uma senha diferente da atual.",
+  "accPwdSaved": "A sua senha foi alterada. Continua com a sessão iniciada aqui; qualquer outro telemóvel ou computador ligado à sua conta foi desconectado.",
+  "accPwdShow": "Mostrar senha",
+  "accPwdHide": "Ocultar senha",
+  "custPurchEmpty": "Ainda não há compras. O que comprar no nosso balcão aparece aqui.",
+  "custPurchVoided": "Anulada"
 }

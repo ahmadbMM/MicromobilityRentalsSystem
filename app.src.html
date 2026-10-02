@@ -415,6 +415,7 @@ window.mmLoading=(function(){
 <div id="confirm-modal"    data-host></div>
 <div id="rate-modal"       data-host></div>
 <div id="bike-info-modal"  data-host></div>
+<div id="acc-pwd-modal"    data-host></div>
 <div id="cust-modal"       data-host></div>
 <div id="bike-profile-modal" data-host></div>
 <div id="cashier-modal"    data-host></div>
@@ -1102,6 +1103,10 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdCalSummary:'{0}: birthday',
   regSummary:'Your booking',
   landJccMeta:'Sun & Tue · 9-11pm',
+  accPwdBtn:'Change',accPwdTitle:'Change your password',accPwdSso:'Only ever signed in with Google or Apple? Leave the current password empty to set one.',
+  accPwdCurReq:'Enter your current password.',accPwdBad:'That is not your current password.',accPwdLocked:'Too many wrong tries. Try again in 15 minutes.',
+  accPwdSame:'Choose a password different from your current one.',accPwdSaved:'Your password is changed. You stay signed in here; any other phone or computer signed in to your account has been signed out.',
+  accPwdShow:'Show password',accPwdHide:'Hide password',custPurchEmpty:'No purchases yet. What you buy at our desk shows here.',custPurchVoided:'Voided',
 },
 ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',spotsLeft1:'{0} مقعد متبقي',spotsLeftN:'{0} مقاعد متبقية',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
   ticketQrLabel:'رمز QR للحجز',errLoginPhoneCc:'لا يوجد حساب بهذا الرقم كرقم سعودي. إذا كان رقمك من دولة أخرى فاكتبه مع رمز الدولة، مثل ‎+20 1012345678.',selectBookingAria:'تحديد الحجز',modifyChangedMsg:'تغيّر هذا الحجز أثناء تعديلك له. راجع التفاصيل ثم احفظ مرة أخرى.',wlAimedClosedMsg:'هذه الرحلة لا تستقبل الحضور المباشر. اختر رحلة أخرى من القائمة أعلاه لتسليمه دراجة.',bdNotEarned:'لم تُكتسب بعد',promoCustAmbiguous:'يوجد أكثر من عميل بهذا الاسم. اختر من القائمة العميل صاحب رقم الجوال الصحيح.',naDelBodyFinal:'سيُحذف تسجيل الدخول والوسوم واشتراكات الإشعارات. تبقى {0} حجوزات سابقة باسم الراكب، فلا تتأثر الكشوف والتقارير. لا يمكن التراجع عن ذلك.',geMoveOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا تبقى المجموعة في هذه الجلسة.',errChangedElsewhere:'تم تعديل هذا الحجز للتو من جهاز آخر. تم تحديث القائمة — راجعها وحاول مجددًا.',errBikeNumberMax:'رقم الدراجة من 4 أرقام كحد أقصى (1–9999)، وإلا فلن يمكن مسح ملصقها وبطاقتها.',ridersEditOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا لا يمكن نقل المجموعة إلى ليلة أخرى.',
@@ -1628,6 +1633,10 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdCalSummary:'{0}: عيد ميلاد',
   regSummary:'حجزك',
   landJccMeta:'الأحد والثلاثاء · 9-11 مساءً',
+  accPwdBtn:'تغيير',accPwdTitle:'غيّر كلمة المرور',accPwdSso:'هل سجّلت الدخول دائمًا عبر Google أو Apple فقط؟ اترك كلمة المرور الحالية فارغة لتعيين كلمة مرور.',
+  accPwdCurReq:'أدخل كلمة المرور الحالية.',accPwdBad:'هذه ليست كلمة المرور الحالية.',accPwdLocked:'محاولات خاطئة كثيرة. حاول مرة أخرى بعد 15 دقيقة.',
+  accPwdSame:'اختر كلمة مرور مختلفة عن كلمة المرور الحالية.',accPwdSaved:'تم تغيير كلمة المرور. ستبقى مسجّل الدخول على هذا الجهاز، وتم تسجيل الخروج من أي هاتف أو جهاز كمبيوتر آخر مسجّل الدخول إلى حسابك.',
+  accPwdShow:'إظهار كلمة المرور',accPwdHide:'إخفاء كلمة المرور',custPurchEmpty:'لا توجد مشتريات بعد. ستظهر هنا مشترياتك من مكتبنا.',custPurchVoided:'ملغاة',
 }};
 // The staff screens' strings are not in LANG on a customer's phone (2026-10-01): the build moves
 // every key only staff code names into staff.js (English) and lang/staff-<code>.json (the rest,
@@ -11904,24 +11913,7 @@ function renderAccount(){
           :`<button class="${on?'btn-secondary':'btn-primary'}" data-on-click="${_on("togglePush")}">${on?t('pushDisableBtn'):t('pushEnableBtn')}</button>`}
       </div>`;
     })()}
-    ${(()=>{
-      // Purchases the desk recorded against this account (Sales tab, linked receipts)
-      const purch=(S.cashSales||[]).filter(r=>r.customer_id===cust.id&&r.pay!=='refunded'&&r.category!=='__cardmeta__')
-        .sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
-      if(!purch.length)return'';
-      const ptot=Math.round(purch.reduce((sm,r)=>sm+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
-      const ar=_isRtl();
-      return`<div class="form-section cu-card640">
-        <div class="form-title cu-mb12">${t('custPurchTitle')} · <bdi class="cu-c-green">${esc(_sar(ptot))}</bdi></div>
-        <div class="cu-purch-list">
-          ${purch.map(r=>`<div class="cu-purch-row">
-            <div class="cu-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="cu-c-muted">×${r.qty}</span>`:''}</div>
-            <span class="cu-purch-date">${r.created_at?new Date(r.created_at).toLocaleDateString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',year:'numeric'}):''}</span>
-            <bdi class="cu-purch-amt">${esc(_sar((Number(r.qty)||0)*(Number(r.price)||0)))}</bdi>
-          </div>`).join('')}
-        </div>
-      </div>`;
-    })()}
+    <div id="acc-purch">${(_purchLoad(cust),_purchHtml(cust))}</div>
     ${(()=>{
       // Delete my account: a request staff act on within 30 days, withdrawable until then.
       if(!cust.session_token||S._delUnavailable===cust.id)return'';
@@ -11940,6 +11932,9 @@ function renderAccount(){
     ${(()=>{
       // v2: settings as hairline rows below the profile card (Language / Sign out)
       return`<div class="acc-settings cu-card640">
+        ${cust.session_token?`<button type="button" class="acc-set-row" id="acc-pwd-btn" data-on-click="${_on("_accPwdOpen")}">
+          <span>${t('authPassword')}</span><span class="acc-set-val">${t('accPwdBtn')}</span>
+        </button>`:''}
         <button type="button" class="acc-set-row" data-on-click="${_on("showLangMenu",_EV)}">
           <span>${t('settingsLanguage')}</span><span class="acc-set-val">${(LANGS.find(x=>x.code===S.lang)||LANGS[0]).label}</span>
         </button>
@@ -12670,6 +12665,9 @@ const _CU={
   flag:'<path d="M5.4 21V3.8M5.4 4.4h11.8l-2.4 4 2.4 4H5.4"/>',
   wave:'<path d="M2.8 9.2c1.5-1.3 3.1-1.3 4.6 0s3.1 1.3 4.6 0 3.1-1.3 4.6 0 3.1 1.3 4.6 0M2.8 14.8c1.5-1.3 3.1-1.3 4.6 0s3.1 1.3 4.6 0 3.1-1.3 4.6 0 3.1 1.3 4.6 0"/>',
   clock:'<circle cx="12" cy="12" r="8.6"/><path d="M12 7.4V12l3.2 2"/>',
+  eye:'<path d="M2.6 12S6 5.6 12 5.6 21.4 12 21.4 12 18 18.4 12 18.4 2.6 12 2.6 12z"/><circle cx="12" cy="12" r="2.9"/>',
+  eyeOff:'<path d="M9.9 6a9.6 9.6 0 0 1 2.1-.4c6 0 9.4 6.4 9.4 6.4a16 16 0 0 1-2.7 3.4M6.6 7.5C4 9.2 2.6 12 2.6 12S6 18.4 12 18.4a8.8 8.8 0 0 0 4.4-1.2M9.9 10a2.9 2.9 0 0 0 4.1 4.1M3.6 3.6l16.8 16.8"/>',
+  close:'<path d="M6.4 6.4l11.2 11.2M17.6 6.4L6.4 17.6"/>',
 };
 // Each ride kind wears a drawn glyph beside its name (the chip was a dot of colour alone).
 const KIND_IC={saturday:'people',petromin:'people',event:'ticket',workshop:'clock',swim:'wave',snd96:'flag',jcc:'bike'};
@@ -16719,6 +16717,86 @@ async function _pwdMustSave(){
 }
 function _pwdMustClose(){const m=document.getElementById('pwd-gate');if(m)m.remove();}
 function _pwdMustSignOut(){_pwdMustClose();S._pwdCheckedFor=null;doLogout();}
+
+// ── Change password from My Account (the owner, 2026-10-03) ──────────────────────────────────
+// customer_change_password (20261003120000) checks the current password - an account that never had
+// one (Google or Apple only) leaves it empty - and hands back a new session token, kept here as the
+// forced change keeps it; every other device holding the old token is signed out. The look and the
+// field rules are the forced change's (_pwdMustShow), in a centred dialog with show/hide on each box.
+function _on__accPwd_1(event,el){event.preventDefault();_accPwdSave()}
+function _pwBox(id,lbl,ac,cls){return`<div class="pg-field${cls||''}"><label for="${id}">${lbl}</label><div class="pw-wrap"><input id="${id}" type="password" autocomplete="${ac}"><button type="button" class="pw-eye" aria-pressed="false" aria-label="${esc(t('accPwdShow'))}" data-on-click="${_on('_pwEye',_EL)}">${_cuIc('eye',18)}</button></div></div>`;}
+function _pwEye(b){const i=b.previousElementSibling,on=i.type==='password';i.type=on?'text':'password';b.setAttribute('aria-pressed',String(on));b.setAttribute('aria-label',t(on?'accPwdHide':'accPwdShow'));b.innerHTML=_cuIc(on?'eyeOff':'eye',18);}
+function _accPwdOpen(done){
+  const cust=S.loggedIn||getSession(),m=document.getElementById('acc-pwd-modal');if(!cust||!m)return;
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_backdropOnly',_EV,_EL,'_accPwdClose')}">
+    <form class="pg-box" role="dialog" aria-modal="true" aria-labelledby="ap-title" data-on-submit="${_on('_on__accPwd_1',_EV,_EL)}" novalidate>
+      <button type="button" class="ap-x" aria-label="${esc(t('closeBtn'))}" data-on-click="${_on('_accPwdClose')}">${_cuIc('close',20)}</button>
+      <div class="pg-kicker">${t('authPassword')}</div>
+      <h2 id="ap-title" class="pg-title">${t('accPwdTitle')}</h2>
+      ${done===true?`<p class="pg-sub ap-done" role="status">${_cuIc('tick',18)} <span>${t('accPwdSaved')}</span></p>
+      <button type="button" class="pg-btn" data-on-click="${_on('_accPwdClose')}">${t('doneBtn')}</button>`
+      :`${cust.sign_in?`<p class="pg-sub">${t('accPwdSso')}</p>`:''}
+      ${_pwBox('ap-cur',t('setCurPwd'),'current-password',' pg-first')}${_pwBox('ap-new',t('setNewPwd'),'new-password')}${_pwBox('ap-new2',t('setNewPwd2'),'new-password')}
+      <div class="ap-hint">${t('authPasswordHint')}</div>
+      <div id="ap-err" class="pg-msg" role="alert"></div>
+      <button id="ap-save" type="submit" class="pg-btn">${t('pwdMustSave')}</button>`}
+    </form></div>`;
+  m.style.display='block';
+  if(done!==true)setTimeout(()=>{const i=document.getElementById('ap-cur');if(i)i.focus();},30);
+}
+async function _accPwdSave(){
+  const cust=S.loggedIn||getSession();if(!cust||S._apBusy)return;
+  const v=id=>document.getElementById(id)?.value||'',cur=v('ap-cur'),a=v('ap-new');
+  const err=document.getElementById('ap-err'),say=k=>{if(err)err.textContent=t(k);};
+  if(err)err.textContent='';
+  if(!cur&&!cust.sign_in)return say('accPwdCurReq');
+  if(a.length<8||!/[A-Z]/.test(a)||!/[0-9]/.test(a))return say('errPasswordLen');
+  if(a!==v('ap-new2'))return say('errPasswordMatch');
+  S._apBusy=true;const btn=document.getElementById('ap-save');if(btn)btn.disabled=true;
+  let res;try{res=await sb.rpc('customer_change_password',{p_id:cust.id,p_token:cust.session_token,p_current:cur,p_new:a});}catch(e){res={error:e};}
+  S._apBusy=false;if(btn)btn.disabled=false;
+  if(res.error){
+    const msg=String((res.error.message||'')+' '+(res.error.hint||''));
+    if(/BAD_TOKEN/.test(msg)){_accPwdClose();doLogout();return;}
+    const k=[['BAD_PASSWORD',cur?'accPwdBad':'accPwdCurReq'],['LOCKED','accPwdLocked'],['SAME_PASSWORD','accPwdSame'],['WEAK_PASSWORD','errPasswordLen']].find(([c])=>msg.includes(c));
+    return say(k?k[1]:'errConnection');
+  }
+  if(typeof res.data==='string'&&res.data){S.loggedIn={...(S.loggedIn||cust),session_token:res.data};setSession(S.loggedIn);}
+  _accPwdOpen(true);
+}
+function _accPwdClose(){const m=document.getElementById('acc-pwd-modal');if(m){m.style.display='none';m.innerHTML='';}const b=document.getElementById('acc-pwd-btn');if(b)b.focus();}
+
+// ── The rider's own desk purchases (customer_purchases, 20261003120000) ─────────────────────────
+// Customers cannot read cashier_sales, so the account page showed purchases on a staff device only.
+// Read at most once a minute per account; until it answers, and on a database without it, the
+// staff device's own copy (S.cashSales) stands in as before. Voided and refunded lines are struck
+// through and left out of the total.
+function _purchLoad(cust){
+  const p=S._purch;if(!cust.session_token||(p&&p.id===cust.id&&(p.busy||Date.now()-p.at<60000)))return;
+  S._purch={id:cust.id,at:Date.now(),rows:p&&p.id===cust.id?p.rows:null,busy:true};
+  const fin=rows=>{const q=S._purch;if(!q||q.id!==cust.id)return;q.busy=false;if(rows)q.rows=rows;const h=document.getElementById('acc-purch');if(h)h.innerHTML=_purchHtml(cust);};
+  sb.rpc('customer_purchases',{p_id:cust.id,p_token:cust.session_token}).then(({data,error})=>fin(!error&&Array.isArray(data)&&data),()=>fin(null));
+}
+function _purchHtml(cust){
+  const p=S._purch,mine=p&&p.id===cust.id&&p.rows;
+  const rows=(mine||(S.cashSales||[]).filter(r=>r.customer_id===cust.id&&r.pay!=='refunded').map(r=>({...r,at:r.created_at}))
+    .sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))).filter(r=>r.category!=='__cardmeta__');
+  if(!mine&&!rows.length)return'';
+  const amt=r=>(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded';
+  const tot=Math.round(rows.reduce((sm,r)=>sm+(off(r)?0:amt(r)),0)*100)/100;
+  const PAY={paid:'paidLabel',pending:'pendingLabel',house:'custOnHouse',refunded:'cashRefunded'};
+  return`<div class="form-section cu-card640">
+    <div class="form-title cu-mb12">${t('custPurchTitle')}${rows.length?` · <bdi class="cu-c-green">${esc(_sar(tot))}</bdi>`:''}</div>
+    ${rows.length?`<div class="cu-purch-list">${rows.map(r=>{
+      const st=r.voided?'custPurchVoided':r.refunded?'cashRefunded':PAY[r.pay];
+      const when=[r.at?new Date(r.at).toLocaleDateString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',year:'numeric'}):'',r.session_title||''].filter(Boolean).join(' · ');
+      return`<div class="cu-purch-row${off(r)?' off':''}">
+        <div class="cu-purch-main"><div class="cu-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="cu-c-muted">×${r.qty}</span>`:''}</div><div class="cu-purch-date">${esc(when)}</div></div>
+        <div class="cu-purch-end"><bdi class="cu-purch-amt">${esc(_sar(amt(r)))}</bdi>${st?`<span class="cu-purch-pay">${t(st)}</span>`:''}</div>
+      </div>`;}).join('')}</div>`
+    :`<div class="cu-purch-empty">${t('custPurchEmpty')}</div>`}
+  </div>`;
+}
 
 function _flagSendLabel(){return t('fixDlgSend').replace('{0}',String(S._flag?S._flag.sel.size:0));}
 function _flagRowHtml(c,k){
