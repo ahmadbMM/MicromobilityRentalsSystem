@@ -110,7 +110,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await bootMember(page);
     const rows = await captureBookingRows(page);
     await page.evaluate(
-      `S.selSession='2099-01-10'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
+      `S.selSession='2099-01-10'; S.regRideGroup='beg'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
        S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
@@ -159,7 +159,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     expect(rows[0].price).toBe(250);
     // A stale client asking for carbon on the Saturday ride is still coerced (the DB trigger too).
     await page.evaluate(
-      `S.selSession='2099-01-10'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road Carbon'];
+      `S.selSession='2099-01-10'; S.regRideGroup='beg'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road Carbon'];
        S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.regSubmitting=false; S.waiverOk=true;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(2);

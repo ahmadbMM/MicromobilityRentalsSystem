@@ -6242,6 +6242,14 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .rm-opt b{font-size:14px}
 .rm-opt span{font-size:12.5px;color:var(--muted);line-height:1.4}
 .rq-msg{display:inline-flex;align-items:center;justify-content:center}
+/* The Saturday ride's groups (2026-10-02): Beg / Int in the Bookings table, the staff pickers */
+.rg-chip{display:inline-block;min-width:30px;text-align:center;padding:2px 7px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;border:1px solid rgba(var(--green-rgb),.35);color:var(--green);background:rgba(var(--green-rgb),.08)}
+.rg-chip.rg-int{border-color:var(--border);color:var(--text);background:var(--s3)}
+.rg-field .rg-opts .toggle-btn{flex:1 1 0}
+.rg-field .rg-km{opacity:.7;font-weight:600;margin-inline-start:4px}
+.cu-rv-grp{font-weight:600}
+/* the rider's two groups: one per row, so 'Intermediates’ group · 40 km' is read whole on a phone */
+#reg-group-wrap .rg-grid{grid-template-columns:1fr}
 .ca-pwd-box{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:1px dashed rgba(var(--green-rgb),.5);background:rgba(var(--green-rgb),.06);margin-bottom:12px}
 .ca-pwd-box span{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
 .ca-pwd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:20px;letter-spacing:1.5px}
@@ -6444,6 +6452,7 @@ body.has-modal .fab-row{display:none !important;}
 #checkin-modal .modal-footer{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
 #checkin-modal .modal-footer>button{width:100%;min-height:44px;}
 html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
+#checkin-modal .modal-footer.ci-sat-foot{grid-template-columns:1fr 1fr 1.3fr;} /* the Saturday check-in: Cancel, Waiting, Check in on one row */
 #checkin-modal .ci-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:4px;}
 #checkin-modal .ci-opts .toggle-btn{width:100%;min-width:0;min-height:42px;padding-inline:6px;white-space:normal;text-align:center;flex:none;}
 .cm-actions{display:grid;grid-template-columns:1fr;grid-auto-rows:1fr;gap:8px;}  /* one column, one height: three buttons of one size, whatever they say */

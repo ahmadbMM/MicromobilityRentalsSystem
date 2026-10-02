@@ -77,7 +77,7 @@ test('a wizard left open from before the rejection cannot submit', async ({ page
 
   // staff reject them while the page sits open
   await page.evaluate(`S.queue=[...getQueue(), entryFromDB(${JSON.stringify(booking())})]`);
-  await page.evaluate(`S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Any'];S.regRiderNames=['Spec Rider'];submitReg()`);
+  await page.evaluate(`S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Any'];S.regRideGroup='beg';S.regRiderNames=['Spec Rider'];submitReg()`);
   await expect(modal(page)).toContainText('This week is full');
   expect(rows).toHaveLength(0);
 });

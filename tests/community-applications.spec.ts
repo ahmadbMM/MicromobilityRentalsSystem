@@ -38,7 +38,7 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await applicationsTab(page);
   await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (2)');
   await expect(page.locator('.filter-pill[data-ca-filter="rejected"]')).toHaveText('Rejected (1)');
-  await expect(page.locator('.filter-pill', { hasText: /^Applications \(2\)$/ })).toBeVisible();
+  await expect(page.locator('.filter-pill', { hasText: /^Applications$/ })).toBeVisible();
 
   const k = row(page, 'a1');
   await expect(k.locator('.ca-name')).toHaveText('Karim Mansour');
@@ -257,6 +257,9 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   await chip(page, 'tag_lead').click(); // a redraw keeps the ride picked
   await chip(page, 'tag_lead').click();
   await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
+  // a Saturday ride asks the rider's group before the approval can go (2026-10-02)
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled();
+  await dlg.locator('.rg-field [data-rg="int"]').click();
 
   await dlg.locator('.ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box .ca-pwd')).toHaveText('Kp7wXr4Mnq'); // the welcome message still comes
@@ -269,7 +272,7 @@ test('Approve can give more tags and put the rider on a Saturday ride’s final 
   expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip', added_by: 'staff' });
   expect(tagRows[0].expires_at ?? null).toBeNull(); // permanent
   await expect.poll(() => bookings.length).toBe(1);
-  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', name: 'Karim Mansour', status: 'waiting', approval: 'approved', type_preference: 'Road', height: 178, price: 0 });
+  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', name: 'Karim Mansour', status: 'waiting', approval: 'approved', type_preference: 'Road', height: 178, price: 0, ride_group: 'int' });
   expect(typeof bookings[0].queue_num).toBe('number');
   expect(await page.evaluate(`_hasTagNow('ca01','tag_vip')&&_hasTagNow('ca01','tag_saturday')`)).toBe(true);
 });
@@ -553,6 +556,8 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   await chip(page, 'tag_vip').click();
   await ride(SAT2).click();
   await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled(); // the group comes next (2026-10-02)
+  await dlg.locator('.rg-field [data-rg="beg"]').click();
   await expect(dlg.locator('.ca-ap-go')).toBeEnabled();
   await dlg.locator('.ca-ap-go').click();
 
@@ -703,6 +708,7 @@ test('before the database has invited_session, the list loads and an invitation 
   expect(asked.some((x) => !x.includes('invited_session') && x.includes('workplace'))).toBe(true); // only that column is dropped
   await row(page, 'a2').locator('.ca-invite').click();
   await page.locator(`#confirm-modal .ca-ap-rides [data-ca-ride="${SAT}"]`).click();
+  await page.locator('#confirm-modal .rg-field [data-rg="beg"]').click();
   await page.locator('#confirm-modal .ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
   await expect(page.locator('#err-bar-el')).toHaveCount(0); // a column still to come is not an error for staff

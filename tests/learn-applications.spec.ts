@@ -50,7 +50,7 @@ test.describe('@staff:community learn to ride', () => {
   test('Applications holds two lists; the learn-to-ride one shows who is learning and what they asked for', async ({ page }) => {
     await learnTab(page);
     // one pill for both lists, the pending ones of both counted; its own address
-    await expect(page.locator('.filter-pill', { hasText: /^Applications \(2\)$/ })).toHaveClass(/active/);
+    await expect(page.locator('.filter-pill', { hasText: /^Applications$/ })).toHaveClass(/active/);
     await expect(page.locator('.apps-kind[data-apps-kind="learning"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.apps-kind[data-apps-kind="learning"] .apps-kind-n')).toHaveText('2');
     expect(new URL(page.url()).pathname).toBe('/community/applications/learning');

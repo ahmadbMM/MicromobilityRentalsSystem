@@ -2,7 +2,6 @@
   "commMembersTitle": "Para sa mga miyembro lang ng komunidad",
   "commMembersMsg": "Ang aming mga community ride ay para sa mga miyembro ng aming komunidad. Mag-apply para sa membership, at susuriin ng aming team ang iyong aplikasyon.",
   "commApplyBtn": "Mag-apply para sa Community Membership ng MicroMobility",
-  "filterRentalBike": "Rental na bisikleta",
   "commAddOwnBike": "May sariling bisikleta ang rider (hindi kumukuha ng puwesto)",
   "tagAddTitle": "Magdagdag ng tag",
   "tagPermLabel": "Permanente",
@@ -3156,5 +3155,19 @@
   "rmPrivacy": "Paalala sa litrato at privacy",
   "rmPrivacySub": "Magpaalam bago kunan o i-share ang ibang miyembro",
   "rmEtiq": "Asal sa kalsada",
-  "rmEtiqSub": "Ligtas na pagbibisikleta bilang grupo sa pampublikong kalsada, at ang support van"
+  "rmEtiqSub": "Ligtas na pagbibisikleta bilang grupo sa pampublikong kalsada, at ang support van",
+  "rgLabel": "Grupo ng ride",
+  "rgBeg": "Grupo ng mga baguhan",
+  "rgInt": "Grupo ng mga intermediate",
+  "rgBegShort": "Bag",
+  "rgIntShort": "Int",
+  "rgBegBrief": "Mula sa tagpuan hanggang sa Jeddah Yacht Club (JYC) at pabalik sa tagpuan, sa karaniwang bilis na mga 20 km/h.",
+  "rgIntBrief": "Mula sa tagpuan hanggang bago ang Marine Sciences roundabout, at pabalik sa tagpuan.",
+  "rgBegPlace": "Jeddah Yacht Club",
+  "rgIntPlace": "Marine Sciences roundabout",
+  "rgInfoAria": "Tungkol sa {0}",
+  "rgPickBtn": "Piliin ang grupong ito",
+  "errPickGroup": "Piliin ang iyong grupo",
+  "colGroup": "Grupo",
+  "rgTurnLbl": "Balikan"
 }

@@ -2,7 +2,6 @@
   "commMembersTitle": "Somente para membros da comunidade",
   "commMembersMsg": "Nossos passeios da comunidade são para os membros da comunidade. Solicite a adesão e nossa equipe vai analisar sua solicitação.",
   "commApplyBtn": "Solicitar adesão à comunidade MicroMobility",
-  "filterRentalBike": "Bicicleta alugada",
   "commAddOwnBike": "O ciclista traz a própria bicicleta (não ocupa vaga)",
   "tagAddTitle": "Adicionar etiqueta",
   "tagPermLabel": "Permanente",
@@ -3156,5 +3155,19 @@
   "rmPrivacy": "Lembrete de fotos e privacidade",
   "rmPrivacySub": "Pedir antes de fotografar ou compartilhar outros membros",
   "rmEtiq": "Etiqueta na estrada",
-  "rmEtiqSub": "Pedalar em grupo com segurança em vias públicas, e a van de apoio"
+  "rmEtiqSub": "Pedalar em grupo com segurança em vias públicas, e a van de apoio",
+  "rgLabel": "Grupo do passeio",
+  "rgBeg": "Grupo iniciante",
+  "rgInt": "Grupo intermediário",
+  "rgBegShort": "Ini",
+  "rgIntShort": "Int",
+  "rgBegBrief": "Do ponto de encontro até o Jeddah Yacht Club (JYC) e de volta ao ponto de encontro, a uma velocidade média de cerca de 20 km/h.",
+  "rgIntBrief": "Do ponto de encontro até pouco antes da rotatória de Ciências Marinhas, e de volta ao ponto de encontro.",
+  "rgBegPlace": "Jeddah Yacht Club",
+  "rgIntPlace": "Rotatória de Ciências Marinhas",
+  "rgInfoAria": "Sobre o {0}",
+  "rgPickBtn": "Escolher este grupo",
+  "errPickGroup": "Escolha seu grupo",
+  "colGroup": "Grupo",
+  "rgTurnLbl": "Ponto de retorno"
 }

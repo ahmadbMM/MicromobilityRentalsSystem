@@ -280,9 +280,10 @@ test('an admin group on a Saturday ride is selected already and rides free', asy
   const bookings = writes(page, 'queue_entries');
   await page.evaluate(`S.sfSession=${JSON.stringify(COMM)};showJccGroupModal()`);
   await page.fill('#jg-name', 'Falcons');
+  await page.locator('#jcc-group-modal .rg-field [data-rg="int"]').click(); // a Saturday ride asks the group (2026-10-02)
   await page.evaluate(`saveJccGroup()`);
   await expect.poll(() => bookings.length).toBe(2);
-  expect(bookings.map((b) => [b.approval, b.price])).toEqual([['approved', 0], ['approved', 0]]);
+  expect(bookings.map((b) => [b.approval, b.price, b.ride_group])).toEqual([['approved', 0, 'int'], ['approved', 0, 'int']]);
 });
 
 test('Add rider offers an own bike only where the ride takes owners', async ({ page }) => {
