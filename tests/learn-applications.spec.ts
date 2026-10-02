@@ -297,6 +297,11 @@ test.describe('@staff:community learn to ride', () => {
     await learnTab(page, { 'rpc:staff_learn_decide': { ok: true } });
     const calls = rpcCalls(page, 'staff_learn_decide');
     await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    // the list repaints after the filter (and once more when the sign-ups land): tap Mark done once it is
+    // still, or on a phone the tap can land on the button that has just moved under it
+    await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveClass(/active/);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(250);
     await row(page, 'l3').locator('.la-done').click();
     await expect.poll(() => calls.length).toBe(1);
     expect(calls[0]).toEqual({ p_id: 'l3', p_status: 'done', p_by: 'Spec Staff' });

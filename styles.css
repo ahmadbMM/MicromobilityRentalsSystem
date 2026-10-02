@@ -7659,6 +7659,28 @@ body:not(.view-staff) .bd-next-t small{font-size:var(--fs-12);color:var(--ink-3)
 body:not(.view-staff) .bd-next-bar{display:block;height:4px;margin-top:4px;background:var(--card-3);border-radius:2px;overflow:hidden;}
 body:not(.view-staff) .bd-next-bar i{display:block;height:100%;width:var(--cu-w);background:var(--go);}
 body:not(.view-staff) .bd-next-n{flex:none;font-size:var(--fs-13);font-weight:700;color:var(--ink-2);font-variant-numeric:tabular-nums;}
+/* ── Fit the screen, one button size (the owner, 2026-10-02: "the screens and pop ups in the customers website
+   are sometimes zoomed in or needs to be scrolled right or left ... fit everything without making it look
+   unaligned, align all buttons and make them have the same size"). The page never moves sideways; a popup
+   never outgrows the screen; a long name, email or link wraps instead of pushing its box wider; every text
+   field is at least 16px, so iOS never zooms into the form when it is tapped; and every rider button is one
+   height, its words centred. ── */
+html:has(body:not(.view-staff)),body:not(.view-staff){overflow-x:clip;}
+body:not(.view-staff) :is(img,video,canvas,iframe){max-width:100%;}
+body:not(.view-staff) :is(.modal-box,.confirm-box,.bike-info-box,.pin-box,.cust-sheet){max-width:min(560px,calc(100vw - 24px));box-sizing:border-box;}
+body:not(.view-staff) :is(.modal-box,.confirm-box,.bike-info-box,.pin-box,.ticket-card,.card,.acc-card,.cu-rv-rider,.mr-row){overflow-wrap:break-word;}
+body:not(.view-staff) :is(.modal-box,.confirm-box,.ticket-card,.card) :is(a,bdi,[dir="ltr"]){overflow-wrap:anywhere;}
+body:not(.view-staff) :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea){font-size:max(16px,1em);}
+:where(body:not(.view-staff)) :where(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet,.toggle-btn,.cancel-reason-opt){display:inline-flex;align-items:center;justify-content:center;}
+body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet,.toggle-btn,.type-info-btn){min-height:48px;box-sizing:border-box;line-height:1.2;}
+body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-sm,.btn-wallet){padding-block:0;}
+/* A booking card's actions (Edit, Reschedule, Cancel; Rate, Book again) share their row in equal widths and
+   step onto a second row when the phone is too narrow for their words, never squeezing them. A popup's two
+   answers (Keep booking / Cancel booking) take half the row each. */
+body:not(.view-staff) .cu-tk-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;}
+body:not(.view-staff) .cu-tk-actions>*{width:100%;min-width:0;white-space:nowrap;}
+body:not(.view-staff) #cancel-reason-modal .dk-flex8{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;}
+body:not(.view-staff) #cancel-reason-modal .dk-flex8>*{width:100%;min-width:0;}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -7762,7 +7784,7 @@ body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-
 body.view-staff :is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.btn-green,.btn-red,#tab-queue .rq-print){
   min-height:38px;padding-top:0;padding-bottom:0;padding-inline:14px;box-sizing:border-box;
   gap:6px;
-  font-size:13px;font-weight:600;line-height:1.15;border-radius:8px;white-space:nowrap;vertical-align:middle;
+  font-size:13px;font-weight:600;line-height:1.15;border-radius:8px;vertical-align:middle;text-align:center;
 }
 body.view-staff #tab-queue .rq-print{background:var(--sf-card);border:1px solid var(--sf-line);color:var(--text);}
 /* the choice buttons (payment, bike type, group, a dialog's options) take the same height, words centred */
@@ -7770,8 +7792,12 @@ body.view-staff :is(.toggle-btn,.sl-pay){min-height:38px;box-sizing:border-box;l
 body.view-staff .sl-pay{border-radius:8px;padding-block:0;}
 body.view-staff :is(.btn-sm,.btn-secondary,.btn-muted)[aria-label]:not(:has(span,b)):empty{width:38px;padding-inline:0;}
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>*{height:38px;min-height:38px;font-size:12.5px;}
-body.view-staff :is(.modal-footer,.ca-actions,.chrome-dact)>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.btn-green,.btn-red,a.btn-secondary){flex:1 1 0;min-width:0;}
-body.view-staff :is(.modal-footer,.ca-actions,.chrome-dact){display:flex;gap:8px;align-items:stretch;}
+body.view-staff :is(.modal-footer,.chrome-dact)>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.btn-green,.btn-red,a.btn-secondary){flex:1 1 0;min-width:0;}
+body.view-staff :is(.modal-footer,.chrome-dact){display:flex;gap:8px;align-items:stretch;}
+/* .ca-actions also holds a list row's many actions (a sign-up's six): each keeps its words' width, the row
+   grows them to fill it, and wraps rather than squeezing them */
+body.view-staff .ca-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch;}
+body.view-staff .ca-actions>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.btn-green,.btn-red,a.btn-secondary){flex:1 1 auto;}
 @media(max-width:767px){
   body.view-staff :is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.btn-green,.btn-red,#tab-queue .rq-print){min-height:44px;}
   body.view-staff :is(.toggle-btn,.sl-pay){min-height:44px;}
