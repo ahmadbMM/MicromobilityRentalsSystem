@@ -802,7 +802,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgGiveBtn:'Give badge',bdgGiven:'Badge given: {0} to {1}',
   bdgTaken:'Badge taken back: {0} from {1}',bdgTake:'Take back',
   bdgTakeSure:'Take it back?',bdgByRiding:'Earned by riding',
-  bdgGivenLine:'Given {0} by {1}',bdgAuto:'Also earned by riding',
+  bdgGivenLine:'Given {0} by {1}',bdgAuto:'Earned by riding only',
   bdgRetired:'Retired',bdgRetire:'Retire',
   bdgRestore:'Bring back',bdgNewBtn:'New badge',
   bdgIcon:'Icon',bdgNameEn:'Name (English)',
@@ -1325,7 +1325,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgGiveBtn:'منح الوسام',bdgGiven:'مُنح الوسام: {0} إلى {1}',
   bdgTaken:'سُحب الوسام: {0} من {1}',bdgTake:'سحب',
   bdgTakeSure:'سحبه؟',bdgByRiding:'مكتسب بالركوب',
-  bdgGivenLine:'مُنح في {0} بواسطة {1}',bdgAuto:'يُكتسب بالركوب أيضاً',
+  bdgGivenLine:'مُنح في {0} بواسطة {1}',bdgAuto:'يُكتسب بالركوب فقط',
   bdgRetired:'متوقف',bdgRetire:'إيقاف',
   bdgRestore:'إعادة',bdgNewBtn:'وسام جديد',
   bdgIcon:'الأيقونة',bdgNameEn:'الاسم (بالإنجليزية)',
@@ -32400,7 +32400,9 @@ function _bdgDlgPaint(open){
   const item=(b,meta,end)=>`<div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b>${meta}</div>${end||''}</div>`;
   const rows=held.map(x=>{const b=_bdgById(x.badge_id);return b?item(b,`<span class="am-meta">${esc(_bdgLine(x))}</span>${x.note?`<span class="bdg-note"><bdi>${esc(x.note)}</bdi></span>`:''}`,_bdgInfoBtn(b)+_bdgTakeBtn(d.cid,b.id))+_bdgInfoPanel(b):'';}).join('')
     +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('');
-  const give=_bdgSorted().filter(b=>!b.retired&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug)));
+  // A badge with an earning rule comes only from riding (the owner, 2026-10-02: "automatically give
+  // badges to accounts that deserve dont let staff give them manually"): only the staff-only ones are offered.
+  const give=_bdgSorted().filter(b=>!b.retired&&!b.auto&&!has.has(b.id));
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__bdgDlg_1",_EV,_EL)}"><div class="confirm-box bdg-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">
     <div class="bdg-head"><div class="bdg-title">${t('mrBadgesTitle')} · ${esc(c.name||'')}</div><button type="button" class="bdg-x" data-on-click="${_on("_bdgDlgClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
@@ -32414,7 +32416,7 @@ function _bdgDlgPaint(open){
 }
 async function _bdgGive(){
   const d=S._bdgDlg;if(!d||!d.pick||d.busy)return;
-  const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!b)return;
+  const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!b||b.auto)return;
   const row={customer_id:d.cid,badge_id:b.id,note:String(d.note||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
   d.busy=true;
   const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id'});
@@ -32472,8 +32474,8 @@ function _commBadges(){
       <div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b><span class="am-meta">${esc(_bdgDesc(b))}</span><span class="am-meta">${esc(meta)}</span>${dated}</div>
       <div class="bdg-acts">
         ${n[b.id]?`<button type="button" class="btn-sm ${hold?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgHoldId",b.id)}">${t('bdgHolders')}</button>`:''}
-        ${b.retired?'':`<button type="button" class="btn-sm ${ride?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRideId",b.id)}">${t('bdgRideBtn')}</button>`}
-        ${b.retired?'':`<button type="button" class="btn-sm ${rider?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRiderId",b.id)}">${t('bdgRiderBtn')}</button>`}
+        ${b.retired||b.auto?'':`<button type="button" class="btn-sm ${ride?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRideId",b.id)}">${t('bdgRideBtn')}</button>`}
+        ${b.retired||b.auto?'':`<button type="button" class="btn-sm ${rider?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRiderId",b.id)}">${t('bdgRiderBtn')}</button>`}
         ${adm&&(!b.system||b.rule)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgEditOpen",b.id)}">${t('editBtn')}</button>`:''}
         ${adm&&!b.auto?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgRetire",b.id,!b.retired)}">${t(b.retired?'bdgRestore':'bdgRetire')}</button>`:''}
         ${adm&&!b.system&&!n[b.id]?`<button type="button" class="btn-sm ${del?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgDelete",b.id)}">${del?t('bdgDeleteSure'):t('deleteBtn')}</button>`:''}
@@ -32534,7 +32536,7 @@ function _bdgRiderHtml(b){
   </div>`;
 }
 async function _bdgGiveRider(bid,cid){
-  const b=_bdgById(bid),c=_custById(cid);if(!b||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
+  const b=_bdgById(bid),c=_custById(cid);if(!b||b.auto||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
   const row={customer_id:cid,badge_id:bid,note:String(S._bdgRiderNote||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
   S._bdgRiderBusy=true;
   const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id'});
@@ -32548,7 +32550,7 @@ async function _bdgGiveRider(bid,cid){
 }
 function _bdgRideHas(bid){return (S.custBadges||[]).filter(x=>x.badge_id===bid).map(x=>x.customer_id);}
 async function _bdgGiveRide(bid,sid){
-  const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!b||!r||S._bdgRideBusy)return;
+  const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!b||b.auto||!r||S._bdgRideBusy)return;
   const has=new Set(_bdgRideHas(bid)),at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(S._bdgRideNote||'').trim().slice(0,140)||null;
   const rows=r.ids.filter(id=>!has.has(id)).map(id=>({customer_id:id,badge_id:bid,note,session_id:sid,awarded_by:by,awarded_at:at}));
   if(!rows.length)return;

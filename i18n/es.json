@@ -1319,7 +1319,7 @@
   "bdgTakeSure": "¿Retirarla?",
   "bdgByRiding": "Conseguida montando",
   "bdgGivenLine": "Otorgada el {0} por {1}",
-  "bdgAuto": "También se consigue montando",
+  "bdgAuto": "Solo se gana rodando",
   "bdgRetired": "Fuera de la lista",
   "bdgRetire": "Quitar de la lista",
   "bdgRestore": "Volver a la lista",

@@ -194,6 +194,20 @@ test.describe('@staff:community badges', () => {
     await expect(page.locator('.bdg-row[data-badge="bd_marshal"] #bdg-rider-res')).toHaveCount(0); // one panel at a time
   });
 
+  test('a badge earned by riding is never given by hand: no Give buttons, not offered in the dialog (the owner, 2026-10-02)', async ({ page }) => {
+    await staff(page);
+    await community(page, 'badges');
+    const fl = page.locator('.bdg-row[data-badge="bd_first_lap"]');
+    await expect(fl).toContainText('Earned by riding only');
+    await expect(fl.getByRole('button', { name: 'Give to a ride', exact: true })).toHaveCount(0);
+    await expect(fl.getByRole('button', { name: 'Give to a rider' })).toHaveCount(0);
+    await expect(page.locator('.bdg-row[data-badge="bd_marshal"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(1);
+    // Sara's only ride is two months old: First Lap is hers, and in any case it is never in the give list.
+    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.locator('#am-cust-rows .am-row[data-cust="c3"] .am-bdg-btn').click();
+    await expect(modal(page).locator('.bdg-pick', { hasText: 'First Lap' })).toHaveCount(0);
+  });
+
   test('a database without the badges tables: no Badges button, and the tab says why', async ({ page }) => {
     await staff(page, { badges: [], customer_badges: [] });
     await community(page, 'accounts');
