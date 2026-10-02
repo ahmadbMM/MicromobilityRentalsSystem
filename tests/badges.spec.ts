@@ -123,7 +123,7 @@ test.describe('@staff:community badges', () => {
     // Give to a ride: the accounts checked in on it (done), not the no-show, not a walk-in.
     const sent = writes(page, 'customer_badges');
     const marshal = tab.locator('.bdg-row[data-badge="bd_marshal"]');
-    await marshal.getByRole('button', { name: 'Give to a ride' }).click();
+    await marshal.getByRole('button', { name: 'Give to a ride', exact: true }).click();
     await expect(marshal.locator('#bdg-ride option')).toHaveCount(1); // the old ride is past the 30 days
     await marshal.locator('#bdg-rnote').fill('National Day ride');
     await marshal.getByRole('button', { name: 'Give to 2 riders' }).click();
@@ -135,7 +135,7 @@ test.describe('@staff:community badges', () => {
     await expect(marshal).toContainText('2 holders');
 
     // Champion: Omar holds it already, so only Lina is left to give it to.
-    await champ.getByRole('button', { name: 'Give to a ride' }).click();
+    await champ.getByRole('button', { name: 'Give to a ride', exact: true }).click();
     await expect(champ.getByRole('button', { name: 'Give to 1 riders' })).toBeVisible();
 
     // A new badge: an icon from the set and a colour, never an emoji.
@@ -158,7 +158,7 @@ test.describe('@staff:community badges', () => {
     await page.evaluate(`S.staffRole='frontdesk';renderCommunity()`);
     await expect(tab.getByRole('button', { name: '+ New badge' })).toHaveCount(0);
     await expect(tab.getByRole('button', { name: 'Edit' })).toHaveCount(0);
-    await expect(tab.getByRole('button', { name: 'Give to a ride' }).first()).toBeVisible();
+    await expect(tab.getByRole('button', { name: 'Give to a ride', exact: true }).first()).toBeVisible();
   });
 
   test('an unpaid returned ride earns nothing in the dialog', async ({ page }) => {
@@ -166,6 +166,32 @@ test.describe('@staff:community badges', () => {
     await community(page, 'accounts');
     await page.locator('#am-cust-rows .am-row[data-cust="c1"] .am-bdg-btn').click();
     await expect(modal(page).locator('.bdg-list')).not.toContainText('Earned by riding');
+  });
+
+  test('Give to a rider finds an account by name or mobile and gives it there, with the note', async ({ page }) => {
+    await staff(page);
+    await community(page, 'badges');
+    const sent = writes(page, 'customer_badges');
+    const row = page.locator('.bdg-row[data-badge="bd_marshal"]');
+    await row.getByRole('button', { name: 'Give to a rider' }).click();
+    const box = row.getByLabel('Find a rider');
+    await box.fill('0551876216'); // Omar's mobile typed the local way
+    await expect(row.locator('#bdg-rider-res .bdg-hold')).toHaveCount(1);
+    await expect(row.locator('#bdg-rider-res')).toContainText('Omar Saleh');
+    await expect(box).toBeFocused();
+    await box.fill('lina');
+    await row.getByLabel('Note for the rider', { exact: false }).fill('Swept Friday');
+    await row.locator('#bdg-rider-res .bdg-hold[data-cust="c1"]').getByRole('button', { name: 'Give badge' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept Friday' });
+    await expect.poll(() => page.evaluate(`(S.custBadges||[]).some(x=>x.customer_id==='c1'&&x.badge_id==='bd_marshal')`)).toBe(true);
+    // Champion is Omar's already: he is listed as holding it, with nothing to press.
+    await page.locator('.bdg-row[data-badge="bd_champion"]').getByRole('button', { name: 'Give to a rider' }).click();
+    const ch = page.locator('.bdg-row[data-badge="bd_champion"]');
+    await ch.getByLabel('Find a rider').fill('omar');
+    await expect(ch.locator('#bdg-rider-res')).toContainText('Has it');
+    await expect(ch.locator('#bdg-rider-res button')).toHaveCount(0);
+    await expect(page.locator('.bdg-row[data-badge="bd_marshal"] #bdg-rider-res')).toHaveCount(0); // one panel at a time
   });
 
   test('a database without the badges tables: no Badges button, and the tab says why', async ({ page }) => {

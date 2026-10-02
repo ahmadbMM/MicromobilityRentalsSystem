@@ -810,7 +810,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgDescAr:'How it is earned (Arabic)',bdgNameReq:'A badge needs an English name.',
   bdgSaved:'Badge saved',bdgDeleted:'Badge deleted',
   bdgDeleteSure:'Delete it?',bdgHolders:'Holders',
-  bdgRideBtn:'Give to a ride',bdgRidePick:'Ride',
+  bdgRideBtn:'Give to a ride',bdgRiderBtn:'Give to a rider',bdgRiderFind:'Find a rider',bdgRiderPh:'Name, mobile or email',bdgRiderNone:'No account matches',bdgRiderHas:'Has it',bdgRidePick:'Ride',
   bdgRideNone:'No ride in the last 30 days has riders with an account who checked in.',bdgRideHint:'Everyone with an account who checked in on that ride. Riders who already hold it keep theirs.',
   bdgRideGo:'Give to {0} riders',bdgRideDone:'Badge given: {0} to {1} riders of {2}',
   bdgNoDb:'Badges are not set up on the database yet.',
@@ -1333,7 +1333,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgDescAr:'كيف يُكتسب (بالعربية)',bdgNameReq:'يحتاج الوسام إلى اسم بالإنجليزية.',
   bdgSaved:'حُفظ الوسام',bdgDeleted:'حُذف الوسام',
   bdgDeleteSure:'حذفه؟',bdgHolders:'الحاملون',
-  bdgRideBtn:'منح لرحلة',bdgRidePick:'الرحلة',
+  bdgRideBtn:'منح لرحلة',bdgRiderBtn:'منح لراكب',bdgRiderFind:'ابحث عن راكب',bdgRiderPh:'الاسم أو الجوال أو البريد',bdgRiderNone:'لا يوجد حساب مطابق',bdgRiderHas:'لديه الوسام',bdgRidePick:'الرحلة',
   bdgRideNone:'لا توجد رحلة خلال آخر 30 يوماً فيها راكبون لديهم حسابات وسجّلوا حضورهم.',bdgRideHint:'كل من لديه حساب وسجّل حضوره في تلك الرحلة. من لديه الوسام مسبقاً يبقى وسامه كما هو.',
   bdgRideGo:'منح لـ{0} راكب',bdgRideDone:'مُنح الوسام: {0} إلى {1} راكب في {2}',
   bdgNoDb:'الأوسمة غير مُعدّة في قاعدة البيانات بعد.',
@@ -32457,15 +32457,15 @@ function _bdgAutoHolders(){
 }
 // The accounts holding a badge: given by staff, and for a badge earned by riding, those who earned it.
 function _bdgAllHolders(b){const ids=new Set((S.custBadges||[]).filter(x=>x.badge_id===b.id).map(x=>x.customer_id));if(b.auto)(_bdgAutoHolders().get(b.slug)||[]).forEach(id=>ids.add(id));return ids;}
-// Community > Badges: every badge with its holders, Give to a ride, and for admins New / Edit / Retire.
-function _bdgToggle(k,id){S[k]=S[k]===id?null:id;S._bdgEdit=null;S._bdgSure=null;renderCommunity();}
+// Community > Badges: every badge with its holders, Give to a ride, Give to a rider, and for admins New / Edit / Retire.
+function _bdgToggle(k,id){const on=S[k]===id;S._bdgHoldId=S._bdgRideId=S._bdgRiderId=null;S[k]=on?null:id;S._bdgEdit=null;S._bdgSure=null;renderCommunity();}
 function _commBadges(){
   const head=`<div class="page-sub bdg-sub">${t('bdgSub')}</div>`;
   if(!_bdgOk())return head+`<div class="empty-state">${t(S._bdgBusy||!S._bdgAt?'loadingLabel':'bdgNoDb')}</div>`;
   const n={};(S.badges||[]).forEach(b=>{n[b.id]=_bdgAllHolders(b).size;});
   const adm=isAdmin(),ed=S._bdgEdit;
   const rows=_bdgSorted().map(b=>{
-    const hold=S._bdgHoldId===b.id,ride=S._bdgRideId===b.id,del=S._bdgSure==='del|'+b.id;
+    const hold=S._bdgHoldId===b.id,ride=S._bdgRideId===b.id,rider=S._bdgRiderId===b.id,del=S._bdgSure==='del|'+b.id;
     const meta=[b.auto?t('bdgAuto'):'',b.retired?t('bdgRetired'):'',t('amHolders').replace('{0}',n[b.id]||0)].filter(Boolean).join(' · ');
     const dated=b.rule?`<span class="am-meta bdg-dated">${esc(t('bdgSeasonal'))}: ${esc(_bdgRuleLine(b.rule))}</span>`:'';
     return`<div class="bdg-row${b.retired?' retired':''}" data-badge="${esc(b.id)}">
@@ -32473,11 +32473,12 @@ function _commBadges(){
       <div class="bdg-acts">
         ${n[b.id]?`<button type="button" class="btn-sm ${hold?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgHoldId",b.id)}">${t('bdgHolders')}</button>`:''}
         ${b.retired?'':`<button type="button" class="btn-sm ${ride?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRideId",b.id)}">${t('bdgRideBtn')}</button>`}
+        ${b.retired?'':`<button type="button" class="btn-sm ${rider?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRiderId",b.id)}">${t('bdgRiderBtn')}</button>`}
         ${adm&&(!b.system||b.rule)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgEditOpen",b.id)}">${t('editBtn')}</button>`:''}
         ${adm&&!b.auto?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgRetire",b.id,!b.retired)}">${t(b.retired?'bdgRestore':'bdgRetire')}</button>`:''}
         ${adm&&!b.system&&!n[b.id]?`<button type="button" class="btn-sm ${del?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgDelete",b.id)}">${del?t('bdgDeleteSure'):t('deleteBtn')}</button>`:''}
       </div></div>
-      ${hold?_bdgHoldersHtml(b):''}${ride?_bdgRideHtml(b):''}${ed&&ed.id===b.id?_bdgEditForm():''}
+      ${hold?_bdgHoldersHtml(b):''}${ride?_bdgRideHtml(b):''}${rider?_bdgRiderHtml(b):''}${ed&&ed.id===b.id?_bdgEditForm():''}
     </div>`;
   }).join('');
   return head+(adm?`<div class="bdg-top"><button type="button" class="btn-primary btn-sm" data-on-click="${_on("_bdgEditOpen","")}">+ ${t('bdgNewBtn')}</button></div>`:'')
@@ -32511,6 +32512,40 @@ function _bdgRideHtml(b){
     <button type="button" class="btn-primary btn-sm bdg-go"${fresh.length?'':' disabled'} data-on-click="${_on("_bdgGiveRide",b.id,cur.s.id)}">${t('bdgRideGo').replace('{0}',fresh.length)}</button>
   </div>`;
 }
+// Give to a rider (the owner, 2026-10-02: "add a button besides add to a ride called add to a
+// rider"): find one account by name, mobile or email and give the badge from here, with the same
+// optional note. Typing repaints the results alone, so the box keeps its focus.
+function _bdgRiderHits(q){
+  const ql=String(q||'').trim().toLowerCase();if(ql.length<2)return[];
+  return _custLiveRows(S.customers).filter(c=>String(c.name||'').toLowerCase().includes(ql)||String(c.email||'').toLowerCase().includes(ql)||_phoneHit(c.phone,q)).slice(0,8);
+}
+function _bdgRiderRes(b){
+  const q=S._bdgRiderQ||'';if(String(q).trim().length<2)return'';
+  const has=_bdgAllHolders(b),hits=_bdgRiderHits(q);
+  return hits.map(c=>`<div class="bdg-hold" data-cust="${esc(c.id)}"><div class="bdg-txt"><b>${esc(c.name||'—')}</b><span class="am-meta"><bdi>${esc([c.phone,c.email].filter(Boolean).join(' · '))}</bdi></span></div>${has.has(c.id)?`<span class="am-meta">${t('bdgRiderHas')}</span>`:`<button type="button" class="btn-primary btn-sm" data-on-click="${_on("_bdgGiveRider",b.id,c.id)}">${t('bdgGiveBtn')}</button>`}</div>`).join('')||`<div class="am-meta">${t('bdgRiderNone')}</div>`;
+}
+function _on__bdgRider_1(event,el){S._bdgRiderQ=el.value;const r=document.getElementById('bdg-rider-res'),b=_bdgById(S._bdgRiderId);if(r&&b)r.innerHTML=_bdgRiderRes(b);}
+function _on__bdgRider_2(event,el){S._bdgRiderNote=el.value;}
+function _bdgRiderHtml(b){
+  return`<div class="bdg-panel">
+    <div class="form-group"><label for="bdg-rq">${t('bdgRiderFind')}</label><input id="bdg-rq" type="search" autocomplete="off" value="${esc(S._bdgRiderQ||'')}" placeholder="${esc(t('bdgRiderPh'))}" data-on-input="${_on("_on__bdgRider_1",_EV,_EL)}"></div>
+    <div class="form-group"><label for="bdg-rinote">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdg-rinote" type="text" maxlength="140" value="${esc(S._bdgRiderNote||'')}" placeholder="${esc(t('bdgNotePh'))}" data-on-input="${_on("_on__bdgRider_2",_EV,_EL)}"></div>
+    <div id="bdg-rider-res" class="bdg-rider-res">${_bdgRiderRes(b)}</div>
+  </div>`;
+}
+async function _bdgGiveRider(bid,cid){
+  const b=_bdgById(bid),c=_custById(cid);if(!b||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
+  const row={customer_id:cid,badge_id:bid,note:String(S._bdgRiderNote||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
+  S._bdgRiderBusy=true;
+  const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id'});
+  S._bdgRiderBusy=false;
+  if(_writeErr(r,'give badge to a rider'))return;
+  _bdgMerge([row]);S._bdgRiderNote='';
+  const msg=t('bdgGiven').replace('{0}',_bdgName(b)).replace('{1}',c.name||'');
+  toast(msg);
+  pushUndo(msg,async()=>{const x=await sb.from('customer_badges').delete().eq('customer_id',cid).eq('badge_id',bid);if(_writeErr(x,'undo badge'))return false;_bdgDrop([row]);_bdgAfter(cid);});
+  _bdgAfter(cid);
+}
 function _bdgRideHas(bid){return (S.custBadges||[]).filter(x=>x.badge_id===bid).map(x=>x.customer_id);}
 async function _bdgGiveRide(bid,sid){
   const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!b||!r||S._bdgRideBusy)return;
@@ -32531,7 +32566,7 @@ async function _bdgGiveRide(bid,sid){
 // (the other languages read the English). Any badge may also be dated: earned by riding enough
 // nights inside one of its windows (YYYY-MM-DD, or MM-DD every year). The app's seasonal badges
 // open here too, for their dates alone: their name, icon and words are the app's.
-function _bdgEditOpen(id){const b=id?_bdgById(id):null;S._bdgEdit=b?{...b,rule:b.rule?{rides:b.rule.rides,windows:(b.rule.windows||[]).map(w=>({...w}))}:null}:{icon:'star',color:'green',rule:null};S._bdgHoldId=S._bdgRideId=null;renderCommunity();}
+function _bdgEditOpen(id){const b=id?_bdgById(id):null;S._bdgEdit=b?{...b,rule:b.rule?{rides:b.rule.rides,windows:(b.rule.windows||[]).map(w=>({...w}))}:null}:{icon:'star',color:'green',rule:null};S._bdgHoldId=S._bdgRideId=S._bdgRiderId=null;renderCommunity();}
 // What is typed stays typed across a repaint (a picked icon, an added window).
 function _bdgEditPull(){
   const e=S._bdgEdit;if(!e)return;const v=id=>{const i=document.getElementById(id);return i?i.value:null;};
