@@ -16,9 +16,12 @@ test('refund restocks the summed quantity per item in one write', async ({ page 
   await page.goto('/');
   await waitForSb(page);
 
-  const result = await page.evaluate(`(async()=>{
+  // The receipt and the stock have to be in before the refund looks for them, and the refund saves
+  // first and restocks after: on a slow CI runner neither fits a fixed 50 ms (2026-10-02).
+  await page.waitForFunction(`(S.cashSales||[]).some(r=>r.receipt_id==='r1')&&(S.inventory||[]).some(i=>i.id==='gel')`);
+  await page.evaluate(`(()=>{
     // capture every inventory PATCH the refund issues
-    const writes=[];
+    const writes=window.__writes=[];
     const realFrom=sb.from.bind(sb);
     sb.from=(t)=>{ const q=realFrom(t);
       if(t==='inventory'){ const realUpd=q.update.bind(q);
@@ -27,10 +30,11 @@ test('refund restocks the summed quantity per item in one write', async ({ page 
       return q;
     };
     confirmDialog=(o)=>o.onConfirm&&o.onConfirm(); // auto-confirm
-    await _ctRefundReceipt('r1');
-    await new Promise(r=>setTimeout(r,50));
-    return { writes, mem:(S.inventory.find(i=>i.id==='gel')||{}).qty };
-  })()`) as { writes: number[]; mem: number };
+    _ctRefundReceipt('r1');
+  })()`);
+  await expect.poll(() => page.evaluate(`window.__writes.length`)).toBeGreaterThan(0);
+  await page.waitForTimeout(100); // a second, racing write would land here
+  const result = await page.evaluate(`({ writes: window.__writes, mem:(S.inventory.find(i=>i.id==='gel')||{}).qty })`) as { writes: number[]; mem: number };
 
   expect(result.writes.length).toBe(1);   // ONE write for the item, not two racing writes
   expect(result.writes[0]).toBe(8);       // 5 + (1+2) restocked
