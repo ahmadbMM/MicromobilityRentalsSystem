@@ -321,6 +321,11 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(r.first_lap.on).toBe(false);
     expect(r.regular).toEqual({ on: false, p: '0/5', hide: false });
     expect(r.carbon.on).toBe(false);
+    // A bike owner pays nothing: checked in is enough.
+    const own = await ev(page, `(()=>{const d=__day(-3);return __run([__e('s0',d,'done',{paid:false,typePreference:'Own'})],[__ses('s0',d,'jcc')]);})()`);
+    expect(own.first_lap.on).toBe(true);
+    const ownNo = await ev(page, `(()=>{const d=__day(-3);return __run([__e('s0',d,'noshow',{paid:false,typePreference:'Own'})],[__ses('s0',d,'jcc')]);})()`);
+    expect(ownNo.first_lap.on).toBe(false);
     // The Saturday ride is free: nothing to mark, so it counts.
     const free = await ev(page, `(()=>{const d=__day(-3);return __run([__e('s0',d,'done',{paid:false})],[__ses('s0',d,'saturday')]);})()`);
     expect(free.first_lap.on).toBe(true);
