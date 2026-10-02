@@ -11847,7 +11847,7 @@ function renderAccount(){
       <div class="form-group cu-mt4">
         <label>${t('bikeTypePref')}</label>
         <div class="toggle-group type-grid cu-mt6">
-          ${bikeTypeOpts(false).filter(ty=>ty!=='Any').map(ty=>_typePick(`<button id="atp-${ty}" type="button"
+          ${bikeTypeOpts(true).filter(ty=>ty!=='Any').map(ty=>_typePick(`<button id="atp-${ty}" type="button"
               class="toggle-btn${accTy===ty?' active':''}" aria-pressed="${(accTy===ty)?'true':'false'}"
               data-on-click="${_on("_accPickType",ty)}"
               >${typePillLabel(ty)}</button>`,ty,'acc')).join('')}
@@ -14815,7 +14815,7 @@ function showEditCustomerModal(id){
   S._cf={mode:'edit',id:c.id,origName:c.name||'',first:n.first,middle:n.middle,last:n.last,email:c.email||'',cc,phone,pwd:'',
     height:c.height!=null?String(c.height):'',gender:c.gender||'',heard:c.heard_from||'',birth:c.birth_date||'',country:c.country||'',city:c.city||'',nationality:c.nationality||'',socials:c.socials||null,type:c.type_preference||'Any',
     defpay:_housePayTypes(c)?'house':'',defpayTypes:(h=>h&&h!=='all'?h:bikeTypeOpts(false))(_housePayTypes(c)),origDefPay:c.default_pay||null,hiddenTypes:_hiddenTypes(c),
-    rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,
+    rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,prof:c.profession||'',work:c.workplace||'',
     origPhone:c.phone||'',origEmail:(c.email||'').toLowerCase()};
   renderCustFormModal();
 }
@@ -16965,7 +16965,11 @@ function renderCustFormModal(){
       </div>
       ${isCreate?'':`<div class="form-group cmy-mt8"><label>${t('slTitle')}</label><div id="cf-sl" class="cf-sl" aria-live="polite">${_cfSlHtml(d)}</div></div>`}
       <div class="form-group cmy-mt8"><label>${t('genderLabel')}${!isCreate&&!d.gender?` <span class="label-hint cmy-c-orange">(${t('amGenderAsk')})</span>`:''}</label><div class="cmy-row6">${gBtn('male',t('genderMale'))}${gBtn('female',t('genderFemale'))}</div></div>
-      ${isCreate?'':`<div class="form-group cmy-mt8"><label>${t('heardLabel')}</label><div class="cmy-cf-heard">${d.heard?heardLabel(d.heard):'—'}</div></div>`}
+      ${isCreate?'':`<div class="form-group cmy-mt8"><label for="cf-heard">${t('heardLabel')}</label><select id="cf-heard"><option value="">—</option>${[...(d.heard==='desk'?['desk']:[]),...HEARD_OPTS].map(c=>`<option value="${c}"${d.heard===c?' selected':''}>${c==='desk'?esc(t('heardDesk')):esc(t('heard_'+c))}</option>`).join('')}${d.heard&&d.heard!=='desk'&&!HEARD_OPTS.includes(d.heard)?`<option value="${esc(d.heard)}" selected>${esc(d.heard)}</option>`:''}</select></div>
+      <div class="cmy-row10 cmy-mt8">
+        <div class="form-group cmy-f1"><label for="cf-prof">${t('accProfession')}</label><input id="cf-prof" type="text" maxlength="80" value="${esc(d.prof||'')}" autocomplete="off"></div>
+        <div class="form-group cmy-f1"><label for="cf-work">${t('accWorkplace')}</label><input id="cf-work" type="text" maxlength="120" value="${esc(d.work||'')}" autocomplete="off"></div>
+      </div>`}
       <div class="form-group cmy-mt8"><label for="cf-birth-d">${t('birthDateLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${dobFieldHtml('cf-birth',d.birth)}</div>
       <div class="cmy-cf-row8">
         <div class="form-group cmy-f1"><label for="cf-country">${t('countryLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><select id="cf-country" data-on-change="${_on("_cfCountry",_P("value"))}">${countryOpts(d.country)}</select></div>
@@ -16974,7 +16978,7 @@ function renderCustFormModal(){
       </div>
       <div class="form-group cmy-mt8"><label>${t('socialsLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${_socFieldsHtml('cf',d.socials,true)}</div>
       ${d.mode==='edit'?`<div class="form-group cmy-mt8"><label>${t('rideNewsTitle')}</label><div id="cf-rn" class="cmy-cf-rn">${_cfRideNewsHtml(d)}</div></div>`:''}
-      <div class="form-group cmy-mt8"><label>${t('bikeTypePref')}</label><div class="cmy-row6w">${bikeTypeOpts(false).map(tBtn).join('')}</div></div>
+      <div class="form-group cmy-mt8"><label>${t('bikeTypePref')}</label><div class="cmy-row6w">${bikeTypeOpts(true).map(tBtn).join('')}</div></div>
       <div class="form-group cmy-mt8"><label for="cf-defpay">${t('defaultPayLabel')}</label>
         <select id="cf-defpay" data-on-change="${_on("_on_renderCustFormModal_3",_EV,_EL)}"><option value=""${d.defpay?'':' selected'}>${t('defPayNormal')}</option><option value="house"${d.defpay==='house'?' selected':''}> ${t('onTheHouseLabel')}</option></select></div>
       ${!isCreate&&_isVip({id:d.id})?`<div class="cmy-cf-vip">${_tagLogo((S.tags||[]).find(x=>x.id===TAG_VIP)||{slug:'vip',name:'VIP'})}<span>${esc(t('vipTermsNote'))}</span></div>`:''}
@@ -17145,7 +17149,10 @@ async function saveCustForm(){
         const{data:pwok,error:pwerr}=await sb.rpc(tempPwd?'staff_set_customer_temp_password':'staff_set_customer_password',{p_customer_id:d.id,p_new_pwd:newPwd});
         if(pwerr||pwok!==true){toast((pwerr&&pwerr.message)||t('errConnection'),'error');return;} // e.g. RPC not deployed → run sql/staff-set-password.sql
       }
-      const{error}=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_cfDefPayVal(),hidden_types:_cfHiddenVal(),...(d.gender?{gender:d.gender}:{})}).eq('id',d.id);
+      // profession, company and how they heard (20261002180000): an account holds every field its application asked
+      const _v=id=>String((document.getElementById(id)||{}).value||'').replace(/\s+/g,' ').trim();
+      const _about={profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null,heard_from:_v('cf-heard')||null};
+      const{error}=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_cfDefPayVal(),hidden_types:_cfHiddenVal(),...(d.gender?{gender:d.gender}:{}),..._about}).eq('id',d.id);
       if(error){if(error.code==='23505')toast(t('errEmailExists'),'error');else toast(error.message||t('errConnection'),'error');return;}
       // Sync the corrected CONTACT info onto the account holder's OWN live bookings only. One account
       // can hold rows for several DIFFERENT people (group bookings, staff-added riders, name-matched

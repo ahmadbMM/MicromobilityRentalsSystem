@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-2c239ffc91';
+const CACHE = 'mmcq-ade0182a93';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,14 +22,14 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=8d55cab0ae';
+const STAFF_JS = './staff.js?v=dc10f92f0e';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=cbbfc08246","./staff-parts/community.js?v=f2b74e3d91","./staff-parts/bikes.js?v=09c5ede7a2","./staff-parts/cashier.js?v=ab9a73b42c","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=5694cbb460","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=8965d87e4b","./staff-parts/workshop.js?v=75e8e7a142","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=eca3c0e9c0","./staff-parts/messages.js?v=d524241366","./staff-parts/team.js?v=6c02db7478","./staff-parts/settings.js?v=c7807e019a"];
-const APP_JS = './app.js?v=6bc79a6f96';
-const APP_CSS = './app.css?v=9646530729';
+const APP_JS = './app.js?v=3b2b9a2294';
+const APP_CSS = './app.css?v=fc3627e351';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
