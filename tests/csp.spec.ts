@@ -103,7 +103,7 @@ test('a staffer trips nothing: every section and sub-view by its address, the ro
   await unlockStaff(page);
   const paths = ['/bookings', '/bookings/sessions', '/bookings/waitlist', '/bookings/riders', '/dashboard', '/sales', '/inventory', '/inventory/supplements', '/inventory/equipment',
     '/workshop', '/community', '/community/stats', '/community/accounts', '/community/flagged', '/community/applications', '/community/birthdays', '/ambassadors',
-    '/website', '/website/bikes', '/website/bikes/categories', '/website/bikes/fields', '/messages', '/analytics', '/history', '/history/log', '/team'];
+    '/website', '/website/bikes', '/website/bikes/categories', '/website/bikes/fields', '/messages', '/analytics', '/history', '/history/log', '/team', '/settings'];
   for (const path of paths) {
     await page.goto(path);
     await ready(page);

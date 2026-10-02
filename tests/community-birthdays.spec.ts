@@ -251,11 +251,12 @@ test.describe('Community > Birthdays', () => {
     expect(await page.evaluate(`(()=>{_bdRows('any');_bdRows('tag_jcc');S.customers=[...S.customers];_bdRows(BD_TAG);return _bdCache.size;})()`)).toBe(1);
   });
 
-  test('a birthday marked read stays read when the rider list comes back empty before staff sign-in', async ({ page }) => {
+  // Since 2026-10-02 the bell tells only what is new: a birthday already there when the list first
+  // loads is known, and must stay known through the empty list RLS hands back before staff sign-in.
+  test('a known birthday stays known when the rider list comes back empty before staff sign-in', async ({ page }) => {
     await staff(page);
     const bell = page.locator('#nt-btn');
-    await bell.click();
-    await page.locator('#nt-panel').getByRole('button', { name: 'Mark all read' }).click();
+    await page.evaluate('_ntSync()');
     await expect(bell.locator('.nt-badge')).toHaveCount(0);
     // RLS answers a read made before the staff session with no rows, not an error
     await page.evaluate(`(()=>{const c=S.customers;S.customers=[];_ntSync();S.customers=c;_ntSync();})()`);

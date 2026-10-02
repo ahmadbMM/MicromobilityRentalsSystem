@@ -21,10 +21,10 @@ async function toRiderStep(page: Page) {
 }
 
 test.describe('bike type info', () => {
-  test('every real bike has an "i"; Any has none; the pills keep their hooks', async ({ page }) => {
+  test('every real bike has an "i"; Any is not offered to riders; the pills keep their hooks', async ({ page }) => {
     await toRiderStep(page);
     const types: string[] = await page.evaluate(`Array.from(document.querySelectorAll('[data-type-slot="0"]')).map(b=>b.dataset.type)`);
-    expect(types).toContain('Any');
+    expect(types).not.toContain('Any'); // Any is staff's to give (the owner, 2026-10-02)
     await expect(page.locator('#reg-type-wrap-0 .type-info-btn')).toHaveCount(types.filter((t) => t !== 'Any' && t !== 'Own').length);
     expect(await page.locator('.type-info-btn[data-type-slot]').count()).toBe(0);
     await expect(page.locator('#reg-type-wrap-0 .type-info-btn').first()).toHaveAttribute('aria-label', 'About Road bikes');

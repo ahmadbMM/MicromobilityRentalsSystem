@@ -380,6 +380,7 @@ export const STAFF_PARTS = {
   analytics: ['renderAnalytics'], community: ['renderCommunity'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
+  team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -938,7 +939,14 @@ export function formatBareWrites(r, limit = 20) {
 // sheet and its strings, ~1 KB gzipped) is the rider's own. CI's gzip also reads ~1.3 KB more than a
 // Mac's for the same file, so a local build at 224.1 was 225.4 on the runner: leave that much room.
 // Staff 318 -> 320 for the same gap (316.2 here, 317.7 on the runner).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 227, staff: 320, core: 165 };
+// Staff 320 -> 324 (2026-10-02): the Settings page, and Team and Settings as parts of their own, which
+// took the desk's core from 164.9 to 160.9 KB but cost two more gzip streams in the half's total.
+// Core 165 -> 170 (2026-10-02): the message templates' editor builds each message's built-in text from
+// the same dictionaries the Community, Workshop, Messages and Ambassadors parts use (ten languages each),
+// so they are shared and live in the core (160.9 -> 167.1 KB here, ~1.5 KB more on the runner).
+// Customer 227 -> 228 and staff 324 -> 326 the same day, for the templates' fill-in code (0.3 and
+// 2 KB here) and the runner's larger gzip readings.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 326, core: 170 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

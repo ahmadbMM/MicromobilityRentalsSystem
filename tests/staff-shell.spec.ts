@@ -105,61 +105,72 @@ test('Front Desk searches only what its own sections hold', async ({ page }) => 
   await expect(page.locator('#gs-panel .gs-item')).toHaveText([/Booking\s*#1 Amal Saad/]);
 });
 
-test('the bell counts what needs attention, and Mark all read clears the badge', async ({ page }) => {
+// The bell tells what is NEW, one line per thing (the owner, 2026-10-02: "dont show applications: 32
+// show a new application was submitted each time a new application has been submitted"). What a
+// list already held the first time it loaded on this device is known, not news.
+test('the bell says nothing about what was already there, then one line for each new thing', async ({ page }) => {
   await staff(page);
+  await page.waitForFunction('_ntLoaded().inv&&_ntLoaded().queue');
   const bell = page.locator('#nt-btn');
-  await expect(bell.locator('.nt-badge')).toHaveText('2'); // a ride past two hours, a helmet low on stock
+  await page.evaluate('_ntSync()');
+  await expect(bell.locator('.nt-badge')).toHaveCount(0); // a ride past two hours and a helmet low on stock: already there
+  await bell.click();
+  await expect(page.locator('#nt-panel .nt-empty')).toHaveText('No new notifications.');
+  await page.evaluate('_ntClose()');
+  // gloves run out: that is new
+  await page.evaluate(`S.inventory=[...S.inventory,{id:'i2',name:'Gloves',category:'Gloves',qty:0,low_threshold:2,price:10}];_ntSync()`);
+  await expect(bell.locator('.nt-badge')).toHaveText('1');
   await bell.click();
   const panel = page.locator('#nt-panel .nt-box');
-  await expect(panel.locator('.nt-row')).toHaveText(['Rides past 2 hours: 1', 'Items low on stock: 1']);
-  await panel.getByRole('button', { name: 'Mark all read' }).click();
-  await expect(bell.locator('.nt-badge')).toHaveCount(0);
-  await expect(panel.locator('.nt-row')).toHaveCount(2); // still listed, no longer new
-  await panel.locator('.nt-row', { hasText: 'low on stock' }).click();
+  await expect(panel.locator('.nt-row')).toHaveText([/Gloves is out of stock/]);
+  await panel.locator('.nt-row').click(); // opening it reads it
   await expect(page.locator('#nt-panel .nt-box')).toHaveCount(0);
   expect(await page.evaluate('S.staffTab')).toBe('inventory');
+  await expect(bell.locator('.nt-badge')).toHaveCount(0);
   // Front Desk is not told about stock it cannot open
-  await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();_ntOpen()`);
-  await expect(page.locator('#nt-panel .nt-row')).toHaveText(['Rides past 2 hours: 1']);
+  await page.evaluate(`S.staffRole='frontdesk';renderTopbarRight();S.inventory=[...S.inventory,{id:'i3',name:'Lights',category:'Lights',qty:0,low_threshold:2,price:10}];_ntSync()`);
+  await expect(page.locator('#nt-btn .nt-badge')).toHaveCount(0);
 });
 
-// The bell remembers which items were marked read, not how many (2026-09-25), and forgets one only
-// against a list that has loaded. A page opens on its snapshot, and the inventory arrives after the
-// first paint: counted against the snapshot's copy, the helmet read earlier came back as new.
 test('what was marked read stays read across a reload, while the page shows its snapshot and the inventory is on its way', async ({ page }) => {
   await staff(page);
+  await page.waitForFunction('_ntLoaded().inv&&_ntLoaded().queue');
   const bell = page.locator('#nt-btn');
-  await expect(bell.locator('.nt-badge')).toHaveText('2');
+  await page.evaluate(`_ntSync();S.inventory=[...S.inventory,{id:'i2',name:'Gloves',category:'Gloves',qty:0,low_threshold:2,price:10}];_ntSync()`);
+  await expect(bell.locator('.nt-badge')).toHaveText('1');
   await bell.click();
   await page.locator('#nt-panel').getByRole('button', { name: 'Mark all read' }).click();
   await expect(bell.locator('.nt-badge')).toHaveCount(0);
-  // the snapshot this device keeps, from before the helmet ran low; the inventory read takes a while
+  // the snapshot this device keeps holds no inventory; the inventory read takes a while
   await page.evaluate(`localStorage.setItem('cq_snapshot',JSON.stringify({q:S.queue,ses:S.sessions,bk:S.bikes,inv:[],cs:[]}))`);
   await page.route(/\/rest\/v1\/inventory/, async route => { await new Promise(r => setTimeout(r, 1500)); await route.fallback(); });
   await page.reload();
   await waitForSb(page);
-  expect(await page.evaluate('S.inventory.length')).toBe(1);
+  await page.waitForFunction('S.inventory.length===1');
   await page.evaluate('_ntSync()');
   await expect(page.locator('#nt-btn .nt-badge')).toHaveCount(0);
 });
 
-test('Mark all read clears the bell however many items are listed', async ({ page }) => {
+test('Mark all read clears the bell however many new things are listed', async ({ page }) => {
   await staff(page);
-  await page.evaluate(`S.inventory=Array.from({length:350},(_,i)=>({id:'k'+i,name:'Item '+i,category:'Helmet',qty:0,low_threshold:1,price:1}));_ntSync()`);
+  await page.waitForFunction('_ntLoaded().inv&&_ntLoaded().queue');
+  await page.evaluate(`_ntSync();S.inventory=Array.from({length:350},(_,i)=>({id:'k'+i,name:'Item '+i,category:'Helmet',qty:0,low_threshold:1,price:1}));_ntSync()`);
   const bell = page.locator('#nt-btn');
-  await expect(bell.locator('.nt-badge')).toHaveText('2');
+  await expect(bell.locator('.nt-badge')).toHaveText('99+');
   await bell.click();
+  await expect(page.locator('#nt-panel .nt-row')).toHaveCount(60); // the latest sixty are listed
   await page.locator('#nt-panel').getByRole('button', { name: 'Mark all read' }).click();
   await expect(bell.locator('.nt-badge')).toHaveCount(0);
 });
 
 test('a different item is new even at the same count, and a read one that clears and returns is new again', async ({ page }) => {
   await staff(page);
+  await page.waitForFunction('_ntLoaded().inv&&_ntLoaded().queue');
   const bell = page.locator('#nt-btn');
+  await page.evaluate('_ntSync()');
   await bell.click();
   const read = page.locator('#nt-panel').getByRole('button', { name: 'Mark all read' });
-  await read.click();
-  // another item low on stock in place of the helmet: still one, but not the one read
+  // another item low on stock in place of the helmet: still one, but not the one known
   await page.evaluate(`S.inventory=[{id:'i2',name:'Gloves',category:'Gloves',qty:0,low_threshold:2,price:10}];_ntSync()`);
   await expect(bell.locator('.nt-badge')).toHaveText('1');
   await read.click();
@@ -167,6 +178,15 @@ test('a different item is new even at the same count, and a read one that clears
   // restocked: gone from the loaded list, so forgotten; low again later, so new again
   await page.evaluate(`S.inventory=[];_ntSync();S.inventory=[{id:'i2',name:'Gloves',category:'Gloves',qty:0,low_threshold:2,price:10}];_ntSync()`);
   await expect(bell.locator('.nt-badge')).toHaveText('1');
+});
+
+test('a kind turned off on Settings is neither shown nor counted', async ({ page }) => {
+  await staff(page);
+  await page.waitForFunction('_ntLoaded().inv&&_ntLoaded().queue');
+  await page.evaluate(`_ntSync();S._ntOff=['stock'];S.inventory=[...S.inventory,{id:'i2',name:'Gloves',category:'Gloves',qty:0,low_threshold:2,price:10}];_ntSync()`);
+  await expect(page.locator('#nt-btn .nt-badge')).toHaveCount(0);
+  await page.evaluate(`S._ntOff=[];_ntSync()`);
+  await expect(page.locator('#nt-btn .nt-badge')).toHaveText('1');
 });
 
 test('Sync now sends what is waiting and says when all is up to date', async ({ page }) => {
