@@ -16408,9 +16408,9 @@ function _tplUse(id,lang,vars){const o=_tplOver(id,lang);return o==null?null:_tp
 function _tplDefault(id,lang){
   const L=lang==='ar'?'ar':'en';
   const hi=(o)=>String(o.hi||'').replace('{name}','{first_name}');
-  if(id==='rm_ride')return L==='en'?RM_RIDE_TPL:'';
-  if(id==='rm_privacy')return L==='en'?RM_PRIVACY:'';
-  if(id==='rm_etiq')return L==='en'?RM_ETIQ:'';
+  if(id==='rm_ride')return L==='en'?RM_RIDE_TPL:RM_RIDE_AR;
+  if(id==='rm_privacy')return L==='en'?RM_PRIVACY:RM_PRIVACY_AR;
+  if(id==='rm_etiq')return L==='en'?RM_ETIQ:RM_ETIQ_AR;
   if(id.startsWith('ca_')){
     const m=CA_MSG[L],v=CA_INV_MSG[L],tp=CA_TP_MSG[L],f=CA_FIX_MSG[L];
     if(id==='ca_approved')return[hi(m),'',m.welcome,'',m.approved,'',m.rides,'','{ride}','',m.seeYou,m.team].join('\n');
@@ -16434,9 +16434,15 @@ function _tplDefault(id,lang){
   if(id.startsWith('amb_')){const m=AMB_MSG[L];return[hi(m),'',id==='amb_reject'?m.reject:m.welcome,'',m.team].join('\n');}
   if(id==='bd_wish')return String(BD_MSG[L]||'').replace('{name}','{first_name}');
   const lk={wa_turn:'waYourTurnMsg',wa_miss:'waMissYouMsg',an_rfm:'anRfmMsg',cn_cancel:'cnMsgDefault'}[id];
-  if(lk){const v=String((LANG[L]&&LANG[L][lk])||'');return id==='an_rfm'?v.replace('{0}','{first_name}'):id==='cn_cancel'?v.replace('{0}','{when}'):v;}
+  if(lk){const v=String(TPL_QUICK[L][lk]||'');return id==='an_rfm'?v.replace('{0}','{first_name}'):id==='cn_cancel'?v.replace('{0}','{when}'):v;}
   return'';
 }
+// The quick texts in both languages for the editor: a staff device holds only its own language's
+// staff strings, so the Arabic ones are not in LANG on an English screen. Their wording as LANG has it.
+const TPL_QUICK={
+  en:{waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',waMissYouMsg:'We miss you at MicroMobility! Come ride the Corniche Circuit with us again - reserve your next ride anytime.\n\nاشتقنا لك في مايكروموبيليتي! تعال واركب في حلبة الكورنيش معنا مجدداً - احجز رحلتك القادمة في أي وقت.',anRfmMsg:"Hi {0}! It's MicroMobility — hope to see you on a ride soon!",cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.'},
+  ar:{waYourTurnMsg:'Hello! Your turn at MicroMobility is coming up soon. Please head to the booth.\n\nمرحباً! اقترب دورك في مايكروموبيليتي. يرجى التوجه إلى الكشك.',waMissYouMsg:'We miss you at MicroMobility! Come ride the Corniche Circuit with us again - reserve your next ride anytime.\n\nاشتقنا لك في مايكروموبيليتي! تعال واركب في حلبة الكورنيش معنا مجدداً - احجز رحلتك القادمة في أي وقت.',anRfmMsg:'مرحباً {0}! نحن مايكروموبيليتي — نتطلع لرؤيتك في رحلة قريباً!',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.'}
+};
 // The Saturday ride's details, as a template: what _rmRideText builds, with its fill-ins showing.
 const RM_RIDE_TPL=`MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date}*
 
@@ -16455,7 +16461,79 @@ Booking:
 *No Registration & QR Code = No Participation*
 *Parking Behind The Building*
 {breakfast}`;
-// The ride details: "3rd of October", "5:45AM". A line whose value the session lacks is left out.
+// The same three in Arabic (the owner, 2026-10-02: "include the arabic language translated"). The rider
+// messages dialog and the templates editor offer them beside the English.
+const RM_RIDE_AR=`جولة MicroMobility الاجتماعية يوم السبت ${RM_E.bike} *{date}*
+
+وقت التجمّع: *{meet_time}*
+وقت الانطلاق: *{start_time}*
+مسافة الجولة:
+مجموعة المبتدئين *20 كم*
+مجموعة المتوسطين *40 كم*
+
+موقع التجمّع:
+{meet_link}
+
+الحجز:
+{booking_link}
+
+*لا مشاركة دون تسجيل ورمز QR*
+*المواقف خلف المبنى*
+{breakfast}`;
+const RM_PRIVACY_AR=`${RM_E.lock} *تذكير ودّي بالخصوصية*
+
+مرحباً يا مجتمع MicroMobility ${RM_E.heart}${RM_E.bike}
+
+مع نموّ مجتمعنا وصنعنا مزيداً من الذكريات معاً، نودّ أن نذكّر الجميع بمراعاة *خصوصية بعضنا وحدوده الشخصية.*
+
+إذا التقطت صوراً أو مقاطع فيديو خلال جولاتنا أو وجبات الإفطار أو الفعاليات أو اللقاءات، فنرجو *عدم نشر صور أو مقاطع يظهر فيها أعضاء آخرون بشكل واضح أو مشاركتها دون موافقتهم.*
+
+ويزداد هذا أهمية حين يتعلق الأمر باحترام خصوصية *عضواتنا.* استأذن دائماً قبل تصوير أي عضو أو نشر محتوى يظهر فيه بوضوح أو الإشارة إليه أو مشاركته.
+
+فالصورة أو المقطع الذي يرتاح شخص لمشاركته قد يفضّل غيره أن يبقى خاصاً، ونريد أن يشعر الجميع بالراحة والاحترام في مجتمعنا.
+
+يسعدنا دائماً أن تلتقط لحظاتك مع MicroMobility وتشاركها، فقط انتبه لمن يظهر فيها غيرك. ${RM_E.heart}
+
+شكراً لمساعدتك في الحفاظ على مجتمع قائم على *الثقة والاحترام والمراعاة والاهتمام ببعضنا.* ${RM_E.pray}
+
+*فريق MicroMobility*`;
+const RM_ETIQ_AR=`آداب ركوب الدراجات على الطرق العامة في MicroMobility
+
+مرحباً بالجميع،
+تذكير ودّي ومهم: جولاتنا الجماعية تقام على طرق عامة مفتوحة، لا على حلبات سباق مغلقة. لا يجوز أن تتقدّم السرعة أو المراكز أو الأرقام الشخصية أو المنافسة على السلامة. فالقيادة المتهوّرة قد تعرّض المجموعة كلها للخطر، وكذلك السائقين والمشاة وسائر مستخدمي الطريق.
+
+قبل الانضمام إلى الجولة:
+• ارتدِ خوذة دراجات بمقاس مناسب.
+• تأكد من جاهزية دراجتك للطريق، وخاصة الفرامل والإطارات والعجلات ومجموعة نقل الحركة والأضواء.
+• احمل ما يكفي من الماء والطعام، مع إثبات هوية وهاتف ورقم للتواصل في الطوارئ.
+• لا تركب وأنت مريض أو تشعر بالدوار أو الإرهاق الشديد أو الجفاف أو غير قادر على التحكم بدراجتك بأمان. وفي الأجواء الحارة أو الرطبة، احضر وجسمك مرتوٍ، وأخبر أحداً فوراً إن شعرت بتشنجات أو دوار أو غثيان أو ضعف غير معتاد أو تشوّش أو أي علامة أخرى من علامات الإجهاد الحراري.
+
+أثناء الركوب مع المجموعة:
+• اتبع تعليمات قائد الجولة والتزم بجميع أنظمة المرور المحلية والإشارات والتقاطعات. لا تتبع المجموعة دون انتباه عبر إشارة حمراء أو تقاطع غير آمن.
+• ابقَ على الجانب الصحيح من الطريق. لا تتجاوز الخط الأوسط، ولا تدخل في اتجاه السير المعاكس، ولا تتجاوز عند منعطف لا ترى ما بعده.
+• حافظ على خط ثابت ومتوقَّع. تجنّب الفرملة المفاجئة أو الانحراف أو التسارع أو تغيير موقعك دون تنبيه.
+• لا تجعل عجلتك تتداخل مع عجلة غيرك، ولا تتقدّم بنصف عجلة على راكب آخر، ولا تقتحم الفجوات، ولا تتجاوز داخل المجموعة بشكل غير آمن.
+• نبّه بوضوح وأشر إلى المخاطر مثل الحفر والحطام والسيارات المتوقفة والحيوانات والمركبات المتباطئة والمنعطفات، ومرّر التنبيهات عبر المجموعة.
+• لا تركبوا أكثر من اثنين جنباً إلى جنب، وانتقلوا إلى صف واحد كلما تطلّب ذلك عرض الطريق أو حركة المرور أو الرؤية أو الأنظمة المحلية.
+• ارفع رأسك، وأبقِ يديك جاهزتين للفرملة، واترك مسافة كافية لتتصرّف بأمان.
+• لا تستخدم الهاتف أو سماعات الأذن أو مقود السباق (aero bars) وأنت تركب قريباً من المجموعة.
+• لا يكون الإسراع أو الهجوم أو النزول السريع أو التناوب في المقدمة إلا حيث الظروف آمنة وتحت السيطرة. ولا تضغط على غيرك ليركب فوق قدرته.
+• عامل السائقين والمشاة وسائر راكبي الدراجات باحترام. تجنّب الجدال والإشارات العدائية والمواجهات.
+
+*${RM_E.van} مساعدة سيارة الدعم*
+
+*ستكون سيارة الدعم على أهبة الاستعداد طوال الجولة. إذا واجهت عطلاً في الدراجة، أو شعرت بتوعّك، أو لم تعد قادراً على المواصلة، أو انفصلت عن المجموعة، أو احتجت إلى المساعدة لأي سبب آخر، فانتقل إلى مكان آمن بعيداً عن الطريق واتصل أو راسل عبر واتساب:*
+
+${RM_E.phone} *+966 56 666 8818*
+
+*أرسل موقعك الحالي أو المباشر واسمك ووصفاً مختصراً للمساعدة التي تحتاجها. لا تستخدم هاتفك وأنت تركب، بل توقّف في مكان آمن قبل الاتصال أو إرسال رسالة.*
+
+إذا حدث عطل أو مرض أو حادث، فنبّه بصوت واضح وابتعد عن الطريق حين يكون ذلك آمناً. لا تتوقف فجأة في مسار السير. أبلغ قائد الجولة قبل مغادرة المجموعة أو تغيير المسار المخطط. وفي حالات الطوارئ الطبية الخطيرة أو المهدِّدة للحياة، اتصل بخدمات الطوارئ المختصة فوراً؛ فسيارة الدعم ليست بديلاً عن الرعاية الطبية الطارئة.
+
+كلٌّ منا مسؤول ليس عن سلامته فقط، بل عن سلامة من يركب بجانبه وخلفه أيضاً. وقد يؤدي تكرار السلوك المتهوّر أو العدائي أو غير الآمن إلى مطالبة الراكب بمغادرة الجولة أو عدم المشاركة في الجولات الجماعية القادمة.
+
+لنواصل الاستمتاع بجولات قوية وتنافسية، ولكن بانضباط وتواصل واحترام وحسن تقدير. لا نتيجة ولا انطلاقة سريعة ولا مقطع ولا رقم شخصي يستحق أن يتسبّب في حادث. اركبوا بأمان واعتنوا ببعضكم. ${RM_E.biker1}${RM_E.biker2}`;
+// The ride details: "3rd of October", "5:45AM" (in Arabic: "3 أكتوبر", "5:45 ص"). A line whose value the session lacks is left out.
 function _rmRideText(sess,lang){
   const ds=String((sess&&(sess.session_date||sess.id))||''),dm=/^(\d{4})-(\d{2})-(\d{2})$/.exec(ds);
   let day=ds;
@@ -16464,6 +16542,13 @@ function _rmRideText(sess,lang){
   const tm=x=>{const m=/^(\d{1,2}):(\d{2})$/.exec(x);if(!m)return x;const h=+m[1];return`${h%12||12}:${m[2]}${h<12?'AM':'PM'}`;};
   const p=_timeText((parseSlots(sess&&sess.bike_slots)||{})._time).split('-').map(x=>x.trim()).filter(Boolean);
   const meet=p.length>1?p[0]:'',start=p.length>1?p[1]:(p[0]||''),loc=_safeUrl(sess&&sess.meet_url);
+  if(lang==='ar'){
+    let dayAr=ds;
+    if(dm){try{dayAr=new Intl.DateTimeFormat('ar-SA-u-nu-latn-ca-gregory',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(+dm[1],+dm[2]-1,+dm[3],12)));}catch(_){}}
+    const tmAr=x=>{const m=/^(\d{1,2}):(\d{2})$/.exec(x);if(!m)return x;const h=+m[1];return`${h%12||12}:${m[2]} ${h<12?'ص':'م'}`;};
+    const v={date:dayAr,meet_time:meet?tmAr(meet):'',start_time:start?tmAr(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*الإفطار بعد الجولة*':''};
+    return _tplUse('rm_ride','ar',v)??_tplFill(RM_RIDE_AR,v);
+  }
   const own=_tplUse('rm_ride',lang||'en',{date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
   if(own!=null)return own;
   const L=[`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
@@ -16481,8 +16566,8 @@ function _rmSess(e){return (S.sessions||[]).find(s=>s.id===(e&&e.sessionId))||nu
 function _rmBtn(e){return _rideKind(_rmSess(e))==='saturday'?`<button type="button" class="btn-sm btn-muted rq-msg" title="${t('rmBtn')}" aria-label="${t('rmBtn')}" aria-haspopup="dialog" data-on-click="${_on("_rmOpen",e.id)}">${RM_ENV}</button>`:'';}
 function _rmText(e,k,lang){
   lang=lang||'en';
-  if(k==='privacy')return _tplUse('rm_privacy',lang,{})??RM_PRIVACY;
-  if(k==='etiq')return _tplUse('rm_etiq',lang,{})??RM_ETIQ;
+  if(k==='privacy')return _tplUse('rm_privacy',lang,{})??(lang==='ar'?RM_PRIVACY_AR:RM_PRIVACY);
+  if(k==='etiq')return _tplUse('rm_etiq',lang,{})??(lang==='ar'?RM_ETIQ_AR:RM_ETIQ);
   return _rmRideText(_rmSess(e),lang);
 }
 const RM_TPL_ID={ride:'rm_ride',privacy:'rm_privacy',etiq:'rm_etiq'};
@@ -16500,8 +16585,8 @@ function _rmRender(){
     body=`<div class="ca-msg-sub">${t('rmSub')}</div>
       <div class="rm-list">${RM_KINDS.map(([k,l,s])=>`<button type="button" class="rm-opt" data-rm="${k}" data-on-click="${_on("_rmPick",k)}"><b>${t(l)}</b><span>${t(s)}</span></button>`).join('')}</div>`;
   }else{
-    // Arabic is offered once an admin has written the Arabic text (Settings > Message templates)
-    const hasAr=!!_tplOver(RM_TPL_ID[m.k],'ar'),lang=hasAr&&m.lang==='ar'?'ar':'en';
+    // English or Arabic, each the admins' text when they wrote one (Settings > Message templates)
+    const hasAr=true,lang=m.lang==='ar'?'ar':'en';
     const txt=_rmText(e,m.k,lang),wa=`https://wa.me/${_waDigits(e.phone)}?text=${encodeURIComponent(txt)}`;
     body=`<div class="ca-msg-sub"><b>${t(kind[1])}</b></div>
       ${hasAr?`<div class="rm-langs" role="group">${['en','ar'].map(g=>`<button type="button" class="toggle-btn${lang===g?' active':''}" aria-pressed="${lang===g}" data-rm-lang="${g}" data-on-click="${_on('_rmLang',g)}">${t(g==='ar'?'tplArabic':'tplEnglish')}</button>`).join('')}</div>`:''}
@@ -16524,7 +16609,7 @@ function _rmRender(){
 }
 async function _rmCopy(){
   const m=S._rmMsg,e=m&&getQueue().find(x=>x.id===m.id);if(!e||!m.k)return;
-  const txt=_rmText(e,m.k,!!_tplOver(RM_TPL_ID[m.k],'ar')&&m.lang==='ar'?'ar':'en');
+  const txt=_rmText(e,m.k,m.lang==='ar'?'ar':'en');
   try{await navigator.clipboard.writeText(txt);toast(t('caCopied'),'success');}
   catch(_e){const el=document.getElementById('rm-msg-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
 }

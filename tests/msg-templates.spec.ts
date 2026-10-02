@@ -37,14 +37,16 @@ test('with no text of its own a message is the built-in one', async ({ page }) =
   expect(txt).not.toContain('Meet Up Location'); // as before: no meeting point, no lines for it
 });
 
-test('an Arabic text adds an Arabic choice to the rider messages', async ({ page }) => {
+test('the rider messages come in English and Arabic, an admin\'s Arabic text first', async ({ page }) => {
   await boot(page, { rm_privacy: { ar: 'تذكير بالخصوصية يا {first_name}' } });
   await page.waitForFunction(`S._tpl&&S._tpl.rm_privacy`);
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${SAT}';renderStaffQueue()`);
   await page.locator('#tab-queue .rq-msg').first().click();
   const box = page.locator('#confirm-modal .ca-msg-box');
   await box.locator('.rm-opt[data-rm="ride"]').click();
-  await expect(box.locator('.rm-langs')).toHaveCount(0); // no Arabic ride details written
+  await box.locator('[data-rm-lang="ar"]').click(); // the built-in Arabic ride details, the ride's own date and times
+  await expect(box.locator('#rm-msg-text')).toHaveValue(/جولة MicroMobility الاجتماعية[\s\S]*وقت التجمّع: \*5:45 ص\*[\s\S]*وقت الانطلاق: \*6:15 ص\*/);
+  await box.locator('[data-rm-lang="en"]').click();
   await box.locator('.rm-back').click();
   await box.locator('.rm-opt[data-rm="privacy"]').click();
   await expect(box.locator('#rm-msg-text')).toHaveValue(/A Friendly Privacy Reminder/);
@@ -69,6 +71,8 @@ test('an admin edits a message on Settings and it is saved for everyone', async 
   await ed.locator('.tpl-fill', { hasText: '{first_name}' }).click();
   await ed.locator('[data-tpl-lang="ar"]').click();
   await expect(ed.locator('#tpl-text')).toHaveAttribute('dir', 'rtl');
+  await expect(ed.locator('#tpl-text')).toHaveValue(/\{first_name\}/); // the Arabic built-in text, its fill-in showing
+  expect(await ed.locator('#tpl-text').inputValue()).toMatch(/[\u0600-\u06FF]/);
   await ed.locator('[data-tpl-lang="en"]').click();
   await expect(ed.locator('#tpl-text')).toHaveValue('Happy birthday {first_name}');
   await ed.locator('#tpl-save').click();
@@ -83,4 +87,10 @@ test('Front Desk does not see the templates', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffRole('frontdesk');setStaffTab('settings')`);
   await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications']);
+});
+
+test('every message opens in the editor with Arabic text on its Arabic tab', async ({ page }) => {
+  await boot(page);
+  const empty = await page.evaluate(`(()=>{const out=[];TPL.forEach(([,l])=>l.forEach(([id])=>{if(!/[\\u0600-\\u06FF]/.test(_tplDefault(id,'ar')))out.push(id);}));return out;})()`);
+  expect(empty).toEqual([]);
 });

@@ -946,7 +946,9 @@ export function formatBareWrites(r, limit = 20) {
 // so they are shared and live in the core (160.9 -> 167.1 KB here, ~1.5 KB more on the runner).
 // Customer 227 -> 228 and staff 324 -> 326 the same day, for the templates' fill-in code (0.3 and
 // 2 KB here) and the runner's larger gzip readings.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 326, core: 170 };
+// Core 170 -> 174, staff 326 -> 330 (2026-10-02): the Saturday ride's three messages in Arabic (~3 KB
+// gzipped), which the bookings rows' envelope opens, so they belong to the core.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 330, core: 174 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
