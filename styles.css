@@ -6243,7 +6243,7 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .rm-opt span{font-size:12.5px;color:var(--muted);line-height:1.4}
 .rq-msg{display:inline-flex;align-items:center;justify-content:center}
 /* The Saturday ride's groups (2026-10-02): Beg / Int in the Bookings table, the staff pickers */
-.rg-chip{display:inline-block;min-width:30px;text-align:center;padding:2px 7px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;border:1px solid rgba(var(--green-rgb),.35);color:var(--green);background:rgba(var(--green-rgb),.08)}
+.rg-chip{display:inline-block;min-width:30px;text-align:center;padding:2px 7px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border:1px solid rgba(var(--green-rgb),.35);color:var(--green);background:rgba(var(--green-rgb),.08)}
 .rg-chip.rg-int{border-color:var(--border);color:var(--text);background:var(--s3)}
 .rg-field .rg-opts .toggle-btn{flex:1 1 0}
 .rg-field .rg-km{opacity:.7;font-weight:600;margin-inline-start:4px}

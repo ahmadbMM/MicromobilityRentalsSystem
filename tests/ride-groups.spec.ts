@@ -147,3 +147,18 @@ test('Add rider onto a Saturday ride asks the group and books it', async ({ page
   await expect.poll(() => rows.length).toBe(1);
   expect(rows[0].ride_group).toBe('beg');
 });
+
+// The My Bookings card's Meeting point button opened the bookings page again: its href was written
+// href=""${link}", an empty address with the link left outside it (2026-10-02).
+test('the booking card’s Meeting point opens the ride’s map link', async ({ page }) => {
+  const MEET = 'https://maps.app.goo.gl/spec-meet';
+  await stubSupabase(page, { sessions: [{ ...sat, meet_url: MEET }], bikes: [], 'rpc:community_member': true,
+    queue_entries: [row('mine', SAT, { customer_id: 'c1', name: 'Spec Rider', ride_group: 'beg' })] });
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setCustTab('myrides')`);
+  const a = page.locator('#tab-myrides a.cu-tk-dir').first();
+  await expect(a).toHaveAttribute('href', MEET);
+  await expect(a).toHaveAttribute('target', '_blank');
+});
