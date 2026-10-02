@@ -32400,9 +32400,9 @@ function _bdgDlgPaint(open){
   const item=(b,meta,end)=>`<div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b>${meta}</div>${end||''}</div>`;
   const rows=held.map(x=>{const b=_bdgById(x.badge_id);return b?item(b,`<span class="am-meta">${esc(_bdgLine(x))}</span>${x.note?`<span class="bdg-note"><bdi>${esc(x.note)}</bdi></span>`:''}`,_bdgInfoBtn(b)+_bdgTakeBtn(d.cid,b.id))+_bdgInfoPanel(b):'';}).join('')
     +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('');
-  // A badge with an earning rule comes only from riding (the owner, 2026-10-02: "automatically give
-  // badges to accounts that deserve dont let staff give them manually"): only the staff-only ones are offered.
-  const give=_bdgSorted().filter(b=>!b.retired&&!b.auto&&!has.has(b.id));
+  // A badge with an earning rule comes from riding (the owner, 2026-10-02: "dont let staff give them
+  // manually"); an admin may give any (_bdgCanGive). One already earned by riding is not offered again.
+  const give=_bdgSorted().filter(b=>_bdgCanGive(b)&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug)));
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__bdgDlg_1",_EV,_EL)}"><div class="confirm-box bdg-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">
     <div class="bdg-head"><div class="bdg-title">${t('mrBadgesTitle')} · ${esc(c.name||'')}</div><button type="button" class="bdg-x" data-on-click="${_on("_bdgDlgClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
@@ -32416,7 +32416,7 @@ function _bdgDlgPaint(open){
 }
 async function _bdgGive(){
   const d=S._bdgDlg;if(!d||!d.pick||d.busy)return;
-  const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!b||b.auto)return;
+  const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!_bdgCanGive(b))return;
   const row={customer_id:d.cid,badge_id:b.id,note:String(d.note||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
   d.busy=true;
   const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id'});
@@ -32460,6 +32460,10 @@ function _bdgAutoHolders(){
 // The accounts holding a badge: given by staff, and for a badge earned by riding, those who earned it.
 function _bdgAllHolders(b){const ids=new Set((S.custBadges||[]).filter(x=>x.badge_id===b.id).map(x=>x.customer_id));if(b.auto)(_bdgAutoHolders().get(b.slug)||[]).forEach(id=>ids.add(id));return ids;}
 // Community > Badges: every badge with its holders, Give to a ride, Give to a rider, and for admins New / Edit / Retire.
+// Who may give a badge by hand: an admin any badge (the owner, 2026-10-02: "give the admin the
+// permission to give whatever badge they want to whoever rider they want"); other staff only the
+// ones with no earning rule, since an earned badge comes from riding.
+function _bdgCanGive(b){return !!b&&!b.retired&&(!b.auto||isAdmin());}
 function _bdgToggle(k,id){const on=S[k]===id;S._bdgHoldId=S._bdgRideId=S._bdgRiderId=null;S[k]=on?null:id;S._bdgEdit=null;S._bdgSure=null;renderCommunity();}
 function _commBadges(){
   const head=`<div class="page-sub bdg-sub">${t('bdgSub')}</div>`;
@@ -32474,8 +32478,8 @@ function _commBadges(){
       <div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b><span class="am-meta">${esc(_bdgDesc(b))}</span><span class="am-meta">${esc(meta)}</span>${dated}</div>
       <div class="bdg-acts">
         ${n[b.id]?`<button type="button" class="btn-sm ${hold?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgHoldId",b.id)}">${t('bdgHolders')}</button>`:''}
-        ${b.retired||b.auto?'':`<button type="button" class="btn-sm ${ride?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRideId",b.id)}">${t('bdgRideBtn')}</button>`}
-        ${b.retired||b.auto?'':`<button type="button" class="btn-sm ${rider?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRiderId",b.id)}">${t('bdgRiderBtn')}</button>`}
+        ${!_bdgCanGive(b)?'':`<button type="button" class="btn-sm ${ride?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRideId",b.id)}">${t('bdgRideBtn')}</button>`}
+        ${!_bdgCanGive(b)?'':`<button type="button" class="btn-sm ${rider?'btn-green':'btn-secondary'}" data-on-click="${_on("_bdgToggle","_bdgRiderId",b.id)}">${t('bdgRiderBtn')}</button>`}
         ${adm&&(!b.system||b.rule)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgEditOpen",b.id)}">${t('editBtn')}</button>`:''}
         ${adm&&!b.auto?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_bdgRetire",b.id,!b.retired)}">${t(b.retired?'bdgRestore':'bdgRetire')}</button>`:''}
         ${adm&&!b.system&&!n[b.id]?`<button type="button" class="btn-sm ${del?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgDelete",b.id)}">${del?t('bdgDeleteSure'):t('deleteBtn')}</button>`:''}
@@ -32506,7 +32510,7 @@ function _bdgRideHtml(b){
   const rides=_bdgRides();
   if(!rides.length)return`<div class="bdg-panel"><div class="am-meta">${t('bdgRideNone')}</div></div>`;
   const cur=rides.find(r=>r.s.id===S._bdgRideSess)||rides[0];
-  const has=new Set(_bdgRideHas(b.id)),fresh=cur.ids.filter(id=>!has.has(id));
+  const has=_bdgAllHolders(b),fresh=cur.ids.filter(id=>!has.has(id));
   return`<div class="bdg-panel">
     <div class="form-group"><label for="bdg-ride">${t('bdgRidePick')}</label><select id="bdg-ride" data-on-change="${_on("_on__bdgRide_1",_EV,_EL)}">${rides.map(r=>`<option value="${esc(r.s.id)}"${r===cur?' selected':''}>${esc(_scanSessLabel(r.s))} (${r.ids.length})</option>`).join('')}</select></div>
     <div class="form-group"><label for="bdg-rnote">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdg-rnote" type="text" maxlength="140" value="${esc(S._bdgRideNote||'')}" placeholder="${esc(t('bdgNotePh'))}" data-on-input="${_on("_on__bdgRide_2",_EV,_EL)}"></div>
@@ -32536,7 +32540,7 @@ function _bdgRiderHtml(b){
   </div>`;
 }
 async function _bdgGiveRider(bid,cid){
-  const b=_bdgById(bid),c=_custById(cid);if(!b||b.auto||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
+  const b=_bdgById(bid),c=_custById(cid);if(!_bdgCanGive(b)||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
   const row={customer_id:cid,badge_id:bid,note:String(S._bdgRiderNote||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
   S._bdgRiderBusy=true;
   const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id'});
@@ -32550,8 +32554,8 @@ async function _bdgGiveRider(bid,cid){
 }
 function _bdgRideHas(bid){return (S.custBadges||[]).filter(x=>x.badge_id===bid).map(x=>x.customer_id);}
 async function _bdgGiveRide(bid,sid){
-  const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!b||b.auto||!r||S._bdgRideBusy)return;
-  const has=new Set(_bdgRideHas(bid)),at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(S._bdgRideNote||'').trim().slice(0,140)||null;
+  const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!_bdgCanGive(b)||!r||S._bdgRideBusy)return;
+  const has=_bdgAllHolders(b),at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(S._bdgRideNote||'').trim().slice(0,140)||null;
   const rows=r.ids.filter(id=>!has.has(id)).map(id=>({customer_id:id,badge_id:bid,note,session_id:sid,awarded_by:by,awarded_at:at}));
   if(!rows.length)return;
   S._bdgRideBusy=true;

@@ -194,18 +194,34 @@ test.describe('@staff:community badges', () => {
     await expect(page.locator('.bdg-row[data-badge="bd_marshal"] #bdg-rider-res')).toHaveCount(0); // one panel at a time
   });
 
-  test('a badge earned by riding is never given by hand: no Give buttons, not offered in the dialog (the owner, 2026-10-02)', async ({ page }) => {
+  test('only an admin gives a badge earned by riding; any staffer the staff-only ones (the owner, 2026-10-02)', async ({ page }) => {
     await staff(page);
     await community(page, 'badges');
+    await expect(page.locator('.bdg-row[data-badge="bd_first_lap"]')).toContainText('Earned by riding only');
+    const can = (role: string) => page.evaluate(`S.staffRole='${role}';[_bdgCanGive(_bdgById('bd_first_lap')),_bdgCanGive(_bdgById('bd_marshal'))]`);
+    expect(await can('frontdesk')).toEqual([false, true]);
+    expect(await can('admin')).toEqual([true, true]);
+  });
+
+  test('an admin gives any badge to any rider, an earned one included (the owner, 2026-10-02)', async ({ page }) => {
+    const c4 = { id: 'c4', name: 'Nora Fahad', email: 'nora.fahad@gmail.com', phone: '+966551876218', gender: 'female', created_at: '2026-06-13T09:00:00Z' };
+    await staff(page, { customers: [...customers, c4] });
+    // In a rider's dialog the admin is offered it, for one who has not earned it.
+    await page.evaluate(`_bdgOpen('c4')`);
+    await expect(modal(page).locator('.bdg-pick', { hasText: 'First Lap' })).toHaveCount(1);
+    await page.evaluate(`_bdgDlgClose()`);
+    await community(page, 'badges');
+    const sent = writes(page, 'customer_badges');
     const fl = page.locator('.bdg-row[data-badge="bd_first_lap"]');
-    await expect(fl).toContainText('Earned by riding only');
-    await expect(fl.getByRole('button', { name: 'Give to a ride', exact: true })).toHaveCount(0);
-    await expect(fl.getByRole('button', { name: 'Give to a rider' })).toHaveCount(0);
-    await expect(page.locator('.bdg-row[data-badge="bd_marshal"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(1);
-    // Sara's only ride is two months old: First Lap is hers, and in any case it is never in the give list.
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
-    await page.locator('#am-cust-rows .am-row[data-cust="c3"] .am-bdg-btn').click();
-    await expect(modal(page).locator('.bdg-pick', { hasText: 'First Lap' })).toHaveCount(0);
+    await expect(fl.getByRole('button', { name: 'Give to a ride', exact: true })).toHaveCount(1);
+    await fl.getByRole('button', { name: 'Give to a rider' }).click();
+    await fl.getByLabel('Find a rider').fill('nora');
+    await fl.locator('#bdg-rider-res .bdg-hold[data-cust="c4"]').getByRole('button', { name: 'Give badge' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c4', badge_id: 'bd_first_lap' });
+    // Lina earned it by riding: she reads Has it.
+    await fl.getByLabel('Find a rider').fill('lina');
+    await expect(fl.locator('#bdg-rider-res')).toContainText('Has it');
   });
 
   test('a database without the badges tables: no Badges button, and the tab says why', async ({ page }) => {
