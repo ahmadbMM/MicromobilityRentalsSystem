@@ -33,11 +33,11 @@ test('two past no-shows put a chip on the request; one does not', async ({ page 
     e('other', { queue_num: 5, customer_id: 'cust2', phone: '0550000002' }),
   ]);
   const txt = await page.evaluate(`document.getElementById('tab-queue').innerText`) as string;
-  expect(txt).toContain('2/3 no-shows');
+  expect(txt).toMatch(/2\/3 no-shows/i); // the chip is a capitalised tile since 8b1a9f1
   // and the clean rider carries nothing
   const rows = await page.evaluate(`[...document.querySelectorAll('#q-results tbody tr, #q-results .q-card')].map(r=>r.innerText)`) as string[];
   const otherRow = rows.find((r) => r.includes('R other'))!;
-  expect(otherRow).not.toContain('no-shows');
+  expect(otherRow).not.toMatch(/no-shows/i);
 });
 
 test('bulk approve takes the pending-and-waiting, leaves the waitlist, and is guarded', async ({ page }) => {
