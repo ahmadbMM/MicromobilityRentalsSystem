@@ -58,3 +58,29 @@ test('bulk approve takes the pending-and-waiting, leaves the waitlist, and is gu
   expect(u).toContain('id=in.(p1,p2)');
   expect(u).toContain('approval=eq.pending');   // a just-rejected rider is not resurrected
 });
+
+// The owner, 2026-10-02: "dont add a separate button for undo approval, clicking on the approved
+// button undos approval, and remove the multi select button from the saturday social ride".
+test('the Approved tile undoes the approval itself, and the Saturday ride has no select boxes', async ({ page }) => {
+  await boot(page, [e('a1', { approval: 'approved' }), e('p1', { queue_num: 2 })]);
+  const tab = page.locator('#tab-queue');
+  await expect(tab.getByRole('button', { name: /Undo approval/ }).filter({ hasNotText: /Approved/i })).toHaveCount(0);
+  await expect(tab.locator('.row-select')).toHaveCount(0);
+  const patches: string[] = [];
+  page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) patches.push(r.postData() || ''); });
+  await tab.locator('button.rq-apok').first().click();
+  await expect.poll(() => patches.length).toBeGreaterThan(0);
+  expect(JSON.parse(patches[0])).toMatchObject({ approval: 'pending' });
+});
+
+test('a circuit night keeps its select boxes', async ({ page }) => {
+  const NIGHT = 'n-1';
+  await stubSupabase(page, { sessions: [{ id: NIGHT, session_date: '2099-01-05', day: 'Monday', status: 'open', capacity: 30, created_at: 1 }],
+    queue_entries: [e('c1', { session_id: NIGHT, session_day: 'Monday', session_date: '2099-01-05', approval: null, price: 115 })], bikes: [] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction(`getQueue().length>0`);
+  await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${NIGHT}';renderStaffQueue()`);
+  await expect(page.locator('#tab-queue .row-select')).not.toHaveCount(0);
+});

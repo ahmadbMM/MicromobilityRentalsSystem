@@ -8247,7 +8247,9 @@ function _rowMenu(id,items){
         {label:`${ICON_PENCIL} ${t('editBookingBtn')}`,run:`showBookingEditModal('${e.id}')`,act:()=>showBookingEditModal(e.id)},
         _custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null])}`;
     }
-    const _apprChip=(_comm&&e.approval==='approved')?`<span class="rq-apok">✓ ${t('apprApprovedChip')}</span><button class="btn-sm btn-muted" title="${t('apprUndoBtn')}" data-on-click="${_on("unapproveEntry",e.id)}">${_artIcon('undo',11)} ${t('apprUndoBtn')}</button>`:'';
+    // The Approved tile is itself the undo (the owner, 2026-10-02: "dont add a separate button for undo
+    // approval, clicking on the approved button undos approval").
+    const _apprChip=(_comm&&e.approval==='approved')?`<button type="button" class="rq-apok" title="${t('apprUndoBtn')}" aria-label="${esc(t('apprApprovedChip'))} · ${esc(t('apprUndoBtn'))}" data-on-click="${_on("unapproveEntry",e.id)}">✓ ${t('apprApprovedChip')}</button>`:'';
     // Waitlisted and waiting rows carry the SAME controls. A waitlisted rider is a rider
     // whose place is not held yet, not a different kind of booking: staff check them in, mark
     // them no-show, edit, note and cancel them exactly the same way. What says they are
@@ -8309,6 +8311,8 @@ function _rowMenu(id,items){
   }
   function _bulkChk(e){
     if(e.status!=='waiting'&&e.status!=='active')return'';
+    // None on the Saturday Social Ride (the owner, 2026-10-02: "remove the multi select button from the saturday social ride").
+    if(_rideKind((S.sessions||[]).find(x=>x.id===e.sessionId))==='saturday')return'';
     const on=S.sfSelected.includes(e.id);
     return`<label class="row-select" title="${t('selectRowTip')}"><input type="checkbox"${on?' checked':''} aria-label="${esc(t('selectBookingAria'))} #${e.queueNum}" data-on-change="${_on("toggleSfSelect",e.id)}"></label>`;
   }
