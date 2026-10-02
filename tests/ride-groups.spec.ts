@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
+import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows, loadStaffHalf } from './helpers/supabase';
 
 // The Saturday ride's two groups (the owner, 2026-10-02): Beginners 20 km (to the Jeddah Yacht
 // Club and back) and Intermediates 40 km (to just before the Marine Sciences roundabout and back).
@@ -161,4 +161,59 @@ test('the booking card’s Meeting point opens the ride’s map link', async ({ 
   const a = page.locator('#tab-myrides a.cu-tk-dir').first();
   await expect(a).toHaveAttribute('href', MEET);
   await expect(a).toHaveAttribute('target', '_blank');
+});
+
+// Each Saturday ride may set its two distances (the owner, 2026-10-02); without them the groups ride
+// 20 and 40 km. They show on the rider's pills and in Ride details, English and Arabic.
+test('a ride’s own distances show on the pills and in Ride details', async ({ page }) => {
+  const own = { ...sat, bike_slots: JSON.stringify({ _time: '05:45 - 06:15', _km: { beg: 25, int: 45 } }) };
+  await stubSupabase(page, { sessions: [own], bikes: [], queue_entries: [row('a', SAT)], 'rpc:community_member': true });
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`S.selEvent='community';S.selSession='${SAT}';S.regStep=2;S.regBikeHeights=['175'];S.regBikeTypes=['Road'];setCustTab('register')`);
+  await expect(page.locator('#reg-group-wrap [data-rg]')).toHaveText([/Beginners’ group.*25 km/, /Intermediates’ group.*45 km/]);
+  await loadStaffHalf(page); // Ride details is built on the staff side
+  expect(await page.evaluate(`_rmRideText(allSessions()[0],'en')`)).toContain('Beginner’s Group *25km*\nIntermediate Group *45km*');
+  expect(await page.evaluate(`_rmRideText(allSessions()[0],'ar')`)).toContain('مجموعة المبتدئين *25 كم*\nمجموعة المتوسطين *45 كم*');
+  expect(await page.evaluate(`_rmRideText({...allSessions()[0],bike_slots:'{"_time":"05:45 - 06:15"}'},'en')`)).toContain('*20km*'); // none set: the usual
+});
+
+test('the new-session form keeps the distances staff give, and only those', async ({ page }) => {
+  await staffBoot(page, SAT, [row('a', SAT)]);
+  const slots = await page.evaluate(`(()=>{S.newSessEvent='community';S.newSessSpots='30';S.newSessKm={beg:'22.5',int:''};return _nsSlots('05:45 - 06:15','').slots;})()`);
+  expect(slots).toEqual({ _time: '05:45 - 06:15', _km: { beg: 22.5 } });
+  const none = await page.evaluate(`(()=>{S.newSessKm={};return _nsSlots('05:45 - 06:15','').slots;})()`);
+  expect(none).toEqual({ _time: '05:45 - 06:15' });
+  // the form asks them on a Saturday ride, with the usual distances as placeholders
+  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showAddSession=true;S.newSessEvent='community';renderStaffQueue()`);
+  await expect(page.locator('#newSessKm-beg')).toHaveAttribute('placeholder', '20');
+  await expect(page.locator('#newSessKm-int')).toHaveAttribute('placeholder', '40');
+});
+
+// A copy of the app from before could send Any; the server refuses it (PICK_TYPE, 20261002160000) and
+// the rider is taken back to choose a bike type.
+test('a booking the server refuses for Any goes back to the bike type', async ({ page }) => {
+  await stubSupabase(page, { sessions: [sat], bikes: [], queue_entries: [], 'rpc:community_member': true,
+    'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'PICK_TYPE' } } });
+  await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`S.selEvent='community';S.selSession='${SAT}';S.regStep=3;S.regBikeHeights=['175'];S.regBikeTypes=['Road'];S.regRideGroup='beg';S.regRiderNames=['Spec Rider'];S.waiverOk=true;setCustTab('register');submitReg()`);
+  await expect.poll(() => page.evaluate('S.regStep')).toBe(2);
+  await expect(page.locator('#reg-type-wrap-0')).toBeVisible(); // the riders step, where the type is chosen
+});
+// This app never sends Any: the riders step wants a type first, so a seeded Any stops there.
+test('the app itself asks for a type instead of sending Any', async ({ page }) => {
+  const rows = await (async () => {
+    await stubSupabase(page, { sessions: [sat], bikes: [], queue_entries: [], 'rpc:community_member': true });
+    await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
+    await page.goto('/');
+    await waitForSb(page);
+    return captureBookingRows(page);
+  })();
+  await page.evaluate(`S.selEvent='community';S.selSession='${SAT}';S.regStep=2;S.regBikeHeights=['175'];S.regBikeTypes=['Any'];S.regRideGroup='beg';setCustTab('register')`);
+  expect(await page.evaluate('validateRegInputs()')).toBe(false);
+  await page.waitForTimeout(300);
+  expect(rows.length).toBe(0);
 });

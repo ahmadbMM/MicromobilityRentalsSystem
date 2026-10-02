@@ -4414,13 +4414,31 @@ const RIDE_GROUP_INFO={
 };
 function _hasRideGroups(s){return !!s&&_rideKind(s)==='saturday';}
 function _rgOk(g){return g==='beg'||g==='int';}
+// A ride's own distances (the owner, 2026-10-02): set on the session form, kept in the session's
+// bike_slots as _km {beg,int} beside its _time; a ride without them rides the usual 20 and 40 km.
+function _rgKm(sess,g){const k=(parseSlots(sess&&sess.bike_slots)||{})._km,v=k&&Number(k[g]);return v>0&&v<=500?v:RIDE_GROUP_INFO[g].km;}
+function _rgKmTxt(sess,g){return t('rtKm').replace('{0}',String(_rgKm(sess,g)));}
+// The Saturday ride's two distances on the session forms (the owner, 2026-10-02): empty reads as the
+// usual 20 and 40 km. key is 'newSessKm' or 'editSessKm' in S.
+function _rgKmFields(key){
+  const v=S[key]||{};
+  return`<div class="form-row rg-km-row">${RIDE_GROUPS.map(g=>`<div class="form-group"><label for="${key}-${g}">${esc(_rgName(g))} (km)</label>
+    <input type="number" id="${key}-${g}" min="1" max="500" step="0.5" inputmode="decimal" value="${esc(v[g]!=null?String(v[g]):'')}" placeholder="${RIDE_GROUP_INFO[g].km}" data-on-input="${_on('_rgKmSet',key,g,_P('value'))}" class="ss-mw140"></div>`).join('')}</div>`;
+}
+function _rgKmSet(key,g,val){S[key]={...(S[key]||{}),[g]:val};}
+// What a form's two distances add to the session's slots: _km, only with a distance staff gave.
+function _rgKmSlot(key){
+  const v=S[key]||{},o={};RIDE_GROUPS.forEach(g=>{const n=Number(String(v[g]==null?'':v[g]).replace(',','.'));if(n>0&&n<=500)o[g]=Math.round(n*10)/10;});
+  return Object.keys(o).length?{_km:o}:{};
+}
+function _rgKmOf(sess){const k=(parseSlots(sess&&sess.bike_slots)||{})._km;return k&&typeof k==='object'?{beg:k.beg!=null?String(k.beg):'',int:k.int!=null?String(k.int):''}:{};}
 function _rgName(g){return _rgOk(g)?t(RIDE_GROUP_INFO[g].name):'';}
 function _rgShort(g){return _rgOk(g)?t(RIDE_GROUP_INFO[g].short):'';}
 // The two pills: fn is the global the pick calls with 'beg' | 'int'; slot, when given, puts the
 // "i" beside each (the rider's form) and names where the sheet's Choose lands.
-function _rgPills(cur,fn,slot){
+function _rgPills(cur,fn,slot,sess){
   return RIDE_GROUPS.map(g=>{const I=RIDE_GROUP_INFO[g],on=cur===g;
-    const btn=`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(fn,g)}">${t(I.name)}<span class="tp-price">${esc(t('rtKm').replace('{0}',String(I.km)))}</span></button>`;
+    const btn=`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(fn,g)}">${t(I.name)}<span class="tp-price">${esc(_rgKmTxt(sess,g))}</span></button>`;
     return slot==null?btn:`<span class="type-pick">${btn}<button type="button" class="type-info-btn" aria-label="${esc(t('rgInfoAria').replace('{0}',t(I.name)))}" aria-haspopup="dialog" data-on-click="${_on('showGroupInfo',g,slot)}">${_artIcon('info',15)}</button></span>`;
   }).join('');
 }
@@ -6398,9 +6416,9 @@ function _qHeightCell(e,cls){
 // Staff are asked the group wherever they put a rider on a Saturday ride (the owner, 2026-10-02):
 // Add rider, Add group, the walk-in, an approval onto a ride, the booking editor and the check-in.
 // set is the global that takes the pick ('beg' | 'int') and repaints its dialog.
-function _rgField(cur,set){
+function _rgField(cur,set,sess){
   return `<div class="form-group rg-field"><label>${t('rgLabel')} *</label><div class="ci-opts rg-opts">${RIDE_GROUPS.map(g=>{const on=cur===g;
-    return`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(set,g)}">${esc(_rgName(g))} <span class="rg-km">${esc(t('rtKm').replace('{0}',String(RIDE_GROUP_INFO[g].km)))}</span></button>`;}).join('')}</div></div>`;
+    return`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(set,g)}">${esc(_rgName(g))} <span class="rg-km">${esc(_rgKmTxt(sess,g))}</span></button>`;}).join('')}</div></div>`;
 }
 // A booking's group in the Bookings table: Beg / Int, a dash where a grouped ride's rider has none.
 function _rgChip(e){const g=e&&e.rideGroup;return _rgOk(g)?`<span class="rg-chip rg-${g}" title="${esc(_rgName(g))}">${esc(_rgShort(g))}</span>`:'<span class="rq-mut">—</span>';}
@@ -9487,7 +9505,7 @@ function renderRegister(){
     </div>
     ${(i===0&&_hasRideGroups(_selSessObj))?`<div id="reg-group-wrap" class="form-group cu-mb8">
       <label>${t('rgLabel')}</label>
-      <div class="toggle-group type-grid rg-grid">${_rgPills(S.regRideGroup,'setRegGroup','reg')}</div>
+      <div class="toggle-group type-grid rg-grid">${_rgPills(S.regRideGroup,'setRegGroup','reg',_selSessObj)}</div>
     </div>`:''}
     ${divider}`;
   }).join('');
@@ -9644,7 +9662,7 @@ function renderRegister(){
       <span class="cu-rv-num">${i+1}</span>
       <div class="cu-f1-min0">
         <div class="cu-rv-name">${esc(nm||(t('riderLabel')+' '+(i+1)))}</div>
-        ${_needsBike(_selSessObj)?`<div class="cu-rv-meta">${typeBadge(ty)}${h?`<span><bdi>${h} ${t('cmUnit')}</bdi></span>`:''}${(i===0&&_hasRideGroups(_selSessObj)&&_rgOk(S.regRideGroup))?`<span class="cu-rv-grp">${esc(_rgName(S.regRideGroup))} · <bdi>${esc(t('rtKm').replace('{0}',String(RIDE_GROUP_INFO[S.regRideGroup].km)))}</bdi></span>`:''}</div>`:''}
+        ${_needsBike(_selSessObj)?`<div class="cu-rv-meta">${typeBadge(ty)}${h?`<span><bdi>${h} ${t('cmUnit')}</bdi></span>`:''}${(i===0&&_hasRideGroups(_selSessObj)&&_rgOk(S.regRideGroup))?`<span class="cu-rv-grp">${esc(_rgName(S.regRideGroup))} · <bdi>${esc(t('rtKm').replace('{0}',String(_rgKm(_selSessObj,S.regRideGroup))))}</bdi></span>`:''}</div>`:''}
       </div>
       <div class="cu-rv-price">${(_freeSel||ty==='Own')?t('freeLabel'):_hFree(i)?t('onTheHouseLabel'):_evSeatPrice(allSessions().find(x=>x.id===S.selSession))!=null?`<bdi>${esc(_sar(_evSeatPrice(allSessions().find(x=>x.id===S.selSession))))}</bdi>`:`<bdi>${esc(priceDisplay(ty))}</bdi>`}</div>
     </div>`;
@@ -10057,7 +10075,7 @@ function showGroupInfo(g,slot){
       <div class="bike-info-body">
         <div class="bike-info-kicker">${t('rgTurnLbl')} · ${esc(t(I.place))}</div>
         <div class="modal-title" id="bike-info-title">${t(I.name)}</div>
-        <span class="bike-info-level${g==='beg'?' easy':''}">${esc(t('rtKm').replace('{0}',String(I.km)))}</span>
+        <span class="bike-info-level${g==='beg'?' easy':''}">${esc(_rgKmTxt(allSessions().find(x=>x.id===S.selSession),g))}</span>
         <p class="bike-info-brief">${t(I.brief)}</p>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" data-on-click="${_on('closeBikeInfo')}">${t('closeBtn')}</button>
@@ -10451,6 +10469,11 @@ async function _submitReg(){
             if(/FIX_FIRST/.test(_msg+' '+((err&&err.message)||''))){
               const _cu=S.loggedIn||getSession();
               if(_cu){await _fixLoad(_cu,true);if(await _fixGate(()=>submitReg()))return;}
+            }
+            // Any is staff's to give (20261002160000): a type left as Any goes back to be chosen
+            if(/PICK_TYPE/.test(_msg+' '+((err&&err.message)||''))){
+              S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Any'?undefined:ty);S.regStep=2;renderRegister();
+              toast(t('errSelectTypeGeneric'),'error');return;
             }
             _bookRefused(err,sess);
             return;
@@ -12168,7 +12191,7 @@ function startEditSession(id){
   S.editSessTitle=sess.title||'';
   // Every field the form shows is set from THIS session. Spots used to keep whatever was last
   // typed into the box for any ride, and a later save wrote that number onto another one.
-  S.editSessSpots=sess.spots!=null?String(sess.spots):'';
+  S.editSessSpots=sess.spots!=null?String(sess.spots):'';S.editSessKm=_rgKmOf(sess);
   S.editSessTotal=sess.capacity||10;
   S.editSessBfSel=((S.breakfastSpots||[]).find(x=>x.name===sess.breakfast_name)||{}).id||(sess.breakfast_name?'__new':'');
   S.showAddSession=false;
@@ -12980,7 +13003,7 @@ function cloneSession(id){
   // Only the date is left blank. The bike allocation follows below.
   S.newSessEvent=_rideKind(s)==='snd96'?'snd96':!_isCommunity(s)?'jcc':(['petromin','swim','workshop'].includes(String(s.ride_kind||''))?String(s.ride_kind):'community');
   S.newSessTitle=s.title||'';
-  S.newSessSpots=s.spots!=null?String(s.spots):'';
+  S.newSessSpots=s.spots!=null?String(s.spots):'';S.newSessKm=_rgKmOf(s);
   S.newSessMapUrl=s.meet_url||'';
   S.newSessBfName=s.breakfast_name||'';S.newSessBfUrl=s.breakfast_url||'';
   // The picker has to show the stop the clone carries, because what it shows is what is saved:
@@ -13218,7 +13241,7 @@ function renderSessions(){
       <div class="form-group ss-mb16">
         <label>${t('sessSpotsLabel')}</label>
         <input type="number" id="ns-spots" min="1" max="500" value="${esc(String(S.newSessSpots||20))}" data-on-input="${_on("_on_renderSessions_15",_EV,_EL)}" class="ss-mw140">
-      </div>`:''}
+      </div>${S.newSessEvent==='community'?_rgKmFields('newSessKm'):''}`:''}
       ${_nsSeats()?`
       <div class="form-row">
         <div class="form-group"><label>${t('sessMapLabel')}</label>
@@ -13371,7 +13394,7 @@ function renderSessions(){
       <div class="form-group ss-mb16">
         <label>${t('sessSpotsLabel')}</label>
         <input type="number" id="es-spots" min="1" max="500" value="${esc(String(S.editSessSpots||editSess.spots||20))}" data-on-input="${_on("_on_renderSessions_32",_EV,_EL)}" class="ss-mw140">
-      </div>`:`
+      </div>${_hasRideGroups(editSess)?_rgKmFields('editSessKm'):''}`:`
       <div class="ss-modes">
         <button class="toggle-btn${S.editSessMode==='total'?' active':''}" aria-pressed="${(S.editSessMode==='total')?'true':'false'}" data-on-click="${_on("_on_renderSessions_33",_EV,_EL)}">${t('sessModeTotal')}</button>
         <button class="toggle-btn${S.editSessMode==='counts'?' active':''}" aria-pressed="${(S.editSessMode==='counts')?'true':'false'}" data-on-click="${_on("_on_renderSessions_34",_EV,_EL)}">${t('sessModeCounts')}</button>
@@ -13848,7 +13871,7 @@ async function saveSessionEdit(){
   if(_isApprovalRide(sess)){
     // Spot cap only: an approval ride allocates places instead of putting out a fleet.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-spots')?.value||S.editSessSpots||sess.spots||'20')||20));
-    slots={_time:timeVal};
+    slots={_time:timeVal,...(_hasRideGroups(sess)?_rgKmSlot('editSessKm'):{})};
   }else if(S.editSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-total')?.value||S.editSessTotal||'10')||10));
@@ -14004,7 +14027,7 @@ async function saveSessionEdit(){
       }
       await loadData();renderSessions();renderStaffQueue();
     });
-    S.editSessionId=null;S.editSessTitle='';S.editSessSpots='';S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
+    S.editSessionId=null;S.editSessTitle='';S.editSessSpots='';S.editSessKm={};S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     renderSessions();renderStaffQueue();
   }catch(e){toast(t('errServerError'),'error');console.error(e);}
 }
@@ -14025,7 +14048,7 @@ function _nsSlots(timeVal,collectVal){
     // The Saturday ride allocates places rather than putting out a fleet: one spot cap, no
     // bike composition. Both other event types are built from actual bikes.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('ns-spots')?.value||S.newSessSpots||'20')||20));
-    slots={_time:timeVal};
+    slots={_time:timeVal,...(S.newSessEvent==='community'?_rgKmSlot('newSessKm'):{})};
   }else if(S.newSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
     total=Math.max(1,Math.min(500,parseInt(document.getElementById('ns-total')?.value||S.newSessTotal||'10')||10));
@@ -14182,7 +14205,7 @@ async function _addSession(){
       if(Object.keys(_extra).length){try{await Promise.all(createdIds.map(id=>sb.from('sessions').update(_extra).eq('id',id)));}catch(e){}}
     }
     await loadData();
-    S.showAddSession=false;S._nsTplId=null;S.newSessRoute='';S.newSessDesc='';S.newSessPrice='';S.newSessOpenAll=true;S.newSessDate='';S.newSessAssignedIds=[];S.newSessStartTime='21:00';S.newSessEndTime='23:00';S.newSessCollect='';S.newSessRepeat='1';S.newSessDays=[];S.newSessAddons=[];S.newSessEvent='jcc';S.newSessSpots='';S.newSessTitle='';S.newSessMapUrl='';S.newSessBfSel='';S.newSessBfName='';S.newSessBfUrl='';
+    S.showAddSession=false;S._nsTplId=null;S.newSessKm={};S.newSessRoute='';S.newSessDesc='';S.newSessPrice='';S.newSessOpenAll=true;S.newSessDate='';S.newSessAssignedIds=[];S.newSessStartTime='21:00';S.newSessEndTime='23:00';S.newSessCollect='';S.newSessRepeat='1';S.newSessDays=[];S.newSessAddons=[];S.newSessEvent='jcc';S.newSessSpots='';S.newSessTitle='';S.newSessMapUrl='';S.newSessBfSel='';S.newSessBfName='';S.newSessBfUrl='';
     S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     if(created>1)toast(t('toastRecurringCreated').replace('{0}',created));
     else toast(`${shortDate(createdDates[0]||date)} - ${t('toastSessionReady')}`);
@@ -14425,7 +14448,7 @@ function renderCommAddModal(){
     // On an approval ride the second destination is Waiting: the rider holds a place and a number
     // like any waiting rider and still awaits selection (approval pending). It used to be the
     // waitlist (owner, 2026-09-27). A ride without approval has one list, so no toggle.
-    +((cur&&_hasRideGroups(cur))?_rgField(S._caRg,'_caRgSet'):'')
+    +((cur&&_hasRideGroups(cur))?_rgField(S._caRg,'_caRgSet',cur):'')
     +((cur&&_isApprovalRide(cur))?('<div class="form-group cmy-mb10"><label>'+t('commAddDestLbl')+'</label>'
     +'<div class="cmy-row6">'
     +'<button type="button" class="toggle-btn'+(S._caDest!=='waiting'?' active':'')+' cmy-f1" data-on-click="'+_on('_on_caDest','list')+'">'+t('commAddDestList')+'</button>'
@@ -14535,7 +14558,7 @@ function showJccGroupModal(){
       </div>
       <div class="form-group cmy-mb10"><label for="jg-sess">${t('colSession')}</label>
         <select id="jg-sess" data-on-change="${_on("_on_showJccGroupModal_2",_EV,_EL)}">${open.map(x=>`<option value="${esc(x.id)}"${_s===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>
-      ${_jgSess&&_hasRideGroups(_jgSess)?_rgField(S._jgRg,'_jgRgSet'):''}
+      ${_jgSess&&_hasRideGroups(_jgSess)?_rgField(S._jgRg,'_jgRgSet',_jgSess):''}
       <div class="form-group cmy-mb6"><label>${t('colRider')} × ${S._jgRiders.length}</label></div>
       ${S._jgRiders.map((r,i)=>`<div class="cmy-rider-row">
         <input id="jg-r-name-${i}" type="text" list="jg-cust-list" data-on-focus="${_on("_dlFill","jg-cust-list")}" placeholder="${t('nameLabel')} ${i+1}" value="${esc(r.name||'')}" maxlength="60" class="cmy-f1m0">
@@ -15530,7 +15553,7 @@ function _caApRender(){
         ${rides.length?`<div class="ca-ap-rides" role="radiogroup" aria-labelledby="ca-ap-ride-l">${(inv?rides:[null,...rides]).map(opt).join('')}</div>`
           :`<div class="ca-ap-none">${t('caRideNoOpen')}</div>`}</div>`;
     const _rs=st.ride&&rides.find(s=>s.id===st.ride);
-    if(_rs&&_hasRideGroups(_rs))rideSec+=_rgField(st.rg,'_caApRg');
+    if(_rs&&_hasRideGroups(_rs))rideSec+=_rgField(st.rg,'_caApRg',_rs);
   }
   const comm=st.tags.includes(TAG_COMMUNITY)||_caTagHeld(cid,TAG_COMMUNITY); // the body says whether the tag comes with it
   const body=rej?t('caRejectBody')
@@ -16377,7 +16400,7 @@ Let’s continue enjoying strong and competitive rides—but with discipline, co
 // or none).
 const TPL_KEY='msg.templates';
 const TPL=[
-  ['tplgRm',[['rm_ride','rmRide',['date','meet_time','start_time','meet_link','booking_link','breakfast']],['rm_privacy','rmPrivacy',[]],['rm_etiq','rmEtiq',[]]]],
+  ['tplgRm',[['rm_ride','rmRide',['date','meet_time','start_time','meet_link','beg_km','int_km','booking_link','breakfast']],['rm_privacy','rmPrivacy',[]],['rm_etiq','rmEtiq',[]]]],
   ['tplgCa',[['ca_approved','tplCaApproved',['first_name','ride']],['ca_invite','tplCaInvite',['first_name','ride','group_link']],['ca_temp','tplCaTemp',['first_name','password','site']],['ca_fix','tplCaFix',['first_name','fields','note','link']],['ca_reject','tplCaReject',['first_name']]]],
   ['tplgLa',[['la_signup','tplLaSignup',['first_name','lesson','account']],['la_moved','tplLaMoved',['first_name','lesson']],['la_fix','tplLaFix',['first_name','fields','note','link']]]],
   ['tplgWs',[['new','tplWsNew'],['confirmed','tplWsConfirmed'],['confirmedPickup','tplWsConfirmedPickup'],['in_workshop','tplWsInWorkshop'],['awaiting_parts','tplWsAwaitingParts'],['ready','tplWsReady'],['readyPickup','tplWsReadyPickup'],['completed','tplWsCompleted'],['cancelled','tplWsCancelled']].map(([k,l])=>['ws_'+k,l,['first_name','ref','service','when','price']])],
@@ -16457,8 +16480,8 @@ const RM_RIDE_TPL=`MicroMobility’s Saturday Community Ride ${RM_E.bike} *{date
 Meet up time: *{meet_time}*
 Start time: *{start_time}*
 Ride distance:
-Beginner’s Group *20km*
-Intermediate Group *40km*
+Beginner’s Group *{beg_km}km*
+Intermediate Group *{int_km}km*
 
 Meet Up Location:
 {meet_link}
@@ -16476,8 +16499,8 @@ const RM_RIDE_AR=`جولة MicroMobility الاجتماعية يوم السبت 
 وقت التجمّع: *{meet_time}*
 وقت الانطلاق: *{start_time}*
 مسافة الجولة:
-مجموعة المبتدئين *20 كم*
-مجموعة المتوسطين *40 كم*
+مجموعة المبتدئين *{beg_km} كم*
+مجموعة المتوسطين *{int_km} كم*
 
 موقع التجمّع:
 {meet_link}
@@ -16554,15 +16577,15 @@ function _rmRideText(sess,lang){
     let dayAr=ds;
     if(dm){try{dayAr=new Intl.DateTimeFormat('ar-SA-u-nu-latn-ca-gregory',{day:'numeric',month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(+dm[1],+dm[2]-1,+dm[3],12)));}catch(_){}}
     const tmAr=x=>{const m=/^(\d{1,2}):(\d{2})$/.exec(x);if(!m)return x;const h=+m[1];return`${h%12||12}:${m[2]} ${h<12?'ص':'م'}`;};
-    const v={date:dayAr,meet_time:meet?tmAr(meet):'',start_time:start?tmAr(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*الإفطار بعد الجولة*':''};
+    const v={beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:dayAr,meet_time:meet?tmAr(meet):'',start_time:start?tmAr(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*الإفطار بعد الجولة*':''};
     return _tplUse('rm_ride','ar',v)??_tplFill(RM_RIDE_AR,v);
   }
-  const own=_tplUse('rm_ride',lang||'en',{date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
+  const own=_tplUse('rm_ride',lang||'en',{beg_km:String(_rgKm(sess,'beg')),int_km:String(_rgKm(sess,'int')),date:day,meet_time:meet?tm(meet):'',start_time:start?tm(start):'',meet_link:loc||'',booking_link:CA_SITE+'/',breakfast:_hasBreakfast(sess)?'*Breakfast after the ride*':''});
   if(own!=null)return own;
   const L=[`MicroMobility’s Saturday Community Ride ${RM_E.bike} *${day}*`,''];
   if(meet)L.push(`Meet up time: *${tm(meet)}*`);
   if(start)L.push(`Start time: *${tm(start)}*`);
-  L.push('Ride distance:','Beginner’s Group *20km*','Intermediate Group *40km*','');
+  L.push('Ride distance:',`Beginner’s Group *${_rgKm(sess,'beg')}km*`,`Intermediate Group *${_rgKm(sess,'int')}km*`,'');
   if(loc)L.push('Meet Up Location: ',loc,'');
   L.push('Booking:',CA_SITE+'/','','*No Registration & QR Code = No Participation*','*Parking Behind The Building*');
   if(_hasBreakfast(sess))L.push('*Breakfast after the ride*');
@@ -17197,7 +17220,7 @@ function showWalkinModal(){
       <button type="button" class="btn-secondary dk-wi-add" data-on-click="${_on("_wiAddRider")}">+ ${t('beAddRiderBtn')}</button>
       <div class="form-group dk-mb14"><label>${t('colSession')}</label>
         <select id="wi-sess" data-on-change="${_on("_on_showWalkinModal_3",_EV,_EL)}">${open.map(x=>`<option value="${esc(x.id)}"${_s===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>
-      ${_hasRideGroups(open.find(x=>x.id===_s))?_rgField(S._wiRg,'_wiRgSet'):''}
+      ${_hasRideGroups(open.find(x=>x.id===_s))?_rgField(S._wiRg,'_wiRgSet',open.find(x=>x.id===_s)):''}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeWalkinModal")}">${t('cancelBtn')}</button>
         <button class="btn-secondary" data-on-click="${_on("saveWalkin")}">${t('addWalkinBtn')}${S._wiRiders.length?` (${S._wiRiders.length+1})`:''}</button>
@@ -17404,7 +17427,7 @@ function showBookingEditModal(entryId){
       </div>
       <div class="form-group dk-mb10"><label>${t('bikeTypeLabel')}</label>
         <div class="dk-flex6">${bikeTypeOpts(_beOwn,_beNoCarbon).map(tyBtn).join('')}</div></div>
-      ${_hasRideGroups(_beSess)?_rgField(S._beRg,'_beRgSet'):''}
+      ${_hasRideGroups(_beSess)?_rgField(S._beRg,'_beRgSet',_beSess):''}
       <div class="form-group dk-mb14"><label for="be-sess">${t('colSession')}</label>
         <select id="be-sess">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
       ${_beComm?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
@@ -23656,7 +23679,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
       ${_stepsHtml}
       <div class="form-group bkm-fg812"><label>${t('bikeTypeLabel')}</label>
         <div class="ci-opts">${bikeTypeOpts(_ownOffered(sess),_noCarbonSessIds.has(e.sessionId)).map(tyBtn).join('')}</div></div>
-      ${_rgField(S._ciRg,'_ciRgSet')}
+      ${_rgField(S._ciRg,'_ciRgSet',sess)}
       <div id="ci-error" role="alert" class="bkm-cierr">${S._ciErr?esc(S._ciErr):''}</div>
       <div class="modal-footer ci-sat-foot">
         <button class="btn-secondary" id="ci-cancel" data-on-click="${_on("closeCheckinModal")}">${t('cancelBtn')}</button>
