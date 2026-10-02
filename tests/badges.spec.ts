@@ -263,7 +263,7 @@ test.describe('@customer:account badges', () => {
     // riding (National Day 96 and Back on Track wait until earned) and the six other ones staff give
     // fold under Badges to earn, which says how many and shows four of them greyed.
     await expect(chips).toHaveCount(3);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/28');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/31');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -271,11 +271,11 @@ test.describe('@customer:account badges', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).toContainText('Badges to earn');
     await expect(more).toContainText('Show');
-    await expect(more.locator('.mr-bm-n')).toHaveText('25');
+    await expect(more.locator('.mr-bm-n')).toHaveText('28');
     await expect(more.locator('.mr-bm-peek svg.bdg-m')).toHaveCount(4);
     // Open: every badge, in the same order as before, the button kept in focus and reading Hide.
     await more.click();
-    await expect(chips).toHaveCount(28);
+    await expect(chips).toHaveCount(31);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toContainText('Hide');
     await expect(more).toBeFocused();
@@ -283,9 +283,9 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(3)).toContainText('Race Ready');
     await expect(chips.nth(3)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
     await expect(chips.nth(3)).toContainText('33%');
-    await expect(chips.nth(27)).toContainText('Race Spirit');
-    await expect(chips.nth(27)).toHaveClass(/locked/);
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(28);
+    await expect(chips.nth(30)).toContainText('Race Spirit');
+    await expect(chips.nth(30)).toHaveClass(/locked/);
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(31);
     expect(EMOJI.test(await page.locator('#mr-badges-host').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -294,7 +294,7 @@ test.describe('@customer:account badges', () => {
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
     // It stays open through that repaint, and closes again.
-    await expect(chips).toHaveCount(28);
+    await expect(chips).toHaveCount(31);
     await more.click();
     await expect(chips).toHaveCount(3);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
@@ -307,7 +307,7 @@ test.describe('@customer:account badges', () => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(1); // First Lap
-    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('26'); // the other nineteen ride badges and the seven staff give
+    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('29'); // the other twenty-two ride badges and the seven staff give
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
@@ -320,7 +320,7 @@ test.describe('@customer:account badges', () => {
     const catalog = [
       ...['marshal', 'pit_crew', 'green_flag', 'super_licence', 'scrutineer', 'champion', 'spirit'].map((x, i) => sys(x, 10 + i * 10, false)),
       ...['national_day_96', 'complete_profile', 'first_lap', 'regular', 'podium', 'front_row', 'carbon', 'streak', 'squad', 'corniche25', 'back_on_track', 'safety_car',
-        'endurance', 'triple_crown', 'slipstream', 'paceline', 'peloton', 'clean_sheet', 'works_team', 'winter_series'].map((x, i) => sys(x, 90 + i * 10)),
+        'endurance', 'triple_crown', 'rolling_start', 'slipstream', 'paceline', 'peloton', 'grand_tour', 'hall_of_fame', 'clean_sheet', 'works_team', 'winter_series'].map((x, i) => sys(x, 90 + i * 10)),
       // 'fuel' is not here: retired. Night Owl is an admin's own, not given to this rider.
       { slug: 'bd_cnight', icon: 'moon', color: 'purple', name: 'Night Owl', description: 'Rode a late ride', system: false, auto: false, sort: 500 },
     ];
@@ -338,11 +338,11 @@ test.describe('@customer:account badges', () => {
     await expect.poll(names).toEqual([
       'Marshal', 'First Lap', // earned: the given one, then by riding
       'Race Ready', 'Grid Regular', 'Podium Pace', 'Front Row', 'Carbon Club', 'Hot Streak', 'Squad Captain', 'Corniche 25', 'Safety Car',
-      'Endurance', 'Triple Crown', 'Clean Sheet', 'Slipstream', 'Paceline', 'Peloton', 'Works Team', // to earn by riding (no Fuel Stop: retired)
+      'Endurance', 'Triple Crown', 'Clean Sheet', 'Rolling Start', 'Slipstream', 'Paceline', 'Peloton', 'Grand Tour', 'Hall of Fame', 'Works Team', // to earn by riding (no Fuel Stop: retired)
       'Winter Series', // dated, shown out of season
       'Pit Crew', 'Green Flag', 'Super Licence', 'Scrutineer', 'Champion', 'Race Spirit', 'Night Owl', // staff give them
     ]);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/26');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/29');
     // Every tile the same size, the earned and the ones to earn alike.
     const sizes = await chips.evaluateAll((els) => [...new Set(els.map((e) => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }))]);
     expect(sizes).toHaveLength(1);
@@ -416,17 +416,22 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(old.streak.p).toBe('0/3');
   });
 
-  test('Triple Crown, Slipstream and its tiers, Works Team, counted in ride nights', async ({ page }) => {
+  test('Triple Crown, the Saturday ladder (1, 5, 10, 25, 50, 100), Works Team, counted in ride nights', async ({ page }) => {
     await page0(page);
     const r = await ev(page, `(()=>{const[E,S_]=${nights([[-60, 'jcc'], [-50, 'saturday'], [-43, 'saturday'], [-36, 'saturday'], [-29, 'saturday'], [-22, 'saturday'], [-15, 'petromin'], [-8, 'petromin']])};
       E.push(__e('s1',__day(-50),'done'),__e('s1',__day(-50),'done'),__e('s1',__day(-50),'done')); // a party of four on one night
       return __run(E,S_);})()`);
     expect(r.triple_crown.on).toBe(true);
+    // The Saturday social ride ladder (the owner, 2026-10-03): five Saturdays, the party of four once.
+    expect(r.rolling_start).toEqual({ on: true, p: '1/1', hide: false });
     expect(r.slipstream).toEqual({ on: true, p: '5/5', hide: false });
-    expect(r.paceline).toEqual({ on: false, p: '5/15', hide: false });
-    expect(r.peloton).toEqual({ on: false, p: '5/30', hide: false }); // shown before its tier since 2026-09-29
+    expect(r.paceline).toEqual({ on: false, p: '5/10', hide: false });
+    expect(r.peloton).toEqual({ on: false, p: '5/25', hide: false }); // shown before its tier since 2026-09-29
+    expect(r.grand_tour).toEqual({ on: false, p: '5/50', hide: false });
+    expect(r.hall_of_fame).toEqual({ on: false, p: '5/100', hide: false });
     expect(r.works_team).toEqual({ on: false, p: '2/3', hide: false });
     const none = await ev(page, `(()=>{const[E,S_]=${nights([[-10, 'jcc']])};return __run(E,S_);})()`);
+    expect(none.rolling_start).toEqual({ on: false, p: '0/1', hide: false });
     expect(none.slipstream).toEqual({ on: false, p: '0/5', hide: false });
     expect(none.works_team).toEqual({ on: false, p: '0/3', hide: false });
     expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
