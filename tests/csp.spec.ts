@@ -96,6 +96,8 @@ test('a customer trips nothing: landing, reserve, sign-in, my bookings, account'
 });
 
 test('a staffer trips nothing: every section and sub-view by its address, the roster dialogs, the bell', async ({ page }) => {
+  // 26 full page loads: ~11 s on a desk, ~30 s on a CI runner, where it ran out of the default 30 s (2026-10-02).
+  test.setTimeout(60_000);
   await watch(page);
   await stubSupabase(page, { sessions, bikes, queue_entries });
   await unlockStaff(page);
