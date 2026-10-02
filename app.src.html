@@ -9104,15 +9104,17 @@ function _syncPaint(){document.querySelectorAll('.sync-now').forEach(b=>{b.disab
 
 // Phones and tablets: the sections this role uses most sit in a bar at the thumb
 // (Claude Design #19). Below 1024px the rail's first four sections are here and More opens the
-// menu with the rest; Front Desk's three sections all fit, so its bar has no More.
-const TB_TABS=['queue','cashier','inventory','workshop'];
-const TB_KEY={queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop'};
+// menu with the rest; Front Desk's three sections all fit, so its bar has no More. Community sits
+// beside Bookings in Workshop's place (the owner, 2026-10-02: "exchange workshop with community and
+// put community besides bookings"); Workshop stays only for a role without Community (Front Desk).
+const TB_TABS=['queue','community','cashier','inventory','workshop'];
+const TB_KEY={queue:'tabQueue',community:'tabCommunity',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop'};
 function _tbRender(){
   const v=document.getElementById('view-staff');if(!v)return;
   let bar=document.getElementById('staff-tabbar');
   if(!bar){bar=document.createElement('nav');bar.id='staff-tabbar';bar.className='staff-tabbar';v.appendChild(bar);}
   bar.setAttribute('aria-label',t('snavSections'));
-  const tabs=TB_TABS.filter(_deskTabOk),more=isAdmin(),open=document.body.classList.contains('snav-open');
+  const tabs=TB_TABS.filter(_deskTabOk).slice(0,4),more=isAdmin(),open=document.body.classList.contains('snav-open');
   bar.innerHTML=tabs.map(k=>{const on=S.staffTab===k;return`<button type="button" class="tb-btn${on?' active':''}" data-tb="${k}"${on?' aria-current="page"':''} data-on-click="${_on("setStaffTab",k)}">${_artIcon(_SNAV_ICON[k],20)}<span>${esc(t(TB_KEY[k]))}</span></button>`;}).join('')
     +(more?`<button type="button" class="tb-btn tb-more${!tabs.includes(S.staffTab)||open?' active':''}" aria-expanded="${open}" aria-controls="staff-tab-nav" data-on-click="${_on("toggleStaffNav")}">${_artIcon('grid',20)}<span>${esc(t('tbMore'))}</span></button>`:'');
 }

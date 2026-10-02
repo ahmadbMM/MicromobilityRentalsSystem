@@ -201,10 +201,12 @@ test('phones and tablets get a bottom bar with the most used sections and More',
   await staff(page);
   const bar = page.locator('#staff-tabbar');
   await expect(bar).toBeVisible();
-  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Sales', 'Inventory', 'Workshop', 'More']);
+  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Community', 'Sales', 'Inventory', 'More']); // Community beside Bookings, Workshop under More (2026-10-02)
   await bar.locator('.tb-btn', { hasText: 'Sales' }).click();
   expect(await page.evaluate('S.staffTab')).toBe('cashier');
   await expect(bar.locator('.tb-btn.active')).toHaveText('Sales');
+  await bar.locator('.tb-btn', { hasText: 'Community' }).click();
+  expect(await page.evaluate('S.staffTab')).toBe('community');
   await bar.locator('.tb-more').click();
   await expect(page.locator('body')).toHaveClass(/snav-open/);
   await page.evaluate(`setStaffRole('frontdesk')`);
