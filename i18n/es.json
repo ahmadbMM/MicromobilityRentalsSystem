@@ -3169,5 +3169,6 @@
   "rgPickBtn": "Elegir este grupo",
   "errPickGroup": "Elige tu grupo",
   "colGroup": "Grupo",
-  "rgTurnLbl": "Punto de retorno"
+  "rgTurnLbl": "Punto de retorno",
+  "filterRentalBike": "Bici de alquiler"
 }

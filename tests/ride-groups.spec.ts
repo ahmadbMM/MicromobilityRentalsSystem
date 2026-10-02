@@ -68,22 +68,21 @@ function patches(page: import('@playwright/test').Page) {
   return out;
 }
 
-test('the Bookings table shows Beg / Int, and its bike filter lists bike types only', async ({ page }) => {
+test('the Bookings table shows Beg / Int, and its bike filter lists the types, then Bike owner and Rental bike', async ({ page }) => {
   await staffBoot(page, SAT, [row('a', SAT, { ride_group: 'beg' }), row('b', SAT, { ride_group: 'int', queue_num: 2 }), row('c', SAT, { queue_num: 3 })]);
   // the table on a desk, the cards on a phone: whichever shows, it reads Beg / Int
   const mobile = await page.locator('.queue-mobile-view').isVisible();
   if (!mobile) await expect(page.locator('.queue-table th', { hasText: /^Group/ })).toBeVisible();
   await expect(page.locator(mobile ? '.queue-mobile-view .rg-chip' : '.queue-table .rg-chip')).toHaveText(['Beg', 'Int']);
   const opts = await page.evaluate(`[...document.querySelectorAll('#tab-queue select.filter-select')].map(s=>[...s.options].map(o=>o.value)).find(v=>v.includes('Road'))`) as string[];
-  expect(opts).toEqual(['all', 'Road', 'Hybrid', 'Mountain', 'Kids', 'Road Carbon']);
+  expect(opts).toEqual(['all', 'Road', 'Hybrid', 'Mountain', 'Kids', 'Road Carbon', 'own', 'rental']);
 });
 
-test('a JCC night has no Group column and the same bike-type-only filter', async ({ page }) => {
+test('a JCC night has no Group column and the same bike filter', async ({ page }) => {
   await staffBoot(page, JCC, [row('j', JCC)]);
   await expect(page.locator('.queue-table th', { hasText: /^Group/ })).toHaveCount(0);
   const opts = await page.evaluate(`[...document.querySelectorAll('#tab-queue select.filter-select')].map(s=>[...s.options].map(o=>o.value)).find(v=>v.includes('Road'))`) as string[];
-  expect(opts).not.toContain('own');
-  expect(opts).not.toContain('rental');
+  expect(opts).toEqual(['all', 'Road', 'Hybrid', 'Mountain', 'Kids', 'Road Carbon', 'own', 'rental']);
 });
 
 test('the Saturday check-in asks the type and the group, with Cancel, Waiting and Check in', async ({ page }) => {

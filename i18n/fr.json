@@ -3169,5 +3169,6 @@
   "rgPickBtn": "Choisir ce groupe",
   "errPickGroup": "Choisissez votre groupe",
   "colGroup": "Groupe",
-  "rgTurnLbl": "Point de demi-tour"
+  "rgTurnLbl": "Point de demi-tour",
+  "filterRentalBike": "Vélo de location"
 }
