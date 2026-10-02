@@ -11102,6 +11102,10 @@ function closeRateModal(){
 // pool and workshop session out of My Rides, the ride count, the tier, the badges and the
 // rating prompt, so a member with ten Saturday rides read as a newcomer with none.
 function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId));}
+// A ride that earns badges: the bike came back (done), paid or not (the owner, 2026-10-02: "make sure
+// every customer that deserves a badge gets it"). Whether staff ticked Paid is the till's business,
+// not the rider's: 21 returned rides on prod were never ticked and their riders went without.
+function _bdgRode(e){return !!e&&e.status==='done';}
 function _pendingRatingId(){
   const cust=S.loggedIn;if(!cust)return null;
   const today=todayStr();
@@ -11305,7 +11309,7 @@ function _bdgSeason(rule,dates){
 }
 // Perfect Week and Perfect Month (the owner, 2026-09-29): every session a week held - Sunday to
 // Saturday, every kind: circuit nights, the Petromin night, the Saturday ride, swims, workshops -
-// ridden (_rideCompleted). A week of fewer than two sessions is left out: it neither earns one nor
+// ridden (_bdgRode). A week of fewer than two sessions is left out: it neither earns one nor
 // breaks a run. Perfect Month is four Perfect Weeks in a row; the week under way breaks nothing
 // until it is over. The weeks come from badge_weeks (S._bdgWeeks), since a rider's own list of
 // sessions knows only the nights they rode; without it neither badge can be told, so both stay
@@ -11337,7 +11341,7 @@ function _mrBadges(all,completed,seasons,cust){
   const fuel=all.some(e=>entryAddons(e).length);
   const streak=_mrStreak(completed);
   const day=e=>String(e.sessionDate||'').slice(0,10),ses=new Map((S.sessions||[]).map(x=>[x.id,x]));
-  const night={};all.forEach(e=>{const d=day(e);if(!d)return;const n=night[e.sessionId]||(night[e.sessionId]={d,done:false,noshow:false});if(_rideCompleted(e))n.done=true;else if(e.status==='noshow')n.noshow=true;});
+  const night={};all.forEach(e=>{const d=day(e);if(!d)return;const n=night[e.sessionId]||(night[e.sessionId]={d,done:false,noshow:false});if(_bdgRode(e))n.done=true;else if(e.status==='noshow')n.noshow=true;});
   const nights=Object.entries(night).sort((a,b)=>a[1].d.localeCompare(b[1].d)),doneN=nights.filter(([,n])=>n.done);
   const dates=doneN.map(([,n])=>n.d),kinds=new Set();let comm=0,corp=0,gap=false,clean=0,cleanBest=0;
   doneN.forEach(([id])=>{const x=ses.get(id);if(!x)return;const k=_rideKind(x);kinds.add(k);if(k==='saturday')comm++;if(k==='petromin')corp++;});
@@ -11346,7 +11350,7 @@ function _mrBadges(all,completed,seasons,cust){
   const R=_bdgRuns(dates),P=(n,of)=>Math.min(n,of)+'/'+of,pct=cust?_profPct(cust):0,PW=_bdgPerfect(completed);
   const nd96=all.some(e=>(e.status==='done'||e.status==='active')&&(ses.get(e.sessionId)||{}).ride_kind==='snd96');
   return[
-    ...(cust?[{s:'complete_profile',on:pct>=100,p:pct+'%'}]:[]), // Race Ready: only the rider's own page holds the whole profile
+    ...(cust?[{s:'complete_profile',on:pct>=100,p:pct+'%'}]:[]), // Race Ready: from the account's profile (the rider's page, and a staffer's Badges dialog)
     {s:'national_day_96',on:nd96,hide:true}, // the 23 September 2026 ride: shown to those who rode it
     {s:'first_lap',on:rides>=1,p:rides+'/1'},
     {s:'regular',on:rides>=5,p:P(rides,5)},
@@ -11418,7 +11422,7 @@ const BDG_GIVEN_SYS=['marshal','pit_crew','green_flag','super_licence','scrutine
 function _mrBadgeList(cust){
   const all=getQueue().filter(e=>e.customerId===cust.id),given=new Map(_bdgMineList(cust).map(g=>[g.slug,g]));
   const cat=Array.isArray(S._bdgCat)&&S._bdgCat.length?new Map(S._bdgCat.map(b=>[b.slug,b])):null;
-  const ride=_mrBadges(all,all.filter(_rideCompleted),S._bdgSeasons,cust).map(r=>{const g=given.get(r.s),x=BD_SYS[r.s]||[];given.delete(r.s);
+  const ride=_mrBadges(all,all.filter(_bdgRode),S._bdgSeasons,cust).map(r=>{const g=given.get(r.s),x=BD_SYS[r.s]||[];given.delete(r.s);
     return{b:g||r.b||{slug:r.s,system:true,icon:x[0],color:x[1]},on:r.on||!!g,p:r.p,g,sn:r.sn,hide:r.hide&&!r.on&&!g};});
   const manual=(cat?[...cat.values()].filter(b=>!b.auto):BDG_GIVEN_SYS.map(s=>({slug:s,system:true,icon:BD_SYS[s][0],color:BD_SYS[s][1]}))).map(b=>({b,on:false,m:true}));
   const seen=new Set(),L=[];
@@ -31885,8 +31889,9 @@ function _bdgSorted(){return (S.badges||[]).slice().sort((a,b)=>(a.retired-b.ret
 function _bdgKey(x){return x.customer_id+'|'+x.badge_id;}
 function _bdgMerge(rows){const k=new Set(rows.map(_bdgKey));S.custBadges=[...(S.custBadges||[]).filter(x=>!k.has(_bdgKey(x))),...rows];}
 function _bdgDrop(rows){const k=new Set(rows.map(_bdgKey));S.custBadges=(S.custBadges||[]).filter(x=>!k.has(_bdgKey(x)));}
-// The ride badges this account has earned already, from the bookings this device holds.
-function _bdgRideOn(cid){const all=getQueue().filter(e=>e.customerId===cid);return new Set(_mrBadges(all,all.filter(_rideCompleted),(S.badges||[]).filter(b=>b.rule&&!b.retired)).filter(r=>r.on).map(r=>r.s));}
+// The ride badges this account has earned already, from the bookings this device holds, and Race
+// Ready from the account's own profile (it read as never earned here before 2026-10-02).
+function _bdgRideOn(cid){const all=getQueue().filter(e=>e.customerId===cid);return new Set(_mrBadges(all,all.filter(_bdgRode),(S.badges||[]).filter(b=>b.rule&&!b.retired),_custById(cid)).filter(r=>r.on).map(r=>r.s));}
 // A dated badge's windows in a line: "12-01 – 02-29, 2027-02-08 – 2027-03-09 · Rides needed 6".
 function _bdgRuleLine(r){return r&&Array.isArray(r.windows)?r.windows.map(w=>w.from+' – '+w.to).join(', ')+' · '+t('bdgRuleRides')+' '+r.rides:'';}
 function _bdgLine(x){return t('bdgGivenLine').replace('{0}',_bdgDay(x.awarded_at)).replace('{1}',x.awarded_by||'—');}

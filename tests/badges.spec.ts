@@ -161,6 +161,14 @@ test.describe('@staff:community badges', () => {
     await expect(tab.getByRole('button', { name: 'Give to a ride' }).first()).toBeVisible();
   });
 
+  test('an unpaid returned ride is earned by riding in the dialog too', async ({ page }) => {
+    await staff(page, { queue_entries: queue_entries.map((q) => (q.id === 'q1' ? { ...q, paid: false } : q)) });
+    await community(page, 'accounts');
+    await page.locator('#am-cust-rows .am-row[data-cust="c1"] .am-bdg-btn').click();
+    await expect(modal(page).locator('.bdg-list')).toContainText('First Lap');
+    await expect(modal(page).locator('.bdg-list')).toContainText('Earned by riding');
+  });
+
   test('a database without the badges tables: no Badges button, and the tab says why', async ({ page }) => {
     await staff(page, { badges: [], customer_badges: [] });
     await community(page, 'accounts');
@@ -296,7 +304,7 @@ test.describe('@customer:account ride badges from the research', () => {
     window.__ses=(id,d,kind)=>({id,session_date:d,day:'Friday',status:'closed',event_kind:kind&&kind!=='jcc'?'community':null,ride_kind:kind==='jcc'?null:kind});
     window.__e=(sid,d,status,extra)=>Object.assign({id:sid+Math.random(),sessionId:sid,sessionDate:d,status:status||'done',paid:true,customerId:'c1',queueNum:5},extra||{});
     window.__day=day;
-    window.__run=(entries,sessions,seasons)=>{S.sessions=sessions;const L=_mrBadges(entries,entries.filter(_rideCompleted),seasons||[]);return Object.fromEntries(L.map(r=>[r.s,{on:!!r.on,p:r.p||null,hide:!!r.hide}]));};
+    window.__run=(entries,sessions,seasons)=>{S.sessions=sessions;const L=_mrBadges(entries,entries.filter(_bdgRode),seasons||[]);return Object.fromEntries(L.map(r=>[r.s,{on:!!r.on,p:r.p||null,hide:!!r.hide}]));};
   })()`;
   type Got = Record<string, { on: boolean; p: string | null; hide: boolean }>;
   const ev = (page: Page, expr: string) => page.evaluate(expr) as Promise<Got>;
@@ -307,6 +315,17 @@ test.describe('@customer:account ride badges from the research', () => {
     await page.evaluate(setup);
   }
   const nights = (spec: [number, string, string?][]) => `(()=>{const S_=[],E=[];${JSON.stringify(spec)}.forEach(([n,kind,st],i)=>{const d=__day(n),id='s'+i;S_.push(__ses(id,d,kind));E.push(__e(id,d,st));});return [E,S_];})()`;
+
+  test('a returned ride counts though staff never ticked Paid (the owner, 2026-10-02)', async ({ page }) => {
+    await page0(page);
+    const r = await ev(page, `(()=>{const E=[],S_=[];[-30,-23,-16,-9,-2].forEach((n,i)=>{const d=__day(n),id='s'+i;S_.push(__ses(id,d,'jcc'));E.push(__e(id,d,'done',{paid:false}));});return __run(E,S_);})()`);
+    expect(r.first_lap.on).toBe(true);
+    expect(r.regular).toEqual({ on: true, p: '5/5', hide: false });
+    expect(r.streak.on).toBe(true);
+    // Still not a ride: booked, checked in or a no-show.
+    const not = await ev(page, `(()=>{const E=[],S_=[];['waiting','checked_in','noshow'].forEach((st,i)=>{const d=__day(-3-i),id='s'+i;S_.push(__ses(id,d,'jcc'));E.push(__e(id,d,st,{paid:true}));});return __run(E,S_);})()`);
+    expect(not.first_lap.on).toBe(false);
+  });
 
   test('Back on Track is a surprise: hidden until a ride two months after the last', async ({ page }) => {
     await page0(page);
