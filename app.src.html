@@ -11102,10 +11102,9 @@ function closeRateModal(){
 // pool and workshop session out of My Rides, the ride count, the tier, the badges and the
 // rating prompt, so a member with ten Saturday rides read as a newcomer with none.
 function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId));}
-// A ride that earns badges: the bike came back (done), paid or not (the owner, 2026-10-02: "make sure
-// every customer that deserves a badge gets it"). Whether staff ticked Paid is the till's business,
-// not the rider's: 21 returned rides on prod were never ticked and their riders went without.
-function _bdgRode(e){return !!e&&e.status==='done';}
+// A ride earns badges only once it is marked Paid (or is on a free ride): the owner, 2026-10-02,
+// "dont count a ride towards a badge unless it was marked paid".
+function _bdgRode(e){return _rideCompleted(e);}
 function _pendingRatingId(){
   const cust=S.loggedIn;if(!cust)return null;
   const today=todayStr();
@@ -11335,7 +11334,7 @@ function _mrBadges(all,completed,seasons,cust){
   // Not on a ride staff approve: its numbers are never shown to riders, and a badge for being
   // #1 there would tell them their place in an order the card is careful to keep to itself.
   const anyP1=all.some(e=>e.queueNum===1&&e.status!=='cancelled'&&e.status!=='removed'&&!_apprSessIds.has(e.sessionId));
-  const carbon=all.some(e=>(e.typePreference==='Road Carbon')&&(e.status==='done'||e.status==='active'));
+  const carbon=all.some(e=>(e.typePreference==='Road Carbon')&&(e.status==='done'||e.status==='active')&&(!!e.paid||_freeSessIds.has(e.sessionId)));
   const bySess={};all.forEach(e=>{if(e.status!=='cancelled'&&e.status!=='removed')bySess[e.sessionId]=(bySess[e.sessionId]||0)+1;});
   const squadMax=Object.values(bySess).reduce((m,v)=>Math.max(m,v),0);
   const fuel=all.some(e=>entryAddons(e).length);

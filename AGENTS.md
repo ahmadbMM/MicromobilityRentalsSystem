@@ -307,8 +307,8 @@ shown once the one before is earned), Clean Sheet (10 nights in a row with no no
 them through `badge_seasons()` and see one while its window is open or opens within 30 days
 (`_bdgSeason`). Winter Series, Ramadan Nights (Umm al-Qura windows to 2028 - move a day after the
 sighting) and Founding Day ship dated. A badge once earned stays: Hot Streak reads the best run.
-Badges count a ride when the bike came back (`_bdgRode`: status done), paid or not - not
-`_rideCompleted`, which also wants Paid ticked (2026-10-02: 21 returned rides were never ticked); the
+Badges count a ride only once it is marked Paid or is on a free ride (`_bdgRode` = `_rideCompleted`;
+the owner, 2026-10-02 - Road Carbon too; National Day 96 stays paid or not, as it shipped); the
 staff Badges dialog passes the account to `_mrBadges`, so Race Ready shows there as earned too.
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
 their past members-only rides.
