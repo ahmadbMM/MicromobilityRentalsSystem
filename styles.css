@@ -3922,6 +3922,9 @@
     }
     :is(html[lang="ar"],html[lang="ur"]) body.view-staff .snav-group{letter-spacing:0;text-transform:none;}
     body.view-staff #staff-tab-nav .snav-group:first-child{padding-top:2px;}
+    /* The rail scrolls when its sections outgrow the screen; nothing in it is squeezed to fit (Settings made
+       it one row taller than a 768px screen, and the flex column shrank the group headings to half a line). */
+    body.view-staff #staff-tab-nav>*{flex-shrink:0;}
     body.view-staff #staff-tab-nav.desk-mode .snav-group{display:none;}
     body.view-staff #staff-tab-nav .tab-btn{
       display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;
@@ -4555,6 +4558,8 @@
       body.view-staff.rail-hover #staff-tab-nav:hover .snav-group{height:auto;padding-top:14px;padding-bottom:5px;}
       /* the low-stock badge would clip in the narrow rail — pin it to the icon */
       body.view-staff.rail-hover #staff-tab-nav .tab-btn .tab-badge{position:absolute;top:4px;inset-inline-end:6px;}
+      /* opened under the pointer, the label is back, and its count sits beside it as on the pinned rail */
+      body.view-staff.rail-hover #staff-tab-nav:hover .tab-btn .tab-badge{position:static;}
       body.view-staff.rail-hover #staff-tab-nav .tab-btn{position:relative;}
     }
     /* tablets/phones use the horizontal strip: no collapsing, no pin button */
