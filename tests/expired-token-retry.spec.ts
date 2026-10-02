@@ -39,7 +39,7 @@ test('a sign-in token the server refuses is renewed once and the sessions load',
     return route.fallback();
   });
   await page.addInitScript((u) => {
-    localStorage.setItem('sb-amyqxovbnlreassrqihr-auth-token', JSON.stringify({
+    localStorage.setItem('sb-qpffkzmsfyilicwcsszz-auth-token', JSON.stringify({
       access_token: 'stale-jwt', token_type: 'bearer', expires_in: 3600,
       expires_at: Math.floor(Date.now() / 1000) + 3 * 3600, refresh_token: 'r1', user: u,
     }));

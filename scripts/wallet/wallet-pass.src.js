@@ -34,7 +34,7 @@ import { zipSync } from 'fflate';
 import { PASS_IMAGES, RIDE_IMAGES } from './pass-images.js';
 import { b64ToBytes, bytesToB64, certPemToDer, importSigner, keyPemToPkcs8, openP12, sha1hex, signDetached } from './sign.js';
 
-const SUPA_DEFAULT = "https://amyqxovbnlreassrqihr.supabase.co";
+const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const DIRECTIONS = "https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7";
 export async function onRequestPost(context) {
   const { request, env } = context;

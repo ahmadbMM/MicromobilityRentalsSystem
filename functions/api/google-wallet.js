@@ -11,7 +11,7 @@
 // GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM (its client_email and PKCS#8 private_key; the key
 // may keep the file's escaped "\n" line breaks); optional SUPABASE_URL, SUPABASE_ANON_KEY (required).
 // Without them the function answers 501 and the app hides its button.
-const SUPA_DEFAULT = "https://amyqxovbnlreassrqihr.supabase.co";
+const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
 const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", event: "Event" };
 

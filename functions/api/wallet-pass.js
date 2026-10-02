@@ -1296,7 +1296,7 @@ async function signDetached(signer, data, extraCerts = [], now = /* @__PURE__ */
 }
 
 // scripts/wallet/wallet-pass.src.js
-var SUPA_DEFAULT = "https://amyqxovbnlreassrqihr.supabase.co";
+var SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 var DIRECTIONS = "https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7";
 async function onRequestPost(context) {
   const { request, env } = context;

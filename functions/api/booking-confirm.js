@@ -15,7 +15,7 @@ export async function onRequestPost(context) {
   const { customerId, token, bookingId } = body || {};
   if (!customerId || !token || !bookingId) return json({ ok: false, error: 'missing fields' }, 400);
 
-  const SUPA = env.SUPABASE_URL || 'https://amyqxovbnlreassrqihr.supabase.co';
+  const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
   const ANON = env.SUPABASE_ANON_KEY;
   if (!ANON) return json({ ok: false, error: 'no anon key' }, 500);
 

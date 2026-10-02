@@ -6,7 +6,7 @@ All schema changes from now on live here as timestamped SQL files managed by the
 ```bash
 npm i -g supabase          # or: brew install supabase/tap/supabase
 supabase login
-supabase link --project-ref amyqxovbnlreassrqihr
+supabase link --project-ref qpffkzmsfyilicwcsszz
 ```
 
 ## Capture the baseline (do this once, before the first new migration)

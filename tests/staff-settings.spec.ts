@@ -48,7 +48,7 @@ test('the name is saved to the account and the bar shows it', async ({ page }) =
 });
 
 test('a picture is added, and shows on the page and in the bar', async ({ page }) => {
-  const url = 'https://amyqxovbnlreassrqihr.supabase.co/storage/v1/object/public/photos/p/abc.jpg';
+  const url = 'https://qpffkzmsfyilicwcsszz.supabase.co/storage/v1/object/public/photos/p/abc.jpg';
   await open(page, { 'rpc:staff_my_settings': { display_name: null, photo: url, nt_off: [] } });
   // a 2x2 PNG
   const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEklEQVR4nGP4z8DwHwyBNBgDADXpBvqGGvb3AAAAAElFTkSuQmCC', 'base64');
