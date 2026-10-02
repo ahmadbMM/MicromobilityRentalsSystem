@@ -3147,5 +3147,14 @@
   "lfxGoneSub": "Maaaring sarado na ang iyong sign-up, o nagpadala kami ng mas bagong link. Kung kailangan mo ng tulong, mag-message sa amin sa WhatsApp.",
   "lfxErrHeight": "Ilagay ang iyong taas sa cm, mula 80 hanggang 250.",
   "laMsgFix": "Ipadala ito sa taong nag-sign up. Ang link ay humihingi lang ng pinili mo; titigil itong gumana kapag humingi ka ulit, o kapag tapos na o kinansela ang sign-up.",
-  "landJccMeta": "Linggo at Martes · 9-11 ng gabi"
+  "landJccMeta": "Linggo at Martes · 9-11 ng gabi",
+  "rmBtn": "Mga mensahe para sa rider na ito",
+  "rmTitle": "Mga mensahe para kay {0}",
+  "rmSub": "Pumili ng mensahe, saka kopyahin o ipadala sa WhatsApp.",
+  "rmRide": "Detalye ng ride",
+  "rmRideSub": "Ang araw, oras, tagpuan at booking link ng ride",
+  "rmPrivacy": "Paalala sa litrato at privacy",
+  "rmPrivacySub": "Magpaalam bago kunan o i-share ang ibang miyembro",
+  "rmEtiq": "Asal sa kalsada",
+  "rmEtiqSub": "Ligtas na pagbibisikleta bilang grupo sa pampublikong kalsada, at ang support van"
 }

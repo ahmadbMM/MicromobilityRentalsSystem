@@ -3147,5 +3147,14 @@
   "lfxGoneSub": "Sua inscrição pode já estar encerrada, ou enviamos um link mais recente. Se precisar de ajuda, fale com a gente no WhatsApp.",
   "lfxErrHeight": "Informe sua altura em cm, entre 80 e 250.",
   "laMsgFix": "Envie isto para a pessoa inscrita. O link pede só o que você escolheu; ele deixa de funcionar se você pedir de novo, ou quando a inscrição for concluída ou cancelada.",
-  "landJccMeta": "Dom. e ter. · 21h-23h"
+  "landJccMeta": "Dom. e ter. · 21h-23h",
+  "rmBtn": "Mensagens para este ciclista",
+  "rmTitle": "Mensagens para {0}",
+  "rmSub": "Escolha uma mensagem e copie ou envie pelo WhatsApp.",
+  "rmRide": "Detalhes do passeio",
+  "rmRideSub": "O dia, os horários, o ponto de encontro e o link de reserva",
+  "rmPrivacy": "Lembrete de fotos e privacidade",
+  "rmPrivacySub": "Pedir antes de fotografar ou compartilhar outros membros",
+  "rmEtiq": "Etiqueta na estrada",
+  "rmEtiqSub": "Pedalar em grupo com segurança em vias públicas, e a van de apoio"
 }

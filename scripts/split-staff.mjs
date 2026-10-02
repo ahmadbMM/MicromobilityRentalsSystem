@@ -932,7 +932,9 @@ export function formatBareWrites(r, limit = 20) {
 // desk's core, what a booth tablet parses before it draws) and twelve section parts fetched after the
 // first paint: the same code, but thirteen gzip streams instead of one cost ~15 KB more in all. The
 // core, 158 KB where the whole half was 297, keeps its own budget so the saving stays.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 225, staff: 315, core: 165 };
+// 2026-10-02: staff 315 -> 318. The Saturday ride's three messages (_rmRender) are the owner's
+// wording, two of them long (~1.6 KB gzipped); only staff devices download them.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 225, staff: 318, core: 165 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
