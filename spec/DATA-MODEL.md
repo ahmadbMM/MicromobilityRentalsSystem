@@ -4,7 +4,7 @@ Every table, column, type and relationship actually used by the app, how each fi
 populated and consumed, plus every RPC, trigger, policy and Pages Function.
 
 Schema facts in this document were read from the **live production database**
-(Supabase project `amyqxovbnlreassrqihr`, region `ap-south-1`, Postgres 17.6) via
+(Supabase project `qpffkzmsfyilicwcsszz`, region `eu-central-1` (Frankfurt) since 2026-10-02 - before that `amyqxovbnlreassrqihr` in `ap-south-1`; Postgres 17.6) via
 `information_schema`, `pg_proc`, `pg_policies`, `pg_indexes` and `pg_trigger`, not from
 the migration files. Where a migration file disagrees with production, production wins and
 the difference is called out.

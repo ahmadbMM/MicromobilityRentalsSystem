@@ -11,7 +11,7 @@ contract itself.
 ### 1.1 Client construction
 
 ```js
-const SUPABASE_URL = 'https://amyqxovbnlreassrqihr.supabase.co';
+const SUPABASE_URL = 'https://qpffkzmsfyilicwcsszz.supabase.co';
 const SUPABASE_KEY = '<anon key, shipped publicly in the bundle>';
 sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 ```

@@ -19,7 +19,7 @@ API contract in §4 is then exactly what the new frontend must call.
 - **Live site:** https://micromobilityrentals.pages.dev (Cloudflare Pages, static, no build server).
 - **Current frontend:** one vanilla-JS single-page app (`app.src.html`, minified to `index.html`).
   The new site may use any stack — this spec is behavioral, not technological.
-- **Backend:** Supabase project `amyqxovbnlreassrqihr` (region ap-south-1).
+- **Backend:** Supabase project `qpffkzmsfyilicwcsszz` (region eu-central-1, Frankfurt) since 2026-10-02; before that `amyqxovbnlreassrqihr` (ap-south-1).
   Postgres + RPCs + Realtime + Storage (public bucket `photos`, files under `p/`).
 - **Trilingual:** English, Arabic (full RTL), Spanish. Every user-visible string exists in
   all three; language is a persistent user choice. EN/AR/ES key parity is a hard rule.
@@ -362,8 +362,8 @@ goes live. Both sites can run side by side during the transition.
 
 ```js
 // Supabase JS v2 client - same credentials the current app ships publicly
-const SUPABASE_URL = 'https://amyqxovbnlreassrqihr.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFteXF4b3ZibmxyZWFzc3JxaWhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwOTk0NzUsImV4cCI6MjA5ODY3NTQ3NX0.NzlLzOqZfTqx2TyeyNeqXwDPfvcPV2q4DHqPrlS8Tjk';
+const SUPABASE_URL = 'https://qpffkzmsfyilicwcsszz.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwZmZrem1zZnlpbGljd2Nzc3p6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyNDQwODAsImV4cCI6MjEwNTgyMDA4MH0.K6qZpK0oR4MXIaFk4DRJGy-H_m6BYnJ-S31swTiHMhQ';
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 ```
 

@@ -1,5 +1,7 @@
 -- ============================================================================
 -- MicroMobility — NEW Supabase project setup (amyqxovbnlreassrqihr)
+-- HISTORICAL (July 2026): written for the project that was production until 2026-10-02. The move to
+-- qpffkzmsfyilicwcsszz copied the whole schema with its grants; do not run this on today's database.
 -- Run this ENTIRE file once in the new project → SQL Editor → New query.
 -- Idempotent: safe to re-run, safe whether or not supabase_schema.sql was
 -- already applied.

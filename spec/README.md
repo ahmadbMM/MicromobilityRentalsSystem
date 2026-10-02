@@ -22,7 +22,7 @@ designer and a developer who have never seen this codebase can recreate it exact
 ## How they were produced
 
 - **Schema, RPCs, triggers, policies and indexes** were read from the **live production
-  database** (`amyqxovbnlreassrqihr`) via `information_schema` / `pg_proc` / `pg_policies` /
+  database** (`amyqxovbnlreassrqihr`, production until the move to `qpffkzmsfyilicwcsszz` on 2026-10-02) via `information_schema` / `pg_proc` / `pg_policies` /
   `pg_indexes` / `pg_trigger` — not from migration files, which can lag.
 - **Client behaviour** was read from [`app.src.html`](../app.src.html) (17,969 lines), the only
   editable source. `index.html` is a generated build artefact and was ignored.
