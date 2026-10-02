@@ -645,3 +645,13 @@ test('a badge earned by riding counts and lists the riders who earned it', async
   // First Lap: everyone who has ridden and paid (Lina, Omar, and Sara on the older ride), none of them stored
   await expect(page.locator('#tab-community .bdg-row[data-badge="bd_first_lap"]')).toContainText('3 holders');
 });
+
+// Fuel Stop counts extras on a booking marked Paid, never ones added and left unpaid (the owner, 2026-10-02).
+test('Fuel Stop needs the booking with the extras to be marked paid', async ({ page }) => {
+  await staff(page);
+  const fuel = (rows: string) => page.evaluate(`(()=>{const all=${rows}.map(entryFromDB);return _mrBadges(all,all.filter(_bdgRode),[],null).find(r=>r.s==='fuel').on;})()`);
+  const r = (paid: boolean, status = 'done') => JSON.stringify([{ ...row('f1', P1, 1, 'Lina Haddad', 'c1', status, paid), addons: JSON.stringify([{ id: 'gel', qty: 1 }]) }]);
+  expect(await fuel(r(false))).toBe(false);          // extras, not paid
+  expect(await fuel(r(true))).toBe(true);            // extras, paid
+  expect(await fuel(r(true, 'cancelled'))).toBe(false); // a cancelled booking's extras were never had
+});

@@ -11409,7 +11409,9 @@ function _mrBadges(all,completed,seasons,cust){
   const carbon=all.some(e=>(e.typePreference==='Road Carbon')&&(e.status==='done'||e.status==='active')&&(!!e.paid||_freeSessIds.has(e.sessionId)));
   const bySess={};all.forEach(e=>{if(e.status!=='cancelled'&&e.status!=='removed')bySess[e.sessionId]=(bySess[e.sessionId]||0)+1;});
   const squadMax=Object.values(bySess).reduce((m,v)=>Math.max(m,v),0);
-  const fuel=all.some(e=>entryAddons(e).length);
+  // Fuel Stop: extras on a booking marked Paid (the owner, 2026-10-02: "dont give the fuel stop badge to bookings
+  // that added extras without paying for them"). Add-ons follow their booking's paid state.
+  const fuel=all.some(e=>entryAddons(e).length&&!!e.paid&&e.status!=='cancelled'&&e.status!=='removed');
   const streak=_mrStreak(completed);
   const day=e=>String(e.sessionDate||'').slice(0,10),ses=new Map((S.sessions||[]).map(x=>[x.id,x]));
   const night={};all.forEach(e=>{const d=day(e);if(!d)return;const n=night[e.sessionId]||(night[e.sessionId]={d,done:false,noshow:false});if(_bdgRode(e))n.done=true;else if(e.status==='noshow')n.noshow=true;});
