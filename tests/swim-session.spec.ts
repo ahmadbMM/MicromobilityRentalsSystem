@@ -66,7 +66,7 @@ test('the swimmer agrees to a swim waiver, not a cycling one', async ({ page }) 
   await asMember(page);
   await page.evaluate(`S.selSession='${SWIM}';regNextFromSession()`);
   const panel = page.locator('#tab-register');
-  await expect(panel).toContainText('swimming carries risk');
+  await expect(panel).toContainText('Swimming carries risk');
   await expect(panel).not.toContainText('wear a helmet');
   await expect(panel).not.toContainText('rented bike');
   // the wrapper has to name the activity too, or the record says a swimmer accepted a
@@ -95,7 +95,7 @@ test('the booking carries the sentinel type and the swim waiver version', async 
   const e = JSON.parse(rpc[0]).p_entries[0];
   expect(e.type_preference).toBe('None');   // not 'Any' — that would mean "any bike will do"
   expect(e.size).toBe('');
-  expect(e.waiver_version).toBe('swim-2026-08-v1');
+  expect(e.waiver_version).toBe('swim-2026-10-v2');
   expect(e.price).toBe(0);                  // free, like the Saturday ride
 });
 
