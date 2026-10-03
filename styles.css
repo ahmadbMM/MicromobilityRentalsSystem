@@ -1461,6 +1461,11 @@
     .bdg-note{font-size:12px;font-style:italic;color:var(--text);overflow-wrap:anywhere;}
     .bdg-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
     #confirm-modal .bdg-dlg{width:min(94vw,520px);max-height:88vh;overflow-y:auto;}
+    #confirm-modal .ig-dlg{width:min(94vw,420px);max-height:88vh;overflow-y:auto;}
+    .ig-now{margin:14px 0 4px;}
+    .ig-num{font-size:22px;font-weight:900;}
+    .ig-why{margin-top:6px;}
+    .ig-typef{margin-top:12px;}
     #confirm-modal .bdg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
     #confirm-modal .bdg-title{font-size:18px;font-weight:900;min-width:0;overflow-wrap:anywhere;}
     #confirm-modal .bdg-x{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;}
@@ -5239,6 +5244,8 @@ body.fix-open{overflow:hidden;}
 .soc-link svg{width:12px;height:12px;flex-shrink:0;color:var(--muted);}
 .soc-link:hover{color:var(--green);border-color:var(--green);}
 .soc-link:hover svg{color:var(--green);}
+.ig-chip{background:transparent;font-family:inherit;cursor:pointer;}
+.ig-chip.ig-none{color:var(--muted);border-style:dashed;}
 .soc-field{display:flex;align-items:center;gap:6px;}
 .soc-field input{flex:1;min-width:0;}
 .soc-open{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--green);text-decoration:none;white-space:nowrap;padding:6px 4px;}

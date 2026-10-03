@@ -818,6 +818,24 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgRideNone:'No ride in the last 30 days has riders with an account who checked in.',bdgRideHint:'Everyone with an account who checked in on that ride. Riders who already hold it keep theirs.',
   bdgRideGo:'Give to {0} riders',bdgRideDone:'Badge given: {0} to {1} riders of {2}',
   bdgNoDb:'Badges are not set up on the database yet.',
+  igTitle:'Instagram followers',
+  igFollowers:'{0} followers',
+  igAsk:'Followers',
+  igByAuto:'Counted by Instagram · {0}',
+  igByStaff:'Typed by {0} · {1}',
+  igNone:'Not counted yet.',
+  igUnavail:'Instagram can\'t count this account: it is personal, private or not found. You can type the number.',
+  igErr:'The last check failed. Try again later.',
+  igCheck:'Check now',
+  igChecking:'Checking…',
+  igOff:'Automatic counting isn\'t set up yet. You can type the number.',
+  igRate:'Instagram asked us to slow down. Try again in an hour.',
+  igToken:'The Instagram key has expired. Ask an admin to renew it.',
+  igTypeLabel:'Type the number',
+  igTypeBad:'Type a number, like 12400 or 12.4k.',
+  igClear:'Remove the number',
+  igSaved:'Followers saved',
+  igNoDb:'Follower counts are not set up on the database yet.',
   bdgBackOnTrack:'Back on Track',bdgBackOnTrackD:'Came back for a ride after two months away',
   bdgSafetyCar:'Safety Car',bdgSafetyCarD:'Rode 6 weeks running (one quiet week in four is forgiven)',
   bdgEndurance:'Endurance',bdgEnduranceD:'Rode 12 weeks running (one quiet week in four is forgiven)',
@@ -1353,6 +1371,24 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgRideNone:'لا توجد رحلة خلال آخر 30 يوماً فيها راكبون لديهم حسابات وسجّلوا حضورهم.',bdgRideHint:'كل من لديه حساب وسجّل حضوره في تلك الرحلة. من لديه الوسام مسبقاً يبقى وسامه كما هو.',
   bdgRideGo:'منح لـ{0} راكب',bdgRideDone:'مُنح الوسام: {0} إلى {1} راكب في {2}',
   bdgNoDb:'الأوسمة غير مُعدّة في قاعدة البيانات بعد.',
+  igTitle:'متابعو إنستغرام',
+  igFollowers:'{0} متابع',
+  igAsk:'المتابعون',
+  igByAuto:'عدّه إنستغرام · {0}',
+  igByStaff:'أدخله {0} · {1}',
+  igNone:'لم يُعدّ بعد.',
+  igUnavail:'لا يستطيع إنستغرام عدّ هذا الحساب: إنه شخصي أو خاص أو غير موجود. يمكنك إدخال العدد.',
+  igErr:'فشل الفحص الأخير. حاول لاحقاً.',
+  igCheck:'افحص الآن',
+  igChecking:'جارٍ الفحص…',
+  igOff:'العدّ التلقائي غير مُعدّ بعد. يمكنك إدخال العدد.',
+  igRate:'طلب منا إنستغرام التمهّل. حاول بعد ساعة.',
+  igToken:'انتهت صلاحية مفتاح إنستغرام. اطلب من أحد المشرفين تجديده.',
+  igTypeLabel:'أدخل العدد',
+  igTypeBad:'أدخل رقماً، مثل 12400 أو 12.4k.',
+  igClear:'إزالة العدد',
+  igSaved:'تم حفظ المتابعين',
+  igNoDb:'أعداد المتابعين غير مُعدّة في قاعدة البيانات بعد.',
   bdgBackOnTrack:'العودة إلى المسار',bdgBackOnTrackD:'عدت للركوب بعد غياب شهرين',
   bdgSafetyCar:'سيارة الأمان',bdgSafetyCarD:'ركبت 6 أسابيع متتالية (يُغفر أسبوع هادئ واحد من كل أربعة)',
   bdgEndurance:'التحمّل',bdgEnduranceD:'ركبت 12 أسبوعاً متتالية (يُغفر أسبوع هادئ واحد من كل أربعة)',
@@ -2455,10 +2491,10 @@ const _SOC_SVG={
 };
 // Staff-side links to a rider's profiles; nothing when the account has none.
 function _socLinkHtml(net,lbl,h){return`<a class="soc-link" href="${_socUrl(net,h)}" target="_blank" rel="noopener noreferrer" title="${esc(t(lbl))}" aria-label="${esc(t(lbl))} ${esc(h)}${t('opensNewTab')}">${_SOC_SVG[net]}<span dir="ltr">${net==='linkedin'?'':'@'}${esc(h)}</span></a>`;}
-function _socLinksHtml(c){
+function _socLinksHtml(c,extra){
   const v=c&&c.socials&&typeof c.socials==='object'?c.socials:null;if(!v)return'';
   const items=SOCIAL_NETS.filter(([net])=>v[net]).map(([net,lbl])=>_socLinkHtml(net,lbl,v[net]));
-  return items.length?`<div class="soc-links">${items.join('')}</div>`:'';
+  return items.length?`<div class="soc-links">${items.join('')}${extra||''}</div>`:'';
 }
 
 
@@ -32917,7 +32953,7 @@ function _amRowInner(c){
       <div class="am-cust-main">
         <div class="am-cust-name">${esc(c.name||'—')}</div>
         ${contact?`<div class="am-cust-contact">${contact}</div>`:''}
-        ${_socLinksHtml(c)}
+        ${_socLinksHtml(c,_igChipHtml(c))}
         ${S.amMissing&&_amMissingOf(c).length?`<div class="am-meta am-missing">${t('amMissingLine').replace('{0}',_amMissingOf(c).join(', '))}</div>`:''}
         ${_fixPendingLine(c)}
         ${_delReqLine(c)}
@@ -33562,6 +33598,129 @@ async function _bdgDelete(id){
   const r=await sb.from('badges').delete().eq('id',id);if(_writeErr(r,'delete badge')){renderCommunity();return;}
   S.badges=(S.badges||[]).filter(x=>x.id!==id);const msg=`${t('bdgDeleted')}: ${_bdgName(b)}`;toast(msg);logAction(msg);renderCommunity();
 }
+// Instagram followers, staff only (the owner, 2026-10-03; migration 20261003220000). A count sits
+// beside the rider's Instagram link in Community > Accounts; tapping it opens a small dialog to
+// check it now or type it. The number is counted by functions/api/ig-followers.js (Instagram's
+// Business Discovery, which answers for Business and Creator accounts only; dormant until the Meta
+// keys are set) or typed by a staffer for a personal account. A row counted for an older handle is
+// not shown. Loaded with the badges when Accounts opens (at most every five minutes); a database
+// without the table leaves S.igRows unset and nothing is drawn.
+async function _igLoad(force){
+  if(!sb||S._igBusy||(!force&&S._igAt&&Date.now()-S._igAt<3e5))return;
+  S._igBusy=true;S._igAt=Date.now();
+  const was=_igSig();
+  try{const r=await _pagedAll(()=>sb.from('customer_ig_followers').select('*').order('customer_id'));
+    if(r&&!r.error&&Array.isArray(r.data))S.igRows=new Map(r.data.map(x=>[x.customer_id,x]));
+  }catch(e){}finally{S._igBusy=false;}
+  if(S.view==='staff'&&S.staffTab==='community'&&S.communityTab==='accounts'&&_igSig()!==was)renderCommunity();
+  if(S._igDlg)_igDlgPaint();
+  _igNudge();
+}
+function _igSig(){return S.igRows?[...S.igRows.values()].map(x=>[x.customer_id,x.handle,x.followers,x.status].join()).join('|'):'';}
+// Keeps the numbers fresh without a cron: at most every three hours a staff device asks the server
+// to count the accounts that are due (it counts 25 and refuses a second pass within 20 minutes).
+async function _igNudge(){
+  if(!S.igRows||S._igOff)return;
+  try{const at=+localStorage.getItem('cq_ig_nudge')||0;if(Date.now()-at<108e5)return;localStorage.setItem('cq_ig_nudge',String(Date.now()));}catch(e){return;}
+  const r=await _igCall({stale:true});
+  if(r&&r.checked)_igLoad(true);
+}
+async function _igCall(body){
+  try{
+    const{data:sess}=await sb.auth.getSession();
+    const tok=sess&&sess.session&&sess.session.access_token;if(!tok)return null;
+    const res=await fetch('/api/ig-followers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({staffToken:tok,...body})});
+    const j=await res.json().catch(()=>null);
+    if(j&&j.skipped)S._igOff=true;
+    return j;
+  }catch(e){return null;}
+}
+function _igHandle(c){const v=c&&c.socials&&typeof c.socials==='object'?c.socials:null;const h=String((v&&v.instagram)||'').trim().replace(/^@+/,'');return /^[A-Za-z0-9._]{1,30}$/.test(h)?h:'';}
+// The row for the account's CURRENT handle, else null.
+function _igRow(c){const h=_igHandle(c),r=h&&S.igRows&&S.igRows.get(c.id);return r&&r.handle===h?r:null;}
+function _igFmt(n,compact){try{return Number(n).toLocaleString(_locale(),compact?{notation:'compact',maximumFractionDigits:1}:{});}catch(e){return String(n);}}
+function _igChipHtml(c){
+  if(!S.igRows||!_igHandle(c))return'';
+  const r=_igRow(c),n=r&&r.followers!=null?r.followers:null;
+  const lbl=n!=null?t('igFollowers').replace('{0}',_igFmt(n,true)):t('igAsk');
+  return`<button type="button" class="soc-link ig-chip${n!=null?'':' ig-none'}" data-on-click="${_on("_igOpen",c.id)}" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}">${_artIcon('people',12)}<span>${esc(lbl)}</span></button>`;
+}
+function _igOpen(cid){S._igDlg={cid,typed:'',msg:'',busy:false};_igDlgPaint(true);_igLoad();}
+function _igClose(){S._igDlg=null;closeConfirm();}
+function _igBackdrop(event,el){if(event.target===el)_igClose();}
+function _igTyped(event,el){if(S._igDlg)S._igDlg.typed=el.value;}
+function _igDlgPaint(open){
+  const d=S._igDlg,m=document.getElementById('confirm-modal');if(!d||!m)return;
+  if(!open&&!m.querySelector('.ig-dlg')){S._igDlg=null;return;}
+  const c=_custById(d.cid)||{},h=_igHandle(c),r=_igRow(c);
+  const day=x=>x?shortDate(fmtDate(new Date(x))):'';
+  let now;
+  if(!S.igRows)now=`<div class="am-meta">${t(S._igBusy?'loadingLabel':'igNoDb')}</div>`;
+  else{
+    const n=r&&r.followers!=null?`<div class="ig-num">${esc(t('igFollowers').replace('{0}',_igFmt(r.followers)))}</div><div class="am-meta">${esc(r.source==='auto'?t('igByAuto').replace('{0}',day(r.counted_at)):t('igByStaff').replace('{0}',r.updated_by||'—').replace('{1}',day(r.counted_at)))}</div>`:`<div class="am-meta">${t('igNone')}</div>`;
+    const why=r&&r.status==='unavailable'?t('igUnavail'):r&&r.status==='error'?t('igErr'):'';
+    now=n+(why?`<div class="am-meta ig-why">${esc(why)}</div>`:'');
+  }
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_igBackdrop",_EV,_EL)}"><div class="confirm-box ig-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}">
+    <div class="bdg-head"><div class="bdg-title">${t('igTitle')} · ${esc(c.name||'')}</div><button type="button" class="bdg-x" data-on-click="${_on("_igClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
+    ${h?`<div class="soc-links">${_socLinkHtml('instagram','socInstagram',h)}</div>`:''}
+    <div class="ig-now">${now}</div>
+    ${d.msg||(S._igOff&&S.igRows)?`<div class="am-meta ig-why" role="status">${esc(d.msg||t('igOff'))}</div>`:''}
+    ${S.igRows&&h?`<div class="form-group ig-typef"><label for="ig-typed">${t('igTypeLabel')}</label><input id="ig-typed" type="text" inputmode="numeric" dir="ltr" maxlength="14" placeholder="12400" value="${esc(d.typed)}" data-on-input="${_on("_igTyped",_EV,_EL)}"></div>`:''}
+    <div class="bdg-foot">
+      ${r?`<button type="button" class="btn-secondary" data-on-click="${_on("_igClear")}">${t('igClear')}</button>`:''}
+      ${S.igRows&&h&&!S._igOff?`<button type="button" class="btn-secondary" data-on-click="${_on("_igCheck")}"${d.busy?' disabled':''}>${t(d.busy?'igChecking':'igCheck')}</button>`:''}
+      ${S.igRows&&h?`<button type="button" class="btn-primary" data-on-click="${_on("_igSave")}">${t('saveBtn')}</button>`:''}
+    </div>
+  </div></div>`;
+}
+// "12,400", "12.4k", "1.2m", Arabic-Indic digits too.
+function _igParse(v){
+  const s=String(v||'').replace(/[٠-٩]/g,ch=>'0123456789'['٠١٢٣٤٥٦٧٨٩'.indexOf(ch)]).replace(/[,\s٬]/g,'').replace('٫','.');
+  const m=s.match(/^(\d+(?:\.\d+)?)([kKmM])?$/);if(!m)return null;
+  const n=Math.round(parseFloat(m[1])*(m[2]?(/k/i.test(m[2])?1e3:1e6):1));
+  return n>=0&&n<=2e9?n:null;
+}
+async function _igSave(){
+  const d=S._igDlg;if(!d||d.busy)return;
+  const c=_custById(d.cid)||{},h=_igHandle(c),n=_igParse(d.typed);
+  if(!h)return;
+  if(n==null){toast(t('igTypeBad'),'warning');return;}
+  const prev=S.igRows&&S.igRows.get(d.cid);
+  const row={customer_id:d.cid,handle:h,followers:n,source:'staff',counted_at:new Date().toISOString(),status:prev&&prev.handle===h?prev.status:'ok',tried_at:prev&&prev.handle===h?prev.tried_at:null,updated_by:(_opName()||'Staff').slice(0,60)};
+  d.busy=true;
+  const bad=await _wr(sb.from('customer_ig_followers').upsert(row,{onConflict:'customer_id'}),'save instagram followers');
+  d.busy=false;
+  if(bad){_igDlgPaint();return;}
+  S.igRows.set(d.cid,row);d.typed='';d.msg='';
+  const msg=`${t('igSaved')}: ${c.name||''}`;toast(msg);logAction(msg);
+  _igAfter(d.cid);
+}
+async function _igClear(){
+  const d=S._igDlg;if(!d||d.busy)return;
+  const c=_custById(d.cid)||{};
+  if(await _wr(sb.from('customer_ig_followers').delete().eq('customer_id',d.cid),'clear instagram followers'))return;
+  S.igRows&&S.igRows.delete(d.cid);d.msg='';
+  logAction(`${t('igClear')}: ${c.name||''}`);
+  _igAfter(d.cid);
+}
+async function _igCheck(){
+  const d=S._igDlg;if(!d||d.busy)return;
+  d.busy=true;d.msg='';_igDlgPaint();
+  const j=await _igCall({customerIds:[d.cid]});
+  d.busy=false;
+  if(!S._igDlg)return;
+  if(!j)d.msg=t('errConnection');
+  else if(j.skipped)d.msg=t('igOff');
+  else if(j.stopped==='rate')d.msg=t('igRate');
+  else if(j.stopped==='token')d.msg=t('igToken');
+  else if(j.error)d.msg=t('errConnection');
+  (j&&Array.isArray(j.results)?j.results:[]).forEach(x=>{if(x&&x.customer_id&&!x.error&&S.igRows)S.igRows.set(x.customer_id,x);});
+  _igAfter(d.cid);
+}
+// After a change: the dialog and the rider's row.
+function _igAfter(cid){if(S._igDlg)_igDlgPaint();if(S.view==='staff'&&S.staffTab==='community'&&S.communityTab==='accounts'&&!_amRepaintRow(cid))renderCommunity();}
 function renderCommunity(){
   _pushNav(); // the address follows the view (its tabs)
   const el=document.getElementById('tab-community');if(!el)return;
@@ -33569,6 +33728,7 @@ function renderCommunity(){
   const sub=['stats','accounts','badges','flagged','applications','learning','birthdays','duplicates'].includes(S.communityTab)&&!(S.communityTab==='duplicates'&&!isAdmin())?S.communityTab:'leaderboard';
   if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy)_mgLoad(); // the recent merges, once
   if(sub==='accounts'||sub==='badges')_bdgLoad(); // the badges and who holds them, at most every five minutes
+  if(sub==='accounts')_igLoad(); // the Instagram follower counts, likewise
   const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length;
   // the pending counts on the Applications pill: both of its lists
   if(!S._caApps&&!S._caBusy&&!S._caErr&&sub!=='applications')_caLoad();
