@@ -3377,6 +3377,7 @@ async function _loadDataInner(showLoader){
   _rtReplaySince(startToken);_rtReplaySince(startToken,'ref');_coreLoadOk=true;
   if(!q.error&&S._netDown){S._netDown=false;_updateConnUI();}
   S.dataLoaded=true; // first successful load - render real content instead of skeletons
+  setTimeout(()=>{try{_forceRatingPrompt();}catch(e){}},0); // a ride waiting for its rating takes the screen the moment the rider's bookings are in: opening the site, signing in (the owner, 2026-10-03)
   S._cacheOnly=false; // the queue's opening session can now be chosen from real data (_sfDefaultToToday)
   if(_firstLoad){
     Promise.all([_refP,_optP]).then(async()=>{
@@ -7018,6 +7019,7 @@ async function _commAskCheck(cust){
   const cur=S.loggedIn;if(!cur||cur.id!==cust.id||S.view==='staff'||S._pg||S._fix)return;
   if(!S.dataLoaded){if(fields.length)_fixGate(null);return;} // no bookings to count yet: the check-up alone
   _profileGate(()=>_profileGate(null)); // the check-up, then the profile page if it is due too
+  try{_forceRatingPrompt();}catch(e){} // and a ride waiting for its rating (it waits behind any page above)
 }
 function _fixWasHtml(k,c){
   let v='';

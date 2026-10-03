@@ -81,6 +81,15 @@ test('a Saturday social ride asks the ride and the breakfast with their parts, a
   await expect.poll(() => open(page)).toBe(false);
 });
 
+test('it opens by itself the moment the site opens signed in, on whatever page that is', async ({ page }) => {
+  const q = [row('q1', today)];
+  await stubSupabase(page, { sessions: [sess(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true });
+  await loginCustomer(page, { id: 'c1' });
+  await page.goto('/');
+  await waitForSb(page);
+  await expect.poll(() => open(page)).toBe(true); // no tab picked, no My Bookings drawn
+});
+
 test('it waits for the next visit: a ride from an earlier day is asked about', async ({ page }) => {
   await page.clock.setSystemTime(new Date('2026-10-06T09:00:00+03:00'));
   await boot(page, [sess('2026-10-04')], [row('q1', '2026-10-04')]);
