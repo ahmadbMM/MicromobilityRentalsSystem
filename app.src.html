@@ -18915,6 +18915,17 @@ function _qPaintRest(rest){
 // replaced. The roster's container (#q-results) is kept, never rebuilt, so the list inside it can
 // be patched, and the filter bar keeps its node, its focus and the phone's keyboard while nothing
 // in it changed.
+// What _mountSearchClears adds once a search is on screen - the clear button, has-clear on the box,
+// the wrapper's position - is not part of the markup, so a piece is compared without it. Compared
+// with it, every repaint after the clear button arrived (60 ms after a paint) replaced the filter bar,
+// and a live update while staff typed took the search's focus and a phone's keyboard away.
+function _shellCmpHtml(el){
+  if(!el.querySelector('.search-clear'))return el.outerHTML;
+  const c=el.cloneNode(true);
+  c.querySelectorAll('.search-clear').forEach(b=>{const w=b.parentElement;b.remove();if(w){w.style.removeProperty('position');if(!w.getAttribute('style'))w.removeAttribute('style');}});
+  c.querySelectorAll('.has-clear').forEach(i=>{i.classList.remove('has-clear');if(!i.getAttribute('class'))i.removeAttribute('class');});
+  return c.outerHTML;
+}
 function _qSyncShell(tab,html){
   const tpl=document.createElement('template');tpl.innerHTML=html;_cssvApply(tpl.content); // data-cssv values set as on screen, so an unchanged piece compares equal
   const want=Array.from(tpl.content.children);
@@ -18927,7 +18938,7 @@ function _qSyncShell(tab,html){
       if(at!==results)tab.insertBefore(results,at);
       continue;
     }
-    if(at&&at!==results&&at.outerHTML===w.outerHTML)continue;
+    if(at&&at!==results&&_shellCmpHtml(at)===w.outerHTML)continue;
     if(at&&at!==results)at.replaceWith(w);else tab.insertBefore(w,at);
   }
   while(tab.children.length>want.length){

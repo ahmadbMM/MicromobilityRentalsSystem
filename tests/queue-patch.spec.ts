@@ -86,6 +86,7 @@ test('a booking that arrives takes its place in order, one that leaves is gone, 
 test('the parts around the roster keep their nodes while their markup stands, and a search keeps its focus', async ({ page }) => {
   await boot(page);
   const r = await page.evaluate(`(()=>{
+    _mountSearchClears(); // the clear button arrives 60 ms after a paint; here it is on screen before the repaints, every run
     const bar=document.querySelector('#tab-queue .filter-bar'),strip=document.querySelector('#tab-queue .stat-strip');
     getQueue().find(e=>e.id==='w2').name='Rider Renamed';  // one row's markup; nothing around the roster
     renderStaffQueue();
