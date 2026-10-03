@@ -221,7 +221,8 @@ with expected(fname, want_definer, note) as (values
   ('staff_fnb_decide',       true,  'confirms/declines/cancels a booking and sets the ride breakfast; checks is_staff() itself'),
   ('staff_fnb_date_set',     true,  'opens/closes a date and cancels its bookings; checks is_staff() itself'),
   ('staff_fnb_dates_open',   true,  'opens a range of dates; checks is_staff() itself'),
-  ('staff_fnb_tier_save',    true,  'writes fnb_tiers; checks is_admin() itself')
+  ('staff_fnb_tier_save',    true,  'writes fnb_tiers; checks is_admin() itself'),
+  ('fnb_feedback_save',      true,  'writes fnb_feedback, which no client can write; token-checked')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
