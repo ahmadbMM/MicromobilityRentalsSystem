@@ -14,7 +14,7 @@ import { extname, join, normalize, sep } from 'node:path';
 
 const PORT = Number(process.argv[2] || process.env.PW_PORT || 4173);
 const ROOT = process.cwd();
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|community|ambassadors|partners|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
 const TYPES = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json',

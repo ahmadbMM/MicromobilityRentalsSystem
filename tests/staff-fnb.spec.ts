@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// F&B Partners (owner, 2026-10-03): cafés and restaurants reserve the Saturdays our Saturday social
+// Vendors, first named F&B Partners (owner, 2026-10-03): cafés and restaurants reserve the Saturdays our Saturday social
 // ride's riders come to them for breakfast. Staff confirm one venue per date (the rest are declined
 // by staff_fnb_decide), make the venues' logins and edit the tiers. Admin only; migration 20261003150000.
 
@@ -53,13 +53,13 @@ const panel = (page: Page) => page.locator('#tab-fnb');
 const dialog = (page: Page) => page.locator('#confirm-modal');
 const toMay = (page: Page) => page.evaluate(`S._fnb.month='2099-05';renderFnb()`);
 
-test.describe('@staff:fnb F&B Partners', () => {
+test.describe('@staff:fnb Vendors', () => {
   test('the calendar paints the dates: open with requests waiting, confirmed with the venue, closed with the reason', async ({ page }) => {
     await open(page);
     const item = page.locator('#staff-tab-nav .tab-btn[data-stab="fnb"]');
     await expect(item).toHaveClass(/active/);
     await expect(item.locator('.tab-badge')).toHaveText('2');
-    expect(new URL(page.url()).pathname).toBe('/partners');
+    expect(new URL(page.url()).pathname).toBe('/vendors');
     await toMay(page);
     const day = (d: string) => panel(page).locator(`.fnb-day[data-fnb-day="${d}"]`);
     await expect(day('2099-05-02')).toHaveClass(/st-open/);
@@ -79,7 +79,7 @@ test.describe('@staff:fnb F&B Partners', () => {
   test('confirming a pending request calls staff_fnb_decide, the higher tier listed first', async ({ page }) => {
     const calls = await open(page);
     await panel(page).locator('[data-fnb-view="requests"]').click();
-    expect(new URL(page.url()).pathname).toBe('/partners/requests');
+    expect(new URL(page.url()).pathname).toBe('/vendors/requests');
     const grp = panel(page).locator('.fnb-grp[data-fnb-grp="2099-05-02"]');
     await expect(grp).toContainText('2 venues asking');
     // The higher tier first.
@@ -142,7 +142,7 @@ test.describe('@staff:fnb F&B Partners', () => {
       body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.fnb_tiers' in the schema cache" }),
     }));
     await unlockStaff(page);
-    await page.goto('/partners');
+    await page.goto('/vendors');
     await waitForSb(page);
     await page.waitForFunction(() => S.view === 'staff' && S.staffTab === 'fnb');
     await expect(panel(page).locator('.fnb-not-set-up')).toContainText("isn’t set up yet");
@@ -190,10 +190,10 @@ async function openFeedback(page: Page) {
   return calls;
 }
 
-test.describe('@staff:fnb F&B Partners feedback', () => {
+test.describe('@staff:fnb Vendors feedback', () => {
   test('the Feedback tab lists it newest breakfast first: stars, turnout beside the booked riders, the two answers', async ({ page }) => {
     await openFeedback(page);
-    expect(new URL(page.url()).pathname).toBe('/partners/feedback');
+    expect(new URL(page.url()).pathname).toBe('/vendors/feedback');
     const cards = panel(page).locator('.fnb-fb');
     await expect(cards).toHaveCount(3);
     expect(await cards.evaluateAll((els) => els.map((e) => e.getAttribute('data-fnb-fb')))).toEqual(['12', '13', '16']);
@@ -274,7 +274,7 @@ test.describe('@staff:fnb F&B Partners feedback', () => {
       body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.fnb_feedback' in the schema cache" }),
     }));
     await unlockStaff(page);
-    await page.goto('/partners/feedback');
+    await page.goto('/vendors/feedback');
     await waitForSb(page);
     await page.waitForFunction(() => S.view === 'staff' && S.staffTab === 'fnb');
     await expect(panel(page).locator('.fnb-fb-missing')).toHaveText('Feedback appears here once the database update is applied.');

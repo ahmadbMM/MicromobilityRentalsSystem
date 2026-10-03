@@ -138,17 +138,17 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/website/bikes/categories');
   });
 
-  test('F&B Partners: /partners is the calendar, a sub-view is a second segment', async ({ page }) => {
-    await staff(page, '/partners/venues');
+  test('Vendors: /vendors is the calendar, a sub-view is a second segment', async ({ page }) => {
+    await staff(page, '/vendors/venues');
     await page.waitForFunction(`S.staffTab==='fnb'`);
     expect(await page.evaluate('S.fnbView')).toBe('venues');
-    expect(at(page)).toBe('/partners/venues');
+    expect(at(page)).toBe('/vendors/venues');
     await page.evaluate(`_fnbView('tiers')`);
-    expect(at(page)).toBe('/partners/tiers');
+    expect(at(page)).toBe('/vendors/tiers');
     await page.evaluate(`_fnbView('feedback')`);
-    expect(at(page)).toBe('/partners/feedback');
+    expect(at(page)).toBe('/vendors/feedback');
     await page.evaluate(`_fnbView('calendar')`);
-    expect(at(page)).toBe('/partners');
+    expect(at(page)).toBe('/vendors');
   });
 
   test('/bookings/riders opens the Petromin page; an unknown sub-view opens the section itself', async ({ page }) => {

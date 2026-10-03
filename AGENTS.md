@@ -446,12 +446,12 @@ The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data 
   minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
   with least left (`bd-next`). `tests/ride-night.spec.ts`.
 
-## F&B Partners (2026-10-03)
+## Vendors (F&B, 2026-10-03; renamed from "F&B Partners" the same day, internals keep `fnb`)
 
 Cafés and restaurants ("venues") reserve the Saturdays our Saturday social ride's riders come to them for
 breakfast, on a portal of their own (another repo; its address is `FNB_PORTAL_URL`, '' until the subdomain is
-decided). Staff side: the admin-only section `fnb` at `/partners` (Calendar), `/partners/requests`,
-`/partners/venues`, `/partners/tiers`, all in the staff part `staff-parts/fnb.js` (`renderFnb`). Migration
+decided). Staff side: the admin-only section `fnb` at `/vendors` (Calendar), `/vendors/requests`,
+`/vendors/venues`, `/vendors/tiers`, all in the staff part `staff-parts/fnb.js` (`renderFnb`). Migration
 20261003150000: staff READ the `fnb_*` tables (`fnb_users` only by the columns in `FNB_USER_COLS`) and every
 write is a `staff_fnb_*` function; confirming one request declines the date's others and the database makes
 the venue the ride's breakfast stop. A temporary password (Add login / Reset password) is shown once, in the
@@ -460,7 +460,7 @@ translation keys start with `pfn`, not `fnb`: the customer half builds keys from
 `f…` key would never leave the customer's language pack. `tests/staff-fnb.spec.ts`.
 Feedback (migration 20261003180000): a venue rates a confirmed breakfast from its portal (`fnb_feedback_save`, the day
 itself to 14 days after); staff only read `fnb_feedback`, loaded by `_fnbLoad` as its own answer (a missing table is
-`W.fbMissing`, the other tabs carry on). `/partners/feedback` lists it newest first with drawn stars (`_fnbStars`),
+`W.fbMissing`, the other tabs carry on). `/vendors/feedback` lists it newest first with drawn stars (`_fnbStars`),
 the turnout beside the riders booked on that Saturday ride (`_fnbBooked`, only when the page holds those rows), and
 "Waiting for feedback" counts confirmed dates still inside the 14 days (`_fnbFbWaiting`); the date dialog and the
 venue dialog's bookings show it too.
