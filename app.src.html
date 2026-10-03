@@ -327,7 +327,7 @@ window.mmLoading=(function(){
     <span class="snav-group" data-group="snavPeople" aria-hidden="true">People</span>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Community</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
-    <button class="tab-btn"        data-stab="fnb"       data-on-click='["setStaffTab","fnb"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">F&amp;B Partners</span></button>
+    <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <span class="snav-group" data-group="snavWebsite" aria-hidden="true">Website</span>
     <button class="tab-btn"        data-stab="website"   data-on-click='["setStaffTab","website"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">micromobility.sa</span></button>
     <button class="tab-btn"        data-stab="catalog"   data-on-click='["setStaffTab","catalog"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bikes catalog</span></button>
@@ -352,7 +352,7 @@ window.mmLoading=(function(){
     <div id="tab-workshop"  class="tab-panel"></div>
     <div id="tab-messages"  class="tab-panel"></div>
     <div id="tab-ambassadors" class="tab-panel"></div>
-    <div id="tab-fnb"       class="tab-panel"></div>
+    <div id="tab-vendors"       class="tab-panel"></div>
     <div id="tab-team"      class="tab-panel"></div>
     <div id="tab-settings"  class="tab-panel"></div>
     <div id="tab-dashboard" class="tab-panel"></div>
@@ -1109,7 +1109,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   accPwdCurReq:'Enter your current password.',accPwdBad:'That is not your current password.',accPwdLocked:'Too many wrong tries. Try again in 15 minutes.',
   accPwdSame:'Choose a password different from your current one.',accPwdSaved:'Your password is changed. You stay signed in here; any other phone or computer signed in to your account has been signed out.',
   accPwdShow:'Show password',accPwdHide:'Hide password',custPurchEmpty:'No purchases yet. What you buy at our desk shows here.',custPurchVoided:'Voided',
-  tabFnb:'Vendors',pfnTitle:'Vendors',pfnBadge:'{0} venue requests waiting',pfnSub:'Cafés and restaurants reserve the Saturdays our riders come to them for breakfast. Confirm one venue per date: the other requests are declined, and the confirmed venue becomes the Saturday ride’s breakfast stop.',pfnNotSetUp:'Vendors isn’t set up yet. It appears here once the database update is applied.',pfnLoadErr:'The vendors could not be loaded.',pfnVCal:'Calendar',pfnVReq:'Requests',pfnVVen:'Venues',pfnVTier:'Tiers',pfnOpenSats:'Open Saturdays…',pfnPrevMonth:'Previous month',pfnNextMonth:'Next month',pfnStOpen:'Open',pfnStConfirmed:'Confirmed',pfnStClosed:'Closed',pfnNPending:'{0} pending',pfnLblState:'This date is',pfnLblReason:'Reason',pfnRsRamadan:'Ramadan',pfnRsEid:'Eid',pfnRsWeather:'Weather',pfnRsHoliday:'Holiday',pfnRsOther:'Other',pfnLblCap:'Venues this date takes (1 to 10)',pfnSaveDate:'Save date',pfnRemoveDate:'Remove date',pfnNotListed:'This Saturday is not open to venues yet. Save it to open it.',pfnRideStop:'Saturday ride breakfast stop',pfnRideNone:'No Saturday ride on this date yet.',pfnRideNoStop:'The ride has no breakfast stop yet.',pfnMap:'Map',pfnReqsOn:'Requests for this date',pfnNoReqDay:'No requests for this date.',pfnErrCap:'Capacity: a number from 1 to 10.',pfnErrHasBk:'This date has requests on it, so it can’t be removed. Close it instead.',pfnCloseQ:'Close {0}?',pfnCloseBody:'Closing cancels this date’s {0} live requests and bookings. The venues see the reason.',pfnCloseBtn:'Close the date',pfnDateSaved:'Date saved: {0}',pfnDateRemoved:'Date removed: {0}',pfnOpenTitle:'Open Saturdays',pfnOpenSub:'Every Saturday in the range that is not listed yet opens for venues to request. Dates already listed keep their state.',pfnLblFrom:'From',pfnLblTo:'To',pfnOpenBtn:'Open them',pfnErrRange:'Pick a range of up to 400 days, the end after the start.',pfnOpenedToast:'{0} Saturdays opened',pfnAsked:'asked {0}',pfnBkPending:'Pending',pfnBkConfirmed:'Confirmed',pfnBkDeclined:'Declined',pfnBkCancelled:'Cancelled',pfnAutoDeclined:'Another venue was confirmed',pfnByVenue:'by the venue',pfnByMm:'by MicroMobility',pfnLate:'late cancel',pfnConfirm:'Confirm',pfnDecline:'Decline',pfnCancelBk:'Cancel booking',pfnConfirmQ:'Confirm {0} for {1}?',pfnConfirmBody:'{0} becomes the Saturday ride’s breakfast stop on this date.',pfnConfirmOthers:'The other {0} requests for this date are declined once it is full.',pfnDeclineQ:'Decline {0} for {1}?',pfnCancelQ:'Cancel {0} on {1}?',pfnNoteHint:'A note for the venue (optional). The venue sees it.',pfnConfirmedToast:'{0} confirmed for {1}',pfnDeclinedToast:'{0} declined for {1}',pfnCancelledToast:'{0} cancelled for {1}',pfnErrFull:'This date already has its venue. Raise its capacity or cancel the confirmed one first.',pfnErrNotPending:'This request was already decided. The list is up to date now.',pfnErrNotLive:'This booking is no longer live.',pfnNCompeting:'{0} venues asking',pfnNoReq:'No requests here.',pfnNoMatch:'No venue matches the search.',pfnSearchVenue:'Search venues',pfnAddVenue:'Add venue',pfnVsActive:'Active',pfnVsPaused:'Paused',pfnVsEnded:'Ended',pfnNoVen:'No venues here yet.',pfnOpenVenue:'Open',pfnNextDate:'Next confirmed date',pfnLogins:'Logins',pfnVenueNew:'New venue',pfnLblName:'Name (English)',pfnLblNameAr:'Name (Arabic)',pfnLblKind:'Kind',pfnKCafe:'Café',pfnKRestaurant:'Restaurant',pfnKBakery:'Bakery',pfnKOther:'Other',pfnLblArea:'Area',pfnLblMap:'Map link (https://)',pfnLblSeats:'Seats',pfnLblContact:'Contact name',pfnLblPhone:'Contact mobile',pfnLblEmail:'Contact email',pfnLblOfferEn:'Offer for riders (English)',pfnLblOfferAr:'Offer for riders (Arabic)',pfnLblTier:'Tier',pfnLblStatus:'Status',pfnInactive:'Off',pfnActive:'Active',pfnErrName:'Give the venue a name of 2 to 80 characters.',pfnErrMap:'The map link must start with https://',pfnErrSeats:'Seats: a number from 1 to 2000.',pfnVenueSaved:'Saved: {0}',pfnLblLogin:'Login',pfnLblPerson:'Person’s name',pfnLblRole:'Role',pfnRoleOwner:'Owner',pfnRoleManager:'Manager',pfnLastIn:'Last sign-in',pfnNever:'Never',pfnResetPwd:'Reset password',pfnDeactivate:'Deactivate',pfnActivate:'Activate',pfnNoLogins:'No logins yet.',pfnLoginHint:'Email or mobile number',pfnAddLogin:'Add login',pfnErrLogin:'Enter an email or a mobile number.',pfnErrTaken:'That login is already in use.',pfnTempFor:'Temporary password for {0}',pfnTempOnce:'Shown only this once. Send it now: it must be changed at the first sign-in.',pfnNoPhone:'Add the venue’s contact mobile to send it on WhatsApp.',pfnLoginAdded:'Login added: {0}',pfnPwdReset:'Password reset: {0}',pfnLoginOn:'Login activated: {0}',pfnLoginOff:'Login deactivated: {0}',pfnBookings:'Bookings',pfnUpcoming:'Upcoming',pfnRecent:'Recent',pfnNone:'None yet.',pfnPatterns:'Monthly patterns',pfnOrd1:'1st Saturday',pfnOrd2:'2nd Saturday',pfnOrd3:'3rd Saturday',pfnOrd4:'4th Saturday',pfnOrdLast:'Last Saturday',pfnEvery1:'every month',pfnEveryN:'every {0} months',pfnTiersSub:'Each tier sets how its venues may book: the booking types, a month’s limit, how far ahead, the notice needed and the cancellation cutoff. The higher priority is listed first when venues compete for a date.',pfnTierUsed:'{0} venues',pfnLblMax:'Dates a month',pfnNoLimit:'no limit',pfnLblHorizon:'How far ahead (days)',pfnLblLead:'Notice needed (days)',pfnLblCutoff:'Cancel up to (days before)',pfnLblPriority:'Priority (higher first)',pfnLblSort:'Order',pfnLblModes:'Booking types allowed',pfnModeSingle:'Single date',pfnModeMulti:'Several dates',pfnModeRecurring:'Monthly pattern',pfnBenefits:'Benefits',pfnBenefitsHint:'Vendors see these benefits on the vendor portal, each in its language.',pfnNoBen:'No benefits yet.',pfnBenEn:'Benefit (English)',pfnBenAr:'Benefit (Arabic)',pfnBenAdd:'Add benefit',pfnBenUp:'Move up',pfnBenDown:'Move down',pfnBenRemove:'Remove',pfnSaveTier:'Save tier',pfnErrTierName:'Give the tier an English name.',pfnErrModes:'Allow at least one booking type.',pfnErrNum:'Check the numbers: a month 1 to 31 dates or empty, ahead 7 to 730 days, notice and cutoff 0 to 90, priority and order whole numbers.',pfnTierSaved:'Tier saved: {0}',pfnVFb:'Feedback',pfnFbOf:'{0} of 5',pfnFbNoCount:'Not given',pfnFbBooked:'{0} booked on the ride',pfnFbTurnout:'Riders who came',pfnFbWell:'Went well',pfnFbBetter:'Could be better',pfnFbSent:'Sent {0}',pfnFbEdited:'edited {0}',pfnFbHead:'Venue feedback',pfnFbWaiting:'Breakfasts waiting for feedback: {0}',pfnFbNone:'No feedback yet. Venues send it from their portal for 14 days after a confirmed breakfast.',pfnFbNoMatch:'No feedback matches the filters.',pfnFbAvg:'Average {0} of 5',pfnFbCount:'Feedback received: {0}',pfnFbMissing:'Feedback appears here once the database update is applied.',pfnFbLoadErr:'The feedback could not be loaded.',pfnFbAllVen:'All venues',pfnFbSearch:'Search feedback',pfnFbLblVen:'Venue',pfnFbLblRating:'Rating',
+  tabVendors:'Vendors',vndTitle:'Vendors',vndBadge:'{0} venue requests waiting',vndSub:'Cafés and restaurants reserve the Saturdays our riders come to them for breakfast. Confirm one venue per date: the other requests are declined, and the confirmed venue becomes the Saturday ride’s breakfast stop.',vndNotSetUp:'Vendors isn’t set up yet. It appears here once the database update is applied.',vndLoadErr:'The vendors could not be loaded.',vndVCal:'Calendar',vndVReq:'Requests',vndVVen:'Venues',vndVTier:'Tiers',vndOpenSats:'Open Saturdays…',vndPrevMonth:'Previous month',vndNextMonth:'Next month',vndStOpen:'Open',vndStConfirmed:'Confirmed',vndStClosed:'Closed',vndNPending:'{0} pending',vndLblState:'This date is',vndLblReason:'Reason',vndRsRamadan:'Ramadan',vndRsEid:'Eid',vndRsWeather:'Weather',vndRsHoliday:'Holiday',vndRsOther:'Other',vndLblCap:'Venues this date takes (1 to 10)',vndSaveDate:'Save date',vndRemoveDate:'Remove date',vndNotListed:'This Saturday is not open to venues yet. Save it to open it.',vndRideStop:'Saturday ride breakfast stop',vndRideNone:'No Saturday ride on this date yet.',vndRideNoStop:'The ride has no breakfast stop yet.',vndMap:'Map',vndReqsOn:'Requests for this date',vndNoReqDay:'No requests for this date.',vndErrCap:'Capacity: a number from 1 to 10.',vndErrHasBk:'This date has requests on it, so it can’t be removed. Close it instead.',vndCloseQ:'Close {0}?',vndCloseBody:'Closing cancels this date’s {0} live requests and bookings. The venues see the reason.',vndCloseBtn:'Close the date',vndDateSaved:'Date saved: {0}',vndDateRemoved:'Date removed: {0}',vndOpenTitle:'Open Saturdays',vndOpenSub:'Every Saturday in the range that is not listed yet opens for venues to request. Dates already listed keep their state.',vndLblFrom:'From',vndLblTo:'To',vndOpenBtn:'Open them',vndErrRange:'Pick a range of up to 400 days, the end after the start.',vndOpenedToast:'{0} Saturdays opened',vndAsked:'asked {0}',vndBkPending:'Pending',vndBkConfirmed:'Confirmed',vndBkDeclined:'Declined',vndBkCancelled:'Cancelled',vndAutoDeclined:'Another venue was confirmed',vndByVenue:'by the venue',vndByMm:'by MicroMobility',vndLate:'late cancel',vndConfirm:'Confirm',vndDecline:'Decline',vndCancelBk:'Cancel booking',vndConfirmQ:'Confirm {0} for {1}?',vndConfirmBody:'{0} becomes the Saturday ride’s breakfast stop on this date.',vndConfirmOthers:'The other {0} requests for this date are declined once it is full.',vndDeclineQ:'Decline {0} for {1}?',vndCancelQ:'Cancel {0} on {1}?',vndNoteHint:'A note for the venue (optional). The venue sees it.',vndConfirmedToast:'{0} confirmed for {1}',vndDeclinedToast:'{0} declined for {1}',vndCancelledToast:'{0} cancelled for {1}',vndErrFull:'This date already has its venue. Raise its capacity or cancel the confirmed one first.',vndErrNotPending:'This request was already decided. The list is up to date now.',vndErrNotLive:'This booking is no longer live.',vndNCompeting:'{0} venues asking',vndNoReq:'No requests here.',vndNoMatch:'No venue matches the search.',vndSearchVenue:'Search venues',vndAddVenue:'Add venue',vndVsActive:'Active',vndVsPaused:'Paused',vndVsEnded:'Ended',vndNoVen:'No venues here yet.',vndOpenVenue:'Open',vndNextDate:'Next confirmed date',vndLogins:'Logins',vndVenueNew:'New venue',vndLblName:'Name (English)',vndLblNameAr:'Name (Arabic)',vndLblKind:'Kind',vndKCafe:'Café',vndKRestaurant:'Restaurant',vndKBakery:'Bakery',vndKOther:'Other',vndLblArea:'Area',vndLblMap:'Map link (https://)',vndLblSeats:'Seats',vndLblContact:'Contact name',vndLblPhone:'Contact mobile',vndLblEmail:'Contact email',vndLblOfferEn:'Offer for riders (English)',vndLblOfferAr:'Offer for riders (Arabic)',vndLblTier:'Tier',vndLblStatus:'Status',vndInactive:'Off',vndActive:'Active',vndErrName:'Give the venue a name of 2 to 80 characters.',vndErrMap:'The map link must start with https://',vndErrSeats:'Seats: a number from 1 to 2000.',vndVenueSaved:'Saved: {0}',vndLblLogin:'Login',vndLblPerson:'Person’s name',vndLblRole:'Role',vndRoleOwner:'Owner',vndRoleManager:'Manager',vndLastIn:'Last sign-in',vndNever:'Never',vndResetPwd:'Reset password',vndDeactivate:'Deactivate',vndActivate:'Activate',vndNoLogins:'No logins yet.',vndLoginHint:'Email or mobile number',vndAddLogin:'Add login',vndErrLogin:'Enter an email or a mobile number.',vndErrTaken:'That login is already in use.',vndTempFor:'Temporary password for {0}',vndTempOnce:'Shown only this once. Send it now: it must be changed at the first sign-in.',vndNoPhone:'Add the venue’s contact mobile to send it on WhatsApp.',vndLoginAdded:'Login added: {0}',vndPwdReset:'Password reset: {0}',vndLoginOn:'Login activated: {0}',vndLoginOff:'Login deactivated: {0}',vndBookings:'Bookings',vndUpcoming:'Upcoming',vndRecent:'Recent',vndNone:'None yet.',vndPatterns:'Monthly patterns',vndOrd1:'1st Saturday',vndOrd2:'2nd Saturday',vndOrd3:'3rd Saturday',vndOrd4:'4th Saturday',vndOrdLast:'Last Saturday',vndEvery1:'every month',vndEveryN:'every {0} months',vndTiersSub:'Each tier sets how its venues may book: the booking types, a month’s limit, how far ahead, the notice needed and the cancellation cutoff. The higher priority is listed first when venues compete for a date.',vndTierUsed:'{0} venues',vndLblMax:'Dates a month',vndNoLimit:'no limit',vndLblHorizon:'How far ahead (days)',vndLblLead:'Notice needed (days)',vndLblCutoff:'Cancel up to (days before)',vndLblPriority:'Priority (higher first)',vndLblSort:'Order',vndLblModes:'Booking types allowed',vndModeSingle:'Single date',vndModeMulti:'Several dates',vndModeRecurring:'Monthly pattern',vndBenefits:'Benefits',vndBenefitsHint:'Vendors see these benefits on the vendor portal, each in its language.',vndNoBen:'No benefits yet.',vndBenEn:'Benefit (English)',vndBenAr:'Benefit (Arabic)',vndBenAdd:'Add benefit',vndBenUp:'Move up',vndBenDown:'Move down',vndBenRemove:'Remove',vndSaveTier:'Save tier',vndErrTierName:'Give the tier an English name.',vndErrModes:'Allow at least one booking type.',vndErrNum:'Check the numbers: a month 1 to 31 dates or empty, ahead 7 to 730 days, notice and cutoff 0 to 90, priority and order whole numbers.',vndTierSaved:'Tier saved: {0}',vndVFb:'Feedback',vndFbOf:'{0} of 5',vndFbNoCount:'Not given',vndFbBooked:'{0} booked on the ride',vndFbTurnout:'Riders who came',vndFbWell:'Went well',vndFbBetter:'Could be better',vndFbSent:'Sent {0}',vndFbEdited:'edited {0}',vndFbHead:'Venue feedback',vndFbWaiting:'Breakfasts waiting for feedback: {0}',vndFbNone:'No feedback yet. Venues send it from their portal for 14 days after a confirmed breakfast.',vndFbNoMatch:'No feedback matches the filters.',vndFbAvg:'Average {0} of 5',vndFbCount:'Feedback received: {0}',vndFbMissing:'Feedback appears here once the database update is applied.',vndFbLoadErr:'The feedback could not be loaded.',vndFbAllVen:'All venues',vndFbSearch:'Search feedback',vndFbLblVen:'Venue',vndFbLblRating:'Rating',
 },
 ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',spotsLeft1:'{0} مقعد متبقي',spotsLeftN:'{0} مقاعد متبقية',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
   ticketQrLabel:'رمز QR للحجز',errLoginPhoneCc:'لا يوجد حساب بهذا الرقم كرقم سعودي. إذا كان رقمك من دولة أخرى فاكتبه مع رمز الدولة، مثل ‎+20 1012345678.',selectBookingAria:'تحديد الحجز',modifyChangedMsg:'تغيّر هذا الحجز أثناء تعديلك له. راجع التفاصيل ثم احفظ مرة أخرى.',wlAimedClosedMsg:'هذه الرحلة لا تستقبل الحضور المباشر. اختر رحلة أخرى من القائمة أعلاه لتسليمه دراجة.',bdNotEarned:'لم تُكتسب بعد',promoCustAmbiguous:'يوجد أكثر من عميل بهذا الاسم. اختر من القائمة العميل صاحب رقم الجوال الصحيح.',naDelBodyFinal:'سيُحذف تسجيل الدخول والوسوم واشتراكات الإشعارات. تبقى {0} حجوزات سابقة باسم الراكب، فلا تتأثر الكشوف والتقارير. لا يمكن التراجع عن ذلك.',geMoveOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا تبقى المجموعة في هذه الجلسة.',errChangedElsewhere:'تم تعديل هذا الحجز للتو من جهاز آخر. تم تحديث القائمة — راجعها وحاول مجددًا.',errBikeNumberMax:'رقم الدراجة من 4 أرقام كحد أقصى (1–9999)، وإلا فلن يمكن مسح ملصقها وبطاقتها.',ridersEditOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا لا يمكن نقل المجموعة إلى ليلة أخرى.',
@@ -1640,7 +1640,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   accPwdCurReq:'أدخل كلمة المرور الحالية.',accPwdBad:'هذه ليست كلمة المرور الحالية.',accPwdLocked:'محاولات خاطئة كثيرة. حاول مرة أخرى بعد 15 دقيقة.',
   accPwdSame:'اختر كلمة مرور مختلفة عن كلمة المرور الحالية.',accPwdSaved:'تم تغيير كلمة المرور. ستبقى مسجّل الدخول على هذا الجهاز، وتم تسجيل الخروج من أي هاتف أو جهاز كمبيوتر آخر مسجّل الدخول إلى حسابك.',
   accPwdShow:'إظهار كلمة المرور',accPwdHide:'إخفاء كلمة المرور',custPurchEmpty:'لا توجد مشتريات بعد. ستظهر هنا مشترياتك من مكتبنا.',custPurchVoided:'ملغاة',
-  tabFnb:'الموردون',pfnTitle:'الموردون',pfnBadge:'{0} طلبات من المطاعم بانتظار الرد',pfnSub:'تحجز المقاهي والمطاعم أيام السبت التي يأتيها فيها راكبونا لتناول الإفطار. أكّد مكاناً واحداً لكل تاريخ: تُرفض الطلبات الأخرى، ويصبح المكان المؤكَّد محطة الإفطار في جولة السبت.',pfnNotSetUp:'قسم الموردين غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',pfnLoadErr:'تعذّر تحميل الموردين.',pfnVCal:'التقويم',pfnVReq:'الطلبات',pfnVVen:'الأماكن',pfnVTier:'الفئات',pfnOpenSats:'فتح أيام السبت…',pfnPrevMonth:'الشهر السابق',pfnNextMonth:'الشهر التالي',pfnStOpen:'متاح',pfnStConfirmed:'مؤكَّد',pfnStClosed:'مغلق',pfnNPending:'{0} قيد الانتظار',pfnLblState:'حالة التاريخ',pfnLblReason:'السبب',pfnRsRamadan:'رمضان',pfnRsEid:'العيد',pfnRsWeather:'الطقس',pfnRsHoliday:'إجازة',pfnRsOther:'أخرى',pfnLblCap:'عدد الأماكن لهذا التاريخ (1 إلى 10)',pfnSaveDate:'حفظ التاريخ',pfnRemoveDate:'إزالة التاريخ',pfnNotListed:'هذا السبت غير متاح للأماكن بعد. احفظه لفتحه.',pfnRideStop:'محطة الإفطار في جولة السبت',pfnRideNone:'لا توجد جولة سبت في هذا التاريخ بعد.',pfnRideNoStop:'لا توجد محطة إفطار للجولة بعد.',pfnMap:'الخريطة',pfnReqsOn:'طلبات هذا التاريخ',pfnNoReqDay:'لا توجد طلبات لهذا التاريخ.',pfnErrCap:'السعة: رقم من 1 إلى 10.',pfnErrHasBk:'لهذا التاريخ طلبات، لذا لا يمكن إزالته. أغلقه بدلاً من ذلك.',pfnCloseQ:'إغلاق {0}؟',pfnCloseBody:'الإغلاق يلغي {0} من الطلبات والحجوزات القائمة لهذا التاريخ. ترى الأماكن السبب.',pfnCloseBtn:'إغلاق التاريخ',pfnDateSaved:'تم حفظ التاريخ: {0}',pfnDateRemoved:'تمت إزالة التاريخ: {0}',pfnOpenTitle:'فتح أيام السبت',pfnOpenSub:'كل سبت في هذه الفترة غير مدرج بعد يُفتح لطلبات الأماكن. تحتفظ التواريخ المدرجة بحالتها.',pfnLblFrom:'من',pfnLblTo:'إلى',pfnOpenBtn:'فتحها',pfnErrRange:'اختر فترة حتى 400 يوم، تنتهي بعد بدايتها.',pfnOpenedToast:'تم فتح {0} من أيام السبت',pfnAsked:'طُلب {0}',pfnBkPending:'قيد الانتظار',pfnBkConfirmed:'مؤكَّد',pfnBkDeclined:'مرفوض',pfnBkCancelled:'ملغى',pfnAutoDeclined:'تم تأكيد مكان آخر',pfnByVenue:'من المكان',pfnByMm:'من MicroMobility',pfnLate:'إلغاء متأخر',pfnConfirm:'تأكيد',pfnDecline:'رفض',pfnCancelBk:'إلغاء الحجز',pfnConfirmQ:'تأكيد {0} في {1}؟',pfnConfirmBody:'يصبح {0} محطة الإفطار في جولة السبت بهذا التاريخ.',pfnConfirmOthers:'تُرفض الطلبات الأخرى ({0}) لهذا التاريخ عند اكتماله.',pfnDeclineQ:'رفض {0} في {1}؟',pfnCancelQ:'إلغاء {0} في {1}؟',pfnNoteHint:'ملاحظة للمكان (اختيارية). يراها المكان.',pfnConfirmedToast:'تم تأكيد {0} في {1}',pfnDeclinedToast:'تم رفض {0} في {1}',pfnCancelledToast:'تم إلغاء {0} في {1}',pfnErrFull:'لهذا التاريخ مكانه بالفعل. ارفع سعته أو ألغِ المكان المؤكَّد أولاً.',pfnErrNotPending:'تم البت في هذا الطلب مسبقاً. القائمة محدَّثة الآن.',pfnErrNotLive:'لم يعد هذا الحجز قائماً.',pfnNCompeting:'{0} أماكن تطلبه',pfnNoReq:'لا توجد طلبات هنا.',pfnNoMatch:'لا يوجد مكان يطابق البحث.',pfnSearchVenue:'ابحث عن مكان',pfnAddVenue:'إضافة مكان',pfnVsActive:'نشط',pfnVsPaused:'متوقف مؤقتاً',pfnVsEnded:'منتهٍ',pfnNoVen:'لا توجد أماكن هنا بعد.',pfnOpenVenue:'فتح',pfnNextDate:'التاريخ المؤكَّد القادم',pfnLogins:'حسابات الدخول',pfnVenueNew:'مكان جديد',pfnLblName:'الاسم (بالإنجليزية)',pfnLblNameAr:'الاسم (بالعربية)',pfnLblKind:'النوع',pfnKCafe:'مقهى',pfnKRestaurant:'مطعم',pfnKBakery:'مخبز',pfnKOther:'أخرى',pfnLblArea:'الحي',pfnLblMap:'رابط الخريطة (https://)',pfnLblSeats:'المقاعد',pfnLblContact:'اسم جهة الاتصال',pfnLblPhone:'جوال جهة الاتصال',pfnLblEmail:'بريد جهة الاتصال',pfnLblOfferEn:'العرض للراكبين (بالإنجليزية)',pfnLblOfferAr:'العرض للراكبين (بالعربية)',pfnLblTier:'الفئة',pfnLblStatus:'الحالة',pfnInactive:'موقوف',pfnActive:'نشط',pfnErrName:'أدخل اسماً للمكان من 2 إلى 80 حرفاً.',pfnErrMap:'يجب أن يبدأ رابط الخريطة بـ https://',pfnErrSeats:'المقاعد: رقم من 1 إلى 2000.',pfnVenueSaved:'تم الحفظ: {0}',pfnLblLogin:'اسم الدخول',pfnLblPerson:'اسم الشخص',pfnLblRole:'الدور',pfnRoleOwner:'المالك',pfnRoleManager:'المدير',pfnLastIn:'آخر دخول',pfnNever:'لم يدخل بعد',pfnResetPwd:'إعادة تعيين كلمة المرور',pfnDeactivate:'إيقاف',pfnActivate:'تفعيل',pfnNoLogins:'لا توجد حسابات دخول بعد.',pfnLoginHint:'البريد الإلكتروني أو رقم الجوال',pfnAddLogin:'إضافة حساب دخول',pfnErrLogin:'أدخل بريداً إلكترونياً أو رقم جوال.',pfnErrTaken:'اسم الدخول هذا مستخدم بالفعل.',pfnTempFor:'كلمة المرور المؤقتة لـ {0}',pfnTempOnce:'تظهر هذه المرة فقط. أرسلها الآن: يجب تغييرها عند أول تسجيل دخول.',pfnNoPhone:'أضف جوال جهة اتصال المكان لإرسالها عبر WhatsApp.',pfnLoginAdded:'تمت إضافة حساب الدخول: {0}',pfnPwdReset:'تمت إعادة تعيين كلمة المرور: {0}',pfnLoginOn:'تم تفعيل حساب الدخول: {0}',pfnLoginOff:'تم إيقاف حساب الدخول: {0}',pfnBookings:'الحجوزات',pfnUpcoming:'القادمة',pfnRecent:'الأخيرة',pfnNone:'لا شيء بعد.',pfnPatterns:'الأنماط الشهرية',pfnOrd1:'السبت الأول',pfnOrd2:'السبت الثاني',pfnOrd3:'السبت الثالث',pfnOrd4:'السبت الرابع',pfnOrdLast:'السبت الأخير',pfnEvery1:'كل شهر',pfnEveryN:'كل {0} أشهر',pfnTiersSub:'تحدد كل فئة طريقة حجز أماكنها: أنواع الحجز، والحد الشهري، ومدى الحجز المسبق، والمهلة المطلوبة، وآخر موعد للإلغاء. تُعرض الأولوية الأعلى أولاً عند تنافس الأماكن على تاريخ.',pfnTierUsed:'{0} أماكن',pfnLblMax:'التواريخ في الشهر',pfnNoLimit:'بلا حد',pfnLblHorizon:'أقصى مدة مسبقة (أيام)',pfnLblLead:'المهلة المطلوبة (أيام)',pfnLblCutoff:'الإلغاء حتى (أيام قبل)',pfnLblPriority:'الأولوية (الأعلى أولاً)',pfnLblSort:'الترتيب',pfnLblModes:'أنواع الحجز المسموحة',pfnModeSingle:'تاريخ واحد',pfnModeMulti:'عدة تواريخ',pfnModeRecurring:'نمط شهري',pfnBenefits:'المزايا',pfnBenefitsHint:'يرى الموردون هذه المزايا في بوابة الموردين، كلٌّ بلغته.',pfnNoBen:'لا توجد مزايا بعد.',pfnBenEn:'الميزة (بالإنجليزية)',pfnBenAr:'الميزة (بالعربية)',pfnBenAdd:'إضافة ميزة',pfnBenUp:'نقل للأعلى',pfnBenDown:'نقل للأسفل',pfnBenRemove:'إزالة',pfnSaveTier:'حفظ الفئة',pfnErrTierName:'أدخل اسماً إنجليزياً للفئة.',pfnErrModes:'اسمح بنوع حجز واحد على الأقل.',pfnErrNum:'تحقق من الأرقام: من 1 إلى 31 تاريخاً في الشهر أو فارغ، والمدة المسبقة من 7 إلى 730 يوماً، والمهلة وموعد الإلغاء من 0 إلى 90، والأولوية والترتيب أعداد صحيحة.',pfnTierSaved:'تم حفظ الفئة: {0}',pfnVFb:'التقييمات',pfnFbOf:'{0} من 5',pfnFbNoCount:'لم يُذكر',pfnFbBooked:'{0} محجوزون في الجولة',pfnFbTurnout:'الراكبون الذين حضروا',pfnFbWell:'ما سار جيداً',pfnFbBetter:'ما يمكن تحسينه',pfnFbSent:'أُرسل {0}',pfnFbEdited:'عُدّل {0}',pfnFbHead:'تقييم المكان',pfnFbWaiting:'وجبات إفطار بانتظار التقييم: {0}',pfnFbNone:'لا توجد تقييمات بعد. ترسلها الأماكن من بوابتها خلال 14 يوماً بعد إفطار مؤكَّد.',pfnFbNoMatch:'لا يوجد تقييم يطابق عوامل التصفية.',pfnFbAvg:'المتوسط {0} من 5',pfnFbCount:'التقييمات المستلمة: {0}',pfnFbMissing:'تظهر التقييمات هنا بعد تطبيق تحديث قاعدة البيانات.',pfnFbLoadErr:'تعذّر تحميل التقييمات.',pfnFbAllVen:'كل الأماكن',pfnFbSearch:'ابحث في التقييمات',pfnFbLblVen:'المكان',pfnFbLblRating:'التقييم',
+  tabVendors:'الموردون',vndTitle:'الموردون',vndBadge:'{0} طلبات من المطاعم بانتظار الرد',vndSub:'تحجز المقاهي والمطاعم أيام السبت التي يأتيها فيها راكبونا لتناول الإفطار. أكّد مكاناً واحداً لكل تاريخ: تُرفض الطلبات الأخرى، ويصبح المكان المؤكَّد محطة الإفطار في جولة السبت.',vndNotSetUp:'قسم الموردين غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',vndLoadErr:'تعذّر تحميل الموردين.',vndVCal:'التقويم',vndVReq:'الطلبات',vndVVen:'الأماكن',vndVTier:'الفئات',vndOpenSats:'فتح أيام السبت…',vndPrevMonth:'الشهر السابق',vndNextMonth:'الشهر التالي',vndStOpen:'متاح',vndStConfirmed:'مؤكَّد',vndStClosed:'مغلق',vndNPending:'{0} قيد الانتظار',vndLblState:'حالة التاريخ',vndLblReason:'السبب',vndRsRamadan:'رمضان',vndRsEid:'العيد',vndRsWeather:'الطقس',vndRsHoliday:'إجازة',vndRsOther:'أخرى',vndLblCap:'عدد الأماكن لهذا التاريخ (1 إلى 10)',vndSaveDate:'حفظ التاريخ',vndRemoveDate:'إزالة التاريخ',vndNotListed:'هذا السبت غير متاح للأماكن بعد. احفظه لفتحه.',vndRideStop:'محطة الإفطار في جولة السبت',vndRideNone:'لا توجد جولة سبت في هذا التاريخ بعد.',vndRideNoStop:'لا توجد محطة إفطار للجولة بعد.',vndMap:'الخريطة',vndReqsOn:'طلبات هذا التاريخ',vndNoReqDay:'لا توجد طلبات لهذا التاريخ.',vndErrCap:'السعة: رقم من 1 إلى 10.',vndErrHasBk:'لهذا التاريخ طلبات، لذا لا يمكن إزالته. أغلقه بدلاً من ذلك.',vndCloseQ:'إغلاق {0}؟',vndCloseBody:'الإغلاق يلغي {0} من الطلبات والحجوزات القائمة لهذا التاريخ. ترى الأماكن السبب.',vndCloseBtn:'إغلاق التاريخ',vndDateSaved:'تم حفظ التاريخ: {0}',vndDateRemoved:'تمت إزالة التاريخ: {0}',vndOpenTitle:'فتح أيام السبت',vndOpenSub:'كل سبت في هذه الفترة غير مدرج بعد يُفتح لطلبات الأماكن. تحتفظ التواريخ المدرجة بحالتها.',vndLblFrom:'من',vndLblTo:'إلى',vndOpenBtn:'فتحها',vndErrRange:'اختر فترة حتى 400 يوم، تنتهي بعد بدايتها.',vndOpenedToast:'تم فتح {0} من أيام السبت',vndAsked:'طُلب {0}',vndBkPending:'قيد الانتظار',vndBkConfirmed:'مؤكَّد',vndBkDeclined:'مرفوض',vndBkCancelled:'ملغى',vndAutoDeclined:'تم تأكيد مكان آخر',vndByVenue:'من المكان',vndByMm:'من MicroMobility',vndLate:'إلغاء متأخر',vndConfirm:'تأكيد',vndDecline:'رفض',vndCancelBk:'إلغاء الحجز',vndConfirmQ:'تأكيد {0} في {1}؟',vndConfirmBody:'يصبح {0} محطة الإفطار في جولة السبت بهذا التاريخ.',vndConfirmOthers:'تُرفض الطلبات الأخرى ({0}) لهذا التاريخ عند اكتماله.',vndDeclineQ:'رفض {0} في {1}؟',vndCancelQ:'إلغاء {0} في {1}؟',vndNoteHint:'ملاحظة للمكان (اختيارية). يراها المكان.',vndConfirmedToast:'تم تأكيد {0} في {1}',vndDeclinedToast:'تم رفض {0} في {1}',vndCancelledToast:'تم إلغاء {0} في {1}',vndErrFull:'لهذا التاريخ مكانه بالفعل. ارفع سعته أو ألغِ المكان المؤكَّد أولاً.',vndErrNotPending:'تم البت في هذا الطلب مسبقاً. القائمة محدَّثة الآن.',vndErrNotLive:'لم يعد هذا الحجز قائماً.',vndNCompeting:'{0} أماكن تطلبه',vndNoReq:'لا توجد طلبات هنا.',vndNoMatch:'لا يوجد مكان يطابق البحث.',vndSearchVenue:'ابحث عن مكان',vndAddVenue:'إضافة مكان',vndVsActive:'نشط',vndVsPaused:'متوقف مؤقتاً',vndVsEnded:'منتهٍ',vndNoVen:'لا توجد أماكن هنا بعد.',vndOpenVenue:'فتح',vndNextDate:'التاريخ المؤكَّد القادم',vndLogins:'حسابات الدخول',vndVenueNew:'مكان جديد',vndLblName:'الاسم (بالإنجليزية)',vndLblNameAr:'الاسم (بالعربية)',vndLblKind:'النوع',vndKCafe:'مقهى',vndKRestaurant:'مطعم',vndKBakery:'مخبز',vndKOther:'أخرى',vndLblArea:'الحي',vndLblMap:'رابط الخريطة (https://)',vndLblSeats:'المقاعد',vndLblContact:'اسم جهة الاتصال',vndLblPhone:'جوال جهة الاتصال',vndLblEmail:'بريد جهة الاتصال',vndLblOfferEn:'العرض للراكبين (بالإنجليزية)',vndLblOfferAr:'العرض للراكبين (بالعربية)',vndLblTier:'الفئة',vndLblStatus:'الحالة',vndInactive:'موقوف',vndActive:'نشط',vndErrName:'أدخل اسماً للمكان من 2 إلى 80 حرفاً.',vndErrMap:'يجب أن يبدأ رابط الخريطة بـ https://',vndErrSeats:'المقاعد: رقم من 1 إلى 2000.',vndVenueSaved:'تم الحفظ: {0}',vndLblLogin:'اسم الدخول',vndLblPerson:'اسم الشخص',vndLblRole:'الدور',vndRoleOwner:'المالك',vndRoleManager:'المدير',vndLastIn:'آخر دخول',vndNever:'لم يدخل بعد',vndResetPwd:'إعادة تعيين كلمة المرور',vndDeactivate:'إيقاف',vndActivate:'تفعيل',vndNoLogins:'لا توجد حسابات دخول بعد.',vndLoginHint:'البريد الإلكتروني أو رقم الجوال',vndAddLogin:'إضافة حساب دخول',vndErrLogin:'أدخل بريداً إلكترونياً أو رقم جوال.',vndErrTaken:'اسم الدخول هذا مستخدم بالفعل.',vndTempFor:'كلمة المرور المؤقتة لـ {0}',vndTempOnce:'تظهر هذه المرة فقط. أرسلها الآن: يجب تغييرها عند أول تسجيل دخول.',vndNoPhone:'أضف جوال جهة اتصال المكان لإرسالها عبر WhatsApp.',vndLoginAdded:'تمت إضافة حساب الدخول: {0}',vndPwdReset:'تمت إعادة تعيين كلمة المرور: {0}',vndLoginOn:'تم تفعيل حساب الدخول: {0}',vndLoginOff:'تم إيقاف حساب الدخول: {0}',vndBookings:'الحجوزات',vndUpcoming:'القادمة',vndRecent:'الأخيرة',vndNone:'لا شيء بعد.',vndPatterns:'الأنماط الشهرية',vndOrd1:'السبت الأول',vndOrd2:'السبت الثاني',vndOrd3:'السبت الثالث',vndOrd4:'السبت الرابع',vndOrdLast:'السبت الأخير',vndEvery1:'كل شهر',vndEveryN:'كل {0} أشهر',vndTiersSub:'تحدد كل فئة طريقة حجز أماكنها: أنواع الحجز، والحد الشهري، ومدى الحجز المسبق، والمهلة المطلوبة، وآخر موعد للإلغاء. تُعرض الأولوية الأعلى أولاً عند تنافس الأماكن على تاريخ.',vndTierUsed:'{0} أماكن',vndLblMax:'التواريخ في الشهر',vndNoLimit:'بلا حد',vndLblHorizon:'أقصى مدة مسبقة (أيام)',vndLblLead:'المهلة المطلوبة (أيام)',vndLblCutoff:'الإلغاء حتى (أيام قبل)',vndLblPriority:'الأولوية (الأعلى أولاً)',vndLblSort:'الترتيب',vndLblModes:'أنواع الحجز المسموحة',vndModeSingle:'تاريخ واحد',vndModeMulti:'عدة تواريخ',vndModeRecurring:'نمط شهري',vndBenefits:'المزايا',vndBenefitsHint:'يرى الموردون هذه المزايا في بوابة الموردين، كلٌّ بلغته.',vndNoBen:'لا توجد مزايا بعد.',vndBenEn:'الميزة (بالإنجليزية)',vndBenAr:'الميزة (بالعربية)',vndBenAdd:'إضافة ميزة',vndBenUp:'نقل للأعلى',vndBenDown:'نقل للأسفل',vndBenRemove:'إزالة',vndSaveTier:'حفظ الفئة',vndErrTierName:'أدخل اسماً إنجليزياً للفئة.',vndErrModes:'اسمح بنوع حجز واحد على الأقل.',vndErrNum:'تحقق من الأرقام: من 1 إلى 31 تاريخاً في الشهر أو فارغ، والمدة المسبقة من 7 إلى 730 يوماً، والمهلة وموعد الإلغاء من 0 إلى 90، والأولوية والترتيب أعداد صحيحة.',vndTierSaved:'تم حفظ الفئة: {0}',vndVFb:'التقييمات',vndFbOf:'{0} من 5',vndFbNoCount:'لم يُذكر',vndFbBooked:'{0} محجوزون في الجولة',vndFbTurnout:'الراكبون الذين حضروا',vndFbWell:'ما سار جيداً',vndFbBetter:'ما يمكن تحسينه',vndFbSent:'أُرسل {0}',vndFbEdited:'عُدّل {0}',vndFbHead:'تقييم المكان',vndFbWaiting:'وجبات إفطار بانتظار التقييم: {0}',vndFbNone:'لا توجد تقييمات بعد. ترسلها الأماكن من بوابتها خلال 14 يوماً بعد إفطار مؤكَّد.',vndFbNoMatch:'لا يوجد تقييم يطابق عوامل التصفية.',vndFbAvg:'المتوسط {0} من 5',vndFbCount:'التقييمات المستلمة: {0}',vndFbMissing:'تظهر التقييمات هنا بعد تطبيق تحديث قاعدة البيانات.',vndFbLoadErr:'تعذّر تحميل التقييمات.',vndFbAllVen:'كل الأماكن',vndFbSearch:'ابحث في التقييمات',vndFbLblVen:'المكان',vndFbLblRating:'التقييم',
 }};
 // The staff screens' strings are not in LANG on a customer's phone (2026-10-01): the build moves
 // every key only staff code names into staff.js (English) and lang/staff-<code>.json (the rest,
@@ -1824,7 +1824,7 @@ function setLang(lang,_fromUrl){
     if(b.dataset.stab==='workshop')_l.innerHTML=_wsTabLabel(); // with the count of new requests
     if(b.dataset.stab==='messages')_l.innerHTML=_smTabLabel(); // with the count of new messages
     if(b.dataset.stab==='ambassadors')_l.innerHTML=_ambTabLabel(); // with applications and rewards waiting
-    if(b.dataset.stab==='fnb')_l.innerHTML=_fnbTabLabel(); // with the venues' requests waiting
+    if(b.dataset.stab==='vendors')_l.innerHTML=_vendorTabLabel(); // with the venues' requests waiting
     if(b.dataset.stab==='team')_l.textContent=t('tabTeam');
     if(b.dataset.stab==='settings')_l.textContent=t('tabSettings');
     if(b.dataset.stab==='dashboard')_l.textContent=t('tabDashboard');
@@ -6041,7 +6041,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'community',ambassadors:'ambassadors',fnb:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account'};
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
@@ -6054,13 +6054,13 @@ const SUB_PATHS={
   inventory:{bikes:'',supplements:'supplements',equipment:'equipment'},
   community:{leaderboard:'',stats:'stats',accounts:'accounts',badges:'badges',flagged:'flagged',applications:'applications',learning:'applications/learning',birthdays:'birthdays',duplicates:'duplicates'},
   catalog:{models:'',categories:'categories',fields:'fields'},
-  fnb:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
+  vendors:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
 };
 const _WEB_PAGE=/^[a-z][a-z0-9_-]{0,40}$/,_SESSION_ID=/^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6})?$/;
 function _subOf(tab){
   const m=SUB_PATHS[tab];
   if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
-  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'leaderboard'):tab==='fnb'?(S.fnbView||'calendar'):((S.cat&&S.cat.view)||'models');
+  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'leaderboard'):tab==='vendors'?(S.vendorView||'calendar'):((S.cat&&S.cat.view)||'models');
   return m[v]||'';
 }
 // Opens the sub-view a segment names; a segment that names none opens the section's own page.
@@ -6079,7 +6079,7 @@ function _setSub(tab,seg){
   else if(tab==='inventory')S.invSection=key;
   else if(tab==='community')S.communityTab=key;
   else if(tab==='catalog')_cat().view=key;
-  else if(tab==='fnb')S.fnbView=key;
+  else if(tab==='vendors')S.vendorView=key;
 }
 function _pathFor(st){
   if(st.view==='staff'){const b=STAFF_PATHS[st.stab]||'bookings';return'/'+b+(st.sub?'/'+st.sub:'');}
@@ -7795,6 +7795,7 @@ function setStaffTab(tab){
   if(tab==='sessions'){S.queueView='sessions';tab='queue';} // Sessions merged into the Bookings tab
   if(tab==='waitlist'){S.queueView='waitlist';tab='queue';} // Waitlist lives there too (third pill)
   if(tab==='handover'){S.queueView='handover';tab='queue';} // the bikes side of the desk: a fourth pill
+  if(tab==='fnb')tab='vendors'; // the section's id until 2026-10-03 (a saved address or tab)
   if(tab==='riders'){S.queueView='petromin';if(!S.ridersSession||S.ridersSession==='all')S.ridersSession=_pmDefaultNight()||'all';tab='queue';} // the Riders tab is the Petromin page in Queue now
   if(!_deskTabOk(tab))tab=_firstTab(); // Front Desk mode: only its own sections (DESK_TABS); an account: only its own list
   if(tab==='queue'&&S.staffTab!=='queue')_autoSelectSession(); // opening the queue: back to the current session
@@ -7815,7 +7816,7 @@ function setStaffTab(tab){
   else if(tab==='workshop')renderWorkshop();
   else if(tab==='messages')renderMessages();
   else if(tab==='ambassadors')renderAmbassadors();
-  else if(tab==='fnb')renderFnb();
+  else if(tab==='vendors')renderVendors();
   else if(tab==='team')renderTeam();
   else if(tab==='settings')renderSettings();
   else if(tab==='dashboard')renderDashboard();
@@ -7847,7 +7848,7 @@ function renderCustomerTabs(){
   const al=document.getElementById('bnav-account-lbl');if(al)al.textContent=t('tabAccount');
 }
 
-const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',fnb:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
@@ -7922,7 +7923,7 @@ function renderStaffTabs(){
   document.getElementById('tab-workshop')  .classList.toggle('active',S.staffTab==='workshop');
   document.getElementById('tab-messages')  .classList.toggle('active',S.staffTab==='messages');
   document.getElementById('tab-ambassadors').classList.toggle('active',S.staffTab==='ambassadors');
-  document.getElementById('tab-fnb').classList.toggle('active',S.staffTab==='fnb');
+  document.getElementById('tab-vendors').classList.toggle('active',S.staffTab==='vendors');
   document.getElementById('tab-team').classList.toggle('active',S.staffTab==='team');
   document.getElementById('tab-settings').classList.toggle('active',S.staffTab==='settings');
   document.getElementById('tab-dashboard').classList.toggle('active',S.staffTab==='dashboard');
@@ -10244,7 +10245,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='workshop'){const a=document.activeElement;renderWorkshop(!!(a&&a.id==='ws-search-input'));} // typing in its search: the list only
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
   else if(tab==='ambassadors'){const a=document.activeElement;renderAmbassadors(!!(a&&a.id==='amb-search-input'));}
-  else if(tab==='fnb'){} // its own loader: nothing of the desk's data is on it
+  else if(tab==='vendors'){} // its own loader: nothing of the desk's data is on it
   else if(tab==='website'){} // its own loader and its own drafts: a repaint of the queue data has nothing for it
   else if(tab==='catalog'){} // the same: the catalogue loads itself
   else if(tab==='team'){} // its own loader too
@@ -19530,9 +19531,11 @@ async function _pinApprove(what){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','community','ambassadors','fnb','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',community:'tabCommunity',ambassadors:'tabAmbassadors',fnb:'tabFnb',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','community','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',community:'tabCommunity',ambassadors:'tabAmbassadors',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
+// An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
+function _modIds(a){return Array.isArray(a)?a.map(x=>x==='fnb'?'vendors':x):null;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 function _editOk(tab){return !Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
 function _firstTab(){return _staffSections().find(_deskTabOk)||'queue';}
@@ -19542,13 +19545,13 @@ function _accessSet(row,uid){
     S._ntOff=Array.isArray(row.nt_off)?row.nt_off:[];S._mePhoto=row.photo||null;S._meName=row.display_name||null;
     try{renderTopbarRight();_ntSync();}catch(_){}
   }
-  S._myView=row&&Array.isArray(row.modules_view)?row.modules_view:null;
-  S._myEdit=row&&Array.isArray(row.modules_edit)?row.modules_edit:null;
+  S._myView=_modIds(row&&row.modules_view);
+  S._myEdit=_modIds(row&&row.modules_edit);
   try{localStorage.setItem('cq_access',JSON.stringify({uid:String(uid||''),view:S._myView,edit:S._myEdit}));}catch(_){}
   if(S.view==='staff'){try{if(!_deskTabOk(S.staffTab))setStaffTab(_firstTab());else renderStaffTabs();}catch(_){}}
 }
 // Until the account's row answers, the lists this device last saw for that account stand.
-(function(){try{const a=JSON.parse(localStorage.getItem('cq_access')||'null');if(a&&a.uid&&a.uid===localStorage.getItem('cq_role_uid')){S._myView=Array.isArray(a.view)?a.view:null;S._myEdit=Array.isArray(a.edit)?a.edit:null;}}catch(_){}})();
+(function(){try{const a=JSON.parse(localStorage.getItem('cq_access')||'null');if(a&&a.uid&&a.uid===localStorage.getItem('cq_role_uid')){S._myView=_modIds(a.view);S._myEdit=_modIds(a.edit);}}catch(_){}})();
 // Read-only (#9): while the section on screen is one this account may open but not change, its
 // writes are refused here with one notice. The audit log, the error log and the sales and
 // bookings this device queued elsewhere (the two outbox flushes) still go through. Declared with
@@ -19819,7 +19822,7 @@ function renderTeam(){
     <div class="tm-add"><input id="tm-add-name" type="text" maxlength="40" placeholder="${esc(t('opsAddPh'))}" aria-label="${esc(t('opsAdd'))}" data-on-keydown="${_on("_on_renderTeam_1",_EV,_EL)}"><button type="button" class="btn-sm btn-green" data-on-click="${_on("_tmAdd")}">${t('opsAdd')}</button></div>
   </div>`;
   const acct=a=>{
-    const d=T.edit[a.user_id]||{role:a.role,view:a.modules_view,edit:a.modules_edit};
+    const d=T.edit[a.user_id]||{role:a.role,view:_modIds(a.modules_view),edit:_modIds(a.modules_edit)};
     const secs=_roleTabs(d.role);
     const inV=k=>!Array.isArray(d.view)||d.view.includes(k),inE=k=>!Array.isArray(d.edit)||d.edit.includes(k);
     const dis=a.is_me?' disabled':'';
@@ -19838,7 +19841,7 @@ function renderTeam(){
 }
 function _tmDraft(uid){
   const T=_tm(),a=(T.accts||[]).find(x=>x.user_id===uid);if(!a||a.is_me)return null;
-  return T.edit[uid]||(T.edit[uid]={role:a.role,view:Array.isArray(a.modules_view)?[...a.modules_view]:null,edit:Array.isArray(a.modules_edit)?[...a.modules_edit]:null});
+  return T.edit[uid]||(T.edit[uid]={role:a.role,view:_modIds(a.modules_view),edit:_modIds(a.modules_edit)});
 }
 // A list that holds every section the role has is stored as null, "everything it allows".
 function _tmNorm(d){
@@ -28271,143 +28274,143 @@ async function _ambMsgCopy(){
   catch(e){const el=document.getElementById('amb-msg-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
 }
 
-// ── F&B Partners: cafés and restaurants reserve the Saturday breakfast stop (2026-10-03) ─────
+// ── Vendors: cafés and restaurants reserve the Saturday breakfast stop (2026-10-03) ─────
 // The owner (2026-10-03): restaurants and cafés ("venues") reserve the Saturdays our Saturday social
 // ride's riders come to them for breakfast, on a portal of their own (built in another repo). Every
-// date asked for waits as Pending until staff confirm ONE venue: staff_fnb_decide(...,'confirm')
+// date asked for waits as Pending until staff confirm ONE venue: staff_vendor_decide(...,'confirm')
 // declines the rest, and the database makes the confirmed venue that day's breakfast stop
 // (sessions.breakfast_name/url). Tiers (single / multi / recurring) carry the booking rules and a
 // benefits list staff edit, because the benefits are not decided yet. Migration 20261003150000:
-// staff READ the tables under is_staff(); every write is a staff_fnb_* function. Admin only (not in
+// staff READ the tables under is_staff(); every write is a staff_vendor_* function. Admin only (not in
 // ROLE_TABS). Calendar / Requests / Venues / Tiers are /partners, /partners/requests, ...
-// tests/staff-fnb.spec.ts.
+// tests/staff-vendors.spec.ts.
 // The portal's address (apps/partners in the website repo; the owner's choice, 2026-10-03). The
 // login message staff send carries it; '' would leave the link line out.
-const FNB_PORTAL_URL='https://vendors.micromobility.sa';
-const FNB_BK_COLS='id,venue_id,day,series_id,kind,status,note,staff_note,requested_by,decided_by,decided_at,cancelled_by,cancel_reason,late_cancel,created_at,updated_at';
-const FNB_USER_COLS='id,venue_id,login,name,role,must_change_pwd,active,last_login_at,created_by,created_at'; // the only columns staff may read: '*' is refused
-const FNB_FB_COLS='booking_id,venue_id,day,rating,turnout,went_well,improve,created_at,updated_at'; // fnb_feedback (20261003180000), read only
-const FNB_RS=['ramadan','eid','weather','holiday']; // a closed date's preset reasons, stored as these codes; 'other' is typed
-const FNB_RS_KEY={ramadan:'pfnRsRamadan',eid:'pfnRsEid',weather:'pfnRsWeather',holiday:'pfnRsHoliday',other:'pfnRsOther'};
-const FNB_BK_KEY={pending:'pfnBkPending',confirmed:'pfnBkConfirmed',declined:'pfnBkDeclined',cancelled:'pfnBkCancelled'};
-const FNB_VS_KEY={active:'pfnVsActive',paused:'pfnVsPaused',ended:'pfnVsEnded'};
-const FNB_K_KEY={cafe:'pfnKCafe',restaurant:'pfnKRestaurant',bakery:'pfnKBakery',other:'pfnKOther'};
-const FNB_MODE_KEY={single:'pfnModeSingle',multi:'pfnModeMulti',recurring:'pfnModeRecurring'};
-const FNB_ORD_KEY={1:'pfnOrd1',2:'pfnOrd2',3:'pfnOrd3',4:'pfnOrd4','-1':'pfnOrdLast'};
-const FNB_ST_COL={pending:'var(--orange)',confirmed:'var(--green)',active:'var(--green)',paused:'var(--orange)'};
-const FNB_VF=['name','name_ar','kind','area','map_url','seats','contact_name','contact_phone','contact_email','offer_en','offer_ar','staff_notes','tier_id','status'];
+const VENDOR_PORTAL_URL='https://vendors.micromobility.sa';
+const VENDOR_BK_COLS='id,venue_id,day,series_id,kind,status,note,staff_note,requested_by,decided_by,decided_at,cancelled_by,cancel_reason,late_cancel,created_at,updated_at';
+const VENDOR_USER_COLS='id,venue_id,login,name,role,must_change_pwd,active,last_login_at,created_by,created_at'; // the only columns staff may read: '*' is refused
+const VENDOR_FB_COLS='booking_id,venue_id,day,rating,turnout,went_well,improve,created_at,updated_at'; // vendor_feedback (20261003180000), read only
+const VENDOR_RS=['ramadan','eid','weather','holiday']; // a closed date's preset reasons, stored as these codes; 'other' is typed
+const VENDOR_RS_KEY={ramadan:'vndRsRamadan',eid:'vndRsEid',weather:'vndRsWeather',holiday:'vndRsHoliday',other:'vndRsOther'};
+const VENDOR_BK_KEY={pending:'vndBkPending',confirmed:'vndBkConfirmed',declined:'vndBkDeclined',cancelled:'vndBkCancelled'};
+const VENDOR_VS_KEY={active:'vndVsActive',paused:'vndVsPaused',ended:'vndVsEnded'};
+const VENDOR_K_KEY={cafe:'vndKCafe',restaurant:'vndKRestaurant',bakery:'vndKBakery',other:'vndKOther'};
+const VENDOR_MODE_KEY={single:'vndModeSingle',multi:'vndModeMulti',recurring:'vndModeRecurring'};
+const VENDOR_ORD_KEY={1:'vndOrd1',2:'vndOrd2',3:'vndOrd3',4:'vndOrd4','-1':'vndOrdLast'};
+const VENDOR_ST_COL={pending:'var(--orange)',confirmed:'var(--green)',active:'var(--green)',paused:'var(--orange)'};
+const VENDOR_VF=['name','name_ar','kind','area','map_url','seats','contact_name','contact_phone','contact_email','offer_en','offer_ar','staff_notes','tier_id','status'];
 // The login message staff send (Copy / WhatsApp), in English or Arabic, picked in the dialog. Not UI.
-const FNB_MSG={
+const VENDOR_MSG={
   en:{hi:'Hello {name},',ready:'Your MicroMobility vendor account is ready.',login:'Login: {login}',pwd:'Temporary password: {pwd}',
     change:'You will be asked to choose your own password the first time you sign in.',link:'Sign in here: {url}',team:'MicroMobility team'},
   ar:{hi:'مرحباً {name}،',ready:'حسابك كمورّد لدى MicroMobility جاهز.',login:'اسم الدخول: {login}',pwd:'كلمة المرور المؤقتة: {pwd}',
     change:'سيُطلب منك اختيار كلمة مرور خاصة بك عند أول تسجيل دخول.',link:'سجّل الدخول من هنا: {url}',team:'فريق MicroMobility'},
 };
-const FNB_CHEV='<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" class="fnb-chev"><path d="M14.6 5.4L8 12l6.6 6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const VENDOR_CHEV='<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" class="vendor-chev"><path d="M14.6 5.4L8 12l6.6 6.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 // The rail's count: requests waiting on a date still to come. Before the section has loaded its
 // rows it is the head count the poll reads.
-function _fnbBadgeN(){const W=S._fnb;if(W&&W.bk){const d=todayStr();return W.bk.filter(b=>b.status==='pending'&&b.day>=d).length;}return S._fnbPN||0;}
-function _fnbTabLabel(){const n=_fnbBadgeN();return esc(t('tabFnb'))+(n?` <span class="tab-badge" title="${esc(t('pfnBadge').replace('{0}',n))}">${n}</span>`:'');}
-function _fnbTabLabelSync(){const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="fnb"] .snav-lbl');if(l)l.innerHTML=_fnbTabLabel();}
+function _vendorBadgeN(){const W=S._vendor;if(W&&W.bk){const d=todayStr();return W.bk.filter(b=>b.status==='pending'&&b.day>=d).length;}return S._vendorPN||0;}
+function _vendorTabLabel(){const n=_vendorBadgeN();return esc(t('tabVendors'))+(n?` <span class="tab-badge" title="${esc(t('vndBadge').replace('{0}',n))}">${n}</span>`:'');}
+function _vendorTabLabelSync(){const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="vendors"] .snav-lbl');if(l)l.innerHTML=_vendorTabLabel();}
 // Kept current like Ambassadors: two head-sized reads every 30 seconds on the section (the
 // pending count and the newest change), the five-minute tick elsewhere; a change reloads the lists.
-async function _fnbPoll(full){
-  if(!sb||S.view!=='staff'||!S._staffAuthed||!isAdmin()||S._fnbPolling)return;
-  const W=S._fnb;
+async function _vendorPoll(full){
+  if(!sb||S.view!=='staff'||!S._staffAuthed||!isAdmin()||S._vendorPolling)return;
+  const W=S._vendor;
   if(W&&W.missing&&!full)return;
-  if(full&&W&&W.bk){renderFnb('reload');return;}
-  S._fnbPolling=true;
+  if(full&&W&&W.bk){renderVendors('reload');return;}
+  S._vendorPolling=true;
   try{
     const[p,l,f]=await Promise.all([
-      sb.from('fnb_bookings').select('id',{count:'exact',head:true}).eq('status','pending').gte('day',todayStr()),
-      sb.from('fnb_bookings').select('updated_at').order('updated_at',{ascending:false}).limit(1),
-      W&&W.bk&&!W.fbMissing?sb.from('fnb_feedback').select('updated_at').order('updated_at',{ascending:false}).limit(1).then(x=>x,e=>({error:e})):null]);
+      sb.from('vendor_bookings').select('id',{count:'exact',head:true}).eq('status','pending').gte('day',todayStr()),
+      sb.from('vendor_bookings').select('updated_at').order('updated_at',{ascending:false}).limit(1),
+      W&&W.bk&&!W.fbMissing?sb.from('vendor_feedback').select('updated_at').order('updated_at',{ascending:false}).limit(1).then(x=>x,e=>({error:e})):null]);
     if(!p.error){
-      S._fnbPN=p.count||0;
-      const sig=S._fnbPN+'|'+((l&&!l.error&&Array.isArray(l.data)&&l.data[0]&&l.data[0].updated_at)||'')+'|'+(f&&!f.error?(Array.isArray(f.data)&&f.data[0]&&f.data[0].updated_at)||'':S._fnbFbTop||'');
-      const moved=S._fnbSig!=null&&S._fnbSig!==sig;S._fnbSig=sig;
-      if(moved&&W&&W.bk)renderFnb('reload');
+      S._vendorPN=p.count||0;
+      const sig=S._vendorPN+'|'+((l&&!l.error&&Array.isArray(l.data)&&l.data[0]&&l.data[0].updated_at)||'')+'|'+(f&&!f.error?(Array.isArray(f.data)&&f.data[0]&&f.data[0].updated_at)||'':S._vendorFbTop||'');
+      const moved=S._vendorSig!=null&&S._vendorSig!==sig;S._vendorSig=sig;
+      if(moved&&W&&W.bk)renderVendors('reload');
     }
   }catch(e){}
-  finally{S._fnbPolling=false;_fnbTabLabelSync();}
+  finally{S._vendorPolling=false;_vendorTabLabelSync();}
 }
-setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='fnb')return;_fnbPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
-function _fnb(){return S._fnb||(S._fnb={tiers:null,venues:[],users:[],dates:[],series:[],bk:null,busy:false,err:false,missing:false,at:0,month:'',rf:'pending',rq:'',vf:'active',vq:'',td:{},fb:[],fbMissing:false,fbErr:false,fbv:'all',fbr:'all',fbq:''});}
-function _fnbV(){return['requests','venues','tiers','feedback'].includes(S.fnbView)?S.fnbView:'calendar';}
-function _fnbIsMissing(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||(/fnb_/.test(m)&&/does not exist|schema cache/.test(m));}
-async function _fnbLoad(){
-  const W=_fnb();if(W.busy||!sb)return;W.busy=true;
-  const from=_fnbAdd(todayStr(),-200);
+setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='vendors')return;_vendorPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
+function _vendor(){return S._vendor||(S._vendor={tiers:null,venues:[],users:[],dates:[],series:[],bk:null,busy:false,err:false,missing:false,at:0,month:'',rf:'pending',rq:'',vf:'active',vq:'',td:{},fb:[],fbMissing:false,fbErr:false,fbv:'all',fbr:'all',fbq:''});}
+function _vendorV(){return['requests','venues','tiers','feedback'].includes(S.vendorView)?S.vendorView:'calendar';}
+function _vendorIsMissing(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||(/vendor_/.test(m)&&/does not exist|schema cache/.test(m));}
+async function _vendorLoad(){
+  const W=_vendor();if(W.busy||!sb)return;W.busy=true;
+  const from=_vendorAdd(todayStr(),-200);
   try{
     const r=await Promise.all([
-      sb.from('fnb_tiers').select('*').order('sort'),
-      sb.from('fnb_venues').select('*').order('name').limit(2000),
-      sb.from('fnb_users').select(FNB_USER_COLS).order('created_at').limit(5000),
-      sb.from('fnb_dates').select('*').gte('day',from).order('day').limit(2000),
-      sb.from('fnb_series').select('*').order('starts_on').limit(2000),
-      sb.from('fnb_bookings').select(FNB_BK_COLS).gte('day',from).order('day').limit(5000),
+      sb.from('vendor_tiers').select('*').order('sort'),
+      sb.from('vendor_venues').select('*').order('name').limit(2000),
+      sb.from('vendor_users').select(VENDOR_USER_COLS).order('created_at').limit(5000),
+      sb.from('vendor_dates').select('*').gte('day',from).order('day').limit(2000),
+      sb.from('vendor_series').select('*').order('starts_on').limit(2000),
+      sb.from('vendor_bookings').select(VENDOR_BK_COLS).gte('day',from).order('day').limit(5000),
       // The venues' feedback (20261003180000): its own answer, so a database without the table
       // (or a refusal) leaves the other tabs working.
-      sb.from('fnb_feedback').select(FNB_FB_COLS).gte('day',from).order('day',{ascending:false}).limit(2000).then(x=>x,e=>({error:e}))]);
+      sb.from('vendor_feedback').select(VENDOR_FB_COLS).gte('day',from).order('day',{ascending:false}).limit(2000).then(x=>x,e=>({error:e}))]);
     const fr=r.pop();
-    if(fr&&fr.error){W.fb=[];W.fbMissing=_fnbIsMissing(fr.error);W.fbErr=!W.fbMissing;}
+    if(fr&&fr.error){W.fb=[];W.fbMissing=_vendorIsMissing(fr.error);W.fbErr=!W.fbMissing;}
     else{W.fb=Array.isArray(fr&&fr.data)?fr.data:[];W.fbMissing=false;W.fbErr=false;}
     const bad=r.find(x=>x&&x.error);
-    if(bad){W.err=true;W.missing=_fnbIsMissing(bad.error);}
+    if(bad){W.err=true;W.missing=_vendorIsMissing(bad.error);}
     else{
       [W.tiers,W.venues,W.users,W.dates,W.series,W.bk]=r.map(x=>Array.isArray(x.data)?x.data:[]);W.err=false;W.missing=false;
-      const d=todayStr();S._fnbPN=W.bk.filter(b=>b.status==='pending'&&b.day>=d).length;
-      S._fnbSig=S._fnbPN+'|'+W.bk.reduce((m,b)=>b.updated_at&&b.updated_at>m?b.updated_at:m,'')+'|'+(S._fnbFbTop=_fnbFbNewest(W.fb));
+      const d=todayStr();S._vendorPN=W.bk.filter(b=>b.status==='pending'&&b.day>=d).length;
+      S._vendorSig=S._vendorPN+'|'+W.bk.reduce((m,b)=>b.updated_at&&b.updated_at>m?b.updated_at:m,'')+'|'+(S._vendorFbTop=_vendorFbNewest(W.fb));
     }
   }catch(e){W.err=true;}
   finally{W.busy=false;W.at=Date.now();}
-  _fnbTabLabelSync();
-  if(S.view!=='staff'||S.staffTab!=='fnb')return;
+  _vendorTabLabelSync();
+  if(S.view!=='staff'||S.staffTab!=='vendors')return;
   // Someone typing on the page keeps the field: a search repaints its list only, any other field nothing.
-  const el=document.getElementById('tab-fnb'),a=document.activeElement;
-  if(a&&el&&el.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){if(a.classList.contains('search-input'))renderFnb('list');return;}
-  renderFnb();
+  const el=document.getElementById('tab-vendors'),a=document.activeElement;
+  if(a&&el&&el.contains(a)&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){if(a.classList.contains('search-input'))renderVendors('list');return;}
+  renderVendors();
 }
-function _fnbAdd(ds,n){const d=new Date(ds+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
-function _fnbLong(ds){try{return new Date(ds+'T12:00:00+03:00').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:KSA_TZ});}catch(e){return ds;}}
-function _fnbVen(id){return(_fnb().venues||[]).find(v=>String(v.id)===String(id))||null;}
-function _fnbVName(v){return v?(S.lang==='ar'&&v.name_ar?v.name_ar:v.name):'';}
-function _fnbTier(id){return(_fnb().tiers||[]).find(x=>x.id===id)||null;}
-function _fnbTierName(id){const x=_fnbTier(id);return x?(S.lang==='ar'&&x.name_ar?x.name_ar:x.name_en):String(id||'');}
-function _fnbDate(ds){return(_fnb().dates||[]).find(d=>d.day===ds)||null;}
-function _fnbOnDay(ds){return(_fnb().bk||[]).filter(b=>b.day===ds);}
-function _fnbRsLabel(r){return FNB_RS_KEY[r]&&r!=='other'?t(FNB_RS_KEY[r]):r==='closed'?t('pfnStClosed'):r;}
-function _fnbChip(st,key){const c=WS_ST_CLS[FNB_ST_COL[st]||'var(--muted)'];return`<span class="ca-status ${c[0]}"><span class="ca-dot ${c[1]}"></span>${esc(t(key))}</span>`;}
+function _vendorAdd(ds,n){const d=new Date(ds+'T00:00:00Z');d.setUTCDate(d.getUTCDate()+n);return d.toISOString().slice(0,10);}
+function _vendorLong(ds){try{return new Date(ds+'T12:00:00+03:00').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:KSA_TZ});}catch(e){return ds;}}
+function _vendorVen(id){return(_vendor().venues||[]).find(v=>String(v.id)===String(id))||null;}
+function _vendorVName(v){return v?(S.lang==='ar'&&v.name_ar?v.name_ar:v.name):'';}
+function _vendorTier(id){return(_vendor().tiers||[]).find(x=>x.id===id)||null;}
+function _vendorTierName(id){const x=_vendorTier(id);return x?(S.lang==='ar'&&x.name_ar?x.name_ar:x.name_en):String(id||'');}
+function _vendorDate(ds){return(_vendor().dates||[]).find(d=>d.day===ds)||null;}
+function _vendorOnDay(ds){return(_vendor().bk||[]).filter(b=>b.day===ds);}
+function _vendorRsLabel(r){return VENDOR_RS_KEY[r]&&r!=='other'?t(VENDOR_RS_KEY[r]):r==='closed'?t('vndStClosed'):r;}
+function _vendorChip(st,key){const c=WS_ST_CLS[VENDOR_ST_COL[st]||'var(--muted)'];return`<span class="ca-status ${c[0]}"><span class="ca-dot ${c[1]}"></span>${esc(t(key))}</span>`;}
 // Competing requests: the higher tier first, then whoever asked first.
-function _fnbBkSort(a,b){const pa=(_fnbTier((_fnbVen(a.venue_id)||{}).tier_id)||{}).priority||0,pb=(_fnbTier((_fnbVen(b.venue_id)||{}).tier_id)||{}).priority||0;return pb-pa||(String(a.created_at)<String(b.created_at)?-1:String(a.created_at)>String(b.created_at)?1:0);}
-function _fnbBkCard(b){
-  const v=_fnbVen(b.venue_id);
-  const B=(cls,key,act,primary)=>`<button type="button" class="${primary?'btn-primary':'btn-secondary'} btn-sm ${cls}" data-on-click="${_on('_fnbDecide',b.id,act)}">${t(key)}</button>`;
-  const acts=b.status==='pending'?B('fnb-confirm','pfnConfirm','confirm',1)+B('fnb-decline','pfnDecline','decline'):b.status==='confirmed'?B('fnb-cancel','pfnCancelBk','cancel'):'';
-  const why=b.status==='declined'&&b.staff_note==='another_venue'?t('pfnAutoDeclined')
-    :b.status==='cancelled'?[t(b.cancelled_by==='venue'?'pfnByVenue':'pfnByMm'),b.cancel_reason?_fnbRsLabel(b.cancel_reason):'',b.late_cancel?t('pfnLate'):''].filter(Boolean).join(' · ')
+function _vendorBkSort(a,b){const pa=(_vendorTier((_vendorVen(a.venue_id)||{}).tier_id)||{}).priority||0,pb=(_vendorTier((_vendorVen(b.venue_id)||{}).tier_id)||{}).priority||0;return pb-pa||(String(a.created_at)<String(b.created_at)?-1:String(a.created_at)>String(b.created_at)?1:0);}
+function _vendorBkCard(b){
+  const v=_vendorVen(b.venue_id);
+  const B=(cls,key,act,primary)=>`<button type="button" class="${primary?'btn-primary':'btn-secondary'} btn-sm ${cls}" data-on-click="${_on('_vendorDecide',b.id,act)}">${t(key)}</button>`;
+  const acts=b.status==='pending'?B('vendor-confirm','vndConfirm','confirm',1)+B('vendor-decline','vndDecline','decline'):b.status==='confirmed'?B('vendor-cancel','vndCancelBk','cancel'):'';
+  const why=b.status==='declined'&&b.staff_note==='another_venue'?t('vndAutoDeclined')
+    :b.status==='cancelled'?[t(b.cancelled_by==='venue'?'vndByVenue':'vndByMm'),b.cancel_reason?_vendorRsLabel(b.cancel_reason):'',b.late_cancel?t('vndLate'):''].filter(Boolean).join(' · ')
     :b.staff_note||'';
-  return`<div class="fnb-bk" data-fnb-bk="${esc(b.id)}" data-status="${esc(b.status)}">
-    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(_fnbVName(v)||('#'+b.venue_id))}</div><div class="ca-when">${esc([v?_fnbTierName(v.tier_id):'',t(FNB_MODE_KEY[b.kind]||'pfnModeSingle'),t('pfnAsked').replace('{0}',fmtStamp(b.created_at))].filter(Boolean).join(' · '))}</div></div>${_fnbChip(b.status,FNB_BK_KEY[b.status]||'pfnBkPending')}</div>
-    ${b.note?`<div class="fnb-note" dir="auto">${esc(b.note)}</div>`:''}
+  return`<div class="vendor-bk" data-vendor-bk="${esc(b.id)}" data-status="${esc(b.status)}">
+    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(_vendorVName(v)||('#'+b.venue_id))}</div><div class="ca-when">${esc([v?_vendorTierName(v.tier_id):'',t(VENDOR_MODE_KEY[b.kind]||'vndModeSingle'),t('vndAsked').replace('{0}',fmtStamp(b.created_at))].filter(Boolean).join(' · '))}</div></div>${_vendorChip(b.status,VENDOR_BK_KEY[b.status]||'vndBkPending')}</div>
+    ${b.note?`<div class="vendor-note" dir="auto">${esc(b.note)}</div>`:''}
     ${why?`<div class="ca-when">${esc(why)}</div>`:''}
     ${acts?`<div class="ca-actions">${acts}</div>`:''}
   </div>`;
 }
 // ── Feedback (2026-10-03, migration 20261003180000) ── a venue rates the breakfast it hosted, from its
 // portal, for 14 days after a confirmed date; staff only read it. One row per booking (booking_id).
-const FNB_STAR='M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6.1L12 16.8l-5.4 3 1.2-6.1-4.5-4.2 6.1-.7z';
-function _fnbFbNewest(a){return(Array.isArray(a)?a:[]).reduce((m,f)=>f&&f.updated_at&&f.updated_at>m?f.updated_at:m,'');}
-function _fnbFbOf(id){return(_fnb().fb||[]).find(f=>String(f.booking_id)===String(id))||null;}
+const VENDOR_STAR='M12 3.2l2.6 5.6 6.1.7-4.5 4.2 1.2 6.1L12 16.8l-5.4 3 1.2-6.1-4.5-4.2 6.1-.7z';
+function _vendorFbNewest(a){return(Array.isArray(a)?a:[]).reduce((m,f)=>f&&f.updated_at&&f.updated_at>m?f.updated_at:m,'');}
+function _vendorFbOf(id){return(_vendor().fb||[]).find(f=>String(f.booking_id)===String(id))||null;}
 // Five drawn stars, filled up to the rating; the words are for a screen reader.
-function _fnbStars(n,quiet){
+function _vendorStars(n,quiet){
   n=Math.max(0,Math.min(5,Math.round(Number(n)||0)));let s='';
-  for(let i=1;i<=5;i++)s+=`<svg class="fnb-star${i<=n?' on':''}" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="${FNB_STAR}"/></svg>`;
-  return`<span class="fnb-stars" data-rating="${n}"${quiet?' aria-hidden="true"':''}>${s}${quiet?'':`<span class="fnb-sr">${esc(t('pfnFbOf').replace('{0}',n))}</span>`}</span>`;
+  for(let i=1;i<=5;i++)s+=`<svg class="vendor-star${i<=n?' on':''}" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="${VENDOR_STAR}"/></svg>`;
+  return`<span class="vendor-stars" data-rating="${n}"${quiet?' aria-hidden="true"':''}>${s}${quiet?'':`<span class="vendor-sr">${esc(t('vndFbOf').replace('{0}',n))}</span>`}</span>`;
 }
 // Riders booked on that date's Saturday ride (waiting or done, not rejected), when the page holds
 // that ride's rows; null otherwise, and the card shows the venue's count alone.
-function _fnbBooked(ds){
+function _vendorBooked(ds){
   if(!S.dataLoaded||ds<_qWindowCut())return null;
   const ss=(S.sessions||[]).filter(s=>s.session_date===ds&&s.event_kind==='community'&&(s.ride_kind||'saturday')==='saturday'&&s.status!=='deleted');
   if(!ss.length)return null;
@@ -28415,460 +28418,460 @@ function _fnbBooked(ds){
   ss.forEach(s=>(m.get(s.id)||[]).forEach(e=>{if((e.status==='waiting'||e.status==='done')&&e.approval!=='rejected')n++;}));
   return n;
 }
-function _fnbFbBlock(f){
-  const v=_fnbVen(f.venue_id),bk=_fnbBooked(f.day),edited=f.updated_at&&f.created_at&&String(f.updated_at).slice(0,16)!==String(f.created_at).slice(0,16);
-  const turn=(f.turnout==null?`<b class="ca-none">${t('pfnFbNoCount')}</b>`:`<b>${esc(String(f.turnout))}</b>`)+(bk!=null?` <span class="amb-dim fnb-fb-booked">${esc(t('pfnFbBooked').replace('{0}',bk))}</span>`:'');
-  const txt=(cls,key,val)=>String(val||'').trim()?`<div class="${cls}"><div class="fnb-lbl">${t(key)}</div><div class="fnb-note" dir="auto">${esc(val)}</div></div>`:'';
-  return`<div class="ca-row fnb-fb" data-fnb-fb="${esc(f.booking_id)}" data-rating="${esc(f.rating)}">
-    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(_fnbVName(v)||('#'+f.venue_id))}</div><div class="ca-when">${esc(_fnbLong(f.day))}</div></div>${_fnbStars(f.rating)}</div>
-    <div class="fnb-fb-turn"><span class="fnb-lbl">${t('pfnFbTurnout')}</span> ${turn}</div>
-    ${txt('fnb-fb-well','pfnFbWell',f.went_well)}${txt('fnb-fb-better','pfnFbBetter',f.improve)}
-    <div class="ca-when fnb-fb-at">${esc([t('pfnFbSent').replace('{0}',fmtStamp(f.created_at)),edited?t('pfnFbEdited').replace('{0}',fmtStamp(f.updated_at)):''].filter(Boolean).join(' · '))}</div>
+function _vendorFbBlock(f){
+  const v=_vendorVen(f.venue_id),bk=_vendorBooked(f.day),edited=f.updated_at&&f.created_at&&String(f.updated_at).slice(0,16)!==String(f.created_at).slice(0,16);
+  const turn=(f.turnout==null?`<b class="ca-none">${t('vndFbNoCount')}</b>`:`<b>${esc(String(f.turnout))}</b>`)+(bk!=null?` <span class="amb-dim vendor-fb-booked">${esc(t('vndFbBooked').replace('{0}',bk))}</span>`:'');
+  const txt=(cls,key,val)=>String(val||'').trim()?`<div class="${cls}"><div class="vendor-lbl">${t(key)}</div><div class="vendor-note" dir="auto">${esc(val)}</div></div>`:'';
+  return`<div class="ca-row vendor-fb" data-vendor-fb="${esc(f.booking_id)}" data-rating="${esc(f.rating)}">
+    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(_vendorVName(v)||('#'+f.venue_id))}</div><div class="ca-when">${esc(_vendorLong(f.day))}</div></div>${_vendorStars(f.rating)}</div>
+    <div class="vendor-fb-turn"><span class="vendor-lbl">${t('vndFbTurnout')}</span> ${turn}</div>
+    ${txt('vendor-fb-well','vndFbWell',f.went_well)}${txt('vendor-fb-better','vndFbBetter',f.improve)}
+    <div class="ca-when vendor-fb-at">${esc([t('vndFbSent').replace('{0}',fmtStamp(f.created_at)),edited?t('vndFbEdited').replace('{0}',fmtStamp(f.updated_at)):''].filter(Boolean).join(' · '))}</div>
   </div>`;
 }
 // ── The calendar ──
-function _fnbMonth(n){const W=_fnb(),[y,m]=(W.month||todayStr().slice(0,7)).split('-').map(Number),d=new Date(Date.UTC(y,m-1+n,1));W.month=d.toISOString().slice(0,7);renderFnb();}
-function _fnbCalHtml(){
-  const W=_fnb(),today=todayStr(),loc=_locale();
+function _vendorMonth(n){const W=_vendor(),[y,m]=(W.month||todayStr().slice(0,7)).split('-').map(Number),d=new Date(Date.UTC(y,m-1+n,1));W.month=d.toISOString().slice(0,7);renderVendors();}
+function _vendorCalHtml(){
+  const W=_vendor(),today=todayStr(),loc=_locale();
   if(!W.month)W.month=today.slice(0,7);
   const[y,m]=W.month.split('-').map(Number),first=new Date(Date.UTC(y,m-1,1)),days=new Date(Date.UTC(y,m,0)).getUTCDate();
   const title=first.toLocaleDateString(loc,{month:'long',year:'numeric',timeZone:'UTC'});
   const wd=[0,1,2,3,4,5,6].map(i=>new Date(Date.UTC(2023,0,1+i)).toLocaleDateString(loc,{weekday:'short',timeZone:'UTC'}));
   const dm={},bm={};W.dates.forEach(d=>{dm[d.day]=d;});W.bk.forEach(b=>{(bm[b.day]=bm[b.day]||[]).push(b);});
-  let cells='';for(let i=0;i<first.getUTCDay();i++)cells+='<span class="fnb-day fnb-blank" aria-hidden="true"></span>';
+  let cells='';for(let i=0;i<first.getUTCDay();i++)cells+='<span class="vendor-day vendor-blank" aria-hidden="true"></span>';
   for(let d=1;d<=days;d++){
     const ds=W.month+'-'+String(d).padStart(2,'0'),r=dm[ds],bs=bm[ds]||[],sat=new Date(Date.UTC(y,m-1,d)).getUTCDay()===6;
     const conf=bs.filter(b=>b.status==='confirmed'),pend=bs.filter(b=>b.status==='pending').length;
     let st='off',lines='';
-    if(conf.length){st='confirmed';lines=`<span class="fnb-ds">${esc(t('pfnStConfirmed'))}</span><span class="fnb-dv">${esc(conf.map(b=>_fnbVName(_fnbVen(b.venue_id))).join(', '))}</span>`;}
-    else if(r&&r.state==='closed'){st='closed';lines=`<span class="fnb-ds">${esc(t('pfnStClosed'))}</span>${r.reason?`<span class="fnb-dv">${esc(_fnbRsLabel(r.reason))}</span>`:''}`;}
-    else if(r){st='open';lines=`<span class="fnb-ds">${esc(t('pfnStOpen'))}</span>${pend?`<span class="fnb-dp">${esc(t('pfnNPending').replace('{0}',pend))}</span>`:''}`;}
-    const cls=`fnb-day st-${st}${ds<today?' past':''}${ds===today?' today':''}`;
-    cells+=r||sat?`<button type="button" class="${cls}" data-fnb-day="${ds}" aria-label="${esc(_fnbLong(ds))}" data-on-click="${_on('_fnbDayOpen',ds)}"><span class="fnb-dn">${d}</span>${lines}</button>`:`<span class="${cls}"><span class="fnb-dn">${d}</span></span>`;
+    if(conf.length){st='confirmed';lines=`<span class="vendor-ds">${esc(t('vndStConfirmed'))}</span><span class="vendor-dv">${esc(conf.map(b=>_vendorVName(_vendorVen(b.venue_id))).join(', '))}</span>`;}
+    else if(r&&r.state==='closed'){st='closed';lines=`<span class="vendor-ds">${esc(t('vndStClosed'))}</span>${r.reason?`<span class="vendor-dv">${esc(_vendorRsLabel(r.reason))}</span>`:''}`;}
+    else if(r){st='open';lines=`<span class="vendor-ds">${esc(t('vndStOpen'))}</span>${pend?`<span class="vendor-dp">${esc(t('vndNPending').replace('{0}',pend))}</span>`:''}`;}
+    const cls=`vendor-day st-${st}${ds<today?' past':''}${ds===today?' today':''}`;
+    cells+=r||sat?`<button type="button" class="${cls}" data-vendor-day="${ds}" aria-label="${esc(_vendorLong(ds))}" data-on-click="${_on('_vendorDayOpen',ds)}"><span class="vendor-dn">${d}</span>${lines}</button>`:`<span class="${cls}"><span class="vendor-dn">${d}</span></span>`;
   }
-  return`<div class="fnb-cal-bar">
-      <button type="button" class="btn-secondary btn-sm fnb-prev" aria-label="${esc(t('pfnPrevMonth'))}" title="${esc(t('pfnPrevMonth'))}" data-on-click="${_on('_fnbMonth',-1)}">${FNB_CHEV}</button>
-      <div class="fnb-month">${esc(title)}</div>
-      <button type="button" class="btn-secondary btn-sm fnb-next" aria-label="${esc(t('pfnNextMonth'))}" title="${esc(t('pfnNextMonth'))}" data-on-click="${_on('_fnbMonth',1)}">${FNB_CHEV}</button>
+  return`<div class="vendor-cal-bar">
+      <button type="button" class="btn-secondary btn-sm vendor-prev" aria-label="${esc(t('vndPrevMonth'))}" title="${esc(t('vndPrevMonth'))}" data-on-click="${_on('_vendorMonth',-1)}">${VENDOR_CHEV}</button>
+      <div class="vendor-month">${esc(title)}</div>
+      <button type="button" class="btn-secondary btn-sm vendor-next" aria-label="${esc(t('vndNextMonth'))}" title="${esc(t('vndNextMonth'))}" data-on-click="${_on('_vendorMonth',1)}">${VENDOR_CHEV}</button>
       <span class="ws-flex1"></span>
-      <button type="button" class="btn-secondary btn-sm fnb-open-sats" data-on-click="${_on('_fnbOpenSats')}">${t('pfnOpenSats')}</button>
+      <button type="button" class="btn-secondary btn-sm vendor-open-sats" data-on-click="${_on('_vendorOpenSats')}">${t('vndOpenSats')}</button>
     </div>
-    <div class="fnb-cal">${wd.map(w=>`<span class="fnb-wd">${esc(w)}</span>`).join('')}${cells}</div>`;
+    <div class="vendor-cal">${wd.map(w=>`<span class="vendor-wd">${esc(w)}</span>`).join('')}${cells}</div>`;
 }
 // A centred dialog in the confirm host, like the Workshop's (_wsDlg), with a stable title so a
 // redraw keeps its place and focus; `after` follows the action row (a venue's logins and bookings).
-function _fnbDlgClose(){S._fnbDay=null;S._fnbVen=null;closeConfirm();}
-function _fnbDlg(title,sub,fields,actions,err,cls,after){
+function _vendorDlgClose(){S._vendorDay=null;S._vendorVen=null;closeConfirm();}
+function _vendorDlg(title,sub,fields,actions,err,cls,after){
   const host=document.getElementById('confirm-modal');if(!host)return;
   host.style.display='block';
-  host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_backdropOnly',_EV,_EL,'_fnbDlgClose')}">
-    <div class="modal-box ws-dlg fnb-dlg ${cls||''}" role="dialog" aria-modal="true" aria-labelledby="fnb-dlg-title">
-      <div class="ca-msg-head"><div class="modal-title ws-m0" id="fnb-dlg-title">${esc(title)}</div><button type="button" class="ca-x" data-on-click="${_on('_fnbDlgClose')}" aria-label="${t('closeBtn')}">&times;</button></div>
+  host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on_backdropOnly',_EV,_EL,'_vendorDlgClose')}">
+    <div class="modal-box ws-dlg vendor-dlg ${cls||''}" role="dialog" aria-modal="true" aria-labelledby="vendor-dlg-title">
+      <div class="ca-msg-head"><div class="modal-title ws-m0" id="vendor-dlg-title">${esc(title)}</div><button type="button" class="ca-x" data-on-click="${_on('_vendorDlgClose')}" aria-label="${t('closeBtn')}">&times;</button></div>
       ${sub?`<div class="ca-msg-sub">${sub}</div>`:''}
       ${fields}
-      <div id="fnb-dlg-err" class="ws-err" role="alert">${esc(err||'')}</div>
+      <div id="vendor-dlg-err" class="ws-err" role="alert">${esc(err||'')}</div>
       <div class="ws-dlg-actions">${actions}</div>
       ${after||''}
     </div></div>`;
 }
-function _fnbReopen(){if(S._fnbDay)_fnbDayRender();else if(S._fnbVen)_fnbVenRender();}
+function _vendorReopen(){if(S._vendorDay)_vendorDayRender();else if(S._vendorVen)_vendorVenRender();}
 // The Saturday ride's breakfast stop on that day, as the page holds it.
-function _fnbRide(ds){
+function _vendorRide(ds){
   const ss=(S.sessions||[]).filter(s=>s.session_date===ds&&s.event_kind==='community'&&(s.ride_kind||'saturday')==='saturday'&&s.status!=='deleted');
-  if(!ss.length)return`<b class="ca-none">${t('pfnRideNone')}</b>`;
-  return ss.map(s=>s.breakfast_name?`<b>${esc(s.breakfast_name)}</b>${/^https:\/\//i.test(s.breakfast_url||'')?` <a class="ca-link" href="${esc(s.breakfast_url)}" target="_blank" rel="noopener noreferrer">${t('pfnMap')}</a>`:''}`:`<b class="ca-none">${t('pfnRideNoStop')}</b>`).join('<br>');
+  if(!ss.length)return`<b class="ca-none">${t('vndRideNone')}</b>`;
+  return ss.map(s=>s.breakfast_name?`<b>${esc(s.breakfast_name)}</b>${/^https:\/\//i.test(s.breakfast_url||'')?` <a class="ca-link" href="${esc(s.breakfast_url)}" target="_blank" rel="noopener noreferrer">${t('vndMap')}</a>`:''}`:`<b class="ca-none">${t('vndRideNoStop')}</b>`).join('<br>');
 }
-function _fnbDayOpen(ds){
-  const r=_fnbDate(ds),rs=r&&r.reason?(FNB_RS.includes(r.reason)?r.reason:'other'):'';
-  S._fnbVen=null;S._fnbDay={day:ds,state:r?r.state:'open',rs,other:rs==='other'?r.reason:'',cap:r?r.capacity:1,err:''};_fnbDayRender();
+function _vendorDayOpen(ds){
+  const r=_vendorDate(ds),rs=r&&r.reason?(VENDOR_RS.includes(r.reason)?r.reason:'other'):'';
+  S._vendorVen=null;S._vendorDay={day:ds,state:r?r.state:'open',rs,other:rs==='other'?r.reason:'',cap:r?r.capacity:1,err:''};_vendorDayRender();
 }
-function _fnbDaySet(k,v){const D=S._fnbDay;if(!D)return;D[k]=v;if(k==='state'||k==='rs')_fnbDayRender();}
-function _fnbDayRender(){
-  const D=S._fnbDay;if(!D)return;
-  const r=_fnbDate(D.day),bs=_fnbOnDay(D.day).sort(_fnbBkSort),fbs=bs.filter(b=>b.status==='confirmed').map(b=>_fnbFbOf(b.id)).filter(Boolean);
-  const pill=(on,key,k,v)=>`<button type="button" class="filter-pill${on?' active':''}" data-fnb-set="${k}-${v}" data-on-click="${_on('_fnbDaySet',k,v)}">${t(key)}</button>`;
-  const reason=D.state!=='closed'?'':`<div class="form-group"><div class="fnb-lbl">${t('pfnLblReason')}</div><div class="filter-row fnb-rs">${[...FNB_RS,'other'].map(k=>pill(D.rs===k,FNB_RS_KEY[k],'rs',k)).join('')}</div>${D.rs==='other'?`<input type="text" id="fnb-d-other" class="fnb-mt6" maxlength="120" value="${esc(D.other||'')}" aria-label="${esc(t('pfnLblReason'))}" data-on-input="${_on('_fnbDaySet','other',_P('value'))}">`:''}</div>`;
-  const fields=`<div class="form-group"><div class="fnb-lbl">${t('pfnLblState')}</div><div class="filter-row">${pill(D.state==='open','pfnStOpen','state','open')}${pill(D.state==='closed','pfnStClosed','state','closed')}</div></div>
+function _vendorDaySet(k,v){const D=S._vendorDay;if(!D)return;D[k]=v;if(k==='state'||k==='rs')_vendorDayRender();}
+function _vendorDayRender(){
+  const D=S._vendorDay;if(!D)return;
+  const r=_vendorDate(D.day),bs=_vendorOnDay(D.day).sort(_vendorBkSort),fbs=bs.filter(b=>b.status==='confirmed').map(b=>_vendorFbOf(b.id)).filter(Boolean);
+  const pill=(on,key,k,v)=>`<button type="button" class="filter-pill${on?' active':''}" data-vendor-set="${k}-${v}" data-on-click="${_on('_vendorDaySet',k,v)}">${t(key)}</button>`;
+  const reason=D.state!=='closed'?'':`<div class="form-group"><div class="vendor-lbl">${t('vndLblReason')}</div><div class="filter-row vendor-rs">${[...VENDOR_RS,'other'].map(k=>pill(D.rs===k,VENDOR_RS_KEY[k],'rs',k)).join('')}</div>${D.rs==='other'?`<input type="text" id="vendor-d-other" class="vendor-mt6" maxlength="120" value="${esc(D.other||'')}" aria-label="${esc(t('vndLblReason'))}" data-on-input="${_on('_vendorDaySet','other',_P('value'))}">`:''}</div>`;
+  const fields=`<div class="form-group"><div class="vendor-lbl">${t('vndLblState')}</div><div class="filter-row">${pill(D.state==='open','vndStOpen','state','open')}${pill(D.state==='closed','vndStClosed','state','closed')}</div></div>
     ${reason}
-    <div class="form-group"><label for="fnb-d-cap">${t('pfnLblCap')}</label><input type="text" inputmode="numeric" id="fnb-d-cap" maxlength="2" value="${esc(D.cap)}" data-on-input="${_on('_fnbDaySet','cap',_P('value'))}"></div>`;
-  const actions=`${r?`<button type="button" class="btn-secondary fnb-remove" data-on-click="${_on('_fnbDayRemove')}">${t('pfnRemoveDate')}</button>`:''}<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_fnbDlgClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary fnb-day-save" data-on-click="${_on('_fnbDaySave')}">${t('pfnSaveDate')}</button>`;
-  const after=`<div class="fnb-ride"><span>${t('pfnRideStop')}</span>${_fnbRide(D.day)}</div>
-    <div class="fnb-sec-h">${t('pfnReqsOn')}</div>
-    <div class="fnb-bks">${bs.map(_fnbBkCard).join('')||`<div class="ca-none">${t('pfnNoReqDay')}</div>`}</div>${fbs.length?`<div class="fnb-sec-h">${t('pfnFbHead')}</div><div class="fnb-bks">${fbs.map(_fnbFbBlock).join('')}</div>`:''}`;
-  _fnbDlg(_fnbLong(D.day),r?'':esc(t('pfnNotListed')),fields,actions,D.err,'fnb-day-dlg',after);
+    <div class="form-group"><label for="vendor-d-cap">${t('vndLblCap')}</label><input type="text" inputmode="numeric" id="vendor-d-cap" maxlength="2" value="${esc(D.cap)}" data-on-input="${_on('_vendorDaySet','cap',_P('value'))}"></div>`;
+  const actions=`${r?`<button type="button" class="btn-secondary vendor-remove" data-on-click="${_on('_vendorDayRemove')}">${t('vndRemoveDate')}</button>`:''}<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_vendorDlgClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary vendor-day-save" data-on-click="${_on('_vendorDaySave')}">${t('vndSaveDate')}</button>`;
+  const after=`<div class="vendor-ride"><span>${t('vndRideStop')}</span>${_vendorRide(D.day)}</div>
+    <div class="vendor-sec-h">${t('vndReqsOn')}</div>
+    <div class="vendor-bks">${bs.map(_vendorBkCard).join('')||`<div class="ca-none">${t('vndNoReqDay')}</div>`}</div>${fbs.length?`<div class="vendor-sec-h">${t('vndFbHead')}</div><div class="vendor-bks">${fbs.map(_vendorFbBlock).join('')}</div>`:''}`;
+  _vendorDlg(_vendorLong(D.day),r?'':esc(t('vndNotListed')),fields,actions,D.err,'vendor-day-dlg',after);
 }
-async function _fnbDaySave(){
-  const D=S._fnbDay;if(!D||S._fnbW)return;
+async function _vendorDaySave(){
+  const D=S._vendorDay;if(!D||S._vendorW)return;
   const cap=Number(String(D.cap).trim());
-  if(!Number.isInteger(cap)||cap<1||cap>10){D.err=t('pfnErrCap');_fnbDayRender();return;}
+  if(!Number.isInteger(cap)||cap<1||cap>10){D.err=t('vndErrCap');_vendorDayRender();return;}
   const reason=D.state==='closed'?(D.rs==='other'?String(D.other||'').trim():D.rs||''):'';
-  const r=_fnbDate(D.day),live=_fnbOnDay(D.day).filter(b=>b.status==='pending'||b.status==='confirmed').length;
+  const r=_vendorDate(D.day),live=_vendorOnDay(D.day).filter(b=>b.status==='pending'||b.status==='confirmed').length;
   if(D.state==='closed'&&live&&(!r||r.state!=='closed')){
-    const ok=await askConfirm({title:t('pfnCloseQ').replace('{0}',_fnbLong(D.day)),body:esc(t('pfnCloseBody').replace('{0}',live)),confirmLabel:t('pfnCloseBtn'),confirmClass:'btn-red'});
-    if(!ok){_fnbDayRender();return;}
+    const ok=await askConfirm({title:t('vndCloseQ').replace('{0}',_vendorLong(D.day)),body:esc(t('vndCloseBody').replace('{0}',live)),confirmLabel:t('vndCloseBtn'),confirmClass:'btn-red'});
+    if(!ok){_vendorDayRender();return;}
   }
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_date_set',{p_day:D.day,p_state:D.state,p_reason:reason,p_capacity:cap,p_by:_opName()||''});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(_writeErr(res,'fnb date')){_fnbDayRender();return;}
-  const W=_fnb(),row={day:D.day,state:D.state,reason,capacity:cap};
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_date_set',{p_day:D.day,p_state:D.state,p_reason:reason,p_capacity:cap,p_by:_opName()||''});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(_writeErr(res,'vendor date')){_vendorDayRender();return;}
+  const W=_vendor(),row={day:D.day,state:D.state,reason,capacity:cap};
   if(r)Object.assign(r,row);else W.dates.push(row);
   if(D.state==='closed')W.bk.forEach(b=>{if(b.day===D.day&&(b.status==='pending'||b.status==='confirmed')){b.status='cancelled';b.cancelled_by='mm';b.cancel_reason=reason||'closed';}});
-  const msg=t('pfnDateSaved').replace('{0}',_fnbLong(D.day));
-  _fnbDlgClose();logAction(msg);toast(msg,'success');_fnbTabLabelSync();renderFnb();_fnbLoad();
+  const msg=t('vndDateSaved').replace('{0}',_vendorLong(D.day));
+  _vendorDlgClose();logAction(msg);toast(msg,'success');_vendorTabLabelSync();renderVendors();_vendorLoad();
 }
-async function _fnbDayRemove(){
-  const D=S._fnbDay;if(!D||S._fnbW)return;
-  if(_fnbOnDay(D.day).length){D.err=t('pfnErrHasBk');_fnbDayRender();return;}
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_date_set',{p_day:D.day,p_state:'remove',p_reason:'',p_capacity:null,p_by:_opName()||''});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(res&&res.error&&/HAS_BOOKINGS/.test(String(res.error.message||''))){D.err=t('pfnErrHasBk');_fnbDayRender();return;}
-  if(_writeErr(res,'fnb date remove'))return;
-  const W=_fnb();W.dates=W.dates.filter(d=>d.day!==D.day);
-  const msg=t('pfnDateRemoved').replace('{0}',_fnbLong(D.day));
-  _fnbDlgClose();logAction(msg);toast(msg,'success');renderFnb();
+async function _vendorDayRemove(){
+  const D=S._vendorDay;if(!D||S._vendorW)return;
+  if(_vendorOnDay(D.day).length){D.err=t('vndErrHasBk');_vendorDayRender();return;}
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_date_set',{p_day:D.day,p_state:'remove',p_reason:'',p_capacity:null,p_by:_opName()||''});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(res&&res.error&&/HAS_BOOKINGS/.test(String(res.error.message||''))){D.err=t('vndErrHasBk');_vendorDayRender();return;}
+  if(_writeErr(res,'vendor date remove'))return;
+  const W=_vendor();W.dates=W.dates.filter(d=>d.day!==D.day);
+  const msg=t('vndDateRemoved').replace('{0}',_vendorLong(D.day));
+  _vendorDlgClose();logAction(msg);toast(msg,'success');renderVendors();
 }
-function _fnbOpenSats(){
-  S._fnbDay=null;S._fnbVen=null;const a=todayStr();
-  _fnbDlg(t('pfnOpenTitle'),esc(t('pfnOpenSub')),
-    `<div class="fnb-form"><div class="form-group"><label for="fnb-os-from">${t('pfnLblFrom')}</label><input type="date" id="fnb-os-from" value="${a}"></div><div class="form-group"><label for="fnb-os-to">${t('pfnLblTo')}</label><input type="date" id="fnb-os-to" value="${_fnbAdd(a,182)}"></div></div>`,
-    `<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_fnbDlgClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary fnb-os-go" data-on-click="${_on('_fnbOpenSatsGo')}">${t('pfnOpenBtn')}</button>`,'','fnb-os-dlg');
+function _vendorOpenSats(){
+  S._vendorDay=null;S._vendorVen=null;const a=todayStr();
+  _vendorDlg(t('vndOpenTitle'),esc(t('vndOpenSub')),
+    `<div class="vendor-form"><div class="form-group"><label for="vendor-os-from">${t('vndLblFrom')}</label><input type="date" id="vendor-os-from" value="${a}"></div><div class="form-group"><label for="vendor-os-to">${t('vndLblTo')}</label><input type="date" id="vendor-os-to" value="${_vendorAdd(a,182)}"></div></div>`,
+    `<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_vendorDlgClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary vendor-os-go" data-on-click="${_on('_vendorOpenSatsGo')}">${t('vndOpenBtn')}</button>`,'','vendor-os-dlg');
 }
-async function _fnbOpenSatsGo(){
-  if(S._fnbW)return;
-  const f=_wsVal('fnb-os-from'),to=_wsVal('fnb-os-to'),re=/^\d{4}-\d{2}-\d{2}$/;
-  if(!re.test(f)||!re.test(to)||to<f||(Date.parse(to)-Date.parse(f))/864e5>400){const e=document.getElementById('fnb-dlg-err');if(e)e.textContent=t('pfnErrRange');return;}
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_dates_open',{p_from:f,p_to:to,p_weekday:6});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(_writeErr(res,'fnb dates open'))return;
-  const msg=t('pfnOpenedToast').replace('{0}',Number(res.data)||0);
-  _fnbDlgClose();logAction(msg);toast(msg,'success');_fnbLoad();
+async function _vendorOpenSatsGo(){
+  if(S._vendorW)return;
+  const f=_wsVal('vendor-os-from'),to=_wsVal('vendor-os-to'),re=/^\d{4}-\d{2}-\d{2}$/;
+  if(!re.test(f)||!re.test(to)||to<f||(Date.parse(to)-Date.parse(f))/864e5>400){const e=document.getElementById('vendor-dlg-err');if(e)e.textContent=t('vndErrRange');return;}
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_dates_open',{p_from:f,p_to:to,p_weekday:6});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(_writeErr(res,'vendor dates open'))return;
+  const msg=t('vndOpenedToast').replace('{0}',Number(res.data)||0);
+  _vendorDlgClose();logAction(msg);toast(msg,'success');_vendorLoad();
 }
 // Confirm (declines the date's other requests once it is full), decline, cancel a confirmed date.
-async function _fnbDecide(id,act){
-  const W=_fnb(),b=(W.bk||[]).find(x=>String(x.id)===String(id));if(!b||S._fnbW)return;
-  const v=_fnbVen(b.venue_id),nm=_fnbVName(v)||('#'+b.venue_id),day=_fnbLong(b.day);
+async function _vendorDecide(id,act){
+  const W=_vendor(),b=(W.bk||[]).find(x=>String(x.id)===String(id));if(!b||S._vendorW)return;
+  const v=_vendorVen(b.venue_id),nm=_vendorVName(v)||('#'+b.venue_id),day=_vendorLong(b.day);
   let note='';
   if(act==='confirm'){
-    const others=_fnbOnDay(b.day).filter(x=>x.status==='pending'&&x.id!==b.id).length;
-    const ok=await askConfirm({title:t('pfnConfirmQ').replace('{0}',nm).replace('{1}',day),body:esc(t('pfnConfirmBody').replace('{0}',nm))+(others?'<br><br>'+esc(t('pfnConfirmOthers').replace('{0}',others)):''),confirmLabel:t('pfnConfirm')});
-    if(!ok){_fnbReopen();return;}
+    const others=_vendorOnDay(b.day).filter(x=>x.status==='pending'&&x.id!==b.id).length;
+    const ok=await askConfirm({title:t('vndConfirmQ').replace('{0}',nm).replace('{1}',day),body:esc(t('vndConfirmBody').replace('{0}',nm))+(others?'<br><br>'+esc(t('vndConfirmOthers').replace('{0}',others)):''),confirmLabel:t('vndConfirm')});
+    if(!ok){_vendorReopen();return;}
   }else{
-    const r=await promptDialog({title:t(act==='decline'?'pfnDeclineQ':'pfnCancelQ').replace('{0}',nm).replace('{1}',day),body:t('pfnNoteHint'),value:'',confirmLabel:t(act==='decline'?'pfnDecline':'pfnCancelBk')});
-    if(r===null){_fnbReopen();return;}
+    const r=await promptDialog({title:t(act==='decline'?'vndDeclineQ':'vndCancelQ').replace('{0}',nm).replace('{1}',day),body:t('vndNoteHint'),value:'',confirmLabel:t(act==='decline'?'vndDecline':'vndCancelBk')});
+    if(r===null){_vendorReopen();return;}
     note=String(r).trim().slice(0,300);
   }
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_decide',{p_booking:b.id,p_action:act,p_note:note,p_by:_opName()||''});}catch(e){res={error:e};}
-  S._fnbW=false;
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_decide',{p_booking:b.id,p_action:act,p_note:note,p_by:_opName()||''});}catch(e){res={error:e};}
+  S._vendorW=false;
   if(res&&res.error){
-    const m=String(res.error.message||''),k=/DATE_FULL/.test(m)?'pfnErrFull':/NOT_PENDING/.test(m)?'pfnErrNotPending':/NOT_LIVE/.test(m)?'pfnErrNotLive':'';
-    if(k)toast(t(k),'error');else _writeErr(res,'fnb decide');
-    _fnbReopen();if(k)_fnbLoad();return;
+    const m=String(res.error.message||''),k=/DATE_FULL/.test(m)?'vndErrFull':/NOT_PENDING/.test(m)?'vndErrNotPending':/NOT_LIVE/.test(m)?'vndErrNotLive':'';
+    if(k)toast(t(k),'error');else _writeErr(res,'vendor decide');
+    _vendorReopen();if(k)_vendorLoad();return;
   }
   // Paint first, the reload after.
   if(act==='confirm'){
-    b.status='confirmed';const d=_fnbDate(b.day),cap=d?d.capacity:1;
+    b.status='confirmed';const d=_vendorDate(b.day),cap=d?d.capacity:1;
     if(W.bk.filter(x=>x.day===b.day&&x.status==='confirmed').length>=cap)W.bk.forEach(x=>{if(x.day===b.day&&x.status==='pending'){x.status='declined';x.staff_note='another_venue';}});
     if(v)(S.sessions||[]).forEach(s=>{if(s.session_date===b.day&&s.event_kind==='community'&&(s.ride_kind||'saturday')==='saturday'&&s.status!=='deleted'){s.breakfast_name=v.name;s.breakfast_url=v.map_url||null;}});
   }else if(act==='decline'){b.status='declined';b.staff_note=note;}
   else{b.status='cancelled';b.cancelled_by='mm';b.cancel_reason=note;}
   b.decided_by=_opName()||'';b.decided_at=new Date().toISOString();
-  const msg=t(act==='confirm'?'pfnConfirmedToast':act==='decline'?'pfnDeclinedToast':'pfnCancelledToast').replace('{0}',nm).replace('{1}',day);
+  const msg=t(act==='confirm'?'vndConfirmedToast':act==='decline'?'vndDeclinedToast':'vndCancelledToast').replace('{0}',nm).replace('{1}',day);
   logAction(msg);toast(msg,'success');
-  _fnbTabLabelSync();renderFnb();_fnbReopen();_fnbLoad();
+  _vendorTabLabelSync();renderVendors();_vendorReopen();_vendorLoad();
 }
 // ── Requests ──
-function _fnbReqRows(f){
-  const W=_fnb(),q=String(W.rq||'').trim().toLowerCase();
+function _vendorReqRows(f){
+  const W=_vendor(),q=String(W.rq||'').trim().toLowerCase();
   let rows=W.bk.filter(b=>f==='all'||b.status===f);
-  if(q)rows=rows.filter(b=>{const v=_fnbVen(b.venue_id);return v&&[v.name,v.name_ar].some(x=>String(x||'').toLowerCase().includes(q));});
+  if(q)rows=rows.filter(b=>{const v=_vendorVen(b.venue_id);return v&&[v.name,v.name_ar].some(x=>String(x||'').toLowerCase().includes(q));});
   return rows;
 }
-function _fnbReqListHtml(){
-  const W=_fnb(),by={};
-  _fnbReqRows(W.rf).forEach(b=>{(by[b.day]=by[b.day]||[]).push(b);});
+function _vendorReqListHtml(){
+  const W=_vendor(),by={};
+  _vendorReqRows(W.rf).forEach(b=>{(by[b.day]=by[b.day]||[]).push(b);});
   const days=Object.keys(by).sort();if(W.rf!=='pending')days.reverse(); // waiting: the soonest first; the rest: the latest first
-  if(!days.length)return`<div class="empty-state">${t(String(W.rq||'').trim()?'pfnNoMatch':'pfnNoReq')}</div>`;
+  if(!days.length)return`<div class="empty-state">${t(String(W.rq||'').trim()?'vndNoMatch':'vndNoReq')}</div>`;
   return days.map(ds=>{
-    const bs=by[ds].sort(_fnbBkSort),r=_fnbDate(ds),np=bs.filter(b=>b.status==='pending').length;
-    return`<div class="fnb-grp" data-fnb-grp="${ds}"><div class="fnb-grp-h"><button type="button" class="ca-link" data-on-click="${_on('_fnbDayOpen',ds)}">${esc(_fnbLong(ds))}</button>${r&&r.state==='closed'?_fnbChip('closed','pfnStClosed'):''}${np>1?`<span class="fnb-cmp-n">${esc(t('pfnNCompeting').replace('{0}',np))}</span>`:''}</div>
-      <div class="fnb-cmp">${bs.map(_fnbBkCard).join('')}</div></div>`;
+    const bs=by[ds].sort(_vendorBkSort),r=_vendorDate(ds),np=bs.filter(b=>b.status==='pending').length;
+    return`<div class="vendor-grp" data-vendor-grp="${ds}"><div class="vendor-grp-h"><button type="button" class="ca-link" data-on-click="${_on('_vendorDayOpen',ds)}">${esc(_vendorLong(ds))}</button>${r&&r.state==='closed'?_vendorChip('closed','vndStClosed'):''}${np>1?`<span class="vendor-cmp-n">${esc(t('vndNCompeting').replace('{0}',np))}</span>`:''}</div>
+      <div class="vendor-cmp">${bs.map(_vendorBkCard).join('')}</div></div>`;
   }).join('');
 }
 // ── Venues ──
-function _fnbVenRows(){
-  const W=_fnb(),q=String(W.vq||'').trim().toLowerCase();
+function _vendorVenRows(){
+  const W=_vendor(),q=String(W.vq||'').trim().toLowerCase();
   let rows=W.venues.filter(v=>W.vf==='all'||v.status===W.vf);
   if(q)rows=rows.filter(v=>[v.name,v.name_ar,v.area,v.contact_name,v.contact_email].some(x=>String(x||'').toLowerCase().includes(q))||_phoneHit(v.contact_phone,W.vq));
   return rows.sort((a,b)=>String(a.name).localeCompare(String(b.name)));
 }
-function _fnbVenRow(v){
-  const W=_fnb(),today=todayStr(),bs=W.bk.filter(b=>String(b.venue_id)===String(v.id));
+function _vendorVenRow(v){
+  const W=_vendor(),today=todayStr(),bs=W.bk.filter(b=>String(b.venue_id)===String(v.id));
   const next=bs.filter(b=>b.status==='confirmed'&&b.day>=today).sort((a,b)=>a.day<b.day?-1:1)[0];
   const pend=bs.filter(b=>b.status==='pending'&&b.day>=today).length;
   const kv=(k,val)=>val?`<div class="ca-kv"><span>${k}</span><b>${val}</b></div>`:'';
-  return`<div class="ca-row fnb-ven" data-fnb-ven="${esc(v.id)}" data-status="${esc(v.status)}">
-    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(v.name)}${v.name_ar?` <span class="amb-dim" dir="rtl">${esc(v.name_ar)}</span>`:''}</div><div class="ca-when">${esc([t(FNB_K_KEY[v.kind]||'pfnKOther'),v.area,_fnbTierName(v.tier_id)].filter(Boolean).join(' · '))}</div></div>${_fnbChip(v.status,FNB_VS_KEY[v.status]||'pfnVsActive')}</div>
-    <div class="ca-grid">${kv(t('pfnLblContact'),esc(v.contact_name||''))}${v.contact_phone?kv(t('wsLblPhone'),`<a class="ca-link" href="tel:${esc(v.contact_phone)}"><bdi dir="ltr">${esc(v.contact_phone)}</bdi></a>`):''}${v.seats?kv(t('pfnLblSeats'),esc(String(v.seats))):''}${next?kv(t('pfnNextDate'),esc(_fnbLong(next.day))):''}${pend?kv(t('pfnBkPending'),esc(String(pend))):''}${kv(t('pfnLogins'),esc(String(W.users.filter(u=>String(u.venue_id)===String(v.id)&&u.active).length)))}</div>
-    <div class="ca-actions"><button type="button" class="btn-secondary btn-sm fnb-ven-open" data-on-click="${_on('_fnbVenOpen',v.id)}">${t('pfnOpenVenue')}</button></div>
+  return`<div class="ca-row vendor-ven" data-vendor-ven="${esc(v.id)}" data-status="${esc(v.status)}">
+    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(v.name)}${v.name_ar?` <span class="amb-dim" dir="rtl">${esc(v.name_ar)}</span>`:''}</div><div class="ca-when">${esc([t(VENDOR_K_KEY[v.kind]||'vndKOther'),v.area,_vendorTierName(v.tier_id)].filter(Boolean).join(' · '))}</div></div>${_vendorChip(v.status,VENDOR_VS_KEY[v.status]||'vndVsActive')}</div>
+    <div class="ca-grid">${kv(t('vndLblContact'),esc(v.contact_name||''))}${v.contact_phone?kv(t('wsLblPhone'),`<a class="ca-link" href="tel:${esc(v.contact_phone)}"><bdi dir="ltr">${esc(v.contact_phone)}</bdi></a>`):''}${v.seats?kv(t('vndLblSeats'),esc(String(v.seats))):''}${next?kv(t('vndNextDate'),esc(_vendorLong(next.day))):''}${pend?kv(t('vndBkPending'),esc(String(pend))):''}${kv(t('vndLogins'),esc(String(W.users.filter(u=>String(u.venue_id)===String(v.id)&&u.active).length)))}</div>
+    <div class="ca-actions"><button type="button" class="btn-secondary btn-sm vendor-ven-open" data-on-click="${_on('_vendorVenOpen',v.id)}">${t('vndOpenVenue')}</button></div>
   </div>`;
 }
-function _fnbVenListHtml(){return _fnbVenRows().map(_fnbVenRow).join('')||`<div class="empty-state">${t(String(_fnb().vq||'').trim()?'pfnNoMatch':'pfnNoVen')}</div>`;}
-function _fnbVenOpen(id){
-  closeConfirm();const v=id==null?null:_fnbVen(id);
-  S._fnbDay=null;S._fnbVen={id:v?v.id:null,f:null,pw:null,lang:'en',err:'',add:{login:'',name:'',role:'manager'}};_fnbVenRender();
+function _vendorVenListHtml(){return _vendorVenRows().map(_vendorVenRow).join('')||`<div class="empty-state">${t(String(_vendor().vq||'').trim()?'vndNoMatch':'vndNoVen')}</div>`;}
+function _vendorVenOpen(id){
+  closeConfirm();const v=id==null?null:_vendorVen(id);
+  S._vendorDay=null;S._vendorVen={id:v?v.id:null,f:null,pw:null,lang:'en',err:'',add:{login:'',name:'',role:'manager'}};_vendorVenRender();
 }
-function _fnbVenGrab(){const V=S._fnbVen;if(!V||!document.getElementById('fnb-v-name'))return;V.f={};FNB_VF.forEach(k=>{const e=document.getElementById('fnb-v-'+k);if(e)V.f[k]=String(e.value||'');});}
-function _fnbAddSet(k,v){const V=S._fnbVen;if(V)V.add[k]=v;}
-function _fnbVenRender(){
-  const V=S._fnbVen;if(!V)return;
-  _fnbVenGrab(); // a redraw keeps what was typed and not saved yet
-  const W=_fnb(),v=V.id!=null?_fnbVen(V.id):null,f=V.f||{};
+function _vendorVenGrab(){const V=S._vendorVen;if(!V||!document.getElementById('vendor-v-name'))return;V.f={};VENDOR_VF.forEach(k=>{const e=document.getElementById('vendor-v-'+k);if(e)V.f[k]=String(e.value||'');});}
+function _vendorAddSet(k,v){const V=S._vendorVen;if(V)V.add[k]=v;}
+function _vendorVenRender(){
+  const V=S._vendorVen;if(!V)return;
+  _vendorVenGrab(); // a redraw keeps what was typed and not saved yet
+  const W=_vendor(),v=V.id!=null?_vendorVen(V.id):null,f=V.f||{};
   const val=k=>f[k]!=null?f[k]:v&&v[k]!=null?String(v[k]):k==='kind'?'cafe':k==='tier_id'?'single':k==='status'?'active':'';
-  const inp=(k,key,attrs)=>`<div class="form-group"><label for="fnb-v-${k}">${t(key)}</label><input type="text" id="fnb-v-${k}" value="${esc(val(k))}" autocomplete="off" ${attrs||''}></div>`;
-  const ta=(k,key,dir)=>`<div class="form-group"><label for="fnb-v-${k}">${t(key)}</label><textarea id="fnb-v-${k}" rows="2" maxlength="1000"${dir?` dir="${dir}"`:''}>${esc(val(k))}</textarea></div>`;
-  const sel=(k,key,opts)=>`<div class="form-group"><label for="fnb-v-${k}">${t(key)}</label><select id="fnb-v-${k}">${opts.map(([o,l])=>`<option value="${esc(o)}"${val(k)===o?' selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
-  const form=`<div class="fnb-form">
-    ${inp('name','pfnLblName','maxlength="80"')}${inp('name_ar','pfnLblNameAr','maxlength="80" dir="rtl"')}
-    ${sel('kind','pfnLblKind',Object.keys(FNB_K_KEY).map(k=>[k,t(FNB_K_KEY[k])]))}${inp('area','pfnLblArea','maxlength="80"')}
-    ${inp('map_url','pfnLblMap','inputmode="url" dir="ltr" placeholder="https://"')}${inp('seats','pfnLblSeats','inputmode="numeric" maxlength="4"')}
-    ${inp('contact_name','pfnLblContact','maxlength="80"')}${inp('contact_phone','pfnLblPhone','inputmode="tel" dir="ltr"')}
-    ${inp('contact_email','pfnLblEmail','inputmode="email" dir="ltr"')}
-    ${sel('tier_id','pfnLblTier',(W.tiers||[]).map(x=>[x.id,_fnbTierName(x.id)+(x.active?'':' ('+t('pfnInactive')+')')]))}
-    ${sel('status','pfnLblStatus',Object.keys(FNB_VS_KEY).map(k=>[k,t(FNB_VS_KEY[k])]))}
-  </div>${ta('offer_en','pfnLblOfferEn')}${ta('offer_ar','pfnLblOfferAr','rtl')}${ta('staff_notes','wsLblStaffNotes')}`;
-  const actions=`<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_fnbDlgClose')}">${t('closeBtn')}</button><button type="button" class="btn-primary fnb-ven-save" data-on-click="${_on('_fnbVenSave')}">${t('saveBtn')}</button>`;
-  _fnbDlg(v?v.name:t('pfnVenueNew'),'',form,actions,V.err,'fnb-ven-dlg',v?_fnbVenInside(v):'');
+  const inp=(k,key,attrs)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><input type="text" id="vendor-v-${k}" value="${esc(val(k))}" autocomplete="off" ${attrs||''}></div>`;
+  const ta=(k,key,dir)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><textarea id="vendor-v-${k}" rows="2" maxlength="1000"${dir?` dir="${dir}"`:''}>${esc(val(k))}</textarea></div>`;
+  const sel=(k,key,opts)=>`<div class="form-group"><label for="vendor-v-${k}">${t(key)}</label><select id="vendor-v-${k}">${opts.map(([o,l])=>`<option value="${esc(o)}"${val(k)===o?' selected':''}>${esc(l)}</option>`).join('')}</select></div>`;
+  const form=`<div class="vendor-form">
+    ${inp('name','vndLblName','maxlength="80"')}${inp('name_ar','vndLblNameAr','maxlength="80" dir="rtl"')}
+    ${sel('kind','vndLblKind',Object.keys(VENDOR_K_KEY).map(k=>[k,t(VENDOR_K_KEY[k])]))}${inp('area','vndLblArea','maxlength="80"')}
+    ${inp('map_url','vndLblMap','inputmode="url" dir="ltr" placeholder="https://"')}${inp('seats','vndLblSeats','inputmode="numeric" maxlength="4"')}
+    ${inp('contact_name','vndLblContact','maxlength="80"')}${inp('contact_phone','vndLblPhone','inputmode="tel" dir="ltr"')}
+    ${inp('contact_email','vndLblEmail','inputmode="email" dir="ltr"')}
+    ${sel('tier_id','vndLblTier',(W.tiers||[]).map(x=>[x.id,_vendorTierName(x.id)+(x.active?'':' ('+t('vndInactive')+')')]))}
+    ${sel('status','vndLblStatus',Object.keys(VENDOR_VS_KEY).map(k=>[k,t(VENDOR_VS_KEY[k])]))}
+  </div>${ta('offer_en','vndLblOfferEn')}${ta('offer_ar','vndLblOfferAr','rtl')}${ta('staff_notes','wsLblStaffNotes')}`;
+  const actions=`<span class="ws-flex1"></span><button type="button" class="btn-secondary" data-on-click="${_on('_vendorDlgClose')}">${t('closeBtn')}</button><button type="button" class="btn-primary vendor-ven-save" data-on-click="${_on('_vendorVenSave')}">${t('saveBtn')}</button>`;
+  _vendorDlg(v?v.name:t('vndVenueNew'),'',form,actions,V.err,'vendor-ven-dlg',v?_vendorVenInside(v):'');
 }
 // Inside a saved venue: its logins (with the one-time temporary password), bookings and patterns.
-function _fnbVenInside(v){
-  const W=_fnb(),V=S._fnbVen,today=todayStr(),same=x=>String(x.venue_id)===String(v.id);
+function _vendorVenInside(v){
+  const W=_vendor(),V=S._vendorVen,today=todayStr(),same=x=>String(x.venue_id)===String(v.id);
   const us=W.users.filter(same);
   const ub=(cls,key,fn,...a)=>`<button type="button" class="btn-secondary btn-sm ${cls}" data-on-click="${_on(fn,...a)}">${t(key)}</button>`;
-  const urow=u=>`<tr data-fnb-user="${esc(u.id)}"><td><bdi dir="ltr">${esc(u.login)}</bdi></td><td>${esc(u.name||'')}</td><td>${t(u.role==='owner'?'pfnRoleOwner':'pfnRoleManager')}</td><td>${u.active?t('pfnActive'):`<span class="amb-dim">${t('pfnInactive')}</span>`}</td><td>${u.last_login_at?esc(fmtStamp(u.last_login_at)):`<span class="amb-dim">${t('pfnNever')}</span>`}</td><td class="fnb-u-act">${ub('fnb-u-reset','pfnResetPwd','_fnbUserReset',u.id)}${u.active?ub('fnb-u-off','pfnDeactivate','_fnbUserActive',u.id,false):ub('fnb-u-on','pfnActivate','_fnbUserActive',u.id,true)}</td></tr>`;
-  const table=us.length?`<div class="fnb-tbl"><table class="fnb-users"><thead><tr><th>${t('pfnLblLogin')}</th><th>${t('pfnLblPerson')}</th><th>${t('pfnLblRole')}</th><th>${t('pfnLblStatus')}</th><th>${t('pfnLastIn')}</th><th></th></tr></thead><tbody>${us.map(urow).join('')}</tbody></table></div>`:`<div class="ca-none">${t('pfnNoLogins')}</div>`;
+  const urow=u=>`<tr data-vendor-user="${esc(u.id)}"><td><bdi dir="ltr">${esc(u.login)}</bdi></td><td>${esc(u.name||'')}</td><td>${t(u.role==='owner'?'vndRoleOwner':'vndRoleManager')}</td><td>${u.active?t('vndActive'):`<span class="amb-dim">${t('vndInactive')}</span>`}</td><td>${u.last_login_at?esc(fmtStamp(u.last_login_at)):`<span class="amb-dim">${t('vndNever')}</span>`}</td><td class="vendor-u-act">${ub('vendor-u-reset','vndResetPwd','_vendorUserReset',u.id)}${u.active?ub('vendor-u-off','vndDeactivate','_vendorUserActive',u.id,false):ub('vendor-u-on','vndActivate','_vendorUserActive',u.id,true)}</td></tr>`;
+  const table=us.length?`<div class="vendor-tbl"><table class="vendor-users"><thead><tr><th>${t('vndLblLogin')}</th><th>${t('vndLblPerson')}</th><th>${t('vndLblRole')}</th><th>${t('vndLblStatus')}</th><th>${t('vndLastIn')}</th><th></th></tr></thead><tbody>${us.map(urow).join('')}</tbody></table></div>`:`<div class="ca-none">${t('vndNoLogins')}</div>`;
   const A=V.add;
-  const add=`<div class="fnb-add-user">
-    <input type="text" id="fnb-u-login" dir="ltr" maxlength="120" autocomplete="off" value="${esc(A.login)}" placeholder="${esc(t('pfnLoginHint'))}" aria-label="${esc(t('pfnLblLogin'))}" data-on-input="${_on('_fnbAddSet','login',_P('value'))}">
-    <input type="text" id="fnb-u-name" maxlength="80" autocomplete="off" value="${esc(A.name)}" placeholder="${esc(t('pfnLblPerson'))}" aria-label="${esc(t('pfnLblPerson'))}" data-on-input="${_on('_fnbAddSet','name',_P('value'))}">
-    <select id="fnb-u-role" aria-label="${esc(t('pfnLblRole'))}" data-on-change="${_on('_fnbAddSet','role',_P('value'))}"><option value="manager"${A.role!=='owner'?' selected':''}>${t('pfnRoleManager')}</option><option value="owner"${A.role==='owner'?' selected':''}>${t('pfnRoleOwner')}</option></select>
-    <button type="button" class="btn-primary btn-sm fnb-u-add" data-on-click="${_on('_fnbUserAdd')}">${t('pfnAddLogin')}</button></div>`;
+  const add=`<div class="vendor-add-user">
+    <input type="text" id="vendor-u-login" dir="ltr" maxlength="120" autocomplete="off" value="${esc(A.login)}" placeholder="${esc(t('vndLoginHint'))}" aria-label="${esc(t('vndLblLogin'))}" data-on-input="${_on('_vendorAddSet','login',_P('value'))}">
+    <input type="text" id="vendor-u-name" maxlength="80" autocomplete="off" value="${esc(A.name)}" placeholder="${esc(t('vndLblPerson'))}" aria-label="${esc(t('vndLblPerson'))}" data-on-input="${_on('_vendorAddSet','name',_P('value'))}">
+    <select id="vendor-u-role" aria-label="${esc(t('vndLblRole'))}" data-on-change="${_on('_vendorAddSet','role',_P('value'))}"><option value="manager"${A.role!=='owner'?' selected':''}>${t('vndRoleManager')}</option><option value="owner"${A.role==='owner'?' selected':''}>${t('vndRoleOwner')}</option></select>
+    <button type="button" class="btn-primary btn-sm vendor-u-add" data-on-click="${_on('_vendorUserAdd')}">${t('vndAddLogin')}</button></div>`;
   const bs=W.bk.filter(same),up=bs.filter(b=>b.day>=today&&(b.status==='pending'||b.status==='confirmed')).sort((a,b)=>a.day<b.day?-1:1);
   const rc=bs.filter(b=>!up.includes(b)).sort((a,b)=>String(b.updated_at||b.created_at)>String(a.updated_at||a.created_at)?1:-1).slice(0,8);
-  const line=b=>{const f=b.status==='confirmed'&&b.day<=today?_fnbFbOf(b.id):null;return`<li class="fnb-bline" data-fnb-vbk="${esc(b.id)}"><span>${esc(_fnbLong(b.day))}</span>${_fnbChip(b.status,FNB_BK_KEY[b.status]||'pfnBkPending')}<span class="amb-dim">${esc(t(FNB_MODE_KEY[b.kind]||'pfnModeSingle'))}</span>${f?_fnbStars(f.rating):''}</li>`;};
-  const list=(key,rows)=>`<div class="fnb-lbl">${t(key)}</div>${rows.length?`<ul class="fnb-blines">${rows.map(line).join('')}</ul>`:`<div class="ca-none">${t('pfnNone')}</div>`}`;
+  const line=b=>{const f=b.status==='confirmed'&&b.day<=today?_vendorFbOf(b.id):null;return`<li class="vendor-bline" data-vendor-vbk="${esc(b.id)}"><span>${esc(_vendorLong(b.day))}</span>${_vendorChip(b.status,VENDOR_BK_KEY[b.status]||'vndBkPending')}<span class="amb-dim">${esc(t(VENDOR_MODE_KEY[b.kind]||'vndModeSingle'))}</span>${f?_vendorStars(f.rating):''}</li>`;};
+  const list=(key,rows)=>`<div class="vendor-lbl">${t(key)}</div>${rows.length?`<ul class="vendor-blines">${rows.map(line).join('')}</ul>`:`<div class="ca-none">${t('vndNone')}</div>`}`;
   const ser=W.series.filter(s=>same(s)&&s.status==='active'&&s.until>=today);
-  const sl=s=>`<li>${esc([t(FNB_ORD_KEY[s.ordinal]||'pfnOrd1'),Number(s.interval_months)>1?t('pfnEveryN').replace('{0}',s.interval_months):t('pfnEvery1'),shortDate(s.starts_on)+' - '+shortDate(s.until)].join(', '))}</li>`;
-  return`<div class="fnb-sec-h">${t('pfnLogins')}</div>${V.pw?_fnbPwHtml(v):''}${table}${add}
-    <div class="fnb-sec-h">${t('pfnBookings')}</div>${list('pfnUpcoming',up)}${list('pfnRecent',rc)}
-    <div class="fnb-sec-h">${t('pfnPatterns')}</div>${ser.length?`<ul class="fnb-blines">${ser.map(sl).join('')}</ul>`:`<div class="ca-none">${t('pfnNone')}</div>`}`;
+  const sl=s=>`<li>${esc([t(VENDOR_ORD_KEY[s.ordinal]||'vndOrd1'),Number(s.interval_months)>1?t('vndEveryN').replace('{0}',s.interval_months):t('vndEvery1'),shortDate(s.starts_on)+' - '+shortDate(s.until)].join(', '))}</li>`;
+  return`<div class="vendor-sec-h">${t('vndLogins')}</div>${V.pw?_vendorPwHtml(v):''}${table}${add}
+    <div class="vendor-sec-h">${t('vndBookings')}</div>${list('vndUpcoming',up)}${list('vndRecent',rc)}
+    <div class="vendor-sec-h">${t('vndPatterns')}</div>${ser.length?`<ul class="vendor-blines">${ser.map(sl).join('')}</ul>`:`<div class="ca-none">${t('vndNone')}</div>`}`;
 }
-function _fnbPwMsg(v,lang){
-  const m=FNB_MSG[lang]||FNB_MSG.en,P=S._fnbVen.pw;
-  const nm=String(P.name||v.contact_name||'').trim().split(/\s+/)[0]||_fnbVName(v);
+function _vendorPwMsg(v,lang){
+  const m=VENDOR_MSG[lang]||VENDOR_MSG.en,P=S._vendorVen.pw;
+  const nm=String(P.name||v.contact_name||'').trim().split(/\s+/)[0]||_vendorVName(v);
   const L=[m.hi.replace('{name}',nm),'',m.ready,'',m.login.replace('{login}',P.login),m.pwd.replace('{pwd}',P.pwd),'',m.change];
-  if(FNB_PORTAL_URL)L.push(m.link.replace('{url}',FNB_PORTAL_URL));
+  if(VENDOR_PORTAL_URL)L.push(m.link.replace('{url}',VENDOR_PORTAL_URL));
   L.push('',m.team);return L.join('\n');
 }
-function _fnbPwHtml(v){
-  const V=S._fnbVen,P=V.pw,txt=_fnbPwMsg(v,V.lang),dg=_waDigits(v.contact_phone||'');
+function _vendorPwHtml(v){
+  const V=S._vendorVen,P=V.pw,txt=_vendorPwMsg(v,V.lang),dg=_waDigits(v.contact_phone||'');
   const lbl=c=>esc((LANGS.find(l=>l.code===c)||{}).label||c);
-  return`<div class="fnb-pw">
-    <div class="ca-pwd-box"><span>${esc(t('pfnTempFor').replace('{0}',P.login))}</span><b class="ca-pwd fnb-pw-val" dir="ltr">${esc(P.pwd)}</b></div>
-    <div class="ca-msg-sub">${t('pfnTempOnce')}</div>
-    <label class="ca-msg-lang">${t('caMsgLang')}<select id="fnb-pw-lang" data-on-change="${_on('_fnbPwLang',_P('value'))}"><option value="en"${V.lang!=='ar'?' selected':''}>${lbl('en')}</option><option value="ar"${V.lang==='ar'?' selected':''}>${lbl('ar')}</option></select></label>
-    <textarea id="fnb-pw-text" class="fnb-pw-msg" readonly dir="${V.lang==='ar'?'rtl':'ltr'}" aria-label="${esc(t('pfnTempFor').replace('{0}',P.login))}">${esc(txt)}</textarea>
-    <div class="ca-actions"><button type="button" class="btn-primary btn-sm fnb-pw-copy" data-on-click="${_on('_fnbPwCopy')}">${t('caCopyBtn')}</button>${dg?`<a class="btn-secondary btn-sm fnb-pw-wa" href="${esc('https://wa.me/'+dg+'?text='+encodeURIComponent(txt))}" target="_blank" rel="noopener noreferrer">${t('caWaBtn')}</a>`:`<span class="ca-none">${t('pfnNoPhone')}</span>`}</div>
+  return`<div class="vendor-pw">
+    <div class="ca-pwd-box"><span>${esc(t('vndTempFor').replace('{0}',P.login))}</span><b class="ca-pwd vendor-pw-val" dir="ltr">${esc(P.pwd)}</b></div>
+    <div class="ca-msg-sub">${t('vndTempOnce')}</div>
+    <label class="ca-msg-lang">${t('caMsgLang')}<select id="vendor-pw-lang" data-on-change="${_on('_vendorPwLang',_P('value'))}"><option value="en"${V.lang!=='ar'?' selected':''}>${lbl('en')}</option><option value="ar"${V.lang==='ar'?' selected':''}>${lbl('ar')}</option></select></label>
+    <textarea id="vendor-pw-text" class="vendor-pw-msg" readonly dir="${V.lang==='ar'?'rtl':'ltr'}" aria-label="${esc(t('vndTempFor').replace('{0}',P.login))}">${esc(txt)}</textarea>
+    <div class="ca-actions"><button type="button" class="btn-primary btn-sm vendor-pw-copy" data-on-click="${_on('_vendorPwCopy')}">${t('caCopyBtn')}</button>${dg?`<a class="btn-secondary btn-sm vendor-pw-wa" href="${esc('https://wa.me/'+dg+'?text='+encodeURIComponent(txt))}" target="_blank" rel="noopener noreferrer">${t('caWaBtn')}</a>`:`<span class="ca-none">${t('vndNoPhone')}</span>`}</div>
   </div>`;
 }
-function _fnbPwLang(l){const V=S._fnbVen;if(!V)return;V.lang=l==='ar'?'ar':'en';_fnbVenRender();}
-async function _fnbPwCopy(){
-  const V=S._fnbVen,v=V&&_fnbVen(V.id);if(!v||!V.pw)return;
-  const txt=_fnbPwMsg(v,V.lang);
+function _vendorPwLang(l){const V=S._vendorVen;if(!V)return;V.lang=l==='ar'?'ar':'en';_vendorVenRender();}
+async function _vendorPwCopy(){
+  const V=S._vendorVen,v=V&&_vendorVen(V.id);if(!v||!V.pw)return;
+  const txt=_vendorPwMsg(v,V.lang);
   try{await navigator.clipboard.writeText(txt);toast(t('caCopied'),'success');}
-  catch(e){const el=document.getElementById('fnb-pw-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
+  catch(e){const el=document.getElementById('vendor-pw-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
 }
-async function _fnbVenSave(){
-  const V=S._fnbVen;if(!V||S._fnbW)return;
-  _fnbVenGrab();const f=V.f||{},p={};
-  FNB_VF.forEach(k=>{p[k]=String(f[k]||'').trim();});
-  const err=p.name.length<2||p.name.length>80?'pfnErrName':p.map_url&&!/^https:\/\//i.test(p.map_url)?'pfnErrMap':p.seats&&!(/^\d+$/.test(p.seats)&&+p.seats>=1&&+p.seats<=2000)?'pfnErrSeats':'';
-  if(err){V.err=t(err);_fnbVenRender();return;}
+async function _vendorVenSave(){
+  const V=S._vendorVen;if(!V||S._vendorW)return;
+  _vendorVenGrab();const f=V.f||{},p={};
+  VENDOR_VF.forEach(k=>{p[k]=String(f[k]||'').trim();});
+  const err=p.name.length<2||p.name.length>80?'vndErrName':p.map_url&&!/^https:\/\//i.test(p.map_url)?'vndErrMap':p.seats&&!(/^\d+$/.test(p.seats)&&+p.seats>=1&&+p.seats<=2000)?'vndErrSeats':'';
+  if(err){V.err=t(err);_vendorVenRender();return;}
   if(V.id!=null)p.id=V.id;
   p.by=_opName()||'';
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_venue_save',{p});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(_writeErr(res,'fnb venue save'))return;
-  const id=typeof res.data==='number'||typeof res.data==='string'?res.data:V.id,W=_fnb(),row={...p,id,seats:p.seats?Number(p.seats):null};delete row.by;
-  const v=id!=null&&_fnbVen(id);if(v)Object.assign(v,row);else if(id!=null)W.venues.push({...row,created_by:p.by,created_at:new Date().toISOString()});
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_venue_save',{p});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(_writeErr(res,'vendor venue save'))return;
+  const id=typeof res.data==='number'||typeof res.data==='string'?res.data:V.id,W=_vendor(),row={...p,id,seats:p.seats?Number(p.seats):null};delete row.by;
+  const v=id!=null&&_vendorVen(id);if(v)Object.assign(v,row);else if(id!=null)W.venues.push({...row,created_by:p.by,created_at:new Date().toISOString()});
   V.id=id;V.f=null;V.err='';
-  const msg=t('pfnVenueSaved').replace('{0}',p.name);logAction(msg);toast(msg,'success');
-  renderFnb();_fnbVenRender();
+  const msg=t('vndVenueSaved').replace('{0}',p.name);logAction(msg);toast(msg,'success');
+  renderVendors();_vendorVenRender();
 }
-async function _fnbUserAdd(){
-  const V=S._fnbVen;if(!V||V.id==null||S._fnbW)return;
+async function _vendorUserAdd(){
+  const V=S._vendorVen;if(!V||V.id==null||S._vendorW)return;
   const A=V.add,login=String(A.login||'').trim(),name=String(A.name||'').trim(),role=A.role==='owner'?'owner':'manager';
-  if(!login||(!login.includes('@')&&login.replace(/\D/g,'').length<7)){V.err=t('pfnErrLogin');_fnbVenRender();return;}
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_user_add',{p_venue:V.id,p_login:login,p_name:name,p_role:role});}catch(e){res={error:e};}
-  S._fnbW=false;
+  if(!login||(!login.includes('@')&&login.replace(/\D/g,'').length<7)){V.err=t('vndErrLogin');_vendorVenRender();return;}
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_user_add',{p_venue:V.id,p_login:login,p_name:name,p_role:role});}catch(e){res={error:e};}
+  S._vendorW=false;
   const m=String(res&&res.error&&res.error.message||'');
-  if(/LOGIN_TAKEN|BAD_LOGIN/.test(m)){V.err=t(/TAKEN/.test(m)?'pfnErrTaken':'pfnErrLogin');_fnbVenRender();return;}
-  if(_writeErr(res,'fnb login add'))return;
+  if(/LOGIN_TAKEN|BAD_LOGIN/.test(m)){V.err=t(/TAKEN/.test(m)?'vndErrTaken':'vndErrLogin');_vendorVenRender();return;}
+  if(_writeErr(res,'vendor login add'))return;
   const d=res.data||{};
-  if(!d.password){_writeErr({error:{message:'no password returned'}},'fnb login add');return;}
-  _fnb().users.push({id:d.id,venue_id:V.id,login:d.login||login,name,role,must_change_pwd:true,active:true,last_login_at:null,created_at:new Date().toISOString()});
+  if(!d.password){_writeErr({error:{message:'no password returned'}},'vendor login add');return;}
+  _vendor().users.push({id:d.id,venue_id:V.id,login:d.login||login,name,role,must_change_pwd:true,active:true,last_login_at:null,created_at:new Date().toISOString()});
   V.pw={login:d.login||login,pwd:d.password,name};V.add={login:'',name:'',role:'manager'};V.err='';
-  const msg=t('pfnLoginAdded').replace('{0}',V.pw.login);logAction(msg);toast(msg,'success');
-  _fnbVenRender();renderFnb();
+  const msg=t('vndLoginAdded').replace('{0}',V.pw.login);logAction(msg);toast(msg,'success');
+  _vendorVenRender();renderVendors();
 }
-async function _fnbUserReset(uid){
-  const V=S._fnbVen,u=_fnb().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._fnbW)return;
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_user_reset',{p_user:u.id});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(_writeErr(res,'fnb login reset'))return;
-  if(typeof res.data!=='string'||!res.data){_writeErr({error:{message:'no password returned'}},'fnb login reset');return;}
+async function _vendorUserReset(uid){
+  const V=S._vendorVen,u=_vendor().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._vendorW)return;
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_user_reset',{p_user:u.id});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(_writeErr(res,'vendor login reset'))return;
+  if(typeof res.data!=='string'||!res.data){_writeErr({error:{message:'no password returned'}},'vendor login reset');return;}
   u.must_change_pwd=true;V.pw={login:u.login,pwd:res.data,name:u.name||''};V.err='';
-  const msg=t('pfnPwdReset').replace('{0}',u.login);logAction(msg);toast(msg,'success');
-  _fnbVenRender();
+  const msg=t('vndPwdReset').replace('{0}',u.login);logAction(msg);toast(msg,'success');
+  _vendorVenRender();
 }
-async function _fnbUserActive(uid,on){
-  const V=S._fnbVen,u=_fnb().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._fnbW)return;
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_user_active',{p_user:u.id,p_active:!!on});}catch(e){res={error:e};}
-  S._fnbW=false;
-  if(_writeErr(res,'fnb login active'))return;
+async function _vendorUserActive(uid,on){
+  const V=S._vendorVen,u=_vendor().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._vendorW)return;
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_user_active',{p_user:u.id,p_active:!!on});}catch(e){res={error:e};}
+  S._vendorW=false;
+  if(_writeErr(res,'vendor login active'))return;
   u.active=!!on;
-  const msg=t(on?'pfnLoginOn':'pfnLoginOff').replace('{0}',u.login);logAction(msg);toast(msg,'success');
-  _fnbVenRender();renderFnb();
+  const msg=t(on?'vndLoginOn':'vndLoginOff').replace('{0}',u.login);logAction(msg);toast(msg,'success');
+  _vendorVenRender();renderVendors();
 }
 // ── Tiers (admin) ── each card edits a draft (W.td[id]), so adding or moving a benefit keeps what was typed.
-function _fnbTd(id){
-  const W=_fnb();
-  if(!W.td[id]){const x=_fnbTier(id);if(!x)return null;W.td[id]={...x,modes:[...(x.modes||[])],max_per_month:x.max_per_month==null?'':String(x.max_per_month),benefits:(Array.isArray(x.benefits)?x.benefits:[]).map(b=>({en:String(b&&b.en||''),ar:String(b&&b.ar||'')})),_err:''};}
+function _vendorTd(id){
+  const W=_vendor();
+  if(!W.td[id]){const x=_vendorTier(id);if(!x)return null;W.td[id]={...x,modes:[...(x.modes||[])],max_per_month:x.max_per_month==null?'':String(x.max_per_month),benefits:(Array.isArray(x.benefits)?x.benefits:[]).map(b=>({en:String(b&&b.en||''),ar:String(b&&b.ar||'')})),_err:''};}
   return W.td[id];
 }
-function _fnbTdSet(id,k,v){const d=_fnbTd(id);if(d)d[k]=v;}
-function _fnbTdMode(id,m,on){const d=_fnbTd(id);if(!d)return;d.modes=d.modes.filter(x=>x!==m);if(on)d.modes.push(m);}
-function _fnbTdBen(id,i,l,v){const d=_fnbTd(id);if(d&&d.benefits[i])d.benefits[i][l]=v;}
-function _fnbTdBenAdd(id){const d=_fnbTd(id);if(!d)return;d.benefits.push({en:'',ar:''});renderFnb();const e=document.querySelector(`[data-fnb-tier="${id}"] [data-fnb-ben="${d.benefits.length-1}"] input`);if(e)e.focus();}
-function _fnbTdBenDel(id,i){const d=_fnbTd(id);if(!d)return;d.benefits.splice(i,1);renderFnb();}
-function _fnbTdBenMove(id,i,n){const d=_fnbTd(id),j=i+n;if(!d||j<0||j>=d.benefits.length)return;const b=d.benefits;[b[i],b[j]]=[b[j],b[i]];renderFnb();}
-function _fnbTierCard(d){
-  const id=d.id,W=_fnb();
-  const fid=k=>`fnb-t-${id}-${k}`;
-  const num=(k,key,ph)=>`<div class="form-group"><label for="${fid(k)}">${t(key)}</label><input type="text" inputmode="numeric" maxlength="4" id="${fid(k)}" value="${esc(d[k]==null?'':String(d[k]))}"${ph?` placeholder="${esc(ph)}"`:''} data-on-input="${_on('_fnbTdSet',id,k,_P('value'))}"></div>`;
-  const txt=(k,key,dir)=>`<div class="form-group"><label for="${fid(k)}">${t(key)}</label><input type="text" maxlength="40" id="${fid(k)}" value="${esc(d[k]||'')}"${dir?` dir="${dir}"`:''} data-on-input="${_on('_fnbTdSet',id,k,_P('value'))}"></div>`;
-  const modes=Object.keys(FNB_MODE_KEY).map(m=>`<label class="fnb-chk"><input type="checkbox" data-fnb-mode="${m}"${d.modes.includes(m)?' checked':''} data-on-change="${_on('_fnbTdMode',id,m,_P('checked'))}">${t(FNB_MODE_KEY[m])}</label>`).join('');
-  const bb=(cls,key,fn,a,b,dis,glyph)=>`<button type="button" class="btn-secondary btn-sm fnb-ben-btn ${cls}" aria-label="${esc(t(key))}" title="${esc(t(key))}"${dis?' disabled':''} data-on-click="${_on(fn,id,a,b)}">${glyph}</button>`;
-  const ben=d.benefits.map((b,i)=>`<div class="fnb-ben" data-fnb-ben="${i}">
-      <input type="text" maxlength="200" value="${esc(b.en)}" placeholder="${esc(t('pfnBenEn'))}" aria-label="${esc(t('pfnBenEn'))}" data-fnb-ben-l="en" data-on-input="${_on('_fnbTdBen',id,i,'en',_P('value'))}">
-      <input type="text" maxlength="200" dir="rtl" value="${esc(b.ar)}" placeholder="${esc(t('pfnBenAr'))}" aria-label="${esc(t('pfnBenAr'))}" data-fnb-ben-l="ar" data-on-input="${_on('_fnbTdBen',id,i,'ar',_P('value'))}">
-      <span class="fnb-ben-btns">${bb('fnb-up','pfnBenUp','_fnbTdBenMove',i,-1,!i,FNB_CHEV)}${bb('fnb-down','pfnBenDown','_fnbTdBenMove',i,1,i===d.benefits.length-1,FNB_CHEV)}<button type="button" class="btn-secondary btn-sm fnb-ben-btn fnb-ben-del" aria-label="${esc(t('pfnBenRemove'))}" title="${esc(t('pfnBenRemove'))}" data-on-click="${_on('_fnbTdBenDel',id,i)}">&times;</button></span>
+function _vendorTdSet(id,k,v){const d=_vendorTd(id);if(d)d[k]=v;}
+function _vendorTdMode(id,m,on){const d=_vendorTd(id);if(!d)return;d.modes=d.modes.filter(x=>x!==m);if(on)d.modes.push(m);}
+function _vendorTdBen(id,i,l,v){const d=_vendorTd(id);if(d&&d.benefits[i])d.benefits[i][l]=v;}
+function _vendorTdBenAdd(id){const d=_vendorTd(id);if(!d)return;d.benefits.push({en:'',ar:''});renderVendors();const e=document.querySelector(`[data-vendor-tier="${id}"] [data-vendor-ben="${d.benefits.length-1}"] input`);if(e)e.focus();}
+function _vendorTdBenDel(id,i){const d=_vendorTd(id);if(!d)return;d.benefits.splice(i,1);renderVendors();}
+function _vendorTdBenMove(id,i,n){const d=_vendorTd(id),j=i+n;if(!d||j<0||j>=d.benefits.length)return;const b=d.benefits;[b[i],b[j]]=[b[j],b[i]];renderVendors();}
+function _vendorTierCard(d){
+  const id=d.id,W=_vendor();
+  const fid=k=>`vendor-t-${id}-${k}`;
+  const num=(k,key,ph)=>`<div class="form-group"><label for="${fid(k)}">${t(key)}</label><input type="text" inputmode="numeric" maxlength="4" id="${fid(k)}" value="${esc(d[k]==null?'':String(d[k]))}"${ph?` placeholder="${esc(ph)}"`:''} data-on-input="${_on('_vendorTdSet',id,k,_P('value'))}"></div>`;
+  const txt=(k,key,dir)=>`<div class="form-group"><label for="${fid(k)}">${t(key)}</label><input type="text" maxlength="40" id="${fid(k)}" value="${esc(d[k]||'')}"${dir?` dir="${dir}"`:''} data-on-input="${_on('_vendorTdSet',id,k,_P('value'))}"></div>`;
+  const modes=Object.keys(VENDOR_MODE_KEY).map(m=>`<label class="vendor-chk"><input type="checkbox" data-vendor-mode="${m}"${d.modes.includes(m)?' checked':''} data-on-change="${_on('_vendorTdMode',id,m,_P('checked'))}">${t(VENDOR_MODE_KEY[m])}</label>`).join('');
+  const bb=(cls,key,fn,a,b,dis,glyph)=>`<button type="button" class="btn-secondary btn-sm vendor-ben-btn ${cls}" aria-label="${esc(t(key))}" title="${esc(t(key))}"${dis?' disabled':''} data-on-click="${_on(fn,id,a,b)}">${glyph}</button>`;
+  const ben=d.benefits.map((b,i)=>`<div class="vendor-ben" data-vendor-ben="${i}">
+      <input type="text" maxlength="200" value="${esc(b.en)}" placeholder="${esc(t('vndBenEn'))}" aria-label="${esc(t('vndBenEn'))}" data-vendor-ben-l="en" data-on-input="${_on('_vendorTdBen',id,i,'en',_P('value'))}">
+      <input type="text" maxlength="200" dir="rtl" value="${esc(b.ar)}" placeholder="${esc(t('vndBenAr'))}" aria-label="${esc(t('vndBenAr'))}" data-vendor-ben-l="ar" data-on-input="${_on('_vendorTdBen',id,i,'ar',_P('value'))}">
+      <span class="vendor-ben-btns">${bb('vendor-up','vndBenUp','_vendorTdBenMove',i,-1,!i,VENDOR_CHEV)}${bb('vendor-down','vndBenDown','_vendorTdBenMove',i,1,i===d.benefits.length-1,VENDOR_CHEV)}<button type="button" class="btn-secondary btn-sm vendor-ben-btn vendor-ben-del" aria-label="${esc(t('vndBenRemove'))}" title="${esc(t('vndBenRemove'))}" data-on-click="${_on('_vendorTdBenDel',id,i)}">&times;</button></span>
     </div>`).join('');
-  return`<div class="ca-row fnb-tier" data-fnb-tier="${esc(id)}">
-    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(d.name_en)}${d.name_ar?` <span class="amb-dim" dir="rtl">${esc(d.name_ar)}</span>`:''}</div><div class="ca-when">${esc(t('pfnTierUsed').replace('{0}',W.venues.filter(v=>v.tier_id===id).length))}</div></div><label class="fnb-chk"><input type="checkbox" data-fnb-active${d.active?' checked':''} data-on-change="${_on('_fnbTdSet',id,'active',_P('checked'))}">${t('pfnActive')}</label></div>
-    <div class="fnb-form">${txt('name_en','pfnLblName')}${txt('name_ar','pfnLblNameAr','rtl')}${num('max_per_month','pfnLblMax',t('pfnNoLimit'))}${num('horizon_days','pfnLblHorizon')}${num('min_lead_days','pfnLblLead')}${num('cancel_cutoff_days','pfnLblCutoff')}${num('priority','pfnLblPriority')}${num('sort','pfnLblSort')}</div>
-    <div class="fnb-lbl">${t('pfnLblModes')}</div><div class="fnb-modes">${modes}</div>
-    <div class="fnb-lbl">${t('pfnBenefits')}</div><div class="ca-msg-sub">${t('pfnBenefitsHint')}</div>
-    <div class="fnb-bens">${ben||`<div class="ca-none">${t('pfnNoBen')}</div>`}</div>
-    <div class="ca-actions"><button type="button" class="btn-secondary btn-sm fnb-ben-add" data-on-click="${_on('_fnbTdBenAdd',id)}">${t('pfnBenAdd')}</button><span class="ws-flex1"></span><span class="ws-err" id="${fid('err')}" role="alert">${esc(d._err||'')}</span><button type="button" class="btn-primary btn-sm fnb-tier-save" data-on-click="${_on('_fnbTierSave',id)}">${t('pfnSaveTier')}</button></div>
+  return`<div class="ca-row vendor-tier" data-vendor-tier="${esc(id)}">
+    <div class="ca-head"><div class="ws-grow"><div class="ca-name">${esc(d.name_en)}${d.name_ar?` <span class="amb-dim" dir="rtl">${esc(d.name_ar)}</span>`:''}</div><div class="ca-when">${esc(t('vndTierUsed').replace('{0}',W.venues.filter(v=>v.tier_id===id).length))}</div></div><label class="vendor-chk"><input type="checkbox" data-vendor-active${d.active?' checked':''} data-on-change="${_on('_vendorTdSet',id,'active',_P('checked'))}">${t('vndActive')}</label></div>
+    <div class="vendor-form">${txt('name_en','vndLblName')}${txt('name_ar','vndLblNameAr','rtl')}${num('max_per_month','vndLblMax',t('vndNoLimit'))}${num('horizon_days','vndLblHorizon')}${num('min_lead_days','vndLblLead')}${num('cancel_cutoff_days','vndLblCutoff')}${num('priority','vndLblPriority')}${num('sort','vndLblSort')}</div>
+    <div class="vendor-lbl">${t('vndLblModes')}</div><div class="vendor-modes">${modes}</div>
+    <div class="vendor-lbl">${t('vndBenefits')}</div><div class="ca-msg-sub">${t('vndBenefitsHint')}</div>
+    <div class="vendor-bens">${ben||`<div class="ca-none">${t('vndNoBen')}</div>`}</div>
+    <div class="ca-actions"><button type="button" class="btn-secondary btn-sm vendor-ben-add" data-on-click="${_on('_vendorTdBenAdd',id)}">${t('vndBenAdd')}</button><span class="ws-flex1"></span><span class="ws-err" id="${fid('err')}" role="alert">${esc(d._err||'')}</span><button type="button" class="btn-primary btn-sm vendor-tier-save" data-on-click="${_on('_vendorTierSave',id)}">${t('vndSaveTier')}</button></div>
   </div>`;
 }
-async function _fnbTierSave(id){
-  const d=_fnbTd(id);if(!d||S._fnbW)return;
+async function _vendorTierSave(id){
+  const d=_vendorTd(id);if(!d||S._vendorW)return;
   const n=(v,lo,hi)=>/^\d+$/.test(String(v).trim())&&+v>=lo&&+v<=hi,int=v=>/^-?\d+$/.test(String(v).trim());
   const mx=String(d.max_per_month==null?'':d.max_per_month).trim();
-  const err=!String(d.name_en||'').trim()?'pfnErrTierName':!d.modes.length?'pfnErrModes'
-    :(mx&&!n(mx,1,31))||!n(d.horizon_days,7,730)||!n(d.min_lead_days,0,90)||!n(d.cancel_cutoff_days,0,90)||!int(d.priority)||!int(d.sort)?'pfnErrNum':'';
+  const err=!String(d.name_en||'').trim()?'vndErrTierName':!d.modes.length?'vndErrModes'
+    :(mx&&!n(mx,1,31))||!n(d.horizon_days,7,730)||!n(d.min_lead_days,0,90)||!n(d.cancel_cutoff_days,0,90)||!int(d.priority)||!int(d.sort)?'vndErrNum':'';
   d._err=err?t(err):'';
-  const e=document.getElementById(`fnb-t-${id}-err`);if(e)e.textContent=d._err;
+  const e=document.getElementById(`vendor-t-${id}-err`);if(e)e.textContent=d._err;
   if(err)return;
-  const p={id,name_en:String(d.name_en).trim(),name_ar:String(d.name_ar||'').trim(),modes:Object.keys(FNB_MODE_KEY).filter(m=>d.modes.includes(m)),
+  const p={id,name_en:String(d.name_en).trim(),name_ar:String(d.name_ar||'').trim(),modes:Object.keys(VENDOR_MODE_KEY).filter(m=>d.modes.includes(m)),
     max_per_month:mx===''?'':+mx,horizon_days:+d.horizon_days,min_lead_days:+d.min_lead_days,cancel_cutoff_days:+d.cancel_cutoff_days,priority:+d.priority,
     benefits:d.benefits.map(b=>({en:String(b.en||'').trim(),ar:String(b.ar||'').trim()})).filter(b=>b.en||b.ar),active:!!d.active,sort:+d.sort};
-  S._fnbW=true;
-  let res;try{res=await sb.rpc('staff_fnb_tier_save',{p});}catch(x){res={error:x};}
-  S._fnbW=false;
+  S._vendorW=true;
+  let res;try{res=await sb.rpc('staff_vendor_tier_save',{p});}catch(x){res={error:x};}
+  S._vendorW=false;
   if(res&&res.error&&/ADMIN_ONLY/.test(String(res.error.message||''))){toast(t('adminOnlyMsg'),'error');return;}
-  if(_writeErr(res,'fnb tier save'))return;
-  const x=_fnbTier(id);if(x)Object.assign(x,p,{max_per_month:mx===''?null:+mx});delete _fnb().td[id];
-  const msg=t('pfnTierSaved').replace('{0}',p.name_en);logAction(msg);toast(msg,'success');
-  renderFnb();
+  if(_writeErr(res,'vendor tier save'))return;
+  const x=_vendorTier(id);if(x)Object.assign(x,p,{max_per_month:mx===''?null:+mx});delete _vendor().td[id];
+  const msg=t('vndTierSaved').replace('{0}',p.name_en);logAction(msg);toast(msg,'success');
+  renderVendors();
 }
 // ── Feedback list ── newest breakfast first; the average and count are over what the filters show.
-function _fnbFbBand(r,k){r=Number(r);return k==='low'?r<=2:k==='mid'?r===3:k==='high'?r>=4:true;}
-function _fnbFbRows(){
-  const W=_fnb(),q=String(W.fbq||'').trim().toLowerCase();
-  let rows=(W.fb||[]).filter(f=>(W.fbv==='all'||String(f.venue_id)===String(W.fbv))&&_fnbFbBand(f.rating,W.fbr));
-  if(q)rows=rows.filter(f=>{const v=_fnbVen(f.venue_id)||{};return[v.name,v.name_ar,f.went_well,f.improve].some(x=>String(x||'').toLowerCase().includes(q));});
+function _vendorFbBand(r,k){r=Number(r);return k==='low'?r<=2:k==='mid'?r===3:k==='high'?r>=4:true;}
+function _vendorFbRows(){
+  const W=_vendor(),q=String(W.fbq||'').trim().toLowerCase();
+  let rows=(W.fb||[]).filter(f=>(W.fbv==='all'||String(f.venue_id)===String(W.fbv))&&_vendorFbBand(f.rating,W.fbr));
+  if(q)rows=rows.filter(f=>{const v=_vendorVen(f.venue_id)||{};return[v.name,v.name_ar,f.went_well,f.improve].some(x=>String(x||'').toLowerCase().includes(q));});
   return rows.sort((a,b)=>a.day<b.day?1:a.day>b.day?-1:String(b.updated_at||'').localeCompare(String(a.updated_at||'')));
 }
 // Confirmed breakfasts with no feedback yet that the venue can still send it for (the day itself
-// to 14 days after, as fnb_feedback_save allows); older ones will not come, so they are not waited on.
-function _fnbFbWaiting(){const W=_fnb(),d=todayStr(),from=_fnbAdd(d,-14);return(W.bk||[]).filter(b=>b.status==='confirmed'&&b.day<=d&&b.day>=from&&!_fnbFbOf(b.id)).length;}
-function _fnbFbListHtml(){
-  const W=_fnb(),rows=_fnbFbRows(),wait=_fnbFbWaiting();
-  const hint=wait?`<div class="fnb-fb-wait">${esc(t('pfnFbWaiting').replace('{0}',wait))}</div>`:'';
-  if(!rows.length)return hint+`<div class="empty-state">${t((W.fb||[]).length?'pfnFbNoMatch':'pfnFbNone')}</div>`;
+// to 14 days after, as vendor_feedback_save allows); older ones will not come, so they are not waited on.
+function _vendorFbWaiting(){const W=_vendor(),d=todayStr(),from=_vendorAdd(d,-14);return(W.bk||[]).filter(b=>b.status==='confirmed'&&b.day<=d&&b.day>=from&&!_vendorFbOf(b.id)).length;}
+function _vendorFbListHtml(){
+  const W=_vendor(),rows=_vendorFbRows(),wait=_vendorFbWaiting();
+  const hint=wait?`<div class="vendor-fb-wait">${esc(t('vndFbWaiting').replace('{0}',wait))}</div>`:'';
+  if(!rows.length)return hint+`<div class="empty-state">${t((W.fb||[]).length?'vndFbNoMatch':'vndFbNone')}</div>`;
   const avg=(rows.reduce((a,f)=>a+Number(f.rating||0),0)/rows.length).toFixed(1);
-  return`<div class="fnb-fb-sum"><b class="fnb-fb-avg">${esc(t('pfnFbAvg').replace('{0}',avg))}</b>${_fnbStars(avg,1)}<span class="amb-dim fnb-fb-n">${esc(t('pfnFbCount').replace('{0}',rows.length))}</span></div>${hint}
-    <div class="ca-list fnb-fbs">${rows.map(_fnbFbBlock).join('')}</div>`;
+  return`<div class="vendor-fb-sum"><b class="vendor-fb-avg">${esc(t('vndFbAvg').replace('{0}',avg))}</b>${_vendorStars(avg,1)}<span class="amb-dim vendor-fb-n">${esc(t('vndFbCount').replace('{0}',rows.length))}</span></div>${hint}
+    <div class="ca-list vendor-fbs">${rows.map(_vendorFbBlock).join('')}</div>`;
 }
-function _fnbFbBody(srch,pill){
-  const W=_fnb();
-  if(W.fbMissing)return`<div class="empty-state fnb-fb-missing">${t('pfnFbMissing')}</div>`;
-  if(W.fbErr)return`<div class="empty-state">${t('pfnFbLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary fnb-retry" data-on-click="${_on('_on_renderFnb_1',_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
-  const vids=[...new Set(W.fb.map(f=>String(f.venue_id)))].map(id=>[id,_fnbVName(_fnbVen(id))||('#'+id)]).sort((a,b)=>a[1].localeCompare(b[1]));
+function _vendorFbBody(srch,pill){
+  const W=_vendor();
+  if(W.fbMissing)return`<div class="empty-state vendor-fb-missing">${t('vndFbMissing')}</div>`;
+  if(W.fbErr)return`<div class="empty-state">${t('vndFbLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary vendor-retry" data-on-click="${_on('_on_renderVendors_1',_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+  const vids=[...new Set(W.fb.map(f=>String(f.venue_id)))].map(id=>[id,_vendorVName(_vendorVen(id))||('#'+id)]).sort((a,b)=>a[1].localeCompare(b[1]));
   if(W.fbv!=='all'&&!vids.some(x=>x[0]===String(W.fbv)))W.fbv='all';
-  const cnt=k=>W.fb.filter(f=>(W.fbv==='all'||String(f.venue_id)===String(W.fbv))&&_fnbFbBand(f.rating,k)).length;
-  const sel=`<select id="fnb-fb-ven" data-on-change="${_on('_fnbFilter','fbv',_P('value'))}"><option value="all">${esc(t('pfnFbAllVen'))}</option>${vids.map(([id,n])=>`<option value="${esc(id)}"${String(W.fbv)===id?' selected':''}>${esc(n)}</option>`).join('')}</select>`;
-  return`<div class="filter-bar"><div class="filter-row">${srch('fnbf','fbq',t('pfnFbSearch'))}${_fField(esc(t('pfnFbLblVen')),sel)}</div>
-      <div class="filter-row fnb-fb-rf" role="group" aria-label="${esc(t('pfnFbLblRating'))}"><span class="fnb-fb-rl">${t('pfnFbLblRating')}</span>${[['all',t('filterAll')],['low','1-2'],['mid','3'],['high','4-5']].map(([k,l])=>pill('fbr',k,l,cnt(k))).join('')}</div></div>
-    <div id="fnb-list">${_fnbFbListHtml()}</div>`;
+  const cnt=k=>W.fb.filter(f=>(W.fbv==='all'||String(f.venue_id)===String(W.fbv))&&_vendorFbBand(f.rating,k)).length;
+  const sel=`<select id="vendor-fb-ven" data-on-change="${_on('_vendorFilter','fbv',_P('value'))}"><option value="all">${esc(t('vndFbAllVen'))}</option>${vids.map(([id,n])=>`<option value="${esc(id)}"${String(W.fbv)===id?' selected':''}>${esc(n)}</option>`).join('')}</select>`;
+  return`<div class="filter-bar"><div class="filter-row">${srch('vendorf','fbq',t('vndFbSearch'))}${_fField(esc(t('vndFbLblVen')),sel)}</div>
+      <div class="filter-row vendor-fb-rf" role="group" aria-label="${esc(t('vndFbLblRating'))}"><span class="vendor-fb-rl">${t('vndFbLblRating')}</span>${[['all',t('filterAll')],['low','1-2'],['mid','3'],['high','4-5']].map(([k,l])=>pill('fbr',k,l,cnt(k))).join('')}</div></div>
+    <div id="vendor-list">${_vendorFbListHtml()}</div>`;
 }
 // ── The page ──
-function _fnbView(k){S.fnbView=k;renderFnb();_pushNav();}
-function _fnbFilter(w,k){_fnb()[w]=k;renderFnb();}
-function _fnbSearch(w,v){_fnb()[w]=v||'';renderFnb('list');}
-function _on_renderFnb_1(event,el){_fnb().err=false;_fnbLoad();renderFnb();}
-function renderFnb(arg){
-  if(arg==='reload'){_fnbLoad();return;}
-  const el=document.getElementById('tab-fnb');if(!el)return;
-  const W=_fnb(),view=_fnbV();
-  if(arg==='list'&&W.bk){const l=document.getElementById('fnb-list');if(l){l.innerHTML=view==='venues'?_fnbVenListHtml():view==='feedback'?_fnbFbListHtml():_fnbReqListHtml();return;}}
-  const head=`<div class="form-title">${t('pfnTitle')}</div><div class="ca-sub">${t('pfnSub')}</div>`;
+function _vendorView(k){S.vendorView=k;renderVendors();_pushNav();}
+function _vendorFilter(w,k){_vendor()[w]=k;renderVendors();}
+function _vendorSearch(w,v){_vendor()[w]=v||'';renderVendors('list');}
+function _on_renderVendors_1(event,el){_vendor().err=false;_vendorLoad();renderVendors();}
+function renderVendors(arg){
+  if(arg==='reload'){_vendorLoad();return;}
+  const el=document.getElementById('tab-vendors');if(!el)return;
+  const W=_vendor(),view=_vendorV();
+  if(arg==='list'&&W.bk){const l=document.getElementById('vendor-list');if(l){l.innerHTML=view==='venues'?_vendorVenListHtml():view==='feedback'?_vendorFbListHtml():_vendorReqListHtml();return;}}
+  const head=`<div class="form-title">${t('vndTitle')}</div><div class="ca-sub">${t('vndSub')}</div>`;
   if(!W.bk){
     let body;
-    if(W.missing)body=`<div class="empty-state fnb-not-set-up">${t('pfnNotSetUp')}</div>`;
-    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('pfnLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary fnb-retry" data-on-click="${_on('_on_renderFnb_1',_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
-    else{if(!W.busy)_fnbLoad();body=skeletonList();}
+    if(W.missing)body=`<div class="empty-state vendor-not-set-up">${t('vndNotSetUp')}</div>`;
+    else if(W.err&&!W.busy)body=`<div class="empty-state">${t('vndLoadErr')}<div class="ws-mt10"><button type="button" class="btn-sm btn-secondary vendor-retry" data-on-click="${_on('_on_renderVendors_1',_EV,_EL)}">${t('retryBtn')}</button></div></div>`;
+    else{if(!W.busy)_vendorLoad();body=skeletonList();}
     el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
     return;
   }
-  if(!W.busy&&Date.now()-(W.at||0)>60000)_fnbLoad();
-  const nav=(k,key,n)=>`<button type="button" class="filter-pill${view===k?' active':''}" data-fnb-view="${k}" data-on-click="${_on('_fnbView',k)}">${t(key)}${n?` <span class="fnb-n">${n}</span>`:''}</button>`;
-  const pill=(w,k,label,n)=>`<button type="button" class="filter-pill${W[w]===k?' active':''}" data-fnb-f="${k}" data-on-click="${_on('_fnbFilter',w,k)}">${label} (${n})</button>`;
-  const srch=(key,w,ph)=>`<div class="${_srchCls(key,W[w])}" data-srch="${key}">${_artIcon('search',13)}<input id="${key}-q" class="search-input" aria-label="${esc(ph)}" placeholder="${esc(ph)}" value="${esc(W[w])}" data-on-input="${_on('_fnbSearch',w,_P('value'))}">${_srchBtn()}</div>`;
+  if(!W.busy&&Date.now()-(W.at||0)>60000)_vendorLoad();
+  const nav=(k,key,n)=>`<button type="button" class="filter-pill${view===k?' active':''}" data-vendor-view="${k}" data-on-click="${_on('_vendorView',k)}">${t(key)}${n?` <span class="vendor-n">${n}</span>`:''}</button>`;
+  const pill=(w,k,label,n)=>`<button type="button" class="filter-pill${W[w]===k?' active':''}" data-vendor-f="${k}" data-on-click="${_on('_vendorFilter',w,k)}">${label} (${n})</button>`;
+  const srch=(key,w,ph)=>`<div class="${_srchCls(key,W[w])}" data-srch="${key}">${_artIcon('search',13)}<input id="${key}-q" class="search-input" aria-label="${esc(ph)}" placeholder="${esc(ph)}" value="${esc(W[w])}" data-on-input="${_on('_vendorSearch',w,_P('value'))}">${_srchBtn()}</div>`;
   let body;
   if(view==='requests'){
     const cnt=k=>(k==='all'?W.bk:W.bk.filter(b=>b.status===k)).length;
-    body=`<div class="filter-bar"><div class="filter-row">${srch('fnbr','rq',t('pfnSearchVenue'))}${['pending','confirmed','declined','cancelled'].map(k=>pill('rf',k,t(FNB_BK_KEY[k]),cnt(k))).join('')}${pill('rf','all',t('filterAll'),cnt('all'))}</div></div><div id="fnb-list">${_fnbReqListHtml()}</div>`;
+    body=`<div class="filter-bar"><div class="filter-row">${srch('vendorr','rq',t('vndSearchVenue'))}${['pending','confirmed','declined','cancelled'].map(k=>pill('rf',k,t(VENDOR_BK_KEY[k]),cnt(k))).join('')}${pill('rf','all',t('filterAll'),cnt('all'))}</div></div><div id="vendor-list">${_vendorReqListHtml()}</div>`;
   }else if(view==='venues'){
     const cnt=k=>(k==='all'?W.venues:W.venues.filter(v=>v.status===k)).length;
-    body=`<div class="filter-bar"><div class="filter-row">${srch('fnbv','vq',t('pfnSearchVenue'))}${Object.keys(FNB_VS_KEY).map(k=>pill('vf',k,t(FNB_VS_KEY[k]),cnt(k))).join('')}${pill('vf','all',t('filterAll'),cnt('all'))}<span class="ws-flex1"></span><button type="button" class="btn-primary btn-sm fnb-add-ven" data-on-click="${_on('_fnbVenOpen',null)}">${t('pfnAddVenue')}</button></div></div><div class="ca-list" id="fnb-list">${_fnbVenListHtml()}</div>`;
+    body=`<div class="filter-bar"><div class="filter-row">${srch('vendorv','vq',t('vndSearchVenue'))}${Object.keys(VENDOR_VS_KEY).map(k=>pill('vf',k,t(VENDOR_VS_KEY[k]),cnt(k))).join('')}${pill('vf','all',t('filterAll'),cnt('all'))}<span class="ws-flex1"></span><button type="button" class="btn-primary btn-sm vendor-add-ven" data-on-click="${_on('_vendorVenOpen',null)}">${t('vndAddVenue')}</button></div></div><div class="ca-list" id="vendor-list">${_vendorVenListHtml()}</div>`;
   }else if(view==='tiers'){
-    body=!isAdmin()?`<div class="empty-state">${t('adminOnlyMsg')}</div>`:`<div class="ca-sub">${t('pfnTiersSub')}</div>${(W.tiers||[]).map(x=>_fnbTierCard(_fnbTd(x.id))).join('')||`<div class="empty-state">${t('pfnNone')}</div>`}`;
-  }else if(view==='feedback')body=_fnbFbBody(srch,pill);
-  else body=_fnbCalHtml();
+    body=!isAdmin()?`<div class="empty-state">${t('adminOnlyMsg')}</div>`:`<div class="ca-sub">${t('vndTiersSub')}</div>${(W.tiers||[]).map(x=>_vendorTierCard(_vendorTd(x.id))).join('')||`<div class="empty-state">${t('vndNone')}</div>`}`;
+  }else if(view==='feedback')body=_vendorFbBody(srch,pill);
+  else body=_vendorCalHtml();
   el.innerHTML=`<div class="form-section ws-mt0">${head}
-    <div class="filter-row cmy-nav">${nav('calendar','pfnVCal')}${nav('requests','pfnVReq',_fnbBadgeN())}${nav('venues','pfnVVen')}${nav('tiers','pfnVTier')}${nav('feedback','pfnVFb')}</div>
-    <div class="fnb-body">${body}</div></div>`;
+    <div class="filter-row cmy-nav">${nav('calendar','vndVCal')}${nav('requests','vndVReq',_vendorBadgeN())}${nav('venues','vndVVen')}${nav('tiers','vndVTier')}${nav('feedback','vndVFb')}</div>
+    <div class="vendor-body">${body}</div></div>`;
 }
 
 // ── Website: what micromobility.sa shows ────────────────────────────────────
@@ -35054,7 +35057,8 @@ function _hasStoredAuth(){try{for(let i=0;i<localStorage.length;i++){if(/^sb-.*-
 function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
-  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','fnb','dashboard','team'].includes(st)?st:'';
+  if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
+  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team'].includes(st)?st:'';
 }
 (async()=>{
   S.loggedIn=getSession();
@@ -35396,7 +35400,7 @@ async function _autoRefresh(full,force){
   if(S.view!=='staff')return;
   try{
     const ok=await (full?loadData():loadDataLight());
-    if(full){_wsPoll(true);_smPoll(true);_ambPoll(true);_fnbPoll(true);} // the workshop, message and ambassador lists are not in loadData: a full refresh reads them too
+    if(full){_wsPoll(true);_smPoll(true);_ambPoll(true);_vendorPoll(true);} // the workshop, message and ambassador lists are not in loadData: a full refresh reads them too
     // A reload that could not reach the server must not make the label say "just now".
     if(ok!==false)_lastRefresh=Date.now();
     try{_ntSync();}catch(_){} // a ride crosses two hours with nothing else changing
@@ -35429,7 +35433,7 @@ try{_updateConnUI();}catch(e){} // reflect connection state on boot (handles sta
 // already delivered. Without realtime: light every 30 s, full every fifth minute, as before.
 // The three section pollers (workshop, messages, ambassadors) ride the five-minute tick too.
 function _pollPlan(n,connected){if(n%30===0)return 'full';if(n%10===0)return connected?'light':'full';return connected?'skip':'light';}
-setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,!!S._rtConnected);if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_fnbPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
+setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,!!S._rtConnected);if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_vendorPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
 // ── Keeping the staff session alive ────────────────────────────────────────
 // supabase-js refreshes the access token on its own timer, but that timer does not run
 // while the tab is hidden or the phone is asleep — which at a booth is most of the evening.

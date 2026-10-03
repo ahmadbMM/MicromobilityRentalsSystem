@@ -454,21 +454,22 @@ The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data 
   minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
   with least left (`bd-next`). `tests/ride-night.spec.ts`.
 
-## Vendors (F&B, 2026-10-03; renamed from "F&B Partners" the same day, internals keep `fnb`)
+## Vendors (F&B, 2026-10-03; first named "F&B Partners", every internal name renamed to vendor(s) the same day)
 
 Cafés and restaurants ("venues") reserve the Saturdays our Saturday social ride's riders come to them for
-breakfast, on a portal of their own (another repo; its address is `FNB_PORTAL_URL`, '' until the subdomain is
-decided). Staff side: the admin-only section `fnb` at `/vendors` (Calendar), `/vendors/requests`,
-`/vendors/venues`, `/vendors/tiers`, all in the staff part `staff-parts/fnb.js` (`renderFnb`). Migration
-20261003150000: staff READ the `fnb_*` tables (`fnb_users` only by the columns in `FNB_USER_COLS`) and every
-write is a `staff_fnb_*` function; confirming one request declines the date's others and the database makes
+breakfast, on a portal of their own (another repo; its address is `VENDOR_PORTAL_URL`, '' until the subdomain is
+decided). Staff side: the admin-only section `vendors` at `/vendors` (Calendar), `/vendors/requests`,
+`/vendors/venues`, `/vendors/tiers`, all in the staff part `staff-parts/vendors.js` (`renderVendors`). The database
+(recreated under the vendor names; migrations 20261003150000/170000/180000 are the fnb-named history): staff READ the `vendor_*` tables (`vendor_users` only by the columns in `VENDOR_USER_COLS`) and every
+write is a `staff_vendor_*` function; confirming one request declines the date's others and the database makes
 the venue the ride's breakfast stop. A temporary password (Add login / Reset password) is shown once, in the
-venue dialog only. Closed-date reasons are stored as codes (`FNB_RS`) or typed text. The section's
-translation keys start with `pfn`, not `fnb`: the customer half builds keys from a bare `'f'+` prefix, so an
-`f…` key would never leave the customer's language pack. `tests/staff-fnb.spec.ts`.
-Feedback (migration 20261003180000): a venue rates a confirmed breakfast from its portal (`fnb_feedback_save`, the day
-itself to 14 days after); staff only read `fnb_feedback`, loaded by `_fnbLoad` as its own answer (a missing table is
-`W.fbMissing`, the other tabs carry on). `/vendors/feedback` lists it newest first with drawn stars (`_fnbStars`),
-the turnout beside the riders booked on that Saturday ride (`_fnbBooked`, only when the page holds those rows), and
-"Waiting for feedback" counts confirmed dates still inside the 14 days (`_fnbFbWaiting`); the date dialog and the
+venue dialog only. Closed-date reasons are stored as codes (`VENDOR_RS`) or typed text. The section's
+translation keys start with `vnd` (not `vendor…`/`f…`: the customer half builds keys from bare prefixes such as `'f'+`,
+and a key a prefix could build never leaves the customer's language pack). The section's id was `fnb` until the
+rename: `setStaffTab`, `_bootStaffTab` and `_modIds` (an account's `modules_view`/`modules_edit`) still read `'fnb'` as `'vendors'`. `tests/staff-vendors.spec.ts`.
+Feedback: a venue rates a confirmed breakfast from its portal (`vendor_feedback_save`, the day
+itself to 14 days after); staff only read `vendor_feedback`, loaded by `_vendorLoad` as its own answer (a missing table is
+`W.fbMissing`, the other tabs carry on). `/vendors/feedback` lists it newest first with drawn stars (`_vendorStars`),
+the turnout beside the riders booked on that Saturday ride (`_vendorBooked`, only when the page holds those rows), and
+"Waiting for feedback" counts confirmed dates still inside the 14 days (`_vendorFbWaiting`); the date dialog and the
 venue dialog's bookings show it too.

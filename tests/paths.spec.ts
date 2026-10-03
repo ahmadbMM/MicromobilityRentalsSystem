@@ -140,15 +140,19 @@ test.describe('staff', () => {
 
   test('Vendors: /vendors is the calendar, a sub-view is a second segment', async ({ page }) => {
     await staff(page, '/vendors/venues');
-    await page.waitForFunction(`S.staffTab==='fnb'`);
-    expect(await page.evaluate('S.fnbView')).toBe('venues');
+    await page.waitForFunction(`S.staffTab==='vendors'`);
+    expect(await page.evaluate('S.vendorView')).toBe('venues');
     expect(at(page)).toBe('/vendors/venues');
-    await page.evaluate(`_fnbView('tiers')`);
+    await page.evaluate(`_vendorView('tiers')`);
     expect(at(page)).toBe('/vendors/tiers');
-    await page.evaluate(`_fnbView('feedback')`);
+    await page.evaluate(`_vendorView('feedback')`);
     expect(at(page)).toBe('/vendors/feedback');
-    await page.evaluate(`_fnbView('calendar')`);
+    await page.evaluate(`_vendorView('calendar')`);
     expect(at(page)).toBe('/vendors');
+    // the section's id until 2026-10-03, as a saved tab or an account's section list may still hold it
+    await page.evaluate(`setStaffTab('dashboard');setStaffTab('fnb')`);
+    expect(await page.evaluate('S.staffTab')).toBe('vendors');
+    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors"]');
   });
 
   test('/bookings/riders opens the Petromin page; an unknown sub-view opens the section itself', async ({ page }) => {
