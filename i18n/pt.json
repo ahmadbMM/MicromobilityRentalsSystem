@@ -3465,7 +3465,7 @@
   "pfnFbSent": "Enviada {0}",
   "pfnFbEdited": "editada {0}",
   "pfnFbHead": "Avaliação do estabelecimento",
-  "pfnFbWaiting": "Aguardando avaliação: {0} cafés da manhã",
+  "pfnFbWaiting": "Cafés da manhã aguardando avaliação: {0}",
   "pfnFbNone": "Nenhuma avaliação ainda. Os estabelecimentos enviam pelo portal durante 14 dias após um café da manhã confirmado.",
   "pfnFbNoMatch": "Nenhuma avaliação corresponde aos filtros.",
   "pfnFbAvg": "Média {0} de 5",

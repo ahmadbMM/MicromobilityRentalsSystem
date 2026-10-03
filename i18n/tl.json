@@ -3465,7 +3465,7 @@
   "pfnFbSent": "Ipinadala {0}",
   "pfnFbEdited": "in-edit {0}",
   "pfnFbHead": "Feedback ng venue",
-  "pfnFbWaiting": "Naghihintay ng feedback: {0} almusal",
+  "pfnFbWaiting": "Mga almusal na naghihintay ng feedback: {0}",
   "pfnFbNone": "Wala pang feedback. Ipinapadala ito ng mga venue mula sa kanilang portal sa loob ng 14 na araw pagkatapos ng kumpirmadong almusal.",
   "pfnFbNoMatch": "Walang feedback na tugma sa mga filter.",
   "pfnFbAvg": "Average na {0} sa 5",

@@ -3465,7 +3465,7 @@
   "pfnFbSent": "Envoyé {0}",
   "pfnFbEdited": "modifié {0}",
   "pfnFbHead": "Avis du lieu",
-  "pfnFbWaiting": "En attente d’avis : {0} petits-déjeuners",
+  "pfnFbWaiting": "Petits-déjeuners en attente d’avis : {0}",
   "pfnFbNone": "Aucun avis pour l’instant. Les lieux l’envoient depuis leur portail pendant 14 jours après un petit-déjeuner confirmé.",
   "pfnFbNoMatch": "Aucun avis ne correspond aux filtres.",
   "pfnFbAvg": "Moyenne {0} sur 5",

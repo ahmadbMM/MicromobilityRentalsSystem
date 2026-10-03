@@ -216,7 +216,7 @@ test.describe('@staff:fnb F&B Partners feedback', () => {
     await expect(o.locator('.fnb-fb-at')).not.toContainText('edited');
     await expect(panel(page).locator('.fnb-fb-avg')).toHaveText('Average 3.7 of 5');
     await expect(panel(page).locator('.fnb-fb-n')).toHaveText('Feedback received: 3');
-    await expect(panel(page).locator('.fnb-fb-wait')).toHaveText('Waiting for feedback: 1 breakfasts');
+    await expect(panel(page).locator('.fnb-fb-wait')).toHaveText('Breakfasts waiting for feedback: 1');
     expect(await page.evaluate(() => /\p{Extended_Pictographic}/u.test(document.getElementById('tab-fnb')!.textContent || ''))).toBe(false);
   });
 

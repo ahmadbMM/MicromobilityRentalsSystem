@@ -955,7 +955,9 @@ export function formatBareWrites(r, limit = 20) {
 // Staff 330 -> 344, core 174 -> 176 (2026-10-03): F&B Partners, a section of its own (the fnb part, 12 KB
 // gzipped) whose 169 English strings ride in the core with every staff string (173.1 KB here, ~1.3 KB
 // more on the runner).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 344, core: 176 };
+// Staff 344 -> 346 (2026-10-03): F&B Partners' Feedback tab (the fnb part 12 -> 14 KB); 343.5 KB here is
+// ~344.8 on the runner, over 344.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 346, core: 176 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
