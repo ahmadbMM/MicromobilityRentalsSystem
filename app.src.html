@@ -3636,8 +3636,13 @@ function _waiverCopy(s){return _needsBike(s)
 // basis, who receives it and where it goes, how long we keep it and how we destroy it, and
 // their rights. The footer link, the sign-up forms and /?privacy all open it. English and
 // Arabic carry the full text; every other language shows the English one under a line that
-// says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice.
+// says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice -
+// and PRIVACY_ASK_FROM with it when riders must confirm the change.
 const PRIVACY_VERSION='2026-10-03';
+// The last version riders must confirm. A change the owner decides needs no fresh confirmation
+// (2026-10-03: the breakfast-venue row) moves PRIVACY_VERSION, the date shown, but not this one;
+// an account that confirmed this version or any later one is not asked again.
+const PRIVACY_ASK_FROM='2026-10-02';
 const _PV_MAIL='<a href="mailto:info@micromobility.sa">info@micromobility.sa</a>';
 const PRIVACY_NOTICE={
 en:[
@@ -5214,7 +5219,7 @@ async function _consentCheck(cust){
     if(cur.ride_news!==undefined){const{ride_news,...rest}=cur;S.loggedIn=rest;setSession(rest);}
   }else{
     _consentsKeep(cust,r);
-    const needAck=r.privacy_version!==PRIVACY_VERSION,needNews=!r.ride_news_at;
+    const needAck=!r.privacy_version||String(r.privacy_version)<PRIVACY_ASK_FROM,needNews=!r.ride_news_at;
     if((needAck||needNews)&&S.view!=='staff')_consentAsk(needAck,needNews);
   }
   if(S.view==='customer'&&S.custTab==='account')renderAccount();

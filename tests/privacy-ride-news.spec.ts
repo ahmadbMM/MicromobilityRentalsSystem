@@ -261,6 +261,15 @@ test.describe('the popup for existing accounts', () => {
     await expect(page.locator('#rn-ask')).toHaveCount(0);
   });
 
+  // 2026-10-03: the breakfast-venue row changed the notice without asking anyone again
+  // (PRIVACY_ASK_FROM stays 2026-10-02, the owner's call).
+  test('a notice change that needs no new confirmation: a rider who confirmed 2026-10-02 is not asked', async ({ page }) => {
+    await arrive(page, consentsServer({ privacy_version: '2026-10-02', ride_news_at: '2026-09-01T10:00:00Z' }));
+    await page.waitForFunction('S._rnFetchedFor==="c1"&&S.loggedIn.ride_news===false');
+    await page.waitForTimeout(300);
+    await expect(page.locator('#rn-ask')).toHaveCount(0);
+  });
+
   test('the notice opens over it without ticking the box, and closing it leaves the question', async ({ page }) => {
     await arrive(page, consentsServer());
     await page.locator('#rn-ask .pv-link').click(); // the link in the sentence above the box
