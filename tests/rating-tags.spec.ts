@@ -4,7 +4,10 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // Analytics > Ratings: the quick tags older ratings carry (2026-09-28; the rider's page no longer asks
 // for them since the detailed rating, 2026-10-03), the detailed rating's questions and reasons, a table
 // by ride night, and a low rating from the last week ringing the bell.
-const ago = (d: number) => new Date(Date.now() - d * 864e5).toISOString();
+// One clock reading for every fixture: r1 and r2 end at the same moment, and two readings a millisecond
+// apart ordered them by that millisecond (the newest-first list then flipped them now and then).
+const T0 = Date.now();
+const ago = (d: number) => new Date(T0 - d * 864e5).toISOString();
 const day = (d: number) => new Date(Date.now() - d * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const done = (id: string, d: number, extra: Record<string, unknown>) => ({
   id, session_id: 's-' + d, session_day: 'Friday', session_date: day(d), queue_num: 1, name: 'Rider ' + id, phone: '', customer_id: 'c1',

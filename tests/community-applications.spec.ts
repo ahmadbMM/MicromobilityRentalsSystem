@@ -38,7 +38,7 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await applicationsTab(page);
   await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (2)');
   await expect(page.locator('.filter-pill[data-ca-filter="rejected"]')).toHaveText('Rejected (1)');
-  await expect(page.locator('.filter-pill', { hasText: /^Applications$/ })).toBeVisible();
+  await expect(page.locator('.filter-pill', { hasText: /^Applications( \(\d+\))?$/ })).toBeVisible();
 
   const k = row(page, 'a1');
   await expect(k.locator('.ca-name')).toHaveText('Karim Mansour');

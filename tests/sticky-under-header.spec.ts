@@ -81,7 +81,7 @@ for (const [name, width, height] of [['a desktop', 1440, 900], ['a phone', 390, 
 }
 
 test('on a tablet the pinned booking number stays readable while the roster scrolls sideways', async ({ page }) => {
-  await staffAt(page, 820, 1100);
+  await staffAt(page, 780, 1100); // 780, not 820: since the roster fits a laptop (2026-10-03) it only just overflows at 820
   // sfShowFinished: the no-show row would otherwise be folded into the "finished" line
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${S1}';S.sfShowFinished=true;renderStaffQueue()`);
   const wrap = page.locator('#tab-queue .queue-table-desktop-wrap');

@@ -49,7 +49,9 @@ test.describe('missing bikes', () => {
   test('Mark missing and Found write the status and stamp the day, with an undo', async ({ page }) => {
     await boot(page);
     const writes = watchWrites(page, 'bikes', 'PATCH');
-    await expect(page.locator('#tab-bikes button', { hasText: /^Missing$/ }).first()).toBeVisible();
+    // Missing is in the bike row's ⋯ menu since 2026-10-03 (the registry is what the row offers)
+    await expect(page.locator('#tab-bikes .rq-more').first()).toBeVisible(); // the fleet is drawn
+    expect(await page.evaluate(`((S._rowMenus||{})['bike:bk-1']||[]).map(i=>i.label)`)).toContain('Missing');
     await page.evaluate(`setMissing('bk-1')`);
     await expect.poll(() => writes.length).toBeGreaterThan(0);
     const w = writes[0].body as Record<string, unknown>;

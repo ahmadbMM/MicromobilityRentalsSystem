@@ -3053,6 +3053,7 @@
     .an-sort-active{color:var(--green)!important;}
     .an-sort-active::after{content:' ↑';font-size:9px;}
     .an-sort-active.desc::after{content:' ↓';}
+    .an-sort-active.an-sort-txt::after{content:none;} /* the label carries its own arrow */
     .analytics-highlight-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;}
     @media(max-width:767px){.analytics-highlight-row{grid-template-columns:1fr;}}
     .analytics-highlight-card{background:linear-gradient(160deg,rgba(var(--tint-rgb),.028),var(--s1) 58%);border:1px solid var(--border);border-radius:6px;padding:18px 20px;transition:border-color .18s ease,box-shadow .18s ease;}
@@ -7946,3 +7947,64 @@ body.view-staff .ca-actions>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.
   body.view-staff :is(.toggle-btn,.sl-pay){min-height:44px;}
   body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>*{height:44px;min-height:44px;font-size:13px;}
 }
+
+/* ── The roster fits a laptop (2026-10-03): at 1280px the table was ~1560px wide and pushed Check In /
+   Return Bike off the screen. Height and size sit under the bike type, the call / WhatsApp pair under
+   the rider's number, and the booking time, add-on chips and the price's breakdown wrap instead of
+   holding their columns open. The Manage booking tiles keep the owner's equal-size grid (2026-10-02). ── */
+#tab-queue .queue-table .q-type-cell{white-space:nowrap;}
+#tab-queue .queue-table .q-type-cell .q-fit{margin-top:6px;line-height:1.15;}
+#tab-queue .queue-table .q-type-cell .q-size{display:inline-block;margin-inline-start:4px;}
+#tab-queue .queue-table .rq-ccin{margin-top:6px;}
+#tab-queue .queue-table .rq-bkat{white-space:normal;display:block;max-width:6.5em;line-height:1.25;}
+#tab-queue .queue-table .rq-adchip{white-space:normal;}
+#tab-queue .queue-table .rq-adline{white-space:normal;max-width:9em;}
+#tab-queue .queue-table td:has(> .rq-rc),#tab-queue .queue-table td:has(> .rider-name){min-width:136px;max-width:15em;}
+#tab-queue .queue-table thead th{letter-spacing:.4px;}
+body.view-staff #tab-queue .queue-table .actions-cell{grid-template-columns:repeat(2,minmax(92px,1fr));min-width:190px;}
+/* Phone (2026-10-03): the ride strip's select is the one ride picker (it lists past nights too), and the
+   page title is dropped - the Bookings pill above already names the page - so the first rider moves up. */
+@media (max-width:767px){
+  body.view-staff #tab-queue .filter-sess-dup{display:none;}
+  body.view-staff #tab-queue .q-head-title{display:none;}
+}
+
+/* ── Sales lines up with the other sections (2026-10-03): its wrapper carried its own 20px inset, so the
+   title and cards jumped sideways when switching from Bookings or Inventory. Category and item names
+   take two lines before they are cut ("Supplements…"). ── */
+body.view-staff #tab-cashier .sl-wrap{padding-inline:0;}
+#tab-cashier .sl-tile-nm{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;line-height:1.25;overflow-wrap:anywhere;}
+
+/* ── Dashboard tiles without an orphan (2026-10-03): seven tiles at 150px left "Available bikes" alone on
+   a second row. One row of seven on a laptop, 4 + 3 on a tablet, pairs on a phone with the last tile
+   across both columns. ── */
+body.view-staff .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
+body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:1/-1;}
+@media (min-width:768px){
+  body.view-staff .dash-kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
+  body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:auto;}
+}
+@media (min-width:1200px){body.view-staff .dash-kpis{grid-template-columns:repeat(7,minmax(0,1fr));}}
+
+/* ── Hand-over (2026-10-03): the bike-number box no longer spans the page; with nobody waiting for a bike
+   it folds away, since there is no one to give one to. ── */
+body.view-staff .ho-give{max-width:640px;}
+body.view-staff .ho-give.ho-give-idle{display:none;}
+/* the fleet row's actions: Edit, maybe Found, and the ⋯ menu, on one line (2026-10-03) */
+body.view-staff #tab-inventory .actions-cell.flt-acts{flex-wrap:nowrap;min-width:0;}
+body.view-staff #tab-inventory .actions-cell.flt-acts>.rq-more{flex:0 0 auto;min-width:36px;}
+/* Wide fleet tables scroll sideways inside their box; Manage bike stays pinned at the end so Edit and the
+   menu are always on screen (2026-10-03). Phones show cards instead and are left alone. */
+@media (min-width:768px){
+  body.view-staff #tab-inventory .bk-table :is(thead th,tbody td):last-child{position:sticky;inset-inline-end:0;z-index:2;background:var(--s1);box-shadow:-1px 0 0 var(--border);}
+  html[dir="rtl"] body.view-staff #tab-inventory .bk-table :is(thead th,tbody td):last-child{box-shadow:1px 0 0 var(--border);}
+  body.view-staff #tab-inventory .bk-table thead th:last-child{background:var(--sf-head,var(--s1));z-index:3;}
+}
+body.view-staff .dash-empty-go{margin-top:10px;}
+
+/* ── The keyboard shortcuts list ("?", 2026-10-03) ── */
+.kb-list{display:flex;flex-direction:column;gap:2px;}
+.kb-row{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;}
+.kb-row:last-child{border-bottom:0;}
+.kb-keys{flex:0 0 92px;display:inline-flex;gap:4px;}
+.kb-row kbd{display:inline-block;min-width:22px;padding:2px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;background:var(--s2,#f6f6f2);font:700 12px/1.4 ui-monospace,Menlo,monospace;text-align:center;color:var(--text);}

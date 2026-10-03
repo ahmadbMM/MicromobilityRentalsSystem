@@ -479,3 +479,20 @@ page's queue rows exactly as `staff_vendor_share_ratings` counts them (`_vendorR
 breakfast score), with each breakfast reason ticked to include; never a rider's name. Share / Share again / Stop
 sharing call `staff_vendor_share_ratings` (only the ticked `{e,k}`) / `staff_vendor_unshare_ratings`; what was shared
 is `vendor_shared_ratings` (`W.sr`, its own answer in `_vendorLoad`). The rider's page says so in one line (`rgBfShareNote`).
+
+## Staff UI pass (2026-10-03)
+
+- **The roster fits a laptop.** Bookings' table has no Height or Contact column: `_qTypeCell` draws the bike type
+  with the rider's height and fitted size under it, and `_qCc` puts the call / WhatsApp pair in the rider's cell. Keep
+  new roster content wrappable (the 1280px check: the table must stay inside `#tab-queue`); the Manage booking tiles
+  keep the owner's equal-size grid (2026-10-02) and the booking time stays under the number (2026-09-21).
+- **One rule for money in and places taken**: `_moneyIn(sessIds)` (paid rentals + add-ons + the session report's
+  collected) and `_placesTaken(sess)` (`_holdsSpot`, waitlist left out) feed both the Dashboard and the Analytics live
+  board. The Sessions page and `spotsLeft` still count waitlisted rows as holding a seat (the booking engine's rule).
+- **A bike row has Edit (and Found) plus a ⋯ menu** (`_rowMenu('bike:'+id, items, b.name)`); the Manage bike column
+  is pinned to the end of the scrolling table. `_rowMenu`'s third argument titles the sheet when it is not a booking's.
+- **Keyboard**: `?` opens the shortcut list (`_kbHelp`), `w` the walk-in, `t` the scanner, through the staff entry
+  point `_kbStaff` (the listener is set at load; calling staff code from it pulls that code into the customer half).
+- The phone roster's one ride picker is the strip's select (it lists past nights under Closed); the filter bar's
+  Session select is hidden there (`.filter-sess-dup`). On a wide screen Sessions shows the next live ride's detail
+  until one is picked (not stored in `S.selSessionDetail`).

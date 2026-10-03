@@ -47,6 +47,7 @@ export const STAFF_ENTRY = [
   // half - about 116 statements a customer's page carried and could never run (the listener
   // answers only in the staff view, where staff.js is loaded).
   '_gsOpen',
+  '_kbStaff', // the walk-in / scan / shortcut-list keys (2026-10-03), listened for at load like Ctrl/Cmd+K
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -963,7 +964,9 @@ export function formatBareWrites(r, limit = 20) {
 // breakfast ratings (EN + AR rows, notice 2026-10-03); 229.7 KB here is ~231.0 on the runner.
 // Staff 348 -> 350 (2026-10-03): Instagram follower counts on Accounts (chip + dialog, 18 strings);
 // 348.4 KB here is ~349.7 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 350, core: 176 };
+// Staff 350 -> 352 (2026-10-03): the staff UI pass (roster fits a laptop, fleet row menu, one money and
+// places rule for Dashboard + Analytics, the keyboard-shortcut list); 349.1 KB here is ~350.7 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 352, core: 176 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
