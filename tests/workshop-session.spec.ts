@@ -70,19 +70,20 @@ test('it lists under its own card only, and no other ride lists under it', async
   expect(under.jcc).toEqual([]);
 });
 
-test('a customer without the tag goes straight to the review; the Saturday ride still turns them away', async ({ page }) => {
+test('a customer without the tag goes straight to the Activity waiver; the Saturday ride still turns them away', async ({ page }) => {
   await asAnyone(page);
   await page.evaluate(`S.selEvent='workshop';goCustomer('register');S.regStep=1;renderRegister()`);
   await page.evaluate(`selectSessCard('${WS}')`);
   await expect.poll(() => page.evaluate('S.selSession')).toBe(WS);
   await page.evaluate(`regNextFromSession()`);
-  expect(await page.evaluate('S.regStep')).toBe(3);            // no riders step, no waiver: day, then confirm
+  // no riders step; every kind has a waiver since 2026-10-03 (the owner: no booking without agreeing)
+  expect(await page.evaluate('S.regStep')).toBe(2.5);
   const panel = page.locator('#tab-register');
-  await expect(panel).toContainText('Review and confirm');
-  await expect(panel).not.toContainText('waiver');
+  await expect(panel).toContainText('Activity waiver');
+  await expect(panel).not.toContainText('Ride waiver');
   await expect(panel).not.toContainText('Bike Type');
-  await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 2');
-  // Back from the review returns to the day list, not to an empty riders panel
+  await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 3');
+  // Back from the waiver returns to the day list, not to an empty riders panel
   await page.locator('#tab-register .mm-reg-foot .btn-secondary').click();
   expect(await page.evaluate('S.regStep')).toBe(1);
   // the members gate is exactly where it was for the Saturday ride
@@ -96,7 +97,7 @@ test('nothing about cycling on the review: no bike type, no height, participants
   await asAnyone(page);
   // a saved cycling profile must not leak onto a workshop booking
   await page.evaluate(`S.selEvent='workshop';goCustomer('register');S.regStep=1;renderRegister();
-    S.selSession='${WS}';S.regBikeTypes=['Road'];S.regBikeHeights=['177'];regNextFromSession()`);
+    S.selSession='${WS}';S.regBikeTypes=['Road'];S.regBikeHeights=['177'];regNextFromSession();toggleWaiver(true);regWaiverContinue()`);
   const panel = page.locator('#tab-register');
   await expect(panel).toContainText('Participants (1)');
   await expect(panel).not.toContainText('Riders');
@@ -105,7 +106,7 @@ test('nothing about cycling on the review: no bike type, no height, participants
   await expect(panel).toContainText('Free');
 });
 
-test('the booking is one person, no bike, free, and carries no waiver', async ({ page }) => {
+test('the booking is one person, no bike, free, and carries the activity waiver', async ({ page }) => {
   await asAnyone(page);
   await page.evaluate(`S.selEvent='workshop';goCustomer('register');S.regStep=1;renderRegister()`);
   const rpc: string[] = [];
@@ -113,14 +114,14 @@ test('the booking is one person, no bike, free, and carries no waiver', async ({
     if (r.method() === 'POST' && r.url().includes('/rpc/customer_create_booking')) rpc.push(r.postData() || '');
   });
   // a stale quantity from a circuit booking must not turn into three places
-  await page.evaluate(`S.selSession='${WS}';S.regQty=3;ensureBikeSizes();regNextFromSession();submitReg()`);
+  await page.evaluate(`S.selSession='${WS}';S.regQty=3;ensureBikeSizes();regNextFromSession();toggleWaiver(true);regWaiverContinue();submitReg()`);
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const entries = JSON.parse(rpc[0]).p_entries;
   expect(entries).toHaveLength(1);
   expect(entries[0].type_preference).toBe('None');
   expect(entries[0].size).toBe('');
   expect(entries[0].price).toBe(0);
-  expect(entries[0].waiver_version ?? null).toBeNull();
+  expect(entries[0].waiver_version).toBe('activity-2026-10-v1');
 });
 
 test('a second reservation on the same workshop is refused', async ({ page }) => {
@@ -136,7 +137,7 @@ test('a second reservation on the same workshop is refused', async ({ page }) =>
   page.on('request', (r) => {
     if (r.method() === 'POST' && r.url().includes('/rpc/customer_create_booking')) rpc.push(r.postData() || '');
   });
-  await page.evaluate(`S.selSession='${WS}';regNextFromSession();submitReg()`);
+  await page.evaluate(`S.selSession='${WS}';regNextFromSession();toggleWaiver(true);regWaiverContinue();submitReg()`);
   await expect(page.locator('#already-booked-banner')).toBeVisible();
   await expect(page.locator('#already-booked-banner')).toContainText('You already have a booking for this session.');
   expect(rpc).toHaveLength(0);

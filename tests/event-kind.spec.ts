@@ -14,7 +14,7 @@ test('the kind is read from the row: seats, no bike, no approval, its own name, 
   await waitForSb(page);
   const r = await page.evaluate(`(()=>{const s=allSessions().find(x=>x.ride_kind==='event'),j=allSessions().find(x=>!x.ride_kind);
     return {kind:_rideKind(s),comm:_isCommunity(s),bike:_needsBike(s),waiver:_needsWaiver(s),appr:_isApprovalRide(s),name:_evName(s),ev:_evOf(s),match:_evMatch(s,'event'),inComm:_evMatch(s,'community'),inJcc:_evMatch(s,'jcc'),seat:_evSeatPrice(s),jccSeat:_evSeatPrice(j),free:_isFreeRide(s),live:_eventsLive(),cls:_evClass(s)};})()`);
-  expect(r).toEqual({ kind: 'event', comm: true, bike: false, waiver: false, appr: false, name: 'Bike maintenance class', ev: 'event', match: true, inComm: false, inJcc: false, seat: 40, jccSeat: null, free: false, live: true, cls: 'ev-event' });
+  expect(r).toEqual({ kind: 'event', comm: true, bike: false, waiver: true, appr: false, name: 'Bike maintenance class', ev: 'event', match: true, inComm: false, inJcc: false, seat: 40, jccSeat: null, free: false, live: true, cls: 'ev-event' });
 });
 
 test('a rider sees the Events card while one is on the books, and the review prices the seat, not a bike', async ({ page }) => {
