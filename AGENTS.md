@@ -473,3 +473,9 @@ itself to 14 days after); staff only read `vendor_feedback`, loaded by `_vendorL
 the turnout beside the riders booked on that Saturday ride (`_vendorBooked`, only when the page holds those rows), and
 "Waiting for feedback" counts confirmed dates still inside the 14 days (`_vendorFbWaiting`); the date dialog and the
 venue dialog's bookings show it too.
+Riders' breakfast ratings (migration 20261003200000): a confirmed date on or before today shows, in the date dialog and the
+venue dialog (`_vendorRgBlock`), the breakfast part of that date's Saturday social ride's ratings, counted from the
+page's queue rows exactly as `staff_vendor_share_ratings` counts them (`_vendorRg`: done, form social, not skip_bf, a
+breakfast score), with each breakfast reason ticked to include; never a rider's name. Share / Share again / Stop
+sharing call `staff_vendor_share_ratings` (only the ticked `{e,k}`) / `staff_vendor_unshare_ratings`; what was shared
+is `vendor_shared_ratings` (`W.sr`, its own answer in `_vendorLoad`). The rider's page says so in one line (`rgBfShareNote`).

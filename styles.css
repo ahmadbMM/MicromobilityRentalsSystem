@@ -5230,6 +5230,7 @@ body.fix-open{overflow:hidden;}
 .rg-q.err .rg-why{border-color:#b42318;}
 .rg-skip{align-self:flex-start;background:none;border:1px solid rgba(15,18,21,.18);border-radius:999px;padding:8px 14px;font-family:var(--font-body);font-weight:600;font-size:13px;color:#4f565c;cursor:pointer;}
 .rg-skip.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;}
+.rg-bfn{margin-top:-4px;font-size:12px;line-height:1.4;color:#4f565c;}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
 .soc-link{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:var(--staff-fs-sm,12px);font-weight:700;}
@@ -6470,6 +6471,21 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 .vendor-bline .vendor-stars{margin-inline-start:auto}
 .vendor-fb>.ca-head{display:flex;align-items:flex-start;gap:10px}
 .vendor-fb>.ca-head>.ws-grow{flex:1;min-width:0}
+/* Riders' breakfast ratings shared with the vendor (2026-10-03): the averages, the reasons with a tick each, what was shared */
+.vendor-rg{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--s1);margin-bottom:8px}
+.vendor-rg-day{font-weight:800;font-size:13px;margin-bottom:4px}
+.vendor-rg-n,.vendor-rg-at{font-size:13px;font-weight:700}
+.vendor-rg-at{color:var(--green)}
+.vendor-rg-avgs{display:flex;flex-direction:column;gap:2px;margin:6px 0;font-size:13px}
+.vendor-rg-avg{display:flex;justify-content:space-between;gap:10px}
+.vendor-rg-avg.sub{padding-inline-start:12px;color:var(--muted)}
+.vendor-rg-whys{display:flex;flex-direction:column;gap:8px}
+#confirm-modal .vendor-rg-why{display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer}
+#confirm-modal .vendor-rg-why input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:2px 0 0;flex:none;accent-color:var(--green)}
+.vendor-rg-why>span{flex:1;min-width:0}
+.vendor-rg-said{margin-top:6px;font-size:13px}
+.vendor-rg-explain{margin-top:10px}
+.vendor-rg-shared{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border)}
 /* Workshop, Messages and Ambassadors without inline styles (2026-09-28, pass 2 of moving the
    style="..." attributes into classes, so the policy can drop style-src 'unsafe-inline'). The three
    lists share one card, so they share these; each rule is scoped by the section's id (or by

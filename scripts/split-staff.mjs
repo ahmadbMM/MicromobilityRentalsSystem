@@ -957,7 +957,9 @@ export function formatBareWrites(r, limit = 20) {
 // more on the runner).
 // Staff 344 -> 346 (2026-10-03): Vendors' Feedback tab (the vendors part 12 -> 14 KB); 343.5 KB here is
 // ~344.8 on the runner, over 344.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 346, core: 176 };
+// Staff 346 -> 348 (2026-10-03): riders' breakfast ratings shared with the vendor (the vendors part 14 ->
+// 16 KB, 17 strings); 346.0 KB here is ~347.3 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 348, core: 176 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

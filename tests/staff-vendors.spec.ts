@@ -288,3 +288,114 @@ test.describe('@staff:vendors Vendors feedback', () => {
     await expect(dialog(page).locator('.vendor-fb')).toHaveCount(0);
   });
 });
+
+// Riders' breakfast ratings shared with the vendor (2026-10-03, migration 20261003200000): the breakfast part
+// of the post-ride rating of that date's Saturday social ride, counted and averaged, and only the reasons
+// staff tick; never a rider's name. staff_vendor_share_ratings / staff_vendor_unshare_ratings.
+const rd = ksa(-2), old = ksa(-9), quiet = ksa(-16);
+const rgSess = (id: string, date: string, o: Record<string, unknown> = {}) => ({
+  id, day: 'Saturday', session_date: date, capacity: 40, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'saturday', breakfast_name: 'Bean Box', breakfast_url: null, bike_slots: '{"_time":"06:00 - 08:00"}', ...o,
+});
+const social = (s: Record<string, number>, why: Record<string, string> = {}, o: Record<string, unknown> = {}) => ({ form: 'social', s, why, ...o });
+const rgFix = {
+  sessions: [...sessions, rgSess('rg-s', rd), rgSess('rg-o', old), rgSess('rg-q', quiet), { id: 'rg-c', day: 'Saturday', session_date: rd, capacity: 12, status: 'open', created_at: 4, bike_slots: '{"_time":"18:00 - 20:00"}' }],
+  vendor_bookings: [...bookings, bk({ id: 20, venue_id: 1, day: rd, status: 'confirmed' }), bk({ id: 21, venue_id: 1, day: quiet, status: 'confirmed' })],
+  queue_entries: [
+    qe({ id: 'r1', name: 'Hidden Rider One', session_id: 'rg-s', session_date: rd, status: 'done', rating_exp: 9,
+      rating_detail: social({ ride: 4, breakfast: 9, bf_restaurant: 8, bf_food: 6, bf_service: 10, overall: 9 }, { ride: 'Too fast for me', bf_restaurant: 'Too small for the group', bf_food: 'Eggs were cold' }) }),
+    qe({ id: 'r2', name: 'Hidden Rider Two', queue_num: 2, session_id: 'rg-s', session_date: rd, status: 'done', rating_exp: 7,
+      rating_detail: social({ breakfast: 7, bf_food: 9, overall: 7 }, { breakfast: 'Slow to serve', overall: 'Long wait' }) }),
+    // Not counted: skipped the breakfast, still on the ride, a circuit form, another date, another ride that day.
+    qe({ id: 'r3', queue_num: 3, session_id: 'rg-s', session_date: rd, status: 'done', rating_detail: social({ breakfast: 1 }, { breakfast: 'skipped' }, { skip_bf: true }) }),
+    qe({ id: 'r4', queue_num: 4, session_id: 'rg-s', session_date: rd, status: 'waiting', rating_detail: social({ breakfast: 1 }) }),
+    qe({ id: 'r5', queue_num: 5, session_id: 'rg-s', session_date: rd, status: 'done', rating_detail: { form: 'rental', s: { breakfast: 1, service: 1 }, why: {} } }),
+    qe({ id: 'r6', session_id: 'rg-o', session_date: old, status: 'done', rating_detail: social({ breakfast: 1 }, { breakfast: 'Other date' }) }),
+    qe({ id: 'r7', session_id: 'rg-c', session_date: rd, status: 'done', rating_detail: social({ breakfast: 1 }, { breakfast: 'Other ride' }) }),
+  ],
+};
+const rgBlock = (page: Page, id = 20) => dialog(page).locator(`.vendor-rg[data-vendor-rg="${id}"]`);
+async function openDay(page: Page, fixtures: Record<string, unknown> = {}) {
+  const calls = await open(page, { ...rgFix, ...fixtures });
+  await page.waitForFunction('S.dataLoaded');
+  await page.evaluate(`_vendorDayOpen('${rd}')`);
+  return calls;
+}
+
+test.describe('@staff:vendors Vendors riders’ breakfast ratings', () => {
+  test('the date dialog counts and averages that ride’s breakfast answers, without names; an unticked reason is left out', async ({ page }) => {
+    const calls = await openDay(page, { 'rpc:staff_vendor_share_ratings': { booking_id: 20, venue_id: 1, day: rd, riders: 2, averages: { breakfast: 8, bf_food: 7.5 }, comments: [{ k: 'bf_food', text: 'Eggs were cold' }], shared_by: 'Spec Staff', shared_at: '2099-05-10T08:00:00Z' } });
+    const b = rgBlock(page);
+    await expect(dialog(page)).toContainText('Riders’ breakfast ratings');
+    await expect(b.locator('.vendor-rg-n')).toHaveText('Riders who rated the breakfast: 2');
+    const avg = (k: string) => b.locator(`.vendor-rg-avg[data-k="${k}"] b`);
+    await expect(avg('breakfast')).toHaveText('8.0/10');
+    await expect(avg('bf_restaurant')).toHaveText('8.0/10');
+    await expect(avg('bf_food')).toHaveText('7.5/10');
+    await expect(avg('bf_service')).toHaveText('10.0/10');
+    await expect(b.locator('.vendor-rg-avg[data-k="bf_atmosphere"]')).toHaveCount(0);
+    // Breakfast reasons only, in question order, each ticked; the ride's and overall's are not offered.
+    const why = b.locator('.vendor-rg-why');
+    expect(await why.evaluateAll((els) => els.map((e) => e.getAttribute('data-k')))).toEqual(['breakfast', 'bf_restaurant', 'bf_food']);
+    await expect(why.nth(0)).toContainText('Breakfast · 7/10');
+    await expect(why.nth(0)).toContainText('Slow to serve');
+    await expect(why.locator('input:checked')).toHaveCount(3);
+    await expect(b).not.toContainText('Hidden Rider');
+    await expect(b).not.toContainText('Too fast for me');
+    await expect(b).not.toContainText('Long wait');
+    await expect(b.locator('.vendor-rg-explain')).toHaveText('The vendor sees the averages and the reasons you tick, never riders’ names, the ride scores or their comments.');
+    await why.nth(1).locator('input').uncheck();
+    await b.locator('.vendor-rg-share').click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_share_ratings').length).toBe(1);
+    expect(calls.find((c) => c.fn === 'staff_vendor_share_ratings')!.body).toEqual({ p_booking: 20, p_comments: [{ e: 'r2', k: 'breakfast' }, { e: 'r1', k: 'bf_food' }], p_by: 'Spec Staff' });
+    // Shared: what the vendor sees, with Share again and Stop sharing.
+    await expect(b.locator('.vendor-rg-at')).toContainText('Shared on');
+    await expect(b.locator('.vendor-rg-at')).toContainText('by Spec Staff');
+    await expect(b.locator('.vendor-rg-share')).toHaveCount(0);
+    await expect(b.locator('.vendor-rg-again')).toBeVisible();
+    await expect(b.locator('.vendor-rg-stop')).toBeVisible();
+  });
+
+  test('a shared date shows what the vendor sees, keeps the shared ticks, and Stop sharing asks first', async ({ page }) => {
+    const calls = await openDay(page, {
+      vendor_shared_ratings: [{ booking_id: 20, venue_id: 1, day: rd, riders: 2, averages: { breakfast: 8, bf_food: 7.5 }, comments: [{ k: 'bf_food', text: 'Eggs were cold' }], shared_by: 'Huda Admin', shared_at: '2099-05-10T08:00:00Z' }],
+    });
+    const b = rgBlock(page);
+    await expect(b.locator('.vendor-rg-at')).toContainText('by Huda Admin');
+    const sees = b.locator('.vendor-rg-shared');
+    await expect(sees).toContainText('What Bean Box sees');
+    await expect(sees.locator('.vendor-rg-n')).toHaveText('Riders who rated the breakfast: 2');
+    await expect(sees.locator('.vendor-rg-avg[data-k="bf_food"] b')).toHaveText('7.5/10');
+    await expect(sees.locator('.vendor-rg-said')).toHaveCount(1);
+    await expect(sees.locator('.vendor-rg-said')).toContainText('Eggs were cold');
+    // The reasons left out last time stay unticked.
+    await expect(b.locator('.vendor-rg-why[data-k="bf_food"] input')).toBeChecked();
+    await expect(b.locator('.vendor-rg-why[data-k="breakfast"] input')).not.toBeChecked();
+    await expect(b.locator('.vendor-rg-explain')).toHaveCount(0);
+    await b.locator('.vendor-rg-stop').click();
+    await expect(dialog(page)).toContainText('Stop sharing with Bean Box?');
+    await dialog(page).getByRole('button', { name: 'Stop sharing' }).click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_unshare_ratings').length).toBe(1);
+    expect(calls.find((c) => c.fn === 'staff_vendor_unshare_ratings')!.body).toEqual({ p_booking: 20 });
+    await expect(rgBlock(page).locator('.vendor-rg-shared')).toHaveCount(0);
+    await expect(rgBlock(page).locator('.vendor-rg-share')).toBeVisible();
+  });
+
+  test('no rating yet: it says so and offers no share; the venue dialog and the Feedback card lead to it', async ({ page }) => {
+    await openDay(page, { vendor_feedback: [fbRow({ booking_id: 20, day: rd })] });
+    await dialog(page).locator('.ca-x').click();
+    await page.evaluate(`_vendorDayOpen('${quiet}')`);
+    await expect(rgBlock(page, 21).locator('.vendor-rg-none')).toHaveText('No rider has rated the breakfast yet.');
+    await expect(rgBlock(page, 21).locator('button')).toHaveCount(0);
+    await dialog(page).locator('.ca-x').click();
+    await panel(page).locator('[data-vendor-view="venues"]').click();
+    await panel(page).locator('.vendor-ven[data-vendor-ven="1"] .vendor-ven-open').click();
+    await expect(rgBlock(page, 20).locator('.vendor-rg-n')).toHaveText('Riders who rated the breakfast: 2');
+    await expect(rgBlock(page, 21).locator('.vendor-rg-none')).toBeVisible();
+    await expect(dialog(page).locator('.vendor-rg[data-vendor-rg="12"]')).toHaveCount(0); // a date still to come
+    await dialog(page).locator('.ca-x').click();
+    await panel(page).locator('[data-vendor-view="feedback"]').click();
+    await panel(page).locator('.vendor-fb[data-vendor-fb="20"] .vendor-fb-share').click();
+    await expect(rgBlock(page, 20).locator('.vendor-rg-share')).toBeVisible();
+    expect(await page.evaluate(() => /\p{Extended_Pictographic}/u.test(document.getElementById('confirm-modal')!.textContent || ''))).toBe(false);
+  });
+});

@@ -65,6 +65,9 @@ test('a Saturday social ride asks the ride and the breakfast with their parts, a
   // an own bike: no bike question under the ride
   expect(await qs(page)).toEqual(['ride', 'ride_checkin', 'ride_staff', 'ride_route', 'breakfast', 'bf_restaurant', 'bf_atmosphere', 'bf_food', 'bf_service', 'overall']);
   const m = page.locator('#rate-modal');
+  // The breakfast's answers may go to the restaurant (Vendors, 2026-10-03): one quiet line says so, under its heading.
+  await expect(m.locator('#rgq-breakfast .rg-bfn')).toHaveText('Your breakfast answers may be shared with the restaurant, without your name.');
+  await expect(m.locator('.rg-bfn')).toHaveCount(1);
   await m.locator('.rg-skip').click(); // did not stay for breakfast
   expect(await qs(page)).toEqual(['ride', 'ride_checkin', 'ride_staff', 'ride_route', 'overall']);
   for (const k of ['ride', 'ride_checkin', 'ride_route', 'overall']) await m.locator(`#rgq-${k} .rg-b[data-v="10"]`).click();
