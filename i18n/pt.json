@@ -3509,5 +3509,7 @@
   "vndRgStoppedToast": "Avaliações deixaram de ser compartilhadas com {0} para {1}",
   "vndRgShareBtn": "Compartilhar avaliações",
   "vndRgSharedBtn": "Avaliações compartilhadas",
-  "rgBfShareNote": "Suas respostas sobre o café da manhã podem ser compartilhadas com o restaurante, sem o seu nome."
+  "rgBfShareNote": "Suas respostas sobre o café da manhã podem ser compartilhadas com o restaurante, sem o seu nome.",
+  "anRatedAt": "Avaliado em {0}",
+  "anRatedApprox": "Passeio terminou em {0} (hora da avaliação não registrada)"
 }

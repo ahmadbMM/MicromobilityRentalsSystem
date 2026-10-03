@@ -3509,5 +3509,7 @@
   "vndRgStoppedToast": "Itinigil ang pagbabahagi ng mga rating kay {0} para sa {1}",
   "vndRgShareBtn": "Ibahagi ang mga rating",
   "vndRgSharedBtn": "Naibahagi ang mga rating",
-  "rgBfShareNote": "Maaaring ibahagi sa restawran ang iyong mga sagot tungkol sa almusal, nang wala ang iyong pangalan."
+  "rgBfShareNote": "Maaaring ibahagi sa restawran ang iyong mga sagot tungkol sa almusal, nang wala ang iyong pangalan.",
+  "anRatedAt": "Ni-rate noong {0}",
+  "anRatedApprox": "Natapos ang ride noong {0} (hindi naitala ang oras ng rating)"
 }

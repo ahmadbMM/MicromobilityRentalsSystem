@@ -3509,5 +3509,7 @@
   "vndRgStoppedToast": "Se dejaron de compartir las valoraciones con {0} para el {1}",
   "vndRgShareBtn": "Compartir valoraciones",
   "vndRgSharedBtn": "Valoraciones compartidas",
-  "rgBfShareNote": "Tus respuestas sobre el desayuno pueden compartirse con el restaurante, sin tu nombre."
+  "rgBfShareNote": "Tus respuestas sobre el desayuno pueden compartirse con el restaurante, sin tu nombre.",
+  "anRatedAt": "Valorado el {0}",
+  "anRatedApprox": "Salida terminada el {0} (hora de la valoración no registrada)"
 }

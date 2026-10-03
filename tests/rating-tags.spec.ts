@@ -33,6 +33,22 @@ test('a detailed rating (rating_detail) shows each question, its reason, and the
   await expect(tab.locator('.an-rg-why')).toHaveText('Gears slipped');
 });
 
+test('every rating lists the time it was given, the most recent first; an older one shows its ride end, marked', async ({ page }) => {
+  const q = [...queue, done('r6', 30, { rating_exp: 7, rated_at: ago(0.01) })]; // the oldest ride, rated a few minutes ago
+  await stubSupabase(page, { sessions: [...sessions, { id: 's-30', day: 'Friday', session_date: day(30), capacity: 12, status: 'closed', created_at: 1 }], queue_entries: q, bikes: [] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setStaffTab('analytics');setAnView('ratings')`);
+  const cards = page.locator('#tab-analytics .an-rate-card');
+  await expect(cards.first()).toContainText('Rider r6'); // rated last, so first, though its ride is the oldest
+  await expect(cards.first().locator('.an-rate-when')).toHaveText(/^Rated /);
+  await expect(cards.first().locator('.an-rate-approx')).toHaveCount(0);
+  await expect(cards.nth(1).locator('.an-rate-when.an-rate-approx')).toContainText('rating time not recorded');
+  const names = await cards.locator('.an-name13').allTextContents();
+  expect(names.slice(1)).toEqual(['Rider r5', 'Rider r1', 'Rider r2', 'Rider r3']); // the rest by their ride's end, newest first
+});
+
 test.describe('staff', () => {
   async function boot(page: Page) {
     await stubSupabase(page, { sessions, queue_entries: queue, bikes: [] });

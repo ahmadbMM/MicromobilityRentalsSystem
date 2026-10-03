@@ -3509,5 +3509,7 @@
   "vndRgStoppedToast": "Partage des notes arrêté avec {0} pour le {1}",
   "vndRgShareBtn": "Partager les notes",
   "vndRgSharedBtn": "Notes partagées",
-  "rgBfShareNote": "Vos réponses sur le petit-déjeuner peuvent être partagées avec le restaurant, sans votre nom."
+  "rgBfShareNote": "Vos réponses sur le petit-déjeuner peuvent être partagées avec le restaurant, sans votre nom.",
+  "anRatedAt": "Noté le {0}",
+  "anRatedApprox": "Sortie terminée le {0} (heure de la note non enregistrée)"
 }
