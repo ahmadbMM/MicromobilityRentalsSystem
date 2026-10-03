@@ -83,7 +83,7 @@ test.describe('@customer:account your rides and the closest badges', () => {
   test('the week strip, the record and the badges nearest to earn', async ({ page }) => {
     const past = ['2099-01-04', '2099-01-11', '2099-01-25'];
     const s = past.map((d) => jcc(d, d, { status: 'closed' }));
-    await open(page, past.map((d, i) => bk({ id: 'p' + i, session_id: d, session_date: d, status: 'done', ride_duration: 50, rating_exp: 9 })), 'en', s); // rated: an unrated ride would hold the forced rating page over the account
+    await open(page, past.map((d, i) => bk({ id: 'p' + i, session_id: d, session_date: d, status: 'done', ride_duration: 50, rating_exp: 9, rating_detail: { form: 'rental', s: { experience: 9 }, why: {} } })), 'en', s); // rated: an unrated ride would hold the forced rating page over the account
     await page.evaluate("goCustomer('account')");
     const myr = page.locator('#tab-account .myr');
     await expect(myr.locator('.myr-weeks i')).toHaveCount(26);

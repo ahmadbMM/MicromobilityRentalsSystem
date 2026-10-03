@@ -11219,7 +11219,9 @@ function _rgTree(g){
   return RG_FORMS[g.form].filter(([k])=>!(k==='bike'&&noBike)&&!(k==='breakfast'&&g.skipBf)).map(([k,sub])=>[k,(sub||[]).filter(x=>!(x==='ride_bike'&&noBike))]);
 }
 function _rgKeys(g){return _rgTree(g).flatMap(([k,sub])=>[k,...sub]);}
-function _rgRated(e){return !!(e&&(e.ratingExp||e.ratingBike||e.ratingDetail));}
+// A ride from RATE_FROM on is rated only once the full form is in: a quick score with tags (the old
+// form, still sent by a phone on an older build or the website's old card) asks again (the owner, 2026-10-03).
+function _rgRated(e){if(!e)return false;if(e.ratingDetail)return true;return !!(e.ratingExp||e.ratingBike)&&String(e.sessionDate||e.sessionId||'').slice(0,10)<RATE_FROM;}
 function _pendingRatingId(){
   const cust=S.loggedIn;if(!cust)return null;
   const today=todayStr(),map={};
@@ -11242,7 +11244,10 @@ function _forceRatingPrompt(){
 function openRateModal(id,forced){
   const e=getQueue().find(x=>x.id===id);if(!e)return;
   const d=e.ratingDetail||{},form=_rgForm(e),same=d.form===form;
-  S._rg={id,forced:!!forced,form,s:{...(same&&d.s||{})},why:{...(same&&d.why||{})},note:e.feedback||'',skipBf:same&&!!d.skip_bf,err:{},saving:false,net:false};
+  // Asked again after a quick score: the bike and the experience it gave start filled in.
+  const pre=e.ratingDetail?{}:form==='social'?{ride_bike:e.ratingBike,overall:e.ratingExp}:{bike:e.ratingBike,experience:e.ratingExp};
+  Object.keys(pre).forEach(k=>{if(!(pre[k]>=1&&pre[k]<=10))delete pre[k];});
+  S._rg={id,forced:!!forced,form,s:{...pre,...(same&&d.s||{})},why:{...(same&&d.why||{})},note:e.feedback||'',skipBf:same&&!!d.skip_bf,err:{},saving:false,net:false};
   renderRateModal();
 }
 function closeRateModal(){

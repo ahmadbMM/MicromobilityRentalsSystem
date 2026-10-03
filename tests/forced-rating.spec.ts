@@ -98,11 +98,17 @@ test('it waits for the next visit: a ride from an earlier day is asked about', a
 
 test('not asked: a rated ride, a ride still out, a ride before the page went live', async ({ page }) => {
   await boot(page, [sess(today), sess('2026-09-30')], [
-    row('q1', today, { rating_exp: 9 }),
+    row('q1', today, { rating_exp: 9, rating_detail: { form: 'rental', s: { service: 9, bike: 9, experience: 9 }, why: {} } }),
     row('q2', today, { id: 'q2', session_id: 's-' + today, queue_num: 2, status: 'active', checked_out_at: null, customer_id: 'c2' }),
     row('q3', '2026-09-30'),
   ]);
   expect(await open(page)).toBe(false);
+});
+
+test('a quick score with tags (the old form) asks again, the bike and experience filled in', async ({ page }) => {
+  await boot(page, [sess(today)], [row('q1', today, { rating_bike: 10, rating_exp: 9, rating_tags: ['route', 'fun'] })]);
+  expect(await open(page)).toBe(true);
+  expect(await page.evaluate(`S._rg.s`)).toEqual({ bike: 10, experience: 9 });
 });
 
 test('a ride still out does not ask', async ({ page }) => {
