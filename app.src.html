@@ -28235,9 +28235,9 @@ async function _ambMsgCopy(){
 // staff READ the tables under is_staff(); every write is a staff_fnb_* function. Admin only (not in
 // ROLE_TABS). Calendar / Requests / Venues / Tiers are /partners, /partners/requests, ...
 // tests/staff-fnb.spec.ts.
-// The portal's address. The subdomain is not decided yet: while this is '' the login message
-// staff send leaves the link line out.
-const FNB_PORTAL_URL='';
+// The portal's address (apps/partners in the website repo; the owner's choice, 2026-10-03). The
+// login message staff send carries it; '' would leave the link line out.
+const FNB_PORTAL_URL='https://vendors.micromobility.sa';
 const FNB_BK_COLS='id,venue_id,day,series_id,kind,status,note,staff_note,requested_by,decided_by,decided_at,cancelled_by,cancel_reason,late_cancel,created_at,updated_at';
 const FNB_USER_COLS='id,venue_id,login,name,role,must_change_pwd,active,last_login_at,created_by,created_at'; // the only columns staff may read: '*' is refused
 const FNB_RS=['ramadan','eid','weather','holiday']; // a closed date's preset reasons, stored as these codes; 'other' is typed

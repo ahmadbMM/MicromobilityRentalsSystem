@@ -104,7 +104,7 @@ test.describe('@staff:fnb F&B Partners', () => {
     await expect(msg).toContainText('Login: huda@beanbox.sa');
     await expect(msg).toContainText('Temporary password: Tmp9-Kq4m');
     await expect(msg).toContainText('the first time you sign in');
-    await expect(msg).not.toContainText('Sign in here'); // the portal's address is not decided yet
+    await expect(msg).toContainText('Sign in here: https://vendors.micromobility.sa');
     await expect(dialog(page).locator('a.fnb-pw-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hello%20Huda/);
     await dialog(page).locator('#fnb-pw-lang').selectOption('ar');
     await expect(msg).toContainText('كلمة المرور المؤقتة: Tmp9-Kq4m');
