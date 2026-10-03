@@ -445,3 +445,16 @@ The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data 
 - **Your rides / closest badges.** `_myrStats` on Account (26-week strip, rides this year, favourite type, timed
   minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
   with least left (`bd-next`). `tests/ride-night.spec.ts`.
+
+## F&B Partners (2026-10-03)
+
+Cafés and restaurants ("venues") reserve the Saturdays our Saturday social ride's riders come to them for
+breakfast, on a portal of their own (another repo; its address is `FNB_PORTAL_URL`, '' until the subdomain is
+decided). Staff side: the admin-only section `fnb` at `/partners` (Calendar), `/partners/requests`,
+`/partners/venues`, `/partners/tiers`, all in the staff part `staff-parts/fnb.js` (`renderFnb`). Migration
+20261003150000: staff READ the `fnb_*` tables (`fnb_users` only by the columns in `FNB_USER_COLS`) and every
+write is a `staff_fnb_*` function; confirming one request declines the date's others and the database makes
+the venue the ride's breakfast stop. A temporary password (Add login / Reset password) is shown once, in the
+venue dialog only. Closed-date reasons are stored as codes (`FNB_RS`) or typed text. The section's
+translation keys start with `pfn`, not `fnb`: the customer half builds keys from a bare `'f'+` prefix, so an
+`f…` key would never leave the customer's language pack. `tests/staff-fnb.spec.ts`.

@@ -38,7 +38,7 @@ export const STAFF_ENTRY = [
   'setStaffTab', 'renderStaffTabs', '_renderStaffTab', '_bgRenderStaffTab',
   'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'renderInventory',
   'renderCashier', 'renderCommunity', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
-  'renderAmbassadors', 'renderTeam', 'renderDashboard', 'renderLogs',
+  'renderAmbassadors', 'renderFnb', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
   'doUndo', '_ucPrompt', // the topbar's Undo and the admin's undo-code question (2026-09-28)
   '_tpMsgOpen', // the account editor's temporary-password message (2026-09-29): its save is customer-half code
@@ -380,6 +380,7 @@ export const STAFF_PARTS = {
   analytics: ['renderAnalytics'], community: ['renderCommunity'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
+  fnb: ['renderFnb'], // 2026-10-03: F&B Partners, admins only
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
 };
 function refsOf(code) {
@@ -951,7 +952,10 @@ export function formatBareWrites(r, limit = 20) {
 // Customer 228 -> 231 (2026-10-03): My Account's change-password dialog and the rider's own purchases
 // (customer_change_password, customer_purchases; ~2 KB gzipped, the owner's request) are the rider's
 // own page. 227.6 KB here is ~228.9 on the runner, over 228: leave the runner's margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 330, core: 174 };
+// Staff 330 -> 344, core 174 -> 176 (2026-10-03): F&B Partners, a section of its own (the fnb part, 12 KB
+// gzipped) whose 169 English strings ride in the core with every staff string (173.1 KB here, ~1.3 KB
+// more on the runner).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 231, staff: 344, core: 176 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

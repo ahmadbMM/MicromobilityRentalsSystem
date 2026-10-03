@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-d85ed1f88c';
+const CACHE = 'mmcq-bf4f7a51a8';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -15,26 +15,26 @@ const SHELL_KEY = './';
 // app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS), and tests/paths.spec.ts checks they agree.
 // On the live customer host a staff address is not the shell's: the server sends it on to the
 // staff address, and the worker lets it through to the network so that it can.
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
-const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|website|messages|analytics|history|team|settings)(?:\/|$)/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|community|ambassadors|partners|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|partners|website|messages|analytics|history|team|settings)(?:\/|$)/;
 const LIVE_CUSTOMER_HOST = self.location.hostname === 'micromobilityrentals.pages.dev';
 const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=384e5c3400';
+const STAFF_JS = './staff.js?v=34147812c9';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=cbbfc08246","./staff-parts/community.js?v=f2b74e3d91","./staff-parts/bikes.js?v=09c5ede7a2","./staff-parts/cashier.js?v=ab9a73b42c","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=5694cbb460","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=8965d87e4b","./staff-parts/workshop.js?v=75e8e7a142","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=eca3c0e9c0","./staff-parts/messages.js?v=d524241366","./staff-parts/team.js?v=6c02db7478","./staff-parts/settings.js?v=c7807e019a"];
-const APP_JS = './app.js?v=541fe0c431';
-const APP_CSS = './app.css?v=e5cd61fbbe';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=cbbfc08246","./staff-parts/community.js?v=f2b74e3d91","./staff-parts/bikes.js?v=09c5ede7a2","./staff-parts/cashier.js?v=ab9a73b42c","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=5694cbb460","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=8965d87e4b","./staff-parts/workshop.js?v=75e8e7a142","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=eca3c0e9c0","./staff-parts/messages.js?v=d524241366","./staff-parts/fnb.js?v=444aa8a61d","./staff-parts/team.js?v=f1c47acfaf","./staff-parts/settings.js?v=c7807e019a"];
+const APP_JS = './app.js?v=49588ab897';
+const APP_CSS = './app.css?v=111e78d81b';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=2e25f97e8e']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=a252167aee']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

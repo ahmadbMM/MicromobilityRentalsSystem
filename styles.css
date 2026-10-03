@@ -3981,7 +3981,9 @@
       body.view-staff #staff-tab-nav{
         display:none;flex-direction:column;align-items:stretch;height:auto;
         position:sticky;top:var(--staff-stick);z-index:61;overflow-y:auto;
-        max-height:calc(100vh - var(--staff-stick));max-height:calc(100dvh - var(--staff-stick));
+        /* a strip of the scrim stays below it however many sections there are (2026-10-03: F&B Partners made
+           the admin's list fill a 780px phone, and tapping outside could no longer close it) */
+        max-height:calc(100vh - var(--staff-stick) - 48px);max-height:calc(100dvh - var(--staff-stick) - 48px);
         padding:8px 10px 14px;border-inline-end:none;
         border-bottom:1px solid rgba(255,255,255,.1);
         box-shadow:0 14px 28px rgba(0,0,0,.45);
@@ -6349,6 +6351,74 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 .amb-red{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
 .amb-red small{color:var(--muted);font-weight:600}
 .amb-red-btns{display:inline-flex;gap:6px;margin-inline-start:auto}
+/* F&B Partners (renderFnb, 2026-10-03): the calendar, the competing requests, the venue and date
+   dialogs and the tier editor. The cards are the Applications card (ca-*); these add the rest. */
+#tab-fnb .fnb-n{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;border-radius:9px;background:var(--orange);color:#fff;font-size:11px;font-weight:800;box-sizing:border-box}
+#tab-fnb .fnb-body{margin-top:14px}
+.fnb-cal-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.fnb-month{font-weight:800;font-size:15px;min-width:140px;text-align:center}
+.fnb-chev{display:block}
+.fnb-next .fnb-chev,.fnb-down .fnb-chev{transform:rotate(180deg)}
+.fnb-up .fnb-chev{transform:rotate(90deg)}
+.fnb-down .fnb-chev{transform:rotate(-90deg)}
+:is(html[lang="ar"],html[lang="ur"]) .fnb-prev .fnb-chev{transform:rotate(180deg)}
+:is(html[lang="ar"],html[lang="ur"]) .fnb-next .fnb-chev{transform:none}
+.fnb-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.fnb-wd{font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.4px}
+#tab-fnb .fnb-day{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:74px;padding:6px 7px;border-radius:8px;border:1px solid var(--border);background:var(--s1);color:var(--text);font:inherit;font-size:11.5px;text-align:start;min-width:0;overflow:hidden;box-sizing:border-box}
+#tab-fnb button.fnb-day{cursor:pointer;transition:border-color .15s,background .15s}
+#tab-fnb button.fnb-day:hover,#tab-fnb button.fnb-day:focus-visible{border-color:var(--green)}
+#tab-fnb .fnb-day.fnb-blank{border:0;background:transparent}
+#tab-fnb .fnb-day.st-off{background:var(--s2);color:var(--muted);opacity:.6}
+#tab-fnb .fnb-day.st-open{border-color:rgba(var(--green-rgb),.45)}
+#tab-fnb .fnb-day.st-confirmed{background:rgba(var(--green-rgb),.12);border-color:var(--green)}
+#tab-fnb .fnb-day.st-closed{background:var(--s3);color:var(--muted)}
+#tab-fnb .fnb-day.past{opacity:.55}
+#tab-fnb .fnb-day.today .fnb-dn{color:var(--green)}
+.fnb-dn{font-weight:800;font-size:13px}
+.fnb-ds{font-weight:800}
+.fnb-dv{font-weight:600;overflow-wrap:anywhere;line-height:1.3}
+.fnb-dp{font-weight:800;color:var(--orange)}
+.fnb-grp{padding:12px 0;border-bottom:1px solid var(--border)}
+.fnb-grp-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;font-size:14px}
+.fnb-cmp-n{font-size:12px;font-weight:800;color:var(--orange)}
+.fnb-cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.fnb-bk{padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--s1)}
+.fnb-bk[data-status="pending"]{border-color:rgba(var(--warn-rgb),.45)}
+.fnb-bk[data-status="confirmed"]{border-color:var(--green)}
+.fnb-note{margin-top:6px;font-size:13px;line-height:1.45;padding:6px 10px;border-radius:8px;background:var(--s3);white-space:pre-wrap;overflow-wrap:anywhere}
+.fnb-dlg.fnb-ven-dlg,.fnb-dlg.fnb-day-dlg{max-width:680px}
+.fnb-dlg input[type="date"]{background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:11px 14px;color:var(--text);font-family:var(--font-body);font-size:14px;width:100%;box-sizing:border-box}
+.fnb-form{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0 12px}
+.fnb-lbl{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:10px 0 6px}
+.fnb-mt6{margin-top:6px}
+.fnb-sec-h{font-weight:800;font-size:14px;margin:18px 0 8px;padding-top:12px;border-top:1px solid var(--border)}
+.fnb-ride{margin:4px 0 0;padding:8px 12px;border-radius:8px;background:rgba(var(--green-rgb),.07);font-size:13px;line-height:1.5}
+.fnb-ride>span{display:block;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
+.fnb-bks{display:flex;flex-direction:column;gap:8px}
+.fnb-tbl{overflow-x:auto}
+.fnb-users{width:100%;border-collapse:collapse;font-size:13px}
+.fnb-users th{text-align:start;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+.fnb-users td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.fnb-u-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.fnb-add-user{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.fnb-add-user input{flex:1 1 160px;min-width:0}
+.fnb-add-user select{flex:0 0 auto}
+.fnb-pw{margin:4px 0 12px}
+body .fnb-dlg textarea.fnb-pw-msg{width:100%;min-height:170px;box-sizing:border-box;resize:vertical;background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-family:var(--font-body);font-size:13.5px;line-height:1.5}
+.fnb-blines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.fnb-bline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+#tab-fnb .fnb-chk{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer;margin-inline-end:14px}
+#tab-fnb .fnb-chk input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green)}
+.fnb-modes{display:flex;flex-wrap:wrap;gap:8px 0}
+.fnb-bens{display:flex;flex-direction:column;gap:8px}
+.fnb-ben{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fnb-ben input{flex:1 1 200px;min-width:0}
+.fnb-ben-btns{display:inline-flex;gap:4px}
+#tab-fnb .fnb-ben-btn{min-width:32px;padding-inline:8px;display:inline-flex;align-items:center;justify-content:center}
+#tab-fnb .fnb-ben-btn:disabled{opacity:.4;cursor:default}
+#tab-fnb .fnb-tier{padding:16px 4px}
+@media(max-width:600px){#tab-fnb .fnb-day{min-height:54px;padding:4px;font-size:10px}#tab-fnb .fnb-dv,#tab-fnb .fnb-dp{display:none}}
 /* Workshop, Messages and Ambassadors without inline styles (2026-09-28, pass 2 of moving the
    style="..." attributes into classes, so the policy can drop style-src 'unsafe-inline'). The three
    lists share one card, so they share these; each rule is scoped by the section's id (or by
