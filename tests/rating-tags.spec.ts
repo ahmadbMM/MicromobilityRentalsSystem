@@ -1,10 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Quick tags on the post-ride rating (2026-09-28): a rider taps what stood out beside the two
-// scores, the tags travel with the rating (customer_booking_update rating_tags), and staff read them
-// in Analytics > Ratings - a tag breakdown, a table by ride night, each rating's tags - while a low
-// rating from the last week rings the bell.
+// Analytics > Ratings: the quick tags older ratings carry (2026-09-28; the rider's page no longer asks
+// for them since the detailed rating, 2026-10-03), the detailed rating's questions and reasons, a table
+// by ride night, and a low rating from the last week ringing the bell.
 const ago = (d: number) => new Date(Date.now() - d * 864e5).toISOString();
 const day = (d: number) => new Date(Date.now() - d * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const done = (id: string, d: number, extra: Record<string, unknown>) => ({
@@ -16,29 +15,22 @@ const queue = [
   done('r2', 2, { rating_exp: 3, rating_bike: 7, rating_tags: ['pace'] }),
   done('r3', 20, { rating_exp: 2, rating_bike: 2, rating_tags: ['bike'] }),
   done('r4', 1, {}), // completed, not rated yet
+  done('r5', 1, { rating_exp: 10, rating_bike: 6, rating_detail: { form: 'rental', s: { service: 9, bike: 6, experience: 10 }, why: { bike: 'Gears slipped' } } }),
 ];
 const sessions = [2, 20, 1].map((d) => ({ id: 's-' + d, day: 'Friday', session_date: day(d), capacity: 12, status: 'closed', created_at: 1 }));
 
-test('a rider adds tags to a rating, and they travel with the scores', async ({ page }) => {
-  await stubSupabase(page, { sessions, queue_entries: queue, bikes: [], 'rpc:customer_booking_update': true, 'rpc:my_bookings': queue });
-  await loginCustomer(page, { id: 'c1' });
+test('a detailed rating (rating_detail) shows each question, its reason, and the averages by question', async ({ page }) => {
+  await stubSupabase(page, { sessions, queue_entries: queue, bikes: [] });
+  await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  const calls: Record<string, unknown>[] = [];
-  page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/customer_booking_update')) { try { calls.push(r.postDataJSON()); } catch { /* */ } } });
-  await page.evaluate(`S._rateSnoozed=new Set();openRateModal('r4')`);
-  const m = page.locator('#rate-modal');
-  await expect(m.locator('.rate-tag')).toHaveCount(6);
-  await m.locator('.rate-tag[data-tag="route"]').click();
-  await m.locator('.rate-tag[data-tag="pace"]').click();
-  await expect(m.locator('.rate-tag.active')).toHaveCount(2);
-  await m.locator('.rate-tag[data-tag="pace"]').click(); // and off again
-  await m.locator('.rate-tag[data-tag="staff"]').click();
-  await page.evaluate(`setRate('exp',8)`);
-  await m.locator('button', { hasText: 'Submit rating' }).click();
-  await expect.poll(() => calls.length).toBe(1);
-  expect((calls[0] as { p_patch: Record<string, unknown> }).p_patch).toMatchObject({ rating_exp: 8, rating_tags: ['route', 'staff'] });
-  await expect.poll(() => page.evaluate(`document.getElementById('rate-modal').style.display`)).toBe('none'); // the modal closed on the thanks (its markup stays behind, hidden)
+  await page.evaluate(`setStaffTab('analytics');setAnView('ratings')`);
+  const tab = page.locator('#tab-analytics');
+  const card = tab.locator('.an-rgcat-card');
+  await expect(card).toBeVisible();
+  await expect(card.locator('.analytics-bar-row')).toHaveCount(3); // service, bike, experience of r5
+  await expect(card.locator('.analytics-bar-row[data-k="bike"]')).toContainText('1 at 8 or under');
+  await expect(tab.locator('.an-rg-why')).toHaveText('Gears slipped');
 });
 
 test.describe('staff', () => {
@@ -59,7 +51,7 @@ test.describe('staff', () => {
     await expect(tags.locator('.analytics-bar-row').first()).toContainText(/Route|Fun|Pace|Bike/);
     const by = tab.locator('.an-bysess-card');
     await expect(by).toBeVisible();
-    await expect(by.locator('tbody tr')).toHaveCount(2); // the two nights with a rating
+    await expect(by.locator('tbody tr')).toHaveCount(3); // the three nights with a rating
     await expect(by.locator(`tbody tr[data-day="${day(2)}"]`)).toContainText('2/2'); // both riders of that night rated
     await expect(by.locator(`tbody tr[data-day="${day(2)}"]`)).toContainText('▼1'); // one low score that night
     await expect(tab.locator('.an-rate-tags').first()).toBeVisible();

@@ -3200,6 +3200,12 @@
     #tab-analytics .an-rate-tag{font-size:10px;font-weight:800;background:var(--s3);border-radius:4px;padding:2px 7px;}
     #tab-analytics .an-rate-note{font-size:12px;color:var(--text);margin-top:7px;padding-top:7px;border-top:1px solid var(--border);line-height:1.5;}
     #tab-analytics .an-low{font-size:10px;color:var(--red);font-weight:800;}
+    #tab-analytics .an-rg{margin-top:8px;display:flex;flex-direction:column;gap:3px;font-size:12px;}
+    #tab-analytics .an-rg-row{display:flex;justify-content:space-between;gap:8px;}
+    #tab-analytics .an-rg-row.an-rg-sub{padding-inline-start:12px;color:var(--muted);}
+    #tab-analytics .an-rg-why{padding-inline-start:12px;font-style:italic;color:var(--text);line-height:1.45;}
+    #tab-analytics .analytics-bar-row.an-rg-sub .analytics-bar-label{padding-inline-start:12px;}
+    #tab-analytics .an-rg-gap{height:10px;}
     /* Growth */
     #tab-analytics .an-funnel-head{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:3px;}
     #tab-analytics .an-funnel-track{height:15px;background:var(--s3);border-radius:3px;overflow:hidden;}
@@ -5198,6 +5204,32 @@ body.fix-open{overflow:hidden;}
 .gate-out{display:block;margin:10px auto 0;background:none;border:none;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:14px;color:#4f565c;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
 .gate-out:hover{color:#0f1215;}
 .gate-out:disabled{opacity:.5;cursor:default;}
+/* Post-ride rating (#rate-modal, renderRateModal, 2026-10-03): the correction request's card, one
+   1-10 scale per question, a part's questions indented under it, a why box under a score of 8 or less.
+   Under the account's own pages (z-index) in case both are up. */
+#rate-modal .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
+#rate-modal .rg-box:focus,#rate-modal .rg-box:focus-visible{outline:none;}
+.rg-kicker{color:#006b3d;}
+.rg-kicker .fx-flag{background:#e8f6ee;color:#008f52;}
+.rg-meta{margin-top:6px;font-weight:600;font-size:13px;color:#4f565c;}
+.rg-list{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+.rg-grp{border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:12px;background:#fbfbf9;display:flex;flex-direction:column;gap:12px;}
+.rg-q{display:flex;flex-direction:column;gap:8px;}
+.rg-q.rg-sub{padding-inline-start:12px;border-inline-start:2px solid rgba(15,18,21,.12);}
+.rg-lbl{font-weight:700;font-size:15px;color:#0f1215;}
+.rg-sub .rg-lbl{font-weight:600;font-size:14px;color:#2b3136;}
+.rg-scale{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;}
+.rg-b{height:36px;min-width:0;padding:0;border-radius:8px;border:1px solid rgba(15,18,21,.15);background:#fff;font-family:var(--font-body);font-weight:700;font-size:14px;color:#0f1215;cursor:pointer;}
+.rg-b:hover{border-color:#008f52;}
+.rg-b.on{background:#0f1215;border-color:#0f1215;color:#fff;}
+.rg-b:focus-visible{outline:2px solid #008f52;outline-offset:2px;}
+.rg-q.err .rg-b:not(.on){border-color:#b42318;}
+.rg-why-l{font-weight:600;font-size:13px;line-height:1.4;color:#4f565c;}
+.rg-why,.rg-note textarea{width:100%;box-sizing:border-box;border:1px solid rgba(15,18,21,.15);border-radius:8px;padding:10px 12px;font-family:var(--font-body);font-weight:500;font-size:16px;color:#0f1215;background:#fff;resize:vertical;outline:none;margin:0;}
+.rg-why:focus,.rg-note textarea:focus{border-color:#008f52;}
+.rg-q.err .rg-why{border-color:#b42318;}
+.rg-skip{align-self:flex-start;background:none;border:1px solid rgba(15,18,21,.18);border-radius:999px;padding:8px 14px;font-family:var(--font-body);font-weight:600;font-size:13px;color:#4f565c;cursor:pointer;}
+.rg-skip.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
 .soc-link{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:var(--staff-fs-sm,12px);font-weight:700;}
@@ -7348,21 +7380,6 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 .sess-card-soon{opacity:.62;cursor:default;pointer-events:none;}
 .sess-card-spots.spots-soon{color:var(--muted);}
 
-/* Quick tags on the post-ride rating (2026-09-28) */
-.rate-tags{display:flex;gap:6px;flex-wrap:wrap;}
-.rate-tags .rate-tag{padding:6px 12px;font-size:12px;}
-    /* ── The rating dialog (renderRateModal, _rateTagsHtml), #rate-modal: without inline styles (2026-09-29,
-       the customer pages' pass; scoped by that id). */
-    #rate-modal .cu-m16{margin:16px 0;}
-    #rate-modal .cu-mw440{max-width:440px;}
-    #rate-modal .cu-rate-b{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent none;color:var(--muted);font-weight:800;font-size:11px;cursor:pointer;}
-    #rate-modal .cu-rate-hint{font-size:12px;color:var(--muted);margin-top:4px;}
-    #rate-modal .cu-rate-k{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-    #rate-modal .cu-rate-meta{font-size:12px;color:var(--green);font-weight:700;margin-top:4px;}
-    #rate-modal .cu-rate-note{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:4px;padding:10px;color:var(--text);font-family:var(--font-body);resize:vertical;}
-    #rate-modal .cu-rate-scale{display:flex;gap:5px;flex-wrap:wrap;}
-    #rate-modal .cu-w100{width:100%;}
-    #rate-modal .cu-rate-on{border-color:var(--green);background:rgba(var(--green-rgb),.18);color:var(--green);}
 
 /* A ticketed event (ride kind 'event', 2026-09-28): its own colour wherever a kind wears one. */
 .ev-event{--ev:#7c3aed;--ev-rgb:124,58,237;}
@@ -7466,7 +7483,7 @@ body:not(.view-staff) :focus-visible{outline:2px solid var(--go);outline-offset:
    (#tab-myrides .cu-tk-sec and the like) that uppercased these one screen at a time. */
 body:not(.view-staff) :is(#cu,*):is(.page-title,.form-title,.modal-title,.auth-title,label,.section-label,.analytics-section-title,
   .landing-events-title,.tab-btn,.cust-bnav-btn,.status-badge,.type-badge,.toggle-btn,.btn-sm,.btn-primary,.btn-secondary,
-  .ticket-num-label,.ticket-label,.cu-tk-sec,.cu-tk-total-k,.cu-k10,.cu-rv-k,.cu-rv-sec,.cu-rate-k,.cu-meter-k,.cu-photo-k,
+  .ticket-num-label,.ticket-label,.cu-tk-sec,.cu-tk-total-k,.cu-k10,.cu-rv-k,.cu-rv-sec,.cu-meter-k,.cu-photo-k,
   .rides-stat-label,.sess-comm-chip,.landing-eyebrow,.cu-tk-label,.wl-loud,.cu-tr-wl,.cu-ad-cat,.reg-row-label,.cust-back-btn){
   text-transform:none;letter-spacing:0;font-style:normal;}
 body:not(.view-staff) .page-title{font-size:var(--fs-26);font-weight:700;letter-spacing:-.5px;line-height:1.15;color:var(--ink);margin:0;}
@@ -7674,12 +7691,6 @@ body:not(.view-staff) .rides-zero-num{color:var(--ink-4);}
 body:not(.view-staff) .cu-meter{background:var(--card-3);}
 
 /* ── Rating: ten 44px targets in two rows of five ───────────────────────────────────────────────── */
-body:not(.view-staff) #rate-modal .cu-rate-scale{display:grid;grid-template-columns:repeat(5,44px);gap:8px;justify-content:start;}
-body:not(.view-staff) #rate-modal .cu-rate-b{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);color:var(--ink-2);font-size:var(--fs-15);font-weight:700;}
-body:not(.view-staff) #rate-modal .cu-rate-on{background:var(--ink);border-color:var(--ink);color:var(--paper);}
-body:not(.view-staff) #rate-modal .cu-rate-b[aria-pressed="true"]{box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--go);}
-body:not(.view-staff) #rate-modal .cu-rate-k{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
-body:not(.view-staff) #rate-modal .cu-rate-meta{color:var(--ink-3);}
 /* ── Wide screens: the page is not a stretched phone ──────────────────────────────────────────── */
 body:not(.view-staff) .reg-side{display:none;}
 @media (min-width:1024px){
