@@ -458,3 +458,9 @@ the venue the ride's breakfast stop. A temporary password (Add login / Reset pas
 venue dialog only. Closed-date reasons are stored as codes (`FNB_RS`) or typed text. The section's
 translation keys start with `pfn`, not `fnb`: the customer half builds keys from a bare `'f'+` prefix, so an
 `f…` key would never leave the customer's language pack. `tests/staff-fnb.spec.ts`.
+Feedback (migration 20261003180000): a venue rates a confirmed breakfast from its portal (`fnb_feedback_save`, the day
+itself to 14 days after); staff only read `fnb_feedback`, loaded by `_fnbLoad` as its own answer (a missing table is
+`W.fbMissing`, the other tabs carry on). `/partners/feedback` lists it newest first with drawn stars (`_fnbStars`),
+the turnout beside the riders booked on that Saturday ride (`_fnbBooked`, only when the page holds those rows), and
+"Waiting for feedback" counts confirmed dates still inside the 14 days (`_fnbFbWaiting`); the date dialog and the
+venue dialog's bookings show it too.

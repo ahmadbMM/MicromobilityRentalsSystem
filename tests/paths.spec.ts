@@ -145,6 +145,8 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/partners/venues');
     await page.evaluate(`_fnbView('tiers')`);
     expect(at(page)).toBe('/partners/tiers');
+    await page.evaluate(`_fnbView('feedback')`);
+    expect(at(page)).toBe('/partners/feedback');
     await page.evaluate(`_fnbView('calendar')`);
     expect(at(page)).toBe('/partners');
   });

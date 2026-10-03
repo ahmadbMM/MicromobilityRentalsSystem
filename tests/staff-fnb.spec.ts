@@ -155,3 +155,136 @@ test.describe('@staff:fnb F&B Partners', () => {
     expect(await page.evaluate('S.staffTab')).toBe('queue');
   });
 });
+
+// Venue feedback (2026-10-03, migration 20261003180000): a venue rates a confirmed breakfast from its portal
+// for 14 days after it; staff read it on Partners > Feedback, in the date's dialog and beside the venue's bookings.
+const ksa = (n: number) => new Date(Date.now() + 3 * 3600e3 + n * 864e5).toISOString().slice(0, 10); // a Riyadh day n days from today
+const fbRow = (o: Record<string, unknown>) => ({
+  booking_id: 12, venue_id: 1, day: '2099-05-09', rating: 4, turnout: 18, went_well: 'Quick service, everyone seated together',
+  improve: 'Tell us the head count a day earlier', created_at: '2099-05-09T10:00:00Z', updated_at: '2099-05-10T08:00:00Z', ...o,
+});
+const qe = (o: Record<string, unknown>) => ({
+  id: 'q1', session_id: '2099-05-09-s', session_day: 'Saturday', session_date: '2099-05-09', queue_num: 1, name: 'Spec Rider', size: 'M',
+  type_preference: 'Any', status: 'waiting', paid: false, price: 0, registered_at: '2099-05-01T10:00:00Z', ...o,
+});
+const fbFix = {
+  fnb_bookings: [
+    ...bookings,
+    bk({ id: 13, venue_id: 2, day: '2099-04-25', status: 'confirmed' }),
+    bk({ id: 14, venue_id: 2, day: ksa(-3), status: 'confirmed' }), // no feedback yet, still within the 14 days
+    bk({ id: 15, venue_id: 1, day: ksa(-30), status: 'confirmed' }), // no feedback, and too late for it: not waited on
+    bk({ id: 16, venue_id: 2, day: ksa(-10), status: 'confirmed' }),
+  ],
+  fnb_feedback: [
+    fbRow({}),
+    fbRow({ booking_id: 13, venue_id: 2, day: '2099-04-25', rating: 2, turnout: null, went_well: '', improve: 'Riders arrived late', created_at: '2099-04-25T09:00:00Z', updated_at: '2099-04-25T09:00:00Z' }),
+    fbRow({ booking_id: 16, venue_id: 2, day: ksa(-10), rating: 5, turnout: 9, went_well: 'Lovely group', improve: '', created_at: ksa(-10) + 'T09:00:00Z', updated_at: ksa(-10) + 'T09:00:00Z' }),
+  ],
+  // The Saturday ride of 2099-05-09: two riders booked (waiting, done); a no-show and a rejected one do not count.
+  queue_entries: [qe({}), qe({ id: 'q2', queue_num: 2, status: 'done' }), qe({ id: 'q3', queue_num: 3, status: 'noshow' }), qe({ id: 'q4', queue_num: 4, approval: 'rejected' })],
+};
+async function openFeedback(page: Page) {
+  const calls = await open(page, fbFix);
+  await page.waitForFunction('S.dataLoaded');
+  await panel(page).locator('[data-fnb-view="feedback"]').click();
+  return calls;
+}
+
+test.describe('@staff:fnb F&B Partners feedback', () => {
+  test('the Feedback tab lists it newest breakfast first: stars, turnout beside the booked riders, the two answers', async ({ page }) => {
+    await openFeedback(page);
+    expect(new URL(page.url()).pathname).toBe('/partners/feedback');
+    const cards = panel(page).locator('.fnb-fb');
+    await expect(cards).toHaveCount(3);
+    expect(await cards.evaluateAll((els) => els.map((e) => e.getAttribute('data-fnb-fb')))).toEqual(['12', '13', '16']);
+    const c = panel(page).locator('.fnb-fb[data-fnb-fb="12"]');
+    await expect(c).toContainText('Bean Box');
+    await expect(c.locator('.fnb-stars .fnb-sr')).toHaveText('4 of 5');
+    await expect(c.locator('.fnb-star.on')).toHaveCount(4);
+    await expect(c.locator('.fnb-star')).toHaveCount(5);
+    await expect(c.locator('.fnb-fb-turn')).toContainText('Riders who came 18');
+    await expect(c.locator('.fnb-fb-booked')).toHaveText('2 booked on the ride');
+    await expect(c.locator('.fnb-fb-well')).toContainText('Quick service, everyone seated together');
+    await expect(c.locator('.fnb-fb-better')).toContainText('Tell us the head count a day earlier');
+    await expect(c.locator('.fnb-fb-at')).toContainText('Sent');
+    await expect(c.locator('.fnb-fb-at')).toContainText('edited');
+    // No count from the venue, no ride held for that date, nothing under "went well".
+    const o = panel(page).locator('.fnb-fb[data-fnb-fb="13"]');
+    await expect(o.locator('.fnb-fb-turn')).toContainText('Not given');
+    await expect(o.locator('.fnb-fb-booked')).toHaveCount(0);
+    await expect(o.locator('.fnb-fb-well')).toHaveCount(0);
+    await expect(o.locator('.fnb-fb-at')).not.toContainText('edited');
+    await expect(panel(page).locator('.fnb-fb-avg')).toHaveText('Average 3.7 of 5');
+    await expect(panel(page).locator('.fnb-fb-n')).toHaveText('Feedback received: 3');
+    await expect(panel(page).locator('.fnb-fb-wait')).toHaveText('Waiting for feedback: 1 breakfasts');
+    expect(await page.evaluate(() => /\p{Extended_Pictographic}/u.test(document.getElementById('tab-fnb')!.textContent || ''))).toBe(false);
+  });
+
+  test('the rating, venue and search filters narrow it, and the average follows', async ({ page }) => {
+    await openFeedback(page);
+    const ids = () => panel(page).locator('.fnb-fb').evaluateAll((els) => els.map((e) => e.getAttribute('data-fnb-fb')));
+    await panel(page).locator('.fnb-fb-rf [data-fnb-f="high"]').click();
+    await expect.poll(ids).toEqual(['12', '16']);
+    await expect(panel(page).locator('.fnb-fb-avg')).toHaveText('Average 4.5 of 5');
+    await panel(page).locator('.fnb-fb-rf [data-fnb-f="low"]').click();
+    await expect.poll(ids).toEqual(['13']);
+    await panel(page).locator('.fnb-fb-rf [data-fnb-f="mid"]').click();
+    await expect(panel(page).locator('.fnb-fb')).toHaveCount(0);
+    await expect(panel(page).locator('#fnb-list .empty-state')).toHaveText('No feedback matches the filters.');
+    await panel(page).locator('.fnb-fb-rf [data-fnb-f="all"]').click();
+    await panel(page).locator('#fnb-fb-ven').selectOption('2');
+    await expect.poll(ids).toEqual(['13', '16']);
+    await expect(panel(page).locator('.fnb-fb-rf [data-fnb-f="high"]')).toContainText('(1)');
+    await panel(page).locator('#fnb-fb-ven').selectOption('all');
+    await expect.poll(ids).toEqual(['12', '13', '16']);
+    const fold = panel(page).locator('[data-srch="fnbf"] .srch-btn'); // a phone folds the search into a button
+    if (await fold.isVisible()) await fold.click();
+    await panel(page).locator('#fnbf-q').fill('head count');
+    await expect.poll(ids).toEqual(['12']);
+    await expect(panel(page).locator('.fnb-fb-n')).toHaveText('Feedback received: 1');
+  });
+
+  test('the date dialog shows the confirmed venue’s feedback; the venue dialog puts stars beside its past bookings', async ({ page }) => {
+    await open(page, fbFix);
+    await toMay(page);
+    await panel(page).locator('.fnb-day[data-fnb-day="2099-05-09"]').click();
+    const fb = dialog(page).locator('.fnb-fb[data-fnb-fb="12"]');
+    await expect(fb).toBeVisible();
+    await expect(dialog(page)).toContainText('Venue feedback');
+    await expect(fb.locator('.fnb-sr')).toHaveText('4 of 5');
+    await expect(fb).toContainText('Quick service, everyone seated together');
+    await expect(fb).toContainText('Tell us the head count a day earlier');
+    // A date without feedback has no such block.
+    await dialog(page).locator('.ca-x').click();
+    await panel(page).locator('.fnb-day[data-fnb-day="2099-05-02"]').click();
+    await expect(dialog(page).locator('.fnb-bk').first()).toBeVisible();
+    await expect(dialog(page).locator('.fnb-fb')).toHaveCount(0);
+    await dialog(page).locator('.ca-x').click();
+    await panel(page).locator('[data-fnb-view="venues"]').click();
+    await panel(page).locator('.fnb-ven[data-fnb-ven="2"] .fnb-ven-open').click();
+    await expect(dialog(page).locator('[data-fnb-vbk="16"] .fnb-sr')).toHaveText('5 of 5');
+    await expect(dialog(page).locator('[data-fnb-vbk="14"] .fnb-stars')).toHaveCount(0); // past, no feedback yet
+    await expect(dialog(page).locator('[data-fnb-vbk="13"] .fnb-stars')).toHaveCount(0); // still to come
+  });
+
+  test('before its database update the Feedback tab says so calmly, and the other tabs keep working', async ({ page }) => {
+    await stubSupabase(page, { ...base, ...fbFix });
+    await page.route(/\/rest\/v1\/fnb_feedback(\?|$)/, (r) => r.fulfill({
+      status: 404, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify({ code: 'PGRST205', message: "Could not find the table 'public.fnb_feedback' in the schema cache" }),
+    }));
+    await unlockStaff(page);
+    await page.goto('/partners/feedback');
+    await waitForSb(page);
+    await page.waitForFunction(() => S.view === 'staff' && S.staffTab === 'fnb');
+    await expect(panel(page).locator('.fnb-fb-missing')).toHaveText('Feedback appears here once the database update is applied.');
+    await expect(panel(page).locator('.fnb-retry')).toHaveCount(0);
+    await panel(page).locator('[data-fnb-view="requests"]').click();
+    await expect(panel(page).locator('.fnb-grp[data-fnb-grp="2099-05-02"]')).toContainText('2 venues asking');
+    await panel(page).locator('[data-fnb-view="calendar"]').click();
+    await toMay(page);
+    await panel(page).locator('.fnb-day[data-fnb-day="2099-05-09"]').click();
+    await expect(dialog(page).locator('.fnb-bk[data-fnb-bk="12"]')).toContainText('Confirmed');
+    await expect(dialog(page).locator('.fnb-fb')).toHaveCount(0);
+  });
+});

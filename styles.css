@@ -6419,6 +6419,25 @@ body .fnb-dlg textarea.fnb-pw-msg{width:100%;min-height:170px;box-sizing:border-
 #tab-fnb .fnb-ben-btn:disabled{opacity:.4;cursor:default}
 #tab-fnb .fnb-tier{padding:16px 4px}
 @media(max-width:600px){#tab-fnb .fnb-day{min-height:54px;padding:4px;font-size:10px}#tab-fnb .fnb-dv,#tab-fnb .fnb-dp{display:none}}
+/* F&B feedback (2026-10-03): the venues' rating as drawn stars, the turnout, what went well and what could be better */
+.fnb-stars{display:inline-flex;align-items:center;gap:1px;flex:none;vertical-align:middle}
+.fnb-star{display:block;color:var(--muted)}
+.fnb-star path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+.fnb-star.on{color:var(--orange)}
+.fnb-star.on path{fill:currentColor}
+.fnb-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+#tab-fnb .fnb-fb-rf{margin-top:8px;align-items:center}
+.fnb-fb-rl{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-inline-end:4px}
+.fnb-fb-sum{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0;font-size:15px}
+.fnb-fb-sum .fnb-star{width:16px;height:16px}
+.fnb-fb-n{font-size:13px}
+.fnb-fb-wait{font-size:13px;color:var(--muted);margin:0 0 10px}
+.fnb-fb-turn{margin-top:6px;font-size:13px;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.fnb-fb-turn .fnb-lbl{margin:0}
+.fnb-fb-at{margin-top:8px}
+.fnb-bline .fnb-stars{margin-inline-start:auto}
+.fnb-fb>.ca-head{display:flex;align-items:flex-start;gap:10px}
+.fnb-fb>.ca-head>.ws-grow{flex:1;min-width:0}
 /* Workshop, Messages and Ambassadors without inline styles (2026-09-28, pass 2 of moving the
    style="..." attributes into classes, so the policy can drop style-src 'unsafe-inline'). The three
    lists share one card, so they share these; each rule is scoped by the section's id (or by
