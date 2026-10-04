@@ -13579,10 +13579,10 @@ function renderSessions(){
         <label>${t(_needsBike(editSess)?'sessRideNameLabel':'sessSessNameLabel')} &nbsp;<span class="label-hint">${t(_needsBike(editSess)?'sessRideNameHint':'sessSessNameHint')}</span></label>
         <input type="text" id="es-title" maxlength="60" value="${esc(_stockEvName(S.editSessTitle)?'':(S.editSessTitle||''))}" placeholder="${esc(_evName({...editSess,title:null}))}" data-on-input="${_on("_on_renderSessions_31",_EV,_EL)}" class="ss-mw340">
       </div>`:''}
-      ${_isApprovalRide(editSess)?`
+      ${_editSeats(editSess)?`
       <div class="form-group ss-mb16">
         <label>${t('sessSpotsLabel')}</label>
-        <input type="number" id="es-spots" min="1" max="500" value="${esc(String(S.editSessSpots||editSess.spots||20))}" data-on-input="${_on("_on_renderSessions_32",_EV,_EL)}" class="ss-mw140">
+        <input type="number" id="es-spots" min="1" max="500" value="${esc(String(S.editSessSpots||editSess.spots||editSess.capacity||20))}" data-on-input="${_on("_on_renderSessions_32",_EV,_EL)}" class="ss-mw140">
       </div>${_hasRideGroups(editSess)?_rgKmFields('editSessKm'):''}`:`
       <div class="ss-modes">
         <button class="toggle-btn${S.editSessMode==='total'?' active':''}" aria-pressed="${(S.editSessMode==='total')?'true':'false'}" data-on-click="${_on("_on_renderSessions_33",_EV,_EL)}">${t('sessModeTotal')}</button>
@@ -13593,7 +13593,7 @@ function renderSessions(){
         ${t('bikeFleetComp')}${S.editSessMode==='fleet'?` &nbsp;·&nbsp; <span class="ss-c-green"><bdi>${esTotal} ${t('bikesWord')}</bdi> ${t('assignBikeTitle').toLowerCase()}</span>`:''}
       </label>`}
       ${_wlCapFieldHtml('es')}
-      ${_isApprovalRide(editSess)?'':S.editSessMode==='counts'?`
+      ${_editSeats(editSess)?'':S.editSessMode==='counts'?`
         <div class="ss-counts-wrap">
           <table class="ss-counts">
             <thead><tr>
@@ -14032,6 +14032,9 @@ function _sessRowSnap(id){const r=(S.sessions||[]).find(s=>s.id===id);if(!r)retu
 // The columns a session edit writes, and so the ones its Undo puts back. Anything else on the
 // row (a publish, the queue counter, the fill rule's mark) belongs to whatever changed it since.
 const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id'];
+// The rides the editor sizes by places, not by bikes: the approval rides, and a ticketed event
+// (seats, no fleet). An event opened as a bike session read "add bikes" on every save.
+function _editSeats(s){return _isApprovalRide(s)||_rideKind(s)==='event';}
 function _sessEditCols(row){const o={};SESS_EDIT_COLS.forEach(k=>{if(row&&k in row)o[k]=row[k];});return o;}
 // A ride's stock name, in any language this page has loaded. Such a title is not a name staff
 // gave the ride: it is the label of whoever saved it, and stored it made a Saturday ride read
@@ -14062,9 +14065,9 @@ async function saveSessionEdit(){
   const esCollect=S.editSessCollect||document.getElementById('es-collect')?.value||'';
   const isNamedEdit=_evNamed(sess);
   let slots,total;
-  if(_isApprovalRide(sess)){
-    // Spot cap only: an approval ride allocates places instead of putting out a fleet.
-    total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-spots')?.value||S.editSessSpots||sess.spots||'20')||20));
+  if(_editSeats(sess)){
+    // Spot cap only: an approval ride (or an event's seats) allocates places instead of putting out a fleet.
+    total=Math.max(1,Math.min(500,parseInt(document.getElementById('es-spots')?.value||S.editSessSpots||sess.spots||sess.capacity||'20')||20));
     slots={_time:timeVal,...(_hasRideGroups(sess)?_rgKmSlot('editSessKm'):{})};
   }else if(S.editSessMode==='total'){
     // Plain bike count: capacity without a type/size breakdown.
@@ -14168,9 +14171,13 @@ async function saveSessionEdit(){
     const _nameEdit=(_typed&&!_stockEvName(_typed))?_typed:null;
     // ride_kind and paid_ride are re-asserted with the rest: a date move re-inserts the row
     // bare, and without them a paid ride would come back complimentary.
+    // An event keeps the shape addSession gives it, paid or free: first come, first seated (no
+    // approval), its seats as spots, the queue hidden. It used to take the paid/free split, so a
+    // free event came back needing approval and a paid one lost its seat count.
+    const _evEdit=_kindEdit==='event';
     const _ce={event_kind:_sndEdit?null:'community',required_tag_id:null,title:_nameEdit,
-      needs_approval:!_paidEdit,hide_queue:_paidEdit?false:(sess.hide_queue!==false),
-      spots:_paidEdit?null:total};
+      needs_approval:!(_paidEdit||_evEdit),hide_queue:_evEdit?true:_paidEdit?false:(sess.hide_queue!==false),
+      spots:(_paidEdit&&!_evEdit)?null:total};
     // Newer columns, written separately so an older database cannot cost a Saturday ride its
     // gate fields (see addSession). Tolerant on both paths: an existing ride already carries them.
     // open_to_all rides with the kind: it is what lets a non-member into the workshop, and a
@@ -16023,7 +16030,7 @@ function _on__caMsgRender_2(event,el){S._caMsg.lang=el.value;_caMsgRender()}
 function _caMsgRender(){
   const m=S._caMsg,host=document.getElementById('confirm-modal');if(!m||!host)return;
   const txt=_caMsgBuild(m.kind,m.lang,m.d);
-  const wa=`https://wa.me/${String(m.to||'').replace(/\D/g,'')}?text=${encodeURIComponent(txt)}`;
+  const wa=`https://wa.me/${_waDigits(m.to)}?text=${encodeURIComponent(txt)}`; // _waDigits, as the card's own icon: a local 05… number gets its country code
   const mail=`mailto:${encodeURIComponent(m.toEmail||'')}?subject=${encodeURIComponent('MicroMobility Community')}&body=${encodeURIComponent(txt)}`;
   host.style.display='block';
   host.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__caMsgRender_1",_EV,_EL)}">
@@ -16846,12 +16853,17 @@ async function _rmCopy(){
 // closes stands in front of the site. customer_set_own_password changes the password ONLY
 // while that mark is set, and hands back a new session token.
 async function _pwdMustCheck(cust){
-  if(!cust||!cust.session_token||S._pwdCheckedFor===cust.id)return;
-  S._pwdCheckedFor=cust.id;
+  if(!cust||!cust.session_token||S._pwdCheckedFor===cust.id||S._pwdChecking===cust.id)return;
+  // The account is marked as checked only on a clean answer. Marked before asking, a failed read
+  // (a blip, a slow start) let a rider with a temporary password past the gate for the whole visit;
+  // the next consent check asks again instead. A database without the function is a clean "no".
+  S._pwdChecking=cust.id;
   try{await _sbReady;}catch(e){}
-  if(!sb)return;
-  let must=false;
-  try{const{data,error}=await sb.rpc('customer_pwd_state',{p_id:cust.id,p_token:cust.session_token});must=!error&&data===true;}catch(e){}
+  if(!sb){S._pwdChecking=null;return;}
+  let must=false,clean=false;
+  try{const{data,error}=await sb.rpc('customer_pwd_state',{p_id:cust.id,p_token:cust.session_token});must=!error&&data===true;clean=!error||_rpcAbsent(error);}catch(e){}
+  S._pwdChecking=null;
+  if(clean)S._pwdCheckedFor=cust.id;
   const cur=S.loggedIn||getSession();
   if(must&&cur&&cur.id===cust.id&&S.view!=='staff')_pwdMustShow();
 }
@@ -17478,6 +17490,9 @@ function showWalkinModal(){
   // changing the session repaints the form, and an owner carried to a ride without them rents.
   const _wiOwn=_ownOffered(open.find(x=>x.id===_s));
   if(!_wiOwn){if(S._wiType==='Own')S._wiType='Any';S._wiRiders.forEach(r=>{if(r.type==='Own')r.type='Any';});}
+  // Road Carbon only where the ride has it (_noCarbon), as every other add path offers it.
+  const _wiNoCarbon=_noCarbon(open.find(x=>x.id===_s));
+  if(_wiNoCarbon){if(S._wiType==='Road Carbon')S._wiType='Any';S._wiRiders.forEach(r=>{if(r.type==='Road Carbon')r.type='Any';});}
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showWalkinModal_1",_EV,_EL)}">
     <div class="modal-box dk-mw420" role="dialog" aria-modal="true">
@@ -17490,12 +17505,12 @@ function showWalkinModal(){
         <div class="form-group dk-fg-w110"><label for="wi-height">${t('colHeight')} (${t('cmUnit')})</label><input id="wi-height" type="number" min="80" max="230" data-on-input="${_on("_wiStockHint")}" value="${esc(_h)}"></div>
       </div>
       <div class="form-group dk-mb10"><label>${t('bikeTypeLabel')}</label>
-        <div class="dk-flex6">${bikeTypeOpts(_wiOwn).map(tyBtn).join('')}</div>
+        <div class="dk-flex6">${bikeTypeOpts(_wiOwn,_wiNoCarbon).map(tyBtn).join('')}</div>
         <div id="wi-stock-hint" class="dk-wi-hint"></div></div>
       ${S._wiRiders.map((r,i)=>`<div class="dk-wi-rrow">
         <input id="wi-r-name-${i}" type="text" list="wi-cust-list" data-on-focus="${_on("_dlFill","wi-cust-list")}" placeholder="${t('nameLabel')} ${i+2}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0" data-on-input="${_on("_nameInput",_EL)}">
         <input id="wi-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-wi-rh">
-        <select id="wi-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="dk-wi-rt">${bikeTypeOpts(_wiOwn).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        <select id="wi-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="dk-wi-rt">${bikeTypeOpts(_wiOwn,_wiNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
         <button type="button" class="btn-sm btn-muted dk-fs0" data-on-click="${_on("_wiRemoveRider",i)}" title="${t('removeBtn')}">${_artIcon('close',11)}</button>
       </div>`).join('')}
       <button type="button" class="btn-secondary dk-wi-add" data-on-click="${_on("_wiAddRider")}">+ ${t('beAddRiderBtn')}</button>
@@ -17614,7 +17629,8 @@ let _wiAttempted=null;
 async function _wiInsertRiders(sessId,riders,phone,custId,retry,rg){
   const sess=allSessions().find(x=>x.id===sessId);if(!sess)return null;
   const groupId=riders.length>1?uid():null;
-  const mk=()=>{const base=nextQNum(sessId);return riders.map((r,i)=>{
+  const mk=()=>{const base=nextQNum(sessId);return riders.map((r0,i)=>{
+    const r={...r0,type:_noCarbon(sess)&&r0.type==='Road Carbon'?'Any':r0.type}; // no Road Carbon where the ride has none (size and fare follow)
     const _match=(i===0&&custId)?((S.customers||[]).find(c=>c.id===custId)||_linkCustomer(r.name,phone,null)):_linkCustomer(r.name,i===0?phone:'',null);
     return _applyDefaultPay({id:uid(),name:r.name,email:(_match&&_match.email)||'',phone:phone||(_match&&_match.phone)||'',size:r.height?heightToSize(r.height,r.type):'',height:r.height,
       typePreference:r.type,paid:false,assignedBikeId:null,sessionId:sessId,sessionDay:sess.day,
@@ -17690,9 +17706,9 @@ function showBookingEditModal(entryId){
     .filter(s=>s.id===e.sessionId||(s.status==='open'&&(s.session_date||s.id)>=today&&!_isApprovalRide(s)))
     .sort(_sessOrder) // targets stay open-and-upcoming only (a move is not a retro-entry); the order is the staff one
     .map(s=>{
-      const cap=s.capacity||12;
-      const taken=(_qBySession().get(s.id)||[]).filter(x=>x.status==='waiting'||x.status==='active').length;
-      const full=s.id!==e.sessionId&&cap-taken<1;
+      // spotsLeft, as the save checks it: a hand count of waiting+active riders offered nights the
+      // save then refused (finished riders still hold their place) and greyed out ones with room.
+      const full=s.id!==e.sessionId&&spotsLeft(s.id)<1;
       return`<option value="${esc(s.id)}"${_s===s.id?' selected':''}${full?' disabled':''}>${_evNamed(s)?esc(_evName(s))+' · ':''}${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))} · ${esc(sessionTime(s))}${full?` (${t('statusFull')})`:''}</option>`;
     }).join('');
   const m=document.getElementById('booking-edit-modal');
@@ -17797,8 +17813,22 @@ async function _saveBookingEdit(){
   // parent has neither, so mint a shared group_id and stamp the parent too (add-group-id.sql).
   let groupId=e.groupId||null;
   if(newRiders.length&&!groupId&&!e.customerId){groupId=uid();patch.group_id=groupId;prev.group_id=null;}
-  const res=await sb.from('queue_entries').update(patch).eq('id',e.id);
-  if(_writeErr(res,'edit booking'))return;
+  let res=await sb.from('queue_entries').update(patch).eq('id',e.id);
+  // The move's number came from this device's copy: another desk adding to that night meanwhile
+  // takes it (23505). Fresh numbers and one more try, as every insert does.
+  if(moving&&res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
+    await loadDataLight();patch.queue_num=nextQNum(toSessionId);
+    res=await sb.from('queue_entries').update(patch).eq('id',e.id);
+  }
+  if(_writeErr(res,'edit booking')){
+    // A rider taken off the bike for the move goes back on it: the move did not happen, and they
+    // were left waiting on their own night with the bike back on the rack.
+    if(offBike){
+      if(await _redoCheckinWrite(e.id,offBike)&&e.checkedInAt)await _wr(sb.from('queue_entries').update({checked_in_at:e.checkedInAt}).eq('id',e.id),'undo check-in');
+      await loadDataLight();renderStaffQueue();
+    }
+    return;
+  }
   if(moving&&e.status==='waitlist')await _addonStockQ(entryAddons(e),-1); // waitlist -> confirmed: reserve the add-ons, like the customer reschedule
   // One entry each with fresh consecutive numbers, same contact + account,
   // exactly like the customer's group booking (waitlist when the session can't fit them).
