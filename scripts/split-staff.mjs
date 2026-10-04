@@ -48,6 +48,11 @@ export const STAFF_ENTRY = [
   // answers only in the staff view, where staff.js is loaded).
   '_gsOpen',
   '_kbStaff', // the walk-in / scan / shortcut-list keys (2026-10-03), listened for at load like Ctrl/Cmd+K
+  // Staff-only hooks the customer half named, each pulling a staff chain into every customer's page
+  // (2026-10-04, the customer half was at 231.9 of 232 KB on the runner): the riders table's realtime
+  // handler (riders list -> scanner -> check-in, return, cashier, hand-over), the N shortcut (check-in
+  // and the riders report), the operator gate's keypad, and the add-on picker's way into the price editor.
+  '_onRidersRt', '_kbCheckInNext', '_opgKey', 'showEditPriceModal',
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -966,7 +971,12 @@ export function formatBareWrites(r, limit = 20) {
 // 348.4 KB here is ~349.7 on the runner.
 // Staff 350 -> 352 (2026-10-03): the staff UI pass (roster fits a laptop, fleet row menu, one money and
 // places rule for Dashboard + Analytics, the keyboard-shortcut list); 349.1 KB here is ~350.7 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 352, core: 176 };
+// Customer 232 -> 190, staff 352 -> 398, core 176 -> 222 (2026-10-04): _onRidersRt, _kbCheckInNext, _opgKey and
+// showEditPriceModal became entry points, and ~45 KB of staff code the customer half carried (the riders list,
+// scanner, check-in, return, cashier, hand-over, riders report, operator gate) moved to staff.js. Here: customer
+// 185.5, staff 392.4, core 218.1 (the runner reads ~1.2 / ~1.6 / ~0.8 more). The customer budget is lowered to
+// keep the win.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 398, core: 222 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

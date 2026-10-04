@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, waitForSb } from './helpers/supabase';
+import { stubSupabase, waitForSb, loadStaffHalf } from './helpers/supabase';
 
 // Deep coverage of the customer sign-in / sign-up modal: validation, Enter-to-submit,
 // phone normalization into the RPCs, double-submit guards, and Google/Apple being sign-in only.
@@ -433,6 +433,7 @@ test.describe('round 4: invisible characters & post-login flow', () => {
 test.describe('round 5: staff phone formats & remember-me default', () => {
   test('staff phone login accepts every format incl. Arabic numerals', async ({ page }) => {
     await boot(page);
+    await loadStaffHalf(page); // a staff helper on a customer's page: the staff half is fetched first (2026-10-04)
     const out = await page.evaluate(`({
       local: _staffPhoneE164('0562847777'),
       arabic: _staffPhoneE164('٠٥٦٢٨٤٧٧٧٧'),

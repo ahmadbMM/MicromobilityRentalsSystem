@@ -145,7 +145,10 @@ test('the live board counts held places, not every row that was not cancelled', 
       { id: 'ns', session_id: 't', status: 'noshow', paid: false }, { id: 'cx', session_id: 't', status: 'cancelled', paid: false },
     ],
   });
-  await expect(page.locator('#tab-analytics .chart-card').first()).toContainText('3/12');
+  // 4: the two waiting, the one on a bike and the waitlisted row, which the server counts against
+  // capacity (_capacity_guard) and so takes a place customers can no longer book; removed, no-show
+  // and cancelled rows hold none. Capped at the capacity, so a full night never reads 53/40 (2026-10-04).
+  await expect(page.locator('#tab-analytics .chart-card').first()).toContainText('4/12');
 });
 
 test('the growth funnel bars have width', async ({ page }) => {
