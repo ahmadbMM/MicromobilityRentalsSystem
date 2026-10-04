@@ -127,3 +127,31 @@ test('Front Desk has no Duplicates tab', async ({ page }) => {
   await expect(page.locator('#tab-community .filter-pill', { hasText: 'Duplicates' })).toHaveCount(0);
   await expect(page.locator('#tab-community .mg-group')).toHaveCount(0);
 });
+
+// A failed read of the recent merges (network, timeout, lapsed sign-in) used to repaint the tab,
+// and the repaint read again at once: a read-and-redraw loop for as long as the failure lasted.
+test('a failed read of the recent merges is said once, not retried in a loop; opening the tab again retries', async ({ page }) => {
+  await boot(page);
+  let n = 0;
+  await page.route(/\/rest\/v1\/customer_merges/, (r) => { n++; return r.fulfill({ status: 500, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '57014', message: 'canceling statement due to statement timeout' }) }); });
+  await page.evaluate(`S._mgRows=null;setStaffTab('community');setCommTab('duplicates')`);
+  await expect(page.locator('#tab-community .tm-note')).toContainText(/connection|connect/i);
+  await page.waitForTimeout(600);
+  expect(n).toBe(1);
+  await page.evaluate(`setCommTab('duplicates')`);
+  await expect.poll(() => n).toBe(2);
+});
+
+// The manual merge search repaints the tab as staff type; the box keeps its focus through it.
+test('typing in the manual merge search keeps the focus across the repaint', async ({ page }) => {
+  await boot(page);
+  await page.evaluate(`setStaffTab('community');setCommTab('duplicates')`);
+  const box = page.locator('#mg-qa');
+  await box.click();
+  await page.keyboard.type('Am');
+  await page.waitForTimeout(300);
+  await page.keyboard.type('al');
+  await expect(page.locator('#mg-qa')).toHaveValue('Amal');
+  await expect(page.locator('#mg-qa')).toBeFocused();
+  await expect(page.locator('#tab-community .mg-matches button').first()).toContainText('Amal');
+});

@@ -32229,13 +32229,12 @@ async function addInvItem(){
   const name=(S._invName||'').trim();if(!name){toast(t('invItemName'),'error');return;}
   const brand=(document.getElementById('inv-brand')?.value||S._invBrand||'').trim();
   const cat=_invResolveCat();
-  const item={id:uid(),name,brand:(brand&&brand!=='__add__')?brand:null,category:cat,qty:parseInt(S._invQty)||0,low_threshold:parseInt(S._invLow)||0,updated_at:new Date().toISOString()};
-  const{error}=await sb.from('inventory').insert(item);
-  if(error){toast(error.message,'error');return;}
-  // The rest of the item in ONE checked write. Photo, price, cost, flavour, volume and nutrition used
-  // to go in six separate writes whose refusals were swallowed behind the Saved toast (2026-09-27
-  // review); every column has existed since 20260922124000, so nothing is left to be tolerant of.
-  if(await _wr(sb.from('inventory').update(_invExtraCols(item.id,cat,true)).eq('id',item.id),'save item'))return;
+  const id=uid();
+  // The whole item in ONE checked write, extras included (photo, price, cost, flavour, volume,
+  // nutrition; every column has existed since 20260922124000). They used to follow in a second
+  // write, and when that one was refused the row was already in: a second Save made a duplicate.
+  const item={id,name,brand:(brand&&brand!=='__add__')?brand:null,category:cat,qty:parseInt(S._invQty)||0,low_threshold:parseInt(S._invLow)||0,updated_at:new Date().toISOString(),..._invExtraCols(id,cat,true)};
+  if(await _wr(sb.from('inventory').insert(item),'save item'))return;
   await loadData();S.showAddInv=false;toast(t('invSaved'));renderInventory();
 }
 async function saveInvEdit(){
@@ -32398,7 +32397,7 @@ function _riderTier(n){const tiers=[[50,'tierLegend'],[25,'tierElite'],[10,'tier
 // ── Tag system (staff-only; customers never see any of this) ─────────────────
 function _tagsById(){const m={};(S.tags||[]).forEach(tg=>m[tg.id]=tg);return m;}
 function _tagsForCust(cid){const m=_tagsById();return _ctRowsFor(cid).filter(ct=>!_tagLapsed(ct)).map(ct=>m[ct.tag_id]).filter(Boolean);} // held or starting later; a lapsed grant is not held
-function setCommTab(k){S.communityTab=k;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;renderCommunity();}
+function setCommTab(k){S.communityTab=k;if(k==='duplicates')S._mgErr=false;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;renderCommunity();}
 function openTagEdit(id){S.tagEdit=id?((S.tags||[]).find(x=>x.id===id)||{}):{};renderCommunity();}
 async function saveTag(){
   const name=(document.getElementById('tag-name')?.value||'').trim();
@@ -32780,9 +32779,11 @@ function _sxPhone(c,out,sharedWith){
   if(sharedWith)out.push({f:'phone',k:'sxPhoneShared',v:raw+'>'+sharedWith,a:[sharedWith]});
 }
 function _sxAgeAt(iso){
-  const b=new Date(iso+'T12:00:00'),now=new Date();
-  let a=now.getFullYear()-b.getFullYear();
-  if(now.getMonth()<b.getMonth()||(now.getMonth()===b.getMonth()&&now.getDate()<b.getDate()))a--;
+  // Against the KSA day (todayStr), as the future-date check beside it is: the device's own date
+  // put a birthday a day early or late around midnight.
+  const [by,bm,bd]=String(iso).split('-').map(Number),[ny,nm,nd]=todayStr().split('-').map(Number);
+  let a=ny-by;
+  if(nm<bm||(nm===bm&&nd<bd))a--;
   return a;
 }
 function _sxBody(c,out){
@@ -33121,9 +33122,9 @@ function _commDuplicates(){
   const pick=(side,q,id)=>{const c=id?_custById(id):null;const list=c?[]:_mgMatches(q);
     return `<div class="mg-pick"><label>${t(side==='a'?'mgPickA':'mgPickB')}</label>
       ${c?`<div class="mg-picked">${esc(c.name||'')} <span class="am-meta">${esc(c.phone||c.email||'')}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("_mgSet",side,"")}">${t('removeBtn')}</button></div>`
-        :`<input type="text" class="search-input" value="${esc(q||'')}" placeholder="${esc(t('mgSearchPh'))}" aria-label="${esc(t(side==='a'?'mgPickA':'mgPickB'))}" data-on-input="${_on(side==='a'?'_on__commDuplicates_1':'_on__commDuplicates_2',_EV,_EL)}">
+        :`<input id="mg-q${side}" type="text" class="search-input" value="${esc(q||'')}" placeholder="${esc(t('mgSearchPh'))}" aria-label="${esc(t(side==='a'?'mgPickA':'mgPickB'))}" data-on-input="${_on(side==='a'?'_on__commDuplicates_1':'_on__commDuplicates_2',_EV,_EL)}">
          ${list.length?`<div class="mg-matches">${list.map(m=>`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_mgSet",side,m.id)}">${esc(m.name||'')} <span class="am-meta">${esc(m.phone||m.email||'')}</span></button>`).join('')}</div>`:''}`}</div>`;};
-  const recent=S._mgMissing?`<div class="tm-note">${t('dbPending')}</div>`:!S._mgRows?skeletonList():!S._mgRows.length?`<div class="empty-state">${t('mgNone')}</div>`
+  const recent=S._mgMissing?`<div class="tm-note">${t('dbPending')}</div>`:S._mgErr&&!S._mgRows?`<div class="tm-note">${t('errConnection')}</div>`:!S._mgRows?skeletonList():!S._mgRows.length?`<div class="empty-state">${t('mgNone')}</div>`
     :`<div class="mg-recent">${S._mgRows.map(r=>`<div class="mg-row"><div><strong>${esc(r.drop_name||r.drop_id)}</strong> → <strong>${esc(r.keep_name||r.keep_id)}</strong><div class="am-meta">${esc(fmtStamp(r.merged_at))}${r.merged_by?' · '+esc(r.merged_by):''}</div></div>
       <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_mgUndo",r.id)}">${t('mgUndoBtn')}</button></div>`).join('')}</div>`;
   return `<div class="form-section cmy-mt0"><div class="form-title">${t('mgTitle')}</div><div class="ca-sub">${t('mgSub')}</div>
@@ -33163,8 +33164,11 @@ async function _mgLoad(){
   try{
     const since=new Date(Date.now()-30*864e5).toISOString();
     let r;try{r=await sb.from('customer_merges').select('id,keep_id,drop_id,keep_name,drop_name,merged_at,merged_by').is('undone_at',null).gte('merged_at',since).order('id',{ascending:false}).limit(50);}catch(e){r={error:e};}
-    if(r&&r.error){S._mgMissing=_rpcAbsent(r.error)||/customer_merges/.test(String(r.error.message||''));S._mgRows=S._mgMissing?[]:null;}
-    else{S._mgMissing=false;S._mgRows=r&&r.data||[];}
+    // A failed read (network, timeout, lapsed sign-in) is remembered: the repaint below used to call
+    // this again at once, a read-and-redraw loop for as long as the failure lasted. Opening the tab
+    // again tries again.
+    if(r&&r.error){S._mgMissing=_rpcAbsent(r.error)||/customer_merges/.test(String(r.error.message||''));S._mgRows=S._mgMissing?[]:null;S._mgErr=!S._mgMissing;}
+    else{S._mgMissing=false;S._mgErr=false;S._mgRows=r&&r.data||[];}
   }finally{S._mgBusy=false;}
   if(S.staffTab==='community'&&S.communityTab==='duplicates')renderCommunity();
 }
@@ -33751,7 +33755,7 @@ function renderCommunity(){
   const el=document.getElementById('tab-community');if(!el)return;
   // The leaderboard and statistics, then accounts, the flagged list, the membership applications and birthdays.
   const sub=['stats','accounts','badges','flagged','applications','learning','birthdays','duplicates'].includes(S.communityTab)&&!(S.communityTab==='duplicates'&&!isAdmin())?S.communityTab:'leaderboard';
-  if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy)_mgLoad(); // the recent merges, once
+  if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy&&!S._mgErr)_mgLoad(); // the recent merges, once
   if(sub==='accounts'||sub==='badges')_bdgLoad(); // the badges and who holds them, at most every five minutes
   if(sub==='accounts')_igLoad(); // the Instagram follower counts, likewise
   const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length;
@@ -33760,7 +33764,7 @@ function renderCommunity(){
   if(!S._laApps&&!S._laBusy&&!S._laErr&&sub!=='learning')_laLoad();
   // Applications opens on the list it was last on (community or learning to ride).
   const navBtn=(k,label)=>{const on=sub===k||(k==='applications'&&sub==='learning'),go=k==='applications'&&S._appsKind==='learning'?'learning':k;return`<button class="filter-pill${on?' active':''}" data-on-click="${_on("setCommTab",go)}">${label}</button>`;};
-  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q')?_ae.id:''; // an Applications search in use
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb')?_ae.id:''; // an Applications or merge search in use
   el.innerHTML=`
     <div class="page-title">${t('commTitle')}</div>
     <div class="page-sub">${t('commSub')}</div>
@@ -34483,7 +34487,7 @@ function renderAnalytics(){
     if(ss==='pending')   return sd*(a.pend-b.pend);
     if(ss==='occupancy') return sd*(a.occ-b.occ);
     if(ss==='noshow')    return sd*(a.noShows-b.noShows);
-    if(ss==='day')       return sd*(new Date(a.s.session_date||a.s.id).getDay()-new Date(b.s.session_date||b.s.id).getDay());
+    if(ss==='day')       return sd*(((_ksaParts(String(a.s.session_date||a.s.id).slice(0,10)+'T12:00:00+03:00')||{}).dow||0)-((_ksaParts(String(b.s.session_date||b.s.id).slice(0,10)+'T12:00:00+03:00')||{}).dow||0)); // the KSA weekday: a bare date parsed as UTC read the day before west of UTC
     if(ss==='toptype')   return sd*String(a.topT||'').localeCompare(String(b.topT||''));
     return sd*(new Date(a.s.session_date||a.s.id)-new Date(b.s.session_date||b.s.id));
   });
@@ -35385,7 +35389,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team'].includes(st)?st:'';
+  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 (async()=>{
   S.loggedIn=getSession();
@@ -35472,8 +35476,10 @@ function _bootStaffTab(nav){
   try{const cl=localStorage.getItem('cq_cancellations');if(cl)S.cancellationLog=JSON.parse(cl);}catch(e){}
   try{const fl=localStorage.getItem('cq_full_log');if(fl)S.fullLog=JSON.parse(fl);}catch(e){}
   
-  const _staffEntry=sessionStorage.getItem('cq_staff_entry')==='1';
-  if(_staffEntry)sessionStorage.removeItem('cq_staff_entry');
+  // Storage can refuse to be read (site data blocked): every read here is guarded, or the boot
+  // stopped before a view was chosen and the page stayed blank.
+  const _lsGet=k=>{try{return localStorage.getItem(k);}catch(e){return null;}};
+  let _staffEntry=false;try{_staffEntry=sessionStorage.getItem('cq_staff_entry')==='1';if(_staffEntry)sessionStorage.removeItem('cq_staff_entry');}catch(e){}
   // The address names a section (2026-09-27: _pathFor and friends). One that is not one of the
   // app's own is put back to /, and the app opens as it does there.
   const _pathNav=_parsePath(_bootPath);
@@ -35499,13 +35505,13 @@ function _bootStaffTab(nav){
   if(new URLSearchParams(location.search).has('staff')){try{const u=new URL(location.href);u.searchParams.delete('staff');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}catch(e){}}
   if(_isStaffHost())document.body.classList.add('staff-host');
 
-  if(!S.loggedIn&&localStorage.getItem('cq_staff')!=='1'&&!_isStaffUrl){
+  if(!S.loggedIn&&_lsGet('cq_staff')!=='1'&&!_isStaffUrl){
     const g=await handleGoogleReturn();
     if(g==='complete')_oauthNoAccount(); // no account for this Google or Apple sign-in: Create account
   }
   
   _navRestoring=true;
-  const staffOK=localStorage.getItem('cq_staff')==='1';
+  const staffOK=_lsGet('cq_staff')==='1';
   const nav=_loadNav();
   let target;
   if(_isStaffUrl){
