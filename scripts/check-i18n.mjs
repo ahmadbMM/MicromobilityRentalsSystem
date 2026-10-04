@@ -84,7 +84,12 @@ for (const code of codes) {
 
 const en = LANG.en;
 const enKeys = Object.keys(en);
-const holes = (v) => (String(v).match(/\{\d+\}/g) || []).sort().join(' ');
+// The fill-ins a string carries: numbered ({0}) and named ({name}, {ref}, {n}...) alike - a translation
+// that drops {name} prints the greeting without the rider's name, one that renames it prints "{nom}".
+const holes = (v) => (String(v).match(/\{(?:\d+|[A-Za-z_]\w*)\}/g) || []).sort().join(' ');
+// Keys whose braces are prose, not fill-ins: tplSub tells staff that "words in {braces}" are filled in,
+// and each language names the braces in its own words.
+const PROSE_BRACES = new Set(['tplSub']);
 
 let failed = false;
 for (const code of codes) {
@@ -97,7 +102,7 @@ for (const code of codes) {
   // (Arabic "رحلتان", two rides): for base_one/_two/... only a hole English lacks is an error.
   const plural = (k) => /_(zero|one|two|few|many|other)$/.test(k);
   const subset = (a, b) => { const B = String(b).split(' '); return !a || String(a).split(' ').every((h) => B.includes(h)); };
-  const badHoles = enKeys.filter((k) => k in pack && (plural(k) ? !subset(holes(pack[k]), holes(en[k])) : holes(pack[k]) !== holes(en[k])));
+  const badHoles = enKeys.filter((k) => k in pack && !PROSE_BRACES.has(k) && (plural(k) ? !subset(holes(pack[k]), holes(en[k])) : holes(pack[k]) !== holes(en[k])));
   const report = (label, list) => {
     if (!list.length) return;
     failed = true;
@@ -106,7 +111,7 @@ for (const code of codes) {
   report('is missing', missing);
   report('has extra', extra);
   report('has empty values for', empty);
-  report('has different {n} placeholders from English in', badHoles);
+  report('has different {n}/{name} placeholders from English in', badHoles);
   // no emoji in any string (the owner, 2026-09-30): icons are drawn, messages are plain text
   const emoji = Object.keys(pack).filter((k) => /[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE0F}]/u.test(String(pack[k]).replace(/[\u2713\u2715\u270E\u2605]/g, '')));
   report('has an emoji in', emoji);
@@ -208,6 +213,56 @@ function readKeyArg(node) {
 {
   const markup = resolved.replace(/<script(?![^>]*\bsrc=)[^>]*>[\s\S]*?<\/script>/g, '');
   for (const m of markup.matchAll(/=\s*(?:"([^"]*)"|'([^']*)')/g)) for (const w of (m[1] ?? m[2]).split(/\s+/)) if (w) literals.add(w);
+}
+
+// ── The other message dictionaries ─────────────────────────────────────────────────────────────
+// Outside LANG, the messages staff copy and send (birthday wishes, the workshop's and the shop's
+// messages, the Saturday ride's...) live in objects keyed by language: {en:'...', ar:'...'} or
+// {en:{hi:'...', ready:'...'}, ar:{...}}. The same rule holds there: every language's string carries
+// the fill-ins English does, or the message goes out with "{name}" in it or without the name.
+{
+  const LANG_CODES = new Set(codes);
+  const textOf = (n) => (n.type === 'Literal' && typeof n.value === 'string' ? n.value
+    : n.type === 'TemplateLiteral' ? n.quasis.map((q) => q.value.cooked).join('') : null);
+  const keyOf = (p) => (p.key.type === 'Identifier' ? p.key.name : p.key.value);
+  const flat = (obj, pre, out) => {
+    for (const p of obj.properties) {
+      if (p.type !== 'Property' || p.computed) continue;
+      if (p.value.type === 'ObjectExpression') flat(p.value, `${pre}${keyOf(p)}.`, out);
+      else { const v = textOf(p.value); if (v != null) out[pre + keyOf(p)] = v; }
+    }
+    return out;
+  };
+  const bad = [];
+  let dicts = 0;
+  (function walk(node) {
+    if (node.type === 'ObjectExpression') {
+      const byLang = {};
+      for (const p of node.properties) if (p.type === 'Property' && !p.computed && LANG_CODES.has(keyOf(p))) byLang[keyOf(p)] = p.value;
+      if (byLang.en && Object.keys(byLang).length > 1) {
+        dicts++;
+        const en = byLang.en.type === 'ObjectExpression' ? flat(byLang.en, '', {}) : { '': textOf(byLang.en) };
+        for (const [code, v] of Object.entries(byLang)) {
+          if (code === 'en') continue;
+          const tr = v.type === 'ObjectExpression' ? flat(v, '', {}) : { '': textOf(v) };
+          for (const k of Object.keys(en)) {
+            if (en[k] == null || tr[k] == null) continue;
+            if (holes(tr[k]) !== holes(en[k])) bad.push(`${code}${k ? '.' + k : ''} [${holes(tr[k])}] vs en [${holes(en[k])}] in "${en[k].slice(0, 40).replace(/\n/g, ' ')}"`);
+          }
+        }
+      }
+    }
+    for (const k of Object.keys(node)) {
+      if (k === 'type' || k === 'start' || k === 'end') continue;
+      const v = node[k];
+      if (Array.isArray(v)) { for (const c of v) if (c && typeof c.type === 'string') walk(c); }
+      else if (v && typeof v.type === 'string') walk(v);
+    }
+  })(ast);
+  if (bad.length) {
+    failed = true;
+    console.error(`check-i18n: ${bad.length} message(s) in the per-language dictionaries outside LANG carry different {n}/{name} placeholders from English (${dicts} dictionaries read):\n  ${bad.slice(0, 40).join('\n  ')}`);
+  }
 }
 
 const undefinedKeys = [...used.keys()].filter((k) => !(k in en)).sort();

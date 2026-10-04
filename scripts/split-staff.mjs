@@ -523,6 +523,11 @@ export async function resolveIncludes(text, root = new URL('../', import.meta.ur
   return parts.join('');
 }
 
+/** The files the `<!--include:path-->` markers pull in (paths relative to the repo root), in order. */
+export function includedFiles(text) {
+  return [...text.matchAll(new RegExp(INCLUDE_RE.source, 'g'))].map((m) => m[1]);
+}
+
 /** Blanks the include markers instead, so the raw source parses and keeps its own line numbers. */
 export function stripIncludes(text) {
   return text.replace(new RegExp(INCLUDE_RE.source, 'g'), '');
@@ -1033,4 +1038,18 @@ export function checkNoEmoji(text) {
     for (const ch of l.match(new RegExp(EMOJI_RE.source, 'gu')) || []) if (!EMOJI_OK.has(ch)) { out.push({ line: i + 1, ch, text: l.trim().slice(0, 120) }); break; }
   });
   return out;
+}
+
+// ── The phone-number rules' version (2026-10-04) ───────────────────────────────────────────────
+// The app asks for assets/phone-rules.json?v=PHONE_RULES_V, and /assets/* is kept a week by the
+// browser (and served cache-first by the worker for a ?v= address): rules rebuilt without moving the
+// version reached nobody for up to a week. The file carries the version it was built from ("v"),
+// so the two have to agree. Answers an error message, or null.
+export function checkPhoneRulesVersion(src, rulesJson) {
+  const m = src.match(/const PHONE_RULES_V='([^']*)'/);
+  if (!m) return 'PHONE_RULES_V was not found in app.src.html';
+  let v;
+  try { v = JSON.parse(rulesJson).v; } catch { return 'assets/phone-rules.json does not parse'; }
+  if (String(v) !== m[1]) return `assets/phone-rules.json is version ${JSON.stringify(v)} but app.src.html asks for PHONE_RULES_V='${m[1]}' - set PHONE_RULES_V to the file's version so the new rules are fetched`;
+  return null;
 }

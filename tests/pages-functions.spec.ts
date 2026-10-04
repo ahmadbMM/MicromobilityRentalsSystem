@@ -38,6 +38,34 @@ test.describe('the middleware', () => {
     expect(await off.text()).toBe('asset');
   });
 
+  test('MM_HOLD=on also answers the shell when the service worker refreshes it, marked so the worker can tell', async () => {
+    // An installed device never navigates to the server: its worker serves the cached app and
+    // refreshes it with a plain fetch of / - which used to get the real app back, hold or not.
+    const onRequest = await load('functions/_middleware.js', 'onRequest');
+    const on = { MM_HOLD: 'on' };
+    for (const path of ['/', '/index.html', '/my-bookings', '/bookings/waitlist']) {
+      const res = await onRequest({ request: new Request('https://site.test' + path), env: on, next: () => new Response('app') });
+      expect(res.status, path).toBe(503);
+      expect(res.headers.get('x-mm-hold'), path).toBe('1');
+    }
+    const api = await onRequest({ request: new Request('https://site.test/api/hold'), env: on, next: () => new Response('x') });
+    expect(api.status).toBe(503);
+    expect(api.headers.get('x-mm-hold')).toBe('1');
+    for (const file of ['/app.js?v=1', '/styles.css', '/lang/ar.json'])
+      expect(await (await onRequest({ request: new Request('https://site.test' + file), env: on, next: () => new Response('asset') })).text(), file).toBe('asset');
+  });
+
+  test('a control character in the address is a 404, never an exception', async () => {
+    // Decoded, %0d%0a reached the Location header of the live host's staff redirect and the
+    // Response constructor threw (a 500).
+    const onRequest = await load('functions/_middleware.js', 'onRequest');
+    for (const path of ['/bookings/%0d%0ax', '/bookings/a%0ab', '/x%00y'])
+      expect((await onRequest({ request: new Request('https://micromobilityrentals.pages.dev' + path), next: () => new Response('asset') })).status, path).toBe(404);
+    const ok = await onRequest({ request: new Request('https://micromobilityrentals.pages.dev/bookings/waitlist?session=4'), next: () => new Response('asset') });
+    expect(ok.status).toBe(302);
+    expect(ok.headers.get('location')).toBe('https://staff.micromobility.sa/bookings/waitlist?session=4');
+  });
+
   const status = async (path: string) => {
     const onRequest = await load('functions/_middleware.js', 'onRequest');
     const res = await onRequest({ request: new Request('https://site.test' + path), next: () => new Response('asset') });
@@ -197,6 +225,35 @@ test.describe('the Apple Wallet pass', () => {
     expect(ok.json.barcode.message).toBe('MMC-abcdef');
   });
 
+  test('add-ons and the TOTAL come from the booking and the shop, never from what the device sends', async () => {
+    const withGel = { ...booking, addons: JSON.stringify([{ id: 'gel', qty: 2 }]) };
+    const run = async (inventory: Response) => {
+      globalThis.fetch = (async (u: string | URL | Request) => {
+        const url = String(u);
+        if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([withGel]));
+        if (url.includes('/rpc/list_sessions')) return new Response(JSON.stringify([circuit]));
+        if (url.includes('/rest/v1/inventory')) return inventory;
+        if (url.includes('apple.com')) return new Response(wwdrDer);
+        return new Response('', { status: 404 });
+      }) as typeof fetch;
+      const post = await load('functions/api/wallet-pass.js', 'onRequestPost');
+      const res = await post({
+        request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: withGel.id, addons: [{ n: 'Gold bar', q: 1, p: 99999 }] }) }),
+        env: { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: PW, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+      });
+      return JSON.parse(strFromU8(unzipSync(new Uint8Array(await res.arrayBuffer()))['pass.json']));
+    };
+    const json = await run(new Response(JSON.stringify([{ id: 'gel', name: 'Energy gel', price: 10 }])));
+    const back = json.eventTicket.backFields.find((f: { key: string }) => f.key === 'addons');
+    expect(back.value).toBe('Energy gel x2 - SAR 20');
+    expect(JSON.stringify(json)).not.toContain('Gold bar');
+    expect(json.eventTicket.auxiliaryFields.find((f: { key: string }) => f.key === 'total').value).toBe('SAR 70');
+    // the shop could not be read: no add-ons named, and no TOTAL rather than a wrong one
+    const blind = await run(new Response('', { status: 500 }));
+    expect(blind.eventTicket.backFields.find((f: { key: string }) => f.key === 'addons')).toBeUndefined();
+    expect(blind.eventTicket.auxiliaryFields.find((f: { key: string }) => f.key === 'total')).toBeUndefined();
+  });
+
   test('a signing failure tells the rider nothing about the certificate', async () => {
     const res = await pass(booking, circuit, 'wrong password');
     expect(res.status).toBe(500);
@@ -331,6 +388,64 @@ test.describe('the Google Wallet pass', () => {
     expect(obj.textModulesData.find((m: { id: string }) => m.id === 'riders')).toMatchObject({ header: 'Riders (2)', body: 'Rider, Mate' });
     expect(obj.logo.sourceUri.uri).toBe('https://site.test/logo.png');
   });
+
+  async function gpass(b: typeof booking, sess: Record<string, unknown> | null, google?: (url: string, init?: RequestInit) => Response | null) {
+    globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+      const url = String(u);
+      if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([b]));
+      if (url.includes('/rpc/list_sessions')) return new Response(JSON.stringify(sess ? [sess] : []));
+      const g = google ? google(url, init) : null;
+      return g || new Response('', { status: 404 });
+    }) as typeof fetch;
+    const post = await load('functions/api/google-wallet.js', 'onRequestPost');
+    const res = await post({
+      request: new Request('https://site.test/api/google-wallet', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: b.id }) }),
+      env: { GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_JSON: keyFile, SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+    });
+    const body = await res.json();
+    return { status: res.status, obj: body.url ? verified(body.url.split('/save/')[1]).payload.payload.genericObjects[0] : null };
+  }
+
+  test('a ride staff approve: approved AND published, as the Apple pass and the app hold it', async () => {
+    const sat = { ...circuit, event_kind: 'community', ride_kind: null, needs_approval: true, hide_queue: false, bike_slots: JSON.stringify({ _time: '05:30 - 06:00' }) };
+    expect((await gpass({ ...booking, approval: 'pending' }, sat)).status).toBe(409);
+    expect((await gpass({ ...booking, approval: 'approved' }, { ...sat, hide_queue: true })).status).toBe(409);
+    const ok = await gpass({ ...booking, approval: 'approved' }, sat);
+    expect(ok.status).toBe(200);
+    expect(ok.obj.barcode.value).toBe('MMC-abcdef');
+    // a gathering ride runs out at the end of its day
+    expect(ok.obj.validTimeInterval).toEqual({ end: { date: '2026-09-23T23:59:00+03:00' } });
+  });
+
+  test('the pass runs out when the ride ends, and a booking that is over is not a live ticket', async () => {
+    const live = await gpass(booking, { ...circuit, bike_slots: JSON.stringify({ _time: '21:00 - 00:30' }) });
+    expect(live.obj.state).toBe('ACTIVE');
+    expect(live.obj.validTimeInterval).toEqual({ end: { date: '2026-09-24T00:30:00+03:00' } });
+    expect((await gpass({ ...booking, status: 'cancelled' }, circuit)).obj.state).toBe('INACTIVE');
+    expect((await gpass({ ...booking, status: 'noshow' }, circuit)).obj.state).toBe('INACTIVE');
+    expect((await gpass({ ...booking, status: 'done' }, circuit)).obj.state).toBe('COMPLETED');
+  });
+
+  test('a pass saved before is brought up to date in Google too, and a slow or failing Google never costs the link', async () => {
+    const calls: { url: string; method?: string; body?: string; auth?: string }[] = [];
+    const google = (url: string, init?: RequestInit) => {
+      if (url.startsWith('https://oauth2.googleapis.com/token')) { calls.push({ url, body: String(init?.body) }); return new Response(JSON.stringify({ access_token: 'tok', expires_in: 3600 })); }
+      if (url.startsWith('https://walletobjects.googleapis.com/')) { calls.push({ url, method: init?.method, body: String(init?.body), auth: (init?.headers as Record<string, string>).Authorization }); return new Response('{}'); }
+      return null;
+    };
+    const r = await gpass({ ...booking, status: 'cancelled' }, circuit, google);
+    expect(r.status).toBe(200);
+    const put = calls.find((c) => c.method === 'PUT');
+    expect(put?.url).toBe('https://walletobjects.googleapis.com/walletobjects/v1/genericObject/3388000000000000001.mm_abcdef123456');
+    expect(put?.auth).toBe('Bearer tok');
+    expect(JSON.parse(put!.body!).state).toBe('INACTIVE');
+    const grant = new URLSearchParams(calls[0].body);
+    expect(grant.get('grant_type')).toBe('urn:ietf:params:oauth:grant-type:jwt-bearer');
+    expect(verified(grant.get('assertion')!).payload).toMatchObject({ iss: EMAIL, aud: 'https://oauth2.googleapis.com/token', scope: 'https://www.googleapis.com/auth/wallet_object.issuer' });
+    // Google refusing the update still hands the rider the save link
+    const down = await gpass(booking, circuit, (url) => (url.includes('googleapis.com') ? new Response('', { status: 500 }) : null));
+    expect(down.status).toBe(200);
+  });
 });
 
 test.describe('the CSP report endpoint', () => {
@@ -398,5 +513,77 @@ test.describe('the contact card endpoint', () => {
     expect((await post({ vcf: '<html><script>alert(1)</script></html>' })).status).toBe(400);
     expect((await post({ vcf: 'BEGIN:VCARD\r\nFN:' + 'x'.repeat(40000) + '\r\nEND:VCARD' })).status).toBe(400);
     expect((await post({})).status).toBe(400);
+  });
+});
+
+test.describe('the push sender', () => {
+  const realFetch = globalThis.fetch;
+  test.afterEach(() => { globalThis.fetch = realFetch; });
+
+  test('sends only to the browsers\' own push services, and keeps the payload small and on this site', async () => {
+    // A throwaway VAPID key and a subscriber key pair, made with WebCrypto as a browser would.
+    const vapid = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']);
+    const priv = Buffer.from(await crypto.subtle.exportKey('pkcs8', vapid.privateKey)).toString('base64url');
+    const pub = Buffer.from(await crypto.subtle.exportKey('raw', vapid.publicKey)).toString('base64url');
+    const sub = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const p256dh = Buffer.from(await crypto.subtle.exportKey('raw', sub.publicKey)).toString('base64url');
+    const auth = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64url');
+    const endpoints = ['https://fcm.googleapis.com/fcm/send/abc', 'https://web.push.apple.com/QXyz', 'https://evil.example/hook', 'http://fcm.googleapis.com/x', 'https://fcm.googleapis.com.evil.example/x', 'https://10.0.0.1/x'];
+    const hits: string[] = [];
+    globalThis.fetch = (async (u: string | URL | Request) => {
+      const url = String(u);
+      if (url.includes('/rpc/is_staff')) return new Response('true');
+      if (url.includes('/rest/v1/push_subscriptions')) return new Response(JSON.stringify(endpoints.map((endpoint) => ({ endpoint, p256dh, auth }))));
+      hits.push(url);
+      return new Response('', { status: 201 });
+    }) as typeof fetch;
+    const post = await load('functions/api/push-send.js', 'onRequestPost');
+    const send = async (extra: Record<string, unknown>) => {
+      hits.length = 0;
+      const res = await post({
+        request: new Request('https://site.test/api/push-send', { method: 'POST', body: JSON.stringify({ staffToken: 'st', customerId: 'c1', title: 'Hi', message: 'Your turn', ...extra }) }),
+        env: { VAPID_PUBLIC_KEY: pub, VAPID_PRIVATE_KEY: priv, SUPABASE_SERVICE_KEY: 'svc', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+      });
+      return res.json();
+    };
+    const r = await send({ url: '/my-bookings', tag: 'booking-q1' });
+    expect(r).toMatchObject({ ok: true, sent: 2, total: 6 });
+    expect(hits.sort()).toEqual(['https://fcm.googleapis.com/fcm/send/abc', 'https://web.push.apple.com/QXyz']);
+    // a long address or a tag of any length cannot push the payload past one record
+    const big = await send({ url: '/' + 'x'.repeat(5000), tag: 'y'.repeat(5000) });
+    expect(big.sent).toBe(2);
+  });
+});
+
+test.describe('the Instagram follower counts', () => {
+  const realFetch = globalThis.fetch;
+  test.afterEach(() => { globalThis.fetch = realFetch; });
+
+  test('a failed lookup is tried again within hours; only an account Instagram will not describe waits the month', async () => {
+    const hours = (h: number) => new Date(Date.now() - h * 36e5).toISOString();
+    const rows = [
+      { customer_id: 'err7h', handle: 'err7h', status: 'error', tried_at: hours(7) },
+      { customer_id: 'err1h', handle: 'err1h', status: 'error', tried_at: hours(1) },
+      { customer_id: 'una10d', handle: 'una10d', status: 'unavailable', tried_at: hours(240) },
+      { customer_id: 'ok3d', handle: 'ok3d', status: 'ok', followers: 5, tried_at: hours(72) },
+    ];
+    const looked: string[] = [];
+    globalThis.fetch = (async (u: string | URL | Request) => {
+      const url = decodeURIComponent(String(u));
+      if (url.includes('/rpc/is_staff')) return new Response('true');
+      if (url.includes('customer_ig_followers?select=tried_at')) return new Response('[]'); // no pass ran lately
+      if (url.includes('/rest/v1/customers?')) return new Response(JSON.stringify(rows.map((r) => ({ id: r.customer_id, socials: { instagram: r.handle } }))));
+      if (url.includes('customer_ig_followers?select=*')) return new Response(JSON.stringify(rows));
+      const m = url.match(/business_discovery\.username\(([^)]+)\)/);
+      if (m) { looked.push(m[1]); return new Response(JSON.stringify({ business_discovery: { followers_count: 10 } })); }
+      return new Response('[{}]');
+    }) as typeof fetch;
+    const post = await load('functions/api/ig-followers.js', 'onRequestPost');
+    const res = await post({
+      request: new Request('https://site.test/api/ig-followers', { method: 'POST', body: JSON.stringify({ staffToken: 'st', stale: true }) }),
+      env: { IG_GRAPH_TOKEN: 'tok', IG_USER_ID: '1', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+    });
+    expect(res.status).toBe(200);
+    expect(looked).toEqual(['err7h']);
   });
 });

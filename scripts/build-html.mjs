@@ -13,7 +13,7 @@ import CleanCSS from 'clean-css';
 import {
   splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, customerCss, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
-  checkCustomerColors, checkNoEmoji,
+  checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion,
 } from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
@@ -139,6 +139,13 @@ for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'REC
   src = src.replace(ph, `const ${name}='${createHash('sha256').update(await readFile(new URL(`../${file}`, import.meta.url))).digest('hex').slice(0, 10)}'`);
 }
 
+// The public origin (site.config.json), read before the split: every half that ships carries it.
+const site = JSON.parse(await readFile(new URL('../site.config.json', import.meta.url), 'utf8'));
+const origin = String(site.origin || '').replace(/\/+$/, '');
+if (!/^https?:\/\/[^/]+$/.test(origin)) {
+  throw new Error(`build: site.config.json origin must be a bare origin, got ${JSON.stringify(site.origin)}`);
+}
+
 // ── The staff half, split off into staff.js (scripts/split-staff.mjs) ──────────
 // A customer's phone used to download the whole app, two thirds of it staff-only. The main
 // script is cut by what a customer's page can reach; the rest becomes staff.js, minified the same
@@ -207,7 +214,8 @@ if (!staffMin.code) throw new Error('build: staff.js did not minify');
 // it (the reports and the till's receipt) are drawn by the staff half, so staff.js is stamped here,
 // before its own hash is taken.
 const fontsHash = createHash('sha256').update(await readFile(new URL('../fonts/fonts.css', import.meta.url))).digest('hex').slice(0, 10);
-staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
+staffMin.code = staffMin.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`)
+  .split('__SITE_ORIGIN__').join(origin); // the staff half names the site too (CA_SITE and the like): never the placeholder
 if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(staffMin.code)) throw new Error('build: a fonts.css reference in staff.js was left without its hash');
 const partsDir = new URL('../staff-parts/', import.meta.url);
 await rm(partsDir, { recursive: true, force: true });
@@ -216,7 +224,7 @@ const staffParts = {}, staffPartsV = {};
 for (const [name, code] of Object.entries(sections.parts)) {
   const min = await terserMinify(code, TERSER_OPTS);
   if (!min.code) throw new Error(`build: staff-parts/${name}.js did not minify`);
-  const c = min.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`);
+  const c = min.code.replace(/fonts\/fonts\.css(?:\?v=[a-z0-9]+)?(?=["'])/g, `fonts/fonts.css?v=${fontsHash}`).split('__SITE_ORIGIN__').join(origin);
   if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(c)) throw new Error(`build: a fonts.css reference in staff-parts/${name}.js was left without its hash`);
   staffParts[name] = c;
   staffPartsV[name] = createHash('sha256').update(c).digest('hex').slice(0, 10);
@@ -232,11 +240,6 @@ await writeFile(new URL('../staff.js', import.meta.url), staffMin.code);
 console.log(`build: staff parts -> ${Object.entries(staffParts).map(([n, c]) => `${n} ${Math.round(gzipBytes(c) / 1000)}`).join(', ')} KB gzipped; staff.js (the desk's core) ${Math.round(gzipBytes(staffMin.code) / 1000)} KB`);
 console.log(`build: staff half -> staff.js ${split.report.staffBytes} -> ${staffMin.code.length} bytes (${split.report.staffStmts} statements, ${split.report.stubs.length} entry points); customer half ${split.report.customerBytes} bytes (${split.report.customerStmts} statements)`);
 
-const site = JSON.parse(await readFile(new URL('../site.config.json', import.meta.url), 'utf8'));
-const origin = String(site.origin || '').replace(/\/+$/, '');
-if (!/^https?:\/\/[^/]+$/.test(origin)) {
-  throw new Error(`build: site.config.json origin must be a bare origin, got ${JSON.stringify(site.origin)}`);
-}
 
 // ── The customer half, out of the page into app.js (2026-10-01) ─────────────
 // It was inline: ~190 KB gzipped inside index.html, which is served max-age=0, so every deploy (several
@@ -494,8 +497,17 @@ if (headers !== headersBefore) await writeFile(headersUrl, headers);
 
 // ── No emoji anywhere in the source: icons are drawn (scripts/split-staff.mjs) ───────────────
 {
-  const em = checkNoEmoji(raw);
-  if (em.length) throw new Error(`build: an emoji in app.src.html - draw the icon instead (_cuIc for rider screens, _artIcon for staff) and keep message text plain:\n${em.slice(0, 20).map((e) => `  line ${e.line}: ${e.ch}  ${e.text}`).join('\n')}`);
+  // app.src.html and every file it pulls in with <!--include:...-->, each with its own line numbers.
+  for (const [file, text] of [['app.src.html', raw], ...await Promise.all(includedFiles(raw).map(async (f) => [f, await readFile(new URL(`../${f}`, import.meta.url), 'utf8')]))]) {
+    const em = checkNoEmoji(text);
+    if (em.length) throw new Error(`build: an emoji in ${file} - draw the icon instead (_cuIc for rider screens, _artIcon for staff) and keep message text plain:\n${em.slice(0, 20).map((e) => `  line ${e.line}: ${e.ch}  ${e.text}`).join('\n')}`);
+  }
+}
+
+// ── The phone-number rules are asked for by their version (scripts/split-staff.mjs) ──────────────
+{
+  const pr = checkPhoneRulesVersion(raw, await readFile(new URL('../assets/phone-rules.json', import.meta.url), 'utf8'));
+  if (pr) throw new Error(`build: ${pr}`);
 }
 
 // ── The download budget ──────────────────────────────────────────────────────

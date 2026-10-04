@@ -51,7 +51,6 @@ export async function onRequestPost(context) {
   }
   const { customerId, token, bookingId } = body || {};
   if (!customerId || !token || !bookingId) return json({ ok: false, error: "missing fields" }, 400);
-  const addons = _cleanAddons(body && body.addons);
   const groupIds = Array.isArray(body && body.groupIds) ? body.groupIds.filter((x2) => typeof x2 === "string").slice(0, 50) : [];
   const SUPA = env.SUPABASE_URL || SUPA_DEFAULT;
   const ANON = env.SUPABASE_ANON_KEY;
@@ -103,8 +102,13 @@ export async function onRequestPost(context) {
     if (b.approval !== "approved" || !_commPublished(sess)) return json({ ok: false, error: "not confirmed" }, 409);
     group = group.filter((r) => r.approval === "approved");
   }
+  // The add-ons are read here, off the bookings themselves and the shop's own prices: the list the
+  // device sends (body.addons) is ignored, or a rider could print any add-on and any TOTAL on a
+  // signed pass. When they cannot be read, the pass names none and shows no TOTAL rather than a
+  // wrong one.
+  const { addons, known: addonsKnown } = await _serverAddons(SUPA, ANON, group);
   try {
-    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, group, sess, approvalRide });
+    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, addonsKnown, group, sess, approvalRide });
     return new Response(pkpass, {
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
@@ -159,7 +163,7 @@ async function buildPkpass(b, cfg) {
   const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
   const addonSum = addons.reduce((s, a) => s + (Number(a.p) || 0), 0);
   const grand = Math.round((rentalSum + addonSum) * 100) / 100;
-  const priceStr = rentalSum || addonSum ? `SAR ${grand}` : "";
+  const priceStr = cfg.addonsKnown !== false && (rentalSum || addonSum) ? `SAR ${grand}` : "";
   // The queue number leads. It is what the desk asks for and what the rider has to read out,
   // so it takes the biggest line on the pass, and the name it belongs to keeps the other half:
   // the desk reads a number and a person off one line. The two clock times sit together below,
@@ -341,6 +345,49 @@ function _sessionDates(b, clock) {
     return { collect: null, start: at(startMin), end: at(endMin) };
   } catch (e) {
     return null;
+  }
+}
+// A booking's add-ons as queue_entries.addons stores them: a JSON list of item ids or {id, qty}.
+function _entryAddons(raw) {
+  let list;
+  try { list = Array.isArray(raw) ? raw : raw ? JSON.parse(raw) : []; } catch (e) { return null; }
+  if (!Array.isArray(list)) return null;
+  const out = [];
+  for (const a of list) {
+    const id = a && typeof a === "object" ? a.id : a;
+    const qty = a && typeof a === "object" ? Math.max(1, Number(a.qty) || 1) : 1;
+    if (id != null && id !== "") out.push({ id: String(id), qty });
+  }
+  return out;
+}
+// The party's add-ons, named and priced from the inventory (readable with the anon key, as the app
+// reads it): {addons: [{n, q, p}], known}. known is false when they could not all be read.
+async function _serverAddons(SUPA, ANON, group) {
+  const want = new Map();
+  for (const r of group) {
+    const list = _entryAddons(r.addons);
+    if (!list) return { addons: [], known: false };
+    for (const a of list) want.set(a.id, (want.get(a.id) || 0) + a.qty);
+  }
+  if (!want.size) return { addons: [], known: true };
+  try {
+    const ids = [...want.keys()].slice(0, 50).map((i) => `"${i.replace(/["\\]/g, "")}"`).join(",");
+    const res = await fetch(`${SUPA}/rest/v1/inventory?select=id,name,price&id=in.(${encodeURIComponent(ids)})`, {
+      headers: { apikey: ANON, Authorization: `Bearer ${ANON}` }
+    });
+    if (!res.ok) return { addons: [], known: false };
+    const rows = await res.json();
+    const by = new Map((Array.isArray(rows) ? rows : []).map((x) => [String(x.id), x]));
+    const out = [];
+    for (const [id, q] of want) {
+      const it = by.get(id);
+      if (!it) return { addons: [], known: false };
+      const price = it.price != null && !Number.isNaN(+it.price) ? +it.price : 0;
+      out.push({ n: it.name || id, q, p: Math.round(price * q * 100) / 100 });
+    }
+    return { addons: _cleanAddons(out), known: true };
+  } catch (e) {
+    return { addons: [], known: false };
   }
 }
 function _cleanAddons(a) {

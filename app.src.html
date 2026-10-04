@@ -36319,6 +36319,16 @@ try{document.addEventListener('keydown',function(e){
   for(var i=0;i<order.length;i++){var el=document.getElementById(order[i][0]);if(el&&el.style.display&&el.style.display!=='none'){var fn=order[i][1];if(fn&&typeof window[fn]==='function'){try{window[fn]();}catch(_){el.style.display='none';}}else{el.style.display='none';el.innerHTML='';}return;}}
 });}catch(e){}
 
+// The hold (MM_HOLD): a page left open never navigates, so the worker never learns of it. Each time
+// the page comes back on screen (at most every two minutes) it asks /api/hold, which the middleware
+// answers 503 + x-mm-hold only while the hold is up (otherwise a plain 404); on hold it reloads into
+// the hold page rather than go on writing to the database being copied.
+let _holdAskAt=0;
+try{document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||navigator.onLine===false||Date.now()-_holdAskAt<120000)return;
+  _holdAskAt=Date.now();
+  fetch('/api/hold',{cache:'no-store'}).then(r=>{if(r.status===503&&r.headers.get('x-mm-hold')==='1')location.reload();}).catch(()=>{});
+});}catch(e){}
 if('serviceWorker' in navigator){
   // The browser looks for a new service worker on navigation, and a booth tab open for days
   // never navigates: it ran the build of the morning it was opened until someone reloaded it.
@@ -36348,6 +36358,9 @@ if('serviceWorker' in navigator){
   try{navigator.serviceWorker.addEventListener('message',ev=>{
     // The push service rotated our subscription: re-register it under the new endpoint.
     if(ev.data&&ev.data.type==='push-resubscribe'){pushSubscribe(true).catch(()=>{});return;}
+    // The site went on hold (MM_HOLD, functions/_middleware.js): the worker now serves the hold
+    // page, and this page must stop writing to the database being copied - reload into it.
+    if(ev.data&&ev.data.type==='mm-hold'){location.reload();return;}
     if(!ev.data||ev.data.type!=='shell-updated')return;
     if(_justReloaded&&Date.now()-_swBootAt<15000)return; // the SW echoing the deploy we just reloaded for (no loops); later deploys still surface
     if(Date.now()-_swBootAt<8000&&!_userTouched){_updReload();return;}

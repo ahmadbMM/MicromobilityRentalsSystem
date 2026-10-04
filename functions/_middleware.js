@@ -29,6 +29,10 @@ export async function onRequest(context) {
     return notFound(); // malformed encoding — refuse
   }
   path = path.replace(/\\/g, '/').toLowerCase();
+  // A control character (CR, LF, NUL...) has no place in any of our addresses. Decoded, one reached
+  // the Location header of the staff redirect below, where a CR/LF made the Response constructor
+  // throw: an uncaught exception, answered as a 500.
+  if ([...path].some((ch) => ch.charCodeAt(0) < 0x20 || ch.charCodeAt(0) === 0x7f)) return notFound();
 
   const blocked =
     /\.(sql|md|ts|mjs|lock|yml|yaml|toml|map|cjs|env|sh)$/.test(path) || // source / config / docs / data
@@ -67,10 +71,18 @@ export async function onRequest(context) {
   if (context.env && context.env.MM_HOLD === 'on') {
     if (path.startsWith('/api/')) {
       return new Response(JSON.stringify({ ok: false, error: 'hold' }), {
-        status: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'retry-after': '900' },
+        status: 503, headers: { 'content-type': 'application/json', 'cache-control': 'no-store', 'retry-after': '900', 'x-mm-hold': '1' },
       });
     }
     if (isNavigation(context.request)) return holdPage();
+    // The app's shell, however it is asked for. The service worker answers an installed device's
+    // navigations from its cache and refreshes the shell with a plain fetch of / (sec-fetch-mode
+    // cors, not navigate), so the check above never saw it: every returning rider and every staff
+    // device kept the app, writing straight to the database being copied. That fetch now gets the
+    // hold page too, marked x-mm-hold, which the worker reads as "serve the hold page from now on"
+    // (service-worker.js), and an open page's own probe of /api/hold gets the 503 above.
+    if ((context.request.method === 'GET' || context.request.method === 'HEAD') &&
+        (path === '/' || path === '/index.html' || APP_ROUTE.test(path))) return holdPage();
   }
 
   // The live customer address keeps no way into staff: the /staff/ stub, /?staff and an NFC
@@ -130,7 +142,7 @@ section+section{margin-top:22px;padding-top:22px;border-top:1px solid var(--line
   return new Response(html, {
     status: 503,
     headers: {
-      'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '900',
+      'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'retry-after': '900', 'x-mm-hold': '1',
       'x-robots-tag': 'noindex', 'content-security-policy': "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
     },
   });

@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-6147f42e0e';
+const CACHE = 'mmcq-af9c34c15c';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,7 +28,7 @@ const STAFF_JS = './staff.js?v=8b9e3fb2c7';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=1c18f4f6c3","./staff-parts/community.js?v=7785f2a1f8","./staff-parts/bikes.js?v=eb894d0469","./staff-parts/cashier.js?v=ab9a73b42c","./staff-parts/catalog.js?v=f2e0905b6c","./staff-parts/inventory.js?v=e82519fb84","./staff-parts/website.js?v=ad70c98251","./staff-parts/history.js?v=f22cddd779","./staff-parts/workshop.js?v=75e8e7a142","./staff-parts/logs.js?v=a9bb8a79fd","./staff-parts/ambassadors.js?v=eca3c0e9c0","./staff-parts/messages.js?v=d524241366","./staff-parts/vendors.js?v=f5814ee821","./staff-parts/team.js?v=1e09b48e93","./staff-parts/settings.js?v=c7807e019a"];
-const APP_JS = './app.js?v=9fb0abb1f6';
+const APP_JS = './app.js?v=69363cb63d';
 const APP_CSS = './app.css?v=38b864f873';
 const SHELL = [
   SHELL_KEY,
@@ -81,6 +81,11 @@ self.addEventListener('activate', (e) => {
 // A response that followed a redirect cannot be handed to a navigation — the browser rejects
 // the whole load rather than the response. Rebuilding it drops the redirect history while
 // keeping the body, status and headers.
+// The hold page (functions/_middleware.js) is a 503 marked x-mm-hold. Its mark is kept in this cache
+// under a key that is no file of the site (the build checks every './' entry here ships).
+const HOLD_KEY = '/__mm-hold';
+const isHold = (res) => !!res && res.status === 503 && res.headers.get('x-mm-hold') === '1';
+
 function navSafe(res) {
   if (!res || !res.redirected) return res;
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: res.headers });
@@ -132,9 +137,18 @@ self.addEventListener('fetch', (e) => {
   }
   if (req.mode === 'navigate') {
     e.respondWith(
-      caches.match(SHELL_KEY).then((cached) => {
+      Promise.all([caches.match(SHELL_KEY), caches.match(HOLD_KEY)]).then(([cached, held]) => {
         const refresh = fetch(new Request(SHELL_KEY, { cache: 'no-cache' })).then((res) => {
           const safe = navSafe(res); // never store redirect history under the shell key
+          if (isHold(safe)) {
+            // The site is on hold (functions/_middleware.js, MM_HOLD): remember it, so the next
+            // navigation shows the hold page instead of the cached app, and tell open pages to
+            // reload into it - an open app would otherwise go on writing to the database.
+            caches.open(CACHE).then((c) => c.put(HOLD_KEY, new Response('1'))).catch(() => {});
+            if (!held) self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'mm-hold' })));
+            return safe;
+          }
+          if (safe && safe.ok && held) caches.open(CACHE).then((c) => c.delete(HOLD_KEY)).catch(() => {});
           if (safe && safe.ok) {
             const copy = safe.clone();
             // If the shell actually changed (new deploy), tell open pages so they can refresh
@@ -151,6 +165,9 @@ self.addEventListener('fetch', (e) => {
         });
         // The cached shell answers instantly; the refresh keeps running for next time. With
         // nothing cached yet, the navigation waits on the network as any first visit does.
+        // On hold, the network answers first: the hold page while it lasts, the app once it is over
+        // (the hold page reloads itself every minute). Offline, the cached app is all there is.
+        if (held) return refresh.catch(() => (cached ? navSafe(cached) : Response.error()));
         if (cached) { refresh.catch(() => {}); return navSafe(cached); }
         return refresh;
       })
@@ -163,6 +180,8 @@ self.addEventListener('fetch', (e) => {
   // Nothing here is revalidated, so a cached copy has to be right for as long as this cache
   // lives: the cache NAME hashes every file the site ships (scripts/build-html.mjs), and the
   // translation packs and city lists are asked for by their own content hash.
+  // The Pages Functions are never cached: an answer from /api is about now, not about this version.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/api/')) return;
   if (url.origin === self.location.origin) {
     // Anything else is asked of the server again (a 304 when it has not changed), for the same
     // reason as at install: this copy is kept for the life of the cache.
@@ -220,7 +239,15 @@ self.addEventListener('notificationclick', (e) => {
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
       for (const w of wins) {
-        if ('focus' in w) { try { w.navigate(new URL(target, self.location.origin).href); } catch (_) { /* older browsers */ } return w.focus(); }
+        // navigate() answers a promise, and rejects for a window this worker does not control
+        // (includeUncontrolled above); a rejection there must not go unhandled. Such a window is
+        // left alone and the target opened in a window of its own instead.
+        if ('focus' in w) {
+          const href = new URL(target, self.location.origin).href;
+          let nav = null;
+          try { nav = w.navigate ? w.navigate(href) : null; } catch (_) { nav = null; }
+          return Promise.resolve(nav).then((r) => (r || w).focus(), () => self.clients.openWindow(href));
+        }
       }
       return self.clients.openWindow(target);
     })

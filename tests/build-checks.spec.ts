@@ -33,6 +33,8 @@ type Checks = {
   ): { rows: { half: string; bytes: number; kb: number; limitKb: number; over: boolean }[]; over: unknown[]; text: string };
   checkCustomerColors(css: string): { found: boolean; offenders: { prop: string; value: string; line: number }[] };
   checkNoEmoji(text: string): { line: number; ch: string; text: string }[];
+  includedFiles(text: string): string[];
+  checkPhoneRulesVersion(src: string, rulesJson: string): string | null;
   staffOnlyLangKeys(keys: string[], customerText: string, staffText: string): Set<string>;
   customerCss(css: string, customerText: string, staffText: string): { css: string; kept: number; dropped: number; droppedBytes: number };
   cssTokens(css: string): { kind: string; text: string }[];
@@ -147,6 +149,25 @@ test.describe('@build build checks', () => {
     const found = checkNoEmoji(['const a = "Paid \u2713";', "toast('Happy birthday \u{1F382}');", '// a comment \u{1F6B2}', 'ok \u2605 \u2715']
       .join('\n'));
     expect(found.map((f) => f.line)).toEqual([2, 3]);
+  });
+
+  test('no emoji in the files app.src.html includes either', async () => {
+    const { checkNoEmoji, includedFiles } = await load();
+    const files = includedFiles(read('app.src.html'));
+    expect(files.length, 'the include markers were read').toBeGreaterThan(0);
+    for (const f of files) expect(checkNoEmoji(read(f)), f).toEqual([]);
+    expect(includedFiles('a<!--include:src/js/a.js-->b<!-- include: src/b.js -->')).toEqual(['src/js/a.js', 'src/b.js']);
+  });
+
+  test('the phone-number rules are asked for by the version the file carries', async () => {
+    const { checkPhoneRulesVersion } = await load();
+    expect(checkPhoneRulesVersion(read('app.src.html'), read('assets/phone-rules.json'))).toBeNull();
+    expect(checkPhoneRulesVersion("const PHONE_RULES_V='1.0';", '{"v":"1.1","codes":{}}')).toContain("PHONE_RULES_V='1.0'");
+    expect(checkPhoneRulesVersion('nothing here', '{"v":"1"}')).toContain('not found');
+  });
+
+  test('the staff half never ships the site-origin placeholder', () => {
+    for (const f of ['index.html', 'app.js', 'staff.js', ...partFiles()]) expect(read(f).includes('__SITE_ORIGIN__'), f).toBe(false);
   });
 
   test('the two halves stay within the gzip budget', async () => {

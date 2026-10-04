@@ -23,12 +23,19 @@ const TYPES: Record<string, string> = {
 };
 
 /** A stand-in for Cloudflare Pages: serves the repo, and 308s /index.html to /. */
-async function startPagesMimic(): Promise<{ url: string; close: () => Promise<void> }> {
+async function startPagesMimic(state: { hold?: boolean } = {}): Promise<{ url: string; close: () => Promise<void> }> {
   const root = process.cwd();
   const server: Server = createServer((req, res) => {
     let path: string;
     try { path = decodeURIComponent(new URL(req.url || '/', 'http://x').pathname); }
     catch { res.writeHead(400); res.end(); return; }
+    // MM_HOLD=on, as functions/_middleware.js answers it: the shell and the app's addresses (however
+    // they are asked for) get the hold page, /api a 503 - each marked x-mm-hold.
+    if (state.hold && (path === '/' || path === '/index.html' || path.startsWith('/api/') || /^\/(?:reserve|my-bookings|account|bookings)(?:\/|$)/.test(path))) {
+      res.writeHead(503, { 'content-type': path.startsWith('/api/') ? 'application/json' : 'text/html', 'cache-control': 'no-store', 'x-mm-hold': '1' });
+      res.end(path.startsWith('/api/') ? '{"ok":false,"error":"hold"}' : '<!doctype html><title>back soon</title><h1 id="hold">We will be back in a few minutes</h1>');
+      return;
+    }
     if (path === '/index.html') { res.writeHead(308, { location: '/' }); res.end(); return; }
     // Cloudflare serves <dir>/index.html for a trailing slash, which is how /staff/ works; and
     // functions/_middleware.js answers the app's own addresses (/bookings, /sales...) with the app.
@@ -159,6 +166,45 @@ test('a section\'s own address is answered from the shell, and never stored as i
       return null;
     });
     expect(shellIsApp).toBe(true);
+  } finally {
+    await site.close();
+  }
+});
+
+test('the hold reaches a device the worker already serves, and lifts with the next visit', async ({ page }) => {
+  // The worker answers an installed device's navigations from its cache, so the server's hold page
+  // never reached returning riders or any staff device: they kept the app, writing to the database
+  // being copied. Its refresh now sees the hold, open pages reload into it, and later navigations
+  // ask the network first until the hold is over.
+  const state = { hold: false };
+  const site = await startPagesMimic(state);
+  await page.route(/supabase\.co|open-meteo\.com|cloudflareinsights\.com/, (r) => r.abort());
+  await stubRealtime(page);
+  try {
+    await page.goto(site.url, { waitUntil: 'load' });
+    await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });
+    await page.goto(site.url, { waitUntil: 'load' }); // the shell is cached now
+
+    state.hold = true;
+    // This navigation is answered from the cache; the refresh behind it meets the hold and the page
+    // reloads into the hold page by itself.
+    await page.goto(site.url, { waitUntil: 'domcontentloaded' }).catch(() => {});
+    await expect(page.locator('#hold')).toBeVisible({ timeout: 15000 });
+    // A deep link too, while it lasts.
+    await page.goto(`${site.url}my-bookings`, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#hold')).toBeVisible();
+
+    state.hold = false;
+    const res = await page.goto(site.url, { waitUntil: 'domcontentloaded' });
+    expect(res?.status()).toBe(200);
+    await expect(page.locator('#hold')).toHaveCount(0);
+    // the mark is gone: the next visit is the cached app again
+    await page.waitForTimeout(500);
+    const marked = await page.evaluate(async () => {
+      for (const n of await caches.keys()) if (await (await caches.open(n)).match('/__mm-hold')) return true;
+      return false;
+    });
+    expect(marked).toBe(false);
   } finally {
     await site.close();
   }
