@@ -2339,6 +2339,7 @@
     #tab-queue .rq-cx{display:flex;align-items:center;gap:10px;padding:9px 14px;margin-bottom:6px;background:rgba(var(--red-rgb),.07);border:1px solid rgba(var(--red-rgb),.2);border-radius:4px;font-size:12px;}
     #tab-queue .rq-cxh{font-weight:800;color:var(--red);}
     #tab-queue .rq-cxr{margin-left:auto;background:rgba(var(--tint-rgb),.07);padding:2px 8px;border-radius:2px;color:var(--muted-l);font-size:11px;}
+    #tab-queue #staff-refresh-label.sync-unsent{color:var(--orange);font-weight:700;}
     #tab-queue .rq-cxx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;margin-left:auto;flex-shrink:0;}
     #tab-queue .rq-dup{color:var(--orange);font-weight:900;cursor:help;}
     #tab-queue .rq-bkat{font-size:11px;font-weight:700;color:var(--muted);white-space:nowrap;}
@@ -4542,6 +4543,28 @@
     html[data-staff-theme="dark"] body.view-staff .view-toggle-btn.active{border-color:rgba(3,255,137,.35);}
     /* the sidebar rail already matches the dark desk; hairline it so it still reads apart */
     html[data-staff-theme="dark"] body.view-staff #staff-tab-nav{border-inline-end-color:rgba(255,255,255,.12);}
+    /* ══ BOOTH MODE (2026-10-04) — Settings > This device, html[data-staff-theme="booth"] (cq_booth).
+       The booth in full sun: black ink on white, every text colour 7:1 or better on the page and the
+       cards (#000 21:1, #2e2e2e 13.5:1, #3b3b3b 10.9:1, green #05522a 9.4:1, amber #5a3a00 10.4:1,
+       red #7d1d12 10.6:1), hairlines turned to rules, and the status words bigger and bolder. ══ */
+    html[data-staff-theme="booth"] body.view-staff{
+      --bg:#ffffff; --s1:#ffffff; --s2:#ffffff; --s3:#ffffff; --in-bg:#ffffff;
+      --text:#000000; --muted:#2e2e2e; --muted-l:#3b3b3b;
+      --green:#05522a; --green-h:#033d1f; --green-d:#05522a; --ac-fill:#05522a; --ac-fill-h:#033d1f;
+      --red:#7d1d12; --orange:#5a3a00;
+      --green-rgb:5,82,42; --red-rgb:125,29,18; --warn-rgb:90,58,0; --tint-rgb:0,0,0;
+      --border:#4d4d4d; --line2:#4d4d4d;
+      --sf-card:#ffffff; --sf-line:#4d4d4d; --sf-line2:#4d4d4d; --sf-ctl:#333333; --sf-ctl-h:#000000;
+      --sf-head:#ffffff; --sf-zebra:#ffffff; --sf-hover:#eeeeee; --sf-hover2:#eeeeee; --sf-sep:#4d4d4d;
+      --sf-chip:#ffffff; --sf-green-ink:#05522a;
+    }
+    html[data-staff-theme="booth"] body.view-staff .status-badge{font-size:15px;font-weight:800;}
+    html[data-staff-theme="booth"] body.view-staff :is(.badge-waiting,.badge-full){color:#5a3a00;}
+    html[data-staff-theme="booth"] body.view-staff .badge-noshow{color:#7d1d12;}
+    html[data-staff-theme="booth"] body.view-staff .badge-reserved{color:#14286e;}
+    html[data-staff-theme="booth"] body.view-staff .stat-chip{border:2px solid #000;font-size:15px;color:#000;}
+    html[data-staff-theme="booth"] body.view-staff :is(.queue-table td,.queue-table th){border-color:#4d4d4d;}
+    html[data-staff-theme="booth"] body.view-staff :is(input,select,textarea,.btn-secondary,.toggle-btn,.pay-toggle){border-width:2px;border-color:#333;}
     /* the rail column's dark paint is the ::before in #view-staff's grid (above): one colour,
        both themes, either direction */
 
@@ -6759,6 +6782,14 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 #scan-modal .bkm-svw{position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;aspect-ratio:1/1;}
 #scan-modal .bkm-svid{width:100%;height:100%;object-fit:cover;}
 #scan-modal .bkm-sframe{position:absolute;inset:14%;border:2px solid rgba(var(--green-rgb),.65);border-radius:8px;pointer-events:none;}
+#scan-modal .scan-bn{position:absolute;left:0;right:0;bottom:0;z-index:1;}
+#scan-modal .scan-bn:empty{display:none;}
+#scan-modal .scan-bn-in{display:flex;align-items:center;gap:10px;width:100%;margin:0;padding:12px 14px;border:0;border-top:3px solid;border-radius:0;font:inherit;font-size:16px;font-weight:700;line-height:1.3;text-align:start;cursor:pointer;}
+#scan-modal .scan-bn-in b{flex:none;font-size:20px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;}
+#scan-modal .scan-bn-in span{min-width:0;overflow-wrap:anywhere;}
+#scan-modal .scan-bn-ok .scan-bn-in{background:#0c7a3d;border-color:#0c7a3d;color:#ffffff;}
+#scan-modal .scan-bn-warn .scan-bn-in{background:#fff3d6;border-color:#8a5c14;color:#3d2700;}
+#scan-modal .scan-bn-err .scan-bn-in{background:#a33b2e;border-color:#a33b2e;color:#ffffff;}
 #scan-modal .bkm-smsg{min-height:18px;font-size:12px;color:var(--muted);margin-top:10px;text-align:center;font-weight:600;}
 #scan-modal .bkm-sexc{width:100%;margin-top:6px;}
 #scan-modal .bkm-chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:6px 0 8px;}
@@ -6971,6 +7002,7 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
   background:var(--sf-head);border:1px solid var(--sf-line2);border-radius:var(--r-md);}
 #checkin-modal .ci-chain .btn-sm{min-height:38px;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #checkin-modal .ci-chain .btn-sm[disabled]{opacity:.45;cursor:default;}
+#checkin-modal .ci-autonext{display:block;margin:6px 0 0 auto;min-height:34px;font-size:12px;}
 #checkin-modal .ci-chain-pos{font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;}
 @media(min-width:1024px){
   body.view-staff.view-staff #checkin-modal .modal-backdrop.ci-drawer-bg{justify-content:flex-end;align-items:stretch;padding:0;
@@ -7860,6 +7892,7 @@ body:not(.view-staff) #cancel-reason-modal .dk-flex8>*{width:100%;min-width:0;}
 #tab-settings .set-k{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 #tab-settings .set-v{font-weight:700;word-break:break-all;margin-top:-6px;}
 #tab-settings .set-hint{font-size:12px;color:var(--muted);}
+#tab-settings .set-tog .set-hint{display:block;font-weight:400;}
 #tab-settings .set-err{font-size:13px;color:var(--red,#c0392b);min-height:0;}
 #tab-settings .set-err:empty{display:none;}
 #tab-settings .set-hr{border:0;border-top:1px solid var(--border);margin:6px 0;}

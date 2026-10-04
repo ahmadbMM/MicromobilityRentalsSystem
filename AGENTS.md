@@ -372,6 +372,37 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   literal (`malformed array literal: "photo"`) - append a name with `array_append(arr, 'name')`, or
   give the literal a type; `arr || some_text_variable` is fine.
 
+## Desk speed (2026-10-04)
+
+Check-in and bike handling at the booth (the owner's first pain). Client only; `tests/desk-speed.spec.ts`.
+
+- **Scanner banner.** Every `say(msg, colour)` in `_onScanPayload` also draws `#scan-banner` through
+  `_scanBanner(kind, msg)`: green is OK, amber (and the muted "already done") is Check, red is Stop, each with
+  its word and a drawn mark so it reads without colour, a WebAudio tone (`_scanTone`; the scanner's Sound
+  switch and Settings, `cq_scan_mute`) and a buzz. OK clears itself after 1.2 s; Check and Stop stay until
+  tapped or the next scan. It lies over the foot of the camera view (absolute in `.bkm-svw`), never in the
+  flow: in the flow its exit moved the buttons under a tap. Another night is Stop (Make an exception unchanged); a blacklisted rider is Stop
+  with Make an exception (`_scanTicket(entry, say, true)` carries on); a rider already in says since when,
+  what they owe and whether they need a bike. In Keep scanning, the check-in confirmed from a scan shows as OK
+  when the camera comes back (`_scanFlash`). Specs: OK can be gone before a slow machine looks, so record
+  the banner with a MutationObserver (see the spec) rather than asserting it once.
+- **Open the next rider** (`cq_ci_next`, the toggle under the check-in's Previous/Next): after a single
+  rider's Confirm, `_ciAfterConfirm` opens the next rider still expected on the roster as shown, after this
+  one or else from the top. Parties, scanned groups and a camera that is coming back are left as they were.
+- **Not here yet**: `_notHere(e)` (waiting, today's ride, past `_sessStart`) is the `nothere` status filter
+  and a stat chip; the rows keep their call / WhatsApp pair.
+- **This device** (Settings): Keep screen on at the desk (`cq_wake`, default on; `_wakeSync` holds a screen
+  wake lock while Bookings or the scanner is open, `_wakeRelease` on leaving the staff view), Booth mode
+  (`cq_booth` → `html[data-staff-theme="booth"]`, set by the head script; the high-contrast block beside the
+  staff dark theme in `styles.css`), Sound.
+- **Sync**: the roster's live label adds "N unsent" from `_outboxCount()+_bookOutboxCount()`; both outbox
+  flushes run under the `mm-outbox` Web Lock (`_mmLock`), so two tabs never send the same change twice;
+  `navigator.storage.persist()` is asked once on entering staff.
+- **Ride time** on a return is `_rideStartMs(e)`: the server's `checked_in_at`, else the device's `cq_ct_<id>`.
+- **Recently cancelled** is read off the synced rows (`_cxRecent`: cancelled in the last five minutes by
+  `cancelled_at`, else `updated_at`); a device keeps only the ids it closed (`cq_cx_hide`). The old
+  `cq_cancellations` log, which held names, is removed at boot.
+
 ## No bar when an action is done (2026-09-27 → 2026-09-29)
 
 The undo bar is gone (2026-09-28): `pushUndo` only logs and fills the topbar Undo (`#topbar-right

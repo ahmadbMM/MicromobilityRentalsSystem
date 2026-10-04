@@ -86,7 +86,7 @@ test('an admin edits a message on Settings and it is saved for everyone', async 
 test('Front Desk does not see the templates', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffRole('frontdesk');setStaffTab('settings')`);
-  await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications']);
+  await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications', 'This device']);
 });
 
 test('every message opens in the editor with Arabic text on its Arabic tab', async ({ page }) => {
