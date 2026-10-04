@@ -187,3 +187,41 @@ test('the editor does not pull the caret back to Brand once another field has it
   await expect(page.locator('#ce-name')).toHaveValue('Sprint 2');
   await expect(page.locator('#ce-slug')).toHaveValue('alvas-sprint-2');
 });
+
+test('moving a category numbers every sibling by its new place (no tie with the stored order)', async ({ page }) => {
+  const top = (id: string, slug: string, name: string, sort: number) => ({ id, parent_id: null, slug, name_en: name, name_ar: '', blurb_en: '', blurb_ar: '', cover: null, sort, published: true, updated_at: at });
+  const cats = [top('c-road', 'road', 'Road', 1), top('c-mtb', 'mountain', 'Mountain', 2), top('c-hyb', 'hybrid', 'Hybrid', 3), top('c-grav', 'gravel', 'Gravel', 4), top('c-kids', 'kids', 'Kids', 5)];
+  const writes = await open(page, { catalog_categories: cats, catalog_models: [], catalog_colors: [], catalog_photos: [] });
+  await panel(page).getByRole('button', { name: /^Categories/ }).click();
+  await panel(page).locator('.cat-tree li[data-cat="hybrid"]').getByRole('button', { name: 'Move down' }).click();
+  await expect.poll(() => writes.length).toBe(4);
+  const sort: Record<string, number> = Object.fromEntries(cats.map(c => [c.id, c.sort]));
+  for (const w of writes) sort[(w.url.match(/id=eq\.([\w-]+)/) || [])[1]] = (w.body as { sort: number }).sort;
+  // the seed values 1..5 used to tie Gravel with Mountain, and the name put Gravel first
+  expect(Object.keys(sort).sort((a, b) => sort[a] - sort[b])).toEqual(['c-road', 'c-mtb', 'c-grav', 'c-hyb', 'c-kids']);
+});
+
+test('a category cover replaced or removed leaves the bucket only when the category is saved', async ({ page }) => {
+  const cover = '/media/catalog/categories/c-kids/old.jpg';
+  const cats = catalog.catalog_categories.map(c => c.id === 'c-kids' ? { ...c, cover } : c);
+  const writes = await open(page, { catalog_categories: cats });
+  const removed: string[] = [];
+  page.on('request', r => { if (r.url().includes('/storage/v1/object/site') && r.method() === 'DELETE') removed.push(r.postData() || ''); });
+  await page.route(/\/storage\/v1\/object\/site/, r => r.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  await panel(page).getByRole('button', { name: /^Categories/ }).click();
+  const kids = () => panel(page).locator('.cat-tree li[data-cat="kids"]');
+  // removed, then cancelled: the saved row still points at the file, so it stays
+  await kids().getByRole('button', { name: 'Edit' }).click();
+  await page.locator('#cat-cat-editor .web-ed-img .btn-red').click();
+  await page.locator('#cat-cat-editor').getByRole('button', { name: 'Cancel' }).click();
+  await page.waitForTimeout(300);
+  expect(removed).toHaveLength(0);
+  // removed, then saved: now it goes
+  await kids().getByRole('button', { name: 'Edit' }).click();
+  await page.locator('#cat-cat-editor .web-ed-img .btn-red').click();
+  await page.locator('#cc-save').click();
+  await expect.poll(() => writes.length).toBe(1);
+  expect(row(writes[0].body)).toMatchObject({ id: 'c-kids', cover: null });
+  await expect.poll(() => removed.length).toBe(1);
+  expect(removed[0]).toContain('catalog/categories/c-kids/old.jpg');
+});

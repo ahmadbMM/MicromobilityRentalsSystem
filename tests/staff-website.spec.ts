@@ -66,6 +66,19 @@ test('Coming Soon is on; the switch opens the website only once confirmed', asyn
   expect(writes[0].body).toEqual([{ key: 'site.coming_soon', value: false, updated_by: 'Spec Staff' }]);
 });
 
+test('a refused Coming Soon switch leaves nothing to undo', async ({ page }) => {
+  await stubSupabase(page, { sessions, queue_entries: [], bikes: [], site_content: [{ key: 'site.coming_soon', value: true }], site_content_history: [] }, { table: 'site_content', status: 403, once: true });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setStaffTab('website')`);
+  await page.locator('#web-cs-switch').click();
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Open the website' }).click();
+  await expect(page.locator('.toast').last()).toContainText('Could not save');
+  // it used to log "Website opened" with an undo for a change that never happened
+  expect(await page.evaluate(`S.actionLog.some(l=>typeof l.fn==='function'&&/Website|Coming Soon/i.test(l.label))`)).toBe(false);
+});
+
 test('the Coming Soon words show what is saved, else the original wording', async ({ page }) => {
   await open(page, { site_content: [{ key: 'coming_soon.title', value: { en: 'Almost there.', ar: 'اقتربنا.' } }] });
   await expect(page.locator('input[data-web-key="coming_soon.title"][data-web-lang="en"]')).toHaveValue('Almost there.');

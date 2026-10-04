@@ -28278,6 +28278,9 @@ async function _ambSet(id,status,code){
   if(!d||!d.ok){
     const k=d&&d.error==='code_taken'?'amCodeTaken':d&&d.error==='code'?'amCodeBad':d&&d.error==='admin_only'?'adminOnlyMsg':'wsSaveErr';
     if(k==='wsSaveErr'){toast(t(k),'error');try{_logError('ambassadors set: '+((res&&res.error&&res.error.message)||(d&&d.error)||'no answer'),'ambassadors',true);}catch(_){}}
+    // The approve dialog says the others in its own line; a row's Reject / Pause / Resume / Reopen
+    // has no dialog open, and a refusal there used to change nothing and say nothing.
+    else if(!document.getElementById('ws-dlg-err'))toast(t(k),'error');
     return{error:k};
   }
   a.status=status;if(d.code)a.code=d.code; // shown at once; the reload below confirms it
@@ -28461,6 +28464,7 @@ async function _vendorLoad(){
     if(bad){W.err=true;W.missing=_vendorIsMissing(bad.error);}
     else{
       [W.tiers,W.venues,W.users,W.dates,W.series,W.bk]=r.map(x=>Array.isArray(x.data)?x.data:[]);W.err=false;W.missing=false;
+      Object.keys(W.td).forEach(k=>{if(!W.td[k]._dirty)delete W.td[k];});
       const d=todayStr();S._vendorPN=W.bk.filter(b=>b.status==='pending'&&b.day>=d).length;
       S._vendorSig=S._vendorPN+'|'+W.bk.reduce((m,b)=>b.updated_at&&b.updated_at>m?b.updated_at:m,'')+'|'+(S._vendorFbTop=_vendorFbNewest(W.fb));
     }
@@ -28935,12 +28939,16 @@ function _vendorTd(id){
   if(!W.td[id]){const x=_vendorTier(id);if(!x)return null;W.td[id]={...x,modes:[...(x.modes||[])],max_per_month:x.max_per_month==null?'':String(x.max_per_month),benefits:(Array.isArray(x.benefits)?x.benefits:[]).map(b=>({en:String(b&&b.en||''),ar:String(b&&b.ar||'')})),_err:''};}
   return W.td[id];
 }
-function _vendorTdSet(id,k,v){const d=_vendorTd(id);if(d)d[k]=v;}
-function _vendorTdMode(id,m,on){const d=_vendorTd(id);if(!d)return;d.modes=d.modes.filter(x=>x!==m);if(on)d.modes.push(m);}
-function _vendorTdBen(id,i,l,v){const d=_vendorTd(id);if(d&&d.benefits[i])d.benefits[i][l]=v;}
-function _vendorTdBenAdd(id){const d=_vendorTd(id);if(!d)return;d.benefits.push({en:'',ar:''});renderVendors();const e=document.querySelector(`[data-vendor-tier="${id}"] [data-vendor-ben="${d.benefits.length-1}"] input`);if(e)e.focus();}
-function _vendorTdBenDel(id,i){const d=_vendorTd(id);if(!d)return;d.benefits.splice(i,1);renderVendors();}
-function _vendorTdBenMove(id,i,n){const d=_vendorTd(id),j=i+n;if(!d||j<0||j>=d.benefits.length)return;const b=d.benefits;[b[i],b[j]]=[b[j],b[i]];renderVendors();}
+// A draft someone has typed into. The others are dropped on every reload (_vendorLoad), so a card left
+// untouched shows what the database holds now, not what it held when the tab was first drawn: saving
+// a stale draft sent every field and wrote over another admin's change.
+function _vendorTdEdit(id){const d=_vendorTd(id);if(d)d._dirty=true;return d;}
+function _vendorTdSet(id,k,v){const d=_vendorTdEdit(id);if(d)d[k]=v;}
+function _vendorTdMode(id,m,on){const d=_vendorTdEdit(id);if(!d)return;d.modes=d.modes.filter(x=>x!==m);if(on)d.modes.push(m);}
+function _vendorTdBen(id,i,l,v){const d=_vendorTdEdit(id);if(d&&d.benefits[i])d.benefits[i][l]=v;}
+function _vendorTdBenAdd(id){const d=_vendorTdEdit(id);if(!d)return;d.benefits.push({en:'',ar:''});renderVendors();const e=document.querySelector(`[data-vendor-tier="${id}"] [data-vendor-ben="${d.benefits.length-1}"] input`);if(e)e.focus();}
+function _vendorTdBenDel(id,i){const d=_vendorTdEdit(id);if(!d)return;d.benefits.splice(i,1);renderVendors();}
+function _vendorTdBenMove(id,i,n){const d=_vendorTdEdit(id),j=i+n;if(!d||j<0||j>=d.benefits.length)return;const b=d.benefits;[b[i],b[j]]=[b[j],b[i]];renderVendors();}
 function _vendorTierCard(d){
   const id=d.id,W=_vendor();
   const fid=k=>`vendor-t-${id}-${k}`;
@@ -29178,7 +29186,7 @@ function _webSetComingSoon(on){
     confirmClass:on?'btn-primary':'btn-red',
     onConfirm:async()=>{
       const prev=(_web().rows['site.coming_soon']||{}).value;
-      await _webRestore([{key:'site.coming_soon',value:on}]);
+      if(!(await _webRestore([{key:'site.coming_soon',value:on}])))return; // refused: nothing to undo
       pushUndo(on?t('webCsOnLog'):t('webCsOffLog'),()=>_webRestore([{key:'site.coming_soon',value:prev===undefined?null:prev}]));
     }
   });
@@ -29836,11 +29844,15 @@ function _catCatCoverPick(){
   _catPick('image/jpeg,image/png,image/webp,image/avif',false,async files=>{
     const E=_cat().ced;if(!E)return;
     toast(t('catUploading'),'info');
-    try{const url=await _catUploadImage(files[0],'catalog/categories/'+E.id);if(E.d.cover)_catStorageRemove([E.d.cover]);E.d.cover=url;toast(t('catUploaded'),'success');renderCatalog();}
+    try{const url=await _catUploadImage(files[0],'catalog/categories/'+E.id);_catCatCoverGone(E);E.d.cover=url;toast(t('catUploaded'),'success');renderCatalog();}
     catch(e){_catUploadToast(e);}
   });
 }
-function _catCatCoverRemove(){const E=_cat().ced;if(!E||!E.d.cover)return;_catStorageRemove([E.d.cover]);E.d.cover=null;renderCatalog();}
+// The cover being replaced or removed leaves the bucket only once the category is saved: the saved
+// row still points at it, so removing it at once left the live /bikes page with a broken picture
+// whenever the edit was then cancelled (or its save refused).
+function _catCatCoverGone(E){if(E.d.cover)(E.gone=E.gone||[]).push(E.d.cover);}
+function _catCatCoverRemove(){const E=_cat().ced;if(!E||!E.d.cover)return;_catCatCoverGone(E);E.d.cover=null;renderCatalog();}
 async function _catCatSave(){
   const C=_cat(),E=C.ced;if(!E||E.busy)return;
   const d=E.d;d.name_en=String(d.name_en||'').trim();d.name_ar=String(d.name_ar||'').trim();d.slug=_catSlugify(d.slug||d.name_en);
@@ -29852,6 +29864,7 @@ async function _catCatSave(){
   try{
     const row={id:E.id,parent_id:d.parent_id||null,slug:d.slug,name_en:d.name_en,name_ar:d.name_ar,blurb_en:String(d.blurb_en||'').trim(),blurb_ar:String(d.blurb_ar||'').trim(),cover:d.cover||null,sort:Number(d.sort)||0,published:d.published!==false};
     const r=await sb.from('catalog_categories').upsert(row,{onConflict:'id'});if(r.error)throw r.error;
+    _catStorageRemove((E.gone||[]).filter(u=>u&&u!==row.cover));
     toast(t('catSaved'),'success');C.ced=null;C.loaded=false;renderCatalog();await _catLoad();
   }catch(e){E.busy=false;err(e&&e.code==='23505'?t('catErrCatTaken'):t('catSaveErr'));try{_logError('catalog category save: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
 }
@@ -29863,14 +29876,17 @@ function _catCatDelete(id){
     catch(e){toast(_catErrText(e),'error');try{_logError('catalog category delete: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
   }});
 }
-// Up or down among its siblings: the two rows swap their sort values.
+// Up or down among its siblings. Every sibling is numbered by its new place: writing positions
+// into the two swapped rows alone tied them with the stored values of the rest (the seeds are
+// 1..5), and the name then decided - Hybrid moved down landed Gravel above Mountain.
 async function _catCatMove(id,dir){
   const C=_cat(),c=_catById(id);if(!c)return;
-  const sib=(c.parent_id?_catSubs(c.parent_id):_catTop());
+  const sib=(c.parent_id?_catSubs(c.parent_id):_catTop()).slice();
   const i=sib.indexOf(c),j=i+dir;if(i<0||j<0||j>=sib.length)return;
-  const rows=sib.map((x,k)=>({id:x.id,sort:k}));rows[i].sort=j;rows[j].sort=i;
+  [sib[i],sib[j]]=[sib[j],sib[i]];
+  const rows=sib.map((x,k)=>({id:x.id,sort:k,was:Number(x.sort)})).filter(rw=>rw.was!==rw.sort);
   try{
-    for(const rw of[rows[i],rows[j]]){const r=await sb.from('catalog_categories').update({sort:rw.sort}).eq('id',rw.id);if(r.error)throw r.error;}
+    for(const rw of rows){const r=await sb.from('catalog_categories').update({sort:rw.sort}).eq('id',rw.id);if(r.error)throw r.error;}
     C.loaded=false;await _catLoad();
   }catch(e){toast(t('catSaveErr'),'error');try{_logError('catalog category move: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
 }
@@ -31304,6 +31320,7 @@ async function _bookOutboxFlush(){
   if(_bookBusy||!sb||(typeof navigator!=='undefined'&&navigator.onLine===false))return;
   _bookBusy=true;
   const snap=_bookOutbox();const done=[];const renum={};const noWaiver=[];
+  const _reasking=!!S._waiverReaskSess&&S.view==='customer'&&S.custTab==='register';
   const _c=S.loggedIn||getSession();
   for(const row of snap){
     try{
@@ -31333,7 +31350,12 @@ async function _bookOutboxFlush(){
         const fresh=nextQNum(row.session_id);
         if(fresh&&fresh!==row.queue_num){renum[row.id]=fresh;row.queue_num=fresh;res=await _roFree(()=>sb.from('queue_entries').upsert(row));}
       }
-      if(res&&res.error&&_waiverRefusal(res.error)){noWaiver.push(row);done.push(row.id);continue;} // cannot land without one: re-asked below
+      // Cannot land without a waiver: re-asked below, one ride at a time. Rows for another ride stay
+      // queued for the next flush (they used to leave the outbox here unasked, so a second ride
+      // booked offline vanished on the next reload with nothing on screen saying so).
+      // While the rider is still on the form a re-ask opened, nothing is re-asked over it (the flush
+      // runs every 15 seconds): the rows wait until they leave it.
+      if(res&&res.error&&_waiverRefusal(res.error)){if(!_reasking&&(!noWaiver.length||noWaiver[0].session_id===row.session_id)){noWaiver.push(row);done.push(row.id);}continue;}
       if(!(res&&res.error))done.push(row.id);
       // A genuine refusal (not a dropped connection) is counted on the row. Three of them is
       // no longer "still sending" -- it is a booking the server will not take, and the ONE
@@ -31348,7 +31370,7 @@ async function _bookOutboxFlush(){
   try{_updateConnUI();}catch(_){}
   Object.keys(renum).forEach(id=>{const e=(S.queue||[]).find(x=>x.id===id);if(e)e.queueNum=renum[id];});
   _bookBusy=false;
-  if(noWaiver.length)_waiverReask(noWaiver.filter(r=>r.session_id===noWaiver[0].session_id));
+  if(noWaiver.length){S._waiverReaskSess=noWaiver[0].session_id;_waiverReask(noWaiver);}
 }
 // Commit the whole cart as one receipt (shared receipt_id), decrement stock, then print it
 // A discount is computed on the WHOLE cart, but it has to be booked against the buckets
