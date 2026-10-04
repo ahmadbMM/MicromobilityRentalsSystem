@@ -355,3 +355,84 @@ test.describe('@staff:community learn to ride search', () => {
     await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
   });
 });
+
+// A priority on each sign-up (the owner, 2026-10-04: "allows staff to put a priority on each learning
+// applicant, Critical High Medium Low"): four choices on a New or Scheduled card, New listed by it.
+test.describe('@staff:community learn to ride priority', () => {
+  const patches = (page: Page) => {
+    const out: { url: string; body: Record<string, unknown> }[] = [];
+    page.on('request', (r) => {
+      if (r.method() !== 'PATCH' || !/\/rest\/v1\/learn_applications\?/.test(r.url())) return;
+      try { out.push({ url: decodeURIComponent(r.url()), body: r.postDataJSON() }); } catch { /* not json */ }
+    });
+    return out;
+  };
+  const order = (page: Page) => page.locator('.la-row').evaluateAll((rs) => rs.map((r) => r.getAttribute('data-learn-id')));
+  const opt = (page: Page, id: string, p: string) => row(page, id).locator(`.la-prio-o[data-prio="${p}"]`);
+
+  test('picking a priority writes it and New lists by it; a second tap takes it off; Undo puts it back', async ({ page }) => {
+    await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l2' ? { ...l, priority: 'low' } : l)) });
+    const marks = patches(page);
+    // Low before none, though Nadia's sign-up is the newer one
+    expect(await order(page)).toEqual(['l2', 'l1']);
+    await expect(row(page, 'l1').locator('.la-prio-o')).toHaveText(['Critical', 'High', 'Medium', 'Low']);
+    await expect(row(page, 'l1').locator('.la-prio')).toHaveAttribute('aria-label', 'Priority');
+    await expect(row(page, 'l1').locator('.la-prio-o.on')).toHaveCount(0);
+    await expect(opt(page, 'l2', 'low')).toHaveAttribute('aria-checked', 'true');
+    await expect(row(page, 'l2')).toHaveAttribute('data-prio', 'low');
+
+    await opt(page, 'l1', 'critical').click();
+    await expect.poll(() => marks.length).toBe(1);
+    expect(marks[0].url).toContain('id=eq.l1');
+    expect(marks[0].body).toEqual({ priority: 'critical' });
+    await expect(opt(page, 'l1', 'critical')).toHaveAttribute('aria-checked', 'true');
+    await expect(row(page, 'l1')).toHaveAttribute('data-prio', 'critical');
+    expect(await order(page)).toEqual(['l1', 'l2']);
+    await expect(page.locator('#topbar-right .undo-btn')).toHaveAttribute('title', /Priority for Nadia Omar: Critical/);
+
+    // the picked one again: no priority
+    await expect(opt(page, 'l1', 'critical')).toHaveAttribute('title', 'Tap again to clear');
+    await opt(page, 'l1', 'critical').click();
+    await expect.poll(() => marks.length).toBe(2);
+    expect(marks[1].body).toEqual({ priority: null });
+    await expect(row(page, 'l1').locator('.la-prio-o.on')).toHaveCount(0);
+    await expect(row(page, 'l1')).not.toHaveAttribute('data-prio', /./);
+    expect(await order(page)).toEqual(['l2', 'l1']);
+
+    await page.locator('#topbar-right .undo-btn').click();
+    await expect.poll(() => marks.length).toBe(3);
+    expect(marks[2].body).toEqual({ priority: 'critical' });
+    await expect(opt(page, 'l1', 'critical')).toHaveAttribute('aria-checked', 'true');
+
+    // a scheduled sign-up carries it too; a cancelled one does not
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await expect(row(page, 'l3').locator('.la-prio-o')).toHaveCount(4);
+    await page.locator('.filter-pill[data-la-filter="cancelled"]').click();
+    await expect(row(page, 'l4')).toBeVisible();
+    await expect(row(page, 'l4').locator('.la-prio')).toHaveCount(0);
+  });
+
+  test('a priority the database refuses goes back to what it was', async ({ page }) => {
+    await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, (r) => (r.request().method() === 'PATCH'
+      ? r.fulfill({ status: 403, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42501', message: 'permission denied' }) })
+      : r.fallback())));
+    await opt(page, 'l1', 'high').click();
+    await expect(page.locator('#err-bar-el')).toBeVisible();
+    await expect(row(page, 'l1').locator('.la-prio-o.on')).toHaveCount(0);
+    expect(await page.evaluate(`_laFind('l1').priority??null`)).toBe(null);
+  });
+
+  test('before the database has priority, the list loads and the cards carry none', async ({ page }) => {
+    const asked: string[] = [];
+    await learnTab(page, {}, () => page.route(/\/rest\/v1\/learn_applications\?/, async (r) => {
+      const sel = new URL(r.request().url()).searchParams.get('select') || '';
+      asked.push(sel);
+      if (sel.includes('priority')) return r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42703', message: 'column learn_applications.priority does not exist' }) });
+      return r.fallback();
+    }));
+    await expect(row(page, 'l1')).toContainText('Nadia Omar');
+    expect(asked.some((x) => x.includes('priority'))).toBe(true);
+    expect(asked.some((x) => !x.includes('priority') && x.includes('fix_token'))).toBe(true); // only that column is dropped
+    await expect(page.locator('.la-prio')).toHaveCount(0);
+  });
+});

@@ -501,3 +501,19 @@ is `vendor_shared_ratings` (`W.sr`, its own answer in `_vendorLoad`). The rider'
 - The phone roster's one ride picker is the strip's select (it lists past nights under Closed); the filter bar's
   Session select is hidden there (`.filter-sess-dup`). On a wide screen Sessions shows the next live ride's detail
   until one is picked (not stored in `S.selSessionDetail`).
+
+## Applications: invited riders' lists, revoking, learn-to-ride priority (2026-10-04)
+
+- **Invited riders** (Community > Applications > Invited) fall into three lists under a second row of pills
+  (`_caInvSubs`, `S._caInvSub`), read off the booking the invitation made on `invited_session` (`_caInvBks`, through
+  merged accounts, `_caCids`): `completed` = checked in (active or done), `noshow` = a no-show, or the ride's day has
+  passed without a check-in (`_caInvSt`); `invited` = the rest. A booking cancelled since shows its reason on the card
+  (`_caInvBkNote`). Nothing is stored: the lists follow the roster.
+- **Revoke invitation** (`_caRevoke`, the Invited list only): the booking is cancelled through the desk's own
+  `_staffCancelNow(id, {cancel_reason:'invite_revoked'}, {noUndo:true})` (numbers close up, the waitlist moves up; no
+  booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same
+  `invited_session`). The Pending card names the ride from that cancelled booking (`_caRevokedNote`). `invite_revoked`
+  is in `CANCEL_SYS` (labelled, never offered to pick) and stays out of Analytics' "Why riders cancel".
+- **Priority** on a learn-to-ride sign-up (`learn_applications.priority`, migration 20261004185500): Critical / High /
+  Medium / Low on New and Scheduled cards (`_laPrioRow`, `_laPrio`; a second tap clears; Undo), New ordered by it
+  (`_laPrioRank`). Until the column exists the list loads without it and the cards carry none (`S._laNoPrio`).

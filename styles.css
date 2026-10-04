@@ -6365,6 +6365,27 @@ body.view-staff .apps-srch .search-input{width:100%;box-sizing:border-box;}
 .la-learner-d{color:var(--muted);font-weight:600;margin-inline-start:6px}
 .la-learner[data-who="child"] .la-kid{background:rgba(var(--green-rgb),.12);color:var(--green)}
 .la-learner[data-who="self"] .la-kid,.la-learner[data-who="other"] .la-kid{background:rgba(var(--tint-rgb),.08);color:var(--text)}
+/* A learn-to-ride sign-up's priority (2026-10-04): four choices on the card, the one picked filled
+   in its colour; Critical and High also mark the card's edge. */
+#tab-community .la-prio{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:10px}
+#tab-community .la-prio-l{font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-inline-end:4px}
+#tab-community .la-prio-o{--pc:var(--muted);display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 12px;border-radius:999px;border:1.5px solid var(--border);background:transparent;color:var(--text);font:inherit;font-size:12.5px;font-weight:700;line-height:1.2;cursor:pointer}
+#tab-community .la-prio-o::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--pc)}
+#tab-community .la-prio-o[data-prio="critical"]{--pc:var(--red)}
+#tab-community .la-prio-o[data-prio="high"]{--pc:var(--orange)}
+#tab-community .la-prio-o[data-prio="medium"]{--pc:var(--text)}
+#tab-community .la-prio-o:hover{border-color:var(--pc)}
+#tab-community .la-prio-o.on{background:var(--pc);border-color:var(--pc);color:var(--s1)}
+#tab-community .la-prio-o.on::before{background:var(--s1)}
+#tab-community .la-row{border-inline-start:3px solid transparent;padding-inline-start:12px}
+#tab-community .la-row[data-prio="critical"]{border-inline-start-color:var(--red)}
+#tab-community .la-row[data-prio="high"]{border-inline-start-color:var(--orange)}
+@media(max-width:767px){#tab-community .la-prio-l{flex-basis:100%}#tab-community .la-prio-o{min-height:44px;padding:0 11px}}
+/* Invited riders' three lists (2026-10-04): a second row of pills under the status pills, and a
+   line on a card about its booking (cancelled, or the invitation revoked). */
+#tab-community .ca-inv-subs{margin:-2px 0 10px;padding-inline-start:10px;border-inline-start:2px solid var(--border)}
+body.view-staff #tab-community .ca-inv-subs .filter-pill.active{background:rgba(var(--green-rgb),.1);border-color:var(--green);color:var(--sf-green-ink)}
+#tab-community .ca-inv-bk{margin-top:8px;font-size:12.5px;font-weight:700;line-height:1.45;padding:7px 10px;border-radius:8px;background:rgba(var(--warn-rgb),.1);color:rgb(var(--warn-rgb))}
 
 /* Workshop requests (renderWorkshop): the Applications card (ca-*) plus these. */
 .ws-ref{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:800;color:var(--green);margin-inline-end:4px}
