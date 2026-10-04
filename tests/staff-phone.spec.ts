@@ -7,6 +7,7 @@ import { stubSupabase, waitForSb, loadStaffHalf } from './helpers/supabase';
 test('_staffPhoneE164 normalizes Saudi phone formats to E.164', async ({ page }) => {
   await stubSupabase(page);
   await page.goto('/');
+  await loadStaffHalf(page); // a staff helper on a customer's page: the staff half is fetched first (2026-10-04)
   const cases: [string, string][] = [
     ['0566668818', '+966566668818'],   // national leading-0
     ['566668818', '+966566668818'],    // bare 9-digit mobile

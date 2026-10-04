@@ -487,8 +487,13 @@ is `vendor_shared_ratings` (`W.sr`, its own answer in `_vendorLoad`). The rider'
   new roster content wrappable (the 1280px check: the table must stay inside `#tab-queue`); the Manage booking tiles
   keep the owner's equal-size grid (2026-10-02) and the booking time stays under the number (2026-09-21).
 - **One rule for money in and places taken**: `_moneyIn(sessIds)` (paid rentals + add-ons + the session report's
-  collected) and `_placesTaken(sess)` (`_holdsSpot`, waitlist left out) feed both the Dashboard and the Analytics live
-  board. The Sessions page and `spotsLeft` still count waitlisted rows as holding a seat (the booking engine's rule).
+  collected) and `_placesTaken(sess)` feed the Dashboard, the Analytics live board and the Sessions page. Places are the
+  server's count (`_capacity_guard` / `_session_fill_status`: waitlisted rows included, as `spotsLeft` counts them)
+  capped at `_placesCap(sess)`, so a full night with riders waiting reads 40/40, never 53/40.
+- **Staff hooks in the customer half are entry points** (`_onRidersRt`, `_kbCheckInNext`, `_opgKey`,
+  `showEditPriceModal`, 2026-10-04): naming a staff function from customer-reachable code (a listener set at load, the
+  realtime setup, a customer dialog) ships its whole chain to every customer. Run the build and watch the customer
+  number; trace a chain by walking the top-level statements of `app.js` from its non-function statements.
 - **A bike row has Edit (and Found) plus a ⋯ menu** (`_rowMenu('bike:'+id, items, b.name)`); the Manage bike column
   is pinned to the end of the scrolling table. `_rowMenu`'s third argument titles the sheet when it is not a booking's.
 - **Keyboard**: `?` opens the shortcut list (`_kbHelp`), `w` the walk-in, `t` the scanner, through the staff entry

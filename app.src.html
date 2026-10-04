@@ -13120,7 +13120,7 @@ function renderDashboard(){
     const n=_placesTaken(x);
     return`<button type="button" class="dash-row" data-on-click="${_on("_on_renderDashboard_1",_EV,_EL,x.id)}"><span class="dash-dot ev-${_evOf(x)}" aria-hidden="true"></span>
       <span class="dash-row-main"><strong>${esc(_evName(x))}</strong><small>${esc(_sessStart(x))} · ${esc(t(_own(SESS_STATUS_KEY,x.status)?SESS_STATUS_KEY[x.status]:'statusClosed'))}</small></span>
-      <em>${n}/${x.capacity||0}</em></button>`;}).join(''):`<div class="empty-state">${t('daySheetNone')}<div class="dash-empty-go"><button type="button" class="btn-secondary" data-on-click="${_on("_on_renderDashboard_2",_EV,_EL)}">${t('newSession')}</button></div></div>`;
+      <em>${n}/${_placesCap(x)}</em></button>`;}).join(''):`<div class="empty-state">${t('daySheetNone')}<div class="dash-empty-go"><button type="button" class="btn-secondary" data-on-click="${_on("_on_renderDashboard_2",_EV,_EL)}">${t('newSession')}</button></div></div>`;
   const alerts=_ntRows();
   const alertHtml=alerts.length?alerts.map(r=>`<button type="button" class="dash-row" data-on-click="${_on(...r.go)}"><span class="nt-dot-inline ${r.c}" aria-hidden="true"></span><span class="dash-row-main">${esc(r.txt)}</span></button>`).join(''):`<div class="empty-state">${t('dashAllClear')}</div>`;
   const tz=ts=>{try{return new Date(ts).toLocaleDateString('en-CA',{timeZone:KSA_TZ});}catch(_){return'';}};
@@ -13674,8 +13674,7 @@ function renderSessions(){
   // hid live sessions behind a Show more button. The pane scrolls.
   const displaySessions=sessList;
   const rows=sessList.length?displaySessions.map(s=>{
-    const booked=(_bySession.get(s.id)||[]).filter(e=>_holdsSpot(e,s)).length;
-    const cap=_isApprovalRide(s)?(s.spots||s.capacity||12):(s.capacity||12);
+    const cap=_placesCap(s),booked=_placesTaken(s); // the Dashboard's and Analytics' rule
     const left=Math.max(0,cap-booked);
     const isOpen=s.status==='open';
     const isFull=s.status==='full';
@@ -13719,8 +13718,7 @@ function renderSessions(){
 
   // ── Two-pane session browser: list (left) + detail (right) on iPad/desktop; master-detail on phone ──
   const _sessD=(s)=>{
-    const booked=(_bySession.get(s.id)||[]).filter(e=>_holdsSpot(e,s)).length;
-    const cap=_isApprovalRide(s)?(s.spots||s.capacity||12):(s.capacity||12);const left=Math.max(0,cap-booked);
+    const cap=_placesCap(s),booked=_placesTaken(s);const left=Math.max(0,cap-booked); // the Dashboard's and Analytics' rule
     const slots=parseSlots(s.bike_slots);const fleetInfo=slots?slotsLabel(slots):'';
     // "Close out": riders still sitting in live states on a night that is over (dated before
     // today KSA, or closed) or is tonight — the desk closes the night out as it packs up, not
@@ -31005,16 +31003,20 @@ function _salesTotals(lines){
 // One rule for "money in" and "places taken" on a set of rides (2026-10-03): the Dashboard and the
 // Analytics live board each counted their own way and read SAR 162.5 against SAR 163 and 8 against 9.
 // Money = paid rentals with their add-ons + what the session report collects (purchases at the desk and
-// cashier sales, discounts and refunds taken off). Places = the rows that hold a spot (_holdsSpot),
-// waitlisted riders left out: they are waiting for one.
+// cashier sales, discounts and refunds taken off). Places = the server's own count (_capacity_guard and
+// _session_fill_status: every row that holds a spot, waitlisted ones included, so this is also what
+// spotsLeft and the customers' "places left" read), capped at the ride's capacity: a full night with
+// riders waiting reads 40/40, not 53/40 (2026-10-04, owner question: the Sessions page said 9/12 where
+// these said 8/12).
 function _moneyIn(sessIds){
   const ids=new Set(sessIds);
   let m=getQueue().filter(e=>ids.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed').reduce((a,e)=>a+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0);
   ids.forEach(sid=>{try{m+=Number(_salesTotals(_cashSessionLines(sid)).collected)||0;}catch(_){}});
   return Math.round(m*100)/100;
 }
+function _placesCap(sess){return _isApprovalRide(sess)?(sess.spots||sess.capacity||12):(sess.capacity||12);}
 function _placesTaken(sess){
-  return getQueue().filter(e=>e.sessionId===sess.id&&e.status!=='waitlist'&&_holdsSpot(e,sess)).length;
+  return Math.min(_placesCap(sess),getQueue().filter(e=>e.sessionId===sess.id&&_holdsSpot(e,sess)).length);
 }
 // Card vs cash split of collected cashier sales for a session (reads the '__cardmeta__' line per receipt)
 function _cashCardCash(sessId){
@@ -34873,10 +34875,9 @@ function renderAnalytics(){
     const tDone=tq.filter(e=>e.status==='done');
     const tActive=allQ.filter(e=>e.status==='active').length;
     const rev=_moneyIn([...tIds]); // the Dashboard's "Collected today", same rule
-    // Booked = places held, by the same rule as the spot counts (_holdsSpot): removed rows and
-    // no-shows gave theirs back, own-bike riders hold none (except on the Petromin ride), and a
-    // waitlisted rider is waiting for one. Counting every row that was not cancelled read "53/40".
-    const cap=todaySess.reduce((a,s)=>a+((_isApprovalRide(s)&&s.spots)||s.capacity||12),0);
+    // Booked = places held (_placesTaken): the server's count, capped at each ride's capacity, so a
+    // full night with riders waiting reads 40/40 and never "53/40".
+    const cap=todaySess.reduce((a,s)=>a+_placesCap(s),0);
     const booked=todaySess.reduce((a,s)=>a+_placesTaken(s),0);
     const stat=(v,l,col)=>`<div class="an-live-stat"><div class="an-live-num" data-cssv="${_cssv({'--an-fg':col})}"><bdi>${v}</bdi></div><div class="an-live-lbl">${l}</div></div>`;
     return`<div class="chart-card an-live-card"><div class="chart-card-title">${t('anLiveTitle')}</div><div class="chart-card-sub">${t('anLiveSub')}</div><div class="an-live-row">${stat(tDone.length,t('anLiveRides'),'var(--green)')}${stat('SAR '+rev,t('anLiveRev'),'var(--green)')}${stat(tActive,t('anLiveActive'),'var(--blue)')}${stat(booked+'/'+cap,t('anLiveFill'),'var(--orange)')}</div></div>`;

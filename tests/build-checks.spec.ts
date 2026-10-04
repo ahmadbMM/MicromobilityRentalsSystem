@@ -200,7 +200,7 @@ test('every fonts.css the built halves ask for carries the file\'s hash: the pri
   // the staff half counts as one: the print windows may sit in staff.js or in a section's part
   for (const [rel, text] of [['index.html', read('index.html')], ['app.js', read('app.js')], ['staff.js + staff-parts', staffAllText()]]) {
     const refs = text.match(/fonts\/fonts\.css[^"'`\s)]*/g) || [];
-    expect(refs.length, rel).toBeGreaterThan(0);
+    if (rel !== 'app.js') expect(refs.length, rel).toBeGreaterThan(0); // the customer script links none since the print windows went to staff.js (2026-10-04)
     for (const r of refs) expect(r, rel).toMatch(/^fonts\/fonts\.css\?v=[a-f0-9]{10}$/);
   }
 });

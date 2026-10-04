@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, unlockStaff, loginCustomer, waitForSb, staffReady } from './helpers/supabase';
+import { stubSupabase, unlockStaff, loginCustomer, waitForSb, staffReady, loadStaffHalf } from './helpers/supabase';
 
 // SECURE_AUTH mode (SECURITY-RUNBOOK.md): the app talks to token-checked RPCs
 // and the no-PII queue_public view instead of the locked tables. The flag is
@@ -101,6 +101,7 @@ test('customer writes route through the token RPCs when the table is locked', as
   expect(res).toEqual({ error: null });
   // Queue numbers never shift (gaps are kept), so _shiftDownAfter is a deliberate no-op: it must
   // make NO writes at all - not a direct table PATCH and not even the shiftdown RPC.
+  await loadStaffHalf(page); // a staff helper on a customer's page: the staff half is fetched first (2026-10-04)
   await page.evaluate(`_shiftDownAfter('s1', 3)`);
 
   expect(rpcCalls.some((c) => c.includes('rpc/customer_booking_update'))).toBe(true);
