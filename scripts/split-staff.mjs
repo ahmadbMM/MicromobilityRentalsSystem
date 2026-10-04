@@ -986,7 +986,11 @@ export function formatBareWrites(r, limit = 20) {
 // (it read 2.0 more than here for 1c230561).
 // Staff 400 -> 404 (2026-10-04): History > Customer activity (renderCustActivity in the history part, 36 strings);
 // 399.2 KB here is ~401.4 on the runner (it read 2.2 more than here for 9e45176b: 394.1 here, 396.3 there).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 404, core: 222 };
+// Core 222 -> 224 (2026-10-04): the review's leftovers that live in the desk's core - an event cloned or
+// templated as an event, a code's repricing from an event's seat, the undo code's plain refusal - with the
+// learn-to-ride switch beside them; 220.8 KB here is ~222.1 on the runner (it read 1.3 more than here for
+// 6ed9a842: 220.3 here, 221.6 there), over 222.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 404, core: 224 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
