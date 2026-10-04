@@ -123,3 +123,15 @@ test("a rider who is not VIP keeps Road Carbon (and the tag check runs on the ri
   await expect.poll(() => page.evaluate(`S.loggedIn&&S.loggedIn.default_pay`)).toBe(null);
   expect(await page.evaluate(`[_regTypeHidden('Road Carbon'),_regHouseFor('Road')]`)).toEqual([false, false]);
 });
+
+test('a refused reprice is said, and the booking is read back as the database holds it', async ({ page }) => {
+  await boot(page, { customer_tags: [], queue_entries: [row('q1', 1, 'v1', 'Vera Vip')] });
+  await page.route(/\/rest\/v1\/queue_entries\?/, (route) => route.request().method() === 'PATCH'
+    ? route.fulfill({ status: 403, contentType: 'application/json', body: JSON.stringify({ code: '42501', message: 'new row violates row-level security policy for table "queue_entries"' }) })
+    : route.fallback());
+  await page.evaluate(`showTagGrantModal('v1','tag_vip')`);
+  await page.evaluate(`saveTagGrant()`);
+  await expect(page.locator('#err-bar-el')).toBeVisible();
+  // the row went back to what the server still says: not paid, at the Road price
+  await expect.poll(() => page.evaluate(`(()=>{const e=S.queue.find(x=>x.id==='q1');return e&&[e.paid,e.price];})()`)).toEqual([false, 75]);
+});

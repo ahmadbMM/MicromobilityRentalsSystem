@@ -52,3 +52,22 @@ test('a handler of a part that has not arrived yet runs once it has', async ({ p
   release();
   await expect.poll(() => page.evaluate('window.__ran')).toBe(1);
 });
+
+test('a several-call handler whose first call waits for a part runs every call, in order, once it has come', async ({ page }) => {
+  await stubSupabase(page, { sessions: [], queue_entries: [] });
+  await page.addInitScript(() => { (window as unknown as { __staffPartsNow?: boolean }).__staffPartsNow = false; });
+  await unlockStaff(page);
+  let release!: () => void;
+  const held = new Promise<void>((r) => { release = r; });
+  await page.route(/\/staff-parts\/[a-z]+\.js/, async (route) => { await held; await route.continue(); });
+  await page.goto('/bookings', { waitUntil: 'domcontentloaded' });
+  await waitForSb(page);
+  await staffReady(page);
+  expect(await page.evaluate('_staffPartsReady()')).toBe(false);
+  await page.evaluate(`window.__calls=[];window._zzLater=function(n){window.__calls.push('b'+n);};`);
+  await page.evaluate(`(()=>{const b=document.createElement('button');b.id='probe2';b.setAttribute('data-on-click',JSON.stringify([['_zzFirst',1],['_zzLater',2]]));document.body.appendChild(b);})()`);
+  await page.evaluate(`document.getElementById('probe2').click()`);
+  await page.evaluate(`window._zzFirst=function(n){window.__calls.push('a'+n);}`);
+  release();
+  await expect.poll(() => page.evaluate('window.__calls')).toEqual(['a1', 'b2']);
+});

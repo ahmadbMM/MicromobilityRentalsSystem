@@ -547,13 +547,15 @@ function _onRun(spec,el,ev){
 }
 // One call ["fn",...args], or several in a row [["fn",...],["fn2",...]].
 function _onExec(steps,el,ev){
-  for(const st of (Array.isArray(steps[0])?steps:[steps])){
-    const fn=typeof st[0]==='string'?window[st[0]]:null;
+  const list=Array.isArray(steps[0])?steps:[steps];
+  for(let i=0;i<list.length;i++){
+    const st=list[i],fn=typeof st[0]==='string'?window[st[0]]:null;
     if(typeof fn!=='function'){
       // A staff section's code that has not arrived yet (staff-parts, 2026-10-01; they load right after
       // the desk's first paint): fetch them all and make the call when they land. A name built at run
-      // time is the only way a section's function can be asked for before its part is here.
-      if(typeof _staffPartsReady==='function'&&!_staffPartsReady()){_loadStaffParts().then(()=>_onExec([st],el,ev),()=>{});return;}
+      // time is the only way a section's function can be asked for before its part is here. The
+      // steps after it wait with it, so a several-call handler still runs whole and in order.
+      if(typeof _staffPartsReady==='function'&&!_staffPartsReady()){const rest=list.slice(i);_loadStaffParts().then(()=>_onExec(rest,el,ev),()=>{});return;}
       console.warn('no handler named',st[0]);return;
     }
     const args=st.slice(1).map(a=>a&&typeof a==='object'&&'@'in a?(a['@']==='this'?el:a['@']==='event'?ev:el[a['@']]):a);
@@ -924,7 +926,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   youreNext:'You’re next',onBikeNow:'On the bike now',inQueueMsg:'You\'re in the queue',
   profilePhotoLabel:'Profile photo',bikePhotoLabel:'Bike photo',uploadPhotoBtn:'Upload photo',removePhotoBtn:'Remove',photoSavedToast:'Photo updated',photoErrToast:'Could not read that image.',
   tierNewcomer:'Newcomer',tierRegular:'Regular',tierPro:'Pro',tierElite:'Elite',tierLegend:'Legend',profileCompleteLabel:'Profile {0}% complete',
-  repeatWeeksLabel:'Repeat weekly',repeatWeeksHint:'creates the same session for the next weeks',repeatOnceOpt:'Just this date',repeatWeeksOpt:'{0} weeks',toastRecurringCreated:'{0} sessions created',tplTitle:'Templates',tplSaveBtn:'Save setup as template',tplNone:'No templates yet. Set a session up, then save it.',bwTitle:'Booking window',bwSub:'How far ahead riders may book, and from what time on the day a ride comes within reach. Blank means no limit. Staff are never held by it.',bwDays:'Days ahead',bwAt:'Opens at',bwSaved:'Booking window saved',bwBad:'Days: 0 to 365',bwOpensOn:'Booking opens {0}',tplPushAsk:'{0} future rides were made from "{1}". Update them to match?',tplPushBtn:'Update rides',tplPushed:'{0} future rides updated',tplPrompt:'Template name',tplSaved:'Template saved: {0}',tplDeleted:'Template removed',tplRemoveAria:'Remove template {0}',tplDays:'Repeat on these days (optional)',fillPreview:'{0} sessions · {1} to {2}',repeatOneWeekOpt:'1 week',
+  repeatWeeksLabel:'Repeat weekly',repeatWeeksHint:'creates the same session for the next weeks',repeatOnceOpt:'Just this date',repeatWeeksOpt:'{0} weeks',toastRecurringCreated:'{0} sessions created',nsTplTitle:'Templates',tplSaveBtn:'Save setup as template',tplNone:'No templates yet. Set a session up, then save it.',bwTitle:'Booking window',bwSub:'How far ahead riders may book, and from what time on the day a ride comes within reach. Blank means no limit. Staff are never held by it.',bwDays:'Days ahead',bwAt:'Opens at',bwSaved:'Booking window saved',bwBad:'Days: 0 to 365',bwOpensOn:'Booking opens {0}',tplPushAsk:'{0} future rides were made from "{1}". Update them to match?',tplPushBtn:'Update rides',tplPushed:'{0} future rides updated',tplPrompt:'Template name',nsTplSaved:'Template saved: {0}',tplDeleted:'Template removed',tplRemoveAria:'Remove template {0}',tplDays:'Repeat on these days (optional)',fillPreview:'{0} sessions · {1} to {2}',repeatOneWeekOpt:'1 week',
   sessionAddonsLabel:'Add-ons offered',sessionAddonsHint:'inventory items customers can add to a booking',addonStepTitle:'Add on your booking',addonStepSub:'Optional extras for this ride.',addonNone:'No add-ons available for this session.',addonsLabel:'Add-ons',addonEditTitle:'Edit add-ons',addonAddBtn:'Add-ons',stockLeft:'left',outOfStock:'Out of stock',coReconOk:'Card + cash balances',coReconOff:'Unaccounted',
   nsSelectAll:'Select all',nsClear:'Clear',nsSelectAllBikes:'Select all bikes',
   invTitle:'Inventory',invSub:'Helmets, accessories and spare-part stock.',invAddBtn:'+ Add item',invItemName:'Item',invCategory:'Category',invQty:'In stock',invLowAt:'Low-stock at',invPrice:'Price (SAR)',invFree:'Free',invCost:'Cost (SAR)',invCostHint:'(what you pay — powers margin)',invLowStock:'Low stock',invOutStock:'Out of stock',invInStock:'In stock',invLowAlert:'{0} item(s) need restocking',invNoItems:'No inventory items yet. Add helmets, locks, accessories or spare parts.',invSaved:'Inventory updated',catHelmet:'Helmet',catAccessory:'Accessory',catSparePart:'Spare part',catApparel:'Apparel',catOther:'Other',catProteinSnacks:'Protein Snacks',catProteinCookies:'Protein Cookies',catProteinGummies:'Protein Gummies',catProteinMuffins:'Protein Muffins',catProteinBars:'Protein Bars',catElectrolyteSachets:'Electrolytes',catEnergyGels:'Energy Gels',
@@ -1477,7 +1479,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   youreNext:'دورك التالي',onBikeNow:'على الدراجة الآن',inQueueMsg:'أنت في الطابور',
   profilePhotoLabel:'صورة الملف',bikePhotoLabel:'صورة الدراجة',uploadPhotoBtn:'رفع صورة',removePhotoBtn:'إزالة',photoSavedToast:'تم تحديث الصورة',photoErrToast:'تعذّرت قراءة الصورة.',
   tierNewcomer:'مبتدئ',tierRegular:'منتظم',tierPro:'محترف',tierElite:'نخبة',tierLegend:'أسطورة',profileCompleteLabel:'اكتمال الملف {0}%',
-  repeatWeeksLabel:'تكرار أسبوعي',repeatWeeksHint:'ينشئ نفس الجلسة للأسابيع القادمة',repeatOnceOpt:'هذا التاريخ فقط',repeatWeeksOpt:'{0} أسابيع',toastRecurringCreated:'تم إنشاء {0} جلسات',tplTitle:'القوالب',tplSaveBtn:'حفظ الإعداد كقالب',tplNone:'لا قوالب بعد. اضبط الجلسة ثم احفظها.',bwTitle:'نافذة الحجز',bwSub:'إلى أي مدى مسبقاً يستطيع الراكبون الحجز، ومن أي ساعة في اليوم الذي تصبح فيه الجولة ضمن النافذة. الفراغ يعني بلا حد. لا يقيّد الموظفين.',bwDays:'أيام مسبقاً',bwAt:'يفتح عند',bwSaved:'تم حفظ نافذة الحجز',bwBad:'الأيام: من 0 إلى 365',bwOpensOn:'يفتح الحجز {0}',tplPushAsk:'{0} جولات قادمة أُنشئت من "{1}". هل تُحدَّث لتطابقه؟',tplPushBtn:'تحديث الجولات',tplPushed:'تم تحديث {0} جولات قادمة',tplPrompt:'اسم القالب',tplSaved:'حُفظ القالب: {0}',tplDeleted:'حُذف القالب',tplRemoveAria:'حذف القالب {0}',tplDays:'كرّرها في هذه الأيام (اختياري)',fillPreview:'{0} جلسة · من {1} إلى {2}',repeatOneWeekOpt:'أسبوع واحد',
+  repeatWeeksLabel:'تكرار أسبوعي',repeatWeeksHint:'ينشئ نفس الجلسة للأسابيع القادمة',repeatOnceOpt:'هذا التاريخ فقط',repeatWeeksOpt:'{0} أسابيع',toastRecurringCreated:'تم إنشاء {0} جلسات',nsTplTitle:'القوالب',tplSaveBtn:'حفظ الإعداد كقالب',tplNone:'لا قوالب بعد. اضبط الجلسة ثم احفظها.',bwTitle:'نافذة الحجز',bwSub:'إلى أي مدى مسبقاً يستطيع الراكبون الحجز، ومن أي ساعة في اليوم الذي تصبح فيه الجولة ضمن النافذة. الفراغ يعني بلا حد. لا يقيّد الموظفين.',bwDays:'أيام مسبقاً',bwAt:'يفتح عند',bwSaved:'تم حفظ نافذة الحجز',bwBad:'الأيام: من 0 إلى 365',bwOpensOn:'يفتح الحجز {0}',tplPushAsk:'{0} جولات قادمة أُنشئت من "{1}". هل تُحدَّث لتطابقه؟',tplPushBtn:'تحديث الجولات',tplPushed:'تم تحديث {0} جولات قادمة',tplPrompt:'اسم القالب',nsTplSaved:'حُفظ القالب: {0}',tplDeleted:'حُذف القالب',tplRemoveAria:'حذف القالب {0}',tplDays:'كرّرها في هذه الأيام (اختياري)',fillPreview:'{0} جلسة · من {1} إلى {2}',repeatOneWeekOpt:'أسبوع واحد',
   nsSelectAll:'تحديد الكل',nsClear:'مسح',nsSelectAllBikes:'تحديد كل الدراجات',
   invTitle:'المخزون',invSub:'الخوذ والإكسسوارات وقطع الغيار.',invAddBtn:'+ إضافة عنصر',invItemName:'العنصر',invCategory:'الفئة',invQty:'المتوفر',invLowAt:'تنبيه عند',invPrice:'السعر (ريال)',invFree:'مجاني',invCost:'التكلفة (ريال)',invCostHint:'(ما تدفعه — يُحسب منه الربح)',invLowStock:'مخزون منخفض',invOutStock:'نفد المخزون',invInStock:'متوفر',invLowAlert:'{0} عنصر بحاجة لإعادة تخزين',invNoItems:'لا توجد عناصر بعد. أضف الخوذ والأقفال والإكسسوارات أو قطع الغيار.',invSaved:'تم تحديث المخزون',catHelmet:'خوذة',catAccessory:'إكسسوار',catSparePart:'قطعة غيار',catApparel:'ملابس',catOther:'أخرى',catProteinSnacks:'سناك بروتين',catProteinCookies:'كوكيز بروتين',catProteinGummies:'علكة بروتين',catProteinMuffins:'مافن بروتين',catProteinBars:'ألواح بروتين',catElectrolyteSachets:'إلكتروليت',catEnergyGels:'جل طاقة',
   cashierTitle:'المبيعات',cashierSub:'العناصر المباعة مع هذا الإيجار',cashierAddBtn:'إضافة عملية بيع',cashCustomOpt:'عنصر مخصص…',cashAmtLabel:'سعر الوحدة (ريال)',cashQtyLabel:'الكمية',cashPayLabel:'الدفع',cashRingUp:'إضافة للبيع',cashNoSales:'لا توجد مشتريات بعد.',cashVoid:'إلغاء',cashDone:'تم',cashAddedToast:'تم تسجيل البيع',cashVoidedToast:'تم إلغاء العملية',cashSelectItem:'اختر عنصراً',cashNameLabel:'اسم العنصر',cashAmtRequired:'أدخل مبلغاً صحيحاً',cashSalesTitle:'المبيعات',cashValue:'قيمة المبيعات',cashQtyCol:'الكمية المباعة',
@@ -2921,13 +2923,17 @@ function _regTypeHidden(ty){
 async function _houseReprice(cid,names,was,now){
   const own=new Set(names.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
   const live=getQueue().filter(e=>e.customerId===cid&&['waiting','waitlist','active'].includes(e.status)&&!_apprSessIds.has(e.sessionId)&&own.has(String(e.name||'').trim().toLowerCase()));
-  const calls=[];
+  const calls=[],ids=[];
   live.forEach(e=>{
     const cov=now(e.typePreference);
-    if(cov&&!e.paid){e.paid=true;e.price=0;calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id));}
-    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const p=priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id));}
+    if(cov&&!e.paid){e.paid=true;e.price=0;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id));}
+    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const p=priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id));}
   });
-  if(calls.length){try{await Promise.all(calls);}catch(e){}}
+  if(!calls.length)return;
+  // A refused write is said, and the rows are read back: the screen must not show a booking on the
+  // house (or pending) that the database still prices the old way - the desk would not collect.
+  let res;try{res=await Promise.all(calls);}catch(e){res=[{error:e||{message:'failed'}}];}
+  if(_writeErr(res,'house reprice'))await _reloadRows(ids);
 }
 // The VIP tag was given or taken on this device (was: whether the account held it before): when
 // that changed its terms, its live bookings follow.
@@ -4891,7 +4897,7 @@ function _srchClose(w,inp){
 }
 // ── Every staff table sorts by any column ─────────────────────────────────
 // Tap a column's name to sort by it, tap again to reverse. Tables that sort their own data (the
-// Queue, History, Riders, the bike picker: their headers carry onclick) keep doing so; tables
+// Queue, History, Riders, the bike picker: their headers carry a data-on-click) keep doing so; tables
 // holding inputs, or whose rows hang together, are left alone. Mounted like the search ×, after
 // every re-render, which puts the chosen order back on the fresh rows.
 const _tsState=new Map();let _tsT=null;
@@ -4901,7 +4907,7 @@ function _tsWidth(row){let n=0;for(const c of row.cells)n+=c.colSpan||1;return n
 function _tsOk(tbl){
   if(tbl.getAttribute('role')==='presentation'||tbl.hasAttribute('data-nosort')||tbl.closest('.pv-tw'))return false;
   const h=tbl.tHead;if(!h||h.rows.length!==1||tbl.tBodies.length!==1)return false;
-  const hr=h.rows[0];if(!hr.cells.length||[...hr.cells].some(c=>c.hasAttribute('onclick')))return false;
+  const hr=h.rows[0];if(!hr.cells.length||[...hr.cells].some(c=>c.hasAttribute('onclick')||c.hasAttribute('data-on-click')))return false;
   const rows=[...tbl.tBodies[0].rows];if(rows.length<2)return false;
   const w=_tsWidth(hr);
   return rows.every(r=>_tsWidth(r)===w&&![...r.cells].some(c=>c.rowSpan>1))&&!tbl.tBodies[0].querySelector('input,select,textarea');
@@ -12990,7 +12996,7 @@ async function _nsTplSave(){
   const next=[{id,label,form},...before.filter(x=>x.label!==label)].slice(0,12);
   if(!await _optWrite('session_templates',next)){S.staffOptions.session_templates=before;renderSessions();return;}
   S._nsTplId=id; // the rides made next carry it
-  const msg=t('tplSaved').replace('{0}',label);
+  const msg=t('nsTplSaved').replace('{0}',label);
   logAction(msg);toast(`✓ ${msg}`);renderSessions();
   // The future rides made from it follow the edit, if the staffer says so.
   const fut=prev?_nsTplFuture(id):[];
@@ -13050,7 +13056,7 @@ async function _nsTplDel(id){
 function _nsTplHtml(){
   const l=_nsTpls();
   return `<div class="ns-tpl">
-    <div class="ns-tpl-head"><span class="ns-tpl-title">${t('tplTitle')}</span>
+    <div class="ns-tpl-head"><span class="ns-tpl-title">${t('nsTplTitle')}</span>
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_nsTplSave")}">${t('tplSaveBtn')}</button></div>
     ${l.length?`<div class="ns-tpl-list">${l.map(x=>`<span class="ns-tpl-chip"><button type="button" class="ns-tpl-use" data-on-click="${_on("_nsTplApply",x.id)}">${esc(x.label)}</button><button type="button" class="ns-tpl-del" aria-label="${esc(t('tplRemoveAria').replace('{0}',x.label))}" data-on-click="${_on("_nsTplDel",x.id)}">&times;</button></span>`).join('')}</div>`
       :`<div class="ns-tpl-none">${t('tplNone')}</div>`}

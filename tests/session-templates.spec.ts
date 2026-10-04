@@ -63,6 +63,8 @@ test('a template saves the setup, fills the form but not its date, and can be re
   });
   const form = page.locator('#sess-add-form');
   await expect(form.locator('.ns-tpl')).toContainText('No templates yet');
+  // the session templates' own heading, not the Settings card's "Message templates"
+  await expect(form.locator('.ns-tpl-title')).toHaveText('Templates');
   await page.evaluate(`S.newSessEvent='community';S.newSessSpots='35';S.newSessStartTime='05:45';S.newSessEndTime='06:15';S.newSessDays=[6];renderSessions()`);
   await form.getByRole('button', { name: 'Save setup as template' }).click();
   const name = page.locator('#prompt-input');
@@ -70,6 +72,9 @@ test('a template saves the setup, fills the form but not its date, and can be re
   await name.fill('Saturday social');
   await name.press('Enter');
   await expect.poll(() => saved.length).toBe(1);
+  // the confirmation names the template it saved
+  expect(await page.evaluate(`t('nsTplSaved').replace('{0}','Saturday social')`)).toBe('Template saved: Saturday social');
+  await expect.poll(() => page.evaluate(`JSON.stringify(S.fullLog||[])`)).toContain('Template saved: Saturday social');
   expect(saved[0]).toEqual([expect.objectContaining({ label: 'Saturday social', form: expect.objectContaining({ newSessEvent: 'community', newSessSpots: '35', newSessDays: [6] }) })]);
   expect(JSON.stringify(saved[0])).not.toContain('newSessDate');
 

@@ -88,6 +88,14 @@ test('a plain table sorts by any column it shows, reverses on a second tap, and 
   await expect.poll(qty).toEqual(['30', '12', '5']);
 });
 
+test('a table that sorts itself (its headers carry a data-on-click) is left to its own sort', async ({ page }) => {
+  await boot(page);
+  await page.evaluate(`setStaffTab('inventory')`);
+  await page.evaluate(`(()=>{const d=document.createElement('div');d.id='ts-probe';d.innerHTML='<table><thead><tr><th data-on-click=\\'["setSfSort","name"]\\'>Name</th><th>Qty</th></tr></thead><tbody><tr><td>B</td><td>2</td></tr><tr><td>A</td><td>1</td></tr></tbody></table><table id="ts-plain"><thead><tr><th>Name</th><th>Qty</th></tr></thead><tbody><tr><td>B</td><td>2</td></tr><tr><td>A</td><td>1</td></tr></tbody></table>';document.querySelector('main').appendChild(d);_mountTableSorts();})()`);
+  await expect(page.locator('#ts-probe table').first().locator('th.th-sort')).toHaveCount(0);
+  await expect(page.locator('#ts-plain th.th-sort')).toHaveCount(2);
+});
+
 test('Petromin: P-001 upward by default, any column on a tap, and two nights\' P-001 stay two bookings', async ({ page }) => {
   const S2 = `${TODAY}-pm`, OLD = '2020-01-01-pm';
   const pm = (id: string, extra: Record<string, unknown> = {}) => ({ id: `${id}-s`, day: 'Wednesday', session_date: id.slice(0, 10), capacity: 35, status: 'open', created_at: 1, bike_slots: JSON.stringify({ _time: '19:00 - 21:00' }), ride_kind: 'petromin', event_kind: 'community', paid_ride: true, ...extra });
