@@ -3029,7 +3029,7 @@ function _refNeeded(){return _refDirty||!_refAt||(!!S._staffAuthed&&!_refByStaff
 // fix_fields (correction requests) and apple_email (the Apple relay address kept beside a real
 // email) came later than the rest. Until a migration has run its column does not exist, and
 // asking for it would fail the whole list, so the missing one is dropped and the list asked again.
-const _CUST_OPT_COLS=['fix_fields','apple_email','ride_news_at','ride_news','deletion_requested_at','merged_into','heard_from']; // ride_news_at before ride_news: the error names the longer one, and a substring match would drop the wrong column
+const _CUST_OPT_COLS=['fix_fields','apple_email','ride_news_at','ride_news','deletion_requested_at','merged_into','heard_from','profession','workplace']; // ride_news_at before ride_news: the error names the longer one, and a substring match would drop the wrong column
 async function _custListFetch(){
   const get=cols=>_pagedAll(()=>sb.from('customers').select(cols).order('created_at').order('id')).catch(e=>({data:null,error:e}));
   let opt=_CUST_OPT_COLS.slice();
@@ -3149,7 +3149,7 @@ function _watchRefWrites(client){
 // day. A database without the function, or an answer not shaped like one, turns the sync off for
 // the page's life and the old reads carry on, so this build is safe on either side of the
 // migration. Signing out, or losing the unlock, drops the copy (_syncDrop): it holds riders' details.
-const SYNC_V=1;                        // bump to throw away every device's copy (a key or a column that changed meaning)
+const SYNC_V=2;                        // 2: customers carry profession + workplace (20261004140000). bump to throw away every device's copy (a key or a column that changed meaning)
 const SYNC_MARGIN_MS=5*60*1000;        // ask again for the last five minutes: a write committed after a read began can carry an earlier stamp
 const SYNC_FULL_EVERY_MS=14*24*3600*1000; // and read each list whole once a fortnight, whatever the copy says (it was daily: a year of bookings and every account, some 8 MB per staff device per day, for a copy the deltas already keep exact)
 const SYNC_TABLES={q:'queue_entries',c:'customers',ct:'customer_tags'};
@@ -15012,9 +15012,16 @@ function showEditCustomerModal(id){
   S._cf={mode:'edit',id:c.id,origName:c.name||'',first:n.first,middle:n.middle,last:n.last,email:c.email||'',cc,phone,pwd:'',
     height:c.height!=null?String(c.height):'',gender:c.gender||'',heard:c.heard_from||'',birth:c.birth_date||'',country:c.country||'',city:c.city||'',nationality:c.nationality||'',socials:c.socials||null,type:c.type_preference||'Any',
     defpay:_housePayTypes(c)?'house':'',defpayTypes:(h=>h&&h!=='all'?h:bikeTypeOpts(false))(_housePayTypes(c)),origDefPay:c.default_pay||null,hiddenTypes:_hiddenTypes(c),
-    rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,prof:c.profession||'',work:c.workplace||'',
+    rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,prof:c.profession||'',work:c.workplace||'',aboutIn:('profession' in c)&&('workplace' in c),
     origPhone:c.phone||'',origEmail:(c.email||'').toLowerCase()};
   renderCustFormModal();
+  // A copy without profession/company (synced before 20261004140000) reads them from the row, so the
+  // boxes show what the account holds and a save never writes them back empty.
+  if(!S._cf.aboutIn&&sb)sb.from('customers').select('profession,workplace').eq('id',c.id).maybeSingle().then(({data,error})=>{
+    const d=S._cf;if(error||!data||!d||d.id!==c.id)return;
+    d.prof=data.profession||'';d.work=data.workplace||'';d.aboutIn=true;
+    [['cf-prof',d.prof],['cf-work',d.work]].forEach(([k,v])=>{const el=document.getElementById(k);if(el&&!el.value)el.value=v;});
+  },()=>{});
 }
 // Ride news on the account editor. Consent is the rider's to give, so staff can only take it
 // away - when a rider replies STOP - and never switch it on for them.
@@ -17437,7 +17444,7 @@ async function saveCustForm(){
       }
       // profession, company and how they heard (20261002180000): an account holds every field its application asked
       const _v=id=>String((document.getElementById(id)||{}).value||'').replace(/\s+/g,' ').trim();
-      const _about={profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null,heard_from:_v('cf-heard')||null};
+      const _about={...(d.aboutIn?{profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null}:{}),heard_from:_v('cf-heard')||null}; // not loaded = not sent: an empty box is not the account's answer
       const{error}=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_cfDefPayVal(),hidden_types:_cfHiddenVal(),...(d.gender?{gender:d.gender}:{}),..._about}).eq('id',d.id);
       if(error){if(error.code==='23505')toast(t('errEmailExists'),'error');else toast(error.message||t('errConnection'),'error');return;}
       // Sync the corrected CONTACT info onto the account holder's OWN live bookings only. One account

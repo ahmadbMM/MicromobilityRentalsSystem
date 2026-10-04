@@ -38,3 +38,36 @@ test('My Account offers Bike owner among the bike types, and never Any', async (
   await expect(page.locator('#atp-Own')).toBeAttached();
   await expect(page.locator('#atp-Any')).toHaveCount(0);
 });
+
+// 2026-10-04: staff_sync did not carry profession or company, so the editor showed them empty and its save
+// wrote them back empty. A copy without them now reads them from the row, and never sends what it never read.
+test('an account copy without profession and company reads them from the row before showing them', async ({ page }) => {
+  await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [], customers });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction(`(S.customers||[]).length>0`);
+  await page.evaluate(`S.customers=S.customers.map(c=>{const x={...c};delete x.profession;delete x.workplace;return x;})`);
+  await page.evaluate(`showEditCustomerModal('c1')`);
+  await expect(page.locator('#cf-prof')).toHaveValue('Engineer');
+  await expect(page.locator('#cf-work')).toHaveValue('Aramco');
+});
+
+test('the editor never saves profession and company it could not read', async ({ page }) => {
+  await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [], customers });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction(`(S.customers||[]).length>0`);
+  await page.route(/\/rest\/v1\/customers\?select=profession/, (r) => r.fulfill({ status: 500, contentType: 'application/json', body: '{"message":"down"}' }));
+  await page.evaluate(`S.customers=S.customers.map(c=>{const x={...c};delete x.profession;delete x.workplace;return x;})`);
+  const sent: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/customers')) sent.push(r.postDataJSON()); });
+  await page.evaluate(`showEditCustomerModal('c1')`);
+  await expect(page.locator('#cf-prof')).toHaveValue('');
+  await page.evaluate(`saveCustForm()`);
+  await expect.poll(() => sent.length).toBeGreaterThan(0);
+  expect(sent[0]).not.toHaveProperty('profession');
+  expect(sent[0]).not.toHaveProperty('workplace');
+  expect(sent[0]).toMatchObject({ heard_from: 'instagram' });
+});
