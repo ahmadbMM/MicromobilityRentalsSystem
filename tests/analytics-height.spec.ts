@@ -22,7 +22,7 @@ test('analytics: session picker, rider-heights card, and the per-session report 
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('analytics')`);
+  await page.evaluate(`setStaffTab('analytics');setAnView('ridership')`); // the card is on Ridership; only the view on show is drawn
 
   // rider-heights card present with the average (185+158+172)/3 = 172
   const html = await page.evaluate(`document.getElementById('tab-analytics').innerHTML`);

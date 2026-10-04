@@ -66,6 +66,7 @@ test('team consumption names the member a till sale was taken by', async ({ page
     rows: [{ id: 'r1', session_id: 's1' }],
     cashSales: [{ id: 'x1', receipt_id: 'x1', session_id: 's1', name: 'Gel', category: 'Food', qty: 2, price: 10, pay: 'team', team_name: 'Ali Member' }],
   });
+  await page.evaluate("setAnView('revenue')"); // only the sub-view on show is drawn (2026-10-04)
   const card = page.locator('#tab-analytics .chart-card', { hasText: 'Ali Member' });
   await expect(card).toHaveCount(1);
 });
@@ -76,6 +77,7 @@ test('repeat rate counts visits: a party on one booking is not a repeat rider', 
     sessions: [{ id: 's1', day: 'Friday', session_date: '2026-01-02', capacity: 12, status: 'closed' }],
     rows: [1, 2, 3].map((i) => ({ id: 'r' + i, session_id: 's1', customer_id: 'c1' })),
   });
+  await page.evaluate("setAnView('customers')");
   await expect(page.locator('#tab-analytics .hl-value', { hasText: '0/1' })).toHaveCount(1);
 });
 
@@ -86,6 +88,7 @@ test('the lapsed rider WhatsApp link carries the full international number', asy
     sessions: [{ id: 's1', day: 'Friday', session_date: past, capacity: 12, status: 'closed' }],
     rows: [{ id: 'r1', session_id: 's1', session_date: past, customer_id: 'c1', phone: '0512345678' }],
   });
+  await page.evaluate("setAnView('customers')");
   const href = await page.locator('#tab-analytics a[href*="wa.me/"]').first().getAttribute('href');
   expect(href).toContain('https://wa.me/966512345678?');
 });
@@ -108,7 +111,7 @@ test('This Month arrows compare the month so far with the same days of last mont
       { id: 'b1', session_id: 'prev' }, { id: 'b2', session_id: 'prev' },
       ...Array.from({ length: 10 }, (_, i) => ({ id: 'l' + i, session_id: 'late' })),
     ],
-    setup: "S.analyticsRange='month';S.anSession='all';",
+    setup: "S.analyticsRange='month';S.anSession='all';S.anView='ridership';",
   });
   const badge = page.locator('#tab-analytics .analytics-kpi-label', { hasText: 'Completed Rides' }).locator('.an-delta');
   await expect(badge).toHaveText(/0%/);

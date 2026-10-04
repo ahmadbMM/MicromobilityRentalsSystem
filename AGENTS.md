@@ -131,16 +131,30 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
   now holds it (`whole:true`), so callers merge it over nothing. Each list is read whole once a
   day. No function (or a stub's `[]`) turns it off for the page and the old reads carry on. The
   copy is dropped with the unlock (`_syncDrop`). A column the desk reads from `customers` must be
-  added to `cust_cols` in `staff_sync` as well as to `CUST_REF_COLS`.
+  added to `cust_cols` in `staff_sync` as well as to `CUST_REF_COLS`. Since 2026-10-04 the copy
+  is one record per row in `mm-sync-2` (a `meta` record per list plus a store per list keyed by
+  `_syncKey`; a change puts and deletes only its rows). The layout is that database's name and
+  IndexedDB version; `SYNC_V` still only says what the rows mean. Each answer also names the keys
+  it brought (`changed`), and `_qEntries` keeps the entry objects of the bookings that did not move
+  (when they still read exactly as their row), while the `S.queue` array is new every time.
 - **A customer's device is cheap to keep open.** It joins only `sessions` and `bikes` on the live
   channel (`_rtTables`), ignores bike events outside My Rides, reloads at most once per
   `RT_CUST_GAP_MS` (`_rtCustWait`), and in secure mode never asks for the staff-only lists
   (`_custOnly`). `goStaff` rebuilds the channel with the staff tables (`_rtEnsureMode`).
 - **Paint first, reconcile after.** Check-in, bulk check-in, no-show and return set the local
   row and call `renderStaffQueue()` before awaiting any reload. Keep that order in new actions.
-- **Hot helpers are cached.** `shortDate` memoises per language; `_decidedByPerson()` and
-  `_qBySession()` are per-load indexes keyed on the `S.queue` array identity, so replace the
-  array (`S.queue=q.slice()`) after an in-place mutation you want them to see.
+- **Hot helpers are cached.** `shortDate` memoises per language; `_decidedByPerson()`,
+  `_qBySession()` and `_qGet(id)` are per-load indexes keyed on the `S.queue` array identity, so
+  replace the array (`S.queue=q.slice()`) after an in-place mutation you want them to see.
+  `_sessGet(id)` is the same over `S.sessions`, `_ctRowsFor(cid)` over `S.customerTags`: use them
+  instead of a `find`/`filter` per row. (2026-10-04)
+- **Analytics is built once per state (2026-10-04).** `renderAnalytics` keeps its markup under
+  `_anModelKey()` (the lists by identity, a sum over the booking fields desk actions edit in place,
+  the bike states, every setting it reads, the language and whether its pack has loaded) and only
+  the sub-view on show is in the page; the others are drawn from `_anCache` when picked (Growth and
+  Ratings are not even computed until then). A spec that reads a card must open its view first
+  (`setAnView('revenue')`). A new input of the page goes into `_anModelKey`, or it will not repaint.
+  Inside the build `_cashScope` indexes the sale lines per session.
 
 ### Staff queue: what a repaint has to keep (2026-09-15)
 - `S._partyOpen` (a Set of party keys) and `S.sfShowFinished` are in-memory UI state: a party

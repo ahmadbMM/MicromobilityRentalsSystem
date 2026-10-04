@@ -2792,6 +2792,15 @@ const SECURE_AUTH=(()=>{try{const v=localStorage.getItem('cq_secure_auth');if(v=
 
 
 const getQueue=()=>S.queue||[];
+// A session by id through a map kept per sessions list (the list is replaced whenever sessions
+// arrive; its objects are edited in place, which the map follows). The roster asked find() for
+// every row, several times a row (2026-10-04, performance).
+let _sgRef=null,_sgLen=-1,_sgMap=null;
+function _sessGet(id){
+  const ss=S.sessions||[];
+  if(_sgRef!==ss||_sgLen!==ss.length||!_sgMap){_sgMap=new Map();ss.forEach(x=>{if(x&&!_sgMap.has(x.id))_sgMap.set(x.id,x);});_sgRef=ss;_sgLen=ss.length;}
+  return _sgMap.get(id);
+}
 // The name suggestions of the walk-in, promo, group and waitlist forms: one <option> per account
 // (thousands), written into the markup on EVERY render of those forms - a keystroke in the
 // name field rebuilt the whole list. The datalist is empty until the field is focused, and is
@@ -2838,6 +2847,14 @@ function _qBySession(){
   if(_qbsRef===S.queue&&_qbsLen===ql.length&&_qbsMap)return _qbsMap;
   const m=new Map();ql.forEach(e=>{let a=m.get(e.sessionId);if(!a){a=[];m.set(e.sessionId,a);}a.push(e);});
   _qbsRef=S.queue;_qbsLen=ql.length;_qbsMap=m;return m;
+}
+// A booking by id, indexed the same way (the Riders search looked every registration's booking up
+// with a find over the whole queue, per keystroke).
+let _qgRef=null,_qgLen=-1,_qgMap=null;
+function _qGet(id){
+  const ql=S.queue||[];
+  if(_qgRef!==S.queue||_qgLen!==ql.length||!_qgMap){_qgMap=new Map();ql.forEach(e=>{if(e&&!_qgMap.has(e.id))_qgMap.set(e.id,e);});_qgRef=S.queue;_qgLen=ql.length;}
+  return _qgMap.get(id);
 }
 // Decided bookings (done / no-show) per person, newest first, indexed once per load. The
 // roster's no-show chip used to scan and sort the whole queue for every row it drew.
@@ -3139,6 +3156,7 @@ async function _custListFetch(){
 // An account merged into another (customers.merged_into, 2026-09-28) is off every list: its
 // bookings, tags and notes are the keeper's now, and it exists only so its holder can still sign in.
 function _custLiveRows(rows){return (rows||[]).filter(c=>c&&!c.merged_into);}
+let _collM=null;function _sortColl(){return _collM||(_collM=new Intl.Collator());} // compares as String.localeCompare with no arguments
 let _cByIdSrc=null,_cById=null;
 function _custById(id){
   if(_cByIdSrc!==S.customers){_cByIdSrc=S.customers;_cById=new Map((S.customers||[]).map(c=>[String(c.id),c]));}
@@ -3246,56 +3264,75 @@ const SYNC_V=2;                        // 2: customers carry profession + workpl
 const SYNC_MARGIN_MS=5*60*1000;        // ask again for the last five minutes: a write committed after a read began can carry an earlier stamp
 const SYNC_FULL_EVERY_MS=14*24*3600*1000; // and read each list whole once a fortnight, whatever the copy says (it was daily: a year of bookings and every account, some 8 MB per staff device per day, for a copy the deltas already keep exact)
 const SYNC_TABLES={q:'queue_entries',c:'customers',ct:'customer_tags'};
-// The order the old reads came back in, which the lists have always been held in.
+// The order the old reads came back in, which the lists have always been held in. The keys are
+// ISO dates, ids and stamps: compared by code point, not by locale (localeCompare was most of a sort).
+const _cmpS=(a,b)=>{a=String(a);b=String(b);return a<b?-1:a>b?1:0;};
 const SYNC_ORDER={
-  q:(a,b)=>String(a.session_id).localeCompare(String(b.session_id))||((a.queue_num||0)-(b.queue_num||0))||String(a.id).localeCompare(String(b.id)),
-  c:(a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||''))||String(a.id).localeCompare(String(b.id)),
-  ct:(a,b)=>String(a.customer_id).localeCompare(String(b.customer_id))||String(a.tag_id).localeCompare(String(b.tag_id)),
+  q:(a,b)=>_cmpS(a.session_id,b.session_id)||((a.queue_num||0)-(b.queue_num||0))||_cmpS(a.id,b.id),
+  c:(a,b)=>_cmpS(a.created_at||'',b.created_at||'')||_cmpS(a.id,b.id),
+  ct:(a,b)=>_cmpS(a.customer_id,b.customer_id)||_cmpS(a.tag_id,b.tag_id),
 };
 const _syncKey=(kind,r)=>kind==='ct'?(r.customer_id+'|'+r.tag_id):String(r.id);
 let _sync={},_syncOff=false,_syncSaveT={},_syncChain={};
+// The copy on disk, one record per row (2026-10-04, performance): a change used to rewrite the
+// whole list, some 5,000 bookings, as one record. 'mm-sync-2' holds a 'meta' record per list
+// (SYNC_V, project, clock) and a store per list keyed by the row's key; a change puts and deletes
+// those rows only. The layout is the database's own (its name and IndexedDB version), not SYNC_V:
+// a new database rather than a new version of 'mm-sync', so a tab still open on an older build
+// never blocks the upgrade. The first layout's copy is not carried over (its rows are read whole
+// once more); the old database is deleted after the first save and with every sign-out.
+const SYNC_DB='mm-sync-2',SYNC_STORES=['meta','q','c','ct'];
 let _idbP=null;
 function _idb(){
   if(_idbP)return _idbP;
   _idbP=new Promise(res=>{
     try{
       if(typeof indexedDB==='undefined')return res(null);
-      const rq=indexedDB.open('mm-sync',1);
-      rq.onupgradeneeded=()=>{try{rq.result.createObjectStore('sets');}catch(_){}};
-      rq.onsuccess=()=>res(rq.result);rq.onerror=()=>res(null);rq.onblocked=()=>res(null);
+      const rq=indexedDB.open(SYNC_DB,1);
+      rq.onupgradeneeded=()=>{try{const db=rq.result;SYNC_STORES.forEach(n=>{if(!db.objectStoreNames.contains(n))db.createObjectStore(n);});}catch(_){}};
+      rq.onsuccess=()=>{const db=rq.result;try{db.onversionchange=()=>db.close();}catch(_){}res(db);};rq.onerror=()=>res(null);rq.onblocked=()=>res(null);
       setTimeout(()=>res(null),3000); // a store that never answers (some private modes) is no store: the lists are read whole
     }catch(e){res(null);}
   });
   return _idbP;
 }
-// One request on the 'sets' store; resolves with its result, or null when there is no store.
-function _idbDo(mode,fn){
+// One transaction over the stores named; resolves with fn's last request's result, or null when there is no store.
+function _idbDo(mode,stores,fn){
   return _idb().then(db=>db?new Promise(res=>{
-    try{const tx=db.transaction('sets',mode);const rq=fn(tx.objectStore('sets'));tx.oncomplete=()=>res(rq?rq.result:null);tx.onerror=tx.onabort=()=>res(null);}
+    try{const tx=db.transaction(stores,mode);const rq=fn(...stores.map(n=>tx.objectStore(n)));tx.oncomplete=()=>res(rq?rq.result:null);tx.onerror=tx.onabort=()=>res(null);}
     catch(e){res(null);}
   }):null);
 }
+function _syncLegacyDrop(){try{if(typeof indexedDB!=='undefined')indexedDB.deleteDatabase('mm-sync');}catch(_){}}
 async function _syncLoad(kind){
-  const rec=await _idbDo('readonly',st=>st.get(kind));
-  if(!rec||rec.v!==SYNC_V||rec.url!==SUPABASE_URL||!rec.wm||!Array.isArray(rec.rows))return null;
-  const rows=new Map();rec.rows.forEach(r=>{if(r)rows.set(_syncKey(kind,r),r);});
-  return{wm:rec.wm,fullAt:rec.fullAt||0,savedAt:Date.now(),rows};
+  let meta=null,list=null;
+  await _idbDo('readonly',['meta',kind],(m,r)=>{const a=m.get(kind);a.onsuccess=()=>{meta=a.result;};const b=r.getAll();b.onsuccess=()=>{list=b.result;};return b;});
+  if(!meta||meta.v!==SYNC_V||meta.url!==SUPABASE_URL||!meta.wm||!Array.isArray(list))return null;
+  const rows=new Map();list.forEach(r=>{if(r)rows.set(_syncKey(kind,r),r);});
+  return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false};
 }
 function _syncSave(kind){
   clearTimeout(_syncSaveT[kind]);
   _syncSaveT[kind]=setTimeout(()=>{
     const st=_sync[kind];if(!st)return;st.savedAt=Date.now();
-    _idbDo('readwrite',s=>s.put({v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:st.fullAt,rows:[...st.rows.values()]},kind));
+    const all=st.all,dirty=st.dirty,gone=st.gone;st.all=false;st.dirty=new Set();st.gone=new Set();
+    _idbDo('readwrite',['meta',kind],(m,r)=>{
+      if(all){r.clear();st.rows.forEach((row,k)=>r.put(row,k));}
+      else{gone.forEach(k=>r.delete(k));dirty.forEach(k=>{const row=st.rows.get(k);if(row)r.put(row,k);});}
+      return m.put({v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:st.fullAt},kind);
+    }).then(()=>{if(all)_syncLegacyDrop();});
   },1500);
 }
 function _syncDrop(){
   _sync={};Object.keys(_syncSaveT).forEach(k=>clearTimeout(_syncSaveT[k]));_syncSaveT={};
   try{localStorage.removeItem('cq_snapshot');}catch(e){} // the boot snapshot holds the same rows (names, phones): it goes with the copy
-  return _idbDo('readwrite',s=>s.clear());
+  _syncLegacyDrop(); // and any copy left in the first layout
+  return _idbDo('readwrite',SYNC_STORES,(...ss)=>{let last=null;ss.forEach(x=>{last=x.clear();});return last;});
 }
 // The list as this device now holds it ({data,error,whole}), or null when there is no sync to
 // be had and the caller reads the old way. One call per list at a time: a second waits for the
-// first, and then asks only for what changed after it.
+// first, and then asks only for what changed after it. `changed` (the keys this answer brought,
+// null after a whole read) lets the caller keep what it built from the rows that did not move.
 function _syncFetch(kind,cut){
   if(_syncOff||!S._staffAuthed||!sb||typeof sb.rpc!=='function')return Promise.resolve(null);
   // A fault in here must never cost the desk its data: it answers null and the old read takes over.
@@ -3325,20 +3362,46 @@ async function _syncRun(kind,cut){
   const d=r.data;
   if(!d||typeof d!=='object'||Array.isArray(d)||!Array.isArray(d.rows)||!d.now){_syncOff=true;return null;}
   if(_sync[kind]!==st)return{data:null,error:{message:'sync: the copy was dropped mid-read'}}; // signed out while the read was on the wire
-  const rows=full?new Map():st.rows;
-  d.rows.forEach(x=>{if(x)rows.set(_syncKey(kind,x),x);});
+  const rows=full?new Map():st.rows,changed=new Set(),gone=new Set();
+  d.rows.forEach(x=>{if(x){const k=_syncKey(kind,x);rows.set(k,x);changed.add(k);}});
   // A key deleted and then used again (a booking rolled back and inserted anew) stays: the row
   // stamped after the delete is the one that exists.
   if(!full)(d.deleted||[]).forEach(x=>{
     const k=String(x&&x.id),cur=rows.get(k);if(!cur)return;
     if(cur.updated_at&&x.at&&Date.parse(cur.updated_at)>Date.parse(x.at))return;
-    rows.delete(k);
+    rows.delete(k);gone.add(k);changed.delete(k);
   });
-  if(cut)rows.forEach((x,k)=>{if(String(x.session_date||x.session_id||'')<cut)rows.delete(k);});
-  const changed=full||d.rows.length>0||(d.deleted||[]).length>0;
-  const next=_sync[kind]={wm:d.now,fullAt:full?Date.now():st.fullAt,savedAt:full?0:st.savedAt,rows};
-  if(changed||(Date.now()-(next.savedAt||0))>30*60*1000)_syncSave(kind); // keep the clock fresh on disk too, without rewriting megabytes on every quiet poll
-  return{data:[...rows.values()].sort(SYNC_ORDER[kind]),error:null,whole:true};
+  if(cut)rows.forEach((x,k)=>{if(String(x.session_date||x.session_id||'')<cut){rows.delete(k);gone.add(k);changed.delete(k);}});
+  const moved=full||changed.size>0||gone.size>0;
+  // The rows are kept in list order, so the next sort starts from a sorted list and costs nothing.
+  let list=st&&!full&&!moved&&st.list&&st.list.length===rows.size?st.list:null;
+  let ordered=rows;
+  if(!list){list=[...rows.values()].sort(SYNC_ORDER[kind]);ordered=new Map();list.forEach(x=>ordered.set(_syncKey(kind,x),x));}
+  const next=_sync[kind]={wm:d.now,fullAt:full?Date.now():st.fullAt,savedAt:full?0:st.savedAt,rows:ordered,list,
+    all:full||!!(st&&st.all),dirty:full?new Set():new Set([...(st.dirty||[]),...changed]),gone:full?new Set():new Set([...(st.gone||[]),...gone])};
+  if(!full)gone.forEach(k=>next.dirty.delete(k));
+  if(moved||(Date.now()-(next.savedAt||0))>30*60*1000)_syncSave(kind); // keep the clock fresh on disk too, without rewriting a row that did not change
+  return{data:list.slice(),error:null,whole:true,changed:full?null:changed};
+}
+// The bookings from a list the sync answered: a row it did not bring this time keeps the entry built
+// from it before, when that entry still reads exactly as the row does (nothing on this device has
+// edited it since), so whatever is kept per entry survives a reload. The array is new either way,
+// so every index keyed on it is rebuilt. Anything else is built afresh.
+const _qBuiltFrom=new WeakMap();
+function _qEntries(q){
+  const rows=q.data||[];
+  if(!q.whole||!q.changed){return rows.map(r=>{const e=entryFromDB(r);_qBuiltFrom.set(e,r);return e;});}
+  const prev=new Map();(S.queue||[]).forEach(e=>{if(e&&e.id!=null)prev.set(String(e.id),e);});
+  return rows.map(r=>{
+    const k=String(r.id),p=!q.changed.has(k)?prev.get(k):null,e=entryFromDB(r);
+    if(p&&_qBuiltFrom.get(p)===r&&_qSameEntry(p,e))return p;
+    _qBuiltFrom.set(e,r);return e;
+  });
+}
+function _qSameEntry(a,b){
+  for(const k in b){const x=a[k],y=b[k];if(x===y)continue;if(Array.isArray(x)&&Array.isArray(y)&&!x.length&&!y.length)continue;return false;}
+  for(const k in a)if(!(k in b))return false;
+  return true;
 }
 // A customer's device in secure mode: not unlocked for staff and no staff session. The staff-only
 // tables (sales, the desk list, promo codes, the team roster, the schema probes) answer it with
@@ -3499,7 +3562,7 @@ async function _loadDataInner(showLoader){
     const _keepPII=(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1');
     const _prevPII={};
     if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
-    S.queue=_qMerge((q.data||[]).map(entryFromDB),q.whole?null:(_qs&&_qs.cut)); // a synced answer is the whole year: laid over nothing
+    S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs&&_qs.cut)); // a synced answer is the whole year: laid over nothing
     _qWholeAt=q.whole?Date.now():(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     if(_keepPII)S.queue.forEach(e=>_carryKnown(e,_prevPII[e.id]));
   }
@@ -4101,7 +4164,7 @@ function _entryFallbackPrice(entry){
   if(PREMIUM_TIERS[entry.typePreference]!=null)return priceForType(entry.typePreference);
   const bikeIds=getAssignedBikeIds(entry);
   if(bikeIds.length){
-    const bikes=bikeIds.map(id=>getBikes().find(b=>b.id===id)).filter(Boolean);
+    const bikes=bikeIds.map(id=>bikeById(id)).filter(Boolean);
     if(bikes.length){const emp=_isEmployeeBooking(entry);return bikes.reduce((s,b)=>s+(emp&&EMPLOYEE_PRICES[b.type]!=null?EMPLOYEE_PRICES[b.type]:priceForBike(b)),0);}
   }
   return priceForEntryType(entry,entry.typePreference);
@@ -5074,7 +5137,11 @@ try{
   const _tsMo=new MutationObserver(()=>{clearTimeout(_tsT);_tsT=setTimeout(_mountTableSorts,80);});
   document.addEventListener('DOMContentLoaded',()=>{_tsMo.observe(document.body,{childList:true,subtree:true});_mountTableSorts();});
 }catch(e){}
-function _debRender(key,fn,ms){if(_debTimers[key])clearTimeout(_debTimers[key]);_debTimers[key]=setTimeout(()=>{_debTimers[key]=null;try{fn();}catch(e){}},ms||160);}
+const _debFns={};
+function _debRender(key,fn,ms){if(_debTimers[key])clearTimeout(_debTimers[key]);_debFns[key]=fn;_debTimers[key]=setTimeout(()=>{_debTimers[key]=null;_debFns[key]=null;try{fn();}catch(e){}},ms||160);}
+// A key that acts on what the search shows (Enter) runs the waiting repaint first; closing the list drops it.
+function _debFlush(key){if(!_debTimers[key])return;clearTimeout(_debTimers[key]);_debTimers[key]=null;const f=_debFns[key];_debFns[key]=null;try{if(f)f();}catch(e){}}
+function _debCancel(key){if(_debTimers[key]){clearTimeout(_debTimers[key]);_debTimers[key]=null;_debFns[key]=null;}}
 function fmtPhone(p){
   if(!p)return'';
   const match=COUNTRY_CODES.find(([code])=>p.startsWith(code));
@@ -6441,9 +6508,9 @@ function _maxRiders(s){if(!s)return 10;return _isGroupRide(s)?GROUP_RIDE_MAX:_is
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
 // queue numbers, seats that overflow to the waitlist, auto-promotion, the lot.
 function _isApprovalRide(s){return _isCommunity(s)&&(s.needs_approval!==false);}
-const _apprSessIds={has:sid=>_isApprovalRide((S.sessions||[]).find(s=>s.id===sid))};
-const _commSessIds={has:sid=>_isCommunity((S.sessions||[]).find(s=>s.id===sid))};
-const _noCarbonSessIds={has:sid=>_noCarbon((S.sessions||[]).find(s=>s.id===sid))};
+const _apprSessIds={has:sid=>_isApprovalRide(_sessGet(sid))};
+const _commSessIds={has:sid=>_isCommunity(_sessGet(sid))};
+const _noCarbonSessIds={has:sid=>_noCarbon(_sessGet(sid))};
 // Which type the new-session form is on. Both community rides share every field except
 // the name and the price, so the form asks this rather than testing for one of them.
 function _nsComm(){return S.newSessEvent==='community'||S.newSessEvent==='petromin'||S.newSessEvent==='swim'||S.newSessEvent==='workshop'||S.newSessEvent==='snd96'||S.newSessEvent==='event';}
@@ -6609,13 +6676,13 @@ function _syncSndTheme(){try{document.body.classList.toggle('snd96',_sndOn());}c
 // The money half of the community test. Every "community rides have no price / no pay
 // button / no add-ons" branch keys off THIS: the Petromin ride is a community ride that
 // charges, and it shows a fare, a pay toggle and add-ons exactly like a JCC booking.
-const _freeSessIds={has:sid=>_isFreeRide((S.sessions||[]).find(s=>s.id===sid))};
+const _freeSessIds={has:sid=>_isFreeRide(_sessGet(sid))};
 // Which columns a rider list should show, decided by the rows actually in it rather than by
 // the session filter -- the All view mixes kinds, so one bike ride has to keep the bike
 // columns for everybody. A column is dropped only when NOTHING on screen would fill it:
 // height, bike type, bike and colour where there is no bike to size or hand over, price and
 // payment where the ride is complimentary. An empty list keeps the full layout.
-function _rowSess(e){return (S.sessions||[]).find(x=>x.id===(e&&e.sessionId));}
+function _rowSess(e){return _sessGet(e&&e.sessionId);}
 // Height gets its own column in the staff queue, big and bold, with the frame size it maps to
 // on the booked type's chart (_entryFitText): staff pick the bike from it at a glance while the
 // rider walks up. A rider without one shows a dash. Staff only - the rider never sees the size.
@@ -6659,14 +6726,13 @@ function _walletOk(sess,entries){
   if(!_isApprovalRide(sess))return true;
   return _commPublished(sess)&&(entries||[]).every(e=>e&&e.approval==='approved');
 }
-function _commPublishedById(sid){return _commPublished((S.sessions||[]).find(s=>s.id===sid));}
+function _commPublishedById(sid){return _commPublished(_sessGet(sid));}
 // Saturday Social Ride membership: a rider is a member when their customer record
 // carries an active Saturday tag. Top level — the queue, the roster report and the
 // report builder's filter all read it.
 function _isSatMember(e){
-  const tg=(S.tags||[]).find(x=>x.id==='tag_saturday');
-  if(!tg||!e||!e.customerId)return false;
-  return (S.customerTags||[]).some(ct=>ct.customer_id===e.customerId&&ct.tag_id===tg.id&&_tagActive(ct));
+  if(!e||!e.customerId||!(S.tags||[]).some(x=>x.id==='tag_saturday'))return false;
+  return _ctRowsFor(e.customerId).some(ct=>ct.tag_id==='tag_saturday'&&_tagActive(ct)); // the account's own tag rows, not every tag row of every account
 }
 // Breakfast-spot picker for the session forms: saved spots + "new spot" inline inputs.
 // selVar/nameVar/urlVar are S-keys; picking a saved spot fills name+url from the list.
@@ -8291,7 +8357,7 @@ async function mwFromBooking(entryId){
 // so what reads as one booking on the queue reads as one entry here.
 function _mwBookingKey(e){return _partyKey(e);} // one key for parties, everywhere
 function _mwRowKey(w){
-  const bk=w&&w.booking_id?getQueue().find(x=>x.id===w.booking_id):null;
+  const bk=w&&w.booking_id?_qGet(w.booking_id):null;
   return (bk&&_mwBookingKey(bk))||('row:'+(w&&w.id));
 }
 // Sessions worth offering in the Staff List's filter: the ones taking bookings, plus any
@@ -8307,8 +8373,8 @@ function _mwSessOpts(){
   allSessions().forEach(x=>{if(x.status!=='deleted'&&parkable.has(x.id))byId.set(x.id,x);});
   _wlManaged().forEach(w=>{
     if(!w.booking_id)return;
-    const bk=getQueue().find(x=>x.id===w.booking_id);
-    const sx=bk&&allSessions().find(x=>x.id===bk.sessionId);
+    const bk=_qGet(w.booking_id);
+    const sx=bk&&_sessGet(bk.sessionId);
     if(sx&&!byId.has(sx.id))byId.set(sx.id,sx);
   });
   return [...byId.values()].sort(_sessOrder);
@@ -8316,7 +8382,7 @@ function _mwSessOpts(){
 /** The session a parked row belongs to — walk-ups belong to none. */
 function _mwRowSess(w){
   if(!w||!w.booking_id)return null;
-  const bk=getQueue().find(x=>x.id===w.booking_id);
+  const bk=_qGet(w.booking_id);
   return bk?bk.sessionId:null;
 }
 // A row passes the filter when it is on the chosen session — or when it is a walk-up, which
@@ -8409,7 +8475,7 @@ function _mwSuggestHtml(){
 function _mwRenderSuggest(){
   const host=document.getElementById('mw-suggest');if(!host)return;
   const html=_mwSuggestHtml();
-  host.innerHTML=html;
+  host.innerHTML=html;host.inert=false;
   host.style.display=html?'block':'none';
   const btn=document.getElementById('mw-browse');
   if(btn){btn.textContent=S._mwShowAll?t('mwHideBtn'):t('mwBrowseBtn');btn.setAttribute('aria-expanded',S._mwShowAll?'true':'false');}
@@ -8418,6 +8484,7 @@ function _mwRenderSuggest(){
 // creating a walk-up row literally named "42", which is what handing the text to
 // addManagedWl() used to do. With no match — a genuinely new name — it still adds by hand.
 function mwEnter(){
+  _debFlush('mw');
   const first=document.querySelector('#mw-suggest .mw-sug');
   if(first){first.click();return;}
   addManagedWl();
@@ -8429,7 +8496,10 @@ function mwSetSess(v){
   S._mwSess=v||'all';
   renderStaffQueue();
 }
-function mwSearch(v){S._mwQ=v;S._mwShowAll=false;_mwRenderSuggest();}
+// The list repaints when typing pauses. Until it has, the lines on show answer an older search, so
+// they take no tap (inert): a quick tap must never add someone the new search would not offer.
+function mwSearch(v){S._mwQ=v;S._mwShowAll=false;_sugHold('mw-suggest');_debRender('mw',_mwRenderSuggest);}
+function _sugHold(id){const h=document.getElementById(id);if(h)h.inert=true;}
 /** Staff are typing a walk-up into the Staff List (its name/search or phone box has the focus). */
 function _mwTyping(){const a=document.activeElement;return !!a&&(a.id==='mw-name'||a.id==='mw-phone')&&!!document.getElementById('mw-list');}
 function mwToggleAll(){S._mwShowAll=!S._mwShowAll;_mwRenderSuggest();}
@@ -8609,7 +8679,7 @@ function _bkPayCell(e){
 /** The party's live bookings, in list order. */
 function _mwPartyBookings(rowId){
   const g=_mwGroups().find(x=>x.some(w=>w.id===rowId))||[];
-  return g.map(w=>w.booking_id&&getQueue().find(x=>x.id===w.booking_id)).filter(Boolean);
+  return g.map(w=>w.booking_id&&_qGet(w.booking_id)).filter(Boolean);
 }
 /** "The four of them are here" — one action, not four. */
 async function mwPartyCheckin(rowId){
@@ -8671,7 +8741,7 @@ function _mwTypeCell(w,bk){
   const cur=(bk?resolvedType(bk):w.bike_type)||'Any';
   // A parked booking follows its ride's rules ('Own' where the ride offers it, no carbon on a
   // community ride); a walk-up belongs to no session, so it gets the ordinary circuit menu.
-  const sess=bk?allSessions().find(x=>x.id===bk.sessionId):null;
+  const sess=bk?_sessGet(bk.sessionId):null;
   const opts=bk?bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)):bikeTypeOpts(false,false);
   const list=opts.includes(cur)?opts:[cur,...opts];
   return`<select class="mw-type" aria-label="${esc(t('bikeTypeLabel'))}" data-on-change="${_on("mwSetType",w.id,_P("value"))}">
@@ -8682,7 +8752,7 @@ function _mwTypeCell(w,bk){
 async function mwSetType(rowId,ty){
   const w=_wlRowById(rowId);if(!w)return;
   if(!CUST_TYPES.includes(ty))return;
-  const bk=w.booking_id?getQueue().find(x=>x.id===w.booking_id):null;
+  const bk=w.booking_id?_qGet(w.booking_id):null;
   if(bk){
     // The BOOKING owns the type — the roster, the ticket and the check-in all read it there,
     // so writing only the list row would leave two screens disagreeing about the same rider.
@@ -8724,7 +8794,7 @@ function renderManagedWl(listOnly){
         // check riders in one at a time even when they arrived together.
         const _posBox=id=>`<input type="number" min="1" value="${i+1}" aria-label="#" data-on-click="${_on("_on_renderManagedWl_1",_EV,_EL)}" data-on-change="${_on("mwSetPos",id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_2",_EV,_EL)}" class="rq-mwpos">`;
         const _row=w=>{
-          const bk=w.booking_id?getQueue().find(x=>x.id===w.booking_id):null;
+          const bk=w.booking_id?_qGet(w.booking_id):null;
           // A parked booking is still a booking: it gets the roster's own controls — check in,
           // no-show, edit, note, cancel — rather than the single Promote button it used to get,
           // which meant staff had to leave the list to do anything real. Only while it is LIVE,
@@ -8745,7 +8815,7 @@ function renderManagedWl(listOnly){
             </div>
             <div class="rq-mwr">
               ${bk?_bkPayCell(bk):payBtnMw(w)}${w.phone?_contactCell(w.phone,{status:'waiting'}):''}
-              ${(_bkLive&&!_isApprovalRide(allSessions().find(x=>x.id===bk.sessionId)))
+              ${(_bkLive&&!_isApprovalRide(_sessGet(bk.sessionId)))
                 ?`<button class="btn-sm btn-muted" data-on-click="${_on("mwAddRider",bk.id)}" title="${esc(t('beAddRidersLabel'))}">+ ${t('beAddRiderBtn')}</button>`:''}
               ${action}
               ${w._virtual?'':`<button class="btn-sm btn-muted" data-on-click="${_on("resolveDeskWaitlist",w.id,"removed")}">${t('wlRemoveBtn')}</button>`}
@@ -8760,7 +8830,7 @@ function renderManagedWl(listOnly){
           ${_drag?_posBox(g[0].id):''}
           <span class="rq-mwgname">${esc(_mwGroupName(g))}</span>
           <span class="mw-party-chip">${t('mwRidersN').replace('{0}',String(g.length))}</span>
-          ${(()=>{const _bk=g.map(w=>w.booking_id&&getQueue().find(x=>x.id===w.booking_id)).filter(Boolean);
+          ${(()=>{const _bk=g.map(w=>w.booking_id&&_qGet(w.booking_id)).filter(Boolean);
             const _in=_bk.filter(e=>e.status==='waiting'||e.status==='waitlist').length;
             const _owed=_bk.filter(e=>!e.paid&&!_freeSessIds.has(e.sessionId)&&['waiting','waitlist','active'].includes(e.status)).length;
             return`${_owed?`<button class="btn-sm btn-muted" data-on-click="${_on("mwPartyPaid",g[0].id)}">\u2713 ${t('bulkPaidBtn')} (${_owed})</button>`:''}
@@ -8953,7 +9023,7 @@ async function toggleWlPayment(id,mode){
 // buttons everywhere). W-numbers are the live order — every move renumbers the session's
 // waitlist 1..n, and promotion (manual pick aside, the auto-promote) takes W1 first. ──
 const _wlCmp=(a,b)=>((a.waitlistNum||9e9)-(b.waitlistNum||9e9))||(new Date(a.registeredAt||0)-new Date(b.registeredAt||0));
-function _wlSessList2(sessionId){return getQueue().filter(x=>x.sessionId===sessionId&&x.status==='waitlist').sort(_wlCmp);}
+function _wlSessList2(sessionId){return (_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist').sort(_wlCmp);}
 async function _wlApplyOrder(order){
   const calls=[];
   order.forEach((x,i)=>{const n=i+1;if(x.waitlistNum!==n){x.waitlistNum=n;calls.push(sb.from('queue_entries').update({waitlist_num:n}).eq('id',x.id));}});
@@ -9254,7 +9324,22 @@ function _ntLoaded(){
   const core=!!S.dataLoaded&&!S._cacheOnly&&_lastLoadOk&&!S._netDown;
   return{queue:core,year:core&&_qWholeAt>0&&_listOk.opts,inv:core&&_listOk.inv,riders:core&&_listOk.riders};
 }
+// The bell's lists are read on every repaint of every tab and for the Dashboard's alerts: two scans
+// of the whole queue, the birthdays over every account, the bikes due for service. They are kept
+// until something they read moves (2026-10-04, performance): the lists by identity, the booking
+// fields a desk action edits in place, the side lists' sizes and new counts, and the minute (a
+// ride runs long and a rating ages by the clock).
+let _ntkRefs=null,_ntkKey=null,_ntkOut=null;
 function _ntKinds(){
+  const W=S._ws,M=S._sm,refs=[S.queue,S.inventory,S.bikes,S.customers,S.customerTags,S.staffOptions,W&&W.jobs,M&&M.rows,S._caApps,S._laApps];
+  const c=(o,f)=>o?o.length+':'+o.filter(f).length:'-',q=S.queue||[];
+  const key=[q.length,q.filter(e=>e.status==='active'||e.ratingExp).length,c(S.inventory,it=>{const n=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return n<=0||(lo>0&&n<=lo);}),
+    (S.bikes||[]).map(b=>b&&b.status).join(),c(W&&W.jobs,j=>j.status==='new'),c(M&&M.rows,m=>m.status==='new'),c(S._caApps,a=>a.status==='pending'),c(S._laApps,a=>a.status==='pending'),
+    JSON.stringify(_ntLoaded()),isAdmin(),_deskTabOk('workshop'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
+  if(_ntkOut&&key===_ntkKey&&refs.every((r,i)=>r===_ntkRefs[i]))return _ntkOut;
+  const out=_ntKindsNow();_ntkRefs=refs;_ntkKey=key;_ntkOut=out;return out;
+}
+function _ntKindsNow(){
   const adm=isAdmin(),out=[],L=_ntLoaded();
   // items: one per thing, {id, txt (the bell's line for it), at (when it happened, if known)}
   const add=(k,items,key,c,go,ready)=>out.push({k,ids:items.map(x=>String(x.id)),items:items.map(x=>({...x,id:String(x.id)})),key,c,go,ready:!!ready});
@@ -9418,7 +9503,7 @@ function printDaySheet(){
   const LIVE=['waiting','waitlist','active']; // the riders still to ride; each one's word comes from STATUS_KEY
   let riders=0;
   const blocks=sess.map(x=>{
-    const rows=getQueue().filter(e=>e.sessionId===x.id&&LIVE.includes(e.status)).sort((a,b)=>(a.status==='waitlist')-(b.status==='waitlist')||a.queueNum-b.queueNum);
+    const rows=(_qBySession().get(x.id)||[]).filter(e=>LIVE.includes(e.status)).sort((a,b)=>(a.status==='waitlist')-(b.status==='waitlist')||a.queueNum-b.queueNum);
     riders+=rows.length;
     const _t=(()=>{try{return sessionTime(x);}catch(_){return'';}})();
     return `<section><h2>${esc(_evName(x))}${_t?` &middot; ${esc(_t)}`:''}<span class="rp-h2n">${t('daySheetRiders')}: ${rows.length}</span></h2>
@@ -11043,8 +11128,8 @@ function _cdLine(a){
   return'';
 }
 function _cdHtml(sess,ds,cls){const a=_cdAttr(sess,ds),l=_cdLine(a);return l?`<div class="tk-cd ${cls||''}" data-cd="${esc(a)}">${_cuIc('clock',15)}<span>${esc(l)}</span></div>`:'';}
-function _cdTick(){document.querySelectorAll('[data-cd]').forEach(el=>{const l=_cdLine(el.dataset.cd),sp=el.querySelector('span');if(!l){el.remove();return;}if(sp&&sp.textContent!==l)sp.textContent=l;});}
-try{setInterval(_cdTick,30000);}catch(_){}
+function _cdTick(){if(document.hidden)return;document.querySelectorAll('[data-cd]').forEach(el=>{const l=_cdLine(el.dataset.cd),sp=el.querySelector('span');if(!l){el.remove();return;}if(sp&&sp.textContent!==l)sp.textContent=l;});}
+try{setInterval(_cdTick,30000);document.addEventListener('visibilitychange',_cdTick);}catch(_){} // a hidden page skips the tick and catches up when it shows
 // ── The route a ride follows (2026-10-01) ─────────────────────────────────────────────────────
 // A ride staff tied to a route (sessions.route_slug, the website's Routes list) names it, with its
 // distance, level and surface and the map link. A bike ride at the circuit with no route of its own
@@ -13313,7 +13398,7 @@ function _sessCalHtml(list){
     const iso=`${ym}-${String(d).padStart(2,'0')}`,ss=(byDay[iso]||[]).sort((a,b)=>_sessStart(a).localeCompare(_sessStart(b))),jn=jobs[iso]||0;
     cells+=`<div class="cal-cell${iso===today?' today':''}${iso<today?' past':''}" data-day="${iso}">
       <div class="cal-dnum">${d}</div>
-      ${ss.map(x=>{const n=getQueue().filter(e=>e.sessionId===x.id&&['waiting','active','done'].includes(e.status)).length;
+      ${ss.map(x=>{const n=(_qBySession().get(x.id)||[]).filter(e=>['waiting','active','done'].includes(e.status)).length;
         return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')}" data-on-click="${_on("_calOpen",x.id)}" title="${esc(_evName(x))} · ${n}/${x.capacity||0}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_evName(x))}</span><em>${n}/${x.capacity||0}</em></button>`;}).join('')}
       ${jn?`<div class="cal-ws">${esc(t('calWs').replace('{0}',jn))}</div>`:''}
       ${!ss.length&&iso>=today?`<button type="button" class="cal-add" aria-label="${esc(t('calNewOn').replace('{0}',shortDate(iso)))}" data-on-click="${_on("_calNew",iso)}">+</button>`:''}
@@ -14541,7 +14626,7 @@ async function toggleSession(id,newStatus){
     // Closing a future free ride only pauses sign-ups (sessions are created closed): its approved
     // riders are marked done only on or after the ride's own day.
     if(newStatus==='closed'&&_isFreeRide(prev)&&String((prev&&(prev.session_date||prev.id))||'').slice(0,10)<=todayStr()){
-      const rows=getQueue().filter(e=>e.sessionId===id&&(e.status==='waiting'||e.status==='active')&&e.approval==='approved');
+      const rows=(_qBySession().get(id)||[]).filter(e=>(e.status==='waiting'||e.status==='active')&&e.approval==='approved');
       const now=new Date().toISOString();
       const act=rows.filter(e=>e.status==='active').map(e=>e.id),wait=rows.filter(e=>e.status==='waiting').map(e=>e.id);
       // a refused write answers {error}: only the rows that landed are counted and undone
@@ -14567,7 +14652,7 @@ async function deleteSession(id){
   if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
   if(!await _pinApprove(t('deleteBtn')))return;
   try{
-    const bookings=getQueue().filter(e=>e.sessionId===id&&e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow').length;
+    const bookings=(_qBySession().get(id)||[]).filter(e=>e.status!=='removed'&&e.status!=='cancelled'&&e.status!=='noshow').length;
     if(bookings>0){toast(t('errHasBookings'),'error');return;}
     // Don't orphan sales: block delete if the session has any non-refunded cashier rows
     const sales=(S.cashSales||[]).filter(r=>r.session_id===id&&r.pay!=='refunded'&&r.category!=='__cardmeta__'&&r.category!=='__discount__').length;
@@ -14718,7 +14803,7 @@ function _caRows(){
   const satTag=(S.tags||[]).find(tg=>tg.id==='tag_saturday');
   return list.map(c=>{
     const sel=S._caGroup?(S._caSelArr||[]).includes(c.id):S._caSel===c.id;
-    const tagged=satTag&&(S.customerTags||[]).some(ct=>ct.customer_id===c.id&&ct.tag_id===satTag.id&&_tagActive(ct));
+    const tagged=satTag&&_ctRowsFor(c.id).some(ct=>ct.tag_id===satTag.id&&_tagActive(ct)); // the account's own tag rows (indexed), not every tag row
     const contact=[c.email,c.phone].filter(Boolean).map(v=>'<bdi>'+esc(v)+'</bdi>').join(' <span class="cmy-sep">·</span> ');
     return '<button type="button" data-on-click="'+(S._caGroup?_on('_caToggleSel',c.id):_on('_on_caPick',c.id))+'" class="cmy-ca-row '+(sel?'cmy-ca-on':'cmy-ca-off')+'">'
       +'<div class="cmy-f1m0"><div class="cmy-ca-name">'+esc(c.name||'—')+'</div>'
@@ -14794,7 +14879,8 @@ async function _commBook(sess,people,o){
   const _live=['waiting','active','waitlist'],_taken=new Set();
   try{const r=await sb.from('queue_entries').select('customer_id,session_id,status').eq('session_id',sess.id).in('customer_id',people.map(c=>c.id)).in('status',_live);
     if(r&&!r.error&&Array.isArray(r.data))r.data.forEach(x=>{if(x.session_id===sess.id&&_live.includes(x.status))_taken.add(x.customer_id);});}catch(_){}
-  const fresh=people.filter(c=>!_taken.has(c.id)&&!getQueue().some(e=>e.sessionId===sess.id&&e.customerId===c.id&&_live.includes(e.status)));
+  const _sq=_qBySession().get(sess.id)||[];
+  const fresh=people.filter(c=>!_taken.has(c.id)&&!_sq.some(e=>e.customerId===c.id&&_live.includes(e.status)));
   const dup=people.length-fresh.length;
   if(!fresh.length)return{res:null,entries:[],dup};
   const comm=_isApprovalRide(sess),free=_isFreeRide(sess); // a seat-based ride: real prices, no approval flow
@@ -14941,7 +15027,7 @@ async function _saveJccGroup(){
 // rows of the roster group (groupId when set, else the shared customer account). ──
 function _groupMembers(entryId){
   const e=getQueue().find(x=>x.id===entryId);if(!e)return[];
-  return getQueue().filter(x=>x.sessionId===e.sessionId&&['waiting','waitlist','active'].includes(x.status)&&(e.groupId?x.groupId===e.groupId:(!!e.customerId&&x.customerId===e.customerId)))
+  return (_qBySession().get(e.sessionId)||[]).filter(x=>['waiting','waitlist','active'].includes(x.status)&&(e.groupId?x.groupId===e.groupId:(!!e.customerId&&x.customerId===e.customerId)))
     .sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -15815,8 +15901,8 @@ function _caRpcErr(res){return !!(res&&res.error)||!res||!res.data;}
 function _caRides(){return allSessions().filter(s=>_rideKind(s)==='saturday'&&_sessLive(s)&&!_sessPastDay(s)).sort(_sessOrder);}
 // A tag the account holds already (a grant not yet started counts, a lapsed one does not), as the
 // Accounts picker reads it: it shows ticked and cannot be picked.
-function _caTagHeld(cid,tid){return !!cid&&(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===tid&&!_tagLapsed(ct));}
-function _caBooked(cid,sid){return !!cid&&getQueue().some(e=>e.sessionId===sid&&e.customerId===cid&&['waiting','active','waitlist'].includes(e.status));}
+function _caTagHeld(cid,tid){return !!cid&&_ctRowsFor(cid).some(ct=>ct.tag_id===tid&&!_tagLapsed(ct));}
+function _caBooked(cid,sid){return !!cid&&(_qBySession().get(sid)||[]).some(e=>e.customerId===cid&&['waiting','active','waitlist'].includes(e.status));}
 function _caApOpen(id,kind){
   const a=_caFind(id);if(!a||a.status!=='pending'||S._caWorking)return;
   S._caAp={id,kind,tags:kind==='approve'?[TAG_COMMUNITY]:[],ride:'',dropComm:true};
@@ -17647,12 +17733,13 @@ function _custPool(q,n){
   return hits.slice(0,n||8);
 }
 function _wiCustMatches(q){return _custPool(q,8);}
-function _wiNameInput(v){S._wiCustId=null;_wiRenderSuggest(v);}
+function _wiNameInput(v){S._wiCustId=null;_sugHold('wi-suggest');_debRender('wi',()=>_wiRenderSuggest(v));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__wiRenderSuggest_1(event,el){event.preventDefault()}
 function _on__wiRenderSuggest_2(event,el){event.preventDefault()}
 function _wiRenderSuggest(v){
   const host=document.getElementById('wi-suggest'),inp=document.getElementById('wi-name');if(!host)return;
+  host.inert=false;
   const q=String(v||'').trim();
   const cs=_wiCustMatches(q);
   if(!q&&!cs.length){host.style.display='none';host.innerHTML='';if(inp)inp.setAttribute('aria-expanded','false');return;}
@@ -17661,7 +17748,7 @@ function _wiRenderSuggest(v){
   host.innerHTML=`${(q&&(!exact||!cs.length))?`<button type="button" class="mw-sug wi-sug-new" role="option" data-on-mousedown="${_on("_on__wiRenderSuggest_1",_EV,_EL)}" data-on-click="${_on("_wiUseTyped")}"><span class="mw-sug-tag">＋</span><span class="mw-sug-name">${t('wiUseTyped').replace('{0}',esc(q))}</span></button>`:''}${cs.length?`<div class="mw-sug-head">${t('wiAccountsHead')}</div>${cs.map(c=>`<button type="button" class="mw-sug" role="option" data-on-mousedown="${_on("_on__wiRenderSuggest_2",_EV,_EL)}" data-on-click="${_on("_wiPickCust",c.id)}"><span class="mw-sug-tag cust">${t('mwCustTag')}</span><span class="mw-sug-name">${esc(c.name||'')}</span><span class="mw-sug-meta">${meta(c)}</span></button>`).join('')}`:''}`;
   host.style.display='block';if(inp)inp.setAttribute('aria-expanded','true');
 }
-function _wiHideSuggest(){const h=document.getElementById('wi-suggest');if(h){h.style.display='none';h.innerHTML='';}const inp=document.getElementById('wi-name');if(inp)inp.setAttribute('aria-expanded','false');}
+function _wiHideSuggest(){_debCancel('wi');const h=document.getElementById('wi-suggest');if(h){h.style.display='none';h.innerHTML='';h.inert=false;}const inp=document.getElementById('wi-name');if(inp)inp.setAttribute('aria-expanded','false');}
 function _wiPickCust(id){
   const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;
   S._wiCustId=id;
@@ -17676,7 +17763,7 @@ function _wiPickCust(id){
 }
 function _wiUseTyped(){S._wiCustId=null;_wiHideSuggest();document.getElementById('wi-phone')?.focus();}
 function _wiNameKey(e){
-  if(e.key==='Enter'){e.preventDefault();const acc=document.querySelector('#wi-suggest .mw-sug:not(.wi-sug-new)');const first=document.querySelector('#wi-suggest .mw-sug');(acc&&document.querySelectorAll('#wi-suggest .mw-sug:not(.wi-sug-new)').length===1?acc:first)?.click();}
+  if(e.key==='Enter'){e.preventDefault();_debFlush('wi');const acc=document.querySelector('#wi-suggest .mw-sug:not(.wi-sug-new)');const first=document.querySelector('#wi-suggest .mw-sug');(acc&&document.querySelectorAll('#wi-suggest .mw-sug:not(.wi-sug-new)').length===1?acc:first)?.click();}
   else if(e.key==='Escape'){e.stopPropagation();_wiHideSuggest();}
 }
 function _wiSync(){(S._wiRiders||[]).forEach((r,i)=>{
@@ -18273,6 +18360,7 @@ function renderStaffQueue(_resultsOnly){
   const _fd=!isAdmin();
   if(_fd&&S.sfSession!=='all'&&_apprSessIds.has(S.sfSession))S.sfSession=_currentSessId(); // one Front Desk cannot see
   const queue=getQueue();const sessions=allSessions().filter(s=>!(_fd&&_isApprovalRide(s)));
+  const _cqv=S.sfSession!=='all'&&_isApprovalRide(_sessGet(S.sfSession)); // _commQueueView(), worked out once per paint
   // A rider who registered on the Petromin form is counted and handled on the Petromin page, so
   // their booking stays off this roster (asked for 2026-09-22). Knowing which they are needs the
   // registrations, so a night that has them loads them here too.
@@ -18377,20 +18465,25 @@ function renderStaffQueue(_resultsOnly){
   // filter still means what it says.
   if(S.sfSearch.trim()){const q=S.sfSearch.trim();filtered=_withParty(filtered.filter(e=>_searchHit(e,q)),filtered);}
   const _sfd=S.sfSortDir;
+  // The keys that cost something (an account lookup, a tag scan) are worked out once per row, not
+  // twice per comparison; names compare through one collator, which orders as localeCompare does.
+  const _sk=new Map(),_coll=_sortColl();
+  if(S.sfSort==='member'&&_cqv)filtered.forEach(e=>_sk.set(e,Number(_isSatMember(e))));
+  else if(S.sfSort==='phone')filtered.forEach(e=>_sk.set(e,String(entryPhone(e)||'')));
   filtered.sort((a,b)=>{
-    if(S.sfSort==='name')   return _sfd*a.name.localeCompare(b.name);
+    if(S.sfSort==='name')   return _sfd*_coll.compare(String(a.name??''),String(b.name??''));
     // A sort held over from another session must not survive on a screen that no longer shows
     // the column: the rows would come back in an order nothing on the page explains.
     if(S.sfSort==='type'&&_qc.bike)   return _sfd*resolvedType(a).localeCompare(resolvedType(b));
     if(S.sfSort==='grp'&&_qc.grp)     return _sfd*String(a.rideGroup||'~').localeCompare(String(b.rideGroup||'~'));
     if(S.sfSort==='paid'&&_qc.money)  return _sfd*(Number(a.paid)-Number(b.paid));
     if(S.sfSort==='status') return _sfd*(a.status||'').localeCompare(b.status||'');
-    if(S.sfSort==='member'&&_commQueueView()) return _sfd*(Number(_isSatMember(a))-Number(_isSatMember(b)));
+    if(S.sfSort==='member'&&_cqv) return _sfd*(_sk.get(a)-_sk.get(b));
     if(S.sfSort==='height'&&_qc.bike) return _sfd*((Number(a.height)||0)-(Number(b.height)||0));
     if(S.sfSort==='session') return _sfd*(String(a.sessionDate||a.sessionId).localeCompare(String(b.sessionDate||b.sessionId))||a.queueNum-b.queueNum);
     if(S.sfSort==='bike'&&_qc.bike) return _sfd*_bikeNamesOf(a).localeCompare(_bikeNamesOf(b),undefined,{numeric:true});
     if(S.sfSort==='price'&&_qc.money) return _sfd*((a.price??DEFAULT_PRICE)-(b.price??DEFAULT_PRICE));
-    if(S.sfSort==='phone') return _sfd*String(entryPhone(a)||'').localeCompare(String(entryPhone(b)||''));
+    if(S.sfSort==='phone') return _sfd*_coll.compare(_sk.get(a),_sk.get(b));
     // Saturday Social Ride rows order by WHEN the spot was reserved (first come, first
     // listed); JCC keeps queue-number order.
     if(a.sessionId===b.sessionId&&_apprSessIds.has(a.sessionId))
@@ -18424,7 +18517,10 @@ function renderStaffQueue(_resultsOnly){
   const qSizeOpts=['all',...BIKE_SIZES,'Kids'].map(z=>
     `<option value="${z}"${S.sfSize===z?' selected':''}>${z==='all'?t('allSizes'):esc(sizeLabel(z))}</option>`).join('');
   const livePosMap={};
-  const allWaiting=getQueue().filter(e=>e.status==='waiting').sort((a,b)=>a.sessionId.localeCompare(b.sessionId)||a.queueNum-b.queueNum);
+  // Places in line, for the sessions on screen only: through the per-session index, not a sort of
+  // every waiting row on every night.
+  const allWaiting=[];{const _qbs=_qBySession();new Set(filtered.map(e=>e.sessionId)).forEach(sid=>(_qbs.get(sid)||[]).forEach(e=>{if(e.status==='waiting')allWaiting.push(e);}));}
+  allWaiting.sort((a,b)=>a.sessionId.localeCompare(b.sessionId)||a.queueNum-b.queueNum);
   const sessPosCounter={};
   const seenBookings=new Set();
   allWaiting.forEach(e=>{
@@ -18465,7 +18561,7 @@ function renderStaffQueue(_resultsOnly){
 
   function entryPhone(e){
     if(e.phone)return e.phone;
-    if(e.customerId){const c=getCustomers().find(x=>x.id===e.customerId);if(c&&c.phone)return c.phone;}
+    if(e.customerId){const c=_custById(e.customerId);if(c&&c.phone)return c.phone;}
     return'';
   }
 
@@ -18498,9 +18594,7 @@ function renderStaffQueue(_resultsOnly){
       ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${t('addonEditTitle')}" class="rq-adbtn">+ ${t('addonAddBtn')}</button>`:''}
     </div>`;
   };
-  function _commQueueView(){
-  return S.sfSession!=='all'&&_isApprovalRide(allSessions().find(s=>s.id===S.sfSession));
-}
+  function _commQueueView(){return _cqv;}
 function _memberCell(e,extra){
   if(!_commQueueView())return '';
   const m=_isSatMember(e);
@@ -18804,7 +18898,7 @@ function renderQRow(e){
       </div>
       <div class="sf-head-actions rq-hacts">
         ${_commQueueView()?(()=>{
-          const nPend=getQueue().filter(e=>e.sessionId===S.sfSession&&_apprOf(e)==='pending'&&e.status==='waiting').length;
+          const nPend=(_qBySession().get(S.sfSession)||[]).filter(e=>_apprOf(e)==='pending'&&e.status==='waiting').length;
           return `${nPend?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("bulkApprovePending")}">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'} rq-nw" data-on-click="${_on("publishCommResults")}">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
         })():''}
         <button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button><button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
@@ -19198,7 +19292,7 @@ function _qSyncShell(tab,html){
 // whatever channel staff prefer. Bookkeeping: every live booking cancelled (stamped staff,
 // guarded on current status) and the session closed, undoable from the bar. To MOVE the
 // night instead, edit the session's date -- bookings already follow it.
-function _cnLiveRows(sid){return getQueue().filter(e=>e.sessionId===sid&&['waiting','waitlist','active'].includes(e.status));}
+function _cnLiveRows(sid){return (_qBySession().get(sid)||[]).filter(e=>['waiting','waitlist','active'].includes(e.status));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showCancelNight_1(event,el){event.stopPropagation()}
 function _on_showCancelNight_2(event,el){S._cnMsg=el.value;_cnSyncLinks()}
@@ -19315,7 +19409,7 @@ function _coCount(sid){
   return(_qBySession().get(sid)||[]).filter(e=>e.status==='active'||e.status==='waiting').length;
 }
 async function closeOutSession(sid){
-  const rows=getQueue().filter(e=>e.sessionId===sid);
+  const rows=(_qBySession().get(sid)||[]).slice();
   // Riders on a bike are RETURNED (staff_return: bike back, check-out stamp, assignment closed),
   // exactly as the Return button does; checked in without a bike they are simply done.
   const toReturn=rows.filter(e=>e.status==='active');
@@ -19382,7 +19476,7 @@ async function closeOutSession(sid){
 // a rider another till just rejected is not resurrected by this.
 async function bulkApprovePending(){
   const sid=S.sfSession;
-  const ids=getQueue().filter(e=>e.sessionId===sid&&_apprOf(e)==='pending'&&e.status==='waiting').map(e=>e.id);
+  const ids=(_qBySession().get(sid)||[]).filter(e=>_apprOf(e)==='pending'&&e.status==='waiting').map(e=>e.id);
   if(!ids.length)return;
   confirmDialog({
     title:t('bulkApproveTitle'),
@@ -19405,7 +19499,7 @@ async function publishCommResults(){
   const sess=(S.sessions||[]).find(x=>x.id===sid);
   if(!sess||!_isApprovalRide(sess))return;
   if(_commPublished(sess)){toast(t('publishedAlready'),'warning');return;}
-  const nApproved=getQueue().filter(e=>e.sessionId===sid&&e.approval==='approved'&&e.status!=='cancelled'&&e.status!=='removed').length;
+  const nApproved=(_qBySession().get(sid)||[]).filter(e=>e.approval==='approved'&&e.status!=='cancelled'&&e.status!=='removed').length;
   confirmDialog({
     title:t('publishConfirmTitle'),
     body:t('publishConfirmBody').replace('{0}',String(nApproved)),
@@ -21079,7 +21173,7 @@ function _promoNudge(e){
 // frees, a reservation is cancelled, or the allocation is expanded.
 async function _autoPromoteOldestWaitlist(sessionId){
   if(_isApprovalRide(allSessions().find(s=>s.id===sessionId)))return false;
-  const wl=getQueue().filter(x=>x.sessionId===sessionId&&x.status==='waitlist')
+  const wl=(_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist')
     .sort(_wlCmp); // staff-set W order first (W1 is next up), registration time as tiebreaker
   // Down the line until one promotion takes. This device's copy can be a moment behind: a first
   // candidate another desk had already promoted or cancelled used to end the attempt, and the
@@ -21122,7 +21216,7 @@ async function _releaseBikes(ids,ctx,inUse){
 // the waitlist (those are the riders waiting FOR one). Approval rides are hand-picked.
 function _hasRoom(sid){
   const sess=allSessions().find(s=>s.id===sid);if(!sess||_isApprovalRide(sess))return true;
-  return getQueue().filter(e=>e.sessionId===sid&&e.status!=='waitlist'&&_holdsSpot(e,sess)).length<((sess&&sess.capacity)||12);
+  return (_qBySession().get(sid)||[]).filter(e=>e.status!=='waitlist'&&_holdsSpot(e,sess)).length<((sess&&sess.capacity)||12);
 }
 // Undoing a cancel or a no-show gives the rider back a place the action had already handed to
 // the longest-waiting rider, and leaving both confirmed is how a 12-bike night ends up with 13.
@@ -21441,7 +21535,7 @@ function _on_showEditQNumModal_3(event,el){el.style.borderColor='rgba(var(--tint
 function _on_showEditQNumModal_4(event,el,a0){if(event.key==='Enter')saveEditedQNum(a0)}
 function showEditQNumModal(entryId){
   const entry=getQueue().find(e=>e.id===entryId);if(!entry)return;
-  const group=getQueue().filter(e=>e.sessionId===entry.sessionId&&e.queueNum===entry.queueNum&&e.status!=='cancelled'&&e.status!=='removed');
+  const group=(_qBySession().get(entry.sessionId)||[]).filter(e=>e.queueNum===entry.queueNum&&e.status!=='cancelled'&&e.status!=='removed');
   const m=document.getElementById('qnum-edit-modal');
   m.style.display='flex';
   const n=group.length;
@@ -21479,14 +21573,14 @@ async function saveEditedQNum(entryId){
   if(getQueue().some(e=>e.sessionId===entry.sessionId&&e.queueNum===newNum&&!['cancelled','removed','noshow'].includes(e.status))){
     if(inp)inp.style.borderColor='var(--red)';toast(t('errQNumTaken'),'error');return;
   }
-  const group=getQueue().filter(e=>e.sessionId===entry.sessionId&&e.queueNum===oldNum&&e.status!=='cancelled'&&e.status!=='removed');
+  const group=(_qBySession().get(entry.sessionId)||[]).filter(e=>e.queueNum===oldNum&&e.status!=='cancelled'&&e.status!=='removed');
   closeEditQNumModal();
   const _qr=await Promise.all(group.map(e=>sb.from('queue_entries').update({queue_num:newNum}).eq('id',e.id)));
   const _qe=_qr.find(r=>r&&r.error);
   if(_qe){toast(t('errSomethingWrong')+(_qe.error.message?' ('+_qe.error.message+')':''),'error');await loadData();renderStaffQueue();return;}
   await loadData();renderStaffQueue();renderHistory();
   pushUndo(`${t('undoRenumber')} #${oldNum}→#${newNum} ${entry.name}`,async()=>{
-    const restored=getQueue().filter(e=>e.sessionId===entry.sessionId&&e.queueNum===newNum&&group.map(x=>x.id).includes(e.id));
+    const restored=(_qBySession().get(entry.sessionId)||[]).filter(e=>e.queueNum===newNum&&group.map(x=>x.id).includes(e.id));
     const r=await Promise.all(restored.map(e=>sb.from('queue_entries').update({queue_num:oldNum}).eq('id',e.id)));
     if(_writeErr(r,'undo renumber')){await loadData();renderStaffQueue();return false;}
     await loadData();renderStaffQueue();renderHistory();
@@ -23014,7 +23108,7 @@ function printSessionReport(){
     .sort((a,b)=>a.queueNum-b.queueNum));
   // Collected = every paid row except cancelled/removed (same basis as the close-out and
   // analytics): a rider who paid then no-showed left their money in the drawer.
-  const paidRows=getQueue().filter(e=>e.sessionId===sessId&&e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const paidRows=(_qBySession().get(sessId)||[]).filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
   const paidSAR=paidRows.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
   // Card / cash split of the collected amount: card rows count fully, split rows count
   // their card share; cash is the remainder (covers cash + anything method-less).
@@ -26767,10 +26861,10 @@ function _onRidersRt(){ // debounce: a burst of submissions at the desk is one r
   if(_ridersRtT)clearTimeout(_ridersRtT);
   _ridersRtT=setTimeout(async()=>{_ridersRtT=null;await loadRiders();if(_pmOpen())renderRiders();else _pmStripRefresh();_renderRiderModal();},400);
 }
-function setRidersSearch(v){S.ridersSearch=v||'';renderRiders(true);}
+function setRidersSearch(v){S.ridersSearch=v||'';_debRender('riders',()=>renderRiders(true));} // one repaint when the typing pauses, not one per key
 function setRidersFilter(v){S.ridersFilter=v||'all';renderRiders();}
 function setRidersSession(v){S.ridersSession=v||'all';_saveQueueView();renderStaffQueue();} // the chips follow the night picked here
-function _riderEntry(r){return r&&r.matched_entry_id?getQueue().find(e=>e.id===r.matched_entry_id)||null:null;}
+function _riderEntry(r){return r&&r.matched_entry_id?_qGet(r.matched_entry_id)||null:null;}
 // A party: the rows that share a booking number, the employee first (party_no 1), then the
 // companions they registered. One number, one badge, one row per rider.
 // Booking numbers start again at P-001 every night, so a party is the same number on the same night.
@@ -26817,7 +26911,8 @@ function _ridersFiltered(){
 }
 // Minutes between check-in and return, shown under the check-out time as "1 h 35 min".
 function _riderDur(a,b){const ms=new Date(b)-new Date(a);if(!(ms>0))return '';const m=Math.round(ms/60000),h=Math.floor(m/60);return h?`${h} ${t('unitHour')} ${String(m%60).padStart(2,'0')} ${t('unitMin')}`:`${m} ${t('unitMin')}`;} // units in the reader's language
-function _riderClock(iso){try{return new Date(iso).toLocaleTimeString(_locale(),{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
+const _rcMemo=new Map(); // a time's label per language: Intl formatting was the dearest part of a Riders row
+function _riderClock(iso){const k=iso+'|'+_locale();let v=_rcMemo.get(k);if(v!==undefined)return v;try{v=new Date(iso).toLocaleTimeString(_locale(),{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit'});}catch(e){v='';}if(_rcMemo.size>4000)_rcMemo.clear();_rcMemo.set(k,v);return v;}
 // Check-in / return: paint first, reconcile after (same order as the queue actions). The price is
 // set by a database trigger at return time and is never rendered in this tab.
 async function _riderPatch(id,patch){
@@ -27451,7 +27546,7 @@ async function _rwLiveRows(sessId){
     return (data||[]).map(x=>({id:x.id,name:x.name,phone:x.phone,queueNum:x.queue_num,customerId:x.customer_id}));
   }catch(e){
     console.warn('walk-in: the live duplicate check fell back to the cached queue',e);
-    return getQueue().filter(x=>x.sessionId===sessId&&['waiting','waitlist','active'].includes(x.status))
+    return (_qBySession().get(sessId)||[]).filter(x=>['waiting','waitlist','active'].includes(x.status))
       .map(x=>({id:x.id,name:x.name,phone:x.phone,queueNum:x.queueNum,customerId:x.customerId}));
   }
 }
@@ -27573,9 +27668,13 @@ function renderRiders(_resultsOnly){
   const night=S.ridersSession&&S.ridersSession!=='all'?all.filter(r=>r.session_id===S.ridersSession):all; // the pills count the night on show
   const nOut=night.filter(r=>r.checked_in_at&&!r.checked_out_at).length,nDone=night.filter(r=>r.checked_out_at).length,nWait=night.filter(r=>!r.checked_in_at).length;
   const _sessById=new Map((S.sessions||[]).map(x=>[x.id,x]));
+  // Every party once, from one pass over the registrations (_riderParty scanned them all per row).
+  const _parties=new Map();all.forEach(x=>{if(!x.booking_no)return;const k=(x.session_id||'')+'\u0001'+x.booking_no;let a=_parties.get(k);if(!a)_parties.set(k,a=[]);a.push(x);});
+  _parties.forEach(a=>a.sort((a,b)=>(Number(a.party_no)||1)-(Number(b.party_no)||1)));
+  const _partyOf=r=>r&&r.booking_no?(_parties.get((r.session_id||'')+'\u0001'+r.booking_no)||[r]):[r];
   const _rowHtml=(r,ctx)=>{
     const sess=r.session_id?(_sessById.get(r.session_id)||null):null;
-    const _pl=_riderParty(r),_ps=_pl.length,_pn=_riderPartyNo(r),_lead=_pn>1?_pl[0]:null;
+    const _pl=_partyOf(r),_ps=_pl.length,_pn=_riderPartyNo(r),_lead=_pn>1?_pl[0]:null;
     return`<tr${ctx.party?' class="party-row iv-party"':''}>
       <td><button type="button" class="status-badge badge-active iv-bno" data-on-click="${_on("openRiderModal",r.id)}">${esc(r.booking_no||'')}</button>${_ps>1?`<div class="iv-pof">${esc(t('ridersPartyOf').replace('{0}',_pn).replace('{1}',_ps))}</div>`:''}${(ctx.party&&ctx.first)?`${ctx.party.some(x=>!x.checked_in_at)?`<div><button class="btn-sm btn-green iv-pbtn" data-on-click="${_on("riderCheckinParty",r.id)}">${t('ridersCheckInAll')} (${ctx.party.filter(x=>!x.checked_in_at).length})</button></div>`:''}${ctx.party.some(x=>x.checked_in_at&&!x.checked_out_at)?`<div><button class="btn-sm btn-green iv-pbtn" data-on-click="${_on("riderReturnParty",r.id)}">${t('returnAllBtn')} (${ctx.party.filter(x=>x.checked_in_at&&!x.checked_out_at).length})</button></div>`:''}<div><button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_toggleRiderParty",_riderKey(r))}">${t('partyHideRiders')} ▴</button></div>`:''}</td>
       <td><strong>${esc(r.badge)}</strong>${r.company?`<div class="iv-sub">${esc(r.company)}</div>`:''}</td>
@@ -27609,8 +27708,9 @@ function renderRiders(_resultsOnly){
     </tr>`;
   };
   // Group the filtered rows by booking number, in the order they appear.
-  const _groups=[],_seen=new Set();
-  rows.forEach(r=>{const k=_riderKey(r);if(_seen.has(k))return;_seen.add(k);_groups.push(rows.filter(x=>_riderKey(x)===k).sort((a,b)=>_riderPartyNo(a)-_riderPartyNo(b)));});
+  const _groups=[],_byKey=new Map();
+  rows.forEach(r=>{const k=_riderKey(r);let g=_byKey.get(k);if(!g){_byKey.set(k,g=[]);_groups.push(g);}g.push(r);});
+  _groups.forEach(g=>g.sort((a,b)=>_riderPartyNo(a)-_riderPartyNo(b)));
   const body=_groups.map(g=>{
     if(g.length<2)return _rowHtml(g[0],{});
     if(!_riderPartyIsOpen(_riderKey(g[0])))return _foldedHtml(g);
@@ -27860,7 +27960,7 @@ function _wsListHtml(){
   return _wsSorted(rows,f).map(_wsRow).join('')||`<div class="empty-state">${t(W.q&&W.q.trim()?'wsNoMatch':'wsEmpty')}</div>`;
 }
 function _wsSetFilter(k){_ws().filter=k;renderWorkshop();}
-function _wsSearch(v){_ws().q=v||'';renderWorkshop(true);}
+function _wsSearch(v){_ws().q=v||'';_debRender('ws',()=>renderWorkshop(true));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderWorkshop_1(event,el){_ws().err=false;_wsLoad();renderWorkshop()}
 function renderWorkshop(listOnly){
@@ -28231,7 +28331,7 @@ function _smListHtml(){
 }
 function _smSetFilter(k){_sm().filter=k;renderMessages();}
 function _smSetKind(v){_sm().kind=_own(SM_KIND_KEY,v)?v:'all';renderMessages();}
-function _smSearch(v){_sm().q=v||'';renderMessages(true);}
+function _smSearch(v){_sm().q=v||'';_debRender('sm',()=>renderMessages(true));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderMessages_1(event,el){_sm().err=false;_smLoad();renderMessages()}
 function renderMessages(listOnly){
@@ -28512,7 +28612,7 @@ function _ambListHtml(){
   return rows.map(_ambRow).join('')||`<div class="empty-state">${t(W.q&&W.q.trim()?'amNoMatch':'amEmpty')}</div>`;
 }
 function _ambSetFilter(k){_amb().filter=k;renderAmbassadors();}
-function _ambSearch(v){_amb().q=v||'';renderAmbassadors(true);}
+function _ambSearch(v){_amb().q=v||'';_debRender('amb',()=>renderAmbassadors(true));}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderAmbassadors_1(event,el){_amb().err=false;_ambLoad();renderAmbassadors()}
 function renderAmbassadors(listOnly){
@@ -29381,7 +29481,7 @@ function _vendorFbBody(srch,pill){
 // ── The page ──
 function _vendorView(k){S.vendorView=k;renderVendors();_pushNav();}
 function _vendorFilter(w,k){_vendor()[w]=k;renderVendors();}
-function _vendorSearch(w,v){_vendor()[w]=v||'';renderVendors('list');}
+function _vendorSearch(w,v){_vendor()[w]=v||'';_debRender('vendor',()=>renderVendors('list'));}
 function _on_renderVendors_1(event,el){_vendor().err=false;_vendorLoad();renderVendors();}
 function renderVendors(arg){
   if(arg==='reload'){_vendorLoad();return;}
@@ -30487,7 +30587,10 @@ function renderHistory(_resultsOnly){
   }
   const sessions=allSessions();
   const {hist,sessionFiltered,filtered}=_histRows();
-  S.histSelected=(S.histSelected||[]).filter(id=>{const e=hist.find(x=>x.id===id);return e&&e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId);}); // drop rows that got paid/removed since selection
+  {const _hb=(S.histSelected||[]).length?new Map(hist.map(x=>[x.id,x])):null; // one index, not a find per selected row
+  S.histSelected=(S.histSelected||[]).filter(id=>{const e=_hb.get(id);return e&&e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId);});} // drop rows that got paid/removed since selection
+  const _hSel=new Set(S.histSelected),_hTime=new Map(); // per paint: the ticks as a set, each session's time worked out once
+  const _hTimeOf=sid=>{let v=_hTime.get(sid);if(v===undefined){v=sessionTime(_sessGet(sid));_hTime.set(sid,v);}return v;};
   const nDone=sessionFiltered.filter(e=>e.status==='done').length,nPaid=sessionFiltered.filter(e=>e.status==='done'&&e.paid).length,
         nPend=sessionFiltered.filter(e=>e.status==='done'&&!e.paid).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
   const _hr2=n=>Math.round(n*100)/100;
@@ -30534,7 +30637,7 @@ function renderHistory(_resultsOnly){
       <td class="hide-mobile">
         <div class="hist-day">${dayLabel(e.sessionDay)||''}</div>
         <div class="hist-sdate">${shortDate(e.sessionDate)}</div>
-        <div class="hist-stime"><bdi>${sessionTime(allSessions().find(s=>s.id===e.sessionId))}</bdi></div>
+        <div class="hist-stime"><bdi>${_hTimeOf(e.sessionId)}</bdi></div>
       </td>
       ${_hc.bike?`<td class="hist-bike">${bike?esc(bike.name):`<span class="hist-c-muted">—</span>`}</td>`:''}
       ${_hc.bike?`<td><div class="hist-row4">
@@ -30543,7 +30646,7 @@ function renderHistory(_resultsOnly){
       ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">${_money(e.price??DEFAULT_PRICE)}</td>`:''}
       ${_hc.money?`<td data-on-click="${_on("_on_renderHistory_4",_EV,_EL)}">
         <div class="hist-row4">
-          ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm hist-sel ${S.histSelected.includes(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${S.histSelected.includes(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
+          ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm hist-sel ${_hSel.has(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${_hSel.has(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
           ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="hist-c-muted">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
           <button data-on-click="${_on("showEditPriceModal",e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" class="hist-pen" data-on-mouseover="${_on("_on_renderHistory_5",_EV,_EL)}" data-on-mouseout="${_on("_on_renderHistory_6",_EV,_EL)}">${ICON_PENCIL}</button>
         </div>
@@ -30898,10 +31001,20 @@ function _vbars(data,opts={}){
 
 function setAnRange(v){S.analyticsRange=v;renderAnalytics();}
 // Analytics sub-tab switching: sections are tagged with <div class="an-anchor" data-anview="..."> markers; show only those belonging to the active view (no re-render needed).
-function setAnView(v){S.anView=v;_applyAnView(v);try{const c=document.getElementById('tab-analytics');if(c)c.scrollIntoView({block:'start',behavior:_sb()});}catch(_){}}
+function setAnView(v){
+  S.anView=v;
+  renderAnalytics(); // with nothing moved since the last build this only shows the view (drawn from the kept markup the first time)
+  try{const c=document.getElementById('tab-analytics');if(c)c.scrollIntoView({block:'start',behavior:_sb()});}catch(_){}}
 function _applyAnView(v){
   const cont=document.getElementById('tab-analytics');if(!cont)return;
   S.anView=v;let cur=null;
+  const c=_anCache; // a sub-view not drawn yet is drawn now, from the markup kept at the last build
+  if(c&&c.el===cont&&c.first&&cont.firstElementChild===c.first&&!c.painted.has(v)&&c.parts.some(p=>p.view===v)){
+    c.painted.add(v);
+    const anchors=cont.querySelectorAll(':scope > .an-anchor');
+    c.parts.forEach((p,i)=>{if(p.view===v&&anchors[i])anchors[i].insertAdjacentHTML('afterend',_anChunk(p));});
+    _cssvApply(cont);
+  }
   [...cont.children].forEach(ch=>{
     if(ch.classList&&ch.classList.contains('an-anchor')){cur=ch.dataset.anview;return;}
     if(cur===null)return; // header (title, range bar, sub-nav) stays visible for every view
@@ -31170,13 +31283,35 @@ function entryPurchases(e){
   if(!e)return[];
   try{return Array.isArray(e.purchases)?e.purchases:(e.purchases?JSON.parse(e.purchases):[]);}catch(_){return[];}
 }
+// Sale lines inside one render (2026-10-04, performance). Analytics asked for each session's lines
+// four and more times per paint, and every ask scanned the whole queue and every cashier sale: on
+// "All time" that was most of the tab's cost. _cashScope(fn) runs fn with the cashier sales indexed
+// by session and each session's lines kept once; outside a scope nothing is kept, so an entry whose
+// purchases were edited in place is read afresh on the next paint. Callers only read the lines.
+let _cslScope=null;
+function _cashScope(fn){
+  if(_cslScope)return fn();
+  _cslScope={lines:new Map(),sales:null};
+  try{return fn();}finally{_cslScope=null;}
+}
+function _salesOfSess(sessId){
+  const sc=_cslScope;
+  if(!sc)return(S.cashSales||[]).filter(r=>r.session_id===sessId);
+  if(!sc.sales){const m=new Map();(S.cashSales||[]).forEach(r=>{let a=m.get(r.session_id);if(!a)m.set(r.session_id,a=[]);a.push(r);});sc.sales=m;}
+  return sc.sales.get(sessId)||[];
+}
 // All sale lines for a session, normalized: rental add-ons (entry.purchases) + standalone cashier-tab sales
 function _cashSessionLines(sessId){
+  const sc=_cslScope;
+  if(sc){const hit=sc.lines.get(sessId);if(hit)return hit;}
   const lines=[];
-  getQueue().filter(e=>e.sessionId===sessId).forEach(e=>entryPurchases(e).forEach(p=>lines.push({name:p.name,cat:p.cat,qty:Number(p.qty)||0,price:Number(p.price)||0,pay:p.pay,who:e.name,src:'rental',item_id:p.id||null})));
-  (S.cashSales||[]).filter(r=>r.session_id===sessId).forEach(r=>lines.push({name:r.name,cat:r.category,qty:Number(r.qty)||0,price:Number(r.price)||0,pay:r.pay,who:r.customer_name||t('cashWalkup'),src:'sale',id:r.id,item_id:r.item_id||null}));
+  (_qBySession().get(sessId)||[]).forEach(e=>entryPurchases(e).forEach(p=>lines.push({name:p.name,cat:p.cat,qty:Number(p.qty)||0,price:Number(p.price)||0,pay:p.pay,who:e.name,src:'rental',item_id:p.id||null})));
+  _salesOfSess(sessId).forEach(r=>lines.push({name:r.name,cat:r.category,qty:Number(r.qty)||0,price:Number(r.price)||0,pay:r.pay,who:r.customer_name||t('cashWalkup'),src:'sale',id:r.id,item_id:r.item_id||null}));
+  if(sc)sc.lines.set(sessId,lines);
   return lines;
 }
+// Every sale line of a set of sessions, in the order given.
+function _cashLinesOf(sessIds){const out=[];for(const sid of sessIds)for(const l of _cashSessionLines(sid))out.push(l);return out;}
 // Aggregate sale lines -> category breakdown + collected/pending/free/team/refunds/discount totals.
 // Special lines: cat '__discount__' (negative, reduces totals), cat '__cardmeta__' (qty 0, ignored), pay 'refunded' (reversed).
 function _salesTotals(lines){
@@ -31219,12 +31354,12 @@ function _moneyIn(sessIds){
 }
 function _placesCap(sess){return _isApprovalRide(sess)?(sess.spots||sess.capacity||12):(sess.capacity||12);}
 function _placesTaken(sess){
-  return Math.min(_placesCap(sess),getQueue().filter(e=>e.sessionId===sess.id&&_holdsSpot(e,sess)).length);
+  return Math.min(_placesCap(sess),(_qBySession().get(sess.id)||[]).filter(e=>_holdsSpot(e,sess)).length);
 }
 // Card vs cash split of collected cashier sales for a session (reads the '__cardmeta__' line per receipt)
 function _cashCardCash(sessId){
   const byR={};
-  (S.cashSales||[]).filter(r=>r.session_id===sessId).forEach(r=>{
+  _salesOfSess(sessId).forEach(r=>{
     const k=r.receipt_id||r.id;byR[k]=byR[k]||{paid:0,card:0,refunded:false};
     if(r.pay==='refunded'){byR[k].refunded=true;return;}
     if(r.category==='__cardmeta__'){byR[k].card=Number(r.price)||0;return;}
@@ -32177,7 +32312,7 @@ function renderCashier(){
   const byR={};const rOrder=[];
   csRows.forEach(r=>{const k=r.receipt_id||r.id;if(!byR[k]){byR[k]={key:k,cust:r.customer_name,at:r.created_at,lines:[]};rOrder.push(k);}byR[k].lines.push(r);});
   const receipts=rOrder.map(k=>byR[k]).sort((a,b)=>new Date(b.at||0)-new Date(a.at||0));
-  const rentalLines=[];getQueue().filter(e=>e.sessionId===sessId).forEach(e=>entryPurchases(e).forEach((p,i)=>rentalLines.push({...p,who:e.name,entryId:e.id,pidx:i})));
+  const rentalLines=[];(_qBySession().get(sessId)||[]).slice().forEach(e=>entryPurchases(e).forEach((p,i)=>rentalLines.push({...p,who:e.name,entryId:e.id,pidx:i})));
   const receiptCards=receipts.map(rc=>{
     const refunded=rc.lines.some(l=>l.pay==='refunded');
     const disp=rc.lines.filter(l=>l.category!=='__cardmeta__');
@@ -32783,7 +32918,7 @@ function _lbInWindow(e,win,ref){
 // Aggregate completed+paid rides. scope 'owner' = booking account credited for EVERY rider it booked;
 // scope 'rider' = each individual rider counted on their own.
 function _lbAgg(win,scope,ref){
-  const locOf=id=>{const s=(S.sessions||[]).find(x=>x.id===id);return s?s.location:null;};
+  const locOf=id=>{const s=_sessGet(id);return s?s.location:null;};
   // An account is shown under its own name. Every rider in a booking carries the booker's
   // account, so the old "name on the lowest queue number" could be a companion's - a child who
   // happened to be #2 one night named the parent's account. That stays only as the fallback
@@ -33318,8 +33453,12 @@ const AM_PAGE=60;
 function _amFilter(k,v){S[k]=v;S.amShow=AM_PAGE;renderCommunity();}
 function _amMore(){S.amShow=(S.amShow||AM_PAGE)+AM_PAGE;const w=document.getElementById('am-cust-rows');if(w)w.innerHTML=_amCustRows();}
 // The rows this device would show, after search, tag and missing-details filters.
+// Newest first, sorted once per accounts list (ISO stamps compare by code point) rather than on every keystroke.
+let _amSortSrc=null,_amSortLen=-1,_amSorted=null;
 function _amFiltered(){
-  const custs=(S.customers||[]).slice().sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+  const _all=S.customers||[];
+  if(_amSortSrc!==S.customers||_amSortLen!==_all.length||!_amSorted){_amSorted=_all.slice().sort((a,b)=>_cmpS(b.created_at||'',a.created_at||''));_amSortSrc=S.customers;_amSortLen=_all.length;}
+  const custs=_amSorted;
   const q=(S.amSearch||'').trim().toLowerCase();
   let shown=q?custs.filter(c=>[c.name,c.email,c.apple_email].some(v=>String(v||'').toLowerCase().includes(q))||_phoneHit(c.phone,q)):custs;
   // Tag filter: only customers holding the selected tag NOW - the same test as the count on its
@@ -34234,8 +34373,10 @@ function bikeHealthSection(){
   const avgOf=(arr,k)=>{const v=arr.map(e=>e[k]).filter(Boolean);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10:0;};
   const avgBike=avgOf(rated,'ratingBike'),avgExp=avgOf(rated,'ratingExp');
   const bikes=getBikes().filter(b=>!_bkOut(b));
+  // Completed rides per bike, in one pass (it filtered every completed ride once per bike).
+  const ridesByBike=new Map();done.forEach(e=>{new Set(getAssignedBikeIds(e)).forEach(id=>{let a=ridesByBike.get(id);if(!a)ridesByBike.set(id,a=[]);a.push(e);});});
   const perBike=bikes.map(b=>{
-    const rides=done.filter(e=>getAssignedBikeIds(e).includes(b.id));
+    const rides=ridesByBike.get(b.id)||[];
     const br=rides.map(e=>e.ratingBike).filter(Boolean);
     const avgR=br.length?Math.round(br.reduce((a,c)=>a+c,0)/br.length*10)/10:0;
     const days=b.in_service_date?Math.max(0,Math.floor((Date.now()-new Date(b.in_service_date+'T00:00:00'))/86400000)):null;
@@ -34246,7 +34387,7 @@ function bikeHealthSection(){
   const attn=perBike.filter(x=>x.attn).sort((a,b)=>(a.avgR||99)-(b.avgR||99));
   // Bike rating aggregated by model (purchasing/retirement signal; uses all bikes so retired units' history still counts).
   const allBk=getBikes(),rbSumM={},rbCntM={};
-  done.forEach(e=>{if(!e.ratingBike)return;getAssignedBikeIds(e).forEach(id=>{const bk=allBk.find(x=>x.id===id);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;rbSumM[mk]=(rbSumM[mk]||0)+e.ratingBike;rbCntM[mk]=(rbCntM[mk]||0)+1;});});
+  done.forEach(e=>{if(!e.ratingBike)return;getAssignedBikeIds(e).forEach(id=>{const bk=bikeById(id);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;rbSumM[mk]=(rbSumM[mk]||0)+e.ratingBike;rbCntM[mk]=(rbCntM[mk]||0)+1;});});
   const modelRows=Object.keys(rbSumM).map(k=>({k,avg:rbSumM[k]/rbCntM[k],n:rbCntM[k]})).sort((a,b)=>b.avg-a.avg);
   const _ratingColor=v=>v>=7?_thc('--green','#03ff89'):v>=5?_thc('--orange','#e08828'):_thc('--red','#f87171');
   const modelCard=modelRows.length?`<div class="chart-card an-mt14">
@@ -34329,7 +34470,13 @@ function bikeHealthSection(){
 }
 
 // Theme-aware chart color: resolves a CSS variable so charts stay readable in light/hc themes
-function _thc(varName,fb){try{const v=getComputedStyle(document.documentElement).getPropertyValue(varName).trim();return v||fb;}catch(e){return fb;}}
+let _thcM=null; // one computed-style read per colour per paint: kept until the paint's task ends
+function _thc(varName,fb){
+  const k=varName+'|'+fb;if(_thcM&&_thcM.has(k))return _thcM.get(k);
+  let out;try{const v=getComputedStyle(document.documentElement).getPropertyValue(varName).trim();out=v||fb;}catch(e){out=fb;}
+  if(!_thcM){_thcM=new Map();queueMicrotask(()=>{_thcM=null;});}
+  _thcM.set(k,out);return out;
+}
 // ── Analytics "Growth" view: pure helpers (unit-tested in nutrition/analytics specs) ──
 function _anFunnelCounts(entries){
   const booked=entries.length;
@@ -34417,8 +34564,8 @@ function _anCustJourneys(entries){
   return c;
 }
 // Retention curve: of riders whose first ride is ≥N days old, the % who rode again within N days.
-function _anRetentionCurve(entries,nowMs){
-  nowMs=nowMs||Date.now();const j=_anCustJourneys(entries);const res={};
+function _anRetentionCurve(entries,nowMs,jj){ // jj: the journeys, when the caller already built them
+  nowMs=nowMs||Date.now();const j=jj||_anCustJourneys(entries);const res={};
   [7,30,90].forEach(w=>{const ms=w*86400000;let elig=0,ret=0;Object.values(j).forEach(({times})=>{const first=times[0];if(nowMs-first<ms)return;elig++;if(times.some(tt=>tt>first&&tt<=first+ms))ret++;});res[w]={eligible:elig,returned:ret,pct:elig?Math.round(ret/elig*100):0};});
   return res;
 }
@@ -34439,8 +34586,8 @@ function _anMargin(lines,costById){
   return{rev,cogs,profit:rev-cogs,marginPct:rev>0?Math.round((rev-cogs)/rev*100):0,haveCost};
 }
 // Lifetime value by first-ride month cohort: avg total spend per rider.
-function _anLTVByCohort(entries){
-  const j=_anCustJourneys(entries),mo={};
+function _anLTVByCohort(entries,jj){
+  const j=jj||_anCustJourneys(entries),mo={};
   Object.values(j).forEach(({times,spend})=>{const k=_ksaParts(times[0]);if(!k)return;const key=k.y+'-'+String(k.m).padStart(2,'0');(mo[key]=mo[key]||{n:0,spend:0}).n++;mo[key].spend+=spend;});
   return Object.entries(mo).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,6).map(([month,v])=>({month,customers:v.n,avgLtv:Math.round(v.spend/v.n)}));
 }
@@ -34557,13 +34704,81 @@ function _anExportCSV(){
 function _on_renderAnalytics_1(event,el){S.analyticsDateFrom=el.value;renderAnalytics()}
 function _on_renderAnalytics_2(event,el){S.analyticsDateTo=el.value;renderAnalytics()}
 function _on_renderAnalytics_3(event,el){S.anSession=el.value;renderAnalytics()}
+// Analytics is built once per state of what it reads (2026-10-04, performance). On "All time" a
+// paint cost a third of a second at phone speed and every realtime event, range tap and tab return
+// paid it again. _anModelKey() names that state: the lists by identity (they are replaced, never
+// edited in place, whenever data arrives), a cheap sum over the fields a desk action changes in
+// place (status, paid, price, bike, rating, purchases), and every setting the page reads. The same
+// key with the page still standing is a no-op. And only the sub-view on show is put in the page:
+// the others are kept as markup (_anCache.parts) and drawn when their button is tapped, Growth and
+// Ratings not even computed until then.
+let _anCache=null;
+const _anIds=new WeakMap();let _anIdN=0;
+function _anObjId(o){if(!o||typeof o!=='object')return 0;let n=_anIds.get(o);if(!n){n=++_anIdN;_anIds.set(o,n);}return n;}
+const _AN_ST={waiting:1,active:2,done:3,noshow:4,cancelled:5,removed:6,waitlist:7};
+function _anRowsSum(q){
+  let h=q.length|0;
+  for(let i=0;i<q.length;i++){const e=q[i];if(!e)continue;
+    h=(Math.imul(h,31)+(_AN_ST[e.status]||9)+(e.paid?16:0)+(((Number(e.price)||0)*32)|0)+((e.rideDuration|0)<<3)+((e.ratingBike|0)<<6)+((e.ratingExp|0)<<10)
+      +((e.purchases&&e.purchases.length|0)<<14)+((e.addons&&e.addons.length|0)<<17)+(e.assignedBikeId?_anStrSum(e.assignedBikeId)<<20:0)
+      +((e.approval==='approved'?1:e.approval==='rejected'?2:e.approval?3:0)<<24)+(e.card_amount!=null?(Number(e.card_amount)|0)<<4:0)+((Number(e.height)|0)<<2))|0;}
+  return h;
+}
+function _anStrSum(v){const s=String(v);let n=0;for(let i=0;i<s.length;i++)n=(n*33+s.charCodeAt(i))|0;return n;}
+function _anSalesSum(rows){let h=rows.length|0;for(let i=0;i<rows.length;i++){const r=rows[i];if(!r)continue;h=(Math.imul(h,31)+(r.pay==='paid'?1:r.pay==='refunded'?2:r.pay==='team'?3:4)+((Number(r.qty)|0)<<3)+(((Number(r.price)||0)*8)|0))|0;}return h;}
+function _anModelKey(){
+  const q=S.queue||[],cs=S.cashSales||[],id=_anObjId;
+  return[id(S.queue),_anRowsSum(q),id(S.cashSales),_anSalesSum(cs),id(S.sessions),(S.sessions||[]).length,id(S.bikes),(S.bikes||[]).map(b=>b&&b.status).join(),
+    id(S.customers),(S.customers||[]).length,id(S.inventory),id(S.anWeather),id(S._tpl),id(S._extraBikes),
+    S.analyticsRange,S.analyticsDateFrom||'',S.analyticsDateTo||'',S.anSession||'',S.lang,_langLoaded(S.lang),S.anRevTarget||0,S.analyticsTrendSort||'',S.analyticsTrendDir||0,
+    todayStr(),S.staffRole||'',document.documentElement.getAttribute('data-theme')||''].join('\u0001');
+}
 function renderAnalytics(){
   if(S.anRevTarget==null){try{S.anRevTarget=Number(localStorage.getItem('cq_an_rev_target'))||0;}catch(e){S.anRevTarget=0;}}
   if(S.anWeather==null){try{const _c=JSON.parse(localStorage.getItem('cq_weather')||'null');if(_c&&_c.w&&Date.now()-_c.at<86400000){S.anWeather=_c.w;S._anWeatherDone=true;}}catch(e){}}
   try{_anEnsureWeather();}catch(e){}
+  if(S.analyticsRange==='custom')S.analyticsRange='all'; // 'custom' (last-N) range was removed; fall back to All time
+  const cont=document.getElementById('tab-analytics');if(!cont)return;
+  const c=_anCache;
+  if(c&&c.key&&c.el===cont&&c.first&&cont.firstElementChild===c.first&&c.key===_anModelKey()){
+    _applyAnView(document.querySelector(`#tab-analytics .an-nav-btn[data-anview="${S.anView}"]`)?S.anView:'overview');
+    return;
+  }
+  _cashScope(_renderAnalyticsNow);
+  if(_anCache&&_anCache.el===cont)_anCache.key=_anModelKey(); // after the build: it may have settled the range and the session focus
+}
+// The markup of each sub-view, cut at its anchors; a lazy section (<!--an-lazy:x-->) is computed
+// the first time its view is drawn.
+const _AN_ANCHOR_RE=/<div class="an-anchor" data-anview="([a-z]+)"><\/div>/g;
+function _anChunk(p){
+  const c=_anCache;
+  if(p.html.indexOf('<!--an-lazy:')<0)return p.html;
+  return p.html.replace(/<!--an-lazy:([a-z]+)-->/g,(_,k)=>{if(c.lazyHtml[k]==null)c.lazyHtml[k]=c.lazy[k]?_cashScope(c.lazy[k]):'';return c.lazyHtml[k];});
+}
+function _anMount(html,lazy){
+  const cont=document.getElementById('tab-analytics');if(!cont)return;
+  const parts=[];let head='',last=0,view=null,m;_AN_ANCHOR_RE.lastIndex=0;
+  while((m=_AN_ANCHOR_RE.exec(html))){const chunk=html.slice(last,m.index);if(view===null)head=chunk;else parts.push({view,html:chunk});view=m[1];last=_AN_ANCHOR_RE.lastIndex;}
+  if(view===null)head=html;else parts.push({view,html:html.slice(last)});
+  _anCache={key:null,el:cont,parts,lazy:lazy||{},lazyHtml:{},painted:new Set(),first:null};
+  const v=parts.some(p=>p.view===S.anView)?S.anView:'overview';
+  _anCache.painted.add(v);
+  cont.innerHTML=head+parts.map(p=>'<div class="an-anchor" data-anview="'+p.view+'"></div>'+(p.view===v?_anChunk(p):'')).join('');
+  _anCache.first=cont.firstElementChild;
+  // Every anchor must be a direct child, one per part, for the later fills to land; markup that
+  // breaks that is drawn whole, as before.
+  if(cont.querySelectorAll(':scope > .an-anchor').length!==parts.length){
+    parts.forEach(p=>_anCache.painted.add(p.view));
+    cont.innerHTML=head+parts.map(p=>'<div class="an-anchor" data-anview="'+p.view+'"></div>'+_anChunk(p)).join('');
+    _anCache.first=cont.firstElementChild;
+  }
+  _cssvApply(cont); // the bars' widths and the colours from the data (data-cssv)
+  // show only the active sub-tab's sections; a view that has left Analytics lands on Overview
+  _applyAnView(document.querySelector(`#tab-analytics .an-nav-btn[data-anview="${S.anView}"]`)?S.anView:'overview');
+}
+function _renderAnalyticsNow(){
   const allQ=getQueue();
   const allSess=allSessions();
-  if(S.analyticsRange==='custom')S.analyticsRange='all'; // 'custom' (last-N) range was removed; fall back to All time
 
   let sessCandidates=_anRangeSessions(allSess); // deleted out, KSA date-string boundaries
   const _anRangeList=[...sessCandidates]; // range-filtered list (for the session dropdown)
@@ -34591,7 +34806,7 @@ function renderAnalytics(){
   const _paidRows=arr=>arr.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
   const noshow=queue.filter(e=>e.status==='noshow');
   // Product sales for the in-range sessions (cashier sales + rental add-ons)
-  const anSalesLines=[...sessIds].reduce((acc,sid)=>acc.concat(_cashSessionLines(sid)),[]);
+  const anSalesLines=_cashLinesOf(sessIds);
   const anSales=_salesTotals(anSalesLines);
   const anTopItems=(()=>{const c={};anSalesLines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__'&&l.pay!=='refunded'&&(Number(l.qty)||0)>0).forEach(l=>{const k=l.name||'—';if(!c[k])c[k]={name:k,qty:0,value:0};c[k].qty+=(Number(l.qty)||0);c[k].value+=(Number(l.qty)||0)*(Number(l.price)||0);});return Object.values(c).sort((a,b)=>b.qty-a.qty||b.value-a.value).slice(0,8);})();
   // ── Approved onto the social ride ──────────────────────────────────────────
@@ -34779,13 +34994,13 @@ function renderAnalytics(){
 
   
   const allBikes=getBikes();
-  ridesWithDur.forEach(e=>{getAssignedBikeIds(e).forEach(bId=>{const bk=allBikes.find(x=>x.id===bId);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;durSumByModel[mk]=(durSumByModel[mk]||0)+e.rideDuration;durCntByModel[mk]=(durCntByModel[mk]||0)+1;});});
+  ridesWithDur.forEach(e=>{getAssignedBikeIds(e).forEach(bId=>{const bk=bikeById(bId);if(!bk)return;const mk=bk.brand&&bk.model?`${bk.brand} - ${bk.model}`:bk.name;durSumByModel[mk]=(durSumByModel[mk]||0)+e.rideDuration;durCntByModel[mk]=(durCntByModel[mk]||0)+1;});});
   const avgDurByModel={};Object.keys(durSumByModel).forEach(k=>{avgDurByModel[k]=Math.round(durSumByModel[k]/durCntByModel[k]);});
   const brandRentals={};
   const modelRentals={};
   done.forEach(e=>{
     getAssignedBikeIds(e).forEach(bId=>{
-      const bk=allBikes.find(x=>x.id===bId);
+      const bk=bikeById(bId);
       if(!bk)return;
       const brand=bk.brand||'';
       const model=bk.model||'';
@@ -34813,7 +35028,7 @@ function renderAnalytics(){
   const modelRevenue={};
   done.filter(e=>e.paid).forEach(e=>{
     getAssignedBikeIds(e).forEach(bId=>{
-      const bk=allBikes.find(x=>x.id===bId);
+      const bk=bikeById(bId);
       if(!bk||!bk.brand||!bk.model)return;
       const mk=`${bk.brand} - ${bk.model}`;
       modelRevenue[mk]=(modelRevenue[mk]||0)+(e.price??DEFAULT_PRICE);
@@ -35056,15 +35271,16 @@ function renderAnalytics(){
   function _anMetricsFor(fromISO,toISO){
     const ss=allSess.filter(s=>{if(s.status==='deleted')return false;const d=String(s.session_date||s.id||'');return d>=fromISO&&d<=toISO;});
     const ids=new Set(ss.map(s=>s.id));
-    const q=allQ.filter(e=>ids.has(e.sessionId));
+    const qbs=_qBySession(),q=[];ss.forEach(s=>{const a=qbs.get(s.id);if(a)for(const e of a)q.push(e);}); // the window's rows through the per-session index, not a scan of every booking
     const dn=q.filter(e=>e.status==='done'),no=q.filter(e=>e.status==='noshow');
     const rc=_revenueOf(q);
     const rt=_amountOf(dn);
-    const sw=ss.filter(s=>dn.some(e=>e.sessionId===s.id));
-    const occ=sw.length?Math.round(sw.reduce((a,s)=>a+(dn.filter(e=>e.sessionId===s.id).length/(s.capacity||12)*100),0)/sw.length):0;
+    const dnBy=new Map();dn.forEach(e=>dnBy.set(e.sessionId,(dnBy.get(e.sessionId)||0)+1));
+    const sw=ss.filter(s=>dnBy.has(s.id));
+    const occ=sw.length?Math.round(sw.reduce((a,s)=>a+(dnBy.get(s.id)/(s.capacity||12)*100),0)/sw.length):0;
     const att=dn.length+no.length;
     const can=q.filter(e=>e.status==='cancelled').length;
-    const sales=_salesTotals([...ids].reduce((a,sid)=>a.concat(_cashSessionLines(sid)),[])).collected;
+    const sales=_salesTotals(_cashLinesOf(ids)).collected;
     return{revCollected:rc,rides:dn.length,occ,uniq:new Set(dn.filter(e=>e.customerId).map(e=>e.customerId)).size,comp:att?Math.round(dn.length/att*100):0,
       sales,nsr:att?Math.round(no.length/att*100):0,cr:att+can>0?Math.round(can/(att+can)*100):0,avgSess:sw.length?Math.round(rt/sw.length):0};
   }
@@ -35172,10 +35388,11 @@ function renderAnalytics(){
     const pairs=_anBasketPairs(Object.values(rcpt)),pmax=pairs.length?pairs[0].count:1;
     const basket=`<div class="chart-card"><div class="chart-card-title">${t('anBasketTitle')}</div><div class="chart-card-sub">${t('anBasketSub')}</div>${pairs.length?pairs.map(p=>`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw150">${esc(p.pair)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(p.count/pmax*100))+'%','--an-bg':'var(--blue)'})}"></div></div><div class="analytics-bar-value">${p.count}×</div></div>`).join(''):`<div class="empty-state">${t('anBasketNone')}</div>`}</div>`;
     // Retention curve (all-time first-ride cohorts)
-    const ret=_anRetentionCurve(allQ.filter(e=>e.status==='done'));
+    const _allDoneQ=allQ.filter(e=>e.status==='done'),_jny=_anCustJourneys(_allDoneQ); // built once for both cards
+    const ret=_anRetentionCurve(_allDoneQ,0,_jny);
     const retCard=`<div class="chart-card"><div class="chart-card-title">${t('anRetCurveTitle')}</div><div class="chart-card-sub">${t('anRetCurveSub')}</div>${[7,30,90].map(w=>{const r=ret[w];const col=r.pct>=40?'var(--green)':r.pct>=20?'var(--blue)':'var(--orange)';return`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw80">${t('anRetWindow').replace('{0}',w)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(r.pct)+'%','--an-bg':col})}"></div></div><div class="analytics-bar-value">${r.pct}% <span class="an-muted-600">· ${t('anRetElig').replace('{0}',r.returned).replace('{1}',r.eligible)}</span></div></div>`;}).join('')}</div>`;
     // LTV by first-ride cohort
-    const ltv=_anLTVByCohort(allQ.filter(e=>e.status==='done'));
+    const ltv=_anLTVByCohort(_allDoneQ,_jny);
     const ltvCard=ltv.length?`<div class="chart-card"><div class="chart-card-title">${t('anLtvTitle')}</div><div class="chart-card-sub">${t('anLtvSub')}</div><div class="an-scroll-x"><table class="analytics-trend-table an-w100"><thead><tr><th>${t('anLtvCohort')}</th><th>${t('anLtvRiders')}</th><th>${t('anLtvAvg')}</th></tr></thead><tbody>${ltv.map(r=>`<tr><td>${r.month}</td><td>${r.customers}</td><td>${_money(r.avgLtv)}</td></tr>`).join('')}</tbody></table></div></div>`:'';
     // Gross margin (needs item costs; card hidden until at least one sold item has a cost)
     const costById={};(S.inventory||[]).forEach(i=>{if(i.cost!=null&&!isNaN(Number(i.cost)))costById[i.id]=Number(i.cost);});
@@ -35191,7 +35408,7 @@ function renderAnalytics(){
       const rmax=Math.max(1,...wrows.map(r=>r.rides));
       weatherCard=`<div class="chart-card"><div class="chart-card-title">${t('anWeatherTitle')}</div><div class="chart-card-sub">${t('anWeatherSub')}</div><div class="an-wx-line"><b>${takeaway}</b> <span class="an-c-muted">· r=${corr.toFixed(2)}</span></div>${wrows.slice(-8).map(r=>`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw96">${esc(shortDate(r.date))} · ${Math.round(r.temp)}°</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(r.rides/rmax*100))+'%','--an-bg':'var(--blue)'})}"></div></div><div class="analytics-bar-value">${r.rides} ${_artIcon('bike',11)}</div></div>`).join('')}</div>`;
     }
-    return`<div class="an-anchor" data-anview="growth"></div>
+    return`
     <div class="analytics-section-title">${t('anNavGrowth')}</div>
     ${kpis}${targetCard}${trends}${marginCard}${funnel}${heatCard}${rfm}${basket}${retCard}${ltvCard}${weatherCard}`;
   }
@@ -35200,7 +35417,7 @@ function renderAnalytics(){
   S._anCsvRows=sessions.map(s=>{const sd=_dn(s.id);const rev=_revenueOf(_qs(s.id));const cap=s.capacity||12;return{date:s.session_date||s.id,day:s.day||'',riders:sd.length,no_shows:_qs(s.id).filter(e=>e.status==='noshow').length,revenue_sar:Math.round(rev),occupancy_pct:cap?Math.round(sd.length/cap*100):0};});
   // Text behind the "Share digest" button (WhatsApp-friendly summary of the current range).
   S._anDigestText=`MicroMobility — ${t('tabAnalytics')}\n• ${t('anTotalRides')}: ${done.length}\n• ${t('anRevCollected')}: ${_money(Math.round(revCollected),_NOISO)}${revPending>0?` (+${_money(Math.round(revPending),_NOISO)} ${t('printPending').toLowerCase()})`:''}\n• ${t('anAvgOccupancy')}: ${avgOccupancy}%${anTopItems.length?`\n• ${t('anTopSellers')}: ${anTopItems[0].name}`:''}${noshow.length?`\n• ${t('anNoShowRate')}: ${noShowRate}% (${noshow.length})`:''}`;
-  document.getElementById('tab-analytics').innerHTML=`
+  const _anHtml=`
     <div class="page-title an-title-row"><span>${t('tabAnalytics')}</span><span class="an-title-btns"><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anShareDigest")}">${_artIcon('share',12)} ${t('anDigestShare')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anExportCSV")}">${_artIcon('download',12)} ${t('anExportCsv')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("printHeightBikeReport")}" title="${t('anHeightReportSub')}">${_artIcon('print',12)} ${t('anHeightReport')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("exportHeightBikeCsv")}">${_artIcon('download',12)} ${t('anHeightReport')} CSV</button></span></div>
     <div class="page-sub">${t('anPageSub')}</div>
     <div class="an-sticky">
@@ -35211,7 +35428,7 @@ function renderAnalytics(){
     </div>
 
     <div class="an-anchor" data-anview="ratings"></div>
-    ${bikeHealthSection()}
+    <!--an-lazy:ratings-->
     <div class="an-anchor" data-anview="overview"></div>
     ${liveBoard()}
 
@@ -35752,10 +35969,9 @@ function renderAnalytics(){
         <div class="analytics-bar-value"><bdi>${it.qty}</bdi> · ${_money(Math.round(it.value*100)/100)}</div>
       </div>`;}).join(''):`<div class="empty-state">${t('cashNoSalesSession')}</div>`}
     </div>
-    ${growthSection()}`;
-  _cssvApply(document.getElementById('tab-analytics')); // the bars' widths and the colours from the data (data-cssv)
-  // show only the active sub-tab's sections; a view that has left Analytics lands on Overview
-  _applyAnView(document.querySelector(`#tab-analytics .an-nav-btn[data-anview="${S.anView}"]`)?S.anView:'overview');
+    <div class="an-anchor" data-anview="growth"></div>
+    <!--an-lazy:growth-->`;
+  _anMount(_anHtml,{growth:growthSection,ratings:bikeHealthSection});
 }
 
 
@@ -36104,7 +36320,7 @@ async function _loadDataLightInner(){
   if(_down)return false;
   if(q&&!q.error){
     _qColsLearn(q.data);
-    S.queue=_qMerge((q.data||[]).map(entryFromDB),q.whole?null:(_qs?_qs.cut:_cut)); // a synced answer is the whole year: laid over nothing
+    S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs?_qs.cut:_cut)); // a synced answer is the whole year: laid over nothing
     _qWholeAt=q.whole?Date.now():(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     try{_applyBookOutbox();}catch(_){}_bookOutboxFlush();
   }
@@ -36146,15 +36362,19 @@ let _pollN=0;
 // whole range), and on a busy night a realtime event lands every few seconds: its background
 // repaints are held to one every five seconds, the last one always landing. A person's own
 // action still renders it at once, through its own path.
-let _anBgAt=0,_anBgT=null;
+// History, Inventory, Community, Cashier and the Dashboard rebuild whole too (2026-10-04,
+// performance): their background repaints are held the same way, to one every 2.5 seconds.
+const _BG_GAP={analytics:5000,history:2500,inventory:2500,community:2500,cashier:2500,dashboard:2500};
+const _bgAt={},_bgT={};
 function _bgRenderStaffTab(){
   // Typing in the new-session or edit-session form: the repaint waits for the next event (the
   // poll's and realtime's repaint used to rebuild the form under the cursor and drop the focus).
   if(S.staffTab==='queue'&&S.queueView==='sessions'&&_nsFormBusy())return;
-  if(S.staffTab!=='analytics'){_renderStaffTab(true);return;}
-  const wait=5000-(Date.now()-_anBgAt);
-  if(wait<=0){_anBgAt=Date.now();_renderStaffTab(true);return;}
-  if(!_anBgT)_anBgT=setTimeout(()=>{_anBgT=null;if(S.view!=='staff'||S.staffTab!=='analytics'||document.hidden)return;_anBgAt=Date.now();_renderStaffTab();},wait);
+  const tab=S.staffTab,gap=_BG_GAP[tab];
+  if(!gap){_renderStaffTab(true);return;}
+  const wait=gap-(Date.now()-(_bgAt[tab]||0));
+  if(wait<=0){_bgAt[tab]=Date.now();_renderStaffTab(true);return;}
+  if(!_bgT[tab])_bgT[tab]=setTimeout(()=>{_bgT[tab]=null;if(S.view!=='staff'||S.staffTab!==tab||document.hidden)return;_bgAt[tab]=Date.now();_renderStaffTab(true);},wait);
 }
 // force: repaint even when the data did not change (a refresh the person asked for).
 async function _autoRefresh(full,force){
@@ -36691,7 +36911,7 @@ try{window.addEventListener('offline',()=>{S._rtConnected=false;_updateConnUI();
 })();
 _sbReady.then(()=>{try{_outboxFlush();}catch(e){}try{_bookOutboxFlush();}catch(e){}});
 // Background retry: flushes only fire on enqueue/online/load, so a queue that didn't drain (page opened offline, transient blip) would otherwise show "pending sync" forever. Retry every 15s while anything is pending; _outboxFlush no-ops when busy/offline/sb-missing.
-try{setInterval(()=>{if(_outboxCount()||_bookOutboxCount()){_outboxFlush();_bookOutboxFlush();}},15000);}catch(e){}
+try{const _obTick=()=>{if(document.hidden)return;if(_outboxCount()||_bookOutboxCount()){_outboxFlush();_bookOutboxFlush();}};setInterval(_obTick,15000);document.addEventListener('visibilitychange',_obTick);}catch(e){} // a hidden page waits; showing it again sends at once
 // ── Global error capture: keep the last 50 errors locally, surface a throttled toast, log to a tolerant table ──
 let _errToastAt=0;
 let _errPingAt=0;

@@ -36,7 +36,7 @@ import { readFile } from 'node:fs/promises';
 export const STAFF_ENTRY = [
   'goStaff', 'openPinModal', '_staffHostGate', // the way in: these always fetch the staff half
   'setStaffTab', 'renderStaffTabs', '_renderStaffTab', '_bgRenderStaffTab',
-  'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'renderInventory',
+  'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'setAnView', 'renderInventory',
   'renderCashier', 'renderCommunity', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
   'renderAmbassadors', 'renderVendors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
@@ -1046,7 +1046,13 @@ export function formatFieldNames(r, limit = 20) {
 // scanner, check-in, return, cashier, hand-over, riders report, operator gate) moved to staff.js. Here: customer
 // 185.5, staff 392.4, core 218.1 (the runner reads ~1.2 / ~1.6 / ~0.8 more). The customer budget is lowered to
 // keep the win.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 398, core: 222 };
+// Customer 190 -> 191, staff 398 -> 406, core 222 -> 226 (2026-10-04, the audit's "fix them all"): the staff security
+// pass (idle lock, sign-out wipe, one-call check-in, exports helper), the vendor staff side (Tell the venue, late
+// cancels), desk speed (scanner banner and tones, Open the next rider, Not here yet, wake lock, booth mode), the
+// accessibility pass (named popups, focus restore, field names) and the performance pass (indexes, Analytics memo,
+// per-row sync). Here: customer 188.1, staff 402.2, core 223.4 (the runner reads ~1.3 / ~1.6 / ~0.8 more). The
+// customer half keeps a 1 KB margin over the runner's reading so a tenth of a KB cannot turn CI red.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 191, staff: 406, core: 226 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
