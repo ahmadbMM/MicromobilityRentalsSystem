@@ -6448,6 +6448,10 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 .vendor-add-user input{flex:1 1 160px;min-width:0}
 .vendor-add-user select{flex:0 0 auto}
 .vendor-pw{margin:4px 0 12px}
+.vendor-late{display:inline-flex;align-items:center;padding:2px 8px;margin-inline-end:6px;border-radius:999px;background:rgba(239,68,68,.12);color:var(--red);font-size:11px;font-weight:800;white-space:nowrap}
+.vendor-tell-row{margin:0 0 6px}
+.vendor-tell-item+.vendor-tell-item{border-top:1px solid var(--border);padding-top:12px}
+body .vendor-dlg .vendor-tell-item textarea.vendor-pw-msg{min-height:130px}
 body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:border-box;resize:vertical;background:var(--s3);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:12px;font-family:var(--font-body);font-size:13.5px;line-height:1.5}
 .vendor-blines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px}
 .vendor-bline{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -6654,6 +6658,7 @@ html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
 #tab-myrides .cmy-mt12{margin-top:12px;}
 #tab-myrides .cmy-bf{width:100%;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;}
 #tab-myrides .cmy-bf-name{color:var(--text);font-weight:800;}
+.cmy-bf-offer{margin-top:6px;font-size:12px;line-height:1.4;color:var(--muted);text-align:center;}
 
 /* ── The sign in / sign up screen reads as one page ──
    For a signed-out visitor this screen IS the page (as-page): the whole thing scrolls under the

@@ -419,3 +419,100 @@ test.describe('@staff:vendors Vendors riders’ breakfast ratings', () => {
     expect(await page.evaluate(() => /\p{Extended_Pictographic}/u.test(document.getElementById('confirm-modal')!.textContent || ''))).toBe(false);
   });
 });
+
+// The portal audit (2026-10-04, migration 20261004130000): "Tell the venue" after a decision, late cancels
+// (Requests pill, the bell), the Viewer role, and the venue's Arabic name and offer on the rider's card.
+test.describe('@staff:vendors Vendors: tell the venue, late cancels, roles', () => {
+  test('a confirmed booking has Tell the venue: a WhatsApp message in either language, and Back to the date', async ({ page }) => {
+    await open(page);
+    await toMay(page);
+    await panel(page).locator('.vendor-day[data-vendor-day="2099-05-09"]').click();
+    await dialog(page).locator('.vendor-bk[data-vendor-bk="12"] .vendor-tell').click();
+    const msg = dialog(page).locator('#vendor-tell-0');
+    await expect(dialog(page).locator('#vendor-dlg-title')).toHaveText('Tell Bean Box');
+    await expect(msg).toContainText('Hello Huda,');
+    await expect(msg).toContainText('Good news: your breakfast on Saturday, 9 May 2099 is confirmed.');
+    await expect(msg).toContainText('Details on the vendor portal: https://vendors.micromobility.sa');
+    await expect(dialog(page).locator('a.vendor-tell-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hello%20Huda/);
+    await dialog(page).locator('#vendor-tell-lang').selectOption('ar');
+    await expect(msg).toContainText('يسعدنا إبلاغك بتأكيد الإفطار');
+    await dialog(page).locator('.vendor-tell-back').click();
+    await expect(dialog(page).locator('.vendor-ride')).toContainText('Bean Box'); // back on the date's dialog
+    // A pending request has nothing to tell yet.
+    await page.evaluate(`_vendorDlgClose();_vendorDayOpen('2099-05-02')`);
+    await expect(dialog(page).locator('.vendor-bk[data-vendor-bk="10"] .vendor-tell')).toHaveCount(0);
+  });
+
+  test('a closed date tells each cancelled venue why; the venue dialog tells its confirmed dates', async ({ page }) => {
+    await open(page, {
+      vendor_bookings: [...bookings, bk({ id: 13, venue_id: 2, day: '2099-05-16', status: 'cancelled', cancelled_by: 'mm', cancel_reason: 'ramadan' })],
+      vendor_venues: [venue({}), venue({ id: 2, name: 'Corniche Kitchen', kind: 'restaurant', tier_id: 'recurring', contact_phone: '+966 50 111 2222', contact_name: 'Omar' })],
+    });
+    await page.evaluate(`_vendorDayOpen('2099-05-16')`);
+    await dialog(page).locator('.vendor-tell-day').click();
+    await expect(dialog(page).locator('#vendor-tell-0')).toContainText('Saturday, 16 May 2099 is now closed for breakfast because of Ramadan');
+    await expect(dialog(page).locator('a.vendor-tell-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966501112222\?text=Hello%20Omar/);
+    await page.evaluate(`_vendorDlgClose();_vendorDlgClose()`);
+    await panel(page).locator('[data-vendor-view="venues"]').click();
+    await panel(page).locator('.vendor-ven[data-vendor-ven="1"] .vendor-ven-open').click();
+    await dialog(page).locator('.vendor-tell-ven').click();
+    await expect(dialog(page).locator('#vendor-tell-0')).toContainText('Your confirmed breakfast dates with MicroMobility:');
+    await expect(dialog(page).locator('#vendor-tell-0')).toContainText('- Saturday, 9 May 2099');
+    await dialog(page).locator('.vendor-tell-back').click();
+    await expect(dialog(page).locator('#vendor-u-login')).toBeVisible(); // back on the venue
+  });
+
+  test('late cancels: their own pill and mark, and a bell line when a new one comes in', async ({ page }) => {
+    await open(page, { vendor_bookings: [...bookings, bk({ id: 14, day: '2099-05-09', status: 'cancelled', cancelled_by: 'venue', cancel_reason: 'Kitchen flood', late_cancel: true, updated_at: new Date().toISOString() })] });
+    await panel(page).locator('[data-vendor-view="requests"]').click();
+    await panel(page).locator('[data-vendor-f="late"]').click();
+    await expect(panel(page).locator('[data-vendor-f="late"]')).toContainText('Late cancels (1)');
+    const card = panel(page).locator('.vendor-bk[data-vendor-bk="14"]');
+    await expect(card.locator('.vendor-late')).toHaveText('late cancel');
+    await expect(card).toContainText('Kitchen flood');
+    await expect(panel(page).locator('.vendor-bk')).toHaveCount(1);
+    // The section's load gave the bell its list; that one is the backlog. A new one is news.
+    expect(await page.evaluate('Array.isArray(S._vendorLate)&&S._vendorLate.map(x=>x.id)')).toEqual([14]);
+    await page.evaluate(`_ntSync();S._vendorLate=[...S._vendorLate,{id:15,day:'2099-05-23',at:new Date().toISOString(),name:'Corniche Kitchen'}];_ntSync()`);
+    const items = await page.evaluate('_ntItems().filter(x=>x.k==="vlate").map(x=>x.txt)') as string[];
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatch(/^Corniche Kitchen cancelled .+ late$/);
+    // The bell's line opens Requests on the Late cancels pill.
+    await page.evaluate(`setStaffTab('dashboard');_on_goVendorLate()`);
+    await expect(panel(page).locator('[data-vendor-f="late"]')).toHaveClass(/active/);
+  });
+
+  test('a login can be added as a Viewer', async ({ page }) => {
+    const calls = await open(page, { 'rpc:staff_vendor_user_add': { id: 8, login: 'view@beanbox.sa', password: 'Tmp9-Kq4m' } });
+    await panel(page).locator('[data-vendor-view="venues"]').click();
+    await panel(page).locator('.vendor-ven[data-vendor-ven="1"] .vendor-ven-open').click();
+    await dialog(page).locator('#vendor-u-login').fill('view@beanbox.sa');
+    await dialog(page).locator('#vendor-u-role').selectOption('viewer');
+    await dialog(page).locator('.vendor-u-add').click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_user_add').length).toBe(1);
+    expect(calls[0].body).toMatchObject({ p_role: 'viewer' });
+    await expect(dialog(page).locator('tr[data-vendor-user="8"]')).toContainText('Viewer (read only)');
+  });
+
+  test('the rider card shows the venue in Arabic on the Arabic page, and its offer in the rider\'s language', async ({ page }) => {
+    await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [] });
+    await page.goto('/');
+    await waitForSb(page);
+    const ride = { id: '2099-05-09-s', session_date: '2099-05-09', event_kind: 'community', ride_kind: 'saturday', needs_approval: true, status: 'open',
+      breakfast_name: 'Bean Box', breakfast_url: 'https://maps.example.test/bean', breakfast_name_ar: 'بين بوكس', breakfast_offer_en: '15% off breakfast', breakfast_offer_ar: 'خصم ١٥٪ على الفطور' };
+    const html = (lang: string, s: Record<string, unknown> = ride) => page.evaluate(`S.lang=${JSON.stringify(lang)};_commInfoHtml(${JSON.stringify(s)})`) as Promise<string>;
+    const en = await html('en');
+    expect(en).toContain('Bean Box');
+    expect(en).toContain('Offer for riders: 15% off breakfast');
+    const ar = await html('ar');
+    expect(ar).toContain('بين بوكس');
+    expect(ar).not.toContain('Bean Box');
+    expect(ar).toContain('خصم ١٥٪ على الفطور');
+    const fr = await html('fr');
+    expect(fr).toContain('Bean Box');
+    expect(fr).toContain('15% off breakfast');
+    // A stop staff typed by hand has no offer line.
+    const plain = await html('en', { ...ride, breakfast_name_ar: null, breakfast_offer_en: null, breakfast_offer_ar: null });
+    expect(plain).not.toContain('cmy-bf-offer');
+  });
+});

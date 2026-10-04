@@ -55,6 +55,7 @@ export const STAFF_ENTRY = [
   '_onRidersRt', '_kbCheckInNext', '_opgKey', 'showEditPriceModal',
   '_idleStaff', // the idle clock (2026-10-04): started by the operator gate's check, which showView runs
   'lockStaff', // the top bar's lock (drawn by customer-half code): its sign-out settles the outboxes and asks first
+  '_vendorLatePoll', // the bell's late cancels by venues (2026-10-04): the vendor poll and the bell's opening fetch them
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);

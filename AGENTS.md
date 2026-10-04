@@ -479,6 +479,17 @@ page's queue rows exactly as `staff_vendor_share_ratings` counts them (`_vendorR
 breakfast score), with each breakfast reason ticked to include; never a rider's name. Share / Share again / Stop
 sharing call `staff_vendor_share_ratings` (only the ticked `{e,k}`) / `staff_vendor_unshare_ratings`; what was shared
 is `vendor_shared_ratings` (`W.sr`, its own answer in `_vendorLoad`). The rider's page says so in one line (`rgBfShareNote`).
+Hardening (migration 20261004130000): venue sign-ins are rows in `vendor_sessions` (token sha256 only, 30 days absolute,
+14 idle; `_vendor_auth`), a temporary password lasts 72 hours (`temp_expires_at`, TEMP_EXPIRED) and must be changed before
+any other call (MUST_CHANGE), roles are owner / manager / viewer (FORBIDDEN; staff pick Viewer in Add login), a confirmed
+breakfast cancelled less than 48 hours ahead needs a reason and is `late_cancel` (the Requests tab's Late cancels pill, the
+bell's `vlate` kind read from `S._vendorLate`, which `_vendorLatePoll` fills from the vendor poll and the bell's opening),
+and `vendor_gate` (dormant until the owner adds the row) makes sign-in need the portal Worker's secret header. "Tell the
+venue" (`_vendorTellOpen`, messages in `VENDOR_TELL`) prefills a WhatsApp / copy message after Confirm, Decline, Cancel,
+closing a date (the day dialog's Tell the venues) and from the venue dialog (its confirmed dates). The ride's breakfast
+stop also carries `breakfast_name_ar` / `breakfast_offer_en` / `breakfast_offer_ar` (set by `_vendor_sync_day`, cleared
+when staff retype the stop by hand); the rider's card (`_commInfoHtml`) shows the Arabic name on the Arabic page and the
+offer in the rider's language (`vndRiderOffer`).
 
 ## Staff UI pass (2026-10-03)
 

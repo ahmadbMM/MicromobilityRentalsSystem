@@ -202,7 +202,7 @@ with expected(fname, want_definer, note) as (values
   ('_vendor_today',             false, 'vendors: today in Riyadh; pure'),
   ('_vendor_login_key',         false, 'pure normalising of a venue login'),
   ('_vendor_pattern_days',      false, 'pure date arithmetic for a monthly pattern'),
-  ('_vendor_user',              true,  'reads vendor_users.session_token, which no client can select; internal only'),
+  ('_vendor_user',              true,  'checks the venue session through _vendor_auth (vendor_sessions, no client grant); internal only'),
   ('_vendor_audit_row',         true,  'trigger: writes vendor_audit, which no client can write'),
   ('_vendor_sync_day',          true,  'writes sessions.breakfast_* from a venue or staff action; internal only'),
   ('_vendor_session_fill',      true,  'trigger: reads vendor_bookings/vendor_venues whoever makes the ride'),
@@ -231,7 +231,18 @@ with expected(fname, want_definer, note) as (values
   ('_pin_ok_strict',         true,  'reads team_members.pin_hash through _pin_ok; internal only'),
   ('staff_purge_session',    true,  'deletes an empty deleted session past RLS; admins only, PIN-checked'),
   ('staff_checkin',          true,  'claims bikes, writes bike_assignments and the booking''s payment in one go; checks is_staff() itself'),
-  ('_addons_price_snapshot', true,  'trigger: reads inventory prices and is_staff() for a booking any caller writes')
+  ('_addons_price_snapshot', true,  'trigger: reads inventory prices and is_staff() for a booking any caller writes'),
+  -- 20261004130000 (vendor portal hardening): sessions by hash, roles, password policy, the gate
+  ('_vendor_auth',              true,  'reads vendor_sessions (no client grant) by token hash, writes last_seen; internal only'),
+  ('_vendor_role',              false, 'pure: refuses a role not in the list'),
+  ('_vendor_phone',             false, 'pure normalising of a contact phone to E.164'),
+  ('_vendor_pwd_problem',       true,  'reads vendor_venues names to refuse a personal password; internal only'),
+  ('_vendor_ride_time',         true,  'reads the Saturday ride''s bike_slots whoever asks; internal only'),
+  ('_vendor_riders',            true,  'counts queue_entries rows the venue cannot see; internal only'),
+  ('_vendor_session_bf_guard',  true,  'trigger: clears sessions.breakfast_name_ar/offer when staff retype the stop'),
+  ('vendor_logout',             true,  'deletes the caller''s own vendor_sessions row by token hash; anon'),
+  ('vendor_logout_others',      true,  'deletes the login''s other vendor_sessions rows; token-checked'),
+  ('vendor_team',               true,  'the venue''s logins for its owners, no secrets; token-checked')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
