@@ -5015,7 +5015,7 @@ function closeAuthModal(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderAuthModal_1(event,el){if(event.key==='Enter')doForgotVerify()}
 function _on_renderAuthModal_2(event,el){if(event.key==='Enter')doResetPassword()}
-function _on_renderAuthModal_3(event,el){S.forgotStep=1;S.forgotVerified=null;renderAuthModal()}
+function _on_renderAuthModal_3(event,el){switchAuthMode('login')} // "Back to login" on step 2 goes to Sign in, as on step 1 (it used to land on step 1 of the reset)
 function _on_renderAuthModal_4(event,el){if(event.key==='Enter')doLogin()}
 function _on_renderAuthModal_5(event,el){if(event.key==='Enter')doLogin()}
 function _on_renderAuthModal_6(event,el){if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleRememberMe();}}
@@ -5193,7 +5193,9 @@ function _siEnsure(){
   },()=>{S._siBusy=false;S._siAt=Date.now();});
 }
 function _siSlot(id){return `<span class="si-slot" data-si="${esc(id)}">${_siHtml(S._siMap&&S._siMap[id])}</span>`;}
-function heardLabel(code){return code==='desk'?t('heardDesk'):HEARD_OPTS.includes(code)?t('heard_'+code):(code?esc(String(code)):'');}
+// Plain text, escaped where it is drawn (a report cell, a card, the vCard); an unknown code was
+// escaped here as well and showed as &amp; in those places.
+function heardLabel(code){return code==='desk'?t('heardDesk'):HEARD_OPTS.includes(code)?t('heard_'+code):(code?String(code):'');}
 function switchAuthMode(mode){S.authMode=mode;S._oauthMiss=null;if(mode!=='forgot'){S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;}if(mode==='signup'){S.signupGender=null;S.signupRideNews=false;S.signupAck=false;}renderAuthModal();if(S.view==='landing')_pushNav();}
 // Gender pills: male turns blue, female turns pink when selected (cu-g-male / cu-g-female in styles.css).
 function _genderBtnCls(which,sel){return which==='male'&&sel==='male'?'cu-f1 cu-g-male':which==='female'&&sel==='female'?'cu-f1 cu-g-female':'cu-f1';}
@@ -5860,7 +5862,7 @@ async function handleGoogleReturn(){
       return false;
     }
     if(cust){
-      if(!cust.photo&&gphoto){try{await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:gphoto});cust={...cust,photo:gphoto};}catch(e){}}
+      if(!cust.photo&&gphoto){try{const r=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:gphoto});if(r&&!r.error&&r.data)cust={...cust,photo:gphoto};}catch(e){}} // only a photo the server took: the device kept one it refused
       S.rememberMe=true;S.loggedIn=cust;setSession(cust);
       return 'loggedin';
     }
@@ -6578,7 +6580,11 @@ async function _bfSaveNew(selVar,nameVar,urlVar){
   const nm=(S[nameVar]||'').trim().slice(0,80);if(!nm)return;
   const url=_safeUrl(S[urlVar])||null;
   const row={id:uid(),name:nm,url,created_at:Date.now()};
-  try{const r=await sb.from('breakfast_spots').insert(row);if(!r.error)S.breakfastSpots=[...(S.breakfastSpots||[]),row];}catch(e){}
+  // Quiet only where the table is not on the database; any other refusal is said (the session
+  // itself is saved either way, the spot just does not join the list).
+  let r;try{r=await sb.from('breakfast_spots').insert(row);}catch(e){r={error:e};}
+  if(r&&r.error){const c=String(r.error.code||'');if(c!=='42P01'&&c!=='PGRST205')_writeErr(r,'breakfast spot');return;}
+  S.breakfastSpots=[...(S.breakfastSpots||[]),row];
 }
 // ── Saturday Social Ride members gate ──────────────────────────────────────
 // Community rides stay VISIBLE to every signed-in customer, but only members
@@ -8461,12 +8467,23 @@ async function mwPartyCheckin(rowId){
 async function mwPartyPaid(rowId){
   const list=_mwPartyBookings(rowId).filter(e=>!e.paid&&!_freeSessIds.has(e.sessionId)&&['waiting','waitlist','active'].includes(e.status));
   if(!list.length)return;
-  const res=await Promise.all(list.map(e=>sb.from('queue_entries').update({paid:true,pay_method:'card'}).eq('id',e.id)));
+  // The same rule as the queue's bulk Paid (bulkSfPaid): guarded on still unpaid, so a rider another
+  // device settled by split or cash keeps how they paid, and an incidental 0 (no promo) is charged the
+  // bike's fare rather than recorded as on the house.
+  const res=await Promise.all(list.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return sb.from('queue_entries').update(p).eq('id',e.id).eq('paid',false).select('id');}));
+  const ok=r=>r&&!r.error&&r.data&&r.data.length;
+  const n=res.filter(ok).length;
   const fail=res.find(r=>r&&r.error);
+  const done=list.filter((e,i)=>ok(res[i])).map(e=>({id:e.id,price:e.price,pay_method:e.pay_method||null}));
   await loadData();
   if(fail){toast(fail.error.message||t('errConnection'),'error');renderStaffQueue();return;}
-  logAction(t('logBulkPaid').replace('{0}',list.length));
-  toast(`${list.length} ${t('paidLabel')}`);
+  logAction(t('logBulkPaid').replace('{0}',n));
+  toast(`${n} ${t('paidLabel')}`);
+  if(done.length)pushUndo(`${t('undoPayment')} · ${done.length}`,async()=>{
+    const r=await Promise.all(done.map(d=>sb.from('queue_entries').update({paid:false,price:d.price,pay_method:d.pay_method}).eq('id',d.id).eq('paid',true)));
+    await loadData();renderStaffQueue();renderMyRides();
+    if(_writeErr(r,'undo payment'))return false;
+  });
   renderStaffQueue();renderMyRides();
 }
 /** Take a whole party off the list in one go — the mirror of adding it in one go. */
@@ -8758,7 +8775,8 @@ function showWlPayMenu(id,evt){
 }
 async function toggleWlPayment(id,mode){
   const w=(S.deskWaitlist||[]).find(x=>x.id===id);if(!w)return;
-  if(mode==='house'&&!(w.paid&&Number(w.price||0)===0)&&!await _pinApprove(t('onTheHouseLabel')))return;
+  // Already free by the price the pill shows: a row with none stored is at its type's fare, not free.
+  if(mode==='house'&&!(w.paid&&_wlRowPrice(w)===0)&&!await _pinApprove(t('onTheHouseLabel')))return;
   const base=priceForType(w.bike_type||'Any');
   const prev={paid:!!w.paid,price:w.price??null,pay_method:w.pay_method||null,card_amount:w.card_amount??null};
   let paid,price,method;
@@ -8816,8 +8834,10 @@ async function wlSetPos(id,val){
   const e=getQueue().find(x=>x.id===id);if(!e||e.status!=='waitlist')return;
   const order=_wlSessList2(e.sessionId);
   const from=order.findIndex(x=>x.id===id);if(from<0)return;
-  let to=Math.round(Number(val))-1;
-  if(isNaN(to)){renderStaffQueue();return;}
+  // An emptied box is no position: Number('') is 0, which used to send the rider to W1.
+  const raw=_asciiDigits(val).trim();
+  let to=Math.round(Number(raw))-1;
+  if(!raw||isNaN(to)){renderStaffQueue();return;}
   to=Math.max(0,Math.min(order.length-1,to));
   if(to===from){renderStaffQueue();return;}
   order.splice(to,0,order.splice(from,1)[0]);
@@ -8924,7 +8944,7 @@ function renderTopbarRight(){
     const cust=S.loggedIn||getSession();
     if(cust){
       _consentCheck(cust); // once per page life: fills both answers, asks for any missing
-      const initials=cust.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      const initials=(cust.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); // guarded as on the landing: a session without a name must not blank the bar
       const avatar=cust.photo
         ?`<img loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="chrome-av-img">`
         :`<div class="chrome-av">${esc(initials)}</div>`;
@@ -8933,7 +8953,7 @@ function renderTopbarRight(){
         <button type="button" class="cust-topbar-link" data-on-click="${_on("goCustomer","account")}" title="${t('tabAccount')}" aria-label="${t('tabAccount')}">
           ${avatar}
           <span class="chrome-av-txt">
-            <span class="cust-topbar-name">${esc(cust.name.split(' ')[0])}</span>
+            <span class="cust-topbar-name">${esc((cust.name||'').split(' ')[0])}</span>
             <span class="cust-topbar-email">${esc(cust.email||cust.phone||'')}</span>
           </span>
         </button>
@@ -9245,10 +9265,16 @@ function _tbRender(){
 // The day sheet (Claude Design #20): one page for today, in the report's green-banner style.
 // Every session on today's date with the riders still expected or out (waiting, waitlist, on
 // a bike), then the workshop's jobs booked for today or in the shop.
+// A session's start as a zero-padded 24h "HH:MM", for ordering: the shown time ("1 PM", ص/م, a
+// gathering prefix) sorted as text put an afternoon ride above a morning one.
+function _dsStart(s){
+  const m=/(\d{1,2}):(\d{2})/.exec(_timeText((parseSlots(s&&s.bike_slots)||{})._time||'09:00'));
+  return m?String(m[1]).padStart(2,'0')+':'+m[2]:'09:00';
+}
 function printDaySheet(){
   const today=todayStr();
   const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today)
-    .sort((a,b)=>String(sessionTime(a)||'').localeCompare(String(sessionTime(b)||'')));
+    .sort((a,b)=>_dsStart(a).localeCompare(_dsStart(b))||String(a.id).localeCompare(String(b.id)));
   if(!sess.length){toast(t('daySheetNone'),'info');return;}
   const LIVE=['waiting','waitlist','active']; // the riders still to ride; each one's word comes from STATUS_KEY
   let riders=0;
@@ -15591,7 +15617,7 @@ function _caRow(a){
       ${kv(t('caLblBike'),a.bike_type?typeLabel(a.bike_type):'')}
       ${kv(t('caLblProf'),esc(a.profession||''))}
       ${kv(t('caLblWork'),esc(a.workplace||''))}
-      ${kv(t('heardLabel'),heardLabel(a.heard_from))}
+      ${kv(t('heardLabel'),esc(heardLabel(a.heard_from)))}
       ${_caSocKv(a)}
       ${kv(t('caLblNews'),_caNews(a.ride_news))}
       ${kv(t('caLblLang'),esc(lang))}
@@ -16251,7 +16277,7 @@ function _laRow(a){
       ${kv(t('caLblHeight'),a.height?esc(t('caHeightCm').replace('{0}',a.height)):'')}
       ${kv(t('caLblProf'),esc(a.profession||''))}
       ${kv(t('caLblWork'),esc(a.workplace||''))}
-      ${kv(t('heardLabel'),heardLabel(a.heard_from))}
+      ${kv(t('heardLabel'),esc(heardLabel(a.heard_from)))}
       ${_caSocKv(a)}
       ${kv(t('caLblNews'),_caNews(a.ride_news))}
       ${kv(t('caLblLang'),esc(lang))}
