@@ -100,6 +100,15 @@ test('approving suggests a code, refuses a taken one, then opens the welcome mes
   await expect(dialog(page).locator('a.amb-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966551234567\?text=Hi%20Sara/);
 });
 
+test('a refusal of a row action (Reject) is said, not swallowed', async ({ page }) => {
+  const calls = await open(page, { 'rpc:staff_ambassador_set': { ok: false, error: 'admin_only' } });
+  await card(page, 5).getByRole('button', { name: 'Reject' }).click();
+  await expect.poll(() => calls.filter(c => c.url.includes('staff_ambassador_set')).length).toBe(1);
+  // no dialog is open for a row's buttons: it used to change nothing and say nothing
+  await expect(page.locator('.toast').filter({ hasText: 'Admin only.' })).toBeVisible();
+  await expect(card(page, 5)).toHaveAttribute('data-status', 'pending');
+});
+
 test('an active ambassador shows their points, and Pause switches the code off', async ({ page }) => {
   const calls = await open(page, {
     ambassadors: [amb({ status: 'active', code: 'SARA10' })],

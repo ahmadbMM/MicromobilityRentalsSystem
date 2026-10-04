@@ -122,4 +122,25 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect(page.locator('#tab-register')).toContainText('Activity waiver');
     await expect(page.locator('.toast').filter({ hasText: 'Please accept the waiver to continue.' })).toBeVisible();
   });
+
+  test('two rides queued offline and refused: the second waits in the outbox and is re-asked once the first form is left', async ({ page }) => {
+    await boot(page, { 'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'WAIVER_REQUIRED' } } });
+    const row = (id: string, sess: string, day: string, date: string) => `{id:'${id}',session_id:'${sess}',session_day:'${day}',session_date:'${date}',queue_num:1,name:'Spec Rider',
+        type_preference:'None',size:'',status:'waiting',paid:false,price:0,registered_at:new Date().toISOString(),customer_id:'c1'}`;
+    await page.evaluate(`goCustomer('register');
+      _bookOutboxAdd(${row('ob1', WS, 'Tuesday', d(5))});_bookOutboxAdd(${row('ob2', EV, 'Friday', d(4))});
+      _applyBookOutbox();`);
+    await page.evaluate(`_bookOutboxFlush()`);
+    // the first ride is re-asked; the second stays queued and on screen (it used to leave the outbox unasked)
+    await expect.poll(() => page.evaluate('_bookOutboxCount()')).toBe(1);
+    expect(await page.evaluate(`[_bookOutbox()[0].id,getQueue().some(e=>e.id==='ob2'),S.selSession]`)).toEqual(['ob2', true, WS]);
+    // a flush while the rider is still on that form does not re-ask over it
+    await page.evaluate(`_bookOutboxFlush()`);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate('[_bookOutboxCount(),S.selSession]')).toEqual([1, WS]);
+    // once the form is left, the next flush re-asks the second ride
+    await page.evaluate(`S.custTab='bookings';_bookOutboxFlush()`);
+    await expect.poll(() => page.evaluate('_bookOutboxCount()')).toBe(0);
+    expect(await page.evaluate('[S.custTab,S.selSession,getQueue().some(e=>e.id==="ob2")]')).toEqual(['register', EV, false]);
+  });
 });

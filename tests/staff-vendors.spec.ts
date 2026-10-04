@@ -135,6 +135,26 @@ test.describe('@staff:vendors Vendors', () => {
     expect(p).toMatchObject({ id: 'recurring', horizon_days: 365, priority: 3 });
   });
 
+  test('a tier card nobody typed into follows a reload; one being edited keeps what was typed', async ({ page }) => {
+    const calls = await open(page);
+    await panel(page).locator('[data-vendor-view="tiers"]').click();
+    const single = panel(page).locator('.vendor-tier[data-vendor-tier="single"]');
+    const rec = panel(page).locator('.vendor-tier[data-vendor-tier="recurring"]');
+    await expect(single.locator('#vendor-t-single-priority')).toHaveValue('1');
+    await rec.locator('#vendor-t-recurring-name_en').fill('Monthly');
+    // Another admin raises Single's priority; the next reload brings it.
+    await page.route(/\/rest\/v1\/vendor_tiers\?/, (r) => r.request().method() === 'GET'
+      ? r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(tiers.map((x) => x.id === 'single' ? { ...x, priority: 5 } : x)) })
+      : r.fallback());
+    await page.evaluate(`document.activeElement&&document.activeElement.blur();_vendorLoad()`);
+    await expect(single.locator('#vendor-t-single-priority')).toHaveValue('5');
+    await expect(rec.locator('#vendor-t-recurring-name_en')).toHaveValue('Monthly');
+    // Saving Single now sends what the database holds, not the stale draft
+    await single.locator('.vendor-tier-save').click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_tier_save').length).toBe(1);
+    expect(calls.filter((c) => c.fn === 'staff_vendor_tier_save')[0].body.p).toMatchObject({ id: 'single', priority: 5 });
+  });
+
   test('before the database update it says so, instead of failing', async ({ page }) => {
     await stubSupabase(page, { sessions, queue_entries: [], bikes: [] });
     await page.route(/\/rest\/v1\/vendor_\w+(\?|$)/, (r) => r.fulfill({
