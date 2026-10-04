@@ -61,6 +61,11 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
   (or on the first line of its statement); `staff_actions` and `error_log` need no marker. Writes that read
   `.error` themselves or return the write to a caller are reported apart. It is a warning while the tail is
   worked down; do not add to it.
+- **Field names (warns, with a count and the first 20; 2026-10-04).** Every `<input>`, `<select>` and
+  `<textarea>` written by a staff-half function has an accessible name: a `<label for>` naming its id, a
+  wrapping `<label>`, `aria-label`, `aria-labelledby` or `title` (a placeholder is not a name). It is at
+  zero; keep it there. Popups likewise carry `aria-labelledby` (their title's id) or `aria-label` - the
+  name is also what keeps a redrawn popup's scroll and focus (`_popStill`); build-checks.spec.ts holds both.
 - **Size budget (fails).** `index.html` gzipped ≤ 250 KB and `staff.js` gzipped ≤ 270 KB (KB = 1000 bytes,
   zlib default level); the build prints both numbers. `SIZE_BUDGET_CUSTOMER_KB` / `SIZE_BUDGET_STAFF_KB` in the
   environment move a limit for one run; a deliberate step up edits `SIZE_BUDGET_DEFAULT_KB` with the reason in

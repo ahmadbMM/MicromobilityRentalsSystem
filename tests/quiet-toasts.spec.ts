@@ -25,7 +25,8 @@ for (const side of ['staff', 'customer'] as const) {
     if (side === 'staff') await unlockStaff(page); else await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await expect(page.locator('#toast-container')).toHaveAttribute('aria-live', 'polite');
+    await expect(page.locator('#toast-live')).toHaveAttribute('aria-live', 'polite');
+    await expect(page.locator('#toast-container')).not.toHaveAttribute('aria-live', /./); // the error bar (role=alert) lives there: not inside a polite region
     await page.evaluate(() => {
       // @ts-expect-error app global
       toast('Saved'); toast('Copied', 'success'); toast('Could not save', 'error'); toast('Bike is out', 'warning'); toast('Nothing to export', 'info');

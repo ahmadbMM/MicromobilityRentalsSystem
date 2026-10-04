@@ -38,6 +38,8 @@ type Checks = {
   staffOnlyLangKeys(keys: string[], customerText: string, staffText: string): Set<string>;
   customerCss(css: string, customerText: string, staffText: string): { css: string; kept: number; dropped: number; droppedBytes: number };
   cssTokens(css: string): { kind: string; text: string }[];
+  checkFieldNames(raw: string, only?: Set<string> | null): { total: number; named: number; unnamed: { line: number; tag: string; fn: string; text: string }[] };
+  formatFieldNames(r: ReturnType<Checks['checkFieldNames']>, limit?: number): string;
 };
 const load = () => import('../scripts/split-staff.mjs' as string) as Promise<Checks>;
 
@@ -46,6 +48,36 @@ const page = (script: string, markup = '') =>
   `<!doctype html><html><body>${markup}\n<script defer src="/vendor/supabase-js-0.js"></script>\n<script>\n${script}\n</script>\n</body></html>`;
 
 test.describe('@build build checks', () => {
+  test('the field-name check tells a named field from an unnamed one, and lists the unnamed', async () => {
+    const { checkFieldNames, formatFieldNames } = await load();
+    const script = [
+      'function staffForm(){return`',
+      '<label for="a">A</label><input id="a">',          // label for
+      '<label>B <input type="text"></label>',             // wrapped
+      '<input aria-label="${esc(t(\'c\'))}" type="number">', // aria-label, with a > inside ${}
+      '<select aria-labelledby="x"></select>',
+      '<input type="hidden" name="h"><button type="button">ok</button><input type="submit">',
+      '<label>D</label><input id="d" placeholder="D">',   // a label that names nothing, a placeholder: unnamed
+      '<textarea data-on-input="${_on(\'f\',x=>x>1)}"></textarea>', // unnamed
+      '`;}',
+      'function customerForm(){return`<input id="z">`;}',
+    ].join('\n');
+    const r = checkFieldNames(page(script), new Set(['staffForm']));
+    expect(r.total).toBe(6);
+    expect(r.unnamed.map((x) => x.tag)).toEqual(['input', 'textarea']);
+    expect(r.unnamed.every((x) => x.fn === 'staffForm')).toBe(true);
+    expect(formatFieldNames(r)).toContain('WARNING - 2 of 6 staff form field(s)');
+    expect(checkFieldNames(page(script), null).unnamed.length, 'without a filter the customer field counts too').toBe(3);
+  });
+
+  test('every staff popup in app.src.html has a name (aria-label or aria-labelledby)', async () => {
+    const raw = read('app.src.html');
+    const unnamed = [...raw.matchAll(/<[a-z]+\b[^<>]*role="dialog"[^<>]*>/g)].map((m) => m[0]).filter((tag) => !/aria-label(?:ledby)?=/.test(tag));
+    expect(unnamed).toEqual([]);
+    // and each aria-labelledby points at an id that is written somewhere
+    for (const m of raw.matchAll(/role="dialog"[^<>]*aria-labelledby="([\w-]+)"/g)) expect(raw.includes(`id="${m[1]}"`), m[1]).toBe(true);
+  });
+
   test('every handler in app.src.html names a top-level function', async () => {
     const { checkHandlerNames, formatHandlerOffenders, resolveIncludes } = await load();
     const raw = read('app.src.html');

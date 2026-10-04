@@ -13,7 +13,7 @@ import CleanCSS from 'clean-css';
 import {
   splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, customerCss, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
-  checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion,
+  checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
 
 // Modularization foundation: logic can live in separate src/ files and be pulled in
@@ -158,6 +158,11 @@ const cssUrl = new URL('../styles.css', import.meta.url);
 const cssSource = await readFile(cssUrl, 'utf8');
 const cssHash = createHash('sha256').update(new CleanCSS({ level: 1 }).minify(cssSource).styles).digest('hex').slice(0, 10);
 const split = splitStaff(src, '/staff.js?v=__STAFF_V__', `/styles.css?v=${cssHash}`);
+
+// ── Every staff form field has a name a screen reader can say (a WARNING, 2026-10-04) ──────────
+// A field with no <label for>, wrapping <label>, aria-label or aria-labelledby is read out as "edit
+// text". The staff half's functions are the ones the check reads (see checkFieldNames).
+console.log(formatFieldNames(checkFieldNames(raw, new Set([...split.staff.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map((m) => m[1])))));
 
 // ── Staff-only strings leave the customer's page (2026-10-01) ─────────────────
 // About two thirds of LANG's keys are words only staff screens say. A key that staff code names and
