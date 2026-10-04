@@ -2704,9 +2704,14 @@ function _jwtRenew(stale){
 // writes on the wire is what _updSafe reads before a silent reload for a new build.
 const SB_READ_MS=25000,SB_WRITE_MS=90000;
 let _sbWritesOut=0;
+// RPCs that only read (checked against the functions on 2026-10-04: no insert, update or delete in
+// them). They travel as a POST, which used to give them the 90 s write timeout and count them as
+// writes on the wire; they are reads: 25 s, and not a write that holds off a silent reload.
+const _READ_RPC=new Set(['staff_sync','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_ambassador_stats','staff_team_list','staff_operator_list','staff_sign_in_methods','staff_sign_in_lock','staff_undo_code_state']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
-  const write=m!=='GET'&&m!=='HEAD';
+  const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
+  const write=m!=='GET'&&m!=='HEAD'&&!(_rpc&&_READ_RPC.has(_rpc[1]));
   if(write)_sbWritesOut++;
   const done=()=>{if(write)_sbWritesOut=Math.max(0,_sbWritesOut-1);};
   let p;
@@ -4031,6 +4036,14 @@ function priceForTypeMax(ty){return RIDE_PRICES_MAX[ty]??DEFAULT_PRICE;}
 // "57.5 ⃁" or "- 20 SAR"; being plain text it goes through esc(), aria-labels and copy alike.
 function _sar(n){const v=Math.round((Number(n)||0)*100)/100;return '⁦⃁ '+v+'⁩';}
 // An add-on's price on a rider's screen (the desk's _priceLabel keeps SAR): Free, or the amount.
+// An amount as the desk reads it (2026-10-04): "SAR 57" or "SAR 57.50" (cents only when there are
+// any), the one format of every staff screen; it replaced _fmtSar, _priceLabel's own build and ~70
+// inline 'SAR '+n. By default it is markup isolated in a <bdi>, so an Arabic line keeps SAR on the
+// left; {isolate:false} (_NOISO) is the plain text for an attribute, a toast, the log, a WhatsApp
+// message, a print or a CSV - no marks there. The customer pages keep the riyal sign (_sar), and the
+// printed reports their thousands separators (_rpSar).
+const _NOISO={isolate:false};
+function _money(n,{isolate=true}={}){const v=Math.round((Number(n)||0)*100)/100,s='SAR '+(v%1===0?v:v.toFixed(2));return isolate?'<bdi>'+s+'</bdi>':s;}
 function _cuPrice(p){if(p==null||p==='')return '';const n=Number(p);return isNaN(n)?'':n===0?t('invFree'):n>0?_sar(n):'';}
 function _sarRange(lo,hi){return lo===hi?_sar(lo):'⁦'+_sar(lo)+' – '+_sar(hi)+'⁩';}
 function priceDisplay(ty){return _sarRange(priceForType(ty),priceForTypeMax(ty));}
@@ -5956,7 +5969,7 @@ async function handleGoogleReturn(){
   if(cust){
     // Backfill the avatar from Google if they have none yet
     let photo=cust.photo;
-    if(!photo&&gphoto){photo=gphoto;try{await sb.from('customers').update({photo:gphoto}).eq('id',cust.id);}catch(e){}}
+    if(!photo&&gphoto){photo=gphoto;try{await sb.from('customers').update({photo:gphoto}).eq('id',cust.id);}catch(e){}} // fire-and-forget: a backfilled avatar, retried on the next sign-in
     const safe={id:cust.id,name:cust.name,email:cust.email,phone:cust.phone,height:cust.height,type_preference:cust.type_preference,created_at:cust.created_at,birth_date:cust.birth_date,country:cust.country,city:cust.city,nationality:cust.nationality||null,socials:cust.socials||null,photo};
     S.rememberMe=true;S.loggedIn=safe;setSession(safe);
     return 'loggedin';
@@ -6031,7 +6044,7 @@ async function doLogin(){
     if(!customer){authErr(t('errInvalidCredentials'));return;}
     
     if(String(customer.password_hash||'').indexOf('pbkdf2:')!==0&&String(customer.password_hash||'').indexOf('oauth:')!==0){
-      try{const up=await makePwdHash(pwd);await sb.from('customers').update({password_hash:up}).eq('id',customer.id);}catch(e){}
+      try{const up=await makePwdHash(pwd);await sb.from('customers').update({password_hash:up}).eq('id',customer.id);}catch(e){} // fire-and-forget: the hash upgrade is retried on the next sign-in
     }
     delete customer.password_hash;
     S.loggedIn=customer;setSession(customer);
@@ -6949,7 +6962,7 @@ function _dobDayOpts(dim,cur,dMax){return `<option value="">${esc(t('dobDay'))}<
 function dobFieldHtml(id,value,opts){
   const o=opts||{};const v=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value||''));
   const y=v?+v[1]:0,m=v?+v[2]:0,d=v?+v[3]:0;
-  const yMax=new Date().getFullYear()-_DOB_MIN_AGE,yMin=new Date().getFullYear()-_DOB_MAX_AGE;
+  const _ny=+todayStr().slice(0,4),yMax=_ny-_DOB_MIN_AGE,yMin=_ny-_DOB_MAX_AGE; // Riyadh's year, as _dobMax
   const dim=(y&&m)?new Date(y,m,0).getDate():31;
   const lim=_dobLimits(y,m);
   const dis=o.disabled?' disabled':'';
@@ -8852,7 +8865,7 @@ function showWlPayMenu(id,evt){
   const menu=document.createElement('div');
   menu.className='pay-menu-popup';
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:200px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
-  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" data-on-click="${_on("_on_showWlPayMenu_1",_EV,_EL,o.mode==='split'?['splitWlPayment',id]:['toggleWlPayment',id,o.mode])}">${o.label}</button>`).join('');
+  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" data-on-click="${_on("_on_showWlPayMenu_1",_EV,_EL,['toggleWlPayment',id,o.mode])}">${o.label}</button>`).join('');
   _popMenu(menu,evt);
 }
 async function toggleWlPayment(id,mode){
@@ -8872,24 +8885,6 @@ async function toggleWlPayment(id,mode){
   toast(paid&&price===0?' '+t('onTheHouseLabel'):paid?'✓ '+t('paidLabel'):t('pendingLabel'));
   const res=await sb.from('desk_waitlist').update(patch).eq('id',id);
   if(_writeErr(res,'payment')){Object.assign(w,prev);renderStaffQueue();return;}
-  pushUndo(`${t('undoPayment')} ${w.name}`,async()=>{
-    const r=await sb.from('desk_waitlist').update(prev).eq('id',id);
-    if(_writeErr(r,'undo payment'))return false;
-    Object.assign(w,prev);renderStaffQueue();
-  });
-}
-async function splitWlPayment(id){
-  const w=(S.deskWaitlist||[]).find(x=>x.id===id);if(!w)return;
-  const price=Math.round(priceForType(w.bike_type||'Any')*100)/100;
-  const raw=await promptDialog({title:t('splitWord'),body:t('splitCardPrompt'),value:w.card_amount!=null?String(w.card_amount):'',numeric:true});if(raw===null)return;
-  let card=parseFloat(_asciiDigits(raw));if(isNaN(card)||card<0)card=0;card=Math.round(Math.min(card,price)*100)/100;
-  const prev={paid:!!w.paid,price:w.price??null,pay_method:w.pay_method||null,card_amount:w.card_amount??null};
-  const patch={paid:true,price,pay_method:'split',card_amount:card};
-  Object.assign(w,patch);
-  renderStaffQueue();
-  toast(`✓ ${t('cashCard')} ${card} · ${t('cashCash')} ${Math.round((price-card)*100)/100}`);
-  const res=await sb.from('desk_waitlist').update(patch).eq('id',id);
-  if(_writeErr(res,'split payment')){Object.assign(w,prev);renderStaffQueue();return;}
   pushUndo(`${t('undoPayment')} ${w.name}`,async()=>{
     const r=await sb.from('desk_waitlist').update(prev).eq('id',id);
     if(_writeErr(r,'undo payment'))return false;
@@ -10687,7 +10682,7 @@ async function _submitReg(){
             const _msg=((err&&(err.code||err.message))||'')+'';
             const _dup=_msg.includes('23505')||/duplicate|unique/i.test(_msg); // unique (session_id,queue_num) clash
             // Roll back any rows that DID insert before retrying or bailing
-            await Promise.all(entries.map(e=>sb.from('queue_entries').delete().eq('id',e.id))).catch(()=>{});
+            await Promise.all(entries.map(e=>sb.from('queue_entries').delete().eq('id',e.id))).catch(()=>{}); // fire-and-forget: rollback of a failed insert
             if(_dup&&_try<3){
               try{const _q2=await _queueFetch(true);if(_q2&&!_q2.error&&_q2.data)S.queue=_q2.data.map(entryFromDB);}catch(e){}
               const _base=nextQNum(S.selSession);entries.forEach((e,i)=>{e.queueNum=_base+i;}); // fresh numbers, then retry
@@ -10723,7 +10718,8 @@ async function _submitReg(){
       const clash=entries.some(e=>getQueue().some(o=>o.id!==e.id&&o.sessionId===e.sessionId&&o.queueNum===e.queueNum&&!['cancelled','removed','waitlist'].includes(o.status)));
       if(clash){
         const fresh=nextQNum(S.selSession);
-        await Promise.all(entries.map((e,i)=>{e.queueNum=fresh+i;return sb.from('queue_entries').update({queue_num:e.queueNum}).eq('id',e.id);}));
+        const _rn=await Promise.all(entries.map((e,i)=>{e.queueNum=fresh+i;return sb.from('queue_entries').update({queue_num:e.queueNum}).eq('id',e.id);}));
+        if(_writeErr(_rn,'booking number'))await loadDataLight();
       }
     }
 
@@ -11530,13 +11526,15 @@ function _mrTier(rides){
   const nx=tiers[ti+1];
   return{name:t(tiers[ti][1]),next:nx?{need:nx[0]-rides,name:t(nx[1]),from:tiers[ti][0],to:nx[0]}:null};
 }
-function _mrWeekStart(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-x.getDay());return x.getTime();}
+// The Sunday that starts a ride day's week, as UTC ms of that date: from YYYY-MM-DD strings on the
+// KSA calendar, so the device's own timezone and its summer-time hours never shift a week.
+function _mrWeekStart(ds){const t=Date.parse(String(ds||'').slice(0,10)+'T00:00:00Z');return isNaN(t)?null:t-new Date(t).getUTCDay()*864e5;}
 // Consecutive ridden weeks, counted back from this week (or last week, so a streak never
 // "breaks" mid-week - positive framing only, no loss pressure).
 function _mrStreak(completed){
-  const weeks=new Set(completed.map(e=>{const ds=(e.sessionDate||'').slice(0,10);return ds?_mrWeekStart(new Date(ds+'T00:00:00')):null;}).filter(Boolean));
+  const weeks=new Set(completed.map(e=>{const ds=(e.sessionDate||'').slice(0,10);return ds?_mrWeekStart(ds):null;}).filter(Boolean));
   if(!weeks.size)return 0;
-  const WEEK=7*864e5,now=_mrWeekStart(new Date());
+  const WEEK=7*864e5,now=_mrWeekStart(todayStr());
   let w=weeks.has(now)?now:(weeks.has(now-WEEK)?now-WEEK:null);
   if(w==null)return 0;
   let n=0;while(weeks.has(w)){n++;w-=WEEK;}
@@ -12780,7 +12778,7 @@ function renderAddonPicker(){
         </div>
       </div>`;}).join('')}
     </div>`:`<div class="empty-state dk-p24">${t('addonNone')}</div>`}
-    <div class="dk-ap-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green">SAR ${total}</span></div>
+    <div class="dk-ap-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green">${_money(total)}</span></div>
     <button class="btn-primary dk-w100-mt12" data-on-click="${_on("closeAddonPicker")}">${t('cashDone')}</button>
   </div>`;
 }
@@ -13218,7 +13216,7 @@ function renderDashboard(){
   el.innerHTML=`<div class="page-title">${t('dashTitle')}</div><div class="page-sub">${t('dashSub')}</div>
     <div class="dash-kpis">
       ${kpi(riders,t('dashBookedToday'),['setStaffTab','queue'])}${kpi(waiting,t('dashWaiting'),['setStaffTab','queue'])}${kpi(onBikes,t('dashOnBikes'),['setStaffTab','queue'])}${kpi(done,t('dashDoneToday'))}
-      ${kpi('SAR '+collected,t('dashCollected'),['setStaffTab','cashier'])}${kpi(openSess,t('dashOpenSessions'),['setStaffTab','sessions'])}${kpi(avail,t('dashAvailBikes'),['_on_goInventoryBikes'])}
+      ${kpi(_money(collected),t('dashCollected'),['setStaffTab','cashier'])}${kpi(openSess,t('dashOpenSessions'),['setStaffTab','sessions'])}${kpi(avail,t('dashAvailBikes'),['_on_goInventoryBikes'])}
     </div>
     <div class="dash-grid">
       <div class="form-section dash-card"><div class="form-title">${t('dashSessionsToday')}</div>${sessHtml}</div>
@@ -13745,12 +13743,6 @@ function renderSessions(){
     return -_sd*_sessOrder(a,b); // date, the default (-1), is the staff order; its arrow reverses it
   });
 
-  function thSessSort(col,label){
-    const active=S.sessSort===col;
-    const arrow=active?(S.sessSortDir===1?'↑':'↓'):'';
-    return`<th class="an-sort-th an-sort-txt${active?' an-sort-active':''}" data-on-click="${_on("setSessSort",col)}">${label}${active?` ${arrow}`:''}</th>`;
-  }
-
   const sessStatusOpts=['all','open','full','closed'].map(s=>{
     const l=s==='all'?t('filterAll'):t(SESS_STATUS_KEY[s]);
     return`<option value="${s}"${S.sessStatusFilter===s?' selected':''}>${l}</option>`;}).join('');
@@ -13976,7 +13968,7 @@ function renderPromoManager(){
     const spent=_promoSpent(c);
     return`<tr${c.active&&!spent?'':' class="pc-off"'}>
     <td data-label="${t('promoCodeLabel')}" class="pc-code-td">${esc(c.code)}</td>
-    <td data-label="${t('promoValueLabel')}">${c.kind==='flat'?`SAR ${c.value}`:`${c.value}%`}${c.applies_to?` · ${typeLabel(c.applies_to)}`:''}</td>
+    <td data-label="${t('promoValueLabel')}">${c.kind==='flat'?_money(c.value):`${c.value}%`}${c.applies_to?` · ${typeLabel(c.applies_to)}`:''}</td>
     <td data-label="${t('promoLimitsLabel')}" class="pc-lim">${_promoLimitsText(c)||'—'}</td>
     <td data-label="${t('promoActiveLabel')}"><button class="btn-sm ${c.active&&!spent?'btn-green':'btn-muted'}" data-on-click="${_on("togglePromoActive",c.id)}">${spent?t(_promoExpired(c)?'promoExpiredLabel':'promoUsedUpLabel'):c.active?t('promoActiveLabel'):t('promoInactiveLabel')}</button></td>
     <td class="cell-actions"><button class="btn-sm btn-red" data-on-click="${_on("delPromo",c.id)}">${t('deleteBtn')}</button></td>
@@ -14209,7 +14201,7 @@ async function saveSessionEdit(){
       }).eq('session_id',oldId);
       if(_mv&&_mv.error){
         // Roll the new row back rather than leave two sessions for one day.
-        try{await sb.from('sessions').delete().eq('id',newId);}catch(_){}
+        try{await sb.from('sessions').delete().eq('id',newId);}catch(_){} // fire-and-forget: rollback; the refusal below is what is said
         _writeErr(_mv,'move bookings');
         return;
       }
@@ -14978,7 +14970,7 @@ async function _saveGroupEdit(){
     const res=await sb.from('queue_entries').update(patch).eq('id',m.id);
     if(_writeErr(res,'edit booking')){
       if(done.length){
-        await Promise.all(done.map(d=>sb.from('queue_entries').update(prev.find(p=>p.id===d.m.id)).eq('id',d.m.id)));
+        await Promise.all(done.map(d=>sb.from('queue_entries').update(prev.find(p=>p.id===d.m.id)).eq('id',d.m.id))); // fire-and-forget: rollback; the reload below shows what stands
         for(const d of done)if(d.took)await _addonStockQ(entryAddons(d.m),1);
       }
       await loadDataLight();renderStaffQueue();return;
@@ -17914,8 +17906,8 @@ async function _saveBookingEdit(){
     if(_writeErr(await sb.from('queue_entries').update(back).eq('id',id),'undo edit')){await loadDataLight();renderStaffQueue();return false;} // nothing below may run over a booking still as edited
     if(offBike&&!(await _redoCheckinWrite(id,offBike))){await loadDataLight();renderStaffQueue();return false;}
     if(moving&&prev.status==='waitlist')await _addonStockQ(entryAddons(e),1); // back to waitlist = release what the move reserved above
-    if(inserted.length)await Promise.all(inserted.map(x=>sb.from('queue_entries').delete().eq('id',x))).catch(()=>{});
-    if(parkedRows.length)await Promise.all(parkedRows.map(x=>sb.from('desk_waitlist').delete().eq('id',x))).catch(()=>{}); // ...and off the Staff List with them
+    if(inserted.length)await Promise.all(inserted.map(x=>sb.from('queue_entries').delete().eq('id',x))).catch(()=>{}); // fire-and-forget: the undo's clean-up, reloaded below
+    if(parkedRows.length)await Promise.all(parkedRows.map(x=>sb.from('desk_waitlist').delete().eq('id',x))).catch(()=>{}); // ...and off the Staff List with them (fire-and-forget: the undo's clean-up)
     await loadDataLight();renderStaffQueue();
   });
   closeBookingEditModal();
@@ -18427,7 +18419,7 @@ function renderStaffQueue(_resultsOnly){
     const canEdit=['waiting','active','waitlist'].includes(e.status);
     if(!ad.length&&!canEdit)return'';
     return`<div class="rq-adw">
-      ${ad.map(a=>`<span class="rq-adchip">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''} · <bdi>SAR ${a.lineTotal}</bdi></span>`).join('')}
+      ${ad.map(a=>`<span class="rq-adchip">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''} · ${_money(a.lineTotal)}</span>`).join('')}
       ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${t('addonEditTitle')}" class="rq-adbtn">+ ${t('addonAddBtn')}</button>`:''}
     </div>`;
   };
@@ -18471,7 +18463,7 @@ function renderQRow(e){
             <span class="rq-bkname">${esc(b.name)}</span>
           </div>`).join('')
         :'<span class="rq-mut">—</span>'}${assignedBikes.some(b=>b.colors&&b.colors.length)?`<div class="rq-swrow">${colorSwatches}</div>`:''}</td>`:''}
-      ${_qc.money?`<td class="rq-price">${_freeSessIds.has(e.sessionId)?`<span class="rq-mut">—</span>`:_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));return _a>0?`SAR ${Math.round((_p+_a)*100)/100}<div class="rq-adline">${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}</div>`:`SAR ${_p}`;})()}</td>
+      ${_qc.money?`<td class="rq-price">${_freeSessIds.has(e.sessionId)?`<span class="rq-mut">—</span>`:_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));return _a>0?`${_money(Math.round((_p+_a)*100)/100)}<div class="rq-adline">${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}</div>`:`${_money(_p)}`;})()}</td>
       <td data-on-click="${_on("_on_renderStaffQueue_5",_EV,_EL)}">
         <div class="rq-payw">
           ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
@@ -18515,9 +18507,9 @@ function renderQRow(e){
     const _ciN=_partyCheckinRows(group).length; // riders a one-tap party check-in would take
     const _pk=_partyKey(primary)||primary.id;
     const _open=_partyIsOpen(_pk)||_apprSessIds.has(primary.sessionId); // approvals are per rider: those parties never fold
-    const priceSpan=_freeSessIds.has(primary.sessionId)?`<span class="rq-mut">—</span>`:`<span class="rq-price">SAR ${totalPrice}</span>
-      ${adTotal>0?`<div class="rq-adline">${t('addonsLabel')}: SAR ${adTotal}</div>`:''}
-      <div class="${remaining>0?'rq-due':'rq-due-ok'}">${paidCount}/${activeGroup.length} ${t('paidLabel')}${houseAmt>0?` · ${houseAmt} ${t('onTheHouseLabel')}`:''} · ${remaining>0?`SAR ${remaining} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</div>`;
+    const priceSpan=_freeSessIds.has(primary.sessionId)?`<span class="rq-mut">—</span>`:`<span class="rq-price">${_money(totalPrice)}</span>
+      ${adTotal>0?`<div class="rq-adline">${t('addonsLabel')}: ${_money(adTotal)}</div>`:''}
+      <div class="${remaining>0?'rq-due':'rq-due-ok'}">${paidCount}/${activeGroup.length} ${t('paidLabel')}${houseAmt>0?` · ${houseAmt} ${t('onTheHouseLabel')}`:''} · ${remaining>0?`${_money(remaining)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</div>`;
 
     if(!_open){
       // One row for the whole party: the holder, the shape of the party, the money, the
@@ -18654,7 +18646,7 @@ function renderQRow(e){
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
         </div>
         <div class="rq-csub${indent}">
-          ${_hasRideGroups(_rowSess(e))?_rgChip(e)+' ':''}${esc(typeLabel(e.typePreference))}${e.height&&_entryFitText(e)?` <span class="q-size">${esc(_entryFitText(e))}</span>`:''}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">SAR ${e.price??DEFAULT_PRICE}</bdi>`}
+          ${_hasRideGroups(_rowSess(e))?_rgChip(e)+' ':''}${esc(typeLabel(e.typePreference))}${e.height&&_entryFitText(e)?` <span class="q-size">${esc(_entryFitText(e))}</span>`:''}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">${_money(e.price??DEFAULT_PRICE,_NOISO)}</bdi>`}
         </div>
       </div>`;
     }).join('');
@@ -18679,7 +18671,7 @@ function renderQRow(e){
             <div class="rq-csub">${_partyCountsLine(group)}</div></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
-        ${_freeSessIds.has(primary.sessionId)?'':`<div class="rq-cmoney"><span><bdi>${_fmtSar(pm.total)}</bdi> · ${pm.paidCount}/${pm.count} ${t('paidLabel')}</span><span class="${pm.due>0?'rq-c-orange':'rq-c-green'}">${pm.due>0?`<bdi>${_fmtSar(pm.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span></div>`}
+        ${_freeSessIds.has(primary.sessionId)?'':`<div class="rq-cmoney"><span>${_money(pm.total)} · ${pm.paidCount}/${pm.count} ${t('paidLabel')}</span><span class="${pm.due>0?'rq-c-orange':'rq-c-green'}">${pm.due>0?`${_money(pm.due)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span></div>`}
         <div class="rq-pbtns">
           ${(()=>{const _ciN=_partyCheckinRows(group).length;return _ciN?`<button class="btn-sm btn-green" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
           ${_partyReturnBtn(group)}
@@ -18714,7 +18706,7 @@ function renderQRow(e){
               <span class="rq-cadl">${n>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
               ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_9",_EV,_EL,e.id)}" class="rq-cadbtn">+ ${t('addonAddBtn')}</button>`:''}
             </div>
-            ${ad.map(a=>`<div class="rq-cadi"><span class="rq-cadn">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''}</span><bdi class="rq-b800">SAR ${a.lineTotal}</bdi></div>`).join('')}
+            ${ad.map(a=>`<div class="rq-cadi"><span class="rq-cadn">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''}</span><bdi class="rq-b800">${_money(a.lineTotal,_NOISO)}</bdi></div>`).join('')}
           </div>`;
         }).join('');
       })()}
@@ -19205,7 +19197,7 @@ async function execCancelNight(){
   // Only a rider who was out on a bike frees one. A waiting row's reserved bike was never taken
   // off the rack, and setting it 'available' could free it from under whoever holds it now.
   const bikes=landed.filter(id=>was.get(id).status==='active').flatMap(id=>was.get(id).bikes);
-  if(bikes.length)await Promise.all(bikes.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
+  if(bikes.length)await _releaseBikes(bikes,'cancel night');
   await _wr(sb.from('sessions').update({status:'closed'}).eq('id',sid),'close session');
   // A cancelled booking hands its add-ons back, exactly as a single cancel does (a waitlist row never held any).
   await _addonStockRows(landed.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),1);
@@ -19228,7 +19220,7 @@ async function execCancelNight(){
       const u=await sb.from('queue_entries').update({status:p.status,cancelled_by:null,assigned_bike_id:av}).eq('id',id).eq('status','cancelled').select('id');
       res.push(u);
       if(!(u&&u.error)&&u.data&&u.data.length)back.push(id);
-      else if(claimed.length)await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
+      else if(claimed.length)await _releaseBikes(claimed,'cancel night');
     }));
     await _addonStockRows(back.filter(id=>was.get(id).status!=='waitlist').map(id=>was.get(id).entry),-1);
     if(back.length)await _wr(sb.from('sessions').update({status:prevSess}).eq('id',sid).eq('status','closed'),'undo cancel night');
@@ -19263,7 +19255,7 @@ async function closeOutSession(sid){
     title:t('closeOutTitle'),
     body:t('closeOutBody').replace('{0}',String(toReturn.length+toDone.length)).replace('{1}',String(toNoshow.length))
       +(nBikes?' '+t('closeOutBikes').replace('{0}',String(nBikes)):'')
-      +(owed.length?` <strong>${t('closeOutOwed').replace('{0}',String(owed.length)).replace('{1}',_fmtSar(owedSar))}</strong>`:''),
+      +(owed.length?` <strong>${t('closeOutOwed').replace('{0}',String(owed.length)).replace('{1}',_money(owedSar,_NOISO))}</strong>`:''),
     confirmLabel:t('closeOutBtn'),
     onConfirm:async()=>{
       const was=new Map(rows.map(e=>[e.id,{status:e.status,bikes:getAssignedBikeIds(e),entry:e}]));
@@ -19510,7 +19502,7 @@ function showPayMenu(id,evt){
   const menu=document.createElement('div');
   menu.className='pay-menu-popup';
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:200px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
-  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}"${o.mode==='price'?' data-act="1"':''} data-on-click="${_on("_on_showPayMenu_1",_EV,_EL,o.mode==='price'?['showEditPriceModal',id]:o.mode==='split'?['splitRentalPayment',id]:['togglePayment',id,o.mode])}">${o.label}</button>`).join('');
+  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}"${o.mode==='price'?' data-act="1"':''} data-on-click="${_on("_on_showPayMenu_1",_EV,_EL,o.mode==='price'?['showEditPriceModal',id]:['togglePayment',id,o.mode])}">${o.label}</button>`).join('');
   _popMenu(menu,evt);
 }
 async function togglePayment(id,mode){
@@ -19544,26 +19536,6 @@ async function togglePayment(id,mode){
   if(_writeErr(_pr,'payment')){await loadDataLight();renderStaffQueue();renderHistory();return;} // surface failure and revert the optimistic toggle
   await _wr(sb.from('queue_entries').update({pay_method:newMethod,card_amount:null}).eq('id',id),'payment method');
   await _reloadRows([id]);renderHistory(); // only this row moved
-  pushUndo(`${t('undoPayment')} #${entry.queueNum} ${entry.name}`,async()=>{
-    const r=await sb.from('queue_entries').update({paid:prevPaid,price:prevPrice,pay_method:prevMethod,card_amount:prevCard}).eq('id',id);
-    if(_writeErr(r,'undo payment')){await loadDataLight();renderStaffQueue();return false;}
-    await loadDataLight();renderStaffQueue();renderHistory();
-  });
-}
-// Split a rental between card and cash: prompt for the card portion, the rest is cash
-async function splitRentalPayment(id){
-  const entry=getQueue().find(e=>e.id===id);if(!entry)return;
-  const price=Math.round(((entry.price===0&&!entry.promoCode?_entryFallbackPrice(entry):(entry.price??DEFAULT_PRICE)))*100)/100;
-  const _tot=Math.round((price+addonsCost(entryAddons(entry)))*100)/100; // the card slice may cover add-ons too — clamping at the rental alone made rental+add-on card payments unrecordable
-  const raw=await promptDialog({title:t('splitWord'),body:t('splitCardPrompt'),value:entry.card_amount!=null?String(entry.card_amount):'',numeric:true});if(raw===null)return;
-  let card=parseFloat(_asciiDigits(raw));if(isNaN(card)||card<0)card=0;card=Math.round(Math.min(card,_tot)*100)/100;
-  const prevPaid=entry.paid,prevPrice=entry.price,prevMethod=entry.pay_method||null,prevCard=entry.card_amount??null;
-  entry.paid=true;entry.price=price;entry.pay_method='split';entry.card_amount=card;
-  renderStaffQueue();renderHistory();
-  toast(`✓ ${t('cashCard')} ${card} · ${t('cashCash')} ${Math.round((_tot-card)*100)/100}`);
-  const _sr=await sb.from('queue_entries').update({paid:true,price:price,pay_method:'split',card_amount:card}).eq('id',id);
-  if(_writeErr(_sr,'split payment')){await loadDataLight();renderStaffQueue();renderHistory();return;}
-  await loadDataLight();renderStaffQueue();renderHistory();
   pushUndo(`${t('undoPayment')} #${entry.queueNum} ${entry.name}`,async()=>{
     const r=await sb.from('queue_entries').update({paid:prevPaid,price:prevPrice,pay_method:prevMethod,card_amount:prevCard}).eq('id',id);
     if(_writeErr(r,'undo payment')){await loadDataLight();renderStaffQueue();return false;}
@@ -20505,8 +20477,10 @@ async function cancelBooking(id,reason,why){
     if(_lastLive)for(const e of _restock){const i=live.indexOf(e);if(res[i]&&res[i].error)await _consumeAddonsOnEnter(e);}
     await loadData();renderMyRides();return;
   }
-  const allBikes=saved.flatMap(s=>s.bikeIds);
-  if(allBikes.length)await Promise.all(allBikes.map(bid=>sb.from('bikes').update({status:'available'}).eq('id',bid)));
+  // No bike is freed here: only a waiting or waitlisted booking is cancelled, and its assigned bike
+  // is a reservation that never left the rack. Setting it 'available' could free it from under
+  // whoever holds it now (or pull it out of maintenance), as the cancel-night comment says, and a
+  // customer's device cannot write bikes at all.
 
   if(reason){
     S.cancellationLog.unshift({
@@ -20613,7 +20587,7 @@ async function _staffCancelNow(id,why){
       if(_writeErr(_cc,'cancel booking',()=>_staffCancelNow(id,why))){await loadData();renderStaffQueue();return;}
       if(!_landed(_cc))return _lostRace();
       if(was==='active'){ // only now that the rider is really off it does the bike go back on the rack
-        await Promise.all(bikeIds.map(bid=>sb.from('bikes').update({status:'available'}).eq('id',bid))).catch(()=>{});
+        await _releaseBikes(bikeIds,'cancel booking');
         try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
       }
       await _shiftDownAfter(entry.sessionId,savedQNum); // close the number gap
@@ -20638,7 +20612,7 @@ async function _staffCancelNow(id,why){
         }else if(plan.status==='waitlist'){patch.status='waitlist';patch.waitlist_num=entry.waitlistNum||nextWlNum(entry.sessionId);}
         const _u=await sb.from('queue_entries').update(patch).eq('id',id).eq('status','cancelled').select('id');
         if(_writeErr(_u,'undo cancel')||!_landed(_u)){ // failed restore must not consume stock or repaint as restored
-          await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
+          await _releaseBikes(claimed,'cancel booking');
           await _redoPromotion(plan.back);
           await loadData();renderStaffQueue();return false;
         }
@@ -21030,6 +21004,20 @@ async function _autoPromoteOldestWaitlist(sessionId){
 // act on it (promote, restock, free a bike); staff see the row as it now stands.
 function _landed(r){return !!(r&&!r.error&&r.data&&r.data.length);}
 async function _lostRace(){await loadDataLight();renderStaffQueue();toast(t('errChangedElsewhere'),'warning');}
+// Puts bikes back on the rack: one checked write per bike, the one door for every release on the
+// desk (a cancel, an undo, a claim given back after a lost race). A refused release is said (error
+// bar, error_log) and the bike states are read back, instead of a bike staying 'in-use' with nothing
+// pointing at it while the screen shows it free. inUse: only a bike still in-use is freed, so one
+// sent to maintenance meanwhile stays out. Returns true when a write was refused.
+async function _releaseBikes(ids,ctx,inUse){
+  ids=[...new Set((ids||[]).filter(b=>b!=null&&b!==''))];
+  if(!ids.length||!sb)return false;
+  const res=await Promise.all(ids.map(id=>(inUse?sb.from('bikes').update({status:'available'}).eq('id',id).eq('status','in-use'):sb.from('bikes').update({status:'available'}).eq('id',id)).then(r=>r,e=>({error:e||{message:'failed'}}))));
+  const bad=_writeErr(res,ctx||'release bike'),want=new Set(ids.map(String));
+  if(!bad)S.bikes=(S.bikes||[]).map(x=>want.has(String(x.id))&&(!inUse||x.status==='in-use')?{...x,status:'available'}:x);
+  else try{const b=await sb.from('bikes').select('id,status');if(b&&!b.error){const m=new Map((b.data||[]).map(x=>[String(x.id),x.status]));S.bikes=(S.bikes||[]).map(x=>m.has(String(x.id))&&m.get(String(x.id))!==x.status?{...x,status:m.get(String(x.id))}:x);}}catch(_){}
+  return bad;
+}
 // Whether a night has a confirmed place free: the live bookings that hold a place, not counting
 // the waitlist (those are the riders waiting FOR one). Approval rides are hand-picked.
 function _hasRoom(sid){
@@ -21045,7 +21033,7 @@ function _hasRoom(sid){
 async function _undoPromotion(p,entry){
   if(p){
     const r=await sb.from('queue_entries').update({status:'waitlist'}).eq('id',p.id).eq('status','waiting').select('id');
-    if(_landed(r)){await _restockAddonsOnExit(p);return{status:'waiting',back:p};}
+    if(!_writeErr(r,'undo')&&_landed(r)){await _restockAddonsOnExit(p);return{status:'waiting',back:p};}
   }
   const sess=allSessions().find(s=>s.id===entry.sessionId);
   const needs=_holdsSpot({...entry,status:'waiting'},sess); // an own-bike rider holds no place (Petromin excepted)
@@ -21055,7 +21043,7 @@ async function _undoPromotion(p,entry){
 async function _redoPromotion(p){
   if(!p)return;
   const r=await sb.from('queue_entries').update({status:'waiting'}).eq('id',p.id).eq('status','waitlist').select('id');
-  if(_landed(r))await _consumeAddonsOnEnter(p);
+  if(!_writeErr(r,'undo')&&_landed(r))await _consumeAddonsOnEnter(p);
 }
 // A Staff List row linked to this booking is spent once the booking leaves the waitlist
 // (promoted / cancelled), whichever page did it.
@@ -21224,7 +21212,7 @@ function showReturnPayModal(id){
       <div class="modal-sub dk-mb24">${t('returnPayMsg')}</div>
       <div class="dk-rp-who">
         #${entry.queueNum} - ${esc(entry.name)}<br>
-        <span class="dk-rp-owed"><bdi>${_fmtSar(_owed)}</bdi> ${t('pendingLabel')}</span>
+        <span class="dk-rp-owed">${_money(_owed)} ${t('pendingLabel')}</span>
       </div>
       <div class="dk-col10">
         <button class="btn-secondary dk-w100" data-on-click="${_on("showCashierModal",id)}">${t('cashierAddBtn')}</button>
@@ -21260,7 +21248,7 @@ function showEditPriceModal(id){
     const lbl=_priceTypes(p);
     return`<button class="${isCur?'dk-ep-pre-on':'dk-ep-pre'}"
       data-on-click="${_on("saveEditedPrice",id,p)}">
-      <span>SAR ${p%1===0?p:p.toFixed(2)}${lbl?`<span class="dk-ep-lbl">${esc(lbl)}</span>`:''}</span>
+      <span>${_money(p)}${lbl?`<span class="dk-ep-lbl">${esc(lbl)}</span>`:''}</span>
       ${isCur?'<span class="dk-fs11">✓</span>':''}
     </button>`;
   }).join('');
@@ -21269,10 +21257,9 @@ function showEditPriceModal(id){
   const _ad=addonLineItems(entryAddons(entry));
   const _adTotal=addonsCost(entryAddons(entry));
   const _grand=Math.round((cur+_adTotal)*100)/100;
-  const _fmtSar=v=>v%1===0?v:v.toFixed(2);
   const breakdown=`<div class="dk-ep-bd">
-    <div class="dk-ep-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green"><bdi>SAR ${_fmtSar(_grand)}</bdi></span></div>
-    <div class="dk-ep-rent"><span>${t('reviewRentalLabel')}</span><span class="dk-ep-rentv"><bdi>SAR ${_fmtSar(cur)}</bdi></span></div>
+    <div class="dk-ep-tot"><span>${t('reviewTotalLabel')}</span><span class="dk-c-green">${_money(_grand)}</span></div>
+    <div class="dk-ep-rent"><span>${t('reviewRentalLabel')}</span><span class="dk-ep-rentv">${_money(cur)}</span></div>
     ${_ad.map(a=>`<div class="dk-ep-ad">
       <span class="dk-ep-adn">${esc(a.name)}</span>
       <div class="dk-ep-step">
@@ -21280,7 +21267,7 @@ function showEditPriceModal(id){
         <span class="dk-ep-qty">${a.qty}</span>
         <button data-on-click="${_on("_epAddonStep",id,a.id,1)}" aria-label="+" class="dk-ep-plus">+</button>
       </div>
-      <span class="dk-ep-lt"><bdi>SAR ${a.lineTotal}</bdi></span>
+      <span class="dk-ep-lt">${_money(a.lineTotal)}</span>
     </div>`).join('')}
     <button class="btn-secondary dk-ep-addbtn" data-on-click="${_on("_epOpenAddons",id)}">+ ${t('addonAddBtn')}</button>
   </div>`;
@@ -21294,7 +21281,7 @@ function showEditPriceModal(id){
         ${presetBtns}
       </div>
       <div class="dk-ep-sec14">
-        <label class="dk-lbl6">${t('rentDiscountLabel')} <span class="dk-ep-lbln">(${t('reviewTotalLabel')} SAR ${_fmtSar(_grand)})</span></label>
+        <label class="dk-lbl6">${t('rentDiscountLabel')} <span class="dk-ep-lbln">(${t('reviewTotalLabel')} ${_money(_grand)})</span></label>
         <div class="dk-ep-disc">
           ${[10,20,30,40,50].map(p=>`<button class="dk-ep-dbtn" data-on-click="${_on("saveEditedPrice",id,Math.max(0,Math.round((_grand*(1-p/100)-_adTotal)*100)/100))}">-${p}%</button>`).join('')}
         </div>
@@ -21302,7 +21289,7 @@ function showEditPriceModal(id){
       <div class="dk-ep-sec16">
         <label class="dk-lbl6">${t('editPriceCustom')}${_adTotal>0?` <span class="dk-ep-lbln">(${t('reviewTotalLabel')})</span>`:''}</label>
         <div class="dk-flex8">
-          <input id="ep-custom" type="number" min="0" step="0.01" value="${_fmtSar(_grand)}"
+          <input id="ep-custom" type="number" min="0" step="0.01" value="${_grand}"
             class="dk-ep-in"
             data-on-keydown="${_on("_on_showEditPriceModal_2",_EV,_EL,id,_adTotal)}">
           <button class="btn-primary dk-ep-ok" data-on-click="${_on("_on_showEditPriceModal_3",_EV,_EL,id,_adTotal)}">✓</button>
@@ -21335,7 +21322,7 @@ async function saveEditedPrice(id,newPrice){
   if(_writeErr(_pr,'edit price',()=>saveEditedPrice(id,newPrice))){entry.price=prevPrice;await loadDataLight();renderStaffQueue();renderHistory();return;}
   await loadData();renderStaffQueue();renderHistory();
   // Who changed the price, from what to what, in the action log (Claude Design #4).
-  const _sar=v=>'SAR '+(v==null?'—':(v%1===0?v:Number(v).toFixed(2)));
+  const _sar=v=>v==null?'—':_money(v,_NOISO);
   logAction(`${t('editPriceBtn')}: #${entry.queueNum} ${entry.name} · ${_sar(prevPrice)} → ${_sar(newPrice)}`);
   pushUndo(`${t('undoEditPrice')} #${entry.queueNum} ${entry.name}`,async()=>{
     const _u=await sb.from('queue_entries').update({price:prevPrice}).eq('id',id);
@@ -21343,7 +21330,7 @@ async function saveEditedPrice(id,newPrice){
     await loadData();renderStaffQueue();renderHistory();
   });
   const _tot=Math.round((newPrice+addonsCost(entryAddons(entry)))*100)/100; // confirm the full amount owed
-  toast(`SAR ${_tot%1===0?_tot:_tot.toFixed(2)}`);
+  toast(_money(_tot,_NOISO));
 }
 
 
@@ -21470,7 +21457,7 @@ function renderReturnModal(){
     <div class="modal-box dk-mw420" role="dialog" aria-modal="true" aria-labelledby="ret-title">
       <div class="modal-title" id="ret-title">${t('retTitle')} · #${e.queueNum} ${esc(e.name)}</div>
       ${bikes?`<div class="modal-sub">${esc(bikes)}</div>`:''}
-      ${S._retAsk?`<div class="form-group dk-rt-fgpay"><label id="ret-pay-lbl">${t('returnPayTitle')} · <bdi>${_fmtSar(Math.round(((e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)))*100)/100)}</bdi></label>
+      ${S._retAsk?`<div class="form-group dk-rt-fgpay"><label id="ret-pay-lbl">${t('returnPayTitle')} · ${_money(Math.round(((e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)))*100)/100)}</label>
         <div role="group" aria-labelledby="ret-pay-lbl" class="dk-rt-grp">
           <button type="button" class="toggle-btn dk-f1${S._retPaid?' active':''}" aria-pressed="${S._retPaid?'true':'false'}" data-on-click="${_on("_retSetPaid",true)}">✓ ${t('paidLabel')}</button>
           <button type="button" class="toggle-btn dk-f1${!S._retPaid?' active':''}" aria-pressed="${!S._retPaid?'true':'false'}" data-on-click="${_on("_retSetPaid",false)}">${t('pendingLabel')}</button>
@@ -21546,7 +21533,7 @@ async function _unreturnWrite(id,bikeIds,markPaid){
   const u={status:'active'};if(markPaid)u.paid=false;
   if(claimed.length<bikeIds.length)u.assigned_bike_id=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
   const _u=await sb.from('queue_entries').update(u).eq('id',id);
-  if(_writeErr(_u,'undo return')){await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});return false;}
+  if(_writeErr(_u,'undo return')){await _releaseBikes(claimed,'undo return');return false;}
   await _wr(sb.from('queue_entries').update({checked_out_at:null}).eq('id',id),'undo check-out');
   return true;
 }
@@ -21609,7 +21596,7 @@ function renderBulkReturn(){
     return`<div class="br-row">
       <div class="br-who"><span class="queue-num-cell br-num">#${esc(e.queueNum)}</span>
         <div class="br-name"><div>${esc(e.name||'')}</div>${bikes?`<div class="br-bike">${esc(bikes)}</div>`:''}</div>
-        ${_brOwes(e)?`<span class="br-owe"><bdi>${_fmtSar(_brAmt(e))}</bdi></span>`:''}</div>
+        ${_brOwes(e)?`<span class="br-owe">${_money(_brAmt(e))}</span>`:''}</div>
       ${needs?`<div class="br-segs" role="group" aria-label="${esc(t('retCondLabel'))} · #${esc(e.queueNum)}">${seg(e,'ok','✓ '+t('retCondOk'))}${seg(e,'needs_check',t('retCondCheck'))}${seg(e,'damaged',t('retCondDamaged'))}</div>`:''}
     </div>`;
   }).join('');
@@ -21623,7 +21610,7 @@ function renderBulkReturn(){
       ${anyOff?`<div class="form-group dk-mt12"><label for="br-notes">${t('bulkReturnNotes')}</label>
         <textarea id="br-notes" rows="2" placeholder="${esc(t('retNotesPh'))}" class="dk-mt4">${esc(b.notes||'')}</textarea></div>`:''}
       ${owe.length?`<div class="br-pay">
-        <div class="br-pay-q">${esc(t('bulkReturnUnpaid').replace('{0}',owe.length))} · <bdi>${_fmtSar(oweAmt)}</bdi></div>
+        <div class="br-pay-q">${esc(t('bulkReturnUnpaid').replace('{0}',owe.length))} · ${_money(oweAmt)}</div>
         <div class="dk-br-grp">${payBtn('paid','✓ '+t('bulkReturnMarkPaid'))}${payBtn('unpaid',t('bulkReturnNoPay'))}</div>
       </div>`:''}
       <div class="modal-footer">
@@ -21682,7 +21669,7 @@ async function _undoCheckinWrite(entry){
   const _ur=await sb.from('queue_entries').update({status:'waiting',assigned_bike_id:null}).eq('id',id).eq('status','active').select('id');
   if(_writeErr(_ur,'undo check-in'))return null;
   if(!_landed(_ur))return{lost:true};
-  if(bikeIds.length)await Promise.all(bikeIds.map(bid=>sb.from('bikes').update({status:'available'}).eq('id',bid))).catch(()=>{});
+  if(bikeIds.length)await _releaseBikes(bikeIds,'undo check-in');
   await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',id),'undo check-in');
   try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
   return{bikeIds};
@@ -21693,7 +21680,7 @@ async function _redoCheckinWrite(id,bikeIds){
   if(claimed.length<bikeIds.length)toast(t('errBikeUnavailable'),'warning');
   const assignedVal=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
   const _u=await sb.from('queue_entries').update({status:'active',assigned_bike_id:assignedVal}).eq('id',id).eq('status','waiting').select('id');
-  if(_writeErr(_u,'undo')||!_landed(_u)){await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});return false;}
+  if(_writeErr(_u,'undo')||!_landed(_u)){await _releaseBikes(claimed,'undo');return false;}
   try{localStorage.setItem('cq_ct_'+id,Date.now());}catch(e){}
   return true;
 }
@@ -21808,7 +21795,7 @@ async function doReopen(id){
   const patch={status:'active'};
   if(claimed.length<bikeIds.length){patch.assigned_bike_id=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);toast(t('errBikeUnavailable'),'warning');}
   const _or=await sb.from('queue_entries').update(patch).eq('id',id).eq('status','done').select('id');
-  const _release=()=>Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b))).catch(()=>{});
+  const _release=()=>_releaseBikes(claimed,'re-open');
   if(_writeErr(_or,'re-open')){await _release();await loadData();renderStaffQueue();return;}
   if(!_landed(_or)){await _release();return _lostRace();}
   await loadData();toast(t('toastReopened'));
@@ -21819,7 +21806,7 @@ async function doReopen(id){
     const _u2=await sb.from('queue_entries').update({status:'done',...(patch.assigned_bike_id!==undefined?{assigned_bike_id:savedAssigned}:{})}).eq('id',id).eq('status','active').select('id');
     if(_writeErr(_u2,'undo re-open')||!_landed(_u2)){await loadData();renderStaffQueue();return false;}
     const _mine=bid=>!getQueue().some(x=>String(x.id)!==String(id)&&['waiting','active'].includes(x.status)&&getAssignedBikeIds(x).includes(bid));
-    await Promise.all(claimed.filter(_mine).map(bid=>sb.from('bikes').update({status:'available'}).eq('id',bid))).catch(()=>{});
+    await _releaseBikes(claimed.filter(_mine),'re-open');
     await loadData();renderStaffQueue();
   });
   renderStaffQueue();
@@ -22271,7 +22258,7 @@ function _accStats(){
     if(e.status==='cancelled')st.cancelled++;
     // Spent is money that stayed: the close-out and the session report leave a cancelled
     // booking out of what was collected even when it was marked paid first, so this does too.
-    if(e.paid&&e.status!=='cancelled')st.spent+=Number(e.price??DEFAULT_PRICE)||0;
+    st.spent+=_bookingRevenue(e); // one definition of revenue (_bookingRevenue)
   });
   return m;
 }
@@ -22280,9 +22267,7 @@ function _accNatCount(rows){return new Set((rows||[]).map(r=>String(r.c.national
 const _ACC_EMPTY={bookings:0,rides:0,commRides:0,upcoming:0,noshows:0,cancelled:0,lastRide:'',minutes:0,spent:0,active14:false,active30:false};
 function _accAge(c){
   const b=String(c.birth_date||'');if(!/^\d{4}-\d{2}-\d{2}/.test(b))return null;
-  const now=new Date(),bd=new Date(b.slice(0,10)+'T00:00:00');
-  let a=now.getFullYear()-bd.getFullYear();
-  if(now.getMonth()<bd.getMonth()||(now.getMonth()===bd.getMonth()&&now.getDate()<bd.getDate()))a--;
+  const a=_sxAgeAt(b.slice(0,10)); // on the KSA day, as the account checks are
   return a>=0&&a<130?a:null;
 }
 // The customer's tag rows that are live right now, most relevant first: the filtered tag
@@ -23082,7 +23067,7 @@ async function doRemove(id){
     const _av=prevStatus==='active'?(claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed))
       :savedAssigned==null?null:(_keepLink||_reserveStillFree(savedAssigned,id))?savedAssigned:null;
     const _u=await sb.from('queue_entries').update({status:prevStatus,assigned_bike_id:_av,queue_num:_restoreNum(entry.sessionId,savedQNum,id)}).eq('id',id);
-    if(_writeErr(_u,'undo remove')){await Promise.all(claimed.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b).eq('status','in-use'))).catch(()=>{});await loadData();renderStaffQueue();renderHistory();return false;}
+    if(_writeErr(_u,'undo remove')){await _releaseBikes(claimed,'undo remove',true);await loadData();renderStaffQueue();renderHistory();return false;}
     await loadData();
     if(restocks)await _consumeAddonsOnEnter(entry); // the restore brings the booking back, so re-reserve what the removal restocked
     renderStaffQueue();renderHistory();
@@ -23701,7 +23686,6 @@ function _partyMoney(members){
   const paid=r2(live.filter(e=>e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0));
   return{total,paid,due:r2(total-paid),count:live.length,paidCount:live.filter(e=>e.paid).length};
 }
-function _fmtSar(v){return `SAR ${v%1===0?v:v.toFixed(2)}`;}
 // What Confirm would charge this rider given the type and payment picked in the modal - the
 // same rule confirmCheckinModal applies, read ahead so the amount on screen moves with the
 // bike type. Promo prices survive; a paid row keeps its amount; a covered type rides free.
@@ -24013,10 +23997,10 @@ function renderCheckinModal(){
         const mine=_partyMoney([_pend]),all=_party.length>1?_partyMoney(_party.map(m=>_ciAsConfirmed(m))):null;
         // One line: this rider's amount; for a party, the party's total and what is still due.
         return `<div id="ci-money" class="bkm-money">
-          <b class="bkm-fs14"><bdi>${_fmtSar(mine.total)}</bdi></b>${mine.paidCount?`<span class="bkm-cgreen">✓ ${t('paidLabel')}</span>`:''}
-          ${all?`<span class="bkm-cmutedl">·</span><span class="bkm-cmuted">${t(_batch?'ciBatchWord':'ciPartyWord')} <bdi>${_fmtSar(all.total)}</bdi></span><span class="${all.due>0?'bkm-corange':'bkm-cgreen'}">${all.due>0?`<bdi>${_fmtSar(all.due)}</bdi> ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span>`:''}
+          <b class="bkm-fs14">${_money(mine.total)}</b>${mine.paidCount?`<span class="bkm-cgreen">✓ ${t('paidLabel')}</span>`:''}
+          ${all?`<span class="bkm-cmutedl">·</span><span class="bkm-cmuted">${t(_batch?'ciBatchWord':'ciPartyWord')} ${_money(all.total)}</span><span class="${all.due>0?'bkm-corange':'bkm-cgreen'}">${all.due>0?`${_money(all.due)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span>`:''}
         </div>`;})()}
-      ${(free||ownFree)?'':`<div class="form-group bkm-fg810"><label>${t('colPayment')}${!e.paid?` · ${_fmtSar(_ciPendingPrice(e))}`:''}</label>
+      ${(free||ownFree)?'':`<div class="form-group bkm-fg810"><label>${t('colPayment')}${!e.paid?` · ${_money(_ciPendingPrice(e),_NOISO)}`:''}</label>
         <div class="ci-opts">
           ${payBtn('pending',' '+t('pendingLabel'))}
           ${payBtn('card','✓ '+t('paidLabel'))}
@@ -24510,7 +24494,7 @@ function renderModal(){
   const isHouseRider=rider.paid&&(rider.price??DEFAULT_PRICE)===0;
   const priceWidget=S.modalPriceEdit
     ?`<span class="bkm-pw">SAR&nbsp;<input id="modal-price-inp" type="number" min="0" step="0.5" value="${rider.price??DEFAULT_PRICE}" class="bkm-pin" data-on-keydown="${_on("_on_renderModal_17",_EV,_EL,rider.id)}"><button data-on-click="${_on("saveModalPrice",rider.id)}" class="bkm-pbset">${t('setBtnShort')}</button><button data-on-click="${_on("_on_renderModal_18",_EV,_EL)}" aria-label="${t('cancelBtn')}" class="bkm-pbx">${_artIcon('close',11)}</button></span>`
-    :`<span role="button" tabindex="0" data-on-click="${_on("_on_renderModal_19",_EV,_EL)}" data-on-keydown="${_on("_on_renderModal_20",_EV,_EL)}" title="${t('editPriceTip')}" class="bkm-price">SAR ${rider.price??DEFAULT_PRICE} </span>`;
+    :`<span role="button" tabindex="0" data-on-click="${_on("_on_renderModal_19",_EV,_EL)}" data-on-keydown="${_on("_on_renderModal_20",_EV,_EL)}" title="${t('editPriceTip')}" class="bkm-price">${_money(rider.price??DEFAULT_PRICE)} </span>`;
   const paySection=!rider.paid
     ?`<div class="bkm-paywarn">
         <span class="bkm-fs16"></span>
@@ -24751,7 +24735,7 @@ async function confirmAssign(){
       if(error)throw error;
       taken=!!(data&&data.length>0);
     }catch(err){
-      await Promise.all(claimed.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
+      await _releaseBikes(claimed,'bike assign');
       toast((err&&err.message)||t('errConnection'),'error');
       await loadData();renderModal();return;
     }
@@ -24764,7 +24748,7 @@ async function confirmAssign(){
       try{const{data:cd}=await sb.from('bikes').select('status').eq('id',b.id).maybeSingle();cur=cd&&cd.status;}catch(e){}
       if(cur!=='in-use'){
         // still available (or unreadable) => the write did not apply (permission/RLS), not a race
-        await Promise.all(claimed.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
+        await _releaseBikes(claimed,'bike assign');
         toast(t('errCheckinRejected'),'error');
         await loadData();renderModal();return;
       }
@@ -24778,7 +24762,7 @@ async function confirmAssign(){
       // under two riders, so look once more after that moment has passed.
       if(!heldByOther){await new Promise(r=>setTimeout(r,1200));await loadDataLight();heldByOther=_heldByOther();}
       if(heldByOther){
-        await Promise.all(claimed.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
+        await _releaseBikes(claimed,'bike assign');
         toast(`${b.name}: ${t('errBikeUnavailable')}`,'error');
         renderModal();return;
       }
@@ -24786,7 +24770,7 @@ async function confirmAssign(){
     claimed.push(b.id);
   }
   let assignedVal;
-  const _relClaimed=()=>Promise.all(claimed.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
+  const _relClaimed=()=>_releaseBikes(claimed,'bike assign');
   if(viaSwap){
     // the swap has landed the bike, the row and the assignment; only the fare follows the new bike
     assignedVal=S.modalBikes[0];
@@ -24845,7 +24829,7 @@ async function confirmAssign(){
   // Release any bike the rider gave up (a bike change), now that the booking no longer names it:
   // freed before the booking write, a failed write left the rider's bike marked available under
   // them. Only while it is still in-use, so one sent to maintenance meanwhile stays out of service.
-  if(toFree.length&&!viaSwap)await Promise.all(toFree.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id).eq('status','in-use'))).catch(()=>{});
+  if(toFree.length&&!viaSwap)await _releaseBikes(toFree,'bike assign',true);
   if(rider&&rider.status==='waitlist'){await _addonsOnLeaveWaitlist(rider,true);await _mwRetireLinked(riderId);} // handed a bike straight off the waitlist
   await _dropOtherReservations(selected.map(b=>b.id),riderId); // "assign anyway" moves the reservation, it does not share it
   if(rider&&rider.typePreference==='Any'&&selected.length>0){
@@ -24855,8 +24839,7 @@ async function confirmAssign(){
   // apply the payment chosen back in the check-in modal (see _ciCarryPay)
   const _carry=S._ciPayCarry;S._ciPayCarry=null;
   if(_carry){
-    if(_carry==='split')await splitRentalPayment(riderId);
-    else if(_carry!=='team')await togglePayment(riderId,_carry);
+    if(_carry!=='team')await togglePayment(riderId,_carry==='split'?'card':_carry); // rentals are card-only: an old split carry records as card
   }
   closeModal();
   if(isReassign){
@@ -24871,12 +24854,12 @@ async function confirmAssign(){
         await loadData();renderStaffQueue();return;
       }
       const back=await _reclaimBikes(toFree);
-      if(back.length<toFree.length){await Promise.all(back.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});toast(t('errBikeUnavailable'),'error');await loadData();renderStaffQueue();return false;}
+      if(back.length<toFree.length){await _releaseBikes(back,'bike assign');toast(t('errBikeUnavailable'),'error');await loadData();renderStaffQueue();return false;}
       const undoAssign={assigned_bike_id:alreadyAssigned.length===1?alreadyAssigned[0]:JSON.stringify(alreadyAssigned)};
       if(priceUpdate.price!=null&&prevPrice!=null)undoAssign.price=prevPrice;
       const u=await sb.from('queue_entries').update(undoAssign).eq('id',riderId).eq('status','active').select('id');
       if(_writeErr(u,'undo')||!_landed(u)){
-        await Promise.all(back.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
+        await _releaseBikes(back,'bike assign');
         if(!(u&&u.error))await _lostRace();else{await loadData();renderStaffQueue();}
         return false;
       }
@@ -24884,7 +24867,7 @@ async function confirmAssign(){
       // the bike given up by the undo leaves no open assignment behind (a database before the
       // reassign trigger would keep one, and staff_checkin would refuse that bike to anyone else)
       if(needsUpdate.length)await _wr(sb.from('bike_assignments').update({returned_at:new Date().toISOString(),return_condition:'swapped'}).eq('booking_id',riderId).in('bike_id',needsUpdate.map(b=>b.id)).is('returned_at',null),'undo');
-      await Promise.all(needsUpdate.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b.id).eq('status','in-use'))).catch(()=>{});
+      await _releaseBikes(needsUpdate.map(b=>b.id),'bike assign',true);
       await loadData();renderStaffQueue();
     });
   }else{
@@ -24898,7 +24881,7 @@ async function confirmAssign(){
       if(_writeErr(u,'undo check-in')){await loadData();renderStaffQueue();return false;}
       if(!_landed(u)){await _lostRace();return false;}
       try{localStorage.removeItem('cq_ct_'+riderId);}catch(e){}
-      await Promise.all(needsUpdate.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b.id))).catch(()=>{});
+      await _releaseBikes(needsUpdate.map(b=>b.id),'bike assign');
       await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',riderId),'undo check-in');
       await loadData();renderStaffQueue();
     });
@@ -25028,7 +25011,7 @@ function renderBikes(_resultsOnly){
     <div class="form-row">
       <div class="form-group">
         <label>${t('bikeRentalPrice')} (SAR)</label>
-        ${!isAdmin()?`<div class="flt-pricero">${S._bkRentalPrice?`SAR ${esc(S._bkRentalPrice)}`:'—'} <span class="flt-fs11">(${t('adminOnlyMsg')})</span></div>`:(()=>{
+        ${!isAdmin()?`<div class="flt-pricero">${S._bkRentalPrice?`${_money(S._bkRentalPrice)}`:'—'} <span class="flt-fs11">(${t('adminOnlyMsg')})</span></div>`:(()=>{
           const presets=['57.5','75','95','105','175','250'];
           const isCustom=S._bkRentalPrice&&!presets.includes(S._bkRentalPrice);
           const sel=isCustom?'custom':S._bkRentalPrice;
@@ -25043,7 +25026,7 @@ function renderBikes(_resultsOnly){
             `<option value="custom"${sel==='custom'?' selected':''}>${t('priceCustomOpt')}</option>`,
           ].join('');
           return`<select id="bk-rental-price" data-on-change="${_on("setBkRentalPrice",_P("value"))}">${opts}</select>`
-            +(isCustom?`<div class="flt-pricecus">${t('customWord')}: SAR ${esc(S._bkRentalPrice)}</div>`:'');
+            +(isCustom?`<div class="flt-pricecus">${t('customWord')}: ${_money(S._bkRentalPrice)}</div>`:'');
         })()}
       </div>
     </div>
@@ -25117,7 +25100,7 @@ function renderBikes(_resultsOnly){
       <td data-label="${esc(t('bikeSpeeds'))}" class="flt-w7s13c">${b.speeds?`${esc(b.speeds)}`:`<span class="flt-mu">—</span>`}</td>
       <td data-label="${esc(t('bikeTypeLabel'))}">${typeBadge(b.type)}</td>
       <td data-label="${esc(t('frameSizeLabel'))}" class="flt-w8">${esc(b.size)}</td>
-      <td data-label="${esc(t('bikeRentalPrice'))}" class="flt-w7nw">${b.rental_price!=null?`SAR ${esc(b.rental_price)}`:`<span class="flt-mu">—</span>`}</td>
+      <td data-label="${esc(t('bikeRentalPrice'))}" class="flt-w7nw">${b.rental_price!=null?`${_money(b.rental_price)}`:`<span class="flt-mu">—</span>`}</td>
       <td data-label="${esc(t('colColor'))}"><div class="flt-g4c">${colorSwatches}</div></td>
       <td data-label="${esc(t('colStatus'))}">
         <div class="flt-ac6">
@@ -26124,7 +26107,7 @@ function openBikeProfile(id){
   const bike=getBikes().find(b=>b.id===id);if(!bike)return;
   const done=getQueue().filter(e=>e.status==='done'&&getAssignedBikeIds(e).includes(id));
   const ridesCount=done.length;
-  const revenue=Math.round(done.filter(e=>e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0)*100)/100;
+  const revenue=_revenueOf(done);
   const ratedB=done.filter(e=>e.ratingBike);
   const avgBike=ratedB.length?Math.round(ratedB.reduce((s,e)=>s+e.ratingBike,0)/ratedB.length*10)/10:0;
   const lastUsed=done.map(e=>e.sessionDate||((e.registeredAt||'').slice(0,10))).filter(Boolean).sort().pop()||'';
@@ -26139,7 +26122,7 @@ function openBikeProfile(id){
       <span class="queue-num-cell flt-hnum">#${e.queueNum}</span>
       <div class="flt-f1mw0"><div class="flt-w7s12">${dayLabel(e.sessionDay)||''} · ${shortDate(e.sessionDate)}</div>
         <div class="flt-hsub">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>
-      <span class="${e.paid?'flt-hpay':'flt-hpay-no'}">SAR ${e.price??DEFAULT_PRICE}</span>
+      <span class="${e.paid?'flt-hpay':'flt-hpay-no'}">${_money(e.price??DEFAULT_PRICE)}</span>
     </div>`).join(''):`<div class="empty-state">${t('bpNoRides')}</div>`;
   const fbHtml=fb.length?`<div class="flt-phfb">${t('bpFeedbackTitle')}</div>
     ${fb.map(e=>`<div class="flt-fb"><div class="flt-fs12">${esc(e.feedback)}</div><div class="flt-fbw">${esc(e.name||'')}${e.ratingBike?` · ★ ${e.ratingBike}/10`:''}</div></div>`).join('')}`:'';
@@ -26156,7 +26139,7 @@ function openBikeProfile(id){
       <div class="flt-pst"><span class="flt-ppill"><span class="avail-dot flt-pdot-${statusK}"></span><span class="flt-ptx-${statusK}">${statusLbl}</span></span></div>
       <div class="flt-pkpis">
         ${kpi(ridesCount,t('bpRides'))}
-        ${kpi('SAR '+revenue,t('bpRevenue'))}
+        ${kpi(_money(revenue),t('bpRevenue'))}
         ${kpi(avgBike?avgBike+'/10':'—',t('bpAvgRating'))}
         ${kpi(lastUsed?shortDate(lastUsed):t('bpNever'),t('bpLastUsed'))}
         ${(()=>{ // rides since the last recorded service, amber past the threshold
@@ -26174,7 +26157,7 @@ function openBikeProfile(id){
       <div class="flt-phspec">${t('bpSpecsTitle')}</div>
       <div>
         ${spec(t('bikeBrand'),bike.brand)}${spec(t('bikeModel'),bike.model)}${spec(t('bikeGroupset'),bike.groupset)}
-        ${spec(t('bikeSpeeds'),bike.speeds)}${spec(t('bikeRentalPrice'),bike.rental_price!=null?'SAR '+bike.rental_price:'')}
+        ${spec(t('bikeSpeeds'),bike.speeds)}${spec(t('bikeRentalPrice'),bike.rental_price!=null?_money(bike.rental_price,_NOISO):'')}
         ${spec(t('lifespanLabel'),_bikeLifespan(bike)!=='—'?_bikeLifespan(bike):(bike.in_service_date?t('bpInServiceLabel')+' '+shortDate(bike.in_service_date):''))}
         <div class="flt-spec0"><span class="flt-specl">${t('bpColorsLabel')}</span><span class="flt-g4">${colors.map(c=>`<span class="flt-pc14" data-cssv="${_cssv({'--flt-bg':c})}"></span>`).join('')}</span></div>
       </div>
@@ -26497,7 +26480,7 @@ function _ahRender(force){
   const done=rows.filter(x=>x.status==='done');
   const noshows=rows.filter(x=>x.status==='noshow').length;
   const cancelled=rows.filter(x=>x.status==='cancelled').length;
-  const spent=rows.filter(x=>x.paid&&x.status!=='cancelled').reduce((sum,x)=>sum+(Number(x.price??DEFAULT_PRICE)||0),0);
+  const spent=_revenueOf(rows);
   const typeCount={};done.forEach(x=>{const ty=resolvedType(x);typeCount[ty]=(typeCount[ty]||0)+1;});
   const favType=Object.keys(typeCount).sort((p,q)=>typeCount[q]-typeCount[p])[0]||'';
   const rated=rows.filter(x=>x.ratingExp||x.ratingBike);
@@ -26528,7 +26511,7 @@ function _ahRender(force){
           <div class="ah-rider-sub">${sub}${x.approval==='pending'?` <span class="ah-appr">${t('apprPendingChip')}</span>`:''}</div>
         </div>
         ${statusBadgeFor(x)}
-        <bdi class="ah-price${x.paid?' paid':''}">${_fmtSar(price)}</bdi>
+        <bdi class="ah-price${x.paid?' paid':''}">${_money(price,_NOISO)}</bdi>
         ${canEdit?`<button type="button" class="btn-sm btn-secondary ah-edit" data-on-click="${_on("showBookingEditModal",x.id)}" aria-label="${esc(t('editBtn'))} · #${esc(x.queueNum)} ${esc(x.name||'')}">${ICON_PENCIL} ${t('editBtn')}</button>`:''}
       </div>`;
     }).join('');
@@ -26562,7 +26545,7 @@ function _ahRender(force){
         ${kpi(done.length,t('custTotalRides'))}
         ${kpi(noshows,t('statusNoshow'),noshows?'warn':'')}
         ${kpi(cancelled,t('statusCancelled'))}
-        ${kpi(`<bdi>${_fmtSar(Math.round(spent*100)/100)}</bdi>`,t('custTotalSpent'))}
+        ${kpi(`${_money(Math.round(spent*100)/100)}`,t('custTotalSpent'))}
       </div>
       ${facts?`<div class="ah-facts">${facts}</div>`:''}
       <div class="ah-sec">${t('ahCurrent')}${cur.length?` <span class="ah-n">${cur.length}</span>`:''}</div>
@@ -26571,11 +26554,11 @@ function _ahRender(force){
       ${fut.length?fut.map(card).join(''):`<div class="ah-empty">${t('ahNoFuture')}</div>`}
       <div class="ah-sec">${t('ahHistory')}${past.length?` <span class="ah-n">${past.length}</span>`:''}</div>
       ${past.length?past.map(card).join(''):`<div class="ah-empty">${t('ahNoHistory')}</div>`}
-      ${purch.length?`<div class="ah-sec">${t('custPurchTitle')} <span class="ah-n"><bdi>${_fmtSar(ptot)}</bdi></span></div>
+      ${purch.length?`<div class="ah-sec">${t('custPurchTitle')} <span class="ah-n">${_money(ptot)}</span></div>
       <div class="ah-purch">${purch.slice().sort((p,q)=>new Date(q.created_at||0)-new Date(p.created_at||0)).map(r=>`<div class="ah-purch-row">
         <div class="ah-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="ah-muted">×${esc(r.qty)}</span>`:''}</div>
         <span class="ah-muted">${r.created_at?shortDate(String(r.created_at).slice(0,10)):''}</span>
-        <bdi class="ah-price">${_fmtSar(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100)}</bdi>
+        <bdi class="ah-price">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
     </div>
   </div>`;
@@ -27579,7 +27562,7 @@ function _wsFind(id){return(_ws().jobs||[]).find(j=>String(j.id)===String(id))||
 function _wsNew(){const W=S._ws;return W&&W.jobs?W.jobs.filter(j=>j.status==='new'):[];}
 function _wsNewN(){return _wsNew().length;}
 function _wsStage(s){return WS_STAGE_KEY[s]?t(WS_STAGE_KEY[s]):String(s||'');}
-function _wsSar(v){return v==null||v===''?'':_fmtSar(Number(v));}
+function _wsSar(v){return v==null||v===''?'':_money(Number(v),_NOISO);}
 // The rail's name for the section, with the count of requests nobody has confirmed yet.
 function _wsTabLabel(){const n=_wsNewN();return esc(t('tabWorkshop'))+(n?` <span class="tab-badge" title="${esc(t('wsNewBadge').replace('{0}',n))}">${n}</span>`:'');}
 function _wsTabLabelSync(){const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="workshop"] .snav-lbl');if(l)l.innerHTML=_wsTabLabel();try{_ntSync();}catch(e){}}
@@ -30254,8 +30237,8 @@ function renderHistory(_resultsOnly){
   const nDone=sessionFiltered.filter(e=>e.status==='done').length,nPaid=sessionFiltered.filter(e=>e.status==='done'&&e.paid).length,
         nPend=sessionFiltered.filter(e=>e.status==='done'&&!e.paid).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
   const _hr2=n=>Math.round(n*100)/100;
-  const sarCollected=_hr2(sessionFiltered.filter(e=>e.status==='done'&&e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0));
-  const sarPending=_hr2(sessionFiltered.filter(e=>e.status==='done'&&!e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0));
+  const sarCollected=_revenueOf(sessionFiltered.filter(e=>e.status==='done'));
+  const sarPending=_amountOf(sessionFiltered.filter(e=>e.status==='done'&&!e.paid));
   function thHistSort(col,label,cls=''){
     const active=S.histSort===col;
     const arrow=active?(S.histSortDir===1?'↑':'↓'):'';
@@ -30303,7 +30286,7 @@ function renderHistory(_resultsOnly){
       ${_hc.bike?`<td><div class="hist-row4">
         ${bike&&bike.colors&&bike.colors.length?bike.colors.map(c=>`<span class="hist-dot" data-cssv="${_cssv({'--hist-bg':c})}"></span>`).join(''):'<span class="hist-c-muted">—</span>'}
       </div></td>`:''}
-      ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">SAR ${e.price??DEFAULT_PRICE}</td>`:''}
+      ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">${_money(e.price??DEFAULT_PRICE)}</td>`:''}
       ${_hc.money?`<td data-on-click="${_on("_on_renderHistory_4",_EV,_EL)}">
         <div class="hist-row4">
           ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm hist-sel ${S.histSelected.includes(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${S.histSelected.includes(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
@@ -30337,7 +30320,7 @@ function renderHistory(_resultsOnly){
       <div class="hist-action-btns hist-btns">
         ${(S.histSelected||[]).length?`<button class="btn-sm btn-green hist-nowrap" data-on-click="${_on("bulkHistMarkPaid")}">${t('histMarkSelPaid').replace('{0}',S.histSelected.length)}</button>`:''}
         <button class="btn-secondary hist-nowrap" data-on-click="${_on("_on_renderHistory_7",_EV,_EL)}">${t('histLogBtn')}${S.histLog.length>0?` (${S.histLog.length})`:''}</button>
-        <button class="btn-secondary hist-nowrap" data-on-click="${_on("exportHistoryCSV")}">${ICON_EXPORT} ${t('exportBtn')||'Export CSV'}</button>
+        <button class="btn-secondary hist-nowrap" data-on-click="${_on("exportHistoryCSV")}">${ICON_EXPORT} ${t('exportBtn')}</button>
       </div>
     </div>
     ${_hvPills}
@@ -30360,8 +30343,8 @@ function renderHistory(_resultsOnly){
       <div class="stat-card"><div class="stat-num hist-c-green">${nPaid}</div><div class="stat-label">${t('filterPaid')}</div></div>
       <div class="stat-card"><div class="stat-num hist-c-mutedl">${nPend}</div><div class="stat-label">${t('pendingLabel')}</div></div>
       <div class="stat-card"><div class="stat-num hist-c-red">${nNoShow}</div><div class="stat-label">${t('filterNoshow')}</div></div>
-      <div class="stat-card"><div class="stat-num hist-sar-green">SAR ${sarCollected}</div><div class="stat-label">${t('printCollected')}</div></div>
-      <div class="stat-card"><div class="stat-num hist-sar-orange">SAR ${sarPending}</div><div class="stat-label">${t('printPending')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-sar-green">${_money(sarCollected)}</div><div class="stat-label">${t('printCollected')}</div></div>
+      <div class="stat-card"><div class="stat-num hist-sar-orange">${_money(sarPending)}</div><div class="stat-label">${t('printPending')}</div></div>
     </div>
     <div class="filter-bar">
       <div class="filter-row">
@@ -30501,7 +30484,7 @@ function showReceipt(id){
     `${t('timeLabel').padEnd(14)}:  ${sessionTime(allSessions().find(s=>s.id===e.sessionId))}`,
     `${t('colBike').padEnd(14)}:  ${bike?bike.name:'—'}`,
     `${t('bikeTypeLabel').padEnd(14)}:  ${typeLabel(resolvedType(e))}`,
-    `${t('colPrice').padEnd(14)}:  ${_fmtSar(Number(e.price??DEFAULT_PRICE)||0)}`, // a receipt that never said how much
+    `${t('colPrice').padEnd(14)}:  ${_money(Number(e.price??DEFAULT_PRICE)||0,_NOISO)}`, // a receipt that never said how much
     `${t('colPayment').padEnd(14)}:  ${e.paid?t('paidLabel')+' ✓':t('pendingLabel')+' '}`,
     '──────────────────────────────────────','',
     t('receiptSeeYou'),'',
@@ -30903,7 +30886,7 @@ function _invCatLabel(c){const b={Helmet:t('catHelmet'),Accessory:t('catAccessor
 function _catParent(c){return (c&&c!=='ProteinSnacks'&&/^Protein[A-Z]/.test(c))?'ProteinSnacks':null;} // the parent group of a sub-category, or null if it stands alone
 function _catGroup(c){return _catParent(c)||(c==='ProteinSnacks'?'ProteinSnacks':null);} // the top-level group a category rolls into (the parent name maps to itself, catching legacy parent-tagged items)
 // Display a price: 0 means the item is free, null/blank means no price set.
-function _priceLabel(p){if(p==null||p==='')return '';const n=Number(p);if(isNaN(n))return '';return n===0?t('invFree'):(n>0?('SAR '+n):'');}
+function _priceLabel(p){if(p==null||p==='')return '';const n=Number(p);if(isNaN(n))return '';return n===0?t('invFree'):(n>0?_money(n,_NOISO):'');}
 function _subtypeKey(s){return String(s||'').trim().replace(/[^A-Za-z0-9 ]/g,'').split(/\s+/).filter(Boolean).map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join('');} // "energy balls" -> "EnergyBalls"
 function _proteinLeaf(subtype){const k=_subtypeKey(subtype);return k?('Protein'+k):'ProteinSnacks';} // a chosen Type -> its stored leaf category; blank falls back to the bare parent
 function _leafSubtype(c){return _catParent(c)==='ProteinSnacks'?c.replace(/^Protein/,'').replace(/([a-z0-9])([A-Z])/g,'$1 $2'):'';} // "ProteinEnergyBalls" -> "Energy Balls"
@@ -30956,6 +30939,16 @@ function _salesTotals(lines){
   const r2=n=>Math.round(n*100)/100;
   return{cats:Object.values(byCat).sort((a,b)=>b.value-a.value),units,value:r2(value),collected:r2(collected),pending:r2(pending),free:r2(free),team:r2(team),refunded:r2(refunded),discount:r2(discount)};
 }
+// Booking revenue, the one definition (2026-10-04). A booking's amount is its rental price (its own
+// price, DEFAULT_PRICE when it has none; 0 on the house) plus its add-ons. It is REVENUE when the
+// booking is paid and still stands: a cancelled or removed booking earns nothing, an unpaid one is
+// pending, and a paid no-show counts (the money is in the drawer). _revenueOf sums it over rows,
+// rounded to cents. Analytics (its tiles, trends, forecast and CSV), the bike passport, History and
+// the account history read it; the Dashboard's _moneyIn is the same sum plus the desk's sales.
+function _bookingAmount(e){return (e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e));}
+function _bookingRevenue(e){return e&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'?_bookingAmount(e):0;}
+function _revenueOf(rows){return Math.round((rows||[]).reduce((a,e)=>a+_bookingRevenue(e),0)*100)/100;}
+function _amountOf(rows){return Math.round((rows||[]).reduce((a,e)=>a+_bookingAmount(e),0)*100)/100;}
 // One rule for "money in" and "places taken" on a set of rides (2026-10-03): the Dashboard and the
 // Analytics live board each counted their own way and read SAR 162.5 against SAR 163 and 8 against 9.
 // Money = paid rentals with their add-ons + what the session report collects (purchases at the desk and
@@ -30966,7 +30959,7 @@ function _salesTotals(lines){
 // these said 8/12).
 function _moneyIn(sessIds){
   const ids=new Set(sessIds);
-  let m=getQueue().filter(e=>ids.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed').reduce((a,e)=>a+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0);
+  let m=_revenueOf(getQueue().filter(e=>ids.has(e.sessionId)));
   ids.forEach(sid=>{try{m+=Number(_salesTotals(_cashSessionLines(sid)).collected)||0;}catch(_){}});
   return Math.round(m*100)/100;
 }
@@ -31177,7 +31170,7 @@ function renderCashierModal(){
         <div class="sl-nm13">${esc(p.name)}${Number(p.qty)>1?` <span class="sl-muted">×${esc(p.qty)}</span>`:''}</div>
         <div class="sl-f11m">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)}</div>
       </div>
-      <div class="sl-amt8"><bdi>SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi></div>
+      <div class="sl-amt8">${_money(Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100)}</div>
       <button class="btn-sm btn-muted" data-on-click="${_on("_cashVoid",i)}" aria-label="${t('cashVoid')}">${t('cashVoid')}</button>
     </div>`).join(''):`<div class="empty-state sl-p18">${t('cashNoSales')}</div>`;
   const payBtn=(val,label)=>`<button data-on-click="${_on("_cashSet","_cashPay",val)}" class="sl-pay${S._cashPay===val?' sl-pay-on':''}">${label}</button>`;
@@ -31191,7 +31184,7 @@ function renderCashierModal(){
       <div class="sl-msub">${t('cashierSub')} · <strong class="sl-text">#${e.queueNum} ${esc(e.name)}</strong></div>
       <div class="sl-mb14">${lines}
         <div class="sl-mtot">
-          <span>${t('repTotal')}</span><span class="sl-green"><bdi>SAR ${tot}</bdi></span>
+          <span>${t('repTotal')}</span><span class="sl-green">${_money(tot)}</span>
         </div>
       </div>
       <div class="sl-mform">
@@ -31341,8 +31334,8 @@ async function _outboxFlush(){
     if(stuck.has(op.id))continue;
     try{
       const res=op.kind==='delete'?await _roFree(()=>sb.from('cashier_sales').delete().eq('id',op.id))
-        :op.kind==='void'?await _roFree(()=>sb.rpc('staff_void_receipt',op.data))
-        :op.kind==='refund'?await _roFree(()=>sb.rpc('staff_refund_receipt',op.data))
+        :op.kind==='void'?await _rpcOp('staff_void_receipt',op.data,true)
+        :op.kind==='refund'?await _rpcOp('staff_refund_receipt',op.data,true)
         :await _roFree(()=>sb.from('cashier_sales').upsert(op.data));
       // A void or refund the server already holds (another device sent it first) is done, not stuck.
       const settled=!(res&&res.error)||((op.kind==='void'||op.kind==='refund')&&/NOT_FOUND/.test(String((res.error&&res.error.message)||'')));
@@ -31378,16 +31371,29 @@ async function _outboxRetryOrClear(){
 // the refunded ones at once; offline, the call waits in the sales outbox with the sales and is
 // sent when the connection returns; a database before the RPCs takes the old path. false when
 // nothing was stored (read-only, a refusal, or the keypad cancelled).
+// Idempotency (20261004150000): a void or refund carries an op id made ONCE, here, and sent with
+// the call and with every replay of it from the outbox. The server keeps each op id's answer
+// (rpc_receipts), so a call that landed but whose answer was lost is answered again from the
+// receipt instead of being run twice - and without asking for a PIN whose approval has expired.
+// The sales and deletes in the outbox need none: an upsert or a delete by the row's own id
+// lands once however often it is sent.
+function _opId(){try{return crypto.randomUUID();}catch(_){return uid();}}
+async function _rpcOp(fn,args,free){
+  const call=a=>free?_roFree(()=>sb.rpc(fn,a)):sb.rpc(fn,a);
+  let r=await call(args);
+  if(r&&r.error&&args&&args.p_op_id&&_rpcAbsent(r.error)){const{p_op_id,...rest}=args;r=await call(rest);} // a database before the op ids
+  return r;
+}
 async function _salesVoid(key,rows,what){
   if(_roNow()){_roRefusal();return false;}
-  const ids=rows.map(r=>r.id);
-  const r=await _gatedRpc(what,a=>sb.rpc('staff_void_receipt',{p_receipt_id:key,p_reason:null,...a}));
+  const ids=rows.map(r=>r.id),opId=_opId();
+  const r=await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:null,...a,p_op_id:opId}));
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids);
   const had=(S.cashSales||[]).slice();
   S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs()}}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs(),p_op_id:opId}}])){S.cashSales=had;return false;}
     ids.forEach(_voidedAdd);return true;
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
@@ -31395,13 +31401,14 @@ async function _salesVoid(key,rows,what){
 }
 async function _salesRefund(key,rows,what){
   if(_roNow()){_roRefusal();return false;}
-  const r=await _gatedRpc(what,a=>sb.rpc('staff_refund_receipt',{p_receipt_id:key,p_reason:null,...a}));
+  const opId=_opId();
+  const r=await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:null,...a,p_op_id:opId}));
   if(r===null)return false;
   if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[]);
   const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
   S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs()}}])){S.cashSales=had;return false;}
+    if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs(),p_op_id:opId}}])){S.cashSales=had;return false;}
     return true;
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
@@ -31533,8 +31540,8 @@ function _ctCartTotals(cart){
 // Live preview of discounted total + card/cash split without a full re-render (avoids swallowing the next click)
 function _ctPreview(){
   const{after,card,cash}=_ctCartTotals(S._ctCart);
-  const g=document.getElementById('ct-grand');if(g)g.textContent='SAR '+after;
-  const sp=document.getElementById('ct-split');if(sp)sp.innerHTML=card>0?`<span>${t('cashCard')} SAR ${card}</span><span>${t('cashCash')} SAR ${cash}</span>`:'';
+  const g=document.getElementById('ct-grand');if(g)g.textContent=_money(after,_NOISO);
+  const sp=document.getElementById('ct-split');if(sp)sp.innerHTML=card>0?`<span>${t('cashCard')} ${_money(card)}</span><span>${t('cashCash')} ${_money(cash)}</span>`:'';
 }
 function _ctCardSAR(paidTotal){const v=parseFloat(S._ctCard);if(isNaN(v)||v<=0)return 0;const c=S._ctCardPct?paidTotal*(v/100):v;return Math.min(Math.max(0,paidTotal),Math.round(c*100)/100);}
 async function _ctRecord(){
@@ -31579,12 +31586,12 @@ async function _ctRecord(){
 }
 // Every change to a recorded receipt goes into the shared action log, like the sale itself: a
 // receipt that can be voided, refunded or re-priced without a trace is money nobody can ask about.
-function _rcLog(what,rows,extra){const r0=(rows||[])[0]||{};const cust=r0.customer_name||'';logAction(`${t('cashierTitle')}: ${what} · ${t('cashReceiptWord')} SAR ${_rcTotal(rows)}${extra||''}${cust?` (${cust})`:''}`);}
+function _rcLog(what,rows,extra){const r0=(rows||[])[0]||{};const cust=r0.customer_name||'';logAction(`${t('cashierTitle')}: ${what} · ${t('cashReceiptWord')} ${_money(_rcTotal(rows),_NOISO)}${extra||''}${cust?` (${cust})`:''}`);}
 // Voiding deletes the receipt outright (a refund keeps it), so it asks first.
 function _ctVoidReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!rows.length)return;
   const cust=(rows.find(r=>r.customer_name)||{}).customer_name||t('cashWalkup');
-  confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · <bdi>SAR ${_rcTotal(rows)}</bdi>`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
+  confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · ${_money(_rcTotal(rows))}`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
     const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
     if(!await _salesVoid(key,cur,t('cashVoid'))){renderCashier();return;} // not stored: nothing voided, nothing restocked
     _rcLog(t('cashVoid'),cur); // the void is stored: logged now, whatever the restock below does
@@ -31686,8 +31693,8 @@ function renderReceiptEdit(){
 async function _ctShareReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.category!=='__cardmeta__');if(!rows.length)return;
   const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
-  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}`).join('\n');
-  const txt=`MicroMobility ${t('cashReceiptWord')}\n${body}\n${t('repTotal')}: SAR ${total}`;
+  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: ${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}`).join('\n');
+  const txt=`MicroMobility ${t('cashReceiptWord')}\n${body}\n${t('repTotal')}: ${_money(total,_NOISO)}`;
   try{if(navigator.share){await navigator.share({title:'MicroMobility',text:txt});return;}}catch(e){return;}
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
 }
@@ -31699,13 +31706,13 @@ function _ctPrintReceipt(rows,cust,at){
   const logoUrl=new URL('/logo.png',location.origin).href;
   const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
-  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">SAR ${Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100}</td></tr>`).join('');
+  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</td></tr>`).join('');
   const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8"><title>${t('cashReceiptWord')}</title><link href="/fonts/fonts.css" rel="stylesheet"><link href="${location.origin}/receipt.css?v=${RECEIPT_CSS_V}" rel="stylesheet"></head><body>
     <div class="mm-banner"><img src="${logoUrl}" alt="Micromobility"><strong>Micromobility Co.</strong><span class="doc">${t('cashReceiptWord')}</span></div>
     <div class="mm-rule"></div>
     <div class="sub">${new Date(at).toLocaleString(_locale(),{timeZone:KSA_TZ})}${cust?`<br>${esc(cust)}`:''}${sess?`<br>${esc(dayLabel(sess.day))} ${esc(shortDate(sess.session_date||sess.id))}`:''}</div>
     <table role="presentation"><tbody>${body}</tbody></table>
-    <div class="tot"><span>${t('repTotal')}</span><span>SAR ${total}</span></div>
+    <div class="tot"><span>${t('repTotal')}</span><span>${_money(total,_NOISO)}</span></div>
     <br><button class="rcpt-print rp-rbtn">${t('repPrintNow')}</button>
   </body></html>`;
   const w=window.open('','_blank','width=380,height=620');if(!w)return;w.document.write(html);w.document.close();w.focus();try{w.document.querySelectorAll('.rcpt-print').forEach(b=>b.addEventListener('click',()=>w.print()));}catch(e){} // the receipt is its own document under the page's policy: its button is wired from here
@@ -31921,18 +31928,18 @@ function renderCashier(){
           <button class="btn-sm btn-muted" data-on-click="${_on("_ctVoidReceipt",rc.key)}" aria-label="${t('cashVoid')}">${t('cashVoid')}</button>
         </div>
       </div>
-      ${disp.map(l=>`<div class="sl-rc-line">${_itemThumb(l.item_id,22)}<span class="sl-f1m0">${esc(l.name)}${Number(l.qty)>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''}${l.category==='__discount__'?'':` <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team_name)}</span>`}</span><bdi class="sl-amt">SAR ${Math.round((Number(l.qty)||0)*(Number(l.price)||0)*100)/100}</bdi></div>`).join('')}
-      <div class="sl-rc-tot"><span>${t('repTotal')}</span><bdi>SAR ${rt}</bdi></div>
-      ${(cardAmt>0&&!refunded)?`<div class="sl-split"><span>${t('cashCard')} SAR ${cardShown}</span><span>${t('cashCash')} SAR ${cashShown}</span></div>`:''}
+      ${disp.map(l=>`<div class="sl-rc-line">${_itemThumb(l.item_id,22)}<span class="sl-f1m0">${esc(l.name)}${Number(l.qty)>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''}${l.category==='__discount__'?'':` <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team_name)}</span>`}</span><bdi class="sl-amt">${_money(Math.round((Number(l.qty)||0)*(Number(l.price)||0)*100)/100,_NOISO)}</bdi></div>`).join('')}
+      <div class="sl-rc-tot"><span>${t('repTotal')}</span>${_money(rt)}</div>
+      ${(cardAmt>0&&!refunded)?`<div class="sl-split"><span>${t('cashCard')} ${_money(cardShown)}</span><span>${t('cashCash')} ${_money(cashShown)}</span></div>`:''}
     </div>`;}).join('');
   const rentalRows=rentalLines.map(p=>`<div class="sl-rent">
       ${_itemThumb(p.id,28)}<div class="sl-rent-b"><div class="sl-nm13">${esc(p.name)}${Number(p.qty)>1?` <span class="sl-muted">×${esc(p.qty)}</span>`:''}</div>
       <div class="sl-f11m">${esc(_invCatLabel(p.cat))} · ${_cashPayBadge(p.pay,p.team)} · ${esc(p.who)} <span class="sl-o65">(${t('cashRentalTag')})</span></div></div>
-      <bdi class="sl-amt8">SAR ${Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100}</bdi>
+      <bdi class="sl-amt8">${_money(Math.round((Number(p.qty)||0)*(Number(p.price)||0)*100)/100,_NOISO)}</bdi>
       <div class="sl-acts6"><button class="btn-sm btn-muted" data-on-click="${_on("showCashierModal",p.entryId)}">${t('cashEditBtn')}</button><button class="btn-sm btn-muted" data-on-click="${_on("_rentalSaleDelete",p.entryId,Number(p.pidx))}">${t('cashVoid')}</button></div>
     </div>`).join('');
   const ledger=(receipts.length||rentalLines.length)?`${receiptCards}${rentalRows}`:`<div class="empty-state sl-p24">${t('cashNoSalesSession')}</div>`;
-  const catRows=tot.cats.map(c=>`<div class="sl-cat"><span class="sl-muted">${esc(_invCatLabel(c.cat))} <span class="sl-o60">×${c.qty}</span></span><span class="sl-b700"><bdi>SAR ${c.value}</bdi></span></div>`).join('');
+  const catRows=tot.cats.map(c=>`<div class="sl-cat"><span class="sl-muted">${esc(_invCatLabel(c.cat))} <span class="sl-o60">×${c.qty}</span></span><span class="sl-b700">${_money(c.value)}</span></div>`).join('');
   el.innerHTML=`<div class="sl-wrap">
     <div class="sl-head">
       <div><h2 class="sl-h2">${t('cashierTitle')}</h2>
@@ -31982,7 +31989,7 @@ function renderCashier(){
             <div class="sl-lbl sl-mb5">${t('cashCartTitle')}</div>
             ${cart.map((l,i)=>`<div class="sl-cl">
               ${_itemThumb(l.item_id,24)}<div class="sl-f1m0"><span class="sl-b700">${esc(l.name)}</span>${l.qty>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''} <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team)}</span></div>
-              <bdi class="sl-amt">SAR ${Math.round(l.qty*l.price*100)/100}</bdi>
+              <bdi class="sl-amt">${_money(Math.round(l.qty*l.price*100)/100,_NOISO)}</bdi>
               <button data-on-click="${_on("_ctCartRemove",i)}" aria-label="${t('cashVoid')}" class="sl-x16">&times;</button>
             </div>`).join('')}
             <div class="sl-disc">
@@ -31996,8 +32003,8 @@ function renderCashier(){
               <button type="button" data-on-click="${_on("_on_renderCashier_15",_EV,_EL)}" class="sl-tgl">${S._ctCardPct?'%':'SAR'}</button>
             </div>`:''}
             <div class="mm-cart-foot">
-            <div class="sl-grand"><span>${t('repTotal')}</span><bdi id="ct-grand" class="sl-green">SAR ${cartAfterDisc}</bdi></div>
-            <div id="ct-split" class="sl-split">${cartCardSAR>0?`<span>${t('cashCard')} SAR ${cartCardSAR}</span><span>${t('cashCash')} SAR ${cartCashSAR}</span>`:''}</div>
+            <div class="sl-grand"><span>${t('repTotal')}</span><bdi id="ct-grand" class="sl-green">${_money(cartAfterDisc,_NOISO)}</bdi></div>
+            <div id="ct-split" class="sl-split">${cartCardSAR>0?`<span>${t('cashCard')} ${_money(cartCardSAR)}</span><span>${t('cashCash')} ${_money(cartCashSAR)}</span>`:''}</div>
             <button class="btn-primary sl-full10" data-on-click="${_on("_ctRecord")}">${t('cashRecordReceiptBtn')}</button>
             </div>
           </div>`:''}
@@ -32005,14 +32012,14 @@ function renderCashier(){
       </div>
       <div class="card sl-p16">
         <div class="sl-kpis">
-          <div><div class="sl-kpi"><bdi>SAR ${tot.value}</bdi></div><div class="sl-lbl">${t('cashValue')}</div></div>
-          <div><div class="sl-kpi sl-green"><bdi>SAR ${tot.collected}</bdi></div><div class="sl-lbl">${t('printCollected')}</div></div>
-          <div><div class="sl-kpi sl-orange"><bdi>SAR ${tot.pending}</bdi></div><div class="sl-lbl">${t('printPending')}</div></div>
+          <div><div class="sl-kpi">${_money(tot.value)}</div><div class="sl-lbl">${t('cashValue')}</div></div>
+          <div><div class="sl-kpi sl-green">${_money(tot.collected)}</div><div class="sl-lbl">${t('printCollected')}</div></div>
+          <div><div class="sl-kpi sl-orange">${_money(tot.pending)}</div><div class="sl-lbl">${t('printPending')}</div></div>
         </div>
-        ${(cc.card>0||cc.cash>0)?`<div class="sl-cc"><span>${t('cashCard')}: <bdi class="sl-blue">SAR ${cc.card}</bdi></span><span>${t('cashCash')}: <bdi class="sl-green">SAR ${cc.cash}</bdi></span></div>`:''}
-        ${tot.team>0?`<div class="sl-tteam">${t('payTeam')}: <bdi>SAR ${tot.team}</bdi></div>`:''}
-        ${tot.discount>0?`<div class="sl-tdisc">${t('cashDiscount')}: <bdi>SAR ${tot.discount}</bdi></div>`:''}
-        ${tot.refunded>0?`<div class="sl-tref">${t('cashRefunds')}: <bdi>SAR ${tot.refunded}</bdi></div>`:''}
+        ${(cc.card>0||cc.cash>0)?`<div class="sl-cc"><span>${t('cashCard')}: <bdi class="sl-blue">${_money(cc.card,_NOISO)}</bdi></span><span>${t('cashCash')}: <bdi class="sl-green">${_money(cc.cash,_NOISO)}</bdi></span></div>`:''}
+        ${tot.team>0?`<div class="sl-tteam">${t('payTeam')}: ${_money(tot.team)}</div>`:''}
+        ${tot.discount>0?`<div class="sl-tdisc">${t('cashDiscount')}: ${_money(tot.discount)}</div>`:''}
+        ${tot.refunded>0?`<div class="sl-tref">${t('cashRefunds')}: ${_money(tot.refunded)}</div>`:''}
         ${catRows?`<div class="sl-cats">${catRows}</div>`:''}
         <div class="sl-led-h">${t('cashLedgerTitle')} <span class="sl-m600">(${lines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__').length})</span></div>
         ${ledger}
@@ -32499,7 +32506,7 @@ function _lbWeekStart(d){const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.get
 // parsed into - so "this week" and "this month" are Riyadh's on a device set to any timezone.
 function _lbToday(){return new Date(todayStr()+'T00:00:00');}
 function _lbInWindow(e,win,ref){
-  const ds=(e.sessionDate||e.registeredAt||'').slice(0,10);if(!ds)return false;
+  const ds=e.sessionDate?String(e.sessionDate).slice(0,10):_ksaDayOf(e.registeredAt);if(!ds)return false; // a stamp's KSA day, not its UTC one
   const d=new Date(ds+'T00:00:00');if(isNaN(d))return false;
   if(win==='all')return true;
   const now=ref||_lbToday();
@@ -32521,7 +32528,7 @@ function _lbAgg(win,scope,ref){
   rides.forEach(e=>{
     const key=scope==='owner'?(e.customerId||('walk:'+e.id)):((e.name||'?').trim().toLowerCase());
     let m=map[key];if(!m)m=map[key]={key,name:e.name||'?',count:0,duration:0,spent:0,minQ:Infinity,weeks:new Set()};
-    m.count++;m.duration+=(e.rideDuration||0);m.spent+=(e.price??DEFAULT_PRICE);
+    m.count++;m.duration+=(e.rideDuration||0);m.spent+=_bookingRevenue(e);
     if(scope==='owner'){const an=e.customerId&&acct.get(String(e.customerId));if(an)m.name=an;else if((e.queueNum||0)<m.minQ){m.minQ=e.queueNum||0;m.name=e.name||m.name;}}else{m.name=e.name||m.name;}
     const ds=(e.sessionDate||e.registeredAt||'').slice(0,10);if(ds){const w=_lbWeekStart(new Date(ds+'T00:00:00')).getTime();if(!isNaN(w))m.weeks.add(w);}
   });
@@ -33352,7 +33359,7 @@ function _commBoard(){
     Object.values(_lbAgg(win,scope,ref)).sort((a,b)=>mv(b)-mv(a)||b.count-a.count).forEach((m,i)=>{prevRank[m.key]=i;}); // same order as the board itself, or ties read as moves
   }
   const medals=[]; // ranks render as plain numbers (1,2,3) with the top-3 highlighted in green
-  const fmtVal=m=>metric==='duration'?fmtDur(m.duration):metric==='spent'?('SAR '+m.spent):String(m.count);
+  const fmtVal=m=>metric==='duration'?fmtDur(m.duration):metric==='spent'?_money(m.spent,_NOISO):String(m.count);
   const valUnit=metric==='count'?(scope==='owner'?t('lbRidersBooked').toLowerCase():t('commRides')):'';
   function rowInner(m,i){
     const initials=(m.name||'?').split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -33690,7 +33697,6 @@ async function _bdgGiveRider(bid,cid){
   pushUndo(msg,async()=>{const x=await sb.from('customer_badges').delete().eq('customer_id',cid).eq('badge_id',bid);if(_writeErr(x,'undo badge'))return false;_bdgDrop([row]);_bdgAfter(cid);});
   _bdgAfter(cid);
 }
-function _bdgRideHas(bid){return (S.custBadges||[]).filter(x=>x.badge_id===bid).map(x=>x.customer_id);}
 async function _bdgGiveRide(bid,sid){
   const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!_bdgCanGive(b)||!r||S._bdgRideBusy)return;
   const has=_bdgAllHolders(b),at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(S._bdgRideNote||'').trim().slice(0,140)||null;
@@ -34092,7 +34098,7 @@ function _anMonthForecast(allSess,allQ,now){
   const ym=y+'-'+String(m).padStart(2,'0');
   const ids=new Set((allSess||[]).filter(s=>s.status!=='deleted'&&String(s.session_date||s.id||'').slice(0,7)===ym).map(s=>s.id));
   const md=(allQ||[]).filter(e=>ids.has(e.sessionId)&&e.status==='done');
-  const rides=md.length,rev=md.filter(e=>e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
+  const rides=md.length,rev=_revenueOf(md);
   const f=elapsed>0?days/elapsed:1;
   return{rides,rev:Math.round(rev),projRides:Math.round(rides*f),projRev:Math.round(rev*f),elapsed,days};
 }
@@ -34140,7 +34146,7 @@ function _anBasketPairs(receipts){
 // Group completed rides by customer into {times:[ms…], spend} — shared by retention & LTV.
 function _anCustJourneys(entries){
   const c={};
-  (entries||[]).forEach(e=>{if(!e.customerId)return;const ts=new Date(e.checkedInAt||e.registeredAt||0).getTime();if(!ts)return;const j=c[e.customerId]||(c[e.customerId]={_bySess:{},spend:0});const sid=e.sessionId||('t'+ts);if(j._bySess[sid]==null||ts<j._bySess[sid])j._bySess[sid]=ts;if(e.paid)j.spend+=(e.price??DEFAULT_PRICE);try{j.spend+=addonsCost(entryAddons(e));}catch(_){}});
+  (entries||[]).forEach(e=>{if(!e.customerId)return;const ts=new Date(e.checkedInAt||e.registeredAt||0).getTime();if(!ts)return;const j=c[e.customerId]||(c[e.customerId]={_bySess:{},spend:0});const sid=e.sessionId||('t'+ts);if(j._bySess[sid]==null||ts<j._bySess[sid])j._bySess[sid]=ts;j.spend+=_bookingRevenue(e);});
   Object.values(c).forEach(j=>{j.times=Object.values(j._bySess).sort((a,b)=>a-b);delete j._bySess;});
   return c;
 }
@@ -34378,8 +34384,8 @@ function renderAnalytics(){
   
 
   
-  const revCollected=_paidRows(queue).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
-  const revPending  =done.filter(e=>!e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
+  const revCollected=_revenueOf(queue);
+  const revPending  =_amountOf(done.filter(e=>!e.paid));
   const revTotal    =revCollected+revPending;
   
   function excVAT(v){return v/1.15;}
@@ -34391,7 +34397,7 @@ function renderAnalytics(){
   // The per-ride, per-session and per-customer averages divide by rides that happened, so their
   // money is those rides' fares (paid or still owed). revTotal also holds places paid ahead for
   // nights not yet ridden and paid no-shows, which pushed "revenue per ride" well above any fare.
-  const doneRev=done.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
+  const doneRev=_amountOf(done);
   const avgRevPerSession=sessionsHeld?Math.round(doneRev/sessionsHeld):0;
   const collectionRate=revTotal>0?Math.round((revCollected/revTotal)*100):0;
 
@@ -34446,7 +34452,7 @@ function renderAnalytics(){
   const dayBreak={};
   done.forEach(e=>{if(_isDay(e.sessionDay))dayBreak[e.sessionDay]=(dayBreak[e.sessionDay]||0)+1;});
   const revByType={};
-  _paidRows(queue).forEach(e=>{const rt=resolvedType(e);revByType[rt]=(revByType[rt]||0)+(e.price??DEFAULT_PRICE);});
+  _paidRows(queue).forEach(e=>{const rt=resolvedType(e);revByType[rt]=(revByType[rt]||0)+_bookingRevenue(e);});
   
   const revByDay={};
   const countByDay={};
@@ -34475,10 +34481,10 @@ function renderAnalytics(){
   done.forEach(e=>{const tm=_sessTimeById[e.sessionId];if(tm)timeBreak[tm]=(timeBreak[tm]||0)+1;});
   const topTime=Object.keys(timeBreak).sort((a,b)=>timeBreak[b]-timeBreak[a])[0]||'—';
   const revPerRide=totalDone>0?(doneRev/totalDone):0;
-  const revPerCustomer=uniqueCustIds.length>0?(done.filter(e=>e.customerId).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0)/uniqueCustIds.length):0;
+  const revPerCustomer=uniqueCustIds.length>0?(_amountOf(done.filter(e=>e.customerId))/uniqueCustIds.length):0;
   const bestSession=sessionsWithDone.length
     ?sessionsWithDone.reduce((best,s)=>{
-        const r=_dn(s.id).filter(e=>e.paid).reduce((sum,e)=>sum+(e.price??DEFAULT_PRICE),0);
+        const r=_revenueOf(queue.filter(e=>e.sessionId===s.id));
         return r>best.r?{s,r}:best;
       },{s:null,r:-1})
     :{s:null,r:0};
@@ -34564,8 +34570,8 @@ function renderAnalytics(){
       const sDone=_dn(s.id);
       const sNo  =_qs(s.id).filter(e=>e.status==='noshow');
       const cap  =s.capacity||12;
-      const rev  =_paidRows(_qs(s.id)).reduce((sum,e)=>sum+(e.price??DEFAULT_PRICE),0);
-      const pend =sDone.filter(e=>!e.paid).reduce((sum,e)=>sum+(e.price??DEFAULT_PRICE),0);
+      const rev  =_revenueOf(_qs(s.id));
+      const pend =_amountOf(sDone.filter(e=>!e.paid));
       const occ  =Math.round(sDone.length/cap*100);
       const types={};sDone.forEach(e=>{const rt=resolvedType(e);types[rt]=(types[rt]||0)+1;});
       const topT =Object.keys(types).sort((a,b)=>types[b]-types[a])[0]||'—';
@@ -34743,7 +34749,7 @@ function renderAnalytics(){
   // Top customers by spend (within range)
   const topCustomers=(()=>{const m={};done.filter(e=>e.customerId).forEach(e=>{
     const c=m[e.customerId]||(m[e.customerId]={id:e.customerId,name:e.name,_s:new Set(),spent:0,last:''});
-    c._s.add(e.sessionId);c.spent+=(e.price??DEFAULT_PRICE);const d=e.sessionDate||'';if(d>=c.last){c.last=d;c.name=e.name||c.name;}});
+    c._s.add(e.sessionId);c.spent+=_bookingRevenue(e);const d=e.sessionDate||'';if(d>=c.last){c.last=d;c.name=e.name||c.name;}});
     return Object.values(m).map(c=>({id:c.id,name:c.name,rides:c._s.size,spent:c.spent,last:c.last})).sort((a,b)=>b.spent-a.spent).slice(0,10);})();
   // Phone comes from the rider's own booking entries (customers table is not bulk-fetched, by
   // design). _waDigits, not bare digits: a number kept as 05xx made the link point at wa.me/05….
@@ -34786,8 +34792,8 @@ function renderAnalytics(){
     const ids=new Set(ss.map(s=>s.id));
     const q=allQ.filter(e=>ids.has(e.sessionId));
     const dn=q.filter(e=>e.status==='done'),no=q.filter(e=>e.status==='noshow');
-    const rc=q.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed').reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
-    const rt=dn.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
+    const rc=_revenueOf(q);
+    const rt=_amountOf(dn);
     const sw=ss.filter(s=>dn.some(e=>e.sessionId===s.id));
     const occ=sw.length?Math.round(sw.reduce((a,s)=>a+(dn.filter(e=>e.sessionId===s.id).length/(s.capacity||12)*100),0)/sw.length):0;
     const att=dn.length+no.length;
@@ -34845,7 +34851,7 @@ function renderAnalytics(){
     const cap=todaySess.reduce((a,s)=>a+_placesCap(s),0);
     const booked=todaySess.reduce((a,s)=>a+_placesTaken(s),0);
     const stat=(v,l,col)=>`<div class="an-live-stat"><div class="an-live-num" data-cssv="${_cssv({'--an-fg':col})}"><bdi>${v}</bdi></div><div class="an-live-lbl">${l}</div></div>`;
-    return`<div class="chart-card an-live-card"><div class="chart-card-title">${t('anLiveTitle')}</div><div class="chart-card-sub">${t('anLiveSub')}</div><div class="an-live-row">${stat(tDone.length,t('anLiveRides'),'var(--green)')}${stat('SAR '+rev,t('anLiveRev'),'var(--green)')}${stat(tActive,t('anLiveActive'),'var(--blue)')}${stat(booked+'/'+cap,t('anLiveFill'),'var(--orange)')}</div></div>`;
+    return`<div class="chart-card an-live-card"><div class="chart-card-title">${t('anLiveTitle')}</div><div class="chart-card-sub">${t('anLiveSub')}</div><div class="an-live-row">${stat(tDone.length,t('anLiveRides'),'var(--green)')}${stat(_money(rev,_NOISO),t('anLiveRev'),'var(--green)')}${stat(tActive,t('anLiveActive'),'var(--blue)')}${stat(booked+'/'+cap,t('anLiveFill'),'var(--orange)')}</div></div>`;
   }
   function growthSection(){
     const _JSDOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -34866,25 +34872,25 @@ function renderAnalytics(){
     }
     // Trend sparklines across recent in-range sessions (oldest → newest)
     const chron=sessions.slice().sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
-    const sRev=chron.map(s=>Math.round(_paidRows(_qs(s.id)).reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0)));
+    const sRev=chron.map(s=>Math.round(_revenueOf(_qs(s.id))));
     const sRides=chron.map(s=>_dn(s.id).length);
     const sOcc=chron.map(s=>{const c=s.capacity||12;return Math.round(_dn(s.id).length/c*100);});
     const _spark=(label,series,fmt,color)=>`<div class="an-spark"><div class="an-spark-lbl">${label}</div><div class="an-spark-val">${series.length?fmt(series[series.length-1]):'—'}</div>${_anSparkline(series,color)}</div>`;
-    const trends=chron.length>=2?`<div class="chart-card"><div class="chart-card-title">${t('anTrendsTitle')}</div><div class="chart-card-sub">${t('anTrendsSub')}</div><div class="an-spark-row">${_spark(t('anRevCollected'),sRev,v=>'SAR '+v,'var(--green)')}${_spark(t('anRidership'),sRides,v=>String(v),'var(--blue)')}${_spark(t('anAvgOccupancy'),sOcc,v=>v+'%','var(--orange)')}</div></div>`:'';
+    const trends=chron.length>=2?`<div class="chart-card"><div class="chart-card-title">${t('anTrendsTitle')}</div><div class="chart-card-sub">${t('anTrendsSub')}</div><div class="an-spark-row">${_spark(t('anRevCollected'),sRev,v=>_money(v),'var(--green)')}${_spark(t('anRidership'),sRides,v=>String(v),'var(--blue)')}${_spark(t('anAvgOccupancy'),sOcc,v=>v+'%','var(--orange)')}</div></div>`:'';
     // Retail attach + this-month forecast
     const at=_anAttachStats(done),fc=_anMonthForecast(allSess,allQ);
     const kpis=`<div class="analytics-kpi-grid">
       <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${at.attachPct}%</div><div class="analytics-kpi-label">${t('anAttachRate')}</div><div class="analytics-kpi-sub">${at.withAddon} ${t('anAttachRateSub')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${at.addonRevPerRide}</bdi></div><div class="analytics-kpi-label">${t('anAddonRevRide')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${_money(at.addonRevPerRide)}</div><div class="analytics-kpi-label">${t('anAddonRevRide')}</div></div>
       <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${fc.projRides}</div><div class="analytics-kpi-label">${t('anProjRides')}</div><div class="analytics-kpi-sub">${fc.rides} ${t('anForecastSoFar')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue"><bdi>SAR ${fc.projRev}</bdi></div><div class="analytics-kpi-label">${t('anProjRev')}</div><div class="analytics-kpi-sub"><bdi>SAR ${fc.rev}</bdi> ${t('anForecastSoFar')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(fc.projRev)}</div><div class="analytics-kpi-label">${t('anProjRev')}</div><div class="analytics-kpi-sub">${_money(fc.rev)} ${t('anForecastSoFar')}</div></div>
     </div><div class="an-fc-note">${t('anForecastSub').replace('{0}',fc.elapsed).replace('{1}',fc.days)}</div>`;
     // Monthly revenue target & pace
     const tgt=S.anRevTarget||0;
-    const targetCard=`<div class="chart-card"><div class="an-target-head"><div class="an-minw0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b class="an-c-green">${t('anTargetOnPace')}</b>`:`<b class="an-c-orange">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div><button class="btn-secondary an-btn-sm-fixed" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button></div>${tgt?`<div class="an-mt10"><div class="an-target-nums"><span><bdi>SAR ${fc.rev}</bdi></span><span class="an-c-muted"><bdi>SAR ${tgt}</bdi></span></div><div class="an-target-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':Math.min(100,Math.round(fc.rev/tgt*100))+'%','--an-bg':fc.rev>=tgt?'var(--green)':'var(--blue)'})}"></div></div></div>`:''}</div>`;
+    const targetCard=`<div class="chart-card"><div class="an-target-head"><div class="an-minw0"><div class="chart-card-title">${t('anTargetTitle')}</div><div class="chart-card-sub">${tgt?`${t('anTargetProjEnd').replace('{0}',fc.projRev)} · ${fc.projRev>=tgt?`<b class="an-c-green">${t('anTargetOnPace')}</b>`:`<b class="an-c-orange">${t('anTargetBehind')}</b>`}`:t('anTargetNone')}</div></div><button class="btn-secondary an-btn-sm-fixed" data-on-click="${_on("_anSetTarget")}">${t('anTargetSet')}</button></div>${tgt?`<div class="an-mt10"><div class="an-target-nums"><span>${_money(fc.rev)}</span><span class="an-c-muted">${_money(tgt)}</span></div><div class="an-target-track"><div class="an-pfill" data-cssv="${_cssv({'--an-w':Math.min(100,Math.round(fc.rev/tgt*100))+'%','--an-bg':fc.rev>=tgt?'var(--green)':'var(--blue)'})}"></div></div></div>`:''}</div>`;
     // RFM segments (all-time recency/frequency/money)
     const cust={};
-    allQ.filter(e=>e.status==='done'&&e.customerId).forEach(e=>{const id=e.customerId;const c=cust[id]||(cust[id]={sess:new Set(),spend:0,last:0,name:'',phone:''});c.sess.add(e.sessionId);if(e.paid)c.spend+=(e.price??DEFAULT_PRICE);try{c.spend+=addonsCost(entryAddons(e));}catch(_){}const ts=new Date(e.checkedInAt||e.registeredAt||0).getTime();if(ts>=c.last){c.last=ts;if(e.name)c.name=e.name;if(e.phone)c.phone=e.phone;}});
+    allQ.filter(e=>e.status==='done'&&e.customerId).forEach(e=>{const id=e.customerId;const c=cust[id]||(cust[id]={sess:new Set(),spend:0,last:0,name:'',phone:''});c.sess.add(e.sessionId);c.spend+=_bookingRevenue(e);const ts=new Date(e.checkedInAt||e.registeredAt||0).getTime();if(ts>=c.last){c.last=ts;if(e.name)c.name=e.name;if(e.phone)c.phone=e.phone;}});
     const nowMs=Date.now(),segs={champions:[],loyal:[],newbie:[],atrisk:[],lost:[]};
     Object.keys(cust).forEach(id=>{const c=cust[id],rides=c.sess.size,rec=c.last?Math.round((nowMs-c.last)/86400000):9999;segs[_anRFMSegment(rec,rides)].push({id,name:c.name,phone:c.phone,rides,recencyDays:rec,spend:Math.round(c.spend)});});
     Object.values(segs).forEach(a=>a.sort((x,y)=>y.spend-x.spend||x.recencyDays-y.recencyDays));
@@ -34892,7 +34898,7 @@ function renderAnalytics(){
     // anRfmAtrisk, keys that exist in no language, so two headings showed the raw key.
     const _rfmStem={champions:'Champions',loyal:'Loyal',newbie:'New',atrisk:'AtRisk',lost:'Lost'};
     const cap=k=>_rfmStem[k];
-    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides} ${_artIcon('bike',11)} · SAR ${r.spend}`;return ph?`<a class="an-rfm-chip" href="https://wa.me/${ph}?text=${encodeURIComponent(_tplUse('an_rfm',S.lang,{first_name:(r.name||'').split(' ')[0]||''})??t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||''))}" target="_blank" rel="noopener">${lbl}</a>`:`<span class="an-rfm-chip-off">${lbl}</span>`;};
+    const rfmChip=r=>{const ph=_waDigits(r.phone),lbl=`${esc(r.name||'—')} · ${r.rides} ${_artIcon('bike',11)} · ${_money(r.spend)}`;return ph?`<a class="an-rfm-chip" href="https://wa.me/${ph}?text=${encodeURIComponent(_tplUse('an_rfm',S.lang,{first_name:(r.name||'').split(' ')[0]||''})??t('anRfmMsg').replace('{0}',(r.name||'').split(' ')[0]||''))}" target="_blank" rel="noopener">${lbl}</a>`:`<span class="an-rfm-chip-off">${lbl}</span>`;};
     const segMeta=[['champions','var(--green)'],['loyal','var(--blue)'],['newbie','var(--green)'],['atrisk','var(--orange)'],['lost','var(--muted-l)']];
     const rfm=`<div class="chart-card"><div class="chart-card-title">${t('anRfmTitle')}</div><div class="chart-card-sub">${t('anRfmSub')}</div>${segMeta.map(([k,col])=>{const list=segs[k];return`<div class="an-mt10"><div class="an-rfm-title" data-cssv="${_cssv({'--an-fg':col})}">${t('anRfm'+cap(k))} <span class="an-muted-700">${list.length}</span> <span class="an-rfm-desc">· ${t('anRfm'+cap(k)+'D')}</span></div><div class="an-rfm-chips">${list.length?list.slice(0,10).map(rfmChip).join('')+(list.length>10?`<span class="an-rfm-more">${t('anRfmMore').replace('{0}',list.length-10)}</span>`:''):`<span class="an-rfm-none">${t('anRfmNone')}</span>`}</div></div>`;}).join('')}</div>`;
     // Market-basket: product pairs sharing a receipt (cashier sales in range)
@@ -34904,11 +34910,11 @@ function renderAnalytics(){
     const retCard=`<div class="chart-card"><div class="chart-card-title">${t('anRetCurveTitle')}</div><div class="chart-card-sub">${t('anRetCurveSub')}</div>${[7,30,90].map(w=>{const r=ret[w];const col=r.pct>=40?'var(--green)':r.pct>=20?'var(--blue)':'var(--orange)';return`<div class="analytics-bar-row"><div class="analytics-bar-label an-minw80">${t('anRetWindow').replace('{0}',w)}</div><div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(r.pct)+'%','--an-bg':col})}"></div></div><div class="analytics-bar-value">${r.pct}% <span class="an-muted-600">· ${t('anRetElig').replace('{0}',r.returned).replace('{1}',r.eligible)}</span></div></div>`;}).join('')}</div>`;
     // LTV by first-ride cohort
     const ltv=_anLTVByCohort(allQ.filter(e=>e.status==='done'));
-    const ltvCard=ltv.length?`<div class="chart-card"><div class="chart-card-title">${t('anLtvTitle')}</div><div class="chart-card-sub">${t('anLtvSub')}</div><div class="an-scroll-x"><table class="analytics-trend-table an-w100"><thead><tr><th>${t('anLtvCohort')}</th><th>${t('anLtvRiders')}</th><th>${t('anLtvAvg')}</th></tr></thead><tbody>${ltv.map(r=>`<tr><td>${r.month}</td><td>${r.customers}</td><td><bdi>SAR ${r.avgLtv}</bdi></td></tr>`).join('')}</tbody></table></div></div>`:'';
+    const ltvCard=ltv.length?`<div class="chart-card"><div class="chart-card-title">${t('anLtvTitle')}</div><div class="chart-card-sub">${t('anLtvSub')}</div><div class="an-scroll-x"><table class="analytics-trend-table an-w100"><thead><tr><th>${t('anLtvCohort')}</th><th>${t('anLtvRiders')}</th><th>${t('anLtvAvg')}</th></tr></thead><tbody>${ltv.map(r=>`<tr><td>${r.month}</td><td>${r.customers}</td><td>${_money(r.avgLtv)}</td></tr>`).join('')}</tbody></table></div></div>`:'';
     // Gross margin (needs item costs; card hidden until at least one sold item has a cost)
     const costById={};(S.inventory||[]).forEach(i=>{if(i.cost!=null&&!isNaN(Number(i.cost)))costById[i.id]=Number(i.cost);});
     const mg=_anMargin(anSalesLines,costById);
-    const marginCard=mg.haveCost?`<div class="chart-card"><div class="chart-card-title">${t('anMarginTitle')}</div><div class="chart-card-sub">${t('anMarginSub')}</div><div class="analytics-kpi-grid an-mt6"><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${mg.marginPct}%</div><div class="analytics-kpi-label">${t('anMargin')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${mg.profit}</bdi></div><div class="analytics-kpi-label">${t('anGrossProfit')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${mg.cogs}</bdi></div><div class="analytics-kpi-label">${t('anCogs')}</div></div></div></div>`:'';
+    const marginCard=mg.haveCost?`<div class="chart-card"><div class="chart-card-title">${t('anMarginTitle')}</div><div class="chart-card-sub">${t('anMarginSub')}</div><div class="analytics-kpi-grid an-mt6"><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${mg.marginPct}%</div><div class="analytics-kpi-label">${t('anMargin')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${_money(mg.profit)}</div><div class="analytics-kpi-label">${t('anGrossProfit')}</div></div><div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange">${_money(mg.cogs)}</div><div class="analytics-kpi-label">${t('anCogs')}</div></div></div></div>`:'';
     // Weather & demand: rides vs daily-high temperature (Open-Meteo)
     const wx=S.anWeather||{};
     const wrows=chron.map(sx=>({date:sx.session_date||sx.id,rides:_dn(sx.id).length,temp:wx[sx.session_date]})).filter(r=>r.temp!=null);
@@ -34925,9 +34931,9 @@ function renderAnalytics(){
   }
 
   // Rows behind the "Export CSV" button (per-session summary for the current range).
-  S._anCsvRows=sessions.map(s=>{const sd=_dn(s.id);const rev=sd.filter(e=>e.paid).reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0);const cap=s.capacity||12;return{date:s.session_date||s.id,day:s.day||'',riders:sd.length,no_shows:_qs(s.id).filter(e=>e.status==='noshow').length,revenue_sar:Math.round(rev),occupancy_pct:cap?Math.round(sd.length/cap*100):0};});
+  S._anCsvRows=sessions.map(s=>{const sd=_dn(s.id);const rev=_revenueOf(_qs(s.id));const cap=s.capacity||12;return{date:s.session_date||s.id,day:s.day||'',riders:sd.length,no_shows:_qs(s.id).filter(e=>e.status==='noshow').length,revenue_sar:Math.round(rev),occupancy_pct:cap?Math.round(sd.length/cap*100):0};});
   // Text behind the "Share digest" button (WhatsApp-friendly summary of the current range).
-  S._anDigestText=`MicroMobility — ${t('tabAnalytics')}\n• ${t('anTotalRides')}: ${done.length}\n• ${t('anRevCollected')}: SAR ${Math.round(revCollected)}${revPending>0?` (+SAR ${Math.round(revPending)} ${t('printPending').toLowerCase()})`:''}\n• ${t('anAvgOccupancy')}: ${avgOccupancy}%${anTopItems.length?`\n• ${t('anTopSellers')}: ${anTopItems[0].name}`:''}${noshow.length?`\n• ${t('anNoShowRate')}: ${noShowRate}% (${noshow.length})`:''}`;
+  S._anDigestText=`MicroMobility — ${t('tabAnalytics')}\n• ${t('anTotalRides')}: ${done.length}\n• ${t('anRevCollected')}: ${_money(Math.round(revCollected),_NOISO)}${revPending>0?` (+${_money(Math.round(revPending),_NOISO)} ${t('printPending').toLowerCase()})`:''}\n• ${t('anAvgOccupancy')}: ${avgOccupancy}%${anTopItems.length?`\n• ${t('anTopSellers')}: ${anTopItems[0].name}`:''}${noshow.length?`\n• ${t('anNoShowRate')}: ${noShowRate}% (${noshow.length})`:''}`;
   document.getElementById('tab-analytics').innerHTML=`
     <div class="page-title an-title-row"><span>${t('tabAnalytics')}</span><span class="an-title-btns"><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anShareDigest")}">${_artIcon('share',12)} ${t('anDigestShare')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("_anExportCSV")}">${_artIcon('download',12)} ${t('anExportCsv')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("printHeightBikeReport")}" title="${t('anHeightReportSub')}">${_artIcon('print',12)} ${t('anHeightReport')}</button><button class="btn-secondary an-btn-sm" data-on-click="${_on("exportHeightBikeCsv")}">${_artIcon('download',12)} ${t('anHeightReport')} CSV</button></span></div>
     <div class="page-sub">${t('anPageSub')}</div>
@@ -35080,7 +35086,7 @@ function renderAnalytics(){
       <div class="analytics-kpi-card">
         <div class="analytics-kpi-value ${noShowRate>15?'an-c-red':'an-c-green'}">${noShowRate}%</div>
         <div class="analytics-kpi-label">${t('anNoShowRate')} ${deltaBadge('nsr',true)}</div>
-        <div class="analytics-kpi-sub">${noshow.length} ${t('anOf')} ${totalAttempted} ${t('anAttempts')} · ~<bdi>SAR ${noShowLost}</bdi> ${t('anNoShowLost')}</div>
+        <div class="analytics-kpi-sub">${noshow.length} ${t('anOf')} ${totalAttempted} ${t('anAttempts')} · ~${_money(noShowLost)} ${t('anNoShowLost')}</div>
       </div>
       <div class="analytics-kpi-card">
         <div class="analytics-kpi-value ${cancelRate>10?'an-c-red':'an-c-mutedl'}">${cancelRate}%</div>
@@ -35158,7 +35164,7 @@ function renderAnalytics(){
           ? Object.entries(modelRevenue).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="analytics-bar-row">
               <div class="analytics-bar-label">${esc(k)}</div>
               <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/Math.max(...Object.values(modelRevenue),1)*100))+'%','--an-bg':modelColorMap[k]||'#0c7a3d'})}"></div></div>
-              <div class="analytics-bar-value">SAR ${v}</div>
+              <div class="analytics-bar-value">${_money(v)}</div>
             </div>`).join('')
           : noDataStr}
       </div>
@@ -35351,7 +35357,7 @@ function renderAnalytics(){
       ${anAddons.items.length?anAddons.items.map(a=>`<div class="analytics-bar-row">
           <div class="analytics-bar-label">${esc(a.name)}${a.brand?` <span class="an-muted-10">${esc(a.brand)}</span>`:''}</div>
           <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(a.units/anAddonMax*100))+'%','--an-bg':'var(--green)'})}"></div></div>
-          <div class="analytics-bar-value">${a.units}${a.value>0?` <span class="an-muted-10">SAR ${a.value}</span>`:''}</div>
+          <div class="analytics-bar-value">${a.units}${a.value>0?` <span class="an-muted-10">${_money(a.value)}</span>`:''}</div>
         </div>`).join(''):`<div class="empty-state">${t('anNoAddons')}</div>`}
     </div>
 
@@ -35406,7 +35412,7 @@ function renderAnalytics(){
       <div class="chart-card-title an-mb6">${t('anTopCustomers')} <span class="an-sub11">· ${t('anTopCustomersSub')}</span></div>
       <table class="analytics-trend-table">
         <thead><tr><th>${t('anLapsedColRider')}</th><th>${t('anLapsedColRides')}</th><th>${t('anSpentCol')}</th><th>${t('anLapsedColLast')}</th></tr></thead>
-        <tbody>${topCustomers.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.rides}</td><td><bdi>SAR ${Math.round(r.spent)}</bdi></td><td>${esc(shortDate(r.last))}</td></tr>`).join('')}</tbody>
+        <tbody>${topCustomers.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.rides}</td><td>${_money(Math.round(r.spent))}</td><td>${esc(shortDate(r.last))}</td></tr>`).join('')}</tbody>
       </table>
     </div>`:''}
     ${retLapsed.length?`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper an-mt8">
@@ -35455,21 +35461,21 @@ function renderAnalytics(){
     <div class="an-anchor" data-anview="revenue"></div>
     <div class="analytics-section-title">${t('coSales')}</div>
     <div class="analytics-kpi-grid">
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${anSales.collected}</bdi></div><div class="analytics-kpi-label">${t('cashValue')} ${deltaBadge('sales')}</div><div class="analytics-kpi-sub">${anSales.units} ${t('cashQtyCol').toLowerCase()}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${anSales.pending}</bdi></div><div class="analytics-kpi-label">${t('printPending')}</div></div>
-      ${anSales.team>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-purple"><bdi>SAR ${anSales.team}</bdi></div><div class="analytics-kpi-label">${t('payTeam')}</div></div>`:''}
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${_money(anSales.collected)}</div><div class="analytics-kpi-label">${t('cashValue')} ${deltaBadge('sales')}</div><div class="analytics-kpi-sub">${anSales.units} ${t('cashQtyCol').toLowerCase()}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange">${_money(anSales.pending)}</div><div class="analytics-kpi-label">${t('printPending')}</div></div>
+      ${anSales.team>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-purple">${_money(anSales.team)}</div><div class="analytics-kpi-label">${t('payTeam')}</div></div>`:''}
     </div>
     <div class="analytics-section-title">${t('anPayTitle')}</div>
     <div class="analytics-kpi-grid">
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green"><bdi>SAR ${payMix.cash}</bdi></div><div class="analytics-kpi-label">${t('anCashCollected')}</div></div>
-      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue"><bdi>SAR ${payMix.card}</bdi></div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMix.card+payMix.cash>0?Math.round(payMix.card/(payMix.card+payMix.cash)*100):0}% ${t('anCardShare')}</div></div>
-      ${anSales.discount>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange"><bdi>SAR ${anSales.discount}</bdi></div><div class="analytics-kpi-label">${t('anDiscountsGiven')}</div></div>`:''}
-      ${anSales.refunded>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-red"><bdi>SAR ${anSales.refunded}</bdi></div><div class="analytics-kpi-label">${t('cashRefunds')}</div></div>`:''}
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-green">${_money(payMix.cash)}</div><div class="analytics-kpi-label">${t('anCashCollected')}</div></div>
+      <div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-blue">${_money(payMix.card)}</div><div class="analytics-kpi-label">${t('anCardCollected')}</div><div class="analytics-kpi-sub">${payMix.card+payMix.cash>0?Math.round(payMix.card/(payMix.card+payMix.cash)*100):0}% ${t('anCardShare')}</div></div>
+      ${anSales.discount>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-orange">${_money(anSales.discount)}</div><div class="analytics-kpi-label">${t('anDiscountsGiven')}</div></div>`:''}
+      ${anSales.refunded>0?`<div class="analytics-kpi-card"><div class="analytics-kpi-value an-c-red">${_money(anSales.refunded)}</div><div class="analytics-kpi-label">${t('cashRefunds')}</div></div>`:''}
     </div>
     ${Object.keys(teamByMember).length?`<div class="chart-card">
       <div class="chart-card-title">${t('anTeamConsumption')}</div>
       <div class="chart-card-sub">${t('anTeamConsumptionSub')}</div>
-      ${bars(teamByMember,()=>_thc('--purple','#a06af0'),v=>`SAR ${v}`)}
+      ${bars(teamByMember,()=>_thc('--purple','#a06af0'),v=>`${_money(v,_NOISO)}`)}
     </div>`:''}
     <div class="chart-card">
       <div class="chart-card-title">${t('anTopSellers')}</div>
@@ -35477,7 +35483,7 @@ function renderAnalytics(){
       ${anTopItems.length?anTopItems.map(it=>{const mx=anTopItems[0].qty||1;return`<div class="analytics-bar-row">
         <div class="analytics-bar-label an-minw120">${esc(it.name)}</div>
         <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.min(100,Math.round(it.qty/mx*100)))+'%','--an-bg':'var(--green)'})}"></div></div>
-        <div class="analytics-bar-value"><bdi>${it.qty}</bdi> · SAR ${Math.round(it.value*100)/100}</div>
+        <div class="analytics-bar-value"><bdi>${it.qty}</bdi> · ${_money(Math.round(it.value*100)/100)}</div>
       </div>`;}).join(''):`<div class="empty-state">${t('cashNoSalesSession')}</div>`}
     </div>
     ${growthSection()}`;
@@ -36238,14 +36244,10 @@ function _refLiveStop(){
   _refLive=false;_refWasLive=false;_refChRetry=0;
   try{if(_refCh){const c=_refCh;_refCh=null;sb.removeChannel(c);}}catch(_){}
 }
-// Probe once whether the optional queue_entries.card_amount column exists. If not, the rental Split option is hidden
-// (it would otherwise silently down-categorize a split as cash). Default assumes present until proven missing.
+// Probe once whether cashier_sales has customer_id (the card_amount probe went with the rental Split
+// option, 2026-10-04: rentals are card-only; old split rows are still read through card_amount).
 async function _probeSchema(){
-  if(!sb||_custOnly())return; // staff questions (the split payment, sales by rider); a device unlocked later keeps the default, which assumes present
-  try{
-    const{error}=await sb.from('queue_entries').select('card_amount').limit(1);
-    if(error){const m=((error.code||error.message)||'')+'';if(m.includes('42703')||/card_amount/i.test(m)||/does not exist/i.test(m)){S.hasCardAmount=false;try{document.querySelectorAll('.pay-menu-popup').forEach(x=>x.remove());}catch(_){}}}
-  }catch(_){}
+  if(!sb||_custOnly())return; // a staff question (sales by rider); a device unlocked later keeps the default, which assumes present
   try{ // does cashier_sales have customer_id? if not, sales record name-only so nothing ever fails to sync
     const{error}=await sb.from('cashier_sales').select('customer_id').limit(1);
     if(error){const m=((error.code||error.message)||'')+'';if(m.includes('42703')||/customer_id/i.test(m)||/does not exist/i.test(m))S.hasCsCust=false;}
