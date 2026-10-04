@@ -346,26 +346,7 @@ for (const [vpName, vp] of Object.entries(VIEWPORTS)) {
         await shot(page, `${P}-dash-empty`);
       });
 
-      test(`undo code ${lang}`, async ({ page }) => {
-        await open(page, { lang, fx: { 'rpc:staff_undo_code_state': { admin: true, has_code: false } } });
-        const lbl = 'Checked in #3 Cara Vale';
-        await page.evaluate(`void _ucDialog('set','')`);
-        await shot(page, `${P}-uc-set`, { full: false });
-        await page.evaluate(`_ucMsg(t('ucFormat'))`);
-        await shot(page, `${P}-uc-set-err`, { full: false });
-        await page.evaluate(`_ucDone(false);void _ucDialog('set',${js(lbl)})`);
-        await shot(page, `${P}-uc-set-label`, { full: false });
-        await page.evaluate(`_ucDone(false);void _ucDialog('ask',${js(lbl)})`);
-        await shot(page, `${P}-uc-ask`, { full: false });
-        await page.evaluate(`_ucMsg(t('ucWrong').replace('{0}',4))`);
-        await shot(page, `${P}-uc-ask-err`, { full: false });
-        await page.evaluate(`_ucDone(false);void _undoAuth(${js(lbl)},true)`);
-        await page.waitForFunction(`!!document.querySelector('#confirm-modal .confirm-box')`);
-        await shot(page, `${P}-uc-set-auth`, { full: false });
-        await page.evaluate(`_ucDone(false)`);
-      });
-
-      test(`undo code before the database has codes ${lang}`, async ({ page }) => {
+      test(`undo confirm ${lang}`, async ({ page }) => {
         await open(page, { lang });
         await page.evaluate(`void _undoAuth(${js('Checked in #3 Cara Vale')},true)`);
         await page.waitForFunction(`!!document.querySelector('#confirm-modal .confirm-box')`);
