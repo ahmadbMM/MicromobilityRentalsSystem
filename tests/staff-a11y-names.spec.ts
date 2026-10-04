@@ -124,12 +124,10 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
     const r = await page.evaluate(`(()=>{const o={};for(const l of ['en','ar','ur']){S.lang=l;o[l]=fmt12h('06:30 - 21:00');}S.lang='en';return o;})()`);
     expect(r).toEqual({ en: '6:30 AM - 9 PM', ar: '6:30 ص - 9 م', ur: '6:30 صبح - 9 رات' });
     const digits = await page.evaluate(() => {
-      // @ts-expect-error app global
       S._opg = { pick: 'Spec Staff', digits: '', msg: '', list: [{ name: 'Spec Staff', has_pin: true }] };
       const ev = new Event('paste', { bubbles: true, cancelable: true }) as Event & { clipboardData?: unknown };
       Object.defineProperty(ev, 'clipboardData', { value: { getData: () => ' 1 2a3 ' } });
       document.dispatchEvent(ev);
-      // @ts-expect-error app global
       const d = S._opg.digits; S._opg = null; return d;
     });
     expect(digits).toBe('123');
