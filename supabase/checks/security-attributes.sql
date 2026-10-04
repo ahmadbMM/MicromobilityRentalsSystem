@@ -227,7 +227,9 @@ with expected(fname, want_definer, note) as (values
   ('vendor_feedback_save',      true,  'writes vendor_feedback, which no client can write; token-checked'),
   ('staff_vendor_share_ratings', true, 'reads riders'' breakfast ratings (queue_entries) and writes vendor_shared_ratings; checks is_staff() itself'),
   ('staff_vendor_unshare_ratings', true, 'deletes one vendor_shared_ratings row; checks is_staff() itself'),
-  ('vendor_shared_ratings_mine', true, 'the signed-in vendor''s own shared breakfast ratings, no rider names; token-checked')
+  ('vendor_shared_ratings_mine', true, 'the signed-in vendor''s own shared breakfast ratings, no rider names; token-checked'),
+  ('_cact_row',                 true,  'trigger: writes customer_activity, which no client can write; reads sessions/customers/ambassadors'),
+  ('_cact_add',                 true,  'writes customer_activity for _cact_row; no client may execute it')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

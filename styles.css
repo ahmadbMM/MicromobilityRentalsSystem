@@ -2961,6 +2961,16 @@
     #tab-history .lg-who{font-size:11px;font-weight:800;color:var(--green);white-space:nowrap;flex-shrink:0;}
     #tab-history .lg-undo{flex-shrink:0;font-size:11px;padding:3px 10px;}
     #tab-history .lg-empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;}
+    /* Customer activity (renderCustActivity, also in #hist-log-host): the action, then what it touched */
+    #tab-history .ca-row{align-items:flex-start;}
+    #tab-history .ca-row .lg-time,#tab-history .ca-row .lg-chip{margin-top:2px;}
+    #tab-history .ca-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+    #tab-history .ca-lbl{font-size:13px;}
+    #tab-history .ca-det{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
+    #tab-history .ca-src{font-size:10px;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:3px;}
+    #tab-history .ca-who{font:inherit;font-size:11px;font-weight:800;color:var(--green);background:none;border:0;padding:0;cursor:pointer;white-space:nowrap;flex-shrink:0;text-align:end;}
+    #tab-history .ca-who:hover,#tab-history .ca-who:focus-visible{text-decoration:underline;}
+    @media (max-width:767px){#tab-history .ca-src{display:none;}}
 
     /* Pull-to-refresh indicator */
     #ptr-ind{position:fixed;top:env(safe-area-inset-top,0);left:50%;transform:translateX(-50%) translateY(-64px);z-index:9998;width:38px;height:38px;border-radius:50%;background:var(--s2);border:1px solid var(--border);box-shadow:0 4px 14px rgba(16,19,18,.1);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease;pointer-events:none;}
