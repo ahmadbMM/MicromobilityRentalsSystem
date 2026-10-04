@@ -33,6 +33,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
 // writes are echoed back as if they succeeded. RPCs answer with the fixture
 // under 'rpc:<name>'; Auth password sign-in answers with 'auth:token'.
 export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrite?: FailWrite) {
+  const ciDone = new Map<string, Record<string, unknown>>(); // bookings staff_checkin checked in, by id
   let failsLeft = failWrite ? (failWrite.once ? 1 : Infinity) : 0;
   // SECURE_AUTH defaults ON in production; pin open mode for the stubbed suite
   // unless a spec explicitly opts into secure mode after this (secureOn sets '1').
@@ -105,8 +106,22 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // staff_checkin with no bike claims the booking's reserved bike(s) when every one is
       // available in the fixture (a bike the fixture lacks counts as available), else drops them.
       if (body === undefined && rpc[1] === 'staff_checkin') {
-        let sent: { p_booking_id?: string; p_bike_id?: string | null } = {};
+        let sent: { p_booking_id?: string; p_bike_id?: string | null; p_paid?: boolean | null; p_price?: number | null; p_pay_method?: string | null } = {};
         try { sent = req.postDataJSON(); } catch { /* no body */ }
+        // The real function checks the booking in, so a later read of the row says so (2026-10-04: a
+        // read after the one-call check-in got the fixture's 'waiting' back and the desk re-offered the rider).
+        // Kept per stub (ciDone), never written into the spec's fixtures: those objects are shared by
+        // the tests of a file, and a rider checked in by one test must not arrive checked in at the next.
+        const ciRow = ((fixtures['queue_entries'] || []) as Record<string, unknown>[]).find((r) => r.id === sent.p_booking_id);
+        const ciNow = { ...(ciRow || {}), ...(ciDone.get(String(sent.p_booking_id)) || {}) };
+        if (ciRow && (ciNow.status === 'waiting' || ciNow.status === 'waitlist')) {
+          const patch: Record<string, unknown> = { status: 'active', checked_in_at: new Date().toISOString() };
+          if (sent.p_bike_id) patch.assigned_bike_id = sent.p_bike_id;
+          if (sent.p_paid != null) patch.paid = sent.p_paid;
+          if (sent.p_price != null) patch.price = sent.p_price;
+          if (sent.p_pay_method != null) patch.pay_method = sent.p_pay_method || null;
+          ciDone.set(String(sent.p_booking_id), patch);
+        }
         if (sent.p_bike_id) body = { ok: true, noop: false, assignment_id: 'a-stub', bikes: [sent.p_bike_id], reservation_dropped: false };
         else {
           const row = ((fixtures['queue_entries'] || []) as Record<string, unknown>[]).find((r) => r.id === sent.p_booking_id) || {};
@@ -156,7 +171,11 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
     const table = m ? m[1] : null;
 
     if (method === 'GET' || method === 'HEAD') {
-      const rows = ((table && fixtures[table]) || []) as unknown[];
+      const rows0 = ((table && fixtures[table]) || []) as unknown[];
+      // what staff_checkin did in this stub, read back as the server would show it
+      const rows = table === 'queue_entries' && ciDone.size
+        ? rows0.map((r) => { const o = r as Record<string, unknown>; const p = ciDone.get(String(o.id)); return p ? { ...o, ...p } : r; })
+        : rows0;
       return route.fulfill({
         status: 200,
         headers: { ...cors(), 'content-type': 'application/json', 'content-range': `0-${rows.length}/${rows.length}` },

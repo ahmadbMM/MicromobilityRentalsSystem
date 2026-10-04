@@ -9331,11 +9331,11 @@ function _ntLoaded(){
 // ride runs long and a rating ages by the clock).
 let _ntkRefs=null,_ntkKey=null,_ntkOut=null;
 function _ntKinds(){
-  const W=S._ws,M=S._sm,refs=[S.queue,S.inventory,S.bikes,S.customers,S.customerTags,S.staffOptions,W&&W.jobs,M&&M.rows,S._caApps,S._laApps];
+  const W=S._ws,M=S._sm,refs=[S.queue,S.inventory,S.bikes,S.customers,S.customerTags,S.staffOptions,W&&W.jobs,M&&M.rows,S._caApps,S._laApps,S._vendorLate];
   const c=(o,f)=>o?o.length+':'+o.filter(f).length:'-',q=S.queue||[];
   const key=[q.length,q.filter(e=>e.status==='active'||e.ratingExp).length,c(S.inventory,it=>{const n=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return n<=0||(lo>0&&n<=lo);}),
     (S.bikes||[]).map(b=>b&&b.status).join(),c(W&&W.jobs,j=>j.status==='new'),c(M&&M.rows,m=>m.status==='new'),c(S._caApps,a=>a.status==='pending'),c(S._laApps,a=>a.status==='pending'),
-    JSON.stringify(_ntLoaded()),isAdmin(),_deskTabOk('workshop'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
+    JSON.stringify(_ntLoaded()),JSON.stringify(S._ntOff||null),(S._vendorLate||[]).length,isAdmin(),_deskTabOk('workshop'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
   if(_ntkOut&&key===_ntkKey&&refs.every((r,i)=>r===_ntkRefs[i]))return _ntkOut;
   const out=_ntKindsNow();_ntkRefs=refs;_ntkKey=key;_ntkOut=out;return out;
 }
@@ -31999,9 +31999,14 @@ let _outboxBusy=false;
 // Lock where the browser has one, so a second tab waits and then reads what the first left, rather
 // than sending the same sale or booking again (2026-10-04).
 function _mmLock(fn){try{if(navigator.locks&&navigator.locks.request)return navigator.locks.request('mm-outbox',()=>fn());}catch(_){}return fn();}
+// A call while a flush is under way, or still waiting for the mm-outbox lock, joins that flush instead of
+// queueing a second one behind it (2026-10-04): before the lock, such a call found _outboxBusy and returned.
+let _outboxP=null;
 function _outboxFlush(){
   if(_outboxBusy||!sb||(typeof navigator!=='undefined'&&navigator.onLine===false))return Promise.resolve();
-  return _mmLock(_outboxFlushRun);
+  if(_outboxP)return _outboxP;
+  _outboxP=Promise.resolve(_mmLock(_outboxFlushRun)).finally(()=>{_outboxP=null;});
+  return _outboxP;
 }
 async function _outboxFlushRun(){
   if(_outboxBusy)return;
@@ -32027,7 +32032,7 @@ async function _outboxFlushRun(){
   _outboxSave(cur);
   _outboxBusy=false;
   if(doneIds.length&&S.view==='staff'&&S.staffTab==='cashier')renderCashier();
-  if(doneIds.length&&cur.length)_outboxFlush(); // drain ops that arrived mid-flush (e.g. a void right after a record)
+  if(doneIds.length&&cur.length)setTimeout(_outboxFlush,0); // drain ops that arrived mid-flush (e.g. a void right after a record), once this flush has let go of the lock
 }
 // Badge click: try once more to sync; if the ops are still stuck and we're online, let the operator discard them so the "pending sync" chip can clear.
 async function _outboxRetryOrClear(){

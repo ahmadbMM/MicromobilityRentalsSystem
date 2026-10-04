@@ -61,7 +61,8 @@ test.describe('@staff:analytics on a device west of UTC', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.waitForFunction('(S.sessions||[]).length===2');
-    await page.evaluate(`S.analyticsRange='all';S.analyticsTrendSort='day';S.analyticsTrendDir=1;setStaffTab('analytics')`);
+    // The session table is Operations' (a view is drawn when it is opened, 2026-10-04)
+    await page.evaluate(`S.analyticsRange='all';S.analyticsTrendSort='day';S.analyticsTrendDir=1;setStaffTab('analytics');setAnView('operations')`);
     // Sunday (0) before Tuesday (2): parsed as UTC and read in Los Angeles they were Saturday (6) and Monday (1)
     await expect(page.locator('#tab-analytics .analytics-trend-table tbody tr').first().locator('td').nth(1)).toContainText(/Sun/);
   });
