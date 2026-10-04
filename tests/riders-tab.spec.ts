@@ -259,6 +259,68 @@ test.describe('walk-in at the desk', () => {
     await expect(page.locator('.toast')).toContainText('P-004');
   });
 
+  test('"Check in now" checks the walk-in\'s booking in too, not only the registration', async ({ page }) => {
+    // The registration read "On ride" while its booking stayed Waiting, and its Return later found
+    // no booking on a bike to move (2026-10-04 review).
+    await stubSupabase(page, {
+      sessions, queue_entries, rider_registrations,
+      'rpc:rider_register': { ok: true, id: 9, match: 'none', resubmitted: false, booking_no: 'P-004' },
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('riders')`);
+    await expect(page.locator('#pm-host tbody tr')).toHaveCount(3);
+    const booked = await captureBookingRows(page);
+    const bkPatches: { url: string; body: Record<string, unknown> }[] = [];
+    page.on('request', (r) => {
+      if (r.method() === 'PATCH' && /rest\/v1\/queue_entries/.test(r.url())) bkPatches.push({ url: r.url(), body: JSON.parse(r.postData() || '{}') });
+    });
+
+    await page.locator('#pm-host button', { hasText: 'Walk-in' }).click();
+    await page.fill('#rw-badge', 'D-78');
+    await page.fill('#rw-name', 'Dana Walkin');
+    await page.fill('#rw-height', '172');
+    await page.locator('#rider-walkin-modal .toggle-btn', { hasText: 'Hybrid' }).click();
+    await page.click('#rw-submit');
+
+    await expect.poll(() => booked.length).toBe(1);
+    await expect.poll(() => bkPatches.filter((p) => p.body.status === 'active').length).toBe(1);
+    const act = bkPatches.find((p) => p.body.status === 'active')!;
+    expect(act.url).toContain(`id=eq.${booked[0].id}`);
+    expect(act.body.checked_in_at).toBeTruthy();
+  });
+
+  test('with "Check in now" unticked the walk-in\'s booking stays Waiting', async ({ page }) => {
+    await stubSupabase(page, {
+      sessions, queue_entries, rider_registrations,
+      'rpc:rider_register': { ok: true, id: 9, match: 'none', resubmitted: false, booking_no: 'P-004' },
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('riders')`);
+    const booked = await captureBookingRows(page);
+    const bkPatches: Record<string, unknown>[] = [];
+    const regPatches: Record<string, unknown>[] = [];
+    page.on('request', (r) => {
+      if (r.method() === 'PATCH' && /rest\/v1\/queue_entries/.test(r.url())) bkPatches.push(JSON.parse(r.postData() || '{}'));
+      if (r.method() === 'PATCH' && /rest\/v1\/rider_registrations/.test(r.url())) regPatches.push(JSON.parse(r.postData() || '{}'));
+    });
+    await page.locator('#pm-host button', { hasText: 'Walk-in' }).click();
+    await page.locator('#rw-checkin').uncheck();
+    await page.fill('#rw-badge', 'D-78');
+    await page.fill('#rw-name', 'Dana Walkin');
+    await page.fill('#rw-height', '172');
+    await page.locator('#rider-walkin-modal .toggle-btn', { hasText: 'Hybrid' }).click();
+    await page.click('#rw-submit');
+    await expect.poll(() => booked.length).toBe(1);
+    await expect.poll(() => regPatches.length).toBe(1);
+    await page.waitForTimeout(300);
+    expect(regPatches[0].checked_in_at).toBeUndefined();
+    expect(bkPatches.filter((p) => p.status === 'active')).toEqual([]);
+  });
+
   test('a walk-in with two companions: one party call, one grouped booking of three, the employee linked and checked in', async ({ page }) => {
     await stubSupabase(page, {
       sessions, queue_entries, rider_registrations,

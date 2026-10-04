@@ -24767,10 +24767,21 @@ async function confirmAssign(){
   const isReassign=rider&&rider.status==='active';
   
   const toFree=alreadyAssigned.filter(id=>!S.modalBikes.includes(id));
+  // A bike change goes through staff_swap_bike, as the Hand-over does: the old bike's open
+  // assignment closes as 'swapped', the old bike is freed and the new one claimed and assigned in
+  // one transaction. Written straight to the rows, the old assignment stayed open: staff_checkin
+  // then refused anyone else that bike, and the rider's return freed it again under its next rider.
+  // The writes below run only where the function is missing.
+  let viaSwap=false;
+  if(isReassign&&S.modalBikes.length===1&&needsUpdate.length===1){
+    let r;try{r=await sb.rpc('staff_swap_bike',{p_booking_id:riderId,p_new_bike_id:needsUpdate[0].id});}catch(err){r={error:err};}
+    if(r&&r.error&&!_rpcAbsent(r.error)){toast(_rpcMessage(r.error),'error');await loadDataLight().catch(()=>{});renderModal();return;}
+    viaSwap=!!(r&&!r.error&&r.data&&r.data.ok===true);
+  }
   // Atomically claim each needed bike: the conditional .eq('status','available') means only ONE device
   // can flip a given bike available->in-use. If 0 rows come back, another device grabbed it first.
   const claimed=[];
-  for(const b of needsUpdate){
+  for(const b of (viaSwap?[]:needsUpdate)){
     let taken=false;
     try{
       const{data,error}=await sb.from('bikes').update({status:'in-use'}).eq('id',b.id).eq('status','available').select('id');
@@ -24813,7 +24824,11 @@ async function confirmAssign(){
   }
   let assignedVal;
   const _relClaimed=()=>Promise.all(claimed.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});
-  if(S.modalBikes.length===1){
+  if(viaSwap){
+    // the swap has landed the bike, the row and the assignment; only the fare follows the new bike
+    assignedVal=S.modalBikes[0];
+    if(Object.keys(priceUpdate).length)await _wr(sb.from('queue_entries').update(priceUpdate).eq('id',riderId),'bike price');
+  }else if(S.modalBikes.length===1){
     assignedVal=S.modalBikes[0];
     // Fresh check-in (waiting->active) is guarded on status: if another device already checked
     // this rider in, our update hits 0 rows — release the bike we claimed so it isn't left
@@ -24867,7 +24882,7 @@ async function confirmAssign(){
   // Release any bike the rider gave up (a bike change), now that the booking no longer names it:
   // freed before the booking write, a failed write left the rider's bike marked available under
   // them. Only while it is still in-use, so one sent to maintenance meanwhile stays out of service.
-  if(toFree.length)await Promise.all(toFree.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id).eq('status','in-use'))).catch(()=>{});
+  if(toFree.length&&!viaSwap)await Promise.all(toFree.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id).eq('status','in-use'))).catch(()=>{});
   if(rider&&rider.status==='waitlist'){await _addonsOnLeaveWaitlist(rider,true);await _mwRetireLinked(riderId);} // handed a bike straight off the waitlist
   await _dropOtherReservations(selected.map(b=>b.id),riderId); // "assign anyway" moves the reservation, it does not share it
   if(rider&&rider.typePreference==='Any'&&selected.length>0){
@@ -24884,6 +24899,15 @@ async function confirmAssign(){
   if(isReassign){
     toast(t('toastBikeChanged'));
     pushUndo(`${t('undoChangeBike')} #${qn} ${rName}`,async()=>{
+      // Back to the old bike the way the change was made: a swap closes the new bike's assignment.
+      if(viaSwap&&alreadyAssigned.length===1){
+        let r;try{r=await sb.rpc('staff_swap_bike',{p_booking_id:riderId,p_new_bike_id:alreadyAssigned[0]});}catch(err){r={error:err};}
+        if(r&&r.error&&!_rpcAbsent(r.error)){toast(_rpcMessage(r.error),'error');await loadData();renderStaffQueue();return false;}
+        if(r&&!r.error&&r.data&&r.data.ok===true){
+          if(priceUpdate.price!=null&&prevPrice!=null)await _wr(sb.from('queue_entries').update({price:prevPrice}).eq('id',riderId),'undo');
+          await loadData();renderStaffQueue();return;
+        }
+      }
       const back=await _reclaimBikes(toFree);
       if(back.length<toFree.length){await Promise.all(back.map(id=>sb.from('bikes').update({status:'available'}).eq('id',id))).catch(()=>{});toast(t('errBikeUnavailable'),'error');await loadData();renderStaffQueue();return false;}
       const undoAssign={assigned_bike_id:alreadyAssigned.length===1?alreadyAssigned[0]:JSON.stringify(alreadyAssigned)};
@@ -24895,6 +24919,9 @@ async function confirmAssign(){
         return false;
       }
       delete S._extraBikes[riderId];
+      // the bike given up by the undo leaves no open assignment behind (a database before the
+      // reassign trigger would keep one, and staff_checkin would refuse that bike to anyone else)
+      if(needsUpdate.length)await _wr(sb.from('bike_assignments').update({returned_at:new Date().toISOString(),return_condition:'swapped'}).eq('booking_id',riderId).in('bike_id',needsUpdate.map(b=>b.id)).is('returned_at',null),'undo');
       await Promise.all(needsUpdate.map(b=>sb.from('bikes').update({status:'available'}).eq('id',b.id).eq('status','in-use'))).catch(()=>{});
       await loadData();renderStaffQueue();
     });
@@ -25455,7 +25482,7 @@ async function _bkDownloadQr(n){
   const svg=QR.svg(_bkPageUrl(n),{size:512,margin:4,logo:false,pad:24,label:t('bkPageTitle')});
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));
   a.download=`bike-${Number(n)}-qr.svg`;document.body.appendChild(a);a.click();
-  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000); // revoked at once, Safari cancelled the download
 }
 // The columns nobody outside staff may read (the tag's chip id, the serial number, the model
 // year, the pedals, the condition and the notes): a plain read of bikes does not return them,
@@ -25514,8 +25541,12 @@ function _bkPrivHtml(isEdit){
 function _bkPrivVal(k,v){
   const s=String(v==null?'':v).trim();if(!s)return null;
   if(k==='year'){const n=parseInt(_asciiDigits(s),10);return n>=1990&&n<=2100?n:null;}
-  return k==='tag'?s.replace(/\s+/g,'').toUpperCase():s;
+  return k==='tag'?_bkTagNorm(s):s;
 }
+// A tag id as staff_resolve_bike and staff_link_tag read one: letters and digits, upper-case.
+// A UID pasted as a phone NFC app shows it (04:A3:2B:...) was saved with its colons and never
+// matched a tap or a reader, which the resolver strips before comparing.
+function _bkTagNorm(v){return String(v==null?'':v).replace(/[^0-9A-Za-z]/g,'').toUpperCase();}
 // The columns to write: every field for a new bike; for an edit, those that changed from what
 // was read, or only those typed when the read failed. prev holds what an undo puts back.
 function _bkPrivPatch(isNew){
@@ -25657,7 +25688,7 @@ const BK_CSV_TYPES=['Road','Hybrid','Mountain','Kids','Gravel'],BK_CSV_STATUSES=
 function _bkCsvTemplate(){
   const ex=['42','Hybrid','M','Aluminum','Alvas','Cross 21S','Shimano Altus','21','SN-000042','','#03ff89','Green','2026-10-01','2026','700c','Disc','Flat','12.5','','available','',''];
   const blob=new Blob(['﻿'+BK_CSV_COLS.join(',')+'\n'+ex.join(',')+'\n'],{type:'text/csv;charset=utf-8'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bikes-import-template.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},0);
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bikes-import-template.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000); // revoked at once, Safari cancelled the download
 }
 // Quotes, doubled quotes, CR LF, a BOM; the delimiter is whichever of , ; and tab the first line uses most.
 function _csvParse(text){
@@ -25689,7 +25720,7 @@ function _bkCsvRows(text){
   const rows=_csvParse(text);if(rows.length<2)return{rows:[],err:'empty'};
   const map=_bkCsvHeaderMap(rows[0]);if(map.number==null||map.type==null)return{rows:[],err:'head'};
   const fleetNums=new Set(getBikes().filter(b=>b.status!=='retired'&&b.bike_number!=null).map(b=>Number(b.bike_number)));
-  const seen=new Set(),frames=_bkFrameList();
+  const seen=new Set(),seenTags=new Set(),frames=_bkFrameList();
   const numOr=(v,int)=>{v=String(v||'').trim().replace(',','.');if(!v)return null;const n=int?parseInt(v,10):parseFloat(v);return isNaN(n)?null:n;};
   const out=rows.slice(1).map((r,i)=>{
     const g=k=>map[k]==null?'':String(r[map[k]]??'').trim();
@@ -25704,11 +25735,15 @@ function _bkCsvRows(text){
     const frRaw=g('frame'),frame=frames.find(f=>f.toLowerCase()===frRaw.toLowerCase())||frRaw||(frames.includes('Aluminum')?'Aluminum':frames[0]||'Aluminum');
     const stRaw=g('status').toLowerCase(),status=!stRaw?'available':BK_CSV_STATUSES.includes(stRaw)?stRaw:null;
     if(!status)errs.push('bkImportErrStatus');
+    // The tag as the form and the resolver read it; one tag on two rows of the file is refused here
+    // (one already on a fleet bike is not visible to this read, and is refused by the insert).
+    const tag=_bkTagNorm(g('tag'))||null;
+    if(tag){if(seenTags.has(tag))errs.push('bkTagTaken');seenTags.add(tag);}
     const dRaw=g('in_service'),inSvc=!dRaw?_todayISO():(_ymdReal(dRaw)?dRaw:null);
     if(!inSvc)errs.push('bkImportErrDate');
     const hex=g('color'),colors=/^#?[0-9a-f]{6}$/i.test(hex)?[hex.startsWith('#')?hex:'#'+hex]:['#03ff89'];
     const bike={id:uid(),bike_number:num>=1?num:null,type:type||g('type'),size:size||g('size'),frame_type:frame,brand:g('brand')||null,model:g('model')||null,groupset:g('groupset')||null,speeds:numOr(g('speeds'),true),
-      serial_number:g('serial')||null,tag_uid:g('tag')||null,colors,color_names:[g('color_name')||''],in_service_date:inSvc||null,model_year:numOr(g('model_year'),true),wheel_size:g('wheel')||null,brake_type:g('brake')||null,
+      serial_number:g('serial')||null,tag_uid:tag,colors,color_names:[g('color_name')||''],in_service_date:inSvc||null,model_year:numOr(g('model_year'),true),wheel_size:g('wheel')||null,brake_type:g('brake')||null,
       pedal_type:g('pedal')||null,weight_kg:numOr(g('weight_kg')),rental_price:numOr(g('price')),status:status||'available',notes:g('notes')||null,retired_date:(status&&status!=='available')?_todayISO():null};
     bike.name=g('name')||genBikeName(bike.type,bike.frame_type,num>=1?num:0,bike.size);
     return{line:i+2,bike,errs};
@@ -25735,13 +25770,24 @@ function _bkCsvPreview(text){
 }
 async function _bkCsvImport(){
   const bikes=_bkCsvPending||[];_bkCsvPending=null;if(!bikes.length)return;
-  const ids=[];
+  const ids=[],refused=[];
   for(let i=0;i<bikes.length;i+=50){
     const chunk=bikes.slice(i,i+50);
     const r=await sb.from('bikes').insert(chunk);
-    if(_writeErr(r,'import bikes'))break;
-    ids.push(...chunk.map(b=>b.id));
+    if(!r.error){ids.push(...chunk.map(b=>b.id));continue;}
+    // One refused row refuses its whole chunk - a tag already on a fleet bike, which the preview
+    // cannot see - and the import used to stop there. The chunk goes again a row at a time, so
+    // only that row stays out; a refusal that is not a clash (a permission, the connection) ends it.
+    let stop=false;
+    for(const b of chunk){
+      const r1=await sb.from('bikes').insert(b);
+      if(!r1.error){ids.push(b.id);continue;}
+      refused.push(r1);
+      if(String(r1.error.code||'')!=='23505'){stop=true;break;}
+    }
+    if(stop)break;
   }
+  if(refused.length)_writeErr(refused,'import bikes');
   const seenBM=new Set();
   for(const b of bikes){if(!ids.includes(b.id))continue;const k=(b.brand||'')+'|'+(b.model||'')+'|'+(b.groupset||'');if(seenBM.has(k))continue;seenBM.add(k);try{await _autoSaveBkOpts(b.brand,b.model,b.groupset);}catch(_){}}
   await loadData();
@@ -27370,11 +27416,14 @@ async function _rwFinish(d,res,r){
   const stamp=d.checkin?{checked_in_at:new Date().toISOString(),checked_in_by:_opName()||null}:{};
   const link=e=>e?{matched_entry_id:e.id,matched_customer_id:e.customerId||null,match_kind:'booking'}:{};
   const writes=[]; // each one a call to make, so Retry can send them again
-  if(res.id)writes.push(()=>sb.from('rider_registrations').update({...link(entry),...stamp}).eq('id',res.id));
+  const regIns=[]; // the registrations stamped as checked in, each with its booking, which goes Active with it
+  if(res.id){regIns.push({...((S.riders||[]).find(x=>x.id===res.id)||{}),id:res.id,name:r.name,height:r.h,type_preference:d.type,matched_entry_id:entry?entry.id:null});writes.push(()=>sb.from('rider_registrations').update({...link(entry),...stamp}).eq('id',res.id));}
   if(companions.length){
     await loadRiders();
     const _emp=(S.riders||[]).find(x=>x.id===res.id);
     (S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(!_emp||x.session_id===_emp.session_id)&&_riderPartyNo(x)>=2).forEach(x=>{
+      const ce=compEntries[_riderPartyNo(x)-2];
+      regIns.push({...x,matched_entry_id:ce?ce.id:null});
       writes.push(()=>sb.from('rider_registrations').update({...link(compEntries[_riderPartyNo(x)-2]),...stamp}).eq('id',x.id));
     });
   }
@@ -27383,6 +27432,17 @@ async function _rwFinish(d,res,r){
     if(_writeErr(rs,'link registration',_link)){await loadRiders();renderRiders();return;}
     toast((res.resubmitted?t('ridersWalkinResub'):t('ridersWalkinAdded')).replace('{0}',r.name).replace('{1}',res.booking_no||''));
     await Promise.all([loadRiders(),created.length?loadDataLight():Promise.resolve()]);
+    // "Check in now" is the booking's check-in too, as the Check in button is (2026-09-25): the
+    // registration alone read "On ride" while its booking stayed Waiting, and its Return later
+    // found no booking on a bike to move.
+    if(d.checkin){
+      // the bookings just made, should the reload not carry them yet
+      const _have=new Set(getQueue().map(x=>x.id)),_new=created.filter(x=>x&&!_have.has(x.id));
+      if(_new.length)S.queue=[...getQueue(),..._new];
+      const moved=[];
+      for(const reg of regIns){const m=reg.matched_entry_id?await _riderBookingIn(reg):null;if(m)moved.push(m);}
+      if(moved.length){await _reloadRows(moved);renderStaffQueue();}
+    }
     renderRiders();
   };
   await _link();
