@@ -95,7 +95,7 @@ test('what reaches the server is the version, and the booking carries it', async
   await page.evaluate(`regNextToReview();toggleWaiver(true);regWaiverContinue();submitReg()`);
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const sent = JSON.parse(rpc[0]);
-  expect(sent.p_entries[0].waiver_version).toBe('2026-10-v2');
+  expect(sent.p_entries[0].waiver_version).toBe('2026-10-v3');
   // the client never sends a time: a timestamp the caller picks is not evidence
   expect(JSON.stringify(sent)).not.toContain('waiver_at');
 });
@@ -111,7 +111,7 @@ test('every rider on a party booking carries the version, not just the first', a
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const entries = JSON.parse(rpc[0]).p_entries as Record<string, unknown>[];
   expect(entries.length).toBe(3);
-  for (const e of entries) expect(e.waiver_version).toBe('2026-10-v2');
+  for (const e of entries) expect(e.waiver_version).toBe('2026-10-v3');
 });
 
 test('the agreement does not carry into the next booking', async ({ page }) => {

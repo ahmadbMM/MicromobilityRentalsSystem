@@ -66,7 +66,7 @@ test.describe('@customer:reserve activity waiver', () => {
       expect(await page.evaluate('S.regStep')).toBe(3);
       await page.evaluate(`submitReg()`);
       await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-      expect(posts[0][0].waiver_version).toBe('activity-2026-10-v1');
+      expect(posts[0][0].waiver_version).toBe('activity-2026-10-v2');
     });
   }
 
@@ -80,7 +80,7 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect(panel).not.toContainText('Activity waiver');
     await page.evaluate(`toggleWaiver(true);regWaiverContinue();submitReg()`);
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-    expect(posts[0][0].waiver_version).toBe('swim-2026-10-v2');
+    expect(posts[0][0].waiver_version).toBe('swim-2026-10-v3');
   });
 
   test('the Arabic activity waiver reads as the owner wrote it', async ({ page }) => {

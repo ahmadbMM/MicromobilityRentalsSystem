@@ -95,7 +95,7 @@ test('the booking carries the sentinel type and the swim waiver version', async 
   const e = JSON.parse(rpc[0]).p_entries[0];
   expect(e.type_preference).toBe('None');   // not 'Any' — that would mean "any bike will do"
   expect(e.size).toBe('');
-  expect(e.waiver_version).toBe('swim-2026-10-v2');
+  expect(e.waiver_version).toBe('swim-2026-10-v3');
   expect(e.price).toBe(0);                  // free, like the Saturday ride
 });
 

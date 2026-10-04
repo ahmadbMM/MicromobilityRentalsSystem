@@ -121,7 +121,7 @@ test('the booking is one person, no bike, free, and carries the activity waiver'
   expect(entries[0].type_preference).toBe('None');
   expect(entries[0].size).toBe('');
   expect(entries[0].price).toBe(0);
-  expect(entries[0].waiver_version).toBe('activity-2026-10-v1');
+  expect(entries[0].waiver_version).toBe('activity-2026-10-v2');
 });
 
 test('a second reservation on the same workshop is refused', async ({ page }) => {
