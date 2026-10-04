@@ -26,6 +26,21 @@ function _icsEsc(s) { return String(s).replace(/([,;\\])/g, '\\$1').replace(/\r?
 /** UTC timestamp for DTSTAMP. @param {Date} [d] @returns {string} */
 function _icsStamp(d) { d = d || new Date(); const p = (/** @type {number} */ n) => String(n).padStart(2, '0'); return d.getUTCFullYear() + p(d.getUTCMonth() + 1) + p(d.getUTCDate()) + 'T' + p(d.getUTCHours()) + p(d.getUTCMinutes()) + p(d.getUTCSeconds()) + 'Z'; }
 
+// A ride's time is Jeddah's, whatever the phone's clock says: a time written without a zone is read
+// in the device's own, so a phone set to London put a 21:00 ride at 21:00 London. Every calendar
+// time is written in UTC instead (KSA is UTC+3 all year, no clock changes). `min` counts minutes
+// from the ride day's midnight and may run past 1440: an end after midnight lands on the next day.
+/** @param {string} ymd YYYYMMDD (KSA) @param {number} min @returns {string} */
+function _icsUtc(ymd, min) { return _icsStamp(new Date(Date.UTC(+ymd.slice(0, 4), +ymd.slice(4, 6) - 1, +ymd.slice(6, 8), 0, min - 180))); }
+
+/** The ride's start and end in minutes (end > start, past 1440 when it runs past midnight). @param {RegExpMatchArray|null} m @returns {[number, number]} */
+function _icsSpan(m) {
+  if (!m) return [540, 660];
+  const s = Number(m[1]) * 60 + Number(m[2]); let e = Number(m[3]) * 60 + Number(m[4]);
+  if (e <= s) e += 1440;
+  return [s, e];
+}
+
 // v2 design: Google Calendar template URL for the ticket's "Add to calendar" ghost button.
 // (The .ics download in _ticketCal below stays available and is what the tests exercise.)
 /** @param {number} idx @returns {string} */
@@ -36,12 +51,13 @@ function _gcalUrl(idx) {
     const m = String(_sessRawTime(sess)).match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
     const d = String(tkt.sessionDate || '').replace(/-/g, '');
     if (d.length !== 8) return '';
-    const sh = (m ? m[1] : '9').padStart(2, '0'), sm = m ? m[2] : '00', eh = (m ? m[3] : '11').padStart(2, '0'), em = m ? m[4] : '00';
+    const [s, en] = _icsSpan(m);
     const loc = ((sess && sess.location) === 'JCC' ? 'Jeddah Corniche Circuit' : (sess && sess.location) || 'Jeddah Corniche Circuit');
     const e = encodeURIComponent;
     return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
       + '&text=' + e('MicroMobility Rental #' + tkt.queueNum)
-      + '&dates=' + e(d + 'T' + sh + sm + '00/' + d + 'T' + eh + em + '00')
+      + '&dates=' + e(_icsUtc(d, s) + '/' + _icsUtc(d, en))
+      + '&ctz=' + e('Asia/Riyadh')
       + '&location=' + e(loc)
       + '&details=' + e('Your bicycle rental at the Jeddah Corniche Circuit. Booking #' + tkt.queueNum);
   } catch (e) { return ''; }
@@ -56,11 +72,11 @@ function _ticketCal(idx) {
     const m = String(_sessRawTime(sess)).match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
     const d = String(tkt.sessionDate || '').replace(/-/g, '');
     if (d.length !== 8) return;
-    const sh = (m ? m[1] : '9').padStart(2, '0'), sm = m ? m[2] : '00', eh = (m ? m[3] : '11').padStart(2, '0'), em = m ? m[4] : '00';
+    const [s, en] = _icsSpan(m);
     const loc = (sess && sess.location) || '';
     const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//MicroMobility//Booking//EN', 'BEGIN:VEVENT',
-      'UID:mm-' + tkt.queueNum + '-' + d + sh + sm + '@micromobility', 'DTSTAMP:' + _icsStamp(),
-      'DTSTART:' + d + 'T' + sh + sm + '00', 'DTEND:' + d + 'T' + eh + em + '00',
+      'UID:mm-' + tkt.queueNum + '-' + d + String(Math.floor(s / 60)).padStart(2, '0') + String(s % 60).padStart(2, '0') + '@micromobility', 'DTSTAMP:' + _icsStamp(),
+      'DTSTART:' + _icsUtc(d, s), 'DTEND:' + _icsUtc(d, en),
       'SUMMARY:' + _icsEsc('MicroMobility Rental #' + tkt.queueNum),
       'DESCRIPTION:' + _icsEsc('Your bicycle rental at the Jeddah Corniche Circuit. Booking #' + tkt.queueNum),
       loc ? 'LOCATION:' + _icsEsc(loc + ', Jeddah') : '', 'BEGIN:VALARM', 'TRIGGER:-PT2H', 'ACTION:DISPLAY',

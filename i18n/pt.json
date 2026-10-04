@@ -65,6 +65,7 @@
   "ucMismatch": "Os dois códigos não são iguais.",
   "ucSaved": "Código para desfazer salvo",
   "ucWrong": "Código errado. Restam {0} tentativas.",
+  "ucWrongPlain": "Código errado.",
   "ucLocked": "Tentativas demais. Tente novamente em {0} s.",
   "authLogin": "Entrar",
   "authSignup": "Criar conta",

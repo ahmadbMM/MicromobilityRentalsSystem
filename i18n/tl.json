@@ -65,6 +65,7 @@
   "ucMismatch": "Hindi magkapareho ang dalawang code.",
   "ucSaved": "Na-save ang undo code",
   "ucWrong": "Maling code. {0} subok na lang.",
+  "ucWrongPlain": "Maling code.",
   "ucLocked": "Masyadong maraming subok. Subukan ulit pagkalipas ng {0} s.",
   "authLogin": "Mag-log in",
   "authSignup": "Gumawa ng account",

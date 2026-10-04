@@ -42,8 +42,8 @@ test('_ticketCal emits a valid VEVENT .ics with a 2-hour reminder for the bookin
 
   expect(ics).toContain('BEGIN:VCALENDAR');
   expect(ics).toContain('BEGIN:VEVENT');
-  expect(ics).toContain('DTSTART:20990314T090000');
-  expect(ics).toContain('DTEND:20990314T110000');
+  expect(ics).toContain('DTSTART:20990314T060000Z'); // 09:00 Jeddah, in UTC
+  expect(ics).toContain('DTEND:20990314T080000Z');
   expect(ics).toContain('SUMMARY:MicroMobility Rental #7');
   expect(ics).toContain('TRIGGER:-PT2H'); // 2-hour reminder
   expect(ics).toContain('END:VCALENDAR');

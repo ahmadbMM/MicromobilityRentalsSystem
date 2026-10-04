@@ -65,6 +65,7 @@
   "ucMismatch": "Les deux codes ne sont pas identiques.",
   "ucSaved": "Code d'annulation enregistré",
   "ucWrong": "Code incorrect. Encore {0} essai(s).",
+  "ucWrongPlain": "Code incorrect.",
   "ucLocked": "Trop d'essais. Réessayez dans {0} s.",
   "authLogin": "Se connecter",
   "authSignup": "Créer un compte",

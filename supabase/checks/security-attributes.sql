@@ -70,6 +70,12 @@ with expected(fname, want_definer, note) as (values
   ('customer_community_apply', true, 'writes community_applications (staff-only) for the signed-in applicant; token-checked, _ip_gate-metered'),
   ('customer_community_me',  true,  'reads the caller''s own account, application and tags for the form; token-checked'),
   ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),
+  -- The 2026-10-03 review fixes (20261004100000); vendor_logout is listed with the vendor portal's
+  ('customer_change_password',  true,  'writes customers.password_hash, login_throttle and customer_owner_pwd; token-checked'),
+  ('customer_purchases',        true,  'reads the rider''s own cashier_sales, which customers cannot read; token-checked'),
+  ('customer_push_subscribe',   true,  'writes push_subscriptions for the signed-in rider; token-checked, known push services only'),
+  ('staff_my_settings',         true,  'writes the caller''s own staff row, auth metadata and team-list name; staff only'),
+  ('_safe_date',                false, 'pure date parse'),
   ('_badge_rule_ok',        false, 'pure shape test of a badge rule, for the check constraint'),
   -- Invoker on purpose: pure logic, no privileged read.
   ('_name_chars_ok',         false, 'pure regex test, no read'),
@@ -180,13 +186,13 @@ with expected(fname, want_definer, note) as (values
   ('_bike_ids',              false, 'pure parse of assigned_bike_id, no read'),
   ('_queue_stamps',          false, 'sets the four timestamps on NEW only'),
   -- Learn to ride (20260928210000, 20260928230000)
-  ('learn_apply',            true,  'the website form writes learn_applications, which anon cannot touch; metered'),
+  ('learn_apply',            true,  'writes learn_applications; only customer_learn_apply calls it since 20261004100000 (revoked from anon/authenticated)'),
   ('staff_learn_schedule',   true,  'finds or makes the account and records the lesson; checks is_staff() itself'),
   ('staff_learn_new_password', true, 'writes customers.password_hash, which no client can select; staff only'),
   ('staff_learn_decide',     true,  'moves a sign-up between its states; checks is_staff() itself'),
   ('_learn_heard_to_account',true,  'trigger: writes customers.heard_from whoever set the sign-up''s account; internal only'),
   -- Workplace and the account page's "about" fields (20260929110000)
-  ('community_apply',        true,  'the website form writes community_applications, which anon cannot touch; metered'),
+  ('community_apply',        true,  'writes community_applications; revoked from anon/authenticated since 20261004100000 (customer_community_apply is the form''s way in)'),
   ('staff_community_approve',true,  'finds or makes the account; checks is_staff() itself'),
   ('customer_about',         true,  'reads the signed-in rider''s own customers row; token-checked'),
   ('customer_set_about',     true,  'writes the signed-in rider''s own customers row; token-checked'),

@@ -36,6 +36,11 @@ function bookings(page: Page) {
 }
 async function toWaiver(page: Page, ev: string, id: string) {
   await page.evaluate(`S.selEvent='${ev}';goCustomer('register');S.regStep=1;renderRegister();S.selSession='${id}';S.regQty=1;ensureBikeSizes();regNextFromSession()`);
+  // An event asks how many seats first (up to five, 2026-10-04); the others go straight to the waiver.
+  if (ev === 'event') {
+    expect(await page.evaluate('S.regStep')).toBe(2);
+    await page.evaluate('regNextToReview()');
+  }
   expect(await page.evaluate('S.regStep')).toBe(2.5);
 }
 
@@ -52,7 +57,7 @@ test.describe('@customer:reserve activity waiver', () => {
       await expect(panel).toContainText('Every activity we run carries some risk.');
       await expect(panel).toContainText('I agree to follow the team’s and the venue’s instructions.');
       await expect(panel).toContainText('I have read the waiver and agree on behalf of everyone on this booking');
-      await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', 'Step 2 of 3');
+      await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', ev === 'event' ? 'Step 3 of 4' : 'Step 2 of 3');
       // unticked: the button is off, and even called directly the step stays put
       await expect(panel.locator('.mm-reg-foot .btn-primary')).toBeDisabled();
       await page.evaluate(`regWaiverContinue()`);

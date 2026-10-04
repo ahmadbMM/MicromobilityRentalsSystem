@@ -16,7 +16,9 @@ async function boot(page: Page, hasCode: boolean, admin = true): Promise<Calls> 
     if (r.request().method() === 'OPTIONS') return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*' } });
     const code = String((r.request().postDataJSON() || {}).p_code || '');
     calls.check.push(code);
-    const body = code === '482915' ? { ok: true } : code === '999999' ? { ok: false, reason: 'locked', seconds: 60 } : { ok: false, reason: 'wrong', left: 4 };
+    const body = code === '482915' ? { ok: true } : code === '999999' ? { ok: false, reason: 'locked', seconds: 60 }
+      : code === '222222' ? { ok: false, reason: 'wrong' } // an answer without a count
+      : { ok: false, reason: 'wrong', left: 4 };
     return r.fulfill({ status: 200, headers: json, body: JSON.stringify(body) });
   });
   await page.route(/\/rest\/v1\/rpc\/staff_set_undo_code/, async (r) => {
@@ -76,6 +78,16 @@ test.describe('@staff:undo undo codes', () => {
     await page.evaluate(`_staffRoleConfirmed('u2','frontdesk')`);
     await page.waitForTimeout(400);
     await expect(box(page)).toHaveCount(0);
+  });
+
+  test('a wrong code the server gives no count for says so plainly, never "undefined tries left"', async ({ page }) => {
+    await boot(page, true);
+    await undoable(page);
+    await undoBtn(page).click();
+    await page.locator('#uc-code').fill('222222');
+    await page.locator('#uc-code').press('Enter');
+    await expect(page.locator('#uc-msg')).toHaveText('Wrong code.');
+    expect(await runs(page)).toBe(0);
   });
 
   test('the topbar Undo asks for the code: a wrong one undoes nothing, the right one undoes', async ({ page }) => {
