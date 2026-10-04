@@ -1046,13 +1046,18 @@ export function formatFieldNames(r, limit = 20) {
 // scanner, check-in, return, cashier, hand-over, riders report, operator gate) moved to staff.js. Here: customer
 // 185.5, staff 392.4, core 218.1 (the runner reads ~1.2 / ~1.6 / ~0.8 more). The customer budget is lowered to
 // keep the win.
-// Customer 190 -> 191, staff 398 -> 406, core 222 -> 226 (2026-10-04, the audit's "fix them all"): the staff security
+// Staff 398 -> 400 (2026-10-04): invited riders' three lists and Revoke invitation, and a priority on each
+// learn-to-ride sign-up (the community part 47.1 -> 48.8 KB, 17 strings); 396.0 KB here is ~398.2 on the runner
+// (it read 2.0 more than here for 1c230561).
+// Staff 400 -> 404 (2026-10-04): History > Customer activity (renderCustActivity in the history part, 36 strings);
+// 399.2 KB here is ~401.4 on the runner (it read 2.2 more than here for 9e45176b: 394.1 here, 396.3 there).
+// Customer 190 -> 191, staff 404 -> 412, core 222 -> 227 (2026-10-04, the audit's "fix them all"): the staff security
 // pass (idle lock, sign-out wipe, one-call check-in, exports helper), the vendor staff side (Tell the venue, late
 // cancels), desk speed (scanner banner and tones, Open the next rider, Not here yet, wake lock, booth mode), the
 // accessibility pass (named popups, focus restore, field names) and the performance pass (indexes, Analytics memo,
-// per-row sync). Here: customer 188.1, staff 402.2, core 223.4 (the runner reads ~1.3 / ~1.6 / ~0.8 more). The
+// per-row sync). Here, merged with main: customer 188.2, staff 407.3, core 224.2 (the runner reads ~1.3 / ~2.2 / ~0.8 more). The
 // customer half keeps a 1 KB margin over the runner's reading so a tenth of a KB cannot turn CI red.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 191, staff: 406, core: 226 };
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 191, staff: 412, core: 227 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

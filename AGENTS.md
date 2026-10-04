@@ -562,3 +562,39 @@ offer in the rider's language (`vndRiderOffer`).
 - The phone roster's one ride picker is the strip's select (it lists past nights under Closed); the filter bar's
   Session select is hidden there (`.filter-sess-dup`). On a wide screen Sessions shows the next live ride's detail
   until one is picked (not stored in `S.selSessionDetail`).
+
+## Applications: invited riders' lists, revoking, learn-to-ride priority (2026-10-04)
+
+- **Invited riders** (Community > Applications > Invited) fall into three lists under a second row of pills
+  (`_caInvSubs`, `S._caInvSub`), read off the booking the invitation made on `invited_session` (`_caInvBks`, through
+  merged accounts, `_caCids`): `completed` = checked in (active or done), `noshow` = a no-show, or the ride's day has
+  passed without a check-in (`_caInvSt`); `invited` = the rest. A booking cancelled since shows its reason on the card
+  (`_caInvBkNote`). Nothing is stored: the lists follow the roster.
+- **Revoke invitation** (`_caRevoke`, the Invited list only): the booking is cancelled through the desk's own
+  `_staffCancelNow(id, {cancel_reason:'invite_revoked'}, {noUndo:true})` (numbers close up, the waitlist moves up; no
+  booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same
+  `invited_session`). The Pending card names the ride from that cancelled booking (`_caRevokedNote`). `invite_revoked`
+  is in `CANCEL_SYS` (labelled, never offered to pick) and stays out of Analytics' "Why riders cancel".
+- **Priority** on a learn-to-ride sign-up (`learn_applications.priority`, migration 20261004185500): Critical / High /
+  Medium / Low on New and Scheduled cards (`_laPrioRow`, `_laPrio`; a second tap clears; Undo), New ordered by it
+  (`_laPrioRank`). Until the column exists the list loads without it and the cards carry none (`S._laNoPrio`).
+
+## Customer activity (2026-10-04)
+
+History > Customer activity (`/history/customers`, `renderCustActivity`) lists what customers did: bookings,
+cancels, moves, ratings, waivers, sign-ups, sign-ins and wrong passwords, account edits, consents, applications,
+messages, the rider forms. The **database** writes it (migration 20261004160000): one AFTER trigger function,
+`_cact_row`, on every table a customer's request writes, inserting through `_cact_add` into `customer_activity`
+(staff-only SELECT; no client can write it). So the booking app, the website, the forms and an old cached build
+all land there, and no page has to remember to log anything.
+- A staff session's writes (`is_staff()`) are never customer activity, and neither is a write with no PostgREST
+  request behind it (cron, a migration, a staging clone's data load). Booking rows count only from the anon or
+  authenticated key, and only the transitions a customer can ask for are named: a waitlist promotion or a renumber
+  inside a customer's cancel is the system, not the customer.
+- The row change says what happened; `request.path` (the RPC's name, kept as `fn`) only breaks ties (a customers
+  update from `customer_login` is a sign-in, folded to one per account per 30 minutes). `origin` is the page's
+  Origin host, or `server` for the website's server-side calls.
+- A new table customers write through an RPC: add its trigger and a branch in `_cact_row`, a `cactA_<code>` string
+  (en, ar, every `i18n/*.json`) and its category in `_CACT_CAT`. Read a row's fields only inside that table's own
+  `if`: PL/pgSQL does not short-circuit `and`, so `tg_table_name = 'x' and new.col ...` breaks every other table's
+  writes (it would have broken customer sign-in).

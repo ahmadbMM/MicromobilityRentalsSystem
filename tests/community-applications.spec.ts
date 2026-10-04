@@ -833,3 +833,162 @@ test('Invited: Add to Community gives the Community tag; Blacklist gives the bla
   await expect(row(page, 'i2').locator('.ca-inv-ban, .ca-inv-comm')).toHaveCount(0);
   expect(await page.evaluate(`_isBlacklisted('c2')&&!_hasTagNow('c2','tag_saturday')`)).toBe(true);
 });
+
+// The owner, 2026-10-04: invited riders in three lists - Invited (the ride still to come), Completed
+// (checked in on it) and Didn't show (a no-show, or the ride's day passed without a check-in) - read
+// off the booking the invitation made; and an invitation revoked while its ride is to come cancels
+// that booking ('invite_revoked') and puts the application back in Pending.
+const PAST = '2020-01-04';
+const invApp = (id: string, name: string, cid: string, sid: string) => ({ ...base, id, status: 'approved', name, email: `${cid}@example.test`, phone: '+966550000000',
+  instagram: '', linkedin: '', existing_account: true, customer_id: cid, decided_at: '2026-09-23T08:00:00Z', decided_by: 'Desk A', invited_session: sid });
+const invBk = (id: string, cid: string, sid: string, status: string, extra: Record<string, unknown> = {}) => ({ id, session_id: sid, customer_id: cid, name: `Rider ${cid}`,
+  status, approval: 'approved', queue_num: Number(id.replace(/\D/g, '')) || 1, session_day: 'Saturday', session_date: sid, type_preference: 'Road', registered_at: '2026-09-22T08:00:00Z', ...extra });
+const invPeople = ['k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7'].map((id, i) => ({ id, name: `Rider ${id}`, email: `${id}@example.test`, phone: `+96655810000${i}`, height: 175, created_at: '2026-01-05T10:00:00Z' }));
+const ids = (page: Page) => page.locator('.ca-row').evaluateAll((rs) => rs.map((r) => r.getAttribute('data-app-id')));
+
+test('Invited riders fall into Invited, Completed and Didn’t show by their booking on the ride', async ({ page }) => {
+  await applicationsTab(page, {
+    sessions: [ride(SAT), ride(PAST)], customers: [...customers, ...invPeople],
+    community_applications: [...apps,
+      invApp('i1', 'Upcoming Booked', 'k1', SAT), invApp('i2', 'Past Done', 'k2', PAST), invApp('i3', 'Past No Show', 'k3', PAST),
+      invApp('i4', 'Past Never Came', 'k4', PAST), invApp('i5', 'Past Cancelled', 'k5', PAST), invApp('i6', 'Upcoming Checked In', 'k6', SAT),
+      invApp('i7', 'Upcoming Cancelled', 'k7', SAT)],
+    queue_entries: [
+      invBk('q1', 'k1', SAT, 'waiting'), invBk('q2', 'k2', PAST, 'done'), invBk('q3', 'k3', PAST, 'noshow'), invBk('q4', 'k4', PAST, 'waiting'),
+      invBk('q5', 'k5', PAST, 'cancelled', { cancel_reason: 'plans', cancelled_by: 'staff' }), invBk('q6', 'k6', SAT, 'active'),
+      invBk('q7', 'k7', SAT, 'cancelled', { cancel_reason: 'work' }),
+    ],
+  });
+  await expect(page.locator('.filter-pill[data-ca-filter="invited"]')).toHaveText('Invited (7)');
+  await expect(page.locator('.ca-inv-subs')).toHaveCount(0); // only under Invited
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  const sub = (k: string) => page.locator(`.ca-inv-subs [data-ca-inv="${k}"]`);
+  await expect(sub('invited')).toHaveText('Invited (2)');
+  await expect(sub('completed')).toHaveText('Completed (2)');
+  await expect(sub('noshow')).toHaveText('Didn’t show (3)');
+  await expect(sub('invited')).toHaveAttribute('aria-pressed', 'true');
+
+  // still to come: booked, or cancelled ahead (which the card says, with the reason); both can be revoked
+  expect((await ids(page)).sort()).toEqual(['i1', 'i7']);
+  for (const id of ['i1', 'i7']) {
+    await expect(row(page, id)).toHaveAttribute('data-inv', 'invited');
+    await expect(row(page, id).locator('.ca-status')).toHaveText('Invited');
+    await expect(row(page, id).locator('.ca-revoke')).toHaveText('Revoke invitation');
+  }
+  await expect(row(page, 'i1').locator('.ca-inv-bk')).toHaveCount(0);
+  await expect(row(page, 'i7').locator('.ca-inv-bk')).toHaveText('Booking cancelled · Work or family commitment');
+
+  // checked in: completed, the latest ride first, nothing to revoke
+  await sub('completed').click();
+  expect(await ids(page)).toEqual(['i6', 'i2']);
+  for (const id of ['i2', 'i6']) {
+    await expect(row(page, id).locator('.ca-status')).toHaveText('Completed');
+    await expect(row(page, id).locator('.ca-revoke')).toHaveCount(0);
+  }
+  await expect(row(page, 'i2').locator('.ca-inv-ban')).toBeVisible(); // what to do after the ride stays
+
+  // a no-show, never checked in, or cancelled: the ride has gone without them
+  await sub('noshow').click();
+  expect((await ids(page)).sort()).toEqual(['i3', 'i4', 'i5']);
+  for (const id of ['i3', 'i4', 'i5']) {
+    await expect(row(page, id)).toHaveAttribute('data-inv', 'noshow');
+    await expect(row(page, id).locator('.ca-status')).toHaveText('Didn’t show');
+    await expect(row(page, id).locator('.ca-revoke')).toHaveCount(0);
+  }
+  await expect(row(page, 'i5').locator('.ca-inv-bk')).toHaveText('Booking cancelled · Change of plans');
+
+  // the search counts each list's matches, and the pick stays
+  await openSearch(page, 'caq');
+  await page.locator('#ca-q').fill('past');
+  await expect(sub('invited')).toHaveText('Invited (0)');
+  await expect(sub('completed')).toHaveText('Completed (1)');
+  await expect(sub('noshow')).toHaveText('Didn’t show (3)');
+  await expect(page.locator('.filter-pill[data-ca-filter="invited"]')).toHaveText('Invited (4)');
+  await expect(sub('noshow')).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('Revoke invitation: the booking is cancelled as invite_revoked, the application goes back to Pending', async ({ page }) => {
+  await applicationsTab(page, {
+    sessions: [ride(SAT)], customers: [...customers, ...invPeople],
+    community_applications: [...apps, invApp('i1', 'Lina Haddad', 'k1', SAT)],
+    queue_entries: [invBk('q1', 'k1', SAT, 'waiting')],
+  });
+  const qp = patches(page, 'queue_entries'), ap = patches(page, 'community_applications');
+  const undo0 = await page.evaluate('S.undoStack.length');
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  await row(page, 'i1').locator('.ca-revoke').click();
+  const day = await page.evaluate(`dayLabel('Saturday')+' '+shortDate('${SAT}')`);
+  const dlg = page.locator('#confirm-modal');
+  await expect(dlg).toContainText('Revoke Lina Haddad’s invitation?');
+  await expect(dlg).toContainText(`Lina Haddad comes off the Saturday Social Ride on ${day}. The application goes back to Pending, where you can invite them to another ride, approve it or reject it.`);
+  await dlg.locator('.btn-red').click();
+
+  await expect.poll(() => ap.length).toBe(1);
+  const c = qp.find((p) => p.url.includes('id=eq.q1'));
+  expect(c && c.body).toMatchObject({ status: 'cancelled', cancelled_by: 'staff', cancel_reason: 'invite_revoked' });
+  expect(c!.url).toContain('status=eq.waiting'); // guarded on what the desk saw
+  expect(ap[0].body).toEqual({ status: 'pending', invited_session: null, decided_at: null, decided_by: null });
+  for (const part of ['id=eq.i1', 'status=eq.approved', `invited_session=eq.${SAT}`]) expect(ap[0].url).toContain(part);
+
+  // back in Pending, where it can be invited again; one action, so no Undo of the booking alone
+  await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (3)');
+  await expect(page.locator('.filter-pill[data-ca-filter="invited"]')).toHaveText('Invited (0)');
+  expect(await page.evaluate('S.undoStack.length')).toBe(undo0);
+  await page.locator('.filter-pill[data-ca-filter="pending"]').click();
+  await expect(row(page, 'i1')).toHaveAttribute('data-status', 'pending');
+  await expect(row(page, 'i1').locator('.ca-invite')).toBeVisible();
+  await expect(page.locator('#toast-container')).toContainText('Lina Haddad’s invitation revoked');
+});
+
+test('A revoked invitation reads so on the Pending card, and the cancelled booking reads Invitation revoked', async ({ page }) => {
+  await stubSupabase(page, { sessions: [ride(SAT)], queue_entries: [invBk('q1', 'k1', SAT, 'cancelled', { cancel_reason: 'invite_revoked', cancelled_by: 'staff' })],
+    bikes: [], customers: [...customers, ...invPeople], tags: [], customer_tags: [],
+    community_applications: [...apps, { ...invApp('i1', 'Lina Haddad', 'k1', SAT), status: 'pending', invited_session: null, decided_at: null, decided_by: null }] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>1');
+  await page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
+  const day = await page.evaluate(`dayLabel('Saturday')+' '+shortDate('${SAT}')`);
+  await expect(row(page, 'i1').locator('.ca-inv-bk')).toHaveText(`Invitation to the ride on ${day} revoked`);
+  await expect(row(page, 'a1').locator('.ca-inv-bk')).toHaveCount(0);
+  expect(await page.evaluate(`_cancelReasonText({cancelReason:'invite_revoked'})`)).toBe('Invitation revoked');
+});
+
+test('A booking cancel that is refused leaves the invitation standing', async ({ page }) => {
+  await stubSupabase(page, { sessions: [ride(SAT)], queue_entries: [invBk('q1', 'k1', SAT, 'waiting')], bikes: [], customers: [...customers, ...invPeople],
+    tags: [], customer_tags: [], community_applications: [...apps, invApp('i1', 'Lina Haddad', 'k1', SAT)] }, { table: 'queue_entries', methods: ['PATCH'] });
+  const ap = patches(page, 'community_applications');
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>1');
+  await page.evaluate(`setStaffTab('community');S.communityTab='applications';S._caFilter='invited';renderCommunity()`);
+  await row(page, 'i1').locator('.ca-revoke').click();
+  await page.locator('#confirm-modal .btn-red').click();
+  await expect(page.locator('#err-bar-el')).toBeVisible();
+  await page.waitForTimeout(300);
+  expect(ap).toEqual([]);
+  await expect(row(page, 'i1')).toHaveAttribute('data-inv', 'invited');
+  expect(await page.evaluate(`_caFind('i1').status+'/'+_caFind('i1').invited_session`)).toBe(`approved/${SAT}`);
+});
+
+test('a rider checked in while the revoke question is open is left alone', async ({ page }) => {
+  await applicationsTab(page, {
+    sessions: [ride(SAT)], customers: [...customers, ...invPeople],
+    community_applications: [...apps, invApp('i1', 'Lina Haddad', 'k1', SAT)],
+    queue_entries: [invBk('q1', 'k1', SAT, 'waiting')],
+  });
+  const qp = patches(page, 'queue_entries'), ap = patches(page, 'community_applications');
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  await row(page, 'i1').locator('.ca-revoke').click();
+  await expect(page.locator('#confirm-modal')).toContainText('Revoke Lina Haddad’s invitation?');
+  await page.evaluate(`(()=>{const e=getQueue().find(x=>x.id==='q1');e.status='active';S.queue=S.queue.slice();})()`); // checked in at the booth meanwhile
+  await page.locator('#confirm-modal .btn-red').click();
+  await expect(page.locator('#toast-container')).toContainText('This booking was just changed on another device');
+  await page.waitForTimeout(300);
+  expect(qp).toEqual([]);
+  expect(ap).toEqual([]);
+  await page.locator('.ca-inv-subs [data-ca-inv="completed"]').click();
+  await expect(row(page, 'i1')).toHaveAttribute('data-inv', 'completed');
+});

@@ -97,13 +97,14 @@ test('a customer trips nothing: landing, reserve, sign-in, my bookings, account'
 
 test('a staffer trips nothing: every section and sub-view by its address, the roster dialogs, the bell', async ({ page }) => {
   // 26 full page loads: ~11 s on a desk, ~30 s on a CI runner, where it ran out of the default 30 s (2026-10-02).
-  test.setTimeout(60_000);
+  // 33 since /history/customers (2026-10-04): 90 s keeps the margin the list has grown into.
+  test.setTimeout(90_000);
   await watch(page);
   await stubSupabase(page, { sessions, bikes, queue_entries });
   await unlockStaff(page);
   const paths = ['/bookings', '/bookings/sessions', '/bookings/waitlist', '/bookings/riders', '/dashboard', '/sales', '/inventory', '/inventory/supplements', '/inventory/equipment',
     '/workshop', '/community', '/community/stats', '/community/accounts', '/community/flagged', '/community/applications', '/community/birthdays', '/ambassadors', '/vendors', '/vendors/requests', '/vendors/venues', '/vendors/tiers', '/vendors/feedback',
-    '/website', '/website/bikes', '/website/bikes/categories', '/website/bikes/fields', '/messages', '/analytics', '/history', '/history/log', '/team', '/settings'];
+    '/website', '/website/bikes', '/website/bikes/categories', '/website/bikes/fields', '/messages', '/analytics', '/history', '/history/log', '/history/customers', '/team', '/settings'];
   for (const path of paths) {
     await page.goto(path);
     await ready(page);

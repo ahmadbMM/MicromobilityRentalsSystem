@@ -62,6 +62,7 @@ with expected(fname, want_definer, note) as (values
   ('community_fix_get',      true,  'reads one application by its change token for the applicant; anon'),
   ('community_fix_submit',   true,  'writes the asked fields of one application by its token; anon, _ip_gate-metered'),
   ('_community_app_to_account', true, 'writes an application''s answers onto its account; no client may execute it'),
+  ('_learn_app_to_account', true, 'writes a learn-to-ride sign-up''s answers about the person onto its account; no client may execute it'),
   ('staff_learn_ask_changes', true, 'writes learn_applications (staff-only); is_staff()-gated'),
   ('learn_fix_get',          true,  'reads one learn-to-ride sign-up by its change token for the applicant; anon'),
   ('learn_fix_submit',       true,  'writes the asked fields of one learn-to-ride sign-up by its token; anon, _ip_gate-metered'),
@@ -242,7 +243,9 @@ with expected(fname, want_definer, note) as (values
   ('_vendor_session_bf_guard',  true,  'trigger: clears sessions.breakfast_name_ar/offer when staff retype the stop'),
   ('vendor_logout',             true,  'deletes the caller''s own vendor_sessions row by token hash; anon'),
   ('vendor_logout_others',      true,  'deletes the login''s other vendor_sessions rows; token-checked'),
-  ('vendor_team',               true,  'the venue''s logins for its owners, no secrets; token-checked')
+  ('vendor_team',               true,  'the venue''s logins for its owners, no secrets; token-checked'),
+  ('_cact_row',                 true,  'trigger: writes customer_activity, which no client can write; reads sessions/customers/ambassadors'),
+  ('_cact_add',                 true,  'writes customer_activity for _cact_row; no client may execute it')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
