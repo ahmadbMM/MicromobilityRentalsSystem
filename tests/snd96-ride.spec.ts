@@ -258,12 +258,12 @@ test('it can be put on a date a Petromin ride already holds', async ({ page }) =
   const writes = sessionWrites(page);
   await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='snd96';S.newSessMode='total';S.newSessTotal='40';renderSessions()`);
   await page.evaluate(`document.getElementById('ns-date').value='2099-01-14';addSession()`);
-  await expect.poll(() => writes.length).toBeGreaterThan(1);
+  await expect.poll(() => writes.length).toBe(1); // one insert carries the whole row (2026-10-04)
 
   const created = writes.find((w) => w.id);
   expect(created?.id).toBe('2099-01-14-nd');   // its own mark, not the Petromin one
   expect(created?.capacity).toBe(40);
-  const gate = Object.assign({}, ...writes.filter((w) => !w.id));
+  const gate = created as Record<string, unknown>;
   expect(gate.event_kind).toBe(null);          // a circuit night, not an employer ride
   expect(gate.ride_kind).toBe('snd96');
   expect(gate.paid_ride).toBe(true);
@@ -307,8 +307,8 @@ test('a second session on the same date is numbered, not refused', async ({ page
 
   await expect.poll(() => writes.filter((w) => w.id).length).toBe(2);
   expect(writes.filter((w) => w.id).map((w) => w.id)).toEqual(['2099-01-14-nd', '2099-01-14-nd-2']);
-  // and the one that stuck is the one that got its event fields
-  const gate = Object.assign({}, ...writes.filter((w) => !w.id));
+  // and the one that stuck carries its event fields (on the insert itself since 2026-10-04)
+  const gate = writes.filter((w) => w.id).slice(-1)[0] as Record<string, unknown>;
   expect(gate.ride_kind).toBe('snd96');
 });
 

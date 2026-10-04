@@ -28,10 +28,10 @@ async function boot(page: Page, fx: Record<string, unknown>) {
   await waitForSb(page);
 }
 /** The CSV exportSessionExcel / exportAccountsCsv hands to the browser, without a download. */
-const csvOf = (call: string) => `(()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
-  const _a=document.createElement.bind(document);document.createElement=(t)=>t==='a'?{click(){},set href(v){},set download(v){}}:_a(t);
+const csvOf = (call: string) => `(async()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
+  const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
   const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
-  try{${call};}finally{window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;}return out;})()`;
+  try{await (0,eval)(${JSON.stringify(call)});}finally{window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;}return out;})()`;
 const printed = (call: string) => `(()=>{let html='';const real=window._openReport;window._openReport=(h)=>{html=h;};
   const orig=window.open;window.open=()=>({document:{write:(h)=>{html=h;},close(){}},focus(){},print(){}});
   try{${call};}finally{window._openReport=real;window.open=orig;}return html;})()`;

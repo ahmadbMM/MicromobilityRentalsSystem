@@ -275,6 +275,8 @@ test.describe('walk-in at the desk', () => {
     const bkPatches: { url: string; body: Record<string, unknown> }[] = [];
     page.on('request', (r) => {
       if (r.method() === 'PATCH' && /rest\/v1\/queue_entries/.test(r.url())) bkPatches.push({ url: r.url(), body: JSON.parse(r.postData() || '{}') });
+      // a check-in is one staff_checkin call, stamped on the server (2026-10-04)
+      if (/rest\/v1\/rpc\/staff_checkin/.test(r.url())) { const b = JSON.parse(r.postData() || '{}'); bkPatches.push({ url: `id=eq.${b.p_booking_id}`, body: { status: 'active', checked_in_at: 'server' } }); }
     });
 
     await page.locator('#pm-host button', { hasText: 'Walk-in' }).click();

@@ -226,7 +226,12 @@ with expected(fname, want_definer, note) as (values
   ('vendor_feedback_save',      true,  'writes vendor_feedback, which no client can write; token-checked'),
   ('staff_vendor_share_ratings', true, 'reads riders'' breakfast ratings (queue_entries) and writes vendor_shared_ratings; checks is_staff() itself'),
   ('staff_vendor_unshare_ratings', true, 'deletes one vendor_shared_ratings row; checks is_staff() itself'),
-  ('vendor_shared_ratings_mine', true, 'the signed-in vendor''s own shared breakfast ratings, no rider names; token-checked')
+  ('vendor_shared_ratings_mine', true, 'the signed-in vendor''s own shared breakfast ratings, no rider names; token-checked'),
+  -- Staff security, 2026-10-04 (20261004120000)
+  ('_pin_ok_strict',         true,  'reads team_members.pin_hash through _pin_ok; internal only'),
+  ('staff_purge_session',    true,  'deletes an empty deleted session past RLS; admins only, PIN-checked'),
+  ('staff_checkin',          true,  'claims bikes, writes bike_assignments and the booking''s payment in one go; checks is_staff() itself'),
+  ('_addons_price_snapshot', true,  'trigger: reads inventory prices and is_staff() for a booking any caller writes')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

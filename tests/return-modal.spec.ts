@@ -56,7 +56,7 @@ test('the bike card offers Return while the bike is out', async ({ page }) => {
   await expect(page.locator('#return-modal')).toContainText('Rider Seven');
 });
 
-test('a database without the RPC: the classic writes run, and damaged still goes to maintenance', async ({ page }) => {
+test('a database without the RPC: the return is refused and said, and nothing is written around it (2026-10-04)', async ({ page }) => {
   await openStaff(page, { ...base, 'rpc:staff_return': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_return' } } });
   const patches: Array<{ table: string; id: string; body: Record<string, unknown> }> = [];
   page.on('request', (r) => {
@@ -67,9 +67,9 @@ test('a database without the RPC: the classic writes run, and damaged still goes
   const m = page.locator('#return-modal');
   await m.getByRole('button', { name: 'Damaged' }).click();
   await m.locator('#ret-confirm').click();
-  await expect.poll(() => patches.some((p) => p.table === 'queue_entries' && p.id === 'e1' && p.body.status === 'done')).toBe(true);
-  await expect.poll(() => patches.some((p) => p.table === 'bikes' && p.id === 'b1' && p.body.status === 'maintenance')).toBe(true);
-  await expect(m).toBeHidden();
+  await expect(page.locator('#err-bar-el')).toContainText(/staff_return|function/i); // said on the error bar, with its retry
+  expect(patches).toEqual([]);
+  await expect.poll(() => page.evaluate(`getQueue().find(e=>e.id==='e1').status`)).toBe('active'); // put back
 });
 
 test('an unpaid rider meets the payment on the return sheet itself, not in a dialog before it', async ({ page }) => {

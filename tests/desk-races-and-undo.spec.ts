@@ -195,6 +195,13 @@ test('close-out returns the no-shows\' add-ons, hands bikes back, and its undo r
   const bikes = [bike('b1', 'in-use')];
   await stubSupabase(page, { sessions: [{ id: OLD, session_date: OLD, day: 'Sunday', status: 'closed', capacity: 10, created_at: 1 }], inventory });
   await statefulTables(page, { queue_entries: q, bikes });
+  // the return is staff_return on the server (no page-side fallback since 2026-10-04): it frees the bike
+  await page.route(/\/rest\/v1\/rpc\/staff_return/, (r) => {
+    const b = r.request().postDataJSON() as { p_booking_id: string };
+    const row = q.find((x) => x.id === b.p_booking_id);
+    if (row) { row.status = 'done'; bikes.filter((x) => x.id === row.assigned_bike_id).forEach((x) => { x.status = 'available'; }); }
+    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ ok: true, noop: false, bikes_freed: 1 }) });
+  });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);

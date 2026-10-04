@@ -22,7 +22,7 @@ test.describe('routes on a ride', () => {
     expect(await page.evaluate(`_routes().map(r=>r.slug)`)).toEqual(['the-corniche', 'obhur-coast']);
     await sel.selectOption('obhur-coast');
     const patches: Record<string, unknown>[] = [];
-    page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/sessions')) { try { patches.push(r.postDataJSON()); } catch { /* */ } } });
+    page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/sessions')) { try { patches.push(r.postDataJSON()); } catch { /* */ } } }); // on the insert (2026-10-04)
     await page.evaluate(`S.newSessMode='total';S.newSessTotal='12'`); // a plain bike count: the fleet picker has no bikes here
     await page.locator('#ns-date').fill('2099-03-03');
     await page.locator('#ns-start').fill('21:00');

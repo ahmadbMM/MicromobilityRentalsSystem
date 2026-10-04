@@ -26,6 +26,8 @@ async function open(page: P) {
   const patches: Record<string, unknown>[] = [];
   page.on('request', (r) => {
     if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries') && r.url().includes('id=eq.e1')) patches.push(r.postDataJSON());
+    // a check-in is one staff_checkin call carrying the payment (2026-10-04): read as the row it writes
+    if (r.url().includes('/rest/v1/rpc/staff_checkin')) { const b = r.postDataJSON(); if (b.p_booking_id === 'e1') patches.push({ status: 'active', assigned_bike_id: b.p_bike_id, paid: b.p_paid, price: b.p_price, type_preference: b.p_type, pay_method: b.p_pay_method }); }
   });
   return { modal, patches };
 }

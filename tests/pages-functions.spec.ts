@@ -516,7 +516,7 @@ test.describe('the contact card endpoint', () => {
   });
 });
 
-test.describe('the push sender', () => {
+test.describe('@staff:security the push sender', () => {
   const realFetch = globalThis.fetch;
   test.afterEach(() => { globalThis.fetch = realFetch; });
 
@@ -530,9 +530,14 @@ test.describe('the push sender', () => {
     const auth = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64url');
     const endpoints = ['https://fcm.googleapis.com/fcm/send/abc', 'https://web.push.apple.com/QXyz', 'https://evil.example/hook', 'http://fcm.googleapis.com/x', 'https://fcm.googleapis.com.evil.example/x', 'https://10.0.0.1/x'];
     const hits: string[] = [];
-    globalThis.fetch = (async (u: string | URL | Request) => {
+    const audit: string[] = [];
+    let used = 0;
+    globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
       const url = String(u);
       if (url.includes('/rpc/is_staff')) return new Response('true');
+      if (url.includes('/auth/v1/user')) return new Response(JSON.stringify({ id: '0f8fad5b-d9cb-469f-a165-70867728950e' }));
+      if (url.includes('/rest/v1/staff_actions') && init?.method === 'HEAD') return new Response(null, { status: 200, headers: { 'content-range': `*/${used}` } });
+      if (url.includes('/rest/v1/staff_actions')) { audit.push(String(init?.body || '')); used++; return new Response(null, { status: 201 }); }
       if (url.includes('/rest/v1/push_subscriptions')) return new Response(JSON.stringify(endpoints.map((endpoint) => ({ endpoint, p256dh, auth }))));
       hits.push(url);
       return new Response('', { status: 201 });
@@ -552,6 +557,31 @@ test.describe('the push sender', () => {
     // a long address or a tag of any length cannot push the payload past one record
     const big = await send({ url: '/' + 'x'.repeat(5000), tag: 'y'.repeat(5000) });
     expect(big.sent).toBe(2);
+    // every send is on record in staff_actions, under the sending account
+    expect(audit).toHaveLength(2);
+    expect(JSON.parse(audit[0])).toMatchObject({ user_id: '0f8fad5b-d9cb-469f-a165-70867728950e', view: 'push' });
+    expect(JSON.parse(audit[0]).action).toMatch(/^push: Hi -> c1/);
+    // thirty sends in ten minutes per account, counted from those rows
+    used = 30;
+    expect(await send({ url: '/' })).toMatchObject({ ok: false, error: 'rate limited' });
+    expect(hits).toEqual([]);
+  });
+
+  test('a notification leads only to a page on this site, sent as its path', async () => {
+    const src = readFileSync(resolve(__dirname, '../functions/api/push-send.js'), 'utf8');
+    const body = src.slice(src.indexOf('function safeUrl('), src.indexOf('// The push services browsers subscribe with.'));
+    const safeUrl = new Function(body + '; return safeUrl;')() as (u: string, o: string) => string;
+    const o = 'https://site.test';
+    expect(safeUrl('/my-bookings?x=1#t', o)).toBe('/my-bookings?x=1#t');
+    expect(safeUrl('https://site.test/account', o)).toBe('/account');
+    expect(safeUrl('./', o)).toBe('/');
+    expect(safeUrl('', o)).toBe('./');
+    expect(safeUrl('https://evil.test/x', o)).toBe('./');
+    expect(safeUrl('//evil.test/x', o)).toBe('./');
+    expect(safeUrl('/\\evil.test', o)).toBe('./');
+    expect(safeUrl('http://site.test/x', o)).toBe('./');
+    expect(safeUrl('javascript:alert(1)', o)).toBe('./');
+    expect(safeUrl('/x', 'http://site.test')).toBe('./'); // never over plain http
   });
 });
 

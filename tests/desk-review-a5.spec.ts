@@ -98,9 +98,11 @@ test('the PIN check refuses when the operator list will not load and none is hel
   }));
   const r = await page.evaluate(`(async()=>{
     S._opPins=undefined;const none=await _pinApprove('x');
-    S._opPins=[{name:'Spec Staff',has_pin:false}];S._opPinsAt=0;const stale=await _pinApprove('x');
-    return {none,stale};})()`);
-  expect(r).toEqual({ none: false, stale: true });               // no list: refused; a held one still answers
+    S._opPins=[{name:'Spec Staff',has_pin:false}];S._opPinsAt=Date.now()-120000;const stale=await _pinApprove('x');
+    S._opPins=[{name:'Spec Staff',has_pin:false}];S._opPinsAt=Date.now()-11*60000;const old=await _pinApprove('x');
+    return {none,stale,old};})()`);
+  // no list: refused; one held from the last few minutes still answers; one older than ten minutes is refused (2026-10-04)
+  expect(r).toEqual({ none: false, stale: true, old: false });
 });
 
 test('the PIN check lets a database with no PINs through', async ({ page }) => {

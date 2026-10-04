@@ -79,7 +79,7 @@ test('the tab has its own address, lists the pairs, opens the merge dialog with 
   await expect(dlg.locator('.mg-dlg-side').first()).toContainText('amal@x.sa');
   await dlg.locator('button', { hasText: 'Merge accounts' }).last().click();
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0]).toEqual({ p_keep: 'c-amal-1', p_drop: 'c-amal-2', p_by: 'Spec Staff' });
+  expect(calls[0]).toEqual({ p_keep: 'c-amal-1', p_drop: 'c-amal-2', p_by: 'Spec Staff', p_op: 'Spec Staff', p_approval: null }); // the approval travels with it (2026-10-04)
   // the merge is on the undo bar
   expect(await page.evaluate(`S.undoStack.length`)).toBe(1);
 });

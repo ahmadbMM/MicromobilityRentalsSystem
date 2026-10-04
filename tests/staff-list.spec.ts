@@ -343,6 +343,7 @@ test.describe('party-level actions', () => {
   function watchPatches(page: import('@playwright/test').Page) {
     const out: { url: string; body: string }[] = [];
     page.on('request', (r) => {
+      if (r.url().includes('/rest/v1/rpc/staff_checkin')) { const b = JSON.parse(r.postData() || '{}'); out.push({ url: `id=eq.${b.p_booking_id}`, body: '{"status":"active"}' }); return; } // one staff_checkin call (2026-10-04)
       if (r.method() !== 'PATCH' || !r.url().includes('/rest/v1/queue_entries')) return;
       out.push({ url: r.url(), body: r.postData() || '' });
     });

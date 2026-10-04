@@ -168,7 +168,7 @@ test('the breakfast stop the picker shows is the one saved, ride after ride', as
   await boot(page, { sessions: [sess(LIVE)], queue_entries: [],
     breakfast_spots: [{ id: 'bf1', name: 'Cafe One', url: 'https://maps.example.com/cafe' }] });
   await page.waitForFunction('(S.breakfastSpots||[]).length>0');
-  const patches = writes(page, 'sessions', 'PATCH');
+  const patches = writes(page, 'sessions', 'POST'); // the stop is on the one insert (2026-10-04)
   const create = async (date: string) => page.evaluate(`document.getElementById('ns-date').value='${date}';addSession()`);
 
   await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='community';S.newSessSpots='20';renderSessions()`);

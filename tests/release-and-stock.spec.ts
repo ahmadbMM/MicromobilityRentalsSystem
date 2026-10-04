@@ -118,11 +118,17 @@ test.describe('stock movements survive two tills', () => {
 });
 
 test.describe('check-in timestamps follow the status write', () => {
-  test('a rider who checks in gets an arrival time', async ({ page }) => {
+  // The status and the arrival stamp are one staff_checkin call (2026-10-04): the server stamps it.
+  test('a rider who checks in gets an arrival time, in the same call as the status', async ({ page }) => {
     await boot(page, [e('a', 1, 'Rider One', 'waiting')]);
     const patches = watch(page, 'queue_entries');
+    const calls: string[] = [];
+    page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/staff_checkin')) calls.push(r.postData() || ''); });
     await page.evaluate(`_checkinMany(['a'])`);
-    await expect.poll(() => patches.some((p) => /"checked_in_at"/.test(p.body)), { timeout: 5000 }).toBe(true);
+    await expect.poll(() => calls.length, { timeout: 5000 }).toBe(1);
+    expect(JSON.parse(calls[0])).toMatchObject({ p_booking_id: 'a', p_bike_id: null });
+    await page.waitForTimeout(300);
+    expect(patches.some((p) => /"checked_in_at"/.test(p.body))).toBe(false); // nothing stamped from the page
   });
 
   test('a row whose status write was refused gets no arrival time', async ({ page }) => {

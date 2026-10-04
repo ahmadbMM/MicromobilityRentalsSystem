@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows, loadStaffHalf } from './helpers/supabase';
+import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows, loadStaffHalf, checkinAsRow } from './helpers/supabase';
 
 // The Saturday ride's two groups (the owner, 2026-10-02): Beginners 20 km (to the Jeddah Yacht
 // Club and back) and Intermediates 40 km (to just before the Marine Sciences roundabout and back).
@@ -64,6 +64,7 @@ function patches(page: import('@playwright/test').Page) {
   const out: Record<string, unknown>[] = [];
   page.on('request', (r) => {
     if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) out.push(r.postDataJSON());
+    const ci = checkinAsRow(r); if (ci) out.push(ci); // a check-in is one staff_checkin call (2026-10-04)
   });
   return out;
 }

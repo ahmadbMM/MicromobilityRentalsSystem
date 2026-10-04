@@ -52,9 +52,12 @@ test.describe('the bike picker', () => {
       bikes: [bike('h1', 1, 'Hybrid', 'in-use'), bike('r1', 2, 'Road')],
     });
     const patches = watch(page, 'queue_entries');
+    const rpcs = watchRpcs(page);
     await page.evaluate(`openModal('e1');S.modalBikes=['r1'];confirmAssign()`);
-    await expect.poll(() => !!checkInWrite(patches, 'e1')).toBe(true);
-    expect(JSON.parse(checkInWrite(patches, 'e1')!.body)).not.toHaveProperty('price');
+    // a bike change is one staff_swap_bike (no fallback writes since 2026-10-04), and no fare write follows
+    await expect.poll(() => rpcs.filter((n) => n === 'staff_swap_bike').length).toBe(1);
+    await page.waitForTimeout(300);
+    expect(patches.filter((p) => p.url.includes('id=eq.e1') && /"price"/.test(p.body))).toEqual([]);
   });
 
   test('an unpaid rider is still priced from the bike handed over', async ({ page }) => {

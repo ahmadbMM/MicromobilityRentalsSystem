@@ -311,13 +311,15 @@ test.describe('staff side', () => {
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='petromin';S.newSessTitle='Petromin Wednesday Ride';S.newSessMode='total';S.newSessTotal='10';renderSessions()`);
     await page.evaluate(`document.getElementById('ns-total').value='10';document.getElementById('ns-date').value='2099-01-13';addSession()`);
 
-    await expect.poll(() => writes.length).toBeGreaterThan(1);
+    await expect.poll(() => writes.length).toBe(1);
     const created = writes.find((w) => w.id);
     expect(created?.id).toBe('2099-01-13-pw'); // a circuit session may share the date
     expect(created?.capacity).toBe(10);        // from the bikes put out, not a typed seat count
     expect(JSON.parse(String(created?.bike_slots))._total).toBe(10);
-    // the gate lands in two writes: the long-standing columns, then the newer pair
-    const gate = Object.assign({}, ...writes.filter((w) => !w.id));
+    // the gate is on the one insert (2026-10-04): no follow-up writes to fail between
+    await page.waitForTimeout(300);
+    expect(writes).toHaveLength(1);
+    const gate = created as Record<string, unknown>;
     expect(gate.ride_kind).toBe('petromin');
     expect(gate.paid_ride).toBe(true);
     expect(gate.needs_approval).toBe(false);  // no approval flow
@@ -361,9 +363,9 @@ test.describe('staff side', () => {
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='community';S.newSessSpots='20';renderSessions()`);
     await page.evaluate(`document.getElementById('ns-date').value='2099-01-17';addSession()`);
 
-    await expect.poll(() => writes.length).toBeGreaterThan(1);
+    await expect.poll(() => writes.length).toBe(1);
     expect(writes.find((w) => w.id)?.id).toBe('2099-01-17'); // no suffix
-    const gate = Object.assign({}, ...writes.filter((w) => !w.id));
+    const gate = writes[0]; // one insert carries the whole row (2026-10-04)
     expect(gate.ride_kind).toBe('saturday');
     expect(gate.paid_ride).toBe(false);
     expect(gate.needs_approval).toBe(true);
@@ -374,52 +376,31 @@ test.describe('staff side', () => {
   });
 });
 
-test.describe('a database that has not run the migration yet', () => {
-  /** Refuses exactly the writes that touch the new columns, the way PostgREST would. */
-  async function noNewColumns(page: import('@playwright/test').Page) {
-    await page.route(/\/rest\/v1\/sessions/, async (route) => {
-      const body = route.request().postData() || '';
-      if (route.request().method() === 'PATCH' && body.includes('ride_kind')) {
-        return route.fulfill({
-          status: 400,
-          headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
-          body: JSON.stringify({ code: 'PGRST204', message: "Could not find the 'ride_kind' column of 'sessions'" }),
-        });
-      }
-      return route.fallback();
-    });
-  }
-
+test.describe('a database that refuses a column', () => {
+  // The whole row is one insert (2026-10-04): a refusal leaves nothing half-made to roll back.
   async function create(page: import('@playwright/test').Page, ev: string, date: string) {
     await stubSupabase(page, fixtures);
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    await noNewColumns(page);
-    const writes: Record<string, unknown>[] = [];
-    page.on('request', (r) => {
-      if (!r.url().includes('/rest/v1/sessions')) return;
-      writes.push({ method: r.method(), body: r.postData() || '' });
+    await page.route(/\/rest\/v1\/sessions/, async (route) => {
+      if (route.request().method() === 'POST' && (route.request().postData() || '').includes('ride_kind')) {
+        return route.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+          body: JSON.stringify({ code: 'PGRST204', message: "Could not find the 'ride_kind' column of 'sessions'" }) });
+      }
+      return route.fallback();
     });
+    const writes: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (r.url().includes('/rest/v1/sessions') && r.method() !== 'GET' && r.method() !== 'HEAD') writes.push({ method: r.method(), body: r.postData() || '' }); });
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='${ev}';S.newSessMode='total';S.newSessTotal='10';S.newSessSpots='20';renderSessions()`);
     await page.evaluate(`const _t=document.getElementById('ns-total');if(_t)_t.value='10';document.getElementById('ns-date').value='${date}';addSession()`);
     return writes;
   }
 
-  test('a Saturday ride is still created — the older columns describe it completely', async ({ page }) => {
-    const writes = await create(page, 'community', '2099-02-07');
-    await expect.poll(() => writes.some((w) => w.method === 'POST')).toBe(true);
-    // the session is NOT rolled back: no DELETE goes out
-    await page.waitForTimeout(400);
-    expect(writes.some((w) => w.method === 'DELETE')).toBe(false);
-    await expect(page.locator('.toast')).not.toContainText(/ride_kind/i);
-  });
-
-  test('a Petromin ride refuses to be created half-made', async ({ page }) => {
+  test('a Petromin ride is refused whole and said: nothing half-made to roll back', async ({ page }) => {
     const writes = await create(page, 'petromin', '2099-02-11');
-    // without paid_ride the ride would come back complimentary, so it is rolled back and said
-    await expect.poll(() => writes.some((w) => w.method === 'DELETE')).toBe(true);
-    await expect(page.locator('.toast')).toBeVisible();
+    await expect(page.locator('.toast').filter({ hasText: /ride_kind/ }).first()).toBeVisible();
+    expect(writes.map((w) => w.method)).toEqual(['POST']);
   });
 });
 

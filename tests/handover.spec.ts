@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 // The desk's fast path (2026-09-28):
 //  - Express: with the scanner's Express switch on, a scanned ticket whose rider has paid is checked
@@ -48,6 +48,12 @@ async function boot(page: Page, fixtures: Record<string, unknown> = {}, init?: (
     }
     return route.fallback();
   });
+  await page.route(/\/rest\/v1\/rpc\/staff_checkin/, async (route) => {
+    const ci = checkinAsRow(route.request());
+    const row = ci && q.find((x) => x.id === ci.id);
+    if (row && ci) Object.assign(row, ci, { checked_in_at: new Date().toISOString() }); // as the server stamps it
+    return route.fallback();
+  });
   // staff_swap_bike lands the bike on the row in the database; the stub's copy follows suit.
   await page.route(/\/rest\/v1\/rpc\/staff_swap_bike/, async (route) => {
     let body: Record<string, unknown> = {};
@@ -70,6 +76,8 @@ function watch(page: Page, table: string) {
       try { body = r.postDataJSON() || {}; } catch { /* not JSON */ }
       if (id) writes.push({ id, body });
     }
+    const ci = table === 'queue_entries' ? checkinAsRow(r) : null; // a check-in is one staff_checkin call (2026-10-04)
+    if (ci) writes.push({ id: String(ci.id), body: ci });
   });
   return writes;
 }
@@ -99,7 +107,7 @@ test.describe('Express', () => {
     await expect(page.locator('#scan-msg')).toContainText('#1 Paid Amal checked in');
     const w = writes.find((x) => x.id === A);
     expect(w && w.body.status).toBe('active');
-    expect(typeof (w && w.body.checked_in_at)).toBe('string');
+    // the arrival stamp is the server's, in the same call
     await expect(page.locator('#scan-modal [role="dialog"]')).toBeVisible(); // no modal took the camera's place
     expect(await page.evaluate(`!!S._ciId`)).toBe(false);
     await expect(page.locator('#scan-tally')).toContainText('1');
@@ -167,7 +175,7 @@ test.describe('Hand-over', () => {
     expect(await page.evaluate(`S.undoStack.length`)).toBe(1);
   });
 
-  test('a tag tapped while the view is open goes to the picked rider; without the function the classic writes run', async ({ page }) => {
+  test('a tag tapped while the view is open goes to the picked rider; without the function it is said and nothing is written', async ({ page }) => {
     await boot(page, {
       'rpc:staff_resolve_bike': found(bikes[1]),
       'rpc:staff_swap_bike': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_swap_bike' } },
@@ -176,9 +184,10 @@ test.describe('Hand-over', () => {
     await page.evaluate(`setStaffTab('handover')`);
     await expect(page.locator('#ho-host .ho-row')).toHaveCount(1);
     await page.evaluate(`_bikeArrived('43','nfc')`);
-    await expect.poll(() => qw.filter((x) => x.id === F && x.body.assigned_bike_id === 'bk-43').length).toBe(1);
-    expect(bw.some((x) => x.id === 'bk-43' && x.body.status === 'in-use')).toBe(true);
-    await expect(page.locator('#ho-host')).toContainText('Nobody is waiting for a bike.');
+    await expect(page.locator('.toast').filter({ hasText: /staff_swap_bike|function/i }).first()).toBeVisible();
+    expect(qw).toEqual([]);
+    expect(bw).toEqual([]);
+    await expect(page.locator('#ho-host .ho-row')).toHaveCount(1); // still waiting for a bike
   });
 
   test('the picked rider is remembered for the tab a tag opens; leaving the view forgets them', async ({ page }) => {

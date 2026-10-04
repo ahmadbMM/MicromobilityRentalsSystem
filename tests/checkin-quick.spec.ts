@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 // Check In opens the quick modal: staff confirm payment (paid or not) and the bike TYPE —
 // no specific bike. The classic picker stays one tap away via "Assign specific bike…".
@@ -22,18 +22,22 @@ test('quick check-in confirms payment + bike type without picking a bike', async
   const patches: Record<string, unknown>[] = [];
   page.on('request', (r) => {
     if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries') && r.url().includes('id=eq.e1')) patches.push(r.postDataJSON());
+    const ci = checkinAsRow(r, 'e1'); if (ci) patches.push(ci);
   });
   await modal.getByRole('button', { name: '✓ Paid', exact: true }).click();
   await modal.getByRole('button', { name: 'Road', exact: true }).click();
   await modal.locator('#ci-confirm').click();
   await expect(modal).toBeHidden();
 
-  await expect.poll(() => patches.length).toBeGreaterThanOrEqual(2);
+  // one staff_checkin call: the status, the payment, the type and the pay method together (2026-10-04)
+  await expect.poll(() => patches.length).toBeGreaterThanOrEqual(1);
   expect(patches[0].status).toBe('active'); // checked in
   expect(patches[0].paid).toBe(true); // payment answered in the same modal
   expect(patches[0].type_preference).toBe('Road'); // type chosen, no assigned_bike_id involved
   expect(patches[0].assigned_bike_id).toBeUndefined();
-  expect(patches[1].pay_method).toBe('card'); // the chosen pay method is recorded, like the pay menu
+  expect(patches[0].pay_method).toBe('card'); // the chosen pay method is recorded, like the pay menu
+  await page.waitForTimeout(300);
+  expect(patches).toHaveLength(1); // nothing written after it
 });
 
 // A bike RESERVED while waiting (assigned_bike_id set, bike still 'available') must be
@@ -48,10 +52,9 @@ test('quick check-in claims the reserved bike (available -> in-use)', async ({ p
   await page.goto('/');
   await waitForSb(page);
 
-  const bikePatches: Record<string, unknown>[] = [];
-  page.on('request', (r) => {
-    if (r.method() === 'PATCH' && r.url().includes('/rest/v1/bikes') && r.url().includes('id=eq.b1')) bikePatches.push(r.postDataJSON());
-  });
+  // staff_checkin with no bike named claims the booking's reserved bike on the server (2026-10-04)
+  const calls: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/staff_checkin')) calls.push(r.postDataJSON()); });
   await page.evaluate(() => {
     // @ts-expect-error app globals
     showCheckinModal('e1');
@@ -59,7 +62,9 @@ test('quick check-in claims the reserved bike (available -> in-use)', async ({ p
   const modal = page.locator('#checkin-modal');
   await modal.locator('#ci-confirm').click();
   await expect(modal).toBeHidden();
-  await expect.poll(() => bikePatches.some((p) => p.status === 'in-use')).toBe(true); // the reservation became a real claim
+  await expect.poll(() => calls.length).toBe(1);
+  expect(calls[0]).toMatchObject({ p_booking_id: 'e1', p_bike_id: null }); // the reservation becomes a real claim there
+  await expect.poll(() => page.evaluate(`getQueue().find(e=>e.id==='e1').assignedBikeId`)).toBe('b1'); // the server said it holds b1
 });
 
 // The booking price follows the type chosen at check-in — except riders on the house
@@ -88,6 +93,7 @@ test('check-in reprices to the chosen type unless the rider is on the house', as
       const id = (r.url().match(/id=eq\.([^&]+)/) || [])[1];
       if (id && !patches[id]) patches[id] = r.postDataJSON();
     }
+    const ci = checkinAsRow(r); if (ci && !patches[String(ci.id)]) patches[String(ci.id)] = ci;
   });
   const checkin = async (id: string) => {
     await page.evaluate((eid) => {

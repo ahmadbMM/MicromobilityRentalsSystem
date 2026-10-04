@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 // The check-in modal's money line for a party (or a scanned group). Stepping through riders
 // must not move the amounts: the total used to price the OPEN rider as Confirm would charge
@@ -94,6 +94,7 @@ test('a Petromin employee retyped at check-in keeps the employee fare', async ({
     if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries') && r.url().includes('id=eq.q1')) {
       try { patched.push(r.postDataJSON()); } catch { /* not JSON */ }
     }
+    const ci = checkinAsRow(r, 'q1'); if (ci) { delete ci.id; patched.push(ci); }
   });
   await open(page, 'q1'); // the registrations are not loaded yet: opening the rider fetches them
   const modal = page.locator('#checkin-modal');
@@ -113,6 +114,7 @@ test('a website booking on a Petromin night is retyped at the standard fare, not
     if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries') && r.url().includes('id=eq.q1')) {
       try { patched.push(r.postDataJSON()); } catch { /* not JSON */ }
     }
+    const ci = checkinAsRow(r, 'q1'); if (ci) { delete ci.id; patched.push(ci); }
   });
   await open(page, 'q1');
   await page.waitForFunction('S.ridersLoaded');

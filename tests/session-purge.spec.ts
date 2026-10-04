@@ -11,24 +11,24 @@ const LIVE = { id: '2099-06-06', session_date: '2099-06-06', day: 'Saturday', st
 async function boot(page: Page, fx: Record<string, Record<string, unknown>[]>) {
   const deletes: string[] = [];
   await stubSupabase(page, { bikes: [], ...fx });
-  // The stub counts a whole table whatever the filter: count what points at the one session asked.
-  await page.route(/\/rest\/v1\/(queue_entries|cashier_sales|rider_registrations)\?.*session_id=eq\./, (r) => {
-    if (r.request().method() !== 'HEAD') return r.fallback();
-    const u = new URL(r.request().url());
-    const tb = u.pathname.split('/').pop() as string;
-    const sid = (u.searchParams.get('session_id') || '').replace(/^eq\./, '');
-    const n = (fx[tb] || []).filter((x) => x.session_id === sid).length;
-    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'access-control-expose-headers': 'content-range', 'content-range': `*/${n}` }, body: '' });
+  // staff_purge_session (20261004120000) decides on the server: answered here as it would, from
+  // the fixtures - status still 'deleted', no booking, sale or registration naming the session.
+  await page.route(/\/rest\/v1\/rpc\/staff_purge_session/, (r) => {
+    const body = r.request().postDataJSON() as { p_id: string; p_op?: string | null; p_approval?: string | null };
+    deletes.push(`?id=eq.${body.p_id}&status=eq.deleted&op=${body.p_op ?? ''}`);
+    const used = ['queue_entries', 'cashier_sales', 'rider_registrations'].some((tb) => (fx[tb] || []).some((x) => x.session_id === body.p_id));
+    const i = fx.sessions.findIndex((x) => x.id === body.p_id);
+    let ans: Record<string, unknown>;
+    if (i < 0) ans = { ok: true, purged: false, reason: 'NOT_FOUND' };
+    else if (fx.sessions[i].status !== 'deleted') ans = { ok: true, purged: false, reason: 'NOT_DELETED' };
+    else if (used) { ans = { ok: true, purged: false, reason: 'IN_USE' }; deletes.pop(); }
+    else { fx.sessions.splice(i, 1); ans = { ok: true, purged: true, id: body.p_id }; } // in place: the stub holds this same array
+    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(ans) });
   });
-  // A DELETE answers with the rows it removed, and the next load no longer has them.
+  // Nothing deletes a session row straight from the page any more.
   await page.route(/\/rest\/v1\/sessions\?/, (r) => {
-    if (r.request().method() !== 'DELETE') return r.fallback();
-    const u = new URL(r.request().url());
-    deletes.push(u.search);
-    const id = (u.searchParams.get('id') || '').replace(/^eq\./, '');
-    const i = fx.sessions.findIndex((x) => x.id === id && x.status === 'deleted');
-    const gone = i < 0 ? [] : fx.sessions.splice(i, 1); // in place: the stub holds this same array
-    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(gone.map((x) => ({ id: x.id }))) });
+    if (r.request().method() === 'DELETE') deletes.push('DIRECT ' + new URL(r.request().url()).search);
+    return r.fallback();
   });
   await unlockStaff(page);
   await page.goto('/');
@@ -49,7 +49,8 @@ test('a deleted session with nothing on record is deleted for good', async ({ pa
   await expect(page.locator('#toast-container')).toContainText('Session deleted permanently.');
   expect(deletes).toHaveLength(1);
   expect(deletes[0]).toContain('id=eq.2026-10-01');
-  expect(deletes[0]).toContain('status=eq.deleted'); // a session restored meanwhile is left alone
+  expect(deletes[0]).toContain('status=eq.deleted'); // a session restored meanwhile is left alone (the server checks)
+  expect(deletes[0]).toContain('op=Spec Staff'); // the operator's approval travels with it
   await expect(page.locator('#tab-queue')).not.toContainText('Deleted Sessions');
 });
 

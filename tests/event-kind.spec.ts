@@ -55,13 +55,12 @@ test.describe('staff', () => {
     await page.locator('#ns-end').fill('21:00');
     await page.evaluate(`addSession()`);
     await expect.poll(() => posts.length).toBe(1);
-    expect(posts[0]).toMatchObject({ id: d(9) + '-ev', capacity: 25, status: 'closed' });
-    await expect.poll(() => patches.length).toBeGreaterThanOrEqual(3);
-    const gate = patches.find((p) => 'needs_approval' in p) as Record<string, unknown>;
-    expect(gate).toMatchObject({ event_kind: 'community', needs_approval: false, hide_queue: true, spots: 25, title: 'Repair night' });
-    const kind = patches.find((p) => 'ride_kind' in p) as Record<string, unknown>;
-    expect(kind).toEqual({ ride_kind: 'event', paid_ride: true, open_to_all: false });
-    const extra = patches.find((p) => 'price' in p) as Record<string, unknown>;
-    expect(extra).toMatchObject({ description: 'Fix a flat in five minutes.', price: 35 });
+    // the whole row in the one insert (2026-10-04): the kind, the gate and the extras, no follow-up writes
+    expect(posts[0]).toMatchObject({ id: d(9) + '-ev', capacity: 25, status: 'closed',
+      event_kind: 'community', needs_approval: false, hide_queue: true, spots: 25, title: 'Repair night',
+      ride_kind: 'event', paid_ride: true, open_to_all: false,
+      description: 'Fix a flat in five minutes.', price: 35 });
+    await page.waitForTimeout(300);
+    expect(patches).toEqual([]);
   });
 });

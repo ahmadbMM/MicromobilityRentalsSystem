@@ -94,7 +94,7 @@ test('staff session with an open check-in: the modal reopens with the bike fille
   await expect(modal.locator('#ci-confirm')).toBeEnabled();
 
   await modal.locator('#ci-confirm').click();
-  await expect.poll(() => rpcs.find((c) => c.name === 'staff_checkin')?.body).toEqual({ p_booking_id: 'e1', p_bike_id: 'b1' });
+  await expect.poll(() => rpcs.find((c) => c.name === 'staff_checkin')?.body).toMatchObject({ p_booking_id: 'e1', p_bike_id: 'b1' }); // with the payment the modal chose (2026-10-04)
   await expect(modal).toBeHidden();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('mm_active_checkin'))).toBeNull();
 });
@@ -116,7 +116,7 @@ test('a bike that is out disables Confirm and names who has it', async ({ page }
   await expect(modal.locator('#ci-confirm')).toBeDisabled();
 });
 
-test('a database without the RPC: the classic check-in write runs instead', async ({ page }) => {
+test('a database without the RPC: the check-in is refused and said, nothing is written around it (2026-10-04)', async ({ page }) => {
   await stubSupabase(page, fixtures({
     'rpc:staff_checkin': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_checkin' } },
   }));
@@ -136,8 +136,9 @@ test('a database without the RPC: the classic check-in write runs instead', asyn
   const modal = page.locator('#checkin-modal');
   await expect(modal.locator('#ci-confirm')).toBeEnabled();
   await modal.locator('#ci-confirm').click();
-  await expect.poll(() => patched.some((p) => p.status === 'active' && p.assigned_bike_id === 'b1')).toBe(true);
-  await expect(modal).toBeHidden();
+  await expect(modal.locator('#ci-error')).toContainText(/staff_checkin|function/i);
+  await expect(modal).toHaveCSS('display', 'flex'); // stays open, saying why
+  expect(patched).toEqual([]);
 });
 
 test('the in-app scanner reads a bike sticker into the open modal, and an expired check-in is ignored', async ({ page }) => {

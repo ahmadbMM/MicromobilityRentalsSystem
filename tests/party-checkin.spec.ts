@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 // A party on the roster gets a one-tap "Check in (N)" next to its one-tap "Mark paid".
 // On 2026-09-08 the card offered only "Mark paid" at party level: the desk paid six parties
@@ -40,6 +40,7 @@ test('a party row gets a one-tap Check in that activates every expected member',
       try { status = r.postDataJSON()?.status; } catch { /* not JSON */ }
       if (id) patched.push({ id, status });
     }
+    const ci = checkinAsRow(r); if (ci) patched.push({ id: String(ci.id), status: 'active' }); // one staff_checkin call (2026-10-04)
   });
   await partyBtn.click();
 

@@ -104,9 +104,9 @@ test('Road Carbon goes out on a carbon frame', async ({ page }) => {
 test('an own bike checks the booking in without one, and says nothing about bikes', async ({ page }) => {
   const { rpc, patch } = await desk(page);
   await page.evaluate(`riderCheckin(4)`);
-  await expect.poll(() => onTable(patch, 'queue_entries', 'q4').length).toBeGreaterThan(0);
-  expect(onTable(patch, 'queue_entries', 'q4')[0].body).toMatchObject({ status: 'active', assigned_bike_id: null });
-  expect(checkins(rpc)).toEqual([]);
+  // in without a bike: staff_checkin with none named (2026-10-04)
+  await expect.poll(() => checkins(rpc)).toEqual(['q4:null']);
+  expect(onTable(patch, 'queue_entries', 'q4')).toEqual([]);
   await page.waitForTimeout(300);
   await expect(page.getByText('checked in without a bike')).toHaveCount(0);
 });
@@ -114,9 +114,8 @@ test('an own bike checks the booking in without one, and says nothing about bike
 test('with no bike of the type free, the booking goes Active without one and the desk is told', async ({ page }) => {
   const { rpc, patch } = await desk(page, { bikes: bikes.map((b) => (b.type === 'Road' ? { ...b, status: 'in-use' } : b)) });
   await page.evaluate(`riderCheckin(1)`);
-  await expect.poll(() => onTable(patch, 'queue_entries', 'q1').length).toBeGreaterThan(0);
-  expect(onTable(patch, 'queue_entries', 'q1')[0].body).toMatchObject({ status: 'active', assigned_bike_id: null });
-  expect(checkins(rpc)).toEqual([]);
+  await expect.poll(() => checkins(rpc)).toEqual(['q1:null']); // no bike named: in without one (2026-10-04)
+  expect(onTable(patch, 'queue_entries', 'q1')).toEqual([]);
   await expect(page.getByText('checked in without a bike')).toBeVisible();
 });
 

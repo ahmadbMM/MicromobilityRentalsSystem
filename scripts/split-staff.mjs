@@ -53,6 +53,8 @@ export const STAFF_ENTRY = [
   // handler (riders list -> scanner -> check-in, return, cashier, hand-over), the N shortcut (check-in
   // and the riders report), the operator gate's keypad, and the add-on picker's way into the price editor.
   '_onRidersRt', '_kbCheckInNext', '_opgKey', 'showEditPriceModal',
+  '_idleStaff', // the idle clock (2026-10-04): started by the operator gate's check, which showView runs
+  'lockStaff', // the top bar's lock (drawn by customer-half code): its sign-out settles the outboxes and asks first
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);

@@ -150,10 +150,10 @@ test('the breakdowns count the accounts on the list', async ({ page }) => {
 
 test('the CSV carries the columns, then the chosen summaries as blocks', async ({ page }) => {
   await staff(page);
-  const csv = await page.evaluate(`(()=>{let out='';const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
+  const csv = await page.evaluate(`(async()=>{let out='';const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
     const _a=document.createElement.bind(document);document.createElement=(tag)=>{const el=_a(tag);if(tag==='a')el.click=()=>{};return el;};
     const _B=window.Blob;window.Blob=function(parts,o){out=parts.join('');return new _B(parts,o);};
-    exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
+    await exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
   expect(csv).toContain('Name,Email,Phone,Tags');
   expect(csv).toContain('Amal Member,amal@example.test');
   expect(csv).toContain('Accounts by tag,#,Share');
@@ -330,10 +330,10 @@ test.describe('the nationality breakdown', () => {
     await page.evaluate(`_accToggle('sections','natCount')`);
     const sheet = await page.evaluate(`_accReportHtml()`) as string;
     expect(sheet).toContain('>25</span><span class="total-lbl">Nationalities</span>');
-    const csv = await page.evaluate(`(()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
-      const _a=document.createElement.bind(document);document.createElement=(t)=>t==='a'?{click(){},set href(v){},set download(v){}}:_a(t);
+    const csv = await page.evaluate(`(async()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
+      const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
       const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
-      exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
+      await exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
     expect(csv).toContain('Nationalities,25');
   });
 

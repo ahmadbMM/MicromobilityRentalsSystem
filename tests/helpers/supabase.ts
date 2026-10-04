@@ -17,7 +17,7 @@ export type FailWrite = {
 };
 
 /** RPCs a spec must opt into: see the stub's answer for them below. */
-const NOT_YET_IN_DB = new Set(['staff_delete_customer', 'customer_set_height', 'customer_set_birth_nat',
+const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // The staff guardrails of 20260928200000: the page takes the plain writes when these are absent,
   // which is what most specs exercise; tests/staff-guardrails.spec.ts stubs them by name.
   'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike',
@@ -100,6 +100,28 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // returns the sessions table (public rows + tagged ones), so default it to the
       // sessions fixture unless a spec overrides it explicitly.
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
+      // The desk's one-call functions (production since 2026-09; the page no longer carries the
+      // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.
+      // staff_checkin with no bike claims the booking's reserved bike(s) when every one is
+      // available in the fixture (a bike the fixture lacks counts as available), else drops them.
+      if (body === undefined && rpc[1] === 'staff_checkin') {
+        let sent: { p_booking_id?: string; p_bike_id?: string | null } = {};
+        try { sent = req.postDataJSON(); } catch { /* no body */ }
+        if (sent.p_bike_id) body = { ok: true, noop: false, assignment_id: 'a-stub', bikes: [sent.p_bike_id], reservation_dropped: false };
+        else {
+          const row = ((fixtures['queue_entries'] || []) as Record<string, unknown>[]).find((r) => r.id === sent.p_booking_id) || {};
+          const raw = String(row.assigned_bike_id || '').trim();
+          let ids: string[] = [];
+          if (raw.startsWith('[')) { try { ids = (JSON.parse(raw) as unknown[]).map(String); } catch { ids = [raw]; } } else if (raw) ids = [raw];
+          const bikes = (fixtures['bikes'] || []) as Record<string, unknown>[];
+          const ok = ids.every((id) => { const b = bikes.find((x) => x.id === id); return !b || b.status === 'available'; });
+          body = { ok: true, noop: false, assignment_id: ids.length && ok ? 'a-stub' : null, bikes: ok ? ids : [], reservation_dropped: !ok };
+        }
+      }
+      if (body === undefined && rpc[1] === 'staff_return') body = { ok: true, noop: false, bikes_freed: 1 };
+      if (body === undefined && rpc[1] === 'staff_swap_bike') body = { ok: true, noop: false, assignment_id: 'a-stub' };
+      if (body === undefined && rpc[1] === 'staff_purge_session') body = { ok: true, purged: true };
+      if (body === undefined && rpc[1] === 'staff_delete_customer') body = { ok: true, bookings: 0, sales: 0, tags: 0, push_subscriptions: 0, flags: 0, rider_links: 0 };
       // Customer bookings go through customer_create_booking, which returns one row per
       // rider. Left to the generic `[]` default it would read as a refusal and every spec
       // that books through the UI would fail, so echo the rows back the way the real
@@ -331,4 +353,21 @@ export async function goStaffTab(page: Page, tab: string) {
  *  context on a customer's page asks for it first; on a staff device the boot already did. */
 export async function loadStaffHalf(page: Page) {
   await page.evaluate(`typeof _loadStaff==='function'?_loadStaff():null`);
+}
+
+/** A check-in is one staff_checkin call carrying the payment (2026-10-04). Specs that watch the
+ *  booking's PATCHes read that call as the row it writes: status active plus whatever it sets. */
+export function checkinAsRow(r: { url(): string; postDataJSON(): unknown }, id?: string): Record<string, unknown> | null {
+  if (!r.url().includes('/rest/v1/rpc/staff_checkin')) return null;
+  let b: Record<string, unknown>;
+  try { b = (r.postDataJSON() || {}) as Record<string, unknown>; } catch { return null; }
+  if (id && b.p_booking_id !== id) return null;
+  const row: Record<string, unknown> = { status: 'active', id: b.p_booking_id };
+  if (b.p_bike_id) row.assigned_bike_id = b.p_bike_id;
+  if (b.p_paid !== undefined) row.paid = b.p_paid;
+  if (b.p_price !== undefined) row.price = b.p_price;
+  if (b.p_type !== undefined) row.type_preference = b.p_type;
+  if (b.p_ride_group !== undefined) row.ride_group = b.p_ride_group || null;
+  if (b.p_pay_method !== undefined) { row.pay_method = b.p_pay_method || null; row.card_amount = b.p_card_amount ?? null; }
+  return row;
 }

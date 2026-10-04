@@ -18,6 +18,10 @@
 // against the staff table before anything is sent. Otherwise anyone could push arbitrary
 // text to every rider who ever enabled notifications.
 
+// A staff account may send this many notifications in this many minutes (counted in staff_actions).
+const PUSH_LIMIT = 30;
+const PUSH_WINDOW_MIN = 10;
+
 export async function onRequestPost(context) {
   const { request, env } = context;
   const PUB = env.VAPID_PUBLIC_KEY, PRIV = env.VAPID_PRIVATE_KEY;
@@ -42,6 +46,25 @@ export async function onRequestPost(context) {
   });
   if (!who.ok || (await who.json()) !== true) return json({ ok: false, error: 'not staff' }, 403);
 
+  // Who is sending: the staff account behind the token. Every send is written to staff_actions
+  // (the audit trail staff read in History > Log) with the service key, and the same rows are
+  // the rate limit: a staff account may send PUSH_LIMIT notifications per PUSH_WINDOW_MIN
+  // minutes. A counter in this isolate would not do: Workers run many isolates and drop them at
+  // will, so the count lives in the database the sends are recorded in.
+  const meRes = await fetch(`${SUPA}/auth/v1/user`, { headers: { apikey: ANON, Authorization: `Bearer ${staffToken}` } });
+  const me = meRes.ok ? await meRes.json().catch(() => null) : null;
+  const uid = me && typeof me.id === 'string' ? me.id : '';
+  if (!/^[0-9a-f-]{36}$/i.test(uid)) return json({ ok: false, error: 'not staff' }, 403);
+  const since = new Date(Date.now() - PUSH_WINDOW_MIN * 60000).toISOString();
+  const countRes = await fetch(
+    `${SUPA}/rest/v1/staff_actions?user_id=eq.${uid}&action=like.${encodeURIComponent('push:*')}&at_server=gte.${encodeURIComponent(since)}&select=id`,
+    { method: 'HEAD', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, Prefer: 'count=exact' } },
+  );
+  const range = countRes.ok ? countRes.headers.get('content-range') || '' : '';
+  const used = Number((range.split('/')[1]) || 'NaN');
+  if (!Number.isFinite(used)) return json({ ok: false, error: 'rate check failed' }, 503); // refused rather than unmetered
+  if (used >= PUSH_LIMIT) return json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429);
+
   // Service-role read: push_subscriptions is not readable with the anon key.
   const subsRes = await fetch(
     `${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(customerId)}&select=*`,
@@ -52,6 +75,16 @@ export async function onRequestPost(context) {
   if (!Array.isArray(subs) || !subs.length) return json({ ok: true, sent: 0, reason: 'no subscriptions' });
 
   const origin = new URL(request.url).origin;
+  // The record first: a send that is not on record is not sent.
+  const logRes = await fetch(`${SUPA}/rest/v1/staff_actions`, {
+    method: 'POST',
+    headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    body: JSON.stringify({
+      at: new Date().toISOString(), user_id: uid, view: 'push',
+      action: `push: ${String(title).slice(0, 120)} -> ${String(customerId).slice(0, 64)}`.slice(0, 300),
+    }),
+  });
+  if (!logRes.ok) return json({ ok: false, error: 'audit failed' }, 502);
   const payload = JSON.stringify({
     title: String(title).slice(0, 120),
     body: String(message || '').slice(0, 300),
@@ -75,14 +108,22 @@ export async function onRequestPost(context) {
   return json({ ok: true, sent, total: subs.length, removed: dead.length });
 }
 
-// Where a notification may lead: an address on this site (a path, or this origin), at most 500
-// characters - the payload has to fit one 4 KB record, and a tap must never open someone else's page.
+// Where a notification may lead: an address on this site only, at most 500 characters - the
+// payload has to fit one 4 KB record, and a tap must never open someone else's page. The value is
+// resolved against this origin and must stay on it over https; what is sent is the path, query and
+// hash alone (the service worker resolves it against its own origin), else './'.
 function safeUrl(u, origin) {
   const s = String(u || '').trim();
   if (!s || s.length > 500) return './';
-  if (/^\.?\/(?![/\\])/.test(s)) return s;
-  try { const x = new URL(s); if (x.origin === origin) return x.href; } catch { /* not a URL */ }
-  return './';
+  let base;
+  try { base = new URL(origin); } catch { return './'; }
+  if (base.protocol !== 'https:' && base.hostname !== 'localhost' && base.hostname !== '127.0.0.1') return './';
+  try {
+    const x = new URL(s, base.origin + '/');
+    if (x.origin !== base.origin) return './';
+    if (x.protocol !== base.protocol) return './';
+    return (x.pathname + x.search + x.hash) || './';
+  } catch { return './'; }
 }
 
 // The push services browsers subscribe with. The endpoint is whatever a rider's browser registered

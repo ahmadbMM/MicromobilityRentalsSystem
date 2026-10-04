@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }); // the camera takes today's tickets (KSA day)
 
 // "Scan several": riders who booked apart but turn up together. Their tickets go on a list in
@@ -37,6 +37,13 @@ async function boot(page: Page, init: () => void) {
     }
     return route.fallback();
   });
+  // a check-in is one staff_checkin call (2026-10-04): the row it writes goes on the copy too
+  await page.route(/\/rest\/v1\/rpc\/staff_checkin/, async (route) => {
+    const ci = checkinAsRow(route.request());
+    const row = ci && rows.find((x) => x.id === ci.id);
+    if (row && ci) Object.assign(row, ci, { checked_in_at: new Date().toISOString() });
+    return route.fallback();
+  });
   await unlockStaff(page);
   await page.addInitScript(init);
   await page.goto('/');
@@ -65,6 +72,7 @@ function watchWrites(page: Page) {
       try { body = r.postDataJSON() || {}; } catch { /* not JSON */ }
       if (id) writes.push({ id, body });
     }
+    const ci = checkinAsRow(r); if (ci) writes.push({ id: String(ci.id), body: ci });
   });
   return writes;
 }

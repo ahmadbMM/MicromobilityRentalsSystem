@@ -307,7 +307,7 @@ test.describe('the till and the sheet agree about money', () => {
     expect(sheet).toMatch(/Discount/i);
     expect(sheet).toContain('SAR -5');
     const csv = await page.evaluate(`(()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
-      const _a=document.createElement.bind(document);document.createElement=(t)=>t==='a'?{click(){},set href(v){},set download(v){}}:_a(t);
+      const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
       const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
       S.sfSession='s0';exportSessionExcel();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as string;
     expect(csv).toMatch(/Discount/i);

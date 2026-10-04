@@ -174,11 +174,11 @@ test('creating one stamps the kind, lifts the gate, and keeps the approval shape
   });
   await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='workshop';S.newSessSpots='30';renderSessions()`);
   await page.evaluate(`document.getElementById('ns-date').value='2099-01-13';addSession()`);
-  await expect.poll(() => writes.length).toBeGreaterThan(1);
+  await expect.poll(() => writes.length).toBe(1); // one insert carries the whole row (2026-10-04)
   const created = writes.find((w) => w.id);
   expect(created?.id).toBe('2099-01-13-tw');   // a circuit session may share the date
   expect(created?.capacity).toBe(30);
-  const gate = Object.assign({}, ...writes.filter((w) => !w.id));
+  const gate = created as Record<string, unknown>;
   expect(gate.event_kind).toBe('community');
   expect(gate.ride_kind).toBe('workshop');
   expect(gate.open_to_all).toBe(true);         // the whole point

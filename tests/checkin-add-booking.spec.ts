@@ -40,6 +40,14 @@ async function boot(page: Page, fixtures: Record<string, unknown> = {}) {
     }
     return route.fallback();
   });
+  // a check-in is one staff_checkin call (2026-10-04): the row it writes goes on the copy too
+  await page.route(/\/rest\/v1\/rpc\/staff_checkin/, async (route) => {
+    let b: Record<string, unknown> = {};
+    try { b = route.request().postDataJSON() || {}; } catch { /* not JSON */ }
+    const row = rows.find((x) => x.id === b.p_booking_id);
+    if (row) Object.assign(row, { status: 'active', ...(b.p_bike_id ? { assigned_bike_id: b.p_bike_id } : {}), ...(b.p_paid != null ? { paid: b.p_paid } : {}) });
+    return route.fallback();
+  });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -60,6 +68,11 @@ function watchWrites(page: Page) {
       let body: Record<string, unknown> = {};
       try { body = r.postDataJSON() || {}; } catch { /* not JSON */ }
       if (id) patches.push({ id, body });
+    }
+    if (r.url().includes('/rest/v1/rpc/staff_checkin')) { // the check-in's one call, read as the row it writes
+      let b: Record<string, unknown> = {};
+      try { b = r.postDataJSON() || {}; } catch { /* not JSON */ }
+      patches.push({ id: String(b.p_booking_id), body: { status: 'active', ...(b.p_paid != null ? { paid: b.p_paid } : {}) } });
     }
     if (r.method() === 'POST' && r.url().includes('/rest/v1/desk_waitlist')) {
       let body: unknown = [];

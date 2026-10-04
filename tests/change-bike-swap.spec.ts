@@ -57,13 +57,9 @@ test('a refused swap is said and changes nothing', async ({ page }) => {
   expect(reqs.filter((r) => !/staff_swap_bike/.test(r.url))).toEqual([]);
 });
 
-test('without the function the plain writes run, and their undo closes the open assignment', async ({ page }) => {
+test('without the function the change is said and nothing is written around it (2026-10-04)', async ({ page }) => {
   const reqs = await open(page, { 'rpc:staff_swap_bike': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_swap_bike' } } });
   await page.evaluate(`(async()=>{openModal('q1');S.modalBikes=['bB'];await confirmAssign();})()`);
-  expect(reqs.some((r) => /queue_entries/.test(r.url) && (r.body as Record<string, unknown>)?.assigned_bike_id === 'bB')).toBe(true);
-  await page.evaluate(`(async()=>{await S.undoStack[S.undoStack.length-1].fn();})()`);
-  const closed = reqs.find((r) => /bike_assignments/.test(r.url) && r.method === 'PATCH');
-  expect(closed).toBeTruthy();
-  expect(closed!.url).toContain('booking_id=eq.q1');
-  expect((closed!.body as Record<string, unknown>).return_condition).toBe('swapped');
+  await expect(page.locator('.toast').filter({ hasText: /staff_swap_bike|function/i }).first()).toBeVisible();
+  expect(reqs.filter((r) => !/staff_swap_bike/.test(r.url))).toEqual([]);
 });
