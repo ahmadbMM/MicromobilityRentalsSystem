@@ -1980,13 +1980,13 @@ async function staffAuthSignIn(identifier,password){
     if(!row){
       // Lookup FAILED (timeout/error): only staff hold a password Auth account, so trust the valid
       // session rather than freezing — the DB still enforces is_staff() on every write.
-      if(lookupFailed){S._staffAuthed=true;S._mustChangePwd=false;setStaffRole(_staffRoleGuess(data.user.id));_staffRoleRetry(data.user.id);setupRefRealtime();return{ok:true};}
+      if(lookupFailed){S._staffAuthed=true;S._mustChangePwd=false;setStaffRole(_staffRoleGuess(data.user.id));_staffRoleRetry(data.user.id);setupRefRealtime();_rtStaffRejoin(data.user.id);return{ok:true};}
       // Lookup SUCCEEDED but returned no row: this Auth user is genuinely not staff — deny.
       try{await sb.auth.signOut();}catch(e){}
       return{ok:false,msg:t('errStaffNotAuthorized')};
     }
     S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(data.user.id,row.role);_accessSet(row,data.user.id);
-    setupRefRealtime();
+    setupRefRealtime();_rtStaffRejoin(data.user.id); // the live channel joined before this sign-in: again, as this account
     return{ok:true};
   }catch(e){return{ok:false,msg:(e&&e.message)||t('errConnection')};}
 }
@@ -2049,7 +2049,7 @@ async function staffAuthRestore(){
     S._staffAuthed=false;return;
   }
   S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(uid,row.role);_accessSet(row,uid);
-  setupRefRealtime();
+  setupRefRealtime();_rtStaffRejoin(uid);
 }
 async function lockStaff(){try{localStorage.removeItem('cq_staff');}catch(e){}_clearActiveCheckin(false);_staffTapCookie(false);try{await _syncDrop();}catch(e){}await staffAuthSignOut();window.location.href='/';} // the lists and the boot snapshot leave with the staff session (2026-09-27: they used to stay on the device)
 
@@ -36065,7 +36065,7 @@ function _tickRefreshLabel(){
   if(!el)return;
   if(_isOffline()){el.textContent=t('offlineLabel');return;}
   if(S._cacheOnly){el.textContent=t('savedCopyLabel');return;} // the boot snapshot with no server read yet: the desk must know it is looking at a copy
-  if(S._rtConnected&&(Date.now()-_lastRefresh)<RT_LIVE_STALE_MS){el.textContent=t('liveLabel');return;} // a joined channel with no read landing for a quarter of an hour says how old the copy is instead
+  if(_rtLive()&&(Date.now()-_lastRefresh)<RT_LIVE_STALE_MS){el.textContent=t('liveLabel');return;} // a joined channel with no read landing for a quarter of an hour says how old the copy is instead
   const sec=Math.round((Date.now()-_lastRefresh)/1000);
   el.textContent=sec<5?t('justNow'):sec<60?`${sec}${t('secondsAgo')}`:`${Math.round(sec/60)}${t('minutesAgo')}`;
 }
@@ -36256,7 +36256,7 @@ try{_updateConnUI();}catch(e){} // reflect connection state on boot (handles sta
 // already delivered. Without realtime: light every 30 s, full every fifth minute, as before.
 // The three section pollers (workshop, messages, ambassadors) ride the five-minute tick too.
 function _pollPlan(n,connected){if(n%30===0)return 'full';if(n%10===0)return connected?'light':'full';return connected?'skip':'light';}
-setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,!!S._rtConnected);if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_vendorPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
+setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,_rtLive());if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_vendorPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
 // ── Keeping the staff session alive ────────────────────────────────────────
 // supabase-js refreshes the access token on its own timer, but that timer does not run
 // while the tab is hidden or the phone is asleep — which at a booth is most of the evening.
@@ -36286,7 +36286,7 @@ try{document.addEventListener('visibilitychange',()=>{
   // an event it could not merge is waiting (_rtWantFull); the light one otherwise. Merged rows
   // land in the state even while hidden, so a glance at WhatsApp used to cost the whole
   // window, photos included, for nothing new.
-  if(S.view==='staff'){const _long=!_hiddenAt||(Date.now()-_hiddenAt)>RT_LIVE_STALE_MS;const _full=_long||!S._rtConnected||_rtWantFull;if(_full)_rtWantFull=false;_autoRefresh(_full);}
+  if(S.view==='staff'){const _long=!_hiddenAt||(Date.now()-_hiddenAt)>RT_LIVE_STALE_MS;const _full=_long||!_rtLive()||_rtWantFull;if(_full)_rtWantFull=false;_autoRefresh(_full);}
   // Customers had no poll/visibility catch-up and My Rides could sit stale. The light set is what
   // it draws from (the rider's own rides, the nights, the bikes' states), and not more often than
   // a live event would bring it: switching to WhatsApp and back used to reload everything.
@@ -36464,6 +36464,28 @@ let _rtStaffMode=null;
 function _rtStaffDevice(){try{return localStorage.getItem('cq_staff')==='1';}catch(e){return false;}}
 function _rtTables(staff){return staff?['queue_entries','desk_waitlist','sessions','bikes','inventory','cashier_sales','rider_registrations']:['sessions','bikes'];}
 function _rtEnsureMode(){if(_rtStaffMode!==null&&_rtStaffMode!==_rtStaffDevice())setupRealtime();}
+// ── Bookings the moment they are made (the owner, 2026-10-04: "i want the bookings to appear as
+// soon as theyre booked, realtime") ──
+// Bookings are staff-only under RLS, so the realtime server sends a booking only to a channel
+// whose token is a staff member's. A staff device's channel could join before its session was
+// read - a page opening while the token was being renewed, a sign-in landing mid-join - and then
+// sat on the anon key: it reported SUBSCRIBED, the poll stood down to its five-minute safety net,
+// and no booking ever arrived (prod 2026-10-04: two of five staff channels on bookings were anon).
+// Now a staff device's channel joins with the session's token (read first, five seconds at most),
+// a staff sign-in rejoins a channel that joined as someone else or as no one (_rtStaffRejoin), and
+// the poll and the Live label count the channel live only once it joined as staff (_rtLive).
+let _rtGen=0,_rtJoinUid=null;
+async function _rtSessionUid(){
+  try{
+    const r=await _withTimeout(sb.auth.getSession(),5000,'session');
+    const s=r&&r.data&&r.data.session;
+    if(!s||!s.access_token)return null;
+    try{if(sb.realtime&&typeof sb.realtime.setAuth==='function')await _withTimeout(sb.realtime.setAuth(s.access_token),5000,'realtime auth');}catch(_){}
+    return (s.user&&s.user.id)||null;
+  }catch(e){return null;}
+}
+function _rtLive(){return !!S._rtConnected&&(!_rtStaffMode||!S._staffAuthed||!!_rtJoinUid);}
+function _rtStaffRejoin(uid){if(_rtStarted&&_rtStaffMode&&uid&&_rtJoinUid!==uid)setupRealtime();}
 function setupRealtime(){
   if(!sb||!sb.channel)return;
   if(_rtRetryT){clearTimeout(_rtRetryT);_rtRetryT=null;} // this rebuild is the one that was pending
@@ -36471,11 +36493,17 @@ function setupRealtime(){
   // CLOSED synchronously, and while _rtChannel still pointed at it that report passed the guard
   // below and scheduled another rebuild.
   try{if(_rtChannel){const c=_rtChannel;_rtChannel=null;sb.removeChannel(c);}}catch(_){}
+  const gen=++_rtGen;_rtJoinUid=null;
+  _rtStaffMode=_rtStaffDevice();
+  if(_rtStaffMode&&sb.auth)_rtSessionUid().then(uid=>{if(gen===_rtGen)_rtJoin(uid);});
+  else _rtJoin(null);
+}
+function _rtJoin(uid){
+  _rtJoinUid=uid;
   try{
     // No customers binding: rider changes come on the private staff-ref channel below. The
     // table is not in the publication and must not be - postgres_changes sends whole rows.
     // rider_registrations are the /register form submissions (own tab, own loader).
-    _rtStaffMode=_rtStaffDevice();
     let _b=sb.channel('mmcq-live');
     _rtTables(_rtStaffMode).forEach(tb=>{_b=_b.on('postgres_changes',{event:'*',schema:'public',table:tb},tb==='rider_registrations'?_onRidersRt:_onRt);});
     const _ch=_rtChannel=_b
