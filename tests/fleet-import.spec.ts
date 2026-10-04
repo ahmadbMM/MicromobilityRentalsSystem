@@ -126,6 +126,42 @@ test.describe('CSV import', () => {
     expect(dels[0].url).toContain('id=in.');
   });
 
+  // Tags as the resolver reads them (2026-10-04 review): a UID typed with colons or in lower case
+  // was saved as typed and never matched a tap; the same tag on two rows was not caught.
+  test('tags are saved as letters and digits in upper case, and a tag twice in the file is refused', async ({ page }) => {
+    await boot(page);
+    const r = await page.evaluate(`(()=>{
+      const out=_bkCsvRows('number,type,tag\\n42,Hybrid,04:a3:2b:1c\\n43,Road,04 A3 2B 1C\\n44,Road,\\n');
+      return {tags:out.rows.map(x=>x.bike.tag_uid),errs:out.rows.map(x=>x.errs),form:_bkPrivVal('tag',' 04:a3-2B 1c ')};
+    })()`) as { tags: (string | null)[]; errs: string[][]; form: string };
+    expect(r.tags).toEqual(['04A32B1C', '04A32B1C', null]);
+    expect(r.errs).toEqual([[], ['bkTagTaken'], []]);
+    expect(r.form).toBe('04A32B1C');
+  });
+
+  test('a row whose tag is already on a fleet bike stays out, and the rest of the file still goes in', async ({ page }) => {
+    await boot(page);
+    const posts: unknown[] = [];
+    // The plain read cannot see tags, so the clash is the insert's: a chunk holding it is refused whole.
+    await page.route(/\/rest\/v1\/bikes/, async (route) => {
+      if (route.request().method() !== 'POST') return route.fallback();
+      const b = route.request().postDataJSON();
+      posts.push(b);
+      const rows = Array.isArray(b) ? b : [b];
+      const head = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+      if (rows.some((x: Record<string, unknown>) => x.tag_uid === 'TAKEN')) {
+        return route.fulfill({ status: 409, headers: head, body: JSON.stringify({ code: '23505', message: 'duplicate key value violates unique constraint "bikes_tag_uid_uniq"' }) });
+      }
+      return route.fulfill({ status: 201, headers: head, body: '[]' });
+    });
+    await page.evaluate(`_bkCsvPreview('number,type,tag\\n42,Hybrid,\\n43,Road,taken\\n44,Road,\\n')`);
+    await page.locator('#confirm-modal button', { hasText: 'Import 3 bikes' }).click();
+    // one chunk of three (refused), then each row on its own: 42 and 44 go in, 43 stays out
+    await expect.poll(() => posts.length).toBe(4);
+    expect(posts.slice(1).map((b) => (b as Record<string, unknown>).bike_number)).toEqual([42, 43, 44]);
+    await expect(page.locator('.toast, #toast, [role="status"]').filter({ hasText: '2 bikes imported' }).first()).toBeAttached();
+  });
+
   test('a file with nothing importable leaves the Import button disabled', async ({ page }) => {
     await boot(page);
     await page.evaluate(`_bkCsvPreview('number,type\\n1,Road\\n')`);
