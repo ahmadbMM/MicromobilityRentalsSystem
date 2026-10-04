@@ -5243,6 +5243,24 @@ body.fix-open{overflow:hidden;}
 .rg-q.err .rg-why{border-color:#b42318;}
 .rg-skip{align-self:flex-start;background:none;border:1px solid rgba(15,18,21,.18);border-radius:999px;padding:8px 14px;font-family:var(--font-body);font-weight:600;font-size:13px;color:#4f565c;cursor:pointer;}
 .rg-skip.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;}
+/* A desk-added booking's waiver (#waiver-gate, renderWaiverGate, 2026-10-04): the correction request's
+   card, the ride it is for (name, day and date, time, place, riders) above the waiver's text and its
+   tick. The rating page's layer: the rating waits for it, so the two are never up together. */
+#waiver-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
+#waiver-gate .wg-box:focus,#waiver-gate .wg-box:focus-visible{outline:none;}
+.wg-sess{margin-top:18px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px;background:#fbfbf9;display:flex;flex-direction:column;gap:8px;}
+.wg-ev{font-weight:800;font-size:17px;line-height:1.25;color:#0f1215;}
+.wg-ln{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;line-height:1.35;color:#2b3136;}
+.wg-ln .cu-ic{flex-shrink:0;color:#008f52;}
+.wg-sec{margin-top:6px;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4f565c;}
+.wg-riders{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.wg-riders li{display:flex;align-items:baseline;gap:8px;font-weight:600;font-size:14px;color:#0f1215;overflow-wrap:anywhere;}
+.wg-num{font-weight:800;color:#008f52;}
+.wg-text{margin-top:14px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px 16px;max-height:240px;overflow-y:auto;font-weight:500;font-size:13.5px;line-height:1.65;color:#4f565c;background:#fff;}
+.wg-text:focus-visible{outline:2px solid #008f52;outline-offset:2px;}
+.wg-agree{display:flex;align-items:center;gap:12px;margin-top:12px;border:1.5px solid rgba(15,18,21,.15);border-radius:12px;padding:14px 16px;cursor:pointer;min-height:52px;font-weight:600;font-size:14px;line-height:1.4;color:#0f1215;}
+.wg-agree.on{border-color:#008f52;background:#e8f6ee;}
+.wg-cb{appearance:auto;-webkit-appearance:checkbox;width:20px;height:20px;flex:none;accent-color:#008f52;margin:0;}
 .rg-bfn{margin-top:-4px;font-size:12px;line-height:1.4;color:#4f565c;}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
@@ -5729,6 +5747,15 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     /* ── A booking's QR tile and its placeholder (_qrBox, ticketQR) on the wizard's tickets and in My
        Bookings: without inline styles (2026-09-29, the customer pages' pass; scoped by that id). */
     #tab-myrides .cu-qr-box,#tab-register .cu-qr-box{border-radius:3px;display:inline-block;line-height:0;border:1px solid var(--border);overflow:hidden;}
+    /* The live line (_qrBox, owner 2026-10-04): a green stroke runs round the code's white margin, one lap
+       every 2.4 s, so a screenshot shows itself by standing still. It keeps moving under reduced motion
+       (the reduced-motion rules cut every animation to one instant): it is how the desk checks a ticket, and it is
+       one thin line. overflow:visible: the night ticket rounds every svg in the card, which would clip it. */
+    .cu-qr-box{position:relative;}
+    .cu-qr-box .qr-live{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+    .cu-qr-box .qr-live path{stroke-dasharray:24 76;animation:qrLive 2.4s linear infinite;}
+    @keyframes qrLive{to{stroke-dashoffset:-100;}}
+    @media (prefers-reduced-motion: reduce){.cu-qr-box .qr-live path{animation-duration:2.4s!important;animation-iteration-count:infinite!important;}}
     #tab-myrides .cu-qr-lazy,#tab-register .cu-qr-lazy{display:inline-block;width:var(--cu-qr);height:var(--cu-qr);}
     :is(html[lang="ar"],html[lang="ur"]) .appr-ok-txt strong{font-size:20px;letter-spacing:0;}
     @media (max-width:767px){

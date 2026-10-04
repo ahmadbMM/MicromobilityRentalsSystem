@@ -31,6 +31,7 @@ with expected(fname, want_definer, note) as (values
   ('_oracle_gate',           true,  'writes login_throttle; internal only'),
   ('customer_create_booking',true,  'the whole point: booking without table rights'),
   ('customer_booking_update',true,  'ditto'),
+  ('customer_accept_waiver', true,  'stamps the waiver on the caller''s own desk-added bookings; token-checked (20261004173000)'),
   ('customer_addon_stock',   true,  'ditto'),
   ('customer_login',         true,  'reads customers'),
   ('customer_signup',        true,  'writes customers'),
