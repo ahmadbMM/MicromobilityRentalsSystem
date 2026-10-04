@@ -25,6 +25,7 @@ const BATCH = 25;               // Instagram allows roughly 200 lookups an hour 
 const STALE_GAP_MIN = 20;
 const OK_DAYS = 7;              // a counted account is counted again after a week
 const MISS_DAYS = 30;           // a personal/unknown one is tried again after a month
+const ERROR_HOURS = 6;          // a lookup that failed (network, an outage, an error we do not know) soon
 const HANDLE = /^[A-Za-z0-9._]{1,30}$/;
 
 export async function onRequestPost(context) {
@@ -60,7 +61,9 @@ export async function onRequestPost(context) {
     if (!custs || !rows) return json({ ok: false, error: 'lookup failed' }, 502);
     const byId = new Map(rows.map((r) => [r.customer_id, r]));
     const now = Date.now();
-    const wait = (r) => (r.status === 'ok' ? OK_DAYS : MISS_DAYS) * 864e5;
+    // Only an account Instagram said it will not describe waits the month: a failed lookup says
+    // nothing about the account, and parking it for 30 days left counted riders uncounted for weeks.
+    const wait = (r) => (r.status === 'ok' ? OK_DAYS * 864e5 : r.status === 'unavailable' ? MISS_DAYS * 864e5 : ERROR_HOURS * 36e5);
     due = custs.map((c) => ({ id: c.id, handle: handleOf(c), row: byId.get(c.id) }))
       .filter((x) => x.handle && (!x.row || x.row.handle !== x.handle || !x.row.tried_at || now - Date.parse(x.row.tried_at) > wait(x.row)))
       // never tried first, then the longest ago

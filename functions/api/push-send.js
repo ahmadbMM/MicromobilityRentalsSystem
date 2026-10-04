@@ -51,11 +51,12 @@ export async function onRequestPost(context) {
   const subs = await subsRes.json();
   if (!Array.isArray(subs) || !subs.length) return json({ ok: true, sent: 0, reason: 'no subscriptions' });
 
+  const origin = new URL(request.url).origin;
   const payload = JSON.stringify({
     title: String(title).slice(0, 120),
     body: String(message || '').slice(0, 300),
-    url: url || './',
-    tag: tag || 'mm-general',
+    url: safeUrl(url, origin),
+    tag: String(tag || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
   });
 
   const results = await Promise.all(subs.map((s) => sendOne(s, payload, PUB, PRIV, env)));
@@ -74,9 +75,33 @@ export async function onRequestPost(context) {
   return json({ ok: true, sent, total: subs.length, removed: dead.length });
 }
 
+// Where a notification may lead: an address on this site (a path, or this origin), at most 500
+// characters - the payload has to fit one 4 KB record, and a tap must never open someone else's page.
+function safeUrl(u, origin) {
+  const s = String(u || '').trim();
+  if (!s || s.length > 500) return './';
+  if (/^\.?\/(?![/\\])/.test(s)) return s;
+  try { const x = new URL(s); if (x.origin === origin) return x.href; } catch { /* not a URL */ }
+  return './';
+}
+
+// The push services browsers subscribe with. The endpoint is whatever a rider's browser registered
+// (customer_push_subscribe), so it is a URL from outside: anything else is never POSTed to - this
+// function would otherwise send a signed request wherever a rider pointed it.
+const PUSH_HOSTS = [/^fcm\.googleapis\.com$/, /^android\.googleapis\.com$/, /(^|\.)push\.services\.mozilla\.com$/,
+  /(^|\.)push\.apple\.com$/, /(^|\.)notify\.windows\.com$/];
+function pushEndpointOk(endpoint) {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:' && !u.port && !u.username && !u.password && PUSH_HOSTS.some((re) => re.test(u.hostname));
+  } catch { return false; }
+}
+
 async function sendOne(sub, payload, vapidPub, vapidPriv, env) {
   try {
     const endpoint = sub.endpoint;
+    if (!pushEndpointOk(endpoint)) return { ok: false, endpoint, error: 'endpoint not a known push service' };
+    if (new TextEncoder().encode(payload).length > 3800) return { ok: false, endpoint, error: 'payload too large' };
     const audience = new URL(endpoint).origin;
     const jwt = await vapidJwt(audience, vapidPriv, env.VAPID_SUBJECT || 'mailto:info@micromobility.sa');
     const encrypted = await encryptPayload(payload, sub.p256dh, sub.auth);
