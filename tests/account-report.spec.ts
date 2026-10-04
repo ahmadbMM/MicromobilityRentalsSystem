@@ -85,7 +85,7 @@ test('every other filter narrows the list as it says', async ({ page }) => {
   expect(await ids(`{fRides:'never'}`)).toEqual(['c2', 'c3', 'c4']);
   expect(await ids(`{fActive:'inactive'}`)).toEqual(['c2', 'c3', 'c4']);
   expect(await ids(`{fUpcoming:'yes'}`)).toEqual(['c1']);
-  expect(await ids(`{fPay:'house'}`)).toEqual(['c2']);
+  expect(await ids(`{fPay:'house'}`)).toEqual(['c2', 'c3']); // a VIP is on the house whatever default_pay says, as the Pay column shows
   expect(await ids(`{sort:'rides'}`)).toEqual(['c1', 'c2', 'c3', 'c4']);
 });
 

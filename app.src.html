@@ -16951,7 +16951,11 @@ async function _accPwdSave(){
     const k=[['BAD_PASSWORD',cur?'accPwdBad':'accPwdCurReq'],['LOCKED','accPwdLocked'],['SAME_PASSWORD','accPwdSame'],['WEAK_PASSWORD','errPasswordLen']].find(([c])=>msg.includes(c));
     return say(k?k[1]:'errConnection');
   }
-  if(typeof res.data==='string'&&res.data){S.loggedIn={...(S.loggedIn||cust),session_token:res.data};setSession(S.loggedIn);}
+  // A wrong current password is ANSWERED 'BAD_PASSWORD' since 20261004100000 (a raise rolled the
+  // try count back); only a new session token (48 hex characters) is a change that went through.
+  if(res.data==='BAD_PASSWORD')return say(cur?'accPwdBad':'accPwdCurReq');
+  if(typeof res.data!=='string'||!/^[0-9a-f]{48}$/.test(res.data))return say('errConnection');
+  S.loggedIn={...(S.loggedIn||cust),session_token:res.data};setSession(S.loggedIn);
   _accPwdOpen(true);
 }
 function _accPwdClose(){const m=document.getElementById('acc-pwd-modal');if(m){m.style.display='none';m.innerHTML='';}const b=document.getElementById('acc-pwd-btn');if(b)b.focus();}
@@ -36559,6 +36563,15 @@ if('serviceWorker' in navigator){
     _updPending=true;
     try{_updBar();}catch(e){}
   });}catch(e){}
+  // The worker's mm-hold message misses the page the navigation itself opens (it is not yet a
+  // client the worker can reach when the refresh meets the hold), but the mark it keeps does not:
+  // a page it served reads the mark at load and a moment later, and reloads into the hold page.
+  // Once per half minute at most, so a mark being cleared as the hold lifts cannot loop.
+  const _holdMark=()=>{try{if(!navigator.serviceWorker.controller||!('caches' in window))return;caches.match('/__mm-hold').then(r=>{
+    if(!r)return;let at=0;try{at=Number(sessionStorage.getItem('cq_hold_reload'))||0;}catch(e){}
+    if(Date.now()-at<30000)return;try{sessionStorage.setItem('cq_hold_reload',String(Date.now()));}catch(e){}
+    location.reload();}).catch(()=>{});}catch(e){}};
+  _holdMark();setTimeout(_holdMark,3000);
   // ...but never over work in progress. Going to the background is not always leaving: on Android
   // a photo picker or the camera hides the page, and a rider mid-booking switches to WhatsApp for a
   // friend's number. Reloading then threw away the open form, the picked photo, the sale in hand.

@@ -34,7 +34,7 @@ test('the modal carries the message, the links and the roll', async ({ page }) =
   await page.evaluate(`showCancelNight('${FUT}')`);
   const m = page.locator('#cancel-night-modal');
   await expect(m).toContainText('2 live booking');
-  await expect(m.locator('textarea')).toHaveValue(/cancelled/);
+  await expect(m.locator('#cn-msg')).toHaveValue(/cancelled/);
   const links = await m.locator('a[href^="https://wa.me/"]').count();
   expect(links).toBe(2);
   const href = await m.locator('a[href^="https://wa.me/"]').last().getAttribute('href');

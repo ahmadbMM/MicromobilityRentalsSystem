@@ -19,11 +19,12 @@ async function account(page: Page, fx: Fixtures = {}, cust: Record<string, unkno
 test.describe('@customer:account change password', () => {
   test('checks the boxes, says each refusal, keeps this device signed in with the new token', async ({ page }) => {
     const sent: Record<string, unknown>[] = [];
-    const answers = ['BAD_PASSWORD', 'SAME_PASSWORD', 'LOCKED', 'tok-new'];
+    // A wrong current password is answered, not raised (20261004100000); the others still raise.
+    const answers = ['ok:BAD_PASSWORD', 'SAME_PASSWORD', 'LOCKED', 'tok:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'];
     await account(page, {}, {}, () => page.route(/\/rest\/v1\/rpc\/customer_change_password/, async (route) => {
       sent.push(route.request().postDataJSON());
       const a = answers.shift()!;
-      if (a.startsWith('tok-')) return route.fulfill({ status: 200, headers: head, body: JSON.stringify(a) });
+      if (a.startsWith('ok:') || a.startsWith('tok:')) return route.fulfill({ status: 200, headers: head, body: JSON.stringify(a.slice(a.indexOf(':') + 1)) });
       return route.fulfill({ status: 400, headers: head, body: JSON.stringify({ code: 'P0001', message: a, details: null, hint: null }) });
     }));
     await page.locator('#acc-pwd-btn').click();
@@ -65,8 +66,8 @@ test.describe('@customer:account change password', () => {
     await save.click();
     await expect(dlg).toContainText('any other phone or computer signed in to your account has been signed out');
     expect(sent[3]).toMatchObject({ p_id: 'c1', p_token: 'tok-spec', p_current: 'Oldpass1', p_new: 'Newpass12' });
-    expect(await page.evaluate(`(S.loggedIn||{}).session_token`)).toBe('tok-new');
-    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_session')).session_token`)).toBe('tok-new');
+    expect(await page.evaluate(`(S.loggedIn||{}).session_token`)).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_session')).session_token`)).toBe('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     await dlg.getByRole('button', { name: 'Done' }).click();
     await expect(page.locator('#acc-pwd-modal [role="dialog"]')).toHaveCount(0);
   });
@@ -76,7 +77,7 @@ test.describe('@customer:account change password', () => {
     await account(page, { 'rpc:customer_about': [{ profession: null, workplace: null, heard_from: null, sign_in: 'google' }] }, { sign_in: 'google' },
       () => page.route(/\/rest\/v1\/rpc\/customer_change_password/, async (route) => {
         sent.push(route.request().postDataJSON());
-        return route.fulfill({ status: 200, headers: head, body: JSON.stringify('tok-g') });
+        return route.fulfill({ status: 200, headers: head, body: JSON.stringify('bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb') });
       }));
     await page.locator('#acc-pwd-btn').click();
     const dlg = page.locator('#acc-pwd-modal [role="dialog"]');

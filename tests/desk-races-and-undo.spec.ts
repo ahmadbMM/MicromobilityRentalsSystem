@@ -276,7 +276,9 @@ test('the promotion goes down the line when the first in line was already dealt 
 test('a restored no-show does not take a number a waitlisted rider holds', async ({ page }) => {
   const q = [row('N', 'noshow', { queue_num: 3 }), row('W', 'waitlist', { queue_num: 3, waitlist_num: 1 }), row('B', 'waiting', { queue_num: 5 })];
   await boot(page, q);
-  await page.evaluate(`doUndoNoShow('N')`);
+  const undo = page.evaluate(`doUndoNoShow('N')`);
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Restore' }).click(); // the night is full (capacity 2): it asks first
+  await undo;
   await expect.poll(() => q[0].status).toBe('waiting');
   expect(q[0].queue_num).not.toBe(3);
 });
