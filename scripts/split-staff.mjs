@@ -984,7 +984,9 @@ export function formatBareWrites(r, limit = 20) {
 // Staff 398 -> 400 (2026-10-04): invited riders' three lists and Revoke invitation, and a priority on each
 // learn-to-ride sign-up (the community part 47.1 -> 48.8 KB, 17 strings); 396.0 KB here is ~398.2 on the runner
 // (it read 2.0 more than here for 1c230561).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 400, core: 222 };
+// Staff 400 -> 404 (2026-10-04): History > Customer activity (renderCustActivity in the history part, 36 strings);
+// 399.2 KB here is ~401.4 on the runner (it read 2.2 more than here for 9e45176b: 394.1 here, 396.3 there).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 190, staff: 404, core: 222 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
