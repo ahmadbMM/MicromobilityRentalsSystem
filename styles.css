@@ -2029,12 +2029,7 @@
     /* The undo-code dialog (_ucRender, and _undoAuth's plain confirm before the database has codes),
        drawn in #confirm-modal: pass 3. Its heading, close button, actions and Undo button are the
        confirm dialog's own chrome- rules above; these are the rest. */
-    #confirm-modal .uc-lbl{font-size:14px;color:var(--muted-l);font-weight:700;margin-bottom:14px;padding:10px 14px;background:var(--s3);border-radius:4px;}
     #confirm-modal .uc-note{color:var(--muted);font-size:12px;}
-    #confirm-modal .uc-mb10{margin-bottom:10px;}
-    #confirm-modal .uc-mb12{margin-bottom:12px;}
-    #confirm-modal .uc-in{letter-spacing:6px;font-size:18px;text-align:center;}
-    #confirm-modal .uc-err{min-height:18px;font-size:13px;font-weight:700;color:var(--red);margin-bottom:10px;}
     /* _artIcon's svg, in every section and on the customer pages. No one id holds them all, so the
        two values are !important: like the inline style, they beat every rule that is not (and no
        rule that sets either of them for an svg is). */
@@ -6296,6 +6291,13 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 
 /* ── Community applications (staff: Community > Applications) ─────────────── */
 .ca-sub{font-size:12.5px;color:var(--muted);line-height:1.5;margin:-4px 0 12px}
+/* Learn to ride: Taking sign-ups (_laTakingRow) - the switch and what the website says; amber while off. */
+.la-taking{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px}
+.la-taking.off{border-color:rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.08)}
+.la-taking-sw{display:inline-flex;align-items:center;gap:8px;font-size:13px;cursor:pointer}
+.la-taking-hint{font-size:12.5px;color:var(--muted);line-height:1.45}
+.la-taking.off .la-taking-hint,.la-taking-note{color:rgb(var(--warn-rgb));font-weight:700}
+.la-taking-note{flex-basis:100%;font-size:12.5px;line-height:1.45}
 .ca-row{padding:14px 4px;border-bottom:1px solid var(--border)}
 .ca-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .ca-name{font-weight:800;font-size:15px}

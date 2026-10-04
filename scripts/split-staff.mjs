@@ -40,7 +40,7 @@ export const STAFF_ENTRY = [
   'renderCashier', 'renderCommunity', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
   'renderAmbassadors', 'renderVendors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
-  'doUndo', '_ucPrompt', // the topbar's Undo and the admin's undo-code question (2026-09-28)
+  'doUndo', // the topbar's Undo (2026-09-28)
   '_tpMsgOpen', // the account editor's temporary-password message (2026-09-29): its save is customer-half code
   // The staff top bar's search (2026-09-29): Ctrl/Cmd+K is listened for at load, and through the
   // search every account's history and the whole account editor were reached from the customer
