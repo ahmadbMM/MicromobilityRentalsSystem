@@ -3208,6 +3208,25 @@
     #tab-analytics .an-attn-title{font-size:13px;font-weight:800;color:var(--muted);margin:14px 0 8px;}
     #tab-analytics .an-rate-list{display:flex;flex-direction:column;gap:8px;margin-top:10px;max-height:520px;overflow-y:auto;}
     #tab-analytics .an-rate-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:10px 13px;}
+    /* All ratings: Select shows a box on each card and the bar's count + Share; each card has its own Share (_rsPaint) */
+    #tab-analytics .rs-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    #tab-analytics .rs-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    #tab-analytics .rs-card:not(.rs-on) .rs-act,#tab-analytics .rs-card.rs-on .rs-idle{display:none;}
+    #tab-analytics .rs-n{font-size:12px;font-weight:700;color:var(--muted);}
+    #tab-analytics .rs-grow{flex:1;}
+    #tab-analytics .rs-pick{display:none;background:none;border:0;padding:2px;margin-inline-end:2px;color:var(--green);cursor:pointer;flex-shrink:0;align-items:center;}
+    #tab-analytics .rs-card.rs-on .rs-pick{display:inline-flex;}
+    #tab-analytics .an-rate-card.rs-sel{border-color:var(--green);}
+    #tab-analytics .rs-one{background:none;border:1px solid var(--border);border-radius:6px;padding:6px;color:var(--muted);cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;}
+    #tab-analytics .rs-one:hover,#tab-analytics .rs-one:focus-visible{color:var(--green);border-color:var(--green);}
+    .rs-dlg{max-width:560px;}
+    .rs-dlg .rs-sub{font-size:12px;color:var(--muted);margin:2px 0 4px;}
+    .rs-dlg .rs-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:12px 0 6px;}
+    .rs-dlg .rs-prev{display:grid;grid-template-columns:1fr;gap:10px;max-height:52vh;overflow-y:auto;margin:12px 0 8px;}
+    .rs-dlg .rs-prev.rs-many{grid-template-columns:1fr 1fr;}
+    .rs-dlg .rs-prev img{width:100%;height:auto;display:block;border:1px solid var(--border);border-radius:8px;background:#fff;}
+    .rs-dlg .rs-wait{padding:36px 10px;text-align:center;color:var(--muted);font-size:13px;}
+    .rs-dlg .rs-hint{font-size:12px;color:var(--muted);margin-bottom:4px;}
     #tab-analytics .an-row-between{display:flex;align-items:center;justify-content:space-between;gap:10px;}
     #tab-analytics .an-rate-meta{font-size:10px;color:var(--muted);}
     #tab-analytics .an-rate-scores{display:flex;gap:14px;flex-shrink:0;}

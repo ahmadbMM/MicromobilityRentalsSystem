@@ -1060,7 +1060,9 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 191 -> 193 (2026-10-05): the rider's waiver step on the ticket for riders staff added (renderWaiverGate,
 // acceptWaiverGate, _pendingWaiver; ~2 KB, customer code by design) merged with the audit; 190.1 KB here is ~191.4 on
 // the runner, over 191.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 193, staff: 412, core: 227 };
+// Staff 412 -> 418 (2026-10-05): ratings as pictures to share in Analytics > All ratings (_rsDraw draws each rating
+// on a canvas; Select, the share dialog, 24 strings; the analytics part +4.8 KB); 413.1 KB here is ~415.3 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 193, staff: 418, core: 227 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
