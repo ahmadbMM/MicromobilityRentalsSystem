@@ -15417,7 +15417,7 @@ async function _loadFlags(){
   if(S._flagsBusy)return;S._flagsBusy=true;
   const sig=_flagsSig();
   try{
-    const{data,error}=await sb.from('customer_flags').select('*').order('flagged_at',{ascending:false}).limit(1000);
+    const{data,error}=await _pagedAll(()=>sb.from('customer_flags').select('*').order('flagged_at',{ascending:false}).order('id')); // every request, page by page: a thousand newest dropped the oldest pending ones (2026-10-05)
     if(error)S._flagsErr=true;else{S._flags=data||[];S._flagsErr=false;S._flagsSig=sig;}
   }catch(e){S._flagsErr=true;}
   finally{S._flagsBusy=false;S._flagsAt=Date.now();}
@@ -15860,7 +15860,9 @@ const CA_COLS='id,created_at,updated_at,submissions,status,name,email,phone,heig
 async function _caLoad(){
   if(S._caBusy||!sb)return;S._caBusy=true;
   try{
-    const q=cols=>sb.from('community_applications').select(cols).order('created_at',{ascending:false}).limit(1000);
+    // Every application, page by page (2026-10-05): the newest thousand left the oldest pending
+    // ones off the list without a word. id ends the sort, so the pages line up (_pagedAll).
+    const q=cols=>_pagedAll(()=>sb.from('community_applications').select(cols).order('created_at',{ascending:false}).order('id'));
     // heard_from (how they heard of us, asked by the form since 2026-09-28) comes with migration
     // 20260928220000: until the database has it, the list loads without it.
     // The change requests' columns come with 20260929100000, workplace (asked since 2026-09-29)
@@ -15914,7 +15916,7 @@ const CA_STATUS={pending:{k:'caPending',col:'var(--orange)'},invited:{k:'caInvit
 function _caSt(a){return a.status==='approved'&&a.invited_session?'invited':a.status;}
 // "Invited to the Saturday Social Ride on Sat 7 Mar", or without the day once the ride has left this device's window.
 function _caInvLine(a){
-  const s=allSessions().find(x=>x.id===a.invited_session);
+  const s=_caInvSess(a);
   return s?t('caInvitedTo').replace('{0}',dayLabel(s.day)+' '+esc(shortDate(s.session_date||s.id))):t('caInvitedAny');
 }
 // Invited riders in three lists (the owner, 2026-10-04: "in invited riders divide them into
@@ -15930,7 +15932,7 @@ function _caCids(a){
   for(let i=0;id&&i<6&&!out.includes(id);i++){out.push(id);const c=cs.find(x=>x.id===id);id=c&&c.merged_into;}
   return out;
 }
-function _caInvSess(a){return allSessions().find(x=>x.id===a.invited_session)||null;}
+function _caInvSess(a){return(a.invited_session&&_sessGet(a.invited_session))||null;} // by the index, not a copy of every session per card (2026-10-05)
 // The invitation's bookings on its ride, the one that says most first: checked in, live, no-show, cancelled.
 const _CA_BK_RANK={active:0,done:0,waiting:1,waitlist:1,noshow:2,cancelled:3};
 function _caInvBks(a){
@@ -15962,7 +15964,7 @@ function _caRevokedNote(a){
   const ids=_caCids(a);if(!ids.length)return'';
   const b=getQueue().filter(e=>e.cancelReason==='invite_revoked'&&ids.includes(e.customerId)).sort((x,y)=>String(y.sessionDate||'').localeCompare(String(x.sessionDate||'')))[0];
   if(!b)return'';
-  const s=allSessions().find(x=>x.id===b.sessionId);
+  const s=_sessGet(b.sessionId);
   return`<div class="ca-inv-bk">${esc(t('caRevokedNote').replace('{0}',s?dayLabel(s.day)+' '+shortDate(s.session_date||s.id):shortDate(b.sessionDate)))}</div>`;
 }
 function _caRow(a){
@@ -16071,8 +16073,9 @@ function _appList(k){
   if(k==='la'&&(S._laFilter||'pending')==='pending')list.sort((x,y)=>_laPrioRank(x)-_laPrioRank(y));
   // Invited riders by their ride: still to come, the soonest first; completed and didn't show, the latest first.
   if(k==='ca'&&S._caFilter==='invited'){
-    const d=a=>{const s=_caInvSess(a);return String((s&&(s.session_date||s.id))||'');},up=_caInvSub()==='invited';
-    list.sort((x,y)=>up?d(x).localeCompare(d(y)):d(y).localeCompare(d(x)));
+    // Each card's ride date once, not twice per comparison (2026-10-05).
+    const dk=new Map(list.map(a=>{const s=_caInvSess(a);return[a,String((s&&(s.session_date||s.id))||'')];})),up=_caInvSub()==='invited';
+    list.sort((x,y)=>up?dk.get(x).localeCompare(dk.get(y)):dk.get(y).localeCompare(dk.get(x)));
   }
   return list.map(k==='la'?_laRow:_caRow).join('')||`<div class="empty-state">${t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty')}</div>`;
 }
@@ -16229,7 +16232,24 @@ async function _caApGo(){
   toast(done,'success');
   // The tags and the ride come after the approval, on the account it landed on. Neither may keep
   // the welcome message from showing: a new account's password is handed back only this once.
-  try{await _caApExtras(a,d,pickTags.filter(tid=>tid!==TAG_BLACKLIST),rideId,comm,strip,rg);}catch(e){toast((e&&e.message)||t('errServerError'),'error');}
+  let booked=null;
+  try{booked=await _caApExtras(a,d,pickTags.filter(tid=>tid!==TAG_BLACKLIST),rideId,comm,strip,rg);}catch(e){toast((e&&e.message)||t('errServerError'),'error');booked=rideId?'failed':null;}
+  // No place saved on the ride (2026-10-05): the message said one was all the same. An invitation is
+  // to a ride, so without its booking there is no invitation to send, and the application stops
+  // naming the ride (it stays approved, as the server has it); an approval goes out without the
+  // ride. The refused booking has said why on the error bar. A password an approval has just made
+  // is handed back only this once, so a failed invitation still shows it, in its own message.
+  if(booked==='failed'){
+    if(inv&&a.invited_session===rideId){
+      a.invited_session=null;
+      let r;try{r=await sb.from('community_applications').update({invited_session:null}).eq('id',a.id).eq('invited_session',rideId);}catch(e){r={error:e};}
+      if(r&&r.error&&!/invited_session/.test(String(r.error.message||'')))_writeErr(r,'application invite');
+    }
+    renderCommunity();
+    if(!inv)_caMsgShow(a,d.existing?'existing':'new',d);
+    else if(d.password)_caMsgShow(a,'temp',d);
+    return;
+  }
   renderCommunity();
   _caMsgShow(a,inv?'invite':d.existing?'existing':'new',rideId?{...d,sid:rideId}:d); // the ride picked, invited or approved, goes in the message
 }
@@ -16251,8 +16271,10 @@ async function _caGiveTags(cid,name,pickTags,dropComm){
     S.customerTags=(S.customerTags||[]).filter(ct=>!(ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY));
   logAction(t('amTagsTitle')+': '+name+' · '+tids.map(tid=>((S.tags||[]).find(tg=>tg.id===tid)||{}).name||tid).join(', '));
 }
+// Answers what came of the ride (2026-10-05): 'booked', 'dup' (on it already, so the place stands),
+// 'failed' (no place saved: the message must not say there is one), or null with no ride picked.
 async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null){
-  const cid=d.customer_id;if(!cid)return;
+  const cid=d.customer_id;if(!cid)return rideId?'failed':null;
   // The approval gave the Community tag; this device learns it now rather than at the next sync.
   // (An old grant on file stays as it is: the server adds the tag with on conflict do nothing.)
   if(comm&&!(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY))_ctMerge([{customer_id:cid,tag_id:TAG_COMMUNITY,added_by:_opName()||'staff',added_at:Date.now(),note:'Community application'}]);
@@ -16260,19 +16282,24 @@ async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null){
   if(strip&&!(await _wr(sb.from('customer_tags').delete().eq('customer_id',cid).eq('tag_id',TAG_COMMUNITY),'application tags')))
     S.customerTags=(S.customerTags||[]).filter(ct=>!(ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY));
   await _caGiveTags(cid,a.name,pickTags,false);
-  const sess=rideId&&allSessions().find(s=>s.id===rideId);
-  if(!sess)return;
+  const sess=rideId&&_sessGet(rideId);
+  if(!sess)return rideId?'failed':null;
   // The account as the booking needs it: this device's copy when it has one, else what the
   // application said (a new account is made from exactly that).
   const c=(S.customers||[]).find(x=>x.id===cid)||{};
   const who={id:cid,name:c.name||d.name||a.name,email:c.email||d.email||a.email,phone:c.phone||d.phone||a.phone,
     height:c.height||a.height||null,type_preference:c.type_preference||a.bike_type||'Any'};
-  const b=await _commBook(sess,[who],{rideGroup:rg});
-  if(b.dup){toast(t('commAddDup'),'warning');return;}
-  if(!b.entries.length||_writeErr(b.res,'add rider'))return;
+  // A bike owner rides their own bike (2026-10-05): the account's Bike owner (type 'Own', which the
+  // form's own-bike answer sets) or that answer itself books Own where the ride takes one, as the
+  // Add rider dialog's own-bike box does. Left out, _commBook booked them as Any, a rental.
+  const own=(who.type_preference==='Own'||a.own_bike===true)&&_needsBike(sess)&&_ownOffered(sess);
+  const b=await _commBook(sess,[who],{rideGroup:rg,own});
+  if(b.dup){toast(t('commAddDup'),'warning');return'dup';}
+  if(!b.entries.length||_writeErr(b.res,'add rider'))return'failed';
   logAction(t('commAddBtn')+': '+who.name+' ('+t('commAddDestList')+' · '+dayLabel(sess.day)+' '+shortDate(sess.session_date||sess.id)+')');
   toast(t('commAddedToast').replace('{0}',who.name));
   loadDataLight().then(()=>renderStaffQueue()).catch(()=>{}); // not awaited: the welcome message waits for nothing
+  return'booked';
 }
 async function _caDecide(a,status){
   S._caWorking=true;
@@ -16620,7 +16647,7 @@ const LA_LEVEL={never:'laLvlNever',tried:'laLvlTried',refresh:'laLvlRefresh'};
 async function _laLoad(){
   if(S._laBusy||!sb)return;S._laBusy=true;
   try{
-    const q=cols=>sb.from('learn_applications').select(cols).order('created_at',{ascending:false}).limit(1000);
+    const q=cols=>_pagedAll(()=>sb.from('learn_applications').select(cols).order('created_at',{ascending:false}).order('id')); // every sign-up, page by page, as the community list (2026-10-05)
     // heard_from (how they heard of us, 20260928230000) and learners (several on one sign-up,
     // 20260928235500) came after the table's own 20260928210000: until the database has a column,
     // the list loads without it (a sign-up then reads as its one learner, _laLearners).
