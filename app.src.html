@@ -3102,22 +3102,29 @@ function _regTypeHidden(ty){
 // A rider's terms changed (the default payment in the account editor, the VIP tag given or taken):
 // their LIVE bookings (waiting/waitlist/active, not on an approval ride, in their own name - any of
 // names) follow at once. Rows the new terms cover become on-the-house; rows only the old terms
-// comped revert to pending at the type price. Manual comps the old terms never covered are left
-// alone. was and now answer, for a bike type, whether the old and the new terms cover it.
+// comped revert to pending at the fare their ride charges (2026-10-05: an event's seat price and
+// nothing on a free ride - an event's seat went back to 57.5 - and a Petromin employee's fare, for
+// which the Riders list is loaded first, as the promo re-price does). Manual comps the old terms
+// never covered are left alone. was and now answer, for a bike type, whether the old and the new
+// terms cover it.
 async function _houseReprice(cid,names,was,now){
   const own=new Set(names.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
   const live=getQueue().filter(e=>e.customerId===cid&&['waiting','waitlist','active'].includes(e.status)&&!_apprSessIds.has(e.sessionId)&&own.has(String(e.name||'').trim().toLowerCase()));
+  if(!S.ridersLoaded&&live.some(e=>{const s=_sessGet(e.sessionId);return s&&s.ride_kind==='petromin';})){try{await loadRiders();}catch(_){}}
   const calls=[],ids=[];
+  // Each write names the row as this device saw it (2026-10-05): one another device changed in the
+  // meantime (paid at the desk, re-priced) is left as it is and read back rather than overwritten.
   live.forEach(e=>{
     const cov=now(e.typePreference);
-    if(cov&&!e.paid){e.paid=true;e.price=0;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id));}
-    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const p=priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id));}
+    if(cov&&!e.paid){e.paid=true;e.price=0;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id).eq('paid',false).select('id'));}
+    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const f=_sessFare(e),p=f!=null?f:priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id).eq('paid',true).eq('price',0).select('id'));}
   });
   if(!calls.length)return;
   // A refused write is said, and the rows are read back: the screen must not show a booking on the
-  // house (or pending) that the database still prices the old way - the desk would not collect.
+  // house (or pending) that the database still prices the old way - the desk would not collect. A
+  // write that changed no row (its row had moved on) is read back too.
   let res;try{res=await Promise.all(calls);}catch(e){res=[{error:e||{message:'failed'}}];}
-  if(_writeErr(res,'house reprice'))await _reloadRows(ids);
+  if(_writeErr(res,'house reprice')||res.some(r=>r&&!r.error&&!(Array.isArray(r.data)&&r.data.length)))await _reloadRows(ids);
 }
 // The VIP tag was given or taken on this device (was: whether the account held it before): when
 // that changed its terms, its live bookings follow.
@@ -4282,7 +4289,19 @@ function priceForBike(bike){
   if(bike.type==='Road'||bike.type==='Mountain'||bike.type==='Hybrid')return priceForType(bike.type);
   return bike.rental_price??priceForType(bike.type);
 }
+// What a booking's ride says about its fare before any bike type does (2026-10-05): nothing on a
+// ride that charges nothing, the seat price on an event; null when the bike type decides. A seat
+// ('None') whose event is not on the page is never a bike's fare either: priceForType has none for
+// 'None', and DEFAULT_PRICE (57.5) was charged for free and 30-riyal seats alike.
+function _sessFare(e){
+  const s=_sessGet(e&&e.sessionId);
+  if(_isFreeRide(s))return 0;
+  const seat=_evSeatPrice(s);
+  if(seat!=null)return seat;
+  return(e&&e.typePreference)==='None'?0:null;
+}
 function _entryFallbackPrice(entry){
+  {const f=_sessFare(entry);if(f!=null)return f;} // the ride first: an event's seat, a free ride's nothing (2026-10-05)
   // Premium tiers (Road Carbon) are fulfilled with a base-type bike: summing the assigned
   // bike's price would silently undercharge the booked premium fare (250 -> 75). Same rule
   // as the bike-assign path.
@@ -4301,6 +4320,11 @@ function fmtDate(d){return d.toLocaleDateString('en-CA',{timeZone:KSA_TZ});}
 // Intl date formatting is slow and a roster asks for the same few dates hundreds of times a
 // render, so the answer is cached per language. The cache is small: a season has a few dates.
 const _shortDateCache=new Map();
+// The day each answer stands for, keyed by the answer as a table cell reads (2026-10-05): a staff
+// table sorts a date column by reading its cells back (_tsVal, _tsDay), which knew only an ISO day
+// and an English "22 Sept 2026" - in Arabic, Portuguese or Tagalog a date column sorted by the day
+// number. Kept apart from the cache, which is cleared as it fills.
+const _shortDateDay=new Map();
 function shortDate(ds){
   if(!ds)return'';
   const lang=(S&&S.lang)||'en';
@@ -4316,6 +4340,7 @@ function shortDate(ds){
   try{
     const d=typeof ds==='number'?new Date(ds):m&&/^[T ]\d/.test(m[2])?new Date(s.replace(' ','T').replace(/([+-]\d{2})$/,'$1:00')):m?new Date(m[1]+'T12:00:00+03:00'):new Date(NaN);
     out=isNaN(d)?(m?m[1]:''):d.toLocaleDateString(_locale(),{day:'numeric',month:'short',year:'numeric',timeZone:KSA_TZ});
+    if(!isNaN(d)&&out){if(_shortDateDay.size>4000)_shortDateDay.clear();_shortDateDay.set(out.replace(/\s+/g,' ').trim(),Date.parse(fmtDate(d)+'T00:00:00Z'));}
   }catch{out=m?m[1]:'';}
   if(_shortDateCache.size>2000)_shortDateCache.clear();
   _shortDateCache.set(ck,out);
@@ -4394,8 +4419,10 @@ function spotsLeft(sid){
   if(_isApprovalRide(sess)){
     const cap=(sess&&sess.spots)||(sess&&sess.capacity)||12;
     // Own-bike riders don't hold a spot: the cap allocates Micromobility bikes only,
-    // so staff can seat any number of bike owners on top of a "full" allocation.
-    return Math.max(0,cap-getQueue().filter(e=>e.sessionId===sid&&_holdsSpot(e,sess)).length);
+    // so staff can seat any number of bike owners on top of a "full" allocation. A waitlisted
+    // request holds none either (2026-10-05: it was counted, so approving a pending request
+    // warned the ride was full while places were still free; the server meters no approval ride).
+    return Math.max(0,cap-getQueue().filter(e=>e.sessionId===sid&&e.status!=='waitlist'&&_holdsSpot(e,sess)).length);
   }
   const cap=(sess&&sess.capacity)||12;
   // Own-bike riders hold no seat on a seat-based ride either - the count allocates
@@ -5220,7 +5247,22 @@ function _tsVal(cell){
   let m=a.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return{n:Date.UTC(+m[1],+m[2]-1,+m[3])};
   m=a.match(/(?:^|\s)(\d{1,2}) ([A-Za-z]{3,4})\.? (\d{4})/);
   if(m&&_TS_MON[m[2].toLowerCase()]!=null)return{n:Date.UTC(+m[3],_TS_MON[m[2].toLowerCase()],+m[1])};
+  const dn=_tsDay(raw);if(dn!=null)return{n:dn}; // a date in the page's own language (2026-10-05)
   return{s:raw};
+}
+// A date as shortDate wrote it in the language on screen, read back as its day (_shortDateDay):
+// the whole cell, else the first date in it ("Mon 2 Oct 2026", a date with the time under it). A
+// match must not sit inside a longer number, or "12 Oct" would read as "2 Oct".
+function _tsDay(raw){
+  if(!_shortDateDay.size||!/\d{4}/.test(raw))return null; // every shortDate carries its year, in Latin digits in all ten locales
+  const hit=_shortDateDay.get(raw);if(hit!=null)return hit;
+  let best=null,at=Infinity,len=0;
+  for(const[k,v]of _shortDateDay){
+    let i=raw.indexOf(k);
+    while(i>=0&&((i>0&&/\d/.test(raw[i-1]))||/\d/.test(raw[i+k.length]||'')))i=raw.indexOf(k,i+1);
+    if(i>=0&&(i<at||(i===at&&k.length>len))){best=v;at=i;len=k.length;}
+  }
+  return best;
 }
 function _tsCmp(x,y){
   if(x.n!=null&&y.n!=null)return x.n-y.n;
@@ -6011,7 +6053,12 @@ function _linkCustomer(name,phone,email){
   }
   const em=String(email||'').trim().toLowerCase();
   if(em){const h=cs.find(c=>String(c.email||'').trim().toLowerCase()===em);if(h)return h;}
-  return nm?(cs.find(c=>String(c.name||'').trim().toLowerCase()===nm)||null):null;
+  // The name alone (2026-10-05): only when no phone was typed - a number that matches nobody is a
+  // person the desk does not know, not a namesake's - and only when exactly one account carries
+  // the name. The first namesake used to take the booking, and their house or VIP terms with it.
+  if(!nm||_asciiDigits(String(phone==null?'':phone)).replace(/\D/g,''))return null;
+  const named=cs.filter(c=>String(c.name||'').trim().toLowerCase()===nm);
+  return named.length===1?named[0]:null;
 }
 function _normPhone(raw,cc){
   cc=cc||'+966';
