@@ -159,10 +159,13 @@ const cssSource = await readFile(cssUrl, 'utf8');
 const cssHash = createHash('sha256').update(new CleanCSS({ level: 1 }).minify(cssSource).styles).digest('hex').slice(0, 10);
 const split = splitStaff(src, '/staff.js?v=__STAFF_V__', `/styles.css?v=${cssHash}`);
 
-// ── Every staff form field has a name a screen reader can say (a WARNING, 2026-10-04) ──────────
+// ── Every form field has a name a screen reader can say (a WARNING, 2026-10-04) ──────────
 // A field with no <label for>, wrapping <label>, aria-label or aria-labelledby is read out as "edit
-// text". The staff half's functions are the ones the check reads (see checkFieldNames).
-console.log(formatFieldNames(checkFieldNames(raw, new Set([...split.staff.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map((m) => m[1])))));
+// text". Each half is read and reported on its own (see checkFieldNames): the staff half's functions,
+// then everything else, the customer half's functions and the page's markup (2026-10-05).
+const staffFnNames = new Set([...split.staff.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map((m) => m[1]));
+console.log(formatFieldNames(checkFieldNames(raw, staffFnNames)));
+console.log(formatFieldNames(checkFieldNames(raw, { except: staffFnNames })));
 
 // ── Staff-only strings leave the customer's page (2026-10-01) ─────────────────
 // About two thirds of LANG's keys are words only staff screens say. A key that staff code names and

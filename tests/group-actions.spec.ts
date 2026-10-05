@@ -130,6 +130,7 @@ test('the Petromin registrations have their own page in Queue, opened from a log
   await expect(page.locator('[data-stab="riders"]')).toHaveCount(0);   // the Riders tab is gone
   const chip = page.locator('#tab-queue .sess-bar-desktop .pm-chip');
   await expect(chip).toHaveCount(1);
+  await expect(chip).toHaveAttribute('type', 'button'); // a real button (2026-10-05), not a role=button div
   await expect(chip.locator('img.pm-logo')).toHaveAttribute('alt', 'Petromin');
   // Right after that night's own chip.
   const order = await page.evaluate(`[...document.querySelectorAll('#tab-queue .sess-bar-desktop .sess-summary-chip')].map(c=>c.classList.contains('pm-chip')?'pm':c.getAttribute('data-on-click'))`) as string[];

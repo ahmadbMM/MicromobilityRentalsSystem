@@ -62,9 +62,11 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
   `.error` themselves or return the write to a caller are reported apart. It is a warning while the tail is
   worked down; do not add to it.
 - **Field names (warns, with a count and the first 20; 2026-10-04).** Every `<input>`, `<select>` and
-  `<textarea>` written by a staff-half function has an accessible name: a `<label for>` naming its id, a
-  wrapping `<label>`, `aria-label`, `aria-labelledby` or `title` (a placeholder is not a name). It is at
-  zero; keep it there. Popups likewise carry `aria-labelledby` (their title's id) or `aria-label` - the
+  `<textarea>` has an accessible name: a `<label for>` naming its id, a wrapping `<label>`, `aria-label`,
+  `aria-labelledby` or `title` (a placeholder is not a name; the attribute must be written on the tag, not
+  in a `${variable}`; a tag named in a comment is not a field). Each half is read and reported on its own:
+  the staff half's functions, then the customer half's functions and the page's markup (2026-10-05). Both
+  are at zero, and build-checks.spec.ts fails when either is not; keep them there. Popups likewise carry `aria-labelledby` (their title's id) or `aria-label` - the
   name is also what keeps a redrawn popup's scroll and focus (`_popStill`); build-checks.spec.ts holds both.
 - **Size budget (fails).** `index.html` gzipped ≤ 250 KB and `staff.js` gzipped ≤ 270 KB (KB = 1000 bytes,
   zlib default level); the build prints both numbers. `SIZE_BUDGET_CUSTOMER_KB` / `SIZE_BUDGET_STAFF_KB` in the
@@ -513,7 +515,7 @@ decided). Staff side: the admin-only section `vendors` at `/vendors` (Calendar),
 (recreated under the vendor names; migrations 20261003150000/170000/180000 are the fnb-named history): staff READ the `vendor_*` tables (`vendor_users` only by the columns in `VENDOR_USER_COLS`) and every
 write is a `staff_vendor_*` function; confirming one request declines the date's others and the database makes
 the venue the ride's breakfast stop. A temporary password (Add login / Reset password) is shown once, in the
-venue dialog only. Closed-date reasons are stored as codes (`VENDOR_RS`) or typed text. The section's
+venue dialog only, whose logins say until when it lasts or that it ran out (`_vendorTempHtml`, `temp_expires_at`). Closed-date reasons are stored as codes (`VENDOR_RS`) or typed text. The section's
 translation keys start with `vnd` (not `vendor…`/`f…`: the customer half builds keys from bare prefixes such as `'f'+`,
 and a key a prefix could build never leaves the customer's language pack). The section's id was `fnb` until the
 rename: `setStaffTab`, `_bootStaffTab` and `_modIds` (an account's `modules_view`/`modules_edit`) still read `'fnb'` as `'vendors'`. `tests/staff-vendors.spec.ts`.

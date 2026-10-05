@@ -931,8 +931,11 @@ export function formatBareWrites(r, limit = 20) {
 // An <input>, <select> or <textarea> written in the source - static markup or a template - is named
 // when it carries aria-label / aria-labelledby / title, sits inside an open <label>, or has an id that
 // some <label for="..."> in the source names (compared as written, so for="${id}" matches id="${id}").
-// A placeholder is not a name. Hidden inputs and the button kinds are skipped. The tag is read up to
-// its own '>', skipping ${...} (a template expression may hold '>' or '=>').
+// A placeholder is not a name. Hidden inputs and the button kinds are skipped, and so is a tag named
+// in a comment ("the group that is not an <input>"). The tag is read up to its own '>', skipping ${...}
+// (a template expression may hold '>' or '=>').
+// The build reads each half on its own (2026-10-05): the staff half's functions (a Set of their names),
+// then the customer half, { except: <the same Set> } - every other function and the page's static markup.
 const FIELD_SKIP_TYPES = /\btype\s*=\s*["']?(hidden|submit|button|reset|image)\b/i;
 function tagEnd(text, from) {
   let depth = 0;
@@ -946,19 +949,24 @@ function tagEnd(text, from) {
 }
 /**
  * @param {string} rawHtml app.src.html as written
- * @param {Set<string>|null} only the top-level function names to report (the staff half's), or null for all
- * @returns {{ total:number, named:number, unnamed:{ line:number, tag:string, fn:string, text:string }[] }}
+ * @param {Set<string>|{except:Set<string>}|null} scope the top-level function names to report (the staff
+ *   half's); { except: names } for everything else (the customer half: its functions and the static markup);
+ *   or null for all
+ * @returns {{ half:string, total:number, named:number, unnamed:{ line:number, tag:string, fn:string, text:string }[] }}
  */
-export function checkFieldNames(rawHtml, only = null) {
+export function checkFieldNames(rawHtml, scope = null) {
   const html = stripIncludes(rawHtml);
   const lineOf = lineIndex(html);
+  const inComment = commentRanges(html, parsedScripts(html));
   const fors = new Set([...html.matchAll(/\bfor\s*=\s*"([^"]+)"|\bfor\s*=\s*'([^']+)'/g)].map((m) => m[1] || m[2]));
   // The top-level function each position falls in: declarations start at the beginning of a line.
   const fnStarts = [...html.matchAll(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].map((m) => [m.index, m[1]]);
   const fnAt = (pos) => { let lo = 0, hi = fnStarts.length - 1, f = ''; while (lo <= hi) { const mid = (lo + hi) >> 1; if (fnStarts[mid][0] <= pos) { f = fnStarts[mid][1]; lo = mid + 1; } else hi = mid - 1; } return f; };
   const { open, close } = mainScript(html);
-  const out = { total: 0, named: 0, unnamed: [] };
+  const only = scope instanceof Set ? scope : null, except = scope && !only && scope.except instanceof Set ? scope.except : null;
+  const out = { half: only ? 'staff' : except ? 'customer' : 'all', total: 0, named: 0, unnamed: [] };
   for (const m of html.matchAll(/<(input|select|textarea)\b/gi)) {
+    if (inComment(m.index)) continue;
     const end = tagEnd(html, m.index + m[0].length);
     if (end < 0) continue;
     const tag = html.slice(m.index, end + 1);
@@ -967,6 +975,7 @@ export function checkFieldNames(rawHtml, only = null) {
     const fn = inScript ? fnAt(m.index) : '';
     if (only && inScript && !only.has(fn)) continue;
     if (only && !inScript) continue; // static markup is the customer's page and the shells
+    if (except && inScript && except.has(fn)) continue;
     out.total++;
     const idm = tag.match(/\bid\s*=\s*"([^"]+)"|\bid\s*=\s*'([^']+)'/);
     const id = idm && (idm[1] || idm[2]);
@@ -978,9 +987,10 @@ export function checkFieldNames(rawHtml, only = null) {
   return out;
 }
 export function formatFieldNames(r, limit = 20) {
-  if (!r.unnamed.length) return `build: every form field has an accessible name (${r.total} checked)`;
+  const half = r.half === 'customer' ? 'customer ' : r.half === 'all' ? '' : 'staff '; // a result from before `half` was the staff half's
+  if (!r.unnamed.length) return `build: every ${half}form field has an accessible name (${r.total} checked)`;
   return [
-    `build: WARNING - ${r.unnamed.length} of ${r.total} staff form field(s) have no accessible name `
+    `build: WARNING - ${r.unnamed.length} of ${r.total} ${half}form field(s) have no accessible name `
       + '(no <label for>, no wrapping <label>, no aria-label/aria-labelledby/title; a placeholder is not a name).',
     `  First ${Math.min(limit, r.unnamed.length)} of ${r.unnamed.length}:`,
     ...r.unnamed.slice(0, limit).map((x) => `  app.src.html:${x.line}  <${x.tag}> in ${x.fn || '(markup)'}  ${x.text}`),

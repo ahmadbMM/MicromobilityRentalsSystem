@@ -95,19 +95,42 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
     expect(moved).toBe(false);
   });
 
-  test('session chips and bike cards answer Enter like a click', async ({ page }) => {
+  // 2026-10-05: the strip's chips and the session forms' bike cards are real <button>s (their parts are spans:
+  // a button holds phrasing content only); the bike picker's table rows stay rows, focusable, answering Enter.
+  test('session chips and bike cards are real buttons; the bike picker\'s rows answer Enter like a click', async ({ page }) => {
     await boot(page);
     await page.evaluate(`S.sfSession='all';renderStaffQueue()`);
-    const chip = page.locator(`#tab-queue .sess-summary-chip[role="button"][data-on-click*="${S2}"]`).first();
-    await expect(chip).toHaveAttribute('tabindex', '0');
+    const chip = page.locator(`#tab-queue button.sess-summary-chip[data-on-click*="${S2}"]`).first();
+    await expect(chip).toHaveAttribute('type', 'button');
+    await expect(chip).not.toHaveAttribute('role', /.*/);
+    await expect(chip).not.toHaveAttribute('tabindex', /.*/);
     await expect(chip).toHaveAttribute('aria-pressed', 'false');
     await chip.focus();
     await page.keyboard.press('Enter');
     await expect.poll(() => page.evaluate('S.sfSession')).toBe(S2);
+    await expect(page.locator(`#tab-queue button.sess-summary-chip[data-on-click*="${S2}"]`).first()).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.evaluate(`document.querySelectorAll('#tab-queue button.sess-summary-chip :is(div,p,ul,ol,table,section)').length`)).toBe(0);
     // every toggle pill says whether it is on
     const pills = page.locator('#tab-queue .filter-pill');
     expect(await pills.count()).toBeGreaterThan(1);
     for (const p of await pills.all()) await expect(p).toHaveAttribute('aria-pressed', /^(true|false)$/);
+    // the new-session form's bike cards: a button to pick, Space as well as a tap
+    await page.evaluate(`S.queueView='sessions';renderStaffQueue();S.showAddSession=true;S.editSessionId=null;S.newSessMode='fleet';S.newSessAssignedIds=[];renderSessions()`);
+    const card = page.locator('#sess-add-form button.bike-assign-card').first();
+    await expect(card).toHaveAttribute('type', 'button');
+    await expect(card).toHaveAttribute('aria-pressed', 'false');
+    await card.focus();
+    await page.keyboard.press('Space');
+    await expect.poll(() => page.evaluate('S.newSessAssignedIds.length')).toBe(1);
+    await expect(page.locator('#sess-add-form button.bike-assign-card').first()).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.evaluate(`document.querySelectorAll('#sess-add-form button.bike-assign-card div').length`)).toBe(0);
+    // the bike picker's rows: still table rows (a row cannot be a button), Enter picks
+    await page.evaluate(`S.showAddSession=false;S.queueView='bookings';renderStaffQueue();openModal('a1')`);
+    const tr = page.locator('#bike-modal tr.bkm-tr[tabindex="0"]').first();
+    await expect(tr).toBeVisible();
+    await tr.focus();
+    await page.keyboard.press('Enter');
+    await expect.poll(() => page.evaluate('S.modalBikes.length')).toBe(1);
   });
 
   test('the error bar is an alert outside the polite region; toasts are said through #toast-live', async ({ page }) => {

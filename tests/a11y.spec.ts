@@ -1,6 +1,6 @@
-import { test } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { stubSupabase, staffReady } from './helpers/supabase';
+import { stubSupabase, staffReady, loginCustomer, waitForSb } from './helpers/supabase';
 
 // Accessibility audit — now a GATE. The backlog it was written to work down is clear:
 // every audited view (landing, auth, booking, my rides, and each staff screen) reports
@@ -84,4 +84,55 @@ test.describe('accessibility audit (report-only)', () => {
       if (STRICT && count > 0) throw new Error(`${count} a11y violation type(s)`);
     });
   }
+});
+
+// The customer half's fields (2026-10-05): the build's field-name check now reads the rider pages too
+// (scripts/split-staff.mjs, tests/build-checks.spec.ts); these are the fields it found unnamed, each now
+// named by its visible label (for=/id) or a translated aria-label. A placeholder is not a name.
+test.describe('@customer:a11y every field on the rider pages has a name', () => {
+  const named = (page: Page, sel: string, name: string | RegExp) => expect(page.locator(sel), sel).toHaveAccessibleName(name);
+
+  test('My Account names each field by its label', async ({ page }) => {
+    await loginCustomer(page, { id: 'c1', name: 'Test Rider Name', height: 170, type_preference: 'Road' });
+    await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+    await expect(page.locator('#acc-first')).toBeVisible();
+    for (const [sel, name] of [['#acc-first', 'First Name'], ['#acc-middle', 'Middle Name'], ['#acc-last', 'Last Name'], ['#acc-email', 'Email Address'],
+      ['#acc-cc', 'Country code'], ['#acc-phone', 'Phone Number'], ['#acc-height', /^Height/], ['#acc-country', 'Country of residence'],
+      ['#acc-city', 'City of residence'], ['#acc-nationality', 'Nationality']] as const) await named(page, sel, name);
+  });
+
+  test('Create account and Forgot password name the country code; the cancel dialog names its own reason', async ({ page }) => {
+    await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
+    await page.goto('/signup');
+    await waitForSb(page);
+    await expect(page.locator('#a-cc')).toBeVisible();
+    await named(page, '#a-cc', 'Country code');
+    await page.evaluate(`switchAuthMode('forgot')`);
+    await named(page, '#a-forgot-cc', 'Country code');
+    await page.evaluate(`showCancelReasonModal('none')`);
+    await page.locator('#cancel-reason-modal .cancel-reason-opt').last().click(); // Other: the box for their own words
+    await expect(page.locator('#cancel-other-text')).toBeVisible();
+    await named(page, '#cancel-other-text', 'Please describe your reason...');
+  });
+
+  test('the application fix page names each field by its item\'s label', async ({ page }) => {
+    await stubSupabase(page, { sessions: [], 'rpc:list_sessions': [], queue_entries: [], bikes: [],
+      'rpc:community_fix_get': { ok: true, first: 'Test', lang: 'en', fields: ['email', 'phone', 'nationality', 'height', 'profession', 'workplace', 'instagram', 'linkedin'], note: '', values: {} } });
+    await page.goto('/?appfix=a1b2c3d4e5f60718293a4b5c6d7e8f901234&lang=en');
+    await waitForSb(page);
+    const box = page.locator('#app-fix .afx-box');
+    await expect(box.locator('#afx-email')).toBeVisible();
+    for (const k of ['email', 'nationality', 'height', 'instagram', 'linkedin']) {
+      const lbl = (await box.locator(`#afx-l-${k}`).textContent() || '').trim();
+      expect(lbl, k).not.toBe('');
+      await named(page, `#app-fix .fx-item[data-afx="${k}"] :is(input,select)`, lbl);
+    }
+    await named(page, '#afx-prof', (await box.locator('#afx-l-profession').textContent() || '').trim());
+    await named(page, '#afx-work', (await box.locator('#afx-l-workplace').textContent() || '').trim());
+    await named(page, '#afx-phone', (await box.locator('#afx-l-phone').textContent() || '').trim());
+    await named(page, '#afx-cc', 'Country code');
+  });
 });

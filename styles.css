@@ -251,6 +251,9 @@
       /* and a ceiling, or a chip left alone on a wrapped row stretches the whole width and
          strands its status badge a foot away from the text it belongs to. */
       flex:1 1 auto;min-width:160px;max-width:460px;}
+    /* The chips are real buttons (2026-10-05): the button's own font, colour, alignment and spacing give
+       way to the page's, so they read as the <div>s they were. Their parts are spans: the fill needs a box. */
+    button.sess-summary-chip{font:inherit;color:inherit;text-align:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;}
     .sess-summary-chip:hover{border-color:rgba(var(--green-rgb),.35);background:var(--s2);}
     .sess-summary-chip.active-sess{border-color:rgba(var(--green-rgb),.3);}
     .sess-chip-info{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;}
@@ -261,7 +264,7 @@
     .sess-chip-date{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .sess-chip-counts{font-size:11px;color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .sess-chip-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-top:6px;}
-    .sess-chip-fill{height:100%;border-radius:2px;background:var(--green);transition:width .25s;}
+    .sess-chip-fill{display:block;height:100%;border-radius:2px;background:var(--green);transition:width .25s;}
     .sess-chip-badge{flex-shrink:0;}
     /* Community (Saturday Social Ride) sessions read blue at a glance, JCC stays green. */
     .sess-summary-chip.community{border-color:rgba(74,168,248,.45);background:rgba(74,168,248,.06);}
@@ -1721,7 +1724,9 @@
     .bike-list-actions .btn-sm{flex:1;text-align:center;white-space:nowrap;}
     .bike-card{background:var(--s1);border:1px solid var(--border);border-radius:7px;padding:16px;display:flex;flex-direction:column;gap:7px;transition:border-color .2s,transform .2s;}
     .bike-assign-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-bottom:16px;}
-    .bike-assign-card{background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:11px 13px;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;user-select:none;}
+    .bike-assign-card{display:flex;flex-direction:column;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:11px 13px;cursor:pointer;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;user-select:none;}
+    /* a bike that can be picked is a real button (2026-10-05), drawn as the card it was; its parts are spans, laid out by the column */
+    button.bike-assign-card{width:100%;font:inherit;color:inherit;text-align:inherit;letter-spacing:inherit;text-transform:inherit;margin:0;}
     .bike-assign-card:hover:not(.busy){border-color:rgba(var(--green-rgb),.5);background:rgba(var(--green-rgb),.05);}
     .bike-assign-card.selected{border-color:var(--green);background:rgba(var(--green-rgb),.09);}
     .bike-assign-card.busy{opacity:.45;cursor:not-allowed;}
@@ -4472,6 +4477,12 @@
     @media(max-width:767px){
       body.view-staff .sf-icon-btn{min-height:44px;min-width:44px;}
       body.view-staff .bk-table td.bk-cell-sel input[type="checkbox"]{width:24px;height:24px;}
+      /* WCAG 2.5.8 at 390px (2026-10-05, every staff section measured): the controls under 24px that no
+         spacing excused. Select all matches the rows' boxes; Assign Bike… (14px of text) and a dialog's ×
+         (22px) take a 44px hit area, their negative margins keeping each where it was drawn. */
+      body.view-staff .bk-table th.flt-selth input[type="checkbox"]{width:24px;height:24px;}
+      body.view-staff #checkin-modal .bkm-alink{min-height:44px;margin:-19px 0 -9px;}
+      body.view-staff .ca-x{min-width:44px;min-height:44px;margin:-10px;}
       /* customer topbar: at ≤400px the avatar + name + LOG OUT overran the viewport */
       #topbar-right .cust-topbar-name,#topbar-right .cust-topbar-email{max-width:64px;}
     }
@@ -6555,6 +6566,9 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 .vendor-users th{text-align:start;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
 .vendor-users td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
 .vendor-u-act{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+/* a login on its temporary password: until when (muted), or past it (red: Reset password sends a new one) */
+.vendor-u-temp{margin-top:2px;font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);white-space:normal}
+.vendor-u-temp.vendor-u-exp{color:var(--red);font-weight:800}
 .vendor-add-user{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
 .vendor-add-user input{flex:1 1 160px;min-width:0}
 .vendor-add-user select{flex:0 0 auto}

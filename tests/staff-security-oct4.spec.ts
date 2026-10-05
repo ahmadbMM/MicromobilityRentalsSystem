@@ -81,6 +81,26 @@ test.describe('@staff:security check-in in one call', () => {
     expect(rpc[0].body).toMatchObject({ p_booking_id: 'w1', p_paid: true, p_pay_method: 'cash' });
     expect(writes.filter((w) => w.method === 'PATCH' || w.method === 'POST')).toEqual([]);
   });
+
+  // Rentals are card-only (the owner); the check-in's split-payment branch is gone (2026-10-05). A rider paid
+  // before by split (or cash) keeps how they paid, so the close-out and the session report still read the row
+  // as taken; a rider marked Paid at the desk is a card payment.
+  test('a rider paid before by split keeps how they paid; one marked Paid is recorded as card', async ({ page }) => {
+    await boot(page, { queue_entries: [row('w1'), row('w2', { queue_num: 2, name: 'Split Rider', paid: true, price: 115, pay_method: 'split', card_amount: 60 })] });
+    const rpc = calls(page, /\/rpc\/staff_checkin/);
+    await page.evaluate(`setStaffTab('queue');S.sfSession='${today}';renderStaffQueue();showCheckinModal('w2')`);
+    await expect(page.locator('#ci-confirm')).toContainText('Paid');
+    await page.evaluate(`(async()=>{await confirmCheckinModal();})()`);
+    await expect.poll(() => rpc.length).toBe(1);
+    expect(rpc[0].body).toMatchObject({ p_booking_id: 'w2' });
+    expect(rpc[0].body).not.toHaveProperty('p_pay_method');
+    expect(rpc[0].body).not.toHaveProperty('p_card_amount');
+    await page.evaluate(`showCheckinModal('w1')`);
+    await expect(page.locator('#ci-confirm')).toContainText('Paid'); // an unpaid rider opens on Paid
+    await page.evaluate(`(async()=>{await confirmCheckinModal();})()`);
+    await expect.poll(() => rpc.length).toBe(2);
+    expect(rpc[1].body).toMatchObject({ p_booking_id: 'w1', p_paid: true, p_pay_method: 'card', p_card_amount: null });
+  });
 });
 
 test.describe('@staff:security add-on prices', () => {

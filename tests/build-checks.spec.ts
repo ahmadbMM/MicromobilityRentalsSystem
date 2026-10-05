@@ -38,7 +38,7 @@ type Checks = {
   staffOnlyLangKeys(keys: string[], customerText: string, staffText: string): Set<string>;
   customerCss(css: string, customerText: string, staffText: string): { css: string; kept: number; dropped: number; droppedBytes: number };
   cssTokens(css: string): { kind: string; text: string }[];
-  checkFieldNames(raw: string, only?: Set<string> | null): { total: number; named: number; unnamed: { line: number; tag: string; fn: string; text: string }[] };
+  checkFieldNames(raw: string, scope?: Set<string> | { except: Set<string> } | null): { half: string; total: number; named: number; unnamed: { line: number; tag: string; fn: string; text: string }[] };
   formatFieldNames(r: ReturnType<Checks['checkFieldNames']>, limit?: number): string;
 };
 const load = () => import('../scripts/split-staff.mjs' as string) as Promise<Checks>;
@@ -68,6 +68,40 @@ test.describe('@build build checks', () => {
     expect(r.unnamed.every((x) => x.fn === 'staffForm')).toBe(true);
     expect(formatFieldNames(r)).toContain('WARNING - 2 of 6 staff form field(s)');
     expect(checkFieldNames(page(script), null).unnamed.length, 'without a filter the customer field counts too').toBe(3);
+  });
+
+  test('the customer half is read too: its functions and the page markup, not the staff functions, not a comment', async () => {
+    const { checkFieldNames, formatFieldNames } = await load();
+    const script = [
+      'function staffForm(){return`<input id="s">`;}',
+      '// a comment that names an <input> is not a field',
+      'function customerForm(){return`<label for="c1">C</label><input id="c1"><select id="c2"></select>`;}',
+      'function waiverStep(){return`<label class="wg"><input type="checkbox" class="wg-cb"> I agree</label>`;}', // a wrapping label names it
+    ].join('\n');
+    const markup = '<input id="m" aria-label="Search"><textarea id="m2"></textarea>';
+    const staff = new Set(['staffForm']);
+    const c = checkFieldNames(page(script, markup), { except: staff });
+    expect(c.half).toBe('customer');
+    expect(c.total).toBe(5); // c1, c2, the waiver box, and the markup's two
+    expect(c.unnamed.map((x) => [x.tag, x.fn])).toEqual([['textarea', ''], ['select', 'customerForm']]);
+    expect(formatFieldNames(c)).toContain('WARNING - 2 of 5 customer form field(s)');
+    expect(formatFieldNames(c)).toContain('<textarea> in (markup)');
+    const s = checkFieldNames(page(script, markup), staff);
+    expect([s.half, s.total, s.unnamed.length]).toEqual(['staff', 1, 1]);
+    expect(formatFieldNames(s)).toContain('WARNING - 1 of 1 staff form field(s)');
+    const ok = checkFieldNames(page('function customerForm(){return`<input aria-label="x">`;}'), { except: staff });
+    expect(formatFieldNames(ok)).toBe('build: every customer form field has an accessible name (1 checked)');
+  });
+
+  test('every form field in app.src.html has an accessible name, on both halves', async () => {
+    const { checkFieldNames, formatFieldNames } = await load();
+    const raw = read('app.src.html');
+    const staff = new Set([...staffAllText().matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map((m) => m[1]));
+    const s = checkFieldNames(raw, staff), c = checkFieldNames(raw, { except: staff });
+    expect(s.total, 'the staff half was read').toBeGreaterThan(300);
+    expect(c.total, 'the customer half was read').toBeGreaterThan(50);
+    expect(s.unnamed, formatFieldNames(s)).toEqual([]);
+    expect(c.unnamed, formatFieldNames(c)).toEqual([]);
   });
 
   test('every staff popup in app.src.html has a name (aria-label or aria-labelledby)', async () => {

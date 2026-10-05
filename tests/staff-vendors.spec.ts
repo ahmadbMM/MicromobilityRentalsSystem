@@ -116,6 +116,60 @@ test.describe('@staff:vendors Vendors', () => {
     await expect(dialog(page).locator('.vendor-pw')).toHaveCount(0);
   });
 
+  test('a login on its temporary password says until when, or that it ran out; Add login and Reset password start 72 hours', async ({ page }) => {
+    // Migration 20261004130000: a temporary password signs in for 72 hours (vendor_users.temp_expires_at, read with the
+    // other columns), then the portal answers TEMP_EXPIRED until staff reset it.
+    const u = (o: Record<string, unknown>) => ({ venue_id: 1, name: '', role: 'manager', must_change_pwd: true, temp_expires_at: null, active: true,
+      last_login_at: null, created_by: 'Spec Staff', created_at: '2099-04-01T08:00:00Z', ...o });
+    const users = [
+      u({ id: 21, login: 'live@example.com', name: 'Test Person', temp_expires_at: '2099-06-01T15:30:00Z' }),
+      u({ id: 22, login: 'expired@example.com', role: 'viewer', temp_expires_at: '2020-01-04T09:00:00Z' }),
+      u({ id: 23, login: 'changed@example.com', role: 'owner', must_change_pwd: false, last_login_at: '2099-04-02T08:00:00Z' }),
+      u({ id: 24, login: 'off@example.com', temp_expires_at: '2020-01-04T09:00:00Z', active: false }),
+      u({ id: 25, login: 'older@example.com' }),
+    ];
+    const reads: string[] = [];
+    page.on('request', (r) => { if (r.method() === 'GET' && r.url().includes('/rest/v1/vendor_users')) reads.push(decodeURIComponent(r.url())); });
+    const calls = await open(page, { vendor_users: users, 'rpc:staff_vendor_user_reset': 'Tmp9-Kq4m-Rx',
+      'rpc:staff_vendor_user_add': { id: 26, login: 'new@example.com', password: 'Tmp9-Kq4m-Ny' } });
+    expect(reads.some((x) => /select=[^&]*temp_expires_at/.test(x)), 'the deadline is read with the login').toBe(true);
+    await panel(page).locator('[data-vendor-view="venues"]').click();
+    await panel(page).locator('.vendor-ven[data-vendor-ven="1"] .vendor-ven-open').click();
+    const temp = (id: number) => dialog(page).locator(`tr[data-vendor-user="${id}"] .vendor-u-temp`);
+    const when = await page.evaluate(`fmtStamp('2099-06-01T15:30:00Z')`) as string; // Riyadh time, as Last sign-in reads
+    expect(when).toContain('2099');
+    await expect(temp(21)).toHaveText(`Temporary password — expires ${when}`);
+    await expect(temp(21)).not.toHaveClass(/vendor-u-exp/);
+    await expect(temp(22)).toHaveText('Temporary password expired — reset it');
+    await expect(temp(22)).toHaveClass(/vendor-u-exp/);
+    const [expColor, red, liveColor] = await page.evaluate(() => {
+      const probe = document.createElement('span'); probe.style.color = 'var(--red)';
+      const exp = document.querySelector('tr[data-vendor-user="22"] .vendor-u-temp')!;
+      exp.parentElement!.appendChild(probe);
+      const out = [getComputedStyle(exp).color, getComputedStyle(probe).color, getComputedStyle(document.querySelector('tr[data-vendor-user="21"] .vendor-u-temp')!).color];
+      probe.remove(); return out;
+    });
+    expect(expColor, 'an expired one reads red').toBe(red);
+    expect(liveColor).not.toBe(red);
+    await expect(temp(23)).toHaveCount(0); // its own password now
+    await expect(temp(24)).toHaveCount(0); // deactivated: it cannot sign in either way
+    await expect(temp(25)).toHaveText('Temporary password'); // set before the deadline existed
+    // Reset password on the expired one: a new temporary password, good for 72 hours.
+    await dialog(page).locator('tr[data-vendor-user="22"] .vendor-u-reset').click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_user_reset').length).toBe(1);
+    await expect(temp(22)).toContainText('Temporary password — expires');
+    await expect(temp(22)).not.toHaveClass(/vendor-u-exp/);
+    const left = (id: number) => page.evaluate(`Date.parse(S._vendor.users.find(u=>u.id===${id}).temp_expires_at)-Date.now()`) as Promise<number>;
+    expect(await left(22)).toBeGreaterThan(71.9 * 36e5);
+    expect(await left(22)).toBeLessThanOrEqual(72 * 36e5);
+    // Add login: the new one says so too.
+    await dialog(page).locator('#vendor-u-login').fill('new@example.com');
+    await dialog(page).locator('.vendor-u-add').click();
+    await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_user_add').length).toBe(1);
+    await expect(temp(26)).toContainText('Temporary password — expires');
+    expect(await left(26)).toBeGreaterThan(71.9 * 36e5);
+  });
+
   test('a tier saves its booking types and benefits', async ({ page }) => {
     const calls = await open(page);
     await panel(page).locator('[data-vendor-view="tiers"]').click();
