@@ -2322,6 +2322,7 @@
   "unsentDropBtn": "Mag-sign out pa rin",
   "dbPending": "Naghihintay sa update ng database.",
   "opSwitch": "Palitan ang operator",
+  "opChange": "Baguhin sa Mga setting",
   "opPinTitle": "PIN para kay {0}",
   "opPinWrong": "Maling PIN. {0} subok na lang.",
   "opPinWrongPlain": "Maling PIN.",

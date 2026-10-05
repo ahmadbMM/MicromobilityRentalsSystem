@@ -2322,6 +2322,7 @@
   "unsentDropBtn": "Sair mesmo assim",
   "dbPending": "Aguardando a atualização do banco de dados.",
   "opSwitch": "Trocar de operador",
+  "opChange": "Alterar em Configurações",
   "opPinTitle": "PIN de {0}",
   "opPinWrong": "PIN errado. Restam {0} tentativas.",
   "opPinWrongPlain": "PIN incorreto.",

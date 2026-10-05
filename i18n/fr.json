@@ -2322,6 +2322,7 @@
   "unsentDropBtn": "Se déconnecter quand même",
   "dbPending": "En attente de la mise à jour de la base de données.",
   "opSwitch": "Changer d'opérateur",
+  "opChange": "Modifier dans Paramètres",
   "opPinTitle": "PIN de {0}",
   "opPinWrong": "PIN incorrect. Encore {0} essais.",
   "opPinWrongPlain": "Code PIN incorrect.",

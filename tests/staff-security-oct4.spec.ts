@@ -3,8 +3,8 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Staff security and server-side reliability (the 2026-10-04 audit): an approval with no operator
 // asks who is there first, and a failed operator list refuses; check-in carries its payment in one
-// staff_checkin call; an add-on line keeps the price it was sold at; an idle device asks the
-// operator again after ten minutes and signs out after twelve hours; signing out takes the staff
+// staff_checkin call; an add-on line keeps the price it was sold at; an idle device signs out
+// after twelve hours (it no longer asks the operator again after ten minutes: 2026-10-05); signing out takes the staff
 // data off the device and asks before losing work not sent yet; every CSV export is on record.
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
 const sessions = [{ id: today, day: 'Tuesday', session_date: today, capacity: 40, status: 'open', created_at: 1, bike_slots: JSON.stringify({ _time: '21:00 - 23:00', _total: 40 }) }];
@@ -117,21 +117,15 @@ test.describe('@staff:security add-on prices', () => {
 });
 
 test.describe('@staff:security idle device', () => {
-  test('ten idle minutes clear the operator and ask again; twelve hours sign the device out', async ({ page }) => {
+  test('a pause keeps the name (it is asked once, 2026-10-05); twelve hours sign the device out', async ({ page }) => {
     await page.clock.install({ time: new Date('2099-03-01T18:00:00+03:00') });
     await boot(page);
     await page.evaluate(`setStaffTab('queue')`);
     expect(await page.evaluate(`_opName()`)).toBe('Spec Staff');
-    await page.clock.fastForward('09:00'); // nine minutes: nothing yet
+    await page.clock.fastForward('30:00'); // half an hour away from the desk
     await page.evaluate(`_idleCheck()`);
     expect(await page.evaluate(`_opName()`)).toBe('Spec Staff');
-    await page.clock.fastForward('02:00');
-    await expect(page.locator('#op-gate-modal .op-gate')).toBeVisible();
-    expect(await page.evaluate(`_opName()`)).toBe('');
-    expect(await page.evaluate(`localStorage.getItem('cq_op_idle')`)).toBe('1');
-    // the account's saved name is not put back unasked
-    await page.evaluate(`_opGateCheck()`);
-    expect(await page.evaluate(`_opName()`)).toBe('');
+    await expect(page.locator('#op-gate-modal .op-gate')).toHaveCount(0);
     // twelve hours: the device signs the staff account out (caught here, not navigated)
     // (the stamp is moved back rather than the clock run twelve hours: the service worker's hourly
     // update timer has no registration under the suite, which blocks workers)

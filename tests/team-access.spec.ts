@@ -57,15 +57,15 @@ test('a lock says how long to wait', async ({ page }) => {
   await expect(gate.locator('.opg-msg')).toHaveText('Too many tries. Wait 60 seconds.');
 });
 
-test('a name without a PIN is picked straight away, and the operator chip switches with Cancel', async ({ page }) => {
+test('a name without a PIN is picked straight away, and the operator chip opens Settings to change it', async ({ page }) => {
   await boot(page, {}, null);
   await page.locator('#op-gate-modal .opg-name', { hasText: 'Malik' }).click();
   expect(await page.evaluate('_opName()')).toBe('Malik');
+  // the name is the account's, changed in Settings (2026-10-05), not switched at the bar
   await page.locator('#topbar .op-chip').click();
-  const gate = page.locator('#op-gate-modal .op-gate');
-  await expect(gate).toContainText('Switch operator');
-  await gate.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.locator('#op-gate-modal .op-gate')).toHaveCount(0);
+  expect(await page.evaluate('S.staffTab')).toBe('settings');
+  await expect(page.locator('#set-name')).toHaveValue('Malik');
   expect(await page.evaluate('_opName()')).toBe('Malik');
 });
 

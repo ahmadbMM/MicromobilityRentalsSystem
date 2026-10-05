@@ -2322,6 +2322,7 @@
   "unsentDropBtn": "फिर भी साइन आउट करें",
   "dbPending": "डेटाबेस अपडेट की प्रतीक्षा है।",
   "opSwitch": "ऑपरेटर बदलें",
+  "opChange": "सेटिंग्स में बदलें",
   "opPinTitle": "{0} का PIN",
   "opPinWrong": "गलत PIN। {0} प्रयास बाकी।",
   "opPinWrongPlain": "गलत पिन।",

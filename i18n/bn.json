@@ -2428,6 +2428,7 @@
   "unsentDropBtn": "তবুও সাইন আউট করুন",
   "dbPending": "ডেটাবেস আপডেটের অপেক্ষায়।",
   "opSwitch": "অপারেটর বদলান",
+  "opChange": "সেটিংসে পরিবর্তন করুন",
   "opPinTitle": "{0}-এর PIN",
   "opPinWrong": "ভুল PIN। আর {0}টি চেষ্টা বাকি।",
   "opPinWrongPlain": "ভুল পিন।",

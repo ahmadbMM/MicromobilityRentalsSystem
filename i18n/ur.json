@@ -2322,6 +2322,7 @@
   "unsentDropBtn": "پھر بھی سائن آؤٹ کریں",
   "dbPending": "ڈیٹا بیس اپڈیٹ کا انتظار ہے۔",
   "opSwitch": "آپریٹر بدلیں",
+  "opChange": "ترتیبات میں تبدیل کریں",
   "opPinTitle": "{0} کا PIN",
   "opPinWrong": "غلط PIN۔ {0} کوششیں باقی۔",
   "opPinWrongPlain": "غلط پن۔",
