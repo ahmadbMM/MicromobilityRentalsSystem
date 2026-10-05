@@ -8261,3 +8261,39 @@ body .landing-event-card.ev-runher .rf-route{display:block;width:100%;max-width:
 .mr-badge.sp-pink,.badge-pop-box.sp-pink{--sp1:#ffc9da;--sp2:#f2789f;--sp3:#c2416e;--spg:242,120,159;--sph:255,236,243;}
 .run-em-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
 .run-em-acts a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+
+/* ── "About this event" and "Details" (the owner, 2026-10-05: picked 1B, 2B, 3B) ───────────────
+   Words under each event card on the picker and under each date's time, each a button of its own
+   beside its card (never inside it), set into the card's own bottom padding so the card still opens
+   the event or the date wherever it is tapped. The sheet is the bike type's, without the picture,
+   with the facts read off the date. */
+.landing-events-grid>.lec-wrap{position:relative;display:flex;min-width:0;}
+.lec-wrap>.landing-event-card{flex:1 1 auto;width:100%;min-width:0;}
+body .lec-wrap.has-about>.landing-event-card{padding-bottom:58px;}
+body .lec-wrap .lec-about{position:absolute;inset-inline-start:28px;bottom:18px;z-index:1;margin:0;padding:4px 0;min-height:0;border:0;
+  background:transparent none;font-family:var(--font-body);font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;
+  text-decoration:underline;text-underline-offset:3px;color:#1A1919;cursor:pointer;}
+body .lec-wrap .lec-about.ab-jcc,body .lec-wrap .lec-about.ab-snd96{color:#fff;}
+body .lec-wrap .lec-about.ab-runher{color:var(--rf-pink-dk);}
+body .lec-wrap .lec-about:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:2px;}
+:is(html[lang="ar"],html[lang="ur"]) body .lec-wrap .lec-about{font-family:'IBM Plex Sans Arabic',sans-serif;}
+@media (max-width:640px){
+  body .lec-wrap.has-about>.landing-event-card{padding-bottom:50px;}
+  body .lec-wrap .lec-about{inset-inline-start:20px;bottom:14px;}
+}
+.session-cards-grid>.sess-wrap{position:relative;display:flex;min-width:0;}
+.sess-wrap>.sess-card{flex:1 1 auto;width:100%;min-width:0;}
+body .sess-wrap.has-about>.sess-card{padding-bottom:40px;}
+body .sess-about{position:absolute;inset-inline-start:35px;bottom:11px;z-index:1;margin:0;padding:3px 0;min-height:0;border:0;
+  background:transparent none;font:inherit;font-size:13px;font-weight:700;text-decoration:underline;text-underline-offset:3px;
+  color:var(--ev,#077A4B);cursor:pointer;}
+body .sess-about.solo{position:static;display:inline-block;margin-top:10px;}
+body .sess-about:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:2px;}
+.ev-info .ev-info-kick{color:var(--ev,#077A4B);}
+.ev-info .ev-info-text{margin:8px 0 0;}
+.ev-info .ev-info-extra{margin:10px 0 0;font-size:14px;line-height:1.5;overflow-wrap:anywhere;}
+.ev-info .ev-info-facts{display:grid;gap:7px;margin:14px 0 4px;padding-top:12px;border-top:1px solid var(--border,rgba(26,25,25,.12));}
+.ev-info .ev-info-facts>div{display:grid;grid-template-columns:minmax(76px,auto) minmax(0,1fr);gap:10px;font-size:14px;line-height:1.45;}
+.ev-info .ev-info-facts dt{font-weight:700;color:var(--muted);}
+.ev-info .ev-info-facts dd{margin:0;overflow-wrap:anywhere;}
+.ev-info .ev-info-facts a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px;}

@@ -688,3 +688,22 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   `done` row on a run, hidden until earned, popped once (`BDG_CHEER`). The badges table holds it as 'red'.
 - Privacy Notice 2026-10-05: the emergency contact row (en/ar); PRIVACY_ASK_FROM unchanged (nobody is asked again).
   `tests/run-for-her.spec.ts`.
+
+## About this event and Details (2026-10-05)
+
+The owner picked 1B, 2B, 3B: an "About this event" link under each event card on the picker and a "Details" link under
+each date's time, both opening ONE sheet (`_infoPaint`, in `#bike-info-modal`): a short description, the live facts
+(`_infoFacts`: who may book, price, when, where with its map, the distance or the ride groups, the places left - never
+on a ride staff approve - and the breakfast stop) and a book button (`_infoBook`: the event, or that date).
+- **Who sees them** (the owner: "only show the i buttons in community events for community members only"): public
+  events and dates show them to everyone; members-only ones (`community` and `runher` cards, any date where
+  `_isCommunity(s)&&!_openToAll(s)`) only to members (`_infoMember`: the members gate's own `community_member` answer,
+  asked once per account, again a minute after a failed check; hidden until it answers).
+- **The words**: `INFO_EV` / `INFO_DT` pair this page's key with the site's field (`experiences.events.*About`,
+  `experiences.dates.about*` in site_content, edited in the staff Website editor, which builds its form from the
+  website's schema). `_infoText`: staff's version for the language, else (English/Arabic) this page's own; any other
+  language takes this page's translation while staff left the English as shipped, else staff's English. Date texts
+  fill `{gather} {start} {end} {collect}` from the date (`_infoFill`). An event date says its own `sessions.description`.
+- **A date's own line**: the session forms' Description box is there for every kind now (`ns-desc`, and `es-desc` on
+  the edit form, saved only when changed); outside events it is an extra line under the words (`.ev-info-extra`).
+- The links are siblings of the card buttons (`.lec-wrap`, `.sess-wrap`), never inside them. `tests/event-info.spec.ts`.

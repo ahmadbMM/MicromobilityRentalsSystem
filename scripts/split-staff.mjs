@@ -1084,7 +1084,10 @@ export function formatFieldNames(r, limit = 20) {
 // distance column, filter and split, the runner's Finished and emergency contact, the distance in Add rider / walk-in /
 // booking editor, the account editor's emergency contact and the Run for Her session form (staff).
 // Here, on 0969444c: customer 202.0, staff 422.4, core 230.9; the runner reads ~1.3 / ~2.2 / ~1.3 more.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 206, staff: 428, core: 235 };
+// Customer 206 -> 208 (2026-10-05): "About this event" under the event cards and "Details" under each date (the
+// owner's 1B/2B/3B: a short description, the live facts and a book button in one sheet; members-only events show it
+// to members only), the site's own words read from site_content, and 29 strings; 205.2 KB here is ~206.5 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 428, core: 235 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
