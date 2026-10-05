@@ -83,7 +83,7 @@ test.describe('@staff:community learn to ride: taking sign-ups', () => {
     await learnTab(page, [], 'admin', { table: 'site_content' });
     await page.locator('#la-taking').click();
     await page.locator('#confirm-modal .btn-red').click();
-    await expect(page.locator('.toast.error, .toast-error, [role="alert"]').filter({ hasText: 'Could not save' }).first()).toBeVisible();
+    await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
     await expect(page.locator('#la-taking')).toBeChecked();
     expect(await page.evaluate('S.undoStack.length')).toBe(0);
   });

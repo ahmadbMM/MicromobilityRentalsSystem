@@ -74,7 +74,7 @@ test('a refused Coming Soon switch leaves nothing to undo', async ({ page }) => 
   await page.evaluate(`setStaffTab('website')`);
   await page.locator('#web-cs-switch').click();
   await page.locator('#confirm-modal').getByRole('button', { name: 'Open the website' }).click();
-  await expect(page.locator('.toast').last()).toContainText('Could not save');
+  await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
   // it used to log "Website opened" with an undo for a change that never happened
   expect(await page.evaluate(`S.actionLog.some(l=>typeof l.fn==='function'&&/Website|Coming Soon/i.test(l.label))`)).toBe(false);
 });
@@ -148,7 +148,7 @@ test('a failed save says so and keeps what was typed', async ({ page }) => {
   const f = page.locator('input[data-web-key="coming_soon.eyebrow"][data-web-lang="en"]');
   await f.fill('Micromobility KSA');
   await page.locator('#web-save').click();
-  await expect(page.locator('.toast').last()).toContainText('Could not save');
+  await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
   await expect(f).toHaveValue('Micromobility KSA');
   await expect(page.locator('#web-save')).toBeEnabled();
 });

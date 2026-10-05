@@ -177,7 +177,7 @@ test('a failed save says so and leaves the message as it was', async ({ page }) 
   await waitForSb(page);
   await page.evaluate(`setStaffTab('messages')`);
   await card(page, 7).getByRole('button', { name: 'Mark replied' }).click();
-  await expect(page.locator('.toast').last()).toContainText('Could not save');
+  await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
   await expect(card(page, 7)).toContainText('New');
 });
 

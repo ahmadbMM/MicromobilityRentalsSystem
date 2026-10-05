@@ -210,7 +210,7 @@ test('a failed save says so and leaves the request as it was', async ({ page }) 
   await page.evaluate(`setStaffTab('workshop')`);
   await panel(page).locator('[data-ws-filter="booked"]').click();
   await card(page, 42).getByRole('button', { name: 'Bike is in' }).click();
-  await expect(page.locator('.toast').last()).toContainText('Could not save');
+  await expect(page.locator('#err-bar-el')).toContainText('did not save'); // the error bar, like every refused write
   await expect(card(page, 42)).toContainText('Booked');
 });
 

@@ -399,7 +399,7 @@ test.describe('a database that refuses a column', () => {
 
   test('a Petromin ride is refused whole and said: nothing half-made to roll back', async ({ page }) => {
     const writes = await create(page, 'petromin', '2099-02-11');
-    await expect(page.locator('.toast').filter({ hasText: /ride_kind/ }).first()).toBeVisible();
+    await expect(page.locator('#err-bar-el')).toContainText('ride_kind'); // the error bar, with the database's words under it
     expect(writes.map((w) => w.method)).toEqual(['POST']);
   });
 });
