@@ -8101,6 +8101,10 @@ body.view-staff .ca-actions>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.
 #tab-queue .queue-table .rq-adline{white-space:normal;max-width:9em;}
 #tab-queue .queue-table td:has(> .rq-rc),#tab-queue .queue-table td:has(> .rider-name){min-width:136px;max-width:15em;}
 #tab-queue .queue-table thead th{letter-spacing:.4px;}
+/* The sort headers are buttons in the header cells (2026-10-05): drawn as the header's own words, a
+   ring only for the keyboard. */
+#tab-queue .queue-table thead th .q-sort-btn{display:inline;margin:0;padding:0;border:0;border-radius:3px;background:transparent none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit;white-space:nowrap;cursor:pointer;min-height:0;}
+#tab-queue .queue-table thead th .q-sort-btn:focus-visible{outline:2px solid var(--sf-green-ink,var(--green));outline-offset:2px;}
 body.view-staff #tab-queue .queue-table .actions-cell{grid-template-columns:repeat(2,minmax(92px,1fr));min-width:190px;}
 /* Phone (2026-10-03): the ride strip's select is the one ride picker (it lists past nights too), and the
    page title is dropped - the Bookings pill above already names the page - so the first rider moves up. */
