@@ -602,20 +602,16 @@ $b$  -- A paid booking keeps what it paid: it moves only to a ride with the same
 $b$);
   d := pg_temp._once(d,
 $a$    cancel_reason    = case
-                         when _cancelling then
-$a$,
+                         when _cancelling then$a$,
 $b$    cancel_reason    = case
                          when q.status = 'cancelled' and coalesce(q.cancelled_by,'') <> 'customer' then x.cancel_reason   -- staff's stays (20261005210000)
-                         when _cancelling then
-$b$);
+                         when _cancelling then$b$);
   d := pg_temp._once(d,
 $a$    cancel_note      = case
-                         when _cancelling then
-$a$,
+                         when _cancelling then$a$,
 $b$    cancel_note      = case
                          when q.status = 'cancelled' and coalesce(q.cancelled_by,'') <> 'customer' then x.cancel_note
-                         when _cancelling then
-$b$);
+                         when _cancelling then$b$);
   execute d;
 end $cbu$;
 
