@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 // Handing a bike over, from the picker and from the quick check-in:
 //   - the picker repriced a paid booking (the drawer then read money nobody took) and priced a
@@ -42,8 +42,13 @@ function watchRpcs(page: Page) {
   page.on('request', (r) => { const m = r.url().match(/\/rest\/v1\/rpc\/([^/?]+)/); if (m && r.method() === 'POST') calls.push(m[1]); });
   return calls;
 }
-const checkInWrite = (patches: { url: string; body: string }[], id: string) =>
-  patches.find((p) => p.url.includes(`id=eq.${id}`) && /"status":"active"/.test(p.body));
+/** A picker check-in is one staff_checkin call since 2026-10-05 (the direct writes are its fallback):
+ *  read as the row it writes. */
+function watchCheckins(page: Page) {
+  const rows: Record<string, unknown>[] = [];
+  page.on('request', (r) => { const row = checkinAsRow(r); if (row) rows.push(row); });
+  return rows;
+}
 
 test.describe('the bike picker', () => {
   test('changing the bike of a rider who has paid leaves what they paid alone', async ({ page }) => {
@@ -65,10 +70,10 @@ test.describe('the bike picker', () => {
       queue_entries: [entry('e1', 1, 'waiting')],
       bikes: [bike('r1', 2, 'Road')],
     });
-    const patches = watch(page, 'queue_entries');
+    const checkins = watchCheckins(page);
     await page.evaluate(`openModal('e1');S.modalBikes=['r1'];confirmAssign()`);
-    await expect.poll(() => !!checkInWrite(patches, 'e1')).toBe(true);
-    expect(JSON.parse(checkInWrite(patches, 'e1')!.body).price).toBe(75);
+    await expect.poll(() => checkins.filter((c) => c.id === 'e1').length).toBe(1);
+    expect(checkins[0]).toMatchObject({ assigned_bike_id: 'r1', price: 75 });
   });
 
   test('a Petromin employee handed a Hybrid is priced at the employee fare, not 57.50', async ({ page }) => {
@@ -77,10 +82,10 @@ test.describe('the bike picker', () => {
       bikes: [bike('h1', 1, 'Hybrid')],
       rider_registrations: [{ id: 'r1', name: 'Rider e1', booking_no: 'A-1001', source: 'petromin', matched_entry_id: 'e1', updated_at: '2099-01-01T10:00:00Z' }],
     });
-    const patches = watch(page, 'queue_entries');
+    const checkins = watchCheckins(page);
     await page.evaluate(`openModal('e1');S.modalBikes=['h1'];confirmAssign()`);
-    await expect.poll(() => !!checkInWrite(patches, 'e1')).toBe(true);
-    expect(JSON.parse(checkInWrite(patches, 'e1')!.body).price).toBe(50);
+    await expect.poll(() => checkins.filter((c) => c.id === 'e1').length).toBe(1);
+    expect(checkins[0].price).toBe(50);
   });
 
   test('reserving a bike held for another rider moves the reservation instead of sharing it', async ({ page }) => {

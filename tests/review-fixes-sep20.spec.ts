@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, unlockStaff, loginCustomer, waitForSb, captureBookingRows } from './helpers/supabase';
+import { stubSupabase, unlockStaff, loginCustomer, waitForSb, captureBookingRows, checkinAsRow } from './helpers/supabase';
 
 // The 2026-09-20 review: writes that reported success without happening, a device with no
 // room left that still handed out tickets, and two checks that measured the wrong thing.
@@ -68,7 +68,11 @@ test('handing a rider a bike keeps the price their promo code bought', async ({ 
   await page.goto('/');
   await waitForSb(page);
   const patches: Record<string, unknown>[] = [];
-  page.on('request', (r) => { if (r.method() === 'PATCH' && /queue_entries/.test(r.url())) patches.push(JSON.parse(r.postData() || '{}')); });
+  page.on('request', (r) => {
+    // the check-in is one staff_checkin call since 2026-10-05: read as the row it writes
+    const row = checkinAsRow(r); if (row) { patches.push(row); return; }
+    if (r.method() === 'PATCH' && /queue_entries/.test(r.url())) patches.push(JSON.parse(r.postData() || '{}'));
+  });
   await page.evaluate(`(async()=>{S.modalRider='e1';S.modalBikes=['b1'];await confirmAssign();})()`);
   await expect.poll(() => patches.length).toBeGreaterThan(0);
   // The bike's list price is 57.5; the discount they were quoted is 47.5.

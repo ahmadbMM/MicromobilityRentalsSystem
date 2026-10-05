@@ -32,9 +32,10 @@ const csvOf = (call: string) => `(async()=>{let out='';const _B=window.Blob;wind
   const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
   const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
   try{await (0,eval)(${JSON.stringify(call)});}finally{window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;}return out;})()`;
-const printed = (call: string) => `(()=>{let html='';const real=window._openReport;window._openReport=(h)=>{html=h;};
+// Awaited: the account report asks for the operator's PIN first since 2026-10-05, so it opens after a tick.
+const printed = (call: string) => `(async()=>{let html='';const real=window._openReport;window._openReport=(h)=>{html=h;return {};};
   const orig=window.open;window.open=()=>({document:{write:(h)=>{html=h;},close(){}},focus(){},print(){}});
-  try{${call};}finally{window._openReport=real;window.open=orig;}return html;})()`;
+  try{await (0,eval)(${JSON.stringify(call)});}finally{window._openReport=real;window.open=orig;}return html;})()`;
 
 test.describe('the account report', () => {
   const customers = [
