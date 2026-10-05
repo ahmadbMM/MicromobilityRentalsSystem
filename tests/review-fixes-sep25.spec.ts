@@ -51,7 +51,9 @@ test("the rider's own hidden bike types and on-the-house perk arrive with the pr
 });
 
 test('cancelling an own-bike rider, who held no place, promotes nobody; cancelling a rider who held one does', async ({ page }) => {
-  const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
+  // Tomorrow's ride: a ride that is over takes nobody new (_sessEnded, 2026-10-05), and from 23:00 in
+  // Riyadh a 21:00-23:00 ride dated today is over, which turned this red for the last hour of every day.
+  const TODAY = new Date(Date.now() + 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
   const sess = [{ id: TODAY, session_date: TODAY, day: 'Friday', status: 'open', capacity: 1, created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":1}' }];
   const row = (id: string, n: number, name: string, x: Record<string, unknown> = {}) => ({
     id, session_id: TODAY, session_day: 'Friday', session_date: TODAY, queue_num: n, name, phone: `05500000${n}0`,
