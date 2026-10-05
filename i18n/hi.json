@@ -2571,7 +2571,6 @@
   "releaseBikeToast": "वापस उपलब्ध में मुक्त की गई",
   "noRiderAssigned": "कोई राइडर नहीं सौंपा",
   "errValidPrice": "कृपया मान्य दाम दर्ज करें (0 या अधिक)।",
-  "toastPriceSet": "दाम SAR {0} सेट हुआ",
   "toastSessionUpdated": "सेशन {0} अपडेट हुआ।",
   "bikeRentalPrice": "किराया दाम",
   "bikeCustomPrice": "कस्टम किराया दाम",

@@ -2571,7 +2571,6 @@
   "releaseBikeToast": "na-release pabalik sa available",
   "noRiderAssigned": "Walang naka-assign na rider",
   "errValidPrice": "Maglagay ng valid na presyo (0 pataas).",
-  "toastPriceSet": "Itinakda ang presyo sa SAR {0}",
   "toastSessionUpdated": "Na-update ang sesyon {0}.",
   "bikeRentalPrice": "Presyo ng Rental",
   "bikeCustomPrice": "Custom na Presyo ng Rental",

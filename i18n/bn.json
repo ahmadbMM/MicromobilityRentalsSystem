@@ -2675,7 +2675,6 @@
   "releaseBikeToast": "আবার উপলব্ধ তালিকায় ছেড়ে দেওয়া হয়েছে",
   "noRiderAssigned": "কোনো রাইডার বরাদ্দ নেই",
   "errValidPrice": "অনুগ্রহ করে একটি সঠিক দাম লিখুন (0 বা তার বেশি)।",
-  "toastPriceSet": "দাম SAR {0} নির্ধারণ করা হয়েছে",
   "toastSessionUpdated": "সেশন {0} হালনাগাদ হয়েছে।",
   "bikeRentalPrice": "ভাড়ার দাম",
   "bikeCustomPrice": "নিজস্ব ভাড়ার দাম",

@@ -1072,7 +1072,13 @@ export function formatFieldNames(r, limit = 20) {
 // the runner, over 191.
 // Staff 412 -> 418 (2026-10-05): ratings as pictures to share in Analytics > All ratings (_rsDraw draws each rating
 // on a canvas; Select, the share dialog, 24 strings; the analytics part +4.8 KB); 413.1 KB here is ~415.3 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 193, staff: 418, core: 227 };
+// Customer 193 -> 198, staff 418 -> 424, core 227 -> 231 (2026-10-05, the full bug audit's fixes, ~150 across the
+// app): waitlist places from customer_waitlist_ranks, the profile/correction gates' refusals, translated page names
+// and spotsLeft plurals, booking-form focus and hidden types, offline parties in one write, the language-pack retry
+// (customer); guarded approvals/removes/undos, the picker's staff_checkin, the sales outbox (updates, stock, PIN),
+// party moves through staff_rider_party_move, on-the-house totals, the WhatsApp link from staff_options (staff).
+// Here: customer 195.3, staff 419.9, core 228.4; the runner reads ~1.3 / ~2.2 / ~1.3 more, so each keeps ~1.4 KB.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 198, staff: 424, core: 231 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

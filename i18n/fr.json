@@ -2571,7 +2571,6 @@
   "releaseBikeToast": "remis en disponible",
   "noRiderAssigned": "Aucun cycliste attribué",
   "errValidPrice": "Veuillez saisir un prix valide (0 ou plus).",
-  "toastPriceSet": "Prix fixé à SAR {0}",
   "toastSessionUpdated": "Session {0} mise à jour.",
   "bikeRentalPrice": "Prix de location",
   "bikeCustomPrice": "Prix de location personnalisé",

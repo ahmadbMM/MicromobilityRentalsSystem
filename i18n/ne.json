@@ -2571,7 +2571,6 @@
   "releaseBikeToast": "फेरि उपलब्धमा छोडियो",
   "noRiderAssigned": "कुनै राइडर तोकिएको छैन",
   "errValidPrice": "कृपया मान्य मूल्य लेख्नुहोस् (० वा बढी)।",
-  "toastPriceSet": "मूल्य SAR {0} सेट भयो",
   "toastSessionUpdated": "सेसन {0} अपडेट भयो।",
   "bikeRentalPrice": "भाडा मूल्य",
   "bikeCustomPrice": "कस्टम भाडा मूल्य",
