@@ -151,3 +151,10 @@ section{break-inside:avoid}
 :root .rp-hrange{max-width:260px;margin-bottom:10px}
 :root .rp-c888{color:#888}
 :root .rp-num{text-align:end;font-weight:800}
+/* the breakfast ratings report (printBreakfastReport): a score's band, a sub-question, each reason riders wrote */
+:root .rp-red{color:#b42318}
+:root .rp-bf-sub{padding-inline-start:24px;color:#3d4540}
+:root .rp-said{display:flex;gap:12px;align-items:baseline;padding:7px 2px;border-bottom:1px solid #e3e8e4;font-size:12px;break-inside:avoid}
+:root .rp-said-k{flex:0 0 11ch;font-weight:700;color:#3d4540}
+:root .rp-said-v{flex:0 0 5ch;font-weight:800;font-variant-numeric:tabular-nums}
+:root .rp-said-t{flex:1 1 auto;white-space:pre-wrap;overflow-wrap:anywhere}
