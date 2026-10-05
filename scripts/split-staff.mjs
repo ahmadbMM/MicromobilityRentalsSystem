@@ -1057,7 +1057,10 @@ export function formatFieldNames(r, limit = 20) {
 // accessibility pass (named popups, focus restore, field names) and the performance pass (indexes, Analytics memo,
 // per-row sync). Here, merged with main: customer 188.2, staff 407.3, core 224.2 (the runner reads ~1.3 / ~2.2 / ~0.8 more). The
 // customer half keeps a 1 KB margin over the runner's reading so a tenth of a KB cannot turn CI red.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 191, staff: 412, core: 227 };
+// Customer 191 -> 193 (2026-10-05): the rider's waiver step on the ticket for riders staff added (renderWaiverGate,
+// acceptWaiverGate, _pendingWaiver; ~2 KB, customer code by design) merged with the audit; 190.1 KB here is ~191.4 on
+// the runner, over 191.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 193, staff: 412, core: 227 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
