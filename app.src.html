@@ -3735,7 +3735,38 @@ const QR=(function(){
       +'<rect width="'+px+'" height="'+px+'" fill="'+light+'"/>'
       +'<g fill="'+dark+'" shape-rendering="crispEdges">'+rects+'</g>'+eyes+logoSvg+'</svg>';
   }
-  return {encode:encode,svg:svg};
+  // The same code drawn on a canvas (owner, 2026-10-05: "the dark qr codes arent getting scanned").
+  // Samsung Internet's dark mode recolours every svg on the page - rectangles as background, darkened;
+  // paths as foreground, lightened - so the ticket's white tile went dark and the code with it, and
+  // a site cannot opt out. It leaves a canvas alone. Same geometry as svg() (no logo), at the
+  // device's pixel ratio, every module's edges on whole device pixels so no hairline shows between.
+  function paint(cv,text,opts){
+    opts=opts||{};
+    var q=opts.margin==null?4:opts.margin,dark=opts.dark||'#0b2018',light=opts.light||'#ffffff';
+    var px=opts.size||96,pad=opts.pad||0,k=Math.min(3,Math.max(1,window.devicePixelRatio||1));
+    var qr=encode(text),n=qr.size,mods=qr.modules,W=Math.round(px*k),cell=(px-2*pad)*k/(n+2*q),o=pad*k;
+    cv.width=W;cv.height=W;cv.style.width=px+'px';cv.style.height=px+'px';
+    var g=cv.getContext('2d');if(!g)return false;
+    function at(i){return Math.round(o+(i+q)*cell);}
+    function inFinder(r,c){return (r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);}
+    g.fillStyle=light;g.fillRect(0,0,W,W);
+    g.fillStyle=dark;
+    for(var r=0;r<n;r++)for(var c=0;c<n;c++){
+      if(!mods[r][c]||inFinder(r,c))continue;
+      g.fillRect(at(c),at(r),at(c+1)-at(c),at(r+1)-at(r));
+    }
+    function box(r,c,span,rad,fill){
+      var x=at(c),y=at(r),w=at(c+span)-x,h=at(r+span)-y;
+      g.fillStyle=fill;g.beginPath();
+      if(g.roundRect)g.roundRect(x,y,w,h,rad*cell);else g.rect(x,y,w,h);
+      g.fill();
+    }
+    [[0,0],[0,n-7],[n-7,0]].forEach(function(e){
+      box(e[0],e[1],7,1.8,dark);box(e[0]+1,e[1]+1,5,1.2,light);box(e[0]+2,e[1]+2,3,0.8,dark);
+    });
+    return true;
+  }
+  return {encode:encode,svg:svg,paint:paint};
 })();
 
 // qrcode-generator (the vendor lib behind QR) is loaded on demand — it's only needed
@@ -3763,7 +3794,10 @@ function _qrBox(payload,px){
   // at a glance (owner, 2026-10-04): a picture of the code cannot move. It is the svg's own stroke
   // for the same reason as the tile, it sits in the code's white margin, never over the code, and
   // it keeps moving even where the rider asked for less motion (styles.css, .qr-live).
-  return `<div class="cu-qr-box">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#00b467" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
+  // The code is also drawn on a canvas (QR.paint, _qrPaint), which takes the svg's place once it is
+  // painted: a browser's dark mode leaves a canvas alone (owner, 2026-10-05). The svg stays as the
+  // fallback, and is what shows until the canvas is painted.
+  return `<div class="cu-qr-box" data-qr="${esc(String(payload))}" data-px="${px}">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<canvas class="qr-cv" role="img" aria-label="${esc(t('ticketQrLabel'))}"></canvas><svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#00b467" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
@@ -3772,6 +3806,19 @@ function _fillLazyQR(){
     try{el.outerHTML=_qrBox(el.getAttribute('data-qr')||'',Number(el.getAttribute('data-px'))||112);}catch(e){}
   });
 }
+// Paints every ticket code's canvas not yet painted under root, then lets it stand in for the svg
+// (.cv). Whatever writes a ticket - a render, the lazy fill, a popup - the observer below paints it
+// in the microtask after the write, before the next frame.
+function _qrPaint(root){
+  if(!window.qrcode||!root||!root.querySelectorAll)return;
+  const list=root.matches&&root.matches('canvas.qr-cv')?[root]:root.querySelectorAll('canvas.qr-cv:not([data-p])');
+  list.forEach(cv=>{
+    const b=cv.parentElement;if(!b||cv.hasAttribute('data-p'))return;
+    cv.setAttribute('data-p','1');
+    try{if(QR.paint(cv,b.getAttribute('data-qr')||'',{size:Number(b.getAttribute('data-px'))||112,margin:4,pad:6}))b.classList.add('cv');}catch(e){}
+  });
+}
+new MutationObserver(ms=>{for(const m of ms)for(const n of m.addedNodes)if(n.nodeType===1&&(n.firstElementChild||n.tagName==='CANVAS'))_qrPaint(n);}).observe(document.documentElement,{childList:true,subtree:true});
 function ticketQR(payload,px){
   px=px||112;
   if(window.qrcode){try{return _qrBox(payload,px);}catch(e){return '';}}
@@ -23801,7 +23848,7 @@ async function undoHistLog(logId){
 }
 
 
-let _scanStream=null,_scanTimer=null,_scanDetector=null,_scanCanvas=null,_scanLastTxt='',_scanLastAt=0,_jsqrPromise=null;
+let _scanStream=null,_scanTimer=null,_scanDetector=null,_scanCanvas=null,_scanLastTxt='',_scanLastAt=0,_jsqrPromise=null,_scanFlip=false;
 // Continuous ("keep scanning") mode. The camera used to close on every scan, so checking
 // in a full session meant reopening it once per rider. Here the scanner reopens itself as
 // soon as the check-in modal closes, and counts what it has processed. Staff still confirm
@@ -24018,6 +24065,22 @@ async function _startScanner(){
     _stopScanStream();
   }
 }
+// The camera frame with its colours inverted, on a canvas the detector can read (480 px wide, as
+// jsQR's is). The canvas filter where the browser has one, else the pixels flipped by hand.
+let _scanInvCv=null;
+function _scanInverted(v){
+  try{
+    const c=_scanInvCv||(_scanInvCv=document.createElement('canvas'));
+    const w=Math.min(v.videoWidth,480),h=Math.round(v.videoHeight*(w/v.videoWidth));
+    c.width=w;c.height=h;
+    const g=c.getContext('2d',{willReadFrequently:true});if(!g)return null;
+    if('filter' in g){g.filter='invert(1)';g.drawImage(v,0,0,w,h);g.filter='none';return c;}
+    g.drawImage(v,0,0,w,h);
+    const d=g.getImageData(0,0,w,h),p=d.data;
+    for(let i=0;i<p.length;i+=4){p[i]=255-p[i];p[i+1]=255-p[i+1];p[i+2]=255-p[i+2];}
+    g.putImageData(d,0,0);return c;
+  }catch(e){return null;}
+}
 async function _scanTick(gen){
   if(!_scanStream||gen!==_scanGen)return; // one loop per start: a loop from a closed start ends here
   const v=document.getElementById('scan-video');
@@ -24027,6 +24090,13 @@ async function _scanTick(gen){
       if(_scanDetector){
         const codes=await _scanDetector.detect(v);
         if(codes&&codes.length)txt=codes[0].rawValue||'';
+        // A code shown light on dark - a ticket a phone's dark mode recoloured, or a picture of one -
+        // is read from an inverted copy of the frame every other look (owner, 2026-10-05: "the dark qr
+        // codes arent getting scanned properly"). jsQR below tries both ways by itself.
+        else if((_scanFlip=!_scanFlip)&&v.videoWidth){
+          const inv=_scanInverted(v),more=inv&&await _scanDetector.detect(inv);
+          if(more&&more.length)txt=more[0].rawValue||'';
+        }
       }else if(window.jsQR&&v.videoWidth){
         const c=_scanCanvas||(_scanCanvas=document.createElement('canvas'));
         const w=Math.min(v.videoWidth,480),h=Math.round(v.videoHeight*(w/v.videoWidth));

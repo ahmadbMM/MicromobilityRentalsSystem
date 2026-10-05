@@ -146,7 +146,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await expect.poll(off).not.toBe(first);
     // It sits on the tile's edge, never over the code: the overlay covers exactly the box.
     const fit = await page.locator('#tab-myrides .cu-qr-box').first().evaluate((b) => {
-      const o = b.querySelector('.qr-live')!.getBoundingClientRect(), q = b.querySelector('svg:not(.qr-live)')!.getBoundingClientRect();
+      const o = b.querySelector('.qr-live')!.getBoundingClientRect(), q = b.querySelector('canvas.qr-cv')!.getBoundingClientRect(); // the painted code (ticket-qr-canvas.spec.ts)
       return Math.abs(o.width - q.width) < 2 && Math.abs(o.height - q.height) < 2 && Math.abs(o.left - q.left) < 2 && Math.abs(o.top - q.top) < 2;
     });
     expect(fit).toBe(true);

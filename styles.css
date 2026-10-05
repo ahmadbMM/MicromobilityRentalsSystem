@@ -5779,6 +5779,11 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
        (the reduced-motion rules cut every animation to one instant): it is how the desk checks a ticket, and it is
        one thin line. overflow:visible: the night ticket rounds every svg in the card, which would clip it. */
     .cu-qr-box{position:relative;}
+    /* The code on a canvas (QR.paint, owner 2026-10-05): Samsung Internet's dark mode recolours svg, so the
+       painted canvas takes the svg's place; until it is painted the svg shows. */
+    .cu-qr-box .qr-cv{display:none;}
+    .cu-qr-box.cv .qr-cv{display:block;}
+    .cu-qr-box.cv>svg:not(.qr-live){display:none;}
     .cu-qr-box .qr-live{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
     .cu-qr-box .qr-live path{stroke-dasharray:24 76;animation:qrLive 2.4s linear infinite;}
     @keyframes qrLive{to{stroke-dashoffset:-100;}}
@@ -7744,8 +7749,8 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .mm-n
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .status-badge{color:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .appr-ok{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :focus-visible{outline-color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-qr-wrap svg,
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-right svg{border-radius:10px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-qr-wrap :is(svg,canvas),
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-right :is(svg,canvas){border-radius:10px;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-c-mutedl,.cu-c-muted){color:var(--night-ink-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-c-text{color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-dot7-ok,.cu-dot8){background:var(--neon);}
