@@ -15181,6 +15181,9 @@ function showGroupEditModal(entryId){
   const primary=members[0];
   const comm=_apprSessIds.has(primary.sessionId),noCarbon=_noCarbonSessIds.has(primary.sessionId),free=_freeSessIds.has(primary.sessionId);
   const own=_ownOffered(allSessions().find(x=>x.id===primary.sessionId));
+  // A ride without bikes (an event's seats, the pool) books 'None', which the type menu has no
+  // entry for: it opened on 'Any' and the save wrote that over every seat (2026-10-05). No menu there.
+  const bikes=_needsBike(_sessGet(primary.sessionId));
   const mainPhone=(primary.groupPhone||primary.phone||'').trim(); // the responsible person's number when stored
   const open=allSessions().filter(x=>_sessLive(x)&&!_isApprovalRide(x)).sort(_sessOrder);
   if(!open.find(x=>x.id===primary.sessionId)){const cur=allSessions().find(x=>x.id===primary.sessionId);if(cur)open.unshift(cur);}
@@ -15206,7 +15209,7 @@ function showGroupEditModal(entryId){
         <input aria-label="${esc(t('nameLabel'))} ${i+1}" id="ge-r-name-${i}" type="text" value="${esc(r.name||'')}" maxlength="60" class="cmy-f1m0">
         <input aria-label="${esc(t('authPhone'))}" id="ge-r-ph-${i}" type="tel" placeholder="05…" value="${esc((r.phone||'').trim()===mainPhone?'':(r.phone||''))}" class="cmy-w104">
         <input aria-label="${esc(t('heightLabel'))}" id="ge-r-h-${i}" type="number" min="80" max="230" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="cmy-w66">
-        <select id="ge-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="cmy-w104">${bikeTypeOpts(own,noCarbon).map(ty=>`<option value="${ty}"${(r.typePreference||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+        ${bikes?`<select id="ge-r-type-${i}" aria-label="${t('bikeTypeLabel')}" class="cmy-w104">${bikeTypeOpts(own,noCarbon).map(ty=>`<option value="${ty}"${(r.typePreference||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>`:''}
       </div>`).join('')}
       <div class="modal-footer">
         <button class="btn-secondary" data-on-click="${_on("closeGroupEditModal")}">${t('cancelBtn')}</button>
@@ -15219,8 +15222,9 @@ function saveGroupEdit(){return _busyRun('groupEdit',_saveGroupEdit);}
 async function _saveGroupEdit(){
   // Each member keeps the index of the row it was drawn on: a member that has left the queue
   // since the dialog opened is skipped, and must not shift everyone after it onto the wrong
-  // row's name, phone and height.
-  const rows=(S._geIds||[]).map((id,i)=>({i,m:getQueue().find(e=>e.id===id)})).filter(r=>r.m);
+  // row's name, phone and height. Left means gone, or no longer live (2026-10-05): a member who
+  // cancelled, or was marked a no-show, meanwhile was moved to the new night with the others.
+  const rows=(S._geIds||[]).map((id,i)=>({i,m:getQueue().find(e=>e.id===id)})).filter(r=>r.m&&['waiting','waitlist','active'].includes(r.m.status));
   const members=rows.map(r=>r.m);
   if(!members.length){closeGroupEditModal();return;}
   const primary=members[0];
@@ -17919,10 +17923,19 @@ async function saveCustForm(){
   // nothing while "Account saved" showed
   if(!isNaN(heightRaw)&&(heightRaw<100||heightRaw>250)){toast(t('errValidHeightCm'),'error');return;}
   const height=(!isNaN(heightRaw)&&heightRaw>=100&&heightRaw<=250)?heightRaw:null;
+  // Everything else the save writes is read now, before the first await (2026-10-05): the editor
+  // can be closed while the checks are on the wire, and a value read after that came back empty -
+  // default_pay and hidden_types null (a VIP's house bookings repriced), profession, company and
+  // how they heard wiped, a typed password never set.
+  const _dp=_cfDefPayVal(),_ht=_cfHiddenVal();
+  const _v=id=>String((document.getElementById(id)||{}).value||'').replace(/\s+/g,' ').trim();
+  // profession, company and how they heard (20261002180000): an account holds every field its application asked
+  const _about={...(d.aboutIn?{profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null}:{}),heard_from:_v('cf-heard')||null}; // not loaded = not sent: an empty box is not the account's answer
+  const pwdTyped=val('cf-pwd');
   if(d.mode==='create'){
     if(!email){toast(t('errValidEmail'),'error');return;}
     if(!fullPhone){toast(t('errPhoneRequired'),'error');return;}
-    const pwd=val('cf-pwd');
+    const pwd=pwdTyped;
     if(pwd.length<8||!/[A-Z]/.test(pwd)||!/[0-9]/.test(pwd)){toast(t('errPasswordLen'),'error');return;}
     if(height==null){toast(t('errValidHeightCm'),'error');return;}
     if(!d.gender){toast(t('errSelectGender'),'error');return;}
@@ -17937,7 +17950,6 @@ async function saveCustForm(){
       if(error){if(error.code==='23505'||/DUPLICATE/i.test(error.message||''))toast(t('errEmailExists'),'error');else toast(error.message||t('errConnection'),'error');return;}
       // birth_date / country / city / default_pay aren't customer_signup params — set them directly
       // (staff hold is_staff() access to customers). A refusal is reported and never undoes the account.
-      const _dp=_cfDefPayVal(),_ht=_cfHiddenVal();
       if(birth||country||city||nationality||soc.val||_dp||_ht)await _wr(sb.from('customers').update({birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_dp,hidden_types:_ht}).eq('id',newId),'save account details');
       logAction(t('logAcctCreated')+name);
       await loadData();closeCustFormModal();toast(name+'! '+t('toastAccountCreated'));renderCommunity();
@@ -17953,17 +17965,14 @@ async function saveCustForm(){
       if(fullPhone&&fullPhone!==(d.origPhone||'')){const{data:dup}=await sb.from('customers').select('id').eq('phone',fullPhone).neq('id',d.id).limit(1);if(dup&&dup.length&&!(await _cfPhShareOk(fullPhone))){toast(t('errPhoneExists'),'error');return;}}
       // Optional password change: only if staff typed one. Validated then set SERVER-SIDE (bcrypt) via
       // the is_staff()-guarded RPC, which also rotates the session token so old logins are invalidated.
-      const newPwd=val('cf-pwd');
+      const newPwd=pwdTyped;
       const tempPwd=!!newPwd&&newPwd===d.tempPwd; // the one Generate made, untouched: temporary
       if(newPwd){
         if(newPwd.length<8||!/[A-Z]/.test(newPwd)||!/[0-9]/.test(newPwd)){toast(t('errPasswordLen'),'error');return;}
         const{data:pwok,error:pwerr}=await sb.rpc(tempPwd?'staff_set_customer_temp_password':'staff_set_customer_password',{p_customer_id:d.id,p_new_pwd:newPwd});
         if(pwerr||pwok!==true){toast((pwerr&&pwerr.message)||t('errConnection'),'error');return;} // e.g. RPC not deployed → run sql/staff-set-password.sql
       }
-      // profession, company and how they heard (20261002180000): an account holds every field its application asked
-      const _v=id=>String((document.getElementById(id)||{}).value||'').replace(/\s+/g,' ').trim();
-      const _about={...(d.aboutIn?{profession:_v('cf-prof').slice(0,80)||null,workplace:_v('cf-work').slice(0,120)||null}:{}),heard_from:_v('cf-heard')||null}; // not loaded = not sent: an empty box is not the account's answer
-      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_cfDefPayVal(),hidden_types:_cfHiddenVal(),...(d.gender?{gender:d.gender}:{}),..._about}).eq('id',d.id);
+      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,default_pay:_dp,hidden_types:_ht,...(d.gender?{gender:d.gender}:{}),..._about}).eq('id',d.id);
       if(res.error&&res.error.code==='23505'){toast(t('errEmailExists'),'error');return;} // the unique key an edit can hit: another account's email
       if(_writeErr(res,'save account'))return;
       // Sync the corrected CONTACT info onto the account holder's OWN live bookings only. One account
@@ -17979,7 +17988,7 @@ async function saveCustForm(){
       }
       // A default-payment change applies IMMEDIATELY to the customer's LIVE bookings (_houseReprice).
       // A VIP stays on the house either way: the tag covers every type.
-      {const _newDp=_cfDefPayVal();
+      {const _newDp=_dp;
       if(_newDp!==(d.origDefPay||null)){
         const _vip=_isVip({id:d.id});
         // "In their own name" is the name before this save OR after it: the rename above went to
@@ -18055,7 +18064,7 @@ function showWalkinModal(){
 }
 // The bike type goes with the rider it was picked for: kept across walk-ins, the next walk-up
 // was booked (and priced) as the last one's Road unless someone noticed the highlighted pill.
-function closeWalkinModal(){const m=document.getElementById('walkin-modal');if(m){m.style.display='none';m.innerHTML='';}S._wiRiders=[];S._wiCustId=null;S._wiType=null;S._wiRg=null;}
+function closeWalkinModal(){const m=document.getElementById('walkin-modal');if(m){m.style.display='none';m.innerHTML='';}S._wiRiders=[];S._wiCustId=null;S._wiType=null;S._wiRg=null;S._wiTried=null;} // a failed insert's rows are this form's to look up, never a later walk-in's (2026-10-05)
 function _wiRgSet(g){_wiSync();S._wiRg=g;showWalkinModal();}
 // ── Walk-in name: a live list of accounts under the field, the typed name as-is on top ──
 // Matches on name, phone digits or email. Picking an account fills what it knows (phone,
@@ -18191,8 +18200,23 @@ async function _saveWalkin(){
   // Extra rider rows: unnamed ones ride under the first walk-up's name ("Tamer 2", "Tamer 3").
   const extras=(S._wiRiders||[]).map((r,i)=>({name:_titleCaseName(_nameClean(r.name||''))||name+' '+(i+2),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any'}));
   const riders=[{name,height,type:S._wiType||'Any'},...extras];
-  const entries=await _wiInsertRiders(sessId,riders,phone,S._wiCustId,()=>saveWalkin(),S._wiRg); // modal is still up, so a retry re-reads the same form
-  if(!entries)return;
+  // A save again after a failed insert (Retry, or the button once more) asks first whether that
+  // insert landed (2026-10-05), as the Riders tab's walk-in does: it is one statement, so its rows
+  // are all on the server or none are, and a reply lost on the way back looks just like a refusal -
+  // inserting again booked the whole party twice. Only the same walk-in counts: same night, same names.
+  let entries=null;
+  const tried=S._wiTried;
+  if(tried&&tried.length===riders.length&&tried[0].sessionId===sessId&&tried.every((x,i)=>x.name===riders[i].name)){
+    let r;try{r=await sb.from('queue_entries').select('id').in('id',tried.map(x=>x.id));}catch(e){r={error:e};}
+    if(_writeErr(r,'walk-in',()=>saveWalkin()))return; // cannot tell yet whether it landed: never insert blind
+    const got=new Set((r.data||[]).map(x=>String(x.id)));
+    if(tried.every(x=>got.has(String(x.id))))entries=tried;
+  }
+  S._wiTried=null;
+  if(!entries){
+    entries=await _wiInsertRiders(sessId,riders,phone,S._wiCustId,()=>saveWalkin(),S._wiRg); // modal is still up, so a retry re-reads the same form
+    if(!entries){S._wiTried=_wiAttempted;return;}
+  }
   closeWalkinModal();
   const _thenCi=S._wiThenCheckin&&entries[0]&&entries[0].id;
   logAction(`${t('addWalkinBtn')}: #${entries[0].queueNum} ${name}${entries.length>1?` +${entries.length-1}`:''}`);
@@ -18316,6 +18340,22 @@ async function _saveBookingEdit(){
     patch.session_id=toSessionId;patch.session_day=newSess.day;patch.session_date=newSess.session_date||toSessionId;
     patch.queue_num=nextQNum(toSessionId); // fresh number in the target session; the old number's gap stays (numbers are never shifted)
     if(e.status==='waitlist')patch.status='waiting';
+    // The new ride's own rules and fare (2026-10-05). A move kept the old ride's type and price: a
+    // free Saturday booking landed on a paid night at 0, a Petromin employee's 50 went to a public
+    // night. The type follows the ride as every add does (_wiInsertRiders, _commBook): Own only where
+    // a rider may bring a bike, Road Carbon only where the ride has it, a seat ('None') on a ride
+    // without bikes and none on one with them. An unpaid booking without a code that is still on the
+    // old ride's fare takes the new ride's; a price staff set by hand, or a code's, stays (as a type
+    // change leaves it), and what was paid stays paid.
+    let ty2=_needsBike(newSess)?(ty==='None'?'Any':ty):'None';
+    if((ty2==='Own'&&!_ownOffered(newSess))||(ty2==='Road Carbon'&&_noCarbon(newSess)))ty2='Any';
+    if(ty2!==ty){patch.type_preference=ty2;patch.size=ty2==='None'?'':(height?heightToSize(height,ty2):(e.size||''));}
+    if(!e.paid&&!e.promoCode){
+      const oldSess=_sessGet(e.sessionId);
+      if(!S.ridersLoaded&&_rideKind(oldSess)==='petromin')await loadRiders(); // the Riders list tells an employee's fare
+      const fare=(s,x,tp)=>_isFreeRide(s)?0:(_evSeatPrice(s)??priceForEntryType(x,tp));
+      if((e.price??DEFAULT_PRICE)===fare(oldSess,e,e.typePreference||'Any'))patch.price=fare(newSess,{...e,sessionId:toSessionId},ty2);
+    }
     // A checked-in rider leaves their bike first - the Undo check-in write: the row guarded on
     // still being on the bike, the bike back on the rack, the assignment closed by the database
     // - and moves as a waiting rider. What they paid stays paid: the patch carries no price.
@@ -18349,6 +18389,8 @@ async function _saveBookingEdit(){
     await loadDataLight();patch.queue_num=nextQNum(toSessionId);
     res=await sb.from('queue_entries').update(patch).eq('id',e.id);
   }
+  // A paid booking the server will not move to a ride with another fare (PAID_MOVE): said in the desk's words.
+  if(res&&res.error&&/PAID_MOVE/.test(String(res.error.message||'')))res.error.said=t('bePaidMoveErr');
   if(_writeErr(res,'edit booking')){
     // A rider taken off the bike for the move goes back on it: the move did not happen, and they
     // were left waiting on their own night with the bike back on the rack.
@@ -18516,11 +18558,19 @@ function _pmDefaultNight(){
 function _pmStripNight(openSess){return openSess.some(s=>_rideKind(s)==='petromin')?null:_pmDefaultNight();}
 function _pmOpen(){return S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='petromin';}
 // The chips count registrations, so the list comes in once the queue shows a Petromin chip.
-// A load that failed is tried again a minute later, not on every repaint.
+// A load that failed is tried again a minute later, not on every repaint, and repaints nothing:
+// the roster asked again on every paint, so a failed load went round in a loop of reads, red bars
+// and repaints (2026-10-05). The roster itself hides the Petromin-registered bookings, so a load
+// that lands repaints it whole when it shows (the strip alone otherwise).
 function _pmEnsureRiders(){
   if(S.ridersLoaded||_ridersLoading||Date.now()-(S._ridersTriedAt||0)<60000)return;
   S._ridersTriedAt=Date.now();
-  loadRiders().then(()=>{if(_pmOpen())renderRiders();else _pmStripRefresh();});
+  loadRiders().then(()=>{
+    if(!S.ridersLoaded)return;
+    if(_pmOpen())renderRiders();
+    else if(S.view==='staff'&&S.staffTab==='queue'&&(S.queueView||'bookings')==='bookings')renderStaffQueue();
+    else _pmStripRefresh();
+  }).catch(()=>{});
 }
 function _pmStripRefresh(){
   if(!(S.view==='staff'&&S.staffTab==='queue'))return;
@@ -18638,7 +18688,8 @@ function _on_renderStaffQueue_13(event,el,a0){const h=_cxHidden().filter(x=>x!==
 function _cxHidden(){try{const v=JSON.parse(localStorage.getItem('cq_cx_hide')||'[]');return Array.isArray(v)?v:[];}catch(e){return[];}}
 function _cxRecent(){
   const cut=Date.now()-5*60*1000,hid=new Set(_cxHidden()),day=todayStr();
-  return getQueue().filter(e=>e.status==='cancelled'&&!hid.has(e.id)&&(S.sfSession==='all'||e.sessionId===S.sfSession)&&String(e.sessionDate||'').slice(0,10)>=day&&(Date.parse(e.cancelledAt||e.updatedAt||'')||0)>=cut)
+  // Front Desk never sees the Saturday side, its cancellations included, as the roster (2026-10-05).
+  return getQueue().filter(e=>e.status==='cancelled'&&!hid.has(e.id)&&(S.sfSession==='all'||e.sessionId===S.sfSession)&&String(e.sessionDate||'').slice(0,10)>=day&&(Date.parse(e.cancelledAt||e.updatedAt||'')||0)>=cut&&!(!isAdmin()&&_apprSessIds.has(e.sessionId)))
     .sort((a,b)=>String(b.cancelledAt||b.updatedAt).localeCompare(String(a.cancelledAt||a.updatedAt))).slice(0,3);
 }
 function _on_renderStaffQueue_14(event,el){if(event.key==='Enter'){event.preventDefault();sfSearchEnter();}}
@@ -18715,7 +18766,7 @@ function renderStaffQueue(_resultsOnly){
   // A rider who registered on the Petromin form is counted and handled on the Petromin page, so
   // their booking stays off this roster (asked for 2026-09-22). Knowing which they are needs the
   // registrations, so a night that has them loads them here too.
-  if(!S.ridersLoaded&&!_ridersLoading&&_pmNights().length)loadRiders().then(()=>{if(S.staffTab==='queue')renderStaffQueue();}).catch(()=>{});
+  if(!S.ridersLoaded&&_pmNights().length)_pmEnsureRiders(); // at most once a minute, and no repaint after a failed load (2026-10-05)
   const _pmBooked=new Set((S.riders||[]).map(r=>r.matched_entry_id).filter(Boolean));
   const base=(S.sfSession!=='all'
     ?queue.filter(e=>e.sessionId===S.sfSession&&e.status!=='removed'&&e.status!=='cancelled')
@@ -18726,7 +18777,7 @@ function renderStaffQueue(_resultsOnly){
   // or riders left stuck in 'waiting'/'active' on old sessions (never checked in / never returned)
   // inflate them — e.g. showing "4 expected" when nothing is actually pending today. A specific
   // session selection keeps its own raw counts.
-  const _liveOnly=S.sfSession==='all',_liveDay=todayStr();
+  const _liveOnly=S.sfSession==='all',_liveDay=todayStr(),_nowMs=Date.now(); // today and now, once per paint (_notHere too)
   // Upper bound (~1 year out) so an absurd far-future date — e.g. stray test data dated 2099 —
   // can never inflate the live Expected/On Bike counts.
   const _capDay=new Date(Date.now()+366*864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
@@ -18741,7 +18792,10 @@ function renderStaffQueue(_resultsOnly){
     const pd=new Date(Date.UTC(+m[1],+m[2]-1,+m[3]-7)).toISOString().slice(0,10);
     const prev=allSessions().find(x=>String(x.session_date||x.id).slice(0,10)===pd&&_isCommunity(x)===_isCommunity(cur))||null;
     if(!prev)return null;
-    const rows=queue.filter(e=>e.sessionId===prev.id&&e.status!=='removed'&&e.status!=='cancelled');
+    // Last week's riders counted as this week's are (2026-10-05): without the Petromin page's riders
+    // and, for Front Desk, the Saturday side - a Petromin night compared its roster with last week's
+    // registrations included.
+    const rows=queue.filter(e=>e.sessionId===prev.id&&e.status!=='removed'&&e.status!=='cancelled'&&!(_fd&&_apprSessIds.has(e.sessionId))&&!_pmBooked.has(e.id));
     return{sess:prev,rows,tip:t('deltaVsLast').replace('{0}',dayLabel(prev.day)||shortDate(pd))};
   })();
   const _dlt=(n,fn)=>_prevWk?n-_prevWk.rows.filter(fn).length:null;
@@ -18775,7 +18829,7 @@ function renderStaffQueue(_resultsOnly){
   }else if(S.sfStatus==='toreserve'){
     filtered=filtered.filter(_isToReserve); // waiting, marked for a bike to be held
   }else if(S.sfStatus==='nothere'){
-    filtered=filtered.filter(_notHere); // expected tonight, the ride has started, not checked in
+    filtered=filtered.filter(e=>_notHere(e,_liveDay,_nowMs)); // expected tonight, the ride has started, not checked in
   }else if(S.sfStatus!=='all'){
     filtered=filtered.filter(e=>e.status===S.sfStatus);
   }
@@ -18841,12 +18895,14 @@ function renderStaffQueue(_resultsOnly){
       return _sfd*((new Date(a.registeredAt||0)-new Date(b.registeredAt||0))||(a.queueNum-b.queueNum));
     return _sfd*(a.sessionId.localeCompare(b.sessionId)||a.queueNum-b.queueNum);
   });
-  S._qOrder=filtered.map(e=>e.id); // the check-in panel's Previous / Next walk the roster as shown
+  S._qOrder=filtered.map(e=>e.id); // the check-in panel's Previous / Next walk the roster as shown (as drawn, set again below)
   function _bikeNamesOf(e){try{return getAssignedBikes(e).map(x=>x.name||'').join(' ');}catch(_){return'';}}
+  // A header sorts through the button inside it, which a keyboard reaches and a screen reader names
+  // as one; the cell says the order it is in (aria-sort) (2026-10-05). It was a clickable <th>.
   function thQSort(col,label,cls=''){
     const active=S.sfSort===col;
     const arrow=active?(S.sfSortDir===1?'↑':'↓'):'';
-    return`<th class="an-sort-th an-sort-txt${active?' an-sort-active':''}${cls?' '+cls:''}" data-on-click="${_on("setSfSort",col)}">${label}${active?' '+arrow:''}</th>`;
+    return`<th class="an-sort-th an-sort-txt${active?' an-sort-active':''}${cls?' '+cls:''}"${active?` aria-sort="${S.sfSortDir===1?'ascending':'descending'}"`:''}><button type="button" class="q-sort-btn" data-on-click="${_on("setSfSort",col)}">${label}${active?' <span aria-hidden="true">'+arrow+'</span>':''}</button></th>`;
   }
   const qSessOpts=`<option value="all"${S.sfSession==='all'?' selected':''}>${t('allSessions')}</option>`+
     // Every session, closed and finished nights included, so a past night can be reviewed
@@ -19315,7 +19371,12 @@ function renderQRow(e){
   const _emptyHtml=`<div class="rq-p8">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}</div>`;
   const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="14">${_emptyHtml}</td></tr>`);
   const rowChunks=[],cardChunks=[],list=_phoneQ?cardChunks:rowChunks;
-  const piece=_phoneQ?(g=>_cd('g:'+g[0].id,_cardOf(g))):(g=>_tb('g:'+g[0].id,_rowOf(g)));
+  // The check-in panel's Previous / Next and "Open the next rider" walk the roster as it is drawn:
+  // party by party, each party's riders together, in the order the pieces go on the page
+  // (2026-10-05). The sorted rows put a party's riders apart wherever the sort split them, so Next
+  // jumped about the screen.
+  const _drawn=[];
+  const piece=_phoneQ?(g=>{_drawn.push(...g.map(e=>e.id));return _cd('g:'+g[0].id,_cardOf(g));}):(g=>{_drawn.push(...g.map(e=>e.id));return _tb('g:'+g[0].id,_rowOf(g));});
   if(S.sfSession==='all'){
     for(const sess of orderedSessions){
       const sessFiltered=_qShown.filter(e=>e.sessionId===sess.id);
@@ -19357,6 +19418,7 @@ function renderQRow(e){
     }
     if(!filtered.length)list.push(_emptyPiece());
   }
+  S._qOrder=_drawn;
   const _shellHtml=_qvPills+_queueHeader+_sessSummaryBar+`${(()=>{
     // Saturday Social Ride (a single community session selected): the JCC stats (Expected / On Bike /
     // Completed) don't apply — show the approval funnel instead: total riders, approved, pending, waitlist.
@@ -19375,7 +19437,7 @@ function renderQRow(e){
     // any — an empty "0 waitlisted" on every ordinary session is noise.
     const nWaitlisted=base.filter(e=>e.status==='waitlist'&&_isLive(e)).length;
     return`<div class="stat-strip">
-      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${_statChip(nWait,t('statExpected'),'var(--green)',['setSfStatus','waiting'])}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(_notHere).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nBike,t('onBikeStat'),'var(--green)',['setSfStatus','active'])}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,e=>e.status==='done'&&e.paid),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
+      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${_statChip(nWait,t('statExpected'),'var(--green)',['setSfStatus','waiting'])}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(e=>_notHere(e,_liveDay,_nowMs)).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nBike,t('onBikeStat'),'var(--green)',['setSfStatus','active'])}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,e=>e.status==='done'&&e.paid),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
     </div>${(()=>{
       const od=base.filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN).length;
       if(!od)return'';
@@ -19436,7 +19498,7 @@ function renderQRow(e){
   const _results=[];
   if(filtered.length>_qShown.length)_results.push(_qLeaf('more',`<div class="rq-showmore"><button class="btn-secondary" data-on-click="${_on("_on_renderStaffQueue_16",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`));
   _results.push(_qBox('cards','<div class="queue-mobile-view">','</div>',cardChunks));
-  _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}">`,'</table></div>',[_qLeaf('head',`<tr>
+  _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}" data-nosort>`,'</table></div>',[_qLeaf('head',`<tr>
         ${thQSort('queue',t('colBookingNum'))}
         ${thQSort('name',t('colRider'))}
         ${_commQueueView()?thQSort('member',t('colMember')):''}
@@ -19885,7 +19947,9 @@ async function bulkSfPaid(){
   const n=res.filter(r=>r&&!r.error&&r.data&&r.data.length).length;
   const fail=res.find(r=>r&&r.error);
   const done=rows.filter((e,i)=>res[i]&&!res[i].error&&res[i].data&&res[i].data.length).map(e=>({id:e.id,price:e.price,pay_method:e.pay_method||null}));
-  await loadData();S.sfSelected=[];
+  // Only the rows this touched are read again (2026-10-05): a payment moves no other booking, and the
+  // whole-window reload made every bulk tap a full download.
+  S.sfSelected=[];await _reloadRows(rows.map(e=>e.id));
   // A refusal part-way still leaves the rows that did flip paid: they are logged and undoable
   // like any other, and the refusal is said after.
   if(n){logAction(t('logBulkPaid').replace('{0}',n));if(!fail)toast(`${n} ${t('paidLabel')}`);}
@@ -19893,7 +19957,7 @@ async function bulkSfPaid(){
   // The rows this device flipped, and only those, go back to unpaid as they were.
   if(done.length)pushUndo(`${t('undoPayment')} · ${done.length}`,async()=>{
     const r=await Promise.all(done.map(d=>sb.from('queue_entries').update({paid:false,price:d.price,pay_method:d.pay_method}).eq('id',d.id).eq('paid',true)));
-    await loadData();renderStaffQueue();renderMyRides();
+    await _reloadRows(done.map(d=>d.id));renderStaffQueue();renderMyRides();
     if(_writeErr(r,'undo payment'))return false;
   });
   renderStaffQueue();renderMyRides();
@@ -19943,12 +20007,15 @@ async function bulkSfCheckin(){
 // Not here yet (2026-10-04): a booking still expected on today's ride once the ride's start has
 // passed - the riders to call. A chip in the stat strip filters the roster to them; each row keeps its
 // call / WhatsApp pair (_qCc).
-function _notHere(e){
+// The session comes from the index and today from the caller, once per paint (2026-10-05): it took a
+// copy of every session and the date in Riyadh for each waiting row, twice a paint. Handed straight to
+// filter() it is given an index and the array instead, and works them out itself.
+function _notHere(e,today,now){
   if(e.status!=='waiting')return false;
-  const s=allSessions().find(x=>x.id===e.sessionId),d=String((s&&(s.session_date||s.id))||'').slice(0,10);
-  if(!s||d!==todayStr())return false;
+  const s=_sessGet(e.sessionId),d=String((s&&(s.session_date||s.id))||'').slice(0,10);
+  if(!s||d!==(typeof today==='string'?today:todayStr()))return false;
   const at=_ksaAt(d,_sessStart(s)||'09:00');
-  return Number.isFinite(at)&&Date.now()>=at;
+  return Number.isFinite(at)&&(typeof now==='number'?now:Date.now())>=at;
 }
 function setSfStatus(v){S.sfStatus=v;S.sfOverdueFirst=false;S.sfLimit=150;renderStaffQueue();}
 // From the overdue banner: On Bike only, the longest-out rider first, contact buttons in reach.
@@ -19975,10 +20042,14 @@ function setSfSearch(v){
 function sfSearchEnter(){
   const q=(S.sfSearch||'').trim().toLowerCase().replace(/^#/,'');
   if(!q)return;
-  const hits=getQueue().filter(e=>_matchesRef(e,q)||String(e.queueNum)===q);
+  // Counted among the riders still expected, a booking number only on the ride picked (or, with
+  // every ride showing, on the roster as drawn) (2026-10-05): every night has a #12, so a number
+  // matched across the twelve-month queue almost never came to exactly one rider. A ticket's ref is
+  // unique and is found wherever it is, as the camera finds it (a wedge scan may beat the repaint).
+  const shown=S.sfSession==='all'?new Set(S._qOrder||[]):null;
+  const hits=getQueue().filter(e=>_ciExpected(e)&&(_matchesRef(e,q)||(String(e.queueNum)===q&&(shown?shown.has(e.id):e.sessionId===S.sfSession))));
   if(hits.length!==1)return;
   const e=hits[0];
-  if(!_ciExpected(e))return;
   // The camera's same-day rule holds here too: a ticket for another night is named, and only
   // "Make an exception" opens it. Without this a wedge scan of tomorrow's ticket checked the
   // rider in on the wrong night.
