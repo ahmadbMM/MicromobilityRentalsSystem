@@ -1,21 +1,23 @@
 import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { generateKeyPairSync, createVerify } from 'node:crypto';
 import { unzipSync, strFromU8 } from 'fflate';
 
 // The Pages Functions never run under the suite's test server (python -m http.server), so a
 // middleware rule that 404s an app asset, or a Wallet pass that is wrong on the phone, only ever
 // showed in production. These call the functions directly, the way Cloudflare does, with the
-// network stubbed. Each test imports a fresh copy (?n=) so module-level state does not leak.
+// network stubbed. Each test imports a fresh copy so module-level state does not leak.
 
 type Ctx = { request: Request; env?: Record<string, string>; next?: () => Response };
 type Fn = (ctx: Ctx) => Promise<Response>;
 let seq = 0;
+// A fresh copy per call, from a data: URL (2026-10-05). The ?n= query this used did not give one:
+// Playwright's loader keeps a single instance per file path whatever the query, so every throttle and
+// budget was shared by the tests (and the spec files) a worker ran. The functions import nothing.
 async function load(rel: string, name: string): Promise<Fn> {
-  const url = pathToFileURL(resolve(__dirname, '..', rel)).href + '?n=' + ++seq;
-  const mod = await import(url);
+  const src = readFileSync(resolve(__dirname, '..', rel), 'utf8') + `\n// copy ${++seq} ${Math.random()}`; // unique: Node keeps a data: module per URL
+  const mod = await import('data:text/javascript;base64,' + Buffer.from(src).toString('base64'));
   return mod[name] as Fn;
 }
 
@@ -298,15 +300,20 @@ test.describe('the Apple Wallet pass', () => {
     expect(await crypto.subtle.verify({ name: 'RSASSA-PKCS1-v1_5' }, pub, W.content(sig, si[5]), set)).toBe(true);
   });
 
-  test('PEM credentials sign the same pass, and ?selftest names the certificate without a booking', async () => {
+  test('PEM credentials sign the same pass, and ?selftest checks them without a booking, naming the certificate only in the log', async () => {
     const env = { APPLE_PASS_CERT_PEM: readFileSync(resolve(FIX, 'test-pass-cert.pem'), 'utf8'), APPLE_PASS_KEY_PEM: readFileSync(resolve(FIX, 'test-pass-key.pem'), 'utf8'), APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' };
     globalThis.fetch = (async () => new Response(wwdrDer)) as typeof fetch;
     const get = await load('functions/api/wallet-pass.js', 'onRequestGet');
-    const res = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env });
+    const logged: string[] = [];
+    const realLog = console.log;
+    console.log = (...a: unknown[]) => { logged.push(a.map(String).join(' ')); };
+    let res: Response;
+    try { res = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env }); } finally { console.log = realLog; }
     expect(res.status).toBe(200);
-    const j = await res.json();
-    expect(j).toMatchObject({ ok: true, source: 'pem', certificate: { subject: 'Pass Type ID: pass.test.wallet', issuer: 'Test Root CA' } });
-    expect(j.signature.length).toBeGreaterThan(1000);
+    // The answer is public: no signature, certificate or source in it since 2026-10-05; the log has them.
+    expect(await res.json()).toEqual({ ok: true });
+    expect(logged.join('\n')).toContain('"source":"pem"');
+    expect(logged.join('\n')).toContain('Pass Type ID: pass.test.wallet');
     expect((await get({ request: new Request('https://site.test/api/wallet-pass'), env })).status).toBe(405); // a plain GET is not a pass
     const off = await get({ request: new Request('https://site.test/api/wallet-pass?selftest'), env: {} });
     expect(off.status).toBe(501); // unconfigured says so
@@ -331,35 +338,45 @@ test.describe('the Google Wallet pass', () => {
     const ok = createVerify('RSA-SHA256').update(`${h}.${p}`).verify(publicKey, Buffer.from(sig, 'base64url'));
     return { ok, header: part(h), payload: part(p) };
   }
+  // What the function logged comes back too: since 2026-10-05 the details are in the log, not the answer.
   async function selftest(env: Record<string, string>) {
     const get = await load('functions/api/google-wallet.js', 'onRequestGet');
-    const res = await get({ request: new Request('https://site.test/api/google-wallet?selftest'), env });
-    return { status: res.status, body: await res.json() };
+    const logged: string[] = [];
+    const real = { log: console.log, warn: console.warn, error: console.error };
+    console.log = console.warn = console.error = (...a: unknown[]) => { logged.push(a.map(String).join(' ')); };
+    try {
+      const res = await get({ request: new Request('https://site.test/api/google-wallet?selftest'), env });
+      return { status: res.status, body: await res.json(), logged: logged.join('\n') };
+    } finally { Object.assign(console, real); }
   }
 
   test('?selftest signs with the whole key file, or with its two fields, escaped line breaks and all', async () => {
     const whole = await selftest({ GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_JSON: keyFile });
     expect(whole.status).toBe(200);
-    expect(whole.body).toMatchObject({ ok: true, issuer: '3388000000000000001', account: EMAIL });
+    expect(whole.body).toEqual({ ok: true }); // the issuer and the account go to the log, not the public answer (2026-10-05)
+    expect(whole.logged).toContain(EMAIL);
     // the key as it reads inside the file: one line with \n in it, even with its quotes
     const escaped = JSON.stringify(privateKey);
     for (const pem of [privateKey, escaped, escaped.slice(1, -1)]) {
       const r = await selftest({ GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_EMAIL: EMAIL, GOOGLE_WALLET_SA_KEY_PEM: pem });
-      expect(r.body).toMatchObject({ ok: true, account: EMAIL });
+      expect(r.body).toEqual({ ok: true });
+      expect(r.logged).toContain(EMAIL);
     }
   });
 
-  test('?selftest names what is missing, and a broken key says so without the key', async () => {
+  test('?selftest logs what is missing, never naming it in the answer, and a broken key says so without the key', async () => {
     const none = await selftest({});
     expect(none.status).toBe(501);
-    expect(none.body.missing).toEqual(['GOOGLE_WALLET_ISSUER_ID', 'GOOGLE_WALLET_SA_JSON (or GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM)']);
+    expect(none.body).toEqual({ ok: false, skipped: 'google wallet not configured' });
+    expect(none.logged).toContain('GOOGLE_WALLET_ISSUER_ID; GOOGLE_WALLET_SA_JSON (or GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM)');
     const noIssuer = await selftest({ GOOGLE_WALLET_SA_JSON: keyFile });
-    expect(noIssuer.body.missing).toEqual(['GOOGLE_WALLET_ISSUER_ID']);
+    expect(JSON.stringify(noIssuer.body)).not.toContain('GOOGLE_WALLET');
+    expect(noIssuer.logged).toContain('missing GOOGLE_WALLET_ISSUER_ID');
     const notAFile = await selftest({ GOOGLE_WALLET_ISSUER_ID: '1', GOOGLE_WALLET_SA_JSON: 'not json' });
-    expect(notAFile.body.missing).toEqual(['GOOGLE_WALLET_SA_JSON (client_email and private_key)']);
+    expect(notAFile.logged).toContain('GOOGLE_WALLET_SA_JSON (client_email and private_key)');
     const bad = await selftest({ GOOGLE_WALLET_ISSUER_ID: '1', GOOGLE_WALLET_SA_EMAIL: EMAIL, GOOGLE_WALLET_SA_KEY_PEM: '-----BEGIN PRIVATE KEY-----\nAAAA\n-----END PRIVATE KEY-----' });
     expect(bad.status).toBe(500);
-    expect(JSON.stringify(bad.body)).not.toContain('AAAA');
+    expect(bad.body).toEqual({ ok: false, error: 'sign failed' });
   });
 
   test('a booking becomes a signed save link carrying its ticket', async () => {
@@ -451,7 +468,9 @@ test.describe('the Google Wallet pass', () => {
 test.describe('the CSP report endpoint', () => {
   const realFetch = globalThis.fetch;
   test.afterEach(() => { globalThis.fetch = realFetch; });
-  const report = (r: Record<string, string>) => new Request('https://site.test/api/csp-report', { method: 'POST', headers: { 'content-type': 'application/csp-report', 'cf-connecting-ip': String(Math.random()) }, body: JSON.stringify({ 'csp-report': { 'document-uri': 'https://site.test/', ...r } }) });
+  // As a browser sends a report to the page's own host: Sec-Fetch-Site same-origin (2026-10-05: the
+  // endpoint hears nothing else).
+  const report = (r: Record<string, string>) => new Request('https://site.test/api/csp-report', { method: 'POST', headers: { 'content-type': 'application/csp-report', 'sec-fetch-site': 'same-origin', 'cf-connecting-ip': String(Math.random()) }, body: JSON.stringify({ 'csp-report': { 'document-uri': 'https://site.test/', ...r } }) });
 
   test('pings for the page\'s own violations, never for what an extension or an in-app browser injects', async () => {
     const pings: string[] = [];

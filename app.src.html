@@ -16084,9 +16084,9 @@ const CA_IG='https://www.instagram.com/MicroMobilitySA/'; // every message about
 // Invite to ride (the owner, 2026-09-30): the invitation to a Saturday Social Ride. Its own
 // sentences and the ride's words; the greeting and the sign-off are CA_MSG's. It carries no account
 // details, no sign-in address, email, mobile or password (the owner, 2026-09-30: no reply to a
-// community application does). Staff may add the community's WhatsApp group link (CA_WA_GROUP).
+// community application does). Staff may add the community's WhatsApp group link, which is read when
+// the invitation is written (_caWaLoad), never kept in this public code (2026-10-05).
 // Not UI: the rider reads it.
-const CA_WA_GROUP='https://chat.whatsapp.com/DEWPeDbRwb503PHu0R9qax?s=cl&p=i&mlu=0&ilr=4';
 const CA_INV_MSG={
   en:{"invited": "You’re invited to our Saturday Social Ride!", "body": "Thank you for applying to join the MicroMobility community. We’d love to ride with you, so we’ve saved you a place on this ride:", "gather": "Gathering", "start": "Ride starts", "meet": "Meeting point", "group": "Join our WhatsApp group for ride updates:", "before": "Before the ride:", "myb": "Your booking and its QR code are waiting in “My Bookings”.", "qr": "Have your QR code ready when you arrive; we scan it to check you in.", "cancel": "If you can’t make it, please cancel from “My Bookings” so someone else can take your place.", "saved": "We’ve also saved you a place on this Saturday Social Ride:"},
   ar:{"invited": "ندعوك إلى جولة السبت الاجتماعية!", "body": "شكرًا لتقديمك طلب الانضمام إلى مجتمع MicroMobility. يسعدنا أن نركب معك، لذلك حجزنا لك مكانًا في هذه الجولة:", "gather": "التجمّع", "start": "انطلاق الجولة", "meet": "نقطة التجمّع", "group": "انضم إلى مجموعتنا على WhatsApp لتصلك أخبار الجولة:", "before": "قبل الجولة:", "myb": "تجد حجزك ورمز QR الخاص به في «حجوزاتي».", "qr": "جهّز رمز QR عند وصولك، إذ نمسحه لتسجيل حضورك.", "cancel": "إذا لم تتمكن من الحضور، فيُرجى إلغاء حجزك من «حجوزاتي» ليحصل غيرك على مكانك.", "saved": "وحجزنا لك أيضًا مكانًا في جولة السبت الاجتماعية هذه:"},
@@ -16753,9 +16753,30 @@ function _tpMsgOpen(name,email,phone,pwd){_caMsgShow({lang:CA_MSG[S.lang]?S.lang
 function _caMsgShow(a,kind,d){
   S._caMsg={kind,lang:CA_MSG[a.lang]?a.lang:'en',to:a.phone,toEmail:a.email,
     d:{name:d.name||a.name,email:d.email||'',phone:d.phone||'',password:d.password||null,oauth:!!d.oauth,
-      existing:!!d.existing,sid:d.sid||null,wa:false,ig:!!a.id}}; // ig: an application's message (not the editor's password one) // wa: the invitation carries the WhatsApp group's link (staff tick it)
+      existing:!!d.existing,sid:d.sid||null,wa:false,waLink:'',ig:!!a.id}}; // ig: an application's message (not the editor's password one) // wa: the invitation carries the WhatsApp group's link (staff tick it); waLink: that link, once read (_caWaLoad)
   if(kind==='new'||kind==='reject'||kind==='invite'){S._caMsg.d.email=S._caMsg.d.email||a.email;S._caMsg.d.phone=S._caMsg.d.phone||a.phone;}
   if(kind==='fix')S._caMsg.d.fix={token:a.fix_token,fields:(a.fix_fields||[]).slice(),note:a.fix_note||''};
+  _caMsgRender();
+  if(kind==='invite')_caWaLoad();
+}
+// The community's WhatsApp group link (2026-10-05), read when an invitation is written from
+// staff_options 'community.wa_group' (staff-only rows; this code and the repository are public, so
+// the link is never written in them). items is the link as a JSON string, or ["link"], or
+// {"url":"link"}. Missing, empty or not an https address: the box is not offered and the invitation
+// goes without the group's line. A refused read falls back to the copy the reference load holds.
+function _caWaOf(items){
+  const v=Array.isArray(items)?items[0]:items&&typeof items==='object'?(items.url||items.link):items;
+  const s=typeof v==='string'?v.trim():'';
+  return /^https:\/\/\S+$/.test(s)?s:'';
+}
+async function _caWaLoad(){
+  const key='community.wa_group';let link='';
+  try{
+    const r=await sb.from('staff_options').select('key,items').eq('key',key).maybeSingle();
+    link=r&&!r.error?(r.data&&r.data.key===key?_caWaOf(r.data.items):''):_caWaOf((S.staffOptions||{})[key]);
+  }catch(e){link=_caWaOf((S.staffOptions||{})[key]);}
+  const m=S._caMsg;if(!m||m.kind!=='invite')return;
+  m.d.waLink=link;if(!link)m.d.wa=false;
   _caMsgRender();
 }
 // Saudi numbers as riders know them (05…), every other one as stored.
@@ -16781,7 +16802,7 @@ function _caMsgBody(kind,lang,d){
       const f=CA_FIX_MSG[lang]||CA_FIX_MSG.en,x=d.fix||{},v=CA_INV_MSG[lang]||CA_INV_MSG.en;
       const ride=d.sid&&allSessions().find(s=>s.id===d.sid);
       const rideLines=ride?[...(kind==='invite'?[]:[v.saved]),..._caInvWhen(ride,lang),..._caRideTips(lang)].join('\n'):'';
-      return _tplUse(id,lang,{first_name:first,ride:rideLines,group_link:d.wa?v.group+'\n'+CA_WA_GROUP:'',password:d.password||'',site:CA_SITE,
+      return _tplUse(id,lang,{first_name:first,ride:rideLines,group_link:d.wa&&d.waLink?v.group+'\n'+d.waLink:'',password:d.password||'',site:CA_SITE,
         fields:(x.fields||[]).map(k=>'• '+(f[k]||(LA_FIX_MSG[lang]||LA_FIX_MSG.en)[k]||k)).join('\n'),note:x.note?f.note+' '+x.note:'',link:x.token?_caFixLink(x.token,lang):''});
     }
   }
@@ -16798,7 +16819,7 @@ function _caMsgBody(kind,lang,d){
     const v=CA_INV_MSG[lang]||CA_INV_MSG.en;
     L.push(v.invited,'',v.body,..._caInvWhen(d.sid&&allSessions().find(s=>s.id===d.sid),lang));
     L.push(..._caRideTips(lang));
-    if(d.wa)L.push('',v.group,CA_WA_GROUP);
+    if(d.wa&&d.waLink)L.push('',v.group,d.waLink); // the link staff_options holds (_caWaLoad); none, no line
     L.push('',m.seeYou,m.team);
     return L.join('\n');
   }
@@ -16835,7 +16856,7 @@ function _caMsgRender(){
       ${m.d.password?`<div class="ca-pwd-box"><span>${t('caPwdLbl')}</span><b class="ca-pwd" dir="ltr">${esc(m.d.password)}</b></div>`:''}
       ${(m.kind==='new'||m.kind==='invite')&&m.d.password?`<button type="button" class="btn-secondary btn-sm ca-tp-go" data-on-click="${_on("_caMsgTemp")}">${t('caTpMsgBtn')}</button>`:''}
       <label class="ca-msg-lang">${t('caMsgLang')}<select id="ca-msg-lang" data-on-change="${_on("_on__caMsgRender_2",_EV,_EL)}">${LANGS.map(l=>`<option value="${l.code}"${l.code===m.lang?' selected':''}>${esc(l.label)}</option>`).join('')}</select></label>
-      ${m.kind==='invite'?`<label class="ca-wa-opt"><input type="checkbox" id="ca-msg-wa"${m.d.wa?' checked':''} data-on-change="${_on("_caMsgWa",_P("checked"))}">${esc(t('caInvWaLbl'))}</label>`:''}
+      ${m.kind==='invite'&&m.d.waLink?`<label class="ca-wa-opt"><input type="checkbox" id="ca-msg-wa"${m.d.wa?' checked':''} data-on-change="${_on("_caMsgWa",_P("checked"))}">${esc(t('caInvWaLbl'))}</label>`:''}
       <textarea id="ca-msg-text" class="ca-msg" readonly dir="${_isRtl(m.lang)?'rtl':'ltr'}" aria-label="${esc(t('caMsgTitle').replace('{0}',m.d.name||''))}">${esc(txt)}</textarea>
       <div class="ca-actions">
         <button type="button" class="btn-primary ca-copy" data-on-click="${_on("_caMsgCopy")}">${t('caCopyBtn')}</button>
@@ -35213,7 +35234,7 @@ async function _igLoad(force){
 }
 function _igSig(){return S.igRows?[...S.igRows.values()].map(x=>[x.customer_id,x.handle,x.followers,x.status].join()).join('|'):'';}
 // Keeps the numbers fresh without a cron: at most every three hours a staff device asks the server
-// to count the accounts that are due (it counts 25 and refuses a second pass within 20 minutes).
+// to count the accounts that are due (it counts up to 22, inside Cloudflare's subrequest limit, and refuses a second pass within 20 minutes).
 async function _igNudge(){
   if(!S.igRows||S._igOff)return;
   try{const at=+localStorage.getItem('cq_ig_nudge')||0;if(Date.now()-at<108e5)return;localStorage.setItem('cq_ig_nudge',String(Date.now()));}catch(e){return;}
@@ -38314,7 +38335,7 @@ if('serviceWorker' in navigator){
     b.querySelector('button').onclick=_updReload;
     document.body.appendChild(b);
   };
-  try{navigator.serviceWorker.addEventListener('message',ev=>{
+  const _swMsg=ev=>{
     // The push service rotated our subscription: re-register it under the new endpoint.
     if(ev.data&&ev.data.type==='push-resubscribe'){pushSubscribe(true).catch(()=>{});return;}
     // The site went on hold (MM_HOLD, functions/_middleware.js): the worker now serves the hold
@@ -38328,7 +38349,14 @@ if('serviceWorker' in navigator){
     // (tab switch / phone pocket), so the next glance always runs the new build.
     _updPending=true;
     try{_updBar();}catch(e){}
-  });}catch(e){}
+  };
+  try{navigator.serviceWorker.addEventListener('message',_swMsg);}catch(e){}
+  // A new worker taking this page over is a deploy too (2026-10-05): the hourly check above installs
+  // one in a tab that never navigates. The worker also says shell-updated as it activates; this is the
+  // browser's own word for it. A first install changes the controller as well (none -> the worker,
+  // clients.claim), which is no update: only a page that already had a worker counts it.
+  let _swHadCtl=!!navigator.serviceWorker.controller;
+  try{navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_swHadCtl)_swMsg({data:{type:'shell-updated'}});_swHadCtl=true;});}catch(e){}
   // The worker's mm-hold message misses the page the navigation itself opens (it is not yet a
   // client the worker can reach when the refresh meets the hold), but the mark it keeps does not:
   // a page it served reads the mark at load and a moment later, and reloads into the hold page.

@@ -7,7 +7,7 @@
 // NOT copied, so the deployed artifact can't leak them even without the middleware.
 import { rm, mkdir, copyFile, cp, access, readFile, writeFile } from 'node:fs/promises';
 import CleanCSS from 'clean-css';
-import { dirname, join, resolve } from 'node:path';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -36,6 +36,29 @@ export const FILES = [
 // country for the city-of-residence picker (scripts/build-cities.mjs).
 export const DIRS = ['functions', 'staff', 'staff-parts', 'vendor', 'splash', 'fonts', 'lang', 'assets', 'cities']; // staff-parts: the staff half's sections, written by build-html
 
+// Which requests run functions/_middleware.js (2026-10-05). With no _routes.json every request did:
+// one Function invocation per font, image and script on every page load. Excluded now: the asset
+// directories and the root's own static files, all of which the middleware passes through untouched
+// (tests/fix5-routes.spec.ts holds every committed file under them to that). Everything else still
+// runs it: / and the app's own addresses (the hold, the 404 answered with the app, the staff host's
+// noindex), /index.html, /api/*, /staff/ (the live host's redirect), /robots.txt and /sitemap.xml
+// (the staff host's), /404.html, and any address the denylist exists to refuse. Rules follow
+// Cloudflare's: "/dir/*" is /dir and everything under it, "/file" that file; a list may not overlap
+// itself, 100 rules at most, 100 characters each (wrangler refuses the deploy otherwise).
+const ROUTES_KEEP_FILES = new Set(['index.html', '404.html', '_headers', '_redirects', 'robots.txt', 'sitemap.xml']);
+const ROUTES_KEEP_DIRS = new Set(['functions', 'staff']);
+export function routesJson() {
+  return {
+    version: 1,
+    description: 'scripts/assemble-dist.mjs: static files skip functions/_middleware.js',
+    include: ['/*'],
+    exclude: [
+      ...DIRS.filter((d) => !ROUTES_KEEP_DIRS.has(d)).map((d) => `/${d}/*`),
+      ...FILES.filter((f) => !ROUTES_KEEP_FILES.has(f)).map((f) => `/${f}`),
+    ],
+  };
+}
+
 const exists = async (p) => { try { await access(p); return true; } catch { return false; } };
 
 async function main() {
@@ -58,9 +81,14 @@ async function main() {
   for (const d of DIRS) {
     const src = join(root, d);
     if (!(await exists(src))) { console.warn(`assemble-dist: skipping missing dir ${d}/`); continue; }
-    await cp(src, join(dist, d), { recursive: true });
+    // No dotfile (.DS_Store, an editor's swap file): these directories skip the middleware now
+    // (_routes.json below), and it was the middleware that refused hidden files (2026-10-05).
+    await cp(src, join(dist, d), { recursive: true, filter: (p) => !basename(p).startsWith('.') });
   }
-  console.log(`assemble-dist: wrote dist/ (${FILES.length} files + ${DIRS.length} dirs)`);
+  // dist/ only: a root served as it is keeps the middleware on every request.
+  const routes = routesJson();
+  await writeFile(join(dist, '_routes.json'), JSON.stringify(routes, null, 2) + '\n');
+  console.log(`assemble-dist: wrote dist/ (${FILES.length} files + ${DIRS.length} dirs; _routes.json keeps ${routes.exclude.length} static paths off the middleware)`);
 }
 
 // Only when run as a script; importing the lists must not rebuild dist/.

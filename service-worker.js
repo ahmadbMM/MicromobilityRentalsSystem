@@ -65,16 +65,25 @@ self.addEventListener('install', (e) => {
 const PINNED = /^\/(?:vendor|fonts|lang)\//;
 
 self.addEventListener('activate', (e) => {
+  // An older version's cache means this activation is an UPDATE, not a first install (2026-10-05).
+  // The hourly reg.update() of a tab left open installs, activates and claims a new worker, but
+  // only the navigation refresh below ever said 'shell-updated', and an open tab never navigates:
+  // it ran the old build until someone reloaded it. So the open windows are told here as well.
+  let updated = false;
   e.waitUntil(
     // Everything but this version's cache goes, including the old 'mmcq-img' photo cache (see the
     // note at the end of the fetch handler).
-    caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+    caches.keys().then((keys) => {
+      updated = keys.some((k) => k !== CACHE && k !== 'mmcq-img' && k.startsWith('mmcq-'));
+      return Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
+    })
       // Evict the poisoned shell entry left by earlier versions. The cache NAME is a hash of
       // the files the site ships (scripts/build-html.mjs), so a worker-only fix does not
       // rotate it — without this delete, a device already broken by the redirected
       // './index.html' entry would stay broken even after installing this worker.
       .then(() => caches.open(CACHE).then((c) => c.delete('./index.html')).catch(() => {}))
       .then(() => self.clients.claim())
+      .then(() => updated && self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'shell-updated' }))))
   );
 });
 

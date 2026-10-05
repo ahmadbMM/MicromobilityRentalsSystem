@@ -5,8 +5,9 @@
 // and the pass is a signed "save to wallet" JWT (RS256, the issuer's service account key) that
 // carries the class and the object inline - Google creates both on save, so no REST call and no
 // pre-made class are needed. The QR carries the same MMC- reference the desk scanner reads.
-// GET /api/google-wallet?selftest signs a fixed payload and names the issuer, so a deploy is checked
-// without a booking. Configuration (Pages env): GOOGLE_WALLET_ISSUER_ID, and the service account as
+// GET /api/google-wallet?selftest signs a fixed payload and answers { ok }, so a deploy is checked
+// without a booking; the issuer, the account and any setting that is missing go to the function's log,
+// not into the public answer (2026-10-05). Configuration (Pages env): GOOGLE_WALLET_ISSUER_ID, and the service account as
 // either GOOGLE_WALLET_SA_JSON (the key file Google Cloud downloads, pasted whole) or
 // GOOGLE_WALLET_SA_EMAIL + GOOGLE_WALLET_SA_KEY_PEM (its client_email and PKCS#8 private_key; the key
 // may keep the file's escaped "\n" line breaks); optional SUPABASE_URL, SUPABASE_ANON_KEY (required).
@@ -222,15 +223,27 @@ export async function onRequestPost(context) {
   }
 }
 
+// ?selftest answers { ok } alone: the answer is public, so what it signed with and which settings
+// are missing are logged instead (2026-10-05). At most SELFTEST_PER_MIN signatures a minute per isolate.
+const SELFTEST_PER_MIN = 6;
+let _stWindow = 0, _stSpent = 0;
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
-  if (!configured(env)) return json({ ok: false, skipped: "google wallet not configured", missing: missing(env) }, 501);
+  if (!configured(env)) {
+    console.warn("google-wallet: selftest - not configured, missing", missing(env).join("; "));
+    return json({ ok: false, skipped: "google wallet not configured" }, 501);
+  }
+  const now = Date.now();
+  if (now - _stWindow >= 60000) { _stWindow = now; _stSpent = 0; }
+  if (++_stSpent > SELFTEST_PER_MIN) return json({ ok: false, error: "rate limited" }, 429);
   try {
     const jwt = await signJwt(env, { iss: account(env).email, aud: "google", typ: "savetowallet", iat: Math.floor(Date.now() / 1000), payload: { genericObjects: [] } });
-    return json({ ok: true, issuer: env.GOOGLE_WALLET_ISSUER_ID, account: account(env).email, jwtLength: jwt.length });
+    if (!jwt) throw new Error("empty token");
+    console.log("google-wallet: selftest signed", JSON.stringify({ issuer: env.GOOGLE_WALLET_ISSUER_ID, account: account(env).email }));
+    return json({ ok: true });
   } catch (e) {
     console.error("google-wallet: selftest failed", (e && e.stack) || e);
-    return json({ ok: false, error: "sign failed: " + String((e && e.message) || e) }, 500);
+    return json({ ok: false, error: "sign failed" }, 500);
   }
 }

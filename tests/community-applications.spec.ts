@@ -514,7 +514,10 @@ test('the server saying there is no account is not reported as a connection faul
 // rider on a Saturday Social Ride staff must pick, with no tag ticked to start with, and an
 // invitation to send, the community's WhatsApp group link added when staff tick it. The invitation
 // carries no account details: no reply to a community application does (the owner, 2026-09-30).
-const WA_GROUP = 'https://chat.whatsapp.com/DEWPeDbRwb503PHu0R9qax?s=cl&p=i&mlu=0&ilr=4';
+// The link is an invented one: the real one lives only in staff_options 'community.wa_group' (2026-10-05:
+// the code and this repository are public), and the invitation reads it from there when it is written.
+const WA_GROUP = 'https://chat.whatsapp.com/SpecInventedGroupLink';
+const WA_ROW = { key: 'community.wa_group', items: WA_GROUP };
 const MEET = 'https://maps.app.goo.gl/meetHere';
 const INV_RIDES = [RIDES[0], { ...RIDES[1], meet_url: MEET, title: 'Sunrise Loop' }, ...RIDES.slice(2)];
 function patches(page: Page, table: string) {
@@ -528,7 +531,7 @@ function patches(page: Page, table: string) {
 
 test('Invite to ride: no tag ticked, a ride to pick, then the approval without Community, the booking and the invitation', async ({ page }) => {
   await applicationsTab(page, {
-    tags: TAGS, sessions: INV_RIDES,
+    tags: TAGS, sessions: INV_RIDES, staff_options: [WA_ROW],
     'rpc:staff_community_approve': { ok: true, existing: false, customer_id: 'ca01', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', password: 'Kp7wXr4Mnq', lang: 'en', oauth: false },
   });
   const calls: Record<string, unknown>[] = [];
@@ -669,6 +672,25 @@ test('an invited application reads Invited and writes its invitation again; a ne
   const inv = await msgBox.locator('#ca-msg-text').inputValue();
   expect(inv).toContain('Saturday, 14 March 2099');
   expect(inv).not.toContain('password');
+});
+
+test('with no group link in staff_options, the invitation offers no WhatsApp box and carries no group line', async ({ page }) => {
+  const invited = [{ ...base, id: 'a6', status: 'approved', name: 'Sami Haddad', email: 'sami.haddad@gmail.com', phone: '+966557771122', instagram: '', linkedin: '', decided_at: '2026-09-29T08:00:00Z', decided_by: 'Desk A', customer_id: 'ca06', existing_account: false, account_oauth: false, invited_session: SAT2 }];
+  // a row for another list only: the invitation must not take its items for a link
+  await applicationsTab(page, { sessions: INV_RIDES, community_applications: [...apps, ...invited], staff_options: [{ key: 'bike_frames', items: [] }] });
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  const read = page.waitForResponse((r) => /\/rest\/v1\/staff_options\?/.test(r.url()) && r.url().includes('community.wa_group'));
+  await row(page, 'a6').locator('.ca-inv-msg').click();
+  await read;
+  const msgBox = page.locator('#confirm-modal .ca-msg-box');
+  await expect(msgBox.locator('#ca-msg-text')).toBeVisible();
+  await page.waitForTimeout(300); // the dialog redraws once the read is in
+  await expect(msgBox.locator('#ca-msg-wa')).toHaveCount(0);
+  const msg = await msgBox.locator('#ca-msg-text').inputValue();
+  expect(msg).toContain('Saturday, 14 March 2099');
+  expect(msg).not.toContain('WhatsApp');
+  expect(msg).not.toContain('chat.whatsapp.com');
+  expect(await page.evaluate(`S._caMsg.d.waLink`)).toBe('');
 });
 
 test('with no Saturday ride open, Invite to ride cannot go ahead', async ({ page }) => {

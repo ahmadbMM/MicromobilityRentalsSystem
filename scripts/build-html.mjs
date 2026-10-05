@@ -334,7 +334,8 @@ if (/fonts\/fonts\.css(?!\?v=[a-f0-9]{10}["'])/.test(out)) throw new Error('buil
 // FILES/DIRS assemble-dist.mjs copies), less the ones that cannot go stale in that cache:
 //   index.html      - rewritten by THIS build further down, and stale-while-revalidate with an
 //                     etag check on every navigation anyway (hashing it would read the previous
-//                     build's bytes and rotate one build late)
+//                     build's bytes and rotate one build late). The page as THIS build makes it is
+//                     hashed in below instead, from memory (2026-10-05).
 //   service-worker.js, _headers, _redirects - never served from the cache
 //   robots.txt, sitemap.xml - rewritten further down by this build, and only crawlers read them
 //   styles.css      - already in, through cssHash
@@ -386,7 +387,12 @@ if (ign.status === 0) { const ignored = new Set(ign.stdout.split('\0').filter(Bo
 const cacheFirst = onDisk.filter((rel) => !NOT_CACHE_FIRST.has(rel)).sort();
 // The versioned halves go into the name too: a deploy that changes only app.js still gets a fresh
 // cache, and the copies of the last version go with the old one instead of piling up.
-const shellHasher = createHash('sha256').update(cssHash).update(appHash).update(appCssHash).update(staffHash).update(JSON.stringify(staffPartsV));
+// And the page itself (2026-10-05), as this build is about to write it (its site origin is filled in
+// further down, so the origin goes in as well). A deploy that changed only the markup left the worker
+// byte-identical, so the hourly reg.update() of a tab left open found nothing new and the tab never
+// heard of the deploy; a new name is a new worker, whose activation tells open tabs (shell-updated).
+const shellHasher = createHash('sha256').update(cssHash).update(appHash).update(appCssHash).update(staffHash).update(JSON.stringify(staffPartsV))
+  .update(out).update(origin);
 for (const rel of cacheFirst) {
   let bytes;
   try { bytes = await readFile(new URL(`../${rel}`, import.meta.url)); }
@@ -466,13 +472,20 @@ const inlineHashes = (html) => [...html.matchAll(/<script(?![^>]*\bsrc=)([^>]*)>
   .map((m) => createHash('sha256').update(m[2]).digest('base64'));
 const staffStub = await readFile(new URL('../staff/index.html', import.meta.url), 'utf8');
 const hashes = [...new Set([...inlineHashes(out), ...inlineHashes(staffStub)])];
+// The one Supabase project the page talks to, read from the app's own SUPABASE_URL (2026-10-05). The
+// policy allowed any *.supabase.co, so a script that got onto the page could have sent what it read
+// to a project of its own; now it names this project's host, https for the API and storage, wss for
+// realtime. A build pointed at another project (staging) changes SUPABASE_URL and gets that host here.
+const supaRef = (srcWithMain.match(/const SUPABASE_URL\s*=\s*'https:\/\/([a-z0-9]+)\.supabase\.co'/) || [])[1];
+if (!supaRef) throw new Error("build: app.src.html has no const SUPABASE_URL = 'https://<ref>.supabase.co' to pin the policy's connect-src to");
+const supaHost = `${supaRef}.supabase.co`;
 const CSP = [
   "default-src 'self'",
   `script-src 'self' ${hashes.map((h) => `'sha256-${h}'`).join(' ')} https://static.cloudflareinsights.com`,
   "style-src 'self' 'report-sample'", // 'report-sample': a refused style's first 40 characters come with its report
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
-  "connect-src 'self' https://micromobility.sa https://*.supabase.co wss://*.supabase.co https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com",
+  `connect-src 'self' https://micromobility.sa https://${supaHost} wss://${supaHost} https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com`,
   "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
   'upgrade-insecure-requests', 'report-uri /api/csp-report', 'report-to csp',
 ].join('; ');
@@ -483,14 +496,19 @@ if (!/^  Content-Security-Policy: /m.test(headers)) throw new Error('build: _hea
 headers = headers.replace(/^  Content-Security-Policy: .*$/m, `  Content-Security-Policy: ${CSP}`);
 if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  Content-Security-Policy: .*)$/m, `$1\n  Reporting-Endpoints: csp="/api/csp-report"`);
 // Early Hints (2026-10-01). Cloudflare Pages sends a page's Link headers as a 103 before the page
-// itself, so the phone starts on the stylesheet, the script and the first font while the HTML is still
-// on its way. It builds them from <link rel=preload> only when the tag carries nothing else, and ours
-// need crossorigin or integrity, so the root's are written here, by hash, like the policy above.
+// itself, so the phone starts on the first font while the HTML is still on its way. It builds them
+// from <link rel=preload> only when the tag carries nothing else, and ours need crossorigin or
+// integrity, so the root's are written here, like the policy above.
+// Only addresses that stay the same from one deploy to the next (2026-10-05). The stylesheet and the
+// script were named here too, by their ?v= hash, but Cloudflare replays the hints it saw on an earlier
+// answer: after a deploy a phone fetched the old app.css and app.js from the hint, then the new ones
+// the page asks for. The page's own <link rel=preload> tags still start those early.
 const EARLY_FONT = '/fonts/SpaceGrotesk-var-latin.woff2';
 if (!out.includes(`href="${EARLY_FONT}"`)) throw new Error(`build: the page no longer preloads ${EARLY_FONT} - update the Early Hints list`);
-const early = `/\n  Link: </app.css?v=${appCssHash}>; rel=preload; as=style, </app.js?v=${appHash}>; rel=preload; as=script, <${EARLY_FONT}>; rel=preload; as=font; type="font/woff2"; crossorigin\n`;
-const EARLY_RE = /^\/\n  Link: [^\n]*\n/m;
-headers = EARLY_RE.test(headers) ? headers.replace(EARLY_RE, early) : headers.replace(/^(\/vendor\/\*\n)/m, `# The root page's Early Hints: written by scripts/build-html.mjs (the files' hashes change every build).\n${early}$1`);
+const early = `# The root page's Early Hints, written by scripts/build-html.mjs: only addresses that never change (a hashed one is replayed by Cloudflare after a deploy).\n/\n  Link: <${EARLY_FONT}>; rel=preload; as=font; type="font/woff2"; crossorigin\n`;
+if (/\?v=/.test(early)) throw new Error('build: an Early Hints address carries a ?v= hash - Cloudflare replays hints from an earlier deploy, so only stable addresses belong there');
+const EARLY_RE = /^(?:# The root page's Early Hints[^\n]*\n)?\/\n  Link: [^\n]*\n/m;
+headers = EARLY_RE.test(headers) ? headers.replace(EARLY_RE, early) : headers.replace(/^(\/vendor\/\*\n)/m, `${early}$1`);
 if (!headers.includes(early)) throw new Error('build: could not write the Early Hints block into _headers');
 if (headers !== headersBefore) await writeFile(headersUrl, headers);
 

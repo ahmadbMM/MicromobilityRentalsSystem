@@ -22,9 +22,10 @@
 //   APPLE_TEAM_ID           - the Apple team id
 //   SUPABASE_URL / SUPABASE_ANON_KEY - already set for the other functions
 //
-// GET /api/wallet-pass?selftest signs a fixed manifest and reports the certificate it used, so a
-// deploy can be checked without a booking (nothing secret is in the answer: a signature is public
-// in every pass, and the certificate's name and expiry are what Wallet shows).
+// GET /api/wallet-pass?selftest signs a fixed manifest and answers { ok }, so a deploy can be
+// checked without a booking. Since 2026-10-05 the certificate it used (where it was read from, its
+// name and expiry) goes to the function's log, not into the public answer, and the signature is no
+// longer handed out; a per-isolate limit keeps the signing from being run in a loop.
 //
 // Security: never trusts client-supplied booking data. It re-reads the booking through the
 // token-checked my_bookings RPC using the caller's own customer id + session token, so a user
@@ -32,7 +33,7 @@
 
 import { zipSync } from 'fflate';
 import { PASS_IMAGES, RIDE_IMAGES } from './pass-images.js';
-import { b64ToBytes, bytesToB64, certPemToDer, importSigner, keyPemToPkcs8, openP12, sha1hex, signDetached } from './sign.js';
+import { b64ToBytes, certPemToDer, importSigner, keyPemToPkcs8, openP12, sha1hex, signDetached } from './sign.js';
 
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const DIRECTIONS = "https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7";
@@ -532,20 +533,29 @@ async function loadSigner(env) {
   s.source = "p12 (" + p12.how + ")";
   return s;
 }
-// GET ?selftest: the signature over a fixed manifest, and the certificate that made it.
+// GET ?selftest: a signature over a fixed manifest, answered as { ok } alone (2026-10-05: the answer
+// is public; the certificate that made it is logged instead). At most SELFTEST_PER_MIN a minute per
+// isolate: each is an RSA signature, and on a cold start a Keychain .p12 that takes a second to open.
 const SELFTEST_MANIFEST = '{"pass.json":"da39a3ee5e6b4b0d3255bfef95601890afd80709"}';
+const SELFTEST_PER_MIN = 6;
+let _stWindow = 0, _stSpent = 0;
 export async function onRequestGet(context) {
   const { request, env } = context;
   if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
   if (!configured(env) || !env.APPLE_PASS_TYPE_ID || !env.APPLE_TEAM_ID) return json({ ok: false, skipped: "wallet not configured" }, 501);
+  const now = Date.now();
+  if (now - _stWindow >= 60000) { _stWindow = now; _stSpent = 0; }
+  if (++_stSpent > SELFTEST_PER_MIN) return json({ ok: false, error: "rate limited" }, 429);
   try {
     const signer = await getSigner(env);
     const wwdr = await getWWDR();
     const signature = await signDetached(signer, strBytes(SELFTEST_MANIFEST), [wwdr]);
-    return json({ ok: true, source: signer.source, certificate: { subject: signer.info.subject, issuer: signer.info.issuerName, notAfter: signer.info.notAfter }, manifest: SELFTEST_MANIFEST, signature: bytesToB64(signature) });
+    if (!signature || !signature.length) throw new Error("empty signature");
+    console.log("wallet-pass: selftest signed", JSON.stringify({ source: signer.source, subject: signer.info.subject, issuer: signer.info.issuerName, notAfter: signer.info.notAfter }));
+    return json({ ok: true });
   } catch (e) {
     console.error("wallet-pass: selftest failed", (e && e.stack) || e);
-    return json({ ok: false, error: String((e && e.message) || e) }, 500);
+    return json({ ok: false, error: "sign failed" }, 500);
   }
 }
 function strBytes(s) {
