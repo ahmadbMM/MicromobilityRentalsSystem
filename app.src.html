@@ -740,7 +740,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   colBookingNum:'Booking #',
   staffQueueTitle:'Staff Panel',addWalkin:'+ Walk-in',
   
-  filterAll:'All',filterDone:'Done',filterNoshow:'No-Show',
+  filterAll:'All',ridersMoveNeedsDb:'Moving a party to another night needs a database update that is not in place yet. Keep this night for now.',syncNeedPin:'A void or refund made offline needs the PIN again. Tap the pending sync count on Sales to enter it.',invQtyDec:'Decrease quantity: {0}',invQtyInc:'Increase quantity: {0}',invDelPriced:'{0} booking(s) still read this item’s price — set its stock to zero instead of deleting it.',filterDone:'Done',filterNoshow:'No-Show',
   allSessions:'All Sessions',colRider:'Rider',colMember:'Membership',memberYes:'Member',memberNo:'Non-member',
   walkinSize:'Frame Size',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
@@ -1293,7 +1293,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   colBookingNum:'رقم الحجز',
   staffQueueTitle:'لوحة الموظفين',addWalkin:'+ زيارة مباشرة',
   
-  filterAll:'الكل',filterDone:'منتهي',filterNoshow:'لم يحضر',
+  filterAll:'الكل',ridersMoveNeedsDb:'نقل المجموعة إلى ليلة أخرى يحتاج إلى تحديث لقاعدة البيانات لم يُطبَّق بعد. أبقِ هذه الليلة الآن.',syncNeedPin:'إلغاء أو استرداد تم دون اتصال يحتاج إلى الرمز مرة أخرى. اضغط على عدد العمليات بانتظار المزامنة في المبيعات لإدخاله.',invQtyDec:'إنقاص الكمية: {0}',invQtyInc:'زيادة الكمية: {0}',invDelPriced:'ما زال {0} حجز/حجوزات يعتمد على سعر هذا المنتج — اجعل مخزونه صفراً بدلاً من حذفه.',filterDone:'منتهي',filterNoshow:'لم يحضر',
   allSessions:'جميع الجلسات',colRider:'الراكب',colMember:'العضوية',memberYes:'عضو',memberNo:'غير عضو',
   walkinSize:'مقاس الإطار',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
@@ -28291,6 +28291,9 @@ function renderRiders(_resultsOnly){
 // The History tab's rows, filtered and sorted exactly as the screen shows them. Shared with
 // the CSV export, which used to apply only the session and the date range, so a list narrowed
 // to "Pending" or one rider's name exported every ride of the night.
+// Owing money: ridden, unpaid, and with something to pay - not a rider of a free ride, nor one on
+// their own bike with nothing bought, whom the roster reads as Free (2026-10-05).
+function _histOwes(e){return e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)&&!_ownFree(e);}
 function _histRows(){
   const hist=getQueue().filter(e=>e.status==='done'||e.status==='noshow'||e.status==='cancelled'||e.status==='removed');
   // The range runs up to today, not open-ended: a booking cancelled for next week is not
@@ -28302,7 +28305,7 @@ function _histRows(){
   let filtered=sessionFiltered.slice();
   if(S.histStatus!=='all') filtered=filtered.filter(e=>e.status===S.histStatus);
   if(S.histPay==='paid')   filtered=filtered.filter(e=>e.paid);
-  if(S.histPay==='pending')filtered=filtered.filter(e=>!e.paid&&e.status==='done');
+  if(S.histPay==='pending')filtered=filtered.filter(_histOwes);
   if(S.histType!=='all')   filtered=filtered.filter(e=>resolvedType(e)===S.histType);
   if(S.histSize!=='all')   filtered=filtered.filter(e=>_entryFits(e).includes(S.histSize));
   if((S.histSearch||'').trim()){const q=S.histSearch.trim().toLowerCase().replace(/^#/,'');filtered=filtered.filter(e=>String(e.name||'').toLowerCase().includes(q)||_phoneHit(e.phone,q)||(e.email||'').toLowerCase().includes(q)||String(e.queueNum)===q||_matchesRef(e,q));}
@@ -31173,10 +31176,13 @@ function renderHistory(_resultsOnly){
   const _hSel=new Set(S.histSelected),_hTime=new Map(); // per paint: the ticks as a set, each session's time worked out once
   const _hTimeOf=sid=>{let v=_hTime.get(sid);if(v===undefined){v=sessionTime(_sessGet(sid));_hTime.set(sid,v);}return v;};
   const nDone=sessionFiltered.filter(e=>e.status==='done').length,nPaid=sessionFiltered.filter(e=>e.status==='done'&&e.paid).length,
-        nPend=sessionFiltered.filter(e=>e.status==='done'&&!e.paid).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
+        nPend=sessionFiltered.filter(_histOwes).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
   const _hr2=n=>Math.round(n*100)/100;
-  const sarCollected=_revenueOf(sessionFiltered.filter(e=>e.status==='done'));
-  const sarPending=_amountOf(sessionFiltered.filter(e=>e.status==='done'&&!e.paid));
+  // Collected is the money taken, a paid no-show's included (_revenueOf, as everywhere else); Pending
+  // what is still owed (_histOwes). Done rows alone left the no-shows' money out, and Pending counted
+  // the free rides' riders at a default fare (2026-10-05).
+  const sarCollected=_revenueOf(sessionFiltered);
+  const sarPending=_amountOf(sessionFiltered.filter(_histOwes));
   function thHistSort(col,label,cls=''){
     const active=S.histSort===col;
     const arrow=active?(S.histSortDir===1?'↑':'↓'):'';
@@ -31406,6 +31412,24 @@ async function exportHistoryCSV(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showReceipt_1(event,el){if(event.target===el)closeReceipt()}
 function _on_showReceipt_2(event,el){setTimeout(closeReceipt,300)}
+// The money on the emailed receipt (2026-10-05): it gave the rental price alone and "Pending" on a
+// free ride. Now the rental, each add-on, the booking's total (_bookingAmount), how it stands (Free on
+// a ride with nothing to pay), then what was bought at the desk on the booking, each as it was paid.
+function _receiptMoney(e){
+  const L=(k,v)=>`${String(k).padEnd(14)}:  ${v}`,amt=n=>_money(Math.round((Number(n)||0)*100)/100,_NOISO);
+  if(_freeSessIds.has(e.sessionId)||_ownFree(e))return[L(t('colPrice'),t('freeLabel')),L(t('colPayment'),t('freeLabel'))];
+  const adds=addonLineItems(entryAddons(e)),house=e.paid&&(e.price??DEFAULT_PRICE)===0;
+  const out=[L(t('colPrice'),amt(e.price??DEFAULT_PRICE))];
+  if(adds.length){out.push(`${t('addonsLabel')}:`);adds.forEach(a=>out.push(L('  '+a.name+(a.qty>1?' ×'+a.qty:''),amt(a.lineTotal))));}
+  out.push(L(t('repTotal'),amt(_bookingAmount(e))),L(t('colPayment'),house?t('onTheHouseLabel'):e.paid?t('paidLabel')+' ✓':t('pendingLabel')));
+  const pur=entryPurchases(e);
+  if(pur.length){
+    const PAY={paid:'paidLabel',pending:'pendingLabel',team:'payTeam'};
+    out.push('',`${t('custPurchTitle')}:`);
+    pur.forEach(p=>out.push(L('  '+p.name+(Number(p.qty)>1?' ×'+p.qty:''),p.pay==='house'?t('onTheHouseLabel'):`${amt(_lineCharge(p))} · ${t(PAY[p.pay]||'pendingLabel')}`)));
+  }
+  return out;
+}
 function showReceipt(id){
   const e=getQueue().find(x=>x.id===id);if(!e)return;
   const bike=getAssignedBikes(e)[0]||null;
@@ -31422,8 +31446,7 @@ function showReceipt(id){
     `${t('timeLabel').padEnd(14)}:  ${sessionTime(allSessions().find(s=>s.id===e.sessionId))}`,
     `${t('colBike').padEnd(14)}:  ${bike?bike.name:'—'}`,
     `${t('bikeTypeLabel').padEnd(14)}:  ${typeLabel(resolvedType(e))}`,
-    `${t('colPrice').padEnd(14)}:  ${_money(Number(e.price??DEFAULT_PRICE)||0,_NOISO)}`, // a receipt that never said how much
-    `${t('colPayment').padEnd(14)}:  ${e.paid?t('paidLabel')+' ✓':t('pendingLabel')+' '}`,
+    ..._receiptMoney(e),
     '──────────────────────────────────────','',
     t('receiptSeeYou'),'',
     'MicroMobility Team','Corniche Circuit, Jeddah',
@@ -32550,7 +32573,21 @@ async function _bookOutboxFlushRun(){
   const snap=_bookOutbox();const done=[];const renum={};const noWaiver=[];
   const _reasking=!!S._waiverReaskSess&&S.view==='customer'&&S.custTab==='register';
   const _c=S.loggedIn||getSession();
+  // A party booked offline is one booking: its riders go in ONE customer_create_booking call, as the
+  // online booking sends them (2026-10-05). One call per rider took a flat promo off every rider in
+  // full. Grouped by account, ride and group; anything but a clean answer for the whole party (a
+  // duplicate, a refusal, no function, no network) sends each rider on its own below, as before.
+  const together=new Set(),parties=new Map();
+  if(_c&&_c.session_token)snap.forEach(row=>{if(String(row.customer_id||'')!==String(_c.id))return;const k=[row.customer_id,row.session_id,row.group_id||''].join('|');let g=parties.get(k);if(!g)parties.set(k,g=[]);g.push(row);});
+  for(const g of parties.values()){
+    if(g.length<2)continue;
+    try{
+      const r=await _roFree(()=>sb.rpc('customer_create_booking',{p_id:_c.id,p_token:_c.session_token,p_entries:g}));
+      if(r&&!r.error&&Array.isArray(r.data)&&r.data.length)g.forEach(x=>{together.add(x.id);done.push(x.id);});
+    }catch(_){}
+  }
   for(const row of snap){
+    if(together.has(row.id))continue;
     try{
       let res;
       // A booking queued offline lands through customer_create_booking, exactly like an online
@@ -33167,16 +33204,18 @@ function renderCashier(){
 // Inventory category/brand dropdowns with a custom-add button
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__invSelHtml_1(event,el,a0){if(event.key==='Enter'){event.preventDefault();_invOptSave(a0)}}
-function _invSelHtml(id,value,addMode,options,addLabel){
+// aria: the field's name. Its label above is not tied to it (one label serves the select and the
+// text box that replaces it), so both were unnamed for a screen reader (2026-10-05).
+function _invSelHtml(id,value,addMode,options,addLabel,aria){
   if(addMode){
     return`<div class="iv-row6">
-      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" class="iv-f1"
+      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" class="iv-f1" aria-label="${esc(addLabel)}"
         data-on-keydown="${_on("_on__invSelHtml_1",_EV,_EL,id)}">
-      <button class="btn-primary iv-ok" data-on-click="${_on("_invOptSave",id)}">✓</button>
+      <button class="btn-primary iv-ok" data-on-click="${_on("_invOptSave",id)}" aria-label="${esc(t('saveBtn'))}">✓</button>
       <button class="btn-secondary iv-no" data-on-click="${_on("_invOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
     </div>`;
   }
-  return`<select id="${id}" data-on-change="${_on("_invSelChange",id,_P("value"))}">
+  return`<select id="${id}" aria-label="${esc(aria||addLabel)}" data-on-change="${_on("_invSelChange",id,_P("value"))}">
     ${options.map(o=>`<option value="${esc(o.v)}"${o.v===value?' selected':''}>${esc(o.l)}</option>`).join('')}
     <option value="__add__">+ ${addLabel}</option>
   </select>`;
@@ -33272,14 +33311,14 @@ function renderInventory(){
   const brandList=[...new Set([...(isSupp?(S.invBrandsSupp||[]):(S.invBrandsEquip||[])),...secItems.map(i=>i.brand).filter(Boolean)])];
   const catOptions=[...presetCats.map(c=>({v:c,l:_invCatLabel(c)})),...customCats.map(c=>({v:c,l:c}))];
   const brandOptions=[{v:'',l:t('invNoBrand')},...brandList.map(b=>({v:b,l:b}))];
-  const catField=_invSelHtml('inv-cat',S._invCat,S._invCatAdd,catOptions,t('addCustomCatLabel'));
-  const brandField=_invSelHtml('inv-brand',S._invBrand,S._invBrandAdd,brandOptions,t('addCustomBrandLabel'));
+  const catField=_invSelHtml('inv-cat',S._invCat,S._invCatAdd,catOptions,t('addCustomCatLabel'),t('invCategory'));
+  const brandField=_invSelHtml('inv-brand',S._invBrand,S._invBrandAdd,brandOptions,t('addCustomBrandLabel'),t('invBrand'));
   // Type dropdown (only under Protein Snacks): defaults + this device's list + any Type already used in the data
   const subtypeList=[...new Set([...PROTEIN_SUBTYPES,...(S.proteinSubtypes||[]),...(S.inventory||[]).map(i=>_leafSubtype(i.category)).filter(Boolean)])];
-  const subtypeField=_invSelHtml('inv-subtype',S._invSubtype,S._invSubtypeAdd,subtypeList.map(s=>({v:s,l:s})),t('addCustomTypeLabel'));
+  const subtypeField=_invSelHtml('inv-subtype',S._invSubtype,S._invSubtypeAdd,subtypeList.map(s=>({v:s,l:s})),t('addCustomTypeLabel'),t('invProteinType'));
   const showSubtype=isSupp&&S._invCat==='ProteinSnacks';
   const flavOptions=[{v:'',l:t('invNoFlavour')},...[...new Set([...((S.invFlavoursByBrand||{})[S._invBrand||'']||[]),...(S.inventory||[]).filter(i=>(i.brand||'')===(S._invBrand||'')&&i.flavour).map(i=>i.flavour)])].filter(f=>!_badFlav(f)).map(f=>({v:f,l:f}))];
-  const flavourField=_invSelHtml('inv-flav',S._invFlav,S._invFlavAdd,flavOptions,t('addCustomFlavLabel'));
+  const flavourField=_invSelHtml('inv-flav',S._invFlav,S._invFlavAdd,flavOptions,t('addCustomFlavLabel'),t('invFlavour'));
   const addForm=(S.showAddInv||isEdit)?`<div class="inline-form">
     <div class="form-title">${isEdit?t('editBtn'):t('invAddBtn')}</div>
     <div class="form-row">
@@ -33320,7 +33359,7 @@ function renderInventory(){
             <input aria-label="${esc(t('a11yAmount'))}" type="number" step="any" value="${esc(mc.a==null?'':mc.a)}" data-on-input="${_on("_nuMicroSet",i,"a",_P("value"))}" placeholder="0" class="iv-mc-a">
             <input aria-label="${esc(t('a11yUnit'))}" type="text" value="${esc(mc.u||'')}" data-on-input="${_on("_nuMicroSet",i,"u",_P("value"))}" placeholder="mg" class="iv-mc-u">
             <input aria-label="${esc(t('nuNrv'))}" type="number" step="any" value="${esc(mc.nrv==null?'':mc.nrv)}" data-on-input="${_on("_nuMicroSet",i,"nrv",_P("value"))}" placeholder="${t('nuNrv')}" class="iv-mc-nrv">
-            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="Remove" class="iv-mc-del">&times;</button>
+            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="${esc(t('removeBtn'))}" class="iv-mc-del">&times;</button>
           </div>`).join('')}
           <button type="button" class="btn-secondary iv-mc-add" data-on-click="${_on("_nuMicroAdd")}">+ ${t('nuAddMicro')}</button>
         </div>
@@ -33345,9 +33384,9 @@ function renderInventory(){
       <td class="iv-td">${it.brand?esc(it.brand):'<span class="iv-muted">—</span>'}</td>
       ${isSupp?`<td class="iv-td">${(it.flavour&&!_badFlav(it.flavour))?esc(it.flavour):'<span class="iv-muted">—</span>'}</td>`:''}
       <td data-sort="${qty}"><div class="iv-ac8">
-        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
+        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}">-</button>
         <span class="iv-qty">${qty}</span>
-        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
+        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}">+</button>`}
       </div></td>
       <td><span class="iv-stat iv-${state}">${stTxt}</span></td>
       <td><div class="actions-cell">
@@ -33371,9 +33410,9 @@ function renderInventory(){
         <span class="iv-cstat iv-${state}">${stTxt}</span>
       </div>
       <div class="iv-cqty">
-        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
+        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}">-</button>
         <span class="iv-cqn">${qty}</span>
-        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
+        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}">+</button>`}
       </div>
       ${_hasNutri(it)?`<button class="btn-sm btn-muted iv-w100" data-on-click="${_on("showNutrition",it.id)}">${t('nuButton')}</button>`:''}
       <div class="iv-row4">
@@ -33490,7 +33529,7 @@ function toggleAddInv(){S.showAddInv=true;S.editInvId=null;S._invName='';S._invC
 function cancelInvForm(){S.showAddInv=false;S.editInvId=null;S._invCatAdd=false;S._invBrandAdd=false;renderInventory();}
 function startInvEdit(id){
   const it=(S.inventory||[]).find(x=>x.id===id);if(!it)return;
-  S.editInvId=id;S.showAddInv=false;S._invName=it.name||'';const _ic=it.category||'Helmet';const _ip=_catParent(_ic)==='ProteinSnacks';S._invCat=_ip?'ProteinSnacks':_ic;S._invSubtype=_ip?(_leafSubtype(_ic)||_defaultSubtype()):(_ic==='ProteinSnacks'?_defaultSubtype():'');S._invSubtypeAdd=false;S._invQty=String(it.qty??'');S._invQty0=S._invQty;S._invLow=String(it.low_threshold??'');S._invFree=(Number(it.price)===0&&it.price!=null);S._invPrice=(it.price!=null&&Number(it.price)>0)?String(it.price):'';S._invCost=(it.cost!=null?String(it.cost):'');S._invBrand=it.brand||'';S._invFlav=it.flavour||'';S._invMl=it.volume_ml!=null?String(it.volume_ml):'';S._invNutri=_itemNutri(it)||{};S._invNutriOpen=false;S._invPhoto=it.photo||'';S._invCatAdd=false;S._invBrandAdd=false;S._invFlavAdd=false;
+  S.editInvId=id;S.showAddInv=false;S._invName=it.name||'';const _ic=it.category||'Helmet';const _ip=_catParent(_ic)==='ProteinSnacks';S._invCat=_ip?'ProteinSnacks':_ic;S._invSubtype=_ip?(_leafSubtype(_ic)||_defaultSubtype()):(_ic==='ProteinSnacks'?_defaultSubtype():'');S._invSubtypeAdd=false;S._invQty=String(it.qty??'');S._invQty0=S._invQty;S._invLow=String(it.low_threshold??'');S._invFree=(Number(it.price)===0&&it.price!=null);S._invPrice=(it.price!=null&&Number(it.price)>0)?String(it.price):'';S._invCost=(it.cost!=null?String(it.cost):'');S._invCost0=S._invCost;S._invBrand=it.brand||'';S._invFlav=it.flavour||'';S._invMl=it.volume_ml!=null?String(it.volume_ml):'';S._invNutri=_itemNutri(it)||{};S._invNutriOpen=false;S._invPhoto=it.photo||'';S._invCatAdd=false;S._invBrandAdd=false;S._invFlavAdd=false;
   S.invSection=_invSecOf(it.category);
   // Make sure a custom category/brand/flavour on this item appears in this section's dropdowns
   const isSupp=S.invSection==='supplements';
@@ -33501,8 +33540,10 @@ function startInvEdit(id){
   renderInventory();
 }
 // What the item form holds besides the row's own columns: the photo, the price (0 = free), the cost
-// (only when typed on a new item, so a blank box does not zero it; an edit writes what the box says),
-// the flavour (supplements only), the volume (drinks only) and the nutrition table.
+// (only when typed on a new item, so a blank box does not zero it; on an edit only when the box was
+// changed: this device may not hold the cost at all - a live update never carries it - and saving a
+// price fix wrote that blank back over the real cost, 2026-10-05), the flavour (supplements only),
+// the volume (drinks only) and the nutrition table.
 function _invExtraCols(id,cat,isNew){
   const _p=parseFloat(S._invPrice),_c=parseFloat(S._invCost);
   const _fv=(document.getElementById('inv-flav')?.value||S._invFlav||'').trim();
@@ -33511,7 +33552,7 @@ function _invExtraCols(id,cat,isNew){
     flavour:(S.invSection==='supplements'&&!_badFlav(_fv))?_fv:null,
     volume_ml:_isDrinkCat(cat)?(parseInt(document.getElementById('inv-ml')?.value||S._invMl||'')||null):null,
     nutrition:_invNutriJson()};
-  if(isNew){if(!isNaN(_c)&&_c>=0)more.cost=_c;}else more.cost=isNaN(_c)?null:_c;
+  if(isNew){if(!isNaN(_c)&&_c>=0)more.cost=_c;}else if(String(S._invCost??'')!==String(S._invCost0??''))more.cost=isNaN(_c)?null:_c;
   return more;
 }
 async function addInvItem(){
@@ -33626,6 +33667,11 @@ function delInvItem(id){
   // refuse to be deleted out from under their bookings; so does this.
   const _live=getQueue().filter(e=>['waiting','waitlist','active'].includes(e.status)&&entryAddons(e).some(a=>String((a&&typeof a==='object')?a.id:a)===String(id))).length;
   if(_live){toast(t('invDelInUse').replace('{0}',_live),'error');return;}
+  // Nor while a ridden booking still reads its price from it (2026-10-05): one not paid yet (the
+  // money owed would drop), or one whose add-on line was saved before lines kept the price they
+  // were sold at (entryAddons' p): its amount, paid or not, would change in every report.
+  const _priced=getQueue().filter(e=>e.status!=='cancelled'&&e.status!=='removed'&&entryAddons(e).some(a=>String(a.id)===String(id)&&((e.status==='done'&&!e.paid)||a.p===undefined))).length;
+  if(_priced){toast(t('invDelPriced').replace('{0}',_priced),'error');return;}
   confirmDialog({title:t('deleteBtn'),body:esc(it.name),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     if(await _wr(sb.from('inventory').delete().eq('id',id),'delete item'))return;
     await loadData();renderInventory();
@@ -33649,7 +33695,10 @@ function _lbInWindow(e,win,ref){
   if(win==='month')return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
   return true;
 }
-// Aggregate completed+paid rides. scope 'owner' = booking account credited for EVERY rider it booked;
+// Aggregate completed rides: paid, or on a free ride, or a bike owner's (_rideCompleted, as the badges
+// count them with _bdgRode). Paid alone left every free Saturday and community ride off the board, the
+// tiers and the stats (2026-10-05); "spent" is still the money (_bookingRevenue).
+// scope 'owner' = booking account credited for EVERY rider it booked;
 // scope 'rider' = each individual rider counted on their own.
 function _lbAgg(win,scope,ref){
   const locOf=id=>{const s=_sessGet(id);return s?s.location:null;};
@@ -33658,7 +33707,7 @@ function _lbAgg(win,scope,ref){
   // happened to be #2 one night named the parent's account. That stays only as the fallback
   // for an account this device does not hold.
   const acct=scope==='owner'?new Map((S.customers||[]).map(c=>[String(c.id),c.name])):null;
-  const rides=getQueue().filter(e=>e.status==='done'&&e.paid&&_lbInWindow(e,win,ref)&&(S.lbBranch==='all'||locOf(e.sessionId)===S.lbBranch));
+  const rides=getQueue().filter(e=>(_rideCompleted(e)||(e.status==='done'&&_isOwnBike(e)))&&_lbInWindow(e,win,ref)&&(S.lbBranch==='all'||locOf(e.sessionId)===S.lbBranch));
   const map={};
   rides.forEach(e=>{
     const key=scope==='owner'?(e.customerId||('walk:'+e.id)):((e.name||'?').trim().toLowerCase());
