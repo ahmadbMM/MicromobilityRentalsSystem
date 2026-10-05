@@ -37762,7 +37762,7 @@ if('serviceWorker' in navigator){
     b.querySelector('button').onclick=_updReload;
     document.body.appendChild(b);
   };
-  try{navigator.serviceWorker.addEventListener('message',ev=>{
+  const _swMsg=ev=>{
     // The push service rotated our subscription: re-register it under the new endpoint.
     if(ev.data&&ev.data.type==='push-resubscribe'){pushSubscribe(true).catch(()=>{});return;}
     // The site went on hold (MM_HOLD, functions/_middleware.js): the worker now serves the hold
@@ -37776,7 +37776,14 @@ if('serviceWorker' in navigator){
     // (tab switch / phone pocket), so the next glance always runs the new build.
     _updPending=true;
     try{_updBar();}catch(e){}
-  });}catch(e){}
+  };
+  try{navigator.serviceWorker.addEventListener('message',_swMsg);}catch(e){}
+  // A new worker taking this page over is a deploy too (2026-10-05): the hourly check above installs
+  // one in a tab that never navigates. The worker also says shell-updated as it activates; this is the
+  // browser's own word for it. A first install changes the controller as well (none -> the worker,
+  // clients.claim), which is no update: only a page that already had a worker counts it.
+  let _swHadCtl=!!navigator.serviceWorker.controller;
+  try{navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_swHadCtl)_swMsg({data:{type:'shell-updated'}});_swHadCtl=true;});}catch(e){}
   // The worker's mm-hold message misses the page the navigation itself opens (it is not yet a
   // client the worker can reach when the refresh meets the hold), but the mark it keeps does not:
   // a page it served reads the mark at load and a moment later, and reloads into the hold page.
