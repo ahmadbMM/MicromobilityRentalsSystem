@@ -252,7 +252,14 @@ with expected(fname, want_definer, note) as (values
   ('vendor_logout_others',      true,  'deletes the login''s other vendor_sessions rows; token-checked'),
   ('vendor_team',               true,  'the venue''s logins for its owners, no secrets; token-checked'),
   ('_cact_row',                 true,  'trigger: writes customer_activity, which no client can write; reads sessions/customers/ambassadors'),
-  ('_cact_add',                 true,  'writes customer_activity for _cact_row; no client may execute it')
+  ('_cact_add',                 true,  'writes customer_activity for _cact_row; no client may execute it'),
+  -- The 2026-10-05 audit (20261005210000 … 20261005210200)
+  ('_waiver_min',               false, 'pure: the current minimum waiver version of each kind'),
+  ('_waiver_outdated',          false, 'pure comparison of a version with _waiver_min'),
+  ('_house_taken',              false, 'reads queue_entries/customers, only ever inside the definer triggers and RPCs; revoked'),
+  ('_session_capacity_promote', true,  'trigger: recounts a session and promotes its waitlist whoever raised the capacity or reopened it'),
+  ('customer_waitlist_ranks',   true,  'reads the session''s waitlist for the caller''s own rows; token-checked'),
+  ('staff_rider_party_move',    true,  'moves a Petromin party, its night counter and its bookings; checks is_staff() itself')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

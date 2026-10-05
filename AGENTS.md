@@ -37,6 +37,17 @@ The served `index.html` is a **minified build artifact**. The editable source of
 - **`SECURE_AUTH` defaults ON in production.** In secure mode the app talks to `SECURITY DEFINER` RPCs + a no-PII `queue_public` view instead of reading the locked tables directly. `localStorage.cq_secure_auth` ('1'/'0') overrides for testing.
 - Customer PII: `customers` is staff-only. `queue_entries` was world-readable **and** writable via the anon key until `supabase/migrations/20260815120000_security_lockdown.sql`. That migration closed UPDATE/DELETE for good. **SELECT is still open** (`public read using(true)`): dropping it broke booking live, because the form does `.insert(...).select()` and `RETURNING` applies SELECT policies to the new row. It stays open until a `customer_create_booking` RPC exists and both call sites are switched — do not drop the policy before that code ships. INSERT is likewise open to anon, so treat the table as an untrusted write surface. Writes to `bikes/sessions/inventory/promo_codes` are staff-only. Passwords are bcrypt (login rate-limited). Staff authenticate via Supabase Auth (`staff` table + `is_staff()`).
 - Any new customer-side write to a locked table must go through a token-checked RPC (see `customer_booking_update`, `customer_addon_stock` for the pattern) — a direct table write will silently fail under RLS.
+- **Waiver versions are checked on the server (2026-10-05, migration 20261005210000).** `_waiver_min(kind)` holds
+  the current minimum of each waiver - `ride`, `swim`, `activity` - and `_waiver_outdated(version)` is true for a
+  version older than the minimum of the kind its prefix names (none = ride, `swim-`, `activity-`; `workshop-` is
+  the activity waiver's old name). `customer_create_booking` and `rider_register` (the Petromin form) then raise
+  `WAIVER_OUTDATED` (P0001); a version with an unknown prefix, one that does not parse and a newer one all pass.
+  After a waiver bump: keep the format `[prefix-]YYYY-MM-vN`; change the version everywhere it is written
+  (`WAIVER_VERSION` / `SWIM_WAIVER_VERSION` / `ACTIVITY_WAIVER_VERSION` here, `WAIVER_VERSIONS` in mm-platform
+  `apps/web/src/content/waivers.ts`, `WAIVER_VERSION` in mm-platform `forms/petromin/src/live-submit.js`);
+  deploy both; then, in a new migration, `create or replace` `_waiver_min` with the new version of that kind
+  (header as in 20261005210000: `language sql stable set search_path to 'public'`, revoked from
+  public/anon/authenticated). Raising it first refuses every page that still carries the old text.
 
 ## Workflow
 
