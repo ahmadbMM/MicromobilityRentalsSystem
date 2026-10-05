@@ -416,6 +416,7 @@ window.mmLoading=(function(){
 <div id="return-modal" data-host></div>
 <div id="confirm-modal"    data-host></div>
 <div id="rate-modal"       data-host></div>
+<div id="waiver-gate"      data-host></div>
 <div id="bike-info-modal"  data-host></div>
 <div id="acc-pwd-modal"    data-host></div>
 <div id="cust-modal"       data-host></div>
@@ -1127,6 +1128,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',bdNextTitle:'Closest badges',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
   regStepOf:'Step {0} of {1}',
   pickRideFirst:'Choose a ride above to continue.',
+  wgKicker:'Waiver needed',wgSub:'Our team booked you on this ride. Read its waiver and agree to it to continue.',wgBtn:'Agree and continue',
   tickWaiverFirst:'Tick the box above to continue.',
   tkHelmetBring:'Helmets are required: bring your own.',
   bdCalSummary:'{0}: birthday',
@@ -1677,6 +1679,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mrNextLine:'رحلتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت رحلتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت رحلتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'رحلاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها رحلة',myrFav:'دراجتك المفضلة',myrFirst:'أول رحلة',myrTime:'الوقت على الدراجة',myrYear:'رحلات هذا العام',bdNextTitle:'أقرب الأوسمة',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
   regStepOf:'الخطوة {0} من {1}',
   pickRideFirst:'اختر رحلة من الأعلى للمتابعة.',
+  wgKicker:'إقرار مطلوب',wgSub:'سجّلك فريقنا في هذه الرحلة. اقرأ إقرارها ووافق عليه للمتابعة.',wgBtn:'أوافق وأتابع',
   tickWaiverFirst:'ضع علامة في المربع أعلاه للمتابعة.',
   tkHelmetBring:'الخوذة إلزامية: أحضر خوذتك.',
   bdCalSummary:'{0}: عيد ميلاد',
@@ -1887,6 +1890,7 @@ function setLang(lang,_fromUrl){
   if(S._pg)renderProfileGate();
   if(S._fix)renderFixGate();
   if(S._rg)renderRateModal();
+  if(S._wg)renderWaiverGate();
 }
 
 
@@ -2904,6 +2908,9 @@ function entryFromDB(e){
     card_amount:e.card_amount!=null?Number(e.card_amount):null,
     approval:e.approval||null, // community events: pending / approved / rejected (null = ordinary booking)
     rideGroup:e.ride_group||null, // the Saturday ride's group: 'beg' | 'int' (20261002120000)
+    // The waiver the row was agreed under. null when the row says it has none (a rider added at the
+    // desk), undefined when the read did not carry the column: only a known null asks (_pendingWaiver).
+    waiverVersion:e.waiver_version===undefined?undefined:(e.waiver_version||null),
     purchases:(()=>{try{return e.purchases?(Array.isArray(e.purchases)?e.purchases:JSON.parse(e.purchases)):[];}catch(_){return[];}})()};
 }
 // The fields the PII-free queue_public view carries, in entry form. Everything else on a row -
@@ -3752,7 +3759,11 @@ function _qrBox(payload,px){
   // dark mode, Chrome's auto dark) inverts CSS backgrounds and left the code in a black frame
   // on every card, while the svg's own fills are kept - so the tile reads white on every card,
   // whatever the browser does to the page around it (owner, 2026-09-27).
-  return `<div class="cu-qr-box">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}</div>`;
+  // A line runs round the tile without stopping, so staff can tell a live ticket from a screenshot
+  // at a glance (owner, 2026-10-04): a picture of the code cannot move. It is the svg's own stroke
+  // for the same reason as the tile, it sits in the code's white margin, never over the code, and
+  // it keeps moving even where the rider asked for less motion (styles.css, .qr-live).
+  return `<div class="cu-qr-box">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#00b467" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
@@ -6259,6 +6270,7 @@ function showView(v){
     if(S._pg){S._pg=null;renderProfileGate();}
     if(S._fix){S._fix=null;renderFixGate();}
     if(S._rg){S._rg=null;renderRateModal();}
+    if(S._wg){S._wg=null;renderWaiverGate();}
   }
   document.getElementById('view-landing').classList.toggle('active',v==='landing');
   document.getElementById('view-customer').classList.toggle('active',v==='customer');
@@ -11614,6 +11626,7 @@ function _pendingRatingId(){
 function _forceRatingPrompt(){
   if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||_isStaffHost())return;
   if(document.getElementById('pwd-gate'))return;
+  if(S._wg||_forceWaiverPrompt())return; // a desk-added booking's waiver comes first (2026-10-04)
   const id=_pendingRatingId();if(id)openRateModal(id,true);
 }
 function openRateModal(id,forced){
@@ -11704,6 +11717,79 @@ async function submitRating(){
   if(error){g.saving=false;g.net=true;renderRateModal();return;}
   const e=getQueue().find(x=>x.id===g.id);if(e){e.ratingBike=bike;e.ratingExp=exp;e.feedback=note;e.ratingDetail=detail;e.ratedAt=new Date().toISOString();}
   S._rg=null;renderRateModal();toast(t('rateThanks'));renderMyRides(); // which opens the next unrated ride, if there is one
+}
+// ── A desk-added booking's waiver: an unskippable page (the owner, 2026-10-04) ──
+// A booking made in the wizard carries the waiver it was agreed under (waiver_version). A rider staff
+// added (add rider, add group, a walk-in) has none, so the next time they open the site signed in a
+// page shows that ride - what, when, where and who - with its waiver, and stays up until they agree:
+// no close, no backdrop, no Escape, moving about keeps it, Log out is the only other way off. Agreeing
+// stamps every row of that ride on the account that has no waiver yet (customer_accept_waiver,
+// 20261004173000), as the wizard's tick does for the whole party. Only rides from today on: a ride
+// already ridden is not signed for after the fact. One ride at a time, the soonest first, and all of
+// them before the post-ride rating (_forceRatingPrompt asks here first).
+function _pendingWaiver(){
+  const cust=S.loggedIn;if(!cust||S._wgOff)return null;
+  const today=todayStr(),map={};
+  getQueue().forEach(e=>{
+    if(e.customerId!==cust.id||e.waiverVersion!==null||!['waiting','waitlist','active','done'].includes(e.status))return;
+    const d=String(e.sessionDate||e.sessionId||'').slice(0,10);if(d<today||map[e.sessionId])return;
+    const s=allSessions().find(x=>x.id===e.sessionId);if(s&&_needsWaiver(s))map[e.sessionId]=d;
+  });
+  const ids=Object.keys(map).sort((a,b)=>map[a].localeCompare(map[b]));
+  return ids.length?ids[0]:null;
+}
+function _forceWaiverPrompt(){
+  const sid=_pendingWaiver();if(!sid)return false;
+  S._wg={sid,ok:false,saving:false,net:false};renderWaiverGate();return true;
+}
+function _wgTick(on){const g=S._wg;if(!g||g.saving)return;g.ok=!!on;g.net=false;renderWaiverGate();}
+function renderWaiverGate(){
+  const g=S._wg,m=document.getElementById('waiver-gate');if(!m)return;
+  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix&&!S._afx&&!S._rg)document.body.classList.remove('fix-open');return;}
+  const s=allSessions().find(x=>x.id===g.sid),me=S.loggedIn&&S.loggedIn.id;
+  if(!s){S._wg=null;return renderWaiverGate();}
+  // The booking as the ticket shows it: every live rider of this ride on the account, in number order.
+  const rows=getQueue().filter(e=>e.sessionId===g.sid&&e.customerId===me&&['waiting','waitlist','active','done'].includes(e.status)).sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
+  const w=_waiverCopy(s),noNum=_isApprovalRide(s),r0=rows[0]||{},ev=_evName(s),ven=_venueName(s);
+  const box=m.querySelector('.auth-backdrop'),top=box?box.scrollTop:0;
+  document.body.classList.add('fix-open');
+  m.style.display='block';
+  m.innerHTML=`<div class="auth-backdrop"><div class="pg-box fx-box wg-box" role="dialog" aria-modal="true" aria-labelledby="wg-title" aria-describedby="wg-sub">
+    <div class="fx-kicker"><span class="fx-flag" aria-hidden="true">${_cuIc('flag',12)}</span>${t('wgKicker')}</div>
+    <h2 id="wg-title" class="pg-title">${esc(w.title)}</h2>
+    <p id="wg-sub" class="pg-sub">${t('wgSub')}</p>
+    <div class="wg-sess">
+      <div class="wg-ev">${esc(ev)}</div>
+      <div class="wg-ln">${_cuIc('cal',15)}<span>${esc(dayLabel(s.day||r0.sessionDay))} · ${esc(shortDate(r0.sessionDate||s.session_date||g.sid))}</span></div>
+      <div class="wg-ln">${_cuIc('clock',15)}<bdi>${esc(sessionTime(s))}</bdi></div>
+      ${ven&&ven!==ev?`<div class="wg-ln">${_cuIc('pin',15)}<span>${esc(ven)}</span></div>`:''}
+      <div class="wg-sec">${t(_needsBike(s)?'reviewRidersLabel':'reviewPartLabel')}</div>
+      <ul class="wg-riders">${rows.map(e=>`<li>${noNum||e.queueNum==null?'':`<bdi class="wg-num">#${e.queueNum}</bdi>`}<span>${esc(e.name||'')}</span></li>`).join('')}</ul>
+    </div>
+    <div class="wg-text" tabindex="0" role="region" aria-label="${esc(w.title)}">${esc(w.body)}</div>
+    <label class="wg-agree${g.ok?' on':''}"><input type="checkbox" class="wg-cb"${g.ok?' checked':''}${g.saving?' disabled':''} data-on-change="${_on("_wgTick",_P("checked"))}"><span>${w.agree}</span></label>
+    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    <button type="button" class="pg-btn"${g.ok&&!g.saving?'':' disabled'} data-on-click="${_on("acceptWaiverGate")}">${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('wgBtn')}</button>
+    <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
+  </div></div>`;
+  const nb=m.querySelector('.auth-backdrop');if(nb&&top)nb.scrollTop=top;
+  if(!g.shown){g.shown=true;const b=m.querySelector('.wg-box');if(b){b.setAttribute('tabindex','-1');try{b.focus({preventScroll:true});}catch(_){}}}
+}
+async function acceptWaiverGate(){
+  const g=S._wg;if(!g||!g.ok||g.saving)return;
+  const c=S.loggedIn||getSession(),s=allSessions().find(x=>x.id===g.sid),ver=s&&_waiverVersionFor(s);
+  if(!c||!c.session_token||!ver){g.net=true;renderWaiverGate();return;}
+  g.saving=true;g.net=false;renderWaiverGate();
+  let res;try{res=await sb.rpc('customer_accept_waiver',{p_id:c.id,p_token:c.session_token,p_session_id:g.sid,p_version:ver});}catch(e){res={error:e};}
+  if(S._wg!==g)return; // signed out meanwhile
+  // A database without the function cannot record the answer, and must not keep the rider out of the site.
+  if(res&&res.error&&_rpcAbsent(res.error)){S._wgOff=true;S._wg=null;renderWaiverGate();_forceRatingPrompt();return;}
+  if(!res||res.error||typeof res.data!=='number'||res.data<0){g.saving=false;g.net=true;renderWaiverGate();return;}
+  const at=new Date().toISOString().replace(/\.\d+Z$/,'Z');
+  getQueue().forEach(e=>{if(e.sessionId===g.sid&&e.customerId===c.id&&e.waiverVersion===null){e.waiverVersion=ver;e.waiverAt=at;}});
+  try{_cacheSave();}catch(_){}
+  S._wg=null;renderWaiverGate();
+  _forceRatingPrompt(); // the next ride's waiver, if there is one, then any rating
 }
 
 // ── My Rides rider profile: tier, streak, badges, member card, share card ──
