@@ -80,7 +80,7 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
 
 ## Do not expose internal files publicly
 
-Cloudflare Pages serves the repo root, so internal files must be blocked from public serving. The live gate is `functions/_middleware.js` (a **denylist** by extension and path prefix); `_redirects` no longer carries rules. The denylist passes `.html`/`.js`, so a committed prototype directory stays publicly reachable unless its prefix is added — `design_handoff_erp_reskin/` is blocked by prefix for exactly this reason (it contains a real staff mobile number). If you add a new served asset, also add it to `FILES` in `scripts/assemble-dist.mjs` — that script now fails the build when a listed file is missing.
+Cloudflare Pages serves the repo root, so internal files must be blocked from public serving. The live gate is `functions/_middleware.js` (a **denylist** by extension and path prefix); `_redirects` no longer carries rules. The denylist passes `.html`/`.js`, so a committed prototype directory stays publicly reachable unless its prefix is added — `design_handoff_erp_reskin/` is blocked by prefix for exactly this reason (it is internal reference; the real staff mobile number it carried was replaced with invented ones on 2026-10-05, and only made-up numbers belong in it). `.wrangler/` (wrangler's local dev state) is `.gitignore`d since 2026-10-05 and blocked too. If you add a new served asset, also add it to `FILES` in `scripts/assemble-dist.mjs` — that script now fails the build when a listed file is missing.
 
 ## Traps in the one-file app (learned from 2026-09-11, NFC bike check-in)
 

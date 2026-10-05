@@ -37,7 +37,8 @@ export async function onRequest(context) {
   const blocked =
     /\.(sql|md|ts|mjs|lock|yml|yaml|toml|map|cjs|env|sh)$/.test(path) || // source / config / docs / data
     // Local databases: wrangler's dev state (.wrangler/state/**.sqlite plus its -wal/-shm
-    // journals) is tracked in git, and a repo-root deploy would otherwise serve it.
+    // journals) was tracked in git until 2026-10-05 (now .gitignore'd), and a repo-root deploy
+    // from a checkout that has it would otherwise serve it.
     /\.(sqlite3?|db)(-wal|-shm|-journal)?$/.test(path) ||
     // configs stay blocked; the PWA manifest, the translation packs, the city lists and the
     // phone-number rules the staff "Looks off" check reads are app assets. The rules file was
@@ -49,9 +50,9 @@ export async function onRequest(context) {
     path.startsWith('/visual/') ||                                     // the local screenshot harness (playwright.visual.config.ts)
     path.startsWith('/scripts/') ||
     path.startsWith('/functions/') ||
-    // The ERP design bundle is 1.8 MB of internal reference and one of its files carries a
-    // real staff mobile number. It is a .html prototype, so the extension allow-list let it
-    // through — block the whole directory by path instead.
+    // The ERP design bundle is 1.8 MB of internal reference, and one of its files carried a
+    // real staff mobile number (replaced with invented ones 2026-10-05). It is a .html prototype,
+    // so the extension allow-list let it through — block the whole directory by path instead.
     path.startsWith('/design_handoff_erp_reskin/') ||
     path.startsWith('/.github/') ||
     path.startsWith('/.claude/') ||
