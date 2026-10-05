@@ -46,8 +46,8 @@ test('a national number that starts with its country code digits keeps the code'
     ['3931234567', '+39', '+393931234567'],     // Italian 393…
     ['96512345678', '+965', '+96512345678'],    // Kuwait with its code
     ['96512345', '+965', '+96596512345'],       // …and a Kuwaiti number that starts 965
-    ['966562989838', '+966', '+966562989838'],  // the Saudi forms are unchanged
-    ['562989838', '+966', '+966562989838'],
+    ['966551234567', '+966', '+966551234567'],  // the Saudi forms are unchanged
+    ['551234567', '+966', '+966551234567'],
   ];
   for (const [input, cc, expected] of cases) {
     expect(await page.evaluate(`_normPhone(${JSON.stringify(input)}, ${JSON.stringify(cc)})`), `${cc} ${input}`).toBe(expected);

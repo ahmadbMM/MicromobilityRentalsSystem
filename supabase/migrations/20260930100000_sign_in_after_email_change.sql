@@ -1,6 +1,6 @@
 -- ============================================================================
--- An account's Google or Apple mark after its email is changed (the owner, 2026-09-30: "Shrooq
--- Iqbal had her account signed up with apple id button then i changed it to a manual email not
+-- An account's Google or Apple mark after its email is changed (the owner, 2026-09-30: "[a
+-- customer] had her account signed up with apple id button then i changed it to a manual email not
 -- using the buttons but it shows that it is linked using the google button, fix this issue").
 --
 -- The marks (20260929140000) match Supabase Auth's sign-in records on the account's email or its
@@ -24,7 +24,7 @@
 --     has records here, so none of them is marked on the stamp: an account the buttons no
 --     longer reach shows no mark. A linked Apple address (apple_email) is an Apple mark in itself.
 --  3. Accounts whose email was changed off an Apple sign-in address since the audit log began
---     (2026-09-28) get that address back as apple_email (Shrooq Iqbal's shrooq.iq@icloud.com,
+--     (2026-09-28) get that address back as apple_email (one account's iCloud address,
 --     changed on 2026-09-30); none other on 2026-09-30.
 --
 -- Rollback:

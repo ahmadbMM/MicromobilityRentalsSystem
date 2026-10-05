@@ -1919,7 +1919,7 @@ function setStaffRole(role){
 }
 // ── Staff Supabase Auth (SECURE_AUTH): the DB trusts the Auth session, not the client-side PIN ──
 // Normalize any phone entry to one canonical form (Saudi +966 default) so every format
-// a staffer might type — 0562989838, 562989838, 966…, 00966…, +966… — maps to one key.
+// a staffer might type — 0551234567, 551234567, 966…, 00966…, +966… — maps to one key.
 function _staffPhoneE164(raw){
   // Delegate to the hardened customer normalizer: Arabic-Indic digits, "+9660…" trunk zeros,
   // 00966/966/05/bare — the staff login previously missed the first two.

@@ -31,13 +31,13 @@ test('_staffLoginEmail resolves every phone format (and email) to the account em
   // TABLE, so what the client owes is: normalize to E.164, ask, and pass the answer through.
   await page.evaluate(`sb.rpc=async(name,args)=>{
     if(name!=='staff_email_for_phone')return {data:null,error:{message:'unexpected '+name}};
-    return {data:args.p_phone==='+966562847777'?'salemb@micromobility.sa':null,error:null};
+    return {data:args.p_phone==='+966551230077'?'desk.one@micromobility.sa':null,error:null};
   }`);
-  for (const p of ['0562847777', '562847777', '966562847777', '00966562847777', '+966562847777', '+966 56 284 7777']) {
-    expect(await page.evaluate(`_staffLoginEmail(${JSON.stringify(p)})`)).toBe('salemb@micromobility.sa');
+  for (const p of ['0551230077', '551230077', '966551230077', '00966551230077', '+966551230077', '+966 55 123 0077']) {
+    expect(await page.evaluate(`_staffLoginEmail(${JSON.stringify(p)})`)).toBe('desk.one@micromobility.sa');
   }
   // Email passes through (lowercased) without touching the RPC; unknown phone resolves to null.
-  expect(await page.evaluate(`_staffLoginEmail('SalemB@Micromobility.SA')`)).toBe('salemb@micromobility.sa');
+  expect(await page.evaluate(`_staffLoginEmail('Desk.One@Micromobility.SA')`)).toBe('desk.one@micromobility.sa');
   expect(await page.evaluate(`_staffLoginEmail('0500000000')`)).toBe(null);
 });
 
@@ -45,7 +45,10 @@ test('the personal mobiles are no longer in the shipped page', async ({ page }) 
   await stubSupabase(page);
   const res = await page.goto('/');
   const html = (await res!.text());
-  expect(html).not.toContain('966562847777');   // salem
-  expect(html).not.toContain('966565834444');   // ahmad
-  // 966566668818 is the PUBLISHED business contact (wa.me links, schema.org) and stays.
+  const js = await (await page.request.get('/app.js')).text();
+  // No Saudi mobile at all but the two PUBLISHED business contacts (the footer's, in wa.me links and
+  // schema.org, and the members dialog's WhatsApp): a staff member's own mobile is never shipped.
+  const published = new Set(['966566668818', '966534423513']);
+  const mobiles = [...(html + js).matchAll(/(?<!\d)(?:\+?966|0)(5\d{8})(?!\d)/g)].map((m) => '966' + m[1]);
+  expect(mobiles.filter((n) => !published.has(n))).toEqual([]);
 });

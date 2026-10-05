@@ -128,9 +128,7 @@ REVOKE EXECUTE ON FUNCTION public.assign_queue_num() FROM anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.queue_num_update_guard() FROM anon, authenticated;
 REVOKE EXECUTE ON FUNCTION public.staff_mark_pwd_changed() FROM anon;
 
--- the three mobiles that have been riding in the public bundle since July
-insert into staff_phones (phone, email) values
-  ('+966562847777','salemb@micromobility.sa'),
-  ('+966566668818','mohammad.alhosni@micromobility.sa'),
-  ('+966565834444','ahmadb@micromobility.sa')
-on conflict (phone) do update set email = excluded.email;
+-- The three mobiles that had been riding in the public bundle since July were moved into
+-- staff_phones here, one row per staff login. Those rows are people's data, so they are no longer
+-- written in this file (2026-10-05, the repository is public): staff phones are entered with
+-- sql/applied/staff-onboarding.sql, as for every other staff member.

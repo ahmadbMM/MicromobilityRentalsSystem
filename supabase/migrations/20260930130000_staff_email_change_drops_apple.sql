@@ -1,6 +1,6 @@
 -- ============================================================================
 -- An email staff change moves the account to the new address (the owner, 2026-09-30: "i want to
--- link the outlook.sa for shrooq not the apple", and for every account from now on: "New email
+-- link the outlook.sa for [the customer] not the apple", and for every account from now on: "New email
 -- only").
 --
 -- 20260930100000 made customers_email_alias keep a shared Apple sign-in address (an iCloud one,
@@ -12,8 +12,8 @@
 -- relay address stays linked whoever changes the email, as since 20260921150000 (the check-up
 -- that asks those accounts for a real email depends on it).
 --
--- Shrooq Iqbal's link was removed by hand on 2026-09-30 (apple_email null; her account signs in
--- with shrooq_iqbal@outlook.sa once she has a password).
+-- That account's Apple link was removed by hand on 2026-09-30 (apple_email null; it signs in
+-- with its outlook.sa address once it has a password).
 --
 -- Rollback: re-run _customer_email_alias from 20260930100000.
 -- Idempotent. Run supabase/checks/security-attributes.sql after.

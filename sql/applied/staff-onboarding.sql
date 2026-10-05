@@ -8,7 +8,7 @@
 -- ── SETUP (run ONCE) ────────────────────────────────────────────────────────
 -- A table for staff phone -> account email, plus a lookup the app calls at login.
 create table if not exists staff_phones (
-  phone text primary key,          -- store E.164, e.g. +966565834444
+  phone text primary key,          -- store E.164, e.g. +966500000000
   email text not null
 );
 alter table staff_phones enable row level security;
@@ -32,12 +32,12 @@ with grant_staff as (
   insert into staff (user_id, role, must_change_pwd)
   select id, 'admin', true               -- use 'frontdesk' for limited access
   from auth.users
-  where email = 'ahmadb@micromobility.sa' -- ← the staff email (any domain)
+  where email = 'staff.name@micromobility.sa' -- ← the staff email (any domain)
   on conflict (user_id) do update set role = excluded.role
   returning user_id
 )
 insert into staff_phones (phone, email)
-values ('+966565834444', 'ahmadb@micromobility.sa')   -- ← phone (E.164) + same email
+values ('+966500000000', 'staff.name@micromobility.sa')   -- ← phone (E.164) + same email
 on conflict (phone) do update set email = excluded.email;
 
 -- Done. They sign in with the email OR the phone + the temp password, then are prompted

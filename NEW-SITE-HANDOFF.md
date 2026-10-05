@@ -337,7 +337,7 @@ inside Bookings; Logs merged into History). Front-desk role sees only Sales + Bo
 - Contacts: members-dialog WhatsApp **+966 53 442 3513**; site footer WhatsApp/phone
   **+966 56 666 8818**; Instagram **@MicroMobilitySA**; location: Jeddah Corniche Circuit.
 - Ops: rides Sun & Tue 9–11pm (JCC), Saturday morning social ride (gathering ~6:30,
-  start ~7:00); staff mapping `+966566668818 → mohammad.alhosni@micromobility.sa`.
+  start ~7:00); the footer number is also a staff phone sign-in (staff_phones).
 
 ## 9. Integration notes for the unified platform
 

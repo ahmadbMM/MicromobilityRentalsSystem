@@ -114,8 +114,8 @@ test('a password account has no mark on My Account', async ({ page }) => {
   await expect(page.locator('#tab-account .si-ico')).toHaveCount(0);
 });
 
-// An account's email changed (the owner, 2026-09-30: Shrooq Iqbal signed up with Apple, staff gave
-// her account another email, and the mark said Google). The server now answers from the new email
+// An account's email changed (the owner, 2026-09-30: a customer signed up with Apple, staff gave
+// the account another email, and the mark said Google). The server now answers from the new email
 // (20260930100000); the page asks it again at once rather than showing the old mark for ten minutes.
 test('the editor asks for the marks again when it saves a new email, and not otherwise', async ({ page }) => {
   await accounts(page);

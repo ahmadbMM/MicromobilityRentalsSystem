@@ -435,17 +435,17 @@ test.describe('round 5: staff phone formats & remember-me default', () => {
     await boot(page);
     await loadStaffHalf(page); // a staff helper on a customer's page: the staff half is fetched first (2026-10-04)
     const out = await page.evaluate(`({
-      local: _staffPhoneE164('0562847777'),
-      arabic: _staffPhoneE164('٠٥٦٢٨٤٧٧٧٧'),
-      intlZero: _staffPhoneE164('+966 0562847777'),
-      zeros: _staffPhoneE164('00966562847777'),
-      bare: _staffPhoneE164('562847777'),
+      local: _staffPhoneE164('0551230077'),
+      arabic: _staffPhoneE164('٠٥٥١٢٣٠٠٧٧'),
+      intlZero: _staffPhoneE164('+966 0551230077'),
+      zeros: _staffPhoneE164('00966551230077'),
+      bare: _staffPhoneE164('551230077'),
     })`) as Record<string, string>;
-    expect(out.local).toBe('+966562847777');
-    expect(out.arabic).toBe('+966562847777'); // was '+' + empty — Arabic keyboards couldn't staff-login by phone
-    expect(out.intlZero).toBe('+966562847777'); // was '+9660…'
-    expect(out.zeros).toBe('+966562847777');
-    expect(out.bare).toBe('+966562847777');
+    expect(out.local).toBe('+966551230077');
+    expect(out.arabic).toBe('+966551230077'); // was '+' + empty — Arabic keyboards couldn't staff-login by phone
+    expect(out.intlZero).toBe('+966551230077'); // was '+9660…'
+    expect(out.zeros).toBe('+966551230077');
+    expect(out.bare).toBe('+966551230077');
   });
 
   test('remember-me defaults ON so logins persist across app restarts', async ({ page }) => {
