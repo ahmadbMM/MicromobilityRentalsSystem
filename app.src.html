@@ -744,6 +744,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   allSessions:'All Sessions',colRider:'Rider',colMember:'Membership',memberYes:'Member',memberNo:'Non-member',
   walkinSize:'Frame Size',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
+  promoCodeExists:'A code with this text already exists.',promoTypeMissing:'Type column missing - run add-roadcarbon-mmteam.sql; the code was saved for every bike type.',bePaidMoveErr:'This booking is paid, and that ride has a different fare, so it cannot move there. Pick a ride with the same fare, or take the payment back first.',
   editBookingBtn:'Edit',editBookingTitle:'Edit Booking',editBookingSub:'Change the rider details or move the booking, the same fields the customer can edit.',undoEditBooking:'Edit booking',saveChangesBtn:'Save Changes',
   beAddRidersLabel:'Add riders',beMoveActiveNote:'Moving a checked-in rider takes them off their bike and puts them back in line on the new ride. What they paid stays paid.',beMovePaidNote:'What they paid stays paid on the new ride.',beAddRiderBtn:'Add rider',beRiderPh:'Rider name',beRemoveRider:'Remove rider',beRidersAdded:'rider(s) added',
   checkInBtn:'Check In',returnBikeBtn:'Return Bike',removeBtn:'Remove',noShowBtn:'No-Show',customerShowedBtn:'Customer Showed',undoCheckinBtn:'Undo Check-in',toastUndoCheckin:'Check-in reversed - rider moved back to waiting.',
@@ -1297,6 +1298,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   allSessions:'جميع الجلسات',colRider:'الراكب',colMember:'العضوية',memberYes:'عضو',memberNo:'غير عضو',
   walkinSize:'مقاس الإطار',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
+  promoCodeExists:'يوجد رمز بهذا النص بالفعل.',promoTypeMissing:'عمود النوع غير موجود - شغّل add-roadcarbon-mmteam.sql؛ تم حفظ الرمز لجميع أنواع الدراجات.',bePaidMoveErr:'هذا الحجز مدفوع، وتلك الرحلة بسعر مختلف، فلا يمكن نقله إليها. اختر رحلة بالسعر نفسه، أو استرجع الدفعة أولاً.',
   editBookingBtn:'تعديل',editBookingTitle:'تعديل الحجز',editBookingSub:'عدّل بيانات الراكب أو انقل الحجز، نفس الحقول التي يمكن للعميل تعديلها.',undoEditBooking:'تعديل الحجز',saveChangesBtn:'حفظ التغييرات',
   beAddRidersLabel:'إضافة رُكّاب',beMoveActiveNote:'نقل راكب مسجّل الدخول يُنزله عن دراجته ويعيده إلى الانتظار في الرحلة الجديدة. ما دفعه يبقى مدفوعاً.',beMovePaidNote:'ما دفعه يبقى مدفوعاً في الرحلة الجديدة.',beAddRiderBtn:'إضافة راكب',beRiderPh:'اسم الراكب',beRemoveRider:'إزالة الراكب',beRidersAdded:'رُكّاب أُضيفوا',
   checkInBtn:'تسجيل الدخول',returnBikeBtn:'إرجاع الدراجة',removeBtn:'حذف',noShowBtn:'لم يحضر',customerShowedBtn:'العميل حضر',undoCheckinBtn:'تراجع عن تسجيل الدخول',toastUndoCheckin:'تم التراجع عن تسجيل الدخول - الراكب عاد إلى قائمة الانتظار.',
@@ -13674,7 +13676,6 @@ function _on_renderSessions_35(event,el){S.editSessMode='fleet';renderSessions()
 function _on_renderSessions_36(event,el,a0,a1){S.editSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_37(event,el){S.editSessTotal=el.value}
 function _on_renderSessions_38(event,el){S.editSessionId=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
-function _on_renderSessions_39(event,el){S.showAddSession=true;S.editSessionId=null;renderSessions()}
 function _on_renderSessions_40(event,el,a0){event.stopPropagation();closeOutSession(a0)}
 function _on_renderSessions_41(event,el,a0){event.stopPropagation();showCancelNight(a0)}
 function _on_renderSessions_42(event,el,a0){event.stopPropagation();toggleSession(a0,'full')}
@@ -14055,60 +14056,20 @@ function renderSessions(){
   // newest-date-first - the furthest-future nights - which both overrode the staff order and
   // hid live sessions behind a Show more button. The pane scrolls.
   const displaySessions=sessList;
-  const rows=sessList.length?displaySessions.map(s=>{
-    const cap=_placesCap(s),booked=_placesTaken(s); // the Dashboard's and Analytics' rule
-    const left=Math.max(0,cap-booked);
-    const isOpen=s.status==='open';
-    const isFull=s.status==='full';
-    const isClosed=s.status==='closed';
-    const slots=parseSlots(s.bike_slots);
-    const fleetInfo=slots?slotsLabel(slots):'—';
-    let statusBadgeHtml,actionBtns;
-    if(isOpen){
-      statusBadgeHtml=`<span class="badge-open">${t('statusOpen')}</span>`;
-      actionBtns=`
-        <button class="btn-sm btn-muted" data-on-click="${_on("toggleSession",s.id,"full")}">${t('markFullBtn')}</button>
-        <button class="btn-sm btn-red" data-on-click="${_on("toggleSession",s.id,"closed")}">${t('closeBtn')}</button>`;
-    }else if(isFull){
-      statusBadgeHtml=`<span class="badge-full">${t('statusFull')}</span>`;
-      actionBtns=`
-        <button class="btn-sm btn-green" data-on-click="${_on("toggleSession",s.id,"open")}">${t('reopenBtn')}</button>
-        <button class="btn-sm btn-red" data-on-click="${_on("toggleSession",s.id,"closed")}">${t('closeBtn')}</button>`;
-    }else{
-      statusBadgeHtml=`<span class="badge-closed">${t('statusClosed')}</span>`;
-      actionBtns=`<button class="btn-sm btn-green" data-on-click="${_on("toggleSession",s.id,"open")}">${t('openBtn')}</button>`;
-    }
-    return`<tr>
-      <td data-label="${t('colDate')}" class="ss-b800">${shortDate(s.session_date||s.id)}</td>
-      <td data-label="${t('colDay')}" class="ss-c-muted">${dayLabel(s.day)||''}</td>
-      <td data-label="${t('colCapacity')}">
-        <div class="ss-b800">${cap}</div>
-        <div class="ss-fleet">${fleetInfo}</div>
-      </td>
-      <td data-label="${t('colBookings')}">${booked} / ${cap} &nbsp;<span class="ss-left">(${left} ${t('spotsLeft')})</span></td>
-      <td data-label="${t('colStatus')}">${statusBadgeHtml}</td>
-      <td class="cell-actions">
-        <div class="actions-cell">
-          <button class="btn-sm btn-green" data-on-click="${_on("startEditSession",s.id)}">${t('editBtn2')}</button>
-          <button class="btn-sm btn-muted" data-on-click="${_on("cloneSession",s.id)}">${t('cloneSessBtn')}</button>
-          ${actionBtns}
-          ${isAdmin()?`<button class="btn-sm btn-red" data-on-click="${_on("deleteSession",s.id)}" ${booked>0?`disabled title="${t('hasBookingsTitle')}"`:''}>${t('deleteBtn')}</button>`:''}
-        </div>
-      </td>
-    </tr>`;
-  }).join(''):`<tr><td colspan="6"><div class="ss-p8">${emptyIllustration(ILLUS_CALENDAR,t('noSessionsYet'),'',`<button class="btn-primary" data-on-click="${_on("_on_renderSessions_39",_EV,_EL)}">${t('newSession')}</button>`)}</div></td></tr>`;
 
   // ── Two-pane session browser: list (left) + detail (right) on iPad/desktop; master-detail on phone ──
   const _sessD=(s)=>{
     const cap=_placesCap(s),booked=_placesTaken(s);const left=Math.max(0,cap-booked); // the Dashboard's and Analytics' rule
     const slots=parseSlots(s.bike_slots);const fleetInfo=slots?slotsLabel(slots):'';
-    // "Close out": riders still sitting in live states on a night that is over (dated before
-    // today KSA, or closed) or is tonight — the desk closes the night out as it packs up, not
-    // the day after. Nobody does this by hand — 1,776 stale 'waiting' rows and 191 stuck
-    // 'active' rows had accumulated since July before this button existed.
+    // "Close out": riders still sitting in live states on a night that is over or is tonight —
+    // the desk closes the night out as it packs up, not the day after. Nobody does this by hand —
+    // 1,776 stale 'waiting' rows and 191 stuck 'active' rows had accumulated since July before
+    // this button existed. The count is the roster's own (_coCount): never a night still ahead,
+    // closed or not (2026-10-05: a closed future night offered it, and marked its riders no-show
+    // days early), and on an approval ride only the riders selected.
     const _today=new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ});
     const _nightOver=s.status==='closed'||String(s.session_date||s.id)<_today;
-    const _closeable=(_nightOver||String(s.session_date||s.id).slice(0,10)===_today)?(_qBySession().get(s.id)||[]).filter(e=>e.status==='active'||e.status==='waiting').length:0;
+    const _closeable=_coCount(s.id);
     const _closeoutBtn=_closeable?`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_40",_EV,_EL,s.id)}" title="${t('closeOutHint')}">${t('closeOutBtn')} (${_closeable})</button>`:'';
     // The opposite case: the night is still AHEAD and has to be called off (weather, venue).
     // Cancelling used to mean closing the session and every rider finding out at the gate.
@@ -14314,10 +14275,12 @@ function renderPromoManager(){
 // can't be reconstructed row-by-row).
 async function _syncPromoBookings(code){
   const lc=String(code||'').toLowerCase();if(!lc)return 0;
-  // A code that has expired or run out of uses stops discounting, exactly as the DB's
-  // _promo_valid decides — so live bookings return to full price on the same rule.
-  const _m0=(S.promoCodes||[]).find(c=>c.active&&String(c.code).toLowerCase()===lc);
-  const match=(_m0&&!_promoSpent(_m0))?_m0:null;
+  // Every row below already carries the code, and its use was counted when it was applied: the
+  // server re-prices such a row from the code without checking again an expiry or a use limit
+  // it has passed since (_enforce_booking_price, 20260925140000), and so does this (2026-10-05).
+  // Only a code switched off or deleted, or one for another rider or another type, takes the
+  // discount away; it used to go from every rider holding a code once its last use was taken.
+  const match=(S.promoCodes||[]).find(c=>c.active&&String(c.code).toLowerCase()===lc)||null;
   const live=getQueue().filter(e=>e.promoCode&&String(e.promoCode).toLowerCase()===lc
     &&['waiting','waitlist','active'].includes(e.status)&&!e.paid&&!_freeSessIds.has(e.sessionId));
   const calls=[],_old=[]; // _old: [row, price before] to put back if the writes are refused
@@ -14356,6 +14319,9 @@ async function addPromo(){
   const code=(document.getElementById('pc-code')?.value||S._pcCode||'').trim().toUpperCase();
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
   if(!code||value<=0){toast(t('promoInvalidMsg'),'error');return;}
+  // A code is its text: a second row with the same text (in any case) left the booking form and
+  // the re-pricing above each picking one of the two (2026-10-05).
+  if((S.promoCodes||[]).some(c=>String(c.code||'').toLowerCase()===code.toLowerCase())){toast(t('promoCodeExists'),'error');return;}
   const row={id:uid(),code,kind:S._pcKind||'percent',value,active:true,created_at:new Date().toISOString()};
   if(S._pcType)row.applies_to=S._pcType;
   // Limits (all optional — omitted means the code behaves exactly as codes always have).
@@ -14378,7 +14344,7 @@ async function addPromo(){
   if(res.error&&row.applies_to&&/applies_to/i.test(res.error.message||'')){
     delete row.applies_to;
     res=await sb.from('promo_codes').insert(row);
-    if(!res.error)toast('applies_to column missing - run add-roadcarbon-mmteam.sql; code saved without a type restriction','warning');
+    if(!res.error)toast(t('promoTypeMissing'),'warning'); // in the staff member's language, as the limits' notice below (2026-10-05)
   }
   // Same tolerance for the limit columns: on a DB that has not run 20260816120000_promo_limits
   // the code still saves, unlimited, and the operator is told which migration is missing.
@@ -14425,7 +14391,23 @@ function _stockEvName(v){
   const x=String(v||'').trim().toLowerCase();if(!x)return false;
   return Object.values(LANG).some(L=>L&&['evSatName','evPetroName','evSwimName','evWorkshopName','evSnd96Name','evEventName','landCommTitle'].some(k=>L[k]&&String(L[k]).trim().toLowerCase()===x));
 }
-async function saveSessionEdit(){
+// One save at a time, as addSession (2026-10-05): a second tap on Save while a date move was on the
+// wire ran the whole move again, and its 23505 retry put a copy of the ride on '<date>-2'.
+function saveSessionEdit(){return _busyRun('sessEdit',_saveSessionEdit);}
+// The rows that name a ride by its id with no foreign key behind them - the application an Invite to
+// ride booked (community_applications.invited_session) and a badge given on the night
+// (customer_badges.session_id) - follow a date move and its Undo (2026-10-05). Left on the old id, the
+// invited rider's card lost its ride and its Invited / Completed / Didn't show list, and the badge its
+// night. Each is said when refused and never blocks the move, as the receipts; a database that
+// predates the column or the table (20260930140000 / 20260929000000) has nothing to move.
+async function _sessMoveRefs(from,to,ctx){
+  const gone=(r,re)=>{const e=r&&r.error;if(!e)return false;const c=String(e.code||''),m=String(e.message||'');return['PGRST204','PGRST205','42P01','42703'].includes(c)||(re.test(m)&&/does not exist|schema cache/i.test(m));};
+  let ca;try{ca=await sb.from('community_applications').update({invited_session:to}).eq('invited_session',from);}catch(e){ca={error:e};}
+  if(!gone(ca,/invited_session|community_applications/)&&!_writeErr(ca,ctx))(S._caApps||[]).forEach(a=>{if(a.invited_session===from)a.invited_session=to;});
+  let cb;try{cb=await sb.from('customer_badges').update({session_id:to}).eq('session_id',from);}catch(e){cb={error:e};}
+  if(!gone(cb,/customer_badges/)&&!_writeErr(cb,ctx))(S.custBadges||[]).forEach(x=>{if(x.session_id===from)x.session_id=to;});
+}
+async function _saveSessionEdit(){
   const oldId=S.editSessionId;
   const sess=allSessions().find(s=>s.id===oldId);if(!sess)return;
   // The whole row as it was, for the date move and for Undo. Both used to re-insert or restore a
@@ -14513,6 +14495,7 @@ async function saveSessionEdit(){
       // day's sales from the ledger, close-out and analytics (deleteSession already guards
       // against exactly this). Reported but never blocking: a refusal does not undo the date move.
       if(!await _wr(sb.from('cashier_sales').update({session_id:newId}).eq('session_id',oldId),'move receipts'))(S.cashSales||[]).forEach(r=>{if(r.session_id===oldId)r.session_id=newId;});
+      await _sessMoveRefs(oldId,newId,'move session'); // the invitations and badges on this ride follow it (2026-10-05)
       // Registrations from a ride's own form (the Petromin Riders list) follow as well. They are
       // the one table with a real foreign key to the session, ON DELETE SET NULL, so deleting
       // the old row below wiped their session and the Riders list lost that night's riders.
@@ -14600,6 +14583,7 @@ async function saveSessionEdit(){
         if(_writeErr(_mv,'undo date move')){try{await sb.from('sessions').delete().eq('id',oldId);}catch(_){} // fire-and-forget: takes the copy back off; the error bar has said the undo failed (the builder has then() only - .catch on it threw, and the undo died here)
         await loadData();renderSessions();return false;}
         if(!await _wr(sb.from('cashier_sales').update({session_id:oldId}).eq('session_id',currentId),'undo date move'))(S.cashSales||[]).forEach(r=>{if(r.session_id===currentId)r.session_id=oldId;});
+        await _sessMoveRefs(currentId,oldId,'undo date move'); // ...and the invitations and badges with them
         const _rr=await sb.from('rider_registrations').update({session_id:oldId}).eq('session_id',currentId);
         if(_writeErr(_rr,'undo date move')){await loadData();renderSessions();return false;} // the moved row stays: deleting it would null them
         (S.riders||[]).forEach(r=>{if(r.session_id===currentId)r.session_id=oldId;});
@@ -14795,7 +14779,7 @@ async function toggleSession(id,newStatus){
     await loadData();
     const lbl={open:t('sessOpened'),closed:t('sessClosed'),full:t('statusFull')+'.'}[newStatus]||newStatus;
     toast(lbl);
-    pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${newStatus}`,async()=>{
+    pushUndo(`${t('undoSessionStatus')} ${shortDate(prev?.session_date||id)} → ${_own(SESS_STATUS_KEY,newStatus)?t(SESS_STATUS_KEY[newStatus]):newStatus}`,async()=>{ // the status in words, not its code (2026-10-05)
       if(_writeErr(await sb.from('sessions').update({status:prevStatus}).eq('id',id),'undo session status'))return false;
       for(const r of _doneIds)await _wr(sb.from('queue_entries').update({status:r.status,checked_out_at:null,...(r.status==='waiting'?{checked_in_at:null}:{})}).eq('id',r.id),'undo session status');
       await loadData();renderSessions();renderStaffQueue();
@@ -19739,24 +19723,28 @@ async function execCancelNight(){
     if(_writeErr(res,'undo cancel night'))return false;
   });
 }
-// How many riders a close-out of this night would settle (on a bike, or checked in and never
+// The riders a close-out of this night would settle (on a bike, or checked in and never
 // returned, or expected and never arrived): tonight's night, or a past one. The Sessions table
 // had the button; the roster, where the desk is at the end of the night, now has it too.
-function _coCount(sid){
-  const s=allSessions().find(x=>x.id===sid);if(!s)return 0;
-  const day=String(s.session_date||s.id).slice(0,10),today=todayStr();
-  if(day>today)return 0;
-  return(_qBySession().get(sid)||[]).filter(e=>e.status==='active'||e.status==='waiting').length;
+// A night still ahead has none, closed or not; and on an approval ride only the riders selected
+// (approved) count (2026-10-05): a request never approved did not ride, and the close-out marked
+// every pending Saturday request a no-show.
+function _coRows(sid){
+  const s=_sessGet(sid);if(!s)return[];
+  if(String(s.session_date||s.id).slice(0,10)>todayStr())return[];
+  const appr=_apprSessIds.has(sid);
+  return(_qBySession().get(sid)||[]).filter(e=>(e.status==='active'||e.status==='waiting')&&!(appr&&_apprOf(e)!=='approved'));
 }
+function _coCount(sid){return _coRows(sid).length;}
 async function closeOutSession(sid){
-  const rows=(_qBySession().get(sid)||[]).slice();
+  const rows=_coRows(sid); // the same day check and the same riders as the button's count
   // Riders on a bike are RETURNED (staff_return: bike back, check-out stamp, assignment closed),
   // exactly as the Return button does; checked in without a bike they are simply done.
   const toReturn=rows.filter(e=>e.status==='active');
   const toDone=rows.filter(e=>e.status==='waiting'&&e.checkedInAt);
   const toNoshow=rows.filter(e=>e.status==='waiting'&&!e.checkedInAt);
   if(!toReturn.length&&!toDone.length&&!toNoshow.length)return;
-  const sess=allSessions().find(x=>x.id===sid)||{};
+  const sess=_sessGet(sid)||{};
   const nBikes=toReturn.reduce((n,e)=>n+getAssignedBikeIds(e).length,0);
   // What is still owed goes in the question: a close-out marks riders Completed, it does not collect.
   const owed=[...toReturn,...toDone].filter(e=>!e.paid);
