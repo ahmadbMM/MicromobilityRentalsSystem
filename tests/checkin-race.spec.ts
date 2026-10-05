@@ -3,8 +3,11 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Two staff check the same WAITING rider into different bikes. The status-guarded write means the
 // loser gets 0 rows; it must release the bike it claimed instead of leaving it orphaned in-use.
+// Since 2026-10-05 the picker checks in through staff_checkin, which settles this race on the server;
+// the direct writes below are its fallback for a database without the function, which this pins.
 test('losing a check-in race releases the claimed bike (no orphan)', async ({ page }) => {
   await stubSupabase(page, {
+    'rpc:staff_checkin': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_checkin in the schema cache' } },
     sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }],
     bikes: [{ id: 'bX', name: 'Bike X', size: 'M', type: 'Hybrid', status: 'available', rental_price: 57.5 }],
     queue_entries: [{ id: 'q5', name: 'Rider 5', session_id: 's1', session_day: 'Friday', session_date: '2099-01-09', queue_num: 5, status: 'waiting', paid: false, price: 30, registered_at: '2099-01-09T10:00:00Z' }],

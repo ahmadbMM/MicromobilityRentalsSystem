@@ -6923,6 +6923,7 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 #bike-modal .bkm-paywarn{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--warn-rgb),.1);border:1px solid rgba(var(--warn-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
 #bike-modal .bkm-payhouse{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--purple-rgb),.08);border:1px solid rgba(var(--purple-rgb),.3);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
 #bike-modal .bkm-paygreen{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(var(--green-rgb),.06);border:1px solid rgba(var(--green-rgb),.2);border-radius:4px;padding:10px 14px;margin-bottom:14px;}
+#bike-modal .bkm-carry{margin:-8px 0 14px;font-size:12px;font-weight:700;color:var(--muted-l);}
 #bike-modal .bkm-fs16{font-size:16px;}
 #bike-modal .bkm-paylbl{font-size:12px;font-weight:800;color:var(--muted-l);}
 #bike-modal .bkm-paypur{font-size:12px;font-weight:800;color:var(--purple);}

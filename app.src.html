@@ -762,7 +762,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   sessionsTitle:'Sessions',sessionsSub:'Create sessions and open them to accept reservations. Closed by default.',sessShowMore:'Show {0} more',
   newSession:'+ New Session',newSessionTitle:'New Session',dateLabel:'Date',
   createSession:'Create Session',colDate:'Date',colDay:'Day',colCapacity:'Capacity',
-  colBookings:'Bookings',colManageBooking:'Manage Booking',colManageBike:'Manage Bike',colManageRecord:'Manage Record',openBtn:'Open',closeBtn:'Close',deleteBtn:'Delete',
+  colBookings:'Bookings',colManageBooking:'Manage Booking',colManageBike:'Manage Bike',colManageRecord:'Manage Record',openBtn:'Open',closeBtn:'Close',tmRoleFor:'Role for {0}',cactColDetail:'Details',cactColSite:'Site',rsNotOpenYet:'That session is not open for booking yet.',rsPaidMove:'This booking is paid. To move it to a session with a different price, ask at the booth.',repPopupBlocked:'The browser kept the report from opening. Tap again to open it.',hoTypeConfirmKeep:'Hand over a {0} to a rider who asked for a {1}? Their fare stays as it is.',ciPayCarryNote:'{0} chosen at check-in: recorded when the bike is assigned',deleteBtn:'Delete',
   statusOpen:'Open',statusClosed:'Closed',statusFull:'Fully Booked',markFullBtn:'Mark Full',reopenBtn:'Re-open',noSessionsYet:'No sessions yet. Create one above.',
   editSessionTitle:'Edit Session',saveSessionBtn:'Save Changes',editBtn2:'Edit',dateWarning:'Changing the date will update all existing bookings for this session.',
   bikesTitle:'Fleet',addBike:'+ Add Bike',editBikeTitle:'Edit Bike',addBikeTitle:'Add New Bike',
@@ -1316,7 +1316,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   sessionsTitle:'الجلسات',sessionsSub:'أنشئ الجلسات وافتحها لقبول الحجوزات. مغلقة بشكل افتراضي.',sessShowMore:'عرض {0} أخرى',
   newSession:'+ جلسة جديدة',newSessionTitle:'جلسة جديدة',dateLabel:'التاريخ',
   createSession:'إنشاء جلسة',colDate:'التاريخ',colDay:'اليوم',colCapacity:'الطاقة',
-  colBookings:'الحجوزات',colManageBooking:'إدارة الحجز',colManageBike:'إدارة الدراجة',colManageRecord:'إدارة السجل',openBtn:'فتح',closeBtn:'إغلاق',deleteBtn:'حذف',
+  colBookings:'الحجوزات',colManageBooking:'إدارة الحجز',colManageBike:'إدارة الدراجة',colManageRecord:'إدارة السجل',openBtn:'فتح',closeBtn:'إغلاق',tmRoleFor:'دور {0}',cactColDetail:'التفاصيل',cactColSite:'الموقع',rsNotOpenYet:'لم يُفتح الحجز في هذه الجلسة بعد.',rsPaidMove:'هذا الحجز مدفوع. لنقله إلى جلسة بسعر مختلف، اسأل عند الكشك.',repPopupBlocked:'منع المتصفح فتح التقرير. اضغط مرة أخرى لفتحه.',hoTypeConfirmKeep:'تسليم {0} لراكب طلب {1}؟ يبقى سعره كما هو.',ciPayCarryNote:'{0}: اختير عند تسجيل الدخول، ويُسجَّل عند تخصيص الدراجة',deleteBtn:'حذف',
   statusOpen:'مفتوح',statusClosed:'مغلق',statusFull:'محجوز بالكامل',markFullBtn:'تعيين كمكتمل',reopenBtn:'إعادة فتح',noSessionsYet:'لا توجد جلسات بعد. أنشئ واحدة أعلاه.',
   editSessionTitle:'تعديل الجلسة',saveSessionBtn:'حفظ التغييرات',editBtn2:'تعديل',dateWarning:'تغيير التاريخ سيحدّث جميع الحجوزات الموجودة لهذه الجلسة.',
   sessionAddonsLabel:'الإضافات المتاحة',sessionAddonsHint:'عناصر من المخزون يمكن للعملاء إضافتها إلى الحجز',addonStepTitle:'أضف إلى حجزك',addonStepSub:'إضافات اختيارية لهذه الرحلة.',addonNone:'لا توجد إضافات متاحة لهذه الجلسة.',addonsLabel:'الإضافات',addonEditTitle:'تعديل الإضافات',addonAddBtn:'الإضافات',stockLeft:'متبقٍ',outOfStock:'نفد المخزون',coReconOk:'البطاقة + النقد متوازنان',coReconOff:'غير محتسب',
@@ -5046,10 +5046,14 @@ async function _releaseReserved(id){
   renderStaffQueue();
   await _reloadRows([id]);
 }
+// A rider on their own bike, or booked with no bike at all ('Own' / 'None'), is never waiting for
+// one: Hand-over, the scanner and the roster's badge leave them out (2026-10-05).
+function _bikeNotOurs(e){const ty=resolvedType(e);return ty==='Own'||ty==='None';}
 function statusBadgeFor(e){
   if(_isReserved(e))return`<span class="status-badge badge-reserved">${t('statusReserved')}</span>`;
   // Checked in and still without a bike on a ride that hands them out: "Needs bike", not "On Bike".
-  if(e&&e.status==='active'&&!getAssignedBikeIds(e).length&&_needsBike(allSessions().find(x=>x.id===e.sessionId)))return`<span class="status-badge badge-waiting">${t('statusNeedsBike')}</span>`;
+  // One session lookup through the map, not a copy of every session per row (2026-10-05).
+  if(e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId)))return`<span class="status-badge badge-waiting">${t('statusNeedsBike')}</span>`;
   if(_isToReserve(e))return`<span class="status-badge badge-toreserve">${t('statusToReserve')}</span>`;
   if(!e||e.status!=='cancelled')return statusBadge(e?e.status:'done');
   const k=e.cancelledBy==='staff'?'statusCancelledByStaff'
@@ -13211,17 +13215,24 @@ function addonLineItems(arr){
 // Total SAR cost of a set of add-ons
 function addonsCost(arr){return Math.round(addonLineItems(arr).reduce((s,a)=>s+a.lineTotal,0)*100)/100;}
 // Tally add-ons across booking groups (qty-aware). Returns {items:[{id,name,brand,units,value}], totalUnits, totalValue}
+// Sold means handed over (2026-10-05): only a rider on the bike or done counts - a no-show or a rider
+// still waiting took nothing home - and each line is valued at the price it was sold at (the line's
+// own p since 20261004120000; older lines at today's inventory price, as addonLineItems reads them).
+// The session report, its Excel sheet and Analytics' add-on sales all read this one rule.
 function addonSalesFromGroups(groups){
   const tally={};let totalUnits=0,totalValue=0;
   (groups||[]).forEach(group=>{
-    (group||[]).forEach(e=>entryAddons(e).forEach(({id,qty})=>{ // per-rider: every rider's own add-ons, not just the lead
-      const it=(S.inventory||[]).find(x=>x.id===id);
-      const name=it?it.name:id,brand=it?(it.brand||''):'',price=(it&&it.price!=null)?Number(it.price):0;
-      if(!tally[id])tally[id]={id,name,brand,units:0,value:0};
-      tally[id].units+=qty;tally[id].value+=price*qty;totalUnits+=qty;totalValue+=price*qty;
-    }));
+    (group||[]).forEach(e=>{ // per-rider: every rider's own add-ons, not just the lead
+      if(!e||(e.status!=='active'&&e.status!=='done'))return;
+      addonLineItems(entryAddons(e)).forEach(({id,qty,name,brand,lineTotal})=>{
+        if(!tally[id])tally[id]={id,name,brand,units:0,value:0};
+        tally[id].units+=qty;tally[id].value+=lineTotal;totalUnits+=qty;totalValue+=lineTotal;
+      });
+    });
   });
-  return{items:Object.values(tally).sort((a,b)=>b.units-a.units||b.value-a.value),totalUnits,totalValue};
+  const r2=n=>Math.round(n*100)/100;
+  const items=Object.values(tally).map(x=>({...x,value:r2(x.value)}));
+  return{items:items.sort((a,b)=>b.units-a.units||b.value-a.value),totalUnits,totalValue:r2(totalValue)};
 }
 // Adjust inventory stock for a set of add-on ids by delta (-1 when a booking consumes them, +1 on cancel/no-show). Clamped at 0; tolerant of a missing qty column.
 async function _addonStock(ids,delta){
@@ -20735,7 +20746,11 @@ function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 function _modIds(a){return Array.isArray(a)?a.map(x=>x==='fnb'?'vendors':x):null;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
-function _editOk(tab){return !Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
+// Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
+// sections an edit list names, so an account with a list (the Owner's is empty) could open its
+// Settings but not save its own name, email or notifications there: read-only mode refused
+// staff_my_settings and staff_set_own_email. It is always the account's to change (2026-10-05).
+function _editOk(tab){return tab==='settings'||!Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
 function _firstTab(){return _staffSections().find(_deskTabOk)||'queue';}
 function _accessSet(row,uid){
   // the account's own Settings (20261002140000): its notification choices, name and picture
@@ -20912,8 +20927,14 @@ async function _tplEdSave(){
   _tplEdSync();const E=S._tplEd;if(!E)return;
   const b=document.getElementById('tpl-save');if(b)b.disabled=true;
   try{
-    await _tplLoad(true);
-    const all={...(S._tpl||{})},mine={};
+    // Its own read, and one that fails stops the save (2026-10-05): _tplLoad keeps this device's
+    // copy when its read fails, and that copy written over the server wiped the messages other
+    // admins had saved since.
+    const cur=await sb.from('site_content').select('value').eq('key',TPL_KEY).maybeSingle();
+    if(_writeErr(cur,'message template',()=>_tplEdSave())){if(b)b.disabled=false;return;}
+    const sv=cur.data&&cur.data.value;
+    const all=(sv&&typeof sv==='object'&&!Array.isArray(sv))?{...sv}:{},mine={};
+    S._tpl={...all};
     ['en','ar'].forEach(g=>{const v=String(E.text[g]||'').replace(/\r/g,'').trim();if(v&&v!==_tplDefault(E.id,g).trim())mine[g]=v;});
     if(Object.keys(mine).length)all[E.id]=mine;else delete all[E.id];
     if(await _wr(sb.from('site_content').upsert({key:TPL_KEY,value:all,updated_by:_opName()||null}),'message template')){if(b)b.disabled=false;return;}
@@ -20986,14 +21007,24 @@ async function _setPwdSave(){
   if(p1!==p2){_setErr('set-pwd-err',t('errPasswordMatch'));return;}
   _setErr('set-pwd-err','');
   const b=document.getElementById('set-pwd-save');if(b)b.disabled=true;
+  // Supabase Auth answers in English: the refusals it names by code are said in the staffer's
+  // language (2026-10-05); anything else still shows its own words.
+  const authSay=(er,isCheck)=>{
+    const c=String((er&&er.code)||''),m=String((er&&er.message)||'');
+    if(isCheck&&(c==='invalid_credentials'||/invalid/i.test(m)))return t('errCurPwd');
+    if(/rate_limit/.test(c)||(er&&er.status===429)||/rate limit|too many/i.test(m))return t('errTooManyTries');
+    if(c==='same_password'||/different from the old password/i.test(m))return t('accPwdSame');
+    if(c==='weak_password'||/weak|at least \d+ characters/i.test(m))return t('errPasswordLen');
+    return m||t('errConnection');
+  };
   try{
     // the current password first: signing in again with it is the check, and keeps the session
     let email=_set().email;
     if(!email){const{data}=await sb.auth.getSession();email=(data&&data.session&&data.session.user&&data.session.user.email)||'';}
     const chk=await sb.auth.signInWithPassword({email,password:cur});
-    if(chk.error){_setErr('set-pwd-err',/invalid/i.test(chk.error.message||'')?t('errCurPwd'):(chk.error.message||t('errConnection')));return;}
+    if(chk.error){_setErr('set-pwd-err',authSay(chk.error,true));return;}
     const{error}=await sb.auth.updateUser({password:p1});
-    if(error){_setErr('set-pwd-err',error.message||t('errConnection'));return;}
+    if(error){_setErr('set-pwd-err',authSay(error,false));return;}
   }catch(e){_setErr('set-pwd-err',t('errConnection'));return;}
   finally{if(b)b.disabled=false;}
   try{const r=await sb.rpc('staff_mark_pwd_changed');if(r&&r.error&&!_tmMissing(r.error))console.error('mark pwd changed',r.error);}catch(_){}
@@ -21044,7 +21075,7 @@ function renderTeam(){
     const chip=(kind,k,on)=>`<button type="button" class="toggle-btn tm-chip${on?' active':''}" aria-pressed="${on}" data-sec="${kind}:${k}"${dis} data-on-click="${_on("_tmToggle",a.user_id,kind,k)}">${esc(_sectionName(k))}</button>`;
     return`<div class="tm-acct" data-acct="${esc(a.user_id)}">
       <div class="tm-acct-head"><strong>${esc(a.email||a.user_id)}</strong>${a.is_me?`<span class="tm-me">${t('acctYou')}</span>`:''}
-        <select class="filter-select tm-role" aria-label="${esc(t('roleAdmin'))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}">${STAFF_ROLES.map(r=>`<option value="${r}"${d.role===r?' selected':''}>${_roleLabel(r)}</option>`).join('')}</select></div>
+        <select class="filter-select tm-role" aria-label="${esc(t('tmRoleFor').replace('{0}',a.email||a.user_id))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}">${STAFF_ROLES.map(r=>`<option value="${r}"${d.role===r?' selected':''}>${_roleLabel(r)}</option>`).join('')}</select></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctView')}</span><div class="tm-chips">${secs.map(k=>chip('view',k,inV(k))).join('')}</div></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctEdit')}</span><div class="tm-chips">${secs.filter(inV).map(k=>chip('edit',k,inE(k))).join('')}</div></div>
       ${a.is_me?'':`<div class="tm-save"><button type="button" class="btn-sm btn-green" data-on-click="${_on("_tmSave",a.user_id)}"${T.edit[a.user_id]?'':' disabled'}>${t('saveBtn')}</button></div>`}
@@ -21258,13 +21289,27 @@ async function confirmCancelWithReason(id){
 }
 
 // Self-service reschedule: move a whole booking (all the customer's waiting riders in one session) to another open upcoming session
+// Where a booking may be moved (2026-10-05): an open circuit ride (_evMatch 'jcc': no community ride,
+// Petromin night, event, workshop or National Day ride), not over yet, and already open to riders
+// (the booking window). The list offered Petromin nights, events, rides that had ended and rides not
+// open yet, and the server then refused the move (members only, NOT_OPEN_YET).
+function _rsTarget(s,fromId){return !!s&&s.id!==fromId&&s.status==='open'&&!_isApprovalRide(s)&&_evMatch(s,'jcc')&&!_sessEnded(s)&&_bwOpen(s);}
+// A move the server refused, said in the rider's language: a members-only ride, a ride not open
+// for booking yet, or a paid booking onto a ride with another fare (PAID_MOVE). True when said.
+function _rsRefused(err,sess){
+  if(!err)return false;
+  const m=String((err.code||'')+' '+(err.message||'')+' '+(err.details||''));
+  if(_rideRuleRefusal(err)==='MEMBERS_ONLY'){showCommMembersModal();return true;}
+  if(/NOT_OPEN_YET/.test(m)){toast(_bwOpensText(sess)||t('rsNotOpenYet'),'error');return true;}
+  if(/PAID_MOVE/.test(m)){toast(t('rsPaidMove'),'error');return true;}
+  return false;
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showRescheduleModal_1(event,el){if(event.target===el)closeRescheduleModal()}
 function showRescheduleModal(fromSessionId){
   const cust=S.loggedIn;if(!cust)return;
   const moving=getQueue().filter(e=>e.customerId===cust.id&&e.sessionId===fromSessionId&&(e.status==='waiting'||e.status==='waitlist'));
   if(!moving.length){toast(t('errCancelWaiting'),'error');return;}
-  const today=_todayISO();
   // Community rides are never a reschedule target: they're invite-only (tag-gated), solo,
   // and approval-based — moving a JCC group in would bypass all three rules.
   // Nor is the National Day ride, in either direction. Entry to it is the federation's own
@@ -21272,7 +21317,9 @@ function showRescheduleModal(fromSessionId){
   // popup. And it takes owners free, so a booking moved out would carry a free own-bike place
   // onto a night that has none.
   if(_rideKind(allSessions().find(s=>s.id===fromSessionId))==='snd96')return;
-  const opts=allSessions().filter(s=>s.id!==fromSessionId&&s.status==='open'&&!_isApprovalRide(s)&&_rideKind(s)!=='snd96'&&(s.session_date||s.id)>=today)
+  // The booking window decides which rides are open yet: read once, and the list drawn again when it lands.
+  if(S._bw===undefined&&!S._bwBusy)_bwLoad().then(()=>{const m=document.getElementById('reschedule-modal');if(m&&m.style.display!=='none'&&m.dataset.from===String(fromSessionId))showRescheduleModal(fromSessionId);});
+  const opts=allSessions().filter(s=>_rsTarget(s,fromSessionId))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   const list=opts.length?opts.map(s=>{
     const full=spotsLeft(s.id)<moving.length; // same yardstick as booking + rescheduleBooking
@@ -21281,7 +21328,7 @@ function showRescheduleModal(fromSessionId){
       <span class="${full?'dk-rs-st-full':'dk-rs-st'}">${full?t('statusFull'):t('availLabel')}</span>
     </button>`;
   }).join(''):`<div class="empty-state">${t('rescheduleNoSessions')}</div>`;
-  const m=document.getElementById('reschedule-modal');m.style.display='flex';
+  const m=document.getElementById('reschedule-modal');m.style.display='flex';m.dataset.from=String(fromSessionId);
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showRescheduleModal_1",_EV,_EL)}">
     <div class="modal-box dk-mw380" role="dialog" aria-modal="true" aria-labelledby="dlgt-rescheduleTitle">
       <div class="dk-rs-head">
@@ -21300,6 +21347,8 @@ async function rescheduleBooking(fromSessionId,toSessionId){
   const newSess=allSessions().find(s=>s.id===toSessionId);if(!newSess){closeRescheduleModal();return;}
   if(_isApprovalRide(newSess)){closeRescheduleModal();return;} // never a reschedule target (invite-only, solo, approval-based); the DB update-gate backstops this
   if(_rideKind(newSess)==='snd96'||_rideKind(allSessions().find(s=>s.id===fromSessionId))==='snd96'){closeRescheduleModal();return;} // National Day: in or out, see showRescheduleModal
+  // the same rule as the list (a list drawn a while ago may name a ride that has ended or is not one to move to)
+  if(!_rsTarget(newSess,fromSessionId)){closeRescheduleModal();toast(!_bwOpen(newSess)?(_bwOpensText(newSess)||t('rsNotOpenYet')):t('errSessionClosed'),'error');return;}
   // Same capacity yardstick as booking (spotsLeft): counting only waiting+active here let a
   // rescheduler land as 'waiting' ahead of riders already waitlisted in the target session.
   if(spotsLeft(toSessionId)<moving.length){toast(t('rescheduleFull'),'error');return;}
@@ -21335,6 +21384,8 @@ async function rescheduleBooking(fromSessionId,toSessionId){
     const b2=nextQNum(toSessionId);
     _rs=await Promise.all(sorted.map((e,i)=>_move(e,b2+i)));
   }
+  const _bad=_rs.find(r=>r&&r.error);
+  if(_bad&&_rsRefused(_bad.error,newSess)){await loadData();renderMyRides();return;} // said in the rider's language
   if(_writeErr(_rs,'reschedule')){await loadData();renderMyRides();return;}
   await loadData();
   // Add-on stock follows where each rider really landed, row by row: a waitlisted rider who
@@ -21675,19 +21726,23 @@ const _CACT_CAT={book:'book',cancel:'book',rebook:'book',reschedule:'book',booki
 const _CACT_CATS=[['book','logCatBook'],['auth','logCatAuth'],['acct','cactCatAccount'],['form','cactCatForms']];
 const _CACT_RED=new Set(['cancel','signin_fail','delete_req']);
 function _cact(){return S._cact||(S._cact={rows:[],at:0,busy:false,failAt:0,end:false});}
+// Rows are ordered newest first by time and then by id, and a page starts after the last row on
+// screen by both (2026-10-05): one booking for a party writes several lines with one timestamp, and
+// paging on the time alone skipped the ones a page boundary fell between.
+function _cactBefore(r,b){return r.at<b.at||(r.at===b.at&&Number(r.id)<Number(b.id));}
 async function _cactLoad(older){
   const c=_cact();if(c.busy||!sb)return;
   if(!older&&c.at&&Date.now()-c.at<60000)return; // a minute's cache, as the Action Log
   if(!older&&Date.now()-c.failAt<30000)return;   // and no read-redraw loop while offline
   c.busy=true;let got=false;
   try{
-    let q=sb.from('customer_activity').select('id,at,customer_id,who,action,detail,origin').order('at',{ascending:false}).limit(CACT_PAGE);
+    let q=sb.from('customer_activity').select('id,at,customer_id,who,action,detail,origin').order('at',{ascending:false}).order('id',{ascending:false}).limit(CACT_PAGE);
     const last=c.rows[c.rows.length-1];
-    if(older&&last)q=q.lt('at',last.at);
+    if(older&&last)q=q.or(`at.lt."${last.at}",and(at.eq."${last.at}",id.lt.${Number(last.id)})`);
     const{data,error}=await q;
     if(!error&&Array.isArray(data)){
       if(older){const ids=new Set(c.rows.map(r=>r.id));c.rows=c.rows.concat(data.filter(r=>!ids.has(r.id)));}
-      else{const ids=new Set(data.map(r=>r.id));const tail=c.rows.filter(r=>!ids.has(r.id)&&last&&r.at<(data[data.length-1]||{}).at);c.rows=data.concat(tail);c.at=Date.now();}
+      else{const ids=new Set(data.map(r=>r.id));const edge=data[data.length-1];const tail=c.rows.filter(r=>!ids.has(r.id)&&last&&edge&&_cactBefore(r,edge));c.rows=data.concat(tail);c.at=Date.now();}
       if(older||!c.end)c.end=data.length<CACT_PAGE;
       got=true;
     }
@@ -21794,13 +21849,13 @@ function renderCustActivity(){
   </div>`;
   if(hadFocus){const inp=document.getElementById('cact-search');if(inp){inp.focus();const v=inp.value;inp.value='';inp.value=v;}}
 }
+// Through _downloadCsv like every other export (2026-10-05): its own blob was revoked in the same
+// tick (Safari and Firefox lost the file), nothing went in the log, and two columns had no name.
 function exportCustActivityCSV(){
   const list=S._cactExport||[];if(!list.length){toast(t('cactEmpty'),'warning');return;}
   const fmt=at=>new Date(at).toLocaleString('en-GB',{timeZone:KSA_TZ,hour12:false});
-  const rows=[[t('logsColTime'),t('logsColBy'),t('logsColAction'),'',''],...list.map(r=>[fmt(r.at),r.who||'',_cactLabel(r),_cactDetail(r),r.origin||''])];
-  const csv=rows.map(r=>r.map(_csvCell).join(',')).join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='customer_activity.csv';a.click();URL.revokeObjectURL(url);
+  const rows=[[t('logsColTime'),t('logsColBy'),t('logsColAction'),t('cactColDetail'),t('cactColSite')],...list.map(r=>[fmt(r.at),r.who||'',_cactLabel(r),_cactDetail(r),r.origin||''])];
+  _downloadCsv('customer_activity.csv',rows,t('cactTitle'),list.length);
 }
 
 async function confirmLogUndo(logId){
@@ -21838,14 +21893,19 @@ async function approveEntry(id){
       // keeps their original queue_num - no renumbering means no unique-index collision.
       // JCC promotes still take a fresh number (position at the end of the queue).
       if(e.status==='waitlist'){patch.status='waiting';if(!_apprSessIds.has(e.sessionId))patch.queue_num=nextQNum(e.sessionId);}
-      const res=await sb.from('queue_entries').update(patch).eq('id',id);
+      // Guarded on the status seen here, as no-show is (2026-10-05): approving from a copy older than
+      // the rider's own cancel brought the cancelled booking back as a confirmed seat.
+      const res=await sb.from('queue_entries').update(patch).eq('id',id).eq('status',e.status).select('id');
       if(res.error&&attempt===0&&(String(res.error.code||'').includes('23505')||/duplicate|unique/i.test(res.error.message||''))){await loadDataLight();continue;}
       if(_writeErr(res,'approve'))return;
+      if(!_landed(res))return _lostRace();
       await loadDataLight();
       logAction(`${t('apprApproveBtn')}: #${patch.queue_num||e.queueNum} ${e.name}`);
       toast(t('apprApprovedToast').replace('{0}',e.name));
+      const _after=patch.status||e.status;
       pushUndo(`${t('apprApproveBtn')} · ${e.name}`,async()=>{
-        if(_writeErr(await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id),'undo'))return false;
+        const u=await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id).eq('status',_after).eq('approval','approved').select('id');
+        if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;} // changed since (cancelled, checked in): left as it is
         await loadDataLight();renderStaffQueue();
       });
       renderStaffQueue();renderMyRides();
@@ -21860,24 +21920,32 @@ async function commToWaitlist(id){
   // Allowed regardless of remaining spots. queue_num is left untouched (numbers are
   // stable, never reused or shifted), so an undo restores the exact same position.
   const e=getQueue().find(x=>x.id===id);if(!e||!['pending','rejected'].includes(_apprOf(e))||e.status!=='waiting')return;
-  if(await _wr(sb.from('queue_entries').update({status:'waitlist',waitlist_num:e.waitlistNum||nextWlNum(e.sessionId)}).eq('id',id),'to waitlist'))return;
+  // guarded like the approval (2026-10-05): a booking cancelled since stays cancelled
+  const r=await sb.from('queue_entries').update({status:'waitlist',waitlist_num:e.waitlistNum||nextWlNum(e.sessionId)}).eq('id',id).eq('status','waiting').select('id');
+  if(_writeErr(r,'to waitlist'))return;
+  if(!_landed(r))return _lostRace();
   await loadDataLight();
   logAction(`${t('waitlistLabel')}: ${e.name}`);
   toast(t('toastWaitlisted'));
   pushUndo(`${t('waitlistLabel')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({status:'waiting'}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
 }
 async function unapproveEntry(id){
   const e=getQueue().find(x=>x.id===id);if(!e||e.approval!=='approved')return;
-  if(await _wr(sb.from('queue_entries').update({approval:'pending'}).eq('id',id),'unapprove'))return;
+  // only while the row is as it was seen: the status (a checked-in rider keeps the chip) and the approval
+  const r=await sb.from('queue_entries').update({approval:'pending'}).eq('id',id).eq('status',e.status).eq('approval','approved').select('id');
+  if(_writeErr(r,'unapprove'))return;
+  if(!_landed(r))return _lostRace();
   await loadDataLight();
   logAction(`${t('apprUndoBtn')}: ${e.name}`);
   toast(`${e.name} · ${t('apprPendingChip')}`);
   pushUndo(`${t('apprUndoBtn')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({approval:'approved'}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({approval:'approved'}).eq('id',id).eq('status',e.status).eq('approval','pending').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
@@ -21889,13 +21957,17 @@ async function rejectEntry(id){
   // which lands them back in Cancelled properly.
   const e=getQueue().find(x=>x.id===id);if(!e||!['pending','rejected'].includes(_apprOf(e))||!['waiting','waitlist'].includes(e.status))return;
   const _wasWaitlist=e.status==='waitlist'; // waitlist never reserved stock
-  if(await _wr(sb.from('queue_entries').update({approval:'rejected',status:'cancelled',cancelled_by:'staff'}).eq('id',id),'reject'))return;
+  // guarded on the status seen here (2026-10-05): the restock below is right only for that status
+  const r=await sb.from('queue_entries').update({approval:'rejected',status:'cancelled',cancelled_by:'staff'}).eq('id',id).eq('status',e.status).select('id');
+  if(_writeErr(r,'reject'))return;
+  if(!_landed(r))return _lostRace();
   if(!_wasWaitlist)await _restockAddonsOnExit(e); // parity with cancel/no-show; restores any add-ons a pre-fix community booking still carries
   await loadDataLight();
   logAction(`${t('apprRejectBtn')}: ${e.name}`);
   toast(t('apprRejectedToast').replace('{0}',e.name));
   pushUndo(`${t('apprRejectBtn')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id).eq('status','cancelled').eq('approval','rejected').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
@@ -22022,8 +22094,15 @@ function _promoNudge(e){
 // Community events NEVER auto-promote: staff hand-pick who comes off the waitlist when a spot
 // frees, a reservation is cancelled, or the allocation is expanded.
 async function _autoPromoteOldestWaitlist(sessionId){
-  if(_isApprovalRide(allSessions().find(s=>s.id===sessionId)))return false;
-  const wl=(_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist')
+  const sess=_sessGet(sessionId);
+  if(_isApprovalRide(sess))return false;
+  // A ride that is over takes nobody new (2026-10-05): removing a done row in History handed a
+  // leftover waitlister a finished night - their add-ons taken from stock and "your turn" sent.
+  if(_sessEnded(sess))return false;
+  // The freed place is a bike, as _promote_next_waitlist reads it on the server: a waitlisted
+  // rider on their own bike is not who it goes to, except on the Petromin ride (_ownTakesPlace).
+  const own=_ownTakesPlace(sess);
+  const wl=(_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist'&&(own||!_isOwnBike(x)))
     .sort(_wlCmp); // staff-set W order first (W1 is next up), registration time as tiebreaker
   // Down the line until one promotion takes. This device's copy can be a moment behind: a first
   // candidate another desk had already promoted or cancelled used to end the attempt, and the
@@ -22687,29 +22766,41 @@ async function _bulkReturnRun(plan){
   renderStaffQueue();
 }
 // The write halves of Undo check-in, shared by one rider and a whole party. _undoCheckinWrite
-// resolves {bikeIds}, {lost:true} (another desk moved the rider first) or null (refused, already
-// said); _redoCheckinWrite undoes it.
+// resolves {bikeIds,checkedInAt}, {lost:true} (another desk moved the rider first) or null
+// (refused, already said); _redoCheckinWrite undoes it.
 async function _undoCheckinWrite(entry){
-  const id=entry.id,bikeIds=getAssignedBikeIds(entry);
+  // The row as this device holds it now, not as it was at check-in (2026-10-05): Express and the
+  // bike picker hand their undo the entry of that moment, and a bike changed since (12 swapped for
+  // 14, then 12 given to another rider) was freed from under its new rider. The write is guarded on
+  // the bike link read here as well, so a copy that is behind loses the race instead of guessing.
+  const cur=getQueue().find(x=>x.id===entry.id)||entry;
+  const id=cur.id,bikeIds=getAssignedBikeIds(cur),checkedInAt=cur.checkedInAt||null;
   // The rider first, guarded on still being on the bike, and only then the bike: freeing it in
   // the same breath let a desk whose copy was behind (the rider already returned, the bike out
   // again under someone else) put that bike back on the rack mid-ride.
-  const _ur=await sb.from('queue_entries').update({status:'waiting',assigned_bike_id:null}).eq('id',id).eq('status','active').select('id');
+  let _uq=sb.from('queue_entries').update({status:'waiting',assigned_bike_id:null}).eq('id',id).eq('status','active');
+  _uq=cur.assignedBikeId==null?_uq.is('assigned_bike_id',null):_uq.eq('assigned_bike_id',cur.assignedBikeId);
+  const _ur=await _uq.select('id');
   if(_writeErr(_ur,'undo check-in'))return null;
   if(!_landed(_ur))return{lost:true};
-  if(bikeIds.length)await _releaseBikes(bikeIds,'undo check-in');
+  if(bikeIds.length)await _releaseBikes(bikeIds,'undo check-in',true); // only while still in use: one sent to maintenance meanwhile stays out
   await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',id),'undo check-in');
   try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
-  return{bikeIds};
+  return{bikeIds,checkedInAt};
 }
-async function _redoCheckinWrite(id,bikeIds){
+// checkedInAt: the arrival the undo cleared, written back with the redo (2026-10-05) - without it
+// the ride's minutes, the two-hour flag and the analytics lost their start.
+async function _redoCheckinWrite(id,bikeIds,checkedInAt){
   // The freed bike may have been assigned to someone else since — reclaim atomically.
   const claimed=await _reclaimBikes(bikeIds);
   if(claimed.length<bikeIds.length)toast(t('errBikeUnavailable'),'warning');
   const assignedVal=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
-  const _u=await sb.from('queue_entries').update({status:'active',assigned_bike_id:assignedVal}).eq('id',id).eq('status','waiting').select('id');
+  const patch={status:'active',assigned_bike_id:assignedVal};
+  if(checkedInAt)patch.checked_in_at=checkedInAt;
+  const _u=await sb.from('queue_entries').update(patch).eq('id',id).eq('status','waiting').select('id');
   if(_writeErr(_u,'undo')||!_landed(_u)){await _releaseBikes(claimed,'undo');return false;}
-  try{localStorage.setItem('cq_ct_'+id,Date.now());}catch(e){}
+  const _at=checkedInAt?Date.parse(checkedInAt):NaN;
+  try{localStorage.setItem('cq_ct_'+id,Number.isFinite(_at)?_at:Date.now());}catch(e){}
   return true;
 }
 async function doUndoCheckin(id){
@@ -22720,7 +22811,7 @@ async function doUndoCheckin(id){
   await loadData();
   toast(t('toastUndoCheckin'));
   pushUndo(`${t('undoUndoCheckin')} #${entry.queueNum} ${entry.name}`,async()=>{
-    const ok=await _redoCheckinWrite(id,w.bikeIds);
+    const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt);
     await loadData();renderStaffQueue();
     if(!ok)return false;
   });
@@ -22756,13 +22847,13 @@ function confirmPartyNoShow(ids){
 async function _undoCheckinMany(ids){
   const es=_liveOf(ids,'active');if(!es.length)return;
   const done=[];
-  for(const e of es){const w=await _undoCheckinWrite(e);if(!w)break;if(w.lost)continue;done.push({id:e.id,bikeIds:w.bikeIds});} // a rider another desk moved first is theirs, not ours to undo
+  for(const e of es){const w=await _undoCheckinWrite(e);if(!w)break;if(w.lost)continue;done.push({id:e.id,bikeIds:w.bikeIds,at:w.checkedInAt});} // a rider another desk moved first is theirs, not ours to undo
   await loadData();
   if(done.length){
     toast(t('partyUndoneToast').replace('{0}',done.length));
     pushUndo(`${t('undoUndoCheckin')} · ${done.length}`,async()=>{
       let ok=true;
-      for(const d of done)if(!(await _redoCheckinWrite(d.id,d.bikeIds)))ok=false;
+      for(const d of done)if(!(await _redoCheckinWrite(d.id,d.bikeIds,d.at)))ok=false;
       await loadData();renderStaffQueue();
       if(!ok)return false;
     });
@@ -23047,9 +23138,11 @@ function _reportShell(o){
 // same in a table cell, right-aligned to its column's other amounts.
 function _rpSar(n){const v=Math.round((Number(n)||0)*100)/100;return '<bdi>SAR '+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</bdi>';}
 function _rpAmt(n){return `<span class="rp-amt">${_rpSar(n)}</span>`;}
+// Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened
+// after an awaited PIN can lose the tap that allows a new window).
 function _openReport(html,w,h){
   const win=window.open('','_blank',`width=${w||1100},height=${h||760}`);
-  if(!win)return;
+  if(!win)return null;
   win.document.write(html);win.document.close();win.focus();
   // The report is its own document under the page's policy: no inline script runs in it and no
   // handler dispatcher listens there, so its Print button is wired here, from the opener, and its
@@ -23058,6 +23151,7 @@ function _openReport(html,w,h){
   try{_cssvApply(win.document);}catch(e){}
   try{win.document.querySelectorAll('.rep-print').forEach(b=>b.addEventListener('click',()=>{try{win.print();}catch(e){}}));}catch(e){} // specs stand in a bare window
   _printWhenReady(win,400);
+  return win;
 }
 // ── Report builder ─────────────────────────────────────────────────────────
 // Every printed report is customizable: pick the columns and sections it carries,
@@ -23134,7 +23228,7 @@ function showPrintReportOptions(){
   const o=_repOpts();
   const chk=(on)=>on?_artIcon('boxOn',15):_artIcon('boxOff',15);
   const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" class="rpt-row">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
-  const _types=['Road','Hybrid','Mountain','Gravel','Road Carbon'];
+  const _types=CAT_RIDE_TYPES; // every bike type a rider can be on, the one list the catalogue keeps (Kids was missing, 2026-10-05)
   const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select rpt-w100" aria-label="${esc(lbl||id)}" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showPrintReportOptions_1",_EV,_EL)}">
@@ -23710,10 +23804,15 @@ function _accReportHtml(){
     <table><thead><tr><th>${t('acrFilterTag')}</th><th>${t('acrHolders')}</th><th>${t('acrOnList')}</th></tr></thead><tbody>${tagRows}</tbody></table>`:''}`;
   return _reportShell({kind:t('acrTitle'),title:t('acrTitle'),docTitle:t('acrTitle'),body:html,maxWidth:'1100px'});
 }
-function printAccountReport(){
+// Every account's details on paper: the same gate as the file below (2026-10-05) - admins only, with
+// the operator's PIN - since the printed report carries the same names, phones and emails.
+async function printAccountReport(){
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
   if(!_accRows().length){toast(t('toastNoExport'),'warning');return;}
+  if(!await _pinApprove(t('acrTitle')))return;
+  // the keypad's tap may no longer count as the one that opens a window: say so, the PIN holds for the next tap
+  if(!_openReport(_accReportHtml(),1200,800)){toast(t('repPopupBlocked'),'info');return;}
   logAction(t('logPrintedReport'));
-  _openReport(_accReportHtml(),1200,800);
 }
 // Every account's details in one file: admins only, with the operator's PIN (2026-10-04 audit).
 async function exportAccountsCsv(){
@@ -24106,11 +24205,15 @@ function printBreakfastReport(){
   _openReport(html,1000,760);
 }
 
-function addHistLog(action,entry,undoFn){
+// kind: 'removed' | 'restored', so a Restore can find the Remove it answers (2026-10-05). Called
+// once the write has landed: it also writes the shared audit log (staff_actions), which used to
+// record a removal or a restore that the server then refused.
+function addHistLog(action,entry,undoFn,kind){
   logAction(`${action} #${entry.queueNum} ${entry.name}`);
-  S.histLog.unshift({
+  const row={
     id:'log-'+Date.now()+'-'+Math.random().toString(36).slice(2),
     action,
+    kind:kind||null,
     entryId:entry.id,
     name:entry.name,
     queueNum:entry.queueNum,
@@ -24118,8 +24221,10 @@ function addHistLog(action,entry,undoFn){
     time:new Date().toLocaleTimeString('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit'}),
     undoFn:undoFn||null,
     undone:false
-  });
+  };
+  S.histLog.unshift(row);
   if(S.histLog.length>200)S.histLog.pop();
+  return row;
 }
 
 function confirmHistRemove(id){
@@ -24137,6 +24242,7 @@ function _reserveStillFree(raw,selfId){
 async function doRemove(id){
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
   const prevStatus=entry.status;
+  if(prevStatus==='removed')return; // removed already (a second tap, or another desk first)
   const savedQNum=entry.queueNum;
   const sess=allSessions().find(s=>s.id===entry.sessionId);
   // Only a rider who is out on a bike has one to hand back. A done row keeps its bike link after
@@ -24149,7 +24255,18 @@ async function doRemove(id){
   // Only a row that held a place frees one. Cancelled, no-show and waitlisted rows hold none
   // (_holdsSpot, spotsLeft), and removing one used to promote the next waitlisted rider into a
   // place that did not exist: the night over capacity and a "you're in" sent to someone who was not.
-  const heldPlace=['waiting','active','done'].includes(prevStatus)&&_holdsSpot(entry,sess);
+  // Nor does a done row (2026-10-05): that rider has ridden, and removing the record of it gives
+  // nobody a bike - it handed a leftover waitlister a ride that was over.
+  const heldPlace=['waiting','active'].includes(prevStatus)&&_holdsSpot(entry,sess);
+  // The row first, guarded on the status seen here, as no-show is (2026-10-05): an unguarded write
+  // removed a row another desk had just changed, and the promotion, the restock and the bike release
+  // below then acted on a status it no longer had.
+  const _rm=await sb.from('queue_entries').update({status:'removed',assigned_bike_id:null}).eq('id',id).eq('status',prevStatus).select('id');
+  // Checked before anything acts on it: the promotion hands the place on, the restock returns
+  // add-ons and the toast says it is done. All three used to run over a refusal, so the desk
+  // believed the place was free while the rider still held it.
+  if(_writeErr(_rm,'remove booking',()=>doRemove(id))){await loadData();renderStaffQueue();renderHistory();return;}
+  if(!_landed(_rm)){await _lostRace();renderHistory();return;}
   addHistLog(t('histRemoved'),entry,async()=>{
     // Undo: restore the status the row actually HAD (a removed no-show/cancelled row must come
     // back as no-show/cancelled — not as a live 'waiting' rider holding a capacity spot), the
@@ -24163,22 +24280,17 @@ async function doRemove(id){
     const _keepLink=prevStatus==='done'||prevStatus==='noshow'||prevStatus==='cancelled'; // a record of what they rode, not a claim on a bike
     const _av=prevStatus==='active'?(claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed))
       :savedAssigned==null?null:(_keepLink||_reserveStillFree(savedAssigned,id))?savedAssigned:null;
-    const _u=await sb.from('queue_entries').update({status:prevStatus,assigned_bike_id:_av,queue_num:_restoreNum(entry.sessionId,savedQNum,id)}).eq('id',id);
-    if(_writeErr(_u,'undo remove')){await _releaseBikes(claimed,'undo remove',true);await loadData();renderStaffQueue();renderHistory();return false;}
+    // only while it is still removed: restored meanwhile (History's Restore), it is not ours to undo
+    const _u=await sb.from('queue_entries').update({status:prevStatus,assigned_bike_id:_av,queue_num:_restoreNum(entry.sessionId,savedQNum,id)}).eq('id',id).eq('status','removed').select('id');
+    if(_writeErr(_u,'undo remove')||!_landed(_u)){await _releaseBikes(claimed,'undo remove',true);await loadData();renderStaffQueue();renderHistory();return false;}
     await loadData();
     if(restocks)await _consumeAddonsOnEnter(entry); // the restore brings the booking back, so re-reserve what the removal restocked
     renderStaffQueue();renderHistory();
-  });
-  // Free the bike of a rider who was riding: null the link AND set the bike available (only if it
-  // is still in-use, so a bike already given back or sent to maintenance stays as it is),
-  // otherwise it reads as 'in-use' forever with nothing pointing at it.
-  const calls=[sb.from('queue_entries').update({status:'removed',assigned_bike_id:null}).eq('id',id)];
-  bikeIds.forEach(bid=>calls.push(sb.from('bikes').update({status:'available'}).eq('id',bid).eq('status','in-use')));
-  // Checked before anything acts on it: the promotion hands the place on, the restock returns
-  // add-ons and the toast says it is done. All three used to run over a refusal, so the desk
-  // believed the place was free while the rider still held it.
-  const _rm=await Promise.all(calls);
-  if(_writeErr(_rm,'remove booking',()=>doRemove(id))){await loadData();renderStaffQueue();return;}
+  },'removed');
+  // Free the bike of a rider who was riding, now that the booking no longer names it: set it
+  // available (only if it is still in-use, so a bike already given back or sent to maintenance
+  // stays as it is), otherwise it reads as 'in-use' forever with nothing pointing at it.
+  if(bikeIds.length)await _releaseBikes(bikeIds,'remove booking',true);
   await _noteRemovedFrom(id,prevStatus);
   // A removal of a row that held a place frees it exactly as a cancellation does, so it hands
   // that place on. Without this the waitlist simply did not move: the place sat empty until
@@ -24225,17 +24337,23 @@ async function doRestoreEntry(id){
   // Back into a place on a night that is already full: ask first, as a restored cancellation does.
   if(consumes&&spotsLeft(entry.sessionId)<=0&&_holdsSpot({...entry,status:'waiting'},allSessions().find(s=>s.id===entry.sessionId))&&
     !await askConfirm({title:t('restoreFullTitle'),body:t('restoreFullBody'),confirmLabel:t('restoreBookingBtn'),confirmClass:'btn-muted'}))return;
+  // The write first, guarded on the row still being removed, and the log line once it has landed (2026-10-05).
+  const _rr=await sb.from('queue_entries').update({status:restoreStatus,queue_num:_restoreNum(entry.sessionId,entry.queueNum,id)}).eq('id',id).eq('status','removed').select('id');
+  if(_writeErr(_rr,'restore')){await loadData();renderHistory();return;}
+  if(!_landed(_rr)){await _lostRace();renderHistory();return;}
+  // The Remove this Restore answers is spent: its Undo would put back a row that is back already.
+  const paired=S.histLog.find(l=>l.entryId===id&&l.kind==='removed'&&!l.undone);
+  if(paired)paired.undone=true;
   addHistLog(t('histRestored'),entry,async()=>{
     // A refused reversal returns false, so the log row is not struck through over a booking
-    // that never changed.
-    const _u=await sb.from('queue_entries').update({status:originalStatus}).eq('id',id);
-    if(_writeErr(_u,'undo restore')){await loadData();renderHistory();return false;}
+    // that never changed. Only while the row is still what the Restore made it.
+    const _u=await sb.from('queue_entries').update({status:originalStatus}).eq('id',id).eq('status',restoreStatus).select('id');
+    if(_writeErr(_u,'undo restore')||!_landed(_u)){await loadData();renderHistory();return false;}
+    if(paired)paired.undone=false; // removed again: that Remove can be undone again
     await loadData();
     if(consumes)await _restockAddonsOnExit(entry); // undoing the restore sends it back out, so return the add-ons again
     renderStaffQueue();renderHistory();
-  });
-  const _rr=await sb.from('queue_entries').update({status:restoreStatus,queue_num:_restoreNum(entry.sessionId,entry.queueNum,id)}).eq('id',id);
-  if(_writeErr(_rr,'restore')){await loadData();renderHistory();return;}
+  },'restored');
   await loadData();
   if(consumes)await _consumeAddonsOnEnter(entry);
   toast(t('restoreEntryBtn')||'Restored');
@@ -24245,6 +24363,10 @@ async function doRestoreEntry(id){
 async function undoHistLog(logId){
   const log=S.histLog.find(l=>l.id===logId);
   if(!log||log.undone||!log.undoFn){toast(t('toastNothingUndo'),'warning');return;}
+  // Only an admin undoes, here as on the topbar and the Log (the owner, 2026-09-28; 2026-10-05).
+  if(!await _undoAuth(`${log.action} #${log.queueNum} ${log.name}`))return;
+  if(log.undone||log.busy)return; // reversed meanwhile, or a second tap while the first runs
+  log.busy=true;
   try{
     // A reversal that was REFUSED returns false rather than throwing (it has already raised
     // the error bar). Marking the row undone on "did not throw" struck it through for good
@@ -24256,6 +24378,7 @@ async function undoHistLog(logId){
     renderHistory();
     toast(t('undoneMsg'));
   }catch(e){toast(t('undoFailed'),'error');}
+  finally{log.busy=false;}
 }
 
 
@@ -24618,8 +24741,10 @@ function _scanTicket(entry,say,_bkOk){
   }
   if(entry.status==='active'){ // already in: when, what they still owe, and whether they still need a bike
     const at=entry.checkedInAt?new Date(entry.checkedInAt).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ}):'';
-    const owe=!entry.paid&&!_freeSessIds.has(entry.sessionId)?(entry.price??DEFAULT_PRICE):0;
-    const noBike=!getAssignedBikeIds(entry).length&&_needsBike(allSessions().find(s=>s.id===entry.sessionId));
+    // what is owed is the rental and the add-ons, as the roster counts an unpaid rider (2026-10-05);
+    // a rider on their own bike or with none needs no bike from the rack (_bikeNotOurs)
+    const owe=!entry.paid?Math.round(((_freeSessIds.has(entry.sessionId)?0:(entry.price??DEFAULT_PRICE))+addonsCost(entryAddons(entry)))*100)/100:0;
+    const noBike=!getAssignedBikeIds(entry).length&&!_bikeNotOurs(entry)&&_needsBike(_sessGet(entry.sessionId));
     say([t('scanAlreadyIn').replace('{0}',entry.queueNum).replace('{1}',nm),at&&t('scanInAt').replace('{0}',at),owe&&t('scanOwes').replace('{0}',owe),noBike&&t('statusNeedsBike')].filter(Boolean).join(' · '),'#ffb347');return;}
   if(entry.status==='done'){say(t('scanDone').replace('{0}',entry.queueNum).replace('{1}',nm),'var(--muted-l)');return;}
   if(entry.status==='cancelled'){say(t('scanCancelled'),'var(--red)');return;}
@@ -24634,10 +24759,15 @@ function _scanTicket(entry,say,_bkOk){
 // Riders who still owe stay in the line and are counted back; when the scanned rider is one of
 // them the usual check-in opens, since payment is what happens next. One Undo takes them all back.
 async function _expressCheckin(entry,say){
-  const party=_ciPartyAll(entry).filter(_ciExpected);
+  // The scanned rider's own party (2026-10-05): a list left from a Scan several run that was closed
+  // part-way is not their party, and Express used to check that whole list in.
+  const party=_partyOf(entry).filter(_ciExpected);
   const free=_freeSessIds.has(entry.sessionId);
   const ready=party.filter(m=>free||m.paid),owed=party.filter(m=>!(free||m.paid));
-  if(!ready.length||!(free||entry.paid)){
+  // The Saturday ride asks each rider's group at check-in (_ciSatRender): when anyone in the party
+  // has none yet, the check-in opens and walks the party, rather than letting them in without one.
+  const noGroup=_hasRideGroups(_sessGet(entry.sessionId))&&party.some(m=>!_rgOk(m.rideGroup));
+  if(!ready.length||!(free||entry.paid)||noGroup){
     try{if(navigator.vibrate)navigator.vibrate(80);}catch(e){}
     toast(t('scanFound').replace('{0}',entry.queueNum).replace('{1}',entry.name||''));
     _scanResume=_scanCont;closeScanModal(_scanCont);showCheckinModal(entry.id);return;
@@ -24690,7 +24820,8 @@ async function _expressCheckinOne(e){
 // hands the bike to the right person although it never showed this view.
 function _hoRows(){
   const today=todayStr();
-  return getQueue().filter(e=>e.status==='active'&&!getAssignedBikeIds(e).length&&_needsBike(allSessions().find(s=>s.id===e.sessionId))
+  // a rider on their own bike, or with none at all, is not waiting for one (_bikeNotOurs, 2026-10-05)
+  return getQueue().filter(e=>e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId))
     &&(S.sfSession==='all'?String(e.sessionDate||e.sessionId||'').slice(0,10)===today:e.sessionId===S.sfSession))
     .sort((a,b)=>String(a.checkedInAt||'').localeCompare(String(b.checkedInAt||''))||(a.queueNum||0)-(b.queueNum||0));
 }
@@ -24709,7 +24840,7 @@ function _hoTarget(){
   let v=null;try{v=JSON.parse(localStorage.getItem('cq_ho')||'null');}catch(_){}
   if(!v||!v.id||Date.now()-(v.at||0)>15*60*1000)return null;
   const e=getQueue().find(x=>x.id===v.id);
-  return e&&e.status==='active'&&!getAssignedBikeIds(e).length?e:null;
+  return e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)?e:null;
 }
 function _hoTyping(){const a=document.activeElement;return !!(a&&a.id==='ho-bike'&&String(a.value||'').trim());}
 function _hoPick(id){S._hoSel=id;renderHandover();}
@@ -24747,9 +24878,14 @@ async function _hoAssign(entryId,d){
   if(e.status!=='active'||getAssignedBikeIds(e).length){toast(t('errChangedElsewhere'),'warning');renderHandover();return;}
   if(b.status!=='available'){toast(_ciBikeStatusText(d)||t('errBikeUnavailable'),'warning');return;}
   // A bike of another type than the rider asked for changes the fare (the price follows the bike):
-  // said before the hand-over, not found on the ticket.
+  // said before the hand-over, not found on the ticket. A Road Carbon booking is ridden on a Road
+  // bike, its own type and not another (every Road Carbon rider was asked, 2026-10-05). The fare
+  // follows only where nothing has fixed it - an unpaid booking without a promo code, on a ride that
+  // charges - and is written below; for the others the question says what they paid stays.
   const _pref=e.typePreference||'Any';
-  if(_pref!=='Any'&&b.type&&b.type!==_pref&&!await askConfirm({title:t('hoTypeConfirm').replace('{0}',typeLabel(b.type)).replace('{1}',typeLabel(_pref)),confirmLabel:t('hoGiveBtn'),confirmClass:'btn-primary'}))return;
+  const _other=_pref!=='Any'&&!!b.type&&b.type!==_pref&&PREMIUM_TIERS[_pref]!==b.type;
+  const _follows=_other&&!e.paid&&!e.promoCode&&!_freeSessIds.has(e.sessionId);
+  if(_other&&!await askConfirm({title:t(_follows?'hoTypeConfirm':'hoTypeConfirmKeep').replace('{0}',typeLabel(b.type)).replace('{1}',typeLabel(_pref)),confirmLabel:t('hoGiveBtn'),confirmClass:'btn-primary'}))return;
   const rsv=_rsvHolder(b.id,e.id);
   if(rsv&&!await askConfirm({title:t('reserveTakenConfirm').replace('{0}',('#'+(rsv.queueNum||'')+' '+(rsv.name||'')).trim()),confirmLabel:t('confirmBtn'),confirmClass:'btn-primary'}))return;
   let r;try{r=await sb.rpc('staff_swap_bike',{p_booking_id:e.id,p_new_bike_id:b.id});}catch(err){r={error:err};}
@@ -24758,6 +24894,16 @@ async function _hoAssign(entryId,d){
   e.assignedBikeId=b.id; // paint first, reconcile after
   const bk=getBikes().find(x=>x.id===b.id);if(bk)bk.status='in-use';
   try{localStorage.setItem('cq_ct_'+e.id,Date.now());}catch(_){} // the ride starts with the bike
+  // The fare the question promised: the bike's type and its price on the booking, as the bike
+  // picker reprices an unpaid booking (2026-10-05); the swap alone left the old type and fare.
+  const prevType=e.typePreference,prevPrice=e.price;let _np=null;
+  if(_follows){
+    const _s=_sessGet(e.sessionId);
+    if(!S.ridersLoaded&&_s&&_s.ride_kind==='petromin')await loadRiders(); // an employee's fare needs the registrations
+    _np=priceForEntryType(e,b.type);
+    const fr=await sb.from('queue_entries').update({type_preference:b.type,price:_np}).eq('id',e.id).eq('paid',false).select('id');
+    if(_writeErr(fr,'hand-over fare')||!_landed(fr))_np=null;else{e.typePreference=b.type;e.price=_np;}
+  }
   await _dropOtherReservations([b.id],e.id);
   const label=t('hoGiven').replace('{0}',_ciBikeNum(b)).replace('{1}',e.queueNum??'').replace('{2}',e.name||'');
   toast('✓ '+label);
@@ -24769,6 +24915,8 @@ async function _hoAssign(entryId,d){
     if(_writeErr(u,'undo hand-over')||!_landed(u))return false;
     await _wr(sb.from('bike_assignments').update({returned_at:new Date().toISOString(),return_condition:'undo'}).eq('booking_id',e.id).eq('bike_id',b.id).is('returned_at',null),'undo hand-over');
     await _wr(sb.from('bikes').update({status:'available'}).eq('id',b.id).eq('status','in-use'),'undo hand-over');
+    // the type and fare back as they were, unless the rider has paid since
+    if(_np!=null)await _wr(sb.from('queue_entries').update({type_preference:prevType,price:prevPrice}).eq('id',e.id).eq('paid',false).eq('price',_np),'undo hand-over');
     try{localStorage.removeItem('cq_ct_'+e.id);}catch(_){}
     await _reloadRows([e.id]);if(S.staffTab==='queue')renderStaffQueue();
   });
@@ -24784,7 +24932,7 @@ async function _hoAssign(entryId,d){
 // forgotten the moment the rider is confirmed, marked no-show or cancelled.
 function _ciSaveDraft(){
   const id=S._ciId;if(!id)return;
-  (S._ciDrafts=S._ciDrafts||{})[id]={type:S._ciType,paid:S._ciPaid,bike:S._ciBike,bikeCode:S._ciBikeCode,rg:S._ciRg};
+  (S._ciDrafts=S._ciDrafts||{})[id]={type:S._ciType,paid:S._ciPaid,picked:S._ciPayPicked===id,bike:S._ciBike,bikeCode:S._ciBikeCode,rg:S._ciRg};
 }
 function _ciDropDraft(id){if(S._ciDrafts)delete S._ciDrafts[id];}
 // ── The rider chain ──────────────────────────────────────────────────────────
@@ -24825,6 +24973,7 @@ function showCheckinModal(id){
   S._ciId=id;S._ciType=resolvedType(e)||'Any';
   // A rider who has not paid yet opens on Paid: at the desk, that is what happens next (2026-09-24).
   S._ciPaid=e.paid?((e.price??DEFAULT_PRICE)===0?'house':'card'):'card'; // card is the only paid state; older cash/split rows read as paid by card
+  S._ciPayPicked=null; // which rider's payment the staffer tapped here: only that one goes on to the bike picker (_ciCarryPay)
   // The Bike field: a bike that arrived with this modal (NFC tab, scanner, the other tab)
   // is kept; anything else starts empty. The open check-in is published for the tab iOS
   // opens when a tag is tapped, and every open tab listens for the answer.
@@ -24835,7 +24984,7 @@ function showCheckinModal(id){
   S._ciBikeMsg=null;S._ciLinkOffer=null;S._ciErr=null;S._ciFocusOnce=true;S._ciOutcome='checkin';
   const _d=(S._ciDrafts||{})[id];
   S._ciRg=e.rideGroup||null; // the Saturday ride's group: asked here (the owner, 2026-10-02)
-  if(_d){S._ciType=_d.type||S._ciType;S._ciPaid=_d.paid||S._ciPaid;if(_d.rg)S._ciRg=_d.rg;if(!_mine){S._ciBike=_d.bike||null;S._ciBikeCode=_d.bikeCode||S._ciBikeCode;}}
+  if(_d){S._ciType=_d.type||S._ciType;S._ciPaid=_d.paid||S._ciPaid;if(_d.picked)S._ciPayPicked=id;if(_d.rg)S._ciRg=_d.rg;if(!_mine){S._ciBike=_d.bike||null;S._ciBikeCode=_d.bikeCode||S._ciBikeCode;}}
   _setActiveCheckin(e);
   _staffBusListen();
   renderCheckinModal();
@@ -24872,13 +25021,22 @@ function _ciPendingPrice(e,_ty,_mode){
   const c=e.customerId?(S.customers||[]).find(x=>x.id===e.customerId):null;
   const houseForTy=!!(c&&_custHouseFor(c,ty)&&String(c.name||'').trim().toLowerCase()===String(e.name||'').trim().toLowerCase());
   const typePrice=(e.promoCode||ty===(e.typePreference||'Any'))?(e.price??DEFAULT_PRICE):_ciTypePrice(e,ty);
+  // A rider on the house switched to Paid or Pending pays the fare again (_ciHouseOff).
+  const off=_ciHouseOff(e,houseForTy);
   if(mode==='house')return 0;
-  if(mode==='pending')return houseForTy?0:typePrice;
-  return e.paid?(e.price??DEFAULT_PRICE):(houseForTy||isHouseNow)?0:typePrice;
+  if(mode==='pending')return houseForTy?0:off?_ciHouseFare(e,ty):typePrice;
+  return off?_ciHouseFare(e,ty):e.paid?(e.price??DEFAULT_PRICE):(houseForTy||isHouseNow)?0:typePrice;
 }
 // A retyped rider is repriced on THEIR fare table, the one their booking was priced from -
 // priceForType alone charged a Petromin employee 57.50 for a bike their company pays 50 for.
 function _ciTypePrice(e,ty){return priceForEntryType(e,ty);}
+// A rider on the house (paid at 0) switched to Paid or Pending in the check-in is a paying rider
+// again: the fare comes back, as togglePayment brings it back (2026-10-05) - the 0 stood, so the
+// switch recorded a paid ride at nothing. Not where the account rides this type free, and not a
+// promo code's 0, which is the price agreed. The fare is the booking's own (the bike on it, the
+// premium tier, an employee's table) or, for another type, that type's.
+function _ciHouseOff(e,houseForTy){return !!(e&&e.paid&&(e.price??DEFAULT_PRICE)===0&&!houseForTy&&!e.promoCode);}
+function _ciHouseFare(e,ty){return ty===(e.typePreference||'Any')?_entryFallbackPrice(e):_ciTypePrice(e,ty);}
 // A party member as Confirm would leave them: the rider in the modal as its toggles have them,
 // anyone the staffer has already set up as their draft has them, everyone else on the defaults
 // the modal opens them with. Pricing only the open rider that way made the group's total jump
@@ -24911,7 +25069,8 @@ function _ciPartyRest(e){return _ciPartyAll(e).filter(x=>x.id!==e.id&&_ciExpecte
 function _ciCloseForNext(e){
   const hold=_scanResume&&_ciPartyRest(e).length>0;
   if(hold)_scanResume=false;
-  closeCheckinModal();
+  S._ciRunOn=true; // the run goes on to its next rider: its scanned list stays (closeCheckinModal)
+  try{closeCheckinModal();}finally{S._ciRunOn=false;}
   if(hold)_scanResume=true;
 }
 // The run is over (nobody left to check in): the scanned group is forgotten and, in
@@ -25126,7 +25285,7 @@ function _ciRenderBikeSpec(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderCheckinModal_1(event,el){if(event.target===el)closeCheckinModal()}
 function _on_renderCheckinModal_2(event,el,a0){S._ciType=a0;renderCheckinModal()}
-function _on_renderCheckinModal_3(event,el,a0){S._ciPaid=a0;renderCheckinModal()}
+function _on_renderCheckinModal_3(event,el,a0){S._ciPaid=a0;S._ciPayPicked=S._ciId;renderCheckinModal()} // tapped by the staffer: the one payment the bike picker may carry on
 function _on_renderCheckinModal_4(event,el){if(event.target===el)closeCheckinModal()}
 function _on_renderCheckinModal_5(event,el,a0){_ciCarryPay();closeCheckinModal(true);openModal(a0)}
 function renderCheckinModal(){
@@ -25247,6 +25406,10 @@ function closeCheckinModal(_noResume,_fromBus){
   const m=document.getElementById('checkin-modal');if(m){m.style.display='none';m.innerHTML='';}S._ciId=null;
   S._ciBike=null;S._ciNfc=false;if(_ciBikeTimer){clearTimeout(_ciBikeTimer);_ciBikeTimer=null;}
   if(wasOpen)_clearActiveCheckin(!_fromBus); // the other tab, if any, closes too
+  // Closed for good, not stepping on to the run's next rider (_ciCloseForNext): a list made by Scan
+  // several ends here (2026-10-05). Kept, it outlived the check-in, and Express on one of its riders
+  // later checked the whole old list in.
+  if(wasOpen&&!S._ciRunOn)S._ciBatch=null;
   // Continuous scan: hand the camera straight back rather than making staff tap Scan again.
   // Skipped when the bike picker is taking over (_noResume), which owns the screen next.
   if(_scanResume&&!_noResume){_scanResume=false;_scanBackAt=Date.now();setTimeout(()=>{if(_scanCont)openScanModal();},80);return;}
@@ -25291,7 +25454,10 @@ async function _dropOtherReservations(bikeIds,selfId){
 }
 // "Assign specific bike…" leaves the check-in modal, and only confirmCheckinModal() reads
 // S._ciPaid — so the payment the staffer just chose used to be silently discarded. Carry it.
-function _ciCarryPay(){S._ciPayCarry=(S._ciPaid&&S._ciPaid!=='pending')?S._ciPaid:null;}
+// Only a payment the staffer tapped (2026-10-05): the modal opens an unpaid rider on Paid, and that
+// default, carried, recorded an unpaid rider as paid by card when their bike was assigned - over the
+// picker's own On the house too. Carried with the rider it was chosen for ({id, mode}).
+function _ciCarryPay(){S._ciPayCarry=(S._ciPayPicked&&S._ciPayPicked===S._ciId&&S._ciPaid&&S._ciPaid!=='pending')?{id:S._ciId,mode:S._ciPaid}:null;}
 // Add-on stock is reserved when a booking takes a real place, and waitlist rows never held
 // any. Promote used to be that moment; with Promote gone, checking a waitlisted rider in IS
 // that moment, so every activation path routes through here. Without it a waitlisted rider's
@@ -25367,6 +25533,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     const houseForTy=c&&_custHouseFor(c,ty)&&String(c.name||'').trim().toLowerCase()===String(e.name||'').trim().toLowerCase();
     const typePrice=()=>(e.promoCode||ty===(e.typePreference||'Any'))?(e.price??DEFAULT_PRICE):_ciTypePrice(e,ty); // an edited price stands unless the type changes
     const setPrice=p=>{if((e.price??DEFAULT_PRICE)!==p)patch.price=p;};
+    const houseOff=_ciHouseOff(e,houseForTy); // on the house now, switched to Paid or Pending: the fare again (2026-10-05)
     if(mode==='house'&&ty!=='Own'&&!houseForTy&&!isHouseNow&&!await _pinApprove(t('onTheHouseLabel')))return; // chosen by hand, not earned: the PIN
     if(S._ciId!==e.id)return; // the modal moved on while the keypad was open
     if(mode==='house'){
@@ -25374,15 +25541,15 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
       setPrice(0);_method=null;
     }else if(mode==='pending'){
       if(houseForTy){if(!e.paid)patch.paid=true;setPrice(0);_method=null;} // covered type: on the house automatically
-      else{if(e.paid)patch.paid=false;setPrice(typePrice());_method=null;}
+      else{if(e.paid)patch.paid=false;setPrice(houseOff?_ciHouseFare(e,ty):typePrice());_method=null;}
     }else{ // card
       if(!e.paid)patch.paid=true;
-      const np=e.paid?(e.price??DEFAULT_PRICE):(houseForTy||isHouseNow)?0:typePrice();
+      const np=houseOff?_ciHouseFare(e,ty):e.paid?(e.price??DEFAULT_PRICE):(houseForTy||isHouseNow)?0:typePrice();
       setPrice(np);
       // A row already paid keeps how it was paid: one taken by cash or split before card-only still
       // reads that way in the close-out and the session report (pay_method, card_amount), and a card
-      // row would only be written 'card' again.
-      _method=np===0?null:(e.paid&&e.pay_method)?undefined:mode;
+      // row would only be written 'card' again. A ride on the house that is now paid was paid by card.
+      _method=np===0?null:(e.paid&&e.pay_method&&!houseOff)?undefined:mode;
     }
   }
   // The Bike field wins over the one-tap suggestion. Through staff_checkin the status, the
@@ -25498,12 +25665,15 @@ function _on_renderModal_17(event,el,a0){if(event.key==='Enter')saveModalPrice(a
 function _on_renderModal_18(event,el){S.modalPriceEdit=false;renderModal()}
 function _on_renderModal_19(event,el){S.modalPriceEdit=true;renderModal()}
 function _on_renderModal_20(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();S.modalPriceEdit=true;renderModal();}}
-function _on_renderModal_21(event,el,a0){togglePayment(a0,true);S.modalPriceEdit=false;renderModal()}
-function _on_renderModal_22(event,el,a0){togglePayment(a0,'house');S.modalPriceEdit=false;renderModal()}
-function _on_renderModal_23(event,el,a0){togglePayment(a0,'pending');S.modalPriceEdit=false;renderModal()}
-function _on_renderModal_24(event,el,a0){togglePayment(a0,'paid');S.modalPriceEdit=false;renderModal()}
-function _on_renderModal_25(event,el,a0){togglePayment(a0,'pending');S.modalPriceEdit=false;renderModal()}
-function _on_renderModal_26(event,el,a0){togglePayment(a0,'house');S.modalPriceEdit=false;renderModal()}
+// The picker's own pay buttons record the payment at once, so a payment carried from the check-in
+// (S._ciPayCarry) is dropped by any of them (2026-10-05). On the house draws the picker again once
+// the PIN is answered: drawn only at once, before the keypad, it kept showing the old state.
+function _on_renderModal_21(event,el,a0){S._ciPayCarry=null;togglePayment(a0,true);S.modalPriceEdit=false;renderModal()}
+function _on_renderModal_22(event,el,a0){S._ciPayCarry=null;S.modalPriceEdit=false;renderModal();togglePayment(a0,'house').then(()=>renderModal(),()=>renderModal())}
+function _on_renderModal_23(event,el,a0){S._ciPayCarry=null;togglePayment(a0,'pending');S.modalPriceEdit=false;renderModal()}
+function _on_renderModal_24(event,el,a0){S._ciPayCarry=null;togglePayment(a0,'paid');S.modalPriceEdit=false;renderModal()}
+function _on_renderModal_25(event,el,a0){S._ciPayCarry=null;togglePayment(a0,'pending');S.modalPriceEdit=false;renderModal()}
+function _on_renderModal_26(event,el,a0){S._ciPayCarry=null;S.modalPriceEdit=false;renderModal();togglePayment(a0,'house').then(()=>renderModal(),()=>renderModal())}
 function _on_renderModal_27(event,el,a0){S.modalAddBikeType=a0;renderModal()}
 function _on_renderModal_28(event,el,a0){S.modalAddBikeSize=a0;renderModal()}
 function _on_renderModal_29(event,el){S.modalAddBikeFrame=el.value;renderModal()}
@@ -25706,6 +25876,10 @@ function renderModal(){
           <button class="pay-toggle pending bkm-fs11" data-on-click="${_on("_on_renderModal_25",_EV,_EL,rider.id)}">${_artIcon('undo',11)} ${t('pendingLabel')}</button>
           <button class="pay-toggle house bkm-fs11" data-on-click="${_on("_on_renderModal_26",_EV,_EL,rider.id)}"> ${t('onTheHouseLabel')}</button>
         </div>`;
+  // A payment tapped in the check-in before "Assign specific bike…" is recorded with the bike
+  // (confirmAssign): said here as what it will be, under what is recorded now (2026-10-05).
+  const _carry=(S._ciPayCarry&&S._ciPayCarry.id===rider.id)?S._ciPayCarry.mode:null;
+  const carryLine=_carry?`<div id="bkm-carry" class="bkm-carry" role="status">${esc(t('ciPayCarryNote').replace('{0}',_carry==='house'?t('onTheHouseLabel'):'✓ '+t('paidLabel')))}</div>`:'';
   const heightBadge=rider.height?`<span class="bkm-mh"><bdi>${rider.height} ${t('cmUnit')}</bdi></span>`:'';
 
   
@@ -25779,7 +25953,7 @@ function renderModal(){
         ${heightBadge}
       </div>
       <div class="modal-sub bkm-mb12">${typeBadge(rider.typePreference)}</div>
-      ${paySection}
+      ${paySection}${carryLine}
       ${fleetLine}
       ${cards}
       ${addBikeToggle}
@@ -25793,16 +25967,18 @@ function pickBike(id){
   renderModal();
 }
 function closeModal(){S._ciPayCarry=null;document.getElementById('bike-modal').style.display='none';S.modalRider=null;S.modalBikes=[];S.modalShowAll=false;S.modalShowAddBike=false;S.modalSearch='';S.modalPriceEdit=false;}
+// Through saveEditedPrice, as the roster's price editor (2026-10-05): the operator's PIN,
+// staff_set_price (its 0..1000 range and the approval on record), the action log and an Undo. A
+// plain table write here skipped all four.
 async function saveModalPrice(id){
   const inp=document.getElementById('modal-price-inp');if(!inp)return;
   const val=parseFloat(inp.value);
   if(isNaN(val)||val<0){inp.style.borderColor='var(--red)';return;}
-  const entry=getQueue().find(e=>e.id===id);if(!entry)return;
-  const prev=entry.price;
-  entry.price=val;
-  if(await _wr(sb.from('queue_entries').update({price:val}).eq('id',id),'set price')){entry.price=prev;return;}
-  await loadData();S.modalPriceEdit=false;renderModal();
-  toast(t('toastPriceSet').replace('{0}',val));
+  if(!getQueue().some(e=>e.id===id))return;
+  await saveEditedPrice(id,val);
+  const now=getQueue().find(e=>e.id===id);
+  if(now&&(now.price??DEFAULT_PRICE)===val)S.modalPriceEdit=false; // set: the field closes (a keypad cancelled keeps it open)
+  if(S.modalRider===id)renderModal();
 }
 async function modalQuickAddBike(){
   if(!S.modalAddBikeType){toast(t('errBikeTypeReq'),'error');return;}
@@ -25838,8 +26014,11 @@ async function reserveBike(){
     const h=getQueue().find(e=>e.id!==rider.id&&(e.status==='waiting'||e.status==='waitlist')&&getAssignedBikeIds(e).includes(id));
     if(h&&!await askConfirm({title:t('reserveTakenConfirm').replace('{0}',('#'+(h.queueNum||'')+' '+h.name).trim()),confirmLabel:t('confirmBtn'),confirmClass:'btn-primary'}))return;
   }
-  const res=await sb.from('queue_entries').update({assigned_bike_id:id,...(id&&rider.toReserve?{to_reserve:false}:{})}).eq('id',rider.id); // a held bike answers the mark
+  // Only while the rider is still expected (2026-10-05): written over a booking checked in, cancelled
+  // or marked no-show on another desk meanwhile, the bike link of a ride under way was overwritten.
+  const res=await sb.from('queue_entries').update({assigned_bike_id:id,...(id&&rider.toReserve?{to_reserve:false}:{})}).eq('id',rider.id).in('status',['waiting','waitlist']).select('id'); // a held bike answers the mark
   if(_writeErr(res,'reserve'))return;
+  if(!_landed(res)){closeModal();return _lostRace();}
   rider.assignedBikeId=id;if(id)rider.toReserve=false;
   if(id)await _dropOtherReservations([id],rider.id); // "assign anyway" moves the reservation here, it does not share it
   const b=id?bikeById(id):null;
@@ -25847,7 +26026,11 @@ async function reserveBike(){
   toast(id?t('bikeReservedToast').replace('{0}',(b&&b.name)||''):t('bikeReserveCleared'));
   logAction(`${t('reserveBikeBtn')}: #${rider.queueNum} ${rider.name}${b?' → '+b.name:' ✕'}`);
   pushUndo(`${t('reserveBikeBtn')} #${rider.queueNum} ${rider.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({assigned_bike_id:prevRaw}).eq('id',rider.id),'undo'))return false;
+    // as guarded: still expected, and still holding the reservation this set
+    let uq=sb.from('queue_entries').update({assigned_bike_id:prevRaw}).eq('id',rider.id).in('status',['waiting','waitlist']);
+    uq=id==null?uq.is('assigned_bike_id',null):uq.eq('assigned_bike_id',id);
+    const u=await uq.select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     const r2=getQueue().find(e=>e.id===rider.id);if(r2)r2.assignedBikeId=prevRaw;
     renderStaffQueue();
   });
@@ -25915,10 +26098,34 @@ async function confirmAssign(){
     if(!(r&&r.data&&r.data.ok===true)){toast(t('errSomethingWrong'),'error');await loadDataLight().catch(()=>{});renderModal();return;}
     viaSwap=true;
   }
+  // A first check-in (a waiting or waitlisted rider onto one bike) goes through staff_checkin, as the
+  // check-in modal and Express do (2026-10-05): the bike, the row, the arrival stamp and the
+  // bike_assignments row land in one transaction. The direct writes below left no assignment row,
+  // so the bike's history did not know who had it. They stay for a database without the function.
+  let viaCheckin=false;
+  if(!isReassign&&S.modalBikes.length===1&&needsUpdate.length===1){
+    const args={p_booking_id:riderId,p_bike_id:needsUpdate[0].id};
+    if(priceUpdate.price!=null)args.p_price=priceUpdate.price;
+    let r;try{r=await sb.rpc('staff_checkin',args);}catch(err){r={error:err};}
+    if(r&&r.error&&!_rpcAbsent(r.error)){
+      const m=String(r.error.message||'');
+      toast(/BIKE_UNAVAILABLE/.test(m)?`${needsUpdate[0].name}: ${t('errBikeUnavailable')}`:/BAD_BOOKING_STATE/.test(m)?t('errChangedElsewhere'):_rpcMessage(r.error),'error');
+      await loadData();
+      const fresh=getQueue().find(e=>e.id===riderId);
+      if(fresh&&fresh.status==='active'){closeModal();renderStaffQueue();}else renderModal(); // checked in on another desk meanwhile: nothing left to do here
+      return;
+    }
+    if(!(r&&r.error)){
+      const d=r&&r.data;
+      if(!d||d.ok!==true){toast(t('errSomethingWrong'),'error');await loadDataLight().catch(()=>{});renderModal();return;}
+      if(d.noop===true){await loadData();closeModal();renderStaffQueue();return;} // already in on this very bike: that check-in did the rest
+      viaCheckin=true;
+    }
+  }
   // Atomically claim each needed bike: the conditional .eq('status','available') means only ONE device
   // can flip a given bike available->in-use. If 0 rows come back, another device grabbed it first.
   const claimed=[];
-  for(const b of (viaSwap?[]:needsUpdate)){
+  for(const b of ((viaSwap||viaCheckin)?[]:needsUpdate)){
     let cl;
     try{cl=await sb.from('bikes').update({status:'in-use'}).eq('id',b.id).eq('status','available').select('id');}catch(err){cl={error:err};}
     if(cl&&cl.error){
@@ -25963,6 +26170,8 @@ async function confirmAssign(){
     // the swap has landed the bike, the row and the assignment; only the fare follows the new bike
     assignedVal=S.modalBikes[0];
     if(Object.keys(priceUpdate).length)await _wr(sb.from('queue_entries').update(priceUpdate).eq('id',riderId),'bike price');
+  }else if(viaCheckin){
+    assignedVal=S.modalBikes[0]; // staff_checkin has written the status, the bike, the fare and the arrival
   }else if(S.modalBikes.length===1){
     assignedVal=S.modalBikes[0];
     // Fresh check-in (waiting->active) is guarded on status: if another device already checked
@@ -26014,7 +26223,7 @@ async function confirmAssign(){
   }
   // The exact check-in stamp, on a check-in only: a bike change reset it, and the ride's time on
   // the bike, the two-hour flag and the analytics minutes all started again from the swap.
-  if(!isReassign)await _wr(sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',riderId),'check-in time');
+  if(!isReassign&&!viaCheckin)await _wr(sb.from('queue_entries').update({checked_in_at:new Date().toISOString()}).eq('id',riderId),'check-in time'); // staff_checkin stamps its own
   // Release any bike the rider gave up (a bike change), now that the booking no longer names it:
   // freed before the booking write, a failed write left the rider's bike marked available under
   // them. Only while it is still in-use, so one sent to maintenance meanwhile stays out of service.
@@ -26025,10 +26234,10 @@ async function confirmAssign(){
     await _wr(sb.from('queue_entries').update({type_preference:selected[0].type}).eq('id',riderId),'save bike type');
   }
   await loadData();
-  // apply the payment chosen back in the check-in modal (see _ciCarryPay)
+  // apply the payment the staffer tapped back in the check-in modal, for this rider (see _ciCarryPay)
   const _carry=S._ciPayCarry;S._ciPayCarry=null;
-  if(_carry){
-    await togglePayment(riderId,_carry); // 'card' or 'house': the check-in modal offers no other paid state (rentals are card-only)
+  if(_carry&&_carry.id===riderId){
+    await togglePayment(riderId,_carry.mode); // 'card' or 'house': the check-in modal offers no other paid state (rentals are card-only)
   }
   closeModal();
   if(isReassign){
@@ -26064,13 +26273,19 @@ async function confirmAssign(){
     toast(`${bikeNames} ${t('toastAssignedChecked')}`);
     try{localStorage.setItem('cq_ct_'+riderId,Date.now());}catch(e){}
     pushUndo(`${t('undoCheckin')} #${qn} ${rName}`,async()=>{
+      // The row as it is now (2026-10-05): a bike changed since is the one to free, and the bike
+      // handed over here, maybe under another rider by now, is left alone. Guarded on that link too.
+      const cur=getQueue().find(e=>e.id===riderId);
+      const curRaw=cur?cur.assignedBikeId:assignedVal;
       const undoEntry={status:'waiting',assigned_bike_id:null};
       if(priceUpdate.price!=null&&prevPrice!=null)undoEntry.price=prevPrice;
-      const u=await sb.from('queue_entries').update(undoEntry).eq('id',riderId).eq('status','active').select('id');
+      let uq=sb.from('queue_entries').update(undoEntry).eq('id',riderId).eq('status','active');
+      uq=curRaw==null?uq.is('assigned_bike_id',null):uq.eq('assigned_bike_id',curRaw);
+      const u=await uq.select('id');
       if(_writeErr(u,'undo check-in')){await loadData();renderStaffQueue();return false;}
       if(!_landed(u)){await _lostRace();return false;}
       try{localStorage.removeItem('cq_ct_'+riderId);}catch(e){}
-      await _releaseBikes(needsUpdate.map(b=>b.id),'bike assign');
+      await _releaseBikes(cur?getAssignedBikeIds(cur):needsUpdate.map(b=>b.id),'bike assign',true);
       await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',riderId),'undo check-in');
       await loadData();renderStaffQueue();
     });
@@ -26098,8 +26313,10 @@ function _on_renderBikes_10(event,el){S._bkSpeeds=el.value}
 function _on_renderBikes_11(event,el){pickImage(el,u=>{S._bkPhoto=u;renderBikes();},480)}
 function _on_renderBikes_12(event,el){S._bkPhoto='';renderBikes()}
 function _on_renderBikes_13(event,el,a0,a1){S.bkSortDir=(S.bkSortCol===a0&&S.bkSortDir===1)?-1:1;S.bkSortCol=a1;renderBikes()}
-function _on_renderBikes_14(event,el,a0){S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
-function _on_renderBikes_15(event,el,a0){S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
+// "+ Road", "+ Hybrid"...: a new bike starts from an empty form, as "+ Add bike" does (2026-10-05) -
+// the last bike edited or cloned left its serial, tag and notes (and its brand, price...) in it.
+function _on_renderBikes_14(event,el,a0){_resetBikeForm();S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
+function _on_renderBikes_15(event,el,a0){_resetBikeForm();S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
 function _on_renderBikes_16(event,el){S.bkShowRetired=!S.bkShowRetired;renderBikes()}
 function _on_renderBikes_17(event,el){el.style.borderColor='rgba(var(--tint-rgb),.15)'}
 function _on_renderBikes_18(event,el){el.style.borderColor='rgba(var(--tint-rgb),.07)'}
@@ -26852,7 +27069,9 @@ function _bkCsvHeaderMap(head){
 function _bkCsvRows(text){
   const rows=_csvParse(text);if(rows.length<2)return{rows:[],err:'empty'};
   const map=_bkCsvHeaderMap(rows[0]);if(map.number==null||map.type==null)return{rows:[],err:'head'};
-  const fleetNums=new Set(getBikes().filter(b=>b.status!=='retired'&&b.bike_number!=null).map(b=>Number(b.bike_number)));
+  // every bike's number, a retired bike's too (2026-10-05): it still wears its number, and the form
+  // and the database refuse it, so the preview passed a row the import then lost
+  const fleetNums=new Set(getBikes().filter(b=>b.bike_number!=null).map(b=>Number(b.bike_number)));
   const seen=new Set(),seenTags=new Set(),frames=_bkFrameList();
   const numOr=(v,int)=>{v=String(v||'').trim().replace(',','.');if(!v)return null;const n=int?parseInt(v,10):parseFloat(v);return isNaN(n)?null:n;};
   const out=rows.slice(1).map((r,i)=>{
@@ -26935,6 +27154,9 @@ async function _bkCsvImport(){
   renderBikes();
 }
 async function addBike(){if(_bkSaving)return;_bkSaving=true;try{await _addBikeNow();}finally{_bkSaving=false;}}
+// The form's rental price as a number, 0 included (2026-10-05): parseFloat(...)||null read a bike set
+// to 0 (by Set price on several bikes, or an import) as not set, and its next save wiped the 0.
+function _bkRentalVal(){const v=parseFloat(S._bkRentalPrice);return Number.isFinite(v)?v:null;}
 async function _addBikeNow(){
   const size=document.getElementById('bk-size').value||'M';
   const brandRaw=document.getElementById('bk-brand')?.value.trim();
@@ -26954,7 +27176,7 @@ async function _addBikeNow(){
   const name=customName||genBikeName(S.addBikeType,S._bkFrame,bikeNum,size);
   _autoSaveBkOpts(brand,model,groupset);
   const colorNames=S.addBikeColorNames.slice(0,S.addBikeColors.length).map(n=>n||'');
-  const rentalPrice=S._bkRentalPrice?parseFloat(S._bkRentalPrice)||null:null;
+  const rentalPrice=_bkRentalVal();
   const startDate=(document.getElementById('bk-start')?.value||S._bkStartDate||_todayISO());
   const bike={id:uid(),name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:colorNames,status:'available',brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,retired_date:null,wheel_size:S._bkWheel||null,brake_type:S._bkBrake||null,weight_kg:_bkWeightVal(),..._bkPrivPatch(true).patch};
   const ins=await sb.from('bikes').insert(bike);
@@ -27051,7 +27273,7 @@ async function _saveBikeEditNow(){
     if(!ok)return;
   }
   const editColorNames=S.addBikeColorNames.slice(0,S.addBikeColors.length).map(n=>n||'');
-  const rentalPrice=S._bkRentalPrice?parseFloat(S._bkRentalPrice)||null:null;
+  const rentalPrice=_bkRentalVal();
   const startDate=(document.getElementById('bk-start')?.value||S._bkStartDate||existing.in_service_date||_todayISO());
   // The status is not the form's to write, and neither is its undo's: the edit sent back the
   // status this device last saw and the undo restored the one from edit time, so undoing an
@@ -27966,10 +28188,13 @@ function riderUndoCheckinParty(id){
 // of the rider's QR (MMP-<number>) or from the booking number in the list.
 async function _scanRider(no,say){
   if(!S.ridersLoaded)await loadRiders();
-  // Numbers repeat night to night: the night on show wins, then a live night, then the latest.
+  // Numbers repeat night to night: tonight's wins (the camera takes today's tickets), then the
+  // night on show, then a live night, then the latest. The night on show came first, and a desk
+  // looking at another night opened that night's P-001 and refused a valid ticket (2026-10-05).
   const hits=(S.riders||[]).filter(x=>String(x.booking_no||'').toUpperCase()===no);
   const _live=new Set(allSessions().filter(_sessLive).map(x=>x.id));
-  const _rank=x=>x.session_id===S.ridersSession?0:_live.has(x.session_id)?1:2;
+  const _today=_todayISO(),_dayOf=sid=>{const s=_sessGet(sid);return String((s&&(s.session_date||s.id))||sid||'').slice(0,10);};
+  const _rank=x=>(_dayOf(x.session_id)===_today?0:4)+(x.session_id===S.ridersSession?0:2)+(_live.has(x.session_id)?0:1);
   hits.sort((a,b)=>_rank(a)-_rank(b)||String(b.session_id||'').localeCompare(String(a.session_id||''))||_riderPartyNo(a)-_riderPartyNo(b));
   const r=hits[0]; // a party's number opens the employee's row
   if(!r){say(t('scanNotFound'),'var(--red)');return;}

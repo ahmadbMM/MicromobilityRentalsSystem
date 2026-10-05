@@ -56,7 +56,7 @@ test.describe('@staff:history customer activity', () => {
     // The newest page is asked for, newest first, and only the columns drawn.
     expect(asked.length).toBeGreaterThan(0);
     const u = new URL(asked[0]);
-    expect(u.searchParams.get('order')).toBe('at.desc');
+    expect(u.searchParams.get('order')).toBe('at.desc,id.desc'); // then by id: lines sharing one time keep their order across pages (2026-10-05)
     expect(u.searchParams.get('limit')).toBe('300');
     expect(u.searchParams.get('select')).toBe('id,at,customer_id,who,action,detail,origin');
 

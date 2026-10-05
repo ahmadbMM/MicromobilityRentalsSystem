@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+import type { Page } from '@playwright/test';
+import { stubSupabase, unlockStaff, waitForSb, checkinAsRow } from './helpers/supabase';
 
 const fixtures = {
   sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }],
@@ -13,16 +14,24 @@ const fixtures = {
   inventory: [{ id: 'i1', name: 'Gel', category: 'EnergyGels', qty: 5, price: 8, low_threshold: 1 }],
 };
 
-test('checking in an on-the-house booking keeps it on the house (no reprice in the PATCH)', async ({ page }) => {
+// The picker's check-in is one staff_checkin call since 2026-10-05 (the direct writes are its
+// fallback): checkinAsRow reads that call as the row it writes; a PATCH with the status covers the fallback.
+function checkinRows(page: Page) {
+  const rows: Record<string, unknown>[] = [];
+  page.on('request', (r) => {
+    const row = checkinAsRow(r); if (row) { rows.push(row); return; }
+    if (r.method() !== 'PATCH' || !/\/rest\/v1\/queue_entries/.test(r.url())) return;
+    try { const b = r.postDataJSON(); if (b && b.status === 'active') rows.push(b); } catch { /* not JSON */ }
+  });
+  return rows;
+}
+
+test('checking in an on-the-house booking keeps it on the house (no reprice in the check-in)', async ({ page }) => {
   await stubSupabase(page, fixtures);
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  const patches: Record<string, unknown>[] = [];
-  await page.route(/\/rest\/v1\/queue_entries/, async (route) => {
-    if (route.request().method() === 'PATCH') patches.push(route.request().postDataJSON());
-    await route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([{ id: 'x' }]) });
-  });
+  const patches = checkinRows(page);
   await page.evaluate(`openModal('qh'); S.modalBikes=['b1'];`);
   await page.evaluate('confirmAssign()');
   await expect.poll(() => patches.some((p) => p.status === 'active')).toBe(true);
@@ -36,11 +45,7 @@ test('a normal booking still gets repriced from the assigned bike at check-in', 
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  const patches: Record<string, unknown>[] = [];
-  await page.route(/\/rest\/v1\/queue_entries/, async (route) => {
-    if (route.request().method() === 'PATCH') patches.push(route.request().postDataJSON());
-    await route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([{ id: 'x' }]) });
-  });
+  const patches = checkinRows(page);
   await page.evaluate(`openModal('qp'); S.modalBikes=['b1'];`);
   await page.evaluate('confirmAssign()');
   await expect.poll(() => patches.some((p) => p.status === 'active')).toBe(true);
