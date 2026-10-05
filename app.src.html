@@ -12945,7 +12945,12 @@ async function _addonStock(ids,delta){
 //
 // A negative result is kept on purpose (oversold / backordered). Clamping at zero here while
 // a refund adds the full quantity back is what mints phantom stock.
-async function _invApplyDelta(id,delta,_depth){
+//
+// onNet (2026-10-05): a caller that can keep the movement for later (the sales outbox,
+// _addonStockBatch) passes it. A failure on the network then calls it in place of the error bar;
+// the count on screen goes back, as for any failure. Without it a failure is said and the
+// movement is gone, as before.
+async function _invApplyDelta(id,delta,_depth,onNet){
   if(!sb||!id||!delta)return null;
   const depth=_depth||0;
   const it=(S.inventory||[]).find(x=>x.id===id);
@@ -12961,7 +12966,7 @@ async function _invApplyDelta(id,delta,_depth){
     if(was===null){
       // No local copy, or a retry after losing the race: ask the row what it actually holds.
       const cur=await sb.from('inventory').select('qty').eq('id',id).maybeSingle();
-      if(cur.error||!cur.data)return null; // unreadable: report nothing rather than guess a total
+      if(cur.error||!cur.data){if(onNet&&cur.error&&_errKind(cur.error)==='net')onNet();return null;} // unreadable: report nothing rather than guess a total
       was=Number(cur.data.qty)||0;
     }
     const next=was+delta;
@@ -12969,6 +12974,7 @@ async function _invApplyDelta(id,delta,_depth){
       .eq('id',id).eq('qty',was).select('id');
     if(res.error){
       if(it)it.qty=was; // put the on-screen count back rather than show stock that was never saved
+      if(onNet&&_errKind(res.error)==='net'){onNet();return null;} // kept for later by the caller
       res.error.said=t('errStockWrite').replace('{0}',(it&&it.name)||id); // the bar names the item
       _writeErr(res,'stock write');
       return null;
@@ -12977,11 +12983,12 @@ async function _invApplyDelta(id,delta,_depth){
     // The row is not what we read: another till moved it. Undo the guess and try again from
     // whatever it holds now, rather than overwriting their movement with ours.
     if(it)it.qty=was;
-    if(depth<4)return _invApplyDelta(id,delta,depth+1);
+    if(depth<4)return _invApplyDelta(id,delta,depth+1,onNet);
     errorBar(t('errStockWrite').replace('{0}',(it&&it.name)||id),null,'contended');
     return null;
   }catch(e){
     if(it&&was!==null)it.qty=was;
+    if(onNet){onNet();return null;}
     console.error('stock write failed',id,e);
     S._netDown=true;_updateConnUI();
     return null;
@@ -12990,9 +12997,14 @@ async function _invApplyDelta(id,delta,_depth){
 // Apply stock deltas from a set of receipt/cart lines, SUMMED per unique item so each inventory
 // row takes exactly one absolute write. Two lines of the same item would otherwise fire concurrent
 // absolute-value writes that can land out of order (over-sell on decrement, under-restock on refund).
+// These are the till's movements (a receipt, its void or refund): one the network did not let through
+// waits in the sales outbox beside the sale (kind 'stock', item and delta) and the flush applies it.
+// Tried once and dropped, an offline sale left the shelf count wrong for good (2026-10-05).
 async function _addonStockBatch(lines,sign){
   const agg={};(lines||[]).forEach(l=>{if(l&&l.item_id)agg[l.item_id]=(agg[l.item_id]||0)+(Number(l.qty)||1)*sign;});
-  await Promise.all(Object.keys(agg).map(id=>_addonStock([id],agg[id])));
+  const later=[];
+  await Promise.all(Object.keys(agg).map(id=>agg[id]?_invApplyDelta(id,agg[id],0,()=>later.push({kind:'stock',id:uid(),data:{item:id,delta:agg[id]}})):null));
+  if(later.length&&sb)_outboxEnqueueMany(later);
 }
 // Qty-aware stock adjustment for a booking's add-ons [{id,qty}] (sign -1 consume, +1 restock)
 async function _addonStockQ(arr,sign){
@@ -17514,7 +17526,7 @@ function _purchHtml(cust){
   const rows=(mine||(S.cashSales||[]).filter(r=>r.customer_id===cust.id&&r.pay!=='refunded').map(r=>({...r,at:r.created_at}))
     .sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))).filter(r=>r.category!=='__cardmeta__');
   if(!mine&&!rows.length)return'';
-  const amt=r=>(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded';
+  const amt=r=>r.pay==='house'?0:(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded'; // on the house keeps its list price, and costs the rider nothing (2026-10-05)
   const tot=Math.round(rows.reduce((sm,r)=>sm+(off(r)?0:amt(r)),0)*100)/100;
   const PAY={paid:'paidLabel',pending:'pendingLabel',house:'custOnHouse',refunded:'cashRefunded'};
   return`<div class="form-section cu-card640">
@@ -23357,7 +23369,7 @@ function exportSessionExcel(){
     ...sessPurch.cats.map(c=>[_invCatLabel(c.cat),c.qty,c.value]),
     ...(sessPurch.discount>0?[[t('cashDiscount'),'',-sessPurch.discount]]:[]),
     [t('repTotal'),sessPurch.units,sessPurch.value],
-    [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[])]:[];
+    [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[]),...(sessPurch.free>0?[[t('onTheHouseLabel'),'',sessPurch.free]]:[])]:[];
   _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rows,...summary,...cashRows],'report '+(sess.session_date||sess.id),rows.length);
 }
 
@@ -23568,7 +23580,7 @@ function printSessionReport(){
         <tr class="rp-b8"><td>${t('repTotal')}</td><td class="rp-te">${sessPurch.units}</td><td class="rp-te">${_rpAmt(sessPurch.value)}</td></tr>
       </tbody>
     </table>
-    <div class="rp-salesline">${t('printCollected')}: <strong>${_rpSar(sessPurch.collected)}</strong>${sessPurch.pending>0?` &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">${_rpSar(sessPurch.pending)}</strong>`:''}${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong>${_rpSar(sessPurch.team)}</strong>`:''}</div>`:''}`;
+    <div class="rp-salesline">${t('printCollected')}: <strong>${_rpSar(sessPurch.collected)}</strong>${sessPurch.pending>0?` &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">${_rpSar(sessPurch.pending)}</strong>`:''}${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong>${_rpSar(sessPurch.team)}</strong>`:''}${sessPurch.free>0?` &nbsp;·&nbsp; ${t('onTheHouseLabel')}: <strong>${_rpSar(sessPurch.free)}</strong>`:''}</div>`:''}`;
   const _sTime=(()=>{try{return sessionTime(sess);}catch(_){return'';}})();
   const html=_reportShell({
     kind:t('printReportTitle'),
@@ -27256,7 +27268,7 @@ function _ahRender(force){
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_ahEditAccount",c.id)}">${ICON_PENCIL} ${t('naEditTitle')}</button>`:'';
   const chips=c?(()=>{const tm=_tagsById();return _ctRowsFor(c.id).filter(ct=>tm[ct.tag_id]).map(ct=>_tagChip(tm[ct.tag_id],ct)).join('');})():'';
   const contact=c?[c.phone,c.email].filter(Boolean):(a.custId?[a.phone]:[]).filter(Boolean);
-  const ptot=Math.round(purch.reduce((sum,r)=>sum+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
+  const ptot=Math.round(purch.reduce((sum,r)=>sum+_lineCharge(r),0)*100)/100; // a line on the house takes nothing
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__ahRender_1",_EV,_EL)}">
     <div class="modal-box ah-box" role="dialog" aria-modal="true" aria-labelledby="ah-title">
       <div class="ah-head">
@@ -27285,7 +27297,7 @@ function _ahRender(force){
       <div class="ah-purch">${purch.slice().sort((p,q)=>new Date(q.created_at||0)-new Date(p.created_at||0)).map(r=>`<div class="ah-purch-row">
         <div class="ah-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="ah-muted">×${esc(r.qty)}</span>`:''}</div>
         <span class="ah-muted">${r.created_at?shortDate(String(r.created_at).slice(0,10)):''}</span>
-        <bdi class="ah-price">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</bdi>
+        <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
     </div>
   </div>`;
@@ -32617,7 +32629,7 @@ function _ctDiscountSAR(cartTotal){const v=parseFloat(S._ctDisc);if(isNaN(v)||v<
 // the one the receipt recorded (100 paid + 100 team at 10% off: screen 80, receipt 90).
 function _ctCartTotals(cart){
   cart=cart||[];
-  const tot=Math.round(cart.reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
+  const tot=Math.round(cart.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house is in the cart at its price and takes nothing
   const paidNum=cart.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0);
   const disc=_ctDiscountSAR(_ctChargeableTotal(cart)),after=Math.round((tot-disc)*100)/100;
   const paidAfter=Math.max(0,Math.round((paidNum-_ctDiscountSplit(cart,disc).onPaid)*100)/100),card=_ctCardSAR(paidAfter),cash=Math.max(0,Math.round((paidAfter-card)*100)/100);
@@ -32651,7 +32663,10 @@ async function _ctRecord(){
   const paidTotal=rows.filter(r=>r.pay==='paid').reduce((s,r)=>s+r.qty*r.price,0);
   const cardSAR=_ctCardSAR(paidTotal);
   if(cardSAR>0)rows.push({id:uid(),receipt_id:rid,session_id:sessId,customer_name:cust,item_id:null,name:t('cashCard'),category:'__cardmeta__',qty:0,price:cardSAR,pay:'paid',team_name:null,created_at:at});
-  if(S._ctCustId&&S.hasCsCust!==false)rows.forEach(r=>{r.customer_id=S._ctCustId;}); // link the receipt to the chosen account (column optional; boot detect clears the flag if missing)
+  // Link the receipt to the chosen account (column optional; boot detect clears the flag if missing).
+  // Not an MM Team line, which is the team member's, nor the card/cash line, which is no purchase: both
+  // showed in the rider's purchases (2026-10-05).
+  if(S._ctCustId&&S.hasCsCust!==false)rows.forEach(r=>{if(r.pay!=='team'&&r.category!=='__cardmeta__')r.customer_id=S._ctCustId;});
   // Queued for offline-safe sync. A row the device could not store reaches neither the server
   // nor a later flush, so it must not be reported as taken: the receipt stays on screen to be
   // re-entered once there is room.
@@ -32679,9 +32694,10 @@ function _ctVoidReceipt(key){
   const cust=(rows.find(r=>r.customer_name)||{}).customer_name||t('cashWalkup');
   confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · ${_money(_rcTotal(rows))}`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
     const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
-    if(!await _salesVoid(key,cur,t('cashVoid'))){renderCashier();return;} // not stored: nothing voided, nothing restocked
+    const v=await _salesVoid(key,cur,t('cashVoid'));
+    if(!v){renderCashier();return;} // not stored: nothing voided, nothing restocked
     _rcLog(t('cashVoid'),cur); // the void is stored: logged now, whatever the restock below does
-    await _addonStockBatch(cur.filter(r=>r.pay!=='refunded'),1); // restock (refunded items were already restocked)
+    await _addonStockBatch(v.restock,1); // what the server voided, refunded lines left out (_rcRestockOf)
     toast(t('cashVoidedToast'));renderCashier();
   }});
 }
@@ -32690,9 +32706,10 @@ async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
   confirmDialog({title:t('cashRefund'),body:t('cashRefundConfirm'),confirmLabel:t('cashRefund'),confirmClass:'btn-muted',onConfirm:async()=>{
     const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
-    if(!await _salesRefund(key,all,t('cashRefund'))){renderCashier();return;} // not stored: not refunded, not restocked
+    const v=await _salesRefund(key,all,t('cashRefund'));
+    if(!v){renderCashier();return;} // not stored: not refunded, not restocked
     _rcLog(t('cashRefund'),all); // the refund is stored: logged now, whatever the restock below does
-    await _addonStockBatch(rows,1); // restock refunded items (summed per item — no concurrent-write race)
+    await _addonStockBatch(v.restock,1); // what the server refunded (_rcRestockOf), summed per item
     toast(t('cashRefundedToast'));renderCashier();
   }});
 }
@@ -32701,7 +32718,10 @@ function _ctReprint(key){const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r
 async function _ctMarkReceiptPaid(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay==='pending');
   if(!rows.length)return;
-  if(!_salesApply(rows.map(r=>({...r,pay:'paid'})),[])){renderCashier();return;}
+  // The one column that changes, as an update on a row still standing (2026-10-05): the whole row it
+  // used to send carried voided_at / refunded_at as this device last saw them, undoing a void or
+  // refund another desk made meanwhile.
+  if(!_salesApply([],[],rows.map(r=>({id:r.id,cols:{pay:'paid'}})))){renderCashier();return;}
   _rcLog(t('cashMarkPaid'),rows);
   toast(t('cashSavedToast'));renderCashier();
 }
@@ -32714,37 +32734,61 @@ function showReceiptEdit(key){
 }
 function closeReceiptEdit(){const m=document.getElementById('receipt-edit-modal');if(m){m.style.display='none';m.innerHTML='';}S._reKey=null;S._reEdit=[];}
 function _reSetSilent(i,k,v){const l=(S._reEdit||[])[i];if(l)l[k]=v;}
-function _reSet(i,k,v){const l=(S._reEdit||[])[i];if(!l)return;l[k]=v;if(k==='pay'&&v==='house')l.price=0;renderReceiptEdit();}
+// On the house keeps the line's price (2026-10-05, _cashSet). A line rung up on the house before
+// that holds 0: leaving On the house gives it the item's price back, as the sale forms do, rather
+// than a Paid line for nothing.
+function _reSet(i,k,v){
+  const l=(S._reEdit||[])[i];if(!l)return;
+  const was=l[k];l[k]=v;
+  if(k==='pay'&&was==='house'&&v!=='house'&&!(parseFloat(l.price)>0)){const it=(S.inventory||[]).find(x=>x.id===l.item_id);if(it&&it.price!=null)l.price=it.price;}
+  renderReceiptEdit();
+}
 async function saveReceiptEdit(){
   const lines=S._reEdit||[],key=S._reKey,upd=[];
   for(const l of lines){
-    let price=parseFloat(l.price);if(l.pay==='house')price=0;
+    let price=parseFloat(l.price);
     if(isNaN(price)||price<0){toast(t('cashAmtRequired'),'error');return;} // an emptied box is a slip, not "free": it used to save as 0
     price=Math.round(price*100)/100;
     const team=l.pay==='team'?((l.team_name||'').trim()||null):null;
-    const row=(S.cashSales||[]).find(r=>r.id===l.id);
-    if(row)upd.push({...row,pay:l.pay,price,team_name:team});
+    const row=(S.cashSales||[]).find(r=>r.id===l.id);if(!row)continue;
+    // Only the columns that changed, as an update (2026-10-05, see _ctMarkReceiptPaid).
+    const cols={};
+    if(l.pay!==row.pay)cols.pay=l.pay;
+    if(price!==Number(row.price))cols.price=price;
+    if(team!==(row.team_name||null))cols.team_name=team;
+    if(Object.keys(cols).length)upd.push({id:row.id,cols,row});
   }
+  // Money not taken: a line made On the house, or charged less, asks the operator's PIN, as a void
+  // does (2026-10-05).
+  if(upd.some(u=>(u.cols.pay==='house'&&u.row.pay!=='house')||(u.cols.price!==undefined&&u.cols.price<Number(u.row.price)))&&!await _pinApprove(t('receiptEditTitle')))return;
   const before=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
-  const after=before.map(r=>upd.find(u=>u.id===r.id)||r);
+  const after=before.map(r=>{const u=upd.find(x=>x.id===r.id);return u?{...r,...u.cols}:r;});
   // The receipt's discount was sized from what was chargeable when it was rung up, and it is not
   // on the form. Left alone, making a line free or a team member's drove the receipt negative (a
   // 50 gel with 10 off, made on-the-house, read -10 and took 10 off Collected). Keep the amount,
   // cap it at what is still chargeable, and book it against paid then pending the way the sale did.
-  const discRows=after.filter(r=>r.category==='__discount__'),del=[];
+  // Each amount goes on a discount row the receipt already has (its own payment first, then any
+  // other), a new row only when it has too few, and a row left over is set to nothing. Never a
+  // delete: deleting a sale row is for admins only, and a refused delete left both discounts on the
+  // server while this device hid one (2026-10-05).
+  const discRows=after.filter(r=>r.category==='__discount__'),ins=[];
   if(discRows.length){
     const goods=after.filter(r=>r.category!=='__discount__'&&r.category!=='__cardmeta__').map(r=>({qty:r.qty,price:r.price,pay:r.pay}));
     const had=Math.round(discRows.reduce((s,r)=>s-(Number(r.qty)||1)*(Number(r.price)||0),0)*100)/100;
     const ds=_ctDiscountSplit(goods,Math.min(Math.max(0,had),_ctChargeableTotal(goods)));
-    const want={paid:ds.onPaid,pending:ds.onPending};
+    const want={paid:ds.onPaid,pending:ds.onPending},pool=discRows.slice(),got={};
+    const put=(r,cols)=>{const ch={};Object.keys(cols).forEach(k=>{if(String(r[k])!==String(cols[k]))ch[k]=cols[k];});if(Object.keys(ch).length)upd.push({id:r.id,cols:ch,row:r});};
+    ['paid','pending'].forEach(p=>{if(want[p]>0){const i=pool.findIndex(r=>r.pay===p);if(i>=0)got[p]=pool.splice(i,1)[0];}});
+    ['paid','pending'].forEach(p=>{if(want[p]>0&&!got[p]&&pool.length)got[p]=pool.shift();});
     ['paid','pending'].forEach(p=>{
-      const ex=discRows.filter(r=>r.pay===p);
-      if(want[p]>0){upd.push({...(ex[0]||discRows[0]),id:ex[0]?ex[0].id:uid(),qty:1,price:-want[p],pay:p});ex.slice(1).forEach(r=>del.push(r.id));}
-      else ex.forEach(r=>del.push(r.id));
+      if(!(want[p]>0))return;
+      if(got[p]){put(got[p],{qty:1,price:-want[p],pay:p});return;}
+      const s=discRows[0];
+      ins.push({id:uid(),receipt_id:s.receipt_id||key,session_id:s.session_id,customer_name:s.customer_name||null,item_id:null,name:s.name||t('cashDiscount'),category:'__discount__',qty:1,price:-want[p],pay:p,team_name:null,created_at:s.created_at,...(s.customer_id?{customer_id:s.customer_id}:{})});
     });
-    discRows.filter(r=>r.pay!=='paid'&&r.pay!=='pending').forEach(r=>del.push(r.id));
+    pool.forEach(r=>put(r,{qty:0,price:0}));
   }
-  if(!_salesApply(upd,del)){renderReceiptEdit();return;} // not stored: the form stays open with the changes
+  if(!_salesApply(ins,[],upd.map(u=>({id:u.id,cols:u.cols})))){renderReceiptEdit();return;} // not stored: the form stays open with the changes
   const now=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
   if(before.some(b=>{const n=now.find(x=>x.id===b.id);return !n||n.pay!==b.pay||Number(n.price)!==Number(b.price)||(n.team_name||'')!==(b.team_name||'');})||now.length!==before.length)_rcLog(t('receiptEditTitle'),now,` (${_rcTotal(before)} → ${_rcTotal(now)})`);
   closeReceiptEdit();toast(t('cashSavedToast'));renderCashier();
@@ -32776,10 +32820,15 @@ function renderReceiptEdit(){
     </div>
   </div>`;
 }
+// What a customer's copy of a receipt lists: not the card/cash line, nor a discount row the receipt
+// no longer carries (an edit sets a spare one to nothing: saveReceiptEdit). A line on the house says
+// so in place of an amount, and takes nothing from the total (2026-10-05).
+function _rcShown(r){return !!r&&r.category!=='__cardmeta__'&&!(r.category==='__discount__'&&!(Number(r.qty)||0));}
+function _rcLineAmt(r){return r.pay==='house'?t('onTheHouseLabel'):_money(Math.round(_lineCharge(r)*100)/100,_NOISO);}
 async function _ctShareReceipt(key){
-  const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.category!=='__cardmeta__');if(!rows.length)return;
-  const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
-  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: ${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}`).join('\n');
+  const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&_rcShown(r));if(!rows.length)return;
+  const total=Math.round(rows.reduce((s,r)=>s+_lineCharge(r),0)*100)/100;
+  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: ${_rcLineAmt(r)}`).join('\n');
   const txt=`MicroMobility ${t('cashReceiptWord')}\n${body}\n${t('repTotal')}: ${_money(total,_NOISO)}`;
   try{if(navigator.share){await navigator.share({title:'MicroMobility',text:txt});return;}}catch(e){return;}
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
@@ -32787,12 +32836,13 @@ async function _ctShareReceipt(key){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _ctPrintReceipt(rows,cust,at){
   if(!rows||!rows.length)return;
-  rows=rows.filter(r=>r.category!=='__cardmeta__'); // drop payment-split metadata from the printed receipt
+  rows=rows.filter(_rcShown); // drop payment-split metadata (and a spare discount row) from the printed receipt
+  if(!rows.length)return;
   const ar=_isRtl();
   const logoUrl=new URL('/logo.png',location.origin).href;
-  const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
+  const total=Math.round(rows.reduce((s,r)=>s+_lineCharge(r),0)*100)/100;
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
-  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</td></tr>`).join('');
+  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">${esc(_rcLineAmt(r))}</td></tr>`).join('');
   const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8"><title>${t('cashReceiptWord')}</title><link href="/fonts/fonts.css" rel="stylesheet"><link href="${location.origin}/receipt.css?v=${RECEIPT_CSS_V}" rel="stylesheet"></head><body>
     <div class="mm-banner"><img src="${logoUrl}" alt="Micromobility"><strong>Micromobility Co.</strong><span class="doc">${t('cashReceiptWord')}</span></div>
     <div class="mm-rule"></div>
@@ -33000,10 +33050,10 @@ function renderCashier(){
   const rentalLines=[];(_qBySession().get(sessId)||[]).slice().forEach(e=>entryPurchases(e).forEach((p,i)=>rentalLines.push({...p,who:e.name,entryId:e.id,pidx:i})));
   const receiptCards=receipts.map(rc=>{
     const refunded=rc.lines.some(l=>l.pay==='refunded');
-    const disp=rc.lines.filter(l=>l.category!=='__cardmeta__');
+    const disp=rc.lines.filter(_rcShown);
     const cardMeta=rc.lines.find(l=>l.category==='__cardmeta__');
     const cardAmt=cardMeta?Math.max(0,Number(cardMeta.price)||0):0;
-    const rt=Math.round(disp.reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
+    const rt=Math.round(disp.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house shows its price, and takes nothing
     const paidNet=Math.round(disp.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
     const cardShown=Math.min(cardAmt,paidNet),cashShown=Math.max(0,Math.round((paidNet-cardShown)*100)/100);
     return`<div class="sl-rc${refunded?' sl-o60':''}">
@@ -33104,6 +33154,7 @@ function renderCashier(){
         </div>
         ${(cc.card>0||cc.cash>0)?`<div class="sl-cc"><span>${t('cashCard')}: <bdi class="sl-blue">${_money(cc.card,_NOISO)}</bdi></span><span>${t('cashCash')}: <bdi class="sl-green">${_money(cc.cash,_NOISO)}</bdi></span></div>`:''}
         ${tot.team>0?`<div class="sl-tteam">${t('payTeam')}: ${_money(tot.team)}</div>`:''}
+        ${tot.free>0?`<div class="sl-thouse">${t('onTheHouseLabel')}: ${_money(tot.free)}</div>`:''}
         ${tot.discount>0?`<div class="sl-tdisc">${t('cashDiscount')}: ${_money(tot.discount)}</div>`:''}
         ${tot.refunded>0?`<div class="sl-tref">${t('cashRefunds')}: ${_money(tot.refunded)}</div>`:''}
         ${catRows?`<div class="sl-cats">${catRows}</div>`:''}
@@ -35496,7 +35547,7 @@ function _anSparkline(values,color,w,h){
 // Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost.
 function _anMargin(lines,costById){
   let rev=0,cogs=0,haveCost=false;
-  (lines||[]).forEach(l=>{if(l.cat==='__discount__'||l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;if(q<=0)return;rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}});
+  (lines||[]).forEach(l=>{if(l.cat==='__discount__'||l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;if(q<=0)return;if(l.pay!=='house')rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}}); // on the house: its cost, no revenue
   rev=Math.round(rev);cogs=Math.round(cogs);
   return{rev,cogs,profit:rev-cogs,marginPct:rev>0?Math.round((rev-cogs)/rev*100):0,haveCost};
 }
@@ -35723,7 +35774,7 @@ function _renderAnalyticsNow(){
   // Product sales for the in-range sessions (cashier sales + rental add-ons)
   const anSalesLines=_cashLinesOf(sessIds);
   const anSales=_salesTotals(anSalesLines);
-  const anTopItems=(()=>{const c={};anSalesLines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__'&&l.pay!=='refunded'&&(Number(l.qty)||0)>0).forEach(l=>{const k=l.name||'—';if(!c[k])c[k]={name:k,qty:0,value:0};c[k].qty+=(Number(l.qty)||0);c[k].value+=(Number(l.qty)||0)*(Number(l.price)||0);});return Object.values(c).sort((a,b)=>b.qty-a.qty||b.value-a.value).slice(0,8);})();
+  const anTopItems=(()=>{const c={};anSalesLines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__'&&l.pay!=='refunded'&&(Number(l.qty)||0)>0).forEach(l=>{const k=l.name||'—';if(!c[k])c[k]={name:k,qty:0,value:0};c[k].qty+=(Number(l.qty)||0);c[k].value+=l.pay==='house'?0:(Number(l.qty)||0)*(Number(l.price)||0);});return Object.values(c).sort((a,b)=>b.qty-a.qty||b.value-a.value).slice(0,8);})();
   // ── Approved onto the social ride ──────────────────────────────────────────
   // On an approval ride, staff pick who comes, so "approved" IS the attendance decision —
   // the number worth watching is how many DIFFERENT people that reached. A rider approved on

@@ -2176,6 +2176,7 @@
     #tab-cashier .sl-kpi{font-size:22px;font-weight:900;}
     #tab-cashier .sl-cc{display:flex;gap:14px;font-size:12px;font-weight:700;margin-bottom:8px;}
     #tab-cashier .sl-tteam{font-size:12px;color:var(--purple);font-weight:800;margin-bottom:8px;}
+    #tab-cashier .sl-thouse{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px;} /* what was given away on the house (2026-10-05) */
     #tab-cashier .sl-tdisc{font-size:12px;color:var(--muted);font-weight:700;margin-bottom:8px;}
     #tab-cashier .sl-tref{font-size:12px;color:var(--orange);font-weight:800;margin-bottom:10px;}
     #tab-cashier .sl-cats{background:var(--s2);border-radius:4px;padding:10px 12px;margin-bottom:12px;}
