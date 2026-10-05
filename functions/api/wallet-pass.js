@@ -769,11 +769,6 @@ var b64ToBytes = (b64) => {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 };
-var bytesToB64 = (bytes) => {
-  let s = "";
-  for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768));
-  return btoa(s);
-};
 var hex = (bytes) => Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 var eq = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
 var cmpBytes = (a, b) => {
@@ -1736,18 +1731,29 @@ async function loadSigner(env) {
   return s;
 }
 var SELFTEST_MANIFEST = '{"pass.json":"da39a3ee5e6b4b0d3255bfef95601890afd80709"}';
+var SELFTEST_PER_MIN = 6;
+var _stWindow = 0;
+var _stSpent = 0;
 async function onRequestGet(context) {
   const { request, env } = context;
   if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
   if (!configured(env) || !env.APPLE_PASS_TYPE_ID || !env.APPLE_TEAM_ID) return json({ ok: false, skipped: "wallet not configured" }, 501);
+  const now = Date.now();
+  if (now - _stWindow >= 6e4) {
+    _stWindow = now;
+    _stSpent = 0;
+  }
+  if (++_stSpent > SELFTEST_PER_MIN) return json({ ok: false, error: "rate limited" }, 429);
   try {
     const signer = await getSigner(env);
     const wwdr = await getWWDR();
     const signature = await signDetached(signer, strBytes(SELFTEST_MANIFEST), [wwdr]);
-    return json({ ok: true, source: signer.source, certificate: { subject: signer.info.subject, issuer: signer.info.issuerName, notAfter: signer.info.notAfter }, manifest: SELFTEST_MANIFEST, signature: bytesToB64(signature) });
+    if (!signature || !signature.length) throw new Error("empty signature");
+    console.log("wallet-pass: selftest signed", JSON.stringify({ source: signer.source, subject: signer.info.subject, issuer: signer.info.issuerName, notAfter: signer.info.notAfter }));
+    return json({ ok: true });
   } catch (e) {
     console.error("wallet-pass: selftest failed", e && e.stack || e);
-    return json({ ok: false, error: String(e && e.message || e) }, 500);
+    return json({ ok: false, error: "sign failed" }, 500);
   }
 }
 function strBytes(s) {

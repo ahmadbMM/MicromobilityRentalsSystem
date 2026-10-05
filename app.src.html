@@ -34699,7 +34699,7 @@ async function _igLoad(force){
 }
 function _igSig(){return S.igRows?[...S.igRows.values()].map(x=>[x.customer_id,x.handle,x.followers,x.status].join()).join('|'):'';}
 // Keeps the numbers fresh without a cron: at most every three hours a staff device asks the server
-// to count the accounts that are due (it counts 25 and refuses a second pass within 20 minutes).
+// to count the accounts that are due (it counts up to 22, inside Cloudflare's subrequest limit, and refuses a second pass within 20 minutes).
 async function _igNudge(){
   if(!S.igRows||S._igOff)return;
   try{const at=+localStorage.getItem('cq_ig_nudge')||0;if(Date.now()-at<108e5)return;localStorage.setItem('cq_ig_nudge',String(Date.now()));}catch(e){return;}

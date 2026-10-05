@@ -21,7 +21,13 @@
 // Community > Accounts opens (at most every few hours), and the server refuses a second pass
 // within STALE_GAP_MIN of the last one, however many devices ask.
 
-const BATCH = 25;               // Instagram allows roughly 200 lookups an hour per token
+// Cloudflare's free plan allows 50 subrequests per call, and every fetch here is one: four reads (the
+// staff check, the last pass, the riders, their rows), then a lookup and a save per account. A batch of
+// 25 made 54, and the call died with nothing saved (2026-10-05): 4 + 2 x 22 = 48 leaves room. A read
+// that pages past 1000 rows costs one more, so the loop also stops at SUBREQ_MAX and leaves the rest
+// for the next pass.
+const BATCH = 22;               // Instagram allows roughly 200 lookups an hour per token
+const SUBREQ_MAX = 48;
 const STALE_GAP_MIN = 20;
 const OK_DAYS = 7;              // a counted account is counted again after a week
 const MISS_DAYS = 30;           // a personal/unknown one is tried again after a month
@@ -42,11 +48,13 @@ export async function onRequestPost(context) {
   const ANON = env.SUPABASE_ANON_KEY;
   if (!ANON) return json({ ok: false, error: 'no anon key' }, 500);
   const H = { apikey: ANON, Authorization: `Bearer ${staffToken}`, 'Content-Type': 'application/json' };
+  let sub = 0; // the subrequests this call has made (see SUBREQ_MAX)
+  const call = (url, init) => { sub++; return fetch(url, init); };
 
-  const who = await fetch(`${SUPA}/rest/v1/rpc/is_staff`, { method: 'POST', headers: H, body: '{}' });
+  const who = await call(`${SUPA}/rest/v1/rpc/is_staff`, { method: 'POST', headers: H, body: '{}' });
   if (!who.ok || (await who.json()) !== true) return json({ ok: false, error: 'not staff' }, 403);
 
-  const rest = (path, init) => fetch(`${SUPA}/rest/v1/${path}`, { ...init, headers: { ...H, ...(init && init.headers) } });
+  const rest = (path, init) => call(`${SUPA}/rest/v1/${path}`, { ...init, headers: { ...H, ...(init && init.headers) } });
 
   // Who to count: [{ id, handle, row }] where row is the account's current customer_ig_followers row.
   let due;
@@ -86,26 +94,36 @@ export async function onRequestPost(context) {
   const results = [];
   let stop = null;
   for (const x of due) {
-    const got = await lookup(env, TOKEN, IGID, x.handle);
-    if (got.stop) { stop = got.stop; break; } // rate limit or a dead token: the rest wait for next time
-    const at = new Date().toISOString();
-    const same = x.row && x.row.handle === x.handle;
-    // A count replaces whatever was there. A miss keeps a number staff typed for the same handle,
-    // and clears a number that belonged to the rider's old handle.
-    const row = got.ok
-      ? { customer_id: x.id, handle: x.handle, followers: got.followers, source: 'auto', counted_at: at, status: 'ok', tried_at: at, updated_by: 'Instagram' }
-      : same
-        ? { customer_id: x.id, handle: x.handle, followers: x.row.followers, source: x.row.source, counted_at: x.row.counted_at, status: got.status, tried_at: at, updated_by: x.row.updated_by }
-        : { customer_id: x.id, handle: x.handle, followers: null, source: null, counted_at: null, status: got.status, tried_at: at, updated_by: null };
-    const w = await rest('customer_ig_followers?on_conflict=customer_id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
-      body: JSON.stringify(row),
-    });
-    const saved = w.ok ? (await w.json())[0] : null;
-    results.push(saved || { ...row, error: 'save failed' });
+    if (sub + 2 > SUBREQ_MAX) break; // no room for this account's lookup and save: it waits for the next pass
+    // A subrequest that throws (the network, or Cloudflare refusing one more) ends the pass with what
+    // was counted so far, instead of a 500 that threw those counts away too (2026-10-05).
+    try {
+      const got = await lookup(env, TOKEN, IGID, x.handle, call);
+      if (got.stop) { stop = got.stop; break; } // rate limit or a dead token: the rest wait for next time
+      const at = new Date().toISOString();
+      const same = x.row && x.row.handle === x.handle;
+      // A count replaces whatever was there. A miss keeps a number staff typed for the same handle,
+      // and clears a number that belonged to the rider's old handle.
+      const row = got.ok
+        ? { customer_id: x.id, handle: x.handle, followers: got.followers, source: 'auto', counted_at: at, status: 'ok', tried_at: at, updated_by: 'Instagram' }
+        : same
+          ? { customer_id: x.id, handle: x.handle, followers: x.row.followers, source: x.row.source, counted_at: x.row.counted_at, status: got.status, tried_at: at, updated_by: x.row.updated_by }
+          : { customer_id: x.id, handle: x.handle, followers: null, source: null, counted_at: null, status: got.status, tried_at: at, updated_by: null };
+      const w = await rest('customer_ig_followers?on_conflict=customer_id', {
+        method: 'POST',
+        headers: { Prefer: 'resolution=merge-duplicates,return=representation' },
+        body: JSON.stringify(row),
+      });
+      const saved = w.ok ? (await w.json())[0] : null;
+      results.push(saved || { ...row, error: 'save failed' });
+    } catch (e) {
+      console.warn('ig-followers: pass cut short', String((e && e.message) || e));
+      stop = 'error';
+      break;
+    }
   }
-  return json({ ok: !stop, checked: results.length, results, ...(stop ? { stopped: stop } : {}) });
+  // 'error' also sets error, so the staff dialog's single check says the connection failed.
+  return json({ ok: !stop, checked: results.length, results, ...(stop ? { stopped: stop } : {}), ...(stop === 'error' ? { error: 'interrupted' } : {}) });
 }
 
 function handleOf(c) {
@@ -116,12 +134,13 @@ function handleOf(c) {
 }
 
 // One Business Discovery lookup. { ok, followers } | { ok:false, status } | { stop: 'rate'|'token'|'error' }
-async function lookup(env, token, igId, handle) {
+// `call` is the caller's counted fetch (SUBREQ_MAX).
+async function lookup(env, token, igId, handle, call = fetch) {
   const ver = env.IG_GRAPH_VERSION || 'v23.0';
   const fields = `business_discovery.username(${handle}){followers_count,username}`;
   let res, data;
   try {
-    res = await fetch(`https://graph.facebook.com/${ver}/${encodeURIComponent(igId)}?fields=${encodeURIComponent(fields)}&access_token=${encodeURIComponent(token)}`);
+    res = await call(`https://graph.facebook.com/${ver}/${encodeURIComponent(igId)}?fields=${encodeURIComponent(fields)}&access_token=${encodeURIComponent(token)}`);
     data = await res.json();
   } catch { return { ok: false, status: 'error' }; }
   const n = data && data.business_discovery && data.business_discovery.followers_count;
