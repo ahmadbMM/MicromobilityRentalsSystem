@@ -68,7 +68,6 @@ test.describe('@staff:history remove, restore and the waitlist', () => {
     const p = patches(page, 'queue_entries');
     await page.evaluate(`doRemove('a')`);
     await expect.poll(() => p.some((x) => x.body.status === 'removed')).toBe(true);
-    await page.waitForTimeout(300);
     expect(p.some((x) => x.url.includes('id=eq.w'))).toBe(false);
   });
 
@@ -77,7 +76,6 @@ test.describe('@staff:history remove, restore and the waitlist', () => {
     const p = patches(page, 'queue_entries');
     await page.evaluate(`doRemove('d')`);
     await expect.poll(() => p.some((x) => x.body.status === 'removed' && x.url.includes('status=eq.done'))).toBe(true);
-    await page.waitForTimeout(300);
     expect(p.some((x) => x.url.includes('id=eq.w'))).toBe(false);
   });
 
@@ -180,7 +178,7 @@ test.describe('@staff:history customer activity', () => {
     const csv = await page.evaluate(`(async()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
       const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
       try{S._cactExport=[${JSON.stringify(act(1))}];exportCustActivityCSV();}finally{window.Blob=_B;document.createElement=_a;}return out;})()`) as string;
-    expect(csv.replace(/^﻿/, '').split('\n')[0]).toBe('Time,By,Action,Details,Site');
+    expect(csv.replace(/^\uFEFF/, '').split('\n')[0]).toBe('Time,By,Action,Details,Site');
     expect(await page.evaluate(`S.fullLog[S.fullLog.length-1].label`)).toBe('Exported Customer activity as CSV (1 rows)');
   });
 });

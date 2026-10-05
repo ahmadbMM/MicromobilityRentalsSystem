@@ -73,7 +73,6 @@ test.describe('@staff:checkin the payment carried into the bike picker', () => {
     await expect(page.locator('#bkm-carry')).toHaveCount(0);
     await page.evaluate(`(async()=>{S.modalBikes=['b1'];await confirmAssign();})()`);
     await expect.poll(() => ci.length).toBe(1);
-    await page.waitForTimeout(300);
     expect(ci[0].paid).toBeUndefined();
     expect(p.some((x) => x.body.paid === true)).toBe(false);
   });
