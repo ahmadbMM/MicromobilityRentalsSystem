@@ -8460,7 +8460,8 @@ function _mwSessOpts(){
     const sx=bk&&_sessGet(bk.sessionId);
     if(sx&&!byId.has(sx.id))byId.set(sx.id,sx);
   });
-  return [...byId.values()].sort(_sessOrder);
+  // Front Desk is never offered a Saturday ride, as on the roster (2026-10-05).
+  return [...byId.values()].filter(x=>isAdmin()||!_isApprovalRide(x)).sort(_sessOrder);
 }
 /** The session a parked row belongs to — walk-ups belong to none. */
 function _mwRowSess(w){
@@ -8494,9 +8495,10 @@ function _mwGroupName(g){
 function _mwAddableBookings(){
   const taken=new Set((S.deskWaitlist||[]).filter(w=>w.status==='waiting'&&w.booking_id).map(w=>w.booking_id));
   const sel=S._mwSess||'all'; // the filter scopes what can be ADDED too: one ride, one list
+  const fd=!isAdmin(); // Front Desk never sees the Saturday side, as on the roster (2026-10-05)
   return getQueue()
     .filter(e=>sel==='all'||e.sessionId===sel)
-    .filter(e=>(e.status==='waiting'||e.status==='waitlist')&&!taken.has(e.id))
+    .filter(e=>(e.status==='waiting'||e.status==='waitlist')&&!taken.has(e.id)&&!(fd&&_apprSessIds.has(e.sessionId)))
     .sort((a,b)=>(a.status===b.status?0:a.status==='waitlist'?-1:1)
       ||((a.status==='waitlist'?a.waitlistNum:a.queueNum)||0)-((b.status==='waitlist'?b.waitlistNum:b.queueNum)||0));
 }
@@ -8848,8 +8850,13 @@ async function mwSetType(rowId,ty){
     if(_writeErr(await sb.from('queue_entries').update(patch).eq('id',bk.id),'bike type'))return;
     bk.typePreference=ty;if(patch.price!==undefined)bk.price=patch.price;
   }
-  if(_writeErr(await sb.from('desk_waitlist').update({bike_type:ty}).eq('id',rowId),'bike type'))return;
-  w.bike_type=ty;
+  // A walk-up's row holds its own price once a payment state was picked (Pending stores the fare):
+  // an unpaid one still at its old type's fare follows the type by the same rule (2026-10-05). Left
+  // behind, the booking made from it later charged the old type's fare.
+  const wPatch={bike_type:ty};
+  if(!bk&&!w.paid&&w.price!=null&&Number(w.price)===priceForType(w.bike_type||'Any'))wPatch.price=priceForType(ty);
+  if(_writeErr(await sb.from('desk_waitlist').update(wPatch).eq('id',rowId),'bike type'))return;
+  w.bike_type=ty;if(wPatch.price!==undefined)w.price=wPatch.price;
   logAction(`${t('bikeTypeLabel')}: ${w.name} \u2192 ${typeLabel(ty)}`);
   renderStaffQueue();renderMyRides();
 }
@@ -8863,7 +8870,12 @@ function _on_renderManagedWl_3(event,el){event.stopPropagation()}
 function _on_renderManagedWl_4(event,el){if(event.key==='Enter')el.blur()}
 function _on_renderManagedWl_5(event,el){if(event.key==='Enter')mwEnter()}
 function _on_renderManagedWl_6(event,el){S._mwSugOpen=true;_mwRenderSuggest()}
-function _on_renderManagedWl_7(event,el){setTimeout(()=>{S._mwSugOpen=false;_mwRenderSuggest();},180)}
+// The box closes its suggestions 180 ms after it loses the focus, by drawing them again: a press on a
+// suggestion that took longer than that lost its button under the pointer, and nothing was picked
+// (2026-10-05). A press inside the list no longer takes the focus from the box (_10), and a keyboard
+// user who tabbed into the list keeps it.
+function _on_renderManagedWl_7(event,el){setTimeout(()=>{const h=document.getElementById('mw-suggest');if(h&&h.contains(document.activeElement))return;S._mwSugOpen=false;_mwRenderSuggest();},180)}
+function _on_renderManagedWl_10(event,el){event.preventDefault()}
 function _on_renderManagedWl_8(event,el){S._mwPh=el.value}
 function _on_renderManagedWl_9(event,el){if(event.key==='Enter')addManagedWl()}
 function renderManagedWl(listOnly){
@@ -8945,7 +8957,7 @@ function renderManagedWl(listOnly){
       <button class="btn-primary rq-fs0" data-on-click="${_on("addManagedWl")}">+ ${t('mwAddBtn')}</button>
       <button class="btn-secondary rq-fs0" data-on-click="${_on("showWlAddModal")}" title="${esc(t('wlAddBtn'))}">${_artIcon('person',12)} ${t('wlAddBtn')}</button>
     </div>
-    <div id="mw-suggest" class="mw-suggest rq-none"></div>
+    <div id="mw-suggest" class="mw-suggest rq-none" data-on-mousedown="${_on("_on_renderManagedWl_10",_EV,_EL)}"></div>
     <div id="mw-list" class="rq-mwlist">${listHtml}</div>`;
   _mwRenderSuggest(); // a background refresh rebuilds this host: put the open picker back
 }
@@ -9006,9 +9018,12 @@ async function addDeskWaitlist(){
 async function _addDeskWaitlist(){
   _wlxSync();
   const name=_titleCaseName(document.getElementById('wl-name')?.value||'');
-  const phone=(document.getElementById('wl-phone')?.value||'').trim();
+  // Arabic-Indic digits count (a valid number typed on an Arabic keyboard was refused), and the number
+  // is stored in the one form every other phone is (_normPhone, 2026-10-05).
+  const phoneRaw=_asciiDigits(document.getElementById('wl-phone')?.value||'').trim();
   if(!name){const i=document.getElementById('wl-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
-  if(phone.replace(/\D/g,'').length<8){const i=document.getElementById('wl-phone');if(i){_fieldErr(i,t('errValidPhone'));i.focus();}return;}
+  if(phoneRaw.replace(/\D/g,'').length<8){const i=document.getElementById('wl-phone');if(i){_fieldErr(i,t('errValidPhone'));i.focus();}return;}
+  const phone=_normPhone(phoneRaw,'+966')||phoneRaw;
   // Extra rows: unnamed riders wait under the first name ("Tamer 2"), same phone.
   const _now=new Date().toISOString(),_op=_opName()||null;
   const rows=[{name,type:S._wlType||'Any'},...(S._wlExtra||[]).map((r,i)=>({name:_titleCaseName(r.name||'')||name+' '+(i+2),type:CUST_TYPES.includes(r.type)?r.type:'Any'}))]
@@ -9301,8 +9316,9 @@ function _gsHits(q){
   const ql=raw.toLowerCase(),qn=ql.replace(/^#/,''),adm=isAdmin(),out=[],today=todayStr();
   const has=v=>v!=null&&String(v).toLowerCase().includes(ql);
   const dayOf=e=>String(e.sessionDate||'').slice(0,10);
-  // bookings: tonight's first, then the newest night
-  getQueue().filter(e=>e.status!=='removed'&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
+  // bookings: tonight's first, then the newest night. Front Desk never sees the Saturday side (the
+  // roster's rule, 2026-10-05): those bookings are not found here either.
+  getQueue().filter(e=>e.status!=='removed'&&!(!adm&&_apprSessIds.has(e.sessionId))&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
     .sort((a,b)=>((dayOf(b)===today)-(dayOf(a)===today))||dayOf(b).localeCompare(dayOf(a))||(a.queueNum-b.queueNum))
     .slice(0,5).forEach(e=>out.push({k:'gsKindBooking',l:`#${e.queueNum} ${e.name||''}`,m:[shortDate(dayOf(e)),_own(STATUS_KEY,e.status)?t(STATUS_KEY[e.status]):''].filter(Boolean).join(' · '),go:['_gsGo','booking',e.id]}));
   if(adm){
@@ -9426,7 +9442,7 @@ function _ntKindsNow(){
   // items: one per thing, {id, txt (the bell's line for it), at (when it happened, if known)}
   const add=(k,items,key,c,go,ready)=>out.push({k,ids:items.map(x=>String(x.id)),items:items.map(x=>({...x,id:String(x.id)})),key,c,go,ready:!!ready});
   const nm=x=>String((x&&(x.name||x.email))||'—');
-  add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue);
+  add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   if(adm){
     add('apps',_caPending().map(a=>({id:a.id,txt:t('ntiApps').replace('{0}',nm(a)),at:a.created_at})),'ntApps','green',['_on_goCommunity','applications'],Array.isArray(S._caApps));
@@ -9578,8 +9594,9 @@ function _dsStart(s){
   return m?String(m[1]).padStart(2,'0')+':'+m[2]:'09:00';
 }
 function printDaySheet(){
-  const today=todayStr();
-  const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today)
+  const today=todayStr(),fd=!isAdmin();
+  // Front Desk's sheet leaves out the Saturday side, as its roster does (2026-10-05).
+  const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today&&!(fd&&_isApprovalRide(x)))
     .sort((a,b)=>_dsStart(a).localeCompare(_dsStart(b))||String(a.id).localeCompare(String(b.id)));
   if(!sess.length){toast(t('daySheetNone'),'info');return;}
   const LIVE=['waiting','waitlist','active']; // the riders still to ride; each one's word comes from STATUS_KEY
@@ -13201,7 +13218,7 @@ function renderAddonPicker(){
   const sess=allSessions().find(s=>s.id===e.sessionId);
   const items=sessionAddonItems(sess);
   const cur=entryAddons(e);
-  const _q=aid=>{const a=cur.find(x=>x.id===aid);return a?a.qty:0;};
+  const _q=aid=>cur.filter(x=>x.id===aid).reduce((n,x)=>n+x.qty,0); // every line of it (one per price sold at)
   const total=addonsCost(cur);
   let m=document.getElementById('addon-picker-backdrop');
   if(!m){m=document.createElement('div');m.id='addon-picker-backdrop';m.className='modal-backdrop';m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';m.onclick=ev=>{if(ev.target===m)closeAddonPicker();};document.body.appendChild(m);}
@@ -13240,12 +13257,21 @@ async function _entryAddonMutate(id,addonId,delta){
   const it=(S.inventory||[]).find(x=>x.id===addonId);if(!it)return false;
   const stock=Number(it.qty)||0;
   let cur=entryAddons(e);
-  const a=cur.find(x=>x.id===addonId);
-  if(delta>0){if(stock<=0)return false;if(a){if(a.qty>=20&&_asCustomer())return false;a.qty+=1;}else cur.push({id:addonId,qty:1});} // a rider's own: 20 of one at most (the server's cap)
-  else{
+  // A line carries the price it was sold at (p, stamped by the database). A unit added after a price
+  // change goes on a line at today's price - one with none yet (an older row) or a new one - never on
+  // the old line, which charged it at the old price (2026-10-05). A unit taken off comes off the last
+  // line, the one added most recently, and only that line goes when it empties.
+  const now=it.price!=null?Number(it.price):null,lines=cur.filter(x=>x.id===addonId);
+  if(delta>0){
+    if(stock<=0)return false;
+    if(lines.reduce((n,x)=>n+x.qty,0)>=20&&_asCustomer())return false; // a rider's own: 20 of one at most (the server's cap)
+    const a=lines.find(x=>x.p===undefined||x.p===now);
+    if(a)a.qty+=1;else cur.push({id:addonId,qty:1});
+  }else{
+    const a=lines[lines.length-1];
     if(!a)return false;
     if(e.status==='active'&&_asCustomer()){toast(t('addonHandedOver'),'warning');return false;} // out on the ride: already handed over (the server keeps them too)
-    a.qty-=1;if(a.qty<=0)cur=cur.filter(x=>x.id!==addonId);
+    a.qty-=1;if(a.qty<=0)cur=cur.filter(x=>x!==a);
   }
   const _before=JSON.stringify(entryAddons(e));
   e.addons=cur;                                            // live update so totals/views reflect immediately
