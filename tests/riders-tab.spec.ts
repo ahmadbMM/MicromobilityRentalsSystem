@@ -393,10 +393,12 @@ test.describe('walk-in at the desk', () => {
     await page.fill('#rw-r-h-2', '');
     await page.click('#rw-submit');
     await expect.poll(() => calls.length).toBe(1);
+    // A blank name goes as '': the database names the rider "Lina 3" itself (a typed name may not
+    // hold a digit, so the stand-in sent from here was refused, 2026-10-05).
     expect(calls[0].p_riders).toEqual([
       { name: 'Lina Kid', height: null, type: 'Hybrid' },
-      { name: 'Lina 3', height: null, type: 'Hybrid' },
-      { name: 'Lina 4', height: null, type: 'Hybrid' },
+      { name: '', height: null, type: 'Hybrid' },
+      { name: '', height: null, type: 'Hybrid' },
     ]);
   });
 
@@ -988,8 +990,9 @@ test('staff edit a party: companions come filled in, one is changed, one removed
   expect(reqs.filter((q) => q.method === 'DELETE' && q.url.includes('id=eq.5'))).toHaveLength(1);
   const add = reqs.filter((q) => q.url.includes('rider_party_add'));
   expect(add).toHaveLength(1);
-  // The blank one gets the employee's first name and the next number in the party, the employee's bike type, and no height.
-  expect(add[0].body).toEqual({ p_id: 1, p_riders: [{ name: 'Amal Niece', height: 140, type: 'Hybrid' }, { name: 'Amal 5', height: null, type: 'Hybrid' }] });
+  // The blank one is sent blank (the database names it from the employee's first name and its place in
+  // the party), with the employee's bike type and no height.
+  expect(add[0].body).toEqual({ p_id: 1, p_riders: [{ name: 'Amal Niece', height: 140, type: 'Hybrid' }, { name: '', height: null, type: 'Hybrid' }] });
   expect(reqs.filter((q) => q.method === 'PATCH' && /id=eq\.1(&|$)/.test(q.url))).toHaveLength(0); // the employee's own row was untouched
   expect(errs).toEqual([]);
 });

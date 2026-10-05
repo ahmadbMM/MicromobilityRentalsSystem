@@ -65,7 +65,7 @@ async function boot(page: P, fx: { queue_entries: Record<string, unknown>[]; rid
   await page.waitForFunction('S.ridersLoaded===true');
   const reqs: Req[] = [];
   page.on('request', (r) => {
-    if (r.method() === 'GET' || r.method() === 'OPTIONS' || !/rest\/v1\/(rider_registrations|queue_entries|rpc\/rider_party_add)/.test(r.url())) return;
+    if (r.method() === 'GET' || r.method() === 'OPTIONS' || !/rest\/v1\/(rider_registrations|queue_entries|rpc\/rider_party_add|rpc\/staff_rider_party_move)/.test(r.url())) return;
     let body: Req['body'] = null;
     try { body = r.postDataJSON(); } catch { /* no body */ }
     reqs.push({ method: r.method(), url: r.url(), body });
@@ -78,7 +78,7 @@ const to = (reqs: Req[], method: string, re: RegExp) => reqs.filter((q) => q.met
 test('moving a party moves every booking in it, books a new companion on the new night and cancels a dropped one', async ({ page }) => {
   const errs: string[] = [];
   page.on('pageerror', (e) => errs.push(`${e.name}: ${e.message}`));
-  const reqs = await boot(page, { queue_entries: partyBookings, rider_registrations: party, 'rpc:rider_party_add': { ok: true, ids: [9], riders: 3 } });
+  const reqs = await boot(page, { queue_entries: partyBookings, rider_registrations: party, 'rpc:rider_party_add': { ok: true, ids: [9], riders: 3 }, 'rpc:staff_rider_party_move': { ok: true, booking_no: 'P-004' } });
   await page.evaluate(`showRiderEdit(1)`);
   const modal = page.locator('#rider-walkin-modal .modal-box');
   await expect(page.locator('#rw-session')).toBeEnabled();
@@ -106,9 +106,12 @@ test('moving a party moves every booking in it, books a new companion on the new
   const posted = to(reqs, 'POST', /rest\/v1\/queue_entries/).flatMap((q) => (Array.isArray(q.body) ? q.body : [q.body])) as Record<string, unknown>[];
   expect(posted.map((r) => [r.name, r.session_id])).toEqual([['Amal Niece', S2]]);
   expect(posted[0].phone).toBe('');                                          // the employee's number stays on the employee's booking
-  // The registrations follow as well.
-  expect(one(to(reqs, 'PATCH', /rider_registrations\?.*id=eq\.1(&|$)/)[0].body)).toMatchObject({ session_id: S2 });
-  expect(one(to(reqs, 'PATCH', /rider_registrations\?.*id=eq\.4(&|$)/)[0].body)).toMatchObject({ session_id: S2 });
+  // The registrations follow as well: the whole party, through staff_rider_party_move, which numbers it
+  // on the new night (2026-10-05). session_id is never written from the page.
+  const mv = to(reqs, 'POST', /rpc\/staff_rider_party_move/);
+  expect(mv).toHaveLength(1);
+  expect(one(mv[0].body)).toEqual({ p_reg_id: 1, p_session: S2 });
+  expect(reqs.filter((q) => q.method === 'PATCH' && /rider_registrations/.test(q.url) && 'session_id' in one(q.body))).toEqual([]);
   expect(errs).toEqual([]);
 });
 
