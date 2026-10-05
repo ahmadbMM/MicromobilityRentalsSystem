@@ -13612,6 +13612,7 @@ function cloneSession(id){
 // that was a rider left 'waiting' on a night long gone. On a ride staff approve only an
 // approved rider is checked in, and the front desk does not handle those rides at all.
 function _kbCheckInNext(){
+  if(!_deskTabOk('queue'))return; // the Dashboard's button too: a role without Bookings does not check riders in (2026-10-05)
   // From another section, the queue opens first (on tonight's ride), so the next rider is
   // tonight's: the night last looked at could be last week's, with stale "waiting" rows.
   if(S.staffTab!=='queue')setStaffTab('queue');
@@ -37540,7 +37541,9 @@ document.addEventListener('keydown',e=>{
   if(_visibleModals().length)return;
   const k=e.key.toLowerCase();
   if(k==='/'){e.preventDefault();if(S.staffTab!=='queue')setStaffTab('queue');setTimeout(()=>{const el=document.getElementById('sf-search-input');if(el){el.focus();try{el.select();}catch(_){}}},60);return;}
-  if(k==='n'){e.preventDefault();_kbCheckInNext();return;}
+  // N opens the check-in, a Bookings action: like W and T, only for a role that has Bookings
+  // (2026-10-05: a cashier or a mechanic could open the check-in from the keyboard).
+  if(k==='n'){e.preventDefault();if(_deskTabOk('queue'))_kbCheckInNext();return;}
   if(k==='w'||k==='t'||e.key==='?'){e.preventDefault();_kbStaff(e.key==='?'?'?':k);return;}
   if(k==='r'){e.preventDefault();if(typeof _autoRefresh==='function')_autoRefresh(true,true);return;}
   const tabKeys={b:'queue',s:'queue',i:'inventory',c:'community',a:'analytics',h:'history',l:'history'};
