@@ -15,6 +15,9 @@
   <title>MicroMobility Experiences</title>
   <meta name="description" content="Book your bike, join a community ride, and skip the queue. Pick a location and a session in a few taps.">
   <meta property="og:type" content="website">
+  <!-- The address a shared link stands for (2026-10-05): the cards that unfurl a link read this
+       page without running it, and it has one description in every language - the root's. -->
+  <meta property="og:url" content="__SITE_ORIGIN__/">
   <meta property="og:site_name" content="MicroMobility Rides">
   <meta property="og:title" content="MicroMobility Rides">
   <meta property="og:description" content="Book your bike, join a community ride, and skip the queue.">
@@ -587,7 +590,7 @@ for(const _t of _ON_TYPES)document.addEventListener(_t,_onDispatch,!!_ON_OWN[_t]
 function _on_page_1(event,el){event.preventDefault();showPrivacyNotice()}
 
 const LANG={
-en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',spotsLeft1:'{0} spot left',spotsLeftN:'{0} spots left',settingsLanguage:'Language',proteinWord:'Protein {0}',
+en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',settingsLanguage:'Language',proteinWord:'Protein {0}',
   ticketQrLabel:'Booking QR code',errLoginPhoneCc:'No account has that number as a Saudi number. If your number is from another country, type it with its country code, like +20 1012345678.',selectBookingAria:'Select booking',modifyChangedMsg:'This booking changed while you were editing it. Check the details and save again.',wlAimedClosedMsg:'This ride isn\'t taking walk-ups. Choose another ride in the list above to hand them a bike.',bdNotEarned:'not earned yet',promoCustAmbiguous:'Several customers have that name. Pick the one with the right phone number from the list.',naDelBodyFinal:'The login, tags and any push subscriptions are removed. {0} past booking(s) stay on record with the rider’s name, so rosters and reports are unchanged. This cannot be undone.',geMoveOnBike:'Someone in this party is already on a bike, so the party stays on this session.',errChangedElsewhere:'This booking was just changed on another device. The list is updated — check it and try again.',errBikeNumberMax:'A bike number can have at most 4 digits (1–9999), or its sticker and tag can\'t be scanned.',ridersEditOnBike:'Someone in this party is already on a bike, so the party can\'t move to another night.',
 
   commMembersTitle:'Community members only',rejTitle:'This week is full',rejMsg:'Your reservation for this ride wasn’t confirmed. Spots are limited and we try to fit in as many riders as we can.',rejNext:'We’d love to see you on the next ride.',rejCardNote:'Full for this week',rejOk:'Got it',commMembersMsg:'Our community rides are for our community members. Apply for membership, and our team will review your application.',commApplyBtn:'Apply for MicroMobility’s Community Membership',commAddOwnBike:'Rider brings their own bike (does not use a spot)',tagAddTitle:'Add tag',tagPermLabel:'Permanent',tagTempLabel:'Temporary',tagDurationLabel:'Duration',tagDatesLabel:'Start & end date',tagStartDate:'Start date',tagEndDate:'End date',tagTodayLabel:'Today',tagUntil:'until {0}',tagFrom:'from {0}',tagExpired:'expired',tagDur1d:'1 day',tagDur3d:'3 days',tagDur1w:'1 week',tagDur2w:'2 weeks',tagDur1m:'1 month',tagDur3m:'3 months',tagDur6m:'6 months',tagDur1y:'1 year',tagEndRequired:'Choose an end date.',tagEndAfterStart:'The end date must be after the start date.',
@@ -664,7 +667,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   anChartPaySplit:'Payment Split',anChartPaySub:'Collected vs pending across all rides',
   anChartCumRev:'Cumulative Revenue',anChartCumSub:'Running total of collected revenue over time',
   anCollectedOnly:'Collected only',
-  anChartRidersPerSession:'Riders per Session',anChartRidersSub:'Blue = riders · dashed = capacity',
+  anChartRidersPerSession:'Riders per Session',anChartRidersSub:'Green = riders · dashed = capacity',
   anChartTypeDistrib:'Bike Type Distribution',anChartTypeSubtext:'Share of rides by type preference',
   anChartOccupancy:'Session Occupancy',anChartOccSub:'% of capacity filled per session',
   anChartDaySub:'Busiest days drive scheduling decisions',
@@ -924,7 +927,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   vatExcl:'excl.',priceCustomOpt:'Custom...',customWord:'Custom',setBtnShort:'Set',resetFiltersBtn:'Reset',searchWord:'Search',undoneTag:'undone',priceVipDiscount:'VIP & Guests Discount',switchLangTip:'Switch language',
   toastConnStale:'Connection lost. What you see may be out of date.',toastCannotCancel:'Cannot cancel this entry.',toastActionUndone:'Action undone: ',toastUndoFailedData:'Undo failed. Data may have changed.',toastNothingUndo:'Nothing to undo',
   confirmUndoTitle:'Undo action?',confirmUndoYes:'Yes, undo it',cancelBookingLabel:'Cancel booking',cancelEntryBody:'This will release any assigned bike and mark the entry as cancelled.',undoRevBody:'This will reverse the action. Some operations may not be fully reversible if data has changed since.',unitMin:'min',unitHour:'h',mfSize:'Size:',mfBrand:'Brand:',mfModel:'Model:',colorWord:'Color',byStaff:'Staff',byGuest:'Guest',
-  logPwdResetSelf:'Password reset (self-service): ',logAcctCreated:'Account created: ',logLoggedIn:'Logged in: ',logLoggedOut:'Logged out: ',logSwitchedAdmin:'Switched to Admin role',logStaffUnlocked:'Staff panel unlocked',logWaitlistedWord:'Waitlisted',logBookedWord:'Booked',logUpdatedBooking:'Updated booking',logBulkPaid:'Bulk marked {0} paid',logBulkCheckin:'Bulk checked in {0}',logStaffResetPwd:'Staff reset password for ',
+  logAcctCreated:'Account created: ',logSwitchedAdmin:'Switched to Admin role',logStaffUnlocked:'Staff panel unlocked',logWaitlistedWord:'Waitlisted',logBookedWord:'Booked',logUpdatedBooking:'Updated booking',logBulkPaid:'Bulk marked {0} paid',logBulkCheckin:'Bulk checked in {0}',logStaffResetPwd:'Staff reset password for ',
   undoEditSession:'Edit session',undoSessionStatus:'Session',undoPayment:'Payment',undoCancelBooking:'Cancel booking',undoStaffCancel:'Staff cancel',undoNoShow:'No-show',undoUndoNoShow:'Undo no-show',undoEditPrice:'Edit price',undoRenumber:'Renumber',undoReturn:'Return',undoUndoCheckin:'Undo check-in',undoReopen:'Re-open',undoChangeBike:'Change bike',undoCheckin:'Check-in',undoAddBike:'Add bike',undoEditBike:'Edit bike',undoRetire:'Retire',undoRestoreBike:'Restore',undoRelease:'Release',undoDeleteBike:'Delete bike',histRemoved:'Removed',histRestored:'Restored',sizeWord:'Size',clearWord:'Clear',cmUnit:'cm',
   rescheduleBtn:'Reschedule',rescheduleTitle:'Move your booking',rescheduleSub:'Pick another session to move all your riders to.',rescheduleNoSessions:'No other open sessions available.',rescheduleFull:'Not enough room in that session.',toastRescheduled:'Booking moved to the new session ✓',
   
@@ -971,7 +974,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errPhoneExists:'An account with this phone number already exists.',
   cfPhSharedThis:'Also on: {0}. Signing in with this number opens this account.',
   cfPhSharedOther:'Also on: {0}. Signing in with this number opens {1}’s account; this account signs in with its email.',
-  errConnection:'Connection error. Check your network.',errSomethingWrong:'That didn’t work, and we’ve been sent the details. Please try again.',errQNumTaken:'That number is already taken by another booking.',
+  errConnection:'Connection error. Check your network.',pageTitle:'MicroMobility Experiences',pageTitleStaff:'MicroMobility Staff',pageDesc:'Book your bike, join a community ride, and skip the queue. Pick a location and a session in a few taps.',a11yHome:'MicroMobility home',a11yCustSections:'Customer sections',a11yCustNav:'Customer navigation',a11yStaffSections:'Staff sections',spotsLeft_zero:'{0} spots left',spotsLeft_one:'{0} spot left',spotsLeft_two:'{0} spots left',spotsLeft_few:'{0} spots left',spotsLeft_many:'{0} spots left',spotsLeft_other:'{0} spots left',errSomethingWrong:'That didn’t work, and we’ve been sent the details. Please try again.',errQNumTaken:'That number is already taken by another booking.',
   errLoginFirst:'Please sign in first.',
   errSelectSession:'Please select a session above.',
   errSessionClosed:'That session is no longer open.',
@@ -1141,7 +1144,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   accPwdShow:'Show password',accPwdHide:'Hide password',custPurchEmpty:'No purchases yet. What you buy at our desk shows here.',custPurchVoided:'Voided',
   tabVendors:'Vendors',vndTitle:'Vendors',vndBadge:'{0} venue requests waiting',vndSub:'Cafés and restaurants reserve the Saturdays our riders come to them for breakfast. Confirm one venue per date: the other requests are declined, and the confirmed venue becomes the Saturday ride’s breakfast stop.',vndNotSetUp:'Vendors isn’t set up yet. It appears here once the database update is applied.',vndLoadErr:'The vendors could not be loaded.',vndVCal:'Calendar',vndVReq:'Requests',vndVVen:'Venues',vndVTier:'Tiers',vndOpenSats:'Open Saturdays…',vndPrevMonth:'Previous month',vndNextMonth:'Next month',vndStOpen:'Open',vndStConfirmed:'Confirmed',vndStClosed:'Closed',vndNPending:'{0} pending',vndLblState:'This date is',vndLblReason:'Reason',vndRsRamadan:'Ramadan',vndRsEid:'Eid',vndRsWeather:'Weather',vndRsHoliday:'Holiday',vndRsOther:'Other',vndLblCap:'Venues this date takes (1 to 10)',vndSaveDate:'Save date',vndRemoveDate:'Remove date',vndNotListed:'This Saturday is not open to venues yet. Save it to open it.',vndRideStop:'Saturday ride breakfast stop',vndRideNone:'No Saturday ride on this date yet.',vndRideNoStop:'The ride has no breakfast stop yet.',vndMap:'Map',vndReqsOn:'Requests for this date',vndNoReqDay:'No requests for this date.',vndErrCap:'Capacity: a number from 1 to 10.',vndErrHasBk:'This date has requests on it, so it can’t be removed. Close it instead.',vndCloseQ:'Close {0}?',vndCloseBody:'Closing cancels this date’s {0} live requests and bookings. The venues see the reason.',vndCloseBtn:'Close the date',vndDateSaved:'Date saved: {0}',vndDateRemoved:'Date removed: {0}',vndOpenTitle:'Open Saturdays',vndOpenSub:'Every Saturday in the range that is not listed yet opens for venues to request. Dates already listed keep their state.',vndLblFrom:'From',vndLblTo:'To',vndOpenBtn:'Open them',vndErrRange:'Pick a range of up to 400 days, the end after the start.',vndOpenedToast:'{0} Saturdays opened',vndAsked:'asked {0}',vndBkPending:'Pending',vndBkConfirmed:'Confirmed',vndBkDeclined:'Declined',vndBkCancelled:'Cancelled',vndAutoDeclined:'Another venue was confirmed',vndByVenue:'by the venue',vndByMm:'by MicroMobility',vndLate:'late cancel',vndConfirm:'Confirm',vndDecline:'Decline',vndCancelBk:'Cancel booking',vndConfirmQ:'Confirm {0} for {1}?',vndConfirmBody:'{0} becomes the Saturday ride’s breakfast stop on this date.',vndConfirmOthers:'The other {0} requests for this date are declined once it is full.',vndDeclineQ:'Decline {0} for {1}?',vndCancelQ:'Cancel {0} on {1}?',vndNoteHint:'A note for the venue (optional). The venue sees it.',vndRiderOffer:'Offer for riders: {0}',vndTell:'Tell the venue',vndTellTitle:'Tell {0}',vndTellVenues:'Tell the venues',vndTellSub:'A message ready to send on WhatsApp or to copy. Pick its language.',vndLateF:'Late cancels',vndRoleViewer:'Viewer (read only)',ntVendorLate:'Late cancels by venues: {0}',ntiVendorLate:'{0} cancelled {1} late',ntkVendorLate:'Late cancels by venues',vndConfirmedToast:'{0} confirmed for {1}',vndDeclinedToast:'{0} declined for {1}',vndCancelledToast:'{0} cancelled for {1}',vndErrFull:'This date already has its venue. Raise its capacity or cancel the confirmed one first.',vndErrNotPending:'This request was already decided. The list is up to date now.',vndErrNotLive:'This booking is no longer live.',vndNCompeting:'{0} venues asking',vndNoReq:'No requests here.',vndNoMatch:'No venue matches the search.',vndSearchVenue:'Search venues',vndAddVenue:'Add venue',vndVsActive:'Active',vndVsPaused:'Paused',vndVsEnded:'Ended',vndNoVen:'No venues here yet.',vndOpenVenue:'Open',vndNextDate:'Next confirmed date',vndLogins:'Logins',vndVenueNew:'New venue',vndLblName:'Name (English)',vndLblNameAr:'Name (Arabic)',vndLblKind:'Kind',vndKCafe:'Café',vndKRestaurant:'Restaurant',vndKBakery:'Bakery',vndKOther:'Other',vndLblArea:'Area',vndLblMap:'Map link (https://)',vndLblSeats:'Seats',vndLblContact:'Contact name',vndLblPhone:'Contact mobile',vndLblEmail:'Contact email',vndLblOfferEn:'Offer for riders (English)',vndLblOfferAr:'Offer for riders (Arabic)',vndLblTier:'Tier',vndLblStatus:'Status',vndInactive:'Off',vndActive:'Active',vndErrName:'Give the venue a name of 2 to 80 characters.',vndErrMap:'The map link must start with https://',vndErrSeats:'Seats: a number from 1 to 2000.',vndVenueSaved:'Saved: {0}',vndLblLogin:'Login',vndLblPerson:'Person’s name',vndLblRole:'Role',vndRoleOwner:'Owner',vndRoleManager:'Manager',vndLastIn:'Last sign-in',vndNever:'Never',vndResetPwd:'Reset password',vndDeactivate:'Deactivate',vndActivate:'Activate',vndNoLogins:'No logins yet.',vndLoginHint:'Email or mobile number',vndAddLogin:'Add login',vndErrLogin:'Enter an email or a mobile number.',vndErrTaken:'That login is already in use.',vndTempFor:'Temporary password for {0}',vndTempOnce:'Shown only this once. Send it now: it must be changed at the first sign-in.',vndNoPhone:'Add the venue’s contact mobile to send it on WhatsApp.',vndLoginAdded:'Login added: {0}',vndPwdReset:'Password reset: {0}',vndLoginOn:'Login activated: {0}',vndLoginOff:'Login deactivated: {0}',vndBookings:'Bookings',vndUpcoming:'Upcoming',vndRecent:'Recent',vndNone:'None yet.',vndPatterns:'Monthly patterns',vndOrd1:'1st Saturday',vndOrd2:'2nd Saturday',vndOrd3:'3rd Saturday',vndOrd4:'4th Saturday',vndOrdLast:'Last Saturday',vndEvery1:'every month',vndEveryN:'every {0} months',vndTiersSub:'Each tier sets how its venues may book: the booking types, a month’s limit, how far ahead, the notice needed and the cancellation cutoff. The higher priority is listed first when venues compete for a date.',vndTierUsed:'{0} venues',vndLblMax:'Dates a month',vndNoLimit:'no limit',vndLblHorizon:'How far ahead (days)',vndLblLead:'Notice needed (days)',vndLblCutoff:'Cancel up to (days before)',vndLblPriority:'Priority (higher first)',vndLblSort:'Order',vndLblModes:'Booking types allowed',vndModeSingle:'Single date',vndModeMulti:'Several dates',vndModeRecurring:'Monthly pattern',vndBenefits:'Benefits',vndBenefitsHint:'Vendors see these benefits on the vendor portal, each in its language.',vndNoBen:'No benefits yet.',vndBenEn:'Benefit (English)',vndBenAr:'Benefit (Arabic)',vndBenAdd:'Add benefit',vndBenUp:'Move up',vndBenDown:'Move down',vndBenRemove:'Remove',vndSaveTier:'Save tier',vndErrTierName:'Give the tier an English name.',vndErrModes:'Allow at least one booking type.',vndErrNum:'Check the numbers: a month 1 to 31 dates or empty, ahead 7 to 730 days, notice and cutoff 0 to 90, priority and order whole numbers.',vndTierSaved:'Tier saved: {0}',vndVFb:'Feedback',vndFbOf:'{0} of 5',vndFbNoCount:'Not given',vndFbBooked:'{0} booked on the ride',vndFbTurnout:'Riders who came',vndFbWell:'Went well',vndFbBetter:'Could be better',vndFbSent:'Sent {0}',vndFbEdited:'edited {0}',vndFbHead:'Venue feedback',vndFbWaiting:'Breakfasts waiting for feedback: {0}',vndFbNone:'No feedback yet. Venues send it from their portal for 14 days after a confirmed breakfast.',vndFbNoMatch:'No feedback matches the filters.',vndFbAvg:'Average {0} of 5',vndFbCount:'Feedback received: {0}',vndFbMissing:'Feedback appears here once the database update is applied.',vndFbLoadErr:'The feedback could not be loaded.',vndFbAllVen:'All venues',vndFbSearch:'Search feedback',vndFbLblVen:'Venue',vndFbLblRating:'Rating',vndRgHead:'Riders’ breakfast ratings',vndRgNotHere:'The riders’ ratings for this date are not loaded on this page yet.',vndRgNone:'No rider has rated the breakfast yet.',vndRgCount:'Riders who rated the breakfast: {0}',vndRgWhy:'Reasons riders gave (ticked ones are shared)',vndRgExplain:'The vendor sees the averages and the reasons you tick, never riders’ names, the ride scores or their comments.',vndRgShare:'Share with {0}',vndRgShared:'Shared on {0} by {1}',vndRgSees:'What {0} sees',vndRgAgain:'Share again',vndRgStop:'Stop sharing',vndRgStopQ:'Stop sharing with {0}?',vndRgStopBody:'{0} will no longer see the riders’ breakfast ratings for {1}.',vndRgSharedToast:'Ratings shared with {0} for {1}',vndRgStoppedToast:'Stopped sharing ratings with {0} for {1}',vndRgShareBtn:'Share ratings',vndRgSharedBtn:'Ratings shared',
 },
-ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',spotsLeft1:'{0} مقعد متبقي',spotsLeftN:'{0} مقاعد متبقية',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
+ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'ممتلئة',settingsLanguage:'اللغة',proteinWord:'{0} بروتين',
   ticketQrLabel:'رمز QR للحجز',errLoginPhoneCc:'لا يوجد حساب بهذا الرقم كرقم سعودي. إذا كان رقمك من دولة أخرى فاكتبه مع رمز الدولة، مثل ‎+20 1012345678.',selectBookingAria:'تحديد الحجز',modifyChangedMsg:'تغيّر هذا الحجز أثناء تعديلك له. راجع التفاصيل ثم احفظ مرة أخرى.',wlAimedClosedMsg:'هذه الرحلة لا تستقبل الحضور المباشر. اختر رحلة أخرى من القائمة أعلاه لتسليمه دراجة.',bdNotEarned:'لم تُكتسب بعد',promoCustAmbiguous:'يوجد أكثر من عميل بهذا الاسم. اختر من القائمة العميل صاحب رقم الجوال الصحيح.',naDelBodyFinal:'سيُحذف تسجيل الدخول والوسوم واشتراكات الإشعارات. تبقى {0} حجوزات سابقة باسم الراكب، فلا تتأثر الكشوف والتقارير. لا يمكن التراجع عن ذلك.',geMoveOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا تبقى المجموعة في هذه الجلسة.',errChangedElsewhere:'تم تعديل هذا الحجز للتو من جهاز آخر. تم تحديث القائمة — راجعها وحاول مجددًا.',errBikeNumberMax:'رقم الدراجة من 4 أرقام كحد أقصى (1–9999)، وإلا فلن يمكن مسح ملصقها وبطاقتها.',ridersEditOnBike:'أحد أفراد هذه المجموعة على دراجة بالفعل، لذا لا يمكن نقل المجموعة إلى ليلة أخرى.',
 
   commMembersTitle:'لأعضاء المجتمع فقط',rejTitle:'هذا الأسبوع مكتمل',rejMsg:'لم يتم تأكيد حجزك لهذه الجولة. المقاعد محدودة ونحاول استيعاب أكبر عدد ممكن من الراكبين.',rejNext:'يسعدنا أن نراك في الجولة القادمة.',rejCardNote:'مكتمل هذا الأسبوع',rejOk:'حسناً',commMembersMsg:'جولات مجتمعنا مخصّصة لأعضاء المجتمع. قدّم طلب العضوية وسيراجع فريقنا طلبك.',commApplyBtn:'قدّم على عضوية مجتمع MicroMobility',commAddOwnBike:'الراكب لديه دراجته الخاصة (لا يشغل مقعداً)',tagAddTitle:'إضافة وسم',tagPermLabel:'دائم',tagTempLabel:'مؤقت',tagDurationLabel:'المدة',tagDatesLabel:'تاريخ البداية والنهاية',tagStartDate:'تاريخ البداية',tagEndDate:'تاريخ النهاية',tagTodayLabel:'اليوم',tagUntil:'حتى {0}',tagFrom:'من {0}',tagExpired:'منتهٍ',tagDur1d:'يوم واحد',tagDur3d:'3 أيام',tagDur1w:'أسبوع',tagDur2w:'أسبوعان',tagDur1m:'شهر',tagDur3m:'3 أشهر',tagDur6m:'6 أشهر',tagDur1y:'سنة',tagEndRequired:'اختر تاريخ النهاية.',tagEndAfterStart:'يجب أن يكون تاريخ النهاية بعد تاريخ البداية.',
@@ -1177,7 +1180,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   logsTitle:'سجل الإجراءات',logsPermanentNote:'سجل تدقيق مشترك - إجراءات كل أجهزة الموظفين، متزامنة مع قاعدة البيانات.',logsSearchPh:'ابحث في الإجراءات…',logCatPay:'الدفع',logCatBook:'الحجوزات',logCatBike:'الدراجات',logCatInv:'المخزون',logCatAuth:'الوصول',logCatOther:'أخرى',logToday:'اليوم',logYesterday:'أمس',logsExportBtn:'تصدير CSV',bdgIconN:'الأيقونة {0} من {1}',bdgClrGreen:'أخضر',bdgClrGold:'ذهبي',bdgClrBlue:'أزرق',bdgClrRed:'أحمر',bdgClrPurple:'بنفسجي',bdgClrOrange:'برتقالي',bdgClrTeal:'أزرق مخضر',bdgClrSilver:'فضي',rsSelect:'تحديد',rsSelN:'المحدد: {0}',rsShareSel:'مشاركة',rsShareOne:'مشاركة هذا التقييم',rsPick:'تحديد هذا التقييم',rsTitle:'مشاركة التقييمات',rsSub:'صورة لكل تقييم: {0}',rsNameLbl:'الاسم على الصورة',rsNameFull:'الاسم الكامل',rsNameFirst:'الاسم الأول',rsNameNone:'بدون اسم',rsAnon:'أحد راكبي مايكروموبيليتي',rsMaking:'جارٍ تجهيز الصور…',rsFail:'تعذّر تجهيز الصور على هذا الجهاز.',rsNoShare:'لا يدعم هذا المتصفح مشاركة الصور: احفظها ثم أرسلها من واتساب.',rsShare:'مشاركة عبر واتساب',rsShareHint:'تفتح قائمة المشاركة: اختر واتساب أو أي تطبيق آخر.',rsSave:'حفظ على الجهاز',rsShareFail:'لم تنجح المشاركة. احفظ الصور بدلًا من ذلك.',rsSaved:'حُفظت صور التقييمات: {0}',rsShared:'شوركت صور التقييمات: {0}',rsKind:'تقييم عميل',rsComment:'التعليق',rsImgAlt:'صورة التقييم {0}',bfRepBtn:'طباعة تقييمات الإفطار',bfRepKind:'تقييمات الإفطار',bfRepVenue:'الإفطار: {0}',bfRepRatings:'التقييمات',bfRepAvg:'متوسط تقييم الإفطار',bfRepSkipped:'لم يبقَ للإفطار',bfRepPerQ:'المتوسط لكل سؤال',bfRepColQ:'السؤال',bfRepColAvg:'المتوسط',bfRepColLow:'الأدنى',bfRepColHigh:'الأعلى',bfRepAll:'كل التقييمات',bfRepWhy:'ما كتبه الراكبون',bfRepNoWhy:'لم يكتب أي راكب شيئًا عن الإفطار.',bfRepNote:'دون أسماء: لا أسماء ولا أرقام حجز ولا بيانات تواصل. يضم التقرير جزء الإفطار من كل تقييم فقط، دون الجولة والتقييم العام والتعليق الختامي. يذكر الراكب سببًا لأي درجة من 8 فما دون.',bfRepLog:'طُبعت تقييمات الإفطار ليوم {0}',cactTitle:'نشاط العملاء',cactNote:'ما قام به العملاء في تطبيق الحجز والموقع والنماذج - تسجّله قاعدة البيانات، فيشمل كل جهاز وكل صفحة.',cactSearchPh:'ابحث بالاسم أو الرحلة أو الإجراء…',cactMore:'عرض الأقدم',cactEmpty:'لا يوجد نشاط للعملاء بعد',cactCatAccount:'الحساب',cactCatForms:'النماذج',cactA_book:'حجز رحلة',cactA_cancel:'ألغى حجزًا',cactA_rebook:'أعاد حجزًا ملغى',cactA_reschedule:'نقل حجزًا إلى رحلة أخرى',cactA_booking_edit:'عدّل حجزًا',cactA_rate:'قيّم رحلة',cactA_waiver:'وقّع إقرار المسؤولية',cactA_addons:'غيّر الإضافات',cactA_signin:'سجّل الدخول',cactA_signin_fail:'كلمة مرور خاطئة',cactA_pwd_reset:'أعاد تعيين كلمة المرور',cactA_pwd_change:'غيّر كلمة المرور',cactA_signup:'أنشأ حسابًا',cactA_profile:'عدّل بيانات الحساب',cactA_consent:'وافق على إشعار الخصوصية',cactA_ride_news:'غيّر أخبار الرحلات',cactA_delete_req:'طلب حذف الحساب',cactA_push_on:'فعّل الإشعارات',cactA_push_off:'أوقف الإشعارات',cactA_flag_answered:'صحّح البيانات التي أشار إليها الموظفون',cactA_message:'أرسل رسالة',cactA_workshop:'طلب خدمة من الورشة',cactA_apply_community:'قدّم على المجتمع',cactA_apply_learn:'سجّل لتعلّم ركوب الدراجة',cactA_apply_fix:'أرسل التعديلات التي طلبها الموظفون',cactA_rider_form:'سجّل في نموذج الراكب',cactA_rider_form_edit:'عدّل نموذج الراكب',cactA_ambassador:'قدّم ليكون سفيرًا',cactA_redeem:'استبدل نقاط السفير',histRangeLabel:'المدة',histRangeToday:'اليوم',histRange7:'آخر 7 أيام',histRange30:'آخر 30 يومًا',histWindowNote:'يعرض آخر 12 شهرًا',histMarkSelPaid:'تحديد {0} كمدفوع',invSearchPh:'ابحث عن العناصر…',invSortCat:'حسب الفئة',invSortStock:'الأقل مخزوناً',invSortSales:'الأكثر مبيعاً',stStartBtn:'جرد المخزون',stCancelBtn:'إنهاء الجرد',stHint:'اكتب الكمية المعدودة لكل عنصر - تُبرز الفروقات.',stApplyBtn:'تطبيق {0} تصحيح',stNoChanges:'لا توجد تصحيحات للتطبيق.',invDelInUse:'مرتبط بـ {0} حجز قائم — اجعل مخزونه صفراً بدلاً من حذفه.',logStockAdj:'المخزون {0}: {1}',logStockTake:'جرد {0}: {1} → {2}',histInLabel:'الدخول',histOutLabel:'الخروج',histTabRides:'الرحلات',logsColTime:'الوقت',logsColBy:'بواسطة',logsColAction:'الإجراء',logsOperator:'الموظف',logsOperatorPh:'اسمك (يوسم سجل التدقيق)',opGateTitle:'من يعمل الآن؟',opGateMsg:'اختر اسمك — يُسجَّل كل إجراء في السجل باسم من قام به.',opGateBtn:'متابعة',logOperatorSet:'تغيير المشغّل: {0}',filterRejected:'مرفوض',errSessionStale:'انتهت صلاحية جلستك — يرجى تسجيل الدخول من جديد.',repPreparedBy:'أعدّه',repReviewedBy:'راجعه',repVatIncl:'شامل ضريبة القيمة المضافة (15%)',logPrintedReport:'طُبع تقرير الجلسة',commSoloOnly:'حجز جولة السبت لراكب واحد فقط لكل عميل — لا يمكن إضافة ركاب آخرين.',
   authPhone:'رقم الهاتف',
   authPassword:'كلمة المرور',authPasswordHint:'8 أحرف كحد أدنى، حرف كبير ورقم',authConfirmPassword:'تأكيد كلمة المرور',
-  tabReserve:'حجز',tabMyRides:'حجوزاتي',tabQueue:'الحجوزات',ridersTitle:'تسجيلات الراكبين',ridersSub:'الراكبون الذين سجلوا عبر micromobility.sa/petromin: الجلسة والشركة ورقم الحجز.',ridersEmpty:'لا توجد تسجيلات بعد',ridersRefresh:'تحديث',ridersScan:'مسح رمز QR',ridersScanFound:'تم العثور على {0} {1} — جارٍ فتح الحجز.',ridersWalkinHalfDone:'تم حفظ التسجيل. لم يُضف الحجز — أعد المحاولة للإكمال.',ridersWalkinDup:'الرقم #{0} {1} محجوز بالفعل في هذه الجلسة. هل هو نفس الراكب؟',ridersWalkinDupSame:'نعم، نفس الراكب',ridersWalkinDupNew:'لا، أضف حجزاً',ridersPartyCount:'{0} ركاب',ridersCheckInAll:'تسجيل دخول الجميع',ridersWalkinBtn:'+ حضور مباشر',ridersWalkinRiders:'يركبون معه',ridersWalkinRiderN:'الراكب {0}: {1}',ridersWalkinErrRiders:'حتى أربعة مرافقين في الحجز الواحد.',ridersPartyOf:'الراكب {0} من {1}',ridersWith:'مع {0}',ridersParty:'المجموعة',ridersEditTitle:'تعديل التسجيل',ridersEditSub:'التغييرات هنا تُحدّث أيضًا حجز الراكب في قائمة الانتظار إن وُجد. يمكن تغيير الجلسة حتى يتم تسجيل دخول الراكب.',ridersEditSaved:'تم تحديث {0}',ridersEditDup:'يوجد تسجيل آخر يستخدم رقم البطاقة هذا في تلك الجلسة.',ridersWalkinTitle:'إضافة راكب حضر مباشرة',ridersWalkinSub:'نفس البيانات التي يطلبها نموذج التسجيل. يحصل الراكب على رقم تسجيل وحجز عادي في قائمة الانتظار، تمامًا كما لو سجّل عبر الإنترنت.',ridersWalkinName:'الاسم الكامل',ridersWalkinCheckinNow:'تسجيل الدخول الآن',ridersWalkinAdd:'إضافة الراكب',ridersWalkinAdded:'تمت إضافة {0} برقم {1}',ridersWalkinResub:'الرقم {1} مسجّل مسبقًا — تم تحديث بيانات {0}',ridersWalkinNoSess:'لا توجد جلسة بترومين اليوم أو قادمة، فلا يوجد ما يُضاف إليه الراكب.',ridersWalkinErrSession:'اختر جلسة ما زالت قائمة.',ridersWalkinErrBadge:'أدخل رقم البطاقة.',ridersWalkinErrName:'أدخل الاسم الكامل للراكب — الاسم الأول والأخير.',ridersWalkinErrPhone:'تحقق من رقم الجوال.',ridersWalkinErrHeight:'يجب أن يكون الطول بين 100 و250 سم.',ridersWalkinErrType:'اختر نوع الدراجة.',ridersWalkinErrCompany:'اختر بترومين أو بترولوب.',ridersWalkinErr:'تعذّرت إضافة الراكب. تحقق من الاتصال وحاول مجددًا.',ridersSearch:'ابحث برقم الحجز أو البادج أو الاسم أو الجوال',colBookingNo:'رقم الحجز',ridersCheckIn:'تسجيل وصول',ridersReturn:'إرجاع الدراجة',ridersUndoCheckin:'تراجع عن الدخول',ridersUndoReturn:'تراجع عن الإرجاع',colCheckedIn:'وقت الدخول',colCheckedOut:'وقت الخروج',ridersBy:'بواسطة {0}',ridersRideTime:'الرحلة {0}',ridersFilterWaiting:'لم يصل',ridersFilterRiding:'في الرحلة',ridersFilterReturned:'أُرجعت',ridersReport:'تقرير الفوترة',ridersReportEmpty:'لا توجد دراجات مُرجعة للتقرير بعد',ridersRepNoCo:'رحلات مكتملة بلا شركة، فلا تظهر في أي من التقريرين: {0}. حدّد بترومين أو بترولوب لكل منها:',ridersRepRides:'الرحلات المكتملة',ridersRepTotal:'الإجمالي',ridersCompany:'الشركة',ridersFilterAll:'الكل',colBadge:'البادج',ridersRemove:'حذف',ridersRemoveConfirm:'حذف هذا التسجيل؟',ridersLoadErr:'تعذر تحميل التسجيلات',loadingLabel:'جارٍ التحميل',ridersResub:'أُرسل {0} مرات',railPinTip:'تثبيت القائمة الجانبية',railHoverTip:'طيّ القائمة',snavRides:'الرحلات',snavSections:'الأقسام',snavCommerce:'التجارة',snavPeople:'الأشخاص',snavInsights:'الرؤى',snavSystem:'النظام',tabAmbassadors:'السفراء',amBadge:'{0} بانتظارك: طلبات ومكافآت',amTitle:'السفراء',amSub:'طلبات من micromobility.sa/ambassadors. الموافقة تمنح السفير كوداً - كود خصم يقبله تطبيق الحجز ونموذج الورشة - وتُحتسب نقاطه من كل حجز يستخدمه.',amNotSetUp:'برنامج السفراء غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',amLoadErr:'تعذّر تحميل السفراء.',amSearch:'ابحث بالاسم أو الكود أو إنستغرام أو الجوال',amFPending:'للمراجعة',amFActive:'نشطون',amFRewards:'مكافآت مطلوبة',amFPaused:'موقوفون',amFRejected:'مرفوضون',amEmpty:'لا يوجد سفراء هنا.',amNoMatch:'لا يوجد سفير يطابق بحثك.',amStPending:'للمراجعة',amStActive:'نشط',amStPaused:'موقوف',amStRejected:'مرفوض',amTier0:'كشاف',amTier1:'كابتن',amTier2:'نخبة',amAppliedOn:'قدّم {0}',amApproveBtn:'موافقة',amRejectBtn:'رفض',amMessageBtn:'رسالة',amPauseBtn:'إيقاف الكود',amResumeBtn:'تفعيل الكود',amReopenBtn:'إعادة فتح',amRewardsAsked:'مكافآت مطلوبة',amPts:'{0} نقطة',amGivenBtn:'تم التسليم',amRedCancelBtn:'إلغاء',amLblInsta:'إنستغرام',amLblPoints:'النقاط',amLblEarned:'المكتسب',amPendingWord:'قيد التأكيد',amLblUses:'الاستخدامات',amLblTier:'المستوى',amLblCode:'الكود',amCodeOn:'مفعّل',amCodeOff:'موقوف',amCodeTaken:'هذا الكود مستخدم بالفعل. اختر كوداً آخر.',amCodeBad:'استخدم من 3 إلى 20 حرفاً ورقماً.',amApproveTitle:'الموافقة على {0}',amApproveSub:'كوده يمنح أصدقاءه الخصم المحدد في الموقع ويكسبه نقاطاً. يعمل فوراً في تطبيق الحجز ونموذج الورشة.',amGivenToast:'تم تسليم {0} إلى {1}',amRedCancelToast:'أُلغي {0} لـ {1}',tabMessages:'الرسائل',smNewBadge:'{0} رسائل جديدة',smTitle:'رسائل micromobility.sa',smSub:'طلبات الشركات وأسئلة مركز المساعدة. رد عبر واتساب أو البريد، ثم أغلق الرسالة.',smNotSetUp:'الرسائل غير مُعدّة بعد. تظهر هنا بعد تطبيق تحديث قاعدة البيانات.',smLoadErr:'تعذّر تحميل الرسائل.',smSearch:'ابحث بالاسم أو الشركة أو البريد أو الجوال أو نص الرسالة',smFNew:'جديدة',smFReplied:'تم الرد',smFClosed:'مغلقة',smEmpty:'لا توجد رسائل هنا.',smNoMatch:'لا توجد رسالة تطابق بحثك.',smStNew:'جديدة',smStReplied:'تم الرد',smStClosed:'مغلقة',smKindBusiness:'طلب شركات',smKindHelp:'مركز المساعدة',smKindJobs:'طلب توظيف',smJobAnyRole:'أي وظيفة',smLblKind:'المصدر',smLblTopic:'الموضوع',smLblEmail:'البريد الإلكتروني',smLblLang:'اللغة',smTopicFaq:'أسئلة شائعة',smTopicDelivery:'الشحن والتوصيل',smTopicReturns:'الإرجاع والاستبدال',smTopicWarranty:'الضمان',smTopicOther:'أخرى',smReplyBtn:'رد',smReplyAgainBtn:'رد مجدداً',smMarkRepliedBtn:'تسجيل الرد',smCloseBtn:'إغلاق',smReopenBtn:'إعادة فتح',smNotesBtn:'ملاحظات',smReplyTitle:'الرد على {0}',smReplySub:'اكتب ردك ثم أرسله عبر واتساب أو البريد. تُسجَّل الرسالة كمردود عليها.',smEmailBtn:'إرسال بالبريد',smNotesTitle:'ملاحظات على {0}',smDeleteBtn:'حذف الرسالة',smDeleteTitle:'حذف {0}؟',smDeleteBody:'للرسائل المزعجة. لا يمكن التراجع عن الحذف.',smDeletedToast:'تم حذف {0}',tabWorkshop:'الورشة',wsNewBadge:'{0} طلبات صيانة جديدة',wsTitle:'طلبات الورشة',wsSub:'طلبات الصيانة من micromobility.sa/workshop. اتصل بالعميل للتأكيد، ثم انقل الدراجة عبر المراحل. يتابعها العميل برقم طلبه.',wsNotSetUp:'الورشة غير مُعدّة بعد. تظهر هنا بعد تطبيق تحديث قاعدة البيانات.',wsLoadErr:'تعذّر تحميل طلبات الورشة.',wsSearch:'ابحث برقم الطلب أو الاسم أو الجوال أو الدراجة',wsFNew:'جديدة',wsFBooked:'مؤكدة',wsFShop:'في الورشة',wsFReady:'جاهزة',wsFDone:'منتهية',wsEmpty:'لا توجد طلبات هنا.',wsNoMatch:'لا يوجد طلب يطابق بحثك.',wsStNew:'طلب جديد',wsStConfirmed:'مؤكد',wsStIn:'في الورشة',wsStParts:'بانتظار القطع',wsStReady:'جاهزة للاستلام',wsStDone:'مكتمل',wsStCancelled:'ملغى',wsLblService:'الخدمة',wsLblHow:'الطريقة',wsLblAsked:'الموعد المطلوب',wsLblBooked:'الموعد المؤكد',wsLblPhone:'الجوال',wsLblBike:'الدراجة',wsLblEstimate:'السعر التقديري',wsLblPrice:'السعر النهائي',wsLblAccount:'الحساب',wsLblParts:'القطع',wsLblAddress:'عنوان الاستلام',wsLblNotes:'ملاحظة العميل',wsLblStaffNotes:'ملاحظات الموظفين',wsLblStage:'المرحلة',wsLaneDropoff:'إحضار للورشة',wsLaneWait:'انتظار سريع',wsLanePickup:'استلام وتوصيل',wsAnyDay:'أي يوم',wsSentOn:'أُرسل {0}',wsConfirmBtn:'تأكيد الحجز',wsCancelBtn:'إلغاء الطلب',wsBikeInBtn:'وصلت الدراجة',wsRescheduleBtn:'تغيير الموعد',wsReadyBtn:'جاهزة للاستلام',wsPartsBtn:'بانتظار القطع',wsPartsInBtn:'وصلت القطع',wsCollectedBtn:'تم التسليم',wsReopenBtn:'إعادة فتح',wsMsgBtn:'رسالة',wsEditBtn:'تعديل',wsHistoryBtn:'السجل',wsHideHistoryBtn:'إخفاء السجل',wsSaveErr:'تعذّر الحفظ. تحقق من الاتصال وحاول مجدداً.',wsMovedToast:'{0}: {1}',wsCancelTitle:'إلغاء {0}؟',wsCancelBody:'يظهر الطلب ملغى للعميل عند التحقق من رقم طلبه.',wsDate:'اليوم',wsTime:'الوقت',wsSchedTitle:'تأكيد {0}',wsReschedTitle:'تغيير موعد {0}',wsSchedSave:'تأكيد الحجز',wsReschedSave:'حفظ الموعد الجديد',wsSchedErr:'اختر اليوم والوقت معاً.',wsBookedToast:'تم حجز {0} في {1}',wsReadyTitle:'{0} جاهزة',wsReadyBody:'السعر النهائي الذي يدفعه العميل. يراه عند التحقق من رقم طلبه.',wsReadySave:'تحديد كجاهزة',wsPriceErr:'أدخل سعراً من 0 إلى 100,000، أو اتركه فارغاً.',wsEditTitle:'تعديل {0}',wsNotesHint:'يراها الموظفون فقط.',wsSavedToast:'تم حفظ {0}',wsDeleteBtn:'حذف الطلب',wsDeleteTitle:'حذف {0}؟',wsDeleteBody:'للطلبات المزعجة أو المكررة. لا يمكن التراجع عن الحذف.',wsDeletedToast:'تم حذف {0}',wsHistRequested:'أُرسل من الموقع',wsHistSched:'تحديد الموعد {0}',wsHistSchedClear:'أُزيل الموعد',wsHistPrice:'تحديد السعر {0}',wsHistPriceClear:'أُزيل السعر',wsHistErr:'تعذّر تحميل السجل.',wsHistEmpty:'لا يوجد سجل بعد.',wsMsgTitle:'رسالة إلى {0}',wsMsgSub:'باللغة التي استخدمها في الموقع. أرسلها عبر واتساب أو انسخها.',snavWebsite:'الموقع',webSub:'ما يعرضه micromobility.sa. يظهر أي تغيير محفوظ على الموقع خلال دقيقة.',webOpenSite:'فتح micromobility.sa',webNotSetUp:'مخزن محتوى الموقع غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',webLoadErr:'تعذّر تحميل محتوى الموقع.',webStatus:'الحالة',webCsOnNow:'صفحة «قريباً» مفعّلة: يرى الزوار شاشة «قريباً» فقط.',webCsOffNow:'الموقع مفتوح: يرى الزوار الصفحات المفعّلة أدناه.',webCsSwitch:'قريباً',webCsLocked:'إيقاف «قريباً» يفتح الموقع، ويصبح ممكناً بعد بناء الصفحة الرئيسية.',webCsCard:'شاشة «قريباً»',webCsCardSub:'النصوص الظاهرة على شاشة «قريباً» بالإنجليزية والعربية.',webCsEyebrow:'العبارة فوق العنوان',webCsTitle:'العنوان',webCsSub:'السطر تحت العنوان',webDiscard:'تجاهل التغييرات',webSaving:'جارٍ الحفظ…',webErrEmpty:'لا يمكن ترك «{0}» فارغاً في أي من اللغتين.',webErrLong:'«{0}» أطول من {1} حرفاً.',webSavedLog:'الموقع: تغيير {0}',webSaved:'تم الحفظ. يظهر على micromobility.sa خلال دقيقة.',webCsOnTitle:'تفعيل «قريباً»؟',webCsOnBody:'سيرى الزوار شاشة «قريباً» فقط حتى يتم إيقافها مجدداً.',webCsOnBtn:'تفعيل',webCsOffTitle:'فتح الموقع؟',webCsOffBody:'سيرى الزوار الصفحات المفعّلة بدلاً من شاشة «قريباً».',webCsOffBtn:'فتح الموقع',webCsOnLog:'الموقع: تفعيل «قريباً»',webCsOffLog:'الموقع: إيقاف «قريباً»',webPutBackTitle:'إرجاع هذا؟',webPutBackBody:'يعود «{0}» إلى: {1}',webPutBack:'إرجاع',webValDefault:'النص الأصلي',webValNotSet:'غير محدد',webEditor:'محتوى الصفحات',webEditorSub:'كل نص وصورة ورقم في صفحات الموقع، بالإنجليزية والعربية. افتح القسم وعدّله ثم احفظ ذلك القسم.',webEdErr:'تعذّر الوصول إلى micromobility.sa لتحميل صفحاته. تحقق من الاتصال، أو قد يحتاج الموقع إلى آخر تحديث.',webEdBad:'هذه القيمة غير صالحة.',webEdBadLink:'يجب أن يبدأ «{0}» بـ https:// أو / أو mailto:',webEdBadNumber:'«{0}» ليس رقماً صالحاً هنا.',webEdOriginal:'الأصلي',webEdMoreLangs:'لغات أخرى ({0} من {1})',webEdMoreHint:'اختياري. اللغة المتروكة فارغة تعرض ترجمة الموقع للنص الإنجليزي، أو النص الإنجليزي نفسه بعد تغييره.',webEdTooLong:'النص أطول مما يتسع له الحقل. اختصره، أو احذف بعض اللغات الأخرى.',webEdAdd:'إضافة',webEdRemove:'حذف',webEdUp:'تحريك لأعلى',webEdDown:'تحريك لأسفل',webEdUpload:'رفع صورة',webEdUploading:'جارٍ رفع الصورة…',webEdUploaded:'تم رفع الصورة. احفظ القسم لاستخدامها.',webEdUploadErr:'تعذّر رفع الصورة. حاول مجدداً.',webEdUploadBig:'الصورة كبيرة جداً حتى بعد تصغيرها. استخدم صورة أقل من 5 ميجابايت.',webEdUploadType:'استخدم صورة JPEG أو PNG أو WebP أو AVIF.',webEdItem:'العنصر {0}',webEdEmptyList:'لا يوجد شيء بعد.',webEdUnsaved:'تغييرات غير محفوظة',webPreview:'معاينة الموقع',webPreviewNoSession:'سجّل الدخول مجدداً لمعاينة الموقع.',webValItems:'{0} عناصر',webValPhoto:'صورة',webValOn:'مفعّل',webValOff:'متوقف',webColVisible:'ظاهرة',webPages:'الصفحات',webPagesSub:'يمكن تفعيل كل صفحة بعد بنائها. الصفحة المتوقفة لا تظهر في القوائم، ورابطها يفتح الصفحة الرئيسية.',webColPage:'الصفحة',webPageLive:'منشورة',webPageHidden:'مخفية',webPageNotBuilt:'لم تُبنَ بعد',webPageReady:'مفعّلة - تظهر عند فتح الموقع',webPageOnLog:'تم تفعيل الصفحة: {0}',webPageOffLog:'تم إيقاف الصفحة: {0}',webPreviewPage:'معاينة',webHistory:'آخر التغييرات',webColWhen:'الوقت',webColWhat:'العنصر',webColNow:'أصبح',webColBefore:'كان',webColBy:'بواسطة',webHistoryEmpty:'لا توجد تغييرات بعد.',tabSessions:'الجلسات',tabBikes:'الدراجات',tabHistory:'السجل',tabAnalytics:'التحليلات',tabInventory:'المخزون',tabCommunity:'المجتمع',
+  tabReserve:'حجز',tabMyRides:'حجوزاتي',tabQueue:'الحجوزات',ridersTitle:'تسجيلات الراكبين',ridersSub:'الراكبون الذين سجلوا عبر micromobility.sa/petromin: الجلسة والشركة ورقم الحجز.',ridersEmpty:'لا توجد تسجيلات بعد',ridersRefresh:'تحديث',ridersScan:'مسح رمز QR',ridersScanFound:'تم العثور على {0} {1} — جارٍ فتح الحجز.',ridersWalkinHalfDone:'تم حفظ التسجيل. لم يُضف الحجز — أعد المحاولة للإكمال.',ridersWalkinDup:'الرقم #{0} {1} محجوز بالفعل في هذه الجلسة. هل هو نفس الراكب؟',ridersWalkinDupSame:'نعم، نفس الراكب',ridersWalkinDupNew:'لا، أضف حجزاً',ridersPartyCount:'{0} ركاب',ridersCheckInAll:'تسجيل دخول الجميع',ridersWalkinBtn:'+ حضور مباشر',ridersWalkinRiders:'يركبون معه',ridersWalkinRiderN:'الراكب {0}: {1}',ridersWalkinErrRiders:'حتى أربعة مرافقين في الحجز الواحد.',ridersPartyOf:'الراكب {0} من {1}',ridersWith:'مع {0}',ridersParty:'المجموعة',ridersEditTitle:'تعديل التسجيل',ridersEditSub:'التغييرات هنا تُحدّث أيضًا حجز الراكب في قائمة الحجوزات إن وُجد. يمكن تغيير الجلسة حتى يتم تسجيل دخول الراكب.',ridersEditSaved:'تم تحديث {0}',ridersEditDup:'يوجد تسجيل آخر يستخدم رقم البطاقة هذا في تلك الجلسة.',ridersWalkinTitle:'إضافة راكب حضر مباشرة',ridersWalkinSub:'نفس البيانات التي يطلبها نموذج التسجيل. يحصل الراكب على رقم تسجيل وحجز عادي في قائمة الحجوزات، تمامًا كما لو سجّل عبر الإنترنت.',ridersWalkinName:'الاسم الكامل',ridersWalkinCheckinNow:'تسجيل الدخول الآن',ridersWalkinAdd:'إضافة الراكب',ridersWalkinAdded:'تمت إضافة {0} برقم {1}',ridersWalkinResub:'الرقم {1} مسجّل مسبقًا — تم تحديث بيانات {0}',ridersWalkinNoSess:'لا توجد جلسة بترومين اليوم أو قادمة، فلا يوجد ما يُضاف إليه الراكب.',ridersWalkinErrSession:'اختر جلسة ما زالت قائمة.',ridersWalkinErrBadge:'أدخل رقم البطاقة.',ridersWalkinErrName:'أدخل الاسم الكامل للراكب — الاسم الأول والأخير.',ridersWalkinErrPhone:'تحقق من رقم الجوال.',ridersWalkinErrHeight:'يجب أن يكون الطول بين 100 و250 سم.',ridersWalkinErrType:'اختر نوع الدراجة.',ridersWalkinErrCompany:'اختر بترومين أو بترولوب.',ridersWalkinErr:'تعذّرت إضافة الراكب. تحقق من الاتصال وحاول مجددًا.',ridersSearch:'ابحث برقم الحجز أو البادج أو الاسم أو الجوال',colBookingNo:'رقم الحجز',ridersCheckIn:'تسجيل وصول',ridersReturn:'إرجاع الدراجة',ridersUndoCheckin:'تراجع عن الدخول',ridersUndoReturn:'تراجع عن الإرجاع',colCheckedIn:'وقت الدخول',colCheckedOut:'وقت الخروج',ridersBy:'بواسطة {0}',ridersRideTime:'الرحلة {0}',ridersFilterWaiting:'لم يصل',ridersFilterRiding:'في الرحلة',ridersFilterReturned:'أُرجعت',ridersReport:'تقرير الفوترة',ridersReportEmpty:'لا توجد دراجات مُرجعة للتقرير بعد',ridersRepNoCo:'رحلات مكتملة بلا شركة، فلا تظهر في أي من التقريرين: {0}. حدّد بترومين أو بترولوب لكل منها:',ridersRepRides:'الرحلات المكتملة',ridersRepTotal:'الإجمالي',ridersCompany:'الشركة',ridersFilterAll:'الكل',colBadge:'البادج',ridersRemove:'حذف',ridersRemoveConfirm:'حذف هذا التسجيل؟',ridersLoadErr:'تعذر تحميل التسجيلات',loadingLabel:'جارٍ التحميل',ridersResub:'أُرسل {0} مرات',railPinTip:'تثبيت القائمة الجانبية',railHoverTip:'طيّ القائمة',snavRides:'الرحلات',snavSections:'الأقسام',snavCommerce:'التجارة',snavPeople:'الأشخاص',snavInsights:'الرؤى',snavSystem:'النظام',tabAmbassadors:'السفراء',amBadge:'{0} بانتظارك: طلبات ومكافآت',amTitle:'السفراء',amSub:'طلبات من micromobility.sa/ambassadors. الموافقة تمنح السفير كوداً - كود خصم يقبله تطبيق الحجز ونموذج الورشة - وتُحتسب نقاطه من كل حجز يستخدمه.',amNotSetUp:'برنامج السفراء غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',amLoadErr:'تعذّر تحميل السفراء.',amSearch:'ابحث بالاسم أو الكود أو إنستغرام أو الجوال',amFPending:'للمراجعة',amFActive:'نشطون',amFRewards:'مكافآت مطلوبة',amFPaused:'موقوفون',amFRejected:'مرفوضون',amEmpty:'لا يوجد سفراء هنا.',amNoMatch:'لا يوجد سفير يطابق بحثك.',amStPending:'للمراجعة',amStActive:'نشط',amStPaused:'موقوف',amStRejected:'مرفوض',amTier0:'كشاف',amTier1:'كابتن',amTier2:'نخبة',amAppliedOn:'قدّم {0}',amApproveBtn:'موافقة',amRejectBtn:'رفض',amMessageBtn:'رسالة',amPauseBtn:'إيقاف الكود',amResumeBtn:'تفعيل الكود',amReopenBtn:'إعادة فتح',amRewardsAsked:'مكافآت مطلوبة',amPts:'{0} نقطة',amGivenBtn:'تم التسليم',amRedCancelBtn:'إلغاء',amLblInsta:'إنستغرام',amLblPoints:'النقاط',amLblEarned:'المكتسب',amPendingWord:'قيد التأكيد',amLblUses:'الاستخدامات',amLblTier:'المستوى',amLblCode:'الكود',amCodeOn:'مفعّل',amCodeOff:'موقوف',amCodeTaken:'هذا الكود مستخدم بالفعل. اختر كوداً آخر.',amCodeBad:'استخدم من 3 إلى 20 حرفاً ورقماً.',amApproveTitle:'الموافقة على {0}',amApproveSub:'كوده يمنح أصدقاءه الخصم المحدد في الموقع ويكسبه نقاطاً. يعمل فوراً في تطبيق الحجز ونموذج الورشة.',amGivenToast:'تم تسليم {0} إلى {1}',amRedCancelToast:'أُلغي {0} لـ {1}',tabMessages:'الرسائل',smNewBadge:'{0} رسائل جديدة',smTitle:'رسائل micromobility.sa',smSub:'طلبات الشركات وأسئلة مركز المساعدة. رد عبر واتساب أو البريد، ثم أغلق الرسالة.',smNotSetUp:'الرسائل غير مُعدّة بعد. تظهر هنا بعد تطبيق تحديث قاعدة البيانات.',smLoadErr:'تعذّر تحميل الرسائل.',smSearch:'ابحث بالاسم أو الشركة أو البريد أو الجوال أو نص الرسالة',smFNew:'جديدة',smFReplied:'تم الرد',smFClosed:'مغلقة',smEmpty:'لا توجد رسائل هنا.',smNoMatch:'لا توجد رسالة تطابق بحثك.',smStNew:'جديدة',smStReplied:'تم الرد',smStClosed:'مغلقة',smKindBusiness:'طلب شركات',smKindHelp:'مركز المساعدة',smKindJobs:'طلب توظيف',smJobAnyRole:'أي وظيفة',smLblKind:'المصدر',smLblTopic:'الموضوع',smLblEmail:'البريد الإلكتروني',smLblLang:'اللغة',smTopicFaq:'أسئلة شائعة',smTopicDelivery:'الشحن والتوصيل',smTopicReturns:'الإرجاع والاستبدال',smTopicWarranty:'الضمان',smTopicOther:'أخرى',smReplyBtn:'رد',smReplyAgainBtn:'رد مجدداً',smMarkRepliedBtn:'تسجيل الرد',smCloseBtn:'إغلاق',smReopenBtn:'إعادة فتح',smNotesBtn:'ملاحظات',smReplyTitle:'الرد على {0}',smReplySub:'اكتب ردك ثم أرسله عبر واتساب أو البريد. تُسجَّل الرسالة كمردود عليها.',smEmailBtn:'إرسال بالبريد',smNotesTitle:'ملاحظات على {0}',smDeleteBtn:'حذف الرسالة',smDeleteTitle:'حذف {0}؟',smDeleteBody:'للرسائل المزعجة. لا يمكن التراجع عن الحذف.',smDeletedToast:'تم حذف {0}',tabWorkshop:'الورشة',wsNewBadge:'{0} طلبات صيانة جديدة',wsTitle:'طلبات الورشة',wsSub:'طلبات الصيانة من micromobility.sa/workshop. اتصل بالعميل للتأكيد، ثم انقل الدراجة عبر المراحل. يتابعها العميل برقم طلبه.',wsNotSetUp:'الورشة غير مُعدّة بعد. تظهر هنا بعد تطبيق تحديث قاعدة البيانات.',wsLoadErr:'تعذّر تحميل طلبات الورشة.',wsSearch:'ابحث برقم الطلب أو الاسم أو الجوال أو الدراجة',wsFNew:'جديدة',wsFBooked:'مؤكدة',wsFShop:'في الورشة',wsFReady:'جاهزة',wsFDone:'منتهية',wsEmpty:'لا توجد طلبات هنا.',wsNoMatch:'لا يوجد طلب يطابق بحثك.',wsStNew:'طلب جديد',wsStConfirmed:'مؤكد',wsStIn:'في الورشة',wsStParts:'بانتظار القطع',wsStReady:'جاهزة للاستلام',wsStDone:'مكتمل',wsStCancelled:'ملغى',wsLblService:'الخدمة',wsLblHow:'الطريقة',wsLblAsked:'الموعد المطلوب',wsLblBooked:'الموعد المؤكد',wsLblPhone:'الجوال',wsLblBike:'الدراجة',wsLblEstimate:'السعر التقديري',wsLblPrice:'السعر النهائي',wsLblAccount:'الحساب',wsLblParts:'القطع',wsLblAddress:'عنوان الاستلام',wsLblNotes:'ملاحظة العميل',wsLblStaffNotes:'ملاحظات الموظفين',wsLblStage:'المرحلة',wsLaneDropoff:'إحضار للورشة',wsLaneWait:'انتظار سريع',wsLanePickup:'استلام وتوصيل',wsAnyDay:'أي يوم',wsSentOn:'أُرسل {0}',wsConfirmBtn:'تأكيد الحجز',wsCancelBtn:'إلغاء الطلب',wsBikeInBtn:'وصلت الدراجة',wsRescheduleBtn:'تغيير الموعد',wsReadyBtn:'جاهزة للاستلام',wsPartsBtn:'بانتظار القطع',wsPartsInBtn:'وصلت القطع',wsCollectedBtn:'تم التسليم',wsReopenBtn:'إعادة فتح',wsMsgBtn:'رسالة',wsEditBtn:'تعديل',wsHistoryBtn:'السجل',wsHideHistoryBtn:'إخفاء السجل',wsSaveErr:'تعذّر الحفظ. تحقق من الاتصال وحاول مجدداً.',wsMovedToast:'{0}: {1}',wsCancelTitle:'إلغاء {0}؟',wsCancelBody:'يظهر الطلب ملغى للعميل عند التحقق من رقم طلبه.',wsDate:'اليوم',wsTime:'الوقت',wsSchedTitle:'تأكيد {0}',wsReschedTitle:'تغيير موعد {0}',wsSchedSave:'تأكيد الحجز',wsReschedSave:'حفظ الموعد الجديد',wsSchedErr:'اختر اليوم والوقت معاً.',wsBookedToast:'تم حجز {0} في {1}',wsReadyTitle:'{0} جاهزة',wsReadyBody:'السعر النهائي الذي يدفعه العميل. يراه عند التحقق من رقم طلبه.',wsReadySave:'تحديد كجاهزة',wsPriceErr:'أدخل سعراً من 0 إلى 100,000، أو اتركه فارغاً.',wsEditTitle:'تعديل {0}',wsNotesHint:'يراها الموظفون فقط.',wsSavedToast:'تم حفظ {0}',wsDeleteBtn:'حذف الطلب',wsDeleteTitle:'حذف {0}؟',wsDeleteBody:'للطلبات المزعجة أو المكررة. لا يمكن التراجع عن الحذف.',wsDeletedToast:'تم حذف {0}',wsHistRequested:'أُرسل من الموقع',wsHistSched:'تحديد الموعد {0}',wsHistSchedClear:'أُزيل الموعد',wsHistPrice:'تحديد السعر {0}',wsHistPriceClear:'أُزيل السعر',wsHistErr:'تعذّر تحميل السجل.',wsHistEmpty:'لا يوجد سجل بعد.',wsMsgTitle:'رسالة إلى {0}',wsMsgSub:'باللغة التي استخدمها في الموقع. أرسلها عبر واتساب أو انسخها.',snavWebsite:'الموقع',webSub:'ما يعرضه micromobility.sa. يظهر أي تغيير محفوظ على الموقع خلال دقيقة.',webOpenSite:'فتح micromobility.sa',webNotSetUp:'مخزن محتوى الموقع غير مُعدّ بعد. يظهر هنا بعد تطبيق تحديث قاعدة البيانات.',webLoadErr:'تعذّر تحميل محتوى الموقع.',webStatus:'الحالة',webCsOnNow:'صفحة «قريباً» مفعّلة: يرى الزوار شاشة «قريباً» فقط.',webCsOffNow:'الموقع مفتوح: يرى الزوار الصفحات المفعّلة أدناه.',webCsSwitch:'قريباً',webCsLocked:'إيقاف «قريباً» يفتح الموقع، ويصبح ممكناً بعد بناء الصفحة الرئيسية.',webCsCard:'شاشة «قريباً»',webCsCardSub:'النصوص الظاهرة على شاشة «قريباً» بالإنجليزية والعربية.',webCsEyebrow:'العبارة فوق العنوان',webCsTitle:'العنوان',webCsSub:'السطر تحت العنوان',webDiscard:'تجاهل التغييرات',webSaving:'جارٍ الحفظ…',webErrEmpty:'لا يمكن ترك «{0}» فارغاً في أي من اللغتين.',webErrLong:'«{0}» أطول من {1} حرفاً.',webSavedLog:'الموقع: تغيير {0}',webSaved:'تم الحفظ. يظهر على micromobility.sa خلال دقيقة.',webCsOnTitle:'تفعيل «قريباً»؟',webCsOnBody:'سيرى الزوار شاشة «قريباً» فقط حتى يتم إيقافها مجدداً.',webCsOnBtn:'تفعيل',webCsOffTitle:'فتح الموقع؟',webCsOffBody:'سيرى الزوار الصفحات المفعّلة بدلاً من شاشة «قريباً».',webCsOffBtn:'فتح الموقع',webCsOnLog:'الموقع: تفعيل «قريباً»',webCsOffLog:'الموقع: إيقاف «قريباً»',webPutBackTitle:'إرجاع هذا؟',webPutBackBody:'يعود «{0}» إلى: {1}',webPutBack:'إرجاع',webValDefault:'النص الأصلي',webValNotSet:'غير محدد',webEditor:'محتوى الصفحات',webEditorSub:'كل نص وصورة ورقم في صفحات الموقع، بالإنجليزية والعربية. افتح القسم وعدّله ثم احفظ ذلك القسم.',webEdErr:'تعذّر الوصول إلى micromobility.sa لتحميل صفحاته. تحقق من الاتصال، أو قد يحتاج الموقع إلى آخر تحديث.',webEdBad:'هذه القيمة غير صالحة.',webEdBadLink:'يجب أن يبدأ «{0}» بـ https:// أو / أو mailto:',webEdBadNumber:'«{0}» ليس رقماً صالحاً هنا.',webEdOriginal:'الأصلي',webEdMoreLangs:'لغات أخرى ({0} من {1})',webEdMoreHint:'اختياري. اللغة المتروكة فارغة تعرض ترجمة الموقع للنص الإنجليزي، أو النص الإنجليزي نفسه بعد تغييره.',webEdTooLong:'النص أطول مما يتسع له الحقل. اختصره، أو احذف بعض اللغات الأخرى.',webEdAdd:'إضافة',webEdRemove:'حذف',webEdUp:'تحريك لأعلى',webEdDown:'تحريك لأسفل',webEdUpload:'رفع صورة',webEdUploading:'جارٍ رفع الصورة…',webEdUploaded:'تم رفع الصورة. احفظ القسم لاستخدامها.',webEdUploadErr:'تعذّر رفع الصورة. حاول مجدداً.',webEdUploadBig:'الصورة كبيرة جداً حتى بعد تصغيرها. استخدم صورة أقل من 5 ميجابايت.',webEdUploadType:'استخدم صورة JPEG أو PNG أو WebP أو AVIF.',webEdItem:'العنصر {0}',webEdEmptyList:'لا يوجد شيء بعد.',webEdUnsaved:'تغييرات غير محفوظة',webPreview:'معاينة الموقع',webPreviewNoSession:'سجّل الدخول مجدداً لمعاينة الموقع.',webValItems:'{0} عناصر',webValPhoto:'صورة',webValOn:'مفعّل',webValOff:'متوقف',webColVisible:'ظاهرة',webPages:'الصفحات',webPagesSub:'يمكن تفعيل كل صفحة بعد بنائها. الصفحة المتوقفة لا تظهر في القوائم، ورابطها يفتح الصفحة الرئيسية.',webColPage:'الصفحة',webPageLive:'منشورة',webPageHidden:'مخفية',webPageNotBuilt:'لم تُبنَ بعد',webPageReady:'مفعّلة - تظهر عند فتح الموقع',webPageOnLog:'تم تفعيل الصفحة: {0}',webPageOffLog:'تم إيقاف الصفحة: {0}',webPreviewPage:'معاينة',webHistory:'آخر التغييرات',webColWhen:'الوقت',webColWhat:'العنصر',webColNow:'أصبح',webColBefore:'كان',webColBy:'بواسطة',webHistoryEmpty:'لا توجد تغييرات بعد.',tabSessions:'الجلسات',tabBikes:'الدراجات',tabHistory:'السجل',tabAnalytics:'التحليلات',tabInventory:'المخزون',tabCommunity:'المجتمع',
   tabDashboard:'لوحة القيادة',dashTitle:'لوحة القيادة',dashSub:'نظرة حية على الكشك الآن.',dashWaiting:'في الانتظار',dashOnBikes:'على الدراجات الآن',dashOpenSessions:'الجلسات المفتوحة',dashAvailBikes:'الدراجات المتاحة',dashAlerts:'التنبيهات',dashAllClear:'كل شيء على ما يرام - لا شيء يحتاج انتباهاً.',sessSelectMsg:'اختر جلسة لعرض تفاصيلها وحجوزاتها.',sessRidersTitle:'الحجوزات',sessBackList:'كل الجلسات',sessNoRiders:'لا توجد حجوزات في هذه الجلسة بعد.',
   anRevCollected:'الإيرادات المحصلة',anAvgPerSession:'متوسط الجلسة',
   anTotalRides:'الرحلات المكتملة',anUniqueCustomers:'العملاء الفريدون',
@@ -1301,7 +1304,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   promoCodeExists:'يوجد رمز بهذا النص بالفعل.',promoTypeMissing:'عمود النوع غير موجود - شغّل add-roadcarbon-mmteam.sql؛ تم حفظ الرمز لجميع أنواع الدراجات.',bePaidMoveErr:'هذا الحجز مدفوع، وتلك الرحلة بسعر مختلف، فلا يمكن نقله إليها. اختر رحلة بالسعر نفسه، أو استرجع الدفعة أولاً.',
   editBookingBtn:'تعديل',editBookingTitle:'تعديل الحجز',editBookingSub:'عدّل بيانات الراكب أو انقل الحجز، نفس الحقول التي يمكن للعميل تعديلها.',undoEditBooking:'تعديل الحجز',saveChangesBtn:'حفظ التغييرات',
   beAddRidersLabel:'إضافة رُكّاب',beMoveActiveNote:'نقل راكب مسجّل الدخول يُنزله عن دراجته ويعيده إلى الانتظار في الرحلة الجديدة. ما دفعه يبقى مدفوعاً.',beMovePaidNote:'ما دفعه يبقى مدفوعاً في الرحلة الجديدة.',beAddRiderBtn:'إضافة راكب',beRiderPh:'اسم الراكب',beRemoveRider:'إزالة الراكب',beRidersAdded:'رُكّاب أُضيفوا',
-  checkInBtn:'تسجيل الدخول',returnBikeBtn:'إرجاع الدراجة',removeBtn:'حذف',noShowBtn:'لم يحضر',customerShowedBtn:'العميل حضر',undoCheckinBtn:'تراجع عن تسجيل الدخول',toastUndoCheckin:'تم التراجع عن تسجيل الدخول - الراكب عاد إلى قائمة الانتظار.',
+  checkInBtn:'تسجيل الدخول',returnBikeBtn:'إرجاع الدراجة',removeBtn:'حذف',noShowBtn:'لم يحضر',customerShowedBtn:'العميل حضر',undoCheckinBtn:'تراجع عن تسجيل الدخول',toastUndoCheckin:'تم التراجع عن تسجيل الدخول - الراكب عاد إلى الانتظار.',
   footerCopy:'© 2026 مايكروموبيليتي. جميع الحقوق محفوظة.',footAddr:'شارع ذي النورين، الشرفية، جدة 23218',footHours:'السبت\u2060–\u2060الخميس\u00a014:00\u2060–\u206022:00 · الجمعة\u00a017:00\u2060–\u206021:00',footVat:'الرقم الضريبي: 312555068900003',sessDeletedGroup:'الجلسات المحذوفة',histLogBtn:'السجل',
   anPayTitle:'المدفوعات',anCashCollected:'المحصّل نقداً',anCardCollected:'المحصّل بالبطاقة',anCardShare:'نسبة البطاقة',anDiscountsGiven:'الخصومات الممنوحة',
   anTeamConsumption:'حساب الفريق حسب العضو',anTeamConsumptionSub:'منتجات مأخوذة على حساب فريق MM (هذا النطاق)',
@@ -1479,7 +1482,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   vatExcl:'غير شامل',priceCustomOpt:'مخصص...',customWord:'مخصص',setBtnShort:'تعيين',resetFiltersBtn:'إعادة تعيين',searchWord:'بحث',undoneTag:'تم التراجع',priceVipDiscount:'خصم كبار الشخصيات والضيوف',switchLangTip:'تغيير اللغة',
   toastConnStale:'خطأ في الاتصال — قد تكون البيانات قديمة',toastCannotCancel:'لا يمكن إلغاء هذا الحجز.',toastActionUndone:'تم التراجع عن الإجراء: ',toastUndoFailedData:'فشل التراجع. ربما تغيّرت البيانات.',toastNothingUndo:'لا شيء للتراجع عنه',
   confirmUndoTitle:'التراجع عن الإجراء؟',confirmUndoYes:'نعم، تراجع',cancelBookingLabel:'إلغاء الحجز',cancelEntryBody:'سيؤدي هذا إلى تحرير أي دراجة معيّنة ووضع الحجز كملغى.',undoRevBody:'سيؤدي هذا إلى عكس الإجراء. قد لا تكون بعض العمليات قابلة للعكس بالكامل إذا تغيّرت البيانات.',unitMin:'د',unitHour:'س',mfSize:'المقاس:',mfBrand:'العلامة:',mfModel:'الطراز:',colorWord:'اللون',byStaff:'موظف',byGuest:'زائر',
-  logPwdResetSelf:'إعادة تعيين كلمة المرور (ذاتي): ',logAcctCreated:'تم إنشاء حساب: ',logLoggedIn:'تسجيل الدخول: ',logLoggedOut:'تسجيل الخروج: ',logSwitchedAdmin:'التحويل إلى دور المدير',logStaffUnlocked:'تم فتح لوحة الموظفين',logWaitlistedWord:'قائمة الانتظار',logBookedWord:'تم الحجز',logUpdatedBooking:'تحديث الحجز',logBulkPaid:'تعليم {0} كمدفوع (جماعي)',logBulkCheckin:'تسجيل دخول {0} (جماعي)',logStaffResetPwd:'الموظف أعاد تعيين كلمة المرور لـ ',
+  logAcctCreated:'تم إنشاء حساب: ',logSwitchedAdmin:'التحويل إلى دور المدير',logStaffUnlocked:'تم فتح لوحة الموظفين',logWaitlistedWord:'قائمة الانتظار',logBookedWord:'تم الحجز',logUpdatedBooking:'تحديث الحجز',logBulkPaid:'تعليم {0} كمدفوع (جماعي)',logBulkCheckin:'تسجيل دخول {0} (جماعي)',logStaffResetPwd:'الموظف أعاد تعيين كلمة المرور لـ ',
   undoEditSession:'تعديل الجلسة',undoSessionStatus:'الجلسة',undoPayment:'الدفع',undoCancelBooking:'إلغاء الحجز',undoStaffCancel:'إلغاء بواسطة الموظف',undoNoShow:'عدم حضور',undoUndoNoShow:'تراجع عن عدم الحضور',undoEditPrice:'تعديل السعر',undoRenumber:'إعادة ترقيم',undoReturn:'إرجاع',undoUndoCheckin:'تراجع عن تسجيل الدخول',undoReopen:'إعادة فتح',undoChangeBike:'تغيير الدراجة',undoCheckin:'تسجيل دخول',undoAddBike:'إضافة دراجة',undoEditBike:'تعديل دراجة',undoRetire:'سحب',undoRestoreBike:'استعادة',undoRelease:'تحرير',undoDeleteBike:'حذف دراجة',histRemoved:'محذوف',histRestored:'مستعاد',sizeWord:'المقاس',clearWord:'مسح',cmUnit:'سم',
   rescheduleBtn:'إعادة جدولة',rescheduleTitle:'نقل حجزك',rescheduleSub:'اختر جلسة أخرى لنقل جميع ركابك إليها.',rescheduleNoSessions:'لا توجد جلسات مفتوحة أخرى متاحة.',rescheduleFull:'لا توجد مساحة كافية في تلك الجلسة.',toastRescheduled:'تم نقل الحجز إلى الجلسة الجديدة ✓',
   
@@ -1523,7 +1526,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errPhoneExists:'يوجد حساب بهذا الرقم مسبقاً.',
   cfPhSharedThis:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح هذا الحساب.',
   cfPhSharedOther:'هذا الرقم مسجّل أيضًا في: {0}. تسجيل الدخول بهذا الرقم يفتح حساب {1}، وهذا الحساب يسجّل الدخول ببريده الإلكتروني.',
-  errConnection:'خطأ في الاتصال. تحقق من شبكتك.',errSomethingWrong:'لم تنجح العملية، ووصلتنا تفاصيل الخطأ. حاول مرة أخرى من فضلك.',errQNumTaken:'هذا الرقم مستخدم بالفعل لحجز آخر.',
+  errConnection:'خطأ في الاتصال. تحقق من شبكتك.',pageTitle:'تجارب MicroMobility',pageTitleStaff:'موظفو MicroMobility',pageDesc:'احجز دراجتك وانضم إلى جولة مجتمعية دون انتظار في الطابور. اختر الموقع والجلسة ببضع نقرات.',a11yHome:'الصفحة الرئيسية لـ MicroMobility',a11yCustSections:'أقسام العميل',a11yCustNav:'تنقّل العميل',a11yStaffSections:'أقسام الموظفين',spotsLeft_zero:'لا مقاعد متبقية',spotsLeft_one:'مقعد واحد متبقي',spotsLeft_two:'مقعدان متبقيان',spotsLeft_few:'{0} مقاعد متبقية',spotsLeft_many:'{0} مقعداً متبقياً',spotsLeft_other:'{0} مقعد متبقي',errSomethingWrong:'لم تنجح العملية، ووصلتنا تفاصيل الخطأ. حاول مرة أخرى من فضلك.',errQNumTaken:'هذا الرقم مستخدم بالفعل لحجز آخر.',
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
   errSessionClosed:'هذه الجلسة لم تعد مفتوحة.',
@@ -1563,7 +1566,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   cancelReason3:'سبب آخر',cancelOtherPlaceholder:'يرجى وصف سببك...',
   cancelConfirmBtn:'إلغاء الحجز',
   noShowCustomerMsg:'سجّلك الفريق غائباً عن هذه الرحلة.',
-  toastNoShow:'تم تسجيله كغائب.',toastUndoNoShow:'تمت إعادته لقائمة الانتظار.',
+  toastNoShow:'تم تسجيله كغائب.',toastUndoNoShow:'تمت إعادته إلى الانتظار.',
   toastBikeReturned:'الدراجة مُعادة. اكتملت الرحلة.',
   toastBikeReturnedPaid:'الدراجة مُعادة وتم تسجيل الدفع.',
   toastRiderRemoved:'تم حذف الراكب.',
@@ -1711,9 +1714,13 @@ function _langLoaded(c){return c==='en'||(!!(LANG[c]&&Object.keys(LANG[c]).lengt
 // A staff device that has not yet got this language's staff strings (see t()).
 function _staffLangNeeded(c){return typeof _staffLangReady==='function'&&typeof _staffP!=='undefined'&&!!_staffP&&!_staffLangReady(c);}
 const _langFetches={};
+// Resolves true when strings arrived (a redraw shows more), false when none did (2026-10-05). The
+// branch for a pack already here answered true even when the staff strings it went for failed:
+// setLang redrew and asked again at once, so a staff device offline (or answered non-OK) fetched
+// and redrew in a loop, hundreds of times a second.
 async function loadLangPack(code){
   if(_langLoaded(code))return true;
-  if(LANG[code]&&Object.keys(LANG[code]).length){await _loadStaffLang(code);return true;} // the customer pack is here, only the staff strings were missing
+  if(LANG[code]&&Object.keys(LANG[code]).length){await _loadStaffLang(code);return !_staffLangNeeded(code);} // the customer pack is here, only the staff strings were missing: true when they came
   if(!LANG[code])return false; // unknown language: nothing to fetch
   try{
     if(!_langFetches[code]){
@@ -1740,6 +1747,32 @@ async function loadLangPack(code){
 function _langPackForget(code,p){
   if(_langFetches[code]===p)delete _langFetches[code];
   if(window.__langPackCode===code&&window.__langPack===p)window.__langPack=null;
+}
+// Strings that did not arrive are asked for again a while later - 5 s, 15 s, 45 s, 2 min, 5 min -
+// and the page is redrawn only when some did (2026-10-05). Choosing the language by hand asks
+// at once and starts the waits again.
+let _langRetryT=null,_langRetryN=0,_langRetryOf='';
+function _langRetryLater(lang){
+  if(_langRetryOf!==lang){clearTimeout(_langRetryT);_langRetryT=null;_langRetryOf=lang;_langRetryN=0;}
+  if(_langRetryT||_langRetryN>=5)return;
+  _langRetryT=setTimeout(()=>{
+    _langRetryT=null;
+    if(S.lang!==lang||_langLoaded(lang))return;
+    loadLangPack(lang).then(ok=>{if(S.lang!==lang)return;if(ok)setLang(lang,true);else _langRetryLater(lang);});
+  },[5000,15000,45000,120000,300000][_langRetryN++]);
+}
+// The page's own words in the language on screen (2026-10-05): the tab's title, the description,
+// and the accessible names the markup is written with - the logo, the section bars, the staff
+// rail, the circuit's card and its picture, the footer's social links. They stayed English in
+// every language, so a screen reader said "Customer sections" on the Arabic page.
+function _pageTitle(){return t(_isStaffHost()?'pageTitleStaff':'pageTitle');}
+function _pageNames(){
+  document.title=_pageTitle();
+  const d=document.querySelector('meta[name="description"]');if(d)d.setAttribute('content',t('pageDesc'));
+  [['#topbar .topbar-logo','a11yHome'],['#customer-tab-nav','a11yCustSections'],['#cust-bottom-nav','a11yCustNav'],['#staff-tab-nav','a11yStaffSections'],['.landing-hero-card','evJccName']]
+    .forEach(([q,k])=>{const el=document.querySelector(q);if(el)el.setAttribute('aria-label',t(k));});
+  const hi=document.querySelector('.landing-hero-card img');if(hi)hi.alt=t('evJccName');
+  document.querySelectorAll('.mf-social a[title]').forEach(a=>a.setAttribute('aria-label',a.title+t('opensNewTab')));
 }
 
 // Every language the site speaks. `label` is the language's own name (what the dropdown
@@ -1817,7 +1850,10 @@ function setLang(lang,_fromUrl){
   S.lang=lang;
   // Not loaded yet: draw now in English (the fallback t() already uses) and draw again the
   // moment the pack arrives. Never block the first paint on a network round trip.
-  if(!_langLoaded(lang))loadLangPack(lang).then(ok=>{if(ok&&S.lang===lang)setLang(lang,true);});
+  if(!_langLoaded(lang)){
+    if(!_fromUrl)_langRetryN=0; // a hand pick starts the waits again
+    loadLangPack(lang).then(ok=>{if(S.lang!==lang)return;if(ok)setLang(lang,true);else _langRetryLater(lang);});
+  }
   // Remembered only when the visitor chose it: a boot in the device's own language or a
   // ?lang link must not turn into a permanent choice on this phone.
   if(!_fromUrl){try{localStorage.setItem('cq_lang',lang);localStorage.setItem('cq_lang_pick','1');}catch(e){}}
@@ -1839,6 +1875,7 @@ function setLang(lang,_fromUrl){
    if(_lb){
      if(_lb.options.length!==LANGS.length)_lb.innerHTML=LANGS.map(l=>`<option value="${l.code}" lang="${l.code}">${l.label}</option>`).join('');
      _lb.value=lang;_lb.title=t('switchLangTip');_lb.setAttribute('aria-label',t('switchLangTip'));}}
+  _pageNames(); // the title, the description and the markup's own names, as the picker above
   const lt=document.getElementById('land-title');if(lt)lt.innerHTML=`<span>MicroMobility</span> Rentals`;
   const ls=document.getElementById('land-sub');if(ls)ls.textContent=t('landingSub');
   const leb=document.getElementById('land-eyebrow');if(leb)leb.textContent=t('landEyebrow');
@@ -1979,13 +2016,24 @@ function _staffRoleRetry(uid,n){
 // Reject a promise that never settles, so a stuck network/auth call surfaces an error instead of
 // hanging the sign-in button forever.
 function _withTimeout(p,ms,label){return Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error((label||'request')+' timed out')),ms))]);}
+// What a staff sign-in that did not go through says (2026-10-05): a wrong password, too many tries
+// or the connection, in the person's language. Supabase's own words ("Request rate limit reached",
+// "Failed to fetch") and the timeout's ("sign-in timed out") were shown as they came, in English;
+// they go to the error log now. A wrong password is not an error and is not logged.
+function _staffAuthMsg(e){
+  const m=String((e&&e.message)||e||''),c=String((e&&e.code)||''),st=Number(e&&e.status)||0;
+  if(c==='invalid_credentials'||/invalid/i.test(m))return t('errInvalidCredentials');
+  try{_logError('staff sign-in: '+((st?st+' ':'')+(c?c+' ':'')+m).trim(),'auth',true);}catch(_){}
+  if(st===429||/rate.?limit|too many/i.test(c+' '+m))return t('errTooManyTries');
+  return navigator.onLine===false?t('errNoInternet'):t('errConnection');
+}
 async function staffAuthSignIn(identifier,password){
   try{
     const email=await _staffLoginEmail(identifier);
     if(email===undefined)return{ok:false,msg:t('errConnection')}; // the phone lookup did not answer
     if(!email)return{ok:false,msg:t('errInvalidCredentials')}; // phone not registered to a staff account
     const{data,error}=await _withTimeout(sb.auth.signInWithPassword({email,password}),20000,'sign-in');
-    if(error||!data||!data.user)return{ok:false,msg:(error&&/invalid/i.test(error.message||''))?t('errInvalidCredentials'):((error&&error.message)||t('errConnection'))};
+    if(error||!data||!data.user)return{ok:false,msg:_staffAuthMsg(error)};
     let row=null,lookupFailed=false;
     // The staff-row lookup confirms authorization, but must never HANG the sign-in.
     try{const r=await _withTimeout(sb.from('staff').select('*').eq('user_id',data.user.id).maybeSingle(),10000,'staff lookup');if(r.error)lookupFailed=true;else row=r.data;}catch(e){lookupFailed=true;}
@@ -1993,15 +2041,16 @@ async function staffAuthSignIn(identifier,password){
       // Lookup FAILED (timeout/error): only staff hold a password Auth account, so trust the valid
       // session rather than freezing — the DB still enforces is_staff() on every write.
       if(lookupFailed){S._staffAuthed=true;S._mustChangePwd=false;setStaffRole(_staffRoleGuess(data.user.id));_staffRoleRetry(data.user.id);setupRefRealtime();_rtStaffRejoin(data.user.id);return{ok:true};}
-      // Lookup SUCCEEDED but returned no row: this Auth user is genuinely not staff — deny.
-      try{await sb.auth.signOut();}catch(e){}
+      // Lookup SUCCEEDED but returned no row: this Auth user is genuinely not staff — deny. On this
+      // device only: supabase-js signs out 'global' by default, every device of the account (2026-10-05).
+      try{await sb.auth.signOut({scope:'local'});}catch(e){}
       return{ok:false,msg:t('errStaffNotAuthorized')};
     }
     S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(data.user.id,row.role);_accessSet(row,data.user.id);
     try{localStorage.setItem('cq_staff_seen',String(Date.now()));localStorage.removeItem('cq_op_idle');}catch(_){} // a sign-in is activity: an old idle mark must not sign them straight out (the idle clock, _idleCheck)
     setupRefRealtime();_rtStaffRejoin(data.user.id); // the live channel joined before this sign-in: again, as this account
     return{ok:true};
-  }catch(e){return{ok:false,msg:(e&&e.message)||t('errConnection')};}
+  }catch(e){return{ok:false,msg:_staffAuthMsg(e)};}
 }
 // What a staff session leaves on the device goes with it (2026-10-04 audit): the bookings and
 // riders copy (_syncDrop, awaited), the action log, the cancellation log, the team list, the error
@@ -2009,12 +2058,14 @@ async function staffAuthSignIn(identifier,password){
 // sent yet: they are sent first (_staffOutboxSettle) and only dropped once the staffer says so.
 const STAFF_WIPE_KEYS=['cq_full_log','cq_cancellations','cq_team','cq_errors','cq_role','cq_role_uid','cq_ho','cq_staff_seen','cq_op_idle'];
 async function _staffWipe(){
-  try{await _syncDrop();}catch(_){}
+  // The keys and the logs go at once, the copy of the lists after (2026-10-05): the boot's revoke
+  // (_staffRevoked) does not wait for the IndexedDB clear, and the boot reads cq_full_log next.
   try{
     STAFF_WIPE_KEYS.forEach(k=>localStorage.removeItem(k));
     for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.indexOf('cq_ct_')===0)localStorage.removeItem(k);}
   }catch(_){}
   S.fullLog=[];S.cancellationLog=[];
+  try{await _syncDrop();}catch(_){}
 }
 // The sales outbox is staff work; the booking outbox may also hold a booking the customer signed in
 // on this device made offline (a shared booth tablet), and that one is theirs: it stays and keeps
@@ -2046,13 +2097,24 @@ async function staffAuthSignOut(auto){
   // The operator name belongs to the account that just left: drop the device copy (and the account's
   // name held in memory) so the next sign-in takes that person's own name instead of inheriting this one.
   try{localStorage.removeItem('cq_op_name');}catch(_){}S._meName=null;S._mePhoto=null;S._meRead=false;
-  try{await sb.auth.signOut();}catch(e){}
+  try{await sb.auth.signOut({scope:'local'});}catch(e){} // this device only: the default, 'global', ended the account's session on every device (2026-10-05)
   return true;
+}
+// The unlock is revoked (no session behind it, or not a staff account): the unlock goes, and with it
+// what a sign-out takes off the device (2026-10-05) - the open check-in, the device's copy of the
+// lists, the staff logs, the team list, the role, the ride clocks (_staffWipe) and the sections
+// this account could open (cq_access) - and the staff tables leave the live channel. Before, only
+// the unlock, the check-in and the lists went, and the next person found the rest. The operator's
+// name is left to its own handling.
+function _staffRevoked(){
+  try{localStorage.removeItem('cq_staff');localStorage.removeItem('cq_access');}catch(_){}
+  S._myView=S._myEdit=null;
+  _clearActiveCheckin(false);_staffTapCookie(false);_staffWipe();_rtEnsureMode();
 }
 // On boot: an unlocked staff device must still hold a live Auth session that maps
 // to a staff row, or the unlock flag is dropped and the PIN gate returns.
 async function staffAuthRestore(){
-  if(!sb||localStorage.getItem('cq_staff')!=='1')return;
+  if(!sb||!_rtStaffDevice())return; // read in a try: storage that refuses must not end the boot's restore in a throw (2026-10-05)
   // The unlock is dropped ONLY when the server positively says this account is not staff.
   // It used to be dropped on any failure at all, including a network blip — so a booth on
   // flaky wifi (or a phone that had been asleep long enough for the access token to lapse)
@@ -2077,7 +2139,7 @@ async function staffAuthRestore(){
         const _noSession=!r.error||_m.includes('authsessionmissing')||_m.includes('session missing')
           ||_m.includes('refresh token not found')||_m.includes('invalid refresh token');
         if(_noSession){
-          if(SECURE_AUTH){try{localStorage.removeItem('cq_staff');}catch(_){}_clearActiveCheckin(false);_staffTapCookie(false);_syncDrop();_rtEnsureMode();} // the unlock goes, so do the open check-in, the device's copy of the lists and the staff tables on the live channel
+          if(SECURE_AUTH)_staffRevoked(); // the unlock goes, and what a sign-out takes goes with it
         }
         S._staffAuthed=false;return;
       }
@@ -2094,7 +2156,7 @@ async function staffAuthRestore(){
   if(err){S._staffAuthed=false;return;}   // ditto: an error is not proof of non-staff
   if(!row){
     // A clean answer with no staff row IS a verdict: this account has no business here.
-    if(SECURE_AUTH){try{localStorage.removeItem('cq_staff');}catch(_){}_clearActiveCheckin(false);_staffTapCookie(false);_syncDrop();_rtEnsureMode();} // the unlock goes, so do the open check-in, the device's copy of the lists and the staff tables on the live channel
+    if(SECURE_AUTH)_staffRevoked(); // the unlock goes, and what a sign-out takes goes with it
     S._staffAuthed=false;return;
   }
   S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(uid,row.role);_accessSet(row,uid);
@@ -3036,22 +3098,29 @@ function _regTypeHidden(ty){
 // A rider's terms changed (the default payment in the account editor, the VIP tag given or taken):
 // their LIVE bookings (waiting/waitlist/active, not on an approval ride, in their own name - any of
 // names) follow at once. Rows the new terms cover become on-the-house; rows only the old terms
-// comped revert to pending at the type price. Manual comps the old terms never covered are left
-// alone. was and now answer, for a bike type, whether the old and the new terms cover it.
+// comped revert to pending at the fare their ride charges (2026-10-05: an event's seat price and
+// nothing on a free ride - an event's seat went back to 57.5 - and a Petromin employee's fare, for
+// which the Riders list is loaded first, as the promo re-price does). Manual comps the old terms
+// never covered are left alone. was and now answer, for a bike type, whether the old and the new
+// terms cover it.
 async function _houseReprice(cid,names,was,now){
   const own=new Set(names.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
   const live=getQueue().filter(e=>e.customerId===cid&&['waiting','waitlist','active'].includes(e.status)&&!_apprSessIds.has(e.sessionId)&&own.has(String(e.name||'').trim().toLowerCase()));
+  if(!S.ridersLoaded&&live.some(e=>{const s=_sessGet(e.sessionId);return s&&s.ride_kind==='petromin';})){try{await loadRiders();}catch(_){}}
   const calls=[],ids=[];
+  // Each write names the row as this device saw it (2026-10-05): one another device changed in the
+  // meantime (paid at the desk, re-priced) is left as it is and read back rather than overwritten.
   live.forEach(e=>{
     const cov=now(e.typePreference);
-    if(cov&&!e.paid){e.paid=true;e.price=0;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id));}
-    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const p=priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id));}
+    if(cov&&!e.paid){e.paid=true;e.price=0;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:true,price:0}).eq('id',e.id).eq('paid',false).select('id'));}
+    else if(!cov&&e.paid&&(e.price??DEFAULT_PRICE)===0&&was(e.typePreference)){const f=_sessFare(e),p=f!=null?f:priceForEntryType(e,e.typePreference||'Any');e.paid=false;e.price=p;ids.push(e.id);calls.push(sb.from('queue_entries').update({paid:false,price:p}).eq('id',e.id).eq('paid',true).eq('price',0).select('id'));}
   });
   if(!calls.length)return;
   // A refused write is said, and the rows are read back: the screen must not show a booking on the
-  // house (or pending) that the database still prices the old way - the desk would not collect.
+  // house (or pending) that the database still prices the old way - the desk would not collect. A
+  // write that changed no row (its row had moved on) is read back too.
   let res;try{res=await Promise.all(calls);}catch(e){res=[{error:e||{message:'failed'}}];}
-  if(_writeErr(res,'house reprice'))await _reloadRows(ids);
+  if(_writeErr(res,'house reprice')||res.some(r=>r&&!r.error&&!(Array.isArray(r.data)&&r.data.length)))await _reloadRows(ids);
 }
 // The VIP tag was given or taken on this device (was: whether the account held it before): when
 // that changed its terms, its live bookings follow.
@@ -3177,7 +3246,7 @@ function _bookEmail(e){
   return(c&&c.email&&!_isRelay(c.email))?c.email:em;
 }
 async function _refFetch(onCustomers){
-  if(typeof localStorage==='undefined'||localStorage.getItem('cq_staff')!=='1')return;
+  if(!_rtStaffDevice())return; // read in a try (2026-10-05): storage that refuses is not a staff device, and must not fail the load
   if(!_refNeeded()){if(onCustomers&&S.customers&&S.customers.length)onCustomers({data:S.customers,error:null});return;}
   if(_refInFlight){await _refInFlight;if(onCustomers&&S.customers&&S.customers.length)onCustomers({data:S.customers,error:null});return;}
   // Paged (PostgREST caps every request at 1000 rows): the customer base and tag list both grow
@@ -3460,7 +3529,7 @@ async function _queueFetch(windowed,days){
 // Falls back to the plain select when the RPC isn't deployed yet, so the app keeps working
 // between shipping this build and running tags-events-migration.sql.
 async function _sessionsFetch(){
-  const isStaffDevice=(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1');
+  const isStaffDevice=_rtStaffDevice(); // read in a try (2026-10-05): one refusal here failed every data load
   if(!isStaffDevice){
     const cust=S.loggedIn||getSession();
     // Only a database without the function falls through. Any other failure is a failed load:
@@ -3567,7 +3636,7 @@ async function _loadDataInner(showLoader){
   // Only replace queue/sessions when their (possibly paged) fetch fully succeeded - a paged error
   // now yields null data, so keep the prior state rather than blanking or truncating the view.
   if(!q.error){
-    const _keepPII=(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1');
+    const _keepPII=_rtStaffDevice();
     const _prevPII={};
     if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
     S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs&&_qs.cut)); // a synced answer is the whole year: laid over nothing
@@ -3591,7 +3660,7 @@ async function _loadDataInner(showLoader){
     Promise.all([_refP,_optP]).then(async()=>{
       try{await _afterOptional();}catch(e){}
       try{if(S.view==='staff')_renderStaffTab(true);else if(S.view==='landing')renderLandingAvail();}catch(e){}
-      if(!(SECURE_AUTH&&!S._staffAuthed&&(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1')))_cacheSave();
+      if(!(SECURE_AUTH&&!S._staffAuthed&&_rtStaffDevice()))_cacheSave();
     }).finally(()=>{_refsLoaded=true;});
     _lastLoadOk=true; // the core data is in: the boot must not paint the snapshot over it
     return;
@@ -3602,7 +3671,7 @@ async function _loadDataInner(showLoader){
   _lastLoadOk=true;
   // Don't snapshot a PII-free (queue_public) load on a staff device — restoring it later
   // would show the staff panel with no names/phones. Only cache full loads.
-  if(!(SECURE_AUTH&&!S._staffAuthed&&(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1')))_cacheSave();
+  if(!(SECURE_AUTH&&!S._staffAuthed&&_rtStaffDevice()))_cacheSave();
 }
 // What the optional lists need once they are in: queued sales applied, voided ones dropped,
 // the MM Team roster merged. Called after the optional fetch on every load.
@@ -4216,7 +4285,19 @@ function priceForBike(bike){
   if(bike.type==='Road'||bike.type==='Mountain'||bike.type==='Hybrid')return priceForType(bike.type);
   return bike.rental_price??priceForType(bike.type);
 }
+// What a booking's ride says about its fare before any bike type does (2026-10-05): nothing on a
+// ride that charges nothing, the seat price on an event; null when the bike type decides. A seat
+// ('None') whose event is not on the page is never a bike's fare either: priceForType has none for
+// 'None', and DEFAULT_PRICE (57.5) was charged for free and 30-riyal seats alike.
+function _sessFare(e){
+  const s=_sessGet(e&&e.sessionId);
+  if(_isFreeRide(s))return 0;
+  const seat=_evSeatPrice(s);
+  if(seat!=null)return seat;
+  return(e&&e.typePreference)==='None'?0:null;
+}
 function _entryFallbackPrice(entry){
+  {const f=_sessFare(entry);if(f!=null)return f;} // the ride first: an event's seat, a free ride's nothing (2026-10-05)
   // Premium tiers (Road Carbon) are fulfilled with a base-type bike: summing the assigned
   // bike's price would silently undercharge the booked premium fare (250 -> 75). Same rule
   // as the bike-assign path.
@@ -4235,6 +4316,11 @@ function fmtDate(d){return d.toLocaleDateString('en-CA',{timeZone:KSA_TZ});}
 // Intl date formatting is slow and a roster asks for the same few dates hundreds of times a
 // render, so the answer is cached per language. The cache is small: a season has a few dates.
 const _shortDateCache=new Map();
+// The day each answer stands for, keyed by the answer as a table cell reads (2026-10-05): a staff
+// table sorts a date column by reading its cells back (_tsVal, _tsDay), which knew only an ISO day
+// and an English "22 Sept 2026" - in Arabic, Portuguese or Tagalog a date column sorted by the day
+// number. Kept apart from the cache, which is cleared as it fills.
+const _shortDateDay=new Map();
 function shortDate(ds){
   if(!ds)return'';
   const lang=(S&&S.lang)||'en';
@@ -4250,6 +4336,7 @@ function shortDate(ds){
   try{
     const d=typeof ds==='number'?new Date(ds):m&&/^[T ]\d/.test(m[2])?new Date(s.replace(' ','T').replace(/([+-]\d{2})$/,'$1:00')):m?new Date(m[1]+'T12:00:00+03:00'):new Date(NaN);
     out=isNaN(d)?(m?m[1]:''):d.toLocaleDateString(_locale(),{day:'numeric',month:'short',year:'numeric',timeZone:KSA_TZ});
+    if(!isNaN(d)&&out){if(_shortDateDay.size>4000)_shortDateDay.clear();_shortDateDay.set(out.replace(/\s+/g,' ').trim(),Date.parse(fmtDate(d)+'T00:00:00Z'));}
   }catch{out=m?m[1]:'';}
   if(_shortDateCache.size>2000)_shortDateCache.clear();
   _shortDateCache.set(ck,out);
@@ -4328,8 +4415,10 @@ function spotsLeft(sid){
   if(_isApprovalRide(sess)){
     const cap=(sess&&sess.spots)||(sess&&sess.capacity)||12;
     // Own-bike riders don't hold a spot: the cap allocates Micromobility bikes only,
-    // so staff can seat any number of bike owners on top of a "full" allocation.
-    return Math.max(0,cap-getQueue().filter(e=>e.sessionId===sid&&_holdsSpot(e,sess)).length);
+    // so staff can seat any number of bike owners on top of a "full" allocation. A waitlisted
+    // request holds none either (2026-10-05: it was counted, so approving a pending request
+    // warned the ride was full while places were still free; the server meters no approval ride).
+    return Math.max(0,cap-getQueue().filter(e=>e.sessionId===sid&&e.status!=='waitlist'&&_holdsSpot(e,sess)).length);
   }
   const cap=(sess&&sess.capacity)||12;
   // Own-bike riders hold no seat on a seat-based ride either - the count allocates
@@ -4669,7 +4758,7 @@ function dayLabel(day){
 }
 function spotsLeftLabel(n){
   if(n===0)return t('spotsFull');
-  return t(n===1?'spotsLeft1':'spotsLeftN').replace('{0}',n);
+  return _tn('spotsLeft',n); // the language's own forms (2026-10-05): one/many only gave Arabic "2 مقاعد" for its dual
 }
 const TYPE_CLS={Road:'type-road',Hybrid:'type-hybrid',Mountain:'type-mountain',Kids:'type-kids',Gravel:'type-gravel',Any:'type-any','Road Carbon':'type-roadcarbon'};
 // Own-property lookup: a stored value such as 'constructor' must not find Object's own members.
@@ -5154,7 +5243,22 @@ function _tsVal(cell){
   let m=a.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return{n:Date.UTC(+m[1],+m[2]-1,+m[3])};
   m=a.match(/(?:^|\s)(\d{1,2}) ([A-Za-z]{3,4})\.? (\d{4})/);
   if(m&&_TS_MON[m[2].toLowerCase()]!=null)return{n:Date.UTC(+m[3],_TS_MON[m[2].toLowerCase()],+m[1])};
+  const dn=_tsDay(raw);if(dn!=null)return{n:dn}; // a date in the page's own language (2026-10-05)
   return{s:raw};
+}
+// A date as shortDate wrote it in the language on screen, read back as its day (_shortDateDay):
+// the whole cell, else the first date in it ("Mon 2 Oct 2026", a date with the time under it). A
+// match must not sit inside a longer number, or "12 Oct" would read as "2 Oct".
+function _tsDay(raw){
+  if(!_shortDateDay.size||!/\d{4}/.test(raw))return null; // every shortDate carries its year, in Latin digits in all ten locales
+  const hit=_shortDateDay.get(raw);if(hit!=null)return hit;
+  let best=null,at=Infinity,len=0;
+  for(const[k,v]of _shortDateDay){
+    let i=raw.indexOf(k);
+    while(i>=0&&((i>0&&/\d/.test(raw[i-1]))||/\d/.test(raw[i+k.length]||'')))i=raw.indexOf(k,i+1);
+    if(i>=0&&(i<at||(i===at&&k.length>len))){best=v;at=i;len=k.length;}
+  }
+  return best;
 }
 function _tsCmp(x,y){
   if(x.n!=null&&y.n!=null)return x.n-y.n;
@@ -5675,7 +5779,7 @@ async function doResetPassword(){
       S.rememberMe=true;S.loggedIn=customer;setSession(customer);S.forgotStep=1;S.forgotEmail='';S.forgotVerified=null;S.authMode='login';
       await loadData();
       closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
-      logAction(t('logPwdResetSelf')+(customer.email||''));
+      // No device log entry (2026-10-05): it kept the rider's email on this device, and the server records the reset (customer_activity).
       toast(t('toastPwReset'));return;
     }
   }catch(e){authErr(t('errConnection'));}
@@ -5945,7 +6049,12 @@ function _linkCustomer(name,phone,email){
   }
   const em=String(email||'').trim().toLowerCase();
   if(em){const h=cs.find(c=>String(c.email||'').trim().toLowerCase()===em);if(h)return h;}
-  return nm?(cs.find(c=>String(c.name||'').trim().toLowerCase()===nm)||null):null;
+  // The name alone (2026-10-05): only when no phone was typed - a number that matches nobody is a
+  // person the desk does not know, not a namesake's - and only when exactly one account carries
+  // the name. The first namesake used to take the booking, and their house or VIP terms with it.
+  if(!nm||_asciiDigits(String(phone==null?'':phone)).replace(/\D/g,''))return null;
+  const named=cs.filter(c=>String(c.name||'').trim().toLowerCase()===nm);
+  return named.length===1?named[0]:null;
 }
 function _normPhone(raw,cc){
   cc=cc||'+966';
@@ -6015,7 +6124,7 @@ async function doSignup(){
       S.loggedIn=safeCustomer;setSession(safeCustomer);
       await loadData();
       closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
-      logAction(t('logAcctCreated')+name);
+      // No device log entry (2026-10-05): it kept the rider's name on a shared tablet; the server records the sign-up (customer_activity).
       toast(`${name}! ${t('toastAccountCreated')}`);
       return;
     }
@@ -6105,7 +6214,7 @@ async function handleGoogleReturn(){
 // sign in - and a line saying why.
 function _oauthNoAccount(){
   const g=S._pendingGoogle||{};S._pendingGoogle=null;
-  try{if(sb&&sb.auth)sb.auth.signOut();}catch(e){}
+  try{if(sb&&sb.auth)sb.auth.signOut({scope:'local'});}catch(e){} // this device only: the default, 'global', signs the account out everywhere (2026-10-05)
   S._oauthMiss={email:g.email||'',name:g.name||''};
   S.authMode='signup';S.signupGender=null;S.signupRideNews=false;S.signupAck=false;
   // The sign-in page may be up already; drawn as a fresh page, so the empty boxes it had do not
@@ -6141,7 +6250,7 @@ async function doLogin(){
       S.loggedIn=customer;setSession(customer);S._pwdCheckedFor=null;_pwdMustCheck(customer);
       await loadData();
       closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
-      logAction(t('logLoggedIn')+customer.name);
+      // No device log entry (2026-10-05): it kept the rider's name on a shared tablet; the server records the sign-in (customer_activity).
       toast(`${t('toastWelcomeBack')}, ${customer.name}!`);
       return;
     }
@@ -6171,7 +6280,7 @@ async function doLogin(){
     S.loggedIn=customer;setSession(customer);
     await loadData();
     closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
-    logAction(t('logLoggedIn')+customer.name);
+    // No device log entry (2026-10-05): it kept the rider's name on a shared tablet; the server records the sign-in (customer_activity).
     toast(`${t('toastWelcomeBack')}, ${customer.name}!`);
   }catch(e){_authFail('exception',e);}
   finally{S._authBusy=false;_authBtnBusy(false);}
@@ -6179,10 +6288,10 @@ async function doLogin(){
 
 
 function doLogout(silent){
-  logAction(t('logLoggedOut')+((S.loggedIn&&S.loggedIn.name)||'customer'));
+  // No device log entry (2026-10-05): it kept the rider's name on a shared tablet, where the next person's History > Log showed it.
   S.loggedIn=null;clearSession();S._pendingGoogle=null;S._commAccess=null;
   S._pwdCheckedFor=null;_pwdMustClose();
-  if(sb&&sb.auth)try{sb.auth.signOut();}catch(e){}
+  if(sb&&sb.auth)try{sb.auth.signOut({scope:'local'});}catch(e){} // this device only (2026-10-05): the default, 'global', ended the rider's Google or Apple session on their other devices too
   S._rName='';S._rEmail='';S._rPhone='';S._rHeight='';
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regStep=1;
   // The next person on this device starts clean: a code, add-ons or a booking being changed
@@ -6282,7 +6391,7 @@ function _staffRedirectFor(h,search,staffEntry,pathname){
   if(pn&&pn.view==='staff')return STAFF_ORIGIN+_pathFor(pn)+(search||''); // a staff section's own address (2026-09-27)
   return q.has('staff')||staffEntry?STAFF_ORIGIN+'/':'';
 }
-function _staffHostGate(){if(localStorage.getItem('cq_staff')==='1')goStaff();else{showView('landing');openPinModal();}}
+function _staffHostGate(){if(_rtStaffDevice())goStaff();else{showView('landing');openPinModal();}}
 let _wakeLk=null;
 function _wakeRelease(){const l=_wakeLk;_wakeLk=null;if(l)try{l.release().catch(()=>{});}catch(_){}}
 function showView(v){
@@ -6304,7 +6413,7 @@ function showView(v){
   document.getElementById('view-staff').classList.toggle('active',v==='staff');
   document.body.classList.toggle('view-staff',v==='staff');
   _syncCustNav();
-  document.title=_isStaffHost()?'MicroMobility Staff':'MicroMobility Experiences'; // one name per address
+  document.title=_pageTitle(); // one name per address, in the language on screen (2026-10-05)
   renderTopbarRight();
   applyThemeIcon(); // topbar logo art follows the view's surface (white paper vs asphalt)
   _opGateCheck(); // staff view is unusable until the operator says who they are
@@ -6430,7 +6539,7 @@ function _pushNav(){
 function _applyNav(st){
   if(!st)return;
   _navRestoring=true;
-  if(st.view==='staff'&&localStorage.getItem('cq_staff')==='1'){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
+  if(st.view==='staff'&&_rtStaffDevice()){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
   else if(st.view==='customer'&&getSession()){
     if(st.ev)S.selEvent=st.ev;
     if(st.step&&(st.ctab||'register')==='register')S.regStep=st.step;
@@ -6821,19 +6930,30 @@ async function _bfSaveNew(selVar,nameVar,urlVar){
 // itself stays invisible to customers) and cached per customer. The
 // queue_entries insert trigger (saturday-members-gate.sql) enforces the same
 // rule in the database, so this gate is UX, not the security boundary.
+// true / false: the server's answer. null: no answer (2026-10-05) - a failed check used to answer
+// false, and a member on a weak signal was told the rides are for members only. Callers say the
+// connection failed for null and keep the members popup for a real false.
 async function commAccess(){
   const cust=S.loggedIn||getSession();
   if(!cust||!cust.id)return false;
   if(S._commAccess&&S._commAccess.custId===cust.id)return S._commAccess.ok;
   try{
     const r=await sb.rpc('community_member',{p_id:cust.id,p_token:cust.session_token||null});
-    if(r.error)return false; // network/RPC failure: deny now, but don't cache so a retry can pass
+    if(r.error)return null; // network/RPC failure: no verdict, and nothing cached so a retry can pass
     const ok=r.data===true;
     // Cache POSITIVE answers only: a "no" can flip mid-session (staff grants the tag while
     // the app is open) and a cached denial kept blocking members until a full reload.
     if(ok)S._commAccess={custId:cust.id,ok};else S._commAccess=null;
     return ok;
-  }catch(e){return false;}
+  }catch(e){return null;}
+}
+// The members gate on a ride or the community card (2026-10-05): true lets the rider on; a real
+// "no" opens the members popup; no answer says the connection failed.
+async function _commGate(){
+  const a=await commAccess();
+  if(a===true)return true;
+  if(a===null)toast(t('errConnection'),'error');else showCommMembersModal();
+  return false;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showCommMembersModal_1(event,el){if(event.target===el)closeConfirm()}
@@ -6919,7 +7039,7 @@ async function selectSessCard(id){
   if(await _profileGate(()=>selectSessCard(id)))return;
   const s=allSessions().find(x=>x.id===id);
   if(_wasRejectedFor(id)){showRejectedModal(s);return;}
-  if(_isCommunity(s)&&!_openToAll(s)&&!(await commAccess())){showCommMembersModal();return;}
+  if(_isCommunity(s)&&!_openToAll(s)&&!(await _commGate()))return; // a failed check says so, a real no is the members popup (2026-10-05)
   // Add-ons are per-session offerings: a switch must drop picks the new session may not sell. The
   // promo code goes too - applied for one ride, it rode along onto the next, including onto a free
   // ride whose box is hidden, where it could not be removed and still spent a use of the code.
@@ -7012,11 +7132,9 @@ async function _openEventLink(){
 }
 async function selectEvent(ev){
   if(await _profileGate(()=>selectEvent(ev)))return;
-  if(ev==='community'&&!(await commAccess())){
-    // The ride itself is never named here: somebody who is not a member is told the rides are
-    // invite-only and how to ask, not which ride is on.
-    showCommMembersModal();return;
-  }
+  // The ride itself is never named here: somebody who is not a member is told the rides are
+  // invite-only and how to ask, not which ride is on. A check that failed says so (2026-10-05).
+  if(ev==='community'&&!(await _commGate()))return;
   S.selEvent=ev;S.selSession=null;
   S.promoApplied=null;S._promoMsg=''; // a code applied on another event's ride does not follow the rider here (see selectSessCard)
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
