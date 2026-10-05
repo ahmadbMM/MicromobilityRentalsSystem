@@ -77,10 +77,27 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
   such as a `SECTION_KEY` map value, no dynamic prefix read off `t('rateTag'+…)` and template-literal calls, or
   `DYNAMIC_KEYS` in the script). Prune from `en`, `ar` and every `i18n/*.json` together.
 - The service worker serves navigations stale-while-revalidate (NOT network-first): a new `index.html` applies on the next load. Other same-origin assets are cache-FIRST with no revalidation, so `styles.css` is busted by a content hash that `scripts/build-html.mjs` writes into both `index.html` and `service-worker.js`. Never hand-edit those version tags.
+- **An open tab hears of a deploy (2026-10-05).** The page asks for a new worker once an hour (`reg.update()`); a new one
+  installs, activates and claims the tab. Its `activate` posts `{type:'shell-updated'}` to every window when an older
+  `mmcq-*` cache existed (an update, not a first install), and the page also takes `controllerchange` as that message
+  when it already had a worker (`_swMsg`, `_swHadCtl`): a silent reload in the first seconds, else the Refresh bar. The
+  cache name also hashes the page as the build writes it (and the site origin), so a markup-only deploy is a new worker
+  too. `tests/fix5-sw-update.spec.ts`. A worker change committed from a worktree carries origin's stamps; the build
+  rewrites them.
 
 ## Do not expose internal files publicly
 
 Cloudflare Pages serves the repo root, so internal files must be blocked from public serving. The live gate is `functions/_middleware.js` (a **denylist** by extension and path prefix); `_redirects` no longer carries rules. The denylist passes `.html`/`.js`, so a committed prototype directory stays publicly reachable unless its prefix is added — `design_handoff_erp_reskin/` is blocked by prefix for exactly this reason (it is internal reference; the real staff mobile number it carried was replaced with invented ones on 2026-10-05, and only made-up numbers belong in it). `.wrangler/` (wrangler's local dev state) is `.gitignore`d since 2026-10-05 and blocked too. If you add a new served asset, also add it to `FILES` in `scripts/assemble-dist.mjs` — that script now fails the build when a listed file is missing.
+
+**`dist/_routes.json` (2026-10-05).** `scripts/assemble-dist.mjs` writes it (`routesJson()`), in `dist/` only: include `/*`,
+exclude the asset directories of `DIRS` (all but `functions` and `staff`) and the root's static `FILES` (all but
+`index.html`, `404.html`, `robots.txt`, `sitemap.xml`, `_headers`, `_redirects`), so a font, image or script no longer
+runs the middleware. Everything else still does: `/`, the app's addresses, `/api/*`, `/staff/`, the staff host's robots
+and noindex, the hold, and every address the denylist refuses. A new directory in `DIRS` is excluded automatically:
+it must hold only files the middleware would pass (no config `.json`, no source), and assemble-dist copies no dotfiles
+into it. `tests/fix5-build-headers-routes.spec.ts` checks the rules the way wrangler validates them (100 rules, 100
+characters, no overlapping `/x/*`) and runs every excluded file through the middleware. A root served as it is has no
+`_routes.json` and keeps the middleware on everything.
 
 ## Traps in the one-file app (learned from 2026-09-11, NFC bike check-in)
 
@@ -225,8 +242,22 @@ Cloudflare Pages serves the repo root, so internal files must be blocked from pu
 with `sign.js` (WebCrypto RSA + hand-written DER, PKCS#12 and CMS; no node-forge) and `pass-images.js`.
 Edit the source and rebuild; CI refuses a stale bundle, exactly as for `index.html`. Credentials come
 as PEM (`APPLE_PASS_CERT_PEM` + `APPLE_PASS_KEY_PEM`, preferred) or the Keychain `.p12`
-(`APPLE_PASS_P12_BASE64` + password); `GET /api/wallet-pass?selftest` signs a fixed manifest and
-names the certificate it used, which is how a deploy is checked without a booking.
+(`APPLE_PASS_P12_BASE64` + password); `GET /api/wallet-pass?selftest` signs a fixed manifest, which is
+how a deploy is checked without a booking.
+
+- **The selftests answer `{ok}` alone (2026-10-05).** `?selftest` on `/api/wallet-pass` and `/api/google-wallet` is
+  public, so its answer is `{ok:true}`, `{ok:false, skipped}` (501, not configured) or `{ok:false, error:'sign failed'}`
+  (500). What was signed with (the certificate's source, subject and expiry; the Google issuer and account) and the
+  names of missing settings go to the function's log (Cloudflare dashboard, real-time logs), and each isolate signs at
+  most six a minute (429 after that). Read `ok` after a deploy; read the log for the certificate's expiry.
+- **Building the bundle in a worktree (2026-10-05).** A worktree whose `node_modules` is a symlink to the main
+  checkout makes esbuild write fflate's real path into the bundle's module comment
+  (`// ../../micromobilityrentals/node_modules/fflate/...`) and CI calls the bundle stale. Build it in the main
+  checkout, or run the `build:wallet` command from `package.json` with `--preserve-symlinks` added; the result must say
+  `// node_modules/fflate/esm/browser.js`.
+- **Function specs load a fresh copy from a `data:` URL** (`load()` in tests/pages-functions.spec.ts): Playwright keeps
+  one module per file path whatever the `?query`, so per-isolate throttles leaked between tests and spec files. The
+  functions import nothing, which is what makes that work; keep it so.
 
 ## Handlers live in attributes, not inline scripts (2026-09-27)
 
@@ -242,7 +273,11 @@ the renderer, and the attribute names it. Static markup carries the JSON as writ
 single-quoted attribute. The inline `<script>` blocks are allowed by hash: the build writes the
 policy line into `_headers` from the built page (never edit that line by hand), and
 `tests/csp.spec.ts` walks every section under the real policy. Violations in production report
-to `/api/csp-report`.
+to `/api/csp-report` (which, since 2026-10-05, hears only the site's own pages: Sec-Fetch-Site same-origin or the
+page's Origin). The policy's `connect-src` names one Supabase host (https and wss), which the build reads from the
+app's `SUPABASE_URL`, so a build pointed at another project needs no second edit. The root's Early Hints (the `/`
+block the build writes into `_headers`) name only addresses that never change (the font): Cloudflare replays hints
+from an earlier deploy, so a `?v=` address there was fetched twice.
 
 **No inline styles either (since 2026-09-29).** The policy has no style-src `'unsafe-inline'`: a
 `style="..."` attribute (or `setAttribute('style', ...)`) is refused by the browser like a handler,
@@ -572,6 +607,12 @@ offer in the rider's language (`vndRiderOffer`).
   merged accounts, `_caCids`): `completed` = checked in (active or done), `noshow` = a no-show, or the ride's day has
   passed without a check-in (`_caInvSt`); `invited` = the rest. A booking cancelled since shows its reason on the card
   (`_caInvBkNote`). Nothing is stored: the lists follow the roster.
+- **The WhatsApp group link is data, not code (2026-10-05).** The invitation's "Include the WhatsApp group link" box
+  reads the link when the message is written (`_caWaLoad`) from `staff_options` key `community.wa_group` (staff-only
+  rows): `items` is the link as a JSON string (`'"https://chat.whatsapp.com/…"'::jsonb`), or `["link"]`, or
+  `{"url":"link"}`, and must be an https address (`_caWaOf`). No row or an empty one: the box is not offered and the
+  message has no group line. Never write the link in the code, a spec or a commit (the repository is public); specs stub
+  an invented one.
 - **Revoke invitation** (`_caRevoke`, the Invited list only): the booking is cancelled through the desk's own
   `_staffCancelNow(id, {cancel_reason:'invite_revoked'}, {noUndo:true})` (numbers close up, the waitlist moves up; no
   booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same
