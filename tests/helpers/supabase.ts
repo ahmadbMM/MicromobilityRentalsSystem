@@ -40,6 +40,10 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
   // The staff half's sections (staff-parts/) load with it, so a spec may call their functions at once;
   // tests/staff-parts.spec.ts covers the way they arrive on a real device (after the first paint).
   await page.addInitScript(() => { (window as unknown as { __staffPartsNow?: boolean }).__staffPartsNow = true; });
+  // The forced post-ride rating page covers everything for a rider with an unrated finished ride from
+  // RATE_FROM (2026-10-03) on, and fixtures dated relative to today cross that day one by one (cust-fit and
+  // the badges specs went red on 2026-10-06). Off here; the specs about it call rateGateOn.
+  await page.addInitScript(() => { (window as unknown as { __noRateGate?: boolean }).__noRateGate = true; });
   // Nothing in the app should FETCH these: wa.me and maps links are places a person is sent,
   // not resources a page loads. Chromium preconnects to them anyway when it renders the
   // links, and wa.me answers 429 once a machine has run the suite enough times in a day —
@@ -318,6 +322,11 @@ function cors() {
 // Unlocks the staff panel locally, exactly like a successful PIN entry does.
 // Also names the operator: the op-gate modal blocks the staff view until a name is set
 // (every logged action carries who did it), and specs act as "Spec Staff".
+/** The forced post-ride rating page, which stubSupabase turns off, back on: call it after stubSupabase. */
+export async function rateGateOn(page: Page) {
+  await page.addInitScript(() => { (window as unknown as { __noRateGate?: boolean }).__noRateGate = false; });
+}
+
 export async function unlockStaff(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem('cq_staff', '1');

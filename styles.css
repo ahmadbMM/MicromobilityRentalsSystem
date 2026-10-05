@@ -7787,6 +7787,10 @@ body:not(.view-staff) .sess-card-date{font-size:var(--fs-13);font-weight:600;col
 body:not(.view-staff) .sess-card-dw{color:var(--go);font-weight:700;}
 body:not(.view-staff) .sess-card-time{font-size:var(--fs-20);font-weight:700;color:var(--ink);direction:inherit;unicode-bidi:normal;letter-spacing:-.2px;}
 body:not(.view-staff) .sess-card-meta{display:block;font-size:var(--fs-13);color:var(--ink-3);}
+/* the breakfast stop by name, once one is set (2026-10-05) */
+body:not(.view-staff) .sess-card-bf{display:flex;align-items:center;gap:6px;min-width:0;margin-top:4px;font-size:var(--fs-13);font-weight:600;color:var(--go);}
+body:not(.view-staff) .sess-card-bf .cu-ic{flex-shrink:0;}
+body:not(.view-staff) .sess-card-bf bdi{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 body:not(.view-staff) .spots-low{color:var(--amber);}
 body:not(.view-staff) .sess-comm-chip.has-ic{gap:6px;font-size:var(--fs-13);font-weight:700;}
 body:not(.view-staff) .sess-comm-chip.has-ic::before{display:none;}
@@ -8461,3 +8465,10 @@ body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere){--sc-edge:#d4a
 body.view-staff #tab-queue .stat-chip.sc-waitlist{--sc-edge:#ea580c;--sc-ink:#9a3412;}
 body.view-staff #tab-queue .stat-chip.sc-active{--sc-edge:#2563eb;--sc-ink:#1e40af;}
 body.view-staff #tab-queue .stat-chip.sc-done{--sc-edge:#16a34a;--sc-ink:#166534;}
+/* the breakfast stop by name on the ride chip, the Sessions card and its detail (the owner, 2026-10-05) */
+body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:700;color:#7a4d06;}
+body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf) svg{flex-shrink:0;}
+body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf) bdi{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.view-staff .sess-chip-bf{margin-top:2px;}
+body.view-staff .sess-lc-bf{margin:-4px 0 8px;}
+body.view-staff .sess-detail-bf{margin-top:4px;}

@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, loginCustomer, waitForSb, rateGateOn } from './helpers/supabase';
 
 // After a ride is checked out or its bike returned (status done), the next time the rider opens the
 // site a rating page takes the screen and cannot be skipped, like a correction request (the owner,
@@ -17,6 +17,7 @@ const row = (id: string, date: string, extra: Record<string, unknown> = {}) => (
 const sess = (date: string, extra: Record<string, unknown> = {}) => ({ id: 's-' + date, day: 'Friday', session_date: date, capacity: 12, status: 'open', created_at: 1, ...extra });
 async function boot(page: Page, sessions: unknown[], queue: unknown[]) {
   await stubSupabase(page, { sessions, queue_entries: queue, 'rpc:my_bookings': queue, 'rpc:customer_booking_update': true });
+  await rateGateOn(page);
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
@@ -84,6 +85,7 @@ test('a Saturday social ride asks the ride and the breakfast with their parts, a
 test('it opens by itself the moment the site opens signed in, on whatever page that is', async ({ page }) => {
   const q = [row('q1', today)];
   await stubSupabase(page, { sessions: [sess(today)], queue_entries: q, 'rpc:my_bookings': q, 'rpc:customer_booking_update': true });
+  await rateGateOn(page);
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);

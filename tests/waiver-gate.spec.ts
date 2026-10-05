@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
+import { stubSupabase, loginCustomer, waitForSb, rateGateOn } from './helpers/supabase';
 
 // Riders staff add (add rider, add group, a walk-in) carry no waiver. The owner, 2026-10-04: "force them
 // to accept the waiver of the session as a pop up that they are forced to accept in order to use the
@@ -23,6 +23,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
   async function boot(page: Page, sessions: unknown[], queue: unknown[], extra: Record<string, unknown> = {}) {
     await stubSupabase(page, { sessions, 'rpc:list_sessions': sessions, queue_entries: queue, 'rpc:my_bookings': queue,
       'rpc:customer_accept_waiver': 2, 'rpc:customer_booking_update': true, ...extra });
+    await rateGateOn(page); // the waiver goes before the rating page, which these specs keep in view
     await loginCustomer(page, { id: 'c1' });
     const calls: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/customer_accept_waiver')) { try { calls.push(r.postDataJSON()); } catch { /* */ } } });

@@ -739,3 +739,15 @@ green no show or cancelled red, make reserved colored make to be reserved colore
   colour; `badge-active` alone also dresses the Membership column and Petromin booking numbers, which keep their look.
   Payment buttons: paid green, pending amber, on the house teal. The roster's figures (`_statChip`, `sc-<status>`)
   wear the same colours, so the strip is the key. Booth mode keeps its 7:1 inks. `tests/staff-colours.spec.ts`.
+
+## The breakfast stop by name (2026-10-05)
+
+The owner: "add the restaurant's name in the session whenever it's added and in the reports and ratings and when
+asking the customers to rate". `_bfName(s)` is the breakfast venue in the reader's language (`breakfast_name`,
+or `breakfast_name_ar` on the Arabic page when a venue booked on the vendor portal brought one), '' on a ride
+without a breakfast or until staff or a venue set one; `_bfAt(s)` says "Breakfast at {0}" (`infoBreakfastAt`,
+the rating form's own word for breakfast in every language). It shows on the rider's date card
+(`.sess-card-bf`), the single-date view and Details (After), the staff ride chip (`.sess-chip-bf`), the Sessions
+card and detail, the reports (the Saturday roster, the session report, close-out, the day sheet; the breakfast
+report already named the day's venues), each rating in Analytics (meta line and the breakfast row) and its
+picture, and the rating form's breakfast question (`_rgLabel(k,bf)`, `g.bf`). `tests/breakfast-venue.spec.ts`.
