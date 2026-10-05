@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { freshModule } from './helpers/fresh-module';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { generateKeyPairSync, createVerify } from 'node:crypto';
@@ -11,14 +12,9 @@ import { unzipSync, strFromU8 } from 'fflate';
 
 type Ctx = { request: Request; env?: Record<string, string>; next?: () => Response };
 type Fn = (ctx: Ctx) => Promise<Response>;
-let seq = 0;
-// A fresh copy per call, from a data: URL (2026-10-05). The ?n= query this used did not give one:
-// Playwright's loader keeps a single instance per file path whatever the query, so every throttle and
-// budget was shared by the tests (and the spec files) a worker ran. The functions import nothing.
+// A fresh copy per call (tests/helpers/fresh-module.ts): its throttles and budgets are its own.
 async function load(rel: string, name: string): Promise<Fn> {
-  const src = readFileSync(resolve(__dirname, '..', rel), 'utf8') + `\n// copy ${++seq} ${Math.random()}`; // unique: Node keeps a data: module per URL
-  const mod = await import('data:text/javascript;base64,' + Buffer.from(src).toString('base64'));
-  return mod[name] as Fn;
+  return (await freshModule(rel))[name] as Fn;
 }
 
 test.describe('the middleware', () => {

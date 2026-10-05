@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { freshModule } from './helpers/fresh-module';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { generateKeyPairSync } from 'node:crypto';
@@ -6,17 +7,14 @@ import { generateKeyPairSync } from 'node:crypto';
 // The public Pages Functions, hardened 2026-10-05: the error and CSP pings cannot be flooded into
 // silence, the Instagram pass stays inside Cloudflare's subrequest limit, and the wallet selftests
 // answer { ok } alone, at most six times a minute per isolate. Called directly, the way Cloudflare
-// does, with the network stubbed. Each load is a fresh copy of the module (a data: URL, as in
-// pages-functions.spec.ts: Playwright keeps one instance per file path, whatever the query), so a
-// test's throttles start empty and are its own.
+// does, with the network stubbed. Each load is a fresh copy of the module
+// (tests/helpers/fresh-module.ts), so a test's throttles start empty and are its own.
 
 type Ctx = { request: Request; env?: Record<string, string> };
 type Fn = (ctx: Ctx) => Promise<Response>;
-let seq = 0;
+// A fresh copy per call (tests/helpers/fresh-module.ts): its throttles and budgets are its own.
 async function load(rel: string, name: string): Promise<Fn> {
-  const src = readFileSync(resolve(__dirname, '..', rel), 'utf8') + `\n// copy ${++seq} ${Math.random()}`; // unique: Node keeps a data: module per URL
-  const mod = await import('data:text/javascript;base64,' + Buffer.from(src).toString('base64'));
-  return mod[name] as Fn;
+  return (await freshModule(rel))[name] as Fn;
 }
 // Runs fn with console.log/warn/error caught, so the function's log can be read and stays out of the report.
 async function quiet<T>(fn: () => Promise<T>): Promise<{ out: T; logged: string }> {
