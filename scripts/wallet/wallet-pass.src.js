@@ -158,7 +158,9 @@ async function buildPkpass(b, cfg) {
   // that is no longer live is marked void, so it shows as void rather than as a ticket.
   const dead = ["done", "cancelled", "noshow", "removed"].includes(String(b.status || ""));
   const ridersValue = single ? b.name || "" : `${group.length} riders`;
-  const types = [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter(Boolean))];
+  // A run has runners, a start and a distance (queue_entries.run_km), not riders and a bike.
+  const isRun = ride === "runher";
+  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter(Boolean))];
   const bikeType = types.length === 1 ? types[0] : types.length > 1 ? "Mixed" : "";
   const addons = Array.isArray(cfg.addons) ? cfg.addons : [];
   const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
@@ -170,8 +172,8 @@ async function buildPkpass(b, cfg) {
   // the desk reads a number and a person off one line. The two clock times sit together below,
   // where collection followed by departure reads as one sequence rather than as two starts.
   const primary = [];
-  primary.push({ key: "queue", label: hideNum ? "RIDE" : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
-  if (ridersValue) primary.push({ key: "riders", label: single ? "RIDER" : "RIDERS", value: ridersValue });
+  primary.push({ key: "queue", label: hideNum ? "RIDE" : isRun ? "RUNNER NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
+  if (ridersValue) primary.push({ key: "riders", label: isRun ? "RUNNER" : single ? "RIDER" : "RIDERS", value: ridersValue });
   const secondary = [];
   // A ride that gathers has no bikes to collect: that time is when to turn up.
   if (collectStr) secondary.push({
@@ -179,9 +181,10 @@ async function buildPkpass(b, cfg) {
     label: _gathersTime(sess) ? "GATHERING TIME" : "BIKE COLLECTION",
     value: collectStr,
   });
-  if (startStr) secondary.push({ key: "start", label: "RIDE STARTS", value: startStr });
+  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : "RIDE STARTS", value: startStr });
   const auxiliary = [];
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
+  if (isRun && (b.run_km === 3 || b.run_km === 5)) auxiliary.push({ key: "distance", label: "DISTANCE", value: `${b.run_km} km` });
   if (priceStr) auxiliary.push({ key: "total", label: "TOTAL", value: priceStr });
   const ridersBack = single ? [] : [{
     key: "riders_list",
@@ -444,7 +447,7 @@ function _sessClock(sess) {
 // window, so the pass printed the session's END as the moment the ride leaves, and dropped
 // the end time entirely, leaving the pass live for hours after the session was over.
 // The app keys this off KIND_TRAITS.gathering; this is the same table.
-const GATHERS = { saturday: true, snd96: true, petromin: false, swim: false, workshop: false, jcc: false };
+const GATHERS = { saturday: true, snd96: true, runher: true, petromin: false, swim: false, workshop: false, jcc: false };
 function _gathersTime(sess) {
   // Needing staff approval is NOT what makes a ride gather: the National Day ride gathers
   // and is open to all. The ride kind decides, exactly as KIND_TRAITS does in the app — and
@@ -465,6 +468,8 @@ const RIDES = {
   workshop: { bg: "rgb(30,22,48)", label: "rgb(183,162,240)", venue: "T100 Triathlon Prep" },
   // Saudi National Day 96 - the guideline's deep green field, with the lime tint on labels.
   snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },
+  // Run for Her (2026-10-05): the berry of the event's pink, with its pale pink on labels (10.2:1 and 7.1:1).
+  runher:   { bg: "rgb(122,28,66)", label: "rgb(255,201,218)", venue: "Run for Her" },
   // The circuit's own card colours: the navy field it is drawn on, with the pale cyan its
   // meta line uses. Both clear AA on the near-white foreground.
   jcc:      { bg: "rgb(6,52,111)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
@@ -478,7 +483,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

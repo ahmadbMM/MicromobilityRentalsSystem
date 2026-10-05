@@ -1078,7 +1078,13 @@ export function formatFieldNames(r, limit = 20) {
 // (customer); guarded approvals/removes/undos, the picker's staff_checkin, the sales outbox (updates, stock, PIN),
 // party moves through staff_rider_party_move, on-the-house totals, the WhatsApp link from staff_options (staff).
 // Here: customer 195.3, staff 419.9, core 228.4; the runner reads ~1.3 / ~2.2 / ~1.3 more, so each keeps ~1.4 KB.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 198, staff: 424, core: 231 };
+// Customer 198 -> 206, staff 424 -> 428, core 231 -> 235 (2026-10-05, Run for Her): the event's card, the runner step
+// (distance, the account details race day needs, the emergency contact, 18 and over), the emergency contact on My
+// Account, the ticket's distance and meeting point, the pink ribbon badge and 42 strings (customer); the roster's
+// distance column, filter and split, the runner's Finished and emergency contact, the distance in Add rider / walk-in /
+// booking editor, the account editor's emergency contact and the Run for Her session form (staff).
+// Here, on 0969444c: customer 202.0, staff 422.4, core 230.9; the runner reads ~1.3 / ~2.2 / ~1.3 more.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 206, staff: 428, core: 235 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

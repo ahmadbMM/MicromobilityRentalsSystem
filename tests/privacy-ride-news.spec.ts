@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-10-03';
+const VERSION = '2026-10-05'; // the emergency contact row (Run for Her); nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
@@ -262,7 +262,7 @@ test.describe('the popup for existing accounts', () => {
   });
 
   // 2026-10-03: the breakfast-venue row changed the notice without asking anyone again
-  // (PRIVACY_ASK_FROM stays 2026-10-02, the owner's call).
+  // (PRIVACY_ASK_FROM stays 2026-10-02, the owner's call); 2026-10-05, the emergency contact row, the same.
   test('a notice change that needs no new confirmation: a rider who confirmed 2026-10-02 is not asked', async ({ page }) => {
     await arrive(page, consentsServer({ privacy_version: '2026-10-02', ride_news_at: '2026-09-01T10:00:00Z' }));
     await page.waitForFunction('S._rnFetchedFor==="c1"&&S.loggedIn.ride_news===false');

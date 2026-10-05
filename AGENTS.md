@@ -652,3 +652,39 @@ all land there, and no page has to remember to log anything.
   (en, ar, every `i18n/*.json`) and its category in `_CACT_CAT`. Read a row's fields only inside that table's own
   `if`: PL/pgSQL does not short-circuit `and`, so `tg_table_name = 'x' and new.col ...` breaks every other table's
   writes (it would have broken customer sign-in).
+
+## Run for Her (2026-10-05)
+
+A running event for community members (the owner: "a ride that is exclusive to community members only ... a running
+race not cycling"): free, 18 and over, first come first served to its places (80), one place per account, each
+runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon badge for finishing it.
+- **The kind** is `ride_kind 'runher'` with `event_kind 'community'` (members gate as on every community ride;
+  `open_to_all` false, `needs_approval` false, `paid_ride` false, `location 'JYC'` = `venueJyc`, `meet_url` the
+  meeting point, `bike_slots._time` "gather - start"). `KIND_TRAITS.runher` = no bike, no breakfast; it gathers.
+  Its session id carries `-rh`; the new-session form has a "Run for Her" button (80 places by default). An older page
+  reads an unknown community kind as the Saturday ride, so a run session goes in only once a page that knows it is live.
+- **The card** (`_runCardHtml`, styles under `RUN FOR HER` in styles.css) shows while a run is on the books
+  (`_runHerLive`) and answers the tap like MicroMobility Experiences (`selectEvent('runher')` -> `_commGate`). The owner
+  picked "C, Blush" from the mockups: white, the poster's pink, the partners' marks as ONE picture
+  (`assets/runher-partners.webp`, in the worker's SHELL) so it shrinks as one, the title in Marcellus
+  (`fonts/Marcellus-400-latin.woff2`, OFL) and the poster's route drawn by `_runRouteSvg` (mirrored in RTL). The owner
+  asked that nothing ever leave the card at any width: keep every part in flow, `max-width:100%`.
+- **The runner step** is step 2 (`_regSteps`): `_runPanelHtml` asks the distance (`S.regRunKm`) and only what the
+  account lacks (`_runNeeds`: a two-word name, an email, a birth date, the emergency contact), read fresh by
+  `_runAccLoad` (customer_profile + customer_emergency); `_runNext` saves through `customer_update_profile` (every other
+  field as it is now) and `customer_set_emergency`. Under 18 on the run's day (`_runUnder18`, `_runAgeOn`) gets
+  `_runAgeModal` at the card, the session card, the step and the submit. A run booking is never "modified" (cancel only).
+- **The database** (migration 20261005230000): `queue_entries.run_km` (3 | 5, copied by `customer_create_booking`);
+  `customers.emergency_name/phone/relation` (relation codes `EM_RELS`; column grants to authenticated only; riders read
+  and save them through `customer_emergency` / `customer_set_emergency`, staff under RLS); `_run_entry_guard` refuses a
+  customer's live row on a run without a distance (RUN_KM), under 18 (RUN_AGE), without the details (RUN_DETAILS) or a
+  second live row (ONE_PER_SESSION); staff are exempt (the desk's dialogs check the age and ask the distance).
+  `_bookRefused` says each in the rider's words.
+- **Staff**: the roster's Distance column (`_qc.km`, `_runKmCell`), the 3 km / 5 km / No distance split that filters
+  (`_runSplitHtml`, `S.sfKm`), Finished instead of Return Bike, "Emergency contact" in the row menu (`_runEmShow`, read
+  when asked: the sync does not carry the columns), the distance in Add rider / the walk-in / the booking editor
+  (`_runKmField`), the account editor's emergency contact (`_cfEmHtml`, written only once read).
+- **The badge** `run_for_her`: `BDG_GLYPH.ribbon` on the `pink` special (`BDG_SPECIAL.pink`, `.sp-pink`), earned by a
+  `done` row on a run, hidden until earned, popped once (`BDG_CHEER`). The badges table holds it as 'red'.
+- Privacy Notice 2026-10-05: the emergency contact row (en/ar); PRIVACY_ASK_FROM unchanged (nobody is asked again).
+  `tests/run-for-her.spec.ts`.

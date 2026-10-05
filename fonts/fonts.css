@@ -291,3 +291,15 @@
   src: url(./Riyal-700.woff2) format('woff2');
   unicode-range: U+20C1;
 }
+
+/* Marcellus - the Run for Her card's title, in the lettering of the event's poster (the owner,
+   2026-10-05). Latin only: the title is "Run for Her" in every language but Arabic, which keeps
+   IBM Plex Sans Arabic. SIL OFL 1.1, fonts/OFL-Marcellus.txt. Fetched only when the card shows. */
+@font-face {
+  font-family: 'Marcellus';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(./Marcellus-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}

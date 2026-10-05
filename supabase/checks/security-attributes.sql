@@ -259,7 +259,11 @@ with expected(fname, want_definer, note) as (values
   ('_house_taken',              false, 'reads queue_entries/customers, only ever inside the definer triggers and RPCs; revoked'),
   ('_session_capacity_promote', true,  'trigger: recounts a session and promotes its waitlist whoever raised the capacity or reopened it'),
   ('customer_waitlist_ranks',   true,  'reads the session''s waitlist for the caller''s own rows; token-checked'),
-  ('staff_rider_party_move',    true,  'moves a Petromin party, its night counter and its bookings; checks is_staff() itself')
+  ('staff_rider_party_move',    true,  'moves a Petromin party, its night counter and its bookings; checks is_staff() itself'),
+  -- Run for Her (20261005230000)
+  ('customer_emergency',        true,  'reads the caller''s own emergency contact; token-checked'),
+  ('customer_set_emergency',    true,  'writes the caller''s own emergency contact; token-checked'),
+  ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

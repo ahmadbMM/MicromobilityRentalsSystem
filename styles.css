@@ -8176,3 +8176,88 @@ body.view-staff .dash-empty-go{margin-top:10px;}
 /* WCAG 2.4.11: a control or row that takes the focus is never left under the sticky top bar (or the
    phone's bottom bar): the page scrolls it clear. --topbar-h is the bar's measured height. */
 html:has(body.view-staff){scroll-padding-top:calc(var(--topbar-h,56px) + 12px);scroll-padding-bottom:84px;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   RUN FOR HER (the owner, 2026-10-05) - a running event for community members.
+   The card on the event picker: "themed like this instagram post", picked "C, Blush" - white like
+   the MicroMobility Experiences card, the poster's pink washed in from the far corner, the three
+   partners' marks as the poster sets them (one picture, assets/runher-partners.webp, so it shrinks as
+   one and never leaves the card), the title in the poster's lettering (Marcellus, fonts/fonts.css),
+   and the poster's route drawn along the bottom: start and finish, along the water, the 3 km turn and
+   the 5 km turn (_runRouteSvg). Every part stays inside the card at any width: the copy wraps, the
+   marks scale down with the card and the route is as wide as the card.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--rf-pink:#E8628E;--rf-pink-dk:#C2416E;--rf-ink:#14304D;--rf-wash:242,120,159;}
+.ev-runher{--ev:#C2416E;--ev-rgb:194,65,110;}
+body:not(.view-staff) .ev-runher:not(.landing-event-card){--ev:#C2416E;--ev-rgb:194,65,110;}
+body .landing-event-card.ev-runher{
+  gap:12px;
+  background-color:#fff;
+  background-image:radial-gradient(120% 140% at 100% 100%,rgba(var(--rf-wash),.26) 0%,rgba(var(--rf-wash),.1) 38%,rgba(255,255,255,0) 66%);
+  border:1px solid rgba(217,79,126,.32);
+  box-shadow:0 1px 3px rgba(26,25,25,.22);
+  color:var(--rf-ink);
+}
+html[dir="rtl"] body .landing-event-card.ev-runher{
+  background-image:radial-gradient(120% 140% at 0% 100%,rgba(var(--rf-wash),.26) 0%,rgba(var(--rf-wash),.1) 38%,rgba(255,255,255,0) 66%);
+}
+body .landing-event-card.ev-runher:hover{border-color:var(--rf-pink);transform:none;box-shadow:0 8px 24px rgba(194,65,110,.22);}
+body .landing-event-card.ev-runher::before{display:none;}
+body .landing-event-card.ev-runher .lec2-copy{width:100%;min-width:0;max-width:100%;}
+body .landing-event-card.ev-runher .lec-title{
+  font-family:'Marcellus','Space Grotesk','Noto Sans Devanagari','Noto Sans Bengali',Georgia,serif;
+  font-weight:400;font-style:normal;text-transform:uppercase;font-size:27px;letter-spacing:.6px;line-height:1.08;
+  color:var(--rf-ink);overflow-wrap:anywhere;
+}
+html[lang="ar"] body .landing-event-card.ev-runher .lec-title{
+  font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:700;font-size:23px;letter-spacing:0;text-transform:none;line-height:1.3;
+}
+body .landing-event-card.ev-runher .rf-meta{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px 9px;margin-top:9px;
+  font-size:13px;font-weight:700;color:var(--rf-pink-dk);letter-spacing:.2px;max-width:100%;
+}
+body .landing-event-card.ev-runher .rf-meta i{width:1px;height:12px;background:rgba(194,65,110,.4);display:inline-block;flex:none;}
+body .landing-event-card.ev-runher .rf-logos{height:46px;max-width:100%;}
+body .landing-event-card.ev-runher .rf-logos img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:0 50%;}
+html[dir="rtl"] body .landing-event-card.ev-runher .rf-logos img{object-position:100% 50%;}
+body .landing-event-card.ev-runher .rf-route{display:block;width:100%;max-width:100%;height:auto;margin-top:auto;overflow:visible;}
+.rf-route .rf-line{fill:none;stroke:var(--rf-pink);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;}
+.rf-route .rf-start{fill:none;stroke:var(--rf-pink);stroke-width:2.2;}
+.rf-route .rf-dot{fill:var(--rf-pink);}
+.rf-route .rf-turn{fill:#fff;stroke:var(--rf-pink);stroke-width:2;}
+.rf-route .rf-pill rect{fill:var(--rf-pink);}
+.rf-route .rf-pill text{fill:#fff;font:700 8.6px/1 'Space Grotesk',sans-serif;letter-spacing:.3px;}
+.rf-route .rf-pill path{fill:none;stroke:var(--rf-pink);stroke-width:1.2;}
+@media (max-width:640px){
+  body .landing-event-card.ev-runher .lec-title{font-size:24px;}
+  html[lang="ar"] body .landing-event-card.ev-runher .lec-title{font-size:21px;}
+  body .landing-event-card.ev-runher .rf-logos{height:40px;}
+}
+
+/* The runner step: the two distances as two large equal buttons, then only what the account lacks. */
+.run-panel .run-adult{margin:0 0 14px;font-size:14px;font-weight:600;color:var(--rf-pink-dk);}
+.run-panel .run-km{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.run-panel .run-km .toggle-btn{min-height:56px;font-size:18px;font-weight:700;width:100%;}
+.run-panel .run-h{margin:18px 0 8px;font-size:15px;font-weight:700;}
+.run-panel .run-sub{margin:-2px 0 12px;font-size:13px;color:var(--muted);}
+.run-panel .run-wait{padding:18px 0;color:var(--muted);}
+.run-em-card{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border,rgba(26,25,25,.14));border-radius:10px;}
+.run-em-n{font-weight:700;overflow-wrap:anywhere;}
+.run-em-m{font-size:13px;color:var(--muted);margin-top:2px;overflow-wrap:anywhere;}
+.run-em-who{font-weight:700;margin-bottom:10px;}
+.run-km-chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.5;white-space:nowrap;color:var(--rf-pink-dk);background:rgba(var(--rf-wash),.16);}
+.run-km-chip.rk-5{color:#fff;background:var(--rf-pink-dk);}
+
+/* Staff: the runners split by distance under the Bookings filter bar; a tap shows that distance alone. */
+#tab-queue .run-split{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px;}
+#tab-queue .run-split-b{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--s1);color:var(--text);font:inherit;font-size:13px;font-weight:700;cursor:pointer;}
+#tab-queue .run-split-b b{min-width:22px;padding:1px 7px;border-radius:999px;background:rgba(var(--rf-wash),.18);color:var(--rf-pink-dk);text-align:center;}
+#tab-queue .run-split-b.on{border-color:var(--rf-pink-dk);background:rgba(var(--rf-wash),.12);}
+.cf-em{border:1px solid var(--border);border-radius:8px;padding:8px 12px 2px;margin:8px 0 0;min-width:0;}
+.cf-em legend{padding:0 6px;font-size:12px;font-weight:700;color:var(--muted);}
+
+/* The finisher's badge: the pink ribbon on a pink medal (BDG_SPECIAL.pink), its band drawn thick. */
+.bdg-m .rb{fill:none;stroke:currentColor;stroke-width:3.4;stroke-linejoin:round;}
+.mr-badge.sp-pink,.badge-pop-box.sp-pink{--sp1:#ffc9da;--sp2:#f2789f;--sp3:#c2416e;--spg:242,120,159;--sph:255,236,243;}
+.run-em-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+.run-em-acts a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
