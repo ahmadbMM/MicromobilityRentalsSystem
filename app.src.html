@@ -3250,7 +3250,7 @@ function _bookEmail(e){
   return(c&&c.email&&!_isRelay(c.email))?c.email:em;
 }
 async function _refFetch(onCustomers){
-  if(typeof localStorage==='undefined'||localStorage.getItem('cq_staff')!=='1')return;
+  if(!_rtStaffDevice())return; // read in a try (2026-10-05): storage that refuses is not a staff device, and must not fail the load
   if(!_refNeeded()){if(onCustomers&&S.customers&&S.customers.length)onCustomers({data:S.customers,error:null});return;}
   if(_refInFlight){await _refInFlight;if(onCustomers&&S.customers&&S.customers.length)onCustomers({data:S.customers,error:null});return;}
   // Paged (PostgREST caps every request at 1000 rows): the customer base and tag list both grow
@@ -3533,7 +3533,7 @@ async function _queueFetch(windowed,days){
 // Falls back to the plain select when the RPC isn't deployed yet, so the app keeps working
 // between shipping this build and running tags-events-migration.sql.
 async function _sessionsFetch(){
-  const isStaffDevice=(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1');
+  const isStaffDevice=_rtStaffDevice(); // read in a try (2026-10-05): one refusal here failed every data load
   if(!isStaffDevice){
     const cust=S.loggedIn||getSession();
     // Only a database without the function falls through. Any other failure is a failed load:
@@ -3640,7 +3640,7 @@ async function _loadDataInner(showLoader){
   // Only replace queue/sessions when their (possibly paged) fetch fully succeeded - a paged error
   // now yields null data, so keep the prior state rather than blanking or truncating the view.
   if(!q.error){
-    const _keepPII=(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1');
+    const _keepPII=_rtStaffDevice();
     const _prevPII={};
     if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
     S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs&&_qs.cut)); // a synced answer is the whole year: laid over nothing
@@ -3664,7 +3664,7 @@ async function _loadDataInner(showLoader){
     Promise.all([_refP,_optP]).then(async()=>{
       try{await _afterOptional();}catch(e){}
       try{if(S.view==='staff')_renderStaffTab(true);else if(S.view==='landing')renderLandingAvail();}catch(e){}
-      if(!(SECURE_AUTH&&!S._staffAuthed&&(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1')))_cacheSave();
+      if(!(SECURE_AUTH&&!S._staffAuthed&&_rtStaffDevice()))_cacheSave();
     }).finally(()=>{_refsLoaded=true;});
     _lastLoadOk=true; // the core data is in: the boot must not paint the snapshot over it
     return;
@@ -3675,7 +3675,7 @@ async function _loadDataInner(showLoader){
   _lastLoadOk=true;
   // Don't snapshot a PII-free (queue_public) load on a staff device — restoring it later
   // would show the staff panel with no names/phones. Only cache full loads.
-  if(!(SECURE_AUTH&&!S._staffAuthed&&(typeof localStorage!=='undefined'&&localStorage.getItem('cq_staff')==='1')))_cacheSave();
+  if(!(SECURE_AUTH&&!S._staffAuthed&&_rtStaffDevice()))_cacheSave();
 }
 // What the optional lists need once they are in: queued sales applied, voided ones dropped,
 // the MM Team roster merged. Called after the optional fetch on every load.
@@ -6394,7 +6394,7 @@ function _staffRedirectFor(h,search,staffEntry,pathname){
   if(pn&&pn.view==='staff')return STAFF_ORIGIN+_pathFor(pn)+(search||''); // a staff section's own address (2026-09-27)
   return q.has('staff')||staffEntry?STAFF_ORIGIN+'/':'';
 }
-function _staffHostGate(){if(localStorage.getItem('cq_staff')==='1')goStaff();else{showView('landing');openPinModal();}}
+function _staffHostGate(){if(_rtStaffDevice())goStaff();else{showView('landing');openPinModal();}}
 let _wakeLk=null;
 function _wakeRelease(){const l=_wakeLk;_wakeLk=null;if(l)try{l.release().catch(()=>{});}catch(_){}}
 function showView(v){
@@ -6542,7 +6542,7 @@ function _pushNav(){
 function _applyNav(st){
   if(!st)return;
   _navRestoring=true;
-  if(st.view==='staff'&&localStorage.getItem('cq_staff')==='1'){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
+  if(st.view==='staff'&&_rtStaffDevice()){goStaff();if(st.stab){_setSub(st.stab,st.sub);setStaffTab(st.stab);_openSessionParam();}}
   else if(st.view==='customer'&&getSession()){
     if(st.ev)S.selEvent=st.ev;
     if(st.step&&(st.ctab||'register')==='register')S.regStep=st.step;
@@ -6933,19 +6933,30 @@ async function _bfSaveNew(selVar,nameVar,urlVar){
 // itself stays invisible to customers) and cached per customer. The
 // queue_entries insert trigger (saturday-members-gate.sql) enforces the same
 // rule in the database, so this gate is UX, not the security boundary.
+// true / false: the server's answer. null: no answer (2026-10-05) - a failed check used to answer
+// false, and a member on a weak signal was told the rides are for members only. Callers say the
+// connection failed for null and keep the members popup for a real false.
 async function commAccess(){
   const cust=S.loggedIn||getSession();
   if(!cust||!cust.id)return false;
   if(S._commAccess&&S._commAccess.custId===cust.id)return S._commAccess.ok;
   try{
     const r=await sb.rpc('community_member',{p_id:cust.id,p_token:cust.session_token||null});
-    if(r.error)return false; // network/RPC failure: deny now, but don't cache so a retry can pass
+    if(r.error)return null; // network/RPC failure: no verdict, and nothing cached so a retry can pass
     const ok=r.data===true;
     // Cache POSITIVE answers only: a "no" can flip mid-session (staff grants the tag while
     // the app is open) and a cached denial kept blocking members until a full reload.
     if(ok)S._commAccess={custId:cust.id,ok};else S._commAccess=null;
     return ok;
-  }catch(e){return false;}
+  }catch(e){return null;}
+}
+// The members gate on a ride or the community card (2026-10-05): true lets the rider on; a real
+// "no" opens the members popup; no answer says the connection failed.
+async function _commGate(){
+  const a=await commAccess();
+  if(a===true)return true;
+  if(a===null)toast(t('errConnection'),'error');else showCommMembersModal();
+  return false;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showCommMembersModal_1(event,el){if(event.target===el)closeConfirm()}
@@ -7031,7 +7042,7 @@ async function selectSessCard(id){
   if(await _profileGate(()=>selectSessCard(id)))return;
   const s=allSessions().find(x=>x.id===id);
   if(_wasRejectedFor(id)){showRejectedModal(s);return;}
-  if(_isCommunity(s)&&!_openToAll(s)&&!(await commAccess())){showCommMembersModal();return;}
+  if(_isCommunity(s)&&!_openToAll(s)&&!(await _commGate()))return; // a failed check says so, a real no is the members popup (2026-10-05)
   // Add-ons are per-session offerings: a switch must drop picks the new session may not sell. The
   // promo code goes too - applied for one ride, it rode along onto the next, including onto a free
   // ride whose box is hidden, where it could not be removed and still spent a use of the code.
@@ -7124,11 +7135,9 @@ async function _openEventLink(){
 }
 async function selectEvent(ev){
   if(await _profileGate(()=>selectEvent(ev)))return;
-  if(ev==='community'&&!(await commAccess())){
-    // The ride itself is never named here: somebody who is not a member is told the rides are
-    // invite-only and how to ask, not which ride is on.
-    showCommMembersModal();return;
-  }
+  // The ride itself is never named here: somebody who is not a member is told the rides are
+  // invite-only and how to ask, not which ride is on. A check that failed says so (2026-10-05).
+  if(ev==='community'&&!(await _commGate()))return;
   S.selEvent=ev;S.selSession=null;
   S.promoApplied=null;S._promoMsg=''; // a code applied on another event's ride does not follow the rider here (see selectSessCard)
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
