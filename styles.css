@@ -2072,6 +2072,14 @@
     #print-opts-modal .rpt-km-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--border);}
     #print-opts-modal .rpt-km-n{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--muted);}
     #print-opts-modal .rpt-km-acts{display:flex;gap:6px;flex-shrink:0;margin-inline-start:auto;}
+    /* The ratings reports' dialog (showRatingsReport, 2026-10-05): who it is for, quick starts, the name pills,
+       the questions under their form's name, and the restaurant mode's note that it stays anonymous. */
+    #print-opts-modal .rr-pills,#print-opts-modal .rr-presets{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px;}
+    #print-opts-modal .rr-qhead{font-size:12px;font-weight:800;color:var(--text);margin:2px 0;}
+    #print-opts-modal .rr-lock{display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;line-height:1.45;color:var(--text);background:var(--acsoft);border-radius:8px;padding:9px 11px;margin:-6px 0 16px;}
+    #print-opts-modal .rr-lock .art-ic{margin-top:2px;}
+    #print-opts-modal .rpt-row-b:disabled{opacity:.45;cursor:not-allowed;}
+    #print-opts-modal .rr-secs .rpt-ell{white-space:normal;}
     /* The billing report dialog (_renderRidersReport, drawn in #rider-report-modal) and the new-build
        bar (#upd-bar, the service worker's "a new version is ready"), without inline styles (2026-09-29;
        the printed reports themselves draw with report.css and receipt.css). Scoped by the id each is
@@ -2846,6 +2854,16 @@
     #sess-host .ss-wl-row{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap;}
     #sess-host .ss-wl-unit{font-size:12px;color:var(--muted);font-weight:700;}
     #sess-host .ss-bf-new{margin-top:8px;display:flex;flex-direction:column;gap:8px;}
+    /* a saved breakfast spot's Edit, and its editor under the picker (2026-10-05) */
+    #sess-host .ss-bf-row{display:flex;gap:8px;align-items:center;}
+    #sess-host .ss-bf-row select{flex:1;min-width:0;}
+    #sess-host .ss-bf-edit{flex:none;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+    #sess-host .ss-bf-ed{margin-top:8px;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:10px;}
+    #sess-host .ss-bf-apply{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;text-align:start;color:var(--text);cursor:pointer;}
+    #sess-host .ss-bf-apply input[type="checkbox"]{flex:none;width:18px;height:18px;min-height:0;margin:0;padding:0;-webkit-appearance:checkbox;appearance:auto;}
+    #sess-host .ss-bf-err{font-size:12px;font-weight:700;color:var(--red);}
+    #sess-host .ss-bf-acts{display:flex;flex-wrap:wrap;gap:8px;}
+    #sess-host .ss-bf-del{margin-inline-start:auto;color:var(--red);}
     #sess-host .ss-form-acts{display:flex;gap:8px;margin-top:16px;}
     /* the bike pickers */
     #sess-host .ss-nobikes{color:var(--muted);font-size:13px;margin-bottom:12px;}
@@ -3172,6 +3190,7 @@
     #tab-analytics .an-title-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
     #tab-analytics .an-title-btns{display:flex;gap:8px;}
     #tab-analytics .an-btn-sm{font-size:12px;padding:6px 12px;}
+    #tab-analytics .rr-launch{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
     #tab-analytics .an-range-txt{font-size:12px;font-weight:700;color:var(--muted);}
     #tab-analytics .an-range-txt-ml{font-size:12px;font-weight:700;color:var(--muted);margin-inline-start:8px;}
     #tab-analytics .an-date{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:700;padding:4px 8px;cursor:pointer;}
@@ -4102,6 +4121,7 @@
     body.view-staff input[type="text"],body.view-staff input[type="tel"],
     body.view-staff input[type="number"],body.view-staff input[type="email"],
     body.view-staff input[type="date"],body.view-staff input[type="time"],
+    body.view-staff input[type="url"],
     body.view-staff input[type="password"],body.view-staff select,body.view-staff textarea{
       background:var(--sf-card);border:1px solid var(--sf-ctl);border-radius:8px;color:var(--text);
       font-size:13.5px;min-height:42px;padding:9px 13px;
@@ -4560,6 +4580,7 @@
     html[data-staff-theme="dark"] body.view-staff input[type="email"],
     html[data-staff-theme="dark"] body.view-staff input[type="date"],
     html[data-staff-theme="dark"] body.view-staff input[type="time"],
+    html[data-staff-theme="dark"] body.view-staff input[type="url"],
     html[data-staff-theme="dark"] body.view-staff input[type="password"],
     html[data-staff-theme="dark"] body.view-staff select,
     html[data-staff-theme="dark"] body.view-staff textarea,

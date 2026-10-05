@@ -1087,7 +1087,14 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 206 -> 208 (2026-10-05): "About this event" under the event cards and "Details" under each date (the
 // owner's 1B/2B/3B: a short description, the live facts and a book button in one sheet; members-only events show it
 // to members only), the site's own words read from site_content, and 29 strings; 205.2 KB here is ~206.5 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 428, core: 235 };
+// Staff 428 -> 440, core 235 -> 240 (2026-10-05): the ratings reports in Analytics > Ratings (the owner: "import all
+// the ratings in one report with anonymous names and only the breakfast part for the restaurants ... make a reports
+// builder that includes a lot of customization"): the restaurant's anonymous breakfast report over any dates and the
+// team's builder (filters, questions, columns, sections and their charts, names, order; print and CSV) in the analytics
+// part (+9 KB, loaded after the desk paints); in the core, its 78 strings, the account report's chart drawer it now
+// shares, and editing and removing a saved breakfast spot from the ride forms (13 strings).
+// Here, on ae320241: staff 436.1, core 236.7; the runner reads ~2.2 / ~1.3 more, so each keeps ~1.7 / ~2.0 KB.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 440, core: 240 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

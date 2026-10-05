@@ -158,3 +158,8 @@ section{break-inside:avoid}
 :root .rp-said-k{flex:0 0 11ch;font-weight:700;color:#3d4540}
 :root .rp-said-v{flex:0 0 5ch;font-weight:800;font-variant-numeric:tabular-nums}
 :root .rp-said-t{flex:1 1 auto;white-space:pre-wrap;overflow-wrap:anywhere}
+/* the ratings reports (showRatingsReport, 2026-10-05): a form's heading row in a table, and a reason's day and rider under its question */
+:root tr.rp-grp td{background:#eef3ef;font-weight:800;color:#123019;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+:root .rp-said-wide .rp-said-k{flex-basis:20ch}
+:root .rp-said-m{display:block;margin-top:1px;font-weight:500;font-size:10.5px;color:#5a635c}
+:root th.rp-thsub{font-weight:600;opacity:.85}

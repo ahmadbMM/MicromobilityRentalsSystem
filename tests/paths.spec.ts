@@ -155,6 +155,48 @@ test.describe('staff', () => {
     expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors"]');
   });
 
+  test('Analytics: /analytics is the overview, each view is a second segment (2026-10-05)', async ({ page }) => {
+    await staff(page, '/analytics/ratings');
+    await page.waitForFunction(`S.staffTab==='analytics'`);
+    expect(await page.evaluate('S.anView')).toBe('ratings');
+    await expect(page.locator('#tab-analytics .an-nav-btn.active')).toHaveAttribute('data-anview', 'ratings');
+    expect(at(page)).toBe('/analytics/ratings');
+    // The sub-nav's buttons move the address, and Back walks it.
+    await page.locator('#tab-analytics .an-nav-btn[data-anview="revenue"]').click();
+    expect(at(page)).toBe('/analytics/revenue');
+    await page.locator('#tab-analytics .an-nav-btn[data-anview="overview"]').click();
+    expect(at(page)).toBe('/analytics');
+    for (const v of ['ridership', 'operations', 'fleet', 'customers', 'growth']) {
+      await page.evaluate(`setAnView('${v}')`);
+      expect(at(page)).toBe('/analytics/' + v);
+    }
+    await page.goBack();
+    await page.waitForFunction(`S.anView==='customers'`);
+    expect(at(page)).toBe('/analytics/customers');
+    await expect(page.locator('#tab-analytics .an-nav-btn.active')).toHaveAttribute('data-anview', 'customers');
+    // An unknown view opens the overview, and the address says so.
+    await staff(page, '/analytics/nope');
+    await page.waitForFunction(`S.staffTab==='analytics'`);
+    expect(await page.evaluate('S.anView')).toBe('overview');
+    expect(at(page)).toBe('/analytics');
+  });
+
+  test('Bookings > Sessions: the calendar is /bookings/sessions/calendar (2026-10-05)', async ({ page }) => {
+    await staff(page, '/bookings/sessions/calendar');
+    await page.waitForFunction(`S.staffTab==='queue'&&S.queueView==='sessions'`);
+    expect(await page.evaluate('S.sessView')).toBe('cal');
+    expect(at(page)).toBe('/bookings/sessions/calendar');
+    const toggle = page.locator('.sess-view-toggle .view-toggle-btn');
+    await toggle.nth(0).click(); // List
+    expect(await page.evaluate('S.sessView')).toBe('list');
+    expect(at(page)).toBe('/bookings/sessions');
+    await toggle.nth(1).click(); // Calendar
+    expect(at(page)).toBe('/bookings/sessions/calendar');
+    await page.goBack();
+    await page.waitForFunction(`S.sessView==='list'`);
+    expect(at(page)).toBe('/bookings/sessions');
+  });
+
   test('/bookings/riders opens the Petromin page; an unknown sub-view opens the section itself', async ({ page }) => {
     await staff(page, '/bookings/riders');
     expect(await page.evaluate('[S.staffTab,S.queueView]')).toEqual(['queue', 'petromin']);

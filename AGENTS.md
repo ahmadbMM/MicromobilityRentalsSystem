@@ -212,6 +212,12 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   these paths, but only a fetch of `/` is ever stored under the shell key) and in
   `scripts/serve.mjs` (the test server). `tests/paths.spec.ts` fails when the four disagree, so
   a new section is added in all four, then in `tests/paths.spec.ts` if it has sub-views.
+- A sub-view needs a branch in `_subOf` (its last `else` reads the catalogue's view) and in `_setSub`, and
+  whatever switches it calls `_pushNav()`, itself or through a renderer that does. Since 2026-10-05 Analytics' views
+  are `/analytics/<view>` (`SUB_PATHS.analytics`, `S.anView`, `setAnView`) and Bookings > Sessions' month
+  calendar is `/bookings/sessions/calendar` (`SESS_CAL_PATH`, `S.sessView`); a third segment like that one
+  is special-cased in `_subOf`/`_setSub`. Filters, sorts, layouts that keep the same page, form modes and
+  popups have no address.
 - Asset addresses in the app are root-relative (`/styles.css`, `/vendor/…`, `/lang/…`): a page
   at `/bookings/waitlist` must still find them. Never write `./x` in the source.
 - The suite runs on `node scripts/serve.mjs` (Cloudflare Pages + the middleware, stood in for),
