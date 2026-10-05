@@ -8742,17 +8742,24 @@ async function mwPartyPaid(rowId){
   // The same rule as the queue's bulk Paid (bulkSfPaid): guarded on still unpaid, so a rider another
   // device settled by split or cash keeps how they paid, and an incidental 0 (no promo) is charged the
   // bike's fare rather than recorded as on the house.
-  const res=await Promise.all(list.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return sb.from('queue_entries').update(p).eq('id',e.id).eq('paid',false).select('id');}));
+  const pats=list.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return p;});
+  const res=await Promise.all(list.map((e,i)=>sb.from('queue_entries').update(pats[i]).eq('id',e.id).eq('paid',false).select('id')));
   const ok=r=>r&&!r.error&&r.data&&r.data.length;
   const n=res.filter(ok).length;
   const done=list.filter((e,i)=>ok(res[i])).map(e=>({id:e.id,price:e.price,pay_method:e.pay_method||null}));
-  await loadData();
-  if(_writeErr(res,'party paid')){renderStaffQueue();return;}
-  logAction(t('logBulkPaid').replace('{0}',n));
-  toast(`${n} ${t('paidLabel')}`);
+  // Painted from the writes' answers, then only the party's rows are read again (2026-10-05): a whole
+  // loadData() per tap re-fetched every list, as the other party actions no longer do. A row the
+  // guard refused (paid meanwhile on another device) comes back as that device left it.
+  list.forEach((e,i)=>{if(ok(res[i]))Object.assign(e,pats[i]);});
+  S.queue=getQueue().slice();renderStaffQueue();
+  await _reloadRows(list.map(e=>e.id));
+  // A refusal part-way still leaves the rows that did flip paid: they are logged and undoable, and
+  // the refusal is said after (as bulkSfPaid does).
+  if(n){logAction(t('logBulkPaid').replace('{0}',n));if(!res.some(r=>r&&r.error))toast(`${n} ${t('paidLabel')}`);}
+  _writeErr(res,'party paid');
   if(done.length)pushUndo(`${t('undoPayment')} · ${done.length}`,async()=>{
     const r=await Promise.all(done.map(d=>sb.from('queue_entries').update({paid:false,price:d.price,pay_method:d.pay_method}).eq('id',d.id).eq('paid',true)));
-    await loadData();renderStaffQueue();renderMyRides();
+    await _reloadRows(done.map(d=>d.id));renderStaffQueue();renderMyRides();
     if(_writeErr(r,'undo payment'))return false;
   });
   renderStaffQueue();renderMyRides();
