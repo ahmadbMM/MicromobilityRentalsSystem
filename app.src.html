@@ -1077,7 +1077,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   gridViewBtn:'Grid',tableViewBtn:'Table',
   searchLabel:'Search bikes...',noResultsLabel:'No bikes match your search.',
   confirmNoShowTitle:'Mark as No-Show?',confirmRemoveTitle:'Remove Rider?',
-  addNewOption:'Add new...',typeNewLabel:'Type new value...',saveBtn:'Save',
+  addNewOption:'Add new...',typeNewLabel:'Type new value...',saveBtn:'Save',waiverOutdatedMsg:'This page is out of date and the waiver has changed. It reloads now: read the new waiver, agree to it and book again.',errCollectLate:'Bike collection can’t be later than the start time.',icsRideTitle:'MicroMobility Ride',icsDescBike:'Your MicroMobility bike rental. Arrive 10 minutes early and show your ticket at the booth.',icsDescRide:'Your MicroMobility ride. Be at the meeting point by the gathering time and show your ticket there.',icsDescVisit:'Your MicroMobility booking. Arrive 10 minutes early and show your ticket when you arrive.',icsAlarm:'Reminder: {0}',
   releaseBikeBtn:'Release',releaseBikeToast:'released back to available',noRiderAssigned:'No rider assigned',
   errValidPrice:'Please enter a valid price (0 or above).',
   toastPriceSet:'Price set to SAR {0}',
@@ -1629,7 +1629,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   gridViewBtn:'شبكة',tableViewBtn:'جدول',
   searchLabel:'ابحث عن دراجة...',noResultsLabel:'لا توجد دراجات تطابق بحثك.',
   confirmNoShowTitle:'تسجيل كغائب؟',confirmRemoveTitle:'حذف الراكب؟',
-  addNewOption:'إضافة جديد...',typeNewLabel:'اكتب قيمة جديدة...',saveBtn:'حفظ',
+  addNewOption:'إضافة جديد...',typeNewLabel:'اكتب قيمة جديدة...',saveBtn:'حفظ',waiverOutdatedMsg:'هذه الصفحة قديمة وقد تغيّر الإقرار. ستُعاد تحميلها الآن: اقرأ الإقرار الجديد ووافق عليه ثم احجز مجدداً.',errCollectLate:'لا يمكن أن يكون وقت استلام الدراجات بعد وقت الانطلاق.',icsRideTitle:'رحلة MicroMobility',icsDescBike:'حجز دراجتك من MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند الكشك.',icsDescRide:'رحلتك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.',icsDescVisit:'حجزك مع MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند وصولك.',icsAlarm:'تذكير: {0}',
   releaseBikeBtn:'تحرير',releaseBikeToast:'تم تحريره وأصبح متاحاً',noRiderAssigned:'لا يوجد راكب',
   errValidPrice:'الرجاء إدخال سعر صحيح (صفر أو أكثر).',
   toastPriceSet:'تم تعيين السعر على {0} ريال',
@@ -6238,8 +6238,9 @@ function prefillFromAccount(){
     S._rHeight=String(S.loggedIn.height);
     if(S.regBikeHeights.length===0)S.regBikeHeights=[String(S.loggedIn.height)]; else if(!S.regBikeHeights[0])S.regBikeHeights[0]=String(S.loggedIn.height); // never stomp a height the customer already typed mid-wizard (e.g. booking bike 1 for a child)
   }
-  
-  if(S.loggedIn.type_preference&&S.loggedIn.type_preference!=='Any'){
+
+  // A type staff hid from this rider is never seeded (_regTyBarred, 2026-10-05).
+  if(S.loggedIn.type_preference&&S.loggedIn.type_preference!=='Any'&&!_regTyBarred(S.loggedIn.type_preference)){
     if(S.regBikeTypes.length===0)S.regBikeTypes=[S.loggedIn.type_preference];
     else if(!S.regBikeTypes[0])S.regBikeTypes[0]=S.loggedIn.type_preference;
   }
@@ -7022,6 +7023,7 @@ async function selectEvent(ev){
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
   // add-ons and the booking being changed from the last one.
   S.lastTickets=[];S.regStep=1;S.regAddons=[];S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;
+  if(S.regRiderNames&&S.regRiderNames.length)S.regRiderNames[0]=undefined; // rider 1 is the account holder again (2026-10-05)
   _perksHydrate();
   // A one-date event has nothing to choose between. The National Day ride is a single night,
   // so picking its card opens the ride itself rather than a list holding one of it — and if
@@ -7142,8 +7144,21 @@ async function _profileGate(next){
   _pgOpen(next,c,false);
   return true;
 }
+// A forced page's save that did not land, sorted (the profile page, a correction request and an
+// application's changes, 2026-10-05). Every failure used to read "check your connection" (pgErrNet),
+// so a rider whose sign-in had ended, or whose answer the server refused, was sent to fix a
+// connection that was fine and could only try again for ever. 'denied' is the server saying the
+// sign-in no longer matches (its null or false answer): the session ends here too, with the
+// signed-out message. A failure on the way (no network, a timeout) keeps the connection message;
+// anything else the server refused is said as such (g.said, a key) and logged.
+function _gateFail(e){
+  if(String((e&&e.message)||e||'')==='denied')return'denied';
+  return(_isNetErr(e)||_isOffline())?'net':'server';
+}
+function _gateSignedOut(){doLogout(true);toast(t('errSessionStale'),'warning');}
+function _gateLog(where,e){try{_logError(`${where} refused: ${(e&&e.code)||''} ${String((e&&e.message)||e||'').slice(0,200)}`,'gate',true);}catch(_){}}
 function _pgOpen(next,c,comm){
-  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,saving:false,comm:!!comm};
+  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,said:'',saving:false,comm:!!comm};
   renderProfileGate();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -7163,7 +7178,7 @@ function renderProfileGate(){
     <div class="pg-field pg-first${g.errBirth?' err':''}"><label for="pg-birth-d">${t('birthDateLabel')}</label>${dobFieldHtml('pg-birth',g.birth,{onchange:'_pgBirth',disabled:!!g.saving})}${g.errBirth?`<div class="pg-msg" role="alert">${esc(g.errBirth)}</div>`:''}</div>
     <div class="pg-field${g.errNat?' err':''}"><label for="pg-nat">${t('nationalityLabel')}</label><select id="pg-nat" class="${g.nat?'':'ph'}" data-on-change="${_on("_pgInput","nat",_P("value"))}"${g.saving?' disabled':''}>${natOpts}</select>${g.errNat?`<div class="pg-msg" role="alert">${esc(g.errNat)}</div>`:''}</div>
     <p class="pg-note">${t('pgNote')}</p>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="pg-save" type="submit" class="pg-btn"${ok?'':' disabled'}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('pgSave')}</button>
     <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
   </form></div>`;
@@ -7175,7 +7190,7 @@ async function _pgSaveComm(cust,g){
   if(error)throw error;
   if(!Array.isArray(data))throw new Error('denied'); // null: the token no longer matches
   const left=_fixClean(data);
-  if(left.some(k=>COMM_ASKS.includes(k)))throw new Error('refused');
+  if(left.some(k=>COMM_ASKS.includes(k))){const er=new Error('refused');er.left=left;throw er;} // still asked: the server did not take it
   S._fixCache={id:cust.id,at:Date.now(),fields:left};
 }
 // Typing must not repaint the form (a date being keyed in would lose its caret), so an
@@ -7194,7 +7209,7 @@ async function _pgSave(){
   g.errBirth=!g.birth?t('pgErrBirth'):_dobErr(g.birth);
   g.errNat=g.nat?'':t('pgErrNat');
   if(g.errBirth||g.errNat){renderProfileGate();setTimeout(()=>{const f=document.getElementById(g.errBirth?'pg-birth-d':'pg-nat');if(f)f.focus();},120);return;}
-  g.saving=true;g.net=false;renderProfileGate();
+  g.saving=true;g.net=false;g.said='';renderProfileGate();
   try{
     let fresh={};
     // The gate asks two things, and customer_set_birth_nat (20260922150000) writes those two and
@@ -7208,10 +7223,10 @@ async function _pgSave(){
       // The whole-profile save: everything but the two answers is taken from the account as it
       // is NOW, never from the copy this device kept at sign-in. Staff correct names and phones
       // in Accounts, and writing that old copy back undid their fix without a trace. No fresh
-      // read, no save - the rider sees the connection message.
+      // read, no save: a read that failed is said as such, and no row means the sign-in has ended.
       const{data:pd,error:pe}=await sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token});
       const cur=!pe&&pd&&pd[0];
-      if(!cur||cur.id!==cust.id)throw(pe||new Error('profile'));
+      if(!cur||cur.id!==cust.id)throw(pe||new Error('denied'));
       fresh={name:cur.name,email:cur.email??null,phone:cur.phone??null,height:cur.height??null,type_preference:cur.type_preference||'Any',country:cur.country??null,city:cur.city??null};
       const{data:ok,error}=await sb.rpc('customer_update_profile',{p_id:cust.id,p_token:cust.session_token,p_name:fresh.name,p_email:fresh.email,p_phone:fresh.phone,p_height:fresh.height,p_type_preference:fresh.type_preference,p_birth_date:g.birth,p_country:fresh.country,p_city:fresh.city,p_nationality:g.nat});
       if(error||!ok)throw(error||new Error('denied'));
@@ -7219,7 +7234,19 @@ async function _pgSave(){
     S.loggedIn={...cust,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
     const next=g.next;S._pg=null;renderProfileGate();
     if(next)next(); // the event they picked, now that the profile is complete
-  }catch(e){g.saving=false;g.net=true;renderProfileGate();}
+  }catch(e){
+    g.saving=false;
+    const k=_gateFail(e);
+    if(k==='denied'){_gateSignedOut();return;} // signing out closes this page (showView)
+    // The server kept asking for what was sent: the answer it did not take is marked on its field.
+    const left=(e&&Array.isArray(e.left))?e.left:null;
+    if(left&&(left.includes('birth_date')||left.includes('nationality'))){
+      if(left.includes('birth_date'))g.errBirth=t('fixErrCheck');
+      if(left.includes('nationality'))g.errNat=t('fixErrCheck');
+    }else if(k==='net')g.net=true;
+    else{g.said='errSomethingWrong';_gateLog('profile page',e);}
+    renderProfileGate();
+  }
 }
 // ── Correction requests ───────────────────────────────────────────────────────
 // Staff tick the account fields that may be wrong (customers.fix_fields). The next time the
@@ -7283,7 +7310,7 @@ async function _fixGate(next){
   // Already up (it opens at sign-in too, _commAskCheck): a later call only says where to go after,
   // and what the rider has typed stays.
   if(S._fix){if(next)S._fix.next=next;return true;}
-  S._fix={next,fields,v:{},err:{},net:false,saving:false,photoUp:false};
+  S._fix={next,fields,v:{},err:{},net:false,said:'',saving:false,photoUp:false};
   renderFixGate();
   return true;
 }
@@ -7425,7 +7452,7 @@ function renderFixGate(){
     <div class="fx-head">${t('fixHead')}<span class="fx-count">${items.length}</span></div>
     <div class="fx-list">${items.map(k=>_fixItemHtml(k,g,c)).join('')}</div>
     <p class="pg-note">${copy.note}</p>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="fx-save" type="submit" class="pg-btn"${g.saving||g.photoUp?' disabled':''}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('pgSave')}</button>
     <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
   </form></div>`;
@@ -7485,7 +7512,7 @@ async function _fixSave(){
     else if(k==='height'){const h=parseInt(_asciiDigits(v.height||''),10);if(!(h>=100&&h<=250))err.height=t('fixErrHeight');else vals.height=String(h);}
     else if(k==='photo'){if(!v.photo)err.photo=t('fixErrPhoto');else vals.photo=v.photo;}
   }
-  g.err=err;g.net=false;
+  g.err=err;g.net=false;g.said='';
   if(Object.keys(err).length){renderFixGate();_fixFocusErr();return;}
   g.saving=true;renderFixGate();
   let left;
@@ -7500,8 +7527,12 @@ async function _fixSave(){
     if(/name_short/.test(m))g.err.name=t('errNameShort');
     else if(/email/.test(m)&&(e.code==='23505'||/taken/.test(m)))g.err.email=t('errEmailExists');
     else if(/phone/.test(m)&&(e.code==='23505'||/taken/.test(m)))g.err.phone=t('errPhoneExists');
-    else g.net=true;
-    renderFixGate();if(!g.net)_fixFocusErr();return;
+    else{
+      const k=_gateFail(e); // see _gateFail (2026-10-05)
+      if(k==='denied'){_gateSignedOut();return;}
+      if(k==='net')g.net=true;else{g.said='errSomethingWrong';_gateLog('correction page',e);}
+    }
+    renderFixGate();if(!g.net&&!g.said)_fixFocusErr();return;
   }
   // What the server took is the account now; what it refused is still asked.
   const took={};
@@ -7718,7 +7749,7 @@ const AFX_LEARN_T={afxKicker:'lfxKicker',afxTitle:'lfxTitle',afxSub:'lfxSub',afx
 function _afxT(g,k){return t(g&&g.learn&&_own(AFX_LEARN_T,k)?AFX_LEARN_T[k]:k);}
 async function _afxOpen(tok){
   const learn=tok.startsWith('l:'),hex=tok.replace(/^l:/,'');
-  S._afx={tok,hex,learn,state:'loading',v:{},err:{},net:false,saving:false};
+  S._afx={tok,hex,learn,state:'loading',v:{},err:{},net:false,said:'',saving:false};
   renderAppFix();
   try{await _sbReady;}catch(e){}
   let r=null;
@@ -7801,7 +7832,7 @@ function renderAppFix(){
     ${g.note?`<div class="afx-note"><span>${t('afxNoteLbl')}</span><bdi>${esc(g.note)}</bdi></div>`:''}
     <div class="fx-head">${t('fixHead')}<span class="fx-count">${g.fields.length}</span></div>
     <div class="fx-list">${g.fields.map(k=>_afxItemHtml(k,g)).join('')}</div>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="afx-save" type="submit" class="pg-btn"${g.saving?' disabled':''}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('afxSave')}</button>
   </form>`;
   else{
@@ -7853,16 +7884,19 @@ async function _afxSave(){
     else if(k==='workplace'){const s=String(v.workplace||'').trim().replace(/\s+/g,' ');if(s.length<2||s.length>120||/[<>"`{}]/.test(s))err.workplace=t('errWorkplace');else vals.workplace=s;}
     else if(k==='instagram'||k==='linkedin'){const h=_socNorm(v[k]);if(!(k==='instagram'?/^[A-Za-z0-9._]{1,30}$/:/^[A-Za-z0-9._%-]{3,100}$/).test(h))err[k]=t('afxErrHandle');else vals[k]=h;}
   }
-  g.err=err;g.net=false;
+  g.err=err;g.net=false;g.said='';
   if(Object.keys(err).length){renderAppFix();_afxFocusErr();return;}
   g.saving=true;renderAppFix();
-  let r=null;
-  try{const{data,error}=await sb.rpc(g.learn?'learn_fix_submit':'community_fix_submit',{p_token:g.hex,p:vals});if(!error&&data)r=data;}catch(e){}
+  let r=null,fail=null;
+  try{const{data,error}=await sb.rpc(g.learn?'learn_fix_submit':'community_fix_submit',{p_token:g.hex,p:vals});if(!error&&data)r=data;else fail=error||{message:'no answer'};}catch(e){fail=e;}
   g.saving=false;
-  if(!r||r.error==='throttled'){g.net=true;renderAppFix();return;}
+  // Only a failure on the way is the connection's (_gateFail, 2026-10-05): too many tries says so,
+  // and anything else the server refused is said as a refusal and logged.
+  if(!r){if(_gateFail(fail)==='net')g.net=true;else{g.said='errSomethingWrong';_gateLog('application changes',fail);}renderAppFix();return;}
+  if(r.error==='throttled'){g.said='errTooManyTries';renderAppFix();return;}
   if(r.ok||r.error==='done'||r.error==='gone'){g.state=r.ok?'thanks':r.error;_afxForget();renderAppFix();return;}
   if(AFX_ERR[r.error]&&g.fields.includes(r.error)){g.err[r.error]=_afxT(g,AFX_ERR[r.error]);renderAppFix();_afxFocusErr();return;}
-  g.net=true;renderAppFix();
+  g.said='errSomethingWrong';_gateLog('application changes',{message:String(r.error||'refused')});renderAppFix();
 }
 
 // ── NFC bike tags: /?bike=<number or tag UID> ─────────────────────────────────────
@@ -8422,7 +8456,8 @@ function _mwSessOpts(){
     const sx=bk&&_sessGet(bk.sessionId);
     if(sx&&!byId.has(sx.id))byId.set(sx.id,sx);
   });
-  return [...byId.values()].sort(_sessOrder);
+  // Front Desk is never offered a Saturday ride, as on the roster (2026-10-05).
+  return [...byId.values()].filter(x=>isAdmin()||!_isApprovalRide(x)).sort(_sessOrder);
 }
 /** The session a parked row belongs to — walk-ups belong to none. */
 function _mwRowSess(w){
@@ -8456,9 +8491,10 @@ function _mwGroupName(g){
 function _mwAddableBookings(){
   const taken=new Set((S.deskWaitlist||[]).filter(w=>w.status==='waiting'&&w.booking_id).map(w=>w.booking_id));
   const sel=S._mwSess||'all'; // the filter scopes what can be ADDED too: one ride, one list
+  const fd=!isAdmin(); // Front Desk never sees the Saturday side, as on the roster (2026-10-05)
   return getQueue()
     .filter(e=>sel==='all'||e.sessionId===sel)
-    .filter(e=>(e.status==='waiting'||e.status==='waitlist')&&!taken.has(e.id))
+    .filter(e=>(e.status==='waiting'||e.status==='waitlist')&&!taken.has(e.id)&&!(fd&&_apprSessIds.has(e.sessionId)))
     .sort((a,b)=>(a.status===b.status?0:a.status==='waitlist'?-1:1)
       ||((a.status==='waitlist'?a.waitlistNum:a.queueNum)||0)-((b.status==='waitlist'?b.waitlistNum:b.queueNum)||0));
 }
@@ -8810,8 +8846,13 @@ async function mwSetType(rowId,ty){
     if(_writeErr(await sb.from('queue_entries').update(patch).eq('id',bk.id),'bike type'))return;
     bk.typePreference=ty;if(patch.price!==undefined)bk.price=patch.price;
   }
-  if(_writeErr(await sb.from('desk_waitlist').update({bike_type:ty}).eq('id',rowId),'bike type'))return;
-  w.bike_type=ty;
+  // A walk-up's row holds its own price once a payment state was picked (Pending stores the fare):
+  // an unpaid one still at its old type's fare follows the type by the same rule (2026-10-05). Left
+  // behind, the booking made from it later charged the old type's fare.
+  const wPatch={bike_type:ty};
+  if(!bk&&!w.paid&&w.price!=null&&Number(w.price)===priceForType(w.bike_type||'Any'))wPatch.price=priceForType(ty);
+  if(_writeErr(await sb.from('desk_waitlist').update(wPatch).eq('id',rowId),'bike type'))return;
+  w.bike_type=ty;if(wPatch.price!==undefined)w.price=wPatch.price;
   logAction(`${t('bikeTypeLabel')}: ${w.name} \u2192 ${typeLabel(ty)}`);
   renderStaffQueue();renderMyRides();
 }
@@ -8825,7 +8866,12 @@ function _on_renderManagedWl_3(event,el){event.stopPropagation()}
 function _on_renderManagedWl_4(event,el){if(event.key==='Enter')el.blur()}
 function _on_renderManagedWl_5(event,el){if(event.key==='Enter')mwEnter()}
 function _on_renderManagedWl_6(event,el){S._mwSugOpen=true;_mwRenderSuggest()}
-function _on_renderManagedWl_7(event,el){setTimeout(()=>{S._mwSugOpen=false;_mwRenderSuggest();},180)}
+// The box closes its suggestions 180 ms after it loses the focus, by drawing them again: a press on a
+// suggestion that took longer than that lost its button under the pointer, and nothing was picked
+// (2026-10-05). A press inside the list no longer takes the focus from the box (_10), and a keyboard
+// user who tabbed into the list keeps it.
+function _on_renderManagedWl_7(event,el){setTimeout(()=>{const h=document.getElementById('mw-suggest');if(h&&h.contains(document.activeElement))return;S._mwSugOpen=false;_mwRenderSuggest();},180)}
+function _on_renderManagedWl_10(event,el){event.preventDefault()}
 function _on_renderManagedWl_8(event,el){S._mwPh=el.value}
 function _on_renderManagedWl_9(event,el){if(event.key==='Enter')addManagedWl()}
 function renderManagedWl(listOnly){
@@ -8907,7 +8953,7 @@ function renderManagedWl(listOnly){
       <button class="btn-primary rq-fs0" data-on-click="${_on("addManagedWl")}">+ ${t('mwAddBtn')}</button>
       <button class="btn-secondary rq-fs0" data-on-click="${_on("showWlAddModal")}" title="${esc(t('wlAddBtn'))}">${_artIcon('person',12)} ${t('wlAddBtn')}</button>
     </div>
-    <div id="mw-suggest" class="mw-suggest rq-none"></div>
+    <div id="mw-suggest" class="mw-suggest rq-none" data-on-mousedown="${_on("_on_renderManagedWl_10",_EV,_EL)}"></div>
     <div id="mw-list" class="rq-mwlist">${listHtml}</div>`;
   _mwRenderSuggest(); // a background refresh rebuilds this host: put the open picker back
 }
@@ -8968,9 +9014,12 @@ async function addDeskWaitlist(){
 async function _addDeskWaitlist(){
   _wlxSync();
   const name=_titleCaseName(document.getElementById('wl-name')?.value||'');
-  const phone=(document.getElementById('wl-phone')?.value||'').trim();
+  // Arabic-Indic digits count (a valid number typed on an Arabic keyboard was refused), and the number
+  // is stored in the one form every other phone is (_normPhone, 2026-10-05).
+  const phoneRaw=_asciiDigits(document.getElementById('wl-phone')?.value||'').trim();
   if(!name){const i=document.getElementById('wl-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
-  if(phone.replace(/\D/g,'').length<8){const i=document.getElementById('wl-phone');if(i){_fieldErr(i,t('errValidPhone'));i.focus();}return;}
+  if(phoneRaw.replace(/\D/g,'').length<8){const i=document.getElementById('wl-phone');if(i){_fieldErr(i,t('errValidPhone'));i.focus();}return;}
+  const phone=_normPhone(phoneRaw,'+966')||phoneRaw;
   // Extra rows: unnamed riders wait under the first name ("Tamer 2"), same phone.
   const _now=new Date().toISOString(),_op=_opName()||null;
   const rows=[{name,type:S._wlType||'Any'},...(S._wlExtra||[]).map((r,i)=>({name:_titleCaseName(r.name||'')||name+' '+(i+2),type:CUST_TYPES.includes(r.type)?r.type:'Any'}))]
@@ -9263,8 +9312,9 @@ function _gsHits(q){
   const ql=raw.toLowerCase(),qn=ql.replace(/^#/,''),adm=isAdmin(),out=[],today=todayStr();
   const has=v=>v!=null&&String(v).toLowerCase().includes(ql);
   const dayOf=e=>String(e.sessionDate||'').slice(0,10);
-  // bookings: tonight's first, then the newest night
-  getQueue().filter(e=>e.status!=='removed'&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
+  // bookings: tonight's first, then the newest night. Front Desk never sees the Saturday side (the
+  // roster's rule, 2026-10-05): those bookings are not found here either.
+  getQueue().filter(e=>e.status!=='removed'&&!(!adm&&_apprSessIds.has(e.sessionId))&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
     .sort((a,b)=>((dayOf(b)===today)-(dayOf(a)===today))||dayOf(b).localeCompare(dayOf(a))||(a.queueNum-b.queueNum))
     .slice(0,5).forEach(e=>out.push({k:'gsKindBooking',l:`#${e.queueNum} ${e.name||''}`,m:[shortDate(dayOf(e)),_own(STATUS_KEY,e.status)?t(STATUS_KEY[e.status]):''].filter(Boolean).join(' · '),go:['_gsGo','booking',e.id]}));
   if(adm){
@@ -9388,7 +9438,7 @@ function _ntKindsNow(){
   // items: one per thing, {id, txt (the bell's line for it), at (when it happened, if known)}
   const add=(k,items,key,c,go,ready)=>out.push({k,ids:items.map(x=>String(x.id)),items:items.map(x=>({...x,id:String(x.id)})),key,c,go,ready:!!ready});
   const nm=x=>String((x&&(x.name||x.email))||'—');
-  add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue);
+  add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   if(adm){
     add('apps',_caPending().map(a=>({id:a.id,txt:t('ntiApps').replace('{0}',nm(a)),at:a.created_at})),'ntApps','green',['_on_goCommunity','applications'],Array.isArray(S._caApps));
@@ -9540,8 +9590,9 @@ function _dsStart(s){
   return m?String(m[1]).padStart(2,'0')+':'+m[2]:'09:00';
 }
 function printDaySheet(){
-  const today=todayStr();
-  const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today)
+  const today=todayStr(),fd=!isAdmin();
+  // Front Desk's sheet leaves out the Saturday side, as its roster does (2026-10-05).
+  const sess=allSessions().filter(x=>x.status!=='deleted'&&String(x.session_date||x.id).slice(0,10)===today&&!(fd&&_isApprovalRide(x)))
     .sort((a,b)=>_dsStart(a).localeCompare(_dsStart(b))||String(a.id).localeCompare(String(b.id)));
   if(!sess.length){toast(t('daySheetNone'),'info');return;}
   const LIVE=['waiting','waitlist','active']; // the riders still to ride; each one's word comes from STATUS_KEY
@@ -9673,8 +9724,14 @@ function closePinModal(){
   if(_isStaffHost())setTimeout(()=>{if(S.view!=='staff')openPinModal();},0);
 }
 
-
-
+// A type staff hid from this rider (customers.hidden_types, or Road Carbon for a VIP) is not theirs
+// to book (2026-10-05): its pill was gone, but a choice seeded from the profile or carried over from
+// another ride stayed selected, priced and booked. Barred only while the picker offers another type:
+// when staff hid every one, the picker shows them all (renderRegister) and so does this.
+function _regTyBarred(ty,sess){
+  if(!ty||!_regTypeHidden(ty))return false;
+  return bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)).some(x=>x!=='Any'&&!_regTypeHidden(x));
+}
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderRegister_1(event,el,a0){S.regRiderNames[a0]=el.value}
@@ -9704,6 +9761,9 @@ function renderRegister(){
   // from everywhere ... only allow staff to use it"): one seeded from the profile or an old booking
   // reads as not chosen yet, so the form asks for a type.
   S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Any'?undefined:ty);
+  // A type staff hid from this rider reads as not chosen yet too (_regTyBarred, 2026-10-05); a booking
+  // being changed keeps the types it was made with (its riders added here start with none).
+  if(!S.modifyEntryId)S.regBikeTypes=S.regBikeTypes.map(ty=>_regTyBarred(ty,_selSessObj)?undefined:ty);
   if(S._bw===undefined)_bwLoad(); // the booking window, once; the list repaints when it lands
   let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,_ev))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
@@ -9834,14 +9894,18 @@ function renderRegister(){
   if(_selSessObj&&!_ownOffered(_selSessObj))S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Own'?'':ty);
   // A quantity carried over from another night may be past this night's allowance.
   if((!_commSel||_grpSel)&&_selSessObj&&S.regQty>_maxRiders(_selSessObj)){S.regQty=_maxRiders(_selSessObj);ensureBikeSizes();}
+  // Rider 1 is the account holder whenever their name box is not drawn (one rider, which a ride that
+  // takes the account holder alone forces): a name typed for rider 1 while the party was bigger, or
+  // on another event, filed a solo booking under it (2026-10-05). An edit keeps the booking's names.
+  if(S.regQty<=1&&!isModifyMode&&S.regRiderNames[0]!==undefined)S.regRiderNames[0]=undefined;
   const qtyStepper=(_commSel&&!_grpSel)?'':`
     <div class="reg-row">
       <span class="reg-row-label">${t(_needsBike(_selSessObj)?'numBikes':'reviewPartLabel')}${_grpSel?` <span class="label-hint">${t('groupCapHint').replace('{0}',String(_maxRiders(_selSessObj)))}</span>`:''}</span>
       <div class="cu-qty-col">
         <div class="qty-stepper">
-          <button class="qty-btn" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">${_cuIc('minus',18)}</button>
+          <button class="qty-btn" id="reg-qty-dec" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">${_cuIc('minus',18)}</button>
           <span class="qty-val" aria-live="polite">${S.regQty}</span>
-          <button class="qty-btn" data-on-click="${_on("changeRegQty",1)}" type="button" aria-label="${t('qtyIncLabel')}">${_cuIc('plus',18)}</button>
+          <button class="qty-btn" id="reg-qty-inc" data-on-click="${_on("changeRegQty",1)}" type="button" aria-label="${t('qtyIncLabel')}">${_cuIc('plus',18)}</button>
         </div>
         ${S._qtyCapNote&&!_grpSel?`<div class="qty-cap-note" role="status">${t('jccCapNote').replace('{0}',String(JCC_ACCOUNT_CAP))}</div>`:''}
       </div>
@@ -9959,6 +10023,7 @@ function renderRegister(){
     const _wl=tkt.status==='waitlist';
     const _mod=_rideKind(_sess)==='snd96'?'':_wl?' tk-wl':_commT?'':' tk-live'+(String(tkt.sessionDate||'').slice(0,10)===todayStr()?' tk-today':'');
     const _owe=(!_commT&&!_wl&&!tkt.paid)?(Number(tkt.price??DEFAULT_PRICE)||0)+addonsCost(entryAddons(tkt)):0;
+    const _rk=(_wl&&!_commT)?_wlRankMin([tkt]):null; // the live place, never the W serial (2026-10-05)
     return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}">
       ${_tkLogo()}
       ${label?`<div class="cu-tk-label">${label}</div>`:''}
@@ -9970,9 +10035,9 @@ function renderRegister(){
         </div>
       </div>`:tkt.status==='waitlist'?`
       <div class="ticket-top">
-        <div class="ticket-num-label wl-loud">${t('wlOnList')}${tkt.waitlistNum?` · ${esc(t('wlLinePos').replace('{0}',tkt.waitlistNum))}`:''}</div>
+        <div class="ticket-num-label wl-loud">${t('wlOnList')}${_rk?` · ${esc(t('wlLinePos').replace('{0}',_rk))}`:''}</div>
         <div class="ticket-num">#${tkt.queueNum}</div>
-        <div class="wl-note">${tkt.waitlistNum?t('wlPosMsg').replace('{0}',String(tkt.waitlistNum)):t('wlPosNoNumMsg')}</div>
+        <div class="wl-note">${_rk?t('wlPosMsg').replace('{0}',String(_rk)):t('wlPosNoNumMsg')}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`:`
       <div class="ticket-top">
@@ -10024,7 +10089,8 @@ function renderRegister(){
 
   
   const _isReturning=cust&&cust.id&&(cust.height||cust.type_preference)&&getQueue().some(e=>e.customerId===cust.id&&(e.status==='done'||e.status==='waiting'||e.status==='active'));
-  const usualBtn=(_isReturning&&!_soleSess&&available.some(s=>s.status==='open'))?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">${_cuIc('again')} ${t('bookUsualBtn')}</button>`:'';
+  // Only on the circuit's list, and only when the shortcut has a night to book there (_usualNights).
+  const usualBtn=(_isReturning&&!_soleSess&&_ev==='jcc'&&_usualNights(cust).length)?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">${_cuIc('again')} ${t('bookUsualBtn')}</button>`:'';
   const panel1=`
     ${_soleSess?stepHeader(t('regStep1TitleOne'),t('regStep1MsgOne'))
                :stepHeader(t('regStep1Title'),t((S.selEvent==='community'||S.selEvent==='workshop')?'regStep1MsgJoin':'regStep1Msg'))}
@@ -10120,7 +10186,7 @@ function renderRegister(){
     <div class="form-section">
       <div class="cu-waiver-text" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
       <label class="mm-waiver-agree cu-waiver${S.waiverOk?' cu-waiver-ok':''}">
-        <input type="checkbox" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
+        <input type="checkbox" id="reg-waiver-cb" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
         <span class="cu-waiver-lbl">${_waiverCopy(_selSessObj).agree}</span>
       </label>
     </div>
@@ -10139,16 +10205,16 @@ function renderRegister(){
       // soft green wash when selected). Quantity stepper appears once selected (the real app
       // supports multi-qty + stock caps, which the prototype's plain checkboxes don't).
       const _aCard=it=>{const qn=_regAddonQty(it.id);const stock=Number(it.qty)||0;const cap=stock>0?stock:10;const sel=qn>0;return`<div class="addon-row${sel?' sel':''}">
-            <button type="button" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?_cuIc('tick',14):''}</button>
+            <button type="button" id="reg-ad-chk-${esc(it.id)}" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?_cuIc('tick',14):''}</button>
             ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="addon-thumb" role="button" tabindex="0" aria-label="${esc(it.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_5",_EV,_EL)}">`:''}
             <div class="cu-f1-min0">
               <div class="cu-ad-name">${esc(it.name)}${it.brand?` <span class="cu-ad-brand">· ${esc(it.brand)}</span>`:''}</div>
               ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" class="cu-ad-nutri">${t('nuButton')}</button>`:''}
             </div>
             ${sel&&cap>1?`<span class="addon-qty">
-              <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,-1)}" aria-label="−">−</button>
+              <button type="button" id="reg-ad-dec-${esc(it.id)}" data-on-click="${_on("_setRegAddonQty",it.id,-1)}" aria-label="−">−</button>
               <span>${qn}</span>
-              <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,1)}" ${qn>=cap?'disabled':''} aria-label="+">+</button>
+              <button type="button" id="reg-ad-inc-${esc(it.id)}" data-on-click="${_on("_setRegAddonQty",it.id,1)}" ${qn>=cap?'disabled':''} aria-label="+">+</button>
             </span>`:''}
             <bdi class="cu-ad-price">${esc(_cuPrice(it.price))}</bdi>
           </div>`;};
@@ -10206,7 +10272,26 @@ function renderRegister(){
       <img src="/assets/snd96-logo.svg" class="snd-flow-logo" alt="${esc(t('evSnd96Name'))}" decoding="async" data-on-error="${_on("_on_renderRegister_6",_EV,_EL)}">
       <div class="snd-flow-name">${esc(t('evSnd96Name'))}</div>
     </div>`:'';
-  document.getElementById('tab-register').innerHTML=_sndHead+body;
+  // A control inside the step (the waiver tick, the rider stepper, an add-on's buttons, the promo
+  // Apply / Remove, a box being typed in when a refresh lands) is drawn again with the step, which
+  // dropped the keyboard focus on <body> (2026-10-05). It keeps it: found again by its id, else what
+  // stands in for it once it is gone or switched off (_regRefocus), a box with its caret.
+  const host=document.getElementById('tab-register'),fa=document.activeElement;
+  let keep=null;
+  if(host&&fa&&fa!==host&&fa.id&&host.contains(fa)){keep={id:fa.id,s:null};try{if(typeof fa.selectionStart==='number')keep.s=[fa.selectionStart,fa.selectionEnd];}catch(_){}}
+  host.innerHTML=_sndHead+body;
+  if(keep)_regRefocus(keep);
+}
+// An add-on's last unit taken off removes its stepper (its tick stands in), a full one switches its
+// "+" off (the "−" stands in), and an applied code switches the promo box off (its button stands in).
+function _regRefocus(k){
+  const ad=/^reg-ad-(?:dec|inc)-(.+)$/.exec(k.id),pr=/^reg-promo-(step2|review)$/.exec(k.id);
+  const ids=[k.id,...(ad?['reg-ad-dec-'+ad[1],'reg-ad-chk-'+ad[1]]:[]),...(pr?['reg-promo-btn-'+pr[1]]:[])];
+  for(const id of ids){
+    const el=document.getElementById(id);if(!el||el.disabled)continue;
+    try{el.focus({preventScroll:true});if(id===k.id&&k.s)el.setSelectionRange(k.s[0],k.s[1]);}catch(_){}
+    return;
+  }
 }
 
 function toggleWaiver(on){S.waiverOk=!!on;S._waiverSess=on?S.selSession:null;renderRegister();}
@@ -10287,8 +10372,8 @@ function _promoBoxHtml(slot,disc,hide,isModify){
       <input id="reg-promo-${slot}" class="reg-promo cu-promo-in" type="text" value="${esc(S.promoApplied?S.promoApplied.code:'')}" placeholder="${t('promoLabel')}" ${S.promoApplied?'disabled':''}
         data-on-keydown="${_on("_on__promoBoxHtml_1",_EV,_EL)}">
       ${S.promoApplied
-        ?`<button class="btn-secondary cu-shrink0" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
-        :`<button class="btn-secondary cu-shrink0" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
+        ?`<button class="btn-secondary cu-shrink0" id="reg-promo-btn-${slot}" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
+        :`<button class="btn-secondary cu-shrink0" id="reg-promo-btn-${slot}" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
     </div>
     ${S._promoMsg?`<div class="cu-promo-err">${S._promoMsg}</div>`:''}
     <div id="reg-promo-disc-${slot}">${_promoDiscLine(disc)}</div>
@@ -10414,7 +10499,9 @@ function validateRegInputs(){
       return false;
     }
   }
+  const _vSess=allSessions().find(x=>x.id===S.selSession);
   for(let i=0;i<qty;i++){
+    if(_regTyBarred(S.regBikeTypes[i],_vSess))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05)
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
       _groupErr(wrap,t('errSelectTypeGeneric'));
@@ -10655,6 +10742,10 @@ function _waiverAgreed(){return !!S.waiverOk&&(!S._waiverSess||S._waiverSess===S
 // A booking queued offline lands through customer_create_booking later, like an online one, so it
 // has to carry the waiver it was agreed under; entryToDB alone left waiver_at empty on the row.
 function _outboxRow(e,sess){const r=entryToDB(e),wv=_waiverVersionFor(sess);return wv?{...r,waiver_version:wv}:r;}
+// Every rider of one booking goes into the outbox in ONE stored write, so they are all kept or none
+// is (2026-10-05). Row by row, a full storage kept the first riders queued, sent on reconnect, while
+// the screen said the booking had failed.
+function _bookOutboxAddAll(rows){if(rows.length===1)return _bookOutboxAdd(rows[0]);const o=_bookOutbox();o.push(...rows);return _bookOutboxSave(o);}
 // The database refuses a customer booking that carries no waiver (customer_create_booking raises
 // WAIVER_REQUIRED, P0001). Whichever path met it, the rider is told why and goes back to the
 // waiver step, unticked, exactly as the client-side guard in submitReg does.
@@ -10695,6 +10786,25 @@ function _bookRefused(err,sess){
   const m=((err&&err.code)||'')+' '+((err&&err.message)||'');
   if(/STALE_SESSION/.test(m)){doLogout(true);toast(t('errSessionStale'),'warning');return;}
   if(/SESSION_CLOSED/.test(m)){toast(t('errSessionClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}
+  // The booking window (_booking_window_guard: 'NOT_OPEN_YET: booking for <date> opens on <day>', or
+  // 'opens at HH:MM' on the day itself) reached riders as the database words it (2026-10-05). It is
+  // said in their language with the day it opens, and the window is read again, so the list greys
+  // the ride as the server sees it.
+  if(/NOT_OPEN_YET/.test(m)){
+    const day=(/opens on (\d{4}-\d{2}-\d{2})/.exec(m)||[])[1],at=(/opens at (\d{1,2}:\d{2})/.exec(m)||[])[1],w=_bwGet();
+    const when=day?shortDate(day)+(w.at?' '+w.at:''):at?shortDate(todayStr())+' '+at:'';
+    toast(when?t('bwOpensOn').replace('{0}',when):t('errSessionClosed'),'error');
+    _bwLoad(true).then(()=>{if(S.view==='customer'&&S.custTab==='register')renderRegister();}).catch(()=>{});
+    return;
+  }
+  // The waiver this page carries is no longer the one in force (WAIVER_OUTDATED): the page is an older
+  // build than the database. Nothing on it can fix that, so it says so and reloads into the current
+  // one, whose waiver the rider then reads and agrees to (2026-10-05).
+  if(/WAIVER_OUTDATED/.test(m+' '+((err&&(err.details||err.detail))||''))){
+    toast(t('waiverOutdatedMsg'),'error');
+    setTimeout(()=>{try{location.reload();}catch(_){}},2500);
+    return;
+  }
   const rule=_rideRuleRefusal(err);
   if(rule==='MEMBERS_ONLY'){showCommMembersModal();return;}
   if(rule==='ONE_PER_SESSION'){toast(t('errAlreadyBooked'),'error');return;}
@@ -10794,7 +10904,7 @@ async function _submitReg(){
   const email=cust.email||'',phone=cust.phone||'';
   
   const riderNames=Array.from({length:qty},(_,i)=>{
-    const entered=S.regRiderNames[i];
+    const entered=qty>1?S.regRiderNames[i]:undefined; // one rider has no name box: the account holder (2026-10-05)
     return (entered!==undefined&&entered.trim())?entered.trim():(i===0?cust.name:'');
   });
   const queue=getQueue();
@@ -10872,7 +10982,7 @@ async function _submitReg(){
       // If the device cannot even store the queue - a full localStorage - there is nothing to
       // sync later and nothing on the server, so the rider must NOT be handed a ticket and a
       // queue number for a booking that exists only until they close the tab.
-      if(!entries.map(e=>_bookOutboxAdd(_outboxRow(e,sess))).every(Boolean)){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
+      if(!_bookOutboxAddAll(entries.map(e=>_outboxRow(e,sess)))){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
       S.queue=[...(S.queue||[]),...entries.map(e=>entryFromDB(entryToDB(e)))];
       _queued=true;_bookOutboxFlush();
     }else{
@@ -10896,7 +11006,7 @@ async function _submitReg(){
           if(typeof navigator!=='undefined'&&navigator.onLine===false){
             // Connection dropped mid-submit: queue instead of losing the booking - unless the
             // queue itself cannot be written, which is the one case where confirming would lie.
-            if(!entries.map(e=>_bookOutboxAdd(_outboxRow(e,sess))).every(Boolean)){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
+            if(!_bookOutboxAddAll(entries.map(e=>_outboxRow(e,sess)))){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
             S.queue=[...(S.queue||[]),...entries.map(e=>entryFromDB(entryToDB(e)))];
             _queued=true;_ok=true;_bookOutboxFlush();
           }else{
@@ -11047,6 +11157,14 @@ async function submitModifyBooking(){
   // Riders added here are new bookings and carry the waiver like any other (see submitReg).
   if(newQty>existing.length&&_needsWaiver(sess)&&!_waiverAgreed()){
     _waiverBack();return;
+  }
+  // Riders added here meet the waitlist cap as a first booking's do (_submitReg, 2026-10-05): on a
+  // full night they land on the waitlist, and a capped one without room for all of them refuses
+  // rather than seating riders past the cap.
+  if(newQty>existing.length){
+    const added=newQty-existing.length,seats=S.regBikeTypes.slice(existing.length,newQty).filter(ty=>ty!=='Own'||_ownTakesPlace(sess)).length;
+    const toWl=_sessFull(sess)||(!_isApprovalRide(sess)&&seats>0&&spotsLeft(S.selSession)<seats);
+    if(toWl&&waitlistRoom(S.selSession)<added){toast(t('errWaitlistFull'),'error');return;}
   }
   // A paid booking keeps what was paid for: a dearer bike on it is the desk's to hand over, and
   // the server refuses the change. Checked before anything is sent, so nothing half-saves.
@@ -11245,6 +11363,41 @@ function _routeHtml(sess,past){
     ${r.track?`<svg class="tk-rt-map" viewBox="0 0 40 158" aria-hidden="true" focusable="false"><path d="${JCC_TRACK}"/><circle cx="12.9" cy="71.4" r="3.2"/></svg>`:''}
   </div>`;
 }
+// ── A waitlisted rider's place in line (2026-10-05) ──
+// waitlist_num is a serial staff hand out and never reuse: W7 can be second in line once five ahead
+// were seated or left, and the ticket said "number 7 in line". The place now comes from the server
+// (customer_waitlist_ranks: the caller's live waitlist rows, 1 = next), asked when a waitlist ticket
+// is drawn and again at most once a minute (after five seconds for a row it has not answered for, a
+// booking just made). Until it answers, when it fails and on a database without it, the ticket says
+// the rider is in line without a number: a serial is never a place.
+function _wlRanksLoad(need){
+  const c=S.loggedIn||getSession();if(!c||!c.id||!c.session_token||!sb)return;
+  const m=S._wlRk,mine=m&&m.id===c.id;if(mine&&(m.busy||m.gone))return;
+  const miss=(need||[]).some(id=>!(mine&&m.map&&m.map.has(String(id))));
+  if(mine&&Date.now()-m.at<(miss?5e3:6e4))return;
+  const cur={id:c.id,at:Date.now(),busy:true,gone:false,map:(m&&m.id===c.id&&m.map)||null};S._wlRk=cur;
+  const key=mp=>JSON.stringify(mp?[...mp]:null);
+  const done=mp=>{cur.busy=false;if(S._wlRk!==cur)return;const was=key(cur.map);cur.map=mp;if(key(mp)!==was)_wlRanksPaint();};
+  Promise.resolve(sb.rpc('customer_waitlist_ranks',{p_id:c.id,p_token:c.session_token})).then(({data,error})=>{
+    if(error){if(_rpcAbsent(error))cur.gone=true;return done(null);}
+    const mp=new Map();
+    (Array.isArray(data)?data:[]).forEach(r=>{const k=Number(r&&r.rank);if(r&&r.entry_id!=null&&Number.isInteger(k)&&k>0)mp.set(String(r.entry_id),k);});
+    done(mp);
+  },()=>done(null));
+}
+function _wlRanksPaint(){
+  if(S.view!=='customer')return;
+  if(S.custTab==='myrides')renderMyRides();
+  else if(S.custTab==='register'&&(S.lastTickets||[]).length)renderRegister();
+}
+function _wlRankOf(e){const c=S.loggedIn||getSession(),m=S._wlRk;return(e&&c&&m&&m.id===c.id&&m.map&&m.map.get(String(e.id)))||null;}
+// The place of the first of these rows still waiting for one, or null while it is not known.
+function _wlRankMin(rows){
+  const wl=(rows||[]).filter(e=>e&&e.status==='waitlist');
+  _wlRanksLoad(wl.map(e=>e.id));
+  const r=wl.map(_wlRankOf).filter(Boolean);
+  return r.length?Math.min(...r):null;
+}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -11272,10 +11425,12 @@ function renderBookingTicket(entries,opts){
   const past=!!opts.bookAgain;
   const _today=String(primary.sessionDate||primary.sessionId||'').slice(0,10)===todayStr();
   const numDisplay=_noNum?esc(sess?_evName(sess):t('landCommTitle')):(n===1?`#${nums[0]}`:isConsec?`#${nums[0]} – #${nums[n-1]}`:nums.map(q=>`#${q}`).join(', '));
-  // The W number is the rider's place in the queue for a spot, and the one thing staff can
-  // quote back to them. Saying it plainly beats "Waitlist" alone, which reads as a dead end.
+  // The rider's place in line, said plainly: "Waitlist" alone reads as a dead end. It is the
+  // server's live place (_wlRankMin), never the W serial (2026-10-05); with none known yet the
+  // note says only that they are in line.
+  const _rkG=(!_noNum&&g.some(e=>e.status==='waitlist'))?_wlRankMin(g):null;
   const wlNote=_allWl&&!_noNum
-    ?`<div class="wl-note">${primary.waitlistNum?t('wlPosMsg').replace('{0}',String(primary.waitlistNum)):t('wlPosNoNumMsg')}</div>`
+    ?`<div class="wl-note">${_rkG?t('wlPosMsg').replace('{0}',String(_rkG)):t('wlPosNoNumMsg')}</div>`
     :'';
   // A ride staff approve hands out no code until the rider is actually through: before the
   // list is published nobody has been told the verdict, and a code in hand would announce it.
@@ -11337,7 +11492,7 @@ function renderBookingTicket(entries,opts){
       :'';
     return`<div class="cu-tr-row">
       <div class="cu-tr-head">
-        ${_noNum?'':e.status==='waitlist'?`<span class="cu-tr-wl"><span class="cu-dot7-due"></span>${e.waitlistNum?esc(t('wlRowPos').replace('{0}',e.waitlistNum)):esc(t('waitlistLabel'))}</span>`:`<span class="cu-tr-num">#${e.queueNum}</span>`}
+        ${_noNum?'':e.status==='waitlist'?`<span class="cu-tr-wl"><span class="cu-dot7-due"></span>${_wlRankOf(e)?esc(t('wlRowPos').replace('{0}',_wlRankOf(e))):esc(t('waitlistLabel'))}</span>`:`<span class="cu-tr-num">#${e.queueNum}</span>`}
         <span class="cu-tr-name">${esc(e.name)}</span>
         ${_needsBike(sess)?typeBadge(resolvedType(e)):''}
       </div>
@@ -11377,7 +11532,7 @@ function renderBookingTicket(entries,opts){
       <div class="ticket-num-block">
         ${_tkLogo()}
         ${_noNum?'':_allWl
-          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${primary.waitlistNum?` \u00b7 ${esc(t('wlLinePos').replace('{0}',primary.waitlistNum))}`:''}</div>`
+          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${_rkG?` \u00b7 ${esc(t('wlLinePos').replace('{0}',_rkG))}`:''}</div>`
           :`<div class="ticket-num-label">${n>1?esc(_nBikes(n)):t('queueNumLabel')}</div>`}
         <div class="ticket-num ${numCls}">${numDisplay}</div>
         ${wlNote}
@@ -11453,13 +11608,18 @@ function downloadBookingICS(sessionId){
   const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
   const esc2=s=>String(s).replace(/[\\,;]/g,x=>'\\'+x).replace(/\n/g,'\\n');
   const _meet=_comm&&_safeUrl(sess.meet_url);
+  // The words are the rider's language and the ride's kind (2026-10-05): every calendar entry said
+  // "bike rental" in English, the swim and the workshop included. A ride that gathers is met at its
+  // meeting point; one with no bike is a booking, not a rental.
+  const _title=(_evNamed(sess)?_evName(sess):t('icsRideTitle'))+' - '+(dayLabel(sess.day)||''); // every named ride by its own name
+  const _desc=_gathersTime(sess)?'icsDescRide':_needsBike(sess)?'icsDescBike':'icsDescVisit';
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MicroMobility//Corniche Circuit//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
     'UID:'+sessionId+'-'+Date.now()+'@micromobility','DTSTAMP:'+stamp,
     'DTSTART:'+_icsUtc(date,sMin),'DTEND:'+_icsUtc(date,eMin),
-    'SUMMARY:'+esc2((_evNamed(sess)?_evName(sess):'MicroMobility Ride')+' - '+(dayLabel(sess.day)||'')), // every named ride by its own name, in the rider's language
+    'SUMMARY:'+esc2(_title),
     'LOCATION:'+esc2(_meet||({'JCC':'Jeddah Corniche Circuit','Sharafeyah Branch':'Sharafeyah, Jeddah'})[sess.location]||sess.location||'Jeddah Corniche Circuit'),
-    'DESCRIPTION:'+esc2('Your MicroMobility bike rental booking. Arrive 10 minutes early and show your ticket at the desk.'),
-    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:MicroMobility ride reminder','END:VALARM',
+    'DESCRIPTION:'+esc2(t(_desc)),
+    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+esc2(t('icsAlarm').replace('{0}',_title)),'END:VALARM',
     'END:VEVENT','END:VCALENDAR'];
   const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
   const url=URL.createObjectURL(blob);
@@ -11472,6 +11632,18 @@ function downloadBookingICS(sessionId){
 // One-tap rebooking for returning riders: pre-fill a solo booking with their remembered height + favourite bike type,
 // auto-pick the soonest open session matching their favourite time-of-day, and take them through what is left of the
 // wizard - the waiver included - to confirm.
+// Community rides are never a "usual" booking: they are free, members-only events. Nor is the
+// National Day ride, which has its own card. The usual is a circuit night, and only one the
+// circuit list itself offers: nothing closes a night automatically, so a past one can still
+// read 'open', and picking it (or a ride from another list) had the Reserve tab drop the
+// choice at once - the rider landed on an empty step one under a "just confirm" toast.
+// The same happened to a night the booking window has not opened yet (_bwOpen): the list does
+// not offer it, so the shortcut does not either. The button asks this same list (2026-10-05): it
+// showed on every event's list, where the shortcut then booked a circuit night or found none.
+function _usualNights(cust){
+  const bookedIds=new Set(getQueue().filter(e=>e.customerId===cust.id&&(e.status==='waiting'||e.status==='active'||e.status==='waitlist')).map(e=>e.sessionId));
+  return allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
+}
 function bookMyUsual(){
   const cust=S.loggedIn||getSession();if(!cust||!cust.id)return;
   const mine=getQueue().filter(e=>e.customerId===cust.id);
@@ -11480,15 +11652,7 @@ function bookMyUsual(){
   mine.forEach(e=>{const s=(S.sessions||[]).find(x=>x.id===e.sessionId);if(!s)return;const tm=(parseSlots(s.bike_slots)||{})._time;if(tm)timeCount[tm]=(timeCount[tm]||0)+1;});
   const favTime=Object.keys(timeCount).sort((a,b)=>timeCount[b]-timeCount[a])[0]||null;
   // Open sessions they are not already in, soonest first; prefer ones with a free spot, matching the favourite time
-  const bookedIds=new Set(mine.filter(e=>e.status==='waiting'||e.status==='active'||e.status==='waitlist').map(e=>e.sessionId));
-  // Community rides are never a "usual" booking: they are free, members-only events. Nor is the
-  // National Day ride, which has its own card. The usual is a circuit night, and only one the
-  // circuit list itself offers: nothing closes a night automatically, so a past one can still
-  // read 'open', and picking it (or a ride from another list) had the Reserve tab drop the
-  // choice at once - the rider landed on an empty step one under a "just confirm" toast.
-  // The same happened to a night the booking window has not opened yet (_bwOpen): the list does
-  // not offer it, so the shortcut does not either.
-  const open=allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
+  const open=_usualNights(cust);
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   const withSpot=open.filter(s=>spotsLeft(s.id)>0);
   const pool=withSpot.length?withSpot:open;
@@ -11596,8 +11760,10 @@ async function addBookingToGWallet(bookingId,btn){
 // A ride the rider actually completed: done, and paid - or on a complimentary ride, where there
 // is nothing to pay and paid stays false for ever. Requiring paid alone left every Saturday,
 // pool and workshop session out of My Rides, the ride count, the tier, the badges and the
-// rating prompt, so a member with ten Saturday rides read as a newcomer with none.
-function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId));}
+// rating prompt, so a member with ten Saturday rides read as a newcomer with none. A ride on the
+// rider's own bike is never paid for either, so it counts once done (2026-10-05, as _bdgRode counts
+// it): an owner's rides on a paid night were missing from My Bookings, the season and Your rides.
+function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId)||_isOwnBike(e));}
 // A ride earns badges only once it is marked Paid (or is on a free ride): the owner, 2026-10-02,
 // "dont count a ride towards a badge unless it was marked paid". A bike owner pays nothing, so
 // their check-in alone counts ("bike owners dont pay because they own a bike checking them in
@@ -12118,12 +12284,24 @@ function _mrBadgesPaint(){const h=document.getElementById('mr-badges-host'),c=S.
 function _mrBadgesMore(){S._bdgMore=!S._bdgMore;_mrBadgesPaint();const b=document.getElementById('mr-badges-more');if(b)b.focus();}
 // Tapping a badge explains how to earn it (and shows progress on locked ones); a given one says who
 // gave it and when, with the note staff wrote. fresh: it pops up because it is new.
+// The popup is a dialog (2026-10-05): its Close takes the focus as it opens, Escape closes it (the
+// page's dialog handling counts it, _visibleModals), and the focus goes back where it was - the badge
+// tapped, or what the rider was on when a new one popped up (found again by its handler when the
+// badge row was drawn again meanwhile).
+let _bdgPopFrom=null;
+function _bdgPopClose(){
+  const p=document.getElementById('badge-pop');if(p)p.remove();
+  let b=_bdgPopFrom;_bdgPopFrom=null;
+  if(b&&!document.contains(b)){const k=b.getAttribute('data-on-click');b=k?[...document.querySelectorAll('[data-on-click]')].find(x=>x.getAttribute('data-on-click')===k):null;}
+  if(b)try{b.focus({preventScroll:true});}catch(_){}
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on__mrBadgeInfo_1(event,el){document.getElementById('badge-pop').remove()}
+function _on__mrBadgeInfo_1(event,el){_bdgPopClose()}
 function _mrBadgeInfo(i,fresh){
   const cust=S.loggedIn;if(!cust)return;
   const x=_mrBadgeList(cust)[i];if(!x)return;
-  const old=document.getElementById('badge-pop');if(old)old.remove();
+  const old=document.getElementById('badge-pop');
+  if(old)old.remove();else{const a=document.activeElement;_bdgPopFrom=a&&a!==document.body&&a.nodeType===1?a:null;}
   const nm=_bdgName(x.b),d=_bdgDesc(x.b),g=x.g;
   const el=document.createElement('div');el.id='badge-pop';el.className='badge-pop';
   const ab=_bdgAbout(x.b);
@@ -12138,8 +12316,9 @@ function _mrBadgeInfo(i,fresh){
     ${g?`<div class="badge-pop-earned">✓ ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.on?`<div class="badge-pop-earned">✓ ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
     <button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
   </div>`;
-  el.addEventListener('click',e=>{if(e.target===el)el.remove();});
+  el.addEventListener('click',e=>{if(e.target===el)_bdgPopClose();});
   document.body.appendChild(el);
+  const cb=el.querySelector('.badge-pop-box > button');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
 }
 // A badge given since this device last showed one pops up once (the newest) while the account page
 // is on screen. Kept per account in this browser, a convenience: another phone shows it again, and
@@ -12739,7 +12918,10 @@ function startEditSession(id){
   S.editSessionId=id;
   S.editSessDate=sess.session_date||sess.id;
   S.editSessStatus=sess.status||'closed';
-  S.editSessCollect=(parseSlots(sess.bike_slots)||{})._collect||sessionCollectTime(sess)||'';
+  // Only a collection time staff typed is the form's (2026-10-05): one worked out from the start when
+  // the form opened was saved with it, and stayed put when the start moved - bikes "from 8:15" on a
+  // ride that now left at 7. Untouched, the box shows the default for the start (_collectAuto).
+  S.editSessCollect=(parseSlots(sess.bike_slots)||{})._collect||'';
   S.editSessMapUrl=sess.meet_url||'';S.editSessBfName=sess.breakfast_name||'';S.editSessBfUrl=sess.breakfast_url||'';
   S.editSessTitle=sess.title||'';
   // Every field the form shows is set from THIS session. Spots used to keep whatever was last
@@ -13035,7 +13217,7 @@ function renderAddonPicker(){
   const sess=allSessions().find(s=>s.id===e.sessionId);
   const items=sessionAddonItems(sess);
   const cur=entryAddons(e);
-  const _q=aid=>{const a=cur.find(x=>x.id===aid);return a?a.qty:0;};
+  const _q=aid=>cur.filter(x=>x.id===aid).reduce((n,x)=>n+x.qty,0); // every line of it (one per price sold at)
   const total=addonsCost(cur);
   let m=document.getElementById('addon-picker-backdrop');
   if(!m){m=document.createElement('div');m.id='addon-picker-backdrop';m.className='modal-backdrop';m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';m.onclick=ev=>{if(ev.target===m)closeAddonPicker();};document.body.appendChild(m);}
@@ -13074,12 +13256,21 @@ async function _entryAddonMutate(id,addonId,delta){
   const it=(S.inventory||[]).find(x=>x.id===addonId);if(!it)return false;
   const stock=Number(it.qty)||0;
   let cur=entryAddons(e);
-  const a=cur.find(x=>x.id===addonId);
-  if(delta>0){if(stock<=0)return false;if(a){if(a.qty>=20&&_asCustomer())return false;a.qty+=1;}else cur.push({id:addonId,qty:1});} // a rider's own: 20 of one at most (the server's cap)
-  else{
+  // A line carries the price it was sold at (p, stamped by the database). A unit added after a price
+  // change goes on a line at today's price - one with none yet (an older row) or a new one - never on
+  // the old line, which charged it at the old price (2026-10-05). A unit taken off comes off the last
+  // line, the one added most recently, and only that line goes when it empties.
+  const now=it.price!=null?Number(it.price):null,lines=cur.filter(x=>x.id===addonId);
+  if(delta>0){
+    if(stock<=0)return false;
+    if(lines.reduce((n,x)=>n+x.qty,0)>=20&&_asCustomer())return false; // a rider's own: 20 of one at most (the server's cap)
+    const a=lines.find(x=>x.p===undefined||x.p===now);
+    if(a)a.qty+=1;else cur.push({id:addonId,qty:1});
+  }else{
+    const a=lines[lines.length-1];
     if(!a)return false;
     if(e.status==='active'&&_asCustomer()){toast(t('addonHandedOver'),'warning');return false;} // out on the ride: already handed over (the server keeps them too)
-    a.qty-=1;if(a.qty<=0)cur=cur.filter(x=>x.id!==addonId);
+    a.qty-=1;if(a.qty<=0)cur=cur.filter(x=>x!==a);
   }
   const _before=JSON.stringify(entryAddons(e));
   e.addons=cur;                                            // live update so totals/views reflect immediately
@@ -13419,7 +13610,7 @@ async function _nsTplPush(tp,list){
     S.newSessAssignedIds=_liveFleetIds(Array.isArray(S.newSessAssignedIds)?S.newSessAssignedIds:[],true);
     const host=document.getElementById('sess-host')||document.getElementById('tab-sessions');if(host)host.innerHTML='';
     const timeVal=`${S.newSessStartTime||'09:00'} - ${S.newSessEndTime||'11:00'}`;
-    const sl=_nsSlots(timeVal,_nsTwoTimes()?(S.newSessCollect||''):'');
+    const sl=_nsSlots(timeVal,_nsTwoTimes()?'':(S.newSessCollect||'')); // the collection time is a bike ride's, not a gathering one's (2026-10-05: this was the wrong way round, so no pushed ride got it)
     if(sl)patch={capacity:sl.total,bike_slots:JSON.stringify(sl.slots),addons:(S.newSessAddons||[]).length?JSON.stringify(S.newSessAddons):null,...(_nsSeats()?{spots:sl.total}:{})};
   }finally{NS_TPL_KEYS.forEach(k=>{S[k]=keep[k];});S.showAddSession=had;}
   if(!patch){renderSessions();return;}
@@ -13435,6 +13626,10 @@ async function _nsTplPush(tp,list){
     await loadData();renderSessions();if(!ok)return false;
   });
 }
+// S._nsTplId (the template the rides made next carry, sessions.template_id) is set here and by
+// _nsTplSave only; every way of opening the form, Cancel and a clone clear it (2026-10-05). It
+// outlived them, so a ride made from an unrelated form was stamped with the last template used, and
+// that template's next push rewrote the ride.
 function _nsTplApply(id){
   const tp=_nsTpls().find(x=>x.id===id);if(!tp)return;
   S._nsTplId=id;
@@ -13479,7 +13674,7 @@ function _nsDaysHtml(){
 function _sessStart(x){return String(((parseSlots(x.bike_slots)||{})._time)||'').split(/\s*[-–]\s*/)[0]||'';}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderDashboard_1(event,el,a0){setStaffTab('queue');setSfSession(a0)}
-function _on_renderDashboard_2(event,el){setStaffTab('sessions');S.showAddSession=true;S.editSessionId=null;S.newSessDate=todayStr();renderSessions()}
+function _on_renderDashboard_2(event,el){setStaffTab('sessions');S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate=todayStr();renderSessions()}
 function renderDashboard(){
   const el=document.getElementById('tab-dashboard');if(!el)return;
   if(!S.dataLoaded){el.innerHTML=skeletonList();return;}
@@ -13526,7 +13721,7 @@ function renderDashboard(){
 // The same sessions as the list, filters included, laid out by day with the workshop's jobs
 // booked for that day. A session opens in the list; a free day from today on starts a new one.
 function _calMove(n){const[y,m]=(S._calYm||todayStr().slice(0,7)).split('-').map(Number);const d=new Date(y,m-1+n,1);S._calYm=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;renderSessions();}
-function _calNew(iso){S.showAddSession=true;S.editSessionId=null;S.newSessDate=iso;renderSessions();setTimeout(()=>document.getElementById('sess-add-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);}
+function _calNew(iso){S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate=iso;renderSessions();setTimeout(()=>document.getElementById('sess-add-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);}
 function _calOpen(id){S.sessView='list';selectSessionDetail(id);}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__sessCalHtml_1(event,el){S._calYm=null;renderSessions()}
@@ -13542,8 +13737,8 @@ function _sessCalHtml(list){
     const iso=`${ym}-${String(d).padStart(2,'0')}`,ss=(byDay[iso]||[]).sort((a,b)=>_sessStart(a).localeCompare(_sessStart(b))),jn=jobs[iso]||0;
     cells+=`<div class="cal-cell${iso===today?' today':''}${iso<today?' past':''}" data-day="${iso}">
       <div class="cal-dnum">${d}</div>
-      ${ss.map(x=>{const n=(_qBySession().get(x.id)||[]).filter(e=>['waiting','active','done'].includes(e.status)).length;
-        return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')}" data-on-click="${_on("_calOpen",x.id)}" title="${esc(_evName(x))} · ${n}/${x.capacity||0}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_evName(x))}</span><em>${n}/${x.capacity||0}</em></button>`;}).join('')}
+      ${ss.map(x=>{const n=_placesTaken(x),cap=_placesCap(x); // the one rule for places (2026-10-05): it counted its own way here
+        return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')}" data-on-click="${_on("_calOpen",x.id)}" title="${esc(_evName(x))} · ${n}/${cap}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_evName(x))}</span><em>${n}/${cap}</em></button>`;}).join('')}
       ${jn?`<div class="cal-ws">${esc(t('calWs').replace('{0}',jn))}</div>`:''}
       ${!ss.length&&iso>=today?`<button type="button" class="cal-add" aria-label="${esc(t('calNewOn').replace('{0}',shortDate(iso)))}" data-on-click="${_on("_calNew",iso)}">+</button>`:''}
     </div>`;
@@ -13562,7 +13757,7 @@ function _sessCalHtml(list){
 function cloneSession(id){
   const s=allSessions().find(x=>x.id===id);if(!s)return;
   const slots=parseSlots(s.bike_slots)||{};
-  S.showAddSession=true;S.editSessionId=null;S.newSessDate='';S.newSessRepeat='1';S.newSessDays=[];
+  S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate='';S.newSessRepeat='1';S.newSessDays=[];
   // Everything the form asks for comes across, so a clone is the same session on a new date:
   // the event kind, its name, seats, meeting point, breakfast stop, add-ons and waitlist rule.
   // Only the date is left blank. The bike allocation follows below.
@@ -13628,12 +13823,21 @@ function selectSessionDetail(id){
   // On phone the detail replaces the list, so bring it to the top
   if(id&&window.matchMedia&&window.matchMedia('(max-width:767px)').matches){try{window.scrollTo({top:0,behavior:_sb()});}catch(_){window.scrollTo(0,0);}}
 }
+// The bike collection time on the session forms (2026-10-05). The box showed a time worked out from
+// the start when the form was drawn, and the save took it as typed: change the start afterwards and
+// the ride said bikes go out after it has left. Now only a time staff type is the form's
+// (newSessCollect / editSessCollect); untouched, the box shows the default for the start as it
+// stands (45 minutes before, as sessionCollectTime works it out for a ride with none), follows the
+// start while it is edited, and saves nothing. A typed time later than the start is refused.
+function _collectAuto(start){const m=_hhmmToMin(start);return m==null?'':_minToHhmm(Math.max(0,m-COLLECT_BEFORE_MIN));}
+function _collectLate(collect,start){const c=_hhmmToMin(collect),s=_hhmmToMin(start);return c!=null&&s!=null&&c>s;}
+function _collectFollow(id,start,typed){if(typed)return;const el=document.getElementById(id);if(el)el.value=_collectAuto(start);}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderSessions_1(event,el){S.newSessDate=el.value;_nsFillSync()}
 function _on_renderSessions_2(event,el){S.newSessRepeat=el.value;_nsFillSync()}
 function _on_renderSessions_3(event,el){S.newSessStartTime=el.value}
 function _on_renderSessions_4(event,el){S.newSessEndTime=el.value}
-function _on_renderSessions_5(event,el){S.newSessStartTime=el.value}
+function _on_renderSessions_5(event,el){S.newSessStartTime=el.value;_collectFollow('ns-collect',el.value,S.newSessCollect)}
 function _on_renderSessions_6(event,el){S.newSessEndTime=el.value}
 function _on_renderSessions_7(event,el){S.newSessCollect=el.value}
 function _on_renderSessions_8(event,el){S.newSessEvent='jcc';renderSessions()}
@@ -13654,13 +13858,13 @@ function _on_renderSessions_18(event,el){S.newSessMode='counts';renderSessions()
 function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
-function _on_renderSessions_22(event,el){S.showAddSession=false;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
+function _on_renderSessions_22(event,el){S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_23(event,el){S.editSessDate=el.value}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
 function _on_renderSessions_25(event,el){S.editSessStartTime=el.value}
 function _on_renderSessions_26(event,el){S.editSessEndTime=el.value}
 function _on_renderSessions_27(event,el){S.editSessMapUrl=el.value}
-function _on_renderSessions_28(event,el){S.editSessStartTime=el.value}
+function _on_renderSessions_28(event,el){S.editSessStartTime=el.value;_collectFollow('es-collect',el.value,S.editSessCollect)}
 function _on_renderSessions_29(event,el){S.editSessEndTime=el.value}
 function _on_renderSessions_30(event,el){S.editSessCollect=el.value}
 function _on_renderSessions_31(event,el){S.editSessTitle=el.value}
@@ -13678,10 +13882,10 @@ function _on_renderSessions_43(event,el,a0){event.stopPropagation();toggleSessio
 function _on_renderSessions_44(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
 function _on_renderSessions_45(event,el,a0){event.stopPropagation();toggleSession(a0,'closed')}
 function _on_renderSessions_46(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
-function _on_renderSessions_47(event,el){S.showAddSession=true;S.editSessionId=null;renderSessions()}
+function _on_renderSessions_47(event,el){S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;renderSessions()}
 function _on_renderSessions_48(event,el){S.sessView='list';renderSessions()}
 function _on_renderSessions_49(event,el){S.sessView='cal';renderSessions()}
-function _on_renderSessions_50(event,el){S.showAddSession=!S.showAddSession;S.editSessionId=null;renderSessions()}
+function _on_renderSessions_50(event,el){S.showAddSession=!S.showAddSession;S.editSessionId=null;S._nsTplId=null;renderSessions()}
 function _on_renderSessions_51(event,el){S.sessLocFilter=el.value;renderSessions()}
 function _on_renderSessions_52(event,el){S.showDeletedSess=!S.showDeletedSess;renderSessions()}
 function renderSessions(){
@@ -13770,7 +13974,7 @@ function renderSessions(){
         </div>
         <div class="form-group">
           <label for="ns-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.newSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
+          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_collectAuto(S.newSessStartTime||'21:00'))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       ${_nsDaysHtml()}
@@ -13954,7 +14158,7 @@ function renderSessions(){
         </div>
         <div class="form-group">
           <label for="es-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.editSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" class="ss-collect">
+          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_collectAuto(S.editSessStartTime||'21:00'))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       
@@ -14420,7 +14624,8 @@ async function _saveSessionEdit(){
   const esStart=S.editSessStartTime||document.getElementById('es-start')?.value||'21:00';
   const esEnd=S.editSessEndTime||document.getElementById('es-end')?.value||'23:00';
   const timeVal=`${esStart} - ${esEnd}`;
-  const esCollect=S.editSessCollect||document.getElementById('es-collect')?.value||'';
+  const esCollect=S.editSessCollect||''; // only a time staff typed or the ride had (_collectAuto, 2026-10-05)
+  if(esCollect&&!_twoTimesSess(sess)&&_collectLate(esCollect,esStart)){const ce=document.getElementById('es-collect');if(ce){_fieldErr(ce,t('errCollectLate'));ce.focus();}else toast(t('errCollectLate'),'error');return;}
   const isNamedEdit=_evNamed(sess);
   let slots,total;
   if(_editSeats(sess)){
@@ -14653,7 +14858,8 @@ async function _addSession(){
   // A ride staff approve keeps its gathering time as the moment bikes go out; every other
   // bike ride carries its own, which is the time the rider's Wallet pass prints.
   const collectEl=document.getElementById('ns-collect');
-  const collectVal=(collectEl&&collectEl.value)||'';
+  const collectVal=collectEl?(S.newSessCollect||''):''; // only a time staff typed (_collectAuto, 2026-10-05)
+  if(collectVal&&!_nsTwoTimes()&&_collectLate(collectVal,startT)){_fieldErr(collectEl,t('errCollectLate'));collectEl.focus();return;}
   const isCommSess=_nsComm();
   // The National Day ride is shaped exactly like the Petromin one - real queue numbers,
   // circuit prices, capacity from the bikes actually put out - and differs only in being
@@ -37780,9 +37986,9 @@ document.addEventListener('keydown',e=>{
 // ── Modal accessibility: focus in, trap Tab, Escape to close, focus back out ──
 // Topmost last: by z-index, then page order. The flag dialog and confirms (#confirm-modal, 300)
 // sit over every other dialog but come early in the page, so page order alone sent Escape to
-// the window underneath them.
+// the window underneath them. A rider's badge popup (.badge-pop) is one too (2026-10-05).
 function _visibleModals(){
-  return[...document.querySelectorAll('.modal-backdrop,.pin-backdrop,.auth-backdrop,.scan-backdrop')].filter(m=>m.getClientRects().length>0)
+  return[...document.querySelectorAll('.modal-backdrop,.pin-backdrop,.auth-backdrop,.scan-backdrop,.badge-pop')].filter(m=>m.getClientRects().length>0)
     .map((m,i)=>({m,i,z:parseInt(getComputedStyle(m).zIndex,10)||0})).sort((a,b)=>a.z-b.z||a.i-b.i).map(x=>x.m);
 }
 function _modalFocusables(modal){
@@ -37838,7 +38044,7 @@ document.addEventListener('keydown',e=>{
   if(!modal)return;
   if(e.key==='Escape'){
     // Dismissible dialogs only — the PIN gate and the auth page are page-level, not dialogs.
-    if(!modal.classList.contains('modal-backdrop')&&!modal.classList.contains('scan-backdrop'))return;
+    if(!modal.classList.contains('modal-backdrop')&&!modal.classList.contains('scan-backdrop')&&!modal.classList.contains('badge-pop'))return;
     modal.click();
     // Handled only if that closed it: the per-dialog Escape list below then stands down, where it
     // used to go on and close the NEXT dialog in its list too (the cashier sale under the team
