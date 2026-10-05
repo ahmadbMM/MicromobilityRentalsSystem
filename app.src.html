@@ -12915,17 +12915,24 @@ function addonLineItems(arr){
 // Total SAR cost of a set of add-ons
 function addonsCost(arr){return Math.round(addonLineItems(arr).reduce((s,a)=>s+a.lineTotal,0)*100)/100;}
 // Tally add-ons across booking groups (qty-aware). Returns {items:[{id,name,brand,units,value}], totalUnits, totalValue}
+// Sold means handed over (2026-10-05): only a rider on the bike or done counts - a no-show or a rider
+// still waiting took nothing home - and each line is valued at the price it was sold at (the line's
+// own p since 20261004120000; older lines at today's inventory price, as addonLineItems reads them).
+// The session report, its Excel sheet and Analytics' add-on sales all read this one rule.
 function addonSalesFromGroups(groups){
   const tally={};let totalUnits=0,totalValue=0;
   (groups||[]).forEach(group=>{
-    (group||[]).forEach(e=>entryAddons(e).forEach(({id,qty})=>{ // per-rider: every rider's own add-ons, not just the lead
-      const it=(S.inventory||[]).find(x=>x.id===id);
-      const name=it?it.name:id,brand=it?(it.brand||''):'',price=(it&&it.price!=null)?Number(it.price):0;
-      if(!tally[id])tally[id]={id,name,brand,units:0,value:0};
-      tally[id].units+=qty;tally[id].value+=price*qty;totalUnits+=qty;totalValue+=price*qty;
-    }));
+    (group||[]).forEach(e=>{ // per-rider: every rider's own add-ons, not just the lead
+      if(!e||(e.status!=='active'&&e.status!=='done'))return;
+      addonLineItems(entryAddons(e)).forEach(({id,qty,name,brand,lineTotal})=>{
+        if(!tally[id])tally[id]={id,name,brand,units:0,value:0};
+        tally[id].units+=qty;tally[id].value+=lineTotal;totalUnits+=qty;totalValue+=lineTotal;
+      });
+    });
   });
-  return{items:Object.values(tally).sort((a,b)=>b.units-a.units||b.value-a.value),totalUnits,totalValue};
+  const r2=n=>Math.round(n*100)/100;
+  const items=Object.values(tally).map(x=>({...x,value:r2(x.value)}));
+  return{items:items.sort((a,b)=>b.units-a.units||b.value-a.value),totalUnits,totalValue:r2(totalValue)};
 }
 // Adjust inventory stock for a set of add-on ids by delta (-1 when a booking consumes them, +1 on cancel/no-show). Clamped at 0; tolerant of a missing qty column.
 async function _addonStock(ids,delta){
@@ -22654,9 +22661,11 @@ function _reportShell(o){
 // same in a table cell, right-aligned to its column's other amounts.
 function _rpSar(n){const v=Math.round((Number(n)||0)*100)/100;return '<bdi>SAR '+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</bdi>';}
 function _rpAmt(n){return `<span class="rp-amt">${_rpSar(n)}</span>`;}
+// Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened
+// after an awaited PIN can lose the tap that allows a new window).
 function _openReport(html,w,h){
   const win=window.open('','_blank',`width=${w||1100},height=${h||760}`);
-  if(!win)return;
+  if(!win)return null;
   win.document.write(html);win.document.close();win.focus();
   // The report is its own document under the page's policy: no inline script runs in it and no
   // handler dispatcher listens there, so its Print button is wired here, from the opener, and its
@@ -22665,6 +22674,7 @@ function _openReport(html,w,h){
   try{_cssvApply(win.document);}catch(e){}
   try{win.document.querySelectorAll('.rep-print').forEach(b=>b.addEventListener('click',()=>{try{win.print();}catch(e){}}));}catch(e){} // specs stand in a bare window
   _printWhenReady(win,400);
+  return win;
 }
 // ── Report builder ─────────────────────────────────────────────────────────
 // Every printed report is customizable: pick the columns and sections it carries,
@@ -22741,7 +22751,7 @@ function showPrintReportOptions(){
   const o=_repOpts();
   const chk=(on)=>on?_artIcon('boxOn',15):_artIcon('boxOff',15);
   const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" class="rpt-row">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
-  const _types=['Road','Hybrid','Mountain','Gravel','Road Carbon'];
+  const _types=CAT_RIDE_TYPES; // every bike type a rider can be on, the one list the catalogue keeps (Kids was missing, 2026-10-05)
   const sel=(id,val,opts,onchg,lbl)=>`<select class="filter-select rpt-w100" aria-label="${esc(lbl||id)}" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${val===op[0]?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showPrintReportOptions_1",_EV,_EL)}">
@@ -23317,10 +23327,15 @@ function _accReportHtml(){
     <table><thead><tr><th>${t('acrFilterTag')}</th><th>${t('acrHolders')}</th><th>${t('acrOnList')}</th></tr></thead><tbody>${tagRows}</tbody></table>`:''}`;
   return _reportShell({kind:t('acrTitle'),title:t('acrTitle'),docTitle:t('acrTitle'),body:html,maxWidth:'1100px'});
 }
-function printAccountReport(){
+// Every account's details on paper: the same gate as the file below (2026-10-05) - admins only, with
+// the operator's PIN - since the printed report carries the same names, phones and emails.
+async function printAccountReport(){
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
   if(!_accRows().length){toast(t('toastNoExport'),'warning');return;}
+  if(!await _pinApprove(t('acrTitle')))return;
+  // the keypad's tap may no longer count as the one that opens a window: say so, the PIN holds for the next tap
+  if(!_openReport(_accReportHtml(),1200,800)){toast(t('repPopupBlocked'),'info');return;}
   logAction(t('logPrintedReport'));
-  _openReport(_accReportHtml(),1200,800);
 }
 // Every account's details in one file: admins only, with the operator's PIN (2026-10-04 audit).
 async function exportAccountsCsv(){
