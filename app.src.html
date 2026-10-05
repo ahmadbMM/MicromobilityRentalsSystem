@@ -20275,7 +20275,11 @@ function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 function _modIds(a){return Array.isArray(a)?a.map(x=>x==='fnb'?'vendors':x):null;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
-function _editOk(tab){return !Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
+// Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
+// sections an edit list names, so an account with a list (the Owner's is empty) could open its
+// Settings but not save its own name, email or notifications there: read-only mode refused
+// staff_my_settings and staff_set_own_email. It is always the account's to change (2026-10-05).
+function _editOk(tab){return tab==='settings'||!Array.isArray(S._myEdit)||S._myEdit.includes(tab);}
 function _firstTab(){return _staffSections().find(_deskTabOk)||'queue';}
 function _accessSet(row,uid){
   // the account's own Settings (20261002140000): its notification choices, name and picture
@@ -20451,8 +20455,14 @@ async function _tplEdSave(){
   _tplEdSync();const E=S._tplEd;if(!E)return;
   const b=document.getElementById('tpl-save');if(b)b.disabled=true;
   try{
-    await _tplLoad(true);
-    const all={...(S._tpl||{})},mine={};
+    // Its own read, and one that fails stops the save (2026-10-05): _tplLoad keeps this device's
+    // copy when its read fails, and that copy written over the server wiped the messages other
+    // admins had saved since.
+    const cur=await sb.from('site_content').select('value').eq('key',TPL_KEY).maybeSingle();
+    if(_writeErr(cur,'message template',()=>_tplEdSave())){if(b)b.disabled=false;return;}
+    const sv=cur.data&&cur.data.value;
+    const all=(sv&&typeof sv==='object'&&!Array.isArray(sv))?{...sv}:{},mine={};
+    S._tpl={...all};
     ['en','ar'].forEach(g=>{const v=String(E.text[g]||'').replace(/\r/g,'').trim();if(v&&v!==_tplDefault(E.id,g).trim())mine[g]=v;});
     if(Object.keys(mine).length)all[E.id]=mine;else delete all[E.id];
     if(await _wr(sb.from('site_content').upsert({key:TPL_KEY,value:all,updated_by:_opName()||null}),'message template')){if(b)b.disabled=false;return;}
@@ -20525,14 +20535,24 @@ async function _setPwdSave(){
   if(p1!==p2){_setErr('set-pwd-err',t('errPasswordMatch'));return;}
   _setErr('set-pwd-err','');
   const b=document.getElementById('set-pwd-save');if(b)b.disabled=true;
+  // Supabase Auth answers in English: the refusals it names by code are said in the staffer's
+  // language (2026-10-05); anything else still shows its own words.
+  const authSay=(er,isCheck)=>{
+    const c=String((er&&er.code)||''),m=String((er&&er.message)||'');
+    if(isCheck&&(c==='invalid_credentials'||/invalid/i.test(m)))return t('errCurPwd');
+    if(/rate_limit/.test(c)||(er&&er.status===429)||/rate limit|too many/i.test(m))return t('errTooManyTries');
+    if(c==='same_password'||/different from the old password/i.test(m))return t('accPwdSame');
+    if(c==='weak_password'||/weak|at least \d+ characters/i.test(m))return t('errPasswordLen');
+    return m||t('errConnection');
+  };
   try{
     // the current password first: signing in again with it is the check, and keeps the session
     let email=_set().email;
     if(!email){const{data}=await sb.auth.getSession();email=(data&&data.session&&data.session.user&&data.session.user.email)||'';}
     const chk=await sb.auth.signInWithPassword({email,password:cur});
-    if(chk.error){_setErr('set-pwd-err',/invalid/i.test(chk.error.message||'')?t('errCurPwd'):(chk.error.message||t('errConnection')));return;}
+    if(chk.error){_setErr('set-pwd-err',authSay(chk.error,true));return;}
     const{error}=await sb.auth.updateUser({password:p1});
-    if(error){_setErr('set-pwd-err',error.message||t('errConnection'));return;}
+    if(error){_setErr('set-pwd-err',authSay(error,false));return;}
   }catch(e){_setErr('set-pwd-err',t('errConnection'));return;}
   finally{if(b)b.disabled=false;}
   try{const r=await sb.rpc('staff_mark_pwd_changed');if(r&&r.error&&!_tmMissing(r.error))console.error('mark pwd changed',r.error);}catch(_){}
@@ -20583,7 +20603,7 @@ function renderTeam(){
     const chip=(kind,k,on)=>`<button type="button" class="toggle-btn tm-chip${on?' active':''}" aria-pressed="${on}" data-sec="${kind}:${k}"${dis} data-on-click="${_on("_tmToggle",a.user_id,kind,k)}">${esc(_sectionName(k))}</button>`;
     return`<div class="tm-acct" data-acct="${esc(a.user_id)}">
       <div class="tm-acct-head"><strong>${esc(a.email||a.user_id)}</strong>${a.is_me?`<span class="tm-me">${t('acctYou')}</span>`:''}
-        <select class="filter-select tm-role" aria-label="${esc(t('roleAdmin'))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}">${STAFF_ROLES.map(r=>`<option value="${r}"${d.role===r?' selected':''}>${_roleLabel(r)}</option>`).join('')}</select></div>
+        <select class="filter-select tm-role" aria-label="${esc(t('tmRoleFor').replace('{0}',a.email||a.user_id))}"${dis} data-on-change="${_on("_tmRole",a.user_id,_P("value"))}">${STAFF_ROLES.map(r=>`<option value="${r}"${d.role===r?' selected':''}>${_roleLabel(r)}</option>`).join('')}</select></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctView')}</span><div class="tm-chips">${secs.map(k=>chip('view',k,inV(k))).join('')}</div></div>
       <div class="tm-row"><span class="tm-lbl">${t('acctEdit')}</span><div class="tm-chips">${secs.filter(inV).map(k=>chip('edit',k,inE(k))).join('')}</div></div>
       ${a.is_me?'':`<div class="tm-save"><button type="button" class="btn-sm btn-green" data-on-click="${_on("_tmSave",a.user_id)}"${T.edit[a.user_id]?'':' disabled'}>${t('saveBtn')}</button></div>`}
