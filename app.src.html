@@ -25852,8 +25852,10 @@ function _on_renderBikes_10(event,el){S._bkSpeeds=el.value}
 function _on_renderBikes_11(event,el){pickImage(el,u=>{S._bkPhoto=u;renderBikes();},480)}
 function _on_renderBikes_12(event,el){S._bkPhoto='';renderBikes()}
 function _on_renderBikes_13(event,el,a0,a1){S.bkSortDir=(S.bkSortCol===a0&&S.bkSortDir===1)?-1:1;S.bkSortCol=a1;renderBikes()}
-function _on_renderBikes_14(event,el,a0){S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
-function _on_renderBikes_15(event,el,a0){S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
+// "+ Road", "+ Hybrid"...: a new bike starts from an empty form, as "+ Add bike" does (2026-10-05) -
+// the last bike edited or cloned left its serial, tag and notes (and its brand, price...) in it.
+function _on_renderBikes_14(event,el,a0){_resetBikeForm();S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
+function _on_renderBikes_15(event,el,a0){_resetBikeForm();S.showAddBike=true;S.addBikeType=a0;S.editBikeId=null;S.addBikeSize='M';S.addBikeColors=['#03ff89'];S.addBikeColorNames=[''];S._bkName='';S._bkFrame='';S._bkNumber=String(_nextBikeNumber());renderBikes();_scrollToBikeForm()}
 function _on_renderBikes_16(event,el){S.bkShowRetired=!S.bkShowRetired;renderBikes()}
 function _on_renderBikes_17(event,el){el.style.borderColor='rgba(var(--tint-rgb),.15)'}
 function _on_renderBikes_18(event,el){el.style.borderColor='rgba(var(--tint-rgb),.07)'}
@@ -26606,7 +26608,9 @@ function _bkCsvHeaderMap(head){
 function _bkCsvRows(text){
   const rows=_csvParse(text);if(rows.length<2)return{rows:[],err:'empty'};
   const map=_bkCsvHeaderMap(rows[0]);if(map.number==null||map.type==null)return{rows:[],err:'head'};
-  const fleetNums=new Set(getBikes().filter(b=>b.status!=='retired'&&b.bike_number!=null).map(b=>Number(b.bike_number)));
+  // every bike's number, a retired bike's too (2026-10-05): it still wears its number, and the form
+  // and the database refuse it, so the preview passed a row the import then lost
+  const fleetNums=new Set(getBikes().filter(b=>b.bike_number!=null).map(b=>Number(b.bike_number)));
   const seen=new Set(),seenTags=new Set(),frames=_bkFrameList();
   const numOr=(v,int)=>{v=String(v||'').trim().replace(',','.');if(!v)return null;const n=int?parseInt(v,10):parseFloat(v);return isNaN(n)?null:n;};
   const out=rows.slice(1).map((r,i)=>{
@@ -26689,6 +26693,9 @@ async function _bkCsvImport(){
   renderBikes();
 }
 async function addBike(){if(_bkSaving)return;_bkSaving=true;try{await _addBikeNow();}finally{_bkSaving=false;}}
+// The form's rental price as a number, 0 included (2026-10-05): parseFloat(...)||null read a bike set
+// to 0 (by Set price on several bikes, or an import) as not set, and its next save wiped the 0.
+function _bkRentalVal(){const v=parseFloat(S._bkRentalPrice);return Number.isFinite(v)?v:null;}
 async function _addBikeNow(){
   const size=document.getElementById('bk-size').value||'M';
   const brandRaw=document.getElementById('bk-brand')?.value.trim();
@@ -26708,7 +26715,7 @@ async function _addBikeNow(){
   const name=customName||genBikeName(S.addBikeType,S._bkFrame,bikeNum,size);
   _autoSaveBkOpts(brand,model,groupset);
   const colorNames=S.addBikeColorNames.slice(0,S.addBikeColors.length).map(n=>n||'');
-  const rentalPrice=S._bkRentalPrice?parseFloat(S._bkRentalPrice)||null:null;
+  const rentalPrice=_bkRentalVal();
   const startDate=(document.getElementById('bk-start')?.value||S._bkStartDate||_todayISO());
   const bike={id:uid(),name,size,type:S.addBikeType,colors:[...S.addBikeColors],color_names:colorNames,status:'available',brand,model,groupset,speeds,rental_price:rentalPrice,frame_type:S._bkFrame,bike_number:bikeNum,in_service_date:startDate,retired_date:null,wheel_size:S._bkWheel||null,brake_type:S._bkBrake||null,weight_kg:_bkWeightVal(),..._bkPrivPatch(true).patch};
   const ins=await sb.from('bikes').insert(bike);
@@ -26805,7 +26812,7 @@ async function _saveBikeEditNow(){
     if(!ok)return;
   }
   const editColorNames=S.addBikeColorNames.slice(0,S.addBikeColors.length).map(n=>n||'');
-  const rentalPrice=S._bkRentalPrice?parseFloat(S._bkRentalPrice)||null:null;
+  const rentalPrice=_bkRentalVal();
   const startDate=(document.getElementById('bk-start')?.value||S._bkStartDate||existing.in_service_date||_todayISO());
   // The status is not the form's to write, and neither is its undo's: the edit sent back the
   // status this device last saw and the undo restored the one from edit time, so undoing an
@@ -27720,10 +27727,13 @@ function riderUndoCheckinParty(id){
 // of the rider's QR (MMP-<number>) or from the booking number in the list.
 async function _scanRider(no,say){
   if(!S.ridersLoaded)await loadRiders();
-  // Numbers repeat night to night: the night on show wins, then a live night, then the latest.
+  // Numbers repeat night to night: tonight's wins (the camera takes today's tickets), then the
+  // night on show, then a live night, then the latest. The night on show came first, and a desk
+  // looking at another night opened that night's P-001 and refused a valid ticket (2026-10-05).
   const hits=(S.riders||[]).filter(x=>String(x.booking_no||'').toUpperCase()===no);
   const _live=new Set(allSessions().filter(_sessLive).map(x=>x.id));
-  const _rank=x=>x.session_id===S.ridersSession?0:_live.has(x.session_id)?1:2;
+  const _today=_todayISO(),_dayOf=sid=>{const s=_sessGet(sid);return String((s&&(s.session_date||s.id))||sid||'').slice(0,10);};
+  const _rank=x=>(_dayOf(x.session_id)===_today?0:4)+(x.session_id===S.ridersSession?0:2)+(_live.has(x.session_id)?0:1);
   hits.sort((a,b)=>_rank(a)-_rank(b)||String(b.session_id||'').localeCompare(String(a.session_id||''))||_riderPartyNo(a)-_riderPartyNo(b));
   const r=hits[0]; // a party's number opens the employee's row
   if(!r){say(t('scanNotFound'),'var(--red)');return;}
