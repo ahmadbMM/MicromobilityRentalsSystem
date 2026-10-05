@@ -680,7 +680,8 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   customer's live row on a run without a distance (RUN_KM), under 18 (RUN_AGE), without the details (RUN_DETAILS) or a
   second live row (ONE_PER_SESSION); staff are exempt (the desk's dialogs check the age and ask the distance).
   `_bookRefused` says each in the rider's words.
-- **Staff**: the roster's Distance column (`_qc.km`, `_runKmCell`), the 3 km / 5 km / No distance split that filters
+- **Staff**: the roster's Distance column (`_qc.km`, `_runKmCell`), the Membership column with its filter and sort (`_memv`:
+  the Saturday ride's, kept apart from `_cqv` so Approve / Publish stay off the run; 2026-10-06), the 3 km / 5 km / No distance split that filters
   (`_runSplitHtml`, `S.sfKm`), Finished instead of Return Bike, "Emergency contact" in the row menu (`_runEmShow`, read
   when asked: the sync does not carry the columns), the distance in Add rider / the walk-in / the booking editor
   (`_runKmField`), the account editor's emergency contact (`_cfEmHtml`, written only once read).

@@ -19724,6 +19724,9 @@ function renderStaffQueue(_resultsOnly){
   if(_fd&&S.sfSession!=='all'&&_apprSessIds.has(S.sfSession))S.sfSession=_currentSessId(); // one Front Desk cannot see
   const queue=getQueue();const sessions=allSessions().filter(s=>!(_fd&&_isApprovalRide(s)));
   const _cqv=S.sfSession!=='all'&&_isApprovalRide(_sessGet(S.sfSession)); // _commQueueView(), worked out once per paint
+  // The Membership column, its filter and its sort: the Saturday ride's, and Run for Her's (the owner, 2026-10-06: "add a
+  // membership column in the bookings table of run for her"). The run is members only, yet staff can add anyone at the desk.
+  const _memv=_cqv||(S.sfSession!=='all'&&_rideKind(_sessGet(S.sfSession))==='runher');
   // A rider who registered on the Petromin form is counted and handled on the Petromin page, so
   // their booking stays off this roster (asked for 2026-09-22). Knowing which they are needs the
   // registrations, so a night that has them loads them here too.
@@ -19823,7 +19826,7 @@ function renderStaffQueue(_resultsOnly){
     if(S.sfBike==='rental')filtered=filtered.filter(e=>!_isOwnBike(e));
     if(_qTypes.includes(S.sfBike))filtered=filtered.filter(e=>(e.typePreference||'Any')===S.sfBike);
   }
-  if(_commQueueView()&&S.sfMember&&S.sfMember!=='all')filtered=filtered.filter(e=>_isSatMember(e)===(S.sfMember==='yes'));
+  if(_memv&&S.sfMember&&S.sfMember!=='all')filtered=filtered.filter(e=>_isSatMember(e)===(S.sfMember==='yes'));
   // Run for Her's runners by distance (the owner, 2026-10-05: "allow the staff in the bookings page to
   // separate them"): the filter, and the split under the filter bar that sets it.
   if(!['all','3','5','none'].includes(S.sfKm||'all'))S.sfKm='all';
@@ -19838,7 +19841,7 @@ function renderStaffQueue(_resultsOnly){
   // The keys that cost something (an account lookup, a tag scan) are worked out once per row, not
   // twice per comparison; names compare through one collator, which orders as localeCompare does.
   const _sk=new Map(),_coll=_sortColl();
-  if(S.sfSort==='member'&&_cqv)filtered.forEach(e=>_sk.set(e,Number(_isSatMember(e))));
+  if(S.sfSort==='member'&&_memv)filtered.forEach(e=>_sk.set(e,Number(_isSatMember(e))));
   else if(S.sfSort==='phone')filtered.forEach(e=>_sk.set(e,String(entryPhone(e)||'')));
   filtered.sort((a,b)=>{
     if(S.sfSort==='name')   return _sfd*_coll.compare(String(a.name??''),String(b.name??''));
@@ -19849,7 +19852,7 @@ function renderStaffQueue(_resultsOnly){
     if(S.sfSort==='km'&&_qc.km)       return _sfd*((Number(a.runKm)||99)-(Number(b.runKm)||99));
     if(S.sfSort==='paid'&&_qc.money)  return _sfd*(Number(a.paid)-Number(b.paid));
     if(S.sfSort==='status') return _sfd*(a.status||'').localeCompare(b.status||'');
-    if(S.sfSort==='member'&&_cqv) return _sfd*(_sk.get(a)-_sk.get(b));
+    if(S.sfSort==='member'&&_memv) return _sfd*(_sk.get(a)-_sk.get(b));
     if(S.sfSort==='height'&&_qc.bike) return _sfd*((Number(a.height)||0)-(Number(b.height)||0));
     if(S.sfSort==='session') return _sfd*(String(a.sessionDate||a.sessionId).localeCompare(String(b.sessionDate||b.sessionId))||a.queueNum-b.queueNum);
     if(S.sfSort==='bike'&&_qc.bike) return _sfd*_bikeNamesOf(a).localeCompare(_bikeNamesOf(b),undefined,{numeric:true});
@@ -19969,7 +19972,7 @@ function renderStaffQueue(_resultsOnly){
   };
   function _commQueueView(){return _cqv;}
 function _memberCell(e,extra){
-  if(!_commQueueView())return '';
+  if(!_memv)return '';
   const m=_isSatMember(e);
   return `<td data-label="${esc(t('colMember'))}"${extra||''}><span class="status-badge ${m?'badge-active':'badge-done'}">${t(m?'memberYes':'memberNo')}</span></td>`;
 }
@@ -20440,7 +20443,7 @@ function renderQRow(e){
         </div>
         <label class="filter-sess${_sessSummaryBar?' filter-sess-dup':''}"><span class="filter-field-lbl">${t('colSession')}</span>
           <select class="filter-select" data-on-change="${_on("setSfSession",_P("value"))}" aria-label="${esc(t('colSession'))}">${qSessOpts}</select></label>
-        ${_fBtn('q',[S.sfStatus!=='all',S.sfPay&&S.sfPay!=='all',S.sfBike&&S.sfBike!=='all',S.sfSize&&S.sfSize!=='all',_commQueueView()&&S.sfMember&&S.sfMember!=='all',_qc.km&&S.sfKm&&S.sfKm!=='all'].filter(Boolean).length)}
+        ${_fBtn('q',[S.sfStatus!=='all',S.sfPay&&S.sfPay!=='all',S.sfBike&&S.sfBike!=='all',S.sfSize&&S.sfSize!=='all',_memv&&S.sfMember&&S.sfMember!=='all',_qc.km&&S.sfKm&&S.sfKm!=='all'].filter(Boolean).length)}
         <button class="btn-sm btn-green scan-inline" data-on-click="${_on("openScanModal")}" title="${t('scanTitle')}">
           ${_artIcon('camera',14)}
           ${t('scanBtn')}
@@ -20451,7 +20454,7 @@ function renderQRow(e){
         ${_qc.money?_fField(t('filterPay'),`<select class="filter-select" data-on-change="${_on("setSfPay",_P("value"))}" aria-label="${esc(t('filterPay'))}">${qPayOpts}</select>`):''}
         ${_qc.bike?_fField(t('bikeTypeLabel'),`<select class="filter-select" data-on-change="${_on("setSfBike",_P("value"))}" aria-label="${esc(t('bikeTypeLabel'))}">${qBikeOpts}</select>`)
           +_fField(t('filterSize'),`<select class="filter-select" data-on-change="${_on("setSfSize",_P("value"))}" aria-label="${esc(t('filterSize'))}">${qSizeOpts}</select>`):''}
-        ${_commQueueView()?_fField(t('colMember'),`<select class="filter-select" data-on-change="${_on("_on_renderStaffQueue_15",_EV,_EL)}" aria-label="${esc(t('colMember'))}">${[['all',t('filterAll')],['yes',t('memberYes')],['no',t('memberNo')]].map(([v,l])=>`<option value="${v}"${(S.sfMember||'all')===v?' selected':''}>${l}</option>`).join('')}</select>`):''}
+        ${_memv?_fField(t('colMember'),`<select class="filter-select" data-on-change="${_on("_on_renderStaffQueue_15",_EV,_EL)}" aria-label="${esc(t('colMember'))}">${[['all',t('filterAll')],['yes',t('memberYes')],['no',t('memberNo')]].map(([v,l])=>`<option value="${v}"${(S.sfMember||'all')===v?' selected':''}>${l}</option>`).join('')}</select>`):''}
         ${_qc.km?_fField(t('runKmLabel'),`<select class="filter-select" data-on-change="${_on("setSfKm",_P("value"))}" aria-label="${esc(t('runKmLabel'))}">${[['all',t('filterAll')],...RUN_KMS.map(k=>[String(k),_runKmTxt(k)]),['none',t('runKmNone')]].map(([v,l])=>`<option value="${v}"${(S.sfKm||'all')===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`):''}`)}
       ${_qc.km?_runSplitHtml(base):''}
       <div class="result-count" id="q-result-count">${filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:''}</div>
@@ -20475,7 +20478,7 @@ function renderQRow(e){
   _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}" data-nosort>`,'</table></div>',[_qLeaf('head',`<tr>
         ${thQSort('queue',t('colBookingNum'))}
         ${thQSort('name',t('colRider'))}
-        ${_commQueueView()?thQSort('member',t('colMember')):''}
+        ${_memv?thQSort('member',t('colMember')):''}
         ${_qc.bike?thQSort('type',t('bikeTypeLabel')):''}
         ${_qc.grp?thQSort('grp',t('colGroup')):''}
         ${_qc.km?thQSort('km',t('runKmLabel')):''}

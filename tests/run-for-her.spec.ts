@@ -181,6 +181,28 @@ test.describe('@staff:bookings Run for Her', () => {
     await expect(tq.locator('tr[data-id="r1"]')).not.toContainText('Return Bike');
   });
 
+  test('the roster shows who is a member, filters and sorts by it, with no Approve or Publish', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const tags = [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#00e585', locked: true }];
+    const customer_tags = [{ customer_id: 'cr1', tag_id: 'tag_saturday', added_at: 1, expires_at: null, starts_at: null }];
+    await staffBoot(page, [row('r1', 5), row('r2', 3)], { tags, customer_tags });
+    await page.evaluate(`(()=>{S.tags=${JSON.stringify(tags)};S.customerTags=${JSON.stringify(customer_tags)};renderStaffQueue();})()`);
+    const tq = page.locator('#tab-queue');
+    await expect(tq.locator('.queue-table thead')).toContainText('Membership');
+    await expect(tq.locator('tr[data-id="r1"] td[data-label="Membership"]')).toHaveText('Member');
+    await expect(tq.locator('tr[data-id="r2"] td[data-label="Membership"]')).toHaveText('Non-member');
+    await page.evaluate(`S.sfMember='no';renderStaffQueue()`);
+    await expect(tq.locator('.queue-table tbody tr[data-id]')).toHaveCount(1);
+    await expect(tq.locator('.queue-table tbody tr[data-id="r2"]')).toHaveCount(1);
+    await page.evaluate(`S.sfMember='all';S.sfSort='member';S.sfSortDir=-1;renderStaffQueue()`);
+    expect(await page.evaluate(`S._qOrder.join()`)).toBe('r1,r2');
+    // the run takes no approvals: those buttons stay on the Saturday ride
+    await expect(tq.getByRole('button', { name: 'Publish' })).toHaveCount(0);
+    // another night's roster has no Membership column
+    await page.evaluate(`S.sfSession='2099-10-18';S.sfSort='queue';renderStaffQueue()`);
+    await expect(tq.locator('.queue-table thead')).not.toContainText('Membership');
+  });
+
   test('Finished ends a free run at once: no payment question for a runner who owes nothing', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await staffBoot(page, [row('r1', 5, { status: 'active', checked_in_at: '2099-10-17T03:00:00Z' })]);
