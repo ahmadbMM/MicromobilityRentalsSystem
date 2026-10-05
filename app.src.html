@@ -1076,7 +1076,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   gridViewBtn:'Grid',tableViewBtn:'Table',
   searchLabel:'Search bikes...',noResultsLabel:'No bikes match your search.',
   confirmNoShowTitle:'Mark as No-Show?',confirmRemoveTitle:'Remove Rider?',
-  addNewOption:'Add new...',typeNewLabel:'Type new value...',saveBtn:'Save',
+  addNewOption:'Add new...',typeNewLabel:'Type new value...',saveBtn:'Save',waiverOutdatedMsg:'This page is out of date and the waiver has changed. It reloads now: read the new waiver, agree to it and book again.',errCollectLate:'Bike collection can’t be later than the start time.',icsRideTitle:'MicroMobility Ride',icsDescBike:'Your MicroMobility bike rental. Arrive 10 minutes early and show your ticket at the booth.',icsDescRide:'Your MicroMobility ride. Be at the meeting point by the gathering time and show your ticket there.',icsDescVisit:'Your MicroMobility booking. Arrive 10 minutes early and show your ticket when you arrive.',icsAlarm:'Reminder: {0}',
   releaseBikeBtn:'Release',releaseBikeToast:'released back to available',noRiderAssigned:'No rider assigned',
   errValidPrice:'Please enter a valid price (0 or above).',
   toastPriceSet:'Price set to SAR {0}',
@@ -1627,7 +1627,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   gridViewBtn:'شبكة',tableViewBtn:'جدول',
   searchLabel:'ابحث عن دراجة...',noResultsLabel:'لا توجد دراجات تطابق بحثك.',
   confirmNoShowTitle:'تسجيل كغائب؟',confirmRemoveTitle:'حذف الراكب؟',
-  addNewOption:'إضافة جديد...',typeNewLabel:'اكتب قيمة جديدة...',saveBtn:'حفظ',
+  addNewOption:'إضافة جديد...',typeNewLabel:'اكتب قيمة جديدة...',saveBtn:'حفظ',waiverOutdatedMsg:'هذه الصفحة قديمة وقد تغيّر الإقرار. ستُعاد تحميلها الآن: اقرأ الإقرار الجديد ووافق عليه ثم احجز مجدداً.',errCollectLate:'لا يمكن أن يكون وقت استلام الدراجات بعد وقت الانطلاق.',icsRideTitle:'رحلة MicroMobility',icsDescBike:'حجز دراجتك من MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند الكشك.',icsDescRide:'رحلتك مع MicroMobility. كن في نقطة التجمع بحلول وقت التجمع واعرض تذكرتك هناك.',icsDescVisit:'حجزك مع MicroMobility. احضر قبل الموعد بـ 10 دقائق واعرض تذكرتك عند وصولك.',icsAlarm:'تذكير: {0}',
   releaseBikeBtn:'تحرير',releaseBikeToast:'تم تحريره وأصبح متاحاً',noRiderAssigned:'لا يوجد راكب',
   errValidPrice:'الرجاء إدخال سعر صحيح (صفر أو أكثر).',
   toastPriceSet:'تم تعيين السعر على {0} ريال',
@@ -6242,8 +6242,9 @@ function prefillFromAccount(){
     S._rHeight=String(S.loggedIn.height);
     if(S.regBikeHeights.length===0)S.regBikeHeights=[String(S.loggedIn.height)]; else if(!S.regBikeHeights[0])S.regBikeHeights[0]=String(S.loggedIn.height); // never stomp a height the customer already typed mid-wizard (e.g. booking bike 1 for a child)
   }
-  
-  if(S.loggedIn.type_preference&&S.loggedIn.type_preference!=='Any'){
+
+  // A type staff hid from this rider is never seeded (_regTyBarred, 2026-10-05).
+  if(S.loggedIn.type_preference&&S.loggedIn.type_preference!=='Any'&&!_regTyBarred(S.loggedIn.type_preference)){
     if(S.regBikeTypes.length===0)S.regBikeTypes=[S.loggedIn.type_preference];
     else if(!S.regBikeTypes[0])S.regBikeTypes[0]=S.loggedIn.type_preference;
   }
@@ -7026,6 +7027,7 @@ async function selectEvent(ev){
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
   // add-ons and the booking being changed from the last one.
   S.lastTickets=[];S.regStep=1;S.regAddons=[];S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;
+  if(S.regRiderNames&&S.regRiderNames.length)S.regRiderNames[0]=undefined; // rider 1 is the account holder again (2026-10-05)
   _perksHydrate();
   // A one-date event has nothing to choose between. The National Day ride is a single night,
   // so picking its card opens the ride itself rather than a list holding one of it — and if
@@ -9709,8 +9711,14 @@ function closePinModal(){
   if(_isStaffHost())setTimeout(()=>{if(S.view!=='staff')openPinModal();},0);
 }
 
-
-
+// A type staff hid from this rider (customers.hidden_types, or Road Carbon for a VIP) is not theirs
+// to book (2026-10-05): its pill was gone, but a choice seeded from the profile or carried over from
+// another ride stayed selected, priced and booked. Barred only while the picker offers another type:
+// when staff hid every one, the picker shows them all (renderRegister) and so does this.
+function _regTyBarred(ty,sess){
+  if(!ty||!_regTypeHidden(ty))return false;
+  return bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)).some(x=>x!=='Any'&&!_regTypeHidden(x));
+}
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderRegister_1(event,el,a0){S.regRiderNames[a0]=el.value}
@@ -9740,6 +9748,9 @@ function renderRegister(){
   // from everywhere ... only allow staff to use it"): one seeded from the profile or an old booking
   // reads as not chosen yet, so the form asks for a type.
   S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Any'?undefined:ty);
+  // A type staff hid from this rider reads as not chosen yet too (_regTyBarred, 2026-10-05); a booking
+  // being changed keeps the types it was made with (its riders added here start with none).
+  if(!S.modifyEntryId)S.regBikeTypes=S.regBikeTypes.map(ty=>_regTyBarred(ty,_selSessObj)?undefined:ty);
   if(S._bw===undefined)_bwLoad(); // the booking window, once; the list repaints when it lands
   let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,_ev))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
@@ -9870,14 +9881,18 @@ function renderRegister(){
   if(_selSessObj&&!_ownOffered(_selSessObj))S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Own'?'':ty);
   // A quantity carried over from another night may be past this night's allowance.
   if((!_commSel||_grpSel)&&_selSessObj&&S.regQty>_maxRiders(_selSessObj)){S.regQty=_maxRiders(_selSessObj);ensureBikeSizes();}
+  // Rider 1 is the account holder whenever their name box is not drawn (one rider, which a ride that
+  // takes the account holder alone forces): a name typed for rider 1 while the party was bigger, or
+  // on another event, filed a solo booking under it (2026-10-05). An edit keeps the booking's names.
+  if(S.regQty<=1&&!isModifyMode&&S.regRiderNames[0]!==undefined)S.regRiderNames[0]=undefined;
   const qtyStepper=(_commSel&&!_grpSel)?'':`
     <div class="reg-row">
       <span class="reg-row-label">${t(_needsBike(_selSessObj)?'numBikes':'reviewPartLabel')}${_grpSel?` <span class="label-hint">${t('groupCapHint').replace('{0}',String(_maxRiders(_selSessObj)))}</span>`:''}</span>
       <div class="cu-qty-col">
         <div class="qty-stepper">
-          <button class="qty-btn" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">${_cuIc('minus',18)}</button>
+          <button class="qty-btn" id="reg-qty-dec" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">${_cuIc('minus',18)}</button>
           <span class="qty-val" aria-live="polite">${S.regQty}</span>
-          <button class="qty-btn" data-on-click="${_on("changeRegQty",1)}" type="button" aria-label="${t('qtyIncLabel')}">${_cuIc('plus',18)}</button>
+          <button class="qty-btn" id="reg-qty-inc" data-on-click="${_on("changeRegQty",1)}" type="button" aria-label="${t('qtyIncLabel')}">${_cuIc('plus',18)}</button>
         </div>
         ${S._qtyCapNote&&!_grpSel?`<div class="qty-cap-note" role="status">${t('jccCapNote').replace('{0}',String(JCC_ACCOUNT_CAP))}</div>`:''}
       </div>
@@ -9995,6 +10010,7 @@ function renderRegister(){
     const _wl=tkt.status==='waitlist';
     const _mod=_rideKind(_sess)==='snd96'?'':_wl?' tk-wl':_commT?'':' tk-live'+(String(tkt.sessionDate||'').slice(0,10)===todayStr()?' tk-today':'');
     const _owe=(!_commT&&!_wl&&!tkt.paid)?(Number(tkt.price??DEFAULT_PRICE)||0)+addonsCost(entryAddons(tkt)):0;
+    const _rk=(_wl&&!_commT)?_wlRankMin([tkt]):null; // the live place, never the W serial (2026-10-05)
     return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}">
       ${_tkLogo()}
       ${label?`<div class="cu-tk-label">${label}</div>`:''}
@@ -10006,9 +10022,9 @@ function renderRegister(){
         </div>
       </div>`:tkt.status==='waitlist'?`
       <div class="ticket-top">
-        <div class="ticket-num-label wl-loud">${t('wlOnList')}${tkt.waitlistNum?` · ${esc(t('wlLinePos').replace('{0}',tkt.waitlistNum))}`:''}</div>
+        <div class="ticket-num-label wl-loud">${t('wlOnList')}${_rk?` · ${esc(t('wlLinePos').replace('{0}',_rk))}`:''}</div>
         <div class="ticket-num">#${tkt.queueNum}</div>
-        <div class="wl-note">${tkt.waitlistNum?t('wlPosMsg').replace('{0}',String(tkt.waitlistNum)):t('wlPosNoNumMsg')}</div>
+        <div class="wl-note">${_rk?t('wlPosMsg').replace('{0}',String(_rk)):t('wlPosNoNumMsg')}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
       </div>`:`
       <div class="ticket-top">
@@ -10060,7 +10076,8 @@ function renderRegister(){
 
   
   const _isReturning=cust&&cust.id&&(cust.height||cust.type_preference)&&getQueue().some(e=>e.customerId===cust.id&&(e.status==='done'||e.status==='waiting'||e.status==='active'));
-  const usualBtn=(_isReturning&&!_soleSess&&available.some(s=>s.status==='open'))?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">${_cuIc('again')} ${t('bookUsualBtn')}</button>`:'';
+  // Only on the circuit's list, and only when the shortcut has a night to book there (_usualNights).
+  const usualBtn=(_isReturning&&!_soleSess&&_ev==='jcc'&&_usualNights(cust).length)?`<button class="btn-secondary cu-usual" data-on-click="${_on("bookMyUsual")}">${_cuIc('again')} ${t('bookUsualBtn')}</button>`:'';
   const panel1=`
     ${_soleSess?stepHeader(t('regStep1TitleOne'),t('regStep1MsgOne'))
                :stepHeader(t('regStep1Title'),t((S.selEvent==='community'||S.selEvent==='workshop')?'regStep1MsgJoin':'regStep1Msg'))}
@@ -10156,7 +10173,7 @@ function renderRegister(){
     <div class="form-section">
       <div class="cu-waiver-text" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
       <label class="mm-waiver-agree cu-waiver${S.waiverOk?' cu-waiver-ok':''}">
-        <input type="checkbox" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
+        <input type="checkbox" id="reg-waiver-cb" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
         <span class="cu-waiver-lbl">${_waiverCopy(_selSessObj).agree}</span>
       </label>
     </div>
@@ -10175,16 +10192,16 @@ function renderRegister(){
       // soft green wash when selected). Quantity stepper appears once selected (the real app
       // supports multi-qty + stock caps, which the prototype's plain checkboxes don't).
       const _aCard=it=>{const qn=_regAddonQty(it.id);const stock=Number(it.qty)||0;const cap=stock>0?stock:10;const sel=qn>0;return`<div class="addon-row${sel?' sel':''}">
-            <button type="button" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?_cuIc('tick',14):''}</button>
+            <button type="button" id="reg-ad-chk-${esc(it.id)}" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?_cuIc('tick',14):''}</button>
             ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="addon-thumb" role="button" tabindex="0" aria-label="${esc(it.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_5",_EV,_EL)}">`:''}
             <div class="cu-f1-min0">
               <div class="cu-ad-name">${esc(it.name)}${it.brand?` <span class="cu-ad-brand">· ${esc(it.brand)}</span>`:''}</div>
               ${_hasNutri(it)?`<button type="button" data-on-click="${_on("showNutrition",it.id)}" class="cu-ad-nutri">${t('nuButton')}</button>`:''}
             </div>
             ${sel&&cap>1?`<span class="addon-qty">
-              <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,-1)}" aria-label="−">−</button>
+              <button type="button" id="reg-ad-dec-${esc(it.id)}" data-on-click="${_on("_setRegAddonQty",it.id,-1)}" aria-label="−">−</button>
               <span>${qn}</span>
-              <button type="button" data-on-click="${_on("_setRegAddonQty",it.id,1)}" ${qn>=cap?'disabled':''} aria-label="+">+</button>
+              <button type="button" id="reg-ad-inc-${esc(it.id)}" data-on-click="${_on("_setRegAddonQty",it.id,1)}" ${qn>=cap?'disabled':''} aria-label="+">+</button>
             </span>`:''}
             <bdi class="cu-ad-price">${esc(_cuPrice(it.price))}</bdi>
           </div>`;};
@@ -10242,7 +10259,26 @@ function renderRegister(){
       <img src="/assets/snd96-logo.svg" class="snd-flow-logo" alt="${esc(t('evSnd96Name'))}" decoding="async" data-on-error="${_on("_on_renderRegister_6",_EV,_EL)}">
       <div class="snd-flow-name">${esc(t('evSnd96Name'))}</div>
     </div>`:'';
-  document.getElementById('tab-register').innerHTML=_sndHead+body;
+  // A control inside the step (the waiver tick, the rider stepper, an add-on's buttons, the promo
+  // Apply / Remove, a box being typed in when a refresh lands) is drawn again with the step, which
+  // dropped the keyboard focus on <body> (2026-10-05). It keeps it: found again by its id, else what
+  // stands in for it once it is gone or switched off (_regRefocus), a box with its caret.
+  const host=document.getElementById('tab-register'),fa=document.activeElement;
+  let keep=null;
+  if(host&&fa&&fa!==host&&fa.id&&host.contains(fa)){keep={id:fa.id,s:null};try{if(typeof fa.selectionStart==='number')keep.s=[fa.selectionStart,fa.selectionEnd];}catch(_){}}
+  host.innerHTML=_sndHead+body;
+  if(keep)_regRefocus(keep);
+}
+// An add-on's last unit taken off removes its stepper (its tick stands in), a full one switches its
+// "+" off (the "−" stands in), and an applied code switches the promo box off (its button stands in).
+function _regRefocus(k){
+  const ad=/^reg-ad-(?:dec|inc)-(.+)$/.exec(k.id),pr=/^reg-promo-(step2|review)$/.exec(k.id);
+  const ids=[k.id,...(ad?['reg-ad-dec-'+ad[1],'reg-ad-chk-'+ad[1]]:[]),...(pr?['reg-promo-btn-'+pr[1]]:[])];
+  for(const id of ids){
+    const el=document.getElementById(id);if(!el||el.disabled)continue;
+    try{el.focus({preventScroll:true});if(id===k.id&&k.s)el.setSelectionRange(k.s[0],k.s[1]);}catch(_){}
+    return;
+  }
 }
 
 function toggleWaiver(on){S.waiverOk=!!on;S._waiverSess=on?S.selSession:null;renderRegister();}
@@ -10323,8 +10359,8 @@ function _promoBoxHtml(slot,disc,hide,isModify){
       <input id="reg-promo-${slot}" class="reg-promo cu-promo-in" type="text" value="${esc(S.promoApplied?S.promoApplied.code:'')}" placeholder="${t('promoLabel')}" ${S.promoApplied?'disabled':''}
         data-on-keydown="${_on("_on__promoBoxHtml_1",_EV,_EL)}">
       ${S.promoApplied
-        ?`<button class="btn-secondary cu-shrink0" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
-        :`<button class="btn-secondary cu-shrink0" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
+        ?`<button class="btn-secondary cu-shrink0" id="reg-promo-btn-${slot}" data-on-click="${_on("removePromo")}">${t('promoRemoveBtn')}</button>`
+        :`<button class="btn-secondary cu-shrink0" id="reg-promo-btn-${slot}" data-on-click="${_on("applyPromoCode")}">${t('promoApplyBtn')}</button>`}
     </div>
     ${S._promoMsg?`<div class="cu-promo-err">${S._promoMsg}</div>`:''}
     <div id="reg-promo-disc-${slot}">${_promoDiscLine(disc)}</div>
@@ -10450,7 +10486,9 @@ function validateRegInputs(){
       return false;
     }
   }
+  const _vSess=allSessions().find(x=>x.id===S.selSession);
   for(let i=0;i<qty;i++){
+    if(_regTyBarred(S.regBikeTypes[i],_vSess))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05)
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
       _groupErr(wrap,t('errSelectTypeGeneric'));
@@ -10691,6 +10729,10 @@ function _waiverAgreed(){return !!S.waiverOk&&(!S._waiverSess||S._waiverSess===S
 // A booking queued offline lands through customer_create_booking later, like an online one, so it
 // has to carry the waiver it was agreed under; entryToDB alone left waiver_at empty on the row.
 function _outboxRow(e,sess){const r=entryToDB(e),wv=_waiverVersionFor(sess);return wv?{...r,waiver_version:wv}:r;}
+// Every rider of one booking goes into the outbox in ONE stored write, so they are all kept or none
+// is (2026-10-05). Row by row, a full storage kept the first riders queued, sent on reconnect, while
+// the screen said the booking had failed.
+function _bookOutboxAddAll(rows){if(rows.length===1)return _bookOutboxAdd(rows[0]);const o=_bookOutbox();o.push(...rows);return _bookOutboxSave(o);}
 // The database refuses a customer booking that carries no waiver (customer_create_booking raises
 // WAIVER_REQUIRED, P0001). Whichever path met it, the rider is told why and goes back to the
 // waiver step, unticked, exactly as the client-side guard in submitReg does.
@@ -10731,6 +10773,25 @@ function _bookRefused(err,sess){
   const m=((err&&err.code)||'')+' '+((err&&err.message)||'');
   if(/STALE_SESSION/.test(m)){doLogout(true);toast(t('errSessionStale'),'warning');return;}
   if(/SESSION_CLOSED/.test(m)){toast(t('errSessionClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}
+  // The booking window (_booking_window_guard: 'NOT_OPEN_YET: booking for <date> opens on <day>', or
+  // 'opens at HH:MM' on the day itself) reached riders as the database words it (2026-10-05). It is
+  // said in their language with the day it opens, and the window is read again, so the list greys
+  // the ride as the server sees it.
+  if(/NOT_OPEN_YET/.test(m)){
+    const day=(/opens on (\d{4}-\d{2}-\d{2})/.exec(m)||[])[1],at=(/opens at (\d{1,2}:\d{2})/.exec(m)||[])[1],w=_bwGet();
+    const when=day?shortDate(day)+(w.at?' '+w.at:''):at?shortDate(todayStr())+' '+at:'';
+    toast(when?t('bwOpensOn').replace('{0}',when):t('errSessionClosed'),'error');
+    _bwLoad(true).then(()=>{if(S.view==='customer'&&S.custTab==='register')renderRegister();}).catch(()=>{});
+    return;
+  }
+  // The waiver this page carries is no longer the one in force (WAIVER_OUTDATED): the page is an older
+  // build than the database. Nothing on it can fix that, so it says so and reloads into the current
+  // one, whose waiver the rider then reads and agrees to (2026-10-05).
+  if(/WAIVER_OUTDATED/.test(m+' '+((err&&(err.details||err.detail))||''))){
+    toast(t('waiverOutdatedMsg'),'error');
+    setTimeout(()=>{try{location.reload();}catch(_){}},2500);
+    return;
+  }
   const rule=_rideRuleRefusal(err);
   if(rule==='MEMBERS_ONLY'){showCommMembersModal();return;}
   if(rule==='ONE_PER_SESSION'){toast(t('errAlreadyBooked'),'error');return;}
@@ -10830,7 +10891,7 @@ async function _submitReg(){
   const email=cust.email||'',phone=cust.phone||'';
   
   const riderNames=Array.from({length:qty},(_,i)=>{
-    const entered=S.regRiderNames[i];
+    const entered=qty>1?S.regRiderNames[i]:undefined; // one rider has no name box: the account holder (2026-10-05)
     return (entered!==undefined&&entered.trim())?entered.trim():(i===0?cust.name:'');
   });
   const queue=getQueue();
@@ -10908,7 +10969,7 @@ async function _submitReg(){
       // If the device cannot even store the queue - a full localStorage - there is nothing to
       // sync later and nothing on the server, so the rider must NOT be handed a ticket and a
       // queue number for a booking that exists only until they close the tab.
-      if(!entries.map(e=>_bookOutboxAdd(_outboxRow(e,sess))).every(Boolean)){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
+      if(!_bookOutboxAddAll(entries.map(e=>_outboxRow(e,sess)))){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
       S.queue=[...(S.queue||[]),...entries.map(e=>entryFromDB(entryToDB(e)))];
       _queued=true;_bookOutboxFlush();
     }else{
@@ -10932,7 +10993,7 @@ async function _submitReg(){
           if(typeof navigator!=='undefined'&&navigator.onLine===false){
             // Connection dropped mid-submit: queue instead of losing the booking - unless the
             // queue itself cannot be written, which is the one case where confirming would lie.
-            if(!entries.map(e=>_bookOutboxAdd(_outboxRow(e,sess))).every(Boolean)){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
+            if(!_bookOutboxAddAll(entries.map(e=>_outboxRow(e,sess)))){S.regSubmitting=false;renderRegister();return;} // _lsSetCritical has already said why
             S.queue=[...(S.queue||[]),...entries.map(e=>entryFromDB(entryToDB(e)))];
             _queued=true;_ok=true;_bookOutboxFlush();
           }else{
@@ -11083,6 +11144,14 @@ async function submitModifyBooking(){
   // Riders added here are new bookings and carry the waiver like any other (see submitReg).
   if(newQty>existing.length&&_needsWaiver(sess)&&!_waiverAgreed()){
     _waiverBack();return;
+  }
+  // Riders added here meet the waitlist cap as a first booking's do (_submitReg, 2026-10-05): on a
+  // full night they land on the waitlist, and a capped one without room for all of them refuses
+  // rather than seating riders past the cap.
+  if(newQty>existing.length){
+    const added=newQty-existing.length,seats=S.regBikeTypes.slice(existing.length,newQty).filter(ty=>ty!=='Own'||_ownTakesPlace(sess)).length;
+    const toWl=_sessFull(sess)||(!_isApprovalRide(sess)&&seats>0&&spotsLeft(S.selSession)<seats);
+    if(toWl&&waitlistRoom(S.selSession)<added){toast(t('errWaitlistFull'),'error');return;}
   }
   // A paid booking keeps what was paid for: a dearer bike on it is the desk's to hand over, and
   // the server refuses the change. Checked before anything is sent, so nothing half-saves.
@@ -11281,6 +11350,41 @@ function _routeHtml(sess,past){
     ${r.track?`<svg class="tk-rt-map" viewBox="0 0 40 158" aria-hidden="true" focusable="false"><path d="${JCC_TRACK}"/><circle cx="12.9" cy="71.4" r="3.2"/></svg>`:''}
   </div>`;
 }
+// ── A waitlisted rider's place in line (2026-10-05) ──
+// waitlist_num is a serial staff hand out and never reuse: W7 can be second in line once five ahead
+// were seated or left, and the ticket said "number 7 in line". The place now comes from the server
+// (customer_waitlist_ranks: the caller's live waitlist rows, 1 = next), asked when a waitlist ticket
+// is drawn and again at most once a minute (after five seconds for a row it has not answered for, a
+// booking just made). Until it answers, when it fails and on a database without it, the ticket says
+// the rider is in line without a number: a serial is never a place.
+function _wlRanksLoad(need){
+  const c=S.loggedIn||getSession();if(!c||!c.id||!c.session_token||!sb)return;
+  const m=S._wlRk,mine=m&&m.id===c.id;if(mine&&(m.busy||m.gone))return;
+  const miss=(need||[]).some(id=>!(mine&&m.map&&m.map.has(String(id))));
+  if(mine&&Date.now()-m.at<(miss?5e3:6e4))return;
+  const cur={id:c.id,at:Date.now(),busy:true,gone:false,map:(m&&m.id===c.id&&m.map)||null};S._wlRk=cur;
+  const key=mp=>JSON.stringify(mp?[...mp]:null);
+  const done=mp=>{cur.busy=false;if(S._wlRk!==cur)return;const was=key(cur.map);cur.map=mp;if(key(mp)!==was)_wlRanksPaint();};
+  Promise.resolve(sb.rpc('customer_waitlist_ranks',{p_id:c.id,p_token:c.session_token})).then(({data,error})=>{
+    if(error){if(_rpcAbsent(error))cur.gone=true;return done(null);}
+    const mp=new Map();
+    (Array.isArray(data)?data:[]).forEach(r=>{const k=Number(r&&r.rank);if(r&&r.entry_id!=null&&Number.isInteger(k)&&k>0)mp.set(String(r.entry_id),k);});
+    done(mp);
+  },()=>done(null));
+}
+function _wlRanksPaint(){
+  if(S.view!=='customer')return;
+  if(S.custTab==='myrides')renderMyRides();
+  else if(S.custTab==='register'&&(S.lastTickets||[]).length)renderRegister();
+}
+function _wlRankOf(e){const c=S.loggedIn||getSession(),m=S._wlRk;return(e&&c&&m&&m.id===c.id&&m.map&&m.map.get(String(e.id)))||null;}
+// The place of the first of these rows still waiting for one, or null while it is not known.
+function _wlRankMin(rows){
+  const wl=(rows||[]).filter(e=>e&&e.status==='waitlist');
+  _wlRanksLoad(wl.map(e=>e.id));
+  const r=wl.map(_wlRankOf).filter(Boolean);
+  return r.length?Math.min(...r):null;
+}
 function renderBookingTicket(entries,opts){
   opts=opts||{};
   if(!entries||!entries.length)return'';
@@ -11308,10 +11412,12 @@ function renderBookingTicket(entries,opts){
   const past=!!opts.bookAgain;
   const _today=String(primary.sessionDate||primary.sessionId||'').slice(0,10)===todayStr();
   const numDisplay=_noNum?esc(sess?_evName(sess):t('landCommTitle')):(n===1?`#${nums[0]}`:isConsec?`#${nums[0]} – #${nums[n-1]}`:nums.map(q=>`#${q}`).join(', '));
-  // The W number is the rider's place in the queue for a spot, and the one thing staff can
-  // quote back to them. Saying it plainly beats "Waitlist" alone, which reads as a dead end.
+  // The rider's place in line, said plainly: "Waitlist" alone reads as a dead end. It is the
+  // server's live place (_wlRankMin), never the W serial (2026-10-05); with none known yet the
+  // note says only that they are in line.
+  const _rkG=(!_noNum&&g.some(e=>e.status==='waitlist'))?_wlRankMin(g):null;
   const wlNote=_allWl&&!_noNum
-    ?`<div class="wl-note">${primary.waitlistNum?t('wlPosMsg').replace('{0}',String(primary.waitlistNum)):t('wlPosNoNumMsg')}</div>`
+    ?`<div class="wl-note">${_rkG?t('wlPosMsg').replace('{0}',String(_rkG)):t('wlPosNoNumMsg')}</div>`
     :'';
   // A ride staff approve hands out no code until the rider is actually through: before the
   // list is published nobody has been told the verdict, and a code in hand would announce it.
@@ -11373,7 +11479,7 @@ function renderBookingTicket(entries,opts){
       :'';
     return`<div class="cu-tr-row">
       <div class="cu-tr-head">
-        ${_noNum?'':e.status==='waitlist'?`<span class="cu-tr-wl"><span class="cu-dot7-due"></span>${e.waitlistNum?esc(t('wlRowPos').replace('{0}',e.waitlistNum)):esc(t('waitlistLabel'))}</span>`:`<span class="cu-tr-num">#${e.queueNum}</span>`}
+        ${_noNum?'':e.status==='waitlist'?`<span class="cu-tr-wl"><span class="cu-dot7-due"></span>${_wlRankOf(e)?esc(t('wlRowPos').replace('{0}',_wlRankOf(e))):esc(t('waitlistLabel'))}</span>`:`<span class="cu-tr-num">#${e.queueNum}</span>`}
         <span class="cu-tr-name">${esc(e.name)}</span>
         ${_needsBike(sess)?typeBadge(resolvedType(e)):''}
       </div>
@@ -11413,7 +11519,7 @@ function renderBookingTicket(entries,opts){
       <div class="ticket-num-block">
         ${_tkLogo()}
         ${_noNum?'':_allWl
-          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${primary.waitlistNum?` \u00b7 ${esc(t('wlLinePos').replace('{0}',primary.waitlistNum))}`:''}</div>`
+          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${_rkG?` \u00b7 ${esc(t('wlLinePos').replace('{0}',_rkG))}`:''}</div>`
           :`<div class="ticket-num-label">${n>1?esc(_nBikes(n)):t('queueNumLabel')}</div>`}
         <div class="ticket-num ${numCls}">${numDisplay}</div>
         ${wlNote}
@@ -11489,13 +11595,18 @@ function downloadBookingICS(sessionId){
   const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
   const esc2=s=>String(s).replace(/[\\,;]/g,x=>'\\'+x).replace(/\n/g,'\\n');
   const _meet=_comm&&_safeUrl(sess.meet_url);
+  // The words are the rider's language and the ride's kind (2026-10-05): every calendar entry said
+  // "bike rental" in English, the swim and the workshop included. A ride that gathers is met at its
+  // meeting point; one with no bike is a booking, not a rental.
+  const _title=(_evNamed(sess)?_evName(sess):t('icsRideTitle'))+' - '+(dayLabel(sess.day)||''); // every named ride by its own name
+  const _desc=_gathersTime(sess)?'icsDescRide':_needsBike(sess)?'icsDescBike':'icsDescVisit';
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MicroMobility//Corniche Circuit//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
     'UID:'+sessionId+'-'+Date.now()+'@micromobility','DTSTAMP:'+stamp,
     'DTSTART:'+_icsUtc(date,sMin),'DTEND:'+_icsUtc(date,eMin),
-    'SUMMARY:'+esc2((_evNamed(sess)?_evName(sess):'MicroMobility Ride')+' - '+(dayLabel(sess.day)||'')), // every named ride by its own name, in the rider's language
+    'SUMMARY:'+esc2(_title),
     'LOCATION:'+esc2(_meet||({'JCC':'Jeddah Corniche Circuit','Sharafeyah Branch':'Sharafeyah, Jeddah'})[sess.location]||sess.location||'Jeddah Corniche Circuit'),
-    'DESCRIPTION:'+esc2('Your MicroMobility bike rental booking. Arrive 10 minutes early and show your ticket at the desk.'),
-    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:MicroMobility ride reminder','END:VALARM',
+    'DESCRIPTION:'+esc2(t(_desc)),
+    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+esc2(t('icsAlarm').replace('{0}',_title)),'END:VALARM',
     'END:VEVENT','END:VCALENDAR'];
   const blob=new Blob([lines.join('\r\n')],{type:'text/calendar;charset=utf-8'});
   const url=URL.createObjectURL(blob);
@@ -11508,6 +11619,18 @@ function downloadBookingICS(sessionId){
 // One-tap rebooking for returning riders: pre-fill a solo booking with their remembered height + favourite bike type,
 // auto-pick the soonest open session matching their favourite time-of-day, and take them through what is left of the
 // wizard - the waiver included - to confirm.
+// Community rides are never a "usual" booking: they are free, members-only events. Nor is the
+// National Day ride, which has its own card. The usual is a circuit night, and only one the
+// circuit list itself offers: nothing closes a night automatically, so a past one can still
+// read 'open', and picking it (or a ride from another list) had the Reserve tab drop the
+// choice at once - the rider landed on an empty step one under a "just confirm" toast.
+// The same happened to a night the booking window has not opened yet (_bwOpen): the list does
+// not offer it, so the shortcut does not either. The button asks this same list (2026-10-05): it
+// showed on every event's list, where the shortcut then booked a circuit night or found none.
+function _usualNights(cust){
+  const bookedIds=new Set(getQueue().filter(e=>e.customerId===cust.id&&(e.status==='waiting'||e.status==='active'||e.status==='waitlist')).map(e=>e.sessionId));
+  return allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
+}
 function bookMyUsual(){
   const cust=S.loggedIn||getSession();if(!cust||!cust.id)return;
   const mine=getQueue().filter(e=>e.customerId===cust.id);
@@ -11516,15 +11639,7 @@ function bookMyUsual(){
   mine.forEach(e=>{const s=(S.sessions||[]).find(x=>x.id===e.sessionId);if(!s)return;const tm=(parseSlots(s.bike_slots)||{})._time;if(tm)timeCount[tm]=(timeCount[tm]||0)+1;});
   const favTime=Object.keys(timeCount).sort((a,b)=>timeCount[b]-timeCount[a])[0]||null;
   // Open sessions they are not already in, soonest first; prefer ones with a free spot, matching the favourite time
-  const bookedIds=new Set(mine.filter(e=>e.status==='waiting'||e.status==='active'||e.status==='waitlist').map(e=>e.sessionId));
-  // Community rides are never a "usual" booking: they are free, members-only events. Nor is the
-  // National Day ride, which has its own card. The usual is a circuit night, and only one the
-  // circuit list itself offers: nothing closes a night automatically, so a past one can still
-  // read 'open', and picking it (or a ride from another list) had the Reserve tab drop the
-  // choice at once - the rider landed on an empty step one under a "just confirm" toast.
-  // The same happened to a night the booking window has not opened yet (_bwOpen): the list does
-  // not offer it, so the shortcut does not either.
-  const open=allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
+  const open=_usualNights(cust);
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   const withSpot=open.filter(s=>spotsLeft(s.id)>0);
   const pool=withSpot.length?withSpot:open;
@@ -11632,8 +11747,10 @@ async function addBookingToGWallet(bookingId,btn){
 // A ride the rider actually completed: done, and paid - or on a complimentary ride, where there
 // is nothing to pay and paid stays false for ever. Requiring paid alone left every Saturday,
 // pool and workshop session out of My Rides, the ride count, the tier, the badges and the
-// rating prompt, so a member with ten Saturday rides read as a newcomer with none.
-function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId));}
+// rating prompt, so a member with ten Saturday rides read as a newcomer with none. A ride on the
+// rider's own bike is never paid for either, so it counts once done (2026-10-05, as _bdgRode counts
+// it): an owner's rides on a paid night were missing from My Bookings, the season and Your rides.
+function _rideCompleted(e){return !!e&&e.status==='done'&&(!!e.paid||_freeSessIds.has(e.sessionId)||_isOwnBike(e));}
 // A ride earns badges only once it is marked Paid (or is on a free ride): the owner, 2026-10-02,
 // "dont count a ride towards a badge unless it was marked paid". A bike owner pays nothing, so
 // their check-in alone counts ("bike owners dont pay because they own a bike checking them in
@@ -12154,12 +12271,24 @@ function _mrBadgesPaint(){const h=document.getElementById('mr-badges-host'),c=S.
 function _mrBadgesMore(){S._bdgMore=!S._bdgMore;_mrBadgesPaint();const b=document.getElementById('mr-badges-more');if(b)b.focus();}
 // Tapping a badge explains how to earn it (and shows progress on locked ones); a given one says who
 // gave it and when, with the note staff wrote. fresh: it pops up because it is new.
+// The popup is a dialog (2026-10-05): its Close takes the focus as it opens, Escape closes it (the
+// page's dialog handling counts it, _visibleModals), and the focus goes back where it was - the badge
+// tapped, or what the rider was on when a new one popped up (found again by its handler when the
+// badge row was drawn again meanwhile).
+let _bdgPopFrom=null;
+function _bdgPopClose(){
+  const p=document.getElementById('badge-pop');if(p)p.remove();
+  let b=_bdgPopFrom;_bdgPopFrom=null;
+  if(b&&!document.contains(b)){const k=b.getAttribute('data-on-click');b=k?[...document.querySelectorAll('[data-on-click]')].find(x=>x.getAttribute('data-on-click')===k):null;}
+  if(b)try{b.focus({preventScroll:true});}catch(_){}
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on__mrBadgeInfo_1(event,el){document.getElementById('badge-pop').remove()}
+function _on__mrBadgeInfo_1(event,el){_bdgPopClose()}
 function _mrBadgeInfo(i,fresh){
   const cust=S.loggedIn;if(!cust)return;
   const x=_mrBadgeList(cust)[i];if(!x)return;
-  const old=document.getElementById('badge-pop');if(old)old.remove();
+  const old=document.getElementById('badge-pop');
+  if(old)old.remove();else{const a=document.activeElement;_bdgPopFrom=a&&a!==document.body&&a.nodeType===1?a:null;}
   const nm=_bdgName(x.b),d=_bdgDesc(x.b),g=x.g;
   const el=document.createElement('div');el.id='badge-pop';el.className='badge-pop';
   const ab=_bdgAbout(x.b);
@@ -12174,8 +12303,9 @@ function _mrBadgeInfo(i,fresh){
     ${g?`<div class="badge-pop-earned">✓ ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.on?`<div class="badge-pop-earned">✓ ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
     <button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
   </div>`;
-  el.addEventListener('click',e=>{if(e.target===el)el.remove();});
+  el.addEventListener('click',e=>{if(e.target===el)_bdgPopClose();});
   document.body.appendChild(el);
+  const cb=el.querySelector('.badge-pop-box > button');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
 }
 // A badge given since this device last showed one pops up once (the newest) while the account page
 // is on screen. Kept per account in this browser, a convenience: another phone shows it again, and
@@ -37584,9 +37714,9 @@ document.addEventListener('keydown',e=>{
 // ── Modal accessibility: focus in, trap Tab, Escape to close, focus back out ──
 // Topmost last: by z-index, then page order. The flag dialog and confirms (#confirm-modal, 300)
 // sit over every other dialog but come early in the page, so page order alone sent Escape to
-// the window underneath them.
+// the window underneath them. A rider's badge popup (.badge-pop) is one too (2026-10-05).
 function _visibleModals(){
-  return[...document.querySelectorAll('.modal-backdrop,.pin-backdrop,.auth-backdrop,.scan-backdrop')].filter(m=>m.getClientRects().length>0)
+  return[...document.querySelectorAll('.modal-backdrop,.pin-backdrop,.auth-backdrop,.scan-backdrop,.badge-pop')].filter(m=>m.getClientRects().length>0)
     .map((m,i)=>({m,i,z:parseInt(getComputedStyle(m).zIndex,10)||0})).sort((a,b)=>a.z-b.z||a.i-b.i).map(x=>x.m);
 }
 function _modalFocusables(modal){
@@ -37642,7 +37772,7 @@ document.addEventListener('keydown',e=>{
   if(!modal)return;
   if(e.key==='Escape'){
     // Dismissible dialogs only — the PIN gate and the auth page are page-level, not dialogs.
-    if(!modal.classList.contains('modal-backdrop')&&!modal.classList.contains('scan-backdrop'))return;
+    if(!modal.classList.contains('modal-backdrop')&&!modal.classList.contains('scan-backdrop')&&!modal.classList.contains('badge-pop'))return;
     modal.click();
     // Handled only if that closed it: the per-dialog Escape list below then stands down, where it
     // used to go on and close the NEXT dialog in its list too (the cashier sale under the team

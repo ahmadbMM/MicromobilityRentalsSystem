@@ -24,7 +24,8 @@ const queue_entries = [
 
 test.describe('a rider on the waitlist', () => {
   test('keeps their booking number, and is told loudly that they are waitlisted', async ({ page }) => {
-    await stubSupabase(page, { sessions: [sess], bikes: [], queue_entries, 'rpc:community_member': true });
+    // the place in line is the server's (customer_waitlist_ranks), never the W serial (2026-10-05)
+    await stubSupabase(page, { sessions: [sess], bikes: [], queue_entries, 'rpc:community_member': true, 'rpc:customer_waitlist_ranks': [{ entry_id: 'c', rank: 1 }] });
     await loginCustomer(page, { id: 'c1', name: 'Rider 3' });
     await page.goto('/');
     await waitForSb(page);
