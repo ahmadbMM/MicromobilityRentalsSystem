@@ -743,7 +743,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   colBookingNum:'Booking #',
   staffQueueTitle:'Staff Panel',addWalkin:'+ Walk-in',
   
-  filterAll:'All',filterDone:'Done',filterNoshow:'No-Show',
+  filterAll:'All',ridersMoveNeedsDb:'Moving a party to another night needs a database update that is not in place yet. Keep this night for now.',syncNeedPin:'A void or refund made offline needs the PIN again. Tap the pending sync count on Sales to enter it.',invQtyDec:'Decrease quantity: {0}',invQtyInc:'Increase quantity: {0}',invDelPriced:'{0} booking(s) still read this item’s price — set its stock to zero instead of deleting it.',filterDone:'Done',filterNoshow:'No-Show',
   allSessions:'All Sessions',colRider:'Rider',colMember:'Membership',memberYes:'Member',memberNo:'Non-member',
   walkinSize:'Frame Size',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
@@ -1297,7 +1297,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   colBookingNum:'رقم الحجز',
   staffQueueTitle:'لوحة الموظفين',addWalkin:'+ زيارة مباشرة',
   
-  filterAll:'الكل',filterDone:'منتهي',filterNoshow:'لم يحضر',
+  filterAll:'الكل',ridersMoveNeedsDb:'نقل المجموعة إلى ليلة أخرى يحتاج إلى تحديث لقاعدة البيانات لم يُطبَّق بعد. أبقِ هذه الليلة الآن.',syncNeedPin:'إلغاء أو استرداد تم دون اتصال يحتاج إلى الرمز مرة أخرى. اضغط على عدد العمليات بانتظار المزامنة في المبيعات لإدخاله.',invQtyDec:'إنقاص الكمية: {0}',invQtyInc:'زيادة الكمية: {0}',invDelPriced:'ما زال {0} حجز/حجوزات يعتمد على سعر هذا المنتج — اجعل مخزونه صفراً بدلاً من حذفه.',filterDone:'منتهي',filterNoshow:'لم يحضر',
   allSessions:'جميع الجلسات',colRider:'الراكب',colMember:'العضوية',memberYes:'عضو',memberNo:'غير عضو',
   walkinSize:'مقاس الإطار',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
@@ -8896,17 +8896,24 @@ async function mwPartyPaid(rowId){
   // The same rule as the queue's bulk Paid (bulkSfPaid): guarded on still unpaid, so a rider another
   // device settled by split or cash keeps how they paid, and an incidental 0 (no promo) is charged the
   // bike's fare rather than recorded as on the house.
-  const res=await Promise.all(list.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return sb.from('queue_entries').update(p).eq('id',e.id).eq('paid',false).select('id');}));
+  const pats=list.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return p;});
+  const res=await Promise.all(list.map((e,i)=>sb.from('queue_entries').update(pats[i]).eq('id',e.id).eq('paid',false).select('id')));
   const ok=r=>r&&!r.error&&r.data&&r.data.length;
   const n=res.filter(ok).length;
   const done=list.filter((e,i)=>ok(res[i])).map(e=>({id:e.id,price:e.price,pay_method:e.pay_method||null}));
-  await loadData();
-  if(_writeErr(res,'party paid')){renderStaffQueue();return;}
-  logAction(t('logBulkPaid').replace('{0}',n));
-  toast(`${n} ${t('paidLabel')}`);
+  // Painted from the writes' answers, then only the party's rows are read again (2026-10-05): a whole
+  // loadData() per tap re-fetched every list, as the other party actions no longer do. A row the
+  // guard refused (paid meanwhile on another device) comes back as that device left it.
+  list.forEach((e,i)=>{if(ok(res[i]))Object.assign(e,pats[i]);});
+  S.queue=getQueue().slice();renderStaffQueue();
+  await _reloadRows(list.map(e=>e.id));
+  // A refusal part-way still leaves the rows that did flip paid: they are logged and undoable, and
+  // the refusal is said after (as bulkSfPaid does).
+  if(n){logAction(t('logBulkPaid').replace('{0}',n));if(!res.some(r=>r&&r.error))toast(`${n} ${t('paidLabel')}`);}
+  _writeErr(res,'party paid');
   if(done.length)pushUndo(`${t('undoPayment')} · ${done.length}`,async()=>{
     const r=await Promise.all(done.map(d=>sb.from('queue_entries').update({paid:false,price:d.price,pay_method:d.pay_method}).eq('id',d.id).eq('paid',true)));
-    await loadData();renderStaffQueue();renderMyRides();
+    await _reloadRows(done.map(d=>d.id));renderStaffQueue();renderMyRides();
     if(_writeErr(r,'undo payment'))return false;
   });
   renderStaffQueue();renderMyRides();
@@ -13252,7 +13259,12 @@ async function _addonStock(ids,delta){
 //
 // A negative result is kept on purpose (oversold / backordered). Clamping at zero here while
 // a refund adds the full quantity back is what mints phantom stock.
-async function _invApplyDelta(id,delta,_depth){
+//
+// onNet (2026-10-05): a caller that can keep the movement for later (the sales outbox,
+// _addonStockBatch) passes it. A failure on the network then calls it in place of the error bar;
+// the count on screen goes back, as for any failure. Without it a failure is said and the
+// movement is gone, as before.
+async function _invApplyDelta(id,delta,_depth,onNet){
   if(!sb||!id||!delta)return null;
   const depth=_depth||0;
   const it=(S.inventory||[]).find(x=>x.id===id);
@@ -13268,7 +13280,7 @@ async function _invApplyDelta(id,delta,_depth){
     if(was===null){
       // No local copy, or a retry after losing the race: ask the row what it actually holds.
       const cur=await sb.from('inventory').select('qty').eq('id',id).maybeSingle();
-      if(cur.error||!cur.data)return null; // unreadable: report nothing rather than guess a total
+      if(cur.error||!cur.data){if(onNet&&cur.error&&_errKind(cur.error)==='net')onNet();return null;} // unreadable: report nothing rather than guess a total
       was=Number(cur.data.qty)||0;
     }
     const next=was+delta;
@@ -13276,6 +13288,7 @@ async function _invApplyDelta(id,delta,_depth){
       .eq('id',id).eq('qty',was).select('id');
     if(res.error){
       if(it)it.qty=was; // put the on-screen count back rather than show stock that was never saved
+      if(onNet&&_errKind(res.error)==='net'){onNet();return null;} // kept for later by the caller
       res.error.said=t('errStockWrite').replace('{0}',(it&&it.name)||id); // the bar names the item
       _writeErr(res,'stock write');
       return null;
@@ -13284,11 +13297,12 @@ async function _invApplyDelta(id,delta,_depth){
     // The row is not what we read: another till moved it. Undo the guess and try again from
     // whatever it holds now, rather than overwriting their movement with ours.
     if(it)it.qty=was;
-    if(depth<4)return _invApplyDelta(id,delta,depth+1);
+    if(depth<4)return _invApplyDelta(id,delta,depth+1,onNet);
     errorBar(t('errStockWrite').replace('{0}',(it&&it.name)||id),null,'contended');
     return null;
   }catch(e){
     if(it&&was!==null)it.qty=was;
+    if(onNet){onNet();return null;}
     console.error('stock write failed',id,e);
     S._netDown=true;_updateConnUI();
     return null;
@@ -13297,9 +13311,14 @@ async function _invApplyDelta(id,delta,_depth){
 // Apply stock deltas from a set of receipt/cart lines, SUMMED per unique item so each inventory
 // row takes exactly one absolute write. Two lines of the same item would otherwise fire concurrent
 // absolute-value writes that can land out of order (over-sell on decrement, under-restock on refund).
+// These are the till's movements (a receipt, its void or refund): one the network did not let through
+// waits in the sales outbox beside the sale (kind 'stock', item and delta) and the flush applies it.
+// Tried once and dropped, an offline sale left the shelf count wrong for good (2026-10-05).
 async function _addonStockBatch(lines,sign){
   const agg={};(lines||[]).forEach(l=>{if(l&&l.item_id)agg[l.item_id]=(agg[l.item_id]||0)+(Number(l.qty)||1)*sign;});
-  await Promise.all(Object.keys(agg).map(id=>_addonStock([id],agg[id])));
+  const later=[];
+  await Promise.all(Object.keys(agg).map(id=>agg[id]?_invApplyDelta(id,agg[id],0,()=>later.push({kind:'stock',id:uid(),data:{item:id,delta:agg[id]}})):null));
+  if(later.length&&sb)_outboxEnqueueMany(later);
 }
 // Qty-aware stock adjustment for a booking's add-ons [{id,qty}] (sign -1 consume, +1 restock)
 async function _addonStockQ(arr,sign){
@@ -17880,7 +17899,7 @@ function _purchHtml(cust){
   const rows=(mine||(S.cashSales||[]).filter(r=>r.customer_id===cust.id&&r.pay!=='refunded').map(r=>({...r,at:r.created_at}))
     .sort((a,b)=>new Date(b.at||0)-new Date(a.at||0))).filter(r=>r.category!=='__cardmeta__');
   if(!mine&&!rows.length)return'';
-  const amt=r=>(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded';
+  const amt=r=>r.pay==='house'?0:(Number(r.qty)||0)*(Number(r.price)||0),off=r=>r.voided||r.refunded||r.pay==='refunded'; // on the house keeps its list price, and costs the rider nothing (2026-10-05)
   const tot=Math.round(rows.reduce((sm,r)=>sm+(off(r)?0:amt(r)),0)*100)/100;
   const PAY={paid:'paidLabel',pending:'pendingLabel',house:'custOnHouse',refunded:'cashRefunded'};
   return`<div class="form-section cu-card640">
@@ -23917,7 +23936,7 @@ function exportSessionExcel(){
     ...sessPurch.cats.map(c=>[_invCatLabel(c.cat),c.qty,c.value]),
     ...(sessPurch.discount>0?[[t('cashDiscount'),'',-sessPurch.discount]]:[]),
     [t('repTotal'),sessPurch.units,sessPurch.value],
-    [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[])]:[];
+    [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[]),...(sessPurch.free>0?[[t('onTheHouseLabel'),'',sessPurch.free]]:[])]:[];
   _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rows,...summary,...cashRows],'report '+(sess.session_date||sess.id),rows.length);
 }
 
@@ -24128,7 +24147,7 @@ function printSessionReport(){
         <tr class="rp-b8"><td>${t('repTotal')}</td><td class="rp-te">${sessPurch.units}</td><td class="rp-te">${_rpAmt(sessPurch.value)}</td></tr>
       </tbody>
     </table>
-    <div class="rp-salesline">${t('printCollected')}: <strong>${_rpSar(sessPurch.collected)}</strong>${sessPurch.pending>0?` &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">${_rpSar(sessPurch.pending)}</strong>`:''}${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong>${_rpSar(sessPurch.team)}</strong>`:''}</div>`:''}`;
+    <div class="rp-salesline">${t('printCollected')}: <strong>${_rpSar(sessPurch.collected)}</strong>${sessPurch.pending>0?` &nbsp;·&nbsp; ${t('printPending')}: <strong class="rp-amber">${_rpSar(sessPurch.pending)}</strong>`:''}${sessPurch.team>0?` &nbsp;·&nbsp; ${t('payTeam')}: <strong>${_rpSar(sessPurch.team)}</strong>`:''}${sessPurch.free>0?` &nbsp;·&nbsp; ${t('onTheHouseLabel')}: <strong>${_rpSar(sessPurch.free)}</strong>`:''}</div>`:''}`;
   const _sTime=(()=>{try{return sessionTime(sess);}catch(_){return'';}})();
   const html=_reportShell({
     kind:t('printReportTitle'),
@@ -27939,7 +27958,7 @@ function _ahRender(force){
       <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_ahEditAccount",c.id)}">${ICON_PENCIL} ${t('naEditTitle')}</button>`:'';
   const chips=c?(()=>{const tm=_tagsById();return _ctRowsFor(c.id).filter(ct=>tm[ct.tag_id]).map(ct=>_tagChip(tm[ct.tag_id],ct)).join('');})():'';
   const contact=c?[c.phone,c.email].filter(Boolean):(a.custId?[a.phone]:[]).filter(Boolean);
-  const ptot=Math.round(purch.reduce((sum,r)=>sum+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
+  const ptot=Math.round(purch.reduce((sum,r)=>sum+_lineCharge(r),0)*100)/100; // a line on the house takes nothing
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__ahRender_1",_EV,_EL)}">
     <div class="modal-box ah-box" role="dialog" aria-modal="true" aria-labelledby="ah-title">
       <div class="ah-head">
@@ -27968,7 +27987,7 @@ function _ahRender(force){
       <div class="ah-purch">${purch.slice().sort((p,q)=>new Date(q.created_at||0)-new Date(p.created_at||0)).map(r=>`<div class="ah-purch-row">
         <div class="ah-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="ah-muted">×${esc(r.qty)}</span>`:''}</div>
         <span class="ah-muted">${r.created_at?shortDate(String(r.created_at).slice(0,10)):''}</span>
-        <bdi class="ah-price">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</bdi>
+        <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
     </div>
   </div>`;
@@ -28476,7 +28495,12 @@ function _rwValidate(d){
   const riders=(d.riders||[]).map(r=>{
     const hRaw=String(r.height||'').trim(),h=hRaw?parseInt(hRaw,10):null;
     const no=r.id?null:++nextNo; // a saved companion keeps its number; a new one takes the next
-    return {id:r.id||null,locked:!!r.locked,name:String(r.name||'').trim().replace(/\s+/g,' ')||`${first} ${no||''}`.trim(),height:h,type:r.type||d.type,hRaw};
+    // A blank name goes to the database as '' and the database names the rider itself, "<first name> <n>"
+    // (rider_register, rider_party_add). Sending the stand-in worked out here was refused: it carries a
+    // digit, which _name_chars_ok allows in no typed name (rider_name_chars), so every walk-in with an
+    // unnamed companion failed (2026-10-05). The stand-in below is for the screen and the booking only.
+    const typed=String(r.name||'').trim().replace(/\s+/g,' ');
+    return {id:r.id||null,locked:!!r.locked,name:typed||`${first} ${no||''}`.trim(),typed:!!typed,height:h,type:r.type||d.type,hRaw};
   });
   if(!d.err&&riders.length>4)d.err=t('ridersWalkinErrRiders');
   if(!d.err)riders.some((r,i)=>{
@@ -28509,6 +28533,8 @@ function _rwBookingPatch(e,want){
   }
   return p;
 }
+// What staff_rider_party_move answers when it refuses, in the form's words (anything else: the plain error).
+const RW_MOVE_ERR={checked_in:'ridersEditOnBike',on_bike:'ridersEditOnBike',duplicate:'ridersEditDup',session:'ridersWalkinErrSession',full:'rescheduleFull'};
 async function saveRiderEdit(){
   const d=S._rw;if(!d||!d.editId||d.saving)return;
   const r=(S.riders||[]).find(x=>String(x.id)===d.editId);if(!r){closeRiderWalkin();return;}
@@ -28523,10 +28549,11 @@ async function saveRiderEdit(){
   if((phone||null)!==(r.phone||null))patch.phone=phone;
   if(h!==Number(r.height))patch.height=h;
   if(d.type!==r.type_preference)patch.type_preference=d.type;
+  // A move to another night is not a column written here: staff_rider_party_move moves the whole
+  // party and numbers it on that night (below).
   const moving=!d.locked&&!!d.session&&d.session!==(r.session_id||'');
-  if(moving)patch.session_id=d.session;
   // Companions: what changed on the saved ones, which were dropped, which are new. The party
-  // shares one night, so a move takes every companion's row with it.
+  // shares one night: the move takes every companion's row with it.
   const compUpd=[];
   for(const c of v.riders.filter(c=>c.id)){
     const ex=(S.riders||[]).find(x=>String(x.id)===String(c.id));if(!ex)continue;
@@ -28537,7 +28564,6 @@ async function saveRiderEdit(){
     if(patch.badge!==undefined)cp.badge=badge;
     if(patch.company!==undefined)cp.company=d.company||null;
     if(patch.phone!==undefined)cp.phone=phone;
-    if(moving)cp.session_id=d.session;
     if(Object.keys(cp).length)compUpd.push([ex.id,cp]);
   }
   const compDel=(d.removed||[]).slice(),compNew=v.riders.filter(c=>!c.id);
@@ -28576,8 +28602,32 @@ async function saveRiderEdit(){
   // letting it skip the check put a full night over its capacity.
   if(movers.length&&spotsLeft(ns.id)<movers.length){d.err=t('rescheduleFull');renderRiderWalkin();return;}
   const compWork=compUpd.length||compDel.length||compNew.length;
-  if(!Object.keys(patch).length&&!jobs.length&&!compWork&&!bk.cancel.length&&!bk.add.length){closeRiderWalkin();return;}
+  if(!moving&&!Object.keys(patch).length&&!jobs.length&&!compWork&&!bk.cancel.length&&!bk.add.length){closeRiderWalkin();return;}
   d.saving=true;d.err='';renderRiderWalkin();
+  // The move goes first, through staff_rider_party_move (2026-10-05): the database moves every
+  // registration of the party to the night and gives it that night's next number, as rider_edit does
+  // for a rider's own move. Writing session_id from here kept the old number, which clashed with a
+  // party already holding it there (and read as "another registration uses this badge") or, when it
+  // landed, left the night's counter to hand the same number out again and refuse that registration.
+  // A database without the function refuses the move, saying why, and nothing is written.
+  if(moving){
+    let mv;try{mv=await sb.rpc('staff_rider_party_move',{p_reg_id:Number(r.id),p_session:d.session});}catch(err){mv={error:err};}
+    const md=mv&&!mv.error&&mv.data&&typeof mv.data==='object'&&!Array.isArray(mv.data)?mv.data:null;
+    if(!md||md.ok!==true){
+      d.saving=false;
+      if(mv&&mv.error&&_rpcAbsent(mv.error))d.err=t('ridersMoveNeedsDb');
+      else if(mv&&mv.error){renderRiderWalkin();_writeErr(mv,'move party',()=>saveRiderEdit());return;}
+      else d.err=t(RW_MOVE_ERR[md&&md.error]||'ridersWalkinErr');
+      renderRiderWalkin();return;
+    }
+    const from=r.session_id||'',bno=r.booking_no;
+    (S.riders||[]).forEach(x=>{if(x.booking_no===bno&&(x.session_id||'')===from){x.session_id=d.session;if(md.booking_no)x.booking_no=md.booking_no;}});
+    S.riders=(S.riders||[]).slice();
+    if(md.booking_no)d.bookingNo=md.booking_no;
+    // The database may move the bookings with the registrations: read them back, so a booking already
+    // on the new night is not moved, and numbered, a second time below.
+    if(movers.length)await _reloadRows(movers.map(j=>j.id));
+  }
   if(Object.keys(patch).length){
     const res=await sb.from('rider_registrations').update(patch).eq('id',r.id);
     if(res.error){
@@ -28593,12 +28643,13 @@ async function saveRiderEdit(){
   let touched=false;
   for(const j of jobs){
     const p={...j.p};
-    if(j.mv){
-      const cur=getQueue().find(x=>x.id===j.id)||j.x;
+    const cur=getQueue().find(x=>x.id===j.id)||j.x;
+    if(j.mv&&cur.sessionId!==ns.id){ // not already moved with the registrations (above)
       p.session_id=ns.id;p.session_day=ns.day;p.session_date=ns.session_date||ns.id;
       p.queue_num=nextQNum(ns.id); // a fresh number on the new night; the old number's gap stays
       if(cur.status==='waitlist')p.status='waiting';
     }
+    if(!Object.keys(p).length)continue;
     const res=await sb.from('queue_entries').update(p).eq('id',j.id);
     if(_writeErr(res,'edit booking',()=>saveRiderEdit())){d.saving=false;renderRiderWalkin();return;}
     _rwBookingLanded(j.id,p);touched=true;
@@ -28616,14 +28667,18 @@ async function saveRiderEdit(){
     bk.cancel=bk.cancel.filter(y=>y.id!==c.id);
   }
   if(compNew.length&&!compErr){
-    const {data,error}=await sb.rpc('rider_party_add',{p_id:r.id,p_riders:compNew.map(c=>({name:c.name,height:c.height,type:c.type}))});
+    // A blank name is sent blank: the database names the rider (see _rwValidate).
+    const {data,error}=await sb.rpc('rider_party_add',{p_id:r.id,p_riders:compNew.map(c=>({name:c.typed?c.name:'',height:c.height,type:c.type}))});
     if(error||!data||!data.ok)compErr=error||data||{};
     else{
       // They are on the party now: the form holds their ids (and the names they were given), so
-      // a retry edits these rows instead of adding the same people a second time.
+      // a retry edits these rows instead of adding the same people a second time. A blank one is
+      // named by the database, on its own count of the party: its booking takes that name.
       const ids=Array.isArray(data.ids)?data.ids:[];
-      (d.riders||[]).filter(c=>!c.id).forEach((c,i)=>{if(ids[i]!=null){c.id=ids[i];c.name=compNew[i].name;}});
-      if(e)ids.forEach((id,i)=>{if(compNew[i])bk.add.push({id,name:compNew[i].name,height:compNew[i].height,type:compNew[i].type});});
+      if(ids.length)await loadRiders();
+      const nm=(id,i)=>{const x=(S.riders||[]).find(y=>String(y.id)===String(id));return (x&&x.name)||compNew[i].name;};
+      (d.riders||[]).filter(c=>!c.id).forEach((c,i)=>{if(ids[i]!=null){c.id=ids[i];c.name=nm(ids[i],i);}});
+      if(e)ids.forEach((id,i)=>{if(compNew[i])bk.add.push({id,name:nm(id,i),height:compNew[i].height,type:compNew[i].type});});
     }
   }
   if(bk.add.length){
@@ -28662,13 +28717,19 @@ async function submitRiderWalkin(){
     d.err=t('ridersWalkinErrSession');d.session=(_walkinSessions()[0]||{}).id||'';renderRiderWalkin();return;
   }
   const {badge,name,h,phone,riders}=v;
+  // The companions this badge already has on the night, as this tab holds them: the registration goes
+  // over theirs (same badge, same night), and one it leaves off is deleted by rider_register, booking
+  // and all to cancel (_rwFinish, 2026-10-05).
+  const _bk=String(badge).toLowerCase().replace(/[^a-z0-9]/g,'');
+  const prevComp=(S.riders||[]).filter(x=>String(x.badge||'').toLowerCase().replace(/[^a-z0-9]/g,'')===_bk&&(x.session_id||'')===d.session&&_riderPartyNo(x)>=2)
+    .map(x=>({id:x.id,entry:x.matched_entry_id||null}));
   d.saving=true;renderRiderWalkin();
   let res;
   try{
     // p_riders only when there are companions: a database that predates the party migration
-    // still takes a solo walk-in.
+    // still takes a solo walk-in. A blank name is sent blank: the database names the rider (_rwValidate).
     const args={p_badge:badge,p_name:name,p_height:h,p_type:d.type,p_source:'petromin',p_phone:phone,p_session_id:d.session,p_company:d.company||null};
-    if(riders.length)args.p_riders=riders.map(r=>({name:r.name,height:r.height,type:r.type}));
+    if(riders.length)args.p_riders=riders.map(r=>({name:r.typed?r.name:'',height:r.height,type:r.type}));
     const{data,error}=await sb.rpc('rider_register',args);
     if(error)throw error;res=data;
   }catch(e){console.warn('walk-in failed',e);d.saving=false;d.err=t('ridersWalkinErr');renderRiderWalkin();return;}
@@ -28678,7 +28739,7 @@ async function submitRiderWalkin(){
     if(/^rider_/.test(String(code))&&res.rider)msg=t('ridersWalkinRiderN').replace('{0}',res.rider).replace('{1}',msg);
     d.saving=false;d.err=msg;renderRiderWalkin();return;
   }
-  await _rwFinish(d,res,{name,h,phone,riders});
+  await _rwFinish(d,res,{name,h,phone,riders,prevComp});
 }
 // The session's live bookings, read from the server rather than from the tab's copy of them.
 // A rider who booked on their own phone while walking to the desk is a realtime message away
@@ -28729,6 +28790,25 @@ async function _rwFinish(d,res,r){
   d._pending={res,r};
   const rows=await _rwLiveRows(d.session);
   const companions=r.riders||[];
+  // A party already on the night (the desk entering its registration again): rider_register keeps each
+  // companion's row and its link, so a companion whose booking is still live keeps that booking and
+  // only the others are booked. Every companion used to be booked afresh, a second place each
+  // (2026-10-05). Each takes the name the database gave it (a blank one's stand-in). A companion the
+  // registration left off is deleted by rider_register; their booking is cancelled once the links are
+  // in (_link). Worked out once and kept on the form, so a retry books exactly the same riders.
+  if(!d._comp){
+    const prev=r.prevComp||[];
+    if(companions.length||prev.length)await loadRiders();
+    const live=new Set(rows.map(x=>String(x.id)));
+    const reg=(S.riders||[]).filter(x=>x.booking_no&&x.booking_no===res.booking_no&&(x.session_id||'')===d.session&&_riderPartyNo(x)>=2);
+    const regOf=i=>reg.find(y=>_riderPartyNo(y)===i+2)||null;
+    d._comp={
+      held:companions.map((c,i)=>{const x=regOf(i);return x&&x.matched_entry_id&&live.has(String(x.matched_entry_id))?String(x.matched_entry_id):null;}),
+      names:companions.map((c,i)=>{const x=regOf(i);return (x&&x.name)||c.name;}),
+      gone:prev.filter(p=>p.entry&&!(S.riders||[]).some(x=>String(x.id)===String(p.id))).map(p=>String(p.entry)),
+    };
+  }
+  const C=d._comp;
   let entry=null,created=[];
   // Resuming a failed insert. It is one statement, so either every row landed or none did -
   // but a reply lost on the way back looks exactly like a refusal. If the rows it tried are on
@@ -28746,8 +28826,8 @@ async function _rwFinish(d,res,r){
     entry=(pick.weak&&d.dupChoice==='new')?null:pick.entry;
     d._heldId=entry?entry.id:null;
     // Everyone who still needs a place: the employee unless they hold one already, then the
-    // companions. One insert, one roster group, consecutive numbers.
-    const toInsert=(entry?[]:[{name:r.name,height:r.h,type:d.type}]).concat(companions.map(c=>({name:c.name,height:c.height,type:c.type})));
+    // companions without one. One insert, one roster group, consecutive numbers.
+    const toInsert=(entry?[]:[{name:r.name,height:r.h,type:d.type}]).concat(companions.map((c,i)=>C.held[i]?null:{name:C.names[i],height:c.height,type:c.type}).filter(Boolean));
     if(toInsert.length){
       d._tried=null;
       created=await _wiInsertRiders(d.session,toInsert,entry?'':(r.phone||''),null,_rwRetry);
@@ -28763,7 +28843,9 @@ async function _rwFinish(d,res,r){
   }
   d._tried=null;
   if(created.length)logAction(`${t('addWalkinBtn')}: #${entry.queueNum} ${r.name}${created.length>1?` +${created.length-1}`:''}`);
-  const compEntries=entry===created[0]?created.slice(1):created; // the companions' bookings, in form order
+  // The companions' bookings, in form order: the one a companion holds already, else the next one made.
+  const made=entry===created[0]?created.slice(1):created;let _mk=0;
+  const compEntries=companions.map((c,i)=>C.held[i]?(rows.find(x=>String(x.id)===C.held[i])||{id:C.held[i]}):made[_mk++]);
   closeRiderWalkin();
   // Link every registration row to its booking: the employee by the id the RPC returned, the
   // companions by their place in the party (rows 2..N of the same number, after a reload).
@@ -28786,6 +28868,9 @@ async function _rwFinish(d,res,r){
     if(_writeErr(rs,'link registration',_link)){await loadRiders();renderRiders();return;}
     toast((res.resubmitted?t('ridersWalkinResub'):t('ridersWalkinAdded')).replace('{0}',r.name).replace('{1}',res.booking_no||''));
     await Promise.all([loadRiders(),created.length?loadDataLight():Promise.resolve()]);
+    // The companions this registration left off (rider_register deleted their rows): their places go
+    // too, through the desk's own cancel (the place is handed on, add-ons go back). Once only.
+    for(const id of C.gone.splice(0)){const x=getQueue().find(q=>String(q.id)===id);if(x&&(x.status==='waiting'||x.status==='waitlist'))await _staffCancelNow(x.id);}
     // "Check in now" is the booking's check-in too, as the Check in button is (2026-09-25): the
     // registration alone read "On ride" while its booking stayed Waiting, and its Return later
     // found no booking on a bike to move.
@@ -28899,6 +28984,9 @@ function renderRiders(_resultsOnly){
 // The History tab's rows, filtered and sorted exactly as the screen shows them. Shared with
 // the CSV export, which used to apply only the session and the date range, so a list narrowed
 // to "Pending" or one rider's name exported every ride of the night.
+// Owing money: ridden, unpaid, and with something to pay - not a rider of a free ride, nor one on
+// their own bike with nothing bought, whom the roster reads as Free (2026-10-05).
+function _histOwes(e){return e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)&&!_ownFree(e);}
 function _histRows(){
   const hist=getQueue().filter(e=>e.status==='done'||e.status==='noshow'||e.status==='cancelled'||e.status==='removed');
   // The range runs up to today, not open-ended: a booking cancelled for next week is not
@@ -28910,7 +28998,7 @@ function _histRows(){
   let filtered=sessionFiltered.slice();
   if(S.histStatus!=='all') filtered=filtered.filter(e=>e.status===S.histStatus);
   if(S.histPay==='paid')   filtered=filtered.filter(e=>e.paid);
-  if(S.histPay==='pending')filtered=filtered.filter(e=>!e.paid&&e.status==='done');
+  if(S.histPay==='pending')filtered=filtered.filter(_histOwes);
   if(S.histType!=='all')   filtered=filtered.filter(e=>resolvedType(e)===S.histType);
   if(S.histSize!=='all')   filtered=filtered.filter(e=>_entryFits(e).includes(S.histSize));
   if((S.histSearch||'').trim()){const q=S.histSearch.trim().toLowerCase().replace(/^#/,'');filtered=filtered.filter(e=>String(e.name||'').toLowerCase().includes(q)||_phoneHit(e.phone,q)||(e.email||'').toLowerCase().includes(q)||String(e.queueNum)===q||_matchesRef(e,q));}
@@ -30071,14 +30159,15 @@ function _vendorStars(n,quiet){
   for(let i=1;i<=5;i++)s+=`<svg class="vendor-star${i<=n?' on':''}" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="${VENDOR_STAR}"/></svg>`;
   return`<span class="vendor-stars" data-rating="${n}"${quiet?' aria-hidden="true"':''}>${s}${quiet?'':`<span class="vendor-sr">${esc(t('vndFbOf').replace('{0}',n))}</span>`}</span>`;
 }
-// Riders booked on that date's Saturday ride (waiting or done, not rejected), when the page holds
-// that ride's rows; null otherwise, and the card shows the venue's count alone.
+// Riders booked on that date's Saturday ride (waiting, out on the ride or done, not rejected), when
+// the page holds that ride's rows; null otherwise, and the card shows the venue's count alone. A rider
+// checked in and still riding (active) counts too: on the day itself they were left out (2026-10-05).
 function _vendorBooked(ds){
   if(!S.dataLoaded||ds<_qWindowCut())return null;
   const ss=_vendorSats(ds);
   if(!ss.length)return null;
   const m=_qBySession();let n=0;
-  ss.forEach(s=>(m.get(s.id)||[]).forEach(e=>{if((e.status==='waiting'||e.status==='done')&&e.approval!=='rejected')n++;}));
+  ss.forEach(s=>(m.get(s.id)||[]).forEach(e=>{if((e.status==='waiting'||e.status==='active'||e.status==='done')&&e.approval!=='rejected')n++;}));
   return n;
 }
 function _vendorFbBlock(f,share){
@@ -30181,12 +30270,14 @@ function _vendorCalHtml(){
   for(let d=1;d<=days;d++){
     const ds=W.month+'-'+String(d).padStart(2,'0'),r=dm[ds],bs=bm[ds]||[],sat=new Date(Date.UTC(y,m-1,d)).getUTCDay()===6;
     const conf=bs.filter(b=>b.status==='confirmed'),pend=bs.filter(b=>b.status==='pending').length;
-    let st='off',lines='';
-    if(conf.length){st='confirmed';lines=`<span class="vendor-ds">${esc(t('vndStConfirmed'))}</span><span class="vendor-dv">${esc(conf.map(b=>_vendorVName(_vendorVen(b.venue_id))).join(', '))}</span>`;}
-    else if(r&&r.state==='closed'){st='closed';lines=`<span class="vendor-ds">${esc(t('vndStClosed'))}</span>${r.reason?`<span class="vendor-dv">${esc(_vendorRsLabel(r.reason))}</span>`:''}`;}
-    else if(r){st='open';lines=`<span class="vendor-ds">${esc(t('vndStOpen'))}</span>${pend?`<span class="vendor-dp">${esc(t('vndNPending').replace('{0}',pend))}</span>`:''}`;}
+    // say: what the cell shows, for the button's name. The name was the date alone, which hid the
+    // status the cell draws from a screen reader (2026-10-05).
+    let st='off',lines='',say=[];
+    if(conf.length){st='confirmed';const vn=conf.map(b=>_vendorVName(_vendorVen(b.venue_id))).join(', ');lines=`<span class="vendor-ds">${esc(t('vndStConfirmed'))}</span><span class="vendor-dv">${esc(vn)}</span>`;say=[t('vndStConfirmed'),vn];}
+    else if(r&&r.state==='closed'){st='closed';lines=`<span class="vendor-ds">${esc(t('vndStClosed'))}</span>${r.reason?`<span class="vendor-dv">${esc(_vendorRsLabel(r.reason))}</span>`:''}`;say=[t('vndStClosed'),r.reason?_vendorRsLabel(r.reason):''];}
+    else if(r){st='open';lines=`<span class="vendor-ds">${esc(t('vndStOpen'))}</span>${pend?`<span class="vendor-dp">${esc(t('vndNPending').replace('{0}',pend))}</span>`:''}`;say=[t('vndStOpen'),pend?t('vndNPending').replace('{0}',pend):''];}
     const cls=`vendor-day st-${st}${ds<today?' past':''}${ds===today?' today':''}`;
-    cells+=r||sat?`<button type="button" class="${cls}" data-vendor-day="${ds}" aria-label="${esc(_vendorLong(ds))}" data-on-click="${_on('_vendorDayOpen',ds)}"><span class="vendor-dn">${d}</span>${lines}</button>`:`<span class="${cls}"><span class="vendor-dn">${d}</span></span>`;
+    cells+=r||sat?`<button type="button" class="${cls}" data-vendor-day="${ds}" aria-label="${esc([_vendorLong(ds),...say].filter(Boolean).join(', '))}" data-on-click="${_on('_vendorDayOpen',ds)}"><span class="vendor-dn">${d}</span>${lines}</button>`:`<span class="${cls}"><span class="vendor-dn">${d}</span></span>`;
   }
   return`<div class="vendor-cal-bar">
       <button type="button" class="btn-secondary btn-sm vendor-prev" aria-label="${esc(t('vndPrevMonth'))}" title="${esc(t('vndPrevMonth'))}" data-on-click="${_on('_vendorMonth',-1)}">${VENDOR_CHEV}</button>
@@ -30471,8 +30562,13 @@ function _vendorTellMsg(it,lang){
 function _vendorTellOpen(items){if(S._vendorVen)_vendorVenGrab();S._vendorTell={items,lang:S.lang==='ar'?'ar':'en'};_vendorTellRender();}
 function _vendorTellBk(id){
   const b=(_vendor().bk||[]).find(x=>String(x.id)===String(id));if(!b)return;
-  const kind=b.status==='confirmed'?'confirm':b.status==='declined'?'decline':'cancel';
-  _vendorTellOpen([{venue_id:b.venue_id,day:b.day,kind,note:kind==='cancel'?b.cancel_reason:b.staff_note}]);
+  let kind=b.status==='confirmed'?'confirm':b.status==='declined'?'decline':'cancel';
+  // A booking cancelled by closing its date carries the date's reason as its own: a code ('ramadan'),
+  // 'closed', or the reason typed (staff_vendor_date_set). It says the date closed, with the reason in
+  // words, as the day's Tell the venues does; it used to go out as "cancelled ... Note: ramadan" (2026-10-05).
+  const cr=String(b.cancel_reason||''),r=_vendorDate(b.day);
+  if(kind==='cancel'&&(cr==='closed'||VENDOR_RS.includes(cr)||(!!r&&r.state==='closed'&&cr===String(r.reason||''))))kind='close';
+  _vendorTellOpen([{venue_id:b.venue_id,day:b.day,kind,note:kind==='confirm'||kind==='decline'?b.staff_note:cr}]);
 }
 function _vendorTellDay(ds){
   const r=_vendorDate(ds),seen={},items=[];
@@ -30816,7 +30912,7 @@ function _webSetComingSoon(on){
 async function _webSetPage(key,on){
   const p=SITE_PAGES.find(x=>x.key===key);
   if(!p||!p.built||key==='home'){renderWebsite();return;}
-  const k='page.'+key+'.visible',prev=(_web().rows[k]||{}).value,nm=_isRtl()?p.ar:p.en;
+  const k='page.'+key+'.visible',prev=(_web().rows[k]||{}).value,nm=S.lang==='ar'?p.ar:p.en;
   const msg=(on?t('webPageOnLog'):t('webPageOffLog')).replace('{0}',nm);
   if(!(await _webRestore([{key:k,value:!!on}])))return;
   pushUndo(msg,()=>_webRestore([{key:k,value:prev===undefined?null:prev}]));
@@ -30835,7 +30931,7 @@ function _webKeyName(k){
   const f=SITE_TEXTS.find(x=>x.key===k);if(f)return t(f.label);
   if(k==='site.coming_soon')return t('webCsSwitch');
   const m=/^page\.([a-z_]+)\.visible$/.exec(k),p=m&&SITE_PAGES.find(x=>x.key===m[1]);
-  if(p)return(_isRtl()?p.ar:p.en)+' · '+t('webColVisible');
+  if(p)return(S.lang==='ar'?p.ar:p.en)+' · '+t('webColVisible');
   const E=_webEd(),ef=E.fields[k];
   if(ef){const [pg,sid]=k.split('.');const P=(E.schema||[]).find(x=>x.page===pg),Sec=P&&(P.sections||[]).find(x=>x.id===sid);return[P&&_webLbl(P.label),Sec&&_webLbl(Sec.label),_webLbl(ef.label)].filter(Boolean).join(' · ');}
   return k;
@@ -30847,7 +30943,7 @@ function _webValText(v,key){
   if(typeof v==='object'&&typeof v.url==='string')return v.url?t('webValPhoto')+' '+String(v.url).split('/').pop():t('webValDefault');
   if(typeof v==='object'&&typeof v.href==='string')return v.href||'—';
   if(typeof v==='number')return String(v);
-  if(typeof v==='object'&&(typeof v.en==='string'||typeof v.ar==='string')){const x=_isRtl()?(v.ar||v.en):(v.en||v.ar);return String(x).length>60?String(x).slice(0,57)+'…':String(x);}
+  if(typeof v==='object'&&(typeof v.en==='string'||typeof v.ar==='string')){const x=S.lang==='ar'?(v.ar||v.en):(v.en||v.ar);return String(x).length>60?String(x).slice(0,57)+'…':String(x);}
   return String(JSON.stringify(v)).slice(0,60);
 }
 // ── Website content editor ──────────────────────────────────────────────────
@@ -30874,7 +30970,9 @@ async function _webEdLoad(){
   E.loading=false;
   if(S.view==='staff'&&S.staffTab==='website')renderWebsite();
 }
-const _webLbl=l=>(l&&typeof l==='object')?((_isRtl()?l.ar:l.en)||l.en||''):String(l||'');
+// The website's own names come in English and Arabic: Arabic on the Arabic page only. _isRtl() is true
+// in Urdu too, where it showed the editor's pages and fields in Arabic (2026-10-05).
+const _webLbl=l=>(l&&typeof l==='object')?((S.lang==='ar'?l.ar:l.en)||l.en||''):String(l||'');
 function _webDefStored(f){
   switch(f.type){
     case 'text':case 'longtext':return{en:(f.def&&f.def.en)||'',ar:(f.def&&f.def.ar)||''};
@@ -31036,7 +31134,7 @@ async function _webPreview(to){
   try{
     const r=await sb.auth.getSession();const tok=r&&r.data&&r.data.session&&r.data.session.access_token;
     if(!tok){toast(t('webPreviewNoSession'),'error');return;}
-    window.open(SITE_URL+'/'+(_isRtl()?'ar':'en')+'/preview#t='+encodeURIComponent(tok)+(to?'&to='+encodeURIComponent(to):''),'_blank','noopener');
+    window.open(SITE_URL+'/'+(S.lang==='ar'?'ar':'en')+'/preview#t='+encodeURIComponent(tok)+(to?'&to='+encodeURIComponent(to):''),'_blank','noopener');
   }catch(e){toast(t('webPreviewNoSession'),'error');}
 }
 const _webAbs=u=>/^\//.test(String(u||''))?SITE_URL+u:String(u||'');
@@ -31158,7 +31256,7 @@ function renderWebsite(){
     <div class="page-sub web-card-sub">${t('webPagesSub')}</div>
     <div class="table-wrapper"><table class="web-table web-pages"><thead><tr><th>${t('webColPage')}</th><th>${t('colStatus')}</th><th>${t('webColVisible')}</th><th></th></tr></thead><tbody>
       ${SITE_PAGES.map(p=>{
-        const nm=_isRtl()?p.ar:p.en,home=p.key==='home';
+        const nm=S.lang==='ar'?p.ar:p.en,home=p.key==='home';
         // Home is shown by the Coming Soon switch above; every other built page by its own switch.
         const on=p.built&&(home?!cs:_webPageOn(p.key));
         const st=!p.built?`<span class="web-muted">${t('webPageNotBuilt')}</span>`:home?(cs?esc(t('webCsSwitch')):t('webPageLive')):on?(cs?t('webPageReady'):t('webPageLive')):t('webPageHidden');
@@ -31212,7 +31310,8 @@ async function _catLoad(){
   C.busy=false;
   if(S.view==='staff'&&S.staffTab==='catalog')renderCatalog();
 }
-const _catBi=(en,ar)=>_isRtl()?(ar||en||''):(en||ar||'');
+// English or Arabic, as the website writes the catalogue: Arabic on the Arabic page only, not in Urdu (2026-10-05).
+const _catBi=(en,ar)=>S.lang==='ar'?(ar||en||''):(en||ar||'');
 const _catTop=()=>_cat().cats.filter(c=>!c.parent_id);
 const _catSubs=id=>_cat().cats.filter(c=>c.parent_id===id);
 const _catById=id=>_cat().cats.find(c=>c.id===id)||null;
@@ -31770,10 +31869,13 @@ function renderHistory(_resultsOnly){
   const _hSel=new Set(S.histSelected),_hTime=new Map(); // per paint: the ticks as a set, each session's time worked out once
   const _hTimeOf=sid=>{let v=_hTime.get(sid);if(v===undefined){v=sessionTime(_sessGet(sid));_hTime.set(sid,v);}return v;};
   const nDone=sessionFiltered.filter(e=>e.status==='done').length,nPaid=sessionFiltered.filter(e=>e.status==='done'&&e.paid).length,
-        nPend=sessionFiltered.filter(e=>e.status==='done'&&!e.paid).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
+        nPend=sessionFiltered.filter(_histOwes).length,nNoShow=sessionFiltered.filter(e=>e.status==='noshow').length;
   const _hr2=n=>Math.round(n*100)/100;
-  const sarCollected=_revenueOf(sessionFiltered.filter(e=>e.status==='done'));
-  const sarPending=_amountOf(sessionFiltered.filter(e=>e.status==='done'&&!e.paid));
+  // Collected is the money taken, a paid no-show's included (_revenueOf, as everywhere else); Pending
+  // what is still owed (_histOwes). Done rows alone left the no-shows' money out, and Pending counted
+  // the free rides' riders at a default fare (2026-10-05).
+  const sarCollected=_revenueOf(sessionFiltered);
+  const sarPending=_amountOf(sessionFiltered.filter(_histOwes));
   function thHistSort(col,label,cls=''){
     const active=S.histSort===col;
     const arrow=active?(S.histSortDir===1?'↑':'↓'):'';
@@ -32003,6 +32105,24 @@ async function exportHistoryCSV(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showReceipt_1(event,el){if(event.target===el)closeReceipt()}
 function _on_showReceipt_2(event,el){setTimeout(closeReceipt,300)}
+// The money on the emailed receipt (2026-10-05): it gave the rental price alone and "Pending" on a
+// free ride. Now the rental, each add-on, the booking's total (_bookingAmount), how it stands (Free on
+// a ride with nothing to pay), then what was bought at the desk on the booking, each as it was paid.
+function _receiptMoney(e){
+  const L=(k,v)=>`${String(k).padEnd(14)}:  ${v}`,amt=n=>_money(Math.round((Number(n)||0)*100)/100,_NOISO);
+  if(_freeSessIds.has(e.sessionId)||_ownFree(e))return[L(t('colPrice'),t('freeLabel')),L(t('colPayment'),t('freeLabel'))];
+  const adds=addonLineItems(entryAddons(e)),house=e.paid&&(e.price??DEFAULT_PRICE)===0;
+  const out=[L(t('colPrice'),amt(e.price??DEFAULT_PRICE))];
+  if(adds.length){out.push(`${t('addonsLabel')}:`);adds.forEach(a=>out.push(L('  '+a.name+(a.qty>1?' ×'+a.qty:''),amt(a.lineTotal))));}
+  out.push(L(t('repTotal'),amt(_bookingAmount(e))),L(t('colPayment'),house?t('onTheHouseLabel'):e.paid?t('paidLabel')+' ✓':t('pendingLabel')));
+  const pur=entryPurchases(e);
+  if(pur.length){
+    const PAY={paid:'paidLabel',pending:'pendingLabel',team:'payTeam'};
+    out.push('',`${t('custPurchTitle')}:`);
+    pur.forEach(p=>out.push(L('  '+p.name+(Number(p.qty)>1?' ×'+p.qty:''),p.pay==='house'?t('onTheHouseLabel'):`${amt(_lineCharge(p))} · ${t(PAY[p.pay]||'pendingLabel')}`)));
+  }
+  return out;
+}
 function showReceipt(id){
   const e=getQueue().find(x=>x.id===id);if(!e)return;
   const bike=getAssignedBikes(e)[0]||null;
@@ -32019,8 +32139,7 @@ function showReceipt(id){
     `${t('timeLabel').padEnd(14)}:  ${sessionTime(allSessions().find(s=>s.id===e.sessionId))}`,
     `${t('colBike').padEnd(14)}:  ${bike?bike.name:'—'}`,
     `${t('bikeTypeLabel').padEnd(14)}:  ${typeLabel(resolvedType(e))}`,
-    `${t('colPrice').padEnd(14)}:  ${_money(Number(e.price??DEFAULT_PRICE)||0,_NOISO)}`, // a receipt that never said how much
-    `${t('colPayment').padEnd(14)}:  ${e.paid?t('paidLabel')+' ✓':t('pendingLabel')+' '}`,
+    ..._receiptMoney(e),
     '──────────────────────────────────────','',
     t('receiptSeeYou'),'',
     'MicroMobility Team','Corniche Circuit, Jeddah',
@@ -32490,6 +32609,10 @@ function _cashSessionLines(sessId){
 }
 // Every sale line of a set of sessions, in the order given.
 function _cashLinesOf(sessIds){const out=[];for(const sid of sessIds)for(const l of _cashSessionLines(sid))out.push(l);return out;}
+// What a sale line charges. An On-the-house line keeps its item's list price (2026-10-05), so the
+// reports can say what was given away (_salesTotals' free, the close-out's On the house row), but it
+// is never money taken or owed: every total of a receipt, cart or account reads it as nothing.
+function _lineCharge(l){return !l||l.pay==='house'?0:(Number(l.qty)||0)*(Number(l.price)||0);}
 // Aggregate sale lines -> category breakdown + collected/pending/free/team/refunds/discount totals.
 // Special lines: cat '__discount__' (negative, reduces totals), cat '__cardmeta__' (qty 0, ignored), pay 'refunded' (reversed).
 function _salesTotals(lines){
@@ -32657,9 +32780,14 @@ async function _savePurchases(e,next,ctx){
 function _purchaseIdx(arr,line){const i=arr.indexOf(line);return i>=0?i:arr.findIndex(p=>p&&p.at===line.at&&p.name===line.name&&Number(p.qty)===Number(line.qty));}
 // Delete a rental sale (a purchase recorded on a booking) straight from the Sales ledger: remove it + restock
 async function _rentalSaleDelete(entryId,pidx){
-  const e=getQueue().find(x=>x.id===entryId);if(!e)return;
-  const line=entryPurchases(e)[pidx];if(!line)return;
+  const e0=getQueue().find(x=>x.id===entryId);if(!e0)return;
+  const line=entryPurchases(e0)[pidx];if(!line)return;
   confirmDialog({title:t('cashVoid'),body:esc(line.name),confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
+    // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
+    if(!await _pinApprove(t('cashVoid'))){renderCashier();return;}
+    // The booking as it stands NOW. The one read when the question opened can be a reload old, and
+    // writing its list back dropped a sale another desk had rung up on it meanwhile (2026-10-05).
+    const e=getQueue().find(x=>x.id===entryId);if(!e){renderCashier();return;}
     const cur=entryPurchases(e),at=_purchaseIdx(cur,line);if(at<0){renderCashier();return;}
     if(!await _savePurchases(e,cur.filter((_,i)=>i!==at),'void rental sale')){renderCashier();return;}
     if(line.id)await _addonStock([line.id],Number(line.qty)||1);
@@ -32669,22 +32797,21 @@ async function _rentalSaleDelete(entryId,pidx){
 }
 // Field setter; picking an inventory item prefills its price + category
 // The amount always follows the latest choice: an item with no price clears it (it used to keep
-// the last item's price), and leaving "on the house" brings the item's price back (it used to
-// stay at 0, so switching to Paid rang up a paid sale for nothing).
+// the last item's price). On the house keeps the item's price (2026-10-05): the line takes nothing
+// (_lineCharge) and the reports say what was given away. It used to drop to 0, so the close-out's
+// On the house row never had anything to show.
 function _cashSet(k,v){
-  const prev=S[k];S[k]=v;
+  S[k]=v;
   if(k==='_cashItem'){
     const it=(S.inventory||[]).find(x=>x.id===v);
-    if(it){S._cashName=it.name;S._cashCat=it.category||'Other';S._cashAmt=S._cashPay==='house'?'0':(it.price!=null?String(it.price):'');}
-    else if(v==='__custom__'){S._cashName='';S._cashCat=INV_CATS[0]||'Other';if(S._cashPay!=='house')S._cashAmt='';}
+    if(it){S._cashName=it.name;S._cashCat=it.category||'Other';S._cashAmt=it.price!=null?String(it.price):'';}
+    else if(v==='__custom__'){S._cashName='';S._cashCat=INV_CATS[0]||'Other';S._cashAmt='';}
   }
-  if(k==='_cashPay'&&v==='house')S._cashAmt='0'; // on the house is always free
-  else if(k==='_cashPay'&&prev==='house'){const it=(S.inventory||[]).find(x=>x.id===S._cashItem);S._cashAmt=(it&&it.price!=null)?String(it.price):'';}
   renderCashierModal();
 }
 async function _cashTeamCustom(){const n=_teamRosterAdd(await promptDialog({title:t('teamCustomPrompt')}));if(!n)return;S._cashTeam=n;renderCashierModal();}
 async function _cashAddLine(){
-  const e=getQueue().find(x=>x.id===S._cashEntry);if(!e)return;
+  const e0=getQueue().find(x=>x.id===S._cashEntry);if(!e0)return;
   const isCustom=S._cashItem==='__custom__';
   const it=isCustom?null:(S.inventory||[]).find(x=>x.id===S._cashItem);
   const name=isCustom?(S._cashName||'').trim():(it?it.name:'');
@@ -32693,8 +32820,13 @@ async function _cashAddLine(){
   const pay=S._cashPay;
   if(pay==='team'&&!(S._cashTeam||'').trim()){toast(t('teamChoose'),'error');return;}
   let price=parseFloat(S._cashAmt);
-  if(pay==='house')price=0; // on the house is free
+  if(pay==='house'&&(isNaN(price)||price<0))price=0; // on the house keeps the price typed (_cashSet); with none it is worth nothing on the reports
   if(isNaN(price)||price<0){toast(t('cashAmtRequired'),'error');return;}
+  // A sale given away is money not taken: the operator's PIN, as for a house ride (2026-10-05).
+  if(pay==='house'&&!await _pinApprove(t('onTheHouseLabel')))return;
+  // The booking as it stands now: the PIN can take a while, and a list read before it would drop a
+  // sale another desk rang up meanwhile (2026-10-05).
+  const e=getQueue().find(x=>x.id===e0.id);if(!e)return;
   const cat=isCustom?(S._cashCat||'Other'):(it?(it.category||'Other'):'Other');
   const line={id:it?it.id:null,name,cat,qty,price:Math.round(price*100)/100,pay,team:pay==='team'?(S._cashTeam||'').trim():'',at:new Date().toISOString()};
   if(!await _savePurchases(e,[...entryPurchases(e),line],'ring up sale')){renderCashierModal();return;} // not saved: the stock stays and the form keeps the sale to try again
@@ -32707,9 +32839,13 @@ async function _cashAddLine(){
 }
 // Voiding a sale deletes it, so it asks first - the same question the Sales ledger asks for the same line.
 function _cashVoid(i){
-  const e=getQueue().find(x=>x.id===S._cashEntry);if(!e)return;
-  const arr=entryPurchases(e);const line=arr[i];if(!line)return;
+  const e0=getQueue().find(x=>x.id===S._cashEntry);if(!e0)return;
+  const arr=entryPurchases(e0);const line=arr[i];if(!line)return;
   confirmDialog({title:t('cashVoid'),body:esc(line.name),confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
+    // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
+    if(!await _pinApprove(t('cashVoid'))){renderCashierModal();return;}
+    // The booking as it stands NOW, not as it was when the question opened (see _rentalSaleDelete).
+    const e=getQueue().find(x=>x.id===e0.id);if(!e){renderCashierModal();return;}
     const cur=entryPurchases(e),at=_purchaseIdx(cur,line);
     if(at<0){renderCashierModal();return;}
     if(!await _savePurchases(e,cur.filter((_,idx)=>idx!==at),'void sale')){renderCashierModal();return;} // still on the booking: nothing goes back on the shelf
@@ -32729,7 +32865,7 @@ function _on_renderCashierModal_5(event,el){S._cashTeam=el.value}
 function renderCashierModal(){
   const e=getQueue().find(x=>x.id===S._cashEntry);if(!e){closeCashierModal();return;}
   const purchases=entryPurchases(e);
-  const tot=Math.round(purchases.reduce((s,p)=>s+(Number(p.qty)||0)*(Number(p.price)||0),0)*100)/100;
+  const tot=Math.round(purchases.reduce((s,p)=>s+_lineCharge(p),0)*100)/100; // a line on the house takes nothing
   const invItems=(S.inventory||[]).slice().sort((a,b)=>(a.name||'').localeCompare(b.name||''));
   const isCustom=S._cashItem==='__custom__';
   const lines=purchases.length?purchases.map((p,i)=>`<div class="sl-ml">
@@ -32811,20 +32947,18 @@ function _ctCustPick(id){
 function _ctQtyStep(d){S._ctQty=String(Math.max(1,(parseInt(S._ctQty)||1)+d));renderCashier();}
 function _cashQtyStep(d){S._cashQty=String(Math.max(1,(parseInt(S._cashQty)||1)+d));renderCashierModal();}
 // The amount follows the latest choice, as in _cashSet: no stale price from the last item, and
-// leaving "on the house" does not leave a paid sale at 0.
+// on the house keeps the item's price (it takes nothing: _lineCharge).
 function _ctSet(k,v){
-  const prev=S[k];S[k]=v;
+  S[k]=v;
   if(k==='_ctItem'){
     const it=(S.inventory||[]).find(x=>x.id===v);
-    if(it){S._ctName=it.name;S._ctCat=it.category||'Other';S._ctAmt=S._ctPay==='house'?'0':(it.price!=null?String(it.price):'');}
-    else if(v==='__custom__'){S._ctName='';S._ctCat=INV_CATS[0]||'Other';if(S._ctPay!=='house')S._ctAmt='';}
+    if(it){S._ctName=it.name;S._ctCat=it.category||'Other';S._ctAmt=it.price!=null?String(it.price):'';}
+    else if(v==='__custom__'){S._ctName='';S._ctCat=INV_CATS[0]||'Other';S._ctAmt='';}
   }
-  if(k==='_ctPay'&&v==='house')S._ctAmt='0'; // on the house is always free
-  else if(k==='_ctPay'&&prev==='house'){const it=(S.inventory||[]).find(x=>x.id===S._ctItem);S._ctAmt=(it&&it.price!=null)?String(it.price):'';}
   renderCashier();
 }
 // Add the current form item to the in-progress receipt cart (does not persist yet)
-function _ctCartAdd(){
+async function _ctCartAdd(){
   const isCustom=S._ctItem==='__custom__';
   const it=isCustom?null:(S.inventory||[]).find(x=>x.id===S._ctItem);
   const name=isCustom?(S._ctName||'').trim():(it?it.name:'');
@@ -32833,10 +32967,13 @@ function _ctCartAdd(){
   const pay=S._ctPay;
   if(pay==='team'&&!(S._ctTeam||'').trim()){toast(t('teamChoose'),'error');return;}
   let price=parseFloat(S._ctAmt);
-  if(pay==='house')price=0; // on the house is free
+  if(pay==='house'&&(isNaN(price)||price<0))price=0; // on the house keeps the price typed (_ctSet); with none it is worth nothing on the reports
   if(isNaN(price)||price<0){toast(t('cashAmtRequired'),'error');return;}
   const cat=isCustom?(S._ctCat||'Other'):(it?(it.category||'Other'):'Other');
-  S._ctCart=[...(S._ctCart||[]),{item_id:it?it.id:null,name,cat,qty,price:Math.round(price*100)/100,pay,team:pay==='team'?(S._ctTeam||'').trim():''}];
+  const line={item_id:it?it.id:null,name,cat,qty,price:Math.round(price*100)/100,pay,team:pay==='team'?(S._ctTeam||'').trim():''};
+  // A sale given away is money not taken: the operator's PIN before it goes in the cart (2026-10-05).
+  if(pay==='house'&&!await _pinApprove(t('onTheHouseLabel')))return;
+  S._ctCart=[...(S._ctCart||[]),line];
   S._ctItem='';S._ctName='';S._ctQty='1';S._ctAmt='';S._ctCat=INV_CATS[0]||'Other'; // keep customer + payment + team
   renderCashier();
 }
@@ -32857,6 +32994,9 @@ function _voidedIds(){try{return JSON.parse(localStorage.getItem('cq_sales_voide
 // carries thousands of them and is part of why the quota runs out in the first place. The
 // list only has to outlive the ops still waiting in the outbox.
 function _voidedAdd(id){try{const v=_voidedIds();if(v.indexOf(id)<0){v.push(id);localStorage.setItem('cq_sales_voided',JSON.stringify(v.slice(-500)));}}catch(_){}}
+// A void or delete that was given up on never reached the server: its rows come off the list, so the
+// next read shows them again instead of hiding them on this device for good (2026-10-05).
+function _voidedDrop(ids){try{const s=new Set((ids||[]).map(String));if(s.size)localStorage.setItem('cq_sales_voided',JSON.stringify(_voidedIds().filter(id=>!s.has(String(id)))));}catch(_){}}
 // Persist data we MUST NOT lose (queued offline sales/bookings). If the quota is full, the
 // snapshot cache is disposable — drop it and retry. Only then, if it still fails, surface the
 // error rather than silently losing a sale/booking (the old save just swallowed the exception).
@@ -32887,8 +33027,22 @@ function _outboxCount(){return _outbox().length;}
 // store kept the first lines and dropped the rest). An op replaces any op still waiting for the
 // same sale - an upsert carries the whole row, a delete ends it - so two ops for one sale can
 // never land in the wrong order: a refund replayed under an older "paid", or a void under the
-// sale it voided.
-function _outboxEnqueueMany(ops){const ids=new Set(ops.map(x=>x.id));const o=_outbox().filter(op=>!ids.has(op.id));ops.forEach(x=>o.push({oid:uid(),kind:x.kind,id:x.id,data:x.data||null}));const ok=_outboxSave(o);_outboxFlush();return ok;}
+// sale it voided. Since 2026-10-05 a change to a sale is an 'update' (the columns that changed,
+// see _salesApply): one for a sale whose insert or update is still waiting is folded into it, as a
+// new op (a flush sending the old one meanwhile drops only that one), so the insert is never
+// replaced by a change to a row the server has not got. A 'stock' op is one shelf movement, its id
+// its own: it never replaces anything. `rows` keeps the sale ids a void hides here (_outboxDiscard).
+function _outboxEnqueueMany(ops){
+  const o=_outbox();
+  ops.forEach(x=>{
+    if(x.kind==='update'){
+      const i=o.findIndex(op=>op.id===x.id&&(op.kind==='upsert'||op.kind==='update'));
+      if(i>=0){const w=o.splice(i,1)[0];o.push({oid:uid(),kind:w.kind,id:w.id,data:{...(w.data||{}),...(x.data||{})}});return;}
+    }else if(x.kind!=='stock'){for(let i=o.length-1;i>=0;i--)if(o[i].id===x.id&&o[i].kind!=='stock')o.splice(i,1);}
+    o.push({oid:uid(),kind:x.kind,id:x.id,data:x.data||null,...(x.rows?{rows:x.rows}:{})});
+  });
+  const ok=_outboxSave(o);_outboxFlush();return ok;
+}
 let _outboxBusy=false;
 // Two tabs of the desk share one outbox (localStorage): each flush runs under the 'mm-outbox' Web
 // Lock where the browser has one, so a second tab waits and then reads what the first left, rather
@@ -32898,40 +33052,105 @@ function _mmLock(fn){try{if(navigator.locks&&navigator.locks.request)return navi
 // queueing a second one behind it (2026-10-04): before the lock, such a call found _outboxBusy and returned.
 let _outboxP=null;
 function _outboxFlush(){
-  if(_outboxBusy||!sb||(typeof navigator!=='undefined'&&navigator.onLine===false))return Promise.resolve();
+  // The flush under way first (2026-10-05): checked after _outboxBusy, a call made while one ran was
+  // answered at once, before anything was sent, rather than joining it.
   if(_outboxP)return _outboxP;
+  if(_outboxBusy||!sb||(typeof navigator!=='undefined'&&navigator.onLine===false))return Promise.resolve();
   _outboxP=Promise.resolve(_mmLock(_outboxFlushRun)).finally(()=>{_outboxP=null;});
   return _outboxP;
+}
+// The lines a void or refund puts back on the shelf: the rows the server says it changed, never this
+// screen's copy of the receipt (2026-10-05). The copy was read before the question was answered, and
+// another desk may have voided or refunded the receipt meanwhile: the stock came back twice. A void
+// leaves out a line already refunded (its refund restocked it); a receipt the server changed nothing
+// on restocks nothing. The first answer this device gets for an op restocks, a replayed one too: the
+// call it replays had its answer lost, so nothing restocked for it, and an op leaves the outbox once
+// answered.
+function _rcRestockOf(kind,data){
+  const items=data&&typeof data==='object'&&Array.isArray(data.items)?data.items:[];
+  return items.filter(x=>x&&x.item_id&&!(kind==='void'&&x.pay==='refunded')).map(x=>({item_id:x.item_id,qty:x.qty}));
 }
 async function _outboxFlushRun(){
   if(_outboxBusy)return;
   _outboxBusy=true;
-  const snapshot=_outbox();const doneIds=[];const stuck=new Set();
+  const snapshot=_outbox();const doneIds=[];const stuck=new Set();const needPin=[];
   for(const op of snapshot){
     // An outbox written before ops were merged can still hold two for one sale. Once the older
     // one fails, the newer waits behind it: sent now, it would be overwritten when the older
     // one is retried.
     if(stuck.has(op.id))continue;
+    // A shelf movement a sale, void or refund made without a connection (2026-10-05): applied as the
+    // delta it is. Still no network: it waits. Refused: said by the error bar and dropped, as online.
+    if(op.kind==='stock'){const d=op.data||{};let net=false;try{await _invApplyDelta(d.item,Number(d.delta)||0,0,()=>{net=true;});}catch(_){net=true;}if(net)stuck.add(op.id);else doneIds.push(op.oid);continue;}
+    // A void or refund the server refused for its PIN (PIN_REQUIRED: the approval it was queued with
+    // lasts five minutes) waits for the operator's PIN, asked when the pending-sync count is tapped
+    // (_outboxApprove). Sent again as it was, it was refused for ever (2026-10-05).
+    if(op.needPin){stuck.add(op.id);continue;}
     try{
-      const res=op.kind==='delete'?await _roFree(()=>sb.from('cashier_sales').delete().eq('id',op.id)) // fire-and-forget: a refused op stays in the outbox, retried and shown by the pending-sync chip
+      const res=op.kind==='delete'?await _roFree(()=>sb.from('cashier_sales').delete().eq('id',op.id).select('id')) // fire-and-forget: a refused op stays in the outbox, retried and shown by the pending-sync chip
         :op.kind==='void'?await _rpcOp('staff_void_receipt',op.data,true)
         :op.kind==='refund'?await _rpcOp('staff_refund_receipt',op.data,true)
-        :await _roFree(()=>sb.from('cashier_sales').upsert(op.data));
+        // A change to a recorded sale: its columns only, on a row still standing (2026-10-05). The
+        // whole row it used to send carried voided_at and refunded_at as this device last saw them,
+        // and undid a void or refund another desk had made meanwhile. No row: nothing to change.
+        :op.kind==='update'?await _roFree(()=>sb.from('cashier_sales').update(op.data).eq('id',op.id).is('voided_at',null).is('refunded_at',null).select('id')) // fire-and-forget: as the delete above
+        :await _roFree(()=>sb.from('cashier_sales').upsert(op.data)); // fire-and-forget: as the delete above
       // A void or refund the server already holds (another device sent it first) is done, not stuck.
-      const settled=!(res&&res.error)||((op.kind==='void'||op.kind==='refund')&&/NOT_FOUND/.test(String((res.error&&res.error.message)||'')));
-      if(settled)doneIds.push(op.oid);else stuck.add(op.id);
+      let settled=!(res&&res.error)||((op.kind==='void'||op.kind==='refund')&&/NOT_FOUND/.test(String((res.error&&res.error.message)||'')));
+      // A delete that touched no row is done only when the row is gone: deleting a sale is for admins,
+      // and a refusal under RLS touches nothing and says nothing (2026-10-05). It used to settle then,
+      // while this device hid the row (cq_sales_voided) the server still held.
+      if(settled&&op.kind==='delete'&&!(Array.isArray(res&&res.data)&&res.data.length)){
+        const ex=await _roFree(()=>sb.from('cashier_sales').select('id').eq('id',op.id).limit(1));
+        if(ex.error||(Array.isArray(ex.data)&&ex.data.some(r=>String(r.id)===String(op.id))))settled=false;
+      }
+      if(!settled&&(op.kind==='void'||op.kind==='refund')&&/PIN_REQUIRED/.test(String((res.error&&res.error.message)||'')))needPin.push(op.oid);
+      if(settled){
+        doneIds.push(op.oid);
+        // The shelf follows what the server changed (_rcRestockOf); a movement the network drops waits here.
+        if((op.kind==='void'||op.kind==='refund')&&res&&!res.error)await _addonStockBatch(_rcRestockOf(op.kind,res.data),1);
+      }
+      else stuck.add(op.id);
     }catch(_){stuck.add(op.id);/* keep op for retry */}
   }
   // Re-read the live outbox (ops may have been queued during the awaits) and drop only the ones we actually completed
   const cur=_outbox().filter(op=>doneIds.indexOf(op.oid)<0);
+  let pinNow=false;cur.forEach(op=>{if(needPin.indexOf(op.oid)>=0&&!op.needPin){op.needPin=true;pinNow=true;}});
   _outboxSave(cur);
   _outboxBusy=false;
+  if(pinNow)toast(t('syncNeedPin'),'warning'); // once, when an op first waits for the PIN
   if(doneIds.length&&S.view==='staff'&&S.staffTab==='cashier')renderCashier();
   if(doneIds.length&&cur.length)setTimeout(_outboxFlush,0); // drain ops that arrived mid-flush (e.g. a void right after a record), once this flush has let go of the lock
+}
+// The voids and refunds waiting for the operator's PIN (op.needPin): the PIN first, then each is sent
+// with the approval it gives, under the outbox lock so no other tab sends it too (2026-10-05). The op
+// keeps its op id, so one that landed before is answered from the server's receipt, not run twice.
+async function _outboxApprove(){
+  for(const op0 of _outbox().filter(op=>op.needPin)){
+    const what=t(op0.kind==='refund'?'cashRefund':'cashVoid');
+    if(!await _pinApprove(what))return; // the keypad was closed: they all wait
+    await _mmLock(async()=>{
+      const op=_outbox().find(o=>o.oid===op0.oid);if(!op)return; // sent meanwhile
+      let res;try{res=await _rpcOp(op.kind==='refund'?'staff_refund_receipt':'staff_void_receipt',{...op.data,..._pinArgs()},true);}catch(e){res={error:e};}
+      if(res&&res.error&&!/NOT_FOUND/.test(String(res.error.message||''))){if(!_isNetErr(res.error))_writeErr(res,'sync sale');return;} // still waiting: said, unless it is only the network
+      _outboxSave(_outbox().filter(o=>o.oid!==op.oid));
+      if(res&&!res.error)await _addonStockBatch(_rcRestockOf(op.kind,res.data),1);
+    });
+  }
+}
+// Giving up on what is stuck. A void or delete in it never reached the server, so its rows come off
+// this device's voided list and the ledger is read again: they used to stay hidden here for good while
+// the server still held them (2026-10-05).
+function _outboxDiscard(){
+  const back=[];_outbox().forEach(op=>{if(op.kind==='delete')back.push(op.id);else if(op.kind==='void'&&Array.isArray(op.rows))back.push(...op.rows);});
+  _outboxSave([]);_voidedDrop(back);
+  toast(t('syncDiscardedToast'));
+  Promise.resolve(loadDataLight()).catch(()=>{}).then(()=>{if(S.view==='staff'&&S.staffTab==='cashier')renderCashier();});
 }
 // Badge click: try once more to sync; if the ops are still stuck and we're online, let the operator discard them so the "pending sync" chip can clear.
 async function _outboxRetryOrClear(){
   if(typeof navigator!=='undefined'&&navigator.onLine===false){toast(t('syncOfflineToast'),'warning');return;}
+  await _outboxApprove();
   await _outboxFlush();
   const n=_outboxCount();
   if(!n){if(S.view==='staff'&&S.staffTab==='cashier')renderCashier();return;}
@@ -32940,7 +33159,7 @@ async function _outboxRetryOrClear(){
     body:t('syncStuckBody').replace('{0}',n),
     confirmLabel:t('syncDiscardBtn'),
     confirmClass:'btn-red',
-    onConfirm:()=>{_outboxSave([]);toast(t('syncDiscardedToast'));if(S.view==='staff'&&S.staffTab==='cashier')renderCashier();}
+    onConfirm:_outboxDiscard
   });
 }
 // Local + queued upsert/delete of sale rows (never lost on refresh; syncs to the DB when online).
@@ -32964,35 +33183,39 @@ async function _rpcOp(fn,args,free){
   if(r&&r.error&&args&&args.p_op_id&&_rpcAbsent(r.error)){const{p_op_id,...rest}=args;r=await call(rest);} // a database before the op ids
   return r;
 }
+// Each answers false when nothing was stored, else {restock}: the lines to put back on the shelf now
+// (2026-10-05). That is the server's answer (_rcRestockOf); nothing when the call waits in the outbox
+// (its flush restocks from the answer it gets); this screen's rows only on a database before the RPCs,
+// which answers nothing to go by.
 async function _salesVoid(key,rows,what){
   if(_roNow()){_roRefusal();return false;}
   const ids=rows.map(r=>r.id),opId=_opId();
   const r=await _gatedRpc(what,a=>_rpcOp('staff_void_receipt',{p_receipt_id:key,p_reason:null,...a,p_op_id:opId}));
   if(r===null)return false;
-  if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids);
+  if(r.error&&_rpcAbsent(r.error))return _salesApply([],ids)?{restock:rows.filter(x=>x.pay!=='refunded')}:false;
   const had=(S.cashSales||[]).slice();
   S.cashSales=had.filter(x=>ids.indexOf(x.id)<0);
   if(r.error&&_errKind(r.error)==='net'){
-    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs(),p_op_id:opId}}])){S.cashSales=had;return false;}
-    ids.forEach(_voidedAdd);return true;
+    if(!_outboxEnqueueMany([{kind:'void',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs(),p_op_id:opId},rows:ids}])){S.cashSales=had;return false;}
+    ids.forEach(_voidedAdd);return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
-  ids.forEach(_voidedAdd);return true;
+  ids.forEach(_voidedAdd);return{restock:_rcRestockOf('void',r.data)};
 }
 async function _salesRefund(key,rows,what){
   if(_roNow()){_roRefusal();return false;}
   const opId=_opId();
   const r=await _gatedRpc(what,a=>_rpcOp('staff_refund_receipt',{p_receipt_id:key,p_reason:null,...a,p_op_id:opId}));
   if(r===null)return false;
-  if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[]);
+  if(r.error&&_rpcAbsent(r.error))return _salesApply(rows.map(x=>({...x,pay:'refunded'})),[])?{restock:rows.filter(x=>x.pay!=='refunded'&&x.category!=='__cardmeta__')}:false;
   const now=new Date().toISOString(),had=(S.cashSales||[]).slice();
   S.cashSales=had.map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
   if(r.error&&_errKind(r.error)==='net'){
     if(!_outboxEnqueueMany([{kind:'refund',id:key,data:{p_receipt_id:key,p_reason:null,..._pinArgs(),p_op_id:opId}}])){S.cashSales=had;return false;}
-    return true;
+    return{restock:[]};
   }
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
-  return true;
+  return{restock:_rcRestockOf('refund',r.data)};
 }
 // A sale the server holds as voided is not a sale: kept out of the ledger wherever it is read.
 const _saleLive=r=>!(r&&r.voided_at);
@@ -33000,25 +33223,32 @@ const _saleLive=r=>!(r&&r.voided_at);
 // sent stays on screen as it will be.
 function _outboxReplay(){
   _outbox().forEach(op=>{
+    if(op.kind==='stock')return; // a shelf movement, not a sale
     if(op.kind==='delete')S.cashSales=(S.cashSales||[]).filter(r=>r.id!==op.id);
     else if(op.kind==='void')S.cashSales=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)!==op.id);
     else if(op.kind==='refund')S.cashSales=(S.cashSales||[]).map(r=>(r.receipt_id||r.id)===op.id?{...r,pay:'refunded'}:r);
+    // a change waiting to be sent, over the row as read - unless the read says it was refunded since
+    else if(op.kind==='update'){const i=(S.cashSales||[]).findIndex(r=>r.id===op.id);if(i>=0&&S.cashSales[i].pay!=='refunded'&&!S.cashSales[i].refunded_at)S.cashSales[i]={...S.cashSales[i],...(op.data||{})};}
     else{const i=(S.cashSales||[]).findIndex(r=>r.id===op.id);if(i>=0)S.cashSales[i]=op.data;else S.cashSales.push(op.data);}
   });
 }
-function _salesApply(upserts,deletes){
+// updates: [{id, cols}] - a change to a recorded sale, sent as just the columns that changed
+// (2026-10-05, see _outboxFlushRun). The upserts are new rows.
+function _salesApply(upserts,deletes,updates){
   if(_roNow()){_roRefusal();return false;} // queued, a write would skip the read-only guard
   const had=(S.cashSales||[]).slice(),del=new Set(deletes||[]);
   let cs=(S.cashSales||[]).filter(r=>!del.has(r.id));
   (upserts||[]).forEach(row=>{const i=cs.findIndex(r=>r.id===row.id);if(i>=0)cs[i]=row;else cs=[...cs,row];});
+  (updates||[]).forEach(u=>{const i=cs.findIndex(r=>r.id===u.id);if(i>=0)cs[i]={...cs[i],...u.cols};});
   S.cashSales=cs;
-  const ok=_outboxEnqueueMany([...(upserts||[]).map(r=>({kind:'upsert',id:r.id,data:r})),...[...del].map(id=>({kind:'delete',id}))]);
+  const ok=_outboxEnqueueMany([...(upserts||[]).map(r=>({kind:'upsert',id:r.id,data:r})),...[...del].map(id=>({kind:'delete',id})),...(updates||[]).map(u=>({kind:'update',id:u.id,data:u.cols}))]);
   if(!ok){S.cashSales=had;return false;}
   del.forEach(id=>_voidedAdd(id));
   return true;
 }
-// A receipt's money, as the ledger shows it (the card/cash metadata line is not a sale).
-function _rcTotal(rows){return Math.round((rows||[]).filter(r=>r.category!=='__cardmeta__').reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;}
+// A receipt's money, as the ledger shows it (the card/cash metadata line is not a sale, and a line on
+// the house takes nothing: _lineCharge).
+function _rcTotal(rows){return Math.round((rows||[]).filter(r=>r.category!=='__cardmeta__').reduce((s,r)=>s+_lineCharge(r),0)*100)/100;}
 // ── Offline-safe bookings: queue queue_entries inserts locally and sync when the connection returns ──
 function _bookOutbox(){try{const r=JSON.parse(localStorage.getItem('cq_book_outbox')||'[]');return Array.isArray(r)?r:[];}catch(_){try{localStorage.setItem('cq_book_outbox_bad',localStorage.getItem('cq_book_outbox')||'');localStorage.removeItem('cq_book_outbox');console.error('book outbox corrupted; preserved in cq_book_outbox_bad');}catch(__){}return[];}}
 function _bookOutboxSave(o){return _lsSetCritical('cq_book_outbox',JSON.stringify(o));}
@@ -33036,7 +33266,21 @@ async function _bookOutboxFlushRun(){
   const snap=_bookOutbox();const done=[];const renum={};const noWaiver=[];
   const _reasking=!!S._waiverReaskSess&&S.view==='customer'&&S.custTab==='register';
   const _c=S.loggedIn||getSession();
+  // A party booked offline is one booking: its riders go in ONE customer_create_booking call, as the
+  // online booking sends them (2026-10-05). One call per rider took a flat promo off every rider in
+  // full. Grouped by account, ride and group; anything but a clean answer for the whole party (a
+  // duplicate, a refusal, no function, no network) sends each rider on its own below, as before.
+  const together=new Set(),parties=new Map();
+  if(_c&&_c.session_token)snap.forEach(row=>{if(String(row.customer_id||'')!==String(_c.id))return;const k=[row.customer_id,row.session_id,row.group_id||''].join('|');let g=parties.get(k);if(!g)parties.set(k,g=[]);g.push(row);});
+  for(const g of parties.values()){
+    if(g.length<2)continue;
+    try{
+      const r=await _roFree(()=>sb.rpc('customer_create_booking',{p_id:_c.id,p_token:_c.session_token,p_entries:g}));
+      if(r&&!r.error&&Array.isArray(r.data)&&r.data.length)g.forEach(x=>{together.add(x.id);done.push(x.id);});
+    }catch(_){}
+  }
   for(const row of snap){
+    if(together.has(row.id))continue;
     try{
       let res;
       // A booking queued offline lands through customer_create_booking, exactly like an online
@@ -33115,7 +33359,7 @@ function _ctDiscountSAR(cartTotal){const v=parseFloat(S._ctDisc);if(isNaN(v)||v<
 // the one the receipt recorded (100 paid + 100 team at 10% off: screen 80, receipt 90).
 function _ctCartTotals(cart){
   cart=cart||[];
-  const tot=Math.round(cart.reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
+  const tot=Math.round(cart.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house is in the cart at its price and takes nothing
   const paidNum=cart.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0);
   const disc=_ctDiscountSAR(_ctChargeableTotal(cart)),after=Math.round((tot-disc)*100)/100;
   const paidAfter=Math.max(0,Math.round((paidNum-_ctDiscountSplit(cart,disc).onPaid)*100)/100),card=_ctCardSAR(paidAfter),cash=Math.max(0,Math.round((paidAfter-card)*100)/100);
@@ -33149,7 +33393,10 @@ async function _ctRecord(){
   const paidTotal=rows.filter(r=>r.pay==='paid').reduce((s,r)=>s+r.qty*r.price,0);
   const cardSAR=_ctCardSAR(paidTotal);
   if(cardSAR>0)rows.push({id:uid(),receipt_id:rid,session_id:sessId,customer_name:cust,item_id:null,name:t('cashCard'),category:'__cardmeta__',qty:0,price:cardSAR,pay:'paid',team_name:null,created_at:at});
-  if(S._ctCustId&&S.hasCsCust!==false)rows.forEach(r=>{r.customer_id=S._ctCustId;}); // link the receipt to the chosen account (column optional; boot detect clears the flag if missing)
+  // Link the receipt to the chosen account (column optional; boot detect clears the flag if missing).
+  // Not an MM Team line, which is the team member's, nor the card/cash line, which is no purchase: both
+  // showed in the rider's purchases (2026-10-05).
+  if(S._ctCustId&&S.hasCsCust!==false)rows.forEach(r=>{if(r.pay!=='team'&&r.category!=='__cardmeta__')r.customer_id=S._ctCustId;});
   // Queued for offline-safe sync. A row the device could not store reaches neither the server
   // nor a later flush, so it must not be reported as taken: the receipt stays on screen to be
   // re-entered once there is room.
@@ -33177,9 +33424,10 @@ function _ctVoidReceipt(key){
   const cust=(rows.find(r=>r.customer_name)||{}).customer_name||t('cashWalkup');
   confirmDialog({title:t('cashVoid'),body:`${esc(cust)} · ${_money(_rcTotal(rows))}`,confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
     const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
-    if(!await _salesVoid(key,cur,t('cashVoid'))){renderCashier();return;} // not stored: nothing voided, nothing restocked
+    const v=await _salesVoid(key,cur,t('cashVoid'));
+    if(!v){renderCashier();return;} // not stored: nothing voided, nothing restocked
     _rcLog(t('cashVoid'),cur); // the void is stored: logged now, whatever the restock below does
-    await _addonStockBatch(cur.filter(r=>r.pay!=='refunded'),1); // restock (refunded items were already restocked)
+    await _addonStockBatch(v.restock,1); // what the server voided, refunded lines left out (_rcRestockOf)
     toast(t('cashVoidedToast'));renderCashier();
   }});
 }
@@ -33188,9 +33436,10 @@ async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
   confirmDialog({title:t('cashRefund'),body:t('cashRefundConfirm'),confirmLabel:t('cashRefund'),confirmClass:'btn-muted',onConfirm:async()=>{
     const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
-    if(!await _salesRefund(key,all,t('cashRefund'))){renderCashier();return;} // not stored: not refunded, not restocked
+    const v=await _salesRefund(key,all,t('cashRefund'));
+    if(!v){renderCashier();return;} // not stored: not refunded, not restocked
     _rcLog(t('cashRefund'),all); // the refund is stored: logged now, whatever the restock below does
-    await _addonStockBatch(rows,1); // restock refunded items (summed per item — no concurrent-write race)
+    await _addonStockBatch(v.restock,1); // what the server refunded (_rcRestockOf), summed per item
     toast(t('cashRefundedToast'));renderCashier();
   }});
 }
@@ -33199,7 +33448,10 @@ function _ctReprint(key){const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r
 async function _ctMarkReceiptPaid(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay==='pending');
   if(!rows.length)return;
-  if(!_salesApply(rows.map(r=>({...r,pay:'paid'})),[])){renderCashier();return;}
+  // The one column that changes, as an update on a row still standing (2026-10-05): the whole row it
+  // used to send carried voided_at / refunded_at as this device last saw them, undoing a void or
+  // refund another desk made meanwhile.
+  if(!_salesApply([],[],rows.map(r=>({id:r.id,cols:{pay:'paid'}})))){renderCashier();return;}
   _rcLog(t('cashMarkPaid'),rows);
   toast(t('cashSavedToast'));renderCashier();
 }
@@ -33212,37 +33464,61 @@ function showReceiptEdit(key){
 }
 function closeReceiptEdit(){const m=document.getElementById('receipt-edit-modal');if(m){m.style.display='none';m.innerHTML='';}S._reKey=null;S._reEdit=[];}
 function _reSetSilent(i,k,v){const l=(S._reEdit||[])[i];if(l)l[k]=v;}
-function _reSet(i,k,v){const l=(S._reEdit||[])[i];if(!l)return;l[k]=v;if(k==='pay'&&v==='house')l.price=0;renderReceiptEdit();}
+// On the house keeps the line's price (2026-10-05, _cashSet). A line rung up on the house before
+// that holds 0: leaving On the house gives it the item's price back, as the sale forms do, rather
+// than a Paid line for nothing.
+function _reSet(i,k,v){
+  const l=(S._reEdit||[])[i];if(!l)return;
+  const was=l[k];l[k]=v;
+  if(k==='pay'&&was==='house'&&v!=='house'&&!(parseFloat(l.price)>0)){const it=(S.inventory||[]).find(x=>x.id===l.item_id);if(it&&it.price!=null)l.price=it.price;}
+  renderReceiptEdit();
+}
 async function saveReceiptEdit(){
   const lines=S._reEdit||[],key=S._reKey,upd=[];
   for(const l of lines){
-    let price=parseFloat(l.price);if(l.pay==='house')price=0;
+    let price=parseFloat(l.price);
     if(isNaN(price)||price<0){toast(t('cashAmtRequired'),'error');return;} // an emptied box is a slip, not "free": it used to save as 0
     price=Math.round(price*100)/100;
     const team=l.pay==='team'?((l.team_name||'').trim()||null):null;
-    const row=(S.cashSales||[]).find(r=>r.id===l.id);
-    if(row)upd.push({...row,pay:l.pay,price,team_name:team});
+    const row=(S.cashSales||[]).find(r=>r.id===l.id);if(!row)continue;
+    // Only the columns that changed, as an update (2026-10-05, see _ctMarkReceiptPaid).
+    const cols={};
+    if(l.pay!==row.pay)cols.pay=l.pay;
+    if(price!==Number(row.price))cols.price=price;
+    if(team!==(row.team_name||null))cols.team_name=team;
+    if(Object.keys(cols).length)upd.push({id:row.id,cols,row});
   }
+  // Money not taken: a line made On the house, or charged less, asks the operator's PIN, as a void
+  // does (2026-10-05).
+  if(upd.some(u=>(u.cols.pay==='house'&&u.row.pay!=='house')||(u.cols.price!==undefined&&u.cols.price<Number(u.row.price)))&&!await _pinApprove(t('receiptEditTitle')))return;
   const before=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
-  const after=before.map(r=>upd.find(u=>u.id===r.id)||r);
+  const after=before.map(r=>{const u=upd.find(x=>x.id===r.id);return u?{...r,...u.cols}:r;});
   // The receipt's discount was sized from what was chargeable when it was rung up, and it is not
   // on the form. Left alone, making a line free or a team member's drove the receipt negative (a
   // 50 gel with 10 off, made on-the-house, read -10 and took 10 off Collected). Keep the amount,
   // cap it at what is still chargeable, and book it against paid then pending the way the sale did.
-  const discRows=after.filter(r=>r.category==='__discount__'),del=[];
+  // Each amount goes on a discount row the receipt already has (its own payment first, then any
+  // other), a new row only when it has too few, and a row left over is set to nothing. Never a
+  // delete: deleting a sale row is for admins only, and a refused delete left both discounts on the
+  // server while this device hid one (2026-10-05).
+  const discRows=after.filter(r=>r.category==='__discount__'),ins=[];
   if(discRows.length){
     const goods=after.filter(r=>r.category!=='__discount__'&&r.category!=='__cardmeta__').map(r=>({qty:r.qty,price:r.price,pay:r.pay}));
     const had=Math.round(discRows.reduce((s,r)=>s-(Number(r.qty)||1)*(Number(r.price)||0),0)*100)/100;
     const ds=_ctDiscountSplit(goods,Math.min(Math.max(0,had),_ctChargeableTotal(goods)));
-    const want={paid:ds.onPaid,pending:ds.onPending};
+    const want={paid:ds.onPaid,pending:ds.onPending},pool=discRows.slice(),got={};
+    const put=(r,cols)=>{const ch={};Object.keys(cols).forEach(k=>{if(String(r[k])!==String(cols[k]))ch[k]=cols[k];});if(Object.keys(ch).length)upd.push({id:r.id,cols:ch,row:r});};
+    ['paid','pending'].forEach(p=>{if(want[p]>0){const i=pool.findIndex(r=>r.pay===p);if(i>=0)got[p]=pool.splice(i,1)[0];}});
+    ['paid','pending'].forEach(p=>{if(want[p]>0&&!got[p]&&pool.length)got[p]=pool.shift();});
     ['paid','pending'].forEach(p=>{
-      const ex=discRows.filter(r=>r.pay===p);
-      if(want[p]>0){upd.push({...(ex[0]||discRows[0]),id:ex[0]?ex[0].id:uid(),qty:1,price:-want[p],pay:p});ex.slice(1).forEach(r=>del.push(r.id));}
-      else ex.forEach(r=>del.push(r.id));
+      if(!(want[p]>0))return;
+      if(got[p]){put(got[p],{qty:1,price:-want[p],pay:p});return;}
+      const s=discRows[0];
+      ins.push({id:uid(),receipt_id:s.receipt_id||key,session_id:s.session_id,customer_name:s.customer_name||null,item_id:null,name:s.name||t('cashDiscount'),category:'__discount__',qty:1,price:-want[p],pay:p,team_name:null,created_at:s.created_at,...(s.customer_id?{customer_id:s.customer_id}:{})});
     });
-    discRows.filter(r=>r.pay!=='paid'&&r.pay!=='pending').forEach(r=>del.push(r.id));
+    pool.forEach(r=>put(r,{qty:0,price:0}));
   }
-  if(!_salesApply(upd,del)){renderReceiptEdit();return;} // not stored: the form stays open with the changes
+  if(!_salesApply(ins,[],upd.map(u=>({id:u.id,cols:u.cols})))){renderReceiptEdit();return;} // not stored: the form stays open with the changes
   const now=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded');
   if(before.some(b=>{const n=now.find(x=>x.id===b.id);return !n||n.pay!==b.pay||Number(n.price)!==Number(b.price)||(n.team_name||'')!==(b.team_name||'');})||now.length!==before.length)_rcLog(t('receiptEditTitle'),now,` (${_rcTotal(before)} → ${_rcTotal(now)})`);
   closeReceiptEdit();toast(t('cashSavedToast'));renderCashier();
@@ -33274,10 +33550,15 @@ function renderReceiptEdit(){
     </div>
   </div>`;
 }
+// What a customer's copy of a receipt lists: not the card/cash line, nor a discount row the receipt
+// no longer carries (an edit sets a spare one to nothing: saveReceiptEdit). A line on the house says
+// so in place of an amount, and takes nothing from the total (2026-10-05).
+function _rcShown(r){return !!r&&r.category!=='__cardmeta__'&&!(r.category==='__discount__'&&!(Number(r.qty)||0));}
+function _rcLineAmt(r){return r.pay==='house'?t('onTheHouseLabel'):_money(Math.round(_lineCharge(r)*100)/100,_NOISO);}
 async function _ctShareReceipt(key){
-  const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.category!=='__cardmeta__');if(!rows.length)return;
-  const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
-  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: ${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}`).join('\n');
+  const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&_rcShown(r));if(!rows.length)return;
+  const total=Math.round(rows.reduce((s,r)=>s+_lineCharge(r),0)*100)/100;
+  const body=rows.map(r=>`${r.name}${Number(r.qty)>1?' x'+r.qty:''}: ${_rcLineAmt(r)}`).join('\n');
   const txt=`MicroMobility ${t('cashReceiptWord')}\n${body}\n${t('repTotal')}: ${_money(total,_NOISO)}`;
   try{if(navigator.share){await navigator.share({title:'MicroMobility',text:txt});return;}}catch(e){return;}
   try{window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}catch(e){}
@@ -33285,12 +33566,13 @@ async function _ctShareReceipt(key){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _ctPrintReceipt(rows,cust,at){
   if(!rows||!rows.length)return;
-  rows=rows.filter(r=>r.category!=='__cardmeta__'); // drop payment-split metadata from the printed receipt
+  rows=rows.filter(_rcShown); // drop payment-split metadata (and a spare discount row) from the printed receipt
+  if(!rows.length)return;
   const ar=_isRtl();
   const logoUrl=new URL('/logo.png',location.origin).href;
-  const total=Math.round(rows.reduce((s,r)=>s+(Number(r.qty)||0)*(Number(r.price)||0),0)*100)/100;
+  const total=Math.round(rows.reduce((s,r)=>s+_lineCharge(r),0)*100)/100;
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
-  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">${_money(Math.round((Number(r.qty)||0)*(Number(r.price)||0)*100)/100,_NOISO)}</td></tr>`).join('');
+  const body=rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="rp-tc">${esc(r.qty)}</td><td class="rp-te">${esc(_rcLineAmt(r))}</td></tr>`).join('');
   const html=`<!DOCTYPE html><html lang="${S.lang}" dir="${ar?'rtl':'ltr'}"><head><meta charset="UTF-8"><title>${t('cashReceiptWord')}</title><link href="/fonts/fonts.css" rel="stylesheet"><link href="${location.origin}/receipt.css?v=${RECEIPT_CSS_V}" rel="stylesheet"></head><body>
     <div class="mm-banner"><img src="${logoUrl}" alt="Micromobility"><strong>Micromobility Co.</strong><span class="doc">${t('cashReceiptWord')}</span></div>
     <div class="mm-rule"></div>
@@ -33498,10 +33780,10 @@ function renderCashier(){
   const rentalLines=[];(_qBySession().get(sessId)||[]).slice().forEach(e=>entryPurchases(e).forEach((p,i)=>rentalLines.push({...p,who:e.name,entryId:e.id,pidx:i})));
   const receiptCards=receipts.map(rc=>{
     const refunded=rc.lines.some(l=>l.pay==='refunded');
-    const disp=rc.lines.filter(l=>l.category!=='__cardmeta__');
+    const disp=rc.lines.filter(_rcShown);
     const cardMeta=rc.lines.find(l=>l.category==='__cardmeta__');
     const cardAmt=cardMeta?Math.max(0,Number(cardMeta.price)||0):0;
-    const rt=Math.round(disp.reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
+    const rt=Math.round(disp.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house shows its price, and takes nothing
     const paidNet=Math.round(disp.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
     const cardShown=Math.min(cardAmt,paidNet),cashShown=Math.max(0,Math.round((paidNet-cardShown)*100)/100);
     return`<div class="sl-rc${refunded?' sl-o60':''}">
@@ -33602,6 +33884,7 @@ function renderCashier(){
         </div>
         ${(cc.card>0||cc.cash>0)?`<div class="sl-cc"><span>${t('cashCard')}: <bdi class="sl-blue">${_money(cc.card,_NOISO)}</bdi></span><span>${t('cashCash')}: <bdi class="sl-green">${_money(cc.cash,_NOISO)}</bdi></span></div>`:''}
         ${tot.team>0?`<div class="sl-tteam">${t('payTeam')}: ${_money(tot.team)}</div>`:''}
+        ${tot.free>0?`<div class="sl-thouse">${t('onTheHouseLabel')}: ${_money(tot.free)}</div>`:''}
         ${tot.discount>0?`<div class="sl-tdisc">${t('cashDiscount')}: ${_money(tot.discount)}</div>`:''}
         ${tot.refunded>0?`<div class="sl-tref">${t('cashRefunds')}: ${_money(tot.refunded)}</div>`:''}
         ${catRows?`<div class="sl-cats">${catRows}</div>`:''}
@@ -33614,16 +33897,18 @@ function renderCashier(){
 // Inventory category/brand dropdowns with a custom-add button
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__invSelHtml_1(event,el,a0){if(event.key==='Enter'){event.preventDefault();_invOptSave(a0)}}
-function _invSelHtml(id,value,addMode,options,addLabel){
+// aria: the field's name. Its label above is not tied to it (one label serves the select and the
+// text box that replaces it), so both were unnamed for a screen reader (2026-10-05).
+function _invSelHtml(id,value,addMode,options,addLabel,aria){
   if(addMode){
     return`<div class="iv-row6">
-      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" class="iv-f1"
+      <input id="${id}" type="text" value="${esc(value==='__pending__'?'':value)}" placeholder="${addLabel}" class="iv-f1" aria-label="${esc(addLabel)}"
         data-on-keydown="${_on("_on__invSelHtml_1",_EV,_EL,id)}">
-      <button class="btn-primary iv-ok" data-on-click="${_on("_invOptSave",id)}">✓</button>
+      <button class="btn-primary iv-ok" data-on-click="${_on("_invOptSave",id)}" aria-label="${esc(t('saveBtn'))}">✓</button>
       <button class="btn-secondary iv-no" data-on-click="${_on("_invOptCancel",id)}" aria-label="${t('cancelBtn')}">${_artIcon('close',11)}</button>
     </div>`;
   }
-  return`<select id="${id}" data-on-change="${_on("_invSelChange",id,_P("value"))}">
+  return`<select id="${id}" aria-label="${esc(aria||addLabel)}" data-on-change="${_on("_invSelChange",id,_P("value"))}">
     ${options.map(o=>`<option value="${esc(o.v)}"${o.v===value?' selected':''}>${esc(o.l)}</option>`).join('')}
     <option value="__add__">+ ${addLabel}</option>
   </select>`;
@@ -33719,14 +34004,14 @@ function renderInventory(){
   const brandList=[...new Set([...(isSupp?(S.invBrandsSupp||[]):(S.invBrandsEquip||[])),...secItems.map(i=>i.brand).filter(Boolean)])];
   const catOptions=[...presetCats.map(c=>({v:c,l:_invCatLabel(c)})),...customCats.map(c=>({v:c,l:c}))];
   const brandOptions=[{v:'',l:t('invNoBrand')},...brandList.map(b=>({v:b,l:b}))];
-  const catField=_invSelHtml('inv-cat',S._invCat,S._invCatAdd,catOptions,t('addCustomCatLabel'));
-  const brandField=_invSelHtml('inv-brand',S._invBrand,S._invBrandAdd,brandOptions,t('addCustomBrandLabel'));
+  const catField=_invSelHtml('inv-cat',S._invCat,S._invCatAdd,catOptions,t('addCustomCatLabel'),t('invCategory'));
+  const brandField=_invSelHtml('inv-brand',S._invBrand,S._invBrandAdd,brandOptions,t('addCustomBrandLabel'),t('invBrand'));
   // Type dropdown (only under Protein Snacks): defaults + this device's list + any Type already used in the data
   const subtypeList=[...new Set([...PROTEIN_SUBTYPES,...(S.proteinSubtypes||[]),...(S.inventory||[]).map(i=>_leafSubtype(i.category)).filter(Boolean)])];
-  const subtypeField=_invSelHtml('inv-subtype',S._invSubtype,S._invSubtypeAdd,subtypeList.map(s=>({v:s,l:s})),t('addCustomTypeLabel'));
+  const subtypeField=_invSelHtml('inv-subtype',S._invSubtype,S._invSubtypeAdd,subtypeList.map(s=>({v:s,l:s})),t('addCustomTypeLabel'),t('invProteinType'));
   const showSubtype=isSupp&&S._invCat==='ProteinSnacks';
   const flavOptions=[{v:'',l:t('invNoFlavour')},...[...new Set([...((S.invFlavoursByBrand||{})[S._invBrand||'']||[]),...(S.inventory||[]).filter(i=>(i.brand||'')===(S._invBrand||'')&&i.flavour).map(i=>i.flavour)])].filter(f=>!_badFlav(f)).map(f=>({v:f,l:f}))];
-  const flavourField=_invSelHtml('inv-flav',S._invFlav,S._invFlavAdd,flavOptions,t('addCustomFlavLabel'));
+  const flavourField=_invSelHtml('inv-flav',S._invFlav,S._invFlavAdd,flavOptions,t('addCustomFlavLabel'),t('invFlavour'));
   const addForm=(S.showAddInv||isEdit)?`<div class="inline-form">
     <div class="form-title">${isEdit?t('editBtn'):t('invAddBtn')}</div>
     <div class="form-row">
@@ -33767,7 +34052,7 @@ function renderInventory(){
             <input aria-label="${esc(t('a11yAmount'))}" type="number" step="any" value="${esc(mc.a==null?'':mc.a)}" data-on-input="${_on("_nuMicroSet",i,"a",_P("value"))}" placeholder="0" class="iv-mc-a">
             <input aria-label="${esc(t('a11yUnit'))}" type="text" value="${esc(mc.u||'')}" data-on-input="${_on("_nuMicroSet",i,"u",_P("value"))}" placeholder="mg" class="iv-mc-u">
             <input aria-label="${esc(t('nuNrv'))}" type="number" step="any" value="${esc(mc.nrv==null?'':mc.nrv)}" data-on-input="${_on("_nuMicroSet",i,"nrv",_P("value"))}" placeholder="${t('nuNrv')}" class="iv-mc-nrv">
-            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="Remove" class="iv-mc-del">&times;</button>
+            <button type="button" data-on-click="${_on("_nuMicroDel",i)}" aria-label="${esc(t('removeBtn'))}" class="iv-mc-del">&times;</button>
           </div>`).join('')}
           <button type="button" class="btn-secondary iv-mc-add" data-on-click="${_on("_nuMicroAdd")}">+ ${t('nuAddMicro')}</button>
         </div>
@@ -33792,9 +34077,9 @@ function renderInventory(){
       <td class="iv-td">${it.brand?esc(it.brand):'<span class="iv-muted">—</span>'}</td>
       ${isSupp?`<td class="iv-td">${(it.flavour&&!_badFlav(it.flavour))?esc(it.flavour):'<span class="iv-muted">—</span>'}</td>`:''}
       <td data-sort="${qty}"><div class="iv-ac8">
-        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
+        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}">-</button>
         <span class="iv-qty">${qty}</span>
-        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
+        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}">+</button>`}
       </div></td>
       <td><span class="iv-stat iv-${state}">${stTxt}</span></td>
       <td><div class="actions-cell">
@@ -33818,9 +34103,9 @@ function renderInventory(){
         <span class="iv-cstat iv-${state}">${stTxt}</span>
       </div>
       <div class="iv-cqty">
-        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="Decrease quantity">-</button>
+        ${S.invCount?stInput(it,qty):`<button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,-1)}" aria-label="${esc(t('invQtyDec').replace('{0}',it.name||''))}">-</button>
         <span class="iv-cqn">${qty}</span>
-        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="Increase quantity">+</button>`}
+        <button class="btn-sm btn-muted" data-on-click="${_on("adjInv",it.id,1)}" aria-label="${esc(t('invQtyInc').replace('{0}',it.name||''))}">+</button>`}
       </div>
       ${_hasNutri(it)?`<button class="btn-sm btn-muted iv-w100" data-on-click="${_on("showNutrition",it.id)}">${t('nuButton')}</button>`:''}
       <div class="iv-row4">
@@ -33937,7 +34222,7 @@ function toggleAddInv(){S.showAddInv=true;S.editInvId=null;S._invName='';S._invC
 function cancelInvForm(){S.showAddInv=false;S.editInvId=null;S._invCatAdd=false;S._invBrandAdd=false;renderInventory();}
 function startInvEdit(id){
   const it=(S.inventory||[]).find(x=>x.id===id);if(!it)return;
-  S.editInvId=id;S.showAddInv=false;S._invName=it.name||'';const _ic=it.category||'Helmet';const _ip=_catParent(_ic)==='ProteinSnacks';S._invCat=_ip?'ProteinSnacks':_ic;S._invSubtype=_ip?(_leafSubtype(_ic)||_defaultSubtype()):(_ic==='ProteinSnacks'?_defaultSubtype():'');S._invSubtypeAdd=false;S._invQty=String(it.qty??'');S._invQty0=S._invQty;S._invLow=String(it.low_threshold??'');S._invFree=(Number(it.price)===0&&it.price!=null);S._invPrice=(it.price!=null&&Number(it.price)>0)?String(it.price):'';S._invCost=(it.cost!=null?String(it.cost):'');S._invBrand=it.brand||'';S._invFlav=it.flavour||'';S._invMl=it.volume_ml!=null?String(it.volume_ml):'';S._invNutri=_itemNutri(it)||{};S._invNutriOpen=false;S._invPhoto=it.photo||'';S._invCatAdd=false;S._invBrandAdd=false;S._invFlavAdd=false;
+  S.editInvId=id;S.showAddInv=false;S._invName=it.name||'';const _ic=it.category||'Helmet';const _ip=_catParent(_ic)==='ProteinSnacks';S._invCat=_ip?'ProteinSnacks':_ic;S._invSubtype=_ip?(_leafSubtype(_ic)||_defaultSubtype()):(_ic==='ProteinSnacks'?_defaultSubtype():'');S._invSubtypeAdd=false;S._invQty=String(it.qty??'');S._invQty0=S._invQty;S._invLow=String(it.low_threshold??'');S._invFree=(Number(it.price)===0&&it.price!=null);S._invPrice=(it.price!=null&&Number(it.price)>0)?String(it.price):'';S._invCost=(it.cost!=null?String(it.cost):'');S._invCost0=S._invCost;S._invBrand=it.brand||'';S._invFlav=it.flavour||'';S._invMl=it.volume_ml!=null?String(it.volume_ml):'';S._invNutri=_itemNutri(it)||{};S._invNutriOpen=false;S._invPhoto=it.photo||'';S._invCatAdd=false;S._invBrandAdd=false;S._invFlavAdd=false;
   S.invSection=_invSecOf(it.category);
   // Make sure a custom category/brand/flavour on this item appears in this section's dropdowns
   const isSupp=S.invSection==='supplements';
@@ -33948,8 +34233,10 @@ function startInvEdit(id){
   renderInventory();
 }
 // What the item form holds besides the row's own columns: the photo, the price (0 = free), the cost
-// (only when typed on a new item, so a blank box does not zero it; an edit writes what the box says),
-// the flavour (supplements only), the volume (drinks only) and the nutrition table.
+// (only when typed on a new item, so a blank box does not zero it; on an edit only when the box was
+// changed: this device may not hold the cost at all - a live update never carries it - and saving a
+// price fix wrote that blank back over the real cost, 2026-10-05), the flavour (supplements only),
+// the volume (drinks only) and the nutrition table.
 function _invExtraCols(id,cat,isNew){
   const _p=parseFloat(S._invPrice),_c=parseFloat(S._invCost);
   const _fv=(document.getElementById('inv-flav')?.value||S._invFlav||'').trim();
@@ -33958,7 +34245,7 @@ function _invExtraCols(id,cat,isNew){
     flavour:(S.invSection==='supplements'&&!_badFlav(_fv))?_fv:null,
     volume_ml:_isDrinkCat(cat)?(parseInt(document.getElementById('inv-ml')?.value||S._invMl||'')||null):null,
     nutrition:_invNutriJson()};
-  if(isNew){if(!isNaN(_c)&&_c>=0)more.cost=_c;}else more.cost=isNaN(_c)?null:_c;
+  if(isNew){if(!isNaN(_c)&&_c>=0)more.cost=_c;}else if(String(S._invCost??'')!==String(S._invCost0??''))more.cost=isNaN(_c)?null:_c;
   return more;
 }
 async function addInvItem(){
@@ -34073,6 +34360,11 @@ function delInvItem(id){
   // refuse to be deleted out from under their bookings; so does this.
   const _live=getQueue().filter(e=>['waiting','waitlist','active'].includes(e.status)&&entryAddons(e).some(a=>String((a&&typeof a==='object')?a.id:a)===String(id))).length;
   if(_live){toast(t('invDelInUse').replace('{0}',_live),'error');return;}
+  // Nor while a ridden booking still reads its price from it (2026-10-05): one not paid yet (the
+  // money owed would drop), or one whose add-on line was saved before lines kept the price they
+  // were sold at (entryAddons' p): its amount, paid or not, would change in every report.
+  const _priced=getQueue().filter(e=>e.status!=='cancelled'&&e.status!=='removed'&&entryAddons(e).some(a=>String(a.id)===String(id)&&((e.status==='done'&&!e.paid)||a.p===undefined))).length;
+  if(_priced){toast(t('invDelPriced').replace('{0}',_priced),'error');return;}
   confirmDialog({title:t('deleteBtn'),body:esc(it.name),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     if(await _wr(sb.from('inventory').delete().eq('id',id),'delete item'))return;
     await loadData();renderInventory();
@@ -34096,7 +34388,10 @@ function _lbInWindow(e,win,ref){
   if(win==='month')return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
   return true;
 }
-// Aggregate completed+paid rides. scope 'owner' = booking account credited for EVERY rider it booked;
+// Aggregate completed rides: paid, or on a free ride, or a bike owner's (_rideCompleted, as the badges
+// count them with _bdgRode). Paid alone left every free Saturday and community ride off the board, the
+// tiers and the stats (2026-10-05); "spent" is still the money (_bookingRevenue).
+// scope 'owner' = booking account credited for EVERY rider it booked;
 // scope 'rider' = each individual rider counted on their own.
 function _lbAgg(win,scope,ref){
   const locOf=id=>{const s=_sessGet(id);return s?s.location:null;};
@@ -34105,7 +34400,7 @@ function _lbAgg(win,scope,ref){
   // happened to be #2 one night named the parent's account. That stays only as the fallback
   // for an account this device does not hold.
   const acct=scope==='owner'?new Map((S.customers||[]).map(c=>[String(c.id),c.name])):null;
-  const rides=getQueue().filter(e=>e.status==='done'&&e.paid&&_lbInWindow(e,win,ref)&&(S.lbBranch==='all'||locOf(e.sessionId)===S.lbBranch));
+  const rides=getQueue().filter(e=>(_rideCompleted(e)||(e.status==='done'&&_isOwnBike(e)))&&_lbInWindow(e,win,ref)&&(S.lbBranch==='all'||locOf(e.sessionId)===S.lbBranch));
   const map={};
   rides.forEach(e=>{
     const key=scope==='owner'?(e.customerId||('walk:'+e.id)):((e.name||'?').trim().toLowerCase());
@@ -36076,7 +36371,7 @@ function _anSparkline(values,color,w,h){
 // Gross margin: product revenue minus cost-of-goods for sold lines that map to an item cost.
 function _anMargin(lines,costById){
   let rev=0,cogs=0,haveCost=false;
-  (lines||[]).forEach(l=>{if(l.cat==='__discount__'||l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;if(q<=0)return;rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}});
+  (lines||[]).forEach(l=>{if(l.cat==='__discount__'||l.cat==='__cardmeta__'||l.pay==='refunded')return;const q=Number(l.qty)||0;if(q<=0)return;if(l.pay!=='house')rev+=q*(Number(l.price)||0);if(l.item_id!=null&&costById[l.item_id]!=null){cogs+=q*costById[l.item_id];haveCost=true;}}); // on the house: its cost, no revenue
   rev=Math.round(rev);cogs=Math.round(cogs);
   return{rev,cogs,profit:rev-cogs,marginPct:rev>0?Math.round((rev-cogs)/rev*100):0,haveCost};
 }
@@ -36311,7 +36606,7 @@ function _renderAnalyticsNow(){
   // Product sales for the in-range sessions (cashier sales + rental add-ons)
   const anSalesLines=_cashLinesOf(sessIds);
   const anSales=_salesTotals(anSalesLines);
-  const anTopItems=(()=>{const c={};anSalesLines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__'&&l.pay!=='refunded'&&(Number(l.qty)||0)>0).forEach(l=>{const k=l.name||'—';if(!c[k])c[k]={name:k,qty:0,value:0};c[k].qty+=(Number(l.qty)||0);c[k].value+=(Number(l.qty)||0)*(Number(l.price)||0);});return Object.values(c).sort((a,b)=>b.qty-a.qty||b.value-a.value).slice(0,8);})();
+  const anTopItems=(()=>{const c={};anSalesLines.filter(l=>l.cat!=='__discount__'&&l.cat!=='__cardmeta__'&&l.pay!=='refunded'&&(Number(l.qty)||0)>0).forEach(l=>{const k=l.name||'—';if(!c[k])c[k]={name:k,qty:0,value:0};c[k].qty+=(Number(l.qty)||0);c[k].value+=l.pay==='house'?0:(Number(l.qty)||0)*(Number(l.price)||0);});return Object.values(c).sort((a,b)=>b.qty-a.qty||b.value-a.value).slice(0,8);})();
   // ── Approved onto the social ride ──────────────────────────────────────────
   // On an approval ride, staff pick who comes, so "approved" IS the attendance decision —
   // the number worth watching is how many DIFFERENT people that reached. A rider approved on

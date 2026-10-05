@@ -77,7 +77,7 @@ test.describe('cashier tab', () => {
     expect(left).toEqual({ sales: 0, cart: 2, outbox: 0 });
   });
 
-  test('the amount follows the latest choice: leaving "on the house" brings the price back, a priceless item clears it', async ({ page }) => {
+  test('the amount follows the latest choice: on the house keeps the price, a priceless item clears it', async ({ page }) => {
     await boot(page);
     const amts = await page.evaluate(`(() => {
       setStaffTab('cashier');
@@ -87,7 +87,9 @@ test.describe('cashier tab', () => {
       _ctSet('_ctItem', 'i2'); const d = S._ctAmt;
       return [a, b, c, d];
     })()`);
-    expect(amts).toEqual(['12', '0', '12', '']); // was 12, 0, 0 (a paid sale for nothing), 0
+    // On the house keeps the list price since 2026-10-05 (the line takes nothing: _lineCharge; the reports
+    // say what was given away). Before that: 12, 0, 12, and earlier still 12, 0, 0 (a paid sale for nothing).
+    expect(amts).toEqual(['12', '12', '12', '']);
   });
 
   test('voiding a receipt asks first, then deletes it and writes it to the action log', async ({ page }) => {
@@ -116,8 +118,9 @@ test.describe('cashier tab', () => {
         { id: 'e1', receipt_id: 're', session_id: 's1', name: 'Cap', category: 'Apparel', qty: 1, price: 30, pay: 'paid', created_at: '2099-01-09T11:00:00Z' },
       ];
       _ctMarkReceiptPaid('rp');
-      showReceiptEdit('re'); S._reEdit[0].price = '25'; saveReceiptEdit();
+      showReceiptEdit('re'); S._reEdit[0].price = '25';
     })()`);
+    await page.evaluate('saveReceiptEdit()'); // a lower price asks the operator's PIN first (none here), 2026-10-05
     await page.evaluate(`_ctRefundReceipt('rp')`);
     await page.locator('#confirm-modal .btn-muted').click();
     await expect.poll(() => page.evaluate('S.cashSales.find(r=>r.id==="p1").pay')).toBe('refunded');
@@ -131,7 +134,7 @@ test.describe('cashier tab', () => {
 
   test('making a discounted line free re-books the discount instead of driving the receipt negative', async ({ page }) => {
     await boot(page);
-    const after = await page.evaluate(`(() => {
+    const after = await page.evaluate(`(async () => {
       S._ctSession = 's1';
       S.cashSales = [
         { id: 'g1', receipt_id: 'r1', session_id: 's1', name: 'Gel', item_id: 'i1', category: 'EnergyGels', qty: 1, price: 50, pay: 'paid', created_at: '2099-01-09T11:00:00Z' },
@@ -140,7 +143,7 @@ test.describe('cashier tab', () => {
       ];
       showReceiptEdit('r1');
       S._reEdit.find(l => l.id === 'g1').pay = 'house';
-      saveReceiptEdit();
+      await saveReceiptEdit(); // On the house asks the operator's PIN first (none here), 2026-10-05
       const rows = S.cashSales.filter(r => r.receipt_id === 'r1');
       return { total: _rcTotal(rows), collected: _salesTotals(_cashSessionLines('s1')).collected, disc: rows.filter(r => r.category === '__discount__').map(r => r.price) };
     })()`);
