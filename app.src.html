@@ -12922,7 +12922,10 @@ function startEditSession(id){
   S.editSessionId=id;
   S.editSessDate=sess.session_date||sess.id;
   S.editSessStatus=sess.status||'closed';
-  S.editSessCollect=(parseSlots(sess.bike_slots)||{})._collect||sessionCollectTime(sess)||'';
+  // Only a collection time staff typed is the form's (2026-10-05): one worked out from the start when
+  // the form opened was saved with it, and stayed put when the start moved - bikes "from 8:15" on a
+  // ride that now left at 7. Untouched, the box shows the default for the start (_collectAuto).
+  S.editSessCollect=(parseSlots(sess.bike_slots)||{})._collect||'';
   S.editSessMapUrl=sess.meet_url||'';S.editSessBfName=sess.breakfast_name||'';S.editSessBfUrl=sess.breakfast_url||'';
   S.editSessTitle=sess.title||'';
   // Every field the form shows is set from THIS session. Spots used to keep whatever was last
@@ -13611,7 +13614,7 @@ async function _nsTplPush(tp,list){
     S.newSessAssignedIds=_liveFleetIds(Array.isArray(S.newSessAssignedIds)?S.newSessAssignedIds:[],true);
     const host=document.getElementById('sess-host')||document.getElementById('tab-sessions');if(host)host.innerHTML='';
     const timeVal=`${S.newSessStartTime||'09:00'} - ${S.newSessEndTime||'11:00'}`;
-    const sl=_nsSlots(timeVal,_nsTwoTimes()?(S.newSessCollect||''):'');
+    const sl=_nsSlots(timeVal,_nsTwoTimes()?'':(S.newSessCollect||'')); // the collection time is a bike ride's, not a gathering one's (2026-10-05: this was the wrong way round, so no pushed ride got it)
     if(sl)patch={capacity:sl.total,bike_slots:JSON.stringify(sl.slots),addons:(S.newSessAddons||[]).length?JSON.stringify(S.newSessAddons):null,...(_nsSeats()?{spots:sl.total}:{})};
   }finally{NS_TPL_KEYS.forEach(k=>{S[k]=keep[k];});S.showAddSession=had;}
   if(!patch){renderSessions();return;}
@@ -13627,6 +13630,10 @@ async function _nsTplPush(tp,list){
     await loadData();renderSessions();if(!ok)return false;
   });
 }
+// S._nsTplId (the template the rides made next carry, sessions.template_id) is set here and by
+// _nsTplSave only; every way of opening the form, Cancel and a clone clear it (2026-10-05). It
+// outlived them, so a ride made from an unrelated form was stamped with the last template used, and
+// that template's next push rewrote the ride.
 function _nsTplApply(id){
   const tp=_nsTpls().find(x=>x.id===id);if(!tp)return;
   S._nsTplId=id;
@@ -13671,7 +13678,7 @@ function _nsDaysHtml(){
 function _sessStart(x){return String(((parseSlots(x.bike_slots)||{})._time)||'').split(/\s*[-–]\s*/)[0]||'';}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderDashboard_1(event,el,a0){setStaffTab('queue');setSfSession(a0)}
-function _on_renderDashboard_2(event,el){setStaffTab('sessions');S.showAddSession=true;S.editSessionId=null;S.newSessDate=todayStr();renderSessions()}
+function _on_renderDashboard_2(event,el){setStaffTab('sessions');S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate=todayStr();renderSessions()}
 function renderDashboard(){
   const el=document.getElementById('tab-dashboard');if(!el)return;
   if(!S.dataLoaded){el.innerHTML=skeletonList();return;}
@@ -13718,7 +13725,7 @@ function renderDashboard(){
 // The same sessions as the list, filters included, laid out by day with the workshop's jobs
 // booked for that day. A session opens in the list; a free day from today on starts a new one.
 function _calMove(n){const[y,m]=(S._calYm||todayStr().slice(0,7)).split('-').map(Number);const d=new Date(y,m-1+n,1);S._calYm=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;renderSessions();}
-function _calNew(iso){S.showAddSession=true;S.editSessionId=null;S.newSessDate=iso;renderSessions();setTimeout(()=>document.getElementById('sess-add-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);}
+function _calNew(iso){S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate=iso;renderSessions();setTimeout(()=>document.getElementById('sess-add-form')?.scrollIntoView({behavior:_sb(),block:'start'}),50);}
 function _calOpen(id){S.sessView='list';selectSessionDetail(id);}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__sessCalHtml_1(event,el){S._calYm=null;renderSessions()}
@@ -13734,8 +13741,8 @@ function _sessCalHtml(list){
     const iso=`${ym}-${String(d).padStart(2,'0')}`,ss=(byDay[iso]||[]).sort((a,b)=>_sessStart(a).localeCompare(_sessStart(b))),jn=jobs[iso]||0;
     cells+=`<div class="cal-cell${iso===today?' today':''}${iso<today?' past':''}" data-day="${iso}">
       <div class="cal-dnum">${d}</div>
-      ${ss.map(x=>{const n=(_qBySession().get(x.id)||[]).filter(e=>['waiting','active','done'].includes(e.status)).length;
-        return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')}" data-on-click="${_on("_calOpen",x.id)}" title="${esc(_evName(x))} · ${n}/${x.capacity||0}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_evName(x))}</span><em>${n}/${x.capacity||0}</em></button>`;}).join('')}
+      ${ss.map(x=>{const n=_placesTaken(x),cap=_placesCap(x); // the one rule for places (2026-10-05): it counted its own way here
+        return`<button type="button" class="cal-sess ev-${_evOf(x)} st-${esc(x.status||'')}" data-on-click="${_on("_calOpen",x.id)}" title="${esc(_evName(x))} · ${n}/${cap}"><span class="cal-time">${esc(_sessStart(x))}</span><span class="cal-name">${esc(_evName(x))}</span><em>${n}/${cap}</em></button>`;}).join('')}
       ${jn?`<div class="cal-ws">${esc(t('calWs').replace('{0}',jn))}</div>`:''}
       ${!ss.length&&iso>=today?`<button type="button" class="cal-add" aria-label="${esc(t('calNewOn').replace('{0}',shortDate(iso)))}" data-on-click="${_on("_calNew",iso)}">+</button>`:''}
     </div>`;
@@ -13754,7 +13761,7 @@ function _sessCalHtml(list){
 function cloneSession(id){
   const s=allSessions().find(x=>x.id===id);if(!s)return;
   const slots=parseSlots(s.bike_slots)||{};
-  S.showAddSession=true;S.editSessionId=null;S.newSessDate='';S.newSessRepeat='1';S.newSessDays=[];
+  S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate='';S.newSessRepeat='1';S.newSessDays=[];
   // Everything the form asks for comes across, so a clone is the same session on a new date:
   // the event kind, its name, seats, meeting point, breakfast stop, add-ons and waitlist rule.
   // Only the date is left blank. The bike allocation follows below.
@@ -13819,12 +13826,21 @@ function selectSessionDetail(id){
   // On phone the detail replaces the list, so bring it to the top
   if(id&&window.matchMedia&&window.matchMedia('(max-width:767px)').matches){try{window.scrollTo({top:0,behavior:_sb()});}catch(_){window.scrollTo(0,0);}}
 }
+// The bike collection time on the session forms (2026-10-05). The box showed a time worked out from
+// the start when the form was drawn, and the save took it as typed: change the start afterwards and
+// the ride said bikes go out after it has left. Now only a time staff type is the form's
+// (newSessCollect / editSessCollect); untouched, the box shows the default for the start as it
+// stands (45 minutes before, as sessionCollectTime works it out for a ride with none), follows the
+// start while it is edited, and saves nothing. A typed time later than the start is refused.
+function _collectAuto(start){const m=_hhmmToMin(start);return m==null?'':_minToHhmm(Math.max(0,m-COLLECT_BEFORE_MIN));}
+function _collectLate(collect,start){const c=_hhmmToMin(collect),s=_hhmmToMin(start);return c!=null&&s!=null&&c>s;}
+function _collectFollow(id,start,typed){if(typed)return;const el=document.getElementById(id);if(el)el.value=_collectAuto(start);}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderSessions_1(event,el){S.newSessDate=el.value;_nsFillSync()}
 function _on_renderSessions_2(event,el){S.newSessRepeat=el.value;_nsFillSync()}
 function _on_renderSessions_3(event,el){S.newSessStartTime=el.value}
 function _on_renderSessions_4(event,el){S.newSessEndTime=el.value}
-function _on_renderSessions_5(event,el){S.newSessStartTime=el.value}
+function _on_renderSessions_5(event,el){S.newSessStartTime=el.value;_collectFollow('ns-collect',el.value,S.newSessCollect)}
 function _on_renderSessions_6(event,el){S.newSessEndTime=el.value}
 function _on_renderSessions_7(event,el){S.newSessCollect=el.value}
 function _on_renderSessions_8(event,el){S.newSessEvent='jcc';renderSessions()}
@@ -13845,13 +13861,13 @@ function _on_renderSessions_18(event,el){S.newSessMode='counts';renderSessions()
 function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
-function _on_renderSessions_22(event,el){S.showAddSession=false;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
+function _on_renderSessions_22(event,el){S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_23(event,el){S.editSessDate=el.value}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
 function _on_renderSessions_25(event,el){S.editSessStartTime=el.value}
 function _on_renderSessions_26(event,el){S.editSessEndTime=el.value}
 function _on_renderSessions_27(event,el){S.editSessMapUrl=el.value}
-function _on_renderSessions_28(event,el){S.editSessStartTime=el.value}
+function _on_renderSessions_28(event,el){S.editSessStartTime=el.value;_collectFollow('es-collect',el.value,S.editSessCollect)}
 function _on_renderSessions_29(event,el){S.editSessEndTime=el.value}
 function _on_renderSessions_30(event,el){S.editSessCollect=el.value}
 function _on_renderSessions_31(event,el){S.editSessTitle=el.value}
@@ -13862,7 +13878,7 @@ function _on_renderSessions_35(event,el){S.editSessMode='fleet';renderSessions()
 function _on_renderSessions_36(event,el,a0,a1){S.editSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_37(event,el){S.editSessTotal=el.value}
 function _on_renderSessions_38(event,el){S.editSessionId=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
-function _on_renderSessions_39(event,el){S.showAddSession=true;S.editSessionId=null;renderSessions()}
+function _on_renderSessions_39(event,el){S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;renderSessions()}
 function _on_renderSessions_40(event,el,a0){event.stopPropagation();closeOutSession(a0)}
 function _on_renderSessions_41(event,el,a0){event.stopPropagation();showCancelNight(a0)}
 function _on_renderSessions_42(event,el,a0){event.stopPropagation();toggleSession(a0,'full')}
@@ -13870,10 +13886,10 @@ function _on_renderSessions_43(event,el,a0){event.stopPropagation();toggleSessio
 function _on_renderSessions_44(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
 function _on_renderSessions_45(event,el,a0){event.stopPropagation();toggleSession(a0,'closed')}
 function _on_renderSessions_46(event,el,a0){event.stopPropagation();toggleSession(a0,'open')}
-function _on_renderSessions_47(event,el){S.showAddSession=true;S.editSessionId=null;renderSessions()}
+function _on_renderSessions_47(event,el){S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;renderSessions()}
 function _on_renderSessions_48(event,el){S.sessView='list';renderSessions()}
 function _on_renderSessions_49(event,el){S.sessView='cal';renderSessions()}
-function _on_renderSessions_50(event,el){S.showAddSession=!S.showAddSession;S.editSessionId=null;renderSessions()}
+function _on_renderSessions_50(event,el){S.showAddSession=!S.showAddSession;S.editSessionId=null;S._nsTplId=null;renderSessions()}
 function _on_renderSessions_51(event,el){S.sessLocFilter=el.value;renderSessions()}
 function _on_renderSessions_52(event,el){S.showDeletedSess=!S.showDeletedSess;renderSessions()}
 function renderSessions(){
@@ -13962,7 +13978,7 @@ function renderSessions(){
         </div>
         <div class="form-group">
           <label for="ns-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.newSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
+          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_collectAuto(S.newSessStartTime||'21:00'))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       ${_nsDaysHtml()}
@@ -14146,7 +14162,7 @@ function renderSessions(){
         </div>
         <div class="form-group">
           <label for="es-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_minToHhmm(Math.max(0,(_hhmmToMin(S.editSessStartTime||'21:00')||1260)-COLLECT_BEFORE_MIN)))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" class="ss-collect">
+          <input type="time" id="es-collect" value="${esc(S.editSessCollect||_collectAuto(S.editSessStartTime||'21:00'))}" data-on-input="${_on("_on_renderSessions_30",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       
@@ -14631,7 +14647,8 @@ async function saveSessionEdit(){
   const esStart=S.editSessStartTime||document.getElementById('es-start')?.value||'21:00';
   const esEnd=S.editSessEndTime||document.getElementById('es-end')?.value||'23:00';
   const timeVal=`${esStart} - ${esEnd}`;
-  const esCollect=S.editSessCollect||document.getElementById('es-collect')?.value||'';
+  const esCollect=S.editSessCollect||''; // only a time staff typed or the ride had (_collectAuto, 2026-10-05)
+  if(esCollect&&!_twoTimesSess(sess)&&_collectLate(esCollect,esStart)){const ce=document.getElementById('es-collect');if(ce){_fieldErr(ce,t('errCollectLate'));ce.focus();}else toast(t('errCollectLate'),'error');return;}
   const isNamedEdit=_evNamed(sess);
   let slots,total;
   if(_editSeats(sess)){
@@ -14862,7 +14879,8 @@ async function _addSession(){
   // A ride staff approve keeps its gathering time as the moment bikes go out; every other
   // bike ride carries its own, which is the time the rider's Wallet pass prints.
   const collectEl=document.getElementById('ns-collect');
-  const collectVal=(collectEl&&collectEl.value)||'';
+  const collectVal=collectEl?(S.newSessCollect||''):''; // only a time staff typed (_collectAuto, 2026-10-05)
+  if(collectVal&&!_nsTwoTimes()&&_collectLate(collectVal,startT)){_fieldErr(collectEl,t('errCollectLate'));collectEl.focus();return;}
   const isCommSess=_nsComm();
   // The National Day ride is shaped exactly like the Petromin one - real queue numbers,
   // circuit prices, capacity from the bikes actually put out - and differs only in being
