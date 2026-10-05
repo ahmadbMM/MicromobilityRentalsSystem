@@ -142,8 +142,9 @@ test.describe('@staff:community badges', () => {
     const made = writes(page, 'badges');
     await tab.getByRole('button', { name: '+ New badge' }).click();
     const form = tab.locator('.bdg-form');
-    await form.locator('.bdg-ico[aria-label="bolt"]').click();
-    await form.locator('.bdg-sw[aria-label="teal"]').click();
+    // The choices are named in the staff language (2026-10-05), not by their code names.
+    await form.locator('.bdg-ico').nth(await page.evaluate(`Object.keys(BDG_GLYPH).indexOf('bolt')`) as number).click();
+    await form.getByRole('button', { name: 'Teal', exact: true }).click();
     await form.locator('#bdg-f-name').fill('Night Rider');
     await form.locator('#bdg-f-name_ar').fill('راكب الليل');
     await expect(form.locator('.bdg-preview svg.bdg-m.bdc-teal')).toHaveCount(1);

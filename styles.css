@@ -3069,6 +3069,8 @@
     .an-sort-active::after{content:' ↑';font-size:9px;}
     .an-sort-active.desc::after{content:' ↓';}
     .an-sort-active.an-sort-txt::after{content:none;} /* the label carries its own arrow */
+    /* The sort headings' buttons (2026-10-05): the heading's own look, reached by Tab like any button. */
+    #tab-analytics .an-sort-btn{background:transparent none;border:0;padding:0;margin:0;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit;cursor:pointer;}
     .analytics-highlight-row{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:24px;}
     @media(max-width:767px){.analytics-highlight-row{grid-template-columns:1fr;}}
     .analytics-highlight-card{background:linear-gradient(160deg,rgba(var(--tint-rgb),.028),var(--s1) 58%);border:1px solid var(--border);border-radius:6px;padding:18px 20px;transition:border-color .18s ease,box-shadow .18s ease;}
