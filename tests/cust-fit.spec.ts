@@ -6,7 +6,7 @@ import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 // same size"): nothing is wider than a 320px screen, no text field is under 16px (iOS zooms into those when
 // they are tapped), and the buttons a rider presses are one height. A long name and email are on purpose.
 const day = (n: number) => new Date(Date.now() + n * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
-const T = day(2), P = day(-3);
+const T = day(2), P = day(-3); // P's finished ride is rated: an unrated one from RATE_FROM (2026-10-03) on opens the rating gate over the page
 const NAME = 'Abdulrahman Mohammed Alqahtani Alshehri';
 const sessions = [
   { id: T, day: 'Friday', session_date: T, capacity: 12, status: 'open', created_at: 1, bike_slots: JSON.stringify({ _time: '21:00 - 23:00', _total: 12 }) },
@@ -34,7 +34,7 @@ for (const lang of ['en', 'ar']) test(`the rider screens fit a 320px phone (${la
   await page.goto('/'); await waitForSb(page); await fits(page, 'sign in');
   await page.goto('/signup'); await waitForSb(page); await fits(page, 'sign up');
   await loginCustomer(page, { id: 'c1', name: NAME, email: 'abdulrahman.mohammed.alqahtani@privaterelay.appleid.com', height: 175, type_preference: 'Road' });
-  await stubSupabase(page, { sessions, bikes: [], queue_entries: [row('b1', T), row('b3', P, { status: 'done', paid: true })] });
+  await stubSupabase(page, { sessions, bikes: [], queue_entries: [row('b1', T), row('b3', P, { status: 'done', paid: true, rating_detail: { form: 'rental', s: { service: 10, bike: 10, experience: 10 } } })] });
   await page.goto('/'); await waitForSb(page);
   await page.evaluate(`S.selEvent='jcc';S.selSession=null;S.regStep=1;setCustTab('register')`); await fits(page, 'rides');
   await page.evaluate(`S.selSession='${T}';S.regStep=2;S.regBikeHeights=['175'];renderRegister()`); await fits(page, 'riders');

@@ -919,7 +919,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   noShowFlagTip:'{0} past no-shows',cloneSessBtn:'Clone',cloneBtn:'Clone',
   kbNoWaiting:'No riders waiting',
   fixDupBtn:'Fix duplicate numbers',fixDupTitle:'Fix duplicate booking numbers',fixDupBody:'Found {0} duplicate booking number(s). Each duplicate will get a fresh unique number (the earliest booking keeps its number). Continue?',fixDupConfirm:'Renumber duplicates',fixDupNone:'No duplicate booking numbers found.',fixDupDone:'Renumbered {0} booking(s).',fixDupLog:'Fixed {0} duplicate booking number(s)',
-  expTitle:'Export Report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',expPdf:'PDF / Print',expExcel:'Excel (CSV)',
+  expTitle:'Export Report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',repKmEach:'One report per distance',repKmEachHint:'Each distance prints on its own, numbered from 1, with the columns and filters above.',repRunners:'Runners',expPdf:'PDF / Print',expExcel:'Excel (CSV)',
   eqnTitle:'Edit Booking Number',eqnGroup:'Group of {0} bikes',eqnNewNum:'New Booking Number',
   logsActivity:'Activity Log',logsEmpty:'No actions logged yet.',
   sessModeCounts:'Bike Counts',sessModeTotal:'Total Bikes',sessModeFleet:'From Fleet',
@@ -1475,7 +1475,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   noShowFlagTip:'{0} حالات عدم حضور سابقة',cloneSessBtn:'نسخ',cloneBtn:'نسخ',
   kbNoWaiting:'لا يوجد ركاب في الانتظار',
   fixDupBtn:'إصلاح الأرقام المكررة',fixDupTitle:'إصلاح أرقام الحجوزات المكررة',fixDupBody:'تم العثور على {0} رقم حجز مكرر. سيحصل كل مكرر على رقم فريد جديد (يحتفظ الحجز الأقدم برقمه). متابعة؟',fixDupConfirm:'إعادة ترقيم المكررات',fixDupNone:'لا توجد أرقام حجوزات مكررة.',fixDupDone:'تمت إعادة ترقيم {0} حجز.',fixDupLog:'إصلاح {0} رقم حجز مكرر',
-  repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
+  repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',repKmEach:'تقرير لكل مسافة',repKmEachHint:'تُطبع كل مسافة في تقرير مستقل مرقّم من 1، بالأعمدة وعوامل التصفية أعلاه.',repRunners:'العدّاؤون',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
   eqnTitle:'تعديل رقم الحجز',eqnGroup:'مجموعة من {0} دراجات',eqnNewNum:'رقم الحجز الجديد',
   logsActivity:'سجل النشاط',logsEmpty:'لم يتم تسجيل أي إجراءات بعد.',
   sessModeCounts:'أعداد الدراجات',sessModeTotal:'إجمالي الدراجات',sessModeFleet:'من الأسطول',
@@ -23804,6 +23804,7 @@ const _REP_COLS=[
   {k:'seq',     key:'repColSeq'},
   {k:'qnum',    key:'colBookingNum'},
   {k:'name',    key:'nameLabel'},
+  {k:'km',      key:'runKmLabel'}, // Run for Her's 3 km / 5 km, offered on a run alone (_repColFits)
   {k:'member',  key:'colMember'},
   {k:'phone',   key:'phoneNum'},
   {k:'height',  key:'colHeight'},
@@ -23817,7 +23818,7 @@ const _REP_SECTIONS=[
   {k:'sales',   key:'cashSalesTitle'},
 ];
 function _repDefaults(){
-  return {cols:{seq:1,qnum:1,name:1,member:1,phone:0,height:0,bike:1,payment:1,status:1},
+  return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,height:0,bike:1,payment:1,status:1},
           sections:{summary:1,addons:1,sales:1},
           fType:'all',fStatus:'all',fPay:'all',fMember:'all'};
 }
@@ -23843,19 +23844,53 @@ function _repPaintRow(kind,k,on,rebuild){
   if(kind==='chartsOn'&&k==='nationality'){const d=document.getElementById('acr-nat-top');if(d)d.disabled=!on;}
 }
 function _repToggle(kind,k){const o=_repOpts();o[kind][k]=o[kind][k]?0:1;_repSave();_repPaintRow(kind,k,o[kind][k],showPrintReportOptions);}
-function _repSetFilter(k,v){_repOpts()[k]=v;_repSave();} // the select already shows the pick; nothing else in the dialog depends on it
+function _repSetFilter(k,v){_repOpts()[k]=v;_repSave();_repKmPaint();} // the select already shows the pick; only the per-distance counts follow it
 function _repReset(){S._repOpts=_repDefaults();_repSave();showPrintReportOptions();}
-// Rows the report should carry, after the builder's filters
+// Rows the report should carry, after the builder's filters. The bike type is no filter where nobody
+// rides one: a type saved on a ride night would otherwise empty a run's report.
 function _repFilter(list){
   const o=_repOpts();
   return list.filter(e=>{
-    if(o.fType!=='all'&&resolvedType(e)!==o.fType)return false;
+    if(o.fType!=='all'&&_needsBike(_rowSess(e))&&resolvedType(e)!==o.fType)return false;
     if(o.fStatus!=='all'&&e.status!==o.fStatus)return false;
     if(o.fPay==='paid'&&!e.paid)return false;
     if(o.fPay==='pending'&&e.paid)return false;
     if(o.fMember==='member'&&!_isSatMember(e))return false;
     if(o.fMember==='nonmember'&&_isSatMember(e))return false;
     return true;
+  });
+}
+// The session report's rows (the PDF's and the Excel's): every live outcome, Expected and No-show
+// included, after the builder's filters, in queue-number order.
+function _repRows(sessId){
+  return _repFilter(getQueue()
+    .filter(e=>e.sessionId===sessId&&['waiting','active','done','noshow'].includes(e.status))
+    .sort((a,b)=>a.queueNum-b.queueNum));
+}
+// Which builder columns a session's report carries: the distance on Run for Her alone, and no
+// height or bike where nobody rides one (a runner's line read "Bike: None").
+function _repColFits(sess,k){
+  if(k==='km')return _rideKind(sess)==='runher';
+  if(k==='height'||k==='bike')return !sess||_needsBike(sess);
+  return true;
+}
+// One report per distance of Run for Her (the owner, 2026-10-05: "add the ability in report builder to
+// print a report for each distance in separate"). km: 3 | 5, or 'none' for runners with no distance
+// on record; null keeps every runner.
+function _repKmArg(k){return k==null?null:String(k)==='none'?'none':_runKmOk(k)?Number(k):null;}
+function _repKmRows(list,km){return km==null?list:list.filter(e=>km==='none'?!_runKmOk(e.runKm):Number(e.runKm)===km);}
+function _repKmName(km){return km==='none'?t('runKmNone'):_runKmTxt(km);}
+// The distances the builder offers a sheet for: 3 km and 5 km always, "No distance" only while a
+// live runner has none (one booked before the distance was asked, or added without one).
+function _repKmList(sessId){return[...RUN_KMS,...(_repKmRows(getQueue().filter(e=>e.sessionId===sessId&&['waiting','active','done','noshow'].includes(e.status)),'none').length?['none']:[])];}
+// Each distance's count follows the builder's filters, and an empty one cannot be printed.
+function _repKmPaint(){
+  const box=document.getElementById('rep-km');if(!box)return;
+  const rows=_repRows(S.sfSession);
+  box.querySelectorAll('[data-rep-km]').forEach(r=>{
+    const n=_repKmRows(rows,_repKmArg(r.getAttribute('data-rep-km'))).length;
+    const c=r.querySelector('.rpt-km-n');if(c)c.textContent=`${t('repRunners')}: ${n}`;
+    r.querySelectorAll('button').forEach(b=>{b.disabled=!n;});
   });
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -23871,6 +23906,17 @@ function showPrintReportOptions(){
   const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" class="rpt-row">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
   const _types=CAT_RIDE_TYPES; // every bike type a rider can be on, the one list the catalogue keeps (Kids was missing, 2026-10-05)
   const sel=(id,val,opts,onchg,lbl)=>{const on=_selOnce(val);return `<select class="filter-select rpt-w100" aria-label="${esc(lbl||id)}" data-on-change="${_on(...onchg)}">${opts.map(op=>`<option value="${esc(op[0])}"${on(op[0])?' selected':''}>${esc(op[1])}</option>`).join('')}</select>`;};
+  const _sess=allSessions().find(s=>s.id===S.sfSession);
+  const _run=_rideKind(_sess)==='runher';
+  // Run for Her: a line per distance, each printing (or exporting) that distance's runners alone. The
+  // dialog stays open behind the report, so the next distance is one tap away.
+  const kmRow=k=>`<div class="rpt-km-row" data-rep-km="${k}">
+          <span class="run-km-chip${k==='none'?'':' rk-'+k}">${esc(_repKmName(k))}</span>
+          <span class="rpt-km-n"></span>
+          <span class="rpt-km-acts">
+            <button type="button" class="btn-sm btn-muted" data-on-click="${_on("printSessionReport",k)}">${ICON_PRINT} ${t('repPrintNow')}</button>
+            <button type="button" class="btn-sm btn-muted" data-on-click="${_on("exportSessionExcel",k)}">${ICON_EXPORT} CSV</button>
+          </span></div>`;
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showPrintReportOptions_1",_EV,_EL)}">
     <div class="modal-box rpt-w520" role="dialog" aria-modal="true" aria-labelledby="dlgt-expTitle">
@@ -23879,7 +23925,7 @@ function showPrintReportOptions(){
 
       <div class="rpt-lbl4">${t('repOptCols')}</div>
       <div class="rpt-grid2">
-        ${_REP_COLS.map(c=>row('cols',c.k,t(c.key))).join('')}
+        ${_REP_COLS.filter(c=>_repColFits(_sess,c.k)).map(c=>row('cols',c.k,t(c.key))).join('')}
       </div>
 
       <div class="rpt-lbl4">${t('repOptSections')}</div>
@@ -23889,8 +23935,8 @@ function showPrintReportOptions(){
 
       <div class="rpt-lbl6">${t('repOptFilters')}</div>
       <div class="rpt-grid2f">
-        <label class="rpt-fld">${t('bikeTypeLabel')}
-          ${sel('rep-f-type',o.fType,[['all',t('filterAll')],..._types.map(x=>[x,typeLabel(x)])],['_repSetFilter','fType',_P('value')],t('bikeTypeLabel'))}</label>
+        ${_repColFits(_sess,'bike')?`<label class="rpt-fld">${t('bikeTypeLabel')}
+          ${sel('rep-f-type',o.fType,[['all',t('filterAll')],..._types.map(x=>[x,typeLabel(x)])],['_repSetFilter','fType',_P('value')],t('bikeTypeLabel'))}</label>`:''}
         <label class="rpt-fld">${t('filterStatus')}
           ${sel('rep-f-status',o.fStatus,[['all',t('filterAll')],...['waiting','active','done','noshow'].map(x=>[x,t(STATUS_KEY[x])])],['_repSetFilter','fStatus',_P('value')],t('filterStatus'))}</label>
         <label class="rpt-fld">${t('filterPay')}
@@ -23898,6 +23944,12 @@ function showPrintReportOptions(){
         <label class="rpt-fld">${t('colMember')}
           ${sel('rep-f-member',o.fMember,[['all',t('filterAll')],['member',t('memberYes')],['nonmember',t('memberNo')]],['_repSetFilter','fMember',_P('value')],t('colMember'))}</label>
       </div>
+      ${_run?`
+      <div class="rpt-lbl2">${t('repKmEach')}</div>
+      <div class="rpt-hint">${t('repKmEachHint')}</div>
+      <div class="rpt-km" id="rep-km">
+        ${_repKmList(S.sfSession).map(kmRow).join('')}
+      </div>`:''}
 
       <div class="rpt-acts">
         <button class="btn-primary rpt-w100" data-on-click="${_on("_on_showPrintReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
@@ -23911,6 +23963,7 @@ function showPrintReportOptions(){
       </div>
     </div>
   </div>`;
+  _repKmPaint();
 }
 function _closePrintOpts(){const m=document.getElementById('print-opts-modal');m.style.display='none';m.innerHTML='';}
 
@@ -24475,7 +24528,8 @@ function reportStatusLabel(st){
   const m={waiting:'statusWaiting',active:'statusActive',done:'statusDone',noshow:'statusNoshow',cancelled:'statusCancelled',removed:'histRemoved'};
   return m[st]?t(m[st]):st;
 }
-function exportSessionExcel(){
+// km: one distance of Run for Her (3 | 5 | 'none'), from the builder's per-distance lines.
+function exportSessionExcel(km){
   const sessId=S.sfSession;if(sessId==='all')return;
   const sess=allSessions().find(s=>s.id===sessId);if(!sess)return;
   // Saturday Social Ride: roster-style export (same riders/columns as the printed roster,
@@ -24502,9 +24556,9 @@ function exportSessionExcel(){
   // entirely: "Payment: Pending" still exported everyone, and a paid no-show was on the
   // printed sheet but missing from the file.
   const _ro=_repOpts();
-  const entries=_repFilter(getQueue()
-    .filter(e=>e.sessionId===sessId&&['waiting','active','done','noshow'].includes(e.status))
-    .sort((a,b)=>a.queueNum-b.queueNum));
+  const _run=_rideKind(sess)==='runher';
+  const _km=_run?_repKmArg(km):null;
+  const entries=_repKmRows(_repRows(sessId),_km);
   if(!entries.length){toast(t('toastNoExport'),'warning');return;}
   const groups=[];
   const usedIds=new Set();
@@ -24524,13 +24578,15 @@ function exportSessionExcel(){
     seq:    {h:[t('repColSeq')],v:x=>[x.seq]},
     qnum:   {h:[t('colQueueNum')||'#'],v:x=>[x.qNums]},
     name:   {h:[t('nameLabel')],v:x=>[x.lead.name]},
+    km:     {h:[t('runKmLabel')],v:x=>[x.kms]},
     phone:  {h:[t('repColPhone'),t('repColEmail')],v:x=>[x.lead.phone||'',x.lead.email||'']},
     height: {h:[t('heightLabel')+' ('+t('cmUnit')+')'],v:x=>[x.heights]},
     bike:   {h:[t('repColType'),t('colBike')],v:x=>[x.types,x.bikes]},
     payment:{h:[t('repPriceSar'),t('addonsLabel'),t('colPayment')],v:x=>[x.totalPrice,x.addonNames,x.payLabel]},
-    status: {h:[t('colStatus')],v:x=>[reportStatusLabel(x.topStatus)]},
+    status: {h:[t('colStatus')],v:x=>[_run&&x.topStatus==='active'?t('anFunnelCheckedIn'):reportStatusLabel(x.topStatus)]}, // a runner is not "On Bike"
   };
-  const _pick=_REP_COLS.filter(c=>_xc[c.k]&&_ro.cols[c.k]); // membership is Saturday-only, as on the PDF
+  // membership is Saturday-only, as on the PDF; a sheet of one distance needs no distance column
+  const _pick=_REP_COLS.filter(c=>_xc[c.k]&&_ro.cols[c.k]&&_repColFits(sess,c.k)&&!(c.k==='km'&&_km!=null));
   const _cols=(_pick.length?_pick:_REP_COLS.filter(c=>c.k==='qnum'||c.k==='name')).map(c=>_xc[c.k]);
   const headers=_cols.flatMap(c=>c.h);
   const rows=groups.map((group,_i)=>{
@@ -24539,27 +24595,30 @@ function exportSessionExcel(){
     const bikes=[...new Set(group.flatMap(x=>getAssignedBikes(x).map(b=>b.name)))].join('; ')||'—';
     const totalPrice=group.reduce((s,x)=>s+(x.price??DEFAULT_PRICE),0);
     const allPaid=group.every(x=>x.paid);const somePaid=group.some(x=>x.paid);
-    const payLabel=allPaid?t('paidLabel'):somePaid?t('repPayPartial'):t('pendingLabel');
+    const payLabel=!totalPrice?t('freeLabel'):allPaid?t('paidLabel'):somePaid?t('repPayPartial'):t('pendingLabel'); // free, as the PDF says it: a free runner read "Pending"
     const topStatus=group.slice().sort((a,b)=>(statusPriority[a.status]??5)-(statusPriority[b.status]??5))[0].status;
     const types=[...new Set(group.map(x=>resolvedType(x)).filter(Boolean))].join(', ')||'—';
     const _grpAd={};group.forEach(x=>entryAddons(x).forEach(a=>{_grpAd[a.id]=(_grpAd[a.id]||0)+a.qty;})); // aggregate every rider's add-ons
     const addonNames=Object.entries(_grpAd).map(([id,qty])=>{const it=(S.inventory||[]).find(x=>x.id===id);return (it?it.name:id)+(qty>1?` ×${qty}`:'');}).join('; ')||'—';
     const heights=[...new Set(group.map(x=>x.height).filter(Boolean))].join(', ');
-    const x={seq:_i+1,qNums,lead,types,bikes,totalPrice,addonNames,payLabel,topStatus,heights};
+    const kms=[...new Set(group.map(x=>_runKmOk(x.runKm)?_runKmTxt(x.runKm):''))].filter(Boolean).join(', ');
+    const x={seq:_i+1,qNums,lead,types,bikes,totalPrice,addonNames,payLabel,topStatus,heights,kms};
     return _cols.flatMap(c=>c.v(x));
   });
   // Append an add-on sales summary block below the bookings
   const summary=(_ro.sections.addons&&addonSales.totalUnits>0)?[[],[t('repAddon'),t('repBrand'),t('repBookings'),t('repValueSar')],
     ...addonSales.items.map(a=>[a.name,a.brand||'',a.units,a.value]),
     [t('repTotal'),'',addonSales.totalUnits,addonSales.totalValue]]:[];
-  // Cashier sales for the session, grouped by inventory category
+  // Cashier sales for the session, grouped by inventory category: the whole session's, so a sheet of
+  // one distance leaves them to the full report rather than counting them on every distance
   const sessPurch=_salesTotals(_cashSessionLines(sessId));
-  const cashRows=(_ro.sections.sales&&sessPurch.units>0)?[[],[t('cashSalesTitle')],[t('invCategory'),t('cashQtyCol'),t('repValueSar')],
+  const cashRows=(_ro.sections.sales&&_km==null&&sessPurch.units>0)?[[],[t('cashSalesTitle')],[t('invCategory'),t('cashQtyCol'),t('repValueSar')],
     ...sessPurch.cats.map(c=>[_invCatLabel(c.cat),c.qty,c.value]),
     ...(sessPurch.discount>0?[[t('cashDiscount'),'',-sessPurch.discount]]:[]),
     [t('repTotal'),sessPurch.units,sessPurch.value],
     [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[]),...(sessPurch.free>0?[[t('onTheHouseLabel'),'',sessPurch.free]]:[])]:[];
-  _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rows,...summary,...cashRows],'report '+(sess.session_date||sess.id),rows.length);
+  const _kmTag=_km==null?'':_km==='none'?'_no-distance':`_${_km}km`;
+  _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}${_kmTag}.csv`,[headers,...rows,...summary,...cashRows],'report '+(sess.session_date||sess.id)+_kmTag.replace('_',' '),rows.length);
 }
 
 // End-of-day close-out: bike rentals + product sales for the selected session's whole day, by payment type
@@ -24669,19 +24728,21 @@ function printCommunityRoster(sess){
   logAction(t('logPrintedReport'));
   _openReport(html,1100,760);
 }
-function printSessionReport(){
+// km: one distance of Run for Her (3 | 5 | 'none'), from the builder's per-distance lines: that
+// distance's runners alone, counted from 1, the distance in the title.
+function printSessionReport(km){
   const sessId=S.sfSession;if(sessId==='all')return;
   const sess=allSessions().find(s=>s.id===sessId);if(!sess)return;
   // Saturday Social Ride: a roster report (name / phone / height / bike type / approval), not the
   // JCC financial report. Includes every live rider (waiting/waitlist/active), ordered by when they
   // reserved — the order the staff list uses. Free ride, so no price/payment/add-on sections.
   if(_isApprovalRide(sess)){printCommunityRoster(sess);return;}
+  const _run=_rideKind(sess)==='runher';
+  const _km=_run?_repKmArg(km):null;
   // Template B rows: one line per rider (the design's #/Rider/Bike/Payment/Status), every
   // live outcome on the sheet — Expected and No-show included — only cancelled/removed and
   // still-waitlisted rows stay off. Ordered by queue number.
-  const entries=_repFilter(getQueue()
-    .filter(e=>e.sessionId===sessId&&['waiting','active','done','noshow'].includes(e.status))
-    .sort((a,b)=>a.queueNum-b.queueNum));
+  const entries=_repKmRows(_repRows(sessId),_km);
   // Collected = every paid row except cancelled/removed (same basis as the close-out and
   // analytics): a rider who paid then no-showed left their money in the drawer.
   const paidRows=(_qBySession().get(sessId)||[]).filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
@@ -24726,22 +24787,29 @@ function printSessionReport(){
     seq:    (e,i)=>`<td class="rp-seq">${i+1}</td>`,
     qnum:   e=>`<td class="rp-b7">#${e.queueNum}</td>`, // "#" sets it apart from the row counter beside it
     name:   e=>`<td class="rp-name">${esc(e.name)}</td>`,
+    km:     e=>`<td>${_runKmOk(e.runKm)?esc(_runKmTxt(e.runKm)):'—'}</td>`,
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     phone:  e=>`<td><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi></td>`,
     height: e=>`<td>${e.height?esc(e.height)+' '+t('cmUnit'):'—'}</td>`,
     bike:   e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');
                 const fit=_entryFitText(e);return`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},
     payment:e=>`<td>${_payCell(e)}</td>`,
-    status: e=>`<td class="${_stCls[e.status]||'rp-st'}">${reportStatusLabel(e.status)}</td>`,
+    status: e=>`<td class="${_stCls[e.status]||'rp-st'}">${_run&&e.status==='active'?t('anFunnelCheckedIn'):reportStatusLabel(e.status)}</td>`, // a runner is not "On Bike"
   };
-  const _sel=_REP_COLS.filter(c=>c.k!=='member'&&_ro.cols[c.k]); // membership is Saturday-only
+  // membership is Saturday-only; a sheet of one distance needs no distance column
+  const _sel=_REP_COLS.filter(c=>c.k!=='member'&&_ro.cols[c.k]&&_repColFits(sess,c.k)&&!(c.k==='km'&&_km!=null));
   const _cols=_sel.length?_sel:_REP_COLS.filter(c=>c.k==='qnum'||c.k==='name');
   const _head=_cols.map(c=>`<th>${t(c.key)}</th>`).join('');
   const rows=entries.map((e,i)=>`<tr>${_cols.map(c=>_cell[c.k](e,i)).join('')}</tr>`).join('')
     ||`<tr><td colspan="${_cols.length}" class="rp-empty">—</td></tr>`;
   const vatIncl=Math.round(paidSAR*0.15/1.15*100)/100;
+  // A free run takes no money: its tiles count the runners (and, on the full report, each distance).
+  const _tile=(n,lbl)=>`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${lbl}</span></div>`;
+  const _runTiles=()=>_tile(entries.length,t('repRunners'))+_tile(nCheckedIn,t('anFunnelCheckedIn'))+_tile(entries.filter(e=>e.status==='done').length,t('statusDone'))
+    +(_km==null?_repKmList(sessId).map(k=>_tile(_repKmRows(entries,_repKmArg(k)).length,esc(_repKmName(k)))).join(''):'');
   const body=`
-    ${_ro.sections.summary?`<div class="totals">
+    ${_ro.sections.summary&&_run?`<div class="totals">${_runTiles()}</div>`:''}
+    ${_ro.sections.summary&&!_run?`<div class="totals">
       <div class="total-item"><span class="total-num">${entries.length}</span><span class="total-lbl">${t('printTotalRiders')}</span></div>
       <div class="total-item"><span class="total-num">${nCheckedIn}</span><span class="total-lbl">${t('anFunnelCheckedIn')}</span></div>
       <div class="total-item dark"><span class="total-num">${_rpSar(paidSAR)}</span><span class="total-lbl">${t('printCollected')}</span></div>
@@ -24760,7 +24828,7 @@ function printSessionReport(){
         <tr class="rp-b8"><td>${t('repTotal')}</td><td></td><td class="rp-te">${addonSales.totalUnits}</td><td class="rp-te">${_rpAmt(addonSales.totalValue)}</td></tr>
       </tbody>
     </table>`:''}
-    ${(_ro.sections.sales&&sessPurch.units>0)?`
+    ${(_ro.sections.sales&&_km==null&&sessPurch.units>0)?`
     <h2>${t('cashSalesTitle')}</h2>
     <table>
       <thead><tr><th>${t('invCategory')}</th><th class="rp-te">${t('cashQtyCol')}</th><th class="rp-te">${t('repValueSar')}</th></tr></thead>
@@ -24773,10 +24841,11 @@ function printSessionReport(){
   const _sTime=(()=>{try{return sessionTime(sess);}catch(_){return'';}})();
   const html=_reportShell({
     kind:t('printReportTitle'),
-    title:`${dayLabel(sess.day)} &middot; ${shortDate(sess.session_date||sess.sessionDate||sess.id)}${_sTime?` &middot; ${_sTime}`:''} &middot; ${esc(_evName(sess))}`, // the ride's name in the reader's language: a Petromin, workshop or swim sheet no longer says Corniche Circuit in English
-    refNo:'MM-RPT-'+String(sess.session_date||sess.id).slice(2,10).replace(/-/g,''),
+    title:`${dayLabel(sess.day)} &middot; ${shortDate(sess.session_date||sess.sessionDate||sess.id)}${_sTime?` &middot; ${_sTime}`:''} &middot; ${esc(_evName(sess))}${_km!=null?` &middot; ${esc(_repKmName(_km))}`:''}`, // the ride's name in the reader's language: a Petromin, workshop or swim sheet no longer says Corniche Circuit in English
+    refNo:'MM-RPT-'+String(sess.session_date||sess.id).slice(2,10).replace(/-/g,'')+(_km==null?'':_km==='none'?'-0K':`-${_km}K`),
     // The Collected tile already gives the total; the foot keeps only what it adds, the VAT inside it.
-    note:`${t('repVatIncl')} <strong>${_rpSar(vatIncl)}</strong>`,
+    // A free run has neither.
+    note:_run?'':`${t('repVatIncl')} <strong>${_rpSar(vatIncl)}</strong>`,
     body});
   logAction(t('logPrintedReport'));
   _openReport(html,1100,760);

@@ -24,6 +24,9 @@ const row = (id: string, session: string, qn: number, name: string, customer_id:
   id, session_id: session, session_day: 'Friday', session_date: session, queue_num: qn, name, phone: '0551112222',
   customer_id, status, paid, type_preference: 'Road', price: 115, walk_in: !customer_id, registered_at: '2026-09-01T10:00:00Z',
 });
+// The rider's own finished ride, already rated: an unrated one from RATE_FROM (2026-10-03) on opens the
+// forced rating gate over the page, and P1 (three days back) reached that date on 2026-10-06.
+const rated = <T extends object>(r: T) => ({ ...r, rating_detail: { form: 'rental', s: { service: 10, bike: 10, experience: 10 } } });
 const queue_entries = [
   row('q1', P1, 2, 'Lina Haddad', 'c1', 'done', true),
   row('q2', P1, 3, 'Omar Saleh', 'c2', 'done', true),
@@ -241,7 +244,7 @@ test.describe('@customer:account badges', () => {
     { slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marshal', system: true, note: 'Thanks for sweeping', at: new Date(Date.now() - 36e5).toISOString() },
   ];
   async function rider(page: Page, fx: Fixtures) {
-    await stubSupabase(page, { sessions, queue_entries: [row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true)], ...fx });
+    await stubSupabase(page, { sessions, queue_entries: [rated(row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true))], ...fx });
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
@@ -495,7 +498,7 @@ test.describe('@customer:account ride badges from the research', () => {
     const now = new Date();
     const d = (n: number) => new Date(now.getTime() + n * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
     await stubSupabase(page, {
-      sessions, queue_entries: [row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true)],
+      sessions, queue_entries: [rated(row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true))],
       'rpc:badge_seasons': [{ slug: 'bd_cloop', icon: 'moon', color: 'purple', name: 'Late Loop', description: 'Two late rides', system: false, rule: { rides: 2, windows: [{ from: d(-5), to: d(5) }] } }],
     });
     await loginCustomer(page);
@@ -561,7 +564,7 @@ test.describe('@staff:community dated badges', () => {
 test.describe('@customer:account Race Ready and the about lines', () => {
   const full = { name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', height: 176, birth_date: '1995-04-02', country: 'Saudi Arabia', city: 'Jeddah', photo: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=', type_preference: 'Road' };
   async function rider(page: Page, cust: Record<string, unknown>) {
-    await stubSupabase(page, { sessions, queue_entries: [row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true)] });
+    await stubSupabase(page, { sessions, queue_entries: [rated(row('q1', P1, 2, 'Spec Rider', 'c1', 'done', true))] });
     await loginCustomer(page, cust);
     await page.goto('/');
     await waitForSb(page);

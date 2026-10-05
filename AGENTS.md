@@ -685,6 +685,13 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   (`_runSplitHtml`, `S.sfKm`), Finished instead of Return Bike, "Emergency contact" in the row menu (`_runEmShow`, read
   when asked: the sync does not carry the columns), the distance in Add rider / the walk-in / the booking editor
   (`_runKmField`), the account editor's emergency contact (`_cfEmHtml`, written only once read).
+- **The report builder** (the owner: "print a report for each distance in separate"): on a run, a line per distance
+  (`_repKmList`: 3 km, 5 km, No distance while a runner has none) with its runner count after the filters
+  (`_repKmPaint`) and its own Print / CSV (`printSessionReport(km)` / `exportSessionExcel(km)`: that distance alone,
+  counted from 1, the distance in the title and the file name; the dialog stays open for the next one). The full
+  report gets a Distance column (`_REP_COLS.km`) and a tile per distance; a run's sheet has no bike, height, money
+  tiles or VAT line (`_repColFits`), "Checked in" for a runner on the course, and a saved bike-type filter is ignored
+  where nobody rides. `tests/run-report-per-distance.spec.ts`.
 - **The badge** `run_for_her`: `BDG_GLYPH.ribbon` on the `pink` special (`BDG_SPECIAL.pink`, `.sp-pink`), earned by a
   `done` row on a run, hidden until earned, popped once (`BDG_CHEER`). The badges table holds it as 'red'.
 - Privacy Notice 2026-10-05: the emergency contact row (en/ar); PRIVACY_ASK_FROM unchanged (nobody is asked again).
