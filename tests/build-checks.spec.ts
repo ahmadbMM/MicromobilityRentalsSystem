@@ -183,12 +183,13 @@ test.describe('@build build checks', () => {
     expect(formatBareWrites({ ...r, bare: [], self: [] })).not.toContain('WARNING');
   });
 
-  test('the write check reads app.src.html (a warning, not a gate)', async () => {
+  // The tail was worked down to zero on 2026-10-05: the build still only warns, this keeps it there.
+  test('every write in app.src.html is checked, marked, logging or handed to a checking caller', async () => {
     const { checkBareWrites, formatBareWrites } = await load();
     const r = checkBareWrites(read('app.src.html'));
     expect(r.total).toBeGreaterThan(100);
-    expect(r.checked).toBeGreaterThan(50);
-    test.info().annotations.push({ type: 'bare writes', description: formatBareWrites(r, 0).split('\n')[0] });
+    expect(r.checked).toBeGreaterThan(200);
+    expect([...r.bare, ...r.self], formatBareWrites(r)).toEqual([]);
   });
 
   test('the customer system keeps its colours in its tokens', async () => {

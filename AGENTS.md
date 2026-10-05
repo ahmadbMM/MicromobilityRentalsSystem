@@ -59,8 +59,8 @@ functions (exported by `scripts/split-staff.mjs`) so CI catches a regression eve
   `Promise.all(calls)` alias and `for (const r of results)` are followed one hop). A write that is deliberately
   unchecked - a rollback, a best-effort touch - carries the marker comment **`// fire-and-forget`** on its line
   (or on the first line of its statement); `staff_actions` and `error_log` need no marker. Writes that read
-  `.error` themselves or return the write to a caller are reported apart. It is a warning while the tail is
-  worked down; do not add to it.
+  `.error` themselves or return the write to a caller are reported apart. The tail is at zero since 2026-10-05:
+  the build only warns, but tests/build-checks.spec.ts fails on any bare write or one that reads `.error` itself.
 - **Field names (warns, with a count and the first 20; 2026-10-04).** Every `<input>`, `<select>` and
   `<textarea>` has an accessible name: a `<label for>` naming its id, a wrapping `<label>`, `aria-label`,
   `aria-labelledby` or `title` (a placeholder is not a name; the attribute must be written on the tag, not
