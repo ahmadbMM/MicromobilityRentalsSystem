@@ -8297,3 +8297,141 @@ body .sess-about:focus-visible{outline:2px solid currentColor;outline-offset:3px
 .ev-info .ev-info-facts dt{font-weight:700;color:var(--muted);}
 .ev-info .ev-info-facts dd{margin:0;overflow-wrap:anywhere;}
 .ev-info .ev-info-facts a{color:inherit;font-weight:700;text-decoration:underline;text-underline-offset:2px;}
+
+/* ══ BOOKINGS IN COLOUR (the owner, 2026-10-05) ══════════════════════════════════════════════════
+   "make the session cards in the bookings page in staff website themed the same way they are themed
+   in customer event picker cards, make the bookings rows be colored matching the status of it for
+   instance completed green no show or cancelled red, make reserved colored make to be reserved
+   colored make paid colored". Staff screens only (body.view-staff), after the staff layer it
+   overrides; booth mode keeps its 7:1 inks (the end of this block). */
+
+/* ── The ride chips (Bookings) and ride cards (its Sessions view): each event's own look, as on the
+   event picker. The theme class comes from _sfTheme: th-jcc, th-comm (Saturday, Petromin, the pool,
+   T100), th-runher, th-snd96, th-event. The background sits in --sf-chip-bg so hover and the
+   selected ring never fall back to the plain card the staff layer paints. ── */
+body.view-staff .sess-chip-top{display:flex;align-items:center;gap:8px;min-width:0;margin-bottom:4px;}
+body.view-staff .sess-chip-top:empty{display:none;}
+body.view-staff .sess-chip-top .sess-chip-event{margin-bottom:0;min-width:0;}
+body.view-staff .sf-mark{display:block;flex-shrink:0;width:auto;height:18px;max-width:112px;object-fit:contain;}
+body.view-staff .sf-mark-jcc{height:22px;}
+body.view-staff .sf-mark-comm{height:20px;}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-jcc{
+  --sf-chip-bg:var(--jcc-chev) right 12px bottom 8px/46px 12px no-repeat,linear-gradient(112deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;
+  --sf-ring:#0E97D5;border-color:rgba(14,151,213,.45);color:#fff;}
+html[dir="rtl"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-jcc{
+  --sf-chip-bg:var(--jcc-chev-rtl) left 12px bottom 8px/46px 12px no-repeat,linear-gradient(248deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-comm{
+  --sf-chip-bg:linear-gradient(to bottom right,#fff 0 38%,rgba(255,255,255,.9) 64%,rgba(255,255,255,.62) 100%),var(--mm-pattern) right -10px top -8px/80px auto repeat #fff;
+  --sf-ring:#0c7a3d;border-color:rgba(3,200,110,.55);color:var(--mm-ink);}
+html[dir="rtl"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-comm{
+  --sf-chip-bg:linear-gradient(to bottom left,#fff 0 38%,rgba(255,255,255,.9) 64%,rgba(255,255,255,.62) 100%),var(--mm-pattern) left -10px top -8px/80px auto repeat #fff;}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-runher{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--rf-wash),.26) 0%,rgba(var(--rf-wash),.1) 40%,rgba(255,255,255,0) 70%) #fff;
+  --sf-ring:var(--rf-pink-dk);border-color:rgba(217,79,126,.4);color:var(--rf-ink);}
+html[dir="rtl"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-runher{
+  --sf-chip-bg:radial-gradient(120% 160% at 0% 100%,rgba(var(--rf-wash),.26) 0%,rgba(var(--rf-wash),.1) 40%,rgba(255,255,255,0) 70%) #fff;}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-snd96{
+  --sf-chip-bg:var(--snd-weave) 0 0/28px 28px,var(--snd-bg);
+  --sf-ring:var(--snd-lime-lt);border-color:rgba(0,137,74,.6);color:#fff;}
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
+  --sf-chip-bg:linear-gradient(to bottom right,#fff 0 55%,rgba(124,58,237,.07) 100%) #fff;
+  --sf-ring:#7c3aed;border-color:rgba(124,58,237,.38);}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event),
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{background:var(--sf-chip-bg);}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{border-color:var(--sf-ring);}
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).active-sess,
+body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).selected{
+  border-color:var(--sf-ring);box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(15,18,21,.16);}
+body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event){border-inline-start-width:1px;}
+/* the ride's name: its own colour on the light cards, Run for Her's in its poster's letters */
+body.view-staff .sess-summary-chip.th-runher .sess-chip-event{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:12px;letter-spacing:.9px;color:var(--rf-pink-dk);}
+:is(html[lang="ar"],html[lang="ur"]) body.view-staff .sess-summary-chip.th-runher .sess-chip-event{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:800;letter-spacing:0;}
+body.view-staff .sess-summary-chip.th-event .sess-chip-event{color:#7c3aed;}
+/* the community rides keep their own name colour (Saturday green, Petromin red, the pool teal, T100 orange):
+   the staff layer painted every name green */
+body.view-staff .sess-summary-chip.th-comm .sess-chip-event{color:var(--ev);}
+/* the dark cards (the circuit, the National Day ride): light words, fills and badges */
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .sess-chip-date,
+body.view-staff #sess-host .sess-lc:is(.th-jcc,.th-snd96) .sess-lc-date{color:#fff;}
+body.view-staff #tab-queue .sess-summary-chip.th-jcc :is(.sess-chip-counts,.rq-mut),
+body.view-staff #sess-host .sess-lc.th-jcc :is(.sess-lc-meta,.sess-lc-count){color:var(--jcc-cyan-lt);}
+body.view-staff #tab-queue .sess-summary-chip.th-snd96 :is(.sess-chip-counts,.rq-mut),
+body.view-staff #sess-host .sess-lc.th-snd96 :is(.sess-lc-meta,.sess-lc-count){color:var(--snd-mut);}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-c-green{color:#86efac;}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-c-text{color:#fff;}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-wx{color:rgba(255,255,255,.82);}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-wx-warn{color:#fcd34d;}
+body.view-staff .sess-summary-chip.th-snd96 .sess-chip-event,
+body.view-staff #sess-host .sess-lc.th-snd96 .ev-chip{color:var(--snd-lime-lt);border-color:rgba(140,220,70,.5);}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) :is(.sess-chip-bar,.sess-lc-bar){background:rgba(255,255,255,.2);}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-fill-ok,
+body.view-staff #sess-host .sess-lc:is(.th-jcc,.th-snd96) .ss-fill-ok{background:#4ade80;}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-fill-high,
+body.view-staff #sess-host .sess-lc:is(.th-jcc,.th-snd96) .ss-fill-high{background:#fbbf24;}
+body.view-staff #tab-queue .sess-summary-chip:is(.th-jcc,.th-snd96) .rq-fill-full,
+body.view-staff #sess-host .sess-lc:is(.th-jcc,.th-snd96) .ss-fill-full{background:#f87171;}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-open{color:#86efac;}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-full{color:#fcd34d;}
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-closed{color:#cbd5e1;}
+
+/* ── The roster: one colour per booking state, on the row (or the phone card), its edge and its
+   status badge. Waiting amber, the waitlist orange, to be reserved fuchsia, reserved violet, on a
+   bike blue, completed green, no-show and cancelled red. Solid colours, not washes: the pinned
+   first cell has to mask the columns scrolling under it. ── */
+body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#fef6dc;--rs-edge:#d4a017;--rs-line:#f2d892;}
+body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#ffedd5;--rs-edge:#ea580c;--rs-line:#fdba74;}
+body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#fae8ff;--rs-edge:#c026d3;--rs-line:#f0abfc;}
+body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#ede9fe;--rs-edge:#7c3aed;--rs-line:#c4b5fd;}
+body.view-staff :is(tr,.q-card).row-active{--rs-bg:#dbeafe;--rs-edge:#2563eb;--rs-line:#93c5fd;}
+body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#dcfce7;--rs-edge:#16a34a;--rs-line:#86efac;}
+body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#fee2e2;--rs-edge:#dc2626;--rs-line:#fca5a5;}
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){background:none;opacity:1;}
+/* the lighter grey (#8a938c) is 2.8:1 on these colours; inside a coloured row or card it reads 5:1 */
+body.view-staff :is(.queue-table tbody tr,.queue-mobile-view .q-card):is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){--muted-l:#5f6862;}
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td,
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td:first-child{background:var(--rs-bg);}
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel):hover td,
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel):hover td:first-child{background:linear-gradient(rgba(15,18,21,.04),rgba(15,18,21,.04)) var(--rs-bg);}
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td:first-child{box-shadow:inset 4px 0 0 var(--rs-edge),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td:first-child{box-shadow:inset -4px 0 0 var(--rs-edge),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td{border-bottom-color:rgba(15,18,21,.07);}
+body.view-staff .queue-mobile-view .q-card:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){
+  background:var(--rs-bg);border-color:var(--rs-line);box-shadow:inset 4px 0 0 var(--rs-edge);opacity:1;}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){box-shadow:inset -4px 0 0 var(--rs-edge);}
+body.view-staff #tab-queue .q-card.rq-cleft:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){border-inline-start-color:var(--rs-line);}
+/* the status badge as a pill in its row's colour (st-* marks a booking's state: badge-active also
+   dresses the Member column and Petromin's booking numbers, which keep their look) */
+body.view-staff .status-badge:is(.st-waiting,.st-needsbike,.st-waitlist,.st-toreserve,.st-reserved,.st-active,.st-done,.st-noshow,.st-cancelled,.st-removed){
+  padding:3px 10px 3px 8px;border-radius:999px;border:none;line-height:1.25;}
+body.view-staff .status-badge:is(.st-waiting,.st-needsbike){background:#fde9b0;color:#7a4d06;}
+body.view-staff .status-badge.st-waitlist{background:#fed7aa;color:#9a3412;}
+body.view-staff .status-badge.st-toreserve{background:#f5d0fe;color:#86198f;}
+body.view-staff .status-badge.st-reserved{background:#ddd6fe;color:#5b21b6;}
+body.view-staff .status-badge.st-active{background:#bfdbfe;color:#1e40af;}
+body.view-staff .status-badge.st-done{background:#bbf7d0;color:#166534;}
+body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){background:#fecaca;color:#991b1b;}
+/* the money: paid green, pending amber, on the house teal */
+body.view-staff .pay-toggle.paid{background:#bbf7d0;border:1px solid #86efac;color:#14532d;font-weight:800;}
+body.view-staff .pay-toggle.paid:hover{background:#86efac;opacity:1;}
+body.view-staff .pay-toggle.pending{background:#fde68a;border-color:#f2c94c;color:#713f12;font-weight:800;}
+body.view-staff .pay-toggle.pending:hover{background:#fcd34d;border-color:#e0ac10;}
+body.view-staff .pay-toggle.house{background:#ccfbf1;border-color:#5eead4;color:#115e59;font-weight:800;}
+/* a tap-sized button (38px, 44px on touch) stays a rounded box: a full pill turned the short words round */
+body.view-staff .pay-toggle:is(.paid,.pending,.house){border-radius:9px;padding-inline:12px;}
+body.view-staff .pay-toggle.house:hover{background:#99f6e4;}
+/* booth mode: the same colours, the words in its 7:1 inks */
+html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-waiting,.st-needsbike){color:#4a3000;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-waitlist{color:#6b1d06;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-toreserve{color:#5f0f66;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-reserved{color:#3b1386;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-active{color:#14286e;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-done{color:#05522a;}
+html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){color:#7d1d12;}
+html[data-staff-theme="booth"] body.view-staff .pay-toggle:is(.paid,.pending,.house){color:#000;}
+/* the figures above the roster wear their rows' colours: the strip is the key */
+body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere,.sc-waitlist,.sc-active,.sc-done)::before{content:'';width:9px;height:9px;border-radius:3px;flex-shrink:0;background:var(--sc-edge);}
+body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere,.sc-waitlist,.sc-active,.sc-done) b{color:var(--sc-ink);}
+body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere){--sc-edge:#d4a017;--sc-ink:#7a4d06;}
+body.view-staff #tab-queue .stat-chip.sc-waitlist{--sc-edge:#ea580c;--sc-ink:#9a3412;}
+body.view-staff #tab-queue .stat-chip.sc-active{--sc-edge:#2563eb;--sc-ink:#1e40af;}
+body.view-staff #tab-queue .stat-chip.sc-done{--sc-edge:#16a34a;--sc-ink:#166534;}

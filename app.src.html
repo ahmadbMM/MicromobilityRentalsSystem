@@ -4989,7 +4989,7 @@ const STATUS_KEY={waiting:'statusWaiting',waitlist:'statusWaitlist',active:'stat
 // editor, the Dashboard, the Bookings strip and roster, the Sales ride picker and the Community
 // board. Each used to spell out its own copy of this map. A deleted session has no word.
 const SESS_STATUS_KEY={open:'statusOpen',full:'statusFull',closed:'statusClosed'};
-const statusBadge=s=>`<span class="status-badge ${_own(STATUS_CLS,s)?STATUS_CLS[s]:'badge-done'}">${t(_own(STATUS_KEY,s)?STATUS_KEY[s]:'statusDone')}</span>`;
+const statusBadge=s=>`<span class="status-badge st-${_own(STATUS_CLS,s)?esc(s):'done'} ${_own(STATUS_CLS,s)?STATUS_CLS[s]:'badge-done'}">${t(_own(STATUS_KEY,s)?STATUS_KEY[s]:'statusDone')}</span>`;
 // The same badge, but able to say WHO cancelled. Every cancellation used to read "by
 // Customer" because the label hung off the status word alone — including the ones staff
 // cancelled and the 37 they rejected. Null (anything cancelled before the column existed)
@@ -5060,15 +5060,15 @@ async function _releaseReserved(id){
 // one: Hand-over, the scanner and the roster's badge leave them out (2026-10-05).
 function _bikeNotOurs(e){const ty=resolvedType(e);return ty==='Own'||ty==='None';}
 function statusBadgeFor(e){
-  if(_isReserved(e))return`<span class="status-badge badge-reserved">${t('statusReserved')}</span>`;
+  if(_isReserved(e))return`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`;
   // Checked in and still without a bike on a ride that hands them out: "Needs bike", not "On Bike".
   // One session lookup through the map, not a copy of every session per row (2026-10-05).
-  if(e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId)))return`<span class="status-badge badge-waiting">${t('statusNeedsBike')}</span>`;
-  if(_isToReserve(e))return`<span class="status-badge badge-toreserve">${t('statusToReserve')}</span>`;
+  if(e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId)))return`<span class="status-badge st-needsbike badge-waiting">${t('statusNeedsBike')}</span>`;
+  if(_isToReserve(e))return`<span class="status-badge st-toreserve badge-toreserve">${t('statusToReserve')}</span>`;
   if(!e||e.status!=='cancelled')return statusBadge(e?e.status:'done');
   const k=e.cancelledBy==='staff'?'statusCancelledByStaff'
     :e.cancelledBy==='customer'?'statusCancelledByCustomer':'statusCancelled';
-  return`<span class="status-badge ${STATUS_CLS.cancelled||'badge-done'}">${t(k)}</span>`;
+  return`<span class="status-badge st-cancelled ${STATUS_CLS.cancelled||'badge-done'}">${t(k)}</span>`;
 }
 function esc(s){return s==null?'':String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 // A value as a JavaScript string argument inside a double-quoted inline handler:
@@ -14925,7 +14925,7 @@ function renderSessions(){
   const _shownSessId=S.selSessionDetail||_autoSessId;
   const _listCard=(s)=>{const d=_sessD(s);const pct=d.cap?Math.round(d.booked/d.cap*100):0;const sel=_shownSessId===s.id;
     const _cChip=_evChip(s);
-    return`<button class="sess-lc ${_evClass(s)}${sel?' selected':''}" data-on-click="${_on("selectSessionDetail",s.id)}" aria-label="${esc(shortDate(s.session_date||s.id))}">
+    return`<button class="sess-lc th-${_sfTheme(s)} ${_evClass(s)}${sel?' selected':''}" data-on-click="${_on("selectSessionDetail",s.id)}" aria-label="${esc(shortDate(s.session_date||s.id))}">
       <div class="sess-lc-top"><span class="sess-lc-date">${shortDate(s.session_date||s.id)}</span>${_cChip}${d.badge}</div>
       <div class="sess-lc-meta">${dayLabel(s.day)||''} · <bdi>${sessionTime(s)}</bdi></div>
       <div class="sess-lc-bar"><div class="ss-fill ${pct>=100?'ss-fill-full':pct>80?'ss-fill-high':'ss-fill-ok'}" data-cssv="${_cssv({'--ss-w':pct+'%'})}"></div></div>
@@ -19458,7 +19458,9 @@ function _wxChip(dateStr){
 function _statChip(n,lbl,color,onclick,delta,tip){
   const d=(delta==null||isNaN(delta))?'':`<i class="stat-delta${delta>0?' up':delta<0?' down':''}" title="${esc(tip||'')}">${delta>0?'+':''}${delta}</i>`;
   const inner=`<b${!color?'':color==='var(--green)'?' class="rq-c-green"':color==='var(--orange)'?' class="rq-c-orange"':` class="rq-sc" data-cssv="${_cssv({'--rq-c':color})}"`}>${esc(String(n))}</b>${esc(lbl)}${d}`;
-  return onclick?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on(...onclick)}">${inner}</button>`:`<span class="stat-chip">${inner}</span>`;
+  // a status figure wears its rows' colour, so the strip doubles as the roster's key (2026-10-05)
+  const sc=onclick&&onclick[0]==='setSfStatus'&&/^[a-z]+$/.test(String(onclick[1]))?' sc-'+onclick[1]:'';
+  return onclick?`<button type="button" class="stat-chip stat-chip-clickable${sc}" data-on-click="${_on(...onclick)}">${inner}</button>`:`<span class="stat-chip">${inner}</span>`;
 }
 // ── The Petromin page inside Queue ─────────────────────────────────────────────
 // The /petromin form's registrations (rider_registrations) used to have a Riders tab of
@@ -19504,7 +19506,7 @@ function _pmChipHtml(sid){
   const regs=(S.riders||[]).filter(r=>r.session_id===sid);
   const nIn=regs.filter(r=>r.checked_in_at&&!r.checked_out_at).length,nOut=regs.filter(r=>r.checked_out_at).length;
   const on=S.queueView==='petromin'&&S.ridersSession===sid;
-  return`<button type="button" class="sess-summary-chip pm-chip community ev-petromin${on?' active-sess':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("openPetrominPage",sid)}" title="${esc(t('pmChipTitle'))} · ${dayLabel(s.day)} ${shortDate(_pmDate(s))} · ${esc(sessionTime(s))}">
+  return`<button type="button" class="sess-summary-chip pm-chip th-comm community ev-petromin${on?' active-sess':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("openPetrominPage",sid)}" title="${esc(t('pmChipTitle'))} · ${dayLabel(s.day)} ${shortDate(_pmDate(s))} · ${esc(sessionTime(s))}">
     <span class="sess-chip-info">
       <span class="pm-chip-head"><img class="pm-logo" src="/assets/petromin-logo.png" alt="Petromin" width="58" height="24"><span class="pm-chip-lbl">${t('pmChipLabel')}</span></span>
       <span class="sess-chip-date">${dayLabel(s.day)}, ${shortDate(_pmDate(s))} &nbsp;·&nbsp; <bdi>${sessionTime(s)}</bdi></span>
@@ -19525,6 +19527,15 @@ function openPetrominPage(sid){
 // The session chips at the top of the Queue page. The Petromin form's registrations have a
 // chip of their own, with the Petromin logo, right after that night's chip; with no Petromin
 // night open, one chip for the latest night keeps the page in reach.
+// The ride chips on Bookings and the ride cards on its Sessions view wear their event's own colours,
+// as the event picker's cards do (the owner, 2026-10-05: "make the session cards in the bookings page
+// in staff website themed the same way they are themed in customer event picker cards"): the
+// circuit's navy and white mark, MicroMobility Experiences' pattern for the community rides
+// (Saturday, Petromin, the pool, T100), Run for Her's pink, the National Day green, the events' violet.
+function _sfTheme(s){const k=_rideKind(s);return k==='jcc'||k==='snd96'||k==='runher'||k==='event'?k:'comm';}
+const SF_MARK={jcc:'/jcc-white.webp',comm:'/logo-mark-dark.webp',runher:'/assets/runher-partners.webp',snd96:'/assets/snd96-logo-horizontal.svg'};
+function _sfMark(s){const th=_sfTheme(s),m=SF_MARK[th];return m?`<img class="sf-mark sf-mark-${th}" src="${m}" alt="" loading="lazy" decoding="async" data-on-error="${_on("_on_sfMarkErr",_EV,_EL)}">`:'';}
+function _on_sfMarkErr(event,el){el.remove()}
 function _sessStripHtml(){
   const _fd=!isAdmin();
   const _td=todayStr();
@@ -19550,10 +19561,10 @@ function _sessStripHtml(){
     const _cm=_evNamed(s); // a named ride wears its name and colour on the chip; only the circuit goes bare
     // A real button (2026-10-05): its parts are spans (a button holds phrasing content only), drawn
     // as before by .sess-summary-chip's reset and the strip's own rules.
-    return`<button type="button" class="sess-summary-chip${isCurrent?' active-sess':''}${isToday?' today-sess':''}${_cm?' community '+_evClass(s):''}"
+    return`<button type="button" class="sess-summary-chip th-${_sfTheme(s)}${isCurrent?' active-sess':''}${isToday?' today-sess':''}${_cm?' community '+_evClass(s):''}"
       aria-pressed="${isCurrent?'true':'false'}" data-on-click="${_on("setSfSession",s.id)}" title="${_cm?esc(_evName(s))+' · ':''}${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))} · ${esc(sessionTime(s))}">
       <span class="sess-chip-info">
-        ${_cm?`<span class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</span>`:''}
+        <span class="sess-chip-top">${_sfMark(s)}${_cm?`<span class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</span>`:''}</span>
         <span class="sess-chip-date">${esc(dayLabel(s.day))}, ${esc(shortDate(s.session_date||s.id))} &nbsp;·&nbsp; <bdi>${esc(sessionTime(s))}</bdi>${_wxChip(s.session_date||s.id)}</span>
         <span class="sess-chip-counts">
           <span class="rq-c-green">${sWait} ${t('waitingStat').toLowerCase()}</span>
@@ -19964,7 +19975,7 @@ function _memberCell(e,extra){
 }
 function renderQRow(e){
     const assignedBikes=getAssignedBikes(e);
-    const rowCls=e.status==='active'?'row-active':(e.status==='noshow'||e.status==='cancelled')?'row-noshow-cancel':(e.status==='done'&&e.paid)?'row-done-paid':(e.status==='done')?'row-done':_isReserved(e)?'row-reserved':_isToReserve(e)?'row-toreserve':'';
+    const rowCls=e.status==='active'?'row-active':(e.status==='noshow'||e.status==='cancelled')?'row-noshow-cancel':(e.status==='done'&&e.paid)?'row-done-paid':(e.status==='done')?'row-done':_isReserved(e)?'row-reserved':_isToReserve(e)?'row-toreserve':e.status==='waitlist'?'row-waitlist':e.status==='waiting'?'row-waiting':'';
     const wiTag=e.walkIn?`<span class="walk-in-badge">${t('addWalkin').replace(/^\+ /,'')}</span>`:'';
     const allColors=assignedBikes.flatMap(b=>b.colors&&b.colors.length?b.colors:[]);
     const colorSwatches=allColors.length?allColors.map(c=>`<span class="rq-sw" data-cssv="${_cssv({'--rq-bg':c})}"></span>`).join(''):'<span class="rq-mut">—</span>';
@@ -20021,7 +20032,9 @@ function renderQRow(e){
     const groupCls=group.some(e=>e.status==='active')?'row-active'
       :group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel'
       :(allTerminal&&group.filter(e=>e.status==='done').every(e=>e.paid)&&group.some(e=>e.status==='done'))?'row-done-paid'
-      :allTerminal?'row-done':'';
+      :allTerminal?'row-done'
+      :group.every(e=>e.status==='waitlist')?'row-waitlist'
+      :group.some(e=>e.status==='waiting')?'row-waiting':'';
     const lp=livePosMap[primary.id];
     const totalW=sessWaitCount[primary.sessionId]||0;
     const posCell=primary.status==='waiting'&&lp
@@ -20075,14 +20088,14 @@ function renderQRow(e){
         ${_qc.bike?`<td class="rq-vm">${bikesHeld.length?bikesHeld.map(b=>`<span class="rq-bkname">${esc(b)}</span>`).join('<br>'):'<span class="rq-mut">—</span>'}</td>`:''}
         ${_qc.money?`<td class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
         ${_qc.money?`<td class="rq-vm rq-pcnt">${_freeSessIds.has(primary.sessionId)?'<span class="rq-mut">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
-        <td class="rq-vm rq-st">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
+        <td class="rq-vm rq-st">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
         <td class="rq-vm"><div class="actions-cell">${_ciN>0?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
       </tr>`;
     }
     return group.map((e,i)=>{
       const isFirst=i===0;
       const isLast=i===n-1;
-      const rowCls=e.status==='active'?'row-active':(e.status==='noshow'||e.status==='cancelled')?'row-noshow-cancel':(e.status==='done'&&e.paid)?'row-done-paid':(e.status==='done')?'row-done':_isReserved(e)?'row-reserved':_isToReserve(e)?'row-toreserve':groupCls;
+      const rowCls=e.status==='active'?'row-active':(e.status==='noshow'||e.status==='cancelled')?'row-noshow-cancel':(e.status==='done'&&e.paid)?'row-done-paid':(e.status==='done')?'row-done':_isReserved(e)?'row-reserved':_isToReserve(e)?'row-toreserve':e.status==='waitlist'?'row-waitlist':e.status==='waiting'?'row-waiting':groupCls;
       const assignedBikes=getAssignedBikes(e);
       const allColors=assignedBikes.flatMap(b=>b.colors&&b.colors.length?b.colors:[]);
       const colorSwatches=allColors.length
@@ -20159,7 +20172,7 @@ function renderQRow(e){
     const allSameQ=group.every(e=>e.queueNum===primary.queueNum);
     const isConsec=!allSameQ&&group.every((e,i)=>i===0||e.queueNum===group[i-1].queueNum+1);
     const qNumDisplay=allSameQ?`#${primary.queueNum}`:isConsec?`#${primary.queueNum}&ndash;#${group[n-1].queueNum}`:group.map(e=>`#${e.queueNum}`).join(', ');
-    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':'';
+    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':group.every(e=>e.status==='waitlist')?'row-waitlist':group.some(e=>e.status==='waiting')?'row-waiting':'';
     const lp=livePosMap[primary.id];const totalW=sessWaitCount[primary.sessionId]||0;
     const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge rq-pos11" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp}/${totalW}`)}</span>`:'';
     const sessLabel=S.sfSession==='all'?`<div class="rq-slbl">${esc(dayLabel(primary.sessionDay)||'')} &middot; ${esc(shortDate(primary.sessionDate))}</div>`:'';

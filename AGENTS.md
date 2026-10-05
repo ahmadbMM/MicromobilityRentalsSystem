@@ -707,3 +707,21 @@ on a ride staff approve - and the breakfast stop) and a book button (`_infoBook`
 - **A date's own line**: the session forms' Description box is there for every kind now (`ns-desc`, and `es-desc` on
   the edit form, saved only when changed); outside events it is an extra line under the words (`.ev-info-extra`).
 - The links are siblings of the card buttons (`.lec-wrap`, `.sess-wrap`), never inside them. `tests/event-info.spec.ts`.
+
+## Bookings in colour (2026-10-05)
+
+The owner: "make the session cards in the bookings page in staff website themed the same way they are themed in
+customer event picker cards, make the bookings rows be colored matching the status of it for instance completed
+green no show or cancelled red, make reserved colored make to be reserved colored make paid colored".
+- **Ride chips and Sessions cards** take a theme class from `_sfTheme(s)`: `th-jcc` (the circuit's navy and
+  chevrons, the white JCC mark), `th-comm` (MicroMobility Experiences' pattern for Saturday, Petromin, the pool and
+  T100, the MM mark; the ride's name keeps its own colour), `th-runher` (pink wash, partners lockup, Marcellus),
+  `th-snd96` (the National Day weave and logo), `th-event` (violet). The mark is `_sfMark` (`SF_MARK`). The look sits in
+  `--sf-chip-bg` so hover and the selected ring (`--sf-ring`) keep it. CSS: "BOOKINGS IN COLOUR" at the end of styles.css.
+- **Rows** (and phone cards) carry one state class each, now including `row-waiting` and `row-waitlist`: waiting
+  amber, waitlist orange, to be reserved fuchsia, reserved violet, on a bike blue, completed green (paid or not),
+  no-show and cancelled red. Solid colours (the pinned first cell must mask what scrolls under it) and a 4px edge.
+- **Status badges** of a booking carry `st-<state>` (statusBadge / statusBadgeFor) and become pills in their row's
+  colour; `badge-active` alone also dresses the Membership column and Petromin booking numbers, which keep their look.
+  Payment buttons: paid green, pending amber, on the house teal. The roster's figures (`_statChip`, `sc-<status>`)
+  wear the same colours, so the strip is the key. Booth mode keeps its 7:1 inks. `tests/staff-colours.spec.ts`.
