@@ -5,7 +5,7 @@
 -- session_token on every sign-in. A rider signed in on two devices (or helped
 -- at the desk) left every older device with a dead token: still "signed in",
 -- but my_bookings() silently returns nothing -> My Rides looks empty with no
--- error (reported for Mohammed Alsharif's Saturday booking).
+-- error (reported for a rider's Saturday booking).
 --
 -- Change:
 --   A. Logins REUSE the account's existing token; one is minted only when the

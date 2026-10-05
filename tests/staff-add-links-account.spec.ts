@@ -3,11 +3,11 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // A rider staff add must reach that rider's My Bookings, which shows only rows carrying the
 // customer's id. The link used to be an exact name match and nothing else, so "Ahmed" typed
-// at the desk never met the account "Ahmed Khoja" and the booking stayed invisible to him.
+// at the desk never met the account "Ahmed Saleh" and the booking stayed invisible to him.
 // Now the phone decides first, on its last nine digits, whatever the prefix.
 const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
 const customers = [
-  { id: 'c1', name: 'Ahmed Khoja', email: 'ahmed@example.test', phone: '+966500000001', created_at: '2099-01-01' },
+  { id: 'c1', name: 'Ahmed Saleh', email: 'ahmed@example.test', phone: '+966500000001', created_at: '2099-01-01' },
   { id: 'c2', name: 'Sara Ali', email: 'sara@example.test', phone: '0500000002', created_at: '2099-01-01' },
 ];
 

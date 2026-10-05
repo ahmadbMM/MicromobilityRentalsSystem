@@ -60,7 +60,7 @@ test('Final list approves at once; a ride without approval shows no destination 
 });
 
 test('a rider staff put on the house is added on the house to a paid ride, as from every other add; the others pay', async ({ page }) => {
-  // Rozana Albanawi, on the house, added to Petromin Wednesday from this dialog on 2026-09-29, owed 57.50.
+  // A rider on the house, added to Petromin Wednesday from this dialog on 2026-09-29, was left owing 57.50.
   const PW = '2099-03-04';
   const petromin = sess(PW, { day: 'Wednesday', event_kind: 'community', ride_kind: 'petromin', paid_ride: true, needs_approval: false });
   await boot(page, {

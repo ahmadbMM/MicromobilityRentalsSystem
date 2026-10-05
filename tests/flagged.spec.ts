@@ -113,7 +113,7 @@ test('a name may hold letters of any script, spaces and periods - nothing else, 
   await stubSupabase(page, {});
   await page.goto('/');
   await waitForSb(page);
-  const ok = ['Malik Anas', 'Anne Marie', 'Al Harbi', 'محمد عبد الرحمن', 'مُحَمَّد', 'अमित कुमार', 'सुनिल श्रेष्ठ', 'রবীন্দ্রনাথ ঠাকুর', 'عمران خان', 'José Müller', 'Mohd. Ali', 'Md.Rahman'];
+  const ok = ['Sami Nabil', 'Anne Marie', 'Al Harbi', 'محمد عبد الرحمن', 'مُحَمَّد', 'अमित कुमार', 'सुनिल श्रेष्ठ', 'রবীন্দ্রনাথ ঠাকুর', 'عمران خان', 'José Müller', 'Mohd. Ali', 'Md.Rahman'];
   const bad = ['Malik 2', 'محمد ٣', 'अमित ५', 'রবি ৭', "O'Brien", '.Ali', 'Ali .Omar', 'Md.. Ali', 'ali@x', 'Malik 😀', 'Sara ❤', 'a_b', 'علي، محمد', 'Anne-Marie', 'Al–Harbi'];
   expect(await page.evaluate(`${JSON.stringify(ok)}.map(n=>_nameCharsOk(n))`)).toEqual(ok.map(() => true));
   expect(await page.evaluate(`${JSON.stringify(bad)}.map(n=>_nameCharsOk(n))`)).toEqual(bad.map(() => false));

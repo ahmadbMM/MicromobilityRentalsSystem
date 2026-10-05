@@ -3,8 +3,8 @@
 -- 2026-09-29: "whenever [a rider] is added, it must apply on him the same that applies when he
 -- books himself"). customers.default_pay ('house', or 'house:Road,Hybrid' for those types only) was
 -- applied by customer_create_booking when riders book themselves, and by each staff screen on its
--- own; one screen (Community > Add rider) did not, so Rozana Albanawi, on the house, was added to a
--- Petromin night unpaid and _enforce_booking_price set her the fare. Now the database applies it to
+-- own; one screen (Community > Add rider) did not, so a rider on the house was added to a
+-- Petromin night unpaid and _enforce_booking_price set them the fare. Now the database applies it to
 -- every new booking, with customer_create_booking's rule exactly: the account's own name on the row
 -- (a friend booked under the account pays), a type the perk covers, not already paid - then paid,
 -- at 0. It runs before trg_enforce_booking_price (triggers fire in name order), which leaves a paid

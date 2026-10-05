@@ -5786,7 +5786,7 @@ function _cleanIdent(v){return String(v==null?'':v).replace(/[\u200B-\u200F\u202
 function _titleCaseName(v){return _cleanIdent(v).replace(/\s+/g,' ').replace(/(^|[\s\-'\u2019.])([\p{L}])/gu,(m,sep,ch)=>sep+ch.toLocaleUpperCase());}
 // The customer types their name in two boxes, but it is stored as one `name` field, so the
 // form splits on load and joins on save. First token = first name, the rest = last name
-// ("Malik Anas Alnajjar" -> "Malik" + "Anas Alnajjar").
+// ("Sami Nabil Haddad" -> "Sami" + "Nabil Haddad").
 function _splitName(full){
   const p=_cleanIdent(full).replace(/\s+/g,' ').trim();
   const i=p.indexOf(' ');
@@ -5795,7 +5795,7 @@ function _splitName(full){
 // Join both boxes back into the stored name, with the same casing rule as the old single field.
 function _joinName(first,last){return _titleCaseName(((first||'')+' '+(last||'')).trim());}
 // Name rules: each box needs at least ONE word (a box may hold more than one — e.g. a compound
-// last name like "Anas Alnajjar"), and the joined name must be at least TWO words. Returns ''
+// last name like "Nabil Haddad"), and the joined name must be at least TWO words. Returns ''
 // when valid, otherwise which box to flag.
 function _nameErr(first,last){
   if(!_cleanIdent(first))return'first';
@@ -5837,7 +5837,7 @@ function _isNameCharsErr(e){return /name_chars/.test(String((e&&(e.message||e.hi
 function _isNameShortErr(e){return /name_short/.test(String((e&&(e.message||e.hint||e.details))||e||''));}
 // My Account asks for first / middle (optional) / last. Still one stored `name`: the first word
 // is the first name, the last word is the last name, and anything between is the middle name
-// ("Malik Anas Alnajjar" -> "Malik" + "Anas" + "Alnajjar").
+// ("Sami Nabil Haddad" -> "Sami" + "Nabil" + "Haddad").
 function _splitName3(full){
   const p=_cleanIdent(full).replace(/\s+/g,' ').trim();
   const w=p?p.split(' '):[];
@@ -5907,7 +5907,7 @@ function fmtPhoneInput(el){
 // code, WITHOUT doubling the code. Handles +966…, 966…, 00966…, 0562…, 562… → +966562….
 // Link a rider staff typed to the account it belongs to. Phone first (digits compared on their
 // last nine, so +966 5x, 05x and a bare 5x all meet), then email, then the exact name. The name
-// alone used to be the only rule, and "Ahmed" never matched "Ahmed Khoja": the booking carried no
+// alone used to be the only rule, and "Ahmed" never matched "Ahmed Saleh": the booking carried no
 // customer_id, and My Bookings shows a customer only the rows that carry theirs.
 function _phoneKey(p){const d=_asciiDigits(String(p==null?'':p)).replace(/\D/g,'');return d.length>=9?d.slice(-9):'';}
 // ── Phone search: 05… finds +9665… ───────────────────────────────────────
@@ -15074,7 +15074,7 @@ async function _commBook(sess,people,o){
     const ty=own?'Own':((c.type_preference==='Own'||(c.type_preference==='Road Carbon'&&_noCarbon(sess)))?'Any':(c.type_preference||'Any')); // Own is comm-only pref; Road Carbon only where the ride offers it
     // Each rider is added on their own account, so a rider staff put on the house rides on the house
     // here too (_applyDefaultPay), as from every other add. This dialog was the one path without it:
-    // Rozana Albanawi, on the house, added to Petromin Wednesday on 2026-09-29, owed 57.50.
+    // a rider on the house, added to Petromin Wednesday on 2026-09-29, was left owing 57.50.
     return _applyDefaultPay({id:uid(),name:c.name||'',email:c.email||'',phone:c.phone||'',waitlistNum:null,
     size:c.height?heightToSize(c.height,ty):'',height:c.height||null,
     typePreference:ty,paid:false,assignedBikeId:null,
@@ -21775,7 +21775,7 @@ async function _execRestoreCancelled(id){
   const newQNum=_restoreNum(entry.sessionId,entry.queueNum,id);
   // A restored REJECTED community booking comes back as a fresh request, not the old
   // verdict: without this it sat on the roster as waiting+rejected with no approval
-  // controls at all (the Riham Issa zombie).
+  // controls at all (one such zombie was seen in 2026-09).
   const _wasRejected=_apprSessIds.has(entry.sessionId)&&entry.approval==='rejected';
   const upd={status:'waiting',queue_num:newQNum};
   if(_wasRejected)upd.approval='pending';
@@ -31908,7 +31908,7 @@ async function _teamRosterSyncDB(added,removed,renamed){
   const add=[...new Set((added||[]).filter(Boolean))],del=[...new Set((removed||[]).filter(Boolean))].filter(n=>!add.includes(n));
   try{
     // A rename changes the row in place, so the name keeps its operator PIN. Delete-and-insert
-    // gave "Ahmed K" no PIN, and anyone could pick it at the operator gate.
+    // gave the renamed operator no PIN, and anyone could pick it at the operator gate.
     for(const r of (renamed||[])){if(r&&r.from&&r.to&&r.from!==r.to&&await _wr(sb.from('team_members').update({name:r.to}).eq('name',r.from),'rename team member'))return;}
     if(add.length&&await _wr(sb.from('team_members').upsert(add.map(n=>({name:n})),{onConflict:'name'}),'add team member'))return;
     if(del.length){
