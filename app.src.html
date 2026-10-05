@@ -20817,13 +20817,27 @@ async function confirmCancelWithReason(id){
 }
 
 // Self-service reschedule: move a whole booking (all the customer's waiting riders in one session) to another open upcoming session
+// Where a booking may be moved (2026-10-05): an open circuit ride (_evMatch 'jcc': no community ride,
+// Petromin night, event, workshop or National Day ride), not over yet, and already open to riders
+// (the booking window). The list offered Petromin nights, events, rides that had ended and rides not
+// open yet, and the server then refused the move (members only, NOT_OPEN_YET).
+function _rsTarget(s,fromId){return !!s&&s.id!==fromId&&s.status==='open'&&!_isApprovalRide(s)&&_evMatch(s,'jcc')&&!_sessEnded(s)&&_bwOpen(s);}
+// A move the server refused, said in the rider's language: a members-only ride, a ride not open
+// for booking yet, or a paid booking onto a ride with another fare (PAID_MOVE). True when said.
+function _rsRefused(err,sess){
+  if(!err)return false;
+  const m=String((err.code||'')+' '+(err.message||'')+' '+(err.details||''));
+  if(_rideRuleRefusal(err)==='MEMBERS_ONLY'){showCommMembersModal();return true;}
+  if(/NOT_OPEN_YET/.test(m)){toast(_bwOpensText(sess)||t('rsNotOpenYet'),'error');return true;}
+  if(/PAID_MOVE/.test(m)){toast(t('rsPaidMove'),'error');return true;}
+  return false;
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showRescheduleModal_1(event,el){if(event.target===el)closeRescheduleModal()}
 function showRescheduleModal(fromSessionId){
   const cust=S.loggedIn;if(!cust)return;
   const moving=getQueue().filter(e=>e.customerId===cust.id&&e.sessionId===fromSessionId&&(e.status==='waiting'||e.status==='waitlist'));
   if(!moving.length){toast(t('errCancelWaiting'),'error');return;}
-  const today=_todayISO();
   // Community rides are never a reschedule target: they're invite-only (tag-gated), solo,
   // and approval-based — moving a JCC group in would bypass all three rules.
   // Nor is the National Day ride, in either direction. Entry to it is the federation's own
@@ -20831,7 +20845,9 @@ function showRescheduleModal(fromSessionId){
   // popup. And it takes owners free, so a booking moved out would carry a free own-bike place
   // onto a night that has none.
   if(_rideKind(allSessions().find(s=>s.id===fromSessionId))==='snd96')return;
-  const opts=allSessions().filter(s=>s.id!==fromSessionId&&s.status==='open'&&!_isApprovalRide(s)&&_rideKind(s)!=='snd96'&&(s.session_date||s.id)>=today)
+  // The booking window decides which rides are open yet: read once, and the list drawn again when it lands.
+  if(S._bw===undefined&&!S._bwBusy)_bwLoad().then(()=>{const m=document.getElementById('reschedule-modal');if(m&&m.style.display!=='none'&&m.dataset.from===String(fromSessionId))showRescheduleModal(fromSessionId);});
+  const opts=allSessions().filter(s=>_rsTarget(s,fromSessionId))
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   const list=opts.length?opts.map(s=>{
     const full=spotsLeft(s.id)<moving.length; // same yardstick as booking + rescheduleBooking
@@ -20840,7 +20856,7 @@ function showRescheduleModal(fromSessionId){
       <span class="${full?'dk-rs-st-full':'dk-rs-st'}">${full?t('statusFull'):t('availLabel')}</span>
     </button>`;
   }).join(''):`<div class="empty-state">${t('rescheduleNoSessions')}</div>`;
-  const m=document.getElementById('reschedule-modal');m.style.display='flex';
+  const m=document.getElementById('reschedule-modal');m.style.display='flex';m.dataset.from=String(fromSessionId);
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showRescheduleModal_1",_EV,_EL)}">
     <div class="modal-box dk-mw380" role="dialog" aria-modal="true" aria-labelledby="dlgt-rescheduleTitle">
       <div class="dk-rs-head">
@@ -20859,6 +20875,8 @@ async function rescheduleBooking(fromSessionId,toSessionId){
   const newSess=allSessions().find(s=>s.id===toSessionId);if(!newSess){closeRescheduleModal();return;}
   if(_isApprovalRide(newSess)){closeRescheduleModal();return;} // never a reschedule target (invite-only, solo, approval-based); the DB update-gate backstops this
   if(_rideKind(newSess)==='snd96'||_rideKind(allSessions().find(s=>s.id===fromSessionId))==='snd96'){closeRescheduleModal();return;} // National Day: in or out, see showRescheduleModal
+  // the same rule as the list (a list drawn a while ago may name a ride that has ended or is not one to move to)
+  if(!_rsTarget(newSess,fromSessionId)){closeRescheduleModal();toast(!_bwOpen(newSess)?(_bwOpensText(newSess)||t('rsNotOpenYet')):t('errSessionClosed'),'error');return;}
   // Same capacity yardstick as booking (spotsLeft): counting only waiting+active here let a
   // rescheduler land as 'waiting' ahead of riders already waitlisted in the target session.
   if(spotsLeft(toSessionId)<moving.length){toast(t('rescheduleFull'),'error');return;}
@@ -20894,6 +20912,8 @@ async function rescheduleBooking(fromSessionId,toSessionId){
     const b2=nextQNum(toSessionId);
     _rs=await Promise.all(sorted.map((e,i)=>_move(e,b2+i)));
   }
+  const _bad=_rs.find(r=>r&&r.error);
+  if(_bad&&_rsRefused(_bad.error,newSess)){await loadData();renderMyRides();return;} // said in the rider's language
   if(_writeErr(_rs,'reschedule')){await loadData();renderMyRides();return;}
   await loadData();
   // Add-on stock follows where each rider really landed, row by row: a waitlisted rider who
@@ -21234,19 +21254,23 @@ const _CACT_CAT={book:'book',cancel:'book',rebook:'book',reschedule:'book',booki
 const _CACT_CATS=[['book','logCatBook'],['auth','logCatAuth'],['acct','cactCatAccount'],['form','cactCatForms']];
 const _CACT_RED=new Set(['cancel','signin_fail','delete_req']);
 function _cact(){return S._cact||(S._cact={rows:[],at:0,busy:false,failAt:0,end:false});}
+// Rows are ordered newest first by time and then by id, and a page starts after the last row on
+// screen by both (2026-10-05): one booking for a party writes several lines with one timestamp, and
+// paging on the time alone skipped the ones a page boundary fell between.
+function _cactBefore(r,b){return r.at<b.at||(r.at===b.at&&Number(r.id)<Number(b.id));}
 async function _cactLoad(older){
   const c=_cact();if(c.busy||!sb)return;
   if(!older&&c.at&&Date.now()-c.at<60000)return; // a minute's cache, as the Action Log
   if(!older&&Date.now()-c.failAt<30000)return;   // and no read-redraw loop while offline
   c.busy=true;let got=false;
   try{
-    let q=sb.from('customer_activity').select('id,at,customer_id,who,action,detail,origin').order('at',{ascending:false}).limit(CACT_PAGE);
+    let q=sb.from('customer_activity').select('id,at,customer_id,who,action,detail,origin').order('at',{ascending:false}).order('id',{ascending:false}).limit(CACT_PAGE);
     const last=c.rows[c.rows.length-1];
-    if(older&&last)q=q.lt('at',last.at);
+    if(older&&last)q=q.or(`at.lt."${last.at}",and(at.eq."${last.at}",id.lt.${Number(last.id)})`);
     const{data,error}=await q;
     if(!error&&Array.isArray(data)){
       if(older){const ids=new Set(c.rows.map(r=>r.id));c.rows=c.rows.concat(data.filter(r=>!ids.has(r.id)));}
-      else{const ids=new Set(data.map(r=>r.id));const tail=c.rows.filter(r=>!ids.has(r.id)&&last&&r.at<(data[data.length-1]||{}).at);c.rows=data.concat(tail);c.at=Date.now();}
+      else{const ids=new Set(data.map(r=>r.id));const edge=data[data.length-1];const tail=c.rows.filter(r=>!ids.has(r.id)&&last&&edge&&_cactBefore(r,edge));c.rows=data.concat(tail);c.at=Date.now();}
       if(older||!c.end)c.end=data.length<CACT_PAGE;
       got=true;
     }
@@ -21353,13 +21377,13 @@ function renderCustActivity(){
   </div>`;
   if(hadFocus){const inp=document.getElementById('cact-search');if(inp){inp.focus();const v=inp.value;inp.value='';inp.value=v;}}
 }
+// Through _downloadCsv like every other export (2026-10-05): its own blob was revoked in the same
+// tick (Safari and Firefox lost the file), nothing went in the log, and two columns had no name.
 function exportCustActivityCSV(){
   const list=S._cactExport||[];if(!list.length){toast(t('cactEmpty'),'warning');return;}
   const fmt=at=>new Date(at).toLocaleString('en-GB',{timeZone:KSA_TZ,hour12:false});
-  const rows=[[t('logsColTime'),t('logsColBy'),t('logsColAction'),'',''],...list.map(r=>[fmt(r.at),r.who||'',_cactLabel(r),_cactDetail(r),r.origin||''])];
-  const csv=rows.map(r=>r.map(_csvCell).join(',')).join('\n');
-  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='customer_activity.csv';a.click();URL.revokeObjectURL(url);
+  const rows=[[t('logsColTime'),t('logsColBy'),t('logsColAction'),t('cactColDetail'),t('cactColSite')],...list.map(r=>[fmt(r.at),r.who||'',_cactLabel(r),_cactDetail(r),r.origin||''])];
+  _downloadCsv('customer_activity.csv',rows,t('cactTitle'),list.length);
 }
 
 async function confirmLogUndo(logId){
@@ -21397,14 +21421,19 @@ async function approveEntry(id){
       // keeps their original queue_num - no renumbering means no unique-index collision.
       // JCC promotes still take a fresh number (position at the end of the queue).
       if(e.status==='waitlist'){patch.status='waiting';if(!_apprSessIds.has(e.sessionId))patch.queue_num=nextQNum(e.sessionId);}
-      const res=await sb.from('queue_entries').update(patch).eq('id',id);
+      // Guarded on the status seen here, as no-show is (2026-10-05): approving from a copy older than
+      // the rider's own cancel brought the cancelled booking back as a confirmed seat.
+      const res=await sb.from('queue_entries').update(patch).eq('id',id).eq('status',e.status).select('id');
       if(res.error&&attempt===0&&(String(res.error.code||'').includes('23505')||/duplicate|unique/i.test(res.error.message||''))){await loadDataLight();continue;}
       if(_writeErr(res,'approve'))return;
+      if(!_landed(res))return _lostRace();
       await loadDataLight();
       logAction(`${t('apprApproveBtn')}: #${patch.queue_num||e.queueNum} ${e.name}`);
       toast(t('apprApprovedToast').replace('{0}',e.name));
+      const _after=patch.status||e.status;
       pushUndo(`${t('apprApproveBtn')} · ${e.name}`,async()=>{
-        if(_writeErr(await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id),'undo'))return false;
+        const u=await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id).eq('status',_after).eq('approval','approved').select('id');
+        if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;} // changed since (cancelled, checked in): left as it is
         await loadDataLight();renderStaffQueue();
       });
       renderStaffQueue();renderMyRides();
@@ -21419,24 +21448,32 @@ async function commToWaitlist(id){
   // Allowed regardless of remaining spots. queue_num is left untouched (numbers are
   // stable, never reused or shifted), so an undo restores the exact same position.
   const e=getQueue().find(x=>x.id===id);if(!e||!['pending','rejected'].includes(_apprOf(e))||e.status!=='waiting')return;
-  if(await _wr(sb.from('queue_entries').update({status:'waitlist',waitlist_num:e.waitlistNum||nextWlNum(e.sessionId)}).eq('id',id),'to waitlist'))return;
+  // guarded like the approval (2026-10-05): a booking cancelled since stays cancelled
+  const r=await sb.from('queue_entries').update({status:'waitlist',waitlist_num:e.waitlistNum||nextWlNum(e.sessionId)}).eq('id',id).eq('status','waiting').select('id');
+  if(_writeErr(r,'to waitlist'))return;
+  if(!_landed(r))return _lostRace();
   await loadDataLight();
   logAction(`${t('waitlistLabel')}: ${e.name}`);
   toast(t('toastWaitlisted'));
   pushUndo(`${t('waitlistLabel')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({status:'waiting'}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
 }
 async function unapproveEntry(id){
   const e=getQueue().find(x=>x.id===id);if(!e||e.approval!=='approved')return;
-  if(await _wr(sb.from('queue_entries').update({approval:'pending'}).eq('id',id),'unapprove'))return;
+  // only while the row is as it was seen: the status (a checked-in rider keeps the chip) and the approval
+  const r=await sb.from('queue_entries').update({approval:'pending'}).eq('id',id).eq('status',e.status).eq('approval','approved').select('id');
+  if(_writeErr(r,'unapprove'))return;
+  if(!_landed(r))return _lostRace();
   await loadDataLight();
   logAction(`${t('apprUndoBtn')}: ${e.name}`);
   toast(`${e.name} · ${t('apprPendingChip')}`);
   pushUndo(`${t('apprUndoBtn')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({approval:'approved'}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({approval:'approved'}).eq('id',id).eq('status',e.status).eq('approval','pending').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
@@ -21448,13 +21485,17 @@ async function rejectEntry(id){
   // which lands them back in Cancelled properly.
   const e=getQueue().find(x=>x.id===id);if(!e||!['pending','rejected'].includes(_apprOf(e))||!['waiting','waitlist'].includes(e.status))return;
   const _wasWaitlist=e.status==='waitlist'; // waitlist never reserved stock
-  if(await _wr(sb.from('queue_entries').update({approval:'rejected',status:'cancelled',cancelled_by:'staff'}).eq('id',id),'reject'))return;
+  // guarded on the status seen here (2026-10-05): the restock below is right only for that status
+  const r=await sb.from('queue_entries').update({approval:'rejected',status:'cancelled',cancelled_by:'staff'}).eq('id',id).eq('status',e.status).select('id');
+  if(_writeErr(r,'reject'))return;
+  if(!_landed(r))return _lostRace();
   if(!_wasWaitlist)await _restockAddonsOnExit(e); // parity with cancel/no-show; restores any add-ons a pre-fix community booking still carries
   await loadDataLight();
   logAction(`${t('apprRejectBtn')}: ${e.name}`);
   toast(t('apprRejectedToast').replace('{0}',e.name));
   pushUndo(`${t('apprRejectBtn')} · ${e.name}`,async()=>{
-    if(_writeErr(await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id),'undo'))return false;
+    const u=await sb.from('queue_entries').update({approval:'pending',status:e.status,queue_num:e.queueNum}).eq('id',id).eq('status','cancelled').eq('approval','rejected').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();
@@ -21581,8 +21622,15 @@ function _promoNudge(e){
 // Community events NEVER auto-promote: staff hand-pick who comes off the waitlist when a spot
 // frees, a reservation is cancelled, or the allocation is expanded.
 async function _autoPromoteOldestWaitlist(sessionId){
-  if(_isApprovalRide(allSessions().find(s=>s.id===sessionId)))return false;
-  const wl=(_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist')
+  const sess=_sessGet(sessionId);
+  if(_isApprovalRide(sess))return false;
+  // A ride that is over takes nobody new (2026-10-05): removing a done row in History handed a
+  // leftover waitlister a finished night - their add-ons taken from stock and "your turn" sent.
+  if(_sessEnded(sess))return false;
+  // The freed place is a bike, as _promote_next_waitlist reads it on the server: a waitlisted
+  // rider on their own bike is not who it goes to, except on the Petromin ride (_ownTakesPlace).
+  const own=_ownTakesPlace(sess);
+  const wl=(_qBySession().get(sessionId)||[]).filter(x=>x.status==='waitlist'&&(own||!_isOwnBike(x)))
     .sort(_wlCmp); // staff-set W order first (W1 is next up), registration time as tiebreaker
   // Down the line until one promotion takes. This device's copy can be a moment behind: a first
   // candidate another desk had already promoted or cancelled used to end the attempt, and the
@@ -23665,11 +23713,15 @@ function printBreakfastReport(){
   _openReport(html,1000,760);
 }
 
-function addHistLog(action,entry,undoFn){
+// kind: 'removed' | 'restored', so a Restore can find the Remove it answers (2026-10-05). Called
+// once the write has landed: it also writes the shared audit log (staff_actions), which used to
+// record a removal or a restore that the server then refused.
+function addHistLog(action,entry,undoFn,kind){
   logAction(`${action} #${entry.queueNum} ${entry.name}`);
-  S.histLog.unshift({
+  const row={
     id:'log-'+Date.now()+'-'+Math.random().toString(36).slice(2),
     action,
+    kind:kind||null,
     entryId:entry.id,
     name:entry.name,
     queueNum:entry.queueNum,
@@ -23677,8 +23729,10 @@ function addHistLog(action,entry,undoFn){
     time:new Date().toLocaleTimeString('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit'}),
     undoFn:undoFn||null,
     undone:false
-  });
+  };
+  S.histLog.unshift(row);
   if(S.histLog.length>200)S.histLog.pop();
+  return row;
 }
 
 function confirmHistRemove(id){
@@ -23696,6 +23750,7 @@ function _reserveStillFree(raw,selfId){
 async function doRemove(id){
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
   const prevStatus=entry.status;
+  if(prevStatus==='removed')return; // removed already (a second tap, or another desk first)
   const savedQNum=entry.queueNum;
   const sess=allSessions().find(s=>s.id===entry.sessionId);
   // Only a rider who is out on a bike has one to hand back. A done row keeps its bike link after
@@ -23708,7 +23763,18 @@ async function doRemove(id){
   // Only a row that held a place frees one. Cancelled, no-show and waitlisted rows hold none
   // (_holdsSpot, spotsLeft), and removing one used to promote the next waitlisted rider into a
   // place that did not exist: the night over capacity and a "you're in" sent to someone who was not.
-  const heldPlace=['waiting','active','done'].includes(prevStatus)&&_holdsSpot(entry,sess);
+  // Nor does a done row (2026-10-05): that rider has ridden, and removing the record of it gives
+  // nobody a bike - it handed a leftover waitlister a ride that was over.
+  const heldPlace=['waiting','active'].includes(prevStatus)&&_holdsSpot(entry,sess);
+  // The row first, guarded on the status seen here, as no-show is (2026-10-05): an unguarded write
+  // removed a row another desk had just changed, and the promotion, the restock and the bike release
+  // below then acted on a status it no longer had.
+  const _rm=await sb.from('queue_entries').update({status:'removed',assigned_bike_id:null}).eq('id',id).eq('status',prevStatus).select('id');
+  // Checked before anything acts on it: the promotion hands the place on, the restock returns
+  // add-ons and the toast says it is done. All three used to run over a refusal, so the desk
+  // believed the place was free while the rider still held it.
+  if(_writeErr(_rm,'remove booking',()=>doRemove(id))){await loadData();renderStaffQueue();renderHistory();return;}
+  if(!_landed(_rm)){await _lostRace();renderHistory();return;}
   addHistLog(t('histRemoved'),entry,async()=>{
     // Undo: restore the status the row actually HAD (a removed no-show/cancelled row must come
     // back as no-show/cancelled — not as a live 'waiting' rider holding a capacity spot), the
@@ -23722,22 +23788,17 @@ async function doRemove(id){
     const _keepLink=prevStatus==='done'||prevStatus==='noshow'||prevStatus==='cancelled'; // a record of what they rode, not a claim on a bike
     const _av=prevStatus==='active'?(claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed))
       :savedAssigned==null?null:(_keepLink||_reserveStillFree(savedAssigned,id))?savedAssigned:null;
-    const _u=await sb.from('queue_entries').update({status:prevStatus,assigned_bike_id:_av,queue_num:_restoreNum(entry.sessionId,savedQNum,id)}).eq('id',id);
-    if(_writeErr(_u,'undo remove')){await _releaseBikes(claimed,'undo remove',true);await loadData();renderStaffQueue();renderHistory();return false;}
+    // only while it is still removed: restored meanwhile (History's Restore), it is not ours to undo
+    const _u=await sb.from('queue_entries').update({status:prevStatus,assigned_bike_id:_av,queue_num:_restoreNum(entry.sessionId,savedQNum,id)}).eq('id',id).eq('status','removed').select('id');
+    if(_writeErr(_u,'undo remove')||!_landed(_u)){await _releaseBikes(claimed,'undo remove',true);await loadData();renderStaffQueue();renderHistory();return false;}
     await loadData();
     if(restocks)await _consumeAddonsOnEnter(entry); // the restore brings the booking back, so re-reserve what the removal restocked
     renderStaffQueue();renderHistory();
-  });
-  // Free the bike of a rider who was riding: null the link AND set the bike available (only if it
-  // is still in-use, so a bike already given back or sent to maintenance stays as it is),
-  // otherwise it reads as 'in-use' forever with nothing pointing at it.
-  const calls=[sb.from('queue_entries').update({status:'removed',assigned_bike_id:null}).eq('id',id)];
-  bikeIds.forEach(bid=>calls.push(sb.from('bikes').update({status:'available'}).eq('id',bid).eq('status','in-use')));
-  // Checked before anything acts on it: the promotion hands the place on, the restock returns
-  // add-ons and the toast says it is done. All three used to run over a refusal, so the desk
-  // believed the place was free while the rider still held it.
-  const _rm=await Promise.all(calls);
-  if(_writeErr(_rm,'remove booking',()=>doRemove(id))){await loadData();renderStaffQueue();return;}
+  },'removed');
+  // Free the bike of a rider who was riding, now that the booking no longer names it: set it
+  // available (only if it is still in-use, so a bike already given back or sent to maintenance
+  // stays as it is), otherwise it reads as 'in-use' forever with nothing pointing at it.
+  if(bikeIds.length)await _releaseBikes(bikeIds,'remove booking',true);
   await _noteRemovedFrom(id,prevStatus);
   // A removal of a row that held a place frees it exactly as a cancellation does, so it hands
   // that place on. Without this the waitlist simply did not move: the place sat empty until
@@ -23784,17 +23845,23 @@ async function doRestoreEntry(id){
   // Back into a place on a night that is already full: ask first, as a restored cancellation does.
   if(consumes&&spotsLeft(entry.sessionId)<=0&&_holdsSpot({...entry,status:'waiting'},allSessions().find(s=>s.id===entry.sessionId))&&
     !await askConfirm({title:t('restoreFullTitle'),body:t('restoreFullBody'),confirmLabel:t('restoreBookingBtn'),confirmClass:'btn-muted'}))return;
+  // The write first, guarded on the row still being removed, and the log line once it has landed (2026-10-05).
+  const _rr=await sb.from('queue_entries').update({status:restoreStatus,queue_num:_restoreNum(entry.sessionId,entry.queueNum,id)}).eq('id',id).eq('status','removed').select('id');
+  if(_writeErr(_rr,'restore')){await loadData();renderHistory();return;}
+  if(!_landed(_rr)){await _lostRace();renderHistory();return;}
+  // The Remove this Restore answers is spent: its Undo would put back a row that is back already.
+  const paired=S.histLog.find(l=>l.entryId===id&&l.kind==='removed'&&!l.undone);
+  if(paired)paired.undone=true;
   addHistLog(t('histRestored'),entry,async()=>{
     // A refused reversal returns false, so the log row is not struck through over a booking
-    // that never changed.
-    const _u=await sb.from('queue_entries').update({status:originalStatus}).eq('id',id);
-    if(_writeErr(_u,'undo restore')){await loadData();renderHistory();return false;}
+    // that never changed. Only while the row is still what the Restore made it.
+    const _u=await sb.from('queue_entries').update({status:originalStatus}).eq('id',id).eq('status',restoreStatus).select('id');
+    if(_writeErr(_u,'undo restore')||!_landed(_u)){await loadData();renderHistory();return false;}
+    if(paired)paired.undone=false; // removed again: that Remove can be undone again
     await loadData();
     if(consumes)await _restockAddonsOnExit(entry); // undoing the restore sends it back out, so return the add-ons again
     renderStaffQueue();renderHistory();
-  });
-  const _rr=await sb.from('queue_entries').update({status:restoreStatus,queue_num:_restoreNum(entry.sessionId,entry.queueNum,id)}).eq('id',id);
-  if(_writeErr(_rr,'restore')){await loadData();renderHistory();return;}
+  },'restored');
   await loadData();
   if(consumes)await _consumeAddonsOnEnter(entry);
   toast(t('restoreEntryBtn')||'Restored');
@@ -23804,6 +23871,10 @@ async function doRestoreEntry(id){
 async function undoHistLog(logId){
   const log=S.histLog.find(l=>l.id===logId);
   if(!log||log.undone||!log.undoFn){toast(t('toastNothingUndo'),'warning');return;}
+  // Only an admin undoes, here as on the topbar and the Log (the owner, 2026-09-28; 2026-10-05).
+  if(!await _undoAuth(`${log.action} #${log.queueNum} ${log.name}`))return;
+  if(log.undone||log.busy)return; // reversed meanwhile, or a second tap while the first runs
+  log.busy=true;
   try{
     // A reversal that was REFUSED returns false rather than throwing (it has already raised
     // the error bar). Marking the row undone on "did not throw" struck it through for good
@@ -23815,6 +23886,7 @@ async function undoHistLog(logId){
     renderHistory();
     toast(t('undoneMsg'));
   }catch(e){toast(t('undoFailed'),'error');}
+  finally{log.busy=false;}
 }
 
 
