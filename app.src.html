@@ -1986,14 +1986,14 @@ async function staffAuthSignIn(identifier,password){
     if(!row){
       // Lookup FAILED (timeout/error): only staff hold a password Auth account, so trust the valid
       // session rather than freezing — the DB still enforces is_staff() on every write.
-      if(lookupFailed){S._staffAuthed=true;S._mustChangePwd=false;setStaffRole(_staffRoleGuess(data.user.id));_staffRoleRetry(data.user.id);setupRefRealtime();return{ok:true};}
+      if(lookupFailed){S._staffAuthed=true;S._mustChangePwd=false;setStaffRole(_staffRoleGuess(data.user.id));_staffRoleRetry(data.user.id);setupRefRealtime();_rtStaffRejoin(data.user.id);return{ok:true};}
       // Lookup SUCCEEDED but returned no row: this Auth user is genuinely not staff — deny.
       try{await sb.auth.signOut();}catch(e){}
       return{ok:false,msg:t('errStaffNotAuthorized')};
     }
     S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(data.user.id,row.role);_accessSet(row,data.user.id);
     try{localStorage.setItem('cq_staff_seen',String(Date.now()));localStorage.removeItem('cq_op_idle');}catch(_){} // a sign-in is activity: an old idle mark must not sign them straight out (the idle clock, _idleCheck)
-    setupRefRealtime();
+    setupRefRealtime();_rtStaffRejoin(data.user.id); // the live channel joined before this sign-in: again, as this account
     return{ok:true};
   }catch(e){return{ok:false,msg:(e&&e.message)||t('errConnection')};}
 }
@@ -2092,7 +2092,7 @@ async function staffAuthRestore(){
     S._staffAuthed=false;return;
   }
   S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(uid,row.role);_accessSet(row,uid);
-  setupRefRealtime();
+  setupRefRealtime();_rtStaffRejoin(uid);
 }
 // auto: the idle lock (no one to ask; unsent work is kept for the next sign-in).
 async function lockStaff(auto){
@@ -6455,7 +6455,9 @@ function _needsWaiver(s){return _kindHas(_rideKind(s),'waiver');}
 // size, the waiver (every kind today), then the review. Next and Back
 // both walk this list, so a skipped step is skipped in BOTH directions — Back from the
 // review used to land a swimmer on the empty riders panel.
-function _regSteps(s){const st=[1];if(_needsBike(s))st.push(2);if(_needsWaiver(s))st.push(2.5);st.push(3);return st;}
+// An event has no bike either, but it takes a party (_partyRide): its riders step asks how many
+// seats and the name on each one.
+function _regSteps(s){const st=[1];if(_needsBike(s)||_rideKind(s)==='event')st.push(2);if(_needsWaiver(s))st.push(2.5);st.push(3);return st;}
 function _regNextStep(s,cur){const st=_regSteps(s),i=st.indexOf(cur);return (i>=0&&i<st.length-1)?st[i+1]:3;}
 function _regPrevStep(s,cur){const st=_regSteps(s),i=st.indexOf(cur);return i>0?st[i-1]:1;}
 function _kindHasBf(k){return _kindHas(k,'breakfast');}
@@ -6490,6 +6492,11 @@ function _isGroupRide(s){return _isCommunity(s)&&_rideKind(s)==='petromin';}
 // booking a second time cannot get round it — the two are the same rule.
 // Two = the member and one guest. Staff are exempt, so the desk can still seat a larger party.
 const GROUP_RIDE_MAX=2;
+// An event seats a party too: up to five per account on the session (_group_ride_cap, 20260928160000).
+// The quantity rules of a group ride (the stepper, its cap, the party-size refusal) follow this;
+// everything else a Petromin night means (own bikes taking a place, prices) stays _isGroupRide's.
+const EVENT_SEAT_MAX=5;
+function _partyRide(s){return _isGroupRide(s)||_rideKind(s)==='event';}
 // JCC: three riders per account per SESSION, not per booking - a second booking for the
 // same night draws on the same three. Rows already on the account for that session count
 // (waiting, on the bike, waitlisted); while an existing booking is being modified its
@@ -6501,7 +6508,7 @@ function _jccBooked(s){
   const modifying=!!S.modifyEntryId&&mine.some(e=>e.id===S.modifyEntryId);
   return modifying?mine.filter(e=>e.status==='active').length:mine.length;
 }
-function _maxRiders(s){if(!s)return 10;return _isGroupRide(s)?GROUP_RIDE_MAX:_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
+function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='event'?Math.max(1,EVENT_SEAT_MAX-_jccBooked(s)):_isGroupRide(s)?GROUP_RIDE_MAX:_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
 // The Saturday ride's SHAPE — staff pick the riders, the queue stays hidden until it is
 // published, the spot cap is an allocation rather than a capacity — is what needs_approval
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
@@ -9650,7 +9657,7 @@ function renderRegister(){
   const _commSel=_isCommunity(_selSessObj); // selected session is a community ride
   const _apprSel=_isApprovalRide(_selSessObj); // ...that staff approve rider by rider
   const _freeSel=_isFreeRide(_selSessObj); // ...and a complimentary one (the Saturday ride)
-  const _grpSel=_isGroupRide(_selSessObj); // ...that takes a whole group (the Petromin ride)
+  const _grpSel=_partyRide(_selSessObj); // ...that takes a whole group (the Petromin ride, an event's seats)
   // Road Carbon is not offered on a no-carbon ride; a saved profile preference could still
   // pre-select it (the button set hides it), so coerce any such choice to Road here.
   const _noCarbonSel=_noCarbon(_selSessObj);
@@ -9788,10 +9795,10 @@ function renderRegister(){
   // not (the circuit) was a rental at SAR 0 that held no bike: the choice is cleared to be made again.
   if(_selSessObj&&!_ownOffered(_selSessObj))S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Own'?'':ty);
   // A quantity carried over from another night may be past this night's allowance.
-  if(!_commSel&&_selSessObj&&S.regQty>_maxRiders(_selSessObj)){S.regQty=_maxRiders(_selSessObj);ensureBikeSizes();}
+  if((!_commSel||_grpSel)&&_selSessObj&&S.regQty>_maxRiders(_selSessObj)){S.regQty=_maxRiders(_selSessObj);ensureBikeSizes();}
   const qtyStepper=(_commSel&&!_grpSel)?'':`
     <div class="reg-row">
-      <span class="reg-row-label">${t('numBikes')}${_grpSel?` <span class="label-hint">${t('groupCapHint').replace('{0}',String(_maxRiders(_selSessObj)))}</span>`:''}</span>
+      <span class="reg-row-label">${t(_needsBike(_selSessObj)?'numBikes':'reviewPartLabel')}${_grpSel?` <span class="label-hint">${t('groupCapHint').replace('{0}',String(_maxRiders(_selSessObj)))}</span>`:''}</span>
       <div class="cu-qty-col">
         <div class="qty-stepper">
           <button class="qty-btn" data-on-click="${_on("changeRegQty",-1)}" type="button" aria-label="${t('qtyDecLabel')}">${_cuIc('minus',18)}</button>
@@ -9803,7 +9810,19 @@ function renderRegister(){
     </div>`;
 
   
-  const bikeSections=!_needsBike(_selSessObj)?'':Array.from({length:S.regQty},(_,i)=>{
+  // An event's seats (no bike, no height, no type): a name on each once there is more than one.
+  const seatSections=(_needsBike(_selSessObj)||S.regQty<2)?'':Array.from({length:S.regQty},(_,i)=>`<div class="cu-rider-head">
+      <span class="cu-rider-num">${i+1}</span>
+      ${t('riderLabel')}
+    </div>
+    <div class="form-group cu-mb14">
+      <label for="reg-rider-name-${i}">${t('riderName')}</label>
+      <input type="text" id="reg-rider-name-${i}" placeholder="${t('riderNamePlaceholder')}"
+        autocapitalize="words" autocomplete="name" enterkeyhint="done"
+        value="${esc(S.regRiderNames[i]!==undefined?S.regRiderNames[i]:(i===0&&cust?cust.name:''))}"
+        data-on-input="${_on("_on_renderRegister_1",_EV,_EL,i)}" data-on-blur="${_on("_vBlur",_EL,"name")}"${_modNameLocked(i)?' readonly aria-readonly="true" class="cu-locked"':''}>
+    </div>`).join('');
+  const bikeSections=!_needsBike(_selSessObj)?seatSections:Array.from({length:S.regQty},(_,i)=>{
     const isFirst=i===0;
     const bikeH=S.regBikeHeights[i]||(isFirst&&cust?cust.height:'')||''; // rider 1 = the account holder: use the height saved on their account (they can still change it)
     if(bikeH&&!S.regBikeHeights[i])S.regBikeHeights[i]=String(bikeH); // seed state too - the submit reads state, not the input
@@ -10176,8 +10195,9 @@ function _setRegAddonQty(id,delta){
 }
 function regNextFromSession(){
   if(!S.selSession){toast(t('errSelectSession'),'error');return;}
-  // Nothing to ask on the riders step when there is no bike to size or choose: the workshop and
-  // an event go straight from the day to their waiver (every kind has one since 2026-10-03).
+  // Nothing to ask on the riders step when there is no bike to size or choose: the workshop and the
+  // swim go straight from the day to their waiver (every kind has one since 2026-10-03). An event
+  // stops on it for its seats (_regSteps).
   const _s=allSessions().find(x=>x.id===S.selSession);
   S.regStep=_regNextStep(_s,1);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();
 }
@@ -10246,11 +10266,12 @@ function _promoDiscLine(disc){
 function _regPromoDisc(){
   if(!S.promoApplied)return 0;
   const from=S.modifyEntryId&&S._modKey?S._modKey.split(',').length:0;
-  const _cm=_isFreeRide(allSessions().find(s=>s.id===S.selSession));if(_cm)return 0;
-  const base=S.regBikeTypes.slice(from,S.regQty).reduce((sum,ty,j)=>{
-    const i=from+j;
-    return sum+((i===0&&_regHouseSelf()&&_regHouseFor(ty||'Any'))?0:priceForType(ty||'Any'));
-  },0);
+  const _ss=allSessions().find(s=>s.id===S.selSession);if(_isFreeRide(_ss))return 0;
+  // An event's seat has its own price: the code comes off that, not off a bike's fare (the server
+  // takes it off the seat, _promo_fare, and the preview promised the bike's discount).
+  const seat=_evSeatPrice(_ss);
+  let base=0;
+  for(let i=from;i<S.regQty;i++){const ty=S.regBikeTypes[i];base+=(i===0&&_regHouseSelf()&&_regHouseFor(ty||'Any'))?0:seat!=null?seat:priceForType(ty||'Any');}
   return _promoDiscount(base,from);
 }
 async function applyPromoCode(){
@@ -10329,8 +10350,17 @@ function validateRegInputs(){
   if(!S.selSession){toast(t('errSelectSession'),'error');return false;}
   const qty=S.regQty||1;
   ensureBikeSizes();
-  // A bike-free session asks for no height and no type, so there is nothing here to check.
-  if(!_needsBike(allSessions().find(x=>x.id===S.selSession)))return true;
+  // A bike-free session asks for no height and no type: only an event's extra seats carry names.
+  if(!_needsBike(allSessions().find(x=>x.id===S.selSession))){
+    for(let i=0;qty>1&&i<qty;i++){
+      if((S.regRiderNames[i]!==undefined?S.regRiderNames[i]:i===0?cust.name:'').trim())continue;
+      const nInp=document.getElementById(`reg-rider-name-${i}`);
+      if(nInp){_fieldErr(nInp,t('errEnterName'));nInp.scrollIntoView({behavior:_sb(),block:'center'});nInp.focus({preventScroll:true});}
+      else toast(`${t('riderName')} (${i+1})`,'error');
+      return false;
+    }
+    return true;
+  }
   if(_hasRideGroups(allSessions().find(x=>x.id===S.selSession))&&!_rgOk(S.regRideGroup)){
     const wrap=document.getElementById('reg-group-wrap');
     _groupErr(wrap,t('errPickGroup'));toast(t('errPickGroup'),'error');
@@ -10448,7 +10478,14 @@ function setRegGroup(g){
 // how it is paid and that the type is a preference, which a popup used to say only after booking.
 // renderRegister draws it; setBikeType repaints just this box.
 function _regPriceBox(sess){
-  if(!sess||!_needsBike(sess))return'';
+  if(!sess)return'';
+  // An event's seats: how many, at what, and the total (a free event says nothing here).
+  const seat=_evSeatPrice(sess);
+  if(seat!=null&&!_needsBike(sess)){
+    if(_isFreeRide(sess)||!seat)return'';
+    return`<div class="price-preview"><div class="price-preview-breakdown"><bdi>${S.regQty} &times; ${esc(_sar(seat))}</bdi></div><div class="price-preview-total"><bdi>${esc(_sar(seat*S.regQty))}</bdi></div></div>`;
+  }
+  if(!_needsBike(sess))return'';
   if(_isFreeRide(sess))return`<div class="price-preview"><div class="price-preview-breakdown">${t('pricePerBike')}</div><div class="price-preview-total">${t('freeLabel')}</div></div>`;
   const q=S.regQty,ty=i=>S.regBikeTypes[i]||'Any';
   const hf=i=>i===0&&_regHouseSelf()&&_regHouseFor(ty(i));
@@ -10515,10 +10552,10 @@ function ensureBikeSizes(){
 
 function changeRegQty(delta){
   {const _s=allSessions().find(x=>x.id===S.selSession);
-   if(_isCommunity(_s)&&!_isGroupRide(_s)){S.regQty=1;renderRegister();return;}}
+   if(_isCommunity(_s)&&!_partyRide(_s)){S.regQty=1;renderRegister();return;}}
   {const _s2=allSessions().find(x=>x.id===S.selSession);
    const _max=_maxRiders(_s2);
-   S._qtyCapNote=delta>0&&S.regQty+delta>_max&&!_isGroupRide(_s2); // the sentence by the stepper: only when + is refused
+   S._qtyCapNote=delta>0&&S.regQty+delta>_max&&!_partyRide(_s2); // the sentence by the stepper: only when + is refused
    S.regQty=Math.max(1,Math.min(_max,S.regQty+delta));}
   ensureBikeSizes();
   renderRegister();
@@ -10686,10 +10723,10 @@ async function _submitReg(){
   // Saturday Social Ride: every customer books ONLY themselves - no additional riders. The UI already
   // hides the quantity stepper and forces 1, but hard-clamp here too so no state path can insert a
   // multi-rider (each an approval:'pending', price:0) community booking.
-  if(_isCommunity(_selSess0)&&!_isGroupRide(_selSess0)){qty=1;S.regQty=1;}
+  if(_isCommunity(_selSess0)&&!_partyRide(_selSess0)){qty=1;S.regQty=1;}
   // The party cap, restated at submit: the stepper stops at it, but no state path may post past it.
-  if(qty>_maxRiders(_selSess0)){S.regQty=_maxRiders(_selSess0);ensureBikeSizes();S._qtyCapNote=!_isGroupRide(_selSess0);
-    toast(_isGroupRide(_selSess0)?t('errGroupCap').replace('{0}',String(_maxRiders(_selSess0))):t('jccCapNote').replace('{0}',String(JCC_ACCOUNT_CAP)),'warning');renderRegister();return;}
+  if(qty>_maxRiders(_selSess0)){S.regQty=_maxRiders(_selSess0);ensureBikeSizes();S._qtyCapNote=!_partyRide(_selSess0);
+    toast(_partyRide(_selSess0)?t('errGroupCap').replace('{0}',String(_maxRiders(_selSess0))):t('jccCapNote').replace('{0}',String(JCC_ACCOUNT_CAP)),'warning');renderRegister();return;}
   if(_noCarbon(_selSess0))S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Road Carbon'?'Road':ty); // carbon is off every community ride but Petromin
   ensureBikeSizes();
   if(!validateRegInputs())return;
@@ -10784,7 +10821,7 @@ async function _submitReg(){
       typePreference:!_needsBike(sess)?'None':(_noCarbon(sess)&&S.regBikeTypes[i]==='Road Carbon'?'Any':S.regBikeTypes[i]),paid:false,
       assignedBikeId:null,sessionId:S.selSession,sessionDay:sess.day,sessionDate:sess.session_date||S.selSession,
       queueNum:baseQNum+i,status:bookingStatus,registeredAt:new Date().toISOString(),walkIn:false,
-      customerId:cust.id,price:_isFreeBooking?0:priceForType(S.regBikeTypes[i]), // the Saturday ride is complimentary; the Petromin ride is priced like JCC
+      customerId:cust.id,price:_isFreeBooking?0:_evSeatPrice(sess)!=null?_evSeatPrice(sess):priceForType(S.regBikeTypes[i]), // the Saturday ride is complimentary; the Petromin ride is priced like JCC; an event at its seat price
       // Community events: a reservation is not a seat until staff approve it (waitlist rows too).
       approval:_isCommBooking?'pending':null,
       rideGroup:(_hasRideGroups(sess)&&_rgOk(S.regRideGroup))?S.regRideGroup:null
@@ -10954,9 +10991,12 @@ async function submitModifyBooking(){
 
   const newQty=S.regQty||1;
   ensureBikeSizes();
+  // An event's seats carry no bike: no type to ask for, none to change, and an added seat is
+  // priced at the event's seat (_evSeatPrice), not at a bike's fare.
+  const _bike=_needsBike(allSessions().find(s=>s.id===S.selSession));
 
-  
-  for(let i=0;i<newQty;i++){
+
+  for(let i=0;_bike&&i<newQty;i++){
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
       if(wrap){_groupErr(wrap,t('errSelectTypeGeneric'));wrap.scrollIntoView({behavior:_sb(),block:'center'});}
@@ -10972,7 +11012,7 @@ async function submitModifyBooking(){
   }
   // A paid booking keeps what was paid for: a dearer bike on it is the desk's to hand over, and
   // the server refuses the change. Checked before anything is sent, so nothing half-saves.
-  for(let i=0;i<Math.min(newQty,existing.length);i++){
+  for(let i=0;_bike&&i<Math.min(newQty,existing.length);i++){
     const entry=existing[i],newType=S.regBikeTypes[i];
     const _house=entry.paid&&(entry.price??DEFAULT_PRICE)===0&&!entry.promoCode;
     if(entry.paid&&!_house&&entry.typePreference!==newType&&priceForEntryType(entry,newType)>(entry.price??DEFAULT_PRICE)){toast(t('errPaidTypeDesk'),'error');return;}
@@ -10983,7 +11023,7 @@ async function submitModifyBooking(){
 
   for(let i=0;i<Math.min(newQty,existing.length);i++){
     const entry=existing[i];
-    const newType=S.regBikeTypes[i];
+    const newType=_bike?S.regBikeTypes[i]:entry.typePreference; // a seat keeps its 'None'
     const patch={};
     // The form invites size/height edits — persist them, don't just toast success. A co-rider's
     // name is offered only where it can be written: customer_booking_update has no name column,
@@ -11022,15 +11062,16 @@ async function submitModifyBooking(){
     let nextNum=nextQNum(S.selSession);
     for(let i=existing.length;i<newQty;i++){
       const modRiderName=i===0?cust.name:(S.regRiderNames[i]||'').trim();
-      const modHeight=parseInt(S.regBikeHeights[i])||null;
+      const modHeight=_bike?(parseInt(S.regBikeHeights[i])||null):null;
+      const _seat=_evSeatPrice(sess);
       const entry=_applyDefaultPay({
         id:uid(),name:modRiderName,email:cust.email||'',phone:cust.phone||'',
-        size:modHeight?heightToSize(modHeight,S.regBikeTypes[i]):'',height:modHeight,typePreference:S.regBikeTypes[i],
+        size:modHeight?heightToSize(modHeight,S.regBikeTypes[i]):'',height:modHeight,typePreference:_bike?S.regBikeTypes[i]:'None',
         paid:false,assignedBikeId:null,
         sessionId:S.selSession,sessionDay:sess.day,sessionDate:sess.session_date||S.selSession,
         queueNum:nextNum++,status:'waiting',
         registeredAt:new Date().toISOString(),walkIn:false,
-        customerId:cust.id,price:priceForType(S.regBikeTypes[i])
+        customerId:cust.id,price:_seat!=null?_seat:priceForType(S.regBikeTypes[i])
       },i===0);
       addedEntries.push(entry);
     }
@@ -11082,7 +11123,9 @@ async function submitModifyBooking(){
 
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on_renderBookingTicket_1(event,el,a0,a1){S.lastTickets=[];S.selEvent=a0;S.selSession=a1;S.regStep=2;setCustTab('register')}
+// Edit opens on the ride's own first step after the date (_regNextStep): a bike ride's or an event's
+// riders, a swim's or a workshop's waiver. A fixed step 2 was a page those rides do not have.
+function _on_renderBookingTicket_1(event,el,a0,a1){S.lastTickets=[];S.selEvent=a0;S.selSession=a1;S.regStep=_regNextStep(allSessions().find(s=>s.id===a1),1);setCustTab('register')}
 function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();_photoZoom(el);}}
 // The MicroMobility logo in the booking card's top corner (the owner, 2026-09-30: "make the booking
 // card include micromobility's logo in the top corner"): the start corner, away from the QR code the
@@ -11357,28 +11400,24 @@ function downloadBookingICS(sessionId){
   if(date.length!==8){toast(t('errSessionClosed'),'error');return;}
   const raw=((parseSlots(sess.bike_slots)||{})._time)||'09:00 - 11:00';
   const m=raw.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
-  const pad=n=>String(n).padStart(2,'0');
   const _comm=_isApprovalRide(sess);
-  let st='090000',en='110000',enDate=date;
+  let sMin=540,eMin=660;
   // A community slot is "gathering – ride start", NOT start–end: taking it literally made the
   // calendar event END the moment the ride begins. Start at gathering, end 2h after ride start.
   // A window that runs past midnight ends on the NEXT day: written on the same date, the event
-  // ended before it began and calendar apps refused it or showed nonsense.
+  // ended before it began and calendar apps refused it or showed nonsense. The times are written
+  // in UTC (_icsUtc): without a zone a calendar reads them in the phone's own.
   if(m){
-    st=pad(m[1])+pad(m[2])+'00';
-    const sMin=Number(m[1])*60+Number(m[2]);
-    let eMin=(Number(m[3])+(_gathersTime(sess)?2:0))*60+Number(m[4]); // the pool and the workshop are start-end; the National Day ride gathers
+    sMin=Number(m[1])*60+Number(m[2]);
+    eMin=(Number(m[3])+(_gathersTime(sess)?2:0))*60+Number(m[4]); // the pool and the workshop are start-end; the National Day ride gathers
     if(eMin<=sMin)eMin+=1440;
-    const dayOff=Math.floor(eMin/1440);eMin%=1440;
-    en=pad(Math.floor(eMin/60))+pad(eMin%60)+'00';
-    if(dayOff)enDate=new Date(Date.UTC(+date.slice(0,4),+date.slice(4,6)-1,+date.slice(6,8)+dayOff)).toISOString().slice(0,10).replace(/-/g,'');
   }
   const stamp=new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
   const esc2=s=>String(s).replace(/[\\,;]/g,x=>'\\'+x).replace(/\n/g,'\\n');
   const _meet=_comm&&_safeUrl(sess.meet_url);
   const lines=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//MicroMobility//Corniche Circuit//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT',
     'UID:'+sessionId+'-'+Date.now()+'@micromobility','DTSTAMP:'+stamp,
-    'DTSTART:'+date+'T'+st,'DTEND:'+enDate+'T'+en,
+    'DTSTART:'+_icsUtc(date,sMin),'DTEND:'+_icsUtc(date,eMin),
     'SUMMARY:'+esc2((_evNamed(sess)?_evName(sess):'MicroMobility Ride')+' - '+(dayLabel(sess.day)||'')), // every named ride by its own name, in the rider's language
     'LOCATION:'+esc2(_meet||({'JCC':'Jeddah Corniche Circuit','Sharafeyah Branch':'Sharafeyah, Jeddah'})[sess.location]||sess.location||'Jeddah Corniche Circuit'),
     'DESCRIPTION:'+esc2('Your MicroMobility bike rental booking. Arrive 10 minutes early and show your ticket at the desk.'),
@@ -11409,7 +11448,9 @@ function bookMyUsual(){
   // circuit list itself offers: nothing closes a night automatically, so a past one can still
   // read 'open', and picking it (or a ride from another list) had the Reserve tab drop the
   // choice at once - the rider landed on an empty step one under a "just confirm" toast.
-  const open=allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
+  // The same happened to a night the booking window has not opened yet (_bwOpen): the list does
+  // not offer it, so the shortcut does not either.
+  const open=allSessions().filter(s=>s.status==='open'&&_evMatch(s,'jcc')&&!_sessPastDay(s)&&!_sessEnded(s)&&_bwOpen(s)&&!bookedIds.has(s.id)).sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   const withSpot=open.filter(s=>spotsLeft(s.id)>0);
   const pool=withSpot.length?withSpot:open;
@@ -11672,18 +11713,18 @@ function _mrTier(rides){
   const nx=tiers[ti+1];
   return{name:t(tiers[ti][1]),next:nx?{need:nx[0]-rides,name:t(nx[1]),from:tiers[ti][0],to:nx[0]}:null};
 }
-// The Sunday that starts a ride day's week, as UTC ms of that date: from YYYY-MM-DD strings on the
-// KSA calendar, so the device's own timezone and its summer-time hours never shift a week.
-function _mrWeekStart(ds){const t=Date.parse(String(ds||'').slice(0,10)+'T00:00:00Z');return isNaN(t)?null:t-new Date(t).getUTCDay()*864e5;}
 // Consecutive ridden weeks, counted back from this week (or last week, so a streak never
-// "breaks" mid-week - positive framing only, no loss pressure).
+// "breaks" mid-week - positive framing only, no loss pressure). Weeks are counted on the ride's
+// own KSA day (_bdgWk, Sunday to Saturday, as the badges count them): the device's local midnight
+// stepped by a fixed 7 x 24 hours slipped an hour at a clock change, and a streak ridden on a phone
+// set to such a zone fell apart.
 function _mrStreak(completed){
-  const weeks=new Set(completed.map(e=>{const ds=(e.sessionDate||'').slice(0,10);return ds?_mrWeekStart(ds):null;}).filter(Boolean));
+  const weeks=new Set(completed.map(e=>{const ds=(e.sessionDate||'').slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(ds)?_bdgWk(ds):null;}).filter(w=>w!=null));
   if(!weeks.size)return 0;
-  const WEEK=7*864e5,now=_mrWeekStart(todayStr());
-  let w=weeks.has(now)?now:(weeks.has(now-WEEK)?now-WEEK:null);
+  const now=_bdgWk(todayStr());
+  let w=weeks.has(now)?now:(weeks.has(now-1)?now-1:null);
   if(w==null)return 0;
-  let n=0;while(weeks.has(w)){n++;w-=WEEK;}
+  let n=0;while(weeks.has(w)){n++;w--;}
   return n;
 }
 // ── Badges are drawn, never emoji (the owner, 2026-09-29) ─────────────────────────────────
@@ -12214,7 +12255,7 @@ function renderAccount(){
       <div class="cu-photo-row">
         ${cust.photo
           ?`<img id="acc-photo-img" loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="cu-photo">`
-          :`<div id="acc-photo-img" class="cu-initials">${esc(cust.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
+          :`<div id="acc-photo-img" class="cu-initials">${esc(String(cust.name||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
         <div class="cu-photo-col">
           <div class="cu-photo-k">${t('profilePhotoLabel')}</div>
           <div class="cu-wrap8">
@@ -13133,7 +13174,9 @@ async function _liveToggle(){
   const role=S._liveRole||'leader';
   S._live={on:true,sid,role,lastAt:0,lastSent:0,watchId:null};
   try{
-    S._live.watchId=navigator.geolocation.watchPosition(pos=>_livePush(pos),()=>{toast(t('liveShareErr'),'error');_liveStop();},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+    // Only a refusal (PERMISSION_DENIED) ends the share: a timeout or a lost fix (a tunnel, a
+    // building) is reported again or cured by the next reading, and the watch keeps going.
+    S._live.watchId=navigator.geolocation.watchPosition(pos=>_livePush(pos),err=>{if(err&&err.code===1){toast(t('liveShareErr'),'error');_liveStop();}},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   }catch(e){toast(t('liveShareErr'),'error');S._live=null;return;}
   logAction(`${t('liveShareBtn')}: ${sid} · ${role}`);
   renderHandover();
@@ -13238,8 +13281,11 @@ function _nsFillSync(){const el=document.getElementById('ns-fill');if(el)el.text
 function _nsToggleDay(i){const d=new Set(S.newSessDays||[]);if(d.has(i))d.delete(i);else d.add(i);S.newSessDays=[...d].sort((a,b)=>a-b);renderSessions();}
 // A template is the whole form but its date and repeat, saved by name and shared by every
 // device (staff_options session_templates). Tapping one fills the form.
-const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays'];
-const NS_EV_NAME={jcc:'evJccName',community:'evSatName',petromin:'evPetroName',swim:'evSwimName',workshop:'evWorkshopName',snd96:'evSnd96Name'};
+const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm'];
+// What a template that predates a key (or never had it) leaves behind: these are cleared, not kept
+// from whatever form was open before, so a 50 SAR members-only event does not become free and open.
+const NS_TPL_BLANK={newSessRoute:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessKm:{}};
+const NS_EV_NAME={jcc:'evJccName',community:'evSatName',petromin:'evPetroName',swim:'evSwimName',workshop:'evWorkshopName',snd96:'evSnd96Name',event:'evEventName'};
 function _nsTpls(){return _optList('session_templates').filter(x=>x&&x.id&&x.label&&x.form&&typeof x.form==='object');}
 async function _nsTplSave(){
   const guess=`${t(NS_EV_NAME[S.newSessEvent||'jcc']||'evJccName')} ${S.newSessStartTime||''}`.trim();
@@ -13293,7 +13339,7 @@ async function _nsTplPush(tp,list){
 function _nsTplApply(id){
   const tp=_nsTpls().find(x=>x.id===id);if(!tp)return;
   S._nsTplId=id;
-  NS_TPL_KEYS.forEach(k=>{if(k in tp.form)S[k]=JSON.parse(JSON.stringify(tp.form[k]));});
+  NS_TPL_KEYS.forEach(k=>{if(k in tp.form)S[k]=JSON.parse(JSON.stringify(tp.form[k]));else if(k in NS_TPL_BLANK)S[k]=JSON.parse(JSON.stringify(NS_TPL_BLANK[k]));});
   // Only bikes the picker can show, as a clone does, and no breakfast spot that has since gone.
   S.newSessAssignedIds=_liveFleetIds(Array.isArray(S.newSessAssignedIds)?S.newSessAssignedIds:[],true);
   if(S.newSessBfSel&&S.newSessBfSel!=='__new'&&!(S.breakfastSpots||[]).some(x=>x.id===S.newSessBfSel))S.newSessBfSel='';
@@ -13421,8 +13467,12 @@ function cloneSession(id){
   // Everything the form asks for comes across, so a clone is the same session on a new date:
   // the event kind, its name, seats, meeting point, breakfast stop, add-ons and waitlist rule.
   // Only the date is left blank. The bike allocation follows below.
-  S.newSessEvent=_rideKind(s)==='snd96'?'snd96':!_isCommunity(s)?'jcc':(['petromin','swim','workshop'].includes(String(s.ride_kind||''))?String(s.ride_kind):'community');
+  S.newSessEvent=_rideKind(s)==='snd96'?'snd96':!_isCommunity(s)?'jcc':(['petromin','swim','workshop','event'].includes(String(s.ride_kind||''))?String(s.ride_kind):'community');
   S.newSessTitle=s.title||'';
+  // An event's own words, price and audience, and any ride's route, come across too; a field the
+  // original lacks is cleared, so nothing typed into an earlier form rides along.
+  S.newSessDesc=s.description||'';S.newSessPrice=s.price!=null&&_rideKind(s)==='event'?String(s.price):'';
+  S.newSessOpenAll=s.open_to_all!==false;S.newSessRoute=s.route_slug||'';
   S.newSessSpots=s.spots!=null?String(s.spots):'';S.newSessKm=_rgKmOf(s);
   S.newSessMapUrl=s.meet_url||'';
   S.newSessBfName=s.breakfast_name||'';S.newSessBfUrl=s.breakfast_url||'';
@@ -14170,7 +14220,10 @@ async function _syncPromoBookings(code){
   if(!S.ridersLoaded&&live.some(e=>{const _s=(S.sessions||[]).find(x=>x.id===e.sessionId);return _s&&_s.ride_kind==='petromin';})){try{await loadRiders();}catch(_){}}
   live.forEach(e=>{
     const ty=e.typePreference||'Any';
-    const base=priceForEntryType(e,ty);
+    // An event's row is a seat ('None'): its full fare is the event's price, not a bike's
+    // (priceForEntryType has no fare for 'None' and fell back to the default bike price).
+    const _seat=_evSeatPrice((S.sessions||[]).find(x=>x.id===e.sessionId));
+    const base=_seat!=null?_seat:priceForEntryType(e,ty);
     let price=base;
     const _mine=!match||!match.customer_id||String(match.customer_id)===String(e.customerId||'');
     if(match&&_mine&&(!match.applies_to||match.applies_to===ty)){
@@ -36327,7 +36380,7 @@ function _bootStaffTab(nav){
     // (e.g. supabase-js loaded after the _sbReady timeout, so staffAuthRestore was skipped),
     // the load above read the PII-free queue_public. Retry the auth now that sb exists and,
     // if it succeeds, reload the full queue_entries (names/phones) and re-render.
-    if(localStorage.getItem('cq_staff')==='1'&&!S._staffAuthed&&typeof sb!=='undefined'&&sb&&!(typeof window!=='undefined'&&window.__noWiden)){
+    if(_rtStaffDevice()&&!S._staffAuthed&&typeof sb!=='undefined'&&sb&&!(typeof window!=='undefined'&&window.__noWiden)){ // a guarded read: blocked storage throws
       try{await staffAuthRestore();}catch(e){}
       if(S._staffAuthed){try{await loadData();}catch(e){}try{_refreshView();}catch(e){}}
     }
@@ -36465,7 +36518,7 @@ function _tickRefreshLabel(){
   el.classList.toggle('sync-unsent',!!n);
   if(_isOffline()){el.textContent=t('offlineLabel')+u;return;}
   if(S._cacheOnly){el.textContent=t('savedCopyLabel')+u;return;} // the boot snapshot with no server read yet: the desk must know it is looking at a copy
-  if(S._rtConnected&&(Date.now()-_lastRefresh)<RT_LIVE_STALE_MS){el.textContent=t('liveLabel')+u;return;} // a joined channel with no read landing for a quarter of an hour says how old the copy is instead
+  if(_rtLive()&&(Date.now()-_lastRefresh)<RT_LIVE_STALE_MS){el.textContent=t('liveLabel')+u;return;} // a joined channel with no read landing for a quarter of an hour says how old the copy is instead
   const sec=Math.round((Date.now()-_lastRefresh)/1000);
   el.textContent=(sec<5?t('justNow'):sec<60?`${sec}${t('secondsAgo')}`:`${Math.round(sec/60)}${t('minutesAgo')}`)+u;
 }
@@ -36660,7 +36713,7 @@ try{_updateConnUI();}catch(e){} // reflect connection state on boot (handles sta
 // already delivered. Without realtime: light every 30 s, full every fifth minute, as before.
 // The three section pollers (workshop, messages, ambassadors) ride the five-minute tick too.
 function _pollPlan(n,connected){if(n%30===0)return 'full';if(n%10===0)return connected?'light':'full';return connected?'skip':'light';}
-setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,!!S._rtConnected);if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_vendorPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
+setInterval(()=>{if(document.hidden)return;const plan=_pollPlan(++_pollN,_rtLive());if(plan==='full')_autoRefresh(true);else if(plan==='light')_autoRefresh(false);if(_pollN%10===0&&plan!=='full'&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden)){_wsPoll(false);_smPoll(false);_ambPoll(false);_vendorPoll(false);}},30000); // (_autoRefresh itself no-ops under test)
 // ── Keeping the staff session alive ────────────────────────────────────────
 // supabase-js refreshes the access token on its own timer, but that timer does not run
 // while the tab is hidden or the phone is asleep — which at a booth is most of the evening.
@@ -36690,7 +36743,7 @@ try{document.addEventListener('visibilitychange',()=>{
   // an event it could not merge is waiting (_rtWantFull); the light one otherwise. Merged rows
   // land in the state even while hidden, so a glance at WhatsApp used to cost the whole
   // window, photos included, for nothing new.
-  if(S.view==='staff'){const _long=!_hiddenAt||(Date.now()-_hiddenAt)>RT_LIVE_STALE_MS;const _full=_long||!S._rtConnected||_rtWantFull;if(_full)_rtWantFull=false;_autoRefresh(_full);}
+  if(S.view==='staff'){const _long=!_hiddenAt||(Date.now()-_hiddenAt)>RT_LIVE_STALE_MS;const _full=_long||!_rtLive()||_rtWantFull;if(_full)_rtWantFull=false;_autoRefresh(_full);}
   // Customers had no poll/visibility catch-up and My Rides could sit stale. The light set is what
   // it draws from (the rider's own rides, the nights, the bikes' states), and not more often than
   // a live event would bring it: switching to WhatsApp and back used to reload everything.
@@ -36868,6 +36921,28 @@ let _rtStaffMode=null;
 function _rtStaffDevice(){try{return localStorage.getItem('cq_staff')==='1';}catch(e){return false;}}
 function _rtTables(staff){return staff?['queue_entries','desk_waitlist','sessions','bikes','inventory','cashier_sales','rider_registrations']:['sessions','bikes'];}
 function _rtEnsureMode(){if(_rtStaffMode!==null&&_rtStaffMode!==_rtStaffDevice())setupRealtime();}
+// ── Bookings the moment they are made (the owner, 2026-10-04: "i want the bookings to appear as
+// soon as theyre booked, realtime") ──
+// Bookings are staff-only under RLS, so the realtime server sends a booking only to a channel
+// whose token is a staff member's. A staff device's channel could join before its session was
+// read - a page opening while the token was being renewed, a sign-in landing mid-join - and then
+// sat on the anon key: it reported SUBSCRIBED, the poll stood down to its five-minute safety net,
+// and no booking ever arrived (prod 2026-10-04: two of five staff channels on bookings were anon).
+// Now a staff device's channel joins with the session's token (read first, five seconds at most),
+// a staff sign-in rejoins a channel that joined as someone else or as no one (_rtStaffRejoin), and
+// the poll and the Live label count the channel live only once it joined as staff (_rtLive).
+let _rtGen=0,_rtJoinUid=null;
+async function _rtSessionUid(){
+  try{
+    const r=await _withTimeout(sb.auth.getSession(),5000,'session');
+    const s=r&&r.data&&r.data.session;
+    if(!s||!s.access_token)return null;
+    try{if(sb.realtime&&typeof sb.realtime.setAuth==='function')await _withTimeout(sb.realtime.setAuth(s.access_token),5000,'realtime auth');}catch(_){}
+    return (s.user&&s.user.id)||null;
+  }catch(e){return null;}
+}
+function _rtLive(){return !!S._rtConnected&&(!_rtStaffMode||!S._staffAuthed||!!_rtJoinUid);}
+function _rtStaffRejoin(uid){if(_rtStarted&&_rtStaffMode&&uid&&_rtJoinUid!==uid)setupRealtime();}
 function setupRealtime(){
   if(!sb||!sb.channel)return;
   if(_rtRetryT){clearTimeout(_rtRetryT);_rtRetryT=null;} // this rebuild is the one that was pending
@@ -36875,11 +36950,17 @@ function setupRealtime(){
   // CLOSED synchronously, and while _rtChannel still pointed at it that report passed the guard
   // below and scheduled another rebuild.
   try{if(_rtChannel){const c=_rtChannel;_rtChannel=null;sb.removeChannel(c);}}catch(_){}
+  const gen=++_rtGen;_rtJoinUid=null;
+  _rtStaffMode=_rtStaffDevice();
+  if(_rtStaffMode&&sb.auth)_rtSessionUid().then(uid=>{if(gen===_rtGen)_rtJoin(uid);});
+  else _rtJoin(null);
+}
+function _rtJoin(uid){
+  _rtJoinUid=uid;
   try{
     // No customers binding: rider changes come on the private staff-ref channel below. The
     // table is not in the publication and must not be - postgres_changes sends whole rows.
     // rider_registrations are the /register form submissions (own tab, own loader).
-    _rtStaffMode=_rtStaffDevice();
     let _b=sb.channel('mmcq-live');
     _rtTables(_rtStaffMode).forEach(tb=>{_b=_b.on('postgres_changes',{event:'*',schema:'public',table:tb},tb==='rider_registrations'?_onRidersRt:_onRt);});
     const _ch=_rtChannel=_b

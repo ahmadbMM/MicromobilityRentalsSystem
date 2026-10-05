@@ -374,7 +374,7 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   for every kind but the Saturday ride, `social` (the ride + 4 parts, breakfast + 4 parts, overall).
   Scores 1-10, all required; `RG_LOW` (8) or under needs a reason. Saved whole in
   `queue_entries.rating_detail` ({form, s, why, skip_bf}, cleaned by customer_booking_update,
-  20261003150000) with `rating_bike` / `rating_exp` / `feedback` still written. Older ratings may carry
+  20261003150001) with `rating_bike` / `rating_exp` / `feedback` still written. Older ratings may carry
   `rating_tags` (the rider no longer picks them). Analytics > Ratings (`anView 'ratings'`,
   `bikeHealthSection`, `_anRgCatCard`, `_anRgDetail`); the bell's `lowrate` kind.
 - **Events.** `ride_kind 'event'` (community, seats, `sessions.description`, `sessions.price`,

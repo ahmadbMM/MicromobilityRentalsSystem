@@ -113,7 +113,11 @@ test('realtime errors schedule one rebuild at a time, and a rejoin catches up', 
     _rtChannel = null; _rtRetry = 0; if (_rtRetryT) { clearTimeout(_rtRetryT); _rtRetryT = null; }
     // @ts-expect-error app globals
     setupRealtime();
-    const ch = w.__chans[0];
+  });
+  // A staff device's channel joins once its session has been read (2026-10-04), a tick later.
+  await page.waitForFunction('window.__chans.length===1');
+  await page.evaluate(() => {
+    const ch = (window as unknown as { __chans: { cb: ((s: string) => void) | null }[] }).__chans[0];
     ch.cb!('CHANNEL_ERROR'); ch.cb!('CHANNEL_ERROR'); ch.cb!('TIMED_OUT');
   });
   // Three error reports, then the rebuild at 1s whose removal reports CLOSED: one rebuild only.

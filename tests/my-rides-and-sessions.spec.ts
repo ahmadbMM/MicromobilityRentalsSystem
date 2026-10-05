@@ -339,8 +339,26 @@ test('a window that runs past midnight ends on the next day in the calendar file
     downloadBookingICS('late');
     return blob ? await (blob as Blob).text() : '';
   });
-  expect(ics).toContain('DTSTART:20990410T223000');
-  expect(ics).toContain('DTEND:20990411T003000');
+  // In UTC (KSA is UTC+3): 22:30 Jeddah is 19:30Z, and 00:30 the next morning is 21:30Z the same date.
+  expect(ics).toContain('DTSTART:20990410T193000Z');
+  expect(ics).toContain('DTEND:20990410T213000Z');
+});
+
+test.describe('a phone set to another zone', () => {
+  test.use({ timezoneId: 'Europe/London' });
+  test('the calendar times are Jeddah\'s whatever zone the phone is set to', async ({ page }) => {
+    await customer(page, { sessions: [jcc('eve', '2099-04-10', { bike_slots: '{"_time":"21:00 - 23:00","_total":20}' })], queue_entries: [] });
+    const ics = await page.evaluate(async () => {
+      let blob: Blob | null = null;
+      URL.createObjectURL = ((b: Blob) => { blob = b; return 'blob:x'; }) as typeof URL.createObjectURL;
+      HTMLAnchorElement.prototype.click = () => {};
+      // @ts-expect-error app global
+      downloadBookingICS('eve');
+      return blob ? await (blob as Blob).text() : '';
+    });
+    expect(ics).toContain('DTSTART:20990410T180000Z'); // 21:00 in Jeddah, not 21:00 in London
+    expect(ics).toContain('DTEND:20990410T200000Z');
+  });
 });
 
 // ── Session add-on Select all / Clear ─────────────────────────────────────────

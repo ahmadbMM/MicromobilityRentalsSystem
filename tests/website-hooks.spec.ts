@@ -34,6 +34,31 @@ test.describe('routes on a ride', () => {
 });
 
 test.describe('live location', () => {
+  test('a timeout or a lost fix keeps sharing; only a refused permission stops it', async ({ page }) => {
+    await stubSupabase(page, { sessions, queue_entries: [], bikes: [], 'rpc:staff_live_position': { ok: true }, 'rpc:staff_live_stop': true });
+    await unlockStaff(page);
+    await page.addInitScript(() => {
+      // a phone whose GPS errors on cue: window.__geoErr(code) reports one error to the watch
+      const geo = {
+        watchPosition: (_ok: unknown, err: (e: { code: number }) => void) => { (window as unknown as { __geoErr: (c: number) => void }).__geoErr = (c) => err({ code: c }); return 7; },
+        clearWatch: () => { (window as unknown as { __cleared: boolean }).__cleared = true; },
+      };
+      Object.defineProperty(navigator, 'geolocation', { value: geo, configurable: true });
+    });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setStaffTab('handover')`);
+    await page.locator('#live-share-btn').click();
+    await expect(page.locator('#live-share-btn')).toHaveText('Stop sharing');
+    await page.evaluate(`window.__geoErr(3)`); // TIMEOUT
+    await page.evaluate(`window.__geoErr(2)`); // POSITION_UNAVAILABLE
+    await expect(page.locator('#live-share-btn')).toHaveText('Stop sharing');
+    expect(await page.evaluate(`!!window.__cleared`)).toBe(false);
+    await page.evaluate(`window.__geoErr(1)`); // PERMISSION_DENIED
+    await expect(page.locator('#live-share-btn')).toHaveText('Share my location');
+    expect(await page.evaluate(`window.__cleared`)).toBe(true);
+  });
+
   test('Share my location sends the phone\'s position to staff_live_position and Stop removes it', async ({ page }) => {
     await stubSupabase(page, { sessions, queue_entries: [], bikes: [], 'rpc:staff_live_position': { ok: true }, 'rpc:staff_live_stop': true });
     await unlockStaff(page);

@@ -69,8 +69,12 @@ test.describe('@staff:reliability bikes released through one checked door', () =
 test.describe('@staff:reliability KSA calendar', () => {
   test('a week starts on the Sunday of the ride day, whatever the device clock zone', async ({ page }) => {
     await boot(page);
-    expect(await page.evaluate(`[_mrWeekStart('2026-10-04'),_mrWeekStart('2026-10-10'),_mrWeekStart('2026-10-11'),_mrWeekStart('')]`))
-      .toEqual([Date.UTC(2026, 9, 4), Date.UTC(2026, 9, 4), Date.UTC(2026, 9, 11), null]);
+    // _bdgWk (main's week index, which replaced _mrWeekStart on 2026-10-04): Sunday 4 Oct to Saturday
+    // 10 Oct is one week, Sunday 11 Oct the next, Saturday 3 Oct the one before.
+    const [sun, sat, nextSun, prevSat] = await page.evaluate(`[_bdgWk('2026-10-04'),_bdgWk('2026-10-10'),_bdgWk('2026-10-11'),_bdgWk('2026-10-03')]`) as number[];
+    expect(sat).toBe(sun);
+    expect(nextSun).toBe(sun + 1);
+    expect(prevSat).toBe(sun - 1);
   });
   test('an account age is counted on the KSA day', async ({ page }) => {
     await boot(page);
