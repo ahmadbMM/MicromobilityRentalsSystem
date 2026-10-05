@@ -4843,7 +4843,7 @@ function _rgShort(g){return _rgOk(g)?t(RIDE_GROUP_INFO[g].short):'';}
 // "i" beside each (the rider's form) and names where the sheet's Choose lands.
 function _rgPills(cur,fn,slot,sess){
   return RIDE_GROUPS.map(g=>{const I=RIDE_GROUP_INFO[g],on=cur===g;
-    const btn=`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(fn,g)}">${t(I.name)}<span class="tp-price">${esc(_rgKmTxt(sess,g))}</span></button>`;
+    const btn=`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-rg="${g}" data-on-click="${_on(fn,g)}"><span class="tp-txt">${t(I.name)} <span class="tp-price">${esc(_rgKmTxt(sess,g))}</span></span></button>`;
     return slot==null?btn:`<span class="type-pick">${btn}<button type="button" class="type-info-btn" aria-label="${esc(t('rgInfoAria').replace('{0}',t(I.name)))}" aria-haspopup="dialog" data-on-click="${_on('showGroupInfo',g,slot)}">${_artIcon('info',15)}</button></span>`;
   }).join('');
 }
@@ -10073,9 +10073,9 @@ function renderRegister(){
     if(!_tyOpts.length)_tyOpts=bikeTypeOpts(_ownOffered(_selSessObj),_noCarbonSel).filter(ty=>ty!=='Any');
     // Every real bike carries an "i" beside its pill (_typePick): its picture and brief, with a Choose.
     // Each pill says what that bike costs, so Road Carbon's price is not a surprise at the total.
-    const _pp=ty=>(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':`<span class="tp-price">${esc(_sar(priceForType(ty)))}</span>`;
+    const _pp=ty=>(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':` <span class="tp-price">${esc(_sar(priceForType(ty)))}</span>`;
     const typeBtns=_tyOpts.map(ty=>_typePick(
-      `<button class="toggle-btn${selTy===ty?' active':''}" aria-pressed="${(selTy===ty)?'true':'false'}" data-type-slot="${i}" data-type="${ty}" data-on-click="${_on("setBikeType",i,ty)}">${typePillLabel(ty)}${_pp(ty)}</button>`,ty,i)
+      `<button class="toggle-btn${selTy===ty?' active':''}" aria-pressed="${(selTy===ty)?'true':'false'}" data-type-slot="${i}" data-type="${ty}" data-on-click="${_on("setBikeType",i,ty)}"><span class="tp-txt">${typePillLabel(ty)}${_pp(ty)}</span></button>`,ty,i)
     ).join('');
 
     const divider=(S.regQty>1&&i<S.regQty-1)?`<div class="cu-divider"></div>`:'';
@@ -12735,7 +12735,7 @@ function renderAccount(){
           ${bikeTypeOpts(true).filter(ty=>ty!=='Any').map(ty=>_typePick(`<button id="atp-${ty}" type="button"
               class="toggle-btn${accTy===ty?' active':''}" aria-pressed="${(accTy===ty)?'true':'false'}"
               data-on-click="${_on("_accPickType",ty)}"
-              >${typePillLabel(ty)}</button>`,ty,'acc')).join('')}
+              ><span class="tp-txt">${typePillLabel(ty)}</span></button>`,ty,'acc')).join('')}
         </div>
         <div class="cu-type-hint">${t('typePrefHint')}</div>
       </div>

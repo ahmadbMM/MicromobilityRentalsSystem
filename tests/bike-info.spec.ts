@@ -125,4 +125,37 @@ test.describe('bike type info', () => {
     await expect(page.locator('#atp-Mountain')).toHaveClass(/active/);
     await expect(page.locator('#atp-Road')).not.toHaveClass(/active/);
   });
+
+  // A pill and its "i" are one button, and no name, price or icon leaves it at any width or in a long
+  // language (the owner, 2026-10-05): long names wrap, the price drops under them, the cells stay even.
+  test('every pill and its "i" are one even button, and nothing spills out of it', async ({ page }) => {
+    await toRiderStep(page);
+    await page.locator('[data-type-slot="0"][data-type="Road Carbon"]').click();
+    for (const lang of ['en', 'pt']) {
+      if (lang !== 'en') await page.evaluate(`setLang('${lang}')`);
+      for (const width of [320, 390, 1024]) {
+        await page.setViewportSize({ width, height: 900 });
+        const bad: string[] = await page.locator('#reg-type-wrap-0 .type-grid').evaluate((g) => {
+          const out: string[] = [], cells = [...g.children], hs = cells.map((c) => c.getBoundingClientRect().height);
+          if (Math.max(...hs) - Math.min(...hs) > 1) out.push('uneven ' + hs.map(Math.round));
+          for (const c of cells) {
+            const pill = (c.matches('.toggle-btn') ? c : c.querySelector('.toggle-btn')) as HTMLElement, i = c.querySelector('.type-info-btn');
+            const pr = pill.getBoundingClientRect(), name = pill.textContent!.trim();
+            if (pill.scrollWidth > pill.clientWidth || pill.scrollHeight > pill.clientHeight) out.push('clipped ' + name);
+            if (!i) continue;
+            const ir = i.getBoundingClientRect(), sr = i.querySelector('svg')!.getBoundingClientRect();
+            if (Math.abs(ir.top - pr.top) > .5 || Math.abs(ir.height - pr.height) > .5 || ir.left > pr.right) out.push('apart ' + name);
+            if (sr.left < ir.left || sr.right > ir.right || sr.top < ir.top || sr.bottom > ir.bottom) out.push('icon out ' + name);
+            if (getComputedStyle(pill).borderStartEndRadius !== '0px' || getComputedStyle(i).borderStartStartRadius !== '0px') out.push('two shapes ' + name);
+          }
+          return out;
+        });
+        expect(bad, `${lang} at ${width}px`).toEqual([]);
+      }
+    }
+    // the picked pill fills its "i" too
+    const on = page.locator('.type-pick:has(.toggle-btn.active) .type-info-btn');
+    expect(await on.evaluate((e) => getComputedStyle(e).backgroundColor))
+      .toBe(await page.locator('.toggle-btn.active[data-type-slot="0"]').evaluate((e) => getComputedStyle(e).backgroundColor));
+  });
 });

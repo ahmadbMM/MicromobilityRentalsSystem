@@ -7702,8 +7702,23 @@ body:not(.view-staff) .toggle-btn{background:var(--card);border:1px solid var(--
 body:not(.view-staff) .toggle-btn.active,
 body:not(.view-staff) :is(.cu-g-male,.cu-g-female){background:var(--ink);border-color:var(--ink);color:var(--paper);}
 body:not(.view-staff) .toggle-btn.active::before{background:var(--neon);}
-body:not(.view-staff) .type-pick:has(.toggle-btn.active) .type-info-btn{border-color:var(--ink);color:var(--ink);}
+/* A pill and its "i" are ONE button (the owner, 2026-10-05): one outline and one fill, the pill rounds
+   the start, the "i" the end (1px over the pill, so no hairline seam), a short rule in the text colour parts them */
+body:not(.view-staff) .type-pick>.toggle-btn{border-start-end-radius:0;border-end-end-radius:0;border-inline-end:0;}
+body:not(.view-staff) .type-pick>.type-info-btn{position:relative;margin-inline-start:-1px;background:var(--card);border:1px solid var(--line-2);border-inline-start:0;border-radius:var(--r-ctl);border-start-start-radius:0;border-end-start-radius:0;color:var(--ink);}
+body:not(.view-staff) .type-pick>.type-info-btn::before{content:'';position:absolute;inset-block:12px;inset-inline-start:0;width:1px;background:currentColor;opacity:.22;}
+body:not(.view-staff) .type-pick:has(.toggle-btn.active)>.type-info-btn{background:var(--ink);border-color:var(--ink);color:var(--paper);}
 body:not(.view-staff) .tp-price{margin-inline-start:6px;font-size:var(--fs-13);font-weight:500;opacity:.7;}
+/* Every name and price stays inside its pill at every width and in every language (the owner, 2026-10-05):
+   label and price are one text block that wraps - a long name onto a second line, the price under it
+   as a whole - and every row of the grid is as tall as the tallest, so the cells stay even */
+body:not(.view-staff) .type-grid{grid-auto-rows:1fr;align-items:stretch;}
+body:not(.view-staff) .type-grid .toggle-btn{white-space:normal;padding-block:6px;}
+body:not(.view-staff) .tp-txt{min-width:0;text-align:center;line-height:1.25;overflow-wrap:break-word;}
+body:not(.view-staff) .tp-txt .tp-price{display:inline-block;margin-inline-start:0;white-space:nowrap;}
+/* the picked dot rides in the text, just before the first word, however the name wraps */
+body:not(.view-staff) .type-grid .toggle-btn.active::before{content:none;}
+body:not(.view-staff) .type-grid .toggle-btn.active>.tp-txt::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--neon);margin-inline-end:7px;vertical-align:1px;}
 body:not(.view-staff) .type-badge{border-radius:6px;font-weight:600;}
 /* Ride kinds wear the brand's colours, not a framework's defaults (violet-600, orange-700) */
 body:not(.view-staff) .ev-event:not(.landing-event-card){--ev:#8C3B6E;--ev-rgb:140,59,110;}
