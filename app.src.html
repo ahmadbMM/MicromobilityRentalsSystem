@@ -7146,8 +7146,21 @@ async function _profileGate(next){
   _pgOpen(next,c,false);
   return true;
 }
+// A forced page's save that did not land, sorted (the profile page, a correction request and an
+// application's changes, 2026-10-05). Every failure used to read "check your connection" (pgErrNet),
+// so a rider whose sign-in had ended, or whose answer the server refused, was sent to fix a
+// connection that was fine and could only try again for ever. 'denied' is the server saying the
+// sign-in no longer matches (its null or false answer): the session ends here too, with the
+// signed-out message. A failure on the way (no network, a timeout) keeps the connection message;
+// anything else the server refused is said as such (g.said, a key) and logged.
+function _gateFail(e){
+  if(String((e&&e.message)||e||'')==='denied')return'denied';
+  return(_isNetErr(e)||_isOffline())?'net':'server';
+}
+function _gateSignedOut(){doLogout(true);toast(t('errSessionStale'),'warning');}
+function _gateLog(where,e){try{_logError(`${where} refused: ${(e&&e.code)||''} ${String((e&&e.message)||e||'').slice(0,200)}`,'gate',true);}catch(_){}}
 function _pgOpen(next,c,comm){
-  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,saving:false,comm:!!comm};
+  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,said:'',saving:false,comm:!!comm};
   renderProfileGate();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -7167,7 +7180,7 @@ function renderProfileGate(){
     <div class="pg-field pg-first${g.errBirth?' err':''}"><label for="pg-birth-d">${t('birthDateLabel')}</label>${dobFieldHtml('pg-birth',g.birth,{onchange:'_pgBirth',disabled:!!g.saving})}${g.errBirth?`<div class="pg-msg" role="alert">${esc(g.errBirth)}</div>`:''}</div>
     <div class="pg-field${g.errNat?' err':''}"><label for="pg-nat">${t('nationalityLabel')}</label><select id="pg-nat" class="${g.nat?'':'ph'}" data-on-change="${_on("_pgInput","nat",_P("value"))}"${g.saving?' disabled':''}>${natOpts}</select>${g.errNat?`<div class="pg-msg" role="alert">${esc(g.errNat)}</div>`:''}</div>
     <p class="pg-note">${t('pgNote')}</p>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="pg-save" type="submit" class="pg-btn"${ok?'':' disabled'}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('pgSave')}</button>
     <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
   </form></div>`;
@@ -7179,7 +7192,7 @@ async function _pgSaveComm(cust,g){
   if(error)throw error;
   if(!Array.isArray(data))throw new Error('denied'); // null: the token no longer matches
   const left=_fixClean(data);
-  if(left.some(k=>COMM_ASKS.includes(k)))throw new Error('refused');
+  if(left.some(k=>COMM_ASKS.includes(k))){const er=new Error('refused');er.left=left;throw er;} // still asked: the server did not take it
   S._fixCache={id:cust.id,at:Date.now(),fields:left};
 }
 // Typing must not repaint the form (a date being keyed in would lose its caret), so an
@@ -7198,7 +7211,7 @@ async function _pgSave(){
   g.errBirth=!g.birth?t('pgErrBirth'):_dobErr(g.birth);
   g.errNat=g.nat?'':t('pgErrNat');
   if(g.errBirth||g.errNat){renderProfileGate();setTimeout(()=>{const f=document.getElementById(g.errBirth?'pg-birth-d':'pg-nat');if(f)f.focus();},120);return;}
-  g.saving=true;g.net=false;renderProfileGate();
+  g.saving=true;g.net=false;g.said='';renderProfileGate();
   try{
     let fresh={};
     // The gate asks two things, and customer_set_birth_nat (20260922150000) writes those two and
@@ -7212,10 +7225,10 @@ async function _pgSave(){
       // The whole-profile save: everything but the two answers is taken from the account as it
       // is NOW, never from the copy this device kept at sign-in. Staff correct names and phones
       // in Accounts, and writing that old copy back undid their fix without a trace. No fresh
-      // read, no save - the rider sees the connection message.
+      // read, no save: a read that failed is said as such, and no row means the sign-in has ended.
       const{data:pd,error:pe}=await sb.rpc('customer_profile',{p_id:cust.id,p_token:cust.session_token});
       const cur=!pe&&pd&&pd[0];
-      if(!cur||cur.id!==cust.id)throw(pe||new Error('profile'));
+      if(!cur||cur.id!==cust.id)throw(pe||new Error('denied'));
       fresh={name:cur.name,email:cur.email??null,phone:cur.phone??null,height:cur.height??null,type_preference:cur.type_preference||'Any',country:cur.country??null,city:cur.city??null};
       const{data:ok,error}=await sb.rpc('customer_update_profile',{p_id:cust.id,p_token:cust.session_token,p_name:fresh.name,p_email:fresh.email,p_phone:fresh.phone,p_height:fresh.height,p_type_preference:fresh.type_preference,p_birth_date:g.birth,p_country:fresh.country,p_city:fresh.city,p_nationality:g.nat});
       if(error||!ok)throw(error||new Error('denied'));
@@ -7223,7 +7236,19 @@ async function _pgSave(){
     S.loggedIn={...cust,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
     const next=g.next;S._pg=null;renderProfileGate();
     if(next)next(); // the event they picked, now that the profile is complete
-  }catch(e){g.saving=false;g.net=true;renderProfileGate();}
+  }catch(e){
+    g.saving=false;
+    const k=_gateFail(e);
+    if(k==='denied'){_gateSignedOut();return;} // signing out closes this page (showView)
+    // The server kept asking for what was sent: the answer it did not take is marked on its field.
+    const left=(e&&Array.isArray(e.left))?e.left:null;
+    if(left&&(left.includes('birth_date')||left.includes('nationality'))){
+      if(left.includes('birth_date'))g.errBirth=t('fixErrCheck');
+      if(left.includes('nationality'))g.errNat=t('fixErrCheck');
+    }else if(k==='net')g.net=true;
+    else{g.said='errSomethingWrong';_gateLog('profile page',e);}
+    renderProfileGate();
+  }
 }
 // ── Correction requests ───────────────────────────────────────────────────────
 // Staff tick the account fields that may be wrong (customers.fix_fields). The next time the
@@ -7287,7 +7312,7 @@ async function _fixGate(next){
   // Already up (it opens at sign-in too, _commAskCheck): a later call only says where to go after,
   // and what the rider has typed stays.
   if(S._fix){if(next)S._fix.next=next;return true;}
-  S._fix={next,fields,v:{},err:{},net:false,saving:false,photoUp:false};
+  S._fix={next,fields,v:{},err:{},net:false,said:'',saving:false,photoUp:false};
   renderFixGate();
   return true;
 }
@@ -7429,7 +7454,7 @@ function renderFixGate(){
     <div class="fx-head">${t('fixHead')}<span class="fx-count">${items.length}</span></div>
     <div class="fx-list">${items.map(k=>_fixItemHtml(k,g,c)).join('')}</div>
     <p class="pg-note">${copy.note}</p>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="fx-save" type="submit" class="pg-btn"${g.saving||g.photoUp?' disabled':''}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('pgSave')}</button>
     <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
   </form></div>`;
@@ -7489,7 +7514,7 @@ async function _fixSave(){
     else if(k==='height'){const h=parseInt(_asciiDigits(v.height||''),10);if(!(h>=100&&h<=250))err.height=t('fixErrHeight');else vals.height=String(h);}
     else if(k==='photo'){if(!v.photo)err.photo=t('fixErrPhoto');else vals.photo=v.photo;}
   }
-  g.err=err;g.net=false;
+  g.err=err;g.net=false;g.said='';
   if(Object.keys(err).length){renderFixGate();_fixFocusErr();return;}
   g.saving=true;renderFixGate();
   let left;
@@ -7504,8 +7529,12 @@ async function _fixSave(){
     if(/name_short/.test(m))g.err.name=t('errNameShort');
     else if(/email/.test(m)&&(e.code==='23505'||/taken/.test(m)))g.err.email=t('errEmailExists');
     else if(/phone/.test(m)&&(e.code==='23505'||/taken/.test(m)))g.err.phone=t('errPhoneExists');
-    else g.net=true;
-    renderFixGate();if(!g.net)_fixFocusErr();return;
+    else{
+      const k=_gateFail(e); // see _gateFail (2026-10-05)
+      if(k==='denied'){_gateSignedOut();return;}
+      if(k==='net')g.net=true;else{g.said='errSomethingWrong';_gateLog('correction page',e);}
+    }
+    renderFixGate();if(!g.net&&!g.said)_fixFocusErr();return;
   }
   // What the server took is the account now; what it refused is still asked.
   const took={};
@@ -7722,7 +7751,7 @@ const AFX_LEARN_T={afxKicker:'lfxKicker',afxTitle:'lfxTitle',afxSub:'lfxSub',afx
 function _afxT(g,k){return t(g&&g.learn&&_own(AFX_LEARN_T,k)?AFX_LEARN_T[k]:k);}
 async function _afxOpen(tok){
   const learn=tok.startsWith('l:'),hex=tok.replace(/^l:/,'');
-  S._afx={tok,hex,learn,state:'loading',v:{},err:{},net:false,saving:false};
+  S._afx={tok,hex,learn,state:'loading',v:{},err:{},net:false,said:'',saving:false};
   renderAppFix();
   try{await _sbReady;}catch(e){}
   let r=null;
@@ -7805,7 +7834,7 @@ function renderAppFix(){
     ${g.note?`<div class="afx-note"><span>${t('afxNoteLbl')}</span><bdi>${esc(g.note)}</bdi></div>`:''}
     <div class="fx-head">${t('fixHead')}<span class="fx-count">${g.fields.length}</span></div>
     <div class="fx-list">${g.fields.map(k=>_afxItemHtml(k,g)).join('')}</div>
-    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
     <button id="afx-save" type="submit" class="pg-btn"${g.saving?' disabled':''}>${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('afxSave')}</button>
   </form>`;
   else{
@@ -7857,16 +7886,19 @@ async function _afxSave(){
     else if(k==='workplace'){const s=String(v.workplace||'').trim().replace(/\s+/g,' ');if(s.length<2||s.length>120||/[<>"`{}]/.test(s))err.workplace=t('errWorkplace');else vals.workplace=s;}
     else if(k==='instagram'||k==='linkedin'){const h=_socNorm(v[k]);if(!(k==='instagram'?/^[A-Za-z0-9._]{1,30}$/:/^[A-Za-z0-9._%-]{3,100}$/).test(h))err[k]=t('afxErrHandle');else vals[k]=h;}
   }
-  g.err=err;g.net=false;
+  g.err=err;g.net=false;g.said='';
   if(Object.keys(err).length){renderAppFix();_afxFocusErr();return;}
   g.saving=true;renderAppFix();
-  let r=null;
-  try{const{data,error}=await sb.rpc(g.learn?'learn_fix_submit':'community_fix_submit',{p_token:g.hex,p:vals});if(!error&&data)r=data;}catch(e){}
+  let r=null,fail=null;
+  try{const{data,error}=await sb.rpc(g.learn?'learn_fix_submit':'community_fix_submit',{p_token:g.hex,p:vals});if(!error&&data)r=data;else fail=error||{message:'no answer'};}catch(e){fail=e;}
   g.saving=false;
-  if(!r||r.error==='throttled'){g.net=true;renderAppFix();return;}
+  // Only a failure on the way is the connection's (_gateFail, 2026-10-05): too many tries says so,
+  // and anything else the server refused is said as a refusal and logged.
+  if(!r){if(_gateFail(fail)==='net')g.net=true;else{g.said='errSomethingWrong';_gateLog('application changes',fail);}renderAppFix();return;}
+  if(r.error==='throttled'){g.said='errTooManyTries';renderAppFix();return;}
   if(r.ok||r.error==='done'||r.error==='gone'){g.state=r.ok?'thanks':r.error;_afxForget();renderAppFix();return;}
   if(AFX_ERR[r.error]&&g.fields.includes(r.error)){g.err[r.error]=_afxT(g,AFX_ERR[r.error]);renderAppFix();_afxFocusErr();return;}
-  g.net=true;renderAppFix();
+  g.said='errSomethingWrong';_gateLog('application changes',{message:String(r.error||'refused')});renderAppFix();
 }
 
 // ── NFC bike tags: /?bike=<number or tag UID> ─────────────────────────────────────

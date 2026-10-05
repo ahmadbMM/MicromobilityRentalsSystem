@@ -147,7 +147,8 @@ test('a failed save keeps the values and says so', async ({ page }) => {
   await pickBirth(page, 'pg-birth', '1996-03-14');
   await page.selectOption('#pg-nat', 'Egypt');
   await page.click('#pg-save');
-  await expect(page.locator('#profile-gate .pg-net')).toContainText('Couldn’t save');
+  // a refusal (not the network) is said as one since 2026-10-05; the connection message is for the network
+  await expect(page.locator('#profile-gate .pg-net')).toContainText(/That didn.t work/);
   await expect(page.locator('#pg-birth')).toHaveValue('1996-03-14');
   await expect(page.locator('#pg-nat')).toHaveValue('Egypt');
   await expect(page.locator('#pg-save')).toBeEnabled();
@@ -234,19 +235,22 @@ test.describe('with customer_set_birth_nat on the server', () => {
     expect(await page.evaluate('[S.selEvent,S.loggedIn.nationality,S.loggedIn.birth_date]')).toEqual(['jcc', 'Egypt', '1996-03-14']);
   });
 
-  test('a refused save keeps the gate up and is not retried as a whole-profile save', async ({ page }) => {
+  // false is the server not knowing the sign-in (customer_set_birth_nat's token check): since
+  // 2026-10-05 the rider is signed out with the session-expired message rather than asked to check
+  // a connection that is fine, for ever.
+  test('a save the server answers as signed out ends the session and is not retried as a whole-profile save', async ({ page }) => {
     await boot(page, eight, { nationality: null, birth_date: null }, { 'rpc:customer_set_birth_nat': false });
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
     await pickBirth(page, 'pg-birth', '1996-03-14');
     await page.selectOption('#pg-nat', 'Egypt');
     const calls = watch(page);
     await page.click('#pg-save');
-    await expect(page.locator('#profile-gate .pg-net')).toBeVisible();
+    await expect.poll(() => page.evaluate('S.loggedIn')).toBeNull();
+    await expect(page.locator('#profile-gate .pg-box')).toHaveCount(0);
     expect(calls.map((c) => c.name)).toEqual(['customer_set_birth_nat']);
-    expect(await page.evaluate('S.selEvent')).toBe('none');
   });
 
-  test('a server error is the connection message, not a fall back', async ({ page }) => {
+  test('a server error is said, not a fall back', async ({ page }) => {
     await boot(page, eight, { nationality: null, birth_date: null }, { 'rpc:customer_set_birth_nat': { __rpcError: { status: 500, code: 'XX000', message: 'boom' } } });
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
     await pickBirth(page, 'pg-birth', '1996-03-14');
