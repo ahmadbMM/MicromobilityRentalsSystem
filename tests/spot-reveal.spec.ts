@@ -120,15 +120,19 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     expect(patches.some((p) => p.meet_url === MEET && p.breakfast_name === 'Harbour Cafe')).toBe(true);
   });
 
-  test('a time after the ride gathers is refused; Show now clears it; an unchanged time is not written', async ({ page }) => {
+  test('any time is taken, even after the ride gathers; Show now clears it', async ({ page }) => {
+    // the owner, 2026-10-06: "make me able to choose anytime i want no need the announcement time to be before the ride starts"
     await staff(page, [sat({ meet_url: MEET, reveal_at: '2099-10-23T17:00:00.000Z' })]);
     const patches = writes(page, 'PATCH');
     await page.evaluate(`setStaffTab('sessions');startEditSession('${SAT}')`);
     await expect(page.locator('#es-reveal')).toHaveValue('2099-10-23T20:00');
-    await page.locator('#es-reveal').fill('2099-10-24T07:00');
+    await page.locator('#es-reveal').fill('2099-10-24T07:00'); // the ride gathers at 6 that morning
     await page.getByRole('button', { name: 'Save Changes' }).click();
-    await expect(page.locator('#sess-host')).toContainText('Pick a time before the ride starts.');
-    expect(patches.length).toBe(0);
+    await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
+    expect(patches.find((p) => 'reveal_at' in p)).toEqual({ reveal_at: '2099-10-24T04:00:00.000Z' });
+    patches.length = 0;
+    await page.evaluate(`S.sessions=S.sessions.map(s=>s.id==='${SAT}'?{...s,reveal_at:'2099-10-24T04:00:00.000Z'}:s);startEditSession('${SAT}')`);
+    await expect(page.locator('#es-reveal')).toHaveValue('2099-10-24T07:00');
     await page.locator('#es-reveal-clr').click();
     await expect(page.locator('#es-reveal')).toHaveValue('');
     await page.getByRole('button', { name: 'Save Changes' }).click();

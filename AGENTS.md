@@ -791,8 +791,8 @@ staff chooses".
   template) and staff read the table whole. Nothing runs at the time: the next read carries them.
 - **Staff** set it under the breakfast picker of the Saturday ride's new-session form and editor (`_revealFieldHtml`;
   `S.newSessReveal` / `S.editSessReveal` hold the box's own `YYYY-MM-DDTHH:MM`, Riyadh time, `_revealIso` /
-  `_revealLocal`). It must come before the ride gathers (`_revealLate`); a repeat tells each week as long ahead of its
-  own day; the editor writes it on its own and only when it changed. The Sessions card and its detail say "Hidden from
+  `_revealLocal`). Any time is taken, even one after the ride gathers (the owner, 2026-10-06: "make me able to choose
+  anytime i want"); a repeat tells each week as long before or after its own day as the first; the editor writes it on its own and only when it changed. The Sessions card and its detail say "Hidden from
   riders until ..." (`_revealStaffHtml`).
 - **Riders** (`_spotHeld(s)`: the row came without them while the time is ahead, or was read before the time and is
   drawn less than `REVEAL_GRACE_MS` after it; a row that came with them has been told, whatever the phone's clock
