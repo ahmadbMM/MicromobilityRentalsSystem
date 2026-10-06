@@ -58,11 +58,34 @@ const dlg = (page: Page) => page.locator('#print-opts-modal .rr-dlg');
 const pick = (page: Page, label: string, option: string) => dlg(page).locator(`select[aria-label="${label}"]`).selectOption({ label: option });
 
 test.describe('@staff:analytics ratings reports', () => {
-  test('the restaurant\'s report: every Saturday\'s breakfast in one sheet, anonymous, one restaurant or all', async ({ page }) => {
+  test('the restaurant\'s report: one ride\'s breakfast (the newest by default), or every ride, anonymous, one restaurant or all', async ({ page }) => {
     await boot(page);
     await page.locator('#tab-analytics .rr-open-bf').click();
     await expect(dlg(page)).toHaveAttribute('data-mode', 'bf');
     await expect(dlg(page).locator('.modal-title')).toHaveText('Breakfast report for restaurants');
+    // The ride is picked, not the dates (the owner, 2026-10-06): the newest first, then every ride.
+    const ride = dlg(page).locator('select[aria-label="Ride"]');
+    await expect(ride.locator('option')).toHaveCount(3);
+    expect(await ride.locator('option').evaluateAll((o) => o.map((x) => (x as HTMLOptionElement).value))).toEqual(['sat-b', 'sat-a', 'all']);
+    await expect(ride.locator('option').first()).toContainText('Dune Bakery');
+    await expect(ride).toHaveValue('sat-b');
+    await expect(dlg(page).locator('select[aria-label="Restaurant"]')).toHaveCount(0); // a ride has its own restaurant
+    await expect(page.locator('#rr-count')).toContainText('Breakfast ratings on the report: 1');
+    // one ride: its restaurant and its day head the sheet, and nothing of the other ride is on it
+    await ride.selectOption('sat-a');
+    await expect(page.locator('#rr-count')).toContainText('Breakfast ratings on the report: 2');
+    const one = await printed(page);
+    const ot = text(one);
+    expect(ot).toContain('Cafe Bloom');
+    expect(one).not.toContain('Dune Bakery');
+    expect(ot).toMatch(/2 Ratings/);
+    expect(ot).toMatch(/7\.0\/10 Breakfast average/); // (9 + 5) / 2
+    expect(ot).toMatch(/1 Did not stay for breakfast/);
+    for (const s of ['Eggs a bit cold', 'Food came late']) expect(one).toContain(s);
+    // every ride: the sheet as it was, for one restaurant or all of them
+    await page.locator('#tab-analytics .rr-open-bf').click();
+    await dlg(page).locator('select[aria-label="Ride"]').selectOption('all');
+    await expect(dlg(page).locator('select[aria-label="Restaurant"]')).toHaveCount(1);
     await expect(page.locator('#rr-count')).toContainText('Breakfast ratings on the report: 3');
     await expect(page.locator('#rr-count')).toContainText('Did not stay for breakfast: 1');
     // Nothing on the restaurant's dialog can put a name on it.
@@ -105,6 +128,7 @@ test.describe('@staff:analytics ratings reports', () => {
   test('the restaurant\'s CSV is anonymous and breakfast only', async ({ page }) => {
     await boot(page);
     await page.locator('#tab-analytics .rr-open-bf').click();
+    await dlg(page).locator('select[aria-label="Ride"]').selectOption('all'); // every ride (the newest alone is the default)
     const [file] = await Promise.all([page.waitForEvent('download'), dlg(page).locator('.rr-csv').click()]);
     expect(file.suggestedFilename()).toMatch(/^breakfast-ratings_/);
     const csv = await (await file.createReadStream()).toArray().then((c) => Buffer.concat(c).toString('utf8'));

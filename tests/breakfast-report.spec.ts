@@ -60,28 +60,30 @@ test.describe('@staff:bookings breakfast ratings report', () => {
     await expect(page.locator('#print-opts-modal .rpt-bf')).toHaveCount(0);
   });
 
-  test('the sheet carries the day\'s breakfast ratings and reasons, anonymously, and nothing of the ride', async ({ page }) => {
+  test('the sheet carries the ride\'s breakfast ratings and reasons, anonymously, and nothing of the ride', async ({ page }) => {
     await boot(page);
     await page.evaluate(`S.sfSession='sat1';showPrintReportOptions()`);
     const html = await printed(page);
     await expect(page.locator('#print-opts-modal .rpt-bf')).toHaveCount(0); // the dialog closed
 
-    // Which day and which breakfast; both Saturday groups of the day are counted.
+    // Which ride and which breakfast: the ride picked on the roster alone, not every Saturday ride that day
+    // (the owner, 2026-10-06: "let the breakfast report make me choose the session not the date").
     expect(html).toContain('Breakfast ratings');
     expect(html).toContain('Cafe Bloom');
     const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
-    expect(text).toMatch(/2 Ratings/); // r1 + r2: the waiting rider and the circuit rider do not count
-    expect(text).toMatch(/8\.0\/10 Breakfast average/); // (9 + 7) / 2
+    expect(text).toMatch(/1 Ratings/); // r1: the waiting rider, the circuit rider and the other ride's rider do not count
+    expect(text).toMatch(/9\.0\/10 Breakfast average/);
     expect(text).toMatch(/1 Did not stay for breakfast/);
     // Per question: average, lowest, highest, how many.
-    expect(text).toMatch(/Restaurant 8\.5 8 9 2/);
-    expect(text).toMatch(/Atmosphere 9\.5 9 10 2/);
-    expect(text).toMatch(/Food 7\.5 6 9 2/);
+    expect(text).toMatch(/Restaurant 8\.0 8 8 1/);
+    expect(text).toMatch(/Atmosphere 10\.0 10 10 1/);
+    expect(text).toMatch(/Food 6\.0 6 6 1/);
     // The breakfast's reasons, escaped; each one beside its question and score.
-    for (const s of ['Too small for the group', 'Slow to serve', 'We waited 40 minutes']) expect(html).toContain(s);
+    expect(html).toContain('Too small for the group');
     expect(html).toContain('&lt;b&gt;cold&lt;/b&gt; eggs');
     expect(html).not.toContain('<b>cold</b>');
-    expect(text).toMatch(/Service 5\/10 We waited 40 minutes/);
+    // the other ride that day is a sheet of its own
+    for (const s of ['Slow to serve', 'We waited 40 minutes']) expect(html).not.toContain(s);
 
     // Anonymous: no name, phone or booking number of anyone on the day.
     for (const name of ['Lina Haddad', 'Omar Saleh', 'Maya Saeed', 'Not Done Yet', 'Circuit Rider']) expect(html).not.toContain(name);
@@ -92,15 +94,21 @@ test.describe('@staff:bookings breakfast ratings report', () => {
     for (const s of ['Too fast for me', 'Hard to find at the start', 'Long wait', 'Great morning overall', 'should not show', 'circuit reason']) {
       expect(html).not.toContain(s);
     }
-
-    // Every rating, best breakfast first: the 9 before the 7.
     const rows = await page.evaluate(`(() => {
       const d = new DOMParser().parseFromString(window.__bfr, 'text/html');
       return [...d.querySelectorAll('table')][1].querySelectorAll('tbody tr').length;
     })()`);
-    expect(rows).toBe(2);
+    expect(rows).toBe(1);
     expect(text.indexOf('1 9 8 10 6 10')).toBeGreaterThan(-1);
-    expect(text.indexOf('1 9 8 10 6 10')).toBeLessThan(text.indexOf('2 7 9 9 9 5'));
+
+    // The other ride that day, picked on the roster, prints its own.
+    await page.evaluate(`S.sfSession='sat2';showPrintReportOptions()`);
+    const html2 = await printed(page);
+    const text2 = html2.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    expect(text2).toMatch(/1 Ratings/);
+    expect(text2).toMatch(/7\.0\/10 Breakfast average/);
+    expect(html2).toContain('We waited 40 minutes');
+    expect(html2).not.toContain('Too small for the group');
   });
 
   test('a day nobody rated says so', async ({ page }) => {

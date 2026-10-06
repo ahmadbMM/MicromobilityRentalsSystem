@@ -751,3 +751,8 @@ the rating form's own word for breakfast in every language). It shows on the rid
 card and detail, the reports (the Saturday roster, the session report, close-out, the day sheet; the breakfast
 report already named the day's venues), each rating in Analytics (meta line and the breakfast row) and its
 picture, and the rating form's breakfast question (`_rgLabel(k,bf)`, `g.bf`). `tests/breakfast-venue.spec.ts`.
+- **The breakfast report is by ride, not by date** (the owner, 2026-10-06: "let the breakfast report make me choose
+  the session not the date"): Analytics > Ratings > A restaurant picks a Ride (`_rrBfRides`, newest first, each
+  "day · restaurant"; `o.sess` '' = the newest, 'all' = every ride with the restaurant filter) instead of a date
+  range, and one ride's sheet leaves out the parts that compare rides (`RR_BF_MANY`). The Bookings sheet
+  (`printBreakfastReport`) prints the roster's ride alone, no longer every Saturday ride that day.
