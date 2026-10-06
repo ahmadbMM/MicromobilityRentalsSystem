@@ -118,3 +118,13 @@ test('an ordinary ride still offers the pass straight away', async ({ page }) =>
   })]);
   await expect(wallet(page)).toHaveCount(1);
 });
+
+// Helmets are free on every ride (the owner, 2026-10-06: "why does it say that? we offer free
+// helmets" - the community card said "bring your own"). A rental still says one comes with the bike.
+test('the helmet line: free on a community ride, with the bike on a rental, never "bring your own"', async ({ page }) => {
+  const card = await myBookings(page, [satur(), jcc],
+    [row(), row({ id: 'bk2', session_id: '2099-01-11', session_day: 'Sunday', session_date: '2099-01-11', approval: null })]);
+  await expect(card).toContainText('Helmets are required. We provide one for free.');
+  await expect(card).toContainText('Helmets are required. One comes with every bike.');
+  await expect(card).not.toContainText(/bring your own/i);
+});

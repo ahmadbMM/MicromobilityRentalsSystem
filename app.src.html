@@ -1136,7 +1136,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   pickRideFirst:'Choose a ride above to continue.',
   wgKicker:'Waiver needed',wgSub:'Our team booked you on this ride. Read its waiver and agree to it to continue.',wgBtn:'Agree and continue',
   tickWaiverFirst:'Tick the box above to continue.',
-  tkHelmetBring:'Helmets are required: bring your own.',
+  tkHelmetFree:'Helmets are required. We provide one for free.',
   bdCalSummary:'{0}: birthday',
   regSummary:'Your booking',
   landJccMeta:'Sun & Tue · 9-11pm',
@@ -1690,7 +1690,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   pickRideFirst:'اختر رحلة من الأعلى للمتابعة.',
   wgKicker:'إقرار مطلوب',wgSub:'سجّلك فريقنا في هذه الرحلة. اقرأ إقرارها ووافق عليه للمتابعة.',wgBtn:'أوافق وأتابع',
   tickWaiverFirst:'ضع علامة في المربع أعلاه للمتابعة.',
-  tkHelmetBring:'الخوذة إلزامية: أحضر خوذتك.',
+  tkHelmetFree:'الخوذة إلزامية، ونوفّرها لك مجانًا.',
   bdCalSummary:'{0}: عيد ميلاد',
   regSummary:'حجزك',
   landJccMeta:'الأحد والثلاثاء · 9-11 مساءً',
@@ -10857,7 +10857,7 @@ function renderRegister(){
         ${_runKmOk(tkt.runKm)?`<div class="ticket-col"><div class="ticket-label">${t('runKmLabel')}</div><div class="ticket-value">${esc(_runKmTxt(tkt.runKm))}</div></div>`:''}
       </div>
       ${_owe>0?`<div class="price-note tk-owe">${esc(t('tkPayAmount').replace('{0}',_sar(_owe)))}</div>`:''}
-      ${(!_wl&&_needsBike(_sess))?`<div class="price-note">${t(_commT?'tkHelmetBring':'tkHelmetLine')}</div>`:''}
+      ${(!_wl&&_needsBike(_sess))?`<div class="price-note">${t(_commT?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
       ${_spotHeld(_sess)?_revealNoteHtml(_sess):''}
       <div class="cu-tk-acts">
         ${_wl?'':`<button type="button" data-on-click="${_on("downloadBookingICS",tkt.sessionId)}" class="btn-secondary cu-tk-btn" aria-label="${t('ticketAddCal')}">
@@ -12404,7 +12404,7 @@ function renderBookingTicket(entries,opts){
         <span class="cu-tk-total-v"><bdi>${_comm?t('freeLabel'):esc(_sar(total+g.reduce((s,e)=>s+addonsCost(entryAddons(e)),0)))}</bdi></span>
       </div>
       ${(!past&&!_comm&&!_allWl&&g.some(e=>!e.paid&&(e.price??DEFAULT_PRICE)>0))?`<div class="price-note">${t('payAtBoothLine')}</div>`:''}
-      ${(!past&&!_allWl&&_needsBike(sess))?`<div class="price-note">${t(_comm?'tkHelmetBring':'tkHelmetLine')}</div>`:''}
+      ${(!past&&!_allWl&&_needsBike(sess))?`<div class="price-note">${t(_comm?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
     </div>
     ${past?'':`<div class="cu-tk-btns">
       ${_allWl?'':`<button class="btn-secondary cu-tk-cal" data-on-click="${_on("downloadBookingICS",primary.sessionId)}" aria-label="${t('addToCalendarBtn')}"> ${t('addToCalendarBtn')}</button>`}
