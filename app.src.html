@@ -20626,9 +20626,13 @@ function renderQRow(e){
     if(sel.length){
       const anyWaiting=sel.some(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='waiting';});
       const act=sel.filter(id=>{const e=getQueue().find(x=>x.id===id);return e&&e.status==='active';});
+      // A free ride (the Saturday social ride, Run for Her, any community ride that is not a paid one) has
+      // nothing to collect: its riders get Check in, never Mark paid (the owner, 2026-10-06: "remove the mark
+      // paid button from free sessions only keep check in status").
+      const canPay=sel.some(id=>{const e=getQueue().find(x=>x.id===id);return e&&!_freeSessIds.has(e.sessionId);});
       _results.push(_qLeaf('bulk',`<div class="rq-bulk">
         <span class="rq-bulkn">${sel.length} ${t('bulkSelectedLabel')}</span>
-        <button class="btn-sm btn-green" data-on-click="${_on("bulkSfPaid")}">✓ ${t('bulkPaidBtn')}</button>
+        ${canPay?`<button class="btn-sm btn-green" data-on-click="${_on("bulkSfPaid")}">✓ ${t('bulkPaidBtn')}</button>`:''}
         ${anyWaiting?`<button class="btn-sm btn-green" data-on-click="${_on("bulkSfCheckin")}">${t('bulkCheckinBtn')}</button>`:''}
         ${act.length?`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderStaffQueue_17",_EV,_EL)}">${t('bulkReturnBtn')} (${act.length})</button>`:''}
         <button class="btn-sm btn-muted" data-on-click="${_on("clearSfSelect")}">${t('bulkClearSel')}</button>
@@ -21051,7 +21055,7 @@ async function bulkSfPaid(){
   // card-only, or on the house keeps how they paid: relabelling a split 'card' while its card
   // slice stayed made the session report and the drawer count disagree. The fare follows the pay
   // pill's rule, so an incidental 0 (no promo) is charged the bike's fare, not recorded as free.
-  const rows=ids.map(id=>getQueue().find(e=>e.id===id)).filter(e=>e&&!e.paid);
+  const rows=ids.map(id=>getQueue().find(e=>e.id===id)).filter(e=>e&&!e.paid&&!_freeSessIds.has(e.sessionId)); // a free ride's rider has nothing to pay (2026-10-06)
   const res=await Promise.all(rows.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return sb.from('queue_entries').update(p).eq('id',e.id).eq('paid',false).select('id');}));
   const n=res.filter(r=>r&&!r.error&&r.data&&r.data.length).length;
   const fail=res.find(r=>r&&r.error);
@@ -23060,10 +23064,13 @@ async function doReturn(id){
   // No bike to inspect: a rider who still owes gets the payment question, the rest are done. A runner
   // on Run for Her owes nothing (a free run, no add-ons): Finished finishes (2026-10-05).
   const _runFree=_rideKind(_sessGet(entry.sessionId))==='runher'&&!((entry.price??DEFAULT_PRICE)+addonsCost(entryAddons(entry))>0);
-  if(!needs){if(!entry.paid&&!_runFree){showReturnPayModal(id);return;}return _finishReturn(id,false,'ok',null);}
+  // Nor does a rider on any free ride (the owner, 2026-10-06: "remove the mark paid button from free sessions"):
+  // the Saturday social ride's return asked Paid / Pending / Add to till of a rider who owed nothing.
+  const _noPay=_runFree||_freeSessIds.has(entry.sessionId);
+  if(!needs){if(!entry.paid&&!_noPay){showReturnPayModal(id);return;}return _finishReturn(id,false,'ok',null);}
   // One sheet where there were two dialogs in a row (the payment question, then the condition):
   // the condition, the notes, and - for a rider still owing - the payment, on the same sheet.
-  S._retId=id;S._retPaid=false;S._retAsk=!entry.paid;S._retCond='ok';S._retNotes='';
+  S._retId=id;S._retPaid=false;S._retAsk=!entry.paid&&!_noPay;S._retCond='ok';S._retNotes='';
   renderReturnModal();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -26735,7 +26742,8 @@ function renderModal(){
   const priceWidget=S.modalPriceEdit
     ?`<span class="bkm-pw">SAR&nbsp;<input aria-label="${esc(t('colPrice'))}" id="modal-price-inp" type="number" min="0" step="0.5" value="${rider.price??DEFAULT_PRICE}" class="bkm-pin" data-on-keydown="${_on("_on_renderModal_17",_EV,_EL,rider.id)}"><button data-on-click="${_on("saveModalPrice",rider.id)}" class="bkm-pbset">${t('setBtnShort')}</button><button data-on-click="${_on("_on_renderModal_18",_EV,_EL)}" aria-label="${t('cancelBtn')}" class="bkm-pbx">${_artIcon('close',11)}</button></span>`
     :`<span role="button" tabindex="0" data-on-click="${_on("_on_renderModal_19",_EV,_EL)}" data-on-keydown="${_on("_on_renderModal_20",_EV,_EL)}" title="${t('editPriceTip')}" class="bkm-price">${_money(rider.price??DEFAULT_PRICE)} </span>`;
-  const paySection=!rider.paid
+  // A free ride has nothing to pay, so no payment line (2026-10-06), as the check-in pop-up has none.
+  const paySection=_freeSessIds.has(rider.sessionId)?'':!rider.paid
     ?`<div class="bkm-paywarn">
         <span class="bkm-fs16"></span>
         <span class="bkm-paylbl">${t('payPendingWarning')} –</span>

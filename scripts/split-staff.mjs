@@ -1094,7 +1094,11 @@ export function formatFieldNames(r, limit = 20) {
 // part (+9 KB, loaded after the desk paints); in the core, its 78 strings, the account report's chart drawer it now
 // shares, and editing and removing a saved breakfast spot from the ride forms (13 strings).
 // Here, on ae320241: staff 436.1, core 236.7; the runner reads ~2.2 / ~1.3 more, so each keeps ~1.7 / ~2.0 KB.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 440, core: 240 };
+// Staff 440 -> 443 (2026-10-06): the staff half read ~439.5 of 440 on the runner after 813a8e5d (Run for Her's
+// race-day paperwork), so any staff change failed the build step. With "no Mark paid on a free ride" (the bulk bar,
+// the bulk action, the return's payment question, the bike pop-up's payment line; +0.1 KB) it is 437.5 here, ~439.6
+// on the runner; 443 keeps ~3.4 KB.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 443, core: 240 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
