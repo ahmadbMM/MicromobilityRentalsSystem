@@ -1412,8 +1412,9 @@ async function buildPkpass(b, cfg) {
     value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
-  const meetUrl = _meetUrl(sess);
-  const place = _meetPlace(sess);
+  const heldUntil = _revealAhead(sess);
+  const meetUrl = heldUntil ? "" : _meetUrl(sess);
+  const place = heldUntil ? null : _meetPlace(sess);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -1456,7 +1457,7 @@ async function buildPkpass(b, cfg) {
         ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: skin.venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
-        { key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` },
+        heldUntil ? { key: "directions", label: "Meeting point", value: `Announced ${heldUntil}. Open your booking in the app to see it then.` } : { key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` },
         ...ridersBack,
         ...addonsBack,
         { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },
@@ -1492,6 +1493,15 @@ var _MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, 
 function _meetUrl(sess) {
   const u = sess && sess.meet_url ? String(sess.meet_url) : "";
   return /^https:\/\//.test(u) ? u : DIRECTIONS;
+}
+function _revealAhead(sess) {
+  const r = Date.parse(sess && sess.reveal_at || "");
+  if (!(r > Date.now())) return "";
+  try {
+    return new Date(r).toLocaleString("en-GB", { timeZone: "Asia/Riyadh", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit", hour12: true });
+  } catch (e) {
+    return "soon";
+  }
 }
 var CIRCUIT = { lat: 21.6266, lng: 39.1099, text: "Your ride is nearby - the Circuit is just ahead" };
 function _meetPlace(sess) {

@@ -1101,7 +1101,12 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 208 -> 211 (2026-10-06): staff can flag every field of an account, so the rider's correction page
 // answers nine more (the bike type, profession, company, how they heard of us, each social handle, the emergency
 // contact) with "I don't have one" for the optional ones; 207.2 KB here is ~208.6 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 211, staff: 443, core: 240 };
+// Staff 443 -> 445, core 240 -> 242 (2026-10-06): the Saturday ride's meeting point and breakfast spot told at a
+// time staff choose (sessions.reveal_at): the "announce at" box on the new-session form and the editor, its checks,
+// the Sessions card's mark and 8 strings (+1.0 KB each); the riders' "announced <time>" lines and the read at the
+// time add +0.8 KB to the customer half, inside 211. Here, on 7a4e8185: customer 208.0, staff 440.1, core 238.9; the
+// runner reads ~1.3 / ~2.2 / ~1.3 more, which left the staff half 0.7 KB and the core 0.2.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 211, staff: 445, core: 242 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
