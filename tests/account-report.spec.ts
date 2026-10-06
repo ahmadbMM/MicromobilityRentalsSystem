@@ -368,3 +368,137 @@ test.describe('the nationality breakdown', () => {
     expect(fig.match(/<tr>/g) || []).toHaveLength(22);   // the header, then a row per slice
   });
 });
+
+// ── Nationalities we don't have yet, and those we have only 1 or 2 of ─────────
+// (the owner, 2026-10-06). Counted over every account whatever the filters, and apart over the
+// community (a live Community tag); "counted among" picks customers, community members or both.
+
+test.describe('nationalities missing and the 1 or 2s', () => {
+  const T0 = Date.now();
+  const cust = (id: string, name: string, nationality: string, gender = 'male') =>
+    ({ id, name, email: `${id}@example.test`, nationality, gender, created_at: '2026-08-20T10:00:00Z' });
+  const people = [
+    cust('k1', 'Ali Saudi', 'Saudi Arabia'), cust('k2', 'Badr Saudi', 'Saudi Arabia'), cust('k3', 'Caid Saudi', 'Saudi Arabia', 'female'),
+    cust('k4', 'Dina Egypt', 'Egypt', 'female'), cust('k5', 'Emad Egypt', 'Egypt'),
+    cust('k6', 'Farah India', 'India', 'female'),
+    cust('k7', 'Ghazi Jordan', 'Jordan'),                       // his Community tag has lapsed
+    cust('k8', 'Hana Blank', '', 'female'),                     // a member with no nationality recorded
+    cust('s1', 'Sami Syria', 'Syria'), cust('s2', 'Salma Syria', 'Syria', 'female'), cust('s3', 'Saad Syria', 'Syria'),
+  ];
+  const live = (customer_id: string) => ({ customer_id, tag_id: 'tag_saturday', added_at: T0 - 30 * day, expires_at: null, starts_at: null });
+  const ctags = [live('k1'), live('k2'), live('k4'), live('k8'), live('s1'), live('s2'), live('s3'),
+    { customer_id: 'k7', tag_id: 'tag_saturday', added_at: T0 - 400 * day, expires_at: T0 - 10 * day, starts_at: null }];
+
+  async function open(page: import('@playwright/test').Page) {
+    await stubSupabase(page, { sessions, queue_entries: [], bikes: [], customers: people, tags, customer_tags: ctags });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction(`getCustomers().length===${people.length}`);
+    await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  }
+  const csvOf = (page: import('@playwright/test').Page) => page.evaluate(`(async()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
+      const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};
+      const _c=URL.createObjectURL;URL.createObjectURL=()=>'blob:x';
+      await exportAccountsCsv();window.Blob=_B;document.createElement=_a;URL.createObjectURL=_c;return out;})()`) as Promise<string>;
+
+  test('what we have nobody from: no customer at all, and customers but no community member yet', async ({ page }) => {
+    await open(page);
+    const all = await page.evaluate(`NATIONALITIES.length`) as number;
+    const m = await page.evaluate(`_accNatMissing(_accNatTally())`) as { noAcc: string[]; noComm: string[]; accNoComm: string[] };
+    expect(m.noAcc).toHaveLength(all - 5);                  // Saudi Arabia, Egypt, India, Jordan, Syria are here
+    expect(m.noAcc).toContain('Brazil');
+    expect(m.noAcc).not.toContain('Egypt');
+    expect(m.noComm).toHaveLength(all - 3);                 // members from Saudi Arabia, Egypt, Syria; the lapsed tag and the blank count for nothing
+    expect(m.accNoComm).toEqual(['India', 'Jordan']);       // the community's list minus the first, so 'both' names nobody twice
+    expect(m.noAcc.length + m.accNoComm.length).toBe(m.noComm.length);
+  });
+
+  test('the 1 or 2s, among customers and among the community, fewest first', async ({ page }) => {
+    await open(page);
+    const few = (k: string) => page.evaluate(`_accNatFew(_accNatTally().${k}).map(r=>[r.nat,r.people.map(c=>c.id)])`);
+    expect(await few('acc')).toEqual([['India', ['k6']], ['Jordan', ['k7']], ['Egypt', ['k4', 'k5']]]);
+    expect(await few('comm')).toEqual([['Egypt', ['k4']], ['Saudi Arabia', ['k1', 'k2']]]);
+  });
+
+  test('the filter keeps only the accounts whose nationality has 1 or 2', async ({ page }) => {
+    await open(page);
+    const ids = (f: string) => page.evaluate(`(()=>{S._accOpts=null;const o=_accOpts();Object.assign(o,${f});return _accRows().map(r=>r.c.id);})()`);
+    expect(await ids(`{fNatFew:'accounts'}`)).toEqual(['k4', 'k5', 'k6', 'k7']);
+    // among the community: a member, from a nationality with one or two members (Emad is no member)
+    expect(await ids(`{fNatFew:'community'}`)).toEqual(['k1', 'k2', 'k4']);
+    // it works with the other filters, and counts over everyone, not over what they leave
+    expect(await ids(`{fNatFew:'accounts',fGender:'female'}`)).toEqual(['k4', 'k6']);
+    // the printed filter line names it
+    expect(await page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),{fNatFew:'community'});return _accReportHtml();})()`))
+      .toContain('Only 1 or 2 of their nationality: Community members');
+  });
+
+  test('both sections are off by default, then print what "counted among" picks, whatever the filters', async ({ page }) => {
+    await open(page);
+    expect(await page.evaluate(`_accReportHtml()`)).not.toContain('Nationalities we don');
+    await page.evaluate(`_accToggle('sections','natMissing');_accToggle('sections','natFew')`);
+    // a filter that leaves Egypt alone on the list does not make anything else look missing
+    await page.evaluate(`_accSet('fNationality','Egypt')`);
+    let sheet = await page.evaluate(`_accReportHtml()`) as string;
+    expect(sheet).toContain('Counted over all 11 customers, whatever the filters. 1 of them have no nationality recorded.');
+    expect(sheet).toContain('No customers and no community members yet');
+    expect(sheet).toContain('Customers, but no community members yet');
+    expect(sheet).toContain('<li>India <span class="rp-c888">1</span></li>');
+    expect(sheet).toContain('<li>Brazil</li>');
+    expect(sheet).not.toContain('<li>Saudi Arabia');
+    expect(sheet).toContain('Only 1 or 2 customers');
+    expect(sheet).toContain('Only 1 or 2 community members');
+    expect(sheet).toContain('<td class="rp-name">Egypt</td><td>2</td><td>Dina Egypt, Emad Egypt</td>');
+    // customers only
+    await page.evaluate(`_accSetNatIn('natMissingIn','accounts');_accSetNatIn('natFewIn','accounts')`);
+    sheet = await page.evaluate(`_accReportHtml()`) as string;
+    expect(sheet).toContain('No customers yet');
+    expect(sheet).not.toContain('Customers, but no community members yet');
+    expect(sheet).not.toContain('Only 1 or 2 community members');
+    // community only: India and Jordan have customers, but no member
+    await page.evaluate(`_accSetNatIn('natMissingIn','community');_accSetNatIn('natFewIn','community')`);
+    sheet = await page.evaluate(`_accReportHtml()`) as string;
+    expect(sheet).toContain('No community members yet');
+    expect(sheet).toContain('<li>India</li>');
+    expect(sheet).toContain('<td class="rp-name">Saudi Arabia</td><td>2</td><td>Ali Saudi, Badr Saudi</td>');
+    expect(sheet).not.toContain('Only 1 or 2 customers');
+    // with every nationality recorded, the note does not say "0 of them"
+    await page.evaluate(`getCustomers().find(c=>c.id==='k8').nationality='Syria'`);
+    expect(await page.evaluate(`_accReportHtml()`)).toContain('Counted over all 11 customers, whatever the filters.</div>');
+    // a value from nowhere is refused
+    await page.evaluate(`_accSetNatIn('natFewIn','everyone')`);
+    expect(await page.evaluate(`_accOpts().natFewIn`)).toBe('community');
+  });
+
+  test('the sections follow the accounts into the CSV', async ({ page }) => {
+    await open(page);
+    await page.evaluate(`_accToggle('sections','natMissing');_accToggle('sections','natFew')`);
+    const csv = await csvOf(page);
+    expect(csv).toContain('"Customers, but no community members yet",2');   // a comma in the title: quoted
+    expect(csv).toMatch(/\nIndia,1\r?\n/);
+    expect(csv).toContain('Only 1 or 2 customers,3');
+    expect(csv).toMatch(/\nEgypt,2,"Dina Egypt, Emad Egypt"\r?\n/);
+  });
+
+  test('the builder offers both sections, their "counted among" pickers and the filter', async ({ page }) => {
+    await open(page);
+    await page.getByRole('button', { name: /Account report/ }).click();
+    const m = page.locator('#print-opts-modal');
+    const missingIn = m.locator('#acr-natMissing-in'), fewIn = m.locator('#acr-natFew-in');
+    await expect(missingIn).toBeDisabled();                     // its section is off
+    await expect(fewIn).toBeDisabled();
+    await m.getByRole('button', { name: 'Nationalities we don\'t have yet' }).click();
+    await expect(missingIn).toBeEnabled();
+    await expect(missingIn).toHaveValue('both');
+    await expect(fewIn).toBeDisabled();
+    await m.getByRole('button', { name: 'Nationalities with only 1 or 2' }).click();
+    await expect(fewIn).toBeEnabled();
+    await expect(missingIn.locator('option')).toHaveText(['Customers', 'Community members', 'Both']);
+    await fewIn.selectOption('community');
+    expect(await page.evaluate(`_accOpts().natFewIn`)).toBe('community');
+    const filter = m.locator('select[aria-label="Only 1 or 2 of their nationality"]');
+    await filter.selectOption('accounts');
+    await expect(m.locator('#acr-count')).toContainText('4 / 11');
+  });
+});
