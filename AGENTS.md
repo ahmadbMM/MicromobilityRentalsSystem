@@ -762,3 +762,17 @@ picture, and the rating form's breakfast question (`_rgLabel(k,bf)`, `g.bf`). `t
   "day · restaurant"; `o.sess` '' = the newest, 'all' = every ride with the restaurant filter) instead of a date
   range, and one ride's sheet leaves out the parts that compare rides (`RR_BF_MANY`). The Bookings sheet
   (`printBreakfastReport`) prints the roster's ride alone, no longer every Saturday ride that day.
+
+## Flag every field (2026-10-06)
+
+The owner: "when flagging a customer make the staff be able to flag every single field". FIX_FIELDS (the staff
+flag dialog's rows and the rider's correction page) holds every field of an account: the ten there were, plus
+`type_preference`, `profession`, `workplace`, `heard_from`, each handle (`instagram`, `x`, `tiktok`, `linkedin`)
+and `emergency` (name + phone + relationship as one answer). FIX_EXTRA are the ones the session does not carry:
+the page reads them when asked (`_fixCurLoad`: customer_about, customer_profile, customer_emergency) to say "On
+your account"; `_fixVal` reads them for staff rows and the Flagged history (a handle as a string, the emergency
+contact as {name, phone, relation}). FIX_OPTIONAL can be answered "I don't have one" (`fixNone`), sent as
+`p_values.none`, which clears them. Server: migration 20261006021500 (the two `*_fields_known` checks,
+`staff_flag_customer`'s list, `customer_fix_save`'s rules = the account page's own: customer_set_about,
+customer_set_socials, customer_set_emergency with the own-number refusal). Apply the SQL before the app ships:
+the old staff_flag_customer silently drops names it does not know. `tests/flag-every-field.spec.ts`.

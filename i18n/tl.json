@@ -2780,6 +2780,7 @@
   "fixWasEmpty": "Wala pang nakalagay sa iyong account",
   "fixNote": "Makakapag-book ka na pagka-save ng mga ito.",
   "fixErrPick": "Pumili ng isa para magpatuloy.",
+  "fixNone": "Wala ako nito",
   "fixErrHeight": "Ilagay ang iyong taas sa cm, mula 100 hanggang 250.",
   "fixErrPhoto": "Mag-upload ng larawan para magpatuloy.",
   "fixErrCheck": "Mukhang hindi ito tama. Pakitingnan at subukang muli.",

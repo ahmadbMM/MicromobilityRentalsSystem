@@ -1098,7 +1098,10 @@ export function formatFieldNames(r, limit = 20) {
 // race-day paperwork), so any staff change failed the build step. With "no Mark paid on a free ride" (the bulk bar,
 // the bulk action, the return's payment question, the bike pop-up's payment line; +0.1 KB) it is 437.5 here, ~439.6
 // on the runner; 443 keeps ~3.4 KB.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 208, staff: 443, core: 240 };
+// Customer 208 -> 211 (2026-10-06): staff can flag every field of an account, so the rider's correction page
+// answers nine more (the bike type, profession, company, how they heard of us, each social handle, the emergency
+// contact) with "I don't have one" for the optional ones; 207.2 KB here is ~208.6 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 211, staff: 443, core: 240 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

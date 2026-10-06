@@ -2780,6 +2780,7 @@
   "fixWasEmpty": "Todavía no hay nada en tu cuenta",
   "fixNote": "Podrás reservar en cuanto se guarden estos datos.",
   "fixErrPick": "Elige una opción para continuar.",
+  "fixNone": "No tengo",
   "fixErrHeight": "Indica tu estatura en cm, entre 100 y 250.",
   "fixErrPhoto": "Sube una foto para continuar.",
   "fixErrCheck": "Esto no parece correcto. Revísalo e inténtalo de nuevo.",

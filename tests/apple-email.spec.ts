@@ -203,7 +203,7 @@ test('staff see the Apple address in the editor, find accounts by it, and see cu
   expect(await page.evaluate(`!!_searchHit(getQueue().find(e=>e.id==='b1'),'zz.real')`)).toBe(true);   // searchable by it too
   // A password is never something staff can flag.
   await page.evaluate(`closeCustomerProfile();showFlagFieldsModal('c2')`);
-  await expect(page.locator('#confirm-modal .fl-row')).toHaveCount(10);
+  await expect(page.locator('#confirm-modal .fl-row')).toHaveCount(19); // every field of the account (2026-10-06)
   await expect(page.locator('#confirm-modal .fl-row[data-flag="password"]')).toHaveCount(0);
 });
 

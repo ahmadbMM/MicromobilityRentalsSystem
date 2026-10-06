@@ -8472,3 +8472,13 @@ body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf) bdi{min-width:0;o
 body.view-staff .sess-chip-bf{margin-top:2px;}
 body.view-staff .sess-lc-bf{margin:-4px 0 8px;}
 body.view-staff .sess-detail-bf{margin-top:4px;}
+/* The correction page's new boxes (2026-10-06, every field can be flagged): a handle after its @, the emergency
+   contact's three boxes, and "I don't have one", which sets a box aside */
+.fx-soc{display:flex;align-items:center;gap:6px;min-width:0;}
+.fx-soc-at{font-weight:800;color:var(--muted,#5a635c);}
+.fx-soc input{flex:1;min-width:0;}
+.fx-em .form-group{margin-bottom:10px;}
+.fx-em.off{opacity:.45;}
+.fx-none{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:6px 0;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--text,#111512);cursor:pointer;}
+.fx-none:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px;}
+.fx-none.on{color:var(--go,#077a4b);}
