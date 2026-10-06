@@ -7799,7 +7799,7 @@ body:not(.view-staff) .sess-card-reveal bdi{white-space:normal;}
 body:not(.view-staff) .cu-reveal{display:flex;align-items:flex-start;justify-content:center;gap:6px;margin:12px 0 0;font-size:var(--fs-13);line-height:1.45;font-weight:600;color:var(--ink-2);text-align:center;}
 body:not(.view-staff) .cu-reveal .cu-ic{flex-shrink:0;margin-top:2px;}
 body:not(.view-staff) #tab-register .ticket-card>.cu-reveal{margin:0;padding:0 24px 12px;}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-reveal{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-reveal{color:var(--night-ink-2);}
 body:not(.view-staff) .spots-low{color:var(--amber);}
 body:not(.view-staff) .sess-comm-chip.has-ic{gap:6px;font-size:var(--fs-13);font-weight:700;}
 body:not(.view-staff) .sess-comm-chip.has-ic::before{display:none;}
@@ -7821,31 +7821,31 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-cols::after{backgr
 /* The night ticket: a place is held. Near-black with neon, the brand's own pairing, and the one
    surface in the app that is not paper. The QR's white tile is drawn inside the SVG, so a phone's
    forced dark mode cannot invert it. */
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live{background:var(--night);border-color:var(--night);color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-num{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-num-label,.ticket-label,.cu-tk-when,.cu-tk-sec,.cu-tk-total-k,.price-note,.cu-hint-mt3,.cu-tr-in,.cu-tr-out,.cu-tk-label,.cu-k10){color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-value,.tk-venue,.cu-tr-name,.cu-tk-total-v,.cu-tk-ad-name,.cu-rv-name){color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.tk-dw,.tk-collect,.cu-c-green,.cu-pay-ok){color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-pay-due{color:var(--night-amber);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-tk-total-v{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.ticket-header,.ticket-cols,.cu-tr-row,.cu-tk-addons){border-color:var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-cols::before,
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-cols::after{border-color:var(--night);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid){background:transparent;color:var(--night-ink);border-color:var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid):hover{background:var(--night-2);border-color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .btn-red{background:transparent;color:var(--night-red);border-color:var(--night-red-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.type-badge,.cu-tr-num){background:var(--night-2);color:var(--night-ink);border-color:var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .mm-note{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .mm-note :is(.cu-c-green,.cu-c-text){color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .status-badge{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .appr-ok{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :focus-visible{outline-color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-qr-wrap :is(svg,canvas),
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .ticket-right :is(svg,canvas){border-radius:10px;}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-c-mutedl,.cu-c-muted){color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-c-text{color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.cu-dot7-ok,.cu-dot8){background:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .cu-dot7-due{background:var(--night-amber);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th){background:var(--night);border-color:var(--night);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-num{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-num-label,.ticket-label,.cu-tk-when,.cu-tk-sec,.cu-tk-total-k,.price-note,.cu-hint-mt3,.cu-tr-in,.cu-tr-out,.cu-tk-label,.cu-k10){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-value,.tk-venue,.cu-tr-name,.cu-tk-total-v,.cu-tk-ad-name,.cu-rv-name){color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-dw,.tk-collect,.cu-c-green,.cu-pay-ok){color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-pay-due{color:var(--night-amber);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-tk-total-v{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-header,.ticket-cols,.cu-tr-row,.cu-tk-addons){border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-cols::before,
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-cols::after{border-color:var(--night);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid){background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.btn-secondary,.btn-sm,.btn-green,.btn-green-solid):hover{background:var(--night-2);border-color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .btn-red{background:transparent;color:var(--night-red);border-color:var(--night-red-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.type-badge,.cu-tr-num){background:var(--night-2);color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .mm-note{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .mm-note :is(.cu-c-green,.cu-c-text){color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .status-badge{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .appr-ok{background:var(--night-2);border-color:var(--night-line);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :focus-visible{outline-color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-qr-wrap :is(svg,canvas),
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-right :is(svg,canvas){border-radius:10px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.cu-c-mutedl,.cu-c-muted){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-c-text{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.cu-dot7-ok,.cu-dot8){background:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-dot7-due{background:var(--night-amber);}
 /* Today's ticket: its one designed moment - a neon line drawn across the top, once. */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-today{position:relative;overflow:hidden;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-today::after{content:'';position:absolute;top:0;inset-inline:0;height:3px;background:var(--neon);
@@ -7868,7 +7868,7 @@ body:not(.view-staff) .btn-wallet,
 body:not(.view-staff) .btn-wallet.gwallet{background:var(--wallet);color:var(--wallet-ink);border:1px solid var(--wallet);border-radius:var(--r-ctl);box-shadow:none;min-height:48px;}
 body:not(.view-staff) .btn-wallet::before{display:none;}
 body:not(.view-staff) .btn-wallet:hover{background:var(--wallet);border-color:var(--wallet);box-shadow:none;}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .btn-wallet{border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .btn-wallet{border-color:var(--night-line);}
 
 /* ── Landing: the day's ride first ─────────────────────────────────────────────────────────────── */
 body:not(.view-staff) .land-today{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 16px;width:100%;text-align:start;
@@ -7965,21 +7965,21 @@ body:not(.view-staff) .tk-rt-osm{font-size:var(--fs-12);color:var(--ink-4);margi
 body:not(.view-staff) .tk-rt-map{flex:none;width:30px;height:118px;overflow:visible;}
 body:not(.view-staff) .tk-rt-map path{fill:none;stroke:var(--go);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;}
 body:not(.view-staff) .tk-rt-map circle{fill:var(--card);stroke:var(--ink);stroke-width:1.6;}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li{color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li::before{background:var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.on::before{background:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-st-dot{background:var(--night);border-color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.on .tk-st-dot{background:var(--neon);border-color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.cur .tk-st-dot{box-shadow:0 0 0 3px var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-stages li.cur .tk-st-l{color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-st-s{color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-cd{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-route{border-color:var(--night-line);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live :is(.tk-rt-k,.tk-rt-m,.tk-rt-osm){color:var(--night-ink-2);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-n{color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-a{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-map path{stroke:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-live .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li::before{background:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li.on::before{background:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-st-dot{background:var(--night);border-color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li.on .tk-st-dot{background:var(--neon);border-color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li.cur .tk-st-dot{box-shadow:0 0 0 3px var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-stages li.cur .tk-st-l{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-st-s{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-cd{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-route{border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-rt-k,.tk-rt-m,.tk-rt-osm){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-n{color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-a{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map path{stroke:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
 body:not(.view-staff) .myr{margin:0 0 8px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
 body:not(.view-staff) .myr-h{font-size:var(--fs-15);font-weight:700;color:var(--ink);margin-bottom:10px;}
 body:not(.view-staff) .myr-weeks{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:3px;}
@@ -8502,3 +8502,47 @@ body.view-staff .sess-detail-rv{margin-top:4px;}
 #sess-host .ss-reveal-row button[hidden]{display:none;}
 #sess-host .ss-reveal-note{margin-top:4px;font-size:12px;color:var(--muted);}
 #sess-host .ss-reveal-note:empty{display:none;}
+/* ══ TICKETS IN THEIR EVENT'S COLOURS (the owner, 2026-10-06) ═════════════════════════════════════
+   "make all booking cards themed the same way the event card is themed", the whole card: every ticket
+   on My Bookings and after booking wears its event-picker card's look in every state (_tkThemeCls:
+   tk-th th-jcc | th-comm | th-runher | th-event; National Day keeps its own skin). The night ticket's
+   rules in the customer system read .ticket-card:is(.tk-live,.tk-th) and are written in its colours,
+   so each theme redefines those colours on the card and gives it the card's background. Outside the
+   customer system on purpose: these are the event cards' own inks, like the cards themselves. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{
+  --night:#06346F;--night-2:rgba(255,255,255,.08);--night-ink:#fff;--night-ink-2:rgba(255,255,255,.74);
+  --night-line:rgba(159,213,238,.24);--neon:#9FD5EE;
+  background:var(--jcc-chev) right 18px bottom 12px/74px 20px no-repeat,linear-gradient(112deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;
+  border:1px solid rgba(14,151,213,.4);color:#fff;}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{
+  background:var(--jcc-chev-rtl) left 18px bottom 12px/74px 20px no-repeat,linear-gradient(248deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc .ticket-num{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;}
+/* the light cards: ink on white, the event's own accent where the night ticket has its neon */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event){
+  --night:#fff;--night-ink:#1A1919;--night-ink-2:rgba(26,25,25,.62);--night-line:rgba(26,25,25,.12);
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm{
+  --night-2:#F1F8F4;--neon:#077A4B;
+  background:linear-gradient(to bottom left,rgba(255,255,255,0) 0,rgba(255,255,255,.8) 150px,#fff 280px) no-repeat,var(--mm-pattern) right -16px top -12px/112px auto repeat #fff;
+  border:1px solid rgba(3,255,137,.34);}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm{
+  background:linear-gradient(to bottom right,rgba(255,255,255,0) 0,rgba(255,255,255,.8) 150px,#fff 280px) no-repeat,var(--mm-pattern) left -16px top -12px/112px auto repeat #fff;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-runher{
+  --night-2:#FDF0F5;--night-ink:#14304D;--night-ink-2:rgba(20,48,77,.66);--night-line:rgba(217,79,126,.22);--neon:#C2416E;
+  background:radial-gradient(120% 60% at 100% 100%,rgba(242,120,159,.26) 0%,rgba(242,120,159,.1) 38%,rgba(255,255,255,0) 66%) #fff;
+  border:1px solid rgba(217,79,126,.32);}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-runher{
+  background:radial-gradient(120% 60% at 0% 100%,rgba(242,120,159,.26) 0%,rgba(242,120,159,.1) 38%,rgba(255,255,255,0) 66%) #fff;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-runher .ticket-num{font-family:'Marcellus','Space Grotesk',Georgia,serif;font-weight:400;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-event{
+  --night-2:#F5F0FE;--night-line:rgba(124,58,237,.18);--neon:#6D28D9;
+  background:linear-gradient(to bottom right,#fff 0 55%,rgba(124,58,237,.07) 100%) #fff;border:1px solid rgba(124,58,237,.3);}
+/* the states the night ticket left on paper keep their own signs under the theme */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.tk-wl{border:1.5px dashed var(--amber-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.tk-wl,.tk-past) .ticket-num{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.tk-wl .wl-note{color:var(--night-amber);}
+/* the event's own mark where the MicroMobility lockup was (TK_MARK) */
+.ticket-card .tk-logo-ev img{display:inline;max-width:100%;object-fit:contain;object-position:left center;}
+html[dir="rtl"] .ticket-card .tk-logo-ev img{object-position:right center;}
+.ticket-card .tk-logo-ev .tk-logo-runher{height:30px;}
+.ticket-card .tk-logo-ev .tk-logo-jcc{height:40px;}

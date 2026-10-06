@@ -10820,15 +10820,14 @@ function renderRegister(){
     const _collect=(_needsBike(_sess)||_gth)?fmt12h(sessionCollectTime(_sess)):'';
     const _collectLbl=_gth?t('sessGatherTime'):t('sessCollectTime');
     const label=total>1?`${t('bike')} ${idx+1} / ${total}`:'';
-    // Dark only when a place is held (see renderBookingTicket); a waitlist place and a reservation
-    // waiting on staff stay paper. What is owed and where it is paid is on the ticket itself now
-    // that no popup says it after booking.
+    // The state classes as on renderBookingTicket, under the event's colours (_tkThemeCls). What is
+    // owed and where it is paid is on the ticket itself now that no popup says it after booking.
     const _wl=tkt.status==='waitlist';
     const _mod=_rideKind(_sess)==='snd96'?'':_wl?' tk-wl':_commT?'':' tk-live'+(String(tkt.sessionDate||'').slice(0,10)===todayStr()?' tk-today':'');
     const _owe=(!_commT&&!_wl&&!tkt.paid)?(Number(tkt.price??DEFAULT_PRICE)||0)+addonsCost(entryAddons(tkt)):0;
     const _rk=(_wl&&!_commT)?_wlRankMin([tkt]):null; // the live place, never the W serial (2026-10-05)
-    return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}">
-      ${_tkLogo()}
+    return`<div class="ticket-card ${_evClass(_sess)}${idx>0?' cu-mt16':''}${_mod}${_tkThemeCls(_sess)}">
+      ${_tkLogo(_sess)}
       ${label?`<div class="cu-tk-label">${label}</div>`:''}
       ${_commT?`
       <div class="ticket-top cu-tk-top1">
@@ -12118,7 +12117,21 @@ function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key==
 // the card (white lettering on a dark card, dark on a light one). On the My Bookings card it heads the
 // number's column, in the flow, so it never lies over the label (it did on a past or waitlist card,
 // which has no code to push the column down; the owner, same day).
-function _tkLogo(){return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.webp" alt="" decoding="async"><img class="tk-logo-d" src="/logo.webp" alt="" decoding="async"></span>`;}
+function _tkLogo(sess){
+  const th=_tkTheme(sess);
+  if(th)return`<span class="tk-logo tk-logo-ev" aria-hidden="true"><img class="tk-logo-${th}" src="${TK_MARK[th]}" alt="" decoding="async"></span>`;
+  return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.webp" alt="" decoding="async"><img class="tk-logo-d" src="/logo.webp" alt="" decoding="async"></span>`;
+}
+// Every ticket in its event's colours (the owner, 2026-10-06: "make all booking cards themed the same way the
+// event card is themed", the whole card): the circuit's navy and chevrons, MicroMobility Experiences' white and
+// pattern (the Saturday ride, the pool, T100, Petromin), Run for Her's blush, events' violet, each with the mark
+// its event-picker card wears. The National Day card keeps the green skin it already had. The night ticket's rules
+// are written in its colours (--night, --neon, --night-ink...), so a theme is those colours redefined on the card
+// plus the card's background ("TICKETS IN THEIR EVENT'S COLOURS" in styles.css); every state takes it, and the
+// status line, the waitlist's dashed edge and the code say which state a ticket is in.
+const TK_MARK={jcc:'/jcc-white.webp',comm:'/logo-dark.webp',runher:'/assets/runher-partners.webp',event:'/logo-dark.webp'};
+function _tkTheme(s){if(!s)return'';const k=_rideKind(s);return k==='snd96'?'':k==='jcc'||k==='runher'||k==='event'?k:'comm';}
+function _tkThemeCls(s){const th=_tkTheme(s);return th?` tk-th th-${th}`:'';}
 // ── The ticket through the night (the owner, 2026-10-01: "do 1 2 5 6 10") ─────────────────────
 // On the ride's day a held ticket says where the rider is: Booked, Checked in, On the bike, Done
 // (no bike step where the activity has no bike). Read off the rows as the desk wrote them: active
@@ -12350,17 +12363,17 @@ function renderBookingTicket(entries,opts){
       ${_rideKind(sess)==='runher'?'':`<button class="btn-sm btn-green cu-act110" data-on-click="${_on("bookAgain",_ids)}">${_cuIc('again')} ${t('bookAgainBtn')}</button>`}
     </div>`:'');
   const numCls=numDisplay.length<=4?'cu-num-l':numDisplay.length<=9?'cu-num-m':'cu-num-s';
-  // The ticket a rider carries is dark: the brand's near-black with neon, the one surface in the
-  // app that is not paper (tk-live). A waitlist place, a reservation staff have not confirmed and
-  // a past ride stay paper, so a dark card always means a place is held.
+  // The state classes (tk-live held, tk-today, tk-wl, tk-past) stay; since 2026-10-06 every ticket also
+  // wears its event's colours in every state (_tkThemeCls), so the night look no longer says "held": the
+  // status line, the code and the waitlist's dashed edge do.
   const _held=!past&&!_allWl&&_qrReady&&['waiting','active'].includes(stForBadge);
   // The National Day card keeps its own green skin in every state: the night and paper states are the house's.
   const _mod=_rideKind(sess)==='snd96'?'':past?' tk-past':_allWl?' tk-wl':_held?' tk-live'+(_today?' tk-today':''):'';
   const _dw=!past?_dayWord(primary.sessionDate):'';
-  return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}">
+  return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}${_tkThemeCls(sess)}">
     <div class="ticket-header">
       <div class="ticket-num-block">
-        ${_tkLogo()}
+        ${_tkLogo(sess)}
         ${_noNum?'':_allWl
           ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${_rkG?` \u00b7 ${esc(t('wlLinePos').replace('{0}',_rkG))}`:''}</div>`
           :`<div class="ticket-num-label">${n>1?esc(_nBikes(n)):t(_rideKind(sess)==='runher'?'runNumLabel':'queueNumLabel')}</div>`}

@@ -42,9 +42,10 @@ for (const width of [390, 800]) {
 }
 
 // The owner, 2026-09-30: "make the booking card include micromobility's logo in the top corner".
-// The start corner (right in Arabic), the white-lettered logo on the dark card, clear of the QR code.
+// The start corner (right in Arabic), clear of the QR code. Since 2026-10-06 ("make all booking cards themed
+// the same way the event card is themed") the mark is the event card's own: the circuit's white JCC mark.
 for (const lang of ['en', 'ar']) {
-  test(`the booking card wears the MicroMobility logo in its top start corner (${lang})`, async ({ page }) => {
+  test(`the booking card wears its event's mark in its top start corner (${lang})`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 1400 });
     await stubSupabase(page, { sessions, 'rpc:list_sessions': sessions, queue_entries: [], bikes: [] });
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
@@ -53,16 +54,17 @@ for (const lang of ['en', 'ar']) {
     await page.evaluate(`S.selEvent='jcc';goCustomer('register');S.selSession='${S1}';
       S.lastTickets=[{id:'t1',queueNum:7,sessionId:'${S1}',sessionDay:'Sunday',sessionDate:'${S1}',name:'Spec Rider',status:'waiting',paid:false,price:75}];renderRegister();`);
     const card = page.locator('#tab-register .ticket-card');
-    await expect(card.locator('.tk-logo-d')).toBeVisible(); // a live ticket is dark: white lettering
-    await expect(card.locator('.tk-logo-l')).toBeHidden();
+    await expect(card).toHaveClass(/\bth-jcc\b/);
+    await expect(card.locator('.tk-logo-ev .tk-logo-jcc')).toBeVisible(); // the circuit card's white JCC mark
+    await expect(card.locator('.tk-logo-l, .tk-logo-d')).toHaveCount(0);
     const m = await card.evaluate((c) => {
-      const box = c.getBoundingClientRect(), l = c.querySelector('.tk-logo-d')!.getBoundingClientRect();
+      const box = c.getBoundingClientRect(), l = c.querySelector('.tk-logo-ev img')!.getBoundingClientRect();
       const q = c.querySelector('.ticket-qr-wrap, .cu-qr-box')?.getBoundingClientRect();
       return { top: l.top - box.top, start: document.dir === 'rtl' ? box.right - l.right : l.left - box.left, h: l.height, clear: !q || l.bottom <= q.top || l.right <= q.left || l.left >= q.right };
     });
     expect(m.top).toBeLessThan(20);
     expect(m.start).toBeLessThan(20);
-    expect(Math.round(m.h)).toBe(44);
+    expect(Math.round(m.h)).toBe(40);
     expect(m.clear).toBe(true);
   });
 }

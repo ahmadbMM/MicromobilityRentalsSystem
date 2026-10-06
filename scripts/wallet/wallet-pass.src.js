@@ -149,6 +149,8 @@ async function buildPkpass(b, cfg) {
   const clock = _sessTimes(sess);
   const collectStr = clock ? _hhmm(clock.collectMin) : "";
   const startStr = clock ? _hhmm(clock.startMin) : "";
+  // an event names the place staff gave it (sessions.location), else the circuit; every other ride its skin's
+  const venue = ride === "event" ? ({ JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[String((sess && sess.location) || "").trim()] || String((sess && sess.location) || "").trim() || "Jeddah Corniche Circuit") : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || `#${primaryNum}`;
   const time = _sessClock(sess) || b.session_time || "";
@@ -205,7 +207,7 @@ async function buildPkpass(b, cfg) {
     serialNumber: String(b.id),
     organizationName: "MicroMobility Rentals",
     description: hideNum ? `Booking - ${rideName}` : `Booking ${numsDisplay} - ${rideName}`,
-    foregroundColor: "rgb(242,245,242)",
+    foregroundColor: skin.fg || "rgb(242,245,242)",
     backgroundColor: skin.bg,
     labelColor: skin.label,
     sharingProhibited: true,
@@ -223,7 +225,7 @@ async function buildPkpass(b, cfg) {
     // Semantic tags let iOS drive Live Activities, lock-screen relevance and the event guide.
     semantics: {
       eventName: rideName,
-      venueName: skin.venue,
+      venueName: venue,
       ...place ? { venueLocation: { latitude: place.lat, longitude: place.lng } } : {},
       eventType: "PKEventTypeGeneric",
       ...dates ? { eventStartDate: dates.start, eventEndDate: dates.end } : {}
@@ -238,7 +240,7 @@ async function buildPkpass(b, cfg) {
       backFields: [
         { key: "when", label: "Session", value: `${when}${time ? " \xB7 " + time : ""}`.trim() },
         ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
-        { key: "venue", label: "Venue", value: skin.venue },
+        { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
         heldUntil
           ? { key: "directions", label: "Meeting point", value: `Announced ${heldUntil}. Open your booking in the app to see it then.` }
@@ -470,8 +472,15 @@ function _gathersTime(sess) {
   return !!sess && GATHERS[_rideOf(sess)] === true;
 }
 // Each ride is told apart in a crowded Wallet by its own colour, and named by its own words.
+// Each pass in its event-picker card's colours (the owner, 2026-10-06: "make sure that the apple pass booking cards
+// are themed the same way the event picker card is themed"), with its card's art (pass-images.js RIDE_IMAGES):
+// fg the text, label the field labels. MicroMobility Experiences' rides (the Saturday ride, the pool, T100) are
+// white with ink and the brand's green (its labels darkened to read on white, 5.4:1); Run for Her white with its
+// navy ink and pink (4.9:1); an event white with the violet (7:1); the circuit its navy. Petromin keeps the
+// company's own red and National Day its green, as before.
+const EXP = { bg: "rgb(255,255,255)", fg: "rgb(26,25,25)", label: "rgb(7,122,75)" };
 const RIDES = {
-  saturday: { bg: "rgb(9,40,26)", label: "rgb(61,220,150)", venue: "Saturday Social Ride" },
+  saturday: { ...EXP, venue: "Saturday Social Ride" },
   // The one ride that does not take the near-black field the others use: a dark maroon read
   // as muddy brown rather than as a colour, and the salmon labels on it looked washed out.
   // Petromin commits to its red instead - the same rgb(163,59,46) the app tints this ride
@@ -479,15 +488,15 @@ const RIDES = {
   // near-white foreground (5.9:1) and the field (4.9:1); do not darken the label towards
   // salmon again, it drops to 2.7:1.
   petromin: { bg: "rgb(163,59,46)", label: "rgb(255,214,203)", venue: "Petromin Wednesday Ride" },
-  swim:     { bg: "rgb(10,30,46)", label: "rgb(122,190,240)", venue: "Triathlon Pool Session" },
-  workshop: { bg: "rgb(30,22,48)", label: "rgb(183,162,240)", venue: "T100 Triathlon Prep" },
+  swim:     { ...EXP, venue: "Triathlon Pool Session" },
+  workshop: { ...EXP, venue: "T100 Triathlon Prep" },
   // Saudi National Day 96 - the guideline's deep green field, with the lime tint on labels.
   snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },
-  // Run for Her (2026-10-05): the berry of the event's pink, with its pale pink on labels (10.2:1 and 7.1:1).
-  runher:   { bg: "rgb(122,28,66)", label: "rgb(255,201,218)", venue: "Run for Her" },
-  // The circuit's own card colours: the navy field it is drawn on, with the pale cyan its
-  // meta line uses. Both clear AA on the near-white foreground.
-  jcc:      { bg: "rgb(6,52,111)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
+  runher:   { bg: "rgb(255,255,255)", fg: "rgb(20,48,77)", label: "rgb(194,65,110)", venue: "Run for Her" },
+  event:    { bg: "rgb(255,255,255)", fg: "rgb(26,25,25)", label: "rgb(109,40,217)", venue: "MicroMobility Event" },
+  // The circuit's own card colours: the navy field it is drawn on, white type, and the pale cyan its
+  // meta line uses. Both clear AA.
+  jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
 };
 function _rideOf(sess) {
   if (!sess) return "jcc";
@@ -498,7 +507,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

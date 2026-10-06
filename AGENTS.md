@@ -510,7 +510,9 @@ price, payment, venue and the bike rule until after booking.
   today's gets `tk-today` and the one designed motion (a neon line drawn across its top). A waitlist
   place (`tk-wl`, paper, dashed amber), a reservation staff have not confirmed and a past ride (`tk-past`,
   no code, calendar, directions or Wallet) stay paper, so dark always means a place is held. Waitlisted
-  riders keep their QR: checking in at the booth is how they leave the waitlist.
+  riders keep their QR: checking in at the booth is how they leave the waitlist. **Superseded 2026-10-06**: every
+  ticket now wears its event card's colours in every state (see "Tickets and Wallet passes in their event's
+  colours"); the state classes remain and the status line, the code and the dashed edge say the state.
 - **Icons are drawn; no emoji anywhere.** The owner, 2026-09-30: "use no emojis always create your own
   icons". Rider screens use `_CU` / `_cuIc(name, px, flip)`: one monoline stroke (1.75 on 24, round ends,
   like the ML mark); `flip` mirrors it in Arabic and Urdu. Staff keep `_ART` / `_artIcon`. Message and
@@ -804,3 +806,27 @@ staff chooses".
   mirrors the rider side (mm-platform `spotHeld` / `revealWhen` in lib/tickets.ts: Experiences' card and Details, the
   My Account ticket and its calendar file) and reads signed-out visitors' rides through `list_sessions(null, null)`
   too, since the table hides the held row. `tests/spot-reveal.spec.ts`.
+
+## Tickets and Wallet passes in their event's colours (2026-10-06)
+
+The owner: "make all booking cards themed the same way the event card is themed" (picked: My Bookings tickets in
+the app, the whole card; not the website's tickets) and "make sure that the apple pass booking cards are themed the
+same way the event picker card is themed".
+- **Tickets** (My Bookings and the card after booking) carry `tk-th th-<theme>` (`_tkThemeCls`, `_tkTheme`: `jcc`,
+  `comm` for MicroMobility Experiences' rides - the Saturday ride, the pool, T100, Petromin - `runher`, `event`;
+  National Day keeps the green skin it had) and the event card's mark in the logo slot (`_tkLogo(sess)`, `TK_MARK`).
+  The night ticket's rules in the customer system read `.ticket-card:is(.tk-live,.tk-th)` and are written in its
+  colours, so a theme only redefines `--night`, `--night-2`, `--night-ink`, `--night-ink-2`, `--night-line`, `--neon`
+  (and on the white cards `--night-amber` / `--night-red`) on the card and gives it the event card's background:
+  "TICKETS IN THEIR EVENT'S COLOURS", after the customer system in styles.css (raw colours are the event cards' own
+  inks, so the block sits outside the system's colour check, like the cards). The state classes stay: a waitlist
+  ticket keeps its dashed amber edge and its quieter number. `tests/ticket-themes.spec.ts`.
+- **The Apple Wallet pass** takes the same look per kind (`RIDES` in scripts/wallet/wallet-pass.src.js: `fg`, `bg`,
+  `label`; `event` is a kind of its own now): the circuit navy with white type, Experiences white with ink and a
+  darkened brand green, Run for Her white with its navy and pink, an event white with the violet; Petromin and National
+  Day as before. Its strip and logo are the event card's art (`RIDE_IMAGES` in pass-images.js: the circuit's run and
+  chevrons with the white JCC mark, the brand pattern with the Light Version lockup, the blush with the route and the
+  partners' marks, the violet wash), drawn from the cards' own CSS and assets by `node scripts/wallet/render-art.mjs
+  <folder>` (375x98-point strips and logos inside 160x50, @1x/@2x/@3x). To redraw one, run it, replace the base64 in
+  pass-images.js and `npm run build:wallet` (from a worktree add `--preserve-symlinks`, see above). tests/pages-functions.spec.ts checks each kind's colours and art.
+

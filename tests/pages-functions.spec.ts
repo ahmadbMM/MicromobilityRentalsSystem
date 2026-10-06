@@ -170,10 +170,51 @@ test.describe('the Apple Wallet pass', () => {
       request: new Request('https://site.test/api/wallet-pass', { method: 'POST', body: JSON.stringify({ customerId: 'c1', token: 't', bookingId: b.id, ...(party.groupIds ? { groupIds: party.groupIds } : {}) }) }),
       env: { APPLE_PASS_P12_BASE64: p12b64, APPLE_PASS_P12_PASSWORD: pw, APPLE_PASS_TYPE_ID: 'pass.test', APPLE_TEAM_ID: 'TEAM', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
     });
-    if (res.headers.get('content-type') !== 'application/vnd.apple.pkpass') return { status: res.status, body: await res.json(), json: null };
+    if (res.headers.get('content-type') !== 'application/vnd.apple.pkpass') return { status: res.status, body: await res.json(), json: null, files: null };
     const files = unzipSync(new Uint8Array(await res.arrayBuffer()));
-    return { status: res.status, body: null, json: JSON.parse(strFromU8(files['pass.json'])) };
+    return { status: res.status, body: null, json: JSON.parse(strFromU8(files['pass.json'])), files };
   }
+
+  // The owner, 2026-10-06: "make sure that the apple pass booking cards are themed the same way the event picker
+  // card is themed": each kind of ride's pass takes its event card's colours and art (pass-images.js RIDE_IMAGES).
+  test('each pass wears its event card’s colours, strip and mark', async () => {
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    const comm = (k: string, x: Record<string, unknown> = {}) => ({ ...circuit, event_kind: 'community', ride_kind: k, needs_approval: false, ...x });
+    const cases: [string, Record<string, unknown>, string, string, string][] = [
+      ['jcc', circuit, 'rgb(6,52,111)', 'rgb(255,255,255)', 'rgb(159,213,238)'],
+      ['saturday', comm('saturday'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
+      ['swim', comm('swim'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
+      ['workshop', comm('workshop'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
+      ['runher', comm('runher', { location: 'JYC' }), 'rgb(255,255,255)', 'rgb(20,48,77)', 'rgb(194,65,110)'],
+      ['event', comm('event', { location: 'JYC' }), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(109,40,217)'],
+    ];
+    const b64 = (u: Uint8Array) => Buffer.from(u).toString('base64');
+    for (const [kind, sess, bg, fg, label] of cases) {
+      const r = await pass(booking, sess);
+      expect(r.status, kind).toBe(200);
+      expect([r.json.backgroundColor, r.json.foregroundColor, r.json.labelColor], kind).toEqual([bg, fg, label]);
+      for (const f of ['strip@2x.png', 'logo@2x.png', 'strip@3x.png']) expect(b64(r.files![f]), `${kind} ${f}`).toBe(P.RIDE_IMAGES[kind][f]);
+    }
+    // the art differs where the cards do: the circuit's navy strip is not Experiences' white one
+    expect(P.RIDE_IMAGES.jcc['strip@2x.png']).not.toBe(P.RIDE_IMAGES.saturday['strip@2x.png']);
+    expect(P.RIDE_IMAGES.runher['logo@2x.png']).not.toBe(P.RIDE_IMAGES.saturday['logo@2x.png']);
+    // an event names the place staff gave it
+    const ev = await pass(booking, comm('event', { location: 'JYC' }));
+    expect(ev.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'venue').value).toBe('Jeddah Yacht Club');
+  });
+
+  // The meeting point told at a time staff choose (2026-10-06): list_sessions leaves it blank until then, which
+  // must not read as the circuit on the pass.
+  test('a ride whose meeting point is told later says when, and pins no place', async () => {
+    const sat = { ...circuit, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: false, meet_url: null, reveal_at: new Date(Date.now() + 864e5).toISOString() };
+    const r = await pass({ ...booking, approval: 'approved' }, sat);
+    const dir = r.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'directions');
+    expect(dir.label).toBe('Meeting point');
+    expect(dir.value).toMatch(/^Announced /);
+    expect(dir.attributedValue).toBeUndefined();
+    expect(r.json.locations).toBeUndefined();
+    expect(r.json.semantics.venueLocation).toBeUndefined();
+  });
 
   test('a ride that ends at midnight or later expires the next day, not before it starts', async () => {
     const { json } = await pass(booking, { ...circuit, bike_slots: JSON.stringify({ _time: '21:00 - 00:30' }) });
