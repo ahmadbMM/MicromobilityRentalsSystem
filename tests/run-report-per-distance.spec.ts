@@ -21,8 +21,8 @@ const row = (id: string, km: number | null, x: Record<string, unknown> = {}) => 
 });
 const runners = [row('r1', 5, { status: 'active' }), row('r2', 3), row('r3', 5, { status: 'done' }), row('r4', null), row('r5', 3, { status: 'noshow' })];
 
-async function boot(page: Page, sessId = RUN) {
-  await stubSupabase(page, { sessions: [run, jcc], bikes: [], queue_entries: [...runners, { ...row('j1', null), session_id: jcc.id, session_day: 'Sunday', session_date: jcc.session_date, type_preference: 'Hybrid', price: 75 }] });
+async function boot(page: Page, sessId = RUN, extra: Record<string, unknown> = {}) {
+  await stubSupabase(page, { sessions: [run, jcc], bikes: [], queue_entries: [...runners, { ...row('j1', null), session_id: jcc.id, session_day: 'Sunday', session_date: jcc.session_date, type_preference: 'Hybrid', price: 75 }], ...extra });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -135,5 +135,93 @@ test.describe('@staff:bookings Run for Her report per distance', () => {
     await expect(m.locator('[data-rep="cols:km"]')).toHaveCount(0);
     await expect(m.locator('[data-rep="cols:bike"]')).toBeVisible();
     await expect(m.getByLabel('Bike type')).toBeVisible();
+  });
+
+  // The race-day gaps (the owner, 2026-10-06: "fix them"): membership on the run's sheet, the emergency
+  // contacts on paper, and the day sheet reading as a run.
+  const tags = [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#00e585', locked: true }];
+  const customer_tags = [{ customer_id: 'cr1', tag_id: 'tag_saturday', added_at: 1, expires_at: null, starts_at: null }];
+  const members = async (page: Page) => page.evaluate(`(()=>{S.tags=${JSON.stringify(tags)};S.customerTags=${JSON.stringify(customer_tags)};S._repOpts=null;showPrintReportOptions();})()`);
+
+  test('the run’s report prints Membership when it is ticked, and a ride night is not offered a column it ignores', async ({ page }) => {
+    await boot(page, RUN, { tags, customer_tags });
+    await members(page);
+    await catchReports(page);
+    await catchCsv(page);
+    const m = page.locator('#print-opts-modal');
+    await expect(m.locator('[data-rep="cols:member"]')).toHaveAttribute('aria-pressed', 'true');
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'Print' }).click();
+    const html = (await page.evaluate('window.__rep') as string[])[0];
+    expect(html).toMatch(/<th>Membership<\/th>/);
+    expect(text(html)).toMatch(/Runner r1 Member\b/);
+    expect(text(html)).toMatch(/Runner r3 Non-member/);
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'CSV' }).click();
+    const [csv] = await page.evaluate('window.__csv') as { name: string; text: string }[];
+    expect(csv.text.split('\n')[0]).toContain('Membership');
+    expect(csv.text).toContain('Runner r1,Member');
+    // Untick it and it is gone from the sheet.
+    await m.locator('[data-rep="cols:member"]').click();
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'Print' }).click();
+    expect((await page.evaluate('window.__rep') as string[])[1]).not.toMatch(/<th>Membership<\/th>/);
+    // A ride night's sheet never printed it: the builder no longer offers it there.
+    await page.evaluate(`S.sfSession='${jcc.id}';showPrintReportOptions()`);
+    await expect(m.locator('[data-rep="cols:member"]')).toHaveCount(0);
+    await expect(m.locator('[data-rep="cols:em"]')).toHaveCount(0);
+  });
+
+  test('the emergency contact column: off at first, read once ticked, one line per runner', async ({ page }) => {
+    const reads: string[] = [];
+    page.on('request', (r) => { if (/\/rest\/v1\/customers\?.*emergency_name/.test(r.url())) reads.push(r.url()); });
+    const customers = [
+      { id: 'cr1', name: 'Runner r1', phone: '0550000001', emergency_name: 'Nora Haddad', emergency_phone: '+966551234567', emergency_relation: 'sibling' },
+      { id: 'cr3', name: 'Runner r3', phone: '0550000003', emergency_name: null, emergency_phone: null, emergency_relation: null },
+    ];
+    await boot(page, RUN, { customers });
+    await catchReports(page);
+    await catchCsv(page);
+    const m = page.locator('#print-opts-modal');
+    const em = m.locator('[data-rep="cols:em"]');
+    await expect(em).toHaveAttribute('aria-pressed', 'false');
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'Print' }).click();
+    expect((await page.evaluate('window.__rep') as string[])[0]).not.toContain('Emergency contact');
+    expect(reads).toEqual([]); // nobody's contact is read until the column is asked for
+    await em.click();
+    await expect.poll(() => reads.length).toBe(1);
+    await expect.poll(() => page.evaluate(`_repEmReady('${RUN}')`)).toBe(true);
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'Print' }).click();
+    const html = (await page.evaluate('window.__rep') as string[])[1];
+    expect(html).toMatch(/<th>Emergency contact<\/th>/);
+    const body = text(html);
+    expect(body).toMatch(/Runner r1 .*Nora Haddad Brother or sister \+966551234567/);
+    expect(body).toMatch(/Runner r3 Non-member — /); // no contact on record
+    await m.locator('.rpt-km-row').nth(1).getByRole('button', { name: 'CSV' }).click();
+    const [csv] = await page.evaluate('window.__csv') as { name: string; text: string }[];
+    expect(csv.text).toContain('Nora Haddad · Brother or sister · +966551234567');
+    // Printed before the read is in: the read comes first, then the sheet, with the contacts on it.
+    await page.evaluate(`S._repEm=null;printSessionReport(5)`);
+    await expect.poll(async () => (await page.evaluate('window.__rep') as string[]).length).toBe(3);
+    expect((await page.evaluate('window.__rep') as string[])[2]).toContain('Nora Haddad');
+  });
+
+  test('the day sheet on race day: each runner’s distance, no bike column, a runner on the course checked in', async ({ page }) => {
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
+    const RH = `${today}-rh`;
+    const r = (id: string, km: number | null, x: Record<string, unknown> = {}) => ({ ...row(id, km, x), session_id: RH, session_date: today });
+    await stubSupabase(page, { sessions: [{ ...run, id: RH, session_date: today }], bikes: [], queue_entries: [r('r1', 5, { status: 'active' }), r('r2', 3), r('r4', null)] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await catchReports(page);
+    await page.evaluate('printDaySheet()');
+    const html = (await page.evaluate('window.__rep') as string[])[0];
+    expect(html).toMatch(/<th>Distance<\/th>/);
+    expect(html).not.toMatch(/<th>Bike Type<\/th>/);
+    const body = text(html);
+    expect(body).toContain('Runners: 3');
+    expect(body).toMatch(/Runner r1 5 km Checked in/);
+    expect(body).toMatch(/Runner r2 3 km /);
+    expect(body).toMatch(/Runner r4 — /);
+    expect(body).not.toContain('On Bike');
   });
 });

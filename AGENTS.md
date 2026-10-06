@@ -698,6 +698,12 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   report gets a Distance column (`_REP_COLS.km`) and a tile per distance; a run's sheet has no bike, height, money
   tiles or VAT line (`_repColFits`), "Checked in" for a runner on the course, and a saved bike-type filter is ignored
   where nobody rides. `tests/run-report-per-distance.spec.ts`.
+  2026-10-06 ("fix them"): the run's sheet and CSV print Membership when ticked (`_repColFits` offers it only where a
+  sheet prints it: the Saturday roster and the run); an **Emergency contact** column (run only, OFF by default: personal
+  data) read in one go for the session's accounts when ticked or when the builder opens with it ticked (`_repEmLoad`;
+  the sync does not carry the columns), a print before the read is in waits for it (`_repEmWait`) and a report the
+  browser then blocks says "tap again" (`repPopupBlocked`); the day sheet gives a run a Distance column, no bike
+  column on any no-bike session, "Runners: N", and "Checked in" for a runner on the course.
 - **The badge** `run_for_her`: `BDG_GLYPH.ribbon` on the `pink` special (`BDG_SPECIAL.pink`, `.sp-pink`), earned by a
   `done` row on a run, hidden until earned, popped once (`BDG_CHEER`). The badges table holds it as 'red'.
 - Privacy Notice 2026-10-05: the emergency contact row (en/ar); PRIVACY_ASK_FROM unchanged (nobody is asked again).
