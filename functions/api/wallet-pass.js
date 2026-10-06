@@ -1432,9 +1432,9 @@ async function buildPkpass(b, cfg) {
     value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
-  const heldUntil = _revealAhead(sess);
-  const meetUrl = heldUntil ? "" : _meetUrl(sess);
-  const place = heldUntil ? null : _meetPlace(sess);
+  const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String(sess && sess.meet_url || ""));
+  const meetUrl = meetHeld ? "" : _meetUrl(sess);
+  const place = meetHeld ? null : _meetPlace(sess);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -1477,7 +1477,7 @@ async function buildPkpass(b, cfg) {
         ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
-        heldUntil ? { key: "directions", label: "Meeting point", value: `Announced ${heldUntil}. Open your booking in the app to see it then.` } : { key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` },
+        ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         ...addonsBack,
         { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },

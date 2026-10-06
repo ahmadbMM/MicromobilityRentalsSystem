@@ -791,34 +791,39 @@ contact as {name, phone, relation}). FIX_OPTIONAL can be answered "I don't have 
 `staff_flag_customer`'s list, `customer_fix_save`'s rules = the account page's own: customer_set_about,
 customer_set_socials, customer_set_emergency with the own-number refusal). Apply the SQL before the app ships:
 the old staff_flag_customer silently drops names it does not know. `tests/flag-every-field.spec.ts`.
-## The meeting point and breakfast spot, told at a time staff choose (2026-10-06)
+## The breakfast spot, told at a time staff choose (2026-10-06)
 
 The owner: "add an option for saturday social ride to announce/make the spot and location visible at the time the
-staff chooses".
-- **The database** (migration 20261006150000): `sessions.reveal_at` (timestamptz; null = shown as soon as staff set
-  them, as before). While it is ahead of `now()`, `list_sessions` - riders' one read of the rides (this app, the
-  website, the wallet pass) - returns the ride with `location`, `meet_url`, `route_slug` and the breakfast stop
-  (`breakfast_name`, `_url`, `_name_ar`, `_offer_en`, `_offer_ar`) blank, and the table's read policy hides the row
-  from everyone but staff: the public key can read the table itself and the live channel goes by the same policy, and
-  RLS hides rows, not columns. The values are written where they always were (the editor, the vendor portal, a
-  template) and staff read the table whole. Nothing runs at the time: the next read carries them.
-- **Staff** set it under the breakfast picker of the Saturday ride's new-session form and editor (`_revealFieldHtml`;
-  `S.newSessReveal` / `S.editSessReveal` hold the box's own `YYYY-MM-DDTHH:MM`, Riyadh time, `_revealIso` /
-  `_revealLocal`). Any time is taken, even one after the ride gathers (the owner, 2026-10-06: "make me able to choose
-  anytime i want"); a repeat tells each week as long before or after its own day as the first; the editor writes it on its own and only when it changed. The Sessions card and its detail say "Hidden from
-  riders until ..." (`_revealStaffHtml`).
-- **Riders** (`_spotHeld(s)`: the row came without them while the time is ahead, or was read before the time and is
-  drawn less than `REVEAL_GRACE_MS` after it; a row that came with them has been told, whatever the phone's clock
-  says; on a staff device the clock decides) read "Meeting point and breakfast spot: announced <when>" (`_revealLine`,
+staff chooses", then, the same day, "show the meeting point immediately only hide the breakfast spot and location".
+- **The database** (migrations 20261006150000, 20261006170000): `sessions.reveal_at` (timestamptz; null = shown as
+  soon as staff set it, as before). While it is ahead of `now()`, `list_sessions` - riders' one read of the rides
+  (this app, the website, the wallet pass) - returns the ride with the breakfast stop (`breakfast_name`, `_url`,
+  `_name_ar`, `_offer_en`, `_offer_ar`), `location` and `route_slug` blank; `meet_url` comes as it is (170000). The
+  table's read policy hides the row from everyone but staff until then: the public key can read the table itself and
+  the live channel goes by the same policy, and RLS hides rows, not columns. The values are written where they always
+  were (the editor, the vendor portal, a template) and staff read the table whole. Nothing runs at the time: the next
+  read carries them.
+- **Staff** set it under the breakfast picker of the Saturday ride's new-session form and editor ("Announce breakfast
+  spot at", `_revealFieldHtml`; `S.newSessReveal` / `S.editSessReveal` hold the box's own `YYYY-MM-DDTHH:MM`, Riyadh
+  time, `_revealIso` / `_revealLocal`). Any time is taken, even one after the ride gathers (the owner, 2026-10-06:
+  "make me able to choose anytime i want"); a repeat tells each week as long before or after its own day as the first;
+  the editor writes it on its own and only when it changed. The Sessions card and its detail say "Breakfast spot hidden
+  until ..." (`_revealStaffHtml`).
+- **Riders** (`_spotHeld(s)`: the row came without the breakfast stop while the time is ahead, or was read before the
+  time and is drawn less than `REVEAL_GRACE_MS` after it; a row that came with it has been told, whatever the phone's
+  clock says; on a staff device the clock decides) read "Breakfast spot: announced <when>" (`_revealLine`,
   `_revealWhen`: Today / Tomorrow or the day and date, then the Riyadh time) on the date card, the one-ride card,
-  Details ("Where: Announced ...") and the ticket, where it stands in for the breakfast block and the directions button
-  is left out. `_venueName` says Meeting point, `_rideRoute` draws nothing and the calendar file has no LOCATION, never
-  the circuit. A page holding a ride whose time is still ahead reads again when it comes (`_revealArm`, within a day,
-  spread over twenty seconds, through `_rtApply`): no row changes at that moment, so no live event would tell it.
-- The wallet pass says when instead of Directions and pins no place (`_revealAhead`, scripts/wallet). The website
-  mirrors the rider side (mm-platform `spotHeld` / `revealWhen` in lib/tickets.ts: Experiences' card and Details, the
-  My Account ticket and its calendar file) and reads signed-out visitors' rides through `list_sessions(null, null)`
-  too, since the table hides the held row. `tests/spot-reveal.spec.ts`.
+  Details (under After) and the ticket, where it stands in for the breakfast block. The meeting point, its button and
+  the calendar file's LOCATION are there as on any ride; `_rideRoute` draws nothing while held. `_meetHeld(s)` (held
+  and no `meet_url` in the row: a database before 170000, or none set yet) names a meeting point without a link and
+  leaves the calendar's LOCATION out, never the circuit. A page holding a ride whose time is still ahead reads again
+  when it comes (`_revealArm`, within a day, spread over twenty seconds, through `_rtApply`): no row changes at that
+  moment, so no live event would tell it.
+- The wallet pass carries the meeting point as usual (it names no breakfast); a held row without one leaves the
+  directions and the place out (`_revealAhead`, scripts/wallet). The website mirrors the rider side (mm-platform
+  `spotHeld` / `revealWhen` in lib/tickets.ts: Experiences' card and Details, the My Account ticket and its calendar
+  file) and reads signed-out visitors' rides through `list_sessions(null, null)` too, since the table hides the held
+  row. `tests/spot-reveal.spec.ts`.
 
 ## Tickets and Wallet passes in their event's colours (2026-10-06)
 

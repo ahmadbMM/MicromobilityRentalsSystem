@@ -194,12 +194,12 @@ async function buildPkpass(b, cfg) {
     value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
-  // A Saturday ride whose meeting point is told at a time staff chose (sessions.reveal_at, 2026-10-06):
-  // list_sessions leaves it blank until then, which would read as the circuit here. The pass says when
-  // it is told instead, and pins no place.
-  const heldUntil = _revealAhead(sess);
-  const meetUrl = heldUntil ? "" : _meetUrl(sess);
-  const place = heldUntil ? null : _meetPlace(sess);
+  // A Saturday ride whose breakfast spot is told at a time staff chose (sessions.reveal_at, 2026-10-06): its
+  // meeting point shows at once (20261006170000). A row that came without it while held (a database before
+  // that) would read as the circuit here, so the pass then leaves the directions and the place out.
+  const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String((sess && sess.meet_url) || ""));
+  const meetUrl = meetHeld ? "" : _meetUrl(sess);
+  const place = meetHeld ? null : _meetPlace(sess);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -242,9 +242,7 @@ async function buildPkpass(b, cfg) {
         ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
-        heldUntil
-          ? { key: "directions", label: "Meeting point", value: `Announced ${heldUntil}. Open your booking in the app to see it then.` }
-          : { key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` },
+        ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         ...addonsBack,
         { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },
@@ -282,7 +280,7 @@ function _meetUrl(sess) {
   const u = sess && sess.meet_url ? String(sess.meet_url) : "";
   return /^https:\/\//.test(u) ? u : DIRECTIONS;
 }
-// When a ride's meeting point is told, in Riyadh time ("Fri 9 Oct, 8:00 pm"), while that is still ahead;
+// When a ride's breakfast spot is told, in Riyadh time ("Fri 9 Oct, 8:00 pm"), while that is still ahead;
 // "" when it is told already or the ride holds nothing back.
 function _revealAhead(sess) {
   const r = Date.parse((sess && sess.reveal_at) || "");

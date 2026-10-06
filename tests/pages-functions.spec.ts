@@ -203,17 +203,20 @@ test.describe('the Apple Wallet pass', () => {
     expect(ev.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'venue').value).toBe('Jeddah Yacht Club');
   });
 
-  // The meeting point told at a time staff choose (2026-10-06): list_sessions leaves it blank until then, which
-  // must not read as the circuit on the pass.
-  test('a ride whose meeting point is told later says when, and pins no place', async () => {
-    const sat = { ...circuit, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: false, meet_url: null, reveal_at: new Date(Date.now() + 864e5).toISOString() };
-    const r = await pass({ ...booking, approval: 'approved' }, sat);
-    const dir = r.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'directions');
-    expect(dir.label).toBe('Meeting point');
-    expect(dir.value).toMatch(/^Announced /);
-    expect(dir.attributedValue).toBeUndefined();
-    expect(r.json.locations).toBeUndefined();
-    expect(r.json.semantics.venueLocation).toBeUndefined();
+  // The breakfast spot told at a time staff choose (2026-10-06): the meeting point shows at once (20261006170000);
+  // a row that came without it while held (a database before that) must not read as the circuit on the pass.
+  test('a ride whose breakfast spot is told later still gives its meeting point; without one it pins no place', async () => {
+    const at = new Date(Date.now() + 864e5).toISOString();
+    const sat = { ...circuit, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: false, reveal_at: at };
+    const meet = 'https://www.google.com/maps/place/Meet/@21.6012,39.1101,17z';
+    const shown = await pass({ ...booking, approval: 'approved' }, { ...sat, meet_url: meet });
+    const dir = shown.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'directions');
+    expect(dir.value).toBe(meet);
+    expect(shown.json.locations[0]).toMatchObject({ latitude: 21.6012, longitude: 39.1101 });
+    const blank = await pass({ ...booking, approval: 'approved' }, { ...sat, meet_url: null });
+    expect(blank.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'directions')).toBeUndefined();
+    expect(blank.json.locations).toBeUndefined();
+    expect(blank.json.semantics.venueLocation).toBeUndefined();
   });
 
   test('a ride that ends at midnight or later expires the next day, not before it starts', async () => {
