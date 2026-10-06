@@ -3901,5 +3901,15 @@
   "bdgRunForHer": "Run for Her",
   "bdgRunForHerD": "Tapusin ang Run for Her.",
   "bdgRunForHerA": "Ang pink na laso, para sa lahat ng tumakbo at tumapos sa Run for Her kasama ang MicroMobility community.",
+  "rshKicker": "Bago ang karera",
+  "rshTitle": "Pagbabahagi ng iyong detalye para sa karera",
+  "rshSub": "Para makasali sa karera, ibabahagi namin ang mga detalyeng ito tungkol sa iyo sa Sela at Jeddah Yacht Club (JYC):",
+  "rshName": "Buong pangalan",
+  "rshKm": "Napiling distansya",
+  "rshNote": "Wala nang iba pang ibabahagi tungkol sa iyo, at para lamang sa karerang ito.",
+  "rshAgree": "Pumapayag ako na ibahagi ng MicroMobility ang mga detalyeng ito sa Sela at Jeddah Yacht Club (JYC) para makasali ako sa karera.",
+  "errRunShare": "Pumayag na ibahagi ang iyong detalye para sa karera upang ma-book ang iyong puwesto.",
+  "rshCol": "Pumayag magbahagi",
+  "rshNotYet": "Hindi pa",
   "runNumLabel": "Numero ng mananakbo"
 }

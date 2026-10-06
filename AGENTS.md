@@ -710,6 +710,19 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   `done` row on a run, hidden until earned, popped once (`BDG_CHEER`). The badges table holds it as 'red'.
 - Privacy Notice 2026-10-05: the emergency contact row (en/ar); PRIVACY_ASK_FROM unchanged (nobody is asked again).
   `tests/run-for-her.spec.ts`.
+- **Sharing with Sela and JYC** (the owner, 2026-10-06: "force them to approve it, that we will share the following
+  info about them with Sela/JYC in order to participate in the race"; run participants only): full name, email,
+  birth date, distance, emergency contact. Kept on the row as `queue_entries.data_share_at` (migration
+  20261006180000; entry `shareAt`, a known null asks, undefined never). Booking: `_runNext` saves the details, then
+  `_shareAsk` puts up `#share-gate` with Back; agreeing sets `S.regShare` (the run's id, `_shareAgreed`) and moves on
+  (`_runGo`); the booking sends `share_ok:true` (`_createBookings`, `_outboxRow`) and `customer_create_booking` stamps
+  the time. `_run_entry_guard` refuses a customer's new live run row without it (`RUN_SHARE`; `_bookRefused` asks
+  again); a page that skipped the step is asked in `validateRegInputs`. Booked before, or added at the desk:
+  `_pendingShare` / `_forceSharePrompt`, the waiver gate's unskippable page (Log out only), after the waiver and
+  before the rating (`_forceRatingPrompt`), live rows (waiting / waitlist / active) from today on;
+  `customer_accept_share`. Staff: the run report's "Agreed to share" column (`_REP_COLS.share`, Yes / Not yet).
+  Privacy Notice 2026-10-06: a Sela/JYC row, a consent bullet, the emergency contact row; nobody is asked again.
+  The website mirrors the page (`/api/account/pending-share`). `tests/run-share-gate.spec.ts`.
 
 ## About this event and Details (2026-10-05)
 

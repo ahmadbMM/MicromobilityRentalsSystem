@@ -1106,7 +1106,11 @@ export function formatFieldNames(r, limit = 20) {
 // the Sessions card's mark and 8 strings (+1.0 KB each); the riders' "announced <time>" lines and the read at the
 // time add +0.8 KB to the customer half, inside 211. Here, on 7a4e8185: customer 208.0, staff 440.1, core 238.9; the
 // runner reads ~1.3 / ~2.2 / ~1.3 more, which left the staff half 0.7 KB and the core 0.2.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 211, staff: 445, core: 242 };
+// Customer 211 -> 213 (2026-10-06): a Run for Her runner agrees before their details go to Sela and JYC (the owner:
+// "force them to approve it"): the page asked on the runner step and on the next visit of anyone booked before or
+// added at the desk, its 10 strings in each language, and the Privacy Notice's new rows in English and Arabic
+// (+1.5 KB). Here, on 8e3c6869: customer 208.1 -> 209.6, ~211.0 on the runner.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 213, staff: 445, core: 242 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

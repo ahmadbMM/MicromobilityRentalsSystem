@@ -420,6 +420,7 @@ window.mmLoading=(function(){
 <div id="confirm-modal"    data-host></div>
 <div id="rate-modal"       data-host></div>
 <div id="waiver-gate"      data-host></div>
+<div id="share-gate"       data-host></div>
 <div id="bike-info-modal"  data-host></div>
 <div id="acc-pwd-modal"    data-host></div>
 <div id="cust-modal"       data-host></div>
@@ -715,7 +716,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   activityWaiverTitle:'Activity waiver',activityWaiverBody:'You cannot book any ride or activity with MicroMobility until you have read and agreed to this waiver. Every activity we run carries some risk. I take part entirely at my own risk, and I alone am responsible for myself, my safety and my personal belongings. I am also responsible for any damage I cause to other people or their property. To the fullest extent permitted by law, MicroMobility, its staff and its partners are not responsible for anything that happens to me or to my belongings, including any injury, fracture, illness, loss, theft or damage, however it is caused, during the activity or in connection with it. I agree to follow the team’s and the venue’s instructions.',activityWaiverAgree:'I have read the waiver and agree on behalf of everyone on this booking',
   evWorkshopName:'T100 Triathlon Prep',partnerStf:'In partnership with Saudi Triathlon Federation',sessEventOpenHint:'Open to every signed-in customer - no tag needed. One place per account, no bikes, complimentary. Staff still approve the list, and the queue stays hidden until it is published.',
   infoAbout:'About this event',infoDetails:'Details',infoBookEvent:'Book this event',infoChooseDate:'Choose this date',infoWho:'Who',infoPrice:'Price',infoWhen:'When',infoNext:'Next date',infoWhere:'Where',infoMap:'Map',infoGroups:'Groups',infoPlaces:'Places',infoAfter:'After',infoWhoAll:'Everyone',infoWhoMembers:'Community members',infoWhoMembers18:'Community members, 18 and over',infoBreakfastAt:'Breakfast at {0}',sessDescHintDate:'An extra line in this date’s Details, under the event’s own words.',infoEvJcc:'Ride the Jeddah Corniche Circuit, the Formula 1 track, on Sunday and Tuesday evenings. Choose your bike type when you book, collect it at the booth and pay there. Every bike comes with a helmet. Up to 3 riders per account each evening; bikes go first come, first served.',infoEvComm:'Our community’s own rides, for members: the Saturday Social Ride with breakfast after, Petromin’s Wednesdays and triathlon pool sessions. Each member books a place for themselves; on the Saturday ride our team confirms the list before the ride.',infoEvRunher:'A morning run along the water at the Jeddah Yacht Club, in partnership with the Jeddah Yacht Club and Dr. Samir Abbas Hospital. Choose 3 km or 5 km when you book. For community members aged 18 and over; free, one place per account. 80 places, then a waitlist.',infoEvEvent:'Talks, classes and festivals you book a seat for. Each event says who can book (everyone, or community members) and what a seat costs. Up to 5 seats per booking; first come, first seated.',infoEvSnd96:'A ride for the Kingdom on the Jeddah Corniche Circuit, open to every signed-in customer at circuit prices. When the bikes run out, the waitlist opens.',infoDtJcc:'An evening on the circuit. Collect your bike from {collect}; the session runs {start} to {end}. Pay at the booth.',infoDtSat:'We gather at {gather} and set off at {start}. Choose your group: Beginners, 20 km to the Jeddah Yacht Club and back, or Intermediates, 40 km to just before the Marine Sciences roundabout and back. Breakfast together after the ride. Free; our team confirms the list before the ride.',infoDtPetro:'Petromin’s Wednesday evening on the circuit. Collect your bike from {collect}; circuit prices; bikes go first come, first served.',infoDtSwim:'A triathlon swim session at the pool, {start} to {end}. No bike needed. Free; our team confirms the list.',infoDtWs:'T100 Triathlon Prep, in partnership with the Saudi Triathlon Federation, {start} to {end}. Open to everyone; free; our team confirms the list.',infoDtRun:'Meet at {gather}; the run starts at {start}. Choose 3 km or 5 km when you book. Free; 80 places, then a waitlist.',
-  evRunHerName:'Run for Her',runNumLabel:'Runner number',landRunHerKm:'3 or 5 km',runPartnersAlt:'Partners: Jeddah Yacht Club and Dr. Samir Abbas Hospital',venueJyc:'Jeddah Yacht Club',runKm:'{0} km',runKmLabel:'Distance',runKmNone:'No distance',runAdultsNote:'For community members aged 18 and over on race day.',runYouLabel:'Your details',runStepTitle:'Runner details',runStepMsg:'Pick your distance. We only ask for what your account is missing.',runAgeTitle:'For runners 18 and over',runAgeMsg:'Run for Her is open to community members aged 18 and over on race day. The birth date on your account says you are under 18.',runDobReq:'Enter your birth date.',runFinishBtn:'Finished',runEmNone:'No emergency contact on this account yet.',emTitle:'Emergency contact',emSub:'Someone we can call if you need help during the run. It is saved on your account, so you only give it once.',emSubAcc:'Someone we can call if you need help at an event.',emName:'Contact’s name',emPhone:'Contact’s mobile number',emRelation:'Relationship to you',emPick:'Choose',emChange:'Change',emRel_spouse:'Spouse',emRel_parent:'Parent',emRel_sibling:'Brother or sister',emRel_child:'Son or daughter',emRel_relative:'Relative',emRel_friend:'Friend',emRel_colleague:'Colleague',emRel_other:'Other',errRunKm:'Pick 3 km or 5 km.',errRunDetails:'Some runner details are missing. Please check them and continue.',errEmName:'Enter your contact’s name.',errEmPhone:'Enter your contact’s mobile number.',errEmRelation:'Choose how they are related to you.',errEmSelf:'Your contact’s number can’t be your own.',sessEventRunHint:'A running event for community members aged 18 and over. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Each runner picks 3 km or 5 km.',bdgRunForHer:'Run for Her',bdgRunForHerD:'Finish the Run for Her.',bdgRunForHerA:'The pink ribbon, for everyone who ran and finished the Run for Her with the MicroMobility community.',
+  evRunHerName:'Run for Her',runNumLabel:'Runner number',landRunHerKm:'3 or 5 km',runPartnersAlt:'Partners: Jeddah Yacht Club and Dr. Samir Abbas Hospital',venueJyc:'Jeddah Yacht Club',runKm:'{0} km',runKmLabel:'Distance',runKmNone:'No distance',runAdultsNote:'For community members aged 18 and over on race day.',runYouLabel:'Your details',runStepTitle:'Runner details',runStepMsg:'Pick your distance. We only ask for what your account is missing.',runAgeTitle:'For runners 18 and over',runAgeMsg:'Run for Her is open to community members aged 18 and over on race day. The birth date on your account says you are under 18.',runDobReq:'Enter your birth date.',runFinishBtn:'Finished',runEmNone:'No emergency contact on this account yet.',emTitle:'Emergency contact',emSub:'Someone we can call if you need help during the run. It is saved on your account, so you only give it once.',emSubAcc:'Someone we can call if you need help at an event.',emName:'Contact’s name',emPhone:'Contact’s mobile number',emRelation:'Relationship to you',emPick:'Choose',emChange:'Change',emRel_spouse:'Spouse',emRel_parent:'Parent',emRel_sibling:'Brother or sister',emRel_child:'Son or daughter',emRel_relative:'Relative',emRel_friend:'Friend',emRel_colleague:'Colleague',emRel_other:'Other',errRunKm:'Pick 3 km or 5 km.',errRunDetails:'Some runner details are missing. Please check them and continue.',errEmName:'Enter your contact’s name.',errEmPhone:'Enter your contact’s mobile number.',errEmRelation:'Choose how they are related to you.',errEmSelf:'Your contact’s number can’t be your own.',sessEventRunHint:'A running event for community members aged 18 and over. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Each runner picks 3 km or 5 km.',bdgRunForHer:'Run for Her',bdgRunForHerD:'Finish the Run for Her.',bdgRunForHerA:'The pink ribbon, for everyone who ran and finished the Run for Her with the MicroMobility community.',rshKicker:'Before the race',rshTitle:'Sharing your details for the race',rshSub:'To take part in the race, we will share these details about you with Sela and Jeddah Yacht Club (JYC):',rshName:'Full name',rshKm:'Distance chosen',rshNote:'Nothing else about you is shared, and only for this race.',rshAgree:'I agree to MicroMobility sharing these details with Sela and Jeddah Yacht Club (JYC) so I can take part in the race.',errRunShare:'Agree to share your details for the race to book your place.',rshCol:'Agreed to share',rshNotYet:'Not yet',
   reviewPartLabel:'Participants',
   acrTitle:'Account report',acrSub:'Every account, with the columns and filters you pick. Choices are remembered on this device.',acrColTags:'Tags',acrColTagSince:'Tag since',acrColTagUntil:'Tag until',acrColAge:'Age',acrColJoined:'Joined',acrColBookings:'Bookings',acrColRides:'Rides completed',acrColCommRides:'Community rides',acrColLastRide:'Last ride',acrColActive14:'Active (14 days)',acrBdActive14:'Active in the last 14 days',acrActive14Yes:'Booking in the last 14 days',acrActive14No:'No booking in the last 14 days',acrStatActive14:'Active last 14 days',acrColActive30:'Active (30 days)',acrBdActive30:'Active in the last 30 days',acrActive30Yes:'Booking in the last 30 days',acrActive30No:'No booking in the last 30 days',acrStatActive30:'Active last 30 days',acrYes:'Yes',acrNo:'No',acrColSpent:'Spent (SAR)',acrColPending:'Upcoming',
   acrFilterTag:'Tag',acrTagAny:'Any tag',acrTagNone:'No tag',acrFilterJoined:'Joined',acrLastDays:'Last {0} days',acrFilterRides:'Rides',acrRodeAny:'Rode at least once',acrRodeNever:'Never rode',acrRode5:'5 rides or more',acrFilterActive:'Last active',acrInactive:'No ride in a year',acrFilterAge:'Age',acrAgeU18:'Under 18',acrAge1829:'18-29',acrAge3044:'30-44',acrAge45:'45 and over',acrPayHouse:'On the house',acrPayNormal:'Pays normally',acrFilterUpcoming:'Upcoming booking',acrHasUpcoming:'Has one',acrNoUpcoming:'None',
@@ -1271,7 +1272,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   activityWaiverTitle:'إقرار المشاركة',activityWaiverBody:'لا يمكنك حجز أي رحلة أو نشاط لدى مايكروموبيليتي إلا بعد قراءة هذا الإقرار والموافقة عليه. كل نشاط ننظّمه ينطوي على قدر من المخاطر، وأشارك فيه على مسؤوليتي الشخصية بالكامل، وأتحمل وحدي المسؤولية عن نفسي وسلامتي وممتلكاتي الشخصية. وأنا مسؤول عن أي أضرار ألحقها بالآخرين أو بممتلكاتهم. وإلى أقصى حد يسمح به النظام، لا تتحمل مايكروموبيليتي ولا موظفوها ولا شركاؤها أي مسؤولية عن أي شيء يحدث لي أو لممتلكاتي، بما في ذلك أي إصابة أو كسر أو مرض أو فقدان أو سرقة أو تلف، أيًّا كان سببه، أثناء النشاط أو بسببه. وأتعهد بالالتزام بتعليمات الفريق وإدارة الموقع.',activityWaiverAgree:'قرأت الإقرار وأوافق نيابةً عن كل شخص في هذا الحجز',
   evWorkshopName:'T100 التحضير للترايثلون',partnerStf:'بالشراكة مع الاتحاد السعودي للترايثلون',sessEventOpenHint:'متاحة لكل عميل مسجّل - لا حاجة لأي وسم. مقعد واحد لكل حساب، بلا دراجات، ومجانًا. يعتمد الفريق القائمة كالمعتاد، ويبقى الطابور مخفيًا حتى النشر.',
   infoAbout:'عن هذه الفعالية',infoDetails:'التفاصيل',infoBookEvent:'احجز هذه الفعالية',infoChooseDate:'اختر هذا الموعد',infoWho:'لمن',infoPrice:'السعر',infoWhen:'الموعد',infoNext:'الموعد القادم',infoWhere:'المكان',infoMap:'الخريطة',infoGroups:'المجموعات',infoPlaces:'الأماكن',infoAfter:'بعدها',infoWhoAll:'الجميع',infoWhoMembers:'أعضاء المجتمع',infoWhoMembers18:'أعضاء المجتمع ممن أتموا 18 عامًا',infoBreakfastAt:'الإفطار في {0}',sessDescHintDate:'سطر إضافي في تفاصيل هذا الموعد، تحت وصف الفعالية.',infoEvJcc:'اركب على حلبة كورنيش جدة، مضمار الفورمولا 1، مساء الأحد والثلاثاء. اختر نوع دراجتك عند الحجز، واستلمها من الكشك وادفع هناك. تأتي كل دراجة مع خوذة. حتى 3 ركاب لكل حساب في الأمسية، والدراجات بأسبقية الحضور.',infoEvComm:'جولات مجتمعنا الخاصة بالأعضاء: جولة السبت الاجتماعية مع فطور بعدها، وأربعاء بترومين، وجلسات السباحة للترايثلون. يحجز كل عضو مكانًا لنفسه، ويعتمد فريقنا قائمة جولة السبت قبل موعدها.',infoEvRunher:'جري صباحي على الواجهة البحرية في نادي جدة لليخوت، بالشراكة مع نادي جدة لليخوت ومستشفى الدكتور سمير عباس. اختر 3 كم أو 5 كم عند الحجز. لأعضاء المجتمع ممن أتموا 18 عامًا؛ مجانًا، ومكان واحد لكل حساب. 80 مكانًا، ثم قائمة انتظار.',infoEvEvent:'محاضرات ودورات ومهرجانات تحجز فيها مقعدًا. تحدد كل فعالية من يحق له الحجز (الجميع أو أعضاء المجتمع) وسعر المقعد. حتى 5 مقاعد في الحجز، والأسبقية لمن يحجز أولًا.',infoEvSnd96:'جولة لأجل الوطن على حلبة كورنيش جدة، متاحة لكل عميل مسجّل بأسعار الحلبة. وعند نفاد الدراجات تُفتح قائمة الانتظار.',infoDtJcc:'أمسية على الحلبة. استلم دراجتك من {collect}، والجلسة من {start} إلى {end}. الدفع عند الكشك.',infoDtSat:'نتجمع في {gather} وننطلق في {start}. اختر مجموعتك: المبتدئون، 20 كم إلى نادي جدة لليخوت والعودة، أو المتوسطون، 40 كم إلى ما قبل دوار العلوم البحرية والعودة. فطور معًا بعد الجولة. مجانًا، ويعتمد فريقنا القائمة قبل الجولة.',infoDtPetro:'أمسية أربعاء بترومين على الحلبة. استلم دراجتك من {collect}، بأسعار الحلبة، والدراجات بأسبقية الحضور.',infoDtSwim:'جلسة سباحة للترايثلون في المسبح، من {start} إلى {end}. لا حاجة إلى دراجة. مجانًا، ويعتمد فريقنا القائمة.',infoDtWs:'التحضير للترايثلون T100 بالشراكة مع الاتحاد السعودي للترايثلون، من {start} إلى {end}. متاحة للجميع، مجانًا، ويعتمد فريقنا القائمة.',infoDtRun:'التجمع في {gather}، وينطلق الجري في {start}. اختر 3 كم أو 5 كم عند الحجز. مجانًا؛ 80 مكانًا، ثم قائمة انتظار.',
-  evRunHerName:'نركض لأجلها',runNumLabel:'رقم العدّاء',landRunHerKm:'3 أو 5 كم',runPartnersAlt:'الشركاء: نادي جدة لليخوت ومستشفى الدكتور سمير عباس',venueJyc:'نادي جدة لليخوت',runKm:'{0} كم',runKmLabel:'المسافة',runKmNone:'بلا مسافة',runAdultsNote:'لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق.',runYouLabel:'بياناتك',runStepTitle:'بيانات العدّاء',runStepMsg:'اختر مسافتك. لا نطلب إلا ما ينقص حسابك.',runAgeTitle:'للعدّائين من 18 عامًا فأكثر',runAgeMsg:'سباق نركض لأجلها متاح لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق. تاريخ الميلاد في حسابك يُظهر أن عمرك أقل من 18 عامًا.',runDobReq:'أدخل تاريخ ميلادك.',runFinishBtn:'أنهى السباق',runEmNone:'لا توجد جهة اتصال للطوارئ في هذا الحساب بعد.',emTitle:'جهة اتصال للطوارئ',emSub:'شخص نتصل به إن احتجت إلى مساعدة أثناء السباق. تُحفظ في حسابك فلا تُطلب منك مرة أخرى.',emSubAcc:'شخص نتصل به إن احتجت إلى مساعدة في إحدى الفعاليات.',emName:'اسم جهة الاتصال',emPhone:'رقم جوال جهة الاتصال',emRelation:'صلة القرابة بك',emPick:'اختر',emChange:'تغيير',emRel_spouse:'الزوج أو الزوجة',emRel_parent:'الأب أو الأم',emRel_sibling:'الأخ أو الأخت',emRel_child:'الابن أو الابنة',emRel_relative:'قريب',emRel_friend:'صديق',emRel_colleague:'زميل عمل',emRel_other:'أخرى',errRunKm:'اختر 3 كم أو 5 كم.',errRunDetails:'بعض بيانات العدّاء ناقصة. راجعها ثم تابع.',errEmName:'أدخل اسم جهة الاتصال.',errEmPhone:'أدخل رقم جوال جهة الاتصال.',errEmRelation:'اختر صلة القرابة.',errEmSelf:'لا يمكن أن يكون رقم جهة الاتصال هو رقمك.',sessEventRunHint:'سباق جري لأعضاء المجتمع ممن أتموا 18 عامًا. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يختار كل عدّاء 3 كم أو 5 كم.',bdgRunForHer:'نركض لأجلها',bdgRunForHerD:'أكمل سباق نركض لأجلها.',bdgRunForHerA:'الشريط الوردي، لكل من ركض وأكمل سباق نركض لأجلها مع مجتمع مايكروموبيليتي.',
+  evRunHerName:'نركض لأجلها',runNumLabel:'رقم العدّاء',landRunHerKm:'3 أو 5 كم',runPartnersAlt:'الشركاء: نادي جدة لليخوت ومستشفى الدكتور سمير عباس',venueJyc:'نادي جدة لليخوت',runKm:'{0} كم',runKmLabel:'المسافة',runKmNone:'بلا مسافة',runAdultsNote:'لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق.',runYouLabel:'بياناتك',runStepTitle:'بيانات العدّاء',runStepMsg:'اختر مسافتك. لا نطلب إلا ما ينقص حسابك.',runAgeTitle:'للعدّائين من 18 عامًا فأكثر',runAgeMsg:'سباق نركض لأجلها متاح لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق. تاريخ الميلاد في حسابك يُظهر أن عمرك أقل من 18 عامًا.',runDobReq:'أدخل تاريخ ميلادك.',runFinishBtn:'أنهى السباق',runEmNone:'لا توجد جهة اتصال للطوارئ في هذا الحساب بعد.',emTitle:'جهة اتصال للطوارئ',emSub:'شخص نتصل به إن احتجت إلى مساعدة أثناء السباق. تُحفظ في حسابك فلا تُطلب منك مرة أخرى.',emSubAcc:'شخص نتصل به إن احتجت إلى مساعدة في إحدى الفعاليات.',emName:'اسم جهة الاتصال',emPhone:'رقم جوال جهة الاتصال',emRelation:'صلة القرابة بك',emPick:'اختر',emChange:'تغيير',emRel_spouse:'الزوج أو الزوجة',emRel_parent:'الأب أو الأم',emRel_sibling:'الأخ أو الأخت',emRel_child:'الابن أو الابنة',emRel_relative:'قريب',emRel_friend:'صديق',emRel_colleague:'زميل عمل',emRel_other:'أخرى',errRunKm:'اختر 3 كم أو 5 كم.',errRunDetails:'بعض بيانات العدّاء ناقصة. راجعها ثم تابع.',errEmName:'أدخل اسم جهة الاتصال.',errEmPhone:'أدخل رقم جوال جهة الاتصال.',errEmRelation:'اختر صلة القرابة.',errEmSelf:'لا يمكن أن يكون رقم جهة الاتصال هو رقمك.',sessEventRunHint:'سباق جري لأعضاء المجتمع ممن أتموا 18 عامًا. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يختار كل عدّاء 3 كم أو 5 كم.',bdgRunForHer:'نركض لأجلها',bdgRunForHerD:'أكمل سباق نركض لأجلها.',bdgRunForHerA:'الشريط الوردي، لكل من ركض وأكمل سباق نركض لأجلها مع مجتمع مايكروموبيليتي.',rshKicker:'قبل السباق',rshTitle:'مشاركة بياناتك للسباق',rshSub:'للمشاركة في السباق، سنشارك بياناتك التالية مع صلة ونادي جدة لليخوت (JYC):',rshName:'الاسم الكامل',rshKm:'المسافة المختارة',rshNote:'لا نشارك أي شيء آخر عنك، وللسباق فقط.',rshAgree:'أوافق على أن تشارك مايكروموبيليتي هذه البيانات مع صلة ونادي جدة لليخوت (JYC) لأتمكن من المشاركة في السباق.',errRunShare:'وافق على مشاركة بياناتك للسباق لتحجز مكانك.',rshCol:'وافق على المشاركة',rshNotYet:'ليس بعد',
   reviewPartLabel:'المشاركون',
   acrTitle:'تقرير الحسابات',acrSub:'كل الحسابات، بالأعمدة والفلاتر التي تختارها. تُحفظ اختياراتك على هذا الجهاز.',acrColTags:'الأوسمة',acrColTagSince:'الوسم منذ',acrColTagUntil:'الوسم حتى',acrColAge:'العمر',acrColJoined:'تاريخ الانضمام',acrColBookings:'الحجوزات',acrColRides:'الرحلات المكتملة',acrColCommRides:'رحلات المجتمع',acrColLastRide:'آخر رحلة',acrColActive14:'نشط (14 يومًا)',acrBdActive14:'النشاط في آخر 14 يومًا',acrActive14Yes:'حجز في آخر 14 يومًا',acrActive14No:'لا حجز في آخر 14 يومًا',acrStatActive14:'نشطون في آخر 14 يومًا',acrColActive30:'نشط (30 يومًا)',acrBdActive30:'النشاط في آخر 30 يومًا',acrActive30Yes:'حجز في آخر 30 يومًا',acrActive30No:'لا حجز في آخر 30 يومًا',acrStatActive30:'نشطون في آخر 30 يومًا',acrYes:'نعم',acrNo:'لا',acrColSpent:'المدفوع (ر.س)',acrColPending:'حجوزات قادمة',
   acrFilterTag:'الوسم',acrTagAny:'أي وسم',acrTagNone:'بلا وسم',acrFilterJoined:'الانضمام',acrLastDays:'آخر {0} يومًا',acrFilterRides:'الرحلات',acrRodeAny:'ركب مرة على الأقل',acrRodeNever:'لم يركب أبدًا',acrRode5:'5 رحلات أو أكثر',acrFilterActive:'آخر نشاط',acrInactive:'بلا رحلة منذ سنة',acrFilterAge:'العمر',acrAgeU18:'أقل من 18',acrAge1829:'18-29',acrAge3044:'30-44',acrAge45:'45 فأكثر',acrPayHouse:'على حساب المحل',acrPayNormal:'يدفع عاديًا',acrFilterUpcoming:'حجز قادم',acrHasUpcoming:'لديه حجز',acrNoUpcoming:'لا يوجد',
@@ -1934,6 +1935,7 @@ function setLang(lang,_fromUrl){
   if(S._fix)renderFixGate();
   if(S._rg)renderRateModal();
   if(S._wg)renderWaiverGate();
+  if(S._sg)renderShareGate();
 }
 
 
@@ -2984,6 +2986,9 @@ function entryFromDB(e){
     // The waiver the row was agreed under. null when the row says it has none (a rider added at the
     // desk), undefined when the read did not carry the column: only a known null asks (_pendingWaiver).
     waiverVersion:e.waiver_version===undefined?undefined:(e.waiver_version||null),
+    // When a Run for Her runner agreed that their details go to Sela and JYC (20261006180000): the same
+    // rule, only a known null asks (_pendingShare).
+    shareAt:e.data_share_at===undefined?undefined:(e.data_share_at||null),
     purchases:(()=>{try{return e.purchases?(Array.isArray(e.purchases)?e.purchases:JSON.parse(e.purchases)):[];}catch(_){return[];}})()};
 }
 // The fields the PII-free queue_public view carries, in entry form. Everything else on a row -
@@ -3017,7 +3022,7 @@ async function _createBookings(entries){
   const c=S.loggedIn||getSession();
   if(c&&c.session_token){
     const r=await sb.rpc('customer_create_booking',{
-      p_id:c.id,p_token:c.session_token,p_entries:entries.map(e=>({...entryToDB(e),waiver_version:_waiverVersionFor(allSessions().find(x=>x.id===e.sessionId))})),
+      p_id:c.id,p_token:c.session_token,p_entries:entries.map(e=>({...entryToDB(e),waiver_version:_waiverVersionFor(allSessions().find(x=>x.id===e.sessionId)),...(e.shareOk?{share_ok:true}:{})})),
     });
     if(!r.error){
       if(!r.data||!r.data.length)return{error:{code:'PGRST116',message:'booking refused'}};
@@ -3988,10 +3993,11 @@ function _waiverCopy(s){const k=_waiverKind(s);return k==='ride'
 // Arabic carry the full text; every other language shows the English one under a line that
 // says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice -
 // and PRIVACY_ASK_FROM with it when riders must confirm the change.
-const PRIVACY_VERSION='2026-10-05';
+const PRIVACY_VERSION='2026-10-06';
 // The last version riders must confirm. A change the owner decides needs no fresh confirmation
 // (2026-10-03: the breakfast-venue row; the same day, Instagram follower counts; 2026-10-05: the
-// emergency contact, said again where it is asked) moves PRIVACY_VERSION,
+// emergency contact, said again where it is asked; 2026-10-06: Run for Her runners' details to Sela
+// and JYC, which each runner agrees to on its own page, _pendingShare) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -4015,7 +4021,7 @@ en:[
     ['Profession and company','Asked on a community membership application and a learn-to-ride sign-up; optional on your account page. Seen only by our staff.','So our staff can get to know the riders who apply to join our riding community or sign up for a riding lesson. We never share them.'],
     ['Learn-to-ride sign-up: each learner’s name (for a child or another adult), age, gender, height and riding experience','Asked only on a learn-to-ride sign-up. Seen only by our staff.','Arranging the lesson, having a bike of the right size ready and teaching at the right level'],
     ['How you heard about us','Asked on a community membership application and a learn-to-ride sign-up; optional on your account page','Knowing how riders find us, in totals only'],
-    ['Emergency contact: the name, mobile number and relationship to you of someone we can call','Required to take part in some events, such as Run for Her; optional on your account page. Seen only by our staff. Please tell that person you gave us their details.','Calling someone for you if you need help during an event. We never contact them for anything else, and never share their details.'],
+    ['Emergency contact: the name, mobile number and relationship to you of someone we can call','Required to take part in some events, such as Run for Her; optional on your account page. Seen only by our staff, and by the hosts of an event you agree to share it with. Please tell that person you gave us their details.','Calling someone for you if you need help during an event. We never contact them for anything else, and share their details only with the hosts of an event you agree to share them with.'],
     ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
     ['Your choice about ride news, and when you made it','Recorded when you choose','Knowing whether we may send you ride news'],
   ]}},
@@ -4034,6 +4040,7 @@ en:[
     '<strong>To keep financial records:</strong> the law requires it.',
     '<strong>For anonymised totals and to improve our service:</strong> our legitimate interest. Totals never identify anyone.',
     '<strong>For optional details and ride news:</strong> your consent. You give it by filling in those fields or choosing ride news, and you can withdraw it at any time.',
+    '<strong>To share a runner’s details with the hosts of Run for Her:</strong> your consent, which we ask for before you can take part in the race.',
   ]},
   {p:'<strong>We use your data only for the purposes above.</strong> If we ever want to use it for something else, we will ask you first, unless the law allows otherwise.'},
   {h:'If you don’t give us your data'},
@@ -4053,6 +4060,7 @@ en:[
   {table:{head:['Who','What they receive, and why','Location'],rows:[
     ['Our staff','What they need to run rides','Saudi Arabia'],
     ['Petromin','The names of riders on rides we run for Petromin, and nothing else','Saudi Arabia'],
+    ['Sela and Jeddah Yacht Club (JYC)','For Run for Her, and only if you agree: your full name, email address, birth date, the distance you chose and your emergency contact, so you can take part in the race. Nothing else about you.','Saudi Arabia'],
     ['The restaurant or café hosting a Saturday ride breakfast','Your breakfast ratings and the reasons you gave for them, only when our staff choose to share them, and never your name or anything else about you','Saudi Arabia'],
     ['Supabase','Hosts our database','Frankfurt, Germany (European Union)'],
     ['Cloudflare','Hosts the website and counts visits','Worldwide network'],
@@ -4108,7 +4116,7 @@ ar:[
     ['المهنة والشركة','تُطلبان في طلب عضوية المجتمع وفي التسجيل في دروس تعلّم الركوب، وهما اختياريتان في صفحة حسابك، ولا يطّلع عليهما إلا موظفونا.','ليتعرّف موظفونا على الراكبين المتقدّمين للانضمام إلى مجتمع الركوب لدينا أو المسجّلين في دروس تعلّم الركوب. لا نشاركهما إطلاقًا.'],
     ['التسجيل في دروس تعلّم الركوب: اسم كل متعلّم (للطفل أو لشخص بالغ آخر) وعمره وجنسه وطوله وخبرته في الركوب','يُطلب في التسجيل في دروس تعلّم الركوب فقط، ولا يطّلع عليه إلا موظفونا.','ترتيب الدرس، وتجهيز دراجة بالمقاس المناسب، والتعليم بالمستوى المناسب'],
     ['كيف عرفت عنا','يُسأل في طلب عضوية المجتمع وفي التسجيل في دروس تعلّم الركوب، وهو اختياري في صفحة حسابك','معرفة كيف يصل إلينا الراكبون، في صورة أعداد إجمالية فقط'],
-    ['جهة اتصال للطوارئ: اسم شخص يمكننا الاتصال به ورقم جواله وصلة قرابته بك','مطلوبة للمشاركة في بعض الفعاليات مثل سباق نركض لأجلها، واختيارية في صفحة حسابك. لا يراها إلا موظفونا. يُرجى إبلاغ ذلك الشخص بأنك أعطيتنا بياناته.','الاتصال بشخص نيابةً عنك إن احتجت إلى مساعدة أثناء إحدى الفعاليات. لا نتواصل معه لأي غرض آخر، ولا نشارك بياناته أبدًا.'],
+    ['جهة اتصال للطوارئ: اسم شخص يمكننا الاتصال به ورقم جواله وصلة قرابته بك','مطلوبة للمشاركة في بعض الفعاليات مثل سباق نركض لأجلها، واختيارية في صفحة حسابك. لا يراها إلا موظفونا، والجهات المنظِّمة لفعالية توافق على مشاركتها معها. يُرجى إبلاغ ذلك الشخص بأنك أعطيتنا بياناته.','الاتصال بشخص نيابةً عنك إن احتجت إلى مساعدة أثناء إحدى الفعاليات. لا نتواصل معه لأي غرض آخر، ولا نشارك بياناته إلا مع الجهات المنظِّمة لفعالية توافق على مشاركتها معها.'],
     ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
     ['اختيارك بشأن أخبار الرحلات ووقت اختيارك','يُسجَّل عند اختيارك','معرفة ما إذا كان يحق لنا إرسال أخبار الرحلات إليك'],
   ]}},
@@ -4127,6 +4135,7 @@ ar:[
     '<strong>لحفظ السجلات المالية:</strong> لأن النظام يُلزمنا بذلك.',
     '<strong>للإحصاءات المجمّعة وتحسين خدماتنا:</strong> مصلحتنا المشروعة، ولا تحدد الإحصاءات هوية أحد.',
     '<strong>للبيانات الاختيارية وأخبار الرحلات:</strong> موافقتك، وتمنحها بتعبئة تلك الحقول أو باختيار أخبار الرحلات، ويمكنك سحبها في أي وقت.',
+    '<strong>لمشاركة بيانات العدّاء مع الجهات المنظِّمة لسباق نركض لأجلها:</strong> موافقتك، ونطلبها منك قبل أن تتمكن من المشاركة في السباق.',
   ]},
   {p:'<strong>لا نستخدم بياناتك إلا للأغراض المذكورة أعلاه.</strong> وإذا أردنا استخدامها لغرض آخر، فسنطلب موافقتك أولًا، ما لم يُجز النظام غير ذلك.'},
   {h:'إذا لم تزوّدنا ببياناتك'},
@@ -4146,6 +4155,7 @@ ar:[
   {table:{head:['الجهة','ما تتلقاه ولماذا','الموقع'],rows:[
     ['موظفونا','ما يحتاجونه لتشغيل الرحلات','المملكة العربية السعودية'],
     ['بترومين','أسماء الراكبين في الرحلات التي ننظّمها لبترومين فقط، ولا شيء غير ذلك','المملكة العربية السعودية'],
+    ['صلة ونادي جدة لليخوت (JYC)','لسباق نركض لأجلها، وفقط إذا وافقت: اسمك الكامل وبريدك الإلكتروني وتاريخ ميلادك والمسافة التي اخترتها وجهة اتصالك للطوارئ، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
     ['المطعم أو المقهى الذي يستضيف إفطار جولة السبت','تقييماتك للإفطار والأسباب التي ذكرتها لها، فقط عندما يختار موظفونا مشاركتها، ودون اسمك أو أي شيء آخر عنك','المملكة العربية السعودية'],
     ['Supabase','استضافة قاعدة بياناتنا','فرانكفورت، ألمانيا (الاتحاد الأوروبي)'],
     ['Cloudflare','استضافة الموقع وإحصاء الزيارات','شبكة عالمية'],
@@ -6357,7 +6367,7 @@ function doLogout(silent){
   S._pwdCheckedFor=null;_pwdMustClose();
   if(sb&&sb.auth)try{sb.auth.signOut({scope:'local'});}catch(e){} // this device only (2026-10-05): the default, 'global', ended the rider's Google or Apple session on their other devices too
   S._rName='';S._rEmail='';S._rPhone='';S._rHeight='';
-  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regStep=1;
+  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regShare=null;S.regStep=1;
   // The next person on this device starts clean: a code, add-ons or a booking being changed
   // belonged to the account that just left (a promo can be tied to one customer).
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;
@@ -6471,7 +6481,9 @@ function showView(v){
     if(S._fix){S._fix=null;renderFixGate();}
     if(S._rg){S._rg=null;renderRateModal();}
     if(S._wg){S._wg=null;renderWaiverGate();}
+    if(S._sg){S._sg=null;renderShareGate();}
   }
+  if(v!=='customer'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   document.getElementById('view-landing').classList.toggle('active',v==='landing');
   document.getElementById('view-customer').classList.toggle('active',v==='customer');
   document.getElementById('view-staff').classList.toggle('active',v==='staff');
@@ -7424,8 +7436,12 @@ async function _runNext(sess){
     if(/^em_/.test(d)){const k=d==='em_relation'?'rel':d==='em_name'?'name':'phone';const el=g('run-em-'+k);if(el)_fieldErr(el,_emErrSay(err));}
     return;
   }finally{_runBusy=false;if(btn)btn.disabled=false;}
-  S.regStep=_regNextStep(sess,2);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();
+  // The details are on the account: the runner now agrees that they go to Sela and JYC (_shareAsk),
+  // once per booking, and the step moves on when they do.
+  if(!_shareAgreed()){_shareAsk(sess);return;}
+  _runGo(sess);
 }
+function _runGo(sess){S.regStep=_regNextStep(sess,2);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();}
 // ── The Run for Her card (the owner, 2026-10-05: "themed like this instagram post", picked
 // "C, Blush"): white with the poster's pink washed in from the far corner, the three partners'
 // marks as the poster sets them (one picture, so it shrinks as one and never leaves the card),
@@ -8916,6 +8932,7 @@ function setCustTab(tab){
   else if(tab==='register')renderRegister();
   else if(tab==='account')renderAccount();
   _pushNav();
+  if(tab!=='register'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   try{_forceRatingPrompt();}catch(e){} // a pending post-ride rating is mandatory on any customer tab
 }
 function setStaffTab(tab){
@@ -11141,7 +11158,7 @@ function regNextToReview(){
 }
 function regBookAnother(){
   S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;
-  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regRiderNames=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
+  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regShare=null;S.regRiderNames=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
   renderRegister();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
 }
 // Promo codes: discount on the booking total
@@ -11291,6 +11308,7 @@ function validateRegInputs(){
   if(_rideKind(_rs)==='runher'){
     if(!_runKmOk(S.regRunKm)){toast(t('errRunKm'),'error');if(S.regStep!==2){S.regStep=2;renderRegister();}return false;}
     if(_runUnder18(cust,_rs)){_runAgeModal();return false;}
+    if(!_shareAgreed()){_shareAsk(_rs);return false;}
   }}
   // A bike-free session asks for no height and no type: only an event's extra seats carry names.
   if(!_needsBike(allSessions().find(x=>x.id===S.selSession))){
@@ -11561,7 +11579,8 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
 function _waiverAgreed(){return !!S.waiverOk&&(!S._waiverSess||S._waiverSess===S.selSession);}
 // A booking queued offline lands through customer_create_booking later, like an online one, so it
 // has to carry the waiver it was agreed under; entryToDB alone left waiver_at empty on the row.
-function _outboxRow(e,sess){const r=entryToDB(e),wv=_waiverVersionFor(sess);return wv?{...r,waiver_version:wv}:r;}
+// A runner's agreement to share their details (share_ok, Run for Her) travels the same way.
+function _outboxRow(e,sess){const r=entryToDB(e),wv=_waiverVersionFor(sess);return{...r,...(wv?{waiver_version:wv}:{}),...(e.shareOk?{share_ok:true}:{})};}
 // Every rider of one booking goes into the outbox in ONE stored write, so they are all kept or none
 // is (2026-10-05). Row by row, a full storage kept the first riders queued, sent on reconnect, while
 // the screen said the booking had failed.
@@ -11626,10 +11645,12 @@ function _bookRefused(err,sess){
     setTimeout(()=>{try{location.reload();}catch(_){}},2500);
     return;
   }
-  // Run for Her (20261005230000): under 18, a distance or a detail the account lacks.
+  // Run for Her (20261005230000): under 18, a distance or a detail the account lacks; no agreement to
+  // share the details with Sela and JYC (RUN_SHARE, 20261006180000) asks for it again.
   {const _rd=m+' '+String((err&&(err.details||err.detail))||'');
   if(/RUN_AGE/.test(_rd)){_runAgeModal();return;}
-  if(/RUN_KM|RUN_DETAILS/.test(_rd)){S.regStep=2;_runAccLoad(true);renderRegister();toast(t(/RUN_KM/.test(_rd)?'errRunKm':'errRunDetails'),'error');return;}}
+  if(/RUN_KM|RUN_DETAILS/.test(_rd)){S.regStep=2;_runAccLoad(true);renderRegister();toast(t(/RUN_KM/.test(_rd)?'errRunKm':'errRunDetails'),'error');return;}
+  if(/RUN_SHARE/.test(_rd)){S.regShare=null;const _s=(sess&&sess.id)?sess:allSessions().find(x=>x.id===S.selSession);if(_s)_shareAsk(_s);else toast(t('errRunShare'),'error');return;}}
   const rule=_rideRuleRefusal(err);
   if(rule==='MEMBERS_ONLY'){showCommMembersModal();return;}
   if(rule==='ONE_PER_SESSION'){toast(t('errAlreadyBooked'),'error');return;}
@@ -11798,7 +11819,8 @@ async function _submitReg(){
       // Community events: a reservation is not a seat until staff approve it (waitlist rows too).
       approval:_isCommBooking?'pending':null,
       rideGroup:(_hasRideGroups(sess)&&_rgOk(S.regRideGroup))?S.regRideGroup:null,
-      runKm:(_rideKind(sess)==='runher'&&_runKmOk(S.regRunKm))?Number(S.regRunKm):null
+      runKm:(_rideKind(sess)==='runher'&&_runKmOk(S.regRunKm))?Number(S.regRunKm):null,
+      shareOk:_rideKind(sess)==='runher'&&_shareAgreed() // customer_create_booking stamps data_share_at (20261006180000)
     },i===0));
     _applyPromoToEntries(entries);
     const _offline=(typeof navigator!=='undefined'&&navigator.onLine===false);
@@ -11909,7 +11931,7 @@ async function _submitReg(){
     _sendBookingEmail(entries[0]); // confirmation email (no-op unless Brevo is configured server-side)
     S.lastTickets=entries.map(e=>getQueue().find(q=>q.id===e.id)||e);
     S._rHeight='';S._rDate='';S.selSession=null;S.regType=null;
-    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
+    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regShare=null;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
     S.waiverOk=false;S._waiverSess=null; // agreed for THIS booking; the next one asks again
     const _qn=entries.map(e=>e.queueNum);
     const numStr=qty>1?`#${_qn[0]} – #${_qn[_qn.length-1]}`:`#${_qn[0]}`;
@@ -12665,7 +12687,9 @@ function _pendingRatingId(){
 function _forceRatingPrompt(){
   if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||_isStaffHost())return;
   if(document.getElementById('pwd-gate'))return;
+  if(S._sg&&!S._sg.gate)return; // a runner answering the booking's own ask is not interrupted
   if(S._wg||_forceWaiverPrompt())return; // a desk-added booking's waiver comes first (2026-10-04)
+  if(S._sg||_forceSharePrompt())return; // then a runner's agreement to share their details (2026-10-06)
   const id=_pendingRatingId();if(id)openRateModal(id,true);
 }
 function openRateModal(id,forced){
@@ -12830,6 +12854,92 @@ async function acceptWaiverGate(){
   try{_cacheSave();}catch(_){}
   S._wg=null;renderWaiverGate();
   _forceRatingPrompt(); // the next ride's waiver, if there is one, then any rating
+}
+// ── Run for Her: a runner agrees that their details go to Sela and JYC (the owner, 2026-10-06) ──
+// "add a pop up for all customers that are booking or already have booked or even added to the run
+// for her and force them to approve it, that we will share the following info about them with
+// Sela/JYC in order to participate in the race": full name, email address, birth date, the distance
+// chosen and the emergency contact; for the run's participants only. Agreeing is kept on the runner's
+// row (queue_entries.data_share_at, 20261006180000), and the database refuses a customer's run booking
+// without it (RUN_SHARE).
+// - Booking: the runner step asks once its details are saved (_runNext), and moves on when the runner
+//   agrees; the booking carries share_ok and customer_create_booking stamps the time. S.regShare is the
+//   run it was given for, so it is never carried onto another booking.
+// - Booked before this, or added at the desk: the waiver gate's page, after any waiver and before the
+//   rating (_forceRatingPrompt), for each run still ahead that holds a live row of the account with no
+//   agreement. No close, no backdrop, no Escape; Log out is the only other way off
+//   (customer_accept_share). A database without the function lets the runner through.
+function _shareAgreed(){return !!S.regShare&&S.regShare===S.selSession;}
+function _pendingShare(){
+  const cust=S.loggedIn;if(!cust||S._sgOff)return null;
+  const today=todayStr();let best=null;
+  getQueue().forEach(e=>{
+    if(e.customerId!==cust.id||e.shareAt!==null||!['waiting','waitlist','active'].includes(e.status))return;
+    const d=String(e.sessionDate||e.sessionId||'').slice(0,10);
+    if(d<today||_rideKind(allSessions().find(x=>x.id===e.sessionId))!=='runher')return;
+    if(!best||d<best.d)best={d,e};
+  });
+  return best&&best.e;
+}
+function _forceSharePrompt(){
+  const e=_pendingShare();if(!e)return false;
+  S._sg={sid:e.sessionId,day:e.sessionDay,km:e.runKm,gate:true,ok:false,saving:false,net:false};renderShareGate();return true;
+}
+// The booking's ask: the same page with Back in place of Log out.
+function _shareAsk(sess){S._sg={sid:sess.id,km:S.regRunKm,gate:false,ok:false,saving:false,net:false};renderShareGate();}
+function _shareBack(){S._sg=null;renderShareGate();}
+function _sgTick(on){const g=S._sg;if(!g||g.saving)return;g.ok=!!on;g.net=false;renderShareGate();}
+function renderShareGate(){
+  const g=S._sg,m=document.getElementById('share-gate');if(!m)return;
+  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix&&!S._afx&&!S._rg&&!S._wg)document.body.classList.remove('fix-open');return;}
+  const s=allSessions().find(x=>x.id===g.sid);
+  if(!s){S._sg=null;return renderShareGate();}
+  const ev=_evName(s),ven=_venueName(s),km=_runKmOk(g.km)?' · '+_runKmTxt(g.km):'';
+  const items=[t('rshName'),t('authEmail'),t('birthDateLabel'),t('rshKm')+km,t('emTitle')];
+  const box=m.querySelector('.auth-backdrop'),top=box?box.scrollTop:0;
+  document.body.classList.add('fix-open');
+  m.style.display='block';
+  m.innerHTML=`<div class="auth-backdrop"><div class="pg-box fx-box wg-box sg-box" role="dialog" aria-modal="true" aria-labelledby="sg-title" aria-describedby="sg-sub">
+    <div class="fx-kicker"><span class="fx-flag" aria-hidden="true">${_cuIc('run',12)}</span>${t('rshKicker')}</div>
+    <h2 id="sg-title" class="pg-title">${t('rshTitle')}</h2>
+    <div class="wg-sess">
+      <div class="wg-ev">${esc(ev)}</div>
+      <div class="wg-ln">${_cuIc('cal',15)}<span>${esc(dayLabel(s.day||g.day))} · ${esc(shortDate(s.session_date||g.sid))}</span></div>
+      <div class="wg-ln">${_cuIc('clock',15)}<bdi>${esc(sessionTime(s))}</bdi></div>
+      ${ven&&ven!==ev?`<div class="wg-ln">${_cuIc('pin',15)}<span>${esc(ven)}</span></div>`:''}
+    </div>
+    <p id="sg-sub" class="pg-sub sg-sub">${t('rshSub')}</p>
+    <ul class="sg-list">${items.map(x=>`<li>${_cuIc('tick',15)}<span>${esc(x)}</span></li>`).join('')}</ul>
+    <p class="sg-note">${t('rshNote')}</p>
+    <label class="wg-agree${g.ok?' on':''}"><input type="checkbox" class="wg-cb"${g.ok?' checked':''}${g.saving?' disabled':''} data-on-change="${_on("_sgTick",_P("checked"))}"><span>${t('rshAgree')}</span></label>
+    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    <button type="button" class="pg-btn"${g.ok&&!g.saving?'':' disabled'} data-on-click="${_on("acceptShareGate")}">${g.saving?`<span class="pg-spin" aria-hidden="true"></span>${t('pgSaving')}`:t('wgBtn')}</button>
+    ${g.gate?`<button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>`
+      :`<button type="button" class="gate-out" data-on-click="${_on("_shareBack")}">${t('regBackBtn')}</button>`}
+  </div></div>`;
+  const nb=m.querySelector('.auth-backdrop');if(nb&&top)nb.scrollTop=top;
+  if(!g.shown){g.shown=true;const b=m.querySelector('.sg-box');if(b){b.setAttribute('tabindex','-1');try{b.focus({preventScroll:true});}catch(_){}}}
+}
+async function acceptShareGate(){
+  const g=S._sg;if(!g||!g.ok||g.saving)return;
+  // The booking's ask: kept for this run, sent with the booking, and the runner step moves on.
+  if(!g.gate){
+    S.regShare=g.sid;S._sg=null;renderShareGate();
+    const s=allSessions().find(x=>x.id===g.sid);if(s&&S.regStep===2&&S.selSession===g.sid)_runGo(s);
+    return;
+  }
+  const c=S.loggedIn||getSession();
+  if(!c||!c.session_token){g.net=true;renderShareGate();return;}
+  g.saving=true;g.net=false;renderShareGate();
+  let res;try{res=await sb.rpc('customer_accept_share',{p_id:c.id,p_token:c.session_token,p_session_id:g.sid});}catch(e){res={error:e};}
+  if(S._sg!==g)return; // signed out meanwhile
+  if(res&&res.error&&_rpcAbsent(res.error)){S._sgOff=true;S._sg=null;renderShareGate();_forceRatingPrompt();return;}
+  if(!res||res.error||typeof res.data!=='number'||res.data<0){g.saving=false;g.net=true;renderShareGate();return;}
+  const at=new Date().toISOString().replace(/\.\d+Z$/,'Z');
+  getQueue().forEach(e=>{if(e.sessionId===g.sid&&e.customerId===c.id&&e.shareAt===null)e.shareAt=at;});
+  try{_cacheSave();}catch(_){}
+  S._sg=null;renderShareGate();
+  _forceRatingPrompt(); // another run, if there is one, then any rating
 }
 
 // ── My Rides rider profile: tier, streak, badges, member card, share card ──
@@ -24105,6 +24215,7 @@ const _REP_COLS=[
   {k:'member',  key:'colMember'},
   {k:'phone',   key:'phoneNum'},
   {k:'em',      key:'emTitle'}, // Run for Her's emergency contacts, off until ticked: read from the server when on (_repEmLoad)
+  {k:'share',   key:'rshCol'}, // and whether each runner agreed that their details go to Sela and JYC (data_share_at, 2026-10-06)
   {k:'height',  key:'colHeight'},
   {k:'bike',    key:'colBike'},
   {k:'payment', key:'colPayment'},
@@ -24116,7 +24227,7 @@ const _REP_SECTIONS=[
   {k:'sales',   key:'cashSalesTitle'},
 ];
 function _repDefaults(){
-  return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,em:0,height:0,bike:1,payment:1,status:1},
+  return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,em:0,share:1,height:0,bike:1,payment:1,status:1},
           sections:{summary:1,addons:1,sales:1},
           fType:'all',fStatus:'all',fPay:'all',fMember:'all'};
 }
@@ -24173,7 +24284,7 @@ function _repRows(sessId){
 // ticked and ignored on every other sheet), and no height or bike where nobody rides one (a runner's
 // line read "Bike: None").
 function _repColFits(sess,k){
-  if(k==='km'||k==='em')return _rideKind(sess)==='runher';
+  if(k==='km'||k==='em'||k==='share')return _rideKind(sess)==='runher';
   if(k==='member')return !sess||_isApprovalRide(sess)||_rideKind(sess)==='runher';
   if(k==='height'||k==='bike')return !sess||_needsBike(sess);
   return true;
@@ -25006,6 +25117,7 @@ function exportSessionExcel(km){
     member: {h:[t('colMember')],v:x=>[t(_isSatMember(x.lead)?'memberYes':'memberNo')]},
     phone:  {h:[t('repColPhone'),t('repColEmail')],v:x=>[x.lead.phone||'',x.lead.email||'']},
     em:     {h:[t('emTitle')],v:x=>{const c=_repEmText(x.lead);return[c?[c.name,c.rel,c.phone].filter(Boolean).join(' · '):''];}},
+    share:  {h:[t('rshCol')],v:x=>[x.lead.shareAt?t('repYes'):x.lead.shareAt===null?t('rshNotYet'):'']},
     height: {h:[t('heightLabel')+' ('+t('cmUnit')+')'],v:x=>[x.heights]},
     bike:   {h:[t('repColType'),t('colBike')],v:x=>[x.types,x.bikes]},
     payment:{h:[t('repPriceSar'),t('addonsLabel'),t('colPayment')],v:x=>[x.totalPrice,x.addonNames,x.payLabel]},
@@ -25219,6 +25331,7 @@ function printSessionReport(km){
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     phone:  e=>`<td><bdi>${esc(fmtPhone(e.phone))||'—'}</bdi></td>`,
     em:     e=>{const c=_repEmText(e);return`<td>${c?`${esc(c.name)}${c.rel?`<span class="rp-pm">${esc(c.rel)}</span>`:''}<br><bdi dir="ltr">${esc(c.phone)}</bdi>`:'—'}</td>`;},
+    share:  e=>`<td>${e.shareAt?t('repYes'):e.shareAt===null?`<span class="rp-amber">${t('rshNotYet')}</span>`:'—'}</td>`,
     height: e=>`<td>${e.height?esc(e.height)+' '+t('cmUnit'):'—'}</td>`,
     bike:   e=>{const bikes=getAssignedBikes(e).map(b=>b.name).join(', ');
                 const fit=_entryFitText(e);return`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},

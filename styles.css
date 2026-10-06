@@ -5349,6 +5349,15 @@ body.fix-open{overflow:hidden;}
 .wg-agree{display:flex;align-items:center;gap:12px;margin-top:12px;border:1.5px solid rgba(15,18,21,.15);border-radius:12px;padding:14px 16px;cursor:pointer;min-height:52px;font-weight:600;font-size:14px;line-height:1.4;color:#0f1215;}
 .wg-agree.on{border-color:#008f52;background:#e8f6ee;}
 .wg-cb{appearance:auto;-webkit-appearance:checkbox;width:20px;height:20px;flex:none;accent-color:#008f52;margin:0;}
+/* A Run for Her runner agrees that their details go to Sela and JYC (#share-gate, renderShareGate,
+   2026-10-06): the waiver page's card, layer and tick, the run above the five details shared. */
+#share-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
+#share-gate .sg-box:focus,#share-gate .sg-box:focus-visible{outline:none;}
+#share-gate .sg-sub{margin-top:16px;}
+.sg-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:10px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px;background:#fff;}
+.sg-list li{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;line-height:1.35;color:#0f1215;overflow-wrap:anywhere;}
+.sg-list .cu-ic{flex-shrink:0;color:#008f52;}
+.sg-note{margin-top:10px;font-size:12.5px;line-height:1.45;color:#4f565c;}
 .rg-bfn{margin-top:-4px;font-size:12px;line-height:1.4;color:#4f565c;}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}

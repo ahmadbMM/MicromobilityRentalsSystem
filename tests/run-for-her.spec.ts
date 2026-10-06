@@ -83,7 +83,15 @@ test.describe('@customer:runher Run for Her', () => {
     await expect(page.locator('#run-em-phone-err')).toContainText('can’t be your own');
     await page.fill('#run-em-phone', '0551234567');
     await page.locator('#run-next').click();
+    // the details are saved; the runner agrees that they go to Sela and JYC before moving on (2026-10-06)
+    const sg = page.locator('#share-gate');
+    await expect(sg.locator('#sg-title')).toHaveText('Sharing your details for the race');
+    await expect(sg.locator('.sg-list li')).toHaveText(['Full name', 'Email address', 'Birth date', 'Distance chosen · 5 km', 'Emergency contact']);
+    await expect(sg.locator('.gate-out')).toHaveText('Back');
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
     await expect(page.locator('#reg-waiver-cb')).toBeVisible();
+    await expect(sg.locator('.sg-box')).toHaveCount(0);
     expect(sent.map((x) => x.u)).toEqual(['customer_update_profile', 'customer_set_emergency']);
     expect(sent[0].b).toMatchObject({ p_name: 'Sara Haddad', p_email: 'sara@example.com', p_phone: '+966500000001', p_birth_date: '1995-05-05', p_nationality: 'SA' });
     expect(sent[1].b).toMatchObject({ p_name: 'Nora Haddad', p_phone: '+966551234567', p_relation: 'sibling' });
@@ -92,7 +100,7 @@ test.describe('@customer:runher Run for Her', () => {
     await expect(page.locator('#tab-register .run-km-chip')).toHaveText('5 km');
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(1);
-    expect(rows[0]).toMatchObject({ session_id: RUN, run_km: 5, type_preference: 'None', price: 0 });
+    expect(rows[0]).toMatchObject({ session_id: RUN, run_km: 5, type_preference: 'None', price: 0, share_ok: true });
     expect(String(rows[0].waiver_version)).toMatch(/^activity-/);
     const tk = page.locator('#tab-register .ticket-card');
     await expect(tk).toContainText('Runner number');
@@ -111,15 +119,42 @@ test.describe('@customer:runher Run for Her', () => {
     await expect(page.locator('.run-em-card')).toContainText('Brother or sister');
     await page.locator('#run-km-wrap [data-km="3"]').click();
     await page.locator('#run-next').click();
+    // Back keeps the runner on the step; agreeing moves on, and is not asked again on the way back through
+    const sg = page.locator('#share-gate');
+    await expect(sg.locator('.sg-list li').nth(3)).toHaveText('Distance chosen · 3 km');
+    await sg.locator('.gate-out').click();
+    await expect(sg.locator('.sg-box')).toHaveCount(0);
+    await expect(page.locator('#run-km-wrap')).toBeVisible();
+    await page.locator('#run-next').click();
+    await expect(sg.locator('.pg-btn')).toBeDisabled();
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
     await expect(page.locator('#reg-waiver-cb')).toBeVisible();
+    await page.evaluate('S.regStep=2;renderRegister()');
+    await page.locator('#run-next').click();
+    await expect(page.locator('#reg-waiver-cb')).toBeVisible();
+    await expect(sg.locator('.sg-box')).toHaveCount(0);
   });
 
   test('the server’s runner refusals are said in the rider’s words', async ({ page }) => {
     await custBoot(page, { 'rpc:customer_profile': profile({ name: 'Sara Haddad', email: 'sara@example.com' }), 'rpc:customer_emergency': contact,
       'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'Runners must be 18 or over.', details: 'RUN_AGE' } } }, { name: 'Sara Haddad' });
-    await page.evaluate(`S.selEvent='runher';S.selSession='${RUN}';S.regRunKm=5;S.waiverOk=true;S._waiverSess='${RUN}';S.regStep=3;setCustTab('register')`);
+    await page.evaluate(`S.selEvent='runher';S.selSession='${RUN}';S.regRunKm=5;S.regShare='${RUN}';S.waiverOk=true;S._waiverSess='${RUN}';S.regStep=3;setCustTab('register')`);
     await page.evaluate('submitReg()');
     await expect(page.locator('#confirm-modal')).toContainText('For runners 18 and over');
+  });
+
+  test('a booking that reaches the server without the runner\'s agreement asks for it (RUN_SHARE)', async ({ page }) => {
+    await custBoot(page, { 'rpc:customer_profile': profile({ name: 'Sara Haddad', email: 'sara@example.com' }), 'rpc:customer_emergency': contact,
+      'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'Agree to share your details for the race.', details: 'RUN_SHARE' } } }, { name: 'Sara Haddad' });
+    await page.evaluate(`S.selEvent='runher';S.selSession='${RUN}';S.regRunKm=5;S.regShare='${RUN}';S.waiverOk=true;S._waiverSess='${RUN}';S.regStep=3;setCustTab('register')`);
+    await page.evaluate('submitReg()');
+    await expect(page.locator('#share-gate #sg-title')).toBeVisible();
+    expect(await page.evaluate('S.regShare')).toBe(null);
+    // and a page that skipped the step is asked before anything is sent
+    await page.locator('#share-gate .gate-out').click();
+    await page.evaluate('submitReg()');
+    await expect(page.locator('#share-gate #sg-title')).toBeVisible();
   });
 
   test('My Account keeps the emergency contact and saves a new one', async ({ page }) => {

@@ -3901,5 +3901,15 @@
   "bdgRunForHer": "Run for Her",
   "bdgRunForHerD": "Termina la Run for Her.",
   "bdgRunForHerA": "El lazo rosa, para todos los que corrieron y terminaron la Run for Her con la comunidad MicroMobility.",
+  "rshKicker": "Antes de la carrera",
+  "rshTitle": "Compartir tus datos para la carrera",
+  "rshSub": "Para participar en la carrera, compartiremos estos datos tuyos con Sela y el Jeddah Yacht Club (JYC):",
+  "rshName": "Nombre completo",
+  "rshKm": "Distancia elegida",
+  "rshNote": "No se comparte nada más sobre ti, y solo para esta carrera.",
+  "rshAgree": "Acepto que MicroMobility comparta estos datos con Sela y el Jeddah Yacht Club (JYC) para poder participar en la carrera.",
+  "errRunShare": "Acepta compartir tus datos para la carrera para reservar tu plaza.",
+  "rshCol": "Aceptó compartir",
+  "rshNotYet": "Todavía no",
   "runNumLabel": "Número de corredor"
 }
