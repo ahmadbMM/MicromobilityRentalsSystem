@@ -52,4 +52,20 @@ test.describe('@customer:account bug hunt oct 7 (s05)', () => {
     const r = await page.evaluate(`(async()=>{const p=accRemovePhoto();doLogout(true);await p;return {li:!!S.loggedIn,ss:!!getSession()};})()`);
     expect(r).toEqual({ li: false, ss: false });
   });
+
+  test('a changed email another account holds is said as such, not as the generic save error', async ({ page }) => {
+    const me = { id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '+966500000001' };
+    await stubSupabase(page, {
+      sessions: [], bikes: [], queue_entries: [], 'rpc:customer_profile': [me],
+      'rpc:customer_update_profile': { __rpcError: { status: 409, code: '23505', message: 'email_taken' } },
+    });
+    await loginCustomer(page, me);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+    await page.waitForFunction(`!S._profHydrating`);
+    await page.fill('#acc-email', 'taken@example.com');
+    await page.evaluate(`saveAccount()`);
+    await expect(page.locator('#acc-err')).toHaveText('An account with this email already exists.');
+  });
 });

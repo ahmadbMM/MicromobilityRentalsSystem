@@ -13812,7 +13812,7 @@ async function saveAccount(){
       if(v.type_preference&&S.regBikeTypes.length===0)S.regBikeTypes=[v.type_preference];
       toast(t('accountSaved'));renderAccount();renderTopbarRight();return;
     }
-  }catch(e){const _m=String((e&&e.message)||e||''),_d=String((e&&e.details)||'');setErr(_isNameCharsErr(e)?t('errNameChars'):_isNameShortErr(e)?t('errNameShort'):/BAD_INPUT/.test(_m)&&_d==='workplace'?t('errWorkplace'):/BAD_INPUT/.test(_m)&&_d==='profession'?t('errProfession'):/phone_taken/.test(_m)?t('errPhoneExists'):/RATE_LIMITED/.test(_m)?t('errTooManyTries'):t('errSaveAccount'));} // phone_taken: customer_update_profile refuses a number another account holds; RATE_LIMITED: a new phone or email is metered per network
+  }catch(e){const _m=String((e&&e.message)||e||''),_d=String((e&&e.details)||'');setErr(_isNameCharsErr(e)?t('errNameChars'):_isNameShortErr(e)?t('errNameShort'):/BAD_INPUT/.test(_m)&&_d==='workplace'?t('errWorkplace'):/BAD_INPUT/.test(_m)&&_d==='profession'?t('errProfession'):/phone_taken/.test(_m)?t('errPhoneExists'):/email_taken/.test(_m)||(e&&e.code==='23505'&&/email/i.test(_m))?t('errEmailExists'):/RATE_LIMITED/.test(_m)?t('errTooManyTries'):t('errSaveAccount'));} // phone_taken / email_taken: customer_update_profile refuses a number or an email another account holds (email_taken since 2026-10-07; before it, the unique index's own 23505); RATE_LIMITED: a new phone or email is metered per network
 }
 
 // ── The emergency contact on My Account (2026-10-05) ──────────────────────────────────────────
