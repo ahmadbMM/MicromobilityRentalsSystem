@@ -11,12 +11,14 @@ const SAT = '2099-05-02';
 const RUN = '2099-05-03-rh';
 const PW = '2099-05-06-pw';
 const POOL = '2099-05-04-sw';
+const EV = '2099-05-07-ev';
 const slots = '{"_time":"19:00 - 21:00"}';
 const sessions = [
   { id: NIGHT, day: 'Friday', session_date: NIGHT, capacity: 12, status: 'open', created_at: 1, bike_slots: slots },
   { id: SAT, day: 'Saturday', session_date: SAT, capacity: 20, status: 'open', created_at: 2, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, spots: 20, bike_slots: slots },
   { id: RUN, day: 'Saturday', session_date: '2099-05-03', capacity: 50, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'runher', needs_approval: false, bike_slots: slots },
   { id: POOL, day: 'Sunday', session_date: '2099-05-04', capacity: 12, status: 'open', created_at: 5, event_kind: 'community', ride_kind: 'swim', needs_approval: false, bike_slots: slots },
+  { id: EV, day: 'Thursday', session_date: '2099-05-07', capacity: 20, spots: 20, status: 'open', created_at: 6, event_kind: 'community', ride_kind: 'event', title: 'Class', needs_approval: false, bike_slots: slots },
   { id: PW, day: 'Wednesday', session_date: '2099-05-06', capacity: 10, status: 'open', created_at: 4, event_kind: 'community', ride_kind: 'petromin', paid_ride: true, needs_approval: false, bike_slots: slots },
 ];
 const customers = [{ id: 'c1', name: 'Amal Member', created_at: '2026-01-01T00:00:00Z' }, { id: 'c2', name: 'Badr Member', created_at: '2026-01-01T00:00:00Z' }];
@@ -61,10 +63,10 @@ test.describe('@staff:bookings no group add on a Saturday ride, Run for Her or t
 
   test('Add rider has no Group on a Saturday ride, Run for Her or the pool session, and a Group picked elsewhere ends on switching to one', async ({ page }) => {
     await boot(page);
-    await show(page, PW);
+    await show(page, EV);
     await page.evaluate(`showCommAddModal()`);
     const toggles = page.locator('#comm-add-modal .cmy-ca-toggles');
-    await expect(toggles).toHaveCount(1); // Petromin keeps its Group
+    await expect(toggles).toHaveCount(1); // a ticketed event keeps its Group (Petromin takes no Add rider since 2026-10-07)
     await page.evaluate(`_on_caGroup(true)`);
     expect(await page.evaluate('S._caGroup')).toBe(true);
     await page.evaluate(`_on_caSess(${JSON.stringify(SAT)})`);

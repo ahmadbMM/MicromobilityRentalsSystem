@@ -47,22 +47,25 @@ test('Waiting adds the rider waiting, with a number and the selection pending', 
 });
 
 test('Final list approves at once; a ride without approval shows no destination toggle', async ({ page }) => {
-  await boot(page);
+  // a ticketed event: no approval (circuit and Petromin nights take no Add rider since 2026-10-07)
+  const EV = '2099-03-02';
+  await boot(page, { sessions: [sess(LIVE), saturday, sess(EV, { event_kind: 'community', ride_kind: 'event', title: 'Class', needs_approval: false, spots: 20 })] });
   const rows = inserts(page);
   await page.evaluate(`S.sfSession=${JSON.stringify(COMM)};showCommAddModal()`);
   await expect(dest(page, 'Final list')).toHaveClass(/active/);
   await page.evaluate(`S._caSel='c1';_saveCommAdd()`);
   await expect.poll(() => rows.length).toBe(1);
   expect(rows[0]).toMatchObject({ status: 'waiting', approval: 'approved' });
-  await page.selectOption('#comm-add-modal select', LIVE);
+  await page.selectOption('#comm-add-modal select', EV);
   await expect(dest(page, 'Final list')).toHaveCount(0);
   await expect(dest(page, 'Waiting')).toHaveCount(0);
 });
 
 test('a rider staff put on the house is added on the house to a paid ride, as from every other add; the others pay', async ({ page }) => {
-  // A rider on the house, added to Petromin Wednesday from this dialog on 2026-09-29, was left owing 57.50.
+  // A rider on the house, added to Petromin Wednesday from this dialog on 2026-09-29, was left owing 57.50. Petromin
+  // takes no Add rider since 2026-10-07, so a paid event stands in for it.
   const PW = '2099-03-04';
-  const petromin = sess(PW, { day: 'Wednesday', event_kind: 'community', ride_kind: 'petromin', paid_ride: true, needs_approval: false });
+  const petromin = sess(PW, { day: 'Wednesday', event_kind: 'community', ride_kind: 'event', title: 'Paid class', paid_ride: true, price: 57.5, needs_approval: false, spots: 20 });
   await boot(page, {
     sessions: [sess(LIVE), saturday, petromin],
     customers: [

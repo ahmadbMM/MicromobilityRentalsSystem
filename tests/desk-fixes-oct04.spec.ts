@@ -116,9 +116,10 @@ test('the booking editor greys out a night the save would call full (finished ri
 });
 
 // ── Walk-in: no Road Carbon where the ride has none ─────────────────────────────
-test('the walk-in offers no Road Carbon on a Saturday ride, and a carried-over pick books as Any', async ({ page }) => {
+// (A workshop ride: the Saturday ride this was written for takes no walk-ins since 2026-10-07.)
+test('the walk-in offers no Road Carbon on a community ride, and a carried-over pick books as Any', async ({ page }) => {
   const sat = { id: '2099-02-07', day: 'Saturday', session_date: '2099-02-07', capacity: 20, spots: 20, status: 'open', created_at: 1,
-    bike_slots: '{"_time":"06:00 - 08:00"}', event_kind: 'community', ride_kind: 'saturday', needs_approval: true };
+    bike_slots: '{"_time":"06:00 - 08:00"}', event_kind: 'community', ride_kind: 'workshop', needs_approval: false };
   await staff(page, { sessions: [sat] });
   const posted: Record<string, unknown>[] = [];
   page.on('request', (r) => { if (r.method() === 'POST' && /queue_entries/.test(r.url())) { const b = JSON.parse(r.postData() || '[]'); posted.push(...(Array.isArray(b) ? b : [b])); } });
@@ -127,7 +128,8 @@ test('the walk-in offers no Road Carbon on a Saturday ride, and a carried-over p
   expect(await page.evaluate('S._wiType')).toBe('Any');
   await page.evaluate(`_wiInsertRiders('2099-02-07',[{name:'Carbon Fan',height:180,type:'Road Carbon'}],'',null)`);
   await expect.poll(() => posted.length).toBe(1);
-  expect(posted[0]).toMatchObject({ name: 'Carbon Fan', type_preference: 'Any' });
+  expect(posted[0]).toMatchObject({ name: 'Carbon Fan' });
+  expect(posted[0].type_preference).not.toBe('Road Carbon'); // a ride without bikes books None; never the carbon pick
 });
 
 // ── Forced password: a failed check is asked again ─────────────────────────────

@@ -298,7 +298,6 @@ test('Add rider offers an own bike only where the ride takes owners', async ({ p
   const own = page.locator('#comm-add-modal input[type="checkbox"]');
   await expect(own).toHaveCount(1);
   await own.check();
-  await page.selectOption('#comm-add-modal select', LIVE);               // a circuit night: no owners
-  await expect(own).toHaveCount(0);
-  expect(await page.evaluate('S._caOwn')).toBe(false);
+  // a circuit night (the one ride without owners) takes no Add rider since 2026-10-07: not even in the list
+  await expect(page.locator(`#comm-add-modal select option[value="${LIVE}"]`)).toHaveCount(0);
 });

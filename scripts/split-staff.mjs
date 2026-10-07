@@ -1154,7 +1154,9 @@ export function formatFieldNames(r, limit = 20) {
 // kinds of work with their rates, hours per day and ride, what we owe over a range or picked rides, Mark as paid,
 // payments with undo, pay slips and statements, 88 strings in each language (the Team part; the English strings sit
 // in the core). Here, on d5c7f43e: staff 471.8 (~474.0 on the runner), core 251.1 (~252.4).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 475, core: 254 };
+// Staff 475 -> 478 (2026-10-07): no Walk-in on the pool session, a Saturday ride or Run for Her, no Add rider on
+// Petromin or a circuit night (+0.1 KB); the staff half was at 472.0 here (~474.2 on the runner), inside 2.5 KB of 475.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 478, core: 254 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

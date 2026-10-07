@@ -118,9 +118,10 @@ test('a reserved rider shows the held bike under the status', async ({ page }) =
 test('the phone header keeps every queue action on screen', async ({ page }, info) => {
   await boot(page, [row('q1')]);
   const head = page.locator('#tab-queue .section-header');
-  for (const name of ['Add group', 'Add rider', 'Print Report']) {
+  for (const name of ['Add group', 'Print Report']) {
     await expect(head.locator('button', { hasText: name })).toBeVisible();
   }
+  await expect(head.locator('button', { hasText: 'Add rider' })).toHaveCount(0); // not on a circuit night (2026-10-07)
   await expect(page.locator('#tab-queue button[aria-label="More"]')).toHaveCount(0);
   if (info.project.name === 'mobile') {
     await expect(page.locator('#tab-queue .scan-fab')).toBeVisible();

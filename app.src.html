@@ -6779,6 +6779,12 @@ function _isApprovalRide(s){return _isCommunity(s)&&(s.needs_approval!==false);}
 // too"): their riders come one at a time, each with their own ride group, distance or age check. The roster's
 // Add group, its ride list and the Add rider dialog's Group all ask this.
 function _noGroupAdd(s){const k=s&&_rideKind(s);return k==='saturday'||k==='runher'||k==='swim';}
+// No walk-ins on the Triathlon Pool Session, a Saturday ride or Run for Her, and no Add rider on Petromin or a
+// circuit night (the owner, 2026-10-07: "remove the walk in button from triathlon pool session saturday social
+// ride and run for her, and remove add rider from petromin and jcc sessions"). The roster's buttons (and the
+// phone's walk-in button) go on those rides, and neither dialog offers them in its ride list.
+function _noWalkin(s){const k=s&&_rideKind(s);return k==='swim'||k==='saturday'||k==='runher';}
+function _noAddRider(s){const k=s&&_rideKind(s);return k==='petromin'||k==='jcc';}
 const _apprSessIds={has:sid=>_isApprovalRide(_sessGet(sid))};
 const _commSessIds={has:sid=>_isCommunity(_sessGet(sid))};
 const _noCarbonSessIds={has:sid=>_noCarbon(_sessGet(sid))};
@@ -16510,7 +16516,7 @@ function skeletonList(){return`<div class="mm-loading mm-loading--inline" role="
 // Every session, of every kind. A toggle inside the modal switches between adding one
 // member and adding several as a group; JCC groups have their own walk-in-style modal
 // (showJccGroupModal) with free-text riders and a group name.
-function _caSessList(){return allSessions().filter(s=>s.status!=='deleted').sort(_sessOrder);}
+function _caSessList(){return allSessions().filter(s=>s.status!=='deleted'&&!_noAddRider(s)).sort(_sessOrder);}
 function showCommAddModal(group){
   S._caGroup=!!group;
   const sess=_caSessList();
@@ -20294,7 +20300,7 @@ function _on_showWalkinModal_1(event,el){if(event.target===el)closeWalkinModal()
 function _on_showWalkinModal_2(event,el){setTimeout(_wiHideSuggest,150)}
 function _on_showWalkinModal_3(event,el){_wiSync();showWalkinModal()}
 function showWalkinModal(){
-  const open=allSessions().filter(x=>x.status!=='deleted'&&!(!isAdmin()&&_isApprovalRide(x))).sort(_sessOrder); // every session, closed ones after the live; front desk stays off approval rides
+  const open=allSessions().filter(x=>x.status!=='deleted'&&!_noWalkin(x)&&!(!isAdmin()&&_isApprovalRide(x))).sort(_sessOrder); // every session that takes walk-ins, closed ones after the live; front desk stays off approval rides
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   const selId=(S.sfSession!=='all'&&open.find(x=>x.id===S.sfSession))?S.sfSession:open[0].id;
   S._wiType=S._wiType||'Any';
@@ -21698,7 +21704,7 @@ function renderQRow(e){
           const nPend=(_qBySession().get(S.sfSession)||[]).filter(e=>_apprOf(e)==='pending'&&e.status==='waiting').length;
           return `${nPend?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("bulkApprovePending")}">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'} rq-nw" data-on-click="${_on("publishCommResults")}">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
         })():''}
-        <button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button>${S.sfSession!=='all'&&_noGroupAdd(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>`}${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
+        ${S.sfSession!=='all'&&_noWalkin(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button>`}${S.sfSession!=='all'&&_noGroupAdd(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>`}${isAdmin()&&_caSessList().length&&!(S.sfSession!=='all'&&_noAddRider(_sessGet(S.sfSession)))?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
         ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" class="rq-print" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn rq-nw" data-on-click="${_on("printDaySheet")}">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
         <div class="density-toggle hide-mobile">
           <button class="density-btn${S.queueDensity==='comfortable'?' active':''}" data-on-click="${_on("setQueueDensity","comfortable")}" title="${t('comfortableTip')}">${_artIcon('grid',13)}</button>
@@ -21879,8 +21885,8 @@ function renderQRow(e){
          scrolls, instead of riding away with the filter bar and the header (2026-09-22).
          Icons only: a ticket to scan one, a walker for a walk-up. -->
     <div class="fab-row">
-      <button type="button" class="fab-btn walkin-fab" data-on-click="${_on("showWalkinModal")}"
-        title="${esc(t('addWalkin').replace(/^\+ /,''))}" aria-label="${esc(t('addWalkin').replace(/^\+ /,''))}">${_artIcon('walk',24)}</button>
+      ${S.sfSession!=='all'&&_noWalkin(_sessGet(S.sfSession))?'':`<button type="button" class="fab-btn walkin-fab" data-on-click="${_on("showWalkinModal")}"
+        title="${esc(t('addWalkin').replace(/^\+ /,''))}" aria-label="${esc(t('addWalkin').replace(/^\+ /,''))}">${_artIcon('walk',24)}</button>`}
       <button type="button" class="fab-btn scan-fab" data-on-click="${_on("openScanModal")}"
         title="${esc(t('scanBtn'))}" aria-label="${esc(t('scanBtn'))}">${_artIcon('ticket',24)}</button>
     </div>`;
