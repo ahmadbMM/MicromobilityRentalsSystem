@@ -29287,7 +29287,7 @@ function _ahRender(force){
   const lastRide=done.map(x=>String(x.sessionDate||'')).filter(Boolean).sort().pop()||'';
   const kpi=(v,l,cls)=>`<div class="ah-kpi${cls?' '+cls:''}"><div class="ah-kpi-v">${v}</div><div class="ah-kpi-l">${l}</div></div>`;
   const facts=[
-    firstSeen?`${t('custMemberSince')}: ${shortDate(_ksaDayOf(firstSeen)||String(firstSeen).slice(0,10))}`:'', // a timestamp: its Riyadh day, not its UTC one (2026-10-07)
+    firstSeen?`${t('custMemberSince')}: ${shortDate(String(firstSeen))}`:'', // the whole stamp: shortDate reads it as the Riyadh day; cut to 10 it was the UTC day (2026-10-07)
     lastRide?`${t('acrColLastRide')}: ${shortDate(lastRide)}`:'',
     favType?`${t('custFavType')}: ${typeLabel(favType)}`:'',
     avgRating?`${t('custAvgRating')}: ${avgRating}/10`:'',
@@ -29355,7 +29355,7 @@ function _ahRender(force){
       ${purch.length?`<div class="ah-sec">${t('custPurchTitle')} <span class="ah-n">${_money(ptot)}</span></div>
       <div class="ah-purch">${purch.slice().sort((p,q)=>new Date(q.created_at||0)-new Date(p.created_at||0)).map(r=>`<div class="ah-purch-row">
         <div class="ah-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="ah-muted">×${esc(r.qty)}</span>`:''}</div>
-        <span class="ah-muted">${r.created_at?shortDate(_ksaDayOf(r.created_at)||String(r.created_at).slice(0,10)):''}</span>
+        <span class="ah-muted">${r.created_at?shortDate(String(r.created_at)):''}</span>
         <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
     </div>
