@@ -30491,14 +30491,6 @@ function _riderEntry(r){return r&&r.matched_entry_id?_qGet(r.matched_entry_id)||
 function _riderKey(r){return (r.session_id||'')+'|'+(r.booking_no||('id:'+r.id));}
 function _riderNoNum(r){const m=String(r&&r.booking_no||'').match(/(\d+)\s*$/);return m?Number(m[1]):Infinity;}
 function _riderParty(r){return r&&r.booking_no?(S.riders||[]).filter(x=>x.booking_no===r.booking_no&&(x.session_id||'')===(r.session_id||'')).sort((a,b)=>(Number(a.party_no)||1)-(Number(b.party_no)||1)):[r];}
-// The booking's emergency contacts (the Petromin form asks them since 2026-10-07, migration 20261007235900: one
-// pair for the party, on every row; the employee's row is read so a row from before still finds it): the name,
-// how they are related, and the number to call. '' while there is none (a database without the columns too).
-function _riderEmHtml(r,n){
-  const lead=_riderParty(r)[0]||r,x=r['emergency'+n+'_phone']?r:lead,ph=x['emergency'+n+'_phone'];if(!ph)return'';
-  const rel=x['emergency'+n+'_relation'];
-  return`${esc(x['emergency'+n+'_name']||'')}${EM_RELS.includes(rel)?` · ${esc(t('emRel_'+rel))}`:''} · <a href="tel:${esc(ph)}" dir="ltr" class="iv-link">${esc(ph)}</a>`;
-}
 function _riderPartyNo(r){return Number(r&&r.party_no)||1;}
 // A party folds to one row until opened, as on the Bookings tab; a search opens every party.
 function _riderPartyIsOpen(no){return !!(S.ridersSearch&&S.ridersSearch.trim())||!!(S._riderPartyOpen&&S._riderPartyOpen.has(no));}
@@ -30731,8 +30723,6 @@ function _renderRiderModal(){
         ${(()=>{const pl=_riderParty(r);return pl.length>1?row(t('ridersParty'),esc(t('ridersPartyOf').replace('{0}',_riderPartyNo(r)).replace('{1}',pl.length))+(_riderPartyNo(r)>1?` · ${esc(t('ridersWith').replace('{0}',pl[0].name||''))}`:'')):'';})()}
         ${row(t('ridersCompany'),esc(r.company||''))}
         ${row(t('authPhone'),r.phone?`<a href="https://wa.me/${esc(_waDigits(r.phone))}" target="_blank" rel="noopener" dir="ltr" class="iv-link">${esc(r.phone)}</a>`:'')}
-        ${row(t('emTitle'),_riderEmHtml(r,''))}
-        ${row(t('em2Title'),_riderEmHtml(r,'2'))}
         ${row(t('colHeight'),r.height?`<span class="q-height">${esc(String(r.height))} ${t('cmUnit')}</span>`:'')}
         ${row(t('bikeTypeLabel'),`<span class="ci-type">${typeBadge(r.type_preference)}</span>`)}
         ${row(t('colSession'),r.session_id?`${shortDate(r.session_id.slice(0,10))}${sess?' · '+esc(sessionTime(sess)):''}`:'')}

@@ -859,7 +859,7 @@ test.describe('a party under one booking number', () => {
   // The form can send companions: each is a row of their own under the employee's badge and
   // booking number, party_no 2..N. The tab shows who is with whom; the number opens the employee.
   const party = [
-    { ...base, id: 5, booking_no: 'P-005', party_no: 1, badge: 'E-90', company: 'Petromin', name: 'Dana Lead', phone: '+966500000005', emergency_name: 'Omar Lead', emergency_phone: '+966551230011', emergency_relation: 'spouse', height: 170, type_preference: 'Road', match_kind: 'none', submissions: 1, checked_in_at: null, checked_out_at: null, updated_at: '2099-02-08T10:00:00Z' },
+    { ...base, id: 5, booking_no: 'P-005', party_no: 1, badge: 'E-90', company: 'Petromin', name: 'Dana Lead', phone: '+966500000005', height: 170, type_preference: 'Road', match_kind: 'none', submissions: 1, checked_in_at: null, checked_out_at: null, updated_at: '2099-02-08T10:00:00Z' },
     { ...base, id: 6, booking_no: 'P-005', party_no: 2, badge: 'E-90', company: 'Petromin', name: 'Dana Kid', phone: null, height: 150, type_preference: 'Hybrid', match_kind: 'none', submissions: 1, checked_in_at: null, checked_out_at: null, updated_at: '2099-02-08T10:00:00Z' },
     { ...base, id: 7, booking_no: 'P-005', party_no: 3, badge: 'E-90', company: 'Petromin', name: 'Dana Friend', phone: null, height: 180, type_preference: 'Mountain', match_kind: 'none', submissions: 1, checked_in_at: null, checked_out_at: null, updated_at: '2099-02-08T10:00:00Z' },
   ];
@@ -886,16 +886,6 @@ test.describe('a party under one booking number', () => {
     await expect(rows.nth(1)).toContainText('with Dana Lead');
     await expect(rows.nth(2)).toContainText('Rider 3 of 3');
     await expect(page.locator('#pm-host tbody tr', { hasText: 'P-001' })).not.toContainText('Rider 1 of');   // a solo row says nothing
-  });
-
-  test('the booking\'s emergency contact shows on every rider of the party (Petromin form, 2026-10-07)', async ({ page }) => {
-    await boot(page);
-    await page.evaluate(`openRiderModal('6')`); // a companion: the pair is read from the employee's row
-    const box = page.locator('#rider-modal .modal-box');
-    await expect(box).toContainText('Omar Lead');
-    await expect(box).toContainText('Spouse');
-    await expect(box.locator('a[href="tel:+966551230011"]')).toBeVisible();
-    await expect(box).not.toContainText('Second emergency contact');
   });
 
   test('scanning the number opens the employee; a companion cannot change the shared badge', async ({ page }) => {

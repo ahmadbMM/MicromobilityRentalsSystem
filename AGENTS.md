@@ -967,6 +967,6 @@ customers and force them even add it in the sign up page and all forms currently
   and none on file, `_fixCopy` says why (`emReqTitle`, `emReqSub`).
 - Privacy Notice row (en/ar): one contact required on every account, asked at sign-up or before the next booking;
   no further confirmation beyond the 2026-10-07 one (the check-up itself asks).
-- The website mirrors it: the community and learn-to-ride forms ask it on their account step, the Petromin form asks
-  it of the employee (rider_registrations, its own migration), and the website's account area has a forced pop-up.
+- The website mirrors it: the community and learn-to-ride forms ask it on their account step, and the website's account
+  area has a forced pop-up. NOT the Petromin form (the owner, 2026-10-07: "dont ask for a contact on petromin form").
   `tests/emergency-required.spec.ts`.
