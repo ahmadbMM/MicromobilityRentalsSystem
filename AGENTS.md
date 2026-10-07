@@ -858,3 +858,37 @@ same way the event picker card is themed".
   <folder>` (375x98-point strips and logos inside 160x50, @1x/@2x/@3x). To redraw one, run it, replace the base64 in
   pass-images.js and `npm run build:wallet` (from a worktree add `--preserve-symlinks`, see above). tests/pages-functions.spec.ts checks each kind's colours and art.
 
+## A second emergency contact (2026-10-07)
+
+The owner: "add a second optional emergency contact field show it in the customer my account field and allow the
+staff to flag it". The first contact (Run for Her, 2026-10-05) is unchanged; the second is always optional.
+- **The database** (migration 20261007150000): `customers.emergency2_name/phone/relation`, with the first contact's
+  checks and column grants (authenticated only). `customer_emergency` answers both (six columns; dropped and made
+  again because its return type grew, so an old page still reads the first three). `customer_set_emergency2` saves
+  or clears the second. Both setters refuse the other contact's number (`em_same`, last nine digits, like
+  `em_self`), and a second contact never stands alone: clearing the first moves the second up
+  (`customer_set_emergency`, `customer_set_emergency2`, and `customer_fix_save` after its loop).
+  `emergency2` is a flaggable field: both `*_fields_known` checks, `staff_flag_customer`'s list and
+  `customer_fix_save` (patched in place, marker `(20261007150000)`, so it composes with 20261007120000's patch in
+  either order): its "I don't have one" clears it, its answer is checked against the first contact as it stands
+  after the loop, and the flag history records it as {name, phone, relation} like the first.
+- **The rider**: `_emOf` maps customer_emergency's row to `S._em.v` = {name, phone, rel, name2, phone2, rel2, two};
+  `two` is false on a database without the columns, and then no second contact is offered anywhere. `_emRead(pre,
+  own, other)` refuses `other`'s number (`errEmSame`); every save of one contact passes the other's number.
+  My Account's emergency card carries the second under the first once the first is saved and `v.two` is
+  true, and steps it aside while the first is being changed (`_accEm2Html`: Add a second contact, the three boxes
+  `acc-em2-*`, or the saved card with Change and Remove; `saveEmergency2` / `_accEm2Remove` call
+  `customer_set_emergency2`, Remove with all three blank). The correction page asks `emergency2` like the first
+  (`fx-em2-`, `_fixEm2Inp`); `_fixCurLoad` reads both when either is asked, and `_fixSave` checks the second last,
+  against the first as it will stand. `tests/second-emergency-customer.spec.ts`.
+- **Staff**: the sync carries neither contact. `_emFetch(cols, ask)` reads both, or the first alone on a database
+  from before the migration (42703, `_em2Gone`), and remembers which in `S._em2Db`. The account editor shows the
+  second fieldset (`cf-em2-*`, `_cfEmSetHtml`) only once its columns were read (`d.em2In`), and `_cfEmVal` writes both:
+  each contact all three boxes or none, never one number for both, and a second typed alone is saved as the first.
+  The row menu's Emergency contact (`_runEmShow`) shows the second under the first with its own Call / WhatsApp. The
+  flag dialog offers "Second emergency contact" only on a database known to have it (`_flagOffered`, `_flagPicked`,
+  `_em2Probe`, asked once per page before the first dialog draws): the old `staff_flag_customer` drops a name it does
+  not know and withdraws a request left with none. **The Run for Her report keeps the first contact only**: that
+  sheet goes to Sela and JYC, and a runner agrees to share one emergency contact. `tests/second-emergency-staff.spec.ts`.
+- Privacy Notice 2026-10-07: the emergency contact row names a second person (en/ar); PRIVACY_ASK_FROM unchanged
+  (nobody is asked again). The Run for Her share consent still lists "Emergency contact" as one item.

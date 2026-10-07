@@ -1119,7 +1119,13 @@ export function formatFieldNames(r, limit = 20) {
 // under the new ride's fare, the light reload keeping riders' names, the check-in's pending bike lookup...). Here,
 // on 01c23a1d + the hunt: customer 209.6 -> 210.2, staff 440.1 -> 442.0, core 238.9 -> 240.0; the runner reads
 // ~1.4 / ~2.2 / ~1.3 more, which left 0.8 KB on the staff half and 0.7 on the core.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 215, staff: 448, core: 246 };
+// Customer 215 -> 217, staff 448 -> 450 (2026-10-07): a second, optional emergency contact (the owner: "add a second
+// optional emergency contact field show it in the customer my account field and allow the staff to flag it"): My
+// Account's Add / Change / Remove and the correction page's answer, the account editor's second fieldset, the row
+// menu's second card and the flag dialog's database check, 4 strings in each language. Here, on eaf80c7a (WhatsApp on
+// My Account) + it: customer 212.9, staff 445.1, core 242.1, ~214.3 / ~447.3 / ~243.4 on the runner, which left the
+// customer and the staff half 0.7 KB each; 217 / 450 keep ~2.7.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 450, core: 246 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

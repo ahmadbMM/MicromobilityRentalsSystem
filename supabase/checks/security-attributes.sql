@@ -261,8 +261,9 @@ with expected(fname, want_definer, note) as (values
   ('customer_waitlist_ranks',   true,  'reads the session''s waitlist for the caller''s own rows; token-checked'),
   ('staff_rider_party_move',    true,  'moves a Petromin party, its night counter and its bookings; checks is_staff() itself'),
   -- Run for Her (20261005230000)
-  ('customer_emergency',        true,  'reads the caller''s own emergency contact; token-checked'),
+  ('customer_emergency',        true,  'reads the caller''s own emergency contacts, both of them (20261007150000); token-checked'),
   ('customer_set_emergency',    true,  'writes the caller''s own emergency contact; token-checked'),
+  ('customer_set_emergency2',   true,  'writes the caller''s own second emergency contact (20261007150000); token-checked'),
   ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules')
 )
 select e.fname,

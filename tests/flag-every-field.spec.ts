@@ -8,8 +8,10 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 
 const S1 = '2099-01-01';
 const sessions = [{ id: S1, session_date: S1, day: 'Sunday', status: 'open', capacity: 20, created_at: 1, event_kind: 'jcc' }];
+// The second emergency contact too (20261007150000): the dialog offers it once the database is known to have it, and the
+// stub answers the dialog's probe as a database that has (tests/second-emergency-staff.spec.ts covers one that has not).
 const ALL = ['name', 'email', 'phone', 'whatsapp', 'birth_date', 'gender', 'nationality', 'country', 'city', 'height', 'photo',
-  'type_preference', 'profession', 'workplace', 'heard_from', 'instagram', 'x', 'tiktok', 'linkedin', 'emergency'];
+  'type_preference', 'profession', 'workplace', 'heard_from', 'instagram', 'x', 'tiktok', 'linkedin', 'emergency', 'emergency2'];
 
 test.describe('@staff:community flag every field', () => {
   test('the dialog lists every field the account holds, with what it holds, and asks for the new ones', async ({ page }) => {
@@ -113,6 +115,9 @@ test.describe('@customer:fix the rider answers every kind of field', () => {
     await page.click('#fx-save');
     await expect(page.locator('.fx-item[data-fx="emergency"] .pg-msg')).toContainText('can’t be your own');
     expect(sent).toHaveLength(0);
+    // the page moves the focus to the refused item 80 ms after the save (_fixFocusErr): typing before that, a slow
+    // machine sent the number into the name box
+    await expect(page.locator('#fx-em-name')).toBeFocused();
     await page.fill('#fx-em-phone', '0551234567');
     await page.click('#fx-save');
     await expect.poll(() => sent.length).toBe(1);

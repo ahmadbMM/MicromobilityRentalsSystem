@@ -8048,6 +8048,19 @@ body:not(.view-staff) .cu-tk-actions{display:grid;grid-template-columns:repeat(a
 body:not(.view-staff) .cu-tk-actions>*{width:100%;min-width:0;white-space:nowrap;}
 body:not(.view-staff) #cancel-reason-modal .dk-flex8{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:10px;}
 body:not(.view-staff) #cancel-reason-modal .dk-flex8>*{width:100%;min-width:0;}
+/* ── My Account's emergency card (2026-10-07): the optional second contact sits under the first, past a hairline.
+   Each contact's line keeps its words at the start and its buttons at the end; where the row is too narrow for
+   both, the buttons step under the words. An empty error line under a saved contact takes no room. Scoped by
+   the account tab: the card's own id begins like a hex colour, which the build's colour check reads as one. ── */
+body:not(.view-staff) #tab-account .acc-em2{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+body:not(.view-staff) #tab-account .acc-em2-t{font-size:var(--fs-15);font-weight:700;color:var(--ink);margin-bottom:4px;}
+body:not(.view-staff) #tab-account .run-em-card{flex-wrap:wrap;}
+body:not(.view-staff) #tab-account .run-em-card>.cu-f1-min0{flex:1 1 180px;min-width:0;}
+body:not(.view-staff) #tab-account .acc-em2-acts{display:flex;flex-wrap:wrap;gap:8px;}
+body:not(.view-staff) #tab-account .acc-em2-err:empty{min-height:0;margin:0;}
+/* The correction page's emergency contacts: its box is a phone's width at every size, so the number and the
+   relationship stack there as they do on a phone (side by side, a desktop left the number some 40px wide). */
+body:not(.view-staff) .fx-em .form-row{grid-template-columns:1fr;gap:0;}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -8326,6 +8339,8 @@ body .landing-event-card.ev-runher .rf-route{display:block;width:100%;max-width:
 .mr-badge.sp-pink,.badge-pop-box.sp-pink{--sp1:#ffc9da;--sp2:#f2789f;--sp3:#c2416e;--spg:242,120,159;--sph:255,236,243;}
 .run-em-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
 .run-em-acts a{display:inline-flex;align-items:center;gap:6px;text-decoration:none;}
+/* The row menu's Emergency contact popup: the second contact's heading, under the first one's buttons (2026-10-07). */
+#confirm-modal .run-em-h2{margin:16px 0 8px;font-size:12px;font-weight:700;color:var(--muted);}
 
 /* ── "About this event" and "Details" (the owner, 2026-10-05: picked 1B, 2B, 3B) ───────────────
    Words under each event card on the picker and under each date's time, each a button of its own

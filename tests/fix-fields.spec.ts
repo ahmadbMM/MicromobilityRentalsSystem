@@ -197,7 +197,9 @@ test('staff tick fields in a report-builder dialog and the row says what was ask
   const dlg = page.locator('#confirm-modal .fl-box');
   await expect(dlg).toBeVisible();
   await expect(dlg.locator('.fl-preview')).toContainText('Let’s get your details right'); // the rider's message, above the fields
-  await expect(dlg.locator('.fl-row')).toHaveCount(20); // every field of the account since 2026-10-06, WhatsApp since 2026-10-07 (flag-every-field.spec.ts)
+  // every field of the account since 2026-10-06 (flag-every-field.spec.ts), WhatsApp since 2026-10-07, and the second emergency
+  // contact, which the dialog offers because the stub answers its probe as a database that has the columns: 21
+  await expect(dlg.locator('.fl-row')).toHaveCount(21);
   await expect(dlg.locator('.fl-row[data-flag="email"] .fl-val')).toHaveText('amal@example.test');
   await expect(page.locator('#fl-send')).toBeDisabled();
   await dlg.locator('.fl-row[data-flag="phone"]').click();
