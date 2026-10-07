@@ -943,7 +943,7 @@
     #tab-register .cu-mod-hint{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
     #tab-register .cu-mod-ic{display:inline-flex;align-items:center;color:var(--green);}
     #tab-register .cu-mod-note{padding:16px 18px;margin-bottom:20px;}
-    #tab-register .cu-mod-qn{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);}
+    #tab-register .cu-mod-qn{margin-inline-start:auto;font-size:11px;font-weight:700;color:var(--muted);}
     #tab-register .cu-mod-title{font-size:14px;font-weight:800;color:var(--green);}
     #tab-register .cu-mt10{margin-top:10px;}
     #tab-register .cu-mt14{margin-top:14px;}
@@ -1091,7 +1091,7 @@
     input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.6);cursor:pointer;}
     select{appearance:none;-webkit-appearance:none;
       background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
-      background-repeat:no-repeat;background-position:right 13px center;padding-right:34px;}
+      background-repeat:no-repeat;background-position:right 13px center;padding-inline-end:34px;}
     /* City of residence waits for a country: dimmed, label and all, until one is chosen. */
     #acc-city:disabled,#cf-city:disabled{opacity:.45;cursor:not-allowed;}
     .form-group:has(>#acc-city:disabled)>label,.form-group:has(>#cf-city:disabled)>label{opacity:.45;}
@@ -2503,7 +2503,9 @@
       .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
 
 
-      .hide-mobile{display:table-cell!important;}
+      /* cells only, and never the roster's empty Session placeholder (.rq-none, hidden at every width): it stood as
+         a blank column on a tablet, and the density toggle turned from a flex row into a table cell (2026-10-07) */
+      :is(td,th).hide-mobile:not(.rq-none){display:table-cell!important;}
       .queue-table th,.queue-table td{padding:11px 12px;}
       .sess-admin-table th,.sess-admin-table td{padding:10px 12px;}
 
@@ -2584,7 +2586,7 @@
       input[type="date"],input[type="time"],input[type="password"],select{
         padding:12px 14px;font-size:16px;border-radius:4px;min-height:46px;
       }
-      select{padding-right:34px;} /* the shorthand above took back the room the chevron sits in */
+      select{padding-inline-end:34px;} /* the shorthand above took back the room the chevron sits in */
       .filter-select{height:40px;font-size:13px;min-height:40px;}
 
       .stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;flex-wrap:unset;}
@@ -2892,7 +2894,7 @@
     #sess-host .ss-ad-all{font-size:11px;margin-bottom:10px;}
     #sess-host .ss-ad-cat{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:6px;}
     #sess-host .ss-ad-list{display:flex;flex-wrap:wrap;gap:8px;}
-    #sess-host .ss-ad{display:flex;align-items:center;gap:8px;border-radius:4px;padding:6px 11px 6px 6px;cursor:pointer;font-family:inherit;text-align:start;}
+    #sess-host .ss-ad{display:flex;align-items:center;gap:8px;border-radius:4px;padding:6px;padding-inline-end:11px;cursor:pointer;font-family:inherit;text-align:start;}
     #sess-host .ss-ad-on{border:1.5px solid var(--green);background:rgba(var(--green-rgb),.08);}
     #sess-host .ss-ad-off{border:1.5px solid var(--border);background:var(--s2);}
     #sess-host .ss-ad-img{width:34px;height:34px;border-radius:3px;object-fit:contain;background:var(--photo-bg);flex-shrink:0;}
@@ -3832,6 +3834,10 @@
     /* Selects get their chevron back. The `background` shorthand above also cleared the
        chevron image the base select rule draws, so every dropdown read as an empty text box. */
     body select{background:#ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23888' d='M6 8L0 0h12z'/%3E%3C/svg%3E") no-repeat right 13px center;}
+    /* The chevron and its room sit at the end edge in Arabic and Urdu, as the staff selects', the birth date's
+       and the correction page's do (2026-10-07): a rider's country, city and every other select drew it at the
+       start, before the words. The dial codes read left to right there and keep theirs on the right. */
+    html[dir="rtl"] body select:where(:not(.phone-cc,.auth-cc-row select)){background-position:left 13px center;}
     body input:focus,body select:focus,body textarea:focus{
       border-color:#077a4b;box-shadow:inset 0 0 0 1px #077a4b;outline:none;}
     body input[type="checkbox"]{accent-color:#00b467;width:22px;height:22px;border-radius:6px;}
@@ -5471,8 +5477,8 @@ body.view-staff .q-card.row-reserved{background:rgba(29,78,216,.04);border-color
    #pm-host. Each rule is scoped by that id, so it outranks every class rule (the body.view-staff
    layer included) as the inline style did. The booking pop-up and the walk-in form are beside
    .rw-dup. */
-#pm-host .iv-party{border-left:2px solid rgba(var(--green-rgb),.2);}
-#pm-host .iv-bno{font-variant-numeric:tabular-nums;font:inherit;font-weight:800;cursor:pointer;border:0;}
+#pm-host .iv-party{border-inline-start:2px solid rgba(var(--green-rgb),.2);}
+#pm-host .iv-bno{font:inherit;font-variant-numeric:tabular-nums;font-weight:800;cursor:pointer;border:0;} /* the font shorthand first: after it, it reset the digits' width (2026-10-07) */
 #pm-host .iv-pof{font-size:11px;color:var(--muted);margin-top:3px;}
 #pm-host .iv-pcount{font-size:10px;color:var(--green);font-weight:800;margin-top:3px;}
 #pm-host .iv-pbtn{margin-top:4px;white-space:nowrap;}
@@ -6936,7 +6942,7 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 #scan-modal .bkm-smsg{min-height:18px;font-size:12px;color:var(--muted);margin-top:10px;text-align:center;font-weight:600;}
 #scan-modal .bkm-sexc{width:100%;margin-top:6px;}
 #scan-modal .bkm-chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;padding:0;margin:6px 0 8px;}
-#scan-modal .bkm-chip{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 3px 3px 9px;font-size:12px;font-weight:700;}
+#scan-modal .bkm-chip{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px;padding-inline-start:9px;font-size:12px;font-weight:700;}
 #scan-modal .bkm-chipr{display:inline-flex;align-items:center;gap:4px;background:var(--s3);border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-size:12px;font-weight:700;}
 #scan-modal .bkm-dim{opacity:.6;}
 #scan-modal .bkm-chipx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;}
@@ -7153,7 +7159,7 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
   background:var(--sf-head);border:1px solid var(--sf-line2);border-radius:var(--r-md);}
 #checkin-modal .ci-chain .btn-sm{min-height:38px;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #checkin-modal .ci-chain .btn-sm[disabled]{opacity:.45;cursor:default;}
-#checkin-modal .ci-autonext{display:block;margin:6px 0 0 auto;min-height:34px;font-size:12px;}
+#checkin-modal .ci-autonext{display:block;margin:6px 0 0;margin-inline-start:auto;min-height:34px;font-size:12px;}
 #checkin-modal .ci-chain-pos{font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;}
 @media(min-width:1024px){
   body.view-staff.view-staff #checkin-modal .modal-backdrop.ci-drawer-bg{justify-content:flex-end;align-items:stretch;padding:0;
@@ -7840,10 +7846,10 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-cols::after{backgr
    forced dark mode cannot invert it. */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th){background:var(--night);border-color:var(--night);color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-num{color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-num-label,.ticket-label,.cu-tk-when,.cu-tk-sec,.cu-tk-total-k,.price-note,.cu-hint-mt3,.cu-tr-in,.cu-tr-out,.cu-tk-label,.cu-k10){color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-num-label,.ticket-label,.cu-tk-when,.cu-tk-sec,.cu-tk-total-k,.price-note,.cu-hint-mt3,.cu-tr-in,.cu-tr-out,.cu-tr-dur,.cu-tk-label,.cu-k10){color:var(--night-ink-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-value,.tk-venue,.cu-tr-name,.cu-tk-total-v,.cu-tk-ad-name,.cu-rv-name){color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-dw,.tk-collect,.cu-c-green,.cu-pay-ok){color:var(--neon);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-pay-due{color:var(--night-amber);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.cu-pay-due,.cu-tr-wl){color:var(--night-amber);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-tk-total-v{color:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-header,.ticket-cols,.cu-tr-row,.cu-tk-addons){border-color:var(--night-line);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ticket-cols::before,
@@ -7994,7 +8000,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-route{border-color:var(--night-line);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-rt-k,.tk-rt-m,.tk-rt-osm){color:var(--night-ink-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-n{color:var(--night-ink);}
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-a{color:var(--neon);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-rt-a,.tk-rt-done){color:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map path{stroke:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
 body:not(.view-staff) .myr{margin:0 0 8px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
