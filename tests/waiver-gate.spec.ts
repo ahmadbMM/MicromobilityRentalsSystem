@@ -125,6 +125,21 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await expect.poll(() => open(page)).toBe(false);
   });
 
+  test('a page older than the waiver in force says so and reloads into the current one (the owner, 2026-10-07)', async ({ page }) => {
+    const calls = await boot(page, [sess(FUT)], [row('q1', FUT)]);
+    await expect.poll(() => open(page)).toBe(true);
+    await page.route('**/rest/v1/rpc/customer_accept_waiver', (r) => r.fulfill({ status: 400, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify({ code: 'P0001', message: 'WAIVER_OUTDATED', details: null, hint: null }) }));
+    const m = page.locator('#waiver-gate');
+    await m.locator('.wg-cb').check();
+    const reloaded = page.waitForEvent('load', { timeout: 15000 });
+    await m.locator('.pg-btn').click();
+    await expect(page.locator('.toast').filter({ hasText: 'the waiver has changed' })).toBeVisible();
+    await expect(m.locator('.pg-net')).toHaveCount(0); // not taken for a network failure
+    await reloaded;
+    expect(calls.length).toBe(1);
+  });
+
   test('Log out takes the page down with the account', async ({ page }) => {
     await boot(page, [sess(FUT)], [row('q1', FUT)]);
     await expect.poll(() => open(page)).toBe(true);

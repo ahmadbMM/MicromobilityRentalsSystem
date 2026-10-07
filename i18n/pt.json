@@ -4019,5 +4019,6 @@
   "waNo": "Não",
   "waSame": "O mesmo do celular",
   "errWaPhone": "Digite o seu número de WhatsApp.",
-  "waSubAcc": "O número em que nossa equipe envia mensagens sobre seus passeios."
+  "waSubAcc": "O número em que nossa equipe envia mensagens sobre seus passeios.",
+  "wgOutdatedMsg": "Esta página está desatualizada e o termo mudou. Ela é recarregada agora: leia o novo termo e aceite-o."
 }

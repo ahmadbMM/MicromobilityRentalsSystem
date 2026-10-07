@@ -4019,5 +4019,6 @@
   "waNo": "Hindi",
   "waSame": "Pareho sa mobile",
   "errWaPhone": "Ilagay ang iyong WhatsApp number.",
-  "waSubAcc": "Ang number kung saan ka minemensahe ng aming team tungkol sa iyong mga ride."
+  "waSubAcc": "Ang number kung saan ka minemensahe ng aming team tungkol sa iyong mga ride.",
+  "wgOutdatedMsg": "Luma na ang page na ito at nagbago ang waiver. Magre-reload ito ngayon: basahin ang bagong waiver at tanggapin ito."
 }
