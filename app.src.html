@@ -24010,6 +24010,13 @@ async function _noShowMany(ids){
       const _u=await sb.from('queue_entries').update(patch).eq('id',d.e.id).eq('status','noshow').select('id');
       if(_writeErr(_u,'undo no-show')||!_landed(_u)){await _redoPromotion(plan.back);ok=false;break;}
       back.push({d,status:plan.status});
+      // Mirrored on this device's rows before the next rider is planned (2026-10-07): the room
+      // check, the free number and the next W are read from them, and the riders restored before
+      // were still no-shows there - a second rider took a place that was gone, or the number or
+      // W the first had just been given (a duplicate number refused the undo half-way).
+      const _cur=getQueue().find(x=>x.id===d.e.id);
+      if(_cur)Object.assign(_cur,{status:plan.status,queueNum:patch.queue_num},patch.waitlist_num!=null?{waitlistNum:patch.waitlist_num}:{});
+      const _pb=plan.back&&getQueue().find(x=>x.id===plan.back.id);if(_pb)_pb.status='waitlist';
     }
     await loadData();
     for(const x of back)if(x.status==='waiting')await _consumeAddonsOnEnter(x.d.e);
@@ -24021,13 +24028,15 @@ async function _noShowMany(ids){
 }
 async function doReopen(id){
   const entry=getQueue().find(e=>e.id===id);if(!entry||entry.status!=='done')return;
-  const bikeIds=getAssignedBikeIds(entry);const savedAssigned=entry.assignedBikeId??null;
+  const bikeIds=getAssignedBikeIds(entry);const savedAssigned=entry.assignedBikeId??null;const savedOut=entry.checkedOutAt||null;
   // The rider goes back out on their bike only if it is still free, claimed atomically. The
   // bike used to stay attached whatever it was doing now - out under the next rider, or in the
   // workshop after a damaged return - so two riders were "on" one bike and returning this one
   // freed it from under the other.
   const claimed=await _reclaimBikes(bikeIds);
-  const patch={status:'active'};
+  // Back on the bike: the return's check-out stamp goes, as Undo return clears it (2026-10-07: History
+  // showed "Out" under a rider still riding); the Undo below puts it back.
+  const patch={status:'active',checked_out_at:null};
   if(claimed.length<bikeIds.length){patch.assigned_bike_id=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);toast(t('errBikeUnavailable'),'warning');}
   const _or=await sb.from('queue_entries').update(patch).eq('id',id).eq('status','done').select('id');
   const _release=()=>_releaseBikes(claimed,'re-open');
@@ -24038,7 +24047,7 @@ async function doReopen(id){
     // Only the bikes the re-open actually took go back: one it could not claim was never this
     // rider's again, and flipping it 'available' would free it under whoever has it now. The
     // row gets its ride record back (which bike it was) along with 'done'.
-    const _u2=await sb.from('queue_entries').update({status:'done',...(patch.assigned_bike_id!==undefined?{assigned_bike_id:savedAssigned}:{})}).eq('id',id).eq('status','active').select('id');
+    const _u2=await sb.from('queue_entries').update({status:'done',checked_out_at:savedOut,...(patch.assigned_bike_id!==undefined?{assigned_bike_id:savedAssigned}:{})}).eq('id',id).eq('status','active').select('id');
     if(_writeErr(_u2,'undo re-open')||!_landed(_u2)){await loadData();renderStaffQueue();return false;}
     const _mine=bid=>!getQueue().some(x=>String(x.id)!==String(id)&&['waiting','active'].includes(x.status)&&getAssignedBikeIds(x).includes(bid));
     await _releaseBikes(claimed.filter(_mine),'re-open');
@@ -25127,7 +25136,7 @@ async function exportAccountsCsv(){
 
 // Localized status label for exports/reports (falls back to the raw status string)
 function reportStatusLabel(st){
-  const m={waiting:'statusWaiting',active:'statusActive',done:'statusDone',noshow:'statusNoshow',cancelled:'statusCancelled',removed:'histRemoved'};
+  const m={waiting:'statusWaiting',waitlist:'statusWaitlist',active:'statusActive',done:'statusDone',noshow:'statusNoshow',cancelled:'statusCancelled',removed:'histRemoved'}; // waitlist: History's export printed the raw word (2026-10-07)
   return m[st]?t(m[st]):st;
 }
 // km: one distance of Run for Her (3 | 5 | 'none'), from the builder's per-distance lines.
@@ -25516,7 +25525,7 @@ function printBreakfastReport(){
     ${why.length?why.map(c=>`<div class="rp-said"><span class="rp-said-k">${esc(_rgLabel(c.k))}</span><span class="rp-said-v ${c.v==null?'rp-grey':_bfScoreCls(c.v)}"><bdi>${c.v==null?'&mdash;':c.v+t('anOutOf10')}</bdi></span><span class="rp-said-t" dir="auto">${esc(c.text)}</span></div>`).join('')
       :`<div class="rp-none">${t('bfRepNoWhy')}</div>`}`
     :`<div class="rp-none">${t('vndRgNone')}</div>`}`;
-  const venues=[...new Set(day.map(s=>String(s.breakfast_name||'').trim()).filter(Boolean))].join(', ');
+  const venues=[...new Set(day.map(_bfName).filter(Boolean))].join(', '); // in the reader's language, as every other report names it (2026-10-07)
   const html=_reportShell({
     kind:t('bfRepKind'),
     title:esc(_evName(sess)),
