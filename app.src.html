@@ -38940,8 +38940,8 @@ function _renderAnalyticsNow(){
   function bars(data,colorFn,valueFmt,isType){
     const max=Math.max(...Object.values(data),1);
     return Object.entries(data).sort((a,b)=>b[1]-a[1]).filter(([,v])=>v>0).map(([k,v])=>{
-      const lbl=isType?_tl(k):esc(k);
-      return`<div class="analytics-bar-row" title="${esc(String(lbl).replace(/<[^>]*>/g,''))}: ${valueFmt?esc(String(valueFmt(v)).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()):v}">
+      const lbl=isType?_tl(k):esc(k),tip=isType?String(lbl).replace(/<[^>]*>/g,''):String(k); // the tooltip escapes the raw name once (a till name "A&B" read "A&amp;B")
+      return`<div class="analytics-bar-row" title="${esc(tip)}: ${valueFmt?esc(String(valueFmt(v)).replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim()):v}">
         <div class="analytics-bar-label">${lbl}</div>
         <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':(Math.round(v/max*100))+'%','--an-bg':colorFn(k)})}"></div></div>
         <div class="analytics-bar-value">${valueFmt?valueFmt(v):v}</div>
@@ -39078,7 +39078,9 @@ function _renderAnalyticsNow(){
   // String(): created_at is text in the schema and every writer sends an ISO string, but a row
   // hand-inserted through the dashboard can hold a number — and .slice on one throws, taking
   // the whole Analytics tab down with it. The sibling sort above already guards this way.
-  (S.customers||[]).forEach(c=>{const m=String(c.created_at||'').slice(0,7);if(!/^\d{4}-\d{2}$/.test(m))return;
+  // The sign-up month is KSA's (2026-10-07): created_at is written in UTC, and its first seven
+  // characters put a sign-up before 03:00 on the 1st into the month before.
+  (S.customers||[]).forEach(c=>{const s=String(c.created_at||''),k=/^\d{4}-\d{2}-\d{2}T/.test(s)?_ksaParts(s):null;const m=k?k.y+'-'+String(k.m).padStart(2,'0'):s.slice(0,7);if(!/^\d{4}-\d{2}$/.test(m))return;
     const ent=_cohorts[m]||(_cohorts[m]={month:m,signups:0,rode:0,repeat:0});ent.signups++;
     const rc=custAll[c.id]?custAll[c.id].count:0;if(rc>=1)ent.rode++;if(rc>=2)ent.repeat++;});
   const cohortRows=Object.values(_cohorts).sort((a,b)=>b.month.localeCompare(a.month)).slice(0,6);
@@ -40145,6 +40147,10 @@ async function _loadDataLightInner(){
   const _lightDays=(S&&S._fullWindow)?QUEUE_BOOT_DAYS:undefined;
   const _cut=_lightDays?_qWindowCut(_lightDays):null;
   const _qs=_qSlice();
+  // A staff device without its Auth session reads the PII-free view (the boot's widening, the poll,
+  // _reloadRows): what it already knew of each rider is kept, as loadData does (2026-10-07: the light
+  // reload laid name-less rows over the roster).
+  const _keepPII=SECURE_AUTH&&!S._staffAuthed&&_rtStaffDevice();
   try{[q,ses,cs,bk,wl]=await Promise.all([
     _queueFetch(true,_qs?_qs.days:_lightDays),
     _sessionsFetch(),
@@ -40163,14 +40169,17 @@ async function _loadDataLightInner(){
   if(_down)return false;
   if(q&&!q.error){
     _qColsLearn(q.data);
+    const _prevPII={};
+    if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
     S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs?_qs.cut:_cut)); // a synced answer is the whole year: laid over nothing
+    if(_keepPII)S.queue.forEach(e=>_carryKnown(e,_prevPII[e.id]));
     _qWholeAt=q.whole?Date.now():(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     try{_applyBookOutbox();}catch(_){}_bookOutboxFlush();
   }
   if(ses&&!ses.error){S.sessions=ses.data||[];_revealArm();}
   if(bk&&!bk.error){const _bm=new Map((bk.data||[]).map(r=>[r.id,r.status]));S.bikes=(S.bikes||[]).map(b=>(_bm.has(b.id)&&_bm.get(b.id)!==b.status)?{...b,status:_bm.get(b.id)}:b);} // merge fresh statuses, keep photos/other fields
+  if(wl&&!wl.error)S.deskWaitlist=wl.data||[]; // before the replay: a desk-list event merged mid-flight is newer than this answer (2026-10-07: it was laid under it and lost)
   _rtReplaySince(_t0); // realtime rows that arrived while this was in flight are newer than its answer
-  if(wl&&!wl.error)S.deskWaitlist=wl.data||[];
   if(cs&&!cs.error){
     const _live=(cs.data||[]).filter(_saleLive);
     if(_cut){const ids=new Set((cs.data||[]).map(r=>r.id));S.cashSales=(S.cashSales||[]).filter(r=>String(r.created_at||'')<_cut&&!ids.has(r.id)).concat(_live);}
@@ -40217,7 +40226,9 @@ function _bgRenderStaffTab(){
   if(!gap){_renderStaffTab(true);return;}
   const wait=gap-(Date.now()-(_bgAt[tab]||0));
   if(wait<=0){_bgAt[tab]=Date.now();_renderStaffTab(true);return;}
-  if(!_bgT[tab])_bgT[tab]=setTimeout(()=>{_bgT[tab]=null;if(S.view!=='staff'||S.staffTab!==tab||document.hidden)return;_bgAt[tab]=Date.now();_renderStaffTab(true);},wait);
+  // A repaint dropped because the page went to the background: the reload on its return finds the
+  // same data (_lastFp already counts it as drawn) and must repaint anyway (2026-10-07).
+  if(!_bgT[tab])_bgT[tab]=setTimeout(()=>{_bgT[tab]=null;if(document.hidden&&S.view==='staff'&&S.staffTab===tab)_lastFp=null;if(S.view!=='staff'||S.staffTab!==tab||document.hidden)return;_bgAt[tab]=Date.now();_renderStaffTab(true);},wait);
 }
 // force: repaint even when the data did not change (a refresh the person asked for).
 async function _autoRefresh(full,force){
@@ -40653,7 +40664,7 @@ document.addEventListener('keydown',e=>{
   // sign-in dialog's markup stays in the page hidden once drawn, and a bare "is there one"
   // check was always yes, so every shortcut here was dead.
   if(_visibleModals().length)return;
-  const k=e.key.toLowerCase();
+  const k=String(e.key||'').toLowerCase(); // a synthetic keydown (autofill, a password manager) can carry no key
   if(k==='/'){e.preventDefault();if(S.staffTab!=='queue')setStaffTab('queue');setTimeout(()=>{const el=document.getElementById('sf-search-input');if(el){el.focus();try{el.select();}catch(_){}}},60);return;}
   // N opens the check-in, a Bookings action: like W and T, only for a role that has Bookings
   // (2026-10-05: a cashier or a mechanic could open the check-in from the keyboard).
