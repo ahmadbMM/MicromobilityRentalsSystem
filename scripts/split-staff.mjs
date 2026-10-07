@@ -1110,7 +1110,11 @@ export function formatFieldNames(r, limit = 20) {
 // "force them to approve it"): the page asked on the runner step and on the next visit of anyone booked before or
 // added at the desk, its 10 strings in each language, and the Privacy Notice's new rows in English and Arabic
 // (+1.5 KB). Here, on 8e3c6869: customer 208.1 -> 209.6, ~211.0 on the runner.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 213, staff: 445, core: 242 };
+// Core 242 -> 244 (2026-10-07): Reserve bike reserves with no bike chosen, and the picker takes a bike's number
+// (the owner: "change the reserve bike to not force the staff to choose a bike and add a bike number option when
+// choosing a bike"), with 4 strings in each language (+0.9 KB). Here, on 01c23a1d: core 238.9 -> 239.8, ~241.1 on
+// the runner, 0.9 KB under 242; staff 441.0 (~443.2 on the runner) stays inside 445.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 213, staff: 445, core: 244 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

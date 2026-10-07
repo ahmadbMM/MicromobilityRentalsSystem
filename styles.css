@@ -6901,6 +6901,7 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 #checkin-modal .bkm-cbin{flex:1;font-size:18px;letter-spacing:.06em;}
 #checkin-modal .bkm-nowrap{white-space:nowrap;}
 #checkin-modal .bkm-cbspec{margin-top:6px;font-size:12.5px;min-height:18px;}
+#checkin-modal .bkm-cbrsv{font-size:12.5px;font-weight:700;} /* the number a reservation without a fleet bike kept (2026-10-07) */
 #checkin-modal .bkm-mt6{margin-top:6px;}
 #checkin-modal .bkm-csline{font-weight:800;color:var(--text);}
 #checkin-modal .bkm-cok{color:var(--green);font-weight:700;}
@@ -6978,6 +6979,13 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
 #bike-modal .bkm-vam{vertical-align:middle;}
 #bike-modal .bkm-sin{width:100%;padding:9px 12px;padding-inline-start:34px;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.1);border-radius:4px;color:var(--text);font-family:var(--font-body);font-size:13px;font-weight:600;outline:none medium;transition:border-color .15s;}
 #bike-modal .bkm-sclr{position:absolute;inset-inline-end:10px;top:50%;transform:translateY(-50%);background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px;}
+/* the picker's Bike number field (2026-10-07): typed like the check-in's, its answer under it */
+#bike-modal .bkm-nobar{margin:0 0 12px;}
+#bike-modal .bkm-noin{display:block;width:100%;max-width:180px;margin-top:4px;font-size:18px;letter-spacing:.06em;}
+#bike-modal .bkm-nomsg{margin-top:6px;font-size:12.5px;}
+#bike-modal .bkm-nomsg:empty{display:none;}
+#bike-modal .bkm-nomsg .bkm-cok{color:var(--green);font-weight:700;}
+#bike-modal .bkm-nomsg .bkm-cwarn{color:var(--orange);font-weight:700;}
 #bike-modal .bkm-fbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px;padding:8px 10px;background:rgba(var(--tint-rgb),.02);border:1px solid rgba(var(--tint-rgb),.06);border-radius:4px;}
 #bike-modal .bkm-fsz{font-size:10px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;}
 #bike-modal .bkm-fpoff{padding:3px 9px;border-radius:3px;border:1.5px solid rgba(var(--tint-rgb),.1);background:transparent none;color:var(--muted-l);font-family:var(--font-body);font-size:11px;font-weight:700;cursor:pointer;}
@@ -8423,14 +8431,16 @@ body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-fu
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-closed{color:#cbd5e1;}
 
 /* ── The roster: one colour per booking state, on the row (or the phone card), its edge and its
-   status badge. Waiting amber, the waitlist orange, to be reserved fuchsia, reserved violet, on a
-   bike blue, completed green, no-show and cancelled red. Solid colours, not washes: the pinned
-   first cell has to mask the columns scrolling under it. ── */
-body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#fef6dc;--rs-edge:#d4a017;--rs-line:#f2d892;}
+   status badge. Waiting (not checked in yet) white, the waitlist orange, to be reserved fuchsia,
+   reserved violet, checked in yellow (on a bike or still needing one), completed green, no-show and
+   cancelled red (the owner, 2026-10-07: "i want the pending bookings to be colored white not yellow,
+   make the checked in bookings yellow instead"; checked in was blue). Solid colours, not washes: the
+   pinned first cell has to mask the columns scrolling under it. ── */
+body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#fff;--rs-edge:#c9cfcb;--rs-line:#e1e5e2;}
 body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#ffedd5;--rs-edge:#ea580c;--rs-line:#fdba74;}
 body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#fae8ff;--rs-edge:#c026d3;--rs-line:#f0abfc;}
 body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#ede9fe;--rs-edge:#7c3aed;--rs-line:#c4b5fd;}
-body.view-staff :is(tr,.q-card).row-active{--rs-bg:#dbeafe;--rs-edge:#2563eb;--rs-line:#93c5fd;}
+body.view-staff :is(tr,.q-card).row-active{--rs-bg:#fef6dc;--rs-edge:#d4a017;--rs-line:#f2d892;}
 body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#dcfce7;--rs-edge:#16a34a;--rs-line:#86efac;}
 body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#fee2e2;--rs-edge:#dc2626;--rs-line:#fca5a5;}
 body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){background:none;opacity:1;}
@@ -8451,11 +8461,11 @@ body.view-staff #tab-queue .q-card.rq-cleft:is(.row-waiting,.row-waitlist,.row-t
    dresses the Member column and Petromin's booking numbers, which keep their look) */
 body.view-staff .status-badge:is(.st-waiting,.st-needsbike,.st-waitlist,.st-toreserve,.st-reserved,.st-active,.st-done,.st-noshow,.st-cancelled,.st-removed){
   padding:3px 10px 3px 8px;border-radius:999px;border:none;line-height:1.25;}
-body.view-staff .status-badge:is(.st-waiting,.st-needsbike){background:#fde9b0;color:#7a4d06;}
+body.view-staff .status-badge.st-waiting{background:#fff;color:#3d4540;box-shadow:inset 0 0 0 1px #c9cfcb;}
 body.view-staff .status-badge.st-waitlist{background:#fed7aa;color:#9a3412;}
 body.view-staff .status-badge.st-toreserve{background:#f5d0fe;color:#86198f;}
 body.view-staff .status-badge.st-reserved{background:#ddd6fe;color:#5b21b6;}
-body.view-staff .status-badge.st-active{background:#bfdbfe;color:#1e40af;}
+body.view-staff .status-badge:is(.st-active,.st-needsbike){background:#fde9b0;color:#7a4d06;}
 body.view-staff .status-badge.st-done{background:#bbf7d0;color:#166534;}
 body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){background:#fecaca;color:#991b1b;}
 /* the money: paid green, pending amber, on the house teal */
@@ -8468,20 +8478,22 @@ body.view-staff .pay-toggle.house{background:#ccfbf1;border-color:#5eead4;color:
 body.view-staff .pay-toggle:is(.paid,.pending,.house){border-radius:9px;padding-inline:12px;}
 body.view-staff .pay-toggle.house:hover{background:#99f6e4;}
 /* booth mode: the same colours, the words in its 7:1 inks */
-html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-waiting,.st-needsbike){color:#4a3000;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-waiting{color:#1f2622;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-waitlist{color:#6b1d06;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-toreserve{color:#5f0f66;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-reserved{color:#3b1386;}
-html[data-staff-theme="booth"] body.view-staff .status-badge.st-active{color:#14286e;}
+html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-active,.st-needsbike){color:#4a3000;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-done{color:#05522a;}
 html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){color:#7d1d12;}
 html[data-staff-theme="booth"] body.view-staff .pay-toggle:is(.paid,.pending,.house){color:#000;}
 /* the figures above the roster wear their rows' colours: the strip is the key */
 body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere,.sc-waitlist,.sc-active,.sc-done)::before{content:'';width:9px;height:9px;border-radius:3px;flex-shrink:0;background:var(--sc-edge);}
 body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere,.sc-waitlist,.sc-active,.sc-done) b{color:var(--sc-ink);}
-body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere){--sc-edge:#d4a017;--sc-ink:#7a4d06;}
+/* waiting is white: its key is a white square with the row's grey edge */
+body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere){--sc-edge:#fff;--sc-ink:#3d4540;}
+body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere)::before{box-shadow:inset 0 0 0 1px #9aa29d;}
 body.view-staff #tab-queue .stat-chip.sc-waitlist{--sc-edge:#ea580c;--sc-ink:#9a3412;}
-body.view-staff #tab-queue .stat-chip.sc-active{--sc-edge:#2563eb;--sc-ink:#1e40af;}
+body.view-staff #tab-queue .stat-chip.sc-active{--sc-edge:#d4a017;--sc-ink:#7a4d06;}
 body.view-staff #tab-queue .stat-chip.sc-done{--sc-edge:#16a34a;--sc-ink:#166534;}
 /* the breakfast stop by name on the ride chip, the Sessions card and its detail (the owner, 2026-10-05) */
 body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:700;color:#7a4d06;}

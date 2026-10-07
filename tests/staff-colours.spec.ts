@@ -7,6 +7,8 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // make to be reserved colored make paid colored". The ride chips and the Sessions view's cards wear their
 // event's look; each roster row (and phone card) takes its booking state's colour, its badge too; the
 // payment button its own; the figures above the roster are the key.
+// 2026-10-07 (the owner): "i want the pending bookings to be colored white not yellow, make the checked in
+// bookings yellow instead": waiting rows are white, checked-in ones (on a bike, or still needing one) yellow.
 
 const J = '2099-10-18';
 const sessions = [
@@ -78,11 +80,11 @@ test.describe('@staff:bookings Bookings in colour', () => {
     await bookings(page);
     const tr = (name: string) => `#tab-queue .queue-table-desktop-wrap tbody tr:has-text("${name}")`;
     const want: [string, string, string, string][] = [
-      ['Waiting Rider', 'row-waiting', 'rgb(254, 246, 220)', 'st-waiting'],
+      ['Waiting Rider', 'row-waiting', 'rgb(255, 255, 255)', 'st-waiting'],
       ['Bike Held', 'row-reserved', 'rgb(237, 233, 254)', 'st-reserved'],
       ['To Hold', 'row-toreserve', 'rgb(250, 232, 255)', 'st-toreserve'],
       ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 237, 213)', 'st-waitlist'],
-      ['On The Bike', 'row-active', 'rgb(219, 234, 254)', 'st-active'],
+      ['On The Bike', 'row-active', 'rgb(254, 246, 220)', 'st-active'],
       ['Done Paid', 'row-done-paid', 'rgb(220, 252, 231)', 'st-done'],
       ['Done Unpaid', 'row-done', 'rgb(220, 252, 231)', 'st-done'],
       ['No Show Rider', 'row-noshow-cancel', 'rgb(254, 226, 226)', 'st-noshow'],
@@ -97,7 +99,8 @@ test.describe('@staff:bookings Bookings in colour', () => {
       expect(await page.locator(tr(name)).evaluate((el) => getComputedStyle(el).opacity), name).toBe('1');
     }
     // the badge is a pill of its row's colour
-    expect(await bg(page, `${tr('On The Bike')} .status-badge.st-active`)).toBe('rgb(191, 219, 254)');
+    expect(await bg(page, `${tr('On The Bike')} .status-badge.st-active`)).toBe('rgb(253, 233, 176)');
+    expect(await bg(page, `${tr('Waiting Rider')} .status-badge.st-waiting`)).toBe('rgb(255, 255, 255)');
     // paid green, pending amber, on the house teal
     expect(await bg(page, `${tr('Paid Waiting')} .pay-toggle.paid`)).toBe('rgb(187, 247, 208)');
     expect(await bg(page, `${tr('Waiting Rider')} .pay-toggle.pending`)).toBe('rgb(253, 230, 138)');
@@ -129,7 +132,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
   test('on a phone the cards take the same colours and edge', async ({ page }) => {
     await bookings(page, 390);
     const card = (name: string) => `#tab-queue .queue-mobile-view .q-card:has-text("${name}")`;
-    for (const [name, colour] of [['Waiting Rider', 'rgb(254, 246, 220)'], ['On The Bike', 'rgb(219, 234, 254)'], ['Done Paid', 'rgb(220, 252, 231)'], ['No Show Rider', 'rgb(254, 226, 226)']]) {
+    for (const [name, colour] of [['Waiting Rider', 'rgb(255, 255, 255)'], ['On The Bike', 'rgb(254, 246, 220)'], ['Done Paid', 'rgb(220, 252, 231)'], ['No Show Rider', 'rgb(254, 226, 226)']]) {
       expect(await bg(page, card(name)), name).toBe(colour);
       expect(await page.locator(card(name)).first().evaluate((el) => getComputedStyle(el).boxShadow), name).toContain('inset');
     }

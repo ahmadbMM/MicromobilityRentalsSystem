@@ -198,6 +198,14 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
 - `queue_entries.to_reserve` (migration 20260915120000) is a staff mark read straight off the
   table; `entryFromDB` maps it to `toReserve`. `reserveBike()` sends `to_reserve:false` only when
   the rider carries the mark, so a client from before the column never sends the field.
+- Reserve bike needs no bike (2026-10-07, migration 20261007160000): `queue_entries.reserved` is a reservation with no
+  fleet bike chosen and `reserved_bike_no` the number typed for it when the fleet has no such bike (`reserved`,
+  `reservedBikeNo` in `entryFromDB`). `_isReserved` is waiting plus either kind; `_reservedWhat` is what the roster
+  shows under the badge. The picker's Bike number field (`_bkmNoInput`, `S.modalBikeNo`) picks a fleet bike by its
+  number like tapping its row (a tapped row fills the field); a number the fleet has but cannot hand out is refused
+  with the bike's status. `reserveBike()` and `_releaseReserved()` send the two columns only when they change, so a
+  fleet bike on a booking that never had the other kind still writes `assigned_bike_id` alone.
+  `tests/reserve-no-bike.spec.ts`.
 
 ## Addresses: every section and sub-view has its own path (2026-09-27)
 - The router lives beside `_pushNav` in `app.src.html`: `STAFF_PATHS` (staff tab → first
@@ -754,8 +762,10 @@ green no show or cancelled red, make reserved colored make to be reserved colore
   `th-snd96` (the National Day weave and logo), `th-event` (violet). The mark is `_sfMark` (`SF_MARK`). The look sits in
   `--sf-chip-bg` so hover and the selected ring (`--sf-ring`) keep it. CSS: "BOOKINGS IN COLOUR" at the end of styles.css.
 - **Rows** (and phone cards) carry one state class each, now including `row-waiting` and `row-waitlist`: waiting
-  amber, waitlist orange, to be reserved fuchsia, reserved violet, on a bike blue, completed green (paid or not),
-  no-show and cancelled red. Solid colours (the pinned first cell must mask what scrolls under it) and a 4px edge.
+  white, waitlist orange, to be reserved fuchsia, reserved violet, checked in (`row-active`: on a bike, or "Needs
+  bike") yellow, completed green (paid or not), no-show and cancelled red. Solid colours (the pinned first cell must
+  mask what scrolls under it) and a 4px edge. 2026-10-07, the owner: "i want the pending bookings to be colored white
+  not yellow, make the checked in bookings yellow instead" (waiting was amber and checked in blue until then).
 - **Status badges** of a booking carry `st-<state>` (statusBadge / statusBadgeFor) and become pills in their row's
   colour; `badge-active` alone also dresses the Membership column and Petromin booking numbers, which keep their look.
   Payment buttons: paid green, pending amber, on the house teal. The roster's figures (`_statChip`, `sc-<status>`)
