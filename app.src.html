@@ -9604,7 +9604,11 @@ function _mwPartyBookings(rowId){
 /** "The four of them are here" — one action, not four. */
 async function mwPartyCheckin(rowId){
   const ids=_mwPartyBookings(rowId).filter(e=>e.status==='waiting'||e.status==='waitlist').map(e=>e.id);
-  if(ids.length)await _checkinMany(ids);
+  if(!ids.length)return;
+  // Undoable as the roster's bulk check-in is (bulkSfCheckin): the riders this desk checked in, and only
+  // those. The party's was the one check-in with no Undo (2026-10-07).
+  const done=await _checkinMany(ids);
+  if(done&&done.length)pushUndo(`${t('undoCheckinBtn')} · ${done.length}`,async()=>{await _undoCheckinMany(done);});
 }
 /** Likewise for the money: one payer settles for the whole party. */
 async function mwPartyPaid(rowId){
@@ -9668,6 +9672,9 @@ function _mwTypeCell(w,bk){
   // A parked booking follows its ride's rules ('Own' where the ride offers it, no carbon on a
   // community ride); a walk-up belongs to no session, so it gets the ordinary circuit menu.
   const sess=bk?_sessGet(bk.sessionId):null;
+  // A ride with no bike (a run, an event's seats, the pool) has no type to wait for: its booking's 'None'
+  // was offered as a select whose every other choice wrote a bike type onto a runner (2026-10-07).
+  if(sess&&!_needsBike(sess))return'';
   const opts=bk?bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)):bikeTypeOpts(false,false);
   const list=opts.includes(cur)?opts:[cur,...opts];
   return`<select class="mw-type" aria-label="${esc(t('bikeTypeLabel'))}" data-on-change="${_on("mwSetType",w.id,_P("value"))}">
@@ -10159,18 +10166,21 @@ function _gsHits(q){
   const has=v=>v!=null&&String(v).toLowerCase().includes(ql);
   const dayOf=e=>String(e.sessionDate||'').slice(0,10);
   // bookings: tonight's first, then the newest night. Front Desk never sees the Saturday side (the
-  // roster's rule, 2026-10-05): those bookings are not found here either.
-  getQueue().filter(e=>e.status!=='removed'&&!(!adm&&_apprSessIds.has(e.sessionId))&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
+  // roster's rule, 2026-10-05): those bookings are not found here either. Each kind is searched only
+  // where the account has the section it opens in (2026-10-07): a role without Bookings (mechanic,
+  // cashier) was offered bookings, and a pick sent it to its first section with nothing open.
+  const okQ=_deskTabOk('queue'),okInv=_deskTabOk('inventory');
+  if(okQ)getQueue().filter(e=>e.status!=='removed'&&!(!adm&&_apprSessIds.has(e.sessionId))&&(has(e.name)||has(e.email)||_phoneHit(e.phone,raw)||String(e.queueNum)===qn||_matchesRef(e,ql)))
     .sort((a,b)=>((dayOf(b)===today)-(dayOf(a)===today))||dayOf(b).localeCompare(dayOf(a))||(a.queueNum-b.queueNum))
     .slice(0,5).forEach(e=>out.push({k:'gsKindBooking',l:`#${e.queueNum} ${e.name||''}`,m:[shortDate(dayOf(e)),_own(STATUS_KEY,e.status)?t(STATUS_KEY[e.status]):''].filter(Boolean).join(' · '),go:['_gsGo','booking',e.id]}));
   if(adm){
     (S.customers||[]).filter(c=>has(c.name)||has(c.email)||_phoneHit(c.phone,raw)).slice(0,4)
       .forEach(c=>out.push({k:'gsKindAccount',l:c.name||c.email||'',m:fmtPhone(c.phone)||c.email||'',go:['_gsGo','acct',c.id]}));
-    getBikes().filter(b=>b.status!=='retired'&&(has(b.name)||String(b.bike_number??'')===qn||has(b.brand)||has(b.model))).slice(0,4)
+    if(okInv)getBikes().filter(b=>b.status!=='retired'&&(has(b.name)||String(b.bike_number??'')===qn||has(b.brand)||has(b.model))).slice(0,4)
       .forEach(b=>out.push({k:'gsKindBike',l:b.name||'',m:[typeLabel(b.type),b.size].filter(Boolean).join(' · '),go:['_gsGo','bike',b.id]}));
-    (S.inventory||[]).filter(it=>has(it.name)||has(it.brand)).slice(0,4)
+    if(okInv)(S.inventory||[]).filter(it=>has(it.name)||has(it.brand)).slice(0,4)
       .forEach(it=>out.push({k:'gsKindItem',l:it.name||'',m:`${Number(it.qty)||0} ${t('stockLeft')}`,go:['_gsGo','item',it.id]}));
-    allSessions().filter(x=>x.status!=='deleted'&&(has(x.title)||has(_evName(x))||String(x.session_date||x.id).includes(ql)||has(shortDate(x.session_date||x.id))))
+    if(okQ)allSessions().filter(x=>x.status!=='deleted'&&(has(x.title)||has(_evName(x))||String(x.session_date||x.id).includes(ql)||has(shortDate(x.session_date||x.id))))
       .sort((a,b)=>String(b.session_date||b.id).localeCompare(String(a.session_date||a.id))).slice(0,3)
       .forEach(x=>out.push({k:'gsKindSession',l:_evName(x),m:`${dayLabel(x.day)} · ${shortDate(x.session_date||x.id)}`,go:['_gsGo','sess',x.id]}));
   }
@@ -10275,7 +10285,7 @@ function _ntKinds(){
   const c=(o,f)=>o?o.length+':'+o.filter(f).length:'-',q=S.queue||[];
   const key=[q.length,q.filter(e=>e.status==='active'||e.ratingExp).length,c(S.inventory,it=>{const n=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return n<=0||(lo>0&&n<=lo);}),
     (S.bikes||[]).map(b=>b&&b.status).join(),c(W&&W.jobs,j=>j.status==='new'),c(M&&M.rows,m=>m.status==='new'),c(S._caApps,a=>a.status==='pending'),c(S._laApps,a=>a.status==='pending'),
-    JSON.stringify(_ntLoaded()),JSON.stringify(S._ntOff||null),(S._vendorLate||[]).length,isAdmin(),_deskTabOk('workshop'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
+    JSON.stringify(_ntLoaded()),JSON.stringify(S._ntOff||null),(S._vendorLate||[]).length,isAdmin(),_deskTabOk('workshop'),_deskTabOk('queue'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
   if(_ntkOut&&key===_ntkKey&&refs.every((r,i)=>r===_ntkRefs[i]))return _ntkOut;
   const out=_ntKindsNow();_ntkRefs=refs;_ntkKey=key;_ntkOut=out;return out;
 }
@@ -10284,7 +10294,8 @@ function _ntKindsNow(){
   // items: one per thing, {id, txt (the bell's line for it), at (when it happened, if known)}
   const add=(k,items,key,c,go,ready)=>out.push({k,ids:items.map(x=>String(x.id)),items:items.map(x=>({...x,id:String(x.id)})),key,c,go,ready:!!ready});
   const nm=x=>String((x&&(x.name||x.email))||'—');
-  add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
+  // A ride running long opens Bookings: only for an account that has it (2026-10-07), as 'ws' asks for Workshop.
+  if(_deskTabOk('queue'))add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   if(adm){
     add('apps',_caPending().map(a=>({id:a.id,txt:t('ntiApps').replace('{0}',nm(a)),at:a.created_at})),'ntApps','green',['_on_goCommunity','applications'],Array.isArray(S._caApps));
@@ -10495,10 +10506,11 @@ function openStaffPwdModal(mandatory){
       <button class="btn-primary pin-w100" data-on-click="${_on("_staffPwdSubmit")}">${t('saveBtn')}</button>
       ${mandatory?'':`<button class="pin-cancel" data-on-click="${_on("_on_openStaffPwdModal_3",_EV,_EL)}">${t('cancelBtn')}</button>`}
     </div>`;
-  if(!mandatory)m.onclick=e=>{if(e.target===m)m.remove();}; // mandatory: backdrop click does nothing
+  m.onclick=mandatory?null:e=>{if(e.target===m)m.remove();}; // mandatory: backdrop click does nothing (a box opened by hand first kept its dismissing click, 2026-10-07)
   setTimeout(()=>document.getElementById('staff-newpwd')?.focus(),50);
 }
 async function _staffPwdSubmit(){
+  if(document.querySelector('#staff-pwd-modal .btn-primary')?.disabled)return; // Enter while a save is on the wire: the button is off, the key was not (2026-10-07)
   const p1=document.getElementById('staff-newpwd')?.value||'';
   const p2=document.getElementById('staff-newpwd2')?.value||'';
   const err=m=>{const el=document.getElementById('staff-pwd-err');if(el)el.textContent=m;};
@@ -10547,6 +10559,7 @@ function renderPinModal(){
 }
 
 async function _staffAuthSubmit(){
+  if(document.querySelector('#pin-modal .btn-primary')?.disabled)return; // Enter while a sign-in is on the wire signed in twice (2026-10-07)
   const email=(document.getElementById('staff-auth-email')?.value||'').trim();
   const pwd=document.getElementById('staff-auth-pwd')?.value||'';
   const err=m=>{const el=document.getElementById('staff-auth-err');if(el)el.textContent=m;};
@@ -11067,7 +11080,8 @@ function renderRegister(){
       // v2: add-ons as hairline checkbox rows (22px green check tile, name, price right-aligned,
       // soft green wash when selected). Quantity stepper appears once selected (the real app
       // supports multi-qty + stock caps, which the prototype's plain checkboxes don't).
-      const _aCard=it=>{const qn=_regAddonQty(it.id);const stock=Number(it.qty)||0;const cap=stock>0?stock:10;const sel=qn>0;return`<div class="addon-row${sel?' sel':''}">
+      // The "+" stops where _setRegAddonQty does: 20 of one at most, the server's cap (2026-10-07; it stayed on and did nothing).
+      const _aCard=it=>{const qn=_regAddonQty(it.id);const stock=Number(it.qty)||0;const cap=Math.min(20,stock>0?stock:10);const sel=qn>0;return`<div class="addon-row${sel?' sel':''}">
             <button type="button" id="reg-ad-chk-${esc(it.id)}" class="addon-check${sel?' on':''}" data-on-click="${_on("_setRegAddonQty",it.id,sel?-qn:1)}" aria-pressed="${sel}" aria-label="${esc(it.name)}">${sel?_cuIc('tick',14):''}</button>
             ${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="${esc(it.name)}" class="addon-thumb" role="button" tabindex="0" aria-label="${esc(it.name)}" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_on_renderRegister_5",_EV,_EL)}">`:''}
             <div class="cu-f1-min0">
@@ -11787,7 +11801,8 @@ async function _submitReg(){
   
   const riderNames=Array.from({length:qty},(_,i)=>{
     const entered=qty>1?S.regRiderNames[i]:undefined; // one rider has no name box: the account holder (2026-10-05)
-    return (entered!==undefined&&entered.trim())?entered.trim():(i===0?cust.name:'');
+    // Saved as the review shows it (_titleCaseName there): "sara ali" was reviewed as "Sara Ali" and booked as typed (2026-10-07).
+    return (entered!==undefined&&String(entered).trim())?_titleCaseName(entered):(i===0?cust.name:'');
   });
   const queue=getQueue();
   
@@ -12101,7 +12116,7 @@ async function submitModifyBooking(){
     
     let nextNum=nextQNum(S.selSession);
     for(let i=existing.length;i<newQty;i++){
-      const modRiderName=i===0?cust.name:(S.regRiderNames[i]||'').trim();
+      const modRiderName=i===0?cust.name:_titleCaseName(S.regRiderNames[i]||''); // as the review shows it, and as a rename here is saved
       const modHeight=_bike?(parseInt(S.regBikeHeights[i])||null):null;
       const _seat=_evSeatPrice(sess);
       const entry=_applyDefaultPay({
