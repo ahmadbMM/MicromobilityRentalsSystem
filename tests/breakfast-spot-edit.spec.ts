@@ -37,6 +37,12 @@ async function boot(page: Page) {
     const ids = m ? m[1].split(',').map((x) => x.replace(/"/g, '')) : [];
     return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(ids.map((id) => ({ id }))) });
   });
+  // A removed spot comes back as the row deleted, as the database answers it (the page checks it landed).
+  await page.route(/\/rest\/v1\/breakfast_spots\?/, async (r) => {
+    if (r.request().method() !== 'DELETE') return r.fallback();
+    const m = decodeURIComponent(r.request().url()).match(/id=eq\.([^&]*)/);
+    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(m ? [{ id: m[1] }] : []) });
+  });
   await unlockStaff(page);
   await page.goto('/bookings/sessions');
   await waitForSb(page);

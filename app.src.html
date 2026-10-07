@@ -7160,7 +7160,8 @@ async function _bfEdDel(selVar,nameVar,urlVar,rerender){
   ed.busy=true;
   let r;try{r=await sb.from('breakfast_spots').delete().eq('id',sp.id).select('id');}catch(e){r={error:e};}
   ed.busy=false;
-  if(_writeErr(r,'remove breakfast spot')){window[rerender]();return;}
+  // A refusal under RLS removes no row and says nothing: the spot is still on the list (2026-10-07).
+  if(_writeErr(r,'remove breakfast spot')||!_landed(r)){if(!r.error)ed.err=t('errWritePerm');window[rerender]();return;}
   S.breakfastSpots=(S.breakfastSpots||[]).filter(x=>x.id!==sp.id);
   // The ride on the form keeps the spot it already had, as its own name and link; a form that had only
   // picked it goes back to none.
@@ -7294,14 +7295,16 @@ function _runAgeModal(){
 const EM_RELS=['spouse','parent','sibling','child','relative','friend','colleague','other'];
 function _emLoad(cust,force){
   const c=cust||S.loggedIn||getSession();if(!c||!c.id||!c.session_token||!sb)return;
-  const m=S._em;if(!force&&m&&m.id===c.id&&(m.busy||m.v||m.gone))return;
+  // A failure is asked again on Retry (force) or a minute on, not by the repaint it causes: that repaint
+  // called this again at once, so an offline phone asked in a loop for as long as the page was open (2026-10-07).
+  const m=S._em;if(!force&&m&&m.id===c.id&&(m.busy||m.v||m.gone||(m.err&&Date.now()-m.at<6e4)))return;
   const cur={id:c.id,busy:true,v:null,err:false,gone:false};S._em=cur;
   Promise.resolve(sb.rpc('customer_emergency',{p_id:c.id,p_token:c.session_token})).then(({data,error})=>{
-    cur.busy=false;if(S._em!==cur)return;
+    cur.busy=false;cur.at=Date.now();if(S._em!==cur)return;
     if(error){cur.err=true;if(_rpcAbsent(error))cur.gone=true;}
     else{const r=(Array.isArray(data)&&data[0])||{};cur.v={name:r.emergency_name||'',phone:r.emergency_phone||'',rel:r.emergency_relation||''};}
     _emPaint();
-  },()=>{cur.busy=false;cur.err=true;if(S._em===cur)_emPaint();});
+  },()=>{cur.busy=false;cur.err=true;cur.at=Date.now();if(S._em===cur)_emPaint();});
 }
 function _emPaint(){if(S.view!=='customer')return;if(S.custTab==='register'&&S.regStep===2)renderRegister();else if(S.custTab==='account')_accEmPaint();}
 // A stored number split for the form: the longest dial code it starts with, and the rest.
@@ -7353,15 +7356,15 @@ function _emErrSay(e){
 function _runAccLoad(force){
   const c=S.loggedIn||getSession();if(!c||!c.id||!c.session_token||!sb)return;
   _emLoad(c,force);
-  const m=S._runAcc;if(!force&&m&&m.id===c.id&&(m.busy||m.v))return;
+  const m=S._runAcc;if(!force&&m&&m.id===c.id&&(m.busy||m.v||(m.err&&Date.now()-m.at<6e4)))return; // a failure waits for Retry, as _emLoad
   const cur={id:c.id,busy:true,v:null,err:false};S._runAcc=cur;
   Promise.resolve(sb.rpc('customer_profile',{p_id:c.id,p_token:c.session_token})).then(({data,error})=>{
-    cur.busy=false;if(S._runAcc!==cur)return;
+    cur.busy=false;cur.at=Date.now();if(S._runAcc!==cur)return;
     const r=!error&&Array.isArray(data)&&data[0];
     if(!r||r.id!==c.id)cur.err=true;
     else{cur.v=r;S.loggedIn=_withProfile(S.loggedIn||c,r);setSession(S.loggedIn);}
     _emPaint();
-  },()=>{cur.busy=false;cur.err=true;if(S._runAcc===cur)_emPaint();});
+  },()=>{cur.busy=false;cur.err=true;cur.at=Date.now();if(S._runAcc===cur)_emPaint();});
 }
 function _runRetry(){_runAccLoad(true);renderRegister();}
 // What race day needs that the account lacks: a full name (two words), an email, a birth date,
@@ -7705,7 +7708,8 @@ function _readEventLink(){
     if(q.has('ev')||q.has('session')){
       const ev=q.get('ev')||'',sid=q.get('session')||'';
       if(['jcc','community','snd96','workshop','event','runher'].includes(ev)){
-        sessionStorage.setItem(_EVLINK_KEY,JSON.stringify({ev,session:/^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6})?$/.test(sid)?sid:null}));
+        // A second ride of a kind on one date is '<date>-rh-2' (two parts after the date, 2026-10-07).
+        sessionStorage.setItem(_EVLINK_KEY,JSON.stringify({ev,session:/^\d{4}-\d{2}-\d{2}(-[a-z0-9]{1,6}){0,2}$/.test(sid)?sid:null}));
         sessionStorage.removeItem(_TABLINK_KEY);
       }
       q.delete('ev');q.delete('session');
@@ -8229,7 +8233,7 @@ function _fixCopy(g,c){
 function _on_renderFixGate_1(event,el){event.preventDefault();_fixSave()}
 function renderFixGate(){
   const g=S._fix,m=document.getElementById('fix-gate');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';document.body.classList.remove('fix-open');setTimeout(_forceRatingPrompt,0);return;} // the rating waits behind it
+  if(!g){m.style.display='none';m.innerHTML='';if(!S._afx)document.body.classList.remove('fix-open');setTimeout(_forceRatingPrompt,0);return;} // the rating waits behind it; an applicant's page still up keeps the page still
   _fixRead();
   const c={...(S.loggedIn||getSession()||{}),...(g.cur||{})};
   _fixCurLoad(g);
@@ -8498,9 +8502,14 @@ function renderLandingAvail(){
 function _todayCardHtml(cust){
   if(!cust||!cust.id)return'';
   const td=todayStr();
-  const mine=getQueue().filter(e=>e.customerId===cust.id&&_bookingAhead(e)&&String(e.sessionDate||e.sessionId||'').slice(0,10)===td);
-  if(!mine.length)return'';
-  const sess=allSessions().find(s=>s.id===mine[0].sessionId);
+  const all=getQueue().filter(e=>e.customerId===cust.id&&_bookingAhead(e)&&String(e.sessionDate||e.sessionId||'').slice(0,10)===td);
+  if(!all.length)return'';
+  // Two rides today: the card is ONE ride's - the one under way, else the next - with that ride's rows
+  // only. One list across both mixed their numbers under one ride's time, and could show a number on a
+  // ride staff approve before its list is published (2026-10-07).
+  const rank=id=>{const s=_sessGet(id);return[all.some(e=>e.sessionId===id&&e.status==='active')?0:1,s&&_sessEnded(s)?1:0,String((parseSlots(s&&s.bike_slots)||{})._time||'').split('-')[0].trim().padStart(5,'0')];};
+  const sid=[...new Set(all.map(e=>e.sessionId))].map(id=>[id,rank(id)]).sort((a,b)=>a[1][0]-b[1][0]||a[1][1]-b[1][1]||a[1][2].localeCompare(b[1][2]))[0][0];
+  const mine=all.filter(e=>e.sessionId===sid),sess=_sessGet(sid);
   const on=mine.some(e=>e.status==='active'),wl=mine.every(e=>e.status==='waitlist');
   const num=(!sess||_isApprovalRide(sess))?'':mine.filter(e=>e.status!=='waitlist').map(e=>'#'+e.queueNum).join(', ');
   return`<button type="button" class="land-today${wl?' wl':''}" data-on-click="${_on("setCustTab","myrides")}">
@@ -9392,7 +9401,9 @@ function _mwRenderSuggest(){
 // addManagedWl() used to do. With no match — a genuinely new name — it still adds by hand.
 function mwEnter(){
   _debFlush('mw');
-  const first=document.querySelector('#mw-suggest .mw-sug');
+  // Only a search picks the top row: with the box empty the list on show is the newest accounts
+  // (or Browse), and Enter parked the first of them unasked (2026-10-07). Empty, it asks for a name.
+  const first=String(S._mwQ||'').trim()&&document.querySelector('#mw-suggest .mw-sug');
   if(first){first.click();return;}
   addManagedWl();
 }
