@@ -1138,7 +1138,12 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 217 -> 218 (2026-10-07): the first emergency contact required on Create account (its boxes, the second
 // behind its button) and the check-up's own words; 214.6 local, ~216.0 on the runner. Staff 460 -> 461 the same day:
 // the Riders pop-up's emergency contacts on top of Applications.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 461, core: 250 };
+// Staff 461 -> 464, core 250 -> 253 (2026-10-07, on top of the above): the owner's decisions on the bug hunt's
+// questions - Undo check-in puts a rider who came off the waitlist back onto it (every check-in path keeps what
+// leaving the waitlist did), a party or booking moved onto Run for Her is asked its distance and age, a ride moved
+// to another date takes its announce time along, deleting a tag and resetting or deactivating a venue login ask
+// first, and 7 strings in each language (~+1.5 KB staff, ~+1.3 KB core).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 464, core: 253 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

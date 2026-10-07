@@ -33,7 +33,7 @@ test.describe('@staff:community deleting a tag asks first', () => {
     await page.waitForFunction('(S.customerTags||[]).length===3');
     const writes: string[] = [];
     page.on('request', (r) => { if (/\/rest\/v1\/(tags|customer_tags)\b/.test(r.url()) && !['GET', 'HEAD', 'OPTIONS'].includes(r.method())) writes.push(`${r.method()} ${decodeURIComponent(r.url())}`); });
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('community');setCommTab('tags')`);
     const row = page.locator('.am-tag-row', { hasText: 'Night Owls' });
     await expect(row).toContainText('2 holders');
 

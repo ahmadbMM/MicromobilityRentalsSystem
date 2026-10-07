@@ -4020,5 +4020,11 @@
   "waSame": "Pareho sa mobile",
   "errWaPhone": "Ilagay ang iyong WhatsApp number.",
   "waSubAcc": "Ang number kung saan ka minemensahe ng aming team tungkol sa iyong mga ride.",
-  "wgOutdatedMsg": "Luma na ang page na ito at nagbago ang waiver. Magre-reload ito ngayon: basahin ang bagong waiver at tanggapin ito."
+  "wgOutdatedMsg": "Luma na ang page na ito at nagbago ang waiver. Magre-reload ito ngayon: basahin ang bagong waiver at tanggapin ito.",
+  "toastUndoCheckinWl": "Na-undo ang check-in - naibalik ang rider sa waitlist.",
+  "amTagDelBody": "Kapag binura ang tag, matatanggal ito sa bawat account na may hawak nito.",
+  "vndResetQ": "I-reset ang password ng {0}?",
+  "vndResetBody": "Hindi na gagana ang kasalukuyang password at masa-sign out ang login na ito sa vendor portal sa bawat device. Pagkatapos, makakakuha ka ng bagong pansamantalang password na ipapadala.",
+  "vndDeactivateQ": "I-deactivate ang {0}?",
+  "vndDeactivateBody": "Masa-sign out ang login na ito sa vendor portal sa bawat device at hindi ito makakapag-sign in hanggang ma-activate ulit."
 }

@@ -4020,5 +4020,11 @@
   "waSame": "O mesmo do celular",
   "errWaPhone": "Digite o seu número de WhatsApp.",
   "waSubAcc": "O número em que nossa equipe envia mensagens sobre seus passeios.",
-  "wgOutdatedMsg": "Esta página está desatualizada e o termo mudou. Ela é recarregada agora: leia o novo termo e aceite-o."
+  "wgOutdatedMsg": "Esta página está desatualizada e o termo mudou. Ela é recarregada agora: leia o novo termo e aceite-o.",
+  "toastUndoCheckinWl": "Check-in desfeito - o ciclista voltou para a lista de espera.",
+  "amTagDelBody": "Excluir a etiqueta a remove de todas as contas que a têm.",
+  "vndResetQ": "Redefinir a senha de {0}?",
+  "vndResetBody": "A senha atual deixa de funcionar e este acesso é desconectado do portal de fornecedores em todos os dispositivos. Em seguida, aparece uma nova senha temporária para enviar.",
+  "vndDeactivateQ": "Desativar {0}?",
+  "vndDeactivateBody": "Este acesso é desconectado do portal de fornecedores em todos os dispositivos e não consegue entrar até ser ativado novamente."
 }

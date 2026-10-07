@@ -4020,5 +4020,11 @@
   "waSame": "El mismo que el móvil",
   "errWaPhone": "Escribe tu número de WhatsApp.",
   "waSubAcc": "El número en el que nuestro equipo te escribe sobre tus salidas.",
-  "wgOutdatedMsg": "Esta página está desactualizada y la exención ha cambiado. Se recarga ahora: lee la nueva exención y acéptala."
+  "wgOutdatedMsg": "Esta página está desactualizada y la exención ha cambiado. Se recarga ahora: lee la nueva exención y acéptala.",
+  "toastUndoCheckinWl": "Registro deshecho - el ciclista vuelve a la lista de espera.",
+  "amTagDelBody": "Eliminar la etiqueta la quita de todas las cuentas que la tienen.",
+  "vndResetQ": "¿Restablecer la contraseña de {0}?",
+  "vndResetBody": "La contraseña actual deja de funcionar y este acceso se desconecta del portal de proveedores en todos los dispositivos. Después obtienes una nueva contraseña temporal para enviar.",
+  "vndDeactivateQ": "¿Desactivar {0}?",
+  "vndDeactivateBody": "Este acceso se desconecta del portal de proveedores en todos los dispositivos y no puede iniciar sesión hasta que se vuelva a activar."
 }

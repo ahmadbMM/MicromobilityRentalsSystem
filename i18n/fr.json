@@ -4020,5 +4020,11 @@
   "waSame": "Identique au mobile",
   "errWaPhone": "Saisissez votre numéro WhatsApp.",
   "waSubAcc": "Le numéro sur lequel notre équipe vous écrit au sujet de vos sorties.",
-  "wgOutdatedMsg": "Cette page n’est plus à jour et la décharge a changé. Elle se recharge maintenant : lisez la nouvelle décharge et acceptez-la."
+  "wgOutdatedMsg": "Cette page n’est plus à jour et la décharge a changé. Elle se recharge maintenant : lisez la nouvelle décharge et acceptez-la.",
+  "toastUndoCheckinWl": "Enregistrement annulé - le cycliste est de retour sur la liste d'attente.",
+  "amTagDelBody": "Supprimer le tag le retire de tous les comptes qui l’ont.",
+  "vndResetQ": "Réinitialiser le mot de passe de {0} ?",
+  "vndResetBody": "Le mot de passe actuel cesse de fonctionner et cet identifiant est déconnecté du portail fournisseurs sur tous les appareils. Vous obtenez ensuite un nouveau mot de passe temporaire à envoyer.",
+  "vndDeactivateQ": "Désactiver {0} ?",
+  "vndDeactivateBody": "Cet identifiant est déconnecté du portail fournisseurs sur tous les appareils et ne peut plus se connecter tant qu’il n’est pas réactivé."
 }
