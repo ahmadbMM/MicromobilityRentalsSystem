@@ -26536,10 +26536,14 @@ function _ciBikeInput(v,now){
   if(_ciBikeTimer){clearTimeout(_ciBikeTimer);_ciBikeTimer=null;}
   const code=String(v||'').trim();
   if(!code){S._ciBike=null;S._ciBikeMsg=null;S._ciLinkOffer=null;_ciRenderBikeSpec();return;}
-  if(now)_ciResolve(code);else _ciBikeTimer=setTimeout(()=>{_ciBikeTimer=null;_ciResolve(code);},350);
+  if(now)_ciResolve(code);else{_ciBikeTimer=setTimeout(()=>{_ciBikeTimer=null;_ciResolve(code);},350);_ciRenderBikeSpec();} // Confirm waits for the lookup (_ciConfirmBlocked)
 }
 async function _ciResolve(code){
   const myId=S._ciId;if(!myId)return;
+  // A lookup typed for a rider the modal has since left (the debounce outlived the switch) or a
+  // field a scanned bike has filled since: nothing to look up. It used to leave "Looking..." on
+  // the next rider's field for good (2026-10-07).
+  if(String(S._ciBikeCode||'').trim()!==code){_ciRenderBikeSpec();return;}
   S._ciBikeMsg=t('ciBikeLooking');_ciRenderBikeSpec();
   let d=null,err=null;
   try{
@@ -26581,8 +26585,9 @@ function _ciResolveLocal(code){
   return{found:true,bike:b,rented_to:h?{name:h.name,since:h.checkedInAt||null}:null};
 }
 async function _ciLinkTag(){
-  const o=S._ciLinkOffer;if(!o)return;
-  let r;try{r=await sb.rpc('staff_link_tag',{p_bike_id:o.bike.id,p_tag_uid:o.uid});}catch(e){r={error:e};}
+  const o=S._ciLinkOffer;if(!o||o.busy)return;
+  o.busy=true; // one link per tap: a second tap while the first was out logged the link twice (2026-10-07)
+  let r;try{r=await sb.rpc('staff_link_tag',{p_bike_id:o.bike.id,p_tag_uid:o.uid});}catch(e){r={error:e};}finally{o.busy=false;}
   if(r&&r.error){toast(_rpcMessage(r.error),'error');return;}
   toast(t('ciTagLinked').replace('{0}',_ciBikeNum(o.bike)));
   logAction(`${t('ciLinkTag').replace('{0}',_ciBikeNum(o.bike))}`);
@@ -26819,7 +26824,11 @@ async function _addonsOnLeaveWaitlist(entry,wasWaitlist){
 function _ciConfirmBlocked(){
   const e=S._ciId&&getQueue().find(x=>x.id===S._ciId);
   if(e&&_hasRideGroups(allSessions().find(x=>x.id===e.sessionId))&&!_rgOk(S._ciRg))return true; // a Saturday rider needs a group first
-  return (S._ciOutcome||'checkin')==='checkin'&&_ciBikeBlocked();
+  const o=S._ciOutcome||'checkin';
+  // A number still being looked up (in its debounce, or its answer on the way): Confirm waits for
+  // it. It used to hand over the bike the field named BEFORE the edit (2026-10-07).
+  if((o==='checkin'||o==='waiting')&&(_ciBikeTimer||S._ciBikeMsg===t('ciBikeLooking')))return true;
+  return o==='checkin'&&_ciBikeBlocked();
 }
 function _ciPickOutcome(v){S._ciOutcome=v;renderCheckinModal();}
 function confirmCheckinOutcome(){
@@ -26945,7 +26954,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   if(_scanResume)_scanCount++;
   _ciCloseForNext(e);
   if(_gotBikes.length===1)e.assignedBikeId=_gotBikes[0];else if(!_gotBikes.length)e.assignedBikeId=null;
-  Object.assign(e,{status:'active',typePreference:ty},patch.paid?{paid:true}:{},patch.price!==undefined?{price:patch.price}:{});
+  Object.assign(e,{status:'active',typePreference:ty},patch.paid!==undefined?{paid:patch.paid}:{},patch.price!==undefined?{price:patch.price}:{}); // Pending too: the row read Paid until the re-sync (2026-10-07)
   S._flashId=e.id;S._flashColor='green';renderStaffQueue(); // the row moves now; the re-sync below confirms it
   await _addonsOnLeaveWaitlist(e,_wasWl);
   await _mwRetireLinked(e.id); // a Staff List row carrying this booking is spent once they ride
@@ -27355,7 +27364,10 @@ async function saveModalPrice(id){
   if(now&&(now.price??DEFAULT_PRICE)===val)S.modalPriceEdit=false; // set: the field closes (a keypad cancelled keeps it open)
   if(S.modalRider===id)renderModal();
 }
-async function modalQuickAddBike(){
+// One quick add at a time, as the fleet form's Add (_bkSaving, 2026-10-07): a second tap while the
+// insert was out passed the number check on the stale list and said "number taken" over the bike just added.
+async function modalQuickAddBike(){if(_bkSaving)return;_bkSaving=true;try{await _modalQuickAddBikeNow();}finally{_bkSaving=false;}}
+async function _modalQuickAddBikeNow(){
   if(!S.modalAddBikeType){toast(t('errBikeTypeReq'),'error');return;}
   if(!S.modalAddBikeFrame){toast(t('errBikeFrameReq'),'error');return;}
   const bikeNum=parseInt(S.modalAddBikeNumber||'');
@@ -27431,11 +27443,18 @@ async function _dropOtherBikeNo(no,selfId){
     if(!(await _wr(sb.from('queue_entries').update({reserved_bike_no:null}).eq('id',e.id).eq('reserved_bike_no',no).in('status',['waiting','waitlist']),'move reservation')))e.reservedBikeNo=null;
   }
 }
+// One assign at a time (2026-10-07): a second tap while the first was out claimed, checked in and
+// logged again, pushed a second Undo and said "no longer available" over a bike just handed over.
+let _assignBusy=false;
 async function confirmAssign(){
+  if(_assignBusy)return;_assignBusy=true;
+  try{return await _confirmAssignRun();}finally{_assignBusy=false;}
+}
+async function _confirmAssignRun(){
   if(S.modalBikes.length===0){toast(t('errSelectBike'),'error');return;}
   const rider=getQueue().find(e=>e.id===S.modalRider);
-  
-  if(S.modalBikes.length>1){toast(t('errMaxOneBike'),'error');S.modalBikes=S.modalBikes.slice(0,1);return;}
+  if(!rider){closeModal();return _lostRace();} // the booking went on another desk: nothing to hand a bike to
+  if(S.modalBikes.length>1){toast(t('errMaxOneBike'),'error');S.modalBikes=S.modalBikes.slice(0,1);renderModal();return;} // drawn as trimmed, or the next Confirm freed a bike nobody saw dropped
   const allBikes=getBikes();
   const selected=S.modalBikes.map(id=>allBikes.find(b=>b.id===id)).filter(Boolean);
   
@@ -27648,7 +27667,8 @@ async function confirmAssign(){
       }
       const back=await _reclaimBikes(toFree);
       if(back.length<toFree.length){await _releaseBikes(back,'bike assign');toast(t('errBikeUnavailable'),'error');await loadData();renderStaffQueue();return false;}
-      const undoAssign={assigned_bike_id:alreadyAssigned.length===1?alreadyAssigned[0]:JSON.stringify(alreadyAssigned)};
+      // a rider who had no bike yet (checked in without one) goes back to none, not to the text '[]'
+      const undoAssign={assigned_bike_id:alreadyAssigned.length===0?null:alreadyAssigned.length===1?alreadyAssigned[0]:JSON.stringify(alreadyAssigned)};
       if(priceUpdate.price!=null&&prevPrice!=null)undoAssign.price=prevPrice;
       const u=await sb.from('queue_entries').update(undoAssign).eq('id',riderId).eq('status','active').select('id');
       if(_writeErr(u,'undo')||!_landed(u)){
@@ -28440,14 +28460,16 @@ function _csvParse(text){
   text=String(text||'').replace(/^﻿/,'');
   const first=text.split(/\r?\n/,1)[0]||'';
   const delim=[',',';','\t'].map(d=>[d,first.split(d).length-1]).sort((a,b)=>b[1]-a[1])[0][0];
-  const rows=[];let row=[],cell='',q=false;
-  const end=()=>{row.push(cell);cell='';if(row.some(x=>String(x).trim()!==''))rows.push(row);row=[];};
+  // Each row keeps the file line it starts on (row.line): blank lines are left out, so the
+  // preview's line numbers could not be counted from a row's place in the list (2026-10-07).
+  const rows=[];let row=[],cell='',q=false,ln=1,at=1;
+  const end=()=>{row.push(cell);cell='';if(row.some(x=>String(x).trim()!=='')){row.line=at;rows.push(row);}row=[];};
   for(let i=0;i<text.length;i++){
     const c=text[i];
-    if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++;}else q=false;}else cell+=c;continue;}
+    if(q){if(c==='"'){if(text[i+1]==='"'){cell+='"';i++;}else q=false;}else{if(c==='\n')ln++;cell+=c;}continue;}
     if(c==='"'){q=true;continue;}
     if(c===delim){row.push(cell);cell='';continue;}
-    if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;end();continue;}
+    if(c==='\n'||c==='\r'){if(c==='\r'&&text[i+1]==='\n')i++;end();at=++ln;continue;}
     cell+=c;
   }
   if(cell!==''||row.length)end();
@@ -28493,7 +28515,7 @@ function _bkCsvRows(text){
       serial_number:g('serial')||null,tag_uid:tag,colors,color_names:[g('color_name')||''],in_service_date:inSvc||null,model_year:numOr(g('model_year'),true),wheel_size:g('wheel')||null,brake_type:g('brake')||null,
       pedal_type:g('pedal')||null,weight_kg:numOr(g('weight_kg')),rental_price:numOr(g('price')),status:status||'available',notes:g('notes')||null,retired_date:(status&&status!=='available')?_todayISO():null};
     bike.name=g('name')||genBikeName(bike.type,bike.frame_type,num>=1?num:0,bike.size);
-    return{line:i+2,bike,errs};
+    return{line:r.line||i+2,bike,errs};
   });
   return{rows:out,err:null};
 }
@@ -28619,8 +28641,10 @@ function startEdit(id){
   S._bkName=bike.name;S._bkNameCustom=bike.name!==genBikeName(bike.type,bike.frame_type,bike.bike_number,bike.size);
   S._bkNumber=bike.bike_number!=null?String(bike.bike_number):'';
   S._bkStartDate=bike.in_service_date||'';
-  renderBikes();_scrollToBikeForm();
+  // The read starts (and marks the box as loading) before the form is drawn: drawn first, Edit
+  // from another bike's open form showed THAT bike's serial, tag and notes until the answer came (2026-10-07).
   _bkPrivLoad(id);
+  renderBikes();_scrollToBikeForm();
 }
 // The same bike again, one number along. The Add form opens carrying every spec of the one
 // it was taken from — type, frame, size, colours, brand, model, groupset, speeds, price,
@@ -29045,9 +29069,14 @@ function _bkFieldHtml(id,val,addMode,list){
 // ── Shared option lists (staff_options): brands carry their models ──────────────────
 function _optList(key){const v=(S.staffOptions||{})[key];return Array.isArray(v)?v:[];}
 async function _optWrite(key,items){
+  const was=(S.staffOptions||{})[key];
   S.staffOptions={...(S.staffOptions||{}),[key]:items};
   const r=await sb.from('staff_options').upsert({key,items,updated_at:new Date().toISOString()});
-  return !_writeErr(r,'options');
+  if(!_writeErr(r,'options'))return true;
+  // Refused: the list goes back to what the database still holds, unless a later write has
+  // replaced it meanwhile. Kept, the form offered entries nobody else would ever see (2026-10-07).
+  if((S.staffOptions||{})[key]===items)S.staffOptions={...S.staffOptions,[key]:was};
+  return false;
 }
 function _bkBrandNames(){return _optList('bike_brands').map(b=>b&&b.name).filter(Boolean);}
 function _bkModelsFor(brand){const b=_optList('bike_brands').find(x=>x&&x.name===brand);return b&&Array.isArray(b.models)?b.models:[];}
@@ -29106,19 +29135,29 @@ async function _optListSave(){
   const o=S._optEdit;if(!o)return;
   const seen=new Set();const rows=o.items.map(it=>({v:String(it.v||'').trim(),orig:it.orig})).filter(it=>it.v&&!seen.has(it.v)&&seen.add(it.v));
   const items=rows.map(it=>it.v);
+  // The form's own pick follows a rename (2026-10-07): it was cleared like a removed entry, and the
+  // bike open in the form then saved with no brand (and no model), or no groupset, wheel, brake, frame.
+  const ren=v=>{const r=v?rows.find(it=>it.orig===v):null;return r?r.v:v;};
   let ok=true;
   if(o.kind==='brands'){
     const prev=_optList('bike_brands');
     ok=await _optWrite('bike_brands',rows.map(it=>{const was=it.orig?prev.find(b=>b.name===it.orig):null;return{name:it.v,models:(was&&Array.isArray(was.models))?was.models:[]};}).sort((a,b)=>a.name.localeCompare(b.name)));
+    if(!ok)return;
+    S._bkBrand=ren(S._bkBrand);
     if(S._bkBrand&&!items.includes(S._bkBrand)){S._bkBrand='';S._bkModel='';}
   }else if(o.kind==='models'){
     const l=_optList('bike_brands').map(b=>b.name===S._bkBrand?{...b,models:_srt(items)}:b);
+    // a brand the list does not hold (the form shows it anyway, _bkFieldHtml) joins it with these
+    // models: they were dropped and the editor closed as if saved (2026-10-07)
+    if(!l.some(b=>b&&b.name===S._bkBrand))l.push({name:S._bkBrand,models:_srt(items)}),l.sort((a,c)=>String(a&&a.name).localeCompare(String(c&&c.name)));
     ok=await _optWrite('bike_brands',l);
+    if(!ok)return;
+    S._bkModel=ren(S._bkModel);
     if(S._bkModel&&!items.includes(S._bkModel))S._bkModel='';
-  }else if(o.kind==='groupsets'){ok=await _optWrite('bike_groupsets',_srt(items));if(S._bkGroupset&&!items.includes(S._bkGroupset))S._bkGroupset='';}
-  else if(o.kind==='wheels'){ok=await _optWrite('bike_wheels',items);if(S._bkWheel&&!items.includes(S._bkWheel))S._bkWheel='';}
-  else if(o.kind==='brakes'){ok=await _optWrite('bike_brakes',items);if(S._bkBrake&&!items.includes(S._bkBrake))S._bkBrake='';}
-  else{ok=await _optWrite('bike_frames',items);if(S._bkFrame&&!items.includes(S._bkFrame))S._bkFrame='';}
+  }else if(o.kind==='groupsets'){ok=await _optWrite('bike_groupsets',_srt(items));if(!ok)return;S._bkGroupset=ren(S._bkGroupset);if(S._bkGroupset&&!items.includes(S._bkGroupset))S._bkGroupset='';}
+  else if(o.kind==='wheels'){ok=await _optWrite('bike_wheels',items);if(!ok)return;S._bkWheel=ren(S._bkWheel);if(S._bkWheel&&!items.includes(S._bkWheel))S._bkWheel='';}
+  else if(o.kind==='brakes'){ok=await _optWrite('bike_brakes',items);if(!ok)return;S._bkBrake=ren(S._bkBrake);if(S._bkBrake&&!items.includes(S._bkBrake))S._bkBrake='';}
+  else{ok=await _optWrite('bike_frames',items);if(!ok)return;S._bkFrame=ren(S._bkFrame);if(S._bkFrame&&!items.includes(S._bkFrame))S._bkFrame='';}
   if(!ok)return;
   closeOptListModal();renderBikes();
 }
