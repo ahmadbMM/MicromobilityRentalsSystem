@@ -21270,8 +21270,10 @@ async function closeOutSession(sid){
   const sess=_sessGet(sid)||{};
   const nBikes=toReturn.reduce((n,e)=>n+getAssignedBikeIds(e).length,0);
   // What is still owed goes in the question: a close-out marks riders Completed, it does not collect.
-  const owed=[...toReturn,...toDone].filter(e=>!e.paid);
-  const owedSar=Math.round(owed.reduce((sum,e)=>sum+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0)*100)/100;
+  // Owed as the bulk return reads it (_brOwes, 2026-10-07): a free ride's riders, and a rider with
+  // nothing to pay, owe nothing - the Saturday ride's close-out said "12 of them still owe SAR 0".
+  const owed=[...toReturn,...toDone].filter(_brOwes);
+  const owedSar=Math.round(owed.reduce((sum,e)=>sum+_brAmt(e),0)*100)/100;
   confirmDialog({
     title:t('closeOutTitle'),
     body:t('closeOutBody').replace('{0}',String(toReturn.length+toDone.length)).replace('{1}',String(toNoshow.length))
@@ -21523,7 +21525,7 @@ async function staffResetPassword(){
     <div class="dk-sr-t">✓ ${t('staffResetDone').replace('{0}',esc(cust.name))}</div>
     <div class="dk-sr-msg">${t('staffResetGiveMsg')} <strong class="dk-sr-pw">${esc(pw)}</strong></div>
   </div>`;
-  document.getElementById('staff-reset-pw').value='';
+  const _pwIn=document.getElementById('staff-reset-pw');if(_pwIn)_pwIn.value=''; // the tool may have been closed while the server answered
 }
 
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -22450,7 +22452,11 @@ async function rescheduleBooking(fromSessionId,toSessionId){
     }
   }
   const base=nextQNum(toSessionId);
-  const sorted=moving.slice().sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
+  // Only the riders the database holds are moved there (2026-10-07): a rider still in the outbox was
+  // retargeted above, and sent through the door too it matched no row, so the move of the others
+  // was reported as failed (and their add-ons left where they were), as cancelBooking already avoids.
+  const _queuedIds=new Set(_bookOutbox().map(r=>r.id));
+  const sorted=moving.filter(e=>!_queuedIds.has(e.id)).sort((a,b)=>(a.queueNum||0)-(b.queueNum||0));
   // Reprice across the free/paid boundary: into a community ride -> free (0); out of one -> the bike's
   // real price. Same-kind moves keep the existing price (incl. any promo discount already applied).
   const _toComm=_isApprovalRide(newSess);
@@ -22949,13 +22955,18 @@ async function confirmLogUndo(logId){
   if(!await _undoAuth(item.label,true))return;
   if(item.undone)return; // reversed another way while it was confirmed
   item.undone=true; // claim synchronously so the topbar's Undo can't also fire the same reversal
-  S.undoStack=(S.undoStack||[]).filter(u=>u.fn!==item.fn); // and take it off the topbar Undo so that button can't re-run it either
+  const _st=S.undoStack||[],_at=_st.findIndex(u=>u.fn===item.fn),_su=_at>=0?_st[_at]:null;
+  S.undoStack=_st.filter(u=>u.fn!==item.fn); // and take it off the topbar Undo so that button can't re-run it either
+  // A refused or failed reversal goes back where it was on the topbar's Undo too (2026-10-07), as
+  // doUndo puts it back: dropped from the stack with the topbar left unpainted, the topbar's button
+  // still named this action while a tap on it reversed the one before it.
+  const _back=()=>{item.undone=false;if(_su&&!S.undoStack.includes(_su))S.undoStack.splice(Math.min(_at,S.undoStack.length),0,_su);};
   try{
     // Claimed above so two buttons cannot run one reversal; hand it back if it was refused.
-    if(await item.fn()===false){item.undone=false;toast(t('undoFailed'),'error');if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;}
+    if(await item.fn()===false){_back();toast(t('undoFailed'),'error');renderTopbarRight();if(S.staffTab==='history'&&S.histView==='log')renderLogs();return;}
     toast(t('toastActionUndone')+item.label);
   }catch(e){
-    item.undone=false; // reversal failed — allow a retry
+    _back(); // reversal failed — allow a retry
     toast(t('toastUndoFailedData'),'error');
   }
   renderTopbarRight();renderLogs();renderStaffQueue();
@@ -23169,7 +23180,7 @@ function _promoNudge(e){
     const wa='https://wa.me/'+String(e.phone).replace(/\D/g,'')+'?text='+encodeURIComponent(_tplUse('wa_turn',S.lang,{})??t('waYourTurnMsg'));
     b.innerHTML='<span class="dk-pn-msg">'+t('promoNudgeMsg').replace('{0}',esc(e.name||''))+'</span>'
       +'<a href="'+wa+'" target="_blank" rel="noopener" class="dk-pn-wa">WhatsApp</a>'
-      +'<button class="dk-pn-x" aria-label="close">\u2715</button>';
+      +'<button type="button" class="dk-pn-x" aria-label="'+esc(t('closeBtn'))+'">\u2715</button>';
     b.querySelector('button').onclick=()=>b.remove();
     b.querySelector('a').addEventListener('click',()=>setTimeout(()=>b.remove(),400));
     document.body.appendChild(b);
@@ -23509,6 +23520,9 @@ async function _priceWrite(id,price,what){
 }
 async function saveEditedPrice(id,newPrice){
   if(isNaN(newPrice)||newPrice<0){toast(t('errValidPrice'),'error');return;}
+  // In halalas (2026-10-07): a typed total less the add-ons (110.2 - 10.1) came out as
+  // 100.10000000000001 and was saved like that as the rider's price.
+  newPrice=Math.round(newPrice*100)/100;
   const entry=getQueue().find(e=>e.id===id);if(!entry)return;
   if(newPrice!==entry.price&&!await _pinApprove(t('pinWhatPrice')))return;
   const prevPrice=entry.price;
