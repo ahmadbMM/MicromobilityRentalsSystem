@@ -29114,6 +29114,9 @@ async function _optListSave(){
 function _optEditBtn(kind){return`<button type="button" class="opt-edit" title="${esc(t('optEditList'))}" aria-label="${esc(t('optEditList'))}" data-on-click="${_on("showOptListModal",kind)}">✎</button>`;}
 function _bkSelChange(id,val){
   if(val==='__add__'){
+    // What the field held, for Cancel to put back (2026-10-07): it used to come back empty, and a
+    // bike edited past a mistaken "+ Add new" was saved without its brand / model / groupset.
+    S._bkAddWas={...(S._bkAddWas||{}),[id]:{'bk-brand':S._bkBrand,'bk-model':S._bkModel,'bk-groupset':S._bkGroupset,'bk-wheel':S._bkWheel,'bk-brake':S._bkBrake}[id]||''};
     if(id==='bk-brand'){S._bkBrand='';S._bkBrandAdd=true;}
     else if(id==='bk-model'){S._bkModel='';S._bkModelAdd=true;}
     else if(id==='bk-groupset'){S._bkGroupset='';S._bkGroupsetAdd=true;}
@@ -29122,7 +29125,7 @@ function _bkSelChange(id,val){
     renderBikes();
     setTimeout(()=>document.getElementById(id)?.focus(),50);
   }else{
-    if(id==='bk-brand'){if(S._bkBrand!==val)S._bkModel='';S._bkBrand=val;renderBikes();} // models hang off the brand
+    if(id==='bk-brand'){if(S._bkBrand!==val){S._bkModel='';if(S._bkAddWas)S._bkAddWas['bk-model']='';}S._bkBrand=val;renderBikes();} // models hang off the brand
     else if(id==='bk-model')S._bkModel=val;
     else if(id==='bk-groupset')S._bkGroupset=val;
     else if(id==='bk-wheel')S._bkWheel=val;
@@ -29141,11 +29144,12 @@ async function _bkOptSave(id){
   renderBikes();
 }
 function _bkOptCancel(id){
-  if(id==='bk-brand'){S._bkBrandAdd=false;S._bkBrand='';}
-  else if(id==='bk-model'){S._bkModelAdd=false;S._bkModel='';}
-  else if(id==='bk-groupset'){S._bkGroupsetAdd=false;S._bkGroupset='';}
-  else if(id==='bk-wheel'){S._bkWheelAdd=false;S._bkWheel='';}
-  else if(id==='bk-brake'){S._bkBrakeAdd=false;S._bkBrake='';}
+  const was=(S._bkAddWas||{})[id]||''; // the value before "+ Add new" (_bkSelChange)
+  if(id==='bk-brand'){S._bkBrandAdd=false;S._bkBrand=was;}
+  else if(id==='bk-model'){S._bkModelAdd=false;S._bkModel=was;}
+  else if(id==='bk-groupset'){S._bkGroupsetAdd=false;S._bkGroupset=was;}
+  else if(id==='bk-wheel'){S._bkWheelAdd=false;S._bkWheel=was;}
+  else if(id==='bk-brake'){S._bkBrakeAdd=false;S._bkBrake=was;}
   renderBikes();
 }
 // A bike saved with a brand, model or groupset the lists do not know yet teaches the lists.
@@ -29283,7 +29287,7 @@ function _ahRender(force){
   const lastRide=done.map(x=>String(x.sessionDate||'')).filter(Boolean).sort().pop()||'';
   const kpi=(v,l,cls)=>`<div class="ah-kpi${cls?' '+cls:''}"><div class="ah-kpi-v">${v}</div><div class="ah-kpi-l">${l}</div></div>`;
   const facts=[
-    firstSeen?`${t('custMemberSince')}: ${shortDate(String(firstSeen).slice(0,10))}`:'',
+    firstSeen?`${t('custMemberSince')}: ${shortDate(_ksaDayOf(firstSeen)||String(firstSeen).slice(0,10))}`:'', // a timestamp: its Riyadh day, not its UTC one (2026-10-07)
     lastRide?`${t('acrColLastRide')}: ${shortDate(lastRide)}`:'',
     favType?`${t('custFavType')}: ${typeLabel(favType)}`:'',
     avgRating?`${t('custAvgRating')}: ${avgRating}/10`:'',
@@ -29351,7 +29355,7 @@ function _ahRender(force){
       ${purch.length?`<div class="ah-sec">${t('custPurchTitle')} <span class="ah-n">${_money(ptot)}</span></div>
       <div class="ah-purch">${purch.slice().sort((p,q)=>new Date(q.created_at||0)-new Date(p.created_at||0)).map(r=>`<div class="ah-purch-row">
         <div class="ah-purch-name">${esc(r.name||'')}${Number(r.qty)>1?` <span class="ah-muted">×${esc(r.qty)}</span>`:''}</div>
-        <span class="ah-muted">${r.created_at?shortDate(String(r.created_at).slice(0,10)):''}</span>
+        <span class="ah-muted">${r.created_at?shortDate(_ksaDayOf(r.created_at)||String(r.created_at).slice(0,10)):''}</span>
         <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
     </div>
@@ -29536,13 +29540,21 @@ async function _riderBookingUndoOut(r){
 // A desk action on some registrations: each registration first (painted at once), then its
 // booking; one reload of the bookings that moved at the end.
 async function _riderAct(ids,patch,move){
+  // One desk action per rider at a time (2026-10-07). The row and the pop-up are repainted before the
+  // write, so a quick second tap landed on the button that had taken the first one's place - Check in
+  // becomes Return - and returned a rider who had just been checked in.
+  const busy=S._riderBusy||(S._riderBusy=new Set());
+  ids=ids.filter(id=>!busy.has(String(id)));if(!ids.length)return;
+  ids.forEach(id=>busy.add(String(id)));
   const moved=[];
-  for(const id of ids){
-    if(!await _riderPatch(id,typeof patch==='function'?patch():patch))continue;
-    const r=(S.riders||[]).find(x=>String(x.id)===String(id));
-    const m=r?await move(r):null;if(m)moved.push(m);
-  }
-  if(moved.length)await _reloadRows(moved);
+  try{
+    for(const id of ids){
+      if(!await _riderPatch(id,typeof patch==='function'?patch():patch))continue;
+      const r=(S.riders||[]).find(x=>String(x.id)===String(id));
+      const m=r?await move(r):null;if(m)moved.push(m);
+    }
+    if(moved.length)await _reloadRows(moved);
+  }finally{ids.forEach(id=>busy.delete(String(id)));}
   _renderRiderModal();
 }
 const _riderInPatch=()=>({checked_in_at:new Date().toISOString(),checked_in_by:_opName()||null});
@@ -29582,7 +29594,9 @@ async function _scanRider(no,say){
   hits.sort((a,b)=>_rank(a)-_rank(b)||String(b.session_id||'').localeCompare(String(a.session_id||''))||_riderPartyNo(a)-_riderPartyNo(b));
   const r=hits[0]; // a party's number opens the employee's row
   if(!r){say(t('scanNotFound'),'var(--red)');return;}
-  if(!_scanDayOk(r.session_id,null,null,say,()=>_scanRiderGo(r,no)))return; // tonight's registration, or an exception
+  // The night's own date stands in when the ride is not on this device yet (a scan at boot, before
+  // the sessions load): with none, every registration read as tonight's (2026-10-07).
+  if(!_scanDayOk(r.session_id,r.session_id,null,say,()=>_scanRiderGo(r,no)))return; // tonight's registration, or an exception
   _scanRiderGo(r,no);
 }
 function _scanRiderGo(r,no){
@@ -31211,7 +31225,9 @@ function _ambListHtml(){
   let rows=W.rows.filter(a=>f==='all'||(f==='rewards'?_ambReds(a.id).some(r=>r.status==='requested'):a.status===f));
   if((W.q||'').trim())rows=rows.filter(a=>_ambHit(a,W.q));
   const bal=a=>(W.stats[a.id]||{}).balance||0;
-  rows.sort((x,y)=>f==='pending'?(x.created_at<y.created_at?-1:1):f==='active'?bal(y)-bal(x)||y.id-x.id:(x.updated_at<y.updated_at?1:-1));
+  // Ties fall to the id, as in Workshop and Messages: a comparator that never answers 0 left rows of the same
+  // instant in no fixed order, so they could swap places between repaints (2026-10-07).
+  rows.sort((x,y)=>f==='pending'?(x.created_at<y.created_at?-1:x.created_at>y.created_at?1:x.id-y.id):f==='active'?bal(y)-bal(x)||y.id-x.id:(x.updated_at<y.updated_at?1:x.updated_at>y.updated_at?-1:y.id-x.id));
   return rows.map(_ambRow).join('')||`<div class="empty-state">${t(W.q&&W.q.trim()?'amNoMatch':'amEmpty')}</div>`;
 }
 function _ambSetFilter(k){_amb().filter=k;renderAmbassadors();}
@@ -31421,7 +31437,9 @@ async function _vendorPoll(full){
   try{
     const[p,l,f]=await Promise.all([
       sb.from('vendor_bookings').select('id',{count:'exact',head:true}).eq('status','pending').gte('day',todayStr()),
-      sb.from('vendor_bookings').select('updated_at').order('updated_at',{ascending:false}).limit(1),
+      // the newest change among the rows _vendorLoad reads (from 200 days back): an older row's change, never
+      // in the loaded list, left the two signatures apart and reloaded the section every 30 s (2026-10-07)
+      sb.from('vendor_bookings').select('updated_at').gte('day',_vendorAdd(todayStr(),-200)).order('updated_at',{ascending:false}).limit(1),
       W&&W.bk&&!W.fbMissing?sb.from('vendor_feedback').select('updated_at').order('updated_at',{ascending:false}).limit(1).then(x=>x,e=>({error:e})):null]);
     _vendorLatePoll();
     if(!p.error){
