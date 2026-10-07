@@ -33,11 +33,17 @@
 --     offer staff corrected kept the old one on the ride ("Breakfast at ...") until another booking
 --     was decided. It now resyncs the venue's confirmed days still ahead, as vendor_profile_save does
 --     for a venue's own edit, and leaves a stop staff typed by hand on the ride (p_keep_hand).
+--  8. staff_community_approve gave the Community tag with "on conflict do nothing", so an applicant
+--     whose Community grant had lapsed (expired, or dated to start later: not _ctag_active) stayed
+--     without membership after the approval. A lapsed grant now becomes a permanent one, as the
+--     insert would make it (no start or end, added by / at / note of the approval); a grant still in
+--     force, time-limited or not, stays as it is. The booking app's approve dialog does the same on
+--     its side since 2026-10-07 (it replaces an expired row); both together are harmless.
 --
 -- Rollback: re-run the saved pg_get_functiondef of staff_set_access, staff_my_settings,
---   _staff_ref_broadcast, staff_unmerge_customers, staff_community_new_password and
---   staff_vendor_venue_save from before this migration (or reverse each patch below: every changed
---   line carries "(20261007120100)");
+--   _staff_ref_broadcast, staff_unmerge_customers, staff_community_new_password,
+--   staff_vendor_venue_save and staff_community_approve from before this migration (or reverse each
+--   patch below: every changed line carries "(20261007120100)");
 --   drop trigger if exists zz_sync_tombstone_key on public.customer_tags;
 -- Idempotent. Run supabase/checks/security-attributes.sql after.
 -- ============================================================================
@@ -176,6 +182,27 @@ $b$   where id = vid;
 end $vv$;
 
 
+-- ── 8. staff_community_approve: a lapsed Community grant becomes a permanent one ─────────────
+do $ca$
+declare d text;
+begin
+  d := pg_get_functiondef('public.staff_community_approve(uuid,text,boolean)'::regprocedure);
+  if position('(20261007120100)' in d) > 0 then
+    raise notice 'staff_community_approve already renews a lapsed grant; nothing to do';
+    return;
+  end if;
+  d := pg_temp._once(d,
+$a$    on conflict (customer_id, tag_id) do nothing;$a$,
+$b$    -- a lapsed grant (expired, or dated to start later) gives way to a permanent one, as the insert
+    -- would make it; a grant in force stays as it is (20261007120100)
+    on conflict (customer_id, tag_id) do update
+       set starts_at = null, expires_at = null,
+           added_by = excluded.added_by, added_at = excluded.added_at, note = excluded.note
+     where not _ctag_active(customer_tags.starts_at, customer_tags.expires_at);$b$);
+  execute d;
+end $ca$;
+
+
 -- ── checks ────────────────────────────────────────────────────────────────────────────────────
 do $chk$
 declare f text;
@@ -186,7 +213,8 @@ begin
     'public._staff_ref_broadcast()',
     'public.staff_unmerge_customers(bigint)',
     'public.staff_community_new_password(uuid)',
-    'public.staff_vendor_venue_save(jsonb)'] loop
+    'public.staff_vendor_venue_save(jsonb)',
+    'public.staff_community_approve(uuid,text,boolean)'] loop
     if position('(20261007120100)' in pg_get_functiondef(f::regprocedure)) = 0 then
       raise exception '% was not patched', f;
     end if;
