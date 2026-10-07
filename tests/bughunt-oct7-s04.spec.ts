@@ -38,6 +38,19 @@ test.describe('@staff:bookings the desk', () => {
     expect(await page.evaluate(`_ntKindsNow().some(x=>x.k==='long')`)).toBe(false);
   });
 
+  test('a walk-up handed a bike is never booked onto a ride without bikes, nor shown a bike type there', async ({ page }) => {
+    const run = { id: `${D}-rh`, session_date: D, day: 'Sunday', status: 'open', capacity: 80, created_at: 2, event_kind: 'community',
+      ride_kind: 'runher', needs_approval: false, paid_ride: false, location: 'JYC', bike_slots: '{"_time":"06:00 - 06:30"}' };
+    await stubSupabase(page, { sessions: [...sessions, run], queue_entries: [qe('r1', 1, { status: 'waitlist', session_id: run.id, type_preference: 'None', waitlist_num: 1 })],
+      desk_waitlist: [{ id: 'wr', name: 'Rider 1', status: 'waiting', booking_id: 'r1', kind: 'managed', created_at: '2099-01-01T10:00:00Z' }] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goStaff()');
+    expect(await page.evaluate('_wlOpenSess().map(s=>s.id)')).toEqual(['s0']);
+    expect(await page.evaluate(`_mwTypeCell(_wlRowById('wr'),_qGet('r1'))`)).toBe('');
+  });
+
   test('a party checked in from the Staff List can be undone, like the roster\'s bulk check-in', async ({ page }) => {
     await boot(page);
     await page.evaluate(`S.staffRole='admin';mwPartyCheckin('w1')`);

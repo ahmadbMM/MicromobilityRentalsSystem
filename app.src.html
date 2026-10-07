@@ -9815,7 +9815,7 @@ function payBtnMw(w){const isHouse=w.paid&&_wlRowPrice(w)===0;return`<button cla
 // List, which ask the same question next to the same decision.
 const availChip=avail=>avail>0?`<span class="rq-avail">${t('wlAvailNow').replace('{0}',avail)}</span>`:`<span class="rq-mut">—</span>`;
 function _wlAvail(ty){const base=PREMIUM_TIERS[ty]||ty;return(S.bikes||[]).filter(b=>b.status==='available'&&(!base||base==='Any'||b.type===base)).length;} // premium tiers count their fulfilling base type (Road Carbon -> Road)
-function _wlOpenSess(){return allSessions().filter(x=>_sessLive(x)&&!_isApprovalRide(x)).sort(_sessOrder);}
+function _wlOpenSess(){return allSessions().filter(x=>_sessLive(x)&&!_isApprovalRide(x)&&_needsBike(x)).sort(_sessOrder);} // a walk-up waits for a bike: never booked onto a ride without one (a morning run was "tonight's ride" until it ended, 2026-10-07)
 // The view mirrors the Bookings queue page: same section header (live indicator, header
 // buttons, density toggle), stat cards, filter bar (session + search), desktop table and
 // mobile cards. Adding goes through a modal, exactly like the queue's Walk-in.
@@ -11011,7 +11011,7 @@ function renderRegister(){
       <div class="cu-f1-min0">
         <div class="cu-rv-name">${esc(nm||(t('riderLabel')+' '+(i+1)))}</div>
         ${(_rideKind(_selSessObj)==='runher'&&_runKmOk(S.regRunKm))?`<div class="cu-rv-meta"><span class="run-km-chip">${esc(_runKmTxt(S.regRunKm))}</span></div>`:''}
-        ${_needsBike(_selSessObj)?`<div class="cu-rv-meta">${typeBadge(ty)}${h?`<span><bdi>${h} ${t('cmUnit')}</bdi></span>`:''}${(i===0&&_hasRideGroups(_selSessObj)&&_rgOk(S.regRideGroup))?`<span class="cu-rv-grp">${esc(_rgName(S.regRideGroup))} · <bdi>${esc(t('rtKm').replace('{0}',String(_rgKm(_selSessObj,S.regRideGroup))))}</bdi></span>`:''}</div>`:''}
+        ${_needsBike(_selSessObj)?`<div class="cu-rv-meta">${typeBadge(ty)}${h?`<span><bdi>${esc(String(h))} ${t('cmUnit')}</bdi></span>`:''}${(i===0&&_hasRideGroups(_selSessObj)&&_rgOk(S.regRideGroup))?`<span class="cu-rv-grp">${esc(_rgName(S.regRideGroup))} · <bdi>${esc(t('rtKm').replace('{0}',String(_rgKm(_selSessObj,S.regRideGroup))))}</bdi></span>`:''}</div>`:''}
       </div>
       <div class="cu-rv-price">${(_freeSel||ty==='Own')?t('freeLabel'):_hFree(i)?t('onTheHouseLabel'):_evSeatPrice(allSessions().find(x=>x.id===S.selSession))!=null?`<bdi>${esc(_sar(_evSeatPrice(allSessions().find(x=>x.id===S.selSession))))}</bdi>`:`<bdi>${esc(priceDisplay(ty))}</bdi>`}</div>
     </div>`;
