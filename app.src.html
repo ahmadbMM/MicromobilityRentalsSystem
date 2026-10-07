@@ -6700,10 +6700,11 @@ function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='event'?Math.max(1,
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
 // queue numbers, seats that overflow to the waitlist, auto-promotion, the lot.
 function _isApprovalRide(s){return _isCommunity(s)&&(s.needs_approval!==false);}
-// No group is added at once to a Saturday ride or to Run for Her (the owner, 2026-10-07: "remove the add group
-// button from saturday and run for her"): their riders come one at a time, each with their own ride group,
-// distance and age check. The roster's Add group, its ride list and the Add rider dialog's Group all ask this.
-function _noGroupAdd(s){const k=s&&_rideKind(s);return k==='saturday'||k==='runher';}
+// No group is added at once to a Saturday ride, to Run for Her or to the Triathlon Pool Session (the owner,
+// 2026-10-07: "remove the add group button from saturday and run for her", then "from triathlon pool session
+// too"): their riders come one at a time, each with their own ride group, distance or age check. The roster's
+// Add group, its ride list and the Add rider dialog's Group all ask this.
+function _noGroupAdd(s){const k=s&&_rideKind(s);return k==='saturday'||k==='runher'||k==='swim';}
 const _apprSessIds={has:sid=>_isApprovalRide(_sessGet(sid))};
 const _commSessIds={has:sid=>_isCommunity(_sessGet(sid))};
 const _noCarbonSessIds={has:sid=>_noCarbon(_sessGet(sid))};
