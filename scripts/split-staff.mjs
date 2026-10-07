@@ -1114,7 +1114,12 @@ export function formatFieldNames(r, limit = 20) {
 // (the owner: "change the reserve bike to not force the staff to choose a bike and add a bike number option when
 // choosing a bike"), with 4 strings in each language (+0.9 KB). Here, on 01c23a1d: core 238.9 -> 239.8, ~241.1 on
 // the runner, 0.9 KB under 242; staff 441.0 (~443.2 on the runner) stays inside 445.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 213, staff: 445, core: 244 };
+// Customer 213 -> 215, staff 445 -> 448, core 244 -> 246 (2026-10-07, on top of the Reserve change above): the line-by-line bug hunt's fixes across the
+// whole app (one-at-a-time guards on double taps, Riyadh days for UTC stamps, Arabic-keyboard digits, a party moved
+// under the new ride's fare, the light reload keeping riders' names, the check-in's pending bike lookup...). Here,
+// on 01c23a1d + the hunt: customer 209.6 -> 210.2, staff 440.1 -> 442.0, core 238.9 -> 240.0; the runner reads
+// ~1.4 / ~2.2 / ~1.3 more, which left 0.8 KB on the staff half and 0.7 on the core.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 215, staff: 448, core: 246 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
