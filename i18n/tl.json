@@ -3913,5 +3913,6 @@
   "errRunShare": "Pumayag na ibahagi ang iyong detalye para sa karera upang ma-book ang iyong puwesto.",
   "rshCol": "Pumayag magbahagi",
   "rshNotYet": "Hindi pa",
-  "runNumLabel": "Numero ng mananakbo"
+  "runNumLabel": "Numero ng mananakbo",
+  "catErrYear": "Taon ng modelo: mula 1990 hanggang 2100."
 }

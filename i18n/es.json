@@ -3913,5 +3913,6 @@
   "errRunShare": "Acepta compartir tus datos para la carrera para reservar tu plaza.",
   "rshCol": "Aceptó compartir",
   "rshNotYet": "Todavía no",
-  "runNumLabel": "Número de corredor"
+  "runNumLabel": "Número de corredor",
+  "catErrYear": "Año del modelo: de 1990 a 2100."
 }
