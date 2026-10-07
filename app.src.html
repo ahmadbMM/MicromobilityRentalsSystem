@@ -24825,7 +24825,7 @@ function _accRows(){
     if(!['all','any','none'].includes(o.fTag)&&!live.some(x=>x.tag_id===o.fTag))return false;
     if(o.fGender==='unset'){if(c.gender)return false;}else if(o.fGender!=='all'&&String(c.gender||'')!==o.fGender)return false;
     if(o.fCountry!=='all'&&tv(c.country)!==o.fCountry)return false;
-    if(o.fNationality!=='all'&&tv(c.nationality)!==o.fNationality)return false;
+    if(o.fNationality==='unset'){if(tv(c.nationality))return false;}else if(o.fNationality!=='all'&&tv(c.nationality)!==o.fNationality)return false;
     if(o.fCity!=='all'&&tv(c.city)!==o.fCity)return false;
     if(o.fType!=='all'&&String(c.type_preference||'')!==o.fType)return false;
     if(o.fJoined!=='all'&&_ksaDayOf(c.created_at)<sinceIso(Number(o.fJoined)))return false;
@@ -25026,7 +25026,7 @@ function _accFilterDefs(){
     ['fGender',t('genderLabel'),[all,['male',t('genderMale')],['female',t('genderFemale')],['unset',t('acrGenderUnset')]]],
     ['fAge',t('acrFilterAge'),[all,['u18',t('acrAgeU18')],['18-29',t('acrAge1829')],['30-44',t('acrAge3044')],['45',t('acrAge45')]]],
     ['fCountry',t('countryLabel'),[all,..._saTwice(distinct('country')).map(x=>[x,nationalityLabel(x)])]],
-    ['fNationality',t('nationalityLabel'),[all,..._saTwice(distinct('nationality')).map(x=>[x,nationalityLabel(x)])]],
+    ['fNationality',t('nationalityLabel'),[all,['unset',t('acrGenderUnset')],..._saTwice(distinct('nationality')).map(x=>[x,nationalityLabel(x)])]],
     ['fNatFew',t('acrFilterNatFew'),[all,['accounts',t('acrAmongAcc')],['community',t('acrAmongComm')]]],
     ['fCity',t('cityLabel'),[all,...distinct('city').map(x=>[x,x])]],
     ['fType',t('bikeTypeLabel'),[all,..._ACC_TYPES.map(x=>[x,typeLabel(x)])]],
