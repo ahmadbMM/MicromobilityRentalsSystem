@@ -7419,6 +7419,20 @@ body.view-staff .dash-kpi span{font-size:var(--staff-fs-sm);color:var(--muted);f
 body.view-staff .dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
 @media(max-width:900px){body.view-staff .dash-grid{grid-template-columns:1fr;}}
 body.view-staff .dash-card{margin:0;}
+/* A customer from a nationality the community has nobody from (_natNewBox, 2026-10-07): big on purpose. */
+body.view-staff .natnew-box{margin:14px 0 4px;padding:18px 20px;border:2px solid var(--blue);border-radius:14px;background:rgba(var(--blue-rgb),.08);}
+body.view-staff .natnew-head{display:flex;gap:14px;align-items:flex-start;color:var(--blue);}
+body.view-staff .natnew-head svg{flex:none;margin-top:2px;}
+body.view-staff .natnew-head h3{margin:0;font-size:20px;line-height:1.25;color:var(--text);}
+body.view-staff .natnew-head p{margin:4px 0 0;color:var(--muted);font-size:14px;}
+body.view-staff .natnew-list{margin-top:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;}
+body.view-staff .natnew-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;padding:10px 12px;min-height:44px;border:1px solid var(--sf-line,var(--border));border-radius:10px;background:var(--sf-card,var(--card));font:inherit;color:var(--text);text-align:start;cursor:pointer;}
+body.view-staff .natnew-row:hover{border-color:var(--blue);}
+body.view-staff .natnew-nat{font-weight:700;color:var(--blue);}
+body.view-staff .natnew-name{flex:1;min-width:0;overflow-wrap:anywhere;}
+body.view-staff .natnew-row small{color:var(--muted);}
+body.view-staff .natnew-more{margin-top:8px;color:var(--muted);font-size:13px;}
+body.view-staff .natnew-acts{margin-top:14px;display:flex;justify-content:flex-end;}
 body.view-staff .dash-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--sf-line2);background:none;font:inherit;color:var(--text);text-align:start;cursor:pointer;min-height:44px;}
 body.view-staff .dash-row:last-child{border-bottom:0;}
 body.view-staff .dash-row-main{flex:1;min-width:0;display:flex;flex-direction:column;font-size:13px;}

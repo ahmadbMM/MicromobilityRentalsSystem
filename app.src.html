@@ -748,7 +748,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   completedLabel:'Completed',
   colQueueNum:'#',repColSeq:'No.',colSession:'Session',colBike:'Bike',colColor:'Bike Color',colPayment:'Payment',colStatus:'Status',
   cancelBooking:'Cancel',
-  statusWaiting:'Waiting',statusReserved:'Reserved',statusToReserve:'To be reserved',menuToReserve:'To be reserved',menuToWaitlist:'Move to waitlist',toastToWaitlist:'Moved to the waitlist',menuClearToReserve:'Clear to be reserved',menuReserveBike:'Reserve bike…',menuReleaseBike:'Release reserved bike',bikeReleasedToast:'Reserved bike released',statusActive:'On Bike',statusDone:'Complete',statusNoshow:'No-Show',statusCancelled:'Cancelled',statusCancelledByStaff:'Cancelled by Staff',statusCancelledByCustomer:'Cancelled by Customer',
+  statusWaiting:'Waiting',statusReserved:'Reserved',statusToReserve:'To be reserved',menuToReserve:'To be reserved',menuToWaitlist:'Move to waitlist',toastToWaitlist:'Moved to the waitlist',natNewTitle:'A new nationality in Customers',natNewTitleN:'{0} new nationalities in Customers',natNewSub:'These customers come from a country no community member is from yet.',natNewMore:'+{0} more',natNewOk:'Got it',ntiNatNew:'{0} ({1}): a nationality the community does not have yet',ntNatNew:'Customers from nationalities the community does not have: {0}',ntkNatNew:'New nationality in Customers',menuClearToReserve:'Clear to be reserved',menuReserveBike:'Reserve bike…',menuReleaseBike:'Release reserved bike',bikeReleasedToast:'Reserved bike released',statusActive:'On Bike',statusDone:'Complete',statusNoshow:'No-Show',statusCancelled:'Cancelled',statusCancelledByStaff:'Cancelled by Staff',statusCancelledByCustomer:'Cancelled by Customer',
   colBookingNum:'Booking #',
   staffQueueTitle:'Staff Panel',addWalkin:'+ Walk-in',
   
@@ -1308,7 +1308,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   completedLabel:'مكتملة',
   colQueueNum:'#',repColSeq:'م',colSession:'الجلسة',colBike:'الدراجة',colColor:'لون الدراجة',colPayment:'الدفع',colStatus:'الحالة',
   cancelBooking:'إلغاء',
-  statusWaiting:'بانتظار',statusReserved:'محجوز',statusToReserve:'بانتظار الحجز',menuToReserve:'بانتظار الحجز',menuToWaitlist:'نقل إلى قائمة الانتظار',toastToWaitlist:'نُقل إلى قائمة الانتظار',menuClearToReserve:'إلغاء بانتظار الحجز',menuReserveBike:'حجز دراجة…',menuReleaseBike:'إلغاء حجز الدراجة',bikeReleasedToast:'تم إلغاء حجز الدراجة',statusActive:'على الدراجة',statusDone:'مكتمل',statusNoshow:'لم يحضر',statusCancelled:'ملغي',statusCancelledByStaff:'ملغي من قِبَل الموظفين',statusCancelledByCustomer:'ملغي من قِبَل العميل',
+  statusWaiting:'بانتظار',statusReserved:'محجوز',statusToReserve:'بانتظار الحجز',menuToReserve:'بانتظار الحجز',menuToWaitlist:'نقل إلى قائمة الانتظار',toastToWaitlist:'نُقل إلى قائمة الانتظار',natNewTitle:'جنسية جديدة بين العملاء',natNewTitleN:'{0} جنسيات جديدة بين العملاء',natNewSub:'هؤلاء العملاء من بلد لا يوجد منه أي عضو في المجتمع حتى الآن.',natNewMore:'+{0} آخرون',natNewOk:'حسناً',ntiNatNew:'{0} ({1}): جنسية ليست في المجتمع بعد',ntNatNew:'عملاء من جنسيات ليست في المجتمع: {0}',ntkNatNew:'جنسية جديدة بين العملاء',menuClearToReserve:'إلغاء بانتظار الحجز',menuReserveBike:'حجز دراجة…',menuReleaseBike:'إلغاء حجز الدراجة',bikeReleasedToast:'تم إلغاء حجز الدراجة',statusActive:'على الدراجة',statusDone:'مكتمل',statusNoshow:'لم يحضر',statusCancelled:'ملغي',statusCancelledByStaff:'ملغي من قِبَل الموظفين',statusCancelledByCustomer:'ملغي من قِبَل العميل',
   colBookingNum:'رقم الحجز',
   staffQueueTitle:'لوحة الموظفين',addWalkin:'+ زيارة مباشرة',
   
@@ -10401,7 +10401,7 @@ function _ntKinds(){
   const c=(o,f)=>o?o.length+':'+o.filter(f).length:'-',q=S.queue||[];
   const key=[q.length,q.filter(e=>e.status==='active'||e.ratingExp).length,c(S.inventory,it=>{const n=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return n<=0||(lo>0&&n<=lo);}),
     (S.bikes||[]).map(b=>b&&b.status).join(),c(W&&W.jobs,j=>j.status==='new'),c(M&&M.rows,m=>m.status==='new'),c(S._caApps,a=>a.status==='pending'),c(S._laApps,a=>a.status==='pending'),
-    JSON.stringify(_ntLoaded()),JSON.stringify(S._ntOff||null),(S._vendorLate||[]).length,isAdmin(),_deskTabOk('workshop'),_deskTabOk('queue'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
+    JSON.stringify(_ntLoaded()),JSON.stringify(S._ntOff||null),(S._vendorLate||[]).length,(S.customers||[]).map(c=>c.nationality||'').join(),isAdmin(),_deskTabOk('workshop'),_deskTabOk('queue'),S.lang,_langLoaded(S.lang),Math.floor(Date.now()/60000),todayStr()].join('|');
   if(_ntkOut&&key===_ntkKey&&refs.every((r,i)=>r===_ntkRefs[i]))return _ntkOut;
   const out=_ntKindsNow();_ntkRefs=refs;_ntkKey=key;_ntkOut=out;return out;
 }
@@ -10422,13 +10422,14 @@ function _ntKindsNow(){
     add('lowrate',getQueue().filter(e=>e.status==='done'&&e.ratingExp>0&&e.ratingExp<=4&&Date.now()-_rodeAt(e)<7*864e5).map(e=>({id:e.id,txt:t('ntiLowRate').replace('{0}',nm(e)).replace('{1}',String(e.ratingExp)),at:e.checkedOutAt})),'ntLowRate','red',['_on_goRatings'],L.queue); // a rider's week-old 4/10 is worth a look
     // a venue cancelling a confirmed breakfast late (vendor_cancel, 20261004130000): the poll's 30-day list
     add('vlate',(S._vendorLate||[]).map(b=>({id:b.id,txt:t('ntiVendorLate').replace('{0}',b.name||'').replace('{1}',shortDate(b.day)),at:b.at})),'ntVendorLate','red',['_on_goVendorLate'],Array.isArray(S._vendorLate));
+    add('natnew',_natNewRows().map(c=>({id:c.id,txt:t('ntiNatNew').replace('{0}',nm(c)).replace('{1}',nationalityLabel(String(c.nationality).trim())),at:c.created_at})),'ntNatNew','green',['_on_goCommunity','overview'],L.riders); // a nationality the community has nobody from
     add('stock',(S.inventory||[]).filter(it=>{const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return q<=0||(lo>0&&q<=lo);}).map(it=>{const o=(Number(it.qty)||0)<=0;return{id:it.id+'|'+(o?'out':'low'),txt:t(o?'ntiStockOut':'ntiStockLow').replace('{0}',nm(it))};}),'ntStock','red',['setStaffTab','inventory'],L.inv);
   }
   return out;
 }
 // The kinds a staffer can turn off on their Settings page (staff.nt_off), in the bell's order, with
 // the label the page shows; the admin-only ones are offered to admins only.
-const NT_KINDS=[['long','ntkLong',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1]];
+const NT_KINDS=[['long','ntkLong',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1],['natnew','ntkNatNew',1]];
 function _ntOff(){return Array.isArray(S._ntOff)?S._ntOff:[];}
 // The Dashboard's Alerts card: what needs attention now, one line per kind with its count.
 function _ntRows(kinds){return(kinds||_ntKinds()).filter(x=>x.ids.length).map(x=>({...x,n:x.ids.length,txt:t(x.key).replace('{0}',x.ids.length)}));}
@@ -38532,6 +38533,7 @@ function _renderPeople(sec){
     <div class="page-title">${t(cust?'tabCustomers':'commTitle')}</div>
     <div class="page-sub">${t(cust?'custSub':'commSub')}</div>
     <div class="filter-row cmy-nav">${nav}</div>
+    ${cust?'':_natNewBox()}
     <div class="cmy-mt14">${body}</div>`;
   if(sub==='activity')renderCustActivity();
   // Re-focus whichever search box was active so typing is not interrupted by the re-render
@@ -38566,6 +38568,39 @@ function _custOverview(){
       <div class="form-section dash-card"><div class="form-title">${t('custNewest')}</div>${newest}</div>
       <div class="form-section dash-card"><div class="form-title">${t('custKpiFlags')}</div>${flagRows}</div>
     </div>`;
+}
+// A customer from a nationality the community has nobody from (the owner, 2026-10-07: "make the system
+// give a notification and big box in the community page that someone of a nationality we dont have
+// appeared in the customers area"). "We don't have" is the community's side of the nationality report
+// (_accNatMissing().accNoComm): customers hold it, no member does. The bell says so once per customer
+// ('natnew'); the box heads every Community view until this device says Got it, and comes back when
+// another such customer appears. Once a member from that nationality joins, its customers leave both.
+function _natNewRows(){
+  const tally=_accNatTally(),miss=_accNatMissing(tally).accNoComm,at=c=>Date.parse(c.created_at||'')||0;
+  return miss.flatMap(n=>tally.acc.get(n)||[]).sort((a,b)=>at(b)-at(a));
+}
+const _NATNEW_KEY='cq_natnew_ok';
+function _natNewOk(){try{const v=JSON.parse(localStorage.getItem(_NATNEW_KEY)||'[]');return new Set(Array.isArray(v)?v.map(String):[]);}catch(_){return new Set();}}
+function _natNewAck(){
+  const ids=_natNewRows().map(c=>String(c.id));
+  try{localStorage.setItem(_NATNEW_KEY,JSON.stringify(ids));}catch(_){}
+  const seen=_ntSeen();if(Array.isArray(seen.natnew)){seen.natnew=[...new Set([...seen.natnew.map(String),...ids])];_ntSeenSave(seen);} // the bell's lines for them are read too
+  _ntSync();renderCommunity();
+}
+const _NATNEW_SHOW=12;
+function _natNewBox(){
+  if(!_ntLoaded().riders||!getCustomers().length)return''; // the tags too, or everyone reads as from nowhere
+  const ok=_natNewOk(),rows=_natNewRows().filter(c=>!ok.has(String(c.id)));
+  if(!rows.length)return'';
+  const nats=[...new Set(rows.map(c=>String(c.nationality).trim()))];
+  const list=rows.slice(0,_NATNEW_SHOW).map(c=>`<button type="button" class="natnew-row" data-on-click="${_on("showEditCustomerModal",c.id)}"><span class="natnew-nat">${esc(nationalityLabel(String(c.nationality).trim()))}</span><span class="natnew-name"><bdi>${esc(c.name||c.email||'—')}</bdi></span><small>${esc(_pplDay(c.created_at))}</small></button>`).join('');
+  const more=rows.length>_NATNEW_SHOW?`<div class="natnew-more">${esc(t('natNewMore').replace('{0}',String(rows.length-_NATNEW_SHOW)))}</div>`:'';
+  return`<section class="natnew-box" role="status" aria-labelledby="natnew-h">
+    <div class="natnew-head">${_artIcon('globe',28)}<div><h3 id="natnew-h">${esc(t(nats.length>1?'natNewTitleN':'natNewTitle').replace('{0}',String(nats.length)))}</h3>
+      <p>${esc(t('natNewSub'))}</p></div></div>
+    <div class="natnew-list">${list}</div>${more}
+    <div class="natnew-acts"><button type="button" class="btn-primary" data-on-click="${_on("_natNewAck")}">${t('natNewOk')}</button></div>
+  </section>`;
 }
 function _commOverview(){
   const now=Date.now();
