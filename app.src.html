@@ -7041,6 +7041,21 @@ function _revealSet(k,v){S[k]=_revealIso(v)?String(v).slice(0,16):'';_revealNote
 function _revealClear(k){S[k]='';const el=document.getElementById((k==='newSessReveal'?'ns':'es')+'-reveal');if(el)el.value='';_revealNotePaint(k);}
 function _revealNotePaint(k){const p=k==='newSessReveal'?'ns':'es',n=document.getElementById(p+'-reveal-note'),b=document.getElementById(p+'-reveal-clr');
   if(n)n.textContent=_revealNoteTxt(S[k]);if(b)b.hidden=!S[k];}
+// The announce time of a ride moved to another date moves with it (the owner, 2026-10-07: asked whether it should - a
+// ride moved later kept its old time and showed the breakfast spot at once - "yes"): as many days on or back, at the
+// same Riyadh time (no daylight saving there), exactly as _addSession's _rvFor tells each ride of a repeat. Null for none.
+function _revealMove(iso,from,to){const ms=iso?Date.parse(iso):NaN;if(!isFinite(ms))return null;
+  const d=Date.parse(to+'T00:00:00+03:00')-Date.parse(from+'T00:00:00+03:00');return new Date(ms+(isFinite(d)?d:0)).toISOString();}
+// The editor's box follows its Date while it holds the ride's own time moved with it (computed from the ride's row each
+// time, never from the box, so a date typed digit by digit lands right); a time typed or cleared in this edit stays.
+function _esRevealFollow(was){
+  const s=_sessGet(S.editSessionId);if(!s||!s.reveal_at||!_hasBreakfast(s))return;
+  const d0=String(s.session_date||s.id).slice(0,10);
+  if(S.editSessReveal!==_revealLocal(_revealMove(s.reveal_at,d0,was||d0)))return;
+  S.editSessReveal=_revealLocal(_revealMove(s.reveal_at,d0,S.editSessDate||d0));
+  const el=document.getElementById('es-reveal');if(el)el.value=S.editSessReveal;
+  _revealNotePaint('editSessReveal');
+}
 // The mark on the Sessions card and its detail while riders cannot see where the ride meets yet.
 function _revealStaffHtml(s,cls){return _revealMs(s)>Date.now()?`<div class="${cls}">${_artIcon('clock',12)}<bdi>${esc(t('revealHeldNote').replace('{0}',_revealWhen(s)))}</bdi></div>`:'';}
 // Breakfast-spot picker for the session forms: saved spots + "new spot" inline inputs.
@@ -15199,7 +15214,7 @@ function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
 function _on_renderSessions_22(event,el){S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
-function _on_renderSessions_23(event,el){S.editSessDate=el.value}
+function _on_renderSessions_23(event,el){const was=S.editSessDate;S.editSessDate=el.value;_esRevealFollow(was)}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
 function _on_renderSessions_25(event,el){S.editSessStartTime=el.value}
 function _on_renderSessions_26(event,el){S.editSessEndTime=el.value}
@@ -15982,8 +15997,11 @@ async function _saveSessionEdit(){
   const esCollect=S.editSessCollect||''; // only a time staff typed or the ride had (_collectAuto, 2026-10-05)
   if(esCollect&&!_twoTimesSess(sess)&&_collectLate(esCollect,esStart)){const ce=document.getElementById('es-collect');if(ce){_fieldErr(ce,t('errCollectLate'));ce.focus();}else toast(t('errCollectLate'),'error');return;}
   // When riders are told where the Saturday ride meets (_revealFieldHtml): any time staff pick, even after the
-  // ride gathers (the owner, 2026-10-06: "make me able to choose anytime i want").
-  const _rvIso=_hasBreakfast(sess)?_revealIso(S.editSessReveal):null;
+  // ride gathers (the owner, 2026-10-06: "make me able to choose anytime i want"). A date move takes the ride's own
+  // time with it (the owner, 2026-10-07, _revealMove): the box still holding that time (it follows the Date as typed,
+  // _esRevealFollow; set by a script it does not) is moved here; a time typed in this edit is written as typed, and a
+  // ride with none keeps none. Undo puts the old one back (SESS_EDIT_COLS).
+  const _rvIso=_hasBreakfast(sess)?(S.editSessReveal===_revealLocal(sess.reveal_at)?_revealMove(sess.reveal_at,_prevDate,newDate):_revealIso(S.editSessReveal)):null;
   const isNamedEdit=_evNamed(sess);
   let slots,total;
   if(_editSeats(sess)){
@@ -16765,10 +16783,21 @@ function _groupMembers(entryId){
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showGroupEditModal_1(event,el){if(event.target===el)closeGroupEditModal()}
+// A party moved onto Run for Her is asked its distance, as Add rider, the walk-in and the booking editor ask (the
+// owner, 2026-10-07: asked whether a party moved there from this editor should be asked, "yes it should"). The field
+// is drawn in its own host when the Session picked is a run other than the party's own, so a change of Session shows
+// or hides it without redrawing what was typed in the rest of the form; one distance for every member moved.
+function _geKmPaint(){
+  const h=document.getElementById('ge-km');if(!h)return;
+  const p=_qGet((S._geIds||[])[0]),to=document.getElementById('ge-sess')?.value;
+  h.innerHTML=p&&to&&to!==p.sessionId&&_rideKind(_sessGet(to))==='runher'?_runKmField(S._geKm,'_geKmSet'):'';
+}
+function _geKmSet(k){S._geKm=_runKmOk(k)?Number(k):null;_geKmPaint();}
 function showGroupEditModal(entryId){
   const members=_groupMembers(entryId);
   if(members.length<2){showBookingEditModal(entryId);return;} // solo row: the normal editor
   S._geIds=members.map(m=>m.id);
+  {const k=[...new Set(members.map(x=>Number(x.runKm)||0))];S._geKm=k.length===1&&_runKmOk(k[0])?k[0]:null;} // a party on a run all at one distance keeps it
   const primary=members[0];
   const comm=_apprSessIds.has(primary.sessionId),noCarbon=_noCarbonSessIds.has(primary.sessionId),free=_freeSessIds.has(primary.sessionId);
   const own=_ownOffered(allSessions().find(x=>x.id===primary.sessionId));
@@ -16793,7 +16822,7 @@ function showGroupEditModal(entryId){
         <div class="form-group cmy-fg-half"><label for="ge-phone">${t('authPhone')}</label><input id="ge-phone" type="tel" value="${esc(mainPhone)}" placeholder="05…"></div>
       </div>
       ${comm?'':onBike?`<div class="ge-no-move cmy-ge-nomove">${t('geMoveOnBike')}</div>`:`<div class="form-group cmy-mb10"><label for="ge-sess">${t('colSession')}</label>
-        <select id="ge-sess">${open.map(x=>`<option value="${esc(x.id)}"${primary.sessionId===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div>`}
+        <select id="ge-sess" data-on-change="${_on("_geKmPaint")}">${open.map(x=>`<option value="${esc(x.id)}"${primary.sessionId===x.id?' selected':''}>${esc(dayLabel(x.day))} ${esc(shortDate(x.session_date||x.id))} · ${esc(sessionTime(x))}${_sessFull(x)?` (${t('statusFull')})`:''}</option>`).join('')}</select></div><div id="ge-km"></div>`}
       <div class="form-group cmy-mb6"><label>${t('colRider')} × ${members.length}</label></div>
       ${members.map((r,i)=>`<div class="cmy-rider-row">
         <span class="cmy-ge-num">#${r.queueNum||''}</span>
@@ -16808,7 +16837,7 @@ function showGroupEditModal(entryId){
       </div>
     </div></div>`;
 }
-function closeGroupEditModal(){const m=document.getElementById('group-edit-modal');if(m){m.style.display='none';m.innerHTML='';}S._geIds=null;}
+function closeGroupEditModal(){const m=document.getElementById('group-edit-modal');if(m){m.style.display='none';m.innerHTML='';}S._geIds=null;S._geKm=null;}
 function saveGroupEdit(){return _busyRun('groupEdit',_saveGroupEdit);}
 async function _saveGroupEdit(){
   // Each member keeps the index of the row it was drawn on: a member that has left the queue
@@ -16832,6 +16861,13 @@ async function _saveGroupEdit(){
     // spotsLeft, as the single-booking editor: counting only waiting+active let finished
     // riders free phantom places and overfilled the night.
     if(spotsLeft(toSessionId)<members.length){toast(t('rescheduleFull'),'error');return;}
+  }
+  // Onto Run for Her (the owner, 2026-10-07, _geKmPaint): the distance, written on every member moved, and 18 and over
+  // on the day for each member's account, as Add rider asks (the database leaves staff's moves to staff).
+  const toRun=moving&&_rideKind(sessT)==='runher';
+  if(toRun){
+    if(!_runKmOk(S._geKm)){toast(t('errRunKm'),'error');const f=document.querySelector('#group-edit-modal .run-km-field');if(f)_groupErr(f,t('errRunKm'));return;}
+    const young=members.map(x=>x.customerId&&(S.customers||[]).find(c=>c.id===x.customerId)).find(c=>c&&_runUnder18(c,sessT));if(young){toast(t('runAgeTitle')+': '+(young.name||''),'error');return;}
   }
   const prev=members.map(m=>({id:m.id,name:m.name,phone:m.phone||'',height:m.height||null,size:m.size||'',type_preference:m.typePreference,price:m.price??DEFAULT_PRICE,
     group_name:m.groupName||null,group_contact:m.groupContact||null,group_phone:m.groupPhone||null,session_id:m.sessionId,session_day:m.sessionDay,session_date:m.sessionDate,queue_num:m.queueNum,status:m.status}));
@@ -16863,6 +16899,7 @@ async function _saveGroupEdit(){
       if((ty2==='Own'&&!_ownOffered(sessT))||(ty2==='Road Carbon'&&_noCarbon(sessT)))ty2='Any';
       if(ty2!==tyNow){patch.type_preference=ty2;patch.size=ty2==='None'?'':(height?heightToSize(height,ty2):(m.size||''));}
       if(!m.paid&&!m.promoCode&&(m.price??DEFAULT_PRICE)===fare(_sessGet(m.sessionId),m,m.typePreference||'Any'))patch.price=fare(sessT,{...m,sessionId:toSessionId},ty2);
+      if(toRun){patch.run_km=Number(S._geKm);prev[k].run_km=m.runKm||null;} // the distance asked, and Undo (or a refused member's rollback) takes it back
     }
     let res=await sb.from('queue_entries').update(patch).eq('id',m.id);
     // The numbers came from this device's copy: another desk adding to that night meanwhile takes one
@@ -20419,6 +20456,11 @@ async function _saveBookingEdit(){
   // Run for Her's distance: kept on the run, dropped off it.
   if(_rideKind(allSessions().find(s=>s.id===toSessionId))==='runher'){
     if(!_runKmOk(S._beKm)){toast(t('errRunKm'),'error');const f=document.querySelector('#booking-edit-modal .run-km-field');if(f)_groupErr(f,t('errRunKm'));return;}
+    // A move onto the run asks 18 and over on the day of the booking's account, as Add rider does (the owner, 2026-10-07:
+    // asked whether it should, "yes it should"; the database leaves staff's moves to staff). Riders added here carry
+    // that same account, so it answers for them too.
+    if(toSessionId!==e.sessionId){const c=e.customerId&&(S.customers||[]).find(x=>x.id===e.customerId);
+      if(c&&_runUnder18(c,allSessions().find(s=>s.id===toSessionId))){toast(t('runAgeTitle')+': '+(c.name||''),'error');return;}}
     if(Number(S._beKm)!==Number(e.runKm))patch.run_km=Number(S._beKm);
   }else if(e.runKm)patch.run_km=null;
   // The Undo puts back what the edit changed, the group and the distance too: a Saturday booking moved
