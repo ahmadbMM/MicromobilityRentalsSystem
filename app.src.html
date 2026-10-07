@@ -807,8 +807,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdFrontRow:'Front Row',bdFrontRowD:'Held booking #1 in a session',
   bdCarbon:'Carbon Club',bdCarbonD:'Rode the Road Carbon',
   bdStreak:'Hot Streak',bdStreakD:'Rode 3 weeks in a row',
-  bdSquad:'Squad Captain',bdSquadD:'Booked for 3+ riders at once',
-  bdFuel:'Fuel Stop',bdFuelD:'Added extras to a booking',
+  bdSquad:'Squad Captain',bdSquadD:'Brought 3+ riders to one ride, all checked in and paid',
+  bdFuel:'Fuel Stop',bdFuelD:'Paid for extras on a booking',
   bd25:'Corniche 25',bd25D:'25 rides on the corniche',
   bdgNew:'New badge!',bdgGivenBy:'Given by the MicroMobility team · {0}',
   bdgMarshal:'Marshal',bdgMarshalD:'Led or swept a group ride, or helped run an event',
@@ -882,8 +882,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdFrontRowA:'The front row of the grid starts ahead of everyone: you were first in the queue for a ride.',
   bdCarbonA:'Race bikes are made of carbon: light and fast. For riders who took out our Road Carbon.',
   bdStreakA:'Riding week after week builds a habit. Three weeks running lights the flame.',
-  bdSquadA:'Riding is better together: for bringing three or more riders to one ride.',
-  bdFuelA:'Every racer needs a pit stop: for adding a drink or snack to your booking.',
+  bdSquadA:'Riding is better together: for bringing three or more riders to one ride, every one of them checked in and paid.',
+  bdFuelA:'Every racer needs a pit stop: for paying for a drink or snack with your booking.',
   bd25A:'Twenty-five rides along the Jeddah Corniche. You know this road by heart.',
   bdgMarshalA:'Marshals keep a race safe and running. Given by the team to riders who lead, sweep or help at events.',
   bdgPitCrewA:'A pit crew gets a car back in the race. Given for stopping to help another rider.',
@@ -1366,8 +1366,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdFrontRow:'الصف الأول',bdFrontRowD:'حصلت على الحجز رقم 1 في جلسة',
   bdCarbon:'نادي الكربون',bdCarbonD:'ركبت درّاجة الرود كاربون',
   bdStreak:'حماس متواصل',bdStreakD:'ركبت 3 أسابيع متتالية',
-  bdSquad:'قائد المجموعة',bdSquadD:'حجزت لـ3 رُكّاب أو أكثر دفعة واحدة',
-  bdFuel:'محطة تزوّد',bdFuelD:'أضفت إضافات إلى حجزك',
+  bdSquad:'قائد المجموعة',bdSquadD:'أحضرت 3 رُكّاب أو أكثر إلى رحلة واحدة، كلهم سجّلوا حضورهم ودفعوا',
+  bdFuel:'محطة تزوّد',bdFuelD:'دفعت ثمن إضافات في حجزك',
   bd25:'كورنيش 25',bd25D:'25 رحلة على الكورنيش',
   bdgNew:'وسام جديد!',bdgGivenBy:'مُنح من فريق مايكروموبيليتي · {0}',
   bdgMarshal:'المنظّم',bdgMarshalD:'قدت رحلة جماعية أو تابعت مؤخرتها، أو ساعدت في تنظيم فعالية',
@@ -1441,8 +1441,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdFrontRowA:'الصف الأول ينطلق قبل الجميع: كنت الأول في طابور إحدى الرحلات.',
   bdCarbonA:'دراجات السباق مصنوعة من الكربون: خفيفة وسريعة. للراكبين الذين جرّبوا دراجة الرود كاربون.',
   bdStreakA:'الركوب أسبوعاً بعد أسبوع يبني العادة. ثلاثة أسابيع متتالية تُشعل الشعلة.',
-  bdSquadA:'الركوب أجمل مع الآخرين: لمن أحضر ثلاثة راكبين أو أكثر إلى رحلة واحدة.',
-  bdFuelA:'كل متسابق يحتاج إلى وقفة تزوّد: لمن أضاف مشروباً أو وجبة خفيفة إلى حجزه.',
+  bdSquadA:'الركوب أجمل مع الآخرين: لمن أحضر ثلاثة راكبين أو أكثر إلى رحلة واحدة، كلهم سجّلوا حضورهم ودفعوا.',
+  bdFuelA:'كل متسابق يحتاج إلى وقفة تزوّد: لمن دفع ثمن مشروب أو وجبة خفيفة مع حجزه.',
   bd25A:'خمس وعشرون رحلة على كورنيش جدة. صرت تعرف هذا الطريق عن ظهر قلب.',
   bdgMarshalA:'المنظّمون يحافظون على سلامة السباق وسيره. يمنحه الفريق لمن يقود الرحلة أو يتابع مؤخرتها أو يساعد في الفعاليات.',
   bdgPitCrewA:'طاقم الصيانة يعيد السيارة إلى السباق. يُمنح لمن توقف ليساعد راكباً آخر.',
@@ -13155,11 +13155,22 @@ function _mrBadges(all,completed,seasons,cust){
   // #1 there would tell them their place in an order the card is careful to keep to itself.
   const anyP1=all.some(e=>e.queueNum===1&&e.status!=='cancelled'&&e.status!=='removed'&&!_apprSessIds.has(e.sessionId));
   const carbon=all.some(e=>(e.typePreference==='Road Carbon')&&(e.status==='done'||e.status==='active')&&(!!e.paid||_freeSessIds.has(e.sessionId)));
-  const bySess={};all.forEach(e=>{if(e.status!=='cancelled'&&e.status!=='removed')bySess[e.sessionId]=(bySess[e.sessionId]||0)+1;});
-  const squadMax=Object.values(bySess).reduce((m,v)=>Math.max(m,v),0);
-  // Fuel Stop: extras on a booking marked Paid (the owner, 2026-10-02: "dont give the fuel stop badge to bookings
-  // that added extras without paying for them"). Add-ons follow their booking's paid state.
-  const fuel=all.some(e=>entryAddons(e).length&&!!e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  // Squad Captain: three or more riders on one booking night, every one of them checked in (on the bike or
+  // done) and paid (the owner, 2026-10-07: "make sure all the riders are paid and checked in"). A free ride
+  // has nothing to pay and an own bike pays nothing for the ride, as _bdgRode. A party with a no-show or a
+  // rider still owing earns nothing that night; cancelled and removed riders are not part of it.
+  const bySess={};all.forEach(e=>{if(e.status==='cancelled'||e.status==='removed')return;const s=bySess[e.sessionId]||(bySess[e.sessionId]={n:0,ok:true});s.n++;
+    if(!((e.status==='active'||e.status==='done')&&(!!e.paid||_freeSessIds.has(e.sessionId)||_isOwnBike(e))))s.ok=false;});
+  const squadMax=Object.values(bySess).reduce((m,s)=>s.ok?Math.max(m,s.n):m,0);
+  // Fuel Stop: extras the rider paid for (the owner, 2026-10-02 and 2026-10-07: "make sure that the customer
+  // paid for the extras not only added it"). Add-ons follow their booking's paid state, and count once
+  // handed over (on the bike or done, as addonSalesFromGroups); extras at no cost and a booking on the house
+  // (marked paid at SAR 0 by staff, not a promo, not an own bike, whose rides cost 0 anyway) were not paid for.
+  // A line's price is the one it was sold at (p), else the inventory's; one the device cannot price
+  // (an older line, the inventory not loaded) counts as charged rather than costing a rider the badge.
+  const _house=e=>Number(e.price??DEFAULT_PRICE)===0&&!e.promoCode&&!_isOwnBike(e);
+  const _charged=a=>{if(a.p!==undefined)return a.p>0;const it=(S.inventory||[]).find(x=>x.id===a.id);return !it||!(Number(it.price)===0);};
+  const fuel=all.some(e=>!!e.paid&&(e.status==='active'||e.status==='done')&&entryAddons(e).some(_charged)&&!_house(e));
   const streak=_mrStreak(completed);
   const day=e=>String(e.sessionDate||'').slice(0,10),ses=new Map((S.sessions||[]).map(x=>[x.id,x]));
   const night={};all.forEach(e=>{const d=day(e);if(!d)return;const n=night[e.sessionId]||(night[e.sessionId]={d,done:false,noshow:false});if(_bdgRode(e))n.done=true;else if(e.status==='noshow')n.noshow=true;});

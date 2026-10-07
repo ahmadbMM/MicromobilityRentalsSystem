@@ -663,4 +663,24 @@ test('Fuel Stop needs the booking with the extras to be marked paid', async ({ p
   expect(await fuel(r(false))).toBe(false);          // extras, not paid
   expect(await fuel(r(true))).toBe(true);            // extras, paid
   expect(await fuel(r(true, 'cancelled'))).toBe(false); // a cancelled booking's extras were never had
+  // Paid for, not only added (the owner, 2026-10-07): handed over, charged, and not on the house.
+  expect(await fuel(r(true, 'waiting'))).toBe(false);   // paid ahead, extras not yet handed over
+  expect(await fuel(r(true, 'active'))).toBe(true);     // on the bike with them
+  const house = JSON.stringify([{ ...row('f1', P1, 1, 'Lina Haddad', 'c1', 'done', true), price: 0, addons: JSON.stringify([{ id: 'gel', qty: 1 }]) }]);
+  expect(await fuel(house)).toBe(false);                // marked paid at SAR 0: the rider paid nothing
+  const free = JSON.stringify([{ ...row('f1', P1, 1, 'Lina Haddad', 'c1', 'done', true), addons: JSON.stringify([{ id: 'gel', qty: 1, p: 0 }]) }]);
+  expect(await fuel(free)).toBe(false);                 // extras sold at no cost
+});
+
+// Squad Captain: three or more riders on one night, every one checked in and paid (the owner, 2026-10-07).
+test('Squad Captain needs every rider of the party checked in and paid', async ({ page }) => {
+  await staff(page);
+  const squad = (rows: string) => page.evaluate(`(()=>{const all=${rows}.map(entryFromDB);return _mrBadges(all,all.filter(_bdgRode),[],null).find(r=>r.s==='squad').on;})()`);
+  const party = (...st: [string, boolean][]) => JSON.stringify(st.map(([status, paid], i) => row('q' + i, P1, i + 1, 'Lina Haddad', 'c1', status, paid)));
+  expect(await squad(party(['done', true], ['active', true], ['done', true]))).toBe(true);
+  expect(await squad(party(['done', true], ['done', true]))).toBe(false);                     // two is not a squad
+  expect(await squad(party(['done', true], ['done', true], ['done', false]))).toBe(false);    // one still owes
+  expect(await squad(party(['done', true], ['done', true], ['waiting', true]))).toBe(false);  // one never checked in
+  expect(await squad(party(['done', true], ['done', true], ['noshow', true]))).toBe(false);   // one did not come
+  expect(await squad(party(['done', true], ['done', true], ['done', true], ['cancelled', false]))).toBe(true); // a cancelled rider is not in the party
 });
