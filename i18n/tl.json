@@ -1082,6 +1082,8 @@
   "statusReserved": "Naka-reserve",
   "statusToReserve": "Ire-reserve",
   "menuToReserve": "Ire-reserve",
+  "menuToWaitlist": "Ilipat sa waitlist",
+  "toastToWaitlist": "Inilipat sa waitlist",
   "menuClearToReserve": "Alisin ang ire-reserve",
   "menuReserveBike": "Mag-reserve ng bisikleta…",
   "menuReleaseBike": "I-release ang naka-reserve na bisikleta",

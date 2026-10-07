@@ -1082,6 +1082,8 @@
   "statusReserved": "ریزرو",
   "statusToReserve": "ریزرو کرنا ہے",
   "menuToReserve": "ریزرو کرنا ہے",
+  "menuToWaitlist": "ویٹ لسٹ میں ڈالیں",
+  "toastToWaitlist": "ویٹ لسٹ میں ڈال دیا گیا",
   "menuClearToReserve": "\"ریزرو کرنا ہے\" ہٹائیں",
   "menuReserveBike": "سائیکل ریزرو کریں…",
   "menuReleaseBike": "ریزرو سائیکل چھوڑیں",

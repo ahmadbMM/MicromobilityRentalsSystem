@@ -5669,6 +5669,9 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #booking-edit-modal .dk-be-rrow{display:flex;gap:6px;margin-top:8px;align-items:center;}
 #booking-edit-modal .dk-be-rh{width:70px;flex-shrink:0;}
 #booking-edit-modal .dk-be-rt{width:100px;flex-shrink:0;}
+#booking-edit-modal .dk-be-rwl{display:inline-flex;align-items:center;gap:4px;flex-shrink:0;margin:0;font-size:12px;color:var(--muted);white-space:nowrap;cursor:pointer;}
+#booking-edit-modal .dk-be-rwl input{-webkit-appearance:checkbox;appearance:checkbox;flex:none;width:16px;height:16px;min-height:0;margin:0;padding:0;accent-color:var(--orange);}
+#booking-edit-modal .dk-be-rrow:has(.dk-be-rwl){flex-wrap:wrap;}#booking-edit-modal .dk-be-rrow:has(.dk-be-rwl) .dk-f1-m0{flex-basis:100%;}
 #booking-edit-modal .dk-w100-mt8{width:100%;margin-top:8px;}
 /* calling off a night */
 #cancel-night-modal .dk-cn-box{max-width:520px;max-height:88vh;overflow-y:auto;}

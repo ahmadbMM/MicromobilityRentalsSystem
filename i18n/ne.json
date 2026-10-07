@@ -1082,6 +1082,8 @@
   "statusReserved": "आरक्षित",
   "statusToReserve": "आरक्षित गर्नुपर्ने",
   "menuToReserve": "आरक्षित गर्नुपर्ने",
+  "menuToWaitlist": "प्रतीक्षा सूचीमा सार्नुहोस्",
+  "toastToWaitlist": "प्रतीक्षा सूचीमा सारियो",
   "menuClearToReserve": "\"आरक्षित गर्नुपर्ने\" हटाउनुहोस्",
   "menuReserveBike": "साइकल आरक्षित गर्नुहोस्…",
   "menuReleaseBike": "आरक्षित साइकल छोड्नुहोस्",

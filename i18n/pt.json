@@ -1082,6 +1082,8 @@
   "statusReserved": "Reservada",
   "statusToReserve": "A reservar",
   "menuToReserve": "A reservar",
+  "menuToWaitlist": "Mover para a lista de espera",
+  "toastToWaitlist": "Movido para a lista de espera",
   "menuClearToReserve": "Remover \"a reservar\"",
   "menuReserveBike": "Reservar bicicleta…",
   "menuReleaseBike": "Liberar bicicleta reservada",

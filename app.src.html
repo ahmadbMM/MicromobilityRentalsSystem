@@ -748,7 +748,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   completedLabel:'Completed',
   colQueueNum:'#',repColSeq:'No.',colSession:'Session',colBike:'Bike',colColor:'Bike Color',colPayment:'Payment',colStatus:'Status',
   cancelBooking:'Cancel',
-  statusWaiting:'Waiting',statusReserved:'Reserved',statusToReserve:'To be reserved',menuToReserve:'To be reserved',menuClearToReserve:'Clear to be reserved',menuReserveBike:'Reserve bike…',menuReleaseBike:'Release reserved bike',bikeReleasedToast:'Reserved bike released',statusActive:'On Bike',statusDone:'Complete',statusNoshow:'No-Show',statusCancelled:'Cancelled',statusCancelledByStaff:'Cancelled by Staff',statusCancelledByCustomer:'Cancelled by Customer',
+  statusWaiting:'Waiting',statusReserved:'Reserved',statusToReserve:'To be reserved',menuToReserve:'To be reserved',menuToWaitlist:'Move to waitlist',toastToWaitlist:'Moved to the waitlist',menuClearToReserve:'Clear to be reserved',menuReserveBike:'Reserve bike…',menuReleaseBike:'Release reserved bike',bikeReleasedToast:'Reserved bike released',statusActive:'On Bike',statusDone:'Complete',statusNoshow:'No-Show',statusCancelled:'Cancelled',statusCancelledByStaff:'Cancelled by Staff',statusCancelledByCustomer:'Cancelled by Customer',
   colBookingNum:'Booking #',
   staffQueueTitle:'Staff Panel',addWalkin:'+ Walk-in',
   
@@ -1308,7 +1308,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   completedLabel:'مكتملة',
   colQueueNum:'#',repColSeq:'م',colSession:'الجلسة',colBike:'الدراجة',colColor:'لون الدراجة',colPayment:'الدفع',colStatus:'الحالة',
   cancelBooking:'إلغاء',
-  statusWaiting:'بانتظار',statusReserved:'محجوز',statusToReserve:'بانتظار الحجز',menuToReserve:'بانتظار الحجز',menuClearToReserve:'إلغاء بانتظار الحجز',menuReserveBike:'حجز دراجة…',menuReleaseBike:'إلغاء حجز الدراجة',bikeReleasedToast:'تم إلغاء حجز الدراجة',statusActive:'على الدراجة',statusDone:'مكتمل',statusNoshow:'لم يحضر',statusCancelled:'ملغي',statusCancelledByStaff:'ملغي من قِبَل الموظفين',statusCancelledByCustomer:'ملغي من قِبَل العميل',
+  statusWaiting:'بانتظار',statusReserved:'محجوز',statusToReserve:'بانتظار الحجز',menuToReserve:'بانتظار الحجز',menuToWaitlist:'نقل إلى قائمة الانتظار',toastToWaitlist:'نُقل إلى قائمة الانتظار',menuClearToReserve:'إلغاء بانتظار الحجز',menuReserveBike:'حجز دراجة…',menuReleaseBike:'إلغاء حجز الدراجة',bikeReleasedToast:'تم إلغاء حجز الدراجة',statusActive:'على الدراجة',statusDone:'مكتمل',statusNoshow:'لم يحضر',statusCancelled:'ملغي',statusCancelledByStaff:'ملغي من قِبَل الموظفين',statusCancelledByCustomer:'ملغي من قِبَل العميل',
   colBookingNum:'رقم الحجز',
   staffQueueTitle:'لوحة الموظفين',addWalkin:'+ زيارة مباشرة',
   
@@ -9645,6 +9645,7 @@ function _rowMenu(id,items,title){
         :(resolvedType(e)==='Own'?null:{label:t('menuReserveBike'),run:`_reserveFromMenu('${e.id}')`,act:()=>_reserveFromMenu(e.id)}),
       (_isReserved(e)||resolvedType(e)==='Own'||e.status!=='waiting')?null:{label:e.toReserve?t('menuClearToReserve'):t('menuToReserve'),run:`_toggleToReserve('${e.id}')`,act:()=>_toggleToReserve(e.id)},
       (_opt&&_opt.noPark)?null:{label:t('mwMoveBtn'),run:`mwFromBooking('${e.id}')`,act:()=>mwFromBooking(e.id)},
+      e.status==='waiting'?{label:`${_artIcon('clock',12)} ${t('menuToWaitlist')}`,run:`staffToWaitlist('${e.id}')`,act:()=>staffToWaitlist(e.id)}:null,
       _mEdit,_mResched,_mCust,_mEm,
       {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
     if(e.status==='active')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("doReturn",e.id)}">${t(_run?'runFinishBtn':'returnBikeBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
@@ -20582,6 +20583,7 @@ function showBookingEditModal(entryId){
           <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0">
           <input id="be-nr-height-${i}" type="number" min="80" max="230" aria-label="${t('colHeight')}" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-be-rh">
           <select id="be-nr-type-${i}" aria-label="${t('bikeTypeLabel')}" data-on-change="${_on("_beSyncNewRiders")}" class="dk-be-rt">${bikeTypeOpts(_beOwn,_beNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
+          <label class="dk-be-rwl" title="${esc(t('menuToWaitlist'))}"><input id="be-nr-wl-${i}" type="checkbox"${r.wl?' checked':''}>${t('waitlistLabel')}</label>
           <button type="button" class="btn-sm btn-muted dk-fs0" data-on-click="${_on("_beRemoveRider",i)}" aria-label="${t('beRemoveRider')}">&#x2715;</button>
         </div>`).join('')}
         <button type="button" class="btn-secondary dk-w100-mt8" data-on-click="${_on("_beAddRider")}">+ ${t('beAddRiderBtn')}</button>
@@ -20600,10 +20602,10 @@ function _beKmSet(k){_beSyncNewRiders();S._beKm=_runKmOk(k)?Number(k):null;showB
 function showRescheduleEdit(id){showBookingEditModal(id);setTimeout(()=>{const s=document.getElementById('be-sess');if(s)s.focus();},120);}
 // New-rider rows survive the modal's re-renders (type clicks, add/remove) by syncing DOM -> state first.
 function _beSyncNewRiders(){(S._beNewRiders||[]).forEach((r,i)=>{
-  const n=document.getElementById('be-nr-name-'+i),h=document.getElementById('be-nr-height-'+i),ty=document.getElementById('be-nr-type-'+i);
-  if(n)r.name=n.value;if(h)r.height=h.value;if(ty)r.type=ty.value;
+  const n=document.getElementById('be-nr-name-'+i),h=document.getElementById('be-nr-height-'+i),ty=document.getElementById('be-nr-type-'+i),wl=document.getElementById('be-nr-wl-'+i);
+  if(n)r.name=n.value;if(h)r.height=h.value;if(ty)r.type=ty.value;if(wl)r.wl=wl.checked;
 });}
-function _beAddRider(){_beSyncNewRiders();S._beNewRiders=[...(S._beNewRiders||[]),{name:'',height:'',type:'Any'}];showBookingEditModal(S._beId);}
+function _beAddRider(){_beSyncNewRiders();S._beNewRiders=[...(S._beNewRiders||[]),{name:'',height:'',type:'Any',wl:false}];showBookingEditModal(S._beId);}
 function _beRemoveRider(i){_beSyncNewRiders();(S._beNewRiders||[]).splice(i,1);showBookingEditModal(S._beId);}
 function saveBookingEdit(){return _busyRun('bookingEdit',_saveBookingEdit);}
 async function _saveBookingEdit(){
@@ -20683,7 +20685,7 @@ async function _saveBookingEdit(){
   // stamped with a group_id in that same write.
   _beSyncNewRiders();
   let newRiders=(S._beNewRiders||[])
-    .map(r=>({name:_titleCaseName(r.name||''),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any'}))
+    .map(r=>({name:_titleCaseName(r.name||''),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any',wl:!!r.wl}))
     .filter(r=>r.name||r.height);
   // Saturday rule: one rider per customer. Community bookings never take added riders —
   // the modal hides the rows, and this guards any stale/scripted path (incl. moving into one).
@@ -20720,10 +20722,14 @@ async function _saveBookingEdit(){
   const inserted=[],insertedEnts=[],parkedRows=[];
   if(newRiders.length){
     const sessT=allSessions().find(s=>s.id===toSessionId);
-    const rStatus=(_sessFull(sessT)||spotsLeft(toSessionId)<newRiders.length+(moving?1:0))?'waitlist':'waiting';
+    // A rider staff tick Waitlist goes on the waitlist whatever room the ride has (2026-10-07);
+    // the rest are waitlisted only when the ride cannot fit them, as before.
+    const _seated=newRiders.filter(r=>!r.wl).length;
+    const autoWl=_sessFull(sessT)||spotsLeft(toSessionId)<_seated+(moving?1:0);
     let qn=nextQNum(toSessionId)+(moving?1:0); // when moving, the edited entry already took the next number
-    let _wln=rStatus==='waitlist'?nextWlNum(toSessionId):0;
+    let _wln=nextWlNum(toSessionId);
     for(const r of newRiders){
+      const rStatus=(r.wl||autoWl)?'waitlist':'waiting';
       const ent=_applyDefaultPay({id:uid(),name:r.name,email:e.email||'',phone,size:r.height?heightToSize(r.height,r.type):'',height:r.height,waitlistNum:rStatus==='waitlist'?_wln++:null,
         typePreference:_noCarbon(sessT)&&r.type==='Road Carbon'?'Any':r.type,paid:false,assignedBikeId:null,sessionId:toSessionId,
         sessionDay:moving?patch.session_day:e.sessionDay,sessionDate:moving?patch.session_date:e.sessionDate,
@@ -23982,6 +23988,30 @@ async function commToWaitlist(id){
   pushUndo(`${t('waitlistLabel')} · ${e.name}`,async()=>{
     const u=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
     if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
+    await loadDataLight();renderStaffQueue();
+  });
+  renderStaffQueue();renderMyRides();
+}
+// Any waiting booking onto the end of its ride's waitlist (the owner, 2026-10-07: "add an action to
+// do bookings to change a current booking to waitlist"). The place it held is not handed on: staff
+// moved this rider out of it on purpose, and who gets it is theirs to say. A waitlisted rider holds
+// no add-on stock, so the add-ons go back on the shelf until a promotion or check-in takes them
+// again; on an approval ride the rider is no longer picked (an approve is the way back).
+async function staffToWaitlist(id){
+  const e=getQueue().find(x=>x.id===id);if(!e||e.status!=='waiting')return;
+  const appr=_isApprovalRide(_sessGet(e.sessionId))&&e.approval==='approved';
+  const r=await sb.from('queue_entries').update({status:'waitlist',waitlist_num:nextWlNum(e.sessionId),...(appr?{approval:'pending'}:{})})
+    .eq('id',id).eq('status','waiting').select('id');
+  if(_writeErr(r,'to waitlist'))return;
+  if(!_landed(r))return _lostRace();
+  await _restockAddonsOnExit(e);
+  await loadDataLight();
+  logAction(`${t('menuToWaitlist')}: #${e.queueNum} ${e.name}`);
+  toast(t('toastToWaitlist'));
+  pushUndo(`${t('menuToWaitlist')} · ${e.name}`,async()=>{
+    const u=await sb.from('queue_entries').update({status:'waiting',...(appr?{approval:'approved'}:{})}).eq('id',id).eq('status','waitlist').select('id');
+    if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
+    await _consumeAddonsOnEnter(e);
     await loadDataLight();renderStaffQueue();
   });
   renderStaffQueue();renderMyRides();

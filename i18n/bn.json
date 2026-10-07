@@ -1171,6 +1171,8 @@
   "statusReserved": "রিজার্ভ করা",
   "statusToReserve": "রিজার্ভ করতে হবে",
   "menuToReserve": "রিজার্ভ করতে হবে",
+  "menuToWaitlist": "ওয়েটিং লিস্টে সরান",
+  "toastToWaitlist": "ওয়েটিং লিস্টে সরানো হয়েছে",
   "menuClearToReserve": "‘রিজার্ভ করতে হবে’ মুছে দিন",
   "menuReserveBike": "সাইকেল রিজার্ভ করুন…",
   "menuReleaseBike": "রিজার্ভ করা সাইকেল ছেড়ে দিন",
