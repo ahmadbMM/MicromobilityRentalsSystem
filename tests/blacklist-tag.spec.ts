@@ -33,7 +33,7 @@ async function boot(page: Page, fx: Fixtures = {}) {
   await page.goto('/');
   await waitForSb(page);
 }
-const accounts = (page: Page) => page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+const accounts = (page: Page) => page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
 const applications = (page: Page) => page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
 const modal = (page: Page) => page.locator('#confirm-modal');
 
@@ -53,7 +53,8 @@ test('the chip is black and wears the white mark struck through, and nothing els
   await expect(comm).toBeVisible();
   await expect(comm.locator('.tag-ban-sign')).toHaveCount(0);
   await expect(comm).not.toContainText('Community');
-  // The tag manager lists it as a locked tag: Edit, no Delete.
+  // The tag manager (Community > Tags since 2026-10-07) lists it as a locked tag: Edit, no Delete.
+  await page.evaluate(`setStaffTab('community');setCommTab('tags')`);
   const row = page.locator('.am-tag-row', { has: page.locator('.am-chip.tag-ban') });
   await expect(row).toContainText('1 holders');
   await expect(row.locator('button', { hasText: 'Delete' })).toHaveCount(0);

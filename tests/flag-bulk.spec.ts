@@ -37,7 +37,7 @@ test.describe('@staff:community bulk flagging', () => {
   test('Select mode flags many accounts at once, adding to what each is asked', async ({ page }) => {
     const calls: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && /rpc\/staff_flag_customer/.test(r.url())) calls.push(JSON.parse(r.postData() || '{}')); });
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
     await page.evaluate(`_amSelMode()`);
     const bar = page.locator('#am-sel-bar');
     await expect(bar.locator('.am-selgo')).toBeDisabled();

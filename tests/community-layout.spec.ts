@@ -16,7 +16,7 @@ async function accounts(page: P) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');setCommTab('accounts')`);
+  await page.evaluate(`setStaffTab('customers');setCustomersTab('accounts')`);
   await expect(page.locator('#am-cust-rows .am-cust')).toHaveCount(2);
 }
 const row = (page: P) => page.locator('.am-row[data-cust="c1"] .am-cust');

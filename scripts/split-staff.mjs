@@ -37,7 +37,7 @@ export const STAFF_ENTRY = [
   'goStaff', 'openPinModal', '_staffHostGate', // the way in: these always fetch the staff half
   'setStaffTab', 'renderStaffTabs', '_renderStaffTab', '_bgRenderStaffTab',
   'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'setAnView', 'renderInventory',
-  'renderCashier', 'renderCommunity', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
+  'renderCashier', 'renderCommunity', 'renderCustomers', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
   'renderAmbassadors', 'renderVendors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
   'doUndo', // the topbar's Undo (2026-09-28)
@@ -385,8 +385,9 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // real function. A statement two parts share goes back to staff.js (and with it, until nothing
 // changes, whatever it reaches), so staff.js never calls into a part except through a stand-in.
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
+// Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
@@ -1125,7 +1126,11 @@ export function formatFieldNames(r, limit = 20) {
 // menu's second card and the flag dialog's database check, 4 strings in each language. Here, on eaf80c7a (WhatsApp on
 // My Account) + it: customer 212.9, staff 445.1, core 242.1, ~214.3 / ~447.3 / ~243.4 on the runner, which left the
 // customer and the staff half 0.7 KB each; 217 / 450 keep ~2.7.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 450, core: 246 };
+// Staff 450 -> 453 (2026-10-07): Customers and Community as two sections (the owner: "make a separate customer
+// management/dashboard page and a separate community management dashboard page"), each with an overview, Community's
+// Tags page with its holders, the leaderboard and statistics as Analytics views, and 29 strings in each language
+// (+2.0 KB on the staff half; the core stays within 246).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 453, core: 246 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

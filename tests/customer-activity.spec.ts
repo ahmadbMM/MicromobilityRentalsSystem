@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// History > Customer activity (/history/customers): what customers did on the booking app, the
+// Customers > Activity (/customers/activity; History's until 2026-10-07): what customers did on the booking app, the
 // website and the forms. The database writes the lines (customer_activity, migration
 // 20261004160000); the staff page only reads them, newest first, and says each one in words.
 
@@ -30,17 +30,17 @@ async function staff(page: Page, path = '/') {
   await page.goto(path);
   await waitForSb(page);
 }
-const rows = (page: Page) => page.locator('#hist-log-host .ca-row');
+const rows = (page: Page) => page.locator('#cact-host .ca-row');
 const at = (page: Page) => new URL(page.url()).pathname;
 
-test.describe('@staff:history customer activity', () => {
+test.describe('@staff:customers customer activity', () => {
   test('History shows what customers did, in words, newest first, and the name opens the account', async ({ page }) => {
     const asked: string[] = [];
     page.on('request', (r) => { if (r.method() === 'GET' && r.url().includes('/rest/v1/customer_activity')) asked.push(r.url()); });
     await staff(page);
-    await page.evaluate(`setStaffTab('history')`);
-    await page.locator('#tab-history .filter-pill', { hasText: 'Customer activity' }).click();
-    expect(at(page)).toBe('/history/customers');
+    await page.evaluate(`setStaffTab('customers')`);
+    await page.locator('#tab-customers .filter-pill', { hasText: 'Activity' }).click();
+    expect(at(page)).toBe('/customers/activity');
     await expect(rows(page)).toHaveCount(5);
     // Newest first, read as sentences with what they touched.
     await expect(rows(page).nth(0)).toContainText('Cancelled a booking');
@@ -61,12 +61,12 @@ test.describe('@staff:history customer activity', () => {
     expect(u.searchParams.get('select')).toBe('id,at,customer_id,who,action,detail,origin');
 
     // A category keeps only its own lines.
-    await page.locator('#hist-log-host .filter-pill', { hasText: 'Bookings' }).click();
+    await page.locator('#cact-host .filter-pill', { hasText: 'Bookings' }).click();
     await expect(rows(page)).toHaveCount(2);
-    await page.locator('#hist-log-host .filter-pill', { hasText: 'Access' }).click();
+    await page.locator('#cact-host .filter-pill', { hasText: 'Access' }).click();
     await expect(rows(page)).toHaveCount(1);
     await expect(rows(page).first()).toContainText('Signed in');
-    await page.locator('#hist-log-host .filter-pill', { hasText: 'All' }).first().click();
+    await page.locator('#cact-host .filter-pill', { hasText: 'All' }).first().click();
     await expect(rows(page)).toHaveCount(5);
 
     // The search reads the name, the words and the details.
@@ -84,14 +84,16 @@ test.describe('@staff:history customer activity', () => {
     await expect(page.locator('#cust-modal')).toContainText('Omar Saleh');
   });
 
-  test('the address opens the view, and the Action Log is still one tap away', async ({ page }) => {
+  test('its address opens the view, the old History address follows it, and History keeps the Action Log', async ({ page }) => {
     await staff(page, '/history/customers');
-    await page.waitForFunction(`S.staffTab==='history'&&S.histView==='customers'`);
+    await page.waitForFunction(`S.staffTab==='customers'&&S.customersTab==='activity'`);
+    expect(at(page)).toBe('/customers/activity');
     await expect(rows(page)).toHaveCount(5);
+    await page.evaluate(`setStaffTab('history')`);
+    await expect(page.locator('#tab-history .filter-pill', { hasText: 'Customer activity' })).toHaveCount(0);
     await page.locator('#tab-history .filter-pill', { hasText: 'Action Log' }).click();
     expect(at(page)).toBe('/history/log');
     await expect(page.locator('#hist-log-host .lg-h3')).toHaveText('Action Log');
-    await expect(rows(page)).toHaveCount(0);
   });
 
   test('a refused read leaves the view empty and says so, without asking again in a loop', async ({ page }) => {
@@ -101,8 +103,8 @@ test.describe('@staff:history customer activity', () => {
       n++;
       return r.fulfill({ status: 401, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '42501', message: 'permission denied' }) });
     });
-    await page.evaluate(`setStaffTab('history');S.histView='customers';renderHistory()`);
-    await expect(page.locator('#hist-log-host .lg-empty')).toHaveText('No customer activity yet');
+    await page.evaluate(`setStaffTab('customers');setCustomersTab('activity')`);
+    await expect(page.locator('#cact-host .lg-empty')).toHaveText('No customer activity yet');
     await page.waitForTimeout(600);
     await page.evaluate(`renderHistory();renderHistory()`);
     await page.waitForTimeout(300);

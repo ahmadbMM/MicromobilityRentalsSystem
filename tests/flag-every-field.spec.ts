@@ -52,7 +52,7 @@ test.describe('@staff:community flag every field', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.waitForFunction('(S.customers||[]).length>0');
-    await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
     const row = page.locator('.flg-row[data-flag-id="f1"]');
     await expect(row.locator('.flg-change[data-field="instagram"]')).toContainText('@old.handle');
     await expect(row.locator('.flg-change[data-field="instagram"]')).toContainText('@new.handle');

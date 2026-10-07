@@ -23,7 +23,7 @@ test('the circuit and community tags show their logos; other tags keep their nam
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0&&(S.tags||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   const chips = page.locator('.am-row[data-cust="c1"] .am-chips .am-chip');
   await expect(chips).toHaveCount(3);
 

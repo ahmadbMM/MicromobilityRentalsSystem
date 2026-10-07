@@ -23,7 +23,7 @@ async function accounts(page: import('@playwright/test').Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   await expect(page.locator('.am-vcard')).toHaveCount(2);
 }
 

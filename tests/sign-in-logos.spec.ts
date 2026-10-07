@@ -20,7 +20,7 @@ async function accounts(page: Page, extra: Record<string, unknown> = {}) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
 }
 const row = (page: Page, name: string) => page.locator('.am-cust').filter({ hasText: name });
 
@@ -64,7 +64,7 @@ test('a staffer who may only view Community still sees the marks (the lookup is 
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`S._myEdit=['queue'];S._siAt=0;S._siMap=null;setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`S._myEdit=['queue'];S._siAt=0;S._siMap=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   expect(await page.evaluate(`_roNow()`)).toBe(true);
   await expect(row(page, 'Adam Apple').locator('.si-apple')).toHaveCount(1);
 });

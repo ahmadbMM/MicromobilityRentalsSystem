@@ -166,7 +166,7 @@ test.describe('@staff:community rb1 lists read whole (2026-10-05)', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.waitForFunction('(S.customers||[]).length>0');
-    await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
     await page.waitForFunction('Array.isArray(S._flags)&&S._flags.length===1002');
     expect(seen.some((s) => /offset=1000/.test(s))).toBe(true);
     await expect(page.locator('.flg-row[data-flag-id="f1001"]')).toHaveCount(1);

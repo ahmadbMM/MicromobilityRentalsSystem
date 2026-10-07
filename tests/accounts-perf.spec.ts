@@ -25,7 +25,7 @@ async function accounts(page: import('@playwright/test').Page) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';S.amShow=null;S.amSearch='';S.amTagFilter='';S.amMissing=false`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';S.amShow=null;S.amSearch='';S.amTagFilter='';S.amMissing=false`);
   expect(await page.evaluate(SEED)).toBe(200);
 }
 

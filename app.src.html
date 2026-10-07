@@ -328,6 +328,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="inventory" data-on-click='["setStaffTab","inventory"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Inventory</span></button>
     <button class="tab-btn"        data-stab="workshop"  data-on-click='["setStaffTab","workshop"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Workshop</span></button>
     <span class="snav-group" data-group="snavPeople" aria-hidden="true">People</span>
+    <button class="tab-btn"        data-stab="customers" data-on-click='["setStaffTab","customers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Customers</span></button>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Community</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
@@ -347,6 +348,7 @@ window.mmLoading=(function(){
     <div id="tab-queue"     class="tab-panel active"></div>
     <div id="tab-inventory"  class="tab-panel"></div>
     <div id="tab-cashier"   class="tab-panel"></div>
+    <div id="tab-customers"  class="tab-panel"></div>
     <div id="tab-community"  class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
@@ -950,7 +952,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tabCashier:'Sales',cashTabSub:'Sell items and track sales for a session',cashNewSale:'New sale',cashCustomerLabel:'Customer (optional)',cashCustomerPh:'Search name, phone, email - or type a name',cashAcctLinked:'Linked to account',custPurchTitle:'Purchases',cashItemsWord:'items',cashAllItems:'All items',cashLedgerTitle:'Sales',cashNoSalesSession:'No sales recorded for this session yet.',cashRentalTag:'rental',cashNoSessions:'No sessions yet. Create a session first.',cashWalkup:'Walk-up',cashAddItemBtn:'Add item',cashRecordReceiptBtn:'Record receipt',cashReceiptWord:'Receipt',cashReceiptRecorded:'Receipt recorded',cashCartEmpty:'Add at least one item',cashCartTitle:'Receipt items',payTeam:'MM Team',teamChoose:'Choose team member',teamCustom:'Custom name',teamCustomPrompt:'Team member name',teamManage:'Manage team',teamMgrTitle:'MM Team members',teamAddMember:'Add member',teamEmpty:'No team members yet.',cashShare:'Share',closeoutBtn:'Close-out',closeoutTitle:'Day close-out',coRentals:'Bike rentals',coSales:'Product sales',coGrand:'Grand total',anTopSellers:'Top sellers',anTopSellersSub:'Most-sold products (this range)',cashPendingSync:'{0} pending sync',syncStuckTitle:'Sales stuck syncing',syncStuckBody:'{0} sale(s) could not sync. They may reference data that was changed or removed. Discard them? This cannot be undone.',syncDiscardBtn:'Discard',syncDiscardedToast:'Pending sales discarded.',syncOfflineToast:'Still offline - they will sync when the connection returns.',cashEditBtn:'Edit',cashMarkPaid:'Mark paid',receiptEditTitle:'Edit receipt',cashSavedToast:'Receipt updated',cashDiscount:'Discount',cashCard:'Card',cashCash:'Cash',splitWord:'Split',rentDiscountLabel:'Discount %',cashRefund:'Refund',cashRefunded:'Refunded',cashRefunds:'Refunds',cashRefundConfirm:'Refund this receipt? The items go back to stock and the sale is reversed (kept as a record).',cashRefundedToast:'Receipt refunded',cashSplitLabel:'Card payment',reorderTitle:'Reorder suggestions',reorderSold:'sold',reorderSuggest:'reorder',reorderNone:'Nothing needs reordering right now.',reorderShareBtn:'Share list',reorderShareTitle:'Reorder list - MicroMobility',
   invBrand:'Brand',invNoBrand:'No brand',addCustomCatLabel:'Add custom category...',addCustomBrandLabel:'Add brand...',invProteinType:'Type',addCustomTypeLabel:'Add type...',invFlavour:'Flavour',invNoFlavour:'No flavour',addCustomFlavLabel:'Add flavour...',invVolumeMl:'Volume (ml)',invVolumeMlPh:'e.g. 500',nuTitle:'Nutrition Facts',nuOptional:'optional',servingSize:'Serving size',nuServingPh:'e.g. 1 bottle',nuCalories:'Calories',nuProtein:'Protein',nuCarbs:'Carbs',nuSugar:'Sugars',nuFat:'Fat',nuSatFat:'Saturated fat',nuSodium:'Sodium',nuCaffeine:'Caffeine',nuIngredients:'Ingredients',nuButton:'Nutrition',nuFibre:'Fibre',nuSalt:'Salt',nuMicros:'Vitamins & minerals',nuAddMicro:'Add vitamin / mineral',nuMicroName:'Vitamin / mineral',nuNrv:'NRV%',
   invSecBikes:'Bikes',invSecEquipment:'Equipment',invSecSupplements:'Supplements & Beverages',
-  commTitle:'Community',commTabLeaderboard:'Leaderboard',sessEventLabel:'Event',sessEventCommHint:'Private event: only tagged riders can see or book it. Reservations need staff approval, and queue order stays staff-only.',sessSpotsLabel:'Spots',sessGatherTime:'Gathering time',sessCollectTime:'Bike collection time',sessCollectHint:'when bikes start going out; it is what the rider’s Wallet pass shows',sessStartTime:'Start time',commGatherShort:'Gathering',commStartShort:'Start',sessMapLabel:'Meeting point (Google Maps link)',sessMapPh:'Paste a Google Maps link',sessBfNameLabel:'Breakfast spot',sessBfNamePh:'e.g. Brew92',meetPointLbl:'Meeting point',breakfastSpotLbl:'Breakfast spot',revealSpotsAt:'Breakfast spot: announced {0}',revealLbl:'Announce breakfast spot at',revealHint:'riders see the breakfast spot from this time (Riyadh); empty shows it as soon as it is set. The meeting point always shows.',revealNowBtn:'Show now',revealHeldNote:'Breakfast spot hidden until {0}',revealPastNote:'Riders can see it now',freeLabel:'Free',apprPendingChip:'Pending approval',apprApproveBtn:'Approve',apprRejectBtn:'Reject',apprUndoBtn:'Undo approval',commAddRiderBtn:'Add rider',wlTitle:'Waitlist',wlAddBtn:'Add to waitlist',wlEmpty:'Nobody is waiting.',wlGivenBtn:'Bike given',wlRemoveBtn:'Remove',wlAddedToast:'{0} added to the waitlist',wlGivenToast:'Bike given to {0}',wlRemovedToast:'Removed from the waitlist',undoWl:'Back on the waitlist',wlAvailNow:'{0} available now',updReloadBtn:'Refresh',promoNudgeMsg:'{0} is next — send them a WhatsApp',mwTitle:'Staff Managed Waitlist',mwMoveBtn:'To staff list',mwOnlyOpenMsg:'Only a booking that has not ridden yet can go on the staff list.',mwMovedToast:'{0} moved to the staff list',mwSub:'Hand-picked and hand-ordered by staff — drag or use the arrows.',tblScrollLabel:'Table — scroll sideways',wlPosMsg:'You’re number {0} in line. Nothing is held for you yet: if a place opens, staff check you in at the booth with this code, and they may message you on WhatsApp first.',wlPosNoNumMsg:'You’re in line for a place. Nothing is held for you yet: if a place opens, staff check you in at the booth with this code, and they may message you on WhatsApp first.',anApprovedUnique:'Riders approved (unique)',anApprovedTotal:'Approvals given',anApprovedAvg:'Rides per rider',mwEmptyForSess:'Nobody on the list for this session — pick All Sessions to see the rest.',naDelBtn:'Delete account',naDelTitle:'Delete this account',naDelLiveMsg:'This rider has {0} live booking(s). Finish or cancel those first — deleting the account under them leaves a booking nobody can look up.',naDelDone:'{0}\u2019s account deleted',errAdminOnly:'Admin accounts only.',mwAddBtn:'Add',mwRidersN:'{0} riders',mwPartyMovedToast:'{0} riders moved to the staff list',mwRemovePartyBody:'This takes all {0} riders off the staff list. Their bookings are not touched.',mwSearchPh:'Booking number, name or phone…',mwBrowseBtn:'From bookings',mwHideBtn:'Hide list',mwNoMatches:'Nobody left to add matches that.',mwCustTag:'Customer',mwFromBookings:'Bookings & waitlist',mwFromCustomers:'Saved customers',groupNameLabel:'Group name',groupNamePh:'e.g. Tamer Group',contactNameLabel:'Contact name',groupEditTitle:'Edit group booking',defaultPayLabel:'Default payment',defPayNormal:'Normal',housePayTypesLabel:'On the house for these bike types',hiddenTypesLabel:'Hidden bike types',custBtn:'Customer',promoSyncedToast:'{0} live bookings repriced',anCntRiders:'Number of Riders',anCntRidersSub:'unique riders across counted rides',anCntRides:'Number of Rides',anRideDefSub:'paid = ride before 12 Aug 2026 · checked-in only from then on',anRideMinutes:'Actual Riding Minutes',anMeasuredRides:'rides with measured time',reserveBikeBtn:'Reserve bike',bikeReservedToast:'{0} reserved',bkmNoHint:'Leave it empty to reserve without choosing a bike.',bkmNoNotFleet:'Bike {0} is not in the fleet.',bkmNoNotFleetRsv:'Bike {0} is not in the fleet. Reserve bike keeps the number on this booking.',rsvNoBikeToast:'Reserved, no bike chosen',reserveTakenConfirm:'Reserved for {0} — assign anyway?',reservedChip:'Reserved',commAddGroupBtn:'Add group',commAddGroupTitle:'Add group to a JCC session',commAddGroupHint:'Pick two or more riders — they stay grouped together on the roster.',commAddGroupMin:'Select at least 2 riders.',commGroupAddedToast:'{0} added as a group',commAddTitle:'Add rider to the social ride',commAddSearchLbl:'Customer',commAddSearchPh:'Search name, email or phone…',commAddNoMatch:'No matching customers.',commAddDestLbl:'Add to',commAddDestList:'Final list',commAddBtn:'Add rider',commAddDup:'Already booked in this session.',commAddedToast:'{0} added',bfNoneOpt:'- none -',bfNewOpt:'+ New breakfast spot…',commFullWaitlistMsg:'This ride is full. You can still reserve: you’ll join the waitlist, and if a place opens, staff may pick you.',wiPickCustPh:'Type a name or pick a saved customer',apprApprovedChip:'Approved',apprApprovedToast:'{0} approved',apprRejectedToast:'{0} rejected',commCuePending:'Reserved. Waiting for staff to confirm.',commCueUnderReview:'Reserved - the rider list is being finalised',wlCapLabel:'Waitlist limit',wlCapCount:'Number',wlCapPct:'Percent',wlCapHint:'How many riders may wait for a spot once the session is full. Leave blank or 0 for no limit; a percentage is taken from the session capacity.',errWaitlistFull:'The waitlist for this session is full.',publishBtn:'Publish',publishedChip:'Published',publishedAlready:'Results are already published for this ride.',publishConfirmTitle:'Publish the rider list?',publishConfirmBody:'{0} approved rider(s) will immediately see that they are confirmed. This cannot be undone from here.',publishedToast:'Results published - {0} rider(s) confirmed',commCueConfirmed:'Your place is confirmed',commConfirmedSub:'Show this code at the gathering point when you arrive.',ticketQrHold:'Your code appears here once your place is confirmed.',commCueWaitlist:'On the waitlist. If a place opens and staff pick you, this card turns into your ticket.',commTabStats:'Statistics',commTabAccounts:'Accounts',doneBtn:'Done',amTagsTitle:'Tags',amTagsSub:'Tags gate access to private events. Customers never see tags or that they exist.',amHolders:'{0} holders',amAutoTag:'Auto-granted',amNewTag:'New tag',amEditTag:'Edit tag',amTagName:'Tag name',amTagNamePh:'e.g. Saturday Social Ride',amTagColor:'Colour',amTagDesc:'Description',amTagDescPh:'Who is this tag for?',amTagNameReq:'Enter a tag name.',amTagSaved:'Tag saved',amTagDeleted:'Tag deleted',amNoTags:'No tags',amCustomersTitle:'Customers',amSearchPh:'Search name, email or phone',amEditTags:'Tags',amSaveContact:'Save contact',amContactSaved:'{0} saved as a contact',amContactNone:'This account has no phone or email to save.',amNoCustomers:'No customer accounts yet.',amShowMore:'Show {0} more',amShowingOf:'Showing {0} of {1}',amFilterAll:'All',commSub:'Rider leaderboard, statistics, accounts, tags and correction requests.',commLeaderboard:'Leaderboard',commEvents:'Upcoming rides',commRides:'rides',commNoLeaders:'No completed rides yet.',commNoEvents:'No upcoming sessions scheduled.',commStatRiders:'Active riders',commStatRides:'Rides',commStatMinutes:'Minutes ridden',commStatAvg:'Avg / rider',commSearchPh:'Search rider…',commNoMatch:'No rider matches.',commShareBtn:'Share',commCopied:'Leaderboard copied',commSpotlight:'Top rider',commToNext:'{0} rides to {1}',commMaxTier:'Top tier reached',commMilestones:'Milestone watch',commMilestonesSub:'Riders close to their next milestone',commMileAway:'{0} away',
+  tabCustomers:'Customers',custSub:'Every account: details, correction requests, activity and duplicates.',commTabOverview:'Overview',commTabMembers:'Members',custTabActivity:'Activity',anNavCommunity:'Community',custKpiTotal:'Accounts',custKpiNew7:'New this week',custKpiNew30:'New in 30 days',custKpiMembers:'Community members',custKpiFlags:'Waiting on a correction',custNewest:'Newest accounts',custFlagFields:'{0} fields asked',commKpiNewMembers:'New members in 30 days',commKpiApps:'Applications waiting',commKpiLearn:'Learn to ride: new',commKpiBdays:'Birthdays this week',commBdSoon:'Birthdays coming up',commNoAppsWaiting:'No applications waiting.',commNoBdays:'No birthdays on file yet.',commGiveBadge:'Give a badge',tgHoldersBtn:'Holders',tgSearchPh:'Find a holder, or someone to give it to',tgGiveTo:'Give it to',tgGiveBtn:'Give',tgNoHolders:'Nobody holds this tag.',tgRemoveQ:'Take {1} off {0}?',tgSince:'since {0}',tgUntil:'until {0}',commTitle:'Community',commTabLeaderboard:'Leaderboard',sessEventLabel:'Event',sessEventCommHint:'Private event: only tagged riders can see or book it. Reservations need staff approval, and queue order stays staff-only.',sessSpotsLabel:'Spots',sessGatherTime:'Gathering time',sessCollectTime:'Bike collection time',sessCollectHint:'when bikes start going out; it is what the rider’s Wallet pass shows',sessStartTime:'Start time',commGatherShort:'Gathering',commStartShort:'Start',sessMapLabel:'Meeting point (Google Maps link)',sessMapPh:'Paste a Google Maps link',sessBfNameLabel:'Breakfast spot',sessBfNamePh:'e.g. Brew92',meetPointLbl:'Meeting point',breakfastSpotLbl:'Breakfast spot',revealSpotsAt:'Breakfast spot: announced {0}',revealLbl:'Announce breakfast spot at',revealHint:'riders see the breakfast spot from this time (Riyadh); empty shows it as soon as it is set. The meeting point always shows.',revealNowBtn:'Show now',revealHeldNote:'Breakfast spot hidden until {0}',revealPastNote:'Riders can see it now',freeLabel:'Free',apprPendingChip:'Pending approval',apprApproveBtn:'Approve',apprRejectBtn:'Reject',apprUndoBtn:'Undo approval',commAddRiderBtn:'Add rider',wlTitle:'Waitlist',wlAddBtn:'Add to waitlist',wlEmpty:'Nobody is waiting.',wlGivenBtn:'Bike given',wlRemoveBtn:'Remove',wlAddedToast:'{0} added to the waitlist',wlGivenToast:'Bike given to {0}',wlRemovedToast:'Removed from the waitlist',undoWl:'Back on the waitlist',wlAvailNow:'{0} available now',updReloadBtn:'Refresh',promoNudgeMsg:'{0} is next — send them a WhatsApp',mwTitle:'Staff Managed Waitlist',mwMoveBtn:'To staff list',mwOnlyOpenMsg:'Only a booking that has not ridden yet can go on the staff list.',mwMovedToast:'{0} moved to the staff list',mwSub:'Hand-picked and hand-ordered by staff — drag or use the arrows.',tblScrollLabel:'Table — scroll sideways',wlPosMsg:'You’re number {0} in line. Nothing is held for you yet: if a place opens, staff check you in at the booth with this code, and they may message you on WhatsApp first.',wlPosNoNumMsg:'You’re in line for a place. Nothing is held for you yet: if a place opens, staff check you in at the booth with this code, and they may message you on WhatsApp first.',anApprovedUnique:'Riders approved (unique)',anApprovedTotal:'Approvals given',anApprovedAvg:'Rides per rider',mwEmptyForSess:'Nobody on the list for this session — pick All Sessions to see the rest.',naDelBtn:'Delete account',naDelTitle:'Delete this account',naDelLiveMsg:'This rider has {0} live booking(s). Finish or cancel those first — deleting the account under them leaves a booking nobody can look up.',naDelDone:'{0}\u2019s account deleted',errAdminOnly:'Admin accounts only.',mwAddBtn:'Add',mwRidersN:'{0} riders',mwPartyMovedToast:'{0} riders moved to the staff list',mwRemovePartyBody:'This takes all {0} riders off the staff list. Their bookings are not touched.',mwSearchPh:'Booking number, name or phone…',mwBrowseBtn:'From bookings',mwHideBtn:'Hide list',mwNoMatches:'Nobody left to add matches that.',mwCustTag:'Customer',mwFromBookings:'Bookings & waitlist',mwFromCustomers:'Saved customers',groupNameLabel:'Group name',groupNamePh:'e.g. Tamer Group',contactNameLabel:'Contact name',groupEditTitle:'Edit group booking',defaultPayLabel:'Default payment',defPayNormal:'Normal',housePayTypesLabel:'On the house for these bike types',hiddenTypesLabel:'Hidden bike types',custBtn:'Customer',promoSyncedToast:'{0} live bookings repriced',anCntRiders:'Number of Riders',anCntRidersSub:'unique riders across counted rides',anCntRides:'Number of Rides',anRideDefSub:'paid = ride before 12 Aug 2026 · checked-in only from then on',anRideMinutes:'Actual Riding Minutes',anMeasuredRides:'rides with measured time',reserveBikeBtn:'Reserve bike',bikeReservedToast:'{0} reserved',bkmNoHint:'Leave it empty to reserve without choosing a bike.',bkmNoNotFleet:'Bike {0} is not in the fleet.',bkmNoNotFleetRsv:'Bike {0} is not in the fleet. Reserve bike keeps the number on this booking.',rsvNoBikeToast:'Reserved, no bike chosen',reserveTakenConfirm:'Reserved for {0} — assign anyway?',reservedChip:'Reserved',commAddGroupBtn:'Add group',commAddGroupTitle:'Add group to a JCC session',commAddGroupHint:'Pick two or more riders — they stay grouped together on the roster.',commAddGroupMin:'Select at least 2 riders.',commGroupAddedToast:'{0} added as a group',commAddTitle:'Add rider to the social ride',commAddSearchLbl:'Customer',commAddSearchPh:'Search name, email or phone…',commAddNoMatch:'No matching customers.',commAddDestLbl:'Add to',commAddDestList:'Final list',commAddBtn:'Add rider',commAddDup:'Already booked in this session.',commAddedToast:'{0} added',bfNoneOpt:'- none -',bfNewOpt:'+ New breakfast spot…',commFullWaitlistMsg:'This ride is full. You can still reserve: you’ll join the waitlist, and if a place opens, staff may pick you.',wiPickCustPh:'Type a name or pick a saved customer',apprApprovedChip:'Approved',apprApprovedToast:'{0} approved',apprRejectedToast:'{0} rejected',commCuePending:'Reserved. Waiting for staff to confirm.',commCueUnderReview:'Reserved - the rider list is being finalised',wlCapLabel:'Waitlist limit',wlCapCount:'Number',wlCapPct:'Percent',wlCapHint:'How many riders may wait for a spot once the session is full. Leave blank or 0 for no limit; a percentage is taken from the session capacity.',errWaitlistFull:'The waitlist for this session is full.',publishBtn:'Publish',publishedChip:'Published',publishedAlready:'Results are already published for this ride.',publishConfirmTitle:'Publish the rider list?',publishConfirmBody:'{0} approved rider(s) will immediately see that they are confirmed. This cannot be undone from here.',publishedToast:'Results published - {0} rider(s) confirmed',commCueConfirmed:'Your place is confirmed',commConfirmedSub:'Show this code at the gathering point when you arrive.',ticketQrHold:'Your code appears here once your place is confirmed.',commCueWaitlist:'On the waitlist. If a place opens and staff pick you, this card turns into your ticket.',commTabAccounts:'Accounts',doneBtn:'Done',amTagsTitle:'Tags',amTagsSub:'Tags gate access to private events. Customers never see tags or that they exist.',amHolders:'{0} holders',amAutoTag:'Auto-granted',amNewTag:'New tag',amEditTag:'Edit tag',amTagName:'Tag name',amTagNamePh:'e.g. Saturday Social Ride',amTagColor:'Colour',amTagDesc:'Description',amTagDescPh:'Who is this tag for?',amTagNameReq:'Enter a tag name.',amTagSaved:'Tag saved',amTagDeleted:'Tag deleted',amNoTags:'No tags',amCustomersTitle:'Customers',amSearchPh:'Search name, email or phone',amEditTags:'Tags',amSaveContact:'Save contact',amContactSaved:'{0} saved as a contact',amContactNone:'This account has no phone or email to save.',amNoCustomers:'No customer accounts yet.',amShowMore:'Show {0} more',amShowingOf:'Showing {0} of {1}',amFilterAll:'All',commSub:'Members, tags, badges, applications and birthdays.',commLeaderboard:'Leaderboard',commEvents:'Upcoming rides',commRides:'rides',commNoLeaders:'No completed rides yet.',commNoEvents:'No upcoming sessions scheduled.',commStatRiders:'Active riders',commStatRides:'Rides',commStatMinutes:'Minutes ridden',commStatAvg:'Avg / rider',commSearchPh:'Search rider…',commNoMatch:'No rider matches.',commShareBtn:'Share',commCopied:'Leaderboard copied',commSpotlight:'Top rider',commToNext:'{0} rides to {1}',commMaxTier:'Top tier reached',commMilestones:'Milestone watch',commMilestonesSub:'Riders close to their next milestone',commMileAway:'{0} away',
   lbWindowWeek:'This week',lbWindowMonth:'This month',lbWindowAll:'All-time',lbScopeOwner:'Booking owners',lbScopeRider:'Riders',lbScopeOwnerSub:'Credited for every rider in their bookings',lbScopeRiderSub:'Each individual rider',lbRankByLabel:'Rank by',lbRidersBooked:'Riders booked',lbMinutes:'Minutes',lbSpent:'Spent',lbStreakTip:'{0}-week streak',lbNewLabel:'new',
   statusWaitlist:'Waitlist',waitlistLabel:'Waitlist',toastWaitlisted:'Added to the waitlist',toastPromoted:'Promoted from waitlist',
   bulkPaidBtn:'Mark paid',bulkCheckinBtn:'Check in',bulkClearSel:'Clear',bulkSelectedLabel:'selected',
@@ -1508,7 +1510,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tabCashier:'المبيعات',cashTabSub:'بيع العناصر وتتبع المبيعات لكل جلسة',cashNewSale:'عملية بيع جديدة',cashCustomerLabel:'العميل (اختياري)',cashCustomerPh:'ابحث بالاسم أو الجوال أو البريد - أو اكتب اسماً',cashAcctLinked:'مرتبط بالحساب',custPurchTitle:'المشتريات',cashItemsWord:'عناصر',cashAllItems:'كل العناصر',cashLedgerTitle:'المبيعات',cashNoSalesSession:'لا توجد مبيعات مسجلة لهذه الجلسة بعد.',cashRentalTag:'إيجار',cashNoSessions:'لا توجد جلسات بعد. أنشئ جلسة أولاً.',cashWalkup:'زبون عابر',cashAddItemBtn:'إضافة عنصر',cashRecordReceiptBtn:'تسجيل الفاتورة',cashReceiptWord:'فاتورة',cashReceiptRecorded:'تم تسجيل الفاتورة',cashCartEmpty:'أضف عنصراً واحداً على الأقل',cashCartTitle:'عناصر الفاتورة',payTeam:'فريق MM',teamChoose:'اختر عضو الفريق',teamCustom:'اسم مخصص',teamCustomPrompt:'اسم عضو الفريق',teamManage:'إدارة الفريق',teamMgrTitle:'أعضاء فريق MM',teamAddMember:'إضافة عضو',teamEmpty:'لا يوجد أعضاء فريق بعد.',cashShare:'مشاركة',closeoutBtn:'إغلاق اليوم',closeoutTitle:'تقرير إغلاق اليوم',coRentals:'تأجير الدراجات',coSales:'مبيعات المنتجات',coGrand:'الإجمالي الكلي',anTopSellers:'الأكثر مبيعاً',anTopSellersSub:'المنتجات الأكثر مبيعاً (هذا النطاق)',cashPendingSync:'{0} بانتظار المزامنة',syncStuckTitle:'مبيعات عالقة في المزامنة',syncStuckBody:'{0} عملية بيع تعذّرت مزامنتها. قد تشير إلى بيانات تم تغييرها أو حذفها. تجاهلها؟ لا يمكن التراجع.',syncDiscardBtn:'تجاهل',syncDiscardedToast:'تم تجاهل المبيعات المعلقة.',syncOfflineToast:'لا يزال دون اتصال - ستتم المزامنة عند عودة الاتصال.',cashEditBtn:'تعديل',cashMarkPaid:'تحديد مدفوع',receiptEditTitle:'تعديل الفاتورة',cashSavedToast:'تم تحديث الفاتورة',cashDiscount:'خصم',cashCard:'بطاقة',cashCash:'نقدًا',splitWord:'تقسيم',rentDiscountLabel:'خصم %',cashRefund:'استرداد',cashRefunded:'مُسترد',cashRefunds:'المستردات',cashRefundConfirm:'استرداد هذه الفاتورة؟ تعود العناصر إلى المخزون ويُعكس البيع (يبقى كسجل).',cashRefundedToast:'تم استرداد الفاتورة',cashSplitLabel:'الدفع بالبطاقة',reorderTitle:'اقتراحات إعادة الطلب',reorderSold:'مُباع',reorderSuggest:'أعد الطلب',reorderNone:'لا شيء يحتاج إعادة طلب الآن.',reorderShareBtn:'مشاركة القائمة',reorderShareTitle:'قائمة إعادة الطلب - مايكروموبيليتي',
   invBrand:'العلامة التجارية',invNoBrand:'بدون علامة',addCustomCatLabel:'إضافة فئة مخصصة...',addCustomBrandLabel:'إضافة علامة...',invProteinType:'النوع',addCustomTypeLabel:'إضافة نوع...',invFlavour:'النكهة',invNoFlavour:'بدون نكهة',addCustomFlavLabel:'إضافة نكهة...',invVolumeMl:'الحجم (مل)',invVolumeMlPh:'مثال: 500',nuTitle:'القيمة الغذائية',nuOptional:'اختياري',servingSize:'حجم الحصة',nuServingPh:'مثال: زجاجة واحدة',nuCalories:'السعرات',nuProtein:'البروتين',nuCarbs:'الكربوهيدرات',nuSugar:'السكريات',nuFat:'الدهون',nuSatFat:'الدهون المشبعة',nuSodium:'الصوديوم',nuCaffeine:'الكافيين',nuIngredients:'المكونات',nuButton:'القيمة الغذائية',nuFibre:'الألياف',nuSalt:'الملح',nuMicros:'الفيتامينات والمعادن',nuAddMicro:'إضافة فيتامين / معدن',nuMicroName:'فيتامين / معدن',nuNrv:'NRV%',
   invSecBikes:'الدراجات',invSecEquipment:'المعدات',invSecSupplements:'المكمّلات والمشروبات',
-  commTitle:'المجتمع',commTabLeaderboard:'المتصدرون',sessEventLabel:'الفعالية',sessEventCommHint:'فعالية خاصة: يراها ويحجزها الحاصلون على الوسم فقط. تحتاج الحجوزات موافقة الموظفين، ويبقى ترتيب الطابور للموظفين فقط.',sessSpotsLabel:'المقاعد',sessGatherTime:'وقت التجمع',sessCollectTime:'وقت استلام الدراجات',sessCollectHint:'الوقت الذي تبدأ فيه الدراجات بالخروج؛ وهو ما تعرضه بطاقة Wallet للراكب',sessStartTime:'وقت الانطلاق',commGatherShort:'التجمع',commStartShort:'الانطلاق',sessMapLabel:'نقطة التجمع (رابط خرائط جوجل)',sessMapPh:'الصق رابط خرائط جوجل',sessBfNameLabel:'مكان الفطور',sessBfNamePh:'مثال: Brew92',meetPointLbl:'نقطة التجمع',breakfastSpotLbl:'موقع الفطور',revealSpotsAt:'موقع الفطور: يُعلَن عنه {0}',revealLbl:'موعد إعلان موقع الفطور',revealHint:'يرى الراكبون موقع الفطور من هذا الوقت (بتوقيت الرياض)؛ إن تُرك فارغًا يظهر فور إضافته. نقطة التجمع تظهر دائمًا.',revealNowBtn:'إظهار الآن',revealHeldNote:'موقع الفطور مخفي حتى {0}',revealPastNote:'يراه الراكبون الآن',freeLabel:'مجاني',apprPendingChip:'بانتظار الموافقة',apprApproveBtn:'موافقة',apprRejectBtn:'رفض',apprUndoBtn:'تراجع عن الموافقة',commAddRiderBtn:'إضافة مشارك',wlTitle:'قائمة الانتظار',wlAddBtn:'إضافة إلى القائمة',wlEmpty:'لا يوجد أحد في الانتظار.',wlGivenBtn:'تم تسليم الدراجة',wlRemoveBtn:'إزالة',wlAddedToast:'تمت إضافة {0} إلى قائمة الانتظار',wlGivenToast:'تم تسليم الدراجة إلى {0}',wlRemovedToast:'تمت الإزالة من قائمة الانتظار',undoWl:'إعادة إلى قائمة الانتظار',wlAvailNow:'{0} متاحة الآن',updReloadBtn:'تحديث',promoNudgeMsg:'{0} هو التالي — أرسل له رسالة واتساب',mwTitle:'قائمة انتظار يديرها الموظفون',mwMoveBtn:'إلى قائمة الموظفين',mwOnlyOpenMsg:'يمكن إضافة الحجوزات التي لم تبدأ ركوبها فقط إلى قائمة الموظفين.',mwMovedToast:'تم نقل {0} إلى قائمة الموظفين',mwSub:'يضيفها ويرتبها الموظفون يدوياً — بالسحب أو بالأسهم.',tblScrollLabel:'جدول — مرّر أفقياً',wlPosMsg:'أنت رقم {0} في قائمة الانتظار. لم يُحجز لك مقعد بعد: إذا توفر مقعد يسجّل الفريق دخولك بهذا الرمز عند الكشك، وقد يراسلك عبر واتساب قبل ذلك.',wlPosNoNumMsg:'أنت في قائمة الانتظار. لم يُحجز لك مقعد بعد: إذا توفر مقعد يسجّل الفريق دخولك بهذا الرمز عند الكشك، وقد يراسلك عبر واتساب قبل ذلك.',anApprovedUnique:'الراكبون المعتمدون (فريدون)',anApprovedTotal:'عدد الموافقات',anApprovedAvg:'جولات لكل راكب',mwEmptyForSess:'لا أحد في القائمة لهذه الجلسة — اختر كل الجلسات لعرض البقية.',naDelBtn:'حذف الحساب',naDelTitle:'حذف هذا الحساب',naDelLiveMsg:'لدى هذا الراكب {0} حجز/حجوزات قائمة. أنهِها أو ألغِها أولاً — حذف الحساب يترك حجزاً لا يمكن لأحد الوصول إليه.',naDelDone:'تم حذف حساب {0}',errAdminOnly:'للمسؤولين فقط.',mwAddBtn:'إضافة',mwRidersN:'{0} راكبين',mwPartyMovedToast:'تم نقل {0} راكبين إلى قائمة الموظفين',mwRemovePartyBody:'سيؤدي هذا إلى إزالة {0} راكبين من قائمة الموظفين. لن تتأثر حجوزاتهم.',mwSearchPh:'رقم الحجز أو الاسم أو الهاتف…',mwBrowseBtn:'من الحجوزات',mwHideBtn:'إخفاء القائمة',mwNoMatches:'لا يوجد من يمكن إضافته يطابق ذلك.',mwCustTag:'عميل',mwFromBookings:'الحجوزات وقائمة الانتظار',mwFromCustomers:'العملاء المحفوظون',groupNameLabel:'اسم المجموعة',groupNamePh:'مثال: مجموعة تامر',contactNameLabel:'اسم جهة الاتصال',groupEditTitle:'تعديل حجز المجموعة',defaultPayLabel:'الدفع الافتراضي',defPayNormal:'عادي',housePayTypesLabel:'على حساب المحل لهذه الأنواع',hiddenTypesLabel:'أنواع الدراجات المخفية',custBtn:'العميل',promoSyncedToast:'تم تحديث أسعار {0} من الحجوزات النشطة',anCntRiders:'عدد الراكبين',anCntRidersSub:'راكبون فريدون ضمن الرحلات المحتسبة',anCntRides:'عدد الرحلات',anRideDefSub:'قبل 12 أغسطس 2026: المدفوع يُحتسب رحلة · بعده: تسجيل الدخول فقط',anRideMinutes:'دقائق الركوب الفعلية',anMeasuredRides:'رحلة بوقت مُقاس',reserveBikeBtn:'حجز الدراجة',bikeReservedToast:'تم حجز {0}',bkmNoHint:'اتركه فارغاً لحجز الدراجة دون اختيار دراجة بعينها.',bkmNoNotFleet:'الدراجة {0} ليست في الأسطول.',bkmNoNotFleetRsv:'الدراجة {0} ليست في الأسطول. «حجز الدراجة» يحفظ الرقم في هذا الحجز.',rsvNoBikeToast:'تم الحجز دون اختيار دراجة',reserveTakenConfirm:'محجوزة لـ {0} — هل تريد المتابعة؟',reservedChip:'محجوزة',commAddGroupBtn:'إضافة مجموعة',commAddGroupTitle:'إضافة مجموعة إلى جلسة JCC',commAddGroupHint:'اختر مشاركَين أو أكثر — سيظهرون كمجموعة واحدة في القائمة.',commAddGroupMin:'اختر مشاركَين على الأقل.',commGroupAddedToast:'تمت إضافة {0} كمجموعة',commAddTitle:'إضافة مشارك إلى الجولة الاجتماعية',commAddSearchLbl:'العميل',commAddSearchPh:'ابحث بالاسم أو البريد أو الجوال…',commAddNoMatch:'لا يوجد عملاء مطابقون.',commAddDestLbl:'إضافة إلى',commAddDestList:'القائمة النهائية',commAddBtn:'إضافة مشارك',commAddDup:'محجوز في هذه الجلسة بالفعل.',commAddedToast:'تمت إضافة {0}',bfNoneOpt:'- بدون -',bfNewOpt:'+ موقع فطور جديد…',commFullWaitlistMsg:'هذه الجولة مكتملة. يمكنك الحجز مع ذلك: ستنضم إلى قائمة الانتظار، وإذا توفر مقعد قد يختارك الفريق.',wiPickCustPh:'اكتب اسمًا أو اختر عميلًا محفوظًا',apprApprovedChip:'مقبول',apprApprovedToast:'تمت الموافقة على {0}',apprRejectedToast:'تم رفض {0}',commCuePending:'تم الحجز، بانتظار تأكيد الفريق.',commCueUnderReview:'تم الحجز - يجري إعداد قائمة المشاركين',wlCapLabel:'حد قائمة الانتظار',wlCapCount:'عدد',wlCapPct:'نسبة',wlCapHint:'عدد المشاركين المسموح لهم بالانتظار بعد اكتمال الجلسة. اتركه فارغاً أو 0 لعدم وضع حد؛ تُحتسب النسبة من سعة الجلسة.',errWaitlistFull:'قائمة الانتظار لهذه الجلسة ممتلئة.',publishBtn:'نشر',publishedChip:'تم النشر',publishedAlready:'تم نشر نتائج هذه الجولة بالفعل.',publishConfirmTitle:'نشر قائمة المشاركين؟',publishConfirmBody:'سيرى {0} مشارك مقبول تأكيد مشاركته فوراً. لا يمكن التراجع عن ذلك من هنا.',publishedToast:'تم نشر النتائج - تأكيد {0} مشارك',commCueConfirmed:'تم تأكيد مقعدك',commConfirmedSub:'اعرض هذا الرمز عند الوصول إلى نقطة التجمع.',ticketQrHold:'يظهر رمزك هنا بعد تأكيد مقعدك.',commCueWaitlist:'على قائمة الانتظار. إذا توفر مقعد واختارك الفريق تتحول هذه البطاقة إلى تذكرتك.',commTabStats:'الإحصائيات',commTabAccounts:'الحسابات',doneBtn:'تم',amTagsTitle:'الوسوم',amTagsSub:'تتحكم الوسوم في الوصول إلى الفعاليات الخاصة. لا يرى العملاء الوسوم ولا يعلمون بوجودها.',amHolders:'{0} حاملًا',amAutoTag:'تُمنح تلقائيًا',amNewTag:'وسم جديد',amEditTag:'تعديل الوسم',amTagName:'اسم الوسم',amTagNamePh:'مثال: جولة السبت الاجتماعية',amTagColor:'اللون',amTagDesc:'الوصف',amTagDescPh:'لمن هذا الوسم؟',amTagNameReq:'أدخل اسم الوسم.',amTagSaved:'تم حفظ الوسم',amTagDeleted:'تم حذف الوسم',amNoTags:'لا وسوم',amCustomersTitle:'العملاء',amSearchPh:'ابحث بالاسم أو البريد أو الهاتف',amEditTags:'الوسوم',amSaveContact:'حفظ جهة الاتصال',amContactSaved:'تم حفظ {0} كجهة اتصال',amContactNone:'لا يوجد رقم أو بريد لحفظه في هذا الحساب.',amNoCustomers:'لا توجد حسابات عملاء بعد.',amShowMore:'عرض {0} إضافية',amShowingOf:'يعرض {0} من {1}',amFilterAll:'الكل',commSub:'لوحة متصدّري الركّاب والإحصائيات وحسابات الراكبين والوسوم وطلبات التصحيح.',commLeaderboard:'المتصدرون',commEvents:'الرحلات القادمة',commRides:'رحلات',commNoLeaders:'لا توجد رحلات مكتملة بعد.',commNoEvents:'لا توجد جلسات قادمة.',commStatRiders:'الركّاب النشطون',commStatRides:'الرحلات',commStatMinutes:'دقائق الركوب',commStatAvg:'متوسط/راكب',commSearchPh:'ابحث عن راكب…',commNoMatch:'لا يوجد راكب مطابق.',commShareBtn:'مشاركة',commCopied:'تم نسخ لوحة المتصدرين',commSpotlight:'الراكب الأبرز',commToNext:'{0} رحلات حتى {1}',commMaxTier:'بلغ أعلى فئة',commMilestones:'على وشك الإنجاز',commMilestonesSub:'ركّاب قريبون من إنجازهم القادم',commMileAway:'تبقّى {0}',
+  tabCustomers:'العملاء',custSub:'كل الحسابات: البيانات وطلبات التصحيح والنشاط والحسابات المكررة.',commTabOverview:'نظرة عامة',commTabMembers:'الأعضاء',custTabActivity:'النشاط',anNavCommunity:'المجتمع',custKpiTotal:'الحسابات',custKpiNew7:'جديدة هذا الأسبوع',custKpiNew30:'جديدة خلال 30 يوماً',custKpiMembers:'أعضاء المجتمع',custKpiFlags:'بانتظار التصحيح',custNewest:'أحدث الحسابات',custFlagFields:'{0} حقول مطلوبة',commKpiNewMembers:'أعضاء جدد خلال 30 يوماً',commKpiApps:'طلبات بانتظار الرد',commKpiLearn:'تعلّم الركوب: جديدة',commKpiBdays:'أعياد ميلاد هذا الأسبوع',commBdSoon:'أعياد ميلاد قادمة',commNoAppsWaiting:'لا توجد طلبات بانتظار الرد.',commNoBdays:'لا توجد أعياد ميلاد مسجلة بعد.',commGiveBadge:'منح وسام',tgHoldersBtn:'الحاملون',tgSearchPh:'ابحث عن حامل، أو عن شخص لتمنحه إياه',tgGiveTo:'امنحه لـ',tgGiveBtn:'منح',tgNoHolders:'لا أحد يحمل هذا الوسم.',tgRemoveQ:'إزالة {1} من {0}؟',tgSince:'منذ {0}',tgUntil:'حتى {0}',commTitle:'المجتمع',commTabLeaderboard:'المتصدرون',sessEventLabel:'الفعالية',sessEventCommHint:'فعالية خاصة: يراها ويحجزها الحاصلون على الوسم فقط. تحتاج الحجوزات موافقة الموظفين، ويبقى ترتيب الطابور للموظفين فقط.',sessSpotsLabel:'المقاعد',sessGatherTime:'وقت التجمع',sessCollectTime:'وقت استلام الدراجات',sessCollectHint:'الوقت الذي تبدأ فيه الدراجات بالخروج؛ وهو ما تعرضه بطاقة Wallet للراكب',sessStartTime:'وقت الانطلاق',commGatherShort:'التجمع',commStartShort:'الانطلاق',sessMapLabel:'نقطة التجمع (رابط خرائط جوجل)',sessMapPh:'الصق رابط خرائط جوجل',sessBfNameLabel:'مكان الفطور',sessBfNamePh:'مثال: Brew92',meetPointLbl:'نقطة التجمع',breakfastSpotLbl:'موقع الفطور',revealSpotsAt:'موقع الفطور: يُعلَن عنه {0}',revealLbl:'موعد إعلان موقع الفطور',revealHint:'يرى الراكبون موقع الفطور من هذا الوقت (بتوقيت الرياض)؛ إن تُرك فارغًا يظهر فور إضافته. نقطة التجمع تظهر دائمًا.',revealNowBtn:'إظهار الآن',revealHeldNote:'موقع الفطور مخفي حتى {0}',revealPastNote:'يراه الراكبون الآن',freeLabel:'مجاني',apprPendingChip:'بانتظار الموافقة',apprApproveBtn:'موافقة',apprRejectBtn:'رفض',apprUndoBtn:'تراجع عن الموافقة',commAddRiderBtn:'إضافة مشارك',wlTitle:'قائمة الانتظار',wlAddBtn:'إضافة إلى القائمة',wlEmpty:'لا يوجد أحد في الانتظار.',wlGivenBtn:'تم تسليم الدراجة',wlRemoveBtn:'إزالة',wlAddedToast:'تمت إضافة {0} إلى قائمة الانتظار',wlGivenToast:'تم تسليم الدراجة إلى {0}',wlRemovedToast:'تمت الإزالة من قائمة الانتظار',undoWl:'إعادة إلى قائمة الانتظار',wlAvailNow:'{0} متاحة الآن',updReloadBtn:'تحديث',promoNudgeMsg:'{0} هو التالي — أرسل له رسالة واتساب',mwTitle:'قائمة انتظار يديرها الموظفون',mwMoveBtn:'إلى قائمة الموظفين',mwOnlyOpenMsg:'يمكن إضافة الحجوزات التي لم تبدأ ركوبها فقط إلى قائمة الموظفين.',mwMovedToast:'تم نقل {0} إلى قائمة الموظفين',mwSub:'يضيفها ويرتبها الموظفون يدوياً — بالسحب أو بالأسهم.',tblScrollLabel:'جدول — مرّر أفقياً',wlPosMsg:'أنت رقم {0} في قائمة الانتظار. لم يُحجز لك مقعد بعد: إذا توفر مقعد يسجّل الفريق دخولك بهذا الرمز عند الكشك، وقد يراسلك عبر واتساب قبل ذلك.',wlPosNoNumMsg:'أنت في قائمة الانتظار. لم يُحجز لك مقعد بعد: إذا توفر مقعد يسجّل الفريق دخولك بهذا الرمز عند الكشك، وقد يراسلك عبر واتساب قبل ذلك.',anApprovedUnique:'الراكبون المعتمدون (فريدون)',anApprovedTotal:'عدد الموافقات',anApprovedAvg:'جولات لكل راكب',mwEmptyForSess:'لا أحد في القائمة لهذه الجلسة — اختر كل الجلسات لعرض البقية.',naDelBtn:'حذف الحساب',naDelTitle:'حذف هذا الحساب',naDelLiveMsg:'لدى هذا الراكب {0} حجز/حجوزات قائمة. أنهِها أو ألغِها أولاً — حذف الحساب يترك حجزاً لا يمكن لأحد الوصول إليه.',naDelDone:'تم حذف حساب {0}',errAdminOnly:'للمسؤولين فقط.',mwAddBtn:'إضافة',mwRidersN:'{0} راكبين',mwPartyMovedToast:'تم نقل {0} راكبين إلى قائمة الموظفين',mwRemovePartyBody:'سيؤدي هذا إلى إزالة {0} راكبين من قائمة الموظفين. لن تتأثر حجوزاتهم.',mwSearchPh:'رقم الحجز أو الاسم أو الهاتف…',mwBrowseBtn:'من الحجوزات',mwHideBtn:'إخفاء القائمة',mwNoMatches:'لا يوجد من يمكن إضافته يطابق ذلك.',mwCustTag:'عميل',mwFromBookings:'الحجوزات وقائمة الانتظار',mwFromCustomers:'العملاء المحفوظون',groupNameLabel:'اسم المجموعة',groupNamePh:'مثال: مجموعة تامر',contactNameLabel:'اسم جهة الاتصال',groupEditTitle:'تعديل حجز المجموعة',defaultPayLabel:'الدفع الافتراضي',defPayNormal:'عادي',housePayTypesLabel:'على حساب المحل لهذه الأنواع',hiddenTypesLabel:'أنواع الدراجات المخفية',custBtn:'العميل',promoSyncedToast:'تم تحديث أسعار {0} من الحجوزات النشطة',anCntRiders:'عدد الراكبين',anCntRidersSub:'راكبون فريدون ضمن الرحلات المحتسبة',anCntRides:'عدد الرحلات',anRideDefSub:'قبل 12 أغسطس 2026: المدفوع يُحتسب رحلة · بعده: تسجيل الدخول فقط',anRideMinutes:'دقائق الركوب الفعلية',anMeasuredRides:'رحلة بوقت مُقاس',reserveBikeBtn:'حجز الدراجة',bikeReservedToast:'تم حجز {0}',bkmNoHint:'اتركه فارغاً لحجز الدراجة دون اختيار دراجة بعينها.',bkmNoNotFleet:'الدراجة {0} ليست في الأسطول.',bkmNoNotFleetRsv:'الدراجة {0} ليست في الأسطول. «حجز الدراجة» يحفظ الرقم في هذا الحجز.',rsvNoBikeToast:'تم الحجز دون اختيار دراجة',reserveTakenConfirm:'محجوزة لـ {0} — هل تريد المتابعة؟',reservedChip:'محجوزة',commAddGroupBtn:'إضافة مجموعة',commAddGroupTitle:'إضافة مجموعة إلى جلسة JCC',commAddGroupHint:'اختر مشاركَين أو أكثر — سيظهرون كمجموعة واحدة في القائمة.',commAddGroupMin:'اختر مشاركَين على الأقل.',commGroupAddedToast:'تمت إضافة {0} كمجموعة',commAddTitle:'إضافة مشارك إلى الجولة الاجتماعية',commAddSearchLbl:'العميل',commAddSearchPh:'ابحث بالاسم أو البريد أو الجوال…',commAddNoMatch:'لا يوجد عملاء مطابقون.',commAddDestLbl:'إضافة إلى',commAddDestList:'القائمة النهائية',commAddBtn:'إضافة مشارك',commAddDup:'محجوز في هذه الجلسة بالفعل.',commAddedToast:'تمت إضافة {0}',bfNoneOpt:'- بدون -',bfNewOpt:'+ موقع فطور جديد…',commFullWaitlistMsg:'هذه الجولة مكتملة. يمكنك الحجز مع ذلك: ستنضم إلى قائمة الانتظار، وإذا توفر مقعد قد يختارك الفريق.',wiPickCustPh:'اكتب اسمًا أو اختر عميلًا محفوظًا',apprApprovedChip:'مقبول',apprApprovedToast:'تمت الموافقة على {0}',apprRejectedToast:'تم رفض {0}',commCuePending:'تم الحجز، بانتظار تأكيد الفريق.',commCueUnderReview:'تم الحجز - يجري إعداد قائمة المشاركين',wlCapLabel:'حد قائمة الانتظار',wlCapCount:'عدد',wlCapPct:'نسبة',wlCapHint:'عدد المشاركين المسموح لهم بالانتظار بعد اكتمال الجلسة. اتركه فارغاً أو 0 لعدم وضع حد؛ تُحتسب النسبة من سعة الجلسة.',errWaitlistFull:'قائمة الانتظار لهذه الجلسة ممتلئة.',publishBtn:'نشر',publishedChip:'تم النشر',publishedAlready:'تم نشر نتائج هذه الجولة بالفعل.',publishConfirmTitle:'نشر قائمة المشاركين؟',publishConfirmBody:'سيرى {0} مشارك مقبول تأكيد مشاركته فوراً. لا يمكن التراجع عن ذلك من هنا.',publishedToast:'تم نشر النتائج - تأكيد {0} مشارك',commCueConfirmed:'تم تأكيد مقعدك',commConfirmedSub:'اعرض هذا الرمز عند الوصول إلى نقطة التجمع.',ticketQrHold:'يظهر رمزك هنا بعد تأكيد مقعدك.',commCueWaitlist:'على قائمة الانتظار. إذا توفر مقعد واختارك الفريق تتحول هذه البطاقة إلى تذكرتك.',commTabAccounts:'الحسابات',doneBtn:'تم',amTagsTitle:'الوسوم',amTagsSub:'تتحكم الوسوم في الوصول إلى الفعاليات الخاصة. لا يرى العملاء الوسوم ولا يعلمون بوجودها.',amHolders:'{0} حاملًا',amAutoTag:'تُمنح تلقائيًا',amNewTag:'وسم جديد',amEditTag:'تعديل الوسم',amTagName:'اسم الوسم',amTagNamePh:'مثال: جولة السبت الاجتماعية',amTagColor:'اللون',amTagDesc:'الوصف',amTagDescPh:'لمن هذا الوسم؟',amTagNameReq:'أدخل اسم الوسم.',amTagSaved:'تم حفظ الوسم',amTagDeleted:'تم حذف الوسم',amNoTags:'لا وسوم',amCustomersTitle:'العملاء',amSearchPh:'ابحث بالاسم أو البريد أو الهاتف',amEditTags:'الوسوم',amSaveContact:'حفظ جهة الاتصال',amContactSaved:'تم حفظ {0} كجهة اتصال',amContactNone:'لا يوجد رقم أو بريد لحفظه في هذا الحساب.',amNoCustomers:'لا توجد حسابات عملاء بعد.',amShowMore:'عرض {0} إضافية',amShowingOf:'يعرض {0} من {1}',amFilterAll:'الكل',commSub:'الأعضاء والوسوم والأوسمة والطلبات وأعياد الميلاد.',commLeaderboard:'المتصدرون',commEvents:'الرحلات القادمة',commRides:'رحلات',commNoLeaders:'لا توجد رحلات مكتملة بعد.',commNoEvents:'لا توجد جلسات قادمة.',commStatRiders:'الركّاب النشطون',commStatRides:'الرحلات',commStatMinutes:'دقائق الركوب',commStatAvg:'متوسط/راكب',commSearchPh:'ابحث عن راكب…',commNoMatch:'لا يوجد راكب مطابق.',commShareBtn:'مشاركة',commCopied:'تم نسخ لوحة المتصدرين',commSpotlight:'الراكب الأبرز',commToNext:'{0} رحلات حتى {1}',commMaxTier:'بلغ أعلى فئة',commMilestones:'على وشك الإنجاز',commMilestonesSub:'ركّاب قريبون من إنجازهم القادم',commMileAway:'تبقّى {0}',
   lbWindowWeek:'هذا الأسبوع',lbWindowMonth:'هذا الشهر',lbWindowAll:'كل الأوقات',lbScopeOwner:'أصحاب الحجوزات',lbScopeRider:'الركّاب',lbScopeOwnerSub:'يُحتسب لكل راكب في حجوزاتهم',lbScopeRiderSub:'كل راكب على حدة',lbRankByLabel:'الترتيب حسب',lbRidersBooked:'الركّاب المحجوزون',lbMinutes:'الدقائق',lbSpent:'الإنفاق',lbStreakTip:'{0} أسابيع متتالية',lbNewLabel:'جديد',
   statusWaitlist:'قائمة الانتظار',waitlistLabel:'قائمة الانتظار',toastWaitlisted:'تمت إضافتك إلى قائمة الانتظار',toastPromoted:'تمت الترقية من قائمة الانتظار',
   bulkPaidBtn:'تحديد كمدفوع',bulkCheckinBtn:'تسجيل الدخول',bulkClearSel:'مسح',bulkSelectedLabel:'محدد',
@@ -1917,6 +1919,7 @@ function setLang(lang,_fromUrl){
     if(b.dataset.stab==='cashier')_l.textContent=t('tabCashier');
     if(b.dataset.stab==='inventory'){const _lo=(S.inventory||[]).filter(it=>{const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return q<=0||(lo>0&&q<=lo);}).length;_l.innerHTML=esc(t('tabInventory'))+(_lo?` <span class="tab-badge" title="${esc(t('invLowAlert').replace('{0}',_lo))}" aria-label="${esc(t('invLowAlert').replace('{0}',_lo))}">${_lo}</span>`:'');}
     if(b.dataset.stab==='community')_l.textContent=t('tabCommunity');
+    if(b.dataset.stab==='customers')_l.textContent=t('tabCustomers');
     if(b.dataset.stab==='website')_l.textContent='micromobility.sa'; // the address is the name, in every language
     if(b.dataset.stab==='workshop')_l.innerHTML=_wsTabLabel(); // with the count of new requests
     if(b.dataset.stab==='messages')_l.innerHTML=_smTabLabel(); // with the count of new messages
@@ -1957,7 +1960,7 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','community','analytics','history']};
+const ROLE_TABS={frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','customers','community','analytics','history']};
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 function setStaffRole(role){
@@ -2697,7 +2700,7 @@ const S={
   invBrandsEquip:(()=>{try{return JSON.parse(localStorage.getItem('cq_inv_brands_eq'))||[];}catch(e){return[];}})(),
   invBrandsSupp:(()=>{try{let l=JSON.parse(localStorage.getItem('cq_inv_brands_supp'))||[];if(!l.includes('SIS'))l=['SIS',...l];return l;}catch(e){return['SIS'];}})(),
   dataLoaded:false,
-  communityTab:'leaderboard',lbWindow:'all',lbScope:'owner',lbMetric:'count',lbBranch:'all',lbSearch:'',_lbSearchFocused:false,selSessionDetail:null,selEvent:'jcc',newSessEvent:'jcc',newSessSpots:'',newSessTitle:'',
+  communityTab:'overview',customersTab:'overview',lbWindow:'all',lbScope:'owner',lbMetric:'count',lbBranch:'all',lbSearch:'',_lbSearchFocused:false,selSessionDetail:null,selEvent:'jcc',newSessEvent:'jcc',newSessSpots:'',newSessTitle:'',
   _rDate:'',newSessCollect:'',editSessCollect:'',selSession:null,regType:null,regQty:1,waiverOk:false,lastTickets:[],modifyEntryId:null,regSubmitting:false,_alreadyBookedSession:null,regStep:1,
   regRiderNames:[],  
   _rName:'',_rEmail:'',_rPhone:'',_rCC:'+966',_rHeight:'',
@@ -6457,7 +6460,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',customers:'customers',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account'};
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
@@ -6466,14 +6469,18 @@ const SIGNUP_PATH='signup';
 // name of the queue's 'managed' view (setStaffTab still takes it), so both read as /bookings/waitlist.
 const SUB_PATHS={
   queue:{bookings:'',sessions:'sessions',managed:'waitlist',waitlist:'waitlist',petromin:'riders',handover:'handover'},
-  history:{rides:'',log:'log',customers:'customers'},
+  history:{rides:'',log:'log'},
   inventory:{bikes:'',supplements:'supplements',equipment:'equipment'},
-  community:{leaderboard:'',stats:'stats',accounts:'accounts',badges:'badges',flagged:'flagged',applications:'applications',learning:'applications/learning',birthdays:'birthdays',duplicates:'duplicates'},
+  // Customers and Community are two sections since 2026-10-07 (the owner: "make a separate customer management/dashboard
+  // page and a separate community management dashboard page"); the leaderboard and statistics went to Analytics.
+  // Community's accounts list is its members: /community/members.
+  customers:{overview:'',accounts:'accounts',flagged:'flagged',duplicates:'duplicates',activity:'activity'},
+  community:{overview:'',accounts:'members',flagged:'flagged',tags:'tags',badges:'badges',applications:'applications',learning:'applications/learning',birthdays:'birthdays'},
   catalog:{models:'',categories:'categories',fields:'fields'},
   vendors:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
   // Analytics' views (the owner, 2026-10-05: "add a url path for ratings and all other clickable buttons"):
   // /analytics is the overview, /analytics/ratings the ratings, and so on.
-  analytics:{overview:'',revenue:'revenue',ridership:'ridership',operations:'operations',fleet:'fleet',ratings:'ratings',customers:'customers',growth:'growth'},
+  analytics:{overview:'',revenue:'revenue',ridership:'ridership',operations:'operations',fleet:'fleet',ratings:'ratings',customers:'customers',growth:'growth',leaderboard:'leaderboard',community:'community'},
 };
 // Bookings > Sessions has two layouts, the list and the month calendar; the calendar is
 // /bookings/sessions/calendar (2026-10-05), so it can be linked and a reload stays on it.
@@ -6483,7 +6490,7 @@ function _subOf(tab){
   const m=SUB_PATHS[tab];
   if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
   if(tab==='queue'&&(S.queueView||'bookings')==='sessions'&&S.sessView==='cal')return SESS_CAL_PATH;
-  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'leaderboard'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):((S.cat&&S.cat.view)||'models');
+  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='customers'?(S.customersTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):((S.cat&&S.cat.view)||'models');
   return m[v]||'';
 }
 // Opens the sub-view a segment names; a segment that names none opens the section's own page.
@@ -6503,6 +6510,7 @@ function _setSub(tab,seg){
   else if(tab==='history')S.histView=key;
   else if(tab==='inventory')S.invSection=key;
   else if(tab==='community')S.communityTab=key;
+  else if(tab==='customers')S.customersTab=key;
   else if(tab==='catalog')_cat().view=key;
   else if(tab==='vendors')S.vendorView=key;
   else if(tab==='analytics')S.anView=key;
@@ -6523,7 +6531,12 @@ function _parsePath(pathname){
   if(segs[0]==='website'&&segs[1]==='bikes')return segs.length<=3?{view:'staff',stab:'catalog',sub:segs[2]||''}:null;
   const stab=Object.keys(STAFF_PATHS).find(k=>STAFF_PATHS[k]===segs[0]);
   if(!stab||segs.length>3)return null;
-  return{view:'staff',stab,sub:segs.slice(1).join('/')};
+  // Addresses from before Customers had a section of its own (2026-10-07) go where their page is now.
+  const sub=segs.slice(1).join('/');
+  if(stab==='community'&&sub==='stats')return{view:'staff',stab:'analytics',sub:'community'};
+  if(stab==='community'&&(sub==='accounts'||sub==='duplicates'))return{view:'staff',stab:'customers',sub};
+  if(stab==='history'&&sub==='customers')return{view:'staff',stab:'customers',sub:'activity'};
+  return{view:'staff',stab,sub};
 }
 function _pathState(pathname){const pn=_parsePath(pathname);return pn&&!pn.root?pn:null;}
 // The query stays as it is, but for ?session=, which is Bookings' own (see above).
@@ -9012,6 +9025,7 @@ function setStaffTab(tab){
   else if(tab==='inventory')renderInventory();
   else if(tab==='cashier')renderCashier();
   else if(tab==='community')renderCommunity();
+  else if(tab==='customers')renderCustomers();
   else if(tab==='website')renderWebsite();
   else if(tab==='catalog')renderCatalog();
   else if(tab==='workshop')renderWorkshop();
@@ -9077,7 +9091,7 @@ function renderCustomerTabs(){
   const al=document.getElementById('bnav-account-lbl');if(al)al.textContent=t('tabAccount');
 }
 
-const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
@@ -9145,6 +9159,7 @@ function renderStaffTabs(){
   document.getElementById('tab-inventory') .classList.toggle('active',S.staffTab==='inventory');
   document.getElementById('tab-cashier')   .classList.toggle('active',S.staffTab==='cashier');
   document.getElementById('tab-community') .classList.toggle('active',S.staffTab==='community');
+  document.getElementById('tab-customers') .classList.toggle('active',S.staffTab==='customers');
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -11624,13 +11639,14 @@ function _deferWhileTyping(tab){
 }
 function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for something the staffer did
   const tab=S.staffTab;
-  if(bg&&['cashier','inventory','community','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
+  if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
   if(tab==='queue')renderStaffQueue();
   else if(tab==='bikes')renderBikes();
   else if(tab==='history')renderHistory();
   else if(tab==='analytics')renderAnalytics();
   else if(tab==='inventory')renderInventory();
   else if(tab==='community')renderCommunity();
+  else if(tab==='customers')renderCustomers();
   else if(tab==='cashier')renderCashier();
   else if(tab==='workshop'){const a=document.activeElement;renderWorkshop(!!(a&&a.id==='ws-search-input'));} // typing in its search: the list only
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
@@ -16988,7 +17004,7 @@ async function _loadFlags(){
     if(error)S._flagsErr=true;else{S._flags=data||[];S._flagsErr=false;S._flagsSig=sig;}
   }catch(e){S._flagsErr=true;}
   finally{S._flagsBusy=false;S._flagsAt=Date.now();}
-  if(S.staffTab==='community'&&S.communityTab==='flagged')renderCommunity();
+  if(_pplOn('flagged')||_pplOn('overview'))renderCommunity(); // both overviews count the requests waiting
 }
 function _flagsRetry(){S._flagsErr=false;S._flagsAt=0;renderCommunity();}
 function _flagShow(k,v){
@@ -17041,9 +17057,10 @@ function _commFlagged(){
   const _age=Date.now()-(S._flagsAt||0);
   if(!S._flagsBusy&&_age>3000&&(_age>60000||_flagsSig()!==S._flagsSig))_loadFlags();
   const f=S._flagFilter||'all';
-  const n=k=>k==='all'?S._flags.length:S._flags.filter(r=>r.status===k).length;
+  const all=_amScope()==='members'?S._flags.filter(r=>_hasTagNow(r.customer_id,TAG_COMMUNITY)):S._flags; // Community: its members' requests only
+  const n=k=>k==='all'?all.length:all.filter(r=>r.status===k).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${f===k?' active':''}" aria-pressed="${(f===k)?'true':'false'}" data-on-click="${_on("_on__commFlagged_1",_EV,_EL,k)}">${label} (${n(k)})</button>`;
-  const list=S._flags.filter(r=>f==='all'||r.status===f);
+  const list=all.filter(r=>f==='all'||r.status===f);
   // Replied: the latest reply first (the owner, 2026-09-29), so an old request answered today is at
   // the top. The other lists keep the newest request first, as read; a tie keeps that order too.
   if(f==='answered'){const at=r=>Date.parse(r.answered_at||'')||0;list.sort((a,b)=>at(b)-at(a));}
@@ -17131,7 +17148,7 @@ async function _bdMark(id,y,on){
   const before=(S.staffOptions||{})[BD_KEY];
   const ok=await _optWrite(BD_KEY,next);
   if(!ok)S.staffOptions={...(S.staffOptions||{}),[BD_KEY]:before};
-  if(S.staffTab==='community')renderCommunity();
+  if(_pplOpen())renderCommunity();
   _ntSync();
   return ok;
 }
@@ -18488,7 +18505,7 @@ function _appsKinds(sub){
 // show the number of applications"), and a whole redraw would undo the Accounts rows' own repaints.
 function _appsCountSync(){
   if(S.staffTab!=='community')return;
-  if(S.communityTab==='applications'||S.communityTab==='learning')renderCommunity();
+  if(S.communityTab==='applications'||S.communityTab==='learning'||S.communityTab==='overview')renderCommunity(); // the overview counts and lists them too
 }
 // The lesson's day, time and place: the day and time in Riyadh, the place remembered on this
 // device for the next one.
@@ -19239,7 +19256,7 @@ async function _flagSave(clear){
   _flagClose();
   toast(list.length?t('fixSentToast').replace('{0}',c.name||'').replace('{1}',names):t('fixClearedToast').replace('{0}',c.name||''));
   S._flags=null; // the Flagged list reloads with this request in it
-  if(S.staffTab==='community')renderCommunity(); // the row, and the filter pill's count
+  if(_pplOpen())renderCommunity(); // the row, and the filter pill's count
   if(S._cf&&String(S._cf.id)===String(c.id)){
     const w=document.getElementById('cf-flag-wrap');if(w)w.innerHTML=_cfFlagHtml(c);
     const l=document.getElementById('cf-fix-line');if(l)l.innerHTML=_fixPendingLine(c);
@@ -19297,7 +19314,7 @@ function closeCustFormModal(){const m=document.getElementById('new-acct-modal');
 function _custJumpTags(id){
   const c=(S.customers||[]).find(x=>x.id===id);
   closeCustFormModal();
-  setStaffTab('community');
+  S.customersTab='accounts';setStaffTab('customers');
   S.amSearch=(c&&c.name)||'';S.tagCustId=id;
   renderCommunity();
   setTimeout(()=>{const w=document.getElementById('am-cust-rows');if(w)w.scrollIntoView({behavior:_sb(),block:'start'});},80);
@@ -22228,11 +22245,12 @@ async function _pinApprove(what){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','community','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',community:'tabCommunity',ambassadors:'tabAmbassadors',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','customers','community','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabCustomers',community:'tabCommunity',ambassadors:'tabAmbassadors',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
-function _modIds(a){return Array.isArray(a)?a.map(x=>x==='fnb'?'vendors':x):null;}
+// The accounts were Community's until Customers became a section (2026-10-07): a list naming Community names it too.
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x);if(l.includes('community')&&!l.includes('customers'))l.push('customers');return l;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
 // sections an edit list names, so an account with a list (the Owner's is empty) could open its
@@ -23244,7 +23262,7 @@ async function _cactLoad(older){
   }catch(_){}
   c.busy=false;
   if(!got)c.failAt=Date.now();
-  if(S.view==='staff'&&S.staffTab==='history'&&S.histView==='customers')renderCustActivity();
+  if(S.view==='staff'&&_pplOn('activity'))renderCustActivity();
 }
 // The line's second half: the ride, the rider, what changed - read off the row's detail.
 function _cactDetail(r){
@@ -23298,7 +23316,7 @@ function _on_cact_day(event,el){S._cactDay=el.value;renderCustActivity()}
 function _on_cact_more(event,el){el.disabled=true;_cactLoad(true)}
 function _on_cact_open(event,el,a0){if(a0)openAccountHistory(a0)}
 function renderCustActivity(){
-  const el=document.getElementById('hist-log-host');if(!el)return;
+  const el=document.getElementById('cact-host');if(!el)return; // Customers > Activity (it was History's until 2026-10-07)
   const c=_cact();
   try{_cactLoad(false);}catch(_){}
   const list=_cactList();S._cactExport=list;
@@ -33709,7 +33727,6 @@ function _on_renderHistory_5(event,el){el.style.color='var(--green)'}
 function _on_renderHistory_6(event,el){el.style.color='var(--muted)'}
 function _on_renderHistory_7(event,el){S.showHistLog=!S.showHistLog;renderHistory()}
 function _on_renderHistory_8(event,el){S.histLimit=(S.histLimit||60)+100;renderHistory()}
-function _on_renderHistory_9(event,el){S.histView='customers';renderHistory()}
 function renderHistory(_resultsOnly){
   // History off screen is not rebuilt (2026-10-01): 42 paths call this after a write - every payment
   // toggle, every return - and on a busy night the hidden rebuild cost 22 ms a time on a booth tablet.
@@ -33720,11 +33737,10 @@ function renderHistory(_resultsOnly){
   const _hvPills=`<div class="filter-row hist-mb12">
     <button type="button" class="filter-pill${(S.histView||'rides')==='rides'?' active':''}" aria-pressed="${((S.histView||'rides')==='rides')?'true':'false'}" data-on-click="${_on("_on_renderHistory_1",_EV,_EL)}">${t('histTabRides')}</button>
     <button type="button" class="filter-pill${S.histView==='log'?' active':''}" aria-pressed="${(S.histView==='log')?'true':'false'}" data-on-click="${_on("_on_renderHistory_2",_EV,_EL)}">${t('logsTitle')}</button>
-    <button type="button" class="filter-pill${S.histView==='customers'?' active':''}" aria-pressed="${(S.histView==='customers')?'true':'false'}" data-on-click="${_on("_on_renderHistory_9",_EV,_EL)}">${t('cactTitle')}</button>
   </div>`;
-  if(S.histView==='log'||S.histView==='customers'){ // the Action Log and Customer activity live inside the History tab
+  if(S.histView==='log'){ // the Action Log lives inside the History tab (Customer activity moved to Customers, 2026-10-07)
     const _hl=document.getElementById('tab-history');
-    if(_hl){_hl.innerHTML=`<div class="section-header hist-mb8"><div><div class="page-title">${t('historyTitle')}</div></div></div>${_hvPills}<div id="hist-log-host"></div>`;if(S.histView==='log')renderLogs();else renderCustActivity();}
+    if(_hl){_hl.innerHTML=`<div class="section-header hist-mb8"><div><div class="page-title">${t('historyTitle')}</div></div></div>${_hvPills}<div id="hist-log-host"></div>`;renderLogs();}
     return;
   }
   const sessions=allSessions();
@@ -34186,6 +34202,15 @@ function _applyAnView(v){
     ch.style.display=(cur===v)?'':'none';
   });
   cont.querySelectorAll('.an-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.anview===v));
+  if(v==='leaderboard'||v==='community')_anBoardPaint();
+}
+// The riders' leaderboard and the community statistics (Community's until 2026-10-07): drawn fresh into their
+// hosts each time, outside the kept markup, as their own controls (scope, window, search) change them.
+function _anBoardPaint(){
+  const v=S.anView,h=document.getElementById(v==='leaderboard'?'an-lb-host':v==='community'?'an-cs-host':'');if(!h)return;
+  const b=_commBoard();h.innerHTML=v==='leaderboard'?b.leaderboardView:b.statsView;
+  _cssvApply(h);
+  if(S._lbSearchFocused){const si=document.getElementById('lb-search');if(si){si.focus();const x=si.value;si.value='';si.value=x;}}
 }
 function setAnSort(col){
   if(S.analyticsTrendSort===col)S.analyticsTrendDir*=-1;
@@ -36324,7 +36349,8 @@ function _riderTier(n){const tiers=[[50,'tierLegend'],[25,'tierElite'],[10,'tier
 // ── Tag system (staff-only; customers never see any of this) ─────────────────
 function _tagsById(){const m={};(S.tags||[]).forEach(tg=>m[tg.id]=tg);return m;}
 function _tagsForCust(cid){const m=_tagsById();return _ctRowsFor(cid).filter(ct=>!_tagLapsed(ct)).map(ct=>m[ct.tag_id]).filter(Boolean);} // held or starting later; a lapsed grant is not held
-function setCommTab(k){S.communityTab=k;if(k==='duplicates')S._mgErr=false;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;renderCommunity();}
+function setCustomersTab(k){S.customersTab=k;if(k==='duplicates')S._mgErr=false;S.tagEdit=null;S.tagCustId=null;renderCustomers();}
+function setCommTab(k){S.communityTab=k;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;renderCommunity();}
 function openTagEdit(id){S.tagEdit=id?((S.tags||[]).find(x=>x.id===id)||{}):{};renderCommunity();}
 async function saveTag(){
   const name=(document.getElementById('tag-name')?.value||'').trim();
@@ -36846,7 +36872,7 @@ let _amSortSrc=null,_amSortLen=-1,_amSorted=null;
 function _amFiltered(){
   const _all=S.customers||[];
   if(_amSortSrc!==S.customers||_amSortLen!==_all.length||!_amSorted){_amSorted=_all.slice().sort((a,b)=>_cmpS(b.created_at||'',a.created_at||''));_amSortSrc=S.customers;_amSortLen=_all.length;}
-  const custs=_amSorted;
+  const custs=_amScope()==='members'?_amSorted.filter(c=>_hasTagNow(c.id,TAG_COMMUNITY)):_amSorted; // Community > Members: its members only
   const q=(S.amSearch||'').trim().toLowerCase();
   let shown=q?custs.filter(c=>[c.name,c.email,c.apple_email].some(v=>String(v||'').toLowerCase().includes(q))||_phoneHit(c.phone,q)):custs;
   // Tag filter: only customers holding the selected tag NOW - the same test as the count on its
@@ -36988,23 +37014,6 @@ function _on__commAccounts_4(event,el){_amFilter('amFixing',!S.amFixing)}
 function _on__commAccounts_5(event,el){S._amFocused=true}
 function _on__commAccounts_6(event,el){S._amFocused=false}
 function _commAccounts(){
-  const tagRows=(S.tags||[]).slice().sort((a,b)=>(b.auto_grant?1:0)-(a.auto_grant?1:0)||String(a.name).localeCompare(String(b.name))).map(tg=>{
-    const cnt=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct)).length;
-    return `<div class="am-tag-row">
-      ${_tagChip(tg)}
-      <span class="am-meta">${tg.auto_grant?t('amAutoTag')+' · ':''}${t('amHolders').replace('{0}',cnt)}</span>
-      <div class="cmy-am-tacts">
-        <button class="btn-sm btn-secondary" data-on-click="${_on("openTagEdit",tg.id)}">${t('editBtn')}</button>
-        ${tg.locked?'':`<button class="btn-sm btn-red" data-on-click="${_on("deleteTag",tg.id)}">${t('deleteBtn')}</button>`}
-      </div>
-    </div>`;
-  }).join('')||`<div class="empty-state">${t('amNoTags')}</div>`;
-  const tagPanel=`<div class="form-section cmy-mt0">
-    <div class="form-title">${t('amTagsTitle')}</div>
-    <div class="cmy-am-sub">${t('amTagsSub')}</div>
-    ${tagRows}
-    ${S.tagEdit!==null?_tagEditForm():`<button class="btn-secondary cmy-mt12" data-on-click="${_on("openTagEdit","")}">+ ${t('amNewTag')}</button>`}
-  </div>`;
   const rows=_amCustRows();
   // Tag filter pills: All + one per tag (in the tag's colour), with live holder counts.
   const _nMissing=(S.customers||[]).filter(c=>_amMissingOf(c).length).length;
@@ -37027,7 +37036,7 @@ function _commAccounts(){
     ${delReqPill}${missingPill}${fixingPill}${sxPill}
   </div>`;
   const custPanel=`<div class="form-section">
-    <div class="form-title cmy-am-title">${t('amCustomersTitle')} <span id="am-cust-count" class="cmy-am-count">(${S._amShownCount||0})</span><button type="button" class="btn-sm ${S.amSel?'btn-green':'btn-secondary'} cmy-mis-auto" aria-pressed="${S.amSel?'true':'false'}" data-on-click="${_on("_amSelMode")}">${_artIcon(S.amSel?'boxOn':'boxOff',13)} ${S.amSel?t('doneBtn'):t('amSelBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showNewAcctModal")}">+ ${t('naBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showAccountReportOptions")}">${ICON_EXPORT} ${t('acrTitle')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printDefaultAccountReport")}">${ICON_PRINT} ${t('acrPrintDefault')}</button></div>
+    <div class="form-title cmy-am-title">${t(_amScope()==='members'?'commTabMembers':'amCustomersTitle')} <span id="am-cust-count" class="cmy-am-count">(${S._amShownCount||0})</span><button type="button" class="btn-sm ${S.amSel?'btn-green':'btn-secondary'} cmy-mis-auto" aria-pressed="${S.amSel?'true':'false'}" data-on-click="${_on("_amSelMode")}">${_artIcon(S.amSel?'boxOn':'boxOff',13)} ${S.amSel?t('doneBtn'):t('amSelBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showNewAcctModal")}">+ ${t('naBtn')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showAccountReportOptions")}">${ICON_EXPORT} ${t('acrTitle')}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("printDefaultAccountReport")}">${ICON_PRINT} ${t('acrPrintDefault')}</button></div>
     ${filterPills}
     <div class="filter-row cmy-am-frow">
       <div class="${_srchCls('am',S.amSearch)} cmy-am-srch" data-srch="am">
@@ -37042,7 +37051,7 @@ function _commAccounts(){
     ${S.amSel?`<div id="am-sel-bar" class="am-selbar" role="group" aria-label="${esc(t('amSelBtn'))}">${_amSelBarInner()}</div>`:''}
     <div id="am-cust-rows">${rows}</div>
   </div>`;
-  return tagPanel+custPanel;
+  return custPanel;
 }
 // ── Duplicates: two accounts for one person (2026-09-28) ─────────────────────────────────────
 // Likely pairs: the same phone (its last nine digits), or the same name and birth date. Merging
@@ -37165,7 +37174,7 @@ async function _mgLoad(){
     if(r&&r.error){S._mgMissing=_rpcAbsent(r.error)||/customer_merges/.test(String(r.error.message||''));S._mgRows=S._mgMissing?[]:null;S._mgErr=!S._mgMissing;}
     else{S._mgMissing=false;S._mgErr=false;S._mgRows=r&&r.data||[];}
   }finally{S._mgBusy=false;}
-  if(S.staffTab==='community'&&S.communityTab==='duplicates')renderCommunity();
+  if(_pplOn('duplicates'))renderCommunity();
 }
 async function _mgUndoWrite(id){
   let r;try{r=await sb.rpc('staff_unmerge_customers',{p_id:id});}catch(e){r={error:e};}
@@ -37174,7 +37183,7 @@ async function _mgUndoWrite(id){
   toast('✓ '+t('mgUndone').replace('{0}',nm||''));
   logAction(t('mgUndone').replace('{0}',nm||''));
   S._mgRows=null;
-  refDirty();await loadData();if(S.staffTab==='community')renderCommunity(); // the account is a plain row again: read the list, do not rebuild it here
+  refDirty();await loadData();if(_pplOpen())renderCommunity(); // the account is a plain row again: read the list, do not rebuild it here
   return true;
 }
 async function _mgUndo(id){await _mgUndoWrite(id);}
@@ -37346,7 +37355,7 @@ async function _bdgLoad(force){
   S._bdgErr=!!fail&&!_bdgMissing(fail);
   // The Badges tab leaves its Loading line; Accounts is repainted only when what its rows show has
   // changed (2,600 rows, and a staffer may be in the middle of one).
-  if(S.view==='staff'&&S.staffTab==='community'&&(S.communityTab==='badges'||(S.communityTab==='accounts'&&_bdgSig()!==was)))renderCommunity();
+  if(S.view==='staff'&&(_pplOn('badges')||(_pplOn('accounts')&&_bdgSig()!==was)))renderCommunity();
   if(S._bdgDlg)_bdgDlgPaint();
 }
 function _bdgSig(){return _bdgOk()?S.badges.map(b=>[b.id,b.icon,b.color,b.name,b.retired].join()).join('|')+'#'+(S.custBadges||[]).map(_bdgKey).join():'';}
@@ -37373,7 +37382,7 @@ function _bdgStaffRow(c){return c&&c.photo===undefined?{...c,photo:true}:c;}
 function _bdgRuleLine(r){return r&&Array.isArray(r.windows)?r.windows.map(w=>w.from+' – '+w.to).join(', ')+' · '+t('bdgRuleRides')+' '+r.rides:'';}
 function _bdgLine(x){return t('bdgGivenLine').replace('{0}',_bdgDay(x.awarded_at)).replace('{1}',x.awarded_by||'—');}
 // After a change: the open dialog, the rider's row in Accounts, the Badges tab.
-function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();if(S.view!=='staff'||S.staffTab!=='community')return;if(S.communityTab==='badges')renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
+function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();if(S.view!=='staff'||!_pplOpen())return;if(_pplOn('badges')||_pplOn('overview'))renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
 // A take-back or a delete asks once more on the same button: the second tap does it.
 function _bdgArm(k){if(S._bdgSure===k)return true;S._bdgSure=k;return false;}
 function _bdgTakeBtn(cid,bid){const on=S._bdgSure===cid+'|'+bid;return`<button type="button" class="btn-sm ${on?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgTake",cid,bid)}">${t(on?'bdgTakeSure':'bdgTake')}</button>`;}
@@ -37684,7 +37693,7 @@ async function _igLoad(force){
   }catch(e){fail=e||{message:'failed'};}finally{S._igBusy=false;}
   const c=String(fail&&fail.code||''),m=String(fail&&fail.message||'');
   S._igErr=!!fail&&!(c==='PGRST205'||c==='42P01'||(/customer_ig_followers/.test(m)&&/does not exist|schema cache/.test(m)));
-  if(S.view==='staff'&&S.staffTab==='community'&&S.communityTab==='accounts'&&_igSig()!==was)renderCommunity();
+  if(S.view==='staff'&&_pplOn('accounts')&&_igSig()!==was)renderCommunity();
   if(S._igDlg)_igDlgPaint();
   _igNudge();
 }
@@ -37792,32 +37801,191 @@ async function _igCheck(){
   _igAfter(d.cid);
 }
 // After a change: the dialog and the rider's row.
-function _igAfter(cid){if(S._igDlg)_igDlgPaint();if(S.view==='staff'&&S.staffTab==='community'&&S.communityTab==='accounts'&&!_amRepaintRow(cid))renderCommunity();}
+function _igAfter(cid){if(S._igDlg)_igDlgPaint();if(S.view==='staff'&&_pplOn('accounts')&&!_amRepaintRow(cid))renderCommunity();}
+// Customers and Community are two sections (the owner, 2026-10-07: "make a separate customer management/dashboard page
+// and a separate community management dashboard page"; "i want the community management to include a tag management
+// page, customer info and flagging management page, badges and giving them to customers page, applications management").
+// Customers: an overview, every account, the correction requests, the activity log (from History) and, for admins,
+// duplicates. Community: an overview, its members (the same list, members only) and their requests, tags, badges,
+// applications and birthdays. The leaderboard and statistics are Analytics views now. One renderer draws both;
+// renderCommunity stays the name every write repaints with, and draws whichever of them is open.
+function _pplOpen(){return S.staffTab==='community'||S.staffTab==='customers';}
+function _pplSub(){return S.staffTab==='customers'?(S.customersTab||'overview'):(S.communityTab||'overview');}
+function _pplOn(k){return _pplOpen()&&_pplSub()===k;}
+function _amScope(){return S.staffTab==='community'?'members':'all';} // the accounts list and the requests: Community shows its members'
 function renderCommunity(){
+  if(S.staffTab==='customers')return renderCustomers();
+  if(S.staffTab==='analytics'){if(S.anView==='leaderboard'||S.anView==='community')renderAnalytics();return;} // its view repaints there (_anBoardPaint)
+  _renderPeople('community');
+}
+function renderCustomers(){_renderPeople('customers');}
+// From an overview figure: the section and its view (and the requests' filter).
+function _pplGo(sec,sub,ff){
+  if(ff)S._flagFilter=ff;
+  if(sec==='customers')S.customersTab=sub;else{S.communityTab=sub;if(sub==='applications'||sub==='learning')S._appsKind=sub;}
+  if(S.staffTab!==sec)setStaffTab(sec);else renderCommunity();
+}
+function _amGo(k){S.amTagFilter='';S.amMissing=S.amFixing=S.amSuspect=S.amDelReq=false;S[k]=true;S.amShow=AM_PAGE;_pplGo('customers','accounts');}
+function _renderPeople(sec){
+  const cust=sec==='customers';
+  const el=document.getElementById('tab-'+sec);if(!el)return;
+  // The other section's markup goes: both draw the same lists, and their ids (am-search, am-cust-rows...) must be one.
+  {const o=document.getElementById('tab-'+(cust?'community':'customers'));if(o&&o.firstChild)o.innerHTML='';}
+  const subs=cust?['overview','accounts','flagged','activity',...(isAdmin()?['duplicates']:[])]:['overview','accounts','flagged','tags','badges','applications','learning','birthdays'];
+  let sub=cust?S.customersTab:S.communityTab;if(!subs.includes(sub))sub='overview';
+  if(cust)S.customersTab=sub;else S.communityTab=sub;
   _pushNav(); // the address follows the view (its tabs)
-  const el=document.getElementById('tab-community');if(!el)return;
-  // The leaderboard and statistics, then accounts, the flagged list, the membership applications and birthdays.
-  const sub=['stats','accounts','badges','flagged','applications','learning','birthdays','duplicates'].includes(S.communityTab)&&!(S.communityTab==='duplicates'&&!isAdmin())?S.communityTab:'leaderboard';
   if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy&&!S._mgErr)_mgLoad(); // the recent merges, once
-  if(sub==='accounts'||sub==='badges')_bdgLoad(); // the badges and who holds them, at most every five minutes
+  if(sub==='accounts'||sub==='badges'||(!cust&&sub==='overview'))_bdgLoad(); // the badges and who holds them, at most every five minutes
   if(sub==='accounts')_igLoad(); // the Instagram follower counts, likewise
-  const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length;
+  if(sub==='overview'&&!S._flags&&!S._flagsBusy&&!S._flagsErr)_loadFlags(); // the requests waiting, for its figure
   // the pending counts on the Applications pill: both of its lists
-  if(!S._caApps&&!S._caBusy&&!S._caErr&&sub!=='applications')_caLoad();
-  if(!S._laApps&&!S._laBusy&&!S._laErr&&sub!=='learning')_laLoad();
+  if(!cust&&!S._caApps&&!S._caBusy&&!S._caErr&&sub!=='applications')_caLoad();
+  if(!cust&&!S._laApps&&!S._laBusy&&!S._laErr&&sub!=='learning')_laLoad();
+  const go=cust?'setCustomersTab':'setCommTab';
   // Applications opens on the list it was last on (community or learning to ride).
-  const navBtn=(k,label)=>{const on=sub===k||(k==='applications'&&sub==='learning'),go=k==='applications'&&S._appsKind==='learning'?'learning':k;return`<button type="button" class="filter-pill${on?' active':''}" aria-pressed="${(on)?'true':'false'}" data-on-click="${_on("setCommTab",go)}">${label}</button>`;};
-  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb')?_ae.id:''; // an Applications or merge search in use
+  const navBtn=(k,label)=>{const on=sub===k||(k==='applications'&&sub==='learning'),to=k==='applications'&&S._appsKind==='learning'?'learning':k;return`<button type="button" class="filter-pill${on?' active':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on(go,to)}">${label}</button>`;};
+  let nav;
+  if(cust)nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabAccounts'))+navBtn('flagged',t('commTabFlagged'))+navBtn('activity',t('custTabActivity'))
+    +(isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):'');
+  else{
+    const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length,apN=_caPendingN()+_laPendingN();
+    nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabMembers'))+navBtn('flagged',t('commTabFlagged'))+navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle'))
+      +navBtn('applications',t('commTabApplications')+(apN?` (${apN})`:''))+navBtn('birthdays',t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''));
+  }
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q')?_ae.id:''; // a search in use
+  const body=sub==='overview'?(cust?_custOverview():_commOverview()):sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_commFlagged():sub==='tags'?_commTags()
+    :sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='badges'?_commBadges():_commAccounts();
   el.innerHTML=`
-    <div class="page-title">${t('commTitle')}</div>
-    <div class="page-sub">${t('commSub')}</div>
-    <div class="filter-row cmy-nav">${navBtn('leaderboard',t('commTabLeaderboard'))}${navBtn('stats',t('commTabStats'))}${navBtn('accounts',t('commTabAccounts'))}${navBtn('badges',t('mrBadgesTitle'))}${navBtn('flagged',t('commTabFlagged'))}${navBtn('applications',t('commTabApplications')+(()=>{const n=_caPendingN()+_laPendingN();return n?` (${n})`:'';})())}${navBtn('birthdays',t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''))}${isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):''}</div>
-    <div class="cmy-mt14">${sub==='leaderboard'?_commBoard().leaderboardView:sub==='stats'?_commBoard().statsView:sub==='flagged'?_commFlagged():sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='badges'?_commBadges():_commAccounts()}</div>`;
+    <div class="page-title">${t(cust?'tabCustomers':'commTitle')}</div>
+    <div class="page-sub">${t(cust?'custSub':'commSub')}</div>
+    <div class="filter-row cmy-nav">${nav}</div>
+    <div class="cmy-mt14">${body}</div>`;
+  if(sub==='activity')renderCustActivity();
   // Re-focus whichever search box was active so typing is not interrupted by the re-render
-  if(S._lbSearchFocused){const _si=document.getElementById('lb-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(S._amFocused){const _si=document.getElementById('am-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(S._bdFocused){const _si=document.getElementById('bd-search');if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
   if(_appF){const _si=document.getElementById(_appF);if(_si){_si.focus();const _v=_si.value;_si.value='';_si.value=_v;}}
+}
+// The overviews' figures and short lists, in the Dashboard's tiles (dash-kpi / dash-row).
+function _pplKpi(v,l,go){return`<button type="button" class="dash-kpi"${go?` data-on-click="${_on(...go)}"`:' disabled'}><strong>${v==null?'…':esc(String(v))}</strong><span>${esc(l)}</span></button>`;}
+function _pplRow(main,small,em,go){return`<button type="button" class="dash-row" data-on-click="${_on(...go)}"><span class="dash-row-main"><strong>${esc(main)}</strong>${small?`<small>${esc(small)}</small>`:''}</span>${em?`<em>${esc(em)}</em>`:''}</button>`;}
+function _pplDay(iso){const d=String(iso||'').slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(d)?shortDate(d):'';}
+function _custOverview(){
+  const cs=S.customers||[],now=Date.now(),at=c=>Date.parse(c.created_at||'')||0;
+  const n7=cs.filter(c=>at(c)>=now-7*864e5).length,n30=cs.filter(c=>at(c)>=now-30*864e5).length;
+  const mem=new Set((S.customerTags||[]).filter(ct=>ct.tag_id===TAG_COMMUNITY&&_tagActive(ct)).map(ct=>String(ct.customer_id))).size;
+  const fl=Array.isArray(S._flags)?S._flags.filter(r=>r.status==='pending'):null;
+  const kpis=[
+    _pplKpi(cs.length,t('custKpiTotal'),['_pplGo','customers','accounts']),
+    _pplKpi(n7,t('custKpiNew7'),null),_pplKpi(n30,t('custKpiNew30'),null),
+    _pplKpi(mem,t('custKpiMembers'),['_pplGo','community','accounts']),
+    _pplKpi(fl?fl.length:null,t('custKpiFlags'),['_pplGo','customers','flagged','pending']),
+    _pplKpi(cs.filter(c=>c.deletion_requested_at).length,t('amDelReqFilter'),['_amGo','amDelReq']),
+    _pplKpi(cs.filter(c=>_amMissingOf(c).length).length,t('amMissingBtn'),['_amGo','amMissing']),
+    _pplKpi(cs.filter(c=>_sxOf(c)).length,t('sxFilterBtn'),['_amGo','amSuspect']),
+    isAdmin()?_pplKpi(_dupGroups().length,t('commTabDuplicates'),['_pplGo','customers','duplicates']):'',
+  ].join('');
+  const newest=cs.slice().sort((a,b)=>at(b)-at(a)).slice(0,8).map(c=>_pplRow(c.name||c.email||'—',c.email||c.phone||'',_pplDay(c.created_at),['showEditCustomerModal',c.id])).join('')||`<div class="empty-state">${t('amNoCustomers')}</div>`;
+  const byId=new Map(cs.map(c=>[String(c.id),c]));
+  const flagRows=fl?(fl.slice(0,8).map(r=>{const c=byId.get(String(r.customer_id))||{};return _pplRow(c.name||'—',(Array.isArray(r.fields)?r.fields.length:0)?t('custFlagFields').replace('{0}',String(r.fields.length)):'',_pplDay(r.flagged_at),['_pplGo','customers','flagged','pending']);}).join('')||`<div class="empty-state">${t('flgEmpty')}</div>`):S._flagsErr?`<div class="empty-state">${t('flgLoadErr')}</div>`:skeletonList();
+  return`<div class="dash-kpis">${kpis}</div>
+    <div class="dash-grid">
+      <div class="form-section dash-card"><div class="form-title">${t('custNewest')}</div>${newest}</div>
+      <div class="form-section dash-card"><div class="form-title">${t('custKpiFlags')}</div>${flagRows}</div>
+    </div>`;
+}
+function _commOverview(){
+  const now=Date.now();
+  const memCt=(S.customerTags||[]).filter(ct=>ct.tag_id===TAG_COMMUNITY&&_tagActive(ct));
+  const newMem=memCt.filter(ct=>(Number(ct.added_at)||0)>=now-30*864e5).length; // added_at is epoch ms
+  const bd=_bdRows(BD_TAG).rows;
+  const fl=Array.isArray(S._flags)?S._flags.filter(r=>r.status==='pending'&&_hasTagNow(r.customer_id,TAG_COMMUNITY)).length:null;
+  const kpis=[
+    _pplKpi(new Set(memCt.map(ct=>String(ct.customer_id))).size,t('custKpiMembers'),['_pplGo','community','accounts']),
+    _pplKpi(newMem,t('commKpiNewMembers'),null),
+    _pplKpi(Array.isArray(S._caApps)?_caPendingN():null,t('commKpiApps'),['_pplGo','community','applications']),
+    _pplKpi(Array.isArray(S._laApps)?_laPendingN():null,t('commKpiLearn'),['_pplGo','community','learning']),
+    _pplKpi(fl,t('custKpiFlags'),['_pplGo','community','flagged','pending']),
+    _pplKpi(bd.filter(r=>r.days<=7).length,t('commKpiBdays'),['_pplGo','community','birthdays']),
+    _pplKpi((S.tags||[]).length,t('amTagsTitle'),['_pplGo','community','tags']),
+    _pplKpi((S.badges||[]).filter(b=>!b.retired).length,t('mrBadgesTitle'),['_pplGo','community','badges']),
+  ].join('');
+  const nm=x=>String((x&&(x.name||x.email))||'—');
+  const apps=Array.isArray(S._caApps)?(_caPending().slice().sort((a,b)=>String(a.created_at||'').localeCompare(String(b.created_at||''))).slice(0,6).map(a=>_pplRow(nm(a),t('commTabApplications'),_pplDay(a.created_at),['_pplGo','community','applications']))
+    .concat(Array.isArray(S._laApps)?_laPending().slice(0,3).map(a=>_pplRow(nm(a),t('commKpiLearn'),_pplDay(a.created_at),['_pplGo','community','learning'])):[]).join('')||`<div class="empty-state">${t('commNoAppsWaiting')}</div>`):skeletonList();
+  const bds=bd.slice(0,6).map(r=>_pplRow(r.c.name||'—',_bdWhen(r.days),'',['_pplGo','community','birthdays'])).join('')||`<div class="empty-state">${t('commNoBdays')}</div>`;
+  return`<div class="dash-kpis">${kpis}</div>
+    <div class="dash-grid">
+      <div class="form-section dash-card"><div class="form-title">${t('commKpiApps')}</div>${apps}</div>
+      <div class="form-section dash-card"><div class="form-title">${t('commBdSoon')}</div>${bds}</div>
+      <div class="form-section dash-card"><div class="form-title">${t('dashQuick')}</div><div class="dash-actions">
+        <button type="button" class="btn-primary" data-on-click="${_on("_pplGo","community","applications")}">${t('commTabApplications')}</button>
+        <button type="button" class="btn-secondary" data-on-click="${_on("_commNewTag")}">+ ${t('amNewTag')}</button>
+        <button type="button" class="btn-secondary" data-on-click="${_on("_pplGo","community","badges")}">${t('commGiveBadge')}</button>
+        <button type="button" class="btn-secondary" data-on-click="${_on("_pplGo","community","accounts")}">${t('commTabMembers')}</button>
+      </div></div>
+    </div>`;
+}
+function _commNewTag(){S.communityTab='tags';S.tagEdit={};if(S.staffTab!=='community')setStaffTab('community');else renderCommunity();}
+// ── Community > Tags (2026-10-07): every tag, what it does, who holds it; give it or take it back here ──
+// The tag list and its editor moved here from the top of the accounts list. "Holders" opens one tag:
+// its holders (newest grant first) and one search that finds a holder or someone to give it to. Giving
+// goes through the grant dialog (permanent or for a while); taking back asks first.
+function _tgOpen(id){S._tgOpenId=S._tgOpenId===id?null:id;S._tgQ='';S._tgShow=100;renderCommunity();}
+function _tgQInput(v){S._tgQ=v;S._tgShow=100;_debRender('tgq',renderCommunity);}
+function _tgMore(){S._tgShow=(S._tgShow||100)+100;renderCommunity();}
+async function _tgTakeBack(cid,tid){
+  const c=(S.customers||[]).find(x=>x.id===cid),tg=(S.tags||[]).find(x=>x.id===tid);
+  if(!await askConfirm({title:t('tgRemoveQ').replace('{0}',(c&&c.name)||'—').replace('{1}',(tg&&tg.name)||''),confirmLabel:t('removeBtn'),confirmClass:'btn-red'}))return;
+  await toggleCustTag(cid,tid);
+}
+function _tgHoldersHtml(tg){
+  const byId=new Map((S.customers||[]).map(c=>[String(c.id),c]));
+  const q=(S._tgQ||'').trim().toLowerCase();
+  const hit=c=>!q||[c.name,c.email,c.apple_email].some(v=>String(v||'').toLowerCase().includes(q))||_phoneHit(c.phone,q);
+  const held=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&!_tagLapsed(ct)).map(ct=>({ct,c:byId.get(String(ct.customer_id))})).filter(x=>x.c);
+  const heldIds=new Set(held.map(x=>String(x.c.id)));
+  const rows=held.filter(x=>hit(x.c)).sort((a,b)=>(Number(b.ct.added_at)||0)-(Number(a.ct.added_at)||0));
+  const cap=S._tgShow||100;
+  const when=ct=>[Number(ct.added_at)>1?t('tgSince').replace('{0}',_tagDateFmt(ct.added_at)):'',ct.expires_at?t('tgUntil').replace('{0}',_tagDateFmt(ct.expires_at)):''].filter(Boolean).join(' · ');
+  const holderRows=rows.slice(0,cap).map(({ct,c})=>`<div class="tg-row">
+      <span class="tg-who"><strong>${esc(c.name||'—')}</strong><small>${esc([c.phone||c.email||'',when(ct)].filter(Boolean).join(' · '))}</small></span>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("showEditCustomerModal",c.id)}">${t('editBtn')}</button>
+      <button type="button" class="btn-sm btn-red" data-on-click="${_on("_tgTakeBack",c.id,tg.id)}">${t('removeBtn')}</button>
+    </div>`).join('');
+  const give=q.length>=2?(S.customers||[]).filter(c=>!heldIds.has(String(c.id))&&hit(c)).slice(0,8).map(c=>`<div class="tg-row tg-give">
+      <span class="tg-who"><strong>${esc(c.name||'—')}</strong><small>${esc(c.phone||c.email||'')}</small></span>
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on("toggleCustTag",c.id,tg.id)}">${t('tgGiveBtn')}</button>
+    </div>`).join(''):'';
+  return`<div class="tg-holders">
+    <div class="${_srchCls('tg',S._tgQ)} tg-srch" data-srch="tg">${_artIcon('search',13)}<input id="tg-q" type="text" class="search-input" aria-label="${esc(t('tgSearchPh'))}" placeholder="${esc(t('tgSearchPh'))}" value="${esc(S._tgQ||'')}" data-on-input="${_on("_tgQInput",_P("value"))}">${_srchBtn()}</div>
+    ${give?`<div class="tg-sub">${t('tgGiveTo')}</div>${give}`:''}
+    <div class="tg-sub">${t('amHolders').replace('{0}',String(rows.length))}</div>
+    ${holderRows||`<div class="empty-state">${t('tgNoHolders')}</div>`}
+    ${rows.length>cap?`<div class="cmy-more"><button type="button" class="btn-secondary" data-on-click="${_on("_tgMore")}">${t('amShowMore').replace('{0}',String(Math.min(rows.length-cap,100)))}</button></div>`:''}
+  </div>`;
+}
+function _commTags(){
+  const tagRows=(S.tags||[]).slice().sort((a,b)=>(b.auto_grant?1:0)-(a.auto_grant?1:0)||String(a.name).localeCompare(String(b.name))).map(tg=>{
+    const cnt=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct)).length;
+    return `<div class="am-tag-row">
+      ${_tagChip(tg)}
+      <span class="am-meta">${tg.auto_grant?t('amAutoTag')+' · ':''}${t('amHolders').replace('{0}',cnt)}</span>
+      <div class="cmy-am-tacts">
+        <button class="btn-sm ${S._tgOpenId===tg.id?'btn-primary':'btn-secondary'}" aria-expanded="${S._tgOpenId===tg.id?'true':'false'}" data-on-click="${_on("_tgOpen",tg.id)}">${t('tgHoldersBtn')}</button>
+        <button class="btn-sm btn-secondary" data-on-click="${_on("openTagEdit",tg.id)}">${t('editBtn')}</button>
+        ${tg.locked?'':`<button class="btn-sm btn-red" data-on-click="${_on("deleteTag",tg.id)}">${t('deleteBtn')}</button>`}
+      </div>
+    </div>${S._tgOpenId===tg.id?_tgHoldersHtml(tg):''}`;
+  }).join('')||`<div class="empty-state">${t('amNoTags')}</div>`;
+  const tagPanel=`<div class="form-section cmy-mt0">
+    <div class="form-title">${t('amTagsTitle')}</div>
+    <div class="cmy-am-sub">${t('amTagsSub')}</div>
+    ${tagRows}
+    ${S.tagEdit!==null?_tagEditForm():`<button class="btn-secondary cmy-mt12" data-on-click="${_on("openTagEdit","")}">+ ${t('amNewTag')}</button>`}
+  </div>`;
+  return tagPanel;
 }
 function shareLeaderboard(){
   const txt=S._lbShareTxt||'';if(!txt)return;
@@ -39691,12 +39859,16 @@ function _renderAnalyticsNow(){
     <div class="an-sticky">
       ${_rangeBar()}
       <div class="an-subnav">
-        ${[['overview',t('anNavOverview')],['revenue',t('anRevenue')],['ridership',t('anRidership')],['operations',t('anOperations')],['fleet',t('anFleetSection')],['ratings',t('anRatingsNav')],['customers',t('anNavCustomers')],['growth',t('anNavGrowth')]].map(([v,l])=>`<button class="an-nav-btn${S.anView===v?' active':''}" data-anview="${v}" data-on-click="${_on("setAnView",v)}">${l}</button>`).join('')}
+        ${[['overview',t('anNavOverview')],['revenue',t('anRevenue')],['ridership',t('anRidership')],['operations',t('anOperations')],['fleet',t('anFleetSection')],['ratings',t('anRatingsNav')],['customers',t('anNavCustomers')],['growth',t('anNavGrowth')],['leaderboard',t('commTabLeaderboard')],['community',t('anNavCommunity')]].map(([v,l])=>`<button class="an-nav-btn${S.anView===v?' active':''}" data-anview="${v}" data-on-click="${_on("setAnView",v)}">${l}</button>`).join('')}
       </div>
     </div>
 
     <div class="an-anchor" data-anview="ratings"></div>
     <!--an-lazy:ratings-->
+    <div class="an-anchor" data-anview="leaderboard"></div>
+    <div id="an-lb-host"></div>
+    <div class="an-anchor" data-anview="community"></div>
+    <div id="an-cs-host"></div>
     <div class="an-anchor" data-anview="overview"></div>
     ${liveBoard()}
 
@@ -40302,7 +40474,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','cashier','inventory','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','sessions','cashier','inventory','customers','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 (async()=>{
   S.loggedIn=getSession();

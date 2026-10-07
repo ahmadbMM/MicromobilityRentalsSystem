@@ -116,7 +116,7 @@ test('an account sees only its sections, and a section it may not change is read
   await page.evaluate(`_accessSet({modules_view:['queue','cashier','community'],modules_edit:['cashier']},'u1')`);
   // the sections the rail offers (on a phone the rail sits behind the menu, so not "visible")
   const offered = () => page.evaluate(`[...document.querySelectorAll('#staff-tab-nav .tab-btn')].filter(b=>b.style.display!=='none').map(b=>b.querySelector('.snav-lbl').textContent.trim())`);
-  await expect.poll(offered).toEqual(['Bookings', 'Sales', 'Community', 'Settings']) // Settings is every account's own page (2026-10-02);
+  await expect.poll(offered).toEqual(['Bookings', 'Sales', 'Customers', 'Community', 'Settings']) // a list naming Community names Customers (its accounts, 2026-10-07) // Settings is every account's own page (2026-10-02);
   await page.evaluate(`setStaffTab('queue')`);
   await expect(page.locator('#ro-banner')).toHaveText('Read-only mode: no changes allowed');
   const refused = await page.evaluate(`sb.from('queue_entries').update({paid:true}).eq('id','x').select().then(r=>r.error&&r.error.code)`);

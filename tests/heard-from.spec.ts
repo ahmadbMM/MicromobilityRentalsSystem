@@ -41,7 +41,7 @@ test('the desk reads it on the account row and in the editor', async ({ page }) 
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   const rows = page.locator('#am-cust-rows');
   await expect(rows).toContainText('Invited');
   await expect(rows).toContainText('Added by our team');

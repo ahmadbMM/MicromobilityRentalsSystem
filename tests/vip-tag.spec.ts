@@ -41,7 +41,7 @@ function patches(page: Page) {
 
 test('the VIP chip is gold and wears the drawn letters, not its name as text', async ({ page }) => {
   await boot(page);
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-logo-vip') }).first();
   await expect(chip).toBeVisible();
   await expect(chip).toHaveCSS('background-color', 'rgb(166, 124, 0)'); // #a67c00

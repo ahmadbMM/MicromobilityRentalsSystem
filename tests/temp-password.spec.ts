@@ -16,7 +16,7 @@ async function editor(page: Page, fx: Fixtures = {}) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity();showEditCustomerModal('c1')`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers();showEditCustomerModal('c1')`);
   await expect(page.locator('#new-acct-modal #cf-pwd')).toBeVisible();
 }
 function rpcs(page: Page) {

@@ -160,12 +160,14 @@ for (const lang of ['en', 'ar']) {
     if (lang === 'ar') await page.addInitScript(() => { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); });
     await boot(page, { customers: [{ id: 'c1', name: 'Intl Rider', email: 'i@x.sa', phone: '+966564221234', created_at: '2026-09-01T00:00:00Z' }], community_applications: [] });
     for (const [open, id] of [
-      [`setStaffTab('community');setCommTab('accounts')`, 'am-search'],
+      [`setStaffTab('customers');setCustomersTab('accounts')`, 'am-search'],
       [`setStaffTab('community');setCommTab('applications')`, 'ca-q'],
       [`setStaffTab('inventory')`, 'bk-search-input'],
       [`setStaffTab('queue')`, 'sf-search-input'],
     ]) {
       await page.evaluate(open);
+      // the applications' first read redraws the list when it lands: wait for it, so the fold tapped is the one on screen
+      await page.waitForFunction('!S._caBusy&&!S._laBusy');
       const wrap = page.locator(`#${id}`).locator('xpath=..');
       const fold = wrap.locator('.srch-btn');
       if (await fold.isVisible()) await fold.click(); // a phone folds the search into a button

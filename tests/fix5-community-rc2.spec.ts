@@ -259,14 +259,14 @@ test.describe('@staff:community fix5 rc2 duplicates and looks fine', () => {
     // A new list is grouped again.
     expect(await page.evaluate(`(()=>{const a=_dupGroups();S.customers=S.customers.slice();return a!==_dupGroups();})()`)).toBe(true);
     expect(await page.evaluate(`(()=>{const a=_custBookingsN('d1');S.queue=[...S.queue,entryFromDB(${JSON.stringify(dupRow('q5', 'd1'))})];return [a,_custBookingsN('d1')];})()`)).toEqual([1, 2]);
-    await page.evaluate(`setStaffTab('community');setCommTab('duplicates')`);
-    const recent = page.locator('#tab-community .mg-row').first();
+    await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
+    const recent = page.locator('#tab-customers .mg-row').first();
     await expect(recent).toContainText('Gone Fixture → Amal Fixture');
     await expect(recent.locator('bdi')).toHaveCount(2);
     await page.evaluate(`setLang('ar')`);
     await expect.poll(() => page.evaluate(`_langLoaded('ar')`)).toBe(true);
     await page.evaluate(`renderCommunity()`);
-    await expect(page.locator('#tab-community .mg-row').first()).toContainText('Gone Fixture ← Amal Fixture');
+    await expect(page.locator('#tab-customers .mg-row').first()).toContainText('Gone Fixture ← Amal Fixture');
   });
 
   test('"Looks fine" is written against the row as it was read, and a row that moved on is read again and added to', async ({ page }) => {
@@ -290,7 +290,7 @@ test.describe('@staff:community fix5 rc2 duplicates and looks fine', () => {
       return r.fallback();
     });
     const posts = sent(page, 'staff_options', 'POST');
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
     await page.waitForFunction('!!_phoneRules');
     await page.evaluate(`_amFilter('amSuspect',true)`);
     await page.locator('.am-row[data-cust="lf1"] .am-sx .am-fine').click();

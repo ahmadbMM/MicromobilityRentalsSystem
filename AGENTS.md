@@ -370,7 +370,7 @@ the rider reads, the ride and who gave it), both staff-only; admins change the c
 `badges.icon` names a glyph in `BDG_GLYPH` and `color` one of `BDG_COLORS`; `_bdgMedal` puts it on
 the hexagon. `BD_SYS` maps the app's sixteen slugs to icon, colour and translation key (`t(key)` the
 name, `t(key+'D')` how it is earned); the first nine are also earned by riding (`_mrBadges`). Staff
-give from a rider's Badges button in Community > Accounts (`_bdgOpen`) or to everyone checked in on a
+give from a rider's Badges button in Customers > Accounts or Community > Members (`_bdgOpen`) or to everyone checked in on a
 ride from Community > Badges (`/community/badges`, `_commBadges`); take-back and delete ask on a second
 tap (`_bdgArm`); every badge in that dialog has an "i" (`_bdgInfoBtn`, the bike type's `type-info-btn`) opening
 what it means, how it is earned and its dates under it (`_bdgInfoPanel`). The rider reads theirs through `customer_my_badges` (token-checked; an account merged
@@ -421,7 +421,7 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   `_roleTabs`, `_roleNorm`; `isAdmin()` is `role==='admin'`. `_pinApprove(what)` asks the operator's
   PIN (the gate's keypad, `staff_check_operator_pin`) before refunds, voids, deletes, price changes
   and merges; a right answer holds five minutes (`_pinOk`).
-- **Duplicates.** Community > Duplicates (`/community/duplicates`, admins): `_dupGroups`
+- **Duplicates.** Customers > Duplicates (`/customers/duplicates`, admins): `_dupGroups`
   (same phone, or same name + birth date), `_mgOpen`/`_mgRun` → `staff_merge_customers`,
   `_mgUndoWrite` → `staff_unmerge_customers` (30 days). A row with `merged_into` is off every list
   (`_custLiveRows`); `customer_login`/`customer_oauth_login` follow it to the keeper.
@@ -651,7 +651,7 @@ offer in the rider's language (`vndRiderOffer`).
 
 ## Customer activity (2026-10-04)
 
-History > Customer activity (`/history/customers`, `renderCustActivity`) lists what customers did: bookings,
+Customers > Activity (`/customers/activity`, `renderCustActivity` into `#cact-host`; History's until 2026-10-07) lists what customers did: bookings,
 cancels, moves, ratings, waivers, sign-ups, sign-ins and wrong passwords, account edits, consents, applications,
 messages, the rider forms. The **database** writes it (migration 20261004160000): one AFTER trigger function,
 `_cact_row`, on every table a customer's request writes, inserting through `_cact_add` into `customer_activity`
@@ -750,6 +750,27 @@ on a ride staff approve - and the breakfast stop) and a book button (`_infoBook`
 - **A date's own line**: the session forms' Description box is there for every kind now (`ns-desc`, and `es-desc` on
   the edit form, saved only when changed); outside events it is an extra line under the words (`.ev-info-extra`).
 - The links are siblings of the card buttons (`.lec-wrap`, `.sess-wrap`), never inside them. `tests/event-info.spec.ts`.
+
+## Customers and Community (2026-10-07)
+
+The owner: "make a separate customer management/dashboard page and a separate community management dashboard page ...
+i dont want the leaderboard and statistics to be with the community page"; "i want the community management to include
+a tag management page, customer info and flagging management page, badges and giving them to customers page,
+applications management".
+- **Customers** (`/customers`, `S.customersTab`, `setCustomersTab`; NOT `setCustTab`, which is the rider app's): Overview
+  (`_custOverview`), Accounts (every account), Flagged, Activity (from History), Duplicates (admins).
+- **Community** (`/community`, `S.communityTab`): Overview (`_commOverview`), Members (`/community/members`, sub key
+  `accounts`: the same list, `_amScope()==='members'` keeps holders of TAG_COMMUNITY), Flagged (members' requests),
+  Tags (`_commTags`: the tag list and editor, moved off the accounts page, plus each tag's holders, give / take back),
+  Badges, Applications, Birthdays.
+- One renderer, `_renderPeople(sec)`; `renderCommunity()` stays the repaint every write calls and draws whichever is
+  open (`_pplOpen`, `_pplOn(sub)`). It empties the other section's panel, because both draw the same element ids.
+  Both are the `community` staff part (`STAFF_PARTS.community: ['renderCommunity','renderCustomers']`).
+- Leaderboard and Statistics are Analytics views `leaderboard` / `community`, drawn fresh into `#an-lb-host` /
+  `#an-cs-host` by `_anBoardPaint` (outside the kept markup). From Community they repaint through `renderAnalytics()`,
+  not `_anBoardPaint`, so `_commBoard` stays in the analytics part instead of the desk's core.
+- Old addresses go to the new ones in `_parsePath` (/community/stats, /community/accounts, /community/duplicates,
+  /history/customers). An account's section list naming `community` also grants `customers` (`_modIds`).
 
 ## Bookings in colour (2026-10-05)
 

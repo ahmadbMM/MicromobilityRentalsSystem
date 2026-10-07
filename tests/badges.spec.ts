@@ -51,8 +51,9 @@ async function staff(page: Page, fx: Fixtures = {}) {
   await waitForSb(page);
   await page.evaluate(`S.staffRole='admin'`);
 }
+// Accounts are the Customers section's since 2026-10-07; Badges stay in Community.
 const community = async (page: Page, tab: string) => {
-  await page.evaluate(`setStaffTab('community');S.communityTab='${tab}';renderCommunity()`);
+  await page.evaluate(tab === 'accounts' ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()` : `setStaffTab('community');S.communityTab='${tab}';renderCommunity()`);
   await page.waitForFunction('S._bdgAt>0&&!S._bdgBusy');
 };
 const writes = (page: Page, table: string) => {
@@ -233,7 +234,7 @@ test.describe('@staff:community badges', () => {
     await community(page, 'accounts');
     await expect(page.locator('#am-cust-rows .am-row[data-cust="c1"]')).toBeVisible();
     await expect(page.locator('#am-cust-rows .am-bdg-btn')).toHaveCount(0);
-    await page.evaluate(`S.communityTab='badges';renderCommunity()`);
+    await page.evaluate(`setStaffTab('community');setCommTab('badges')`);
     await expect(page.locator('#tab-community')).toContainText('Badges are not set up on the database yet.');
   });
 });

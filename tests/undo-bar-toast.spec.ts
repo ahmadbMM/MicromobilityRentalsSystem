@@ -34,8 +34,8 @@ test('an undoable action shows its own toast and no bar; the topbar Undo takes i
 
 test('a merge takes the pair off the Duplicates list at once and asks for the customer list again', async ({ page }) => {
   await boot(page);
-  await page.evaluate(`setStaffTab('community');S.communityTab='duplicates';renderCommunity()`);
-  await expect(page.locator('#tab-community')).toContainText('Maan Barnawi');
+  await page.evaluate(`setStaffTab('customers');S.customersTab='duplicates';renderCustomers()`);
+  await expect(page.locator('#tab-customers')).toContainText('Maan Barnawi');
   // Approval and the reload are stubbed: the reload's answer is the fixture, which knows nothing
   // of the merge, so what is asserted is the desk's own bookkeeping.
   await page.evaluate(`window._pinApprove=async()=>true;window.__loads=0;window.loadData=async()=>{window.__loads++;};window.__dirty=null;window.refDirty=()=>{window.__dirty=true;}`);
@@ -44,5 +44,5 @@ test('a merge takes the pair off the Duplicates list at once and asks for the cu
   await expect(page.locator('#undo-bar-el')).toHaveCount(0);
   expect(await page.evaluate(`S.customers.map(c=>c.id).sort()`)).toEqual(['c1', 'c3']);
   expect(await page.evaluate(`[window.__dirty, window.__loads]`)).toEqual([true, 1]);
-  await expect(page.locator('#tab-community')).not.toContainText('b@icloud.com');
+  await expect(page.locator('#tab-customers')).not.toContainText('b@icloud.com');
 });

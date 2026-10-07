@@ -64,7 +64,7 @@ test('staff see the icons on the Community row, edit them on the form, and repor
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
 
   const links = page.locator('.am-cust').filter({ hasText: 'Amal Member' }).locator('.soc-link');
   await expect(links).toHaveCount(2);

@@ -22,7 +22,7 @@ async function staff(page: Page, fx: Fixtures = {}) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>1');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
 }
 function traffic(page: Page) {
   const out = { asked: [] as unknown[], patches: [] as Record<string, unknown>[], signups: [] as Record<string, unknown>[] };

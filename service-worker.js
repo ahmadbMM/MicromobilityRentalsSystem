@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-0b38cb168a';
+const CACHE = 'mmcq-381682b3fa';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -15,26 +15,26 @@ const SHELL_KEY = './';
 // app.src.html (STAFF_PATHS, CUST_PATHS, SUB_PATHS), and tests/paths.spec.ts checks they agree.
 // On the live customer host a staff address is not the shell's: the server sends it on to the
 // staff address, and the worker lets it through to the network so that it can.
-const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
-const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
+const APP_ROUTE = /^\/(?:reserve|my-bookings|account|signup|bookings|dashboard|sales|inventory|workshop|customers|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/[a-z0-9-]+){0,2}\/?$/;
+const STAFF_ROUTE = /^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/;
 const LIVE_CUSTOMER_HOST = self.location.hostname === 'micromobilityrentals.pages.dev';
 const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) && !(LIVE_CUSTOMER_HOST && STAFF_ROUTE.test(p)));
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=3a5e03db9b';
+const STAFF_JS = './staff.js?v=ee5b12fe38';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=edb3bac6d6","./staff-parts/community.js?v=94442bcb8f","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=75fc1a836b","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=3386361580","./staff-parts/team.js?v=80f605241b","./staff-parts/settings.js?v=8b4a497a04"];
-const APP_JS = './app.js?v=fdbb09723e';
-const APP_CSS = './app.css?v=43e8cbebc3';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=eb86c24864","./staff-parts/community.js?v=3125255e19","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=d69d3e345a","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=3386361580","./staff-parts/team.js?v=fcdd45cdee","./staff-parts/settings.js?v=8b4a497a04"];
+const APP_JS = './app.js?v=33656dcd12';
+const APP_CSS = './app.css?v=f526569a58';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=6033e95832']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=3ffac770eb']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

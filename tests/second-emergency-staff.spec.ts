@@ -200,7 +200,7 @@ test.describe('@staff:accounts second emergency contact', () => {
         emergency2: { before: { name: 'Omar Saleh', phone: '+966551230077', relation: 'friend' },
           after: { name: 'Omar Nabil Saleh', phone: '+966551230099', relation: 'colleague' }, at: '2026-10-07T10:00:00Z' } } }] });
     const calls = flagCalls(page);
-    await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
     const row = page.locator('.flg-row[data-flag-id="f1"]');
     await expect(row.locator('.flg-asked')).toHaveText('Asked to correct: Second emergency contact');
     const ch = row.locator('.flg-change[data-field="emergency2"]');

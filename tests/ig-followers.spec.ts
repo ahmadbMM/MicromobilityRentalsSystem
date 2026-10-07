@@ -33,7 +33,7 @@ async function staff(page: Page, api: Api, fx: Fixtures = {}, noTable = false) {
   // The endpoint is staff-only: the app sends the Supabase session's token, which the stub lacks.
   await page.evaluate(`S.staffRole='admin'`);
   await page.evaluate(`sb.auth.getSession=async()=>({data:{session:{access_token:'spec-token'}}})`);
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   await page.waitForFunction('S._igAt>0&&!S._igBusy');
   return calls;
 }

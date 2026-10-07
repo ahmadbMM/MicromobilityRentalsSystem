@@ -74,7 +74,7 @@ test('Community: the Missing details chip lists the accounts still lacking one, 
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   const chip = page.getByRole('button', { name: 'Missing details (1)' });
   await expect(chip).toBeVisible();
   await expect(page.locator('.am-cust')).toHaveCount(2);

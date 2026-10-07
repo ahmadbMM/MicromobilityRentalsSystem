@@ -27,7 +27,7 @@ test.describe('ids in the staff panel', () => {
     await boot(page, { customers, tags: [{ id: 'tag_vip', name: 'VIP', slug: 'vip', color: '#e5a100' }],
       sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }] });
     await page.waitForFunction('(S.customers||[]).length>1');
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
     const row = page.locator('.am-row', { hasText: 'Evil Name' });
     await expect(row).toBeVisible();
     await page.waitForTimeout(200);
@@ -58,7 +58,7 @@ test.describe('tag grants', () => {
   const open = async (page: Page, fail?: FailWrite) => {
     await boot(page, { tags, customers, customer_tags }, fail);
     await page.waitForFunction('(S.customerTags||[]).length===3');
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   };
 
   test('the tag filter lists exactly the riders its count says hold the tag now', async ({ page }) => {
@@ -153,12 +153,12 @@ test.describe('leaderboard', () => {
     await boot(page, { queue_entries, customers: [{ id: 'c1', name: 'Now Rider', created_at: '2025-01-01T00:00:00Z' }, { id: 'c2', name: 'Old Rider', created_at: '2025-01-01T00:00:00Z' }] });
     await page.waitForFunction('getQueue().length===7');
     const [streak, oldStreak] = await page.evaluate(`[t('lbStreakTip').replace('{0}',3), t('lbStreakTip').replace('{0}',4)]`) as [string, string];
-    await page.evaluate(`setStaffTab('community');S.communityTab='leaderboard';S.lbWindow='week';renderCommunity()`);
-    await expect(page.locator('#tab-community')).toContainText(streak, { useInnerText: true }); // the week window used to cap every streak at 1
+    await page.evaluate(`S.anView='leaderboard';setStaffTab('analytics');S.lbWindow='week';renderCommunity()`);
+    await expect(page.locator('#tab-analytics')).toContainText(streak, { useInnerText: true }); // the week window used to cap every streak at 1
     await page.evaluate(`S.lbWindow='all';renderCommunity()`);
-    await expect(page.locator('#tab-community')).toContainText('Old Rider', { useInnerText: true });
-    await expect(page.locator('#tab-community')).toContainText(streak, { useInnerText: true });
-    await expect(page.locator('#tab-community')).not.toContainText(oldStreak, { useInnerText: true }); // its run ended in January 2025
+    await expect(page.locator('#tab-analytics')).toContainText('Old Rider', { useInnerText: true });
+    await expect(page.locator('#tab-analytics')).toContainText(streak, { useInnerText: true });
+    await expect(page.locator('#tab-analytics')).not.toContainText(oldStreak, { useInnerText: true }); // its run ended in January 2025
   });
 
   test('the owner board names an account by the account, not by a companion it booked', async ({ page }) => {
@@ -167,9 +167,9 @@ test.describe('leaderboard', () => {
       customers: [{ id: 'c1', name: 'Parent Account', created_at: '2025-01-01T00:00:00Z' }],
     });
     await page.waitForFunction('getQueue().length===2&&(S.customers||[]).length===1');
-    await page.evaluate(`setStaffTab('community');S.communityTab='leaderboard';S.lbScope='owner';S.lbWindow='all';renderCommunity()`);
-    await expect(page.locator('#tab-community')).toContainText('Parent Account', { useInnerText: true });
-    await expect(page.locator('#tab-community')).not.toContainText('Kid Rider', { useInnerText: true });
+    await page.evaluate(`S.anView='leaderboard';setStaffTab('analytics');S.lbScope='owner';S.lbWindow='all';renderCommunity()`);
+    await expect(page.locator('#tab-analytics')).toContainText('Parent Account', { useInnerText: true });
+    await expect(page.locator('#tab-analytics')).not.toContainText('Kid Rider', { useInnerText: true });
   });
 
   test('on the 31st, the month board still compares with last month', async ({ page }) => {
@@ -182,9 +182,9 @@ test.describe('leaderboard', () => {
     ];
     await boot(page, { queue_entries, customers: [{ id: 'cA', name: 'Amal', created_at: '2025-01-01T00:00:00Z' }, { id: 'cB', name: 'Badr', created_at: '2025-01-01T00:00:00Z' }] });
     await page.waitForFunction('getQueue().length===8');
-    await page.evaluate(`setStaffTab('community');S.communityTab='leaderboard';S.lbScope='owner';S.lbMetric='count';S.lbWindow='month';renderCommunity()`);
-    await expect(page.locator('#tab-community')).toContainText('▲1', { useInnerText: true }); // Badr was 2nd in September; it read "–" from the 29th on
-    await expect(page.locator('#tab-community')).toContainText('▼1', { useInnerText: true });
+    await page.evaluate(`S.anView='leaderboard';setStaffTab('analytics');S.lbScope='owner';S.lbMetric='count';S.lbWindow='month';renderCommunity()`);
+    await expect(page.locator('#tab-analytics')).toContainText('▲1', { useInnerText: true }); // Badr was 2nd in September; it read "–" from the 29th on
+    await expect(page.locator('#tab-analytics')).toContainText('▼1', { useInnerText: true });
   });
 
   test('upcoming rides leave out deleted sessions', async ({ page }) => {
@@ -192,9 +192,9 @@ test.describe('leaderboard', () => {
       { id: 's-open', day: 'Friday', session_date: '2099-03-06', capacity: 12, status: 'open', created_at: 1 },
       { id: 's-gone', day: 'Tuesday', session_date: '2099-03-03', capacity: 12, status: 'deleted', created_at: 2 },
     ] });
-    await page.evaluate(`setStaffTab('community');S.communityTab='stats';renderCommunity()`);
+    await page.evaluate(`S.anView='community';setStaffTab('analytics');renderCommunity()`);
     const [kept, gone] = await page.evaluate(`[shortDate('2099-03-06'), shortDate('2099-03-03')]`) as [string, string];
-    await expect(page.locator('#tab-community')).toContainText(kept, { useInnerText: true });
-    await expect(page.locator('#tab-community')).not.toContainText(gone, { useInnerText: true });
+    await expect(page.locator('#tab-analytics')).toContainText(kept, { useInnerText: true });
+    await expect(page.locator('#tab-analytics')).not.toContainText(gone, { useInnerText: true });
   });
 });

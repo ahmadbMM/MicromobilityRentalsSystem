@@ -30,7 +30,7 @@ async function accounts(page: Page, extra: Record<string, unknown> = {}) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   await page.waitForFunction('!!_phoneRules');                     // the libphonenumber rules arrived
   await page.evaluate(`_amFilter('amSuspect',true)`);
 }
@@ -188,7 +188,7 @@ test('a phone-rules file that cannot be loaded is not asked for again on every r
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   await expect.poll(() => asked).toBe(1);
   await page.waitForFunction('!_phoneRulesReq');
   await page.evaluate(`renderCommunity();renderCommunity();_amFilter('amSuspect',true)`);

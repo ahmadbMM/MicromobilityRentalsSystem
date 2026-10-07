@@ -145,7 +145,7 @@ test('staff filters list Saudi Arabia twice and count it once', async ({ page })
   await page.evaluate(`_closePrintOpts();(()=>{const o=_accOpts();o.fNationality='all';})()`);
 
   // The Accounts list filter: two copies, the top one selected.
-  await page.evaluate(`S.amNat='Saudi Arabia';setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+  await page.evaluate(`S.amNat='Saudi Arabia';setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
   const amSel = page.locator('select[aria-label="Nationality"]').filter({ has: page.locator('option[value="Egypt"]') });
   await expect(amSel).toHaveCount(1);
   expect(await amSel.evaluate(el => [...(el as HTMLSelectElement).options].map(o => [o.value, o.selected]))).toEqual(

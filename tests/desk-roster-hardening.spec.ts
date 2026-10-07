@@ -63,7 +63,7 @@ test('ids, days and types that carry markup render as text, and the buttons stil
   await page.evaluate(`showCommAddModal()`);
   await page.evaluate(`closeCommAddModal();showEditCustomerModal(${JSON.stringify(EVIL_CUST)})`);
   await page.evaluate(`closeCustFormModal();showWalkinModal();_wiRenderSuggest('Evil')`);
-  await page.evaluate(`closeWalkinModal();setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+  await page.evaluate(`closeWalkinModal();setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
   await expect(page.locator('.flg-row')).toHaveCount(1);
   expect(await pwned()).toEqual([null, 0]);
 
@@ -200,7 +200,7 @@ test('the Flagged list retries after a failed read, and re-reads when a request 
     return r.fallback();
   });
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
   await expect(page.locator('.flg-retry')).toBeVisible();
   await page.locator('.flg-retry').click();
   await expect(page.locator('.flg-row')).toHaveCount(1);

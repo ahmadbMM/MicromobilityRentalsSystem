@@ -17,7 +17,7 @@ async function editor(page: Page, fx: Fixtures = {}) {
   await page.waitForFunction('(S.customers||[]).length>0');
 }
 async function openEditor(page: Page) {
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity();showEditCustomerModal('c1')`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers();showEditCustomerModal('c1')`);
   await expect(page.locator('#new-acct-modal #cf-sl')).toBeVisible();
 }
 function rpcs(page: Page) {

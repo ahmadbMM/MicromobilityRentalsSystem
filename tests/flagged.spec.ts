@@ -24,7 +24,7 @@ async function flaggedTab(page: Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
   await expect(page.locator('.flg-row')).toHaveCount(3);
 }
 const row = (page: Page, id: string) => page.locator(`.flg-row[data-flag-id="${id}"]`);
@@ -79,7 +79,7 @@ test('Replied lists the latest reply first; All keeps the newest request first',
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
   const ids = () => page.locator('.flg-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-flag-id')));
   await expect.poll(ids).toEqual(['g1', 'f1', 'g2', 'g3']);
   await page.locator('.filter-pill', { hasText: 'Replied (3)' }).click();

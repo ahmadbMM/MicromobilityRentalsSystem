@@ -48,7 +48,7 @@ async function staff(page: Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length===3&&(S.queue||[]).length===10');
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';S.amSearch='';renderCommunity()`);
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';S.amSearch='';renderCustomers()`);
 }
 const modal = (page: Page) => page.locator('#cust-modal');
 const cards = (page: Page) => modal(page).locator('.ah-bk');

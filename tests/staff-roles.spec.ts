@@ -28,13 +28,13 @@ test.describe('roles', () => {
       setStaffRole('admin');
       return out;})()`) as Record<string, { role: string; admin: boolean; tabs: string[] }>;
     expect(r.admin.admin).toBe(true);
-    expect(r.admin.tabs.length).toBe(14); // Vendors since 2026-10-03
+    expect(r.admin.tabs.length).toBe(15); // Vendors since 2026-10-03, Customers since 2026-10-07
     expect(r.frontdesk).toEqual({ role: 'frontdesk', admin: false, tabs: ['queue', 'cashier', 'workshop'] });
     expect(r.leader).toEqual({ role: 'leader', admin: false, tabs: ['queue'] });
     expect(r.mechanic).toEqual({ role: 'mechanic', admin: false, tabs: ['inventory', 'workshop'] });
     expect(r.cashier).toEqual({ role: 'cashier', admin: false, tabs: ['cashier', 'inventory'] });
     expect(r.owner.admin).toBe(false);
-    expect(r.owner.tabs).toEqual(['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'community', 'analytics', 'history']);
+    expect(r.owner.tabs).toEqual(['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'analytics', 'history']);
     expect(r.bogus.role).toBe('admin'); // setStaffRole keeps the larger default for a name it does not know; the row's role is normalised on read
     expect(await page.evaluate(`_roleNorm('bogus','frontdesk')`)).toBe('frontdesk');
     expect(await page.evaluate(`_roleNorm('owner','frontdesk')`)).toBe('owner');
@@ -72,7 +72,7 @@ test.describe('roles', () => {
     await expect(acct.locator('.tm-chip[data-sec="view:inventory"]')).toBeVisible();
     // owner: every section on view, none on edit
     await page.evaluate(`_tmRole('u-mech','owner')`);
-    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(8);
+    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(9); // Customers is a section of its own since 2026-10-07
     await expect(acct.locator('.tm-chip[data-sec^="edit:"].active')).toHaveCount(0);
     const draft = await page.evaluate(`_tm().edit['u-mech']`) as { role: string; edit: string[] | null };
     expect(draft.role).toBe('owner');

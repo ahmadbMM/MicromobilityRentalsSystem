@@ -29,7 +29,7 @@ function writes(page: Page, table: string, method: string) {
 test.describe('@staff:community bug hunt 2026-10-07', () => {
   test('a double tap on the tag grant writes it once', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
     const posts = writes(page, 'customer_tags', 'POST');
     await page.evaluate(`showTagGrantModal('c-two','tag_saturday')`);
     await page.evaluate(`Promise.all([saveTagGrant(),saveTagGrant()])`);
@@ -40,7 +40,7 @@ test.describe('@staff:community bug hunt 2026-10-07', () => {
 
   test('blacklisting a member whose Community removal is refused still closes the dialog and shows the blacklist', async ({ page }) => {
     await boot(page, {}, { table: 'customer_tags', methods: ['DELETE'] });
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
     await page.evaluate(`showTagGrantModal('c-mem','tag_blacklist')`);
     await page.evaluate(`saveTagGrant()`);
     await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);

@@ -131,12 +131,12 @@ test.describe('@staff:community WhatsApp number', () => {
     expect(calls[0]).toMatchObject({ p_customer_id: 'c1', p_fields: ['whatsapp'] });
     await page.evaluate(`closeConfirm&&closeConfirm()`).catch(() => {});
 
-    await page.evaluate(`setStaffTab('community');S.communityTab='flagged';renderCommunity()`);
+    await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
     const ch = page.locator('.flg-row[data-flag-id="f1"] .flg-change[data-field="whatsapp"]');
     await expect(ch).toContainText('+966500000002 · Same as mobile');
     await expect(ch).toContainText('+966551234567');
 
-    await page.evaluate(`S.communityTab='applications';renderCommunity()`);
+    await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
     const card = page.locator('.ca-row[data-app-id="a1"]');
     await expect(card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('b')).toHaveText('+201001234567');
     await expect(card.locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/201001234567');

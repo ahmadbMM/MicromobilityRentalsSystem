@@ -62,8 +62,8 @@ test('staff see who asked, filter to them, and can clear a request', async ({ pa
   await page.waitForFunction('getCustomers().length===2');
   const patches: Record<string, unknown>[] = [];
   page.on('request', (r) => { if (r.method() === 'PATCH' && /\/rest\/v1\/customers/.test(r.url())) patches.push(r.postDataJSON()); });
-  await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
-  const pill = page.locator('#tab-community .am-pick', { hasText: 'Deletion requested' });
+  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  const pill = page.locator('#tab-customers .am-pick', { hasText: 'Deletion requested' });
   await expect(pill).toHaveText('Deletion requested (1)');
   await pill.click();
   await expect(page.locator('#am-cust-rows .am-row')).toHaveCount(1);
