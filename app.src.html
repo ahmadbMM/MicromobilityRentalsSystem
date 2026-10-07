@@ -5016,7 +5016,7 @@ function _photoZoom(img){
   const old=document.getElementById('photo-lightbox');if(old)old.remove();
   const el=document.createElement('div');
   el.id='photo-lightbox';el.className='photo-lightbox';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',img.alt||'');
-  el.innerHTML=`<button class="photo-lightbox-close" aria-label="${esc(t('cancelBtn'))}">&#x2715;</button><img src="${esc(img.src)}" alt="${esc(img.alt||'')}">${img.alt?`<div class="photo-lightbox-cap">${esc(img.alt)}</div>`:''}`;
+  el.innerHTML=`<button class="photo-lightbox-close" aria-label="${esc(t('closeBtn'))}">&#x2715;</button><img src="${esc(img.src)}" alt="${esc(img.alt||'')}">${img.alt?`<div class="photo-lightbox-cap">${esc(img.alt)}</div>`:''}`;
   const close=()=>{el.remove();document.removeEventListener('keydown',onKey);};
   const onKey=e=>{if(e.key==='Escape')close();};
   el.addEventListener('click',close);
@@ -5122,8 +5122,14 @@ function _reserveFromMenu(id){
 }
 async function _releaseReserved(id){
   const e=getQueue().find(x=>x.id===id);if(!e||!_isReserved(e))return;
-  const res=await sb.from('queue_entries').update({assigned_bike_id:null,...(e.reserved?{reserved:false,reserved_bike_no:null}:{})}).eq('id',id);
+  // Only while the rider is still expected and still holds what this desk saw, as reserveBike (2026-10-07): from a
+  // roster not yet repainted it cleared the bike of a rider another desk had just checked in. A hold with no bike
+  // (reserved, 2026-10-07) is matched on its empty bike.
+  let q=sb.from('queue_entries').update({assigned_bike_id:null,...(e.reserved?{reserved:false,reserved_bike_no:null}:{})}).eq('id',id).in('status',['waiting','waitlist']);
+  q=e.assignedBikeId==null?q.is('assigned_bike_id',null):q.eq('assigned_bike_id',e.assignedBikeId);
+  const res=await q.select('id');
   if(_writeErr(res,'reserve'))return;
+  if(!_landed(res))return _lostRace();
   e.assignedBikeId=null;e.reserved=false;e.reservedBikeNo=null;
   logAction(`${t('menuReleaseBike')}: #${e.queueNum} ${e.name}`);
   toast(t('bikeReleasedToast'));
@@ -6379,9 +6385,14 @@ function doLogout(silent){
   // No device log entry (2026-10-05): it kept the rider's name on a shared tablet, where the next person's History > Log showed it.
   S.loggedIn=null;clearSession();S._pendingGoogle=null;S._commAccess=null;
   S._pwdCheckedFor=null;_pwdMustClose();
+  // The once-per-account reads start over (2026-10-07): the same account signing in again on this page
+  // came back without its ride-news and deletion answers (customer_login carries neither), so both
+  // sections stayed off My Account, a check that failed on a stale token hid them for good, and the
+  // sign-in check-up (_commAskCheck) was not asked again.
+  S._rnFetchedFor=null;S._rnUnavailable=null;S._delFetchedFor=null;S._delUnavailable=null;S._commAskedFor=null;
   if(sb&&sb.auth)try{sb.auth.signOut({scope:'local'});}catch(e){} // this device only (2026-10-05): the default, 'global', ended the rider's Google or Apple session on their other devices too
   S._rName='';S._rEmail='';S._rPhone='';S._rHeight='';
-  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regShare=null;S.regStep=1;
+  S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regRiderNames=[];S.regQty=1;S.regType=null;S.selSession=null;S.lastTickets=[];S._alreadyBookedSession=null;S.regSubmitting=false;S.waiverOk=false;S.regShare=null;S.regStep=1;
   // The next person on this device starts clean: a code, add-ons or a booking being changed
   // belonged to the account that just left (a promo can be tied to one customer).
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;
