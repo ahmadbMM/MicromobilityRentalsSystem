@@ -1856,7 +1856,7 @@ function setLang(lang,_fromUrl){
   // Not loaded yet: draw now in English (the fallback t() already uses) and draw again the
   // moment the pack arrives. Never block the first paint on a network round trip.
   if(!_langLoaded(lang)){
-    if(!_fromUrl)_langRetryN=0; // a hand pick starts the waits again
+    if(!_fromUrl){_langRetryN=0;clearTimeout(_langRetryT);_langRetryT=null;} // a hand pick starts the waits again: a wait still pending (up to 5 min) kept its place, and the next ask came only then (2026-10-07)
     loadLangPack(lang).then(ok=>{if(S.lang!==lang)return;if(ok)setLang(lang,true);else _langRetryLater(lang);});
   }
   // Remembered only when the visitor chose it: a boot in the device's own language or a
@@ -2007,11 +2007,11 @@ function _staffRoleRetry(uid,n){
   n=n||0;if(n>=4)return;
   setTimeout(async()=>{
     if(!S._staffAuthed||!sb)return;
-    // the whole row: its sections and the forced password change apply once it answers, not only the role
-    let r=null;try{r=await sb.from('staff').select('role,modules_view,modules_edit,must_change_pwd').eq('user_id',uid).maybeSingle();}catch(e){r=null;}
-    if(r&&r.error&&/modules_view|must_change_pwd|42703/i.test((r.error.code||'')+' '+(r.error.message||''))){ // before the migration: the role alone
-      try{r=await sb.from('staff').select('role').eq('user_id',uid).maybeSingle();}catch(e){r=null;}
-    }
+    // the whole row, as the sign-in reads it: its sections, the forced password change and the account's
+    // own settings (name, picture, notifications) apply once it answers, not only the role. It named four
+    // columns, so after a lookup that failed the account's name never came and the operator gate asked
+    // for it again (2026-10-07)
+    let r=null;try{r=await sb.from('staff').select('*').eq('user_id',uid).maybeSingle();}catch(e){r=null;}
     if(r&&!r.error&&r.data){
       _staffRoleConfirmed(uid,r.data.role);_accessSet(r.data,uid);
       if(r.data.must_change_pwd&&!S._mustChangePwd){S._mustChangePwd=true;if(S.view==='staff')openStaffPwdModal(true);}
