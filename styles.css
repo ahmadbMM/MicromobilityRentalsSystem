@@ -7383,6 +7383,58 @@ body.view-staff .tm-save{display:flex;justify-content:flex-end;}
    scoped by the id of the section or dialog host the markup is drawn into, so it outranks every
    class rule (the body.view-staff layer included), exactly as the inline style did. */
 #tab-team .tm-mt0{margin-top:0;}
+/* ── Team > Part-timers (2026-10-07): log hours, what we owe over a range or picked rides ── */
+#tab-team .tm-views{margin:4px 0 14px;}
+#tab-team .pt-add{flex-wrap:wrap;}
+#tab-team .pt-add select{flex:1 1 220px;min-width:0;max-width:360px;height:38px;}
+#tab-team .pt-add input{flex:0 1 160px;}
+#tab-team .pt-person input{min-width:0;height:36px;}
+#tab-team .pt-person #pt-ed-name{flex:1 1 180px;}
+#tab-team .pt-person #pt-ed-rate{flex:0 1 120px;}
+#tab-team .pt-off strong{color:var(--muted);text-decoration:line-through;}
+#tab-team .pt-mail{font-size:var(--staff-fs-sm);color:var(--muted);overflow-wrap:anywhere;}
+#tab-team .pt-allin{margin-top:10px;}
+#tab-team .pt-log input,#tab-team .pt-log select{width:100%;}
+#tab-team .pt-log-foot{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+#tab-team .pt-amt{margin-inline-end:auto;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);}
+#tab-team .pt-modes{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+#tab-team .pt-who-f{margin-inline-start:auto;height:36px;max-width:240px;}
+#tab-team .pt-range{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px;}
+#tab-team .pt-range label{display:flex;flex-direction:column;gap:4px;font-size:var(--staff-fs-sm);font-weight:700;color:var(--muted);}
+#tab-team .pt-range input{height:36px;}
+#tab-team .pt-range .btn-sm{min-height:36px;}
+#tab-team .pt-cal{margin-bottom:14px;}
+#tab-team .pt-vt{margin-inline-start:auto;}
+#tab-team .pt-picked{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:13px;font-weight:700;}
+#tab-team .pt-picked span{margin-inline-end:auto;}
+#tab-team .pt-pick.on{background:rgba(var(--green-rgb),.18);box-shadow:inset 0 0 0 2px var(--green);}
+#tab-team .pt-pick.pt-none:not(.on),#tab-team .pt-ride.pt-none:not(.on){opacity:.6;}
+#tab-team .pt-rides{display:flex;flex-direction:column;}
+#tab-team .pt-ride{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--sf-line2);cursor:pointer;font-size:14px;}
+#tab-team .pt-ride input{width:18px;height:18px;flex:none;}
+#tab-team .pt-ride span{flex:1;min-width:0;}
+#tab-team .pt-ride em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);}
+#tab-team .pt-ride.on{background:rgba(var(--green-rgb),.08);}
+#tab-team .pt-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:4px 0 16px;}
+#tab-team .pt-tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid var(--sf-line2);border-radius:8px;background:var(--sf-card);}
+#tab-team .pt-tile span{font-size:var(--staff-fs-sm);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+html[dir="rtl"] #tab-team .pt-tile span{letter-spacing:0;}
+#tab-team .pt-tile strong{font-size:24px;font-variant-numeric:tabular-nums;}
+#tab-team .pt-owed{border-color:rgba(var(--green-rgb),.4);background:rgba(var(--green-rgb),.06);}
+#tab-team .pt-owed strong{color:var(--green);}
+#tab-team .pt-h{font-weight:700;margin:6px 0 8px;}
+#tab-team .pt-dim{color:var(--muted);font-weight:400;}
+#tab-team .pt-table{margin-bottom:14px;}
+#tab-team .pt-table td{font-variant-numeric:tabular-nums;vertical-align:middle;}
+#tab-team .pt-acts{white-space:nowrap;text-align:end;}
+#tab-team .pt-acts .btn-sm{margin-inline-start:4px;}
+#tab-team .pt-foot{display:flex;justify-content:flex-end;}
+@media(max-width:767px){
+  #tab-team .pt-tile{padding:10px;}
+  #tab-team .pt-tile strong{font-size:18px;}
+  #tab-team .pt-who-f{margin-inline-start:0;max-width:none;flex:1 1 100%;}
+  #tab-team .pt-vt{margin-inline-start:0;}
+}
 #team-mgr-modal .tm-z260{z-index:260;}
 #team-mgr-modal .tm-w400{max-width:400px;}
 #team-mgr-modal .tm-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
