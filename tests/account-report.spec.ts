@@ -502,3 +502,20 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     await expect(m.locator('#acr-count')).toContainText('4 / 11');
   });
 });
+
+test('Print default prints the saved community report: its own columns, community members only', async ({ page }) => {
+  await staff(page);
+  await expect(page.getByRole('button', { name: /Print default/ })).toBeVisible();
+  // the builder is set up (VIP picked as the tag on purpose) and saved as the default
+  await page.evaluate(`const o=_accOpts();o.cols.email=0;o.cols.spent=1;o.fTag='tag_vip';S.staffOptions={...(S.staffOptions||{}),acc_report_default:[JSON.parse(JSON.stringify(o))]}`);
+  await page.evaluate(`_accReset()`);   // the device's own choices go back to the house defaults
+  const r = await page.evaluate(`(()=>{const o=_accDefaultOpts();return {tag:o.fTag,email:o.cols.email,spent:o.cols.spent,ids:_accWith(o,()=>_accRows().map(r=>r.c.id)),html:_accWith(o,()=>_accReportHtml(t('acrDefaultTitle'))),dev:_accOpts().cols.email}})()`) as { tag: string; email: number; spent: number; ids: string[]; html: string; dev: number };
+  expect(r.tag).toBe('tag_saturday');   // the community tag is forced
+  expect(r.ids).toEqual(['c1']);        // c2's community tag has expired, c3 is VIP only
+  expect(r.email).toBe(0);
+  expect(r.spent).toBe(1);
+  expect(r.html).toContain('Community report');
+  expect(r.html).toContain('Spent (SAR)');
+  expect(r.html).not.toContain('Cara Vip');
+  expect(r.dev).toBe(1);                // the device's own builder is left as it was
+});
