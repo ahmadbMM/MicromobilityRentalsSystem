@@ -511,7 +511,9 @@ function _popStill(old,nu){
   if(!nu.isConnected||!nu.getClientRects().length)return; // drawn while hidden: nothing is on screen
   try{nu.getAnimations({subtree:true}).forEach(a=>{if(_POP_IN.has(a.animationName))a.finish();});}catch(e){}
   const name=_popName(nu);if(!name||name!==_popName(old))return; // another popup: it starts at its top
-  [old,...old.querySelectorAll('*')].forEach(el=>{if(el._popTop>0){const n=_popFind(nu,_popKey(old,el));if(n)n.scrollTop=el._popTop;}});
+  // The copy knows its place at once: its own scroll event comes a frame later, and a redraw before that (an answer
+  // from the server straight after a dialog was put back, _vendorUserAsk) sent it to the top (2026-10-07).
+  [old,...old.querySelectorAll('*')].forEach(el=>{if(el._popTop>0){const n=_popFind(nu,_popKey(old,el));if(n){n.scrollTop=el._popTop;n._popTop=n.scrollTop;}}});
   const f=_popFocus,ae=document.activeElement;
   if(f&&old.contains(f)&&(!ae||ae===document.body)){ // the focused control went with the old copy, and nothing has taken the focus since
     const n=_popFind(nu,_popKey(old,f));
@@ -32938,8 +32940,21 @@ async function _vendorUserAdd(){
   const msg=t('vndLoginAdded').replace('{0}',V.pw.login);logAction(msg);toast(msg,'success');
   _vendorVenRender();renderVendors();
 }
+// Reset password and Deactivate sign the login out of the vendor portal everywhere (both delete its vendor_sessions),
+// so they ask first, naming the login; Activate asks nothing (the owner, 2026-10-07: "yes" to "should they ask first?").
+// The question takes the venue dialog's place: what was typed there is kept, and the dialog is put back where it was,
+// scroll included (_popStill), before anything is sent, so the rest goes on as it did with no question. The login is
+// read again after the answer: a reload while the question was open brings new rows. Null: not confirmed.
+async function _vendorUserAsk(uid,q,body,btn){
+  const u=_vendor().users.find(x=>String(x.id)===String(uid)),was=document.querySelector('#confirm-modal .modal-backdrop');if(!u)return null;
+  _vendorVenGrab();
+  const ok=await askConfirm({title:t(q).replace('{0}',()=>u.login),body:esc(t(body)),confirmLabel:t(btn),confirmClass:'btn-red'});
+  _vendorVenRender();const nu=document.querySelector('#confirm-modal .modal-backdrop');if(was&&nu&&nu!==was)_popStill(was,nu);
+  return ok&&_vendor().users.find(x=>String(x.id)===String(uid))||null;
+}
 async function _vendorUserReset(uid){
-  const V=S._vendorVen,u=_vendor().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._vendorW)return;
+  const V=S._vendorVen;if(!V||S._vendorW)return;
+  const u=await _vendorUserAsk(uid,'vndResetQ','vndResetBody','vndResetPwd');if(!u)return;
   S._vendorW=true;
   let res;try{res=await sb.rpc('staff_vendor_user_reset',{p_user:u.id});}catch(e){res={error:e};}
   S._vendorW=false;
@@ -32950,7 +32965,8 @@ async function _vendorUserReset(uid){
   _vendorVenRender();
 }
 async function _vendorUserActive(uid,on){
-  const V=S._vendorVen,u=_vendor().users.find(x=>String(x.id)===String(uid));if(!V||!u||S._vendorW)return;
+  const V=S._vendorVen;if(!V||S._vendorW)return;
+  const u=on?_vendor().users.find(x=>String(x.id)===String(uid)):await _vendorUserAsk(uid,'vndDeactivateQ','vndDeactivateBody','vndDeactivate');if(!u)return;
   S._vendorW=true;
   let res;try{res=await sb.rpc('staff_vendor_user_active',{p_user:u.id,p_active:!!on});}catch(e){res={error:e};}
   S._vendorW=false;
@@ -36817,6 +36833,12 @@ async function saveTag(){
   }catch(e){toast((e&&e.message)||t('errServerError'),'error');}
 }
 async function deleteTag(id){
+  const tg0=(S.tags||[]).find(x=>x.id===id);if(!tg0||tg0.locked)return;
+  // It takes the tag off every account that holds it, so it asks first, naming the tag and how many accounts hold it,
+  // the count its row shows (the owner, 2026-10-07: "yes" to "should they ask first?"). The tag is read again after
+  // the answer: another device may have changed or deleted it while the question was open.
+  const held=(S.customerTags||[]).filter(ct=>ct.tag_id===id&&_tagActive(ct)).length;
+  if(!await askConfirm({title:t('wsDeleteTitle').replace('{0}',()=>tg0.name||''),body:`${esc(t('amHolders').replace('{0}',held))}<br>${esc(t('amTagDelBody'))}`,confirmLabel:t('deleteBtn'),confirmClass:'btn-red'}))return;
   const tg=(S.tags||[]).find(x=>x.id===id);if(!tg||tg.locked)return;
   const removedCT=(S.customerTags||[]).filter(ct=>ct.tag_id===id);
   try{

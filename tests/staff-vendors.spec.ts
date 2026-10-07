@@ -156,6 +156,7 @@ test.describe('@staff:vendors Vendors', () => {
     await expect(temp(25)).toHaveText('Temporary password'); // set before the deadline existed
     // Reset password on the expired one: a new temporary password, good for 72 hours.
     await dialog(page).locator('tr[data-vendor-user="22"] .vendor-u-reset').click();
+    await dialog(page).locator('.confirm-box .btn-red').click(); // it asks first (the owner, 2026-10-07; tests/ask-before-delete.spec.ts)
     await expect.poll(() => calls.filter((c) => c.fn === 'staff_vendor_user_reset').length).toBe(1);
     await expect(temp(22)).toContainText('Temporary password — expires');
     await expect(temp(22)).not.toHaveClass(/vendor-u-exp/);

@@ -97,7 +97,8 @@ test.describe('tag grants', () => {
 
   test('undoing a tag delete checks its writes and does not show the tag twice', async ({ page }) => {
     await open(page);
-    await page.evaluate(`deleteTag('tag_vip')`);
+    await page.evaluate(`void deleteTag('tag_vip')`);
+    await page.locator('#confirm-modal .btn-red').click(); // it asks first (the owner, 2026-10-07)
     await expect.poll(() => page.evaluate(`S.tags.length`)).toBe(0);
     // The staff-ref echo of the restore often lands before the answer does.
     const res = await page.evaluate(`(async () => { S.tags = [...S.tags, { id: 'tag_vip', name: 'VIP', slug: 'vip' }]; return await S.undoStack[S.undoStack.length - 1].fn(); })()`);
@@ -108,7 +109,8 @@ test.describe('tag grants', () => {
 
   test('an undo the server refuses says so instead of showing the tag restored', async ({ page }) => {
     await open(page, { table: 'tags', methods: ['POST'] });
-    await page.evaluate(`deleteTag('tag_vip')`);
+    await page.evaluate(`void deleteTag('tag_vip')`);
+    await page.locator('#confirm-modal .btn-red').click(); // it asks first (the owner, 2026-10-07)
     await expect.poll(() => page.evaluate(`S.tags.length`)).toBe(0);
     const res = await page.evaluate(`S.undoStack[S.undoStack.length - 1].fn()`);
     expect(res).toBe(false);
