@@ -170,9 +170,7 @@ test.describe('auth survives a dropped request', () => {
   test('signup is deliberately left alone, so a landed insert is never repeated', async ({ page }) => {
     await boot(page, [e('a', 1, 'Rider One', 'waiting')]);
     // the build minifies quote style, so match on the call shape rather than the literal
-    const reset = await page.evaluate(`doResetPassword.toString()`) as string;
     const signup = await page.evaluate(`doSignup.toString()`) as string;
-    expect(/_rpcResilient\(\s*["']customer_reset/.test(reset)).toBe(true);
     expect(/_rpcResilient\(\s*["']customer_signup/.test(signup)).toBe(false);
     expect(/sb\.rpc\(\s*["']customer_signup/.test(signup)).toBe(true);
   });

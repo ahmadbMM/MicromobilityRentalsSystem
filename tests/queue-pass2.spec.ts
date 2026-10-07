@@ -68,7 +68,7 @@ test('closing a future free ride leaves its riders as they are (sign-ups only pa
   expect(patches).toEqual([]);
 });
 
-test('closing a free session marks its approved riders completed, and no one else', async ({ page }) => {
+test('closing a free session completes the riders on a bike and makes the unchecked ones no-shows, and no one else', async ({ page }) => {
   // on the ride's own day: closing a future one only pauses sign-ups (next test)
   const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
   const free = { id: TODAY + '-sat', day: 'Saturday', session_date: TODAY, capacity: 20, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, needs_approval: true, spots: 20 };
@@ -83,7 +83,8 @@ test('closing a free session marks its approved riders completed, and no one els
   await expect.poll(() => patches.length).toBe(2);
   const act = patches.find(p => p.url.includes('a2'))!, wait = patches.find(p => p.url.includes('a1'))!;
   expect(act.body.status).toBe('done'); expect(act.body.checked_out_at).toBeTruthy(); expect(act.body.checked_in_at).toBeUndefined();
-  expect(wait.body.status).toBe('done'); expect(wait.body.checked_in_at).toBeTruthy();
+  // never checked in: a no-show (the owner, 2026-10-07), with no made-up check-in time
+  expect(wait.body.status).toBe('noshow'); expect(wait.body.checked_in_at).toBeUndefined(); expect(wait.body.checked_out_at).toBeUndefined();
   expect(patches.some(p => p.url.includes('a3') || p.url.includes('a4'))).toBe(false);   // never selected: untouched
 });
 

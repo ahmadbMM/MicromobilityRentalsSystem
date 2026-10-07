@@ -3,7 +3,6 @@ import { stubSupabase, waitForSb } from './helpers/supabase';
 
 // Sign-in paths that must tell a failed request apart from an answer.
 
-const customer = { id: 'c9', name: 'Test User', email: 'x@y.com', phone: '+966508727012', height: 170, type_preference: 'Any', created_at: '2026-01-01', session_token: 'tok9' };
 
 async function boot(page: Page, fixtures: Record<string, unknown> = {}) {
   await stubSupabase(page, fixtures);
@@ -36,20 +35,3 @@ test('a Google return with no account still goes to the new-account form', async
   expect(await page.evaluate('S._pendingGoogle && S._pendingGoogle.email')).toBe('g@example.com');
 });
 
-test('a second tap on Reset while the first is out sends nothing', async ({ page }) => {
-  await boot(page);
-  let calls = 0;
-  await page.route(/\/rest\/v1\/rpc\/customer_reset/, async (route) => {
-    calls++;
-    await new Promise((r) => setTimeout(r, 400));
-    await route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([customer]) });
-  });
-  await page.evaluate(`openAuthModal();switchAuthMode('forgot');S.forgotEmail='x@y.com';S.forgotCc='+966';S.forgotPhoneRaw='0508727012';S.forgotVerified='pending';S.forgotStep=2;renderAuthModal()`);
-  await page.fill('#a-reset-pwd', 'Zq8xTselah');
-  await page.fill('#a-reset-pwd2', 'Zq8xTselah');
-  await page.evaluate('doResetPassword();doResetPassword();doResetPassword()');
-  await page.waitForFunction('S.loggedIn && S.loggedIn.session_token==="tok9"');
-  await page.waitForTimeout(200);
-  expect(calls).toBe(1);
-  expect(await page.evaluate('!!S._authBusy')).toBe(false);          // released for the next flow
-});

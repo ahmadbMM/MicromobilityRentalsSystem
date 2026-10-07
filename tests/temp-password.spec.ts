@@ -71,17 +71,18 @@ test('Generate makes a random temporary password; saving it marks it temporary a
   expect(log).not.toContain(pwd2);
 });
 
-test('a password staff type themselves is set as before, with no temporary mark and no message', async ({ page }) => {
+// Every password staff set is temporary (the owner, 2026-10-07): typed by hand too, the rider picks
+// their own at the next sign-in, and staff get the message to send.
+test('a password staff type themselves is temporary too, with the message to send', async ({ page }) => {
   await editor(page);
   const calls = rpcs(page);
   await page.locator('.cf-pwd-gen').click();
   await page.locator('#cf-pwd').fill('MyChoice99'); // generated, then replaced by hand
-  await expect(page.locator('#cf-pwd-temp')).toBeHidden();
+  await expect(page.locator('#cf-pwd-temp')).toBeVisible();
   await page.evaluate('saveCustForm()');
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0]).toEqual({ fn: 'staff_set_customer_password', body: { p_customer_id: 'c1', p_new_pwd: 'MyChoice99' } });
-  await page.waitForTimeout(300);
-  await expect(page.locator('#confirm-modal .ca-msg-box')).toHaveCount(0);
+  expect(calls[0]).toEqual({ fn: 'staff_set_customer_temp_password', body: { p_customer_id: 'c1', p_new_pwd: 'MyChoice99' } });
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toHaveCount(1);
 });
 
 test('a refused temporary password says so and keeps the editor open', async ({ page }) => {

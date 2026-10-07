@@ -104,14 +104,12 @@ test.describe('@customer:a11y every field on the rider pages has a name', () => 
       ['#acc-city', 'City of residence'], ['#acc-nationality', 'Nationality']] as const) await named(page, sel, name);
   });
 
-  test('Create account and Forgot password name the country code; the cancel dialog names its own reason', async ({ page }) => {
+  test('Create account names the country code; the cancel dialog names its own reason', async ({ page }) => {
     await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
     await page.goto('/signup');
     await waitForSb(page);
     await expect(page.locator('#a-cc')).toBeVisible();
     await named(page, '#a-cc', 'Country code');
-    await page.evaluate(`switchAuthMode('forgot')`);
-    await named(page, '#a-forgot-cc', 'Country code');
     await page.evaluate(`showCancelReasonModal('none')`);
     await page.locator('#cancel-reason-modal .cancel-reason-opt').last().click(); // Other: the box for their own words
     await expect(page.locator('#cancel-other-text')).toBeVisible();
