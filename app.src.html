@@ -22192,8 +22192,7 @@ async function _checkinMany(idList){
     if(r&&r.error&&/^BAD_BOOKING_STATE/.test(String(r.error.message||'')))return{};
     if(!(r&&r.error)&&r&&r.data&&r.data.ok===true&&r.data.noop!==true){
       landed.push(id);
-      await _addonsOnLeaveWaitlist(e,!!wasWl.get(id));
-      await _mwRetireLinked(id); // a Staff List row carrying this booking is spent once they ride
+      await _ciLeaveWl(e||{id},!!wasWl.get(id)); // the add-ons' stock, the Staff List row, and what Undo check-in reads
     }
     return r||{};
   }));
@@ -24046,10 +24045,22 @@ async function _redoPromotion(p){
 }
 // A Staff List row linked to this booking is spent once the booking leaves the waitlist
 // (promoted / cancelled), whichever page did it.
+// Resolves the ids of the rows it spent: an Undo check-in that puts the rider back on the waitlist
+// brings them back (_mwReviveLinked, 2026-10-07).
 async function _mwRetireLinked(bookingId,status){
-  const rows=(S.deskWaitlist||[]).filter(w=>w.booking_id===bookingId&&w.status==='waiting');
+  const rows=(S.deskWaitlist||[]).filter(w=>w.booking_id===bookingId&&w.status==='waiting'),spent=[];
   for(const w of rows){
-    if(!await _wr(sb.from('desk_waitlist').update({status:status||'done',resolved_at:new Date().toISOString()}).eq('id',w.id),'update staff list'))w.status=status||'done';
+    if(!await _wr(sb.from('desk_waitlist').update({status:status||'done',resolved_at:new Date().toISOString()}).eq('id',w.id),'update staff list')){w.status=status||'done';spent.push(w.id);}
+  }
+  return spent;
+}
+// The Staff List rows a check-in off the waitlist spent, on the list again with the rider when that
+// check-in is undone: guarded on still being spent, so a row taken off the list meanwhile stays off.
+async function _mwReviveLinked(ids){
+  for(const id of ids||[]){
+    const r=await sb.from('desk_waitlist').update({status:'waiting',resolved_at:null}).eq('id',id).eq('status','done').select('id');
+    if(_writeErr(r,'update staff list'))return;
+    const w=_landed(r)&&(S.deskWaitlist||[]).find(x=>x.id===id);if(w){w.status='waiting';w.resolved_at=null;}
   }
 }
 async function doNoShow(id){
@@ -24650,19 +24661,28 @@ async function _bulkReturnRun(plan){
   renderStaffQueue();
 }
 // The write halves of Undo check-in, shared by one rider and a whole party. _undoCheckinWrite
-// resolves {bikeIds,checkedInAt}, {lost:true} (another desk moved the rider first) or null
+// resolves {bikeIds,checkedInAt,to,wn}, {lost:true} (another desk moved the rider first) or null
 // (refused, already said); _redoCheckinWrite undoes it.
-async function _undoCheckinWrite(entry){
+// from: the status the rider had right before this check-in. A rider who came off the waitlist goes
+// back onto it (the owner, 2026-10-07: "back to waitlist" - put back as waiting they held a place, and
+// could over-fill a full night), with the W number the row kept through the check-in (the queue number
+// never moved), and what leaving the waitlist did is reversed: the add-ons' stock comes back and the
+// Staff List rows the check-in spent (as this device knows them, _ciLeftWl) are on the list again.
+// Anything else - and a caller that names nothing, like the booking editor taking a rider off their
+// bike to move them - goes back to waiting, as it always did. extra: more of the row put back in the
+// same write (the bike picker's fare).
+async function _undoCheckinWrite(entry,from,extra){
   // The row as this device holds it now, not as it was at check-in (2026-10-05): Express and the
   // bike picker hand their undo the entry of that moment, and a bike changed since (12 swapped for
   // 14, then 12 given to another rider) was freed from under its new rider. The write is guarded on
   // the bike link read here as well, so a copy that is behind loses the race instead of guessing.
   const cur=getQueue().find(x=>x.id===entry.id)||entry;
   const id=cur.id,bikeIds=getAssignedBikeIds(cur),checkedInAt=cur.checkedInAt||null;
+  const to=from==='waitlist'?'waitlist':'waiting',wn=to==='waitlist'?_ciWlNum(cur):null;
   // The rider first, guarded on still being on the bike, and only then the bike: freeing it in
   // the same breath let a desk whose copy was behind (the rider already returned, the bike out
   // again under someone else) put that bike back on the rack mid-ride.
-  let _uq=sb.from('queue_entries').update({status:'waiting',assigned_bike_id:null}).eq('id',id).eq('status','active');
+  let _uq=sb.from('queue_entries').update({status:to,assigned_bike_id:null,...(wn?{waitlist_num:wn}:{}),...(extra||{})}).eq('id',id).eq('status','active');
   _uq=cur.assignedBikeId==null?_uq.is('assigned_bike_id',null):_uq.eq('assigned_bike_id',cur.assignedBikeId);
   const _ur=await _uq.select('id');
   if(_writeErr(_ur,'undo check-in'))return null;
@@ -24670,32 +24690,73 @@ async function _undoCheckinWrite(entry){
   if(bikeIds.length)await _releaseBikes(bikeIds,'undo check-in',true); // only while still in use: one sent to maintenance meanwhile stays out
   await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',id),'undo check-in');
   try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
-  return{bikeIds,checkedInAt};
+  const mw=_ciLeftWl.get(id);_ciLeftWl.delete(id);
+  if(to==='waitlist'){
+    await _restockAddonsOnExit(cur); // a waitlisted booking holds no add-on stock
+    if(mw&&mw.length)await _mwReviveLinked(mw);
+  }
+  return{bikeIds,checkedInAt,to,wn};
+}
+// The W number a rider going back onto the waitlist takes: the one the row kept through the check-in,
+// unless a rider on the waitlist holds it now, then the next one - the database's own rule for a staff
+// write (_wl_num_assign keeps the number staff send, and gives one already taken the next).
+function _ciWlNum(e){
+  const n=e.waitlistNum;
+  return n&&!getQueue().some(x=>x.id!==e.id&&x.sessionId===e.sessionId&&x.status==='waitlist'&&x.waitlistNum===n)?n:nextWlNum(e.sessionId);
+}
+// Which of these riders, on a bike now, came off the waitlist at their check-in (2026-10-07), as ids. A
+// row that never waited there carries no W number and is not asked about (unless this device checked it
+// in off the waitlist: its copy may have lost the number). The database's record of the
+// row says which status it left for 'active' (audit_log, staff-read since 20260928200000; a re-open,
+// done -> active, is not a check-in), so a check-in made on another desk or before a reload is known
+// too; this device's own check-ins (_ciLeftWl) answer when that record cannot be read.
+async function _ciCameFromWl(es){
+  const ids=(es||[]).filter(e=>e&&(e.waitlistNum||_ciLeftWl.has(e.id))).map(e=>e.id),out=new Set();
+  if(!ids.length)return out;
+  const was=new Map();
+  try{
+    // newest first; the status change of each row comes back as {status:{old,new}}
+    const r=await sb.from('audit_log').select('row_id,changed->status').eq('tbl','queue_entries').in('row_id',ids)
+      .eq('changed->status->>new','active').order('id',{ascending:false}).limit(ids.length*10);
+    if(!r.error)(r.data||[]).forEach(a=>{const s=a&&a.status;if(s&&s.new==='active'&&ids.includes(a.row_id)&&!was.has(a.row_id)&&(s.old==='waiting'||s.old==='waitlist'))was.set(a.row_id,s.old);});
+  }catch(_){}
+  ids.forEach(id=>{if(was.has(id)?was.get(id)==='waitlist':_ciLeftWl.has(id))out.add(id);});
+  return out;
+}
+// The row as an Undo check-in left it, painted before the reload (paint first, reconcile after).
+function _ciUndoLocal(id,w){
+  const e=getQueue().find(x=>x.id===id);
+  if(e&&w&&w.to)Object.assign(e,{status:w.to,assignedBikeId:null,checkedInAt:null},w.to==='waitlist'?{waitlistNum:w.wn}:{});
 }
 // checkedInAt: the arrival the undo cleared, written back with the redo (2026-10-05) - without it
-// the ride's minutes, the two-hour flag and the analytics lost their start.
-async function _redoCheckinWrite(id,bikeIds,checkedInAt){
+// the ride's minutes, the two-hour flag and the analytics lost their start. from: where the undo left
+// the rider ('waiting' unless named); one it put back on the waitlist leaves it again, as a check-in does.
+async function _redoCheckinWrite(id,bikeIds,checkedInAt,from){
   // The freed bike may have been assigned to someone else since — reclaim atomically.
   const claimed=await _reclaimBikes(bikeIds);
   if(claimed.length<bikeIds.length)toast(t('errBikeUnavailable'),'warning');
   const assignedVal=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
   const patch={status:'active',assigned_bike_id:assignedVal};
   if(checkedInAt)patch.checked_in_at=checkedInAt;
-  const _u=await sb.from('queue_entries').update(patch).eq('id',id).eq('status','waiting').select('id');
+  const wl=from==='waitlist';
+  const _u=await sb.from('queue_entries').update(patch).eq('id',id).eq('status',wl?'waitlist':'waiting').select('id');
   if(_writeErr(_u,'undo')||!_landed(_u)){await _releaseBikes(claimed,'undo');return false;}
   const _at=checkedInAt?Date.parse(checkedInAt):NaN;
   try{localStorage.setItem('cq_ct_'+id,Number.isFinite(_at)?_at:Date.now());}catch(e){}
+  if(wl){const e=getQueue().find(x=>x.id===id);if(e)await _ciLeaveWl(e,true);}
   return true;
 }
 async function doUndoCheckin(id){
   const entry=getQueue().find(e=>e.id===id);if(!entry||entry.status!=='active')return;
-  const w=await _undoCheckinWrite(entry);
+  const fromWl=(await _ciCameFromWl([entry])).has(id); // off the waitlist at check-in: back onto it (2026-10-07)
+  const w=await _undoCheckinWrite(entry,fromWl?'waitlist':'waiting');
   if(!w){await loadData();renderStaffQueue();return false;}
   if(w.lost){await _lostRace();return false;}
+  _ciUndoLocal(id,w);renderStaffQueue(); // paint first, reconcile after
   await loadData();
-  toast(t('toastUndoCheckin'));
+  toast(w.to==='waitlist'?t('toastUndoCheckinWl'):t('toastUndoCheckin'));
   pushUndo(`${t('undoUndoCheckin')} #${entry.queueNum} ${entry.name}`,async()=>{
-    const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt);
+    const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt,w.to);
     await loadData();renderStaffQueue();
     if(!ok)return false;
   });
@@ -24730,14 +24791,16 @@ function confirmPartyNoShow(ids){
 }
 async function _undoCheckinMany(ids){
   const es=_liveOf(ids,'active');if(!es.length)return;
+  const wl=await _ciCameFromWl(es); // who came off the waitlist at check-in goes back onto it (2026-10-07)
   const done=[];
-  for(const e of es){const w=await _undoCheckinWrite(e);if(!w)break;if(w.lost)continue;done.push({id:e.id,bikeIds:w.bikeIds,at:w.checkedInAt});} // a rider another desk moved first is theirs, not ours to undo
+  for(const e of es){const w=await _undoCheckinWrite(e,wl.has(e.id)?'waitlist':'waiting');if(!w)break;if(w.lost)continue;_ciUndoLocal(e.id,w);done.push({id:e.id,bikeIds:w.bikeIds,at:w.checkedInAt,to:w.to});} // a rider another desk moved first is theirs, not ours to undo
+  if(done.length)renderStaffQueue(); // paint first, reconcile after
   await loadData();
   if(done.length){
     toast(t('partyUndoneToast').replace('{0}',done.length));
     pushUndo(`${t('undoUndoCheckin')} · ${done.length}`,async()=>{
       let ok=true;
-      for(const d of done)if(!(await _redoCheckinWrite(d.id,d.bikeIds,d.at)))ok=false;
+      for(const d of done)if(!(await _redoCheckinWrite(d.id,d.bikeIds,d.at,d.to)))ok=false;
       await loadData();renderStaffQueue();
       if(!ok)return false;
     });
@@ -26919,7 +26982,9 @@ async function _expressCheckin(entry,say){
   renderStaffQueue();
   pushUndo(`${t('checkInBtn')}: ${done.map(d=>'#'+(d.e.queueNum??'')+' '+(d.e.name||'')).join(', ')}`,async()=>{
     let ok=true;
-    for(const d of done){const w=await _undoCheckinWrite(d.e);if(!w||w.lost)ok=false;}
+    const wl=await _ciCameFromWl(done.map(d=>getQueue().find(x=>x.id===d.e.id)||d.e)); // off the waitlist: back onto it (2026-10-07)
+    for(const d of done){const w=await _undoCheckinWrite(d.e,wl.has(d.e.id)?'waitlist':'waiting');if(!w||w.lost)ok=false;else _ciUndoLocal(d.e.id,w);}
+    renderStaffQueue(); // paint first, reconcile after
     await loadData();renderStaffQueue();
     if(!ok)return false;
   });
@@ -26936,8 +27001,7 @@ async function _expressCheckinOne(e){
   if(d.reservation_dropped===true)toast(`${e.name||''}: ${t('errBikeUnavailable')}`,'warning');
   try{localStorage.setItem('cq_ct_'+e.id,Date.now());}catch(_){}
   Object.assign(e,{status:'active'},bikeIds.length===1?{assignedBikeId:bikeIds[0]}:{});
-  await _addonsOnLeaveWaitlist(e,wasWl);
-  await _mwRetireLinked(e.id);
+  await _ciLeaveWl(e,wasWl);
   if(bikeIds.length)await _dropOtherReservations(bikeIds,e.id);
   _ciDropDraft(e.id);
   return{e,bikeIds};
@@ -27604,6 +27668,18 @@ function _ciCarryPay(){S._ciPayCarry=(S._ciPayPicked&&S._ciPayPicked===S._ciId&&
 async function _addonsOnLeaveWaitlist(entry,wasWaitlist){
   if(wasWaitlist)await _consumeAddonsOnEnter(entry);
 }
+// What a check-in does on top of the row, on every path (the modal, bulk and the Staff List's party,
+// Express, the bike picker, a Petromin registration, the redo of an Undo check-in): the add-ons' stock
+// for a rider leaving the waitlist, and the Staff List row carrying the booking, spent once they ride.
+// This device keeps, per booking it checked in off the waitlist, the Staff List rows that spent
+// (_ciLeftWl): an Undo check-in puts that rider back on the waitlist and brings the rows back with
+// them (the owner, 2026-10-07: "back to waitlist").
+const _ciLeftWl=new Map();
+async function _ciLeaveWl(e,wasWl){
+  await _addonsOnLeaveWaitlist(e,wasWl);
+  const spent=await _mwRetireLinked(e.id);
+  if(wasWl)_ciLeftWl.set(e.id,spent);else _ciLeftWl.delete(e.id);
+}
 // One Confirm at a time. A double tap ran the whole check-in twice: staff_checkin answers a
 // repeat with a no-op success, so everything after it ran again - a waitlisted rider's add-ons
 // taken from stock twice, the log line twice, the next rider's modal reset under the staffer.
@@ -27745,8 +27821,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   if(_gotBikes.length===1)e.assignedBikeId=_gotBikes[0];else if(!_gotBikes.length)e.assignedBikeId=null;
   Object.assign(e,{status:'active',typePreference:ty},patch.paid!==undefined?{paid:patch.paid}:{},patch.price!==undefined?{price:patch.price}:{}); // Pending too: the row read Paid until the re-sync (2026-10-07)
   S._flashId=e.id;S._flashColor='green';renderStaffQueue(); // the row moves now; the re-sync below confirms it
-  await _addonsOnLeaveWaitlist(e,_wasWl);
-  await _mwRetireLinked(e.id); // a Staff List row carrying this booking is spent once they ride
+  await _ciLeaveWl(e,_wasWl); // the add-ons' stock and the Staff List row, kept for an Undo check-in
   if(_gotBikes.length)await _dropOtherReservations(_gotBikes,e.id);
   logAction(`${t('checkInBtn')}: #${e.queueNum} ${e.name}`);
   _ciDropDraft(e.id);
@@ -28244,6 +28319,7 @@ async function _confirmAssignRun(){
   const rider=getQueue().find(e=>e.id===S.modalRider);
   if(!rider){closeModal();return _lostRace();} // the booking went on another desk: nothing to hand a bike to
   if(S.modalBikes.length>1){toast(t('errMaxOneBike'),'error');S.modalBikes=S.modalBikes.slice(0,1);renderModal();return;} // drawn as trimmed, or the next Confirm freed a bike nobody saw dropped
+  const _wasWl=rider.status==='waitlist'; // handed a bike straight off the waitlist (read before any write)
   const allBikes=getBikes();
   const selected=S.modalBikes.map(id=>allBikes.find(b=>b.id===id)).filter(Boolean);
   
@@ -28431,7 +28507,9 @@ async function _confirmAssignRun(){
   // freed before the booking write, a failed write left the rider's bike marked available under
   // them. Only while it is still in-use, so one sent to maintenance meanwhile stays out of service.
   if(toFree.length&&!viaSwap)await _releaseBikes(toFree,'bike assign',true);
-  if(rider&&rider.status==='waitlist'){await _addonsOnLeaveWaitlist(rider,true);await _mwRetireLinked(riderId);} // handed a bike straight off the waitlist
+  // Handed a bike straight off the waitlist: the add-ons' stock and the Staff List row, kept for an Undo
+  // check-in. A first check-in from waiting leaves the Staff List as it always has (and forgets an older one).
+  if(_wasWl)await _ciLeaveWl(rider,true);else if(!isReassign)_ciLeftWl.delete(riderId);
   await _dropOtherReservations(selected.map(b=>b.id),riderId); // "assign anyway" moves the reservation, it does not share it
   if(rider&&rider.typePreference==='Any'&&selected.length>0){
     await _wr(sb.from('queue_entries').update({type_preference:selected[0].type}).eq('id',riderId),'save bike type');
@@ -28479,18 +28557,14 @@ async function _confirmAssignRun(){
     pushUndo(`${t('undoCheckin')} #${qn} ${rName}`,async()=>{
       // The row as it is now (2026-10-05): a bike changed since is the one to free, and the bike
       // handed over here, maybe under another rider by now, is left alone. Guarded on that link too.
-      const cur=getQueue().find(e=>e.id===riderId);
-      const curRaw=cur?cur.assignedBikeId:assignedVal;
-      const undoEntry={status:'waiting',assigned_bike_id:null};
-      if(priceUpdate.price!=null&&prevPrice!=null)undoEntry.price=prevPrice;
-      let uq=sb.from('queue_entries').update(undoEntry).eq('id',riderId).eq('status','active');
-      uq=curRaw==null?uq.is('assigned_bike_id',null):uq.eq('assigned_bike_id',curRaw);
-      const u=await uq.select('id');
-      if(_writeErr(u,'undo check-in')){await loadData();renderStaffQueue();return false;}
-      if(!_landed(u)){await _lostRace();return false;}
-      try{localStorage.removeItem('cq_ct_'+riderId);}catch(e){}
-      await _releaseBikes(cur?getAssignedBikeIds(cur):needsUpdate.map(b=>b.id),'bike assign',true);
-      await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',riderId),'undo check-in');
+      // Through Undo check-in's own write (2026-10-07), the fare the bike set put back with it: a rider
+      // handed the bike straight off the waitlist goes back onto it (the owner: "back to waitlist").
+      const cur=getQueue().find(e=>e.id===riderId)||{...rider,status:'active',assignedBikeId:assignedVal};
+      const fromWl=(await _ciCameFromWl([cur])).has(riderId);
+      const w=await _undoCheckinWrite(cur,fromWl?'waitlist':'waiting',(priceUpdate.price!=null&&prevPrice!=null)?{price:prevPrice}:null);
+      if(!w){await loadData();renderStaffQueue();return false;}
+      if(w.lost){await _lostRace();return false;}
+      _ciUndoLocal(riderId,w);renderStaffQueue(); // paint first, reconcile after
       await loadData();renderStaffQueue();
     });
   }
@@ -30362,8 +30436,7 @@ async function _riderBookingIn(r){
     toast(`✓ ${r.name||''} · ${t('assignedBikeLabel')}: ${got.name}`);
   }
   try{localStorage.setItem('cq_ct_'+e.id,Date.now());}catch(_){} // the ride time the return records
-  await _addonsOnLeaveWaitlist(e,wasWl);
-  await _mwRetireLinked(e.id);
+  await _ciLeaveWl(e,wasWl);
   if(got)await _dropOtherReservations([got.id],e.id);
   logAction(`${t('checkInBtn')}: #${e.queueNum} ${e.name}`);
   return e.id;
@@ -30377,8 +30450,11 @@ async function _riderBookingOut(r){
 }
 async function _riderBookingUndoIn(r){
   const e=_riderEntry(r);if(!e||e.status!=='active')return null;
-  const w=await _undoCheckinWrite(e);
-  return w&&!w.lost?e.id:null;
+  const fromWl=(await _ciCameFromWl([e])).has(e.id); // off the waitlist at check-in: back onto it (2026-10-07)
+  const w=await _undoCheckinWrite(e,fromWl?'waitlist':'waiting');
+  if(!w||w.lost)return null;
+  _ciUndoLocal(e.id,w); // the reload after the whole action reconciles it
+  return e.id;
 }
 async function _riderBookingUndoOut(r){
   const e=_riderEntry(r);if(!e||e.status!=='done')return null;
