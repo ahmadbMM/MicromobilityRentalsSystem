@@ -18938,7 +18938,9 @@ function _flagToggle(k){
   const c=(S.customers||[]).find(x=>String(x.id)===String(f.id));
   const b=document.querySelector(`#confirm-modal .fl-row[data-flag="${k}"]`);
   if(!b||!c){_renderFlagModal();return;}
+  const had=document.activeElement===b;
   b.outerHTML=_flagRowHtml(c,k);
+  if(had)document.querySelector(`#confirm-modal .fl-row[data-flag="${k}"]`)?.focus(); // a keyboard tick keeps its place (2026-10-07)
   const send=document.getElementById('fl-send');
   if(send){send.disabled=!f.sel.size;send.innerHTML=`${_artIcon('flag',14)} ${_flagSendLabel()}`;}
 }
@@ -18994,14 +18996,14 @@ function _custJumpTags(id){
   renderCommunity();
   setTimeout(()=>{const w=document.getElementById('am-cust-rows');if(w)w.scrollIntoView({behavior:_sb(),block:'start'});},80);
 }
-function _cfSet(k,v,btn){if(!S._cf)return;S._cf[k]=v;if(btn&&btn.parentElement){[...btn.parentElement.children].forEach(b=>b.classList.remove('active'));btn.classList.add('active');}}
+function _cfSet(k,v,btn){if(!S._cf)return;S._cf[k]=v;if(btn&&btn.parentElement){[...btn.parentElement.children].forEach(b=>{b.classList.remove('active');b.setAttribute('aria-pressed','false');});btn.classList.add('active');btn.setAttribute('aria-pressed','true');}}
 // Multi-select toggle for the "on the house" bike types (no re-render: typed fields survive).
 function _cfDefTy(ty,btn){
   if(!S._cf)return;
   const a=S._cf.defpayTypes||(S._cf.defpayTypes=[]);
   const i=a.indexOf(ty);
   if(i>=0)a.splice(i,1);else a.push(ty);
-  if(btn)btn.classList.toggle('active',i<0);
+  if(btn){btn.classList.toggle('active',i<0);btn.setAttribute('aria-pressed',String(i<0));}
 }
 // Multi-select toggle for the HIDDEN bike types (types this customer never sees).
 function _cfHidTy(ty,btn){
@@ -19009,7 +19011,7 @@ function _cfHidTy(ty,btn){
   const a=S._cf.hiddenTypes||(S._cf.hiddenTypes=[]);
   const i=a.indexOf(ty);
   if(i>=0)a.splice(i,1);else a.push(ty);
-  if(btn)btn.classList.toggle('active',i<0);
+  if(btn){btn.classList.toggle('active',i<0);btn.setAttribute('aria-pressed',String(i<0));}
 }
 function _cfHiddenVal(){
   if(!S._cf)return null;
@@ -19096,7 +19098,7 @@ async function _cfSlReset(){
 // Under the field the editor says so, from staff_phone_accounts: which accounts hold the number
 // and which one it signs in. A database without that function refuses the number as before.
 function _cfPhFull(){
-  const raw=String((document.getElementById('cf-phone')||{}).value||'').replace(/\D/g,'');
+  const raw=_asciiDigits((document.getElementById('cf-phone')||{}).value||'').replace(/\D/g,'');
   return raw?_normPhone(raw,(document.getElementById('cf-cc')||{}).value||'+966'):'';
 }
 function _cfPhHtml(d){
@@ -19270,7 +19272,7 @@ function _cfEmHtml(d){
 function _cfEmVal(d){
   if(!d||!d.emIn||!document.getElementById('cf-em-name'))return null;
   const v=id=>String((document.getElementById(id)||{}).value||'');
-  const n=_nameClean(v('cf-em-name')),raw=v('cf-em-phone').replace(/\D/g,''),rel=v('cf-em-rel');
+  const n=_nameClean(v('cf-em-name')),raw=_asciiDigits(v('cf-em-phone')).replace(/\D/g,''),rel=v('cf-em-rel');
   if(!n&&!raw&&!rel)return{row:{emergency_name:null,emergency_phone:null,emergency_relation:null}};
   const ph=raw?_normPhone(raw,v('cf-em-cc')||'+966'):'';
   if([...n].length<2||!_nameCharsOk(n)||!_namePartsOk(n))return{err:t('errEmName')};
@@ -19284,7 +19286,7 @@ async function saveCustForm(){
   const first=val('cf-first'),middle=val('cf-middle'),last=val('cf-last');
   const email=_cleanIdent(val('cf-email')).toLowerCase();
   const cc=val('cf-cc')||'+966';
-  const phoneRaw=val('cf-phone').replace(/\D/g,'');
+  const phoneRaw=_asciiDigits(val('cf-phone')).replace(/\D/g,''); // digits typed on an Arabic keyboard are digits: \D alone dropped them and the save wiped the number (2026-10-07)
   const heightRaw=parseInt(val('cf-height'));
   const birth=val('cf-birth')||null;
   if(_dobErr(birth)){toast(_dobErr(birth),'error');document.getElementById('cf-birth-d')?.focus();return;}
@@ -19401,7 +19403,7 @@ function showWalkinModal(){
   // the button destroyed itself mid-click. A second quick tap then landed on a detached
   // node and did nothing. Restyle the buttons in place instead; nothing else here depends
   // on the selected type at render time.
-  const tyBtn=ty=>`<button type="button" data-wi-type="${esc(ty)}" data-on-click="${_on("_wiSetType",ty)}" class="${S._wiType===ty?'dk-wi-ty-on':'dk-wi-ty'}">${typeLabel(ty)}</button>`;
+  const tyBtn=ty=>`<button type="button" data-wi-type="${esc(ty)}" aria-pressed="${S._wiType===ty?'true':'false'}" data-on-click="${_on("_wiSetType",ty)}" class="${S._wiType===ty?'dk-wi-ty-on':'dk-wi-ty'}">${typeLabel(ty)}</button>`;
   const keep=id=>{const el=document.getElementById(id);return el?el.value:'';} // preserve typed values across type-pill re-renders
   const _n=keep('wi-name'),_p=keep('wi-phone'),_h=keep('wi-height'),_s=keep('wi-sess')||selId;
   // The type menu follows the picked session: 'Own' only where that ride takes owners, so
@@ -19442,6 +19444,7 @@ function showWalkinModal(){
         <button class="btn-primary" data-on-click="${_on("saveWalkinCheckin")}">${t('wiAddCheckinBtn')}</button>
       </div>
     </div></div>`;
+  _wiStockHint(); // the rebuilt hint line starts empty: a type, height or account already in the form says what is free at once (2026-10-07)
   setTimeout(()=>{const i=document.getElementById('wi-name');if(i&&!_n&&(!document.activeElement||document.activeElement===document.body))i.focus();},60); // don't steal focus from a fast typist
 }
 // The bike type goes with the rider it was picked for: kept across walk-ins, the next walk-up
@@ -19500,6 +19503,7 @@ function _wiPickCust(id){
   // The repaint rebuilds the extra-rider rows from state, so what was typed into them is read
   // back first; it used to vanish when the picked account's bike type differed.
   if(c.type_preference&&bikeTypeOpts(false).includes(c.type_preference)&&S._wiType!==c.type_preference){S._wiType=c.type_preference;_wiSync();showWalkinModal();}
+  else _wiStockHint(); // the height just filled changes the size on the rack
   document.getElementById('wi-phone')?.focus();
 }
 function _wiUseTyped(){S._wiCustId=null;_wiHideSuggest();document.getElementById('wi-phone')?.focus();}
@@ -19576,7 +19580,7 @@ async function _saveWalkin(){
   _wiSync();
   const name=_titleCaseName(_nameClean(document.getElementById('wi-name')?.value||'')); // the box also searches by phone, so it is not filtered as typed
   if(!name){const i=document.getElementById('wi-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
-  const phone=(document.getElementById('wi-phone')?.value||'').trim();
+  const phone=_asciiDigits(document.getElementById('wi-phone')?.value||'').trim();
   const height=parseInt(document.getElementById('wi-height')?.value)||null;
   const sessId=document.getElementById('wi-sess')?.value;
   const sess=allSessions().find(x=>x.id===sessId);if(!sess)return;
@@ -19621,13 +19625,12 @@ async function _saveWalkin(){
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showBookingEditModal_1(event,el,a0,a1){S._beType=a0;showBookingEditModal(a1)}
 function _on_showBookingEditModal_2(event,el){if(event.target===el)closeBookingEditModal()}
+function _on_showBookingEditModal_3(event,el){_beSyncNewRiders();showBookingEditModal(S._beId)}
 function showBookingEditModal(entryId){
   const e=getQueue().find(x=>x.id===entryId);if(!e)return;
   if(!['waiting','waitlist','active'].includes(e.status)){toast(t('errCancelWaiting'),'error');return;}
   const _beSess=allSessions().find(s=>s.id===e.sessionId);
   const _beComm=_isApprovalRide(_beSess); // an approval ride books one rider at a time — no add-riders row
-  const _beOwn=_ownOffered(_beSess); // 'Own' is offered on every community ride and the National Day ride
-  const _beNoCarbon=_noCarbon(_beSess); // Road Carbon is hidden on every community ride but Petromin
   S._beId=entryId;
   S._beType=S._beType&&S._beRender===entryId?S._beType:(e.typePreference||'Any');
   S._beRg=S._beRender===entryId?S._beRg:(e.rideGroup||null);
@@ -19636,7 +19639,13 @@ function showBookingEditModal(entryId){
   S._beRender=entryId;
   const keep=id=>{const el=document.getElementById(id);return el!=null&&el.value!==''?el.value:null;};
   const _n=keep('be-name')??e.name??'',_p=keep('be-phone')??e.phone??'',_h=keep('be-height')??(e.height?String(e.height):''),_s=keep('be-sess')??e.sessionId;
-  const tyBtn=ty=>`<button type="button" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" class="${S._beType===ty?'dk-be-ty-on':'dk-be-ty'}">${typeLabel(ty)}</button>`;
+  // The ride the booking goes to decides what the form asks (2026-10-07): drawn from the booking's own
+  // ride, a move onto Run for Her or a grouped Saturday ride was refused for a distance or a group the
+  // form never offered. Changing the Session repaints the form.
+  const _beTo=allSessions().find(s=>s.id===_s)||_beSess;
+  const _beOwn=_ownOffered(_beTo); // 'Own' is offered on every community ride and the National Day ride
+  const _beNoCarbon=_noCarbon(_beTo); // Road Carbon is hidden on every community ride but Petromin
+  const tyBtn=ty=>`<button type="button" aria-pressed="${S._beType===ty?'true':'false'}" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" class="${S._beType===ty?'dk-be-ty-on':'dk-be-ty'}">${typeLabel(ty)}</button>`;
   // Session move for any open booking (2026-09-28): a checked-in rider is taken off their bike
   // and put back in line on the new ride (the Undo check-in write, then the move); what was
   // paid stays paid, at its price. Capacity-checked like the customer reschedule.
@@ -19664,10 +19673,10 @@ function showBookingEditModal(entryId){
       </div>
       <div class="form-group dk-mb10"><label>${t('bikeTypeLabel')}</label>
         <div class="dk-flex6">${bikeTypeOpts(_beOwn,_beNoCarbon).map(tyBtn).join('')}</div></div>
-      ${_hasRideGroups(_beSess)?_rgField(S._beRg,'_beRgSet',_beSess):''}
-      ${_rideKind(_beSess)==='runher'?_runKmField(S._beKm,'_beKmSet'):''}
+      ${_hasRideGroups(_beTo)?_rgField(S._beRg,'_beRgSet',_beTo):''}
+      ${_rideKind(_beTo)==='runher'?_runKmField(S._beKm,'_beKmSet'):''}
       <div class="form-group dk-mb14"><label for="be-sess">${t('colSession')}</label>
-        <select id="be-sess">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
+        <select id="be-sess" data-on-change="${_on("_on_showBookingEditModal_3",_EV,_EL)}">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
       ${_beComm?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
         ${(S._beNewRiders||[]).map((r,i)=>`<div class="dk-be-rrow">
           <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0">
@@ -19701,7 +19710,7 @@ async function _saveBookingEdit(){
   const e=getQueue().find(x=>x.id===S._beId);if(!e){closeBookingEditModal();return;}
   const name=_titleCaseName(document.getElementById('be-name')?.value||'');
   if(!name){const i=document.getElementById('be-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
-  const phone=(document.getElementById('be-phone')?.value||'').trim();
+  const phone=_asciiDigits(document.getElementById('be-phone')?.value||'').trim();
   const height=parseInt(document.getElementById('be-height')?.value)||null;
   const ty=S._beType||e.typePreference||'Any';
   const toSessionId=document.getElementById('be-sess')?.value||e.sessionId;
@@ -19725,6 +19734,10 @@ async function _saveBookingEdit(){
     if(!_runKmOk(S._beKm)){toast(t('errRunKm'),'error');const f=document.querySelector('#booking-edit-modal .run-km-field');if(f)_groupErr(f,t('errRunKm'));return;}
     if(Number(S._beKm)!==Number(e.runKm))patch.run_km=Number(S._beKm);
   }else if(e.runKm)patch.run_km=null;
+  // The Undo puts back what the edit changed, the group and the distance too: a Saturday booking moved
+  // off its ride and back by Undo came back without its group (2026-10-07).
+  if('ride_group' in patch)prev.ride_group=e.rideGroup||null;
+  if('run_km' in patch)prev.run_km=e.runKm||null;
   const moving=toSessionId!==e.sessionId;let offBike=null;
   if(moving){
     const newSess=allSessions().find(s=>s.id===toSessionId);if(!newSess)return;
@@ -19903,15 +19916,20 @@ async function _wxEnsureForecast(){
   try{const c=JSON.parse(localStorage.getItem('cq_weather_fc')||'null');
     if(c&&c.at&&Date.now()-c.at<3*3600*1000){S.weatherFc=c.d;return;}}catch(_){}
   if(S.weatherFc&&S._wxAt&&Date.now()-S._wxAt<3*3600*1000)return;
+  // A failed fetch waits ten minutes (2026-10-07): it went out again on every repaint of the roster, which
+  // a busy night runs several times a minute, and an error answer was kept for three hours as "no forecast".
+  if(S._wxFailAt&&Date.now()-S._wxFailAt<600000)return;
   S._wxBusy=true;
   try{
     const r=await fetch('https://api.open-meteo.com/v1/forecast?latitude=21.6246&longitude=39.1068&daily=temperature_2m_max,wind_speed_10m_max&forecast_days=8&timezone=auto');
+    if(!r.ok)throw new Error('forecast '+r.status);
     const j=await r.json();
     const d={};(j.daily&&j.daily.time||[]).forEach((day,i)=>{d[day]={t:Math.round(j.daily.temperature_2m_max[i]),w:Math.round(j.daily.wind_speed_10m_max[i])};});
-    S.weatherFc=d;S._wxAt=Date.now();
+    if(!Object.keys(d).length)throw new Error('forecast empty');
+    S.weatherFc=d;S._wxAt=Date.now();S._wxFailAt=0;
     try{localStorage.setItem('cq_weather_fc',JSON.stringify({at:Date.now(),d}));}catch(_){}
     if(S.view==='staff'&&S.staffTab==='queue')renderStaffQueue();
-  }catch(_){}
+  }catch(_){S._wxFailAt=Date.now();}
   S._wxBusy=false;
 }
 // The suffix for one session chip: nothing when the date is out of range or the fetch never
@@ -20220,9 +20238,13 @@ function renderStaffQueue(_resultsOnly){
   // can never inflate the live Expected/On Bike counts.
   const _capDay=new Date(Date.now()+366*864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
   const _isLive=e=>{if(!_liveOnly)return true;const d=String(e.sessionDate||e.sessionId||'').slice(0,10);return d>=_liveDay&&d<=_capDay;};
+  // Completed = finished and settled. A free ride's riders and a bike owner with nothing to pay are never
+  // marked paid (there is nothing to mark), so they count once done; a free night read "0 completed" with
+  // every runner home (2026-10-07).
+  const _doneSettled=e=>e.status==='done'&&(e.paid||_freeSessIds.has(e.sessionId)||_ownFree(e));
   const total=base.length,nWait=base.filter(e=>e.status==='waiting'&&_isLive(e)).length,
         nBike=base.filter(e=>e.status==='active'&&_isLive(e)).length,nDone=base.filter(e=>e.status==='done').length,
-        nDonePaid=base.filter(e=>e.status==='done'&&e.paid).length;
+        nDonePaid=base.filter(_doneSettled).length;
   // The same night last week, for the deltas on the chips: same weekday, same kind of ride.
   const _prevWk=(()=>{
     if(S.sfSession==='all')return null;const cur=allSessions().find(x=>x.id===S.sfSession);if(!cur)return null;
@@ -20886,7 +20908,7 @@ function renderQRow(e){
     // any — an empty "0 waitlisted" on every ordinary session is noise.
     const nWaitlisted=base.filter(e=>e.status==='waitlist'&&_isLive(e)).length;
     return`<div class="stat-strip">
-      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${_statChip(nWait,t('statExpected'),'var(--green)',['setSfStatus','waiting'])}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(e=>_notHere(e,_liveDay,_nowMs)).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nBike,t('onBikeStat'),'var(--green)',['setSfStatus','active'])}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,e=>e.status==='done'&&e.paid),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
+      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${_statChip(nWait,t('statExpected'),'var(--green)',['setSfStatus','waiting'])}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(e=>_notHere(e,_liveDay,_nowMs)).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nBike,t('onBikeStat'),'var(--green)',['setSfStatus','active'])}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,_doneSettled),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
     </div>${(()=>{
       const od=base.filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN).length;
       if(!od)return'';
