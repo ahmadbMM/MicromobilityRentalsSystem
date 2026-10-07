@@ -22,7 +22,7 @@
 // Usage: node scripts/check-i18n.mjs   (exit 1 on any problem)
 import { readFileSync, existsSync } from 'node:fs';
 import * as acorn from 'acorn';
-import { resolveIncludes, mainScript } from './split-staff.mjs';
+import { resolveIncludes, mainScript, EMOJI_RE } from './split-staff.mjs';
 
 const SRC = new URL('../app.src.html', import.meta.url);
 const html = readFileSync(SRC, 'utf8');
@@ -112,8 +112,10 @@ for (const code of codes) {
   report('has extra', extra);
   report('has empty values for', empty);
   report('has different {n}/{name} placeholders from English in', badHoles);
-  // no emoji in any string (the owner, 2026-09-30): icons are drawn, messages are plain text
-  const emoji = Object.keys(pack).filter((k) => /[\u{1F000}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE0F}]/u.test(String(pack[k]).replace(/[\u2713\u2715\u270E\u2605]/g, '')));
+  // no emoji in any string (the owner, 2026-09-30): icons are drawn, messages are plain text. The
+  // build's own list (EMOJI_RE): this one lacked the star and the circle (U+2B50, U+2B55), and the
+  // build reads app.src.html only, so a pack carrying either passed both (2026-10-07).
+  const emoji = Object.keys(pack).filter((k) => EMOJI_RE.test(String(pack[k]).replace(/[\u2713\u2715\u270E\u2605]/g, '')));
   report('has an emoji in', emoji);
 }
 

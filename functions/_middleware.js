@@ -92,9 +92,11 @@ export async function onRequest(context) {
   if (reqUrl.hostname.toLowerCase() === 'micromobilityrentals.pages.dev') {
     const bike = (reqUrl.searchParams.get('bike') || '').trim();
     if (path === '/staff' || path.startsWith('/staff/') || STAFF_ROUTE.test(path) || reqUrl.searchParams.has('staff') || reqUrl.searchParams.has('bike')) {
-      // A staff section's own address keeps its path and query on the way over.
+      // A staff section's own address keeps its path and query on the way over. The path is the
+      // decoded one, so it is encoded again: a header value holds no character past U+00FF, and an
+      // Arabic letter in the address made the Response constructor throw - a 500 (2026-10-07).
       const to = STAFF_ROUTE.test(path) && !reqUrl.searchParams.has('bike')
-        ? STAFF_ORIGIN + path.replace(/\/+$/, '') + reqUrl.search
+        ? STAFF_ORIGIN + encodeURI(path.replace(/\/+$/, '')) + reqUrl.search
         : STAFF_ORIGIN + '/' + (/^[0-9A-Za-z-]{1,40}$/.test(bike) ? '?bike=' + bike : '');
       return new Response(null, { status: 302, headers: { location: to, 'cache-control': 'no-store' } });
     }

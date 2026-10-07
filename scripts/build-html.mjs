@@ -179,7 +179,9 @@ const staffKeys = staffOnlyLangKeys(allKeys, custHtml.slice(0, custLangSpan.star
 const langPart = (o, staff) => Object.fromEntries(Object.entries(o).filter(([k]) => staffKeys.has(k) === staff));
 custHtml = custHtml.slice(0, custLangSpan.start) + langText(langPart(LANG_ALL[INLINE_LANG], false)) + custHtml.slice(custLangSpan.end);
 const staffEn = langPart(LANG_ALL[INLINE_LANG], true);
-split.staff = split.staff.replace(/^(\/\/[^\n]*\n)/, `$1Object.assign(LANG.en,${JSON.stringify(staffEn)}); // the staff screens' English (scripts/build-html.mjs)\n`);
+// A function, not a replacement string: a string there reads "$&", "$'" or "$$" in a staff string as a
+// pattern, and would write that string into staff.js changed (2026-10-07).
+split.staff = split.staff.replace(/^(\/\/[^\n]*\n)/, (m, head) => `${head}Object.assign(LANG.en,${JSON.stringify(staffEn)}); // the staff screens' English (scripts/build-html.mjs)\n`);
 if (!split.staff.includes('Object.assign(LANG.en,')) throw new Error('build: the staff English strings were not written into staff.js');
 const langDir = new URL('../lang/', import.meta.url);
 await mkdir(langDir, { recursive: true });

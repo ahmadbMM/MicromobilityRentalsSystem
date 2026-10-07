@@ -148,6 +148,7 @@ self.addEventListener('fetch', (e) => {
   if (req.mode === 'navigate') {
     e.respondWith(
       Promise.all([caches.match(SHELL_KEY), caches.match(HOLD_KEY)]).then(([cached, held]) => {
+        let stored = Promise.resolve(); // the refresh's write to the cache, for waitUntil below
         const refresh = fetch(new Request(SHELL_KEY, { cache: 'no-cache' })).then((res) => {
           const safe = navSafe(res); // never store redirect history under the shell key
           if (isHold(safe)) {
@@ -167,7 +168,7 @@ self.addEventListener('fetch', (e) => {
             const oldTag = cached && cached.headers.get('etag');
             const changed = !!cached && (!newTag || !oldTag || newTag !== oldTag);
             const page = safe.clone();
-            caches.open(CACHE).then((c) => c.put(SHELL_KEY, copy).then(() => pageFiles(c, page))).then(() => {
+            stored = caches.open(CACHE).then((c) => c.put(SHELL_KEY, copy).then(() => pageFiles(c, page))).then(() => {
               if (changed) self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'shell-updated' })));
             });
           }
@@ -178,7 +179,14 @@ self.addEventListener('fetch', (e) => {
         // On hold, the network answers first: the hold page while it lasts, the app once it is over
         // (the hold page reloads itself every minute). Offline, the cached app is all there is.
         if (held) return refresh.catch(() => (cached ? navSafe(cached) : Response.error()));
-        if (cached) { refresh.catch(() => {}); return navSafe(cached); }
+        // The refresh outlives the answer, so the worker is kept alive until it is stored: once the
+        // cached shell has answered, nothing else held the worker, and the browser may stop an idle
+        // one before the new shell was written (2026-10-07).
+        if (cached) {
+          const kept = refresh.then(() => stored).catch(() => {});
+          try { e.waitUntil(kept); } catch (_) { /* the event is over: the refresh still runs */ }
+          return navSafe(cached);
+        }
         return refresh;
       })
     );
