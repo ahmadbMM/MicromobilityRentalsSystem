@@ -649,6 +649,20 @@ offer in the rider's language (`vndRiderOffer`).
   Medium / Low on New and Scheduled cards (`_laPrioRow`, `_laPrio`; a second tap clears; Undo), New ordered by it
   (`_laPrioRank`). Until the column exists the list loads without it and the cards carry none (`S._laNoPrio`).
 
+## Applications filters and sorts; money spent on every account list (2026-10-07)
+
+- **Applications** (both lists) have a Filter button (`_fBtn('caap'|'laap')`, panel `_apPanel(k)`): a Sort by
+  (`_apSorts(k)`, `S._apSort[k]`; "Suggested order" = the list's own order) and one dropdown per field the cards show
+  (`_apDefs(k)`: `[key, label, options, test]`, picks in `S._apF[k]`). Filters narrow the list AND every status
+  pill's count (`_apTests` → `_appN`/`_caInvN`/`_appIn`), like the search. A sort puts cards without the value last.
+  A new card field gets its filter by adding one row to `_apDefs`.
+- **Money spent** = `_spentOf(customerId)`: paid bookings by `_bookingRevenue` (a cancelled one keeps nothing), summed
+  by `_spentMap()` (cached 1 s: a booking marked paid changes neither the queue array nor its length). Bands
+  `SP_BANDS` / `_spOpts()` / `_spSel()` are shared; `_spLine(cid)` shows the total on a row while its filter or sort is
+  on. Wired into Accounts (`S.amSpent`, `S.amSort`), the account report (`fSpent`, sorts `spent`/`spentLo`),
+  Applications (through the card's account, `_apAcct`), Flagged (`S._flagSpent`/`S._flagSort`) and Birthdays
+  (`S._bdSpent`/`S._bdSort`). A new list of accounts should use the same helpers. `tests/list-filters-money.spec.ts`.
+
 ## Customer activity (2026-10-04)
 
 Customers > Activity (`/customers/activity`, `renderCustActivity` into `#cact-host`; History's until 2026-10-07) lists what customers did: bookings,

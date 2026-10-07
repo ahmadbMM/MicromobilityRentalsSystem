@@ -215,11 +215,11 @@ test.describe('Community > Birthdays', () => {
     const filter = page.locator('#tab-community .filter-toggle');
     await expect(filter).not.toContainText('(1)');
     await filter.click();
-    await page.locator('#fm-bd select').selectOption('tag_jcc');
+    await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');
     await expect(names(page)).toHaveText(['Not Member']);
     await expect(filter).toContainText('(1)');
     await expect(page.locator('#tab-community')).toContainText('Birthdays, soonest first.');  // no longer "Community members'"
-    await page.locator('#fm-bd select').selectOption('all');
+    await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('all');
     await expect(names(page)).toHaveCount(7);                                               // everyone with a date, a lapsed tag too
     expect(await page.evaluate('_bdTodayOpen().length')).toBe(1);                           // the bell: Amal alone, not the other two born today
   });
@@ -231,9 +231,9 @@ test.describe('Community > Birthdays', () => {
     await page.evaluate(`setCommTab('birthdays')`);
     await expect(names(page)).toHaveCount(5);
     await page.locator('#tab-community .filter-toggle').click();
-    await expect(page.locator('#fm-bd select')).toHaveValue('tag_saturday');
-    await expect(page.locator('#fm-bd select option:checked')).toHaveText('Community');
-    await page.locator('#fm-bd select').selectOption('tag_jcc');                            // the first tag can be picked
+    await expect(page.locator('#fm-bd select[aria-label="Tag"]')).toHaveValue('tag_saturday');
+    await expect(page.locator('#fm-bd select[aria-label="Tag"] option:checked')).toHaveText('Community');
+    await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');                            // the first tag can be picked
     await expect(names(page)).toHaveText(['Not Member']);
     // 700 more riders with a birth date: every account, 300 at a time
     await page.evaluate(`S.customers=[...S.customers,...Array.from({length:700},(_,i)=>({id:'x'+i,name:'Rider '+i,phone:'',birth_date:'1990-01-15',created_at:'2026-01-01T00:00:00Z'}))];_bdSetTag('all')`);

@@ -1143,7 +1143,12 @@ export function formatFieldNames(r, limit = 20) {
 // leaving the waitlist did), a party or booking moved onto Run for Her is asked its distance and age, a ride moved
 // to another date takes its announce time along, deleting a tag and resetting or deactivating a venue login ask
 // first, and 7 strings in each language (~+1.5 KB staff, ~+1.3 KB core).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 464, core: 253 };
+// Staff 464 -> 466 (2026-10-07, on top of the above): every filter on both Applications lists (and
+// Learn to ride's sort; the community list's Sort gains money spent, height, times sent and decided), and money spent
+// as a filter and a sort on every list of accounts (Accounts, the account report, Applications, Flagged, Birthdays),
+// 38 strings in each language; the owner asked for both. Here, on f89b9b24
+// + it: staff 461.4, core 249.1 (~463.5 / ~250.4 on the runner); the core stays within 253.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 466, core: 253 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
