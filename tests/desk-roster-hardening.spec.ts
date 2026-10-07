@@ -274,16 +274,19 @@ test('the walk-in type goes with its rider, and picking an account keeps the typ
   expect(await page.evaluate('S._wiType')).toBe('Hybrid');
 });
 
-test('an admin group on a Saturday ride is selected already and rides free', async ({ page }) => {
+test('a Saturday ride takes no group: Add group does not offer it, and a stale pick books nothing', async ({ page }) => {
+  // The owner, 2026-10-07: "remove the add group button from saturday and run for her".
   const COMM = '2099-03-07';
-  await boot(page, { sessions: [sess(COMM, { event_kind: 'community', ride_kind: 'saturday', needs_approval: true, spots: 20 })], queue_entries: [] });
+  await boot(page, { sessions: [sess(LIVE), sess(COMM, { event_kind: 'community', ride_kind: 'saturday', needs_approval: true, spots: 20 })], queue_entries: [] });
   const bookings = writes(page, 'queue_entries');
   await page.evaluate(`S.sfSession=${JSON.stringify(COMM)};showJccGroupModal()`);
+  await expect(page.locator('#jg-sess option')).toHaveCount(1);
+  await expect(page.locator(`#jg-sess option[value="${COMM}"]`)).toHaveCount(0);
   await page.fill('#jg-name', 'Falcons');
-  await page.locator('#jcc-group-modal .rg-field [data-rg="int"]').click(); // a Saturday ride asks the group (2026-10-02)
+  await page.evaluate(`(()=>{const s=document.getElementById('jg-sess');const o=document.createElement('option');o.value=${JSON.stringify(COMM)};s.appendChild(o);s.value=${JSON.stringify(COMM)};})()`);
   await page.evaluate(`saveJccGroup()`);
-  await expect.poll(() => bookings.length).toBe(2);
-  expect(bookings.map((b) => [b.approval, b.price, b.ride_group])).toEqual([['approved', 0, 'int'], ['approved', 0, 'int']]);
+  await page.waitForTimeout(300);
+  expect(bookings).toEqual([]);
 });
 
 test('Add rider offers an own bike only where the ride takes owners', async ({ page }) => {

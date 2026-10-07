@@ -6700,6 +6700,10 @@ function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='event'?Math.max(1,
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
 // queue numbers, seats that overflow to the waitlist, auto-promotion, the lot.
 function _isApprovalRide(s){return _isCommunity(s)&&(s.needs_approval!==false);}
+// No group is added at once to a Saturday ride or to Run for Her (the owner, 2026-10-07: "remove the add group
+// button from saturday and run for her"): their riders come one at a time, each with their own ride group,
+// distance and age check. The roster's Add group, its ride list and the Add rider dialog's Group all ask this.
+function _noGroupAdd(s){const k=s&&_rideKind(s);return k==='saturday'||k==='runher';}
 const _apprSessIds={has:sid=>_isApprovalRide(_sessGet(sid))};
 const _commSessIds={has:sid=>_isCommunity(_sessGet(sid))};
 const _noCarbonSessIds={has:sid=>_noCarbon(_sessGet(sid))};
@@ -16254,15 +16258,18 @@ function renderCommAddModal(){
   // circuit nights too (a free, place-less "Own" on a paid night), and a tick carried over
   // when the session was switched to a pool night, where the box is hidden.
   const _ownOk=_needsBike(cur)&&_ownOffered(cur);if(!_ownOk)S._caOwn=false;
+  // A Saturday ride or Run for Her takes riders one by one (_noGroupAdd): no Group choice, and a group picked
+  // for another ride goes back to one rider when the session is switched to one of them.
+  const _grpOk=!_noGroupAdd(cur);if(!_grpOk&&S._caGroup){S._caGroup=false;S._caSel=null;}
   const keep=document.getElementById('ca-search');const _q=keep?keep.value:(S._caSearch||'');S._caSearch=_q;
   m.style.display='flex';
   m.innerHTML='<div class="modal-backdrop" data-on-click="'+_on('_on_backdropOnly',_EV,_EL,'closeCommAddModal')+'">'
     +'<div class="modal-box cmy-mw460" role="dialog" aria-modal="true" aria-labelledby="dlgt-commAddTitle">'
     +'<div class="modal-title" id="dlgt-commAddTitle">'+t('commAddTitle')+'</div>'
-    +'<div class="cmy-ca-toggles">'
+    +(_grpOk?'<div class="cmy-ca-toggles">'
     +'<button type="button" class="toggle-btn'+(S._caGroup?'':' active')+' cmy-f1" data-on-click="'+_on('_on_caGroup',false)+'">'+t('commAddRiderBtn')+'</button>'
     +'<button type="button" class="toggle-btn'+(S._caGroup?' active':'')+' cmy-f1" data-on-click="'+_on('_on_caGroup',true)+'">'+t('commAddGroupBtn')+'</button>'
-    +'</div>'
+    +'</div>':'')
     +(S._caGroup?'<div class="cmy-ca-hint">'+t('commAddGroupHint')+'</div>':'')
     +'<div class="form-group cmy-fg-top"><label>'+t('colSession')+'</label>'
     +'<select aria-label="'+esc(t('colSession'))+'" data-on-change="'+_on('_on_caSess',_P('value'))+'">'+sess.map(s=>'<option value="'+esc(s.id)+'"'+(s.id===S._caSess?' selected':'')+'>'+esc(dayLabel(s.day))+' '+esc(shortDate(s.session_date||s.id))+' · '+esc(_evName(s))+(s.status==='closed'?' ('+t('statusClosed')+')':'')+'</option>').join('')+'</select>'
@@ -16340,6 +16347,7 @@ async function _commBook(sess,people,o){
 }
 async function _saveCommAdd(){
   const sess=allSessions().find(s=>s.id===S._caSess);if(!sess)return;
+  if(S._caGroup&&_noGroupAdd(sess)){S._caGroup=false;renderCommAddModal();return;} // one at a time there (_noGroupAdd)
   const ids=S._caGroup?(S._caSelArr||[]):(S._caSel?[S._caSel]:[]);
   if(S._caGroup&&ids.length<2){toast(t('commAddGroupMin'),'warning');return;}
   const picks=ids.map(id=>(S.customers||[]).find(x=>x.id===id)).filter(Boolean);if(!picks.length)return;
@@ -16369,7 +16377,7 @@ async function _saveCommAdd(){
 function _on_showJccGroupModal_1(event,el){if(event.target===el)closeJccGroupModal()}
 function _on_showJccGroupModal_2(event,el){_jgSync();showJccGroupModal()}
 function showJccGroupModal(){
-  const open=allSessions().filter(x=>x.status!=='deleted'&&!(!isAdmin()&&_isApprovalRide(x))).sort(_sessOrder); // every session, closed ones after the live; front desk stays off approval rides
+  const open=allSessions().filter(x=>x.status!=='deleted'&&!(!isAdmin()&&_isApprovalRide(x))&&!_noGroupAdd(x)).sort(_sessOrder); // every session, closed ones after the live; front desk stays off approval rides; never a Saturday ride or Run for Her (_noGroupAdd)
   if(!open.length){toast(t('noSessionsAvail'),'warning');return;}
   if(!S._jgRiders||!S._jgRiders.length)S._jgRiders=[{name:'',height:'',type:'Any'},{name:'',height:'',type:'Any'}];
   const selId=(S.sfSession!=='all'&&open.find(x=>x.id===S.sfSession))?S.sfSession:open[0].id;
@@ -16426,7 +16434,7 @@ async function _saveJccGroup(){
   const cname=_titleCaseName(document.getElementById('jg-cname')?.value||''); // who the main phone belongs to
   const phone=(document.getElementById('jg-phone')?.value||'').trim();
   const sessId=document.getElementById('jg-sess')?.value;
-  const sess=allSessions().find(x=>x.id===sessId);if(!sess)return;
+  const sess=allSessions().find(x=>x.id===sessId);if(!sess||_noGroupAdd(sess))return;
   if(_hasRideGroups(sess)&&!_rgOk(S._jgRg)){toast(t('errPickGroup'),'error');const f=document.querySelector('#jcc-group-modal .rg-field');if(f)_groupErr(f,t('errPickGroup'));return;}
   // Every row is a rider — an empty row still holds a bike for the group ("Tamer Group 3").
   const riders=(S._jgRiders||[]).map(r=>({name:_titleCaseName(r.name||''),phone:(r.phone||'').trim(),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any'}));
@@ -20792,7 +20800,7 @@ function renderQRow(e){
           const nPend=(_qBySession().get(S.sfSession)||[]).filter(e=>_apprOf(e)==='pending'&&e.status==='waiting').length;
           return `${nPend?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("bulkApprovePending")}">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'} rq-nw" data-on-click="${_on("publishCommResults")}">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
         })():''}
-        <button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button><button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
+        <button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button>${S.sfSession!=='all'&&_noGroupAdd(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>`}${isAdmin()&&allSessions().some(s=>s.status!=='deleted')?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
         ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" class="rq-print" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn rq-nw" data-on-click="${_on("printDaySheet")}">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
         <div class="density-toggle hide-mobile">
           <button class="density-btn${S.queueDensity==='comfortable'?' active':''}" data-on-click="${_on("setQueueDensity","comfortable")}" title="${t('comfortableTip')}">${_artIcon('grid',13)}</button>
@@ -32323,7 +32331,9 @@ function _web(){return S.web||(S.web={rows:{},draft:{},hist:[],loaded:false,busy
 async function _webLoad(){
   const W=_web();if(W.busy)return;W.busy=true;
   try{
-    const r=await sb.from('site_content').select('key,value,updated_at,updated_by');
+    // No updated_by (2026-10-07, migration 20261007233000): the row names nobody since, as anyone may read it; who
+    // saved what is site_content_history's changed_by, which only admins read (below).
+    const r=await sb.from('site_content').select('key,value,updated_at');
     if(r.error)throw r.error;
     W.rows=Object.fromEntries((r.data||[]).map(x=>[x.key,x]));
     const h=await sb.from('site_content_history').select('id,key,old_value,new_value,changed_at,changed_by').order('id',{ascending:false}).limit(40);
