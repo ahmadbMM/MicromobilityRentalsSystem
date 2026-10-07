@@ -133,7 +133,7 @@ test('staff filters list Saudi Arabia twice and count it once', async ({ page })
   await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;`);
 
   const defs = await page.evaluate(`Object.fromEntries(_accFilterDefs().map(([k,,o])=>[k,o.map(x=>x[0])]))`) as Record<string, string[]>;
-  expect(defs.fNationality).toEqual(['all', 'Saudi Arabia', 'Egypt', 'Saudi Arabia', 'Yemen']);
+  expect(defs.fNationality).toEqual(['all', 'unset', 'Saudi Arabia', 'Egypt', 'Saudi Arabia', 'Yemen']); // 'unset': Not set, accounts with no nationality (2026-10-07)
   expect(defs.fCountry).toEqual(['all', 'Saudi Arabia', 'Saudi Arabia', 'Yemen']);
   expect(await page.evaluate(`_accBreakdown('nationality',_accRows(),_accOpts())`)).toEqual([{ label: 'Saudi Arabia', value: 2 }, { label: 'Egypt', value: 1 }, { label: 'Yemen', value: 1 }]);
   expect(await page.evaluate(`(()=>{const o=_accOpts();o.fNationality='Saudi Arabia';const ids=_accRows().map(r=>r.c.id).sort();o.fNationality='all';return ids;})()`)).toEqual(['c1', 'c2']);
