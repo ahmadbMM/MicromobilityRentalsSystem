@@ -34133,6 +34133,10 @@ function _cashSet(k,v){
 }
 async function _cashTeamCustom(){const n=_teamRosterAdd(await promptDialog({title:t('teamCustomPrompt')}));if(!n)return;S._cashTeam=n;renderCashierModal();}
 async function _cashAddLine(){
+  // A second tap while the first sale's write is out rang it up twice: the list already held the
+  // first line, so both landed and the stock came off twice (2026-10-07; _ctRecord's _ctBusy).
+  if(S._cashBusy)return;S._cashBusy=true;
+  try{
   const e0=getQueue().find(x=>x.id===S._cashEntry);if(!e0)return;
   const isCustom=S._cashItem==='__custom__';
   const it=isCustom?null:(S.inventory||[]).find(x=>x.id===S._cashItem);
@@ -34158,6 +34162,7 @@ async function _cashAddLine(){
   toast(t('cashAddedToast'));
   renderCashierModal();
   if(S.view==='staff')renderStaffQueue();
+  }finally{S._cashBusy=false;}
 }
 // Voiding a sale deletes it, so it asks first - the same question the Sales ledger asks for the same line.
 function _cashVoid(i){
@@ -34605,6 +34610,9 @@ async function _bookOutboxFlushRun(){
     if(together.has(row.id))continue;
     try{
       let res;
+      // The outbox's own count of refusals (_tries, below) is no column of queue_entries: written into
+      // the direct insert, it was refused for that alone, so one refusal there was a refusal for ever (2026-10-07).
+      const{_tries:_nT,...dbRow}=row;
       // A booking queued offline lands through customer_create_booking, exactly like an online
       // one. It used to insert straight into queue_entries — which works only while the anon
       // "public insert booking" policy exists. The moment that policy is dropped (it is the
@@ -34622,13 +34630,13 @@ async function _bookOutboxFlushRun(){
         else if(_m.includes('pgrst202')||_m.includes('42883')||_m.includes('could not find')||_m.includes('does not exist'))res=null;
         else res={error:(r&&r.error)||{message:'booking refused'}};
       }
-      if(!res)res=await _roFree(()=>sb.from('queue_entries').upsert(row,{ignoreDuplicates:true})); // fire-and-forget: a background flush; a refused row stays queued and is said after three tries (below). Already landed (a lost response) = done; never overwrite staff changes made since
+      if(!res)res=await _roFree(()=>sb.from('queue_entries').upsert(dbRow,{ignoreDuplicates:true})); // fire-and-forget: a background flush; a refused row stays queued and is said after three tries (below). Already landed (a lost response) = done; never overwrite staff changes made since
       // queue_num collides with a booking made on another device while offline: the partial unique
       // index rejects it and it would otherwise retry forever. Take a fresh number and re-upsert
       // (one bump per flush; a further collision resolves on the next flush as data loads).
       if(res&&res.error&&/23505|duplicate|unique/i.test((res.error.code||'')+' '+(res.error.message||''))){
         const fresh=nextQNum(row.session_id);
-        if(fresh&&fresh!==row.queue_num){renum[row.id]=fresh;row.queue_num=fresh;res=await _roFree(()=>sb.from('queue_entries').upsert(row));} // fire-and-forget: as above, the outbox keeps a refused row
+        if(fresh&&fresh!==row.queue_num){renum[row.id]=fresh;row.queue_num=fresh;res=await _roFree(()=>sb.from('queue_entries').upsert({...dbRow,queue_num:fresh}));} // fire-and-forget: as above, the outbox keeps a refused row
       }
       // Cannot land without a waiver: re-asked below, one ride at a time. Rows for another ride stay
       // queued for the next flush (they used to leave the outbox here unasked, so a second ride
@@ -34748,7 +34756,8 @@ async function _ctRecord(){
 }
 // Every change to a recorded receipt goes into the shared action log, like the sale itself: a
 // receipt that can be voided, refunded or re-priced without a trace is money nobody can ask about.
-function _rcLog(what,rows,extra){const r0=(rows||[])[0]||{};const cust=r0.customer_name||'';logAction(`${t('cashierTitle')}: ${what} · ${t('cashReceiptWord')} ${_money(_rcTotal(rows),_NOISO)}${extra||''}${cust?` (${cust})`:''}`);}
+// The customer is any line's: an MM Team line carries none, and a receipt's first line can be one (2026-10-07).
+function _rcLog(what,rows,extra){const cust=((rows||[]).find(r=>r&&r.customer_name)||{}).customer_name||'';logAction(`${t('cashierTitle')}: ${what} · ${t('cashReceiptWord')} ${_money(_rcTotal(rows),_NOISO)}${extra||''}${cust?` (${cust})`:''}`);}
 // Voiding deletes the receipt outright (a refund keeps it), so it asks first.
 function _ctVoidReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!rows.length)return;
@@ -34774,7 +34783,7 @@ async function _ctRefundReceipt(key){
     toast(t('cashRefundedToast'));renderCashier();
   }});
 }
-function _ctReprint(key){const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(rows.length)_ctPrintReceipt(rows,rows[0].customer_name,rows[0].created_at);}
+function _ctReprint(key){const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(rows.length)_ctPrintReceipt(rows,(rows.find(r=>r.customer_name)||{}).customer_name,rows[0].created_at);} // the customer from any line (see _rcLog)
 // Quick action: customer paid -> flip a receipt's pending lines to paid
 async function _ctMarkReceiptPaid(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay==='pending');
@@ -35106,7 +35115,7 @@ function renderCashier(){
   // Ledger: cashier-tab sales grouped into receipts (printable/voidable) + rental add-ons shown individually
   const csRows=(S.cashSales||[]).filter(r=>r.session_id===sessId);
   const byR={};const rOrder=[];
-  csRows.forEach(r=>{const k=r.receipt_id||r.id;if(!byR[k]){byR[k]={key:k,cust:r.customer_name,at:r.created_at,lines:[]};rOrder.push(k);}byR[k].lines.push(r);});
+  csRows.forEach(r=>{const k=r.receipt_id||r.id;if(!byR[k]){byR[k]={key:k,cust:r.customer_name,at:r.created_at,lines:[]};rOrder.push(k);}else if(!byR[k].cust&&r.customer_name)byR[k].cust=r.customer_name;byR[k].lines.push(r);}); // the customer from any line: an MM Team line has none (see _rcLog)
   const receipts=rOrder.map(k=>byR[k]).sort((a,b)=>new Date(b.at||0)-new Date(a.at||0));
   const rentalLines=[];(_qBySession().get(sessId)||[]).slice().forEach(e=>entryPurchases(e).forEach((p,i)=>rentalLines.push({...p,who:e.name,entryId:e.id,pidx:i})));
   const receiptCards=receipts.map(rc=>{
@@ -35580,6 +35589,10 @@ function _invExtraCols(id,cat,isNew){
   return more;
 }
 async function addInvItem(){
+  // One save at a time (2026-10-07): the form stays up through the write and the reload, and a
+  // second tap meanwhile inserted the item again under a new id.
+  if(S._invBusy)return;S._invBusy=true;
+  try{
   const name=(S._invName||'').trim();if(!name){toast(t('invItemName'),'error');return;}
   const brand=(document.getElementById('inv-brand')?.value||S._invBrand||'').trim();
   const cat=_invResolveCat();
@@ -35590,8 +35603,12 @@ async function addInvItem(){
   const item={id,name,brand:(brand&&brand!=='__add__')?brand:null,category:cat,qty:parseInt(S._invQty)||0,low_threshold:parseInt(S._invLow)||0,updated_at:new Date().toISOString(),..._invExtraCols(id,cat,true)};
   if(await _wr(sb.from('inventory').insert(item),'save item'))return;
   await loadData();S.showAddInv=false;toast(t('invSaved'));renderInventory();
+  }finally{S._invBusy=false;}
 }
 async function saveInvEdit(){
+  if(S._invBusy)return; // a second tap applied the typed stock change twice (2026-10-07)
+  S._invBusy=true;
+  try{
   const id=S.editInvId;if(!id)return;
   const name=(S._invName||'').trim();if(!name){toast(t('invItemName'),'error');return;}
   const brand=(document.getElementById('inv-brand')?.value||S._invBrand||'').trim();
@@ -35603,11 +35620,14 @@ async function saveInvEdit(){
   // box leaves the stock alone. Stock-take is the place to set an absolute count.
   const upd={name,brand:(brand&&brand!=='__add__')?brand:null,category:cat,low_threshold:parseInt(S._invLow)||0,updated_at:new Date().toISOString()};
   if(await _wr(sb.from('inventory').update(upd).eq('id',id),'save item'))return;
+  // A movement that landed moves the baseline with it (2026-10-07): when the write below was then
+  // refused and the form saved again, the same change was applied a second time.
   {const q1=parseInt(S._invQty),q0=parseInt(S._invQty0);const d=(isNaN(q1)||isNaN(q0))?0:q1-q0; // no baseline, no guess
-    if(d){const it=(S.inventory||[]).find(x=>x.id===id);if(await _invApplyDelta(id,d)!==null)logAction(t('logStockAdj').replace('{0}',it?it.name:name).replace('{1}',(d>0?'+':'')+d));}}
+    if(d){const it=(S.inventory||[]).find(x=>x.id===id);if(await _invApplyDelta(id,d)!==null){S._invQty0=String(q1);logAction(t('logStockAdj').replace('{0}',it?it.name:name).replace('{1}',(d>0?'+':'')+d));}}}
   // The rest of the item in one checked write (see addInvItem).
   if(await _wr(sb.from('inventory').update(_invExtraCols(id,cat,false)).eq('id',id),'save item'))return;
   await loadData();S.editInvId=null;toast(t('invSaved'));renderInventory();
+  }finally{S._invBusy=false;}
 }
 let _invAdjPend={},_invAdjTimer=null;
 // Debounced audit log: rapid +/- taps collapse into one net entry per item. Only movements the
@@ -35738,7 +35758,7 @@ function _lbAgg(win,scope,ref){
     let m=map[key];if(!m)m=map[key]={key,name:e.name||'?',count:0,duration:0,spent:0,minQ:Infinity,weeks:new Set()};
     m.count++;m.duration+=(e.rideDuration||0);m.spent+=_bookingRevenue(e);
     if(scope==='owner'){const an=e.customerId&&acct.get(String(e.customerId));if(an)m.name=an;else if((e.queueNum||0)<m.minQ){m.minQ=e.queueNum||0;m.name=e.name||m.name;}}else{m.name=e.name||m.name;}
-    const ds=(e.sessionDate||e.registeredAt||'').slice(0,10);if(ds){const w=_lbWeekStart(new Date(ds+'T00:00:00')).getTime();if(!isNaN(w))m.weeks.add(w);}
+    const ds=e.sessionDate?String(e.sessionDate).slice(0,10):_ksaDayOf(e.registeredAt);if(ds){const w=_lbWeekStart(new Date(ds+'T00:00:00')).getTime();if(!isNaN(w))m.weeks.add(w);} // a stamp's KSA day, as _lbInWindow reads it (its UTC day is the day before after 21:00)
   });
   return map;
 }
