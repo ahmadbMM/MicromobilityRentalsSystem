@@ -110,12 +110,13 @@ test.describe('@staff:bookings bug hunt 2026-10-07 (s11)', () => {
     await page.waitForFunction(`S.staffOptions && S.staffOptions.bike_brands`);
     await page.waitForTimeout(300);
     await page.evaluate(`setStaffTab('inventory');S.invSection='bikes';renderInventory();S.showAddBike=true;S._bkBrand='Giant';S._bkModel='TCR';renderBikes()`);
+    await expect(page.locator('#bk-brand')).toHaveValue('Giant'); // the form is drawn (the bikes part can load late under load)
     await page.locator('.opt-edit[data-on-click*="brands"]').click();
     const modal = page.locator('#optlist-modal');
     await modal.locator('input[aria-label="Giant"]').fill('Giant Bicycles');
     await modal.locator('#optlist-save').click();
     await expect(modal).toBeHidden();
-    expect(await page.evaluate(`[S._bkBrand,S._bkModel]`)).toEqual(['Giant Bicycles', 'TCR']);
+    await expect.poll(() => page.evaluate(`[S._bkBrand,S._bkModel]`)).toEqual(['Giant Bicycles', 'TCR']);
   });
 
   test('a refused list save leaves the form\'s lists as the database holds them', async ({ page }) => {
