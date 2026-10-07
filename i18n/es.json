@@ -3913,5 +3913,11 @@
   "rshCol": "Aceptó compartir",
   "rshNotYet": "Todavía no",
   "runNumLabel": "Número de corredor",
-  "catErrYear": "Año del modelo: de 1990 a 2100."
+  "catErrYear": "Año del modelo: de 1990 a 2100.",
+  "waLabel": "Número de WhatsApp",
+  "waAsk": "¿{0} es también tu número de WhatsApp?",
+  "waYes": "Sí",
+  "waNo": "No",
+  "waSame": "El mismo que el móvil",
+  "errWaPhone": "Escribe tu número de WhatsApp."
 }

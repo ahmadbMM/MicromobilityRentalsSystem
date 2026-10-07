@@ -3913,5 +3913,11 @@
   "rshCol": "شیئر کرنے پر رضامند",
   "rshNotYet": "ابھی نہیں",
   "runNumLabel": "رنر نمبر",
-  "catErrYear": "ماڈل کا سال: 1990 سے 2100 تک۔"
+  "catErrYear": "ماڈل کا سال: 1990 سے 2100 تک۔",
+  "waLabel": "WhatsApp نمبر",
+  "waAsk": "کیا {0} آپ کا WhatsApp نمبر بھی ہے؟",
+  "waYes": "ہاں",
+  "waNo": "نہیں",
+  "waSame": "موبائل نمبر والا ہی",
+  "errWaPhone": "اپنا WhatsApp نمبر درج کریں۔"
 }

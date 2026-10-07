@@ -5297,6 +5297,9 @@ body.fix-open{overflow:hidden;}
 .fx-opt{flex:1;height:46px;border-radius:8px;border:1px solid rgba(15,18,21,.15);background:#fff;font-family:var(--font-body);font-weight:600;font-size:15px;color:#0f1215;cursor:pointer;}
 .fx-opt.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;box-shadow:inset 0 0 0 1px #008f52;}
 .fx-item.err .fx-opt{border-color:#b42318;}
+/* WhatsApp: "Is <mobile> your WhatsApp number too?", Yes / No, and on No the number (2026-10-07) */
+.fx-q{font-weight:600;font-size:14.5px;line-height:1.4;color:#0f1215;}
+.fx-wa-row{margin-top:8px;}
 .fx-photo{display:flex;align-items:center;gap:12px;}
 .fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(15,18,21,.1);box-sizing:border-box;}
 .fx-ph.new{border-color:#008f52;}

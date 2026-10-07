@@ -78,8 +78,8 @@ test('the card shows how the applicant heard of us, and Not answered when it is 
 // 2026-09-29: "show the unanswered/filled fields, don't hide them").
 test('every question has its line, an empty answer reading Not answered', async ({ page }) => {
   const blank = { instagram: '', linkedin: '', workplace: null, heard_from: null, profession: '', own_bike: null };
-  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a2' ? { ...a, ...blank } : a.id === 'a1' ? { ...a, workplace: 'Aramco', heard_from: 'friend', own_bike: true } : a)) });
-  const labels = ['Mobile', 'Email', 'Born', 'Gender', 'Nationality', 'Height', 'Own bike', 'Bike', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news', 'Form language'];
+  await applicationsTab(page, { community_applications: apps.map((a) => (a.id === 'a2' ? { ...a, ...blank } : a.id === 'a1' ? { ...a, workplace: 'Aramco', heard_from: 'friend', own_bike: true, whatsapp_same: true } : a)) });
+  const labels = ['Mobile', 'WhatsApp number', 'Email', 'Born', 'Gender', 'Nationality', 'Height', 'Own bike', 'Bike', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news', 'Form language'];
   for (const id of ['a1', 'a2']) expect(await row(page, id).locator('.ca-kv > span').allTextContents()).toEqual(labels);
   const k = row(page, 'a1');
   await expect(k.locator('.ca-kv-none')).toHaveCount(0);
@@ -89,7 +89,7 @@ test('every question has its line, an empty answer reading Not answered', async 
   // the handle reads as typed, not in the labels' capitals
   await expect(k.locator('.ca-kv', { hasText: 'Instagram' }).locator('.soc-link span')).toHaveCSS('text-transform', 'none');
   const h = row(page, 'a2');
-  const empty = ['Own bike', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn'];
+  const empty = ['WhatsApp number', 'Own bike', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn'];
   await expect(h.locator('.ca-kv-none')).toHaveCount(empty.length);
   for (const k2 of empty) await expect(h.locator('.ca-kv', { hasText: k2 }).locator('b')).toHaveText('Not answered');
   await expect(h.locator('.soc-link')).toHaveCount(0);

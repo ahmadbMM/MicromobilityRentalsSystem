@@ -3913,5 +3913,11 @@
   "rshCol": "Pumayag magbahagi",
   "rshNotYet": "Hindi pa",
   "runNumLabel": "Numero ng mananakbo",
-  "catErrYear": "Taon ng modelo: mula 1990 hanggang 2100."
+  "catErrYear": "Taon ng modelo: mula 1990 hanggang 2100.",
+  "waLabel": "WhatsApp number",
+  "waAsk": "Ang {0} ba ay WhatsApp number mo rin?",
+  "waYes": "Oo",
+  "waNo": "Hindi",
+  "waSame": "Pareho sa mobile",
+  "errWaPhone": "Ilagay ang iyong WhatsApp number."
 }

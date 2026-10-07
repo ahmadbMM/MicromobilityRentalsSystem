@@ -3913,5 +3913,11 @@
   "rshCol": "साझा गर्न सहमत",
   "rshNotYet": "अहिलेसम्म छैन",
   "runNumLabel": "धावक नम्बर",
-  "catErrYear": "मोडल वर्ष: 1990 देखि 2100 सम्म।"
+  "catErrYear": "मोडल वर्ष: 1990 देखि 2100 सम्म।",
+  "waLabel": "WhatsApp नम्बर",
+  "waAsk": "के {0} तपाईंको WhatsApp नम्बर पनि हो?",
+  "waYes": "हो",
+  "waNo": "होइन",
+  "waSame": "मोबाइल नम्बर नै",
+  "errWaPhone": "आफ्नो WhatsApp नम्बर लेख्नुहोस्।"
 }

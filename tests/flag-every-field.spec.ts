@@ -8,7 +8,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 
 const S1 = '2099-01-01';
 const sessions = [{ id: S1, session_date: S1, day: 'Sunday', status: 'open', capacity: 20, created_at: 1, event_kind: 'jcc' }];
-const ALL = ['name', 'email', 'phone', 'birth_date', 'gender', 'nationality', 'country', 'city', 'height', 'photo',
+const ALL = ['name', 'email', 'phone', 'whatsapp', 'birth_date', 'gender', 'nationality', 'country', 'city', 'height', 'photo',
   'type_preference', 'profession', 'workplace', 'heard_from', 'instagram', 'x', 'tiktok', 'linkedin', 'emergency'];
 
 test.describe('@staff:community flag every field', () => {
