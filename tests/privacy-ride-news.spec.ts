@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-10-07'; // a second emergency contact, always optional; every rider confirms it again (PRIVACY_ASK_FROM)
+const VERSION = '2026-10-07'; // the emergency contacts (a second, optional; the first required); nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
@@ -262,17 +262,15 @@ test.describe('the popup for existing accounts', () => {
     await expect(page.locator('#rn-ask')).toHaveCount(0);
   });
 
-  // 2026-10-03, 2026-10-05 and 2026-10-06 changed the notice without asking anyone again (PRIVACY_ASK_FROM stayed
-  // 2026-10-02, the owner's call). 2026-10-07, the second emergency contact, is confirmed again (the owner): a rider
-  // who confirmed 2026-10-02 is asked for the confirmation alone; one who confirmed 2026-10-07 is not (above).
-  test('the second emergency contact is confirmed again: a rider who confirmed 2026-10-02 is asked, the confirmation alone', async ({ page }) => {
-    const calls = await arrive(page, consentsServer({ privacy_version: '2026-10-02', ride_news_at: '2026-09-01T10:00:00Z' }));
-    const ask = page.locator('#rn-ask');
-    await expect(ask.getByRole('button', { name: 'No ride news' })).toHaveCount(0);
-    await page.locator('#cs-ack-box').click();
-    await ask.getByRole('button', { name: 'Continue' }).click();
-    await expect(ask).toHaveCount(0);
-    expect(calls[1]).toMatchObject({ p_privacy: VERSION, p_ride_news: null });
+  // 2026-10-03: the breakfast-venue row changed the notice without asking anyone again
+  // (PRIVACY_ASK_FROM stays 2026-10-02, the owner's call); 2026-10-05, the emergency contact row, the same;
+  // 2026-10-06, Sela and JYC for Run for Her (the runners agree on their own page), the same; 2026-10-07, the
+  // emergency contacts, the same (the owner: "dont ask current customers to accept the privacy notice").
+  test('a notice change that needs no new confirmation: a rider who confirmed 2026-10-02 is not asked', async ({ page }) => {
+    await arrive(page, consentsServer({ privacy_version: '2026-10-02', ride_news_at: '2026-09-01T10:00:00Z' }));
+    await page.waitForFunction('S._rnFetchedFor==="c1"&&S.loggedIn.ride_news===false');
+    await page.waitForTimeout(300);
+    await expect(page.locator('#rn-ask')).toHaveCount(0);
   });
 
   test('the notice opens over it without ticking the box, and closing it leaves the question', async ({ page }) => {

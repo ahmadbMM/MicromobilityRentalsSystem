@@ -929,9 +929,9 @@ staff to flag it". The first contact (Run for Her, 2026-10-05) is unchanged; the
   not know and withdraws a request left with none. **The Run for Her report keeps the first contact only**: that
   sheet goes to Sela and JYC, and a runner agrees to share one emergency contact. `tests/second-emergency-staff.spec.ts`.
 - Privacy Notice 2026-10-07: the emergency contact row names a second person and says only the first is ever shared
-  (en/ar). Riders confirm it again (the owner, 2026-10-07): PRIVACY_ASK_FROM is 2026-10-07, so every account that
-  confirmed an older notice meets the confirmation once more, and the website's learn-to-ride form asks it too (its
-  PRIVACY_ASK_FROM comes from here through sync-privacy-notice). The Run for Her share consent still lists
+  (en/ar). Nobody is asked to confirm it again: PRIVACY_ASK_FROM stays 2026-10-02 (the owner, 2026-10-07: "dont ask
+  current customers to accept the privacy notice"; a4253c82 had briefly moved it to 2026-10-07). The website's
+  learn-to-ride form takes the same date through sync-privacy-notice. The Run for Her share consent still lists
   "Emergency contact" as one item.
 
 ## The first emergency contact is required (2026-10-07)
