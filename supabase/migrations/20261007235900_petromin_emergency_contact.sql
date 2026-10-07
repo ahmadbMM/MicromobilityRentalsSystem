@@ -99,10 +99,12 @@ comment on column public.rider_registrations.emergency2_relation is
 do $reg$
 declare d text;
 begin
-  if to_regprocedure('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)') is not null
-     and position('(20261007235900)' in pg_get_functiondef('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)'::regprocedure)) > 0 then
-    raise notice 'rider_register already takes p_emergency; nothing to do';
-    return;
+  -- two steps: Postgres may read both sides of an AND, and the cast fails while the new signature is absent
+  if to_regprocedure('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)') is not null then
+    if position('(20261007235900)' in pg_get_functiondef(to_regprocedure('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)'))) > 0 then
+      raise notice 'rider_register already takes p_emergency; nothing to do';
+      return;
+    end if;
   end if;
   d := pg_get_functiondef('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text)'::regprocedure);
 
@@ -273,10 +275,12 @@ grant  execute on function public.rider_register(text,text,integer,text,text,tex
 do $edit$
 declare d text;
 begin
-  if to_regprocedure('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)') is not null
-     and position('(20261007235900)' in pg_get_functiondef('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)'::regprocedure)) > 0 then
-    raise notice 'rider_edit already takes p_emergency; nothing to do';
-    return;
+  -- two steps: Postgres may read both sides of an AND, and the cast fails while the new signature is absent
+  if to_regprocedure('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)') is not null then
+    if position('(20261007235900)' in pg_get_functiondef(to_regprocedure('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)'))) > 0 then
+      raise notice 'rider_edit already takes p_emergency; nothing to do';
+      return;
+    end if;
   end if;
   d := pg_get_functiondef('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text)'::regprocedure);
 
