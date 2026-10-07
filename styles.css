@@ -5569,6 +5569,8 @@ body.view-staff .am-hist.on{color:var(--sf-green-ink,var(--green));}
 .fl-ic{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:rgba(var(--warn-rgb),.14);color:var(--orange);flex-shrink:0;}
 .fl-sub{font-size:13px;line-height:1.5;color:var(--muted);margin-bottom:14px;}
 .fl-sec{font-size:var(--staff-fs-sm,12px);font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.fl-sec-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.fl-sec-row .btn-sm{text-transform:none;letter-spacing:0;}
 .fl-preview{border:1px solid var(--border);border-inline-start:3px solid var(--orange);border-radius:6px;padding:10px 12px;margin-bottom:14px;}
 .fl-pv-title{font-weight:800;font-size:14px;color:var(--text);margin-bottom:4px;}
 .fl-pv-body{font-size:12.5px;line-height:1.5;color:var(--muted);}
@@ -6770,6 +6772,17 @@ body.has-modal .fab-row{display:none !important;}
    name and clipped the email beside five buttons, so there each rider becomes a card: everything
    it knows on its own lines, and every button in reach underneath. */
 .am-cust-main{flex:1;min-width:0;}
+/* Select mode (2026-10-07): a box on each row, and a strip above the list to flag many at once. */
+.am-sel{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;flex-shrink:0;border:none;background:none;border-radius:7px;color:var(--muted);cursor:pointer;}
+.am-sel:hover{background:rgba(var(--tint-rgb),.06);}
+.am-sel[aria-pressed="true"]{color:var(--orange);}
+.am-selbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;}
+.am-seln{font-size:13px;font-weight:800;color:var(--orange);margin-inline-end:auto;white-space:nowrap;}
+.am-selgo{display:inline-flex;align-items:center;gap:6px;}
+@media (max-width:767px){
+  body.view-staff #am-cust-rows .am-cust.am-selmode{position:relative;padding-inline-start:52px;}
+  body.view-staff #am-cust-rows .am-cust.am-selmode>.am-sel{position:absolute;inset-inline-start:8px;top:10px;}
+}
 .am-cust-name{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .am-cust-contact{font-size:var(--staff-fs-sm,12px);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .am-cust-actions{display:flex;gap:6px;flex-shrink:0;}
