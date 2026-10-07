@@ -9779,6 +9779,7 @@ async function mwRemoveParty(rowId){
 // blank rider row already waiting, because the staffer clicked the button that says so.
 function mwAddRider(bookingId){
   showBookingEditModal(bookingId);
+  const b=getQueue().find(x=>x.id===bookingId);if(b&&_noGroupAdd(_sessGet(b.sessionId)))return; // no riders added there (_noGroupAdd)
   _beAddRider();
 }
 function _mwTypeCell(w,bk){
@@ -9872,7 +9873,7 @@ function renderManagedWl(listOnly){
             </div>
             <div class="rq-mwr">
               ${bk?_bkPayCell(bk):payBtnMw(w)}${w.phone?_contactCell(w.phone,{status:'waiting'}):''}
-              ${(_bkLive&&!_isApprovalRide(_sessGet(bk.sessionId)))
+              ${(_bkLive&&!_isApprovalRide(_sessGet(bk.sessionId))&&!_noGroupAdd(_sessGet(bk.sessionId)))
                 ?`<button class="btn-sm btn-muted" data-on-click="${_on("mwAddRider",bk.id)}" title="${esc(t('beAddRidersLabel'))}">+ ${t('beAddRiderBtn')}</button>`:''}
               ${action}
               ${w._virtual?'':`<button class="btn-sm btn-muted" data-on-click="${_on("resolveDeskWaitlist",w.id,"removed")}">${t('wlRemoveBtn')}</button>`}
@@ -20538,6 +20539,10 @@ function showBookingEditModal(entryId){
   // ride, a move onto Run for Her or a grouped Saturday ride was refused for a distance or a group the
   // form never offered. Changing the Session repaints the form.
   const _beTo=allSessions().find(s=>s.id===_s)||_beSess;
+  // No riders added to a booking on a Saturday ride, Run for Her or the pool session, as no group is added there
+  // (_noGroupAdd; the owner, 2026-10-07: "yes" to removing Add riders on a Run for Her booking too - added runners
+  // got no distance). Riders typed while another ride was picked go with the row.
+  const _beNoAdd=_beComm||_noGroupAdd(_beTo);if(_noGroupAdd(_beTo))S._beNewRiders=[];
   const _beOwn=_ownOffered(_beTo); // 'Own' is offered on every community ride and the National Day ride
   const _beNoCarbon=_noCarbon(_beTo); // Road Carbon is hidden on every community ride but Petromin
   const tyBtn=ty=>`<button type="button" aria-pressed="${S._beType===ty?'true':'false'}" data-on-click="${_on("_on_showBookingEditModal_1",_EV,_EL,ty,entryId)}" class="${S._beType===ty?'dk-be-ty-on':'dk-be-ty'}">${typeLabel(ty)}</button>`;
@@ -20572,7 +20577,7 @@ function showBookingEditModal(entryId){
       ${_rideKind(_beTo)==='runher'?_runKmField(S._beKm,'_beKmSet'):''}
       <div class="form-group dk-mb14"><label for="be-sess">${t('colSession')}</label>
         <select id="be-sess" data-on-change="${_on("_on_showBookingEditModal_3",_EV,_EL)}">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
-      ${_beComm?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
+      ${_beNoAdd?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
         ${(S._beNewRiders||[]).map((r,i)=>`<div class="dk-be-rrow">
           <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0">
           <input id="be-nr-height-${i}" type="number" min="80" max="230" aria-label="${t('colHeight')}" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-be-rh">
@@ -20685,6 +20690,7 @@ async function _saveBookingEdit(){
   if(newRiders.length&&(_isApprovalRide(allSessions().find(s=>s.id===toSessionId))||_isApprovalRide(allSessions().find(s=>s.id===e.sessionId)))){
     toast(t('commSoloOnly'),'warning');newRiders=[];S._beNewRiders=[];
   }
+  if(newRiders.length&&_noGroupAdd(allSessions().find(s=>s.id===toSessionId))){newRiders=[];S._beNewRiders=[];} // one at a time there (_noGroupAdd); the form shows no row
   // Group link for the roster: riders under an account parent inherit its customerId (groups
   // already); riders under an "Add group" member join that group_id; a walk-in/staff-created
   // parent has neither, so mint a shared group_id and stamp the parent too (add-group-id.sql).
