@@ -38,6 +38,7 @@ test('@staff:catalog the model search keeps its field while typing', async ({ pa
   await page.evaluate(`setStaffTab('catalog')`);
   await expect(page.locator('#tab-catalog tr[data-model]')).toHaveCount(2);
   const q = page.locator('#tab-catalog .cat-bar input.search-input');
+  if (!(await q.isVisible())) await page.locator('[data-srch="cat"] .srch-btn').click(); // a phone folds the search into a button
   await q.click();
   await q.pressSequentially('trek');
   await expect(q).toHaveValue('trek');
