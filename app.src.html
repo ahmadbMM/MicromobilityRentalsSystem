@@ -31634,7 +31634,7 @@ function _vendorDayRender(){
 }
 async function _vendorDaySave(){
   const D=S._vendorDay;if(!D||S._vendorW)return;
-  const cap=Number(String(D.cap).trim());
+  const cap=Number(_asciiDigits(D.cap).trim()); // an Arabic keyboard types ٣ (2026-10-07)
   if(!Number.isInteger(cap)||cap<1||cap>10){D.err=t('vndErrCap');_vendorDayRender();return;}
   const reason=D.state==='closed'?(D.rs==='other'?String(D.other||'').trim():D.rs||''):'';
   const r=_vendorDate(D.day),live=_vendorOnDay(D.day).filter(b=>b.status==='pending'||b.status==='confirmed').length;
@@ -31899,7 +31899,7 @@ async function _vendorTellCopy(i){
 async function _vendorVenSave(){
   const V=S._vendorVen;if(!V||S._vendorW)return;
   _vendorVenGrab();const f=V.f||{},p={};
-  VENDOR_VF.forEach(k=>{p[k]=String(f[k]||'').trim();});
+  VENDOR_VF.forEach(k=>{p[k]=String(f[k]||'').trim();});p.seats=_asciiDigits(p.seats); // ٤٠ from an Arabic keyboard is 40 (2026-10-07)
   const err=p.name.length<2||p.name.length>80?'vndErrName':p.map_url&&!/^https:\/\//i.test(p.map_url)?'vndErrMap':p.seats&&!(/^\d+$/.test(p.seats)&&+p.seats>=1&&+p.seats<=2000)?'vndErrSeats':'';
   if(err){V.err=t(err);_vendorVenRender();return;}
   if(V.id!=null)p.id=V.id;
@@ -31916,7 +31916,7 @@ async function _vendorVenSave(){
 }
 async function _vendorUserAdd(){
   const V=S._vendorVen;if(!V||V.id==null||S._vendorW)return;
-  const A=V.add,login=String(A.login||'').trim(),name=String(A.name||'').trim(),role=A.role==='owner'||A.role==='viewer'?A.role:'manager';
+  const A=V.add,login=_asciiDigits(A.login).trim(),name=String(A.name||'').trim(),role=A.role==='owner'||A.role==='viewer'?A.role:'manager';
   if(!login||(!login.includes('@')&&login.replace(/\D/g,'').length<7)){V.err=t('vndErrLogin');_vendorVenRender();return;}
   S._vendorW=true;
   let res;try{res=await sb.rpc('staff_vendor_user_add',{p_venue:V.id,p_login:login,p_name:name,p_role:role});}catch(e){res={error:e};}
@@ -31991,6 +31991,7 @@ function _vendorTierCard(d){
 }
 async function _vendorTierSave(id){
   const d=_vendorTd(id);if(!d||S._vendorW)return;
+  ['max_per_month','horizon_days','min_lead_days','cancel_cutoff_days','priority','sort'].forEach(k=>{if(d[k]!=null)d[k]=_asciiDigits(d[k]);}); // Arabic-keyboard digits (2026-10-07)
   const n=(v,lo,hi)=>/^\d+$/.test(String(v).trim())&&+v>=lo&&+v<=hi,int=v=>/^-?\d+$/.test(String(v).trim());
   const mx=String(d.max_per_month==null?'':d.max_per_month).trim();
   const err=!String(d.name_en||'').trim()?'vndErrTierName':!d.modes.length?'vndErrModes'
@@ -32391,12 +32392,22 @@ function _webEdPick(k,i,fid){
   inp.onchange=()=>{const f=inp.files&&inp.files[0];if(f)_webEdUpload(f,k,i,fid);};
   inp.click();
 }
+// A WebP or AVIF cut-out (any see-through pixel) is saved as a PNG like a PNG one: drawn into a JPEG its
+// transparent background came out black. Read on a small copy of the picture (2026-10-07).
+function _imgHasAlpha(bmp){
+  try{
+    const c=document.createElement('canvas');c.width=Math.max(1,Math.min(64,bmp.width));c.height=Math.max(1,Math.min(64,bmp.height));
+    const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bmp,0,0,c.width,c.height);
+    const d=x.getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=4)if(d[i]<255)return true;
+  }catch(_){}
+  return false;
+}
 async function _webShrink(file){
   const bmp=await createImageBitmap(file);
   const sc=Math.min(1,2000/Math.max(bmp.width,bmp.height));
   const w=Math.max(1,Math.round(bmp.width*sc)),h=Math.max(1,Math.round(bmp.height*sc));
   const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(bmp,0,0,w,h);
-  const png=file.type==='image/png'; // keeps a transparent background (the hero bike)
+  const png=file.type==='image/png'||(file.type!=='image/jpeg'&&_imgHasAlpha(bmp)); // keeps a transparent background (the hero bike)
   const type=png?'image/png':'image/jpeg';
   const blob=await new Promise(r=>c.toBlob(r,type,.85));
   return{blob,type,ext:png?'png':'jpg',bmp};
@@ -32653,7 +32664,7 @@ const _catStamp=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice
 async function _catUploadImage(file,folder){
   if(!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('type');
   const bmp=await createImageBitmap(file);
-  const png=file.type==='image/png',type=png?'image/png':'image/jpeg',ext=png?'png':'jpg'; // PNG keeps a cut-out background
+  const png=file.type==='image/png'||(file.type!=='image/jpeg'&&_imgHasAlpha(bmp)),type=png?'image/png':'image/jpeg',ext=png?'png':'jpg'; // PNG keeps a cut-out background
   const main=await _catDraw(bmp,2000,type,.85);
   if(!main||main.size>10*1024*1024)throw new Error('big');
   const base=folder+'/'+_catStamp();
@@ -32796,6 +32807,7 @@ async function _catSave(){
   const st=d.subtype_id?_catById(d.subtype_id):null;
   if(d.subtype_id&&(!st||st.parent_id!==d.category_id))d.subtype_id=null;
   const year=d.model_year===''||d.model_year==null?null:Number(d.model_year);
+  if(year!=null&&!(Number.isInteger(year)&&year>=1990&&year<=2100)){_catErr(t('catErrYear'));return;} // the table's own range: refused there as "could not save" (2026-10-07)
   ed.busy=true;ed.err='';_catSyncSave();
   let r=null;
   try{
@@ -33035,16 +33047,14 @@ function _catEditorHtml(){
   </div>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
-function _on__catModelsHtml_1(event,el){_cat().q=el.value;renderCatalog()}
-function _catModelsHtml(){
+// A keystroke redraws the list alone: drawing the whole tab replaced the field being typed in, so
+// the search stopped after its first letter (2026-10-07).
+function _on__catModelsHtml_1(event,el){_cat().q=el.value;const l=document.getElementById('cat-models-list');if(l)l.innerHTML=_catModelsListHtml();else renderCatalog();}
+function _catModelsListHtml(){
   const C=_cat();
   const q=String(C.q||'').trim().toLowerCase();
   const rows=C.models.filter(m=>!q||(m.brand+' '+m.name+' '+m.slug).toLowerCase().includes(q));
-  const bar=`<div class="cat-bar">
-    <div class="${_srchCls('cat',C.q)}" data-srch="cat">${_artIcon('search',13)}<input class="search-input" type="search" value="${esc(C.q||'')}" placeholder="${esc(t('catSearchPh'))}" aria-label="${esc(t('catSearchPh'))}" data-on-input="${_on("_on__catModelsHtml_1",_EV,_EL)}">${_srchBtn()}</div>
-    <button type="button" class="btn-primary btn-sm" data-on-click="${_on("_catEdit",null)}" ${_catTop().length?'':'disabled'}>${t('catAddModel')}</button></div>`;
-  const note=_catTop().length?'':`<div class="web-hint">${t('catNoCats')}</div>`;
-  const table=rows.length?`<div class="table-wrapper"><table class="web-table cat-table"><thead><tr><th></th><th>${t('catColModel')}</th><th>${t('catColCategory')}</th><th>${t('catColRide')}</th><th>${t('catColPhotos')}</th><th>${t('catColPublished')}</th><th>${t('catColUpdated')}</th><th></th></tr></thead><tbody>
+  return rows.length?`<div class="table-wrapper"><table class="web-table cat-table"><thead><tr><th></th><th>${t('catColModel')}</th><th>${t('catColCategory')}</th><th>${t('catColRide')}</th><th>${t('catColPhotos')}</th><th>${t('catColPublished')}</th><th>${t('catColUpdated')}</th><th></th></tr></thead><tbody>
     ${rows.map(m=>{const c=_catById(m.category_id),s=m.subtype_id?_catById(m.subtype_id):null;const ph=C.photos.filter(p=>p.model_id===m.id);const cover=ph.find(p=>p.is_cover)||ph[0];
       return`<tr data-model="${esc(m.slug)}"><td>${cover?`<img class="cat-thumb" src="${_catImg(cover.url,640)}" alt="" loading="lazy">`:'<span class="cat-thumb-empty" aria-hidden="true"></span>'}</td>
       <td data-sort="${esc((m.brand+' '+m.name).trim())}"><strong>${esc((m.brand?m.brand+' ':'')+m.name)}</strong><div class="cat-slug">${esc(_catPath(m))}</div></td>
@@ -33054,7 +33064,14 @@ function _catModelsHtml(){
       <td class="num">${esc(fmtStamp(m.updated_at))}</td>
       <td><span class="cat-tools"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_catEdit",m.id)}">${t('editBtn')}</button>${m.published?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_webPreview",_catPath(m))}">${t('catPreview')}</button>`:''}</span></td></tr>`;}).join('')}
     </tbody></table></div>`:`<div class="web-muted">${C.models.length?t('catNoMatch'):t('catEmptyModels')}</div>`;
-  return`${C.ed?_catEditorHtml():''}<div class="card web-card">${bar}${note}${table}</div>`;
+}
+function _catModelsHtml(){
+  const C=_cat();
+  const bar=`<div class="cat-bar">
+    <div class="${_srchCls('cat',C.q)}" data-srch="cat">${_artIcon('search',13)}<input class="search-input" type="search" value="${esc(C.q||'')}" placeholder="${esc(t('catSearchPh'))}" aria-label="${esc(t('catSearchPh'))}" data-on-input="${_on("_on__catModelsHtml_1",_EV,_EL)}">${_srchBtn()}</div>
+    <button type="button" class="btn-primary btn-sm" data-on-click="${_on("_catEdit",null)}" ${_catTop().length?'':'disabled'}>${t('catAddModel')}</button></div>`;
+  const note=_catTop().length?'':`<div class="web-hint">${t('catNoCats')}</div>`;
+  return`${C.ed?_catEditorHtml():''}<div class="card web-card">${bar}${note}<div id="cat-models-list">${_catModelsListHtml()}</div></div>`;
 }
 function _catCatFormHtml(){
   const E=_cat().ced,d=E.d,parent=d.parent_id?_catById(d.parent_id):null;
@@ -33166,7 +33183,7 @@ function renderHistory(_resultsOnly){
   const sessions=allSessions();
   const {hist,sessionFiltered,filtered}=_histRows();
   {const _hb=(S.histSelected||[]).length?new Map(hist.map(x=>[x.id,x])):null; // one index, not a find per selected row
-  S.histSelected=(S.histSelected||[]).filter(id=>{const e=_hb.get(id);return e&&e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId);});} // drop rows that got paid/removed since selection
+  S.histSelected=(S.histSelected||[]).filter(id=>{const e=_hb.get(id);return e&&_histOwes(e);});} // drop rows that got paid/removed since selection
   const _hSel=new Set(S.histSelected),_hTime=new Map(); // per paint: the ticks as a set, each session's time worked out once
   const _hTimeOf=sid=>{let v=_hTime.get(sid);if(v===undefined){v=sessionTime(_sessGet(sid));_hTime.set(sid,v);}return v;};
   const nDone=sessionFiltered.filter(e=>e.status==='done').length,nPaid=sessionFiltered.filter(e=>e.status==='done'&&e.paid).length,
@@ -33188,7 +33205,8 @@ function renderHistory(_resultsOnly){
   const hPayOpts=['all','paid','pending'].map(s=>{
     const l={all:t('filterAll'),paid:t('filterPaid'),pending:t('pendingLabel')}[s];
     return`<option value="${s}"${S.histPay===s?' selected':''}>${l}</option>`;}).join('');
-  const hTypeOpts=['all','Road','Hybrid','Mountain','Any'].map(ty=>
+  // Every type a booking carries (resolvedType): Kids, Road Carbon and Own riders could not be picked out (2026-10-07).
+  const hTypeOpts=['all',...CUST_TYPES.filter(ty=>ty!=='Any'),'Any'].map(ty=>
     `<option value="${ty}"${S.histType===ty?' selected':''}>${ty==='all'?t('filterAll'):typeLabel(ty)}</option>`).join('');
   const hSortOpts=[['date',t('sortNewest')],['name',t('sortName')],['type',t('sortType')],['amount',t('colPayment')],['status',t('colStatus')],['dur',t('colDuration')]].map(([v,l])=>
     `<option value="${v}"${S.histSort===v?' selected':''}>${l}</option>`).join('');
@@ -33227,7 +33245,7 @@ function renderHistory(_resultsOnly){
       ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">${_money(e.price??DEFAULT_PRICE)}</td>`:''}
       ${_hc.money?`<td data-on-click="${_on("_on_renderHistory_4",_EV,_EL)}">
         <div class="hist-row4">
-          ${e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId)?`<button class="btn-sm hist-sel ${_hSel.has(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${_hSel.has(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
+          ${_histOwes(e)?`<button class="btn-sm hist-sel ${_hSel.has(e.id)?'hist-sel-on':'hist-sel-off'}" title="${t('selectRowTip')}" data-on-click="${_on("toggleHistSelect",e.id)}">${_hSel.has(e.id)?_artIcon('boxOn',13):_artIcon('boxOff',13)}</button>`:''}
           ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="hist-c-muted">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
           <button data-on-click="${_on("showEditPriceModal",e.id)}" title="${t('editPriceBtn')}" aria-label="${t('editPriceBtn')}" class="hist-pen" data-on-mouseover="${_on("_on_renderHistory_5",_EV,_EL)}" data-on-mouseout="${_on("_on_renderHistory_6",_EV,_EL)}">${ICON_PENCIL}</button>
         </div>
@@ -33333,9 +33351,10 @@ function setHistStatus(v){S.histStatus=v;renderHistory();}
 function setHistRange(v){S.histRange=v;S.histLimit=60;renderHistory();}
 function toggleHistSelect(id){S.histSelected=S.histSelected||[];const i=S.histSelected.indexOf(id);if(i>=0)S.histSelected.splice(i,1);else S.histSelected.push(id);renderHistory();}
 async function bulkHistMarkPaid(){
-  // Only rides that still owe something. A free ride has nothing to collect - its row offers no
-  // selection any more, and one picked before that is dropped here.
-  const rows=(S.histSelected||[]).map(id=>getQueue().find(e=>e.id===id)).filter(e=>e&&e.status==='done'&&!e.paid&&!_freeSessIds.has(e.sessionId));
+  // Only rides that still owe something (_histOwes). A free ride has nothing to collect - its row offers
+  // no selection any more, and one picked before that is dropped here. Nor does a rider on their own
+  // bike with nothing bought, whose row reads "—" where the payment goes (2026-10-07).
+  const rows=(S.histSelected||[]).map(id=>getQueue().find(e=>e.id===id)).filter(e=>e&&_histOwes(e));
   if(!rows.length){S.histSelected=[];renderHistory();return;}
   // The same write as marking one row paid from its pill (togglePayment): card, any split
   // cleared, and an incidental price of 0 (no promo) back to the bike's price - otherwise the
