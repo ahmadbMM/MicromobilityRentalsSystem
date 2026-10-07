@@ -40,7 +40,7 @@ test('staff ask a new sign-up for changes, get the link and message, and the car
   const dlg = page.locator('#confirm-modal .ca-fx-box');
   await expect(dlg).toContainText('Ask Nadia Omar for changes');
   expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix)))
-    .toEqual(['name', 'email', 'phone', 'birth_date', 'gender', 'nationality', 'height', 'profession', 'workplace', 'instagram', 'linkedin']);
+    .toEqual(['name', 'email', 'phone', 'whatsapp', 'birth_date', 'gender', 'nationality', 'height', 'profession', 'workplace', 'instagram', 'linkedin']);
   await dlg.locator('[data-ca-fix="instagram"]').click();
   await dlg.locator('[data-ca-fix="workplace"]').click();
   await dlg.locator('#ca-fx-note').fill('Where do you work?');
@@ -71,7 +71,7 @@ test('a scheduled sign-up can be asked too, its account’s own details left out
   await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
   await row(page, 'l3').locator('.la-fix-btn').click();
   expect(await page.locator('#confirm-modal .ca-fx-box [data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix)))
-    .toEqual(['birth_date', 'nationality', 'profession', 'workplace', 'instagram', 'linkedin']);
+    .toEqual(['whatsapp', 'birth_date', 'nationality', 'profession', 'workplace', 'instagram', 'linkedin']);
   await page.locator('#confirm-modal .ca-fx-box .chrome-x').click();
   await page.locator('.filter-pill[data-la-filter="done"]').click();
   await expect(row(page, 'l5').locator('.la-fix-btn')).toHaveCount(0);

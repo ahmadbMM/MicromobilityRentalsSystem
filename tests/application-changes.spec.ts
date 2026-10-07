@@ -32,7 +32,7 @@ test('an application sent from an account asks only for its own answers, not the
   await staff(page, { community_applications: [{ ...karim, customer_id: 'c1' }] });
   await card(page).locator('.ca-fix-btn').click();
   const dlg = page.locator('#confirm-modal .ca-fx-box');
-  expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix))).toEqual(['birth_date', 'nationality', 'bike_type', 'profession', 'workplace', 'instagram', 'linkedin']);
+  expect(await dlg.locator('[data-ca-fix]').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.caFix))).toEqual(['whatsapp', 'birth_date', 'nationality', 'bike_type', 'profession', 'workplace', 'instagram', 'linkedin']);
 });
 
 test('staff pick the fields, get the link and a message in the applicant’s language, and the card says it is waiting', async ({ page }) => {

@@ -3919,5 +3919,6 @@
   "waYes": "Sí",
   "waNo": "No",
   "waSame": "El mismo que el móvil",
-  "errWaPhone": "Escribe tu número de WhatsApp."
+  "errWaPhone": "Escribe tu número de WhatsApp.",
+  "waSubAcc": "El número en el que nuestro equipo te escribe sobre tus salidas."
 }

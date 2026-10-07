@@ -229,7 +229,7 @@ test.describe('@staff:community learn to ride', () => {
 
   // The person signing up gives what the community form asks (owner, 2026-09-28): the card shows it.
   test('the card shows the person\'s own details, as a community application does', async ({ page }) => {
-    const person = { birth_date: '1992-03-04', gender: 'female', nationality: 'Egypt', height: 162, profession: 'Architect', instagram: 'nadia.o', linkedin: 'nadia-omar', ride_news: true };
+    const person = { birth_date: '1992-03-04', gender: 'female', nationality: 'Egypt', height: 162, profession: 'Architect', instagram: 'nadia.o', linkedin: 'nadia-omar', ride_news: true, whatsapp_same: true };
     await learnTab(page, { learn_applications: learners.map((l) => (l.id === 'l1' ? { ...l, ...person } : l)) });
     const r = row(page, 'l1');
     await expect(r).toContainText('Born');
@@ -244,7 +244,7 @@ test.describe('@staff:community learn to ride', () => {
     // A sign-up without those details keeps every line, each saying Not answered (the owner,
     // 2026-09-29: "show the unanswered/filled fields, don't hide them").
     const l2 = row(page, 'l2');
-    for (const k of ['Born', 'Gender', 'Nationality', 'Height', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news']) {
+    for (const k of ['WhatsApp number', 'Born', 'Gender', 'Nationality', 'Height', 'Profession', 'Company', 'How did you hear about us?', 'Instagram', 'LinkedIn', 'Ride news']) {
       await expect(l2.locator('.ca-kv', { hasText: k })).toHaveClass(/ca-kv-none/);
       await expect(l2.locator('.ca-kv', { hasText: k }).locator('b')).toHaveText('Not answered');
     }
