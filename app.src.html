@@ -8198,7 +8198,9 @@ function renderFixGate(){
   const items=_fixItems(g.fields),copy=_fixCopy(g,c);
   document.body.classList.add('fix-open');
   m.style.display='block';
-  m.innerHTML=`<div class="auth-backdrop"><form class="pg-box fx-box" role="dialog" aria-modal="true" aria-labelledby="fx-title" aria-describedby="fx-sub" novalidate data-on-submit="${_on("_on_renderFixGate_1",_EV,_EL)}">
+  g.waOnly=_fixWaOnly(g,c);
+  if(g.waOnly)m.innerHTML=_fixWaHtml(g,c);
+  else m.innerHTML=`<div class="auth-backdrop"><form class="pg-box fx-box" role="dialog" aria-modal="true" aria-labelledby="fx-title" aria-describedby="fx-sub" novalidate data-on-submit="${_on("_on_renderFixGate_1",_EV,_EL)}">
     <div class="fx-kicker"><span class="fx-flag" aria-hidden="true">${_artIcon('flag',12)}</span>${copy.kicker}</div>
     <h2 id="fx-title" class="pg-title">${copy.title}</h2>
     <p id="fx-sub" class="pg-sub">${copy.sub}</p>
@@ -8215,6 +8217,29 @@ function renderFixGate(){
   _fixRefill();
   if(!g.shown){g.shown=true;const b=m.querySelector('.fx-box');if(b){b.setAttribute('tabindex','-1');try{b.focus({preventScroll:true});}catch(e){}}}
 }
+// WhatsApp alone, and the server's own ask (a community member who has not answered yet): one
+// question on its own pop-up, not the check-up's list (the owner, 2026-10-07: "make it as a pop up
+// that forces customers to answer is your phone number the same as your whatsapp number yes or no,
+// if no ask them for their whatsapp number"). Yes saves at once; No opens the number box and Save.
+// Log out stays the only other way off. A staff flag on an answer already given keeps the list.
+function _fixWaOnly(g,c){return g.fields.length===1&&g.fields[0]==='whatsapp'&&_fixOwnAsk('whatsapp',c);}
+function _fixWaHtml(g,c){
+  const w=g.v.wa||{},ph=c.phone||'',same=ph?w.same:false,err=g.err.whatsapp,dis=g.saving?' disabled':'';
+  const spin=`<span class="pg-spin" aria-hidden="true"></span>`;
+  return `<div class="auth-backdrop"><form class="pg-box fx-box fx-wa-box" role="dialog" aria-modal="true" aria-labelledby="fx-title" novalidate data-on-submit="${_on("_on_renderFixGate_1",_EV,_EL)}">
+    <div class="fx-wa-ic" aria-hidden="true">${_artIcon('whatsapp',26)}</div>
+    <h2 id="fx-title" class="pg-title">${ph?t('waAsk').replace('{0}',`<bdi dir="ltr">${esc(ph)}</bdi>`):esc(t('waLabel'))}</h2>
+    <div class="fx-item pg-field${err?' err':''}" data-fx="whatsapp">
+      ${ph?`<div class="fx-seg fx-wa-seg" role="group" aria-labelledby="fx-title">${['yes','no'].map(x=>{const on=same===(x==='yes');return`<button type="button" class="fx-opt${on?' on':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_fixWaSame",x)}"${dis}>${g.saving&&on&&x==='yes'?spin:''}${t(x==='yes'?'waYes':'waNo')}</button>`;}).join('')}</div>`:''}
+      ${same===false?`<label class="fx-lbl fx-wa-lbl" id="fx-l-whatsapp" for="fx-wa-phone">${esc(t('waLabel'))}</label>
+      <div class="phone-row fx-wa-row"><select class="phone-cc" id="fx-wa-cc" aria-label="${esc(t('a11yDialCode'))}" data-on-change="${_on("_fixClearErr","whatsapp")}"${dis}>${_ccOpts(w.cc||'+966')}</select><input class="phone-num" id="fx-wa-phone" type="tel" inputmode="tel" autocomplete="off" value="${esc(w.num||'')}" placeholder="5x xxx xxxx" aria-labelledby="fx-l-whatsapp" data-on-input="${_on("_on__fixItemHtml_wa",_EV,_EL)}"${dis}></div>`:''}
+      ${err?`<div class="pg-msg" role="alert">${esc(err)}</div>`:''}
+    </div>
+    ${g.net||g.said?`<div class="pg-net" role="alert">${t(g.net?'pgErrNet':g.said)}</div>`:''}
+    <button id="fx-save" type="submit" class="pg-btn"${same===false?'':' hidden'}${g.saving?' disabled':''}>${g.saving?spin+t('pgSaving'):t('pgSave')}</button>
+    <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${dis}>${t('logOut')}</button>
+  </form></div>`;
+}
 // Clearing an error touches its own item only: repainting would drop the caret mid-word.
 function _fixClearErr(k){
   const g=S._fix;if(!g||!g.err[k])return;delete g.err[k];
@@ -8225,7 +8250,9 @@ function _fixBirth(){_fixClearErr('birth_date');}
 function _fixPick(el,k){el.classList.toggle('ph',!el.value);_fixClearErr(k);}
 // Yes / No to "is your mobile your WhatsApp too": No opens the number box, which then takes the focus.
 function _fixWaSame(x){
-  const g=S._fix;if(!g)return;_fixRead();g.v.wa={...(g.v.wa||{}),same:x==='yes'};delete g.err.whatsapp;renderFixGate();
+  const g=S._fix;if(!g||g.saving)return;_fixRead();g.v.wa={...(g.v.wa||{}),same:x==='yes'};delete g.err.whatsapp;g.net=false;g.said='';
+  if(x==='yes'&&g.waOnly){_fixSave();return;} // the WhatsApp pop-up: Yes is the whole answer
+  renderFixGate();
   if(x!=='yes'){const el=document.getElementById('fx-wa-phone');if(el)try{el.focus({preventScroll:true});}catch(e){}}
 }
 function _fixEmInp(k,el){const g=S._fix;if(!g)return;(g.v.em=g.v.em||{})[k]=el.value;_fixClearErr('emergency');}

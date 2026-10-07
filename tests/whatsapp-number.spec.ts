@@ -26,23 +26,28 @@ function saves(page: Page) {
 }
 
 test.describe('@customer:fix WhatsApp number', () => {
-  test('Yes: the mobile is their WhatsApp too', async ({ page }) => {
+  // Its own pop-up when it is the only thing asked (the owner, 2026-10-07: "make it as a pop up that forces
+  // customers to answer ... yes or no, if no ask them for their whatsapp number"): open as the site opens,
+  // no list, no way past it but an answer or Log out.
+  test('opens on its own as the site opens: one question, Yes or No, nothing else', async ({ page }) => {
+    await rider(page);
+    const box = page.locator('#fix-gate .fx-wa-box');
+    await expect(box).toBeVisible();
+    await expect(page.locator('#fx-title')).toHaveText('Is 0500000001 your WhatsApp number too?');
+    await expect(box.locator('.fx-opt')).toHaveText(['Yes', 'No']);
+    await expect(box.locator('.fx-head, .fx-was, .fx-kicker')).toHaveCount(0); // not the check-up's list
+    await expect(page.locator('#fx-save')).toBeHidden(); // nothing to save until No
+    await expect(box.locator('.gate-out')).toHaveText('Log out');
+    await page.keyboard.press('Escape');
+    await expect(box).toBeVisible();
+  });
+
+  test('Yes saves at once', async ({ page }) => {
     await rider(page);
     const sent = saves(page);
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
-    const it = page.locator('#fix-gate .fx-item[data-fx="whatsapp"]');
-    await expect(it).toBeVisible();
-    // the server asked it on its own: the account's check-up, not "our team noticed"
-    await expect(page.locator('#fx-title')).toHaveText('A few details for your account');
-    await expect(it.locator('.fx-q')).toHaveText('Is 0500000001 your WhatsApp number too?');
-    await expect(page.locator('#fx-wa-phone')).toHaveCount(0);
-    // nothing picked: asked to pick, nothing sent
-    await page.click('#fx-save');
-    await expect(it).toHaveClass(/err/);
-    expect(sent).toHaveLength(0);
-    await it.locator('.fx-opt', { hasText: 'Yes' }).click();
-    await expect(it.locator('.fx-opt.on')).toHaveText('Yes');
-    await page.click('#fx-save');
+    const box = page.locator('#fix-gate .fx-wa-box');
+    await box.locator('.fx-opt', { hasText: 'Yes' }).click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].p_values).toEqual({ whatsapp: { same: true } });
     await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
@@ -51,11 +56,11 @@ test.describe('@customer:fix WhatsApp number', () => {
   test('No: a WhatsApp number box with the country codes, checked like the mobile', async ({ page }) => {
     await rider(page);
     const sent = saves(page);
-    await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
     const it = page.locator('#fix-gate .fx-item[data-fx="whatsapp"]');
     await it.locator('.fx-opt', { hasText: 'No' }).click();
     await expect(page.locator('#fx-wa-phone')).toBeVisible();
     await expect(page.locator('#fx-wa-phone')).toBeFocused();
+    await expect(page.locator('#fx-save')).toBeVisible();
     await expect(page.locator('#fx-wa-cc')).toHaveValue('+966');
     expect(await page.locator('#fx-wa-cc option').count()).toBeGreaterThan(100); // the mobile's own list
     await page.click('#fx-save');
@@ -66,6 +71,21 @@ test.describe('@customer:fix WhatsApp number', () => {
     await page.click('#fx-save');
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].p_values).toEqual({ whatsapp: { same: false, phone: '+971501234567' } });
+    await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
+  });
+
+  test('with other things asked too it stays one item of the check-up', async ({ page }) => {
+    await stubSupabase(page, {
+      sessions, queue_entries: [], 'rpc:my_bookings': [],
+      'rpc:customer_whatsapp': [{ phone: '0500000001', whatsapp_same: null, whatsapp: null }],
+      'rpc:customer_fix_fields': ['whatsapp', 'height'],
+      'rpc:customer_fix_save': [],
+    });
+    await loginCustomer(page, { id: 'c1', phone: '0500000001' });
+    await page.goto('/');
+    await waitForSb(page);
+    await expect(page.locator('#fix-gate .fx-item[data-fx="whatsapp"] .fx-q')).toHaveText('Is 0500000001 your WhatsApp number too?');
+    await expect(page.locator('#fix-gate .fx-wa-box')).toHaveCount(0);
   });
 
   test('a staff flag on an answered one reads as a correction and shows what is on file', async ({ page }) => {

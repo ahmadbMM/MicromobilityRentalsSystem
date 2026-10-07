@@ -5300,6 +5300,13 @@ body.fix-open{overflow:hidden;}
 /* WhatsApp: "Is <mobile> your WhatsApp number too?", Yes / No, and on No the number (2026-10-07) */
 .fx-q{font-weight:600;font-size:14.5px;line-height:1.4;color:#0f1215;}
 .fx-wa-row{margin-top:8px;}
+.fx-wa-box .fx-wa-ic{width:48px;height:48px;border-radius:50%;background:#e8f6ee;color:#008f52;display:flex;align-items:center;justify-content:center;}
+.fx-wa-box .pg-title{font-size:24px;margin-top:14px;}
+.fx-wa-box .fx-item{margin-top:18px;background:none;border:0;padding:0;box-shadow:none;}
+.fx-wa-box .pg-title bdi{unicode-bidi:isolate;direction:ltr;}
+.fx-wa-box .fx-opt{height:52px;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;}
+.fx-wa-box .fx-wa-lbl{display:block;margin-top:16px;}
+.fx-wa-box .pg-btn[hidden]{display:none;}
 .fx-photo{display:flex;align-items:center;gap:12px;}
 .fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(15,18,21,.1);box-sizing:border-box;}
 .fx-ph.new{border-color:#008f52;}
