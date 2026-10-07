@@ -14,7 +14,7 @@
 --     its place (20261007150000); otherwise it is refused, detail 'em_required' (patched in place).
 --
 -- Rollback: run the three patches backwards (each replacement back to its anchor).
--- Idempotent (each patch is skipped when its function already carries '(20261007230000)').
+-- Idempotent (each patch is skipped when its function already carries '(20261007235800)').
 -- Run supabase/checks/security-attributes.sql after.
 -- ============================================================================
 
@@ -43,14 +43,14 @@ do $asks$
 declare d text;
 begin
   d := pg_get_functiondef('public._customer_asks(text)'::regprocedure);
-  if position('(20261007230000)' in d) > 0 then
+  if position('(20261007235800)' in d) > 0 then
     raise notice '_customer_asks already asks the emergency contact; nothing to do';
     return;
   end if;
   d := pg_temp._once(d,
 $a$  return f;
 end$a$,
-$b$  -- The first emergency contact, of every account (20261007230000).
+$b$  -- The first emergency contact, of every account (20261007235800).
   if coalesce(btrim(c.emergency_phone),'') = '' and not ('emergency' = any(f)) then
     f := f || 'emergency'::text;
   end if;
@@ -66,14 +66,14 @@ do $cfs$
 declare d text;
 begin
   d := pg_get_functiondef('public.customer_fix_save(text,text,jsonb)'::regprocedure);
-  if position('(20261007230000)' in d) > 0 then
+  if position('(20261007235800)' in d) > 0 then
     raise notice 'customer_fix_save already keeps the first contact; nothing to do';
     return;
   end if;
   d := pg_temp._once(d,
 $a$        when 'emergency' then
           update customers set emergency_name = null, emergency_phone = null, emergency_relation = null where id = p_id;$a$,
-$b$        when 'emergency' then continue;  -- the first contact is required: never cleared here (20261007230000)$b$);
+$b$        when 'emergency' then continue;  -- the first contact is required: never cleared here (20261007235800)$b$);
   execute d;
 end $cfs$;
 
@@ -83,14 +83,14 @@ do $cse$
 declare d text;
 begin
   d := pg_get_functiondef('public.customer_set_emergency(text,text,text,text,text)'::regprocedure);
-  if position('(20261007230000)' in d) > 0 then
+  if position('(20261007235800)' in d) > 0 then
     raise notice 'customer_set_emergency already refuses a bare clear; nothing to do';
     return;
   end if;
   d := pg_temp._once(d,
 $a$  if v_name is null and v_ph is null and v_rel is null then$a$,
 $b$  if v_name is null and v_ph is null and v_rel is null then
-    -- the first contact is required: cleared only when a second takes its place (20261007230000)
+    -- the first contact is required: cleared only when a second takes its place (20261007235800)
     if not exists (select 1 from customers x where x.id = p_id and x.emergency2_phone is not null) then
       raise exception 'BAD_INPUT' using errcode = '22023', detail = 'em_required';
     end if;$b$);
@@ -115,7 +115,7 @@ begin
     if not has_function_privilege('anon', f, 'execute') or not has_function_privilege('authenticated', f, 'execute') then
       raise exception '% lost a client grant', f;
     end if;
-    if position('(20261007230000)' in pg_get_functiondef(f::regprocedure)) = 0 then
+    if position('(20261007235800)' in pg_get_functiondef(f::regprocedure)) = 0 then
       raise exception 'the % patch did not take', f;
     end if;
   end loop;
@@ -123,13 +123,13 @@ begin
      or has_function_privilege('authenticated', 'public._customer_asks(text)', 'execute') then
     raise exception '_customer_asks must not be callable by clients';
   end if;
-  if position('(20261007230000)' in pg_get_functiondef('public._customer_asks(text)'::regprocedure)) = 0 then
+  if position('(20261007235800)' in pg_get_functiondef('public._customer_asks(text)'::regprocedure)) = 0 then
     raise exception '_customer_asks does not ask the emergency contact';
   end if;
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261007230000', 'emergency_contact_required')
+values ('20261007235800', 'emergency_contact_required')
 on conflict (version) do nothing;
 
 notify pgrst, 'reload schema';

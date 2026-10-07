@@ -8259,7 +8259,7 @@ function _fixRefill(){
 // What the server asks for on its own, never a staff flag: the account check-up (a password for an
 // account that signs in with Google or Apple only, and the email while it is a hidden Apple one) and a community member's missing birth
 // date or nationality (_customer_asks), and the first emergency contact of every account without one
-// (20261007230000). Staff flag what an account holds, so a birth date asked while one is on file is theirs;
+// (20261007235800). Staff flag what an account holds, so a birth date asked while one is on file is theirs;
 // the emergency contact is the server's ask until the read says the account has one.
 function _fixOwnAsk(k,c){return k==='password'||(k==='email'&&_isRelay(c.email))||(COMM_ASKS.includes(k)&&!c[k])||(k==='whatsapp'&&c.whatsapp_same!==true&&c.whatsapp_same!==false)
   ||(k==='emergency'&&!(S._fix&&S._fix.cur&&S._fix.cur.emergency));}
@@ -30320,7 +30320,7 @@ function _riderEntry(r){return r&&r.matched_entry_id?_qGet(r.matched_entry_id)||
 function _riderKey(r){return (r.session_id||'')+'|'+(r.booking_no||('id:'+r.id));}
 function _riderNoNum(r){const m=String(r&&r.booking_no||'').match(/(\d+)\s*$/);return m?Number(m[1]):Infinity;}
 function _riderParty(r){return r&&r.booking_no?(S.riders||[]).filter(x=>x.booking_no===r.booking_no&&(x.session_id||'')===(r.session_id||'')).sort((a,b)=>(Number(a.party_no)||1)-(Number(b.party_no)||1)):[r];}
-// The booking's emergency contacts (the Petromin form asks them since 2026-10-07, migration 20261007233000: one
+// The booking's emergency contacts (the Petromin form asks them since 2026-10-07, migration 20261007235900: one
 // pair for the party, on every row; the employee's row is read so a row from before still finds it): the name,
 // how they are related, and the number to call. '' while there is none (a database without the columns too).
 function _riderEmHtml(r,n){

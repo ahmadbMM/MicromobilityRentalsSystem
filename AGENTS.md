@@ -939,7 +939,7 @@ staff to flag it". The first contact (Run for Her, 2026-10-05) is unchanged; the
 The owner: "make the emergency contact obligatory only the first one not the second and unskippable for all the
 customers and force them even add it in the sign up page and all forms currently available". The second contact
 (above) stays optional.
-- **The database** (migration 20261007230000, runs after 20261007150000): `_customer_asks` asks `'emergency'` of every
+- **The database** (migration 20261007235800, runs after 20261007150000): `_customer_asks` asks `'emergency'` of every
   account whose `emergency_phone` is blank. That one rule opens the check-up at sign-in (`customer_fix_fields` ->
   `_commAskCheck` -> `_fixGate`, Log out the only other way off) and makes `customer_create_booking` refuse the
   account's bookings meanwhile (FIX_FIRST, which `submitReg` answers with the check-up). Staff adds and walk-ins are

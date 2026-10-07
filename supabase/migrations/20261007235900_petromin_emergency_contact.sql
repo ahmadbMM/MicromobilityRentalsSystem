@@ -38,7 +38,7 @@
 --   execute to anon, authenticated, service_role; drop function public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb); drop function public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb);
 --   run the rider_party_add patch backwards; then alter table public.rider_registrations drop column
 --   emergency_name, ... emergency2_relation (the constraints go with them).
--- Idempotent: each patch is skipped when its function already carries '(20261007233000)'.
+-- Idempotent: each patch is skipped when its function already carries '(20261007235900)'.
 -- Run supabase/checks/security-attributes.sql after.
 -- ============================================================================
 
@@ -82,17 +82,17 @@ alter table public.rider_registrations drop constraint if exists rider_registrat
 alter table public.rider_registrations add constraint rider_registrations_emergency2_needs_first
   check (emergency2_name is null or emergency_name is not null);
 comment on column public.rider_registrations.emergency_name is
-  'Who to call if a rider on this booking needs help; one pair per booking, on every row of the party (20261007233000).';
+  'Who to call if a rider on this booking needs help; one pair per booking, on every row of the party (20261007235900).';
 comment on column public.rider_registrations.emergency_phone is
-  'The emergency contact''s mobile number, digits with an optional + (20261007233000).';
+  'The emergency contact''s mobile number, digits with an optional + (20261007235900).';
 comment on column public.rider_registrations.emergency_relation is
-  'The emergency contact to the employee: spouse, parent, sibling, child, relative, friend, colleague or other (20261007233000).';
+  'The emergency contact to the employee: spouse, parent, sibling, child, relative, friend, colleague or other (20261007235900).';
 comment on column public.rider_registrations.emergency2_name is
-  'An optional second emergency contact, held only beside a first (20261007233000).';
+  'An optional second emergency contact, held only beside a first (20261007235900).';
 comment on column public.rider_registrations.emergency2_phone is
-  'The second emergency contact''s mobile number (20261007233000).';
+  'The second emergency contact''s mobile number (20261007235900).';
 comment on column public.rider_registrations.emergency2_relation is
-  'The second emergency contact to the employee, the same eight codes (20261007233000).';
+  'The second emergency contact to the employee, the same eight codes (20261007235900).';
 
 
 -- ── 2. rider_register takes p_emergency (patched from its live definition) ─────────────────────
@@ -100,7 +100,7 @@ do $reg$
 declare d text;
 begin
   if to_regprocedure('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)') is not null
-     and position('(20261007233000)' in pg_get_functiondef('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)'::regprocedure)) > 0 then
+     and position('(20261007235900)' in pg_get_functiondef('public.rider_register(text,text,integer,text,text,text,text,text,jsonb,text,text,jsonb)'::regprocedure)) > 0 then
     raise notice 'rider_register already takes p_emergency; nothing to do';
     return;
   end if;
@@ -119,7 +119,7 @@ $a$  v_staff boolean := is_staff(); v_prev rider_registrations%rowtype;
 begin
 $a$,
 $b$  v_staff boolean := is_staff(); v_prev rider_registrations%rowtype;
-  -- the emergency contact pair for the whole booking (20261007233000)
+  -- the emergency contact pair for the whole booking (20261007235900)
   v_em jsonb; v_em_set boolean := false;
   v_em_name text; v_em_phone text; v_em_rel text; v_em2_name text; v_em2_phone text; v_em2_rel text;
 begin
@@ -129,7 +129,7 @@ $b$);
   d := pg_temp._once(d,
 $a$  if v_sess.id is not null and v_last9 is not null then
 $a$,
-$b$  -- The emergency contact (20261007233000): p_emergency = {name, phone, relation, name2, phone2, relation2},
+$b$  -- The emergency contact (20261007235900): p_emergency = {name, phone, relation, name2, phone2, relation2},
   -- one pair for the whole booking. The first contact is required on every registration that is not the
   -- desk's, except an edit proved by rider_edit that sends none (the stored pair stays). The second is all
   -- three or none. Neither is the rider's own number, and the second is not the first's. The words are
@@ -195,7 +195,7 @@ $b$);
 $a$  v_bno := v_prev.booking_no;
   if v_bno is null then
 $a$,
-$b$  -- No contact sent (the desk, or an edit that leaves it alone): the booking keeps the pair it has (20261007233000).
+$b$  -- No contact sent (the desk, or an edit that leaves it alone): the booking keeps the pair it has (20261007235900).
   if not v_em_set and v_prev.id is not null then
     v_em_name := v_prev.emergency_name; v_em_phone := v_prev.emergency_phone; v_em_rel := v_prev.emergency_relation;
     v_em2_name := v_prev.emergency2_name; v_em2_phone := v_prev.emergency2_phone; v_em2_rel := v_prev.emergency2_relation;
@@ -257,7 +257,7 @@ $b$);
 $a$    'ok', true, 'resubmitted', v_n > 1, 'booking_no', v_bno, 'riders', v_n_extra + 1,
 $a$,
 $b$    'ok', true, 'resubmitted', v_n > 1, 'booking_no', v_bno, 'riders', v_n_extra + 1,
-    -- the pair this booking now holds, for the form's edit: what it sent, or (a proved edit) what it kept (20261007233000)
+    -- the pair this booking now holds, for the form's edit: what it sent, or (a proved edit) what it kept (20261007235900)
     'emergency', case when v_em_name is not null then jsonb_strip_nulls(jsonb_build_object('name', v_em_name, 'phone', v_em_phone,
         'relation', v_em_rel, 'name2', v_em2_name, 'phone2', v_em2_phone, 'relation2', v_em2_rel)) end,
 $b$);
@@ -274,7 +274,7 @@ do $edit$
 declare d text;
 begin
   if to_regprocedure('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)') is not null
-     and position('(20261007233000)' in pg_get_functiondef('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)'::regprocedure)) > 0 then
+     and position('(20261007235900)' in pg_get_functiondef('public.rider_edit(text,text,text,text,integer,text,text,text,text,jsonb,text,jsonb)'::regprocedure)) > 0 then
     raise notice 'rider_edit already takes p_emergency; nothing to do';
     return;
   end if;
@@ -291,7 +291,7 @@ $b$p_waiver text DEFAULT NULL::text, p_emergency jsonb DEFAULT NULL::jsonb)
   d := pg_temp._once(d,
 $a$    v_r := rider_register(p_badge, p_name, p_height, p_type, coalesce(v_row.source, 'petromin'), p_phone, v_sess_id, p_company, p_riders, p_waiver);
 $a$,
-$b$    -- the emergency contact goes through as given; none keeps the stored pair (20261007233000)
+$b$    -- the emergency contact goes through as given; none keeps the stored pair (20261007235900)
     v_r := rider_register(p_badge, p_name, p_height, p_type, coalesce(v_row.source, 'petromin'), p_phone, v_sess_id, p_company, p_riders, p_waiver,
                           p_emergency => p_emergency);
 $b$);
@@ -308,7 +308,7 @@ do $party$
 declare d text;
 begin
   d := pg_get_functiondef('public.rider_party_add(bigint,jsonb)'::regprocedure);
-  if position('(20261007233000)' in d) > 0 then
+  if position('(20261007235900)' in d) > 0 then
     raise notice 'rider_party_add already copies the emergency contacts; nothing to do';
     return;
   end if;
@@ -319,7 +319,7 @@ $a$booking_no, party_no)
     values (v_row.badge, v_name, v_row.phone, v_h, v_type, null, null, 'none', v_row.source, v_row.session_id, v_row.company, v_row.booking_no, v_next)
 $a$,
 $b$booking_no, party_no,
-                                     emergency_name, emergency_phone, emergency_relation, emergency2_name, emergency2_phone, emergency2_relation)  -- the booking's emergency contacts (20261007233000)
+                                     emergency_name, emergency_phone, emergency_relation, emergency2_name, emergency2_phone, emergency2_relation)  -- the booking's emergency contacts (20261007235900)
     values (v_row.badge, v_name, v_row.phone, v_h, v_type, null, null, 'none', v_row.source, v_row.session_id, v_row.company, v_row.booking_no, v_next,
             v_row.emergency_name, v_row.emergency_phone, v_row.emergency_relation, v_row.emergency2_name, v_row.emergency2_phone, v_row.emergency2_relation)
 $b$);
@@ -349,7 +349,7 @@ begin
                      and exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')) then
       raise exception '% lost SECURITY DEFINER or its search_path', f;
     end if;
-    if position('(20261007233000)' in pg_get_functiondef(f::regprocedure)) = 0 then
+    if position('(20261007235900)' in pg_get_functiondef(f::regprocedure)) = 0 then
       raise exception 'the patch of % did not take', f;
     end if;
   end loop;
@@ -371,7 +371,7 @@ begin
 end $chk$;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261007233000', 'petromin_emergency_contact')
+values ('20261007235900', 'petromin_emergency_contact')
 on conflict (version) do nothing;
 
 notify pgrst, 'reload schema';
