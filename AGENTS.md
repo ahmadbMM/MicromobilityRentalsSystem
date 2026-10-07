@@ -933,3 +933,26 @@ staff to flag it". The first contact (Run for Her, 2026-10-05) is unchanged; the
   confirmed an older notice meets the confirmation once more, and the website's learn-to-ride form asks it too (its
   PRIVACY_ASK_FROM comes from here through sync-privacy-notice). The Run for Her share consent still lists
   "Emergency contact" as one item.
+
+## The first emergency contact is required (2026-10-07)
+
+The owner: "make the emergency contact obligatory only the first one not the second and unskippable for all the
+customers and force them even add it in the sign up page and all forms currently available". The second contact
+(above) stays optional.
+- **The database** (migration 20261007230000, runs after 20261007150000): `_customer_asks` asks `'emergency'` of every
+  account whose `emergency_phone` is blank. That one rule opens the check-up at sign-in (`customer_fix_fields` ->
+  `_commAskCheck` -> `_fixGate`, Log out the only other way off) and makes `customer_create_booking` refuse the
+  account's bookings meanwhile (FIX_FIRST, which `submitReg` answers with the check-up). Staff adds and walk-ins are
+  not refused. `customer_fix_save` no longer clears the first contact for "I don't have one"; `customer_set_emergency`
+  refuses a blank save (detail `em_required`, `errEmRequired`) unless a second contact moves up into its place.
+- **Create account** (`_suEmHtml`, `_suEmBoxes`, `_suEm2Read`, styles `.auth-em*`): the first contact required, the
+  second behind "Add a second contact" (`S.suEm2`), all three boxes or none; both checked by `_emRead` against the
+  rider's own number and each other. `doSignup` saves them once the account exists (`customer_set_emergency`,
+  `customer_set_emergency2`); a save that fails is asked again by the check-up.
+- **The check-up**: `'emergency'` left `FIX_OPTIONAL` (no "I don't have one"); with the emergency contact the only ask
+  and none on file, `_fixCopy` says why (`emReqTitle`, `emReqSub`).
+- Privacy Notice row (en/ar): one contact required on every account, asked at sign-up or before the next booking;
+  no further confirmation beyond the 2026-10-07 one (the check-up itself asks).
+- The website mirrors it: the community and learn-to-ride forms ask it on their account step, the Petromin form asks
+  it of the employee (rider_registrations, its own migration), and the website's account area has a forced pop-up.
+  `tests/emergency-required.spec.ts`.

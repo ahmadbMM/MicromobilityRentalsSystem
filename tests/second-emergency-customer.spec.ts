@@ -190,17 +190,11 @@ test.describe('@customer:account second emergency contact', () => {
       expect(await page.evaluate('S._em')).toBeNull();
     });
 
-    test('both flagged and the first answered "I don\'t have one": the second is checked against no first number', async ({ page }) => {
-      const sent = rpcBodies(page, 'customer_fix_save');
+    test('both flagged: only the second offers "I don\'t have one" (the first is required, 2026-10-07)', async ({ page }) => {
       await rider(page, ['emergency', 'emergency2'], { ...first, ...second });
       await expect(page.locator('.fx-item[data-fx="emergency"] .fx-was')).toContainText('Nora Haddad');
-      await page.locator('.fx-item[data-fx="emergency"] .fx-none').click();
-      await page.fill('#fx-em2-name', 'Nora Haddad');
-      await page.fill('#fx-em2-phone', '0551234567'); // the number the first holds now: the first is going
-      await page.selectOption('#fx-em2-rel', 'sibling');
-      await page.click('#fx-save');
-      await expect.poll(() => sent.length).toBe(1);
-      expect(vals(sent)[0]).toEqual({ emergency2: { name: 'Nora Haddad', phone: '+966551234567', relation: 'sibling' }, none: ['emergency'] });
+      await expect(page.locator('.fx-item[data-fx="emergency"] .fx-none')).toHaveCount(0);
+      await expect(page.locator('.fx-item[data-fx="emergency2"] .fx-none')).toBeVisible();
     });
 
     test('both flagged and answered: each is checked against the other as typed, not against what they replace', async ({ page }) => {

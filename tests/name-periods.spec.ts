@@ -55,6 +55,7 @@ test('sign-up: "Md. Rahman" is sent as written; "A. Rahman" is an initial and ne
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   await page.evaluate('S.signupAck=true;doSignup()');
   await expect(page.locator('#auth-err')).toContainText(SHORT);
   expect(sent).toHaveLength(0);
@@ -81,6 +82,7 @@ test('the database refusing a name reads as the rule, periods included', async (
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   await page.evaluate('S.signupAck=true;doSignup()');
   await expect(page.locator('#auth-err')).toContainText(CHARS);
 });

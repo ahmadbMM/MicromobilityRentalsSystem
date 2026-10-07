@@ -26,6 +26,7 @@ test('the sign-up form does not ask how they heard of us, and signs up without i
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   await page.evaluate('S.signupAck=true;doSignup()');
   await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
   expect(calls).toHaveLength(1);

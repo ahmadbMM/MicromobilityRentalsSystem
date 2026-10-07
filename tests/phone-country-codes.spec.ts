@@ -30,6 +30,7 @@ async function fillRest(page: Page) {
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
 }
 
 test('a national number that starts with its country code digits keeps the code', async ({ page }) => {

@@ -448,6 +448,13 @@
     .auth-or::before,.auth-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
     .auth-or::before{left:0;}.auth-or::after{right:0;}
     .auth-submit{width:100%;margin-top:6px;}
+    /* Create account's emergency contacts (2026-10-07): a titled group under the account's own boxes;
+       the relationship list as wide as the boxes, the second contact behind its button. */
+    .auth-em{border-top:1px solid var(--line2);padding-top:14px;margin:4px 0 6px;}
+    .auth-em-t{font-size:13.5px;font-weight:800;color:var(--text);margin-bottom:3px;}
+    .auth-em-sub{font-size:12.5px;font-weight:500;color:var(--muted);line-height:1.45;margin-bottom:12px;}
+    .auth-box .auth-field>select{width:100%;}
+    .auth-em2-add{display:inline-flex;align-items:center;gap:6px;margin:0 0 16px;}
     .auth-err{font-size:13px;color:var(--red);font-weight:700;margin-bottom:10px;min-height:18px;text-align:center;}
     .auth-note{font-size:13.5px;font-weight:600;line-height:1.5;color:var(--text);background:var(--s3);border-left:3px solid var(--green);border-radius:4px;padding:10px 12px;margin:0 0 14px;}
     :is(html[lang="ar"],html[lang="ur"]) .auth-note{border-left:0;border-right:3px solid var(--green);}

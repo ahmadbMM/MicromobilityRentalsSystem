@@ -72,6 +72,7 @@ test.describe('signup', () => {
     await page.fill('#a-pwd', 'Zq8xTselah');
     await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
+    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.locator('#su-ack-box').click(); // the Privacy Notice confirmation is required
   }
 
@@ -184,6 +185,7 @@ test.describe('Google and Apple: sign-in only', () => {
     await page.fill('#a-pwd', 'Ride2Work');
     await page.fill('#a-pwd2', 'Ride2Work');
     await page.fill('#a-height', '156');
+    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
     await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
     expect(made).toEqual([]);
@@ -267,6 +269,7 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-pwd', 'Zq8xTselah');
     await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
+    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
     const err = await page.locator('#auth-err').textContent();
     expect(err).toMatch(/phone|هاتف|جوال/i);
@@ -285,6 +288,7 @@ test.describe('remaining hardening', () => {
     await page.fill('#a-pwd', 'Zq8xTselah');
     await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
+    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
     await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
     expect(await page.evaluate('S.rememberMe')).toBe(true);
@@ -390,6 +394,7 @@ test.describe('round 4: invisible characters & post-login flow', () => {
     await page.fill('#a-pwd', 'Zq8xTselah');
     await page.fill('#a-pwd2', 'Zq8xTselah');
     await page.fill('#a-height', '175');
+    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
     await page.evaluate('S.signupAck=true;doSignup()');
     await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
     expect(calls[0].p_email).toBe('faisal@example.com');

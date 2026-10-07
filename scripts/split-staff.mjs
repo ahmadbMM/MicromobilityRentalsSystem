@@ -1135,7 +1135,10 @@ export function formatFieldNames(r, limit = 20) {
 // rules, the messages in every language and the form's questions, with 47 strings in each language. The code is in
 // the community part; the English strings sit in the core. Here, on f24d9da5: staff 449.2 -> 455.6 (~457.8 on
 // the runner), core 243.1 -> 247.2 (~248.5).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 460, core: 250 };
+// Customer 217 -> 218 (2026-10-07): the first emergency contact required on Create account (its boxes, the second
+// behind its button) and the check-up's own words; 214.6 local, ~216.0 on the runner. Staff 460 -> 461 the same day:
+// the Riders pop-up's emergency contacts on top of Applications.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 461, core: 250 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

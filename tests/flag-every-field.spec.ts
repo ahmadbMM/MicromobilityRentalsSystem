@@ -95,8 +95,10 @@ test.describe('@customer:fix the rider answers every kind of field', () => {
     await expect(page.locator('.fx-item[data-fx="type_preference"] .fx-was')).toContainText(await page.evaluate(`typeLabel('Road')`) as string);
     await expect(page.locator('#fx-profession')).toHaveValue('');
     await expect(page.locator('#fx-soc-instagram')).toHaveValue('');
-    // the optional ones offer "I don't have one", the others do not
-    await expect(page.locator('#fix-gate .fx-none')).toHaveCount(4);
+    // the optional ones offer "I don't have one", the others do not: not the first emergency contact, which
+    // every account must have since 2026-10-07
+    await expect(page.locator('#fix-gate .fx-none')).toHaveCount(3);
+    await expect(page.locator('.fx-item[data-fx="emergency"] .fx-none')).toHaveCount(0);
 
     // nothing answered: every item says so, nothing is sent
     await page.click('#fx-save');
@@ -128,19 +130,18 @@ test.describe('@customer:fix the rider answers every kind of field', () => {
     await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
   });
 
-  test('a handle that is not one, and "I don\'t have one" for a handle and the emergency contact', async ({ page }) => {
-    await rider(page, ['x', 'linkedin', 'emergency']);
+  test('a handle that is not one, and "I don\'t have one" for a handle', async ({ page }) => {
+    await rider(page, ['x', 'linkedin']);
     const sent = saves(page);
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
     await page.fill('#fx-soc-x', 'not a handle!');
     await page.locator('.fx-item[data-fx="linkedin"] .fx-none').click();
-    await page.locator('.fx-item[data-fx="emergency"] .fx-none').click();
     await page.click('#fx-save');
     await expect(page.locator('.fx-item[data-fx="x"] .pg-msg')).toContainText('Check the');
     expect(sent).toHaveLength(0);
     await page.fill('#fx-soc-x', '@good_x');
     await page.click('#fx-save');
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0].p_values).toEqual({ x: 'good_x', none: ['linkedin', 'emergency'] });
+    expect(sent[0].p_values).toEqual({ x: 'good_x', none: ['linkedin'] });
   });
 });

@@ -140,6 +140,7 @@ test('sign-up: signs are dropped as they are typed, and a name that still carrie
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   // a value that arrives without typing (autofill, a script) is still judged at submit
   await page.evaluate(`document.getElementById('a-last').value='Babalghoum 2'`);
   await page.evaluate('S.signupAck=true;doSignup()');
@@ -163,6 +164,7 @@ test('sign-up: the server refusing the name reads as the same message', async ({
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.fill('#a-pwd2', 'Zq8xTselah');
   await page.fill('#a-height', '175');
+  await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
   await page.evaluate('S.signupAck=true;doSignup()');
   await expect(page.locator('#auth-err')).toContainText('Names can only contain letters, spaces and periods.');
 });
