@@ -14808,6 +14808,9 @@ function cloneSession(id){
   S.newSessSpots=s.spots!=null?String(s.spots):'';S.newSessKm=_rgKmOf(s);
   S.newSessMapUrl=s.meet_url||'';
   S.newSessBfName=s.breakfast_name||'';S.newSessBfUrl=s.breakfast_url||'';
+  // The announce time is a moment on the original's dates, and the clone has none yet: blank, never
+  // one typed into a form cancelled earlier (2026-10-07: it rode along and hid the new ride's spot).
+  S.newSessReveal='';
   // The picker has to show the stop the clone carries, because what it shows is what is saved:
   // the saved spot of that name, or "New" with the name and link filled in.
   {const _sp=s.breakfast_name&&(S.breakfastSpots||[]).find(x=>String(x.name||'').trim().toLowerCase()===String(s.breakfast_name).trim().toLowerCase());
@@ -15277,6 +15280,9 @@ function renderSessions(){
   let sessList=sessions.filter(s=>s.status!=='deleted');
   if(S.sessStatusFilter!=='all') sessList=sessList.filter(s=>s.status===S.sessStatusFilter);
   const _sessLocs=[...new Set(sessions.filter(s=>s.status!=='deleted').map(s=>String(s.location||'').trim()).filter(Boolean))].sort();
+  // A place no live session names any more is no filter (2026-10-07): its select had gone, and the list
+  // stayed empty with nothing on screen to clear it.
+  if(S.sessLocFilter&&S.sessLocFilter!=='all'&&!_sessLocs.includes(S.sessLocFilter))S.sessLocFilter='all';
   if(S.sessLocFilter&&S.sessLocFilter!=='all') sessList=sessList.filter(s=>String(s.location||'').trim()===S.sessLocFilter);
   const _sd=S.sessSortDir;
   const _bySession=_qBySession();
@@ -15383,7 +15389,7 @@ function renderSessions(){
     <div class="filter-bar">
       <div class="filter-row">${_fBtn('sess',[S.sessStatusFilter,S.sessLocFilter].filter(v=>v&&v!=='all').length)}</div>
       ${_fPanel('sess',_fField(t('filterStatus'),`<select class="filter-select" data-on-change="${_on("setSessStatusFilter",_P("value"))}" aria-label="${esc(t('filterStatus'))}">${sessStatusOpts}</select>`)
-        +(_sessLocs.length>1?_fField(t('ticketLocation'),`<select class="filter-select" data-on-change="${_on("_on_renderSessions_51",_EV,_EL)}" aria-label="${esc(t('ticketLocation'))}">${['all',..._sessLocs].map(v=>`<option value="${esc(v)}"${(S.sessLocFilter||'all')===v?' selected':''}>${v==='all'?t('filterAll'):esc(v)}</option>`).join('')}</select>`):'')
+        +((_sessLocs.length>1||(S.sessLocFilter&&S.sessLocFilter!=='all'))?_fField(t('ticketLocation'),`<select class="filter-select" data-on-change="${_on("_on_renderSessions_51",_EV,_EL)}" aria-label="${esc(t('ticketLocation'))}">${['all',..._sessLocs].map(v=>`<option value="${esc(v)}"${(S.sessLocFilter||'all')===v?' selected':''}>${v==='all'?t('filterAll'):esc(v)}</option>`).join('')}</select>`):'')
         +_fField(t('sortBy'),`<select class="filter-select" data-on-change="${_on("setSessSort",_P("value"))}" aria-label="${esc(t('sortBy'))}">${sessSortOpts}</select>`))}
       ${(()=>{const _nd=sessions.filter(s=>s.status!=='deleted').length;return sessList.length!==_nd?`<div class="result-count">${sessList.length} ${t('resultOf')} ${_nd} ${t('resultSessions')}</div>`:'';})()}
     </div>
@@ -15560,7 +15566,10 @@ async function _syncPromoBookings(code){
   }
   return calls.length;
 }
-async function addPromo(){
+// One add at a time (2026-10-07): a second tap while the first insert was on the wire passed the
+// same-text check (the list reloads after it) and was refused by the unique index as an error.
+function addPromo(){return _busyRun('promoAdd',_addPromo);}
+async function _addPromo(){
   const code=(document.getElementById('pc-code')?.value||S._pcCode||'').trim().toUpperCase();
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
   if(!code||value<=0){toast(t('promoInvalidMsg'),'error');return;}
@@ -15623,7 +15632,9 @@ function delPromo(id){
 function _sessRowSnap(id){const r=(S.sessions||[]).find(s=>s.id===id);if(!r)return null;const o={...r};delete o.display;return o;}
 // The columns a session edit writes, and so the ones its Undo puts back. Anything else on the
 // row (a publish, the queue counter, the fill rule's mark) belongs to whatever changed it since.
-const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at'];
+// The date's own words are one of them since the editor got its Description box (2026-10-07: Undo left
+// the new text on the ride). hide_queue is not: a publish clears it.
+const SESS_EDIT_COLS=['day','session_date','capacity','status','bike_slots','addons','title','spots','meet_url','breakfast_name','breakfast_url','event_kind','needs_approval','ride_kind','paid_ride','open_to_all','required_tag_id','reveal_at','description'];
 // The rides the editor sizes by places, not by bikes: the approval rides, and a ticketed event
 // (seats, no fleet). An event opened as a bike session read "add bikes" on every save.
 function _editSeats(s){return _isApprovalRide(s)||_rideKind(s)==='event'||_rideKind(s)==='runher';}
@@ -16518,7 +16529,12 @@ async function _saveGroupEdit(){
   }
   const prev=members.map(m=>({id:m.id,name:m.name,phone:m.phone||'',height:m.height||null,size:m.size||'',type_preference:m.typePreference,price:m.price??DEFAULT_PRICE,
     group_name:m.groupName||null,group_contact:m.groupContact||null,group_phone:m.groupPhone||null,session_id:m.sessionId,session_day:m.sessionDay,session_date:m.sessionDate,queue_num:m.queueNum,status:m.status}));
-  const base=moving?nextQNum(toSessionId):0;
+  let qn=moving?nextQNum(toSessionId):0;
+  // A party moves under the new ride's rules and fare, as one booking does (the single-booking editor,
+  // 2026-10-05; here 2026-10-07): it kept the old ride's type and price, so a party moved off a free ride
+  // stayed at 0 on a paid night and a bike type stayed on a ride without bikes.
+  const fare=(s,x,tp)=>_isFreeRide(s)?0:(_evSeatPrice(s)??priceForEntryType(x,tp));
+  if(moving&&!S.ridersLoaded&&members.some(x=>_rideKind(_sessGet(x.sessionId))==='petromin'))await loadRiders(); // the Riders list tells an employee's fare
   const done=[]; // rows this save has written, put back if a later one is refused
   for(let k=0;k<rows.length;k++){
     const{i,m}=rows[k];
@@ -16534,8 +16550,22 @@ async function _saveGroupEdit(){
       // Reprice like the single-booking editor: only unpaid rows still on the old type's default.
       if(!_freeSessIds.has(m.sessionId)&&!m.paid&&(m.price??DEFAULT_PRICE)===priceForEntryType(m,m.typePreference||'Any'))patch.price=priceForEntryType(m,ty);
     }
-    if(moving){patch.session_id=toSessionId;patch.session_day=sessT.day;patch.session_date=sessT.session_date||toSessionId;patch.queue_num=base+k;if(m.status==='waitlist')patch.status='waiting';}
-    const res=await sb.from('queue_entries').update(patch).eq('id',m.id);
+    if(moving){
+      patch.session_id=toSessionId;patch.session_day=sessT.day;patch.session_date=sessT.session_date||toSessionId;patch.queue_num=qn++;if(m.status==='waitlist')patch.status='waiting';
+      const tyNow=patch.type_preference||m.typePreference||'Any';
+      let ty2=_needsBike(sessT)?(tyNow==='None'?'Any':tyNow):'None';
+      if((ty2==='Own'&&!_ownOffered(sessT))||(ty2==='Road Carbon'&&_noCarbon(sessT)))ty2='Any';
+      if(ty2!==tyNow){patch.type_preference=ty2;patch.size=ty2==='None'?'':(height?heightToSize(height,ty2):(m.size||''));}
+      if(!m.paid&&!m.promoCode&&(m.price??DEFAULT_PRICE)===fare(_sessGet(m.sessionId),m,m.typePreference||'Any'))patch.price=fare(sessT,{...m,sessionId:toSessionId},ty2);
+    }
+    let res=await sb.from('queue_entries').update(patch).eq('id',m.id);
+    // The numbers came from this device's copy: another desk adding to that night meanwhile takes one
+    // (23505). Fresh numbers and one more try, as the single-booking move does.
+    if(moving&&res&&res.error&&(String(res.error.code||res.error.message).includes('23505')||/duplicate|unique/i.test(res.error.message||''))){
+      await loadDataLight();patch.queue_num=nextQNum(toSessionId);qn=patch.queue_num+1;
+      res=await sb.from('queue_entries').update(patch).eq('id',m.id);
+    }
+    if(res&&res.error&&/PAID_MOVE/.test(String(res.error.message||'')))res.error.said=t('bePaidMoveErr'); // a paid member the server will not move to another fare
     if(_writeErr(res,'edit booking')){
       if(done.length){
         await Promise.all(done.map(d=>sb.from('queue_entries').update(prev.find(p=>p.id===d.m.id)).eq('id',d.m.id))); // fire-and-forget: rollback; the reload below shows what stands
@@ -16887,7 +16917,7 @@ function _bdWishHtml(c,y){
   const wa=ok
     ?`<a class="bd-wa" href="${esc(_bdWaUrl(c))}" target="_blank" rel="noopener" data-on-click="${_on("_bdWaClick",c.id,y)}" title="${esc(t('bdWishWa'))}" aria-label="${esc(t('bdWishWa'))}: ${esc(c.name||'')}">${_artIcon('whatsapp',14)}</a>`
     :`<span class="bd-wa off" role="img" title="${esc(t('bdNoPhone'))}" aria-label="${esc(t('bdNoPhone'))}">${_artIcon('whatsapp',14)}</span>`;
-  const tip=w?t('bdWishedBy').replace('{0}',w.by||'—')+(w.at?' · '+new Date(w.at).toLocaleString(_locale(),{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):''):t('bdMarkWished');
+  const tip=w?t('bdWishedBy').replace('{0}',w.by||'—')+(w.at?' · '+new Date(w.at).toLocaleString(_locale(),{timeZone:KSA_TZ,day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):''):t('bdMarkWished');
   return`<span class="bd-wish-cell">${wa}<button type="button" class="bd-wish${w?' on':''}" aria-pressed="${w?'true':'false'}" title="${esc(tip)}" aria-label="${esc(w?t('bdWished'):t('bdMarkWished'))}: ${esc(c.name||'')}" data-on-click="${_on("_bdMark",c.id,y,!w)}"><span class="bd-wish-ic" aria-hidden="true">✓</span><span class="bd-wish-lbl">${esc(w?t('bdWished'):t('bdMarkWished'))}</span></button></span>`;
 }
 function _bdAvatar(c){const i=String(c.name||'?').trim().split(/\s+/).map(w=>w[0]||'').join('').slice(0,2).toUpperCase();return`<span class="bd-av" aria-hidden="true">${esc(i)}</span>`;}
