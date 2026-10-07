@@ -35905,7 +35905,7 @@ function renderTagGrantModal(){
   </div>`;
 }
 async function saveTagGrant(){
-  const st=S._tg;if(!st)return;
+  const st=S._tg;if(!st||st.busy)return; // a second tap while the first is on its way inserted the row twice: the second was refused (duplicate key) and said so in red (2026-10-07)
   // Permanent grants keep the pre-migration row shape so an unmigrated DB still works;
   // only temporary grants write the starts_at / expires_at window columns.
   const row={customer_id:st.cid,tag_id:st.tid,added_by:'staff',added_at:Date.now()};
@@ -35925,6 +35925,7 @@ async function saveTagGrant(){
       row.starts_at=start;row.expires_at=end;
     }
   }
+  st.busy=true;
   try{
     // A lapsed grant of the same tag is still on file under the same key; it gives way to the new one.
     if((S.customerTags||[]).some(ct=>ct.customer_id===st.cid&&ct.tag_id===st.tid&&_tagLapsed(ct))){
@@ -35935,13 +35936,16 @@ async function saveTagGrant(){
     _ctMerge([row]);
     if(st.tid===TAG_VIP)await _vipChanged(st.cid,_wasVip);
     // Blacklisting a Community member takes the Community tag away too, unless the box was unticked.
+    // A refused removal is said by _wr; the blacklist is given all the same, so the dialog closes and the
+    // row shows it (it used to stay open, and a second tap was refused as a duplicate grant).
     if(st.tid===TAG_BLACKLIST&&st.dropComm&&_hasTagNow(st.cid,TAG_COMMUNITY)){
-      if(await _wr(sb.from('customer_tags').delete().eq('customer_id',st.cid).eq('tag_id',TAG_COMMUNITY),'grant tag'))return;
-      S.customerTags=(S.customerTags||[]).filter(ct=>!(ct.customer_id===st.cid&&ct.tag_id===TAG_COMMUNITY));
+      if(!await _wr(sb.from('customer_tags').delete().eq('customer_id',st.cid).eq('tag_id',TAG_COMMUNITY),'grant tag'))
+        S.customerTags=(S.customerTags||[]).filter(ct=>!(ct.customer_id===st.cid&&ct.tag_id===TAG_COMMUNITY));
     }
     S._tg=null;closeConfirm();
     if(!_amRepaintRow(st.cid))renderCommunity();
   }catch(e){toast((e&&e.message)||t('errServerError'),'error');}
+  finally{st.busy=false;}
 }
 // The two system tags wear their brands instead of their names: the circuit's symbol on its
 // blue, the micromobility mark on green. Any tag staff create keeps its name. The name still
@@ -36149,7 +36153,7 @@ function _sxAgeAt(iso){
 function _sxBody(c,out){
   let age=null;const b=c.birth_date;
   if(b){
-    const ok=/^\d{4}-\d{2}-\d{2}$/.test(b)&&!isNaN(new Date(b+'T12:00:00'))&&new Date(b+'T12:00:00').toISOString().slice(0,10)===b;
+    const ok=/^\d{4}-\d{2}-\d{2}$/.test(b)&&!isNaN(new Date(b+'T12:00:00Z'))&&new Date(b+'T12:00:00Z').toISOString().slice(0,10)===b; // noon UTC read back as UTC: the device's noon was the day before in UTC on a desk east of UTC+12, and every birth date read as not a date (2026-10-07)
     const today=todayStr(); // the venue's day, not UTC's (a birth date typed after 21:00 Riyadh time read as tomorrow's)
     if(!ok)out.push({f:'birth_date',k:'sxDobBad',v:b});
     else if(b>today)out.push({f:'birth_date',k:'sxDobFuture',v:b});
@@ -36492,7 +36496,7 @@ function _dupGroupsNow(){
 function _mgAcctHtml(c,extra){
   return `<div class="mg-acct"><div class="mg-acct-main"><button type="button" class="mg-name" data-on-click="${_on("openAccountHistory",c.id)}">${esc(c.name||'')}</button>
     <span class="am-meta">${esc(c.phone||'')}${c.phone&&c.email?' · ':''}${esc(c.email||'')}${c.birth_date?' · '+esc(c.birth_date):''}</span>
-    <span class="am-meta">${esc(t('mgBookingsN').replace('{0}',_custBookingsN(c.id)))}${c.created_at?' · '+esc(shortDate(String(c.created_at).slice(0,10))):''}</span></div>${extra||''}</div>`;
+    <span class="am-meta">${esc(t('mgBookingsN').replace('{0}',_custBookingsN(c.id)))}${c.created_at?' · '+esc(shortDate(String(c.created_at))):''}</span></div>${extra||''}</div>`; // the stamp is UTC: shortDate reads it as the Riyadh day (cut to its date, a late-evening sign-up read as the day before; 2026-10-07)
 }
 function _mgMatches(q){
   q=String(q||'').trim();if(q.length<2)return[];
@@ -36999,7 +37003,8 @@ function _bdgEditOpen(id){const b=id?_bdgById(id):null;S._bdgEdit=b?{...b,rule:b
 function _bdgEditPull(){
   const e=S._bdgEdit;if(!e)return;const v=id=>{const i=document.getElementById(id);return i?i.value:null;};
   ['name','name_ar','description','description_ar'].forEach(f=>{const x=v('bdg-f-'+f);if(x!=null)e[f]=x;});
-  if(e.rule){e.rule.windows.forEach((w,i)=>{const f=v('bdg-w-f-'+i),to=v('bdg-w-t-'+i);if(f!=null)w.from=f.trim();if(to!=null)w.to=to.trim();});const r=v('bdg-f-rides');if(r!=null)e.rule.rides=r;}
+  // The dates as Western digits: an Arabic keyboard types Arabic-Indic ones, which the check (and the table) refused as not a date (2026-10-07).
+  if(e.rule){e.rule.windows.forEach((w,i)=>{const f=v('bdg-w-f-'+i),to=v('bdg-w-t-'+i);if(f!=null)w.from=_asciiDigits(f).trim();if(to!=null)w.to=_asciiDigits(to).trim();});const r=v('bdg-f-rides');if(r!=null)e.rule.rides=r;}
 }
 function _bdgEditSet(k,v){const e=S._bdgEdit;if(!e)return;_bdgEditPull();e[k]=v;renderCommunity();}
 function _bdgWinAdd(){const e=S._bdgEdit;if(!e)return;_bdgEditPull();e.rule=e.rule||{rides:1,windows:[]};e.rule.windows.push({from:'',to:''});renderCommunity();}
@@ -37036,7 +37041,7 @@ function _bdgRuleOf(e){
   return ok&&rides>=1&&rides<=99&&W.length<=20?{rides,windows:W.map(w=>({from:w.from,to:w.to}))}:false;
 }
 async function _bdgSave(){
-  const e=S._bdgEdit;if(!e)return;
+  const e=S._bdgEdit;if(!e||e.busy)return; // a second tap on a new badge's Save made a second badge (a new id each time; 2026-10-07)
   _bdgEditPull();
   const rule=_bdgRuleOf(e);if(rule===false){toast(t('bdgRuleBad'),'error');return;}
   const v=k=>String(e[k]||'').trim();
@@ -37044,7 +37049,9 @@ async function _bdgSave(){
   if(!e.system&&!row.name){toast(t('bdgNameReq'),'error');return;}
   const id=e.id||('bd_c'+uid());
   if(!e.id)Object.assign(row,{id,slug:id,sort:500+(S.badges||[]).length});
+  e.busy=true;
   const r=e.id?await sb.from('badges').update(row).eq('id',id):await sb.from('badges').insert(row);
+  e.busy=false;
   if(_writeErr(r,'save badge'))return;
   S.badges=[...(S.badges||[]).filter(b=>b.id!==id),{system:false,auto:false,retired:false,...(_bdgById(id)||{}),...row,id}];
   S._bdgEdit=null;const msg=`${t('bdgSaved')}: ${e.system?_bdgName(e):row.name}`;toast(msg);logAction(msg);renderCommunity();
@@ -37473,8 +37480,11 @@ function _rsPick(id){
   _rsBarPaint();
 }
 function _rsPickPaint(b,on){b.setAttribute('aria-pressed',on?'true':'false');b.innerHTML=_artIcon(on?'boxOn':'boxOff',18);const card=b.closest('.an-rate-card');if(card)card.classList.toggle('rs-sel',on);}
-function _rsBarPaint(){const n=_rsSet().size,el=document.querySelector('#tab-analytics .rs-n'),go=document.querySelector('#tab-analytics .rs-go');if(el)el.textContent=t('rsSelN').replace('{0}',n);if(go)go.disabled=!n;}
-function _rsShareSel(){const ids=[..._rsSet()].filter(id=>getQueue().some(e=>e.id===id));if(ids.length)_rsOpen(ids);}
+// The picks whose card is on the list as drawn (2026-10-07): a pick kept from another range or ride counted
+// in the bar after the next tap (the card said 3, one more tap said 5) and went into the pictures unseen.
+function _rsShown(){const c=document.querySelector('#tab-analytics .rs-card');return c?[..._rsSet()].filter(id=>c.querySelector(`[data-rs-pick="${CSS.escape(String(id))}"]`)):[];}
+function _rsBarPaint(){const n=_rsShown().length,el=document.querySelector('#tab-analytics .rs-n'),go=document.querySelector('#tab-analytics .rs-go');if(el)el.textContent=t('rsSelN').replace('{0}',n);if(go)go.disabled=!n;}
+function _rsShareSel(){const ids=_rsShown().filter(id=>getQueue().some(e=>e.id===id));if(ids.length)_rsOpen(ids);}
 // Ratings summary + per-bike health (avg ratings, usage, service age -> "needs attention")
 // rows: the bookings of the range and session picked above it, as every other view reads them
 // (2026-10-05: this one read every booking, whatever the range bar said). Without them, every booking.
@@ -37974,8 +37984,10 @@ function _rrPrint(){
   const bf=S._rrMode==='bf',p=bf?_rrBfPick():_rrPick();
   if(!p.rows.length&&!(bf&&p.skip.length)){toast(t(bf?'vndRgNone':'rrNone'),'warning');return;}
   const html=bf?_rrBfReportHtml():_rrReportHtml();
-  _closePrintOpts();
+  // The dialog stays up until the report has opened: a blocked window says "tap again", which the
+  // dialog closed first left nothing to tap (2026-10-07).
   if(!_openReport(html,1200,800)){toast(t('repPopupBlocked'),'info');return;}
+  _closePrintOpts();
   logAction(bf?t('rrBfLog').replace('{0}',p.sid!=='all'?((_rrBfRides().find(x=>x.id===p.sid)||{label:p.sid}).label)
     :(p.o.venue==='all'?t('rrAllVenues'):(_rrVenues(p.rows)[0]||{label:p.o.venue}).label)+', '+t('rrAllRides')):t('rrLog').replace('{0}',p.rows.length));
 }
