@@ -12624,12 +12624,14 @@ async function _ambMineEnsure(cust){
     let r;try{r=await sb.rpc('ambassador_mine',{p_id:cust.id,p_token:cust.session_token});}catch(e){r={error:e};}
     S._ambMineBusy=false;
     S._ambMine=(r&&!r.error&&r.data&&r.data.ok&&r.data.ambassador)?{...r.data,forId:cust.id}:{ambassador:false,forId:cust.id};
+    // Another account signed in while this was asked (its own ask was turned away as busy): ask for it now.
+    const now=S.loggedIn||getSession();if(now&&now.id&&now.id!==cust.id)return _ambMineEnsure(now);
   }
   _ambMinePaint();
 }
 function _ambMinePaint(){
-  const a=S._ambMine,host=document.getElementById('tab-account');
-  if(!a||!a.ambassador||!host||document.getElementById('amb-mine'))return;
+  const a=S._ambMine,host=document.getElementById('tab-account'),c=S.loggedIn||getSession();
+  if(!a||!a.ambassador||!host||!c||a.forId!==c.id||document.getElementById('amb-mine'))return; // never another account's code and points (2026-10-07)
   const ev=Array.isArray(a.events)?a.events.slice(0,5):[];
   const kpi=(v,l)=>`<div class="amb-kpi"><div class="amb-kpi-v">${esc(String(v??0))}</div><div class="amb-kpi-l">${l}</div></div>`;
   const card=document.createElement('div');card.id='amb-mine';card.className='amb-mine';
@@ -13556,19 +13558,7 @@ function renderAccount(){
     })()}
     <div class="form-section cu-card640-0">
       <div class="form-title">${t('profileInfo')}</div>
-      <div class="cu-photo-row">
-        ${cust.photo
-          ?`<img id="acc-photo-img" loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="cu-photo">`
-          :`<div id="acc-photo-img" class="cu-initials">${esc(String(cust.name||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
-        <div class="cu-photo-col">
-          <div class="cu-photo-k">${t('profilePhotoLabel')}</div>
-          <div class="cu-wrap8">
-            <label class="btn-secondary cu-upload">${t('uploadPhotoBtn')}
-              <input type="file" accept="image/*" class="cu-hidden" data-on-change="${_on("accUploadPhoto",_EL)}"></label>
-            ${cust.photo?`<button class="btn-secondary cu-photo-btn" data-on-click="${_on("accRemovePhoto")}">${t('removePhotoBtn')}</button>`:''}
-          </div>
-        </div>
-      </div>
+      ${_accPhotoRow(cust)}
       ${(()=>{const _n=_splitName3(cust.name||'');return`
       <div class="form-row form-row-3">
         <div class="form-group"><label for="acc-first">${t('firstName')}</label>
@@ -13724,7 +13714,7 @@ function onAccCountryChange(country){_setCityCountry('acc-city',country);}
 // The type pill picks for the form, not for the account: it used to write straight onto
 // S.loggedIn, so a choice never saved still steered Book my usual and the Reserve prefill.
 // It is held against the account it was picked for, and survives the form being repainted.
-function _accPickType(ty){const c=S.loggedIn||getSession();S._accType=c?{id:c.id,ty}:null;CUST_TYPES.forEach(x=>document.getElementById('atp-'+x)?.classList.toggle('active',x===ty));}
+function _accPickType(ty){const c=S.loggedIn||getSession();S._accType=c?{id:c.id,ty}:null;CUST_TYPES.forEach(x=>{const b=document.getElementById('atp-'+x);if(!b)return;b.classList.toggle('active',x===ty);b.setAttribute('aria-pressed',String(x===ty));});} // aria-pressed too, as the gender pills (it stayed on the old pick)
 function _accTypeFor(c){return((S._accType&&c&&S._accType.id===c.id)?S._accType.ty:(c&&c.type_preference))||'Any';}
 // The gender pills pick for the form the same way.
 function _accPickGender(g){const c=S.loggedIn||getSession();S._accGender=c?{id:c.id,g}:null;['male','female'].forEach(x=>{const b=document.getElementById('agn-'+x);if(!b)return;b.className='toggle-btn '+_genderBtnCls(x,g)+(x===g?' active':'');b.setAttribute('aria-pressed',String(x===g));});}
@@ -13812,7 +13802,10 @@ async function saveAccount(){
         }
         about={profession:a.profession||null,workplace:a.workplace||null,heard_from:hf||ab.heard_from||null,gender:gd||cur.gender||null};
       }
-      S.loggedIn={..._withProfile(cust,cur),...v,socials,...about};
+      // Laid over the account as it is now (2026-10-07): the copy from before these round trips put
+      // back a sign-out made meanwhile and dropped what other reads (ride news, deletion) brought.
+      const _now=S.loggedIn||getSession();if(!_now||_now.id!==cust.id)return;
+      S.loggedIn={..._withProfile(_now,cur),...v,socials,...about};
       // A new email can change how the account signs in: not fresh, so the page asks customer_about again.
       setSession(S.loggedIn);S._accType=null;S._accGender=null;S._profFresh=v.email!==(cur.email??'')?null:{id:cust.id,at:Date.now()};
       if(v.height){S._rHeight=String(v.height);}
@@ -13911,20 +13904,45 @@ function pickImage(input,cb,max,square,onFail){
   reader.onerror=()=>{toast(t('photoErrToast'),'error');if(onFail)onFail();};
   reader.readAsDataURL(file);
 }
-function accUploadPhoto(input){pickImage(input,url=>_saveAccPhoto(url),256);}
+// The account page's photo row (the picture or the initials, Upload and Remove).
+function _accPhotoRow(cust){
+  return`<div class="cu-photo-row">
+        ${cust.photo
+          ?`<img id="acc-photo-img" loading="lazy" decoding="async" src="${esc(cust.photo)}" alt="" class="cu-photo">`
+          :`<div id="acc-photo-img" class="cu-initials">${esc(String(cust.name||'').split(' ').filter(Boolean).map(w=>w[0]).join('').slice(0,2).toUpperCase())}</div>`}
+        <div class="cu-photo-col">
+          <div class="cu-photo-k">${t('profilePhotoLabel')}</div>
+          <div class="cu-wrap8">
+            <label class="btn-secondary cu-upload">${t('uploadPhotoBtn')}
+              <input type="file" accept="image/*" class="cu-hidden" data-on-change="${_on("accUploadPhoto",_EL)}"></label>
+            ${cust.photo?`<button class="btn-secondary cu-photo-btn" data-on-click="${_on("accRemovePhoto")}">${t('removePhotoBtn')}</button>`:''}
+          </div>
+        </div>
+      </div>`;
+}
+// The same picture can be picked again after a refused save (the box kept it, so no change fired).
+function accUploadPhoto(input){pickImage(input,url=>_saveAccPhoto(url),256);try{input.value='';}catch(_){}}
+// A photo saved or removed (2026-10-07): the account as it is NOW takes it (a copy from before the
+// round trip put back a sign-out made meanwhile, or undid a profile read that landed), and a form
+// holding unsaved edits keeps them - only its photo row is drawn again.
+function _accPhotoSet(cust,photo){
+  const cur=S.loggedIn;if(!cur||cur.id!==cust.id)return false;
+  S.loggedIn={...cur,photo};setSession(S.loggedIn);
+  const row=_accDirty()&&document.querySelector('#tab-account .cu-photo-row');
+  if(row)row.outerHTML=_accPhotoRow(S.loggedIn);else renderAccount();
+  renderTopbarRight();return true;
+}
 async function _saveAccPhoto(dataUrl){
   const cust=S.loggedIn;if(!cust)return;
   const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:dataUrl});
   if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
-  S.loggedIn={...cust,photo:dataUrl};setSession(S.loggedIn);
-  toast(t('photoSavedToast'));renderAccount();renderTopbarRight();
+  if(_accPhotoSet(cust,dataUrl))toast(t('photoSavedToast'));
 }
 async function accRemovePhoto(){
   const cust=S.loggedIn;if(!cust)return;
   const{data:ok,error}=await sb.rpc('customer_set_photo',{p_id:cust.id,p_token:cust.session_token,p_photo:null});
   if(error||!ok){toast((error&&error.message)||t('photoErrToast'),'error');return;}
-  S.loggedIn={...cust,photo:null};setSession(S.loggedIn);
-  renderAccount();renderTopbarRight();
+  _accPhotoSet(cust,null);
 }
 
 
@@ -13953,12 +13971,12 @@ function slotsLabel(raw){
     return Object.entries(counts).filter(([,v])=>v>0).map(([ty,v])=>`${abbr[ty]||ty}×${v}`).join(', ')||'—';
   }
   if(fmt==='counts'){
-    return Object.entries(s).filter(([k,v])=>v>0&&k!=='_bikes').map(([ty,v])=>`${abbr[ty]||ty}×${v}`).join(', ')||'—';
+    return Object.entries(s).filter(([k,v])=>v>0&&k[0]!=='_').map(([ty,v])=>`${abbr[ty]||ty}×${v}`).join(', ')||'—';
   }
   
   const parts=[];
   for(const[ty,szs]of Object.entries(s)){
-    if(ty==='_bikes')continue;
+    if(ty[0]==='_')continue; // the settings keys (_time, _collect, _wl, _km...), not bike types: a Saturday ride's _km read "_km×60" (2026-10-07)
     const sum=typeof szs==='number'?szs:Object.values(szs||{}).reduce((a,b)=>a+(b||0),0);
     if(sum>0)parts.push(`${abbr[ty]||ty}×${sum}`);
   }
@@ -14506,7 +14524,7 @@ async function _routesLoad(){
   catch(e){S._routes=[];}finally{S._routesBusy=false;}
   if(!S._routes.length)return; // no routes: the picker stays away, nothing to repaint
   if(S.view==='staff'&&S.staffTab==='queue'&&S.queueView==='sessions'&&!_nsFormBusy())try{renderSessions();}catch(_){}
-  if(S.view==='customer'&&S.custTab==='myrides')try{renderMyRides();}catch(_){} // a ticket's route names itself once the list is in
+  try{_wlRanksPaint();}catch(_){} // a ticket's route names itself once the list is in: My Bookings, and the tickets just booked (which showed the slug, 2026-10-07)
 }
 // A staffer in the middle of the session form: a background repaint would take their field away.
 function _nsFormBusy(){const a=document.activeElement;return !!(a&&a.closest&&a.closest('#sess-host, #tab-sessions')&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName));}
@@ -14551,6 +14569,9 @@ async function _livePush(pos){
   const now=Date.now();if(now-L.lastSent<8000)return;L.lastSent=now;
   const c=pos.coords;
   let r;try{r=await sb.rpc('staff_live_position',{p_session_id:L.sid,p_role:L.role,p_lat:c.latitude,p_lng:c.longitude,p_heading:Number.isFinite(c.heading)?c.heading:null,p_speed:Number.isFinite(c.speed)?c.speed:null});}catch(e){r={error:e};}
+  // Stopped (or stopped and started again) while this was on its way: neither "sharing" nor a stop belongs to
+  // it, and a position the server took after the stop is taken away again (2026-10-07).
+  if(S._live!==L){const N=S._live;if(r&&!r.error&&!(N&&N.sid===L.sid&&N.role===L.role))Promise.resolve(sb.rpc('staff_live_stop',{p_session_id:L.sid,p_role:L.role})).catch(()=>{});return;}
   if(r&&r.error){if(_rpcAbsent(r.error))toast(t('dbPending'),'error');else toast(_rpcMessage(r.error),'error');await _liveStop();return;}
   L.lastAt=now;
   const m=document.getElementById('live-share-msg');if(m)m.textContent=t('liveShareOn').replace('{0}',new Date(now).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ}));
