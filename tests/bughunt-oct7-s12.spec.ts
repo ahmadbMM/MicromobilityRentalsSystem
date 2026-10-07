@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Bug hunt 2026-10-07 (s12): the bike form's "+ Add new" Cancel, a second tap on a Petromin rider while
