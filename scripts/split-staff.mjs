@@ -1130,7 +1130,12 @@ export function formatFieldNames(r, limit = 20) {
 // management/dashboard page and a separate community management dashboard page"), each with an overview, Community's
 // Tags page with its holders, the leaderboard and statistics as Analytics views, and 29 strings in each language
 // (+2.0 KB on the staff half; the core stays within 246).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 453, core: 246 };
+// Staff 453 -> 460, core 246 -> 250 (2026-10-07): Applications made the admins' own (the owner: "add more
+// customization in it"): sort, card details, saved views, approving or rejecting several at once, default tags and
+// rules, the messages in every language and the form's questions, with 47 strings in each language. The code is in
+// the community part; the English strings sit in the core. Here, on f24d9da5: staff 449.2 -> 455.6 (~457.8 on
+// the runner), core 243.1 -> 247.2 (~248.5).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 217, staff: 460, core: 250 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

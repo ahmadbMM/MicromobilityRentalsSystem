@@ -772,6 +772,23 @@ applications management".
 - Old addresses go to the new ones in `_parsePath` (/community/stats, /community/accounts, /community/duplicates,
   /history/customers). An account's section list naming `community` also grants `customers` (`_modIds`).
 
+## Applications, made the admins' own (2026-10-07)
+
+The owner: "add more customization in it" (Applications); picked: views and bulk actions, message templates, default
+tags and rules, form questions.
+- Per device (localStorage): `cq_ca_view` (sort, hidden card details: `CA_CARD_FIELDS`, `_caShow`), `cq_ca_views`
+  (saved views: status, search, sort). `_caSortList` orders the community list (not Invited's own order).
+- Select pending cards (`S._caSel`), then Approve / Reject several (`_caBulk`; approval through `_caApproveQuiet`,
+  no ride, no message: the welcome is sent from each card after).
+- staff_options `community.app_rules` = {defaultTags:[...], rules:[{id,field,op,value,action:'reject'|'tag',tag}]}:
+  `_caDefaultTags(a)` starts the approval dialog (Community is always kept as the approval's own); reject rules mark a
+  card and "Apply rules" rejects the marked. Admins edit it in Applications > Customize.
+- Message templates: the ca_*/la_* messages take every language (`_tplLangs`, `_tplOver(id,lang)`); others stay en/ar.
+  A save keeps the languages the editor did not open.
+- site_content `community.form` = {q:{<question>:{on,req,label:{lang:text}}}} (`CF_QS`, `_apFormSettings`): the website
+  form (mm-platform forms/community) reads it as it opens; customer_community_apply reads it too (migration
+  20261007230000, which patches the function by replace() and drops NOT NULL on four application columns).
+
 ## Bookings in colour (2026-10-05)
 
 The owner: "make the session cards in the bookings page in staff website themed the same way they are themed in
