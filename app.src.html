@@ -4003,11 +4003,12 @@ const PRIVACY_VERSION='2026-10-07';
 // The last version riders must confirm. A change the owner decides needs no fresh confirmation
 // (2026-10-03: the breakfast-venue row; the same day, Instagram follower counts; 2026-10-05: the
 // emergency contact, said again where it is asked; 2026-10-06: Run for Her runners' details to Sela
-// and JYC, which each runner agrees to on its own page, _pendingShare; 2026-10-07: a second emergency
-// contact, always optional) moves PRIVACY_VERSION,
+// and JYC, which each runner agrees to on its own page, _pendingShare) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
-const PRIVACY_ASK_FROM='2026-10-02';
+// 2026-10-07: the second emergency contact IS confirmed again (the owner): every account that confirmed an older
+// notice is asked once more, the confirmation alone (ride news, once answered, stays answered).
+const PRIVACY_ASK_FROM='2026-10-07';
 const _PV_MAIL='<a href="mailto:info@micromobility.sa">info@micromobility.sa</a>';
 const PRIVACY_NOTICE={
 en:[

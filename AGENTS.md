@@ -890,5 +890,8 @@ staff to flag it". The first contact (Run for Her, 2026-10-05) is unchanged; the
   `_em2Probe`, asked once per page before the first dialog draws): the old `staff_flag_customer` drops a name it does
   not know and withdraws a request left with none. **The Run for Her report keeps the first contact only**: that
   sheet goes to Sela and JYC, and a runner agrees to share one emergency contact. `tests/second-emergency-staff.spec.ts`.
-- Privacy Notice 2026-10-07: the emergency contact row names a second person (en/ar); PRIVACY_ASK_FROM unchanged
-  (nobody is asked again). The Run for Her share consent still lists "Emergency contact" as one item.
+- Privacy Notice 2026-10-07: the emergency contact row names a second person and says only the first is ever shared
+  (en/ar). Riders confirm it again (the owner, 2026-10-07): PRIVACY_ASK_FROM is 2026-10-07, so every account that
+  confirmed an older notice meets the confirmation once more, and the website's learn-to-ride form asks it too (its
+  PRIVACY_ASK_FROM comes from here through sync-privacy-notice). The Run for Her share consent still lists
+  "Emergency contact" as one item.
