@@ -1148,12 +1148,13 @@ export function formatFieldNames(r, limit = 20) {
 // as a filter and a sort on every list of accounts (Accounts, the account report, Applications, Flagged, Birthdays),
 // 38 strings in each language; the owner asked for both. Here, on f89b9b24
 // + it: staff 461.4, core 249.1 (~463.5 / ~250.4 on the runner); the core stays within 253.
-// Staff 448 -> 453 (2026-10-07): Team > Part-timers (the owner: "create me a part timers logging system ... give me
-// the total for a date range or a number of sessions i choose from the calendar view or list"): staff accounts as
-// part-timers with a rate, hours logged per day and ride, and what we owe over a range or picked rides, with 57
-// strings in each language (+8.3 KB with the bug hunt's own growth, in the Team part, fetched after the desk paints).
-// Here, on 92ae3d35: staff 450.3 (~452.5 on the runner), core 242.5 (~243.8).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 999, core: 253 };
+// Staff 466 -> 475, core 253 -> 254 (2026-10-07): Team > Part-timers (the owner: "create me a part timers logging
+// system ... give me the total for a date range or a number of sessions i choose from the calendar view or list", then
+// "1 do it, 2 do a, 3 admins only, 4 rate for each kind of work"): the front desk's part-timers as staff accounts,
+// kinds of work with their rates, hours per day and ride, what we owe over a range or picked rides, Mark as paid,
+// payments with undo, pay slips and statements, 88 strings in each language (the Team part; the English strings sit
+// in the core). Here, on d5c7f43e: staff 471.8 (~474.0 on the runner), core 251.1 (~252.4).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 475, core: 254 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

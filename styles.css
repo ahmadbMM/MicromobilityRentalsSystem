@@ -7415,7 +7415,7 @@ body.view-staff .tm-save{display:flex;justify-content:flex-end;}
 #tab-team .pt-ride span{flex:1;min-width:0;}
 #tab-team .pt-ride em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums;color:var(--muted);}
 #tab-team .pt-ride.on{background:rgba(var(--green-rgb),.08);}
-#tab-team .pt-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:4px 0 16px;}
+#tab-team .pt-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 16px;}
 #tab-team .pt-tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px;border:1px solid var(--sf-line2);border-radius:8px;background:var(--sf-card);}
 #tab-team .pt-tile span{font-size:var(--staff-fs-sm);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
 html[dir="rtl"] #tab-team .pt-tile span{letter-spacing:0;}
@@ -7425,11 +7425,27 @@ html[dir="rtl"] #tab-team .pt-tile span{letter-spacing:0;}
 #tab-team .pt-h{font-weight:700;margin:6px 0 8px;}
 #tab-team .pt-dim{color:var(--muted);font-weight:400;}
 #tab-team .pt-table{margin-bottom:14px;}
+#tab-team .pt-owe .table-wrap,#tab-team .pt-payments .table-wrap{overflow-x:auto;max-width:100%;}
+#tab-team .pt-owe,#tab-team .pt-payments{min-width:0;overflow:hidden;}
 #tab-team .pt-table td{font-variant-numeric:tabular-nums;vertical-align:middle;}
 #tab-team .pt-acts{white-space:nowrap;text-align:end;}
 #tab-team .pt-acts .btn-sm{margin-inline-start:4px;}
-#tab-team .pt-foot{display:flex;justify-content:flex-end;}
+#tab-team .pt-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap;}
+#tab-team .pt-sep{width:1px;align-self:stretch;background:var(--sf-line2);margin:0 4px;}
+#tab-team .pt-note-g{margin-bottom:12px;}
+#tab-team .pt-note-g input{width:100%;}
+#tab-team .pt-paid-row td{color:var(--muted);}
+#tab-team .pt-paidmark{white-space:nowrap;}
+#tab-team .pt-kind input{min-width:0;height:36px;}
+#tab-team .pt-kind #pt-ek-name{flex:1 1 180px;}
+#tab-team .pt-kind #pt-ek-rate{flex:0 1 120px;}
+#confirm-modal .pt-paydlg{display:flex;flex-direction:column;gap:6px;text-align:start;}
+#confirm-modal .pt-paydlg p{margin:0 0 8px;font-weight:700;}
+#confirm-modal .pt-paydlg label{font-size:12.5px;font-weight:700;color:var(--muted);margin-top:6px;}
+#confirm-modal .pt-paydlg input,#confirm-modal .pt-paydlg select{width:100%;height:40px;}
 @media(max-width:767px){
+  #tab-team .pt-tiles{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #tab-team .pt-sep{display:none;}
   #tab-team .pt-tile{padding:10px;}
   #tab-team .pt-tile strong{font-size:18px;}
   #tab-team .pt-who-f{margin-inline-start:0;max-width:none;flex:1 1 100%;}
