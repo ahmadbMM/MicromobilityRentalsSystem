@@ -17616,7 +17616,15 @@ async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null){
   const cid=d.customer_id;if(!cid)return rideId?'failed':null;
   // The approval gave the Community tag; this device learns it now rather than at the next sync.
   // (An old grant on file stays as it is: the server adds the tag with on conflict do nothing.)
-  if(comm&&!(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY))_ctMerge([{customer_id:cid,tag_id:TAG_COMMUNITY,added_by:_opName()||'staff',added_at:Date.now(),note:'Community application'}]);
+  // A LAPSED grant stayed lapsed that way, so the approved rider was still no member (2026-10-07):
+  // it gives way to a permanent one, as Add to Community does (_caInvTag).
+  if(comm){
+    const old=(S.customerTags||[]).find(ct=>ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY);
+    const row={customer_id:cid,tag_id:TAG_COMMUNITY,added_by:_opName()||'staff',added_at:Date.now(),note:'Community application'};
+    if(!old)_ctMerge([row]);
+    else if(_tagLapsed(old)&&!(await _wr(sb.from('customer_tags').delete().eq('customer_id',cid).eq('tag_id',TAG_COMMUNITY),'application tags')
+      ||await _wr(sb.from('customer_tags').insert([row]),'application tags')))_ctMerge([row]);
+  }
   // Unticked, on a database that gave the tag anyway: take off the row that approval just added.
   if(strip&&!(await _wr(sb.from('customer_tags').delete().eq('customer_id',cid).eq('tag_id',TAG_COMMUNITY),'application tags')))
     S.customerTags=(S.customerTags||[]).filter(ct=>!(ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY));
@@ -17731,7 +17739,18 @@ async function _caRevoke(id){
 }
 async function _caReopen(id){
   const a=_caFind(id);if(!a||S._caWorking||!(a.status==='rejected'||_caGone(a)))return;
-  if(!(await _caDecide(a,'pending')))return;
+  if(_caGone(a)){
+    // staff_community_decide refuses every approved application ('decided'), so Back to pending on
+    // one whose account is gone always said "already decided on another device" (2026-10-07). It
+    // goes back the way Revoke does: a write guarded on what this desk saw, approved and accountless.
+    const upd={status:'pending',decided_at:null,decided_by:null};if(a.invited_session)upd.invited_session=null;
+    S._caWorking=true;
+    let r;try{r=await sb.from('community_applications').update(upd).eq('id',a.id).eq('status','approved').is('customer_id',null).select('id');}catch(e){r={error:e};}
+    S._caWorking=false;
+    if(_writeErr(r,'application reopen'))return;
+    if(!_landed(r)){toast(t('caErrDecided'),'warning');_caLoad();return;}
+    Object.assign(a,upd);
+  }else if(!(await _caDecide(a,'pending')))return;
   toast(t('caReopenedToast'));renderCommunity();
 }
 async function _caNewPwd(id){
@@ -18169,7 +18188,7 @@ function _learnApplications(){
   if(!S._laBusy&&Date.now()-(S._laAt||0)>60000)_laLoad(); // a minute old: read again, the list stays meanwhile
   _loadPhoneRules();
   const f=S._laFilter||'pending';
-  const pill=(k,label)=>`<button type="button" class="filter-pill${f===k?' active':''}" aria-pressed="${(f===k)?'true':'false'}" aria-pressed="${f===k}" data-la-filter="${k}" data-on-click="${_on("_on__learnApplications_2",_EV,_EL,k)}">${label} (${_appN('la',k)})</button>`;
+  const pill=(k,label)=>`<button type="button" class="filter-pill${f===k?' active':''}" aria-pressed="${(f===k)?'true':'false'}" data-la-filter="${k}" data-on-click="${_on("_on__learnApplications_2",_EV,_EL,k)}">${label} (${_appN('la',k)})</button>`;
   return`<div class="form-section cmy-mt0">
     <div class="form-title">${t('laTitle')}</div>
     <div class="ca-sub">${t('laSub')}</div>
@@ -18288,7 +18307,7 @@ async function _laDecide(a,status){
 }
 // Done and Cancel can be undone (the topbar's Undo, or History > Log): the sign-up goes back where it
 // was, and a cancelled one that had no lesson yet goes back to New.
-function _laUndoTo(a,prev){return async()=>{if(await _laDecide(a,prev))renderCommunity();};}
+function _laUndoTo(a,prev){return async()=>{if(!(await _laDecide(a,prev)))return false;renderCommunity();};} // false: nothing was reversed (doUndo keeps it undoable)
 async function _laDone(id){
   const a=_laFind(id);if(!a||a.status!=='scheduled'||S._laWorking)return;
   if(!(await _laDecide(a,'done')))return;
@@ -18529,7 +18548,10 @@ function _tplLoad(force){
   if(_tplP)return _tplP;
   if(!sb||(S._tpl!==undefined&&!force))return Promise.resolve();
   _tplP=sb.from('site_content').select('value').eq('key',TPL_KEY).maybeSingle()
-    .then(r=>{const v=r&&!r.error&&r.data&&r.data.value;S._tpl=(v&&typeof v==='object'&&!Array.isArray(v))?v:(S._tpl||{});},()=>{S._tpl=S._tpl||{};})
+    // A refused read keeps what this device holds; with nothing yet it stays unread, so the next section
+    // change asks again (2026-10-07: an empty copy stood for "no texts of our own" all session, and
+    // Settings showed the built-in texts in place of the admins').
+    .then(r=>{if(!r||r.error)return;const v=r.data&&r.data.value;S._tpl=(v&&typeof v==='object'&&!Array.isArray(v))?v:(S._tpl||{});},()=>{})
     .finally(()=>{_tplP=null;});
   return _tplP;
 }
