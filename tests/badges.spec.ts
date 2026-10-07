@@ -208,6 +208,23 @@ test.describe('@staff:community badges', () => {
     expect(await can('admin')).toEqual([true, true]);
   });
 
+  test('Squad Captain and Fuel Stop are never given by hand, not even by an admin (the owner, 2026-10-07)', async ({ page }) => {
+    const paid = [
+      { id: 'bd_squad', slug: 'squad', icon: 'people', color: 'blue', name: 'Squad Captain', system: true, auto: true, retired: false, sort: 160 },
+      { id: 'bd_fuel', slug: 'fuel', icon: 'bottle', color: 'red', name: 'Fuel Stop', system: true, auto: true, retired: false, sort: 170 },
+    ];
+    const c4 = { id: 'c4', name: 'Nora Fahad', email: 'nora.fahad@gmail.com', phone: '+966551876218', gender: 'female', created_at: '2026-06-13T09:00:00Z' };
+    await staff(page, { badges: [...badges, ...paid], customers: [...customers, c4] });
+    await community(page, 'badges');
+    expect(await page.evaluate(`[_bdgCanGive(_bdgById('bd_squad')),_bdgCanGive(_bdgById('bd_fuel')),_bdgCanGive(_bdgById('bd_first_lap'))]`)).toEqual([false, false, true]);
+    await expect(page.locator('.bdg-row[data-badge="bd_squad"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(0);
+    // The rider's dialog offers First Lap to give, never these two.
+    await page.evaluate(`_bdgOpen('c4')`);
+    const picks = page.locator('.bdg-dlg .bdg-pick');
+    await expect(picks.filter({ hasText: 'First Lap' })).toHaveCount(1);
+    await expect(picks.filter({ hasText: /Squad Captain|Fuel Stop/ })).toHaveCount(0);
+  });
+
   test('an admin gives any badge to any rider, an earned one included (the owner, 2026-10-02)', async ({ page }) => {
     const c4 = { id: 'c4', name: 'Nora Fahad', email: 'nora.fahad@gmail.com', phone: '+966551876218', gender: 'female', created_at: '2026-06-13T09:00:00Z' };
     await staff(page, { customers: [...customers, c4] });

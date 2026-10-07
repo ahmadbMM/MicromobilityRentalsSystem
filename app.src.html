@@ -38154,8 +38154,12 @@ function _bdgAllHolders(b){const ids=new Set((S.custBadges||[]).filter(x=>x.badg
 // Community > Badges: every badge with its holders, Give to a ride, Give to a rider, and for admins New / Edit / Retire.
 // Who may give a badge by hand: an admin any badge (the owner, 2026-10-02: "give the admin the
 // permission to give whatever badge they want to whoever rider they want"); other staff only the
-// ones with no earning rule, since an earned badge comes from riding.
-function _bdgCanGive(b){return !!b&&!b.retired&&(!b.auto||isAdmin());}
+// ones with no earning rule, since an earned badge comes from riding. Squad Captain and Fuel Stop
+// are never given by hand, an admin included: they say a rider paid (every rider of the party, the
+// extras), and a hand-given one said it of a rider who had not (the owner, 2026-10-07; one Fuel Stop
+// given to an account with no extras at all was taken back that day).
+const BDG_PAID_ONLY=new Set(['squad','fuel']);
+function _bdgCanGive(b){return !!b&&!b.retired&&!(b.system&&BDG_PAID_ONLY.has(b.slug))&&(!b.auto||isAdmin());}
 function _bdgToggle(k,id){
   const on=S[k]===id,was=S._bdgHoldId||S._bdgRideId||S._bdgRiderId;
   S._bdgHoldId=S._bdgRideId=S._bdgRiderId=null;S[k]=on?null:id;S._bdgEdit=null;S._bdgSure=null;

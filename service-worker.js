@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-385335ab7e';
+const CACHE = 'mmcq-768313281c';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,13 +22,13 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=0527ac33bb';
+const STAFF_JS = './staff.js?v=27fa31eee2';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=eb86c24864","./staff-parts/community.js?v=52afc2d365","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=d69d3e345a","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=21b48cefbf","./staff-parts/team.js?v=fcdd45cdee","./staff-parts/settings.js?v=7ac400a51f"];
-const APP_JS = './app.js?v=c7587f7156';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=eb86c24864","./staff-parts/community.js?v=511a98661d","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=d69d3e345a","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=21b48cefbf","./staff-parts/team.js?v=fcdd45cdee","./staff-parts/settings.js?v=7ac400a51f"];
+const APP_JS = './app.js?v=3717740d5d';
 const APP_CSS = './app.css?v=91e9c2874a';
 const SHELL = [
   SHELL_KEY,
