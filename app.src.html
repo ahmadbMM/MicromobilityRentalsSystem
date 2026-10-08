@@ -26993,7 +26993,7 @@ function printSessionReport(km){
 // ── Report for Sela (the owner, 2026-10-08: "add it as a button to print updated whenever needed") ── Run for
 // Her only, from the export dialog: every live booking, the waitlist after the booked runners in waitlist order
 // and shaded, with what Sela asked for (full name, email, birth date, distance, the FIRST emergency contact, as
-// _repEmLoad) beside the runner number (no "Agreed to share": the owner took it off, 2026-10-08). The accounts are read at each
+// _repEmLoad) beside a serial 1..N (the owner, 2026-10-08) and the runner number (no "Agreed to share": the owner took it off, 2026-10-08). The accounts are read at each
 // tap, so the sheet is as of that moment. Print, or an Excel file: a real .xlsx (stored zip), because the
 // waitlist's shading cannot travel in a CSV. Not filtered by the builder: Sela gets the whole list.
 async function _selaRows(){
@@ -27009,14 +27009,14 @@ async function _selaRows(){
     (r.data||[]).forEach(x=>m.set(x.id,x));
   }
   let n=0;
-  const rows=es.map(e=>{
+  const rows=es.map((e,i)=>{
     const c=m.get(e.customerId)||{},km=_runKmOk(e.runKm)?Number(e.runKm):null;
-    return{wl:!!wl(e),km,cells:['#'+(e.queueNum||''),wl(e)?`${t('waitlistLabel')} ${++n}`:t('anFunnelBooked'),
+    return{wl:!!wl(e),km,cells:[i+1,'#'+(e.queueNum||''),wl(e)?`${t('waitlistLabel')} ${++n}`:t('anFunnelBooked'),
       c.name||e.name||'',c.email||e.email||'',c.birth_date?String(c.birth_date).slice(0,10).split('-').reverse().join('/'):'',
       km?_runKmTxt(km):'',c.emergency_phone?c.emergency_name||'':'',c.emergency_phone||'',
       c.emergency_phone&&EM_RELS.includes(c.emergency_relation)?t('emRel_'+c.emergency_relation):'']};
   });
-  return{sess,rows,head:[t('runNumLabel'),t('colStatus'),t('nameLabel'),t('repColEmail'),t('birthDateLabel'),t('runKmLabel'),t('emTitle'),t('emPhone'),t('selaColRel')]};
+  return{sess,rows,head:[t('repColSeq'),t('runNumLabel'),t('colStatus'),t('nameLabel'),t('repColEmail'),t('birthDateLabel'),t('runKmLabel'),t('emTitle'),t('emPhone'),t('selaColRel')]};
 }
 async function printSelaReport(){
   const win=window.open('','_blank','width=1200,height=760'); // on the tap: a window opened after the read would be blocked
@@ -27026,7 +27026,7 @@ async function printSelaReport(){
   const body=`<div class="totals">${tile(b.length,t('anFunnelBooked'))}${RUN_KMS.map(k=>tile(b.filter(r=>r.km===k).length,_runKmTxt(k))).join('')}${tile(d.rows.length-b.length,t('waitlistLabel'))}</div>
     <div class="rp-salesline"><span class="rp-wl-key"></span> ${t('selaWlKey')}</div>
     <table><thead><tr>${d.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
-    <tbody>${d.rows.map(r=>`<tr${r.wl?' class="rp-wl"':''}>${r.cells.map((v,i)=>`<td${i===0?' class="rp-b7"':i===2?' class="rp-name"':''}><bdi>${esc(v)||'—'}</bdi></td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    <tbody>${d.rows.map(r=>`<tr${r.wl?' class="rp-wl"':''}>${r.cells.map((v,i)=>`<td${i===0?' class="rp-seq"':i===1?' class="rp-b7"':i===3?' class="rp-name"':''}><bdi>${esc(v)||'—'}</bdi></td>`).join('')}</tr>`).join('')}</tbody></table>`;
   const s=d.sess;
   const html=_reportShell({kind:t('selaRepBtn'),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
     refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-SELA',maxWidth:'1180px',body});
@@ -27046,7 +27046,7 @@ async function exportSelaXlsx(){
     ['xl/workbook.xml',`${H}<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Run for Her" sheetId="1" r:id="rId1"/></sheets></workbook>`],
     ['xl/_rels/workbook.xml.rels',`${H}<Relationships xmlns="${O}package/2006/relationships">${rel('rId1','worksheet','worksheets/sheet1.xml')}${rel('rId2','styles','styles.xml')}</Relationships>`],
     ['xl/styles.xml',`${H}<styleSheet xmlns="${M}"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fill('BE185D')}${fill('FEF3C7')}</fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/><xf numFmtId="0" fontId="0" fillId="3" borderId="0" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
-    ['xl/worksheets/sheet1.xml',`${H}<worksheet xmlns="${M}"><sheetViews><sheetView workbookViewId="0"${_isRtl()?' rightToLeft="1"':''}><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${[14,14,28,34,12,10,26,18,18].map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.map((r,i)=>`<row r="${i+1}">${r.map((v,j)=>`<c r="${col(j)}${i+1}" s="${st[i]}" t="inlineStr"><is><t>${X(v)}</t></is></c>`).join('')}</row>`).join('')}</sheetData><autoFilter ref="A1:${col(d.head.length-1)}${rows.length}"/></worksheet>`],
+    ['xl/worksheets/sheet1.xml',`${H}<worksheet xmlns="${M}"><sheetViews><sheetView workbookViewId="0"${_isRtl()?' rightToLeft="1"':''}><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${[6,14,14,28,34,12,10,26,18,18].map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.map((r,i)=>`<row r="${i+1}">${r.map((v,j)=>typeof v==='number'?`<c r="${col(j)}${i+1}" s="${st[i]}"><v>${v}</v></c>`:`<c r="${col(j)}${i+1}" s="${st[i]}" t="inlineStr"><is><t>${X(v)}</t></is></c>`).join('')}</row>`).join('')}</sheetData><autoFilter ref="A1:${col(d.head.length-1)}${rows.length}"/></worksheet>`],
   ];
   // A stored (uncompressed) zip: local headers, the central directory, its end record. CRC-32 per file.
   const enc=new TextEncoder(),tb=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;tb[n]=c>>>0;}

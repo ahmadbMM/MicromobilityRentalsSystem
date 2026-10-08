@@ -58,13 +58,14 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     expect(names).toEqual(['Test Runner One', 'Test Runner Two', 'Test Waiter One', 'Test Waiter Two']);
     expect(body).not.toContain('Booked as r9');
     expect(html.match(/<tr class="rp-wl">/g)?.length).toBe(2);
-    expect(body).toMatch(/#11 Waitlist 1 Test Waiter One/);
-    expect(body).toMatch(/#12 Waitlist 2 Test Waiter Two/);
+    expect(body).toMatch(/3 #11 Waitlist 1 Test Waiter One/);
+    expect(body).toMatch(/4 #12 Waitlist 2 Test Waiter Two/);
+    expect(html.match(/<td class="rp-seq"><bdi>(\d+)<\/bdi><\/td>/g)?.map((x) => x.replace(/\D/g, ''))).toEqual(['1', '2', '3', '4']);
     // what Sela asked for, the first emergency contact only, and a gap shown as a dash
-    expect(body).toMatch(/#1 Booked Test Runner One one@example\.test 02\/04\/1990 5 km Contact One \+966551234567 Brother or sister/);
-    expect(body).toMatch(/#2 Booked Test Runner Two two@example\.test — 3 km — — —/);
+    expect(body).toMatch(/1 #1 Booked Test Runner One one@example\.test 02\/04\/1990 5 km Contact One \+966551234567 Brother or sister/);
+    expect(body).toMatch(/2 #2 Booked Test Runner Two two@example\.test — 3 km — — —/);
     expect(body).not.toContain('Second Contact');
-    for (const h of ['Runner number', 'Email', 'Birth date', 'Distance', 'Emergency contact', 'Relationship']) expect(html).toContain(`<th>${h}</th>`);
+    for (const h of ['No.', 'Runner number', 'Email', 'Birth date', 'Distance', 'Emergency contact', 'Relationship']) expect(html).toContain(`<th>${h}</th>`);
     expect(body).toMatch(/2 Booked/);
     expect(body).toMatch(/1 3 km/);
     expect(body).toMatch(/1 5 km/);
@@ -85,11 +86,11 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     expect(f.type).toContain('spreadsheetml.sheet');
     expect(f.head).toEqual([0x50, 0x4b]); // "PK": a zip
     for (const p of ['[Content_Types].xml', 'xl/workbook.xml', 'xl/styles.xml', 'xl/worksheets/sheet1.xml']) expect(f.text).toContain(p);
-    expect(f.text).toContain('<c r="A1" s="1" t="inlineStr"><is><t>Runner number</t></is></c>');
-    expect(f.text).toMatch(/<row r="2"><c r="A2" s="0"[^>]*><is><t>#1<\/t>/);
-    expect(f.text).toMatch(/<row r="4"><c r="A4" s="2"[^>]*><is><t>#11<\/t>/);
+    expect(f.text).toContain('<c r="A1" s="1" t="inlineStr"><is><t>No.</t></is></c><c r="B1" s="1" t="inlineStr"><is><t>Runner number</t></is></c>');
+    expect(f.text).toMatch(/<row r="2"><c r="A2" s="0"><v>1<\/v><\/c><c r="B2" s="0"[^>]*><is><t>#1<\/t>/);
+    expect(f.text).toMatch(/<row r="4"><c r="A4" s="2"><v>3<\/v><\/c><c r="B4" s="2"[^>]*><is><t>#11<\/t>/);
     expect(f.text).toContain('<t>Test Waiter Two</t>');
-    expect(f.text).toContain('<autoFilter ref="A1:I5"/>');
+    expect(f.text).toContain('<autoFilter ref="A1:J5"/>');
     expect(f.text).toContain('FFFEF3C7');
   });
 
