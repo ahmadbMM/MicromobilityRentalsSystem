@@ -8072,7 +8072,7 @@ const FIX_SOC=['instagram','x','tiktok','linkedin'];
 // emergency_*, emergency2_*) or from a flag's history (a handle as a string, an emergency contact as {name, phone, relation}).
 function _fixVal(c,k){
   if(!c)return'';
-  if(k==='type_preference')return c.type_preference?typeLabel(c.type_preference):'';
+  if(k==='type_preference')return(c.type_preference&&c.type_preference!=='Any')?typeLabel(c.type_preference):''; // Any reads as not set
   if(k==='profession')return c.profession||'';
   if(k==='workplace')return c.workplace||'';
   if(k==='heard_from')return c.heard_from?heardLabel(c.heard_from):'';
@@ -8225,7 +8225,7 @@ function _fixItemHtml(k,g,c){
       <label class="fx-upload${g.photoUp||g.saving?' dis':''}">${g.photoUp?t('fixPhotoUploading'):v.photo?t('fixPhotoAgain'):t('uploadPhotoBtn')}<input type="file" accept="image/*" data-on-change="${_on("_fixPhoto",_EL)}"${g.photoUp||g.saving?' disabled':''}></label></div>
       <div class="fx-hint">${t('fixPhotoHint')}</div>`;}
   const none=FIX_OPTIONAL.includes(k)&&!!(g.none&&g.none.has(k)),off=dis||(none?' disabled':'');
-  if(k==='type_preference')body=`<select id="fx-type" class="${v.type_preference?'':'ph'}" aria-labelledby="fx-l-type_preference" data-on-change="${_on("_fixPick",_EL,"type_preference")}"${dis}><option value="">${esc(t('emPick'))}</option>${CUST_TYPES.map(x=>`<option value="${x}"${v.type_preference===x?' selected':''}>${esc(typeLabel(x))}</option>`).join('')}</select>`;
+  if(k==='type_preference')body=`<select id="fx-type" class="${(v.type_preference&&v.type_preference!=='Any')?'':'ph'}" aria-labelledby="fx-l-type_preference" data-on-change="${_on("_fixPick",_EL,"type_preference")}"${dis}><option value="">${esc(t('emPick'))}</option>${CUST_TYPES.filter(x=>x!=='Any').map(x=>`<option value="${x}"${v.type_preference===x?' selected':''}>${esc(typeLabel(x))}</option>`).join('')}</select>`;
   else if(k==='profession'||k==='workplace')body=`<input id="fx-${k}" type="text" maxlength="${k==='profession'?80:120}" autocomplete="${k==='profession'?'organization-title':'organization'}" value="${esc(v[k]||'')}" aria-labelledby="fx-l-${k}" data-on-input="${_on("_fixClearErr",k)}"${off}>`;
   else if(k==='heard_from')body=`<select id="fx-heard" class="${v.heard_from?'':'ph'}" aria-labelledby="fx-l-heard_from" data-on-change="${_on("_fixPick",_EL,"heard_from")}"${dis}><option value="">${esc(t('emPick'))}</option>${HEARD_OPTS.map(x=>`<option value="${x}"${v.heard_from===x?' selected':''}>${esc(heardLabel(x))}</option>`).join('')}</select>`;
   else if(FIX_SOC.includes(k))body=`<div class="fx-soc"><span class="fx-soc-at" aria-hidden="true">@</span><input id="fx-soc-${k}" type="text" autocapitalize="none" autocomplete="off" spellcheck="false" maxlength="100" value="${esc(v[k]||'')}" aria-labelledby="fx-l-${k}" data-on-input="${_on("_fixClearErr",k)}"${off}></div>`;
@@ -8412,7 +8412,7 @@ async function _fixSave(){
   const v=g.v,err={},vals={},none=[];
   for(const k of _fixItems(g.fields).sort((a,b)=>(a==='emergency2')-(b==='emergency2'))){ // the second contact last: it is checked against the first
     if(FIX_OPTIONAL.includes(k)&&g.none&&g.none.has(k)){none.push(k);continue;}
-    if(k==='type_preference'){if(!CUST_TYPES.includes(v.type_preference))err[k]=t('fixErrPick');else vals[k]=v.type_preference;continue;}
+    if(k==='type_preference'){if(!CUST_TYPES.includes(v.type_preference)||v.type_preference==='Any')err[k]=t('fixErrPick');else vals[k]=v.type_preference;continue;}
     if(k==='profession'||k==='workplace'){const x=String(v[k]||'').replace(/\s+/g,' ').trim(),max=k==='profession'?80:120;
       if(x.length<2||x.length>max||/[<>"`{}]/.test(x))err[k]=t(k==='profession'?'errProfession':'errWorkplace');else vals[k]=x;continue;}
     if(k==='heard_from'){if(!HEARD_OPTS.includes(v.heard_from))err[k]=t('fixErrPick');else vals[k]=v.heard_from;continue;}
@@ -10884,8 +10884,8 @@ function renderRegister(){
   // Community rides are personal: one reservation, the account holder only - no group bookings.
   if(_commSel&&!_grpSel&&S.regQty!==1){S.regQty=1;ensureBikeSizes();}
   // Carbon road bikes are not offered on a no-carbon ride: a selection carried over from a
-  // JCC pick (or a profile preference) silently becomes 'Any' here.
-  if(_noCarbonSel)S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Road Carbon'?'Any':ty);
+  // JCC pick (or a profile preference) becomes the regular Road bike, never Any (riders never get Any).
+  if(_noCarbonSel)S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Road Carbon'?'Road':ty);
   // "My own bike" carried over from a ride that offers it (the Saturday ride) onto one that does
   // not (the circuit) was a rental at SAR 0 that held no bike: the choice is cleared to be made again.
   if(_selSessObj&&!_ownOffered(_selSessObj))S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Own'?'':ty);
@@ -11519,6 +11519,7 @@ function validateRegInputs(){
   const _vSess=allSessions().find(x=>x.id===S.selSession);
   for(let i=0;i<qty;i++){
     if(_regTyBarred(S.regBikeTypes[i],_vSess))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05)
+    if(S.regBikeTypes[i]==='Any')S.regBikeTypes[i]=undefined; // Any is staff's to give: the rider picks a bike (2026-10-09)
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
       _groupErr(wrap,t('errSelectTypeGeneric'));
@@ -11668,6 +11669,7 @@ function _regSideHtml(sess){
   </aside>`;
 }
 function setBikeType(idx,type){
+  if(type==='Any')return; // never a rider's choice (the owner, 2026-10-09: "make sure they can never choose any")
   S.regBikeTypes[idx]=type;
   document.querySelectorAll(`[data-type-slot="${idx}"]`).forEach(btn=>{
     btn.classList.toggle('active',btn.dataset.type===type);
@@ -11994,7 +11996,7 @@ async function _submitReg(){
       waitlistNum:bookingStatus==='waitlist'?_wlBase+i:null,
       id:uid(),name:riderNames[i],email,phone,
       size:(_needsBike(sess)&&heights[i])?heightToSize(heights[i],S.regBikeTypes[i]):'',height:_needsBike(sess)?(heights[i]||null):null,
-      typePreference:!_needsBike(sess)?'None':(_noCarbon(sess)&&S.regBikeTypes[i]==='Road Carbon'?'Any':S.regBikeTypes[i]),paid:false,
+      typePreference:!_needsBike(sess)?'None':(_noCarbon(sess)&&S.regBikeTypes[i]==='Road Carbon'?'Road':S.regBikeTypes[i]),paid:false,
       assignedBikeId:null,sessionId:S.selSession,sessionDay:sess.day,sessionDate:sess.session_date||S.selSession,
       queueNum:baseQNum+i,status:bookingStatus,registeredAt:new Date().toISOString(),walkIn:false,
       customerId:cust.id,price:_isFreeBooking?0:_evSeatPrice(sess)!=null?_evSeatPrice(sess):priceForType(S.regBikeTypes[i]), // the Saturday ride is complimentary; the Petromin ride is priced like JCC; an event at its seat price
@@ -12175,6 +12177,7 @@ async function submitModifyBooking(){
 
 
   for(let i=0;_bike&&i<newQty;i++){
+    if(S.regBikeTypes[i]==='Any')S.regBikeTypes[i]=undefined; // Any is staff's to give (2026-10-09)
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
       if(wrap){_groupErr(wrap,t('errSelectTypeGeneric'));wrap.scrollIntoView({behavior:_sb(),block:'center'});}
