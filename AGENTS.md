@@ -696,7 +696,7 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
 - **Report for Sela** (2026-10-08, the staff part `sela`): the run's export dialog has a line of its own, Print
   (`printSelaReport`) and Excel (`exportSelaXlsx`, a real .xlsx built in the page: a stored zip, no library). Every
   live booking, booked by runner number then the waitlist in its order, shaded (`tr.rp-wl` in report.css, fill
-  FEF3C7 in the file), with full name, email, birth date, distance, the FIRST emergency contact and "Agreed to share".
+  FEF3C7 in the file), with full name, email, birth date, distance, the FIRST emergency contact (no "Agreed to share" column: the owner removed it 2026-10-08).
   The accounts are read at each tap (`_selaRows`), and the builder's filters do not apply: Sela gets the whole list.
 - **The card** (`_runCardHtml`, styles under `RUN FOR HER` in styles.css) shows while a run is on the books
   (`_runHerLive`) and answers the tap like MicroMobility Experiences (`selectEvent('runher')` -> `_commGate`). The owner

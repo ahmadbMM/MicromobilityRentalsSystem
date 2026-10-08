@@ -61,15 +61,15 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     expect(body).toMatch(/#11 Waitlist 1 Test Waiter One/);
     expect(body).toMatch(/#12 Waitlist 2 Test Waiter Two/);
     // what Sela asked for, the first emergency contact only, and a gap shown as a dash
-    expect(body).toMatch(/#1 Booked Test Runner One one@example\.test 02\/04\/1990 5 km Contact One \+966551234567 Brother or sister No/);
-    expect(body).toMatch(/#2 Booked Test Runner Two two@example\.test — 3 km — — — Yes/);
+    expect(body).toMatch(/#1 Booked Test Runner One one@example\.test 02\/04\/1990 5 km Contact One \+966551234567 Brother or sister/);
+    expect(body).toMatch(/#2 Booked Test Runner Two two@example\.test — 3 km — — —/);
     expect(body).not.toContain('Second Contact');
-    for (const h of ['Runner number', 'Email', 'Birth date', 'Distance', 'Emergency contact', 'Relationship', 'Agreed to share']) expect(html).toContain(`<th>${h}</th>`);
+    for (const h of ['Runner number', 'Email', 'Birth date', 'Distance', 'Emergency contact', 'Relationship']) expect(html).toContain(`<th>${h}</th>`);
     expect(body).toMatch(/2 Booked/);
     expect(body).toMatch(/1 3 km/);
     expect(body).toMatch(/1 5 km/);
     expect(body).toMatch(/2 Waitlist/);
-    expect(body).toMatch(/2 \/ 4 Agreed to share/);
+    expect(html).not.toContain('Agreed to share');
   });
 
   test('Excel: a real .xlsx with the header styled and the waitlist rows shaded', async ({ page }) => {
@@ -89,7 +89,7 @@ test.describe('@staff:bookings Run for Her report for Sela', () => {
     expect(f.text).toMatch(/<row r="2"><c r="A2" s="0"[^>]*><is><t>#1<\/t>/);
     expect(f.text).toMatch(/<row r="4"><c r="A4" s="2"[^>]*><is><t>#11<\/t>/);
     expect(f.text).toContain('<t>Test Waiter Two</t>');
-    expect(f.text).toContain('<autoFilter ref="A1:J5"/>');
+    expect(f.text).toContain('<autoFilter ref="A1:I5"/>');
     expect(f.text).toContain('FFFEF3C7');
   });
 
