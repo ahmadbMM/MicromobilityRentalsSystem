@@ -9,9 +9,10 @@ async function pickBirth(page: import('@playwright/test').Page, id: string, iso:
 }
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// After a rider's eighth booking, picking an event brings one page before the session list:
-// birth date and nationality, both required. Every booking counts except a cancelled one -
-// upcoming and waitlisted included; a complete profile never sees it; it never says why.
+// Once a rider has booked, picking an event (or opening the site) brings one page before the session
+// list: the nationality from the first booking, the birth date from the fourth (the owner, 2026-10-09;
+// it was both after the eighth). Every booking counts except a cancelled one - upcoming and waitlisted
+// included; a complete profile never sees it; it never says why.
 
 const S1 = '2099-01-01';
 const sessions = [{ id: S1, session_date: S1, day: 'Sunday', status: 'open', capacity: 20, created_at: 1, event_kind: 'jcc' }];
@@ -63,7 +64,7 @@ test('what staff asked to correct opens when the site opens, then the profile pa
   await page.fill('#fx-phone', '0551234567');
   await page.click('#fx-save');
   await expect(fix).toBeHidden();
-  await expect(page.locator('#profile-gate .pg-box')).toBeVisible();  // the eighth-booking page follows
+  await expect(page.locator('#profile-gate .pg-box')).toBeVisible();  // the profile page follows
 });
 
 test('eight bookings and a bare profile: the gate takes the event pick, saves both, then continues', async ({ page }) => {
@@ -99,18 +100,61 @@ test('eight bookings and a bare profile: the gate takes the event pick, saves bo
   await expect(page.locator('#app-footer')).toBeVisible();
 });
 
-test('seven bookings: no gate', async ({ page }) => {
-  await boot(page, eight.slice(0, 7), { nationality: null, birth_date: null });
+test('no bookings: no gate', async ({ page }) => {
+  await boot(page, [], { nationality: null, birth_date: null });
   await page.evaluate(`selectEvent('jcc')`);
   await expect(page.locator('#profile-gate')).toBeHidden();
   expect(await page.evaluate('S.selEvent')).toBe('jcc');
 });
 
-test('cancelled bookings do not count', async ({ page }) => {
-  await boot(page, eight.slice(0, 6).concat([row(6, 'cancelled'), row(7, 'cancelled')]), { nationality: null, birth_date: null });
+test('one reserved booking: the nationality alone is asked, and saved with the birth date left as it is', async ({ page }) => {
+  await boot(page, [row(0, 'waiting')], { nationality: null, birth_date: null });
+  const calls: string[] = [];
+  page.on('request', r => { if (/rpc\/customer_update_profile/.test(r.url())) calls.push(r.postData() || ''); });
+  const box = page.locator('#profile-gate .pg-box');
+  await expect(box).toBeVisible();                                    // at site open, before any pick
+  await expect(box).toContainText('One detail to finish your profile');
+  await expect(page.locator('#pg-birth-y')).toHaveCount(0);
+  await expect(page.locator('#pg-save')).toBeDisabled();
+  await page.selectOption('#pg-nat', 'Egypt');
+  await page.click('#pg-save');
+  await expect(box).toBeHidden();
+  const body = JSON.parse(calls[0]);
+  expect(body.p_nationality).toBe('Egypt');
+  expect(body.p_birth_date || null).toBeNull();
+});
+
+test('three bookings with a nationality on file: no gate', async ({ page }) => {
+  await boot(page, eight.slice(0, 3), { nationality: 'Jordan', birth_date: null });
   await page.evaluate(`selectEvent('jcc')`);
   await expect(page.locator('#profile-gate')).toBeHidden();
   expect(await page.evaluate('S.selEvent')).toBe('jcc');
+});
+
+test('the fourth booking: the birth date alone is asked when the nationality is on file', async ({ page }) => {
+  await boot(page, [row(0, 'done'), row(1, 'done'), row(2, 'waiting'), row(3, 'waitlist')], { nationality: 'Jordan', birth_date: null });
+  const box = page.locator('#profile-gate .pg-box');
+  await expect(box).toBeVisible();
+  await expect(box).toContainText('One detail to finish your profile');
+  await expect(page.locator('#pg-nat')).toHaveCount(0);
+  await pickBirth(page, 'pg-birth', '1996-03-14');
+  await page.click('#pg-save');
+  await expect(box).toBeHidden();
+  expect(await page.evaluate('[S.loggedIn.nationality,S.loggedIn.birth_date]')).toEqual(['Jordan', '1996-03-14']);
+});
+
+test('cancelled bookings do not count', async ({ page }) => {
+  await boot(page, [row(0, 'cancelled'), row(1, 'removed')], { nationality: null, birth_date: null });
+  await page.evaluate(`selectEvent('jcc')`);
+  await expect(page.locator('#profile-gate')).toBeHidden();
+  expect(await page.evaluate('S.selEvent')).toBe('jcc');
+});
+
+test('three bookings and a cancelled fourth: the nationality only, no birth date yet', async ({ page }) => {
+  await boot(page, eight.slice(0, 3).concat([row(3, 'cancelled')]), { nationality: null, birth_date: null });
+  await expect(page.locator('#profile-gate .pg-box')).toBeVisible();
+  await expect(page.locator('#pg-birth-y')).toHaveCount(0);
+  await expect(page.locator('#pg-nat')).toBeVisible();
 });
 
 test('a complete profile never sees it', async ({ page }) => {

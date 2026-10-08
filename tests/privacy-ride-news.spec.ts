@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-10-07'; // the emergency contacts (a second, optional; the first required); nobody is asked again
+const VERSION = '2026-10-09'; // nationality after the first booking, birth date after the fourth; nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
@@ -44,12 +44,12 @@ test.describe('the Privacy Notice', () => {
     await expect(box).toContainText('What we collect, and whether you must give it');
     await expect(box).toContainText('Frankfurt, Germany');
     await expect(box).toContainText('We will reply within 30 days');
-    // Birth date and nationality: optional until the eighth booking, and before any booking for community members
+    // Nationality from the first booking, birth date from the fourth, and before any booking for community members
     const nat = box.locator('tr', { hasText: 'Nationality' });
     await expect(nat).toContainText('Community members: required before booking');
     await expect(nat).toContainText('Which nationality you give never decides who can book.');
-    await expect(box.locator('tr', { hasText: 'Date of birth' })).toContainText('Optional for your first eight bookings, then required.');
-    await expect(box).toContainText('Community members can’t book until they add them.');
+    await expect(box.locator('tr', { hasText: 'Date of birth' })).toContainText('Optional for your first three bookings, then required.');
+    await expect(box).toContainText('Community members can’t book until they add both.');
     await expect(box.locator('.pv-note')).toHaveCount(0); // English is a full version
     await page.keyboard.press('Escape');
     await expect(page.locator('#privacy-backdrop')).toHaveCount(0);

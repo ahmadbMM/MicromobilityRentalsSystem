@@ -764,13 +764,14 @@ Cancelled and removed bookings are excluded from the Bookings list base set enti
 
 ## 20a. Rider profile gate 🟢
 
-After a rider's **eighth booking** — every row on the account counts, ridden, on the bike, no-show,
-upcoming or waitlisted, except a cancelled one — the next event pick (`selectEvent`, and the session
-card as a second guard) shows one page before the session list: **birth date** and **nationality**,
-both required, no close / later / back; only the header stays usable and leaving through it
-drops the gate until the next pick. Saved through `customer_update_profile` with the rest of the
+From a rider's **first booking** the **nationality**, and from the **fourth** the **birth date**
+(the owner, 2026-10-09; both were after the eighth) — every row on the account counts, ridden, on the
+bike, no-show, upcoming or waitlisted, except a cancelled one — the site opening on the account and
+the next event pick (`selectEvent`, and the session card as a second guard) show one page before the
+session list asking only what is due and missing, required, no close / later / back; Log out is the
+only other way off. Saved through `customer_update_profile` with the rest of the
 profile carried through, then the picked event opens. Never shown once the account carries
-both; the page never mentions the count. Nationality is fetched once through
+what is due; the page never mentions the count. Nationality is fetched once through
 `customer_profile` before deciding — if that answer never comes (offline) the rider is not held
 up. Birth dates in the future or implying an age under five are refused client-side.
 
