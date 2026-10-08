@@ -74,3 +74,60 @@ test('the bell has a kind for it, with a line per customer', async ({ page }) =>
   expect(k!.txt.find((x) => x.startsWith('Farah India'))).toContain('India');
   expect(await page.evaluate(`NT_KINDS.some(r=>r[0]==='natnew')`)).toBe(true); // can be turned off on Settings
 });
+
+// The owner, 2026-10-09: "add filters and search bar and sorting and customizability" to the box.
+test('the box can be searched, filtered, sorted and laid out', async ({ page }) => {
+  await open(page);
+  await page.evaluate(`localStorage.removeItem('cq_natnew_view');S._nn=null;S.customers=[...S.customers,
+    {id:'k10',name:'Zara Brazil',email:'zara@example.test',phone:'+966500000010',nationality:'Brazil',gender:'female',created_at:new Date(Date.now()-2*864e5).toISOString()},
+    {id:'k11',name:'Amir Brazil',email:'amir@example.test',nationality:'Brazil',gender:'male',created_at:'2026-07-01T10:00:00Z'}];renderCommunity()`);
+  const box = page.locator('#tab-community .natnew-box');
+  const names = () => box.locator('.natnew-row .natnew-name').allTextContents();
+  await expect(box.locator('.natnew-row')).toHaveCount(4);
+  await expect(box.locator('.natnew-count')).toHaveText('4 of 4 customers');
+  // search keeps its caret through the repaint
+  await box.locator('#natnew-q').fill('jordan');
+  await expect(box.locator('.natnew-row')).toHaveCount(1);
+  await expect(box.locator('#natnew-q')).toBeFocused();
+  await expect(box.locator('#natnew-reset')).toBeVisible();
+  await box.locator('#natnew-q').fill('');
+  // nationality, gender and joined filters
+  await box.locator('#natnew-nat').selectOption('Brazil');
+  await expect.poll(names).toEqual(['Zara Brazil', 'Amir Brazil']);
+  await box.locator('#natnew-gender').selectOption('female');
+  await expect.poll(names).toEqual(['Zara Brazil']);
+  await box.locator('#natnew-gender').selectOption('');
+  await box.locator('#natnew-since').selectOption('7');
+  await expect.poll(names).toEqual(['Zara Brazil']);
+  await box.locator('#natnew-reset').click();
+  await expect(box.locator('.natnew-row')).toHaveCount(4);
+  await expect(box.locator('#natnew-nat')).toHaveValue('');
+  // sorting
+  await box.locator('#natnew-sort').selectOption('name');
+  await expect.poll(names).toEqual(['Amir Brazil', 'Farah India', 'Ghazi Jordan', 'Zara Brazil']);
+  await box.locator('#natnew-sort').selectOption('big');
+  await expect.poll(async () => (await names()).slice(0, 2).sort()).toEqual(['Amir Brazil', 'Zara Brazil']);
+  // Customize: group by nationality, and show the email and phone
+  await box.locator('.natnew-cust summary').click();
+  await box.getByRole('checkbox', { name: 'Group by nationality' }).check();
+  await expect(box.locator('.natnew-grp')).toHaveCount(3);
+  await expect(box.locator('.natnew-grp-h').first()).toHaveText('Brazil 2');
+  await box.getByRole('checkbox', { name: 'Phone' }).check();
+  await expect(box).toContainText('+966500000010');
+  // how many show
+  await box.locator('#natnew-show').selectOption('12');
+  await box.getByRole('checkbox', { name: 'Group by nationality' }).uncheck();
+  // the device keeps the layout across a repaint; the filters last the visit
+  await page.evaluate(`renderCommunity()`);
+  await expect(box.locator('#natnew-sort')).toHaveValue('big');
+  expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_natnew_view')).phone`)).toBe(true);
+});
+
+test('Show more lists the rest past the chosen number', async ({ page }) => {
+  await open(page);
+  await page.evaluate(`localStorage.setItem('cq_natnew_view',JSON.stringify({show:12}));S._nn=null;S.customers=[...S.customers,...Array.from({length:14},(_,i)=>({id:'b'+i,name:'Brazil '+i,email:'b'+i+'@example.test',nationality:'Brazil',created_at:'2026-08-0'+(1+i%9)+'T10:00:00Z'}))];renderCommunity()`);
+  const box = page.locator('#tab-community .natnew-box');
+  await expect(box.locator('.natnew-row')).toHaveCount(12);
+  await box.getByRole('button', { name: 'Show 4 more' }).click();
+  await expect(box.locator('.natnew-row')).toHaveCount(16);
+});
