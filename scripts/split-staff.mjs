@@ -1157,7 +1157,10 @@ export function formatFieldNames(r, limit = 20) {
 // in the core). Here, on d5c7f43e: staff 471.8 (~474.0 on the runner), core 251.1 (~252.4).
 // Staff 475 -> 478 (2026-10-07): no Walk-in on the pool session, a Saturday ride or Run for Her, no Add rider on
 // Petromin or a circuit night (+0.1 KB); the staff half was at 472.0 here (~474.2 on the runner), inside 2.5 KB of 475.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 218, staff: 478, core: 254 };
+// Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
+// badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
+// language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

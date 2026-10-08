@@ -822,6 +822,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgScrutineer:'Scrutineer',bdgScrutineerD:'Reported a bike fault the team confirmed',
   bdgChampion:'Champion',bdgChampionD:'Won a MicroMobility challenge or event',
   bdgSpirit:'Race Spirit',bdgSpiritD:'Showed great sportsmanship on a ride',
+  bdgT100:'T100 Finisher',bdgT100D:'Finished the T100 race in Jeddah',bdgT50:'T50 Finisher',bdgT50D:'Finished the T50 race in Jeddah',bdgT25:'T25 Finisher',bdgT25D:'Finished the T25 race in Jeddah',
   bdgSub:'Riders see their badges on their account page. Give one to a rider with the Badges button on their row in Accounts, or here to everyone who rode a ride.',bdgNone:'No badges yet',
   bdgGiveTitle:'Give a badge',bdgAllHeld:'They hold every badge there is to give.',
   bdgNoteLabel:'Note for the rider',bdgNotePh:'They read it with the badge',
@@ -896,6 +897,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgScrutineerA:'Scrutineers check every car before a race. Given for spotting a bike fault the team then fixed.',
   bdgChampionA:'A champion\'s badge, given by the team for winning one of our challenges or events.',
   bdgSpiritA:'Sportsmanship matters more than speed. Given for cheering others on and lifting the whole ride.',
+  bdgT100A:'For crossing the finish line of the T100 when the race came to Jeddah: the full distance. Given by our team.',bdgT50A:'For crossing the finish line of the T50 when the race came to Jeddah. Given by our team.',bdgT25A:'For crossing the finish line of the T25 when the race came to Jeddah. Given by our team.',
   bdgBackOnTrackA:'Life gets busy. This one welcomes you back on the bike after two months or more away.',
   bdgSafetyCarA:'When the safety car is out, the race slows but doesn\'t stop: a quiet week won\'t break your run.',
   bdgEnduranceA:'Endurance races reward those who keep going: twelve weeks of riding, one quiet week in four allowed.',
@@ -1383,6 +1385,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgScrutineer:'المُدقِّق',bdgScrutineerD:'أبلغت عن عطل في دراجة وأكّده الفريق',
   bdgChampion:'البطل',bdgChampionD:'فزت في تحدٍّ أو فعالية من مايكروموبيليتي',
   bdgSpirit:'روح السباق',bdgSpiritD:'أظهرت روحاً رياضية رائعة خلال رحلة',
+  bdgT100:'إنجاز T100',bdgT100D:'أنهيت سباق T100 في جدة',bdgT50:'إنجاز T50',bdgT50D:'أنهيت سباق T50 في جدة',bdgT25:'إنجاز T25',bdgT25D:'أنهيت سباق T25 في جدة',
   bdgSub:'يرى الراكبون أوسمتهم في صفحة حسابهم. امنح راكباً وساماً من زر الأوسمة في صفّه ضمن الحسابات، أو امنحه هنا لكل من ركب في رحلة.',bdgNone:'لا أوسمة بعد',
   bdgGiveTitle:'منح وسام',bdgAllHeld:'لديه كل الأوسمة المتاحة للمنح.',
   bdgNoteLabel:'ملاحظة للراكب',bdgNotePh:'يقرؤها مع الوسام',
@@ -1457,6 +1460,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgScrutineerA:'المدقّقون يفحصون كل سيارة قبل السباق. يُمنح لمن لاحظ عطلاً في دراجة ثم أصلحه الفريق.',
   bdgChampionA:'وسام الأبطال، يمنحه الفريق لمن فاز في أحد تحدياتنا أو فعالياتنا.',
   bdgSpiritA:'الروح الرياضية أهم من السرعة. يُمنح لمن يشجّع الآخرين ويجعل الرحلة أجمل للجميع.',
+  bdgT100A:'لمن عبر خط النهاية في سباق T100 حين أُقيم في جدة، بالمسافة الكاملة. يمنحه فريقنا.',bdgT50A:'لمن عبر خط النهاية في سباق T50 حين أُقيم في جدة. يمنحه فريقنا.',bdgT25A:'لمن عبر خط النهاية في سباق T25 حين أُقيم في جدة. يمنحه فريقنا.',
   bdgBackOnTrackA:'الحياة تنشغل أحياناً. هذا الوسام يرحّب بعودتك إلى الدراجة بعد شهرين أو أكثر.',
   bdgSafetyCarA:'حين تخرج سيارة الأمان يهدأ السباق ولا يتوقف: أسبوع هادئ لن يكسر سلسلتك.',
   bdgEnduranceA:'سباقات التحمّل تكافئ من يواصل: اثنا عشر أسبوعاً من الركوب مع أسبوع هادئ مسموح من كل أربعة.',
@@ -13201,6 +13205,10 @@ const BDG_GLYPH={
   // Run for Her (2026-10-05): the pink ribbon - one band, the back strand (.o) under the front.
   ribbon:'<path class="rb o" d="M12 3.1A3.9 3.9 0 0 0 8.1 7c0 1.8 1.3 3.6 3.9 6.7L17.4 21"/><path class="rb" d="M6.6 21 12 13.7c2.6-3.1 3.9-4.9 3.9-6.7A3.9 3.9 0 0 0 12 3.1"/>',
   calcrown:'<rect class="o" x="3" y="4.5" width="18" height="16.5" rx="2.2"/><path d="M3 8.5h18v2H3z"/><path class="s" d="M8 2.5v4M16 2.5v4"/><path transform="translate(5.64 9.94) scale(.53)" d="M3 7.5l4.6 4.2L12 4.5l4.4 7.2L21 7.5l-1.8 10.5H4.8z"/>',
+  // The T100 races in Jeddah (2026-10-08): the distance drawn in figures over a swim wave.
+  t100:'<path class="s" d="M3.4 7.3 5.4 5.5v9M12.2 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0ZM19.6 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0Z"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
+  t50:'<path class="s" d="M10.6 5.5h-4.6l-.5 4.1c.7-.6 1.5-.9 2.4-.9 1.6 0 2.9 1.2 2.9 2.9s-1.3 2.9-3 2.9c-1.2 0-2.2-.6-2.7-1.6M18.6 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0Z"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
+  t25:'<path class="s" d="M5.8 7.6c.3-1.3 1.3-2.1 2.6-2.1 1.5 0 2.6 1 2.6 2.4 0 1-.5 1.8-1.4 2.7L5.6 14.5H10.8M18.6 5.5h-4.6l-.5 4.1c.7-.6 1.5-.9 2.4-.9 1.6 0 2.9 1.2 2.9 2.9s-1.3 2.9-3 2.9c-1.2 0-2.2-.6-2.7-1.6"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
 };
 const BDG_COLORS=['green','gold','blue','red','purple','orange','teal','silver'];
 // The drawn-special medallions: 'special' (Race Ready, the owner 2026-09-29) gold running into
@@ -13219,7 +13227,7 @@ function _bdgMedal(icon,color,cls){
 // how it is earned. The ride badges are earned by riding (_mrBadges); Marshal to Race Spirit only
 // when staff give them. The badges table seeds the same slugs (migrations 20260929000000, 010000).
 const BD_SYS={first_lap:['flag','green','bdFirstLap'],regular:['wheel','teal','bdRegular'],podium:['podium','purple','bdPodium'],front_row:['one','gold','bdFrontRow'],carbon:['bike','silver','bdCarbon'],streak:['flame','orange','bdStreak'],squad:['people','blue','bdSquad'],fuel:['bottle','red','bdFuel'],corniche25:['wave','blue','bd25'],
-  marshal:['shield','orange','bdgMarshal'],pit_crew:['wrench','silver','bdgPitCrew'],green_flag:['wflag','green','bdgGreenFlag'],super_licence:['card','purple','bdgSuperLicence'],scrutineer:['search','teal','bdgScrutineer'],champion:['trophy','gold','bdgChampion'],spirit:['heart','red','bdgSpirit'],complete_profile:['profile','special','bdgRaceReady'],national_day_96:['n96','national','bdgNationalDay96'],
+  marshal:['shield','orange','bdgMarshal'],pit_crew:['wrench','silver','bdgPitCrew'],green_flag:['wflag','green','bdgGreenFlag'],super_licence:['card','purple','bdgSuperLicence'],scrutineer:['search','teal','bdgScrutineer'],champion:['trophy','gold','bdgChampion'],spirit:['heart','red','bdgSpirit'],t100:['t100','gold','bdgT100'],t50:['t50','silver','bdgT50'],t25:['t25','orange','bdgT25'],complete_profile:['profile','special','bdgRaceReady'],national_day_96:['n96','national','bdgNationalDay96'],
   back_on_track:['return','teal','bdgBackOnTrack'],safety_car:['beacon','orange','bdgSafetyCar'],endurance:['clock','purple','bdgEndurance'],triple_crown:['crown','gold','bdgTripleCrown'],slipstream:['wind','green','bdgSlipstream'],paceline:['wind','blue','bdgPaceline'],peloton:['wind','gold','bdgPeloton'],rolling_start:['wind','teal','bdgRollingStart'],grand_tour:['wind','purple','bdgGrandTour'],hall_of_fame:['wind','special','bdgHallOfFame'],clean_sheet:['calcheck','green','bdgCleanSheet'],works_team:['briefcase','teal','bdgWorksTeam'],perfect_week:['calstar','purple','bdgPerfectWeek'],perfect_month:['calcrown','gold','bdgPerfectMonth'],run_for_her:['ribbon','pink','bdgRunForHer'],winter_series:['snow','blue','bdgWinterSeries'],ramadan_nights:['lantern','purple','bdgRamadanNights'],founding_day:['fort','orange','bdgFoundingDay']};
 // A badge's name and how-to line in the reader's language: the app's own from its translations, one
 // an admin made from its English or Arabic words.
@@ -13385,7 +13393,7 @@ function _bdgMineLoad(cust){
 }
 function _bdgMineList(cust){const m=S._bdgMine;return(cust&&m&&m.id===cust.id&&Array.isArray(m.list))?m.list:[];}
 // The badges staff give by hand that the app knows itself: shown where the database has no badge_catalog.
-const BDG_GIVEN_SYS=['marshal','pit_crew','green_flag','super_licence','scrutineer','champion','spirit'];
+const BDG_GIVEN_SYS=['marshal','pit_crew','green_flag','super_licence','scrutineer','champion','spirit','t100','t50','t25'];
 // The account's badges as its page shows them (the owner, 2026-09-29: all of them, sorted, the same
 // size): every badge in the catalogue - earned ones first, then those to earn by riding, the dated
 // ones and the ones staff give, each group in the catalogue's order. One not earned is greyed, with

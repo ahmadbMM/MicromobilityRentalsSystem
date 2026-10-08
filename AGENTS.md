@@ -391,6 +391,9 @@ sighting) and Founding Day ship dated. A badge once earned stays: Hot Streak rea
 Badges count a ride only once it is marked Paid or is on a free ride, a bike owner's (`Own`) once checked in (`_bdgRode`;
 the owner, 2026-10-02 - Road Carbon too; National Day 96 stays paid or not, as it shipped); the
 staff Badges dialog passes the account to `_mrBadges`, so Race Ready shows there as earned too.
+The T100 race badges (migration 20261008120000, the owner 2026-10-08): `t100` / `t50` / `t25`, one per race distance in Jeddah,
+staff-given only (the races are not ours, so nothing in the bookings says who finished); drawn as the distance in figures over a
+swim wave (gold / silver / orange), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS).
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
 their past members-only rides.
 Race Ready (`complete_profile`) is earned at 100% on the account page's profile meter (`_profPct`,

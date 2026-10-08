@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Page, type Request } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
@@ -282,10 +283,11 @@ test.describe('@customer:account badges', () => {
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
     const more = page.locator('#tab-account #mr-badges-more');
     // Only the earned take room (2026-09-30): the two given and First Lap. The twenty to earn by
-    // riding (National Day 96 and Back on Track wait until earned) and the six other ones staff give
+    // riding (National Day 96 and Back on Track wait until earned) and the nine other ones staff give (the
+    // three T100 race badges among them)
     // fold under Badges to earn, which says how many and shows four of them greyed.
     await expect(chips).toHaveCount(3);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/31');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/34');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -293,11 +295,11 @@ test.describe('@customer:account badges', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).toContainText('Badges to earn');
     await expect(more).toContainText('Show');
-    await expect(more.locator('.mr-bm-n')).toHaveText('28');
+    await expect(more.locator('.mr-bm-n')).toHaveText('31');
     await expect(more.locator('.mr-bm-peek svg.bdg-m')).toHaveCount(4);
     // Open: every badge, in the same order as before, the button kept in focus and reading Hide.
     await more.click();
-    await expect(chips).toHaveCount(31);
+    await expect(chips).toHaveCount(34);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toContainText('Hide');
     await expect(more).toBeFocused();
@@ -307,7 +309,7 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(3)).toContainText('33%');
     await expect(chips.nth(30)).toContainText('Race Spirit');
     await expect(chips.nth(30)).toHaveClass(/locked/);
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(31);
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(34);
     expect(EMOJI.test(await page.locator('#mr-badges-host').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -316,7 +318,7 @@ test.describe('@customer:account badges', () => {
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
     // It stays open through that repaint, and closes again.
-    await expect(chips).toHaveCount(31);
+    await expect(chips).toHaveCount(34);
     await more.click();
     await expect(chips).toHaveCount(3);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
@@ -325,11 +327,31 @@ test.describe('@customer:account badges', () => {
     expect(await page.evaluate(`(()=>{const b=S._bdgMine.list[0],en=_bdgName(b);S.lang='ar';const ar=_bdgName(b);S.lang='en';return[en,ar];})()`)).toEqual(['Night Owl', 'بومة الليل']);
   });
 
+  test('the T100 race badges: given by staff, drawn as the distance in gold, silver and orange (2026-10-08)', async ({ page }) => {
+    const t100 = [{ slug: 't100', icon: 't100', color: 'gold', name: 'T100 Finisher', system: true, note: 'Jeddah', at: new Date(Date.now() - 36e5).toISOString() }];
+    await rider(page, { 'rpc:customer_my_badges': t100 });
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('T100 Finisher');
+    await expect(pop).toContainText('Finished the T100 race in Jeddah');
+    await expect(pop.locator('svg.bdg-m.bdc-gold')).toHaveCount(1);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await page.locator('#mr-badges-more').click();
+    // T50 and T25 wait among the ones staff give, each in its own colour and drawing.
+    for (const [name, col] of [['T50 Finisher', 'silver'], ['T25 Finisher', 'orange']]) {
+      const tile = page.locator('#tab-account .mr-badge', { hasText: name });
+      await expect(tile).toHaveClass(/locked/);
+      await expect(tile.locator(`svg.bdg-m.bdc-${col}`)).toHaveCount(1);
+    }
+    expect(await page.evaluate(`['t100','t50','t25'].map(k=>BD_SYS[k][0]===k&&!!BDG_GLYPH[k]&&BDG_GIVEN_SYS.includes(k))`)).toEqual([true, true, true]);
+    const ar = JSON.parse(readFileSync('lang/ar.json', 'utf8'));
+    expect([ar.bdgT100, ar.bdgT25D]).toEqual(['إنجاز T100', 'أنهيت سباق T25 في جدة']);
+  });
+
   test('a database without customer_my_badges still shows the ride badges', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(1); // First Lap
-    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('29'); // the other twenty-two ride badges and the seven staff give
+    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('32'); // the other twenty-two ride badges and the ten staff give
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
