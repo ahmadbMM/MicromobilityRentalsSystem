@@ -68,8 +68,8 @@ test('closing a future free ride leaves its riders as they are (sign-ups only pa
   expect(patches).toEqual([]);
 });
 
-test('closing a free session completes the riders on a bike and makes the unchecked ones no-shows, and no one else', async ({ page }) => {
-  // on the ride's own day: closing a future one only pauses sign-ups (next test)
+test('closing a free session on its day leaves every rider as they are; only Close out settles them', async ({ page }) => {
+  // the owner, 2026-10-09: "dont mark all bookings no show or completed unless the close out button is clicked"
   const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
   const free = { id: TODAY + '-sat', day: 'Saturday', session_date: TODAY, capacity: 20, status: 'open', created_at: 3, event_kind: 'community', ride_kind: 'saturday', paid_ride: false, needs_approval: true, spots: 20 };
   const fr = (id: string, status: string, approval: string | null) => row(id, { session_id: free.id, session_date: free.session_date, session_day: 'Saturday', status, approval, price: 0 });
@@ -80,11 +80,12 @@ test('closing a free session completes the riders on a bike and makes the unchec
   const patches: { url: string; body: Record<string, unknown> }[] = [];
   page.on('request', r => { if (r.method() === 'PATCH' && /queue_entries/.test(r.url())) patches.push({ url: decodeURIComponent(r.url()), body: JSON.parse(r.postData() || '{}') }); });
   await page.evaluate(`toggleSession('${free.id}','closed')`);
-  await expect.poll(() => patches.length).toBe(2);
-  const act = patches.find(p => p.url.includes('a2'))!, wait = patches.find(p => p.url.includes('a1'))!;
-  expect(act.body.status).toBe('done'); expect(act.body.checked_out_at).toBeTruthy(); expect(act.body.checked_in_at).toBeUndefined();
-  // never checked in: a no-show (the owner, 2026-10-07), with no made-up check-in time
-  expect(wait.body.status).toBe('noshow'); expect(wait.body.checked_in_at).toBeUndefined(); expect(wait.body.checked_out_at).toBeUndefined();
+  await page.waitForTimeout(600);
+  expect(patches).toEqual([]);                                                            // closing is only a status change
+  await page.evaluate(`closeOutSession('${free.id}')`);
+  await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
+  await expect.poll(() => patches.some(p => p.body.status === 'noshow')).toBe(true);     // the button settles them
+  expect(patches.find(p => p.body.status === 'noshow')!.url).toContain('a1');
   expect(patches.some(p => p.url.includes('a3') || p.url.includes('a4'))).toBe(false);   // never selected: untouched
 });
 

@@ -1216,8 +1216,6 @@
   "amMissingBtn": "Dados faltando",
   "amMissingLine": "Faltando: {0}",
   "ciPartyWord": "grupo",
-  "closeFreeDone": "{0} ciclistas marcados como concluídos",
-  "closeFreeNoshow": "{0} que nunca fizeram check-in marcados como ausentes",
   "foldShow": "Mostrar",
   "foldHide": "Ocultar finalizados",
   "foldFinished": "{0} finalizados",
