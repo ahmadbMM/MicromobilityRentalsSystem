@@ -4162,5 +4162,9 @@
   "ptUndone": "Pagamento desfeito",
   "ptReceived": "Recebido por",
   "ptPerKind": "Por tipo de trabalho",
-  "ptSlipPaid": "Pago em {0} · {1}"
+  "ptSlipPaid": "Pago em {0} · {1}",
+  "selaRepBtn": "Relatório para a Sela",
+  "selaRepHint": "Todas as reservas, incluindo a lista de espera, com o que a Sela pediu: nome completo, e-mail, data de nascimento, distância e contato de emergência. Os dados são lidos de novo a cada toque.",
+  "selaColRel": "Parentesco",
+  "selaWlKey": "As linhas sombreadas estão na lista de espera, na ordem de espera."
 }

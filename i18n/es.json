@@ -4162,5 +4162,9 @@
   "ptUndone": "Pago deshecho",
   "ptReceived": "Recibido por",
   "ptPerKind": "Por tipo de trabajo",
-  "ptSlipPaid": "Pagado el {0} · {1}"
+  "ptSlipPaid": "Pagado el {0} · {1}",
+  "selaRepBtn": "Informe para Sela",
+  "selaRepHint": "Todas las reservas, incluida la lista de espera, con lo que pidió Sela: nombre completo, correo electrónico, fecha de nacimiento, distancia y contacto de emergencia. Los datos se leen de nuevo cada vez que pulsas.",
+  "selaColRel": "Parentesco",
+  "selaWlKey": "Las filas sombreadas están en la lista de espera, por orden de espera."
 }

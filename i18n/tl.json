@@ -4162,5 +4162,9 @@
   "ptUndone": "Na-undo ang bayad",
   "ptReceived": "Tinanggap ni",
   "ptPerKind": "Kada uri ng trabaho",
-  "ptSlipPaid": "Binayaran {0} · {1}"
+  "ptSlipPaid": "Binayaran {0} · {1}",
+  "selaRepBtn": "Ulat para sa Sela",
+  "selaRepHint": "Bawat booking, kasama ang waitlist, na may hiningi ng Sela: buong pangalan, email, petsa ng kapanganakan, layo at emergency contact. Binabasa muli ang mga detalye sa bawat pindot.",
+  "selaColRel": "Kaugnayan",
+  "selaWlKey": "Ang mga may lilim na hanay ay nasa waitlist, ayon sa pagkakasunod."
 }

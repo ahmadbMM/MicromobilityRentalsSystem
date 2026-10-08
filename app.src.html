@@ -926,7 +926,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   noShowFlagTip:'{0} past no-shows',cloneSessBtn:'Clone',cloneBtn:'Clone',
   kbNoWaiting:'No riders waiting',
   fixDupBtn:'Fix duplicate numbers',fixDupTitle:'Fix duplicate booking numbers',fixDupBody:'Found {0} duplicate booking number(s). Each duplicate will get a fresh unique number (the earliest booking keeps its number). Continue?',fixDupConfirm:'Renumber duplicates',fixDupNone:'No duplicate booking numbers found.',fixDupDone:'Renumbered {0} booking(s).',fixDupLog:'Fixed {0} duplicate booking number(s)',
-  expTitle:'Export Report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',repKmEach:'One report per distance',repKmEachHint:'Each distance prints on its own, numbered from 1, with the columns and filters above.',repRunners:'Runners',expPdf:'PDF / Print',expExcel:'Excel (CSV)',
+  expTitle:'Export Report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',repKmEach:'One report per distance',repKmEachHint:'Each distance prints on its own, numbered from 1, with the columns and filters above.',selaRepBtn:'Report for Sela',selaRepHint:'Every booking, the waitlist included, with what Sela asked for: full name, email, birth date, distance and emergency contact. The details are read fresh at each tap.',selaColRel:'Relationship',selaWlKey:'Shaded rows are on the waitlist, in waitlist order.',repRunners:'Runners',expPdf:'PDF / Print',expExcel:'Excel (CSV)',
   eqnTitle:'Edit Booking Number',eqnGroup:'Group of {0} bikes',eqnNewNum:'New Booking Number',
   logsActivity:'Activity Log',logsEmpty:'No actions logged yet.',
   sessModeCounts:'Bike Counts',sessModeTotal:'Total Bikes',sessModeFleet:'From Fleet',
@@ -1487,7 +1487,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   noShowFlagTip:'{0} حالات عدم حضور سابقة',cloneSessBtn:'نسخ',cloneBtn:'نسخ',
   kbNoWaiting:'لا يوجد ركاب في الانتظار',
   fixDupBtn:'إصلاح الأرقام المكررة',fixDupTitle:'إصلاح أرقام الحجوزات المكررة',fixDupBody:'تم العثور على {0} رقم حجز مكرر. سيحصل كل مكرر على رقم فريد جديد (يحتفظ الحجز الأقدم برقمه). متابعة؟',fixDupConfirm:'إعادة ترقيم المكررات',fixDupNone:'لا توجد أرقام حجوزات مكررة.',fixDupDone:'تمت إعادة ترقيم {0} حجز.',fixDupLog:'إصلاح {0} رقم حجز مكرر',
-  repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',repKmEach:'تقرير لكل مسافة',repKmEachHint:'تُطبع كل مسافة في تقرير مستقل مرقّم من 1، بالأعمدة وعوامل التصفية أعلاه.',repRunners:'العدّاؤون',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
+  repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',repKmEach:'تقرير لكل مسافة',repKmEachHint:'تُطبع كل مسافة في تقرير مستقل مرقّم من 1، بالأعمدة وعوامل التصفية أعلاه.',selaRepBtn:'تقرير صلة',selaRepHint:'كل الحجوزات، ومعها قائمة الانتظار، بما طلبته صلة: الاسم الكامل والبريد الإلكتروني وتاريخ الميلاد والمسافة وجهة الاتصال للطوارئ. تُقرأ البيانات من جديد عند كل ضغطة.',selaColRel:'صلة القرابة',selaWlKey:'الصفوف المظللة في قائمة الانتظار، بترتيبها.',repRunners:'العدّاؤون',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
   eqnTitle:'تعديل رقم الحجز',eqnGroup:'مجموعة من {0} دراجات',eqnNewNum:'رقم الحجز الجديد',
   logsActivity:'سجل النشاط',logsEmpty:'لم يتم تسجيل أي إجراءات بعد.',
   sessModeCounts:'أعداد الدراجات',sessModeTotal:'إجمالي الدراجات',sessModeFleet:'من الأسطول',
@@ -25733,8 +25733,8 @@ function _rpSar(n){const v=Math.round((Number(n)||0)*100)/100;return '<bdi>SAR '
 function _rpAmt(n){return `<span class="rp-amt">${_rpSar(n)}</span>`;}
 // Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened
 // after an awaited PIN can lose the tap that allows a new window).
-function _openReport(html,w,h){
-  const win=window.open('','_blank',`width=${w||1100},height=${h||760}`);
+function _openReport(html,w,h,win){
+  win=win||window.open('','_blank',`width=${w||1100},height=${h||760}`); // a caller that reads first opens the window on the tap and passes it
   if(!win)return null;
   win.document.write(html);win.document.close();win.focus();
   // The report is its own document under the page's policy: no inline script runs in it and no
@@ -25943,7 +25943,14 @@ function showPrintReportOptions(){
       <div class="rpt-hint">${t('repKmEachHint')}</div>
       <div class="rpt-km" id="rep-km">
         ${_repKmList(S.sfSession).map(kmRow).join('')}
-      </div>`:''}
+      </div>
+      <div class="rpt-lbl2">${t('selaRepBtn')}</div>
+      <div class="rpt-hint">${t('selaRepHint')}</div>
+      <div class="rpt-km"><div class="rpt-sela-row">
+        <span class="rpt-km-acts">
+          <button type="button" class="btn-sm btn-muted" data-on-click="${_on("printSelaReport")}">${ICON_PRINT} ${t('repPrintNow')}</button>
+          <button type="button" class="btn-sm btn-muted" data-on-click="${_on("exportSelaXlsx")}">${ICON_EXPORT} Excel</button>
+        </span></div></div>`:''}
 
       <div class="rpt-acts">
         <button class="btn-primary rpt-w100" data-on-click="${_on("_on_showPrintReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
@@ -26974,6 +26981,80 @@ function printSessionReport(km){
     body});
   logAction(t('logPrintedReport'));
   if(_openReport(html,1100,760)===null)toast(t('repPopupBlocked'),'info'); // opened after the contacts' read, past the tap: the next tap opens at once
+}
+// ── Report for Sela (the owner, 2026-10-08: "add it as a button to print updated whenever needed") ── Run for
+// Her only, from the export dialog: every live booking, the waitlist after the booked runners in waitlist order
+// and shaded, with what Sela asked for (full name, email, birth date, distance, the FIRST emergency contact, as
+// _repEmLoad) beside the runner number and whether the runner agreed to share. The accounts are read at each
+// tap, so the sheet is as of that moment. Print, or an Excel file: a real .xlsx (stored zip), because the
+// waitlist's shading cannot travel in a CSV. Not filtered by the builder: Sela gets the whole list.
+async function _selaRows(){
+  const sess=allSessions().find(s=>s.id===S.sfSession);if(!sess||_rideKind(sess)!=='runher')return null;
+  const wl=e=>e.status==='waitlist'?1:0;
+  const es=getQueue().filter(e=>e.sessionId===sess.id&&['waiting','active','done','noshow','waitlist'].includes(e.status))
+    .sort((a,b)=>wl(a)-wl(b)||(wl(a)?(a.waitlistNum||0)-(b.waitlistNum||0):(a.queueNum||0)-(b.queueNum||0)));
+  if(!es.length){toast(t('toastNoExport'),'warning');return null;}
+  const ids=[...new Set(es.map(e=>e.customerId).filter(Boolean))],m=new Map();
+  if(ids.length){
+    let r;try{r=await sb.from('customers').select('id,name,email,birth_date,emergency_name,emergency_phone,emergency_relation').in('id',ids);}catch(x){r={error:x};}
+    if(!r||r.error){toast(t('errConnection'),'error');return null;}
+    (r.data||[]).forEach(x=>m.set(x.id,x));
+  }
+  let n=0;
+  const rows=es.map(e=>{
+    const c=m.get(e.customerId)||{},km=_runKmOk(e.runKm)?Number(e.runKm):null;
+    return{wl:!!wl(e),km,ok:!!e.shareAt,cells:['#'+(e.queueNum||''),wl(e)?`${t('waitlistLabel')} ${++n}`:t('anFunnelBooked'),
+      c.name||e.name||'',c.email||e.email||'',c.birth_date?String(c.birth_date).slice(0,10).split('-').reverse().join('/'):'',
+      km?_runKmTxt(km):'',c.emergency_phone?c.emergency_name||'':'',c.emergency_phone||'',
+      c.emergency_phone&&EM_RELS.includes(c.emergency_relation)?t('emRel_'+c.emergency_relation):'',t(e.shareAt?'repYes':'repNo')]};
+  });
+  return{sess,rows,head:[t('runNumLabel'),t('colStatus'),t('nameLabel'),t('repColEmail'),t('birthDateLabel'),t('runKmLabel'),t('emTitle'),t('emPhone'),t('selaColRel'),t('rshCol')]};
+}
+async function printSelaReport(){
+  const win=window.open('','_blank','width=1200,height=760'); // on the tap: a window opened after the read would be blocked
+  const d=await _selaRows();
+  if(!d){try{win&&win.close();}catch(_){}return;}
+  const b=d.rows.filter(r=>!r.wl),tile=(n,l)=>`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${esc(l)}</span></div>`;
+  const body=`<div class="totals">${tile(b.length,t('anFunnelBooked'))}${RUN_KMS.map(k=>tile(b.filter(r=>r.km===k).length,_runKmTxt(k))).join('')}${tile(d.rows.length-b.length,t('waitlistLabel'))}${tile(d.rows.filter(r=>r.ok).length+' / '+d.rows.length,t('rshCol'))}</div>
+    <div class="rp-salesline"><span class="rp-wl-key"></span> ${t('selaWlKey')}</div>
+    <table><thead><tr>${d.head.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${d.rows.map(r=>`<tr${r.wl?' class="rp-wl"':''}>${r.cells.map((v,i)=>`<td${i===0?' class="rp-b7"':i===2?' class="rp-name"':''}><bdi>${esc(v)||'—'}</bdi></td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  const s=d.sess;
+  const html=_reportShell({kind:t('selaRepBtn'),title:`${shortDate(s.session_date||s.id)} &middot; ${esc(_evName(s))}`,
+    refNo:'MM-RPT-'+String(s.session_date||s.id).slice(2,10).replace(/-/g,'')+'-SELA',maxWidth:'1180px',body});
+  logAction(t('logPrintedReport'));
+  if(_openReport(html,1200,760,win)===null)toast(t('repPopupBlocked'),'info');
+}
+async function exportSelaXlsx(){
+  const d=await _selaRows();if(!d)return;
+  const rows=[d.head,...d.rows.map(r=>r.cells)],st=[1,...d.rows.map(r=>r.wl?2:0)];
+  const X=v=>String(v).replace(/[<>&"]/g,c=>'&#'+c.charCodeAt(0)+';'),col=i=>String.fromCharCode(65+i);
+  const O='http://schemas.openxmlformats.org/',M=O+'spreadsheetml/2006/main',R=O+'officeDocument/2006/relationships',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+  const rel=(id,ty,to)=>`<Relationship Id="${id}" Type="${R}/${ty}" Target="${to}"/>`,ov=(p,ty)=>`<Override PartName="/${p}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.${ty}+xml"/>`;
+  const fill=c=>`<fill><patternFill patternType="solid"><fgColor rgb="FF${c}"/></patternFill></fill>`;
+  const files=[
+    ['[Content_Types].xml',`${H}<Types xmlns="${O}package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/>${ov('xl/workbook.xml','sheet.main')}${ov('xl/worksheets/sheet1.xml','worksheet')}${ov('xl/styles.xml','styles')}</Types>`],
+    ['_rels/.rels',`${H}<Relationships xmlns="${O}package/2006/relationships">${rel('rId1','officeDocument','xl/workbook.xml')}</Relationships>`],
+    ['xl/workbook.xml',`${H}<workbook xmlns="${M}" xmlns:r="${R}"><sheets><sheet name="Run for Her" sheetId="1" r:id="rId1"/></sheets></workbook>`],
+    ['xl/_rels/workbook.xml.rels',`${H}<Relationships xmlns="${O}package/2006/relationships">${rel('rId1','worksheet','worksheets/sheet1.xml')}${rel('rId2','styles','styles.xml')}</Relationships>`],
+    ['xl/styles.xml',`${H}<styleSheet xmlns="${M}"><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font></fonts><fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fill('BE185D')}${fill('FEF3C7')}</fills><borders count="1"><border/></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" applyFont="1" applyFill="1"/><xf numFmtId="0" fontId="0" fillId="3" borderId="0" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`],
+    ['xl/worksheets/sheet1.xml',`${H}<worksheet xmlns="${M}"><sheetViews><sheetView workbookViewId="0"${_isRtl()?' rightToLeft="1"':''}><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>${[14,14,28,34,12,10,26,18,18,15].map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('')}</cols><sheetData>${rows.map((r,i)=>`<row r="${i+1}">${r.map((v,j)=>`<c r="${col(j)}${i+1}" s="${st[i]}" t="inlineStr"><is><t>${X(v)}</t></is></c>`).join('')}</row>`).join('')}</sheetData><autoFilter ref="A1:${col(d.head.length-1)}${rows.length}"/></worksheet>`],
+  ];
+  // A stored (uncompressed) zip: local headers, the central directory, its end record. CRC-32 per file.
+  const enc=new TextEncoder(),tb=[];for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;tb[n]=c>>>0;}
+  const le=f=>{const u=new Uint8Array(f.reduce((a,x)=>a+x[1],0)),v=new DataView(u.buffer);let o=0;for(const[x,z]of f){if(z===4)v.setUint32(o,x,true);else v.setUint16(o,x,true);o+=z;}return u;};
+  const out=[],cd=[];let off=0,cds=0;
+  for(const[nm,txt]of files){
+    const b=enc.encode(txt),n=enc.encode(nm);let c=-1;for(const x of b)c=tb[(c^x)&255]^(c>>>8);c=(c^-1)>>>0;
+    const lh=le([[0x04034b50,4],[20,2],[0,2],[0,2],[0,2],[33,2],[c,4],[b.length,4],[b.length,4],[n.length,2],[0,2]]);
+    const ch=le([[0x02014b50,4],[20,2],[20,2],[0,2],[0,2],[0,2],[33,2],[c,4],[b.length,4],[b.length,4],[n.length,2],[0,2],[0,2],[0,2],[0,2],[0,4],[off,4]]);
+    out.push(lh,n,b);cd.push(ch,n);off+=lh.length+n.length+b.length;cds+=ch.length+n.length;
+  }
+  const blob=new Blob([...out,...cd,le([[0x06054b50,4],[0,2],[0,2],[files.length,2],[files.length,2],[cds,4],[off,4],[0,2]])],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`run-for-her_${String(d.sess.session_date||d.sess.id).slice(0,10)}_sela.xlsx`;a.rel='noopener';
+  document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(url);},4000);
+  try{logAction(t('logCsvExport').replace('{0}','Sela').replace('{1}',String(d.rows.length)));}catch(_){}
 }
 // ── Breakfast ratings report (the owner, 2026-10-05: "print a report that contains the day of the saturday
 // social ride ... all the ratings and comment of the customers anonymously but only the breakfast section

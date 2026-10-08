@@ -170,3 +170,6 @@ section{break-inside:avoid}
 :root .rp-said-wide .rp-said-k{flex-basis:20ch}
 :root .rp-said-m{display:block;margin-top:1px;font-weight:500;font-size:10.5px;color:#5a635c}
 :root th.rp-thsub{font-weight:600;opacity:.85}
+/* Report for Sela (2026-10-08): waitlist rows shaded, and the key beside the legend line */
+:root tr.rp-wl td{background:#fef3c7}
+.rp-wl-key{display:inline-block;width:12px;height:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:2px;vertical-align:-2px}

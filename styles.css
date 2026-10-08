@@ -2076,7 +2076,7 @@
     #print-opts-modal .rpt-flex1{flex:1;}
     /* Run for Her: one line per distance, each with its own Print and CSV (2026-10-05). Wraps on a phone. */
     #print-opts-modal .rpt-km{margin-bottom:18px;border-top:1px solid var(--border);}
-    #print-opts-modal .rpt-km-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--border);}
+    #print-opts-modal .rpt-km-row,#print-opts-modal .rpt-sela-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px;padding:9px 0;border-bottom:1px solid var(--border);}
     #print-opts-modal .rpt-km-n{flex:1 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--muted);}
     #print-opts-modal .rpt-km-acts{display:flex;gap:6px;flex-shrink:0;margin-inline-start:auto;}
     /* The ratings reports' dialog (showRatingsReport, 2026-10-05): who it is for, quick starts, the name pills,

@@ -4162,5 +4162,9 @@
   "ptUndone": "Paiement annulé",
   "ptReceived": "Reçu par",
   "ptPerKind": "Par type de travail",
-  "ptSlipPaid": "Payé le {0} · {1}"
+  "ptSlipPaid": "Payé le {0} · {1}",
+  "selaRepBtn": "Rapport pour Sela",
+  "selaRepHint": "Toutes les réservations, liste d’attente comprise, avec ce que Sela a demandé : nom complet, e-mail, date de naissance, distance et contact d’urgence. Les données sont relues à chaque appui.",
+  "selaColRel": "Lien",
+  "selaWlKey": "Les lignes grisées sont sur la liste d’attente, dans l’ordre d’attente."
 }
