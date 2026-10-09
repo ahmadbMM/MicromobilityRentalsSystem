@@ -156,6 +156,7 @@ test('a bike sticker scanned there still goes to this check-in, and the camera c
 
 test('To staff list parks the rider from the modal and the run moves on without them', async ({ page }) => {
   await boot(page);
+  await page.evaluate(`localStorage.setItem('cq_ci_next','0')`); // "Open the next rider" is on by default since s1010; this run ends on Badr
   const { patches, parks } = watchWrites(page);
   await openCheckin(page, A1);
   const modal = page.locator('#checkin-modal [role="dialog"]');

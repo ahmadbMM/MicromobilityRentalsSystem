@@ -240,7 +240,7 @@ test("a tag on a bike out with a rider on the ride opens that rider's return, ah
   await expect(m).toContainText('Goes to maintenance.');
   await m.locator('#ret-notes').fill('Chain snapped');
   await m.locator('#ret-confirm').click();
-  await expect.poll(() => rpcs.find((c) => c.name === 'staff_return')?.body).toEqual({ p_booking_id: 'e2', p_return_condition: 'damaged', p_notes: 'Chain snapped' });
+  await expect.poll(() => rpcs.find((c) => c.name === 'staff_return')?.body).toMatchObject({ p_booking_id: 'e2', p_return_condition: 'damaged', p_notes: 'Chain snapped' }); // + the desk outbox's p_op_id since s1010
   await expect(m).toBeHidden();
 });
 
