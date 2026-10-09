@@ -118,13 +118,14 @@ test.describe('PIN approval', () => {
     await expect(page.locator('#op-gate-modal .op-gate')).toBeHidden();
   });
 
-  test('a refund asks for the PIN after its confirm and writes nothing until it is given', async ({ page }) => {
+  test('a refund asks for the PIN after its reason and writes nothing until it is given', async ({ page }) => {
     await boot(page, { ...withPin, cashier_sales: [sale] });
     const writes: string[] = [];
     page.on('request', (r) => { if (['PATCH', 'POST', 'DELETE'].includes(r.method()) && r.url().includes('/rest/v1/cashier_sales')) writes.push(r.method()); });
     await page.evaluate(`setStaffTab('cashier')`);
-    await page.evaluate(`_ctRefundReceipt('r1')`);
-    await page.locator('#confirm-modal button', { hasText: 'Refund' }).last().click();
+    await page.evaluate(`_ctRefundReceipt('r1');0`);
+    await page.locator('#mny-modal .mny-chip').first().click(); // the refund asks why first (2026-10-09)
+    await page.locator('#mny-mr-go').click();
     await expect(page.locator('#op-gate-modal .op-gate')).toBeVisible();
     await expect(page.locator('#op-gate-modal .op-gate')).toContainText('Refund');
     expect(writes.length).toBe(0);

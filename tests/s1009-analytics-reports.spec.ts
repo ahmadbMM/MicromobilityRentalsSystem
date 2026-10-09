@@ -33,7 +33,7 @@ test.describe('@staff:analytics reports inbox', () => {
     await expect(items.nth(0)).toContainText('Daily close-out');
     await expect(items.nth(1)).toContainText('Weekly KPIs');
     await items.nth(0).locator('.rpi-open').click();
-    await expect(items.nth(0).locator('.rpi-lines')).toContainText('SAR 1420'); // rides and till
+    await expect(items.nth(0).locator('.rpi-lines')).toContainText('SAR 1,420'); // rides and till (one money format, 2026-10-09)
     await expect(items.nth(0).locator('tbody tr')).toHaveCount(1);
     await items.nth(1).locator('.rpi-open').click();
     await expect(items.nth(1)).toContainText('+30%'); // 26 rides against 20 the week before

@@ -97,7 +97,7 @@ test.describe('@staff:inventory stock movements', () => {
   test('the reorder rule follows the business settings', async ({ page }) => {
     await open(page, { staff_options: [{ key: 'biz', items: { reorder_mult: 3, reorder_min: 2 } }] });
     // bar: 2 on the shelf, low at 5: max(5x3, 0 sold, 2) - 2 = 13
-    expect(await page.evaluate("_invReorderNeed(2,5,0)")).toBe(13);
+    expect(await page.evaluate("_reorderNeed(2,5,0)")).toBe(13);
     await expect(page.locator('.iv-ro')).toContainText('+13');
   });
 });

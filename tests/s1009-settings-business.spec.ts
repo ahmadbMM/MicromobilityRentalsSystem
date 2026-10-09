@@ -91,7 +91,7 @@ test.describe('@staff:settings business settings', () => {
     await row.getByRole('button', { name: 'Save' }).click();
     await expect.poll(() => calls.filter((c) => c.name === 'staff_set_ride_price').length).toBe(1);
     expect(calls.find((c) => c.name === 'staff_set_ride_price')!.body).toMatchObject({ p_type: 'Road', p_price: 80, p_max: null, p_employee: 60, p_op: 'Spec Staff' });
-    expect(await page.evaluate(`[RIDE_PRICES.Road,RIDE_PRICES_MAX.Any,EMPLOYEE_PRICES.Road,EMPLOYEE_PRICES.Hybrid,priceForType('Road')]`)).toEqual([80, 80, 60, 50, 80]);
+    await expect.poll(() => page.evaluate(`[RIDE_PRICES.Road,RIDE_PRICES_MAX.Any,EMPLOYEE_PRICES.Road,EMPLOYEE_PRICES.Hybrid,priceForType('Road')]`)).toEqual([80, 80, 60, 50, 80]); // applied once the answer is in
   });
 
   test('the highest fare may not be under the fare', async ({ page }) => {

@@ -48,6 +48,7 @@ test.describe('@staff:sales money controls at the desk', () => {
     await go.click();
     await expect.poll(() => calls.filter((c) => c.name === 'staff_void_receipt').length).toBe(1);
     expect(calls.find((c) => c.name === 'staff_void_receipt')!.body).toMatchObject({ p_receipt_id: 'r1', p_reason: 'other: Card machine charged twice' });
+    await expect.poll(() => page.evaluate(`((S.fullLog||[]).slice(-1)[0]||{}).label||''`)).toContain('Card machine charged twice'); // logged once the answer is in
     const last = await page.evaluate(`S.fullLog[S.fullLog.length-1]`) as { label: string; m: Record<string, unknown> };
     expect(last.label).toContain('Card machine charged twice');
     expect(last.m).toMatchObject({ kind: 'void', entity: 'receipt', entity_id: 'r1' });
@@ -75,15 +76,14 @@ test.describe('@staff:sales money controls at the desk', () => {
     expect(await page.evaluate(`S.cashSales.some(r=>r.id==='sale1')`)).toBe(true);
   });
 
-  test('History bulk Mark paid asks how they paid and records cash as cash', async ({ page }) => {
+  test('History bulk Mark paid records card without asking (rentals are card-only)', async ({ page }) => {
     await boot(page, { queue_entries: [row('h1'), row('h2')] });
     const w = posts(page, 'queue_entries');
     await page.evaluate(`setStaffTab('history');renderHistory();S.histSelected=['h1','h2'];void bulkHistMarkPaid()`);
-    const dlg = page.getByRole('dialog', { name: 'How did they pay?' });
-    await expect(dlg).toContainText('2 booking(s)');
-    await dlg.getByRole('button', { name: 'Cash', exact: true }).click();
     await expect.poll(() => w.filter((x) => x.method === 'PATCH').length).toBe(2);
-    w.forEach((x) => expect(x.body).toMatchObject({ paid: true, pay_method: 'cash', card_amount: null }));
+    await expect(page.locator('#mny-modal [role="dialog"]')).toHaveCount(0);
+    w.forEach((x) => expect(x.body).toMatchObject({ paid: true, pay_method: 'card', card_amount: null }));
+    await expect.poll(() => page.evaluate(`S.fullLog[S.fullLog.length-1].label`)).toContain('Card');
   });
 
   test('the till: open with a float, count, close with expected vs counted, and the Z-report', async ({ page }) => {
@@ -135,7 +135,7 @@ test.describe('@staff:sales money controls at the desk', () => {
 
   test('the receipt is a simplified tax invoice: seller, VAT number, number, VAT inside, ZATCA QR', async ({ page }) => {
     await boot(page, { receipt_numbers: [{ receipt_id: 'r1', no: 42 }] });
-    await page.evaluate(`S.staffOptions={...S.staffOptions,biz:{vat_no:'300000000000003',legal_name:'MicroMobility Test Co.'}}`);
+    await page.evaluate(`S.staffOptions={...S.staffOptions,biz:{vat_no:'300000000000003',seller_name:'MicroMobility Test Co.'}};_bizFromOpts()`);
     const pop = page.waitForEvent('popup');
     await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier();_ctReprint('r1')`);
     const w = await pop;

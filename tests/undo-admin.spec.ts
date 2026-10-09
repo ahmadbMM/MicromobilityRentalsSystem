@@ -66,7 +66,7 @@ test.describe('@staff:undo admin undo', () => {
     await expect(page.locator('#hist-log-host')).toContainText('Payment · 1');
     await expect(page.locator('#hist-log-host').getByRole('button', { name: 'Undo' })).toHaveCount(0);
     await page.evaluate(`doUndo();confirmLogUndo(S.actionLog[0].id)`);
-    await expect(page.locator('#toast-container .toast', { hasText: 'Admin only.' }).first()).toBeVisible();
+    await expect(page.locator('.toast', { hasText: 'Your account cannot undo actions.' }).first()).toBeVisible(); // the undo cap, off for non-admins by default (2026-10-09)
     await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
     expect(await runs(page)).toBe(0);
   });

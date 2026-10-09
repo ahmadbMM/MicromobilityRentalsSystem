@@ -81,10 +81,11 @@ test.describe('point of sale', () => {
     await page.evaluate(`
       S.cashSales = [{ id: 'cs1', receipt_id: 'r1', session_id: 's1', name: 'Vitamin Water',
         item_id: 'i1', category: 'Drinks', qty: 2, price: 10, pay: 'paid', created_at: '2099-01-09T11:00:00Z' }];
-      _ctRefundReceipt('r1');
+      _ctRefundReceipt('r1');0
     `);
-    // the refund asks for confirmation first
-    await page.locator('#confirm-modal .btn-muted').click();
+    // the refund asks why first (a reason is required since 2026-10-09)
+    await page.locator('#mny-modal .mny-chip').first().click();
+    await page.locator('#mny-mr-go').click();
 
     await expect.poll(() => page.evaluate(`S.cashSales[0].pay`)).toBe('refunded');
     expect(await page.evaluate(`S.inventory.find(i => i.id === 'i1').qty`)).toBe(7); // 5 + 2 restocked

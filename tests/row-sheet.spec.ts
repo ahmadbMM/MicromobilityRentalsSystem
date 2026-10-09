@@ -62,8 +62,9 @@ test('a row runs its action and the sheet closes; the backdrop and the × close 
   await more(page).click();
   await sheet(page).locator('[role="menuitem"]', { hasText: 'No-Show' }).click();
   await expect(page.locator('.pay-menu-popup')).toHaveCount(0);
-  await expect(page.locator('#confirm-modal .confirm-box')).toBeVisible();
-  await page.evaluate(`closeConfirm()`);
+  // one-tap No-show (2026-10-09): it runs without a confirm
+  await expect(page.locator('#confirm-modal .confirm-box')).toHaveCount(0);
+  await expect(page.locator('.toast', { hasText: 'Marked as No-Show' }).first()).toBeAttached(); // a quiet toast
   await more(page).click();
   await expect(sheet(page)).toBeVisible();
   await page.locator('.row-sheet-bg').click({ position: { x: 5, y: 5 } });

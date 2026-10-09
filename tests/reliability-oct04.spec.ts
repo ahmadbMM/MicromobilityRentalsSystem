@@ -103,7 +103,9 @@ test.describe('@staff:reliability outbox ops carry one op id', () => {
     const calls = rpcs(page);
     await page.evaluate(`setStaffTab('cashier')`);
     await page.route(/\/rest\/v1\/rpc\/staff_void_receipt/, (r) => r.abort('internetdisconnected'));
-    await page.evaluate(`_ctVoidReceipt('r1')`);
+    await page.evaluate(`_ctVoidReceipt('r1');0`);
+    await page.locator('#mny-modal .mny-chip').first().click(); // the void asks why (2026-10-09)
+    await page.locator('#mny-mr-go').click();
     await expect.poll(() => page.evaluate(`_outbox().filter(o=>o.kind==='void').length`)).toBe(1);
     const queued = await page.evaluate(`_outbox()[0].data.p_op_id`);
     expect(queued).toMatch(/^[0-9a-f-]{36}$/);

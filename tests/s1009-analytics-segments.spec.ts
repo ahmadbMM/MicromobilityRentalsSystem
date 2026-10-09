@@ -41,7 +41,7 @@ test.describe('@staff:customers acting on a selection', () => {
     await add.click();
     await expect.poll(() => posts.length).toBe(1);
     expect((posts[0] as Record<string, unknown>[]).map((r) => r.customer_id).sort()).toEqual(['c1', 'c2', 'c3']);
-    expect(await page.evaluate(`(S.customerTags||[]).filter(x=>x.tag_id==='tag_x').length`)).toBe(3);
+    await expect.poll(() => page.evaluate(`(S.customerTags||[]).filter(x=>x.tag_id==='tag_x').length`)).toBe(3); // kept once the answer is in
   });
 
   test('the badge tab never offers Squad Captain or Fuel Stop', async ({ page }) => {

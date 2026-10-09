@@ -99,9 +99,10 @@ test.describe('cashier tab', () => {
       S.cashSales = [{ id: 'cs1', receipt_id: 'r1', session_id: 's1', customer_name: 'Walk Up', item_id: 'i1', name: 'Gel', category: 'EnergyGels', qty: 2, price: 12, pay: 'paid', created_at: '2099-01-09T11:00:00Z' }];
       _ctVoidReceipt('r1');
     })()`);
-    await expect(page.locator('#confirm-modal .confirm-box')).toContainText('SAR 24');
+    await expect(page.locator('#mny-modal .mny-box')).toContainText('SAR 24'); // it asks why (2026-10-09)
     expect(await page.evaluate('S.cashSales.length')).toBe(1); // nothing happens before the answer
-    await page.locator('#confirm-modal .btn-red').click();
+    await page.locator('#mny-modal .mny-chip').first().click();
+    await page.locator('#mny-mr-go').click();
     await expect.poll(() => page.evaluate('S.cashSales.length')).toBe(0);
     // The stock count moves on screen before its write goes out, and the void is logged once
     // that write has come back, so the log is waited for on its own, not read after the count.
@@ -121,8 +122,9 @@ test.describe('cashier tab', () => {
       showReceiptEdit('re'); S._reEdit[0].price = '25';
     })()`);
     await page.evaluate('saveReceiptEdit()'); // a lower price asks the operator's PIN first (none here), 2026-10-05
-    await page.evaluate(`_ctRefundReceipt('rp')`);
-    await page.locator('#confirm-modal .btn-muted').click();
+    await page.evaluate(`_ctRefundReceipt('rp');0`);
+    await page.locator('#mny-modal .mny-chip').first().click(); // the refund asks why (2026-10-09)
+    await page.locator('#mny-mr-go').click();
     await expect.poll(() => page.evaluate('S.cashSales.find(r=>r.id==="p1").pay')).toBe('refunded');
     // As with a void, the refund is logged after its restock write, a moment after the row turns.
     await expect.poll(() => page.evaluate('S.fullLog.some(l=>l.label.includes(t("cashRefund")))')).toBe(true);

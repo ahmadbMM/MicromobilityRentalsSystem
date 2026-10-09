@@ -85,7 +85,7 @@ test.describe('@staff:reports the account report and add-on sales', () => {
     await page.waitForFunction('getCustomers().length===1');
     await page.evaluate(`window.__opened=0;window.open=()=>{window.__opened++;return null;};S.staffRole='frontdesk'`);
     await page.evaluate('printAccountReport()');
-    await expect(page.locator('.toast', { hasText: 'Admin only.' }).first()).toBeVisible();
+    await expect(page.locator('.toast', { hasText: 'Your account cannot export lists.' }).first()).toBeVisible(); // the export cap, off for non-admins by default (2026-10-09)
     expect(await page.evaluate('window.__opened')).toBe(0);
   });
 

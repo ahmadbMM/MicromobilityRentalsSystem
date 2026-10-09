@@ -119,8 +119,9 @@ test('the admin sets how many rides a service lasts, and the list follows', asyn
   page.on('request', (r) => {
     if (r.method() === 'POST' && r.url().includes('/rest/v1/staff_options')) saved.push(r.postData() || '');
   });
-  const input = page.locator('#tab-bikes .bk-svc-every input');
-  await expect(page.locator('#tab-bikes .bk-svc-every')).toContainText('Service every');
+  const every = page.locator('#tab-bikes .bk-svc-every').first(); // the second is "or every N days" (2026-10-09)
+  const input = every.locator('input');
+  await expect(every).toContainText('Service every');
   await expect(input).toHaveValue('30');
   await input.fill('3');
   await input.dispatchEvent('change');
