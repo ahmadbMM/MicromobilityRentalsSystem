@@ -17,9 +17,10 @@
 //
 // Body: { staffToken, customerIds: [id, ...] }  - count these accounts now (at most 10)
 //       { staffToken, stale: true }              - count up to BATCH accounts that are due
-// A stale pass is what keeps the numbers fresh without a cron: a staff device asks for one when
-// Community > Accounts opens (at most every few hours), and the server refuses a second pass
-// within STALE_GAP_MIN of the last one, however many devices ask.
+// A stale pass counts whoever is due: a staff device asks for one when Community > Accounts opens
+// (at most every few hours), and the server refuses a second pass within STALE_GAP_MIN of the last
+// one, however many devices ask. The same pass also runs every hour without a staffer, from the
+// Edge Function supabase/functions/ig-followers-cron (pg_cron, 20261009210000); change both.
 
 // Cloudflare's free plan allows 50 subrequests per call, and every fetch here is one: four reads (the
 // staff check, the last pass, the riders, their rows), then a lookup and a save per account. A batch of

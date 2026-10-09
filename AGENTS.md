@@ -425,6 +425,14 @@ The T100 race badges (migration 20261008120000, the owner 2026-10-08): `t100` / 
 staff-given only (the races are not ours, so nothing in the bookings says who finished); since 2026-10-09 drawn as finisher
 medals on a ribbon with the race's name struck on them (`BDG_RACE` / `_bdgRace`, gold / silver / bronze whatever the row's colour,
 not in the icon picker), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS, Medal.tsx).
+Badge ladders (the owner, 2026-10-09, "the same way it's done in clash of clans achievements"): `BDG_LADDERS` makes
+First Lap > Grid Regular > Podium Pace > Corniche 25, Hot Streak > Safety Car > Endurance, Rolling Start > ... > Hall of Fame,
+Perfect Week > Perfect Month and T25 > T50 > T100 the levels of one badge each. The rider's page folds each into one tile
+(`_bdgFold`: the top level reached, level dots, the next level's progress; the popup lists every level, `_bdgLevelsHtml`).
+A level held - earned or given - brings every level under it (`_bdgClimb`): T100 given shows T50 and T25 as held, in the
+staff dialog as "Comes with a higher level", and `_bdgAllHolders` counts them. Display only: the catalogue and
+`customer_badges` keep one row per level, so staff give, take back and count each level as before; nothing is stored
+for a level that comes with a higher one.
 Staff see an account's badges (given + earned by riding) in its history window and its editor: the core draws only the empty
 section (`_bdgSecHtml`), and `_bdgStrips` - a stand-in into the Community part - fills it, again after every badge load or change.
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
@@ -676,6 +684,10 @@ offer in the rider's language (`vndRiderOffer`).
   `{"url":"link"}`, and must be an https address (`_caWaOf`). No row or an empty one: the box is not offered and the
   message has no group line. Never write the link in the code, a spec or a commit (the repository is public); specs stub
   an invented one.
+- **Invite asks the bike type (2026-10-09).** Once a ride with bikes is picked, the Invite dialog shows that ride's
+  types (`_caApTypes`: `bikeTypeOpts` with Own / Road Carbon as the ride offers them, Any included as a staff choice)
+  and Invite waits for one (`S._caAp.ty`). The booking is made on that type (`_caApExtras(..., ty)`; Own books an own
+  bike); a plain Approve onto a ride still books the account's own answer.
 - **Revoke invitation** (`_caRevoke`, the Invited list only): the booking is cancelled through the desk's own
   `_staffCancelNow(id, {cancel_reason:'invite_revoked'}, {noUndo:true})` (numbers close up, the waitlist moves up; no
   booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same

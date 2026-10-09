@@ -54,11 +54,12 @@ function patches(page: Page, table: string) {
   });
   return out;
 }
-async function decide(page: Page, id: string, kind: 'approve' | 'invite') {
+async function decide(page: Page, id: string, kind: 'approve' | 'invite', ty = 'Road') {
   await row(page, id).locator(kind === 'approve' ? '.ca-approve' : '.ca-invite').click();
   const dlg = page.locator('#confirm-modal .ca-ap-box');
   await dlg.locator(`.ca-ap-rides [data-ca-ride="${SAT}"]`).click();
   await dlg.locator('.rg-field [data-rg="int"]').click(); // a Saturday ride asks the rider's group
+  if (kind === 'invite') await dlg.locator(`.ca-ap-tys [data-ca-ty="${ty}"]`).click(); // an invitation, the bike (2026-10-09)
   await dlg.locator('.ca-ap-go').click();
 }
 
@@ -71,13 +72,13 @@ test.describe('@staff:community rb1 applications (2026-10-05)', () => {
     expect(bookings[0]).toMatchObject({ session_id: SAT, customer_id: 'c1', type_preference: 'Own', approval: 'approved' });
   });
 
-  test('inviting an applicant who said they have their own bike books it as their own', async ({ page }) => {
+  test('an invitation books the bike type staff pick: Own for an applicant with their own bike', async ({ page }) => {
     await applicationsTab(page, {
       'rpc:staff_community_approve': NEW_ACCT,
       community_applications: apps.map((a) => (a.id === 'a1' ? { ...a, own_bike: true } : a)),
     });
     const bookings = posts(page, 'queue_entries');
-    await decide(page, 'a1', 'invite');
+    await decide(page, 'a1', 'invite', 'Own');
     await expect.poll(() => bookings.length).toBe(1);
     expect(bookings[0]).toMatchObject({ session_id: SAT, customer_id: 'ca01', type_preference: 'Own' });
   });
