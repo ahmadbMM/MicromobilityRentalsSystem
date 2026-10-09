@@ -33,7 +33,11 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_inventory_move', 'staff_inventory_receive', 'staff_inventory_set_count', 'staff_inventory_extras',
   // A staff account's own preferences (20261009190000): without it they stay on the device, as production
   // runs until the migration is applied; tests/s1009-custom-*.spec.ts stub it by name.
-  'staff_my_prefs']);
+  'staff_my_prefs',
+  // The scheduled close-out made by hand and the employee-list import (20261009181000/182000): the page reads as
+  // before without them; tests/s1009-analytics-*.spec.ts stub them by name. (staff_monthly_totals is not here: Analytics
+  // asks for it on every paint, and a stub's [] is a database with no months yet.)
+  'report_snapshot_make', 'staff_roster_import']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

@@ -388,11 +388,13 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
 // Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
+  // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
+  imports: ['openRosterImport'],
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
   // 2026-10-09: the fleet's condition (the check after a return, incidents, the maintenance log and its report)
   fleet: ['_bpFleetFill', '_fleetAfterReturn', '_bkCheckClear', '_fleetReport', '_retPhotoPick'],
@@ -1175,7 +1177,9 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 480 -> 484, core 254 -> 257 (2026-10-09): personal customisation (Start on, the phone tab bar, filters kept per
 // section and synced, text size, density, the bell's read state on the account, templates in every language) and 18
 // strings in each language; here 480.2 / 253.8 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 221, staff: 518, core: 268 };
+// Staff 480 -> 494, core 254 -> 257 (2026-10-09, builder S5): Analytics months / reports inbox / year-on-year, acting on a
+// selection, the employee-list import and a customer's own activity, 111 strings in each language (English in the core).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 540, core: 275 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

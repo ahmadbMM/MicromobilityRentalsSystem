@@ -66,7 +66,7 @@ test('the Accounts row shows what is coming up and opens it over the rider\'s pa
 
   await expect(modal(page).locator('#ah-title')).toHaveText('Lina Haddad');
   await expect(modal(page).locator('.modal-sub')).toContainText('lina.haddad@gmail.com');
-  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 3']);
+  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 3', 'Customer activity']);
   await expect(modal(page).locator('.ah-kpi-v')).toHaveText(['1', '1', '1', 'SAR 115']); // done, no-show, cancelled, paid
 
   // Today: out on a bike now.
@@ -109,12 +109,12 @@ test('Edit opens the booking over the history, and Escape closes one window at a
 test('an open history follows the data, and leaves itself alone when nothing of the rider\'s changed', async ({ page }) => {
   await staff(page);
   await page.locator('.am-row[data-cust="c1"] .am-hist').click();
-  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 3']);
+  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 3', 'Customer activity']);
   expect(await page.evaluate(`(()=>{const b=document.querySelector('#cust-modal .ah-box');
     S.queue=S.queue.map(e=>e.id==='x1'?{...e,status:'cancelled'}:e);_renderStaffTab();
     return b===document.querySelector('#cust-modal .ah-box');})()`)).toBe(true);
   await page.evaluate(`S.queue=S.queue.map(e=>e.id==='u3'?{...e,status:'cancelled',cancelledBy:'staff'}:e);_renderStaffTab()`);
-  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 1', 'History 4']);
+  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 1', 'History 4', 'Customer activity']);
   await expect(modal(page).locator('.ah-kpi-v').nth(2)).toHaveText('2');
 });
 
@@ -147,7 +147,7 @@ test('rides older than the device holds come in one small read, for this rider o
     return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify([old, stray]) });
   });
   await page.locator('.am-row[data-cust="c1"] .am-hist').click();
-  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 4']);
+  await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 4', 'Customer activity']);
   await expect(cards(page).last()).toContainText('#11');
   await expect(modal(page)).not.toContainText('Someone Else');
   expect(reads).toHaveLength(1);
