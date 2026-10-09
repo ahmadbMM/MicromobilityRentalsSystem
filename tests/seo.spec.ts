@@ -9,7 +9,8 @@ import { stubSupabase, waitForSb } from './helpers/supabase';
 test.describe('crawlable surface', () => {
   test('the built page carries static prose about the business in both languages', async () => {
     const html = await readFile(resolve(__dirname, '../index.html'), 'utf8');
-    const noscript = html.match(/<noscript>[\s\S]*?<\/noscript>/)?.[0] ?? '';
+    // the longest <noscript>: the <head> carries one of its own, the customer stylesheet (2026-10-09)
+    const noscript = [...html.matchAll(/<noscript>[\s\S]*?<\/noscript>/g)].map((m) => m[0]).sort((a, b) => b.length - a.length)[0] ?? '';
     expect(noscript).toContain('Jeddah Corniche Circuit');
     expect(noscript).toContain('Road carbon');
     expect(noscript).toContain('Saturday Social Ride');
