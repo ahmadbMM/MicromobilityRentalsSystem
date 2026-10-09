@@ -9061,6 +9061,13 @@ body.view-staff .mny-aurow{margin:6px 0 10px;}
 :is(#tab-history,#tab-customers) .lg-open:hover{color:var(--green);}
 :is(#tab-history,#tab-customers) .lg-amt{font-size:12px;font-weight:700;white-space:nowrap;}
 :is(#tab-history,#tab-customers) .lg-acct{color:var(--muted);font-weight:600;}
+/* A line names the device and the account now (2026-10-09): on a phone the who-part shortens and the action takes
+   its own line, so the action text is never squeezed to nothing. */
+:is(#tab-history,#tab-customers) .lg-who{min-width:0;flex-shrink:1;overflow:hidden;text-overflow:ellipsis;}
+@media (max-width:640px){
+  :is(#tab-history,#tab-customers) .lg-row{flex-wrap:wrap;row-gap:4px;}
+  :is(#tab-history,#tab-customers) .lg-row .lg-label{flex:1 1 100%;white-space:normal;}
+}
 :is(#tab-history,#tab-customers) .lg-more{text-align:center;padding:12px 0;}
 @media (max-width:560px){:is(#mny-modal,#mny-host) .mny-grid2{grid-template-columns:1fr;}}
 
