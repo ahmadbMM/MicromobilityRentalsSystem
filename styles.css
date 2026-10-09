@@ -3113,6 +3113,8 @@
     #tab-analytics .rpi-acts .btn-sm{min-height:44px;}
     #tab-analytics .rpi-lines{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:4px 16px;margin:10px 0;}
     #tab-analytics .rpi-line{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px;}
+    #tab-analytics .rpi-days-h{margin:14px 0 6px;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+    #tab-analytics .rpi-days{font-variant-numeric:tabular-nums;}
     /* Chart hover targets get a pointer + subtle highlight so tooltips feel interactive */
     .an-hit{cursor:pointer;transition:opacity .12s ease,filter .12s ease;}
     svg:hover .an-hit{opacity:.45;}
@@ -6886,6 +6888,9 @@ body.has-modal .fab-row{display:none !important;}
 #confirm-modal .seg-prog{display:flex;flex-direction:column;gap:10px;}
 #confirm-modal .seg-pn{font-size:12px;font-weight:800;color:var(--muted);}
 #confirm-modal .seg-who{font-size:16px;font-weight:800;}
+#confirm-modal .seg-langs{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:4px 0;}
+#confirm-modal .seg-langs .toggle-btn{min-height:44px;}
+#confirm-modal .seg-lang{font-size:var(--fs-xs,12px);font-weight:700;color:var(--muted);}
 #confirm-modal .rim-file{display:inline-flex;align-items:center;min-height:44px;margin:10px 0;cursor:pointer;}
 #confirm-modal .rim-file:focus-within{outline:2px solid var(--green);outline-offset:2px;}
 #confirm-modal .rim-file{position:relative;}
@@ -9047,6 +9052,8 @@ body.view-staff .mny-aurow{margin:6px 0 10px;}
 :is(#mny-host,#an-team-host) .mny-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;}
 :is(#mny-host,#an-team-host,#mny-modal) .mny-fld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-xs);font-weight:700;color:var(--muted);}
 :is(#mny-host,#an-team-host) .mny-fld .filter-select{min-height:44px;}
+#mny-host .mny-fld-q{flex:1 1 220px;min-width:0;}
+#mny-host .aus-local{display:block;margin:6px 0;}
 :is(#mny-host,#an-team-host) .mny-filters button{min-height:44px;}
 #mny-host .mny-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
 #mny-host .mny-tile{border:1px solid var(--border);border-radius:var(--r-lg);padding:10px 12px;background:var(--s1);}

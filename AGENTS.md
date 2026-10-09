@@ -981,3 +981,26 @@ customers and force them even add it in the sign up page and all forms currently
 - The website mirrors it: the community and learn-to-ride forms ask it on their account step, and the website's account
   area has a forced pop-up. NOT the Petromin form (the owner, 2026-10-07: "dont ask for a contact on petromin form").
   `tests/emergency-required.spec.ts`.
+
+## Team > Invite writes Auth's tables itself (2026-10-09)
+- `staff_invite` (20261009162000) is a definer function that INSERTs straight into `auth.users`,
+  `auth.identities` and `staff` (bcrypt via `crypt()`, email pre-confirmed, empty token strings) - the page
+  has no service key for Auth's admin API. A Supabase Auth upgrade that changes those tables (a new NOT NULL
+  column, another identity shape) can leave an account that cannot sign in while the invite still says ok.
+- So the page reads it back at once: `staff_invite_check(user)` (20261009208000, admins, read-only) answers
+  `{ok, staff, auth, identity, confirmed, password}`; any false shows "The account was not set up fully" with
+  the missing parts and the temporary password is NOT shown (`_tmInviteCheck`, `_tmInviteBroken`). Before the
+  function exists `staff_team_list` stands in (staff row + Auth user with that email). After an Auth upgrade,
+  invite a throwaway account and sign in with it once.
+
+## On the house is approved on the server (2026-10-09)
+- `staff_set_house(booking, on, op, approval)` (20261009205000) is the desk's door for a hand-chosen ride on
+  the house: `_pin_ok` + `_mgr_ok('house', fare, approval)`. `_houseSet` calls it from the pay menu, the booking
+  modal, the check-in (before `staff_checkin`, which then carries no payment) and an Undo that puts a house
+  ride back; `S._houseNoDb` keeps the old direct write until the function exists.
+- `trg_house_guard` (BEFORE UPDATE on queue_entries) refuses MANAGER_REQUIRED when a signed-in non-admin
+  staff write turns a row into paid + price 0 over Settings' manager limit without that RPC's
+  transaction-local flag `mm.house_ok`. Earned free rides pass on purpose (VIP, default payment on the house
+  for the holder's own row: `_house_earned`; type Own; a free community ride; a promo's 0), as do inserts,
+  admins, customers and the service role. The walk-in waitlist (desk_waitlist) and the till's house lines
+  (cashier_sales) are still the page's PIN alone.
