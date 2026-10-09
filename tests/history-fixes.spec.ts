@@ -60,7 +60,7 @@ test('a free ride is never offered for "mark paid", and a stale pick of one is i
   expect(await page.locator('#hist-results button[data-on-click*="toggleHistSelect"]').count()).toBe(1); // the owing one only
   const writes: { url: string; body: Record<string, unknown> }[] = [];
   page.on('request', (r) => { if (r.method() === 'PATCH' && /queue_entries/.test(r.url())) writes.push({ url: r.url(), body: r.postDataJSON() }); });
-  await page.evaluate(`S.histSelected=['f1','h2'];bulkHistMarkPaid()`);
+  await page.evaluate(`_askPayMethod=async()=>'card';S.histSelected=['f1','h2'];bulkHistMarkPaid()`); // how they paid is asked since 2026-10-09
   await expect.poll(() => writes.length).toBe(1);
   expect(writes[0].url).toContain('id=eq.h2');
   // Same write as the pill's "Paid": card, no split, and a price of 0 with no promo behind it

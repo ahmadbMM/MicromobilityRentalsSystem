@@ -77,7 +77,7 @@ test('the drawer count records expected vs counted into the log', async ({ page 
   await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`setStaffTab('cashier');S._ctSession='${S1}';renderCashier()`);
   await page.waitForTimeout(250);
-  await page.getByRole('button', { name: /Count the drawer/ }).click();
+  await page.getByRole('button', { name: 'Till', exact: true }).click(); // no till tables in this stub: the count goes to the log as before
   const box = page.locator('.confirm-box').filter({ hasText: /Expected cash/ });
   await expect(box).toContainText('SAR 75');
   await box.locator('input').fill('70');

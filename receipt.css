@@ -24,3 +24,8 @@ td{padding:6px 5px;border-bottom:1px dashed #cfd6c9;text-align:start;font-weight
 :root .rp-te{text-align:end}
 :root .rp-rbtn{display:block;margin:0 auto;padding:8px 20px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-family:inherit}
 @media print{:root .rp-rbtn{display:none}}
+/* The simplified tax invoice's lines (2026-10-09): the receipt number, the VAT inside the total, the ZATCA QR. */
+.rc-meta{display:flex;justify-content:space-between;font-size:11px;font-weight:800;border:1px dashed #cfd6c9;border-radius:6px;padding:5px 8px;margin:6px 0 8px}
+.rc-vat{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#3d453f;padding:4px 5px 0}
+.rc-qr{text-align:center;margin-top:12px}
+.rc-qr img{display:inline-block;width:150px;height:150px;image-rendering:pixelated}

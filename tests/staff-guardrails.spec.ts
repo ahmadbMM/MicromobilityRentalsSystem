@@ -19,7 +19,7 @@ async function boot(page: Page, fixtures: Record<string, unknown> = {}) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`localStorage.setItem('cq_op_name','Spec Staff');confirmDialog=(o)=>o.onConfirm&&o.onConfirm();S._opPins=[{name:'Spec Staff',has_pin:false}];S._opPinsAt=Date.now();`);
+  await page.evaluate(`localStorage.setItem('cq_op_name','Spec Staff');confirmDialog=(o)=>o.onConfirm&&o.onConfirm();_askMoneyReason=async()=>({v:'mistake',txt:'Rung up by mistake'});S._opPins=[{name:'Spec Staff',has_pin:false}];S._opPinsAt=Date.now();`);
 }
 type Call = { name: string; body: Record<string, unknown> };
 const rpcs = (page: Page) => {
@@ -83,7 +83,7 @@ test('a void goes through staff_void_receipt: the rows leave this ledger, nothin
   await page.evaluate(`setStaffTab('cashier')`);
   await page.evaluate(`_ctVoidReceipt('r1')`);
   await expect.poll(() => calls.filter((c) => c.name === 'staff_void_receipt').length).toBe(1);
-  expect(calls.find((c) => c.name === 'staff_void_receipt')!.body).toMatchObject({ p_receipt_id: 'r1', p_op: 'Spec Staff', p_approval: null });
+  expect(calls.find((c) => c.name === 'staff_void_receipt')!.body).toMatchObject({ p_receipt_id: 'r1', p_reason: 'mistake', p_op: 'Spec Staff', p_approval: null });
   await expect.poll(() => page.evaluate(`S.cashSales.some(r=>r.id==='sale1')`)).toBe(false);
   await page.waitForTimeout(200);
   expect(writes).toEqual([]);
