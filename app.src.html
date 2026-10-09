@@ -871,6 +871,13 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgNoDb:'Badges are not set up on the database yet.',
   igTitle:'Instagram followers',
   igSectTotal:'Total Instagram followers',
+  igSectAvg:'Average Instagram followers',
+  igAvgOf:'over {0} accounts with a count',
+  igAvgLine:'average',
+  igCommAvg:'community average {0}',
+  igVsAbove:'{0}% above the community average ({1})',
+  igVsBelow:'{0}% below the community average ({1})',
+  igVsAt:'At the community average ({0})',
   igTotOf:'{0} of {1} accounts with Instagram counted',
   igFollowers:'{0} followers',
   igAsk:'Followers',
@@ -1443,6 +1450,13 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgNoDb:'الأوسمة غير مُعدّة في قاعدة البيانات بعد.',
   igTitle:'متابعو إنستغرام',
   igSectTotal:'إجمالي متابعي إنستغرام',
+  igSectAvg:'متوسط متابعي إنستغرام',
+  igAvgOf:'من {0} حساباً لها عدد',
+  igAvgLine:'المتوسط',
+  igCommAvg:'متوسط المجتمع {0}',
+  igVsAbove:'أعلى من متوسط المجتمع بنسبة {0}% ({1})',
+  igVsBelow:'أقل من متوسط المجتمع بنسبة {0}% ({1})',
+  igVsAt:'عند متوسط المجتمع ({0})',
   igTotOf:'تم عدّ {0} من {1} حساباً لديها إنستغرام',
   igFollowers:'{0} متابع',
   igAsk:'المتابعون',
@@ -18110,7 +18124,11 @@ function _caSx(a){
 // answer ('' or null) reads Not answered.
 function _caKv(k,v){const none=v==null||v==='';return`<div class="ca-kv${none?' ca-kv-none':''}"><span>${k}</span><b>${none?esc(t('caNoAnswer')):v}</b></div>`;}
 // Instagram and LinkedIn as card lines: the profile's link, or Not answered.
-function _caSocKv(a){return SOCIAL_NETS.filter(([net])=>net==='instagram'||net==='linkedin').map(([net,lbl])=>{const h=String(a[net]||'').trim();return _caKv(esc(t(lbl)),h?_socLinkHtml(net,lbl,h):'');}).join('');}
+// acct: the application's account; its followers chip sits beside the Instagram link while the account holds
+// the same handle (2026-10-09), coloured against the community's average like the accounts lists'.
+function _caSocKv(a,acct){return SOCIAL_NETS.filter(([net])=>net==='instagram'||net==='linkedin').map(([net,lbl])=>{const h=String(a[net]||'').trim();
+  const chip=net==='instagram'&&h&&acct&&_igHandle(acct).toLowerCase()===h.replace(/^@+/,'').toLowerCase()?_igChipHtml(acct):'';
+  return _caKv(esc(t(lbl)),h?(chip?`<span class="ca-soc">${_socLinkHtml(net,lbl,h)}${chip}</span>`:_socLinkHtml(net,lbl,h)):'');}).join('');}
 function _caGender(g){return g==='female'?t('genderFemale'):g==='male'?t('genderMale'):'';}
 function _caNews(v){return v===true?t('caYes'):v===false?t('caNo'):'';}
 // An application Invite to ride decided is approved in the database, with the ride it booked in
@@ -18221,7 +18239,7 @@ function _caRow(a){
       ${_caShow('prof')?kv(t('caLblProf'),esc(a.profession||'')):''}
       ${_caShow('work')?kv(t('caLblWork'),esc(a.workplace||'')):''}
       ${_caShow('heard')?kv(t('heardLabel'),esc(heardLabel(a.heard_from))):''}
-      ${_caShow('socials')?_caSocKv(a):''}
+      ${_caShow('socials')?_caSocKv(a,_apAcct('ca',a)):''}
       ${_caShow('news')?kv(t('caLblNews'),_caNews(a.ride_news)):''}
       ${_caShow('lang')?kv(t('caLblLang'),esc(lang)):''}
     </div>
@@ -19459,7 +19477,7 @@ function _laRow(a){
       ${kv(t('caLblProf'),esc(a.profession||''))}
       ${kv(t('caLblWork'),esc(a.workplace||''))}
       ${kv(t('heardLabel'),esc(heardLabel(a.heard_from)))}
-      ${_caSocKv(a)}
+      ${_caSocKv(a,_apAcct('la',a))}
       ${kv(t('caLblNews'),_caNews(a.ride_news))}
       ${kv(t('caLblLang'),esc(lang))}
     </div>
@@ -28235,10 +28253,11 @@ const _REP_SECTIONS=[
   {k:'addons',  key:'repAddonsSold'},
   {k:'sales',   key:'cashSalesTitle'},
   {k:'ig',      key:'igSectTotal'}, // the followers of every account on the sheet, added up
+  {k:'igAvg',   key:'igSectAvg'},   // and their average, beside the community's (2026-10-09)
 ];
 function _repDefaults(){
   return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,em:0,share:1,height:0,bike:1,payment:1,status:1,ig:0},
-          sections:{summary:1,addons:1,sales:1,ig:0},
+          sections:{summary:1,addons:1,sales:1,ig:0,igAvg:0},
           fType:'all',fStatus:'all',fPay:'all',fMember:'all'};
 }
 function _repOpts(){
@@ -28340,9 +28359,29 @@ function _igTotal(cids){
 }
 function _igOfTxt(tot){return t('igTotOf').replace('{0}',String(tot.counted)).replace('{1}',String(tot.handles));}
 // The builder's line, the printed tile and the file's rows. Nothing while the counts are not in hand.
-function _igLineHtml(tot){return S.igRows?`${esc(t('igTitle'))}: <span class="rpt-c-text">${esc(_igFmt(tot.sum))}</span> · ${esc(_igOfTxt(tot))}`:'';}
-function _igTileHtml(tot){return S.igRows?`<div class="totals"><div class="total-item dark"><span class="total-num">${esc(_igFmt(tot.sum))}</span><span class="total-lbl">${esc(t('igTitle'))} · ${esc(_igOfTxt(tot))}</span></div></div>`:'';}
-function _igCsvRows(tot){return S.igRows?[[],[t('igTitle'),tot.sum,_igOfTxt(tot)]]:[];}
+function _igLineHtml(tot){if(!S.igRows)return'';const a=_igAvgOf(tot),c=_igAvg();
+  return`${esc(t('igTitle'))}: <span class="rpt-c-text">${esc(_igFmt(tot.sum))}</span> · ${esc(_igOfTxt(tot))}${a!=null?` · ${esc(t('igAvgLine'))}: <span class="rpt-c-text">${esc(_igFmt(a))}</span>`:''}${c?` · ${esc(t('igCommAvg').replace('{0}',_igFmt(Math.round(c.avg))))}`:''}`;}
+// The sheet's average (the owner, 2026-10-09: "add the average as an option in all applicable report builders"):
+// the followers of the accounts on it with a count, over how many have one - the community average's own rule
+// (_igAvg) - and the community's beside it.
+function _igAvgOf(tot){return tot.counted?Math.round(tot.sum/tot.counted):null;}
+function _igAvgLbl(tot){const c=_igAvg();return t('igSectAvg')+' · '+t('igAvgOf').replace('{0}',String(tot.counted))+(c?' · '+t('igCommAvg').replace('{0}',_igFmt(Math.round(c.avg))):'');}
+// The tiles the sheet's sections ask for (sec: the builder's sections), as [number, label] pairs.
+function _igTiles(tot,sec){
+  if(!S.igRows)return[];
+  const out=[];
+  if(sec.ig)out.push([_igFmt(tot.sum),t('igTitle')+' · '+_igOfTxt(tot)]);
+  if(sec.igAvg){const a=_igAvgOf(tot);out.push([a==null?'—':_igFmt(a),_igAvgLbl(tot)]);}
+  return out;
+}
+function _igTileHtml(tot,sec){const ts=_igTiles(tot,sec);return ts.length?`<div class="totals">${ts.map(([n,l],i)=>`<div class="total-item${i?'':' dark'}"><span class="total-num">${esc(n)}</span><span class="total-lbl">${esc(l)}</span></div>`).join('')}</div>`:'';}
+function _igCsvRows(tot,sec){
+  if(!S.igRows||(!sec.ig&&!sec.igAvg))return[];
+  const out=[[]];
+  if(sec.ig)out.push([t('igTitle'),tot.sum,_igOfTxt(tot)]);
+  if(sec.igAvg){const c=_igAvg();out.push([t('igSectAvg'),_igAvgOf(tot)??'',t('igAvgOf').replace('{0}',String(tot.counted)),...(c?[t('igCommAvg').replace('{0}',String(Math.round(c.avg)))]:[])]);}
+  return out;
+}
 function _igCellTxt(cid){const n=_igNum(cid);return n==null?'':_igFmt(n);}
 // The customers a session's sheet carries: the roster's riders on a Saturday ride, else the report's rows.
 function _repIgIds(sessId){
@@ -28537,6 +28576,7 @@ const _ACC_SECTIONS=[
   {k:'natFew',  key:'acrSectNatFew'},
   {k:'tags',    key:'acrSectTags'},
   {k:'ig',      key:'igSectTotal'}, // every listed account's followers added up
+  {k:'igAvg',   key:'igSectAvg'},   // and their average, beside the community's (2026-10-09)
 ];
 // How many nationalities the nationality breakdown names before the rest becomes one
 // "Other" slice. 0 is all of them. The other breakdowns keep the house default of seven.
@@ -28547,7 +28587,7 @@ const _ACC_NAT_IN=[['accounts','acrAmongAcc'],['community','acrAmongComm'],['bot
 function _accDefaults(){
   return {cols:{name:1,email:1,phone:1,rideNews:0,tags:1,tagSince:0,tagUntil:0,gender:1,age:1,birth:0,country:0,nationality:0,instagram:0,igFollowers:0,x:0,tiktok:0,linkedin:0,city:1,height:0,type:1,
                 joined:1,bookings:0,rides:1,commRides:0,upcoming:0,noshows:0,cancelled:0,lastRide:1,active14:1,active30:1,minutes:0,spent:0,pay:0,hidden:0},
-          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1,ig:0},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
+          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1,ig:0,igAvg:0},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
           chartsOn:{tags:1,gender:1,age:1,city:0,country:0,nationality:0,type:1,joined:1,rides:1,active:0,active14:1,active30:1},
           charts:{tags:'donut',gender:'donut',age:'bar',city:'hbar',country:'hbar',nationality:'hbar',type:'bar',joined:'line',rides:'bar',active:'hbar',active14:'hbar',active30:'hbar'},
           fTag:'all',fGender:'all',fCountry:'all',fNationality:'all',fNatFew:'all',fCity:'all',fType:'all',fJoined:'all',fRides:'all',fActive:'all',fAge:'all',fPay:'all',fUpcoming:'all',fRideNews:'all',fSpent:'all'};
@@ -29109,7 +29149,7 @@ function _accReportHtml(title){
   if(o.sections.summary)tiles.push([rows.length,t('acrStatAccounts'),''],[nTagged,t('acrStatTagged'),' dark'],[nRides,t('acrStatRides'),''],
     [nActive,t('acrStatActive'),''],[nActive14,t('acrStatActive14'),''],[nActive30,t('acrStatActive30'),'']);
   if(o.sections.natCount)tiles.push([nNats,t('acrStatNats'),o.sections.summary?'':' dark']);
-  if(o.sections.ig&&S.igRows){const tot=_igTotal(rows.map(r=>r.c.id));tiles.push([_igFmt(tot.sum),t('igTitle')+' · '+_igOfTxt(tot),tiles.length?'':' dark']);}
+  if(o.sections.ig||o.sections.igAvg)_igTiles(_igTotal(rows.map(r=>r.c.id)),o.sections).forEach(([n,l])=>tiles.push([n,l,tiles.length?'':' dark']));
   const html=`
     ${tiles.length?`<div class="totals">${tiles.map(([n,lbl,cls])=>`<div class="total-item${cls}"><span class="total-num">${n}</span><span class="total-lbl">${esc(lbl)}</span></div>`).join('')}</div>`:''}
     ${filterLine?`<div class="rp-filter">${esc(filterLine)}</div>`:''}
@@ -29143,7 +29183,7 @@ async function exportAccountsCsv(){
   const blocks=_ACC_BREAKDOWNS.filter(k=>o.chartsOn[k]).flatMap(k=>{const items=_accBreakdown(k,rows,o);if(!items.length)return[];const total=items.reduce((s,x)=>s+x.value,0)||1;
     return[[],[_accBdTitle(k),'#',t('acrShare')],...items.map(x=>[x.label,x.value,Math.round(x.value/total*100)+'%'])];});
   if(o.sections.natCount)blocks.push([],[t('acrStatNats'),_accNatCount(rows)]);
-  if(o.sections.ig)blocks.push(..._igCsvRows(_igTotal(rows.map(r=>r.c.id))));
+  blocks.push(..._igCsvRows(_igTotal(rows.map(r=>r.c.id)),o.sections));
   blocks.push(..._accNatCsv(o));
   _downloadCsv(`accounts_${new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ})}.csv`,[cols.map(c=>t(c.key)),...rows.map(r=>cols.map(c=>r.cells[c.k])),...blocks],t('acrTitle'),rows.length);
 }
@@ -29195,7 +29235,7 @@ function exportSessionExcel(km){
       const n=_ig?_igNum(e.customerId):null;
       return[i+1,e.name||'',...(_showMem?[t(_isSatMember(e)?'memberYes':'memberNo')]:[]),phone,...(_bike?[e.height||'',typeLabel(resolvedType(e))]:[]),statusOf(e),...(_ig?[n==null?'':n]:[])];
     });
-    const igRows=_repOpts().sections.ig?_igCsvRows(_igTotal(riders.map(e=>e.customerId))):[];
+    const igRows=_igCsvRows(_igTotal(riders.map(e=>e.customerId)),_repOpts().sections);
     _downloadCsv(`roster_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rosterRows,...igRows],'roster '+(sess.session_date||sess.id));
     return;
   }
@@ -29272,7 +29312,7 @@ function exportSessionExcel(km){
     [t('repTotal'),sessPurch.units,sessPurch.value],
     [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[]),...(sessPurch.free>0?[[t('onTheHouseLabel'),'',sessPurch.free]]:[])]:[];
   const _kmTag=_km==null?'':_km==='none'?'_no-distance':`_${_km}km`;
-  const igRows=_ro.sections.ig?_igCsvRows(_igTotal(entries.map(e=>e.customerId))):[];
+  const igRows=_igCsvRows(_igTotal(entries.map(e=>e.customerId)),_ro.sections);
   _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}${_kmTag}.csv`,[headers,...rows,...summary,...cashRows,...igRows],'report '+(sess.session_date||sess.id)+_kmTag.replace('_',' '),rows.length);
 }
 
@@ -29376,7 +29416,7 @@ function printCommunityRoster(sess){
       <div class="total-item"><span class="total-num rp-amber">${nPending}</span><span class="total-lbl">${t('apprPendingChip')}</span></div>
       <div class="total-item"><span class="total-num">${nWaitlist}</span><span class="total-lbl">${t('waitlistLabel')}</span></div>
     </div>
-    ${_repOpts().sections.ig?_igTileHtml(_igTotal(riders.map(e=>e.customerId))):''}
+    ${_igTileHtml(_igTotal(riders.map(e=>e.customerId)),_repOpts().sections)}
     <table>
       <thead><tr><th>#</th><th>${t('nameLabel')}</th>${_showMem?`<th>${t('colMember')}</th>`:''}<th>${t('repColPhone')}</th>${_bike?`<th>${t('heightLabel')}</th><th>${t('repColType')}</th>`:''}<th>${t('colStatus')}</th>${_ig?`<th>${t('igTitle')}</th>`:''}</tr></thead>
       <tbody>${rows}</tbody>
@@ -29484,7 +29524,7 @@ function printSessionReport(km){
       <div class="total-item"><span class="total-num">${_rpSar(cardSAR)}</span><span class="total-lbl">${t('cashCard')}</span></div>
       <div class="total-item"><span class="total-num">${_rpSar(cashSAR)}</span><span class="total-lbl">${t('cashCash')}</span></div>
     </div>`:''}
-    ${_ro.sections.ig?_igTileHtml(_igTotal(entries.map(e=>e.customerId))):''}
+    ${_igTileHtml(_igTotal(entries.map(e=>e.customerId)),_ro.sections)}
     <table>
       <thead><tr>${_head}</tr></thead>
       <tbody>${rows}</tbody>
@@ -43748,7 +43788,7 @@ async function _igLoad(force){
   if(!sb||S._igBusy||(!force&&S._igAt&&Date.now()-S._igAt<(S._igErr?BDG_RETRY_MS:3e5)))return;
   const was=_igSig();
   await _igFetch(); // the read itself is shared with the report builders
-  if(S.view==='staff'&&_pplOn('accounts')&&_igSig()!==was)renderCommunity();
+  if(S.view==='staff'&&(_pplOn('accounts')||_pplOn('applications')||_pplOn('learning'))&&_igSig()!==was)renderCommunity();
   if(S._igDlg)_igDlgPaint();
   _igNudge();
 }
@@ -43775,12 +43815,43 @@ function _igHandle(c){const v=c&&c.socials&&typeof c.socials==='object'?c.social
 // The row for the account's CURRENT handle, else null.
 function _igRow(c){const h=_igHandle(c),r=h&&S.igRows&&S.igRows.get(c.id);return r&&r.handle===h?r:null;}
 function _igFmt(n,compact){try{return Number(n).toLocaleString(_locale(),compact?{notation:'compact',maximumFractionDigits:1}:{});}catch(e){return String(n);}}
+// The chip wears the account's place against the community's average (the owner, 2026-10-09: "green and greener
+// when their followers is above the community members average and red and redder when its below"): see _igTone.
 function _igChipHtml(c){
   if(!S.igRows||!_igHandle(c))return'';
   const r=_igRow(c),n=r&&r.followers!=null?r.followers:null;
   const lbl=n!=null?t('igFollowers').replace('{0}',_igFmt(n,true)):t('igAsk');
-  return`<button type="button" class="soc-link ig-chip${n!=null?'':' ig-none'}" data-on-click="${_on("_igOpen",c.id)}" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}">${_artIcon('people',12)}<span>${esc(lbl)}</span></button>`;
+  const av=n!=null?_igAvg():null,tone=av?_igTone(n,av.avg):null,vs=tone?_igVsTxt(tone,av.avg):'';
+  return`<button type="button" class="soc-link ig-chip${n!=null?'':' ig-none'}${tone?' ig-tone':''}"${tone?` data-cssv="${_cssv({'--igh':String(tone.hue),'--iga':String(tone.alpha)})}" title="${esc(vs)}"`:''} data-on-click="${_on("_igOpen",c.id)}" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}${n!=null?' · '+esc(lbl):''}${vs?' · '+esc(vs):''}">${tone?_igArrow(tone):_artIcon('people',12)}<span>${esc(lbl)}</span></button>`;
 }
+// The community's average: the followers of every member (a live Community tag) whose count is on file, over how
+// many members have one - a member not counted yet does not pull it down (the owner's pick, 2026-10-09). null
+// while nobody is counted. Kept until the counts, the tags or the accounts change (S._igV moves on a save).
+let _igAvgKey=null,_igAvgVal=null;
+function _igAvg(){
+  if(!S.igRows)return null;
+  const key=[S.igRows,S._igV||0,S.customerTags,S.customers];
+  if(_igAvgKey&&key.every((x,i)=>x===_igAvgKey[i]))return _igAvgVal;
+  const ids=new Set((S.customerTags||[]).filter(ct=>ct.tag_id===TAG_COMMUNITY&&_tagActive(ct)).map(ct=>ct.customer_id));
+  const tot=_igTotal([...ids]);
+  _igAvgKey=key;_igAvgVal=tot.counted?{avg:tot.sum/tot.counted,counted:tot.counted,members:ids.size,sum:tot.sum}:null;
+  return _igAvgVal;
+}
+function _igIsMember(cid){return(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===TAG_COMMUNITY&&_tagActive(ct));}
+// Where a count sits against the average, as a ratio: the average itself is yellow, half of it or less full red,
+// double or more full green, smooth between on a log scale (so one 50k account does not wash everyone else out).
+// hue 0 red -> 50 yellow -> 135 green; the tint deepens with the distance.
+function _igTone(n,avg){
+  if(n==null||!(avg>0))return null;
+  const r=Math.max(Number(n)||0,0)/avg,x=Math.max(-1,Math.min(1,Math.log2(Math.max(r,1e-6))));
+  return{x,r,hue:Math.round(x<0?50+x*50:50+x*85),alpha:Math.round((0.14+0.2*Math.abs(x))*100)/100};
+}
+function _igVsTxt(tone,avg){
+  const p=Math.round(Math.abs(tone.r-1)*100),a=_igFmt(Math.round(avg));
+  return p===0?t('igVsAt').replace('{0}',a):t(tone.r>1?'igVsAbove':'igVsBelow').replace('{0}',String(p)).replace('{1}',a);
+}
+// A small triangle, up above the average and down below it, so the colour is never the only sign.
+function _igArrow(tone){return`<svg class="ig-arw" aria-hidden="true" width="9" height="9" viewBox="0 0 10 10" fill="currentColor"><path d="${tone.r>=1?'M5 1.5 9 8.5H1z':'M5 8.5 1 1.5h8z'}"/></svg>`;}
 function _igOpen(cid){S._igDlg={cid,typed:'',msg:'',busy:false};_igLoad(!!S._igErr);_igDlgPaint(true);} // as _bdgOpen: Loading first, a retry after a failed read
 function _igClose(){S._igDlg=null;closeConfirm();}
 function _igBackdrop(event,el){if(event.target===el)_igClose();}
@@ -43856,7 +43927,15 @@ async function _igCheck(){
   _igAfter(d.cid);
 }
 // After a change: the dialog and the rider's row.
-function _igAfter(cid){if(S._igDlg)_igDlgPaint();if(S.view==='staff'&&_pplOn('accounts')&&!_amRepaintRow(cid))renderCommunity();}
+// A member's count moves the community's average, so every chip's colour may change: the whole list is drawn
+// again. Anyone else's changes their own row (the applications' cards are drawn again either way).
+function _igAfter(cid){
+  S._igV=(S._igV||0)+1;
+  if(S._igDlg)_igDlgPaint();
+  if(S.view!=='staff'||!_pplOpen())return;
+  if(_pplOn('accounts')&&!_igIsMember(cid)&&_amRepaintRow(cid))return;
+  renderCommunity();
+}
 // Customers and Community are two sections (the owner, 2026-10-07: "make a separate customer management/dashboard page
 // and a separate community management dashboard page"; "i want the community management to include a tag management
 // page, customer info and flagging management page, badges and giving them to customers page, applications management").
@@ -43893,7 +43972,7 @@ function _renderPeople(sec){
   _pushNav(); // the address follows the view (its tabs)
   if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy&&!S._mgErr)_mgLoad(); // the recent merges, once
   if(sub==='accounts'||sub==='badges'||(!cust&&sub==='overview'))_bdgLoad(); // the badges and who holds them, at most every five minutes
-  if(sub==='accounts')_igLoad(); // the Instagram follower counts, likewise
+  if(sub==='accounts'||sub==='applications'||sub==='learning')_igLoad(); // the Instagram follower counts, likewise (the cards' chips too, 2026-10-09)
   if(sub==='overview'&&!S._flags&&!S._flagsBusy&&!S._flagsErr)_loadFlags(); // the requests waiting, for its figure
   // the pending counts on the Applications pill: both of its lists
   if(!cust&&!S._caApps&&!S._caBusy&&!S._caErr&&sub!=='applications')_caLoad();

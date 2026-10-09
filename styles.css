@@ -5433,6 +5433,13 @@ body.fix-open{overflow:hidden;}
 .soc-link:hover svg{color:var(--green);}
 .ig-chip{background:transparent;font-family:inherit;cursor:pointer;}
 .ig-chip.ig-none{color:var(--muted);border-style:dashed;}
+/* Against the community's average (2026-10-09): --igh is the hue (0 red, 50 yellow, 135 green), --iga how deep the
+   tint is; the text keeps the page's ink, the triangle and the border carry the colour. */
+.ig-chip.ig-tone{border-color:hsl(var(--igh) 70% 38% / .8);background:hsl(var(--igh) 85% 48% / var(--iga));}
+.ig-chip.ig-tone .ig-arw{color:hsl(var(--igh) 80% 30%);flex:none;}
+:root[data-theme="dark"] .ig-chip.ig-tone{border-color:hsl(var(--igh) 65% 55% / .85);}
+:root[data-theme="dark"] .ig-chip.ig-tone .ig-arw{color:hsl(var(--igh) 75% 62%);}
+.ca-soc{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center;}
 .soc-field{display:flex;align-items:center;gap:6px;}
 .soc-field input{flex:1;min-width:0;}
 .soc-open{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--green);text-decoration:none;white-space:nowrap;padding:6px 4px;}
