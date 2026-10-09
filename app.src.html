@@ -18674,6 +18674,10 @@ function _appList(k){
   }
   if(k==='ca'&&S._caFilter!=='invited')_caSortList(list);
   if(k==='la')_apSortList('la',list); // the community list's order is its toolbar's Sort (_caSortList)
+  // Pending ones the applicant has updated after Ask for changes go to the top, the latest update
+  // first (the owner, 2026-10-09); the Sort above orders the rest. Asking again clears fix_done_at.
+  if((S[k==='la'?'_laFilter':'_caFilter']||'pending')==='pending')
+    list.sort((x,y)=>String(y.fix_done_at||'').localeCompare(String(x.fix_done_at||'')));
   return list.map(k==='la'?_laRow:_caRow).join('')||_emptyState(t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty'));
 }
 function _appSrch(k){
