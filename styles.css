@@ -3751,6 +3751,24 @@
     .badge-pop-about{font-size:13px;line-height:1.5;color:var(--muted);margin:-4px 0 14px;}
     .badge-pop-earned{margin-top:12px;font-weight:800;color:var(--green);font-size:13px;}
     .badge-pop-prog{margin-top:12px;font-family:var(--font-mono);font-weight:700;font-size:15px;color:var(--green);letter-spacing:1px;}
+    /* Badge ladders (2026-10-09, _bdgFold): a tile's level marks under its name, and the popup's list of
+       levels, the reached ones ticked; six levels stay in the popup, which scrolls on a short screen. */
+    /* out of the flow, so a ladder tile is as tall as any other: every tile keeps the room under its name */
+    .mr-badge{padding-bottom:11px;}
+    .mr-badge-lv{position:absolute;bottom:4px;inset-inline:0;display:flex;justify-content:center;gap:2px;}
+    .mr-badge-lv i{width:5px;height:5px;border-radius:50%;background:var(--border);}
+    .mr-badge-lv i.on{background:var(--green);}
+    .badge-pop-box{max-height:calc(100dvh - 48px);overflow-y:auto;}
+    .badge-pop-lvn{font-family:var(--font-mono);font-size:11px;font-weight:700;letter-spacing:1px;color:var(--green);margin:-8px 0 12px;}
+    .badge-lvls{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-direction:column;gap:6px;text-align:start;}
+    .badge-lvl{display:flex;align-items:center;gap:10px;padding:7px 9px;border:1px solid var(--border);border-radius:6px;background:var(--s2);}
+    .badge-lvl.cur{border-color:rgba(var(--green-rgb),.55);}
+    .badge-lvl .bdg-m{width:28px;height:28px;}
+    .badge-lvl-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+    .badge-lvl-t b{font-size:12.5px;}
+    .badge-lvl-t small{font-size:11.5px;color:var(--muted);line-height:1.35;}
+    .badge-lvl-n{flex:none;font-family:var(--font-mono);font-size:11.5px;font-weight:700;color:var(--muted);}
+    .badge-lvl.on .badge-lvl-n{color:var(--green);}
     /* ── A badge's popup (_mrBadgeInfo), #badge-pop: without inline styles (2026-09-29, the customer pages'
        pass; scoped by that id). */
     #badge-pop .cu-w100-mt14{width:100%;margin-top:14px;}

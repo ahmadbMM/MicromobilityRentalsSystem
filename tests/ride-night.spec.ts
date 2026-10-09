@@ -95,10 +95,13 @@ test.describe('@customer:account your rides and the closest badges', () => {
     await expect(myr.locator('dd').nth(2)).toHaveText('2 h 30 min');
     const next = page.locator('#tab-account .bd-next-row');
     await expect(next).toHaveCount(2);
-    // two to go on both: Safety Car (4 of 6 weeks, a quiet week forgiven) leads Regular (3 of 5 rides)
-    await expect(next.locator('.bd-next-n')).toHaveText(['4/6', '3/5']);
-    await next.nth(1).click();
-    await expect(page.locator('#badge-pop .badge-pop-prog')).toHaveText('3/5');
+    // two to go on both, the nearer share first: Grid Regular (3 of 5 rides) leads Hot Streak (1 of 3 weeks in a
+    // row), the first level of the ladder Safety Car is on since 2026-10-09
+    await expect(next.locator('.bd-next-n')).toHaveText(['3/5', '1/3']);
+    await expect(next.nth(1)).toContainText('Hot Streak');
+    await next.nth(0).click();
+    await expect(page.locator('#badge-pop .badge-pop-lvn')).toHaveText('Level 1 of 4');
+    await expect(page.locator('#badge-pop .badge-lvl').nth(1)).toContainText('3/5');
   });
 
   test('no rides: no strip and no closest badges', async ({ page }) => {

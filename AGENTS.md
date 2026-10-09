@@ -395,6 +395,14 @@ The T100 race badges (migration 20261008120000, the owner 2026-10-08): `t100` / 
 staff-given only (the races are not ours, so nothing in the bookings says who finished); since 2026-10-09 drawn as finisher
 medals on a ribbon with the race's name struck on them (`BDG_RACE` / `_bdgRace`, gold / silver / bronze whatever the row's colour,
 not in the icon picker), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS, Medal.tsx).
+Badge ladders (the owner, 2026-10-09, "the same way it's done in clash of clans achievements"): `BDG_LADDERS` makes
+First Lap > Grid Regular > Podium Pace > Corniche 25, Hot Streak > Safety Car > Endurance, Rolling Start > ... > Hall of Fame,
+Perfect Week > Perfect Month and T25 > T50 > T100 the levels of one badge each. The rider's page folds each into one tile
+(`_bdgFold`: the top level reached, level dots, the next level's progress; the popup lists every level, `_bdgLevelsHtml`).
+A level held - earned or given - brings every level under it (`_bdgClimb`): T100 given shows T50 and T25 as held, in the
+staff dialog as "Comes with a higher level", and `_bdgAllHolders` counts them. Display only: the catalogue and
+`customer_badges` keep one row per level, so staff give, take back and count each level as before; nothing is stored
+for a level that comes with a higher one.
 Staff see an account's badges (given + earned by riding) in its history window and its editor: the core draws only the empty
 section (`_bdgSecHtml`), and `_bdgStrips` - a stand-in into the Community part - fills it, again after every badge load or change.
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of

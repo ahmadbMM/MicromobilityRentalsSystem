@@ -1162,7 +1162,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   mrStreak_few:'{0} weeks in a row',
   mrStreak_many:'{0} weeks in a row',
   mrStreak_other:'{0} weeks in a row',
-  mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',bdNextTitle:'Closest badges',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
+  mrNextLine:'Next ride: {0} ({1})',tkStBooked:'Booked',tkStIn:'Checked in',tkStBike:'On the bike',tkStDone:'Done',tkCueNoBike:'Checked in. Your bike is being handed over.',tkCueBike:'On the bike: {0}',tkCueDone:'Ride done: {0} on the bike.',tkCueDoneNoDur:'Ride done.',tkCdCollect:'Bike collection in {0}',tkCdGather:'Gathering in {0}',tkCdStart:'Starts in {0}',myrTitle:'Your rides',myrWeeks:'{0} of the last 26 weeks with a ride',myrFav:'Favourite bike',myrFirst:'First ride',myrTime:'Time on the bike',myrYear:'Rides this year',bdNextTitle:'Closest badges',bdLevelOf:'Level {0} of {1}',bdMaxLevel:'Top level reached',bdLevels:'Levels',bdgViaLevel:'Comes with a higher level',rtTitle:'Route',rtLap:'{0} km a lap',rtCircuitNote:'Flat, smooth tarmac, floodlit at night',rtKm:'{0} km',rtRidden:'Ridden',rtMapLink:'Open the map',rtOsm:'Track: © OpenStreetMap contributors',
   regStepOf:'Step {0} of {1}',
   pickRideFirst:'Choose a ride above to continue.',
   wgKicker:'Waiver needed',wgSub:'Our team booked you on this ride. Read its waiver and agree to it to continue.',wgBtn:'Agree and continue',
@@ -1727,7 +1727,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   mrStreak_few:'{0} أسابيع متتالية',
   mrStreak_many:'{0} أسبوعاً متتالياً',
   mrStreak_other:'{0} أسبوعاً متتالياً',
-  mrNextLine:'رحلتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت رحلتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت رحلتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'رحلاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها رحلة',myrFav:'دراجتك المفضلة',myrFirst:'أول رحلة',myrTime:'الوقت على الدراجة',myrYear:'رحلات هذا العام',bdNextTitle:'أقرب الأوسمة',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
+  mrNextLine:'رحلتك القادمة: {0} ({1})',tkStBooked:'محجوز',tkStIn:'الحضور',tkStBike:'على الدراجة',tkStDone:'انتهت',tkCueNoBike:'تم تسجيل حضورك. يجري تسليمك الدراجة.',tkCueBike:'على الدراجة: {0}',tkCueDone:'انتهت رحلتك: {0} على الدراجة.',tkCueDoneNoDur:'انتهت رحلتك.',tkCdCollect:'استلام الدراجة بعد {0}',tkCdGather:'التجمع بعد {0}',tkCdStart:'تبدأ بعد {0}',myrTitle:'رحلاتك',myrWeeks:'{0} من آخر 26 أسبوعاً فيها رحلة',myrFav:'دراجتك المفضلة',myrFirst:'أول رحلة',myrTime:'الوقت على الدراجة',myrYear:'رحلات هذا العام',bdNextTitle:'أقرب الأوسمة',bdLevelOf:'المستوى {0} من {1}',bdMaxLevel:'وصلت إلى أعلى مستوى',bdLevels:'المستويات',bdgViaLevel:'ضمن مستوى أعلى',rtTitle:'المسار',rtLap:'{0} كم للفة',rtCircuitNote:'مسطّح وإسفلت ناعم وإضاءة ليلية',rtKm:'{0} كم',rtRidden:'أنجزته',rtMapLink:'افتح الخريطة',rtOsm:'الحلبة: © مساهمو OpenStreetMap',
   regStepOf:'الخطوة {0} من {1}',
   pickRideFirst:'اختر رحلة من الأعلى للمتابعة.',
   wgKicker:'إقرار مطلوب',wgSub:'سجّلك فريقنا في هذه الرحلة. اقرأ إقرارها ووافق عليه للمتابعة.',wgBtn:'أوافق وأتابع',
@@ -13662,24 +13662,52 @@ function _mrBadgeList(cust){
     seen.add(s);L.push(x);
   });
   const rank=x=>x.on?0:x.m?3:x.sn?2:1;
-  return L.map((x,i)=>[x,i]).sort((a,z)=>rank(a[0])-rank(z[0])||a[1]-z[1]).map(a=>a[0]);
+  return _bdgFold(L).map((x,i)=>[x,i]).sort((a,z)=>rank(a[0])-rank(z[0])||a[1]-z[1]).map(a=>a[0]);
 }
+// Badge ladders (the owner, 2026-10-09: "the same way it's done in clash of clans achievements"): badges that
+// count the same thing to a higher number are the levels of one badge, lowest first. The rider sees one tile per
+// ladder - the highest level reached, how many of its levels, the next one's progress - and its popup lists every
+// level. A level reached brings every level under it, given by staff or earned by riding ("getting the t100
+// automatically gives the ones before"). The catalogue and customer_badges keep one row per level, so staff
+// still give, take back and count each level; nothing is stored for a level that comes with a higher one.
+const BDG_LADDERS=[['first_lap','regular','podium','corniche25'],['streak','safety_car','endurance'],
+  ['rolling_start','slipstream','paceline','peloton','grand_tour','hall_of_fame'],['perfect_week','perfect_month'],['t25','t50','t100']];
+const BDG_LADDER_OF=new Map(BDG_LADDERS.flatMap(L=>L.map((s,i)=>[s,[L,i]])));
+// A set of slugs held, with every level under each one.
+function _bdgClimb(on){const o=new Set(on);[...o].forEach(s=>{const l=BDG_LADDER_OF.get(s);if(l)l[0].slice(0,l[1]).forEach(x=>o.add(x));});return o;}
+// The badge list with each ladder folded into one entry, where its first level stood: the top level reached
+// (else the first), lv its levels, lvN how many are reached, nx the next one, p the next one's progress.
+function _bdgFold(L){
+  const by=new Map(L.map(x=>[x.b.slug,x])),done=new Set(),out=[];
+  L.forEach(x=>{const l=BDG_LADDER_OF.get(x.b.slug);if(!l){out.push(x);return;}
+    if(done.has(l[0]))return;done.add(l[0]);
+    const lv=l[0].map(s=>by.get(s)).filter(Boolean);let top=-1;
+    lv.forEach((y,i)=>{if(y.on)top=i;});lv.forEach((y,i)=>{if(i<top)y.on=true;});
+    const nx=lv[top+1]||null;
+    out.push({...lv[Math.max(top,0)],lv,lvN:top+1,nx,p:nx?nx.p:null});
+  });
+  return out;
+}
+// A ladder tile's level marks: one per level, filled up to the one reached.
+function _bdgPips(x){return`<span class="mr-badge-lv" aria-hidden="true">${x.lv.map((y,i)=>`<i${i<x.lvN?' class="on"':''}></i>`).join('')}</span>`;}
 // Only the earned badges take room on the page (the owner, 2026-09-30); the ones still to earn fold
 // under a button that says how many there are and shows a few of them greyed, so the rider knows
 // they are there. Open, it stays open through repaints until the page reloads (S._bdgMore). Each
 // tile keeps its place in _mrBadgeList, which the popup reads.
 function _mrBadgesRow(cust){
   const L=_mrBadgeList(cust).map((x,i)=>[x,i]),on=L.filter(a=>a[0].on),lk=L.filter(a=>!a[0].on),open=!!S._bdgMore;
-  const tiles=A=>A.map(([x,i])=>{const nm=_bdgName(x.b);return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
+  const tiles=A=>A.map(([x,i])=>{const nm=_bdgName(x.b),lv=x.lv&&x.lvN?' · '+t('bdLevelOf').replace('{0}',x.lvN).replace('{1}',x.lv.length):'';return`<button type="button" class="mr-badge${x.on?'':' locked'}${x.g?' given':''}${x.lv?' ladder':''}${_bdgSpCls(x.b)}" data-on-click="${_on("_mrBadgeInfo",i)}" aria-label="${esc(nm)}${esc(lv)}: ${esc(_bdgDesc(x.b))}${x.on?'':' ('+esc(t('bdNotEarned'))+')'}">
     ${x.on?'':`<span class="mr-badge-p">${x.p||_artIcon('lock',10)}</span>`}
     ${_bdgMedal(x.b.icon,_bdgCol(x.b))}
     <span class="mr-badge-nm">${esc(nm)}</span>
+    ${x.lv?_bdgPips(x):''}
   </button>`;}).join('');
   // The closest badges still to earn (2026-10-01): the two with the least left among those already
   // begun (a count n/of above zero), each with its bar; a tap opens it as the tile does.
-  const near=lk.map(a=>{const m=/^(\d+)\/(\d+)$/.exec(a[0].p||'');return m&&+m[1]>0&&+m[1]<+m[2]?{a,n:+m[1],of:+m[2]}:null;}).filter(Boolean)
+  // A ladder's next level counts too, reached ones and all: it is the next badge that ladder gives (nx).
+  const near=L.filter(a=>!a[0].on||a[0].nx).map(a=>{const m=/^(\d+)\/(\d+)$/.exec(a[0].p||'');return m&&+m[1]>0&&+m[1]<+m[2]?{a,y:a[0].nx||a[0],n:+m[1],of:+m[2]}:null;}).filter(Boolean)
     .sort((x,y)=>(x.of-x.n)-(y.of-y.n)||y.n/y.of-x.n/x.of).slice(0,2);
-  const nextH=near.length?`<div class="bd-next"><div class="bd-next-h">${t('bdNextTitle')}</div>${near.map(({a:[x,i],n,of})=>`<button type="button" class="bd-next-row" data-on-click="${_on("_mrBadgeInfo",i)}">
+  const nextH=near.length?`<div class="bd-next"><div class="bd-next-h">${t('bdNextTitle')}</div>${near.map(({a:[,i],y:x,n,of})=>`<button type="button" class="bd-next-row" data-on-click="${_on("_mrBadgeInfo",i)}">
     ${_bdgMedal(x.b.icon,_bdgCol(x.b),'bd-next-ic')}
     <span class="bd-next-t"><strong>${esc(_bdgName(x.b))}</strong><small>${esc(_bdgDesc(x.b))}</small>
       <span class="bd-next-bar" role="progressbar" aria-label="${esc(_bdgName(x.b))}" aria-valuemin="0" aria-valuemax="${of}" aria-valuenow="${n}"><i data-cssv="${_cssv({'--cu-w':Math.round(n/of*100)+'%'})}"></i></span></span>
@@ -13711,6 +13739,13 @@ function _bdgPopClose(){
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__mrBadgeInfo_1(event,el){_bdgPopClose()}
+// A ladder's levels in its popup, lowest first: each medal (greyed until reached), how it is earned, and a
+// tick or the progress made towards it.
+function _bdgLevelsHtml(x){
+  return`<div class="badge-pop-how">${t('bdLevels')}</div><ol class="badge-lvls">${x.lv.map((y,i)=>`<li class="badge-lvl${y.on?' on':''}${i===x.lvN-1?' cur':''}">
+    ${_bdgMedal(y.b.icon,_bdgCol(y.b),y.on?'':'locked')}<span class="badge-lvl-t"><b>${esc(_bdgName(y.b))}</b><small>${esc(_bdgDesc(y.b))}</small></span>
+    <bdi class="badge-lvl-n">${y.on?'✓':y.p&&/^\d+\/\d+$/.test(y.p)?esc(y.p):_artIcon('lock',12)}</bdi></li>`).join('')}</ol>`;
+}
 function _mrBadgeInfo(i,fresh){
   const cust=S.loggedIn;if(!cust)return;
   const x=_mrBadgeList(cust)[i];if(!x)return;
@@ -13723,11 +13758,12 @@ function _mrBadgeInfo(i,fresh){
     ${fresh?`<div class="badge-pop-new">${t('bdgNew')}</div>`:''}
     ${_bdgMedal(x.b.icon,_bdgCol(x.b),'badge-pop-ic'+(x.on?'':' locked'))}
     <div class="badge-pop-nm">${esc(nm)}</div>
+    ${x.lv&&x.lvN?`<div class="badge-pop-lvn">${esc(t('bdLevelOf').replace('{0}',x.lvN).replace('{1}',x.lv.length))}</div>`:''}
     ${ab?`<div class="badge-pop-about">${esc(ab)}</div>`:''}
-    ${d?`<div class="badge-pop-how">${t('bdHowTo')}</div><div class="badge-pop-d">${esc(d)}</div>`:''}
+    ${x.lv?_bdgLevelsHtml(x):d?`<div class="badge-pop-how">${t('bdHowTo')}</div><div class="badge-pop-d">${esc(d)}</div>`:''}
     ${!x.on&&x.sn&&(x.sn.cur||x.sn.next)?`<div class="badge-pop-how">${esc(x.sn.cur?t('bdgSeasonOpen').replace('{0}',_bdgDay(x.sn.cur.to)):t('bdgSeasonSoon').replace('{0}',_bdgDay(x.sn.next)))}</div>`:''}
     ${g&&g.note?`<div class="badge-pop-note"><bdi>${esc(g.note)}</bdi></div>`:''}
-    ${g?`<div class="badge-pop-earned">✓ ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.on?`<div class="badge-pop-earned">✓ ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
+    ${g?`<div class="badge-pop-earned">✓ ${esc(t('bdgGivenBy').replace('{0}',_bdgDay(g.at)))}</div>`:x.lv?(x.lvN===x.lv.length?`<div class="badge-pop-earned">✓ ${t('bdMaxLevel')}</div>`:''):x.on?`<div class="badge-pop-earned">✓ ${t('bdEarned')}</div>`:(x.p?`<div class="badge-pop-prog">${x.p}</div>`:'')}
     <button type="button" class="btn-secondary cu-w100-mt14" data-on-click="${_on("_on__mrBadgeInfo_1",_EV,_EL)}">${t('closeWord')||'Close'}</button>
   </div>`;
   el.addEventListener('click',e=>{if(e.target===el)_bdgPopClose();});
@@ -13743,7 +13779,7 @@ function _bdgCelebrate(){
   if(!top)return;
   const k='cq_bdg_seen_'+cust.id;
   try{if(at(top)<=(+localStorage.getItem(k)||0))return;localStorage.setItem(k,String(at(top)));}catch(_){return;}
-  const i=_mrBadgeList(cust).findIndex(x=>x.g===top);
+  const i=_mrBadgeList(cust).findIndex(x=>x.g===top||(x.lv&&x.lv.some(y=>y.g===top)));
   if(i>=0)_mrBadgeInfo(i,true);
 }
 // Race Ready and National Day 96 pop up the first time this device sees them earned (Race Ready the
@@ -41355,6 +41391,11 @@ function _bdgWentIn(rows,r){const got=r&&Array.isArray(r.data)?new Set(r.data.ma
 // The ride badges this account has earned already, from the bookings this device holds, and Race
 // Ready from the account's own profile (it read as never earned here before 2026-10-02).
 function _bdgRideOn(cid){const all=getQueue().filter(e=>e.customerId===cid);return new Set(_mrBadges(all,all.filter(_bdgRode),(S.badges||[]).filter(b=>b.rule&&!b.retired),_bdgStaffRow(_custById(cid))).filter(r=>r.on).map(r=>r.s));}
+// Every slug the account holds - given, earned by riding, and each level under a ladder level it holds
+// (_bdgClimb). ride: _bdgRideOn's answer, when the caller has it.
+function _bdgHasSlugs(cid,ride){const o=new Set(ride||_bdgRideOn(cid));_bdgHeld(cid).forEach(x=>{const b=_bdgById(x.badge_id);if(b&&b.system)o.add(b.slug);});return _bdgClimb(o);}
+// The slug of a ladder's level above b that the account holds, the highest: the one b comes with.
+function _bdgAbove(b,has){const l=b&&b.system&&BDG_LADDER_OF.get(b.slug);if(!l)return null;for(let i=l[0].length-1;i>l[1];i--)if(has.has(l[0][i]))return l[0][i];return null;}
 // A staff device never holds a rider's photo (CUST_REF_COLS and staff_sync leave the column out on
 // purpose), and Race Ready counts it, so here it was never earned by anyone (2026-10-05). On a staff
 // row the photo is unknown and counted as there; the rider's own page, which has it, is unchanged.
@@ -41375,9 +41416,11 @@ function _bdgTakeBtn(cid,bid){const on=S._bdgSure===cid+'|'+bid;return`<button t
 // core and only hold the empty section (_bdgSecHtml); _bdgStrips, a stand-in into the Community part, fills it.
 function _bdgStripHtml(cid){
   if(!_bdgOk())return`<div class="am-meta">${t(S._bdgBusy||!S._bdgAt?'loadingLabel':S._bdgErr?'errConnection':'bdgNoDb')}</div>`;
-  const held=new Set(_bdgHeld(cid).map(x=>x.badge_id)),ride=_bdgRideOn(cid);
-  const list=_bdgSorted().filter(b=>held.has(b.id)||(b.auto&&ride.has(b.slug)));
-  return`<div class="bdg-strip">${list.map(b=>`<button type="button" class="bdg-chip" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgOpen",cid)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>`).join('')||`<span class="am-meta">${t('bdgNone')}</span>`}<button type="button" class="btn-sm btn-secondary bdg-strip-btn" data-on-click="${_on("_bdgOpen",cid)}">${_artIcon('medal',13)} ${t('bdgGiveTitle')}</button></div>`;
+  const held=new Set(_bdgHeld(cid).map(x=>x.badge_id)),ride=_bdgRideOn(cid),has=_bdgHasSlugs(cid,ride);
+  // A ladder shows once, at its top level held, with how many of its levels that is.
+  const list=_bdgSorted().filter(b=>(held.has(b.id)||(b.auto&&ride.has(b.slug))||(b.system&&has.has(b.slug)))&&!_bdgAbove(b,has));
+  const lv=b=>{const l=b.system&&BDG_LADDER_OF.get(b.slug);return l?` · ${esc(t('bdLevelOf').replace('{0}',l[1]+1).replace('{1}',l[0].length))}`:'';};
+  return`<div class="bdg-strip">${list.map(b=>`<button type="button" class="bdg-chip" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgOpen",cid)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}${lv(b)}</span></button>`).join('')||`<span class="am-meta">${t('bdgNone')}</span>`}<button type="button" class="btn-sm btn-secondary bdg-strip-btn" data-on-click="${_on("_bdgOpen",cid)}">${_artIcon('medal',13)} ${t('bdgGiveTitle')}</button></div>`;
 }
 function _bdgStrips(){const hs=document.querySelectorAll('.bdg-strip-host');if(!hs.length)return;_bdgLoad();hs.forEach(h=>{h.innerHTML=_bdgStripHtml(h.dataset.cid);});}
 // One rider's badges: what they hold (given, with who gave it and the note; or earned by riding) and
@@ -41401,13 +41444,15 @@ function _on__bdgDlg_2(event,el){if(S._bdgDlg)S._bdgDlg.note=el.value;}
 function _bdgDlgPaint(open){
   const d=S._bdgDlg,m=document.getElementById('confirm-modal');if(!d||!m)return;
   if(!open&&!m.querySelector('.bdg-dlg')){S._bdgDlg=null;return;}
-  const c=_custById(d.cid)||{},held=_bdgHeld(d.cid),has=new Set(held.map(x=>x.badge_id)),ride=_bdgRideOn(d.cid);
+  const c=_custById(d.cid)||{},held=_bdgHeld(d.cid),has=new Set(held.map(x=>x.badge_id)),ride=_bdgRideOn(d.cid),all=_bdgHasSlugs(d.cid,ride);
   const item=(b,meta,end)=>`<div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b>${meta}</div>${end||''}</div>`;
   const rows=held.map(x=>{const b=_bdgById(x.badge_id);return b?item(b,`<span class="am-meta">${esc(_bdgLine(x))}</span>${x.note?`<span class="bdg-note"><bdi>${esc(x.note)}</bdi></span>`:''}`,_bdgInfoBtn(b)+_bdgTakeBtn(d.cid,b.id))+_bdgInfoPanel(b):'';}).join('')
-    +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('');
+    +_bdgSorted().filter(b=>b.auto&&!has.has(b.id)&&ride.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgByRiding')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('')
+    // the levels under a ladder level held, not given nor ridden themselves: they come with it
+    +_bdgSorted().filter(b=>b.system&&!has.has(b.id)&&!ride.has(b.slug)&&all.has(b.slug)).map(b=>item(b,`<span class="am-meta">${t('bdgViaLevel')}</span>`,_bdgInfoBtn(b))+_bdgInfoPanel(b)).join('');
   // A badge with an earning rule comes from riding (the owner, 2026-10-02: "dont let staff give them
   // manually"); an admin may give any (_bdgCanGive). One already earned by riding is not offered again.
-  const give=_bdgSorted().filter(b=>_bdgCanGive(b)&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug)));
+  const give=_bdgSorted().filter(b=>_bdgCanGive(b)&&!has.has(b.id)&&!(b.auto&&ride.has(b.slug))&&!(b.system&&all.has(b.slug)));
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__bdgDlg_1",_EV,_EL)}"><div class="confirm-box bdg-dlg" role="dialog" aria-modal="true" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">
     <div class="bdg-head"><div class="bdg-title">${t('mrBadgesTitle')} · ${esc(c.name||'')}</div><button type="button" class="bdg-x x-close" data-on-click="${_on("_bdgDlgClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
@@ -41470,7 +41515,10 @@ function _bdgAutoHolders(){
   _bdgAutoKey=key;_bdgAutoMap=out;return out;
 }
 // The accounts holding a badge: given by staff, and for a badge earned by riding, those who earned it.
-function _bdgAllHolders(b){const ids=new Set((S.custBadges||[]).filter(x=>x.badge_id===b.id).map(x=>x.customer_id));if(b.auto)(_bdgAutoHolders().get(b.slug)||[]).forEach(id=>ids.add(id));return ids;}
+// A ladder level is held too by everyone holding a level above it (_bdgClimb).
+function _bdgOwnHolders(b){const ids=new Set((S.custBadges||[]).filter(x=>x.badge_id===b.id).map(x=>x.customer_id));if(b.auto)(_bdgAutoHolders().get(b.slug)||[]).forEach(id=>ids.add(id));return ids;}
+function _bdgAllHolders(b){const ids=_bdgOwnHolders(b),l=b.system&&BDG_LADDER_OF.get(b.slug);
+  if(l)l[0].slice(l[1]+1).forEach(s=>{const h=(S.badges||[]).find(x=>x.system&&x.slug===s);if(h)_bdgOwnHolders(h).forEach(id=>ids.add(id));});return ids;}
 // Community > Badges: every badge with its holders, Give to a ride, Give to a rider, and for admins New / Edit / Retire.
 // Who may give a badge by hand: an admin any badge (the owner, 2026-10-02: "give the admin the
 // permission to give whatever badge they want to whoever rider they want"); other staff only the
@@ -41495,7 +41543,8 @@ function _commBadges(){
   const adm=isAdmin(),ed=S._bdgEdit;
   const rows=_bdgSorted().map(b=>{
     const hold=S._bdgHoldId===b.id,ride=S._bdgRideId===b.id,rider=S._bdgRiderId===b.id,del=S._bdgSure==='del|'+b.id;
-    const meta=[b.auto?t('bdgAuto'):'',b.retired?t('bdgRetired'):'',t('amHolders').replace('{0}',n[b.id]||0)].filter(Boolean).join(' · ');
+    const l=b.system&&BDG_LADDER_OF.get(b.slug);
+    const meta=[l?t('bdLevelOf').replace('{0}',l[1]+1).replace('{1}',l[0].length):'',b.auto?t('bdgAuto'):'',b.retired?t('bdgRetired'):'',t('amHolders').replace('{0}',n[b.id]||0)].filter(Boolean).join(' · ');
     const dated=b.rule?`<span class="am-meta bdg-dated">${esc(t('bdgSeasonal'))}: ${esc(_bdgRuleLine(b.rule))}</span>`:'';
     return`<div class="bdg-row${b.retired?' retired':''}" data-badge="${esc(b.id)}">
       <div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt"><b>${esc(_bdgName(b))}</b><span class="am-meta">${esc(_bdgDesc(b))}</span><span class="am-meta">${esc(meta)}</span>${dated}</div>
@@ -41517,8 +41566,12 @@ function _bdgHoldersHtml(b){
   const list=(S.custBadges||[]).filter(x=>x.badge_id===b.id).map(x=>({x,c:_custById(x.customer_id)})).filter(r=>r.c).sort((p,q)=>String(q.x.awarded_at).localeCompare(String(p.x.awarded_at)));
   // earned by riding, and not also given: by name, after the given ones; nothing to take away
   const given=new Set(list.map(r=>r.x.customer_id));
-  const rode=b.auto?[...(_bdgAutoHolders().get(b.slug)||[])].filter(id=>!given.has(id)).map(id=>_custById(id)).filter(Boolean).sort((p,q)=>String(p.name||'').localeCompare(String(q.name||''))):[];
-  return`<div class="bdg-panel">${list.map(({x,c})=>`<div class="bdg-hold"><div class="bdg-txt"><b>${esc(c.name||'—')}</b><span class="am-meta">${esc(_bdgLine(x))}${x.note?` · <bdi>${esc(x.note)}</bdi>`:''}</span></div>${_bdgTakeBtn(x.customer_id,b.id)}</div>`).join('')}${rode.map(c=>`<div class="bdg-hold" data-rode="${esc(c.id)}"><div class="bdg-txt"><b>${esc(c.name||'—')}</b><span class="am-meta">${t('bdgEarnedRide')}</span></div></div>`).join('')}${(list.length||rode.length)?'':`<div class="am-meta">${t('bdgNone')}</div>`}</div>`;
+  const byName=(p,q)=>String(p.name||'').localeCompare(String(q.name||''));
+  const rode=b.auto?[...(_bdgAutoHolders().get(b.slug)||[])].filter(id=>!given.has(id)).map(id=>_custById(id)).filter(Boolean).sort(byName):[];
+  // then those it comes with, through a higher level of its ladder they hold
+  const own=_bdgOwnHolders(b),up=[..._bdgAllHolders(b)].filter(id=>!own.has(id)).map(id=>_custById(id)).filter(Boolean).sort(byName);
+  rode.push(...up.map(c=>({...c,_via:1})));
+  return`<div class="bdg-panel">${list.map(({x,c})=>`<div class="bdg-hold"><div class="bdg-txt"><b>${esc(c.name||'—')}</b><span class="am-meta">${esc(_bdgLine(x))}${x.note?` · <bdi>${esc(x.note)}</bdi>`:''}</span></div>${_bdgTakeBtn(x.customer_id,b.id)}</div>`).join('')}${rode.map(c=>`<div class="bdg-hold" data-rode="${esc(c.id)}"><div class="bdg-txt"><b>${esc(c.name||'—')}</b><span class="am-meta">${t(c._via?'bdgViaLevel':'bdgEarnedRide')}</span></div></div>`).join('')}${(list.length||rode.length)?'':`<div class="am-meta">${t('bdgNone')}</div>`}</div>`;
 }
 // The rides of the last 30 days and the accounts that rode each (checked in: on the bike or done).
 function _bdgRides(){

@@ -173,22 +173,47 @@ test.describe('@staff:community badges', () => {
     // Omar: Champion given, First Lap earned by riding.
     await page.evaluate(`openAccountHistory('c2')`);
     const hist = page.locator('#cust-modal .bdg-strip');
-    await expect(hist.locator('.bdg-chip')).toHaveText(['Champion', 'First Lap']);
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Champion', 'First Lap · Level 1 of 4']); // a ladder: its top level held
     await expect(hist.locator('.bdg-chip svg.bdg-m')).toHaveCount(2);
     await hist.locator('.bdg-chip', { hasText: 'Champion' }).click();
     await expect(modal(page)).toContainText('Badges · Omar Saleh');
     await modal(page).locator('.bdg-pick', { hasText: 'Marshal' }).click();
     await modal(page).getByRole('button', { name: 'Give badge' }).click();
-    await expect(hist.locator('.bdg-chip')).toHaveText(['Marshal', 'Champion', 'First Lap']); // painted again in place
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Marshal', 'Champion', 'First Lap · Level 1 of 4']); // painted again in place
     await modal(page).locator('.bdg-foot').getByRole('button', { name: 'Close' }).click();
     await page.evaluate(`closeCustomerProfile()`);
     // The editor: the same section, under the tags; Sara's one is First Lap, from her ride two months back.
     await page.evaluate(`showEditCustomerModal('c3')`);
     const ed = page.locator('#new-acct-modal .bdg-strip');
-    await expect(ed.locator('.bdg-chip')).toHaveText(['First Lap']);
+    await expect(ed.locator('.bdg-chip')).toHaveText(['First Lap · Level 1 of 4']);
     await ed.getByRole('button', { name: 'Give a badge' }).click();
     await expect(modal(page)).toContainText('Badges · Sara Nabil');
     expect(EMOJI.test(await ed.innerText())).toBe(false);
+  });
+
+  test('a ladder level held brings the levels under it: T100 gives T50 and T25 (the owner, 2026-10-09)', async ({ page }) => {
+    const race = ['t100', 't50', 't25'].map((k, i) => ({ id: 'bd_' + k, slug: k, icon: k, color: 'gold', name: k.toUpperCase() + ' Finisher', system: true, auto: false, retired: false, sort: 75 + i }));
+    await staff(page, { badges: [...badges, ...race], customer_badges: [...customer_badges, { customer_id: 'c1', badge_id: 'bd_t100', note: null, session_id: null, awarded_by: 'Malik', awarded_at: '2026-10-08T18:00:00Z' }] });
+    await community(page, 'accounts');
+    await page.evaluate(`openAccountHistory('c1')`);
+    // The strip shows the ladder once, at its top level; First Lap is a ladder of four.
+    await expect(page.locator('#cust-modal .bdg-strip .bdg-chip')).toHaveText([/T100 Finisher · Level 3 of 3$/, 'First Lap · Level 1 of 4']); // the medal's own T100 text comes first
+    await page.locator('#cust-modal .bdg-strip .bdg-chip').first().click();
+    const list = modal(page).locator('.bdg-list');
+    await expect(list.locator('.bdg-item', { hasText: 'T50 Finisher' })).toContainText('Comes with a higher level');
+    await expect(list.locator('.bdg-item', { hasText: 'T25 Finisher' })).toContainText('Comes with a higher level');
+    await expect(list.locator('.bdg-item', { hasText: 'T50 Finisher' }).getByRole('button', { name: 'Take back' })).toHaveCount(0); // nothing stored to take back
+    await expect(modal(page).locator('.bdg-pick', { hasText: /T(25|50|100) Finisher/ })).toHaveCount(0); // held already, none offered
+    await modal(page).locator('.bdg-foot').getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`closeCustomerProfile()`);
+    // Community > Badges counts her as a holder of every level, and says which level each row is.
+    await community(page, 'badges');
+    const t25 = page.locator('.bdg-row[data-badge="bd_t25"]');
+    await expect(t25).toContainText('Level 1 of 3');
+    await expect(t25).toContainText('1 holder');
+    await t25.getByRole('button', { name: 'Holders' }).click();
+    await expect(t25.locator('.bdg-hold')).toContainText('Comes with a higher level');
+    expect(await page.evaluate(`[..._bdgAllHolders(_bdgById('bd_t50'))]`)).toEqual(['c1']);
   });
 
   test('an unpaid returned ride earns nothing in the dialog', async ({ page }) => {
@@ -306,12 +331,12 @@ test.describe('@customer:account badges', () => {
 
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
     const more = page.locator('#tab-account #mr-badges-more');
-    // Only the earned take room (2026-09-30): the two given and First Lap. The twenty to earn by
-    // riding (National Day 96 and Back on Track wait until earned) and the nine other ones staff give (the
-    // three T100 race badges among them)
+    // Only the earned take room (2026-09-30): the two given and First Lap. The eleven to earn by
+    // riding (National Day 96 and Back on Track wait until earned; each ladder is one badge since
+    // 2026-10-09) and the seven other ones staff give (the T25 / T50 / T100 ladder among them)
     // fold under Badges to earn, which says how many and shows four of them greyed.
     await expect(chips).toHaveCount(3);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/34');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/21');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -319,11 +344,11 @@ test.describe('@customer:account badges', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).toContainText('Badges to earn');
     await expect(more).toContainText('Show');
-    await expect(more.locator('.mr-bm-n')).toHaveText('31');
+    await expect(more.locator('.mr-bm-n')).toHaveText('18');
     await expect(more.locator('.mr-bm-peek svg.bdg-m')).toHaveCount(4);
     // Open: every badge, in the same order as before, the button kept in focus and reading Hide.
     await more.click();
-    await expect(chips).toHaveCount(34);
+    await expect(chips).toHaveCount(21);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toContainText('Hide');
     await expect(more).toBeFocused();
@@ -331,9 +356,10 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(3)).toContainText('Race Ready');
     await expect(chips.nth(3)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
     await expect(chips.nth(3)).toContainText('33%');
-    await expect(chips.nth(30)).toContainText('Race Spirit');
-    await expect(chips.nth(30)).toHaveClass(/locked/);
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(34);
+    await expect(chips.nth(19)).toContainText('Race Spirit');
+    await expect(chips.nth(19)).toHaveClass(/locked/);
+    await expect(chips.nth(20)).toContainText('T25 Finisher'); // the race ladder, at its first level
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(21);
     expect(EMOJI.test(await page.locator('#mr-badges-host').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -342,7 +368,7 @@ test.describe('@customer:account badges', () => {
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
     // It stays open through that repaint, and closes again.
-    await expect(chips).toHaveCount(34);
+    await expect(chips).toHaveCount(21);
     await more.click();
     await expect(chips).toHaveCount(3);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
@@ -357,31 +383,59 @@ test.describe('@customer:account badges', () => {
     const pop = page.locator('#badge-pop');
     await expect(pop).toContainText('T100 Finisher');
     await expect(pop).toContainText('Finished the T100 race in Jeddah');
-    await expect(pop.locator('svg.bdg-m.bdg-race')).toHaveCount(1);
-    await expect(pop.locator('svg.bdg-race text').first()).toHaveText('T100');
+    await expect(pop.locator('svg.badge-pop-ic.bdg-race')).toHaveCount(1);
+    await expect(pop.locator('svg.badge-pop-ic text').first()).toHaveText('T100');
+    // One badge in three levels (2026-10-09): T100 brings T25 and T50 with it, each its own medal.
+    await expect(pop.locator('.badge-pop-lvn')).toHaveText('Level 3 of 3');
+    await expect(pop.locator('.badge-lvl.on')).toHaveCount(3);
+    await expect(pop.locator('.badge-lvl svg.bdg-race text:first-of-type')).toHaveText(['T25', 'T50', 'T100']);
     await pop.getByRole('button', { name: 'Close' }).click();
-    await page.locator('#mr-badges-more').click();
-    // T50 and T25 wait among the ones staff give, each its own medal with the race's name on it.
-    for (const [name, tx] of [['T50 Finisher', 'T50'], ['T25 Finisher', 'T25']]) {
-      const tile = page.locator('#tab-account .mr-badge', { hasText: name });
-      await expect(tile).toHaveClass(/locked/);
-      await expect(tile.locator('svg.bdg-m.bdg-race text').first()).toHaveText(tx);
-    }
+    const tile = page.locator('#tab-account .mr-badges .mr-badge.ladder', { hasText: 'T100 Finisher' });
+    await expect(tile).not.toHaveClass(/locked/);
+    await expect(tile.locator('.mr-badge-lv i.on')).toHaveCount(3);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: /T50 Finisher|T25 Finisher/ })).toHaveCount(0);
     expect(await page.evaluate(`['t100','t50','t25'].map(k=>BD_SYS[k][0]===k&&!!BDG_RACE[k]&&!BDG_GLYPH[k]&&BDG_GIVEN_SYS.includes(k))`)).toEqual([true, true, true]);
     const ar = JSON.parse(readFileSync('lang/ar.json', 'utf8'));
     expect([ar.bdgT100, ar.bdgT25D]).toEqual(['إنجاز T100', 'أنهيت سباق T25 في جدة']);
+  });
+
+  test('a ladder is one tile at its level reached, with the next level as the closest badge (the owner, 2026-10-09)', async ({ page }) => {
+    const ss = [1, 2, 3, 4, 5].map((n) => ({ ...sessions[0], id: day(-n * 7), session_date: day(-n * 7), created_at: n }));
+    await stubSupabase(page, { sessions: ss, queue_entries: ss.map((x, i) => rated(row('r' + i, x.id, 2, 'Spec Rider', 'c1', 'done', true))) });
+    await loginCustomer(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+    // Five rides: First Lap and Grid Regular, one tile showing Grid Regular, two of four marks filled.
+    const tile = page.locator('#tab-account .mr-badges .mr-badge.ladder', { hasText: 'Grid Regular' });
+    await expect(tile).not.toHaveClass(/locked/);
+    await expect(tile.locator('.mr-badge-lv i')).toHaveCount(4);
+    await expect(tile.locator('.mr-badge-lv i.on')).toHaveCount(2);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: /^First Lap$/ })).toHaveCount(0);
+    // Five weeks running earned Hot Streak, so its next level, Safety Car (5/6), is the closest badge.
+    await expect(page.locator('#tab-account .mr-badge.ladder', { hasText: 'Hot Streak' })).not.toHaveClass(/locked/);
+    await expect(page.locator('#tab-account .bd-next-row').first()).toContainText('Safety Car');
+    await expect(page.locator('#tab-account .bd-next-row').first()).toContainText('5/6');
+    await tile.click();
+    const pop = page.locator('#badge-pop');
+    await expect(pop.locator('.badge-pop-lvn')).toHaveText('Level 2 of 4');
+    await expect(pop.locator('.badge-lvl.on')).toHaveCount(2);
+    await expect(pop.locator('.badge-lvl.cur')).toContainText('Grid Regular');
+    await expect(pop.locator('.badge-lvl').nth(2)).toContainText('5/10');
+    expect(EMOJI.test(await pop.innerText())).toBe(false);
   });
 
   test('a database without customer_my_badges still shows the ride badges', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(1); // First Lap
-    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('32'); // the other twenty-two ride badges and the ten staff give
+    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('19'); // the other eleven ride badges and the eight staff give, a ladder one each
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
     await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('Every rider\'s story starts with one lap');
-    await expect(page.locator('#badge-pop')).toContainText('Earned');
+    await expect(page.locator('#badge-pop .badge-pop-lvn')).toHaveText('Level 1 of 4');
+    await expect(page.locator('#badge-pop .badge-lvl')).toHaveText([/First Lap[\s\S]*✓/, /Grid Regular[\s\S]*1\/5/, /Podium Pace[\s\S]*1\/10/, /Corniche 25[\s\S]*1\/25/]);
   });
 
   test('the whole catalogue in order, in equal tiles: a retired badge only for a rider who holds it, an admin\'s own greyed until given', async ({ page }) => {
@@ -405,13 +459,12 @@ test.describe('@customer:account badges', () => {
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
     const names = () => chips.evaluateAll((els) => els.map((e) => e.querySelector('.mr-badge-nm')!.textContent));
     await expect.poll(names).toEqual([
-      'Marshal', 'First Lap', // earned: the given one, then by riding
-      'Race Ready', 'Grid Regular', 'Podium Pace', 'Front Row', 'Carbon Club', 'Hot Streak', 'Squad Captain', 'Corniche 25', 'Safety Car',
-      'Endurance', 'Triple Crown', 'Clean Sheet', 'Rolling Start', 'Slipstream', 'Paceline', 'Peloton', 'Grand Tour', 'Hall of Fame', 'Works Team', // to earn by riding (no Fuel Stop: retired)
+      'Marshal', 'First Lap', // earned: the given one, then by riding (First Lap the ladder to Corniche 25)
+      'Race Ready', 'Front Row', 'Carbon Club', 'Hot Streak', 'Squad Captain', 'Triple Crown', 'Clean Sheet', 'Rolling Start', 'Works Team', // to earn by riding (no Fuel Stop: retired); Hot Streak and Rolling Start are ladders
       'Winter Series', // dated, shown out of season
       'Pit Crew', 'Green Flag', 'Super Licence', 'Scrutineer', 'Champion', 'Race Spirit', 'Night Owl', // staff give them
     ]);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/29');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('2/19');
     // Every tile the same size, the earned and the ones to earn alike.
     const sizes = await chips.evaluateAll((els) => [...new Set(els.map((e) => { const r = e.getBoundingClientRect(); return Math.round(r.width) + 'x' + Math.round(r.height); }))]);
     expect(sizes).toHaveLength(1);
@@ -658,9 +711,12 @@ test.describe('@customer:account Race Ready and the about lines', () => {
   test('every app badge explains itself, and Grid Regular says what the grid is', async ({ page }) => {
     await rider(page, {});
     await page.locator('#mr-badges-more').click();
-    await page.locator('#tab-account .mr-badge', { hasText: 'Grid Regular' }).click();
-    await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('the grid is where the cars line up to start');
-    await expect(page.locator('#badge-pop .badge-pop-d')).toHaveText('Completed 5 rides');
+    await page.locator('#tab-account .mr-badge', { hasText: 'Front Row' }).click();
+    await expect(page.locator('#badge-pop .badge-pop-about')).not.toBeEmpty();
+    await expect(page.locator('#badge-pop .badge-pop-d')).not.toBeEmpty();
+    // Grid Regular, now a level of First Lap's ladder, keeps its own about and how-to lines
+    await page.evaluate(`_bdgPopClose()`);
+    expect(await page.evaluate(`[_bdgAbout({slug:'regular',system:true}),_bdgDesc({slug:'regular',system:true})]`)).toEqual([expect.stringContaining('the grid is where the cars line up to start'), 'Completed 5 rides']);
     // Every badge the app knows has a name, a how-to line and an about line (check-i18n holds the
     // other nine languages to the same keys).
     const missing = await page.evaluate(`Object.values(BD_SYS).flatMap(([,,k])=>[k,k+'D',k+'A']).filter(k=>!LANG.en[k])`);
