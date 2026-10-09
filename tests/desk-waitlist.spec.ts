@@ -77,6 +77,7 @@ test('the multi-rider add still puts a party on the list', async ({ page }) => {
   await page.locator('#wl-phone').fill('0551234567');   // required: a walk-up needs a contact
   await page.evaluate(`_wlxAdd()`);                     // re-renders, keeping what was typed
   await page.locator('#wlx-name-0').fill('Second Rider');
+  await page.locator('#wlx-type-0').selectOption('Hybrid'); // an extra rider's type is picked (B8)
   await page.evaluate(`addDeskWaitlist()`);
   await expect.poll(() => rows.length).toBe(2);
   await expect(page.locator('#mw-host')).toContainText('Family Head');

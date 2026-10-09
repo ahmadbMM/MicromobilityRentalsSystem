@@ -41,6 +41,7 @@ export const STAFF_ENTRY = [
   'renderAmbassadors', 'renderVendors', 'renderTeam', 'renderDashboard', 'renderLogs',
   'renderModal', 'renderCheckinModal', '_ntSync', '_tbRender',
   'doUndo', // the topbar's Undo (2026-09-28)
+  '_retBackFromTill', // the till closed from a return: the return sheet comes back (2026-10-09, D7; closeCashierModal is customer-half code)
   '_tpMsgOpen', // the account editor's temporary-password message (2026-09-29): its save is customer-half code
   // The staff top bar's search (2026-09-29): Ctrl/Cmd+K is listened for at load, and through the
   // search every account's history and the whole account editor were reached from the customer
@@ -402,6 +403,8 @@ export const STAFF_PARTS = {
   // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
   // (with the Action Log, which shares the account names and the record links with them)
   money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
+  // 2026-10-09 (round 2): the desk note's editor, My shift, joining and leaving a party
+  desk: ['_deskNoteEdit', '_myShiftOpen', '_partyJoin', '_partyLeave'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
