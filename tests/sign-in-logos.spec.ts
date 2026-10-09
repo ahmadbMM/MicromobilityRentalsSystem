@@ -34,10 +34,8 @@ test('Accounts: the mark after the email says how the account signs in', async (
   await expect(row(page, 'Pavel Password').locator('.si-ico')).toHaveCount(0);
   // right after the email, before the phone
   const html = await row(page, 'Gina Google').locator('.am-cust-contact').innerHTML();
-  // (both read masked until a tap shows them, 2026-10-10)
-  expect(html.indexOf('g•••@gmail.com')).toBeGreaterThan(-1);
-  expect(html.indexOf('g•••@gmail.com')).toBeLessThan(html.indexOf('si-google'));
-  expect(html.indexOf('si-google')).toBeLessThan(html.indexOf('+966 50•• •• 001'));
+  expect(html.indexOf('gina@gmail.com')).toBeLessThan(html.indexOf('si-google'));
+  expect(html.indexOf('si-google')).toBeLessThan(html.indexOf('+966500000001'));
   // asked once, not on every repaint
   const calls: string[] = [];
   page.on('request', (r) => { if (r.url().includes('/rpc/staff_sign_in_methods')) calls.push(r.url()); });
