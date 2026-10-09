@@ -46,15 +46,36 @@ test('the community section opens on a big box naming them, newest first', async
   await expect(page.locator('.natnew-box')).toHaveCount(0);
 });
 
-test('Got it puts the box away until another such customer appears', async ({ page }) => {
+test('Got it folds the box to a bar until another such customer appears', async ({ page }) => {
   await open(page);
   await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Got it' }).click();
-  await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
+  await expect(page.locator('#tab-community .natnew-box.natnew-min')).toBeVisible();
+  await expect(page.locator('#tab-community .natnew-row')).toHaveCount(0);
   await page.evaluate(`S.customers=[...S.customers,{id:'k9',name:'Ivo Brazil',email:'k9@example.test',nationality:'Brazil',created_at:new Date().toISOString()}];renderCommunity()`);
   const box = page.locator('#tab-community .natnew-box');
   await expect(box.locator('h3')).toHaveText('A new nationality in Customers');
   await expect(box.locator('.natnew-row')).toHaveCount(1);
   await expect(box).toContainText('Ivo Brazil');
+});
+
+// The owner, 2026-10-09: "i want the unique nationalities box to be accessible not one i click the got it
+// button it vanishes".
+test('after Got it, Show list opens everyone again and Hide list folds it', async ({ page }) => {
+  await open(page);
+  await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Got it' }).click();
+  const bar = page.locator('#tab-community .natnew-box.natnew-min');
+  await expect(bar.locator('h3')).toHaveText('Nationalities no community member has yet');
+  await bar.getByRole('button', { name: 'Show list (2)' }).click();
+  const box = page.locator('#tab-community .natnew-box');
+  await expect(box).not.toHaveClass(/natnew-min/);
+  await expect(box.locator('.natnew-row')).toHaveCount(2);
+  await expect(box.getByRole('button', { name: 'Got it' })).toHaveCount(0);
+  await box.locator('#natnew-q').fill('jordan');
+  await expect(box.locator('.natnew-row')).toHaveCount(1);
+  await page.evaluate(`setCommTab('tags')`); // stays open across Community views
+  await expect(page.locator('#tab-community .natnew-row')).toHaveCount(1);
+  await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Hide list' }).click();
+  await expect(page.locator('#tab-community .natnew-box.natnew-min')).toBeVisible();
 });
 
 test('a member from that nationality joining takes its customers off the list', async ({ page }) => {
