@@ -387,7 +387,7 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
 // Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier', '_eonOpen'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
@@ -1160,7 +1160,11 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
 // badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
 // language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
+// Staff 480 -> 486, core 254 -> 259 (2026-10-09, s1009-desk): the front desk round (local bike numbers, the
+// type/size warning, Sending and the failed check-in bar, single check-in Undo, bulk No-show, the live count,
+// desk keys, Close out's per-bike marks, the Petromin bike) and 33 strings in each language; the night's
+// summary went to the cashier part. Here 255.0 core / 481.6 staff local (~2 KB more on the runner).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 486, core: 259 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

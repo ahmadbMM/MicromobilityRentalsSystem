@@ -208,6 +208,8 @@ test('close-out returns the no-shows\' add-ons, hands bikes back, and its undo r
   await page.waitForFunction('getQueue().length>0');
   const inv = inventoryWrites(page);
   await page.evaluate(`closeOutSession('${OLD}')`);
+  // each bike still out is ticked back before the close-out returns it (2026-10-09, B1)
+  await page.locator('#co-bikes .co-mk-ok').click();
   await page.locator('.confirm-box button').filter({ hasText: /close out/i }).click();
   await expect.poll(() => q[1].status).toBe('noshow');
   await expect.poll(() => bikes[0].status).toBe('available');
