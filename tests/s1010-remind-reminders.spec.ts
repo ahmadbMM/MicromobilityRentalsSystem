@@ -111,7 +111,7 @@ test.describe('@staff:bookings reminder bell', () => {
     await page.clock.setFixedTime(new Date('2099-01-08T12:00:00Z')); // 15:00 KSA, the day before the ride
     await open(page);
     const items = await page.evaluate(`(()=>{const out=[];_r7Bell((k,items)=>out.push([k,items.map(i=>i.id)]),{queue:true});return out;})()`);
-    expect(items).toEqual([['remind', ['rm:s1']], ['wlfree', ['wl:s1:9']]]); // 3 places held of 12, one rider waiting
+    expect(items).toEqual([['remind', ['rm:s1']], ['wlfree', []]]); // Automatic (the default): a free place is never left waiting
     expect(await page.evaluate(`NT_KINDS.map(k=>k[0]).includes('remind')&&NT_KINDS.map(k=>k[0]).includes('wlfree')`)).toBe(true);
   });
 

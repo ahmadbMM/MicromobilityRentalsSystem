@@ -10,7 +10,7 @@
 --     rider's link (/?claim=<token>); status open -> claimed | expired | declined | cancelled | closed
 --     (closed: the booking left the waitlist some other way). Staff read every row and may set sent_at
 --     (the WhatsApp went out) and status (cancel); rows are made only by the functions below.
---  3. _wl_mode(): Settings > Business wl_offer_mode, 'auto' | 'staff' | 'claim', default 'staff'.
+--  3. _wl_mode(): Settings > Business wl_offer_mode, 'auto' | 'staff' | 'claim', default 'auto' (today's behaviour).
 --     _wl_claim_min(): wl_claim_min minutes (default 30, held to 5..720; _biz_int reads 1..1000).
 --  4. _promote_next_waitlist (every server-side promotion: a rider's own cancel, a move, more places on
 --     a ride) promotes only in 'auto'. In 'staff' it promotes nobody (staff choose on the desk); in
@@ -98,7 +98,7 @@ language sql stable security definer set search_path to 'public'
 as $$
   select coalesce((
     select case when o.items ->> 'wl_offer_mode' in ('auto', 'staff', 'claim') then o.items ->> 'wl_offer_mode' end
-      from staff_options o where o.key = 'biz'), 'staff')
+      from staff_options o where o.key = 'biz'), 'auto')
 $$;
 revoke execute on function public._wl_mode() from public, anon, authenticated;
 

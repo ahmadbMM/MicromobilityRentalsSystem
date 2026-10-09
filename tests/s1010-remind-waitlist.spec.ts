@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// Who a freed waitlist place goes to (2026-10-09, R7): Settings > Business wl_offer_mode 'auto' (the old
-// automatic promotion), 'staff' (the default: a centred dialog, staff give the place) or 'claim' (a timed
+// Who a freed waitlist place goes to (2026-10-09, R7): Settings > Business wl_offer_mode 'auto' (the default:
+// the old automatic promotion), 'staff' (a centred dialog, staff give the place) or 'claim' (a timed
 // offer the rider claims from a link; waitlist_offers + staff_offer_spot, 20261009225000).
 const sessions = [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 2, status: 'open', created_at: 1, bike_slots: JSON.stringify({ _time: '19:00 - 21:00' }) }];
 const qe = (id: string, n: number, extra: Record<string, unknown> = {}) => ({
@@ -26,9 +26,19 @@ function writes(page: Page) {
 }
 
 test.describe('@staff:bookings waitlist offers', () => {
-  test('by default a no-show promotes nobody: staff choose in a centred dialog', async ({ page }) => {
+  test('with no setting the mode is Automatic, exactly as before', async ({ page }) => {
+    await open(page);
+    expect(await page.evaluate('_wlMode()')).toBe('auto');
+    const w = writes(page);
+    await page.evaluate(`setStaffTab('queue');setSfSession('s1');doNoShow('e1')`);
+    await expect.poll(() => w.find((x) => /"status":"waiting"/.test(x) && /id=eq\.e3/.test(x))).toBeTruthy();
+    await page.waitForTimeout(900);
+    await expect(page.locator('#wlo-title')).toHaveCount(0);
+  });
+
+  test('in Staff choose a no-show promotes nobody: staff choose in a centred dialog', async ({ page }) => {
     // three places: the stub reads its fixture back after each write, so the place stays free after the reload
-    await open(page, undefined, { sessions: [{ ...sessions[0], capacity: 3 }] });
+    await open(page, 'staff', { sessions: [{ ...sessions[0], capacity: 3 }] });
     expect(await page.evaluate('_wlMode()')).toBe('staff');
     const w = writes(page);
     await page.evaluate(`setStaffTab('queue');setSfSession('s1');doNoShow('e1')`);
@@ -54,7 +64,7 @@ test.describe('@staff:bookings waitlist offers', () => {
   });
 
   test('a free place with riders waiting shows on Bookings and in the bell', async ({ page }) => {
-    await stubSupabase(page, { sessions, queue_entries: [qe('e1', 1), qe('e3', 3, { status: 'waitlist', waitlist_num: 1 })], bikes: [], staff_options: [] });
+    await stubSupabase(page, { sessions, queue_entries: [qe('e1', 1), qe('e3', 3, { status: 'waitlist', waitlist_num: 1 })], bikes: [], staff_options: [{ key: 'biz', items: { wl_offer_mode: 'staff' } }] });
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
@@ -100,7 +110,7 @@ test.describe('@staff:bookings waitlist offers', () => {
     await open(page);
     await page.evaluate(`S._staffAuthed=true;setStaffTab('settings');setSettingsView('business')`);
     const sel = page.locator('#biz-wl_offer_mode');
-    await expect(sel).toHaveValue('staff');
+    await expect(sel).toHaveValue('auto'); // the default
     await expect.poll(() => sel.locator('option').count()).toBe(2);
   });
 

@@ -999,7 +999,7 @@ Migration `20261009225000_reminders_waitlist_offers.sql`; the page works without
   `REM_MSG` in the `remind` part; `_tplDefault` reaches them through `globalThis['_remDef'+'ault']` so the core does not
   pull the dictionary in.
 - **Who a freed place goes to**: Settings > Business > The waitlist, `wl_offer_mode` = `auto` (the old
-  `_autoPromoteOldestWaitlist`), `staff` (**the default**) or `claim`; `wl_claim_min` (5-720, default 30). `_wlMode()`
+  `_autoPromoteOldestWaitlist`), `staff` or `claim`; **the default is `auto`** (unset = today's behaviour, staff opt in); `wl_claim_min` (5-720, default 30). `_wlMode()`
   reads it (`claim` reads as `staff` while `S._wlNoDb`). In `staff` / `claim` the desk's cancel and no-show paths call
   `_wlAskSoon(sid)`, which opens `openWlOffers(sid)` (a centred dialog: Give the place = the old guarded promotion, by
   hand, with Undo; in `claim` also Offer = `staff_offer_spot`, and the open offers with Send on WhatsApp / Withdraw).
