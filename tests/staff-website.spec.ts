@@ -202,6 +202,38 @@ test('each built page opens in preview on its own', async ({ page }) => {
   await expect(panel(page).locator('.web-pages tr', { hasText: 'Store' }).getByRole('button')).toHaveCount(0);
 });
 
+test('Preview on iPhone shows the website at a phone\'s width, scaled to fit the window', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await open(page);
+  // the website answers the preview link with a page that reports the width it was given
+  await page.route(/^https:\/\/micromobility\.sa\//, r => r.fulfill({ status: 200, contentType: 'text/html',
+    body: '<!doctype html><meta name="viewport" content="width=device-width"><body><p id="w"></p><script>document.getElementById("w").textContent="w"+innerWidth+"x"+innerHeight</script>' }));
+  await page.evaluate(`sb.auth.getSession=async()=>({data:{session:{access_token:'tok.en'}}});window.__opened=[];window.open=u=>{window.__opened.push(u);return null;}`);
+  await panel(page).getByRole('button', { name: 'Preview on iPhone' }).click();
+  const dlg = page.getByRole('dialog', { name: 'Website on an iPhone' });
+  await expect(dlg).toBeVisible();
+  const frame = dlg.locator('iframe.web-phone-screen');
+  await expect(frame).toHaveAttribute('src', 'https://micromobility.sa/en/preview#t=tok.en');
+  await expect(page.frameLocator('#confirm-modal iframe.web-phone-screen').locator('#w')).toHaveText('w390x844');
+  // 720 tall is shorter than the phone: the whole phone is scaled down and still fits
+  const box = await dlg.locator('.web-phone-fit').boundingBox();
+  expect(box!.height).toBeLessThan(720 - 120);
+  expect(box!.width / box!.height).toBeCloseTo(414 / 868, 2);
+  const dbox = await dlg.boundingBox();
+  expect(dbox!.y).toBeGreaterThanOrEqual(0);
+  expect(dbox!.y + dbox!.height).toBeLessThanOrEqual(720);
+  // Open full size closes it and opens the ordinary preview
+  await dlg.getByRole('button', { name: 'Open full size' }).click();
+  await expect(dlg).toBeHidden();
+  await expect.poll(() => page.evaluate('window.__opened.length')).toBe(1);
+  expect(await page.evaluate('window.__opened[0]')).toBe('https://micromobility.sa/en/preview#t=tok.en');
+  // Escape closes it too
+  await panel(page).getByRole('button', { name: 'Preview on iPhone' }).click();
+  await expect(dlg).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(dlg).toBeHidden();
+});
+
 test('in Arabic the section reads right to left', async ({ page }) => {
   await page.addInitScript(() => { try { localStorage.setItem('cq_lang', 'ar'); localStorage.setItem('cq_lang_pick', '1'); } catch { /* */ } });
   await open(page);

@@ -7302,6 +7302,13 @@ body.view-staff input.web-toggle[type="checkbox"]:focus-visible{outline:2px soli
 }
 /* Website content editor (2026-09-24) */
 body.view-staff .web-head-btns{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+/* Website preview on an iPhone (_webPhonePreview): a 390 x 844 screen in a 12px bezel, scaled
+   whole by --wpp-s (set from the window's size) so the site inside still sees a phone's width. */
+.confirm-box.web-phone-box{width:auto;max-width:calc(100vw - 24px);padding:16px 16px 14px;}
+.web-phone-fit{--wpp-s:1;width:calc(414px * var(--wpp-s));height:calc(868px * var(--wpp-s));margin:0 auto 14px;}
+.web-phone{width:414px;height:868px;box-sizing:border-box;padding:12px;border-radius:56px;background:#111;box-shadow:0 0 0 2px #3a3a3c,0 12px 40px rgba(0,0,0,.35);transform:scale(var(--wpp-s));transform-origin:top left;}
+:is(html[lang="ar"],html[lang="ur"]) .web-phone{transform-origin:top right;}
+.web-phone-screen{display:block;width:390px;height:844px;border:0;border-radius:44px;background:#fff;}
 body.view-staff .web-ed-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px;}
 body.view-staff .web-ed-sec{border:1px solid var(--sf-line2);border-radius:8px;margin-bottom:8px;background:var(--sf-card);}
 body.view-staff .web-ed-sec-head{display:flex;justify-content:space-between;align-items:center;width:100%;padding:12px 14px;border:0;background:none;cursor:pointer;font:inherit;font-weight:700;font-size:14px;color:var(--text);text-align:start;}

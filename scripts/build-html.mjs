@@ -508,7 +508,7 @@ const CSP = [
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
   `connect-src 'self' https://micromobility.sa https://${supaHost} wss://${supaHost} https://cloudflareinsights.com https://api.open-meteo.com https://archive-api.open-meteo.com`,
-  "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
+  "media-src 'self' blob:", "worker-src 'self'", "manifest-src 'self'", "frame-src https://micromobility.sa", "frame-ancestors 'none'", "base-uri 'self'", "object-src 'none'", "form-action 'self'",
   'upgrade-insecure-requests', 'report-uri /api/csp-report', 'report-to csp',
 ].join('; ');
 const headersUrl = new URL('../_headers', import.meta.url);
