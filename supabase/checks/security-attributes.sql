@@ -264,7 +264,15 @@ with expected(fname, want_definer, note) as (values
   ('customer_emergency',        true,  'reads the caller''s own emergency contacts, both of them (20261007150000); token-checked'),
   ('customer_set_emergency',    true,  'writes the caller''s own emergency contact; token-checked'),
   ('customer_set_emergency2',   true,  'writes the caller''s own second emergency contact (20261007150000); token-checked'),
-  ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules')
+  ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules'),
+  -- Fleet condition, maintenance and stock movements (20261009170000)
+  ('staff_return',              true,  'frees the bikes, closes the assignment and stamps the booking in one go; staff only'),
+  ('_return_check_all',         true,  'reads the business setting in staff_options for staff_return; internal only'),
+  ('_bikes_check_hold',         false, 'trigger: refuses check -> in-use, reads nothing'),
+  ('staff_inventory_move',      true,  'moves stock and writes inventory_moves, which no client can insert; staff only'),
+  ('staff_inventory_receive',   true,  'stock in at cost (weighted average), supplier and expiry; staff only'),
+  ('staff_inventory_set_count', true,  'a stock-take count as a movement; staff only'),
+  ('staff_inventory_extras',    true,  'reads inventory cost, supplier and expiry, which anon and authenticated cannot; staff only')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

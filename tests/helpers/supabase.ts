@@ -27,7 +27,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // Business settings, pricing, team accounts and retention (20261009160000-20261009165000): the page
   // runs as before without them; the tests/s1009-settings-*.spec.ts specs stub them by name.
   'staff_set_biz', 'staff_set_ride_price', 'staff_team_more', 'staff_set_caps', 'staff_set_disabled', 'staff_invite',
-  'staff_reset_password', 'staff_purge_preview', 'staff_purge_old']);
+  'staff_reset_password', 'staff_purge_preview', 'staff_purge_old',
+  // Stock movements (20261009170000): without them the desk moves the count alone, as before;
+  // tests/s1009-fleet-*.spec.ts stub them by name.
+  'staff_inventory_move', 'staff_inventory_receive', 'staff_inventory_set_count', 'staff_inventory_extras']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
