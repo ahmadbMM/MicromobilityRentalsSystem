@@ -29,7 +29,7 @@ async function settle(page: import('@playwright/test').Page) {
 async function audit(page: import('@playwright/test').Page, label: string) {
   await settle(page);
   const results = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa'])
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
     .analyze();
   // axe files anything it could not decide (notably colour-contrast over gradients/opacity)
   // under `incomplete`. Reading only `violations` is how a real contrast defect stayed hidden.
@@ -69,22 +69,89 @@ test.describe('accessibility audit (report-only)', () => {
     if (STRICT && count > 0) throw new Error(`${count} a11y violation type(s)`);
   });
 
-  // The staff back office is the app's actual product and was entirely unaudited —
-  // two landing snapshots covered a few percent of the surface.
-  for (const tab of ['queue', 'cashier', 'inventory', 'analytics', 'history'] as const) {
-    test(`staff: ${tab}`, async ({ page }) => {
+  // The staff back office is the app's actual product. Every section of STAFF_PATHS (2026-10-09; it was
+  // five), in English and again in Arabic, right to left, with the rules of WCAG 2.1 and 2.2 AA too.
+  const STAFF_TABS = ['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'ambassadors',
+    'vendors', 'website', 'catalog', 'messages', 'analytics', 'history', 'team', 'settings'] as const;
+  for (const lang of ['en', 'ar'] as const) {
+    for (const tab of STAFF_TABS) {
+      test(`staff: ${tab} (${lang})`, async ({ page }) => {
+        await stubSupabase(page, staffFixtures());
+        await page.addInitScript((l) => {
+          localStorage.setItem('cq_staff', '1');
+          localStorage.setItem('cq_op_name', 'A11y Spec');
+          localStorage.setItem('cq_lang', l);
+        }, lang);
+        await page.goto('/');
+        await staffReady(page);
+        await waitForSb(page);
+        if (lang === 'ar') await page.locator('html[dir="rtl"]').waitFor();
+        await page.evaluate((t) => (window as unknown as { setStaffTab: (x: string) => void }).setStaffTab(t), tab);
+        const count = await audit(page, `staff ${tab} ${lang}`);
+        if (STRICT && count > 0) throw new Error(`${count} a11y violation type(s)`);
+      });
+    }
+  }
+
+  // The staff dark theme is a choice again (Settings > This device > Theme, 2026-10-09): its contrast is held too.
+  for (const tab of ['queue', 'dashboard', 'cashier', 'inventory', 'customers', 'analytics', 'history', 'settings'] as const) {
+    test(`staff dark: ${tab}`, async ({ page }) => {
+      await stubSupabase(page, staffFixtures());
+      await page.addInitScript(() => {
+        localStorage.setItem('cq_staff', '1');
+        localStorage.setItem('cq_op_name', 'A11y Spec');
+        localStorage.setItem('cq_staff_theme', 'dark');
+      });
+      await page.goto('/');
+      await staffReady(page);
+      await waitForSb(page);
+      await expect(page.locator('html')).toHaveAttribute('data-staff-theme', 'dark');
+      await page.evaluate((t) => (window as unknown as { setStaffTab: (x: string) => void }).setStaffTab(t), tab);
+      const count = await audit(page, `staff dark ${tab}`);
+      if (STRICT && count > 0) throw new Error(`${count} a11y violation type(s)`);
+    });
+  }
+
+  // The dialogs the desk lives in: check-in, the booking editor, a customer, a bike, a sale.
+  const DIALOGS: [string, string, string][] = [
+    ['check-in', `showCheckinModal('q1')`, '#checkin-modal [role="dialog"]'],
+    ['booking editor', `showBookingEditModal('q1')`, '[role="dialog"]'],
+    ['customer', `showEditCustomerModal('c1')`, '[role="dialog"]'],
+    ['bike', `openBikeProfile('b1')`, '#bike-profile-modal [role="dialog"], #bike-profile-modal .modal-backdrop'],
+    ['sale', `showCashierModal('q1')`, '#cashier-modal [role="dialog"], #cashier-modal .modal-backdrop'],
+  ];
+  for (const [name, open, sel] of DIALOGS) {
+    test(`staff dialog: ${name}`, async ({ page }) => {
+      await stubSupabase(page, staffFixtures());
       await page.addInitScript(() => {
         localStorage.setItem('cq_staff', '1');
         localStorage.setItem('cq_op_name', 'A11y Spec');
       });
       await page.goto('/');
       await staffReady(page);
-      await page.evaluate((t) => (window as unknown as { setStaffTab: (x: string) => void }).setStaffTab(t), tab);
-      const count = await audit(page, `staff ${tab}`);
+      await waitForSb(page);
+      await page.waitForFunction(`getQueue().length>0`);
+      await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${DAY}';renderStaffQueue()`);
+      await page.evaluate(open);
+      await page.locator(sel).first().waitFor();
+      const count = await audit(page, `staff dialog ${name}`);
       if (STRICT && count > 0) throw new Error(`${count} a11y violation type(s)`);
     });
   }
 });
+
+// Tomorrow in Riyadh: a "live" ride for the fixtures (a today-dated one turns into yesterday after 23:00 KSA).
+const DAY = new Date(Date.now() + 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
+function staffFixtures() {
+  return {
+    sessions: [{ id: DAY, session_date: DAY, day: 'Saturday', status: 'open', capacity: 20, created_at: 1 }],
+    bikes: [{ id: 'b1', name: 'R-11', type: 'Road', size: 'M', status: 'available', colors: ['#111111'], color_names: ['Black'], bike_number: 11 }],
+    customers: [{ id: 'c1', name: 'Lina Haddad', phone: '0550000001', email: 'lina@example.com', height: 168 }],
+    queue_entries: [{ id: 'q1', session_id: DAY, session_day: 'Saturday', session_date: DAY, queue_num: 1, name: 'Lina Haddad',
+      phone: '0550000001', customer_id: 'c1', type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 75,
+      registered_at: DAY + 'T10:00:00Z' }],
+  };
+}
 
 // The customer half's fields (2026-10-05): the build's field-name check now reads the rider pages too
 // (scripts/split-staff.mjs, tests/build-checks.spec.ts); these are the fields it found unnamed, each now

@@ -1160,7 +1160,10 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
 // badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
 // language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
+// Staff 480 -> 483, core 254 -> 255 (2026-10-09): the accessibility and consistency pass (theme choice, shortcut
+// switch, named buttons and toggle states, sortable headers as buttons, captions, 17 strings in each language);
+// here staff 479.2, core 252.3 local (~481 / ~253.6 on the runner), inside 2.5 KB of the old limits.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 483, core: 255 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

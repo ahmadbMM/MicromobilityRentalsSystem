@@ -128,7 +128,7 @@ test('revenue per ride divides the rides\' fares, not money paid ahead for later
     setup: "S.analyticsRange='all';S.anSession='all';",
   });
   const v = await page.locator('#tab-analytics .hl-item', { hasText: 'Revenue per Ride' }).locator('.hl-value').textContent();
-  expect(v).toContain('SAR 100.00');
+  expect(v).toMatch(/^SAR 100(?!\.)/); // one money format since 2026-10-09: cents only when there are any (was SAR 100.00)
 });
 
 test('no revenue at all raises no low-collection alert', async ({ page }) => {

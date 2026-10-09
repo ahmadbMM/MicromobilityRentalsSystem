@@ -240,9 +240,10 @@ test.describe('@staff:bookings device', () => {
   test('Booth mode is a staff setting kept on the device: black ink on white', async ({ page }) => {
     await boot(page);
     await goStaffTab(page, 'settings');
-    await page.locator('#set-booth').check();
+    // Booth is one of the Theme choices since 2026-10-09 (Light / Dark / Booth / Follow this device), kept as cq_staff_theme
+    await page.locator('#set-theme').selectOption('booth');
     await expect(page.locator('html')).toHaveAttribute('data-staff-theme', 'booth');
-    expect(await page.evaluate(`localStorage.getItem('cq_booth')`)).toBe('1');
+    expect(await page.evaluate(`localStorage.getItem('cq_staff_theme')`)).toBe('booth');
     await page.reload();
     await waitForSb(page);
     await expect(page.locator('html')).toHaveAttribute('data-staff-theme', 'booth');
