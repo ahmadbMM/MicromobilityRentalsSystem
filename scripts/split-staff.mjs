@@ -450,6 +450,8 @@ export const STAFF_PARTS = {
   deskq: ['_dqEnqueue', '_dqFlush', '_dqBoot', '_dqOpen'],
   // 2026-10-09: the self-service kiosk (a desk tablet in kiosk mode), and the deposit ledger's writes and settle dialog
   kiosk: ['_kioskOpen'], deposits: ['_depTake', '_depSettle', '_depSettleOpen'],
+  // 2026-10-09 (R7): ride reminders on WhatsApp and who a freed waitlist place goes to (staff pick or a timed offer)
+  remind: ['openRemindSheet', 'openWlOffers'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -1268,7 +1270,9 @@ export function formatFieldNames(r, limit = 20) {
 // (partLangKeys) and each account loads only its sections' parts; with the round's features (desk notes, My shift,
 // the desk outbox, the kiosk, deposits, house rides, reminders...) measured here at customer 224.1, staff 577.1 and
 // core 259.0 KB local. Limits: customer +2, staff +5, core +6 (rounded up). New staff code goes in a part.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 227, staff: 583, core: 265 };
+// With R7 merged (ride reminders, waitlist offers: the 'remind' part ~9 KB, the rider's /?claim= page ~1.5 KB on the
+// customer half) measured 225.8 / 588.2 / 260.8 KB local; the same margins give 228 / 594 / 267.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 594, core: 267 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

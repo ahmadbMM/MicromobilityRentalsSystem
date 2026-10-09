@@ -1034,3 +1034,42 @@ customers and force them even add it in the sign up page and all forms currently
   for the holder's own row: `_house_earned`; type Own; a free community ride; a promo's 0), as do inserts,
   admins, customers and the service role. The walk-in waitlist (desk_waitlist) and the till's house lines
   (cashier_sales) are still the page's PIN alone.
+
+## Ride reminders and waitlist offers (2026-10-09, R7)
+
+No WhatsApp Business API and no e-mail: every message is a staff-sent wa.me link, and the database keeps what went out.
+Migration `20261009225000_reminders_waitlist_offers.sql`; the page works without it (see "Before the migration").
+
+- **Reminders** (Bookings > a ride > Reminders, staff part `remind`: `openRemindSheet(sid, kind)`). Lists the bookings
+  `_remTargets` gives (status waiting, not an approval still pending or refused), each with Send (wa.me in the rider's
+  language) and a language picker; "Send to the N not reminded" runs Next / Skip / Stop like the segment messages
+  (`seg-prog` markup and strings). Kinds `24h` / `2h`; a 24 h one counts as done once any reminder went, a 2 h one only
+  after a 2 h one (`_remDone`). Sent = `queue_entries.reminded_at` + `reminded_kind` (`remindedAt` / `remindedKind` in
+  `entryFromDB`; `remindedAt` is `undefined` for a row read without the column, which is how `_remColOk` knows to write
+  nothing and keep the mark on the device, `S._remLocal`). The rider's language comes from the account's nationality
+  (`REM_NAT_LANG`), else English. The message has a "Can't come?" link to `CA_SITE/my-bookings?lang=<code>`.
+- **Templates** `remind_24h`, `remind_2h`, `wl_offer` (group `tplgRemind`). Their built-in texts in all ten languages are
+  `REM_MSG` in the `remind` part; `_tplDefault` reaches them through `globalThis['_remDef'+'ault']` so the core does not
+  pull the dictionary in.
+- **Who a freed place goes to**: Settings > Business > The waitlist, `wl_offer_mode` = `auto` (the old
+  `_autoPromoteOldestWaitlist`), `staff` or `claim`; **the default is `auto`** (unset = today's behaviour, staff opt in); `wl_claim_min` (5-720, default 30). `_wlMode()`
+  reads it (`claim` reads as `staff` while `S._wlNoDb`). In `staff` / `claim` the desk's cancel and no-show paths call
+  `_wlAskSoon(sid)`, which opens `openWlOffers(sid)` (a centred dialog: Give the place = the old guarded promotion, by
+  hand, with Undo; in `claim` also Offer = `staff_offer_spot`, and the open offers with Send on WhatsApp / Withdraw).
+  `_wlLine` / `_wlFree` keep the promotion's rules (no approval ride, no ride that is over, Own bikes only where they take
+  a place, `_wlCmp` order). The server's `_promote_next_waitlist` follows the same setting (it promotes only in `auto`;
+  in `claim` it calls `_wl_offer_fill`), so a rider's own cancel behaves as the desk does.
+- **The bell**: kinds `remind` (from 14:00 KSA the day before a ride with bookings not reminded; `REMIND_FROM_H`) and
+  `wlfree` (a ride with a free place and someone eligible waiting, not in `auto`), both in `NT_KINDS` so Settings can turn
+  them off; added by `_r7Bell`, which `_ntKindsNow` calls by a built name so the customer half does not carry it.
+- **The rider's claim page** `/?claim=<32 hex>` (`_readClaimParam`, `_wlcOpen`, `renderClaim`, host `#wl-claim`): the ride,
+  a countdown, Claim my place / I can't come; `customer_claim_get` / `customer_claim_spot(token, decline)`. The token
+  waits in sessionStorage `cq_claim` until the page reaches an end state.
+- **Database** (20261009225000): `waitlist_offers` (token, status open|claimed|expired|declined|cancelled|closed, staff
+  read + update sent_at/status), `_wl_mode()`, `_wl_claim_min()`, `_wl_offer_fill(session)`, `staff_offer_spot`,
+  `customer_claim_get`, `customer_claim_spot`, a trigger closing an open offer when its booking leaves the waitlist, and
+  pg_cron `mm-wl-offers` every 5 minutes (`_wl_offer_tick`: expired offers pass to the next rider). An expired or declined
+  offer is not offered again automatically on that ride; staff may offer it again by hand.
+- **Before the migration**: the stub lists the three RPCs in `NOT_YET_IN_DB` and `waitlist_offers` in
+  `TABLES_NOT_YET_IN_DB`. Settings shows only Automatic / Staff choose; reminders are marked on the device only.
+  Specs: `tests/s1010-remind-*.spec.ts`.

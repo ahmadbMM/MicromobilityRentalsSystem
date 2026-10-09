@@ -423,6 +423,7 @@ window.mmLoading=(function(){
 <div id="profile-gate"     data-host></div>
 <div id="fix-gate"         data-host></div>
 <div id="app-fix"          data-host></div>
+<div id="wl-claim"         data-host></div>
 <div id="return-pay-modal" data-host></div>
 <div id="return-modal" data-host></div>
 <div id="confirm-modal"    data-host></div>
@@ -1084,6 +1085,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   receiptSeeYou:'We hope to see you at the Corniche Circuit again soon!',
   typeRoad:'Road',typeHybrid:'Hybrid',typeMountain:'Mountain',typeGravel:'Gravel',typeKids:'Kids',typeAny:'Any',typeRoadCarbon:'Road Carbon',typeOwn:'Bike owner',typeNone:'No bike',ridersNoBikeFree:'checked in without a bike - none free that fits',typeOwnPref:'I have my own bike',
   liveLabel:'Live',savedCopyLabel:'Saved copy',bpSvcSince:'Rides since service',bpMarkServiced:'Mark serviced',bpLastServiced:'Last serviced',attnTitle:'Bikes needing attention',attnInMaint:'In maintenance',attnDue:'Service due · {0} rides',attnNever:'Never serviced',attnLow:'Low rating {0}/10',attnHide:'Hide',sendWorkshop:'Send to workshop',svcRecent:'Recent service log',svcKindService:'Serviced',svcKindWorkshop:'Sent to workshop',svcEveryN:'Service every {0} rides',gsOpenBtn:'Search',gsPh:'Search bookings, accounts, bikes…',gsNone:'Nothing found.',gsMin:'Type two or more letters or digits.',gsKindBooking:'Booking',gsKindAccount:'Account',gsKindBike:'Bike',gsKindItem:'Item',gsKindSession:'Session',gsKindWorkshop:'Workshop',ntOpen:'Notifications',ntMarkRead:'Mark all read',ntLong:'Rides past 2 hours: {0}',ntApps:'Membership applications waiting: {0}',ntMsgs:'New website messages: {0}',ntWs:'New workshop requests: {0}',ntAttn:'Bikes needing attention: {0}',ntStock:'Items low on stock: {0}',ntLowRate:'Low ratings this week: {0}',syncNowBtn:'Sync now',syncingLbl:'Syncing…',syncDone:'Up to date',errWriteExists:'That already exists. Reload to see it, or change it and try again.',syncLeft:'Changes still waiting to sync: {0}',tbMore:'More',daySheetBtn:'Print day sheet',daySheetTitle:'Day sheet',daySheetNone:'No session today.',daySheetRiders:'Riders',daySheetWs:'Workshop today',repPageOf:'Page {0} of {1}',coNoSales:'Nothing sold',logPrintedDaySheet:'Printed the day sheet',tabTeam:'Team',tabCatalog:'Bikes catalog',catSub:'What micromobility.sa/bikes shows: the categories, their sub-types, and every model with its specifications, colours and photos. A model shows on the site once it is published.',catOpenSite:'Open /bikes',catViewModels:'Models',catViewCats:'Categories',catViewFields:'Specification fields',catAddModel:'+ Add model',catAddCat:'+ Add category',catAddSub:'+ Add sub-type',catAddField:'+ Add field',catSearchPh:'Search brand or model',catNoMatch:'Nothing matches.',catColModel:'Model',catColCategory:'Category',catColRide:'Rides as',catColPhotos:'Photos',catColPublished:'On the site',catColUpdated:'Updated',catEmptyModels:'No models yet. Add the first one.',catNoCats:'Add a category first: every model belongs to one.',catBrand:'Brand',catName:'Model name',catSlug:'Address',catSlugHint:'The model’s address on the site: {0}. Lowercase letters, digits and hyphens.',catCategory:'Category',catSubtype:'Sub-type',catNoSubtype:'None',catYear:'Model year',catRideType:'Rides as',catRideTypeHint:'The rental bike type it counts as; it sets the ride price shown beside Book a ride. Leave it empty for a bike that is not rented.',catRideNone:'Not rented',catTagline:'Tagline',catDescription:'Description',catDescHint:'Plain text. A blank line starts a new paragraph.',catSpecs:'Specifications',catSpecsHint:'An empty field is not shown. The Arabic box may stay empty: the site then shows the English.',catColours:'Colours',catColourName:'Colour name',catColourHex:'Swatch',catAddColour:'+ Add colour',catPhotos:'Photos',catPhotosHint:'The cover is the photo shown in lists. A photo given a colour is shown when a visitor picks that colour; the others show for every colour.',catUploadPhotos:'Upload photos',catPhotoColour:'Colour',catAnyColour:'Every colour',catCover:'Cover',catAlt:'Description for screen readers',catSheet:'Spec sheet (PDF)',catUploadSheet:'Upload PDF',catPublished:'Published on the site',catPublishedShort:'Published',catDraft:'Draft',catHidden:'Hidden',catDeleteModelTitle:'Delete this model?',catDeleteModelBody:'Its photos, colours and specifications go with it, and the site stops showing it at once.',catDeleteCatTitle:'Delete this category?',catDeleteCatBody:'Only an empty one can go: its models and sub-types must be moved or deleted first.',catDeleteFieldTitle:'Delete this field?',catDeleteFieldBody:'Models keep the value they had; the site simply stops showing it.',catSaved:'Saved',catDeleted:'Deleted',catSaveErr:'Could not save. Try again.',catLoadErr:'Could not load the catalogue. Check your connection and try again.',catUploading:'Uploading…',catUploaded:'Uploaded',catUploadErr:'The upload failed. Try again.',catUploadType:'Photos only: JPEG, PNG, WebP or AVIF.',catUploadPdfType:'A PDF file only.',catUploadBig:'That file is too big: 10 MB at most.',catErrName:'Give the model a name.',catErrCategory:'Pick a category.',catErrSlug:'The address may only have lowercase letters, digits and hyphens, and it starts with a letter.',catErrSlugTaken:'Another model already uses this address.',catErrColour:'Every colour needs a name.',catCatName:'Name',catCatSlug:'Address',catCatBlurb:'Short description',catCatCover:'Cover photo',catCatPublished:'Shown on the site',catCatModels:'{0} models',catCatSubs:'{0} sub-types',catCatEmpty:'No categories yet.',catCatsSub:'Categories are the first level under /bikes; each can hold sub-types. A model belongs to one category and, if you like, one of its sub-types.',catErrCatName:'Give it a name.',catErrCatTaken:'Another one at this level already uses this address.',catCatInUse:'It still has models or sub-types. Move or delete them first.',catFieldKey:'Key',catFieldKeyHint:'How the value is stored: lowercase letters, digits and underscores. It cannot change later.',catFieldLabel:'Label',catFieldGroup:'Group',catFieldUnit:'Unit',catFieldSort:'Order',catFieldUsed:'Used by',catFieldsSub:'The specifications a model can carry, with their labels in English and Arabic. Every model offers these boxes; the site shows the ones that are filled in, grouped and in this order.',catErrFieldKey:'The key may only have lowercase letters, digits and underscores, and it starts with a letter.',catErrFieldLabel:'Give the field a label.',catErrFieldTaken:'A field with this key already exists.',catFieldsEmpty:'No fields yet.',catPreview:'View on the site',catUnsaved:'You have unsaved changes. Leave without saving?',teamPageSub:'Who works the desk: operator PINs, and what each sign-in account can open and change.',opsTitle:'Operators',opsSub:'The names at the operator gate. A name with a PIN asks for it.',opsPinSet:'PIN set',opsPinNone:'No PIN',opsSetPin:'Set PIN',opsClearPin:'Clear PIN',opsPinPrompt:'New 4-digit PIN for {0}',opsPinBad:'A PIN is 4 digits.',opsPinSaved:'PIN saved for {0}',opsPinCleared:'PIN cleared for {0}',opsAdd:'Add name',opsAddPh:'Name',acctTitle:'Sign-in accounts',acctSub:'Each account\'s role, and the sections it can open and change. Nobody changes their own.',acctYou:'You',acctView:'Can open',acctEdit:'Can change',acctSaved:'Access saved for {0}',logCsvExport:'Exported {0} as CSV ({1} rows)',unsentTitle:'{0} changes not sent yet',unsentBody:'These sales or bookings are still only on this device. Signing out deletes them for good. Cancel, reconnect and wait for them to send.',unsentDropBtn:'Sign out anyway',dbPending:'Waiting for the database update.',xTypePick:'Bike type…',guestOfName:'Guest of {0}',bkSuggLabel:'Suggested',giveBikeBtn:'Give bike',ciOutLater:'Save, check in later',deskNoteTitle:'Desk note',deskNoteHint:'For the desk only, up to 200 characters. Riders never see it.',deskNotePh:'Left ID, pays on return…',shiftTitle:'My shift',shiftMine:'My actions today',shiftNone:'Nothing yet today.',shiftLate:'Out too long',partyJoinBtn:'Join a party',partyJoinHint:'Pick who this rider came with. They ride, pay and check in together.',partyJoinNone:'No other bookings on this ride.',partyLeaveBtn:'Leave the party',partyJoined:'{0} joined {1}',partyLeft:'{0} left the party',nfcSentTitle:'Sent to your open tab',nfcSentBody:'Bike {0} went to the staff tab that is already open. Switch back to it.',nfcSentHere:'Open it here instead',tmAccess:'Accounts and operators',ptTab:'Part-timers',ptKinds:'Kinds of work',ptKindsSub:'The front-desk jobs part-timers are paid for, each with its rate per hour: welcoming and checking in riders, taking payment, handing out bikes.',ptKind:'Kind of work',ptPickKind:'Choose the kind of work',ptKindNone:'No kinds of work yet. Add one under Kinds of work, with its rate per hour.',ptKindAdd:'Add kind of work',ptKindPh:'e.g. Welcome and check-in',ptKindAdded:'Kind of work added: {0}',ptKindSaved:'Kind of work saved: {0}',ptKindDup:'There is already a kind of work named {0}.',ptErrKind:'Choose the kind of work.',ptUnpaid:'Unpaid',ptPaid:'Paid',ptPaidOn:'Paid {0}',ptMarkPaid:'Mark as paid ({0})',ptPayTitle:'Mark as paid',ptPayBody:'{0} · {1} · Entries: {2} · Part-timers: {3}',ptPayDay:'Paid on',ptPayHow:'Paid by',ptTransfer:'Bank transfer',ptPayDone:'Marked as paid: {0}',ptPayments:'Payments',ptPaymentsNone:'No payments yet.',ptSlip:'Pay slip',ptStatement:'Statement',ptUndoPay:'Undo payment',ptUndoAsk:'Its hours become unpaid again.',ptUndone:'Payment undone',ptReceived:'Received by',ptPerKind:'Per kind of work',ptSlipPaid:'Paid on {0} · {1}',ptPageSub:'Log the hours part-timers work and see what we owe them.',ptPeople:'Part-timers',ptPeopleSub:'Staff accounts that work at the front desk and are paid by the hour.',ptOne:'Part-timer',ptRate:'Rate per hour (SAR)',ptPerHour:'per hour',ptNoAccount:'No staff account',ptDeactivate:'Deactivate',ptActivate:'Activate',ptPickAcct:'Choose a staff account',ptAdd:'Add part-timer',ptAllAdded:'Every staff account is already a part-timer.',ptNone:'No part-timers yet. Choose a staff account below.',ptAdded:'Part-timer added: {0}',ptSaved:'Part-timer saved: {0}',ptErrRate:'Enter a rate of 0 or more.',ptLog:'Log hours',ptEditEntry:'Edit entry',ptWho:'Part-timer',ptPickWho:'Choose a part-timer',ptRide:'Ride',ptNoRide:'No ride (pick a date)',ptHours:'Hours worked',ptNote:'Note (optional)',ptAmountIs:'{0} h × {1} = {2}',ptSaveHours:'Save hours',ptErrWho:'Choose a part-timer.',ptErrHours:'Hours must be more than 0 and no more than 24.',ptDupShift:'{0} already has {1} h on this ride. Log these hours as well?',ptLogAgain:'Log as well',ptUpdated:'Entry updated: {0} h for {1}',ptLogged:'{0} h logged for {1}',ptDelAsk:'Delete this entry?',ptDeleted:'Entry deleted',ptHoursN:'{0} h',ptNoHours:'no hours',ptNoRidesMonth:'No rides this month.',ptOwe:'What we owe',ptByRange:'Date range',ptByRides:'Pick rides',ptAll:'All part-timers',ptLastMonth:'Last month',ptPicked:'Rides picked: {0}',ptPickHint:'Tap rides on the calendar or tick them in the list.',ptPickMonth:'Pick all this month',ptTotHours:'Hours',ptTotRides:'Rides',ptTotOwed:'We owe',ptPerPerson:'Per part-timer',ptNoRideShort:'No ride',ptEntries:'Entries',ptColRate:'Rate',ptColAmount:'Amount',ptNoEntries:'No hours logged for this choice.',ptTotal:'Total',opChange:'Change in Settings',opSwitch:'Switch operator',opPinTitle:'PIN for {0}',opPinWrong:'Wrong PIN. {0} tries left.',opPinWrongPlain:'Wrong PIN.',opPinLocked:'Too many tries. Wait {0} seconds.',roMode:'Read-only mode: no changes allowed',dashActivity:'Recent activity',dashQuick:'Quick actions',dashNoActivity:'Nothing logged yet today.',dashCollected:'Collected today',dashBookedToday:'Riders today',dashDoneToday:'Rides done today',dashSessionsToday:'Today\'s sessions',dashCheckinNext:'Check in next',kbTitle:'Keyboard shortcuts',kbFindQueue:'Search the bookings',kbThisList:'Show this list',calViewList:'List',calViewCal:'Calendar',calPrev:'Previous month',calNext:'Next month',calToday:'Today',calWs:'{0} workshop',calNewOn:'New session on {0}',errAddonsNotSaved:'Your booking is made, but the add-ons were not saved. Add them from My Bookings.',bkExportedToast:'{0} bike(s) exported',errTooManyTries:'Too many tries from this network. Please wait a few minutes and try again.',errPaidTypeDesk:'This booking is already paid. To change to a bike that costs more, ask at the booth.',addonHandedOver:'Add-ons already handed over cannot be removed here. Ask at the booth.',teamPinKept:'Only an admin can remove a name that has a PIN: {0}',acctOneSection:'Pick at least one section this account can open.',acctNoneOpen:'This account has no sections to open. Ask an admin to give it access on the Team page.',anPieces:'{0} pcs',drawerCountBtn:'Count the drawer',drawerCountTitle:'Drawer count',drawerCountBody:'Expected cash for this day: SAR {0}. Enter what the drawer actually holds:',drawerExpected:'expected',drawerCounted:'counted',drawerExactToast:'Drawer matches — recorded',drawerDiffToast:'Recorded — drawer is off by {0}',cnBtn:'Cancel the night',cnTitle:'Cancel the night',cnSub:'{0} live booking(s). Tell the riders first — then cancel. To MOVE the whole night, edit the session\u2019s date instead: bookings follow it.',cnMsgLabel:'Message to riders',cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.',cnCopyNumbers:'Copy all numbers',cnCopiedToast:'Numbers copied',cnCopyByHand:'Could not copy. Copy the numbers from the box.',cnConfirmBtn:'Cancel {0} booking(s)',cnDoneToast:'Night cancelled — {0} booking(s) cancelled, riders keep their history',wxTip:'Forecast: {0}\u00b0C high, wind up to {1} km/h',noShowHistChip:'{0}/{1} no-shows',noShowHistTip:'No-shows across this rider\u2019s last five decided bookings',bulkApproveBtn:'Approve all ({0})',bulkApproveTitle:'Approve every pending request',bulkApproveBody:'{0} pending request(s) will be approved. Waitlisted requests are left for you to pick individually. Riders see nothing until you publish.',bulkApprovedToast:'{0} request(s) approved',ciPrev:'Previous',ciNext:'Next',scanBnOk:'OK',scanBnWarn:'Check',scanBnErr:'Stop',scanSoundBtn:'Sound',scanBlacklisted:'#{0} {1} is on the blacklist. Ask a lead before checking them in.',scanAlreadyIn:'#{0} {1} is already checked in',scanInAt:'since {0}',scanOwes:'owes SAR {0}',scanCheckedIn:'#{0} {1} checked in',ciAutoNext:'Open the next rider',notHereChip:'Not here yet',cxHideAria:'Hide the cancellation of {0}',syncUnsent:'{0} unsent',setDevice:'This device',setDeviceSub:'Kept on this phone or computer only.',setPersonal:'Personal',setPersonalSub:'Your own choices. They follow your account to every device.',setStartOn:'Start on',setStartUsual:'The usual first section',setLanguage:'Language',setTabBar:'Phone tab bar',setTabBarHint:'Pick up to four sections for the bar at the bottom of a phone screen.',setTabBarReset:'Use the usual sections',setFilters:'Remembered filters',setFiltersHint:'Each section keeps its last filters, sorts and layout. Reset puts them all back to the start.',setFiltersReset:'Reset filters',setFiltersDone:'Filters reset',setDisplay:'Display',setTextSize:'Text size',setDensity:'Density',setComfortable:'Comfortable',setCompact:'Compact',setDensityHint:'Compact fits more rows in tables and lists on a laptop. Phones keep full-size buttons.',setWake:'Keep screen on at the desk',setBooth:'Booth mode (high contrast for sunlight)',ciChainLabel:'Riders to check in',ciStepOf:'Rider {0} of {1}',ciPartyLabel:'Riders in this party',dupPhoneTip:'This phone number is on another live booking in this session',overdueRideTip:'On the bike for over two hours',wiStockHint:'{0} {1} free on the rack',wiNoStockHint:'No {0} left on the rack — riders on the waitlist may be counting on returns.',moreActionsLbl:'More actions',vndTempPwd:'Temporary password',vndTempExpires:'Temporary password — expires {0}',vndTempExpired:'Temporary password expired — reset it',a11yDialCode:'Country code',a11yMsgKind:'Message type',a11yAmount:'Amount',a11yUnit:'Unit',closeOutBtn:'Close out',closeOutHint:'Finish the night: checked-in riders become Completed, no-arrivals become No-show.',closeOutTitle:'Close out the night',closeOutBody:'{0} checked-in rider(s) will be marked Completed and {1} who never arrived will be marked No-show. Waitlisted riders are not touched. This can be undone from the bar at the top.',closeOutDoneToast:'Night closed out — {0} completed, {1} no-shows',bookSyncPending:'Your booking hasn’t reached the booth yet. The app keeps trying while it’s open.',bookSyncRefused:'Your booking could not be sent. Please show this phone at the booth.',updateReadyToast:'A new version is ready. Refresh the page to update.',justNow:'just now',secondsAgo:'s ago',minutesAgo:'m ago',offlineLabel:'Offline',offlineBanner:'You’re offline. Changes are saved and will sync when you’re back online.',unreachableBanner:'Connected to wifi, but the server can’t be reached. You may need to sign in to this network.',retryBtn:'Try again',errWritePerm:'That did not save - your staff session may have expired. Unlock again and retry.',errWriteDup:'That booking number was just taken by another device. Reload and try again.',
+  remBtn:'Reminders',remTitle:'Reminders · {0}',remKindLbl:'Which reminder',remKind24:'The day before',remKind2:'2 hours before',remSummary:'{0} riders booked · {1} to remind · {2} with no number',remLocalOnly:'Waiting for the database update: who was reminded is kept on this device only.',remSendAll:'Send to the {0} not reminded',remRemindedAt:'Reminded {0} ({1})',remNotYet:'Not reminded yet',remNoNumber:'no number',remLangLbl:'Message language for {0}',remSend:'Send',remNone:'No rider holds a place on this ride yet.',remBackToList:'Back to the list',remLog:'Ride reminders ({0}): {1} sent for {2}',ntRemind:'Rides with riders not reminded: {0}',ntiRemind:'{0}: {1} riders not reminded yet',ntkRemind:'Tomorrow\'s riders not reminded yet',ntWlFree:'Rides with a free place and riders waiting: {0}',ntiWlFree:'{0}: {1} free, {2} waiting',ntkWlFree:'A free place with riders waiting',wlFreeBtn:'{0} free: who gets it',wloTitle:'A place is free · {0}',wloSummary:'{0} free · {1} waiting',wloHintStaff:'Choose who gets the place. Nobody moves up until you do.',wloHintClaim:'Offer: the rider gets a link and {0} minutes to claim the place; after that it goes to the next in line by itself. Give: the place is theirs now.',wloOpenOffers:'Offers waiting for an answer',wloClaimBy:'Claim by {0}',wloSent:'sent',wloSend:'Send on WhatsApp',wloSendAgain:'Send again',wloWithdraw:'Withdraw',wloNextUp:'Next in line',wloWaitingSince:'Waiting since {0}',wloOffered:'offered',wloOffer:'Offer',wloGive:'Give the place',wloGiven:'Has the place now',wloMore:'{0} more on the waitlist',wloNobody:'Nobody on the waitlist can take this place.',wloFull:'The ride has no free place now.',wloOfferLog:'Waitlist place offered: {0}',wloPushTitle:'A place is free for you',wloPushBody:'Claim it within {0} minutes.',tplgRemind:'Ride reminders and waitlist offers',tplRemind24:'Reminder the day before',tplRemind2:'Reminder 2 hours before',tplWlOffer:'A waitlist place to claim',bizCardWaitlist:'The waitlist',bizCardWaitlistSub:'Who gets a place that frees up when a rider cancels or does not come. Approval rides stay hand-picked.',bizWlMode:'When a place frees up',bizWlModeAuto:'The next in line gets it at once',bizWlModeStaff:'Staff choose who gets it',bizWlModeClaim:'The next in line gets a link to claim it',bizWlClaim:'Minutes to claim an offered place',bizWlClaimLater:'The claim link becomes a choice once the database update is applied.',wlcKicker:'Waitlist',wlcTitle:'A place is free for you',wlcEnds:'It is yours if you claim it within',wlcClaim:'Claim my place',wlcDecline:'I can\'t come',wlcDoneTitle:'Your place is booked',wlcDoneSub:'See you on the ride. Your ticket is in My Bookings.',wlcLateTitle:'This offer has ended',wlcLateSub:'The time to claim it ran out, so the place went to the next rider. You are still on the waitlist.',wlcFullSub:'The place was taken before you claimed it. You are still on the waitlist.',wlcGoneSub:'This link no longer holds an offer. Your bookings are in My Bookings.',wlcNoTitle:'Thank you for telling us',wlcNoSub:'The place goes to the next rider. You are still on the waitlist.',
   undoBtn:'Undo',undoneMsg:'Undone.',undoFailed:'Undo failed.',errStorageFull:'Device storage is full — free some space; unsynced sales/bookings may not be saved.',errStockWrite:'Stock for {0} was not saved — the count on screen has been put back.',
   fleetBadge:'Fleet',altBadge:'Alt',
   showOtherTypes:'↓ Show other types',hideOtherTypes:'↑ Hide other types',available2:'available',
@@ -1649,6 +1651,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   receiptSeeYou:'نأمل رؤيتك في حلبة الكورنيش مجدداً!',
   typeRoad:'طريق',typeHybrid:'هجين',typeMountain:'جبلي',typeGravel:'حصى',typeKids:'أطفال',typeAny:'أي نوع',typeRoadCarbon:'طريق كربون',typeOwn:'صاحب دراجة',typeNone:'بدون دراجة',ridersNoBikeFree:'سُجّل وصوله بدون دراجة - لا توجد دراجة مناسبة متاحة',typeOwnPref:'لدي دراجتي الخاصة',
   liveLabel:'مباشر',savedCopyLabel:'نسخة محفوظة',bpSvcSince:'رحلات منذ الصيانة',bpMarkServiced:'تسجيل صيانة',bpLastServiced:'آخر صيانة',attnTitle:'دراجات تحتاج انتباهاً',attnInMaint:'في الصيانة',attnDue:'موعد الصيانة · {0} رحلة',attnNever:'لم تُصان بعد',attnLow:'تقييم منخفض {0}/10',attnHide:'إخفاء',sendWorkshop:'إلى الورشة',svcRecent:'آخر سجلات الصيانة',svcKindService:'صيانة',svcKindWorkshop:'أُرسلت للورشة',svcEveryN:'صيانة كل {0} رحلة',gsOpenBtn:'بحث',gsPh:'ابحث في الحجوزات والحسابات والدراجات…',gsNone:'لا نتائج.',gsMin:'اكتب حرفين أو رقمين على الأقل.',gsKindBooking:'حجز',gsKindAccount:'حساب',gsKindBike:'دراجة',gsKindItem:'صنف',gsKindSession:'جلسة',gsKindWorkshop:'الورشة',ntOpen:'الإشعارات',ntMarkRead:'تعليم الكل كمقروء',ntLong:'رحلات تجاوزت ساعتين: {0}',ntApps:'طلبات عضوية بانتظار الرد: {0}',ntMsgs:'رسائل جديدة من الموقع: {0}',ntWs:'طلبات ورشة جديدة: {0}',ntAttn:'دراجات تحتاج انتباهاً: {0}',ntStock:'أصناف منخفضة المخزون: {0}',ntLowRate:'تقييمات منخفضة هذا الأسبوع: {0}',syncNowBtn:'زامن الآن',syncingLbl:'جارٍ المزامنة…',syncDone:'كل شيء محدّث',errWriteExists:'هذا موجود بالفعل. أعد التحميل لتراه، أو غيّره ثم حاول مجددًا.',syncLeft:'تغييرات بانتظار المزامنة: {0}',tbMore:'المزيد',daySheetBtn:'طباعة كشف اليوم',daySheetTitle:'كشف اليوم',daySheetNone:'لا جلسة اليوم.',daySheetRiders:'الراكبون',daySheetWs:'الورشة اليوم',repPageOf:'صفحة {0} من {1}',coNoSales:'لم يُبع شيء',logPrintedDaySheet:'طُبع كشف اليوم',tabTeam:'الفريق',tabCatalog:'كتالوج الدراجات',catSub:'ما يعرضه micromobility.sa/bikes: الفئات وأنواعها الفرعية، وكل موديل بمواصفاته وألوانه وصوره. يظهر الموديل على الموقع بعد نشره.',catOpenSite:'افتح /bikes',catViewModels:'الموديلات',catViewCats:'الفئات',catViewFields:'حقول المواصفات',catAddModel:'+ إضافة موديل',catAddCat:'+ إضافة فئة',catAddSub:'+ إضافة نوع فرعي',catAddField:'+ إضافة حقل',catSearchPh:'ابحث بالعلامة أو الموديل',catNoMatch:'لا توجد نتائج مطابقة.',catColModel:'الموديل',catColCategory:'الفئة',catColRide:'يُستأجر كـ',catColPhotos:'الصور',catColPublished:'على الموقع',catColUpdated:'آخر تعديل',catEmptyModels:'لا موديلات بعد. أضف الأول.',catNoCats:'أضف فئة أولاً: كل موديل ينتمي إلى فئة.',catBrand:'العلامة التجارية',catName:'اسم الموديل',catSlug:'العنوان',catSlugHint:'عنوان الموديل على الموقع: {0}. أحرف لاتينية صغيرة وأرقام وشرطات.',catCategory:'الفئة',catSubtype:'النوع الفرعي',catNoSubtype:'بدون',catYear:'سنة الموديل',catRideType:'يُستأجر كـ',catRideTypeHint:'نوع دراجة التأجير الذي يُحسب عليه؛ يحدد سعر الجولة الظاهر بجانب زر احجز جولة. اتركه فارغاً لدراجة لا تُستأجر.',catRideNone:'لا تُستأجر',catTagline:'العبارة التعريفية',catDescription:'الوصف',catDescHint:'نص عادي. السطر الفارغ يبدأ فقرة جديدة.',catSpecs:'المواصفات',catSpecsHint:'الحقل الفارغ لا يُعرض. يمكن ترك خانة العربية فارغة فيعرض الموقع الإنجليزية.',catColours:'الألوان',catColourName:'اسم اللون',catColourHex:'عيّنة اللون',catAddColour:'+ إضافة لون',catPhotos:'الصور',catPhotosHint:'صورة الغلاف هي التي تظهر في القوائم. الصورة المرتبطة بلون تظهر عند اختيار الزائر ذلك اللون؛ وبقية الصور تظهر مع كل لون.',catUploadPhotos:'رفع صور',catPhotoColour:'اللون',catAnyColour:'كل الألوان',catCover:'الغلاف',catAlt:'وصف لقارئات الشاشة',catSheet:'ورقة المواصفات (PDF)',catUploadSheet:'رفع PDF',catPublished:'منشور على الموقع',catPublishedShort:'منشور',catDraft:'مسودة',catHidden:'مخفي',catDeleteModelTitle:'حذف هذا الموديل؟',catDeleteModelBody:'تُحذف معه صوره وألوانه ومواصفاته، ويتوقف الموقع عن عرضه فوراً.',catDeleteCatTitle:'حذف هذه الفئة؟',catDeleteCatBody:'لا تُحذف إلا الفئة الفارغة: يجب نقل موديلاتها وأنواعها الفرعية أو حذفها أولاً.',catDeleteFieldTitle:'حذف هذا الحقل؟',catDeleteFieldBody:'تحتفظ الموديلات بالقيمة التي كانت لديها؛ ويتوقف الموقع عن عرضها فقط.',catSaved:'تم الحفظ',catDeleted:'تم الحذف',catSaveErr:'لم يتم الحفظ. حاول مرة أخرى.',catLoadErr:'لم يتم تحميل الكتالوج. تحقق من الاتصال وحاول مرة أخرى.',catUploading:'جارٍ الرفع…',catUploaded:'تم الرفع',catUploadErr:'فشل الرفع. حاول مرة أخرى.',catUploadType:'صور فقط: JPEG أو PNG أو WebP أو AVIF.',catUploadPdfType:'ملف PDF فقط.',catUploadBig:'الملف كبير جداً: 10 ميغابايت على الأكثر.',catErrName:'أدخل اسم الموديل.',catErrCategory:'اختر فئة.',catErrSlug:'العنوان يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات، ويبدأ بحرف.',catErrSlugTaken:'موديل آخر يستخدم هذا العنوان.',catErrColour:'كل لون يحتاج إلى اسم.',catCatName:'الاسم',catCatSlug:'العنوان',catCatBlurb:'وصف قصير',catCatCover:'صورة الغلاف',catCatPublished:'يظهر على الموقع',catCatModels:'{0} موديلات',catCatSubs:'{0} أنواع فرعية',catCatEmpty:'لا فئات بعد.',catCatsSub:'الفئات هي المستوى الأول تحت /bikes، ولكل فئة أنواع فرعية إن شئت. ينتمي الموديل إلى فئة واحدة، وإلى أحد أنواعها الفرعية إن أردت.',catErrCatName:'أدخل اسماً.',catErrCatTaken:'عنصر آخر في هذا المستوى يستخدم هذا العنوان.',catCatInUse:'ما زالت تحتوي على موديلات أو أنواع فرعية. انقلها أو احذفها أولاً.',catFieldKey:'المفتاح',catFieldKeyHint:'كيف تُخزَّن القيمة: أحرف لاتينية صغيرة وأرقام وشرطات سفلية. لا يمكن تغييره لاحقاً.',catFieldLabel:'التسمية',catFieldGroup:'المجموعة',catFieldUnit:'الوحدة',catFieldSort:'الترتيب',catFieldUsed:'مستخدم في',catFieldsSub:'المواصفات التي يمكن أن يحملها الموديل، بتسمياتها بالإنجليزية والعربية. تظهر هذه الخانات لكل موديل؛ ويعرض الموقع المملوءة منها مجمّعة وبهذا الترتيب.',catErrFieldKey:'المفتاح يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات سفلية، ويبدأ بحرف.',catErrFieldLabel:'أدخل تسمية للحقل.',catErrFieldTaken:'يوجد حقل بهذا المفتاح.',catFieldsEmpty:'لا حقول بعد.',catPreview:'عرض على الموقع',catUnsaved:'لديك تغييرات غير محفوظة. الخروج دون حفظ؟',teamPageSub:'من يعمل على المكتب: الأرقام السرية للمشغّلين، وما يستطيع كل حساب فتحه وتعديله.',opsTitle:'المشغّلون',opsSub:'الأسماء في شاشة المشغّل. الاسم الذي له رقم سري يطلبه.',opsPinSet:'له رقم سري',opsPinNone:'بلا رقم سري',opsSetPin:'تعيين الرقم السري',opsClearPin:'حذف الرقم السري',opsPinPrompt:'رقم سري جديد من 4 أرقام لـ {0}',opsPinBad:'الرقم السري 4 أرقام.',opsPinSaved:'حُفظ الرقم السري لـ {0}',opsPinCleared:'حُذف الرقم السري لـ {0}',opsAdd:'إضافة اسم',opsAddPh:'الاسم',acctTitle:'حسابات الدخول',acctSub:'دور كل حساب، والأقسام التي يستطيع فتحها وتعديلها. لا أحد يغيّر حسابه بنفسه.',acctYou:'أنت',acctView:'يستطيع فتح',acctEdit:'يستطيع تعديل',acctSaved:'حُفظت الصلاحيات لـ {0}',logCsvExport:'تم تصدير {0} بصيغة CSV ({1} صف)',unsentTitle:'{0} تغييرات لم تُرسل بعد',unsentBody:'هذه المبيعات أو الحجوزات لا تزال على هذا الجهاز فقط. تسجيل الخروج يحذفها نهائيًا. ألغِ، وأعد الاتصال وانتظر حتى تُرسل.',unsentDropBtn:'تسجيل الخروج على أي حال',dbPending:'بانتظار تحديث قاعدة البيانات.',xTypePick:'نوع الدراجة…',guestOfName:'ضيف {0}',bkSuggLabel:'مقترحة',giveBikeBtn:'سلّم دراجة',ciOutLater:'احفظ، والتسجيل لاحقًا',deskNoteTitle:'ملاحظة المكتب',deskNoteHint:'للمكتب فقط، حتى 200 حرف. لا يراها العميل.',deskNotePh:'ترك الهوية، يدفع عند الإرجاع…',shiftTitle:'ورديتي',shiftMine:'ما قمت به اليوم',shiftNone:'لا شيء بعد اليوم.',shiftLate:'خارج لفترة طويلة',partyJoinBtn:'ضمّه إلى مجموعة',partyJoinHint:'اختر من جاء معه هذا العميل. يركبون ويدفعون ويسجلون معًا.',partyJoinNone:'لا توجد حجوزات أخرى في هذه الجولة.',partyLeaveBtn:'أخرجه من المجموعة',partyJoined:'انضم {0} إلى {1}',partyLeft:'خرج {0} من المجموعة',nfcSentTitle:'أُرسلت إلى الصفحة المفتوحة',nfcSentBody:'ذهبت الدراجة {0} إلى صفحة الموظفين المفتوحة. ارجع إليها.',nfcSentHere:'افتحها هنا بدلًا من ذلك',tmAccess:'الحسابات والمشغّلون',ptTab:'الموظفون بدوام جزئي',ptKinds:'أنواع العمل',ptKindsSub:'مهام الاستقبال التي يُدفع للموظفين بدوام جزئي مقابلها، ولكل منها سعر للساعة: استقبال الدراجين وتسجيل حضورهم، واستلام الدفع، وتسليم الدراجات.',ptKind:'نوع العمل',ptPickKind:'اختر نوع العمل',ptKindNone:'لا توجد أنواع عمل بعد. أضف نوعًا في أنواع العمل مع سعر الساعة.',ptKindAdd:'إضافة نوع عمل',ptKindPh:'مثال: الاستقبال وتسجيل الحضور',ptKindAdded:'تمت إضافة نوع العمل: {0}',ptKindSaved:'تم حفظ نوع العمل: {0}',ptKindDup:'يوجد نوع عمل باسم {0}.',ptErrKind:'اختر نوع العمل.',ptUnpaid:'غير مدفوع',ptPaid:'مدفوع',ptPaidOn:'دُفع {0}',ptMarkPaid:'تسجيل كمدفوع ({0})',ptPayTitle:'تسجيل كمدفوع',ptPayBody:'{0} · {1} · {2} تسجيلات · {3} موظفين',ptPayDay:'تاريخ الدفع',ptPayHow:'طريقة الدفع',ptTransfer:'تحويل بنكي',ptPayDone:'تم التسجيل كمدفوع: {0}',ptPayments:'المدفوعات',ptPaymentsNone:'لا توجد مدفوعات بعد.',ptSlip:'قسيمة الراتب',ptStatement:'كشف حساب',ptUndoPay:'إلغاء الدفع',ptUndoAsk:'ستعود ساعاته غير مدفوعة.',ptUndone:'تم إلغاء الدفع',ptReceived:'استلمه',ptPerKind:'لكل نوع عمل',ptSlipPaid:'دُفع في {0} · {1}',ptPageSub:'سجّل ساعات عمل الموظفين بدوام جزئي واعرف المبلغ المستحق لهم.',ptPeople:'الموظفون بدوام جزئي',ptPeopleSub:'حسابات موظفين يعملون في الاستقبال ويُدفع لهم بالساعة.',ptOne:'دوام جزئي',ptRate:'سعر الساعة (SAR)',ptPerHour:'للساعة',ptNoAccount:'لا يوجد حساب موظف',ptDeactivate:'إيقاف',ptActivate:'تفعيل',ptPickAcct:'اختر حساب موظف',ptAdd:'إضافة موظف بدوام جزئي',ptAllAdded:'كل حسابات الموظفين مضافة بدوام جزئي.',ptNone:'لا يوجد موظفون بدوام جزئي بعد. اختر حساب موظف بالأسفل.',ptAdded:'تمت إضافة موظف بدوام جزئي: {0}',ptSaved:'تم حفظ الموظف بدوام جزئي: {0}',ptErrRate:'أدخل سعرًا يساوي 0 أو أكثر.',ptLog:'تسجيل ساعات',ptEditEntry:'تعديل التسجيل',ptWho:'الموظف',ptPickWho:'اختر الموظف',ptRide:'الرحلة',ptNoRide:'بدون رحلة (اختر تاريخًا)',ptHours:'عدد الساعات',ptNote:'ملاحظة (اختياري)',ptAmountIs:'{0} س × {1} = {2}',ptSaveHours:'حفظ الساعات',ptErrWho:'اختر الموظف.',ptErrHours:'يجب أن تكون الساعات أكثر من 0 ولا تزيد على 24.',ptDupShift:'لدى {0} مسبقًا {1} س في هذه الرحلة. هل تسجّل هذه الساعات أيضًا؟',ptLogAgain:'سجّل أيضًا',ptUpdated:'تم تعديل التسجيل: {0} س لـ {1}',ptLogged:'تم تسجيل {0} س لـ {1}',ptDelAsk:'حذف هذا التسجيل؟',ptDeleted:'تم حذف التسجيل',ptHoursN:'{0} س',ptNoHours:'لا ساعات',ptNoRidesMonth:'لا توجد رحلات هذا الشهر.',ptOwe:'المبلغ المستحق',ptByRange:'فترة زمنية',ptByRides:'اختيار رحلات',ptAll:'كل الموظفين',ptLastMonth:'الشهر الماضي',ptPicked:'الرحلات المختارة: {0}',ptPickHint:'اضغط على الرحلات في التقويم أو حدّدها في القائمة.',ptPickMonth:'اختيار كل رحلات الشهر',ptTotHours:'الساعات',ptTotRides:'الرحلات',ptTotOwed:'المستحق',ptPerPerson:'لكل موظف',ptNoRideShort:'بدون رحلة',ptEntries:'التسجيلات',ptColRate:'السعر',ptColAmount:'المبلغ',ptNoEntries:'لا توجد ساعات مسجّلة لهذا الاختيار.',ptTotal:'المجموع',opChange:'غيّره من الإعدادات',opSwitch:'تبديل المشغّل',opPinTitle:'الرقم السري لـ {0}',opPinWrong:'رقم سري خاطئ. تبقّت {0} محاولات.',opPinWrongPlain:'رقم سري خاطئ.',opPinLocked:'محاولات كثيرة. انتظر {0} ثانية.',roMode:'وضع القراءة فقط: لا يمكن التعديل',dashActivity:'آخر النشاطات',dashQuick:'إجراءات سريعة',dashNoActivity:'لا شيء مسجل اليوم بعد.',dashCollected:'المُحصّل اليوم',dashBookedToday:'راكبو اليوم',dashDoneToday:'رحلات منتهية اليوم',dashSessionsToday:'جلسات اليوم',dashCheckinNext:'تسجيل دخول التالي',kbTitle:'اختصارات لوحة المفاتيح',kbFindQueue:'البحث في الحجوزات',kbThisList:'عرض هذه القائمة',calViewList:'قائمة',calViewCal:'تقويم',calPrev:'الشهر السابق',calNext:'الشهر التالي',calToday:'اليوم',calWs:'{0} ورشة',calNewOn:'جلسة جديدة في {0}',errAddonsNotSaved:'تم الحجز، لكن الإضافات لم تُحفظ. أضفها من حجوزاتي.',bkExportedToast:'تم تصدير {0} دراجة',errTooManyTries:'محاولات كثيرة من هذه الشبكة. انتظر بضع دقائق ثم حاول مجدداً.',errPaidTypeDesk:'هذا الحجز مدفوع. لتغييره إلى دراجة أغلى، اسأل عند الكشك.',addonHandedOver:'لا يمكن حذف الإضافات التي سُلّمت من هنا. اسأل عند الكشك.',teamPinKept:'لا يحذف الاسم الذي له رقم سري إلا المدير: {0}',acctOneSection:'اختر قسماً واحداً على الأقل يستطيع هذا الحساب فتحه.',acctNoneOpen:'لا توجد أقسام يستطيع هذا الحساب فتحها. اطلب من المدير منحه الصلاحية من صفحة الفريق.',anPieces:'{0} قطع',drawerCountBtn:'جرد الدرج',drawerCountTitle:'جرد الدرج',drawerCountBody:'النقد المتوقع لهذا اليوم: SAR {0}. أدخل ما في الدرج فعلياً:',drawerExpected:'المتوقع',drawerCounted:'المعدود',drawerExactToast:'الدرج مطابق — تم التسجيل',drawerDiffToast:'تم التسجيل — فرق الدرج {0}',cnBtn:'إلغاء الليلة',cnTitle:'إلغاء الليلة',cnSub:'{0} حجز قائم. أبلغ المشاركين أولاً ثم ألغِ. لنقل الليلة كاملة عدّل تاريخ الجلسة بدلاً من ذلك — الحجوزات تتبعه.',cnMsgLabel:'رسالة للمشاركين',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.',cnCopyNumbers:'نسخ جميع الأرقام',cnCopiedToast:'تم نسخ الأرقام',cnCopyByHand:'تعذّر النسخ. انسخ الأرقام من المربع.',cnConfirmBtn:'إلغاء {0} حجز',cnDoneToast:'أُلغيت الليلة — {0} حجز أُلغي مع بقاء السجل',wxTip:'التوقعات: {0} درجة عظمى، رياح حتى {1} كم/س',noShowHistChip:'{0}/{1} غياب',noShowHistTip:'مرات الغياب في آخر خمسة حجوزات محسومة لهذا الراكب',bulkApproveBtn:'الموافقة على الكل ({0})',bulkApproveTitle:'الموافقة على جميع الطلبات المعلقة',bulkApproveBody:'سيتم قبول {0} من الطلبات المعلقة. تُترك طلبات قائمة الانتظار لتختارها بنفسك. لن يرى المشاركون شيئاً حتى تنشر النتائج.',bulkApprovedToast:'تمت الموافقة على {0} من الطلبات',ciPrev:'السابق',ciNext:'التالي',scanBnOk:'تم',scanBnWarn:'انتبه',scanBnErr:'توقف',scanSoundBtn:'الصوت',scanBlacklisted:'#{0} {1} في القائمة السوداء. اسأل المسؤول قبل تسجيل دخوله.',scanAlreadyIn:'#{0} {1} مسجّل دخوله بالفعل',scanInAt:'منذ {0}',scanOwes:'عليه SAR {0}',scanCheckedIn:'تم تسجيل دخول #{0} {1}',ciAutoNext:'فتح الراكب التالي',notHereChip:'لم يصل بعد',cxHideAria:'إخفاء إلغاء {0}',syncUnsent:'{0} غير مُرسلة',setDevice:'هذا الجهاز',setDeviceSub:'تُحفظ على هذا الهاتف أو الحاسوب فقط.',setPersonal:'تفضيلاتي',setPersonalSub:'اختياراتك الخاصة، وتنتقل مع حسابك إلى كل جهاز.',setStartOn:'البدء من',setStartUsual:'القسم الأول المعتاد',setLanguage:'اللغة',setTabBar:'شريط الأقسام في الجوال',setTabBarHint:'اختر حتى أربعة أقسام للشريط أسفل شاشة الجوال.',setTabBarReset:'استخدم الأقسام المعتادة',setFilters:'الفلاتر المحفوظة',setFiltersHint:'يحتفظ كل قسم بآخر فلاتر وترتيب وطريقة عرض استخدمتها، وزر الإعادة يرجعها كلها إلى البداية.',setFiltersReset:'إعادة ضبط الفلاتر',setFiltersDone:'تمت إعادة ضبط الفلاتر',setDisplay:'العرض',setTextSize:'حجم النص',setDensity:'كثافة العرض',setComfortable:'مريح',setCompact:'مضغوط',setDensityHint:'العرض المضغوط يُظهر صفوفاً أكثر في الجداول والقوائم على الحاسوب، وتبقى الأزرار بحجمها الكامل على الجوال.',setWake:'إبقاء الشاشة مضاءة في الكشك',setBooth:'وضع الكشك (تباين عالٍ لضوء الشمس)',ciChainLabel:'الراكبون بانتظار تسجيل الحضور',ciStepOf:'الراكب {0} من {1}',ciPartyLabel:'ركّاب هذه المجموعة',dupPhoneTip:'رقم الجوال هذا موجود في حجز آخر قائم في هذه الجلسة',overdueRideTip:'على الدراجة منذ أكثر من ساعتين',wiStockHint:'{0} {1} متاحة على الرف',wiNoStockHint:'لا يوجد {0} متبقٍ على الرف — قد يعتمد منتظرو القائمة على المرتجعات.',moreActionsLbl:'مزيد من الإجراءات',vndTempPwd:'كلمة مرور مؤقتة',vndTempExpires:'كلمة مرور مؤقتة — تنتهي {0}',vndTempExpired:'انتهت صلاحية كلمة المرور المؤقتة — أعد تعيينها',a11yDialCode:'رمز الدولة',a11yMsgKind:'نوع الرسالة',a11yAmount:'الكمية',a11yUnit:'الوحدة',closeOutBtn:'إنهاء الليلة',closeOutHint:'إنهاء الليلة: من سجّل حضوره يُعتبر مكتملاً، ومن لم يحضر يُسجّل كغياب.',closeOutTitle:'إنهاء الليلة',closeOutBody:'سيتم تسجيل {0} من الحاضرين كمكتملين و{1} ممن لم يحضروا كغياب. لن يتم المساس بقائمة الانتظار. يمكن التراجع من الشريط في الأعلى.',closeOutDoneToast:'تم إنهاء الليلة — {0} مكتمل، {1} غياب',bookSyncPending:'لم يصل حجزك إلى الكشك بعد — سيستمر بالمحاولة ما دام التطبيق مفتوحاً.',bookSyncRefused:'تعذّر إرسال حجزك. يرجى إظهار هذا الهاتف عند الكشك.',updateReadyToast:'يتوفر إصدار جديد — حدّث الصفحة للتحديث.',justNow:'الآن',secondsAgo:'ث مضت',minutesAgo:'د مضت',offlineLabel:'غير متصل',offlineBanner:'أنت غير متصل - يتم حفظ التغييرات وستتم المزامنة عند عودة الاتصال.',unreachableBanner:'متصل بالشبكة لكن تعذّر الوصول إلى الخادم - قد تحتاج إلى تسجيل الدخول إلى هذه الشبكة.',retryBtn:'إعادة المحاولة',errWritePerm:'لم يتم الحفظ - ربما انتهت جلسة الموظف. أعد فتح القفل ثم حاول مجددًا.',errWriteDup:'تم أخذ رقم الحجز للتو من جهاز آخر. أعد التحميل وحاول مجددًا.',
+  remBtn:'التذكيرات',remTitle:'التذكيرات · {0}',remKindLbl:'أي تذكير',remKind24:'قبل يوم',remKind2:'قبل ساعتين',remSummary:'{0} راكب محجوز · {1} للتذكير · {2} بلا رقم',remLocalOnly:'بانتظار تحديث قاعدة البيانات: تُحفظ أسماء من تم تذكيرهم على هذا الجهاز فقط.',remSendAll:'أرسل إلى {0} لم يتم تذكيرهم',remRemindedAt:'تم التذكير {0} ({1})',remNotYet:'لم يتم التذكير بعد',remNoNumber:'لا يوجد رقم',remLangLbl:'لغة الرسالة إلى {0}',remSend:'إرسال',remNone:'لا يوجد راكب محجوز في هذه الرحلة بعد.',remBackToList:'العودة إلى القائمة',remLog:'تذكيرات الرحلة ({0}): أُرسل {1} لـ {2}',ntRemind:'رحلات فيها ركاب لم يتم تذكيرهم: {0}',ntiRemind:'{0}: {1} راكب لم يتم تذكيرهم بعد',ntkRemind:'ركاب الغد الذين لم يتم تذكيرهم',ntWlFree:'رحلات فيها مكان شاغر وركاب ينتظرون: {0}',ntiWlFree:'{0}: {1} شاغر، {2} في الانتظار',ntkWlFree:'مكان شاغر وركاب في الانتظار',wlFreeBtn:'{0} شاغر: لمن يذهب',wloTitle:'مكان شاغر · {0}',wloSummary:'{0} شاغر · {1} في الانتظار',wloHintStaff:'اختر من يحصل على المكان. لن يتقدّم أحد حتى تختار.',wloHintClaim:'عرض: يصل الراكب رابط ولديه {0} دقيقة لتأكيد المكان، وبعدها ينتقل تلقائياً إلى التالي. منح: يصبح المكان له الآن.',wloOpenOffers:'عروض بانتظار الرد',wloClaimBy:'التأكيد قبل {0}',wloSent:'أُرسل',wloSend:'أرسل عبر واتساب',wloSendAgain:'أرسل مرة أخرى',wloWithdraw:'سحب العرض',wloNextUp:'التالي في الدور',wloWaitingSince:'ينتظر منذ {0}',wloOffered:'عُرض عليه',wloOffer:'اعرض',wloGive:'امنح المكان',wloGiven:'حصل على المكان',wloMore:'{0} آخرون في قائمة الانتظار',wloNobody:'لا أحد في قائمة الانتظار يمكنه أخذ هذا المكان.',wloFull:'لا يوجد مكان شاغر في الرحلة الآن.',wloOfferLog:'عُرض مكان من قائمة الانتظار: {0}',wloPushTitle:'يوجد مكان شاغر لك',wloPushBody:'أكّده خلال {0} دقيقة.',tplgRemind:'تذكيرات الرحلات وعروض قائمة الانتظار',tplRemind24:'تذكير قبل يوم',tplRemind2:'تذكير قبل ساعتين',tplWlOffer:'مكان من قائمة الانتظار للتأكيد',bizCardWaitlist:'قائمة الانتظار',bizCardWaitlistSub:'من يحصل على المكان الذي يتفرّغ عند إلغاء راكب أو عدم حضوره. رحلات الموافقة تبقى باختيار الموظفين.',bizWlMode:'عند تفرّغ مكان',bizWlModeAuto:'يحصل عليه التالي في الدور فوراً',bizWlModeStaff:'يختار الموظفون من يحصل عليه',bizWlModeClaim:'يصل التالي في الدور رابط لتأكيده',bizWlClaim:'دقائق تأكيد المكان المعروض',bizWlClaimLater:'يصبح رابط التأكيد خياراً بعد تطبيق تحديث قاعدة البيانات.',wlcKicker:'قائمة الانتظار',wlcTitle:'يوجد مكان شاغر لك',wlcEnds:'المكان لك إذا أكّدته خلال',wlcClaim:'أكّد مكاني',wlcDecline:'لا أستطيع الحضور',wlcDoneTitle:'تم حجز مكانك',wlcDoneSub:'نراك في الرحلة. تذكرتك في «حجوزاتي».',wlcLateTitle:'انتهى هذا العرض',wlcLateSub:'انتهى وقت التأكيد فانتقل المكان إلى الراكب التالي. ما زلت في قائمة الانتظار.',wlcFullSub:'تم شغل المكان قبل أن تؤكّده. ما زلت في قائمة الانتظار.',wlcGoneSub:'لم يعد هذا الرابط يحمل عرضاً. حجوزاتك في «حجوزاتي».',wlcNoTitle:'شكراً لإبلاغنا',wlcNoSub:'ينتقل المكان إلى الراكب التالي. ما زلت في قائمة الانتظار.',
   undoBtn:'تراجع',undoneMsg:'تم التراجع.',undoFailed:'فشل التراجع.',errStorageFull:'ذاكرة الجهاز ممتلئة — أفرغ بعض المساحة؛ قد لا تُحفظ المبيعات/الحجوزات غير المتزامنة.',errStockWrite:'لم يتم حفظ مخزون {0} — تمت إعادة العدد الظاهر على الشاشة.',
   fleetBadge:'الأسطول',altBadge:'بديل',
   showOtherTypes:'↓ عرض أنواع أخرى',hideOtherTypes:'↑ إخفاء الأنواع الأخرى',available2:'متاح',
@@ -2016,7 +2019,7 @@ function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includ
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back.
-const STAFF_PART_TABS={analytics:['analytics'],community:['community','customers'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier']};
+const STAFF_PART_TABS={analytics:['analytics'],community:['community','customers'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -3074,6 +3077,7 @@ function entryFromDB(e){
     rideGroup:e.ride_group||null, // the Saturday ride's group: 'beg' | 'int' (20261002120000)
     runKm:e.run_km||null, // Run for Her's distance: 3 | 5 (20261005230000)
     via:e.via||null, // 'kiosk': a walk-in who registered on the desk tablet (20261009230000)
+    remindedAt:e.reminded_at===undefined?undefined:(e.reminded_at||null),remindedKind:e.reminded_kind||null, // the last ride reminder staff sent, and which (20261009225000); undefined: read without the column
     // The waiver the row was agreed under. null when the row says it has none (a rider added at the
     // desk), undefined when the read did not carry the column: only a known null asks (_pendingWaiver).
     waiverVersion:e.waiver_version===undefined?undefined:(e.waiver_version||null),
@@ -8946,6 +8950,57 @@ function goCustomer(tab){
   _pushNav();
 }
 
+// ── A freed waitlist place, claimed: /?claim=<token> (2026-10-09, R7) ───────────────────────────
+// Staff sent the rider a WhatsApp with this link (waitlist_offers, 20261009225000). The page shows the ride,
+// how long the offer holds and one button; customer_claim_spot checks the window and the room on the server,
+// so the countdown here is only what the rider reads. The token waits in this tab like ?appfix= does.
+const WLC_KEY='cq_claim',_wlcOk=x=>/^[0-9a-f]{32}$/.test(x);
+function _readClaimParam(){
+  let k='';
+  try{const u=new URL(location.href);k=(u.searchParams.get('claim')||'').trim().toLowerCase();
+    if(u.searchParams.has('claim')){u.searchParams.delete('claim');history.replaceState(history.state,'',u.pathname+u.search+u.hash);if(_wlcOk(k))sessionStorage.setItem(WLC_KEY,k);}
+    else k=sessionStorage.getItem(WLC_KEY)||'';}catch(e){}
+  return _wlcOk(k)?k:'';
+}
+// The rpc's answer, or null when it did not come back.
+async function _wlcRpc(f,a){try{await _sbReady;const x=await sb.rpc(f,a);return x.error?null:x.data;}catch(e){return null;}}
+async function _wlcOpen(tok){
+  S._wlc={tok,st:'load'};renderClaim();
+  const r=await _wlcRpc('customer_claim_get',{p_token:tok}),g=S._wlc;if(!g||g.tok!==tok)return;
+  if(r&&r.ok){g.d=r;g.skew=Date.parse(r.now)-Date.now();}
+  g.st=!r?'net':!r.ok?'gone':r.status==='open'?'ask':r.status==='claimed'?'done':r.status==='expired'?'late':'gone';
+  renderClaim();
+}
+async function _wlcGo(no){
+  const g=S._wlc;if(!g||g.busy)return;g.busy=true;renderClaim();
+  const r=await _wlcRpc('customer_claim_spot',{p_token:g.tok,p_decline:!!no});
+  g.busy=false;g.net=!r;
+  if(r)g.st=r.ok?(r.declined?'no':'done'):r.reason==='EXPIRED'?'late':r.reason==='FULL'?'full':'gone';
+  renderClaim();
+}
+function _wlcClose(){try{sessionStorage.removeItem(WLC_KEY);}catch(e){}S._wlc=null;renderClaim();}
+function _wlcClock(){const g=S._wlc,ms=Math.max(0,Date.parse(g.d.expires_at)-Date.now()-(g.skew||0)),s=Math.floor(ms/1e3);return ms?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'';}
+function _wlcTick(){const g=S._wlc,c=g&&g.st==='ask'&&_wlcClock(),el=document.getElementById('wlc-clock');if(!c){if(g&&g.st==='ask'){g.st='late';renderClaim();}else clearInterval(S._wlcT);return;}if(el)el.textContent=c;}
+function renderClaim(){
+  const g=S._wlc,m=document.getElementById('wl-claim');if(!m)return;
+  clearInterval(S._wlcT);
+  m.style.display=g?'block':'none';document.body.classList.toggle('fix-open',!!g);
+  if(!g){m.innerHTML='';return;}
+  const se=(g.d||{}).session||{},tm=String(se.time||'').split('-')[0].trim(),st=g.st,end=st!=='ask'&&st!=='load';
+  if(end&&st!=='net')try{sessionStorage.removeItem(WLC_KEY);}catch(e){} // an answered link does not open again on the next page
+  let when='';try{when=new Date(String(se.date).slice(0,10)+'T12:00:00Z').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'})+(tm?' · '+fmt12h(tm):'');}catch(e){}
+  const b=(fn,a,k,c)=>`<button type="button" class="${c||'pg-btn'}" data-on-click="${_on(fn,a)}"${g.busy?' disabled':''}>${t(k)}</button>`;
+  m.innerHTML=`<div class="auth-backdrop"><div class="pg-box fx-box wlc-box" role="dialog" aria-modal="true" aria-labelledby="wlc-title" tabindex="-1">${st==='load'?skeletonList():`
+    <div class="fx-kicker">${_cuIc('clock',14)}${t('wlcKicker')}</div>
+    <h2 id="wlc-title" class="pg-title">${t({done:'wlcDoneTitle',no:'wlcNoTitle',ask:'wlcTitle',net:'wlcTitle'}[st]||'wlcLateTitle')}</h2>
+    ${g.d&&st!=='gone'?`<p class="pg-sub"><bdi>${esc(se.title||'MicroMobility')}</bdi><br><bdi>${esc(when)}</bdi></p>`:''}
+    ${end?`<p class="pg-sub">${t({done:'wlcDoneSub',late:'wlcLateSub',full:'wlcFullSub',no:'wlcNoSub',net:'pgErrNet'}[st]||'wlcGoneSub')}</p>`
+      :`<div class="wlc-ends">${t('wlcEnds')} <b id="wlc-clock" dir="ltr">${_wlcClock()}</b></div>${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}${b('_wlcGo',0,'wlcClaim')}${b('_wlcGo',1,'wlcDecline','afx-link')}`}
+    ${st==='done'?`<a class="pg-btn wlc-mine" href="/${CUST_PATHS.myrides}">${t('tabMyRides')}</a>`:''}
+    ${st==='net'?b('_wlcOpen',g.tok,'retryBtn'):''}${end?b('_wlcClose',0,'closeBtn','afx-link'):''}`}</div></div>`;
+  if(st==='ask')S._wlcT=setInterval(_wlcTick,1000);
+  if(!g.shown&&st!=='load'){g.shown=1;try{m.querySelector('.wlc-box').focus({preventScroll:true});}catch(e){}}
+}
 // ── An applicant's changes: /?appfix=<token> ────────────────────────────────────
 // Staff asked an applicant to change some fields of their community application (_caFxGo), and
 // the message they sent carries this link. The token comes off the address bar at boot, as ?bike=
@@ -10768,6 +10823,7 @@ function _ntKindsNow(){
   if(_deskTabOk('queue'))add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
   // A walk-in who registered on the desk tablet and is waiting tonight (kiosk mode, 2026-10-09)
   if(_deskTabOk('queue'))add('kiosk',getQueue().filter(e=>e.via==='kiosk'&&e.status==='waiting'&&String(e.sessionDate||'').slice(0,10)===todayStr()).map(e=>({id:e.id,txt:t('ntiKiosk').replace('{0}',nm(e)),at:e.registeredAt})),'ntKiosk','green',['setStaffTab','queue'],L.queue);
+  {const f=globalThis['_r7'+'Bell'];if(typeof f==='function')f(add,L);} // ride reminders and freed places (2026-10-09, R7): staff-half code, named so this customer-half list does not pull it in
   if(_deskTabOk('analytics'))add('closeout',(S._rpiSnaps||[]).map(x=>({id:x.id,txt:t('ntiCloseout').replace('{0}',shortDate(x.period_from)),at:x.created_at})),'ntCloseout','green',['_on_goReports'],Array.isArray(S._rpiSnaps));
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   if(adm){
@@ -10786,7 +10842,7 @@ function _ntKindsNow(){
 }
 // The kinds a staffer can turn off on their Settings page (staff.nt_off), in the bell's order, with
 // the label the page shows; the admin-only ones are offered to admins only.
-const NT_KINDS=[['long','ntkLong',0],['kiosk','ntkKiosk',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1],['natnew','ntkNatNew',1],['closeout','ntkCloseout',0]];
+const NT_KINDS=[['long','ntkLong',0],['kiosk','ntkKiosk',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1],['natnew','ntkNatNew',1],['closeout','ntkCloseout',0],['remind','ntkRemind',0],['wlfree','ntkWlFree',0]];
 function _ntOff(){return Array.isArray(S._ntOff)?S._ntOff:[];}
 // The Dashboard's Alerts card: what needs attention now, one line per kind with its count.
 function _ntRows(kinds){return(kinds||_ntKinds()).filter(x=>x.ids.length).map(x=>({...x,n:x.ids.length,txt:t(x.key).replace('{0}',x.ids.length)}));}
@@ -19704,6 +19760,8 @@ const TPL=[
   ['tplgAmb',[['amb_welcome','tplAmbWelcome',['first_name','code','discount']],['amb_reject','tplAmbReject',['first_name']]]],
   ['tplgBd',[['bd_wish','tplBdWish',['first_name']]]],
   ['tplgQuick',[['wa_turn','tplWaTurn',[]],['wa_miss','tplWaMiss',[]],['an_rfm','tplAnRfm',['first_name']],['cn_cancel','tplCnCancel',['when']],['seg_ops','tplSegOps',['first_name']],['seg_news','tplSegNews',['first_name']]]],
+  // Ride reminders and the waitlist's offer of a place (2026-10-09, R7); their built-in texts in all ten languages are REM_MSG
+  ['tplgRemind',[['remind_24h','tplRemind24',['first_name','ride','date','time','cancel_link']],['remind_2h','tplRemind2',['first_name','ride','date','time','cancel_link']],['wl_offer','tplWlOffer',['first_name','ride','date','time','minutes','claim_link']]]],
 ];
 function _tplDef(id){for(const[,list]of TPL){const x=list.find(r=>r[0]===id);if(x)return x;}return null;}
 // Read once a staff session is up, and again when Settings saves; the messages that open before it
@@ -19768,6 +19826,8 @@ function _tplDefault(id,lang){
   if(id==='sm_reply'){const f=SM_MSG[L];return[hi(f),'',f.thanks,'','','',f.team].join('\n');}
   if(id.startsWith('amb_')){const m=AMB_MSG[L];return[hi(m),'',id==='amb_reject'?m.reject:m.welcome,'',m.team].join('\n');}
   if(id==='bd_wish')return String(BD_MSG[L]||'').replace('{name}','{first_name}');
+  // REM_MSG lives with the reminders (staff part 'remind'), which every staff device loads once the desk has painted.
+  if(/^(remind_|wl_offer)/.test(id)){const f=globalThis['_remDef'+'ault'];return typeof f==='function'?f(id,lang):'';}
   const lk={wa_turn:'waYourTurnMsg',wa_miss:'waMissYouMsg',an_rfm:'anRfmMsg',cn_cancel:'cnMsgDefault',seg_ops:'segOpsMsg',seg_news:'segNewsMsg'}[id];
   if(lk){const v=String(TPL_QUICK[L][lk]||'');return id==='an_rfm'||id.startsWith('seg_')?v.replace('{0}','{first_name}'):id==='cn_cancel'?v.replace('{0}','{when}'):v;}
   return'';
@@ -22586,6 +22646,7 @@ function renderQRow(e){
           return `${nPend?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("bulkApprovePending")}">✓ ${t('bulkApproveBtn').replace('{0}',String(nPend))}</button>`:''}<button class="btn-sm ${_commPublishedById(S.sfSession)?'btn-muted':'btn-green'} rq-nw" data-on-click="${_on("publishCommResults")}">${_commPublishedById(S.sfSession)?t('publishedChip'):t('publishBtn')}</button>`;
         })():''}
         ${S.sfSession!=='all'&&_noWalkin(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-green walkin-head rq-nw" data-on-click="${_on("showWalkinModal")}">${t('addWalkin')}</button>`}${S.sfSession!=='all'&&_noGroupAdd(_sessGet(S.sfSession))?'':`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showJccGroupModal")}">${t('commAddGroupBtn')}</button>`}${isAdmin()&&_caSessList().length&&!(S.sfSession!=='all'&&_noAddRider(_sessGet(S.sfSession)))?`<button class="btn-sm btn-muted rq-nw" data-on-click="${_on("showCommAddModal")}">${t('commAddRiderBtn')}</button>`:''}
+        ${S.sfSession!=='all'&&_editOk('queue')&&_sessGet(S.sfSession)&&!_sessEnded(_sessGet(S.sfSession))?`<button type="button" class="btn-sm btn-muted rq-nw rem-open" aria-haspopup="dialog" data-on-click="${_on("openRemindSheet",S.sfSession)}">${_artIcon('bell',13)} ${t('remBtn')}</button>${(()=>{const f=_wlMode()!=='auto'?_wlFree(S.sfSession):0,n=f?_wlLine(S.sfSession).length:0;return f&&n?`<button type="button" class="btn-sm btn-green rq-nw wl-open" aria-haspopup="dialog" data-on-click="${_on("openWlOffers",S.sfSession)}">${_artIcon('promote',13)} ${esc(t('wlFreeBtn').replace('{0}',String(f)))}</button>`:'';})()}`:''}
         ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" class="rq-print" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn rq-nw" data-on-click="${_on("printDaySheet")}">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
         <button type="button" class="btn-sm btn-muted my-shift-btn rq-nw" data-on-click="${_on("_myShiftOpen")}">${_artIcon('clock',12)} ${t('shiftTitle')}</button>
         <div class="density-toggle hide-mobile">
@@ -24249,6 +24310,8 @@ const BIZ_CARDS=[
   ['kpi','bizCardKpi','bizCardKpiSub',[['kpi_targets','','kpi']]],
   ['approvals','bizCardApprovals','bizCardApprovalsSub',[['pin_all','bizPinAll','bool'],['mgr_over','bizMgrOver','num',[0,100000]],['mgr_for','bizMgrFor','mgrFor'],['approvers','bizApprovers','approvers']]],
   ['deposits','bizCardDeposits','bizCardDepositsSub',[['deposits','','deps']]], // 2026-10-09: premium bikes leave a deposit at check-in
+  // Who a freed waitlist place goes to (2026-10-09, R7): _wlMode, waitlist_offers (20261009225000)
+  ['waitlist','bizCardWaitlist','bizCardWaitlistSub',[['wl_offer_mode','bizWlMode','wlmode'],['wl_claim_min','bizWlClaim','int',[5,720]]]],
 ];
 const DEP_TYPES=['Road Carbon','Road','Hybrid','Mountain','Kids'];
 const BIZ_KPI=[['rides','kpiRides',[1,100000],1],['occupancy','kpiOccupancyPct',[1,100],1],['rating','kpiRatingOf10',[1,10],0.1],['sales','kpiSalesSar',[1,10000000],1]];
@@ -24276,6 +24339,10 @@ function _bizFieldHtml(card,[k,l,kind,ex],ro){
   if(kind==='vrs'){const on=new Set(Array.isArray(cur)?cur:def||[]);return`<fieldset class="biz-checks"><legend>${t(l)}</legend>${(def||[]).map(r=>`<label class="set-tog"><input type="checkbox" data-biz-vrs="${esc(r)}"${on.has(r)?' checked':''}${dis}><span>${esc(t(VENDOR_RS_KEY[r]||r))}</span></label>`).join('')}</fieldset>`;}
   if(kind==='deps'){const v=cur&&typeof cur==='object'&&!Array.isArray(cur)?cur:{};return`<div class="biz-kpi">${DEP_TYPES.map((ty,i)=>`<div class="form-group"><label for="${id}-${i}">${esc(typeLabel(ty))} (SAR)</label><input id="${id}-${i}" type="number" inputmode="numeric" min="0" max="100000" step="1" value="${v[ty]>0?esc(String(v[ty])):''}" placeholder="0"${dis}></div>`).join('')}</div>`;}
   if(kind==='kpi'){const v=cur&&typeof cur==='object'?cur:{};return`<div class="biz-kpi">${BIZ_KPI.map(([kk,ll,r,st])=>`<div class="form-group"><label for="${id}-${kk}">${t(ll)}</label><input id="${id}-${kk}" type="number" min="${r[0]}" max="${r[1]}" step="${st}" value="${v[kk]!=null?esc(String(v[kk])):''}"${dis}></div>`).join('')}</div>`;}
+  // The timed offer needs the database's offers (waitlist_offers): until a read shows them, only Automatic and Staff choose.
+  if(kind==='wlmode'){if(S._wlDbOk===undefined&&sb){S._wlDbOk=null;sb.from('waitlist_offers').select('id').limit(1).then(r=>{S._wlDbOk=!r.error;if(r.error)S._wlNoDb=true;if(S.staffTab==='settings')renderSettings();},()=>{S._wlDbOk=false;});}
+    const v=cur==='staff'||cur==='claim'?cur:'auto',opts=[['auto','bizWlModeAuto'],['staff','bizWlModeStaff'],...(S._wlDbOk||v==='claim'?[['claim','bizWlModeClaim']]:[])];
+    return`<div class="form-group">${lab}<select id="${id}" class="filter-select"${dis}>${opts.map(([x,ll])=>`<option value="${x}"${v===x?' selected':''}>${esc(t(ll))}</option>`).join('')}</select>${S._wlDbOk?'':`<div class="set-hint">${t('bizWlClaimLater')}</div>`}</div>`;}
   if(kind==='mgrFor'){const v=cur&&typeof cur==='object'?cur:{};return`<fieldset class="biz-checks"><legend>${t(l)}</legend>${[['refund','cashRefund'],['house','onTheHouseLabel'],['price','pinWhatPrice']].map(([kk,ll])=>`<label class="set-tog"><input type="checkbox" data-biz-mgr="${kk}"${v[kk]?' checked':''}${dis}><span>${esc(t(ll))}</span></label>`).join('')}</fieldset>`;}
   if(kind==='approvers'){const v=new Set(Array.isArray(cur)?cur:[]),ops=(S._opPins||[]).map(o=>o.name),names=[...new Set([...ops,...v])].sort();
     if(!Array.isArray(S._opPins)&&!S._bizOpsAsked){S._bizOpsAsked=true;_opList().then(x=>{if(x.list){S._opPins=x.list;S._opPinsAt=Date.now();if(S.staffTab==='settings')renderSettings();}});}
@@ -24324,6 +24391,7 @@ function _bizRead(id){
     else if(kind==='vrs'){patch[k]=[...document.querySelectorAll('[data-biz-vrs]')].filter(x=>x.checked).map(x=>x.getAttribute('data-biz-vrs'));}
     else if(kind==='kpi'){const o={};for(const[kk,,r]of BIZ_KPI){const raw=_asciiDigits(val(`${fid}-${kk}`));if(!raw)continue;const n=Number(raw);if(!isFinite(n)||n<r[0]||n>r[1])return{err:[`${fid}-${kk}`,t('bizRangeErr').replace('{0}',r[0]).replace('{1}',r[1])]};o[kk]=n;}patch[k]=Object.keys(o).length?o:null;}
     else if(kind==='deps'){const o={};for(let i=0;i<DEP_TYPES.length;i++){const raw=_asciiDigits(val(`${fid}-${i}`));if(!raw)continue;const n=Number(raw);if(!Number.isInteger(n)||n<0||n>100000)return{err:[`${fid}-${i}`,t('bizRangeErr').replace('{0}',0).replace('{1}',100000)]};if(n>0)o[DEP_TYPES[i]]=n;}patch[k]=Object.keys(o).length?o:null;}
+    else if(kind==='wlmode'){const v=val(fid);patch[k]=v==='staff'||v==='claim'?v:'auto';}
     else if(kind==='mgrFor'){const o={};document.querySelectorAll('[data-biz-mgr]').forEach(x=>{if(x.checked)o[x.getAttribute('data-biz-mgr')]=true;});patch[k]=o;}
     else if(kind==='approvers'){patch[k]=[...document.querySelectorAll('[data-biz-apv]')].filter(x=>x.checked).map(x=>x.getAttribute('data-biz-apv'));}
   }
@@ -26447,6 +26515,327 @@ function _promoNudge(e){
         <a class="btn-primary pn-wa" href="${esc(wa)}" target="_blank" rel="noopener" data-on-click="${_on("closeConfirm")}">${_artIcon('whatsapp',14)} WhatsApp</a></div>
     </div></div>`;
 }
+// ── Who a freed place goes to (2026-10-09, R7) ──────────────────────────────────────────────────
+// Settings > Business wl_offer_mode: 'auto' (the default: the place goes to the next rider at once, as it
+// always did), 'staff' (staff pick from a centred dialog, openWlOffers) or 'claim' (the next rider gets a
+// link to claim it within wl_claim_min minutes; waitlist_offers, 20261009225000). 'claim' needs the
+// database's offers: until they answer it reads as 'staff' (S._wlNoDb).
+function _wlMode(){const m=_biz('wl_offer_mode','auto');return m==='staff'||(m==='claim'&&S._wlNoDb)?'staff':m==='claim'?'claim':'auto';}
+// The waitlisted riders a freed place on this ride can go to, in line order (the rules of
+// _autoPromoteOldestWaitlist: no approval ride, no ride that is over, Own bikes only where they take a place).
+function _wlLine(sid){
+  const sess=_sessGet(sid);if(!sess||_isApprovalRide(sess)||_sessEnded(sess)||sess.cancelled_at)return[];
+  const own=_ownTakesPlace(sess);
+  return(_qBySession().get(sid)||[]).filter(x=>x.status==='waitlist'&&(own||!_isOwnBike(x))).sort(_wlCmp);
+}
+// Places free on the ride: its capacity less the bookings holding one.
+function _wlFree(sid){
+  const sess=_sessGet(sid);if(!sess)return 0;
+  return Math.max(0,((sess&&sess.capacity)||12)-(_qBySession().get(sid)||[]).filter(e=>e.status!=='waitlist'&&_holdsSpot(e,sess)).length);
+}
+// The rides with a place free and someone waiting for it, soonest first (the bell's 'wlfree' and the
+// Bookings button). Nothing in 'auto': the place has already gone.
+function _wlFreeRows(){
+  if(_wlMode()==='auto')return[];
+  const today=todayStr();
+  return allSessions().filter(s=>String(s.session_date||s.id).slice(0,10)>=today).map(s=>({s,free:_wlFree(s.id),n:_wlLine(s.id).length}))
+    .filter(x=>x.free>0&&x.n>0).sort((a,b)=>String(a.s.session_date||a.s.id).localeCompare(String(b.s.session_date||b.s.id)));
+}
+function _wlBellGo(){const r=_wlFreeRows()[0];if(!r)return;setStaffTab('queue');setSfSession(r.s.id);openWlOffers(r.s.id);}
+// After a cancel or a no-show freed a place: the dialog once the action has painted, unless another
+// dialog is up (the bell and the Bookings button still say it).
+function _wlAskSoon(sid){
+  clearTimeout(S._wlAskT);S._wlAskSid=sid;
+  S._wlAskT=setTimeout(()=>{const m=document.getElementById('confirm-modal');if(m&&m.style.display!=='none'&&m.innerHTML)return;if(_wlFree(S._wlAskSid)>0&&_wlLine(S._wlAskSid).length)openWlOffers(S._wlAskSid,true);},700);
+}
+// Ride reminders (2026-10-09, R7): the bookings a reminder goes to (a place held, not checked in, not an
+// approval still pending or refused), and the rides of tomorrow with some not reminded yet, from 14:00 KSA
+// the day before (the bell's 'remind').
+const REMIND_FROM_H=14;
+function _remTargets(sid){return(_qBySession().get(sid)||[]).filter(e=>e.status==='waiting'&&e.approval!=='pending'&&e.approval!=='rejected');}
+function _remDue(){
+  let h=0;try{h=+new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',hour12:false}).format(new Date());}catch(_){return[];}
+  if(h<REMIND_FROM_H)return[];
+  const tm=_ksaDayOf(Date.now()+864e5);
+  return allSessions().filter(s=>String(s.session_date||s.id).slice(0,10)===tm&&!s.cancelled_at).map(s=>({s,n:_remTargets(s.id).filter(e=>!e.remindedAt).length})).filter(x=>x.n);
+}
+// The bell's ride reminders and freed places (2026-10-09, R7), added to _ntKindsNow's list by name.
+function _r7Bell(add,L){
+  if(!(_deskTabOk('queue')&&_editOk('queue')))return;
+    add('remind',_remDue().map(x=>({id:'rm:'+x.s.id,txt:t('ntiRemind').replace('{0}',_evName(x.s)+' '+shortDate(x.s.session_date||x.s.id)).replace('{1}',String(x.n))})),'ntRemind','warn',['_remBellGo'],L.queue);
+    add('wlfree',_wlFreeRows().map(x=>({id:'wl:'+x.s.id+':'+x.free,txt:t('ntiWlFree').replace('{0}',_evName(x.s)+' '+shortDate(x.s.session_date||x.s.id)).replace('{1}',String(x.free)).replace('{2}',String(x.n))})),'ntWlFree','warn',['_wlBellGo'],L.queue);
+}
+function _remBellGo(){const r=_remDue()[0];if(!r)return;setStaffTab('queue');setSfSession(r.s.id);openRemindSheet(r.s.id,'24h');}
+// ── Ride reminders and the waitlist's offers (2026-10-09, R7): staff part 'remind' ─────────────────────
+// No WhatsApp Business API and no e-mail: staff send each message from a wa.me link, one chat at a time,
+// with the Next / Skip / Stop run of the segment messages (_segPaint's seg-prog). What went out is kept on
+// the booking (queue_entries.reminded_at / reminded_kind, 20261009225000), so a second phone sees it and
+// the bell stops asking. Every message is a template (Settings > Message templates): remind_24h, remind_2h
+// and wl_offer, built in here in all ten languages and sent in the rider's language (the account's
+// nationality chooses it; staff change it per rider in the sheet).
+const REM_MSG={
+  en:{r24:"Hi {first_name},\nThis is MicroMobility with a reminder: your ride {ride} is on {date} at {time}. See you there!\n\nCan't come? Please cancel in My Bookings so a rider on the waitlist gets your place:\n{cancel_link}",
+    r2:"Hi {first_name},\nYour MicroMobility ride {ride} starts today at {time}. See you soon!\n\nCan't come? Please cancel in My Bookings so someone else can ride:\n{cancel_link}",
+    offer:"Hi {first_name},\nGood news from MicroMobility: a place has opened on {ride}, {date} at {time}.\n\nIt is yours if you claim it within {minutes} minutes:\n{claim_link}\n\nAfter that it goes to the next rider on the waitlist."},
+  ar:{r24:"مرحباً {first_name}،\nتذكير من مايكروموبيليتي: رحلتك {ride} يوم {date} الساعة {time}. نراك هناك!\n\nلا تستطيع الحضور؟ يرجى إلغاء الحجز من «حجوزاتي» ليحصل أحد المنتظرين على مكانك:\n{cancel_link}",
+    r2:"مرحباً {first_name}،\nرحلتك مع مايكروموبيليتي {ride} تبدأ اليوم الساعة {time}. نراك قريباً!\n\nلا تستطيع الحضور؟ يرجى إلغاء الحجز من «حجوزاتي» ليتمكن غيرك من الركوب:\n{cancel_link}",
+    offer:"مرحباً {first_name}،\nخبر سار من مايكروموبيليتي: توفّر مكان في {ride}، يوم {date} الساعة {time}.\n\nالمكان لك إذا أكّدته خلال {minutes} دقيقة:\n{claim_link}\n\nبعد ذلك ينتقل المكان إلى التالي في قائمة الانتظار."},
+  fr:{r24:"Bonjour {first_name},\nUn petit rappel de MicroMobility : votre sortie {ride} a lieu le {date} à {time}. À bientôt !\n\nVous ne pouvez pas venir ? Annulez dans Mes réservations pour qu'une personne en liste d'attente prenne votre place :\n{cancel_link}",
+    r2:"Bonjour {first_name},\nVotre sortie MicroMobility {ride} commence aujourd'hui à {time}. À tout à l'heure !\n\nVous ne pouvez pas venir ? Annulez dans Mes réservations pour qu'une autre personne puisse rouler :\n{cancel_link}",
+    offer:"Bonjour {first_name},\nBonne nouvelle de MicroMobility : une place s'est libérée pour {ride}, le {date} à {time}.\n\nElle est à vous si vous la confirmez dans les {minutes} minutes :\n{claim_link}\n\nEnsuite, elle passe à la personne suivante sur la liste d'attente."},
+  es:{r24:"Hola {first_name}:\nTe recordamos desde MicroMobility que tu salida {ride} es el {date} a las {time}. ¡Nos vemos allí!\n\n¿No puedes venir? Cancela en Mis reservas para que alguien de la lista de espera ocupe tu plaza:\n{cancel_link}",
+    r2:"Hola {first_name}:\nTu salida de MicroMobility {ride} empieza hoy a las {time}. ¡Hasta pronto!\n\n¿No puedes venir? Cancela en Mis reservas para que otra persona pueda montar:\n{cancel_link}",
+    offer:"Hola {first_name}:\nBuenas noticias de MicroMobility: se ha liberado una plaza en {ride}, el {date} a las {time}.\n\nEs tuya si la confirmas en los próximos {minutes} minutos:\n{claim_link}\n\nDespués pasará a la siguiente persona de la lista de espera."},
+  pt:{r24:"Olá {first_name},\nUm lembrete da MicroMobility: o seu passeio {ride} é em {date} às {time}. Até lá!\n\nNão pode vir? Cancele em Minhas reservas para que alguém da lista de espera fique com a sua vaga:\n{cancel_link}",
+    r2:"Olá {first_name},\nO seu passeio MicroMobility {ride} começa hoje às {time}. Até já!\n\nNão pode vir? Cancele em Minhas reservas para que outra pessoa possa pedalar:\n{cancel_link}",
+    offer:"Olá {first_name},\nBoa notícia da MicroMobility: abriu uma vaga em {ride}, em {date} às {time}.\n\nA vaga é sua se a confirmar nos próximos {minutes} minutos:\n{claim_link}\n\nDepois disso, passa para a próxima pessoa da lista de espera."},
+  ur:{r24:"السلام علیکم {first_name}،\nمائیکرو موبیلیٹی کی طرف سے یاد دہانی: آپ کی رائیڈ {ride} {date} کو {time} بجے ہے۔ وہاں ملاقات ہوگی!\n\nنہیں آ سکتے؟ براہ کرم میری بکنگز میں جا کر منسوخ کریں تاکہ انتظار کی فہرست میں موجود کسی رائیڈر کو آپ کی جگہ مل سکے:\n{cancel_link}",
+    r2:"السلام علیکم {first_name}،\nآپ کی مائیکرو موبیلیٹی رائیڈ {ride} آج {time} بجے شروع ہو رہی ہے۔ جلد ملاقات ہوگی!\n\nنہیں آ سکتے؟ براہ کرم میری بکنگز میں جا کر منسوخ کریں تاکہ کوئی اور رائیڈ کر سکے:\n{cancel_link}",
+    offer:"السلام علیکم {first_name}،\nمائیکرو موبیلیٹی کی طرف سے خوشخبری: {ride} میں ایک جگہ خالی ہوئی ہے، {date} کو {time} بجے۔\n\nاگر آپ {minutes} منٹ کے اندر تصدیق کر دیں تو یہ جگہ آپ کی ہے:\n{claim_link}\n\nاس کے بعد یہ انتظار کی فہرست میں اگلے رائیڈر کو مل جائے گی۔"},
+  hi:{r24:"नमस्ते {first_name},\nमाइक्रोमोबिलिटी की ओर से याद दिलाना: आपकी राइड {ride} {date} को {time} बजे है। वहीं मिलते हैं!\n\nनहीं आ सकते? कृपया मेरी बुकिंग में जाकर रद्द करें, ताकि प्रतीक्षा सूची के किसी राइडर को आपकी जगह मिल सके:\n{cancel_link}",
+    r2:"नमस्ते {first_name},\nआपकी माइक्रोमोबिलिटी राइड {ride} आज {time} बजे शुरू हो रही है। जल्द मिलते हैं!\n\nनहीं आ सकते? कृपया मेरी बुकिंग में जाकर रद्द करें, ताकि कोई और राइड कर सके:\n{cancel_link}",
+    offer:"नमस्ते {first_name},\nमाइक्रोमोबिलिटी से खुशखबरी: {ride} में एक जगह खाली हुई है, {date} को {time} बजे।\n\nअगर आप {minutes} मिनट के अंदर इसे पक्का कर लें, तो यह जगह आपकी है:\n{claim_link}\n\nउसके बाद यह प्रतीक्षा सूची के अगले राइडर को मिल जाएगी।"},
+  tl:{r24:"Hi {first_name},\nPaalala mula sa MicroMobility: ang ride mo na {ride} ay sa {date} nang {time}. Kita tayo roon!\n\nHindi makakapunta? Pakikansela sa Aking mga Booking para mapunta ang puwesto mo sa nasa waitlist:\n{cancel_link}",
+    r2:"Hi {first_name},\nMagsisimula ngayong araw nang {time} ang MicroMobility ride mo na {ride}. Kita tayo mamaya!\n\nHindi makakapunta? Pakikansela sa Aking mga Booking para may ibang makasakay:\n{cancel_link}",
+    offer:"Hi {first_name},\nMagandang balita mula sa MicroMobility: may nabakanteng puwesto sa {ride}, sa {date} nang {time}.\n\nSa iyo ito kung kukunin mo sa loob ng {minutes} minuto:\n{claim_link}\n\nPagkatapos noon, mapupunta ito sa susunod sa waitlist."},
+  ne:{r24:"नमस्ते {first_name},\nमाइक्रोमोबिलिटीबाट सम्झना: तपाईंको राइड {ride} {date} मा {time} बजे छ। त्यहीँ भेटौँला!\n\nआउन सक्नुहुन्न? कृपया मेरा बुकिङमा गएर रद्द गर्नुहोस्, ताकि प्रतीक्षा सूचीमा रहेका कसैले तपाईंको ठाउँ पाउन्:\n{cancel_link}",
+    r2:"नमस्ते {first_name},\nतपाईंको माइक्रोमोबिलिटी राइड {ride} आज {time} बजे सुरु हुँदैछ। छिट्टै भेटौँला!\n\nआउन सक्नुहुन्न? कृपया मेरा बुकिङमा गएर रद्द गर्नुहोस्, ताकि अरू कसैले राइड गर्न पाउन्:\n{cancel_link}",
+    offer:"नमस्ते {first_name},\nमाइक्रोमोबिलिटीबाट खुसीको खबर: {ride} मा एउटा ठाउँ खाली भएको छ, {date} मा {time} बजे।\n\n{minutes} मिनेटभित्र पक्का गर्नुभयो भने यो ठाउँ तपाईंको हो:\n{claim_link}\n\nत्यसपछि यो प्रतीक्षा सूचीको अर्को राइडरलाई जान्छ।"},
+  bn:{r24:"নমস্কার {first_name},\nমাইক্রোমোবিলিটির পক্ষ থেকে মনে করিয়ে দিচ্ছি: আপনার রাইড {ride} {date} তারিখে {time}-এ। সেখানে দেখা হবে!\n\nআসতে পারবেন না? দয়া করে আমার বুকিং থেকে বাতিল করুন, যাতে অপেক্ষমাণ তালিকার কেউ আপনার জায়গা পান:\n{cancel_link}",
+    r2:"নমস্কার {first_name},\nআপনার মাইক্রোমোবিলিটি রাইড {ride} আজ {time}-এ শুরু হচ্ছে। শিগগিরই দেখা হবে!\n\nআসতে পারবেন না? দয়া করে আমার বুকিং থেকে বাতিল করুন, যাতে অন্য কেউ রাইড করতে পারেন:\n{cancel_link}",
+    offer:"নমস্কার {first_name},\nমাইক্রোমোবিলিটি থেকে সুখবর: {ride}-এ একটি জায়গা খালি হয়েছে, {date} তারিখে {time}-এ।\n\n{minutes} মিনিটের মধ্যে নিশ্চিত করলে জায়গাটি আপনার:\n{claim_link}\n\nএরপর এটি অপেক্ষমাণ তালিকার পরের জনের কাছে যাবে।"},
+};
+function _remDefault(id,lang){const m=REM_MSG[lang]||REM_MSG.en;return id==='remind_24h'?m.r24:id==='remind_2h'?m.r2:id==='wl_offer'?m.offer:'';}
+// The rider's language, as their nationality suggests it (no account stores a language); staff change it per rider.
+const REM_NAT_LANG={ur:['PK'],hi:['IN'],bn:['BD'],ne:['NP'],tl:['PH'],fr:['FR','BE','CH','LU','MC','SN','CI','CM','ML','BF','NE','TD','GA','CG','CD','BJ','TG','GN','MG','DJ','KM','HT','CF','RW','BI'],es:['ES','MX','AR','CO','CL','PE','VE','EC','GT','CU','BO','DO','HN','PY','SV','NI','CR','PA','UY','GQ'],pt:['PT','BR','AO','MZ','CV','GW','ST','TL'],
+  ar:['SA','AE','KW','QA','BH','OM','YE','IQ','SY','JO','LB','PS','EG','SD','LY','TN','DZ','MA','MR','SO','DJ','KM']};
+function _remLangOf(e){
+  const g=S._rem||S._wlo,o=g&&g.lang&&g.lang[e.id];if(o)return o;
+  const c=e.customerId?_custById(e.customerId):null,n=String((c&&c.nationality)||'').trim(),code=(_NAT_CODE[n]||n).toUpperCase();
+  for(const[l,list]of Object.entries(REM_NAT_LANG))if(list.includes(code))return l;
+  return'en';
+}
+function _remPhone(e){const c=e.customerId?_custById(e.customerId):null;return _waDigits(c?_waNum(c):e.phone||'');}
+function _remTime(hhmm,lang){
+  const m=/^(\d{1,2}):(\d{2})$/.exec(String(hhmm||'').trim());if(!m)return'';
+  try{return new Intl.DateTimeFormat(_langOf(lang).locale,{hour:'numeric',minute:'2-digit',timeZone:'UTC'}).format(new Date(Date.UTC(2000,0,1,+m[1],+m[2])));}catch(_){return m[0];}
+}
+function _remDate(d,lang){try{return new Date(String(d).slice(0,10)+'T12:00:00Z').toLocaleDateString(_langOf(lang).locale,{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'});}catch(_){return String(d).slice(0,10);}}
+// The message's fill-ins: the first name, the ride, its day and start time in the rider's language, and the links.
+function _remVars(e,sess,lang,extra){
+  const raw=_timeText((parseSlots(sess&&sess.bike_slots)||{})._time||'09:00 - 11:00').split('-').map(x=>x.trim());
+  const start=_gathersTime(sess)&&raw[1]?raw[1]:raw[0];
+  return{first_name:String(e.name||'').trim().split(/\s+/)[0]||'',ride:_evName(sess),date:_remDate(sess.session_date||sess.id,lang),time:_remTime(start,lang),
+    cancel_link:CA_SITE+'/'+CUST_PATHS.myrides+'?lang='+encodeURIComponent(lang),...(extra||{})};
+}
+function _remText(id,e,sess,lang,extra){const v=_remVars(e,sess,lang,extra);return _tplUse(id,lang,v)??_tplFill(_remDefault(id,lang),v);}
+// What this device marked before the database had the columns (kept for the session only).
+function _remWhen(e){const l=S._remLocal&&S._remLocal[e.id];return l||(e.remindedAt?{at:e.remindedAt,kind:e.remindedKind}:null);}
+// The rows carry reminded_at once the database has it (entryFromDB keeps undefined for a row read without it).
+function _remColOk(){return(S.queue||[]).some(e=>e.remindedAt!==undefined);}
+// ── The sheet ────────────────────────────────────────────────────────────────────────────────────
+function openRemindSheet(sid,kind){
+  const sess=_sessGet(sid);if(!sess)return;
+  if(!_editOk('queue')){toast(t('roMode'),'info');return;}
+  if(!kind){const st=_hhmmToMin(String((parseSlots(sess.bike_slots)||{})._time||'').split('-')[0].trim());
+    let now=0;try{now=_hhmmToMin(new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()))||0;}catch(_){}
+    kind=String(sess.session_date||sid).slice(0,10)===todayStr()&&st!=null&&st-now<=6*60?'2h':'24h';}
+  {const ae=document.activeElement;S._remRet=ae&&ae!==document.body?ae:null;}
+  S._rem={sid,kind,run:null,lang:{}};
+  _tplLoad().then(()=>{if(S._rem&&S._rem.sid===sid)_remPaint();});
+  _remPaint();
+}
+function _remClose(){S._rem=null;closeConfirm();const r=S._remRet;S._remRet=null;if(r&&document.contains(r))try{r.focus({preventScroll:true});}catch(_){}}
+function _on_rem_bd(event,el){if(event.target===el)_remClose();}
+function _remSet(k,v){const g=S._rem;if(!g||g.run)return;g[k]=v;_remPaint();}
+function _remLangSet(id,v){const g=S._rem;if(!g)return;g.lang[id]=v;_remPaint();}
+function _remTplId(){return S._rem&&S._rem.kind==='2h'?'remind_2h':'remind_24h';}
+// Not reminded yet with this reminder: a 24 h reminder counts once any reminder went; a 2 h one only a 2 h one.
+function _remDone(e,kind){const w=_remWhen(e);return !!w&&(kind==='24h'||w.kind==='2h');}
+function _remPaint(){
+  const g=S._rem,m=document.getElementById('confirm-modal');if(!g||!m)return;
+  const sess=_sessGet(g.sid);if(!sess){_remClose();return;}
+  const rows=_remTargets(g.sid).slice().sort((a,b)=>(a.queueNum||0)-(b.queueNum||0)),todo=rows.filter(e=>!_remDone(e,g.kind)&&_remPhone(e));
+  const noNum=rows.filter(e=>!_remPhone(e)).length;
+  let body='';
+  if(g.run){
+    const R=g.run,cur=R.list[R.i];
+    body=cur?`<div class="seg-prog" aria-live="polite"><div class="seg-pn">${esc(t('segMsgProg').replace('{0}',R.i+1).replace('{1}',R.list.length))}</div>
+      <div class="seg-who"><bdi>${esc(cur.name||'')}</bdi> · #${esc(String(cur.queueNum??''))} · <bdi dir="ltr">${esc(cur.phone||'')}</bdi> · ${esc(_langOf(_remLangOf(cur)).label)}</div>
+      <div class="seg-acts"><button type="button" class="btn-green" data-on-click="${_on("_remRunOpen")}">${_artIcon('whatsapp',13)} ${t('segMsgOpen')}</button><button type="button" class="btn-secondary" data-on-click="${_on("_remRunSkip")}">${t('segMsgSkip')}</button><button type="button" class="btn-secondary" data-on-click="${_on("_remRunStop")}">${t('segMsgStop')}</button></div>
+      <div class="am-meta">${esc(t('segMsgDone').replace('{0}',R.sent).replace('{1}',R.skipped))}</div></div>`
+      :`<div class="seg-prog" aria-live="polite"><b>${esc(t('segMsgFinished'))}</b><div class="am-meta">${esc(t('segMsgDone').replace('{0}',R.sent).replace('{1}',R.skipped))}</div>
+      <div class="seg-acts"><button type="button" class="btn-secondary" data-on-click="${_on("_remRunBack")}">${t('remBackToList')}</button></div></div>`;
+  }else{
+    const lopts=cur=>LANGS.map(l=>`<option value="${l.code}"${l.code===cur?' selected':''}>${esc(l.label)}</option>`).join('');
+    body=`<div class="seg-kind" role="group" aria-label="${esc(t('remKindLbl'))}">${[['24h','remKind24'],['2h','remKind2']].map(([k,l])=>`<button type="button" class="toggle-btn${g.kind===k?' active':''}" aria-pressed="${g.kind===k}" data-on-click="${_on("_remSet","kind",k)}">${t(l)}</button>`).join('')}</div>
+      <div class="am-meta">${esc(t('remSummary').replace('{0}',rows.length).replace('{1}',todo.length).replace('{2}',noNum))}</div>
+      ${_remColOk()||!rows.length?'':`<div class="am-meta rem-local">${t('remLocalOnly')}</div>`}
+      <div class="seg-acts"><button type="button" class="btn-primary" data-on-click="${_on("_remRunStart")}"${todo.length?'':' disabled'}>${esc(t('remSendAll').replace('{0}',todo.length))}</button></div>
+      ${rows.length?`<ul class="rem-list">${rows.map(e=>{const w=_remWhen(e),ph=_remPhone(e),lg=_remLangOf(e);
+        return `<li class="rem-row${_remDone(e,g.kind)?' done':''}"><div class="rem-who"><b><bdi>${esc(e.name||'')}</bdi></b> <span class="rem-num">#${esc(String(e.queueNum??''))}</span>
+          <div class="rem-st">${w?esc(t('remRemindedAt').replace('{0}',fmt12h(new Date(w.at).toLocaleTimeString('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}))).replace('{1}',t(w.kind==='2h'?'remKind2':'remKind24'))):t('remNotYet')}${ph?'':' · '+esc(t('remNoNumber'))}</div></div>
+          <select class="filter-select rem-lang" aria-label="${esc(t('remLangLbl').replace('{0}',e.name||''))}" data-on-change="${_on("_remLangSet",e.id,_P("value"))}">${lopts(lg)}</select>
+          <button type="button" class="btn-sm btn-green rem-send" data-on-click="${_on("_remSendOne",e.id)}"${ph?'':' disabled'}>${_artIcon('whatsapp',13)} ${t('remSend')}</button></li>`;}).join('')}</ul>`:_emptyState(t('remNone'))}`;
+  }
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_rem_bd",_EV,_EL)}"><div class="confirm-box seg-dlg rem-dlg" role="dialog" aria-modal="true" aria-labelledby="rem-title">
+    <div class="bdg-head"><h2 class="bdg-title" id="rem-title">${esc(t('remTitle').replace('{0}',_evName(sess)+' '+shortDate(sess.session_date||sess.id)))}</h2><button type="button" class="bdg-x" data-on-click="${_on("_remClose")}" aria-label="${esc(t('closeBtn'))}">&times;</button></div>
+    <div class="seg-body">${body}</div>
+  </div></div>`;
+}
+// One rider: their chat opens with the message in their language, and the booking says it was sent.
+async function _remSendOne(id){
+  const g=S._rem;if(!g)return;const e=_qGet(id),sess=_sessGet(g.sid);if(!e||!sess)return;
+  const ph=_remPhone(e);if(!ph)return;
+  const lang=_remLangOf(e);
+  try{window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(_remText(_remTplId(),e,sess,lang)),'_blank','noopener');}catch(_){}
+  await _remMark([e],g.kind);
+  _remPaint();
+}
+async function _remMark(list,kind){
+  const at=new Date().toISOString();
+  S._remLocal=S._remLocal||{};
+  list.forEach(e=>{S._remLocal[e.id]={at,kind};});
+  if(!_remColOk())return; // the database has no columns for it yet: this device remembers, nothing is written
+  const ids=list.map(e=>e.id);
+  if(await _wr(sb.from('queue_entries').update({reminded_at:at,reminded_kind:kind}).in('id',ids),'ride reminder'))return;
+  list.forEach(e=>{e.remindedAt=at;e.remindedKind=kind;delete S._remLocal[e.id];});
+  S.queue=(S.queue||[]).slice();
+}
+function _remRunStart(){
+  const g=S._rem;if(!g)return;
+  const list=_remTargets(g.sid).slice().sort((a,b)=>(a.queueNum||0)-(b.queueNum||0)).filter(e=>!_remDone(e,g.kind)&&_remPhone(e));
+  if(!list.length)return;
+  g.run={list,i:0,sent:0,skipped:0};_remPaint();
+}
+async function _remRunOpen(){
+  const g=S._rem,R=g&&g.run,cur=R&&R.list[R.i];if(!cur)return;
+  const sess=_sessGet(g.sid);if(!sess)return;
+  try{window.open('https://wa.me/'+_remPhone(cur)+'?text='+encodeURIComponent(_remText(_remTplId(),cur,sess,_remLangOf(cur))),'_blank','noopener');}catch(_){}
+  R.sent++;R.i++;
+  if(R.i>=R.list.length)_remRunEnd();
+  _remPaint();
+  await _remMark([cur],g.kind);
+  _remPaint();
+}
+function _remRunSkip(){const R=S._rem&&S._rem.run;if(!R)return;R.skipped++;R.i++;if(R.i>=R.list.length)_remRunEnd();_remPaint();}
+function _remRunStop(){const R=S._rem&&S._rem.run;if(!R)return;R.skipped+=R.list.length-R.i;R.i=R.list.length;_remRunEnd();_remPaint();}
+function _remRunBack(){const g=S._rem;if(!g)return;g.run=null;_remPaint();}
+function _remRunEnd(){const g=S._rem,R=g&&g.run;if(!R||R.logged)return;R.logged=true;const s=_sessGet(g.sid);logAction(t('remLog').replace('{0}',t(g.kind==='2h'?'remKind2':'remKind24')).replace('{1}',R.sent).replace('{2}',s?_evName(s)+' '+shortDate(s.session_date||s.id):g.sid));}
+
+// ── A place is free: who gets it ─────────────────────────────────────────────────────────────────
+// 'staff': the next riders in line, each with Give the place (the promotion the desk always made, now by
+// hand). 'claim': the offers still open on the ride (Send on WhatsApp with the rider's link, Withdraw) and
+// Offer beside Give. The offers come from waitlist_offers; a database without it reads as 'staff'.
+const WLO_SHOW=6;
+function openWlOffers(sid,auto){
+  const sess=_sessGet(sid);if(!sess)return;
+  if(!_editOk('queue')){if(!auto)toast(t('roMode'),'info');return;}
+  if(!auto){const ae=document.activeElement;S._wloRet=ae&&ae!==document.body?ae:null;}
+  S._wlo={sid,offers:_wlMode()==='claim'?null:[],busy:false,given:[],lang:{}};
+  _wloPaint();
+  if(_wlMode()==='claim')_wloLoad(sid);
+}
+async function _wloLoad(sid){
+  let r;try{r=await sb.from('waitlist_offers').select('id,booking_id,status,offered_at,expires_at,sent_at,token').eq('session_id',sid).eq('status','open');}catch(e){r={error:e};}
+  const g=S._wlo;if(!g||g.sid!==sid)return;
+  if(r.error){
+    if(_rpcAbsent(r.error)||/PGRST205|42P01/.test(String(r.error.code||''))){S._wlNoDb=true;g.offers=[];toast(t('dbPending'),'info');}
+    else{g.offers=[];g.err=true;}
+  }else g.offers=(r.data||[]).filter(o=>Date.parse(o.expires_at)>Date.now());
+  _wloPaint();
+}
+function _wloClose(){S._wlo=null;closeConfirm();const r=S._wloRet;S._wloRet=null;if(r&&document.contains(r))try{r.focus({preventScroll:true});}catch(_){}}
+function _on_wlo_bd(event,el){if(event.target===el&&!(S._wlo&&S._wlo.busy))_wloClose();}
+function _wloLangSet(id,v){const g=S._wlo;if(!g)return;g.lang[id]=v;_wloPaint();}
+function _wloPaint(){
+  const g=S._wlo,m=document.getElementById('confirm-modal');if(!g||!m)return;
+  const sess=_sessGet(g.sid);if(!sess){_wloClose();return;}
+  const claim=_wlMode()==='claim',free=_wlFree(g.sid),line=_wlLine(g.sid),dis=g.busy?' disabled':'';
+  const offered=new Set((g.offers||[]).map(o=>o.booking_id));
+  const lopts=cur=>LANGS.map(l=>`<option value="${l.code}"${l.code===cur?' selected':''}>${esc(l.label)}</option>`).join('');
+  const until=o=>fmt12h(new Date(o.expires_at).toLocaleTimeString('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}));
+  const offersHtml=!claim?'':g.offers===null?`<div class="am-meta">${t('loadingLabel')}</div>`
+    :g.offers.length?`<h3 class="wlo-h">${t('wloOpenOffers')}</h3><ul class="rem-list">${g.offers.map(o=>{const e=_qGet(o.booking_id);if(!e)return'';const ph=_remPhone(e);
+      return `<li class="rem-row"><div class="rem-who"><b><bdi>${esc(e.name||'')}</bdi></b> <span class="rem-num">W${esc(String(e.waitlistNum??''))}</span>
+        <div class="rem-st">${esc(t('wloClaimBy').replace('{0}',until(o)))}${o.sent_at?' · '+esc(t('wloSent')):''}</div></div>
+        <select class="filter-select rem-lang" aria-label="${esc(t('remLangLbl').replace('{0}',e.name||''))}" data-on-change="${_on("_wloLangSet",e.id,_P("value"))}">${lopts(_remLangOf(e))}</select>
+        <span class="wlo-acts"><button type="button" class="btn-sm btn-green" data-on-click="${_on("_wloSend",o.id)}"${ph?dis:' disabled'}>${_artIcon('whatsapp',13)} ${t(o.sent_at?'wloSendAgain':'wloSend')}</button>
+        <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_wloWithdraw",o.id)}"${dis}>${t('wloWithdraw')}</button></span></li>`;}).join('')}</ul>`:'';
+  const given=g.given.map(e=>{const ph=_remPhone(e);return `<li class="rem-row done"><div class="rem-who"><b><bdi>${esc(e.name||'')}</bdi></b> <span class="rem-num">#${esc(String(e.queueNum??''))}</span><div class="rem-st">${t('wloGiven')}</div></div>
+    ${ph?`<a class="btn-sm btn-green" href="${esc('https://wa.me/'+ph+'?text='+encodeURIComponent(_tplUse('wa_turn',S.lang,{})??t('waYourTurnMsg')))}" target="_blank" rel="noopener">${_artIcon('whatsapp',13)} WhatsApp</a>`:''}</li>`;}).join('');
+  const lineHtml=line.length?`<h3 class="wlo-h">${t('wloNextUp')}</h3><ul class="rem-list">${line.slice(0,WLO_SHOW).map(e=>`<li class="rem-row"><div class="rem-who"><b><bdi>${esc(e.name||'')}</bdi></b> <span class="rem-num">W${esc(String(e.waitlistNum??''))}</span>
+      <div class="rem-st">${esc(t('wloWaitingSince').replace('{0}',shortDate(_ksaDayOf(e.registeredAt))))}${offered.has(e.id)?' · '+esc(t('wloOffered')):''}</div></div>
+      <span class="wlo-acts">${claim&&!offered.has(e.id)?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_wloOffer",e.id)}"${free?dis:' disabled'}>${t('wloOffer')}</button>`:''}
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_wloGive",e.id)}"${free?dis:' disabled'}>${t('wloGive')}</button></span></li>`).join('')}</ul>
+      ${line.length>WLO_SHOW?`<div class="am-meta">${esc(t('wloMore').replace('{0}',line.length-WLO_SHOW))}</div>`:''}`:`<div class="am-meta">${t('wloNobody')}</div>`;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_wlo_bd",_EV,_EL)}"><div class="confirm-box seg-dlg rem-dlg" role="dialog" aria-modal="true" aria-labelledby="wlo-title">
+    <div class="bdg-head"><h2 class="bdg-title" id="wlo-title">${esc(t('wloTitle').replace('{0}',_evName(sess)+' '+shortDate(sess.session_date||sess.id)))}</h2><button type="button" class="bdg-x" data-on-click="${_on("_wloClose")}" aria-label="${esc(t('closeBtn'))}"${dis}>&times;</button></div>
+    <div class="seg-body"><div class="am-meta" aria-live="polite">${esc(t('wloSummary').replace('{0}',free).replace('{1}',line.length))}</div>
+    <div class="am-meta">${t(claim?'wloHintClaim':'wloHintStaff').replace('{0}',String(_wlClaimMin()))}</div>
+    ${given?`<ul class="rem-list">${given}</ul>`:''}${offersHtml}${lineHtml}${g.err?`<div class="am-meta" role="alert">${t('errConnection')}</div>`:''}</div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on("_wloClose")}"${dis}>${t('closeBtn')}</button></div>
+  </div></div>`;
+}
+function _wlClaimMin(){const n=Number(_biz('wl_claim_min',30));return Number.isInteger(n)&&n>=5&&n<=720?n:30;}
+// Give the place now: the promotion _autoPromoteOldestWaitlist makes in 'auto', for the rider staff chose.
+async function _wloGive(id){
+  const g=S._wlo;if(!g||g.busy)return;const e=_qGet(id);if(!e||e.status!=='waitlist')return;
+  if(_wlFree(g.sid)<=0){toast(t('wloFull'),'info');_wloPaint();return;}
+  g.busy=true;_wloPaint();
+  try{
+    const r=await sb.from('queue_entries').update({status:'waiting'}).eq('id',id).eq('status','waitlist').select('id');
+    if(_writeErr(r,'promote from waitlist'))return;
+    if(!_landed(r)){await _lostRace();return;}
+    e.status='waiting';S.queue=(S.queue||[]).slice();
+    await _mwRetireLinked(id);
+    await _consumeAddonsOnEnter(e);
+    if(VAPID_PUBLIC_KEY)pushNotify(e.customerId,t('pushPromotedTitle'),t('pushPromotedBody').replace('{0}',e.queueNum),'/','booking-'+e.id); // a push only once the site sends them
+    g.given.push(e);
+    logAction(`${t('wloGive')}: #${e.queueNum} ${e.name}`);
+    toast(t('toastPromoted'),'success');
+    pushUndo(`${t('wloGive')} · ${e.name}`,async()=>{
+      const u=await sb.from('queue_entries').update({status:'waitlist'}).eq('id',id).eq('status','waiting').select('id');
+      if(_writeErr(u,'undo')||!_landed(u)){await loadDataLight();renderStaffQueue();return false;}
+      await _restockAddonsOnExit(e);
+      await loadDataLight();renderStaffQueue();
+    },{k:'promote',e:'booking',id});
+    await loadDataLight();
+  }finally{g.busy=false;renderStaffQueue();_wloPaint();}
+}
+// Offer the place with a timed link (staff_offer_spot); the dialog then shows it with its Send.
+async function _wloOffer(id){
+  const g=S._wlo;if(!g||g.busy)return;
+  g.busy=true;_wloPaint();
+  let r;try{r=await sb.rpc('staff_offer_spot',{p_session_id:g.sid,p_booking_id:id||null});}catch(e){r={error:e};}
+  g.busy=false;
+  if(r.error){
+    if(_rpcAbsent(r.error)){S._wlNoDb=true;toast(t('dbPending'),'info');_wloPaint();return;}
+    _writeErr(r,'offer a place');_wloPaint();return;
+  }
+  const o=r.data;
+  if(o&&o.id){g.offers=(g.offers||[]).filter(x=>x.id!==o.id).concat([{...o,sent_at:null}]);logAction(t('wloOfferLog').replace('{0}',((_qGet(o.booking_id)||{}).name)||''));}
+  _wloPaint();
+}
+async function _wloSend(oid){
+  const g=S._wlo;if(!g)return;const o=(g.offers||[]).find(x=>x.id===oid);if(!o)return;
+  const e=_qGet(o.booking_id),sess=_sessGet(g.sid);if(!e||!sess)return;
+  const ph=_remPhone(e);if(!ph)return;const lang=_remLangOf(e);
+  const mins=Math.max(1,Math.round((Date.parse(o.expires_at)-Date.now())/6e4));
+  try{window.open('https://wa.me/'+ph+'?text='+encodeURIComponent(_remText('wl_offer',e,sess,lang,{minutes:String(mins),claim_link:CA_SITE+'/?claim='+o.token+'&lang='+encodeURIComponent(lang)})),'_blank','noopener');}catch(_){}
+  if(VAPID_PUBLIC_KEY)pushNotify(e.customerId,t('wloPushTitle'),t('wloPushBody').replace('{0}',String(mins)),'/?claim='+o.token,'offer-'+o.id);
+  if(!o.sent_at){const at=new Date().toISOString();if(!await _wr(sb.from('waitlist_offers').update({sent_at:at}).eq('id',o.id),'offer sent'))o.sent_at=at;}
+  _wloPaint();
+}
+async function _wloWithdraw(oid){
+  const g=S._wlo;if(!g||g.busy)return;
+  const r=await sb.from('waitlist_offers').update({status:'cancelled'}).eq('id',oid).eq('status','open').select('id');
+  if(_writeErr(r,'withdraw offer'))return;
+  g.offers=(g.offers||[]).filter(x=>x.id!==oid);
+  _wloPaint();
+}
 // When a spot frees up (cancel / no-show), promote the oldest waitlisted rider in that session.
 // Community events NEVER auto-promote: staff hand-pick who comes off the waitlist when a spot
 // frees, a reservation is cancelled, or the allocation is expanded.
@@ -26456,6 +26845,10 @@ async function _autoPromoteOldestWaitlist(sessionId){
   // A ride that is over takes nobody new (2026-10-05): removing a done row in History handed a
   // leftover waitlister a finished night - their add-ons taken from stock and "your turn" sent.
   if(_sessEnded(sess))return false;
+  // Settings > Business wl_offer_mode (2026-10-09, R7): 'auto' promotes as below; 'staff' asks the staffer
+  // which waitlisted rider gets the place (a centred dialog); 'claim' offers it with a timed link. Both
+  // land in _wlAskSoon once the action that freed the place has painted.
+  if(_wlMode()!=='auto'){_wlAskSoon(sessionId);return false;}
   // The freed place is a bike, as _promote_next_waitlist reads it on the server: a waitlisted
   // rider on their own bike is not who it goes to, except on the Petromin ride (_ownTakesPlace).
   const own=_ownTakesPlace(sess);
@@ -46241,6 +46634,7 @@ function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}
   // device without one lands on the PIN screen with no bike on it anywhere.
   const _bikeCode=_readBikeParam();
   const _afxTok=_readAppFixParam(); // /?appfix= or /?learnfix=: an applicant asked to change their application or sign-up
+  const _wlcTok=_readClaimParam(); // /?claim=: a freed waitlist place offered to this rider (2026-10-09)
   const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
   if(!_isStaffUrl&&_pathNav&&_pathNav.signup)S.authMode='signup'; // /signup opens Create account
@@ -46307,6 +46701,7 @@ function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}
   try{const _st=_navState();history.replaceState(_st,'',_navUrl(_st));}catch(e){} // the address names where the app opened
   if(new URLSearchParams(location.search).has('privacy'))try{showPrivacyNotice();}catch(e){} // the link people are sent
   if(_afxTok&&!_isStaffUrl)try{_afxOpen(_afxTok);}catch(e){}
+  if(_wlcTok&&!_isStaffUrl)try{_wlcOpen(_wlcTok);}catch(e){}
 })();
 
 
