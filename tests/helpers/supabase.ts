@@ -43,7 +43,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
  *  numbers). Every request to one answers as a database without it does (PGRST205), unless the spec
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
-const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers']);
+const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
