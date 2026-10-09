@@ -238,7 +238,7 @@ begin
   if position('(20261009162000)' in d) > 0 then raise notice 'staff_set_access already takes manager'; return; end if;
   d := pg_temp._once(d,
 $a$p_role not in ('admin', 'frontdesk', 'leader', 'mechanic', 'cashier', 'owner') then$a$,
-$b$p_role not in ('admin', 'manager', 'frontdesk', 'leader', 'mechanic', 'cashier', 'owner') then  -- manager (20261009162000)$b$);
+$b$p_role not in ('admin', 'manager', 'frontdesk', 'leader', 'mechanic', 'cashier', 'owner') then /* manager (20261009162000) */$b$);
   -- 'customers' has been a section of its own since 2026-10-07: an account limited to it was refused
   d := pg_temp._once(d,
 $a$'inventory','workshop','community',$a$,
