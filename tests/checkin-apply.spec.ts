@@ -51,7 +51,7 @@ test('Waiting keeps the payment and type it was given, and Confirm leaves the ri
 test('the four outcomes are one row of choices, Check in first and chosen, and Confirm applies it', async ({ page }) => {
   const { modal, patches } = await open(page);
   const outs = modal.locator('.ci-outcomes .ci-out');
-  await expect(outs).toHaveText(['Check In', 'Waiting', 'No-Show', 'Cancel booking']);
+  await expect(outs).toHaveText(['Check In', 'Save, check in later', 'No-Show', 'Cancel booking']);
   await expect(modal.locator('#ci-out-checkin')).toHaveAttribute('aria-checked', 'true');
   // choosing another and coming back moves the choice, and touches nothing on the server
   await modal.locator('#ci-out-noshow').click();

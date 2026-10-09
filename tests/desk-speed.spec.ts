@@ -192,7 +192,11 @@ test.describe('@staff:bookings check-in', () => {
     await page.evaluate(`setStaffTab('queue');setSfSession('s0')`);
     await page.evaluate(`showCheckinModal('${A}')`);
     const tog = page.locator('#ci-autonext');
-    await expect(tog).toHaveAttribute('aria-pressed', 'false');
+    // on by default since 2026-10-09 (D10); turned off here, the panel closes after Confirm
+    await expect(tog).toHaveAttribute('aria-pressed', 'true');
+    await tog.click();
+    expect(await page.evaluate(`localStorage.getItem('cq_ci_next')`)).toBe('0');
+    await expect(page.locator('#ci-autonext')).toHaveAttribute('aria-pressed', 'false');
     await page.locator('#ci-confirm').click();
     await expect.poll(() => page.evaluate('S._ciId')).toBeNull();
 

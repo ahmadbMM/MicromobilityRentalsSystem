@@ -71,9 +71,9 @@ test('Confirm on the check-in modal says what it records for the payment', async
   await queue(page);
   await page.evaluate(`showCheckinModal('w1')`);
   const btn = page.locator('#ci-confirm');
-  await expect(btn).toContainText('Confirm · ✓ Paid');
+  await expect(btn).toContainText(/Confirm · Paid SAR \d/); // the amount too (2026-10-09, D11)
   await page.evaluate(`_on_renderCheckinModal_3(null,null,'pending')`);
-  await expect(btn).toContainText('Confirm · Pending');
+  await expect(btn).toContainText(/Confirm · Pending SAR \d/);
 });
 
 test('a checked-in rider without a bike reads "Needs bike", not "On Bike"', async ({ page }) => {
