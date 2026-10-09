@@ -1172,7 +1172,10 @@ export function formatFieldNames(r, limit = 20) {
 // incidents, the maintenance log), stock movements (receive at cost, reasons, history, value, CSV import) and
 // the workshop's payment, parts and reports - mostly in the fleet / inventory / workshop parts, but 145 strings in
 // each language whose English sits in the core (~2 KB gz). Here: staff 492.0, core 254.2 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 221, staff: 514, core: 265 };
+// Staff 480 -> 484, core 254 -> 257 (2026-10-09): personal customisation (Start on, the phone tab bar, filters kept per
+// section and synced, text size, density, the bell's read state on the account, templates in every language) and 18
+// strings in each language; here 480.2 / 253.8 local.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 221, staff: 518, core: 268 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

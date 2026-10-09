@@ -30,7 +30,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_reset_password', 'staff_purge_preview', 'staff_purge_old',
   // Stock movements (20261009170000): without them the desk moves the count alone, as before;
   // tests/s1009-fleet-*.spec.ts stub them by name.
-  'staff_inventory_move', 'staff_inventory_receive', 'staff_inventory_set_count', 'staff_inventory_extras']);
+  'staff_inventory_move', 'staff_inventory_receive', 'staff_inventory_set_count', 'staff_inventory_extras',
+  // A staff account's own preferences (20261009190000): without it they stay on the device, as production
+  // runs until the migration is applied; tests/s1009-custom-*.spec.ts stub it by name.
+  'staff_my_prefs']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
