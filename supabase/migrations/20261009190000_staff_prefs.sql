@@ -33,7 +33,7 @@ as $function$
 declare
   _uid uuid := auth.uid(); _cur jsonb; _k text; _v jsonb; _old jsonb; _kind text; _ids jsonb; _b jsonb;
 begin
-  if _uid is null or not exists (select 1 from staff where user_id = _uid) then
+  if _uid is null or not exists (select 1 from staff where user_id = _uid and disabled_at is null) then
     raise exception 'NOT_STAFF' using errcode = '42501';
   end if;
   select coalesce(prefs, '{}'::jsonb) into _cur from staff where user_id = _uid for update;
@@ -112,4 +112,12 @@ on conflict (version) do nothing;
 
 notify pgrst, 'reload schema';
 
+
+-- The staff audit trigger skips prefs-only saves (a bell mark-read would otherwise write an audit row each time).
+drop trigger if exists staff_audit on public.staff;
+drop trigger if exists staff_audit_del on public.staff;
+create trigger staff_audit after update on public.staff for each row
+  when ((to_jsonb(old) - 'prefs') is distinct from (to_jsonb(new) - 'prefs'))
+  execute function public._audit_row();
+create trigger staff_audit_del after delete on public.staff for each row execute function public._audit_row();
 commit;

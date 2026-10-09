@@ -56,6 +56,21 @@ returns boolean
 language sql stable security definer set search_path to 'public'
 as $$ select exists(select 1 from staff where user_id = auth.uid() and role = 'admin' and disabled_at is null); $$;
 
+-- _staff_mod (20261009150000) also skips a disabled account, like is_staff()/is_admin() above.
+create or replace function public._staff_mod(p_mod text, p_edit boolean default false)
+returns boolean
+language sql stable security definer set search_path to 'public'
+as $fn$
+  select exists(
+    select 1 from staff s
+     where s.user_id = auth.uid() and s.disabled_at is null
+       and (s.role = 'admin'
+            or (case when p_edit then s.modules_edit else s.modules_view end) is null
+            or p_mod = any(case when p_edit then s.modules_edit else s.modules_view end)))
+$fn$;
+revoke all on function public._staff_mod(text, boolean) from public, anon;
+grant execute on function public._staff_mod(text, boolean) to authenticated;
+
 -- ── 2. Caps ─────────────────────────────────────────────────────────────────────────────────
 create or replace function public._staff_cap(p_cap text)
 returns boolean
@@ -144,6 +159,7 @@ begin
     end if;
     update staff set disabled_at = coalesce(disabled_at, now()) where user_id = p_user;
     update auth.users set banned_until = now() + interval '100 years' where id = p_user;
+    delete from auth.sessions where user_id = p_user;
   else
     update staff set disabled_at = null where user_id = p_user;
     update auth.users set banned_until = null where id = p_user;
@@ -257,7 +273,7 @@ end $ic$;
 do $chk$
 declare f text;
 begin
-  foreach f in array array['public.is_staff()', 'public.is_admin()', 'public._staff_cap(text)', 'public._staff_owner()',
+  foreach f in array array['public.is_staff()', 'public.is_admin()', 'public._staff_mod(text,boolean)', 'public._staff_cap(text)', 'public._staff_owner()',
     'public.staff_team_more()', 'public.staff_team_list()', 'public.staff_set_caps(uuid,jsonb)',
     'public.staff_set_disabled(uuid,boolean)', 'public.staff_reset_password(uuid,text)',
     'public.staff_invite(text,text,text,text)', 'public.staff_set_access(uuid,text,text[],text[])',

@@ -72,7 +72,7 @@ as $fn$
   qa as (
     select s.m, q.session_id, q.status, coalesce(q.paid, false) as paid, q.customer_id,
       coalesce(q.price, 57.5) + coalesce((
-        select sum(coalesce(case when jsonb_typeof(a) = 'object' and (a->>'p') ~ '^-?[0-9.]+$' then (a->>'p')::numeric end, i.price, 0)
+        select sum(coalesce(case when jsonb_typeof(a) = 'object' and (a->>'p') ~ '^-?[0-9]+(\.[0-9]+)?$' then (a->>'p')::numeric end, i.price, 0)
                    * greatest(coalesce(case when jsonb_typeof(a) = 'object' and (a->>'qty') ~ '^[0-9]+$' then (a->>'qty')::numeric end, 1), 1))
         from jsonb_array_elements(_mt_json(q.addons)) a
         left join inventory i on i.id = case when jsonb_typeof(a) = 'object' then a->>'id' else a #>> '{}' end
@@ -82,7 +82,7 @@ as $fn$
         select sum(coalesce((p->>'qty')::numeric, 0) * coalesce((p->>'price')::numeric, 0))
         from jsonb_array_elements(_mt_json(q.purchases)) p
         where jsonb_typeof(p) = 'object' and p->>'pay' = 'paid' and coalesce(p->>'cat', '') <> '__cardmeta__'
-          and (p->>'qty') ~ '^-?[0-9.]+$' and (p->>'price') ~ '^-?[0-9.]+$'
+          and (p->>'qty') ~ '^-?[0-9]+(\.[0-9]+)?$' and (p->>'price') ~ '^-?[0-9]+(\.[0-9]+)?$'
       ), 0) as purch
     from queue_entries q
     join s on s.id = q.session_id

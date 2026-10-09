@@ -49,12 +49,12 @@ drop policy if exists staff_options_del on public.staff_options;
 create policy staff_options_read on public.staff_options for select
   using ((select is_staff()));
 create policy staff_options_ins on public.staff_options for insert
-  with check ((select is_staff()) and (key <> 'biz' or (select is_admin())));
+  with check ((select is_staff()) and ((key <> 'biz' and key not like 'biz.%') or (select is_admin())));
 create policy staff_options_upd on public.staff_options for update
-  using ((select is_staff()) and (key <> 'biz' or (select is_admin())))
-  with check ((select is_staff()) and (key <> 'biz' or (select is_admin())));
+  using ((select is_staff()) and ((key <> 'biz' and key not like 'biz.%') or (select is_admin())))
+  with check ((select is_staff()) and ((key <> 'biz' and key not like 'biz.%') or (select is_admin())));
 create policy staff_options_del on public.staff_options for delete
-  using ((select is_staff()) and (key <> 'biz' or (select is_admin())));
+  using ((select is_staff()) and ((key <> 'biz' and key not like 'biz.%') or (select is_admin())));
 
 -- ── 2. The audit trigger for rows keyed by another column ───────────────────────────────────
 create or replace function public._audit_keyed()

@@ -301,7 +301,7 @@ begin
   values (p_item, p_qty, 'received', p_unit_cost, v_sup, p_expires_on,
           nullif(left(btrim(coalesce(p_note, '')), 300), ''), v_on_shelf, nullif(left(btrim(coalesce(p_by, '')), 120), ''))
   returning id into v_id;
-  return jsonb_build_object('ok', true, 'qty', v_on_shelf, 'cost', v_cost, 'expires_on', v_exp, 'move_id', v_id);
+  return jsonb_build_object('ok', true, 'qty', v_on_shelf, 'cost', case when _staff_cap('can_see_costs') then v_cost end, 'expires_on', v_exp, 'move_id', v_id);
 end $function$;
 revoke all on function public.staff_inventory_receive(text,integer,numeric,text,date,text,text) from public, anon;
 grant execute on function public.staff_inventory_receive(text,integer,numeric,text,date,text,text) to authenticated;
@@ -337,7 +337,7 @@ create or replace function public.staff_inventory_extras()
 as $function$
 begin
   if not is_staff() then raise exception 'FORBIDDEN' using errcode = '42501'; end if;
-  return query select i.id, i.cost, i.supplier, i.expires_on from public.inventory i;
+  return query select i.id, case when _staff_cap('can_see_costs') then i.cost end, i.supplier, i.expires_on from public.inventory i;
 end $function$;
 revoke all on function public.staff_inventory_extras() from public, anon;
 grant execute on function public.staff_inventory_extras() to authenticated;

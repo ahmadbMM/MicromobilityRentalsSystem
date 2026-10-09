@@ -289,4 +289,7 @@ drop policy if exists "till counts delete" on public.till_counts;
 create policy "till counts delete" on public.till_counts
   for delete to authenticated using ((select public.is_admin()));
 
+
+insert into supabase_migrations.schema_migrations (version, name)
+values ('20261009150000', 'money_controls') on conflict (version) do nothing;
 commit;

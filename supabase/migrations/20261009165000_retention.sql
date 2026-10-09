@@ -28,7 +28,7 @@
 
 begin;
 
-create extension if not exists pg_cron;
+create extension if not exists pg_cron with schema pg_catalog;
 
 -- The cut-off for one table: now less its setting, else less its default.
 create or replace function public._ret_cut(p_key text, p_unit text, p_default int)
