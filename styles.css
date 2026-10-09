@@ -9204,3 +9204,72 @@ html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-noshow,.st-ca
 .nfc-sent-t{font-size:22px;font-weight:900;margin:0 0 10px;}
 .nfc-sent-box p{margin:0 0 16px;color:var(--muted);font-weight:600;}
 .nfc-sent-box button{min-height:44px;}
+/* ── KIOSK MODE (2026-10-09): a desk tablet's self-service screen for walk-ins (#kiosk, drawn by
+   _koRender in the kiosk part). Full screen over the staff panel, below the operator's PIN keypad
+   (z 290) and the toasts; large type and 56px+ targets for a standing walk-in; staff tokens only. ── */
+#kiosk{position:fixed;inset:0;z-index:280;background:var(--sf-card);color:var(--text);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+body.kiosk-on{overflow:hidden;}
+#kiosk .ko-wrap{min-height:100%;display:flex;flex-direction:column;max-width:760px;margin:0 auto;padding:16px 16px 24px;box-sizing:border-box;}
+#kiosk .ko-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 18px;}
+#kiosk .ko-brand{font-weight:800;font-size:20px;letter-spacing:.2px;}
+#kiosk .ko-lang{display:inline-flex;align-items:center;gap:8px;color:var(--muted);}
+#kiosk .ko-lang select{min-height:48px;font-size:17px;padding:6px 12px;border:1px solid var(--sf-ctl);border-radius:10px;background:var(--sf-card);color:var(--text);}
+#kiosk .ko-main{flex:1;outline:medium none;}
+#kiosk .ko-h1{font-size:clamp(26px,5vw,38px);line-height:1.15;font-weight:800;margin:8px 0 10px;}
+#kiosk .ko-h2{font-size:20px;font-weight:700;margin:22px 0 10px;}
+#kiosk .ko-sub{font-size:18px;color:var(--muted);margin:0 0 18px;line-height:1.45;}
+#kiosk .ko-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:22px;}
+#kiosk .ko-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:60px;padding:12px 22px;border-radius:14px;font-size:19px;font-weight:700;border:1px solid var(--sf-ctl);background:var(--sf-card);color:var(--text);cursor:pointer;}
+#kiosk .ko-btn:disabled{opacity:.5;cursor:default;}
+#kiosk .ko-btn:focus-visible,#kiosk .ko-ride:focus-visible,#kiosk .ko-hit:focus-visible,#kiosk .ko-type:focus-visible,#kiosk .ko-back:focus-visible,#kiosk .ko-exit:focus-visible{outline:3px solid var(--green);outline-offset:2px;}
+#kiosk .ko-big{min-height:150px;flex-direction:column;font-size:22px;border-width:2px;}
+#kiosk .ko-alt{border-color:var(--green);color:var(--sf-green-ink);}
+#kiosk .ko-primary{width:100%;margin-top:18px;background:var(--green);border-color:var(--green);color:var(--sf-card);}
+#kiosk .ko-ghost{width:100%;margin-top:10px;}
+#kiosk .ko-back{display:inline-flex;align-items:center;gap:6px;min-height:48px;padding:0 12px;margin-inline-start:-12px;border:none;background:transparent none;color:var(--muted);font-size:17px;cursor:pointer;}
+#kiosk .ko-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;flex:1;min-width:0;}
+#kiosk .ko-field label,#kiosk .ko-set legend{font-size:16px;font-weight:700;}
+#kiosk .ko-field :is(input,select),#kiosk .ko-phone :is(input,select){min-height:56px;font-size:20px;padding:8px 14px;border:1px solid var(--sf-ctl);border-radius:12px;background:var(--sf-card);color:var(--text);box-sizing:border-box;width:100%;}
+#kiosk .ko-bad :is(input,select){border-color:var(--red);}
+#kiosk .ko-row{display:flex;gap:12px;flex-wrap:wrap;}
+#kiosk .ko-phone{display:flex;gap:8px;}
+#kiosk .ko-phone select{flex:0 0 112px;width:112px;}
+#kiosk .ko-pin{letter-spacing:10px;text-align:center;font-size:28px;max-width:240px;}
+#kiosk .ko-set{border:1px solid var(--sf-line2);border-radius:14px;padding:12px 14px 4px;margin:0 0 14px;}
+#kiosk .ko-set.ko-bad{border-color:var(--red);}
+#kiosk .ko-err{margin:6px 0 4px;padding:12px 14px;border-radius:12px;background:rgba(var(--red-rgb),.1);color:var(--red);font-size:17px;font-weight:600;}
+#kiosk .ko-empty{margin:14px 0;padding:18px;border-radius:14px;background:var(--sf-head);font-size:18px;}
+#kiosk .ko-note{color:var(--muted);font-size:16px;margin:14px 0 0;}
+#kiosk .ko-list{list-style:none;margin:0;padding:0;display:grid;gap:10px;}
+#kiosk .ko-hit,#kiosk .ko-ride{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:64px;padding:12px 18px;border:1px solid var(--sf-ctl);border-radius:14px;background:var(--sf-card);color:var(--text);font-size:20px;font-weight:700;text-align:start;cursor:pointer;}
+#kiosk .ko-ride{flex-direction:column;align-items:flex-start;gap:6px;min-height:84px;}
+#kiosk .ko-ride-ln{display:inline-flex;align-items:center;gap:8px;font-size:17px;font-weight:600;color:var(--muted);}
+#kiosk .ko-ride-tag{font-size:15px;font-weight:700;color:var(--sf-green-ink);}
+#kiosk .ko-ride.ko-full{opacity:.55;cursor:default;}
+#kiosk .ko-types{display:flex;flex-wrap:wrap;gap:10px;padding:4px 0 10px;}
+#kiosk .ko-type{min-height:56px;min-width:120px;padding:8px 18px;border-radius:12px;border:2px solid var(--sf-ctl);background:var(--sf-card);color:var(--text);font-size:18px;font-weight:700;cursor:pointer;}
+#kiosk .ko-type.on{border-color:var(--green);background:rgba(var(--green-rgb),.12);color:var(--sf-green-ink);}
+#kiosk .ko-fit{font-size:18px;font-weight:700;color:var(--sf-green-ink);margin:4px 0 6px;}
+#kiosk .ko-sess{font-size:17px;margin:0 0 12px;color:var(--muted);}
+#kiosk .ko-waiver{max-height:40vh;overflow-y:auto;white-space:pre-line;padding:14px 16px;border:1px solid var(--sf-line2);border-radius:14px;background:var(--sf-head);font-size:16px;line-height:1.55;}
+#kiosk .ko-agree{display:flex;align-items:flex-start;gap:12px;margin:16px 0 4px;font-size:18px;font-weight:600;cursor:pointer;}
+#kiosk .ko-agree input{width:28px;height:28px;flex:0 0 28px;margin:0;accent-color:var(--green);}
+#kiosk .ko-done{text-align:center;padding-top:6vh;color:var(--sf-green-ink);}
+#kiosk .ko-done .ko-h1,#kiosk .ko-done .ko-sub{color:var(--text);}
+#kiosk .ko-desk{font-size:22px;font-weight:800;margin:18px 0 6px;color:var(--text);}
+#kiosk .ko-foot{display:flex;justify-content:flex-end;padding-top:24px;}
+#kiosk .ko-exit{min-height:44px;padding:0 14px;border:none;background:transparent none;color:var(--muted);font-size:14px;cursor:pointer;}
+#kiosk .dob-row{display:flex;gap:8px;}
+#kiosk .dob-row select{min-height:56px;font-size:18px;}
+.kiosk-badge{background:rgba(var(--green-rgb),.14);color:var(--sf-green-ink);}
+#tab-settings .set-kiosk{margin-top:14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+/* ── Deposits (2026-10-09): the check-in's deposit block, the return's, and the settle dialog ── */
+.ci-dep .ci-dep-ref,.ret-dep-keep input{width:100%;box-sizing:border-box;min-height:44px;margin-top:8px;}
+.ret-dep-keep{display:flex;gap:8px;flex-wrap:wrap;}
+.ret-dep-keep input[type="number"]{flex:0 0 140px;width:140px;}
+.ret-dep-keep input[type="text"]{flex:1;min-width:180px;}
+.ret-dep,.ci-dep{border-top:1px solid var(--sf-line2);padding-top:10px;}
+.br-dep{font-size:12px;font-weight:700;color:var(--orange);margin-inline-start:8px;white-space:nowrap;}
+.br-dep-note{margin:10px 0 0;font-size:13px;color:var(--muted);}
+#dep-modal .dep-box{max-width:440px;width:calc(100vw - 32px);}
+#dep-modal .dep-line{font-weight:700;margin-bottom:10px;}
