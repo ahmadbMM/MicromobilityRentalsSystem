@@ -388,11 +388,13 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
   analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
-  catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
+  catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
+  // 2026-10-09: the fleet's condition (the check after a return, incidents, the maintenance log and its report)
+  fleet: ['_bpFleetFill', '_fleetAfterReturn', '_bkCheckClear', '_fleetReport', '_retPhotoPick'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -1160,7 +1162,11 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
 // badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
 // language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
+// Staff 480 -> 496, core 254 -> 257 (2026-10-09, builder S4): fleet condition (the check after a return,
+// incidents, the maintenance log), stock movements (receive at cost, reasons, history, value, CSV import) and
+// the workshop's payment, parts and reports - mostly in the fleet / inventory / workshop parts, but 145 strings in
+// each language whose English sits in the core (~2 KB gz). Here: staff 492.0, core 254.2 local.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 496, core: 257 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
