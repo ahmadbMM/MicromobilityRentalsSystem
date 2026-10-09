@@ -36,16 +36,21 @@ test.describe('@staff:bookings s1009 desk: keyboard', () => {
     await page.waitForTimeout(250); // the drawer's own focus (the Bike field)
     await page.keyboard.press(']'); // from the Bike field too: no bike number holds a bracket
     await expect.poll(() => page.evaluate('S._ciId')).toBe('b');
+    await page.waitForTimeout(250); // the next rider's drawer puts focus in its Bike field first, for a scan
     await blur(page);
     await page.keyboard.press('[');
     await expect.poll(() => page.evaluate('S._ciId')).toBe('a');
+    await page.waitForTimeout(250);
     await blur(page);
     await page.keyboard.press('3');
     await expect.poll(() => page.evaluate('S._ciPaid')).toBe('house');
+    await expect(page.locator('#ci-confirm')).toBeFocused(); // focus rests on Confirm: the next key is a shortcut, Enter confirms
     await page.keyboard.press('1');
     await expect.poll(() => page.evaluate('S._ciPaid')).toBe('pending');
+    await expect(page.locator('#ci-confirm')).toBeFocused(); // focus rests on Confirm: the next key is a shortcut, Enter confirms
     await page.keyboard.press('2');
     await expect.poll(() => page.evaluate('S._ciPaid')).toBe('card');
+    await expect(page.locator('#ci-confirm')).toBeFocused(); // focus rests on Confirm: the next key is a shortcut, Enter confirms
     await page.keyboard.press('x');
     await expect.poll(() => page.evaluate('S._ciOutcome')).toBe('noshow');
     await expect(page.locator('#ci-out-noshow')).toHaveAttribute('aria-checked', 'true');

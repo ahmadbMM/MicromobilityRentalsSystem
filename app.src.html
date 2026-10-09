@@ -42827,8 +42827,11 @@ function _kbDesk(k,ev){
     if(c==='BracketLeft'){hit('.ci-prev');return;}
     if(c==='BracketRight'){hit('.ci-next');return;}
     const pi={Digit1:0,Numpad1:0,Digit2:1,Numpad2:1,Digit3:2,Numpad3:2}[c];
-    if(pi!=null){const b=box.querySelectorAll('.ci-opts .bkm-flex1');if(b.length===3){ev.preventDefault();b[pi].click();}return;}
-    if(c==='KeyX'&&hit('#ci-out-noshow'))setTimeout(()=>{const f=document.getElementById('ci-confirm');if(f&&!f.disabled)f.focus();},0);
+    // Focus then rests on Confirm (after the repaint and the dialog focus manager), so the next key is
+    // another shortcut and Enter confirms - not a digit typed into the Bike field.
+    const toConfirm=()=>setTimeout(()=>{const f=document.getElementById('ci-confirm');if(f&&!f.disabled)f.focus();},90);
+    if(pi!=null){const b=box.querySelectorAll('.ci-opts .bkm-flex1');if(b.length===3){ev.preventDefault();b[pi].click();toConfirm();}return;}
+    if(c==='KeyX'&&hit('#ci-out-noshow'))toConfirm();
     return;
   }
   const host=document.getElementById('q-results');if(!host||S.staffTab!=='queue'||!host.getClientRects().length)return;
