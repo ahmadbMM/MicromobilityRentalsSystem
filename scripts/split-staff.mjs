@@ -388,7 +388,7 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
 // Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow'], bikes: ['renderBikes'], cashier: ['renderCashier', '_eonOpen'],
   catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
@@ -1185,6 +1185,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 480 -> 498, core 254 -> 257 (2026-10-09): the money controls (audit trail panel and search, void/refund reasons,
 // the till with its Z-report, the exceptions and Team reports; staff part "money", 16 KB) and their ~125 strings, which
 // sit in the core with every staff string. Here 491.9 / 253.0 local, from 476.7 / 251.2.
+// Staff 480 -> 486, core 254 -> 259 (2026-10-09, s1009-desk): the front desk round (local bike numbers, the
+// type/size warning, Sending and the failed check-in bar, single check-in Undo, bulk No-show, the live count,
+// desk keys, Close out's per-bike marks, the Petromin bike) and 33 strings in each language; the night's
+// summary went to the cashier part. Here 255.0 core / 481.6 staff local (~2 KB more on the runner).
 export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 560, core: 280 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
