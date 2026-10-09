@@ -769,7 +769,9 @@ From a rider's **first booking** the **nationality**, and from the **fourth** th
 bike, no-show, upcoming or waitlisted, except a cancelled one — the site opening on the account and
 the next event pick (`selectEvent`, and the session card as a second guard) show one page before the
 session list asking only what is due and missing, required, no close / later / back; Log out is the
-only other way off. Saved through `customer_update_profile` with the rest of the
+only other way off. The server asks the same (`_customer_asks`, 20261009120000), so
+`customer_create_booking` refuses the second booking without a nationality and the fifth without a
+birth date (FIX_FIRST), and a rider who leaves by Log out meets the page again at the next sign-in. Saved through `customer_update_profile` with the rest of the
 profile carried through, then the picked event opens. Never shown once the account carries
 what is due; the page never mentions the count. Nationality is fetched once through
 `customer_profile` before deciding — if that answer never comes (offline) the rider is not held

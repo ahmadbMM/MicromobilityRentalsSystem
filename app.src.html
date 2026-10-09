@@ -7951,10 +7951,12 @@ function _gateFail(e){
 }
 function _gateSignedOut(){doLogout(true);toast(t('errSessionStale'),'warning');}
 function _gateLog(where,e){try{_logError(`${where} refused: ${(e&&e.code)||''} ${String((e&&e.message)||e||'').slice(0,200)}`,'gate',true);}catch(_){}}
-// ask: which of the two the page shows ('birth', 'nat'); a community member is asked both.
-function _pgOpen(next,c,comm,ask){
-  const a=comm||!ask?['birth','nat']:ask;
-  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,said:'',saving:false,comm:!!comm,ask:a};
+// ask: which of the two the page shows ('birth', 'nat'). comm: the server asked for them
+// (_customer_asks) and takes them back through customer_fix_save; member: it asked because the
+// account is a community member, which the page then says.
+function _pgOpen(next,c,comm,ask,member){
+  const a=ask&&ask.length?ask:['birth','nat'];
+  S._pg={next,birth:c.birth_date||'',nat:c.nationality||'',errBirth:'',errNat:'',net:false,said:'',saving:false,comm:!!comm,member:!!(comm&&member),ask:a};
   renderProfileGate();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -7968,9 +7970,9 @@ function renderProfileGate(){
   const ok=_pgFilled(g)&&!g.saving,one=g.ask.length===1,hb=g.ask.includes('birth'),hn=g.ask.includes('nat');
   m.style.display='flex';
   m.innerHTML=`<div class="auth-backdrop"><form class="pg-box" role="dialog" aria-modal="true" aria-labelledby="pg-title" data-on-submit="${_on("_on_renderProfileGate_1",_EV,_EL)}">
-    <div class="pg-kicker">${t(g.comm?'pgCommKicker':'pgKicker')}</div>
-    <h2 id="pg-title" class="pg-title">${t(g.comm?'pgCommTitle':one?'pgTitleOne':'pgTitle')}</h2>
-    <p class="pg-sub">${t(g.comm?'pgCommSub':one?'pgSubOne':'pgSub')}</p>
+    <div class="pg-kicker">${t(g.member?'pgCommKicker':'pgKicker')}</div>
+    <h2 id="pg-title" class="pg-title">${t(g.member&&!one?'pgCommTitle':one?'pgTitleOne':'pgTitle')}</h2>
+    <p class="pg-sub">${t(g.member?'pgCommSub':one?'pgSubOne':'pgSub')}</p>
     ${hb?`<div class="pg-field pg-first${g.errBirth?' err':''}"><label for="pg-birth-d">${t('birthDateLabel')}</label>${dobFieldHtml('pg-birth',g.birth,{onchange:'_pgBirth',disabled:!!g.saving})}${g.errBirth?`<div class="pg-msg" role="alert">${esc(g.errBirth)}</div>`:''}</div>`:''}
     ${hn?`<div class="pg-field${hb?'':' pg-first'}${g.errNat?' err':''}"><label for="pg-nat">${t('nationalityLabel')}</label><select id="pg-nat" class="${g.nat?'':'ph'}" data-on-change="${_on("_pgInput","nat",_P("value"))}"${g.saving?' disabled':''}>${natOpts}</select>${g.errNat?`<div class="pg-msg" role="alert">${esc(g.errNat)}</div>`:''}</div>`:''}
     <p class="pg-note">${t('pgNote')}</p>
@@ -8145,7 +8147,13 @@ async function _fixGate(next){
   const fields=await _fixLoad(cust);
   if(!fields.length)return false;
   const c=await _fixProfile(cust);
-  if(_commAskOnly(fields,c)){_pgOpen(next,c,true);return true;}
+  // The server asks the two on its own (_customer_asks): a community member's, or the nationality
+  // from the first booking and the birth date from the fourth (20261009120000). What the booking
+  // count explains reads as the account's own profile page, anything more as the community's.
+  if(_commAskOnly(fields,c)){
+    const ask=fields.map(k=>k==='birth_date'?'birth':'nat'),due=_pgDue(c,_pgCount(cust));
+    _pgOpen(next,c,true,ask,!ask.every(k=>due.includes(k)));return true;
+  }
   // Already up (it opens at sign-in too, _commAskCheck): a later call only says where to go after,
   // and what the rider has typed stays.
   if(S._fix){if(next)S._fix.next=next;return true;}
@@ -8177,8 +8185,11 @@ async function _commAskCheck(cust){
   try{await _sbReady;}catch(e){}
   if(!sb||S.view==='staff')return;
   const fields=await _fixLoad(cust,true);
-  // The booking-count rule counts the rider's bookings: the first load, without a loading screen.
-  if(!S.dataLoaded&&_loadInFlight){try{await _loadInFlight;}catch(e){}}
+  // The booking-count rule counts the rider's bookings: the load under way, without a loading screen.
+  // Any load, not only the first: signing in again on this page reloads them after Log out stripped
+  // them, and counting before that load ends found none, so a rider who left the page by Log out was
+  // not asked again (the owner, 2026-10-09: "make sure it pops up again the next time he signs in").
+  if(_loadInFlight){try{await _loadInFlight;}catch(e){}}
   const cur=S.loggedIn;if(!cur||cur.id!==cust.id||S.view==='staff'||S._pg||S._fix)return;
   if(!S.dataLoaded){if(fields.length)_fixGate(null);return;} // no bookings to count yet: the check-up alone
   _profileGate(()=>_profileGate(null)); // the check-up, then the profile page if it is due too

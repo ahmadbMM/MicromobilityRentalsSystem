@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-d2741c1abb';
+const CACHE = 'mmcq-d51d4f406a';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,7 +28,7 @@ const STAFF_JS = './staff.js?v=66b84f822a';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=eb86c24864","./staff-parts/community.js?v=c9a5a1113f","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=d69d3e345a","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=21b48cefbf","./staff-parts/sela.js?v=8e808aa969","./staff-parts/team.js?v=d7086bd2bf","./staff-parts/settings.js?v=7ac400a51f"];
-const APP_JS = './app.js?v=2388be17cd';
+const APP_JS = './app.js?v=805658d556';
 const APP_CSS = './app.css?v=91e9c2874a';
 const SHELL = [
   SHELL_KEY,
