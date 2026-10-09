@@ -392,8 +392,11 @@ Badges count a ride only once it is marked Paid or is on a free ride, a bike own
 the owner, 2026-10-02 - Road Carbon too; National Day 96 stays paid or not, as it shipped); the
 staff Badges dialog passes the account to `_mrBadges`, so Race Ready shows there as earned too.
 The T100 race badges (migration 20261008120000, the owner 2026-10-08): `t100` / `t50` / `t25`, one per race distance in Jeddah,
-staff-given only (the races are not ours, so nothing in the bookings says who finished); drawn as the distance in figures over a
-swim wave (gold / silver / orange), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS).
+staff-given only (the races are not ours, so nothing in the bookings says who finished); since 2026-10-09 drawn as finisher
+medals on a ribbon with the race's name struck on them (`BDG_RACE` / `_bdgRace`, gold / silver / bronze whatever the row's colour,
+not in the icon picker), listed in `BDG_GIVEN_SYS` after Race Spirit; the website mirrors them (ride-record.ts GIVEN_SYS, Medal.tsx).
+Staff see an account's badges (given + earned by riding) in its history window and its editor: the core draws only the empty
+section (`_bdgSecHtml`), and `_bdgStrips` - a stand-in into the Community part - fills it, again after every badge load or change.
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
 their past members-only rides.
 Race Ready (`complete_profile`) is earned at 100% on the account page's profile meter (`_profPct`,

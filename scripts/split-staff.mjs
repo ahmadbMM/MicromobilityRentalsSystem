@@ -385,9 +385,10 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // real function. A statement two parts share goes back to staff.js (and with it, until nothing
 // changes, whatever it reaches), so staff.js never calls into a part except through a stand-in.
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
-// Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
+// Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part. _bdgStrips (2026-10-09):
+// an account's badges in the history window and the editor, which are core, drawn by the badges code Community holds.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_bdgStrips'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only

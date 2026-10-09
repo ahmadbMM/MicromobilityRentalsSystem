@@ -13230,10 +13230,6 @@ const BDG_GLYPH={
   // Run for Her (2026-10-05): the pink ribbon - one band, the back strand (.o) under the front.
   ribbon:'<path class="rb o" d="M12 3.1A3.9 3.9 0 0 0 8.1 7c0 1.8 1.3 3.6 3.9 6.7L17.4 21"/><path class="rb" d="M6.6 21 12 13.7c2.6-3.1 3.9-4.9 3.9-6.7A3.9 3.9 0 0 0 12 3.1"/>',
   calcrown:'<rect class="o" x="3" y="4.5" width="18" height="16.5" rx="2.2"/><path d="M3 8.5h18v2H3z"/><path class="s" d="M8 2.5v4M16 2.5v4"/><path transform="translate(5.64 9.94) scale(.53)" d="M3 7.5l4.6 4.2L12 4.5l4.4 7.2L21 7.5l-1.8 10.5H4.8z"/>',
-  // The T100 races in Jeddah (2026-10-08): the distance drawn in figures over a swim wave.
-  t100:'<path class="s" d="M3.4 7.3 5.4 5.5v9M12.2 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0ZM19.6 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0Z"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
-  t50:'<path class="s" d="M10.6 5.5h-4.6l-.5 4.1c.7-.6 1.5-.9 2.4-.9 1.6 0 2.9 1.2 2.9 2.9s-1.3 2.9-3 2.9c-1.2 0-2.2-.6-2.7-1.6M18.6 10a2.6 4.5 0 1 1-5.2 0 2.6 4.5 0 0 1 5.2 0Z"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
-  t25:'<path class="s" d="M5.8 7.6c.3-1.3 1.3-2.1 2.6-2.1 1.5 0 2.6 1 2.6 2.4 0 1-.5 1.8-1.4 2.7L5.6 14.5H10.8M18.6 5.5h-4.6l-.5 4.1c.7-.6 1.5-.9 2.4-.9 1.6 0 2.9 1.2 2.9 2.9s-1.3 2.9-3 2.9c-1.2 0-2.2-.6-2.7-1.6"/><path class="s o" d="M3.5 19.5c1.4 0 1.4-1.3 2.8-1.3s1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3 1.4-1.3 2.8-1.3 1.4 1.3 2.8 1.3"/>',
 };
 const BDG_COLORS=['green','gold','blue','red','purple','orange','teal','silver'];
 // The drawn-special medallions: 'special' (Race Ready, the owner 2026-09-29) gold running into
@@ -13242,7 +13238,14 @@ const BDG_COLORS=['green','gold','blue','red','purple','orange','teal','silver']
 // copy draws nothing.
 const BDG_SPECIAL={special:[['#ffe58a','#f0a500','#00b86b'],'#b87d00'],national:[['#5fd99a','#159a57','#0a5c33'],'#08502c'],pink:[['#ffc9da','#f2789f','#c2416e'],'#a3325b']}; // pink: Run for Her (2026-10-05)
 let _bdgSpN=0;
+// The T100 races in Jeddah (2026-10-08; redrawn 2026-10-09, the owner: "look better than this"): a finisher's
+// medal on a ribbon, the race's name struck on it, in gold (T100), silver (T50) and bronze (T25). Not offered in
+// the icon picker: they belong to those three badges. [text, [gradient], rim, ink]
+const BDG_RACE={t100:['T100',['#fff3b8','#f3c431','#b07c00'],'#7d5800','#5c3f00'],t50:['T50',['#fff','#cfd5de','#858f9e'],'#636b78','#323946'],t25:['T25',['#ffd9b5','#dc8d4c','#93501d'],'#713b12','#4d2408']};
+function _bdgRace(r,cls){const id='bdgsp'+(++_bdgSpN),w=r[0].length>3?20.5:15.5,tx=(y,f,o)=>`<text class="bdg-rt" x="20" y="${y}" fill="${f}"${o} text-anchor="middle" font-size="11" textLength="${w}" lengthAdjust="spacingAndGlyphs">${r[0]}</text>`;
+  return `<svg class="bdg-m bdg-race${cls?' '+cls:''}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${r[1].map((c,i)=>`<stop offset="${i/2}" stop-color="${c}"/>`).join('')}</linearGradient></defs><path fill="#1e4f96" d="M9 .8h7.4l6.4 12.6h-7.4z"/><path fill="#153a70" d="M31 .8h-7.4l-6.4 12.6h7.4z"/><path stroke="#fff" stroke-opacity=".55" stroke-width=".9" fill="none" d="M12.7.8l6.4 12.6M27.3.8l-6.4 12.6"/><circle cx="20" cy="24.8" r="14.2" fill="url(#${id})" stroke="${r[2]}" stroke-width="1.2"/><circle cx="20" cy="24.8" r="11.7" fill="none" stroke="${r[2]}" stroke-opacity=".45" stroke-width=".8"/><path d="M9.6 21.4a11 11 0 0 1 7.3-7.7" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.3" stroke-linecap="round"/>${tx(29.1,'#fff',' fill-opacity=".55"')}${tx(28.4,r[3],'')}</svg>`;}
 function _bdgMedal(icon,color,cls){
+  if(BDG_RACE[icon])return _bdgRace(BDG_RACE[icon],cls);
   const g=BDG_GLYPH[icon]||BDG_GLYPH.medal,c=BDG_COLORS.includes(color)?color:'green',sp=BDG_SPECIAL[color];
   if(sp){const id='bdgsp'+(++_bdgSpN);
     return `<svg class="bdg-m bdg-sp${cls?' '+cls:''}" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">${sp[0].map((c,i)=>`<stop offset="${[0,.45,1][i]}" stop-color="${c}"/>`).join('')}</linearGradient></defs><path class="bdg-hexsp" fill="url(#${id})" stroke="${sp[1]}" d="M20 2.2 35.4 11.1v17.8L20 37.8 4.6 28.9V11.1z"/><path class="bdg-hexin" d="M20 5.9 32.2 12.95v14.1L20 34.1 7.8 27.05v-14.1z"/><g transform="translate(9.4 9.4) scale(.883)">${g}</g></svg>`;}
@@ -20063,6 +20066,7 @@ function renderCustFormModal(){
           ${(()=>{const _tm=_tagsById();const myCT=(S.customerTags||[]).filter(ct=>ct.customer_id===d.id&&_tm[ct.tag_id]);return myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;})()}
           <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_custJumpTags",d.id)}">${t('amEditTags')}</button>
         </div></div>`}
+      ${isCreate?'':_bdgSecHtml(d.id)}
       <div class="modal-footer">
         ${(!isCreate&&isAdmin())?`<button class="btn-red cmy-mie-auto" data-on-click="${_on("deleteCustomerAccount",d.id)}">${t('naDelBtn')}</button>`:''}
         <button class="btn-secondary" data-on-click="${_on("closeCustFormModal")}">${t('cancelBtn')}</button>
@@ -20072,7 +20076,7 @@ function renderCustFormModal(){
   // Not on the house: the bike types it covers start hidden. Set through the CSSOM (the policy
   // refuses a style attribute), so the Default payment select's el.style.display flip shows them.
   if(d.defpay!=='house'){const _r=document.getElementById('cf-defpay-types');if(_r)_r.style.display='none';}
-  if(!isCreate)_cfSlLoad(d);
+  if(!isCreate){_cfSlLoad(d);_bdgStrips();}
   if(d.ph===undefined)_cfPhCheck();
 }
 // ── Delete a customer account ────────────────────────────────────────────────
@@ -30897,6 +30901,8 @@ function _ahEditAccount(id){
 // Repaints whenever the staff tab does (realtime, reloads, a saved edit), but only when one
 // of this rider's bookings actually changed, so a busy night does not keep rebuilding it.
 function _ahRefresh(){if(S._ah)_ahRender();}
+// The account's badges, in this window and the editor: the section only; the Community part draws them (_bdgStrips).
+function _bdgSecHtml(cid){return`<div class="bdg-strip-sec"><div class="bdg-strip-h">${t('mrBadgesTitle')}</div><div class="bdg-strip-host" data-cid="${esc(cid)}"><span class="am-meta">${t('loadingLabel')}</span></div></div>`;}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ahRender_1(event,el){if(event.target===el)closeCustomerProfile()}
 function _ahRender(force){
@@ -30996,6 +31002,7 @@ function _ahRender(force){
         ${kpi(`${_money(Math.round(spent*100)/100)}`,t('custTotalSpent'))}
       </div>
       ${facts?`<div class="ah-facts">${facts}</div>`:''}
+      ${c?_bdgSecHtml(c.id):''}
       <div class="ah-sec">${t('ahCurrent')}${cur.length?` <span class="ah-n">${cur.length}</span>`:''}</div>
       ${cur.length?cur.map(card).join(''):`<div class="ah-empty">${t('ahNoCurrent')}</div>`}
       <div class="ah-sec">${t('ahFuture')}${fut.length?` <span class="ah-n">${fut.length}</span>`:''}</div>
@@ -31011,6 +31018,7 @@ function _ahRender(force){
     </div>
   </div>`;
   m.style.display='flex';
+  if(c)_bdgStrips();
   if(!force){const nb=m.querySelector('.modal-box');if(nb)nb.scrollTop=keepTop;}
 }
 
@@ -38555,6 +38563,7 @@ async function _bdgLoad(force){
   // changed (2,600 rows, and a staffer may be in the middle of one).
   if(S.view==='staff'&&(_pplOn('badges')||(_pplOn('accounts')&&_bdgSig()!==was)))renderCommunity();
   if(S._bdgDlg)_bdgDlgPaint();
+  _bdgStrips();
 }
 function _bdgSig(){return _bdgOk()?S.badges.map(b=>[b.id,b.icon,b.color,b.name,b.retired].join()).join('|')+'#'+(S.custBadges||[]).map(_bdgKey).join():'';}
 function _bdgOk(){return Array.isArray(S.badges)&&S.badges.length>0;}
@@ -38580,11 +38589,23 @@ function _bdgStaffRow(c){return c&&c.photo===undefined?{...c,photo:true}:c;}
 function _bdgRuleLine(r){return r&&Array.isArray(r.windows)?r.windows.map(w=>w.from+' – '+w.to).join(', ')+' · '+t('bdgRuleRides')+' '+r.rides:'';}
 function _bdgLine(x){return t('bdgGivenLine').replace('{0}',_bdgDay(x.awarded_at)).replace('{1}',x.awarded_by||'—');}
 // After a change: the open dialog, the rider's row in Accounts, the Badges tab.
-function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();if(S.view!=='staff'||!_pplOpen())return;if(_pplOn('badges')||_pplOn('overview'))renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
+function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();_bdgStrips();if(S.view!=='staff'||!_pplOpen())return;if(_pplOn('badges')||_pplOn('overview'))renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
 // A take-back or a delete asks once more on the same button: the second tap does it.
 function _bdgArm(k){if(S._bdgSure===k)return true;S._bdgSure=k;return false;}
 function _bdgTakeBtn(cid,bid){const on=S._bdgSure===cid+'|'+bid;return`<button type="button" class="btn-sm ${on?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgTake",cid,bid)}">${t(on?'bdgTakeSure':'bdgTake')}</button>`;}
 
+// One account's badges in its history window and its editor (the owner, 2026-10-09: "i want to be able to see
+// the badges each account has from the account info and/or edit"): what it holds, given or earned by riding, each
+// medal with its name; a tap opens the badges dialog, where staff give or take one. Painted again in place
+// (_bdgStrips) when the badges load or change, so a half-typed edit is never redrawn. The two windows are the desk's
+// core and only hold the empty section (_bdgSecHtml); _bdgStrips, a stand-in into the Community part, fills it.
+function _bdgStripHtml(cid){
+  if(!_bdgOk())return`<div class="am-meta">${t(S._bdgBusy||!S._bdgAt?'loadingLabel':S._bdgErr?'errConnection':'bdgNoDb')}</div>`;
+  const held=new Set(_bdgHeld(cid).map(x=>x.badge_id)),ride=_bdgRideOn(cid);
+  const list=_bdgSorted().filter(b=>held.has(b.id)||(b.auto&&ride.has(b.slug)));
+  return`<div class="bdg-strip">${list.map(b=>`<button type="button" class="bdg-chip" title="${esc(_bdgDesc(b))}" data-on-click="${_on("_bdgOpen",cid)}">${_bdgMedal(b.icon,_bdgCol(b))}<span>${esc(_bdgName(b))}</span></button>`).join('')||`<span class="am-meta">${t('bdgNone')}</span>`}<button type="button" class="btn-sm btn-secondary bdg-strip-btn" data-on-click="${_on("_bdgOpen",cid)}">${_artIcon('medal',13)} ${t('bdgGiveTitle')}</button></div>`;
+}
+function _bdgStrips(){const hs=document.querySelectorAll('.bdg-strip-host');if(!hs.length)return;_bdgLoad();hs.forEach(h=>{h.innerHTML=_bdgStripHtml(h.dataset.cid);});}
 // One rider's badges: what they hold (given, with who gave it and the note; or earned by riding) and
 // the ones left to give, each with an optional note the rider reads beside it.
 function _bdgOpen(cid){S._bdgDlg={cid,pick:null,note:''};S._bdgSure=null;_bdgLoad(!!S._bdgErr);_bdgDlgPaint(true);} // the read first, so the dialog opens on Loading; after a failed read, opening it is a retry
