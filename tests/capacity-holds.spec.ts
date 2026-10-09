@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // The number staff put in is the number of riders, full stop. A place is held right through
 // the ride — checking in does not release it and neither does finishing, which is where places
@@ -22,7 +25,7 @@ const spots = (page: import('@playwright/test').Page) =>
   page.evaluate(`spotsLeft('${sess.id}')`) as Promise<number>;
 
 async function staff(page: import('@playwright/test').Page, rows: Record<string, unknown>[]) {
-  await stubSupabase(page, { sessions: [sess], bikes, queue_entries: rows });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions: [sess], bikes, queue_entries: rows });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -62,7 +65,7 @@ test.describe('a place is held until the booking is cancelled', () => {
 });
 
 test('a rider booking into a full session is waitlisted, even after riders finish', async ({ page }) => {
-  await stubSupabase(page, {
+  await stubSupabase(page, { staff_options: WL_AUTO,
     sessions: [sess], bikes,
     queue_entries: [row('a', 1, 'done'), row('b', 2, 'done'), row('c', 3, 'waiting'), row('d', 4, 'active')],
   });

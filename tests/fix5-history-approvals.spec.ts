@@ -1,5 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // The 2026-10-05 fixes to History, the waitlist, approvals, Customer activity and Reschedule:
 //   - a removal another desk got to first changed nothing else, and the log line came after the write;
@@ -23,7 +26,7 @@ const e = (id: string, n: number, status: string, extra: Record<string, unknown>
 });
 
 async function boot(page: Page, fx: Record<string, unknown>) {
-  await stubSupabase(page, { sessions: [sess(FUT, FUT), sess(PAST, PAST, { status: 'closed' })], bikes: [], ...fx });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions: [sess(FUT, FUT), sess(PAST, PAST, { status: 'closed' })], bikes: [], ...fx });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -83,7 +86,7 @@ test.describe('@staff:history remove, restore and the waitlist', () => {
     test(`a freed place ${petromin ? 'goes to a waitlisted bike owner on the Petromin ride' : 'passes over a waitlisted rider on their own bike'}`, async ({ page }) => {
       const ride = sess('cr', FUT, { event_kind: 'community', needs_approval: false, paid_ride: true, ...(petromin ? { ride_kind: 'petromin' } : {}) });
       const on = (x: Record<string, unknown>) => ({ ...x, session_id: 'cr' });
-      await stubSupabase(page, {
+      await stubSupabase(page, { staff_options: WL_AUTO,
         sessions: [ride], bikes: [],
         queue_entries: [on(e('a', 1, 'waiting')), on(e('b', 2, 'waiting')),
           on(e('own', 3, 'waitlist', { waitlist_num: 1, type_preference: 'Own' })), on(e('w', 4, 'waitlist', { waitlist_num: 2 }))],
@@ -126,7 +129,7 @@ test.describe('@staff:bookings approvals change only a booking still as it was s
   const on = (x: Record<string, unknown>) => ({ ...x, session_id: 'sat', session_day: 'Saturday' });
 
   test('every approval write is guarded on the status seen', async ({ page }) => {
-    await stubSupabase(page, {
+    await stubSupabase(page, { staff_options: WL_AUTO,
       sessions: [sat], bikes: [],
       queue_entries: [on(e('p1', 1, 'waiting', { approval: 'pending' })), on(e('p2', 2, 'waiting', { approval: 'pending' })),
         on(e('p3', 3, 'waiting', { approval: 'pending' })), on(e('ok', 4, 'waiting', { approval: 'approved' }))],
@@ -145,7 +148,7 @@ test.describe('@staff:bookings approvals change only a booking still as it was s
   });
 
   test('approving a booking the rider has just cancelled does not bring it back', async ({ page }) => {
-    await stubSupabase(page, { sessions: [sat], bikes: [], queue_entries: [on(e('p1', 1, 'waiting', { approval: 'pending' }))] });
+    await stubSupabase(page, { staff_options: WL_AUTO, sessions: [sat], bikes: [], queue_entries: [on(e('p1', 1, 'waiting', { approval: 'pending' }))] });
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
@@ -198,7 +201,7 @@ test.describe('@customer:reschedule where a booking can move', () => {
   const mine = { id: 'mine', customer_id: 'c1', session_id: 's0', session_date: day(3), session_day: 'Sunday', queue_num: 1,
     name: 'Spec Rider', status: 'waiting', type_preference: 'Hybrid', size: 'M', paid: false, price: 57.5, registered_at: '2099-01-01T10:00:00Z' };
   async function rider(page: Page, x: Record<string, unknown> = {}) {
-    await stubSupabase(page, { sessions, bikes: [], queue_entries: [mine], customers: [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.test' }], ...x });
+    await stubSupabase(page, { staff_options: WL_AUTO, sessions, bikes: [], queue_entries: [mine], customers: [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.test' }], ...x });
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider', session_token: 'tok' });
     await page.goto('/');
     await waitForSb(page);

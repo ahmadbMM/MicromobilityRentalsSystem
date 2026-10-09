@@ -1,5 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, type FailWrite, type Fixtures } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // The last writes that read .error themselves go through _writeErr (2026-10-05): a refusal is
 // said in the error bar, and written to the error log, in words that fit what was refused. A
@@ -8,7 +11,7 @@ import { stubSupabase, unlockStaff, waitForSb, type FailWrite, type Fixtures } f
 
 const FUT = '2099-11-11';
 async function boot(page: Page, fx: Fixtures, fail?: FailWrite) {
-  await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], tags: [], customers: [], customer_tags: [], ...fx }, fail);
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions: [], queue_entries: [], bikes: [], tags: [], customers: [], customer_tags: [], ...fx }, fail);
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);

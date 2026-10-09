@@ -1,5 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // The 2026-09-25 review: the app side of the database fixes (20260925140000), and a staff path
 // the review found promoting a waitlister into a place nobody had given up.
@@ -21,7 +24,7 @@ test('a paid booking is not moved to a dearer bike from the phone; one that cost
     id: 'holder', session_id: S1, session_day: 'Sunday', session_date: S1, queue_num: 5, name: 'Spec Rider', phone: '0500000001',
     customer_id: 'c1', type_preference: 'Hybrid', height: 175, size: 'M', status: 'waiting', paid: true, price: 57.5, registered_at: '2099-01-01T10:00:00Z',
   };
-  await stubSupabase(page, { sessions, 'rpc:list_sessions': sessions, queue_entries: [holder], bikes: [], 'rpc:customer_booking_update': true });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions, 'rpc:list_sessions': sessions, queue_entries: [holder], bikes: [], 'rpc:customer_booking_update': true });
   await loginCustomer(page);
   await page.goto('/');
   await waitForSb(page);
@@ -38,7 +41,7 @@ test('a paid booking is not moved to a dearer bike from the phone; one that cost
 });
 
 test("the rider's own hidden bike types and on-the-house perk arrive with the profile as a booking starts", async ({ page }) => {
-  await stubSupabase(page, {
+  await stubSupabase(page, { staff_options: WL_AUTO,
     sessions, 'rpc:list_sessions': sessions, queue_entries: [], bikes: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', hidden_types: 'Road', default_pay: 'house:Hybrid' }],
   });
@@ -59,7 +62,7 @@ test('cancelling an own-bike rider, who held no place, promotes nobody; cancelli
     id, session_id: TODAY, session_day: 'Friday', session_date: TODAY, queue_num: n, name, phone: `05500000${n}0`,
     type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 75, registered_at: `${TODAY}T10:0${n}:00Z`, ...x,
   });
-  await stubSupabase(page, {
+  await stubSupabase(page, { staff_options: WL_AUTO,
     sessions: sess,
     queue_entries: [row('e1', 1, 'Amal Saad'), row('own', 2, 'Badr Omar', { type_preference: 'Own', price: 0 }), row('wl', 3, 'Dana Faisal', { status: 'waitlist', waitlist_num: 1 })],
     bikes: [],

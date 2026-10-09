@@ -402,6 +402,8 @@ export const STAFF_PARTS = {
   // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
   // (with the Action Log, which shares the account names and the record links with them)
   money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
+  // 2026-10-09 (R7): ride reminders on WhatsApp and who a freed waitlist place goes to (staff pick or a timed offer)
+  remind: ['openRemindSheet', 'openWlOffers'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -1193,7 +1195,9 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 480 -> 483, core 254 -> 255 (2026-10-09): the accessibility and consistency pass (theme choice, shortcut
 // switch, named buttons and toggle states, sortable headers as buttons, captions, 17 strings in each language);
 // here staff 479.2, core 252.3 local (~481 / ~253.6 on the runner), inside 2.5 KB of the old limits.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 560, core: 280 };
+// Customer 224 -> 226 (2026-10-09, R7): the rider's page for a freed waitlist place (/?claim=, a countdown and one
+// button, ~1.3 KB) and its 13 strings; here 222.7 local (~224.1 on the runner), which the old limit could not hold.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 226, staff: 560, core: 280 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

@@ -1,6 +1,9 @@
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // The queue's desk actions (cancel, no-show, re-open, close-out, cancel-night) and their undos,
 // against a stub that keeps state and honours PostgREST's eq./in. filters, so a guarded write
@@ -69,7 +72,7 @@ const row = (id: string, status: string, x: Row = {}): Row => ({
 const bike = (id: string, status: string): Row => ({ id, name: 'Bike ' + id, type: 'Road', size: 'M', status, colors: [], color_names: [] });
 
 async function boot(page: Page, q: Row[], bikes: Row[] = [], refuse?: (table: string, body: Row) => boolean) {
-  await stubSupabase(page, { sessions, inventory, 'rpc:staff_return': { ok: true, noop: false, bikes_freed: 1 } });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions, inventory, 'rpc:staff_return': { ok: true, noop: false, bikes_freed: 1 } });
   const hits = await statefulTables(page, { queue_entries: q, bikes }, refuse);
   await unlockStaff(page);
   await page.goto('/');
@@ -193,7 +196,7 @@ test('close-out returns the no-shows\' add-ons, hands bikes back, and its undo r
   const q = [old('A', 'active', { assigned_bike_id: 'b1', checked_in_at: '2020-02-02T18:00:00Z' }),
     old('N', 'waiting', { addons: JSON.stringify([{ id: 'gel', qty: 2 }]) })];
   const bikes = [bike('b1', 'in-use')];
-  await stubSupabase(page, { sessions: [{ id: OLD, session_date: OLD, day: 'Sunday', status: 'closed', capacity: 10, created_at: 1 }], inventory });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions: [{ id: OLD, session_date: OLD, day: 'Sunday', status: 'closed', capacity: 10, created_at: 1 }], inventory });
   await statefulTables(page, { queue_entries: q, bikes });
   // the return is staff_return on the server (no page-side fallback since 2026-10-04): it frees the bike
   await page.route(/\/rest\/v1\/rpc\/staff_return/, (r) => {
@@ -293,7 +296,7 @@ test('a restored no-show does not take a number a waitlisted rider holds', async
 });
 
 test('the topbar Undo keeps a refused reversal undoable, and claims it before running it', async ({ page }) => {
-  await stubSupabase(page);
+  await stubSupabase(page, { staff_options: WL_AUTO });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -344,7 +347,7 @@ test('a no-show sharing a number with a live booking is not a duplicate', async 
 });
 
 test('the log keeps two identical actions made in the same minute', async ({ page }) => {
-  await stubSupabase(page);
+  await stubSupabase(page, { staff_options: WL_AUTO });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -361,7 +364,7 @@ test('the log keeps two identical actions made in the same minute', async ({ pag
 
 test('a return whose payment write fails is not reported as paid, and the retry saves it', async ({ page }) => {
   const entry = row('A', 'active', { assigned_bike_id: 'b1' });
-  await stubSupabase(page, {
+  await stubSupabase(page, { staff_options: WL_AUTO,
     sessions, inventory, queue_entries: [entry], bikes: [bike('b1', 'in-use')],
     'rpc:staff_return': { ok: true, noop: false, bikes_freed: 1 },
   }, { table: 'queue_entries', methods: ['PATCH'], once: true });

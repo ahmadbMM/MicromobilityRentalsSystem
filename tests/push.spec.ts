@@ -49,7 +49,10 @@ test.describe('promotion tells the rider', () => {
     // _autoPromoteOldestWaitlist() — the only promotion left, and the one that most needs a
     // push, since it fires when a spot frees with nobody watching the staff screen. (The manual
     // Promote button is gone: staff check a waitlisted rider in like any other booking.)
-    expect(calls.length).toBe(1);
+    // Since 2026-10-09 (R7) also the place staff give from the freed-place dialog, and the timed offer they send;
+    // those two push only when the site sends pushes (VAPID_PUBLIC_KEY set).
+    expect(calls.length).toBe(3);
+    expect(src.match(/if\(VAPID_PUBLIC_KEY\)pushNotify\(e\.customerId/g) || []).toHaveLength(2);
   });
 
   test('a push failure can never block the booth', async () => {

@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
+// These specs cover the automatic promotion: Settings > Business wl_offer_mode 'auto' (the default is 'staff' since
+// 2026-10-09, R7: staff choose who gets a freed place, tests/s1010-remind-waitlist.spec.ts).
+const WL_AUTO = [{ key: 'biz', items: { wl_offer_mode: 'auto' } }];
 
 // Three defects found by reading, now fixed:
 //
@@ -20,7 +23,7 @@ const e = (id: string, n: number, name: string, status: string, extra: Record<st
 });
 
 async function boot(page: import('@playwright/test').Page, queue_entries: Record<string, unknown>[], extra: Record<string, unknown> = {}) {
-  await stubSupabase(page, { sessions, queue_entries, bikes: [], ...extra });
+  await stubSupabase(page, { staff_options: WL_AUTO, sessions, queue_entries, bikes: [], ...extra });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
