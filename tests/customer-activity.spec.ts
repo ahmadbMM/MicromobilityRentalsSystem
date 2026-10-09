@@ -30,6 +30,17 @@ async function staff(page: Page, path = '/') {
   await page.goto(path);
   await waitForSb(page);
 }
+// The kind, the dates and the customer are asked of the server since 2026-10-09 (M21): this answers the read the
+// way PostgREST would, from the fixture, for the in.(...) filters the view sends.
+async function serverFilters(page: Page) {
+  await page.route(/\/rest\/v1\/customer_activity/, (r) => {
+    const u = new URL(r.request().url());
+    const inList = (k: string) => { const v = u.searchParams.get(k); const m = v && /^in\.\((.*)\)$/.exec(v); return m ? m[1].split(',').map((x) => x.replace(/^"|"$/g, '')) : null; };
+    const acts = inList('action'), custs = inList('customer_id');
+    const body = customer_activity.filter((x) => (!acts || acts.includes(x.action)) && (!custs || custs.includes(String(x.customer_id))));
+    return r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  });
+}
 const rows = (page: Page) => page.locator('#cact-host .ca-row');
 const at = (page: Page) => new URL(page.url()).pathname;
 
@@ -38,6 +49,7 @@ test.describe('@staff:customers customer activity', () => {
     const asked: string[] = [];
     page.on('request', (r) => { if (r.method() === 'GET' && r.url().includes('/rest/v1/customer_activity')) asked.push(r.url()); });
     await staff(page);
+    await serverFilters(page);
     await page.evaluate(`setStaffTab('customers')`);
     await page.locator('#tab-customers .filter-pill', { hasText: 'Activity' }).click();
     expect(at(page)).toBe('/customers/activity');
@@ -60,8 +72,9 @@ test.describe('@staff:customers customer activity', () => {
     expect(u.searchParams.get('limit')).toBe('300');
     expect(u.searchParams.get('select')).toBe('id,at,customer_id,who,action,detail,origin');
 
-    // A category keeps only its own lines.
+    // A category keeps only its own lines: the server is asked for that kind's actions (2026-10-09).
     await page.locator('#cact-host .filter-pill', { hasText: 'Bookings' }).click();
+    await expect.poll(() => asked.some((x) => /action=in\./.test(x))).toBe(true);
     await expect(rows(page)).toHaveCount(2);
     await page.locator('#cact-host .filter-pill', { hasText: 'Access' }).click();
     await expect(rows(page)).toHaveCount(1);

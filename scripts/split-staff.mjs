@@ -387,11 +387,13 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 // Every part is fetched as soon as the desk has painted, so a section is there before it is opened.
 // Customers (its own section since 2026-10-07) is drawn by Community's code, so both are one part.
 export const STAFF_PARTS = {
-  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers'], bikes: ['renderBikes'], cashier: ['renderCashier'],
+  analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory'], website: ['renderWebsite'], history: ['renderHistory'],
   workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
+  // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
+  imports: ['openRosterImport'],
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
 };
 function refsOf(code) {
@@ -1160,7 +1162,9 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
 // badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
 // language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
+// Staff 480 -> 494, core 254 -> 257 (2026-10-09, builder S5): Analytics months / reports inbox / year-on-year, acting on a
+// selection, the employee-list import and a customer's own activity, 111 strings in each language (English in the core).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 494, core: 257 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

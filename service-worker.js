@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-eb0b4efa31';
+const CACHE = 'mmcq-d59a2daa95';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,19 +22,19 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=a188f2905e';
+const STAFF_JS = './staff.js?v=6887c98fe3';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=eb86c24864","./staff-parts/community.js?v=9c20214b3a","./staff-parts/bikes.js?v=551169c2f9","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=d69d3e345a","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=21b48cefbf","./staff-parts/sela.js?v=8e808aa969","./staff-parts/team.js?v=d7086bd2bf","./staff-parts/settings.js?v=7ac400a51f"];
-const APP_JS = './app.js?v=99eb99af67';
-const APP_CSS = './app.css?v=91e9c2874a';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=5c76790660","./staff-parts/community.js?v=3f129073a4","./staff-parts/bikes.js?v=17f4727ac5","./staff-parts/cashier.js?v=6e188a5349","./staff-parts/catalog.js?v=913472dbf5","./staff-parts/inventory.js?v=496d339d7a","./staff-parts/website.js?v=00080e780b","./staff-parts/history.js?v=0f53659a3f","./staff-parts/workshop.js?v=fda9a87321","./staff-parts/logs.js?v=130656d2d9","./staff-parts/ambassadors.js?v=dcc95b4310","./staff-parts/messages.js?v=048e106a1e","./staff-parts/vendors.js?v=21b48cefbf","./staff-parts/sela.js?v=8e808aa969","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=d7086bd2bf","./staff-parts/settings.js?v=0144c1e5e5"];
+const APP_JS = './app.js?v=6074767abc';
+const APP_CSS = './app.css?v=c89bf1e43d';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=c7baab6539']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=d486930c06']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
