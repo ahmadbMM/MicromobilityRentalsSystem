@@ -49,7 +49,9 @@ test.describe('@staff:team accounts', () => {
   });
 
   test('a new sign-in gets a temporary password shown once; a bad name is refused first', async ({ page }) => {
-    await boot(page, { 'rpc:staff_invite': { ok: true, user_id: '33333333-3333-3333-3333-333333333333' } });
+    await boot(page, { 'rpc:staff_invite': { ok: true, user_id: '33333333-3333-3333-3333-333333333333' },
+      // the read-back after the invite (20261009208000; tests/s1010-gaps-invite.spec.ts covers the rest)
+      'rpc:staff_invite_check': { ok: true, staff: true, auth: true, identity: true, confirmed: true, password: true } });
     const calls = rpcs(page);
     await page.evaluate(`setStaffTab('team')`);
     await page.fill('#tm-inv-email', 'new.person@example.com');

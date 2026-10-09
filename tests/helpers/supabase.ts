@@ -39,7 +39,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // asks for it on every paint, and a stub's [] is a database with no months yet.)
   'report_snapshot_make', 'staff_roster_import',
   // Money controls (20261009150000): account names for the logs, audit and Team report; tests/s1009-money-*.spec.ts stub it.
-  'staff_people']);
+  'staff_people',
+  // On the house through the server, the audit trail's text search, the read-back after an invite
+  // (20261009205000/206000/208000): the page runs as before without them; tests/s1010-gaps-*.spec.ts stub them.
+  'staff_set_house', 'staff_audit_search', 'staff_invite_check']);
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
  *  numbers). Every request to one answers as a database without it does (PGRST205), unless the spec
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
