@@ -83,9 +83,7 @@ test('the card shows what the applicant changed and what it was', async ({ page 
     fix_done_at: '2026-09-29T09:30:00Z', fix_prev: { phone: '+966552468013', instagram: 'karim.rides' } }] });
   const done = card(page).locator('.ca-fix-done');
   await expect(done).toContainText('Updated by the applicant');
-  await expect(done).toContainText('was +966 55•• •• 013'); // masked like the card until a tap shows the record (2026-10-10)
-  await card(page).locator('.pii-m').first().click();
-  await expect(card(page).locator('.ca-fix-done')).toContainText('was +966552468013');
+  await expect(done).toContainText('was +966552468013');
   await expect(done).toContainText('was @karim.rides');
   await expect(card(page).locator('.ca-fix-msg')).toHaveCount(0);
   await expect(card(page)).toContainText('+966551112222');

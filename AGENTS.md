@@ -1102,7 +1102,8 @@ PDPL Art. 19 (least privilege), from the staff research of 2026-10-09. Migration
   account editor shows everything and records an `edit`. A CSV whose header row names personal data (`_piiCols`,
   read in `_downloadCsv`) and the printed account, session, roster and Sela reports record one `export`/`print` line
   with the count (`_piiExport`), whatever the setting.
-- Off for everyone: Settings > Business > Personal data (`pii_mask` false; unset is on). Off for one account: the
+- OFF by default since 2026-10-10 (the owner: "dont hide personal info return it to visible all the time"): on only
+  while Settings > Business > Personal data is ticked (`pii_mask` true; unset or false is off). Off for one account: the
   Team cap "See personal data unhidden" (`can_see_pii_unmasked`, `staff_set_caps` takes it since this migration;
   the client sends it only when on, so an older database never sees the name). Admins are masked too and tap like
   everyone; nothing is recorded for what an unmasked account sees, only its exports.

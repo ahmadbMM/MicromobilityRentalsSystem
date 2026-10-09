@@ -42,7 +42,6 @@ test('the Applications tab shows every answer, the handles as links, and an acco
 
   const k = row(page, 'a1');
   await expect(k.locator('.ca-name')).toHaveText('Karim Mansour');
-  await k.locator('.pii-m').first().click(); // phone, email and birth date read masked until a tap (2026-10-10)
   for (const txt of ['+966552468013', 'karim.mansour@gmail.com', 'Egypt', '178 cm', 'Road', 'Architect', 'Male', 'English']) await expect(k).toContainText(txt);
   await expect(k.locator('a.soc-link[href="https://www.instagram.com/karim.rides"]')).toBeVisible();
   await expect(k.locator('a.soc-link[href="https://www.linkedin.com/in/karim-mansour-arch"]')).toBeVisible();

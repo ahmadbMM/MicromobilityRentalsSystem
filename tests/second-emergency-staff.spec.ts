@@ -126,9 +126,6 @@ test.describe('@staff:accounts second emergency contact', () => {
     const m = page.locator('#confirm-modal');
     await expect(m.locator('#run-em-title')).toHaveText('Emergency contact');
     await expect(m.locator('.run-em-card')).toHaveCount(2);
-    await expect(m.locator('.run-em-card').nth(0)).toContainText('N•••'); // both contacts masked until a tap (2026-10-10)
-    await m.locator('.pii-m').first().click();
-    await expect(m.locator('.pii-m')).toHaveCount(0);
     await expect(m.locator('.run-em-card').nth(0)).toContainText('Nora Haddad');
     await expect(m.locator('.run-em-card').nth(0)).toContainText('Brother or sister');
     await expect(m.locator('.run-em-h2')).toHaveText('Second emergency contact');

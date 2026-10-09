@@ -138,8 +138,6 @@ test.describe('@staff:community WhatsApp number', () => {
 
     await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
     const card = page.locator('.ca-row[data-app-id="a1"]');
-    await expect(card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('b')).toHaveText('+20 10•• ••• 567'); // masked until a tap (2026-10-10)
-    await card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('.pii-m').click();
     await expect(card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('b')).toHaveText('+201001234567');
     await expect(card.locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/201001234567');
     await expect(card.locator('a.ca-call')).toHaveAttribute('href', 'tel:+966552468013');
@@ -234,7 +232,6 @@ test.describe('@staff:community WhatsApp on a learn-to-ride sign-up', () => {
     await page.waitForFunction('(S.customers||[]).length>0');
     await page.evaluate(`setStaffTab('community');setCommTab('learning')`);
     const card = page.locator('.la-row[data-learn-id="l1"]');
-    await card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('.pii-m').click(); // masked until a tap (2026-10-10)
     await expect(card.locator('.ca-kv', { hasText: 'WhatsApp number' }).locator('b')).toHaveText('+971504829153');
   });
 });

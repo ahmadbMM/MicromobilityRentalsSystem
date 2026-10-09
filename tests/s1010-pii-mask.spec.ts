@@ -25,7 +25,8 @@ function rpcs(page: Page) {
   return calls;
 }
 async function boot(page: Page, x: Record<string, unknown> = {}) {
-  await stubSupabase(page, { queue_entries: ROWS, sessions: [SESSION], bikes: [], customers: [CUST], 'rpc:staff_pii_reveal': true, ...x });
+  // masking is off unless Settings > Business ticks it (the owner, 2026-10-10): these tests tick it
+  await stubSupabase(page, { queue_entries: ROWS, sessions: [SESSION], bikes: [], customers: [CUST], 'rpc:staff_pii_reveal': true, staff_options: [{ key: 'biz', items: { pii_mask: true } }], ...x });
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
@@ -33,6 +34,18 @@ async function boot(page: Page, x: Record<string, unknown> = {}) {
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';setSfSession('${SID}')`);
 }
 const roster = (page: Page) => page.locator('.queue-table tbody tr, .q-card');
+
+// The owner, 2026-10-10: "dont hide personal info return it to visible all the time" - with nothing set, nothing is masked.
+test('@staff:bookings with no setting, personal data reads in full and nothing is recorded', async ({ page }, info) => {
+  test.skip(info.project.name === 'mobile', 'no number on the phone card');
+  const calls = rpcs(page);
+  await boot(page, { staff_options: [] });
+  await expect(roster(page).filter({ hasText: 'Other Omar' }).first()).toContainText('0559876543');
+  await expect(page.locator('.pii-m')).toHaveCount(0);
+  await page.evaluate(`openAccountHistory('c1')`);
+  await expect(page.locator('#cust-modal .modal-sub')).toContainText('huda@example.com');
+  expect(calls.filter((c) => c.name === 'staff_pii_reveal')).toHaveLength(0);
+});
 
 test.describe('@staff:bookings s1010 personal data', () => {
   // The phone card shows no number at all (Call and WhatsApp only); the table is where numbers are read.

@@ -65,10 +65,6 @@ test('the Accounts row shows what is coming up and opens it over the rider\'s pa
   await btn.click();
 
   await expect(modal(page).locator('#ah-title')).toHaveText('Lina Haddad');
-  // personal data reads masked until a tap shows it (2026-10-10, PDPL least privilege)
-  await expect(modal(page).locator('.modal-sub')).toContainText('l•••@gmail.com');
-  await expect(modal(page).locator('.modal-sub')).not.toContainText('lina.haddad@gmail.com');
-  await modal(page).locator('.modal-sub .pii-m').first().click();
   await expect(modal(page).locator('.modal-sub')).toContainText('lina.haddad@gmail.com');
   await expect(modal(page).locator('.ah-sec')).toHaveText(['Current bookings 1', 'Future bookings 2', 'History 3', 'Customer activity']);
   await expect(modal(page).locator('.ah-kpi-v')).toHaveText(['1', '1', '1', 'SAR 115']); // done, no-show, cancelled, paid

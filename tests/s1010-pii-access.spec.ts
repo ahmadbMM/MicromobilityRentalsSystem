@@ -82,10 +82,10 @@ test.describe('@staff:history s1010 data access', () => {
     await expect(page.locator('#mny-host')).toContainText(/database/i);
   });
 
-  test('Settings > Business has the switch, on by default; Team offers the cap and sends it only when on', async ({ page }) => {
+  test('Settings > Business has the switch, off by default (the owner, 2026-10-10); Team offers the cap and sends it only when on', async ({ page }) => {
     await boot(page, { 'rpc:staff_set_access': true, 'rpc:staff_set_caps': true, 'rpc:staff_operator_list': [] });
     await page.evaluate(`setStaffTab('settings');setSettingsView('business')`);
-    await expect(page.locator('#biz-pii_mask')).toBeChecked();
+    await expect(page.locator('#biz-pii_mask')).not.toBeChecked();
     const calls = rpcs(page);
     await page.evaluate(`setStaffTab('team')`);
     const desk = page.locator(`.tm-acct[data-acct="${DESK}"]`);

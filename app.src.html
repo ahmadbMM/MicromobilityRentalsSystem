@@ -24173,10 +24173,11 @@ function _can(k){if(isAdmin())return true;const c=S._myCaps,v=c&&typeof c==='obj
 // record's personal data for the rest of this page's life and records the look once (staff_pii_reveal ->
 // pii_reveals + an Action Log line). Calling, WhatsApp, email and the account editor work without a tap
 // and are recorded the same way. A SCREEN mask: staff still read the columns through the API.
-// Off for everyone with the Business setting pii_mask = false; off for an account with the cap
-// can_see_pii_unmasked. Admins are masked too (an admin taps to show, like everyone; no extra step).
+// OFF unless the Business setting pii_mask is true (the owner, 2026-10-10: "dont hide personal info return it
+// to visible all the time"; it was on unless set to false); off for an account with the cap can_see_pii_unmasked.
+// While on, admins are masked too (an admin taps to show, like everyone; no extra step).
 const PII_FIELDS=['phone','whatsapp','email','emergency','emergency2','birth_date'];
-function _piiOn(){if(_biz('pii_mask',true)===false)return false;const c=S._myCaps;return!(c&&typeof c==='object'&&c.can_see_pii_unmasked===true);}
+function _piiOn(){if(_biz('pii_mask',false)!==true)return false;const c=S._myCaps;return!(c&&typeof c==='object'&&c.can_see_pii_unmasked===true);}
 function _piiKeys(cid,bid){return[cid?'c:'+cid:'',bid?'q:'+bid:''].filter(Boolean);}
 function _piiShown(cid,bid){if(!_piiOn())return true;const o=S._piiOpen;return!!o&&_piiKeys(cid,bid).some(k=>o.has(k));}
 function _piiMask(kind,v){
@@ -24497,7 +24498,7 @@ const BIZ_CARDS=[
   ['deposits','bizCardDeposits','bizCardDepositsSub',[['deposits','','deps']]], // 2026-10-09: premium bikes leave a deposit at check-in
   // Who a freed waitlist place goes to (2026-10-09, R7): _wlMode, waitlist_offers (20261009225000)
   ['waitlist','bizCardWaitlist','bizCardWaitlistSub',[['wl_offer_mode','bizWlMode','wlmode'],['wl_claim_min','bizWlClaim','int',[5,720]]]],
-  ['privacy','bizCardPrivacy','bizCardPrivacySub',[['pii_mask','bizPiiMask','boolOn']]], // personal data masked on staff screens (2026-10-10): on unless set to false
+  ['privacy','bizCardPrivacy','bizCardPrivacySub',[['pii_mask','bizPiiMask','bool']]], // personal data masked on staff screens: off unless ticked (the owner, 2026-10-10)
 ];
 const DEP_TYPES=['Road Carbon','Road','Hybrid','Mountain','Kids'];
 const BIZ_KPI=[['rides','kpiRides',[1,100000],1],['occupancy','kpiOccupancyPct',[1,100],1],['rating','kpiRatingOf10',[1,10],0.1],['sales','kpiSalesSar',[1,10000000],1]];

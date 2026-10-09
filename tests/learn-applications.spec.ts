@@ -60,7 +60,6 @@ test.describe('@staff:community learn to ride', () => {
 
     const n = row(page, 'l1');
     await expect(n.locator('.ca-name')).toHaveText('Nadia Omar');
-    await n.locator('.pii-m').first().click(); // phone, email and birth date read masked until a tap (2026-10-10)
     for (const txt of ['+966552220001', 'nadia.omar@gmail.com', '34 years', 'Female', '162 cm', 'Never ridden', 'English']) await expect(n).toContainText(txt);
     await expect(n.locator('.la-learners-h')).toHaveText('Learners (1)');
     await expect(n.locator('.la-learner')).toHaveText(/Nadia Omar\s+Applicant/);

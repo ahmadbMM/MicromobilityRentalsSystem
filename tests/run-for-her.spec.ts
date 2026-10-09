@@ -250,8 +250,6 @@ test.describe('@staff:bookings Run for Her', () => {
     await staffBoot(page, [row('r1', 5)], { customers: [{ id: 'cr1', name: 'Runner r1', phone: '0550000001', emergency_name: 'Nora Haddad', emergency_phone: '+966551234567', emergency_relation: 'sibling' }] });
     await page.evaluate(`_runEmShow('cr1')`);
     const m = page.locator('#confirm-modal');
-    await expect(m).not.toContainText('Nora Haddad'); // masked until a tap shows it (2026-10-10)
-    await m.locator('.pii-m').first().click();
     await expect(m).toContainText('Nora Haddad');
     await expect(m).toContainText('Brother or sister');
     await expect(m.locator('a[href="tel:+966551234567"]')).toBeVisible();
