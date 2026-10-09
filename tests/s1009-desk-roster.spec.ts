@@ -96,11 +96,11 @@ test.describe('@staff:bookings s1009 desk: the night at a glance', () => {
     await expect(d).toHaveCount(0);
   });
 
-  test('B6: the staff offline banner says what needs a connection; the customer one keeps its wording', async ({ page }) => {
+  test('B6: the staff offline banner says what works offline (the desk outbox, 2026-10-10); the customer one keeps its wording', async ({ page }) => {
     await boot(page);
     await page.evaluate(`Object.defineProperty(navigator,'onLine',{value:false,configurable:true});_updateConnUI()`);
     const b = page.locator('#conn-banner');
-    await expect(b).toContainText('Check-ins, returns and payments need a connection');
+    await expect(b).toContainText('Check-ins, returns, payments, no-shows and bike hand-overs are saved on this device');
     await page.evaluate(`showView('customer');_updateConnUI()`);
     await expect(b).toContainText('Changes are saved and will sync');
   });

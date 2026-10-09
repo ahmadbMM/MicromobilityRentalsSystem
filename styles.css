@@ -5840,6 +5840,23 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #confirm-modal .co-mk-damaged.active,#confirm-modal .co-mk-missing.active{border-color:var(--orange);color:var(--orange);}
 /* The roster's live count: at the top as it scrolls, never at the foot. */
 #tab-queue .q-live-count{position:sticky;top:var(--topbar-h,56px);z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:0 0 10px;padding:6px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-md,6px);}
+/* The desk outbox (2026-10-10): the roster header's "N unsynced" chip, the mark beside a rider whose change waits or was refused, and its list */
+#tab-queue .dq-chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:4px 12px;margin-inline-start:auto;background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.45);border-radius:999px;color:var(--orange);font:700 13px/1.2 var(--font-body);cursor:pointer;}
+#tab-queue .dq-chip.dq-bad{background:rgba(var(--red-rgb),.12);border-color:rgba(var(--red-rgb),.5);color:var(--red);}
+#tab-queue .dq-chip:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+#tab-queue .dq-mark{display:inline-block;margin-inline-start:4px;padding:1px 8px;border-radius:999px;background:rgba(var(--warn-rgb),.14);color:var(--orange);font:700 11px/1.5 var(--font-body);white-space:normal;vertical-align:middle;}
+#tab-queue .dq-mark.dq-bad{background:rgba(var(--red-rgb),.14);color:var(--red);}
+#dq-modal .dq-box{max-width:520px;width:calc(100% - 32px);}
+#dq-modal .dq-intro{margin:0 0 10px;color:var(--muted);font-size:13px;line-height:1.5;}
+#dq-modal .dq-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:55vh;overflow-y:auto;}
+#dq-modal .dq-row{padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--s1);}
+#dq-modal .dq-row.dq-bad{border-color:rgba(var(--red-rgb),.5);}
+#dq-modal .dq-what{color:var(--text);font-size:14px;}
+#dq-modal .dq-at{color:var(--muted);font-size:12px;margin-inline-start:4px;}
+#dq-modal .dq-state{margin-top:4px;color:var(--orange);font-size:12px;font-weight:700;}
+#dq-modal .dq-bad .dq-state{color:var(--red);}
+#dq-modal .dq-acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+#dq-modal .dq-acts button{min-height:44px;}
 #tab-queue .q-lc-btn{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:4px 10px;background:transparent none;border:1px solid transparent;border-radius:999px;color:var(--muted-l);font:700 13px/1 var(--font-body);cursor:pointer;}
 #tab-queue .q-lc-btn b{font-size:16px;color:var(--text);}
 #tab-queue .q-lc-active b{color:var(--green);}

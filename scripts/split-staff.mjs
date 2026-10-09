@@ -402,6 +402,8 @@ export const STAFF_PARTS = {
   // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
   // (with the Action Log, which shares the account names and the record links with them)
   money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
+  // 2026-10-10: the desk outbox's store (IndexedDB), its replay and the unsynced list (the list, the overlay and the chip stay in the core)
+  deskq: ['_dqEnqueue', '_dqFlush', '_dqBoot', '_dqOpen'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
