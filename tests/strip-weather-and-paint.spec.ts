@@ -29,7 +29,10 @@ test('the chip shows the forecast, amber when it bites, silent when absent', asy
   await page.evaluate(`renderStaffQueue()`);
   const chips = await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].map(c=>c.innerText)`) as string[];
   expect(chips.find((c) => c.includes('1 Jan'))).toContain('43°');
-  expect(chips.find((c) => c.includes('2 Jan'))).toContain('ᯓ31');      // windy day carries the wind
+  expect(chips.find((c) => c.includes('2 Jan'))).toContain('31');      // windy day carries the wind
+  // the wind is drawn (2026-10-09; it was the Batak letter ᯓ, which no screen reader or font names)
+  expect(await page.evaluate(`[...document.querySelectorAll('.sess-chip-date')].some(c=>c.innerText.includes('2 Jan')&&!!c.querySelector('.rq-wx-warn svg'))`)).toBe(true);
+  expect(chips.join(' ')).not.toContain('ᯓ');
 });
 
 test('no forecast, no problem — the strip renders bare', async ({ page }) => {

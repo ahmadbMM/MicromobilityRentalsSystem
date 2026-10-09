@@ -1189,6 +1189,9 @@ export function formatFieldNames(r, limit = 20) {
 // type/size warning, Sending and the failed check-in bar, single check-in Undo, bulk No-show, the live count,
 // desk keys, Close out's per-bike marks, the Petromin bike) and 33 strings in each language; the night's
 // summary went to the cashier part. Here 255.0 core / 481.6 staff local (~2 KB more on the runner).
+// Staff 480 -> 483, core 254 -> 255 (2026-10-09): the accessibility and consistency pass (theme choice, shortcut
+// switch, named buttons and toggle states, sortable headers as buttons, captions, 17 strings in each language);
+// here staff 479.2, core 252.3 local (~481 / ~253.6 on the runner), inside 2.5 KB of the old limits.
 export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 560, core: 280 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 

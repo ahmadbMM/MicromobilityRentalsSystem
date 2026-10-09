@@ -32,11 +32,16 @@ for (const side of ['staff', 'customer'] as const) {
       toast('Saved'); toast('Copied', 'success'); toast('Could not save', 'error'); toast('Bike is out', 'warning'); toast('Nothing to export', 'info');
     });
     const all = await toasts(page);
-    expect(all.map((x) => [x.text, x.drawn])).toEqual([
+    // an error is its own alert beside the polite region since 2026-10-09, so it comes after the others in the page
+    const by = (txt: string) => all.find((x) => x.text === txt)!;
+    expect(all).toHaveLength(5);
+    expect([['Saved', false], ['Copied', false], ['Could not save', true], ['Bike is out', true], ['Nothing to export', true]]
+      .map(([txt]) => [txt, by(txt as string).drawn])).toEqual([
       ['Saved', false], ['Copied', false], ['Could not save', true], ['Bike is out', true], ['Nothing to export', true],
     ]);
-    expect(all[0].cls).toContain('quiet');
-    expect(all[2].cls).not.toContain('quiet');
+    expect(by('Saved').cls).toContain('quiet');
+    expect(by('Could not save').cls).not.toContain('quiet');
+    await expect(page.locator('#toast-container > .toast.error')).toHaveAttribute('role', 'alert');
   });
 }
 
