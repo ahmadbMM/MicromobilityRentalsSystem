@@ -24,6 +24,8 @@ async function boot(page: Page, fixtures: Record<string, unknown> = {}) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
+  // the first load paints the default tab; a test that switches tabs before it lands is switched back (CI is slower)
+  await page.waitForFunction(`getQueue().length>0`);
   await page.evaluate(`localStorage.setItem('cq_op_name','Spec Staff');S.staffRole='admin';`);
 }
 
@@ -72,6 +74,7 @@ test.describe('@staff:history audit trail, action log, exceptions, team', () => 
     await expect.poll(() => sent.length).toBeGreaterThan(0);
     expect(sent[sent.length - 1]).toMatchObject({ action: 'Refund · test', kind: 'refund', entity: 'receipt', entity_id: 'r9', amount: 12.5 });
     await page.evaluate(`setStaffTab('history');S.histView='log';S._dbLogAt=0;renderHistory()`);
+    await expect(page.locator('#tab-history')).toBeVisible();
     const row = page.locator('.lg-row').filter({ hasText: '#7 Rider One' });
     await expect(row).toContainText('Device Name');
     await expect(row).toContainText('Desk Person');
