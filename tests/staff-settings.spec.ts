@@ -31,7 +31,7 @@ test('Settings has its own address and every role can open it', async ({ page })
   await page.evaluate(`setStaffRole('frontdesk');setStaffTab('settings')`);
   expect(await page.evaluate('S.staffTab')).toBe('settings');
   await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="settings"]')).toBeAttached();
-  await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications', 'This device']);
+  await expect(page.locator('#tab-settings .form-title')).toHaveText(['Profile', 'Sign-in', 'Notifications', 'This device', 'Personal', 'Display']);
 });
 
 test('the name is saved to the account and the bar shows it', async ({ page }) => {

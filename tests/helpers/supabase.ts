@@ -23,7 +23,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_pin_approve', 'staff_void_receipt', 'staff_refund_receipt', 'staff_set_price', 'staff_delete_session', 'staff_delete_bike',
   // One number on several accounts (20260930180000): without it the account editor refuses a
   // number another account has, as it used to; tests/shared-phone.spec.ts stubs it by name.
-  'staff_phone_accounts']);
+  'staff_phone_accounts',
+  // A staff account's own preferences (20261009190000): without it they stay on the device, as production
+  // runs until the migration is applied; tests/s1009-custom-*.spec.ts stub it by name.
+  'staff_my_prefs']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

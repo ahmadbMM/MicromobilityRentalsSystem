@@ -8248,6 +8248,30 @@ body:not(.view-staff) .fx-em .form-row{grid-template-columns:1fr;gap:0;}
 :is(#tab-settings,#tab-community) .tpl-own{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:var(--green);background:rgba(var(--green-rgb),.1);}
 :is(#tab-settings,#tab-community) .tpl-edit{font-size:13px;color:var(--green);}
 .rm-langs{display:flex;gap:8px;margin:0 0 10px;}
+
+/* ── Settings > Personal and Display (2026-10-09): the staffer's own choices ── */
+.tpl-box .rm-langs{flex-wrap:wrap;}
+#tab-settings .set-seg{display:flex;flex-wrap:wrap;gap:8px;}
+#tab-settings .set-seg .toggle-btn{min-height:44px;min-width:64px;}
+#tab-settings .set-tb{border:0;padding:0;margin:0;min-width:0;display:flex;flex-direction:column;gap:6px;}
+#tab-settings .set-tb>button{align-self:flex-start;}
+#tab-settings .set-tog input:disabled+span{color:var(--muted);}
+/* Text size: the staff layer is drawn in px, so the browser's own font size changes nothing; the staff page is
+   zoomed instead (layout, tap targets and pop-ups grow together, and the width a phone lays out shrinks with it). */
+html[data-staff-fs="115"] body.view-staff{zoom:1.15;}
+html[data-staff-fs="130"] body.view-staff{zoom:1.3;}
+/* Density: Compact packs the rows of every staff table and list from tablet width up; a phone keeps its 44px
+   targets, and a touch screen's buttons never go under 24px. The Bookings roster keeps its own switch. */
+@media (min-width:768px){
+  html[data-staff-density="compact"] body.view-staff #view-staff table:not(.queue-table) :is(th,td),
+  html[data-staff-density="compact"] body.view-staff #view-staff :is(.bk-table,.pt-table) :is(th,td){padding-top:4px;padding-bottom:4px;}
+  html[data-staff-density="compact"] body.view-staff #view-staff :is(.ca-row,.lg-row,.tpl-row,.hist-row){padding-top:6px;padding-bottom:6px;}
+  html[data-staff-density="compact"] body.view-staff #view-staff :is(.set-tog,.hl-item){padding-top:6px;padding-bottom:6px;}
+  html[data-staff-density="compact"] body.view-staff #view-staff :is(.chart-card,.stat-card,.form-section){padding:12px;}
+}
+@media (min-width:768px) and (pointer:coarse){
+  html[data-staff-density="compact"] body.view-staff #view-staff :is(td,.ca-row,.lg-row) :is(button,a.btn-sm){min-height:24px;min-width:24px;}
+}
 .rm-langs .toggle-btn{flex:1;}
 .tpl-fills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px;}
 .tpl-fill{border:1px solid var(--border);background:var(--s3);color:var(--text);border-radius:6px;padding:3px 8px;font:inherit;font-size:12px;font-family:ui-monospace,Menlo,monospace;cursor:pointer;}
