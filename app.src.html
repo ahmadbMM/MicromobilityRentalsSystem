@@ -4336,7 +4336,9 @@ function priceForTypeMax(ty){return RIDE_PRICES_MAX[ty]??DEFAULT_PRICE;}
 // values are written into the constants in place (_bizApplyPub here, _bizApplyStaff on the staff
 // side), so every use keeps reading the same names.
 var _BIZ=null,_BIZ_FULL=false,_BIZ_DEF={},_PRICE_ROWS=null;
-function _biz(k,d){const b=_BIZ;const v=b&&typeof b==='object'&&Object.prototype.hasOwnProperty.call(b,k)?b[k]:undefined;return(v===undefined||v===null||v==='')?d:v;}
+// A staff device reads its staff_options 'biz' (the whole set) whenever it holds one, also before
+// _bizFromOpts has run; a rider's page has only the public copy (_BIZ).
+function _biz(k,d){const o=S.staffOptions&&S.staffOptions.biz,b=o&&typeof o==='object'&&!Array.isArray(o)?o:_BIZ;const v=b&&typeof b==='object'&&Object.prototype.hasOwnProperty.call(b,k)?b[k]:undefined;return(v===undefined||v===null||v==='')?d:v;}
 function _bizCp(v){try{return structuredClone(v);}catch(_){return JSON.parse(JSON.stringify(v));}}
 // the setting when it passes ok(), else the built-in value (kept from the first call)
 function _bizV(k,cur,ok){if(!Object.prototype.hasOwnProperty.call(_BIZ_DEF,k))_BIZ_DEF[k]=_bizCp(cur);const v=_biz(k,undefined);return(v!==undefined&&(!ok||ok(v)))?v:_bizCp(_BIZ_DEF[k]);}
@@ -22539,10 +22541,11 @@ async function closeOutSession(sid){
       if(retBad.length){const f=retBad[0].w;if(f.rpcError)errorBar(_rpcMessage(f.rpcError),null,(f.rpcError&&f.rpcError.message)||'');else _writeErr(f.writes,'close out');}
       doneIds=retOk.map(x=>x.id);
       // A bike marked Missing is out of the pool until it is found, as Missing on the bike's row does
-      // (setMissing's write; its undo is this close-out's).
+      // (setMissing's write; its undo is this close-out's). Its needs_check return has just put it on
+      // 'check' (held for a check, 20261009170000), so that status is taken over too.
       const okBikes=new Set(retOk.flatMap(x=>x.w.bikeIds||[]).map(String));
       const lost=missing.filter(id=>okBikes.has(String(id)));
-      for(const id of lost)await _wr(sb.from('bikes').update({status:'missing',retired_date:_todayISO()}).eq('id',id).in('status',['available','maintenance']),'mark missing');
+      for(const id of lost)await _wr(sb.from('bikes').update({status:'missing',retired_date:_todayISO()}).eq('id',id).in('status',['available','maintenance','check']),'mark missing');
       if(toDone.length){
         const r=await sb.from('queue_entries').update({status:'done'})
           .in('id',toDone.map(e=>e.id)).eq('status','waiting').select('id');
@@ -33882,7 +33885,8 @@ function _wsDlg(title,sub,fields,actions){
       <div id="ws-dlg-err" class="ws-err" role="alert"></div>
       <div class="ws-dlg-actions">${actions}</div>
     </div></div>`;
-  setTimeout(()=>{const i=host.querySelector('.ws-dlg input,.ws-dlg select,.ws-dlg textarea');if(i)i.focus();},30);
+  setTimeout(()=>{if(host.contains(document.activeElement))return; // a person already in a field keeps it
+    const i=host.querySelector('.ws-dlg input,.ws-dlg select,.ws-dlg textarea');if(i)i.focus();},30);
 }
 function _wsDlgErr(key){const e=document.getElementById('ws-dlg-err');if(e)e.textContent=t(key);}
 function _wsVal(id){const e=document.getElementById(id);return e?String(e.value||'').trim():'';}
@@ -38000,9 +38004,6 @@ async function _csUpsert(data){
   if(r&&r.error&&/sold_by_name/i.test(String(r.error.message||''))){S.hasCsSeller=false;r=await _roFree(()=>sb.from('cashier_sales').upsert(strip(data)));} // fire-and-forget: as above
   return r;
 }
-// Business settings (staff_options 'biz', an object; the Business tab writes it). Each value falls back
-// to what the page used before there was a setting.
-function _biz(k,d){const o=(S.staffOptions||{}).biz;return o&&typeof o==='object'&&!Array.isArray(o)&&o[k]!=null&&o[k]!==''?o[k]:d;}
 // The "Changes" button a record's dialog carries: that record's lines of the audit trail
 // (openAuditPanel). ids: one id or several (a receipt's lines).
 function _auditBtn(tbl,ids,title){return`<button type="button" class="btn-sm btn-secondary mny-aubtn" data-on-click="${_on("openAuditPanel",tbl,[].concat(ids||[]).map(String),String(title||''))}">${_cuIc('clock',13)} ${t('auChanges')}</button>`;}
@@ -38415,7 +38416,7 @@ async function _ctShareReceipt(key){
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 // The printed receipt as a simplified tax invoice (2026-10-09, M23): the seller's name, VAT number and
-// address (Business settings 'biz': legal_name, vat_no, address, vat_rate; until they are set, the
+// address (Business settings 'biz': seller_name, vat_no, seller_addr, vat_pct; until they are set, the
 // footer's number and address and 15%), the receipt's sequential number (receipt_numbers, given by the
 // database when the receipt's first line was stored), who served, the VAT inside the total, and a
 // ZATCA phase-1 QR code (TLV: seller, VAT number, time, total with VAT, VAT; base64).
@@ -38443,8 +38444,8 @@ async function _rcWrite(w,rows,all,cust,at){
   const total=r2(rows.reduce((s,r)=>s+_lineCharge(r),0));
   const sess=allSessions().find(s=>s.id===rows[0].session_id);
   const key=rows[0].receipt_id||rows[0].id;
-  const seller=String(_biz('legal_name','Micromobility Co.')),vatNo=String(_biz('vat_no','312555068900003')),addr=String(_biz('address',t('footAddr')));
-  const rate=Math.max(0,Number(_biz('vat_rate',15))||0);
+  const seller=String(_biz('seller_name','Micromobility Co.')),vatNo=String(_biz('vat_no','312555068900003')),addr=String(_biz('seller_addr',t('footAddr')));
+  const rate=Math.round(_vatRate()*10000)/100;
   const vat=r2(total*rate/(100+rate)),net=r2(total-vat);
   const soldBy=(all.find(r=>r&&r.sold_by_name)||{}).sold_by_name||'';
   let no=null;
@@ -38565,7 +38566,7 @@ function _mnyOpen(html,focusSel){
   const m=_mnyHost();
   if(m.style.display!=='block'||!m.innerHTML)S._mnyBack=document.activeElement;
   m.style.display='block';m.innerHTML=html;_cssvApply(m);
-  if(focusSel)setTimeout(()=>{const f=m.querySelector(focusSel);if(f)try{f.focus();}catch(_){}},40);
+  if(focusSel)setTimeout(()=>{if(m.contains(document.activeElement))return;const f=m.querySelector(focusSel);if(f)try{f.focus();}catch(_){}},40); // never out of a field already in use
 }
 function _mnyClose(){
   const m=document.getElementById('mny-modal');if(m){m.style.display='none';m.innerHTML='';}
@@ -38617,9 +38618,6 @@ function _mrGo(){
   const v=r.code+(r.note.trim()?': '+r.note.trim().slice(0,240):'');
   const res=S._mnyRes;S._mnyRes=null;S._mr=null;_mnyClose();if(res)res({v,txt:_moneyReasonText(v)});
 }
-
-// ── B2: how a bulk payment was taken ──────────────────────────────────────────────────────────────
-function _pmGo(m){const res=S._mnyRes;S._mnyRes=null;_mnyClose();if(res)res(m==='cash'?'cash':'card');}
 
 // ── M1: the audit trail ───────────────────────────────────────────────────────────────────────────
 // audit_log (20260928200000) holds, for every update, the columns that changed {col:{old,new}}, and
@@ -39820,14 +39818,12 @@ async function _invSetCount(id,to){
   const res=await sb.from('inventory').update({qty:to,updated_at:new Date().toISOString()}).eq('id',id);
   return !_writeErr(res,'stock-take');
 }
-// The reorder rule (biz.reorder_mult / biz.reorder_min, 2 and 4 until set): enough for the low mark
-// times the multiplier, what sold, or the minimum, whichever is most, less what is on the shelf.
 // Cost, supplier and expiry, which the table does not hand out (staff_inventory_extras). ok=false:
 // the database is older, and the supplier and expiry fields stay hidden.
 function _invX(){return S._invX||(S._invX={ok:false,busy:false,at:0,map:new Map()});}
 async function _invXLoad(force){
-  const X=_invX();if(X.busy||(!force&&Date.now()-X.at<60000))return;X.busy=true;
-  try{const r=await sb.rpc('staff_inventory_extras');if(!r.error&&Array.isArray(r.data)&&(r.data.length||X.ok)){X.ok=true;X.map=new Map(r.data.map(x=>[x.id,x]));}else if(r.error&&!_rpcAbsent(r.error))X.ok=X.ok||false;}catch(_){}
+  const X=_invX();if(X.busy||X.gone||(!force&&Date.now()-X.at<60000))return;X.busy=true;
+  try{const r=await sb.rpc('staff_inventory_extras');if(!r.error&&Array.isArray(r.data)&&(r.data.length||X.ok)){X.ok=true;X.map=new Map(r.data.map(x=>[x.id,x]));}else if(r.error&&_rpcAbsent(r.error))X.gone=true;}catch(_){} // missing: not asked again on this page
   finally{X.busy=false;X.at=Date.now();}
   if(X.ok&&S.view==='staff'&&S.staffTab==='inventory')renderInventory();
 }
