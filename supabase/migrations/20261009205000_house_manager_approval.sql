@@ -62,7 +62,11 @@ as $$
 declare k text; pr boolean; amt numeric;
 begin
   if not (coalesce(new.paid, false) and coalesce(new.price, 0) = 0) then return new; end if;   -- not on the house
-  if coalesce(old.paid, false) and coalesce(old.price, 0) = 0 then return new; end if;        -- it already was
+  if coalesce(old.paid, false) and coalesce(old.price, 0) = 0                                 -- it already was, and is the same ride
+     and new.type_preference is not distinct from old.type_preference
+     and new.customer_id is not distinct from old.customer_id
+     and new.name is not distinct from old.name
+     and new.session_id is not distinct from old.session_id then return new; end if;
   if coalesce(current_setting('mm.house_ok', true), '') = '1' then return new; end if;         -- staff_set_house
   if coalesce(auth.role(), '') <> 'authenticated' then return new; end if;                     -- service role, cron
   if not is_staff() or is_admin() then return new; end if;

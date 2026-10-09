@@ -116,8 +116,9 @@ as $$
 declare _s sessions%rowtype; _own boolean; _held int; _open int; _free int; _n int := 0; r record; _min int;
 begin
   if _wl_mode() <> 'claim' then return 0; end if;
+  perform pg_advisory_xact_lock(hashtext('promote:'||p_session_id));  /* the promotion's own lock: two fills never pick one rider */
   select * into _s from sessions where id = p_session_id;
-  if not found or coalesce(_s.needs_approval, false) or _s.cancelled_at is not null then return 0; end if;
+  if not found or coalesce(_s.needs_approval, false) or _s.cancelled_at is not null or _s.status = 'deleted' then return 0; end if;
   if (select w.ends_at from _session_window(_s) w) <= now() then return 0; end if;
   _own := coalesce(_s.event_kind,'') = 'community' and coalesce(_s.ride_kind,'') = 'petromin';
   select count(*) into _held from queue_entries q
@@ -139,8 +140,9 @@ begin
      limit _free
   loop
     insert into waitlist_offers (booking_id, session_id, token, expires_at)
-    values (r.id, p_session_id, replace(gen_random_uuid()::text, '-', ''), now() + make_interval(mins => _min));
-    _n := _n + 1;
+    values (r.id, p_session_id, replace(gen_random_uuid()::text, '-', ''), now() + make_interval(mins => _min))
+    on conflict (booking_id) where status = 'open' do nothing;
+    if found then _n := _n + 1; end if;
   end loop;
   return _n;
 end $$;

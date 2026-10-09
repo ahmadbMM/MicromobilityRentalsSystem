@@ -136,4 +136,7 @@ comment on table public.rpc_receipts is
 
 notify pgrst, 'reload schema';
 
+
+insert into supabase_migrations.schema_migrations (version, name)
+values ('20261009215000', 'desk_outbox_op_ids') on conflict (version) do nothing;
 commit;

@@ -69,8 +69,9 @@ alter table public.pii_reveals enable row level security;
 revoke all on table public.pii_reveals from public, anon, authenticated;
 grant select on table public.pii_reveals to authenticated;
 drop policy if exists pii_reveals_read on public.pii_reveals;
-create policy pii_reveals_read on public.pii_reveals for select
-  using ((select is_admin()) or (select _staff_owner()));
+create policy pii_reveals_read on public.pii_reveals for select to authenticated
+  using ((select is_admin()) or exists (select 1 from public.staff s
+         where s.user_id = (select auth.uid()) and s.role = 'owner' and s.disabled_at is null));
 
 -- ── 2. A look, recorded ─────────────────────────────────────────────────────────────────────
 create or replace function public.staff_pii_reveal(p_customer text, p_fields text[], p_via text default 'reveal',
