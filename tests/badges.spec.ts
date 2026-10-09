@@ -167,6 +167,30 @@ test.describe('@staff:community badges', () => {
     await expect(tab.getByRole('button', { name: 'Give to a ride', exact: true }).first()).toBeVisible();
   });
 
+  test('an account\'s badges show in its history window and its editor, and open the Badges dialog (the owner, 2026-10-09)', async ({ page }) => {
+    await staff(page);
+    await community(page, 'accounts');
+    // Omar: Champion given, First Lap earned by riding.
+    await page.evaluate(`openAccountHistory('c2')`);
+    const hist = page.locator('#cust-modal .bdg-strip');
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Champion', 'First Lap']);
+    await expect(hist.locator('.bdg-chip svg.bdg-m')).toHaveCount(2);
+    await hist.locator('.bdg-chip', { hasText: 'Champion' }).click();
+    await expect(modal(page)).toContainText('Badges · Omar Saleh');
+    await modal(page).locator('.bdg-pick', { hasText: 'Marshal' }).click();
+    await modal(page).getByRole('button', { name: 'Give badge' }).click();
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Marshal', 'Champion', 'First Lap']); // painted again in place
+    await modal(page).locator('.bdg-foot').getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`closeCustomerProfile()`);
+    // The editor: the same section, under the tags; Sara's one is First Lap, from her ride two months back.
+    await page.evaluate(`showEditCustomerModal('c3')`);
+    const ed = page.locator('#new-acct-modal .bdg-strip');
+    await expect(ed.locator('.bdg-chip')).toHaveText(['First Lap']);
+    await ed.getByRole('button', { name: 'Give a badge' }).click();
+    await expect(modal(page)).toContainText('Badges · Sara Nabil');
+    expect(EMOJI.test(await ed.innerText())).toBe(false);
+  });
+
   test('an unpaid returned ride earns nothing in the dialog', async ({ page }) => {
     await staff(page, { queue_entries: queue_entries.map((q) => (q.id === 'q1' ? { ...q, paid: false } : q)) });
     await community(page, 'accounts');
@@ -327,22 +351,23 @@ test.describe('@customer:account badges', () => {
     expect(await page.evaluate(`(()=>{const b=S._bdgMine.list[0],en=_bdgName(b);S.lang='ar';const ar=_bdgName(b);S.lang='en';return[en,ar];})()`)).toEqual(['Night Owl', 'بومة الليل']);
   });
 
-  test('the T100 race badges: given by staff, drawn as the distance in gold, silver and orange (2026-10-08)', async ({ page }) => {
+  test('the T100 race badges: given by staff, drawn as finisher medals in gold, silver and bronze (2026-10-08, redrawn 2026-10-09)', async ({ page }) => {
     const t100 = [{ slug: 't100', icon: 't100', color: 'gold', name: 'T100 Finisher', system: true, note: 'Jeddah', at: new Date(Date.now() - 36e5).toISOString() }];
     await rider(page, { 'rpc:customer_my_badges': t100 });
     const pop = page.locator('#badge-pop');
     await expect(pop).toContainText('T100 Finisher');
     await expect(pop).toContainText('Finished the T100 race in Jeddah');
-    await expect(pop.locator('svg.bdg-m.bdc-gold')).toHaveCount(1);
+    await expect(pop.locator('svg.bdg-m.bdg-race')).toHaveCount(1);
+    await expect(pop.locator('svg.bdg-race text').first()).toHaveText('T100');
     await pop.getByRole('button', { name: 'Close' }).click();
     await page.locator('#mr-badges-more').click();
-    // T50 and T25 wait among the ones staff give, each in its own colour and drawing.
-    for (const [name, col] of [['T50 Finisher', 'silver'], ['T25 Finisher', 'orange']]) {
+    // T50 and T25 wait among the ones staff give, each its own medal with the race's name on it.
+    for (const [name, tx] of [['T50 Finisher', 'T50'], ['T25 Finisher', 'T25']]) {
       const tile = page.locator('#tab-account .mr-badge', { hasText: name });
       await expect(tile).toHaveClass(/locked/);
-      await expect(tile.locator(`svg.bdg-m.bdc-${col}`)).toHaveCount(1);
+      await expect(tile.locator('svg.bdg-m.bdg-race text').first()).toHaveText(tx);
     }
-    expect(await page.evaluate(`['t100','t50','t25'].map(k=>BD_SYS[k][0]===k&&!!BDG_GLYPH[k]&&BDG_GIVEN_SYS.includes(k))`)).toEqual([true, true, true]);
+    expect(await page.evaluate(`['t100','t50','t25'].map(k=>BD_SYS[k][0]===k&&!!BDG_RACE[k]&&!BDG_GLYPH[k]&&BDG_GIVEN_SYS.includes(k))`)).toEqual([true, true, true]);
     const ar = JSON.parse(readFileSync('lang/ar.json', 'utf8'));
     expect([ar.bdgT100, ar.bdgT25D]).toEqual(['إنجاز T100', 'أنهيت سباق T25 في جدة']);
   });

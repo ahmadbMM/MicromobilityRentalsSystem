@@ -68,10 +68,12 @@ test.describe('a community member who has not given both', () => {
     }
     expect(await page.evaluate(`document.body.classList.contains('gate-page')`)).toBe(true);
     await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
-    await expect(box).toContainText('Two details for your community profile');
+    await expect(box).toContainText('One detail to finish your profile');
+    await expect(box).toContainText('Community members need these');
     expect(await page.evaluate('S.selEvent')).toBe('none');
-    // what the account already holds is filled in; only the missing one is left to answer
-    await expect(page.locator('#pg-birth')).toHaveValue('1990-05-05');
+    // only the missing one is asked; what the account already holds is not shown again (2026-10-09)
+    await expect(page.locator('#pg-birth')).toHaveCount(0);
+    await expect(page.locator('#pg-nat')).toBeVisible();
     await expect(page.locator('#profile-gate button')).toHaveText(['Save and continue', 'Log out']);
   });
 

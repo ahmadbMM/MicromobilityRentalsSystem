@@ -1465,6 +1465,14 @@
     :is(#tab-community,#tab-customers,#tab-analytics) .am-bdg{display:inline-flex;line-height:0;}
     :is(#tab-community,#tab-customers,#tab-analytics) .am-bdg .bdg-m{width:22px;height:22px;}
     .bdg-item{display:flex;align-items:center;gap:10px;}
+    /* An account's badges in its history window and editor (_bdgStripSec, 2026-10-09): medal + name chips. */
+    .bdg-strip-sec{margin:12px 0 4px;}
+    .bdg-strip-h{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
+    .bdg-strip{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
+    .bdg-chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:4px 10px 4px 5px;border:1px solid var(--border);border-radius:999px;background:var(--s1);color:var(--text);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+    .bdg-chip .bdg-m{width:28px;height:28px;}
+    .bdg-chip:hover{border-color:rgba(var(--green-rgb),.5);}
+    .bdg-strip-btn{display:inline-flex;align-items:center;gap:4px;}
     .bdg-item>.bdg-m{width:36px;height:36px;}
     .bdg-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1;}
     .bdg-txt b{font-size:13.5px;font-weight:800;}
@@ -3704,6 +3712,8 @@
     .bdg-sp .bdg-hexsp{stroke-width:1.6;stroke-linejoin:round;}
     .bdg-sp .bdg-hexin{fill:none;stroke:#fff;stroke-opacity:.6;stroke-width:1.1;stroke-linejoin:round;}
     .bdg-sp .o{opacity:.45;}
+    /* The T100 / T50 / T25 finisher medals (_bdgRace): the race's name struck in the condensed face. */
+    .bdg-race .bdg-rt{font-family:'Barlow Condensed','Barlow',sans-serif;font-weight:800;}
     .mr-badge.special,.badge-pop-box.special{--sp1:#ffe58a;--sp2:#f0a500;--sp3:#00b86b;--spg:240,165,0;--sph:255,226,140;}
     .mr-badge.sp-national,.badge-pop-box.sp-national{--sp1:#5fd99a;--sp2:#159a57;--sp3:#0a5c33;--spg:21,154,87;--sph:235,255,244;}
     .mr-badge.special{position:relative;overflow:hidden;border:1.5px solid transparent;background:linear-gradient(var(--s1),var(--s1)) padding-box,linear-gradient(135deg,var(--sp1),var(--sp2) 45%,var(--sp3)) border-box;}
@@ -7615,6 +7625,11 @@ body.view-staff .natnew-grp .natnew-list{margin-top:6px;}
 body.view-staff .natnew-det{flex-basis:100%;overflow-wrap:anywhere;}
 @media (max-width:640px){body.view-staff .natnew-sel{flex:1 1 45%;}body.view-staff .natnew-sel select{max-width:none;width:100%;}}
 body.view-staff .natnew-acts{margin-top:14px;display:flex;justify-content:flex-end;}
+/* After Got it: a small bar that opens the list again (2026-10-09). */
+body.view-staff .natnew-min{padding:10px 14px;border-width:1px;}
+body.view-staff .natnew-min .natnew-head{align-items:center;flex-wrap:wrap;gap:8px 12px;}
+body.view-staff .natnew-min .natnew-head svg{margin-top:0;}
+body.view-staff .natnew-min h3{flex:1 1 200px;font-size:16px;}
 body.view-staff .dash-row{display:flex;align-items:center;gap:10px;width:100%;padding:10px 4px;border:0;border-bottom:1px solid var(--sf-line2);background:none;font:inherit;color:var(--text);text-align:start;cursor:pointer;min-height:44px;}
 body.view-staff .dash-row:last-child{border-bottom:0;}
 body.view-staff .dash-row-main{flex:1;min-width:0;display:flex;flex-direction:column;font-size:13px;}

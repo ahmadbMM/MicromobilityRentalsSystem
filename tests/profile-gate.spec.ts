@@ -318,3 +318,20 @@ test.describe('with customer_set_birth_nat on the server', () => {
     expect(calls.slice(3).every((c) => c.name === 'customer_profile')).toBe(true);
   });
 });
+
+// The server asks too (20261009120000): customer_fix_fields names the due detail, the page asks only
+// it in the account's own wording, and the answer goes back through customer_fix_save.
+test('the server asks the nationality after one booking: the profile page, not the community one, saved as the server asked', async ({ page }) => {
+  await boot(page, [row(0, 'waiting')], { nationality: null, birth_date: null }, { 'rpc:customer_fix_fields': ['nationality'], 'rpc:customer_fix_save': [] });
+  const sent: string[] = [];
+  page.on('request', r => { if (/rpc\/customer_fix_save/.test(r.url())) sent.push(r.postData() || ''); });
+  const box = page.locator('#profile-gate .pg-box');
+  await expect(box).toBeVisible();
+  await expect(box).toContainText('One detail to finish your profile');
+  await expect(box).not.toContainText(/community/i);
+  await expect(page.locator('#pg-birth-y')).toHaveCount(0);
+  await page.selectOption('#pg-nat', 'Egypt');
+  await page.click('#pg-save');
+  await expect(box).toBeHidden();
+  expect(JSON.parse(sent[0]).p_values.nationality).toBe('Egypt');
+});
