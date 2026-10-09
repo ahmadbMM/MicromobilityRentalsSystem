@@ -69,6 +69,8 @@ test('a new request shows what the customer sent, and the account with that mobi
   await expect(c).toContainText('Full service');
   await expect(c).toContainText('Drop off');
   await expect(c).toContainText('17:00');
+  await expect(c).toContainText('+966 55•• •• 567'); // masked until a tap shows it (2026-10-10)
+  await c.locator('.pii-m').first().click();
   await expect(c).toContainText('+966551234567');
   await expect(c).toContainText('ALVAS DA54 AL');
   await expect(c).toContainText('New brake pads (SAR 60)');

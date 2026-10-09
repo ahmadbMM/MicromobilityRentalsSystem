@@ -134,7 +134,7 @@ test('the box can be searched, filtered, sorted and laid out', async ({ page }) 
   await expect(box.locator('.natnew-grp')).toHaveCount(3);
   await expect(box.locator('.natnew-grp-h').first()).toHaveText('Brazil 2');
   await box.getByRole('checkbox', { name: 'Phone' }).check();
-  await expect(box).toContainText('+966500000010');
+  await expect(box).toContainText('+966 50•• •• 010'); // masked: each row is a button, the number shows in the account (2026-10-10)
   // how many show
   await box.locator('#natnew-show').selectOption('12');
   await box.getByRole('checkbox', { name: 'Group by nationality' }).uncheck();

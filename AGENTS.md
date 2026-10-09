@@ -1073,3 +1073,31 @@ Migration `20261009225000_reminders_waitlist_offers.sql`; the page works without
 - **Before the migration**: the stub lists the three RPCs in `NOT_YET_IN_DB` and `waitlist_offers` in
   `TABLES_NOT_YET_IN_DB`. Settings shows only Automatic / Staff choose; reminders are marked on the device only.
   Specs: `tests/s1010-remind-*.spec.ts`.
+## Personal data hidden until shown (2026-10-10)
+
+PDPL Art. 19 (least privilege), from the staff research of 2026-10-09. Migration 20261009220000.
+- **A screen mask, not an access control.** Staff screens draw phone and WhatsApp numbers, emails, emergency contacts
+  and birth dates masked (`_piiMask`: `05•• ••• 567`, `h•••@example.com`, the birth year, a contact's initial). The
+  columns are still readable by any staff account through the API (staff_sync, the editor, the reports): no column
+  grant changed, deliberately (see "column grants break invoker", 2026-09-25).
+- `_pii(kind, value, customerId, bookingId)` draws the value shown, or a `.pii-m` button with an accessible name
+  ("Hidden phone number. Tap to show"); `_piiTxt` is the same as plain text for places a button cannot go (inside a
+  suggestion button or a link); `_piiLink` is a tel:/wa.me/mailto: value (hidden: the mask plus a link worded Call /
+  WhatsApp / Email). A tap (`_piiReveal`) shows every hidden field of that record (customer `c:<id>`, booking
+  `q:<id>`) for the page's life (`S._piiOpen`), swapped in place so focus stays, and records it once
+  (`_piiLog` -> `staff_pii_reveal`, deduped per record, way and fields in `S._piiLogged`).
+- Call / WhatsApp / email links carry `_piiAttrs(via, ...)`: they work without a tap and are recorded. Opening the
+  account editor shows everything and records an `edit`. A CSV whose header row names personal data (`_piiCols`,
+  read in `_downloadCsv`) and the printed account, session, roster and Sela reports record one `export`/`print` line
+  with the count (`_piiExport`), whatever the setting.
+- Off for everyone: Settings > Business > Personal data (`pii_mask` false; unset is on). Off for one account: the
+  Team cap "See personal data unhidden" (`can_see_pii_unmasked`, `staff_set_caps` takes it since this migration;
+  the client sends it only when on, so an older database never sees the name). Admins are masked too and tap like
+  everyone; nothing is recorded for what an unmasked account sees, only its exports.
+- Before the migration: `staff_pii_reveal` missing -> the look goes to the Action Log (`logAction`, kind `pii`).
+- History > Data access (`/history/data-access`, admins and the Owner role; money part, `_paDraw`): pii_reveals by
+  staffer, customer, way and dates, CSV; under it the quarterly access review (staff_team_list + staff_team_more:
+  role, sections, caps, last sign-in) with Mark as reviewed (`staff_access_reviewed` -> staff_options
+  `biz.access_review`, admin-only by the 20261009160000 policies). Due after 91 days.
+- The phone card of Bookings shows no number at all (Call / WhatsApp only), so there is nothing to mask there.
+  Vendor contacts (businesses) and staff accounts' own emails are not masked. `tests/s1010-pii-*.spec.ts`.

@@ -289,6 +289,7 @@ export const DYNAMIC_KEYS = [
   /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
   /^bdg?[A-Z0-9]\w*[DA]$/, // bdFirstLapD, bdgMarshalA, ...: a badge's how-to and about lines, read as t(BD_SYS[slug][2]+'D'|'A')
   /^\w+_(zero|one|two|few|many|other)$/, // mrRides_one, ...: a count's plural forms, read by _tn(base, n) through Intl.PluralRules
+  /^pii(Via|Fld)_\w+$/, // piiVia_reveal, piiFld_phone: the core's look log (_piiLog, _piiExport) names them by the way and the field
 ];
 /**
  * @param staffKeys the keys staffOnlyLangKeys gave the staff half
@@ -1272,7 +1273,9 @@ export function formatFieldNames(r, limit = 20) {
 // core 259.0 KB local. Limits: customer +2, staff +5, core +6 (rounded up). New staff code goes in a part.
 // With R7 merged (ride reminders, waitlist offers: the 'remind' part ~9 KB, the rider's /?claim= page ~1.5 KB on the
 // customer half) measured 225.8 / 588.2 / 260.8 KB local; the same margins give 228 / 594 / 267.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 228, staff: 594, core: 267 };
+// With R6 merged (personal data masked until shown: the mask and its look log in the core, ~2.6 KB, since every roster
+// row draws through them; History > Data access in the money part) measured 226.4 / 592.8 / 265.3; the same margins give 229 / 598 / 272.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 229, staff: 598, core: 272 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

@@ -45,6 +45,7 @@ test.describe('on a phone', () => {
     expect(actions!.y).toBeGreaterThan(main!.y + main!.height - 1);   // buttons under the details
     // the email and phone read in full — no clipping
     const contact = row(page).locator('.am-cust-contact');
+    await contact.locator('.pii-m').first().click(); // masked until a tap shows them (2026-10-10)
     await expect(contact).toContainText('sara.ali@gmail.com');
     expect(await contact.evaluate((e) => e.scrollWidth <= e.clientWidth + 1)).toBe(true);
     // all five buttons, each with its name on it
