@@ -4049,6 +4049,8 @@
   "em2Title": "Segundo contacto de emergencia",
   "emReqTitle": "Añade tu contacto de emergencia",
   "emReqSub": "Ahora pedimos a cada participante una persona a la que llamar si necesita ayuda en una salida o evento. Añádela una vez y podrás reservar.",
+  "igReqTitle": "Añade tu Instagram",
+  "igReqSub": "Pedimos a cada miembro de la comunidad su cuenta de Instagram. Añádela una vez y podrás reservar.",
   "errEmRequired": "Tu cuenta necesita un contacto de emergencia. Cámbialo en lugar de eliminarlo.",
   "em2Sub": "Otra persona a la que podamos llamar si no localizamos a tu primer contacto.",
   "em2Add": "Añadir un segundo contacto",
