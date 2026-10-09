@@ -1275,7 +1275,10 @@ export function formatFieldNames(r, limit = 20) {
 // customer half) measured 225.8 / 588.2 / 260.8 KB local; the same margins give 228 / 594 / 267.
 // With R6 merged (personal data masked until shown: the mask and its look log in the core, ~2.6 KB, since every roster
 // row draws through them; History > Data access in the money part) measured 226.4 / 592.8 / 265.3; the same margins give 229 / 598 / 272.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 229, staff: 598, core: 272 };
+// Staff 598 -> 602 (2026-10-10): Instagram followers on the reports (column, total, average, the builders' line) and
+// against the community's average on the accounts lists and the applications' cards, with the members' Instagram ask:
+// 596.3 KB here was 599.0 on the runner; +4 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 229, staff: 602, core: 272 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
