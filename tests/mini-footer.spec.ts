@@ -28,7 +28,7 @@ test('carries exactly the spec content, and nothing of the full footer', async (
   await expect(f).toContainText('+(966) 56 666 8818');
   await expect(f).toContainText('info@micromobility.sa');
   await expect(f).toContainText('Thu Al-Nurayn St, Al Sharafeyah, Jeddah 23218');
-  expect(plain(await f.innerText())).toContain('Sat–Thu 14:00–22:00 · Fri 17:00–21:00');
+  expect(plain(await f.innerText())).toContain('Sat–Thu 14:00–22:00 · Fri closed');
   // the three policy links were removed on request — the footer is contact + legal only
   await expect(f).not.toContainText('Help Center');
   await expect(f).not.toContainText('Privacy Policy');
