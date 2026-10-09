@@ -11,7 +11,7 @@ import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
 import { minify as terserMinify } from 'terser';
 import CleanCSS from 'clean-css';
 import {
-  splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, customerCss, splitSections,
+  splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, partLangKeys, customerCss, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
   checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
@@ -178,14 +178,25 @@ const allKeys = [...new Set(Object.values(LANG_ALL).flatMap((o) => Object.keys(o
 const staffKeys = staffOnlyLangKeys(allKeys, custHtml.slice(0, custLangSpan.start) + custHtml.slice(custLangSpan.end), split.staff);
 const langPart = (o, staff) => Object.fromEntries(Object.entries(o).filter(([k]) => staffKeys.has(k) === staff));
 custHtml = custHtml.slice(0, custLangSpan.start) + langText(langPart(LANG_ALL[INLINE_LANG], false)) + custHtml.slice(custLangSpan.end);
-const staffEn = langPart(LANG_ALL[INLINE_LANG], true);
+// Since 2026-10-09 the staff keys are cut once more, by the staff part that names them (partLangKeys in
+// scripts/split-staff.mjs): the desk's core keeps what it can ask for, and each part carries the rest in
+// its own file (English) and in lang/staff-<part>-<code>.json (the other languages, fetched with the part).
+const sections = splitSections(split.staff);
+const keyHome = partLangKeys(staffKeys, sections.core, sections.parts);
+const pick = (o, keys) => Object.fromEntries(Object.entries(o).filter(([k]) => keys.has(k)));
 // A function, not a replacement string: a string there reads "$&", "$'" or "$$" in a staff string as a
 // pattern, and would write that string into staff.js changed (2026-10-07).
-split.staff = split.staff.replace(/^(\/\/[^\n]*\n)/, (m, head) => `${head}Object.assign(LANG.en,${JSON.stringify(staffEn)}); // the staff screens' English (scripts/build-html.mjs)\n`);
-if (!split.staff.includes('Object.assign(LANG.en,')) throw new Error('build: the staff English strings were not written into staff.js');
+const withEn = (code, keys, what) => {
+  const out = code.replace(/^(\/\/[^\n]*\n)/, (m, head) => `${head}Object.assign(LANG.en,${JSON.stringify(pick(LANG_ALL[INLINE_LANG], keys))}); // ${what}'s English (scripts/build-html.mjs)\n`);
+  if (!out.includes('Object.assign(LANG.en,')) throw new Error(`build: the staff English strings were not written into ${what}`);
+  return out;
+};
+sections.core = withEn(sections.core, keyHome.core, 'the desk core');
+for (const n of Object.keys(sections.parts)) if (keyHome.parts[n].size) sections.parts[n] = withEn(sections.parts[n], keyHome.parts[n], `staff part ${n}`);
 const langDir = new URL('../lang/', import.meta.url);
 await mkdir(langDir, { recursive: true });
-const packHash = {}, staffPackHash = {};
+for (const f of await readdir(langDir)) if (/^staff-[a-z]+-[a-z]{2,3}\.json$/.test(f)) await rm(new URL(f, langDir)); // the parts' packs of the last build
+const packHash = {}, staffPackHash = {}, partPackHash = {};
 const writePack = async (name, obj) => {
   const json = JSON.stringify(obj);
   await writeFile(new URL(`${name}.json`, langDir), json);
@@ -193,8 +204,12 @@ const writePack = async (name, obj) => {
 };
 for (const code of packCodes) {
   packHash[code] = await writePack(code, langPart(LANG_ALL[code], false));
-  const st = langPart(LANG_ALL[code], true);
-  if (Object.keys(st).length) staffPackHash[code] = await writePack(`staff-${code}`, st); // staff-<code>: the middleware lets /lang/[a-z-]{2,8}.json through
+  const st = pick(LANG_ALL[code], keyHome.core);
+  if (Object.keys(st).length) staffPackHash[code] = await writePack(`staff-${code}`, st); // staff-<code>: the middleware lets /lang/[a-z-]{2,24}.json through
+  for (const n of Object.keys(sections.parts)) {
+    const pp = pick(LANG_ALL[code], keyHome.parts[n]);
+    if (Object.keys(pp).length) (partPackHash[n] ||= {})[code] = await writePack(`staff-${n}-${code}`, pp);
+  }
 }
 // Each pack is versioned by its own content, so a translation change busts exactly that
 // file. Three places need it: the loader, the <head> prefetch that starts before the
@@ -209,7 +224,7 @@ custHtml = custHtml.replace('<script>try{var _ql=', `<script>window.__LANG_V=${p
 if (!custHtml.includes('var STAFF_LANG_V={};')) throw new Error('build: the staff loader\'s STAFF_LANG_V placeholder is missing (scripts/split-staff.mjs)');
 custHtml = custHtml.replace('var STAFF_LANG_V={};', `var STAFF_LANG_V=${JSON.stringify(staffPackHash)};`);
 split.html = custHtml;
-console.log(`build: extracted ${packCodes.join(', ')} to lang/ (${packCodes.length} packs); ${staffKeys.size} of ${allKeys.length} keys are staff-only (staff.js + lang/staff-<code>.json)`);
+console.log(`build: extracted ${packCodes.join(', ')} to lang/ (${packCodes.length} packs); ${staffKeys.size} of ${allKeys.length} keys are staff-only, ${keyHome.core.size} of them in the desk core (staff.js + lang/staff-<code>.json), the rest with the parts that say them (lang/staff-<part>-<code>.json)`);
 // compress stays off (2026-10-01, measured): with it on, app.js and staff.js shrank by under 1% once
 // gzipped - the compressor's rewrites are mostly what gzip and brotli already fold away - so it buys
 // nothing for the risk of its transforms.
@@ -217,7 +232,6 @@ const TERSER_OPTS = { compress: false, mangle: { toplevel: false }, format: { co
 // The staff half in parts (splitSections in scripts/split-staff.mjs): the desk's core stays staff.js,
 // each section goes to staff-parts/<name>.js under its own hash, stamped into the core before the
 // core's own hash is taken.
-const sections = splitSections(split.staff);
 const staffMin = await terserMinify(sections.core, TERSER_OPTS);
 if (!staffMin.code) throw new Error('build: staff.js did not minify');
 // fonts.css is asked for with its own hash (see below, for index.html); the print windows that link
@@ -242,6 +256,8 @@ for (const [name, code] of Object.entries(sections.parts)) {
 }
 if (!staffMin.code.includes('var STAFF_PARTS_V={};')) throw new Error('build: the staff parts loader placeholder (STAFF_PARTS_V) is missing');
 staffMin.code = staffMin.code.replace('var STAFF_PARTS_V={};', `var STAFF_PARTS_V=${JSON.stringify(staffPartsV)};`);
+if (!staffMin.code.includes('var STAFF_PART_LANG_V={};')) throw new Error('build: the staff parts loader placeholder (STAFF_PART_LANG_V) is missing');
+staffMin.code = staffMin.code.replace('var STAFF_PART_LANG_V={};', `var STAFF_PART_LANG_V=${JSON.stringify(partPackHash)};`);
 // Everything a staff device runs, for the checks below that read the staff half's text.
 const staffAll = staffMin.code + '\n' + Object.values(staffParts).join('\n');
 const staffHash = createHash('sha256').update(staffMin.code).digest('hex').slice(0, 10);
@@ -316,6 +332,10 @@ console.log(`build: app.css ${appCss.styles.length} bytes (${appCssRes.dropped} 
 const beforeCss = out;
 out = out.replace(/app\.css\?v=[a-z0-9]+/g, `app.css?v=${appCssHash}`);
 if (out === beforeCss) throw new Error('build: the page links no app.css?v= to tag');
+// A staff device's <head> writes the whole styles.css instead of app.css (2026-10-09): the same tag the
+// staff loader asks for, so the loader finds that link and waits on it instead of adding a second one.
+if (!/\/styles\.css\?v=[a-z0-9]+" data-staff-css/.test(out)) throw new Error('build: the <head> staff stylesheet (styles.css?v= data-staff-css) was not found');
+out = out.replace(/\/styles\.css\?v=[a-z0-9]+/g, `/styles.css?v=${cssHash}`);
 // fonts.css the same way. Its ?v= was bumped by hand, and the print windows (receipt, day sheet,
 // billing report) asked for it with none: /fonts/ is cached as immutable for a year, so those
 // windows could keep an old copy that long. Every reference now carries the file's own hash.

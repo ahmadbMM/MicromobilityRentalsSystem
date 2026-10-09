@@ -26,7 +26,7 @@ test.describe('@customer:ticket the ticket code on a canvas', () => {
   // jsQR (the scanner's own fallback decoder), told not to try the inverted image: a code must read
   // dark on light as it is shown.
   async function decode(page: Page, dataUrl: string) {
-    await page.addScriptTag({ url: '/vendor/jsqr-1.4.0.js' });
+    await page.addScriptTag({ url: '/vendor/jsqr-1.4.0.min.js' });
     return page.evaluate(async (src) => {
       const img = new Image();
       img.src = src;

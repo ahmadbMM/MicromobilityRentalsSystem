@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-53a843d18e';
+const CACHE = 'mmcq-e02ef97ac1';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,13 +22,13 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=210d2f283f';
+const STAFF_JS = './staff.js?v=df70ce6e90';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=3adf455d85","./staff-parts/community.js?v=3097745802","./staff-parts/bikes.js?v=5b69a9256d","./staff-parts/cashier.js?v=d84d941a04","./staff-parts/catalog.js?v=2b34f62873","./staff-parts/inventory.js?v=8e72f71799","./staff-parts/website.js?v=c54f496a00","./staff-parts/history.js?v=2ec7172645","./staff-parts/workshop.js?v=97f0e15e86","./staff-parts/ambassadors.js?v=22d3cfd3c7","./staff-parts/messages.js?v=d78f848cde","./staff-parts/vendors.js?v=cec7399bbd","./staff-parts/sela.js?v=8e808aa969","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=8d92cdf6e1","./staff-parts/settings.js?v=b835c1a022","./staff-parts/fleet.js?v=a52bcb1834","./staff-parts/money.js?v=469a4a3611"];
-const APP_JS = './app.js?v=1c2094bc17';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=318f597b94","./staff-parts/community.js?v=fad09b502a","./staff-parts/bikes.js?v=575a608003","./staff-parts/cashier.js?v=6b6f115706","./staff-parts/catalog.js?v=89c734e769","./staff-parts/inventory.js?v=6107acafb8","./staff-parts/website.js?v=6c469c690f","./staff-parts/history.js?v=56a009def0","./staff-parts/workshop.js?v=ba11c89fd8","./staff-parts/ambassadors.js?v=1c5c3f315f","./staff-parts/messages.js?v=febcf6ace4","./staff-parts/vendors.js?v=cec7399bbd","./staff-parts/sela.js?v=aa33628f37","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=7784b173b6","./staff-parts/settings.js?v=4034bc8fbc","./staff-parts/fleet.js?v=6f867e766c","./staff-parts/money.js?v=af4aedf994"];
+const APP_JS = './app.js?v=f9f29b39c4';
 const APP_CSS = './app.css?v=1168e0b5df';
 const SHELL = [
   SHELL_KEY,
@@ -58,8 +58,16 @@ const SHELL = [
 // right. It used to be 'reload', which ignored the copy the page had just downloaded and fetched
 // index.html, styles.css and every image a second time on every first visit - about 690 KB - and
 // again after every deploy that changed this file (2026-09-27 review).
+// A file named by its own hash (?v=) is the same file whichever deploy names it (2026-10-09): one the last
+// version's cache already holds is copied over instead of downloaded again. A deploy that changed one part
+// of the staff half used to send every device the whole half, the stylesheet and app.js once more.
+function precache(c, u) {
+  const fresh = () => c.add(new Request(u, { cache: 'no-cache' }));
+  if (!/[?&]v=[a-f0-9]{10}\b/.test(u)) return fresh();
+  return caches.match(u).then((hit) => (hit && hit.ok ? c.put(u, hit) : fresh())).catch(fresh);
+}
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'no-cache' })))).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => precache(c, u)))).then(() => self.skipWaiting()));
 });
 
 // Named by version (vendor/, fonts/, lang/, a ?v= hash): whatever the HTTP cache holds is right.

@@ -44,7 +44,7 @@ export async function onRequest(context) {
     // phone-number rules the staff "Looks off" check reads are app assets. The rules file was
     // blocked with the configs, so production answered it 404 and every phone passed the check.
     (/\.json$/.test(path) && path !== '/manifest.json' && path !== '/assets/phone-rules.json' &&
-      !/^\/lang\/[a-z-]{2,8}\.json$/.test(path) && !/^\/cities\/[a-z]{2}\.json$/.test(path)) ||
+      !/^\/lang\/[a-z-]{2,24}\.json$/.test(path) && !/^\/cities\/[a-z]{2}\.json$/.test(path)) ||
     path === '/app.src' || /\/app\.src\.html$/.test(path) ||            // the readable app source
     path.startsWith('/tests/') ||
     path.startsWith('/visual/') ||                                     // the local screenshot harness (playwright.visual.config.ts)

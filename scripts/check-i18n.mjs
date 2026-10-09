@@ -16,13 +16,13 @@
 //     referenced when a t('key') call names it, when any string literal in the code equals it
 //     (the SECTION_KEY / NS_EV_NAME-style maps, {k:'tabQueue'}, are read through t(map[k])), or
 //     when it starts with a prefix the code builds keys from: t('rateTag'+k), t(`frame${f}`) -
-//     those prefixes are read off the t() calls themselves, plus DYNAMIC_KEYS below for the few
+//     those prefixes are read off the t() calls themselves, plus DYNAMIC_KEYS (scripts/split-staff.mjs) for the few
 //     built away from the call.
 //
 // Usage: node scripts/check-i18n.mjs   (exit 1 on any problem)
 import { readFileSync, existsSync } from 'node:fs';
 import * as acorn from 'acorn';
-import { resolveIncludes, mainScript, EMOJI_RE } from './split-staff.mjs';
+import { resolveIncludes, mainScript, EMOJI_RE, DYNAMIC_KEYS } from './split-staff.mjs';
 
 const SRC = new URL('../app.src.html', import.meta.url);
 const html = readFileSync(SRC, 'utf8');
@@ -153,12 +153,8 @@ try {
   process.exit(1);
 }
 
-/** Keys built away from the t() call (a variable or a map filled by code holds the name). Regexes on the key. */
-const DYNAMIC_KEYS = [
-  /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
-  /^bdg?[A-Z0-9]\w*[DA]$/, // bdFirstLapD, bdgMarshalA, ...: a badge's how-to and about lines, read as t(BD_SYS[slug][2]+'D'|'A')
-  /^\w+_(zero|one|two|few|many|other)$/, // mrRides_one, ...: a count's plural forms, read by _tn(base, n) through Intl.PluralRules
-];
+// DYNAMIC_KEYS (keys built away from the t() call) live in split-staff.mjs since 2026-10-09: the build keeps
+// every key they match in the desk's core, never in a lazily loaded staff part.
 
 const used = new Map(); // key -> number of t('key') calls
 const prefixes = new Map(); // prefix -> how it was built, for the report
@@ -279,7 +275,7 @@ const unused = enKeys.filter((k) => !referenced(k)).sort();
 if (unused.length) {
   const rows = [];
   for (let i = 0; i < unused.length; i += 6) rows.push('  ' + unused.slice(i, i + 6).join(', '));
-  console.warn(`check-i18n: WARNING - ${unused.length} en key(s) are defined but nothing in the code references them: no t('key'), no string literal equal to the key, and no dynamic prefix (${prefixList.join(', ')}). Prune them (from en, ar and every i18n/*.json) when sure, or add the prefix to DYNAMIC_KEYS in scripts/check-i18n.mjs if the code builds them:\n${rows.join('\n')}`);
+  console.warn(`check-i18n: WARNING - ${unused.length} en key(s) are defined but nothing in the code references them: no t('key'), no string literal equal to the key, and no dynamic prefix (${prefixList.join(', ')}). Prune them (from en, ar and every i18n/*.json) when sure, or add the prefix to DYNAMIC_KEYS in scripts/split-staff.mjs if the code builds them:\n${rows.join('\n')}`);
 }
 
 if (failed) process.exit(1);
