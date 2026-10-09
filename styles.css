@@ -6582,6 +6582,8 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
 .ca-ap-tags .am-pick:disabled{cursor:default}
 .ca-ap-none{font-size:12.5px;color:var(--muted);line-height:1.5}
 .ca-ap-rides{display:flex;flex-direction:column;gap:6px}
+.ca-ap-tys{display:flex;flex-wrap:wrap;gap:6px}
+.ca-ap-tys .toggle-btn{flex:1 1 90px;min-width:0}
 .ca-ap-ride{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%;text-align:start;padding:10px 12px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text);font:inherit;font-size:13px;cursor:pointer}
 .ca-ap-ride b{font-weight:800}
 .ca-ap-ride .ca-ap-rt{color:var(--muted);font-weight:600}

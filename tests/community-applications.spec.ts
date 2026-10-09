@@ -561,6 +561,12 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   await expect(ride(SAT2)).toHaveAttribute('aria-checked', 'true');
   await expect(dlg.locator('.ca-ap-go')).toBeDisabled(); // the group comes next (2026-10-02)
   await dlg.locator('.rg-field [data-rg="beg"]').click();
+  // and the bike to put them on (the owner, 2026-10-09): the ride's types, Road Carbon not on a Saturday ride, none picked
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled();
+  expect(await dlg.locator('.ca-ap-tys [data-ca-ty]').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-ca-ty')))).toEqual(['Any', 'Road', 'Hybrid', 'Mountain', 'Kids', 'Own']);
+  await expect(dlg.locator('.ca-ap-tys [aria-pressed="true"]')).toHaveCount(0);
+  await dlg.locator('.ca-ap-tys [data-ca-ty="Hybrid"]').click();
+  await expect(dlg.locator('.ca-ap-tys [data-ca-ty="Hybrid"]')).toHaveAttribute('aria-pressed', 'true');
   await expect(dlg.locator('.ca-ap-go')).toBeEnabled();
   await dlg.locator('.ca-ap-go').click();
 
@@ -573,7 +579,7 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
   await expect.poll(() => tagRows.length).toBe(1);
   expect(tagRows[0]).toMatchObject({ customer_id: 'ca01', tag_id: 'tag_vip' });
   await expect.poll(() => bookings.length).toBe(1);
-  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', status: 'waiting', approval: 'approved' });
+  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'ca01', status: 'waiting', approval: 'approved', type_preference: 'Hybrid' });
   expect(await page.evaluate(`_hasTagNow('ca01','tag_saturday')`)).toBe(false);
 
   // the invitation: the ride's title, day, times and meeting point, and nothing about the account
@@ -731,6 +737,7 @@ test('before the database has invited_session, the list loads and an invitation 
   await row(page, 'a2').locator('.ca-invite').click();
   await page.locator(`#confirm-modal .ca-ap-rides [data-ca-ride="${SAT}"]`).click();
   await page.locator('#confirm-modal .rg-field [data-rg="beg"]').click();
+  await page.locator('#confirm-modal .ca-ap-tys [data-ca-ty="Road"]').click();
   await page.locator('#confirm-modal .ca-ap-go').click();
   await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
   await expect(page.locator('#err-bar-el')).toHaveCount(0); // a column still to come is not an error for staff

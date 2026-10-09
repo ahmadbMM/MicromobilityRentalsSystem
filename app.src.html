@@ -18498,6 +18498,11 @@ function _caApTag(tid){
 }
 function _caApRide(sid){if(!S._caAp)return;S._caAp.ride=sid||'';_caApRender();}
 function _caApRg(g){if(!S._caAp)return;S._caAp.rg=g;_caApRender();}
+// An invitation asks staff the bike to put the rider on (the owner, 2026-10-09: "ask the staff for
+// what type of bike to assign to him"): the types the picked ride offers, Own only where it takes
+// owners, Road Carbon only where it has it; none on a ride without bikes.
+function _caApTypes(sess){return sess&&_needsBike(sess)?bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)):[];}
+function _caApTy(ty){if(!S._caAp)return;S._caAp.ty=ty;_caApRender();}
 function _caApSet(k,v){if(S._caAp)S._caAp[k]=v;}
 function _caApClose(){S._caAp=null;closeConfirm();}
 function _caApRender(){
@@ -18530,13 +18535,19 @@ function _caApRender(){
           :`<div class="ca-ap-none">${t('caRideNoOpen')}</div>`}</div>`;
     const _rs=st.ride&&rides.find(s=>s.id===st.ride);
     if(_rs&&_hasRideGroups(_rs))rideSec+=_rgField(st.rg,'_caApRg',_rs);
+    if(inv){
+      const tys=_caApTypes(_rs);
+      if(st.ty&&!tys.includes(st.ty))st.ty=''; // a ride switched to one without that type asks again
+      if(tys.length)rideSec+=`<div class="form-group ca-ap-ty"><label>${t('bikeTypeLabel')} *</label><div class="ca-ap-tys">${tys.map(ty=>{const on=st.ty===ty;
+        return`<button type="button" class="toggle-btn${on?' active':''}" aria-pressed="${on?'true':'false'}" data-ca-ty="${esc(ty)}" data-on-click="${_on("_caApTy",ty)}">${typeLabel(ty)}</button>`;}).join('')}</div></div>`;
+    }
   }
   const comm=st.tags.includes(TAG_COMMUNITY)||_caTagHeld(cid,TAG_COMMUNITY); // the body says whether the tag comes with it
   const body=rej?t('caRejectBody')
     :inv?(acct?t('caInviteBodyExisting').replace('{0}',acct.name||acct.email||''):t('caInviteBody'))
     :acct?t(comm?'caApproveBodyExisting':'caApproveBodyExistingNoComm').replace('{0}',acct.name||acct.email||''):t(comm?'caApproveBody':'caApproveBodyNoComm');
   const _rgRide=st.ride&&allSessions().find(s=>s.id===st.ride);
-  const wait=(inv&&!st.ride)||(!rej&&!!_rgRide&&_hasRideGroups(_rgRide)&&!_rgOk(st.rg)); // Invite waits for a ride; a Saturday ride for its group
+  const wait=(inv&&(!st.ride||(_caApTypes(_rgRide).length>0&&!st.ty)))||(!rej&&!!_rgRide&&_hasRideGroups(_rgRide)&&!_rgOk(st.rg)); // Invite waits for a ride and its bike type; a Saturday ride for its group
   m.style.display='block';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_backdropOnly",_EV,_EL,"_caApClose")}">
     <div class="confirm-box ca-ap-box" role="dialog" aria-modal="true" aria-labelledby="ca-ap-title" data-ca-kind="${rej?'reject':inv?'invite':'approve'}">
@@ -18559,6 +18570,9 @@ async function _caApGo(){
   const st=S._caAp,a=st&&_caFind(st.id);if(!a||a.status!=='pending'||S._caWorking)return;
   const pickTags=st.tags.slice(),rideId=st.ride,rg=st.rg,dropComm=st.dropComm!==false,inv=st.kind==='invite';
   if(inv&&!_caRides().some(s=>s.id===rideId))return; // an invitation is to a ride: the button waits for one
+  const ty=inv?(st.ty||null):null;
+  const tys=inv?_caApTypes(_sessGet(rideId)):[];
+  if(tys.length&&!tys.includes(ty))return; // and for the bike staff put them on
   if(st.kind==='reject'){
     const acct=_caAcct(a); // found before the decision, the way the dialog found it
     _caApClose();
@@ -18602,7 +18616,7 @@ async function _caApGo(){
   // The tags and the ride come after the approval, on the account it landed on. Neither may keep
   // the welcome message from showing: a new account's password is handed back only this once.
   let booked=null;
-  try{booked=await _caApExtras(a,d,pickTags.filter(tid=>tid!==TAG_BLACKLIST),rideId,comm,strip,rg);}catch(e){toast((e&&e.message)||t('errServerError'),'error');booked=rideId?'failed':null;}
+  try{booked=await _caApExtras(a,d,pickTags.filter(tid=>tid!==TAG_BLACKLIST),rideId,comm,strip,rg,ty);}catch(e){toast((e&&e.message)||t('errServerError'),'error');booked=rideId?'failed':null;}
   // No place saved on the ride (2026-10-05): the message said one was all the same. An invitation is
   // to a ride, so without its booking there is no invitation to send, and the application stops
   // naming the ride (it stays approved, as the server has it); an approval goes out without the
@@ -18642,7 +18656,7 @@ async function _caGiveTags(cid,name,pickTags,dropComm){
 }
 // Answers what came of the ride (2026-10-05): 'booked', 'dup' (on it already, so the place stands),
 // 'failed' (no place saved: the message must not say there is one), or null with no ride picked.
-async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null){
+async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null,ty=null){
   const cid=d.customer_id;if(!cid)return rideId?'failed':null;
   // The approval gave the Community tag; this device learns it now rather than at the next sync.
   // (An old grant on file stays as it is: the server adds the tag with on conflict do nothing.)
@@ -18665,11 +18679,13 @@ async function _caApExtras(a,d,pickTags,rideId,comm=true,strip=false,rg=null){
   // application said (a new account is made from exactly that).
   const c=(S.customers||[]).find(x=>x.id===cid)||{};
   const who={id:cid,name:c.name||d.name||a.name,email:c.email||d.email||a.email,phone:c.phone||d.phone||a.phone,
-    height:c.height||a.height||null,type_preference:c.type_preference||a.bike_type||'Any'};
+    height:c.height||a.height||null,type_preference:ty||c.type_preference||a.bike_type||'Any'};
   // A bike owner rides their own bike (2026-10-05): the account's Bike owner (type 'Own', which the
   // form's own-bike answer sets) or that answer itself books Own where the ride takes one, as the
   // Add rider dialog's own-bike box does. Left out, _commBook booked them as Any, a rental.
-  const own=(who.type_preference==='Own'||a.own_bike===true)&&_needsBike(sess)&&_ownOffered(sess);
+  // An invitation books the type staff picked in the dialog (ty), Own included; only an approval
+  // falls back to the account's own answer.
+  const own=(ty?ty==='Own':(who.type_preference==='Own'||a.own_bike===true))&&_needsBike(sess)&&_ownOffered(sess);
   const b=await _commBook(sess,[who],{rideGroup:rg,own});
   if(b.dup){toast(t('commAddDup'),'warning');return'dup';}
   if(!b.entries.length||_writeErr(b.res,'add rider'))return'failed';

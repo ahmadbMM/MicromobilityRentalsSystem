@@ -646,6 +646,10 @@ offer in the rider's language (`vndRiderOffer`).
   `{"url":"link"}`, and must be an https address (`_caWaOf`). No row or an empty one: the box is not offered and the
   message has no group line. Never write the link in the code, a spec or a commit (the repository is public); specs stub
   an invented one.
+- **Invite asks the bike type (2026-10-09).** Once a ride with bikes is picked, the Invite dialog shows that ride's
+  types (`_caApTypes`: `bikeTypeOpts` with Own / Road Carbon as the ride offers them, Any included as a staff choice)
+  and Invite waits for one (`S._caAp.ty`). The booking is made on that type (`_caApExtras(..., ty)`; Own books an own
+  bike); a plain Approve onto a ride still books the account's own answer.
 - **Revoke invitation** (`_caRevoke`, the Invited list only): the booking is cancelled through the desk's own
   `_staffCancelNow(id, {cancel_reason:'invite_revoked'}, {noUndo:true})` (numbers close up, the waitlist moves up; no
   booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same
