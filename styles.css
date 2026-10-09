@@ -8248,6 +8248,45 @@ body:not(.view-staff) .fx-em .form-row{grid-template-columns:1fr;gap:0;}
 :is(#tab-settings,#tab-community) .tpl-own{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;color:var(--green);background:rgba(var(--green-rgb),.1);}
 :is(#tab-settings,#tab-community) .tpl-edit{font-size:13px;color:var(--green);}
 .rm-langs{display:flex;gap:8px;margin:0 0 10px;}
+
+/* ── Settings > Business / Pricing, saved views, KPI targets, Team accounts (2026-10-09) ── */
+#tab-settings .set-views{margin:4px 0 14px;flex-wrap:wrap;}
+#tab-settings .biz-pair{border:1px solid var(--border);border-radius:6px;padding:10px 12px;margin:0;display:flex;flex-direction:column;gap:8px;min-width:0;}
+#tab-settings .biz-pair legend{font-size:12px;font-weight:700;color:var(--muted);padding:0 4px;}
+#tab-settings .biz-checks{border:0;padding:0;margin:0;min-width:0;}
+#tab-settings .biz-checks legend{font-size:12px;font-weight:700;color:var(--muted);padding:0;margin-bottom:2px;}
+#tab-settings .biz-kpi{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+#tab-settings .biz-kpi .form-group{margin:0;}
+#tab-settings textarea{width:100%;min-height:64px;resize:vertical;}
+#tab-settings .ret-prev{font-size:13px;color:var(--text);background:rgba(var(--green-rgb),.08);border-radius:6px;padding:8px 10px;}
+#tab-settings .tm-op-acts{display:flex;gap:8px;flex-wrap:wrap;}
+#tab-settings .tm-op-acts button,#tab-settings .set-card>button{min-height:44px;}
+#tab-settings .pr-table input{width:100%;min-width:84px;max-width:140px;}
+#tab-settings .pr-table th[scope="row"]{white-space:nowrap;text-align:start;}
+#tab-settings .tm-note{margin:0 0 12px;}
+.sv-bar{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;margin:8px 0 4px;}
+.sv-bar .sv-lbl{display:flex;flex-direction:column;gap:2px;min-width:0;margin:0;}
+.sv-bar .sv-pick{max-width:260px;min-height:38px;}
+.sv-bar button{min-height:38px;}
+.sv-box{max-width:420px;width:calc(100% - 32px);}
+.sv-box .modal-footer,.tm-pwd-box .modal-footer{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+.kpi-card{margin:0 0 16px;}
+.kpi-card .kpi-rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 18px;}
+.kpi-card .kpi-top{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted);margin-bottom:6px;}
+.kpi-card .kpi-top b{color:var(--text);font-variant-numeric:tabular-nums;}
+.kpi-card .kpi-bar{height:8px;border-radius:999px;background:var(--s3);overflow:hidden;}
+.kpi-card .kpi-bar span{display:block;height:100%;width:var(--kpi-w,0%);background:var(--green);border-radius:inherit;}
+#tab-team .tm-meta{align-items:center;flex-wrap:wrap;gap:8px;font-size:13px;}
+#tab-team .tm-off{color:var(--red);background:rgba(var(--red-rgb),.1);}
+#tab-team .tm-preset{max-width:220px;min-height:38px;margin-inline-start:auto;}
+#tab-team .tm-save{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+#tab-team .tm-invite .tm-add{flex-wrap:wrap;}
+#tab-team .tm-invite .tm-add input{flex:1 1 200px;min-width:0;}
+#tab-team .tm-invite .tm-add select{flex:0 1 180px;min-height:38px;}
+.tm-pwd-box{max-width:420px;width:calc(100% - 32px);}
+.tm-pwd-box .tm-pwd{font-family:var(--font-mono);font-size:22px;font-weight:700;letter-spacing:.06em;text-align:center;padding:14px;border:1px dashed var(--border);border-radius:6px;margin:12px 0;user-select:all;}
+#tab-messages .sm-assign{display:inline-flex;align-items:center;gap:6px;margin:0;margin-inline-start:auto;}
+#tab-messages .sm-assign select{min-height:38px;max-width:200px;}
 .rm-langs .toggle-btn{flex:1;}
 .tpl-fills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px;}
 .tpl-fill{border:1px solid var(--border);background:var(--s3);color:var(--text);border-radius:6px;padding:3px 8px;font:inherit;font-size:12px;font-family:ui-monospace,Menlo,monospace;cursor:pointer;}

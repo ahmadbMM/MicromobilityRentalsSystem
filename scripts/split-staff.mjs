@@ -56,6 +56,7 @@ export const STAFF_ENTRY = [
   '_idleStaff', // the idle clock (2026-10-04): started by the operator gate's check, which showView runs
   'lockStaff', // the top bar's lock (drawn by customer-half code): its sign-out settles the outboxes and asks first
   '_vendorLatePoll', // the bell's late cancels by venues (2026-10-04): the vendor poll and the bell's opening fetch them
+  '_bizFromOpts', // the business settings (2026-10-09): applied when the staff lists arrive, which customer-half code fetches
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -1160,7 +1161,12 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 218 -> 219, staff 478 -> 480 (2026-10-08): the three T100 race badges (T100 / T50 / T25, the owner: "do
 // badges for completing the t100 races that will take place in jeddah"), their drawings and 9 strings in each
 // language. main was already at 216.8 / 477.2 on the runner; here 215.9 / 475.3 local.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 219, staff: 480, core: 254 };
+// Customer 219 -> 221, staff 480 -> 498, core 254 -> 262 (2026-10-09, branch s1009-settings): Settings > Business and
+// > Pricing (the hard-coded values and fares an admin now changes, with the riders' public copy and fares read at boot),
+// saved views on six lists, Team accounts (invite, disable, temporary password, presets, caps), approvals, retention
+// and the KPI card, 171 strings in each language (the English sit in the core). Here: customer 218.2, staff 493.1,
+// core 258.8 local (main was 216.3 / ~477 / 251.2).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 221, staff: 498, core: 262 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

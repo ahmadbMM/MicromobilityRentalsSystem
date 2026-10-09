@@ -34,13 +34,14 @@ test.describe('roles', () => {
     expect(r.mechanic).toEqual({ role: 'mechanic', admin: false, tabs: ['inventory', 'workshop'] });
     expect(r.cashier).toEqual({ role: 'cashier', admin: false, tabs: ['cashier', 'inventory'] });
     expect(r.owner.admin).toBe(false);
-    expect(r.owner.tabs).toEqual(['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'analytics', 'history']);
+    // Messages, Vendors, the website and Team too since 2026-10-09 (read-only: an owner's edit list is empty)
+    expect(r.owner.tabs).toEqual(['queue', 'dashboard', 'cashier', 'inventory', 'workshop', 'customers', 'community', 'vendors', 'website', 'messages', 'analytics', 'history', 'team']);
     expect(r.bogus.role).toBe('admin'); // setStaffRole keeps the larger default for a name it does not know; the row's role is normalised on read
     expect(await page.evaluate(`_roleNorm('bogus','frontdesk')`)).toBe('frontdesk');
     expect(await page.evaluate(`_roleNorm('owner','frontdesk')`)).toBe('owner');
   });
 
-  test('an owner opens Analytics and History and is bounced off Team; the sections render', async ({ page }) => {
+  test('an owner opens Analytics, History and Team; the sections render', async ({ page }) => {
     await boot(page);
     await page.evaluate(`setStaffRole('owner')`);
     await page.evaluate(`setStaffTab('analytics')`);
@@ -49,13 +50,12 @@ test.describe('roles', () => {
     await page.evaluate(`setStaffTab('history')`);
     expect(await page.evaluate(`S.staffTab`)).toBe('history');
     await page.evaluate(`setStaffTab('team')`);
-    expect(await page.evaluate(`S.staffTab`)).not.toBe('team');
+    expect(await page.evaluate(`S.staffTab`)).toBe('team'); // the owner reads Team since 2026-10-09
     // the rail shows the owner's sections only
-    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="team"]')).toBeHidden();
-    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="website"]')).toBeHidden();
+    await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="ambassadors"]')).toBeHidden();
   });
 
-  test('the Team page offers the six roles, shows a role its own sections, and an owner starts read-only', async ({ page }) => {
+  test('the Team page offers the seven roles, shows a role its own sections, and an owner starts read-only', async ({ page }) => {
     await boot(page, {
       'rpc:staff_team_list': [
         { user_id: 'u-me', email: 'me@x.sa', role: 'admin', modules_view: null, modules_edit: null, is_me: true },
@@ -66,13 +66,13 @@ test.describe('roles', () => {
     await page.evaluate(`setStaffTab('team')`);
     const acct = page.locator('.tm-acct[data-acct="u-mech"]');
     await expect(acct).toBeVisible();
-    await expect(acct.locator('select.tm-role option')).toHaveCount(6);
-    await expect(acct.locator('select.tm-role option').nth(5)).toHaveText('Owner (read-only)');
+    await expect(acct.locator('select.tm-role option')).toHaveCount(7); // Manager since 2026-10-09
+    await expect(acct.locator('select.tm-role option').nth(6)).toHaveText('Owner (read-only)');
     await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(2); // inventory, workshop
     await expect(acct.locator('.tm-chip[data-sec="view:inventory"]')).toBeVisible();
     // owner: every section on view, none on edit
     await page.evaluate(`_tmRole('u-mech','owner')`);
-    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(9); // Customers is a section of its own since 2026-10-07
+    await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(13); // Customers since 2026-10-07; Messages, Vendors, website, Team since 2026-10-09
     await expect(acct.locator('.tm-chip[data-sec^="edit:"].active')).toHaveCount(0);
     const draft = await page.evaluate(`_tm().edit['u-mech']`) as { role: string; edit: string[] | null };
     expect(draft.role).toBe('owner');
