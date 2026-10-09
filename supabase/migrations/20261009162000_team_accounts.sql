@@ -64,6 +64,7 @@ as $fn$
   select exists(
     select 1 from staff s
      where s.user_id = auth.uid() and s.disabled_at is null
+       and not (p_edit and s.role = 'owner')  -- the Owner role only looks
        and (s.role = 'admin'
             or (case when p_edit then s.modules_edit else s.modules_view end) is null
             or p_mod = any(case when p_edit then s.modules_edit else s.modules_view end)))
