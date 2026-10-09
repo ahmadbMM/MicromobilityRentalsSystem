@@ -30,6 +30,7 @@ test('refund restocks the summed quantity per item in one write', async ({ page 
       return q;
     };
     confirmDialog=(o)=>o.onConfirm&&o.onConfirm(); // auto-confirm
+    _askMoneyReason=async()=>({v:'mistake',txt:'Rung up by mistake'}); // the reason asked since 2026-10-09
     _ctRefundReceipt('r1');
   })()`);
   await expect.poll(() => page.evaluate(`window.__writes.length`)).toBeGreaterThan(0);

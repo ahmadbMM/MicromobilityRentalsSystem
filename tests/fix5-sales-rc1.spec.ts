@@ -25,7 +25,7 @@ async function boot(page: Page, extra: Fixtures = {}, pin = false) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.inventory||[]).length>0');
-  await page.evaluate(`confirmDialog=(o)=>o.onConfirm&&o.onConfirm();S._opPins=[{name:'Spec Staff',has_pin:${pin}}];S._opPinsAt=Date.now();`);
+  await page.evaluate(`confirmDialog=(o)=>o.onConfirm&&o.onConfirm();_askMoneyReason=async()=>({v:'mistake',txt:'Rung up by mistake'});S._opPins=[{name:'Spec Staff',has_pin:${pin}}];S._opPinsAt=Date.now();`);
 }
 /** Writes to a table: method, decoded address, body. */
 function writes(page: Page, table: string) {

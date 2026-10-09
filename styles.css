@@ -8939,3 +8939,71 @@ body.view-staff .flx-up{color:var(--green);font-weight:700;}
 body.view-staff .flx-down{color:var(--red);font-weight:700;}
 body.view-staff .an-ws-card{margin-bottom:16px;}
 body.view-staff .ws-rep-btn{min-height:36px;}
+
+/* ── Money controls (2026-10-09): the Changes panel, the reason and payment questions, the till, the
+   audit search, the exceptions and Team reports. Dialogs are drawn under #mny-modal (made on demand,
+   above the record dialogs they open from); History's views under #mny-host; Analytics > Team under
+   #an-team-host. Tokens only. */
+body.view-staff .mny-aubtn{display:inline-flex;align-items:center;gap:6px;min-height:36px;}
+body.view-staff .mny-aurow{margin:6px 0 10px;}
+#mny-modal .mny-bd{z-index:400;}
+#mny-modal .mny-box{width:min(480px,100%);max-height:88vh;display:flex;flex-direction:column;padding:0;overflow:hidden;}
+#mny-modal .mny-box.mny-wide{width:min(640px,100%);}
+#mny-modal .mny-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 10px;border-bottom:1px solid var(--border);}
+#mny-modal .mny-title{margin:0;font-size:var(--fs-md);}
+#mny-modal .mny-x{min-width:44px;min-height:44px;background:transparent none;border:0;color:var(--muted);font-size:24px;cursor:pointer;border-radius:var(--r-md);}
+#mny-modal .mny-x:focus-visible,#mny-modal .mny-chip:focus-visible,#mny-modal .mny-pmb:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+#mny-modal .mny-body{padding:14px 18px;overflow:auto;flex:1;}
+#mny-modal .mny-foot{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;padding:12px 18px;border-top:1px solid var(--border);}
+#mny-modal .mny-foot button{min-height:44px;}
+#mny-modal .mny-sub{font-size:var(--fs-sm);color:var(--muted);margin-bottom:12px;line-height:1.5;}
+#mny-modal .mny-lbl,#mny-host .mny-lbl{display:block;font-size:var(--fs-xs);font-weight:700;color:var(--muted);margin:10px 0 6px;}
+#mny-modal .mny-in{width:100%;min-height:44px;}
+#mny-modal .mny-chips{display:flex;flex-wrap:wrap;gap:8px;}
+#mny-modal .mny-chip{min-height:44px;padding:8px 14px;border:1px solid var(--border);border-radius:var(--r-pill);background:var(--s1);color:var(--text);font-weight:600;cursor:pointer;}
+#mny-modal .mny-chip.on{border-color:var(--green);background:var(--acsoft);color:var(--green);}
+#mny-modal .mny-go[disabled]{opacity:.5;cursor:not-allowed;}
+#mny-modal .mny-pm{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+#mny-modal .mny-pmb{min-height:64px;border:1px solid var(--border);border-radius:var(--r-lg);background:var(--s1);color:var(--text);font-size:var(--fs-md);font-weight:700;cursor:pointer;}
+#mny-modal .mny-pmb:hover{border-color:var(--green);}
+:is(#mny-modal,#mny-host) .mny-au{list-style:none;margin:0;padding:0;}
+:is(#mny-modal,#mny-host) .mny-au-row{padding:10px 0;border-bottom:1px solid var(--border);}
+:is(#mny-modal,#mny-host) .mny-au-meta{font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px;}
+:is(#mny-modal,#mny-host) .mny-au-who{font-weight:700;color:var(--text);}
+:is(#mny-modal,#mny-host) .mny-au-lines{margin:0;padding-inline-start:18px;font-size:var(--fs-sm);line-height:1.6;}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-empty{padding:16px 0;color:var(--muted);font-size:var(--fs-sm);}
+:is(#mny-modal,#mny-host) .mny-more{text-align:center;padding:12px 0;}
+:is(#mny-modal,#mny-host) .mny-link{background:transparent none;border:0;padding:0 2px;color:var(--green);font:inherit;text-decoration:underline;cursor:pointer;min-height:24px;text-align:start;}
+#mny-modal .mny-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0 0 10px;font-size:var(--fs-sm);}
+#mny-modal .mny-dl dt{color:var(--muted);}
+#mny-modal .mny-dl dd{margin:0;text-align:end;font-weight:700;}
+#mny-modal .mny-counts{margin:0 0 8px;padding-inline-start:18px;font-size:var(--fs-xs);line-height:1.7;}
+:is(#mny-modal,#mny-host) .mny-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-over{color:var(--orange);font-weight:700;}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-short{color:var(--red);font-weight:700;}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-exact{color:var(--green);font-weight:700;}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-mut{color:var(--muted);font-size:var(--fs-xs);}
+:is(#mny-modal,#mny-host,#an-team-host) .mny-note{color:var(--muted);font-size:var(--fs-xs);}
+:is(#mny-host,#an-team-host) .mny-wrap{display:flex;flex-direction:column;gap:12px;}
+:is(#mny-host,#an-team-host) .mny-h{display:flex;flex-direction:column;gap:2px;}
+:is(#mny-host,#an-team-host) .mny-h3{margin:0;font-size:var(--fs-lg);}
+:is(#mny-host,#an-team-host) .mny-h4{margin:8px 0 4px;font-size:var(--fs-base);}
+:is(#mny-host,#an-team-host) .mny-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;}
+:is(#mny-host,#an-team-host,#mny-modal) .mny-fld{display:flex;flex-direction:column;gap:4px;font-size:var(--fs-xs);font-weight:700;color:var(--muted);}
+:is(#mny-host,#an-team-host) .mny-fld .filter-select{min-height:44px;}
+:is(#mny-host,#an-team-host) .mny-filters button{min-height:44px;}
+#mny-host .mny-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;}
+#mny-host .mny-tile{border:1px solid var(--border);border-radius:var(--r-lg);padding:10px 12px;background:var(--s1);}
+#mny-host .mny-tile-v{font-size:var(--fs-lg);font-weight:800;}
+#mny-host .mny-tile-l{font-size:var(--fs-xs);color:var(--muted);font-weight:700;}
+#mny-host .mny-tile-s{font-size:var(--fs-sm);font-weight:700;margin-top:2px;}
+:is(#mny-host,#an-team-host) .mny-tw{overflow-x:auto;}
+:is(#mny-host,#an-team-host) .mny-t{width:100%;border-collapse:collapse;font-size:var(--fs-sm);}
+:is(#mny-host,#an-team-host) .mny-t th{text-align:start;font-size:var(--fs-xs);color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap;}
+:is(#mny-host,#an-team-host) .mny-t td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top;}
+:is(#tab-history,#tab-customers) .lg-open{background:transparent none;border:0;padding:0;color:var(--text);text-align:start;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--border);min-height:24px;}
+:is(#tab-history,#tab-customers) .lg-open:hover{color:var(--green);}
+:is(#tab-history,#tab-customers) .lg-amt{font-size:12px;font-weight:700;white-space:nowrap;}
+:is(#tab-history,#tab-customers) .lg-acct{color:var(--muted);font-weight:600;}
+:is(#tab-history,#tab-customers) .lg-more{text-align:center;padding:12px 0;}
+@media (max-width:560px){:is(#mny-modal,#mny-host) .mny-grid2{grid-template-columns:1fr;}}

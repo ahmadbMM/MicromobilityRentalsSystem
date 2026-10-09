@@ -37,7 +37,13 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   // The scheduled close-out made by hand and the employee-list import (20261009181000/182000): the page reads as
   // before without them; tests/s1009-analytics-*.spec.ts stub them by name. (staff_monthly_totals is not here: Analytics
   // asks for it on every paint, and a stub's [] is a database with no months yet.)
-  'report_snapshot_make', 'staff_roster_import']);
+  'report_snapshot_make', 'staff_roster_import',
+  // Money controls (20261009150000): account names for the logs, audit and Team report; tests/s1009-money-*.spec.ts stub it.
+  'staff_people']);
+/** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
+ *  numbers). Every request to one answers as a database without it does (PGRST205), unless the spec
+ *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
+const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers']);
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
@@ -184,6 +190,12 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
 
     const m = url.pathname.match(/\/rest\/v1\/([^/?]+)/);
     const table = m ? m[1] : null;
+    if (table && TABLES_NOT_YET_IN_DB.has(table) && !(table in fixtures)) {
+      return route.fulfill({
+        status: 404, headers: { ...cors(), 'content-type': 'application/json' },
+        body: JSON.stringify({ code: 'PGRST205', message: `Could not find the table 'public.${table}' in the schema cache`, details: null, hint: null }),
+      });
+    }
 
     if (method === 'GET' || method === 'HEAD') {
       const rows0 = ((table && fixtures[table]) || []) as unknown[];

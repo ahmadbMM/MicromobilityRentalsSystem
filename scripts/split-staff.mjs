@@ -390,7 +390,7 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
 export const STAFF_PARTS = {
   analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow'], bikes: ['renderBikes'], cashier: ['renderCashier'],
   catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
-  workshop: ['renderWorkshop'], logs: ['renderLogs'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
+  workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
   // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
@@ -398,6 +398,9 @@ export const STAFF_PARTS = {
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
   // 2026-10-09: the fleet's condition (the check after a return, incidents, the maintenance log and its report)
   fleet: ['_bpFleetFill', '_fleetAfterReturn', '_bkCheckClear', '_fleetReport', '_retPhotoPick'],
+  // 2026-10-09: the audit trail, void/refund reasons, the till, the exceptions and Team reports
+  // (with the Action Log, which shares the account names and the record links with them)
+  money: ['renderMoneyView', 'openAuditPanel', 'recordDrawerCount', 'renderTeamReport', '_askMoneyReason', 'renderLogs'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -1179,7 +1182,10 @@ export function formatFieldNames(r, limit = 20) {
 // strings in each language; here 480.2 / 253.8 local.
 // Staff 480 -> 494, core 254 -> 257 (2026-10-09, builder S5): Analytics months / reports inbox / year-on-year, acting on a
 // selection, the employee-list import and a customer's own activity, 111 strings in each language (English in the core).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 540, core: 275 };
+// Staff 480 -> 498, core 254 -> 257 (2026-10-09): the money controls (audit trail panel and search, void/refund reasons,
+// the till with its Z-report, the exceptions and Team reports; staff part "money", 16 KB) and their ~125 strings, which
+// sit in the core with every staff string. Here 491.9 / 253.0 local, from 476.7 / 251.2.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 224, staff: 560, core: 280 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
