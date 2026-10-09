@@ -34,6 +34,7 @@ function watchWrites(page: import('@playwright/test').Page) {
     if (/\/rpc\/staff_sign_in_methods\b/.test(r.url())) return; // a read (the editor's Google/Apple marks), sent as a POST
     if (/\/rpc\/staff_sign_in_lock\b/.test(r.url())) return; // a read (the editor's sign-in tries), sent as a POST
     if (/\/rpc\/badge_weeks\b/.test(r.url())) return; // a read (the editor's badges, since 75a25635), sent as a POST
+    if (/\/rpc\/staff_pii_reveal\b/.test(r.url())) return; // the editor's look at personal data, recorded (2026-10-10): not a change to the account
     calls.push({ method: r.method(), table: m[1], body: r.postData() || '', url: r.url() });
   });
   return calls;

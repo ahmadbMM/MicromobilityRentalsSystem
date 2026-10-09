@@ -74,6 +74,8 @@ test('the tab has its own address, lists the pairs, opens the merge dialog with 
   await tab.locator('.mg-group').first().locator('button', { hasText: 'Merge' }).click();
   const dlg = page.locator('#confirm-modal');
   await expect(dlg).toContainText('Merge accounts');
+  await expect(dlg.locator('.mg-dlg-side').first()).not.toContainText('amal.s@y.sa'); // masked until shown (2026-10-10)
+  await page.evaluate(`_piiReveal(null,'c-amal-1','');_piiReveal(null,'c-amal-2','')`);
   await expect(dlg.locator('.mg-dlg-side').first()).toContainText('amal.s@y.sa'); // more bookings stays
   await dlg.locator('button', { hasText: 'Keep the other one' }).click();
   await expect(dlg.locator('.mg-dlg-side').first()).toContainText('amal@x.sa');

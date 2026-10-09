@@ -9148,3 +9148,15 @@ html[data-staff-theme="dark"] body.view-staff .status-badge.st-reserved{color:#5
 html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-active,.st-needsbike){color:#7a4d06;}
 html[data-staff-theme="dark"] body.view-staff .status-badge.st-done{color:#166534;}
 html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){color:#991b1b;}
+
+/* ── Personal data hidden until shown (2026-10-10): the masked value is a button; History > Data access ── */
+body.view-staff .pii-m:is(#_x,*){display:inline-flex;align-items:center;position:relative;min-height:24px;margin:0;padding:0 4px;border:0;border-bottom:1px dashed var(--muted);border-radius:0;background:transparent none;color:inherit;font:inherit;letter-spacing:.04em;cursor:pointer;direction:ltr;unicode-bidi:isolate;}
+body.view-staff .pii-m:is(#_x,*)::after{content:'';position:absolute;inset:-10px -4px;}
+body.view-staff .pii-m:is(#_x,*):hover{color:var(--green);border-bottom-color:var(--green);}
+body.view-staff .pii-m:is(#_x,*):focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+body.view-staff .pii-v:focus{outline:medium none;}
+#mny-host .pa-review{margin-top:24px;}
+#mny-host .pa-stamp{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:var(--fs-sm);color:var(--text);}
+#mny-host .pa-stamp.pa-due b{color:var(--orange);}
+#mny-host .pa-stamp button{min-height:44px;}
+#mny-host .pa-tbl tr.pa-off td{color:var(--muted);}
