@@ -149,7 +149,14 @@ test.describe('@staff:bookings s1010 desk', () => {
   });
 
   test('D13: the desk note shows on the row and in the check-in, and is edited from the row menu', async ({ page }) => {
-    await boot(page);
+    // The server keeps what it was sent: the editor re-reads the row after its write (_reloadRows), and the
+    // stub answers that read from these rows.
+    const qrows = rows();
+    page.on('request', (r) => {
+      if (r.method() !== 'PATCH' || !r.url().includes('/rest/v1/queue_entries')) return;
+      try { const b = r.postDataJSON() || {}; const x = qrows.find((q) => decodeURIComponent(r.url()).includes(`id=eq.${q.id}`)); if (x) Object.assign(x, b); } catch { /* not JSON */ }
+    });
+    await boot(page, { queue_entries: qrows });
     await expect(page.locator('.rq-dnote').filter({ visible: true }).first()).toContainText('Left ID');
     const writes = patches(page, 'queue_entries');
     await page.evaluate(`showCheckinModal('${A}')`);

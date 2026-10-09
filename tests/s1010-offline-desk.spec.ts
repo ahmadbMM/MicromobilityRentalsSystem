@@ -98,7 +98,9 @@ test.describe('@staff:checkin s1010 offline desk', () => {
     // never dropped: still listed, the row reads as the server has it
     expect(await page.evaluate('_DQ.length')).toBe(1);
     expect(await page.evaluate(`getQueue().find(e=>e.id==='e1').status`)).toBe('waiting');
-    // the list: a centred dialog with the reason, Retry and Discard
+    // the list: a centred dialog with the reason, Retry and Discard (the check-in went on to the next
+    // rider after the confirm, "Open the next rider": closed first, as staff would)
+    await page.evaluate('closeCheckinModal()');
     await chip(page).click();
     const dlg = page.getByRole('dialog', { name: 'Unsynced changes' });
     await expect(dlg).toBeVisible();

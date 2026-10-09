@@ -302,7 +302,7 @@ a further **120-second** gate before posting ([app.src.html:17917](../app.src.ht
 
 Two decoders, in order of preference ([app.src.html:12200](../app.src.html#L12200)):
 1. **`BarcodeDetector`** with `formats:['qr_code']` where the browser has it;
-2. **`jsQR`** (vendored, `./vendor/jsqr-1.4.0.js`) drawing the video onto a canvas capped at
+2. **`jsQR`** (vendored, `./vendor/jsqr-1.4.0.min.js` (minified 2026-10-09)) drawing the video onto a canvas capped at
    480 px wide, with `willReadFrequently:true`.
 
 Polling interval **150 ms**. Accepted payload regex:

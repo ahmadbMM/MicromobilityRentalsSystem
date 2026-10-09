@@ -25,9 +25,11 @@ test('the desk paints before the sections arrive, and a section opens once its p
   page.on('pageerror', (e) => errors.push(e.message));
   await goStaffTab(page, 'analytics');
   release();
-  await expect.poll(() => page.evaluate('_staffPartsReady()')).toBe(true);
   await expect(page.locator('#tab-analytics')).not.toBeEmpty();
-  expect(asked.length).toBeGreaterThan(5); // every part was asked for, not only Analytics
+  // Every part an admin's sections use was asked for, not only Analytics; the two only an action
+  // reaches (Sela's report, the roster import) wait for it (2026-10-09, _staffPartWanted).
+  await expect.poll(() => asked.length).toBeGreaterThan(5);
+  expect(asked.some((u) => /\/(sela|imports)\.js/.test(u))).toBe(false);
   expect(errors).toEqual([]);
 });
 

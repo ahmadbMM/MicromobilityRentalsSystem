@@ -142,18 +142,35 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
 ## How the staff panel stays in sync (learned 2026-09-13, performance pass)
 
 - **A realtime event is merged, not fetched.** `_onRt` merges the row a `postgres_changes`
-  event carries (`queue_entries`, `sessions`, `bikes`) straight into `S.*` on a staff device and
-  repaints the visible tab. Reloading the window per event made every phone re-fetch half a
-  megabyte whenever any other phone did anything. Tables with post-processing (inventory,
-  cashier_sales, customers, desk_waitlist) still take the debounced reload.
+  event carries (`queue_entries`, `sessions`, `bikes`, `inventory`, `desk_waitlist` and, since
+  2026-10-09, `cashier_sales`) straight into `S.*` on a staff device and repaints the visible tab.
+  Reloading the window per event made every phone re-fetch half a megabyte whenever any other
+  phone did anything. Only a row the event could not carry whole takes the debounced reload. A
+  `rider_registrations` event is merged by id too (`_onRidersRt`), and ignored on a device that
+  never loaded that list. A merge that lands while a reload is on the wire is laid again over its
+  answer (`_rtReplaySince`), sales included, so a new table that merges must be replayed after the
+  load sets its list.
 - **A device's own write re-syncs only the rows it touched.** `_reloadRows(ids)` reads those
   ids plus bike states and merges; it filters the answer to the ids asked for. Use it after a
   single-row write; use `loadDataLight()` only when other rows move too (no-show and cancel
   promote the waitlist and shift numbers).
-- **The light reload covers two months, merged over what is held.** After the twelve-month
-  window has streamed in, `loadDataLight()` fetches `QUEUE_BOOT_DAYS` of queue rows and sales
-  and merges them over older rows; every tenth background poll is a full reload. A row older
-  than two months edited on another device converges within five minutes, not thirty seconds.
+- **The poll's cadence (`_pollPlan`, a tick every 30 s, paused while the tab is hidden).** With the
+  live channel joined as staff (`_rtLive()`): nothing on most ticks, the LIGHT set every tenth
+  (five minutes) and the FULL load every thirtieth (fifteen minutes). Without it: light every tick,
+  full every tenth. The section lists beside the desk's data (workshop, messages, ambassadors,
+  vendors) ride the five-minute tick through their count checks (`_secPolls`), only for sections
+  the account can open, and are read whole every fourth full load (an hour).
+- **The light reload covers the live nights, merged over what is held.** After the twelve-month
+  window has streamed in, `loadDataLight()` asks queue_entries for the last two days (`_qSlice`;
+  the whole window every half hour), the sessions from two days ago (`_sessMerge`), the desk list's
+  waiting rows plus those settled in two days (`_dwMerge`, paged), and two months of sales, each
+  laid over the older rows it holds. The full load reads the sales' year once, then two months
+  merged over it, and the whole year again every six hours (`CS_WHOLE_EVERY_MS`), by named
+  columns (`CS_COLS`: a column the screens read from cashier_sales must be added there).
+- **The staff session's token is renewed only within fifteen minutes of expiry** (`_staffKeepAlive`,
+  `TOKEN_RENEW_MS`), checked every ten minutes and on every return to the tab.
+- **The boot snapshot leaves the bookings out on a syncing device** (`cq_snapshot` `qIdb`): the boot
+  reads them from the IndexedDB copy (`_snapQueue`). Elsewhere it still carries the boot window.
 - **A signed-in staff device syncs, it does not re-read (2026-09-24).** `_syncFetch` keeps
   bookings, riders and rider tags in IndexedDB (`mm-sync`) and asks `staff_sync` (migration
   20260924230000) for the rows whose `updated_at` moved since the server clock of its last read,
@@ -258,6 +275,19 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   promise); otherwise move the reference. An entry point must be a plain `function` declaration.
 - The boot awaits `_loadStaff()` before the snapshot paint on a staff device, so staff code runs as
   itself. In the source nothing is split: `_loadStaff` exists only in the built page.
+- **Staff parts load by role, and carry their own strings (2026-10-09).** After the desk's first paint
+  only the parts whose sections the account can open are fetched (`STAFF_PART_TABS` /
+  `_staffPartWanted` in app.src.html, `_loadStaffPartsWanted` in the generated loader); any other part
+  comes the first time its stand-in is called. A staff string goes with the one part that names it
+  (`partLangKeys` in scripts/split-staff.mjs): English inside the part, the other languages in
+  `lang/staff-<part>-<code>.json`, fetched with the part. A key the core can name - as a word, a
+  prefix/suffix it builds keys from, or one of `DYNAMIC_KEYS` (shared with check-i18n) - or that two
+  parts name stays in the core. A NEW way of building keys at run time in core code must be added
+  to `DYNAMIC_KEYS`, or its keys may sit in a part the account never loads.
+- **A staff device's `<head>` writes styles.css, not app.css (2026-10-09).** The same test as
+  `_staffWanted` (cq_staff, the staff entry flag, the staff host, ?staff/?bike, a staff path) runs
+  in a head script that `document.write`s the one stylesheet; `_loadStaffCss` finds that link
+  (`data-staff-css`) and adds nothing. Customers keep app.css (and a `<noscript>` copy of it).
 - Specs run against the built page: a customer-context call of a staff function is a no-op there,
   and `page.evaluate('goStaff()')` waits for the half to load (the stub returns a promise).
 

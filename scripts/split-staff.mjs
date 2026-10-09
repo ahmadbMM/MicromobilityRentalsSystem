@@ -58,6 +58,7 @@ export const STAFF_ENTRY = [
   'lockStaff', // the top bar's lock (drawn by customer-half code): its sign-out settles the outboxes and asks first
   '_vendorLatePoll', // the bell's late cancels by venues (2026-10-04): the vendor poll and the bell's opening fetch them
   '_bizFromOpts', // the business settings (2026-10-09): applied when the staff lists arrive, which customer-half code fetches
+  '_snapQueue', // the boot snapshot's bookings from the sync copy (2026-10-09): awaited by the boot; a customer's page gets nothing
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -163,7 +164,7 @@ var _staffP=null,_staffJsP=null,_staffCssP=null;
 var STAFF_JS=${JSON.stringify(staffUrl)}; // var, and this block leads the script: the boot calls _loadStaff before the script has finished running
 var STAFF_CSS=${JSON.stringify(staffCssUrl || '')};
 var STAFF_LANG_V={}; // the build stamps {code:contentHash} of lang/staff-<code>.json
-var LANG_STAFF={},_staffLangP={};
+var LANG_STAFF={},_staffLangP={},_staffLangGot={};
 // The stored marks and the address first, S.view last: this runs at the top of the script too
 // (the early load below), before S exists, and the try answers false only when nothing else did.
 function _staffWanted(){try{if(localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||_isStaffHost())return true;const q=new URLSearchParams(location.search);if(q.has('staff')||q.has('bike'))return true;const p=_parsePath(location.pathname);if(p&&p.view==='staff')return true;return S.view==='staff';}catch(e){return false;}}
@@ -183,6 +184,11 @@ function _loadStaffJs(){
 function _loadStaffCss(){
   if(_staffCssP)return _staffCssP;
   if(!STAFF_CSS)return(_staffCssP=Promise.resolve());
+  // The page's <head> already wrote styles.css on a device it took for staff (2026-10-09), and app.css
+  // not at all: a script runs only once the stylesheets above it are in, so the link has its sheet.
+  const own=document.querySelector('link[data-staff-css]');
+  if(own&&own.sheet)return(_staffCssP=Promise.resolve());
+  if(own)try{own.remove();}catch(e){} // it failed: ask again below
   _staffCssP=new Promise((res,rej)=>{
     const l=document.createElement('link');let done=false;
     const fail=why=>{if(done)return;done=true;_staffCssP=null;try{l.remove();}catch(e){}rej(new Error(why));};
@@ -199,12 +205,12 @@ function _loadStaffCss(){
 // The language on screen: S when it exists, else what the head's early script chose (S is still in
 // its temporal dead zone at the top of the script, where typeof throws too - hence the try).
 function _staffLangCode(){try{if(S&&S.lang)return S.lang;}catch(e){}return window.__langPackCode||'en';}
-function _staffLangReady(c){return !c||c==='en'||!STAFF_LANG_V[c]||!!LANG_STAFF[c];}
+function _staffLangReady(c){return !c||c==='en'||((!STAFF_LANG_V[c]||!!_staffLangGot[c])&&(typeof _partLangsReady!=='function'||_partLangsReady(c)));} // the parts' strings too, once staff.js is here (2026-10-09)
 // Never rejects: a pack that did not arrive leaves t() answering in English, as the customer packs do.
 function _loadStaffLang(c){
   if(_staffLangReady(c))return Promise.resolve();
-  if(!_staffLangP[c])_staffLangP[c]=fetch('/lang/staff-'+c+'.json?v='+STAFF_LANG_V[c]).then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object')LANG_STAFF[c]=d;else delete _staffLangP[c];}).catch(()=>{delete _staffLangP[c];});
-  return _staffLangP[c];
+  if(!_staffLangGot[c]&&STAFF_LANG_V[c]&&!_staffLangP[c])_staffLangP[c]=fetch('/lang/staff-'+c+'.json?v='+STAFF_LANG_V[c]).then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object'){LANG_STAFF[c]=Object.assign(LANG_STAFF[c]||{},d);_staffLangGot[c]=true;}else delete _staffLangP[c];}).catch(()=>{delete _staffLangP[c];});
+  return Promise.all([_staffLangP[c],typeof _loadPartLangs==='function'?_loadPartLangs(c):null]).then(()=>{});
 }
 function _loadStaff(){
   if(_staffP)return _staffP;
@@ -267,6 +273,41 @@ export function staffOnlyLangKeys(keys, customerText, staffText) {
   const cust = langKeyParts(customerText), staff = langKeyParts(staffText);
   const out = new Set();
   for (const k of keys) if (!namesKey(cust, k) && namesKey(staff, k)) out.add(k);
+  return out;
+}
+
+// ── Which file of the staff half carries each staff string (2026-10-09) ────────────────────────
+// The staff strings used to ride whole in the desk's core (English in staff.js, the rest in
+// lang/staff-<code>.json): some 20 KB gzipped of words only Analytics, Community, the till or the
+// website editor say, parsed on every boot. A staff key now goes with the part that names it when
+// the core cannot ask for it - not as a word, not through a prefix or suffix it builds keys from,
+// and not as one of DYNAMIC_KEYS (keys built away from any t() call, which stay in the core
+// whoever names them). A key two parts name stays in the core too. English rides in the part's own file,
+// the other languages in lang/staff-<part>-<code>.json, fetched with the part.
+/** Keys built away from the t() call (a variable or a map filled by code holds the name). Regexes on the key. */
+export const DYNAMIC_KEYS = [
+  /^ev[A-Z]\w*Name$/, // evJccName, evSatName, ...: NS_EV_NAME and the ride-kind fallbacks name them, some by ride kind at runtime
+  /^bdg?[A-Z0-9]\w*[DA]$/, // bdFirstLapD, bdgMarshalA, ...: a badge's how-to and about lines, read as t(BD_SYS[slug][2]+'D'|'A')
+  /^\w+_(zero|one|two|few|many|other)$/, // mrRides_one, ...: a count's plural forms, read by _tn(base, n) through Intl.PluralRules
+];
+/**
+ * @param staffKeys the keys staffOnlyLangKeys gave the staff half
+ * @param coreText the desk's core (staff.js) as splitSections cut it
+ * @param partTexts {name: code} of every staff part
+ * @returns {{ core: Set<string>, parts: Record<string, Set<string>> }}
+ */
+export function partLangKeys(staffKeys, coreText, partTexts, dynamic = DYNAMIC_KEYS) {
+  const core = langKeyParts(coreText);
+  const parts = Object.entries(partTexts).map(([n, text]) => [n, langKeyParts(text)]);
+  const out = { core: new Set(), parts: Object.fromEntries(parts.map(([n]) => [n, new Set()])) };
+  for (const k of staffKeys) {
+    if (dynamic.some((re) => re.test(k)) || namesKey(core, k)) { out.core.add(k); continue; }
+    // One part only: a key two parts share stays in the core (copied into both it cost the staff
+    // half ~7 KB gzipped for ~5 KB off the core, measured 2026-10-09).
+    const owners = parts.filter(([, pp]) => namesKey(pp, k)).map(([n]) => n);
+    if (owners.length !== 1) { out.core.add(k); continue; }
+    out.parts[owners[0]].add(k);
+  }
   return out;
 }
 
@@ -491,18 +532,35 @@ export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
   const loader = `
 // ── The staff half's parts (generated by scripts/split-staff.mjs; do not edit here) ──────────────
 // A section's code is in staff-parts/<name>.js; the stand-ins below fetch it and run the real function,
-// whose declaration replaces the stand-in. Every part is fetched once the desk has painted.
+// whose declaration replaces the stand-in. Once the desk has painted, the parts this account can open
+// are fetched (_staffPartWanted, 2026-10-09: a desk account no longer runs Analytics, the website
+// editor or Vendors on every boot); any other part comes the first time something asks for it.
+// A part's strings in the language on screen come with it (lang/staff-<part>-<code>.json; English
+// rides inside the part).
 var STAFF_PARTS_V={}; // the build stamps {name:contentHash}
-var _staffPartP={},_staffPartsAll=null,_staffPartsDone=false;
+var STAFF_PART_LANG_V={}; // the build stamps {name:{code:contentHash}}
+var _staffPartP={},_staffPartsAll=null,_staffPartsDone=false,_staffPartsIdle=false,_partLangP={},_partLangGot={};
+// Never rejects: a pack that did not arrive leaves t() answering in English, as the core's packs do.
+function _loadPartLang(n,c){
+  const v=STAFF_PART_LANG_V[n]&&STAFF_PART_LANG_V[n][c];
+  if(!c||c==='en'||!v||_partLangGot[n+':'+c])return Promise.resolve();
+  const k=n+':'+c;
+  if(!_partLangP[k])_partLangP[k]=fetch('/lang/staff-'+n+'-'+c+'.json?v='+v).then(r=>r.ok?r.json():null).then(d=>{if(d&&typeof d==='object'){LANG_STAFF[c]=Object.assign(LANG_STAFF[c]||{},d);_partLangGot[k]=true;}delete _partLangP[k];}).catch(()=>{delete _partLangP[k];});
+  return _partLangP[k];
+}
+// The strings of every part already asked for, in language c (a language chosen after they came).
+function _loadPartLangs(c){return Promise.all(Object.keys(_staffPartP).map(n=>_loadPartLang(n,c)));}
+function _partLangsReady(c){return Object.keys(_staffPartP).every(n=>!c||c==='en'||!(STAFF_PART_LANG_V[n]&&STAFF_PART_LANG_V[n][c])||!!_partLangGot[n+':'+c]);}
 function _loadStaffPart(n){
   if(_staffPartP[n])return _staffPartP[n];
-  _staffPartP[n]=new Promise((res,rej)=>{
+  const code=new Promise((res,rej)=>{
     const s=document.createElement('script');let done=false;
     const fail=why=>{if(done)return;done=true;delete _staffPartP[n];try{s.remove();}catch(e){}rej(new Error(why));};
     const tm=setTimeout(()=>fail('staff part '+n+' did not load in 30 s'),30000);
     s.src='/staff-parts/'+n+'.js?v='+STAFF_PARTS_V[n];s.onload=()=>{if(done)return;done=true;clearTimeout(tm);res();};s.onerror=()=>{clearTimeout(tm);fail('staff part '+n+' did not load');};
     document.head.appendChild(s);
   });
+  _staffPartP[n]=Promise.all([code,_loadPartLang(n,_staffLangCode())]).then(()=>{});
   return _staffPartP[n];
 }
 function _loadStaffParts(){
@@ -510,8 +568,14 @@ function _loadStaffParts(){
   _staffPartsAll=Promise.all(Object.keys(STAFF_PARTS_V).map(_loadStaffPart)).then(()=>{_staffPartsDone=true;},e=>{_staffPartsAll=null;throw e;});
   return _staffPartsAll;
 }
+// The parts this account can open (the app's _staffPartWanted; every part where it is missing).
+function _loadStaffPartsWanted(){
+  if(_staffPartsDone)return Promise.resolve();
+  const want=Object.keys(STAFF_PARTS_V).filter(n=>{try{return typeof _staffPartWanted!=='function'||_staffPartWanted(n);}catch(e){return true;}});
+  return Promise.all(want.map(n=>_loadStaffPart(n).catch(()=>{}))).then(()=>{if(Object.keys(STAFF_PARTS_V).every(n=>_staffPartP[n]))return _loadStaffParts();});
+}
 function _staffPartsReady(){return _staffPartsDone;}
-try{(window.requestIdleCallback||(f=>setTimeout(f,1200)))(()=>{_loadStaffParts().catch(()=>{});},{timeout:3000});}catch(e){}
+try{(window.requestIdleCallback||(f=>setTimeout(f,1200)))(()=>{_staffPartsIdle=true;_loadStaffPartsWanted().catch(()=>{});},{timeout:3000});}catch(e){}
 ${stubs}
 `;
   const coreStmts = stmts.filter((st) => !inPart.has(st));
@@ -1200,7 +1264,11 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 480 -> 483, core 254 -> 255 (2026-10-09): the accessibility and consistency pass (theme choice, shortcut
 // switch, named buttons and toggle states, sortable headers as buttons, captions, 17 strings in each language);
 // here staff 479.2, core 252.3 local (~481 / ~253.6 on the runner), inside 2.5 KB of the old limits.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 226, staff: 580, core: 290 }; // TEMP during the round-2 merge; reset after the perf branch
+// Round 2 (2026-10-09/10, s1010-int, after the perf branch): the staff strings only one part says live in that part
+// (partLangKeys) and each account loads only its sections' parts; with the round's features (desk notes, My shift,
+// the desk outbox, the kiosk, deposits, house rides, reminders...) measured here at customer 224.1, staff 577.1 and
+// core 259.0 KB local. Limits: customer +2, staff +5, core +6 (rounded up). New staff code goes in a part.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 227, staff: 583, core: 265 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
