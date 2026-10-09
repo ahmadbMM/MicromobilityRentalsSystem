@@ -43,7 +43,7 @@ test('Return asks for condition and notes, then calls staff_return with them', a
   await m.locator('#ret-notes').fill('bent derailleur');
   await m.locator('#ret-confirm').click();
   await expect.poll(() => rpcs.find((c) => c.name === 'staff_return')?.body)
-    .toEqual({ p_booking_id: 'e1', p_return_condition: 'damaged', p_notes: 'bent derailleur' });
+    .toEqual({ p_booking_id: 'e1', p_return_condition: 'damaged', p_notes: 'bent derailleur', p_op_id: expect.any(String) }); // the op id a replay lands once by (20261009215000)
   await expect(m).toBeHidden();
 });
 
