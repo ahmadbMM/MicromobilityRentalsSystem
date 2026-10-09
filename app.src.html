@@ -870,6 +870,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdgRideGo:'Give to {0} riders',bdgRideDone:'Badge given: {0} to {1} riders of {2}',
   bdgNoDb:'Badges are not set up on the database yet.',
   igTitle:'Instagram followers',
+  igSectTotal:'Total Instagram followers',
+  igTotOf:'{0} of {1} accounts with Instagram counted',
   igFollowers:'{0} followers',
   igAsk:'Followers',
   igByAuto:'Counted by Instagram · {0}',
@@ -1440,6 +1442,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdgRideGo:'منح لـ{0} راكب',bdgRideDone:'مُنح الوسام: {0} إلى {1} راكب في {2}',
   bdgNoDb:'الأوسمة غير مُعدّة في قاعدة البيانات بعد.',
   igTitle:'متابعو إنستغرام',
+  igSectTotal:'إجمالي متابعي إنستغرام',
+  igTotOf:'تم عدّ {0} من {1} حساباً لديها إنستغرام',
   igFollowers:'{0} متابع',
   igAsk:'المتابعون',
   igByAuto:'عدّه إنستغرام · {0}',
@@ -28218,15 +28222,17 @@ const _REP_COLS=[
   {k:'bike',    key:'colBike'},
   {k:'payment', key:'colPayment'},
   {k:'status',  key:'colStatus'},
+  {k:'ig',      key:'igTitle'}, // each rider's Instagram followers (the owner, 2026-10-09)
 ];
 const _REP_SECTIONS=[
   {k:'summary', key:'repOptSummary'},
   {k:'addons',  key:'repAddonsSold'},
   {k:'sales',   key:'cashSalesTitle'},
+  {k:'ig',      key:'igSectTotal'}, // the followers of every account on the sheet, added up
 ];
 function _repDefaults(){
-  return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,em:0,share:1,height:0,bike:1,payment:1,status:1},
-          sections:{summary:1,addons:1,sales:1},
+  return {cols:{seq:1,qnum:1,name:1,km:1,member:1,phone:0,em:0,share:1,height:0,bike:1,payment:1,status:1,ig:0},
+          sections:{summary:1,addons:1,sales:1,ig:0},
           fType:'all',fStatus:'all',fPay:'all',fMember:'all'};
 }
 function _repOpts(){
@@ -28254,7 +28260,7 @@ function _repPaintRow(kind,k,on,rebuild){
 }
 function _repToggle(kind,k){const o=_repOpts();o[kind][k]=o[kind][k]?0:1;_repSave();_repPaintRow(kind,k,o[kind][k],showPrintReportOptions);
   if(kind==='cols'&&k==='em'&&o.cols.em)_repEmLoad(S.sfSession);} // ticked: the contacts are read now, so Print opens at once
-function _repSetFilter(k,v){_repOpts()[k]=v;_repSave();_repKmPaint();} // the select already shows the pick; only the per-distance counts follow it
+function _repSetFilter(k,v){_repOpts()[k]=v;_repSave();_repKmPaint();_repIgPaint();} // the select already shows the pick; only the per-distance counts follow it
 function _repReset(){S._repOpts=_repDefaults();_repSave();showPrintReportOptions();}
 // Rows the report should carry, after the builder's filters. The bike type is no filter where nobody
 // rides one: a type saved on a ride night would otherwise empty a run's report.
@@ -28287,6 +28293,57 @@ function _repColFits(sess,k){
   if(k==='height'||k==='bike')return !sess||_needsBike(sess);
   return true;
 }
+// ── Instagram followers on a report (the owner, 2026-10-09: "i want to be able to see how many total
+// instagram followers do we have from all the accounts included in the report") ──
+// The session report, the Saturday roster and the account report each offer a column (one account's
+// count) and a section (every account on the sheet added up). An account counts once however many of
+// its bookings are on the sheet, and only for the handle it has now (_igRow); a walk-in without an
+// account has no Instagram on file. The counts are Community > Accounts' (customer_ig_followers): a
+// builder reads them as it opens, since it can be opened before Accounts ever was.
+function _igFetch(){
+  if(S._igBusy)return S._igP;
+  S._igBusy=true;S._igAt=Date.now();
+  S._igP=(async()=>{
+    let fail=null;
+    try{const r=await _pagedAll(()=>sb.from('customer_ig_followers').select('*').order('customer_id'));
+      if(r&&!r.error&&Array.isArray(r.data))S.igRows=new Map(r.data.map(x=>[x.customer_id,x]));
+      else fail=(r&&r.error)||{message:'no rows'};
+    }catch(e){fail=e||{message:'failed'};}finally{S._igBusy=false;}
+    const c=String(fail&&fail.code||''),m=String(fail&&fail.message||'');
+    S._igErr=!!fail&&!(c==='PGRST205'||c==='42P01'||(/customer_ig_followers/.test(m)&&/does not exist|schema cache/.test(m)));
+  })();
+  return S._igP;
+}
+// For a builder: a read when the counts are older than five minutes (30 s after a failed one), then paint.
+function _igForReport(paint){
+  if(!sb)return;
+  if(!S._igBusy&&S._igAt&&Date.now()-S._igAt<(S._igErr?3e4:3e5))return;
+  _igFetch().then(paint,()=>{});
+}
+// One account's count as a number, or null (no handle, not counted yet, counted for an older handle).
+function _igNum(cid){const c=cid&&_custById(cid),r=c&&_igRow(c);return r&&r.followers!=null?Number(r.followers)||0:null;}
+// sum: the followers added up; counted: accounts with a count; handles: accounts with an Instagram.
+function _igTotal(cids){
+  const seen=new Set();let sum=0,counted=0,handles=0;
+  (cids||[]).forEach(id=>{
+    if(!id||seen.has(String(id)))return;seen.add(String(id));
+    const c=_custById(id);if(!c||!_igHandle(c))return;handles++;
+    const n=_igNum(id);if(n!=null){sum+=n;counted++;}
+  });
+  return {sum,counted,handles};
+}
+function _igOfTxt(tot){return t('igTotOf').replace('{0}',String(tot.counted)).replace('{1}',String(tot.handles));}
+// The builder's line, the printed tile and the file's rows. Nothing while the counts are not in hand.
+function _igLineHtml(tot){return S.igRows?`${esc(t('igTitle'))}: <span class="rpt-c-text">${esc(_igFmt(tot.sum))}</span> · ${esc(_igOfTxt(tot))}`:'';}
+function _igTileHtml(tot){return S.igRows?`<div class="totals"><div class="total-item dark"><span class="total-num">${esc(_igFmt(tot.sum))}</span><span class="total-lbl">${esc(t('igTitle'))} · ${esc(_igOfTxt(tot))}</span></div></div>`:'';}
+function _igCsvRows(tot){return S.igRows?[[],[t('igTitle'),tot.sum,_igOfTxt(tot)]]:[];}
+function _igCellTxt(cid){const n=_igNum(cid);return n==null?'':_igFmt(n);}
+// The customers a session's sheet carries: the roster's riders on a Saturday ride, else the report's rows.
+function _repIgIds(sessId){
+  const sess=_sessDisp(sessId);if(!sess)return [];
+  return (_isApprovalRide(sess)?_rosterRiders(sess):_repRows(sessId)).map(e=>e.customerId);
+}
+function _repIgPaint(){const el=document.getElementById('rep-ig');if(el)el.innerHTML=_igLineHtml(_igTotal(_repIgIds(S.sfSession)));}
 // One report per distance of Run for Her (the owner, 2026-10-05: "add the ability in report builder to
 // print a report for each distance in separate"). km: 3 | 5, or 'none' for runners with no distance
 // on record; null keeps every runner.
@@ -28391,6 +28448,7 @@ function showPrintReportOptions(){
         <label class="rpt-fld">${t('colMember')}
           ${sel('rep-f-member',o.fMember,[['all',t('filterAll')],['member',t('memberYes')],['nonmember',t('memberNo')]],['_repSetFilter','fMember',_P('value')],t('colMember'))}</label>
       </div>
+      <div id="rep-ig" class="rpt-count" role="status"></div>
       ${_run?`
       <div class="rpt-lbl2">${t('repKmEach')}</div>
       <div class="rpt-hint">${t('repKmEachHint')}</div>
@@ -28417,7 +28475,7 @@ function showPrintReportOptions(){
       </div>
     </div>
   </div>`;
-  _repKmPaint();
+  _repKmPaint();_repIgPaint();_igForReport(_repIgPaint);
   if(_run&&o.cols.em)_repEmLoad(S.sfSession); // re-read each time the builder opens: a runner may have changed theirs
 }
 function _closePrintOpts(){const m=document.getElementById('print-opts-modal');m.style.display='none';m.innerHTML='';}
@@ -28444,6 +28502,7 @@ const _ACC_COLS=[
   {k:'country',  key:'countryLabel'},
   {k:'nationality',key:'nationalityLabel'},
   {k:'instagram',key:'socInstagram'},
+  {k:'igFollowers',key:'igTitle'}, // the count beside the handle (the owner, 2026-10-09)
   {k:'x',        key:'socX'},
   {k:'tiktok',   key:'socTiktok'},
   {k:'linkedin', key:'socLinkedin'},
@@ -28471,6 +28530,7 @@ const _ACC_SECTIONS=[
   {k:'natMissing',key:'acrSectNatMissing'},
   {k:'natFew',  key:'acrSectNatFew'},
   {k:'tags',    key:'acrSectTags'},
+  {k:'ig',      key:'igSectTotal'}, // every listed account's followers added up
 ];
 // How many nationalities the nationality breakdown names before the rest becomes one
 // "Other" slice. 0 is all of them. The other breakdowns keep the house default of seven.
@@ -28479,9 +28539,9 @@ const _ACC_NAT_TOPS=[10,20,50,0];
 // community's members, or both - each printed apart.
 const _ACC_NAT_IN=[['accounts','acrAmongAcc'],['community','acrAmongComm'],['both','acrAmongBoth']];
 function _accDefaults(){
-  return {cols:{name:1,email:1,phone:1,rideNews:0,tags:1,tagSince:0,tagUntil:0,gender:1,age:1,birth:0,country:0,nationality:0,instagram:0,x:0,tiktok:0,linkedin:0,city:1,height:0,type:1,
+  return {cols:{name:1,email:1,phone:1,rideNews:0,tags:1,tagSince:0,tagUntil:0,gender:1,age:1,birth:0,country:0,nationality:0,instagram:0,igFollowers:0,x:0,tiktok:0,linkedin:0,city:1,height:0,type:1,
                 joined:1,bookings:0,rides:1,commRides:0,upcoming:0,noshows:0,cancelled:0,lastRide:1,active14:1,active30:1,minutes:0,spent:0,pay:0,hidden:0},
-          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
+          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1,ig:0},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
           chartsOn:{tags:1,gender:1,age:1,city:0,country:0,nationality:0,type:1,joined:1,rides:1,active:0,active14:1,active30:1},
           charts:{tags:'donut',gender:'donut',age:'bar',city:'hbar',country:'hbar',nationality:'hbar',type:'bar',joined:'line',rides:'bar',active:'hbar',active14:'hbar',active30:'hbar'},
           fTag:'all',fGender:'all',fCountry:'all',fNationality:'all',fNatFew:'all',fCity:'all',fType:'all',fJoined:'all',fRides:'all',fActive:'all',fAge:'all',fPay:'all',fUpcoming:'all',fRideNews:'all',fSpent:'all'};
@@ -28506,7 +28566,9 @@ function _accSetChart(k,v){_accOpts().charts[k]=v;_accSave();}
 function _accSetNatTop(v){_accOpts().natTop=Number(v)||0;_accSave();}
 function _accSetNatIn(k,v){if(_ACC_NAT_IN.some(([x])=>x===v)){_accOpts()[k]=v;_accSave();}}
 // The one thing a filter pick changes on the dialog: how many accounts are on the list.
-function _accPaintCount(){const el=document.getElementById('acr-count');if(!el)return;el.innerHTML=`${t('acrOnList')}: <span class="rpt-c-text">${_accRows().length}</span> / ${getCustomers().length}`;}
+function _accPaintCount(){const el=document.getElementById('acr-count');if(!el)return;const rows=_accRows();el.innerHTML=`${t('acrOnList')}: <span class="rpt-c-text">${rows.length}</span> / ${getCustomers().length}`;_accIgPaint(rows);}
+// The listed accounts' Instagram followers, added up, under the count.
+function _accIgPaint(rows){const el=document.getElementById('acr-ig');if(el)el.innerHTML=_igLineHtml(_igTotal((rows||_accRows()).map(r=>r.c.id)));}
 function _accReset(){S._accOpts=_accDefaults();_accSave();showAccountReportOptions();}
 // KSA calendar days for the report's windows. Session dates are KSA days, so every cutoff and
 // every timestamp compared with them has to be one too: a UTC day made the 14/30/90/365-day
@@ -28632,7 +28694,7 @@ function _accCells(c,st,o){
     tagUntil:lead&&lead.expires_at?_tagDateFmt(lead.expires_at):'',
     gender:_accGender(c.gender),heard:heardLabel(c.heard_from),age:age==null?'':String(age),birth:c.birth_date||'',
     country:c.country||'',nationality:c.nationality||'',city:c.city||'',
-    instagram:(c.socials&&c.socials.instagram)||'',x:(c.socials&&c.socials.x)||'',tiktok:(c.socials&&c.socials.tiktok)||'',linkedin:(c.socials&&c.socials.linkedin)||'',
+    instagram:(c.socials&&c.socials.instagram)||'',igFollowers:(n=>n==null?'':String(n))(_igNum(c.id)),x:(c.socials&&c.socials.x)||'',tiktok:(c.socials&&c.socials.tiktok)||'',linkedin:(c.socials&&c.socials.linkedin)||'',
     height:c.height?String(c.height)+' '+t('cmUnit'):'',
     type:c.type_preference?typeLabel(c.type_preference):'',
     joined:c.created_at?shortDate(_ksaDayOf(c.created_at)):'',
@@ -28953,6 +29015,7 @@ function showAccountReportOptions(){
         ${fld(t('acrSortLabel'),sel('sort',o.sort,_accSortOpts(),['_accSet','sort',_P('value')],t('acrSortLabel')))}
       </div>
       <div id="acr-count" class="rpt-count">${t('acrOnList')}: <span class="rpt-c-text">${rows.length}</span> / ${getCustomers().length}</div>
+      <div id="acr-ig" class="rpt-count" role="status">${_igLineHtml(_igTotal(rows.map(r=>r.c.id)))}</div>
 
       <div class="rpt-acts">
         <button class="btn-primary rpt-w100" data-on-click="${_on("_on_showAccountReportOptions_2",_EV,_EL)}">${ICON_PRINT} ${t('expPdf')}</button>
@@ -28968,6 +29031,7 @@ function showAccountReportOptions(){
     </div>
   </div>`;
   if(_scroll){const _b=m.querySelector('.modal-box');if(_b)_b.scrollTop=_scroll;}
+  _igForReport(()=>_accIgPaint());
 }
 // The two nationality sections as parts, for the sheet and the file alike: each section a title, the
 // note on what was counted, and its lists - names (with the customers we have from each, on the
@@ -29039,6 +29103,7 @@ function _accReportHtml(title){
   if(o.sections.summary)tiles.push([rows.length,t('acrStatAccounts'),''],[nTagged,t('acrStatTagged'),' dark'],[nRides,t('acrStatRides'),''],
     [nActive,t('acrStatActive'),''],[nActive14,t('acrStatActive14'),''],[nActive30,t('acrStatActive30'),'']);
   if(o.sections.natCount)tiles.push([nNats,t('acrStatNats'),o.sections.summary?'':' dark']);
+  if(o.sections.ig&&S.igRows){const tot=_igTotal(rows.map(r=>r.c.id));tiles.push([_igFmt(tot.sum),t('igTitle')+' · '+_igOfTxt(tot),tiles.length?'':' dark']);}
   const html=`
     ${tiles.length?`<div class="totals">${tiles.map(([n,lbl,cls])=>`<div class="total-item${cls}"><span class="total-num">${n}</span><span class="total-lbl">${esc(lbl)}</span></div>`).join('')}</div>`:''}
     ${filterLine?`<div class="rp-filter">${esc(filterLine)}</div>`:''}
@@ -29072,6 +29137,7 @@ async function exportAccountsCsv(){
   const blocks=_ACC_BREAKDOWNS.filter(k=>o.chartsOn[k]).flatMap(k=>{const items=_accBreakdown(k,rows,o);if(!items.length)return[];const total=items.reduce((s,x)=>s+x.value,0)||1;
     return[[],[_accBdTitle(k),'#',t('acrShare')],...items.map(x=>[x.label,x.value,Math.round(x.value/total*100)+'%'])];});
   if(o.sections.natCount)blocks.push([],[t('acrStatNats'),_accNatCount(rows)]);
+  if(o.sections.ig)blocks.push(..._igCsvRows(_igTotal(rows.map(r=>r.c.id))));
   blocks.push(..._accNatCsv(o));
   _downloadCsv(`accounts_${new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ})}.csv`,[cols.map(c=>t(c.key)),...rows.map(r=>cols.map(c=>r.cells[c.k])),...blocks],t('acrTitle'),rows.length);
 }
@@ -29111,19 +29177,20 @@ function exportSessionExcel(km){
   // Saturday Social Ride: roster-style export (same riders/columns as the printed roster,
   // height included) — the JCC columns below (price/payment/add-ons) don't apply to the free ride.
   if(_isApprovalRide(sess)){
-    const riders=_repFilter(getQueue()
-      .filter(e=>e.sessionId===sessId&&(e.status==='waiting'||e.status==='waitlist'||e.status==='active'))
-      .sort((a,b)=>new Date(a.registeredAt||0)-new Date(b.registeredAt||0)));
+    const riders=_rosterRiders(sess);
     if(!riders.length){toast(t('toastNoExport'),'warning');return;}
     const statusOf=e=>e.status==='waitlist'?t('waitlistLabel'):(e.approval==='approved'?t('apprApprovedChip'):t('apprPendingChip'));
     const _showMem=!!_repOpts().cols.member;
     const _bike=_needsBike(sess); // no frame to size, no type to hand over
-    const headers=['#',t('nameLabel'),...(_showMem?[t('colMember')]:[]),t('repColPhone'),...(_bike?[t('heightLabel')+' ('+t('cmUnit')+')',t('repColType')]:[]),t('colStatus')];
+    const _ig=!!_repOpts().cols.ig;
+    const headers=['#',t('nameLabel'),...(_showMem?[t('colMember')]:[]),t('repColPhone'),...(_bike?[t('heightLabel')+' ('+t('cmUnit')+')',t('repColType')]:[]),t('colStatus'),...(_ig?[t('igTitle')]:[])];
     const rosterRows=riders.map((e,i)=>{
       const phone=e.phone||(e.customerId?((getCustomers().find(x=>x.id===e.customerId)||{}).phone||''):'')||'';
-      return[i+1,e.name||'',...(_showMem?[t(_isSatMember(e)?'memberYes':'memberNo')]:[]),phone,...(_bike?[e.height||'',typeLabel(resolvedType(e))]:[]),statusOf(e)];
+      const n=_ig?_igNum(e.customerId):null;
+      return[i+1,e.name||'',...(_showMem?[t(_isSatMember(e)?'memberYes':'memberNo')]:[]),phone,...(_bike?[e.height||'',typeLabel(resolvedType(e))]:[]),statusOf(e),...(_ig?[n==null?'':n]:[])];
     });
-    _downloadCsv(`roster_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rosterRows],'roster '+(sess.session_date||sess.id));
+    const igRows=_repOpts().sections.ig?_igCsvRows(_igTotal(riders.map(e=>e.customerId))):[];
+    _downloadCsv(`roster_${dayLabel(sess.day)}_${sess.session_date||sess.id}.csv`,[headers,...rosterRows,...igRows],'roster '+(sess.session_date||sess.id));
     return;
   }
   // The sheet follows the export dialog as the PDF does: the same riders (every live outcome,
@@ -29164,6 +29231,7 @@ function exportSessionExcel(km){
     bike:   {h:[t('repColType'),t('colBike')],v:x=>[x.types,x.bikes]},
     payment:{h:[t('repPriceSar'),t('addonsLabel'),t('colPayment')],v:x=>[x.totalPrice,x.addonNames,x.payLabel]},
     status: {h:[t('colStatus')],v:x=>[_run&&x.topStatus==='active'?t('anFunnelCheckedIn'):reportStatusLabel(x.topStatus)]}, // a runner is not "On Bike"
+    ig:     {h:[t('igTitle')],v:x=>{const n=_igNum(x.lead.customerId);return[n==null?'':n];}},
   };
   // the columns this session's sheet carries (_repColFits), as on the PDF; a sheet of one distance needs no distance column
   const _pick=_REP_COLS.filter(c=>_xc[c.k]&&_ro.cols[c.k]&&_repColFits(sess,c.k)&&!(c.k==='km'&&_km!=null));
@@ -29198,7 +29266,8 @@ function exportSessionExcel(km){
     [t('repTotal'),sessPurch.units,sessPurch.value],
     [t('printCollected'),'',sessPurch.collected],[t('printPending'),'',sessPurch.pending],...(sessPurch.team>0?[[t('payTeam'),'',sessPurch.team]]:[]),...(sessPurch.free>0?[[t('onTheHouseLabel'),'',sessPurch.free]]:[])]:[];
   const _kmTag=_km==null?'':_km==='none'?'_no-distance':`_${_km}km`;
-  _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}${_kmTag}.csv`,[headers,...rows,...summary,...cashRows],'report '+(sess.session_date||sess.id)+_kmTag.replace('_',' '),rows.length);
+  const igRows=_ro.sections.ig?_igCsvRows(_igTotal(entries.map(e=>e.customerId))):[];
+  _downloadCsv(`report_${dayLabel(sess.day)}_${sess.session_date||sess.id}${_kmTag}.csv`,[headers,...rows,...summary,...cashRows,...igRows],'report '+(sess.session_date||sess.id)+_kmTag.replace('_',' '),rows.length);
 }
 
 // End-of-day close-out: bike rentals + product sales for the selected session's whole day, by payment type
@@ -29263,12 +29332,17 @@ function printCloseout(){
 }
 // Saturday Social Ride roster: every live rider with the details staff need on the ground —
 // name, phone, height, bike type, approval status — ordered by reservation time.
-function printCommunityRoster(sess){
-  const cm=t('cmUnit');
-  const riders=_repFilter(getQueue()
+// The roster's riders (the sheet's and the file's): every live one, after the builder's filters, by when they reserved.
+function _rosterRiders(sess){
+  return _repFilter(getQueue()
     .filter(e=>e.sessionId===sess.id&&(e.status==='waiting'||e.status==='waitlist'||e.status==='active'))
     .sort((a,b)=>new Date(a.registeredAt||0)-new Date(b.registeredAt||0)));
+}
+function printCommunityRoster(sess){
+  const cm=t('cmUnit');
+  const riders=_rosterRiders(sess);
   const _showMem=!!_repOpts().cols.member; // membership is the Saturday-specific column
+  const _ig=!!_repOpts().cols.ig;
   const _bike=_needsBike(sess); // a pool session has no frame to size and no type to hand over
   const statusOf=e=>e.status==='waitlist'?t('waitlistLabel'):(e.approval==='approved'?t('apprApprovedChip'):t('apprPendingChip'));
   const nApproved=riders.filter(e=>e.approval==='approved'&&e.status!=='waitlist').length;
@@ -29286,8 +29360,9 @@ function printCommunityRoster(sess){
       ${_bike?`<td>${e.height?esc(String(e.height))+' '+cm:'—'}</td>`:''}
       ${_bike?`<td>${esc(typeLabel(resolvedType(e)))}</td>`:''}
       <td>${esc(statusOf(e))}</td>
+      ${_ig?`<td>${esc(_igCellTxt(e.customerId))||'—'}</td>`:''}
     </tr>`;
-  }).join('')||`<tr><td colspan="${(_showMem?7:6)-(_bike?0:2)}" class="rp-empty">—</td></tr>`;
+  }).join('')||`<tr><td colspan="${(_showMem?7:6)-(_bike?0:2)+(_ig?1:0)}" class="rp-empty">—</td></tr>`;
   const body=`
     <div class="totals">
       <div class="total-item"><span class="total-num">${riders.length}</span><span class="total-lbl">${t('statNumRiders')}</span></div>
@@ -29295,8 +29370,9 @@ function printCommunityRoster(sess){
       <div class="total-item"><span class="total-num rp-amber">${nPending}</span><span class="total-lbl">${t('apprPendingChip')}</span></div>
       <div class="total-item"><span class="total-num">${nWaitlist}</span><span class="total-lbl">${t('waitlistLabel')}</span></div>
     </div>
+    ${_repOpts().sections.ig?_igTileHtml(_igTotal(riders.map(e=>e.customerId))):''}
     <table>
-      <thead><tr><th>#</th><th>${t('nameLabel')}</th>${_showMem?`<th>${t('colMember')}</th>`:''}<th>${t('repColPhone')}</th>${_bike?`<th>${t('heightLabel')}</th><th>${t('repColType')}</th>`:''}<th>${t('colStatus')}</th></tr></thead>
+      <thead><tr><th>#</th><th>${t('nameLabel')}</th>${_showMem?`<th>${t('colMember')}</th>`:''}<th>${t('repColPhone')}</th>${_bike?`<th>${t('heightLabel')}</th><th>${t('repColType')}</th>`:''}<th>${t('colStatus')}</th>${_ig?`<th>${t('igTitle')}</th>`:''}</tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   const html=_reportShell({
@@ -29379,6 +29455,7 @@ function printSessionReport(km){
                 const fit=_entryFitText(e);return`<td>${esc(typeLabel(resolvedType(e)))}${fit?' '+esc(fit):''}${bikes?' &middot; '+esc(bikes):''}</td>`;},
     payment:e=>`<td>${_payCell(e)}</td>`,
     status: e=>`<td class="${_stCls[e.status]||'rp-st'}">${_run&&e.status==='active'?t('anFunnelCheckedIn'):reportStatusLabel(e.status)}</td>`, // a runner is not "On Bike"
+    ig:     e=>`<td>${esc(_igCellTxt(e.customerId))||'—'}</td>`,
   };
   // the columns this session's sheet carries (_repColFits: membership on the run, not on a ride night); a
   // sheet of one distance needs no distance column
@@ -29401,6 +29478,7 @@ function printSessionReport(km){
       <div class="total-item"><span class="total-num">${_rpSar(cardSAR)}</span><span class="total-lbl">${t('cashCard')}</span></div>
       <div class="total-item"><span class="total-num">${_rpSar(cashSAR)}</span><span class="total-lbl">${t('cashCash')}</span></div>
     </div>`:''}
+    ${_ro.sections.ig?_igTileHtml(_igTotal(entries.map(e=>e.customerId))):''}
     <table>
       <thead><tr>${_head}</tr></thead>
       <tbody>${rows}</tbody>
@@ -43625,14 +43703,8 @@ async function _bdgDelete(id){
 // S._igErr, said in the dialog and tried again after BDG_RETRY_MS, as the badges (2026-10-05).
 async function _igLoad(force){
   if(!sb||S._igBusy||(!force&&S._igAt&&Date.now()-S._igAt<(S._igErr?BDG_RETRY_MS:3e5)))return;
-  S._igBusy=true;S._igAt=Date.now();
-  const was=_igSig();let fail=null;
-  try{const r=await _pagedAll(()=>sb.from('customer_ig_followers').select('*').order('customer_id'));
-    if(r&&!r.error&&Array.isArray(r.data))S.igRows=new Map(r.data.map(x=>[x.customer_id,x]));
-    else fail=(r&&r.error)||{message:'no rows'};
-  }catch(e){fail=e||{message:'failed'};}finally{S._igBusy=false;}
-  const c=String(fail&&fail.code||''),m=String(fail&&fail.message||'');
-  S._igErr=!!fail&&!(c==='PGRST205'||c==='42P01'||(/customer_ig_followers/.test(m)&&/does not exist|schema cache/.test(m)));
+  const was=_igSig();
+  await _igFetch(); // the read itself is shared with the report builders
   if(S.view==='staff'&&_pplOn('accounts')&&_igSig()!==was)renderCommunity();
   if(S._igDlg)_igDlgPaint();
   _igNudge();

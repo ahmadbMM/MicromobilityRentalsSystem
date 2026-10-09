@@ -1573,6 +1573,8 @@
   "bdgRideDone": "Conquista concedida: {0} a {1} ciclistas de {2}",
   "bdgNoDb": "As conquistas ainda não estão configuradas no banco de dados.",
   "igTitle": "Seguidores no Instagram",
+  "igSectTotal": "Total de seguidores no Instagram",
+  "igTotOf": "{0} de {1} contas com Instagram contadas",
   "igFollowers": "{0} seguidores",
   "igAsk": "Seguidores",
   "igByAuto": "Contado pelo Instagram · {0}",

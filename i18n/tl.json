@@ -1573,6 +1573,8 @@
   "bdgRideDone": "Naibigay ang badge: {0} sa {1} rider ng {2}",
   "bdgNoDb": "Hindi pa naka-set up ang mga badge sa database.",
   "igTitle": "Mga follower sa Instagram",
+  "igSectTotal": "Kabuuang Instagram followers",
+  "igTotOf": "{0} sa {1} account na may Instagram ang nabilang",
   "igFollowers": "{0} follower",
   "igAsk": "Mga follower",
   "igByAuto": "Binilang ng Instagram · {0}",

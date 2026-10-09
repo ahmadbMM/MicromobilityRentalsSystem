@@ -1573,6 +1573,8 @@
   "bdgRideDone": "Insignia otorgada: {0} a {1} ciclistas de {2}",
   "bdgNoDb": "Las insignias aún no están configuradas en la base de datos.",
   "igTitle": "Seguidores de Instagram",
+  "igSectTotal": "Total de seguidores de Instagram",
+  "igTotOf": "{0} de {1} cuentas con Instagram contadas",
   "igFollowers": "{0} seguidores",
   "igAsk": "Seguidores",
   "igByAuto": "Contado por Instagram · {0}",

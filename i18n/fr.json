@@ -1573,6 +1573,8 @@
   "bdgRideDone": "Badge donné : {0} à {1} cyclistes de {2}",
   "bdgNoDb": "Les badges ne sont pas encore configurés dans la base de données.",
   "igTitle": "Abonnés Instagram",
+  "igSectTotal": "Total des abonnés Instagram",
+  "igTotOf": "{0} sur {1} comptes Instagram comptés",
   "igFollowers": "{0} abonnés",
   "igAsk": "Abonnés",
   "igByAuto": "Compté par Instagram · {0}",
