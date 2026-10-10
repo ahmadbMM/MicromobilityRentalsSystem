@@ -592,6 +592,38 @@ price, payment, venue and the bike rule until after booking.
   the old token values are held on them, their subtitles are the hand-written ones, and they carry no
   photographs.
 
+## Less like a template, second pass (2026-10-10)
+
+The owner asked again for the rider app to look less AI-made. A re-audit found the features added after the
+customer system (the pop-up pages, the badge sheet, the bike and event sheets) had been styled outside it and
+brought the template look back. Fixed, and guarded so it stays fixed:
+
+- **Sentence case on every rider element**, not a list of classes: one rule in the customer system
+  (`:is(#cu,*):not(:where(...))`) sets `text-transform:none;letter-spacing:normal` on everything except the
+  owner's landing tiles, SVG text, the kiosk, the promo code's typed value and the large figures that keep their
+  own tight tracking. A new rider label needs no rule of its own.
+- **The pop-up pages** (profile, correction, rating, waiver, share, password; `.pg-*`, `.fx-*`, `.rg-*`, `.wg-*`)
+  use the customer tokens (`--ink`, `--go`, `--line`...), not the old `#0f1215` / `#008f52`; their kicker icon
+  sits inline with no tinted circle; rating scores are 44px tall.
+- **No entrance motion on rider screens**: tabs, dialogs, the badge sheet and the pulsing dots do not animate in.
+  The one designed motion stays today's ticket line and the QR's live line.
+- **Hover needs a pointer.** The build moves every `:hover` rule of app.css under
+  `@media (hover:hover) and (pointer:fine)` (`gateHover`, scripts/split-staff.mjs), so a tap on a phone leaves
+  nothing stuck. Write `:hover` in styles.css as before. tests/build-checks.spec.ts holds it.
+- **The session picker is days with rows** (`_sessDays`): each day is a heading (Today / Tomorrow in words) and
+  its sessions are rows that lead with the time. A row says its status only when it is news (places left under
+  four, the waitlist, turned down, not open yet); "Available" is never shown. The date is not repeated in a row.
+- **My Bookings with nothing booked** shows a drawn bike, one line and the next open circuit night as a button
+  (`_nextOpenRide`, `_bookNextOpen`), not a big grey 0.
+- **My Account says the record in words**: rides and tier with what the next tier takes (no bar), the weeks with
+  a ride as a sentence (no 26-mark strip), the record as a plain list, the closest badges with their count (no
+  bars), and what the profile lacks as a sentence (`_profMissing`, key `profMissing`) instead of "56% complete".
+- **A ticket's buttons in one voice**: calendar and directions (drawn icons) side by side, the Wallet button,
+  then edit / reschedule / cancel (or rate / book again) as one row of quiet text buttons under a rule.
+- **Badge sheet**: a plain semibold name (no italic capitals), sentence-case headings, a drawn tick.
+- **Copy**: no "Please" at the start of rider messages, no "successfully", no "it only takes a minute".
+  Write "Enter your email.", "Saved.", "You’re signed out."
+
 ## The ride night on the ticket, the route, Your rides (2026-10-01)
 
 The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data the app already holds; no migration.

@@ -133,7 +133,7 @@ test('a field the server refuses is pointed out, and a link that no longer works
   const box = page.locator('#app-fix .afx-box');
   await box.locator('#afx-phone').fill('0551112222');
   await box.locator('#afx-save').click();
-  await expect(box.locator('.fx-item[data-afx="phone"] .pg-msg')).toContainText('valid phone number');
+  await expect(box.locator('.fx-item[data-afx="phone"] .pg-msg')).toContainText('phone number of at least 8 digits');
 });
 
 test('a decided application or a replaced request opens on "This link no longer works"', async ({ page }) => {

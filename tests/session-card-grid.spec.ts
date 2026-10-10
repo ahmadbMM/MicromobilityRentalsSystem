@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// Every session card inside one event is the same card: the same height, and its date,
-// time and status on the same lines at the same x. That used to depend on how wide the
+// Every session card inside one event is the same card: the same height, and its time and
+// status on the same lines at the same x (the date is the day's heading since 2026-10-10). That used to depend on how wide the
 // words happened to be - a long weekday, a ride name, a "Gathering ... Start ..." time
 // all sat on one line and pushed their neighbours along, so a list of three sessions was
 // three different heights on a phone and a ragged staircase on a desktop.
@@ -37,12 +37,11 @@ async function cards(page: import('@playwright/test').Page) {
       const px = (n: number) => Math.round(n);
       const box = (el: Element | null) => (el ? el.getBoundingClientRect() : null);
       const card = c.getBoundingClientRect();
-      const date = box(c.querySelector('.sess-card-date'))!;
       const time = box(c.querySelector('.sess-card-time'))!;
-      const spots = box(c.querySelector('.sess-card-spots'))!;
+      const spots = box(c.querySelector('.sess-card-spots'));
       return {
         height: px(card.height), width: px(card.width),
-        dateStart: px(date.left), timeStart: px(time.left), spotsEnd: px(spots.right),
+        timeStart: px(time.left), spotsEnd: spots ? px(spots.right) : null,
       };
     }));
 }
@@ -64,10 +63,12 @@ for (const [event, sessions] of [['the circuit', circuit], ['the community rides
       const rows = await cards(page);
       expect(same(rows, (r) => r.height)).toBe(1);   // one size
       expect(same(rows, (r) => r.width)).toBe(1);
-      expect(same(rows, (r) => r.dateStart)).toBe(1); // one column
-      expect(same(rows, (r) => r.timeStart)).toBe(1);
-      expect(same(rows, (r) => r.spotsEnd)).toBe(1);  // status pinned to the far end
-      expect(rows[0].timeStart).toBe(rows[0].dateStart); // the time sits under the date
+      expect(same(rows, (r) => r.timeStart)).toBe(1); // one column: every row leads with its time
+      const withStatus = rows.filter((r) => r.spotsEnd !== null);
+      expect(same(withStatus, (r) => r.spotsEnd!)).toBeLessThanOrEqual(1);  // a status, when there is one, pinned to the far end
+      // each day is said once, as a heading over its rows; no row repeats the date
+      await expect(page.locator('.sess-day-h')).toHaveCount(3);
+      await expect(page.locator('.sess-card .sess-card-date')).toHaveCount(0);
     });
   }
 }
@@ -94,7 +95,8 @@ test('a card marked full or turned down is still the same card', async ({ page }
 
   const rows = await cards(page);
   expect(same(rows, (r) => r.height)).toBe(1);
-  expect(same(rows, (r) => r.spotsEnd)).toBe(1); // "Full for this week" ends where "Available" does
+  expect(same(rows.filter((r) => r.spotsEnd !== null), (r) => r.spotsEnd!)).toBe(1); // "Full for this week" ends where the turned-down note does
+  expect(rows.filter((r) => r.spotsEnd === null)).toHaveLength(1); // an open ride says nothing: "Available" is not news
 });
 
 // Off-screen session cards used to skip rendering (content-visibility:auto) with a 100px

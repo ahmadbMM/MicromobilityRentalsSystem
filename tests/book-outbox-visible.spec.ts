@@ -5,7 +5,7 @@ import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 // it as booked, the roster had never heard of it, and the flush retried silently forever. The
 // one device that knows is the rider's own, so the rider's own screen now says so — a banner
 // with three states: still sending (amber, after a grace period), refused by the server (red,
-// "show this phone at the booth"), and gone once it lands.
+// "Show this phone at the booth"), and gone once it lands.
 
 const sessions = [{ id: '2099-07-07', session_date: '2099-07-07', day: 'Sunday', status: 'open', capacity: 10, created_at: 1 }];
 const row = (over: Record<string, unknown> = {}) => ({
@@ -44,7 +44,7 @@ test('three genuine refusals turn it red and name the fix', async ({ page }) => 
   await boot(page, [row({ _tries: 3 })]);
   await page.evaluate(`_updateConnUI()`);
   const b = page.locator('#conn-banner');
-  await expect(b).toContainText('show this phone at the booth');
+  await expect(b).toContainText('Show this phone at the booth');
   const bg = await b.evaluate((el) => getComputedStyle(el).backgroundColor);
   expect(bg).toBe('rgb(163, 59, 46)');                     // red, not the amber of "sending"
 });

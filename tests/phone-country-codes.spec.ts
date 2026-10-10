@@ -117,10 +117,10 @@ test('phone login: a number that cannot be Saudi asks for its country code', asy
   await page.fill('#a-pwd', 'Zq8xTselah');
   await page.evaluate('doLogin()');
   await expect(page.locator('#auth-err')).not.toBeEmpty();
-  expect(await page.locator('#auth-err').textContent()).not.toContain('Incorrect credentials');
+  expect(await page.locator('#auth-err').textContent()).not.toContain('sign-in details aren’t right');
   expect(calls[0].p_identifier).toBe('+9661012345678');            // still tried as Saudi first
   // A Saudi mobile that finds nothing is a plain wrong login, as before.
   await page.fill('#a-identifier', '0508727012');
   await page.evaluate('doLogin()');
-  await expect(page.locator('#auth-err')).toContainText('Incorrect credentials');
+  await expect(page.locator('#auth-err')).toContainText('sign-in details aren’t right');
 });

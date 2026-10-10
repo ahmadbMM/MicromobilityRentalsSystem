@@ -106,7 +106,7 @@ test('with a staff flag as well, the general message covers all of it', async ({
 });
 
 // An Apple account that is also a community member owing a birth date or a nationality: nothing
-// on it was flagged by staff, so "Our team noticed" would be untrue (2026-09-29).
+// on it was flagged by staff, so "Our team asked you" would be untrue (2026-09-29).
 const profile = (email: string, x: Record<string, unknown>) =>
   ({ 'rpc:customer_profile': [{ id: 'c1', name: 'Sara Khalid', email, phone: '0500000001', gender: 'female', nationality: 'Jordan', birth_date: '1990-01-01', ...x }] });
 
@@ -118,7 +118,7 @@ test('a password and a missing birth date read as the account’s own check-up, 
   await expect(box.locator('.pg-title')).toHaveText('A few details for your account');
   await expect(box.locator('.pg-sub')).toHaveText('Google and Apple sign-in are going away, so your account needs a password, and a few more details. Add them once and you can book.');
   await expect(box.locator('.pg-note')).toHaveText('From now on you sign in with your email or mobile number and this password. You can book as soon as this is saved.');
-  await expect(box).not.toContainText('Our team noticed');
+  await expect(box).not.toContainText('Our team asked you');
   expect(await page.locator('#fix-gate .fx-item').evaluateAll(els => els.map(e => (e as HTMLElement).dataset.fx))).toEqual(['birth_date', 'password']);
 });
 
@@ -133,7 +133,7 @@ test('a staff flag on a birth date already held keeps the general message', asyn
   await rider(page, 'sara@example.com', ['password', 'birth_date'], profile('sara@example.com', {}));
   await page.evaluate(`selectEvent('jcc')`);
   await expect(page.locator('#fix-gate .pg-title')).toHaveText('Let’s get your details right');
-  await expect(page.locator('#fix-gate .pg-sub')).toContainText('Our team noticed');
+  await expect(page.locator('#fix-gate .pg-sub')).toContainText('Our team asked you');
 });
 
 test('in Arabic, the account’s own check-up reads the same', async ({ page }) => {

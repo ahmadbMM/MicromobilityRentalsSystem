@@ -42,7 +42,7 @@ test.describe('the waiver', () => {
     await page.evaluate(atReview('S.waiverOk=false;'));
     await page.evaluate(`submitReg()`);
     expect(await page.evaluate('S.regStep')).toBe(2.5);
-    await expect(page.locator('.toast')).toContainText(/accept the waiver/i);
+    await expect(page.locator('.toast')).toContainText(/tick the waiver/i);
     await page.waitForTimeout(200);
     expect(rows.length).toBe(0);
   });

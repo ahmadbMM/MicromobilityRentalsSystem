@@ -32,7 +32,8 @@ test('customers see the Saturday ride as available until staff mark it full', as
   await page.evaluate(`S.selEvent='community';setCustTab('register')`);
 
   expect(await page.evaluate(`spotsLeft('comm1')`)).toBe(0);
-  await expect(page.locator('.sess-card-comm .sess-card-spots')).toHaveText('Available');
+  await expect(page.locator('.sess-card-comm')).toBeVisible();
+  await expect(page.locator('.sess-card-comm .sess-card-spots')).toHaveCount(0); // open, and an open ride says nothing
 });
 
 test('own-bike riders do not consume community spots', async ({ page }) => {

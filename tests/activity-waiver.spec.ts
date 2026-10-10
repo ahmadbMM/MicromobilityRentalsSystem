@@ -107,7 +107,7 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
     await expect.poll(() => page.evaluate('S.regStep')).toBe(2.5);
     expect(await page.evaluate('S.waiverOk')).toBe(false);
-    await expect(page.locator('.toast').filter({ hasText: 'Please accept the waiver to continue.' })).toBeVisible();
+    await expect(page.locator('.toast').filter({ hasText: 'Tick the waiver to continue.' })).toBeVisible();
     await expect(page.locator('#tab-register')).toContainText('Activity waiver');
     await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
     // the raw code never reaches the screen
@@ -125,7 +125,7 @@ test.describe('@customer:reserve activity waiver', () => {
     expect(await page.evaluate(`getQueue().some(e=>e.id==='ob1')`)).toBe(false);
     expect(await page.evaluate('[S.custTab,S.selSession,S.regStep,S.regQty]')).toEqual(['register', WS, 2.5, 1]);
     await expect(page.locator('#tab-register')).toContainText('Activity waiver');
-    await expect(page.locator('.toast').filter({ hasText: 'Please accept the waiver to continue.' })).toBeVisible();
+    await expect(page.locator('.toast').filter({ hasText: 'Tick the waiver to continue.' })).toBeVisible();
   });
 
   test('two rides queued offline and refused: the second waits in the outbox and is re-asked once the first form is left', async ({ page }) => {

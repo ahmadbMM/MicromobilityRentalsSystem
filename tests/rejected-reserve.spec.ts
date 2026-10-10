@@ -31,11 +31,13 @@ async function sessionList(page: import('@playwright/test').Page, rows: unknown[
   await expect(cards).toHaveCount(2);        // both rides painted before anything is clicked
   return cards;
 }
+// The date is the day's heading (2026-10-10), so a session is found under its day.
+const dayRow = (p: import('@playwright/test').Page, d: string) => p.locator('.sess-day').filter({ hasText: d }).locator('.sess-card');
 const modal = (p: import('@playwright/test').Page) => p.locator('#confirm-modal .confirm-box');
 
 test('the ride they were turned down for is marked, and tapping it explains instead of opening the form', async ({ page }) => {
-  const cards = await sessionList(page, [booking()]);
-  const turned = cards.filter({ hasText: '10 Jan' });
+  await sessionList(page, [booking()]);
+  const turned = dayRow(page, '10 Jan');
   await expect(turned).toHaveClass(/sess-card-rej/);
   await expect(turned).toContainText('Full for this week');
 
@@ -51,8 +53,8 @@ test('the ride they were turned down for is marked, and tapping it explains inst
 });
 
 test("next week's ride is untouched", async ({ page }) => {
-  const cards = await sessionList(page, [booking()]);
-  const open = cards.filter({ hasText: '17 Jan' });
+  await sessionList(page, [booking()]);
+  const open = dayRow(page, '17 Jan');
   await expect(open).not.toHaveClass(/sess-card-rej/);
   await open.scrollIntoViewIfNeeded();
   await open.click();
@@ -61,8 +63,8 @@ test("next week's ride is untouched", async ({ page }) => {
 });
 
 test('a rider who was approved, or never asked, sees an ordinary card', async ({ page }) => {
-  const cards = await sessionList(page, [booking({ approval: 'approved', status: 'waiting' })]);
-  await expect(cards.filter({ hasText: '10 Jan' })).not.toHaveClass(/sess-card-rej/);
+  await sessionList(page, [booking({ approval: 'approved', status: 'waiting' })]);
+  await expect(dayRow(page, '10 Jan')).not.toHaveClass(/sess-card-rej/);
 });
 
 test('a wizard left open from before the rejection cannot submit', async ({ page }) => {
@@ -72,7 +74,7 @@ test('a wizard left open from before the rejection cannot submit', async ({ page
   await waitForSb(page);
   const rows = await captureBookingRows(page);
   await page.evaluate(`S.selEvent='community';setCustTab('register')`);
-  await page.locator('.sess-card').filter({ hasText: '10 Jan' }).click();   // opened while still allowed
+  await dayRow(page, '10 Jan').click();   // opened while still allowed
   await page.waitForFunction(`S.selSession==='2099-01-10'`);
 
   // staff reject them while the page sits open

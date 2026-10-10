@@ -29,7 +29,7 @@ test.describe('@customer:bf the breakfast venue on the rider’s side', () => {
   test('the date card names the venue once one is set, in Arabic by its Arabic name', async ({ page }) => {
     await member(page, [sat(), sat2]);
     await page.evaluate(`selectEvent('community')`);
-    const card = (d: string) => page.locator(`#tab-register .sess-card:has-text("${d}")`);
+    const card = (d: string) => page.locator('#tab-register .sess-day').filter({ hasText: d }).locator('.sess-card'); // the date is the day's heading
     await expect(page.locator('#tab-register .sess-card')).toHaveCount(2);
     await expect(page.locator('#tab-register .sess-card .sess-card-bf')).toHaveCount(1);
     await expect(page.locator('#tab-register .sess-card-bf')).toHaveText('Breakfast at Harbour Cafe');

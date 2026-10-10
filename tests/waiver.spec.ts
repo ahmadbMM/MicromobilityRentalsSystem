@@ -56,7 +56,7 @@ test('continue is refused until the box is ticked', async ({ page }) => {
   // even called directly, the step will not advance
   await page.evaluate(`regWaiverContinue()`);
   expect(await page.evaluate('S.regStep')).toBe(2.5);
-  await expect(page.locator('.toast')).toContainText(/accept the waiver/i);
+  await expect(page.locator('.toast')).toContainText(/tick the waiver/i);
 });
 
 test('ticking it opens the way through to review', async ({ page }) => {

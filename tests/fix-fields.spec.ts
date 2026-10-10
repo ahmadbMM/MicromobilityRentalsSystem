@@ -113,7 +113,7 @@ test('what the server refuses stays asked; what it took is the account now', asy
   await page.click('#fix-gate .fx-opt >> nth=1');                            // Female
   await page.click('#fx-save');
   await expect(page.locator('#fix-gate .fx-item')).toHaveCount(1);
-  await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .pg-msg')).toHaveText('That didn’t look right. Please check it and try again.');
+  await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .pg-msg')).toHaveText('That doesn’t look right. Check it and try again.');
   expect(await page.evaluate('[S.loggedIn.gender,S.loggedIn.email]')).toEqual(['female', 'spec@example.com']);
   expect(await page.evaluate('S.selEvent')).toBe('none');                     // still not booked in
 });

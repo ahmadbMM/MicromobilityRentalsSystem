@@ -420,6 +420,31 @@ export function customerCss(css, customerText, staffText, scope = STAFF_SCOPE) {
   return { css: filter(css), kept, dropped, droppedBytes, droppedSelectors };
 }
 
+// A phone has no pointer to rest on anything: a tap leaves :hover stuck on the button until the next tap
+// elsewhere, so a pressed card stays tinted and a lifted button stays lifted (2026-10-10, the "less AIsh"
+// pass). Every rider rule written with :hover is moved under @media (hover:hover) and (pointer:fine) as
+// app.css is built; the source keeps writing :hover as it always has. A selector list that mixes hover and
+// non-hover selectors is split, so the non-hover half still applies everywhere.
+export const HOVER_MEDIA = '@media (hover:hover) and (pointer:fine)';
+export function gateHover(css) {
+  const GROUP = /^@(?:media|supports|layer|container|document)\b/i;
+  let gated = 0;
+  function walk(text) {
+    let out = '';
+    for (const t of cssTokens(text)) {
+      if (t.kind === 'rule' && /:hover\b/.test(t.prelude)) {
+        const sels = splitSelectors(t.prelude), hov = sels.filter((x) => /:hover\b/.test(x)), rest = sels.filter((x) => !/:hover\b/.test(x));
+        if (rest.length) out += `${rest.join(',')}{${t.body}}`;
+        out += `${HOVER_MEDIA}{${hov.join(',')}{${t.body}}}`; gated++;
+      } else if (t.kind === 'at' && t.body !== null && GROUP.test(t.prelude) && !t.prelude.includes('hover:hover')) {
+        out += t.open + walk(t.body) + '}';
+      } else out += t.text;
+    }
+    return out;
+  }
+  return { css: walk(css), gated };
+}
+
 // ── The staff half in parts (2026-10-01) ────────────────────────────────────────────────────────
 // A booth tablet parsed all of staff.js (297 KB gzipped) before it could draw the Bookings screen,
 // though about half of it is sections the desk does not open at boot: Analytics, Community, the
@@ -1278,7 +1303,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 598 -> 602 (2026-10-10): Instagram followers on the reports (column, total, average, the builders' line) and
 // against the community's average on the accounts lists and the applications' cards, with the members' Instagram ask:
 // 596.3 KB here was 599.0 on the runner; +4 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 229, staff: 602, core: 272 };
+// Customer 229 -> 232 (2026-10-10, the "less AIsh" second pass): the session picker's day headings, the empty My
+// Bookings' next ride, the account's sentences in place of its meters: 227.3 KB here, about 228.7 on the runner; +3
+// restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 602, core: 272 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

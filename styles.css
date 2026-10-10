@@ -5289,68 +5289,66 @@ body.view-staff #view-staff .view-main{margin:0;width:auto;justify-self:stretch;
 #profile-gate .auth-backdrop{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;z-index:90;top:var(--topbar-h,56px);align-items:flex-start;padding:16px;overflow:auto;}
 @media (min-width:768px){#profile-gate .auth-backdrop{padding-top:88px;}}
 body.gate-page #app-footer,body.gate-page #cust-bottom-nav{display:none !important;} /* no way past the page: the header's links leave it up (showView) */
-.pg-box{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(15,18,21,.06),0 6px 20px rgba(15,18,21,.05);padding:24px 20px;width:100%;max-width:420px;box-sizing:border-box;margin:0;font-family:var(--font-body);color:#0f1215;}
+.pg-box{background:var(--card);border-radius:var(--r-card);border:1px solid var(--line);box-shadow:none;padding:24px 20px;width:100%;max-width:420px;box-sizing:border-box;margin:0;font-family:var(--font-body);color:var(--ink);}
 @media (min-width:768px){.pg-box{padding:32px 28px;}}
-.pg-kicker{font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#4f565c;}
-.pg-title{font-family:var(--font-display);font-weight:800;font-size:28px;line-height:1.1;margin:8px 0 0;text-wrap:pretty;color:#0f1215;}
+.pg-kicker{font-weight:600;font-size:13px;color:var(--ink-2);}
+.pg-title{font-family:var(--font-display);font-weight:800;font-size:28px;line-height:1.1;margin:8px 0 0;text-wrap:pretty;color:var(--ink);}
 @media (min-width:768px){.pg-title{font-size:30px;}}
-.pg-sub{font-weight:500;font-size:15px;line-height:1.45;color:#4f565c;margin:10px 0 0;text-wrap:pretty;}
+.pg-sub{font-weight:500;font-size:15px;line-height:1.45;color:var(--ink-2);margin:10px 0 0;text-wrap:pretty;}
 .pg-field{margin-top:16px;display:flex;flex-direction:column;gap:6px;}
 .pg-field.pg-first{margin-top:24px;}
-.pg-field label{font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#0f1215;}
-.pg-field input,.pg-field select{height:48px;border:1px solid rgba(15,18,21,.15);border-radius:8px;padding:0 14px;font-family:var(--font-body);font-weight:500;font-size:16px !important;color:#0f1215;background:#fff;width:100%;box-sizing:border-box;outline:none;appearance:none;-webkit-appearance:none;box-shadow:none;margin:0;}
+.pg-field label{font-weight:600;font-size:13px;color:var(--ink-2);}
+.pg-field input,.pg-field select{height:48px;border:1px solid var(--line-2);border-radius:8px;padding:0 14px;font-family:var(--font-body);font-weight:500;font-size:16px !important;color:var(--ink);background:var(--card);width:100%;box-sizing:border-box;outline:none;appearance:none;-webkit-appearance:none;box-shadow:none;margin:0;}
 .pg-field select{padding-inline-end:40px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%234f565c' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;}
 html[dir="rtl"] .pg-field select{background-position:left 14px center;}
-.pg-field select.ph{color:#767e85;}
-.pg-field input::placeholder{color:#767e85;}
-.pg-field input:focus,.pg-field select:focus{border-color:#008f52;box-shadow:none;}
-.pg-field.err input,.pg-field.err select{border-color:#b42318;}
-.pg-msg{font-weight:500;font-size:13px;line-height:1.4;color:#b42318;}
+.pg-field select.ph{color:var(--ink-3);}
+.pg-field input::placeholder{color:var(--ink-3);}
+.pg-field input:focus,.pg-field select:focus{border-color:var(--go);box-shadow:none;}
+.pg-field.err input,.pg-field.err select{border-color:var(--red);}
+.pg-msg{font-weight:500;font-size:13px;line-height:1.4;color:var(--red);}
     /* ── The forced password change (_pwdMustShow), #pwd-gate: without inline styles (2026-09-29, the customer
        pages' pass; scoped by that id). */
     #pwd-gate .cu-mt10{margin-top:10px;}
-.pg-note{font-weight:500;font-size:13px;line-height:1.45;color:#767e85;margin:14px 0 0;text-wrap:pretty;}
-.pg-net{margin-top:14px;padding:10px 12px;background:#eceff0;border-radius:8px;font-weight:600;font-size:13px;line-height:1.4;color:#b42318;}
-.pg-btn{margin-top:20px;width:100%;height:48px;border-radius:999px;border:none;background:#008f52;color:#fff;font-family:var(--font-body);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;padding:0;}
-.pg-btn:hover{background:#007d48;}
-.pg-btn:focus-visible{outline:2px solid #008f52;outline-offset:3px;}
-.pg-btn:disabled{background:#e5e9ea;color:#767e85;cursor:default;}
-.pg-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:pgspin .8s linear infinite;display:inline-block;flex-shrink:0;}
+.pg-note{font-weight:500;font-size:13px;line-height:1.45;color:var(--ink-3);margin:14px 0 0;text-wrap:pretty;}
+.pg-net{margin-top:14px;padding:10px 12px;background:var(--card-2);border-radius:8px;font-weight:600;font-size:13px;line-height:1.4;color:var(--red);}
+.pg-btn{margin-top:20px;width:100%;height:48px;border-radius:999px;border:none;background:var(--go);color:var(--paper);font-family:var(--font-body);font-weight:700;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;padding:0;}
+.pg-btn:hover{background:var(--go-2);}
+.pg-btn:focus-visible{outline:2px solid var(--go);outline-offset:3px;}
+.pg-btn:disabled{background:var(--card-3);color:var(--ink-3);cursor:default;}
+.pg-spin{width:16px;height:16px;border-radius:50%;border:2px solid rgba(251,249,244,.35);border-top-color:var(--paper);animation:pgspin .8s linear infinite;display:inline-block;flex-shrink:0;}
 @keyframes pgspin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.pg-spin{animation:none;}}
 /* Correction request (#fix-gate): staff asked the rider to fix some account fields. A pop-up
    over the page, the profile gate's card inside, one item per flagged field. */
 #fix-gate .auth-backdrop,#app-fix .auth-backdrop,#wl-claim .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;}
 body.fix-open{overflow:hidden;}
-.fx-box{margin:auto;animation:fxIn .22s ease-out;}
+.fx-box{margin:auto;}
 #fix-gate .fx-box:focus,#fix-gate .fx-box:focus-visible,#app-fix .fx-box:focus,#app-fix .fx-box:focus-visible,#wl-claim .fx-box:focus,#wl-claim .fx-box:focus-visible{outline:none;} /* the card takes focus on open; it is not a control */
-@keyframes fxIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.fx-box{animation:none;}}
-.fx-kicker{display:flex;align-items:center;gap:8px;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#b54708;}
-.fx-flag{width:24px;height:24px;border-radius:50%;background:#fff4e5;color:#dc6803;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
-.fx-head{display:flex;align-items:center;gap:8px;margin-top:22px;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#4f565c;}
-.fx-count{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#0f1215;color:#fff;font-size:11px;letter-spacing:0;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;}
+.fx-kicker{display:flex;align-items:center;gap:6px;font-weight:600;font-size:13px;color:var(--amber);}
+.fx-flag{color:var(--amber);display:inline-flex;align-items:center;flex-shrink:0;}
+.fx-head{display:flex;align-items:center;gap:8px;margin-top:22px;font-weight:600;font-size:13px;color:var(--ink-2);}
+.fx-count{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--card-2);color:var(--ink);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;}
 .fx-list{display:flex;flex-direction:column;gap:10px;margin-top:10px;}
-.fx-item.pg-field{margin-top:0;gap:8px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:12px;background:#fbfbf9;}
-.fx-item.pg-field.err{border-color:#b42318;background:#fff;}
+.fx-item.pg-field{margin-top:0;gap:8px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--paper);}
+.fx-item.pg-field.err{border-color:var(--red);background:var(--card);}
 .fx-top{display:flex;align-items:center;gap:8px;}
-.fx-lbl{font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#0f1215;}
-.fx-was{font-weight:500;font-size:13px;line-height:1.4;color:#4f565c;overflow-wrap:anywhere;}
-.fx-was bdi{font-weight:700;color:#0f1215;}
+.fx-lbl{font-weight:700;font-size:14px;color:var(--ink);}
+.fx-was{font-weight:500;font-size:13px;line-height:1.4;color:var(--ink-2);overflow-wrap:anywhere;}
+.fx-was bdi{font-weight:700;color:var(--ink);}
 .fx-row3{display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"f l" "m m";gap:6px;}
 .fx-row3 #fx-first{grid-area:f;}.fx-row3 #fx-middle{grid-area:m;}.fx-row3 #fx-last{grid-area:l;}
 @media (min-width:480px){.fx-row3{grid-template-columns:1fr 1fr 1fr;grid-template-areas:"f m l";}}
 .fx-row2{display:grid;grid-template-columns:1fr;gap:6px;}
 @media (min-width:480px){.fx-row2{grid-template-columns:1fr 1fr;}}
-.fx-item select:disabled{background-color:#f3f4f4;color:#9aa0a6;}
+.fx-item select:disabled{background-color:var(--card-2);color:var(--ink-4);}
 .fx-seg{display:flex;gap:8px;}
-.fx-opt{flex:1;height:46px;border-radius:8px;border:1px solid rgba(15,18,21,.15);background:#fff;font-family:var(--font-body);font-weight:600;font-size:15px;color:#0f1215;cursor:pointer;}
-.fx-opt.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;box-shadow:inset 0 0 0 1px #008f52;}
-.fx-item.err .fx-opt{border-color:#b42318;}
+.fx-opt{flex:1;height:46px;border-radius:8px;border:1px solid var(--line-2);background:var(--card);font-family:var(--font-body);font-weight:600;font-size:15px;color:var(--ink);cursor:pointer;}
+.fx-opt.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);box-shadow:inset 0 0 0 1px var(--go);}
+.fx-item.err .fx-opt{border-color:var(--red);}
 /* WhatsApp: "Is <mobile> your WhatsApp number too?", Yes / No, and on No the number (2026-10-07) */
-.fx-q{font-weight:600;font-size:14.5px;line-height:1.4;color:#0f1215;}
+.fx-q{font-weight:600;font-size:14.5px;line-height:1.4;color:var(--ink);}
 .fx-wa-row{margin-top:8px;}
-.fx-wa-box .fx-wa-ic{width:48px;height:48px;border-radius:50%;background:#e8f6ee;color:#008f52;display:flex;align-items:center;justify-content:center;}
+.fx-wa-box .fx-wa-ic{color:var(--go);display:flex;}
 .fx-wa-box .pg-title{font-size:24px;margin-top:14px;}
 .fx-wa-box .fx-item{margin-top:18px;background:none;border:0;padding:0;box-shadow:none;}
 .fx-wa-box .pg-title bdi{unicode-bidi:isolate;direction:ltr;}
@@ -5358,73 +5356,73 @@ body.fix-open{overflow:hidden;}
 .fx-wa-box .fx-wa-lbl{display:block;margin-top:16px;}
 .fx-wa-box .pg-btn[hidden]{display:none;}
 .fx-photo{display:flex;align-items:center;gap:12px;}
-.fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(15,18,21,.1);box-sizing:border-box;}
-.fx-ph.new{border-color:#008f52;}
-.fx-ph-none{display:inline-flex;align-items:center;justify-content:center;background:#eceff0;color:#767e85;}
-.fx-upload{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border-radius:999px;border:1px solid rgba(15,18,21,.18);background:#fff;font-weight:700;font-size:14px;color:#0f1215;cursor:pointer;}
+.fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--line);box-sizing:border-box;}
+.fx-ph.new{border-color:var(--go);}
+.fx-ph-none{display:inline-flex;align-items:center;justify-content:center;background:var(--card-2);color:var(--ink-3);}
+.fx-upload{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;}
 .pg-field .fx-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:none;}
-.fx-upload:focus-within{outline:2px solid #008f52;outline-offset:2px;}
+.fx-upload:focus-within{outline:2px solid var(--go);outline-offset:2px;}
 .fx-upload.dis{opacity:.55;pointer-events:none;}
-.fx-hint{font-weight:500;font-size:12.5px;line-height:1.4;color:#767e85;}
+.fx-hint{font-weight:500;font-size:12.5px;line-height:1.4;color:var(--ink-3);}
 /* Log out under the profile page's and the correction request's Save: the one way off either
    page, and it leaves the account (there is no "Not now", 2026-09-29) */
-.gate-out{display:block;margin:10px auto 0;background:none;border:none;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:14px;color:#4f565c;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-.gate-out:hover{color:#0f1215;}
+.gate-out{display:block;margin:10px auto 0;background:none;border:none;padding:8px 12px;font-family:var(--font-body);font-weight:600;font-size:14px;color:var(--ink-2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+.gate-out:hover{color:var(--ink);}
 .gate-out:disabled{opacity:.5;cursor:default;}
 /* Post-ride rating (#rate-modal, renderRateModal, 2026-10-03): the correction request's card, one
    1-10 scale per question, a part's questions indented under it, a why box under a score of 8 or less.
    Under the account's own pages (z-index) in case both are up. */
 #rate-modal .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 #rate-modal .rg-box:focus,#rate-modal .rg-box:focus-visible{outline:none;}
-.rg-kicker{color:#006b3d;}
-.rg-kicker .fx-flag{background:#e8f6ee;color:#008f52;}
-.rg-meta{margin-top:6px;font-weight:600;font-size:13px;color:#4f565c;}
+.rg-kicker{color:var(--go-2);}
+.rg-kicker .fx-flag{color:var(--go);}
+.rg-meta{margin-top:6px;font-weight:600;font-size:13px;color:var(--ink-2);}
 .rg-list{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
-.rg-grp{border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:12px;background:#fbfbf9;display:flex;flex-direction:column;gap:12px;}
+.rg-grp{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--paper);display:flex;flex-direction:column;gap:12px;}
 .rg-q{display:flex;flex-direction:column;gap:8px;}
-.rg-q.rg-sub{padding-inline-start:12px;border-inline-start:2px solid rgba(15,18,21,.12);}
-.rg-lbl{font-weight:700;font-size:15px;color:#0f1215;}
-.rg-sub .rg-lbl{font-weight:600;font-size:14px;color:#2b3136;}
+.rg-q.rg-sub{padding-inline-start:12px;border-inline-start:2px solid var(--line);}
+.rg-lbl{font-weight:700;font-size:15px;color:var(--ink);}
+.rg-sub .rg-lbl{font-weight:600;font-size:14px;color:var(--ink);}
 .rg-scale{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;}
-.rg-b{height:36px;min-width:0;padding:0;border-radius:8px;border:1px solid rgba(15,18,21,.15);background:#fff;font-family:var(--font-body);font-weight:700;font-size:14px;color:#0f1215;cursor:pointer;}
-.rg-b:hover{border-color:#008f52;}
-.rg-b.on{background:#0f1215;border-color:#0f1215;color:#fff;}
-.rg-b:focus-visible{outline:2px solid #008f52;outline-offset:2px;}
-.rg-q.err .rg-b:not(.on){border-color:#b42318;}
-.rg-why-l{font-weight:600;font-size:13px;line-height:1.4;color:#4f565c;}
-.rg-why,.rg-note textarea{width:100%;box-sizing:border-box;border:1px solid rgba(15,18,21,.15);border-radius:8px;padding:10px 12px;font-family:var(--font-body);font-weight:500;font-size:16px;color:#0f1215;background:#fff;resize:vertical;outline:none;margin:0;}
-.rg-why:focus,.rg-note textarea:focus{border-color:#008f52;}
-.rg-q.err .rg-why{border-color:#b42318;}
-.rg-skip{align-self:flex-start;background:none;border:1px solid rgba(15,18,21,.18);border-radius:999px;padding:8px 14px;font-family:var(--font-body);font-weight:600;font-size:13px;color:#4f565c;cursor:pointer;}
-.rg-skip.on{border-color:#008f52;background:#e8f6ee;color:#006b3d;}
+.rg-b{height:44px;min-width:0;padding:0;border-radius:8px;border:1px solid var(--line-2);background:var(--card);font-family:var(--font-body);font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;}
+.rg-b:hover{border-color:var(--go);}
+.rg-b.on{background:var(--ink);border-color:var(--ink);color:var(--card);}
+.rg-b:focus-visible{outline:2px solid var(--go);outline-offset:2px;}
+.rg-q.err .rg-b:not(.on){border-color:var(--red);}
+.rg-why-l{font-weight:600;font-size:13px;line-height:1.4;color:var(--ink-2);}
+.rg-why,.rg-note textarea{width:100%;box-sizing:border-box;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;font-family:var(--font-body);font-weight:500;font-size:16px;color:var(--ink);background:var(--card);resize:vertical;outline:none;margin:0;}
+.rg-why:focus,.rg-note textarea:focus{border-color:var(--go);}
+.rg-q.err .rg-why{border-color:var(--red);}
+.rg-skip{align-self:flex-start;background:none;border:1px solid var(--line-2);border-radius:999px;padding:8px 14px;font-family:var(--font-body);font-weight:600;font-size:13px;color:var(--ink-2);cursor:pointer;}
+.rg-skip.on{border-color:var(--go);background:var(--go-wash);color:var(--go-2);}
 /* A desk-added booking's waiver (#waiver-gate, renderWaiverGate, 2026-10-04): the correction request's
    card, the ride it is for (name, day and date, time, place, riders) above the waiver's text and its
    tick. The rating page's layer: the rating waits for it, so the two are never up together. */
 #waiver-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 #waiver-gate .wg-box:focus,#waiver-gate .wg-box:focus-visible{outline:none;}
-.wg-sess{margin-top:18px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px;background:#fbfbf9;display:flex;flex-direction:column;gap:8px;}
-.wg-ev{font-weight:800;font-size:17px;line-height:1.25;color:#0f1215;}
-.wg-ln{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;line-height:1.35;color:#2b3136;}
-.wg-ln .cu-ic{flex-shrink:0;color:#008f52;}
-.wg-sec{margin-top:6px;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#4f565c;}
+.wg-sess{margin-top:18px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--paper);display:flex;flex-direction:column;gap:8px;}
+.wg-ev{font-weight:800;font-size:17px;line-height:1.25;color:var(--ink);}
+.wg-ln{display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;line-height:1.35;color:var(--ink);}
+.wg-ln .cu-ic{flex-shrink:0;color:var(--go);}
+.wg-sec{margin-top:6px;font-weight:600;font-size:13px;color:var(--ink-2);}
 .wg-riders{list-style:none;display:flex;flex-direction:column;gap:4px;}
-.wg-riders li{display:flex;align-items:baseline;gap:8px;font-weight:600;font-size:14px;color:#0f1215;overflow-wrap:anywhere;}
-.wg-num{font-weight:800;color:#008f52;}
-.wg-text{margin-top:14px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px 16px;max-height:240px;overflow-y:auto;font-weight:500;font-size:13.5px;line-height:1.65;color:#4f565c;background:#fff;}
-.wg-text:focus-visible{outline:2px solid #008f52;outline-offset:2px;}
-.wg-agree{display:flex;align-items:center;gap:12px;margin-top:12px;border:1.5px solid rgba(15,18,21,.15);border-radius:12px;padding:14px 16px;cursor:pointer;min-height:52px;font-weight:600;font-size:14px;line-height:1.4;color:#0f1215;}
-.wg-agree.on{border-color:#008f52;background:#e8f6ee;}
-.wg-cb{appearance:auto;-webkit-appearance:checkbox;width:20px;height:20px;flex:none;accent-color:#008f52;margin:0;}
+.wg-riders li{display:flex;align-items:baseline;gap:8px;font-weight:600;font-size:14px;color:var(--ink);overflow-wrap:anywhere;}
+.wg-num{font-weight:800;color:var(--go);}
+.wg-text{margin-top:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;max-height:240px;overflow-y:auto;font-weight:500;font-size:13.5px;line-height:1.65;color:var(--ink-2);background:var(--card);}
+.wg-text:focus-visible{outline:2px solid var(--go);outline-offset:2px;}
+.wg-agree{display:flex;align-items:center;gap:12px;margin-top:12px;border:1.5px solid var(--line-2);border-radius:12px;padding:14px 16px;cursor:pointer;min-height:52px;font-weight:600;font-size:14px;line-height:1.4;color:var(--ink);}
+.wg-agree.on{border-color:var(--go);background:var(--go-wash);}
+.wg-cb{appearance:auto;-webkit-appearance:checkbox;width:20px;height:20px;flex:none;accent-color:var(--go);margin:0;}
 /* A Run for Her runner agrees that their details go to Sela and JYC (#share-gate, renderShareGate,
    2026-10-06): the waiver page's card, layer and tick, the run above the five details shared. */
 #share-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 #share-gate .sg-box:focus,#share-gate .sg-box:focus-visible{outline:none;}
 #share-gate .sg-sub{margin-top:16px;}
-.sg-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:10px;border:1px solid rgba(15,18,21,.12);border-radius:12px;padding:14px;background:#fff;}
-.sg-list li{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;line-height:1.35;color:#0f1215;overflow-wrap:anywhere;}
-.sg-list .cu-ic{flex-shrink:0;color:#008f52;}
-.sg-note{margin-top:10px;font-size:12.5px;line-height:1.45;color:#4f565c;}
-.rg-bfn{margin-top:-4px;font-size:12px;line-height:1.4;color:#4f565c;}
+.sg-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);}
+.sg-list li{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;line-height:1.35;color:var(--ink);overflow-wrap:anywhere;}
+.sg-list .cu-ic{flex-shrink:0;color:var(--go);}
+.sg-note{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--ink-2);}
+.rg-bfn{margin-top:-4px;font-size:12px;line-height:1.4;color:var(--ink-2);}
 /* Community row: a rider's social profiles, staff-side */
 .soc-links{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;}
 .soc-link{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px 0 7px;border-radius:999px;border:1px solid var(--border);color:var(--text);text-decoration:none;font-size:var(--staff-fs-sm,12px);font-weight:700;}
@@ -8017,6 +8015,13 @@ body:not(.view-staff) :is(#cu,*):is(.page-title,.form-title,.modal-title,.auth-t
   .ticket-num-label,.ticket-label,.cu-tk-sec,.cu-tk-total-k,.cu-k10,.cu-rv-k,.cu-rv-sec,.cu-meter-k,.cu-photo-k,
   .rides-stat-label,.sess-comm-chip,.landing-eyebrow,.cu-tk-label,.wl-loud,.cu-tr-wl,.cu-ad-cat,.reg-row-label,.cust-back-btn){
   text-transform:none;letter-spacing:0;font-style:normal;}
+/* Every element, not a list of classes (2026-10-10). Features added after the list above (the pop-up
+   pages, the bike and event sheets, the badge sheet, the add-ons' total) brought tracked capitals back
+   one class at a time. The owner's landing tiles keep theirs; the large figures keep their own tight
+   tracking; a promo code is typed in capitals but its placeholder is not. */
+body:not(.view-staff) :is(#cu,*):not(:where(.landing-event-card,.landing-event-card *,svg *,#kiosk *,.cu-promo-in,
+  .page-title,.sess-card-time,.ticket-num,.land-today-t,.mr-season-n,.reg-side-time)){text-transform:none;letter-spacing:normal;}
+body:not(.view-staff) .cu-promo-in::placeholder{text-transform:none;letter-spacing:normal;}
 body:not(.view-staff) .page-title{font-size:var(--fs-26);font-weight:700;letter-spacing:-.5px;line-height:1.15;color:var(--ink);margin:0;}
 body:not(.view-staff) .page-sub{font-size:var(--fs-15);color:var(--ink-2);line-height:1.5;}
 body:not(.view-staff) .form-title{font-size:var(--fs-17);font-weight:700;}
@@ -8229,12 +8234,10 @@ body:not(.view-staff) .landing-event-card{
 /* ── Account: the season in sentences ───────────────────────────────────────────────────────────── */
 body:not(.view-staff) .mr-season{display:grid;gap:10px;margin:18px 0 8px;padding:18px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
 body:not(.view-staff) .mr-season-rides{display:flex;align-items:baseline;gap:8px;}
-body:not(.view-staff) .mr-season-n{font-size:var(--fs-34);font-weight:700;letter-spacing:-1px;line-height:1;}
+body:not(.view-staff) .mr-season-n{font-size:var(--fs-20);font-weight:700;line-height:1.2;}
 body:not(.view-staff) .mr-season-w{font-size:var(--fs-15);color:var(--ink-2);}
 body:not(.view-staff) .mr-season-tier{font-size:var(--fs-15);color:var(--ink-2);}
 body:not(.view-staff) .mr-season-tier strong{color:var(--ink);}
-body:not(.view-staff) .mr-season .mr-tierbar{height:4px;margin:8px 0 0;max-width:none;border-radius:2px;background:var(--card-3);overflow:hidden;}
-body:not(.view-staff) .mr-season .cu-tier-fill{display:block;height:100%;width:var(--cu-w);background:var(--go);}
 body:not(.view-staff) .mr-season-line{display:flex;align-items:center;gap:8px;font-size:var(--fs-15);color:var(--ink);}
 body:not(.view-staff) .mr-season-line .cu-ic{color:var(--go);}
 body:not(.view-staff) .mr-season-next{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:0 14px;text-align:start;
@@ -8245,7 +8248,7 @@ body:not(.view-staff) .mr-season-next:hover{background:var(--card-3);}
 body:not(.view-staff) .mr-badge{font-size:var(--fs-12);border-radius:10px;}
 body:not(.view-staff) .mr-badge-nm{line-height:1.2;height:2.4em;min-height:0;}
 body:not(.view-staff) .rides-zero-num{color:var(--ink-4);}
-body:not(.view-staff) .cu-meter{background:var(--card-3);}
+body:not(.view-staff) .cu-prof-miss{max-width:640px;margin:16px auto;font-size:var(--fs-15);line-height:1.5;color:var(--amber);}
 
 /* ── Rating: ten 44px targets in two rows of five ───────────────────────────────────────────────── */
 /* ── Wide screens: the page is not a stretched phone ──────────────────────────────────────────── */
@@ -8319,10 +8322,11 @@ body:not(.view-staff) .myr-h{font-size:var(--fs-15);font-weight:700;color:var(--
 body:not(.view-staff) .myr-weeks{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:3px;}
 body:not(.view-staff) .myr-weeks i{display:block;aspect-ratio:1;max-height:14px;border-radius:3px;background:var(--card-3);}
 body:not(.view-staff) .myr-weeks i.on{background:var(--go);}
-body:not(.view-staff) .myr-wl{font-size:var(--fs-12);color:var(--ink-3);margin-top:6px;}
-body:not(.view-staff) .myr-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px;margin:14px 0 0;}
-body:not(.view-staff) .myr-f dt{font-size:var(--fs-12);color:var(--ink-3);}
-body:not(.view-staff) .myr-f dd{margin:2px 0 0;font-size:var(--fs-15);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .myr-wl{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .myr-f{display:grid;margin:12px 0 0;}
+body:not(.view-staff) .myr-f>div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-top:1px solid var(--line);}
+body:not(.view-staff) .myr-f dt{font-size:var(--fs-15);color:var(--ink-2);}
+body:not(.view-staff) .myr-f dd{margin:0;font-size:var(--fs-15);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:end;}
 body:not(.view-staff) .bd-next{display:grid;gap:8px;margin:10px 0 12px;}
 body:not(.view-staff) .bd-next-h{font-size:var(--fs-13);color:var(--ink-3);}
 body:not(.view-staff) .bd-next-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-ctl);text-align:start;color:var(--ink);cursor:pointer;}
@@ -8374,6 +8378,57 @@ body:not(.view-staff) .fx-em .form-row{grid-template-columns:1fr;gap:0;}
 #wl-claim .wlc-ends b{color:var(--go);font-variant-numeric:tabular-nums;font-size:var(--fs-20);}
 #wl-claim .wlc-mine{display:flex;align-items:center;justify-content:center;text-decoration:none;margin-top:14px;}
 #wl-claim .fx-kicker{color:var(--go);}
+/* ── Nothing arrives with a flourish (2026-10-10): no fade-and-rise on a tab, a dialog or the badge sheet,
+   no pulsing dot. The one designed motion stays today's ticket line (and the QR's live line). ───────── */
+body:not(.view-staff) :is(.tab-panel.active,.modal-backdrop,.modal-box,.confirm-box,.badge-pop,.badge-pop-box,
+  .photo-lightbox,.photo-lightbox img,.pay-menu-popup,.dot-green,.refresh-dot){animation:none;}
+
+/* ── The badge sheet: a name, not a trophy plate ──────────────────────────────────────────────────── */
+body:not(.view-staff) .badge-pop-box{border:1px solid var(--line);border-radius:var(--r-sheet);background:var(--card);box-shadow:var(--sh-float);}
+body:not(.view-staff) .badge-pop-nm{font-size:var(--fs-20);font-weight:700;font-style:normal;color:var(--ink);font-synthesis:none;margin-bottom:8px;}
+body:not(.view-staff) :is(.badge-pop-how,.badge-pop-lvn){font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .badge-pop-new{font-size:var(--fs-13);font-weight:600;color:var(--go);}
+body:not(.view-staff) :is(.badge-pop-prog,.badge-lvl-n){font-family:inherit;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) :is(.badge-pop-earned,.badge-lvl-n){display:inline-flex;align-items:center;gap:6px;}
+body:not(.view-staff) .badge-pop-note{font-style:normal;background:var(--card-2);border-radius:var(--r-ctl);}
+body:not(.view-staff) .badge-lvl{border-radius:var(--r-ctl);background:var(--card-2);border-color:var(--line);}
+
+/* ── The session picker: days, each said once, with its sessions as rows (_sessDays, 2026-10-10) ──── */
+body:not(.view-staff) .session-cards-grid{grid-auto-rows:auto;gap:20px;}
+body:not(.view-staff) .sess-day-h{margin:0 0 8px;font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .sess-day-list{display:grid;grid-auto-rows:1fr;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);overflow:hidden;}
+body:not(.view-staff) .sess-day-list .sess-card{border:0;border-radius:0;border-top:1px solid var(--line);}
+body:not(.view-staff) .sess-day-list>.sess-wrap:first-child>.sess-card{border-top:0;}
+body:not(.view-staff) .sess-day-list .sess-card:focus-visible{outline-offset:-3px;}
+body:not(.view-staff) .sess-day-list .sess-card.sess-selected{box-shadow:inset 0 0 0 2px var(--ink);}
+body:not(.view-staff) .sess-card-head .sess-card-time{flex:1;min-width:0;}
+body:not(.view-staff) .sess-card-sub{display:flex;align-items:baseline;gap:12px;min-width:0;}
+body:not(.view-staff) .sess-card-sub .sess-card-meta{flex:1;min-width:0;}
+body:not(.view-staff) .sess-card-spots::before{display:none;}
+
+/* ── Nothing booked: a drawn bike, one line, and the next ride that can be booked (2026-10-10) ────── */
+body:not(.view-staff) .rides-zero{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 16px 48px;border-top:0;margin-top:16px;text-align:center;}
+body:not(.view-staff) .rides-zero-ic{color:var(--ink-3);display:flex;}
+body:not(.view-staff) .rides-zero-msg{margin:0;font-size:var(--fs-15);font-weight:600;color:var(--ink-2);}
+body:not(.view-staff) .rides-zero-next{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;max-width:360px;min-height:44px;
+  padding:14px 16px;border:1px solid var(--line);border-radius:var(--r-card);background:var(--card);color:var(--ink);text-align:start;cursor:pointer;}
+body:not(.view-staff) .rides-zero-next:hover{background:var(--card-2);}
+body:not(.view-staff) .rides-zero-next .rz-k{font-size:var(--fs-13);font-weight:600;color:var(--go);}
+body:not(.view-staff) .rides-zero-next .rz-t{font-size:var(--fs-17);font-weight:700;}
+body:not(.view-staff) .rides-zero-next .rz-m{font-size:var(--fs-13);color:var(--ink-3);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .rides-zero .btn-primary{width:100%;max-width:360px;}
+
+/* ── A ticket's buttons in one voice (2026-10-10): calendar and directions side by side, the Wallet
+   button under them, and the booking's own changes (edit, reschedule, cancel; rate, book again on a
+   past ride) as one quiet row of text buttons under a rule, all in one size and weight. ──────────── */
+body:not(.view-staff) .cu-tk-btns :is(.cu-tk-cal,.cu-tk-dir){font-size:var(--fs-15);font-weight:600;gap:8px;padding-inline:8px;white-space:nowrap;min-width:0;}
+body:not(.view-staff) .cu-tk-actions{grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:4px;margin-top:2px;border-top:1px solid var(--line);}
+body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .cu-tk-actions{border-top-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red){
+  background:transparent;border-color:transparent;font-size:var(--fs-15);font-weight:600;gap:6px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red):hover{border-color:var(--line-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red):hover{background:var(--night-2);border-color:var(--night-line);}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -8736,7 +8791,7 @@ body .lec-wrap .lec-about:focus-visible{outline:2px solid currentColor;outline-o
   body .lec-wrap.has-about>.landing-event-card{padding-bottom:50px;}
   body .lec-wrap .lec-about{inset-inline-start:20px;bottom:14px;}
 }
-.session-cards-grid>.sess-wrap{position:relative;display:flex;min-width:0;}
+.session-cards-grid>.sess-wrap,.sess-day-list>.sess-wrap{position:relative;display:flex;min-width:0;}
 .sess-wrap>.sess-card{flex:1 1 auto;width:100%;min-width:0;}
 body .sess-wrap.has-about>.sess-card{padding-bottom:40px;}
 body .sess-about{position:absolute;inset-inline-start:35px;bottom:11px;z-index:1;margin:0;padding:3px 0;min-height:0;border:0;
@@ -8936,6 +8991,8 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{
   border:1px solid rgba(14,151,213,.4);color:#fff;}
 html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{
   background:var(--jcc-chev-rtl) left 18px bottom 12px/74px 20px no-repeat,linear-gradient(248deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;}
+/* the chevrons sit in the card's bottom corner, under the last row of buttons: the card keeps room for them */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{padding-bottom:30px;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc .ticket-num{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;}
 /* the light cards: ink on white, the event's own accent where the night ticket has its neon */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event){

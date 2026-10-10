@@ -119,7 +119,7 @@ test.describe('sign-up: the confirmation is required, ride news is not', () => {
     await waitForSb(page);
     await fillSignup(page);
     await page.evaluate('doSignup()');
-    await expect(page.locator('#auth-err')).toHaveText('Please confirm you’ve read the Privacy Notice.');
+    await expect(page.locator('#auth-err')).toHaveText('Tick to confirm you’ve read the Privacy Notice.');
     expect(signup.length).toBe(0);
   });
 
@@ -205,7 +205,7 @@ test.describe('the popup for existing accounts', () => {
     await expect(ask).toBeVisible();
     await ask.getByRole('button', { name: 'No ride news' }).click(); // not confirmed yet
     // the reminder sits right under the box, which is outlined - not at the foot of the sheet
-    await expect(page.locator('#rn-ask-ackerr')).toHaveText('Please confirm you’ve read the Privacy Notice.');
+    await expect(page.locator('#rn-ask-ackerr')).toHaveText('Tick to confirm you’ve read the Privacy Notice.');
     expect(await page.evaluate(`document.getElementById('cs-ack').nextElementSibling.id`)).toBe('rn-ask-ackerr');
     await expect(page.locator('#cs-ack')).toHaveCSS('outline-style', 'solid');
     expect(calls.length).toBe(1); // only the read

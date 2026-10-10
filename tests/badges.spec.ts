@@ -435,7 +435,8 @@ test.describe('@customer:account badges', () => {
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
     await expect(page.locator('#badge-pop .badge-pop-about')).toContainText('Every rider\'s story starts with one lap');
     await expect(page.locator('#badge-pop .badge-pop-lvn')).toHaveText('Level 1 of 4');
-    await expect(page.locator('#badge-pop .badge-lvl')).toHaveText([/First Lap[\s\S]*✓/, /Grid Regular[\s\S]*1\/5/, /Podium Pace[\s\S]*1\/10/, /Corniche 25[\s\S]*1\/25/]);
+    await expect(page.locator('#badge-pop .badge-lvl').first().locator('.badge-lvl-n svg')).toHaveCount(1);
+    await expect(page.locator('#badge-pop .badge-lvl')).toHaveText([/First Lap/, /Grid Regular[\s\S]*1\/5/, /Podium Pace[\s\S]*1\/10/, /Corniche 25[\s\S]*1\/25/]);
   });
 
   test('the whole catalogue in order, in equal tiles: a retired badge only for a rider who holds it, an admin\'s own greyed until given', async ({ page }) => {

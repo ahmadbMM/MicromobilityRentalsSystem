@@ -11,7 +11,7 @@ import { FILES as DIST_FILES, DIRS as DIST_DIRS } from './assemble-dist.mjs';
 import { minify as terserMinify } from 'terser';
 import CleanCSS from 'clean-css';
 import {
-  splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, partLangKeys, customerCss, splitSections,
+  splitStaff, resolveIncludes, mainScript, staffOnlyLangKeys, partLangKeys, customerCss, gateHover, splitSections,
   checkHandlerNames, formatHandlerOffenders, checkBareWrites, formatBareWrites, checkSizeBudget, gzipBytes,
   checkCustomerColors, checkNoEmoji, includedFiles, checkPhoneRulesVersion, checkFieldNames, formatFieldNames,
 } from './split-staff.mjs';
@@ -324,11 +324,12 @@ let out = await minify(src, {
 // the staff loader adds styles.css itself. app.css is written minified here, so the file in the repo
 // is the file that ships and its tag is the hash of those bytes.
 const appCssRes = customerCss(cssSource, out + '\n' + appCode, staffAll);
-const appCss = new CleanCSS({ level: 1 }).minify(appCssRes.css);
+const appHover = gateHover(appCssRes.css);
+const appCss = new CleanCSS({ level: 1 }).minify(appHover.css);
 if (appCss.errors.length) throw new Error(`build: app.css did not minify: ${appCss.errors.join('; ')}`);
 const appCssHash = createHash('sha256').update(appCss.styles).digest('hex').slice(0, 10);
 await writeFile(new URL('../app.css', import.meta.url), appCss.styles);
-console.log(`build: app.css ${appCss.styles.length} bytes (${appCssRes.dropped} staff-only rules, ${appCssRes.droppedBytes} bytes of styles.css, left to the staff loader)`);
+console.log(`build: app.css ${appCss.styles.length} bytes (${appCssRes.dropped} staff-only rules, ${appCssRes.droppedBytes} bytes of styles.css, left to the staff loader; ${appHover.gated} hover rules gated to a pointer)`);
 const beforeCss = out;
 out = out.replace(/app\.css\?v=[a-z0-9]+/g, `app.css?v=${appCssHash}`);
 if (out === beforeCss) throw new Error('build: the page links no app.css?v= to tag');

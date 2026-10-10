@@ -180,7 +180,7 @@ test.describe('@customer:a11y every field on the rider pages has a name', () => 
     await page.evaluate(`showCancelReasonModal('none')`);
     await page.locator('#cancel-reason-modal .cancel-reason-opt').last().click(); // Other: the box for their own words
     await expect(page.locator('#cancel-other-text')).toBeVisible();
-    await named(page, '#cancel-other-text', 'Please describe your reason...');
+    await named(page, '#cancel-other-text', 'Tell us the reason');
   });
 
   test('the application fix page names each field by its item\'s label', async ({ page }) => {

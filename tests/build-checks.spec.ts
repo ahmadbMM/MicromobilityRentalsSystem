@@ -38,6 +38,7 @@ type Checks = {
   staffOnlyLangKeys(keys: string[], customerText: string, staffText: string): Set<string>;
   customerCss(css: string, customerText: string, staffText: string): { css: string; kept: number; dropped: number; droppedBytes: number };
   cssTokens(css: string): { kind: string; text: string }[];
+  gateHover(css: string): { css: string; gated: number };
   checkFieldNames(raw: string, scope?: Set<string> | { except: Set<string> } | null): { half: string; total: number; named: number; unnamed: { line: number; tag: string; fn: string; text: string }[] };
   formatFieldNames(r: ReturnType<Checks['checkFieldNames']>, limit?: number): string;
 };
@@ -300,10 +301,25 @@ test.describe('@build the customer page leaves the staff half\'s strings and sty
     for (const gone of ['{a:2}', '{a:4}', '{a:9}', '{a:10}', 'max-width:9px']) expect(out, gone).not.toContain(gone);
   });
 
+  test('a rider\'s hover styles need a pointer: a tap on a phone leaves nothing stuck', async () => {
+    const { gateHover, cssTokens } = await load();
+    type Tk = { kind: string; text: string; prelude?: string; body?: string | null };
+    const r = gateHover('.a:hover{x:1}.b,.c:hover{x:2}@media (min-width:9px){.d:hover{x:3}.e{x:4}}.f:focus{x:5}');
+    expect(r.gated).toBe(3);
+    expect(r.css).toBe('@media (hover:hover) and (pointer:fine){.a:hover{x:1}}.b{x:2}@media (hover:hover) and (pointer:fine){.c:hover{x:2}}'
+      + '@media (min-width:9px){@media (hover:hover) and (pointer:fine){.d:hover{x:3}}.e{x:4}}.f:focus{x:5}');
+    // the built app.css: every :hover sits inside the pointer's @media
+    const flat = (css: string, at = ''): string[] => (cssTokens(css) as Tk[]).flatMap((t) => t.kind === 'rule' ? [at + t.text]
+      : t.kind === 'at' && t.body != null && /^@(media|supports)/.test(t.prelude || '') ? flat(t.body, at + t.prelude + '|') : []);
+    const loose = flat(read('app.css')).filter((x) => x.includes(':hover') && !x.includes('hover:hover'));
+    expect(loose.slice(0, 5)).toEqual([]);
+  });
+
   test('app.css is styles.css with rules taken out, never added or reordered', async () => {
-    const { cssTokens } = await load();
-    // app.css is the build's clean-css pass over a filtered styles.css, so against the same pass over the
-    // whole file every rule it keeps (with the @media around it) must be found, in the same order.
+    const { cssTokens, gateHover } = await load();
+    // app.css is the build's clean-css pass over a filtered styles.css (its :hover rules moved under a
+    // pointer's @media), so against the same passes over the whole file every rule it keeps (with the
+    // @media around it) must be found, in the same order.
     const { default: CleanCSS } = (await import('clean-css' as string)) as { default: new (o: object) => { minify(css: string): { styles: string } } };
     const flat = (css: string, at = ''): string[] => cssTokens(css).flatMap((t) => {
       const tk = t as { kind: string; text: string; prelude?: string; body?: string | null };
@@ -311,7 +327,7 @@ test.describe('@build the customer page leaves the staff half\'s strings and sty
       if (tk.kind === 'at' && tk.body != null && /^@(media|supports)/.test(tk.prelude || '')) return flat(tk.body, at + tk.prelude + '|');
       return [];
     });
-    const full = flat(new CleanCSS({ level: 1 }).minify(read('styles.css')).styles);
+    const full = flat(new CleanCSS({ level: 1 }).minify(gateHover(read('styles.css')).css).styles);
     const cust = flat(read('app.css'));
     expect(cust.length).toBeGreaterThan(1000);
     expect(cust.length).toBeLessThan(full.length);
