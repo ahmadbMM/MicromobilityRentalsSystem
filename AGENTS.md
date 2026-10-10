@@ -629,6 +629,17 @@ brought the template look back. Fixed, and guarded so it stays fixed:
 - **Copy**: no "Please" at the start of rider messages, no "successfully", no "it only takes a minute".
   Write "Enter your email.", "Saved.", "You’re signed out."
 
+## Accounts and Members as a list (2026-10-10)
+
+The owner: "make the accounts and members pages look like a list instead and make it very aligned and organized and
+equally space". `_amRowInner` draws each account as columns (`.am-c-name`, `.am-c-email` / `.am-c-phone` inside
+`.am-cust-contact`, `.am-c-soc`, `.am-c-tags`) in `.am-list` under a header row (`.am-head`, not `.am-cust`, so specs
+counting accounts never count it). From 1280px one line a row; 768-1279 two lines a row in the same columns; a phone
+keeps the card. A cell that does not fit ends in an ellipsis; social accounts show one link (the Instagram count chip
+always) and tags one chip, then "+N" (`_amPlusN`; the card shows them all). What needs staff action (missing details,
+a correction, a deletion request, a look-off, no gender) is `.am-extras`, a full-width strip inside its row. The six
+buttons have fixed widths so every row's columns line up.
+
 ## The ride night on the ticket, the route, Your rides (2026-10-01)
 
 The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data the app already holds; no migration.

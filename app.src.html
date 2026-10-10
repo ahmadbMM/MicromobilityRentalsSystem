@@ -43243,30 +43243,38 @@ function _segMsgOpen(){
 function _segMsgSkip(){const R=S._seg&&S._seg.run;if(!R)return;R.skipped++;R.i++;if(R.i>=R.list.length)_segMsgEnd();_segPaint();}
 function _segMsgStop(){const R=S._seg&&S._seg.run;if(!R)return;R.skipped+=R.list.length-R.i;R.i=R.list.length;_segMsgEnd();_segPaint();}
 function _segMsgEnd(){const g=S._seg,R=g&&g.run;if(!R||R.logged)return;R.logged=true;logAction(t('segMsgLog').replace('{0}',t(g.kind==='news'?'segMsgNews':'segMsgOps')).replace('{1}',R.sent));}
+// "+3" after the first few chips of a list cell, for what the row has no room to show (the list hides the rest; the
+// phone's card shows them all and hides this).
+function _amPlusN(n,keep){return n>keep?`<span class="am-moren" title="${n-keep}">+${n-keep}</span>`:'';}
 function _amRowInner(c){
   {
     const myTags=_tagsForCust(c.id);
     const _tm=_tagsById();
     const myCT=_ctRowsFor(c.id).filter(ct=>_tm[ct.tag_id]);
-    const chips=myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;
+    const chips=myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):'<span class="am-none">—</span>';
     const picking=S.tagCustId===c.id;
     const picker=picking?`<div class="am-picker">${(S.tags||[]).map(tg=>{const on=myTags.some(x=>x.id===tg.id);return `<button class="am-pick${on?' on':''}" aria-pressed="${!!(on)}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
-    const contact=[c.email?`<bdi>${_pii('email',c.email,c.id)}</bdi>${_siSlot(c.id)}`:'',c.phone?`<bdi>${_pii('phone',c.phone,c.id)}</bdi>`:'',c.heard_from?`<bdi>${esc(heardLabel(c.heard_from))}</bdi>`:''].filter(Boolean)
-      .join(' <span class="cmy-sep">·</span> ');
+    // One line per account, in columns that line up down the list (2026-10-10, the owner: "make the accounts and
+    // members pages look like a list ... very aligned and organized and equally space"): the name (with the sorted-on
+    // value or the money spent under it), the email with its sign-in marks, the phone, the social accounts, the tags
+    // and badges. Whatever asks for staff action (missing details, a correction asked for, a deletion request, a
+    // look-off check, no gender) is a strip under the row, the full width, so the rows stay one height.
+    const email=c.email?`<bdi>${_pii('email',c.email,c.id)}</bdi>${_siSlot(c.id)}`:'<span class="am-none">—</span>';
+    const phone=c.phone?`<bdi>${_pii('phone',c.phone,c.id)}</bdi>`:'<span class="am-none">—</span>';
+    const bdgs=_bdgOk()?_bdgHeld(c.id).map(x=>_bdgById(x.badge_id)).filter(Boolean).map(b=>`<span class="am-bdg" title="${esc(_bdgName(b))}" role="img" aria-label="${esc(_bdgName(b))}">${_bdgMedal(b.icon,_bdgCol(b))}</span>`):[];
+    const nSoc=c.socials&&typeof c.socials==='object'?SOCIAL_NETS.filter(([n])=>c.socials[n]).length:0; // the Instagram count chip always shows
+    const sub=[c.heard_from?`<div class="am-meta am-heard">${esc(heardLabel(c.heard_from))}</div>`:'',S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):'',_amSortLine(c)].filter(Boolean).join('');
     // Accounts made before signup asked for a gender have none; offer it on the row, one tap.
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"male")}">${t('genderMale')}</button><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"female")}">${t('genderFemale')}</button></div>`;
     const selBox=S.amSel?(on=>`<button type="button" class="am-sel" aria-pressed="${on?'true':'false'}" aria-label="${esc(t('amSelBtn'))} · ${esc(c.name||'')}" data-on-click="${_on("_amSelToggle",c.id)}">${_artIcon(on?'boxOn':'boxOff',18)}</button>`)(_amSelOn(c.id)):'';
+    const extras=[S.amMissing&&_amMissingOf(c).length?`<div class="am-meta am-missing">${t('amMissingLine').replace('{0}',_amMissingOf(c).join(', '))}</div>`:'',
+      _fixPendingLine(c),_delReqLine(c),S.amSuspect?_sxLineHtml(c):'',genderAsk].filter(Boolean).join('');
     return `<div class="am-cust${S.amSel?' am-selmode':''}">${selBox}
       <div class="am-cust-main">
-        <div class="am-cust-name">${esc(c.name||'—')}</div>
-        ${contact?`<div class="am-cust-contact">${contact}</div>`:''}
-        ${_socLinksHtml(c,_igChipHtml(c))}
-        ${S.amMissing&&_amMissingOf(c).length?`<div class="am-meta am-missing">${t('amMissingLine').replace('{0}',_amMissingOf(c).join(', '))}</div>`:''}
-        ${_fixPendingLine(c)}
-        ${S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):''}${_amSortLine(c)}
-        ${_delReqLine(c)}
-        ${S.amSuspect?_sxLineHtml(c):''}
-        <div class="am-chips">${chips}${_bdgOk()?_bdgHeld(c.id).map(x=>_bdgById(x.badge_id)).filter(Boolean).map(b=>`<span class="am-bdg" title="${esc(_bdgName(b))}" role="img" aria-label="${esc(_bdgName(b))}">${_bdgMedal(b.icon,_bdgCol(b))}</span>`).join(''):''}</div>${genderAsk}
+        <div class="am-c-name"><div class="am-cust-name">${esc(c.name||'—')}</div>${sub?`<div class="am-c-sub">${sub}</div>`:''}</div>
+        <div class="am-cust-contact"><span class="am-c-email">${email}</span><span class="am-c-phone">${phone}</span></div>
+        <div class="am-c-soc">${_socLinksHtml(c,_igChipHtml(c))||'<span class="am-none">—</span>'}${_amPlusN(nSoc,1)}</div>
+        <div class="am-c-tags"><div class="am-chips">${chips}${bdgs.join('')}</div>${_amPlusN(myCT.length+bdgs.length,1)}</div>
       </div>
       <div class="am-cust-actions">
         <button class="btn-sm btn-secondary am-flag${_flagFieldsOf(c).length?' on':''}" data-on-click="${_on("showFlagFieldsModal",c.id)}" title="${esc(t('fixFlagBtn'))}" aria-label="${esc(t('fixFlagBtn'))} · ${esc(c.name||'')}">${_artIcon('flag',14)}<span class="am-btn-lbl">${t('fixFlagBtn')}</span></button>
@@ -43276,6 +43284,7 @@ function _amRowInner(c){
         <button class="btn-sm btn-secondary" data-on-click="${_on("showEditCustomerModal",c.id)}">${t('editBtn')}</button>
         <button class="btn-sm ${picking?'btn-green':'btn-secondary'}" data-on-click="${_on("_amPickTags",c.id)}">${picking?t('doneBtn'):t('amEditTags')}</button>
       </div>
+      ${extras?`<div class="am-extras">${extras}</div>`:''}
     </div>${picker}`;
   }
 }
@@ -43332,7 +43341,13 @@ function _commAccounts(){
     ${_amPanel()}
     ${_svBar('accounts')}
     ${S.amSel?`<div id="am-sel-bar" class="am-selbar" role="group" aria-label="${esc(t('amSelBtn'))}">${_amSelBarInner()}</div>`:''}
-    <div id="am-cust-rows">${rows}</div>
+    <div class="am-list">
+      <div class="am-head${S.amSel?' am-selmode':''}" aria-hidden="true">${S.amSel?'<span class="am-sel"></span>':''}
+        <div class="am-cust-main"><div>${t('nameLabel')}</div><div class="am-cust-contact"><span>${t('emailAddr')}</span><span>${t('phoneNum')}</span></div><div>${t('socialsLabel')}</div><div>${t('amTagsTitle')}</div></div>
+        <div class="am-cust-actions"></div>
+      </div>
+      <div id="am-cust-rows">${rows}</div>
+    </div>
   </div>`;
   return custPanel;
 }

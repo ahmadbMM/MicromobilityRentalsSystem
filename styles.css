@@ -9392,3 +9392,79 @@ body.view-staff .pii-v:focus{outline:medium none;}
 #mny-host .pa-stamp.pa-due b{color:var(--orange);}
 #mny-host .pa-stamp button{min-height:44px;}
 #mny-host .pa-tbl tr.pa-off td{color:var(--muted);}
+
+/* ── Accounts and Members as a list (2026-10-10, the owner: "make the accounts and members pages look like a list
+   instead and make it very aligned and organized and equally space") ──
+   On a tablet or a laptop every account is one row of the same height, in columns that line up under a header:
+   name, email, phone, social accounts, tags and badges, then the same six buttons at the same width. A cell that
+   does not fit ends in an ellipsis rather than wrapping (the full value is in Edit and Bookings & history). What
+   asks for staff action is a strip under its row (.am-extras), so the rows themselves stay even. A phone keeps
+   the card. */
+@media (min-width:768px){
+  body.view-staff .am-list{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--sf-card,var(--s1));}
+  body.view-staff .am-list :is(.am-cust,.am-head){display:flex;align-items:center;gap:14px;min-height:62px;margin:0;padding:8px 16px;
+    border:0;border-bottom:1px solid var(--border);border-radius:0;background:none;box-sizing:border-box;}
+  body.view-staff .am-list #am-cust-rows .am-row:last-child>.am-cust:last-child{border-bottom:0;}
+  body.view-staff .am-list #am-cust-rows .am-cust:hover{background:rgba(var(--tint-rgb),.025);}
+  body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{flex:1;min-width:0;display:grid;align-items:center;gap:0 16px;
+    grid-template-columns:minmax(0,1.2fr) minmax(0,1.45fr) 128px minmax(0,1.3fr) minmax(0,1fr);}
+  body.view-staff .am-list .am-cust-contact{display:contents;}
+  body.view-staff .am-list .am-cust-main>*,body.view-staff .am-list .am-cust-contact>*{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  body.view-staff .am-list .am-cust-name{font-size:14px;font-weight:700;line-height:20px;}
+  body.view-staff .am-list .am-c-sub{display:flex;gap:10px;overflow:hidden;line-height:18px;}
+  body.view-staff .am-list .am-c-sub .am-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;margin:0;}
+  body.view-staff .am-list :is(.am-c-email,.am-c-phone){font-size:13px;color:var(--text);line-height:20px;}
+  body.view-staff .am-list .am-c-phone{font-variant-numeric:tabular-nums;}
+  body.view-staff .am-list .am-c-soc .soc-links,body.view-staff .am-list .am-chips{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin:0;overflow:hidden;}
+  body.view-staff .am-list .am-c-soc .soc-link,body.view-staff .am-list .am-chips>*{flex:none;}
+  body.view-staff .am-list .am-none{color:var(--muted-l,var(--muted));}
+  body.view-staff .am-list :is(.am-c-soc,.am-c-tags){display:flex;align-items:center;gap:6px;}
+  body.view-staff .am-list .am-c-soc .soc-links>:nth-child(n+2):not(.ig-chip),body.view-staff .am-list .am-chips>:nth-child(n+2){display:none;}
+  body.view-staff .am-list .am-moren{flex:none;font-size:12px;font-weight:700;color:var(--muted);}
+  /* the same six buttons, the same width on every row (and an empty slot of that width over them in the header) */
+  body.view-staff .am-list .am-cust-actions{flex:none;width:316px;display:flex;justify-content:flex-end;align-items:center;gap:6px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm{height:36px;min-height:36px;padding:0;justify-content:center;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:is(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:38px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:68px;}
+  body.view-staff .am-list .am-sel{width:36px;height:36px;flex:none;}
+  /* the header: the columns' names in the staff tables' style */
+  body.view-staff .am-list .am-head{min-height:40px;padding-block:0;background:var(--sf-head,var(--s2));}
+  body.view-staff .am-list .am-head .am-cust-main>*,body.view-staff .am-list .am-head .am-cust-contact>*{font-size:12px;font-weight:700;color:var(--muted);}
+  /* what needs a staffer, under its row */
+  body.view-staff .am-list .am-cust:has(>.am-extras){flex-wrap:wrap;row-gap:4px;}
+  body.view-staff .am-list .am-extras{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:6px 18px;padding:0 0 4px;}
+  body.view-staff .am-list .am-extras>*{margin:0;}
+  body.view-staff .am-list .am-picker{padding:4px 16px 14px;}
+}
+/* an iPad or a narrow laptop: two lines a row, still in columns - name over email, phone over the social accounts,
+   then the tags - and the buttons a little narrower */
+@media (min-width:768px) and (max-width:1279px){
+  body.view-staff .am-list :is(.am-cust,.am-head){min-height:66px;gap:10px;padding-inline:12px;}
+  body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.2fr);
+    grid-template-areas:"n p t" "e s t";gap:2px 14px;}
+  body.view-staff .am-list .am-c-name{grid-area:n;}
+  body.view-staff .am-list .am-c-email{grid-area:e;}
+  body.view-staff .am-list .am-c-phone{grid-area:p;}
+  body.view-staff .am-list .am-c-soc{grid-area:s;}
+  body.view-staff .am-list .am-c-tags{grid-area:t;}
+  body.view-staff .am-list .am-head .am-cust-main>:nth-child(1){grid-area:n;}
+  body.view-staff .am-list .am-head .am-cust-contact>:nth-child(1){grid-area:e;}
+  body.view-staff .am-list .am-head .am-cust-contact>:nth-child(2){grid-area:p;}
+  body.view-staff .am-list .am-head .am-cust-main>:nth-child(3){grid-area:s;}
+  body.view-staff .am-list .am-head .am-cust-main>:nth-child(4){grid-area:t;}
+  body.view-staff .am-list .am-head{min-height:52px;}
+  body.view-staff .am-list .am-c-sub .am-heard{display:none;} /* where they heard of us is in Edit; the row keeps two lines */
+  body.view-staff .am-list .am-c-sub:not(:has(>:not(.am-heard))){display:none;}
+  body.view-staff .am-list :is(.am-c-email,.am-c-phone){font-size:12.5px;}
+  body.view-staff .am-list .am-c-email{color:var(--muted);}
+  body.view-staff .am-list .am-cust-actions{width:268px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:56px;}
+}
+@media (max-width:767px){
+  body.view-staff .am-list .am-head{display:none;}
+  body.view-staff .am-list :is(.am-c-email,.am-c-phone){display:block;}
+  body.view-staff .am-list .am-none{display:none;}
+  body.view-staff .am-list .am-moren{display:none;}
+  body.view-staff .am-list .am-chips{margin-top:8px;}
+  body.view-staff .am-list .am-extras{margin-top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+}
