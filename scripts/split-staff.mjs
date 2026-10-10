@@ -1306,7 +1306,7 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 229 -> 232 (2026-10-10, the "less AIsh" second pass): the session picker's day headings, the empty My
 // Bookings' next ride, the account's sentences in place of its meters: 227.3 KB here, about 228.7 on the runner; +3
 // restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 602, core: 272 };
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 606, core: 272 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

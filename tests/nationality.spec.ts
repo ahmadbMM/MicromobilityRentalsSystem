@@ -149,7 +149,7 @@ test('staff filters list Saudi Arabia twice and count it once', async ({ page })
   const amSel = page.locator('select[aria-label="Nationality"]').filter({ has: page.locator('option[value="Egypt"]') });
   await expect(amSel).toHaveCount(1);
   expect(await amSel.evaluate(el => [...(el as HTMLSelectElement).options].map(o => [o.value, o.selected]))).toEqual(
-    [['', false], ['Saudi Arabia', true], ['Egypt', false], ['Saudi Arabia', false], ['Yemen', false]]);
+    [['', false], ['unset', false], ['Saudi Arabia', true], ['Egypt', false], ['Saudi Arabia', false], ['Yemen', false]]); // 'unset': Not set (2026-10-10)
 });
 
 test('phone-code pickers show +966 first and again between +964 and +967, one code for both', async ({ page }) => {
