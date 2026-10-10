@@ -29266,7 +29266,7 @@ function exportSessionExcel(km){
   if(_isApprovalRide(sess)){
     const riders=_rosterRiders(sess);
     if(!riders.length){toast(t('toastNoExport'),'warning');return;}
-    const statusOf=e=>e.status==='waitlist'?t('waitlistLabel'):(e.approval==='approved'?t('apprApprovedChip'):t('apprPendingChip'));
+    const statusOf=_rosterStatus;
     const _showMem=!!_repOpts().cols.member;
     const _bike=_needsBike(sess); // no frame to size, no type to hand over
     const _ig=!!_repOpts().cols.ig;
@@ -29419,11 +29419,18 @@ function printCloseout(){
 }
 // Saturday Social Ride roster: every live rider with the details staff need on the ground —
 // name, phone, height, bike type, approval status — ordered by reservation time.
-// The roster's riders (the sheet's and the file's): every live one, after the builder's filters, by when they reserved.
+// The roster's riders (the sheet's and the file's): every one on the night, returned and no-show included, so a
+// closed-out ride still prints its whole list (it printed only the riders not yet returned: a closed ride came out
+// with one line), after the builder's filters, by when they reserved.
 function _rosterRiders(sess){
   return _repFilter(getQueue()
-    .filter(e=>e.sessionId===sess.id&&(e.status==='waiting'||e.status==='waitlist'||e.status==='active'))
+    .filter(e=>e.sessionId===sess.id&&['waiting','waitlist','active','done','noshow'].includes(e.status))
     .sort((a,b)=>new Date(a.registeredAt||0)-new Date(b.registeredAt||0)));
+}
+// A returned or no-show rider reads as such; the others by their approval.
+function _rosterStatus(e){
+  if(e.status==='done'||e.status==='noshow')return reportStatusLabel(e.status);
+  return e.status==='waitlist'?t('waitlistLabel'):(e.approval==='approved'?t('apprApprovedChip'):t('apprPendingChip'));
 }
 function printCommunityRoster(sess){
   const cm=t('cmUnit');
@@ -29431,7 +29438,7 @@ function printCommunityRoster(sess){
   const _showMem=!!_repOpts().cols.member; // membership is the Saturday-specific column
   const _ig=!!_repOpts().cols.ig;
   const _bike=_needsBike(sess); // a pool session has no frame to size and no type to hand over
-  const statusOf=e=>e.status==='waitlist'?t('waitlistLabel'):(e.approval==='approved'?t('apprApprovedChip'):t('apprPendingChip'));
+  const statusOf=_rosterStatus;
   const nApproved=riders.filter(e=>e.approval==='approved'&&e.status!=='waitlist').length;
   const nPending=riders.filter(e=>_apprOf(e)==='pending'&&e.status!=='waitlist').length;
   const nWaitlist=riders.filter(e=>e.status==='waitlist').length;

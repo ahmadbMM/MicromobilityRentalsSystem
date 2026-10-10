@@ -104,6 +104,25 @@ test.describe('@staff:bookings the breakfast venue on the staff side', () => {
     expect(await printed(page, `S._ctSession='${today}';printCloseout()`)).toContain('Breakfast at Harbour Cafe');
   });
 
+  test('a closed-out ride prints its whole roster: returned and no-show riders too', async ({ page }) => {
+    const closed = sat({ id: today, session_date: today, status: 'closed' });
+    const on = (id: string, x: Record<string, unknown>) => row(id, { session_id: today, session_date: today, ...x });
+    await staff(page, [closed], [
+      on('a', { status: 'done' }), on('b', { status: 'done' }), on('c', { status: 'noshow' }),
+      on('d', { status: 'waiting' }), on('e', { status: 'cancelled' }),
+    ]);
+    await page.waitForFunction(`S.dataLoaded&&getQueue().length===5`);
+    await page.evaluate(`S._repOpts=_repDefaults();setStaffTab('queue');S.queueView='bookings';S.sfSession='${today}';renderStaffQueue()`);
+    const h = await printed(page, `printSessionReport()`);
+    for (const n of ['Rider a', 'Rider b', 'Rider c', 'Rider d']) expect(h).toContain(n);
+    expect(h).not.toContain('Rider e');
+    expect(h).toContain('Complete');
+    expect(h).toContain('No-Show');
+    // the CSV carries the same four
+    const csv = await page.evaluate(`(()=>{let r=null;const o=window._downloadCsv;window._downloadCsv=(n,rows)=>{r=rows;};try{exportSessionExcel();}finally{window._downloadCsv=o;}return r;})()`) as string[][];
+    expect(csv.length).toBe(5);
+  });
+
   test('each rating in Analytics, and its picture, says where the rider had breakfast', async ({ page }) => {
     const done = row('r1', {
       status: 'done', paid: true, checked_in_at: ago(30), checked_out_at: ago(28), rated_at: ago(2), rating_exp: 9, rating_bike: 8,
