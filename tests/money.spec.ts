@@ -28,11 +28,9 @@ test.describe('booking flow', () => {
     await page.locator('[data-type-slot="0"][data-type="Hybrid"]').click();
     await page.locator('button', { hasText: 'Review booking' }).click();
 
-    // Waiver — one tap, on behalf of the whole booking; Continue is refused without it
-    await page.locator('#tab-register input[type="checkbox"]').check();
-    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
-
-    // Step 3 — confirm; the stub echoes the insert back as success
+    // Step 3 — the review: the waiver, one tap on behalf of the whole booking (Confirm is off without it),
+    // then confirm; the stub echoes the insert back as success
+    await page.locator('#reg-waiver-cb').check();
     await page.locator('button', { hasText: 'Confirm booking' }).click();
 
     const panel = page.locator('#tab-register');

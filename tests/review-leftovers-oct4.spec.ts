@@ -49,15 +49,13 @@ test.describe('@customer:reserve event seats', () => {
     await expect(page.locator('#reg-rider-name-0')).toHaveValue('Spec Rider');
     await expect(page.locator('#reg-rider-name-1')).toHaveValue('');
     await expect(panel.locator('.price-preview')).toContainText('80'); // 2 x 40, the seat, not a bike
-    // the second seat needs a name before the waiver
+    // the second seat needs a name before the review
     await page.evaluate('regNextToReview()');
     expect(await page.evaluate('S.regStep')).toBe(2);
     await page.locator('#reg-rider-name-1').fill('Lina Guest');
     await page.evaluate('regNextToReview()');
-    expect(await page.evaluate('S.regStep')).toBe(2.5);
-    await panel.locator('input[type="checkbox"]').check();
-    await panel.locator('.mm-reg-foot .btn-primary').click();
-    expect(await page.evaluate('S.regStep')).toBe(3);
+    expect(await page.evaluate('S.regStep')).toBe(3); // the review, with the waiver on it (2026-10-10)
+    await panel.locator('#reg-waiver-cb').check();
     await page.evaluate('submitReg()');
     await expect.poll(() => rows.length, { timeout: 6000 }).toBe(2);
     expect(rows.map((r) => [r.name, r.type_preference, r.price])).toEqual([['Spec Rider', 'None', 40], ['Lina Guest', 'None', 40]]);
@@ -74,10 +72,10 @@ test.describe('@customer:reserve event seats', () => {
     expect(r.rows).toEqual([20, 20]);
   });
 
-  test('Edit opens a step the ride has: an event its seats, a workshop its waiver, the circuit its riders', async ({ page }) => {
+  test('Edit opens a step the ride has: an event its seats, a workshop its review (with the waiver), the circuit its riders', async ({ page }) => {
     await rider(page);
     const steps = await page.evaluate(`[${JSON.stringify(EV.id)},${JSON.stringify(WS.id)},${JSON.stringify(JCC.id)}].map(id=>{const s=allSessions().find(x=>x.id===id);_on_renderBookingTicket_1(null,null,_evOf(s),id);return S.regStep;})`);
-    expect(steps).toEqual([2, 2.5, 2]);
+    expect(steps).toEqual([2, 3, 2]);
   });
 });
 

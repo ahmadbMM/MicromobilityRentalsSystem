@@ -34,14 +34,15 @@ function rpcCalls(page: Page, name: string) {
 }
 
 test.describe('the waiver', () => {
-  test('a review reached without the waiver goes back to it instead of booking', async ({ page }) => {
+  test('a review submitted without the waiver ticked points at it instead of booking', async ({ page }) => {
     // "Book my usual" used to land here directly; the rows then carried a waiver_version
     // for a rider who never saw the text.
     await boot(page);
     const rows = await captureBookingRows(page);
     await page.evaluate(atReview('S.waiverOk=false;'));
     await page.evaluate(`submitReg()`);
-    expect(await page.evaluate('S.regStep')).toBe(2.5);
+    expect(await page.evaluate('S.regStep')).toBe(3); // the review, where the waiver is (2026-10-10)
+    await expect(page.locator('#reg-waiver-cb')).toBeFocused();
     await expect(page.locator('.toast')).toContainText(/tick the waiver/i);
     await page.waitForTimeout(200);
     expect(rows.length).toBe(0);
@@ -49,7 +50,7 @@ test.describe('the waiver', () => {
 
   test('a tick given for one session is not carried onto another', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`S.selEvent='jcc';goCustomer('register');S.selSession='${S1}';S.regStep=2.5;renderRegister();toggleWaiver(true)`);
+    await page.evaluate(`S.selEvent='jcc';goCustomer('register');S.selSession='${S1}';S.regStep=3;renderRegister();toggleWaiver(true)`);
     expect(await page.evaluate('S.waiverOk')).toBe(true);
     await page.evaluate(`S.selSession='${S2}';renderRegister()`);
     expect(await page.evaluate('S.waiverOk')).toBe(false);

@@ -73,7 +73,7 @@ test.describe('@customer:reserve fix5 booking form', () => {
     await page.keyboard.press('Enter');
     await expect.poll(() => page.evaluate('S.regQty')).toBe(2);
     await expect(page.locator('#reg-qty-inc')).toBeFocused();
-    await page.evaluate(`S.regQty=1;S.regStep=2.5;renderRegister()`);
+    await page.evaluate(`S.regQty=1;S.regStep=3;renderRegister()`);
     await page.locator('#reg-waiver-cb').focus();
     await page.keyboard.press('Space');
     await expect.poll(() => page.evaluate('S.waiverOk')).toBe(true);

@@ -36,12 +36,14 @@ function bookings(page: Page) {
 }
 async function toWaiver(page: Page, ev: string, id: string) {
   await page.evaluate(`S.selEvent='${ev}';goCustomer('register');S.regStep=1;renderRegister();S.selSession='${id}';S.regQty=1;ensureBikeSizes();regNextFromSession()`);
-  // An event asks how many seats first (up to five, 2026-10-04); the others go straight to the waiver.
+  // An event asks how many seats first (up to five, 2026-10-04); the others go straight to the review, where the
+  // waiver is (2026-10-10).
   if (ev === 'event') {
     expect(await page.evaluate('S.regStep')).toBe(2);
     await page.evaluate('regNextToReview()');
   }
-  expect(await page.evaluate('S.regStep')).toBe(2.5);
+  expect(await page.evaluate('S.regStep')).toBe(3);
+  await expect(page.locator('#reg-waiver')).toBeVisible();
 }
 
 test.describe('@customer:reserve activity waiver', () => {
@@ -57,19 +59,14 @@ test.describe('@customer:reserve activity waiver', () => {
       await expect(panel).toContainText('Every activity we run carries some risk.');
       await expect(panel).toContainText('I agree to follow the team’s and the venue’s instructions.');
       await expect(panel).toContainText('I have read the waiver and agree on behalf of everyone on this booking');
-      await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', ev === 'event' ? 'Step 3 of 4' : 'Step 2 of 3');
-      // unticked: the button is off, and even called directly the step stays put
+      await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', ev === 'event' ? 'Step 3 of 3' : 'Step 2 of 2');
+      // unticked: Confirm is off, and a submit called directly posts no acceptance nobody gave
       await expect(panel.locator('.mm-reg-foot .btn-primary')).toBeDisabled();
-      await page.evaluate(`regWaiverContinue()`);
-      expect(await page.evaluate('S.regStep')).toBe(2.5);
-      // nor does a submit from here post an acceptance nobody gave
       await page.evaluate(`submitReg()`);
-      expect(await page.evaluate('S.regStep')).toBe(2.5);
-      expect(posts).toHaveLength(0);
-      await panel.locator('input[type="checkbox"]').check();
-      await panel.locator('.mm-reg-foot .btn-primary').click();
       expect(await page.evaluate('S.regStep')).toBe(3);
-      await page.evaluate(`submitReg()`);
+      expect(posts).toHaveLength(0);
+      await panel.locator('#reg-waiver-cb').check();
+      await panel.locator('.mm-reg-foot .btn-primary').click();
       await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
       expect(posts[0][0].waiver_version).toBe('activity-2026-10-v2');
     });
@@ -83,7 +80,7 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect(panel).toContainText('Swim waiver');
     await expect(panel).toContainText('I confirm that I can swim unaided');
     await expect(panel).not.toContainText('Activity waiver');
-    await page.evaluate(`toggleWaiver(true);regWaiverContinue();submitReg()`);
+    await page.evaluate(`toggleWaiver(true);submitReg()`);
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
     expect(posts[0][0].waiver_version).toBe('swim-2026-10-v3');
   });
@@ -97,16 +94,16 @@ test.describe('@customer:reserve activity waiver', () => {
     await expect(panel).toContainText('كل نشاط ننظّمه ينطوي على قدر من المخاطر');
   });
 
-  test('a booking the database refuses for its waiver (WAIVER_REQUIRED) goes back to the waiver step', async ({ page }) => {
+  test('a booking the database refuses for its waiver (WAIVER_REQUIRED) goes back to the waiver, unticked', async ({ page }) => {
     await boot(page, { 'rpc:customer_create_booking': { __rpcError: { status: 400, code: 'P0001', message: 'WAIVER_REQUIRED' } } });
     const posts = bookings(page);
     await toWaiver(page, 'workshop', WS);
-    await page.evaluate(`toggleWaiver(true);regWaiverContinue()`);
+    await page.evaluate(`toggleWaiver(true)`);
     expect(await page.evaluate('S.regStep')).toBe(3);
     await page.evaluate(`submitReg()`);
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-    await expect.poll(() => page.evaluate('S.regStep')).toBe(2.5);
-    expect(await page.evaluate('S.waiverOk')).toBe(false);
+    await expect.poll(() => page.evaluate('S.waiverOk')).toBe(false);
+    expect(await page.evaluate('S.regStep')).toBe(3);
     await expect(page.locator('.toast').filter({ hasText: 'Tick the waiver to continue.' })).toBeVisible();
     await expect(page.locator('#tab-register')).toContainText('Activity waiver');
     await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
@@ -123,7 +120,7 @@ test.describe('@customer:reserve activity waiver', () => {
     await page.evaluate(`_bookOutboxFlush()`);
     await expect.poll(() => page.evaluate('_bookOutboxCount()')).toBe(0);
     expect(await page.evaluate(`getQueue().some(e=>e.id==='ob1')`)).toBe(false);
-    expect(await page.evaluate('[S.custTab,S.selSession,S.regStep,S.regQty]')).toEqual(['register', WS, 2.5, 1]);
+    expect(await page.evaluate('[S.custTab,S.selSession,S.regStep,S.regQty]')).toEqual(['register', WS, 3, 1]);
     await expect(page.locator('#tab-register')).toContainText('Activity waiver');
     await expect(page.locator('.toast').filter({ hasText: 'Tick the waiver to continue.' })).toBeVisible();
   });

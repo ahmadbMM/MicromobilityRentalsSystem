@@ -58,8 +58,9 @@ test('Book my usual takes the rider through the waiver, on a night the circuit l
   await customer(page, { sessions, queue_entries: [booking({ session_id: 'old', session_date: '2099-01-01', status: 'done', paid: true })] },
     { height: 175, type_preference: 'Road' });
   await page.evaluate(`S.selEvent='community';bookMyUsual()`);
-  expect(await page.evaluate('[S.selSession,S.selEvent,S.regStep]')).toEqual(['next', 'jcc', 2.5]);
-  await expect(page.locator('.mm-waiver-agree')).toBeVisible();          // the waiver, not the review
+  expect(await page.evaluate('[S.selSession,S.selEvent,S.regStep]')).toEqual(['next', 'jcc', 3]);
+  await expect(page.locator('#reg-waiver .mm-waiver-agree')).toBeVisible();          // the review, with its waiver to tick (2026-10-10)
+  await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
 });
 
 // ── Undo of a date move ──────────────────────────────────────────────────────

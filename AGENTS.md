@@ -621,6 +621,11 @@ brought the template look back. Fixed, and guarded so it stays fixed:
 - **A ticket's buttons in one voice**: calendar and directions (drawn icons) side by side, the Wallet button,
   then edit / reschedule / cancel (or rate / book again) as one row of quiet text buttons under a rule.
 - **Badge sheet**: a plain semibold name (no italic capitals), sentence-case headings, a drawn tick.
+- **The waiver is ticked on the review** (since 2026-10-10; it was step 2.5 of its own): `_regSteps` has no 2.5,
+  the review draws `#reg-waiver` (text and tick) above Confirm, and Confirm stays off until it is ticked
+  (`#wv-why` says why). A change that adds no riders asks nothing. `_waiverBack` (the submit's guard, the
+  database's WAIVER_REQUIRED, a refused outbox row) lands on the review with the tick focused (`_wvFocus`). An
+  old saved `regStep` 2.5 opens the review.
 - **Copy**: no "Please" at the start of rider messages, no "successfully", no "it only takes a minute".
   Write "Enter your email.", "Saved.", "You’re signed out."
 

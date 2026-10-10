@@ -95,8 +95,7 @@ test.describe('@customer:runher Run for Her', () => {
     expect(sent.map((x) => x.u)).toEqual(['customer_update_profile', 'customer_set_emergency']);
     expect(sent[0].b).toMatchObject({ p_name: 'Sara Haddad', p_email: 'sara@example.com', p_phone: '+966500000001', p_birth_date: '1995-05-05', p_nationality: 'SA' });
     expect(sent[1].b).toMatchObject({ p_name: 'Nora Haddad', p_phone: '+966551234567', p_relation: 'sibling' });
-    await page.locator('#reg-waiver-cb').check();
-    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await page.locator('#reg-waiver-cb').check(); // on the review since 2026-10-10
     await expect(page.locator('#tab-register .run-km-chip')).toHaveText('5 km');
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(1);

@@ -51,7 +51,7 @@ test('it keeps the Saturday shape: members only, approved, solo, free, hidden qu
 test('choosing it skips the riders step — there is nothing to ask', async ({ page }) => {
   await asMember(page);
   await page.evaluate(`S.selSession='${SWIM}';regNextFromSession()`);
-  expect(await page.evaluate('S.regStep')).toBe(2.5);          // straight to the waiver
+  expect(await page.evaluate('S.regStep')).toBe(3);            // straight to the review, waiver on it
   await expect(page.locator('#tab-register')).not.toContainText('Bike Type');
   await expect(page.locator('#tab-register')).not.toContainText('Height');
 });
@@ -90,7 +90,7 @@ test('the booking carries the sentinel type and the swim waiver version', async 
   page.on('request', (r) => {
     if (r.method() === 'POST' && r.url().includes('/rpc/customer_create_booking')) rpc.push(r.postData() || '');
   });
-  await page.evaluate(`S.selSession='${SWIM}';regNextFromSession();toggleWaiver(true);regWaiverContinue();submitReg()`);
+  await page.evaluate(`S.selSession='${SWIM}';regNextFromSession();toggleWaiver(true);submitReg()`);
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const e = JSON.parse(rpc[0]).p_entries[0];
   expect(e.type_preference).toBe('None');   // not 'Any' — that would mean "any bike will do"
@@ -99,10 +99,10 @@ test('the booking carries the sentinel type and the swim waiver version', async 
   expect(e.price).toBe(0);                  // free, like the Saturday ride
 });
 
-test('the stepper names the middle step for what it actually is', async ({ page }) => {
+test('a swim has no riders step, and its review carries the swim waiver', async ({ page }) => {
   await asMember(page);
   await page.evaluate(`S.selSession='${SWIM}';regNextFromSession()`);
-  await expect(page.locator('#tab-register .reg-stepper')).toContainText('Swim waiver');
+  await expect(page.locator('#reg-waiver')).toContainText('Swim waiver');
   await expect(page.locator('#tab-register .reg-stepper')).not.toContainText('Riders');
 });
 

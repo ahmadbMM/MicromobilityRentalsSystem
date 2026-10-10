@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// A waiver step sits between the riders and the review. One person taps the box for the
-// whole party, and the copy they accept says so — "on behalf of every rider on this
+// The waiver sits on the review, above Confirm (since 2026-10-10; it was a step of its own between the
+// riders and the review). One person taps the box for the whole party, and the copy they accept says so — "on behalf of every rider on this
 // booking" — because a booking takes up to ten riders and only the account holder is here.
 //
-// What must hold: the step cannot be walked past, going back does not skip it, the
+// What must hold: Confirm cannot be passed unticked (nor submitReg called around it), the
 // agreement does not survive into the next booking, and what reaches the server is a
 // VERSION (which wording) rather than a timestamp the client chose.
 
@@ -34,11 +34,11 @@ async function withRiders(page: import('@playwright/test').Page, n: number) {
   await page.evaluate(`S.regQty=${n};S.regRiderNames=${names};S.regBikeHeights=${hs};S.regBikeTypes=${ty};ensureBikeSizes();renderRegister()`);
 }
 
-test('the riders step leads to the waiver, not straight to review', async ({ page }) => {
+test('the riders step leads to the review, and the waiver is on it', async ({ page }) => {
   await toRiders(page);
   await page.evaluate(`regNextToReview()`);
-  expect(await page.evaluate('S.regStep')).toBe(2.5);
-  await expect(page.locator('#tab-register')).toContainText('Ride waiver');
+  expect(await page.evaluate('S.regStep')).toBe(3);
+  await expect(page.locator('#reg-waiver')).toContainText('Ride waiver');
   // The owner's terms (2026-10-03): no booking without agreeing, and the rider alone answers for
   // themselves and their belongings, injuries, fractures, loss and theft included.
   await expect(page.locator('#tab-register')).toContainText('You cannot book any ride or activity with MicroMobility until you have read and agreed to this waiver');
@@ -46,43 +46,52 @@ test('the riders step leads to the waiver, not straight to review', async ({ pag
   await expect(page.locator('#tab-register')).toContainText('including any injury, fracture, illness, loss, theft or damage');
 });
 
-test('continue is refused until the box is ticked', async ({ page }) => {
+test('confirm is refused until the box is ticked', async ({ page }) => {
   await toRiders(page);
+  const rpc: string[] = [];
+  page.on('request', (r) => { if (r.url().includes('/rpc/customer_create_booking')) rpc.push(r.url()); });
   await page.evaluate(`regNextToReview()`);
 
-  const cont = page.locator('#tab-register .mm-reg-foot .btn-primary');
-  await expect(cont).toBeDisabled();
+  const confirm = page.locator('#tab-register .mm-reg-foot .btn-primary');
+  await expect(confirm).toBeDisabled();
+  await expect(page.locator('#wv-why')).toBeVisible();
 
-  // even called directly, the step will not advance
-  await page.evaluate(`regWaiverContinue()`);
-  expect(await page.evaluate('S.regStep')).toBe(2.5);
-  await expect(page.locator('.toast')).toContainText(/tick the waiver/i);
-});
-
-test('ticking it opens the way through to review', async ({ page }) => {
-  await toRiders(page);
-  await page.evaluate(`regNextToReview()`);
-  await page.locator('#tab-register input[type="checkbox"]').check();
-  expect(await page.evaluate('S.waiverOk')).toBe(true);
-  await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+  // even called directly, nothing is booked: the rider is shown the waiver
+  await page.evaluate(`submitReg()`);
   expect(await page.evaluate('S.regStep')).toBe(3);
+  await expect(page.locator('.toast')).toContainText(/tick the waiver/i);
+  await expect(page.locator('#reg-waiver-cb')).toBeFocused();
+  await page.waitForTimeout(300);
+  expect(rpc).toEqual([]);
 });
 
-test('going back from review lands on the waiver, not past it', async ({ page }) => {
+test('ticking it turns Confirm on', async ({ page }) => {
   await toRiders(page);
-  await page.evaluate(`regNextToReview();toggleWaiver(true);regWaiverContinue()`);
+  await page.evaluate(`regNextToReview()`);
+  await page.locator('#reg-waiver-cb').check();
+  expect(await page.evaluate('S.waiverOk')).toBe(true);
+  await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeEnabled();
+  await expect(page.locator('#wv-why')).toHaveCount(0);
+});
+
+test('going back from review lands on the riders', async ({ page }) => {
+  await toRiders(page);
+  await page.evaluate(`regNextToReview();toggleWaiver(true)`);
   expect(await page.evaluate('S.regStep')).toBe(3);
   await page.locator('#tab-register .mm-reg-foot .btn-secondary').click();
-  expect(await page.evaluate('S.regStep')).toBe(2.5);
+  expect(await page.evaluate('S.regStep')).toBe(2);
 });
 
-// Since 2026-09-30 the waiver is a step of its own in the stepper (it hid inside "Riders", so the
-// rider met a step the stepper never announced).
-test('the stepper shows the waiver as its own step', async ({ page }) => {
+// The waiver was a step of its own from 2026-09-30 to 2026-10-10; it is part of the review now, so the
+// stepper counts three steps and an old saved step (2.5) lands on the review.
+test('the stepper counts three steps, and an old waiver step opens the review', async ({ page }) => {
   await toRiders(page);
   await page.evaluate(`regNextToReview()`);
   const label = await page.getAttribute('#tab-register .reg-stepper', 'aria-label');
-  expect(label).toBe('Step 3 of 4');
+  expect(label).toBe('Step 3 of 3');
+  await page.evaluate(`S.regStep=2.5;renderRegister()`);
+  expect(await page.evaluate('S.regStep')).toBe(3);
+  await expect(page.locator('#reg-waiver')).toBeVisible();
   await expect(page.locator('#tab-register .reg-stepper [aria-current="step"]')).toHaveCount(1);
 });
 
@@ -92,7 +101,7 @@ test('what reaches the server is the version, and the booking carries it', async
   page.on('request', (r) => {
     if (r.method() === 'POST' && r.url().includes('/rpc/customer_create_booking')) rpc.push(r.postData() || '');
   });
-  await page.evaluate(`regNextToReview();toggleWaiver(true);regWaiverContinue();submitReg()`);
+  await page.evaluate(`regNextToReview();toggleWaiver(true);submitReg()`);
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const sent = JSON.parse(rpc[0]);
   expect(sent.p_entries[0].waiver_version).toBe('2026-10-v3');
@@ -107,7 +116,7 @@ test('every rider on a party booking carries the version, not just the first', a
     if (r.method() === 'POST' && r.url().includes('/rpc/customer_create_booking')) rpc.push(r.postData() || '');
   });
   await withRiders(page, 3);
-  await page.evaluate(`regNextToReview();toggleWaiver(true);regWaiverContinue();submitReg()`);
+  await page.evaluate(`regNextToReview();toggleWaiver(true);submitReg()`);
   await expect.poll(() => rpc.length, { timeout: 6000 }).toBeGreaterThan(0);
   const entries = JSON.parse(rpc[0]).p_entries as Record<string, unknown>[];
   expect(entries.length).toBe(3);

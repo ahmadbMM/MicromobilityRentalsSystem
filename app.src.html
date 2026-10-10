@@ -1182,7 +1182,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   regStepOf:'Step {0} of {1}',
   pickRideFirst:'Choose a ride above to continue.',
   wgKicker:'Waiver needed',wgSub:'Our team booked you on this ride. Read its waiver and agree to it to continue.',wgBtn:'Agree and continue',
-  tickWaiverFirst:'Tick the box above to continue.',
+  tickWaiverFirst:'Tick the waiver to confirm your booking.',
   tkHelmetFree:'Helmets are required. We provide one for free.',
   bdCalSummary:'{0}: birthday',
   regSummary:'Your booking',
@@ -1758,7 +1758,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   regStepOf:'الخطوة {0} من {1}',
   pickRideFirst:'اختر رحلة من الأعلى للمتابعة.',
   wgKicker:'إقرار مطلوب',wgSub:'سجّلك فريقنا في هذه الرحلة. اقرأ إقرارها ووافق عليه للمتابعة.',wgBtn:'أوافق وأتابع',
-  tickWaiverFirst:'ضع علامة في المربع أعلاه للمتابعة.',
+  tickWaiverFirst:'ضع علامة على الإقرار لتأكيد حجزك.',
   tkHelmetFree:'الخوذة إلزامية، ونوفّرها لك مجانًا.',
   bdCalSummary:'{0}: عيد ميلاد',
   regSummary:'حجزك',
@@ -7004,7 +7004,8 @@ function _needsWaiver(s){return _kindHas(_rideKind(s),'waiver');}
 // An event has no bike either, but it takes a party (_partyRide): its riders step asks how many
 // seats and the name on each one.
 // Run for Her stops on it too: the distance, and what the account still lacks for race day (_runPanelHtml).
-function _regSteps(s){const st=[1];if(_needsBike(s)||_rideKind(s)==='event'||_rideKind(s)==='runher')st.push(2);if(_needsWaiver(s))st.push(2.5);st.push(3);return st;}
+// The waiver is ticked on the review step since 2026-10-10 (it was a step of its own, 2.5, between the riders and the review).
+function _regSteps(s){const st=[1];if(_needsBike(s)||_rideKind(s)==='event'||_rideKind(s)==='runher')st.push(2);st.push(3);return st;}
 function _regNextStep(s,cur){const st=_regSteps(s),i=st.indexOf(cur);return (i>=0&&i<st.length-1)?st[i+1]:3;}
 function _regPrevStep(s,cur){const st=_regSteps(s),i=st.indexOf(cur);return i>0?st[i-1]:1;}
 function _kindHasBf(k){return _kindHas(k,'breakfast');}
@@ -11212,7 +11213,7 @@ function renderRegister(){
   // ONLY the event picked on the landing page: JCC rides for 'jcc', Saturday Social Rides
   // for 'community' - switching events happens on the landing event cards.
   const _ev=S.selEvent||'jcc';
-  // A tick given for another session does not carry over: the waiver step shows it unticked.
+  // A tick given for another session does not carry over: the review's waiver shows it unticked.
   if(S.waiverOk&&S._waiverSess&&S._waiverSess!==S.selSession){S.waiverOk=false;S._waiverSess=null;}
   const _selSessObj=_sessDisp(S.selSession);
   const _commSel=_isCommunity(_selSessObj); // selected session is a community ride
@@ -11539,12 +11540,13 @@ function renderRegister(){
 
   
   if(!S.selSession&&!hasTickets&&S.regStep>1)S.regStep=1;
+  if(S.regStep===2.5)S.regStep=3; // the old waiver step, from an address or a saved state
   const curStep=hasTickets?4:(S.regStep||1);
   // Progress stepper: every step the ride has, the waiver included (it used to hide inside
   // "Riders", and a two-step ride drew a line to nowhere). Only the current step names itself;
   // done steps carry a drawn tick. RTL-aware: the row mirrors with the page.
   const _steps=_regSteps(_selSessObj);
-  const _stepLbl=v=>v===1?t('regProg1'):v===2?(_rideKind(_selSessObj)==='runher'?t('runStepTitle'):t('regProg2')):v===2.5?_waiverCopy(_selSessObj).title:t('regProg3');
+  const _stepLbl=v=>v===1?t('regProg1'):v===2?(_rideKind(_selSessObj)==='runher'?t('runStepTitle'):t('regProg2')):t('regProg3');
   const stepper=cur=>{const ci=Math.max(0,_steps.indexOf(Number(cur)||1)),n=_steps.length;
     return `<div class="reg-stepper cu-stepper" role="group" aria-label="${esc(t('regStepOf').replace('{0}',ci+1).replace('{1}',n))}">${_steps.map((v,i)=>{const done=i<ci,on=i===ci;
       return `<div class="cu-step"><span aria-current="${on?'step':'false'}" class="cu-step-c ${done||on?'cu-step-on':'cu-step-off'}">${done?ICON_TICK:i+1}</span>${on?`<span class="cu-step-lbl">${_stepLbl(v)}</span>`:''}</div>${i<n-1?`<span aria-hidden="true" class="cu-step-ln${done?' cu-step-ln-on':''}"></span>`:''}`;}).join('')}</div>`;};
@@ -11634,10 +11636,25 @@ function renderRegister(){
         ?`<button class="btn-primary cu-w100" data-on-click="${_on("_on_renderRegister_3",_EV,_EL)}"> ${t('modifyExistingBtn')}</button>`
         :`<button class="btn-primary cu-w100" data-on-click="${_on("_on_renderRegister_4",_EV,_EL)}">${t('myRidesTitle')}</button>`}
     </div>`:'';
+  // The waiver is agreed here, on the review, right above Confirm (2026-10-10): every booking that adds riders
+  // still agrees to it (the submit and the database check it again), one screen sooner. A change that only edits
+  // the riders already booked adds nobody, and asks nothing (submitModifyBooking).
+  const _wvAsk=_needsWaiver(_selSessObj)&&!(isModifyMode&&S.regQty<=existingEntries.length);
+  const _wvWait=_wvAsk&&!_waiverAgreed();
+  const waiverCard=_wvAsk&&!alreadyHere?`<div class="form-section cu-mt16 cu-wv-rv" id="reg-waiver">
+      <h2 class="form-title">${esc(_waiverCopy(_selSessObj).title)}</h2>
+      <div class="cu-ad-sub">${t('waiverSub')}</div>
+      <div class="cu-waiver-text" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
+      <label class="mm-waiver-agree cu-waiver${S.waiverOk?' cu-waiver-ok':''}">
+        <input type="checkbox" id="reg-waiver-cb" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
+        <span class="cu-waiver-lbl">${_waiverCopy(_selSessObj).agree}</span>
+      </label>
+    </div>`:'';
   const confirmBtns=alreadyHere?'':`
     <div class="mm-reg-foot cu-foot">
+      ${_wvWait?`<p class="reg-foot-why" id="wv-why">${t('tickWaiverFirst')}</p>`:''}
       <button class="btn-secondary" data-on-click="${_on("regGoStep",_regPrevStep(_selSessObj,3))}" ${S.regSubmitting?'disabled':''}>${t('regBackBtn')}</button>
-      <button class="btn-primary cu-f1" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting?'disabled':''}>${S.regSubmitting?' ...':(isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn'))}</button>
+      <button class="btn-primary cu-f1${_wvWait?' cu-dim':''}" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting||_wvWait?'disabled':''}${_wvWait?' aria-describedby="wv-why"':''}>${S.regSubmitting?' ...':(isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn'))}</button>
     </div>`;
   const detailsCard=`<div class="form-section">
       <div class="cu-rv-head">
@@ -11656,21 +11673,6 @@ function renderRegister(){
       ${reviewAddons}
       ${_promoBoxHtml('review',_promoDisc,_freeSel||(isModifyMode&&S.regQty<=existingEntries.length),isModifyMode)}
     </div>`;
-  const panelWaiver=`
-    ${stepHeader(_waiverCopy(_selSessObj).title,t('waiverSub'))}
-    <div class="form-section">
-      <div class="cu-waiver-text" tabindex="0" role="region" aria-label="${esc(_waiverCopy(_selSessObj).title)}">${esc(_waiverCopy(_selSessObj).body)}</div>
-      <label class="mm-waiver-agree cu-waiver${S.waiverOk?' cu-waiver-ok':''}">
-        <input type="checkbox" id="reg-waiver-cb" ${S.waiverOk?'checked':''} data-on-change="${_on("toggleWaiver",_P("checked"))}" class="cu-waiver-cb">
-        <span class="cu-waiver-lbl">${_waiverCopy(_selSessObj).agree}</span>
-      </label>
-    </div>
-    <div class="mm-reg-foot cu-foot">
-      ${S.waiverOk?'':`<p class="reg-foot-why" id="wv-why">${t('tickWaiverFirst')}</p>`}
-      <button class="btn-secondary" data-on-click="${_on("regGoStep",_regPrevStep(_selSessObj,2.5))}">${t('regBackBtn')}</button>
-      <button class="btn-primary cu-f1${S.waiverOk?'':' cu-dim'}" ${S.waiverOk?'':'disabled aria-describedby="wv-why"'} data-on-click="${_on("regWaiverContinue")}">${t('regContinueBtn')}</button>
-    </div>`;
-
   const panel3=`
     ${stepHeader(t('regStep3Title'),t('regStep3Msg'))}
     ${isModifyMode?'':(()=>{
@@ -11718,6 +11720,7 @@ function renderRegister(){
       </div>
       ${(!_freeSel&&_needsBike(_selSessObj)&&totalMax+addonTotal>0)?`<div class="price-note">${t('payAtBoothLine')}</div>`:''}`;
     })()}</div>
+    ${waiverCard}
     ${alreadyBanner}
     ${confirmBtns}`;
 
@@ -11734,7 +11737,7 @@ function renderRegister(){
       <button class="btn-primary cu-w100-mt18" data-on-click="${_on("regBookAnother")}">${t('regBookAnotherBtn')}</button>
     </div>`:'';
 
-  const _step=hasTickets?panelDone:curStep===1?panel1:curStep===2?panel2:curStep===2.5?panelWaiver:panel3;
+  const _step=hasTickets?panelDone:curStep===1?panel1:curStep===2?panel2:panel3;
   // On a wide screen the steps after the first sit beside a summary of the booking (ride, venue,
   // riders, total and how it is paid) that stays in view; a phone has its sticky footer instead.
   const _side=(!hasTickets&&curStep>1)?_regSideHtml(_selSessObj):'';
@@ -11771,13 +11774,6 @@ function _regRefocus(k){
 }
 
 function toggleWaiver(on){S.waiverOk=!!on;S._waiverSess=on?S.selSession:null;renderRegister();}
-// The waiver gates the review step. Not every path to the review walks through here ("Book my
-// usual" jumped straight to it), so the submit checks the tick again (submitReg).
-function regWaiverContinue(){
-  if(!_waiverAgreed()){toast(t('waiverRequired'),'error');return;}
-  S.regStep=3;renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
-  _regFocus();
-}
 function regGoStep(n){S.regStep=n;renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();}
 // A step change replaces the whole step, which left the focus on <body>: a keyboard or screen
 // reader user lost their place on every Continue. The new step's heading takes it instead.
@@ -12240,16 +12236,18 @@ function _outboxRow(e,sess){const r=entryToDB(e),wv=_waiverVersionFor(sess);retu
 function _bookOutboxAddAll(rows){if(rows.length===1)return _bookOutboxAdd(rows[0]);const o=_bookOutbox();o.push(...rows);return _bookOutboxSave(o);}
 // The database refuses a customer booking that carries no waiver (customer_create_booking raises
 // WAIVER_REQUIRED, P0001). Whichever path met it, the rider is told why and goes back to the
-// waiver step, unticked, exactly as the client-side guard in submitReg does.
+// waiver on the review, unticked, exactly as the client-side guard in submitReg does.
 function _waiverOutdatedErr(err){return /WAIVER_OUTDATED/.test(((err&&err.code)||'')+' '+((err&&err.message)||'')+' '+((err&&(err.details||err.detail))||''));}
 function _waiverRefusal(err){return /WAIVER_REQUIRED/.test(((err&&err.code)||'')+' '+((err&&err.message)||'')+' '+((err&&(err.details||err.detail))||''));}
+// The waiver card on the review, brought into view with its tick focused.
+function _wvFocus(){const c=document.getElementById('reg-waiver'),b=document.getElementById('reg-waiver-cb');if(!c)return;try{c.scrollIntoView({block:'center',behavior:_sb()});}catch(e){}try{if(b)b.focus({preventScroll:true});}catch(e){}}
 function _waiverBack(){
   toast(t('waiverRequired'),'error');S.waiverOk=false;S._waiverSess=null;
-  S.regStep=2.5;renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
+  S.regStep=3;renderRegister();_pushNav();_wvFocus();
 }
 // A booking queued offline that the server refused for its waiver (a row queued by an older build,
 // before every kind asked for one) can never land as it is: nobody agreed. It leaves the outbox, and
-// the rider is put back on that ride's waiver step with the riders it held, to agree and book again.
+// the rider is put back on that ride's review, at its waiver, with the riders it held, to agree and book again.
 function _waiverReask(rows){
   const r0=rows[0],sess=r0&&_sessDisp(r0.session_id),ids=new Set(rows.map(r=>r.id));
   S.queue=(S.queue||[]).filter(e=>!ids.has(e.id));
@@ -13190,7 +13188,7 @@ function bookMyUsual(){
   // If we already know their setup the riders step has nothing to ask, but the waiver is not
   // skipped: the booking stamps the waiver version as accepted, and only the wizard's waiver
   // step earns that stamp. Jumping straight to review booked riders who never saw it.
-  S.regStep=(!(cust.height&&_usualTy)||_hasRideGroups(pick))?_regNextStep(pick,1):_needsWaiver(pick)?2.5:3; // a Saturday ride asks its group on the riders step
+  S.regStep=(!(cust.height&&_usualTy)||_hasRideGroups(pick))?_regNextStep(pick,1):3; // a Saturday ride asks its group on the riders step
   setCustTab('register');
   try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
   toast(t('bookUsualToast'));
