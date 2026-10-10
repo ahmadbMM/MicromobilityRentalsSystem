@@ -47267,7 +47267,9 @@ function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}
     if(!S.dataLoaded&&localStorage.getItem('cq_staff')==='1'&&(!SECURE_AUTH||_hasStoredAuth())){
       await _cacheRestore(()=>!S.dataLoaded);
       if(S.dataLoaded){
-        let stab=_bootStaffTab(_loadNav())||_startTab()||'queue';
+        // the address first, as the boot below does: /history opened here showed the Start on section
+        const _pn=_parsePath(_bootPath);
+        let stab=(_pn&&_pn.view==='staff'&&_pn.stab)||_bootStaffTab(_loadNav())||_startTab()||'queue';
         if(stab==='sessions'){S.queueView='sessions';stab='queue';}
         S.staffTab=stab;showView('staff');
         try{renderStaffTabs();}catch(e){}try{_autoSelectSession();}catch(e){}try{_renderStaffTab();}catch(e){}
