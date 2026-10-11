@@ -519,3 +519,26 @@ test('Print default prints the saved community report: its own columns, communit
   expect(r.html).not.toContain('Cara Vip');
   expect(r.dev).toBe(1);                // the device's own builder is left as it was
 });
+
+test('@staff:community Edit default opens the saved default, saves it back and leaves the device\'s choices alone', async ({ page }) => {
+  await staff(page);
+  // a saved default without Spent; the device's own builder has Spent on
+  await page.evaluate(`const d=_accDefaults();d.cols.spent=0;d.cols.minutes=1;S.staffOptions={...(S.staffOptions||{}),acc_report_default:[d]};
+    _optWrite=async(k,v)=>{S.staffOptions={...S.staffOptions,[k]:v};return true;};
+    _accOpts().cols.spent=1;_accSave()`);
+  await page.getByRole('button', { name: 'Edit default' }).click();
+  const m = page.locator('#print-opts-modal');
+  await expect(m.locator('.modal-title')).toHaveText('Edit the default community report');
+  await expect(m.locator('[data-rep="cols:spent"]')).toHaveAttribute('aria-pressed', 'false');
+  await expect(m.locator('[data-rep="cols:minutes"]')).toHaveAttribute('aria-pressed', 'true');
+  await expect(m.getByRole('button', { name: 'PDF / Print' })).toHaveCount(0);
+  await m.locator('[data-rep="cols:spent"]').click();
+  await m.getByRole('button', { name: 'Save default' }).click();
+  await expect(m).toBeHidden();
+  const r = await page.evaluate(`(()=>{const d=_accDefaultOpts();return {spent:d.cols.spent,minutes:d.cols.minutes,tag:d.fTag,devSpent:_accOpts().cols.spent,devSaved:JSON.parse(localStorage.getItem('cq_acc_rep_opts')).cols.minutes,edit:!!S._accDefEdit}})()`);
+  expect(r).toEqual({ spent: 1, minutes: 1, tag: 'tag_saturday', devSpent: 1, devSaved: 0, edit: false });
+  // the plain builder opens on the device's choices again
+  await page.getByRole('button', { name: /Account report/ }).click();
+  await expect(m.locator('.modal-title')).toHaveText('Account report');
+  await expect(m.locator('[data-rep="cols:minutes"]')).toHaveAttribute('aria-pressed', 'false');
+});
