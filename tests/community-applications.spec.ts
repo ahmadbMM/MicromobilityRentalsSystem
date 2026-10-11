@@ -157,11 +157,11 @@ test('Approve (an application from before the form made accounts): a welcome wit
   expect(ar).not.toContain('Kp7wXr4Mnq');
   await expect(dlg.locator('#ca-msg-text')).toHaveAttribute('dir', 'rtl');
 
-  // The password message: the password, where to sign in, and that it is changed at once.
+  // The password message: the account's email (2026-10-11), the password, where to sign in, and that it is changed at once.
   await dlg.locator('#ca-msg-lang').selectOption('en');
   await dlg.locator('.ca-tp-go').click();
   const pw = await dlg.locator('#ca-msg-text').inputValue();
-  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
+  expect(pw).toBe(['Hi Karim,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: karim.mansour@gmail.com', 'Temporary password: Kp7wXr4Mnq', '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
     'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '',
     'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '', 'The MicroMobility team'].join('\n'));
   await expect(dlg.locator('.ca-tp-go')).toHaveCount(0);
@@ -667,9 +667,9 @@ test('an invited application reads Invited and writes its invitation again; a ne
   await page.locator('#confirm-modal .btn-primary').click();
   await expect(msgBox.locator('.ca-pwd')).toHaveText('Nw4pQx8Lrt');
   const again = await msgBox.locator('#ca-msg-text').inputValue();
-  expect(again).toContain('We’ve set a temporary password for your MicroMobility account:\nNw4pQx8Lrt');
+  expect(again).toContain('We’ve set a temporary password for your MicroMobility account:\nEmail: sami.haddad@gmail.com\nTemporary password: Nw4pQx8Lrt');
   expect(again).toContain('As soon as you sign in with it, you’ll be asked to change it to a password of your own.');
-  for (const none of ['sami.haddad@gmail.com', '0557771122']) expect(again).not.toContain(none);
+  expect(again).not.toContain('0557771122');
   expect(again).not.toContain('invited');
   await msgBox.locator('.ca-x').click();
   // its invitation again carries only the ride

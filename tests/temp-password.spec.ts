@@ -53,16 +53,16 @@ test('Generate makes a random temporary password; saving it marks it temporary a
   await expect(msg.locator('.ca-pwd')).toHaveText(pwd2);
   await expect(msg).toContainText('Their old password no longer works');
   const txt = await msg.locator('#ca-msg-text').inputValue();
-  // The password, where to sign in, and that it is changed at once - nothing else about the account
-  // (the owner, 2026-09-30).
-  expect(txt).toBe(['Hi Huda,', '', 'We’ve set a temporary password for your MicroMobility account:', pwd2, '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
+  // The account's email, the password, where to sign in, and that it is changed at once (the owner,
+  // 2026-09-30; the email since 2026-10-11) - not the mobile.
+  expect(txt).toBe(['Hi Huda,', '', 'We’ve set a temporary password for your MicroMobility account:', 'Email: huda.saleh@gmail.com', 'Temporary password: ' + pwd2, '', 'Sign in with it here:', 'https://micromobilityrentals.pages.dev', '',
     'As soon as you sign in with it, you’ll be asked to change it to a password of your own.', '', 'The MicroMobility team'].join('\n'));
   expect(txt).not.toContain('instagram'); // not about an application: no Instagram line (2026-09-30)
-  for (const none of ['huda.saleh@gmail.com', '0551239876']) expect(txt).not.toContain(none);
+  expect(txt).not.toContain('0551239876');
   // in the staff member's language to begin with, any of the ten
   await msg.locator('#ca-msg-lang').selectOption('ar');
   const ar = await msg.locator('#ca-msg-text').inputValue();
-  expect(ar).toContain('أنشأنا كلمة مرور مؤقتة لحسابك في MicroMobility:\n' + pwd2);
+  expect(ar).toContain('أنشأنا كلمة مرور مؤقتة لحسابك في MicroMobility:\nالبريد الإلكتروني: huda.saleh@gmail.com\nكلمة المرور المؤقتة: ' + pwd2);
   expect(ar).toContain('سيُطلب منك تغييرها إلى كلمة مرور خاصة بك');
   await msg.locator('#ca-msg-lang').selectOption('en');
   expect(await msg.locator('a.ca-wa').getAttribute('href')).toMatch(/^https:\/\/wa\.me\/966551239876\?text=/);
