@@ -976,7 +976,7 @@
   "acrNatWho": "Qui",
   "acrNatNote": "Compté sur l’ensemble des {0} clients, quels que soient les filtres.",
   "acrNatBlank": "{0} d’entre eux n’ont pas de nationalité enregistrée.",
-  "acrNatAccNoCommNote": "Le nombre à côté de chacune indique combien de clients nous en avons.",
+  "acrNatAccNoCommNote": "Le nombre à côté de chacune indique combien de clients nous avons de cette nationalité ; leurs comptes sont listés dessous.",
   "acrChHbar": "Barres",
   "acrChDonut": "Anneau",
   "acrChLine": "Courbe",

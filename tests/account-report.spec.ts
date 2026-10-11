@@ -444,7 +444,9 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     expect(sheet).toContain('Counted over all 11 customers, whatever the filters. 1 of them have no nationality recorded.');
     expect(sheet).toContain('No customers and no community members yet');
     expect(sheet).toContain('Customers, but no community members yet');
-    expect(sheet).toContain('<li>India <span class="rp-c888">1</span></li>');
+    // each nationality we have customers from but no member yet lists those accounts under it (2026-10-11)
+    expect(sheet).toContain('<li class="rp-natgrp"><b>India</b> <span class="rp-c888">1</span><ul class="rp-natppl"><li>Farah India</li></ul></li>');
+    expect(sheet).toContain('<li class="rp-natgrp"><b>Jordan</b> <span class="rp-c888">1</span><ul class="rp-natppl"><li>Ghazi Jordan</li></ul></li>');
     expect(sheet).toContain('<li>Brazil</li>');
     expect(sheet).not.toContain('<li>Saudi Arabia');
     expect(sheet).toContain('Only 1 or 2 customers');
@@ -460,7 +462,8 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     await page.evaluate(`_accSetNatIn('natMissingIn','community');_accSetNatIn('natFewIn','community')`);
     sheet = await page.evaluate(`_accReportHtml()`) as string;
     expect(sheet).toContain('No community members yet');
-    expect(sheet).toContain('<li>India</li>');
+    expect(sheet).toContain('<b>India</b> <span class="rp-c888">1</span><ul class="rp-natppl"><li>Farah India</li></ul>');
+    expect(sheet).toContain('<li>Brazil</li>');                // nobody from it: a name alone
     expect(sheet).toContain('<td class="rp-name">Saudi Arabia</td><td>2</td><td>Ali Saudi, Badr Saudi</td>');
     expect(sheet).not.toContain('Only 1 or 2 customers');
     // with every nationality recorded, the note does not say "0 of them"
@@ -476,7 +479,7 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     await page.evaluate(`_accToggle('sections','natMissing');_accToggle('sections','natFew')`);
     const csv = await csvOf(page);
     expect(csv).toContain('"Customers, but no community members yet",2');   // a comma in the title: quoted
-    expect(csv).toMatch(/\nIndia,1\r?\n/);
+    expect(csv).toMatch(/\nIndia,1\r?\n,Farah India,\r?\n/);   // the account under its nationality
     expect(csv).toContain('Only 1 or 2 customers,3');
     expect(csv).toMatch(/\nEgypt,2,"Dina Egypt, Emad Egypt"\r?\n/);
   });

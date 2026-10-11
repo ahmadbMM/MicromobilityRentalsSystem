@@ -976,7 +976,7 @@
   "acrNatWho": "Quiénes",
   "acrNatNote": "Contado sobre los {0} clientes, sean cuales sean los filtros.",
   "acrNatBlank": "{0} de ellos no tienen nacionalidad registrada.",
-  "acrNatAccNoCommNote": "El número junto a cada una es cuántos clientes tenemos de ella.",
+  "acrNatAccNoCommNote": "El número junto a cada una es cuántos clientes tenemos de ella; sus cuentas aparecen debajo.",
   "acrChHbar": "Barras",
   "acrChDonut": "Anillo",
   "acrChLine": "Línea",

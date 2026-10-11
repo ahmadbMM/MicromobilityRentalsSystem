@@ -161,6 +161,11 @@ section{break-inside:avoid}
 :root .rp-natnote{font-size:11px;color:#5a635c;margin:0 0 6px}
 :root .rp-natlist{columns:4 140px;column-gap:18px;list-style:none;margin:0 0 6px;padding:0;font-size:11px}
 :root .rp-natlist li{padding:2px 0;break-inside:avoid}
+/* a nationality with the accounts that hold it listed under it (2026-10-11) */
+.rp-natppl-list{columns:3 200px}
+.rp-natgrp{padding:4px 0 6px!important}
+.rp-natppl{list-style:none;margin:2px 0 0;padding:0 0 0 10px;border-left:2px solid #ddd}
+.rp-natppl li{padding:1px 0;font-size:10.5px}
 /* the heights report (printHeightBikeReport) */
 :root .rp-hsec{margin-bottom:26px}
 :root .rp-h2top{margin-top:0}
