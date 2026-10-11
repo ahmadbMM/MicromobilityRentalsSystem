@@ -657,6 +657,17 @@ buttons have fixed widths so every row's columns line up.
   errCancelWaiting (bookings not yet checked in), statusWaiting في الانتظار, regProg2 المشاركون, toastPromoted,
   toastBookingCancelled, wlcLateTitle, the waitlist lines (مكان, تسجيل الحضور), pgNote, authPasswordHint, authCancel.
 
+## A shorter rating page, 44px targets (2026-10-11)
+
+- **Every ride but the Saturday ride** rates on a shorter page: why is asked only for a score of `RG_LOW_SHORT` (6) or
+  under, never above the setting (`_rgLow(g)`; the Saturday ride, form `social`, keeps `RG_LOW` from Settings), the
+  intro says that number (`rgSubShort`), each scale names its ends (`.rg-ends`, Poor / Great), and the kicker line is
+  gone. The data written is unchanged (form, scores, why per question). tests/forced-rating.spec.ts.
+- **Targets and text**: add-on +/- 44px, the session card's Details link, the sign-in page's switch link and the
+  pages' Log out reach 44px; `--ink-4` is for dots and lines, text takes `--ink-3` (ticket stages, the map credit).
+- **The cancel dialog says what is missing inside it** (`#cr-err`, `_crErr`: `cancelReasonPick`, `cancelReasonWrite`),
+  not in a bar that goes.
+
 ## The ride night on the ticket, the route, Your rides (2026-10-01)
 
 The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data the app already holds; no migration.

@@ -8277,7 +8277,7 @@ body:not(.view-staff) .reg-side{display:none;}
    Stages: four dots on one line, the ones reached filled, the current one ringed; on the night
    ticket they are neon. The route draws the circuit as one stroke with the start as a dot. */
 body:not(.view-staff) .tk-stages{display:flex;list-style:none;margin:12px 0 4px;padding:0;gap:0;}
-body:not(.view-staff) .tk-stages li{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;padding-top:14px;font-size:var(--fs-12);color:var(--ink-4);}
+body:not(.view-staff) .tk-stages li{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px;position:relative;padding-top:14px;font-size:var(--fs-12);color:var(--ink-3);}
 body:not(.view-staff) .tk-stages li::before{content:'';position:absolute;top:4px;inset-inline:0;height:2px;background:var(--line);}
 body:not(.view-staff) .tk-stages li.on::before{background:var(--go);}
 body:not(.view-staff) .tk-stages li:last-child::before{inset-inline-end:auto;width:10px;}
@@ -8297,7 +8297,7 @@ body:not(.view-staff) .tk-rt-n{font-size:var(--fs-15);font-weight:700;color:var(
 body:not(.view-staff) .tk-rt-m{font-size:var(--fs-13);color:var(--ink-2);font-variant-numeric:tabular-nums;}
 body:not(.view-staff) .tk-rt-done{display:flex;align-items:center;gap:5px;font-size:var(--fs-13);font-weight:600;color:var(--go);}
 body:not(.view-staff) .tk-rt-a{font-size:var(--fs-13);font-weight:600;color:var(--go);}
-body:not(.view-staff) .tk-rt-osm{font-size:var(--fs-12);color:var(--ink-4);margin-top:2px;}
+body:not(.view-staff) .tk-rt-osm{font-size:var(--fs-12);color:var(--ink-3);margin-top:2px;}
 body:not(.view-staff) .tk-rt-map{flex:none;width:30px;height:118px;overflow:visible;}
 body:not(.view-staff) .tk-rt-map path{fill:none;stroke:var(--go);stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;}
 body:not(.view-staff) .tk-rt-map circle{fill:var(--card);stroke:var(--ink);stroke-width:1.6;}
@@ -8435,6 +8435,18 @@ body:not(.view-staff) .cu-qr-lazy.qr-fb{display:inline-flex;flex-direction:colum
   background:var(--card);color:var(--ink);border-radius:var(--r-ctl);text-align:center;}
 body:not(.view-staff) .qr-fb-k{max-width:16em;font-size:var(--fs-12);line-height:1.35;color:var(--ink-2);}
 body:not(.view-staff) .qr-fb-c{font-size:var(--fs-17);font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;}
+
+/* ── A rating scale says which end is good (rentals, events, classes; 2026-10-11) ── */
+body:not(.view-staff) .rg-ends{display:flex;justify-content:space-between;margin-top:-2px;font-size:var(--fs-12);color:var(--ink-3);}
+
+/* ── Everything a rider taps is 44px, and no text is set in the faintest grey (2026-10-11, the audit's item 13) ──
+   --ink-4 (2.4:1 on paper) is for dots and lines only; text takes --ink-3 (about 5:1). */
+body:not(.view-staff) .addon-qty button{width:44px;height:44px;border-radius:var(--r-ctl);font-size:var(--fs-17);}
+body:not(.view-staff) .sess-about{display:inline-flex;align-items:center;min-height:44px;padding-block:0;bottom:0;}
+body:not(.view-staff) .auth-switch-link{display:inline-flex;align-items:center;min-height:44px;padding-inline:4px;}
+body:not(.view-staff) .gate-out{min-height:44px;}
+body:not(.view-staff) .cr-err{margin:10px 0 0;}
+body:not(.view-staff) .cr-err:empty{display:none;}
 
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 

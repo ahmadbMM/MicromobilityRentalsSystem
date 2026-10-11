@@ -27,7 +27,7 @@ async function boot(page: Page, sessions: unknown[], queue: unknown[]) {
   return calls;
 }
 
-test('a circuit ride: an unskippable page asks service, bike and experience, and why for 8 or under', async ({ page }) => {
+test('a circuit ride: an unskippable page asks service, bike and experience, and why for 6 or under (the Saturday ride keeps 8)', async ({ page }) => {
   const calls = await boot(page, [sess(today)], [row('q1', today)]);
   expect(await open(page)).toBe(true);
   expect(await qs(page)).toEqual(['service', 'bike', 'experience']);
@@ -44,8 +44,13 @@ test('a circuit ride: an unskippable page asks service, bike and experience, and
   await m.locator('#rgq-service .rg-b[data-v="9"]').click();
   await m.locator('#rgq-bike .rg-b[data-v="7"]').click();
   await m.locator('#rgq-experience .rg-b[data-v="10"]').click();
-  await expect(m.locator('.rg-why')).toHaveCount(1); // only the 7 asks why
-  await expect(m.locator('#rgq-bike .rg-why-l')).toContainText('7');
+  await expect(m.locator('.rg-why')).toHaveCount(0); // a 7 is not asked why on a rental since 2026-10-11 (the page is shorter)
+  await expect(m.locator('.pg-sub')).toHaveText('Score each from 1 to 10. For a 6 or under, tell us why.');
+  await expect(m.locator('#rgq-bike .rg-ends')).toHaveText(/Poor\s*Great/); // which end is good
+  await expect(m.locator('.rg-kicker')).toHaveCount(0);
+  await m.locator('#rgq-bike .rg-b[data-v="6"]').click();
+  await expect(m.locator('.rg-why')).toHaveCount(1); // only the 6 asks why
+  await expect(m.locator('#rgq-bike .rg-why-l')).toContainText('6');
   await m.locator('.pg-btn').click();
   await expect(m.locator('.rg-q.err')).toHaveCount(1);
   await expect(m.locator('#rgq-bike.err')).toBeVisible();
@@ -54,8 +59,8 @@ test('a circuit ride: an unskippable page asks service, bike and experience, and
   await m.locator('#rate-note').fill('Lovely night');
   await m.locator('.pg-btn').click();
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0].p_patch).toEqual({ rating_bike: 7, rating_exp: 10, feedback: 'Lovely night',
-    rating_detail: { form: 'rental', s: { service: 9, bike: 7, experience: 10 }, why: { bike: 'Gears slipped' } } });
+  expect(calls[0].p_patch).toEqual({ rating_bike: 6, rating_exp: 10, feedback: 'Lovely night',
+    rating_detail: { form: 'rental', s: { service: 9, bike: 6, experience: 10 }, why: { bike: 'Gears slipped' } } });
   await expect.poll(() => open(page)).toBe(false);
 });
 
