@@ -5140,5 +5140,15 @@
   "amfSortIgOld": "Seguidores contados há mais tempo",
   "amfSortMinutes": "Mais minutos pedalados",
   "amfSortCountry": "País, A a Z",
-  "scanTwinUsed": "Esse bilhete é para {0}. Foi aberta a reserva de hoje em vez disso."
+  "scanTwinUsed": "Esse bilhete é para {0}. Foi aberta a reserva de hoje em vez disso.",
+  "amfSeen": "Última vez que abriu o app ou o site",
+  "amfSignedIn": "Último login",
+  "amfOver90": "Há mais de 90 dias",
+  "amfNotSeen": "Sem registo",
+  "amfViaApp": "App",
+  "amfViaWeb": "Site",
+  "amfSortSeen": "Aberto mais recentemente",
+  "amfSortSeenOld": "Há mais tempo sem abrir",
+  "amfSortSignin": "Login mais recente",
+  "amfSortSigninOld": "Há mais tempo sem login"
 }

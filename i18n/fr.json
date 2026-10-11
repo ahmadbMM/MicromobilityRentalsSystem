@@ -5140,5 +5140,15 @@
   "amfSortIgOld": "Abonnés comptés il y a le plus longtemps",
   "amfSortMinutes": "Le plus de minutes roulées",
   "amfSortCountry": "Pays, A à Z",
-  "scanTwinUsed": "Ce billet est pour {0}. Sa réservation d'aujourd'hui a été ouverte à la place."
+  "scanTwinUsed": "Ce billet est pour {0}. Sa réservation d'aujourd'hui a été ouverte à la place.",
+  "amfSeen": "Dernière ouverture de l'appli ou du site",
+  "amfSignedIn": "Dernière connexion",
+  "amfOver90": "Il y a plus de 90 jours",
+  "amfNotSeen": "Non enregistré",
+  "amfViaApp": "Appli",
+  "amfViaWeb": "Site web",
+  "amfSortSeen": "Ouvert le plus récemment",
+  "amfSortSeenOld": "Le plus longtemps sans ouverture",
+  "amfSortSignin": "Connecté le plus récemment",
+  "amfSortSigninOld": "Le plus longtemps sans connexion"
 }

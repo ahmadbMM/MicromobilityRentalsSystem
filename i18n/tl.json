@@ -5140,5 +5140,15 @@
   "amfSortIgOld": "Pinakamatagal nang nabilang na follower",
   "amfSortMinutes": "Pinakamaraming minutong nag-ride",
   "amfSortCountry": "Bansa, A hanggang Z",
-  "scanTwinUsed": "Para sa {0} ang tiket na iyan. Binuksan sa halip ang booking nila para ngayong araw."
+  "scanTwinUsed": "Para sa {0} ang tiket na iyan. Binuksan sa halip ang booking nila para ngayong araw.",
+  "amfSeen": "Huling pagbukas ng app o website",
+  "amfSignedIn": "Huling pag-sign in",
+  "amfOver90": "Higit 90 araw na ang nakalipas",
+  "amfNotSeen": "Walang tala",
+  "amfViaApp": "App",
+  "amfViaWeb": "Website",
+  "amfSortSeen": "Pinakabagong nagbukas",
+  "amfSortSeenOld": "Pinakamatagal mula huling pagbukas",
+  "amfSortSignin": "Pinakabagong nag-sign in",
+  "amfSortSigninOld": "Pinakamatagal mula huling pag-sign in"
 }
