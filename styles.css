@@ -6728,7 +6728,7 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 #tab-vendors .vendor-day.st-open{border-color:rgba(var(--green-rgb),.45)}
 #tab-vendors .vendor-day.st-confirmed{background:rgba(var(--green-rgb),.12);border-color:var(--green)}
 #tab-vendors .vendor-day.st-closed{background:var(--s3);color:var(--muted)}
-#tab-vendors .vendor-day.past{opacity:.55}
+#tab-vendors .vendor-day.past{color:var(--muted)} /* was opacity .55: a past Saturday's number fell under 4.5:1 and failed the a11y audit once 10 Oct went by (2026-10-11) */
 #tab-vendors .vendor-day.today .vendor-dn{color:var(--green)}
 .vendor-dn{font-weight:800;font-size:13px}
 .vendor-ds{font-weight:800}
