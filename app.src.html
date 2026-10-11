@@ -5789,6 +5789,9 @@ function _on_renderAuthModal_5(event,el){if(event.key==='Enter')doLogin()}
 function _on_renderAuthModal_6(event,el){if(event.key===' '||event.key==='Enter'){event.preventDefault();toggleRememberMe();}}
 function _on_renderAuthModal_8(event,el){if(event.key==='Enter')doSignup()}
 function _on_authCancelHome(){closeAuthModal();goLanding();}
+// Forgotten passwords go to their own WhatsApp number, not the business line on the site (the owner,
+// 2026-10-11: "all messages and redirects regarding the forget password must go to +966579543977").
+const FORGOT_PW_WA='966579543977';
 function renderAuthModal(){
   const mode=S.authMode;
   // Same-mode re-renders (language/theme switches call render() while the modal is open)
@@ -5831,7 +5834,7 @@ function renderAuthModal(){
         <div class="cu-fg-head">
               <div class="cu-fg-sub">${t('forgotWaSub')}</div>
         </div>
-        <a class="btn-primary auth-submit" href="https://wa.me/966566668818?text=${encodeURIComponent(t('forgotWaText'))}" target="_blank" rel="noopener noreferrer">${t('forgotWaBtn')}</a>
+        <a class="btn-primary auth-submit" href="https://wa.me/${FORGOT_PW_WA}?text=${encodeURIComponent(t('forgotWaText'))}" target="_blank" rel="noopener noreferrer">${t('forgotWaBtn')}</a>
         <div class="cu-fg-sub" dir="ltr">+966 56 666 8818</div>
         <div class="cu-back-row">
           <button class="cu-back-btn" data-on-click="${_on("switchAuthMode","login")}">${_cuIc('back',16,1)} ${t('backToLogin')}</button>

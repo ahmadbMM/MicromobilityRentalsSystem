@@ -141,7 +141,7 @@ test.describe('forgot password', () => {
     await boot(page);
     const calls = await captureRpc(page, 'customer_reset', [customer]);
     await page.evaluate('switchAuthMode("forgot")');
-    const wa = page.locator('#auth-modal a[href^="https://wa.me/966566668818"]');
+    const wa = page.locator('#auth-modal a[href^="https://wa.me/966579543977?"]');
     await expect(wa).toBeVisible();
     expect(decodeURIComponent((await wa.getAttribute('href'))!)).toContain('forgot my password');
     await expect(page.locator('#auth-modal')).toContainText('temporary password');
