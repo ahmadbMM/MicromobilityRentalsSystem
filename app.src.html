@@ -43514,11 +43514,10 @@ function _amRowInner(c){
     // One line per account, in columns that line up down the list (2026-10-10, the owner: "make the accounts and
     // members pages look like a list ... very aligned and organized and equally space"): the name (with the sorted-on
     // value or the money spent under it), the email with its sign-in marks, the phone, the social accounts, the tags
-    // and badges. Whatever asks for staff action (missing details, a correction asked for, a deletion request, a
+    // (badges stay behind the Badges button, not in the tags column: the owner, 2026-10-11). Whatever asks for staff action (missing details, a correction asked for, a deletion request, a
     // look-off check, no gender) is a strip under the row, the full width, so the rows stay one height.
     const email=c.email?`<bdi>${_pii('email',c.email,c.id)}</bdi>${_siSlot(c.id)}`:'<span class="am-none">—</span>';
     const phone=c.phone?`<bdi>${_pii('phone',c.phone,c.id)}</bdi>`:'<span class="am-none">—</span>';
-    const bdgs=_bdgOk()?_bdgHeld(c.id).map(x=>_bdgById(x.badge_id)).filter(Boolean).map(b=>`<span class="am-bdg" title="${esc(_bdgName(b))}" role="img" aria-label="${esc(_bdgName(b))}">${_bdgMedal(b.icon,_bdgCol(b))}</span>`):[];
     const sub=[c.heard_from?`<div class="am-meta am-heard">${esc(heardLabel(c.heard_from))}</div>`:'',S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):'',_amSortLine(c)].filter(Boolean).join('');
     // Accounts made before signup asked for a gender have none; offer it on the row, one tap.
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"male")}">${t('genderMale')}</button><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"female")}">${t('genderFemale')}</button></div>`;
@@ -43530,7 +43529,7 @@ function _amRowInner(c){
         <div class="am-c-name"><div class="am-cust-name">${esc(c.name||'—')}</div>${sub?`<div class="am-c-sub">${sub}</div>`:''}</div>
         <div class="am-cust-contact"><span class="am-c-email">${email}</span><span class="am-c-phone">${phone}</span></div>
         <div class="am-c-soc">${_amSocCell(c)}</div>
-        <div class="am-c-tags"><div class="am-chips">${chips}${bdgs.join('')}</div></div>
+        <div class="am-c-tags"><div class="am-chips">${chips}</div></div>
       </div>
       <div class="am-cust-actions">
         <button class="btn-sm btn-secondary am-flag${_flagFieldsOf(c).length?' on':''}" data-on-click="${_on("showFlagFieldsModal",c.id)}" title="${esc(t('fixFlagBtn'))}" aria-label="${esc(t('fixFlagBtn'))} · ${esc(c.name||'')}">${_artIcon('flag',14)}<span class="am-btn-lbl">${t('fixFlagBtn')}</span></button>

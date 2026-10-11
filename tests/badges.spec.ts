@@ -97,7 +97,7 @@ test.describe('@staff:community badges', () => {
     expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept the Friday ride', awarded_by: 'Spec Staff' });
     await expect(modal(page).locator('.bdg-list')).toContainText('Swept the Friday ride');
     await expect(modal(page).locator('.bdg-pick', { hasText: 'Marshal' })).toHaveCount(0);
-    await expect(lina.locator('.am-bdg svg.bdg-m')).toHaveCount(1); // the row shows it too
+    await expect(lina.locator('.am-c-tags .bdg-m')).toHaveCount(0); // the tags column shows tags only (2026-10-11)
     expect(await page.evaluate('(S.undoStack.at(-1)||{}).label')).toBe('Badge given: Marshal to Lina Haddad');
 
     // Take back asks once more on the same button; only the second tap writes.

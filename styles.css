@@ -1462,8 +1462,6 @@
     #group-edit-modal .cmy-ge-num{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--muted);min-width:26px;}
     /* ── Badges staff give (2026-09-29): a rider's Badges dialog and Community > Badges. Scoped by the
        id each is drawn under, so the body.view-staff layer does not restyle their buttons. ── */
-    :is(#tab-community,#tab-customers,#tab-analytics) .am-bdg{display:inline-flex;line-height:0;}
-    :is(#tab-community,#tab-customers,#tab-analytics) .am-bdg .bdg-m{width:22px;height:22px;}
     .bdg-item{display:flex;align-items:center;gap:10px;}
     /* An account's badges in its history window and editor (_bdgStripSec, 2026-10-09): medal + name chips. */
     .bdg-strip-sec{margin:12px 0 4px;}
