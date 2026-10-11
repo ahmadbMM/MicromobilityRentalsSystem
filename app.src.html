@@ -16409,18 +16409,18 @@ function renderPromoManager(){
   const codes=[...(S.promoCodes||[])].sort((a,b)=>String(a.code).localeCompare(String(b.code)));
   const rows=codes.length?codes.map(c=>{
     const spent=_promoSpent(c);
-    return`<tr${c.active&&!spent?'':' class="pc-off"'}>
+    return`<tr${c.active&&!spent?'':' class="pc-off"'}${S._pcEditId===c.id?' aria-current="true"':''}>
     <td data-label="${t('promoCodeLabel')}" class="pc-code-td">${esc(c.code)}</td>
     <td data-label="${t('promoValueLabel')}">${c.kind==='flat'?_money(c.value):`${c.value}%`}${c.applies_to?` · ${typeLabel(c.applies_to)}`:''}</td>
     <td data-label="${t('promoLimitsLabel')}" class="pc-lim">${_promoLimitsText(c)||'—'}</td>
     <td data-label="${t('promoActiveLabel')}"><button class="btn-sm ${c.active&&!spent?'btn-green':'btn-muted'}" data-on-click="${_on("togglePromoActive",c.id)}">${spent?t(_promoExpired(c)?'promoExpiredLabel':'promoUsedUpLabel'):c.active?t('promoActiveLabel'):t('promoInactiveLabel')}</button></td>
-    <td class="cell-actions"><button class="btn-sm btn-red" data-on-click="${_on("delPromo",c.id)}">${t('deleteBtn')}</button></td>
+    <td class="cell-actions"><div class="actions-cell"><button class="btn-sm" data-on-click="${_on("editPromo",c.id)}">${t('editBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("delPromo",c.id)}">${t('deleteBtn')}</button></div></td>
   </tr>`;}).join(''):`<tr><td colspan="5" class="pc-none">${t('promoNoCodes')}</td></tr>`;
   return`<div class="pc-wrap">
     <h2 class="page-title pc-title">${t('promoMgrTitle')}</h2>
     <div class="inline-form pc-form">
       <div class="form-row">
-        <div class="form-group"><label for="pc-code">${t('promoCodeLabel')}</label><input type="text" id="pc-code" value="${esc(S._pcCode)}" data-on-input="${_on("_on_renderPromoManager_1",_EV,_EL)}" placeholder="SUMMER10" class="pc-upper"></div>
+        <div class="form-group"><label for="pc-code">${t('promoCodeLabel')}</label><input type="text" id="pc-code" value="${esc(S._pcCode)}" data-on-input="${_on("_on_renderPromoManager_1",_EV,_EL)}" placeholder="SUMMER10" class="pc-upper"${S._pcEditId?' readonly':''}></div>
         <div class="form-group"><label for="pc-kind">${t('promoKindLabel')}</label><select id="pc-kind" data-on-change="${_on("_on_renderPromoManager_2",_EV,_EL)}"><option value="percent"${S._pcKind==='percent'?' selected':''}>${t('promoPercentOpt')}</option><option value="flat"${S._pcKind==='flat'?' selected':''}>${t('promoFlatOpt')}</option></select></div>
         <div class="form-group"><label for="pc-value">${t('promoValueLabel')}</label><input id="pc-value" type="number" min="0" step="0.5" value="${esc(S._pcValue)}" data-on-input="${_on("_on_renderPromoManager_3",_EV,_EL)}"></div>
         <div class="form-group"><label for="pc-type">${t('promoAppliesLabel')}</label><select id="pc-type" data-on-change="${_on("_on_renderPromoManager_4",_EV,_EL)}">
@@ -16437,7 +16437,8 @@ function renderPromoManager(){
           <input id="pc-cust" type="text" list="pc-cust-list" data-on-focus="${_on("_dlFill","pc-cust-list")}" value="${esc(S._pcCust||'')}" data-on-input="${_on("_on_renderPromoManager_7",_EV,_EL)}" placeholder="${t('promoAnyone')}">
           <datalist id="pc-cust-list"></datalist></div>
       </div>
-      <button class="btn-primary" data-on-click="${_on("addPromo")}">${t('promoAddBtn')}</button>
+      ${S._pcEditId?`<div class="actions-cell"><button class="btn-primary" data-on-click="${_on("addPromo")}">${t('saveChangesBtn')}</button><button class="btn-sm" data-on-click="${_on("cancelPromoEdit")}">${t('cancelBtn')}</button></div>`
+        :`<button class="btn-primary" data-on-click="${_on("addPromo")}">${t('promoAddBtn')}</button>`}
     </div>
     <div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="sess-admin-table"><caption class="sr-only">${t('sessionsTitle')}</caption><thead><tr>
       <th>${t('promoCodeLabel')}</th><th>${t('promoValueLabel')}</th><th>${t('promoLimitsLabel')}</th><th>${t('promoActiveLabel')}</th><th><span class="sr-only">${t('colActions')}</span></th>
@@ -16497,7 +16498,49 @@ async function _syncPromoBookings(code){
 // One add at a time (2026-10-07): a second tap while the first insert was on the wire passed the
 // same-text check (the list reloads after it) and was refused by the unique index as an error.
 function addPromo(){return _busyRun('promoAdd',_addPromo);}
+/** The account the "One customer only" field names: '' = anyone, null = refused (toast shown). */
+function _pcCustId(){
+  if(!(S._pcCust||'').trim())return'';
+  const nm=String(S._pcCust).trim().toLowerCase(),cs=S.customers||[];
+  // The label from the list first; a bare name only when exactly one account carries it.
+  let hits=cs.filter(x=>_pcCustLabel(x).toLowerCase()===nm);
+  if(!hits.length)hits=cs.filter(x=>String(x.name||'').trim().toLowerCase()===nm);
+  if(!hits.length){toast(t('promoNoSuchCustomer'),'error');return null;}
+  if(hits.length>1){toast(t('promoCustAmbiguous'),'error');return null;}
+  return hits[0].id;
+}
+// Editing a code (2026-10-11): the add form fills with the code and saves over it. The text
+// itself stays: live bookings carry the code by its text, so a renamed code would quietly take
+// their discount away. A new text is a new code.
+function editPromo(id){
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;}
+  const c=(S.promoCodes||[]).find(x=>x.id===id);if(!c)return;
+  const cu=c.customer_id?(S.customers||[]).find(x=>String(x.id)===String(c.customer_id)):null;
+  Object.assign(S,{_pcEditId:id,_pcCode:c.code,_pcKind:c.kind||'percent',_pcValue:String(c.value??''),_pcType:c.applies_to||'',
+    _pcExpires:c.expires_at?String(c.expires_at).slice(0,10):'',_pcMax:c.max_uses!=null?String(c.max_uses):'',_pcCust:cu?_pcCustLabel(cu):''});
+  renderSessions();
+  document.getElementById('pc-value')?.focus();
+}
+function _pcClear(){S._pcEditId=null;S._pcCode='';S._pcKind='percent';S._pcValue='';S._pcType='';S._pcExpires='';S._pcMax='';S._pcCust='';}
+function cancelPromoEdit(){_pcClear();renderSessions();}
+async function _savePromoEdit(){
+  const c=(S.promoCodes||[]).find(x=>x.id===S._pcEditId);
+  if(!c){cancelPromoEdit();return;}
+  const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
+  if(value<=0){toast(t('promoInvalidMsg'),'error');return;}
+  const cust=_pcCustId();if(cust===null)return;
+  const n=parseInt(S._pcMax,10);
+  // Every field is written, so clearing one (no end date, no limit, anyone) takes the limit off.
+  // The use count is the server's and is left alone.
+  const upd={kind:S._pcKind||'percent',value,applies_to:S._pcType||null,expires_at:S._pcExpires||null,
+    max_uses:n>0?n:null,customer_id:cust||null};
+  if(await _wr(sb.from('promo_codes').update(upd).eq('id',c.id),'edit promo code'))return;
+  _pcClear();
+  await loadData();toast(t('promoSavedToast'));renderSessions();
+  await _syncPromoBookings(c.code); // unpaid live bookings on this code take the new discount
+}
 async function _addPromo(){
+  if(S._pcEditId)return _savePromoEdit();
   const code=(document.getElementById('pc-code')?.value||S._pcCode||'').trim().toUpperCase();
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
   if(!code||value<=0){toast(t('promoInvalidMsg'),'error');return;}
@@ -16510,15 +16553,7 @@ async function _addPromo(){
   const _lim={};
   if(S._pcExpires)_lim.expires_at=S._pcExpires;
   {const n=parseInt(S._pcMax,10);if(n>0)_lim.max_uses=n;}
-  if((S._pcCust||'').trim()){
-    const nm=String(S._pcCust).trim().toLowerCase(),cs=S.customers||[];
-    // The label from the list first; a bare name only when exactly one account carries it.
-    let hits=cs.filter(x=>_pcCustLabel(x).toLowerCase()===nm);
-    if(!hits.length)hits=cs.filter(x=>String(x.name||'').trim().toLowerCase()===nm);
-    if(!hits.length){toast(t('promoNoSuchCustomer'),'error');return;}
-    if(hits.length>1){toast(t('promoCustAmbiguous'),'error');return;}
-    _lim.customer_id=hits[0].id;
-  }
+  {const cid=_pcCustId();if(cid===null)return;if(cid)_lim.customer_id=cid;}
   Object.assign(row,_lim);
   let res=await sb.from('promo_codes').insert(row);
   // Tolerant column: a DB that predates the applies_to migration rejects the key — retry
@@ -16536,7 +16571,7 @@ async function _addPromo(){
     if(!res.error)toast(t('promoLimitsMissing'),'warning');
   }
   if(_writeErr(res,'save promo code'))return;
-  S._pcCode='';S._pcValue='';S._pcType='';S._pcExpires='';S._pcMax='';S._pcCust='';
+  _pcClear();
   await loadData();toast(t('promoSavedToast'));renderSessions();
   await _syncPromoBookings(code); // a (re)created code immediately reprices live bookings that carry it
 }
@@ -16551,6 +16586,7 @@ function delPromo(id){
   const c=(S.promoCodes||[]).find(x=>x.id===id);if(!c)return;
   confirmDialog({title:t('deleteBtn'),body:esc(c.code),confirmLabel:t('deleteBtn'),confirmClass:'btn-red',onConfirm:async()=>{
     if(await _wr(sb.from('promo_codes').delete().eq('id',id),'delete promo code'))return;
+    if(S._pcEditId===id)_pcClear();
     await loadData();renderSessions();
     await _syncPromoBookings(c.code); // deleted code: live bookings return to full price
   }});
