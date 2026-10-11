@@ -273,7 +273,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_inventory_receive',   true,  'stock in at cost (weighted average), supplier and expiry; staff only'),
   ('staff_inventory_set_count', true,  'a stock-take count as a movement; staff only'),
   ('staff_inventory_extras',    true,  'reads inventory cost, supplier and expiry, which anon and authenticated cannot; staff only'),
-  -- Last opened / last signed in (20261011120000)
+  -- Last opened / last signed in (20261011130000)
   ('customer_seen',             true,  'writes customer_seen, which no client can touch; token-checked'),
   ('staff_last_seen',           true,  'reads customer_seen and customer_activity; staff only')
 )

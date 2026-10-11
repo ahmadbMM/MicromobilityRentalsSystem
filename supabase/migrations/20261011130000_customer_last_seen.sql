@@ -82,7 +82,7 @@ select a.customer_id, max(a.at), 'app'
 on conflict (customer_id) do nothing;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261011120000', 'customer_last_seen')
+values ('20261011130000', 'customer_last_seen')
 on conflict (version) do nothing;
 
 commit;

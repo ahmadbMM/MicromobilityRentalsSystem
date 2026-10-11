@@ -4133,7 +4133,7 @@ function getSession(){
     return c;
   }catch{return (S&&S._sessionVolatile)||null;}
 }
-// The rider's "last opened" stamp (customer_seen, 20261011120000): staff read it in the account
+// The rider's "last opened" stamp (customer_seen, 20261011130000): staff read it in the account
 // report and the Accounts and Members lists. Sent when the app opens on a remembered session, at a
 // sign-in, and when the app comes back to the screen; at most every 30 minutes from this device
 // (the database keeps one every 5). Never from a staff device, never in a rider's way.
@@ -5927,7 +5927,7 @@ function _siEnsure(){
 }
 // Staff: when each account last opened the app or the website (seen, via 'app' | 'web') and last
 // signed in (signin, from the activity log, kept since 2026-10-04), from staff_last_seen
-// (20261011120000). Read on its own like the sign-in marks, at most every ten minutes, when Accounts,
+// (20261011130000). Read on its own like the sign-in marks, at most every ten minutes, when Accounts,
 // Members or the account report is drawn; a list sorted or filtered on it and the report's count are
 // drawn again when the answer comes. A database without the function shows none, once asked.
 function _lsEnsure(){

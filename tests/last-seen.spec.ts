@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The owner, 2026-10-11: "add an option in report builder for community and customers to show the last time
-// they logged on/opened the website" + "and an option to sort them with it". staff_last_seen (20261011120000)
+// they logged on/opened the website" + "and an option to sort them with it". staff_last_seen (20261011130000)
 // gives each account's last opening (customer_seen, stamped by the app and the website) and last sign-in
 // (customer_activity); the report gains two columns, two filters and four sorts, as do Accounts and Members.
 
