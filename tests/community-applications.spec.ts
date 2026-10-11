@@ -593,12 +593,13 @@ test('Invite to ride: no tag ticked, a ride to pick, then the approval without C
     'Sunrise Loop', 'Saturday, 14 March 2099', 'Gathering 6:00 am · Ride starts 8:00 am', 'Meeting point: ' + MEET, '',
     'Before the ride:',
     '• Your booking and its QR code are waiting in “My Bookings”.',
+    'https://micromobilityrentals.pages.dev',
     '• Have your QR code ready when you arrive; we scan it to check you in.',
     '• If you can’t make it, please cancel from “My Bookings” so someone else can take your place.', '',
     'Follow us on Instagram for ride photos and news:', 'https://www.instagram.com/MicroMobilitySA/', '',
     'See you on the road!', 'The MicroMobility team',
   ].join('\n'));
-  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'micromobilityrentals.pages.dev', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
+  for (const none of ['Kp7wXr4Mnq', 'karim.mansour@gmail.com', '0552468013', 'password', 'chat.whatsapp.com']) expect(msg).not.toContain(none);
   const wa = msgBox.locator('#ca-msg-wa');
   await expect(wa).not.toBeChecked();
   await expect(msgBox.locator('.ca-wa-opt')).toContainText('Include the WhatsApp group link');
@@ -659,7 +660,7 @@ test('an invited application reads Invited and writes its invitation again; a ne
   expect(msg).toContain('You’re invited to our Saturday Social Ride!');
   expect(msg).toContain('Saturday, 7 March 2099');
   expect(msg).not.toContain('Meeting point'); // this ride has no meeting point link
-  for (const none of ['huda.saleh@gmail.com', '0551239876', 'micromobilityrentals.pages.dev', 'password']) expect(msg).not.toContain(none);
+  for (const none of ['huda.saleh@gmail.com', '0551239876', 'password']) expect(msg).not.toContain(none);
   await msgBox.locator('.ca-x').click();
 
   // an account the invitation made: a new temporary password goes in the account message, not the invitation

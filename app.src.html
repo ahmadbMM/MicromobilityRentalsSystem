@@ -18090,8 +18090,8 @@ const CA_SITE='https://micromobilityrentals.pages.dev';
 const CA_IG='https://www.instagram.com/MicroMobilitySA/'; // every message about a community application ends with it (the owner, 2026-09-30)
 // Invite to ride (the owner, 2026-09-30): the invitation to a Saturday Social Ride. Its own
 // sentences and the ride's words; the greeting and the sign-off are CA_MSG's. It carries no account
-// details, no sign-in address, email, mobile or password (the owner, 2026-09-30: no reply to a
-// community application does). Staff may add the community's WhatsApp group link, which is read when
+// details, email, mobile or password (the owner, 2026-09-30: no reply to a community application
+// does); only the website's address, beside "My Bookings" (2026-10-11). Staff may add the community's WhatsApp group link, which is read when
 // the invitation is written (_caWaLoad), never kept in this public code (2026-10-05).
 // Not UI: the rider reads it.
 const CA_INV_MSG={
@@ -18124,8 +18124,9 @@ function _caInvWhen(sess,lang){
 }
 // What a rider booked on a ride needs before it (the owner, 2026-09-30): where the booking and its QR
 // code are, the QR at the gate, and cancelling to free the place. In the invitation and in the
-// welcome message of an approval that put the rider on a ride.
-function _caRideTips(lang){const v=CA_INV_MSG[lang]||CA_INV_MSG.en;return ['',v.before,'• '+v.myb,'• '+v.qr,'• '+v.cancel];}
+// welcome message of an approval that put the rider on a ride. The website's address follows the
+// "My Bookings" line so the rider can open it (the owner, 2026-10-11).
+function _caRideTips(lang){const v=CA_INV_MSG[lang]||CA_INV_MSG.en;return ['',v.before,'• '+v.myb,CA_SITE,'• '+v.qr,'• '+v.cancel];}
 // The message with a temporary password staff made in the account editor (_cfPwdGen), or a new one
 // for an account an application made: the password, where to sign in with it, and that it is
 // changed for their own as soon as they do - nothing else about the account (the owner, 2026-09-30:
