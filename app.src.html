@@ -18068,7 +18068,8 @@ function _bdIcs(){
 // (customer_community_apply, customer_id set). Staff approve or reject here. Approving runs
 // staff_community_approve, which tags that account with the Community tag; an application from
 // before gets an account made with a temporary password, handed back ONCE and sent in the password
-// message (CA_TP_MSG). No reply carries account details (the owner, 2026-09-30). The password is never
+// message (CA_TP_MSG), which names the account's email (the owner, 2026-10-11). No other reply carries
+// account details (the owner, 2026-09-30). The password is never
 // stored readable: a lost one is replaced with staff_community_new_password while the rider has not
 // chosen their own.
 // The message staff send an applicant, in the language they filled the form in (staff can switch).
@@ -19226,6 +19227,9 @@ function _caMsgShow(a,kind,d){
     d:{name:d.name||a.name,email:d.email||'',phone:d.phone||'',password:d.password||null,oauth:!!d.oauth,
       existing:!!d.existing,sid:d.sid||null,wa:false,waLink:'',ig:!!a.id}}; // ig: an application's message (not the editor's password one) // wa: the invitation carries the WhatsApp group's link (staff tick it); waLink: that link, once read (_caWaLoad)
   if(kind==='new'||kind==='reject'||kind==='invite'){S._caMsg.d.email=S._caMsg.d.email||a.email;S._caMsg.d.phone=S._caMsg.d.phone||a.phone;}
+  // The password message names the account it opens (the owner, 2026-10-11): the account's own email
+  // first, the application's when the account is not loaded.
+  if(kind==='temp'&&!S._caMsg.d.email){const c=a.customer_id&&(S.customers||[]).find(x=>x.id===a.customer_id);S._caMsg.d.email=(c&&c.email)||a.email||'';}
   if(kind==='fix')S._caMsg.d.fix={token:a.fix_token,fields:(a.fix_fields||[]).slice(),note:a.fix_note||''};
   _caMsgRender();
   if(kind==='invite')_caWaLoad();
@@ -19273,7 +19277,7 @@ function _caMsgBody(kind,lang,d){
       const f=CA_FIX_MSG[lang]||CA_FIX_MSG.en,x=d.fix||{},v=CA_INV_MSG[lang]||CA_INV_MSG.en;
       const ride=d.sid&&_sessDisp(d.sid);
       const rideLines=ride?[...(kind==='invite'?[]:[v.saved]),..._caInvWhen(ride,lang),..._caRideTips(lang)].join('\n'):'';
-      return _tplUse(id,lang,{first_name:first,ride:rideLines,group_link:d.wa&&d.waLink?v.group+'\n'+d.waLink:'',password:d.password||'',site:CA_SITE,
+      return _tplUse(id,lang,{first_name:first,ride:rideLines,group_link:d.wa&&d.waLink?v.group+'\n'+d.waLink:'',password:d.password||'',email:d.email||'',site:CA_SITE,
         fields:(x.fields||[]).map(k=>'• '+(f[k]||(LA_FIX_MSG[lang]||LA_FIX_MSG.en)[k]||k)).join('\n'),note:x.note?f.note+' '+x.note:'',link:x.token?_caFixLink(x.token,lang):''});
     }
   }
@@ -19294,9 +19298,9 @@ function _caMsgBody(kind,lang,d){
     L.push('',m.seeYou,m.team);
     return L.join('\n');
   }
-  if(kind==='temp'){ // a temporary password: the password, where, and that it is changed at once
+  if(kind==='temp'){ // a temporary password: the account's email, the password, where, and that it is changed at once
     const tp=CA_TP_MSG[lang]||CA_TP_MSG.en;
-    L.push(tp.intro,d.password||'','',tp.signin,CA_SITE,'',tp.change,'',m.team);
+    L.push(tp.intro,...(d.email?[m.email+': '+d.email]:[]),m.temp+': '+(d.password||''),'',tp.signin,CA_SITE,'',tp.change,'',m.team);
     return L.join('\n');
   }
   // Approved (the owner, 2026-09-30: "remove anything related to account info in the message that is
@@ -19973,7 +19977,7 @@ Let’s continue enjoying strong and competitive rides—but with discipline, co
 const TPL_KEY='msg.templates';
 const TPL=[
   ['tplgRm',[['rm_ride','rmRide',['date','meet_time','start_time','meet_link','beg_km','int_km','booking_link','breakfast']],['rm_privacy','rmPrivacy',[]],['rm_etiq','rmEtiq',[]]]],
-  ['tplgCa',[['ca_approved','tplCaApproved',['first_name','ride']],['ca_invite','tplCaInvite',['first_name','ride','group_link']],['ca_temp','tplCaTemp',['first_name','password','site']],['ca_fix','tplCaFix',['first_name','fields','note','link']],['ca_reject','tplCaReject',['first_name']]]],
+  ['tplgCa',[['ca_approved','tplCaApproved',['first_name','ride']],['ca_invite','tplCaInvite',['first_name','ride','group_link']],['ca_temp','tplCaTemp',['first_name','email','password','site']],['ca_fix','tplCaFix',['first_name','fields','note','link']],['ca_reject','tplCaReject',['first_name']]]],
   ['tplgLa',[['la_signup','tplLaSignup',['first_name','lesson','account']],['la_moved','tplLaMoved',['first_name','lesson']],['la_fix','tplLaFix',['first_name','fields','note','link']]]],
   ['tplgWs',[['new','tplWsNew'],['confirmed','tplWsConfirmed'],['confirmedPickup','tplWsConfirmedPickup'],['in_workshop','tplWsInWorkshop'],['awaiting_parts','tplWsAwaitingParts'],['ready','tplWsReady'],['readyPickup','tplWsReadyPickup'],['completed','tplWsCompleted'],['cancelled','tplWsCancelled']].map(([k,l])=>['ws_'+k,l,['first_name','ref','service','when','price']])],
   ['tplgSm',[['sm_reply','tplSmReply',['first_name','ref']]]],
@@ -20028,7 +20032,7 @@ function _tplDefault(id,lang){
     const m=CA_MSG[L],v=CA_INV_MSG[L],tp=CA_TP_MSG[L],f=CA_FIX_MSG[L];
     if(id==='ca_approved')return[hi(m),'',m.welcome,'',m.approved,'',m.rides,'','{ride}','',m.seeYou,m.team].join('\n');
     if(id==='ca_invite')return[hi(m),'',v.invited,'',v.body,'{ride}','','{group_link}','',m.seeYou,m.team].join('\n');
-    if(id==='ca_temp')return[hi(m),'',tp.intro,'{password}','',tp.signin,'{site}','',tp.change,'',m.team].join('\n');
+    if(id==='ca_temp')return[hi(m),'',tp.intro,m.email+': {email}',m.temp+': {password}','',tp.signin,'{site}','',tp.change,'',m.team].join('\n');
     if(id==='ca_fix')return[hi(m),'',f.thanks,'',f.ask,'{fields}','','{note}','',f.open,'{link}','',m.team].join('\n');
     if(id==='ca_reject')return[hi(m),'',m.rejThanks,'',m.rejBody,'',m.rejWelcome,'',m.team].join('\n');
   }

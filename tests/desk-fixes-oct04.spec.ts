@@ -158,3 +158,17 @@ test('a local 05 number gets its country code in the message dialog WhatsApp lin
   const href = await page.locator('#confirm-modal a.ca-wa').getAttribute('href');
   expect(href).toMatch(/^https:\/\/wa\.me\/966552468013\?text=/);
 });
+
+// ── The temporary-password message names the account (the owner, 2026-10-11) ────────────────────
+test('the temporary-password message carries the account email above the password', async ({ page }) => {
+  await staff(page, { sessions: [sess('s0', D0)] });
+  await page.evaluate(`_tpMsgOpen('Karim Mansour','karim@example.test','0552468013','Kp7wXr4Mnq')`);
+  const href = (await page.locator('#confirm-modal a.ca-wa').getAttribute('href')) || '';
+  const txt = decodeURIComponent(href.split('?text=')[1] || '');
+  expect(txt).toContain('Email: karim@example.test\nTemporary password: Kp7wXr4Mnq');
+  // no email on the account: no Email line
+  await page.evaluate(`_caMsgClose();_tpMsgOpen('Karim Mansour','','0552468013','Kp7wXr4Mnq')`);
+  const txt2 = decodeURIComponent(((await page.locator('#confirm-modal a.ca-wa').getAttribute('href')) || '').split('?text=')[1] || '');
+  expect(txt2).not.toContain('Email:');
+  expect(txt2).toContain('Temporary password: Kp7wXr4Mnq');
+});
