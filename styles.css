@@ -9407,7 +9407,7 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list #am-cust-rows .am-row:last-child>.am-cust:last-child{border-bottom:0;}
   body.view-staff .am-list #am-cust-rows .am-cust:hover{background:rgba(var(--tint-rgb),.025);}
   body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{flex:1;min-width:0;display:grid;align-items:center;gap:0 16px;
-    grid-template-columns:minmax(0,1.2fr) minmax(0,1.45fr) 128px minmax(0,1.3fr) minmax(0,1fr);}
+    grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) 124px minmax(0,1.6fr) minmax(0,1.3fr);}
   body.view-staff .am-list .am-cust-contact{display:contents;}
   body.view-staff .am-list .am-cust-main>*,body.view-staff .am-list .am-cust-contact>*{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
   body.view-staff .am-list .am-cust-name{font-size:14px;font-weight:700;line-height:20px;}
@@ -9415,12 +9415,13 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list .am-c-sub .am-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;margin:0;}
   body.view-staff .am-list :is(.am-c-email,.am-c-phone){font-size:13px;color:var(--text);line-height:20px;}
   body.view-staff .am-list .am-c-phone{font-variant-numeric:tabular-nums;}
-  body.view-staff .am-list .am-c-soc .soc-links,body.view-staff .am-list .am-chips{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;margin:0;overflow:hidden;}
-  body.view-staff .am-list .am-c-soc .soc-link,body.view-staff .am-list .am-chips>*{flex:none;}
+  /* every tag and badge shows (2026-10-11, the owner: "i want all the tags to be visible dont show +1 +2"): they wrap
+     onto a second line, and the row grows, rather than hide */
+  body.view-staff .am-list .am-chips{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin:0;padding-block:4px;}
+  body.view-staff .am-list .am-chips>*{flex:none;}
   body.view-staff .am-list .am-none{color:var(--muted-l,var(--muted));}
-  body.view-staff .am-list :is(.am-c-soc,.am-c-tags){display:flex;align-items:center;gap:6px;}
-  body.view-staff .am-list .am-c-soc .soc-links>:nth-child(n+2):not(.ig-chip),body.view-staff .am-list .am-chips>:nth-child(n+2){display:none;}
-  body.view-staff .am-list .am-moren{flex:none;font-size:12px;font-weight:700;color:var(--muted);}
+  body.view-staff .am-list .am-c-tags{display:flex;align-items:center;white-space:normal;overflow:visible;}
+  body.view-staff .am-list .am-c-soc{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;}
   /* the same six buttons, the same width on every row (and an empty slot of that width over them in the header) */
   body.view-staff .am-list .am-cust-actions{flex:none;width:316px;display:flex;justify-content:flex-end;align-items:center;gap:6px;}
   body.view-staff .am-list .am-cust-actions .btn-sm{height:36px;min-height:36px;padding:0;justify-content:center;}
@@ -9437,11 +9438,11 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list .am-picker{padding:4px 16px 14px;}
 }
 /* an iPad or a narrow laptop: two lines a row, still in columns - name over email, phone over the social accounts,
-   then the tags - and the buttons a little narrower */
+   then every tag on a line of its own - and the buttons a little narrower */
 @media (min-width:768px) and (max-width:1279px){
   body.view-staff .am-list :is(.am-cust,.am-head){min-height:66px;gap:10px;padding-inline:12px;}
-  body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1.2fr);
-    grid-template-areas:"n p t" "e s t";gap:2px 14px;}
+  body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);
+    grid-template-areas:"n p" "e s" "t t";gap:2px 14px;}
   body.view-staff .am-list .am-c-name{grid-area:n;}
   body.view-staff .am-list .am-c-email{grid-area:e;}
   body.view-staff .am-list .am-c-phone{grid-area:p;}
@@ -9451,7 +9452,8 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list .am-head .am-cust-contact>:nth-child(1){grid-area:e;}
   body.view-staff .am-list .am-head .am-cust-contact>:nth-child(2){grid-area:p;}
   body.view-staff .am-list .am-head .am-cust-main>:nth-child(3){grid-area:s;}
-  body.view-staff .am-list .am-head .am-cust-main>:nth-child(4){grid-area:t;}
+  body.view-staff .am-list .am-head .am-cust-main>:nth-child(4){display:none;} /* the tags speak for themselves on their line */
+  body.view-staff .am-list .am-c-tags:has(.am-none){display:none;}
   body.view-staff .am-list .am-head{min-height:52px;}
   body.view-staff .am-list .am-c-sub .am-heard{display:none;} /* where they heard of us is in Edit; the row keeps two lines */
   body.view-staff .am-list .am-c-sub:not(:has(>:not(.am-heard))){display:none;}
@@ -9460,11 +9462,43 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list .am-cust-actions{width:268px;}
   body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:56px;}
 }
+/* the social accounts cell, every width: the handle as text with the other networks as icons beside it, the
+   follower count under it as text in the average's colour (2026-10-11, the owner: "cluttered and some info is
+   hidden") - no pills, nothing cut off but a long handle's end */
+body.view-staff .am-list .am-soc-top{display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;}
+body.view-staff .am-list .am-soc-top .soc-link{min-width:0;height:auto;padding:0;border:0;border-radius:0;background:none;gap:6px;
+  font-size:13px;font-weight:600;line-height:20px;}
+body.view-staff .am-list .am-soc-top .soc-link svg{width:14px;height:14px;}
+body.view-staff .am-list .am-soc-top .soc-link span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+body.view-staff .am-list .am-soc-top .soc-link:hover span{text-decoration:underline;}
+body.view-staff .am-list .am-soc-ic{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;
+  border-radius:6px;color:var(--muted);}
+body.view-staff .am-list .am-soc-ic svg{width:13px;height:13px;}
+body.view-staff .am-list .am-soc-ic:hover{color:var(--green);background:rgba(var(--tint-rgb),.06);}
+body.view-staff .am-list .am-soc-ig{display:flex;min-width:0;max-width:100%;}
+body.view-staff .am-list .am-soc-ig .ig-chip{min-width:0;height:auto;padding:0;border:0;border-radius:0;background:none;gap:5px;
+  font-size:12px;font-weight:600;line-height:18px;color:var(--muted);}
+body.view-staff .am-list .am-soc-ig .ig-chip svg{width:10px;height:10px;}
+body.view-staff .am-list .am-soc-ig .ig-chip span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+body.view-staff .am-list .am-soc-ig .ig-chip:hover span{text-decoration:underline;}
+/* the tone mixed with the text colour: darker on a light screen, lighter on a dark one */
+body.view-staff .am-list .am-soc-ig .ig-chip.ig-tone{color:color-mix(in srgb,hsl(var(--igh) 85% 45%) 70%,var(--text));}
+body.view-staff .am-list .am-soc-ig .ig-chip.ig-tone .ig-arw{color:inherit;}
+body.view-staff .am-list .am-soc-ig .ig-chip.ig-none span{text-decoration:underline dotted;text-underline-offset:3px;}
+@media (min-width:768px) and (max-width:1279px){
+  /* the tablet's social cell is one line: the handle, then the count */
+  body.view-staff .am-list .am-c-soc{flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;}
+  body.view-staff .am-list .am-soc-top{flex:0 1 auto;}
+  body.view-staff .am-list .am-soc-ig{flex:none;}
+  body.view-staff .am-list .am-soc-top .soc-link span{min-width:5ch;}
+  body.view-staff .am-list .am-soc-ig .ig-chip>span[data-short]{font-size:0;}
+  body.view-staff .am-list .am-soc-ig .ig-chip>span[data-short]::before{content:attr(data-short);font-size:12px;}
+}
 @media (max-width:767px){
+  body.view-staff .am-list .am-c-soc{margin-top:6px;}
   body.view-staff .am-list .am-head{display:none;}
   body.view-staff .am-list :is(.am-c-email,.am-c-phone){display:block;}
   body.view-staff .am-list .am-none{display:none;}
-  body.view-staff .am-list .am-moren{display:none;}
   body.view-staff .am-list .am-chips{margin-top:8px;}
   body.view-staff .am-list .am-extras{margin-top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
 }

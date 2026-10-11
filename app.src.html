@@ -43285,9 +43285,18 @@ function _segMsgOpen(){
 function _segMsgSkip(){const R=S._seg&&S._seg.run;if(!R)return;R.skipped++;R.i++;if(R.i>=R.list.length)_segMsgEnd();_segPaint();}
 function _segMsgStop(){const R=S._seg&&S._seg.run;if(!R)return;R.skipped+=R.list.length-R.i;R.i=R.list.length;_segMsgEnd();_segPaint();}
 function _segMsgEnd(){const g=S._seg,R=g&&g.run;if(!R||R.logged)return;R.logged=true;logAction(t('segMsgLog').replace('{0}',t(g.kind==='news'?'segMsgNews':'segMsgOps')).replace('{1}',R.sent));}
-// "+3" after the first few chips of a list cell, for what the row has no room to show (the list hides the rest; the
-// phone's card shows them all and hides this).
-function _amPlusN(n,keep){return n>keep?`<span class="am-moren" title="${n-keep}">+${n-keep}</span>`:'';}
+// The list's social accounts cell (2026-10-11, the owner: "why is it cluttered and some info is hidden"): the first
+// handle (Instagram when there is one) as plain text, the other networks as small icons beside it, and the follower
+// count under it as text in the average's colour - every network shows, nothing goes behind +N, no pills.
+function _amSocCell(c){
+  const v=c&&c.socials&&typeof c.socials==='object'?c.socials:null;
+  const nets=v?SOCIAL_NETS.filter(([n])=>v[n]):[];
+  if(!nets.length)return'<span class="am-none">—</span>';
+  const [[n0,l0],...rest]=nets;
+  const icons=rest.map(([net,lbl])=>`<a class="am-soc-ic" href="${_socUrl(net,v[net])}" target="_blank" rel="noopener noreferrer" title="${esc(t(lbl))}: ${net==='linkedin'?'':'@'}${esc(v[net])}" aria-label="${esc(t(lbl))} ${esc(v[net])}${t('opensNewTab')}">${_SOC_SVG[net]}</a>`).join('');
+  const ig=_igChipHtml(c);
+  return`<div class="am-soc-top">${_socLinkHtml(n0,l0,v[n0])}${icons}</div>${ig?`<div class="am-soc-ig">${ig}</div>`:''}`;
+}
 function _amRowInner(c){
   {
     const myTags=_tagsForCust(c.id);
@@ -43304,7 +43313,6 @@ function _amRowInner(c){
     const email=c.email?`<bdi>${_pii('email',c.email,c.id)}</bdi>${_siSlot(c.id)}`:'<span class="am-none">—</span>';
     const phone=c.phone?`<bdi>${_pii('phone',c.phone,c.id)}</bdi>`:'<span class="am-none">—</span>';
     const bdgs=_bdgOk()?_bdgHeld(c.id).map(x=>_bdgById(x.badge_id)).filter(Boolean).map(b=>`<span class="am-bdg" title="${esc(_bdgName(b))}" role="img" aria-label="${esc(_bdgName(b))}">${_bdgMedal(b.icon,_bdgCol(b))}</span>`):[];
-    const nSoc=c.socials&&typeof c.socials==='object'?SOCIAL_NETS.filter(([n])=>c.socials[n]).length:0; // the Instagram count chip always shows
     const sub=[c.heard_from?`<div class="am-meta am-heard">${esc(heardLabel(c.heard_from))}</div>`:'',S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):'',_amSortLine(c)].filter(Boolean).join('');
     // Accounts made before signup asked for a gender have none; offer it on the row, one tap.
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"male")}">${t('genderMale')}</button><button type="button" class="am-pick" data-on-click="${_on("_amSetGender",c.id,"female")}">${t('genderFemale')}</button></div>`;
@@ -43315,8 +43323,8 @@ function _amRowInner(c){
       <div class="am-cust-main">
         <div class="am-c-name"><div class="am-cust-name">${esc(c.name||'—')}</div>${sub?`<div class="am-c-sub">${sub}</div>`:''}</div>
         <div class="am-cust-contact"><span class="am-c-email">${email}</span><span class="am-c-phone">${phone}</span></div>
-        <div class="am-c-soc">${_socLinksHtml(c,_igChipHtml(c))||'<span class="am-none">—</span>'}${_amPlusN(nSoc,1)}</div>
-        <div class="am-c-tags"><div class="am-chips">${chips}${bdgs.join('')}</div>${_amPlusN(myCT.length+bdgs.length,1)}</div>
+        <div class="am-c-soc">${_amSocCell(c)}</div>
+        <div class="am-c-tags"><div class="am-chips">${chips}${bdgs.join('')}</div></div>
       </div>
       <div class="am-cust-actions">
         <button class="btn-sm btn-secondary am-flag${_flagFieldsOf(c).length?' on':''}" data-on-click="${_on("showFlagFieldsModal",c.id)}" title="${esc(t('fixFlagBtn'))}" aria-label="${esc(t('fixFlagBtn'))} · ${esc(c.name||'')}">${_artIcon('flag',14)}<span class="am-btn-lbl">${t('fixFlagBtn')}</span></button>
@@ -44095,7 +44103,7 @@ function _igChipHtml(c){
   const r=_igRow(c),n=r&&r.followers!=null?r.followers:null;
   const lbl=n!=null?t('igFollowers').replace('{0}',_igFmt(n,true)):t('igAsk');
   const av=n!=null?_igAvg():null,tone=av?_igTone(n,av.avg):null,vs=tone?_igVsTxt(tone,av.avg):'';
-  return`<button type="button" class="soc-link ig-chip${n!=null?'':' ig-none'}${tone?' ig-tone':''}"${tone?` data-cssv="${_cssv({'--igh':String(tone.hue),'--iga':String(tone.alpha)})}" title="${esc(vs)}"`:''} data-on-click="${_on("_igOpen",c.id)}" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}${n!=null?' · '+esc(lbl):''}${vs?' · '+esc(vs):''}">${tone?_igArrow(tone):_artIcon('people',12)}<span>${esc(lbl)}</span></button>`;
+  return`<button type="button" class="soc-link ig-chip${n!=null?'':' ig-none'}${tone?' ig-tone':''}"${tone?` data-cssv="${_cssv({'--igh':String(tone.hue),'--iga':String(tone.alpha)})}" title="${esc(vs)}"`:''} data-on-click="${_on("_igOpen",c.id)}" aria-label="${esc(t('igTitle'))} · ${esc(c.name||'')}${n!=null?' · '+esc(lbl):''}${vs?' · '+esc(vs):''}">${tone?_igArrow(tone):_artIcon('people',12)}<span${n!=null?` data-short="${esc(_igFmt(n,true))}"`:''}>${esc(lbl)}</span></button>`;
 }
 // The community's average: the followers of every member (a live Community tag) whose count is on file, over how
 // many members have one - a member not counted yet does not pull it down (the owner's pick, 2026-10-09). null

@@ -66,12 +66,16 @@ test('staff see the icons on the Community row, edit them on the form, and repor
   await page.waitForFunction('getCustomers().length>0');
   await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
 
-  const links = page.locator('.am-cust').filter({ hasText: 'Amal Member' }).locator('.soc-link');
-  await expect(links).toHaveCount(2);
+  // the first handle is the link's text; the other networks are icons beside it, the handle in the tooltip
+  const row = page.locator('.am-cust').filter({ hasText: 'Amal Member' });
+  const links = row.locator('.soc-link');
+  await expect(links).toHaveCount(1);
   await expect(links.first()).toHaveAttribute('href', 'https://www.instagram.com/amal.rides');
-  await expect(links.nth(1)).toHaveAttribute('href', 'https://www.linkedin.com/in/amal-m');
   await expect(links.first()).toHaveText('@amal.rides');                 // the username is the link
-  await expect(links.nth(1)).toHaveText('amal-m');
+  const icons = row.locator('.am-soc-ic');
+  await expect(icons).toHaveCount(1);
+  await expect(icons.first()).toHaveAttribute('href', 'https://www.linkedin.com/in/amal-m');
+  await expect(icons.first()).toHaveAttribute('title', /amal-m/);
   await expect(page.locator('.am-cust').filter({ hasText: 'Bader Lapsed' }).locator('.soc-link')).toHaveCount(0);
 
   // the on-screen report links a handle too
