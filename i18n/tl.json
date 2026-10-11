@@ -5140,5 +5140,6 @@
   "amfSortIgNew": "Pinakabagong nabilang na follower",
   "amfSortIgOld": "Pinakamatagal nang nabilang na follower",
   "amfSortMinutes": "Pinakamaraming minutong nag-ride",
-  "amfSortCountry": "Bansa, A hanggang Z"
+  "amfSortCountry": "Bansa, A hanggang Z",
+  "scanTwinUsed": "Para sa {0} ang tiket na iyan. Binuksan sa halip ang booking nila para ngayong araw."
 }

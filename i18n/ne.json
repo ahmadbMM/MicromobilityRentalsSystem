@@ -5140,5 +5140,6 @@
   "amfSortIgNew": "भर्खर गनिएका फलोअर पहिले",
   "amfSortIgOld": "सबैभन्दा पहिले गनिएका फलोअर पहिले",
   "amfSortMinutes": "सबैभन्दा धेरै मिनेट राइड",
-  "amfSortCountry": "देश, A देखि Z"
+  "amfSortCountry": "देश, A देखि Z",
+  "scanTwinUsed": "यो टिकट {0} को लागि हो। यसको सट्टा आजको बुकिङ खोलियो।"
 }

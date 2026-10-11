@@ -5140,5 +5140,6 @@
   "amfSortIgNew": "Seguidores contados mais recentemente",
   "amfSortIgOld": "Seguidores contados há mais tempo",
   "amfSortMinutes": "Mais minutos pedalados",
-  "amfSortCountry": "País, A a Z"
+  "amfSortCountry": "País, A a Z",
+  "scanTwinUsed": "Esse bilhete é para {0}. Foi aberta a reserva de hoje em vez disso."
 }

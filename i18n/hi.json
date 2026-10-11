@@ -5140,5 +5140,6 @@
   "amfSortIgNew": "हाल में गिने गए फ़ॉलोअर पहले",
   "amfSortIgOld": "सबसे पहले गिने गए फ़ॉलोअर पहले",
   "amfSortMinutes": "सबसे अधिक मिनट राइड",
-  "amfSortCountry": "देश, A से Z"
+  "amfSortCountry": "देश, A से Z",
+  "scanTwinUsed": "यह टिकट {0} के लिए है। इसके बजाय आज की बुकिंग खोली गई।"
 }

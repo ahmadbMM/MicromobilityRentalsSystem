@@ -5140,5 +5140,6 @@
   "amfSortIgNew": "Abonnés comptés le plus récemment",
   "amfSortIgOld": "Abonnés comptés il y a le plus longtemps",
   "amfSortMinutes": "Le plus de minutes roulées",
-  "amfSortCountry": "Pays, A à Z"
+  "amfSortCountry": "Pays, A à Z",
+  "scanTwinUsed": "Ce billet est pour {0}. Sa réservation d'aujourd'hui a été ouverte à la place."
 }
