@@ -1375,6 +1375,7 @@
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-count{color:var(--muted);font-weight:600;font-size:13px;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-mis-auto{margin-inline-start:auto;}
+    :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-acts{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-frow{flex-wrap:wrap;margin-bottom:8px;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-srch{flex:1;min-width:200px;}
     :is(#tab-community,#tab-customers,#tab-analytics) .cmy-am-in{width:100%;box-sizing:border-box;}
@@ -9507,4 +9508,49 @@ body.view-staff .am-list .am-soc-ig .ig-chip.ig-none span{text-decoration:underl
   body.view-staff .am-list .am-none{display:none;}
   body.view-staff .am-list .am-chips{margin-top:8px;}
   body.view-staff .am-list .am-extras{margin-top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+}
+
+/* ── Rectangular buttons (the owner, 2026-10-11: "change all the buttons of the website and staff page to be
+   rectangular not curvy corners or pills"). Every button, button-like link, pill, sort or filter select and search
+   box has square corners, in the customer app and on the staff side. What is not a button keeps its shape: avatars,
+   count badges, status chips, switches, radio dots. Last in the file and !important, as the button recipes above
+   set their own radius in some four hundred places. */
+:is(button:not([role="switch"]),[role="button"],input[type="button"],input[type="submit"],input[type="reset"],select,
+  .filter-select,.search-input,.search-wrap,.srch-btn,.ca-view-in,.filter-pill,.am-pick,.apps-kinds,.apps-kind,.btn,
+  [class^="btn-"]:not([role="switch"]),[class*=" btn-"]:not([role="switch"])){border-radius:0!important;}
+
+/* ── Customers and Community on a phone (the owner, 2026-10-11: "i dont want unaligned and unorganized buttons
+   align them and make them all have the same size"). Every toolbar is a grid of equal cells: the section tabs three
+   to a row, the buttons, status pills and pickers two to a row, all one height; an opened search, a labelled picker and a row's caption take a row of their own. No
+   positional selector (:last-child, :nth-child) here: Chrome tests it on every element before the section scope,
+   and a Bookings row's repaint then restyles the whole roster (roster-repaint-budget). */
+@media (max-width:640px){
+  #tab-community .cmy-nav,#tab-customers .cmy-nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  #tab-community .cmy-nav>*,#tab-customers .cmy-nav>*{width:100%;min-width:0;min-height:40px;height:40px;margin:0;padding:0 6px;justify-content:center;text-align:center;}
+  #tab-community .apps-kinds,#tab-customers .apps-kinds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;}
+  #tab-community .apps-kinds>.apps-kind,#tab-customers .apps-kinds>.apps-kind{width:100%;justify-content:center;}
+  #tab-community .form-section .filter-row,#tab-customers .form-section .filter-row,#tab-community .cmy-am-acts,#tab-customers .cmy-am-acts,#tab-community .cmy-am-pills,#tab-customers .cmy-am-pills,#tab-community .sv-bar,#tab-customers .sv-bar,#tab-community .ca-tb-row,#tab-customers .ca-tb-row,#tab-community .ca-views,#tab-customers .ca-views{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:end;}
+  #tab-community .form-section .filter-row>:is(button,.search-wrap,select,input,label),#tab-customers .form-section .filter-row>:is(button,.search-wrap,select,input,label),#tab-community .cmy-am-acts>:is(button,.search-wrap,select,input,label),#tab-customers .cmy-am-acts>:is(button,.search-wrap,select,input,label),#tab-community .sv-bar>:is(button,.search-wrap,select,input,label),#tab-customers .sv-bar>:is(button,.search-wrap,select,input,label),#tab-community .ca-tb-row>:is(button,.search-wrap,select,input,label),#tab-customers .ca-tb-row>:is(button,.search-wrap,select,input,label),#tab-community .ca-views>:is(button,.search-wrap,select,input,label),#tab-customers .ca-views>:is(button,.search-wrap,select,input,label){width:100%;max-width:none;min-width:0;height:44px;min-height:44px;margin:0;justify-content:center;flex:none!important;}
+  #tab-community .cmy-am-pills>*,#tab-customers .cmy-am-pills>*{width:100%;min-width:0;height:36px;margin:0;text-align:center;}
+  #tab-community .search-wrap.srch-fold:not(.open)>.srch-btn,#tab-customers .search-wrap.srch-fold:not(.open)>.srch-btn{width:100%;height:44px;}
+  #tab-community .search-wrap.srch-fold.open,#tab-customers .search-wrap.srch-fold.open{grid-column:1/-1;width:100%!important;}
+  /* labelled pickers: the caption above, the box the cell's height */
+  #tab-community .form-section .filter-row>label,#tab-community .sv-bar>label,#tab-community .ca-tb-row>label,#tab-customers .form-section .filter-row>label,#tab-customers .sv-bar>label,#tab-customers .ca-tb-row>label{height:auto!important;min-height:0!important;justify-content:flex-start!important;text-align:start;display:flex;flex-direction:column;align-items:stretch;gap:2px;}
+  #tab-community .form-section .filter-row>label select,#tab-community .sv-bar>label select,#tab-community .ca-tb-row>label select,#tab-customers .form-section .filter-row>label select,#tab-customers .sv-bar>label select,#tab-customers .ca-tb-row>label select{width:100%;max-width:none;height:44px;min-height:44px;}
+  #tab-community .form-section .filter-row>label.filter-field,#tab-customers .form-section .filter-row>label.filter-field{grid-column:1/-1;}
+  #tab-community .ca-views>.ca-tb-k,#tab-customers .ca-views>.ca-tb-k,#tab-community .ca-views>.ca-view,#tab-customers .ca-views>.ca-view{grid-column:1/-1;}
+  #tab-community .ca-views>.ca-view,#tab-customers .ca-views>.ca-view{display:grid;grid-template-columns:minmax(0,1fr) 44px;}
+  #tab-community .ca-views>.ca-view>*,#tab-customers .ca-views>.ca-view>*{height:44px;width:100%;}
+  #tab-community .ca-tb-row>label.ca-tb-l,#tab-customers .ca-tb-row>label.ca-tb-l{font-size:11px;text-transform:uppercase;letter-spacing:.06em;align-items:stretch!important;}
+  /* the accounts title: its name and count on a row, its five buttons below */
+  #tab-community .cmy-am-title,#tab-customers .cmy-am-title{display:grid!important;grid-template-columns:auto 1fr;align-items:center;gap:6px 8px;}
+  #tab-community .cmy-am-title>.cmy-am-acts,#tab-customers .cmy-am-title>.cmy-am-acts{grid-column:1/-1;margin:4px 0 0;}
+  #tab-community .cmy-am-acts>button,#tab-customers .cmy-am-acts>button{font-size:13px;padding:0 8px;}
+  /* the Sort picker takes the row (its longest choice is long), Card details the next */
+  #tab-community .ca-tb-row,#tab-customers .ca-tb-row{grid-template-columns:minmax(0,1fr);}
+  #tab-community :is(.sv-bar,.ca-tb-row)>label select,#tab-customers :is(.sv-bar,.ca-tb-row)>label select{margin:0;box-sizing:border-box;}
+  #tab-community .sv-bar,#tab-customers .sv-bar{margin:10px 0 14px;}
+  /* Merge two accounts: the boxes and the button the card's width */
+  #tab-community .mg-pick input,#tab-customers .mg-pick input{width:100%!important;max-width:none;box-sizing:border-box;}
+  #tab-community .mg-manual+button,#tab-customers .mg-manual+button{width:100%;justify-content:center;}
 }
