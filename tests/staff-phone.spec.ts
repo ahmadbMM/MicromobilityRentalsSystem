@@ -46,9 +46,10 @@ test('the personal mobiles are no longer in the shipped page', async ({ page }) 
   const res = await page.goto('/');
   const html = (await res!.text());
   const js = await (await page.request.get('/app.js')).text();
-  // No Saudi mobile at all but the two PUBLISHED business contacts (the footer's, in wa.me links and
-  // schema.org, and the members dialog's WhatsApp): a staff member's own mobile is never shipped.
-  const published = new Set(['966566668818', '966534423513']);
+  // No Saudi mobile at all but the PUBLISHED business contacts (the footer's, in wa.me links and
+  // schema.org, the members dialog's WhatsApp, and Forgot password's own WhatsApp, the owner's pick of
+  // 2026-10-11): a staff member's own mobile is never shipped.
+  const published = new Set(['966566668818', '966534423513', '966579543977']);
   const mobiles = [...(html + js).matchAll(/(?<!\d)(?:\+?966|0)(5\d{8})(?!\d)/g)].map((m) => '966' + m[1]);
   expect(mobiles.filter((n) => !published.has(n))).toEqual([]);
 });
