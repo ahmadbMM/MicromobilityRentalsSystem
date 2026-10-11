@@ -4739,6 +4739,32 @@
       body.view-staff .snav-pin{display:none;}
       body.view-staff .snav-lbl{opacity:1;}
     }
+    /* ── White sidebar (the owner, 2026-10-11): the rail, its column paint and the phone menu bar
+       are white with dark ink in the light and booth themes; the dark staff theme keeps the dark
+       rail above. Greys are 5.9:1 or better on #fff, the active green 5.0:1 on its tint. ── */
+    html:not([data-staff-theme="dark"]) body.view-staff #view-staff.active::before{background:#fff;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav{
+      background:#fff;border-inline-end-color:#e3e3dc;scrollbar-color:#c9cbc4 #fff;
+    }
+    html:not([data-staff-theme="dark"]) body.view-staff .snav-group{color:#5d666b;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn{color:#3d454b;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn .snav-ico{color:#5d666b;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn:hover,
+    html:not([data-staff-theme="dark"]) body.view-staff .snav-pin:hover{background:#f2f2ec;color:#0f1215;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn:hover .snav-ico{color:#0f1215;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn.active{background:#e3f2e8;color:#0a6a35;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn.active .snav-ico{color:#0a6a35;}
+    html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn .tab-badge{background:#f2f2ec;color:#0f1215;}
+    html:not([data-staff-theme="dark"]) body.view-staff .snav-pin{color:#5d666b;}
+    @media(min-width:1024px){
+      html:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){box-shadow:8px 0 28px rgba(0,0,0,.12);}
+      html[dir="rtl"]:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){box-shadow:-8px 0 28px rgba(0,0,0,.12);}
+    }
+    @media(max-width:1023px){
+      html:not([data-staff-theme="dark"]) body.view-staff .snav-burger{background:#fff;color:#0f1215;border-bottom-color:#e3e3dc;}
+      html:not([data-staff-theme="dark"]) body.view-staff .snav-burger-bars span{background:#0c7a3d;}
+      html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav{border-bottom-color:#e3e3dc;box-shadow:0 14px 28px rgba(0,0,0,.14);}
+    }
 
     /* ── Search clear (×) — mounted by _mountSearchClears() into each search field ── */
     .search-clear{
