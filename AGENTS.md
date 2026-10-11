@@ -741,6 +741,10 @@ offer in the rider's language (`vndRiderOffer`).
   booking-only Undo), then the application goes back to Pending with a guarded PATCH (`status` approved and the same
   `invited_session`). The Pending card names the ride from that cancelled booking (`_caRevokedNote`). `invite_revoked`
   is in `CANCEL_SYS` (labelled, never offered to pick) and stays out of Analytics' "Why riders cancel".
+- **Ask for changes on every status (2026-10-11).** "Ask for changes" (`_caFxOpen`, `fixBtns` on the community card,
+  `fix` on the learn card) and the card's asked/answered line (`_caFixNote`) show on every list: pending, invited,
+  completed, didn't show, rejected; new, scheduled, done, cancelled. `_fxOpenOk` only needs the card. The server side
+  (staff_*_ask_changes, community_/learn_fix_get and _submit) accepts any status since migration 20261011120000.
 - **Priority** on a learn-to-ride sign-up (`learn_applications.priority`, migration 20261004185500): Critical / High /
   Medium / Low on New and Scheduled cards (`_laPrioRow`, `_laPrio`; a second tap clears; Undo), New ordered by it
   (`_laPrioRank`). Until the column exists the list loads without it and the cards carry none (`S._laNoPrio`).

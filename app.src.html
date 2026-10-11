@@ -18228,9 +18228,12 @@ function _caRow(a){
   const dial=_waDigits(a.phone),waDial=_waDigits(_waNum(a)); // WhatsApp on the number they gave for it (20261007200000)
   // Icons, as the Bookings table's contact cell (the owner, 2026-09-29); the words are their labels.
   const contact=dial?`<a class="ca-ic ca-call" href="tel:+${esc(dial)}" title="${esc(t('callLabel'))}" aria-label="${esc(t('callLabel'))}"${_piiAttrs('call',a.customer_id,'app:'+a.id)}>${_artIcon('phone',16)}</a><a class="ca-ic ca-chat" href="https://wa.me/${esc(waDial||dial)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp"${_piiAttrs('whatsapp',a.customer_id,'app:'+a.id,'whatsapp')}>${_artIcon('whatsapp',16)}</a>`:'';
-  const fixWait=a.status==='pending'&&!!a.fix_token&&!a.fix_done_at;
+  // Ask for changes, and its message again while unanswered, on every list: pending, invited,
+  // completed, didn't show, rejected (the owner, 2026-10-11; 20261011120000).
+  const fixWait=!!a.fix_token&&!a.fix_done_at;
+  const fixBtns=`<button type="button" class="btn-secondary btn-sm ca-fix-btn" data-on-click="${_on("_caFxOpen",id)}">${t('caFixBtn')}</button>${fixWait?`<button type="button" class="btn-secondary btn-sm ca-fix-msg" data-on-click="${_on("_caMsgOpen",id,"fix")}">${t('caFixMsgBtn')}</button>`:''}`;
   const actions=a.status==='pending'
-    ?`<button type="button" class="btn-primary btn-sm ca-approve" data-on-click="${_on("_caApprove",id)}">${t('caApproveBtn')}</button><button type="button" class="btn-secondary btn-sm ca-invite" data-on-click="${_on("_caInvite",id)}">${t('caInviteBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reject" data-on-click="${_on("_caReject",id)}">${t('caRejectBtn')}</button><button type="button" class="btn-secondary btn-sm ca-fix-btn" data-on-click="${_on("_caFxOpen",id)}">${t('caFixBtn')}</button>${fixWait?`<button type="button" class="btn-secondary btn-sm ca-fix-msg" data-on-click="${_on("_caMsgOpen",id,"fix")}">${t('caFixMsgBtn')}</button>`:''}${contact}`
+    ?`<button type="button" class="btn-primary btn-sm ca-approve" data-on-click="${_on("_caApprove",id)}">${t('caApproveBtn')}</button><button type="button" class="btn-secondary btn-sm ca-invite" data-on-click="${_on("_caInvite",id)}">${t('caInviteBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reject" data-on-click="${_on("_caReject",id)}">${t('caRejectBtn')}</button>${fixBtns}${contact}`
     :a.status==='rejected'
       ?`<button type="button" class="btn-secondary btn-sm ca-reply" data-on-click="${_on("_caMsgOpen",id,"reject")}">${t('caReplyBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reopen" data-on-click="${_on("_caReopen",id)}">${t('caReopenBtn')}</button>`
       :_caGone(a)
@@ -18265,11 +18268,11 @@ function _caRow(a){
     ${note}
     ${acct&&_apSpOn('ca')?_spLine(acct.id):''}
     ${inv?_caInvBkNote(a):a.status==='pending'?_caRevokedNote(a):''}
-    ${a.status==='pending'?_caFixNote(a):''}
+    ${_caFixNote(a)}
     ${ds==='invited'?_caInvOut(acct):''}
     ${sx.length?`<div class="ca-sx">${esc(t('sxFilterBtn'))}: ${sx.map(s=>esc(_sxText(s))).join(' · ')}</div>`:''}
     ${a.status==='pending'?_caRuleChips(a):''}
-    <div class="ca-actions">${actions}</div>
+    <div class="ca-actions">${actions}${a.status==='pending'?'':fixBtns}</div>
   </div>`;
 }
 // ── Applications, made the admins' own (the owner, 2026-10-07: "add more customization in it": views and bulk
@@ -19265,9 +19268,9 @@ function _caFixNote(a){
 // copy, so those are corrected on the account (Ask to correct) and the link asks for the rest.
 const CA_ACCT_FIELDS=['name','email','phone','gender','height'];
 function _caFixFields(a,kind){const all=kind==='la'?LA_FIX_FIELDS:CA_FIX_FIELDS;return a&&a.customer_id?all.filter(k=>!CA_ACCT_FIELDS.includes(k)):all;}
-// The same dialog asks a learn-to-ride sign-up (kind 'la'), New or Scheduled.
+// The same dialog asks a learn-to-ride sign-up (kind 'la'). Any status, on both lists (2026-10-11).
 function _fxFind(kind,id){return kind==='la'?_laFind(id):_caFind(id);}
-function _fxOpenOk(kind,a){return !!a&&(kind==='la'?a.status==='pending'||a.status==='scheduled':a.status==='pending');}
+function _fxOpenOk(kind,a){return !!a;}
 function _caFxOpen(id,kind){
   kind=kind==='la'?'la':'ca';
   const a=_fxFind(kind,id);if(!_fxOpenOk(kind,a)||S._caWorking||S._laWorking)return;
@@ -19465,9 +19468,9 @@ function _laRow(a){
     ?`<div class="la-lesson">${esc(t('laLesson').replace('{0}',fmtStamp(a.lesson_at)+(a.lesson_place?' · '+a.lesson_place:'')))}</div>`:'';
   const sx=a.status==='pending'?_laSx(a):[];
   const id=a.id;
-  // Ask for changes, and its message again while unanswered: New and Scheduled alike.
   const open=a.status==='pending'||a.status==='scheduled';
-  const fix=open?`<button type="button" class="btn-secondary btn-sm la-fix-btn" data-on-click="${_on("_caFxOpen",id,"la")}">${t('caFixBtn')}</button>${a.fix_token&&!a.fix_done_at?`<button type="button" class="btn-secondary btn-sm la-fix-msg" data-on-click="${_on("_laMsgShow",id,"fix")}">${t('caFixMsgBtn')}</button>`:''}`:'';
+  // Ask for changes, and its message again while unanswered: every status (the owner, 2026-10-11).
+  const fix=`<button type="button" class="btn-secondary btn-sm la-fix-btn" data-on-click="${_on("_caFxOpen",id,"la")}">${t('caFixBtn')}</button>${a.fix_token&&!a.fix_done_at?`<button type="button" class="btn-secondary btn-sm la-fix-msg" data-on-click="${_on("_laMsgShow",id,"fix")}">${t('caFixMsgBtn')}</button>`:''}`;
   const actions=a.status==='pending'
     ?`<button type="button" class="btn-primary btn-sm la-schedule" data-on-click="${_on("_laSchedule",id)}">${t('laScheduleBtn')}</button>${fix}<button type="button" class="btn-secondary btn-sm la-cancel" data-on-click="${_on("_laCancel",id)}">${t('laCancelBtn')}</button>`
     :a.status==='scheduled'
@@ -19501,11 +19504,11 @@ function _laRow(a){
       ${kv(t('caLblLang'),esc(lang))}
     </div>
     <div class="la-notes${a.notes?'':' la-notes-none'}"><span>${t('laLblNotes')}</span>${esc(a.notes||t('caNoAnswer'))}</div>
-    ${a.status==='pending'||a.status==='scheduled'?_caFixNote(a):''}
+    ${_caFixNote(a)}
     ${note}
     ${acct&&_apSpOn('la')?_spLine(acct.id):''}
     ${sx.length?`<div class="ca-sx">${esc(t('sxFilterBtn'))}: ${sx.map(s=>esc(_sxText(s))).join(' · ')}</div>`:''}
-    <div class="ca-actions">${actions}</div>
+    <div class="ca-actions">${actions}${open?'':fix}</div>
   </div>`;
 }
 // Handlers of the markup below.

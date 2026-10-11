@@ -136,7 +136,7 @@ test('a field the server refuses is pointed out, and a link that no longer works
   await expect(box.locator('.fx-item[data-afx="phone"] .pg-msg')).toContainText('phone number of at least 8 digits');
 });
 
-test('a decided application or a replaced request opens on "This link no longer works"', async ({ page }) => {
+test('a replaced or missing request opens on "This link no longer works"', async ({ page }) => {
   await applicant(page, { ok: false, error: 'gone' });
   await expect(page.locator('#app-fix [data-afx-state="gone"]')).toContainText('This link no longer works');
   await page.locator('#app-fix .afx-close').click();
@@ -168,4 +168,48 @@ test('the applicant’s page asks for the company and sends it tidied', async ({
   await box.locator('#afx-save').click();
   await expect.poll(() => sent.length).toBe(1);
   expect(sent[0]).toEqual({ p_token: TOKEN, p: { workplace: 'Saudi Aramco' } });
+});
+
+// Every list can be asked (the owner, 2026-10-11; 20261011120000): approved, rejected, and a
+// learn-to-ride sign-up that is done or cancelled, not only pending ones.
+test('changes can be asked of an application whatever its status', async ({ page }) => {
+  const approved = { ...karim, status: 'approved', decided_at: '2026-09-23T08:00:00Z', decided_by: 'Desk A', existing_account: false };
+  const rejected = { ...karim, id: 'a2', status: 'rejected', name: 'Old Applicant', email: 'old.applicant@gmail.com', phone: '+966553579024', decided_at: '2026-09-23T08:00:00Z' };
+  await stubSupabase(page, {
+    sessions: [], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [],
+    community_applications: [approved, rejected],
+    learn_applications: [{ id: 'l9', status: 'done', created_at: '2026-09-27T08:00:00Z', updated_at: '2026-09-27T08:00:00Z', submissions: 1, for_whom: 'self',
+      name: 'Nadia Omar', email: 'nadia.omar@gmail.com', phone: '+966552220001', learner_name: null, learner_age: 34, learner_gender: 'female',
+      learner_height: 162, level: 'never', notes: '', lang: 'en', lesson_at: '2026-10-04T15:00:00Z', lesson_place: 'JCC',
+      decided_at: '2026-09-27T09:00:00Z', decided_by: 'Desk A', customer_id: null, existing_account: null, account_oauth: null }],
+    'rpc:staff_community_ask_changes': { ok: true, token: TOKEN, fields: ['instagram'], note: null },
+    'rpc:staff_learn_ask_changes': { ok: true, token: TOKEN, fields: ['instagram'], note: null },
+  });
+  const calls: string[] = [];
+  page.on('request', (r) => { const m = /rpc\/(staff_(?:community|learn)_ask_changes)/.exec(r.url()); if (m && r.method() === 'POST') calls.push(m[1] + ':' + (JSON.parse(r.postData() || '{}') as { p_id: string }).p_id); });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
+
+  await page.locator('.filter-pill[data-ca-filter="rejected"]').click();
+  const rej = page.locator('.ca-row[data-app-id="a2"]');
+  await rej.locator('.ca-fix-btn').click();
+  await page.locator('#confirm-modal .ca-fx-box [data-ca-fix="instagram"]').click();
+  await page.locator('#confirm-modal .ca-fx-go').click();
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  await page.evaluate('closeConfirm()');
+  await expect(rej.locator('.ca-fix-wait')).toBeVisible(); // the card says it is waiting
+  await expect(rej.locator('.ca-fix-msg')).toHaveCount(1);
+
+  await page.locator('.filter-pill[data-ca-filter="approved"]').click();
+  await expect(card(page).locator('.ca-fix-btn')).toHaveCount(1);
+
+  await page.evaluate(`setCommTab('learning');S._laFilter='done';renderCommunity()`);
+  const done = page.locator('.la-row[data-learn-id="l9"]');
+  await done.locator('.la-fix-btn').click();
+  await page.locator('#confirm-modal .ca-fx-box [data-ca-fix="instagram"]').click();
+  await page.locator('#confirm-modal .ca-fx-go').click();
+  await expect.poll(() => calls).toEqual(['staff_community_ask_changes:a2', 'staff_learn_ask_changes:l9']);
 });
