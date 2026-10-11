@@ -1126,7 +1126,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   removedLabel:'Removed',restoreEntryBtn:'Restore',
   heightPlaceholder:'Height in cm',
   printReportBtn:'Print Report',printReportTitle:'Session Report',printTotalRiders:'Total Riders',printCollected:'Collected',printPending:'Pending',
-  repColPhone:'Phone',repColEmail:'Email',repColType:'Type',repPriceSar:'Price (SAR)',repPayPartial:'Partial',repYes:'Yes',repNo:'No',repAddonsSold:'Add-ons sold',repAddon:'Add-on',repBrand:'Brand',repBookings:'Bookings',repValueSar:'Value (SAR)',repTotal:'Total',repPrintNow:'Print',
+  repColPhone:'Phone',repColEmail:'Email',repColType:'Type',repPriceSar:'Price (SAR)',repPayPartial:'Partial',repYes:'Yes',repNo:'No',repAddonsSold:'Add-ons sold',repAddon:'Add-on',repBrand:'Brand',repBookings:'Bookings',repValueSar:'Value (SAR)',repTotal:'Total',rpRows:'{0} rows',rpShown:'{0} of {1} rows',rpFiltered:'Filtered: “{0}”, {1} of {2} rows. Totals count every row.',rpFilterPh:'Filter rows',rpFilterIn:'Look in',rpAllCols:'Every column',rpSortHint:'Sort by this column',repPrintNow:'Print',
   gridViewBtn:'Grid',tableViewBtn:'Table',
   searchLabel:'Search bikes...',noResultsLabel:'No bikes match your search.',
   confirmRemoveTitle:'Remove Rider?',
@@ -1702,7 +1702,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   removedLabel:'محذوف',restoreEntryBtn:'استعادة',
   heightPlaceholder:'الطول بالسنتيمتر',
   printReportBtn:'طباعة التقرير',printReportTitle:'تقرير الجلسة',printTotalRiders:'إجمالي الركاب',printCollected:'المبلغ المحصل',printPending:'المبلغ المعلق',
-  repColPhone:'الهاتف',repColEmail:'البريد الإلكتروني',repColType:'النوع',repPriceSar:'السعر (SAR)',repPayPartial:'مدفوع جزئياً',repYes:'نعم',repNo:'لا',repAddonsSold:'الإضافات المُباعة',repAddon:'الإضافة',repBrand:'العلامة التجارية',repBookings:'الحجوزات',repValueSar:'القيمة (SAR)',repTotal:'الإجمالي',repPrintNow:'طباعة',
+  repColPhone:'الهاتف',repColEmail:'البريد الإلكتروني',repColType:'النوع',repPriceSar:'السعر (SAR)',repPayPartial:'مدفوع جزئياً',repYes:'نعم',repNo:'لا',repAddonsSold:'الإضافات المُباعة',repAddon:'الإضافة',repBrand:'العلامة التجارية',repBookings:'الحجوزات',repValueSar:'القيمة (SAR)',repTotal:'الإجمالي',rpRows:'{0} صفًا',rpShown:'{0} من {1} صفًا',rpFiltered:'مُصفّى: «{0}»، {1} من {2} صفًا. الإجماليات تحسب كل الصفوف.',rpFilterPh:'تصفية الصفوف',rpFilterIn:'البحث في',rpAllCols:'كل الأعمدة',rpSortHint:'رتّب حسب هذا العمود',repPrintNow:'طباعة',
   gridViewBtn:'شبكة',tableViewBtn:'جدول',
   searchLabel:'ابحث عن دراجة...',noResultsLabel:'لا توجد دراجات تطابق بحثك.',
   confirmRemoveTitle:'حذف الراكب؟',
@@ -28308,8 +28308,99 @@ function _openReport(html,w,h,win){
   // through the CSSOM, before it first draws.
   try{_cssvApply(win.document);}catch(e){}
   try{win.document.querySelectorAll('.rep-print').forEach(b=>b.addEventListener('click',()=>{try{win.print();}catch(e){}}));}catch(e){} // specs stand in a bare window
+  try{if(win.document.querySelector('.mm-banner'))_rpLive(win.document);}catch(e){}
   _printWhenReady(win,400);
   return win;
+}
+// ── Sort and filter inside a report (the owner, 2026-10-11: "make me be able to sort and filter whats
+// inside all reports") ──
+// Every table of every report the shell draws: a heading sorts its column (up, down, back to the sheet's
+// own order), and a table of five rows or more gets a filter line above it - words to look for, in every
+// column or in one. Wired from here like the Print button, since no script runs in the window. What the
+// screen shows is what prints: a filtered table says so on paper, and its totals still count every row.
+// A group heading (rp-grp) keeps its rows under it, sorted among themselves and gone when none is left;
+// a total line, an empty line or any row with a merged cell stays where it is, unfiltered.
+const _RP_DIGITS={'٠':0,'١':1,'٢':2,'٣':3,'٤':4,'٥':5,'٦':6,'٧':7,'٨':8,'٩':9,'۰':0,'۱':1,'۲':2,'۳':3,'۴':4,'۵':5,'۶':6,'۷':7,'۸':8,'۹':9};
+function _rpCellTxt(td){return td?String(td.textContent||'').replace(/\s+/g,' ').trim():'';}
+function _rpBlank(v){return v===''||v==='—'||v==='-'||v==='–';}
+// A cell as a number when it holds exactly one, beside nothing but a unit or a currency ("SAR 1,310.00",
+// "12%", "3 km"); else null, and the column sorts as words. Two numbers (18:30, 12 / 600) are words too.
+function _rpNum(v){
+  const x=String(v).replace(/[٠-٩۰-۹]/g,d=>_RP_DIGITS[d]).replace(/(\d)[,٬](?=\d{3}\b)/g,'$1').replace(/٫/g,'.');
+  const m=x.match(/-?\d+(?:\.\d+)?/g);
+  if(!m||m.length!==1)return null;
+  if(/\p{L}/u.test(x.replace(m[0],'').replace(/SAR|ر\.س|ريال|km|cm|kg|min|كم|سم|دقيقة/gi,'')))return null;
+  return Number(m[0]);
+}
+function _rpLive(doc){
+  doc.querySelectorAll('table').forEach((tb,ti)=>{
+    const hr=tb.tHead&&tb.tHead.rows.length===1?tb.tHead.rows[0]:null;
+    const body=tb.tBodies.length===1?tb.tBodies[0]:null;
+    if(!hr||!body)return;
+    const ths=[...hr.cells];
+    if(ths.some(th=>th.colSpan>1))return;
+    const segs=[];let seg={head:null,data:[],pinned:[]};segs.push(seg);
+    [...body.rows].forEach(r=>{
+      if(r.classList.contains('rp-grp')){seg={head:r,data:[],pinned:[]};segs.push(seg);return;}
+      const fixed=r.classList.contains('rp-b8')||[...r.cells].some(c=>c.colSpan>1)||r.cells.length!==ths.length;
+      (fixed?seg.pinned:seg.data).push(r);
+    });
+    const rows=segs.flatMap(g=>g.data);
+    if(rows.length<2)return;
+    rows.forEach((r,i)=>{r._rpAt=i;});
+    tb.classList.add('rp-live');
+    const st={col:-1,dir:0,q:'',in:-1};
+    const draw=()=>{
+      // the order: each segment's rows by the sorted column, blanks last whichever way
+      if(st.dir){
+        const k=st.col,nums=segs.flatMap(g=>g.data).map(r=>_rpCellTxt(r.cells[k])).filter(v=>!_rpBlank(v));
+        const asNum=nums.length&&nums.every(v=>_rpNum(v)!=null);
+        const coll=new Intl.Collator(S.lang||'en',{numeric:true,sensitivity:'base'});
+        segs.forEach(g=>g.data.sort((a,b)=>{
+          const va=_rpCellTxt(a.cells[k]),vb=_rpCellTxt(b.cells[k]),ea=_rpBlank(va),eb=_rpBlank(vb);
+          if(ea||eb)return ea===eb?a._rpAt-b._rpAt:ea?1:-1;
+          const c=asNum?_rpNum(va)-_rpNum(vb):coll.compare(va,vb);
+          return (c||a._rpAt-b._rpAt)*(c?st.dir:1);
+        }));
+      }else segs.forEach(g=>g.data.sort((a,b)=>a._rpAt-b._rpAt));
+      // the filter: words in the row (or in the one column), any case
+      const q=st.q.trim().toLocaleLowerCase();
+      let shown=0;const all=segs.reduce((n,g)=>n+g.data.length,0);
+      segs.forEach(g=>{
+        let n=0;
+        g.data.forEach(r=>{const txt=(st.in<0?[...r.cells]:[r.cells[st.in]]).map(_rpCellTxt).join(' ').toLocaleLowerCase();
+          const ok=!q||txt.includes(q);r.classList.toggle('rp-hide',!ok);if(ok)n++;});
+        shown+=n;
+        if(g.head)g.head.classList.toggle('rp-hide',!!q&&!n);
+        if(g.head)body.appendChild(g.head);
+        g.data.forEach(r=>body.appendChild(r));g.pinned.forEach(r=>body.appendChild(r));
+      });
+      // the stripes follow the rows on show, not the rows in the table
+      let odd=true;[...body.rows].forEach(r=>{if(r.classList.contains('rp-hide'))return;r.classList.toggle('rp-odd',odd);odd=!odd;});
+      ths.forEach((th,i)=>{if(i===st.col&&st.dir)th.setAttribute('aria-sort',st.dir>0?'ascending':'descending');else th.removeAttribute('aria-sort');});
+      if(cnt)cnt.textContent=q?t('rpShown').replace('{0}',String(shown)).replace('{1}',String(all)):t('rpRows').replace('{0}',String(all));
+      if(pnote){pnote.textContent=q?t('rpFiltered').replace('{0}',st.q.trim()).replace('{1}',String(shown)).replace('{2}',String(all)):'';pnote.hidden=!q;}
+    };
+    ths.forEach((th,i)=>{
+      const b=doc.createElement('button');b.type='button';b.className='rp-sbtn';b.title=t('rpSortHint');
+      while(th.firstChild)b.appendChild(th.firstChild);th.appendChild(b);
+      b.addEventListener('click',()=>{if(st.col!==i){st.col=i;st.dir=1;}else st.dir=st.dir===1?-1:st.dir===-1?0:1;draw();});
+    });
+    let cnt=null,pnote=null;
+    if(rows.length>=5){
+      const bar=doc.createElement('div');bar.className='rp-tools';
+      const inp=doc.createElement('input');inp.type='search';inp.className='rp-q';inp.placeholder=t('rpFilterPh');inp.setAttribute('aria-label',t('rpFilterPh'));inp.id='rp-q'+ti;
+      const sel=doc.createElement('select');sel.className='rp-in';sel.setAttribute('aria-label',t('rpFilterIn'));
+      [[-1,t('rpAllCols')],...ths.map((th,i)=>[i,_rpCellTxt(th)||String(i+1)])].forEach(([v,l])=>{const o=doc.createElement('option');o.value=String(v);o.textContent=l;sel.appendChild(o);});
+      cnt=doc.createElement('span');cnt.className='rp-cnt';cnt.setAttribute('role','status');
+      inp.addEventListener('input',()=>{st.q=inp.value;draw();});
+      sel.addEventListener('change',()=>{st.in=Number(sel.value);draw();});
+      bar.append(inp,sel,cnt);
+      pnote=doc.createElement('div');pnote.className='rp-fnote';pnote.hidden=true;
+      tb.parentNode.insertBefore(bar,tb);tb.parentNode.insertBefore(pnote,tb);
+    }
+    draw();
+  });
 }
 // ── Report builder ─────────────────────────────────────────────────────────
 // Every printed report is customizable: pick the columns and sections it carries,

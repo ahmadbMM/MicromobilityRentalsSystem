@@ -5151,5 +5151,12 @@
   "amfSortSeen": "Aberto mais recentemente",
   "amfSortSeenOld": "Há mais tempo sem abrir",
   "amfSortSignin": "Login mais recente",
-  "amfSortSigninOld": "Há mais tempo sem login"
+  "amfSortSigninOld": "Há mais tempo sem login",
+  "rpRows": "{0} linhas",
+  "rpShown": "{0} de {1} linhas",
+  "rpFiltered": "Filtrado: «{0}», {1} de {2} linhas. Os totais contam todas as linhas.",
+  "rpFilterPh": "Filtrar linhas",
+  "rpFilterIn": "Procurar em",
+  "rpAllCols": "Todas as colunas",
+  "rpSortHint": "Ordenar por esta coluna"
 }

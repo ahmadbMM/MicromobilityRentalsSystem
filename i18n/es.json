@@ -5151,5 +5151,12 @@
   "amfSortSeen": "Abierto más recientemente",
   "amfSortSeenOld": "Más tiempo sin abrir",
   "amfSortSignin": "Sesión iniciada más recientemente",
-  "amfSortSigninOld": "Más tiempo sin iniciar sesión"
+  "amfSortSigninOld": "Más tiempo sin iniciar sesión",
+  "rpRows": "{0} filas",
+  "rpShown": "{0} de {1} filas",
+  "rpFiltered": "Filtrado: «{0}», {1} de {2} filas. Los totales cuentan todas las filas.",
+  "rpFilterPh": "Filtrar filas",
+  "rpFilterIn": "Buscar en",
+  "rpAllCols": "Todas las columnas",
+  "rpSortHint": "Ordenar por esta columna"
 }

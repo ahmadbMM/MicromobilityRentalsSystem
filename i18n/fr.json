@@ -5151,5 +5151,12 @@
   "amfSortSeen": "Ouvert le plus récemment",
   "amfSortSeenOld": "Le plus longtemps sans ouverture",
   "amfSortSignin": "Connecté le plus récemment",
-  "amfSortSigninOld": "Le plus longtemps sans connexion"
+  "amfSortSigninOld": "Le plus longtemps sans connexion",
+  "rpRows": "{0} lignes",
+  "rpShown": "{0} sur {1} lignes",
+  "rpFiltered": "Filtré : « {0} », {1} sur {2} lignes. Les totaux comptent toutes les lignes.",
+  "rpFilterPh": "Filtrer les lignes",
+  "rpFilterIn": "Chercher dans",
+  "rpAllCols": "Toutes les colonnes",
+  "rpSortHint": "Trier par cette colonne"
 }

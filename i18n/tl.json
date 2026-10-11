@@ -5151,5 +5151,12 @@
   "amfSortSeen": "Pinakabagong nagbukas",
   "amfSortSeenOld": "Pinakamatagal mula huling pagbukas",
   "amfSortSignin": "Pinakabagong nag-sign in",
-  "amfSortSigninOld": "Pinakamatagal mula huling pag-sign in"
+  "amfSortSigninOld": "Pinakamatagal mula huling pag-sign in",
+  "rpRows": "{0} hanay",
+  "rpShown": "{0} sa {1} hanay",
+  "rpFiltered": "Na-filter: “{0}”, {1} sa {2} hanay. Binibilang ng mga kabuuan ang bawat hanay.",
+  "rpFilterPh": "I-filter ang mga hanay",
+  "rpFilterIn": "Hanapin sa",
+  "rpAllCols": "Lahat ng column",
+  "rpSortHint": "Ayusin ayon sa column na ito"
 }

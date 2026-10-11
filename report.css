@@ -60,6 +60,20 @@ td{padding:8px 10px;text-align:start;font-size:11px;font-weight:500}
 .rp-pm{color:#5a635c;margin-inline-start:6px}
 :root th.rp-te,:root td.rp-te{text-align:end}
 tbody tr:nth-child(odd) td{background:#fafcfa}
+/* Sort and filter (_rpLive): a heading is a button that reads as the heading; a filtered table stripes
+   the rows on show; the filter line is the screen's, and on paper a filtered table says so instead. */
+table.rp-live tbody tr:nth-child(odd) td{background:none}
+table.rp-live tbody tr.rp-odd td{background:#fafcfa}
+:root tr.rp-hide{display:none}
+.rp-sbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
+.rp-sbtn:focus-visible{outline:2px solid #03ff89;outline-offset:2px}
+th[aria-sort] .rp-sbtn::after{content:"\25B2";font-size:8px;color:#03ff89}
+th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
+.rp-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
+.rp-q,.rp-in{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #b9c1ba;border-radius:4px;background:#fff;color:#111512}
+.rp-q{flex:1;min-width:160px}
+.rp-cnt{font-size:11px;color:#5a635c}
+.rp-fnote{display:none;font-size:10.5px;color:#5a635c;margin:0 0 6px}
 a{color:inherit;text-decoration:none}
 section{break-inside:avoid}
 .mm-chip-row{display:flex;justify-content:flex-end;margin-top:12px;break-inside:avoid}
@@ -74,6 +88,7 @@ section{break-inside:avoid}
    one's bottom, and a long roster ran into the paper edge from page 2 on. Pages 2 on add the 9mm
    @page margin above, where their running title and page number sit. */
 @media print{body{padding:9mm 12mm;box-decoration-break:clone;-webkit-box-decoration-break:clone}.rep-print{display:none}
+  .rp-tools{display:none}.rp-fnote:not([hidden]){display:block}th[aria-sort] .rp-sbtn::after{color:inherit}
   /* On paper the dark fills go: a white banner ruled in the dark green, outlined tiles, pale table
      heads. The screen keeps Template B as it is; a printed page spends far less ink (2026-10-01). */
   .mm-banner{background:#fff;color:#111512;border:1.5px solid #123019}
