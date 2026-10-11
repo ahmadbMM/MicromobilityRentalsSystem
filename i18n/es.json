@@ -2675,7 +2675,6 @@
   "scanInAt": "desde {0}",
   "scanOwes": "debe {0} SAR",
   "scanCheckedIn": "#{0} {1} registrado",
-  "ciAutoNext": "Abrir el siguiente ciclista",
   "notHereChip": "Aún no ha llegado",
   "cxHideAria": "Ocultar la cancelación de {0}",
   "syncUnsent": "{0} sin enviar",

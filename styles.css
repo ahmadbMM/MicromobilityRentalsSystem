@@ -7358,7 +7358,6 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
   background:var(--sf-head);border:1px solid var(--sf-line2);border-radius:var(--r-md);}
 #checkin-modal .ci-chain .btn-sm{min-height:38px;max-width:44%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #checkin-modal .ci-chain .btn-sm[disabled]{opacity:.45;cursor:default;}
-#checkin-modal .ci-autonext{display:block;margin:6px 0 0;margin-inline-start:auto;min-height:34px;font-size:12px;}
 #checkin-modal .ci-chain-pos{font-size:12px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums;}
 @media(min-width:1024px){
   body.view-staff.view-staff #checkin-modal .modal-backdrop.ci-drawer-bg{justify-content:flex-end;align-items:stretch;padding:0;

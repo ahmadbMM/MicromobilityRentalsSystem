@@ -5,7 +5,7 @@ import { stubSupabase, unlockStaff, waitForSb, goStaffTab } from './helpers/supa
 //  - the scanner says what each scan did in a full-width banner, in a word and a mark as well as a
 //    colour (OK / Check / Stop), with a WebAudio tone (muted by the Sound switch) and a buzz; OK
 //    clears itself, Check and Stop stay; a blacklisted rider is a Stop with Make an exception;
-//  - "Open the next rider" (per device) opens the next rider still expected after a single Confirm;
+//  - a single Confirm closes the panel: the next rider is not opened by itself (2026-10-11);
 //  - Not here yet: a stat chip on Bookings for riders still expected after the ride's start;
 //  - the screen stays on at the desk (Wake Lock) and Booth mode is a high-contrast look, both in
 //    Settings > This device;
@@ -186,27 +186,16 @@ test.describe('@staff:bookings scanner feedback', () => {
 });
 
 test.describe('@staff:bookings check-in', () => {
-  test('"Open the next rider" opens the next one still expected after a Confirm; off, the panel closes', async ({ page }) => {
+  test('a Confirm on a rider booked alone closes the panel: the next rider opens only when staff open them', async ({ page }) => {
     await page.setViewportSize({ width: 1366, height: 900 });
     await boot(page);
     await page.evaluate(`setStaffTab('queue');setSfSession('s0')`);
     await page.evaluate(`showCheckinModal('${A}')`);
-    const tog = page.locator('#ci-autonext');
-    // on by default since 2026-10-09 (D10); turned off here, the panel closes after Confirm
-    await expect(tog).toHaveAttribute('aria-pressed', 'true');
-    await tog.click();
-    expect(await page.evaluate(`localStorage.getItem('cq_ci_next')`)).toBe('0');
-    await expect(page.locator('#ci-autonext')).toHaveAttribute('aria-pressed', 'false');
+    await expect(page.locator('#ci-autonext')).toHaveCount(0); // the "Open the next rider" switch is gone (2026-10-11)
     await page.locator('#ci-confirm').click();
     await expect.poll(() => page.evaluate('S._ciId')).toBeNull();
-
-    await tog.waitFor({ state: 'detached' });
-    await page.evaluate(`showCheckinModal('${C}')`);
-    await page.locator('#ci-autonext').click();
-    expect(await page.evaluate(`localStorage.getItem('cq_ci_next')`)).toBe('1');
-    await expect(page.locator('#ci-autonext')).toHaveAttribute('aria-pressed', 'true');
-    await page.locator('#ci-confirm').click();
-    await expect.poll(() => page.evaluate('S._ciId')).toBe(B); // after #3, back round to the first still expected
+    await page.waitForTimeout(400);
+    expect(await page.evaluate('S._ciId')).toBeNull(); // and stays closed
   });
 });
 
