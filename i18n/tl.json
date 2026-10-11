@@ -1045,6 +1045,7 @@
   "myPastRides": "Mga nakaraang ride",
   "noPastRides": "Wala pang natapos na ride.",
   "noCurrentRides": "Wala ka pang booking.",
+  "qrNoSignal": "Walang signal para ipakita ang code. Ipakita ito sa booth:",
   "rzNextRide": "Susunod na bukas na ride",
   "bookAgainBtn": "Mag-book ulit",
   "bookUsualBtn": "I-book ang dati kong booking",

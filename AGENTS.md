@@ -640,6 +640,23 @@ always) and tags one chip, then "+N" (`_amPlusN`; the card shows them all). What
 a correction, a deletion request, a look-off, no gender) is `.am-extras`, a full-width strip inside its row. The six
 buttons have fixed widths so every row's columns line up.
 
+## A ticket with no signal, and the Arabic word for a ride (2026-10-10)
+
+- **The worker keeps what a ticket needs.** SHELL precaches the database library, the QR library, fonts.css (the
+  build stamps its `?v=`) and the faces a ticket uses. On activate, `carryOver()` moves every entry of an older
+  `mmcq-*` cache that is named by its version (vendor/, fonts/, lang/, a `?v=` hash) into the new cache before the
+  old one is deleted, so a deploy no longer throws away the QR library, the fonts and the packs. `precache` copies
+  a versioned file from an older cache instead of downloading it. tests/offline-ticket.spec.ts.
+- **No 7-second wait.** `_sbReady` resolves as soon as DOMContentLoaded has fired with no `window.supabase` (the
+  deferred script ran or failed by then), not after 7 s; it keeps polling, so a late library still connects.
+- **A code that cannot be drawn says itself.** When the QR library cannot load (`_loadQrcode` onerror, or offline),
+  `_qrFallback` turns each `.qr-lazy` into a white tile with the ticket code in large type (key `qrNoSignal`); an
+  `online` event loads the library and `_fillLazyQR` draws the real code over it.
+- **Arabic**: a ride is جولة everywhere (رحلة only in the waiver texts, which are the owner's legal wording, and in
+  مرحلة, "stage"); the brand is مايكروموبيليتي. Fixed meanings: pendingLabel غير مدفوع, onTheHouseLabel على حسابنا,
+  errCancelWaiting (bookings not yet checked in), statusWaiting في الانتظار, regProg2 المشاركون, toastPromoted,
+  toastBookingCancelled, wlcLateTitle, the waitlist lines (مكان, تسجيل الحضور), pgNote, authPasswordHint, authCancel.
+
 ## The ride night on the ticket, the route, Your rides (2026-10-01)
 
 The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data the app already holds; no migration.

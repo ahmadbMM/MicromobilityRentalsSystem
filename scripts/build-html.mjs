@@ -377,7 +377,8 @@ const swBefore = sw;
 sw = sw.replace(/const STAFF_PARTS = \[[^\]]*\];/, `const STAFF_PARTS = ${JSON.stringify(Object.keys(staffPartsV).map((n) => `./staff-parts/${n}.js?v=${staffPartsV[n]}`))};`)
   .replace(/staff\.js\?v=[A-Za-z0-9_]+/g, `staff.js?v=${staffHash}`)
   .replace(/app\.js\?v=[A-Za-z0-9_]+/g, `app.js?v=${appHash}`)
-  .replace(/app\.css\?v=[A-Za-z0-9_]+/g, `app.css?v=${appCssHash}`);
+  .replace(/app\.css\?v=[A-Za-z0-9_]+/g, `app.css?v=${appCssHash}`)
+  .replace(/fonts\.css\?v=[A-Za-z0-9_]+/g, `fonts.css?v=${fontsHash}`);
 const NOT_CACHE_FIRST = new Set(['index.html', 'service-worker.js', '_headers', '_redirects', 'robots.txt', 'sitemap.xml', 'styles.css', 'staff.js', 'app.js', 'app.css', 'report.css', 'receipt.css']); // staff.js, app.js, app.css, report.css, receipt.css: asked for with their own hash (?v=), like the packs
 const VERSIONED_DIRS = new Set(['functions', 'lang', 'cities', 'staff-parts']);
 const shipped = (rel) => DIST_FILES.includes(rel) || DIST_DIRS.some((d) => rel.startsWith(d + '/'));

@@ -23,10 +23,10 @@ test('boot still shows the app when supabase-js fails to load', async ({ page })
     )
     .toBe(true);
 
-  // The loading screen must be dismissed, not stuck.
-  const lsHidden = await page.evaluate(() => {
-    const ls = document.getElementById('loading-screen');
-    return !ls || ls.style.display === 'none';
-  });
-  expect(lsHidden).toBe(true);
+  // The loading screen must be dismissed, not stuck: since 2026-10-10 the boot stops waiting for the library as
+  // soon as the page has loaded, so the view is up within a second and the screen is still fading (250 ms on at
+  // least, then 180 ms) when it appears. It is down well before the old 5 s safety timer.
+  await expect
+    .poll(() => page.evaluate(() => { const ls = document.getElementById('loading-screen'); return !ls || ls.style.display === 'none'; }), { timeout: 3000 })
+    .toBe(true);
 });

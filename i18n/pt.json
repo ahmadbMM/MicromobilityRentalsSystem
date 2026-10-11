@@ -1045,6 +1045,7 @@
   "myPastRides": "Passeios anteriores",
   "noPastRides": "Nenhum passeio concluído ainda.",
   "noCurrentRides": "Nenhuma reserva ainda.",
+  "qrNoSignal": "Sem sinal para mostrar o código. Mostre isto no balcão:",
   "rzNextRide": "Próximo passeio disponível",
   "bookAgainBtn": "Reservar de novo",
   "bookUsualBtn": "Reservar o de sempre",

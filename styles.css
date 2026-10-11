@@ -8428,6 +8428,14 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card .cu-tk-action
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red):hover{border-color:var(--line-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .cu-tk-actions :is(.btn-sm,.btn-secondary,.btn-green,.btn-green-solid,.btn-red):hover{background:var(--night-2);border-color:var(--night-line);}
 
+/* ── A ticket's code with no signal to draw it (_qrFallback, 2026-10-10): the code in large type on the code's
+   own white tile, the same size, so the desk can type it into Scan ──────────────────────────────────────── */
+body:not(.view-staff) .cu-qr-lazy.qr-fb{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:auto;min-width:var(--cu-qr);min-height:var(--cu-qr);height:auto;box-sizing:border-box;padding:10px 12px;
+  background:var(--card);color:var(--ink);border-radius:var(--r-ctl);text-align:center;}
+body:not(.view-staff) .qr-fb-k{max-width:16em;font-size:var(--fs-12);line-height:1.35;color:var(--ink-2);}
+body:not(.view-staff) .qr-fb-c{font-size:var(--fs-17);font-weight:700;font-variant-numeric:tabular-nums;direction:ltr;unicode-bidi:isolate;}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).

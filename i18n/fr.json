@@ -1045,6 +1045,7 @@
   "myPastRides": "Sorties passées",
   "noPastRides": "Aucune sortie terminée pour l'instant.",
   "noCurrentRides": "Aucune réservation pour l’instant.",
+  "qrNoSignal": "Pas de réseau pour afficher le code. Montrez ceci au stand :",
   "rzNextRide": "Prochaine sortie ouverte",
   "bookAgainBtn": "Réserver à nouveau",
   "bookUsualBtn": "Réserver comme d'habitude",

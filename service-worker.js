@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-03cba05ecb';
+const CACHE = 'mmcq-dbd3a97bd7';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,19 +22,19 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=602c8c4cfb';
+const STAFF_JS = './staff.js?v=3cf4622149';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=7544f69c18","./staff-parts/community.js?v=417c2a26c5","./staff-parts/bikes.js?v=25150e2f50","./staff-parts/cashier.js?v=04c42af97b","./staff-parts/catalog.js?v=94060605f1","./staff-parts/inventory.js?v=6107acafb8","./staff-parts/website.js?v=685f85cf37","./staff-parts/history.js?v=08fbdf492b","./staff-parts/workshop.js?v=321ebe8623","./staff-parts/ambassadors.js?v=9b71156740","./staff-parts/messages.js?v=4d4614f164","./staff-parts/vendors.js?v=cec7399bbd","./staff-parts/sela.js?v=4fd6c9dcc9","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=094f146684","./staff-parts/settings.js?v=4fe4cd1953","./staff-parts/fleet.js?v=6f867e766c","./staff-parts/money.js?v=9138b7f063","./staff-parts/desk.js?v=b8cb99a5f0","./staff-parts/deskq.js?v=3530ad4de3","./staff-parts/kiosk.js?v=4b75087d6a","./staff-parts/deposits.js?v=c2e6933853","./staff-parts/remind.js?v=b87df44826"];
-const APP_JS = './app.js?v=53ec94960b';
-const APP_CSS = './app.css?v=62cd3f9e95';
+const APP_JS = './app.js?v=0e0c3d246c';
+const APP_CSS = './app.css?v=1c7f59fbbb';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=6c176c03cd']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=0ef436e76d']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
@@ -49,6 +49,16 @@ const SHELL = [
   './hero.webp',
   './icon-192.png',
   './icon-512.png',
+  // What a ticket needs to open with no signal (2026-10-10): the database library (the boot waits for it), the
+  // QR library (loaded when a ticket draws; without it the code was an empty tile), the stylesheet of the fonts
+  // and the faces a ticket is set in. A rider offline at the Corniche after a deploy had none of them.
+  './vendor/supabase-js-2.117.2.min.js',
+  './vendor/qrcode-generator-2.0.4.js',
+  './fonts/fonts.css?v=4c46a0e230',
+  './fonts/SpaceGrotesk-var-latin.woff2',
+  './fonts/ChakraPetch-700-latin.woff2',
+  './fonts/Riyal-400.woff2',
+  './fonts/Riyal-700.woff2',
 ];
 
 // Checked against the server, never taken from the browser's HTTP cache as it is: the images here
@@ -61,17 +71,27 @@ const SHELL = [
 // A file named by its own hash (?v=) is the same file whichever deploy names it (2026-10-09): one the last
 // version's cache already holds is copied over instead of downloaded again. A deploy that changed one part
 // of the staff half used to send every device the whole half, the stylesheet and app.js once more.
+// Named by version (vendor/, fonts/, lang/, a ?v= hash): whatever the HTTP cache holds is right.
+const PINNED = /^\/(?:vendor|fonts|lang)\//;
+const versioned = (u) => /[?&]v=[a-f0-9]{10}\b/.test(u) || PINNED.test(new URL(u, self.location.href).pathname);
 function precache(c, u) {
   const fresh = () => c.add(new Request(u, { cache: 'no-cache' }));
-  if (!/[?&]v=[a-f0-9]{10}\b/.test(u)) return fresh();
+  if (!versioned(u)) return fresh();
   return caches.match(u).then((hit) => (hit && hit.ok ? c.put(u, hit) : fresh())).catch(fresh);
 }
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => Promise.all(SHELL.map((u) => precache(c, u)))).then(() => self.skipWaiting()));
 });
 
-// Named by version (vendor/, fonts/, lang/, a ?v= hash): whatever the HTTP cache holds is right.
-const PINNED = /^\/(?:vendor|fonts|lang)\//;
+// Before the old version's caches go, whatever they hold that is named by its version (a font, a library, a
+// translation pack, a file with its ?v= hash) moves into this one (2026-10-10). Every deploy used to delete the
+// QR library, the fonts and the packs a phone had stored, so an offline rider after a deploy met a blank code,
+// system fonts and a 7-second wait. A file this version already holds is left as it is.
+function carryOver() {
+  return caches.keys().then((keys) => caches.open(CACHE).then((c) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('mmcq-') && k !== 'mmcq-img').map((k) =>
+    caches.open(k).then((old) => old.keys().then((reqs) => Promise.all(reqs.filter((r) => versioned(r.url)).map((r) =>
+      c.match(r).then((have) => have || old.match(r).then((res) => (res && res.ok ? c.put(r, res) : null))))))))))).catch(() => {});
+}
 
 self.addEventListener('activate', (e) => {
   // An older version's cache means this activation is an UPDATE, not a first install (2026-10-05).
@@ -81,8 +101,8 @@ self.addEventListener('activate', (e) => {
   let updated = false;
   e.waitUntil(
     // Everything but this version's cache goes, including the old 'mmcq-img' photo cache (see the
-    // note at the end of the fetch handler).
-    caches.keys().then((keys) => {
+    // note at the end of the fetch handler), once what is named by its version has been carried over.
+    carryOver().then(() => caches.keys()).then((keys) => {
       updated = keys.some((k) => k !== CACHE && k !== 'mmcq-img' && k.startsWith('mmcq-'));
       return Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)));
     })

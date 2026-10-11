@@ -171,7 +171,7 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
     await expect(kiosk(page).locator('.ko-empty')).toContainText('No ride takes walk-ins');
     await kiosk(page).locator('.ko-lang select').selectOption('ar');
-    await expect(kiosk(page).getByRole('heading', { name: 'رحلات الليلة' })).toBeVisible();
+    await expect(kiosk(page).getByRole('heading', { name: 'جولات الليلة' })).toBeVisible();
     await kiosk(page).locator('.ko-lang select').selectOption('en');
     // the desk keys are off while the kiosk shows
     await page.keyboard.press('w');
