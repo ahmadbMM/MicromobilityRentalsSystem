@@ -147,6 +147,44 @@ test.describe('@staff:community list filters and money spent', () => {
     expect(await ids(page, '#am-cust-rows .am-row', 'data-cust')).toEqual(['c1']);
   });
 
+  test('Decided and Updated most recently sort as times, and a picked Sort orders Invited too (2026-10-11)', async ({ page }) => {
+    await staff(page, 'applications');
+    const out = await page.evaluate(`(()=>{const out={},q=x=>_apSortList(x.k,x.l.slice(),x.so).map(a=>a.id);
+      // a card staff just decided carries the browser's ISO text (Z, 3 digits), the rest the database's
+      const dec=[{id:'d1',status:'approved',created_at:'2026-09-01T00:00:00Z',decided_at:'2026-10-11T10:00:00.123456+00:00'},
+        {id:'d2',status:'approved',created_at:'2026-09-02T00:00:00Z',decided_at:'2026-10-11T10:00:00.124Z'},
+        {id:'d3',status:'pending',created_at:'2026-09-03T00:00:00Z',decided_at:null},
+        {id:'d4',status:'rejected',created_at:'2026-09-04T00:00:00Z',decided_at:'2026-10-09T08:00:00Z'}];
+      out.decided=q({k:'ca',l:dec,so:'decided'});
+      const upd=[{id:'u1',status:'pending',created_at:'2026-09-01T00:00:00Z',submissions:1,updated_at:'2026-10-10T00:00:00Z'},
+        {id:'u2',status:'pending',created_at:'2026-09-02T00:00:00Z',submissions:2,updated_at:'2026-10-08T00:00:00Z'},
+        {id:'u3',status:'approved',created_at:'2026-09-03T00:00:00Z',fix_done_at:'2026-10-09T00:00:00Z',updated_at:'2026-10-11T00:00:00Z'},
+        {id:'u4',status:'approved',created_at:'2026-09-04T00:00:00Z',submissions:3,updated_at:'2026-10-11T00:00:00Z'}];
+      out.updated=q({k:'ca',l:upd,so:'updated'});out.updatedLa=q({k:'la',l:upd,so:'updated'});
+      return out;})()`);
+    // never decided / never updated by the applicant last, newest first among themselves
+    expect(out).toEqual({ decided: ['d2', 'd1', 'd4', 'd3'], updated: ['u3', 'u2', 'u4', 'u1'], updatedLa: ['u3', 'u2', 'u4', 'u1'] });
+
+    // the toolbar offers Suggested (the default) and Updated most recently
+    const sort = page.locator('.ca-tb select[aria-label="Sort"]');
+    await expect(sort).toHaveValue('');
+    await expect(sort.locator('option[value="updated"]')).toHaveText('Updated most recently');
+    // a device that saved the old default ('new') before v2 reads as Suggested
+    expect(await page.evaluate(`(()=>{localStorage.setItem('cq_ca_view','{"sort":"new","hide":[]}');S._caV=null;const a=_caView().sort;
+      localStorage.setItem('cq_ca_view','{"v":2,"sort":"new","hide":[]}');S._caV=null;const b=_caView().sort;S._caV=null;localStorage.removeItem('cq_ca_view');return [a,b];})()`)).toEqual(['', 'new']);
+
+    // Invited: ride order while Suggested; a picked Sort orders it instead
+    const inv = await page.evaluate(`(()=>{const keep=S._caApps;
+      S._caApps=[{id:'i1',status:'approved',name:'Early Ride',created_at:'2026-09-01T00:00:00Z',decided_at:'2026-10-01T00:00:00Z',invited_session:'x'},
+        {id:'i2',status:'approved',name:'Late Ride',created_at:'2026-09-02T00:00:00Z',decided_at:'2026-10-05T00:00:00Z',invited_session:'x'}];
+      const was={sess:window._caInvSess,st:window._caInvSt,sub:window._caInvSub,caSt:window._caSt};
+      _caInvSess=a=>({session_date:a.id==='i1'?'2099-01-01':'2099-02-01'});_caInvSt=()=>'invited';_caInvSub=()=>'invited';_caSt=a=>'invited';
+      S._caFilter='invited';const ids=()=>[..._appList('ca').matchAll(/data-app-id="([^"]+)"/g)].map(m=>m[1]).filter((v,i,a)=>a.indexOf(v)===i);
+      const out={};_caView().sort='';out.sugg=ids();_caView().sort='decided';out.dec=ids();_caView().sort='name';out.name=ids();
+      _caView().sort='';Object.assign(window,{_caInvSess:was.sess,_caInvSt:was.st,_caInvSub:was.sub,_caSt:was.caSt});S._caApps=keep;S._caFilter='pending';return out;})()`);
+    expect(inv).toEqual({ sugg: ['i1', 'i2'], dec: ['i2', 'i1'], name: ['i1', 'i2'] });
+  });
+
   test('the account report, Birthdays and Flagged filter and sort by money spent too', async ({ page }) => {
     await staff(page, 'accounts', 'customers');
     const rep = await page.evaluate(`(()=>{const o=_accOpts();const out={};
