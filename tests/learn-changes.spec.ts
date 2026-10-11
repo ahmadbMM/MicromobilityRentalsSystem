@@ -66,7 +66,7 @@ test('staff ask a new sign-up for changes, get the link and message, and the car
   await expect(page.locator('#confirm-modal #la-msg-text')).toHaveValue(new RegExp(`learnfix=${TOKEN}`));
 });
 
-test('a scheduled sign-up can be asked too, its account’s own details left out; a done one cannot', async ({ page }) => {
+test('a scheduled sign-up can be asked too, its account’s own details left out; a done one too (2026-10-11)', async ({ page }) => {
   await staff(page);
   await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
   await row(page, 'l3').locator('.la-fix-btn').click();
@@ -74,7 +74,7 @@ test('a scheduled sign-up can be asked too, its account’s own details left out
     .toEqual(['whatsapp', 'birth_date', 'nationality', 'profession', 'workplace', 'instagram', 'linkedin']);
   await page.locator('#confirm-modal .ca-fx-box .chrome-x').click();
   await page.locator('.filter-pill[data-la-filter="done"]').click();
-  await expect(row(page, 'l5').locator('.la-fix-btn')).toHaveCount(0);
+  await expect(row(page, 'l5').locator('.la-fix-btn')).toHaveCount(1);
 });
 
 test('the card shows what was changed and what it was', async ({ page }) => {
