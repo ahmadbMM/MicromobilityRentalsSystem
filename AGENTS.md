@@ -399,10 +399,13 @@ card that has the name Petromin Days that only is visible for petromin tag holde
 the Petromin nights inside MicroMobility Experiences, as before; an account holds the Community tag or the Petromin
 tag, never both ("show an error that asks that only one of them must be given per account and vice versa").
 - **The tag** `tag_petromin` (slug `petromin`, locked; migration 20261012180000). `TAG_BRANDS.petromin` has a
-  `word`: the chip is Petromin's red with PETROMIN set in white (`.tag-word-pm`), no image.
+  `img`: the chip is white (`fill`) edged in Petromin red, with Petromin's logo in its colours (`.tag-img-pm`,
+  assets/petromin-logo.png; the owner swapped it in for the first look, PETROMIN in white on red, the same day).
 - **The card** (`_pmCardHtml`, first on the picker) shows only while `_pmMember()` says yes: `petromin_member`
   (token-checked, a bare boolean like `community_member`), asked once per account, a no again after ten minutes, a
-  failed check after one. `selectEvent('petromin')` and a night's tap under it go through `_pmGate()` (asked afresh
+  failed check after one. `selectEvent('petromin')`, a night's tap under it and the confirm (`_sessGate`, which picks
+  the Petromin or the Community gate for a date; the confirm once asked the Community one alone and refused every
+  holder at the last step) go through `_pmGate()` (asked afresh
   unless a yes is held; a no says `pmDaysNo`). `_evMatch(s,'petromin')` = the Petromin nights; `_evOf` files a night
   under `petromin` for a holder (`_pmHeld()`), under `community` for everyone else. `?ev=petromin` links work.
   Details on a night show to holders too; its "Who" reads Community members and Petromin's team.
@@ -1060,7 +1063,10 @@ The owner: "make all booking cards themed the same way the event card is themed"
 the app, the whole card; not the website's tickets) and "make sure that the apple pass booking cards are themed the
 same way the event picker card is themed".
 - **Tickets** (My Bookings and the card after booking) carry `tk-th th-<theme>` (`_tkThemeCls`, `_tkTheme`: `jcc`,
-  `comm` for MicroMobility Experiences' rides - the Saturday ride, the pool, T100, Petromin - `runher`, `event`;
+  `comm` for MicroMobility Experiences' rides - the Saturday ride, T100 - `runher`, `event`, and since 2026-10-12
+  `petromin` (Petromin's red, three speed stripes in the bottom corner, the Petromin logo) and `swim` (pool blue, the
+  water's lines along the foot; the owner: "change the petromin booking card to be petromin themed and the triathlon
+  pool session to be swimming themed");
   National Day keeps the green skin it had) and the event card's mark in the logo slot (`_tkLogo(sess)`, `TK_MARK`).
   The night ticket's rules in the customer system read `.ticket-card:is(.tk-live,.tk-th)` and are written in its
   colours, so a theme only redefines `--night`, `--night-2`, `--night-ink`, `--night-ink-2`, `--night-line`, `--neon`
@@ -1070,7 +1076,8 @@ same way the event picker card is themed".
   ticket keeps its dashed amber edge and its quieter number. `tests/ticket-themes.spec.ts`.
 - **The Apple Wallet pass** takes the same look per kind (`RIDES` in scripts/wallet/wallet-pass.src.js: `fg`, `bg`,
   `label`; `event` is a kind of its own now): the circuit navy with white type, Experiences white with ink and a
-  darkened brand green, Run for Her white with its navy and pink, an event white with the violet; Petromin and National
+  darkened brand green, Run for Her white with its navy and pink, an event white with the violet, the pool white
+  with pool-blue labels and its water strip (`SWIM_IMAGES`, 2026-10-12); Petromin (already in its red) and National
   Day as before. Its strip and logo are the event card's art (`RIDE_IMAGES` in pass-images.js: the circuit's run and
   chevrons with the white JCC mark, the brand pattern with the Light Version lockup, the blush with the route and the
   partners' marks, the violet wash), drawn from the cards' own CSS and assets by `node scripts/wallet/render-art.mjs

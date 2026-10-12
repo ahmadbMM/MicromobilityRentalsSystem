@@ -1271,8 +1271,8 @@
     /* VIP's letters sit smaller than the other marks (the owner, 2026-09-30: "make the vip font smaller"). */
     .tag-logo-vip{width:20px;height:10px;vertical-align:-1px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
-    /* The Petromin tag (2026-10-12): the word itself, slanted and heavy like Petromin's mark. */
-    .tag-word{display:inline-block;flex-shrink:0;font-family:var(--font-display);font-weight:800;font-style:italic;font-size:11px;line-height:1;letter-spacing:.04em;color:currentColor;}
+    /* The Petromin tag (2026-10-12): Petromin's logo in its own colours, on the white chip. */
+    .tag-img{display:inline-block;flex-shrink:0;height:16px;width:auto;vertical-align:-4px;}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
     .tag-banned .tag-logo{width:12px;height:10px;vertical-align:0;}
@@ -9047,7 +9047,7 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc{padding-bottom:30px;}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc .ticket-num{font-family:'Chakra Petch','IBM Plex Sans Arabic',sans-serif;}
 /* the light cards: ink on white, the event's own accent where the night ticket has its neon */
-body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event){
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.th-comm,.th-runher,.th-event,.th-petromin,.th-swim){
   --night:#fff;--night-ink:#1A1919;--night-ink-2:rgba(26,25,25,.62);--night-line:rgba(26,25,25,.12);
   --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-comm{
@@ -9066,6 +9066,23 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-runh
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-event{
   --night-2:#F5F0FE;--night-line:rgba(124,58,237,.18);--neon:#6D28D9;
   background:linear-gradient(to bottom right,#fff 0 55%,rgba(124,58,237,.07) 100%) #fff;border:1px solid rgba(124,58,237,.3);}
+/* A Petromin night (2026-10-12): Petromin's red, its three speed stripes in the bottom corner, its logo as the mark. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-petromin{
+  --night-2:#FDF1F1;--night-line:rgba(214,32,42,.18);--neon:#C41E26;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cg fill='%23d6202a'%3E%3Cpath d='M10 0h86v5H6z'/%3E%3Cpath d='M18 10h78v5H14z' opacity='.7'/%3E%3Cpath d='M26 20h70v5H22z' opacity='.45'/%3E%3C/g%3E%3C/svg%3E") right 0 bottom 12px/96px 26px no-repeat,
+    radial-gradient(110% 55% at 0% 100%,rgba(214,32,42,.09) 0%,rgba(214,32,42,0) 70%) #fff;
+  border:1px solid rgba(214,32,42,.32);padding-bottom:40px;}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-petromin{
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='26' viewBox='0 0 96 26'%3E%3Cg fill='%23d6202a'%3E%3Cpath d='M0 0h86l4 5H0z'/%3E%3Cpath d='M0 10h78l4 5H0z' opacity='.7'/%3E%3Cpath d='M0 20h70l4 5H0z' opacity='.45'/%3E%3C/g%3E%3C/svg%3E") left 0 bottom 12px/96px 26px no-repeat,
+    radial-gradient(110% 55% at 100% 100%,rgba(214,32,42,.09) 0%,rgba(214,32,42,0) 70%) #fff;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-petromin .ticket-num{font-style:italic;}
+.ticket-card .tk-logo-ev .tk-logo-petromin{height:30px;}
+/* The Triathlon Pool Session (2026-10-12): pool blue, the water's lines along the foot of the card. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-swim{
+  --night-2:#EAF6FB;--night-line:rgba(11,111,164,.16);--neon:#0B6FA4;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='26' viewBox='0 0 80 26'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M0 6c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5' stroke='%2338B6E6' stroke-width='2' opacity='.55'/%3E%3Cpath d='M-10 18c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5 10-5 20-5' stroke='%230B6FA4' stroke-width='2' opacity='.35'/%3E%3C/g%3E%3C/svg%3E") left 0 bottom 6px/80px 26px repeat-x,
+    linear-gradient(to bottom,#fff 0 52%,rgba(56,182,230,.10) 100%) #fff;
+  border:1px solid rgba(11,111,164,.3);padding-bottom:34px;}
 /* the states the night ticket left on paper keep their own signs under the theme */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.tk-wl{border:1.5px dashed var(--amber-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.tk-wl,.tk-past) .ticket-num{color:var(--night-ink-2);}

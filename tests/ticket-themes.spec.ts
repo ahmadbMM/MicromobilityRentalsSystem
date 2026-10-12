@@ -15,6 +15,7 @@ const sessions = [
   S('2099-10-24', { event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: false }),
   S('2099-10-28', { event_kind: null, ride_kind: null, bike_slots: '{"_time":"21:00 - 23:00"}' }),
   S('2099-10-29-sw', { event_kind: 'community', ride_kind: 'swim', needs_approval: true, hide_queue: true }),
+  S('2099-10-30-pw', { event_kind: 'community', ride_kind: 'petromin', needs_approval: false, paid_ride: true, bike_slots: '{"_time":"21:00 - 23:00"}' }),
 ];
 const bookings = [
   B('r1', '2099-10-17-rh', { type_preference: 'None', run_km: 5, price: 0, queue_num: 12 }),
@@ -23,6 +24,7 @@ const bookings = [
   B('s1', '2099-10-24', { approval: 'approved', price: 0 }),
   B('w1', '2099-10-28', { status: 'waitlist', waitlist_num: 2 }),
   B('p1', '2099-10-29-sw', { approval: 'pending', price: 0, type_preference: 'None' }),
+  B('m1', '2099-10-30-pw', { price: 57.5 }),
 ];
 
 test.describe('@customer:tickets every ticket in its event’s colours', () => {
@@ -33,7 +35,7 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`goCustomer('myrides')`);
-    await expect(page.locator('#tab-myrides .ticket-card')).toHaveCount(6);
+    await expect(page.locator('#tab-myrides .ticket-card')).toHaveCount(7);
   });
 
   test('each card takes its event card’s theme and mark, whatever its state', async ({ page }) => {
@@ -48,11 +50,15 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     expect(by.jcc).toMatchObject({ th: 'jcc', st: 'live', bg: 'rgb(6, 52, 111)', mark: '/jcc-white.webp' });
     expect(by.jcc.img).toContain('linear-gradient');
     expect(by['jcc-wl']).toMatchObject({ th: 'jcc', bg: 'rgb(6, 52, 111)', border: 'dashed' });
-    // MicroMobility Experiences: the Saturday ride and the pool (a reservation staff have not confirmed yet)
+    // MicroMobility Experiences: the Saturday ride
     expect(by.saturday).toMatchObject({ th: 'comm', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
     expect(by.saturday.img).toContain('mm-pattern');
-    expect(by.swim).toMatchObject({ th: 'comm', st: 'paper', bg: 'rgb(255, 255, 255)' });
-    expect(by.swim.img).toContain('mm-pattern');
+    // the pool (a reservation staff have not confirmed yet): pool blue and the water's lines (2026-10-12)
+    expect(by.swim).toMatchObject({ th: 'swim', st: 'paper', bg: 'rgb(255, 255, 255)', mark: '/logo-dark.webp' });
+    expect(by.swim.img).toContain('56, 182, 230');
+    // a Petromin night: Petromin's speed stripes and its logo (2026-10-12)
+    expect(by.petromin).toMatchObject({ th: 'petromin', bg: 'rgb(255, 255, 255)', mark: '/assets/petromin-logo.png' });
+    expect(by.petromin.img).toContain('d6202a');
     // Run for Her: blush, the partners' marks; events: the violet wash
     expect(by.runher).toMatchObject({ th: 'runher', bg: 'rgb(255, 255, 255)', mark: '/assets/runher-partners.webp' });
     expect(by.runher.img).toContain('radial-gradient');
@@ -77,6 +83,6 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
 
   test('the National Day ticket keeps its own green skin', async ({ page }) => {
     expect(await page.evaluate(`_tkThemeCls({id:'x',session_date:'2099-09-23',ride_kind:'snd96'})`)).toBe('');
-    expect(await page.evaluate(`_tkThemeCls({id:'x',session_date:'2099-09-23',event_kind:'community',ride_kind:'petromin'})`)).toBe(' tk-th th-comm');
+    expect(await page.evaluate(`_tkThemeCls({id:'x',session_date:'2099-09-23',event_kind:'community',ride_kind:'workshop'})`)).toBe(' tk-th th-comm'); // T100 keeps Experiences' look
   });
 });

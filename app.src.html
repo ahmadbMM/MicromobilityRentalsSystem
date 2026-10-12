@@ -7622,6 +7622,11 @@ async function _pmGate(){
   toast(t('pmDaysNo'),'error');if(S.view==='landing')renderLandingAvail();
   return false;
 }
+// The members gate a members-only date answers to: the Petromin tag on a Petromin night opened under
+// Petromin Days (or by a known holder), the Community tag everywhere else. Both the date's tap and the
+// confirm ask it: the confirm re-checked the Community tag alone, and a holder who is no community member
+// was sent back with the members popup at the last step (2026-10-12).
+function _sessGate(s){return _rideKind(s)==='petromin'&&(S.selEvent==='petromin'||_pmHeld())?_pmGate():_commGate();}
 // The Petromin Days card: Petromin's mark, and the next night when one is on the books.
 function _pmCardHtml(){
   const s=allSessions().filter(x=>_rideKind(x)==='petromin'&&_sessLive(x)&&!_sessPastDay(x)).sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id)))[0];
@@ -8110,7 +8115,7 @@ async function selectSessCard(id){
   const s=_sessDisp(id);
   if(_wasRejectedFor(id)){showRejectedModal(s);return;}
   // A Petromin night under Petromin Days asks the Petromin tag; everywhere else, the Community tag.
-  if(_isCommunity(s)&&!_openToAll(s)&&!(await (S.selEvent==='petromin'&&_rideKind(s)==='petromin'?_pmGate():_commGate())))return; // a failed check says so, a real no is the members popup (2026-10-05)
+  if(_isCommunity(s)&&!_openToAll(s)&&!(await _sessGate(s)))return; // a failed check says so, a real no is the members popup (2026-10-05)
   if(_rideKind(s)==='runher'&&_runUnder18(S.loggedIn||getSession(),s)){_runAgeModal();return;}
   // Add-ons are per-session offerings: a switch must drop picks the new session may not sell. The
   // promo code goes too - applied for one ride, it rode along onto the next, including onto a free
@@ -12477,7 +12482,7 @@ async function _submitReg(){
   if(!_ownOffered(_selSess0)&&S.regBikeTypes.slice(0,S.regQty).includes('Own')){S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Own'?'':ty);renderRegister();toast(t('errBikeTypeReq'),'error');return;}
   // Members gate, re-checked at submit: the card/event clicks are already gated, but no
   // state path may insert a community booking for a non-member (the DB trigger backstops this).
-  if(_isCommunity(_selSess0)&&!_openToAll(_selSess0)&&!(await _commGate()))return; // no answer says the connection failed, a real no opens the members popup (2026-10-05)
+  if(_isCommunity(_selSess0)&&!_openToAll(_selSess0)&&!(await _sessGate(_selSess0)))return; // no answer says the connection failed, a real no opens the members popup (2026-10-05)
   // Corrections staff asked for, re-checked at submit: the event pick raises them, but no path
   // into the wizard may book past them.
   if(await _fixGate(()=>submitReg()))return;
@@ -12920,8 +12925,11 @@ function _tkLogo(sess){
 // are written in its colours (--night, --neon, --night-ink...), so a theme is those colours redefined on the card
 // plus the card's background ("TICKETS IN THEIR EVENT'S COLOURS" in styles.css); every state takes it, and the
 // status line, the waitlist's dashed edge and the code say which state a ticket is in.
-const TK_MARK={jcc:'/jcc-white.webp',comm:'/logo-dark.webp',runher:'/assets/runher-partners.webp',event:'/logo-dark.webp'};
-function _tkTheme(s){if(!s)return'';const k=_rideKind(s);return k==='snd96'?'':k==='jcc'||k==='runher'||k==='event'?k:'comm';}
+// The owner, 2026-10-12: "change the petromin booking card to be petromin themed and the triathlon pool session
+// to be swimming themed": a Petromin night's ticket wears Petromin's red, its speed stripes and its logo; the pool
+// session's, pool blue and water.
+const TK_MARK={jcc:'/jcc-white.webp',comm:'/logo-dark.webp',runher:'/assets/runher-partners.webp',event:'/logo-dark.webp',petromin:'/assets/petromin-logo.png',swim:'/logo-dark.webp'};
+function _tkTheme(s){if(!s)return'';const k=_rideKind(s);return k==='snd96'?'':k==='jcc'||k==='runher'||k==='event'||k==='petromin'||k==='swim'?k:'comm';}
 function _tkThemeCls(s){const th=_tkTheme(s);return th?` tk-th th-${th}`:'';}
 // ── The ticket through the night (the owner, 2026-10-01: "do 1 2 5 6 10") ─────────────────────
 // On the ride's day a held ticket says where the rider is: Booked, Checked in, On the bike, Done
@@ -42836,9 +42844,10 @@ async function saveTagGrant(){
 // its holder is pointed out: the Community grant and an application's approval (_isBlacklisted).
 // The VIP tag (2026-09-29) is the fourth: gold, the letters VIP drawn in white (assets/tag-vip.svg;
 // the crown beside them came off the same day), for a rider who always rides on the house (_isVip).
-// The Petromin tag (2026-10-12) is the fifth: Petromin's red with the word PETROMIN set in white,
-// slanted as their mark is, for a rider who books the Petromin nights through Petromin Days.
-const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',word:'PETROMIN'}};
+// The Petromin tag (2026-10-12) is the fifth: Petromin's own logo, in its colours, on a white chip
+// edged in Petromin's red (the owner: "change the petromin tag to include petromin logo instead"; it
+// was the word PETROMIN in white on red), for a rider who books the Petromin nights through Petromin Days.
+const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'}};
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip',TAG_PETROMIN='tag_petromin';
 // The Community tag and the Petromin tag never sit on one account (the owner, 2026-10-12: "when giving a
 // petromin tag to a community member show an error that asks that only one of them must be given per
@@ -42855,7 +42864,7 @@ function _tagBrand(tg){return (tg&&TAG_BRANDS[String(tg.slug||'').toLowerCase()]
 function _tagColor(tg){const b=_tagBrand(tg);return b?b.color:((tg&&tg.color)||'#00e585');}
 function _tagLogo(tg){
   const b=_tagBrand(tg);if(!b)return'';
-  if(b.word)return `<span class="tag-word tag-word-${b.cls}" role="img" aria-label="${esc(tg.name)}">${esc(b.word)}</span>`;
+  if(b.img)return `<img class="tag-img tag-img-${b.cls}" src="${esc(b.img)}" alt="${esc(tg.name)}" width="38" height="16" decoding="async">`;
   if(!b.ban)return `<span class="tag-logo tag-logo-${b.cls}" role="img" aria-label="${esc(tg.name)}"></span>`;
   // The mark with a no-entry ring struck through it.
   return `<span class="tag-banned" role="img" aria-label="${esc(tg.name)}"><span class="tag-logo tag-logo-${b.cls}"></span><svg class="tag-ban-sign" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.4" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M4.7 4.7l14.6 14.6" fill="none" stroke="currentColor" stroke-width="2.4"/></svg></span>`;
@@ -42874,7 +42883,7 @@ function _tagChip(tg,ct){
   const b=_tagBrand(tg);
   // Its colours come from the tag (data-cssv, set through the CSSOM): the fill and the edge, and a
   // tag staff made also takes its colour as the ink.
-  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''} cmy-tc${dim}" data-cssv="${_cssv({'--cmy-tbg':b.color,'--cmy-tbd':b.color})}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
+  if(b)return `<span class="am-chip tag-brand${b.ban?' tag-ban':''} cmy-tc${dim}" data-cssv="${_cssv({'--cmy-tbg':b.fill||b.color,'--cmy-tbd':b.color})}" title="${esc(tg.name)}">${_tagLogo(tg)}${suffix?`<span>${suffix.replace(/^ · /,'')}</span>`:''}</span>`;
   return `<span class="am-chip cmy-tc cmy-tcf${dim}" data-cssv="${_cssv({'--cmy-tbg':col+'22','--cmy-tbd':col+'66','--cmy-tfg':col})}">${esc(tg.name)}${suffix}</span>`;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).

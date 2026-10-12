@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
+import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows, type Fixtures } from './helpers/supabase';
 
 // Petromin Days (the owner, 2026-10-12): the Petromin tag lets its holder book the Petromin nights, and
 // no other members-only ride, through a card of their own that only holders see. Community members
@@ -65,6 +65,18 @@ test.describe('@customer:petromin Petromin Days', () => {
     await expect(sheet).toContainText("Community members and Petromin's team");
   });
 
+  test('a holder who is no community member confirms a Petromin booking (2026-10-12 fix)', async ({ page }) => {
+    await custBoot(page, { 'rpc:petromin_member': true });
+    const rows = await captureBookingRows(page);
+    await card(page).click();
+    await page.locator(`#tab-register .sess-card[data-on-click*="${PW}"]`).click();
+    await expect.poll(() => page.evaluate('S.selSession')).toBe(PW);
+    await page.evaluate(`S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Road'];S.regRiderNames=['Omar Saleh'];S.promoApplied=null;S.waiverOk=true;S._waiverSess=S.selSession;submitReg()`);
+    await expect.poll(() => rows.length).toBe(1);
+    expect(rows[0]).toMatchObject({ session_id: PW, type_preference: 'Road' });
+    await expect(page.locator('#confirm-modal .cm-box')).toHaveCount(0); // never the members popup
+  });
+
   test('a card painted before staff took the tag away says who the days are for', async ({ page }) => {
     await custBoot(page, { 'rpc:petromin_member': true });
     await expect(card(page)).toBeVisible();
@@ -117,13 +129,14 @@ async function staffBoot(page: Page) {
 const modal = (page: Page) => page.locator('#confirm-modal');
 
 test.describe('@staff:tags The Petromin tag', () => {
-  test('the chip is Petromin red with the word in white', async ({ page }) => {
+  test('the chip is Petromin\'s logo on white, edged in Petromin red', async ({ page }) => {
     await staffBoot(page);
-    const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-word-pm') }).first();
+    const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-img-pm') }).first();
     await expect(chip).toBeVisible();
-    await expect(chip).toHaveCSS('background-color', 'rgb(214, 32, 42)'); // #d6202a
-    await expect(chip).toHaveCSS('color', 'rgb(255, 255, 255)');
-    await expect(chip.locator('.tag-word-pm')).toHaveText('PETROMIN');
+    await expect(chip).toHaveCSS('background-color', 'rgb(255, 255, 255)'); // white, so Petromin's red logo reads
+    await expect(chip).toHaveCSS('border-top-color', 'rgb(214, 32, 42)'); // edged in #d6202a
+    await expect(chip.locator('img.tag-img-pm')).toHaveAttribute('src', '/assets/petromin-logo.png');
+    await expect(chip.locator('img.tag-img-pm')).toHaveAttribute('alt', 'Petromin');
     await expect(chip).toHaveAttribute('title', 'Petromin');
   });
 

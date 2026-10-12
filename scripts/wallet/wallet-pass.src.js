@@ -486,7 +486,8 @@ const RIDES = {
   // near-white foreground (5.9:1) and the field (4.9:1); do not darken the label towards
   // salmon again, it drops to 2.7:1.
   petromin: { bg: "rgb(163,59,46)", label: "rgb(255,214,203)", venue: "Petromin Wednesday Ride" },
-  swim:     { ...EXP, venue: "Triathlon Pool Session" },
+  // the pool (2026-10-12): its ticket's pool blue on the labels (5.6:1 on white)
+  swim:     { ...EXP, label: "rgb(11,111,164)", venue: "Triathlon Pool Session" },
   workshop: { ...EXP, venue: "T100 Triathlon Prep" },
   // Saudi National Day 96 - the guideline's deep green field, with the lime tint on labels.
   snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },

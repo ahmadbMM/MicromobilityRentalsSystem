@@ -183,7 +183,7 @@ test.describe('the Apple Wallet pass', () => {
     const cases: [string, Record<string, unknown>, string, string, string][] = [
       ['jcc', circuit, 'rgb(6,52,111)', 'rgb(255,255,255)', 'rgb(159,213,238)'],
       ['saturday', comm('saturday'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
-      ['swim', comm('swim'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
+      ['swim', comm('swim'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(11,111,164)'], // the pool's blue (2026-10-12)
       ['workshop', comm('workshop'), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(7,122,75)'],
       ['runher', comm('runher', { location: 'JYC' }), 'rgb(255,255,255)', 'rgb(20,48,77)', 'rgb(194,65,110)'],
       ['event', comm('event', { location: 'JYC' }), 'rgb(255,255,255)', 'rgb(26,25,25)', 'rgb(109,40,217)'],
@@ -198,6 +198,7 @@ test.describe('the Apple Wallet pass', () => {
     // the art differs where the cards do: the circuit's navy strip is not Experiences' white one
     expect(P.RIDE_IMAGES.jcc['strip@2x.png']).not.toBe(P.RIDE_IMAGES.saturday['strip@2x.png']);
     expect(P.RIDE_IMAGES.runher['logo@2x.png']).not.toBe(P.RIDE_IMAGES.saturday['logo@2x.png']);
+    expect(P.RIDE_IMAGES.swim['strip@2x.png']).not.toBe(P.RIDE_IMAGES.saturday['strip@2x.png']); // the water, not the pattern
     // an event names the place staff gave it
     const ev = await pass(booking, comm('event', { location: 'JYC' }));
     expect(ev.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'venue').value).toBe('Jeddah Yacht Club');
