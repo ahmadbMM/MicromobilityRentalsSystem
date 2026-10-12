@@ -103,7 +103,7 @@ test.describe('@staff:bookings s1010 desk', () => {
     await expect(page.locator('#checkin-modal .bk-sugg')).toHaveCount(0); // a bike is chosen: no more suggestions
   });
 
-  test('D3 + D2: a "Needs bike" row gives a bike; Hand-over opens on that rider and a suggested chip hands it over', async ({ page }) => {
+  test.skip('D3 + D2: a "Needs bike" row gives a bike; Hand-over opens on that rider and a suggested chip hands it over', async ({ page }) => {
     await boot(page);
     const swaps: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.url().includes('/rest/v1/rpc/staff_swap_bike')) swaps.push(r.postDataJSON()); });
@@ -188,8 +188,7 @@ test.describe('@staff:bookings s1010 desk', () => {
     await expect(s).toBeVisible();
     await expect(s.locator('#dk-sheet-t')).toContainText('My shift');
     await expect(s).toContainText('Check In: #9 Someone');
-    await expect(s).toContainText('Needs bike · 1');
-    await expect(s).toContainText('Nada Bikeless');
+    await expect(s).not.toContainText('Needs bike'); // the Give bike step is off (GIVE_BIKE_STEP, 2026-10-12)
     await expect(s).toContainText('Still owing · 1');
     await expect(s).toContainText('Rami Owes');
     await s.getByRole('button', { name: 'Close' }).last().click();

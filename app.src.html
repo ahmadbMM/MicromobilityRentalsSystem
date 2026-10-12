@@ -5457,11 +5457,16 @@ async function _releaseReserved(id){
 // A rider on their own bike, or booked with no bike at all ('Own' / 'None'), is never waiting for
 // one: Hand-over, the scanner and the roster's badge leave them out (2026-10-05).
 function _bikeNotOurs(e){const ty=resolvedType(e);return ty==='Own'||ty==='None';}
+// The Give bike step (2026-10-09, D3) is OFF (the owner, 2026-10-12: "whenever a customer is checked in consider
+// he got a bike"): a checked-in rider is on a bike - no Needs bike badge, no Give bike button, no Hand-over page.
+// true brings the step back. _awaitsBike is the one test for "checked in, still waiting for a bike".
+const GIVE_BIKE_STEP=false;
+function _awaitsBike(e){return GIVE_BIKE_STEP&&!!e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId));}
 function statusBadgeFor(e){
   if(_isReserved(e))return`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`;
   // Checked in and still without a bike on a ride that hands them out: "Needs bike", not "On Bike".
   // One session lookup through the map, not a copy of every session per row (2026-10-05).
-  if(e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId)))return`<span class="status-badge st-needsbike badge-waiting">${t('statusNeedsBike')}</span>`;
+  if(_awaitsBike(e))return`<span class="status-badge st-needsbike badge-waiting">${t('statusNeedsBike')}</span>`;
   if(_isToReserve(e))return`<span class="status-badge st-toreserve badge-toreserve">${t('statusToReserve')}</span>`;
   if(!e||e.status!=='cancelled')return statusBadge(e?e.status:'done');
   const k=e.cancelledBy==='staff'?'statusCancelledByStaff'
@@ -9548,7 +9553,7 @@ function setCustTab(tab){
 function setStaffTab(tab){
   if(tab==='sessions'){S.queueView='sessions';tab='queue';} // Sessions merged into the Bookings tab
   if(tab==='waitlist'){S.queueView='waitlist';tab='queue';} // Waitlist lives there too (third pill)
-  if(tab==='handover'){S.queueView='handover';tab='queue';} // the bikes side of the desk: a fourth pill
+  if(tab==='handover'){S.queueView=GIVE_BIKE_STEP?'handover':'bookings';tab='queue';} // the bikes side of the desk: a fourth pill
   if(tab==='fnb')tab='vendors'; // the section's id until 2026-10-03 (a saved address or tab)
   if(tab==='riders'){S.queueView='petromin';if(!S.ridersSession||S.ridersSession==='all')S.ridersSession=_pmDefaultNight()||'all';tab='queue';} // the Riders tab is the Petromin page in Queue now
   if(!_deskTabOk(tab))tab=_firstTab(); // Front Desk mode: only its own sections (DESK_TABS); an account: only its own list
@@ -10121,7 +10126,7 @@ function _rowMenu(id,items,title){
       _mEdit,_mResched,_mNote,..._mParty,_mCust,_mEm,
       {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
     // In without a bike yet: the main button gives one (2026-10-09, D3); Return moves to the menu.
-    const _nb=e.status==='active'&&!_run&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId));
+    const _nb=!_run&&_awaitsBike(e);
     if(e.status==='active')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}${_nb?`<button class="btn-sm btn-green give-bike-btn" data-on-click="${_on("_giveBike",e.id)}">${t('giveBikeBtn')}</button>`:`<button class="btn-sm btn-green" data-on-click="${_on("doReturn",e.id)}">${t(_run?'runFinishBtn':'returnBikeBtn')}</button>`}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       _nb?{label:t('returnBikeBtn'),run:`doReturn('${e.id}')`,act:()=>doReturn(e.id)}:null,
       _run?null:{label:t('changeBikeBtn'),run:`openModal('${e.id}')`,act:()=>openModal(e.id)},
@@ -15421,7 +15426,7 @@ function _nsRouteHtml(){
 }
 
 // ── The ride leader's live location (2026-09-28) ────────────────────────────────────────────────
-// From Hand-over, a leader (or the sweeper) shares where they are: the phone's position goes to
+// From Hand-over (from Bookings while GIVE_BIKE_STEP is off), a leader (or the sweeper) shares where they are: the phone's position goes to
 // staff_live_position every eight seconds while the switch is on, and riders booked on the ride see
 // the dot on the website's live map. Stopping removes the row; a row older than ten minutes is stale.
 function _liveSid(){return S.sfSession&&S.sfSession!=='all'?S.sfSession:_currentSessId();}
@@ -15445,7 +15450,7 @@ async function _liveToggle(){
     S._live.watchId=navigator.geolocation.watchPosition(pos=>_livePush(pos),err=>{if(err&&err.code===1){toast(t('liveShareErr'),'error');_liveStop();}},{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
   }catch(e){toast(t('liveShareErr'),'error');S._live=null;return;}
   logAction(`${t('liveShareBtn')}: ${sid} · ${role}`);
-  renderHandover();
+  if(GIVE_BIKE_STEP)renderHandover();else if(S.staffTab==='queue')renderStaffQueue(); // the switch is on Bookings while Hand-over is off
 }
 async function _livePush(pos){
   const L=S._live;if(!L||!L.on||!pos||!pos.coords)return;
@@ -15463,7 +15468,7 @@ async function _liveStop(){
   const L=S._live;S._live=null;
   if(L&&L.watchId!=null)try{navigator.geolocation.clearWatch(L.watchId);}catch(_){}
   if(L&&L.sid)try{await sb.rpc('staff_live_stop',{p_session_id:L.sid,p_role:L.role});}catch(_){}
-  renderHandover();
+  if(GIVE_BIKE_STEP)renderHandover();else if(S.staffTab==='queue')renderStaffQueue(); // the switch is on Bookings while Hand-over is off
 }
 // ── Booking window (2026-09-28): how far ahead riders may book ──────────────────────────────
 // site_content 'booking.window' = {"days": N, "at": "HH:MM"}: a ride more than N days ahead is not
@@ -22003,7 +22008,7 @@ function _saveQueueView(){try{sessionStorage.setItem('cq_queue_view',JSON.string
 function _restoreQueueView(){
   let st=null;try{st=JSON.parse(sessionStorage.getItem('cq_queue_view')||'null');}catch(e){}
   if(!st)return;
-  if(['bookings','sessions','managed','petromin','handover'].includes(st.queueView))S.queueView=st.queueView;
+  if(['bookings','sessions','managed','petromin'].concat(GIVE_BIKE_STEP?['handover']:[]).includes(st.queueView))S.queueView=st.queueView;
   if(st.queueView==='petromin'&&typeof st.ridersSession==='string')S.ridersSession=st.ridersSession;
   if(typeof st.sfStatus==='string')S.sfStatus=st.sfStatus;
 }
@@ -22295,11 +22300,12 @@ function renderStaffQueue(_resultsOnly){
   if(!S.dataLoaded){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=skeletonList(7);return;}
   if(!_deskTabOk('queue')&&!_staffSections().some(_deskTabOk)){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=_emptyState(t('acctNoneOpen'));return;}
   if(!isAdmin()&&S.queueView==='sessions')S.queueView='bookings'; // Front Desk has no Sessions view
+  if(!GIVE_BIKE_STEP&&S.queueView==='handover')S.queueView='bookings'; // no Hand-over page while the Give bike step is off
   const _qvPills=`<div class="filter-row rq-mb12">
     <button type="button" class="filter-pill${(S.queueView||'bookings')==='bookings'?' active':''}" aria-pressed="${((S.queueView||'bookings')==='bookings')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>
     ${isAdmin()?`<button type="button" class="filter-pill${S.queueView==='sessions'?' active':''}" aria-pressed="${(S.queueView==='sessions')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_2",_EV,_EL)}">${t('tabSessions')}</button>`:''}
     <button type="button" class="filter-pill${S.queueView==='managed'?' active':''}" aria-pressed="${(S.queueView==='managed')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_3",_EV,_EL)}">${t('wlTitle')}</button>
-    <button type="button" class="filter-pill${S.queueView==='handover'?' active':''}" aria-pressed="${(S.queueView==='handover')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_ho",_EV,_EL)}">${t('hoTitle')}${(()=>{const n=_hoRows().length;return n?` (${n})`:'';})()}</button>
+    ${GIVE_BIKE_STEP?`<button type="button" class="filter-pill${S.queueView==='handover'?' active':''}" aria-pressed="${(S.queueView==='handover')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_ho",_EV,_EL)}">${t('hoTitle')}${(()=>{const n=_hoRows().length;return n?` (${n})`:'';})()}</button>`:''}
     ${_dqChipHtml()}
   </div>`;
   if(S.queueView==='sessions'){ // Sessions view lives inside the Bookings tab now
@@ -23020,7 +23026,7 @@ function renderQRow(e){
     if(!filtered.length)list.push(_emptyPiece());
   }
   S._qOrder=_drawn;
-  const _shellHtml=_qvPills+_queueHeader+_lcHtml+_sessSummaryBar+`${(()=>{
+  const _shellHtml=_qvPills+_queueHeader+_lcHtml+(GIVE_BIKE_STEP?'':_liveHtml())+_sessSummaryBar+`${(()=>{
     // Saturday Social Ride (a single community session selected): the JCC stats (Expected / On Bike /
     // Completed) don't apply — show the approval funnel instead: total riders, approved, pending, waitlist.
     const _commStats=S.sfSession!=='all'&&_isApprovalRide(_sessDisp(S.sfSession));
@@ -30579,7 +30585,7 @@ function _scanTicket(entry,say,_bkOk){
     // what is owed is the rental and the add-ons, as the roster counts an unpaid rider (2026-10-05);
     // a rider on their own bike or with none needs no bike from the rack (_bikeNotOurs)
     const owe=!entry.paid?Math.round(((_freeSessIds.has(entry.sessionId)?0:(entry.price??DEFAULT_PRICE))+addonsCost(entryAddons(entry)))*100)/100:0;
-    const noBike=!getAssignedBikeIds(entry).length&&!_bikeNotOurs(entry)&&_needsBike(_sessGet(entry.sessionId));
+    const noBike=_awaitsBike(entry);
     say([t('scanAlreadyIn').replace('{0}',entry.queueNum).replace('{1}',nm),at&&t('scanInAt').replace('{0}',at),owe&&t('scanOwes').replace('{0}',owe),noBike&&t('statusNeedsBike')].filter(Boolean).join(' · ')+_noteTail(entry),'#ffb347');return;}
   if(entry.status==='done'){say(t('scanDone').replace('{0}',entry.queueNum).replace('{1}',nm),'var(--muted-l)');return;}
   if(entry.status==='cancelled'){say(t('scanCancelled'),'var(--red)');return;}
@@ -30662,7 +30668,7 @@ async function _expressCheckinOne(e){
 function _hoRows(){
   const today=todayStr();
   // a rider on their own bike, or with none at all, is not waiting for one (_bikeNotOurs, 2026-10-05)
-  return getQueue().filter(e=>e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId))
+  return getQueue().filter(e=>_awaitsBike(e)
     &&(S.sfSession==='all'?String(e.sessionDate||e.sessionId||'').slice(0,10)===today:e.sessionId===S.sfSession))
     .sort((a,b)=>String(a.checkedInAt||'').localeCompare(String(b.checkedInAt||''))||(a.queueNum||0)-(b.queueNum||0));
 }
@@ -30681,7 +30687,7 @@ function _hoTarget(){
   let v=null;try{v=JSON.parse(localStorage.getItem('cq_ho')||'null');}catch(_){}
   if(!v||!v.id||Date.now()-(v.at||0)>15*60*1000)return null;
   const e=_qGet(v.id);
-  return e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)?e:null;
+  return GIVE_BIKE_STEP&&e&&e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)?e:null;
 }
 function _hoTyping(){const a=document.activeElement;return !!(a&&a.id==='ho-bike'&&String(a.value||'').trim());}
 function _hoPick(id){S._hoSel=id;renderHandover();}
@@ -30754,12 +30760,12 @@ async function _myShiftOpen(){
   const op=_opName(),since=todayStr()+'T00:00:00+03:00';
   const today=todayStr(),onShow=e=>S.sfSession==='all'?String(e.sessionDate||e.sessionId||'').slice(0,10)===today:e.sessionId===S.sfSession;
   const q=getQueue().filter(onShow);
-  const noBike=q.filter(e=>e.status==='active'&&!getAssignedBikeIds(e).length&&!_bikeNotOurs(e)&&_needsBike(_sessGet(e.sessionId)));
+  const noBike=q.filter(_awaitsBike);
   const owes=q.filter(e=>(e.status==='active'||e.status==='done')&&!e.paid&&!_freeSessIds.has(e.sessionId)&&_brAmt(e)>0);
   const late=q.filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN);
   const who=e=>`<bdi>#${esc(String(e.queueNum??''))} ${esc(e.name||'')}</bdi>`;
   const list=(k,items)=>`<div class="eon-sec"><div class="eon-h">${esc(t(k))} · ${items.length}</div>${items.length?`<ul class="eon-list">${items.join('')}</ul>`:''}</div>`;
-  const open=list('statusNeedsBike',noBike.map(e=>`<li>${who(e)}</li>`))+list('eonOwing',owes.map(e=>`<li>${who(e)} <b class="num">${_money(_brAmt(e))}</b></li>`))
+  const open=(GIVE_BIKE_STEP?list('statusNeedsBike',noBike.map(e=>`<li>${who(e)}</li>`)):'')+list('eonOwing',owes.map(e=>`<li>${who(e)} <b class="num">${_money(_brAmt(e))}</b></li>`))
     +list('shiftLate',late.map(e=>`<li>${who(e)} · ${_rideMinLabel(_activeMinutes(e))}</li>`));
   const draw=acts=>_dkSheet(`${t('shiftTitle')}${op?' · '+op:''}`,`${open}<div class="eon-sec"><div class="eon-h">${esc(t('shiftMine'))}${Array.isArray(acts)?' · '+acts.length:''}</div>${
     acts===null?`<div class="dk-sheet-muted">${esc(t('ciBikeLooking'))}</div>`:!Array.isArray(acts)?`<div class="dk-sheet-muted">${esc(acts)}</div>`

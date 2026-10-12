@@ -163,12 +163,12 @@ test.describe('@staff:checkin undo and reserve', () => {
 });
 
 test.describe('@staff:handover riders and fares', () => {
-  test('a rider on their own bike is not waiting for one', async ({ page }) => {
+  test('nobody checked in waits for a bike while the Give bike step is off (the owner, 2026-10-12)', async ({ page }) => {
     await boot(page, { queue_entries: [entry('own', 1, 'active', { type_preference: 'Own', paid: true, price: 0 }), entry('r2', 2, 'active', { paid: true })] });
     await page.evaluate(`S.sfSession='s0';localStorage.setItem('cq_ho',JSON.stringify({id:'own',at:Date.now()}))`);
-    expect(await page.evaluate('_hoRows().map(e=>e.id)')).toEqual(['r2']);
+    expect(await page.evaluate('_hoRows().map(e=>e.id)')).toEqual([]);
     expect(await page.evaluate(`statusBadgeFor(getQueue().find(x=>x.id==='own'))`)).not.toContain('Needs bike');
-    expect(await page.evaluate(`statusBadgeFor(getQueue().find(x=>x.id==='r2'))`)).toContain('Needs bike');
+    expect(await page.evaluate(`statusBadgeFor(getQueue().find(x=>x.id==='r2'))`)).not.toContain('Needs bike');
     expect(await page.evaluate('_hoTarget()')).toBeNull();
   });
 

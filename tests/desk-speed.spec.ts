@@ -126,7 +126,7 @@ test.describe('@staff:bookings scanner feedback', () => {
     expect(await y()).toBe(y0);
   });
 
-  test('a rider already in is Check: since when, what they owe, and that they need a bike', async ({ page }) => {
+  test('a rider already in is Check: since when and what they owe (no Needs bike: the Give bike step is off)', async ({ page }) => {
     await boot(page);
     await openScanner(page);
     await scan(page, 'MMC-5-eeee5555');
@@ -135,7 +135,7 @@ test.describe('@staff:bookings scanner feedback', () => {
     await expect(banner(page)).toContainText('#5 Riding Eid is already checked in');
     await expect(banner(page)).toContainText('since');
     await expect(banner(page)).toContainText('owes SAR 30');
-    await expect(banner(page)).toContainText('Needs bike');
+    await expect(banner(page)).not.toContainText('Needs bike');
     await page.waitForTimeout(1600);
     await expect(banner(page)).toHaveClass(/scan-bn-warn/);
   });

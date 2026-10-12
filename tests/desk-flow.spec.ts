@@ -76,10 +76,15 @@ test('Confirm on the check-in modal says what it records for the payment', async
   await expect(btn).toContainText(/Confirm · Pending SAR \d/);
 });
 
-test('a checked-in rider without a bike reads "Needs bike", not "On Bike"', async ({ page }) => {
+// The Give bike step is off (GIVE_BIKE_STEP, the owner 2026-10-12): checked in is on a bike, number or not.
+test('a checked-in rider without a bike reads "On Bike" and is returned, not given a bike', async ({ page }) => {
   await queue(page);
   const rows = page.locator('.queue-table tbody tr, .q-card');
-  await expect(rows.filter({ hasText: 'Bikeless Rider' }).first()).toContainText('Needs bike');
+  const bikeless = rows.filter({ hasText: 'Bikeless Rider' }).first();
+  await expect(bikeless).toContainText('On Bike');
+  await expect(bikeless).not.toContainText('Needs bike');
+  await expect(bikeless.locator('.give-bike-btn')).toHaveCount(0);
+  await expect(page.locator('#tab-queue .filter-pill', { hasText: 'Hand-over' })).toHaveCount(0);
   await expect(rows.filter({ hasText: 'Paid Rider' }).first()).toContainText('On Bike');
 });
 

@@ -151,7 +151,10 @@ test.describe('Express', () => {
 });
 
 test.describe('Hand-over', () => {
-  test('lists the riders checked in without a bike, has its own address, and hands a typed number over through staff_swap_bike', async ({ page }) => {
+  // Hand-over is hidden while the Give bike step is off (GIVE_BIKE_STEP, the owner 2026-10-12); a checked-in
+  // rider is on a bike. These come back when the switch does. The return by tag (not Hand-over) still runs.
+  const off = 'the Give bike step is off (GIVE_BIKE_STEP)';
+  test.skip('lists the riders checked in without a bike, has its own address, and hands a typed number over through staff_swap_bike', async ({ page }) => {
     await boot(page, { 'rpc:staff_resolve_bike': found(bikes[0]), 'rpc:staff_swap_bike': { ok: true, noop: false, assignment_id: 'as1' } });
     const swaps = rpcs(page, 'staff_swap_bike');
     await page.evaluate(`setStaffTab('handover')`);
@@ -175,7 +178,7 @@ test.describe('Hand-over', () => {
     expect(await page.evaluate(`S.undoStack.length`)).toBe(1);
   });
 
-  test('a tag tapped while the view is open goes to the picked rider; without the function it is said and nothing is written', async ({ page }) => {
+  test.skip('a tag tapped while the view is open goes to the picked rider; without the function it is said and nothing is written', async ({ page }) => {
     await boot(page, {
       'rpc:staff_resolve_bike': found(bikes[1]),
       'rpc:staff_swap_bike': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.staff_swap_bike' } },
@@ -190,7 +193,7 @@ test.describe('Hand-over', () => {
     await expect(page.locator('#ho-host .ho-row')).toHaveCount(1); // still waiting for a bike
   });
 
-  test('the picked rider is remembered for the tab a tag opens; leaving the view forgets them', async ({ page }) => {
+  test.skip('the picked rider is remembered for the tab a tag opens; leaving the view forgets them', async ({ page }) => {
     await boot(page, { 'rpc:staff_resolve_bike': found(bikes[0]), 'rpc:staff_swap_bike': { ok: true, noop: false } });
     await page.evaluate(`setStaffTab('handover')`);
     await expect(page.locator('#ho-host .ho-row')).toHaveCount(1);
@@ -223,12 +226,12 @@ test.describe('Hand-over', () => {
     await expect(m).toBeHidden();
   });
 
-  test('/bookings/handover opens the view straight from the address', async ({ page }) => {
+  test(`/bookings/handover lands on Bookings while ${off}`, async ({ page }) => {
     await stubSupabase(page, { queue_entries: rows(), sessions, bikes });
     await unlockStaff(page);
     await page.goto('/bookings/handover');
     await waitForSb(page);
-    await expect(page.locator('#ho-host')).toBeVisible();
-    expect(await page.evaluate(`S.queueView`)).toBe('handover');
+    await expect.poll(() => page.evaluate(`S.queueView`)).toBe('bookings');
+    await expect(page.locator('#ho-host')).toHaveCount(0);
   });
 });
