@@ -44,23 +44,20 @@ test.describe('@staff:customers acting on a selection', () => {
     await expect.poll(() => page.evaluate(`(S.customerTags||[]).filter(x=>x.tag_id==='tag_x').length`)).toBe(3); // kept once the answer is in
   });
 
-  test('the badge tab never offers Squad Captain or Fuel Stop', async ({ page }) => {
+  // Every badge may be given by hand since 2026-10-12 (the owner: "make the staff able to give any badge for whoever
+  // they want"), Squad Captain and Fuel Stop included.
+  test('the badge tab offers every badge, Squad Captain and Fuel Stop included', async ({ page }) => {
     const ups: unknown[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/customer_badges')) ups.push(r.postDataJSON()); });
     await boot(page);
     await page.locator('#confirm-modal .seg-tabs button', { hasText: 'Badge' }).click();
-    await expect(page.locator('#confirm-modal .bdg-pick')).toHaveCount(1);
-    await expect(page.locator('#confirm-modal .bdg-pick')).toContainText('Marshal');
-    await page.locator('#confirm-modal .bdg-pick').click();
+    await expect(page.locator('#confirm-modal .bdg-pick')).toHaveCount(3);
+    await page.locator('#confirm-modal .bdg-pick', { hasText: 'Marshal' }).click();
     const give = page.locator('#confirm-modal button', { hasText: 'Give to 3' });
     await give.click();
     await give.click();
     await expect.poll(() => ups.length).toBe(1);
     expect((ups[0] as Record<string, unknown>[]).every((r) => r.badge_id === 'b_marshal')).toBe(true);
-    // a hand-picked Squad Captain is refused even if asked for directly
-    await page.evaluate(`S._seg.badge='b_squad';_segBadge()`);
-    await page.waitForTimeout(200);
-    expect(ups.length).toBe(1);
   });
 
   test('marketing reaches only riders who agreed to ride news; each chat opens in turn', async ({ page }) => {

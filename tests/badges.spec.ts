@@ -836,3 +836,12 @@ test('Carbon Owner brings Road Bike Owner and Bike Owner; the staff ladders clim
   await page.evaluate(`openAccountHistory('c1')`);
   await expect(page.locator('#cust-modal .bdg-strip .bdg-chip').first()).toHaveText('Carbon Owner · Level 3 of 3');
 });
+
+// A level given counts the levels under it in Accounts too (the owner, 2026-10-12: "give all the previous levels
+// badges when a bigger or advanced level is earned"): the badges sort and filter read Chief Marshal as three.
+test('Accounts counts a given ladder level with the levels under it', async ({ page }) => {
+  const lv = [['senior_marshal', 11], ['chief_marshal', 12]].map(([k, n]) => ({ id: 'bd_' + k, slug: k, icon: 'shield', color: 'gold', name: String(k), system: true, auto: false, retired: false, sort: n }));
+  await staff(page, { badges: [...badges, ...lv], customer_badges: [...customer_badges, { customer_id: 'c3', badge_id: 'bd_chief_marshal', note: null, session_id: null, awarded_by: 'Malik', awarded_at: '2026-10-12T18:00:00Z' }] });
+  await community(page, 'accounts');
+  expect(await page.evaluate(`['c1','c2','c3'].map(id=>_amBadgeN(_custById(id)))`)).toEqual([0, 1, 3]);
+});

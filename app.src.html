@@ -43115,7 +43115,9 @@ function _igRankOf(cid){
   }
   return _igRk.get(cid)??null;
 }
-function _amBadgeN(c){return _bdgOk()?_bdgHeld(c.id).length:0;}
+// The badges staff gave an account, each ladder level counting the levels under it (the owner, 2026-10-12: "give all
+// the previous levels badges when a bigger or advanced level is earned"): Chief Marshal given is three badges.
+function _amBadgeN(c){if(!_bdgOk())return 0;const o=new Set();_bdgHeld(c.id).forEach(x=>{const b=_bdgById(x.badge_id);if(b)o.add(b.system?b.slug:'#'+b.id);});return _bdgClimb(o).size;}
 // The filters every account list offers; Members leaves out "Community member" (they all are).
 function _amDefs(all){
   const un=['unset',t('acrGenderUnset')],today=_ksaDaysAgo(0),days=n=>[String(n),t('acrLastDays').replace('{0}',String(n))];
