@@ -9302,8 +9302,9 @@ body.view-staff .x-close:is(#_x,*):focus-visible{outline:2px solid var(--sf-gree
 }
 /* ── The staff dark theme, brought back as a choice (Settings > This device > Theme, 2026-10-09) and
    checked against today's screens: the roster's state colours (2026-10-07) were drawn for paper only, so
-   on dark each state takes a deep wash of its own hue with the same bright edge; the money pills and
-   status pills keep their light colours and dark words, which read on either ground. ── */
+   on dark each state takes a deep wash of its own hue with the same bright edge, and so do the money
+   pills, the status pills and the figures above the roster (2026-10-11, the owner: "make sure the dark
+   theme is perfected": the light pills were the brightest thing on a dark page). ── */
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#101318;--rs-edge:#5b646b;--rs-line:#2a3038;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#2a1a0c;--rs-edge:#f97316;--rs-line:#7c3a12;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#2a1230;--rs-edge:#e879f9;--rs-line:#6b2172;}
@@ -9313,17 +9314,71 @@ html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card):is(.row-done,.row-
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#2e1414;--rs-edge:#ff6f66;--rs-line:#6b2424;}
 html[data-staff-theme="dark"] body.view-staff :is(.queue-table tbody tr,.queue-mobile-view .q-card):is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){--muted-l:#a8b0b6;}
 html[data-staff-theme="dark"] body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td{border-bottom-color:rgba(255,255,255,.07);}
-html[data-staff-theme="dark"] body.view-staff .pay-toggle.paid{background:#bbf7d0;border-color:#86efac;color:#14532d;}
-html[data-staff-theme="dark"] body.view-staff .pay-toggle.pending{background:#fde68a;border-color:#f2c94c;color:#713f12;}
-html[data-staff-theme="dark"] body.view-staff .pay-toggle.pending:hover{background:#fcd34d;}
-/* the status pills keep their own words' colour on dark (the older dark status inks are for bare words) */
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-waiting{color:#3d4540;}
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-waitlist{color:#9a3412;}
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-toreserve{color:#86198f;}
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-reserved{color:#5b21b6;}
-html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-active,.st-needsbike){color:#7a4d06;}
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-done{color:#166534;}
-html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){color:#991b1b;}
+/* the money: a deep wash of its colour, its words bright (paid green, pending amber, on the house teal) */
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.paid{background:#12371f;border-color:#1f7a45;color:#86efac;}
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.paid:hover{background:#174828;}
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.pending{background:#3a2f0c;border-color:#8a6a12;color:#fcd34d;}
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.pending:hover{background:#4a3c10;border-color:#a8821a;}
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.house{background:#0f3533;border-color:#1d7c74;color:#5eead4;}
+html[data-staff-theme="dark"] body.view-staff .pay-toggle.house:hover{background:#13443f;}
+/* the status pills: the same washes as their rows, a shade brighter so they stand off them */
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-waiting{background:#1b2027;color:#d6dbde;box-shadow:inset 0 0 0 1px #4a535b;}
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-waitlist{background:#3a2210;color:#fdba74;}
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-toreserve{background:#3a1640;color:#f0abfc;}
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-reserved{background:#2a2150;color:#c4b5fd;}
+html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-active,.st-needsbike){background:#3a2f0c;color:#fcd34d;}
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-done{background:#12371f;color:#86efac;}
+html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){background:#3d1717;color:#fca5a5;}
+/* the figures above the roster: the key in the dark rows' colours */
+html[data-staff-theme="dark"] body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere){--sc-edge:#1b2027;--sc-ink:#e8ebed;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .stat-chip:is(.sc-waiting,.sc-nothere)::before{box-shadow:inset 0 0 0 1px #7f8890;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .stat-chip.sc-waitlist{--sc-edge:#f97316;--sc-ink:#fdba74;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .stat-chip.sc-active{--sc-edge:#f2b43f;--sc-ink:#fcd34d;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .stat-chip.sc-done{--sc-edge:#25d184;--sc-ink:#86efac;}
+/* the scan button: the deep green every other green button wears here (white on #25d184 was 2:1) */
+html[data-staff-theme="dark"] body.view-staff .scan-fab{background:#0c7a3d;}
+/* The ride chips (Bookings) and ride cards (Sessions) drawn on paper - the community rides, Run for Her,
+   the one-off events - turn dark like the rest of the page and keep their own accent: the pattern under
+   a dark veil, Run for Her's pink glow, the events' violet corner. The circuit and National Day cards are
+   dark already. */
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-comm{
+  --sf-chip-bg:linear-gradient(to bottom right,#101318 0 38%,rgba(16,19,24,.9) 64%,rgba(16,19,24,.74) 100%),var(--mm-pattern) right -10px top -8px/80px auto repeat #101318;
+  --sf-ring:#25d184;border-color:rgba(37,209,132,.4);color:var(--text);}
+html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-comm{
+  --sf-chip-bg:linear-gradient(to bottom left,#101318 0 38%,rgba(16,19,24,.9) 64%,rgba(16,19,24,.74) 100%),var(--mm-pattern) left -10px top -8px/80px auto repeat #101318;}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-runher{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--rf-wash),.24) 0%,rgba(var(--rf-wash),.08) 40%,rgba(16,19,24,0) 70%) #101318;
+  --sf-ring:#f2789f;border-color:rgba(242,120,159,.4);color:var(--text);}
+html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-runher{
+  --sf-chip-bg:radial-gradient(120% 160% at 0% 100%,rgba(var(--rf-wash),.24) 0%,rgba(var(--rf-wash),.08) 40%,rgba(16,19,24,0) 70%) #101318;}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
+  --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(124,58,237,.22) 100%) #101318;
+  --sf-ring:#a78bfa;border-color:rgba(167,139,250,.4);color:var(--text);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).selected,
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-runher .sess-chip-event,
+html[data-staff-theme="dark"] body.view-staff #sess-host .sess-lc.th-runher .ev-chip{color:#f49ac1;border-color:rgba(244,154,193,.5);}
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-chip-event,
+html[data-staff-theme="dark"] body.view-staff #sess-host .sess-lc.th-event .ev-chip{color:#c4b5fd;border-color:rgba(196,181,253,.5);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-comm,.th-runher,.th-event) :is(.sess-chip-bar,.sess-lc-bar){background:rgba(255,255,255,.14);}
+/* Run for Her's partner marks are navy on the poster: white on the dark chip, as the circuit's mark is */
+html[data-staff-theme="dark"] body.view-staff .sf-mark-runher{filter:brightness(0) invert(1);opacity:.9;}
+/* each ride's own colour, as words on dark: the paper inks (circuit blue #2f63ad, the pool's teal, the
+   workshop's orange, the events' violet, Run for Her's pink, National Day green) were 2-3.5:1 here */
+html[data-staff-theme="dark"] body.view-staff .ev-jcc{--ev:#6ea8ff;--ev-rgb:110,168,255;}
+html[data-staff-theme="dark"] body.view-staff .ev-swim{--ev:#2cc5d8;--ev-rgb:44,197,216;}
+html[data-staff-theme="dark"] body.view-staff .ev-workshop{--ev:#fb8c4a;--ev-rgb:251,140,74;}
+html[data-staff-theme="dark"] body.view-staff .ev-event{--ev:#a78bfa;--ev-rgb:167,139,250;}
+html[data-staff-theme="dark"] body.view-staff .ev-runher{--ev:#f2789f;--ev-rgb:242,120,159;}
+html[data-staff-theme="dark"] body.view-staff .ev-snd96{--ev:#3ddc84;--ev-rgb:61,220,132;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-community{--ev:#b48cf0;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-workshop{--ev:#6ea8ff;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-snd96{--ev:#3ddc84;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-jcc{--ev:#e0a84a;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-event{--ev:#a78bfa;}
+/* a tag's chip writes its name in the tag's own colour; on dark that colour is lifted toward white so
+   a deep violet or navy tag still reads (its tint and edge stay the tag's own) */
+html[data-staff-theme="dark"] body.view-staff :is(#tab-community,#tab-customers,#tab-analytics,#new-acct-modal,#confirm-modal,#cust-modal) .cmy-tcf{color:color-mix(in srgb,var(--cmy-tfg,currentColor) 55%,#fff);}
 /* Front desk round 2 (2026-10-09): suggested bikes (check-in, Hand-over), desk notes, the desk sheet
    (My shift, Join a party), the check-in title's tag and the NFC tab's "Sent to your open tab" page. */
 .bk-sugg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;}
