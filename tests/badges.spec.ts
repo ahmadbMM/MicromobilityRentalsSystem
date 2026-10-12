@@ -173,13 +173,13 @@ test.describe('@staff:community badges', () => {
     // Omar: Champion given, First Lap earned by riding.
     await page.evaluate(`openAccountHistory('c2')`);
     const hist = page.locator('#cust-modal .bdg-strip');
-    await expect(hist.locator('.bdg-chip')).toHaveText(['Champion', 'First Lap · Level 1 of 4']); // a ladder: its top level held
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Champion · Level 1 of 3', 'First Lap · Level 1 of 4']); // a ladder: its top level held
     await expect(hist.locator('.bdg-chip svg.bdg-m')).toHaveCount(2);
     await hist.locator('.bdg-chip', { hasText: 'Champion' }).click();
     await expect(modal(page)).toContainText('Badges · Omar Saleh');
     await modal(page).locator('.bdg-pick', { hasText: 'Marshal' }).click();
     await modal(page).getByRole('button', { name: 'Give badge' }).click();
-    await expect(hist.locator('.bdg-chip')).toHaveText(['Marshal', 'Champion', 'First Lap · Level 1 of 4']); // painted again in place
+    await expect(hist.locator('.bdg-chip')).toHaveText(['Marshal · Level 1 of 3', 'Champion · Level 1 of 3', 'First Lap · Level 1 of 4']); // painted again in place
     await modal(page).locator('.bdg-foot').getByRole('button', { name: 'Close' }).click();
     await page.evaluate(`closeCustomerProfile()`);
     // The editor: the same section, under the tags; Sara's one is First Lap, from her ride two months back.
@@ -249,16 +249,16 @@ test.describe('@staff:community badges', () => {
     await expect(page.locator('.bdg-row[data-badge="bd_marshal"] #bdg-rider-res')).toHaveCount(0); // one panel at a time
   });
 
-  test('only an admin gives a badge earned by riding; any staffer the staff-only ones (the owner, 2026-10-02)', async ({ page }) => {
+  test('every staffer gives any badge, one earned by riding included (the owner, 2026-10-12)', async ({ page }) => {
     await staff(page);
     await community(page, 'badges');
-    await expect(page.locator('.bdg-row[data-badge="bd_first_lap"]')).toContainText('Earned by riding only');
+    await expect(page.locator('.bdg-row[data-badge="bd_first_lap"]')).toContainText('Earned by riding');
     const can = (role: string) => page.evaluate(`S.staffRole='${role}';[_bdgCanGive(_bdgById('bd_first_lap')),_bdgCanGive(_bdgById('bd_marshal'))]`);
-    expect(await can('frontdesk')).toEqual([false, true]);
+    expect(await can('frontdesk')).toEqual([true, true]);
     expect(await can('admin')).toEqual([true, true]);
   });
 
-  test('Squad Captain and Fuel Stop are never given by hand, not even by an admin (the owner, 2026-10-07)', async ({ page }) => {
+  test('Squad Captain and Fuel Stop are given by hand like any other (the owner, 2026-10-12: "any badge for whoever they want")', async ({ page }) => {
     const paid = [
       { id: 'bd_squad', slug: 'squad', icon: 'people', color: 'blue', name: 'Squad Captain', system: true, auto: true, retired: false, sort: 160 },
       { id: 'bd_fuel', slug: 'fuel', icon: 'bottle', color: 'red', name: 'Fuel Stop', system: true, auto: true, retired: false, sort: 170 },
@@ -266,13 +266,13 @@ test.describe('@staff:community badges', () => {
     const c4 = { id: 'c4', name: 'Nora Fahad', email: 'nora.fahad@gmail.com', phone: '+966551876218', gender: 'female', created_at: '2026-06-13T09:00:00Z' };
     await staff(page, { badges: [...badges, ...paid], customers: [...customers, c4] });
     await community(page, 'badges');
-    expect(await page.evaluate(`[_bdgCanGive(_bdgById('bd_squad')),_bdgCanGive(_bdgById('bd_fuel')),_bdgCanGive(_bdgById('bd_first_lap'))]`)).toEqual([false, false, true]);
-    await expect(page.locator('.bdg-row[data-badge="bd_squad"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(0);
-    // The rider's dialog offers First Lap to give, never these two.
+    expect(await page.evaluate(`[_bdgCanGive(_bdgById('bd_squad')),_bdgCanGive(_bdgById('bd_fuel')),_bdgCanGive(_bdgById('bd_first_lap'))]`)).toEqual([true, true, true]);
+    await expect(page.locator('.bdg-row[data-badge="bd_squad"]').getByRole('button', { name: 'Give to a rider' })).toHaveCount(1);
+    // The rider's dialog offers them with First Lap.
     await page.evaluate(`_bdgOpen('c4')`);
     const picks = page.locator('.bdg-dlg .bdg-pick');
     await expect(picks.filter({ hasText: 'First Lap' })).toHaveCount(1);
-    await expect(picks.filter({ hasText: /Squad Captain|Fuel Stop/ })).toHaveCount(0);
+    await expect(picks.filter({ hasText: /Squad Captain|Fuel Stop/ })).toHaveCount(2);
   });
 
   test('an admin gives any badge to any rider, an earned one included (the owner, 2026-10-02)', async ({ page }) => {
@@ -326,17 +326,18 @@ test.describe('@customer:account badges', () => {
     await expect(pop).toContainText('Marshal');
     await expect(pop).toContainText('Thanks for sweeping');
     await expect(pop).toContainText('Given by the MicroMobility team');
-    await expect(pop.locator('svg.bdg-m.bdc-orange')).toHaveCount(1);
+    await expect(pop.locator('svg.bdg-m.bdc-orange')).toHaveCount(2); // its medal, and level 1 of the Marshal ladder (2026-10-12)
+    await expect(pop.locator('.badge-lvl')).toHaveText([/Marshal/, /Senior Marshal[\s\S]*5 rides/, /Chief Marshal[\s\S]*15 rides/]);
     await pop.getByRole('button', { name: 'Close' }).click();
 
     const chips = page.locator('#tab-account .mr-badges .mr-badge');
     const more = page.locator('#tab-account #mr-badges-more');
     // Only the earned take room (2026-09-30): the two given and First Lap. The eleven to earn by
     // riding (National Day 96 and Back on Track wait until earned; each ladder is one badge since
-    // 2026-10-09) and the seven other ones staff give (the T25 / T50 / T100 ladder among them)
+    // 2026-10-09) and the eight other ones staff give (the T25 / T50 / T100 and Bike Owner ladders among them)
     // fold under Badges to earn, which says how many and shows four of them greyed.
     await expect(chips).toHaveCount(3);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/21');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/22');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -344,11 +345,11 @@ test.describe('@customer:account badges', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).toContainText('Badges to earn');
     await expect(more).toContainText('Show');
-    await expect(more.locator('.mr-bm-n')).toHaveText('18');
+    await expect(more.locator('.mr-bm-n')).toHaveText('19');
     await expect(more.locator('.mr-bm-peek svg.bdg-m')).toHaveCount(4);
     // Open: every badge, in the same order as before, the button kept in focus and reading Hide.
     await more.click();
-    await expect(chips).toHaveCount(21);
+    await expect(chips).toHaveCount(22);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toContainText('Hide');
     await expect(more).toBeFocused();
@@ -359,7 +360,7 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(19)).toContainText('Race Spirit');
     await expect(chips.nth(19)).toHaveClass(/locked/);
     await expect(chips.nth(20)).toContainText('T25 Finisher'); // the race ladder, at its first level
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(21);
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(22);
     expect(EMOJI.test(await page.locator('#mr-badges-host').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -368,7 +369,7 @@ test.describe('@customer:account badges', () => {
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
     // It stays open through that repaint, and closes again.
-    await expect(chips).toHaveCount(21);
+    await expect(chips).toHaveCount(22);
     await more.click();
     await expect(chips).toHaveCount(3);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
@@ -429,7 +430,7 @@ test.describe('@customer:account badges', () => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(1); // First Lap
-    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('19'); // the other eleven ride badges and the eight staff give, a ladder one each
+    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('20'); // the other eleven ride badges and the nine staff give (Bike Owner since 2026-10-12), a ladder one each
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
@@ -712,7 +713,7 @@ test.describe('@customer:account Race Ready and the about lines', () => {
   test('every app badge explains itself, and Grid Regular says what the grid is', async ({ page }) => {
     await rider(page, {});
     await page.locator('#mr-badges-more').click();
-    await page.locator('#tab-account .mr-badge', { hasText: 'Front Row' }).click();
+    await page.locator('#tab-account .mr-badge', { hasText: 'Carbon Club' }).click();
     await expect(page.locator('#badge-pop .badge-pop-about')).not.toBeEmpty();
     await expect(page.locator('#badge-pop .badge-pop-d')).not.toBeEmpty();
     // Grid Regular, now a level of First Lap's ladder, keeps its own about and how-to lines
@@ -805,4 +806,33 @@ test('Squad Captain needs every rider of the party checked in and paid', async (
   expect(await squad(party(['done', true], ['done', true], ['waiting', true]))).toBe(false);  // one never checked in
   expect(await squad(party(['done', true], ['done', true], ['noshow', true]))).toBe(false);   // one did not come
   expect(await squad(party(['done', true], ['done', true], ['done', true], ['cancelled', false]))).toBe(true); // a cancelled rider is not in the party
+});
+
+// Front Row counts nights first in the queue that were ridden (the owner, 2026-10-12: "make sure all badges go for
+// deserved holders"): a #1 who never came, or never paid, earned it before. Its levels: 1, 3 and 5 such nights.
+test('Front Row is first in the queue on a ride ridden, with Pole Position at 3 and Pole Master at 5', async ({ page }) => {
+  await staff(page);
+  const fr = (rows: string) => page.evaluate(`(()=>{const all=${rows}.map(entryFromDB);const r=_mrBadges(all,all.filter(_bdgRode),[],null);return['front_row','pole_position','pole_master'].map(s=>r.find(x=>x.s===s).on);})()`);
+  const nights = (n: number, status = 'done', paid = true) => JSON.stringify(Array.from({ length: n }, (_, i) => ({ ...row('f' + i, day(-3 - i * 7), 1, 'Lina Haddad', 'c1', status, paid) })));
+  expect(await fr(nights(1, 'noshow'))).toEqual([false, false, false]);   // held #1, never came
+  expect(await fr(nights(1, 'done', false))).toEqual([false, false, false]); // rode, never paid
+  expect(await fr(nights(1))).toEqual([true, false, false]);
+  expect(await fr(nights(3))).toEqual([true, true, false]);
+  expect(await fr(nights(5))).toEqual([true, true, true]);
+});
+
+// Bike Owner (the owner, 2026-10-12): staff give it, nothing in the bookings says who bought a bike from us; a
+// carbon road bike is level 3 and brings Road Bike Owner and Bike Owner with it.
+test('Carbon Owner brings Road Bike Owner and Bike Owner; the staff ladders climb the same way', async ({ page }) => {
+  const own = [['bike_owner', 78], ['road_owner', 79], ['carbon_owner', 80], ['senior_marshal', 11], ['chief_marshal', 12]].map(([k, n]) => ({ id: 'bd_' + k, slug: k, icon: 'bike', color: 'green', name: String(k), system: true, auto: false, retired: false, sort: n }));
+  const given = [['c1', 'bd_carbon_owner'], ['c3', 'bd_chief_marshal']].map(([c, b]) => ({ customer_id: c, badge_id: b, note: null, session_id: null, awarded_by: 'Malik', awarded_at: '2026-10-12T18:00:00Z' }));
+  await staff(page, { badges: [...badges, ...own], customer_badges: [...customer_badges, ...given] });
+  await community(page, 'badges');
+  const holders = (id: string) => page.evaluate(`[..._bdgAllHolders(_bdgById('${id}'))].sort()`);
+  expect(await holders('bd_bike_owner')).toEqual(['c1']);
+  expect(await holders('bd_road_owner')).toEqual(['c1']);
+  expect(await holders('bd_marshal')).toEqual(['c3']);
+  expect(await holders('bd_senior_marshal')).toEqual(['c3']);
+  await page.evaluate(`openAccountHistory('c1')`);
+  await expect(page.locator('#cust-modal .bdg-strip .bdg-chip').first()).toHaveText('Carbon Owner · Level 3 of 3');
 });
