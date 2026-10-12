@@ -434,11 +434,13 @@ staff dialog as "Comes with a higher level", and `_bdgAllHolders` counts them. D
 `customer_badges` keep one row per level, so staff give, take back and count each level as before; nothing is stored
 for a level that comes with a higher one.
 2026-10-12 (migration 20261012120000, the owner: "put levels and multiple badges in each one"): the staff badges are ladders
-too - Marshal > Senior Marshal > Chief Marshal, Pit Crew > Pit Boss > Crew Chief, Green Flag > Clear Track > Track Guardian,
-Scrutineer > Tech Inspector > Chief Scrutineer, Champion > Hat-Trick > Grand Champion, Race Spirit > Fair Play > Heart of the
-Race (each level's line says how often it was done; staff judge it) - plus the new staff-given Bike Owner > Road Bike Owner >
-Carbon Owner (a bike bought from MicroMobility; nothing in the data says so) and Front Row > Pole Position > Pole Master,
-earned by riding: nights first in the queue that were RIDDEN (`_bdgRode`; 1/3/5) - a #1 no-show no longer earns it. Every
+too, five levels each (raised the same day: "1 5 10 are too low") - Marshal > Senior Marshal > Chief Marshal > Clerk of the
+Course > Race Director, Pit Crew > Pit Boss > Crew Chief > Team Manager > Team Principal, Green Flag > Clear Track > Track
+Guardian > Flag Bearer > Track Legend, Scrutineer > Tech Inspector > Chief Scrutineer > Technical Delegate > Chief Engineer,
+Race Spirit > Fair Play > Heart of the Race > Ride Ambassador > Soul of the Ride (1/10/25/50/100), Champion > Repeat Champion
+(slug hat_trick) > Grand Champion > Dynasty > World Champion (1/5/10/25/50); each level's line says how often, staff judge it - plus the new staff-given Bike Owner > Road Bike Owner >
+Carbon Owner (a bike bought from MicroMobility; nothing in the data says so) and Front Row > Pole Position > Pole Master > Grid Leader > Pole
+Legend, earned by riding: nights first in the queue that were RIDDEN (`_bdgRode`; 1/5/10/25/50) - a #1 no-show no longer earns it. Every
 staffer gives any non-retired badge, earned ones and Squad Captain / Fuel Stop included (`_bdgCanGive`, the owner: "make
 the staff able to give any badge for whoever they want").
 Staff see an account's badges (given + earned by riding) in its history window and its editor: the core draws only the empty
