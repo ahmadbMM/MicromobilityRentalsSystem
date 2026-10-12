@@ -5257,5 +5257,13 @@
   "rpFilterPh": "I-filter ang mga hanay",
   "rpFilterIn": "Hanapin sa",
   "rpAllCols": "Lahat ng column",
-  "rpSortHint": "Ayusin ayon sa column na ito"
+  "rpSortHint": "Ayusin ayon sa column na ito",
+  "landPmDaysTitle": "Petromin Days",
+  "landPmDaysNext": "Susunod na ride {0}",
+  "landPmDaysMeta": "Mga ride ng Petromin sa gabi",
+  "pmDaysNo": "Ang Petromin Days ay para sa team ng Petromin.",
+  "infoWhoPetromin": "Mga miyembro ng komunidad at team ng Petromin",
+  "tagOneOfTwo": "Ang isang account ay may tag na Komunidad o tag na Petromin, hindi kailanman pareho. Tanggalin muna ang isa.",
+  "tagOneOfTwoN": "{0} sa mga account na ito ang may tag na {1}. Ang isang account ay may tag na Komunidad o tag na Petromin, hindi kailanman pareho.",
+  "infoEvPetro": "Mga ride ng Petromin sa gabi sa Jeddah Corniche Circuit, para sa team ng Petromin. Pumili ng gabi, pumili ng iyong bisikleta, at sumakay kasama ang iyong mga katrabaho."
 }

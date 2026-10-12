@@ -5257,5 +5257,13 @@
   "rpFilterPh": "Filtrar linhas",
   "rpFilterIn": "Procurar em",
   "rpAllCols": "Todas as colunas",
-  "rpSortHint": "Ordenar por esta coluna"
+  "rpSortHint": "Ordenar por esta coluna",
+  "landPmDaysTitle": "Dias Petromin",
+  "landPmDaysNext": "Próximo passeio {0}",
+  "landPmDaysMeta": "Os passeios noturnos da Petromin",
+  "pmDaysNo": "Os Dias Petromin são para a equipe da Petromin.",
+  "infoWhoPetromin": "Membros da comunidade e equipe da Petromin",
+  "tagOneOfTwo": "Uma conta leva a tag Comunidade ou a tag Petromin, nunca as duas. Remova a outra primeiro.",
+  "tagOneOfTwoN": "{0} destas contas têm a tag {1}. Uma conta leva a tag Comunidade ou a tag Petromin, nunca as duas.",
+  "infoEvPetro": "Os passeios noturnos da Petromin no Circuito da Corniche de Jeddah, para a equipe da Petromin. Escolha a noite, escolha sua bicicleta e pedale com seus colegas."
 }

@@ -1308,7 +1308,9 @@ export function formatFieldNames(r, limit = 20) {
 // restores the margin.
 // staff 606 -> 612 (2026-10-11): sort and filter inside every report (_rpLive) took the last of it, and CI's
 // gzip reads ~3 KB more than a Mac's (604.7 here, 607.5 there).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 232, staff: 612, core: 272 };
+// Customer 232 -> 235 (2026-10-12): Petromin Days, the Petromin tag holders' card and its check (petromin_member):
+// 230.9 KB here, about 232.2 on the runner; +3 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 235, staff: 612, core: 272 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

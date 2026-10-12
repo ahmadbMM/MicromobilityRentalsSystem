@@ -5257,5 +5257,13 @@
   "rpFilterPh": "Filtrar filas",
   "rpFilterIn": "Buscar en",
   "rpAllCols": "Todas las columnas",
-  "rpSortHint": "Ordenar por esta columna"
+  "rpSortHint": "Ordenar por esta columna",
+  "landPmDaysTitle": "Días Petromin",
+  "landPmDaysNext": "Próxima salida {0}",
+  "landPmDaysMeta": "Las salidas nocturnas de Petromin",
+  "pmDaysNo": "Los Días Petromin son para el equipo de Petromin.",
+  "infoWhoPetromin": "Miembros de la comunidad y equipo de Petromin",
+  "tagOneOfTwo": "Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos. Quita primero la otra.",
+  "tagOneOfTwoN": "{0} de estas cuentas tienen la etiqueta {1}. Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos.",
+  "infoEvPetro": "Las salidas nocturnas de Petromin en el Circuito de la Corniche de Yeda, para el equipo de Petromin. Elige una noche, elige tu bici y rueda con tus compañeros."
 }

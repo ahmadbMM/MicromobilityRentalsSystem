@@ -5257,5 +5257,13 @@
   "rpFilterPh": "Filtrer les lignes",
   "rpFilterIn": "Chercher dans",
   "rpAllCols": "Toutes les colonnes",
-  "rpSortHint": "Trier par cette colonne"
+  "rpSortHint": "Trier par cette colonne",
+  "landPmDaysTitle": "Journées Petromin",
+  "landPmDaysNext": "Prochaine sortie {0}",
+  "landPmDaysMeta": "Les sorties du soir de Petromin",
+  "pmDaysNo": "Les Journées Petromin sont réservées à l'équipe Petromin.",
+  "infoWhoPetromin": "Membres de la communauté et équipe Petromin",
+  "tagOneOfTwo": "Un compte reçoit le tag Communauté ou le tag Petromin, jamais les deux. Retirez d'abord l'autre.",
+  "tagOneOfTwoN": "{0} de ces comptes ont le tag {1}. Un compte reçoit le tag Communauté ou le tag Petromin, jamais les deux.",
+  "infoEvPetro": "Les sorties du soir de Petromin sur le Circuit de la Corniche de Djeddah, pour l’équipe Petromin. Choisissez une soirée, choisissez votre vélo et roulez avec vos collègues."
 }

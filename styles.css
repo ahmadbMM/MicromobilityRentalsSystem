@@ -1271,11 +1271,14 @@
     /* VIP's letters sit smaller than the other marks (the owner, 2026-09-30: "make the vip font smaller"). */
     .tag-logo-vip{width:20px;height:10px;vertical-align:-1px;-webkit-mask-image:url('assets/tag-vip.svg');mask-image:url('assets/tag-vip.svg');}
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
+    /* The Petromin tag (2026-10-12): the word itself, slanted and heavy like Petromin's mark. */
+    .tag-word{display:inline-block;flex-shrink:0;font-family:var(--font-display);font-weight:800;font-style:italic;font-size:11px;line-height:1;letter-spacing:.04em;color:currentColor;}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
     .tag-banned .tag-logo{width:12px;height:10px;vertical-align:0;}
     .tag-ban-sign{position:absolute;inset:0;width:20px;height:20px;color:currentColor;}
     .tag-ban-warn{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 12px;border-radius:6px;background:#0b0b0b;color:#fff;font-size:12px;font-weight:700;line-height:1.4;}
+    .tag-ban-warn.tag-rival-warn{background:#a33b2e;} /* Community or Petromin, never both (2026-10-12) */
     .confirm-box .tag-ban-opt{display:flex;align-items:center;gap:8px;margin:0 0 12px;font-size:13px;font-weight:700;letter-spacing:0;text-transform:none;color:var(--text);cursor:pointer;}
     /* Inputs are appearance:none site-wide and the staff skin draws no checkbox of its own: ask for the native box. */
     .confirm-box .tag-ban-opt input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;flex:none;accent-color:var(--green);}
@@ -4979,6 +4982,10 @@
     body .landing-event-card.ev-jcc:hover{border-color:rgba(var(--blue-rgb),.55);}
     body .landing-event-card.ev-community::before{background:linear-gradient(90deg,var(--green),var(--red));}
     body .landing-event-card.ev-community:hover{border-color:rgba(var(--green-rgb),.5);}
+    /* Petromin Days (2026-10-12): Petromin's red, their mark on the end (assets/petromin-logo.png). */
+    body .landing-event-card.ev-petromin::before{background:#d6202a;}
+    body .landing-event-card.ev-petromin:hover{border-color:rgba(214,32,42,.55);}
+    .lec2-logo.pmd-logo{height:40px;}
 
     /* ── The Apple button had gone white-on-white ─────────────────────────────
        It is a .btn-google too (same shape, same layout), and the customer reskin

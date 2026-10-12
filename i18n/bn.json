@@ -5257,5 +5257,13 @@
   "rpFilterPh": "সারি ফিল্টার করুন",
   "rpFilterIn": "কোথায় খুঁজবেন",
   "rpAllCols": "সব কলাম",
-  "rpSortHint": "এই কলাম অনুযায়ী সাজান"
+  "rpSortHint": "এই কলাম অনুযায়ী সাজান",
+  "landPmDaysTitle": "Petromin ডেজ",
+  "landPmDaysNext": "পরের রাইড {0}",
+  "landPmDaysMeta": "Petromin-এর সন্ধ্যার রাইড",
+  "pmDaysNo": "Petromin ডেজ Petromin-এর টিমের জন্য।",
+  "infoWhoPetromin": "কমিউনিটি সদস্য ও Petromin-এর টিম",
+  "tagOneOfTwo": "একটি অ্যাকাউন্ট কমিউনিটি ট্যাগ বা Petromin ট্যাগ পায়, কখনও দুটোই নয়। আগে অন্যটি সরিয়ে দিন।",
+  "tagOneOfTwoN": "এই অ্যাকাউন্টগুলোর {0}টির {1} ট্যাগ আছে। একটি অ্যাকাউন্ট কমিউনিটি ট্যাগ বা Petromin ট্যাগ পায়, কখনও দুটোই নয়।",
+  "infoEvPetro": "জেদ্দা কর্নিশ সার্কিটে Petromin-এর সন্ধ্যার রাইড, Petromin-এর টিমের জন্য। সন্ধ্যা বেছে নিন, আপনার সাইকেল বেছে নিন, আর সহকর্মীদের সঙ্গে রাইড করুন।"
 }

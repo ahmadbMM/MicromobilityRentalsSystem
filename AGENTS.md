@@ -392,6 +392,30 @@ two places: the Community grant dialog shows the warning, and `_caApprove` adds 
 and turns Approve red. Granting the blacklist to a Community member offers to drop the Community
 tag (`S._tg.dropComm`, on by default). Nothing is enforced server-side; it is a staff signal.
 
+## The Petromin tag and Petromin Days (2026-10-12)
+
+The owner: "add a new petromin tag that gives its holders access only to petromin sessions through a new event
+card that has the name Petromin Days that only is visible for petromin tag holders". Community members still find
+the Petromin nights inside MicroMobility Experiences, as before; an account holds the Community tag or the Petromin
+tag, never both ("show an error that asks that only one of them must be given per account and vice versa").
+- **The tag** `tag_petromin` (slug `petromin`, locked; migration 20261012180000). `TAG_BRANDS.petromin` has a
+  `word`: the chip is Petromin's red with PETROMIN set in white (`.tag-word-pm`), no image.
+- **The card** (`_pmCardHtml`, first on the picker) shows only while `_pmMember()` says yes: `petromin_member`
+  (token-checked, a bare boolean like `community_member`), asked once per account, a no again after ten minutes, a
+  failed check after one. `selectEvent('petromin')` and a night's tap under it go through `_pmGate()` (asked afresh
+  unless a yes is held; a no says `pmDaysNo`). `_evMatch(s,'petromin')` = the Petromin nights; `_evOf` files a night
+  under `petromin` for a holder (`_pmHeld()`), under `community` for everyone else. `?ev=petromin` links work.
+  Details on a night show to holders too; its "Who" reads Community members and Petromin's team.
+- **The database**: `_community_booking_gate` lets a Petromin tag holder (`_petromin_holder`) onto a ride whose
+  `ride_kind` is `petromin`, and nowhere else members-only; `customer_booking_update`'s re-book path likewise
+  (patched by one anchor). Nothing about prices changed: the 50 SAR is still the form-registered employee's.
+- **One of the two**: `customer_tags_one_of_two` (trigger, `_tag_one_of_two`) refuses either tag on an account that
+  holds the other in force or still to start (`TAG_EXCLUSIVE`). Staff are told first: `_tagRival` / `_tagRivalHeld`;
+  the grant dialog shows `_tagOneOfTwoWarn()` and its Add waits; the application dialog (`_caApRival`) the same with
+  Approve waiting; a bulk approval counts such an account as not approved; the bulk Tags tab refuses the whole grant
+  (`tagOneOfTwoN`). `staff_community_approve` hits the trigger too, so the server holds the rule whatever the page.
+  `tests/petromin-days.spec.ts`.
+
 ## Badges staff give (2026-09-29)
 
 Migration 20260929000000: `badges` (the catalogue) and `customer_badges` (who holds which, with a note
