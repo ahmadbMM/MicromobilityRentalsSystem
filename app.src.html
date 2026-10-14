@@ -8294,7 +8294,8 @@ async function _profileGate(next){
   const cust=S.loggedIn||getSession();if(!cust||!cust.id)return false;
   if(await _fixGate(next))return true; // corrections staff asked for come first
   // A full-screen wait, not a silent one: this gate can hold the whole route change.
-  if(!S.dataLoaded){if(window.mmLoading)window.mmLoading.show();try{await(_loadInFlight||loadData());}finally{if(window.mmLoading)window.mmLoading.hide();}}
+  // A load that failed is no answer: the rider carries on (never held up on a guess) rather than the tap dying on the rejection.
+  if(!S.dataLoaded){if(window.mmLoading)window.mmLoading.show();try{await(_loadInFlight||loadData());}catch(e){}finally{if(window.mmLoading)window.mmLoading.hide();}}
   const n=_pgCount(cust);
   if(n<Math.min(PG_NAT_AFTER,PG_BIRTH_AFTER))return false;
   // The login row carries no nationality; ask the profile once before deciding. If that
@@ -8404,11 +8405,15 @@ async function _pgSave(){
       const{data:ok,error}=await sb.rpc('customer_update_profile',{p_id:cust.id,p_token:cust.session_token,p_name:fresh.name,p_email:fresh.email,p_phone:fresh.phone,p_height:fresh.height,p_type_preference:fresh.type_preference,p_birth_date:g.birth,p_country:fresh.country,p_city:fresh.city,p_nationality:g.nat});
       if(error||!ok)throw(error||new Error('denied'));
     }
-    S.loggedIn={...cust,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
+    if(S._pg!==g)return; // signed out (or the page replaced) while the save was on its way: nothing to sign back in
+    // On the copy as it is now: what was read meanwhile (the profile's perks) is kept, not written over by the copy from before the save.
+    const _base=(S.loggedIn&&S.loggedIn.id===cust.id)?S.loggedIn:cust;
+    S.loggedIn={..._base,...fresh,birth_date:g.birth,nationality:g.nat};setSession(S.loggedIn);
     const next=g.next;S._pg=null;renderProfileGate();
     if(next)next(); // the event they picked, now that the profile is complete
   }catch(e){
     g.saving=false;
+    if(S._pg!==g)return;
     const k=_gateFail(e);
     if(k==='denied'){_gateSignedOut();return;} // signing out closes this page (showView)
     // The server kept asking for what was sent: the answer it did not take is marked on its field.
@@ -8695,7 +8700,7 @@ function _fixCopy(g,c){
 function _on_renderFixGate_1(event,el){event.preventDefault();_fixSave()}
 function renderFixGate(){
   const g=S._fix,m=document.getElementById('fix-gate');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';if(!S._afx)document.body.classList.remove('fix-open');setTimeout(_forceRatingPrompt,0);return;} // the rating waits behind it; an applicant's page still up keeps the page still
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();setTimeout(_forceRatingPrompt,0);return;} // the rating waits behind it; an applicant's page still up keeps the page still
   _fixRead();
   const c={...(S.loggedIn||getSession()||{}),...(g.cur||{})};
   _fixCurLoad(g);
@@ -8819,7 +8824,7 @@ async function _fixSave(){
     if(k==='heard_from'){if(!HEARD_OPTS.includes(v.heard_from))err[k]=t('fixErrPick');else vals[k]=v.heard_from;continue;}
     if(FIX_SOC.includes(k)){const net=SOCIAL_NETS.find(x=>x[0]===k),h=_socNorm(v[k]);
       if(!h||!net[3].test(h))err[k]=t('socErr').replace('{0}',t(net[1]));else vals[k]=h;continue;}
-    if(k==='whatsapp'){const w=v.wa||{},same=cust.phone?w.same:false;
+    if(k==='whatsapp'){const w=v.wa||{},same=c.phone?w.same:false; // the copy the page asked with (the WhatsApp read's mobile included)
       if(same===true)vals.whatsapp={same:true};
       else if(same!==false)err[k]=t('fixErrPick');
       else{const n=_normPhone(w.num||'',w.cc||'+966');if(_asciiDigits(w.num||'').replace(/\D/g,'').length<7||!/^\+?[0-9]{8,15}$/.test(n))err[k]=t('errWaPhone');else vals.whatsapp={same:false,phone:n};}
@@ -8861,6 +8866,7 @@ async function _fixSave(){
     left=_fixClean(data);
   }catch(e){
     g.saving=false;
+    if(S._fix!==g)return; // signed out while it was on its way
     const m=(((e&&e.message)||'')+' '+((e&&e.details)||'')).toLowerCase();
     if(/name_short/.test(m))g.err.name=t('errNameShort');
     else if(/email/.test(m)&&(e.code==='23505'||/taken/.test(m)))g.err.email=t('errEmailExists');
@@ -8877,7 +8883,8 @@ async function _fixSave(){
   Object.keys(vals).forEach(k=>{if(k!=='password'&&k!=='none'&&!left.includes(k)&&(!FIX_EXTRA.includes(k)||k==='type_preference'))took[k]=k==='height'?parseInt(vals[k],10):vals[k];});
   if(vals.emergency||vals.emergency2||none.includes('emergency')||none.includes('emergency2'))S._em=null; // My Account and the runner step read them again
   if(vals.whatsapp)S._wa=null; // and the WhatsApp card
-  S.loggedIn={...cust,...took};setSession(S.loggedIn);
+  if(S._fix!==g)return; // signed out while it was on its way: nothing to sign back in
+  S.loggedIn={...((S.loggedIn&&S.loggedIn.id===cust.id)?S.loggedIn:cust),...took};setSession(S.loggedIn);
   S._fixCache={id:cust.id,at:Date.now(),fields:left};
   if(left.length){
     g.saving=false;g.fields=left;g.v={};g.err={};_fixItems(left).forEach(k=>{g.err[k]=t('fixErrCheck');});
@@ -9094,14 +9101,16 @@ async function _wlcGo(no){
 function _wlcClose(){try{sessionStorage.removeItem(WLC_KEY);}catch(e){}S._wlc=null;renderClaim();}
 function _wlcClock(){const g=S._wlc,ms=Math.max(0,Date.parse(g.d.expires_at)-Date.now()-(g.skew||0)),s=Math.floor(ms/1e3);return ms?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'';}
 function _wlcTick(){const g=S._wlc,c=g&&g.st==='ask'&&_wlcClock(),el=document.getElementById('wlc-clock');if(!c){if(g&&g.st==='ask'){g.st='late';renderClaim();}else clearInterval(S._wlcT);return;}if(el)el.textContent=c;}
+// The page behind the forced pop-ups stays still while any of them is up: one closing must not free it under another.
+function _fixOpenSync(){document.body.classList.toggle('fix-open',!!(S._fix||S._afx||S._wlc||S._rg||S._wg||S._sg));}
 function renderClaim(){
   const g=S._wlc,m=document.getElementById('wl-claim');if(!m)return;
   clearInterval(S._wlcT);
-  m.style.display=g?'block':'none';document.body.classList.toggle('fix-open',!!g);
+  m.style.display=g?'block':'none';_fixOpenSync();
   if(!g){m.innerHTML='';return;}
   const se=(g.d||{}).session||{},tm=String(se.time||'').split('-')[0].trim(),st=g.st,end=st!=='ask'&&st!=='load';
   if(end&&st!=='net')try{sessionStorage.removeItem(WLC_KEY);}catch(e){} // an answered link does not open again on the next page
-  let when='';try{when=new Date(String(se.date).slice(0,10)+'T12:00:00Z').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'})+(tm?' · '+fmt12h(tm):'');}catch(e){}
+  let when='';if(se.date)try{when=new Date(String(se.date).slice(0,10)+'T12:00:00Z').toLocaleDateString(_locale(),{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'})+(tm?' · '+fmt12h(tm):'');}catch(e){}
   const b=(fn,a,k,c)=>`<button type="button" class="${c||'pg-btn'}" data-on-click="${_on(fn,a)}"${g.busy?' disabled':''}>${t(k)}</button>`;
   m.innerHTML=`<div class="auth-backdrop"><div class="pg-box fx-box wlc-box" role="dialog" aria-modal="true" aria-labelledby="wlc-title" tabindex="-1">${st==='load'?skeletonList():`
     <div class="fx-kicker">${_cuIc('clock',14)}${t('wlcKicker')}</div>
@@ -9227,7 +9236,7 @@ function _afxRead(){
 }
 function renderAppFix(){
   const g=S._afx,m=document.getElementById('app-fix');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix)document.body.classList.remove('fix-open');setTimeout(_forceRatingPrompt,0);return;}
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();setTimeout(_forceRatingPrompt,0);return;}
   _afxRead();
   document.body.classList.add('fix-open');
   m.style.display='block';
@@ -9474,6 +9483,7 @@ async function _bikeArrived(code,src){
   // The server first (where the bike is decides what opens), the loaded fleet when the database
   // predates the RPC or the network failed (2026-10-09).
   const{d,err}=await _bikeLookup(code);
+  if(S.view!=='staff')return; // signed out or left the panel while the bike was looked up
   if(err){toast(_rpcMessage(err),'error');return;}
   if(!d||!d.found||!d.bike){toast(t('nfcUnknownBike').replace('{0}',code),'error');return;}
   // A bike out with a rider on the ride is coming back: that rider's return - the condition, the
@@ -11082,7 +11092,7 @@ async function _syncNow(){
   try{
     await Promise.allSettled([_outboxFlush(),_bookOutboxFlush()]);
     await _autoRefresh(true,true);
-  }finally{S._syncing=false;_syncPaint();try{_updateConnUI();}catch(_){}}
+  }catch(_){}finally{S._syncing=false;_syncPaint();try{_updateConnUI();}catch(_){}}
   const left=_outboxCount()+_bookOutboxCount();
   if(left)toast(t('syncLeft').replace('{0}',left),'error');else toast(t('syncDone'),'success');
 }
