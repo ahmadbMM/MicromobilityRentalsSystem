@@ -19792,7 +19792,9 @@ function _laSchedule(id){
   if(!place){try{place=localStorage.getItem('cq_learn_place')||'';}catch(_){}}
   const who=_laWho(a);
   // Every learner on its own line: name (tag) · age · riding so far.
-  const sub=_laLearners(a).map(l=>`${esc(_laName(a,l))} (${esc(t(LA_WHO_TAG[l.who]||'laOtherTag'))}) · ${esc(t('caAgeYears').replace('{0}',l.age))} · ${esc(t(LA_LEVEL[l.level]||''))}`).join('<br>');
+  // A part not given is left out ("undefined years" and an empty "·" showed before).
+  const sub=_laLearners(a).map(l=>[`${esc(_laName(a,l)||t('caNoAnswer'))} (${esc(t(LA_WHO_TAG[l.who]||'laOtherTag'))})`,
+    l.age!=null&&l.age!==''?esc(t('caAgeYears').replace('{0}',l.age)):'',l.level&&LA_LEVEL[l.level]?esc(t(LA_LEVEL[l.level])):''].filter(Boolean).join(' · ')).join('<br>');
   _wsDlg(t(cur?'laReschedTitle':'laSchedTitle').replace('{0}',who),sub,
     `${_wsWhenFields(cur?cur.date:'',cur?cur.time:'')}
     <div class="form-group"><label for="la-place">${t('laLblPlace')} <span class="label-hint">${t('laPlaceHint')}</span></label><input type="text" id="la-place" maxlength="120" value="${esc(place)}"></div>`,
@@ -19981,7 +19983,7 @@ async function _laMsgCopy(){
   const m=S._laMsg,a=m&&_laFind(m.id);if(!a)return;
   const txt=_laMsgBuild(a,m.kind,m.lang,m.d);
   try{await navigator.clipboard.writeText(txt);toast(t('caCopied'),'success');}
-  catch(e){const el=document.getElementById('la-msg-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
+  catch(e){const el=document.getElementById('la-msg-text');if(el){el.focus();el.select();try{if(document.execCommand('copy'))toast(t('caCopied'),'success');}catch(_){}}} // a refused copy leaves the text selected, not "Copied"
 }
 // ── Messages for a Saturday ride's riders (the owner, 2026-10-02) ──────────────────────────────
 // An envelope beside every Saturday Social Ride booking (never in the ⋯ menu) opens three messages
@@ -20313,7 +20315,7 @@ async function _rmCopy(){
   const m=S._rmMsg,e=m&&_qGet(m.id);if(!e||!m.k)return;
   const txt=_rmText(e,m.k,m.lang==='ar'?'ar':'en');
   try{await navigator.clipboard.writeText(txt);toast(t('caCopied'),'success');}
-  catch(_e){const el=document.getElementById('rm-msg-text');if(el){el.focus();el.select();try{document.execCommand('copy');toast(t('caCopied'),'success');}catch(_){}}}
+  catch(_e){const el=document.getElementById('rm-msg-text');if(el){el.focus();el.select();try{if(document.execCommand('copy'))toast(t('caCopied'),'success');}catch(_){}}}
 }
 
 // ── First sign-in with a temporary password ───────────────────────────────────
@@ -20531,11 +20533,12 @@ async function _flagSave(clear){
   const c=(S.customers||[]).find(x=>String(x.id)===String(f.id));if(!c)return;
   const list=clear?[]:_flagPicked();
   if(!clear&&!list.length)return;
-  f.busy=true;
+  f.busy=true;_flagPaintTail(); // the Send button greys while the call is out, as the bulk send's does
   // One call sets the flag and keeps its history row in step (customer_flags), and records who
   // asked - the staff table holds no names, so it is the desk's operator name.
-  const res=await sb.rpc('staff_flag_customer',{p_customer_id:c.id,p_fields:list,p_by:_opName()||null});
-  f.busy=false;
+  // A thrown call (offline) is an error answer: it left the dialog busy, every Send ignored.
+  let res;try{res=await sb.rpc('staff_flag_customer',{p_customer_id:c.id,p_fields:list,p_by:_opName()||null});}catch(e){res={error:e||{message:'failed'}};}
+  f.busy=false;_flagPaintTail();
   if(_writeErr(res,'ask to correct'))return;
   c.fix_fields=list.length?list:null;
   const names=list.map(_fixLabel).join(', ');
@@ -21205,9 +21208,7 @@ function _wiSetType(ty){
   _wiStockHint();
   document.querySelectorAll('#walkin-modal [data-wi-type]').forEach(b=>{
     const on=b.getAttribute('data-wi-type')===ty;
-    b.style.borderColor=on?'var(--green)':'var(--border)';
-    b.style.background=on?'rgba(var(--green-rgb),.12)':'transparent';
-    b.style.color=on?'var(--green)':'var(--muted)';
+    b.className=on?'dk-wi-ty-on':'dk-wi-ty'; // the classes the form is drawn with (inline colours kept the old pick's class under them)
     b.setAttribute('aria-pressed',String(on));
   });
 }
@@ -21382,6 +21383,9 @@ async function _depSettle(id,kept,why){
   const patch={returned_at:new Date().toISOString(),returned_by_name:(_opName()||'').slice(0,60)||null,kept_amount:kept>0?kept:0,kept_reason:kept>0?String(why||'').slice(0,300):''};
   let r;try{r=await sb.from('deposits').update(patch).eq('id',id).is('returned_at',null).select(DEP_COLS);}catch(x){r={error:x};}
   if(_writeErr(r,'deposit return',()=>_depSettle(id,kept,why)))return false;
+  // No row came back: another device settled it first. What it recorded stands (read again), and
+  // this device logs nothing: its own patch was put on the row here and logged as its settle.
+  if(Array.isArray(r.data)&&!r.data.length){await _depLoad(true);return true;}
   if(d)Object.assign(d,(r.data||[])[0]||patch);
   S._deps=(S._deps||[]).slice();
   const who=d?` · ${d.customer_name||''}`:'';
@@ -21541,7 +21545,8 @@ function _koConfirm(){
   K.acct={id:c.id,name:c.name||'',email:c.email||'',phone:c.phone||'',height:c.height||null,type:c.type_preference||'',nationality:c.nationality||'',birth:c.birth_date||''};
   K.D.height=K.acct.height?String(K.acct.height):'';K.D.type=K.acct.type;
   K.busy=true;K.err='';_koRender();
-  _koNeeds(c).then(need=>{if(S._kiosk!==K)return;K.busy=false;K.need=need;_koGo(Object.values(need).some(Boolean)?'details':'ride');});
+  _koNeeds(c).then(need=>{if(S._kiosk!==K)return;K.busy=false;K.need=need;_koGo(Object.values(need).some(Boolean)?'details':'ride');},
+    ()=>{if(S._kiosk!==K)return;K.busy=false;K.err=t('kioskFail');_koRender();}); // a failure no longer leaves the button greyed until the idle reset
 }
 // What the account still lacks for a booking: the first emergency contact, the nationality (from the
 // first booking) and the birth date (from the fourth), read fresh: the synced copy does not carry the contact.
@@ -21602,7 +21607,7 @@ function _koAgree(on){const K=S._kiosk;K.ok=!!on;_koRender();}
 // The writes, in order: the account (a new one through customer_signup), what it lacked, the booking.
 async function _koSubmit(){
   const K=S._kiosk;if(!K||K.busy)return;
-  const s=_sessGet(K.sid);if(!_koSessOk(s)){K.err=t('kioskRideGone');_koGo('ride');return;}
+  const s=_sessGet(K.sid);if(!_koSessOk(s)){_koGo('ride');K.err=t('kioskRideGone');_koRender();return;} // _koGo clears the message: said after it
   const ver=_waiverVersionFor(s);if(ver&&!K.ok)return;
   K.busy=true;K.err='';_koRender();
   const fail=m=>{K.busy=false;K.err=m||t('kioskFail');_koRender();};
@@ -21779,13 +21784,16 @@ function showBookingEditModal(entryId){
   if(!['waiting','waitlist','active'].includes(e.status)){toast(t('errCancelWaiting'),'error');return;}
   const _beSess=_sessDisp(e.sessionId);
   const _beComm=_isApprovalRide(_beSess); // an approval ride books one rider at a time — no add-riders row
+  const _beAgain=S._beRender===entryId&&!!document.getElementById('be-name'); // a repaint of the open form (a type, the session, a rider row)
   S._beId=entryId;
   S._beType=S._beType&&S._beRender===entryId?S._beType:(e.typePreference||'Any');
   S._beRg=S._beRender===entryId?S._beRg:(e.rideGroup||null);
   S._beKm=S._beRender===entryId?S._beKm:(e.runKm||null);
   if(S._beRender===entryId)_beSyncNewRiders();else S._beNewRiders=[];
   S._beRender=entryId;
-  const keep=id=>{const el=document.getElementById(id);return el!=null&&el.value!==''?el.value:null;};
+  // A repaint keeps what the boxes hold, an emptied phone or height too (it came back as the booking's
+  // own when a type was tapped after); a fresh opening starts from the booking.
+  const keep=id=>{const el=_beAgain?document.getElementById(id):null;return el!=null&&(el.value!==''||id==='be-phone'||id==='be-height')?el.value:null;};
   const _n=keep('be-name')??e.name??'',_p=keep('be-phone')??e.phone??'',_h=keep('be-height')??(e.height?String(e.height):''),_s=keep('be-sess')??e.sessionId;
   // The ride the booking goes to decides what the form asks (2026-10-07): drawn from the booking's own
   // ride, a move onto Run for Her or a grouped Saturday ride was refused for a distance or a group the
@@ -21819,7 +21827,7 @@ function showBookingEditModal(entryId){
       <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · #${e.queueNum}</div>
       <div class="modal-sub">${t('editBookingSub')}</div>
       <div class="mny-aurow">${_auditBtn('queue_entries',e.id,'#'+e.queueNum+' '+(e.name||''))}</div>
-      <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60"></div>
+      <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60" data-on-input="${_on("_nameInput",_EL)}"></div>
       <div class="dk-flex10">
         <div class="form-group dk-fg-f1"><label for="be-phone">${t('authPhone')}</label><input id="be-phone" type="tel" value="${esc(_p)}" placeholder="05…"></div>
         <div class="form-group dk-fg-w110"><label for="be-height">${t('colHeight')} (${t('cmUnit')})</label><input id="be-height" type="number" min="80" max="230" value="${esc(_h)}"></div>
@@ -21832,7 +21840,7 @@ function showBookingEditModal(entryId){
         <select id="be-sess" data-on-change="${_on("_on_showBookingEditModal_3",_EV,_EL)}">${sessOpts}</select>${moveNote?`<div id="be-move-note" class="dk-be-note">${moveNote}</div>`:''}</div>
       ${_beNoAdd?'':`<div class="form-group dk-mb14"><label>${t('beAddRidersLabel')}</label>
         ${(S._beNewRiders||[]).map((r,i)=>`<div class="dk-be-rrow">
-          <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0">
+          <input id="be-nr-name-${i}" type="text" aria-label="${t('beRiderPh')}" placeholder="${t('beRiderPh')}" value="${esc(r.name||'')}" maxlength="60" class="dk-f1-m0" data-on-input="${_on("_nameInput",_EL)}">
           <input id="be-nr-height-${i}" type="number" min="80" max="230" aria-label="${t('colHeight')}" placeholder="${t('cmUnit')}" value="${esc(r.height||'')}" class="dk-be-rh">
           <select id="be-nr-type-${i}" aria-label="${t('bikeTypeLabel')}" data-on-change="${_on("_beSyncNewRiders")}" class="dk-be-rt">${bikeTypeOpts(_beOwn,_beNoCarbon).map(ty=>`<option value="${ty}"${(r.type||'Any')===ty?' selected':''}>${typeLabel(ty)}</option>`).join('')}</select>
           <label class="dk-be-rwl" title="${esc(t('menuToWaitlist'))}"><input id="be-nr-wl-${i}" type="checkbox"${r.wl?' checked':''}>${t('waitlistLabel')}</label>
@@ -21862,7 +21870,7 @@ function _beRemoveRider(i){_beSyncNewRiders();(S._beNewRiders||[]).splice(i,1);s
 function saveBookingEdit(){return _busyRun('bookingEdit',_saveBookingEdit);}
 async function _saveBookingEdit(){
   const e=_qGet(S._beId);if(!e){closeBookingEditModal();return;}
-  const name=_titleCaseName(document.getElementById('be-name')?.value||'');
+  const name=_titleCaseName(_nameClean(document.getElementById('be-name')?.value||'')); // letters and spaces, as every other name box (no dashes or digits)
   if(!name){const i=document.getElementById('be-name');if(i){_fieldErr(i,t('errFieldRequired'));i.focus();}return;}
   const phone=_asciiDigits(document.getElementById('be-phone')?.value||'').trim();
   const height=parseInt(document.getElementById('be-height')?.value)||null;
@@ -21937,7 +21945,7 @@ async function _saveBookingEdit(){
   // stamped with a group_id in that same write.
   _beSyncNewRiders();
   let newRiders=(S._beNewRiders||[])
-    .map(r=>({name:_titleCaseName(r.name||''),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any',wl:!!r.wl}))
+    .map(r=>({name:_titleCaseName(_nameClean(r.name||'')),height:parseInt(r.height)||null,type:CUST_TYPES.includes(r.type)?r.type:'Any',wl:!!r.wl}))
     .filter(r=>r.name||r.height);
   // Saturday rule: one rider per customer. Community bookings never take added riders —
   // the modal hides the rows, and this guards any stale/scripted path (incl. moving into one).
@@ -22294,7 +22302,7 @@ async function _runEmShow(cid){
     <div class="cmy-rej-head"><div class="cmy-minw0"><div id="run-em-title" class="chrome-dt">${t('emTitle')}</div></div><button data-on-click="${_on("closeConfirm")}" aria-label="${t('closeBtn')}" class="chrome-x x-close">&times;</button></div>${body}</div></div>`;};
   paint(`<div class="cmy-rej-msg" role="status">${t('loadingLabel')}…</div>`);
   const r=sb?await _emFetch('id,name',cols=>sb.from('customers').select(cols).eq('id',cid).maybeSingle()):null;
-  if(m.style.display==='none')return; // closed while it was read
+  if(m.style.display==='none'||!document.getElementById('run-em-title'))return; // closed while it was read, or another dialog took its place
   if(!r||r.error||!r.data){paint(`<div class="cmy-rej-msg">${t('errConnection')}</div>`);return;}
   const c=r.data;
   const card=p=>{const ph=c[p+'phone'],rel=c[p+'relation'],f=p==='emergency_'?'emergency':'emergency2';return ph?`<div class="run-em-card"><div class="cu-f1-min0"><div class="run-em-n">${_pii('name',c[p+'name']||'',cid)}</div><div class="run-em-m">${esc(EM_RELS.includes(rel)?t('emRel_'+rel):'')} · <bdi dir="ltr">${_pii(f==='emergency'?'em':'em2',ph,cid)}</bdi></div></div></div>
