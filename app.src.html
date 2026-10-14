@@ -22833,7 +22833,7 @@ function renderQRow(e){
     const allSameQ=group.every(e=>e.queueNum===primary.queueNum);
     const isConsec=!allSameQ&&group.every((e,i)=>i===0||e.queueNum===group[i-1].queueNum+1);
     const qNumDisplay=allSameQ?`#${primary.queueNum}`:isConsec?`#${primary.queueNum}&ndash;#${group[n-1].queueNum}`:group.map(e=>`#${e.queueNum}`).join(', ');
-    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done'&&e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':group.every(e=>e.status==='waitlist')?'row-waitlist':group.some(e=>e.status==='waiting')?'row-waiting':'';
+    const groupCls=group.some(e=>e.status==='active')?'row-active':group.every(e=>['noshow','cancelled'].includes(e.status))?'row-noshow-cancel':group.every(e=>['done','noshow','cancelled'].includes(e.status))&&group.some(e=>e.status==='done')&&group.filter(e=>e.status==='done').every(e=>e.paid)?'row-done-paid':group.every(e=>['done','noshow','cancelled'].includes(e.status))?'row-done':(n===1&&_isReserved(primary))?'row-reserved':(n===1&&_isToReserve(primary))?'row-toreserve':group.every(e=>e.status==='waitlist')?'row-waitlist':group.some(e=>e.status==='waiting')?'row-waiting':'';
     const lp=livePosMap[primary.id];const totalW=sessWaitCount[primary.sessionId]||0;
     const posTag=primary.status==='waiting'&&lp?`<span class="pos-badge rq-pos11" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp}/${totalW}`)}</span>`:'';
     const sessLabel=S.sfSession==='all'?`<div class="rq-slbl">${esc(dayLabel(primary.sessionDay)||'')} &middot; ${esc(shortDate(primary.sessionDate))}</div>`:'';
@@ -22901,7 +22901,7 @@ function renderQRow(e){
         ${(()=>{const _ciN=n>1?_partyCheckinRows(group).length:0;return _ciN?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
         ${n>1?_partyReturnBtn(group,true):''}
         ${(n>1&&!S._partyExpandAll)?`<button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyHideRiders')} ▴</button>`:''}
-        ${(n>1&&!_freeSessIds.has(primary.sessionId)&&group.some(e=>!e.paid&&!['cancelled','noshow'].includes(e.status)))?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
+        ${(n>1&&!_freeSessIds.has(primary.sessionId)&&_partyMoney(group).due>0)?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
       </div>
       ${sessLabel}
       <div>${riderRows}</div>
@@ -23371,7 +23371,8 @@ function showCancelNight(sid){
   const when=`${dayLabel(sess.day)||''} ${shortDate(sess.session_date||sid)}`.trim();
   if(S._cnMsg===undefined||S._cnMsgFor!==sid){S._cnMsg=_tplUse('cn_cancel',S.lang,{when})??t('cnMsgDefault').replace('{0}',when);S._cnMsgFor=sid;}
   let m=document.getElementById('cancel-night-modal');
-  if(!m){m=document.createElement('div');m.id='cancel-night-modal';document.body.appendChild(m);}
+  // A backdrop like every other dialog's: the focus trap and Escape (_MODAL_SEL) find it; it was a bare div they never saw.
+  if(!m){m=document.createElement('div');m.id='cancel-night-modal';m.className='modal-backdrop';document.body.appendChild(m);}
   m.style.display='flex';
   m.style.cssText='position:fixed;inset:0;z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.6)';
   const seen=new Set();
@@ -23425,6 +23426,10 @@ async function _addonStockRows(entries,sign){
   if(arr.length)await _addonStockQ(arr,sign);
 }
 async function execCancelNight(){
+  if(S._cnBusy)return; // a second tap while the first is writing closed the session twice and logged it twice
+  S._cnBusy=true;try{await _execCancelNight();}finally{S._cnBusy=false;}
+}
+async function _execCancelNight(){
   const sid=S._cnSid;const rows=_cnLiveRows(sid);if(!rows.length){closeCancelNight();return;}
   const sess=_sessDisp(sid)||{};const prevSess=sess.status||'open';
   const was=new Map(rows.map(e=>[e.id,{status:e.status,assigned:e.assignedBikeId??null,bikes:getAssignedBikeIds(e),entry:e}]));
@@ -23642,7 +23647,7 @@ async function bulkSfPaid(){
   // card-only, or on the house keeps how they paid: relabelling a split 'card' while its card
   // slice stayed made the session report and the drawer count disagree. The fare follows the pay
   // pill's rule, so an incidental 0 (no promo) is charged the bike's fare, not recorded as free.
-  const rows=ids.map(id=>_qGet(id)).filter(e=>e&&!e.paid&&!_freeSessIds.has(e.sessionId)); // a free ride's rider has nothing to pay (2026-10-06)
+  const rows=ids.map(id=>_qGet(id)).filter(e=>e&&!e.paid&&!_freeSessIds.has(e.sessionId)&&!_ownFree(e)); // a free ride's rider has nothing to pay (2026-10-06), nor an own-bike rider with no add-ons (marked paid at 0 they read On the house)
   const res=await Promise.all(rows.map(e=>{const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);return sb.from('queue_entries').update(p).eq('id',e.id).eq('paid',false).select('id');}));
   const n=res.filter(r=>r&&!r.error&&r.data&&r.data.length).length;
   const fail=res.find(r=>r&&r.error);
@@ -23690,7 +23695,7 @@ async function _checkinMany(idList){
   const fail=res.find(r=>r&&r.error);
   landed.forEach(id=>{const e=_qGet(id);if(e)e.status='active';});renderStaffQueue(); // paint first, reconcile after
   await (fail?loadDataLight():_reloadRows(ids));
-  if(fail){toast(fail.error.message||t('errConnection'),'error');renderStaffQueue();return landed;}
+  if(fail){toast(_rpcSay(fail.error),'error');renderStaffQueue();return landed;} // the desk's words for a known code, not the raw database sentence
   // The count is the riders this desk actually checked in: a row another device got to first
   // is not one of them, and the log is the record staff reconcile the night against.
   if(landed.length)logAction(t('logBulkCheckin').replace('{0}',landed.length));
@@ -23781,7 +23786,7 @@ function sfSearchEnter(){
 }
 function setSfPay(v){S.sfPay=v;S.sfLimit=150;renderStaffQueue();}
 function setSfBike(v){S.sfBike=v;S.sfLimit=150;renderStaffQueue();}
-function setSfSize(v){S.sfSize=v;renderStaffQueue();}
+function setSfSize(v){S.sfSize=v;S.sfLimit=150;renderStaffQueue();}
 function toggleResetTool(){S.showResetTool=!S.showResetTool;renderStaffQueue();}
 async function staffResetPassword(){
   const email=(document.getElementById('staff-reset-email')?.value||'').trim().toLowerCase();
@@ -24184,7 +24189,8 @@ function _prefSet(k,val){
 }
 function _prefPushSoon(){if(Object.keys(S._prefDirty||{}).length&&!S._prefNoDb){clearTimeout(S._prefT);S._prefT=setTimeout(_prefPush,1500);}}
 async function _prefPush(){
-  if(!sb||!S._staffAuthed||S._prefNoDb||S._prefBusy)return;
+  if(S._prefBusy){_prefPushSoon();return;} // a change made while one is on its way goes up after it, not at the next change
+  if(!sb||!S._staffAuthed||S._prefNoDb)return;
   _prefAll();const keys=Object.keys(S._prefDirty||{});if(!keys.length)return;
   const v=S._prefs,patch={};keys.forEach(k=>{patch[k]=_own(v,k)?v[k]:null;});
   S._prefBusy=true;let r;
@@ -24576,8 +24582,9 @@ async function _svSaveDo(sec){
   const shared=!!(document.getElementById('sv-shared')||{}).checked;
   if(name.length<2){const e=document.getElementById('sv-err');if(e)e.textContent=t('svNameErr');return;}
   const v={id:'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),sec,name,state:_svGet(sec),by:_opName()||'',at:new Date().toISOString()};
+  const b=document.getElementById('sv-ok');if(b&&b.disabled)return; // a double tap saved the view twice
+  if(b)b.disabled=true;
   if(shared){
-    const b=document.getElementById('sv-ok');if(b)b.disabled=true;
     const cur=await sb.from('staff_options').select('items').eq('key','views').maybeSingle();
     if(_writeErr(cur,'saved views')){if(b)b.disabled=false;return;}
     const list=Array.isArray(cur.data&&cur.data.items)?cur.data.items:[];
@@ -24898,6 +24905,7 @@ async function _prSave(ty){
   logAction(t('prSavedLog').replace('{0}',typeLabel(ty)).replace('{1}',_money(p,_NOISO)));toast(t('setSaved'),'success');renderSettings();
 }
 async function _prDefaultSave(){
+  if(!isAdmin())return;
   const raw=_asciiDigits(String((document.getElementById('pr-default')||{}).value||'').trim()),n=raw===''?null:Number(raw);
   if(n!=null&&!(isFinite(n)&&n>=1&&n<=5000)){const er=document.getElementById('pr-err');if(er)er.textContent=t('errValidPrice');toast(t('errValidPrice'),'error');return;}
   if(!await _pinApprove(t('prTitle')))return;
@@ -25011,7 +25019,7 @@ function _tplEdRender(){
     <div class="modal-box ca-msg-box tpl-box" role="dialog" aria-modal="true" aria-labelledby="tpl-title">
       <div class="ca-msg-head"><div class="modal-title cmy-m0" id="tpl-title">${esc(t(d[1]))}</div>
         <button type="button" class="ca-x x-close" data-on-click="${_on("_tplEdClose")}" aria-label="${t('closeBtn')}">&times;</button></div>
-      <div class="rm-langs" role="group">${_tplLangs(E.id).map(g=>`<button type="button" class="toggle-btn${E.lang===g?' active':''}" aria-pressed="${E.lang===g}" data-tpl-lang="${g}" data-on-click="${_on('_tplEdLang',g)}">${g==='ar'?t('tplArabic'):g==='en'?t('tplEnglish'):esc((LANGS.find(l=>l.code===g)||{}).label||g)}</button>`).join('')}</div>
+      <div class="rm-langs" role="group" aria-label="${esc(t('setLanguage'))}">${_tplLangs(E.id).map(g=>`<button type="button" class="toggle-btn${E.lang===g?' active':''}" aria-pressed="${E.lang===g}" data-tpl-lang="${g}" data-on-click="${_on('_tplEdLang',g)}">${g==='ar'?t('tplArabic'):g==='en'?t('tplEnglish'):esc((LANGS.find(l=>l.code===g)||{}).label||g)}</button>`).join('')}</div>
       ${d[2].length?`<div class="tpl-fills"><span class="set-k">${t('tplFillins')}</span>${d[2].map(k=>`<button type="button" class="tpl-fill" data-on-click="${_on('_tplEdInsert',k)}" dir="ltr">{${k}}</button>`).join('')}</div>`:''}
       <textarea id="tpl-text" class="ca-msg" dir="${ar?'rtl':'ltr'}" aria-labelledby="tpl-title" data-on-input="${_on('_tplEdSync')}">${esc(E.text[E.lang]||'')}</textarea>
       ${E.text[E.lang]?'':`<div class="set-hint">${t('tplEmptyNote')}</div>`}
@@ -25258,9 +25266,13 @@ async function _tmInvite(){
   const ei=document.getElementById('tm-inv-email'),ni=document.getElementById('tm-inv-name');
   if(!/^[^\s@<>"'()]+@[^\s@<>"'()]+\.[^\s@<>"'()]+$/.test(email)){if(ei){_fieldErr(ei,t('errEmailBad'));ei.focus();}return;}
   if(!/^[\p{L} ]{2,40}$/u.test(name)){if(ni){_fieldErr(ni,t('errNameChars'));ni.focus();}return;} // names: letters and spaces only
-  if(!await _pinApprove(t('tmInvite')))return;
-  const pwd=_genTempPwd(),role=_roleNorm(I.role,'frontdesk');
-  let r;try{r=await sb.rpc('staff_invite',{p_email:email,p_name:name,p_role:role,p_password:pwd});}catch(e){r={error:e};}
+  if(T.invBusy)return; // a second tap while the first was asking made a second invite (refused as taken, after a second PIN)
+  T.invBusy=true;const go=document.getElementById('tm-inv-go');if(go)go.disabled=true;
+  let r;const pwd=_genTempPwd(),role=_roleNorm(I.role,'frontdesk');
+  try{
+    if(!await _pinApprove(t('tmInvite')))return;
+    try{r=await sb.rpc('staff_invite',{p_email:email,p_name:name,p_role:role,p_password:pwd});}catch(e){r={error:e};}
+  }finally{T.invBusy=false;const g2=document.getElementById('tm-inv-go');if(g2)g2.disabled=false;}
   if(r&&r.error){toast(_rpcAbsent(r.error)?t('dbPending'):_rpcSay(r.error),'error');return;}
   T.inv={email:'',name:'',role:'frontdesk'};
   logAction(t('tmInvitedLog').replace('{0}',email).replace('{1}',_roleLabel(role)));
@@ -25326,7 +25338,12 @@ function _tmPwdShow(email,pwd){
     <div class="modal-footer"><button type="button" class="btn-secondary" data-on-click="${_on('_tmPwdCopy',pwd)}">${t('tmCopy')}</button><button type="button" class="btn-primary" data-on-click="${_on('closeConfirm')}">${t('closeBtn')}</button></div>
   </div></div>`;
 }
-function _tmPwdCopy(p){try{navigator.clipboard.writeText(String(p));toast(t('tmCopied'),'success');}catch(_){}}
+// writeText answers a promise: a refusal (no clipboard, page not focused) used to say Copied and leave an
+// unhandled rejection. Refused, the password is selected on the dialog to copy by hand.
+async function _tmPwdCopy(p){
+  try{await navigator.clipboard.writeText(String(p));toast(t('tmCopied'),'success');}
+  catch(_){const v=document.getElementById('tm-pwd-val');if(v)try{const rg=document.createRange();rg.selectNodeContents(v);const sel=getSelection();sel.removeAllRanges();sel.addRange(rg);}catch(_){}}
+}
 // ── Team > Part-timers (the owner, 2026-10-07): the front desk's part-timers (they welcome riders, take
 // payment and hand out bikes) are staff accounts marked as part-timers; each kind of work has its rate per
 // hour; hours are logged per day and ride under a kind; what we owe is added over a date range or over rides
