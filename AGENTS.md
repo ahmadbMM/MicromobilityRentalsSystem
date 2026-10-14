@@ -1251,3 +1251,13 @@ The owner: "create a field for the accounts ... and allow people to add their bl
   written by `saveCustForm` only once read (`d.btIn`). Not in the sync, the Accounts filters or the report builder.
 - Privacy notice 2026-10-14 has a blood type row (en + ar); `PRIVACY_ASK_FROM` unchanged (no re-ask).
 - `BLOOD_TYPES` / `_btLabel` sit beside `EM_RELS`. Tests: `tests/blood-type.spec.ts`.
+
+## ID or Iqama number on the account (2026-10-14)
+
+Asked of every Blood Donation registrant (the owner, 2026-10-14) and kept on the account like the blood type:
+`customers.national_id` (migration 20261014190000_national_id.sql, after 20261014180000), 10 digits starting 1
+(Saudi ID) or 2 (Iqama). Same grants and shape as blood type: `customer_national_id` / `customer_set_national_id`
+(Arabic-Indic digits read as digits, blank clears, else `BAD_INPUT` detail `national_id`), `_purge_old` clears it.
+My Account card `_accNidHtml` / `saveNationalId` (state `S._nid`); staff editor `#cf-nid-host` (`_cfNidHtml`,
+`d.nidIn`, checked before the save). `_nidClean` / `_nidOk` sit beside `EM_RELS`. Privacy notice rows for blood type
+and ID now say both go to a blood donation event's hosts only when the donor agrees. Tests: `tests/national-id.spec.ts`.
