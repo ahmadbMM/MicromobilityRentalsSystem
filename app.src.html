@@ -38280,6 +38280,7 @@ async function _webEdUpload(file,k,i,fid){
     if(error)throw error;
     // The smaller copies are a convenience: one that fails to save only means the full photo is sent.
     for(const w of [640,1280]){try{const v=await _webVariant(bmp,w);if(v)await sb.storage.from('site').upload(path.replace(/\.(jpg|png)$/,'.w'+w+'.webp'),v,{contentType:'image/webp',upsert:false,cacheControl:'31536000'});}catch(_){}}
+    try{bmp.close();}catch(_){} // the decoded photo held its full size in memory until collected
     _webEdInput(k,i,fid,'','/media/'+path);
     renderWebsite();
     toast(t('webEdUploaded'));
@@ -38547,6 +38548,7 @@ const _catStamp=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice
 async function _catUploadImage(file,folder){
   if(!/^image\/(jpeg|png|webp|avif)$/.test(file.type))throw new Error('type');
   const bmp=await createImageBitmap(file);
+  try{ // the decoded photo is let go of however this ends: a batch of photos held each at full size
   const png=file.type==='image/png'||(file.type!=='image/jpeg'&&_imgHasAlpha(bmp)),type=png?'image/png':'image/jpeg',ext=png?'png':'jpg'; // PNG keeps a cut-out background
   const main=await _catDraw(bmp,2000,type,.85);
   if(!main||main.size>10*1024*1024)throw new Error('big');
@@ -38560,6 +38562,7 @@ async function _catUploadImage(file,folder){
     try{const b=await _catDraw(bmp,w,'image/webp',.82);if(b&&b.type==='image/webp')await sb.storage.from('site').upload(base+'.w'+w+'.webp',b,{contentType:'image/webp',upsert:false,cacheControl:'31536000'});}catch(_){}
   }
   return'/media/'+base+'.'+ext;
+  }finally{try{bmp.close();}catch(_){}}
 }
 async function _catUploadPdf(file,folder){
   if(file.type!=='application/pdf'&&!/\.pdf$/i.test(file.name))throw new Error('type');
@@ -38740,9 +38743,9 @@ function _catDelete(id){
   }});
 }
 async function _catTogglePub(id){
-  const C=_cat(),m=C.models.find(x=>x.id===id);if(!m)return;
-  const on=!m.published;m.published=on;renderCatalog(); // shown at once, put back if refused
-  if(await _wr(sb.from('catalog_models').update({published:on}).eq('id',id),'catalog publish')){m.published=!on;renderCatalog();}
+  const C=_cat(),m=C.models.find(x=>x.id===id);if(!m||m._pubBusy)return; // a second tap before the first landed could reach the server first and leave the opposite saved
+  const on=!m.published;m.published=on;m._pubBusy=true;renderCatalog(); // shown at once, put back if refused
+  try{if(await _wr(sb.from('catalog_models').update({published:on}).eq('id',id),'catalog publish')){m.published=!on;renderCatalog();}}finally{m._pubBusy=false;}
 }
 // ── Categories and sub-types ────────────────────────────────────────────────
 function _catCatEdit(id,parentId){
@@ -38819,9 +38822,9 @@ async function _catCatMove(id,dir){
   }catch(e){toast(t('catSaveErr'),'error');try{_logError('catalog category move: '+((e&&e.message)||e),'catalog',true);}catch(_){}}
 }
 async function _catCatTogglePub(id){
-  const C=_cat(),c=_catById(id);if(!c)return;
-  const on=!c.published;c.published=on;renderCatalog();
-  if(await _wr(sb.from('catalog_categories').update({published:on}).eq('id',id),'catalog category publish')){c.published=!on;renderCatalog();}
+  const C=_cat(),c=_catById(id);if(!c||c._pubBusy)return; // as _catTogglePub: one change at a time
+  const on=!c.published;c.published=on;c._pubBusy=true;renderCatalog();
+  try{if(await _wr(sb.from('catalog_categories').update({published:on}).eq('id',id),'catalog category publish')){c.published=!on;renderCatalog();}}finally{c._pubBusy=false;}
 }
 // ── Specification fields ────────────────────────────────────────────────────
 function _catFldEdit(key){
@@ -39243,7 +39246,7 @@ function renderHistory(_resultsOnly){
   if(_histHost){_histHost.innerHTML=_histResults;_cssvApply(_histHost);} // the bikes' colour dots (data-cssv)
 }
 
-function setHistStatus(v){S.histStatus=v;renderHistory();}
+function setHistStatus(v){S.histStatus=v;S.histLimit=60;renderHistory();}
 function setHistRange(v){S.histRange=v;S.histLimit=60;renderHistory();}
 function setHistDates(k,v){if(k!=='histFrom'&&k!=='histTo')return;S[k]=/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?String(v):'';S.histLimit=60;renderHistory();}
 function toggleHistSelect(id){S.histSelected=S.histSelected||[];const i=S.histSelected.indexOf(id);if(i>=0)S.histSelected.splice(i,1);else S.histSelected.push(id);renderHistory();}
@@ -39251,8 +39254,12 @@ async function bulkHistMarkPaid(){
   // Only rides that still owe something (_histOwes). A free ride has nothing to collect - its row offers
   // no selection any more, and one picked before that is dropped here. Nor does a rider on their own
   // bike with nothing bought, whose row reads "—" where the payment goes (2026-10-07).
+  // A second tap while the first batch is out sent it again and logged the money twice.
+  if(S._histPaying)return;
   const rows=(S.histSelected||[]).map(id=>_qGet(id)).filter(e=>e&&_histOwes(e));
   if(!rows.length){S.histSelected=[];renderHistory();return;}
+  S._histPaying=true;
+  try{
   // Rentals are card-only (the owner), so the batch is recorded as card. Any split is cleared, and an
   // incidental price of 0 (no promo) goes back to the bike's price - otherwise the row turned into
   // "on the house" by accident. A promo's deliberate 0 stays 0.
@@ -39263,16 +39270,17 @@ async function bulkHistMarkPaid(){
   logAction(`${t('logBulkPaid').replace('{0}',ids.length)} · ${t(method==='cash'?'cashCash':'cashCard')}`,{k:'pay',e:'booking',id:ids.join(','),amt:_amountOf(rows)});
   S.histSelected=[];
   await loadDataLight();renderHistory();
+  }finally{S._histPaying=false;}
 }
-function setHistPay(v){S.histPay=v;renderHistory();}
-function setHistSess(v){S.histSess=v;renderHistory();}
+function setHistPay(v){S.histPay=v;S.histLimit=60;renderHistory();}
+function setHistSess(v){S.histSess=v;S.histLimit=60;renderHistory();}
 function setHistSort(col){
   if(S.histSort===col) S.histSortDir=-S.histSortDir;
   else{S.histSort=col;S.histSortDir=col==='date'?-1:1;}
   renderHistory();
 }
-function setHistType(v){S.histType=v;renderHistory();}
-function setHistSize(v){S.histSize=v;renderHistory();}
+function setHistType(v){S.histType=v;S.histLimit=60;renderHistory();}
+function setHistSize(v){S.histSize=v;S.histLimit=60;renderHistory();}
 let _histSearchT;
 function setHistSearch(v){S.histSearch=v;S.histLimit=60;const _k=document.activeElement&&document.activeElement.id==='hist-search-input';clearTimeout(_histSearchT);_histSearchT=setTimeout(()=>{renderHistory(_k);if(_k)return;const i=document.querySelector('#tab-history .search-input');if(i){i.focus();try{i.setSelectionRange(i.value.length,i.value.length);}catch(e){}}},220);} // debounced: type freely, filter on pause, keep focus
 function setSessSort(col){
@@ -39733,6 +39741,7 @@ const VW_PRESETS=[
 ];
 function showNutrition(id){
   const it=(S.inventory||[]).find(x=>x.id===id);if(!it)return;
+  closeNutrition(); // a second open stacked a second label with the same id, and Close took away only one
   const nu=_itemNutri(it)||{};
   const serv=nu.serving||(it.volume_ml?(it.volume_ml+' ml'):'');
   const row=(lbl,val,unit)=>(val!=null&&val!=='')?`<div class="sl-nrow"><span class="sl-b700">${t(lbl)}</span><span class="sl-b800">${esc(val)}${unit?' '+unit:''}</span></div>`:'';
@@ -40082,30 +40091,32 @@ async function _cashAddLine(){
   if(it)await _addonStock([it.id],-qty); // point-of-sale: decrement inventory stock by quantity sold
   if(S._retAfterTill&&S._retAfterTill.id===e.id)S._retAfterTill.sold=true; // the return comes back on Paid
   S._cashItem='';S._cashQty='1';S._cashAmt='';S._cashName='';S._cashCat='Other'; // keep payment selection
-  logAction(`${t('cashierTitle')}: ${name} ×${qty} - #${e.queueNum} ${e.name}`);
+  logAction(`${t('cashierTitle')}: ${name} ×${qty} - #${e.queueNum} ${e.name}`,{k:'sale',e:'booking',id:e.id,amt:_lineCharge(line)}); // a sale, as the Sales tab's receipt logs it: the Team report counts it
   toast(t('cashAddedToast'));
   renderCashierModal();
   if(S.view==='staff')renderStaffQueue();
   }finally{S._cashBusy=false;}
 }
-// Voiding a sale deletes it, so it asks first - the same question the Sales ledger asks for the same line.
-function _cashVoid(i){
+// Voiding a sale deletes it, so it asks first - the same question the Sales ledger asks for the same line
+// (_rentalSaleDelete): why, then the PIN, and the log line carries the void (k:'void') so the Team report
+// counts it. It used to ask a bare yes or no and log a line no report read as a void.
+async function _cashVoid(i){
   const e0=_qGet(S._cashEntry);if(!e0)return;
   const arr=entryPurchases(e0);const line=arr[i];if(!line)return;
-  confirmDialog({title:t('cashVoid'),body:esc(line.name),confirmLabel:t('cashVoid'),confirmClass:'btn-red',onConfirm:async()=>{
-    // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
-    if(!await _pinApprove(t('cashVoid'))){renderCashierModal();return;}
-    // The booking as it stands NOW, not as it was when the question opened (see _rentalSaleDelete).
-    const e=_qGet(e0.id);if(!e){renderCashierModal();return;}
-    const cur=entryPurchases(e),at=_purchaseIdx(cur,line);
-    if(at<0){renderCashierModal();return;}
-    if(!await _savePurchases(e,cur.filter((_,idx)=>idx!==at),'void sale')){renderCashierModal();return;} // still on the booking: nothing goes back on the shelf
-    if(line.id)await _addonStock([line.id],Number(line.qty)||1); // void restocks inventory items
-    logAction(`${t('cashierTitle')}: ${t('cashVoid')} · ${line.name} ×${Number(line.qty)||1} - #${e.queueNum} ${e.name}`);
-    toast(t('cashVoidedToast'));
-    renderCashierModal();
-    if(S.view==='staff')renderStaffQueue();
-  }});
+  const why=await _askMoneyReason('void',esc(line.name));
+  if(!why){if(S._cashEntry)renderCashierModal();return;}
+  // Money going back: the operator's PIN, as for a receipt's void (2026-10-05).
+  if(!await _pinApprove(t('cashVoid'))){if(S._cashEntry)renderCashierModal();return;}
+  // The booking as it stands NOW, not as it was when the question opened (see _rentalSaleDelete).
+  const e=_qGet(e0.id);if(!e){if(S._cashEntry)renderCashierModal();return;}
+  const cur=entryPurchases(e),at=_purchaseIdx(cur,line);
+  if(at<0){if(S._cashEntry)renderCashierModal();return;}
+  if(!await _savePurchases(e,cur.filter((_,idx)=>idx!==at),'void sale')){if(S._cashEntry)renderCashierModal();return;} // still on the booking: nothing goes back on the shelf
+  if(line.id)await _addonStock([line.id],Number(line.qty)||1); // void restocks inventory items
+  logAction(`${t('cashierTitle')}: ${t('cashVoid')} · ${line.name} ×${Number(line.qty)||1} - #${e.queueNum} ${e.name} · ${why.txt}`,{k:'void',e:'booking',id:e.id,amt:_lineCharge(line)});
+  toast(t('cashVoidedToast'));
+  if(S._cashEntry)renderCashierModal();
+  if(S.view==='staff')renderStaffQueue();
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderCashierModal_1(event,el){if(event.target===el)closeCashierModal()}

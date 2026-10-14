@@ -220,8 +220,9 @@ test.describe('sales on a booking', () => {
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`showCashierModal('q1'); _cashVoid(0);`);
-    await page.locator('#confirm-modal .btn-red').click();
+    await page.evaluate(`showCashierModal('q1'); void _cashVoid(0);`);
+    await page.locator('#mny-modal .mny-chip').first().click(); // the reason, as the Sales ledger asks
+    await page.locator('#mny-mr-go').click();
     await expect(page.locator('#err-bar-el')).toBeVisible();
     expect(await page.evaluate(`entryPurchases(getQueue().find(e => e.id === 'q1')).length`)).toBe(1);
     expect(await page.evaluate(`S.inventory.find(i => i.id === 'i1').qty`)).toBe(10);

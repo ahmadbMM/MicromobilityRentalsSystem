@@ -150,7 +150,7 @@ test.describe('@staff:sales money given away asks the PIN', () => {
   test("voiding a sale rung up on a booking waits for the operator's PIN", async ({ page }) => {
     await boot(page, {}, true);
     const sent = writes(page, 'queue_entries');
-    await page.evaluate(`showCashierModal('q1');_cashVoid(0);`);
+    await page.evaluate(`showCashierModal('q1');void _cashVoid(0);`); // async now (it asks why first): not awaited, it waits on the keypad
     await expect(page.locator('#op-gate-modal [role="dialog"]')).toBeVisible();
     await page.waitForTimeout(200);
     expect(sent).toEqual([]);

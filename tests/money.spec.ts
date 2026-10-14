@@ -69,8 +69,10 @@ test.describe('point of sale', () => {
     const line = await page.evaluate(`entryPurchases(getQueue().find(e => e.id === 'q1'))[0]`);
     expect(line).toMatchObject({ id: 'i1', name: 'Vitamin Water', qty: 2, price: 10, pay: 'paid' });
 
-    await page.evaluate(`_cashVoid(0)`);
-    await page.locator('#confirm-modal .btn-red').click(); // voiding deletes the sale, so it asks first
+    await page.evaluate(`void _cashVoid(0)`);
+    // voiding deletes the sale, so it asks why first, as the Sales ledger does
+    await page.locator('#mny-modal .mny-chip').first().click();
+    await page.locator('#mny-mr-go').click();
     await expect.poll(() => page.evaluate(`S.inventory.find(i => i.id === 'i1').qty`)).toBe(5);
     expect(await page.evaluate(`entryPurchases(getQueue().find(e => e.id === 'q1')).length`)).toBe(0);
   });
