@@ -34819,7 +34819,7 @@ function _ridersFiltered(){
   return rows;
 }
 // Minutes between check-in and return, shown under the check-out time as "1 h 35 min".
-function _riderDur(a,b){const ms=new Date(b)-new Date(a);if(!(ms>0))return '';const m=Math.round(ms/60000),h=Math.floor(m/60);return h?`${h} ${t('unitHour')} ${String(m%60).padStart(2,'0')} ${t('unitMin')}`:`${m} ${t('unitMin')}`;} // units in the reader's language
+function _riderDur(a,b){if(!a||!b)return '';const ms=new Date(b)-new Date(a);if(!(ms>0))return '';const m=Math.round(ms/60000),h=Math.floor(m/60);return h?`${h} ${t('unitHour')} ${String(m%60).padStart(2,'0')} ${t('unitMin')}`:`${m} ${t('unitMin')}`;} // units in the reader's language
 const _rcMemo=new Map(); // a time's label per language: Intl formatting was the dearest part of a Riders row
 function _riderClock(iso){const k=iso+'|'+_locale();let v=_rcMemo.get(k);if(v!==undefined)return v;try{v=new Date(iso).toLocaleTimeString(_locale(),{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit'});}catch(e){v='';}if(_rcMemo.size>4000)_rcMemo.clear();_rcMemo.set(k,v);return v;}
 // Check-in / return: paint first, reconcile after (same order as the queue actions). The price is
@@ -34905,7 +34905,14 @@ function _riderBikeRow(r){
 function _on__riderBikeKey(event,el,id){if(event.key==='Enter'){event.preventDefault();_riderBikeChange(id);}}
 // A number typed (or a bike code scanned) for this rider: before the check-in it becomes the bike to hand
 // over; on a bike already, the booking's bike changes through staff_swap_bike, with an Undo.
+let _riderBikeBusy=false;
 async function _riderBikeChange(id){
+  // One change at a time: a scanner gun's Enter and a tap on Change (or a double Enter) used to send two
+  // lookups and two swaps, the second refused with an error toast after the first had landed.
+  if(_riderBikeBusy)return;_riderBikeBusy=true;
+  try{await _riderBikeChange1(id);}finally{_riderBikeBusy=false;}
+}
+async function _riderBikeChange1(id){
   const r=(S.riders||[]).find(x=>String(x.id)===String(id)),e=r&&_riderEntry(r),i=document.getElementById('rider-bike-in');
   const code=String((i&&i.value)||'').trim();if(!r||!e||!code)return;
   let d=_bikeLocalHit(code);
@@ -36383,7 +36390,9 @@ async function _wsPartSave(id){
     const mv=await _invMove(it.id,-q,'workshop_part',{ref:'ws:'+j.id,note:_wsRef(j)});if(!mv)return;
     const pr=Number(it.price)||0,line={id:it.id,name:it.name,qty:q,cost:it.cost!=null?Number(it.cost):null,price:pr};
     const used=[...(Array.isArray(j.parts_used)?j.parts_used:[]),line].slice(-30);
-    const patch={parts_used:used,...(addPrice&&pr>0?{price_final:Math.round(((Number(j.price_final)||0)+pr*q)*100)/100}:{})};
+    // On top of the job's price so far: the estimate while no final price is set (it counted from 0,
+    // and Ready then offered the parts alone as the price).
+    const patch={parts_used:used,...(addPrice&&pr>0?{price_final:Math.round(((Number(j.price_final??j.price_quoted)||0)+pr*q)*100)/100}:{})};
     await _wsSave(j,patch,t('wsPartAdded').replace('{0}',`${it.name} ×${q}`).replace('{1}',_wsRef(j)));
   }finally{S._wsPartBusy=false;}
 }
@@ -36702,7 +36711,7 @@ function _smReply(id){
   const lang=m.lang==='ar'?'ar':'en';
   S._smReply={id:m.id,lang,text:_smFrame(m,lang)};
   _smReplyRender();
-  setTimeout(()=>{const x=document.getElementById('sm-reply-text');if(x){x.focus();const p=x.value.indexOf('\n\n\n')+2;try{x.setSelectionRange(p,p);}catch(_){}}},30);
+  setTimeout(()=>{const x=document.getElementById('sm-reply-text');if(x){x.focus();const k=x.value.indexOf('\n\n\n'),p=k<0?x.value.length:k+2;try{x.setSelectionRange(p,p);}catch(_){}}},30);
 }
 function _smReplyLinks(){
   const r=S._smReply,m=r&&_smFind(r.id);if(!m)return{wa:'',mail:''};
