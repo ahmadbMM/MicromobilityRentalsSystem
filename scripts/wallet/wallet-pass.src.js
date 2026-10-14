@@ -162,13 +162,24 @@ async function buildPkpass(b, cfg) {
   const ridersValue = single ? b.name || "" : `${group.length} riders`;
   // A run has runners, a start and a distance (queue_entries.run_km), not riders and a bike.
   const isRun = ride === "runher";
-  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter(Boolean))];
+  // A ride with no bike (the pool, T100, an event) books its seats as type 'None', and 'Any' is a
+  // staff-only choice: neither is a bike to print ("BIKE: None" on a pool session's pass). The Google
+  // pass leaves both out the same way.
+  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter((x) => x && x !== "None" && x !== "Any"))];
   const bikeType = types.length === 1 ? types[0] : types.length > 1 ? "Mixed" : "";
   const addons = Array.isArray(cfg.addons) ? cfg.addons : [];
   const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
   const addonSum = addons.reduce((s, a) => s + (Number(a.p) || 0), 0);
   const grand = Math.round((rentalSum + addonSum) * 100) / 100;
   const priceStr = cfg.addonsKnown !== false && (rentalSum || addonSum) ? `SAR ${grand}` : "";
+  // "Pay at the booth" only where something is owed, as the app's ticket says it: not on a free ride
+  // (a community ride without paid_ride - the owner, 2026-10-06), not once every booking is paid, and
+  // not when every price is a known zero with no add-ons.
+  const freeRide = !!sess && _isCommunity(sess) && !sess.paid_ride;
+  const allPaid = group.every((r) => r.paid === true);
+  const zero = cfg.addonsKnown !== false && !addonSum && group.every((r) => r.price != null && r.price !== "" && +r.price === 0);
+  const owes = !freeRide && !allPaid && !zero;
+  const bikeRide = _needsBike(ride);
   // The queue number leads. It is what the desk asks for and what the rider has to read out,
   // so it takes the biggest line on the pass, and the name it belongs to keeps the other half:
   // the desk reads a number and a person off one line. The two clock times sit together below,
@@ -183,7 +194,7 @@ async function buildPkpass(b, cfg) {
     label: _gathersTime(sess) ? "GATHERING TIME" : "BIKE COLLECTION",
     value: collectStr,
   });
-  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : "RIDE STARTS", value: startStr });
+  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : bikeRide || _gathersTime(sess) ? "RIDE STARTS" : "STARTS", value: startStr });
   const auxiliary = [];
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
   if (isRun && (b.run_km === 3 || b.run_km === 5)) auxiliary.push({ key: "distance", label: "DISTANCE", value: `${b.run_km} km` });
@@ -191,7 +202,7 @@ async function buildPkpass(b, cfg) {
   const ridersBack = single ? [] : [{
     key: "riders_list",
     label: "Riders",
-    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
+    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum || r.queue_num == null ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
   // A Saturday ride whose breakfast spot is told at a time staff chose (sessions.reveal_at, 2026-10-06): its
@@ -239,14 +250,15 @@ async function buildPkpass(b, cfg) {
       auxiliaryFields: auxiliary,
       backFields: [
         { key: "when", label: "Session", value: `${when}${time ? " \xB7 " + time : ""}`.trim() },
-        ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
+        // A ride that gathers has no bike to collect (the front says GATHERING TIME): the back says so too.
+        ...collectStr ? [{ key: "collect_b", label: _gathersTime(sess) ? "Gathering" : "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 ${isRun ? "the run starts" : "the ride leaves"} at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         ...addonsBack,
-        { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },
-        { key: "help", label: "Good to know", value: "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." },
+        ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
+        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
     }
@@ -434,8 +446,11 @@ function _sessTimes(sess) {
   // Staff set the collection time on the session itself. A ride they approve keeps its
   // gathering time as that moment; anything with no time set falls back to three quarters
   // of an hour before the ride leaves.
+  // A ride with no bike to hand out and no gathering (the pool, T100, an event) has no such moment at
+  // all: the app's ticket shows none (_needsBike), and the pass printed BIKE COLLECTION 45 minutes before a
+  // swim.
   const set = toMin(_sessSlot(sess, "_collect"));
-  const collectMin = approval ? toMin(parts[0]) : (set != null ? set : Math.max(0, startMin - COLLECT_BEFORE_MIN));
+  const collectMin = approval ? toMin(parts[0]) : !_needsBike(_rideOf(sess)) ? null : (set != null ? set : Math.max(0, startMin - COLLECT_BEFORE_MIN));
   // Gathering before midnight for a ride that leaves after it: the ride leaves the next day.
   if (approval && collectMin != null && startMin < collectMin) startMin += 1440;
   let endMin = approval ? null : toMin(parts[1] || "");
@@ -463,6 +478,11 @@ function _sessClock(sess) {
 // the end time entirely, leaving the pass live for hours after the session was over.
 // The app keys this off KIND_TRAITS.gathering; this is the same table.
 const GATHERS = { saturday: true, snd96: true, runher: true, petromin: false, swim: false, workshop: false, jcc: false };
+// The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true };
+function _needsBike(ride) {
+  return !NO_BIKE[ride];
+}
 function _gathersTime(sess) {
   // Needing staff approval is NOT what makes a ride gather: the National Day ride gathers
   // and is open to all. The ride kind decides, exactly as KIND_TRAITS does in the app — and

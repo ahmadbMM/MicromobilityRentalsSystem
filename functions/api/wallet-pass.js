@@ -1413,13 +1413,18 @@ async function buildPkpass(b, cfg) {
   const dead = ["done", "cancelled", "noshow", "removed"].includes(String(b.status || ""));
   const ridersValue = single ? b.name || "" : `${group.length} riders`;
   const isRun = ride === "runher";
-  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter(Boolean))];
+  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter((x) => x && x !== "None" && x !== "Any"))];
   const bikeType = types.length === 1 ? types[0] : types.length > 1 ? "Mixed" : "";
   const addons = Array.isArray(cfg.addons) ? cfg.addons : [];
   const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
   const addonSum = addons.reduce((s, a) => s + (Number(a.p) || 0), 0);
   const grand = Math.round((rentalSum + addonSum) * 100) / 100;
   const priceStr = cfg.addonsKnown !== false && (rentalSum || addonSum) ? `SAR ${grand}` : "";
+  const freeRide = !!sess && _isCommunity(sess) && !sess.paid_ride;
+  const allPaid = group.every((r) => r.paid === true);
+  const zero = cfg.addonsKnown !== false && !addonSum && group.every((r) => r.price != null && r.price !== "" && +r.price === 0);
+  const owes = !freeRide && !allPaid && !zero;
+  const bikeRide = _needsBike(ride);
   const primary = [];
   primary.push({ key: "queue", label: hideNum ? "RIDE" : isRun ? "RUNNER NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
   if (ridersValue) primary.push({ key: "riders", label: isRun ? "RUNNER" : single ? "RIDER" : "RIDERS", value: ridersValue });
@@ -1429,7 +1434,7 @@ async function buildPkpass(b, cfg) {
     label: _gathersTime(sess) ? "GATHERING TIME" : "BIKE COLLECTION",
     value: collectStr
   });
-  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : "RIDE STARTS", value: startStr });
+  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : bikeRide || _gathersTime(sess) ? "RIDE STARTS" : "STARTS", value: startStr });
   const auxiliary = [];
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
   if (isRun && (b.run_km === 3 || b.run_km === 5)) auxiliary.push({ key: "distance", label: "DISTANCE", value: `${b.run_km} km` });
@@ -1437,7 +1442,7 @@ async function buildPkpass(b, cfg) {
   const ridersBack = single ? [] : [{
     key: "riders_list",
     label: "Riders",
-    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
+    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum || r.queue_num == null ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String(sess && sess.meet_url || ""));
@@ -1482,14 +1487,15 @@ async function buildPkpass(b, cfg) {
       auxiliaryFields: auxiliary,
       backFields: [
         { key: "when", label: "Session", value: `${when}${time ? " \xB7 " + time : ""}`.trim() },
-        ...collectStr ? [{ key: "collect_b", label: "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 the ride leaves at ${startStr}` : ""}` }] : [],
+        // A ride that gathers has no bike to collect (the front says GATHERING TIME): the back says so too.
+        ...collectStr ? [{ key: "collect_b", label: _gathersTime(sess) ? "Gathering" : "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 ${isRun ? "the run starts" : "the ride leaves"} at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
         ...addonsBack,
-        { key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." },
-        { key: "help", label: "Good to know", value: "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." },
+        ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
+        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
     }
@@ -1664,7 +1670,7 @@ function _sessTimes(sess) {
   let startMin = toMin(approval ? parts[1] || parts[0] : parts[0]);
   if (startMin == null) return null;
   const set = toMin(_sessSlot(sess, "_collect"));
-  const collectMin = approval ? toMin(parts[0]) : set != null ? set : Math.max(0, startMin - COLLECT_BEFORE_MIN);
+  const collectMin = approval ? toMin(parts[0]) : !_needsBike(_rideOf(sess)) ? null : set != null ? set : Math.max(0, startMin - COLLECT_BEFORE_MIN);
   if (approval && collectMin != null && startMin < collectMin) startMin += 1440;
   let endMin = approval ? null : toMin(parts[1] || "");
   if (endMin != null && endMin <= startMin) endMin += 1440;
@@ -1687,6 +1693,10 @@ function _sessClock(sess) {
   }
 }
 var GATHERS = { saturday: true, snd96: true, runher: true, petromin: false, swim: false, workshop: false, jcc: false };
+var NO_BIKE = { swim: true, workshop: true, event: true, runher: true };
+function _needsBike(ride) {
+  return !NO_BIKE[ride];
+}
 function _gathersTime(sess) {
   return !!sess && GATHERS[_rideOf(sess)] === true;
 }
