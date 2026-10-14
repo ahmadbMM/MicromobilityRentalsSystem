@@ -40,7 +40,7 @@ export async function onRequestPost(context) {
       subject: `Booking confirmed — #${b.queue_num}`,
       htmlContent:
         `<div style="font-family:system-ui,sans-serif;max-width:480px;margin:auto">` +
-        `<h2 style="color:#0a7">MicroMobility — booking confirmed 🚲</h2>` +
+        `<h2 style="color:#0a7">MicroMobility — booking confirmed</h2>` +
         `<p>Hi ${escapeHtml(b.name || 'there')}, your bicycle rental is booked.</p>` +
         `<p><b>Booking #${escapeHtml(String(b.queue_num))}</b><br>${escapeHtml(when)}</p>` +
         `<p>See you at the Jeddah Corniche Circuit!</p></div>`,
