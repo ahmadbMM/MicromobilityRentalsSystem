@@ -5221,7 +5221,7 @@ function _rgKmTxt(sess,g){return t('rtKm').replace('{0}',String(_rgKm(sess,g)));
 // usual 20 and 40 km. key is 'newSessKm' or 'editSessKm' in S.
 function _rgKmFields(key){
   const v=S[key]||{};
-  return`<div class="form-row rg-km-row">${RIDE_GROUPS.map(g=>`<div class="form-group"><label for="${key}-${g}">${esc(_rgName(g))} (km)</label>
+  return`<div class="form-row rg-km-row">${RIDE_GROUPS.map(g=>`<div class="form-group"><label for="${key}-${g}">${esc(_rgName(g))} (${esc(t('rtKm').replace('{0}','').trim())})</label>
     <input type="number" id="${key}-${g}" min="1" max="500" step="0.5" inputmode="decimal" value="${esc(v[g]!=null?String(v[g]):'')}" placeholder="${RIDE_GROUP_INFO[g].km}" data-on-input="${_on('_rgKmSet',key,g,_P('value'))}" class="ss-mw140"></div>`).join('')}</div>`;
 }
 function _rgKmSet(key,g,val){S[key]={...(S[key]||{}),[g]:val};}
@@ -5844,7 +5844,7 @@ function renderAuthModal(){
               <div class="cu-fg-sub">${t('forgotWaSub')}</div>
         </div>
         <a class="btn-primary auth-submit" href="https://wa.me/${FORGOT_PW_WA}?text=${encodeURIComponent(t('forgotWaText'))}" target="_blank" rel="noopener noreferrer">${t('forgotWaBtn')}</a>
-        <div class="cu-fg-sub" dir="ltr">+966 56 666 8818</div>
+        <div class="cu-fg-sub" dir="ltr">+${FORGOT_PW_WA.slice(0,3)} ${FORGOT_PW_WA.slice(3,5)} ${FORGOT_PW_WA.slice(5,8)} ${FORGOT_PW_WA.slice(8)}</div>
         <div class="cu-back-row">
           <button class="cu-back-btn" data-on-click="${_on("switchAuthMode","login")}">${_cuIc('back',16,1)} ${t('backToLogin')}</button>
         </div>`;
@@ -5910,7 +5910,7 @@ function renderAuthModal(){
   document.getElementById('auth-modal').innerHTML=`
   <div class="auth-backdrop">
     <div class="auth-box">
-      <img class="auth-logo" src="${logoSrc}" alt="logo">
+      <img class="auth-logo" src="${logoSrc}" alt="MicroMobility">
       <div class="auth-title">${title}</div>
       ${subtitle?`<div class="auth-sub${sw?' has-switch':''}">${subtitle}</div>`:''}
       <div class="auth-err" id="auth-err" role="alert"></div>
@@ -6626,18 +6626,6 @@ async function handleGoogleReturn(){
     S._pendingGoogle={email,name:gname,photo:gphoto};
     return 'complete';
   }
-  let cust=null;
-  try{const{data}=await sb.from('customers').select('id,name,email,phone,height,type_preference,created_at,birth_date,country,city,nationality,socials,photo,default_pay,hidden_types').eq('email',email).maybeSingle();cust=data;}catch(e){}
-  if(cust){
-    // Backfill the avatar from Google if they have none yet
-    let photo=cust.photo;
-    if(!photo&&gphoto){photo=gphoto;try{await sb.from('customers').update({photo:gphoto}).eq('id',cust.id);}catch(e){}} // fire-and-forget: a backfilled avatar, retried on the next sign-in
-    const safe={id:cust.id,name:cust.name,email:cust.email,phone:cust.phone,height:cust.height,type_preference:cust.type_preference,created_at:cust.created_at,birth_date:cust.birth_date,country:cust.country,city:cust.city,nationality:cust.nationality||null,socials:cust.socials||null,photo};
-    S.rememberMe=true;S.loggedIn=safe;setSession(safe);
-    return 'loggedin';
-  }
-  S._pendingGoogle={email,name:gname,photo:gphoto};
-  return 'complete';
 }
 // Google and Apple no longer make accounts (the owner, 2026-09-30); customer_oauth_signup is
 // closed to the app (20260930160000). A Google or Apple sign-in that finds no account ends here:
@@ -6686,34 +6674,6 @@ async function doLogin(){
       toast(`${t('toastWelcomeBack')}, ${customer.name}!`);
       return;
     }
-    const isEmail=identifier.includes('@');
-    const filters=[];
-    if(isEmail){
-      filters.push(`email.eq.${identifier}`);
-    }else{
-      const digits=rawInput.replace(/\D/g,''); 
-      const bare=digits.replace(/^0+/,'');     
-      
-      const candidates=new Set([rawInput,digits,bare,`+966${bare}`,`00966${bare}`]);
-      candidates.forEach(c=>{if(c&&c.length>=5&&/^[+\d]+$/.test(c))filters.push(`phone.eq.${c}`);});
-    }
-    const{data:rows}=await sb.from('customers')
-      .select('id,name,email,phone,height,type_preference,created_at,birth_date,country,city,nationality,socials,photo,password_hash')
-      .or(filters.join(','))
-      .limit(5);
-    let customer=null;
-    for(const row of (rows||[])){if(await verifyPwd(pwd,row.password_hash)){customer=row;break;}}
-    if(!customer){authErr(t('errInvalidCredentials'));return;}
-    
-    if(String(customer.password_hash||'').indexOf('pbkdf2:')!==0&&String(customer.password_hash||'').indexOf('oauth:')!==0){
-      try{const up=await makePwdHash(pwd);await sb.from('customers').update({password_hash:up}).eq('id',customer.id);}catch(e){} // fire-and-forget: the hash upgrade is retried on the next sign-in
-    }
-    delete customer.password_hash;
-    S.loggedIn=customer;setSession(customer);
-    await loadData();
-    closeAuthModal();prefillFromAccount();renderTopbarRight();renderRegister();renderMyRides();if(S.view!=='customer'){renderCustomerTabs();goLanding();} // signing in on the link lands on PICK YOUR EVENT, sections bar ready
-    // No device log entry (2026-10-05): it kept the rider's name on a shared tablet; the server records the sign-in (customer_activity).
-    toast(`${t('toastWelcomeBack')}, ${customer.name}!`);
   }catch(e){_authFail('exception',e);}
   finally{S._authBusy=false;_authBtnBusy(false);}
 }
@@ -7130,7 +7090,9 @@ function _jccBooked(s){
   const modifying=!!S.modifyEntryId&&mine.some(e=>e.id===S.modifyEntryId);
   return modifying?mine.filter(e=>e.status==='active').length:mine.length;
 }
-function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='event'?Math.max(1,EVENT_SEAT_MAX-_jccBooked(s)):_isGroupRide(s)?GROUP_RIDE_MAX:_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
+// A Petromin night counts what the account already holds on it too, as an event does: the stepper
+// offered two to a member with one seat booked, and the server then refused the booking (GROUP_CAP).
+function _maxRiders(s){if(!s)return 10;return _rideKind(s)==='event'?Math.max(1,EVENT_SEAT_MAX-_jccBooked(s)):_isGroupRide(s)?Math.max(1,GROUP_RIDE_MAX-_jccBooked(s)):_isCommunity(s)?1:Math.max(1,JCC_ACCOUNT_CAP-_jccBooked(s));}
 // The Saturday ride's SHAPE — staff pick the riders, the queue stays hidden until it is
 // published, the spot cap is an allocation rather than a capacity — is what needs_approval
 // says. The Petromin ride sets it false, and every one of those behaviours falls away: real
