@@ -1235,3 +1235,19 @@ PDPL Art. 19 (least privilege), from the staff research of 2026-10-09. Migration
   `biz.access_review`, admin-only by the 20261009160000 policies). Due after 91 days.
 - The phone card of Bookings shows no number at all (Call / WhatsApp only), so there is nothing to mask there.
   Vendor contacts (businesses) and staff accounts' own emails are not masked. `tests/s1010-pii-*.spec.ts`.
+
+## Blood type on the account (2026-10-14)
+
+The owner: "create a field for the accounts ... and allow people to add their blood type in my accounts section"
+(asked for the Blood Donation event). `customers.blood_type` (migration 20261014180000_blood_type.sql): `A+`, `A-`,
+`B+`, `B-`, `AB+`, `AB-`, `O+`, `O-`, or `unknown` ("I don't know my blood type"); null = never answered.
+
+- Health data: select + update granted to `authenticated` only (staff under RLS); anon reads it only through
+  `customer_blood_type(p_id, p_token)` and saves through `customer_set_blood_type(p_id, p_token, p_type)`
+  (blank clears; anything else is `BAD_INPUT` detail `blood_type`). `_purge_old` clears it.
+- My Account: its own card under the emergency contact (`_accBtHtml`, `saveBloodType`, state `S._bt`), hidden
+  while the RPC is missing. A save does not repaint the card.
+- Staff account editor: read with the editor (`select('blood_type')`), shown in `#cf-bt-host` (`_cfBtHtml`),
+  written by `saveCustForm` only once read (`d.btIn`). Not in the sync, the Accounts filters or the report builder.
+- Privacy notice 2026-10-14 has a blood type row (en + ar); `PRIVACY_ASK_FROM` unchanged (no re-ask).
+- `BLOOD_TYPES` / `_btLabel` sit beside `EM_RELS`. Tests: `tests/blood-type.spec.ts`.
