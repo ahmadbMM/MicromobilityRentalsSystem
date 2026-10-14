@@ -1907,7 +1907,7 @@ function _savedLang(){
     return v;
   }catch(e){return'';}
 }
-try{window.addEventListener('mm-lang',()=>{const v=localStorage.getItem('mm_lang');if(LANGS.some(l=>l.code===v))setLang(v);});}catch(e){}
+try{window.addEventListener('mm-lang',()=>{let v='';try{v=localStorage.getItem('mm_lang');}catch(_){}if(LANGS.some(l=>l.code===v))setLang(v);});}catch(e){}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showLangMenu_1(event,el,a0){setLang(a0);document.querySelectorAll('.pay-menu-popup').forEach(m=>m.remove())}
 function showLangMenu(evt){
@@ -2013,7 +2013,7 @@ function setLang(lang,_fromUrl){
   if(S.view==='customer'){renderRegister();renderMyRides();if(S.custTab==='account')renderAccount();}
   else if(S.view==='staff')_renderStaffTab();
   else if(S.view==='landing')renderLandingAvail();
-  if(document.getElementById('auth-modal')?.style.display!=='none')renderAuthModal();
+  if(document.getElementById('auth-modal')?.style.display==='flex')renderAuthModal(); // open only (display flex, like every other check): a modal never opened has no display set, and was drawn here on every language change
   if(S._pg)renderProfileGate();
   if(S._fix)renderFixGate();
   if(S._rg)renderRateModal();
@@ -2114,11 +2114,15 @@ function _staffRoleRetry(uid,n){
     // columns, so after a lookup that failed the account's name never came and the operator gate asked
     // for it again (2026-10-07)
     let r=null;try{r=await sb.from('staff').select('*').eq('user_id',uid).maybeSingle();}catch(e){r=null;}
-    if(r&&!r.error&&r.data){
+    if(r&&!r.error&&r.data&&!r.data.disabled_at){
       _staffRoleConfirmed(uid,r.data.role);_accessSet(r.data,uid);
       if(r.data.must_change_pwd&&!S._mustChangePwd){S._mustChangePwd=true;if(S.view==='staff')openStaffPwdModal(true);}
     }
-    else if(!r||r.error)_staffRoleRetry(uid,n+1);
+    // A clean answer with no staff row, or a disabled one (Team, 2026-10-09), is the verdict the sign-in
+    // gives: not staff. It used to confirm a disabled account's role and sections, and to leave a device
+    // with no staff row signed in on the guessed role for the rest of the shift.
+    else if(r&&!r.error){if(SECURE_AUTH)lockStaff(true);}
+    else _staffRoleRetry(uid,n+1);
   },[5000,15000,45000,120000][n]);
 }
 // Reject a promise that never settles, so a stuck network/auth call surfaces an error instead of
@@ -2143,6 +2147,7 @@ async function staffAuthSignIn(identifier,password){
     const{data,error}=await _withTimeout(sb.auth.signInWithPassword({email,password}),20000,'sign-in');
     if(error||!data||!data.user)return{ok:false,msg:_staffAuthMsg(error)};
     let row=null,lookupFailed=false;
+    try{localStorage.setItem('cq_staff_seen',String(Date.now()));localStorage.removeItem('cq_op_idle');}catch(_){} // a sign-in is activity: an old idle mark must not sign them straight out (the idle clock, _idleCheck); before the lookup, so the sign-in whose lookup failed stamps it too
     // The staff-row lookup confirms authorization, but must never HANG the sign-in.
     try{const r=await _withTimeout(sb.from('staff').select('*').eq('user_id',data.user.id).maybeSingle(),10000,'staff lookup');if(r.error)lookupFailed=true;else row=r.data&&!r.data.disabled_at?r.data:null;}catch(e){lookupFailed=true;} // a disabled account (Team, 2026-10-09) is no staff account
     if(!row){
@@ -2155,7 +2160,6 @@ async function staffAuthSignIn(identifier,password){
       return{ok:false,msg:t('errStaffNotAuthorized')};
     }
     S._staffAuthed=true;S._mustChangePwd=!!row.must_change_pwd;_staffRoleConfirmed(data.user.id,row.role);_accessSet(row,data.user.id);
-    try{localStorage.setItem('cq_staff_seen',String(Date.now()));localStorage.removeItem('cq_op_idle');}catch(_){} // a sign-in is activity: an old idle mark must not sign them straight out (the idle clock, _idleCheck)
     setupRefRealtime();_rtStaffRejoin(data.user.id); // the live channel joined before this sign-in: again, as this account
     return{ok:true};
   }catch(e){return{ok:false,msg:_staffAuthMsg(e)};}
@@ -3620,7 +3624,7 @@ async function _syncRun(kind,cut){
   }
   const d=r.data;
   if(!d||typeof d!=='object'||Array.isArray(d)||!Array.isArray(d.rows)||!d.now){_syncOff=true;return null;}
-  if(_sync[kind]!==st)return{data:null,error:{message:'sync: the copy was dropped mid-read'}}; // signed out while the read was on the wire
+  if(_sync[kind]!==st||!S._staffAuthed)return{data:null,error:{message:'sync: the copy was dropped mid-read'}}; // signed out while the read was on the wire (a copy loaded after the drop is in the new _sync, so the session is asked too: its rows must not be saved back to the device)
   const rows=full?new Map():st.rows,changed=new Set(),gone=new Set();
   d.rows.forEach(x=>{if(x){const k=_syncKey(kind,x);rows.set(k,x);changed.add(k);}});
   // A key deleted and then used again (a booking rolled back and inserted anew) stays: the row
@@ -4065,7 +4069,7 @@ function _loadQrcode(){
     const s=document.createElement('script');
     s.src='/vendor/qrcode-generator-2.0.4.js';
     s.integrity='sha384-e9EFD6BGC90bkW9aDV5xbbBfzwN7G8YImHao2lfLVKV/hPB0E0go+H3I64h7oHtA';
-    s.onload=()=>res();s.onerror=()=>{_qrcodeP=null;_qrFallback();res();};
+    s.onload=()=>res();s.onerror=()=>{_qrcodeP=null;try{s.remove();}catch(_){}_qrFallback();res();}; // the failed tag goes: offline, every ticket render asks again and each left one behind
     document.head.appendChild(s);
   });
   return _qrcodeP;
@@ -4439,6 +4443,7 @@ function showPrivacyNotice(){
   const lang=(S&&S.lang)||'en',full=!!PRIVACY_NOTICE[lang];
   let m=document.getElementById('privacy-backdrop');
   if(!m){
+    showPrivacyNotice._from=document.activeElement; // focus goes back there on close (the sign-up form's link)
     m=document.createElement('div');m.id='privacy-backdrop';m.className='modal-backdrop';
     m.style.zIndex='9600'; // above the sign-up form (200) and every staff modal (9500)
     m.addEventListener('click',e=>{if(e.target===m)closePrivacyNotice();});
@@ -4456,7 +4461,7 @@ function showPrivacyNotice(){
   if(!showPrivacyNotice._esc){showPrivacyNotice._esc=true;document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('privacy-backdrop'))closePrivacyNotice();});}
   const x=m.querySelector('.pv-x');if(x)x.focus();
 }
-function closePrivacyNotice(){const m=document.getElementById('privacy-backdrop');if(m)m.remove();}
+function closePrivacyNotice(){const m=document.getElementById('privacy-backdrop');if(m)m.remove();const f=showPrivacyNotice._from;showPrivacyNotice._from=null;if(m&&f&&f.isConnected&&f.focus)try{f.focus({preventScroll:true});}catch(_){}}
 
 const RIDE_PRICES={Road:75,Mountain:57.5,Hybrid:57.5,Kids:57.5,Any:57.5,'Road Carbon':250,Own:0}; // Own = rider brings their own bike, no rental charge
 const RIDE_PRICES_MAX={Road:75,Mountain:57.5,Hybrid:57.5,Kids:57.5,Any:75,'Road Carbon':250,Own:0};
@@ -4801,7 +4806,7 @@ function _holdsSpot(e,sess){
   return !!e&&e.status!=='cancelled'&&e.status!=='removed'&&e.status!=='noshow'&&(!_isOwnBike(e)||_ownTakesPlace(sess));
 }
 function spotsLeft(sid){
-  const sess=S.sessions.find(s=>s.id===sid);
+  const sess=_sessGet(sid);
   // Community events have a hard staff-set spot cap; a reservation (even pending approval)
   // holds a spot until staff reject it, and waitlist rows never hold one.
   if(_isApprovalRide(sess)){
@@ -4859,7 +4864,7 @@ function _wlCapFieldHtml(pfx){
   const val=(isNew?S.newSessWlVal:S.editSessWlVal);
   const mk=(m,lbl)=>`<button type="button" class="toggle-btn${mode===m?' active':''}" aria-pressed="${(mode===m)?'true':'false'}" data-on-click="${_on("_on__wlCapFieldHtml_1",_EV,_EL,isNew?'newSessWlMode':'editSessWlMode',m)}">${lbl}</button>`;
   return `<div class="form-group ss-mb16">
-    <label>${t('wlCapLabel')}</label>
+    <label for="${pfx}-wl">${t('wlCapLabel')}</label>
     <div class="ss-wl-row">
       ${mk('count',t('wlCapCount'))}${mk('pct',t('wlCapPct'))}
       <input type="number" id="${pfx}-wl" min="0" max="${mode==='pct'?100:500}" step="1"
