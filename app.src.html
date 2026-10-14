@@ -25455,7 +25455,8 @@ async function _ptAddPerson(){
   const P=_pt(),a=(P.accts||[]).find(x=>x.user_id===P.addAcct);
   if(!a){const s=document.getElementById('pt-add-acct');if(s){_fieldErr(s,t('errFieldRequired'));s.focus();}return;}
   let name=_ptAcctName(a).slice(0,80);if(name.length<2)name=(name+'..').slice(0,2);
-  const r=await sb.from('part_timers').insert({user_id:a.user_id,name,active:true}).select('user_id,name,active').single();
+  if(P._wBusy)return;P._wBusy=true; // a second tap while the first add is out (the button stays until the redraw)
+  let r;try{r=await sb.from('part_timers').insert({user_id:a.user_id,name,active:true}).select('user_id,name,active').single();}finally{P._wBusy=false;}
   if(_writeErr(r,'part-timer add'))return;
   P.people=[...(P.people||[]),r.data].sort((x,y)=>String(x.name).localeCompare(String(y.name)));P.addAcct='';
   const msg=t('ptAdded').replace('{0}',r.data.name);logAction(msg);toast(`✓ ${msg}`);renderTeam();
@@ -25511,7 +25512,8 @@ function _ptKindFields(nid,rid,selfId){
 }
 async function _ptAddKind(){
   const P=_pt(),v=_ptKindFields('pt-nk-name','pt-nk-rate',null);if(!v)return;
-  const r=await sb.from('part_timer_kinds').insert({...v,active:true}).select('id,name,rate,active').single();
+  if(P._wBusy)return;P._wBusy=true; // a double tap added the kind twice: the name check reads the list the first insert had not joined yet
+  let r;try{r=await sb.from('part_timer_kinds').insert({...v,active:true}).select('id,name,rate,active').single();}finally{P._wBusy=false;}
   if(_writeErr(r,'part-timer kind add'))return;
   P.kinds=[...(P.kinds||[]),r.data].sort((a,b)=>String(a.name).localeCompare(String(b.name)));delete P.dr['nk-name'];delete P.dr['nk-rate'];
   const msg=t('ptKindAdded').replace('{0}',r.data.name);logAction(`${msg} · ${_money(r.data.rate,_NOISO)}`);toast(`✓ ${msg}`);renderTeam();
@@ -25588,8 +25590,11 @@ async function _ptSaveShift(force){
     if(had>0){confirmDialog({title:t('ptLog'),body:esc(t('ptDupShift').replace('{0}',p.name).replace('{1}',String(had))),confirmLabel:t('ptLogAgain'),confirmClass:'btn-primary',onConfirm:()=>_ptSaveShift(true)});return;}
   }
   const row={part_timer_id:p.user_id,kind_id:k.id,work_date:date,session_id:s?s.id:null,hours:Math.round(hours*100)/100,rate:Math.round(rate*100)/100,note:String(f.note||'').trim().slice(0,300)};
-  const r=P.editId?await sb.from('part_timer_shifts').update(row).eq('id',P.editId).select(_PT_SHIFT_COLS).single()
-    :await sb.from('part_timer_shifts').insert(row).select(_PT_SHIFT_COLS).single();
+  // One save at a time: a double tap on Save hours logged the hours twice (the same-ride question only
+  // reads entries already back, and an entry without a ride is not asked about at all).
+  if(P._wBusy)return;P._wBusy=true;
+  let r;try{r=P.editId?await sb.from('part_timer_shifts').update(row).eq('id',P.editId).select(_PT_SHIFT_COLS).single()
+    :await sb.from('part_timer_shifts').insert(row).select(_PT_SHIFT_COLS).single();}finally{P._wBusy=false;}
   if(_writeErr(r,'part-timer hours'))return;
   const was=P.editId;
   P.shifts=[r.data,...(P.shifts||[]).filter(x=>x.id!==r.data.id)].sort((a,b)=>String(b.work_date).localeCompare(String(a.work_date)));
@@ -25876,7 +25881,8 @@ function logAction(label,meta){
 async function _undoAuth(label,confirmFirst){
   if(!_can('undo')){toast(t('capNoUndo'),'warning');return false;} // admins, and the accounts Team lets undo (2026-10-09)
   if(!confirmFirst)return true;
-  return new Promise(res=>confirmDialog({title:t('confirmUndoTitle'),body:`<strong>${esc(label)}</strong><br><span class="uc-note">${t('undoRevBody')}</span>`,confirmLabel:t('confirmUndoYes'),confirmClass:'btn-muted',onConfirm:()=>res(true)}));
+  // askConfirm answers false on Cancel, the backdrop or the x: a promise only a Yes resolved left the Log's Undo waiting for ever
+  return askConfirm({title:t('confirmUndoTitle'),body:`<strong>${esc(label)}</strong><br><span class="uc-note">${t('undoRevBody')}</span>`,confirmLabel:t('confirmUndoYes'),confirmClass:'btn-muted'});
 }
 // No bar pops up after an undoable action (owner, 2026-09-28): the action's own toast says what
 // it did, and it is undone from the topbar's Undo or the History log.
@@ -25957,7 +25963,7 @@ function showCancelReasonModal(id){
       <div class="dk-cr-list" role="group" aria-labelledby="cr-title">
         ${reasons.map((r,i)=>`
           <button type="button" class="cancel-reason-opt dk-cr-opt" data-idx="${i}" aria-pressed="false"
-            data-on-mouseover="${_on("_on_showCancelReasonModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCancelReasonModal_3",_EV,_EL)}">${r}</button>`).join('')}
+            data-on-mouseover="${_on("_on_showCancelReasonModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCancelReasonModal_3",_EV,_EL)}">${esc(r)}</button>`).join('')}
         <div id="cancel-other-wrap" class="dk-cr-other">
           <textarea id="cancel-other-text" aria-label="${esc(t('cancelOtherPlaceholder'))}" placeholder="${t('cancelOtherPlaceholder')||'Please describe your reason...'}"
             class="dk-cr-ta"
@@ -26352,7 +26358,11 @@ async function _loadDbLogs(older){
     }
   }catch(_){}
   _dbLogBusy=false;
-  if(!got){S._dbLogFailAt=Date.now();S._dbLogKey=rk;return;}
+  if(!got){S._dbLogFailAt=Date.now();S._dbLogKey=rk;
+    // Load more disabled its button for the read: drawn again, it can be tapped once more (the first-page
+    // read just failed is not asked again for 30 s, so this redraw does not loop)
+    if(older&&S.view==='staff'&&S.staffTab==='history'&&S.histView==='log'){renderLogs();toast(t('errConnection'),'error');}
+    return;}
   if(S.view==='staff'&&S.staffTab==='history'&&S.histView==='log')renderLogs();
 }
 // Staff accounts by id (staff_people, 20261009150000): the verified name beside a log line, an audit row
@@ -26994,7 +27004,7 @@ function _wlAskSoon(sid){
 const REMIND_FROM_H=14;
 function _remTargets(sid){return(_qBySession().get(sid)||[]).filter(e=>e.status==='waiting'&&e.approval!=='pending'&&e.approval!=='rejected');}
 function _remDue(){
-  let h=0;try{h=+new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',hour12:false}).format(new Date());}catch(_){return[];}
+  let h=0;try{h=+new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',hourCycle:'h23'}).format(new Date());}catch(_){return[];} // h23: an engine that reads hour12:false as h24 says 24 just after midnight
   if(h<REMIND_FROM_H)return[];
   const tm=_ksaDayOf(Date.now()+864e5);
   return allSessions().filter(s=>String(s.session_date||s.id).slice(0,10)===tm&&!s.cancelled_at).map(s=>({s,n:_remTargets(s.id).filter(e=>!e.remindedAt).length})).filter(x=>x.n);
@@ -27058,7 +27068,7 @@ function _remLangOf(e){
 function _remPhone(e){const c=e.customerId?_custById(e.customerId):null;return _waDigits(c?_waNum(c):e.phone||'');}
 function _remTime(hhmm,lang){
   const m=/^(\d{1,2}):(\d{2})$/.exec(String(hhmm||'').trim());if(!m)return'';
-  try{return new Intl.DateTimeFormat(_langOf(lang).locale,{hour:'numeric',minute:'2-digit',timeZone:'UTC'}).format(new Date(Date.UTC(2000,0,1,+m[1],+m[2])));}catch(_){return m[0];}
+  try{return new Intl.DateTimeFormat(_langOf(lang).locale,{hour:'numeric',minute:'2-digit',timeZone:'UTC',...(lang==='en'?{hourCycle:'h12'}:{})}).format(new Date(Date.UTC(2000,0,1,+m[1],+m[2])));}catch(_){return m[0];} // 12-hour in English, as the invitation (_caInvWhen) and every screen
 }
 function _remDate(d,lang){try{return new Date(String(d).slice(0,10)+'T12:00:00Z').toLocaleDateString(_langOf(lang).locale,{weekday:'long',day:'numeric',month:'long',timeZone:'UTC'});}catch(_){return String(d).slice(0,10);}}
 // The message's fill-ins: the first name, the ride, its day and start time in the rider's language, and the links.
@@ -27078,7 +27088,7 @@ function openRemindSheet(sid,kind){
   const sess=_sessGet(sid);if(!sess)return;
   if(!_editOk('queue')){toast(t('roMode'),'info');return;}
   if(!kind){const st=_hhmmToMin(String((parseSlots(sess.bike_slots)||{})._time||'').split('-')[0].trim());
-    let now=0;try{now=_hhmmToMin(new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date()))||0;}catch(_){}
+    let now=0;try{now=_hhmmToMin(new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date()))||0;}catch(_){}
     kind=String(sess.session_date||sid).slice(0,10)===todayStr()&&st!=null&&st-now<=6*60?'2h':'24h';}
   {const ae=document.activeElement;S._remRet=ae&&ae!==document.body?ae:null;}
   S._rem={sid,kind,run:null,lang:{}};
@@ -27467,7 +27477,7 @@ async function doUndoNoShow(id){
 // fresh number if so, keeping the partial unique index satisfied.
 async function doRestoreCancelled(id){
   const entry=_qGet(id);if(!entry||entry.status!=='cancelled')return;
-  if(spotsLeft(entry.sessionId)<=0&&_holdsSpot({...entry,status:'waiting'},S.sessions.find(s=>s.id===entry.sessionId))){ // at capacity — confirm before over-filling (own-bike riders hold no spot, Petromin excepted)
+  if(spotsLeft(entry.sessionId)<=0&&_holdsSpot({...entry,status:'waiting'},_sessDisp(entry.sessionId))){ // at capacity — confirm before over-filling (own-bike riders hold no spot, Petromin excepted)
     confirmDialog({
       title:t('restoreFullTitle'),
       body:t('restoreFullBody'),
@@ -27520,8 +27530,9 @@ async function doReturn(id){
   // the condition, the notes, and - for a rider still owing - the payment, on the same sheet.
   // A rider who still owes opens on Paid, as the check-in does (2026-10-09, D7): rentals are card-only,
   // and paying is what happens at the return.
-  S._retId=id;S._retAsk=!entry.paid&&!_noPay;S._retPaid=S._retAsk;S._retCond='ok';S._retNotes='';S._retPhoto='';
+  S._retId=id;S._retAsk=!entry.paid&&!_noPay;S._retPaid=S._retAsk;S._retCond='ok';S._retNotes='';S._retPhoto='';S._retDep=null;
   renderReturnModal();
+  if(_depOn())_depLoad(true).then(ch=>{if(ch&&S._retId===id)renderReturnModal();},()=>{}); // a deposit taken on another device, as _execReturn reads it
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showReturnPayModal_1(event,el){if(event.target===el)closeReturnPayModal()}
@@ -28294,6 +28305,8 @@ function _on_promptDialog_2(event,el){if(event.key==='Enter'){event.preventDefau
 function _on_promptDialog_3(event,el){_promptDone(document.getElementById('prompt-input').value)}
 function promptDialog({title,body,value,placeholder,numeric,confirmLabel,autocomplete}){
   return new Promise(res=>{
+    // A prompt drawn over one still waiting: the first answers "cancelled" instead of waiting forever
+    if(_promptRes){const p=_promptRes;_promptRes=null;try{p(null);}catch(_){}}
     _promptRes=res;
     const m=document.getElementById('confirm-modal');
     m.style.display='block';
@@ -28325,13 +28338,14 @@ function _promptDone(v){
 function askConfirm({title,body,confirmLabel,confirmClass}){
   return new Promise(res=>{
     let settled=false;
-    const done=v=>{if(!settled){settled=true;res(v);}};
+    let obs=null;
+    const done=v=>{if(!settled){settled=true;if(obs)obs.disconnect();res(v);}}; // the watcher goes with the answer, not at the next dialog's close
     confirmDialog({title,body,confirmLabel:confirmLabel||t('confirmBtn')||'OK',confirmClass,onConfirm:()=>done(true)});
     // Cancel / backdrop / × all run closeConfirm without the callback, so watch for the
     // host emptying and resolve false — otherwise the awaiting call site hangs forever.
     const host=document.getElementById('confirm-modal');
-    const obs=new MutationObserver(()=>{
-      if(host&&host.style.display==='none'){obs.disconnect();done(false);}
+    obs=new MutationObserver(()=>{
+      if(host&&host.style.display==='none')done(false);
     });
     if(host)obs.observe(host,{attributes:true,attributeFilter:['style'],childList:true});
   });
