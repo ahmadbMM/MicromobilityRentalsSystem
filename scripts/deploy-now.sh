@@ -53,9 +53,14 @@ if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
 fi
 
 npm run build:html --silent
-# the same stale guard CI runs: what we upload must match what git holds
-git diff --quiet -- index.html service-worker.js || {
-  [ "${1:-}" = "--dirty" ] || { echo "✗ build changed index.html — commit it (or --dirty)" >&2; exit 1; }
+npm run build:wallet --silent
+# the same stale guard CI runs (the same list): what we upload must match what git holds. It read
+# index.html and service-worker.js alone, so a stale app.js, staff.js, staff part, pack, _headers
+# (the CSP) or wallet function went live from here while git held another.
+GENERATED="index.html app.js app.css lang staff-parts service-worker.js staff.js _headers functions/api/wallet-pass.js"
+# shellcheck disable=SC2086
+git diff --quiet -- $GENERATED || {
+  [ "${1:-}" = "--dirty" ] || { echo "✗ the build changed generated files — commit them (or --dirty):" >&2; git diff --stat -- $GENERATED | tail -5 >&2; exit 1; }
 }
 node scripts/assemble-dist.mjs >/dev/null
 
