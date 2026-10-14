@@ -297,4 +297,20 @@ begin
                             'site_content_history', n_sh, 'error_log', n_el, 'anon', n_an);
 end $function$;
 
+-- checks: every function kept SECURITY DEFINER and its search_path
+do $chk$
+declare f text;
+begin
+  foreach f in array array['queue_num_update_guard','staff_delete_customer','staff_unmerge_customers','_purge_old'] loop
+    if not exists (select 1 from pg_proc p where p.pronamespace = 'public'::regnamespace and p.proname = f and p.prosecdef
+                     and exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')) then
+      raise exception '% is missing, or lost SECURITY DEFINER or its search_path', f;
+    end if;
+  end loop;
+end $chk$;
+
+insert into supabase_migrations.schema_migrations (version, name)
+values ('20261014120100', 'bh14_staff')
+on conflict (version) do nothing;
+
 commit;
