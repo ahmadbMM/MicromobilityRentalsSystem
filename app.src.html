@@ -27019,8 +27019,8 @@ function _remDue(){
   let h=0;try{h=+new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',hourCycle:'h23'}).format(new Date());}catch(_){return[];} // h23: an engine that reads hour12:false as h24 says 24 just after midnight
   if(h<REMIND_FROM_H)return[];
   const tm=_ksaDayOf(Date.now()+864e5);
-  return allSessions().filter(s=>String(s.session_date||s.id).slice(0,10)===tm&&!s.cancelled_at).map(s=>({s,n:_remTargets(s.id).filter(e=>!e.remindedAt).length})).filter(x=>x.n);
-}
+  return allSessions().filter(s=>String(s.session_date||s.id).slice(0,10)===tm&&!s.cancelled_at).map(s=>({s,n:(_qBySession().get(s.id)||[]).filter(e=>e.status==='waiting'&&e.approval!=='pending'&&e.approval!=='rejected'&&!e.remindedAt).length})).filter(x=>x.n);
+} // _remTargets written out: the build puts it in the reminders part, which the bell (the desk core) has not loaded - "_remTargets is not defined", 140 times in error_log to 2026-10-13
 // The bell's ride reminders and freed places (2026-10-09, R7), added to _ntKindsNow's list by name.
 function _r7Bell(add,L){
   if(!(_deskTabOk('queue')&&_editOk('queue')))return;
