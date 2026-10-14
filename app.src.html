@@ -2095,7 +2095,7 @@ async function _staffLoginEmail(identifier){
 // failed lookup used to mean admin, and setStaffRole saved that guess to cq_role, where the
 // next boot kept it - a front-desk account kept every admin section.
 function _staffRoleGuess(uid){
-  try{if(uid&&localStorage.getItem('cq_role_uid')===String(uid))return _roleNorm(localStorage.getItem('cq_role'),'admin');}catch(e){}
+  try{if(uid&&localStorage.getItem('cq_role_uid')===String(uid))return _roleNorm(localStorage.getItem('cq_role'),'frontdesk');}catch(e){} // a missing or unknown stored role is front desk too, never admin
   return'frontdesk';
 }
 // A role read from the staff row: applied, and remembered as belonging to this account.

@@ -78,4 +78,19 @@ test.describe('@bh14 s03 core helpers', () => {
     expect(await page.evaluate(`S.staffRole`)).toBe('frontdesk'); // a disabled row's admin role is never confirmed
     expect(await page.evaluate(`JSON.stringify(window.__locked)`)).toBe(secure ? '[true]' : '[]');
   });
+
+  test('a failed lookup guesses front desk when this account’s stored role is missing or unknown', async ({ page }) => {
+    await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [] });
+    await page.goto('/');
+    await waitForSb(page);
+    await loadStaffHalf(page); // the staff sign-in lives in the staff half
+    const out = await page.evaluate(`(()=>{
+      localStorage.setItem('cq_role_uid','u1');localStorage.removeItem('cq_role');
+      const none=_staffRoleGuess('u1');
+      localStorage.setItem('cq_role','bogus');const bogus=_staffRoleGuess('u1');
+      localStorage.setItem('cq_role','leader');const leader=_staffRoleGuess('u1');
+      return [none,bogus,leader];
+    })()`);
+    expect(out).toEqual(['frontdesk', 'frontdesk', 'leader']);
+  });
 });
