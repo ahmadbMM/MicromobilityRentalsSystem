@@ -28448,6 +28448,7 @@ function _rpAmt(n){return `<span class="rp-amt">${_rpSar(n)}</span>`;}
 // Answers the window, or null when the browser kept it from opening (2026-10-05: a report opened
 // after an awaited PIN can lose the tap that allows a new window).
 function _openReport(html,w,h,win){
+  if(win&&win.closed)win=null; // closed by the staffer while the caller read: writing to it threw and nothing was said
   win=win||window.open('','_blank',`width=${w||1100},height=${h||760}`); // a caller that reads first opens the window on the tap and passes it
   if(!win)return null;
   win.document.write(html);win.document.close();win.focus();
@@ -29525,11 +29526,12 @@ function _accReportHtml(title){
 // the operator's PIN - since the printed report carries the same names, phones and emails.
 async function printAccountReport(){
   if(!_can('export')){toast(t('capNoExport'),'error');return;}
-  if(!_accRows().length){toast(t('toastNoExport'),'warning');return;}
+  const n=_accRows().length; // every account read once here, not once more for the log line
+  if(!n){toast(t('toastNoExport'),'warning');return;}
   if(!await _pinApprove(t('acrTitle')))return;
   // the keypad's tap may no longer count as the one that opens a window: say so, the PIN holds for the next tap
   if(!_openReport(_accReportHtml(),1200,800)){toast(t('repPopupBlocked'),'info');return;}
-  logAction(t('logPrintedReport'));_piiExport(t('acrTitle'),_accRows().length,_piiCols(_accSelCols().map(c=>t(c.key))),'print');
+  logAction(t('logPrintedReport'));_piiExport(t('acrTitle'),n,_piiCols(_accSelCols().map(c=>t(c.key))),'print');
 }
 // Every account's details in one file: admins only, with the operator's PIN (2026-10-04 audit).
 async function exportAccountsCsv(){
@@ -29637,7 +29639,7 @@ function exportSessionExcel(km){
   // bike brings the type, payment brings the price and the add-ons - as the sheet always had.
   const _xc={
     seq:    {h:[t('repColSeq')],v:x=>[x.seq]},
-    qnum:   {h:[t('colQueueNum')||'#'],v:x=>[x.qNums]},
+    qnum:   {h:[t('colBookingNum')],v:x=>[x.qNums]}, // the builder's and the PDF's word for it ("#" sat beside "No.")
     name:   {h:[t('nameLabel')],v:x=>[x.lead.name]},
     km:     {h:[t('runKmLabel')],v:x=>[x.kms]},
     member: {h:[t('colMember')],v:x=>[t(_isSatMember(x.lead)?'memberYes':'memberNo')]},
@@ -29985,7 +29987,7 @@ async function exportSelaXlsx(){
   const d=await _selaRows();if(!d)return;
   _piiExport(t('selaRepBtn'),d.rows.length,_piiCols(d.head),'export');
   const rows=[d.head,...d.rows.map(r=>r.cells)],st=[1,...d.rows.map(r=>r.wl?2:0)];
-  const X=v=>String(v).replace(/[<>&"]/g,c=>'&#'+c.charCodeAt(0)+';'),col=i=>String.fromCharCode(65+i);
+  const X=v=>String(v).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\uFFFE\uFFFF]/g,'').replace(/[<>&"]/g,c=>'&#'+c.charCodeAt(0)+';'),col=i=>String.fromCharCode(65+i);
   const O='http://schemas.openxmlformats.org/',M=O+'spreadsheetml/2006/main',R=O+'officeDocument/2006/relationships',H='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
   const rel=(id,ty,to)=>`<Relationship Id="${id}" Type="${R}/${ty}" Target="${to}"/>`,ov=(p,ty)=>`<Override PartName="/${p}" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.${ty}+xml"/>`;
   const fill=c=>`<fill><patternFill patternType="solid"><fgColor rgb="FF${c}"/></patternFill></fill>`;
@@ -30203,7 +30205,13 @@ function _restoreStatusOf(e){
   if(String(e.sessionDate||'')<todayStr())return 'noshow';
   return 'waiting';
 }
+const _rstBusy=new Set(); // a second tap on Restore while the first runs said "changed elsewhere" over a restore that worked
 async function doRestoreEntry(id){
+  if(_rstBusy.has(id))return;
+  _rstBusy.add(id);
+  try{await _doRestoreEntry(id);}finally{_rstBusy.delete(id);}
+}
+async function _doRestoreEntry(id){
   const entry=_qGet(id);if(!entry||entry.status!=='removed')return;
   const originalStatus=entry.status;
   const restoreStatus=_restoreStatusOf(entry);
@@ -30475,7 +30483,7 @@ async function _startScanner(){
 }
 // The camera frame with its colours inverted, on a canvas the detector can read (480 px wide, as
 // jsQR's is). The canvas filter where the browser has one, else the pixels flipped by hand.
-let _scanInvCv=null;
+let _scanInvCv=null,_scanFails=0;
 function _scanInverted(v){
   try{
     const c=_scanInvCv||(_scanInvCv=document.createElement('canvas'));
@@ -30515,7 +30523,12 @@ async function _scanTick(gen){
         const code=window.jsQR(d.data,w,h);
         if(code&&code.data)txt=code.data;
       }
-    }catch(e){}
+      _scanFails=0;
+    }catch(e){
+      // A browser that has BarcodeDetector but cannot read QR with it (a desktop without the platform's
+      // decoder) failed every frame and the scanner never read a ticket: after a few, jsQR takes over.
+      if(_scanDetector&&++_scanFails>=5){_scanDetector=null;_scanFails=0;_loadJsQR().catch(()=>{});}
+    }
     if(gen!==_scanGen)return; // closed while the frame was being read
     if(txt)_onScanPayload(txt);
   }
@@ -30653,7 +30666,13 @@ function _scanTicket(entry,say,_bkOk){
 // bike reserved for them (staff_checkin lands the bike, the row and the assignment together).
 // Riders who still owe stay in the line and are counted back; when the scanned rider is one of
 // them the usual check-in opens, since payment is what happens next. One Undo takes them all back.
+let _exBusy=false; // the same ticket held up again while its check-in is still out read "changed elsewhere"
 async function _expressCheckin(entry,say){
+  if(_exBusy)return;
+  _exBusy=true;
+  try{await _expressRun(entry,say);}finally{_exBusy=false;}
+}
+async function _expressRun(entry,say){
   // The scanned rider's own party (2026-10-05): a list left from a Scan several run that was closed
   // part-way is not their party, and Express used to check that whole list in.
   const party=_partyOf(entry).filter(_ciExpected);
@@ -30804,6 +30823,7 @@ function _dkSheet(title,body,foot){
       <div class="chrome-dbody dk-sheet-body">${body}</div>
       <div class="chrome-dact">${foot||`<button class="btn-secondary" data-on-click="${_on("_dkClose")}">${t('closeBtn')}</button>`}</div>
     </div></div>`;
+  if(!m.contains(document.activeElement))try{m.querySelector('.x-close').focus();}catch(_){} // the keyboard and a screen reader start inside the sheet, not on the roster behind it
 }
 function _on__dkBg(event,el){if(event.target===el)_dkClose();}
 function _dkClose(){const m=document.getElementById('desk-sheet');if(m){m.style.display='none';m.innerHTML='';}const f=S._dkFrom;S._dkFrom=null;try{if(f&&f.isConnected)f.focus();}catch(_){}}
@@ -30922,7 +30942,7 @@ async function _hoAssign(entryId,d){
     if(_writeErr(fr,'hand-over fare')||!_landed(fr))_np=null;else{e.typePreference=b.type;e.price=_np;}
   }
   await _dropOtherReservations([b.id],e.id);
-  const label=t('hoGiven').replace('{0}',_ciBikeNum(b)).replace('{1}',e.queueNum??'').replace('{2}',e.name||'');
+  const label=t('hoGiven').replace('{0}',_ciBikeNum(b)).replace('{1}',e.queueNum??'').replace('{2}',()=>e.name||'');
   toast('✓ '+label);
   try{if(navigator.vibrate)navigator.vibrate(60);}catch(_){}
   S._hoSel=null; // the next in line
@@ -30987,7 +31007,7 @@ function showCheckinModal(id){
   if(_depOn())_depLoad().then(ch=>{if(ch&&S._ciId===id)renderCheckinModal();},()=>{}); // a deposit already taken for this booking
   // A retyped employee is repriced at their own fare, which needs the registrations. They load
   // with the Riders tab; on a ride that takes them, the first check-in fetches them instead.
-  if(!S.ridersLoaded){const _s=S.sessions.find(s=>s.id===e.sessionId);if(_s&&_s.ride_kind==='petromin')loadRiders().then(()=>{if(S._ciId===id)renderCheckinModal();});}
+  if(!S.ridersLoaded){const _s=S.sessions.find(s=>s.id===e.sessionId);if(_s&&_s.ride_kind==='petromin')loadRiders().then(()=>{if(S._ciId===id)renderCheckinModal();},()=>{});}
   S._ciId=id;S._ciType=resolvedType(e)||'Any';
   // A rider who has not paid yet opens on Paid: at the desk, that is what happens next (2026-09-24).
   S._ciPaid=e.paid?((e.price??DEFAULT_PRICE)===0?'house':'card'):'card'; // card is the only paid state; older cash/split rows read as paid by card
@@ -31538,6 +31558,7 @@ function _dqOpen(){
   let m=document.getElementById('dq-modal');
   if(!m){m=document.createElement('div');m.id='dq-modal';document.body.appendChild(m);}
   _dqRender();
+  try{m.querySelector('.chrome-xt').focus();}catch(_){} // focus into the list (it goes back to the chip on close)
 }
 const _DQ_KIND={checkin:'checkInBtn',return:'retTitle',pay:'colPayment',noshow:'noShowBtn',swap:'hoTitle'};
 function _dqRender(){
