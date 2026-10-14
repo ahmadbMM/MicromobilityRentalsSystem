@@ -17165,7 +17165,7 @@ function _contactCell(phone,entry){
     else if(entry.status==='done'&&!_rgRated(entry))_wa='?text='+encodeURIComponent(t('waRateMsg')+' '+CA_SITE); // "rate your ride" link for finished, unrated riders: the customer site (this page is the staff one)
   }
   return`<div class="rq-cc">
-    <a href="tel:${esc(phone)}" title="${t('callLabel')||'Call'}" aria-label="${esc(t('callLabel'))}" class="rq-ccl"${_piiAttrs('call',entry&&entry.customerId,entry&&entry.id)} data-on-mouseover="${_on("_on__contactCell_1",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_2",_EV,_EL)}">
+    <a href="tel:${esc(phone)}" title="${esc(t('callLabel'))}" aria-label="${esc(t('callLabel'))}" class="rq-ccl"${_piiAttrs('call',entry&&entry.customerId,entry&&entry.id)} data-on-mouseover="${_on("_on__contactCell_1",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_2",_EV,_EL)}">
       ${_artIcon('phone',12)}
     </a>
     <a href="https://wa.me/${_waDigits(phone)}${_wa}" target="_blank" rel="noopener" title="WhatsApp" aria-label="WhatsApp" class="rq-ccl"${_piiAttrs('whatsapp',entry&&entry.customerId,entry&&entry.id)} data-on-mouseover="${_on("_on__contactCell_3",_EV,_EL)}" data-on-mouseout="${_on("_on__contactCell_4",_EV,_EL)}">
@@ -17374,7 +17374,7 @@ function showJccGroupModal(){
   const selId=(S.sfSession!=='all'&&open.find(x=>x.id===S.sfSession))?S.sfSession:open[0].id;
   const m=document.getElementById('jcc-group-modal');if(!m)return;
   const keep=id=>{const el=document.getElementById(id);return el?el.value:'';} // preserve typed values across row add/remove re-renders
-  const _g=keep('jg-name'),_c=keep('jg-cname'),_p=keep('jg-phone'),_s=keep('jg-sess')||selId;
+  const _g=keep('jg-name'),_c=keep('jg-cname'),_p=keep('jg-phone'),_s0=keep('jg-sess'),_s=open.some(x=>x.id===_s0)?_s0:selId; // a kept pick that has left the list (deleted meanwhile) falls back, so the menus follow the session the select really shows
   const _jgSess=open.find(x=>x.id===_s),_jgOwn=_ownOffered(_jgSess),_jgNoCarbon=_noCarbon(_jgSess); // as the walk-in: the menu follows the picked session
   if(!_jgOwn)S._jgRiders.forEach(r=>{if(r.type==='Own')r.type='Any';});
   m.style.display='flex';
@@ -17638,7 +17638,8 @@ async function groupMarkPaid(entryId){
   }));
   if(_writeErr(res,'payment')){await loadDataLight();renderStaffQueue();return;}
   const changed=new Set(members.filter((m,i)=>res[i]&&res[i].data&&res[i].data.length).map(m=>m.id)),nPaid=changed.size;
-  await loadDataLight();renderStaffQueue();
+  await loadDataLight();renderStaffQueue();renderHistory();renderMyRides();
+  if(!nPaid){toast(t('errChangedElsewhere'),'warning');return;} // every one was paid on another device meanwhile: nothing to say paid, nothing to undo
   haptic();
   logAction(t('logBulkPaid').replace('{0}',nPaid),{k:'pay',e:'booking',id:[...changed].join(',')});
   toast(`${nPaid} ✓ ${t('paidLabel')}`);
@@ -17648,8 +17649,6 @@ async function groupMarkPaid(entryId){
     if(_writeErr(r,'undo payment'))return false;
     await loadDataLight();renderStaffQueue();renderHistory();
   });
-  await loadDataLight();
-  renderStaffQueue();renderHistory();renderMyRides();
 }
 // The members a party check-in takes: still expected, and not a community request that is
 // waiting on Approve (those rows show Approve/Reject, never Check In).
@@ -17972,7 +17971,7 @@ function _bdNextRides(today){
   return m;
 }
 function _bdWishHtml(c,y){
-  const w=_bdWished(c.id,y),ok=!!_waDigits(c.phone);
+  const w=_bdWished(c.id,y),ok=!!_waDigits(_waNum(c)); // the number the link opens (_bdWaUrl): a member with a WhatsApp number of their own and no mobile was offered no button
   const wa=ok
     ?`<a class="bd-wa" href="${esc(_bdWaUrl(c))}" target="_blank" rel="noopener" data-on-click="${_on("_bdWaClick",c.id,y)}" title="${esc(t('bdWishWa'))}" aria-label="${esc(t('bdWishWa'))}: ${esc(c.name||'')}">${_artIcon('whatsapp',14)}</a>`
     :`<span class="bd-wa off" role="img" title="${esc(t('bdNoPhone'))}" aria-label="${esc(t('bdNoPhone'))}">${_artIcon('whatsapp',14)}</span>`;
@@ -18358,7 +18357,7 @@ function _caRevokedNote(a){
 }
 function _caRow(a){
   const ds=_caSt(a),inv=ds==='invited'?_caInvSt(a):'';
-  const st=inv?{l:t(CA_INV_ST[inv].k),col:CA_INV_ST[inv].col}:_own(CA_STATUS,ds)?{l:t(CA_STATUS[ds].k),col:CA_STATUS[ds].col}:{l:a.status,col:'var(--muted)'};
+  const st=inv?{l:t(CA_INV_ST[inv].k),col:CA_INV_ST[inv].col}:_own(CA_STATUS,ds)?{l:t(CA_STATUS[ds].k),col:CA_STATUS[ds].col}:{l:esc(a.status),col:'var(--muted)'};
   let age=null;try{age=a.birth_date?_sxAgeAt(a.birth_date):null;}catch(e){}
   const kv=_caKv;
   const when=[t('caAppliedOn').replace('{0}',esc(fmtStamp(a.created_at)))];
@@ -18471,7 +18470,12 @@ function _caShownPending(){return _caSortList((S._caApps||[]).filter(a=>a.status
 function _caSelAll(on){S._caSel=new Set(on?_caShownPending().map(a=>a.id):[]);renderCommunity();}
 async function _caBulk(kind,ids){
   ids=(ids||[...(S._caSel||[])]).filter(id=>{const a=_caFind(id);return a&&a.status==='pending';});
-  if(!ids.length||S._caWorking)return;
+  if(!ids.length||S._caWorking||S._caBulkBusy)return;
+  S._caBulkBusy=true;try{await _caBulkRun(kind,ids);}finally{S._caBulkBusy=false;}
+}
+// One bulk run at a time: S._caWorking is down between two applications, so a second tap on the bar
+// started a second run over the same ticks.
+async function _caBulkRun(kind,ids){
   const ap=kind==='approve';
   if(!await askConfirm({title:t(ap?'caBulkApproveQ':'caBulkRejectQ').replace('{0}',String(ids.length)),body:esc(t(ap?'caBulkApproveBody':'caBulkRejectBody')),confirmLabel:t(ap?'caApproveBtn':'caRejectBtn'),confirmClass:ap?'btn-primary':'btn-red'}))return;
   let n=0,fail=0,pwd=null;
@@ -18616,19 +18620,19 @@ function _apSettings(){
 // admins write it, the website's form reads it as it opens, and customer_community_apply reads it to know what
 // may be left empty (20261007220000). The account's own questions (name, email, mobile, password, gender,
 // height) are always asked: the account needs them.
-const CF_KEY='community.form';
+const CF_KEY='community.form'; // held in S._cfq (+_cfqBusy/_cfqErr): S._cf/_cfBusy are the account editor's, and sharing them showed every question at its default once an account had been edited, and could overwrite an open editor's state
 const CF_QS=[['birth_date','caLblBorn',true],['nationality','caLblNat',true],['profession','caLblProf',true],['workplace','caLblWork',true],['own_bike','caLblOwnBike',true],['bike_type','caLblBike',true],['heard_from','heardLabel',true],['instagram','',false],['linkedin','',false]];
 function _cfName(k){const d=CF_QS.find(x=>x[0]===k);return d&&d[1]?t(d[1]):k==='instagram'?'Instagram':k==='linkedin'?'LinkedIn':k;}
 function _cfQ(k){
-  const q=(((S._cf||{}).q)||{})[k]||{},d=CF_QS.find(x=>x[0]===k)||[k,'',false];
+  const q=(((S._cfq||{}).q)||{})[k]||{},d=CF_QS.find(x=>x[0]===k)||[k,'',false];
   const on=q.on!==false;
   return{on,req:on&&(typeof q.req==='boolean'?q.req:d[2]),label:q.label&&typeof q.label==='object'&&!Array.isArray(q.label)?q.label:{}};
 }
 async function _cfLoad(){
-  if(S._cfBusy)return;S._cfBusy=true;
+  if(S._cfqBusy)return;S._cfqBusy=true;
   let r;try{r=await sb.from('site_content').select('value').eq('key',CF_KEY).maybeSingle();}catch(e){r={error:e};}
-  S._cfBusy=false;
-  if(r&&!r.error){const v=r.data&&r.data.value;S._cf=v&&typeof v==='object'&&!Array.isArray(v)?v:{};S._cfErr=false;}else S._cfErr=true;
+  S._cfqBusy=false;
+  if(r&&!r.error){const v=r.data&&r.data.value;S._cfq=v&&typeof v==='object'&&!Array.isArray(v)?v:{};S._cfqErr=false;}else S._cfqErr=true;
   if(_pplOn('applications')||_pplOn('learning'))renderCommunity();
 }
 // Written against what the server holds now, so two admins changing different questions both land.
@@ -18642,7 +18646,7 @@ async function _cfSave(k,patch){
     q[k]={...(q[k]&&typeof q[k]==='object'?q[k]:{}),...patch};
     v.q=q;
     if(await _wr(sb.from('site_content').upsert({key:CF_KEY,value:v,updated_by:_opName()||null}),'form questions'))return;
-    S._cf=v;logAction(t('cfSaved')+': '+_cfName(k));toast(t('cfSaved'),'success');
+    S._cfq=v;logAction(t('cfSaved')+': '+_cfName(k));toast(t('cfSaved'),'success');
   }finally{S._cfSaving=false;renderCommunity();}
 }
 function _cfOn(k,on){_cfSave(k,{on:!!on});}
@@ -18656,8 +18660,8 @@ function _cfEdSave(){
   _cfSave(E.k,{label});
 }
 function _apFormSettings(){
-  if(S._cf===undefined&&!S._cfBusy&&!S._cfErr)_cfLoad();
-  if(S._cf===undefined)return S._cfErr?_loadErr(t('cfLoadErr'),_on("_cfRetry")):skeletonList();
+  if(S._cfq===undefined&&!S._cfqBusy&&!S._cfqErr)_cfLoad();
+  if(S._cfq===undefined)return S._cfqErr?_loadErr(t('cfLoadErr'),_on("_cfRetry")):skeletonList();
   const E=S._cfEd;
   const rows=CF_QS.map(([k])=>{
     const q=_cfQ(k),own=Object.keys(q.label).length;
@@ -18675,7 +18679,7 @@ function _apFormSettings(){
   }).join('');
   return`<div class="ap-sub">${t('cfSub')}</div>${rows}`;
 }
-function _cfRetry(){S._cfErr=false;_cfLoad();}
+function _cfRetry(){S._cfqErr=false;_cfLoad();}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__commApplications_1(event,el){S._caErr=false;_caLoad()}
 function _on__commApplications_2(event,el,a0){S._caFilter=a0;renderCommunity()}
@@ -19094,7 +19098,9 @@ async function _caApGo(){
 // Give an account the tags picked in the dialog: permanent grants, the row saveTagGrant writes, a
 // lapsed grant of the same tag giving way first. Community is never given here (approval gives it).
 async function _caGiveTags(cid,name,pickTags,dropComm){
-  const tids=pickTags.filter(tid=>tid!==TAG_COMMUNITY&&!_caTagHeld(cid,tid)&&(S.tags||[]).some(tg=>tg.id===tid));
+  let tids=pickTags.filter(tid=>tid!==TAG_COMMUNITY&&!_caTagHeld(cid,tid)&&(S.tags||[]).some(tg=>tg.id===tid));
+  // Petromin on a Community member (a rejection's tags): said and left out, never one insert the database refuses whole (2026-10-12)
+  if(tids.some(tid=>_tagRivalHeld(cid,tid))){toast(t('tagOneOfTwo'),'error');tids=tids.filter(tid=>!_tagRivalHeld(cid,tid));}
   if(!tids.length)return;
   const lapsed=tids.filter(tid=>(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===tid&&_tagLapsed(ct)));
   const rows=tids.map(tid=>({customer_id:cid,tag_id:tid,added_by:'staff',added_at:Date.now()}));
@@ -19182,6 +19188,7 @@ async function _caInvTag(id,which){
   const a=_caFind(id);if(!a||S._caWorking||_caSt(a)!=='invited'||!a.customer_id)return;
   const cid=a.customer_id,ban=which==='ban';
   if(ban?_isBlacklisted(cid):_hasTagNow(cid,TAG_COMMUNITY))return;
+  if(!ban&&_tagRivalHeld(cid,TAG_COMMUNITY)){toast(t('tagOneOfTwo'),'error');return;} // Community or Petromin, never both (2026-10-12): the database refuses it with a bare error
   const ok=await askConfirm({title:t(ban?'caInvBanTitle':'caInvCommTitle').replace('{0}',a.name),body:esc(t(ban?'caInvBanBody':'caInvCommBody')),
     confirmLabel:t(ban?'caInvBanBtn':'caInvCommBtn'),confirmClass:ban?'btn-red':'btn-primary'});
   if(!ok)return;
@@ -19287,7 +19294,7 @@ function _caMsgOpen(id,kind){
 // carried CA_MSG, every language of it, into every customer's download.
 function _tpMsgOpen(name,email,phone,pwd){_caMsgShow({lang:CA_MSG[S.lang]?S.lang:'en',phone,email},'temp',{name,email,phone,password:pwd});}
 function _caMsgShow(a,kind,d){
-  S._caMsg={kind,lang:CA_MSG[a.lang]?a.lang:'en',to:a.phone,toEmail:a.email,
+  S._caMsg={kind,lang:CA_MSG[a.lang]?a.lang:'en',to:_waNum(a)||a.phone,toEmail:a.email, // WhatsApp on the number they gave for it, as the card's chat icon (20261007200000)
     d:{name:d.name||a.name,email:d.email||'',phone:d.phone||'',password:d.password||null,oauth:!!d.oauth,
       existing:!!d.existing,sid:d.sid||null,wa:false,waLink:'',ig:!!a.id}}; // ig: an application's message (not the editor's password one) // wa: the invitation carries the WhatsApp group's link (staff tick it); waLink: that link, once read (_caWaLoad)
   if(kind==='new'||kind==='reject'||kind==='invite'){S._caMsg.d.email=S._caMsg.d.email||a.email;S._caMsg.d.phone=S._caMsg.d.phone||a.phone;}
