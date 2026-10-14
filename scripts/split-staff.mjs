@@ -547,7 +547,14 @@ export function splitSections(code, parts = STAFF_PARTS, roots = STAFF_ENTRY) {
       own[p] = reach(fns, core, new Set([...allEntries].filter((f) => entries.get(f) !== p)));
       for (const st of own[p]) count.set(st, (count.get(st) || 0) + 1);
     }
-    const shared = [...count].filter(([, c]) => c > 1).map(([st]) => st);
+    // A statement nothing reaches by name (a bell kind the desk calls through a list of names, as
+    // _r7Bell -> _remDue) stays in the core, so whatever it calls must be there too: _remTargets went to
+    // the reminders part and every bell paint threw "_remTargets is not defined" (2026-10-14).
+    const owned = new Set(Object.values(own).flatMap((s) => [...s]));
+    const orphans = stmts.filter((st) => !core.has(st) && !owned.has(st));
+    const pulled = reach(orphans.flatMap((st) => st.names), core, allEntries);
+    const shared = [...count].filter(([, c]) => c > 1).map(([st]) => st).concat([...pulled].filter((st) => owned.has(st)));
+    orphans.forEach((st) => core.add(st));
     if (!shared.length) break;
     // shared statements join the core, with everything they reach that is not a section's way in
     const more = reach(shared.flatMap((st) => st.names), core, allEntries);
@@ -1310,7 +1317,10 @@ export function formatFieldNames(r, limit = 20) {
 // gzip reads ~3 KB more than a Mac's (604.7 here, 607.5 there).
 // Customer 232 -> 235 (2026-10-12): Petromin Days, the Petromin tag holders' card and its check (petromin_member):
 // 230.9 KB here, about 232.2 on the runner; +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 235, staff: 612, core: 272 };
+// Staff 612 -> 616, core 272 -> 276 (2026-10-14, the bug hunt): ~30 workers' guards and fixes, and the split now keeps in
+// the core what core code reached only by name calls (_remTargets, _socLinkHtml, _sessRawTime sat in parts and threw):
+// core 271.4 / staff 607.7 here, ~272.7 / ~610 on the runner; +4 each restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 235, staff: 616, core: 276 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
