@@ -40539,7 +40539,11 @@ function _bookOutboxFlush(){
 async function _bookOutboxFlushRun(){
   if(_bookBusy)return;
   _bookBusy=true;
-  const snap=_bookOutbox();const done=[];const renum={};const noWaiver=[];
+  const noWaiver=[];
+  // try/finally: anything thrown outside the per-row guards (a full storage on the save below) left
+  // _bookBusy set, and no booking queued offline was ever sent again until the page reloaded.
+  try{
+  const snap=_bookOutbox();const done=[];const renum={};
   const _reasking=!!S._waiverReaskSess&&S.view==='customer'&&S.custTab==='register';
   const _c=S.loggedIn||getSession();
   // A party booked offline is one booking: its riders go in ONE customer_create_booking call, as the
@@ -40615,7 +40619,7 @@ async function _bookOutboxFlushRun(){
   const cur=_bookOutbox().map(r=>{let x=renum[r.id]?{...r,queue_num:renum[r.id]}:r;if(_tr[r.id])x={...x,_tries:_tr[r.id]};return x;}).filter(r=>done.indexOf(r.id)<0);_bookOutboxSave(cur);
   try{_updateConnUI();}catch(_){}
   Object.keys(renum).forEach(id=>{const e=_qGet(id);if(e)e.queueNum=renum[id];});
-  _bookBusy=false;
+  }finally{_bookBusy=false;}
   if(noWaiver.length){S._waiverReaskSess=noWaiver[0].session_id;_waiverReask(noWaiver);}
 }
 // Commit the whole cart as one receipt (shared receipt_id), decrement stock, then print it
@@ -40877,7 +40881,7 @@ function _ctPrintReceipt(rows,cust,at){
   const all=rows;
   rows=rows.filter(_rcShown); // drop payment-split metadata (and a spare discount row) from the printed receipt
   if(!rows.length)return;
-  const w=window.open('','_blank','width=380,height=760');if(!w)return; // on the tap: the number and the QR are read after
+  const w=window.open('','_blank','width=380,height=760');if(!w){toast(t('repPopupBlocked'),'info');return;} // on the tap: the number and the QR are read after
   _rcWrite(w,rows,all,cust,at);
 }
 async function _rcWrite(w,rows,all,cust,at){
@@ -40907,7 +40911,7 @@ async function _rcWrite(w,rows,all,cust,at){
     <div class="mm-rule"></div>
     <div class="sub">${esc(addr)}<br>${t('rcVatNo')} <bdi>${esc(vatNo)}</bdi></div>
     <div class="rc-meta"><span>${t('rcNo')}</span><bdi>${no!=null?esc(String(no).padStart(6,'0')):'—'}</bdi></div>
-    <div class="sub">${new Date(at).toLocaleString(_locale(),{timeZone:KSA_TZ})}${cust?`<br>${esc(cust)}`:''}${sess?`<br>${esc(dayLabel(sess.day))} ${esc(shortDate(sess.session_date||sess.id))}`:''}${soldBy?`<br>${t('rcSeller')}: <bdi>${esc(soldBy)}</bdi>`:''}</div>
+    <div class="sub">${new Date(at||Date.now()).toLocaleString(_locale(),{timeZone:KSA_TZ})}${cust?`<br>${esc(cust)}`:''}${sess?`<br>${esc(dayLabel(sess.day))} ${esc(shortDate(sess.session_date||sess.id))}`:''}${soldBy?`<br>${t('rcSeller')}: <bdi>${esc(soldBy)}</bdi>`:''}</div>
     <table role="presentation"><tbody>${body}</tbody></table>
     <div class="rc-vat"><span>${t('rcSubtotal')}</span><bdi>${_money(net,_NOISO)}</bdi></div>
     <div class="rc-vat"><span>${t('rcVat').replace('{0}',rate)}</span><bdi>${_money(vat,_NOISO)}</bdi></div>
@@ -41376,8 +41380,9 @@ function _exDraw(noLoad){
   const h=document.getElementById('mny-host');if(!h)return;
   const E=_exS();
   if(!noLoad&&(E.items==null||E.key!==E.from+'~'+E.to)&&!E.busy){_exLoad();return;}
-  const list=_exShown();
   const ops=[...new Set((E.items||[]).map(i=>i.op||'—'))].sort();
+  if(E.op&&E.items&&!E.busy&&!ops.includes(E.op))E.op=''; // an operator the new dates do not have: the box read All while the list stayed filtered to nobody
+  const list=_exShown();
   const sum={};EX_TYPES.forEach(([k])=>sum[k]={n:0,amt:0});
   list.forEach(i=>{const s=sum[i.type];if(s){s.n++;s.amt+=i.amt;}});
   const byOp={};list.forEach(i=>{const o=i.op||'—';const x=byOp[o]||(byOp[o]={n:0,amt:0,types:{}});x.n++;x.amt+=i.amt;x.types[i.type]=(x.types[i.type]||0)+1;});
@@ -41532,7 +41537,8 @@ async function recordDrawerCount(sid){
   T.busy=false;
   if(r.error){T.err=_errMessage(r.error);_tillDraw();return;}
   T.row=(r.data||[])[0]||null;
-  if(T.row){const k=await sb.from('till_counts').select('id,at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',T.row.id).order('at');if(!k.error)T.counts=k.data||[];}
+  if(T.row){try{const k=await sb.from('till_counts').select('id,at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',T.row.id).order('at');if(!k.error)T.counts=k.data||[];}catch(_){}}
+  if(S._till!==T)return; // closed, or another till opened, while the counts were read
   _tillDraw();
 }
 // Before the till tables: what the drawer held, into the action log (2026-09).
@@ -41675,8 +41681,8 @@ async function _tillZ(id){
     const k=await sb.from('till_counts').select('at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',id).order('at');if(!k.error)counts=k.data||[];
   }catch(_){}
   if(!row){if(w)w.close();toast(t('errSomethingWrong'),'error');return;}
-  const c=row.session_id?_tillCtx(row.session_id):{shop:true,sid:null,day:row.day,label:t('tillShopCtx')};
-  if(!row.session_id)c.day=row.day;
+  // A ride deleted since keeps its own day: _tillCtx fell back to today's shop takings for it.
+  const c=!row.session_id?{shop:true,sid:null,day:row.day,label:t('tillShopCtx')}:_sessDisp(row.session_id)?_tillCtx(row.session_id):{shop:false,sid:row.session_id,day:row.day,label:shortDate(row.day)};
   // the day's deposits, read for that day (S._deps holds only the last three days)
   let deps=null;if(!c.shop&&(_depOn()||(S._deps||[]).length)){try{const r=await sb.from('deposits').select(DEP_COLS).eq('day',c.day).order('taken_at');if(!r.error)deps=r.data||[];}catch(_){}}
   const take=_tillTake(c);
@@ -41700,7 +41706,7 @@ async function _tillZ(id){
     ${deps&&deps.length?`<h2>${t('depZTitle')}</h2><table><thead><tr><th>${t('depColWho')}</th><th>${t('logColAmount')}</th><th>${t('depColHow')}</th><th>${t('depColState')}</th></tr></thead><tbody>${deps.map(d=>`<tr><td><bdi>${esc(d.customer_name||'')}</bdi></td><td>${_rpAmt(d.amount)}</td><td>${esc(_depMethodName(d.method))}${d.ref?' · '+esc(d.ref):''}</td><td>${d.returned_at?(Number(d.kept_amount)>0?esc(t('depStateKept').replace('{0}',_money(d.kept_amount,_NOISO)))+(d.kept_reason?' · '+esc(d.kept_reason):''):esc(t('depStateBack'))):esc(t('depStateHeld'))}</td></tr>`).join('')}</tbody></table>`:''}
     ${tot.cats.length?`<h2>${t('coSales')}</h2><table><tbody>${tot.cats.map(x=>`<tr><td>${esc(_invCatLabel(x.cat))} ×${x.qty}</td><td>${_rpAmt(x.value)}</td></tr>`).join('')}</tbody></table>`:''}`;
   const win=_openReport(_reportShell({kind:t('tillZ'),title:c.label,subtitle:shortDate(row.day),body,refNo:'MM-Z-'+String(row.day).replace(/-/g,'').slice(2)}),1000,760,w);
-  if(win)logAction(`${t('tillZ')} · ${c.label}`,{k:'till_z',e:'till',id});
+  if(win)logAction(`${t('tillZ')} · ${c.label}`,{k:'till_z',e:'till',id});else toast(t('repPopupBlocked'),'info');
 }
 
 // ── M5: the Team report (Analytics > Team, admins) ────────────────────────────────────────────────
@@ -42261,7 +42267,7 @@ function renderInventory(){
   const _invHadFocus=document.activeElement&&document.activeElement.id==='inv-search';
   // Reorder suggestions render INSIDE the section they belong to (scoped to that
   // section's low-stock items), not as one banner above every section.
-  const _sold=_itemSoldUnits();
+  const _sold=_sold2; // read once above
   const reorderCard=list=>{
     const ro=(list||[]).filter(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0;return q<=0||(lo>0&&q<=lo);})
       .map(i=>{const q=Number(i.qty)||0,lo=Number(i.low_threshold)||0,s=_sold[i.id]||0;const need=_reorderNeed(q,lo,s);return{i,q,s,need};})
@@ -42717,11 +42723,13 @@ function setCustomersTab(k){S.customersTab=k;if(k==='duplicates')S._mgErr=false;
 function setCommTab(k){S.communityTab=k;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;renderCommunity();}
 function openTagEdit(id){S.tagEdit=id?((S.tags||[]).find(x=>x.id===id)||{}):{};renderCommunity();}
 async function saveTag(){
+  if(S._tagBusy)return; // a second tap while the first write was out made the tag twice
   const name=(document.getElementById('tag-name')?.value||'').trim();
   if(!name){toast(t('amTagNameReq'),'error');return;}
   const color=document.getElementById('tag-color')?.value||'#00e585';
   const desc=(document.getElementById('tag-desc')?.value||'').trim();
   const cur=S.tagEdit||{};
+  S._tagBusy=true;
   try{
     if(cur.id){
       if(await _wr(sb.from('tags').update({name,color,description:desc}).eq('id',cur.id),'save tag'))return;
@@ -42735,6 +42743,7 @@ async function saveTag(){
     }
     S.tagEdit=null;toast(t('amTagSaved'),'success');renderCommunity();
   }catch(e){toast((e&&e.message)||t('errServerError'),'error');}
+  finally{S._tagBusy=false;}
 }
 async function deleteTag(id){
   const tg0=(S.tags||[]).find(x=>x.id===id);if(!tg0||tg0.locked)return;
