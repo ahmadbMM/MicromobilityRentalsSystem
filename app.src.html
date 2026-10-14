@@ -4657,11 +4657,14 @@ function _revealArm(){
   if(!next||next-now>864e5)return; // within a day; a page open longer reads again on its own
   _revealT=setTimeout(()=>{_revealT=null;_rtApply();},next-now+3000+Math.random()*20000);
 }
+// Where the session is: a held Run for Her comes without its location (list_sessions blanks it until the
+// breakfast spot is told), yet it always meets at the Jeddah Yacht Club, never the circuit.
+function _sessLoc(s){return String((s&&s.location)||'').trim()||(_rideKind(s)==='runher'?'JYC':'');}
 function _venueName(s){
   if(!s)return'';
   if(_meetHeld(s))return t('meetPointLbl'); // a held ride without its link still meets at a point, never the circuit
   if(_isApprovalRide(s)&&_safeUrl(s.meet_url))return t('meetPointLbl');
-  const loc=String(s.location||'').trim();
+  const loc=_sessLoc(s);
   return _own(VENUE_KEY,loc)?t(VENUE_KEY[loc]):(loc||t('evJccName'));
 }
 // "3 bikes" on a party's card (it read "3 BIKE"); Arabic has a dual, so two is its own word.
@@ -7029,7 +7032,7 @@ function _rideKind(s){
 // ride, so the three things a Saturday ride quietly implied — a bike to size, a breakfast
 // stop afterwards, a gathering time before the start — each have to be asked rather than
 // assumed. Anything absent from the table answers yes, so adding a kind costs one row.
-const KIND_TRAITS={swim:{bike:false,breakfast:false,gathering:false},workshop:{bike:false,breakfast:false,gathering:false},event:{bike:false,breakfast:false,gathering:false},petromin:{gathering:false},snd96:{breakfast:false},runher:{bike:false,breakfast:false}};
+const KIND_TRAITS={swim:{bike:false,breakfast:false,gathering:false},workshop:{bike:false,breakfast:false,gathering:false},event:{bike:false,breakfast:false,gathering:false},petromin:{gathering:false},snd96:{breakfast:false},runher:{bike:false}}; // Run for Her has a breakfast spot, told when staff choose, as the Saturday ride (the owner, 2026-10-14)
 function _kindHas(k,trait){const tr=KIND_TRAITS[k];return !tr||tr[trait]!==false;}
 function _needsBike(s){return _kindHas(_rideKind(s),'bike');}
 // Does the activity ask the customer to sign anything? Every kind does since 2026-10-03 (the owner:
@@ -8916,7 +8919,7 @@ async function _fixSave(){
 // Meeting point + breakfast spot for a community session (links pasted from Google Maps by
 // staff). Shown to customers on the session picker and on their booking card.
 function _commInfoHtml(sess){
-  if(!_isApprovalRide(sess)||!_hasBreakfast(sess))return''; // meeting point + breakfast are the social ride's
+  if(!(_isApprovalRide(sess)||_rideKind(sess)==='runher')||!_hasBreakfast(sess))return''; // meeting point + breakfast are the social ride's and the run's
   if(_spotHeld(sess))return _revealNoteHtml(sess); // the breakfast spot is told at staff's time: say when
   // Breakfast only - the meeting point lives in the card's action row (in place of
   // Get Directions). Label reads "Breakfast spot" with the venue's name beside it,
@@ -13183,7 +13186,7 @@ function renderBookingTicket(entries,opts){
       ${(_held&&_today&&stForBadge==='waiting')?_cdHtml(sess,primary.sessionDate||primary.sessionId):''}
       ${cueHtml}
       ${(_today&&(_held||(past&&allDone)))?_tkStages(g,sess):''}
-      ${_comm?_commInfoHtml(sess):''}
+      ${_commInfoHtml(sess)}
       ${_routeHtml(sess,past)}
       <div class="cu-tk-sec">${t(_needsBike(sess)?'reviewRidersLabel':'reviewPartLabel')} · ${_noNum?numDisplay:`<bdi dir="ltr">${numDisplay}</bdi>`}</div>
       ${riderRows}
@@ -13254,7 +13257,7 @@ function downloadBookingICS(sessionId){
     'DTSTART:'+_icsUtc(date,sMin),'DTEND:'+_icsUtc(date,eMin),
     'SUMMARY:'+esc2(_title),
     // the meeting point is the place; a held ride whose row came without it has none rather than the circuit
-    ..._meetHeld(sess)?[]:['LOCATION:'+esc2(_meet||({'JCC':'Jeddah Corniche Circuit','Sharafeyah Branch':'Sharafeyah, Jeddah','JYC':'Jeddah Yacht Club'})[sess.location]||sess.location||'Jeddah Corniche Circuit')],
+    ..._meetHeld(sess)?[]:['LOCATION:'+esc2(_meet||({'JCC':'Jeddah Corniche Circuit','Sharafeyah Branch':'Sharafeyah, Jeddah','JYC':'Jeddah Yacht Club'})[_sessLoc(sess)]||_sessLoc(sess)||'Jeddah Corniche Circuit')],
     'DESCRIPTION:'+esc2(t(_desc)+(_spotHeld(sess)?'\n'+_revealLine(sess):'')),
     'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+esc2(t('icsAlarm').replace('{0}',_title)),'END:VALARM',
     'END:VEVENT','END:VCALENDAR'];
@@ -16969,7 +16972,7 @@ async function _saveSessionEdit(){
     // open_to_all rides with the kind: it is what lets a non-member into the workshop, and a
     // date move would otherwise re-insert the row gated.
     await _wr(sb.from('sessions').update({ride_kind:_kindEdit,paid_ride:_paidEdit,...((_wsEdit||_sndEdit)?{open_to_all:true}:_kindEdit==='event'?{open_to_all:!!sess.open_to_all}:{})}).eq('id',newId),'save ride kind');
-    if(_paidEdit||_swimEdit||_wsEdit||_runEdit){
+    if(_paidEdit||_swimEdit||_wsEdit){ // Run for Her keeps its breakfast stop since 2026-10-14
       _ce.breakfast_name=null;_ce.breakfast_url=null; // neither ride has a breakfast stop
       // The pool session still meets somewhere, so it keeps the meeting point and must save
       // it here — a date move re-inserts the row bare and would otherwise lose it.
