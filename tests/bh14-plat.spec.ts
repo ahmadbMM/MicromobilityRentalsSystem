@@ -71,3 +71,51 @@ test.describe('@bh14 the Apple Wallet pass says only what the ride has', () => {
     expect((await pass({ ...booking, type_preference: 'Any' }, circuit)).field('bike')).toBeUndefined();
   });
 });
+
+// The worker carried every older ?v= of every file into each new cache (2026-10-10 carryOver), so app.js,
+// staff.js, the staff parts and the packs of every deploy piled up on a device for good.
+test.describe('@bh14 the worker carries one copy of a file across an update', () => {
+  test.use({ serviceWorkers: 'allow' });
+  test('a file this version precached takes nothing old; of anything else only the newest copy comes', async ({ page }) => {
+    const { createServer } = await import('node:http');
+    const { readFile } = await import('node:fs/promises');
+    const { join, extname } = await import('node:path');
+    const TYPES: Record<string, string> = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
+    const root = process.cwd();
+    const server = createServer((req, res) => {
+      const path = decodeURIComponent(new URL(req.url || '/', 'http://x').pathname);
+      const file = join(root, path === '/' ? '/index.html' : path);
+      if (!file.startsWith(root)) { res.writeHead(403); res.end(); return; }
+      readFile(file).then((body) => { res.writeHead(200, { 'content-type': TYPES[extname(file)] || 'application/octet-stream', 'cache-control': 'no-cache' }); res.end(body); }, () => { res.writeHead(404); res.end('not found'); });
+    });
+    await new Promise<void>((r) => server.listen(0, '127.0.0.1', r));
+    const url = `http://127.0.0.1:${(server.address() as { port: number }).port}/`;
+    await page.route(/supabase\.co|open-meteo\.com|cloudflareinsights\.com/, (r) => r.abort());
+    try {
+      await page.goto(url + 'robots.txt');
+      await page.evaluate(() => Promise.all([
+        caches.open('mmcq-oldversion1').then((c) => Promise.all([
+          c.put('/app.js?v=0000000000', new Response('old app')),
+          c.put('/lang/fr.json?v=aaaaaaaaaa', new Response('{"old":1}', { headers: { date: 'Mon, 05 Oct 2026 10:00:00 GMT' } })),
+        ])),
+        caches.open('mmcq-oldversion2').then((c) => Promise.all([
+          c.put('/lang/fr.json?v=bbbbbbbbbb', new Response('{"new":1}', { headers: { date: 'Sat, 10 Oct 2026 10:00:00 GMT' } })),
+          c.put('/vendor/jsqr-1.4.0.min.js', new Response('/* kept */')),
+        ])),
+      ]));
+      await page.goto(url, { waitUntil: 'load' });
+      await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 20000 });
+      const read = () => page.evaluate(async () => {
+        const keys = await caches.keys();
+        const name = keys.find((k) => k.startsWith('mmcq-') && !k.startsWith('mmcq-oldversion')) || '';
+        const c = await caches.open(name);
+        const has = async (u: string) => !!(await c.match(u));
+        return { oldApp: await has('/app.js?v=0000000000'), frOld: await has('/lang/fr.json?v=aaaaaaaaaa'), frNew: await has('/lang/fr.json?v=bbbbbbbbbb'), scanner: await has('/vendor/jsqr-1.4.0.min.js') };
+      });
+      await expect.poll(async () => { try { return await read(); } catch { return null; } }, { timeout: 10000 })
+        .toEqual({ oldApp: false, frOld: false, frNew: true, scanner: true });
+    } finally {
+      await new Promise<void>((r) => server.close(() => r()));
+    }
+  });
+});

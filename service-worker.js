@@ -87,10 +87,24 @@ self.addEventListener('install', (e) => {
 // translation pack, a file with its ?v= hash) moves into this one (2026-10-10). Every deploy used to delete the
 // QR library, the fonts and the packs a phone had stored, so an offline rider after a deploy met a blank code,
 // system fonts and a 7-second wait. A file this version already holds is left as it is.
+// One copy per file (2026-10-14): every older ?v= of a file came along too, so app.js, staff.js, the staff
+// parts and the packs of every deploy piled up in the cache for good (megabytes a deploy on a staff device).
+// A file this version precached under its own ?v= (the halves, the stylesheets) takes nothing from the old
+// caches, and of anything else only the newest copy (its Date) comes over.
 function carryOver() {
-  return caches.keys().then((keys) => caches.open(CACHE).then((c) => Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('mmcq-') && k !== 'mmcq-img').map((k) =>
-    caches.open(k).then((old) => old.keys().then((reqs) => Promise.all(reqs.filter((r) => versioned(r.url)).map((r) =>
-      c.match(r).then((have) => have || old.match(r).then((res) => (res && res.ok ? c.put(r, res) : null))))))))))).catch(() => {});
+  const pathOf = (u) => new URL(u, self.location.href).pathname;
+  return caches.keys().then((keys) => caches.open(CACHE).then((c) => c.keys().then((own) => {
+    const have = new Set(own.map((r) => pathOf(r.url)));
+    const best = new Map();
+    return Promise.all(keys.filter((k) => k !== CACHE && k.startsWith('mmcq-') && k !== 'mmcq-img').map((k) =>
+      caches.open(k).then((old) => old.keys().then((reqs) => Promise.all(reqs.filter((r) => versioned(r.url) && !have.has(pathOf(r.url))).map((r) =>
+        old.match(r).then((res) => {
+          if (!res || !res.ok) return;
+          const p = pathOf(r.url), at = Date.parse(res.headers.get('date') || '') || 0, cur = best.get(p);
+          if (!cur || at >= cur.at) best.set(p, { r, res, at });
+        })))))))
+      .then(() => Promise.all([...best.values()].map(({ r, res }) => c.put(r, res))));
+  }))).catch(() => {});
 }
 
 self.addEventListener('activate', (e) => {
