@@ -45838,13 +45838,17 @@ function _anSrv(from,to){
   const m=S._anSrv||(S._anSrv=new Map()),k=from+'|'+to;
   if(m.has(k))return m.get(k);
   m.set(k,null);
+  // A failed read is forgotten after thirty seconds, so a later paint asks again (a network blip at the
+  // first paint left Months on "Loading" until the page was reloaded); nothing repaints on a failure,
+  // so this is no loop.
+  const retry=()=>setTimeout(()=>{if(m.get(k)===null)m.delete(k);},30000);
   Promise.resolve(sb.rpc('staff_monthly_totals',{p_from:from,p_to:to})).then(r=>{
-    if(!r||r.error){if(r&&_rpcAbsent(r.error))S._anSrvOff=true;return;} // a refusal stays unanswered: no read-repaint loop
+    if(!r||r.error){if(r&&_rpcAbsent(r.error))S._anSrvOff=true;else retry();return;} // a refusal stays unanswered: no read-repaint loop
     const rows=(Array.isArray(r.data)?r.data:[]).map(x=>{const o={month:String(x.month||'')};Object.keys(x).forEach(c=>{if(c!=='month')o[c]=Number(x[c])||0;});return o;});
     m.set(k,{rows:rows.filter(x=>x.month!=='total'),total:rows.find(x=>x.month==='total')||null});
     S._anSrvV=(S._anSrvV||0)+1;if(rows.some(x=>x.month==='total'))S._anSrvHas=true;
     if(S.view==='staff'&&S.staffTab==='analytics')renderAnalytics();
-  },()=>{});
+  },retry);
   return null;
 }
 // One window's totals in the KPI tiles' terms (_anMetricsFor's keys).
@@ -45910,7 +45914,7 @@ function _anMonthsView(){
   const ty=todayStr().slice(0,4),mo=Array.from({length:12},(_,i)=>String(i+1).padStart(2,'0'));
   const val=(y,m)=>{const r=by.get(y+'-'+m);return r?Math.round(r.rev_rides+r.rev_sales):0;};
   const chart=_areaChart([{vals:mo.map(m=>val(ty,m)),color:_thc('--green','#03ff89'),label:ty,fill:true},{vals:mo.map(m=>val(String(ty-1),m)),color:'rgba(var(--tint-rgb),.35)',label:String(ty-1),fill:false,dashed:true}],
-    mo.map(m=>_anMonthLbl(ty+'-'+m).replace(/\s*\d{4}$/,'')),{unitPfx:'SAR '});
+    mo.map(m=>{try{return new Date(ty+'-'+m+'-15T12:00:00Z').toLocaleDateString(_locale(),{month:'short',timeZone:'UTC'});}catch(_){return m;}}),{unitPfx:'SAR '}); // the month alone: cutting the year off left "out. de" in Portuguese
   return`<div class="analytics-section-title">${t('anNavMonths')}</div><div class="page-sub">${t('anMoSub')}</div>
     <div class="chart-card"><div class="chart-card-title">${t('anMoChart').replace('{0}',ty).replace('{1}',String(ty-1))}</div>${chart}</div>
     <div class="chart-card"><div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="an-scroll-x"><table class="analytics-trend-table an-w100" data-nosort><thead><tr><th>${t('anMoMonth')}</th><th>${t('anTotalRides')}</th><th>${t('anRiders')}</th><th>${t('anCollected')}</th><th>${t('anMoTill')}</th><th>${t('statusNoshow')}</th><th>${t('anCancellations')}</th><th>${t('anAvgOccupancy')}</th></tr></thead><tbody>${rows||`<tr><td colspan="8" class="an-c-muted">${t('anNoData2')}</td></tr>`}</tbody></table></div></div>`;
@@ -45923,14 +45927,16 @@ function _anMonthsView(){
 function _rpi(){return S._rep||(S._rep={rows:null,err:false,missing:false,busy:false,at:0,open:null});}
 async function _rpiLoad(force){
   const R=_rpi();if(R.busy||!sb)return;
-  if(!force&&R.rows&&Date.now()-R.at<120000)return;
+  // A failed read (offline, no table yet) is kept for thirty seconds too: the paint below calls this
+  // again, and with nothing kept a failure asked again at once, round and round while the view was open.
+  if(!force&&(R.rows||R.err||R.missing)&&Date.now()-R.at<(R.rows?120000:30000))return;
   R.busy=true;
   try{
     const r=await sb.from('report_snapshots').select('id,kind,period_from,period_to,data,created_at').order('created_at',{ascending:false}).limit(60);
     if(r.error){const c=String(r.error.code||'');R.missing=c==='PGRST205'||c==='42P01';R.err=!R.missing;}
-    else{R.rows=r.data||[];R.err=false;R.missing=false;R.at=Date.now();}
+    else{R.rows=r.data||[];R.err=false;R.missing=false;}
   }catch(_){R.err=true;}
-  R.busy=false;
+  R.at=Date.now();R.busy=false;
   if(S.view==='staff'&&S.staffTab==='analytics'&&S.anView==='reports')_anXPaint('reports');
 }
 function _rpiTitle(x){
@@ -45997,6 +46003,7 @@ async function _rpiMakeNow(){
   if(r&&r.error){if(_rpcAbsent(r.error))toast(t('dbPending'),'info');else toast(_rpcSay(r.error),'error');_anXPaint('reports');return;}
   toast(r&&r.data!=null?t('repMadeNow'):t('repNoRideToday'),r&&r.data!=null?'success':'info');
   await _rpiLoad(true);_rpiSnapPoll(true);
+  if(S.anView==='reports')_anXPaint('reports'); // a read already in flight returns without painting: the Write now button came back disabled
 }
 function _rpiInboxHtml(){
   const R=_rpi();_rpiLoad(false);
@@ -46217,7 +46224,7 @@ function printHeightBikeReport(){
     return`<section class="rp-hsec"><h2 class="rp-h2top">${title}</h2><div class="rp-hrow"><div class="rp-hmain"><h3 class="rp-h3">${t('repRiderHeights')} (${d.people.length})</h3>${d.hSummary.count?`<div class="rp-hsum">${t('repHeightSummary')}: <b>${t('anHeightAvg')} ${d.hSummary.avg} cm</b> &nbsp;\u00b7&nbsp; ${t('repMin')} ${d.hSummary.min} &nbsp;\u00b7&nbsp; ${t('repMax')} ${d.hSummary.max}</div><h4 class="rp-h4">${t('repHeightRanges')}</h4><table class="rp-hrange"><tbody>${d.hRanges.map(([l,n])=>`<tr><td>${l} cm</td><td class="rp-num">${n}</td></tr>`).join('')}</tbody></table>`:''}<h4 class="rp-h4">${t('repHeightIndividual')}</h4><table><thead><tr><th>${t('nameLabel')}</th><th>${t('repHeightCol')}</th><th>${t('colBike')}</th></tr></thead><tbody>${hRows}</tbody></table></div><div class="rp-hside"><h3 class="rp-h3">${t('repBikesRented')} (${d.rented})</h3><table><tbody>${tRows}</tbody></table></div></div></section>`;
   }).join('');
   const html=_reportShell({kind:t('anHeightReport'),title:t('anHeightReport'),subtitle:esc(_anHeightRangeLabel()),body:blocks,maxWidth:'900px'});
-  _openReport(html,940,840);
+  if(!_openReport(html,940,840))toast(t('repPopupBlocked'),'info'); // a blocked pop-up used to do nothing at all
 }
 function exportHeightBikeCsv(){
   const data=_anHeightBikeData();if(!data.length){toast(t('anCsvEmpty'),'info');return;}
@@ -47259,7 +47266,7 @@ function _renderAnalyticsNow(){
       const allBikes=getBikes().filter(b=>!_bkOut(b));
       if(!allBikes.length)return'';
       const cnt={};done.forEach(e=>getAssignedBikeIds(e).forEach(id=>{cnt[id]=(cnt[id]||0)+1;}));
-      const rows=allBikes.map(b=>({b,n:cnt[b.id]||0})).sort((x,y)=>y.n-x.n||x.b.name.localeCompare(y.b.name));
+      const rows=allBikes.map(b=>({b,n:cnt[b.id]||0})).sort((x,y)=>y.n-x.n||String(x.b.name||'').localeCompare(String(y.b.name||''))); // a bike saved without a name took the whole page down
       const maxN=Math.max(1,...rows.map(r=>r.n));
       const used=rows.filter(r=>r.n>0);const idle=rows.filter(r=>r.n===0);
       const barRows=(used.length?used:rows.slice(0,8)).map(r=>`<div class="analytics-bar-row">
@@ -48175,7 +48182,7 @@ function _rtApply(){
       else{
         // Landing / session picker: re-rendering unchanged state was a no-op — fetch first, so
         // spot counts and session statuses actually move while a customer sits on the picker.
-        await loadDataLight();_lastRefresh=Date.now();
+        if(await loadDataLight()!==false)_lastRefresh=Date.now(); // a failed read is no refresh: the return-to-tab catch-up must still run
         renderLandingAvail();
         if(S.view==='customer'&&S.custTab==='register'&&S.regStep===1&&!S.modifyEntryId)renderRegister(); // step 1 is just session cards — later steps hold form state, never repaint them
       }
@@ -48720,7 +48727,7 @@ function _logError(msg,src,silent){
   const now=Date.now();if(now-_errToastAt>15000){_errToastAt=now;try{toast(t('errSomethingWrong'),'error');}catch(e){}}
 }
 try{window.addEventListener('error',e=>{_logError((e&&e.message)||(e&&e.error&&e.error.message)||'error',((e&&e.filename)||'')+':'+((e&&e.lineno)||''));});}catch(e){}
-try{window.addEventListener('unhandledrejection',e=>{const r=e&&e.reason;_logError((r&&(r.message||r))||'unhandledrejection','promise');});}catch(e){}
+try{window.addEventListener('unhandledrejection',e=>{const r=e&&e.reason;let m=r&&(r.message||r);if(m&&typeof m==='object'){try{m=JSON.stringify(m);}catch(_){m=String(m);}}_logError(m||'unhandledrejection','promise');});}catch(e){} // an error object with no message (a {code, details} answer) used to log as [object Object]
 // A Content-Security-Policy violation on a rider's or staff member's own screen goes into error_log
 // with the element it came from (tag#id.class inside #nearest-id), so a style or handler the policy
 // refuses on some path no test walks is found from the log, not from a complaint. Silent (no toast),
