@@ -13499,7 +13499,7 @@ function _rgQ(k,g){
 }
 function renderRateModal(){
   const g=S._rg,m=document.getElementById('rate-modal');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix&&!S._afx)document.body.classList.remove('fix-open');return;}
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;} // every forced pop-up counted, the claim page too
   const e=_qGet(g.id);if(!e){S._rg=null;return renderRateModal();}
   const s=_sessDisp(e.sessionId);
   g.bf=_bfName(s); // the breakfast question names where the rider ate
@@ -13574,7 +13574,7 @@ function _forceWaiverPrompt(){
 function _wgTick(on){const g=S._wg;if(!g||g.saving)return;g.ok=!!on;g.net=false;renderWaiverGate();}
 function renderWaiverGate(){
   const g=S._wg,m=document.getElementById('waiver-gate');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix&&!S._afx&&!S._rg)document.body.classList.remove('fix-open');return;}
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;}
   const s=_sessDisp(g.sid),me=S.loggedIn&&S.loggedIn.id;
   if(!s){S._wg=null;return renderWaiverGate();}
   // The booking as the ticket shows it: every live rider of this ride on the account, in number order.
@@ -13660,7 +13660,7 @@ function _shareBack(){S._sg=null;renderShareGate();}
 function _sgTick(on){const g=S._sg;if(!g||g.saving)return;g.ok=!!on;g.net=false;renderShareGate();}
 function renderShareGate(){
   const g=S._sg,m=document.getElementById('share-gate');if(!m)return;
-  if(!g){m.style.display='none';m.innerHTML='';if(!S._fix&&!S._afx&&!S._rg&&!S._wg)document.body.classList.remove('fix-open');return;}
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;}
   const s=_sessDisp(g.sid);
   if(!s){S._sg=null;return renderShareGate();}
   const ev=_evName(s),ven=_venueName(s),km=_runKmOk(g.km)?' · '+_runKmTxt(g.km):'';
@@ -17644,7 +17644,7 @@ function _groupPayRows(entryId){
   return getQueue().filter(x=>(x.id===e.id||(k&&_partyKey(x)===k))&&!['cancelled','noshow','removed'].includes(x.status));
 }
 async function groupMarkPaid(entryId){
-  const members=_groupPayRows(entryId).filter(m=>!m.paid);
+  const members=_groupPayRows(entryId).filter(m=>!m.paid&&!_ownFree(m)); // an own-bike rider with no add-ons has nothing to pay (marked paid at 0 they read On the house), as bulkSfPaid
   if(!members.length)return;
   const prev=members.map(m=>({id:m.id,paid:!!m.paid,price:m.price??DEFAULT_PRICE,pay_method:m.pay_method||null}));
   // Only rows still unpaid in the database: a payment taken meanwhile on another device (cash, a
