@@ -5265,5 +5265,6 @@
   "infoWhoPetromin": "Miembros de la comunidad y equipo de Petromin",
   "tagOneOfTwo": "Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos. Quita primero la otra.",
   "tagOneOfTwoN": "{0} de estas cuentas tienen la etiqueta {1}. Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos.",
-  "infoEvPetro": "Las salidas nocturnas de Petromin en el Circuito de la Corniche de Yeda, para el equipo de Petromin. Elige una noche, elige tu bici y rueda con tus compañeros."
+  "infoEvPetro": "Las salidas nocturnas de Petromin en el Circuito de la Corniche de Yeda, para el equipo de Petromin. Elige una noche, elige tu bici y rueda con tus compañeros.",
+  "s13BikeChanged": "Esta bicicleta acaba de cambiarse en otro dispositivo. La lista está actualizada: revísala e inténtalo de nuevo."
 }

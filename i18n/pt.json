@@ -5265,5 +5265,6 @@
   "infoWhoPetromin": "Membros da comunidade e equipe da Petromin",
   "tagOneOfTwo": "Uma conta leva a tag Comunidade ou a tag Petromin, nunca as duas. Remova a outra primeiro.",
   "tagOneOfTwoN": "{0} destas contas têm a tag {1}. Uma conta leva a tag Comunidade ou a tag Petromin, nunca as duas.",
-  "infoEvPetro": "Os passeios noturnos da Petromin no Circuito da Corniche de Jeddah, para a equipe da Petromin. Escolha a noite, escolha sua bicicleta e pedale com seus colegas."
+  "infoEvPetro": "Os passeios noturnos da Petromin no Circuito da Corniche de Jeddah, para a equipe da Petromin. Escolha a noite, escolha sua bicicleta e pedale com seus colegas.",
+  "s13BikeChanged": "Esta bicicleta acabou de ser alterada noutro dispositivo. A lista foi atualizada — verifique-a e tente novamente."
 }
