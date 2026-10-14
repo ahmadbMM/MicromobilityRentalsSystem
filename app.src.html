@@ -11392,7 +11392,9 @@ function renderRegister(){
   // Coming back to step one, or arriving by any path other than the event card, still lands
   // on the ride rather than on a list of one.
   const _soleSess=_soleSessionFor(_ev);
-  if(_soleSess&&!S.selSession)S.selSession=_soleSess.id;
+  // Not one whose booking window is still shut: re-picked here right after the line above dropped it, it led the
+  // rider through every step to a refusal at Confirm (NOT_OPEN_YET). The foot says when it opens instead.
+  if(_soleSess&&!S.selSession&&_bwOpen(_soleSess))S.selSession=_soleSess.id;
 
   
   let existingEntries=[];
@@ -11494,7 +11496,7 @@ function renderRegister(){
 
     
     const hSection=`<div class="form-group cu-mb14">
-      <label>${t('heightLabel')} &nbsp;<span class="label-hint">${t('heightHint')}</span></label>
+      <label for="reg-height-${i}">${t('heightLabel')} &nbsp;<span class="label-hint">${t('heightHint')}</span></label>
       <div class="height-row">
         <input type="number" id="reg-height-${i}" aria-label="${t('heightLabel')}" placeholder="${t('heightPlaceholder')}" min="100" max="250"
           value="${esc(String(bikeH))}" data-on-input="${_on("onBikeHeightInput",i,_P("value"))}" data-on-blur="${_on("_vBlur",_EL,"height")}" required>
@@ -11518,7 +11520,7 @@ function renderRegister(){
     
     const riderDefaultName=isFirst&&cust?cust.name:'';
     const riderNameSection=S.regQty>1?`<div class="form-group cu-mb14">
-      <label>${t('riderName')||'Rider\'s Full Name'}</label>
+      <label for="reg-rider-name-${i}">${t('riderName')||'Rider\'s Full Name'}</label>
       <input type="text" id="reg-rider-name-${i}" placeholder="${t('riderNamePlaceholder')||'Enter rider\'s full name'}"
         autocapitalize="words" autocomplete="name" enterkeyhint="done"
         value="${esc(S.regRiderNames[i]!==undefined?S.regRiderNames[i]:riderDefaultName)}"
@@ -11673,7 +11675,7 @@ function renderRegister(){
         </div>`;
       })()}
     </div>
-    ${available.length?`<div class="mm-reg-foot">${S.selSession?'':`<p class="reg-foot-why" id="rf-why">${t('pickRideFirst')}</p>`}<button class="btn-primary cu-w100${S.selSession?'':' cu-off'}" ${S.selSession?'':'disabled aria-describedby="rf-why"'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
+    ${available.length?`<div class="mm-reg-foot">${S.selSession?'':`<p class="reg-foot-why" id="rf-why">${_soleSess&&_bwOpensText(_soleSess)?esc(_bwOpensText(_soleSess)):t('pickRideFirst')}</p>`}<button class="btn-primary cu-w100${S.selSession?'':' cu-off'}" ${S.selSession?'':'disabled aria-describedby="rf-why"'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
 
   
   if(_runSel&&curStep===2)_runAccLoad();
@@ -12869,7 +12871,9 @@ async function submitModifyBooking(){
   S.regBikeSizes=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRiderNames=[];S.regQty=1;S.regBikeHeights=[];
   S.regSubmitting=false; // before the render so the confirm button comes back enabled
   renderRegister();renderMyRides();
-  }finally{S.regSubmitting=false;}
+  // A path that drew the review while the save was on the wire (a refusal, the waiver sent back) left its Confirm
+  // greyed out as " ..." until something else repainted: it is drawn again once the button is free.
+  }finally{if(S.regSubmitting){S.regSubmitting=false;renderRegister();}}
 }
 
 
@@ -13276,7 +13280,9 @@ function bookMyUsual(){
   S.regQty=1;
   // A hidden type never pre-seeds (staff hid it from this customer's picker — the shortcut
   // must not tunnel past that); stale promo/add-ons from an abandoned run don't ride along.
-  const _usualTy=(cust.type_preference&&cust.type_preference!=='Any'&&!_regTypeHidden(cust.type_preference))?cust.type_preference:null; // Any is staff's to give (2026-10-02)
+  // ...nor one this night does not offer ("My own bike" is the Saturday ride's): seeded, it was cleared on the
+  // review it jumped to, which then showed the rider "Any" and refused the Confirm with no picker on screen.
+  const _usualTy=(cust.type_preference&&cust.type_preference!=='Any'&&!_regTypeHidden(cust.type_preference)&&bikeTypeOpts(_ownOffered(pick),_noCarbon(pick)).includes(cust.type_preference))?cust.type_preference:null; // Any is staff's to give (2026-10-02)
   S.regBikeTypes=[_usualTy||undefined];
   S.regBikeHeights=[cust.height?String(cust.height):''];
   S.regRiderNames=[cust.name||''];
@@ -13286,7 +13292,8 @@ function bookMyUsual(){
   // If we already know their setup the riders step has nothing to ask, but the waiver is not
   // skipped: the booking stamps the waiver version as accepted, and only the wizard's waiver
   // step earns that stamp. Jumping straight to review booked riders who never saw it.
-  S.regStep=(!(cust.height&&_usualTy)||_hasRideGroups(pick))?_regNextStep(pick,1):3; // a Saturday ride asks its group on the riders step
+  const _hOk=+cust.height>=100&&+cust.height<=250; // a height the riders step would refuse is asked there, not refused on the review
+  S.regStep=(!(_hOk&&_usualTy)||_hasRideGroups(pick))?_regNextStep(pick,1):3; // a Saturday ride asks its group on the riders step
   setCustTab('register');
   try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
   toast(t('bookUsualToast'));
@@ -13534,7 +13541,7 @@ async function submitRating(){
   const detail={form:g.form,s,why,...(g.skipBf?{skip_bf:true}:{})};
   const bike=s.bike||s.ride_bike||null,exp=s.experience||s.overall||null,note=String(g.note||'').trim()||null;
   g.saving=true;renderRateModal();
-  const{error}=await _ownEntryUpdate(g.id,{rating_bike:bike,rating_exp:exp,feedback:note,rating_detail:detail});
+  let error=null;try{({error}=await _ownEntryUpdate(g.id,{rating_bike:bike,rating_exp:exp,feedback:note,rating_detail:detail}));}catch(e){error=e||{};} // a thrown call left the forced page saving for ever
   if(S._rg!==g)return; // signed out meanwhile
   if(error){g.saving=false;g.net=true;renderRateModal();return;}
   const e=_qGet(g.id);if(e){e.ratingBike=bike;e.ratingExp=exp;e.feedback=note;e.ratingDetail=detail;e.ratedAt=new Date().toISOString();}
