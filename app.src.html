@@ -32033,6 +32033,9 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     if(!Object.keys(patch).length){closeCheckinModal();return;}
     const _qa=await sb.from('queue_entries').update(patch).eq('id',e.id).in('status',['waiting','waitlist']).select('id');
     if(_writeErr(_qa,'save',()=>applyCheckinChanges()))return;
+    // Checked in, cancelled or marked no-show on another desk meanwhile: nothing was saved, so no
+    // Payment line in the log and no silent close as if it had been (2026-10-14).
+    if(!_landed(_qa)){_ciDropDraft(e.id);closeCheckinModal();return _lostRace();}
     // a bike reserved for someone else and taken here ("assign anyway") moves, as Reserve bike does
     if(_bikeId&&_qa.data&&_qa.data.length)await _dropOtherReservations([_bikeId],e.id);
     if(patch.paid!==undefined||patch.price!==undefined)logAction(`${t('colPayment')}: #${e.queueNum} ${e.name}`,{k:'pay',e:'booking',id:e.id,amt:patch.price!==undefined?patch.price:null});
@@ -32148,8 +32151,10 @@ function _swA(b,i){const n=b&&b.color_names&&b.color_names[i];return` role="img"
 function _bkHex(c){return /^#[0-9a-fA-F]{3,8}$/.test(String(c||''))?String(c):'#888888';}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderModal_1(event,el,a0,a1){if(S.modalSort===a0){S.modalSortDir*=-1;}else{S.modalSort=a1;S.modalSortDir=1;}renderModal()}
-function _on_renderModal_2(event,el){if(!el.style.background.includes('255,137'))el.style.background='rgba(var(--tint-rgb),.025)'}
-function _on_renderModal_3(event,el){if(!el.style.background.includes('255,137'))el.style.background='transparent'}
+// The hover tint is left off the picked row: set over it, then 'transparent' on the way out, it wiped the
+// picked row's green until the next draw (2026-10-14).
+function _on_renderModal_2(event,el){if(!el.classList.contains('bkm-trsel'))el.style.background='rgba(var(--tint-rgb),.025)'}
+function _on_renderModal_3(event,el){if(!el.classList.contains('bkm-trsel'))el.style.background='transparent'}
 function _on_renderModal_4(event,el){S.modalShowAll=!S.modalShowAll;renderModal()}
 function _on_renderModal_5(event,el){el.style.borderColor='rgba(var(--green-rgb),.35)';el.style.color='var(--green)'}
 function _on_renderModal_6(event,el){el.style.borderColor='rgba(var(--tint-rgb),.15)';el.style.color='var(--muted-l)'}
@@ -32397,7 +32402,7 @@ function renderModal(){
   // (confirmAssign): said here as what it will be, under what is recorded now (2026-10-05).
   const _carry=(S._ciPayCarry&&S._ciPayCarry.id===rider.id)?S._ciPayCarry.mode:null;
   const carryLine=_carry?`<div id="bkm-carry" class="bkm-carry" role="status">${esc(t('ciPayCarryNote').replace('{0}',_carry==='house'?t('onTheHouseLabel'):'✓ '+t('paidLabel')))}</div>`:'';
-  const heightBadge=rider.height?`<span class="bkm-mh"><bdi>${rider.height} ${t('cmUnit')}</bdi></span>`:'';
+  const heightBadge=rider.height?`<span class="bkm-mh"><bdi>${esc(String(rider.height))} ${t('cmUnit')}</bdi></span>`:'';
 
   
   if(S.modalShowAddBike&&!S.modalAddBikeNumber)S.modalAddBikeNumber=String(_nextBikeNumber());
@@ -32622,7 +32627,10 @@ async function _confirmAssignRun(){
   // repricing path in the app guards it (see typePrice() in the check-in modal). Handing the
   // rider a bike is not a renegotiation.
   const _promoPriced=!!(rider&&rider.promoCode);
-  if(rider&&selected.length>0&&!_paidRow&&!_premiumTier&&!_promoPriced){
+  // And a free ride (2026-10-14): it has no fare, as every other repricing path keeps it; the bike set
+  // one (57.50, 75...) on the booking, which then counted as money owed.
+  const _freeRide=!!(rider&&_freeSessIds.has(rider.sessionId));
+  if(rider&&selected.length>0&&!_paidRow&&!_premiumTier&&!_promoPriced&&!_freeRide){
     // On THIS booking's fare table: a Petromin employee from the ride's own form rides at the
     // employee fare, and priceForBike alone charged them the public 57.50 for a bike their
     // company pays 50 for. The registrations that say who is an employee load with the Riders
@@ -33854,6 +33862,16 @@ async function _saveBikeEditNow(){
   });
   renderBikes();
 }
+// A status change lands only on the bike as this device last saw it (2026-10-14): handed out, retired or
+// sent to the workshop on another desk meanwhile, it was overwritten - a bike out with a rider marked
+// retired, missing or back in the pool under them, and an undo putting back a status from before. True
+// when written; a refusal is said by _writeErr, a lost race reloads the fleet and says so.
+async function _bkStatusWrite(id,patch,from,ctx){
+  let r;try{r=await sb.from('bikes').update(patch).eq('id',id).eq('status',from).select('id');}catch(e){r={error:e};}
+  if(_writeErr(r,ctx))return false;
+  if(!_landed(r)){await loadData();renderBikes();toast(t('s13BikeChanged'),'warning');return false;}
+  return true;
+}
 async function toggleRetire(id){
   const bike=getBikes().find(x=>x.id===id);if(!bike)return;
   if(bike.status==='in-use'){toast(t('errBikeInUse'),'error');return;}
@@ -33862,24 +33880,22 @@ async function toggleRetire(id){
   const isRetired=prevStatus==='retired'||prevStatus==='maintenance'||prevStatus==='missing';
   const newStatus=isRetired?'available':'retired';
   const newRetired=isRetired?null:_todayISO();
-  if(await _wr(sb.from('bikes').update({status:newStatus,retired_date:newRetired}).eq('id',id),'retire bike'))return;
+  if(!await _bkStatusWrite(id,{status:newStatus,retired_date:newRetired},prevStatus,'retire bike'))return;
   await loadData();
   toast(`${bike.name} ${isRetired?t('restoreBtn').toLowerCase():t('retiredLabel').toLowerCase()}`);
   pushUndo(`${isRetired?t('undoRestoreBike'):t('undoRetire')} ${bike.name}`,async()=>{
-    if(_writeErr(await sb.from('bikes').update({status:prevStatus,retired_date:prevRetired}).eq('id',id),'undo'))return false;
+    if(!await _bkStatusWrite(id,{status:prevStatus,retired_date:prevRetired},newStatus,'undo'))return false;
     await loadData();renderBikes();
   });
   renderBikes();
 }
 async function releaseBike(id){
   const bike=getBikes().find(x=>x.id===id);if(!bike)return;
-  const r=await sb.from('bikes').update({status:'available'}).eq('id',id);
-  if(_writeErr(r,'release bike')){await loadData();renderBikes();return;} // refused: no "released" toast over a bike still in use
+  if(!await _bkStatusWrite(id,{status:'available'},'in-use','release bike'))return; // refused, or no longer in use: no "released" toast
   await loadData();
   toast(`${bike.name} ${t('releaseBikeToast')}`);
   pushUndo(`${t('undoRelease')} ${bike.name}`,async()=>{
-    const u=await sb.from('bikes').update({status:'in-use'}).eq('id',id);
-    if(_writeErr(u,'undo release'))return false;
+    if(!await _bkStatusWrite(id,{status:'in-use'},'available','undo release'))return false; // not over a bike handed out, retired or sent to the workshop since
     await loadData();renderBikes();
   });
   renderBikes();
@@ -33891,12 +33907,11 @@ async function setMissing(id){
   if(bike.status==='in-use'){toast(t('errBikeInUse'),'error');return;}
   const prevStatus=bike.status,prevRetired=bike.retired_date||null;
   const toMissing=bike.status!=='missing';
-  const r=await sb.from('bikes').update({status:toMissing?'missing':'available',retired_date:toMissing?_todayISO():null}).eq('id',id);
-  if(_writeErr(r,'mark missing'))return;
+  if(!await _bkStatusWrite(id,{status:toMissing?'missing':'available',retired_date:toMissing?_todayISO():null},prevStatus,'mark missing'))return;
   await loadData();
   toast(`${bike.name}: ${toMissing?t('missingLabel'):t('foundBtn')}`);
   pushUndo(`${toMissing?t('missingBtn'):t('foundBtn')} ${bike.name}`,async()=>{
-    if(_writeErr(await sb.from('bikes').update({status:prevStatus,retired_date:prevRetired}).eq('id',id),'undo'))return false;
+    if(!await _bkStatusWrite(id,{status:prevStatus,retired_date:prevRetired},toMissing?'missing':'available','undo'))return false;
     await loadData();renderBikes();
   });
   renderBikes();
@@ -33908,11 +33923,11 @@ async function setMaintenance(id){
   const prevStatus=bike.status,prevRetired=bike.retired_date||null;
   const toMaint=bike.status!=='maintenance';
   const newStatus=toMaint?'maintenance':'available';
-  if(await _wr(sb.from('bikes').update({status:newStatus,retired_date:toMaint?_todayISO():null}).eq('id',id),'maintenance'))return;
+  if(!await _bkStatusWrite(id,{status:newStatus,retired_date:toMaint?_todayISO():null},prevStatus,'maintenance'))return;
   await loadData();
   toast(`${bike.name} ${toMaint?t('maintLabel').toLowerCase():t('availLabel').toLowerCase()}`);
   pushUndo(`${t('maintBtn')} ${bike.name}`,async()=>{
-    if(_writeErr(await sb.from('bikes').update({status:prevStatus,retired_date:prevRetired}).eq('id',id),'undo'))return false;
+    if(!await _bkStatusWrite(id,{status:prevStatus,retired_date:prevRetired},newStatus,'undo'))return false;
     await loadData();renderBikes();
   });
   renderBikes();
@@ -33937,8 +33952,11 @@ function _bkSelectedBikes(){return (S.bkSelected||[]).map(id=>getBikes().find(b=
 // Returns the bikes that did change; the error bar says once that some did not, and those
 // stay selected so the desk can try them again.
 async function _bkBulkWrite(bikes,patch,ctx){
-  const res=await Promise.all(bikes.map(b=>sb.from('bikes').update(patch).eq('id',b.id)));
-  const ok=bikes.filter((b,i)=>!(res[i]&&res[i].error));
+  // A status change only over the status each bike had when picked (2026-10-14), as _bkStatusWrite: one
+  // handed out on another desk since was retired or sent to the workshop under its rider.
+  const res=await Promise.all(bikes.map(b=>patch.status?sb.from('bikes').update(patch).eq('id',b.id).eq('status',b.status).select('id'):sb.from('bikes').update(patch).eq('id',b.id)));
+  const ok=bikes.filter((b,i)=>!(res[i]&&res[i].error)&&(!patch.status||_landed(res[i])));
+  if(patch.status&&ok.length<bikes.length&&!res.some(r=>r&&r.error))toast(t('s13BikeChanged'),'warning');
   _writeErr(res,ctx);
   S.bkSelected=bikes.filter(b=>!ok.includes(b)).map(b=>b.id);
   return ok;
@@ -34144,7 +34162,7 @@ function openBikeProfile(id){
         ${spec(t('bikeBrand'),bike.brand)}${spec(t('bikeModel'),bike.model)}${spec(t('bikeGroupset'),bike.groupset)}
         ${spec(t('bikeSpeeds'),bike.speeds)}${spec(t('bikeRentalPrice'),bike.rental_price!=null?_money(bike.rental_price,_NOISO):'')}
         ${spec(t('lifespanLabel'),_bikeLifespan(bike)!=='—'?_bikeLifespan(bike):(bike.in_service_date?t('bpInServiceLabel')+' '+shortDate(bike.in_service_date):''))}
-        <div class="flt-spec0"><span class="flt-specl">${t('bpColorsLabel')}</span><span class="flt-g4">${colors.map((c,ci)=>`<span class="flt-pc14"${_swA(bike,ci)} data-cssv="${_cssv({'--flt-bg':c})}"></span>`).join('')}</span></div>
+        <div class="flt-spec0"><span class="flt-specl">${t('bpColorsLabel')}</span><span class="flt-g4">${colors.map((c,ci)=>`<span class="flt-pc14"${_swA(bike,ci)} data-cssv="${_cssv({'--flt-bg':_bkHex(c)})}"></span>`).join('')}</span></div>
       </div>
       <div class="flt-phhist">${t('bpHistoryTitle')}</div>
       <div class="flt-phist">${histRows}</div>
