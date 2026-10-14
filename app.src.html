@@ -14164,11 +14164,11 @@ function _seasonDashboard(cust){
   const streak=_mrStreak(completed);
   const nextGroup=currentGroups.length?currentGroups[currentGroups.length-1]:null;
   let nextTxt='';
-  if(nextGroup){const nd=Math.max(0,Math.round((new Date((nextGroup[0].sessionDate||'').slice(0,10)+'T00:00:00')-new Date(_todayISO()+'T00:00:00'))/864e5));nextTxt=nd===0?t('mrToday'):nd===1?t('mrTomorrow'):t('mrInDays').replace('{0}',nd);}
+  if(nextGroup){const nd=Math.max(0,Math.round((new Date(String(nextGroup[0].sessionDate||nextGroup[0].sessionId||'').slice(0,10)+'T00:00:00')-new Date(_todayISO()+'T00:00:00'))/864e5));nextTxt=!Number.isFinite(nd)?'':nd===0?t('mrToday'):nd===1?t('mrTomorrow'):t('mrInDays').replace('{0}',nd);} // a row without its date (older rows carry the session id only) said "in NaN days"
   // The season in a few sentences beside the badges rather than four dashboard tiles: rides and
   // tier with what the next tier takes (words, no bar, since 2026-10-10), the week streak (a drawn chain, not an emoji), and the
   // next ride, which opens its ticket.
-  const nd=nextGroup?(dayLabel(nextGroup[0].sessionDay)||shortDate(nextGroup[0].sessionDate)):'';
+  const nd=nextGroup?(dayLabel(nextGroup[0].sessionDay)||shortDate(nextGroup[0].sessionDate||nextGroup[0].sessionId)):'';
   return`
     <div class="mr-season">
       <div class="mr-season-rides"><span class="mr-season-n">${rides}</span><span class="mr-season-w">${esc(_tn('mrRidesU',rides))}</span></div>
@@ -14274,7 +14274,6 @@ function renderAccount(){
   }
   const ccOpts=_ccOpts(accCC);
   const accH=cust.height||'';
-  const accSz=null;
   const accBirth=cust.birth_date||'';
   const accCountry=cust.country||'';
   const accCity=cust.city||'';
@@ -14315,15 +14314,6 @@ function renderAccount(){
   const accAbout='workplace' in cust,accGender=_accGenderFor(cust);
   const accNat=cust.nationality||'';
   const natOpts=`<option value="">${t('selectNationalityOpt')}</option>`+nationalityOpts(accNat);
-  
-  const myEntries=getQueue().filter(e=>e.customerId===cust.id);
-  const myDone=myEntries.filter(e=>e.status==='done');
-  const mySpent=myDone.filter(e=>e.paid).reduce((s,e)=>s+(e.price||0),0);
-  const typeCount={};myDone.forEach(e=>{typeCount[resolvedType(e)]=(typeCount[resolvedType(e)]||0)+1;});
-  const favType=Object.keys(typeCount).sort((a,b)=>typeCount[b]-typeCount[a])[0]||'—';
-  const memberSince=cust.created_at
-    ?new Date(cust.created_at).toLocaleDateString(_locale(),{month:'short',year:'numeric'})
-    :'—';
 
   document.getElementById('tab-account').innerHTML=`
     <h1 class="page-title">${t('accountTitle')}</h1>
@@ -14503,7 +14493,10 @@ function _accGenderFor(c){return((S._accGender&&c&&S._accGender.id===c.id)?S._ac
 // them, none of the signs the database refuses). Empty is allowed here: it clears the box.
 function _aboutTextOk(v,max){const n=[...(v||'')].length;return !v||(n>=2&&n<=max&&/\p{L}/u.test(v)&&!/[<>"`{}]/.test(v));}
 
-async function saveAccount(){
+// One save at a time (as the session forms): a second tap while the first was on the wire sent
+// every call again, and the toast and the repaint came twice.
+function saveAccount(){return _busyRun('accSave',_saveAccount);}
+async function _saveAccount(){
   const cust=S.loggedIn||getSession();
   if(!cust)return;
   const accFirst=document.getElementById('acc-first')?.value||'';
@@ -15308,7 +15301,11 @@ function _noShowCounts(){
   if(_nsRef===S.queue&&_nsLen===ql.length&&_nsById)return{byId:_nsById,byNP:_nsByNP};
   const byId={},byNP={};
   ql.forEach(x=>{if(x.status!=='noshow')return;if(x.customerId){byId[x.customerId]=(byId[x.customerId]||0)+1;}else{const nm=(x.name||'').trim(),ph=(x.phone||'').trim();if(nm||ph)byNP[nm+' '+ph]=(byNP[nm+' '+ph]||0)+1;}});
-  _nsRef=S.queue;_nsLen=ql.length;_nsById=byId;_nsByNP=byNP;return{byId,byNP};
+  _nsRef=S.queue;_nsLen=ql.length;_nsById=byId;_nsByNP=byNP;
+  // Kept for the paint in progress only: a no-show marked (or undone) changes a row in place, the
+  // array and its length stay, and the flag kept the old count until the next reload.
+  queueMicrotask(()=>{_nsById=null;});
+  return{byId,byNP};
 }
 function customerNoShows(e){
   if(!e)return 0;
@@ -15821,7 +15818,9 @@ function cloneSession(id){
   }else{
     S.newSessMode='counts';
     const ts={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
-    ['Road','Hybrid','Mountain','Kids'].forEach(ty=>{if(!ts[ty])ts[ty]=_emptySizes();if(slots[ty])BIKE_SIZES.forEach(sz=>{ts[ty][sz]=slots[ty][sz]||0;});});
+    // A plain number per type (the 'counts' shape) goes on M, as the editor reads it; reading it as
+    // sizes gave every box 0 and the clone could not be saved without typing the fleet again.
+    ['Road','Hybrid','Mountain','Kids'].forEach(ty=>{if(!ts[ty])ts[ty]=_emptySizes();if(typeof slots[ty]==='number')ts[ty].M=slots[ty]||0;else if(slots[ty]&&typeof slots[ty]==='object')BIKE_SIZES.forEach(sz=>{ts[ty][sz]=slots[ty][sz]||0;});});
     S.newSessTypeSizes=ts;
   }
   renderSessions();
@@ -16493,7 +16492,7 @@ function renderPromoManager(){
       ${S._pcEditId?`<div class="actions-cell"><button class="btn-primary" data-on-click="${_on("addPromo")}">${t('saveChangesBtn')}</button><button class="btn-sm" data-on-click="${_on("cancelPromoEdit")}">${t('cancelBtn')}</button></div>`
         :`<button class="btn-primary" data-on-click="${_on("addPromo")}">${t('promoAddBtn')}</button>`}
     </div>
-    <div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="sess-admin-table"><caption class="sr-only">${t('sessionsTitle')}</caption><thead><tr>
+    <div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="sess-admin-table"><caption class="sr-only">${t('promoMgrTitle')}</caption><thead><tr>
       <th>${t('promoCodeLabel')}</th><th>${t('promoValueLabel')}</th><th>${t('promoLimitsLabel')}</th><th>${t('promoActiveLabel')}</th><th><span class="sr-only">${t('colActions')}</span></th>
     </tr></thead><tbody>${rows}</tbody></table></div>
   </div>`;
@@ -16580,7 +16579,7 @@ async function _savePromoEdit(){
   const c=(S.promoCodes||[]).find(x=>x.id===S._pcEditId);
   if(!c){cancelPromoEdit();return;}
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
-  if(value<=0){toast(t('promoInvalidMsg'),'error');return;}
+  if(value<=0||((S._pcKind||'percent')==='percent'&&value>100)){toast(t('promoInvalidMsg'),'error');return;} // more than 100% off is no discount anyone meant
   const cust=_pcCustId();if(cust===null)return;
   const n=parseInt(S._pcMax,10);
   // Every field is written, so clearing one (no end date, no limit, anyone) takes the limit off.
@@ -16596,7 +16595,7 @@ async function _addPromo(){
   if(S._pcEditId)return _savePromoEdit();
   const code=(document.getElementById('pc-code')?.value||S._pcCode||'').trim().toUpperCase();
   const value=parseFloat(document.getElementById('pc-value')?.value||S._pcValue||'')||0;
-  if(!code||value<=0){toast(t('promoInvalidMsg'),'error');return;}
+  if(!code||value<=0||((S._pcKind||'percent')==='percent'&&value>100)){toast(t('promoInvalidMsg'),'error');return;}
   // A code is its text: a second row with the same text (in any case) left the booking form and
   // the re-pricing above each picking one of the two (2026-10-05).
   if((S.promoCodes||[]).some(c=>String(c.code||'').toLowerCase()===code.toLowerCase())){toast(t('promoCodeExists'),'error');return;}
