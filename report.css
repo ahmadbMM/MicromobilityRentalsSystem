@@ -70,7 +70,7 @@ table.rp-live tbody tr.rp-odd td{background:#fafcfa}
 th[aria-sort] .rp-sbtn::after{content:"\25B2";font-size:8px;color:#03ff89}
 th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
 .rp-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
-.rp-q,.rp-in{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #b9c1ba;border-radius:4px;background:#fff;color:#111512}
+.rp-q,.rp-in{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #b9c1ba;border-radius:0;background:#fff;color:#111512}
 .rp-q{flex:1;min-width:160px}
 .rp-cnt{font-size:11px;color:#5a635c}
 .rp-fnote{display:none;font-size:10.5px;color:#5a635c;margin:0 0 6px}
@@ -83,7 +83,7 @@ section{break-inside:avoid}
 .mm-note strong{color:#111512}
 .mm-sign{display:flex;gap:40px;margin-top:32px;font-size:10.5px;color:#5a635c}
 .mm-sign span{flex:1;border-top:1px solid #b9c1ba;padding-top:6px}
-.rep-print{display:block;margin:22px auto 0;padding:9px 26px;background:#0c7a3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
+.rep-print{display:block;margin:22px auto 0;padding:9px 26px;background:#0c7a3d;color:#fff;border:none;border-radius:0;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
 /* clone: the inset repeats on every page; a sliced body padded only the first page's top and the last
    one's bottom, and a long roster ran into the paper edge from page 2 on. Pages 2 on add the 9mm
    @page margin above, where their running title and page number sit. */
@@ -142,7 +142,7 @@ section{break-inside:avoid}
 :root .rp-recon-off{margin-top:9px;padding:8px 11px;border-radius:3px;background:#fdeaea;color:#b42318;font-weight:800;display:flex;justify-content:space-between;font-size:13px}
 :root .rp-recon-ok{margin-top:9px;padding:8px 11px;border-radius:3px;background:#e7f6ec;color:#157347;font-weight:800;text-align:center;font-size:13px}
 /* the billing report (printRidersReport): the total row */
-:root .rp-tot{text-align:end;background:#f2f6f2}
+:root .rp-tot,table.rp-live tbody tr td.rp-tot{text-align:end;background:#f2f6f2}
 /* the account report (_accReportHtml, _accFigure, _accSvg) */
 :root .rp-filter{font-size:11px;color:#5a635c;margin-bottom:10px}
 :root .rp-fig{break-inside:avoid;margin-bottom:8px}
@@ -164,7 +164,7 @@ section{break-inside:avoid}
 /* a nationality with the accounts that hold it listed under it (2026-10-11) */
 .rp-natppl-list{columns:3 200px}
 .rp-natgrp{padding:4px 0 6px!important}
-.rp-natppl{list-style:none;margin:2px 0 0;padding:0 0 0 10px;border-left:2px solid #ddd}
+.rp-natppl{list-style:none;margin:2px 0 0;padding:0;padding-inline-start:10px;border-inline-start:2px solid #ddd} /* the start edge: the right one in Arabic and Urdu */
 .rp-natppl li{padding:1px 0;font-size:10.5px}
 /* the heights report (printHeightBikeReport) */
 :root .rp-hsec{margin-bottom:26px}
@@ -186,10 +186,10 @@ section{break-inside:avoid}
 :root .rp-said-v{flex:0 0 5ch;font-weight:800;font-variant-numeric:tabular-nums}
 :root .rp-said-t{flex:1 1 auto;white-space:pre-wrap;overflow-wrap:anywhere}
 /* the ratings reports (showRatingsReport, 2026-10-05): a form's heading row in a table, and a reason's day and rider under its question */
-:root tr.rp-grp td{background:#eef3ef;font-weight:800;color:#123019;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+:root tr.rp-grp td,table.rp-live tbody tr.rp-grp td{background:#eef3ef;font-weight:800;color:#123019;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
 :root .rp-said-wide .rp-said-k{flex-basis:20ch}
 :root .rp-said-m{display:block;margin-top:1px;font-weight:500;font-size:10.5px;color:#5a635c}
 :root th.rp-thsub{font-weight:600;opacity:.85}
 /* Report for Sela (2026-10-08): waitlist rows shaded, and the key beside the legend line */
-:root tr.rp-wl td{background:#fef3c7}
+:root tr.rp-wl td,table.rp-live tbody tr.rp-wl td{background:#fef3c7}
 .rp-wl-key{display:inline-block;width:12px;height:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:2px;vertical-align:-2px}
