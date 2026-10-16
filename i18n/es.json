@@ -5275,5 +5275,17 @@
   "tagOneOfTwo": "Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos. Quita primero la otra.",
   "tagOneOfTwoN": "{0} de estas cuentas tienen la etiqueta {1}. Una cuenta lleva la etiqueta Comunidad o la etiqueta Petromin, nunca las dos.",
   "infoEvPetro": "Las salidas nocturnas de Petromin en el Circuito de la Corniche de Yeda, para el equipo de Petromin. Elige una noche, elige tu bici y rueda con tus compañeros.",
-  "s13BikeChanged": "Esta bicicleta acaba de cambiarse en otro dispositivo. La lista está actualizada: revísala e inténtalo de nuevo."
+  "s13BikeChanged": "Esta bicicleta acaba de cambiarse en otro dispositivo. La lista está actualizada: revísala e inténtalo de nuevo.",
+  "bdgKm20": "Club de los 20 km",
+  "bdgKm20D": "20 km recorridos en salidas de la comunidad",
+  "bdgKm40": "Club de los 40 km",
+  "bdgKm40D": "40 km recorridos en salidas de la comunidad",
+  "bdgKm70": "Club de los 70 km",
+  "bdgKm70D": "70 km recorridos en salidas de la comunidad",
+  "bdgKm100": "Club de los 100 km",
+  "bdgKm100D": "100 km recorridos en salidas de la comunidad",
+  "bdgKm20A": "Cada salida de la comunidad que terminas suma su distancia: normalmente 20 km con los principiantes y 40 km con los intermedios. Llega a 20 km para ganar esta insignia.",
+  "bdgKm40A": "Cada salida de la comunidad que terminas suma su distancia: normalmente 20 km con los principiantes y 40 km con los intermedios. Llega a 40 km para ganar esta insignia.",
+  "bdgKm70A": "Cada salida de la comunidad que terminas suma su distancia: normalmente 20 km con los principiantes y 40 km con los intermedios. Llega a 70 km para ganar esta insignia.",
+  "bdgKm100A": "Cada salida de la comunidad que terminas suma su distancia: normalmente 20 km con los principiantes y 40 km con los intermedios. Llega a 100 km para ganar esta insignia."
 }

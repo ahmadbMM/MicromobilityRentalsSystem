@@ -337,7 +337,7 @@ test.describe('@customer:account badges', () => {
     // 2026-10-09) and the eight other ones staff give (the T25 / T50 / T100 and Bike Owner ladders among them)
     // fold under Badges to earn, which says how many and shows four of them greyed.
     await expect(chips).toHaveCount(3);
-    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/22');
+    await expect(page.locator('#tab-account .mr-badges-n')).toHaveText('3/23');
     await expect(chips.nth(0)).toContainText('Night Owl');
     await expect(chips.nth(1)).toContainText('Marshal');
     await expect(chips.nth(2)).toContainText('First Lap');
@@ -345,11 +345,11 @@ test.describe('@customer:account badges', () => {
     await expect(more).toHaveAttribute('aria-expanded', 'false');
     await expect(more).toContainText('Badges to earn');
     await expect(more).toContainText('Show');
-    await expect(more.locator('.mr-bm-n')).toHaveText('19');
+    await expect(more.locator('.mr-bm-n')).toHaveText('20');
     await expect(more.locator('.mr-bm-peek svg.bdg-m')).toHaveCount(4);
     // Open: every badge, in the same order as before, the button kept in focus and reading Hide.
     await more.click();
-    await expect(chips).toHaveCount(22);
+    await expect(chips).toHaveCount(23);
     await expect(more).toHaveAttribute('aria-expanded', 'true');
     await expect(more).toContainText('Hide');
     await expect(more).toBeFocused();
@@ -357,10 +357,10 @@ test.describe('@customer:account badges', () => {
     await expect(chips.nth(3)).toContainText('Race Ready');
     await expect(chips.nth(3)).toHaveClass(/locked/); // name, email and phone only: a third of the profile
     await expect(chips.nth(3)).toContainText('33%');
-    await expect(chips.nth(19)).toContainText('Race Spirit');
-    await expect(chips.nth(19)).toHaveClass(/locked/);
-    await expect(chips.nth(20)).toContainText('T25 Finisher'); // the race ladder, at its first level
-    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(22);
+    await expect(chips.nth(20)).toContainText('Race Spirit');
+    await expect(chips.nth(20)).toHaveClass(/locked/);
+    await expect(chips.nth(21)).toContainText('T25 Finisher'); // the race ladder, at its first level
+    await expect(page.locator('#tab-account .mr-badges svg.bdg-m')).toHaveCount(23);
     expect(EMOJI.test(await page.locator('#mr-badges-host').innerText())).toBe(false);
 
     // Seen on this device: asked again, it does not pop up a second time.
@@ -369,7 +369,7 @@ test.describe('@customer:account badges', () => {
     await page.waitForTimeout(200);
     await expect(pop).toHaveCount(0);
     // It stays open through that repaint, and closes again.
-    await expect(chips).toHaveCount(22);
+    await expect(chips).toHaveCount(23);
     await more.click();
     await expect(chips).toHaveCount(3);
     await expect(more).toHaveAttribute('aria-expanded', 'false');
@@ -430,7 +430,7 @@ test.describe('@customer:account badges', () => {
     await rider(page, { 'rpc:customer_my_badges': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_my_badges' } } });
     await page.waitForFunction('S._bdgMine&&!S._bdgMine.busy');
     await expect(page.locator('#tab-account .mr-badges .mr-badge')).toHaveCount(1); // First Lap
-    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('20'); // the other eleven ride badges and the nine staff give (Bike Owner since 2026-10-12), a ladder one each
+    await expect(page.locator('#mr-badges-more .mr-bm-n')).toHaveText('21'); // the other twelve ride badges (the distance ladder since 2026-10-16) and the nine staff give (Bike Owner since 2026-10-12), a ladder one each
     await expect(page.locator('#badge-pop')).toHaveCount(0);
     await page.locator('#tab-account .mr-badge', { hasText: 'First Lap' }).click();
     await expect(page.locator('#badge-pop')).toContainText('First Lap');
@@ -559,6 +559,26 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(none.slipstream).toEqual({ on: false, p: '0/5', hide: false });
     expect(none.works_team).toEqual({ on: false, p: '0/3', hide: false });
     expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
+  });
+
+  // The distance ladder (the owner, 2026-10-16): a Saturday ride ridden adds its group's kilometres - 20 Beginners,
+  // 40 Intermediates, or the ride's own (_km in its slots) - so one Beginners ride is 20 km Club, one Intermediates 40.
+  test('the distance ladder (20, 40, 70, 100 km) adds up the Saturday rides ridden, by group', async ({ page }) => {
+    await page0(page);
+    const km = (expr: string) => ev(page, `(()=>{const r=${expr};return Object.fromEntries(['km20','km40','km70','km100'].map(s=>[s,r[s].on]));})()`);
+    const run = (spec: [string, string?, object?][]) => km(`(()=>{const S_=[],E=[];${JSON.stringify(spec)}.forEach(([g,st,slots],i)=>{const d=__day(-7*(i+1)),id='k'+i;
+      S_.push(Object.assign(__ses(id,d,'saturday'),slots?{bike_slots:JSON.stringify(slots)}:{}));E.push(__e(id,d,st||'done',g?{rideGroup:g}:{}));});return __run(E,S_);})()`);
+    expect(await run([['beg']])).toEqual({ km20: true, km40: false, km70: false, km100: false });
+    expect(await run([['int']])).toEqual({ km20: true, km40: true, km70: false, km100: false });
+    expect(await run([['beg', 'noshow'], ['beg', 'cancelled']])).toEqual({ km20: false, km40: false, km70: false, km100: false });
+    expect(await run([['int'], ['beg'], ['']])).toEqual({ km20: true, km40: true, km70: true, km100: false }); // no group: the Beginners' 20
+    expect(await run([['int'], ['int'], ['beg']])).toEqual({ km20: true, km40: true, km70: true, km100: true });
+    expect(await run([['int', 'done', { _km: { int: 35 } }], ['int', 'done', { _km: { int: 35 } }]])).toEqual({ km20: true, km40: true, km70: true, km100: false }); // the ride's own distance
+    // A party on one night counts the night once; circuit nights add nothing.
+    const party = await ev(page, `(()=>{const d=__day(-7),S_=[__ses('p',d,'saturday'),__ses('j',__day(-3),'jcc')];
+      const E=[__e('p',d,'done',{rideGroup:'int'}),__e('p',d,'done',{rideGroup:'int'}),__e('j',__day(-3),'done')];return __run(E,S_);})()`);
+    expect(party.km40).toEqual({ on: true, p: '40/40', hide: false });
+    expect(party.km70).toEqual({ on: false, p: '40/70', hide: false });
   });
 
   test('Perfect Week is every session of a week ridden; Perfect Month is four in a row, a thin week skipped', async ({ page }) => {

@@ -470,6 +470,10 @@ Carbon Owner (a bike bought from MicroMobility; nothing in the data says so) and
 Legend, earned by riding: nights first in the queue that were RIDDEN (`_bdgRode`; 1/5/10/25/50) - a #1 no-show no longer earns it. Every
 staffer gives any non-retired badge, earned ones and Squad Captain / Fuel Stop included (`_bdgCanGive`, the owner: "make
 the staff able to give any badge for whoever they want").
+The distance ladder (migration 20261016120000, the owner 2026-10-16): 20 km Club > 40 km Club > 70 km Club > 100 km Club
+(`km20`..`km100`), earned by riding - each Saturday social ride night ridden (`_bdgRode`) adds its group's distance (`_rgKm`:
+the ride's own `_km`, else 20 Beginners / 40 Intermediates; no group = Beginners), so one Beginners ride is 20 km Club and one
+Intermediates ride 40 km Club. Other ride kinds add nothing (no distance on record).
 Staff see an account's badges (given + earned by riding) in its history window and its editor: the core draws only the empty
 section (`_bdgSecHtml`), and `_bdgStrips` - a stand-in into the Community part - fills it, again after every badge load or change.
 `list_sessions` also returns nights a rider rode (status done), so a lapsed member keeps the kind of
