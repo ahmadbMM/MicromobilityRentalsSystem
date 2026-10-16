@@ -74,3 +74,34 @@ test('the Waitlist tick survives the editor repainting', async ({ page }) => {
   await expect(page.locator('#be-nr-wl-0')).toBeChecked();
   await expect(page.locator('#be-nr-wl-1')).not.toBeChecked();
 });
+
+// The owner, 2026-10-16: "for staff add a move to the main list button for waitlisted bookings".
+test('a waitlisted booking offers Move to main list; a waiting one does not', async ({ page }) => {
+  await open(page);
+  await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='s1';S.sfStatus='all';renderStaffQueue()`);
+  await page.waitForFunction(`S._rowMenus&&S._rowMenus['e1']&&S._rowMenus['e2']`);
+  const labels = await page.evaluate(`({a:S._rowMenus['e1'].map(i=>i.label),b:S._rowMenus['e2'].map(i=>i.label)})`) as { a: string[]; b: string[] };
+  expect(labels.a.some((l) => /Move to main list/.test(l))).toBe(false);
+  expect(labels.b.some((l) => /Move to main list/.test(l))).toBe(true);
+});
+
+test('Move to main list confirms the booking, guarded on waitlist', async ({ page }) => {
+  await open(page);
+  const writes = patches(page);
+  await page.evaluate(`staffFromWaitlist('e2')`);
+  await expect.poll(() => writes.find((w) => /"status":"waiting"/.test(w))).toBeTruthy();
+  const w = writes.find((x) => /"status":"waiting"/.test(x))!;
+  expect(w).toContain('id=eq.e2');
+  expect(w).toContain('status=eq.waitlist');
+});
+
+test('on a full ride Move to main list asks first', async ({ page }) => {
+  const full = Array.from({ length: 12 }, (_, i) => qe('f' + i, i + 1));
+  await open(page, [...full, qe('e2', 13, { status: 'waitlist', waitlist_num: 1 })]);
+  const writes = patches(page);
+  await page.evaluate(`setStaffTab('queue');renderStaffQueue();staffFromWaitlist('e2')`);
+  await expect(page.locator('#confirm-modal')).toContainText('The ride is full');
+  expect(writes.length).toBe(0);
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Move to main list' }).click();
+  await expect.poll(() => writes.find((w) => /id=eq\.e2/.test(w) && /"status":"waiting"/.test(w))).toBeTruthy();
+});
