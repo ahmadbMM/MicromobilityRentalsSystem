@@ -561,9 +561,9 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(none.triple_crown).toEqual({ on: false, p: '1/3', hide: false });
   });
 
-  // The distance ladder (the owner, 2026-10-16): a Saturday ride ridden adds its group's kilometres - 20 Beginners,
-  // 40 Intermediates, or the ride's own (_km in its slots) - so one Beginners ride is 20 km Club, one Intermediates 40.
-  test('the distance ladder (20, 40, 70, 100 km) adds up the Saturday rides ridden, by group', async ({ page }) => {
+  // The distance ladder (the owner, 2026-10-16: "the distance in one ride not the total"): the longest Saturday ride
+  // ridden - 20 Beginners, 40 Intermediates, or the ride's own (_km in its slots) - never the rides added up.
+  test('the distance ladder (20, 40, 70, 100 km) is the longest single Saturday ride ridden, by group', async ({ page }) => {
     await page0(page);
     const km = (expr: string) => ev(page, `(()=>{const r=${expr};return Object.fromEntries(['km20','km40','km70','km100'].map(s=>[s,r[s].on]));})()`);
     const run = (spec: [string, string?, object?][]) => km(`(()=>{const S_=[],E=[];${JSON.stringify(spec)}.forEach(([g,st,slots],i)=>{const d=__day(-7*(i+1)),id='k'+i;
@@ -571,9 +571,11 @@ test.describe('@customer:account ride badges from the research', () => {
     expect(await run([['beg']])).toEqual({ km20: true, km40: false, km70: false, km100: false });
     expect(await run([['int']])).toEqual({ km20: true, km40: true, km70: false, km100: false });
     expect(await run([['beg', 'noshow'], ['beg', 'cancelled']])).toEqual({ km20: false, km40: false, km70: false, km100: false });
-    expect(await run([['int'], ['beg'], ['']])).toEqual({ km20: true, km40: true, km70: true, km100: false }); // no group: the Beginners' 20
-    expect(await run([['int'], ['int'], ['beg']])).toEqual({ km20: true, km40: true, km70: true, km100: true });
-    expect(await run([['int', 'done', { _km: { int: 35 } }], ['int', 'done', { _km: { int: 35 } }]])).toEqual({ km20: true, km40: true, km70: true, km100: false }); // the ride's own distance
+    expect(await run([['beg'], ['beg'], ['']])).toEqual({ km20: true, km40: false, km70: false, km100: false }); // three 20 km rides are not 60 km; no group: the Beginners' 20
+    expect(await run([['int'], ['int'], ['int']])).toEqual({ km20: true, km40: true, km70: false, km100: false });
+    expect(await run([['int', 'done', { _km: { int: 35 } }]])).toEqual({ km20: true, km40: false, km70: false, km100: false }); // the ride's own distance
+    expect(await run([['int', 'done', { _km: { int: 72 } }]])).toEqual({ km20: true, km40: true, km70: true, km100: false });
+    expect(await run([['int', 'done', { _km: { int: 100 } }]])).toEqual({ km20: true, km40: true, km70: true, km100: true });
     // A party on one night counts the night once; circuit nights add nothing.
     const party = await ev(page, `(()=>{const d=__day(-7),S_=[__ses('p',d,'saturday'),__ses('j',__day(-3),'jcc')];
       const E=[__e('p',d,'done',{rideGroup:'int'}),__e('p',d,'done',{rideGroup:'int'}),__e('j',__day(-3),'done')];return __run(E,S_);})()`);

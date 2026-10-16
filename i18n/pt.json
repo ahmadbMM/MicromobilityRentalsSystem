@@ -5280,15 +5280,15 @@
   "infoEvPetro": "Os passeios noturnos da Petromin no Circuito da Corniche de Jeddah, para a equipe da Petromin. Escolha a noite, escolha sua bicicleta e pedale com seus colegas.",
   "s13BikeChanged": "Esta bicicleta acabou de ser alterada noutro dispositivo. A lista foi atualizada — verifique-a e tente novamente.",
   "bdgKm20": "Clube dos 20 km",
-  "bdgKm20D": "20 km pedalados",
+  "bdgKm20D": "20 km pedalados em um só passeio",
   "bdgKm40": "Clube dos 40 km",
-  "bdgKm40D": "40 km pedalados",
+  "bdgKm40D": "40 km pedalados em um só passeio",
   "bdgKm70": "Clube dos 70 km",
-  "bdgKm70D": "70 km pedalados",
+  "bdgKm70D": "70 km pedalados em um só passeio",
   "bdgKm100": "Clube dos 100 km",
-  "bdgKm100D": "100 km pedalados",
-  "bdgKm20A": "Cada passeio de sábado que você conclui soma a distância: normalmente 20 km com os iniciantes e 40 km com os intermediários. Chegue a 20 km para ganhar este emblema.",
-  "bdgKm40A": "Cada passeio de sábado que você conclui soma a distância: normalmente 20 km com os iniciantes e 40 km com os intermediários. Chegue a 40 km para ganhar este emblema.",
-  "bdgKm70A": "Cada passeio de sábado que você conclui soma a distância: normalmente 20 km com os iniciantes e 40 km com os intermediários. Chegue a 70 km para ganhar este emblema.",
-  "bdgKm100A": "Cada passeio de sábado que você conclui soma a distância: normalmente 20 km com os iniciantes e 40 km com os intermediários. Chegue a 100 km para ganhar este emblema."
+  "bdgKm100D": "100 km pedalados em um só passeio",
+  "bdgKm20A": "Por pedalar 20 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
+  "bdgKm40A": "Por pedalar 40 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
+  "bdgKm70A": "Por pedalar 70 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
+  "bdgKm100A": "Por pedalar 100 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km."
 }
