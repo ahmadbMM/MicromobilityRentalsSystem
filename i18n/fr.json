@@ -5280,15 +5280,15 @@
   "infoEvPetro": "Les sorties du soir de Petromin sur le Circuit de la Corniche de Djeddah, pour l’équipe Petromin. Choisissez une soirée, choisissez votre vélo et roulez avec vos collègues.",
   "s13BikeChanged": "Ce vélo vient d'être modifié sur un autre appareil. La liste est à jour — vérifiez-la et réessayez.",
   "bdgKm20": "Club des 20 km",
-  "bdgKm20D": "20 km parcourus en sorties communautaires",
+  "bdgKm20D": "20 km parcourus à vélo",
   "bdgKm40": "Club des 40 km",
-  "bdgKm40D": "40 km parcourus en sorties communautaires",
+  "bdgKm40D": "40 km parcourus à vélo",
   "bdgKm70": "Club des 70 km",
-  "bdgKm70D": "70 km parcourus en sorties communautaires",
+  "bdgKm70D": "70 km parcourus à vélo",
   "bdgKm100": "Club des 100 km",
-  "bdgKm100D": "100 km parcourus en sorties communautaires",
-  "bdgKm20A": "Chaque sortie communautaire terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 20 km pour obtenir ce badge.",
-  "bdgKm40A": "Chaque sortie communautaire terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 40 km pour obtenir ce badge.",
-  "bdgKm70A": "Chaque sortie communautaire terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 70 km pour obtenir ce badge.",
-  "bdgKm100A": "Chaque sortie communautaire terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 100 km pour obtenir ce badge."
+  "bdgKm100D": "100 km parcourus à vélo",
+  "bdgKm20A": "Chaque sortie du samedi terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 20 km pour obtenir ce badge.",
+  "bdgKm40A": "Chaque sortie du samedi terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 40 km pour obtenir ce badge.",
+  "bdgKm70A": "Chaque sortie du samedi terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 70 km pour obtenir ce badge.",
+  "bdgKm100A": "Chaque sortie du samedi terminée ajoute sa distance : en général 20 km avec les débutants et 40 km avec les intermédiaires. Atteignez 100 km pour obtenir ce badge."
 }
