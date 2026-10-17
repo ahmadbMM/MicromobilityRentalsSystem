@@ -8509,7 +8509,8 @@ function _infoFacts(s,next){
   if(k==='runher')rows.push([t('runKmLabel'),esc(RUN_KMS.map(_runKmTxt).join(' · '))]);
   if(k==='vlap'){const c=_vlCfg(s);rows.push([t('vlRacesLabel'),esc(c.races.map(_vlRaceTxt).join(' · '))]);rows.push([t('vlDivsLabel'),esc(c.divs.map(d=>_vlDivTxt(d)+' '+_vlKmTxt(d)).join(' · '))]);}
   if(_hasRideGroups(s))rows.push([t('infoGroups'),esc(RIDE_GROUPS.map(g=>`${_rgName(g)} ${_rgKmTxt(s,g)}`).join(' · '))]);
-  if(!_isApprovalRide(s)){const n=spotsLeft(s.id);rows.push([t('infoPlaces'),esc(_sessFull(s)||n<=0?t('waitlistLabel'):spotsLeftLabel(n))]);}
+  // Victory Lap says open or waitlist, never how many places (the owner, 2026-10-17: "dont show a specific number of spots")
+  if(!_isApprovalRide(s)){const n=spotsLeft(s.id);rows.push([t('infoPlaces'),esc(_sessFull(s)||n<=0?t('waitlistLabel'):k==='vlap'?t('availLabel'):spotsLeftLabel(n))]);}
   {const bf=_spotHeld(s)?_revealLine(s):_bfAt(s);if(bf)rows.push([t('infoAfter'),esc(bf)]);} // the breakfast spot, or when it is told
   return rows;
 }
@@ -11917,7 +11918,7 @@ function renderRegister(){
         const _c=_evNamed(s);
         // An APPROVAL ride never hints at fullness from computed spots - customers only see
         // "waitlist" once staff explicitly mark the session full. A seat-based one counts down.
-        const _low=!isFull&&!_isApprovalRide(s)&&_n>0&&_n<=3;
+        const _low=!isFull&&!_isApprovalRide(s)&&_rideKind(s)!=='vlap'&&_n>0&&_n<=3; // Victory Lap never counts its places out loud (2026-10-17)
         const _rej=_wasRejectedFor(s.id);
         // One shape for every card in a list, so a list of sessions reads as a column and not
         // as a ragged stack: the ride's name on its own line (only the named rides carry one,
