@@ -5290,5 +5290,9 @@
   "bdgKm20A": "Por pedalar 20 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
   "bdgKm40A": "Por pedalar 40 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
   "bdgKm70A": "Por pedalar 70 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
-  "bdgKm100A": "Por pedalar 100 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km."
+  "bdgKm100A": "Por pedalar 100 km em um único passeio. No passeio de sábado, os iniciantes costumam pedalar 20 km e os intermediários 40 km.",
+  "rateRunBtn": "Avalie sua corrida",
+  "rateRunTitle": "Como foi sua corrida?",
+  "rateRunThanks": "Obrigado por avaliar sua corrida.",
+  "waRateRunMsg": "Obrigado por correr com a MicroMobility! Como foi sua corrida? Avalie aqui:\\n\\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:"
 }

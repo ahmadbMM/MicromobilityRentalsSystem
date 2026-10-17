@@ -122,3 +122,23 @@ test('a ride still out does not ask', async ({ page }) => {
   await boot(page, [sess(today)], [row('q1', today, { status: 'active', checked_out_at: null })]);
   expect(await open(page)).toBe(false);
 });
+
+// Run for Her is a run (the owner, 2026-10-17): no bike question and no "ride" on its page, even when
+// the run's session is not in the list (its id, '<date>-rh', says it is a run).
+for (const loaded of [true, false]) test(`Run for Her asks service and experience, no bike, and says run${loaded ? '' : ' (session not loaded)'}`, async ({ page }) => {
+  const id = today + '-rh';
+  const s = { ...sess(today, { day: 'Saturday', event_kind: 'community', ride_kind: 'runher', location: 'JYC' }), id };
+  const calls = await boot(page, loaded ? [s] : [], [row('q1', today, { session_id: id, session_day: 'Saturday', paid: false, price: 0, run_km: 5 })]);
+  expect(await open(page)).toBe(true);
+  expect(await qs(page)).toEqual(['service', 'experience']);
+  const m = page.locator('#rate-modal');
+  await expect(m.locator('#rate-title')).toHaveText('How was your run?');
+  await expect(m).not.toContainText(/bike|ride/i);
+  await m.locator('#rgq-service .rg-b[data-v="10"]').click();
+  await m.locator('#rgq-experience .rg-b[data-v="9"]').click();
+  await m.locator('.pg-btn').click();
+  await expect.poll(() => calls.length).toBe(1);
+  expect(calls[0].p_patch).toEqual({ rating_bike: null, rating_exp: 9, feedback: null,
+    rating_detail: { form: 'rental', s: { service: 10, experience: 9 }, why: {} } });
+  await expect(page.locator('#toast, .toast').first()).toContainText('Thanks for rating your run.');
+});

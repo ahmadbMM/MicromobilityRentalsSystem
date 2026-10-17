@@ -5290,5 +5290,9 @@
   "bdgKm20A": "Pour avoir parcouru 20 km à vélo en une seule sortie. Lors de la sortie du samedi, les débutants roulent en général 20 km et les intermédiaires 40 km.",
   "bdgKm40A": "Pour avoir parcouru 40 km à vélo en une seule sortie. Lors de la sortie du samedi, les débutants roulent en général 20 km et les intermédiaires 40 km.",
   "bdgKm70A": "Pour avoir parcouru 70 km à vélo en une seule sortie. Lors de la sortie du samedi, les débutants roulent en général 20 km et les intermédiaires 40 km.",
-  "bdgKm100A": "Pour avoir parcouru 100 km à vélo en une seule sortie. Lors de la sortie du samedi, les débutants roulent en général 20 km et les intermédiaires 40 km."
+  "bdgKm100A": "Pour avoir parcouru 100 km à vélo en une seule sortie. Lors de la sortie du samedi, les débutants roulent en général 20 km et les intermédiaires 40 km.",
+  "rateRunBtn": "Notez votre course",
+  "rateRunTitle": "Comment s’est passée votre course ?",
+  "rateRunThanks": "Merci d’avoir noté votre course.",
+  "waRateRunMsg": "Merci d’avoir couru avec MicroMobility ! Comment s’est passée votre course ? Notez-la ici :\\n\\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:"
 }

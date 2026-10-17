@@ -5290,5 +5290,9 @@
   "bdgKm20A": "Por recorrer 20 km en bici en una sola salida. En la salida del sábado, los principiantes suelen hacer 20 km y los intermedios 40 km.",
   "bdgKm40A": "Por recorrer 40 km en bici en una sola salida. En la salida del sábado, los principiantes suelen hacer 20 km y los intermedios 40 km.",
   "bdgKm70A": "Por recorrer 70 km en bici en una sola salida. En la salida del sábado, los principiantes suelen hacer 20 km y los intermedios 40 km.",
-  "bdgKm100A": "Por recorrer 100 km en bici en una sola salida. En la salida del sábado, los principiantes suelen hacer 20 km y los intermedios 40 km."
+  "bdgKm100A": "Por recorrer 100 km en bici en una sola salida. En la salida del sábado, los principiantes suelen hacer 20 km y los intermedios 40 km.",
+  "rateRunBtn": "Valora tu carrera",
+  "rateRunTitle": "¿Qué tal tu carrera?",
+  "rateRunThanks": "Gracias por valorar tu carrera.",
+  "waRateRunMsg": "¡Gracias por correr con MicroMobility! ¿Qué tal tu carrera? Valórala aquí:\\n\\nشكراً لمشاركتك في الجري مع مايكروموبيليتي! كيف كان الجري؟ قيّمه هنا:"
 }
