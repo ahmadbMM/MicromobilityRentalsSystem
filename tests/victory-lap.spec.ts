@@ -53,8 +53,8 @@ test.describe('@customer:vlap Victory Lap', () => {
 
   test('no number of places is ever said: Details say Available, a nearly full date no "places left"', async ({ page }) => {
     await custBoot(page);
-    const facts = await page.evaluate(`(()=>{S.queue=[];const s=_sessGet('${VL}');s.spots=2;return _infoFacts(s).map(r=>r.join('|'))})()`);
-    expect(facts.find((r: string) => r.startsWith('Places'))).toBe('Places|Available');
+    const facts: string[] = await page.evaluate(`(()=>{S.queue=[];const s=_sessGet('${VL}');s.spots=2;return _infoFacts(s).map(r=>r.join('|'))})()`);
+    expect(facts.find((r) => r.startsWith('Places'))).toBe('Places|Available');
     await page.locator('#land-events .landing-event-card.ev-vlap').click();
     await expect.poll(() => page.evaluate('S.selSession')).toBe(VL);
     await expect(page.locator('#tab-register')).not.toContainText(/place(s)? left/i);
