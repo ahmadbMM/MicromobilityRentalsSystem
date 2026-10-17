@@ -185,6 +185,24 @@ test.describe('@staff:community list filters and money spent', () => {
     expect(inv).toEqual({ sugg: ['i1', 'i2'], dec: ['i2', 'i1'], name: ['i1', 'i2'] });
   });
 
+  test('updated applicants sit on top only in the Suggested order; a picked Sort orders the whole list, Invited too (2026-10-17)', async ({ page }) => {
+    await staff(page, 'applications');
+    await expect(page.locator('.ca-row')).toHaveCount(3);
+    // Huda (a2, 160 cm) answered Ask for changes: on top while Suggested
+    await page.evaluate(`(()=>{S._caApps.find(a=>a.id==='a2').fix_done_at='2026-10-16T10:00:00Z';renderCommunity();})()`);
+    expect((await ids(page, '.ca-row', 'data-app-id'))[0]).toBe('a2');
+    // Tallest first is strict: Ali 185, Karim 178, Huda 160 last
+    const sort = page.locator('.ca-tb select[aria-label="Sort"]');
+    await sort.selectOption('tall');
+    expect(await ids(page, '.ca-row', 'data-app-id')).toEqual(['a3', 'a1', 'a2']);
+    await sort.selectOption('');
+    expect((await ids(page, '.ca-row', 'data-app-id'))[0]).toBe('a2');
+    // the Invited list shows the Sort too
+    await page.evaluate(`(()=>{S._caFilter='invited';renderCommunity();})()`);
+    await expect(page.locator('.ca-inv-subs')).toBeVisible();
+    await expect(sort).toBeVisible();
+  });
+
   test('the account report, Birthdays and Flagged filter and sort by money spent too', async ({ page }) => {
     await staff(page, 'accounts', 'customers');
     const rep = await page.evaluate(`(()=>{const o=_accOpts();const out={};

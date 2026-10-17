@@ -18870,7 +18870,7 @@ function _commApplications(){
     <div class="filter-row cmy-mb8">${_appSrch('ca')}${_fBtn('caap',_apOnN('ca'))}${Object.keys(CA_STATUS).map(k=>pill(k,t(CA_STATUS[k].k))).join('')}<button type="button" class="filter-pill ca-refresh" data-on-click="${_on("_caLoad")}">${t('ridersRefresh')}</button>${isAdmin()?`<button type="button" class="filter-pill ca-custom${S._apSet?' active':''}" aria-expanded="${S._apSet?'true':'false'}" data-on-click="${_on("_apSetToggle")}">${_artIcon('cog',13)} ${t('apCustomize')}</button>`:''}</div>
     ${S._apSet&&isAdmin()?_apSettings():''}
     ${_apPanel('ca')}
-    ${f==='invited'?_caInvSubs():_caToolbar(f)}
+    ${f==='invited'?_caInvSubs():''}${_caToolbar(f)}
     <div class="ca-list" id="ca-list">${_appList('ca')}</div>
   </div>`;
 }
@@ -19064,8 +19064,10 @@ function _appList(k){
   if(k==='ca'&&(S._caFilter!=='invited'||_caView().sort))_caSortList(list); // a picked Sort orders Invited too (2026-10-11)
   if(k==='la')_apSortList('la',list); // the community list's order is its toolbar's Sort (_caSortList)
   // Pending ones the applicant has updated after Ask for changes go to the top, the latest update
-  // first (the owner, 2026-10-09); the Sort above orders the rest. Asking again clears fix_done_at.
-  if((S[k==='la'?'_laFilter':'_caFilter']||'pending')==='pending')
+  // first (the owner, 2026-10-09), in the Suggested order only: a Sort staff pick orders the whole
+  // list (2026-10-17: with 25 updated cards pinned above it, every Sort and filter looked dead).
+  // Asking again clears fix_done_at.
+  if((S[k==='la'?'_laFilter':'_caFilter']||'pending')==='pending'&&!(k==='la'?(S._apSort||{}).la:_caView().sort))
     list.sort((x,y)=>(_apTm(y.fix_done_at)||0)-(_apTm(x.fix_done_at)||0));
   return list.map(k==='la'?_laRow:_caRow).join('')||_emptyState(t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty'));
 }
