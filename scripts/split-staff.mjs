@@ -1320,7 +1320,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 612 -> 616, core 272 -> 276 (2026-10-14, the bug hunt): ~30 workers' guards and fixes, and the split now keeps in
 // the core what core code reached only by name calls (_remTargets, _socLinkHtml, _sessRawTime sat in parts and threw):
 // core 271.4 / staff 607.7 here, ~272.7 / ~610 on the runner; +4 each restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 235, staff: 616, core: 276 };
+// Customer 235 -> 238, staff 616 -> 620, core 276 -> 279 (2026-10-17, Defe's places on the Saturday ride): the partner
+// ticket line, the members' own-bike limit, ?signin=, the partner chip, filter, report column and Bookings panel:
+// customer 233.6 / staff 610.7 / core 274.2 here, 235.0 / 613.3 / 275.3 on the runner; +3 / +4 / +3 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 238, staff: 620, core: 279 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
