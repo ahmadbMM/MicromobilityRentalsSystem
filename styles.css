@@ -9674,3 +9674,25 @@ body.view-staff .am-list .am-soc-ig .ig-chip.ig-none span{text-decoration:underl
   #tab-community .mg-pick input,#tab-customers .mg-pick input{width:100%!important;max-width:none;box-sizing:border-box;}
   #tab-community .mg-manual+button,#tab-customers .mg-manual+button{width:100%;justify-content:center;}
 }
+
+/* ══ PARTNER PLACES (Defe, the owner, 2026-10-17) ════════════════════════════════════════════════
+   A partner's booking: the rider's line on the ticket, the staff chip after the name, and the
+   Bookings panel. Defe's colours: berry #A22B63, rose #D782A0, blush #FBE4EE. */
+.ptn-line{margin:10px 0 0;padding:6px 10px;border-inline-start:3px solid #D782A0;background:#FBE4EE;color:#A22B63;font-weight:700;font-size:13px;border-radius:0;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .ptn-line{background:#A22B63;color:#FFFFFF;border-color:#D782A0;}
+.mb-full-note{margin:0 0 8px;}
+.ptn-chip{display:inline-block;margin-inline-start:6px;padding:1px 6px;border:1px solid #D782A0;background:#FBE4EE;color:#A22B63;font-size:11px;font-weight:800;letter-spacing:.4px;line-height:1.5;border-radius:2px;white-space:nowrap;vertical-align:middle;}
+html[data-theme="dark"] .ptn-chip{background:rgba(215,130,160,.18);color:#F2B6CC;border-color:#D782A0;}
+#tab-queue .ptn-panel{margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-inline-start:3px solid #D782A0;background:var(--s1);border-radius:0;}
+#tab-queue .ptn-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}
+#tab-queue .ptn-card{padding:6px 0;border-top:1px solid var(--border);}
+#tab-queue .ptn-card:first-of-type{border-top:0;}
+#tab-queue .ptn-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}
+#tab-queue .ptn-row .ptn-chip{margin:0;}
+#tab-queue .ptn-n{font-size:14px;}
+#tab-queue .ptn-sub{font-size:12px;color:var(--muted);}
+#tab-queue .ptn-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;margin:6px 0 0;}
+#tab-queue .ptn-form label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:700;color:var(--muted);}
+#tab-queue .ptn-form input[type=number],#tab-queue .ptn-form input[type=text]{width:120px;height:32px;padding:0 8px;border-radius:0;}
+#tab-queue .ptn-form label.ptn-sw{flex-direction:row;align-items:center;gap:6px;height:32px;}
+#tab-queue .ptn-form .ptn-save{height:32px;border-radius:0;}

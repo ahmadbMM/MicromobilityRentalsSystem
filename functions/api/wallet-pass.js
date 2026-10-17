@@ -1369,7 +1369,7 @@ async function onRequestPost(context) {
   const approvalRide = sess ? _isApprovalRide(sess) : b.approval != null;
   if (approvalRide) {
     if (!sess) return json({ ok: false, error: "session unavailable" }, 503);
-    if (b.approval !== "approved" || !_commPublished(sess)) return json({ ok: false, error: "not confirmed" }, 409);
+    if (b.approval !== "approved" || !(_commPublished(sess) || b.partner)) return json({ ok: false, error: "not confirmed" }, 409);
     group = group.filter((r) => r.approval === "approved");
   }
   const { addons, known: addonsKnown } = await _serverAddons(SUPA, ANON, group);

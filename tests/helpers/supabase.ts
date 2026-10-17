@@ -45,13 +45,17 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_set_house', 'staff_audit_search', 'staff_invite_check',
   // Ride reminders and waitlist offers (20261009225000): without them the desk offers Automatic / Staff only and the
   // rider's claim page says the link holds no offer; tests/s1010-remind-*.spec.ts stub them by name.
-  'staff_offer_spot', 'customer_claim_get', 'customer_claim_spot']);
+  'staff_offer_spot', 'customer_claim_get', 'customer_claim_spot',
+  // Partner places (20261017120000): without it every member may take one of our bikes, as before;
+  // tests/partner-places.spec.ts stubs it by name.
+  'member_bikes_open']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
  *  numbers). Every request to one answers as a database without it does (PGRST205), unless the spec
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
-const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals']);
+const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals',
+  'session_partners']); // partner places (20261017120000): tests/partner-places.spec.ts gives it rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),

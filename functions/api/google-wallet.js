@@ -205,7 +205,8 @@ export async function onRequestPost(context) {
     if (!sess) return json({ ok: false, error: "session unavailable" }, 503);
     // Approved AND the list published, as the app's _walletOk and the Apple pass hold it: until the
     // list goes out a rider's place is not theirs to know, let alone carry as a signed ticket.
-    if (b.approval !== "approved" || !isPublished(sess)) return json({ ok: false, error: "not confirmed" }, 409);
+    // A partner's booking (queue_entries.partner, 20261017120000) is confirmed when it is made.
+    if (b.approval !== "approved" || !(isPublished(sess) || b.partner)) return json({ ok: false, error: "not confirmed" }, 409);
     group = group.filter((r) => r.approval === "approved");
   }
   const origin = new URL(request.url).origin;

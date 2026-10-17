@@ -100,7 +100,9 @@ export async function onRequestPost(context) {
   const approvalRide = sess ? _isApprovalRide(sess) : b.approval != null;
   if (approvalRide) {
     if (!sess) return json({ ok: false, error: "session unavailable" }, 503);
-    if (b.approval !== "approved" || !_commPublished(sess)) return json({ ok: false, error: "not confirmed" }, 409);
+    // A partner's booking (queue_entries.partner, partner_book, 20261017120000) is confirmed when it
+    // is made: it needs no Publish (the owner, 2026-10-17).
+    if (b.approval !== "approved" || !(_commPublished(sess) || b.partner)) return json({ ok: false, error: "not confirmed" }, 409);
     group = group.filter((r) => r.approval === "approved");
   }
   // The add-ons are read here, off the bookings themselves and the shop's own prices: the list the
