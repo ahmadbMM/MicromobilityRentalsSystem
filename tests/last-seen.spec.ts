@@ -44,6 +44,12 @@ test.describe('@staff:community last opened and last signed in', () => {
     const cells = await page.evaluate(`_accRows().map(r=>[r.c.id,r.cells.lastSeen,r.cells.lastSignin])`) as string[][];
     expect(cells.find((c) => c[0] === 'a2')![1]).toContain('Website');
     expect(cells.find((c) => c[0] === 'a3')!.slice(1)).toEqual(['', '']);
+    // Last login (the owner, 2026-10-17): the later of the two, the date alone - no time, no Website/App.
+    const login = await page.evaluate(`Object.fromEntries(_accRows().map(r=>[r.c.id,r.cells.lastLogin]))`) as Record<string, string>;
+    expect(login.a1).toBe(await page.evaluate(`shortDate(_ksaDayOf(${JSON.stringify(seen[0].seen_at)}))`));
+    expect(login.a2).not.toMatch(/:|Website/);
+    expect(login.a2).toBe(await page.evaluate(`shortDate(_ksaDayOf(${JSON.stringify(seen[1].seen_at)}))`));
+    expect(login.a3).toBe('');
   });
 
   test('report builder and Accounts list carry the new choices', async ({ page }) => {
@@ -51,6 +57,7 @@ test.describe('@staff:community last opened and last signed in', () => {
     await page.evaluate('showAccountReportOptions()');
     const dlg = page.locator('#print-opts-modal');
     await expect(dlg.getByLabel('Last opened the app or website', { exact: true }).first()).toHaveCount(1);
+    await expect(dlg.locator('button[data-rep="cols:lastLogin"]')).toContainText('Last login');
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_seen"]')).toHaveCount(1);
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_signinOld"]')).toHaveCount(1);
     await page.evaluate(`closeModal&&document.querySelectorAll('.modal-overlay').forEach(m=>m.remove())`).catch(() => {});
