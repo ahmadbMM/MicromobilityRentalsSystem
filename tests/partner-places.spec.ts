@@ -162,6 +162,71 @@ test.describe('@staff:bookings partner places', () => {
     expect(await page.evaluate(`_repColFits(_sessGet('${SAT}'),'ptn')`)).toBe(true);
   });
 
+  test('the ribbon badge and the rose stripe mark Defe wherever staff see the booking; a member has neither', async ({ page }) => {
+    await boot(page);
+    const res = page.locator('#q-results');
+    // the desktop draws the Bookings table, a phone the cards: whichever is on show carries the marks
+    await expect(res.locator('[data-id="d1"]').first()).toBeVisible();
+    const cards = (await res.locator('.q-card[data-id="d1"]').count()) > 0;
+    const sel = (id: string) => (cards ? `.q-card[data-id="${id}"]` : `tbody tr[data-id="${id}"]`);
+    const dRow = res.locator(sel('d1'));
+    await expect(dRow).toHaveClass(/ptn-row-mark/);
+    const chip = dRow.locator('.ptn-chip');
+    await expect(chip).toHaveText('DEFE');
+    await expect(chip.locator('svg.ptn-rb path')).toHaveCount(2);
+    await expect(chip).toHaveAttribute('aria-label', 'With Defe');
+    // berry on blush in the staff light theme, whatever the customer side's theme is
+    expect(await chip.evaluate((el) => [getComputedStyle(el).backgroundColor, getComputedStyle(el).color])).toEqual(['rgb(251, 228, 238)', 'rgb(162, 43, 99)']);
+    // the stripe is drawn: a rose inset on the start edge (the table's first cell, the card itself)
+    const edge = cards ? dRow : dRow.locator('td').first();
+    expect(await edge.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('rgb(215, 130, 160)');
+    // a member's has neither
+    const mRow = res.locator(sel('m1'));
+    await expect(mRow).toBeVisible();
+    await expect(mRow).not.toHaveClass(/ptn-row-mark/);
+    await expect(mRow.locator('.ptn-chip')).toHaveCount(0);
+    expect(await (cards ? mRow : mRow.locator('td').first()).evaluate((el) => getComputedStyle(el).boxShadow)).not.toContain('rgb(215, 130, 160)');
+    // the check-in desk
+    await page.evaluate(`showCheckinModal('d1')`);
+    await expect(page.locator('#dlgt-checkin .ptn-chip svg.ptn-rb')).toHaveCount(1);
+    await expect(page.locator('#dlgt-checkin .ptn-chip')).toHaveText('DEFE');
+    await page.evaluate(`closeCheckinModal()`);
+    await page.evaluate(`showCheckinModal('m1')`);
+    await expect(page.locator('#dlgt-checkin')).toContainText('Member One');
+    await expect(page.locator('#dlgt-checkin .ptn-chip')).toHaveCount(0);
+    await page.evaluate(`closeCheckinModal()`);
+    // the booking editor
+    await page.evaluate(`showBookingEditModal('d1')`);
+    await expect(page.locator('#dlgt-editBookingTitle .ptn-chip')).toHaveText('DEFE');
+    await page.evaluate(`closeBookingEditModal();showBookingEditModal('m1')`);
+    await expect(page.locator('#dlgt-editBookingTitle')).toBeVisible();
+    await expect(page.locator('#dlgt-editBookingTitle .ptn-chip')).toHaveCount(0);
+    await page.evaluate(`closeBookingEditModal()`);
+  });
+
+  test('the report puts Partner on for a ride with partner rows, off for one without; a pick holds for its ride', async ({ page }) => {
+    await boot(page);
+    await page.evaluate(`localStorage.removeItem('cq_rep_opts');S._repOpts=null;showPrintReportOptions()`);
+    await expect(page.locator('#print-opts-modal [data-rep="cols:ptn"]')).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.evaluate(`_repOpts().cols.ptn`)).toBe(1);
+    // a ride without partner rows: off
+    expect(await page.evaluate(`_repPtnSync('2099-01-17').cols.ptn`)).toBe(0);
+    // staff untick it on this ride: it stays off here, and another ride still decides for itself
+    await page.evaluate(`_repPtnSync('${SAT}');_repToggle('cols','ptn')`);
+    expect(await page.evaluate(`_repPtnSync('${SAT}').cols.ptn`)).toBe(0);
+    expect(await page.evaluate(`_repPtnSync('2099-01-17').cols.ptn`)).toBe(0);
+    await page.evaluate(`_repReset()`);
+    expect(await page.evaluate(`_repPtnSync('${SAT}').cols.ptn`)).toBe(1);
+    // the CSV's Partner column: the label for Defe, empty for a member
+    const rows = await page.evaluate(`(()=>{let out=null;const o=window._downloadCsv;window._downloadCsv=(n,r)=>{out=r;};try{exportSessionExcel();}finally{window._downloadCsv=o;}return out;})()`) as string[][] | null;
+    expect(rows).not.toBeNull();
+    const head = rows![0], pi = head.indexOf('Partner'), ni = head.indexOf('Name');
+    expect(pi).toBeGreaterThan(-1);
+    const byName = (n: string) => rows!.find((r) => r[ni] === n)!;
+    expect(byName('Defe Rider')[pi]).toBe('Defe');
+    expect(byName('Member One')[pi]).toBe('');
+  });
+
   test('without the table there is no panel and the roster draws as before', async ({ page }) => {
     await boot(page); // session_partners answers PGRST205
     await page.waitForTimeout(400);

@@ -193,3 +193,6 @@ section{break-inside:avoid}
 /* Report for Sela (2026-10-08): waitlist rows shaded, and the key beside the legend line */
 :root tr.rp-wl td,table.rp-live tbody tr.rp-wl td{background:#fef3c7}
 .rp-wl-key{display:inline-block;width:12px;height:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:2px;vertical-align:-2px}
+/* A partner's booking (Defe, 2026-10-17): the ribbon badge after the rider's name, as staff see it */
+.ptn-chip{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:0 5px 0 3px;border:1px solid #D782A0;background:#FBE4EE;color:#A22B63;font-size:9.5px;font-weight:800;letter-spacing:.4px;line-height:1.5;border-radius:2px;white-space:nowrap;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ptn-chip .ptn-rb{flex:none;display:block;width:10px;height:10px}

@@ -10477,7 +10477,7 @@ function renderManagedWl(listOnly){
           return`<div class="rq-mwrow${_party?' rq-pt7':''}">
             <div class="rq-mwl">
               ${(_party||w._virtual)?'':_posBox(w.id)}
-              <span class="rq-mwname">${esc(w.name)}</span>
+              <span class="rq-mwname">${esc(w.name)}</span>${bk?_ptnChip(bk):''}
               ${bk?`<span class="rq-mwnum">#${bk.queueNum}${bk.waitlistNum?` \u00b7 W${bk.waitlistNum}`:''}</span>`:''}
               ${(bk&&bk.status==='waitlist'&&bk.waitlistNum)?`<input type="number" min="1" value="${bk.waitlistNum}" aria-label="W" data-on-click="${_on("_on_renderManagedWl_3",_EV,_EL)}" data-on-change="${_on("wlSetPos",bk.id,_P("value"))}" data-on-keydown="${_on("_on_renderManagedWl_4",_EV,_EL)}" class="rq-mwwl">`:''}
               ${(!_party&&w.phone)?`<span class="rq-mwph"><bdi>${_pii('phone',fmtPhone(w.phone),(bk&&bk.customerId)||w.customer_id||'',bk?bk.id:'w'+w.id)}</bdi></span>`:''}
@@ -11251,7 +11251,7 @@ function printDaySheet(){
     return `<section><h2>${esc(_evName(x))}${_t?` &middot; ${esc(_t)}`:''}${_bfAt(x)?` &middot; ${esc(_bfAt(x))}`:''}<span class="rp-h2n">${t(run?'repRunners':'daySheetRiders')}: ${rows.length}</span></h2>
       <table><thead><tr><th>#</th><th>${t('colRider')}</th>${run?`<th>${t('runKmLabel')}</th>`:bike?`<th>${t('bikeTypeLabel')}</th>`:''}<th>${t('colStatus')}</th><th>${t('filterPay')}</th></tr></thead><tbody>
       ${rows.map(e=>{const price=e.price??DEFAULT_PRICE;
-        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
+        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_ptnChip(e)}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
         ||`<tr><td colspan="${run||bike?5:4}">—</td></tr>`}
       </tbody></table></section>`;
   }).join('');
@@ -15664,8 +15664,13 @@ const ICON_PENCIL=_artIcon('pencil',12);
 const ICON_PRINT=_artIcon('print');
 const ICON_EXPORT=_artIcon('download');
 const ICON_RESCHEDULE=_artIcon('cycle');
-// A partner's booking on the roster (Defe, 2026-10-17): its name in a chip after the rider's.
-function _ptnChip(e){if(!e||!e.partner)return'';const l=_ptnLabel(e.partner);return`<span class="ptn-chip" title="${esc(t('ptnWith').replace('{0}',l))}">${esc(l.toUpperCase())}</span>`;}
+// A partner's booking (Defe, 2026-10-17): an awareness ribbon and the partner's name, berry on blush, after
+// the rider's name wherever staff see the booking (Bookings, check-in, scanner, editor, history, print).
+// The owner, 2026-10-17: "i want there to be a unique indicator on defe bookings so we can distinguish
+// them from our own". Rows and cards of these bookings also carry _ptnRow (a rose stripe on the start edge).
+const _PTN_RIBBON='<svg class="ptn-rb" aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21L14.7 9.2c.9-1.5 1-2.7.6-3.8a3.5 3.5 0 0 0-6.6 0c-.4 1.1-.3 2.3.6 3.8l1.4 2.2"/><path d="M13.1 13.6L17 21"/></svg>';
+function _ptnChip(e){if(!e||!e.partner)return'';const l=_ptnLabel(e.partner),w=esc(t('ptnWith').replace('{0}',l));return`<span class="ptn-chip" role="img" title="${w}" aria-label="${w}">${_PTN_RIBBON}<span aria-hidden="true">${esc(l.toUpperCase())}</span></span>`;}
+function _ptnRow(x){return(Array.isArray(x)?x.some(e=>e&&e.partner):!!(x&&x.partner))?' ptn-row-mark':'';}
 function noShowFlag(e){
   const n=customerNoShows(e);
   return n>=3?`<span title="${t('noShowFlagTip').replace('{0}',n)}" class="rq-nsflag">${n}</span>`:'';
@@ -22109,7 +22114,7 @@ function showBookingEditModal(entryId){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showBookingEditModal_2",_EV,_EL)}">
     <div class="modal-box dk-mw420" role="dialog" aria-modal="true" aria-labelledby="dlgt-editBookingTitle">
-      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · #${e.queueNum}</div>
+      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · #${e.queueNum}${_ptnChip(e)}</div>
       <div class="modal-sub">${t('editBookingSub')}</div>
       <div class="mny-aurow">${_auditBtn('queue_entries',e.id,'#'+e.queueNum+' '+(e.name||''))}</div>
       <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60" data-on-input="${_on("_nameInput",_EL)}"></div>
@@ -22954,7 +22959,7 @@ function renderQRow(e){
       ?`<div class="pos-badge rq-pos" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
       :`<span class="rq-mut12">—</span>`;
     const _flashCls=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:''
-    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}" data-id="${esc(e.id)}">
+    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}" data-id="${esc(e.id)}">
       <td class="rq-w52">
         ${(_apprSessIds.has(e.sessionId)&&!e.partner&&!_commPublished(_rowSess(e)))?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}`:`
         <span class="queue-num-cell ${e.status!=='waiting'?'rq-fs18':'rq-fs22'}">#${e.queueNum}</span>
@@ -23035,7 +23040,7 @@ function renderQRow(e){
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
         ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row rq-gleft" data-id="${esc(primary.id)}">
+      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}" data-id="${esc(primary.id)}">
         <td class="rq-w52 rq-vm">
           <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group))}
@@ -23085,7 +23090,7 @@ function renderQRow(e){
       const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ');
 
       if(isFirst){
-        return`<tr class="${rowCls} ${trCls}" data-id="${esc(e.id)}">
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}" data-id="${esc(e.id)}">
           <td rowspan="${n}" class="rq-w52 rq-vm">
             <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
             ${_bookedAt(_bookedAtOf(group))}
@@ -23114,7 +23119,7 @@ function renderQRow(e){
           <td class="rq-vm"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
-        return`<tr class="${rowCls} ${trCls}" data-id="${esc(e.id)}">
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}" data-id="${esc(e.id)}">
           <td class="rq-vm">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?typeCell:''}
@@ -23157,7 +23162,7 @@ function renderQRow(e){
         <div class="rq-sb8">
           <div class="rq-cl">
             ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
-            <span class="rider-name rq-cname">${esc(e.name)}</span>${_dupMark(e)}${_dqMark(e)}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
@@ -23174,7 +23179,7 @@ function renderQRow(e){
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
       const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft" data-id="${esc(primary.id)}">
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}" data-id="${esc(primary.id)}">
         <div class="rq-chw ${sessLabel?'rq-mb4':'rq-mb6'}">
           <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
@@ -23184,7 +23189,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div class="rq-sb8">
-          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_dqMark(group)}</div>
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_dqMark(group)}</div>
             <div class="rq-csub">${_partyCountsLine(group)}</div></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
@@ -23198,7 +23203,7 @@ function renderQRow(e){
         </div>
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}" data-id="${esc(primary.id)}">
+    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}" data-id="${esc(primary.id)}">
       <div class="rq-ch ${sessLabel?'rq-mb4':'rq-mb6'}">
         <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
         ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span class="rq-wnum2">W${primary.waitlistNum}</span>`:''}
@@ -29023,6 +29028,13 @@ function _repOpts(){
   return S._repOpts;
 }
 function _repSave(){try{localStorage.setItem('cq_rep_opts',JSON.stringify(_repOpts()));}catch(e){}}
+// The Partner column is on by itself for a ride that has partner bookings, off for one that has none (the
+// owner, 2026-10-17); a tick or untick staff make holds for that ride alone (ptnPick = its id).
+function _repPtnSync(sid){
+  const o=_repOpts();
+  if(o.ptnPick!==sid)o.cols.ptn=sid&&sid!=='all'&&(_qBySession().get(sid)||[]).some(e=>e.partner&&!['cancelled','removed'].includes(e.status))?1:0;
+  return o;
+}
 // A tap on a builder row repaints that row alone: rebuilding the dialog sent it back to the
 // top, replayed its entrance and dropped focus, which read as the whole thing refreshing.
 function _repPaintRow(kind,k,on,rebuild){
@@ -29036,7 +29048,7 @@ function _repPaintRow(kind,k,on,rebuild){
   // So do the account report's two nationality sections' "counted among" pickers.
   if(kind==='sections'&&(k==='natMissing'||k==='natFew')){const d=document.getElementById(`acr-${k}-in`);if(d)d.disabled=!on;}
 }
-function _repToggle(kind,k){const o=_repOpts();o[kind][k]=o[kind][k]?0:1;_repSave();_repPaintRow(kind,k,o[kind][k],showPrintReportOptions);
+function _repToggle(kind,k){const o=_repOpts();o[kind][k]=o[kind][k]?0:1;if(kind==='cols'&&k==='ptn')o.ptnPick=S.sfSession;_repSave();_repPaintRow(kind,k,o[kind][k],showPrintReportOptions);
   if(kind==='cols'&&k==='em'&&o.cols.em)_repEmLoad(S.sfSession);} // ticked: the contacts are read now, so Print opens at once
 function _repSetFilter(k,v){_repOpts()[k]=v;_repSave();_repKmPaint();_repIgPaint();} // the select already shows the pick; only the per-distance counts follow it
 function _repReset(){S._repOpts=_repDefaults();_repSave();showPrintReportOptions();}
@@ -29204,7 +29216,7 @@ function _on_showPrintReportOptions_4(event,el){_closePrintOpts();exportSessionE
 function _on_showPrintReportOptions_5(event,el){_closePrintOpts();printBreakfastReport()}
 function showPrintReportOptions(){
   const m=document.getElementById('print-opts-modal');
-  const o=_repOpts();
+  const o=_repPtnSync(S.sfSession);
   const chk=(on)=>on?_artIcon('boxOn',15):_artIcon('boxOff',15);
   const row=(kind,k,label)=>`<button type="button" data-rep="${kind}:${k}" aria-pressed="${o[kind][k]?'true':'false'}" data-on-click="${_on("_repToggle",kind,k)}" class="rpt-row">${chk(o[kind][k])}<span>${esc(label)}</span></button>`;
   const _types=CAT_RIDE_TYPES; // every bike type a rider can be on, the one list the catalogue keeps (Kids was missing, 2026-10-05)
@@ -30030,7 +30042,7 @@ function exportSessionExcel(km){
     if(!riders.length){toast(t('toastNoExport'),'warning');return;}
     const statusOf=_rosterStatus;
     const _showMem=!!_repOpts().cols.member;
-    const _ptn=!!_repOpts().cols.ptn; // the partner a rider booked through (Defe, 2026-10-17)
+    const _ptn=!!_repPtnSync(sessId).cols.ptn; // the partner a rider booked through (Defe, 2026-10-17)
     const _bike=_needsBike(sess); // no frame to size, no type to hand over
     const _ig=!!_repOpts().cols.ig;
     const headers=['#',t('nameLabel'),...(_showMem?[t('colMember')]:[]),...(_ptn?[t('colPartner')]:[]),t('repColPhone'),...(_bike?[t('heightLabel')+' ('+t('cmUnit')+')',t('repColType')]:[]),t('colStatus'),...(_ig?[t('igTitle')]:[])];
@@ -30200,7 +30212,7 @@ function printCommunityRoster(sess){
   const cm=t('cmUnit');
   const riders=_rosterRiders(sess);
   const _showMem=!!_repOpts().cols.member; // membership is the Saturday-specific column
-  const _ptn=!!_repOpts().cols.ptn; // the partner a rider booked through (Defe, 2026-10-17)
+  const _ptn=!!_repPtnSync(sess.id).cols.ptn; // the partner a rider booked through (Defe, 2026-10-17)
   const _ig=!!_repOpts().cols.ig;
   const _bike=_needsBike(sess); // a pool session has no frame to size and no type to hand over
   const statusOf=_rosterStatus;
@@ -30213,7 +30225,7 @@ function printCommunityRoster(sess){
     const phone=e.phone||(e.customerId?((getCustomers().find(x=>x.id===e.customerId)||{}).phone||''):'')||'';
     return`<tr>
       <td class="rp-seq">${i+1}</td>
-      <td class="rp-name">${esc(e.name||'—')}</td>
+      <td class="rp-name">${esc(e.name||'—')}${_ptnChip(e)}</td>
       ${_showMem?`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`:''}
       ${_ptn?`<td>${e.partner?esc(_ptnLabel(e.partner)):'—'}</td>`:''}
       <td>${phone?`<a href="tel:${esc(phone)}"><bdi>${esc(phone)}</bdi></a>`:'—'}</td>
@@ -30304,7 +30316,7 @@ function printSessionReport(km){
   const _cell={
     seq:    (e,i)=>`<td class="rp-seq">${i+1}</td>`,
     qnum:   e=>`<td class="rp-b7">#${e.queueNum}</td>`, // "#" sets it apart from the row counter beside it
-    name:   e=>`<td class="rp-name">${esc(e.name)}</td>`,
+    name:   e=>`<td class="rp-name">${esc(e.name)}${_ptnChip(e)}</td>`,
     km:     e=>`<td>${_runKmOk(e.runKm)?esc(_runKmTxt(e.runKm)):'—'}</td>`,
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     ptn:    e=>`<td>${e.partner?esc(_ptnLabel(e.partner)):'—'}</td>`,
@@ -30802,7 +30814,7 @@ function _scanBatchHtml(){
   const chips=_scanBatch.map(id=>{
     const e=q.find(x=>x.id===id);if(!e)return '';
     const more=_partyOf(e).filter(x=>x.id!==e.id&&_ciExpected(x)).length; // the party that comes with this ticket
-    return `<li class="bkm-chip"><bdi>#${e.queueNum} ${esc(String(e.name||'').split(' ')[0])}</bdi>${more?`<span class="bkm-cmuted">+${more}</span>`:''}<button type="button" data-on-click="${_on("_scanBatchDrop",e.id)}" aria-label="${esc(t('removeBtn')+' #'+e.queueNum+' '+(e.name||''))}" class="bkm-chipx">×</button></li>`;
+    return `<li class="bkm-chip"><bdi>#${e.queueNum} ${esc(String(e.name||'').split(' ')[0])}</bdi>${_ptnChip(e)}${more?`<span class="bkm-cmuted">+${more}</span>`:''}<button type="button" data-on-click="${_on("_scanBatchDrop",e.id)}" aria-label="${esc(t('removeBtn')+' #'+e.queueNum+' '+(e.name||''))}" class="bkm-chipx">×</button></li>`;
   }).join('');
   return `<ul aria-label="${esc(t('ciBatchLabel'))}" class="bkm-chips">${chips}</ul>
     <button type="button" id="scan-batch-go" class="btn-primary bkm-sgo" data-on-click="${_on("_scanBatchGo")}"${pend?'':' disabled'}>${t('scanBatchGo').replace('{0}',pend)}</button>`;
@@ -31061,6 +31073,7 @@ function _noteTail(e){return e&&e.deskNote?' · '+t('deskNoteTitle')+': '+e.desk
 // through Express, or its own check-in; a rider not expected is told why.
 function _scanTicket(entry,say,_bkOk){
   const nm=entry.name||'';
+  if(entry.partner){const s0=say;say=(m,c)=>{s0(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.ptn-chip'))sp.insertAdjacentHTML('beforeend',_ptnChip(entry));};} // a partner's ticket says so on the banner
   const collecting=_scanMulti&&!S._ciId;
   // A blacklisted rider (a staff signal, never a server block) stops the scan: Stop, and Make an
   // exception carries on as the scan would have.
@@ -31213,9 +31226,9 @@ function renderHandover(){
   const rows=_hoRows(),sel=_hoSelected(),out=_hoOut();
   _hoRemember();
   const card=e=>{const sz=_entryFitText(e);const on=!!(sel&&sel.id===e.id);
-    return `<button type="button" class="ho-row${on?' sel':''}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
+    return `<button type="button" class="ho-row${on?' sel':''}${_ptnRow(e)}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
       <span class="ho-num">#${esc(e.queueNum??'')}</span>
-      <span class="ho-name">${esc(e.name||'')}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
+      <span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
       <span class="ho-spec">${esc(typeLabel(e.typePreference||'Any'))}${sz?' · '+esc(sz):''}</span>
       <span class="ho-since">${_hoSince(e)}</span></button>`;};
   host.innerHTML=`<h1 class="page-title">${t('hoTitle')}</h1><div class="page-sub">${t('hoSub')}</div>
@@ -31226,7 +31239,7 @@ function renderHandover(){
     ${sel?_bikeSuggHtml(sel,sel.typePreference||'Any','_hoSugg'):''}
     <h2 class="form-title bkm-ho14">${t('hoWaitingN').replace('{0}',rows.length)}</h2>
     ${rows.length?`<div class="ho-list">${rows.map(card).join('')}</div>`:_emptyState(t('hoEmpty'))}
-    ${out.length?`<h2 class="form-title bkm-ho18">${t('hoOnBikesN').replace('{0}',out.length)}</h2><div class="ho-out">${out.slice(0,40).map(e=>`<div class="ho-out-row"><span class="ho-num">#${esc(e.queueNum??'')}</span><span class="ho-name">${esc(e.name||'')}</span><span class="ho-spec">${esc(getAssignedBikes(e).map(b=>b.name).join(', '))}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("doReturn",e.id)}">${t('returnBikeBtn')}</button></div>`).join('')}</div>`:''}`;
+    ${out.length?`<h2 class="form-title bkm-ho18">${t('hoOnBikesN').replace('{0}',out.length)}</h2><div class="ho-out">${out.slice(0,40).map(e=>`<div class="ho-out-row"><span class="ho-num">#${esc(e.queueNum??'')}</span><span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}</span><span class="ho-spec">${esc(getAssignedBikes(e).map(b=>b.name).join(', '))}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("doReturn",e.id)}">${t('returnBikeBtn')}</button></div>`).join('')}</div>`:''}`;
 }
 function _hoSugg(id,bikeId){const b=bikeById(bikeId);if(b)_hoAssign(id,{found:true,bike:b});}
 // ── The desk part (2026-10-09, round 2; staff-parts/desk.js): the desk note, My shift, joining a party ──
@@ -31294,7 +31307,7 @@ function _partyJoin(id){
   const cand=(_qBySession().get(e.sessionId)||[]).filter(x=>x.id!==e.id&&['waiting','waitlist','active'].includes(x.status)&&(!mine||_partyKey(x)!==mine))
     .sort((a,b)=>(a.queueNum||0)-(b.queueNum||0)).filter(x=>{const k=_partyKey(x)||x.id;if(seen.has(k))return false;seen.add(k);return true;});
   _dkSheet(`${t('partyJoinBtn')} · #${e.queueNum??''} ${e.name||''}`,cand.length?`<div class="dk-sheet-muted">${esc(t('partyJoinHint'))}</div><div class="dk-pj-list">${cand.map(x=>{const n=_partyOf(x).length;
-    return`<button type="button" class="dk-pj" data-on-click="${_on("_partyJoinTo",e.id,x.id)}"><bdi>#${esc(String(x.queueNum??''))} ${esc(x.name||'')}</bdi>${n>1?` <span class="dk-sheet-muted">${esc(t('partyRidersLine').replace('{0}',n))}</span>`:''}</button>`;}).join('')}</div>`
+    return`<button type="button" class="dk-pj" data-on-click="${_on("_partyJoinTo",e.id,x.id)}"><bdi>#${esc(String(x.queueNum??''))} ${esc(x.name||'')}</bdi>${_ptnChip(x)}${n>1?` <span class="dk-sheet-muted">${esc(t('partyRidersLine').replace('{0}',n))}</span>`:''}</button>`;}).join('')}</div>`
     :_emptyState(esc(t('partyJoinNone'))));
 }
 async function _partySetGroup(ids,gid,ctx){
@@ -32140,7 +32153,7 @@ function renderCheckinModal(){
     m.style.display='flex';
     m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div role="status" class="bkm-nsnote">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
@@ -32162,7 +32175,7 @@ function renderCheckinModal(){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
       ${_hBadge}
       ${_ciNoteHtml(e)}
       ${_stepsHtml}
@@ -32216,7 +32229,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox ci-sat" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div class="form-group bkm-fg812"><label>${t('bikeTypeLabel')}</label>
@@ -35131,6 +35144,7 @@ function _ahRender(force){
         ${s?`<span class="ev-chip ${_evClass(s)}">${esc(_evName(s))}</span>`:''}
         <span class="ah-bk-when">${esc([dayLabel(g[0].sessionDay||(s&&s.day)||''),shortDate(b.date),s?sessionTime(s):''].filter(Boolean).join(' · '))}</span>
         ${party?`<span class="ah-bk-party">${esc(t('partyRidersLine').replace('{0}',g.length))}</span>`:''}
+        ${_ptnChip(g.find(x=>x.partner))}
       </div>
       ${riders}
       ${booked?`<div class="ah-bk-foot">${t('reservedAtLabel')}: ${esc(fmtStamp(booked))}</div>`:''}
@@ -39526,7 +39540,7 @@ function renderHistory(_resultsOnly){
         ${regDate?`<div class="hist-sub3">${regDate}</div>`:''}
       </td>
       <td>
-        <div class="rider-name hist-name" role="button" tabindex="0" data-on-click="${_on("openCustomerProfile",e.id)}" data-on-keydown="${_on("_on_renderHistory_3",_EV,_EL,e.id)}" title="${t('custProfileTitle')}">${esc(e.name)}${wiTag}${noShowFlag(e)}</div>
+        <div class="rider-name hist-name" role="button" tabindex="0" data-on-click="${_on("openCustomerProfile",e.id)}" data-on-keydown="${_on("_on_renderHistory_3",_EV,_EL,e.id)}" title="${t('custProfileTitle')}">${esc(e.name)}${_ptnChip(e)}${wiTag}${noShowFlag(e)}</div>
         <div class="rider-sub hist-mt3"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi></div>
         <div class="rider-sub">${hasEmail?esc(em):`<span class="hist-noemail">${t('noEmailLabel')}</span>`}</div>
       </td>
