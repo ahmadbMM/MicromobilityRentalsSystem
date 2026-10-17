@@ -563,7 +563,7 @@ test.describe('@customer:account ride badges from the research', () => {
 
   // The distance ladder (the owner, 2026-10-16: "the distance in one ride not the total"): the longest Saturday ride
   // ridden - 20 Beginners, 40 Intermediates, or the ride's own (_km in its slots) - never the rides added up.
-  test('the distance ladder (20, 40, 70, 100 km) is the longest single Saturday ride ridden, by group', async ({ page }) => {
+  test('the distance ladder (20, 40, 70, 100 km) is the longest single ride ridden: Saturday by group, any other bike ride by its distance', async ({ page }) => {
     await page0(page);
     const km = (expr: string) => ev(page, `(()=>{const r=${expr};return Object.fromEntries(['km20','km40','km70','km100'].map(s=>[s,r[s].on]));})()`);
     const run = (spec: [string, string?, object?][]) => km(`(()=>{const S_=[],E=[];${JSON.stringify(spec)}.forEach(([g,st,slots],i)=>{const d=__day(-7*(i+1)),id='k'+i;
@@ -581,6 +581,15 @@ test.describe('@customer:account ride badges from the research', () => {
       const E=[__e('p',d,'done',{rideGroup:'int'}),__e('p',d,'done',{rideGroup:'int'}),__e('j',__day(-3),'done')];return __run(E,S_);})()`);
     expect(party.km40).toEqual({ on: true, p: '40/40', hide: false });
     expect(party.km70).toEqual({ on: false, p: '40/70', hide: false });
+    // Any bike ride counts, any day (the owner, 2026-10-17: "open for all sessions or anytime"): a circuit or a
+    // Petromin night brings the distance staff gave it (_km.all); none given, none counted; a run never counts.
+    const any = (kind: string, slots?: object, st = 'done') => km(`(()=>{const d=__day(-3),S_=[Object.assign(__ses('a',d,'${kind}'),${JSON.stringify(slots || null)}?{bike_slots:${JSON.stringify(JSON.stringify(slots || {}))}}:{})];
+      return __run([__e('a',d,'${st}')],S_);})()`);
+    expect(await any('jcc')).toEqual({ km20: false, km40: false, km70: false, km100: false });
+    expect(await any('jcc', { _time: '17:00 - 19:00', _total: 10, _km: { all: 45 } })).toEqual({ km20: true, km40: true, km70: false, km100: false });
+    expect(await any('petromin', { _km: { all: 72 } })).toEqual({ km20: true, km40: true, km70: true, km100: false });
+    expect(await any('jcc', { _km: { all: 45 } }, 'noshow')).toEqual({ km20: false, km40: false, km70: false, km100: false });
+    expect(await any('runher', { _km: { all: 30 } })).toEqual({ km20: false, km40: false, km70: false, km100: false });
   });
 
   test('Perfect Week is every session of a week ridden; Perfect Month is four in a row, a thin week skipped', async ({ page }) => {

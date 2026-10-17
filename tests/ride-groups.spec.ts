@@ -190,6 +190,23 @@ test('the new-session form keeps the distances staff give, and only those', asyn
   await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showAddSession=true;S.newSessEvent='community';renderStaffQueue()`);
   await expect(page.locator('#newSessKm-beg')).toHaveAttribute('placeholder', '20');
   await expect(page.locator('#newSessKm-int')).toHaveAttribute('placeholder', '40');
+  await expect(page.locator('#newSessKm-all')).toHaveCount(0);
+});
+
+// Any other bike ride takes one distance for the distance badges (the owner, 2026-10-17: "open for all sessions
+// or anytime"); a session without a bike asks none.
+test('a circuit or Petromin session takes one ride distance, a run none', async ({ page }) => {
+  await staffBoot(page, SAT, [row('a', SAT)]);
+  const slots = await page.evaluate(`(()=>{S.newSessEvent='';S.newSessMode='total';S.newSessTotal='10';S.newSessKm={all:'45'};return _nsSlots('17:00 - 19:00','').slots;})()`);
+  expect(slots).toEqual({ _time: '17:00 - 19:00', _total: 10, _km: { all: 45 } });
+  const none = await page.evaluate(`(()=>{S.newSessKm={all:''};return _nsSlots('17:00 - 19:00','').slots;})()`);
+  expect(none).toEqual({ _time: '17:00 - 19:00', _total: 10 });
+  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showAddSession=true;S.newSessEvent='';renderStaffQueue()`);
+  await expect(page.locator('#newSessKm-all')).toBeVisible();
+  await page.evaluate(`S.newSessEvent='petromin';renderStaffQueue()`);
+  await expect(page.locator('#newSessKm-all')).toBeVisible();
+  await page.evaluate(`S.newSessEvent='runher';renderStaffQueue()`);
+  await expect(page.locator('#newSessKm-all')).toHaveCount(0);
 });
 
 // A copy of the app from before could send Any; the server refuses it (PICK_TYPE, 20261002160000) and
