@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-a41b3846f9';
+const CACHE = 'mmcq-562b7d43e9';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,19 +22,19 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=390e63558e';
+const STAFF_JS = './staff.js?v=1fe91f6d7c';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=458139c7c5","./staff-parts/community.js?v=f2a06c29c2","./staff-parts/bikes.js?v=022c9ffe25","./staff-parts/cashier.js?v=3c9bd42dd1","./staff-parts/catalog.js?v=cb264202c3","./staff-parts/inventory.js?v=c782643c5a","./staff-parts/website.js?v=79dba1ed6f","./staff-parts/history.js?v=31bc083e1a","./staff-parts/workshop.js?v=46a8e087af","./staff-parts/ambassadors.js?v=9b71156740","./staff-parts/messages.js?v=df4d747e3d","./staff-parts/vendors.js?v=cec7399bbd","./staff-parts/sela.js?v=b5365e84d9","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=b593dfecfc","./staff-parts/settings.js?v=917d748d17","./staff-parts/fleet.js?v=6f867e766c","./staff-parts/money.js?v=bf05ca5334","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=8c079bb893","./staff-parts/kiosk.js?v=df76429b3c","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=637e12d207"];
-const APP_JS = './app.js?v=32ee0eb420';
-const APP_CSS = './app.css?v=a3fa2cca84';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=4e54a73c25","./staff-parts/community.js?v=839f998edf","./staff-parts/bikes.js?v=022c9ffe25","./staff-parts/cashier.js?v=3c9bd42dd1","./staff-parts/catalog.js?v=cb264202c3","./staff-parts/inventory.js?v=c782643c5a","./staff-parts/website.js?v=79dba1ed6f","./staff-parts/history.js?v=31bc083e1a","./staff-parts/workshop.js?v=46a8e087af","./staff-parts/ambassadors.js?v=9b71156740","./staff-parts/messages.js?v=df4d747e3d","./staff-parts/vendors.js?v=cec7399bbd","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=d32370109b","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=b593dfecfc","./staff-parts/settings.js?v=917d748d17","./staff-parts/fleet.js?v=6f867e766c","./staff-parts/money.js?v=bf05ca5334","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=8c079bb893","./staff-parts/kiosk.js?v=df76429b3c","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=637e12d207"];
+const APP_JS = './app.js?v=f425c83177';
+const APP_CSS = './app.css?v=96bd06e15f';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=e64094cd7b']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=149477e4e9']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
@@ -46,6 +46,7 @@ const SHELL = [
   './assets/snd96-logo.svg', // the National Day lockup - on the event picker, the first screen in
   './assets/mm-pattern.svg', // the brand pattern behind the Micromobility Experiences card - same screen
   './assets/runher-partners.webp', // the partners' marks on the Run for Her card - same screen
+  './assets/victory-lap-dark.webp', // Victory Lap's logo on its card and tickets - same screen (2026-10-17)
   './hero.webp',
   './icon-192.png',
   './icon-512.png',

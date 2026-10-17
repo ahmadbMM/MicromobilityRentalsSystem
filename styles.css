@@ -8811,6 +8811,139 @@ body .landing-event-card.ev-runher .rf-route{display:block;width:100%;max-width:
 .run-km-chip{display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;line-height:1.5;white-space:nowrap;color:var(--rf-pink-dk);background:rgba(var(--rf-wash),.16);}
 .run-km-chip.rk-5{color:#fff;background:var(--rf-pink-dk);}
 
+/* ════════════════════════════════════════════════════════════════════════
+   VICTORY LAP by Fitness Empire (the owner, 2026-10-17) - a hybrid fitness race run by Kamin Sports.
+   The card on the event picker: the owner picked D - white, the race's logo (assets/victory-lap-dark.webp),
+   what it is and when, a checkered flag down the end edge, no price. Every part stays inside the card
+   at any width: the copy wraps, the logo scales down with the card, the flag keeps its strip.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--vl-ink:#0d0d0d;--vl-purple:#5b3fd6;--vl-checker:linear-gradient(45deg,#fff 25%,transparent 25%,transparent 75%,#fff 75%),linear-gradient(45deg,#fff 25%,transparent 25%,transparent 75%,#fff 75%);}
+.ev-vlap{--ev:#0d0d0d;--ev-rgb:13,13,13;}
+body:not(.view-staff) .ev-vlap:not(.landing-event-card){--ev:#0d0d0d;--ev-rgb:13,13,13;}
+body .landing-event-card.ev-vlap{
+  flex-direction:row;align-items:stretch;gap:0;padding:0;overflow:hidden;
+  background:#fff;border:1px solid rgba(13,13,13,.22);box-shadow:0 1px 3px rgba(26,25,25,.22);color:var(--vl-ink);
+}
+body .landing-event-card.ev-vlap:hover{border-color:var(--vl-ink);transform:none;box-shadow:0 8px 24px rgba(13,13,13,.18);}
+body .landing-event-card.ev-vlap::before{display:none;}
+body .landing-event-card.ev-vlap .vl-card-main{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:16px;padding:22px 20px 18px 24px;}
+html[dir="rtl"] body .landing-event-card.ev-vlap .vl-card-main{padding:22px 24px 18px 20px;}
+body .landing-event-card.ev-vlap .vl-logo{order:0;height:58px;max-width:100%;}
+body .landing-event-card.ev-vlap .vl-logo img{height:100%;width:auto;max-width:100%;object-fit:contain;object-position:0 50%;}
+html[dir="rtl"] body .landing-event-card.ev-vlap .vl-logo img{object-position:100% 50%;}
+body .landing-event-card.ev-vlap .lec2-copy{min-width:0;max-width:100%;}
+body .landing-event-card.ev-vlap .lec-title{font-size:16px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;color:var(--vl-ink);overflow-wrap:anywhere;}
+body .landing-event-card.ev-vlap .vl-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 9px;margin-top:6px;font-size:13px;font-weight:600;color:#4a4a46;max-width:100%;}
+body .landing-event-card.ev-vlap .vl-meta i{width:1px;height:12px;background:rgba(13,13,13,.3);display:inline-block;flex:none;}
+body .landing-event-card.ev-vlap .vl-flag{flex:0 0 44px;background-color:var(--vl-ink);background-image:var(--vl-checker);background-size:16px 16px;background-position:0 0,8px 8px;}
+@media (max-width:640px){
+  body .landing-event-card.ev-vlap .vl-logo{height:50px;}
+  body .landing-event-card.ev-vlap .vl-flag{flex-basis:36px;}
+}
+.ev-name.ev-vlap{color:var(--vl-ink);}
+.vl-no-flag{color:var(--vl-ink);}
+
+/* The athlete step: the races as large buttons (name, then on your own / with a partner), the team's three
+   ways in, the divisions with their stations, the T-shirt sizes and the 5 km time in even grids. */
+.vl-panel .run-adult{color:var(--vl-ink);}
+.vl-panel .vl-races{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.vl-panel .vl-race,.vl-divs .vl-div{display:flex;flex-direction:column;align-items:flex-start;gap:3px;width:100%;min-height:56px;padding:10px 12px;text-align:start;
+  background:#fff;border:1px solid rgba(26,25,25,.18);color:var(--text,#1A1919);cursor:pointer;font:inherit;}
+.vl-panel .vl-race:hover:not(:disabled),.vl-divs .vl-div:hover:not(:disabled){border-color:var(--vl-ink);}
+.vl-panel .vl-race.active,.vl-divs .vl-div.active{border:2px solid var(--vl-ink);padding:9px 11px;background:#f6f6f3;}
+.vl-panel .vl-race:disabled{opacity:.5;cursor:not-allowed;}
+.vl-panel .vl-race-n{font-weight:700;font-size:15px;}
+.vl-panel .vl-race-s{font-size:12px;color:var(--muted);}
+.vl-divs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.vl-divs .vl-div-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;width:100%;}
+.vl-divs .vl-div-h b{font-size:15px;}
+.vl-divs .vl-div-h span{font-size:13px;font-weight:700;color:var(--vl-purple);white-space:nowrap;}
+.vl-div-w{font-size:12px;line-height:1.45;color:var(--muted);}
+.vl-locked{padding:10px 12px;border:1px dashed rgba(26,25,25,.3);font-weight:700;}
+.vl-locked .vl-div-w{font-weight:400;margin-top:3px;}
+.vl-sizes{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;}
+.vl-t5{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+.vl-sizes .toggle-btn,.vl-t5 .toggle-btn{width:100%;min-height:44px;}
+.vl-modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:6px;}
+.vl-modes .toggle-btn{width:100%;min-height:44px;}
+.vl-code-row{display:flex;gap:8px;margin-top:8px;}
+.vl-code-row input{flex:1 1 auto;min-width:0;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+.vl-peek{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;font-size:14px;border:1px solid rgba(26,25,25,.14);}
+.vl-peek-ok{border-color:rgba(0,113,63,.4);background:#f1f8f4;color:#06603b;}
+.vl-peek-bad{border-color:rgba(180,35,24,.35);background:#fdf1f1;color:#b42318;}
+@media (max-width:420px){
+  .vl-panel .vl-races,.vl-divs{grid-template-columns:minmax(0,1fr);}
+  .vl-sizes{grid-template-columns:repeat(3,minmax(0,1fr));}
+}
+.vl-chip{display:inline-flex;align-items:center;padding:2px 9px;font-size:12px;font-weight:700;line-height:1.5;color:#fff;background:var(--vl-ink);white-space:normal;}
+.vl-rv-sub{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);}
+.vl-pay-note{margin-top:8px;}
+
+/* The ticket (My Bookings and the one just booked): white, the logo, the checkered strip down the end edge as
+   on the card; the team's code large, the partner, the T-shirt, how to pay. */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-vlap{
+  --night:#fff;--night-ink:#0d0d0d;--night-ink-2:rgba(13,13,13,.62);--night-line:rgba(13,13,13,.14);--night-2:#f4f4f1;--neon:#5b3fd6;
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);
+  background:#fff;border:1px solid rgba(13,13,13,.28);padding-inline-end:36px;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-vlap::before{display:block;content:'';position:absolute;top:0;bottom:0;left:auto;right:0;width:20px;height:auto;
+  background-color:var(--vl-ink);background-image:var(--vl-checker);background-size:10px 10px;background-position:0 0,5px 5px;pointer-events:none;}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-vlap::before{right:auto;left:0;}
+.ticket-card .tk-logo-ev .tk-logo-vlap{height:34px;}
+.vl-tk-wrap{margin-top:12px;}
+.vl-tk-team{margin-top:12px;padding:12px 14px;border:1px solid rgba(13,13,13,.18);background:#f6f6f3;}
+.vl-tk-code{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12px;font-weight:700;color:var(--muted);}
+.vl-tk-code strong{font-size:22px;letter-spacing:1.5px;color:#0d0d0d;}
+.vl-tk-p{margin-top:4px;font-size:14px;font-weight:600;}
+.vl-tk-btns{margin-top:10px;}
+.vl-tk-meta{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:10px;font-size:13px;color:var(--muted);}
+.vl-tk-pay{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;font-size:13px;line-height:1.45;background:#f5f0fe;border:1px solid rgba(91,63,214,.24);color:#2e1c80;}
+.vl-tk-pay strong{margin-inline-end:4px;}
+.vl-ed-box .vl-divs-sm .vl-div{min-height:48px;}
+
+/* The finisher's badge: the lap ring, purple into black (BDG_SPECIAL.vlap). */
+.mr-badge.sp-vlap,.badge-pop-box.sp-vlap{--sp1:#b9a6ff;--sp2:#5b3fd6;--sp3:#1b1236;--spg:91,63,214;--sph:236,230,255;}
+
+/* Staff: the race column, the split above the roster, and the Victory Lap dialogs. */
+.vl-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;}
+.vl-cell .vl-shirt{font-size:11px;font-weight:700;color:var(--muted);}
+.vl-sub{font-size:12px;color:var(--muted);overflow-wrap:anywhere;}
+.vl-code-chip{display:inline-block;padding:0 6px;font-size:11px;font-weight:700;letter-spacing:.5px;border:1px solid rgba(13,13,13,.3);color:var(--text,#1A1919);}
+.vl-wait{color:#8A5300;font-weight:600;}
+.vl-warn{color:#b42318;font-weight:700;}
+.vl-staff-bar{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px;}
+#vl-staff-host .vl-st-box{width:min(1180px,96vw);max-width:none;max-height:92vh;overflow:auto;}
+#vl-staff-host .vl-ae-box{width:min(560px,96vw);max-width:none;max-height:92vh;overflow:auto;}
+#vl-staff-host .vl-cf-box{width:min(640px,96vw);max-width:none;max-height:92vh;overflow:auto;}
+#vl-staff-host .vl-st-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+#vl-staff-host .vl-st-head-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
+#vl-staff-host .vl-st-sub{font-size:13px;color:var(--muted);margin-top:2px;}
+#vl-staff-host .vl-st-tabs{margin:0 0 12px;}
+#vl-staff-host .vl-st-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+#vl-staff-host .vl-st-tools input{flex:1 1 220px;min-width:0;}
+#vl-staff-host .vl-st-tiles{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+#vl-staff-host .vl-st-tile{display:flex;flex-direction:column;gap:2px;padding:8px 12px;border:1px solid var(--border,rgba(26,25,25,.14));min-width:110px;}
+#vl-staff-host .vl-st-tile b{font-size:18px;}
+#vl-staff-host .vl-st-tile span{font-size:12px;color:var(--muted);}
+#vl-staff-host .vl-st-shirts b{font-size:13px;}
+#vl-staff-host .vl-st-scroll{overflow-x:auto;max-width:100%;}
+#vl-staff-host .vl-st-table{width:100%;border-collapse:collapse;font-size:13px;}
+#vl-staff-host .vl-st-table th{text-align:start;font-size:12px;color:var(--muted);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--border,rgba(26,25,25,.14));white-space:nowrap;}
+#vl-staff-host .vl-st-table td{padding:7px 8px;border-bottom:1px solid var(--border,rgba(26,25,25,.08));vertical-align:top;}
+#vl-staff-host .vl-st-acts{display:flex;flex-wrap:wrap;gap:6px;white-space:nowrap;}
+#vl-staff-host .vl-st-none{padding:18px 8px;color:var(--muted);}
+#vl-staff-host .vl-st-hint{font-size:13px;color:var(--muted);margin:0 0 10px;}
+#vl-staff-host .vl-ae-code{margin-top:8px;width:100%;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+#vl-staff-host .vl-ae-both{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;}
+#vl-staff-host .vl-pr-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;max-height:46vh;overflow:auto;}
+#vl-staff-host .vl-pr-row{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:10px 12px;text-align:start;background:#fff;border:1px solid var(--border,rgba(26,25,25,.18));cursor:pointer;font:inherit;color:inherit;}
+#vl-staff-host .vl-pr-row span{font-size:12px;color:var(--muted);}
+#vl-staff-host .vl-pr-row.active{border:2px solid var(--vl-ink);padding:9px 11px;}
+#vl-staff-host .vl-cf-set{border:1px solid var(--border,rgba(26,25,25,.14));padding:10px 12px;margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px 16px;}
+#vl-staff-host .vl-cf-set legend{font-size:13px;font-weight:700;padding:0 4px;}
+#vl-staff-host .vl-cf-chk{display:flex;align-items:center;gap:6px;font-size:14px;}
+#vl-staff-host .vl-cf-one{margin:0 0 12px;}
+#vl-staff-host textarea{width:100%;}
+
 /* Staff: the runners split by distance under the Bookings filter bar; a tap shows that distance alone. */
 #tab-queue .run-split{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 2px;}
 #tab-queue .run-split-b{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:0 12px;border:1px solid var(--border);border-radius:999px;background:var(--s1);color:var(--text);font:inherit;font-size:13px;font-weight:700;cursor:pointer;}

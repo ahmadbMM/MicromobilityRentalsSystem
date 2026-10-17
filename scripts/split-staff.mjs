@@ -462,6 +462,7 @@ export const STAFF_PARTS = {
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
+  vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports
   // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
   imports: ['openRosterImport'],
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
@@ -1323,7 +1324,7 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 235 -> 238, staff 616 -> 620, core 276 -> 279 (2026-10-17, Defe's places on the Saturday ride): the partner
 // ticket line, the members' own-bike limit, ?signin=, the partner chip, filter, report column and Bookings panel:
 // customer 233.6 / staff 610.7 / core 274.2 here, 235.0 / 613.3 / 275.3 on the runner; +3 / +4 / +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 238, staff: 620, core: 279 };
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 245, staff: 624, core: 279 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

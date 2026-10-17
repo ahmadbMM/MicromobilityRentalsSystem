@@ -922,6 +922,47 @@ runner picks 3 km or 5 km, an emergency contact on the account, the pink ribbon 
   Privacy Notice 2026-10-06: a Sela/JYC row, a consent bullet, the emergency contact row; nobody is asked again.
   The website mirrors the page (`/api/account/pending-share`). `tests/run-share-gate.spec.ts`.
 
+## Victory Lap by Fitness Empire (2026-10-17)
+
+A hybrid fitness race at the Jeddah Corniche Circuit (26 Oct 2026, doors 16:30, first heat 17:15), run by Kamin Sports and
+booked here. The owner's answers: the card (D, white, the logo, a checkered flag down the end edge, NO price) shows to every
+signed-in rider; Community members and Victory Lap tag holders book it; 150 SAR per athlete VAT included, Doubles 150 for each
+partner; the way to pay "announced later" (staff's words); 16 and over; every athlete agrees to share their details with Kamin
+Sports (the exact list comes later); one Singles and one Doubles place per account; Doubles teams join by a code; a rider may
+ask staff for a partner; an unjoined team stays open; the starter changes the division until a partner joins; the finisher's
+badge (B3, the lap ring) comes with a booking checked out or a session closed out; tag chip T1 (the logo in white on black);
+staff manage everything.
+- **The kind** `ride_kind 'vlap'`, `event_kind 'community'`, `paid_ride` true, `price` 150 (`_fare_now` prices it like an event),
+  `needs_approval` false, `open_to_all` false, `location 'JCC'`, `-vl` on the session id, `bike_slots._time` "doors - first heat"
+  (`sessionTime` says "Doors open · First heat"). `KIND_TRAITS.vlap` = no bike, no breakfast. No wallet pass (`_walletOk`).
+  It is booked outside the booking window (`_bwOpensOn`, `_booking_window_guard`).
+- **Who books**: `vlap_member` (Community tag or `tag_vlap`), `_vlMember`/`_vlHeld`/`_vlGate` (as Petromin's), `_sessGate` asks
+  it for a vlap date; `showVlNoModal` says who it is for. `_community_booking_gate` and `customer_booking_update`'s re-book let a
+  tag holder on. `tag_vlap` and the Community tag never sit on one account (`_tag_one_of_two` keeps two pairs now;
+  `_tagRivals`, `_tagOneOfTwoKey` words the warning: `tagOneOfTwoVl`). `TAG_BRANDS.vlap` draws assets/victory-lap-white.webp.
+- **The athlete step** (step 2, `_vlPanelHtml`/`_vlStepNext`, state `S.regVl`): race (women's/men's races by the account's
+  gender, asked once and saved with `customer_set_gender`), the team for Doubles (`new` / `join` with a code, checked by
+  `vl_team_peek` / `pair`), the division (with each station's work, `VL_WORK`), T-shirt, optional 5 km time, and what the account
+  lacks (Run for Her's fields and draft). Then the share gate with Kamin Sports' words (`_vlShareItems`: staff's list from
+  `sessions.vl.share`, else ours with "the exact list is coming"). The booking sends `vl` (`_vlEntryVl`) and `share_ok`.
+- **The database** (migration 20261017210000): `queue_entries.vl` {race, div, shirt, t5k, team, pair}, `sessions.vl` (the
+  race's settings: races, divs, pair, pay, share), `_vl_entry_guard` (VL_RACE, VL_DIV, VL_SHIRT, VL_DETAILS, VL_AGE,
+  VL_GENDER, VL_SHARE, VL_ONE_EACH, VL_NO_TEAM, VL_TEAM_FULL, VL_TEAM_SELF, VL_TEAM_LOCKED; staff are free, `team:'*'` makes a
+  code), `customer_vl_teams` (the partner's first name), `customer_vl_update` (division while alone, T-shirt, 5 km time).
+  `_bookRefused` says each code. A starter who cancels leaves the code with the partner; a new partner can join it.
+- **Tickets**: Singles and Doubles are two tickets (`renderMyRides` groups by session and kind), "Athlete number", the race chip,
+  `_vlTkHtml` (team code, partner or "waiting", Send the code with a ?ev=vlap link, T-shirt, 5 km, how to pay), Change details
+  (`_vlEditOpen`). Theme `th-vlap` (white, checkered strip). No "pay at the booth" anywhere.
+- **Staff**: the roster's Race column (`_qc.vl`, `_vlCell`), the split that filters it (`_vlSplitHtml`, `S.sfVl`: races, wants a
+  partner, waiting for partner, no race), Finished for return, Race details / Pair / Emergency contact in the row menu; the staff
+  part `vlap`: Athletes and teams (`_vlStaffOpen`: athletes, teams, partner requests), an athlete's race (`_vlAthleteEdit`),
+  pairing (`_vlPairOpen`), Race settings (`_vlCfgOpen`: races, divisions, partner requests, price, payment line and Kamin's
+  list in English and Arabic), the Report for Kamin Sports (`printKaminReport` / `exportKaminXlsx`, also in the export dialog).
+  The new-session form has a Victory Lap kind (price 150, 500 places, the circuit's map).
+- **Badge** `victory_lap`: `BDG_GLYPH.lapring` on the `vlap` special, earned by a `done` row on a vlap session, hidden until
+  earned, popped once. Privacy Notice 2026-10-17 (Kamin Sports row, race details row, consent bullet; nobody asked again).
+  `tests/victory-lap.spec.ts`.
+
 ## About this event and Details (2026-10-05)
 
 The owner picked 1B, 2B, 3B: an "About this event" link under each event card on the picker and a "Details" link under
