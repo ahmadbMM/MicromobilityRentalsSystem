@@ -152,7 +152,10 @@ async function buildPkpass(b, cfg) {
   const collectStr = clock ? _hhmm(clock.collectMin) : "";
   const startStr = clock ? _hhmm(clock.startMin) : "";
   // an event names the place staff gave it (sessions.location), else the circuit; every other ride its skin's
-  const venue = ride === "event" ? ({ JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[String((sess && sess.location) || "").trim()] || String((sess && sess.location) || "").trim() || "Jeddah Corniche Circuit") : skin.venue;
+  // (the Victory Lap and the DEFE run too, when staff gave one: they are races, not rides)
+  const _loc = String((sess && sess.location) || "").trim();
+  const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
+  const venue = ride === "event" ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || `#${primaryNum}`;
   const time = _sessClock(sess) || b.session_time || "";
@@ -161,13 +164,20 @@ async function buildPkpass(b, cfg) {
   // take a pass off a phone - only the rider can delete one - but a pass built for a booking
   // that is no longer live is marked void, so it shows as void rather than as a ticket.
   const dead = ["done", "cancelled", "noshow", "removed"].includes(String(b.status || ""));
-  const ridersValue = single ? b.name || "" : `${group.length} riders`;
-  // A run has runners, a start and a distance (queue_entries.run_km), not riders and a bike.
-  const isRun = ride === "runher";
+  // A run has runners, a start and a distance (queue_entries.run_km), not riders and a bike; the
+  // Victory Lap has athletes (the app's vlNumLabel), and every other session with no bike has
+  // participants: nothing on a session that is not a bike ride talks about riding or a bike
+  // (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
+  // cycling anywhere").
+  const isRun = ride === "runher" || ride === "defe5k";
+  const isRace = ride === "vlap";
+  const bikeRide = _needsBike(ride);
+  const who = _people(ride);
+  const ridersValue = single ? b.name || "" : `${group.length} ${who.many.toLowerCase()}`;
   // A ride with no bike (the pool, T100, an event) books its seats as type 'None', and 'Any' is a
   // staff-only choice: neither is a bike to print ("BIKE: None" on a pool session's pass). The Google
   // pass leaves both out the same way.
-  const types = isRun ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter((x) => x && x !== "None" && x !== "Any"))];
+  const types = !bikeRide ? [] : [...new Set(group.map((r) => _bikeLabel(r.type_preference)).filter((x) => x && x !== "None" && x !== "Any"))];
   const bikeType = types.length === 1 ? types[0] : types.length > 1 ? "Mixed" : "";
   const addons = Array.isArray(cfg.addons) ? cfg.addons : [];
   const rentalSum = group.reduce((s, r) => s + (r.price != null && r.price !== "" && !Number.isNaN(+r.price) ? +r.price : 0), 0);
@@ -181,30 +191,32 @@ async function buildPkpass(b, cfg) {
   const allPaid = group.every((r) => r.paid === true);
   const zero = cfg.addonsKnown !== false && !addonSum && group.every((r) => r.price != null && r.price !== "" && +r.price === 0);
   const owes = !freeRide && !allPaid && !zero;
-  const bikeRide = _needsBike(ride);
   // The queue number leads. It is what the desk asks for and what the rider has to read out,
   // so it takes the biggest line on the pass, and the name it belongs to keeps the other half:
   // the desk reads a number and a person off one line. The two clock times sit together below,
   // where collection followed by departure reads as one sequence rather than as two starts.
   const primary = [];
-  primary.push({ key: "queue", label: hideNum ? "RIDE" : isRun ? "RUNNER NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
-  if (ridersValue) primary.push({ key: "riders", label: isRun ? "RUNNER" : single ? "RIDER" : "RIDERS", value: ridersValue });
+  primary.push({ key: "queue", label: hideNum ? _whatLabel(ride) : isRun ? "RUNNER NO." : isRace ? "ATHLETE NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
+  if (ridersValue) primary.push({ key: "riders", label: (single ? who.one : who.many).toUpperCase(), value: ridersValue });
   const secondary = [];
   // A ride that gathers has no bikes to collect: that time is when to turn up.
   if (collectStr) secondary.push({
     key: "collect",
-    label: _gathersTime(sess) ? "GATHERING TIME" : "BIKE COLLECTION",
+    label: _gathersTime(sess) ? "GATHERING TIME" : bikeRide ? "BIKE COLLECTION" : "ARRIVE BY",
     value: collectStr,
   });
-  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : bikeRide || _gathersTime(sess) ? "RIDE STARTS" : "STARTS", value: startStr });
+  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
   const auxiliary = [];
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
   if (isRun && (b.run_km === 3 || b.run_km === 5)) auxiliary.push({ key: "distance", label: "DISTANCE", value: `${b.run_km} km` });
   if (priceStr) auxiliary.push({ key: "total", label: "TOTAL", value: priceStr });
   const ridersBack = single ? [] : [{
     key: "riders_list",
-    label: "Riders",
-    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => `${hideNum || r.queue_num == null ? "" : `#${r.queue_num} `}${r.name || ""}${_bikeLabel(r.type_preference) ? " - " + _bikeLabel(r.type_preference) : ""}`.trim()).join("\n")
+    label: who.many,
+    value: group.slice().sort((a, c) => (a.queue_num || 0) - (c.queue_num || 0)).map((r) => {
+      const bike = bikeRide ? _bikeLabel(r.type_preference) : "";
+      return `${hideNum || r.queue_num == null ? "" : `#${r.queue_num} `}${r.name || ""}${bike && bike !== "None" && bike !== "Any" ? " - " + bike : ""}`.trim();
+    }).join("\n")
   }];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
   // A Saturday ride whose breakfast spot is told at a time staff chose (sessions.reveal_at, 2026-10-06): its
@@ -212,7 +224,7 @@ async function buildPkpass(b, cfg) {
   // that) would read as the circuit here, so the pass then leaves the directions and the place out.
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String((sess && sess.meet_url) || ""));
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
-  const place = meetHeld ? null : _meetPlace(sess);
+  const place = meetHeld ? null : _meetPlace(sess, bikeRide);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -253,7 +265,7 @@ async function buildPkpass(b, cfg) {
       backFields: [
         { key: "when", label: "Session", value: `${when}${time ? " \xB7 " + time : ""}`.trim() },
         // A ride that gathers has no bike to collect (the front says GATHERING TIME): the back says so too.
-        ...collectStr ? [{ key: "collect_b", label: _gathersTime(sess) ? "Gathering" : "Collect your bike", value: `From ${collectStr}${startStr ? ` \xB7 ${isRun ? "the run starts" : "the ride leaves"} at ${startStr}` : ""}` }] : [],
+        ...collectStr ? [{ key: "collect_b", label: _gathersTime(sess) ? "Gathering" : bikeRide ? "Collect your bike" : "Arrive", value: `From ${collectStr}${startStr ? ` \xB7 ${isRun ? "the run starts" : isRace ? "the race starts" : bikeRide ? "the ride leaves" : "it starts"} at ${startStr}` : ""}` }] : [],
         { key: "venue", label: "Venue", value: venue },
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
@@ -304,20 +316,22 @@ function _revealAhead(sess) {
   } catch (e) { return "soon"; }
 }
 const CIRCUIT = { lat: 21.6266, lng: 39.1099, text: "Your ride is nearby - the Circuit is just ahead" };
+// A session with no bike is not "your ride" (the owner, 2026-10-18).
+const CIRCUIT_ANY = { ...CIRCUIT, text: "The Circuit is just ahead" };
 // Where the ride meets, as coordinates. No link of its own means the circuit (the directions
 // link is the circuit's too). A link of its own is placed only when it spells out coordinates
 // (".../@21.5,39.1,17z", "?q=21.5,39.1", "?query=..." and the like); a short maps.app.goo.gl
 // link does not, and then there is no place rather than the wrong one.
-function _meetPlace(sess) {
+function _meetPlace(sess, bikeRide = true) {
   const u = _meetUrl(sess);
-  if (u === DIRECTIONS) return CIRCUIT;
+  if (u === DIRECTIONS) return bikeRide ? CIRCUIT : CIRCUIT_ANY;
   let s = u;
   try { s = decodeURIComponent(u); } catch (e) { /* keep the raw link */ }
   const m = s.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/) || s.match(/[?&](?:q|query|ll|destination|daddr)=(?:loc:)?(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/);
   if (!m) return null;
   const lat = +m[1], lng = +m[2];
   if (!(Math.abs(lat) <= 90 && Math.abs(lng) <= 180)) return null;
-  return { lat, lng, text: "Your ride's meeting point is nearby" };
+  return { lat, lng, text: bikeRide ? "Your ride's meeting point is nearby" : "Your meeting point is nearby" };
 }
 function _attr(s) {
   return String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -479,9 +493,23 @@ function _sessClock(sess) {
 // window, so the pass printed the session's END as the moment the ride leaves, and dropped
 // the end time entirely, leaving the pass live for hours after the session was over.
 // The app keys this off KIND_TRAITS.gathering; this is the same table.
-const GATHERS = { saturday: true, snd96: true, runher: true, petromin: false, swim: false, workshop: false, jcc: false };
+// The Victory Lap gathers (doors open, then the first heat); the DEFE run does not.
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true };
+// Who a booking is for, by kind: riders only where there is a bike.
+function _people(ride) {
+  if (ride === "runher" || ride === "defe5k") return { one: "Runner", many: "Runners" };
+  if (ride === "vlap") return { one: "Athlete", many: "Athletes" };
+  return _needsBike(ride) ? { one: "Rider", many: "Riders" } : { one: "Participant", many: "Participants" };
+}
+// What the booking is for, where a ride staff approve shows no number.
+function _whatLabel(ride) {
+  if (_needsBike(ride)) return "RIDE";
+  if (ride === "runher" || ride === "defe5k") return "RUN";
+  if (ride === "vlap") return "RACE";
+  return ride === "event" ? "EVENT" : "SESSION";
+}
 function _needsBike(ride) {
   return !NO_BIKE[ride];
 }
@@ -515,6 +543,9 @@ const RIDES = {
   snd96:    { bg: "rgb(0,38,40)",  label: "rgb(140,220,70)", venue: "Jeddah Corniche Circuit" },
   runher:   { bg: "rgb(255,255,255)", fg: "rgb(20,48,77)", label: "rgb(194,65,110)", venue: "Run for Her" },
   event:    { bg: "rgb(255,255,255)", fg: "rgb(26,25,25)", label: "rgb(109,40,217)", venue: "MicroMobility Event" },
+  // the tickets' own inks (styles.css th-vlap, th-defe5k)
+  vlap:     { bg: "rgb(255,255,255)", fg: "rgb(13,13,13)", label: "rgb(91,63,214)", venue: "Victory Lap" },
+  defe5k:   { bg: "rgb(255,255,255)", fg: "rgb(59,19,40)", label: "rgb(162,43,99)", venue: "DEFE 5KM Run" },
   // The circuit's own card colours: the navy field it is drawn on, white type, and the pale cyan its
   // meta line uses. Both clear AA.
   jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
@@ -528,7 +559,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";

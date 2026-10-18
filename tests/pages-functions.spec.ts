@@ -204,6 +204,47 @@ test.describe('the Apple Wallet pass', () => {
     expect(ev.json.eventTicket.backFields.find((f: { key: string }) => f.key === 'venue').value).toBe('Jeddah Yacht Club');
   });
 
+  // The owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about cycling
+  // anywhere". A pool session, T100, an event, the runs and the Victory Lap: no ride, rider or bike anywhere a
+  // rider reads on the pass, even with a bike type left on the booking, on a party and on a ride staff approve.
+  test('a session that is not a bike ride never talks about riding or a bike', async () => {
+    const CYCLING = /\b(ride|rides|rider|riders|riding|bike|bikes|cycling|cycle)\b/i;
+    type Field = { label: string; value: unknown };
+    type Pass = { description: string; semantics: { eventName: string; venueName: string }; locations?: { relevantText: string }[]; eventTicket: Record<string, Field[]> };
+    const shown = (j: Pass) => {
+      const t = j.eventTicket;
+      const fields = [...t.headerFields, ...t.primaryFields, ...t.secondaryFields, ...t.auxiliaryFields, ...t.backFields];
+      return [j.description, j.semantics.eventName, j.semantics.venueName, ...(j.locations || []).map((l) => l.relevantText),
+        ...fields.flatMap((f) => [f.label, String(f.value)])].join('\n');
+    };
+    const road = { ...booking, name: 'Sara', type_preference: 'Road' } as typeof booking;
+    const mate = { ...road, id: 'mate01', queue_num: 8, name: 'Mate' };
+    const comm = (k: string, x: Record<string, unknown> = {}) => ({ ...circuit, event_kind: 'community', ride_kind: k, needs_approval: false, ...x });
+    for (const [kind, time] of [['swim', '07:00 - 08:30'], ['workshop', '18:00 - 20:00'], ['event', '19:00 - 22:00'], ['runher', '05:30 - 06:00'], ['defe5k', '06:00 - 08:00'], ['vlap', '15:00 - 16:00']]) {
+      const sess = comm(kind, { bike_slots: JSON.stringify({ _time: time }) });
+      for (const r of [await pass(road, sess), await pass(road, sess, PW, { rows: [mate], groupIds: [road.id, mate.id] }), await pass({ ...road, approval: 'approved' }, { ...sess, needs_approval: true })]) {
+        expect(r.status, kind).toBe(200);
+        expect(shown(r.json), kind).not.toMatch(CYCLING);
+        expect(r.json.eventTicket.auxiliaryFields.find((f: { key: string }) => f.key === 'bike'), kind).toBeUndefined();
+      }
+    }
+    // each says who it is for in its own words
+    const label = async (k: string, party = false) => (await pass(road, comm(k), PW, party ? { rows: [mate], groupIds: [road.id, mate.id] } : {})).json.eventTicket.primaryFields;
+    expect((await label('defe5k')).map((f: { label: string }) => f.label)).toEqual(['RUNNER NO.', 'RUNNER']);
+    expect((await label('vlap')).map((f: { label: string }) => f.label)).toEqual(['ATHLETE NO.', 'ATHLETE']);
+    expect((await label('swim', true)).find((f: { key: string }) => f.key === 'riders')).toMatchObject({ label: 'PARTICIPANTS', value: '2 participants' });
+    // the Victory Lap and the DEFE run are not the Saturday ride: their own colours, the neutral event art
+    const P = await import('../scripts/wallet/pass-images.js' as string);
+    const vl = await pass(road, comm('vlap'));
+    expect(vl.json.labelColor).toBe('rgb(91,63,214)');
+    expect(Buffer.from(vl.files!['strip@2x.png']).toString('base64')).toBe(P.RIDE_IMAGES.event['strip@2x.png']);
+    expect((await pass(road, comm('defe5k'))).json.labelColor).toBe('rgb(162,43,99)');
+    // a bike ride still says so
+    const sat = await pass(road, comm('saturday', { bike_slots: JSON.stringify({ _time: '05:30 - 06:00' }) }));
+    expect(sat.json.eventTicket.primaryFields.find((f: { key: string }) => f.key === 'riders').label).toBe('RIDER');
+    expect(sat.json.eventTicket.secondaryFields.find((f: { key: string }) => f.key === 'start').label).toBe('RIDE STARTS');
+  });
+
   // The breakfast spot told at a time staff choose (2026-10-06): the meeting point shows at once (20261006170000);
   // a row that came without it while held (a database before that) must not read as the circuit on the pass.
   test('a ride whose breakfast spot is told later still gives its meeting point; without one it pins no place', async () => {
@@ -473,6 +514,20 @@ test.describe('the Google Wallet pass', () => {
     expect(ok.obj.barcode.value).toBe('MMC-abcdef');
     // a gathering ride runs out at the end of its day
     expect(ok.obj.validTimeInterval).toEqual({ end: { date: '2026-09-23T23:59:00+03:00' } });
+  });
+
+  test('a session that is not a bike ride names no rider and no bike (the owner, 2026-10-18)', async () => {
+    const road = { ...booking, name: 'Sara', type_preference: 'Road' } as typeof booking;
+    for (const [kind, header, name] of [['swim', 'Participant', 'Swim session'], ['event', 'Participant', 'Event'], ['defe5k', 'Runner', 'DEFE 5KM Run'], ['vlap', 'Athlete', 'Victory Lap']]) {
+      const { status, obj } = await gpass(road, { ...circuit, event_kind: 'community', ride_kind: kind, needs_approval: false });
+      expect(status, kind).toBe(200);
+      expect(obj.textModulesData.find((m: { id: string }) => m.id === 'riders').header, kind).toBe(header);
+      expect(obj.textModulesData.find((m: { id: string }) => m.id === 'bikes'), kind).toBeUndefined();
+      expect(obj.header.defaultValue.value, kind).toBe(name);
+      expect(JSON.stringify(obj.textModulesData.map((m: { header: string }) => m.header)), kind).not.toMatch(/rider|bike/i);
+    }
+    const sat = await gpass(road, { ...circuit, event_kind: 'community', ride_kind: 'saturday', needs_approval: false });
+    expect(sat.obj.textModulesData.find((m: { id: string }) => m.id === 'bikes')).toMatchObject({ header: 'Bike', body: 'Road' });
   });
 
   test('the pass runs out when the ride ends, and a booking that is over is not a live ticket', async () => {

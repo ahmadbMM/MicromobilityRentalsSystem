@@ -14,7 +14,15 @@
 // Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
-const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event" };
+const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
+// The kinds that hand out no bike (the app's KIND_TRAITS bike:false): their pass names no bike and no
+// riders (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
+// cycling anywhere").
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true };
+function people(kind, n) {
+  const [one, many] = kind === "runher" || kind === "defe5k" ? ["Runner", "Runners"] : kind === "vlap" ? ["Athlete", "Athletes"] : NO_BIKE[kind] ? ["Participant", "Participants"] : ["Rider", "Riders"];
+  return n > 1 ? `${many} (${n})` : one;
+}
 
 function json(o, status = 200) {
   return new Response(JSON.stringify(o), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
@@ -62,7 +70,7 @@ function rideKind(sess) {
   if (!sess || sess.event_kind !== "community") return "jcc";
   // runher as the app's _rideKind and the Apple pass read it: an untitled Run for Her was named
   // "Saturday Social Ride" here (2026-10-07).
-  return ["petromin", "swim", "workshop", "runher", "event"].includes(k) ? k : "saturday";
+  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k"].includes(k) ? k : "saturday";
 }
 // The app's own tests (_isCommunity, _isApprovalRide, _commPublished), as the Apple pass reads them:
 // the National Day ride left the community umbrella, and a ride staff approve is one whose
@@ -71,7 +79,7 @@ function isCommunity(sess) { return !!sess && sess.event_kind === "community" &&
 function isApproval(sess) { return isCommunity(sess) && sess.needs_approval !== false; }
 function isPublished(sess) { return isCommunity(sess) && sess.hide_queue === false; }
 // Rides that gather store "gathering - start" in _time and have no end (the app's KIND_TRAITS.gathering).
-const GATHERS = { saturday: true, snd96: true, runher: true };
+const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true };
 // When the pass stops being a ticket: the ride's end on its own day (past midnight rolls into the
 // next one), or the end of the ride's day when its clock has no end. A Jeddah time, +03:00.
 function validUntil(b, sess) {
@@ -113,10 +121,10 @@ function passPayload(env, b, group, sess, approvalRide, origin) {
   const time = rideTime(sess);
   const until = validUntil(b, sess);
   const riders = group.map((r) => clean(r.name, 40)).filter(Boolean).join(", ");
-  const bikes = [...new Set(group.map((r) => clean(r.type_preference, 20)).filter((x) => x && x !== "None" && x !== "Any"))].join(", ");
+  const bikes = NO_BIKE[kind] ? "" : [...new Set(group.map((r) => clean(r.type_preference, 20)).filter((x) => x && x !== "None" && x !== "Any"))].join(", ");
   const text = (id, header, body) => ({ id, header, body });
   const modules = [text("ref", "Reference", ref), text("when", "When", [when, time].filter(Boolean).join(" · ") || "-")];
-  if (riders) modules.push(text("riders", group.length > 1 ? `Riders (${group.length})` : "Rider", riders));
+  if (riders) modules.push(text("riders", people(kind, group.length), riders));
   if (bikes) modules.push(text("bikes", "Bike", bikes));
   if (sess && sess.route_slug) modules.push(text("route", "Route", clean(sess.route_slug, 60)));
   return {
