@@ -41,7 +41,7 @@ test.describe('@customer:reserve event seats', () => {
     expect(await page.evaluate('S.regStep')).toBe(2);
     const panel = page.locator('#tab-register');
     await expect(panel).toContainText('Participants');
-    await expect(panel).toContainText('up to 5 riders');
+    await expect(panel).toContainText('up to 5 participants');
     for (let i = 0; i < 7; i++) await page.evaluate('changeRegQty(1)');
     expect(await page.evaluate('S.regQty')).toBe(5); // the server's cap for an event (_group_ride_cap)
     for (let i = 0; i < 3; i++) await page.evaluate('changeRegQty(-1)');

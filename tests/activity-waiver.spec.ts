@@ -68,7 +68,7 @@ test.describe('@customer:reserve activity waiver', () => {
       await panel.locator('#reg-waiver-cb').check();
       await panel.locator('.mm-reg-foot .btn-primary').click();
       await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
-      expect(posts[0][0].waiver_version).toBe('activity-2026-10-v2');
+      expect(posts[0][0].waiver_version).toBe('activity-2026-10-v3');
     });
   }
 

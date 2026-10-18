@@ -93,7 +93,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await m.locator('.wg-cb').check();
     await m.locator('.pg-btn').click();
     await expect.poll(() => open(page)).toBe(false);
-    expect(calls.map((c) => [c.p_session_id, c.p_version])).toEqual([['s-2099-01-10', 'swim-2026-10-v3'], ['s-2099-01-20', 'activity-2026-10-v2']]);
+    expect(calls.map((c) => [c.p_session_id, c.p_version])).toEqual([['s-2099-01-10', 'swim-2026-10-v3'], ['s-2099-01-20', 'activity-2026-10-v3']]);
   });
 
   test('the waiver comes before the post-ride rating, which opens once it is agreed', async ({ page }) => {

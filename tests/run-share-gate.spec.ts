@@ -19,7 +19,7 @@ const jcc = { id: '2099-10-18', session_date: '2099-10-18', day: 'Sunday', statu
 const row = (id: string, x: Record<string, unknown> = {}) => ({
   id, name: 'Spec Runner', customer_id: 'c1', session_id: RUN, session_day: 'Saturday', session_date: '2099-10-17', queue_num: 7,
   type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-10-01T10:00:00Z', run_km: 5,
-  waiver_version: 'activity-2026-10-v2', waiver_at: '2099-10-01T10:00:00Z', data_share_at: null, ...x,
+  waiver_version: 'activity-2026-10-v3', waiver_at: '2099-10-01T10:00:00Z', data_share_at: null, ...x,
 });
 const open = (page: Page) => page.evaluate(`!!S._sg&&document.getElementById('share-gate').style.display==='block'`);
 
