@@ -4,7 +4,7 @@
 -- by Community members inside MicroMobility Experiences. Free, one place per account, 5 km only. The
 -- runner step shows the account's details filled in (name, email, birth date, emergency contact), asks
 -- for what is missing and lets the runner change any of it. Once the place is booked the rider is asked
--- "Have you registered for the race?" (the race itself is entered on Race Arabia); No shows the link.
+-- "Have you registered for the race?" (the race itself is entered on Defe’s registration page); No shows the link and the members’ code.
 --
 --  1. queue_entries.race_reg: the rider's answer, 'yes' or 'no' (null = not answered), and
 --     race_reg_at when it was given. The booking stands whatever the answer.
@@ -41,7 +41,7 @@ alter table public.queue_entries drop constraint if exists queue_entries_race_re
 alter table public.queue_entries add constraint queue_entries_race_reg_chk
   check (race_reg is null or race_reg in ('yes', 'no'));
 comment on column public.queue_entries.race_reg is
-  'DEFE 5KM Run: has the runner registered for the race on Race Arabia, yes or no; null = not answered (20261018150000).';
+  'DEFE 5KM Run: has the runner registered for the race through Defe, yes or no; null = not answered (20261018150000).';
 comment on column public.queue_entries.race_reg_at is 'When race_reg was answered, ISO UTC (20261018150000).';
 
 

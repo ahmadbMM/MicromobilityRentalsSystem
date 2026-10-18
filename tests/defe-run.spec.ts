@@ -4,7 +4,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows
 // The DEFE 5KM Run (the owner, 2026-10-18): Defe's breast-cancer 5 km race at the Jeddah Corniche Circuit,
 // a date inside MicroMobility Experiences for community members. The runner step shows every detail the
 // account holds, filled in and free to change, and asks for what is missing; the place is booked, then the
-// rider is asked whether they registered for the race on Race Arabia (No shows the link).
+// rider is asked whether they registered for the race through Defe (No shows the link and the MICRO50 code).
 
 const DF = '2099-10-22-df';
 const defe = {
@@ -100,7 +100,9 @@ test.describe('@customer:defe DEFE 5KM Run', () => {
     await q.getByRole('button', { name: 'No' }).click();
     const link = page.locator('#tab-register .defe-reg-link');
     await expect(link).toHaveText('Register for the race');
-    await expect(link).toHaveAttribute('href', /^https:\/\/in\.racearabia\.sa\/defe5k\?.*currentPage=select-competition$/);
+    await expect(page.locator('#tab-register .defe-reg-code')).toHaveText('Use discount code MICRO50 for 50% off, for the first 50 members.');
+    await expect(page.locator('#tab-register .defe-reg-code strong')).toHaveText('MICRO50');
+    await expect(link).toHaveAttribute('href', 'https://in.njuko.com/defe5k?utm_id=97760_v0_s00_e0_tv5');
     await expect(link).toHaveAttribute('target', '_blank');
     await expect.poll(() => sent.filter((x) => x.u === 'customer_set_race_reg').length).toBe(1);
     expect(sent.find((x) => x.u === 'customer_set_race_reg')!.b).toMatchObject({ p_id: 'c1', p_answer: 'no' });
@@ -146,7 +148,7 @@ test.describe('@customer:defe DEFE 5KM Run', () => {
 });
 
 test.describe('@staff:bookings DEFE 5KM Run', () => {
-  test('Bookings shows each runner’s 5 km and whether they registered on Race Arabia', async ({ page }) => {
+  test('Bookings shows each runner’s 5 km and whether they registered for the race', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     const row = (id: string, rr: string | null) => ({
       id, session_id: DF, session_day: 'Thursday', session_date: '2099-10-22', queue_num: Number(id.slice(1)), name: 'Runner ' + id,

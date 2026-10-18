@@ -992,7 +992,8 @@ location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` communit
   share gate, and the runner step shows EVERY detail (`_runNeedsFor`: name, email, birth date filled in and editable;
   emergency contact as a card with Change, or fields when missing) - only what changed is saved.
 - After booking (booked first: riders may follow the link and never come back) `_defeRegHtml` asks "Have you registered
-  for the race?" on the booked page and the My Bookings ticket: Yes / No, No shows `DEFE_RACE_URL` (Race Arabia).
+  for the race?" on the booked page and the My Bookings ticket: Yes / No, No shows `DEFE_RACE_URL` (Defe’s registration, in.njuko.com).
+  No also says the members' race code (`DEFE_RACE_CODE` MICRO50, 50% off for the first 50 members, 2026-10-18).
   `_defeRegSet` -> `customer_set_race_reg` -> `queue_entries.race_reg` yes|no. Staff: Bookings column + `_raceRegCell`,
   report column `rr` ("Registered for the race").
 - Theme: `_defeSessCard` (date card), `body.defe5k` from the runner step on and on the booked page (`_syncDefeTheme`,

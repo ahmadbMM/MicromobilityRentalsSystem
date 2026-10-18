@@ -9902,6 +9902,8 @@ html[dir="rtl"] .defe-flow-head{background:radial-gradient(120% 160% at 0% 100%,
 body:not(.view-staff) .defe-reg-yn .toggle-btn.active{background:var(--df-berry);border-color:var(--df-berry);color:#fff;}
 body:not(.view-staff) .defe-reg-yn .toggle-btn.active::before{background:#F8D3E1;}
 .defe-reg-no{display:grid;gap:8px;}
+.defe-reg-code{padding:8px 10px;background:#FDF1F6;border:1px dashed rgba(162,43,99,.5);font-size:13.5px;font-weight:600;line-height:1.45;color:var(--df-ink);}
+.defe-reg-code strong{font-size:15px;font-weight:800;letter-spacing:1px;color:var(--df-berry);unicode-bidi:isolate;}
 body:not(.view-staff) .defe-reg .defe-reg-link{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:0;text-decoration:none;background:var(--df-berry);border-color:var(--df-berry);color:#fff;text-align:center;}
 body:not(.view-staff) .defe-reg .defe-reg-link:hover{background:var(--df-berry-dk);color:#fff;}
 .defe-reg.defe-reg-done{display:flex;align-items:center;gap:10px;border-width:1px;border-color:rgba(162,43,99,.3);background:#FDF1F6;font-size:13.5px;font-weight:600;}
