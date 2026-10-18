@@ -1324,7 +1324,9 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 235 -> 238, staff 616 -> 620, core 276 -> 279 (2026-10-17, Defe's places on the Saturday ride): the partner
 // ticket line, the members' own-bike limit, ?signin=, the partner chip, filter, report column and Bookings panel:
 // customer 233.6 / staff 610.7 / core 274.2 here, 235.0 / 613.3 / 275.3 on the runner; +3 / +4 / +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 247, staff: 628, core: 281 };
+// Customer 247 -> 250 (2026-10-18, the DEFE 5KM Run): its date card, the runner step's filled-in details, the
+// "registered for the race?" question and its strings: 245.8 KB here, about 247.1 on the runner; +3 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 250, staff: 628, core: 281 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

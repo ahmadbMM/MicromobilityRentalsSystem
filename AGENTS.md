@@ -982,6 +982,26 @@ on a ride staff approve - and the breakfast stop) and a book button (`_infoBook`
   the edit form, saved only when changed); outside events it is an extra line under the words (`.ev-info-extra`).
 - The links are siblings of the card buttons (`.lec-wrap`, `.sess-wrap`), never inside them. `tests/event-info.spec.ts`.
 
+## DEFE 5KM Run (2026-10-18)
+Defe's breast-cancer 5 km race at the Jeddah Corniche Circuit, Thu 22 Oct 2026 19:00 (kits at Jeddah Park, 21 Oct
+16:00-22:00). `ride_kind 'defe5k'` (event_kind community, open_to_all false, free, no approval), session id suffix `-df`,
+location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` community takes it; no landing card of its own).
+- Shares Run for Her's machinery through `_isRun(s)` (runher | defe5k): no bike, the runner step (`_runPanelHtml` /
+  `_runNext`), Runner number, the run rating (`_rgRun`, ids `-rh`/`-df`), report Distance/Emergency/Membership columns,
+  walk-in/group bans. Defe-only through `_isDefe(s)`: 5 km fixed (`S.regRunKm=5`, the DB sets run_km 5), no age rule, no
+  share gate, and the runner step shows EVERY detail (`_runNeedsFor`: name, email, birth date filled in and editable;
+  emergency contact as a card with Change, or fields when missing) - only what changed is saved.
+- After booking (booked first: riders may follow the link and never come back) `_defeRegHtml` asks "Have you registered
+  for the race?" on the booked page and the My Bookings ticket: Yes / No, No shows `DEFE_RACE_URL` (Race Arabia).
+  `_defeRegSet` -> `customer_set_race_reg` -> `queue_entries.race_reg` yes|no. Staff: Bookings column + `_raceRegCell`,
+  report column `rr` ("Registered for the race").
+- Theme: `_defeSessCard` (date card), `body.defe5k` from the runner step on and on the booked page (`_syncDefeTheme`,
+  `--go` berry), `_defeHeadHtml`, ticket `th-defe5k` with `assets/defe-logo.svg`. Wallet passes hidden (`_walletOk`).
+- Badge `defe_5k` (glyph `defe`, colour `defe` in BDG_SPECIAL), earned by a done row on a defe5k session.
+- Migration `20261018150000_defe_run` (race_reg, `customer_set_race_reg`, `_defe_run_guard` RUN_DETAILS /
+  ONE_PER_SESSION, badge row). Session: `supabase/checks/defe-run-session-2026-10-22.sql`, run after the app is live.
+  Tests: `tests/defe-run.spec.ts`.
+
 ## Customers and Community (2026-10-07)
 
 The owner: "make a separate customer management/dashboard page and a separate community management dashboard page ...

@@ -9846,3 +9846,83 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.ptn-row-mark{box-shad
 #tab-queue .ptn-form input[type=number],#tab-queue .ptn-form input[type=text]{width:120px;height:32px;padding:0 8px;border-radius:0;}
 #tab-queue .ptn-form label.ptn-sw{flex-direction:row;align-items:center;gap:6px;height:32px;}
 #tab-queue .ptn-form .ptn-save{height:32px;border-radius:0;}
+
+/* ════════════════════════════════════════════════════════════════════════
+   DEFE 5KM RUN (the owner, 2026-10-18) - Defe's breast-cancer 5 km race, a date inside MicroMobility
+   Experiences. Defe's own pink: the ribbon woven into دفء (assets/defe-logo.svg) in rose, berry for
+   ink and actions, a blush wash. The date card, the flow from the runner step on (body.defe5k), the
+   race box, the "registered for the race?" question, the ticket, staff's chips and the badge.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{--df-rose:#D782A0;--df-berry:#A22B63;--df-berry-dk:#861F50;--df-ink:#3B1328;--df-wash:215,130,160;}
+.ev-defe5k{--ev:#A22B63;--ev-rgb:162,43,99;}
+body:not(.view-staff) .ev-defe5k:not(.landing-event-card){--ev:#A22B63;--ev-rgb:162,43,99;}
+/* the date card: white, the wash from the far corner, the logo, the name, when / how far / where, the cause */
+body .sess-card.defe-card{
+  gap:6px;padding-top:14px;color:var(--df-ink);
+  background-color:#fff;
+  background-image:radial-gradient(120% 140% at 100% 100%,rgba(var(--df-wash),.30) 0%,rgba(var(--df-wash),.12) 40%,rgba(255,255,255,0) 68%);
+  border:1px solid rgba(162,43,99,.30);border-inline-start:3px solid var(--df-berry);}
+html[dir="rtl"] body .sess-card.defe-card{
+  background-image:radial-gradient(120% 140% at 0% 100%,rgba(var(--df-wash),.30) 0%,rgba(var(--df-wash),.12) 40%,rgba(255,255,255,0) 68%);}
+body .sess-card.defe-card:hover:not(.sess-full){background-color:#FFF7FA;}
+body .sess-card.defe-card.sess-selected{background-color:#FCEAF1;border-color:rgba(162,43,99,.6);border-inline-start-color:var(--df-berry);}
+.defe-card-top{display:flex;align-items:center;gap:10px;min-width:0;}
+.defe-card-logo{height:38px;width:auto;max-width:100%;object-fit:contain;display:block;}
+.defe-card-title{font-family:'Space Grotesk',var(--font-body);font-size:19px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;line-height:1.15;color:var(--df-berry);overflow-wrap:anywhere;}
+:is(html[lang="ar"],html[lang="ur"]) .defe-card-title{font-family:'IBM Plex Sans Arabic',sans-serif;letter-spacing:0;text-transform:none;}
+.defe-card-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;font-size:13px;font-weight:600;color:#5b3a4a;min-width:0;}
+.defe-card-meta i{width:1px;height:12px;background:rgba(162,43,99,.35);display:inline-block;flex:none;}
+.defe-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;min-width:0;}
+.defe-card-cause{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--df-berry);min-width:0;}
+.defe-card-cause .ptn-rb,.defe-flow-sub .ptn-rb{color:var(--df-rose);flex:none;}
+/* the flow from the runner step on, and the booked page: berry actions, a blush page */
+body.defe5k:not(.view-staff){--go:#A22B63;--go-2:#861F50;--go-wash:rgba(215,130,160,.16);--neon:#F2A9C4;--green-rgb:162,43,99;--accent2:rgba(162,43,99,.45);}
+body.defe5k:not(.view-staff) .toggle-btn.active{background:var(--df-berry);border-color:var(--df-berry);color:#fff;}
+.defe-flow-head{display:flex;align-items:center;gap:14px;margin:0 0 16px;padding:14px 16px;min-width:0;
+  background:radial-gradient(120% 160% at 100% 100%,rgba(var(--df-wash),.32) 0%,rgba(var(--df-wash),.1) 45%,rgba(255,255,255,0) 72%) #fff;
+  border:1px solid rgba(162,43,99,.28);border-inline-start:3px solid var(--df-berry);color:var(--df-ink);}
+html[dir="rtl"] .defe-flow-head{background:radial-gradient(120% 160% at 0% 100%,rgba(var(--df-wash),.32) 0%,rgba(var(--df-wash),.1) 45%,rgba(255,255,255,0) 72%) #fff;}
+.defe-flow-logo{height:46px;width:auto;max-width:34%;object-fit:contain;flex:none;display:block;}
+.defe-flow-copy{min-width:0;flex:1 1 auto;}
+.defe-flow-name{font-family:'Space Grotesk',var(--font-body);font-size:18px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--df-berry);line-height:1.2;overflow-wrap:anywhere;}
+:is(html[lang="ar"],html[lang="ur"]) .defe-flow-name{font-family:'IBM Plex Sans Arabic',sans-serif;letter-spacing:0;text-transform:none;}
+.defe-flow-sub{display:flex;align-items:center;gap:5px;margin-top:3px;font-size:12.5px;font-weight:600;color:#5b3a4a;}
+/* when the kits go out and when the race starts */
+.defe-when{display:grid;gap:6px;margin:0 0 14px;padding:10px 12px;background:#FDF1F6;border:1px solid rgba(162,43,99,.22);color:var(--df-ink);}
+.defe-when-row{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:13px;line-height:1.4;min-width:0;}
+.defe-when-k{font-weight:800;color:var(--df-berry);min-width:110px;}
+.defe-when-v{min-width:0;overflow-wrap:anywhere;}
+.run-km-chip.defe-km{background:rgba(162,43,99,.1);color:var(--df-berry);border-color:rgba(162,43,99,.35);}
+/* "Have you registered for the race?" */
+.defe-reg{display:grid;gap:8px;margin:0 0 16px;padding:14px 16px;background:#fff;border:1.5px solid var(--df-berry);color:var(--df-ink);}
+.defe-reg-q{font-size:16px;font-weight:800;color:var(--df-berry);}
+.defe-reg-sub{font-size:13px;line-height:1.45;color:#5b3a4a;}
+.defe-reg-yn{display:flex;gap:8px;}
+.defe-reg-yn .toggle-btn{flex:1 1 0;border-radius:0;}
+body:not(.view-staff) .defe-reg-yn .toggle-btn.active{background:var(--df-berry);border-color:var(--df-berry);color:#fff;}
+body:not(.view-staff) .defe-reg-yn .toggle-btn.active::before{background:#F8D3E1;}
+.defe-reg-no{display:grid;gap:8px;}
+body:not(.view-staff) .defe-reg .defe-reg-link{display:flex;align-items:center;justify-content:center;min-height:44px;border-radius:0;text-decoration:none;background:var(--df-berry);border-color:var(--df-berry);color:#fff;text-align:center;}
+body:not(.view-staff) .defe-reg .defe-reg-link:hover{background:var(--df-berry-dk);color:#fff;}
+.defe-reg.defe-reg-done{display:flex;align-items:center;gap:10px;border-width:1px;border-color:rgba(162,43,99,.3);background:#FDF1F6;font-size:13.5px;font-weight:600;}
+.defe-reg.defe-reg-done .cu-ic{color:var(--df-berry);flex:none;}
+.defe-reg.defe-reg-done .btn-sm{border-radius:0;flex:none;}
+/* the ticket: white, Defe's wash, the logo as its mark */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-defe5k{
+  --night:#fff;--night-2:#FDF0F5;--night-ink:#3B1328;--night-ink-2:rgba(59,19,40,.66);--night-line:rgba(162,43,99,.2);--neon:#A22B63;
+  --night-amber:#8A5300;--night-red:#B42318;--night-red-line:rgba(180,35,24,.35);color:var(--night-ink);
+  background:radial-gradient(120% 60% at 100% 100%,rgba(var(--df-wash),.28) 0%,rgba(var(--df-wash),.1) 38%,rgba(255,255,255,0) 66%) #fff;
+  border:1px solid rgba(162,43,99,.32);}
+html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-defe5k{
+  background:radial-gradient(120% 60% at 0% 100%,rgba(var(--df-wash),.28) 0%,rgba(var(--df-wash),.1) 38%,rgba(255,255,255,0) 66%) #fff;}
+.ticket-card .tk-logo-ev .tk-logo-defe5k{height:34px;}
+.ticket-card .defe-when{margin:10px 0;}
+/* staff: the date's chip, and the answer on Bookings */
+body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--df-wash),.28) 0%,rgba(var(--df-wash),.1) 40%,rgba(255,255,255,0) 70%) #fff;
+  --sf-ring:var(--df-berry);border-color:rgba(162,43,99,.4);color:var(--df-ink);background:var(--sf-chip-bg);}
+.rr-chip{display:inline-block;padding:1px 6px;font-size:11px;font-weight:700;border:1px solid;white-space:nowrap;}
+.rr-chip.rr-yes{color:#0c6b3a;border-color:rgba(12,107,58,.4);background:rgba(12,107,58,.08);}
+.rr-chip.rr-no{color:var(--df-berry);border-color:rgba(162,43,99,.45);background:rgba(162,43,99,.08);}
+/* the finisher's badge shares the Defe ride badge's medal colours (.sp-defe, BDG_SPECIAL.defe) */
+@media(max-width:400px){.defe-card-title{font-size:17px;}.defe-card-logo{height:32px;}.defe-flow-logo{height:38px;}.defe-when-k{min-width:0;width:100%;}}
