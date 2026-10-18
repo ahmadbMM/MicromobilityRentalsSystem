@@ -142,6 +142,17 @@ test.describe('@customer:defe DEFE 5KM Run', () => {
     await expect(tk).toContainText('Runner number');
   });
 
+  test('someone else’s Defe place never asks this rider', async ({ page }) => {
+    const theirs = { id: 'q9', session_id: DF, session_day: 'Thursday', session_date: '2099-10-22', queue_num: 1, name: 'Other Runner',
+      status: 'waiting', paid: false, price: 0, run_km: 5, registered_at: '2099-10-18T10:00:00Z', race_reg: null };
+    const withOwner = { ...theirs, id: 'q8', customer_id: 'c2' };
+    await custBoot(page, { 'rpc:my_bookings': [], queue_entries: [theirs, withOwner] });
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect.poll(() => page.evaluate('getQueue().length')).toBe(2);
+    expect(await page.evaluate('!!_pendingRaceReg()')).toBe(false);
+    await expect(page.locator('#race-gate .rr-box')).toHaveCount(0);
+  });
+
   test('the finisher’s badge: Defe’s ribbon, shown once the run is finished', async ({ page }) => {
     await custBoot(page);
     const slugs = (st: string) => page.evaluate(([s, sid]) => {
