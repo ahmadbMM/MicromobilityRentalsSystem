@@ -109,6 +109,26 @@ test.describe('@customer:partner partner places', () => {
   });
 });
 
+test.describe('@customer:badges Rode with Defe', () => {
+  test('checked in on the Defe ride (2026-10-24), member or Defe rider, earns the ribbon wheel; a no-show or another ride does not', async ({ page }) => {
+    await stubSupabase(page, { sessions: [satur()], bikes: [], queue_entries: [] });
+    await page.goto('/');
+    await waitForSb(page);
+    const on = (sid: string, st: string, partner: string | null = null) => page.evaluate(([s, t, p]) =>
+      (window as unknown as { _mrBadges: (a: unknown[], b: unknown[]) => { s: string; on: boolean; hide?: boolean }[] })
+        ._mrBadges([{ id: 'x', sessionId: s, status: t, paid: false, partner: p }], []).find((b) => b.s === 'defe_ride'), [sid, st, partner]);
+    expect(await on('2026-10-24', 'active')).toMatchObject({ on: true, hide: true });
+    expect(await on('2026-10-24', 'done', 'defe')).toMatchObject({ on: true });
+    expect(await on('2026-10-24', 'waiting')).toMatchObject({ on: false });
+    expect(await on('2026-10-24', 'noshow')).toMatchObject({ on: false });
+    expect(await on('2026-10-17', 'done')).toMatchObject({ on: false });
+    const svg = await page.evaluate(`_bdgMedal('defewheel','defe')`) as string;
+    expect(svg).toContain('bdg-sp');
+    expect(svg).toContain('#f6c3d6');
+    expect(await page.evaluate(`t('bdgDefeRide')`)).toBe('Rode with Defe');
+  });
+});
+
 test.describe('@staff:bookings partner places', () => {
   const entries = [
     row({ id: 'd1', name: 'Defe Rider', customer_id: 'c2', partner: 'defe', partner_code: true, approval: 'approved', queue_num: 11 }),

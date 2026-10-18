@@ -8902,6 +8902,8 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 
 /* The finisher's badge: the lap ring, purple into black (BDG_SPECIAL.vlap). */
 .mr-badge.sp-vlap,.badge-pop-box.sp-vlap{--sp1:#b9a6ff;--sp2:#5b3fd6;--sp3:#1b1236;--spg:91,63,214;--sph:236,230,255;}
+/* Rode with Defe: the ribbon wheel, rose into berry (BDG_SPECIAL.defe). */
+.mr-badge.sp-defe,.badge-pop-box.sp-defe{--sp1:#f6c3d6;--sp2:#d782a0;--sp3:#a22b63;--spg:215,130,160;--sph:255,236,243;}
 
 /* Staff: the race column, the split above the roster, and the Victory Lap dialogs. */
 .vl-cell{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;}
