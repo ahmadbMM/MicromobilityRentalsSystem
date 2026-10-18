@@ -112,6 +112,9 @@ for (const code of codes) {
   report('has extra', extra);
   report('has empty values for', empty);
   report('has different {n}/{name} placeholders from English in', badHoles);
+  // A line break typed as the two characters backslash and n (a doubly escaped "\\n" in the JSON) reaches
+  // the rider's WhatsApp as text: waRateRunMsg carried it in eight languages (2026-10-18).
+  report('has a literal backslash-n (write a real line break) in', enKeys.filter((k) => k in pack && /\\n/.test(String(pack[k])) && !/\\n/.test(String(en[k]))));
   // no emoji in any string (the owner, 2026-09-30): icons are drawn, messages are plain text. The
   // build's own list (EMOJI_RE): this one lacked the star and the circle (U+2B50, U+2B55), and the
   // build reads app.src.html only, so a pack carrying either passed both (2026-10-07).
