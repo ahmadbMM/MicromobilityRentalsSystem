@@ -80,6 +80,27 @@ test.describe('@customer:partner partner places', () => {
     expect(await page.evaluate(`S.regBikeTypes[0]`)).toBe('Own');
   });
 
+  test('our bikes taken but the members\' waitlist has room: every type stays open, with the waitlist notice', async ({ page }) => {
+    await stubSupabase(page, { sessions: [satur({ member_wl: 15 })], bikes: [], queue_entries: [], 'rpc:community_member': true, 'rpc:member_bikes_state': 'waitlist', 'rpc:member_bikes_open': true });
+    await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`S.selEvent='community';goCustomer('register');S.regStep=2;selectSessCard('${SAT}')`);
+    await expect(page.locator('#tab-register .mb-full-note')).toHaveText('Our bikes are taken for this ride. Choose one to join the waitlist, or come with your own bike.');
+    await expect(page.locator('#reg-type-wrap-0 button[data-type="Hybrid"]')).toBeEnabled();
+    await expect(page.locator('#reg-type-wrap-0 button[data-type="Own"]')).toBeEnabled();
+  });
+
+  test('member_bikes_state full: only Own, as before', async ({ page }) => {
+    await stubSupabase(page, { sessions: [satur()], bikes: [], queue_entries: [], 'rpc:community_member': true, 'rpc:member_bikes_state': 'full' });
+    await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`S.selEvent='community';goCustomer('register');S.regStep=2;selectSessCard('${SAT}')`);
+    await expect(page.locator('#tab-register .mb-full-note')).toHaveText('Our bikes are taken for this ride. You can still join with your own bike.');
+    await expect(page.locator('#reg-type-wrap-0 button[data-type="Hybrid"]')).toBeDisabled();
+  });
+
   test('without member_bikes_open (before the migration) every type stays open', async ({ page }) => {
     await stubSupabase(page, { sessions: [satur()], bikes: [], queue_entries: [], 'rpc:community_member': true });
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider', height: 175 });
@@ -245,6 +266,24 @@ test.describe('@staff:bookings partner places', () => {
     const byName = (n: string) => rows!.find((r) => r[ni] === n)!;
     expect(byName('Defe Rider')[pi]).toBe('Defe');
     expect(byName('Member One')[pi]).toBe('');
+  });
+
+  test('the members\' waitlist: its own count in the panel, out of the members\' places, and saved with the limit', async ({ page }) => {
+    await boot(page, {
+      sessions: [satur({ member_wl: 15 })],
+      session_partners: [{ session_id: SAT, partner: 'defe', label: 'Defe', places: 80, code: 'PINK24', code_needed: true }],
+      queue_entries: [...entries, row({ id: 'w1', name: 'Wait One', customer_id: 'c9', queue_num: 20, status: 'waitlist', waitlist_num: 1 })],
+    });
+    const panel = page.locator('#tab-queue .ptn-panel');
+    await expect(panel).toContainText('Members booked 1 / 70');
+    await expect(panel).toContainText('Waitlist 1 / 15');
+    await expect(panel.locator('#ptn-mwl')).toHaveValue('15');
+    const patches: unknown[] = [];
+    page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/sessions')) patches.push(r.postDataJSON()); });
+    await panel.locator('#ptn-mwl').fill('20');
+    await panel.locator('.ptn-mem .ptn-save').click();
+    await expect.poll(() => patches.length).toBe(1);
+    expect(patches[0]).toEqual({ member_cap: 70, member_wl: 20 });
   });
 
   test('the Defe shirt answer: on the row, the sizes to give in the panel, and in the report', async ({ page }) => {
