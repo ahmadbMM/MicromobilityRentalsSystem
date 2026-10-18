@@ -2351,7 +2351,7 @@
   "publishConfirmBody": "{0} ciclista(s) aprobado(s) verán de inmediato que están confirmados. Esto no se puede deshacer desde aquí.",
   "publishedToast": "Resultados publicados - {0} ciclista(s) confirmado(s)",
   "commCueConfirmed": "Tu plaza está confirmada",
-  "commCueWaitlist": "En lista de espera. Si se libera una plaza para ti, esta tarjeta se convierte en tu entrada.",
+  "commCueWaitlist": "En lista de espera.",
   "commTabAccounts": "Cuentas",
   "doneBtn": "Hecho",
   "amTagsTitle": "Etiquetas",

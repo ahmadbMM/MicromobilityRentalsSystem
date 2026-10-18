@@ -2351,7 +2351,7 @@
   "publishConfirmBody": "{0} cycliste(s) approuvé(s) verront immédiatement qu'ils sont confirmés. Cela ne peut pas être annulé d'ici.",
   "publishedToast": "Résultats publiés - {0} cycliste(s) confirmé(s)",
   "commCueConfirmed": "Votre place est confirmée",
-  "commCueWaitlist": "Sur liste d’attente. Si une place se libère pour vous, cette carte devient votre billet.",
+  "commCueWaitlist": "Sur liste d’attente.",
   "commTabAccounts": "Comptes",
   "doneBtn": "Terminé",
   "amTagsTitle": "Tags",

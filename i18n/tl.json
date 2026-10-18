@@ -2351,7 +2351,7 @@
   "publishConfirmBody": "{0} inaprubahang rider ang agad na makakakita na kumpirmado sila. Hindi ito mababawi mula rito.",
   "publishedToast": "Nai-publish ang mga resulta - {0} rider ang kumpirmado",
   "commCueConfirmed": "Kumpirmado na ang puwesto mo",
-  "commCueWaitlist": "Nasa waitlist. Kapag may nabakanteng puwesto para sa iyo, magiging ticket mo ang card na ito.",
+  "commCueWaitlist": "Nasa waitlist.",
   "commTabAccounts": "Mga Account",
   "doneBtn": "Tapos",
   "amTagsTitle": "Mga Tag",

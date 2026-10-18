@@ -2351,7 +2351,7 @@
   "publishConfirmBody": "{0} ciclista(s) aprovado(s) verão imediatamente que estão confirmados. Isso não pode ser desfeito daqui.",
   "publishedToast": "Resultados publicados - {0} ciclista(s) confirmado(s)",
   "commCueConfirmed": "Sua vaga está confirmada",
-  "commCueWaitlist": "Na lista de espera. Se uma vaga abrir para você, este cartão vira seu ingresso.",
+  "commCueWaitlist": "Na lista de espera.",
   "commTabAccounts": "Contas",
   "doneBtn": "Concluído",
   "amTagsTitle": "Etiquetas",
