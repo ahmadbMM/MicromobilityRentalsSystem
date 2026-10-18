@@ -9818,6 +9818,10 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
    the start edge beside the status edge of "Bookings in colour", which moves in by 4px on these rows */
 .ptn-chip{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:1px 6px 1px 4px;border:1px solid #D782A0;background:#FBE4EE;color:#A22B63;font-size:11px;font-weight:800;letter-spacing:.4px;line-height:1.5;border-radius:2px;white-space:nowrap;vertical-align:middle;}
 .ptn-chip .ptn-rb{flex:none;display:block;}
+.ptn-shirt{display:inline-block;margin-inline-start:6px;font-size:11px;font-weight:700;color:#A22B63;white-space:nowrap;vertical-align:middle;}
+.ptn-shirt-need{padding:1px 6px;border:1px dashed #A22B63;border-radius:2px;}
+html[data-theme="dark"] body:not(.view-staff) .ptn-shirt,html[data-staff-theme="dark"] body.view-staff .ptn-shirt{color:#F6C3D6;border-color:#F6C3D6;}
+#tab-queue .ptn-shirts{font-size:13px;font-weight:700;color:#A22B63;}
 html[data-theme="dark"] body:not(.view-staff) .ptn-chip,html[data-staff-theme="dark"] body.view-staff .ptn-chip{background:#3a1a2a;color:#F6C3D6;border-color:#D782A0;}
 .queue-table tbody tr.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0;}
 html[dir="rtl"] .queue-table tbody tr.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0;}
