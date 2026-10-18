@@ -5451,6 +5451,15 @@ body.fix-open{overflow:hidden;}
 #share-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
 #share-gate .sg-box:focus,#share-gate .sg-box:focus-visible{outline:none;}
 #share-gate .sg-sub{margin-top:16px;}
+/* The Defe run asks "Have you registered for the race?" as an unskippable centred pop-up (#race-gate,
+   renderRaceGate, 2026-10-18): Yes or No in Defe's berry, No adds the code, the link and Done. */
+#race-gate .auth-backdrop{overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
+#race-gate .rr-box:focus,#race-gate .rr-box:focus-visible{outline:none;}
+#race-gate .pg-title{color:var(--df-berry,#A22B63);}
+#race-gate .rr-sub{margin-top:16px;}
+#race-gate .defe-reg-yn{margin-top:14px;}
+#race-gate .defe-reg-no{margin-top:12px;}
+#race-gate .pg-btn{margin-top:14px;}
 .sg-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card);}
 .sg-list li{display:flex;align-items:center;gap:10px;font-weight:600;font-size:14px;line-height:1.35;color:var(--ink);overflow-wrap:anywhere;}
 .sg-list .cu-ic{flex-shrink:0;color:var(--go);}

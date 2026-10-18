@@ -430,6 +430,7 @@ window.mmLoading=(function(){
 <div id="rate-modal"       data-host></div>
 <div id="waiver-gate"      data-host></div>
 <div id="share-gate"       data-host></div>
+<div id="race-gate"        data-host></div>
 <div id="bike-info-modal"  data-host></div>
 <div id="acc-pwd-modal"    data-host></div>
 <div id="cust-modal"       data-host></div>
@@ -2025,6 +2026,7 @@ function setLang(lang,_fromUrl){
   if(S._rg)renderRateModal();
   if(S._wg)renderWaiverGate();
   if(S._sg)renderShareGate();
+  if(S._xg)renderRaceGate();
 }
 
 
@@ -6854,6 +6856,7 @@ function showView(v){
     if(S._rg){S._rg=null;renderRateModal();}
     if(S._wg){S._wg=null;renderWaiverGate();}
     if(S._sg){S._sg=null;renderShareGate();}
+    if(S._xg){S._xg=null;renderRaceGate();}
   }
   if(v!=='customer'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   document.getElementById('view-landing').classList.toggle('active',v==='landing');
@@ -8065,33 +8068,98 @@ function _defeSessCard(s,o){
     <span class="defe-card-foot"><span class="defe-card-cause">${_PTN_RIBBON}<span>${esc(t('defeCause'))}</span></span>${st}</span>
   </button>${o.dt}</div>`;
 }
-// "Have you registered for the race?" on a booked Defe place: Yes, or No and the way to Defe’s registration page.
+// "Have you registered for the race?" (the owner, 2026-10-18: "i want it as an unskippable pop up").
+// A centred pop-up, like the waiver and share gates: it opens the moment a Defe place is booked and
+// whenever the rider opens the app or signs in while a live place of theirs on a race still ahead has
+// no answer, or answered No (asked again on each visit until Yes; Done lets a No through for this
+// visit). No close, no backdrop, no Escape; Log out is the only other way off. Yes saves and closes;
+// No saves and shows the members' code and the way to Defe's registration page, then Done.
 // The place is booked whatever the answer; the answer tells staff who still has to register.
+// The ticket keeps a line of the answer: Yes with Change, No with the code and the link.
 function _defeRegHtml(e){
   if(!e||!_isDefe(_sessDisp(e.sessionId))||['cancelled','removed','noshow','done'].includes(e.status))return'';
-  const a=(S._rrAns&&S._rrAns[e.id]!==undefined)?S._rrAns[e.id]:(e.raceReg||''),ask=S._rrAsk===e.id,busy=S._rrBusy===e.id;
-  const link=`<a class="btn-primary defe-reg-link" href="${esc(DEFE_RACE_URL)}" target="_blank" rel="noopener" aria-label="${esc(t('defeRegLink')+t('opensNewTab'))}">${esc(t('defeRegLink'))}</a>`;
-  if(a==='yes'&&!ask)return`<div class="defe-reg defe-reg-done" role="status">${_cuIc('tick',16)}<span class="cu-f1-min0">${esc(t('defeRegYesNote'))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_defeRegAsk",e.id)}">${t('emChange')}</button></div>`;
-  const b=(v,lbl)=>`<button type="button" class="toggle-btn${a===v?' active':''}" aria-pressed="${a===v?'true':'false'}"${busy?' disabled':''} data-on-click="${_on("_defeRegSet",e.id,v)}">${esc(lbl)}</button>`;
-  return`<div class="defe-reg" role="group" aria-labelledby="defe-reg-q-${esc(e.id)}">
-    <div class="defe-reg-q" id="defe-reg-q-${esc(e.id)}">${esc(t('defeRegQ'))}</div>
-    <div class="defe-reg-sub">${esc(t('defeRegSub'))}</div>
-    <div class="toggle-group defe-reg-yn">${b('yes',t('waYes'))}${b('no',t('waNo'))}</div>
-    ${a==='no'?`<div class="defe-reg-no"><div class="defe-reg-sub">${esc(t('defeRegNoNote'))}</div><div class="defe-reg-code">${esc(t('defeRegCode')).replace('{0}',`<strong dir="ltr">${DEFE_RACE_CODE}</strong>`)}</div>${link}</div>`:''}
-  </div>`;
+  const a=(S._rrAns&&S._rrAns[e.id]!==undefined)?S._rrAns[e.id]:(e.raceReg||'');
+  const chg=`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_defeRegAsk",e.id)}">${t('emChange')}</button>`;
+  if(a==='yes')return`<div class="defe-reg defe-reg-done" role="status">${_cuIc('tick',16)}<span class="cu-f1-min0">${esc(t('defeRegYesNote'))}</span>${chg}</div>`;
+  if(a==='no')return`<div class="defe-reg">${_defeRegNoHtml()}${chg}</div>`;
+  return'';
 }
-function _defeRegAsk(id){S._rrAsk=id;_defeRegPaint();}
+function _defeRegNoHtml(){
+  const link=`<a class="btn-primary defe-reg-link" href="${esc(DEFE_RACE_URL)}" target="_blank" rel="noopener" aria-label="${esc(t('defeRegLink')+t('opensNewTab'))}">${esc(t('defeRegLink'))}</a>`;
+  return`<div class="defe-reg-no"><div class="defe-reg-sub">${esc(t('defeRegNoNote'))}</div><div class="defe-reg-code">${esc(t('defeRegCode')).replace('{0}',`<strong dir="ltr">${DEFE_RACE_CODE}</strong>`)}</div>${link}</div>`;
+}
+// The account's live place on a Defe race still ahead that wants the answer: none yet, or No not yet
+// passed with Done on this visit. The booking just made counts at once (S.lastTickets).
+function _pendingRaceReg(){
+  const cust=S.loggedIn;if(!cust)return null;
+  const today=todayStr(),seen=new Set();let best=null;
+  [...(S.lastTickets||[]),...getQueue()].forEach(e=>{
+    if(!e||seen.has(e.id))return;seen.add(e.id);
+    if(e.customerId&&e.customerId!==cust.id)return;
+    if(!['waiting','waitlist','active'].includes(e.status))return;
+    const s=_sessDisp(e.sessionId);if(!_isDefe(s))return;
+    const d=String((s&&s.session_date)||e.sessionDate||e.sessionId||'').slice(0,10);if(d<today)return;
+    const a=(S._rrAns&&S._rrAns[e.id]!==undefined)?S._rrAns[e.id]:(e.raceReg||'');
+    if(a==='yes'||(a==='no'&&(S._rrLater||{})[e.id]))return;
+    if(!best||d<best.d)best={d,e};
+  });
+  return best&&best.e;
+}
+function _forceRaceRegPrompt(){
+  if(S._xg)return true;
+  const e=_pendingRaceReg();if(!e)return false;
+  S._xg={id:e.id,sid:e.sessionId,day:e.sessionDay,saving:false,net:false};renderRaceGate();return true;
+}
+// Change on the ticket opens the same pop-up, its answer shown.
+function _defeRegAsk(id){const e=_qGet(id)||(S.lastTickets||[]).find(x=>x.id===id);if(!e)return;S._xg={id,sid:e.sessionId,day:e.sessionDay,saving:false,net:false};renderRaceGate();}
 function _defeRegPaint(){if(S.view!=='customer')return;if(S.custTab==='register')renderRegister();else if(S.custTab==='myrides')renderMyRides();}
+function renderRaceGate(){
+  const g=S._xg,m=document.getElementById('race-gate');if(!m)return;
+  if(!g){m.style.display='none';m.innerHTML='';_fixOpenSync();return;}
+  const s=_sessDisp(g.sid);
+  if(!s){S._xg=null;return renderRaceGate();}
+  const a=(S._rrAns&&S._rrAns[g.id]!==undefined)?S._rrAns[g.id]:((_qGet(g.id)||{}).raceReg||'');
+  const ev=_evName(s),ven=_venueName(s);
+  const b=(v,lbl)=>`<button type="button" class="toggle-btn${a===v?' active':''}" aria-pressed="${a===v?'true':'false'}"${g.saving?' disabled':''} data-on-click="${_on("_defeRegSet",g.id,v)}">${esc(lbl)}</button>`;
+  const box=m.querySelector('.auth-backdrop'),top=box?box.scrollTop:0;
+  document.body.classList.add('fix-open');
+  m.style.display='block';
+  m.innerHTML=`<div class="auth-backdrop"><div class="pg-box fx-box wg-box rr-box" role="dialog" aria-modal="true" aria-labelledby="rr-title" aria-describedby="rr-sub">
+    <h2 id="rr-title" class="pg-title">${esc(t('defeRegQ'))}</h2>
+    <div class="wg-sess">
+      <div class="wg-ev">${esc(ev)}</div>
+      <div class="wg-ln">${_cuIc('cal',15)}<span>${esc(dayLabel(s.day||g.day))} · ${esc(shortDate(s.session_date||g.sid))}</span></div>
+      <div class="wg-ln">${_cuIc('clock',15)}<bdi>${esc(sessionTime(s))}</bdi></div>
+      ${ven&&ven!==ev?`<div class="wg-ln">${_cuIc('pin',15)}<span>${esc(ven)}</span></div>`:''}
+    </div>
+    <p id="rr-sub" class="pg-sub rr-sub">${esc(t('defeRegSub'))}</p>
+    <div class="toggle-group defe-reg-yn">${b('yes',t('waYes'))}${b('no',t('waNo'))}</div>
+    ${a==='no'?_defeRegNoHtml():''}
+    ${g.net?`<div class="pg-net" role="alert">${t('pgErrNet')}</div>`:''}
+    ${a==='no'?`<button type="button" class="pg-btn"${g.saving?' disabled':''} data-on-click="${_on("_raceGateDone")}">${t('doneBtn')}</button>`:''}
+    <button type="button" class="gate-out" data-on-click="${_on("doLogout")}"${g.saving?' disabled':''}>${t('logOut')}</button>
+  </div></div>`;
+  const nb=m.querySelector('.auth-backdrop');if(nb&&top)nb.scrollTop=top;
+  if(!g.shown){g.shown=true;const bx=m.querySelector('.rr-box');if(bx){bx.setAttribute('tabindex','-1');try{bx.focus({preventScroll:true});}catch(_){}}}
+}
+// Done after No: this visit lets it through; the next visit asks again until Yes.
+function _raceGateDone(){
+  const g=S._xg;if(!g||g.saving)return;
+  S._rrLater={...(S._rrLater||{}),[g.id]:true};S._xg=null;renderRaceGate();_defeRegPaint();
+  _forceRatingPrompt(); // another Defe place, if there is one, then any rating
+}
 async function _defeRegSet(id,v){
-  const c=S.loggedIn||getSession();if(!c||!c.id||!c.session_token||S._rrBusy)return;
+  const c=S.loggedIn||getSession(),g=S._xg;if(!c||!c.id||!c.session_token||(g&&g.saving))return;
   const was=(S._rrAns&&S._rrAns[id]!==undefined)?S._rrAns[id]:((_qGet(id)||{}).raceReg||'');
-  S._rrAns={...(S._rrAns||{}),[id]:v};S._rrBusy=id;if(S._rrAsk===id&&v==='yes')S._rrAsk=null;_defeRegPaint();
+  S._rrAns={...(S._rrAns||{}),[id]:v};if(g){g.saving=true;g.net=false;}renderRaceGate();
   let ok=false;
   try{const r=await sb.rpc('customer_set_race_reg',{p_id:c.id,p_token:c.session_token,p_entry_id:id,p_answer:v});ok=!r.error&&r.data===true;}catch(e){}
-  S._rrBusy=null;
-  if(ok){const q=_qGet(id);if(q)q.raceReg=v;(S.lastTickets||[]).forEach(x=>{if(x.id===id)x.raceReg=v;});}
-  else{S._rrAns={...S._rrAns,[id]:was};toast(t('errConnection'),'error');}
-  _defeRegPaint();
+  if(g)g.saving=false;
+  if(ok){const q=_qGet(id);if(q)q.raceReg=v;(S.lastTickets||[]).forEach(x=>{if(x.id===id)x.raceReg=v;});try{_cacheSave();}catch(_){}}
+  else{S._rrAns={...S._rrAns,[id]:was};if(g)g.net=true;}
+  if(S._xg!==g)return; // signed out meanwhile
+  if(ok&&v==='yes'){S._xg=null;renderRaceGate();_defeRegPaint();_forceRatingPrompt();return;}
+  renderRaceGate();_defeRegPaint();
 }
 // The staff's view of the answer: Registered, Not yet, or a dash before it is given.
 function _raceRegCell(e){const a=e&&e.raceReg;return a==='yes'?`<span class="rr-chip rr-yes">${esc(t('defeRegColYes'))}</span>`:a==='no'?`<span class="rr-chip rr-no">${esc(t('defeRegColNo'))}</span>`:'<span class="rq-mut">—</span>';}
@@ -9762,7 +9830,7 @@ function _wlcClose(){try{sessionStorage.removeItem(WLC_KEY);}catch(e){}S._wlc=nu
 function _wlcClock(){const g=S._wlc,ms=Math.max(0,Date.parse(g.d.expires_at)-Date.now()-(g.skew||0)),s=Math.floor(ms/1e3);return ms?Math.floor(s/60)+':'+String(s%60).padStart(2,'0'):'';}
 function _wlcTick(){const g=S._wlc,c=g&&g.st==='ask'&&_wlcClock(),el=document.getElementById('wlc-clock');if(!c){if(g&&g.st==='ask'){g.st='late';renderClaim();}else clearInterval(S._wlcT);return;}if(el)el.textContent=c;}
 // The page behind the forced pop-ups stays still while any of them is up: one closing must not free it under another.
-function _fixOpenSync(){document.body.classList.toggle('fix-open',!!(S._fix||S._afx||S._wlc||S._rg||S._wg||S._sg));}
+function _fixOpenSync(){document.body.classList.toggle('fix-open',!!(S._fix||S._afx||S._wlc||S._rg||S._wg||S._sg||S._xg));}
 function renderClaim(){
   const g=S._wlc,m=document.getElementById('wl-claim');if(!m)return;
   clearInterval(S._wlcT);
@@ -13400,6 +13468,7 @@ async function _submitReg(){
     if(_isCommBooking)toast(bookingStatus==='waitlist'?t('commCueWaitlist'):t('commCuePending'));
     else toast(bookingStatus==='waitlist'?`${t('toastWaitlisted')} ${numStr}`:`${t('toastRegistered')} ${numStr}`);
     renderRegister();renderMyRides();_regFocus();
+    try{_forceRatingPrompt();}catch(e){} // a Defe place asks "Have you registered for the race?" at once
     // The National Day ride still holds its popup open (its federation form is the one thing a rider
     // cannot skip). Paying at the booth and first come, first served are said on the riders step,
     // the review and the ticket, before the booking and after it, so no popup repeats them.
@@ -14168,11 +14237,12 @@ function _pendingRatingId(){
 // Called whenever My Bookings draws, on any customer tab, and as each of the account's own pages
 // closes: those (the profile page, a correction request, the forced password) go first.
 function _forceRatingPrompt(){
-  if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||_isStaffHost())return;
+  if(S.view==='staff'||!S.loggedIn||S._rg||S._pg||S._fix||S._afx||S._xg||_isStaffHost())return;
   if(document.getElementById('pwd-gate'))return;
   if(S._sg&&!S._sg.gate)return; // a runner answering the booking's own ask is not interrupted
   if(S._wg||_forceWaiverPrompt())return; // a desk-added booking's waiver comes first (2026-10-04)
   if(S._sg||_forceSharePrompt())return; // then a runner's agreement to share their details (2026-10-06)
+  if(_forceRaceRegPrompt())return; // then a Defe runner's "Have you registered for the race?" (2026-10-18)
   const id=_pendingRatingId();if(id)openRateModal(id,true);
 }
 function openRateModal(id,forced){

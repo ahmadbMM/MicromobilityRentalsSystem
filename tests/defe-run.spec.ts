@@ -92,23 +92,32 @@ test.describe('@customer:defe DEFE 5KM Run', () => {
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0]).toMatchObject({ session_id: DF, run_km: 5, type_preference: 'None', price: 0 });
     expect(rows[0].share_ok).toBeFalsy();
-    // booked first, then the question
-    const q = page.locator('#tab-register .defe-reg');
-    await expect(q.locator('.defe-reg-q')).toHaveText('Have you registered for the race?');
-    await expect(page.locator('#tab-register .ticket-card')).toContainText('Runner number');
-    await expect(q.locator('.defe-reg-link')).toHaveCount(0);
-    await q.getByRole('button', { name: 'No' }).click();
-    const link = page.locator('#tab-register .defe-reg-link');
-    await expect(link).toHaveText('Register for the race');
-    await expect(page.locator('#tab-register .defe-reg-code')).toHaveText('Use discount code MICRO50 for 50% off, for the first 50 members.');
-    await expect(page.locator('#tab-register .defe-reg-code strong')).toHaveText('MICRO50');
-    await expect(link).toHaveAttribute('href', 'https://in.njuko.com/defe5k?utm_id=97760_v0_s00_e0_tv5');
-    await expect(link).toHaveAttribute('target', '_blank');
-    await expect.poll(() => sent.filter((x) => x.u === 'customer_set_race_reg').length).toBe(1);
-    expect(sent.find((x) => x.u === 'customer_set_race_reg')!.b).toMatchObject({ p_id: 'c1', p_answer: 'no' });
-    await page.locator('#tab-register .defe-reg').getByRole('button', { name: 'Yes' }).click();
-    await expect(page.locator('#tab-register .defe-reg-done')).toContainText('registered for the race');
-    await expect(page.locator('#tab-register .defe-reg-link')).toHaveCount(0);
+    // booked first, then the question: a centred pop-up that cannot be closed (2026-10-18)
+    const q = page.locator("#race-gate .rr-box");
+    await expect(q.locator("#rr-title")).toHaveText("Have you registered for the race?");
+    await expect(page.locator("#tab-register .ticket-card")).toContainText("Runner number");
+    await page.keyboard.press("Escape");
+    await expect(q).toBeVisible();
+    await expect(q.locator(".defe-reg-link")).toHaveCount(0);
+    await q.getByRole("button", { name: "No" }).click();
+    const link = q.locator(".defe-reg-link");
+    await expect(link).toHaveText("Register for the race");
+    await expect(q.locator(".defe-reg-code")).toHaveText("Use discount code MICRO50 for 50% off, for the first 50 members.");
+    await expect(q.locator(".defe-reg-code strong")).toHaveText("MICRO50");
+    await expect(link).toHaveAttribute("href", "https://in.njuko.com/defe5k?utm_id=97760_v0_s00_e0_tv5");
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect.poll(() => sent.filter((x) => x.u === "customer_set_race_reg").length).toBe(1);
+    expect(sent.find((x) => x.u === "customer_set_race_reg")!.b).toMatchObject({ p_id: "c1", p_answer: "no" });
+    // Done lets the No through for this visit; the ticket keeps the code and the link
+    await q.getByRole("button", { name: "Done" }).click();
+    await expect(page.locator("#race-gate .rr-box")).toHaveCount(0);
+    await expect(page.locator("#tab-register .defe-reg-link")).toBeVisible();
+    // Change opens the pop-up again; Yes saves and closes it
+    await page.locator("#tab-register .defe-reg").getByRole("button", { name: "Change" }).click();
+    await page.locator("#race-gate .rr-box").getByRole("button", { name: "Yes" }).click();
+    await expect(page.locator("#race-gate .rr-box")).toHaveCount(0);
+    await expect(page.locator("#tab-register .defe-reg-done")).toContainText("registered for the race");
+    await expect(page.locator("#tab-register .defe-reg-link")).toHaveCount(0);
   });
 
   test('a missing emergency contact and birth date are asked for', async ({ page }) => {
@@ -120,14 +129,15 @@ test.describe('@customer:defe DEFE 5KM Run', () => {
     await expect(page.locator('#reg-waiver-cb')).toHaveCount(0);
   });
 
-  test('the question waits on the ticket in My Bookings, and the answer shows', async ({ page }) => {
+  test('a booked place with no answer asks in the pop-up on opening the app', async ({ page }) => {
     const mine = { id: 'q1', session_id: DF, session_day: 'Thursday', session_date: '2099-10-22', queue_num: 4, name: 'Sara Haddad',
       phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, run_km: 5,
       registered_at: '2099-10-18T10:00:00Z', customer_id: 'c1', race_reg: null };
     await custBoot(page, { 'rpc:my_bookings': [mine], queue_entries: [mine] });
     await page.evaluate(`setCustTab('myrides')`);
     const tk = page.locator('#tab-myrides .ticket-card').first();
-    await expect(tk.locator('.defe-reg-q')).toBeVisible();
+    await expect(page.locator('#race-gate .rr-box #rr-title')).toHaveText('Have you registered for the race?');
+    await expect(tk.locator('.defe-reg')).toHaveCount(0);
     await expect(tk.locator('.defe-when')).toContainText('Jeddah Park');
     await expect(tk).toContainText('Runner number');
   });
