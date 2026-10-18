@@ -65,13 +65,13 @@ test.describe('@staff:accounts and members filters and sorts', () => {
       ['Gender', 'unset', ['c3']],
       ['Nationality', 'unset', ['c3']],
     ] as const) {
-      await panel.getByLabel(lbl, { exact: true }).selectOption(v);
+      await panel.locator(`select[aria-label="${lbl}"]`).selectOption(v);
       expect(await rows(page), `${lbl} = ${v}`).toEqual(want);
-      await panel.getByLabel(lbl, { exact: true }).selectOption('');
+      await panel.locator(`select[aria-label="${lbl}"]`).selectOption('');
     }
     // two at once: the button counts both, Reset takes both off
-    await panel.getByLabel('Gender', { exact: true }).selectOption('male');
-    await panel.getByLabel('Upcoming booking', { exact: true }).selectOption('no');
+    await panel.locator(`select[aria-label="Gender"]`).selectOption('male');
+    await panel.locator(`select[aria-label="Upcoming booking"]`).selectOption('no');
     await expect(page.locator('[aria-controls="fm-am"]')).toContainText('(2)');
     expect(await rows(page)).toEqual(['c2']);
     await panel.locator('.am-reset').click();

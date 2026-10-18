@@ -5248,6 +5248,7 @@
   "amfIgOk": "Encontrado",
   "amfIgUnavail": "Privado o no encontrado",
   "amfIgErr": "La comprobación falló",
+  "amfFlagAny": "Cualquier campo",
   "amfIgBad": "El usuario de Instagram parece incorrecto",
   "amfSortIgAvg": "Más por encima de la media",
   "amfSortIgHandle": "Usuario de Instagram, A a Z",
