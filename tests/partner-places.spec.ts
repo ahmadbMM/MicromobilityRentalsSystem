@@ -352,8 +352,8 @@ test.describe('@staff:bookings partner places', () => {
     await expect(rowOf('Defe Two').locator('.ptn-shirt')).toHaveText('Has a Defe shirt');
     await expect(rowOf('Member One').locator('.ptn-shirt')).toHaveCount(0);
     // The code each Defe booking came with, beside it in plain sight (2026-10-23).
-    await expect(rowOf('Defe Rider').locator('.ptn-code')).toHaveText('PINK24');
-    await expect(rowOf('Defe Two').locator('.ptn-code')).toHaveCount(0);
+    await expect(rowOf('Defe Rider').locator('.ptn-codetag')).toHaveText('PINK24');
+    await expect(rowOf('Defe Two').locator('.ptn-codetag')).toHaveCount(0);
     const rows = await page.evaluate(`(()=>{let out=null;const o=window._downloadCsv;window._downloadCsv=(n,r)=>{out=r;};try{localStorage.removeItem('cq_rep_opts');S._repOpts=null;exportSessionExcel();}finally{window._downloadCsv=o;}return out;})()`) as string[][] | null;
     const head = rows![0], pi = head.indexOf('Partner'), ni = head.indexOf('Name');
     expect(rows!.find((r) => r[ni] === 'Defe Rider')![pi]).toBe('Defe · PINK24 · Shirt to give: M');

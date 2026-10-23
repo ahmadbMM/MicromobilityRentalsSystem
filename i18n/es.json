@@ -5323,7 +5323,7 @@
   "ptnBookedOf": "{0}: {1} / {2} reservadas",
   "ptnByCode": "Reservadas con el código: {0}",
   "ptnShirtHas": "Tiene camiseta de Defe",
-  "ptnCodeUsed": "Código usado para reservar",
+  "ptnCodeTagT": "Código usado para reservar",
   "ptnShirtNeed": "Camiseta por entregar: {0}",
   "ptnShirtSum": "Camisetas de Defe: {0} ya tienen una · por entregar: {1}",
   "ptnMembers": "Miembros reservados {0} / {1} (después solo con bicicleta propia)",
