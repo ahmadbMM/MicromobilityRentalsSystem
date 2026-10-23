@@ -9602,6 +9602,9 @@ html[data-staff-theme="dark"] body.view-staff .ev-workshop{--ev:#fb8c4a;--ev-rgb
 html[data-staff-theme="dark"] body.view-staff .ev-event{--ev:#a78bfa;--ev-rgb:167,139,250;}
 html[data-staff-theme="dark"] body.view-staff .ev-runher{--ev:#f2789f;--ev-rgb:242,120,159;}
 html[data-staff-theme="dark"] body.view-staff .ev-snd96{--ev:#3ddc84;--ev-rgb:61,220,132;}
+/* Victory Lap's race black (#0d0d0d) vanished on dark: its name on the session card, its calendar bar */
+html[data-staff-theme="dark"] body.view-staff .ev-vlap{--ev:#ededea;--ev-rgb:237,237,234;}
+html[data-staff-theme="dark"] body.view-staff .ev-name.ev-vlap{color:var(--ev);}
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-community{--ev:#b48cf0;}
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-workshop{--ev:#6ea8ff;}
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-snd96{--ev:#3ddc84;}
