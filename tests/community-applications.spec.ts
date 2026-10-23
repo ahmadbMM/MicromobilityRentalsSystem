@@ -1022,3 +1022,49 @@ test('a rider checked in while the revoke question is open is left alone', async
   await page.locator('.ca-inv-subs [data-ca-inv="completed"]').click();
   await expect(row(page, 'i1')).toHaveAttribute('data-inv', 'completed');
 });
+
+// Invite again (the owner, 2026-10-23): an invited rider can be invited to another Saturday ride
+// from their card, whatever came of the last one. No approval this time; a booking on the picked
+// ride, on the bike staff choose, then the application names the new ride and the invitation shows.
+test('Invite again: a completed invitee goes on another ride and gets a new invitation', async ({ page }) => {
+  await applicationsTab(page, {
+    tags: TAGS, sessions: [...RIDES, ride(PAST)], customers: [...customers, ...invPeople],
+    community_applications: [...apps, invApp('i2', 'Past Done', 'k2', PAST), invApp('i3', 'Past No Show', 'k3', PAST), invApp('i1', 'Upcoming Booked', 'k1', SAT)],
+    queue_entries: [invBk('q2', 'k2', PAST, 'done'), invBk('q3', 'k3', PAST, 'noshow'), invBk('q1', 'k1', SAT, 'waiting'), invBk('q9', 'k2', SAT, 'waiting')],
+  });
+  const calls: string[] = [];
+  page.on('request', (r) => { if (/rpc\/staff_community_approve/.test(r.url())) calls.push(r.url()); });
+  const bookings = writes(page, 'queue_entries'), marks = patches(page, 'community_applications');
+  await page.locator('.filter-pill[data-ca-filter="invited"]').click();
+  const sub = (k: string) => page.locator(`.ca-inv-subs [data-ca-inv="${k}"]`);
+  // on every list: still to come, completed, didn't show
+  await expect(row(page, 'i1').locator('.ca-reinvite')).toHaveText('Invite again');
+  await sub('noshow').click();
+  await expect(row(page, 'i3').locator('.ca-reinvite')).toHaveText('Invite again');
+  await sub('completed').click();
+  await row(page, 'i2').locator('.ca-reinvite').click();
+
+  const dlg = page.locator('#confirm-modal .ca-ap-box');
+  await expect(dlg).toHaveAttribute('data-ca-kind', 'reinvite');
+  await expect(dlg).toContainText('Invite Past Done to another ride?');
+  await expect(dlg).toContainText('Their earlier ride stays as it is.');
+  await expect(dlg.locator('.ca-ap-go')).toHaveText('Invite again');
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled();
+  await expect(dlg.locator(`[data-ca-ride="${SAT}"]`)).toBeDisabled(); // booked on it already
+  await dlg.locator(`[data-ca-ride="${SAT2}"]`).click();
+  await dlg.locator('.rg-field [data-rg="beg"]').click();
+  await expect(dlg.locator('.ca-ap-go')).toBeDisabled(); // the bike comes next
+  await dlg.locator('.ca-ap-tys [data-ca-ty="Road"]').click();
+  await dlg.locator('.ca-ap-go').click();
+
+  await expect(page.locator('#confirm-modal .ca-msg-box')).toBeVisible();
+  await expect.poll(() => bookings.length).toBe(1);
+  expect(bookings[0]).toMatchObject({ session_id: SAT2, customer_id: 'k2', status: 'waiting', approval: 'approved', type_preference: 'Road' });
+  await expect.poll(() => marks.length).toBe(1);
+  expect(marks[0].body).toEqual({ invited_session: SAT2 });
+  for (const part of ['id=eq.i2', 'status=eq.approved', `invited_session=eq.${PAST}`]) expect(marks[0].url).toContain(part);
+  expect(calls).toEqual([]);
+  expect(await page.locator('#ca-msg-text').inputValue()).toContain('Saturday, 14 March 2099');
+  await expect(page.locator('#toast-container')).toContainText('Past Done invited again');
+  expect(await page.evaluate(`_caFind('i2').invited_session`)).toBe(SAT2);
+});
