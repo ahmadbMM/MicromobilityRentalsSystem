@@ -140,7 +140,7 @@ test('the printed sheet carries the chosen columns, the chosen summaries as char
 
 test('each summary tile carries its share: of every customer, or of every community member on a community report', async ({ page }) => {
   await staff(page);
-  const pcts = (f: string) => page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),${f});return [..._accReportHtml().matchAll(/<span class="total-pct">([^<]*)<\\/span>/g)].map(m=>m[1]);})()`);
+  const pcts = (f: string) => page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),${f});return [..._accReportHtml().matchAll(/<span class="total-pct">([^<]*)<\\/span>/g)].map(m=>m[1]);})()`) as Promise<string[]>;
   // Jeddah: Amal and Dan, 2 of the 4 customers; Amal's 2 rides are every ride there is
   const all = await pcts(`{fCity:'Jeddah'}`);
   expect(all[0]).toBe('50% of 4 customers');
