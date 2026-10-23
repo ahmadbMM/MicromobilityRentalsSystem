@@ -8,6 +8,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows
 // one Singles and one Doubles place per account, and staff who manage every part of it.
 
 const VL = '2099-10-26-vl';
+const PNG_S = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==';
 const vl = {
   id: VL, session_date: '2099-10-26', day: 'Monday', status: 'open', capacity: 500, created_at: 1,
   event_kind: 'community', ride_kind: 'vlap', needs_approval: false, hide_queue: true, spots: 500, open_to_all: false,
@@ -93,7 +94,7 @@ test.describe('@customer:vlap Victory Lap', () => {
     await sg.locator('.pg-btn').click();
     await expect(page.locator('#reg-waiver-cb')).toBeVisible();
     await expect(page.locator('#tab-register .vl-chip').first()).toContainText('Women’s Singles · Open');
-    await expect(page.locator('#tab-register')).toContainText('How to pay will be announced soon');
+    await expect(page.locator('#tab-register')).toContainText('tell us whether you already have a ticket');
     await page.locator('#reg-waiver-cb').check();
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(1);
@@ -136,8 +137,77 @@ test.describe('@customer:vlap Victory Lap', () => {
     expect(html).toContain('VL-AB23');
     expect(html).toContain('Waiting for your partner');
     expect(html).toContain('Send the code');
-    expect(html).toContain('How to pay will be announced soon');
+    expect(html).toContain('Do you already have a ticket, or would you like to buy one?');
     expect(html).toContain('Change details');
+  });
+
+  // The owner, 2026-10-23: once booked, "Do you already have a ticket, or would you like to buy one?" before the
+  // booking card. Buying shows the organiser's bank details and letter and takes a picture of the transfer receipt.
+  async function bookSingles(page: Page) {
+    await toStep2(page);
+    await page.locator('#vl-race-wrap .vl-race').first().click();
+    await page.locator('#vl-div-wrap .vl-div').first().click();
+    await page.locator('#vl-shirt-wrap .toggle-btn', { hasText: /^M$/ }).click();
+    await page.locator('#vl-next').click();
+    await page.locator('#share-gate .wg-cb').check();
+    await page.locator('#share-gate .pg-btn').click();
+    await page.locator('#reg-waiver-cb').check();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+  }
+  const PNG = Buffer.from(PNG_S, 'base64');
+
+  test('after booking: buying a ticket shows the bank details and the letter, and the receipt marks it paid', async ({ page }) => {
+    await custBoot(page, { 'rpc:customer_vl_ticket': true });
+    const rows = await captureBookingRows(page);
+    const calls: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (r.url().includes('/rpc/customer_vl_ticket')) calls.push(r.postDataJSON()); });
+    await bookSingles(page);
+    await expect.poll(() => rows.length).toBe(1);
+    const g = page.locator('#vl-ticket-gate');
+    await expect(g).toContainText('Do you already have a ticket, or would you like to buy one?');
+    await expect(g.locator('.vt-x')).toHaveCount(0); // the booking just made: answer first
+    await g.locator('.vt-yn .toggle-btn').nth(1).click();
+    await expect(g).toContainText('SA73 2000 0003 0002 7515 9940');
+    await expect(g).toContainText('Sports Fitness Unit Company');
+    await expect(g).toContainText('Riyad Bank');
+    await expect(g).toContainText('150');
+    await expect(g.locator('a.vt-pdf')).toHaveAttribute('href', '/assets/victory-lap-bank-letter.pdf');
+    await expect(g.locator('.pg-btn')).toBeDisabled();
+    await g.locator('input[type=file]').setInputFiles({ name: 'receipt.png', mimeType: 'image/png', buffer: PNG });
+    await expect(g.locator('img.vt-prev')).toBeVisible();
+    await g.locator('.pg-btn').click();
+    await expect(g.locator('.vt-box')).toHaveCount(0);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ p_id: 'c1', p_answer: 'buy' });
+    expect(String(calls[0].p_img)).toMatch(/^data:image\/jpeg;base64,/);
+    await expect(page.locator('#tab-register')).toContainText('Receipt received. Your ticket is paid.');
+  });
+
+  test('after booking: "I already have a ticket" asks nothing more; an older place asks on its ticket only', async ({ page }) => {
+    const old = row('m3', { race: 'ws', div: 'so', shirt: 'M' }, { customer_id: 'c1', name: 'Sara Haddad' });
+    await custBoot(page, { 'rpc:customer_vl_ticket': true, queue_entries: [old], 'rpc:my_bookings': [old] });
+    await expect(page.locator('#vl-ticket-gate .vt-box')).toHaveCount(0); // a place booked before this is not asked by a pop-up
+    const html = await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m3')],{actions:true})`);
+    expect(html).toContain('I already have a ticket');
+    await page.evaluate(`_vtAsk('m3',true)`);
+    const g = page.locator('#vl-ticket-gate');
+    await g.locator('.vt-yn .toggle-btn', { hasText: 'I already have a ticket' }).click();
+    await expect(g.locator('.vt-box')).toHaveCount(0);
+    expect(await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m3')],{actions:true})`)).toContain('You have a ticket for the race.');
+    // a place staff marked paid asks nothing
+    const paid = await page.evaluate(`renderBookingTicket([entryFromDB(${JSON.stringify({ ...old, id: 'm4', paid: true })})],{actions:true})`);
+    expect(paid).not.toContain('would you like to buy one');
+  });
+
+  test('a database without the ticket question lets the athlete through: the pop-up steps aside', async ({ page }) => {
+    const old = row('m5', { race: 'ws', div: 'so', shirt: 'M' }, { customer_id: 'c1', name: 'Sara Haddad' });
+    await custBoot(page, { queue_entries: [old], 'rpc:my_bookings': [old],
+      'rpc:customer_vl_ticket': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function public.customer_vl_ticket in the schema cache' } } });
+    await page.evaluate(`_vtAsk('m5',true)`);
+    const g = page.locator('#vl-ticket-gate');
+    await g.locator('.vt-yn .toggle-btn').first().click();
+    await expect(g.locator('.vt-box')).toHaveCount(0);
+    expect(await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m5')],{actions:true})`)).not.toContain('vt-tk');
   });
 
   test('a refusal from the database is said in the rider’s words', async ({ page }) => {
@@ -230,5 +300,24 @@ test.describe('@staff:bookings Victory Lap', () => {
     await host.locator('.vl-cf-box .btn-primary').click();
     await expect.poll(() => saved).not.toBeNull();
     expect(saved).toMatchObject({ price: 150, paid_ride: true, vl: { races: ['ws', 'ms', 'wd', 'md', 'xd'], divs: ['so', 'se', 'op'], pair: true, pay: { en: 'Pay at the venue on race day.' } } });
+  });
+  test('the roster says each athlete’s ticket, and a paid one opens its receipt', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await stubSupabase(page, { sessions: [vl, jcc], bikes: [], queue_entries: [
+      row('q1', { race: 'ws', div: 'so', shirt: 'M' }, { vl_ticket: 'buy', vl_receipt_at: '2099-10-20T10:00:00Z', paid: true, pay_method: 'transfer' }),
+      row('q2', { race: 'ms', div: 'op', shirt: 'L' }, { vl_ticket: 'have' }),
+      row('q3', { race: 'ms', div: 'el', shirt: 'L' }),
+    ], vl_receipts: [{ entry_id: 'q1', img: 'data:image/png;base64,' + PNG_S }] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${VL}';renderStaffQueue()`);
+    const cells: string[] = await page.evaluate(`['q1','q2','q3'].map(id=>_vtStaffChip(getQueue().find(e=>e.id===id)))`);
+    expect(cells[0]).toContain('Paid by transfer');
+    expect(cells[1]).toContain('Has a ticket');
+    expect(cells[2]).toContain('Not answered');
+    await page.evaluate(`_vtRcptOpen('q1')`);
+    await expect(page.locator('#vl-staff-host img.vt-rc-img')).toBeVisible();
   });
 });

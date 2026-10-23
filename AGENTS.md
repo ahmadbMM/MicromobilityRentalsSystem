@@ -962,6 +962,17 @@ staff manage everything.
 - **Badge** `victory_lap`: `BDG_GLYPH.lapring` on the `vlap` special, earned by a `done` row on a vlap session, hidden until
   earned, popped once. Privacy Notice 2026-10-17 (Kamin Sports row, race details row, consent bullet; nobody asked again).
   `tests/victory-lap.spec.ts`.
+- **A ticket, or buy one** (the owner, 2026-10-23, migration 20261023160000): right after a Victory Lap place is booked (not
+  waitlisted) `#vl-ticket-gate` (`renderVtGate`, `S._vt`) asks "Do you already have a ticket, or would you like to buy one?"
+  with no close. Have one: `vl_ticket 'have'`, nothing more asked. Buy one: the organiser's bank details (`VL_BANK`: Sports
+  Fitness Unit Company, Riyad Bank, IBAN, account; amount = the session's price) and their bank letter
+  (assets/victory-lap-bank-letter.pdf), then a receipt picture (resized to a JPEG data: URL, `_vtPick`) sent by
+  `customer_vl_ticket`, which stores it in `vl_receipts` (staff-read only, never synced) and marks the booking paid,
+  `pay_method 'transfer'`, no staff check (the owner's pick). "I'll send it later" leaves `vl_ticket 'buy'`; the ticket
+  (`_vtTkHtml`) keeps the question, the upload or the answer. Places booked before it are asked on the ticket only; a place
+  staff marked paid asks nothing; a database without the RPC makes the question step aside (`S._vtOff`). Staff: the
+  roster's Race cell carries `_vtStaffChip` (Paid by transfer opens the receipt, `_vtRcptOpen`), Race details sets the
+  ticket answer. The default payment line (`vlPayLater`) now points at this question.
 
 ## About this event and Details (2026-10-05)
 
