@@ -18905,7 +18905,19 @@ function showNewAcctModal(){
   renderCustFormModal();
 }
 function showEditCustomerModal(id){
-  const c=(S.customers||[]).find(x=>x.id===id);if(!c)return;
+  const c=(S.customers||[]).find(x=>x.id===id);
+  // Not in this device's copy yet (the list still loading, or a copy that missed the account):
+  // read the one row and open it, never a button that does nothing.
+  if(!c){
+    if(!sb||!id){toast(t('errSomethingWrong'),'error');return;}
+    sb.from('customers').select(CUST_REF_COLS).eq('id',id).maybeSingle().then(({data,error})=>{
+      if(error){toast(t('errConnection'),'error');return;}
+      if(!data){toast(t('errSomethingWrong'),'error');return;}
+      if(!(S.customers||[]).some(x=>x.id===data.id))S.customers=[...(S.customers||[]),data];
+      showEditCustomerModal(data.id);
+    },()=>toast(t('errConnection'),'error'));
+    return;
+  }
   const n=_splitName3(c.name||'');
   let cc='+966',phone='';
   if(c.phone){const m=COUNTRY_CODES.find(([code])=>c.phone.startsWith(code));if(m){cc=m[0];phone=c.phone.slice(m[0].length);}else phone=c.phone;}
