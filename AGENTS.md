@@ -957,7 +957,17 @@ staff manage everything.
   partner, waiting for partner, no race), Finished for return, Race details / Pair / Emergency contact in the row menu; the staff
   part `vlap`: Athletes and teams (`_vlStaffOpen`: athletes, teams, partner requests), an athlete's race (`_vlAthleteEdit`),
   pairing (`_vlPairOpen`), Race settings (`_vlCfgOpen`: races, divisions, partner requests, price, payment line and Kamin's
-  list in English and Arabic), the Report for Kamin Sports (`printKaminReport` / `exportKaminXlsx`, also in the export dialog).
+  list in English and Arabic), and the reports.
+- **The report builder** (the owner, 2026-10-23: "make a report builder ... group doubles together in pdf and excel",
+  `_vrbOpen`, in #print-opts-modal, from the roster bar, Athletes and teams and the export dialog): 25 columns with five
+  starting sets (`VRB_SETS`: Kamin Sports, start list, T-shirts, contacts, payments), six sections (summary, races by
+  division, T-shirts by race, teams one line each, still need a partner, the athlete list), 12 filters, 12 sorts, 7
+  groupings; kept per device (`cq_vl_rep_opts`). A Doubles team (by code) is ONE unit (`_vrbUnits`): sorted by its first
+  partner, its rows together under an `rp-grp rp-team` heading in the PDF (so the sheet’s live sort stays inside the
+  team) and on neighbouring rows in Excel, every other team in a second tint, plus Teams / Still need a partner /
+  Summary sheets (`_vrbXlsx`, several sheets). Inside a group: Singles, then wants-a-partner, then teams. A filter that
+  keeps one partner brings the other (`flags.withMate`, untickable). Accounts read fresh at each tap (`_vrbLoad`).
+  `printKaminReport` / `exportKaminXlsx` are the Kamin set at defaults (`printVlReport` / `exportVlXlsx`).
   The new-session form has a Victory Lap kind (price 150, 500 places, the circuit's map).
 - **Badge** `victory_lap`: `BDG_GLYPH.lapring` on the `vlap` special, earned by a `done` row on a vlap session, hidden until
   earned, popped once. Privacy Notice 2026-10-17 (Kamin Sports row, race details row, consent bullet; nobody asked again).

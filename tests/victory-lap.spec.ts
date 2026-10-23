@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
 
@@ -319,5 +320,64 @@ test.describe('@staff:bookings Victory Lap', () => {
     expect(cells[2]).toContain('Not answered');
     await page.evaluate(`_vtRcptOpen('q1')`);
     await expect(page.locator('#vl-staff-host img.vt-rc-img')).toBeVisible();
+  });
+  // The report builder (the owner, 2026-10-23): columns, filters, sorts and groups, and whatever is picked a
+  // Doubles team prints and exports as one unit - its partners together under the team, far apart as their
+  // numbers are.
+  test('the report builder keeps Doubles partners together in the PDF and in Excel, under any sort or filter', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const q = [
+      row('r1', { race: 'xd', div: 'op', shirt: 'M', team: 'VL-AAAA' }),
+      row('r2', { race: 'ws', div: 'so', shirt: 'S' }),
+      row('r3', { race: 'md', div: 'el', shirt: 'L', pair: true }),
+      row('r4', { race: 'wd', div: 'so', shirt: 'M', team: 'VL-BBBB' }),
+      row('r5', { race: 'xd', div: 'op', shirt: 'XL', team: 'VL-AAAA' }),
+    ];
+    const cust = q.map((r, i) => ({ id: r.customer_id, name: r.name, email: r.id + '@example.com', phone: r.phone, birth_date: '1990-01-0' + (i + 1), gender: ['female', 'female', 'male', 'female', 'male'][i] }));
+    await stubSupabase(page, { sessions: [vl, jcc], bikes: [], queue_entries: q, customers: cust });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`localStorage.removeItem('cq_vl_rep_opts');S._vrbO=null;setStaffTab('queue');S.queueView='bookings';S.sfSession='${VL}';renderStaffQueue()`);
+    await page.locator('#tab-queue .vl-staff-bar .btn-sm', { hasText: 'Report builder' }).click();
+    const m = page.locator('#print-opts-modal');
+    await expect(m.locator('#dlgt-vrb')).toHaveText('Victory Lap report');
+    await expect(m.locator('#vrb-count')).toContainText('On the report: 5 / 5');
+    await expect(m.locator('#vrb-count')).toContainText('Teams: 2');
+    // the order on the sheet: Singles, then who wants a partner, then each team with both partners together
+    const names = (o: string) => page.evaluate(`(async()=>{const d=await _vrbLoad('${VL}',true);const b=_vrbBuild(d,{..._vrbDefaults(),...${o}});return b.rows.map(r=>r.e.id).join(',');})()`);
+    expect(await names('{}')).toBe('r2,r3,r1,r5,r4');
+    expect(await names('{sort:"nameZ"}')).toBe('r2,r3,r4,r1,r5');
+    expect(await names('{group:"race"}')).toBe('r2,r4,r3,r1,r5');
+    // a filter that keeps one partner brings the other along, unless that is unticked
+    expect(await names('{fGender:"female",fRace:"xd"}')).toBe('r1,r5');
+    expect(await names('{fGender:"female",fRace:"xd",flags:{withMate:0}}')).toBe('r1');
+    await m.locator('select[aria-label="Race"]').selectOption('doubles');
+    await expect(m.locator('#vrb-count')).toContainText('On the report: 4 / 5');
+    await m.locator('select[aria-label="Race"]').selectOption('all');
+    // the PDF: the team heading line, then its two partners
+    const [pop] = await Promise.all([page.waitForEvent('popup'), m.locator('.rpt-acts .btn-primary').click()]);
+    await pop.waitForLoadState();
+    const lines: string[] = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')]
+      .map((r) => (r.classList.contains('rp-team') ? 'T:' : '') + [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
+    const ix = (s: string) => lines.findIndex((l) => l.includes(s));
+    expect(lines[ix('VL-AAAA')]).toMatch(/^T:VL-AAAA · Mixed Doubles/);
+    const num = (n: string) => lines.findIndex((l) => l.split('|')[1] === n); // a row reads "<No.>|#<number>|<status>|<name>|..."
+    expect(num('#1')).toBe(ix('VL-AAAA') + 1);
+    expect(num('#5')).toBe(ix('VL-AAAA') + 2);
+    expect(num('#4')).toBe(ix('VL-BBBB') + 1);
+    expect(lines[ix('VL-BBBB')]).toContain('Waiting for partner');
+    await pop.close();
+    // Excel: Athletes, Teams, Still need a partner and Summary; in the athletes sheet r5 follows r1
+    const [dl] = await Promise.all([page.waitForEvent('download'), m.locator('.rpt-acts .btn-secondary', { hasText: 'Excel' }).click()]);
+    const buf = readFileSync((await dl.path())!).toString('utf8');
+    expect(dl.suggestedFilename()).toBe('victory-lap_2099-10-26_kamin.xlsx');
+    for (const n of ['Athletes', 'Teams', 'Still need a partner', 'Summary']) expect(buf).toContain(`name="${n}"`);
+    const s1 = buf.slice(buf.indexOf('<worksheet'), buf.indexOf('</worksheet>'));
+    const at = (x: string) => s1.indexOf(x);
+    expect(at('Athlete r2')).toBeLessThan(at('Athlete r1'));
+    expect(at('Athlete r1')).toBeLessThan(at('Athlete r5'));
+    expect(at('Athlete r5')).toBeLessThan(at('Athlete r4'));
   });
 });

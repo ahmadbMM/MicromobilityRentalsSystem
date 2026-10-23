@@ -462,7 +462,7 @@ export const STAFF_PARTS = {
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
-  vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports
+  vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder
   // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
   imports: ['openRosterImport'],
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
@@ -1330,10 +1330,11 @@ export function formatFieldNames(r, limit = 20) {
 // Bookings partner panel, its add/remove/save and strings: staff 625.3 / core 279.1 here, 628.0 / ~280.5 on the
 // runner (ca0c85b2 was refused at 628.0); +4 / +3 restores the margin.
 // Staff 632 -> 634 (2026-10-23, Last login on every account row and as a sort): ~0.7 KB more; +2 keeps the margin.
+// Staff 634 -> 637 (2026-10-23, the Victory Lap report builder in the vlap part): ~0.8 KB more; +3 keeps the margin.
 // Customer 253 -> 256 (2026-10-23, Petromin's invitation per night): its pop-up before booking, the ticket block and
 // strings, on top of Victory Lap's ticket question: 251.9 KB here, 253.5 on the runner (a89901fd was refused); +3
 // restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 634, core: 284 };
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 637, core: 284 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
