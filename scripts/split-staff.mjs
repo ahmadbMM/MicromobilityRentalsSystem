@@ -462,7 +462,7 @@ export const STAFF_PARTS = {
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
-  vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder
+  vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen', '_prbOpen'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder, and the partner (Defe) report builder beside it, which shares its workbook writer
   // _ahActShow (community): a customer's own activity in their profile; imports: partner companies' employee lists (2026-10-09)
   imports: ['openRosterImport'],
   team: ['renderTeam'], settings: ['renderSettings'], // 2026-10-02: the account's Settings page, and Team with it, out of the desk's core
@@ -1338,7 +1338,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 641 -> 645, core 284 -> 288 (2026-10-23, names for Defe's codes and more Bookings filters and sorts): code, shirt,
 // ride group, gender, age, nationality and special needs filters, a Sort by list, and their strings: staff 638.0 / core
 // 284.2 here, about +3 / +1.5 on the runner; +4 / +4 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 645, core: 288 };
+// Staff 645 -> 650 (2026-10-23, the partner (Defe) report builder in the vlap part, 43 strings in each language; the vlap
+// part's strings now ride in lang/staff-vlap-<code>.json): about +5.8 KB here, so ~646.5 on the runner; the core gains
+// ~0.2 and keeps 288.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 650, core: 288 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

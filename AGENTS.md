@@ -968,6 +968,15 @@ staff manage everything.
   Summary sheets (`_vrbXlsx`, several sheets). Inside a group: Singles, then wants-a-partner, then teams. A filter that
   keeps one partner brings the other (`flags.withMate`, untickable). Accounts read fresh at each tap (`_vrbLoad`).
   `printKaminReport` / `exportKaminXlsx` are the Kamin set at defaults (`printVlReport` / `exportVlXlsx`).
+- **The partner (Defe) report builder** (the owner, 2026-10-23, `_prbOpen`, also in the `vlap` part because it shares
+  `_vrbXlsx`): for a ride with partner bookings, from the Bookings partner panel (`.ptn-rep`) and the export dialog.
+  Groups = each code of `session_partner_codes` (+ codes only bookings hold), "No code", and MicroMobility members
+  (off by default; kept as `gOff`, what is left out, so a new code starts ticked). 30 columns, six sets (`PRB_SETS`:
+  everything, sign-in sheet with a Signature column, T-shirts, contacts, bikes, Instagram), sections (summary, bookings
+  per code, shirts by code, the list), 12 filters, 15 sorts, 11 groupings (code by default); `cq_ptn_rep_opts`.
+  Accounts read fresh (`_prbLoad`, `_emFetch` for both emergency contacts). PDF `printPtnReport`, Excel `exportPtnXlsx`.
+  String keys are `prb*`, not `drb*`: the customer half builds keys from a bare `'d'+` prefix, which would have kept
+  every `d…` staff string on the customer's page (`staffOnlyLangKeys`).
   The new-session form has a Victory Lap kind (price 150, 500 places, the circuit's map).
 - **Badge** `victory_lap`: `BDG_GLYPH.lapring` on the `vlap` special, earned by a `done` row on a vlap session, hidden until
   earned, popped once. Privacy Notice 2026-10-17 (Kamin Sports row, race details row, consent bullet; nobody asked again).

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
@@ -442,5 +443,98 @@ test.describe('@staff:bookings partner places', () => {
     await page.waitForTimeout(400);
     await expect(page.locator('#tab-queue .ptn-panel')).toHaveCount(0);
     await expect(page.locator('#tab-queue .ptn-chip').first()).toBeVisible(); // the rows still say Defe
+  });
+
+  // The partner report builder (the owner, 2026-10-23: "add report builder for defe in 24 oct session ... make staff
+  // choose what fields they want in it and what groups (different code bookings) they want and all types of sorts
+  // and filters"): the codes as groups, members off until ticked, filters, sorts, grouping, PDF and Excel.
+  test('the partner report builder: codes as groups, members off until ticked, filters, sorts, PDF and Excel', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const q = [
+      row({ id: 'd1', name: 'Defe Rose', customer_id: 'c2', partner: 'defe', partner_code: true, partner_code_used: 'PINK10', approval: 'approved', queue_num: 11, partner_ask: { shirt_got: false, shirt: 'M' } }),
+      row({ id: 'd2', name: 'Defe Amal', customer_id: 'c3', partner: 'defe', partner_code: true, partner_code_used: 'ROSE5', approval: 'approved', queue_num: 12, status: 'active', partner_ask: { shirt_got: true } }),
+      row({ id: 'd3', name: 'Defe Zain', customer_id: 'c5', partner: 'defe', partner_code: true, partner_code_used: 'PINK10', approval: 'approved', queue_num: 13, type_preference: 'Own', partner_ask: { shirt_got: false, shirt: 'S' } }),
+      row({ id: 'd4', name: 'Defe Gone', customer_id: 'c6', partner: 'defe', partner_code: true, partner_code_used: 'PINK10', approval: 'approved', queue_num: 14, status: 'cancelled' }),
+      row({ id: 'm1', name: 'Member One', customer_id: 'c4', queue_num: 1 }),
+    ];
+    const cust = [
+      { id: 'c2', name: 'Defe Rose', email: 'rose@example.com', phone: '0550000002', birth_date: '1990-05-01', gender: 'female', nationality: 'Saudi Arabia', socials: { instagram: 'rose.rides' } },
+      { id: 'c3', name: 'Defe Amal', email: 'amal@example.com', phone: '0550000003', birth_date: '2000-05-01', gender: 'female', nationality: 'Egypt' },
+      { id: 'c5', name: 'Defe Zain', email: 'zain@example.com', phone: '0550000005', birth_date: '1980-05-01', gender: 'male', nationality: 'Saudi Arabia' },
+      { id: 'c6', name: 'Defe Gone', email: 'gone@example.com', phone: '0550000006' },
+      { id: 'c4', name: 'Member One', email: 'm1@example.com', phone: '0550000004' },
+    ];
+    await stubSupabase(page, {
+      sessions: [satur()], queue_entries: q, bikes: [], customers: cust,
+      session_partners: [{ session_id: SAT, partner: 'defe', label: 'Defe', places: 80, code: 'DEFE24', code_needed: true }],
+      session_partner_codes: [
+        { session_id: SAT, partner: 'defe', code: 'PINK10', name: 'Pink team', places: 10, created_at: '2026-10-23T10:00:00Z' },
+        { session_id: SAT, partner: 'defe', code: 'ROSE5', places: 5, created_at: '2026-10-23T10:01:00Z' },
+      ],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction(`getQueue().length>0`);
+    await page.evaluate(`localStorage.removeItem('cq_ptn_rep_opts');S._prbO=null;S.staffRole='admin';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SAT}';renderStaffQueue()`);
+    await page.locator('#tab-queue .ptn-panel .ptn-rep').click();
+    const m = page.locator('#print-opts-modal');
+    await expect(m.locator('#dlgt-prb')).toHaveText('Defe report');
+    // the groups: each code with its bookings against its places, then our members, off
+    const grp = (k: string) => m.locator(`[data-rep="gOff:${k}"]`);
+    await expect(grp('c:pink10')).toContainText('Pink team · PINK10 · 2 / 10'); // the name staff gave the code (20261023220000)
+    await expect(grp('c:rose5')).toContainText('ROSE5 · 1 / 5');
+    await expect(grp('mem')).toHaveAttribute('aria-pressed', 'false');
+    await expect(m.locator('#prb-count')).toContainText('On the report: 3 / 5'); // the cancelled one and the member left out
+    const ids = (o: string) => page.evaluate(`(async()=>{const d=await _prbLoad('${SAT}',true);const b=_prbBuild(d,{..._prbDefaults(),...${o}});return b.rows.map(r=>r.e.id).join(',');})()`);
+    expect(await ids('{}')).toBe('d1,d3,d2'); // grouped by code: PINK10 then ROSE5
+    expect(await ids('{group:"none",sort:"nameZ"}')).toBe('d3,d1,d2');
+    expect(await ids('{group:"none",sort:"young"}')).toBe('d2,d1,d3');
+    expect(await ids('{gOff:{"c:pink10":1}}')).toBe('d2,m1');
+    expect(await ids('{fStatus:"all"}')).toBe('d1,d3,d4,d2');
+    expect(await ids('{fShirt:"give"}')).toBe('d1,d3');
+    expect(await ids('{fShirt:"S"}')).toBe('d3');
+    expect(await ids('{fNat:"sa"}')).toBe('d1,d3');
+    expect(await ids('{fBike:"own"}')).toBe('d3');
+    expect(await ids('{fIg:"yes"}')).toBe('d1');
+    expect(await ids('{fStatus:"came"}')).toBe('d2');
+    expect(await ids('{group:"shirt"}')).toBe('d3,d1,d2'); // S, then M, then has one
+    // ticking the members brings them in; a filter in the dialog changes the count
+    await grp('mem').click();
+    await expect(m.locator('#prb-count')).toContainText('On the report: 4 / 5');
+    await m.locator('select[aria-label="Gender"]').selectOption('female');
+    await expect(m.locator('#prb-count')).toContainText('On the report: 2 / 5');
+    await m.locator('select[aria-label="Gender"]').selectOption('all');
+    await grp('mem').click();
+    // a starting set picks its columns
+    await m.locator('[data-prb-set="shirts"]').click();
+    expect(await page.evaluate(`Object.keys(_prbOpts().cols).filter(k=>_prbOpts().cols[k]).join(',')`)).toBe('seq,num,name,code,shirtGot,shirt');
+    // the PDF: a heading per code, the per-code table and the shirts table
+    const [pop] = await Promise.all([page.waitForEvent('popup'), m.locator('.rpt-acts .btn-primary').click()]);
+    await pop.waitForLoadState();
+    await pop.waitForSelector('h2'); // the window opens on the tap; the sheet is written once the accounts are read
+    const hs = await pop.evaluate(() => [...document.querySelectorAll('h2')].map((h) => (h.textContent || '').trim()));
+    expect(hs).toEqual(['Bookings per code', 'Shirts by code', 'Pink team · PINK10 · 2', 'ROSE5 · 1']);
+    const last = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')].map((r) => [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
+    expect(last).toEqual(['3|#12|Defe Amal|ROSE5|Yes|—']);
+    await pop.close();
+    // Excel: the list, the codes and the shirts sheets; the group column first
+    const [dl] = await Promise.all([page.waitForEvent('download'), m.locator('.rpt-acts .btn-secondary', { hasText: 'Excel' }).click()]);
+    const buf = readFileSync((await dl.path())!).toString('utf8');
+    expect(dl.suggestedFilename()).toBe(`defe_${SAT}_shirts.xlsx`);
+    for (const n of ['Rider list', 'Bookings per code', 'Shirt']) expect(buf).toContain(`name="${n}"`);
+    const s1 = buf.slice(buf.indexOf('<worksheet'), buf.indexOf('</worksheet>'));
+    expect(s1.indexOf('Defe Rose')).toBeLessThan(s1.indexOf('Defe Zain'));
+    expect(s1.indexOf('Defe Zain')).toBeLessThan(s1.indexOf('Defe Amal'));
+    expect(s1).not.toContain('Defe Gone');
+  });
+
+  test('the export dialog offers the partner report builder on a partner ride only', async ({ page }) => {
+    await boot(page);
+    await page.evaluate(`showPrintReportOptions()`);
+    const m = page.locator('#print-opts-modal');
+    await expect(m.getByText('Defe report')).toBeVisible();
+    await m.locator('.rpt-km-acts .btn-sm', { hasText: 'Report builder' }).click();
+    await expect(m.locator('#dlgt-prb')).toHaveText('Defe report');
   });
 });

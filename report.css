@@ -203,3 +203,5 @@ section{break-inside:avoid}
 :root tr.rp-mate td:first-child{border-inline-start:3px solid #123019}
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .sn-ico{display:block;width:11px;height:11px}
+/* the partner report's signature column: room to sign on paper */
+:root td.rp-sign{min-width:120px;height:26px}
