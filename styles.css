@@ -9959,6 +9959,9 @@ html[dir="rtl"] .chart-card-title .sn-an-mk{margin:0 0 0 8px;}
 #tab-queue .ptn-code[hidden]{display:none;}
 #tab-queue .ptn-code label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:700;color:var(--muted);}
 #tab-queue .ptn-code input{width:120px;height:32px;padding:0 8px;border-radius:0;}
+#tab-queue .ptn-code input.ptn-code-nm{width:200px;max-width:100%;}
+#tab-queue .ptn-code-label{line-height:32px;font-weight:700;color:#A22B63;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .ptn-code-label{color:#F6C3D6;}
 #tab-queue .ptn-code-name{min-width:120px;font-family:var(--mono,ui-monospace,monospace);line-height:32px;}
 #tab-queue .ptn-code .ptn-sub{line-height:32px;}
 #tab-queue .ptn-code-del,#tab-queue .ptn-code-add{height:32px;border-radius:0;}

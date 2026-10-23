@@ -1335,7 +1335,10 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 253 -> 256 (2026-10-23, Petromin's invitation per night): its pop-up before booking, the ticket block and
 // strings, on top of Victory Lap's ticket question: 251.9 KB here, 253.5 on the runner (a89901fd was refused); +3
 // restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 641, core: 284 };
+// Staff 641 -> 645, core 284 -> 288 (2026-10-23, names for Defe's codes and more Bookings filters and sorts): code, shirt,
+// ride group, gender, age, nationality and special needs filters, a Sort by list, and their strings: staff 638.0 / core
+// 284.2 here, about +3 / +1.5 on the runner; +4 / +4 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 645, core: 288 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

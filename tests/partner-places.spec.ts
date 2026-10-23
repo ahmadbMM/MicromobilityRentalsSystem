@@ -312,9 +312,86 @@ test.describe('@staff:bookings partner places', () => {
     expect(writes[1].url).toContain('code=in.(ROSE5)');
     expect(writes[2].m).toBe('POST');
     expect(writes[2].body).toEqual([
-      { session_id: SAT, partner: 'defe', code: 'PINK10', places: 3 },
-      { session_id: SAT, partner: 'defe', code: 'NEW20', places: 20 },
+      { session_id: SAT, partner: 'defe', code: 'PINK10', places: 3, name: null },
+      { session_id: SAT, partner: 'defe', code: 'NEW20', places: 20, name: null },
     ]);
+  });
+
+  test('a code\'s name beside its bookings, saved from the panel; the Bookings filters and Sort by cut and order the night (2026-10-23)', async ({ page }) => {
+    const ents = [
+      row({ id: 'd1', name: 'Defe Rider', customer_id: 'c2', partner: 'defe', partner_code: true, partner_code_used: 'pink10', approval: 'approved', queue_num: 11, partner_ask: { shirt_got: false, shirt: 'L' } }),
+      row({ id: 'd2', name: 'Defe Two', customer_id: 'c3', partner: 'defe', partner_code: true, partner_code_used: 'ROSE5', approval: 'approved', queue_num: 12, partner_ask: { shirt_got: true } }),
+      row({ id: 'm1', name: 'Member One', customer_id: 'c4', queue_num: 1 }),
+    ];
+    await stubSupabase(page, {
+      sessions: [satur()], queue_entries: ents, bikes: [],
+      customers: [
+        { id: 'c2', name: 'Defe Rider', phone: '0550000002', gender: 'female', nationality: 'Saudi Arabia', birth_date: '1990-05-01' },
+        { id: 'c3', name: 'Defe Two', phone: '0550000003', gender: 'male', nationality: 'Egypt', birth_date: '2012-05-01' },
+        { id: 'c4', name: 'Member One', phone: '0550000004', gender: 'female', nationality: 'Egypt' },
+      ],
+      session_partners: [{ session_id: SAT, partner: 'defe', label: 'Defe', places: 80, code_needed: true }],
+      session_partner_codes: [
+        { session_id: SAT, partner: 'defe', code: 'PINK10', name: 'Jeddah runners', places: 5, created_at: '2026-10-23T10:00:00Z' },
+        { session_id: SAT, partner: 'defe', code: 'ROSE5', name: null, places: 5, created_at: '2026-10-23T10:01:00Z' },
+      ],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction(`getQueue().length>0`);
+    await page.evaluate(`S.staffRole='admin';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SAT}';renderStaffQueue()`);
+    const tab = page.locator('#tab-queue');
+    const rowOf = (n: string) => tab.locator('#q-results tbody tr, #q-results .q-card').filter({ hasText: n }).first();
+    // the name beside the booking (any case of the code), the code while unnamed
+    await expect(rowOf('Defe Rider').locator('.ptn-codetag')).toHaveText('Jeddah runners');
+    await expect(rowOf('Defe Rider').locator('.ptn-codetag')).toHaveAttribute('title', 'Code used to book: pink10');
+    await expect(rowOf('Defe Two').locator('.ptn-codetag')).toHaveText('ROSE5');
+    await expect(rowOf('Member One').locator('.ptn-codetag')).toHaveCount(0);
+    // the report's Partner column names it too
+    expect(await page.evaluate(`_ptnCodeName(getQueue().find(e=>e.id==='d1'))`)).toBe('Jeddah runners');
+    // the panel's name box saves with the code
+    const panel = tab.locator('.ptn-panel');
+    await expect(panel.locator('.ptn-code[data-code="PINK10"] .ptn-code-nm')).toHaveValue('Jeddah runners');
+    const posts: unknown[] = [];
+    page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('/rest/v1/session_partner_codes')) posts.push(r.postDataJSON()); });
+    await panel.locator('.ptn-code[data-code="ROSE5"] .ptn-code-nm').fill('  Pink   Riders ');
+    await panel.locator('.ptn-card[data-partner="defe"] .ptn-form .ptn-save').click();
+    await expect.poll(() => posts.length).toBe(1);
+    expect(posts[0]).toEqual([
+      { session_id: SAT, partner: 'defe', code: 'PINK10', places: 5, name: 'Jeddah runners' },
+      { session_id: SAT, partner: 'defe', code: 'ROSE5', places: 5, name: 'Pink Riders' },
+    ]);
+    const shown = () => page.evaluate<string>(`[...document.querySelectorAll('#q-results tbody tr, #q-results .q-card')].map(r=>(r.innerText.match(/Defe Rider|Defe Two|Member One/)||[''])[0]).filter(Boolean).join(',')`);
+    const reset = `S.sfCode=S.sfShirt=S.sfGen=S.sfAge=S.sfNat='all';S.sfSort='queue';S.sfSortDir=1;`;
+    // the filters: code (by name in the list), shirt, gender, age, nationality
+    await page.evaluate(`S._fOpen=Object.assign(S._fOpen||{},{q:true});renderStaffQueue()`);
+    await expect(tab.locator('select[aria-label="Partner code"] option')).toHaveText(['All', 'Jeddah runners · PINK10', 'ROSE5', 'Booked without a code']);
+    await page.evaluate(`${reset}S.sfCode='pink10';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Rider');
+    await page.evaluate(`${reset}S.sfShirt='need';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Rider');
+    await page.evaluate(`${reset}S.sfShirt='has';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Two');
+    await page.evaluate(`${reset}S.sfGen='female';renderStaffQueue()`);
+    expect((await shown()).split(',').sort()).toEqual(['Defe Rider', 'Member One']);
+    await page.evaluate(`${reset}S.sfAge='u18';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Two');
+    await page.evaluate(`${reset}S.sfAge='unset';renderStaffQueue()`);
+    expect(await shown()).toBe('Member One');
+    await page.evaluate(`${reset}S.sfNat='Egypt';renderStaffQueue()`);
+    expect((await shown()).split(',').sort()).toEqual(['Defe Two', 'Member One']);
+    // Sort by: the code's name (unnamed after named; members last), age (youngest first; unknown last), descending
+    await page.evaluate(`${reset}S.sfSort='code';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Rider,Defe Two,Member One');
+    await page.evaluate(`${reset}S.sfSort='age';renderStaffQueue()`);
+    expect(await shown()).toBe('Defe Two,Defe Rider,Member One');
+    await page.evaluate(`${reset}S.sfSort='age';S.sfSortDir=-1;renderStaffQueue()`);
+    expect(await shown()).toBe('Member One,Defe Rider,Defe Two');
+    await expect(tab.locator('select.q-sort-pick')).toHaveValue('age');
+    await expect(tab.locator('select.q-sort-dir')).toHaveValue('-1');
+    // a saved view keeps them
+    expect(await page.evaluate(`(()=>{S.sfCode='rose5';return _svGet('queue').sfCode})()`)).toBe('rose5');
   });
 
   test('the members\' waitlist: its own count in the panel, out of the members\' places, and saved with the limit', async ({ page }) => {
