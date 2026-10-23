@@ -268,6 +268,55 @@ test.describe('@staff:bookings partner places', () => {
     expect(byName('Member One')[pi]).toBe('');
   });
 
+  test('several codes, each with its own places: booked per code, add, remove, save (2026-10-23)', async ({ page }) => {
+    const ents = entries.map((e) => (e.id === 'd1' ? { ...e, partner_code_used: 'PINK10' } : e));
+    await stubSupabase(page, {
+      sessions: [satur()], queue_entries: ents, bikes: [],
+      session_partners: [{ session_id: SAT, partner: 'defe', label: 'Defe', places: 80, code: 'DEFE24', code_needed: true }],
+      session_partner_codes: [
+        { session_id: SAT, partner: 'defe', code: 'PINK10', places: 2, created_at: '2026-10-23T10:00:00Z' },
+        { session_id: SAT, partner: 'defe', code: 'ROSE5', places: 5, created_at: '2026-10-23T10:01:00Z' },
+      ],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction(`getQueue().length>0`);
+    await page.evaluate(`S.staffRole='admin';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SAT}';renderStaffQueue()`);
+    const panel = page.locator('#tab-queue .ptn-panel');
+    await expect(panel).toContainText('Code places 7 · partner places 80');
+    await expect(panel.locator('#ptn-defe-code')).toHaveCount(0); // the single code's boxes are gone
+    const pink = panel.locator('.ptn-code[data-code="PINK10"]'), rose = panel.locator('.ptn-code[data-code="ROSE5"]');
+    await expect(pink).toContainText('Booked 1 / 2');
+    await expect(rose).toContainText('Booked 0 / 5');
+    await expect(pink.locator('.ptn-code-del')).toBeDisabled(); // it has a booking
+    // the report's Partner column names the code
+    expect(await page.evaluate(`[_ptnLabel('defe'),getQueue().find(e=>e.id==='d1').partnerCodeUsed].join(' · ')`)).toBe('Defe · PINK10');
+    const writes: { m: string; url: string; body: unknown }[] = [];
+    page.on('request', (r) => { if (r.method() !== 'GET' && /session_partner/.test(r.url())) writes.push({ m: r.method(), url: decodeURIComponent(r.url()), body: r.postDataJSON() }); });
+    // a code typed twice (any case) is refused before anything is written
+    await panel.locator('.ptn-code-add').click();
+    await panel.locator('.ptn-code-new .ptn-code-in').fill('pink10');
+    await panel.locator('.ptn-card[data-partner="defe"] .ptn-form .ptn-save').click();
+    await expect(page.locator('.toast').last()).toContainText('The code pink10 is there twice.');
+    expect(writes).toEqual([]);
+    await panel.locator('.ptn-code-new .ptn-code-in').fill('NEW20');
+    await panel.locator('.ptn-code-new .ptn-code-places').fill('20');
+    await pink.locator('.ptn-code-places').fill('3');
+    await rose.locator('.ptn-code-del').click();
+    await expect(rose).toBeHidden();
+    await panel.locator('.ptn-card[data-partner="defe"] .ptn-form .ptn-save').click();
+    await expect.poll(() => writes.length).toBe(3);
+    expect(writes[0]).toMatchObject({ m: 'PATCH', body: { places: 80, code_needed: true } });
+    expect(writes[1].m).toBe('DELETE');
+    expect(writes[1].url).toContain('code=in.(ROSE5)');
+    expect(writes[2].m).toBe('POST');
+    expect(writes[2].body).toEqual([
+      { session_id: SAT, partner: 'defe', code: 'PINK10', places: 3 },
+      { session_id: SAT, partner: 'defe', code: 'NEW20', places: 20 },
+    ]);
+  });
+
   test('the members\' waitlist: its own count in the panel, out of the members\' places, and saved with the limit', async ({ page }) => {
     await boot(page, {
       sessions: [satur({ member_wl: 15 })],

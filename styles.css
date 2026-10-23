@@ -9864,6 +9864,15 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.ptn-row-mark{box-shad
 #tab-queue .ptn-form input[type=number],#tab-queue .ptn-form input[type=text]{width:120px;height:32px;padding:0 8px;border-radius:0;}
 #tab-queue .ptn-form label.ptn-sw{flex-direction:row;align-items:center;gap:6px;height:32px;}
 #tab-queue .ptn-form .ptn-save{height:32px;border-radius:0;}
+#tab-queue .ptn-codes{margin:8px 0 0;display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+#tab-queue .ptn-code-list{display:flex;flex-direction:column;gap:6px;}
+#tab-queue .ptn-code{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px 12px;}
+#tab-queue .ptn-code[hidden]{display:none;}
+#tab-queue .ptn-code label{display:flex;flex-direction:column;gap:2px;font-size:11px;font-weight:700;color:var(--muted);}
+#tab-queue .ptn-code input{width:120px;height:32px;padding:0 8px;border-radius:0;}
+#tab-queue .ptn-code-name{min-width:120px;font-family:var(--mono,ui-monospace,monospace);line-height:32px;}
+#tab-queue .ptn-code .ptn-sub{line-height:32px;}
+#tab-queue .ptn-code-del,#tab-queue .ptn-code-add{height:32px;border-radius:0;}
 
 /* ════════════════════════════════════════════════════════════════════════
    DEFE 5KM RUN (the owner, 2026-10-18) - Defe's breast-cancer 5 km race, a date inside MicroMobility

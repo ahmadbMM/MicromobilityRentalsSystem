@@ -55,7 +55,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
  *  numbers). Every request to one answers as a database without it does (PGRST205), unless the spec
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
 const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals',
-  'session_partners']); // partner places (20261017120000): tests/partner-places.spec.ts gives it rows
+  'session_partners', 'session_partner_codes']); // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
