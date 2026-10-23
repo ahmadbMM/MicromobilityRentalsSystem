@@ -787,6 +787,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   filterAll:'All',ridersMoveNeedsDb:'Moving a party to another night needs a database update that is not in place yet. Keep this night for now.',syncNeedPin:'A void or refund made offline needs the PIN again. Tap the pending sync count on Sales to enter it.',invQtyDec:'Decrease quantity: {0}',invQtyInc:'Increase quantity: {0}',invDelPriced:'{0} booking(s) still read this item’s price — set its stock to zero instead of deleting it.',filterDone:'Done',filterNoshow:'No-Show',
   allSessions:'All Sessions',colRider:'Rider',colMember:'Membership',memberYes:'Member',memberNo:'Non-member',
   snLabel:'Special needs',snShareAll:'of the accounts listed',snAmongComm:'Community members: {0} of {1}',snAmongCust:'Other customers: {0} of {1}',
+  ntkSn:'Bookings by riders with special needs',ntSn:'Bookings by riders with special needs: {0}',ntiSn:'{0} has special needs and booked {1}',anSnTitle:'Riders with special needs',anSnSub:'Holders of the Special needs tag today, and how they rode in this range',anSnHolders:'Holders',anSnInComm:'{0} in the community',anSnRides:'Rides completed',anSnRidesShare:'{0}% of all rides',anSnPerRider:'Rides per rider',anSnOthers:'Everyone else: {0}',anSnNoShow:'No-show rate',anSnByMonth:'By month: riders · rides',anSnNone:'No rides by holders in this range',
   walkinSize:'Frame Size',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
   promoCodeExists:'A code with this text already exists.',promoTypeMissing:'Type column missing - run add-roadcarbon-mmteam.sql; the code was saved for every bike type.',bePaidMoveErr:'This booking is paid, and that ride has a different fare, so it cannot move there. Pick a ride with the same fare, or take the payment back first.',
@@ -1372,6 +1373,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   filterAll:'الكل',ridersMoveNeedsDb:'نقل المجموعة إلى ليلة أخرى يحتاج إلى تحديث لقاعدة البيانات لم يُطبَّق بعد. أبقِ هذه الليلة الآن.',syncNeedPin:'إلغاء أو استرداد تم دون اتصال يحتاج إلى الرمز مرة أخرى. اضغط على عدد العمليات بانتظار المزامنة في المبيعات لإدخاله.',invQtyDec:'إنقاص الكمية: {0}',invQtyInc:'زيادة الكمية: {0}',invDelPriced:'ما زال {0} حجز/حجوزات يعتمد على سعر هذا المنتج — اجعل مخزونه صفراً بدلاً من حذفه.',filterDone:'منتهي',filterNoshow:'لم يحضر',
   allSessions:'جميع الجلسات',colRider:'الراكب',colMember:'العضوية',memberYes:'عضو',memberNo:'غير عضو',
   snLabel:'ذوو الاحتياجات الخاصة',snShareAll:'من الحسابات المدرجة',snAmongComm:'أعضاء المجتمع: {0} من {1}',snAmongCust:'العملاء الآخرون: {0} من {1}',
+  ntkSn:'حجوزات ذوي الاحتياجات الخاصة',ntSn:'حجوزات ذوي الاحتياجات الخاصة: {0}',ntiSn:'{0} من ذوي الاحتياجات الخاصة وحجز {1}',anSnTitle:'الركاب من ذوي الاحتياجات الخاصة',anSnSub:'حاملو وسم ذوي الاحتياجات الخاصة اليوم، وركوبهم في هذه الفترة',anSnHolders:'الحاملون',anSnInComm:'{0} في المجتمع',anSnRides:'الرحلات المكتملة',anSnRidesShare:'{0}% من كل الرحلات',anSnPerRider:'الرحلات لكل راكب',anSnOthers:'الباقون: {0}',anSnNoShow:'نسبة عدم الحضور',anSnByMonth:'حسب الشهر: الركاب · الرحلات',anSnNone:'لا رحلات للحاملين في هذه الفترة',
   walkinSize:'مقاس الإطار',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
   promoCodeExists:'يوجد رمز بهذا النص بالفعل.',promoTypeMissing:'عمود النوع غير موجود - شغّل add-roadcarbon-mmteam.sql؛ تم حفظ الرمز لجميع أنواع الدراجات.',bePaidMoveErr:'هذا الحجز مدفوع، وتلك الجولة بسعر مختلف، فلا يمكن نقله إليها. اختر جولة بالسعر نفسه، أو استرجع الدفعة أولاً.',
@@ -11905,7 +11907,8 @@ function _ntKindsNow(){
   if(_deskTabOk('queue'))add('long',getQueue().filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN&&!(!adm&&_apprSessIds.has(e.sessionId))).map(e=>({id:e.id,txt:t('ntiLong').replace('{0}',nm(e)),at:e.checkedInAt})),'ntLong','warn',['setStaffTab','queue'],L.queue); // Front Desk: not the Saturday side, as on the roster (2026-10-05)
   // A walk-in who registered on the desk tablet and is waiting tonight (kiosk mode, 2026-10-09)
   if(_deskTabOk('queue'))add('kiosk',getQueue().filter(e=>e.via==='kiosk'&&e.status==='waiting'&&String(e.sessionDate||'').slice(0,10)===todayStr()).map(e=>({id:e.id,txt:t('ntiKiosk').replace('{0}',nm(e)),at:e.registeredAt})),'ntKiosk','green',['setStaffTab','queue'],L.queue);
-  {const f=globalThis['_r7'+'Bell'];if(typeof f==='function')f(add,L);} // ride reminders and freed places (2026-10-09, R7): staff-half code, named so this customer-half list does not pull it in
+  {const f=globalThis['_r7'+'Bell'];if(typeof f==='function')f(add,L);}
+  {const f=globalThis['_sn'+'Bell'];if(typeof f==='function')f(add,L);} // a rider with special needs booked (2026-10-23): staff-half code, by name as above // ride reminders and freed places (2026-10-09, R7): staff-half code, named so this customer-half list does not pull it in
   if(_deskTabOk('analytics'))add('closeout',(S._rpiSnaps||[]).map(x=>({id:x.id,txt:t('ntiCloseout').replace('{0}',shortDate(x.period_from)),at:x.created_at})),'ntCloseout','green',['_on_goReports'],Array.isArray(S._rpiSnaps));
   if(_deskTabOk('workshop'))add('ws',_wsNew().map(j=>({id:j.id,txt:t('ntiWs').replace('{0}',nm(j)),at:j.created_at})),'ntWs','green',['setStaffTab','workshop'],S._ws&&S._ws.jobs);
   if(adm){
@@ -11924,7 +11927,7 @@ function _ntKindsNow(){
 }
 // The kinds a staffer can turn off on their Settings page (staff.nt_off), in the bell's order, with
 // the label the page shows; the admin-only ones are offered to admins only.
-const NT_KINDS=[['long','ntkLong',0],['kiosk','ntkKiosk',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1],['natnew','ntkNatNew',1],['closeout','ntkCloseout',0],['remind','ntkRemind',0],['wlfree','ntkWlFree',0]];
+const NT_KINDS=[['long','ntkLong',0],['kiosk','ntkKiosk',0],['ws','ntkWs',0],['apps','ntkApps',1],['learn','ntkLearn',1],['bday','ntkBday',1],['msgs','ntkMsgs',1],['attn','ntkAttn',1],['lowrate','ntkLowRate',1],['stock','ntkStock',1],['vlate','ntkVendorLate',1],['natnew','ntkNatNew',1],['closeout','ntkCloseout',0],['remind','ntkRemind',0],['wlfree','ntkWlFree',0],['sneeds','ntkSn',0]];
 function _ntOff(){return Array.isArray(S._ntOff)?S._ntOff:[];}
 // The Dashboard's Alerts card: what needs attention now, one line per kind with its count.
 function _ntRows(kinds){return(kinds||_ntKinds()).filter(x=>x.ids.length).map(x=>({...x,n:x.ids.length,txt:t(x.key).replace('{0}',x.ids.length)}));}
@@ -16564,7 +16567,7 @@ function _ptnRow(x){return(Array.isArray(x)?x.some(e=>e&&e.partner):!!(x&&x.part
 // beside the status edge and a partner's rose stripe) and the community's mark after the name (_cmChip).
 function _cmRow(x){return(Array.isArray(x)?x.some(_isSatMember):_isSatMember(x))?' cm-row-mark':'';}
 function _cmChip(e){if(!_isSatMember(e))return'';const w=esc(t('amfMember'));return`<span class="cm-mk" role="img" title="${w}" aria-label="${w}"><span class="tag-logo tag-logo-mm"></span></span>`;}
-// The special needs tag (2026-10-23, the owner): a figure in a wheelchair, white on blue. Its holder's bookings carry the
+// The special needs tag (2026-10-23, the owner): a figure in a wheelchair, white on orange. Its holder's bookings carry the
 // mark after the name wherever staff meet them - the roster and its cards, check-in, the hand-over, the scanner's
 // banner, the day sheet and the printed rosters - so the desk can be ready to help before the rider arrives; the
 // reports count them (_snTiles, the account report's Special needs section). Drawn inline (no file), so a printed
@@ -28507,6 +28510,49 @@ function _r7Bell(add,L){
     add('remind',_remDue().map(x=>({id:'rm:'+x.s.id,txt:t('ntiRemind').replace('{0}',_evName(x.s)+' '+shortDate(x.s.session_date||x.s.id)).replace('{1}',String(x.n))})),'ntRemind','warn',['_remBellGo'],L.queue);
     add('wlfree',_wlFreeRows().map(x=>({id:'wl:'+x.s.id+':'+x.free,txt:t('ntiWlFree').replace('{0}',_evName(x.s)+' '+shortDate(x.s.session_date||x.s.id)).replace('{1}',String(x.free)).replace('{2}',String(x.n))})),'ntWlFree','warn',['_wlBellGo'],L.queue);
 }
+// Riders with special needs in Analytics > Customers (the owner, 2026-10-23): today's holders of the tag (how
+// many, how many of them in the community), and how they rode in the range against everyone else - rides
+// completed and their share, rides per rider, the no-show rate - then month by month, the holders who rode
+// and their rides. Nothing until the tag exists.
+function _anSnCard(queue){
+  if(!(S.tags||[]).some(x=>x.id===TAG_SN))return'';
+  const holders=new Set((S.customerTags||[]).filter(ct=>ct.tag_id===TAG_SN&&_tagActive(ct)).map(ct=>ct.customer_id));
+  const inComm=[...holders].filter(cid=>_isSatMember({customerId:cid})).length;
+  const sn=e=>holders.has(e.customerId),rows=queue.filter(e=>e.customerId&&e.status!=='cancelled'&&e.status!=='removed');
+  const done=rows.filter(e=>e.status==='done'),dS=done.filter(sn),dO=done.filter(e=>!sn(e));
+  const per=l=>{const n=new Set(l.map(e=>e.customerId)).size;return n?Math.round(l.length/n*10)/10:0;};
+  const ns=l=>{const b=l.filter(e=>e.status==='done'||e.status==='noshow');return b.length?Math.round(b.filter(e=>e.status==='noshow').length/b.length*100):0;};
+  const months=new Map();dS.forEach(e=>{const k=String(e.sessionDate||'').slice(0,7);if(!/^\d{4}-\d{2}$/.test(k))return;const m=months.get(k)||{r:new Set(),n:0};m.r.add(e.customerId);m.n++;months.set(k,m);});
+  const mo=[...months.entries()].sort((a,b)=>a[0].localeCompare(b[0])).slice(-12),mx=Math.max(1,...mo.map(([,m])=>m.r.size));
+  const ml=k=>{const[y,m]=k.split('-').map(Number);try{return new Date(Date.UTC(y,m-1,15)).toLocaleDateString(_locale(),{month:'short',year:'2-digit',timeZone:'UTC'});}catch(_){return k;}};
+  const stat=(lbl,val,sub)=>`<div class="hl-item"><div class="hl-label">${esc(lbl)}</div><div class="hl-value">${val}<span class="an-hl-note6">${esc(sub)}</span></div></div>`;
+  return`<div class="chart-card sn-an">
+    <div class="chart-card-title"><span class="sn-mk sn-an-mk" aria-hidden="true">${_SN_SVG}</span>${t('anSnTitle')}</div>
+    <div class="chart-card-sub">${t('anSnSub')}</div>
+    <div class="sn-an-grid">
+      ${stat(t('anSnHolders'),holders.size,t('anSnInComm').replace('{0}',inComm))}
+      ${stat(t('anSnRides'),dS.length,t('anSnRidesShare').replace('{0}',done.length?Math.round(dS.length/done.length*100):0))}
+      ${stat(t('anSnPerRider'),per(dS),t('anSnOthers').replace('{0}',per(dO)))}
+      ${stat(t('anSnNoShow'),ns(rows.filter(sn))+'%',t('anSnOthers').replace('{0}',ns(rows.filter(e=>!sn(e)))+'%'))}
+    </div>
+    <div class="cx-words-title">${t('anSnByMonth')}</div>
+    ${mo.length?mo.map(([k,m])=>`<div class="analytics-bar-row">
+      <div class="analytics-bar-label">${esc(ml(k))}</div>
+      <div class="analytics-bar-track"><div class="analytics-bar-fill an-fill" data-cssv="${_cssv({'--an-w':Math.round(m.r.size/mx*100)+'%','--an-bg':'#e8590c'})}"></div></div>
+      <div class="analytics-bar-value"><bdi>${m.r.size}</bdi> · <bdi>${m.n}</bdi></div>
+    </div>`).join(''):_emptyState(t('anSnNone'))}
+  </div>`;
+}
+// The bell rings when a rider holding the special needs tag books (the owner, 2026-10-23): one line per booking
+// still to come (waiting or on the waitlist, today or later), so the desk can get ready - a ramp, a place near
+// the start, a slower group. Like every kind, only a booking made after the kind first loaded is new.
+function _snBellRows(){const today=todayStr();return getQueue().filter(e=>(e.status==='waiting'||e.status==='waitlist')&&String(e.sessionDate||'').slice(0,10)>=today&&_snOf(e));}
+function _snBell(add,L){
+  if(!_deskTabOk('queue')||!(S.tags||[]).some(x=>x.id===TAG_SN))return;
+  add('sneeds',_snBellRows().map(e=>{const s=_sessGet(e.sessionId);return{id:'sn:'+e.id,txt:t('ntiSn').replace('{0}',String(e.name||'—')).replace('{1}',(s?_evName(s)+' ':'')+shortDate(e.sessionDate)),at:e.registeredAt};}),'ntSn','warn',['_snBellGo'],L.queue);
+}
+// Opens Bookings on the ride of the latest of them.
+function _snBellGo(){const e=_snBellRows().sort((a,b)=>String(b.registeredAt||'').localeCompare(String(a.registeredAt||'')))[0];setStaffTab('queue');if(e)setSfSession(e.sessionId);}
 function _remBellGo(){const r=_remDue()[0];if(!r)return;setStaffTab('queue');setSfSession(r.s.id);openRemindSheet(r.s.id,'24h');}
 // ── Ride reminders and the waitlist's offers (2026-10-09, R7): staff part 'remind' ─────────────────────
 // No WhatsApp Business API and no e-mail: staff send each message from a wa.me link, one chat at a time,
@@ -45155,7 +45201,7 @@ async function saveTagGrant(){
 // The Petromin tag (2026-10-12) is the fifth: Petromin's own logo, in its colours, on a white chip
 // edged in Petromin's red (the owner: "change the petromin tag to include petromin logo instead"; it
 // was the word PETROMIN in white on red), for a rider who books the Petromin nights through Petromin Days.
-const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#1f5fa8',svg:1}}; // special_needs: a figure in a wheelchair, white on blue (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
+const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#e8590c',svg:1}}; // special_needs: a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip',TAG_PETROMIN='tag_petromin',TAG_VLAP='tag_vlap';
 // The Community tag and the Petromin tag never sit on one account (the owner, 2026-10-12: "when giving a
 // petromin tag to a community member show an error that asks that only one of them must be given per
@@ -49760,6 +49806,7 @@ function _renderAnalyticsNow(){
     </div>
 
     <div class="an-anchor" data-anview="customers"></div>
+    ${_anSnCard(queue)}
     ${(()=>{
       // Why riders cancel: the reason saved on each cancelled booking (queue_entries.cancel_reason,
       // from 2026-09-22), picked by the rider or recorded by staff cancelling for them. A party

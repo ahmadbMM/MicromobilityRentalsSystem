@@ -5647,5 +5647,19 @@
   "snLabel": "Necessidades especiais",
   "snShareAll": "das contas listadas",
   "snAmongComm": "Membros da comunidade: {0} de {1}",
-  "snAmongCust": "Outros clientes: {0} de {1}"
+  "snAmongCust": "Outros clientes: {0} de {1}",
+  "ntkSn": "Reservas de pessoas com necessidades especiais",
+  "ntSn": "Reservas de pessoas com necessidades especiais: {0}",
+  "ntiSn": "{0} tem necessidades especiais e reservou {1}",
+  "anSnTitle": "Pessoas com necessidades especiais",
+  "anSnSub": "Titulares da etiqueta Necessidades especiais hoje, e como pedalaram neste período",
+  "anSnHolders": "Titulares",
+  "anSnInComm": "{0} na comunidade",
+  "anSnRides": "Passeios concluídos",
+  "anSnRidesShare": "{0}% de todos os passeios",
+  "anSnPerRider": "Passeios por pessoa",
+  "anSnOthers": "Os demais: {0}",
+  "anSnNoShow": "Taxa de faltas",
+  "anSnByMonth": "Por mês: pessoas · passeios",
+  "anSnNone": "Nenhum passeio de titulares neste período"
 }

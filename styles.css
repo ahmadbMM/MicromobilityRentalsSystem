@@ -9928,12 +9928,18 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-m
 body.view-staff .queue-table tbody tr td.cm-cell,body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to right,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
 html[dir="rtl"] body.view-staff .queue-table tbody tr td.cm-cell,html[dir="rtl"] body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to left,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') left -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
 body.view-staff .queue-mobile-view .q-card.cm-row-mark{background:linear-gradient(to bottom right,var(--rs-bg,var(--s1)) 0 35%,color-mix(in srgb,var(--rs-bg,var(--s1)) 60%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
-/* The special needs tag (2026-10-23): a figure in a wheelchair, white on blue - on its tag chip (.tag-svg) and after
+/* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
-.sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#1f5fa8;color:#fff;border-radius:2px;vertical-align:middle;}
+.sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;}
 .sn-ico{display:block;width:14px;height:14px;}
 .tag-svg{display:inline-flex;align-items:center;flex-shrink:0;}
 .tag-svg .sn-ico{width:16px;height:16px;}
+/* Analytics > Customers: riders with special needs (_anSnCard, 2026-10-23) */
+.sn-an-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:10px 0 6px;}
+.sn-an-grid .hl-item{margin:0;}
+.chart-card-title .sn-an-mk{margin:0 8px 0 0;vertical-align:-3px;}
+html[dir="rtl"] .chart-card-title .sn-an-mk{margin:0 0 0 8px;}
+@media (max-width:700px){.sn-an-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
 #tab-queue .ptn-panel{margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-inline-start:3px solid #D782A0;background:var(--s1);border-radius:0;}
 #tab-queue .ptn-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}
 #tab-queue .ptn-card{padding:6px 0;border-top:1px solid var(--border);}

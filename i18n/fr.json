@@ -5647,5 +5647,19 @@
   "snLabel": "Besoins particuliers",
   "snShareAll": "des comptes listés",
   "snAmongComm": "Membres de la communauté : {0} sur {1}",
-  "snAmongCust": "Autres clients : {0} sur {1}"
+  "snAmongCust": "Autres clients : {0} sur {1}",
+  "ntkSn": "Réservations de personnes à besoins particuliers",
+  "ntSn": "Réservations de personnes à besoins particuliers : {0}",
+  "ntiSn": "{0} a des besoins particuliers et a réservé {1}",
+  "anSnTitle": "Personnes à besoins particuliers",
+  "anSnSub": "Titulaires du tag Besoins particuliers aujourd’hui, et leurs sorties sur cette période",
+  "anSnHolders": "Titulaires",
+  "anSnInComm": "{0} dans la communauté",
+  "anSnRides": "Sorties terminées",
+  "anSnRidesShare": "{0} % de toutes les sorties",
+  "anSnPerRider": "Sorties par personne",
+  "anSnOthers": "Tous les autres : {0}",
+  "anSnNoShow": "Taux d’absence",
+  "anSnByMonth": "Par mois : personnes · sorties",
+  "anSnNone": "Aucune sortie des titulaires sur cette période"
 }

@@ -201,5 +201,5 @@ section{break-inside:avoid}
 /* Victory Lap reports (2026-10-23): a Doubles team's heading line, lighter than a group's, and its partners' rows marked down the start edge so the pair reads as one */
 :root tr.rp-grp.rp-team td,table.rp-live tbody tr.rp-grp.rp-team td{background:#f4f7f5;text-transform:none;letter-spacing:0;font-size:11px;border-top:2px solid #123019}
 :root tr.rp-mate td:first-child{border-inline-start:3px solid #123019}
-.sn-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#1f5fa8;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.sn-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .sn-ico{display:block;width:11px;height:11px}

@@ -5647,5 +5647,19 @@
   "snLabel": "Espesyal na pangangailangan",
   "snShareAll": "ng mga nakalistang account",
   "snAmongComm": "Mga miyembro ng komunidad: {0} sa {1}",
-  "snAmongCust": "Ibang customer: {0} sa {1}"
+  "snAmongCust": "Ibang customer: {0} sa {1}",
+  "ntkSn": "Mga booking ng riders na may espesyal na pangangailangan",
+  "ntSn": "Mga booking ng riders na may espesyal na pangangailangan: {0}",
+  "ntiSn": "May espesyal na pangangailangan si {0} at nag-book ng {1}",
+  "anSnTitle": "Riders na may espesyal na pangangailangan",
+  "anSnSub": "Mga may tag na Espesyal na pangangailangan ngayon, at paano sila sumakay sa panahong ito",
+  "anSnHolders": "May tag",
+  "anSnInComm": "{0} sa komunidad",
+  "anSnRides": "Natapos na rides",
+  "anSnRidesShare": "{0}% ng lahat ng rides",
+  "anSnPerRider": "Rides bawat rider",
+  "anSnOthers": "Lahat ng iba: {0}",
+  "anSnNoShow": "Rate ng hindi sumipot",
+  "anSnByMonth": "Bawat buwan: riders · rides",
+  "anSnNone": "Walang rides ng may tag sa panahong ito"
 }
