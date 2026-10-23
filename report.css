@@ -47,6 +47,8 @@ body{font-family:'Barlow',system-ui,sans-serif;color:#111512;font-size:13px;padd
 .total-item.dark{background:#123019}
 .total-item.dark .total-num{color:#03ff89}
 .total-item.dark .total-lbl{color:#9fc4ab}
+.total-pct{font-size:10px;font-weight:600;color:#5a635c;margin-top:3px;font-variant-numeric:tabular-nums} /* the tile's share of every customer or community member */
+.total-item.dark .total-pct{color:#9fc4ab}
 h2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin:22px 0 7px;padding-inline-start:8px;border-inline-start:4px solid #0c7a3d}
 table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
 th{background:#123019;color:#e9f4ec;padding:8px 10px;text-align:start;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700}

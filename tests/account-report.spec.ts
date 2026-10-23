@@ -138,6 +138,22 @@ test('the printed sheet carries the chosen columns, the chosen summaries as char
   expect(html2).not.toContain('#2a78d6');
 });
 
+test('each summary tile carries its share: of every customer, or of every community member on a community report', async ({ page }) => {
+  await staff(page);
+  const pcts = (f: string) => page.evaluate(`(()=>{S._accOpts=null;Object.assign(_accOpts(),${f});return [..._accReportHtml().matchAll(/<span class="total-pct">([^<]*)<\\/span>/g)].map(m=>m[1]);})()`);
+  // Jeddah: Amal and Dan, 2 of the 4 customers; Amal's 2 rides are every ride there is
+  const all = await pcts(`{fCity:'Jeddah'}`);
+  expect(all[0]).toBe('50% of 4 customers');
+  expect(all[1]).toBe('100% of 2 customers');
+  expect(all).toHaveLength(5);
+  // the Community tag picked: measured against its live members only (Bader's tag has lapsed)
+  const comm = await pcts(`{fTag:'tag_saturday'}`);
+  expect(comm[0]).toBe('100% of 1 community members');
+  // Cara (VIP) never finished a ride: none of the 2
+  const vip = await pcts(`{fTag:'tag_vip'}`);
+  expect(vip[1]).toBe('0% of 2 customers');
+});
+
 test('the breakdowns count the accounts on the list', async ({ page }) => {
   await staff(page);
   const bd = (k: string) => page.evaluate(`_accBreakdown('${k}',_accRows(),_accOpts())`);
