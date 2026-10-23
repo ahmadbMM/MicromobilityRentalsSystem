@@ -1341,7 +1341,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 645 -> 650 (2026-10-23, the partner (Defe) report builder in the vlap part, 43 strings in each language; the vlap
 // part's strings now ride in lang/staff-vlap-<code>.json): about +5.8 KB here, so ~646.5 on the runner; the core gains
 // ~0.2 and keeps 288.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 650, core: 288 };
+// Staff 650 -> 655, core 288 -> 291 (2026-10-23, staff comments on bookings and applications: the thread, the roster's
+// mark, the menu row and the cards' line, in the desk core because the roster names them): staff 648.4 / core 287.0 here,
+// 650.3 / 288.1 on the runner (23094324 was refused); +5 / +3 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 655, core: 291 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
