@@ -10053,3 +10053,19 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
 .rr-chip.rr-no{color:var(--df-berry);border-color:rgba(162,43,99,.45);background:rgba(162,43,99,.08);}
 /* the finisher's badge shares the Defe ride badge's medal colours (.sp-defe, BDG_SPECIAL.defe) */
 @media(max-width:400px){.defe-card-title{font-size:17px;}.defe-card-logo{height:32px;}.defe-flow-logo{height:38px;}.defe-when-k{min-width:0;width:100%;}}
+/* STAFF COMMENTS (2026-10-23): a staff-only thread on a booking or an application (_scOpen, staff_comments) */
+.sc-chip{display:flex;align-items:center;gap:4px;margin-top:3px;max-width:24ch;padding:1px 6px;border:1px solid var(--border);background:var(--surface,transparent);color:var(--text);font:inherit;font-size:var(--staff-fs-sm,12px);cursor:pointer;border-radius:0;}
+.sc-chip .sc-chip-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-weight:500;}
+.sc-card{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
+.sc-card-last{flex:1 1 220px;min-width:0;font-size:13px;overflow-wrap:anywhere;}
+.sc-meta{color:var(--muted);font-size:12px;font-weight:600;}
+#sc-sheet .sc-sheet{width:min(92vw,520px);max-height:calc(100vh - 40px);display:flex;flex-direction:column;}
+#sc-sheet .sc-hint{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}
+#sc-sheet .sc-list{list-style:none;margin:0 0 12px;padding:0;overflow-y:auto;min-height:40px;display:flex;flex-direction:column;gap:8px;}
+#sc-sheet .sc-item{border:1px solid var(--border);padding:8px 10px;}
+#sc-sheet .sc-item .sc-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+#sc-sheet .sc-del{margin-inline-start:auto;}
+#sc-sheet .sc-body{margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;}
+#sc-sheet .sc-none{color:var(--muted);font-size:13px;}
+#sc-sheet .sc-lbl{font-size:13px;font-weight:700;margin-bottom:4px;}
+#sc-sheet textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;padding:8px;}

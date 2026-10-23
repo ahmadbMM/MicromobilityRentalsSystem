@@ -1357,3 +1357,16 @@ Saudi ID or Iqama number. The 2026-10-14 field (`customers.national_id`, My Acco
 removed and migration 20261023180000_drop_national_id.sql dropped the column, `customer_national_id`,
 `customer_set_national_id` and its `_purge_old` line, deleting every stored number. Don't add it back, in any
 form, sign-up, event registration or report; an event host that needs it collects it themselves.
+
+## Staff comments (2026-10-23)
+
+The owner: "add the ability for staff to add comments on customers bookings and applications that are visible only to
+staff themselves". A thread per booking (`kind 'booking'`, queue_entries.id), community application (`community_app`)
+or learn-to-ride sign-up (`learn_app`) in **`staff_comments`** (migration 20261023230000): a table of its own, staff-only
+under RLS, so no customer read (queue_public, my_bookings, staff_sync's whole rows) can carry it. The database stamps the
+author (`_staff_comments_stamp`: auth.uid(), staff.display_name else the email); a staffer deletes their own, an admin
+any; no edits. Client: `_scLoad` reads the whole table (`SC_COLS`, `_pagedAll`) when Bookings or Applications paints, at
+most once a minute (`_scEnsure`), indexed by `_scOf(kind,id)`; `_scOpen` is the thread (`#sc-sheet`), `_scChip` the
+roster's mark (in `statusCellHtml`), `_scMenuItem` the ⋯ menu's row on every booking status, `_scCardHtml` the line on
+each application card. Until the table exists `S._scMissing` and the thread says "Waiting for the database update".
+`tests/staff-comments.spec.ts`.
