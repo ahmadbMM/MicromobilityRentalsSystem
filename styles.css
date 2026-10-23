@@ -9943,7 +9943,8 @@ html[dir="rtl"] .chart-card-title .sn-an-mk{margin:0 0 0 8px;}
 #tab-queue .ptn-panel{margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-inline-start:3px solid #D782A0;background:var(--s1);border-radius:0;}
 #tab-queue .ptn-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}
 #tab-queue .ptn-title{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
-#tab-queue .ptn-title .ptn-rep{text-transform:none;letter-spacing:0;font-weight:700;}
+#tab-queue .ptn-title .ptn-rep,#tab-queue .ptn-title .ptn-rep-shirts{text-transform:none;letter-spacing:0;font-weight:700;}
+#tab-queue .ptn-reps{display:flex;gap:6px;flex-wrap:wrap;}
 #tab-queue .ptn-card{padding:6px 0;border-top:1px solid var(--border);}
 #tab-queue .ptn-card:first-of-type{border-top:0;}
 #tab-queue .ptn-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}

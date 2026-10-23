@@ -527,6 +527,17 @@ test.describe('@staff:bookings partner places', () => {
     expect(s1.indexOf('Defe Rose')).toBeLessThan(s1.indexOf('Defe Zain'));
     expect(s1.indexOf('Defe Zain')).toBeLessThan(s1.indexOf('Defe Amal'));
     expect(s1).not.toContain('Defe Gone');
+    // Shirt requests (2026-10-23): the panel's button opens the builder on its own set - only the riders who asked for a
+    // shirt, grouped and ordered by size, with the shirts table - and leaving the set puts those choices back.
+    await expect(page.locator('#tab-queue .ptn-panel .ptn-rep-shirts')).toHaveText(/Shirt requests/);
+    await page.evaluate(`_prbOpen('${SAT}','shirtreq')`);
+    await expect(m.locator('[data-prb-set="shirtreq"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(m.locator('#prb-count')).toContainText('On the report: 2 / 5');
+    const o = await page.evaluate(`(()=>{const o=_prbOpts();return {f:o.fShirt,g:o.group,s:o.sort,secs:o.secs,cols:Object.keys(o.cols).filter(k=>o.cols[k]).join(',')};})()`);
+    expect(o).toEqual({ f: 'give', g: 'shirt', s: 'shirt', secs: { summary: 0, codes: 0, shirts: 1, list: 1 }, cols: 'seq,num,name,code,phone,shirt' });
+    expect(await page.evaluate(`(async()=>{const d=await _prbLoad('${SAT}',true);return _prbBuild(d,_prbOpts()).rows.map(r=>r.e.name+' '+r.size).join(',');})()`)).toBe('Defe Zain S,Defe Rose M');
+    await m.locator('[data-prb-set="full"]').click();
+    expect(await page.evaluate(`(()=>{const o=_prbOpts();return [o.fShirt,o.group,o.sort,o.secs.codes].join(',');})()`)).toBe('all,code,num,1');
   });
 
   test('the export dialog offers the partner report builder on a partner ride only', async ({ page }) => {
