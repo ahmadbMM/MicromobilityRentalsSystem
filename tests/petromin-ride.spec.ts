@@ -98,7 +98,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=2; S.regBikeHeights=[175,168]; S.regBikeTypes=['Road','Road'];
-       S.regRiderNames=['Spec Rider','Friend']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider','Friend']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(2);
     expect(rows[0].price).toBe(75);
@@ -111,7 +111,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-10'; S.regRideGroup='beg'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].price).toBe(0);
@@ -123,7 +123,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Own'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].type_preference).toBe('Own');
@@ -152,7 +152,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road Carbon'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].type_preference).toBe('Road Carbon');
@@ -160,7 +160,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     // A stale client asking for carbon on the Saturday ride is still coerced (the DB trigger too).
     await page.evaluate(
       `S.selSession='2099-01-10'; S.regRideGroup='beg'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road Carbon'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.regSubmitting=false; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.regSubmitting=false; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(2);
     expect(rows[1].type_preference).not.toBe('Road Carbon');
@@ -179,7 +179,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Own'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].status).toBe('waitlist');
@@ -202,7 +202,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].status).toBe('waitlist');
@@ -224,7 +224,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=5; S.regBikeHeights=[175,175,175,175,175];
        S.regBikeTypes=['Road','Road','Road','Road','Road'];
-       S.regRiderNames=['A','B','C','D','E']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['A','B','C','D','E']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect(page.locator('.toast')).toContainText(/up to 2 riders/i);
     expect(rows).toHaveLength(0);           // nothing was posted
@@ -251,7 +251,7 @@ test.describe('it behaves like a circuit session, not like the Saturday ride', (
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].status).toBe('waitlist');
@@ -436,7 +436,7 @@ test.describe('a Petromin night at capacity', () => {
     const rows = await captureBookingRows(page);
     await page.evaluate(
       `S.selSession='2099-01-13-pw'; S.regQty=1; S.regBikeHeights=[175]; S.regBikeTypes=['Road'];
-       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;submitReg();`,
+       S.regRiderNames=['Spec Rider']; S.promoApplied=null; S.waiverOk=true;S._pmInvSeen=S.selSession;submitReg();`,
     );
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0].status).toBe('waitlist');

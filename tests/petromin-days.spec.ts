@@ -71,7 +71,7 @@ test.describe('@customer:petromin Petromin Days', () => {
     await card(page).click();
     await page.locator(`#tab-register .sess-card[data-on-click*="${PW}"]`).click();
     await expect.poll(() => page.evaluate('S.selSession')).toBe(PW);
-    await page.evaluate(`S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Road'];S.regRiderNames=['Omar Saleh'];S.promoApplied=null;S.waiverOk=true;S._waiverSess=S.selSession;submitReg()`);
+    await page.evaluate(`S.regQty=1;S.regBikeHeights=[175];S.regBikeTypes=['Road'];S.regRiderNames=['Omar Saleh'];S.promoApplied=null;S.waiverOk=true;S._waiverSess=S.selSession;S._pmInvSeen=S.selSession;submitReg()`);
     await expect.poll(() => rows.length).toBe(1);
     expect(rows[0]).toMatchObject({ session_id: PW, type_preference: 'Road' });
     await expect(page.locator('#confirm-modal .cm-box')).toHaveCount(0); // never the members popup
