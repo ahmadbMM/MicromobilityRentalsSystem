@@ -339,7 +339,7 @@ test.describe('@staff:bookings partner places', () => {
     await boot(page, {
       session_partners: [{ session_id: SAT, partner: 'defe', label: 'Defe', places: 80, code: 'PINK24', code_needed: false }],
       queue_entries: [
-        row({ id: 'd1', name: 'Defe Rider', customer_id: 'c2', partner: 'defe', approval: 'approved', queue_num: 11, partner_ask: { shirt_got: false, shirt: 'M' } }),
+        row({ id: 'd1', name: 'Defe Rider', customer_id: 'c2', partner: 'defe', approval: 'approved', queue_num: 11, partner_code_used: 'PINK24', partner_ask: { shirt_got: false, shirt: 'M' } }),
         row({ id: 'd2', name: 'Defe Two', customer_id: 'c3', partner: 'defe', approval: 'approved', queue_num: 12, partner_ask: { shirt_got: true } }),
         row({ id: 'd3', name: 'Defe Three', customer_id: 'c5', partner: 'defe', approval: 'approved', queue_num: 13, partner_ask: { shirt_got: false, shirt: 'M' } }),
         row({ id: 'm1', name: 'Member One', customer_id: 'c4', queue_num: 1 }),
@@ -351,9 +351,12 @@ test.describe('@staff:bookings partner places', () => {
     await expect(rowOf('Defe Rider').locator('.ptn-shirt.ptn-shirt-need')).toHaveText('Shirt to give: M');
     await expect(rowOf('Defe Two').locator('.ptn-shirt')).toHaveText('Has a Defe shirt');
     await expect(rowOf('Member One').locator('.ptn-shirt')).toHaveCount(0);
+    // The code each Defe booking came with, beside it in plain sight (2026-10-23).
+    await expect(rowOf('Defe Rider').locator('.ptn-code')).toHaveText('PINK24');
+    await expect(rowOf('Defe Two').locator('.ptn-code')).toHaveCount(0);
     const rows = await page.evaluate(`(()=>{let out=null;const o=window._downloadCsv;window._downloadCsv=(n,r)=>{out=r;};try{localStorage.removeItem('cq_rep_opts');S._repOpts=null;exportSessionExcel();}finally{window._downloadCsv=o;}return out;})()`) as string[][] | null;
     const head = rows![0], pi = head.indexOf('Partner'), ni = head.indexOf('Name');
-    expect(rows!.find((r) => r[ni] === 'Defe Rider')![pi]).toBe('Defe · Shirt to give: M');
+    expect(rows!.find((r) => r[ni] === 'Defe Rider')![pi]).toBe('Defe · PINK24 · Shirt to give: M');
     expect(rows!.find((r) => r[ni] === 'Defe Two')![pi]).toBe('Defe · Has a Defe shirt');
   });
 

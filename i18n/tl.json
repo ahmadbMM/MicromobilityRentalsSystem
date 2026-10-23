@@ -5323,6 +5323,7 @@
   "ptnBookedOf": "{0}: {1} / {2} naka-book",
   "ptnByCode": "Naka-book gamit ang code: {0}",
   "ptnShirtHas": "May Defe shirt na",
+  "ptnCodeUsed": "Code na ginamit sa pag-book",
   "ptnShirtNeed": "Shirt na ibibigay: {0}",
   "ptnShirtSum": "Defe shirts: {0} ang may shirt na · ibibigay: {1}",
   "ptnMembers": "Naka-book na miyembro {0} / {1} (pagkatapos ay sariling bisikleta lang)",
