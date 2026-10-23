@@ -46357,6 +46357,7 @@ function _amCustRows(){
   const page=shown.slice(0,cap);
   const rest=shown.length-page.length;
   const more=rest>0?`<div class="cmy-more"><button type="button" class="btn-secondary" data-on-click="${_on("_amMore")}">${t('amShowMore').replace('{0}',Math.min(rest,AM_PAGE))}</button><div class="am-meta cmy-mt6">${esc(t('amShowingOf').replace('{0}',page.length).replace('{1}',shown.length))}</div></div>`:'';
+  if(page.length)_amPicEnsure();
   return (page.map(_amRowHtml).join('')||_emptyState((S.amSearch||'').trim()?t('commNoMatch'):t('amNoCustomers')))+more;
 }
 // A rider's deletion request on their row: when they asked, and the two ways staff answer it -
@@ -46587,6 +46588,66 @@ function _amSocCell(c){
   const ig=_igChipHtml(c);
   return`<div class="am-soc-top">${_socLinkHtml(n0,l0,v[n0])}${icons}</div>${ig?`<div class="am-soc-ig">${ig}</div>`:''}`;
 }
+// The rider's profile photo beside the name on Accounts and Members (the owner, 2026-10-23: "add the customers' profile
+// photos for staff to see"); tap it to see it big. The account list leaves photo out - a few old photos are inline
+// images of up to 47 KB, 1.5 MB together - so the photos come on their own while the page is open: every link
+// (Google's or our Storage's, about 85 KB for all) once per half hour, and an inline one only for a row on the page.
+// With personal data masked (Settings) a row shows its initials until it is revealed.
+const AM_PIC_TTL=30*60*1000;
+const _amPic={at:0,busy:false,src:new Map(),inl:new Set(),asked:new Set()};
+function _amPicSrc(c){
+  const v=_amPic.src.get(String(c.id))||c.photo||'';
+  return /^(https:\/\/|data:image\/)/.test(v)?v:'';
+}
+function _amAvHtml(c){
+  const src=_piiShown(c.id)?_amPicSrc(c):'';
+  return src?`<img class="am-av" src="${esc(src)}" alt="${esc(c.name||'')}" loading="lazy" decoding="async" referrerpolicy="no-referrer" role="button" tabindex="0" data-on-click="${_on("_photoZoom",_EL)}" data-on-keydown="${_on("_amAvKey",_EV,_EL)}" data-on-error="${_on("_amAvBroken",_EL)}">`
+    :`<span class="am-av am-av-none" aria-hidden="true">${esc(_setInitials(c.name))}</span>`;
+}
+function _amAvKey(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();_photoZoom(el);}}
+// A link that no longer opens (a Google photo changed) goes back to the initials, and is not asked again until the next read.
+function _amAvBroken(el){
+  const row=el&&el.closest('.am-row');if(!row)return;
+  const id=row.getAttribute('data-cust');_amPic.src.set(String(id),'-');
+  const s=document.createElement('span');s.className='am-av am-av-none';s.setAttribute('aria-hidden','true');s.textContent=_setInitials(el.alt);
+  el.replaceWith(s);
+}
+// Called with every paint of the rows; reads after the markup is in place.
+function _amPicEnsure(){
+  if(!sb)return;
+  setTimeout(()=>{
+    if(_amPic.busy||Date.now()-_amPic.at<AM_PIC_TTL){_amPicInline();return;}
+    _amPic.busy=true;
+    Promise.all([
+      _pagedAll(()=>sb.from('customers').select('id,photo').like('photo','https://%').order('id')),
+      _pagedAll(()=>sb.from('customers').select('id').like('photo','data:%').order('id'))
+    ]).then(([a,b])=>{
+      if(!a||a.error||!a.data||!b||b.error||!b.data)return;
+      const src=new Map(),inl=new Set(b.data.map(r=>String(r.id)));
+      a.data.forEach(r=>src.set(String(r.id),r.photo));
+      _amPic.src.forEach((v,k)=>{if(inl.has(k)&&v&&v!=='-')src.set(k,v);});
+      _amPic.src=src;_amPic.inl=inl;_amPic.at=Date.now();
+    }).catch(()=>{}).finally(()=>{_amPic.busy=false;_amPicPaint();_amPicInline();});
+  },0);
+}
+function _amPicRows(){return [...document.querySelectorAll('#am-cust-rows .am-row[data-cust]')];}
+async function _amPicInline(){
+  const ids=_amPicRows().map(r=>r.getAttribute('data-cust')).filter(id=>_amPic.inl.has(id)&&!_amPic.src.has(id)&&!_amPic.asked.has(id));
+  if(!ids.length||!sb)return;
+  ids.forEach(id=>_amPic.asked.add(id));
+  let r;try{r=await sb.from('customers').select('id,photo').in('id',ids);}catch(e){r={error:e};}
+  if(!r||r.error||!r.data){ids.forEach(id=>_amPic.asked.delete(id));return;}
+  r.data.forEach(x=>{if(x.photo)_amPic.src.set(String(x.id),x.photo);});
+  _amPicPaint();
+}
+// Swaps the initials for the photo on the rows on screen, nothing else.
+function _amPicPaint(){
+  _amPicRows().forEach(row=>{
+    const av=row.querySelector('.am-av-none');if(!av)return;
+    const c=_custById(row.getAttribute('data-cust'));if(!c||!_amPicSrc(c)||!_piiShown(c.id))return;
+    av.outerHTML=_amAvHtml(c);
+  });
+}
 function _amRowInner(c){
   {
     const myTags=_tagsForCust(c.id);
@@ -46610,7 +46671,7 @@ function _amRowInner(c){
       _fixPendingLine(c),_delReqLine(c),S.amSuspect?_sxLineHtml(c):'',genderAsk].filter(Boolean).join('');
     return `<div class="am-cust${S.amSel?' am-selmode':''}">${selBox}
       <div class="am-cust-main">
-        <div class="am-c-name"><div class="am-cust-name">${esc(c.name||'—')}</div>${sub?`<div class="am-c-sub">${sub}</div>`:''}</div>
+        <div class="am-c-name">${_amAvHtml(c)}<div class="am-c-nm"><div class="am-cust-name">${esc(c.name||'—')}</div>${sub?`<div class="am-c-sub">${sub}</div>`:''}</div></div>
         <div class="am-cust-contact"><span class="am-c-email">${email}</span><span class="am-c-phone">${phone}</span></div>
         <div class="am-c-soc">${_amSocCell(c)}</div>
         <div class="am-c-tags"><div class="am-chips">${chips}</div></div>

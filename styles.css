@@ -9819,6 +9819,16 @@ body.view-staff .am-list .am-soc-ig .ig-chip:hover span{text-decoration:underlin
 body.view-staff .am-list .am-soc-ig .ig-chip.ig-tone{color:color-mix(in srgb,hsl(var(--igh) 85% 45%) 70%,var(--text));}
 body.view-staff .am-list .am-soc-ig .ig-chip.ig-tone .ig-arw{color:inherit;}
 body.view-staff .am-list .am-soc-ig .ig-chip.ig-none span{text-decoration:underline dotted;text-underline-offset:3px;}
+/* the rider's photo before the name, every width (2026-10-23); their initials when there is none. Square, as every
+   clickable thing here (2026-10-11) */
+body.view-staff #am-cust-rows .am-c-name{display:flex;align-items:center;gap:10px;min-width:0;}
+body.view-staff #am-cust-rows .am-c-nm{flex:1;min-width:0;overflow:hidden;}
+body.view-staff #am-cust-rows .am-av{flex:none;width:38px;height:38px;box-sizing:border-box;border:1px solid var(--border);
+  object-fit:cover;background:rgba(var(--green-rgb),.1);}
+body.view-staff #am-cust-rows img.am-av{cursor:zoom-in;}
+body.view-staff #am-cust-rows .am-av-none{display:flex;align-items:center;justify-content:center;color:var(--green);
+  font-size:13px;font-weight:800;letter-spacing:.02em;}
+@media (max-width:767px){body.view-staff #am-cust-rows .am-av{width:44px;height:44px;}}
 @media (min-width:768px) and (max-width:1279px){
   /* the tablet's social cell is one line: the handle, then the count */
   body.view-staff .am-list .am-c-soc{flex-direction:row;align-items:center;justify-content:flex-start;gap:10px;}
