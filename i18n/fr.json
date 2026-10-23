@@ -5271,6 +5271,8 @@
   "amfSortSeenOld": "Le plus longtemps sans ouverture",
   "amfSortSignin": "Connecté le plus récemment",
   "amfSortSigninOld": "Le plus longtemps sans connexion",
+  "amfSortLogin": "Dernière connexion, plus récente",
+  "amfSortLoginOld": "Dernière connexion, plus ancienne",
   "rpRows": "{0} lignes",
   "rpShown": "{0} sur {1} lignes",
   "rpFiltered": "Filtré : « {0} », {1} sur {2} lignes. Les totaux comptent toutes les lignes.",

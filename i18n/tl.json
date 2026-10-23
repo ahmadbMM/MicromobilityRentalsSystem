@@ -5271,6 +5271,8 @@
   "amfSortSeenOld": "Pinakamatagal mula huling pagbukas",
   "amfSortSignin": "Pinakabagong nag-sign in",
   "amfSortSigninOld": "Pinakamatagal mula huling pag-sign in",
+  "amfSortLogin": "Huling pag-login, pinakabago",
+  "amfSortLoginOld": "Huling pag-login, pinakamatagal na",
   "rpRows": "{0} hanay",
   "rpShown": "{0} sa {1} hanay",
   "rpFiltered": "Na-filter: “{0}”, {1} sa {2} hanay. Binibilang ng mga kabuuan ang bawat hanay.",

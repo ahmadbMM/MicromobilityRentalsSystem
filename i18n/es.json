@@ -5271,6 +5271,8 @@
   "amfSortSeenOld": "Más tiempo sin abrir",
   "amfSortSignin": "Sesión iniciada más recientemente",
   "amfSortSigninOld": "Más tiempo sin iniciar sesión",
+  "amfSortLogin": "Último acceso, más reciente",
+  "amfSortLoginOld": "Último acceso, más antiguo",
   "rpRows": "{0} filas",
   "rpShown": "{0} de {1} filas",
   "rpFiltered": "Filtrado: «{0}», {1} de {2} filas. Los totales cuentan todas las filas.",

@@ -41,6 +41,9 @@ test.describe('@staff:community last opened and last signed in', () => {
     expect(await report(page, 'fTag', 'all', 'x_seen')).toEqual(['a1', 'a2', 'a3']);
     expect(await report(page, 'fTag', 'all', 'x_seenOld')).toEqual(['a2', 'a1', 'a3']);
     expect(await report(page, 'fTag', 'all', 'x_signin')).toEqual(['a1', 'a3', 'a2']);
+    // Last login as a sort (the owner, 2026-10-23), never seen last either way.
+    expect(await report(page, 'fTag', 'all', 'x_login')).toEqual(['a1', 'a2', 'a3']);
+    expect(await report(page, 'fTag', 'all', 'x_loginOld')).toEqual(['a2', 'a1', 'a3']);
     const cells = await page.evaluate(`_accRows().map(r=>[r.c.id,r.cells.lastSeen,r.cells.lastSignin])`) as string[][];
     expect(cells.find((c) => c[0] === 'a2')![1]).toContain('Website');
     expect(cells.find((c) => c[0] === 'a3')!.slice(1)).toEqual(['', '']);
@@ -60,10 +63,17 @@ test.describe('@staff:community last opened and last signed in', () => {
     await expect(dlg.locator('button[data-rep="cols:lastLogin"]')).toContainText('Last login');
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_seen"]')).toHaveCount(1);
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_signinOld"]')).toHaveCount(1);
+    await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_login"]')).toHaveText('Last login, most recent');
     await page.evaluate(`closeModal&&document.querySelectorAll('.modal-overlay').forEach(m=>m.remove())`).catch(() => {});
     await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';S.amSort='seen';renderCustomers()`);
     expect(await page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')))).toEqual(['a1', 'a2', 'a3']);
     await expect(page.locator('#am-cust-rows .am-row[data-cust="a1"] .am-sortline')).toContainText('Last opened the app or website');
+    // Each account row carries its Last login with the time (the owner, 2026-10-23); none when never seen.
+    const a1 = page.locator('#am-cust-rows .am-row[data-cust="a1"] .am-lastseen');
+    await expect(a1).toHaveText(await page.evaluate(`'Last login: '+fmtStamp(${JSON.stringify(seen[0].seen_at)})`) as string);
+    await expect(a1).toHaveAttribute('title', 'App');
+    await expect(page.locator('#am-cust-rows .am-row[data-cust="a2"] .am-lastseen')).toHaveAttribute('title', 'Website');
+    await expect(page.locator('#am-cust-rows .am-row[data-cust="a3"] .am-lastseen')).toHaveText('');
   });
 });
 

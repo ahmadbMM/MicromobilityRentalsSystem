@@ -1329,7 +1329,8 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 628 -> 632, core 281 -> 284 (2026-10-23, Defe's several codes with their own places): the codes list in the
 // Bookings partner panel, its add/remove/save and strings: staff 625.3 / core 279.1 here, 628.0 / ~280.5 on the
 // runner (ca0c85b2 was refused at 628.0); +4 / +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 253, staff: 632, core: 284 };
+// Staff 632 -> 634 (2026-10-23, Last login on every account row and as a sort): ~0.7 KB more; +2 keeps the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 253, staff: 634, core: 284 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
