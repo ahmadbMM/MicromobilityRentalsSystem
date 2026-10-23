@@ -1330,7 +1330,10 @@ export function formatFieldNames(r, limit = 20) {
 // Bookings partner panel, its add/remove/save and strings: staff 625.3 / core 279.1 here, 628.0 / ~280.5 on the
 // runner (ca0c85b2 was refused at 628.0); +4 / +3 restores the margin.
 // Staff 632 -> 634 (2026-10-23, Last login on every account row and as a sort): ~0.7 KB more; +2 keeps the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 253, staff: 634, core: 284 };
+// Customer 253 -> 256 (2026-10-23, Petromin's invitation per night): its pop-up before booking, the ticket block and
+// strings, on top of Victory Lap's ticket question: 251.9 KB here, 253.5 on the runner (a89901fd was refused); +3
+// restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 634, core: 284 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
