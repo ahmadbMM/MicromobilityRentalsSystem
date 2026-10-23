@@ -5646,5 +5646,9 @@
   "vtColNone": "Hindi sumagot",
   "vtViewRcpt": "Tingnan ang resibo",
   "vtRcptSave": "I-save ang larawan",
-  "vtRcptNone": "Walang nakitang resibo."
+  "vtRcptNone": "Walang nakitang resibo.",
+  "snLabel": "Espesyal na pangangailangan",
+  "snShareAll": "ng mga nakalistang account",
+  "snAmongComm": "Mga miyembro ng komunidad: {0} sa {1}",
+  "snAmongCust": "Ibang customer: {0} sa {1}"
 }

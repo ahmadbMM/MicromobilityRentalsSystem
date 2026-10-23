@@ -5646,5 +5646,9 @@
   "vtColNone": "Sin respuesta",
   "vtViewRcpt": "Ver comprobante",
   "vtRcptSave": "Guardar imagen",
-  "vtRcptNone": "No se encontró ningún comprobante."
+  "vtRcptNone": "No se encontró ningún comprobante.",
+  "snLabel": "Necesidades especiales",
+  "snShareAll": "de las cuentas listadas",
+  "snAmongComm": "Miembros de la comunidad: {0} de {1}",
+  "snAmongCust": "Otros clientes: {0} de {1}"
 }

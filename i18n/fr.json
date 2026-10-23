@@ -5646,5 +5646,9 @@
   "vtColNone": "Pas de réponse",
   "vtViewRcpt": "Voir le reçu",
   "vtRcptSave": "Enregistrer l'image",
-  "vtRcptNone": "Aucun reçu trouvé."
+  "vtRcptNone": "Aucun reçu trouvé.",
+  "snLabel": "Besoins particuliers",
+  "snShareAll": "des comptes listés",
+  "snAmongComm": "Membres de la communauté : {0} sur {1}",
+  "snAmongCust": "Autres clients : {0} sur {1}"
 }

@@ -786,6 +786,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   filterAll:'All',ridersMoveNeedsDb:'Moving a party to another night needs a database update that is not in place yet. Keep this night for now.',syncNeedPin:'A void or refund made offline needs the PIN again. Tap the pending sync count on Sales to enter it.',invQtyDec:'Decrease quantity: {0}',invQtyInc:'Increase quantity: {0}',invDelPriced:'{0} booking(s) still read this item’s price — set its stock to zero instead of deleting it.',filterDone:'Done',filterNoshow:'No-Show',
   allSessions:'All Sessions',colRider:'Rider',colMember:'Membership',memberYes:'Member',memberNo:'Non-member',
+  snLabel:'Special needs',snShareAll:'of the accounts listed',snAmongComm:'Community members: {0} of {1}',snAmongCust:'Other customers: {0} of {1}',
   walkinSize:'Frame Size',
   addWalkinBtn:'Add Walk-in',cancelBtn:'Cancel',
   promoCodeExists:'A code with this text already exists.',promoTypeMissing:'Type column missing - run add-roadcarbon-mmteam.sql; the code was saved for every bike type.',bePaidMoveErr:'This booking is paid, and that ride has a different fare, so it cannot move there. Pick a ride with the same fare, or take the payment back first.',
@@ -1370,6 +1371,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   filterAll:'الكل',ridersMoveNeedsDb:'نقل المجموعة إلى ليلة أخرى يحتاج إلى تحديث لقاعدة البيانات لم يُطبَّق بعد. أبقِ هذه الليلة الآن.',syncNeedPin:'إلغاء أو استرداد تم دون اتصال يحتاج إلى الرمز مرة أخرى. اضغط على عدد العمليات بانتظار المزامنة في المبيعات لإدخاله.',invQtyDec:'إنقاص الكمية: {0}',invQtyInc:'زيادة الكمية: {0}',invDelPriced:'ما زال {0} حجز/حجوزات يعتمد على سعر هذا المنتج — اجعل مخزونه صفراً بدلاً من حذفه.',filterDone:'منتهي',filterNoshow:'لم يحضر',
   allSessions:'جميع الجلسات',colRider:'الراكب',colMember:'العضوية',memberYes:'عضو',memberNo:'غير عضو',
+  snLabel:'ذوو الاحتياجات الخاصة',snShareAll:'من الحسابات المدرجة',snAmongComm:'أعضاء المجتمع: {0} من {1}',snAmongCust:'العملاء الآخرون: {0} من {1}',
   walkinSize:'مقاس الإطار',
   addWalkinBtn:'إضافة زيارة',cancelBtn:'إلغاء',
   promoCodeExists:'يوجد رمز بهذا النص بالفعل.',promoTypeMissing:'عمود النوع غير موجود - شغّل add-roadcarbon-mmteam.sql؛ تم حفظ الرمز لجميع أنواع الدراجات.',bePaidMoveErr:'هذا الحجز مدفوع، وتلك الجولة بسعر مختلف، فلا يمكن نقله إليها. اختر جولة بالسعر نفسه، أو استرجع الدفعة أولاً.',
@@ -12110,7 +12112,7 @@ function printDaySheet(){
     return `<section><h2>${esc(_evName(x))}${_t?` &middot; ${esc(_t)}`:''}${_bfAt(x)?` &middot; ${esc(_bfAt(x))}`:''}<span class="rp-h2n">${t(run?'repRunners':'daySheetRiders')}: ${rows.length}</span></h2>
       <table><thead><tr><th>#</th><th>${t('colRider')}</th>${run?`<th>${t('runKmLabel')}</th>`:bike?`<th>${t('bikeTypeLabel')}</th>`:''}<th>${t('colStatus')}</th><th>${t('filterPay')}</th></tr></thead><tbody>
       ${rows.map(e=>{const price=e.price??DEFAULT_PRICE;
-        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_ptnChip(e)}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
+        return`<tr><td class="rp-b7">#${e.queueNum}${e.status==='waitlist'&&e.waitlistNum?' · W'+e.waitlistNum:''}</td><td class="rp-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}</td>${third(e)}<td>${run&&e.status==='active'?t('anFunnelCheckedIn'):t(STATUS_KEY[e.status])}</td><td>${!price?t('freeLabel'):e.paid?`${_rpAmt(price)}<span class="rp-pm">&#10003;</span>`:`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`}</td></tr>`;}).join('')
         ||`<tr><td colspan="${run||bike?5:4}">—</td></tr>`}
       </tbody></table></section>`;
   }).join('');
@@ -16612,6 +16614,25 @@ const _PTN_RIBBON='<svg class="ptn-rb" aria-hidden="true" width="12" height="12"
 function _ptnShirt(e){const a=e&&e.partnerAsk;if(!a||typeof a.shirt_got!=='boolean')return'';return a.shirt_got?t('ptnShirtHas'):t('ptnShirtNeed').replace('{0}',String(a.shirt||'?'));}
 function _ptnChip(e){if(!e||!e.partner)return'';const l=_ptnLabel(e.partner),w=esc(t('ptnWith').replace('{0}',l)+(e.partnerCodeUsed?' · '+e.partnerCodeUsed:'')),sh=_ptnShirt(e);return`<span class="ptn-chip" role="img" title="${w}" aria-label="${w}">${_PTN_RIBBON}<span aria-hidden="true">${esc(l.toUpperCase())}</span></span>${sh?`<span class="ptn-shirt${e.partnerAsk.shirt_got?'':' ptn-shirt-need'}">${esc(sh)}</span>`:''}`;}
 function _ptnRow(x){return(Array.isArray(x)?x.some(e=>e&&e.partner):!!(x&&x.partner))?' ptn-row-mark':'';}
+// Community members' bookings wear the community's colours on the Bookings page, on every night they book (the owner,
+// 2026-10-23: "i want community members to have their bookings themed in a different way in bookings page so staff
+// can recognize them from other customers"): a green band down the start edge of the row or the phone card (_cmRow,
+// beside the status edge and a partner's rose stripe) and the community's mark after the name (_cmChip).
+function _cmRow(x){return(Array.isArray(x)?x.some(_isSatMember):_isSatMember(x))?' cm-row-mark':'';}
+function _cmChip(e){if(!_isSatMember(e))return'';const w=esc(t('amfMember'));return`<span class="cm-mk" role="img" title="${w}" aria-label="${w}"><span class="tag-logo tag-logo-mm"></span></span>`;}
+// The special needs tag (2026-10-23, the owner): a figure in a wheelchair, white on blue. Its holder's bookings carry the
+// mark after the name wherever staff meet them - the roster and its cards, check-in, the hand-over, the scanner's
+// banner, the day sheet and the printed rosters - so the desk can be ready to help before the rider arrives; the
+// reports count them (_snTiles, the account report's Special needs section). Drawn inline (no file), so a printed
+// sheet carries it too.
+const TAG_SN='tag_special_needs';
+const _SN_SVG='<svg class="sn-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.2" cy="3.4" r="2.3" fill="currentColor"/><path d="M9.7 7.4l.7 5.9h5.4l2.5 5.9 2.2-.9" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M10.1 10.1h4.5" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M7.6 11.6a5.4 5.4 0 1 0 8.1 6.6" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>';
+function _snCid(cid){return !!cid&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_SN&&_tagActive(ct));}
+function _snOf(e){return !!e&&_snCid(e.customerId);}
+function _snChip(e){if(!_snOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_SN),w=esc((tg&&tg.name)||t('snLabel'));return`<span class="sn-mk" role="img" title="${w}" aria-label="${w}">${_SN_SVG}</span>`;}
+// The printed sheets' tile: how many riders on it hold the tag, and their share. Nothing when none do.
+function _snTile(list){const n=(list||[]).filter(_snOf).length,all=(list||[]).length;if(!n)return'';
+  return`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${esc(t('snLabel'))} &middot; ${Math.round(n/all*100)}%</span></div>`;}
 function noShowFlag(e){
   const n=customerNoShows(e);
   return n>=3?`<span title="${t('noShowFlagTip').replace('{0}',n)}" class="rq-nsflag">${n}</span>`:'';
@@ -23123,7 +23144,7 @@ function showBookingEditModal(entryId){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_showBookingEditModal_2",_EV,_EL)}">
     <div class="modal-box dk-mw420" role="dialog" aria-modal="true" aria-labelledby="dlgt-editBookingTitle">
-      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · #${e.queueNum}${_ptnChip(e)}</div>
+      <div class="modal-title" id="dlgt-editBookingTitle">${t('editBookingTitle')} · #${e.queueNum}${_ptnChip(e)}${_snChip(e)}</div>
       <div class="modal-sub">${t('editBookingSub')}</div>
       <div class="mny-aurow">${_auditBtn('queue_entries',e.id,'#'+e.queueNum+' '+(e.name||''))}</div>
       <div class="form-group dk-fg-top"><label for="be-name">${t('nameLabel')} *</label><input id="be-name" type="text" value="${esc(_n)}" maxlength="60" data-on-input="${_on("_nameInput",_EL)}"></div>
@@ -24019,7 +24040,7 @@ function renderQRow(e){
       ?`<div class="pos-badge rq-pos" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
       :`<span class="rq-mut12">—</span>`;
     const _flashCls=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:''
-    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}" data-id="${esc(e.id)}">
+    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}${_cmRow(e)}" data-id="${esc(e.id)}">
       <td class="rq-w52">
         ${(_apprSessIds.has(e.sessionId)&&!e.partner&&!_commPublished(_rowSess(e)))?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}`:`
         <span class="queue-num-cell ${e.status!=='waiting'?'rq-fs18':'rq-fs22'}">#${e.queueNum}</span>
@@ -24028,7 +24049,7 @@ function renderQRow(e){
         ${e.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
 `}
       </td>
-      <td><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${_ptnChip(e)}${wiTag}${noShowFlag(e)}${_dqMark(e)}</span></div><div class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</div>${_qCc(entryPhone(e),e)}${_adChips(e)}</td>
+      <td${_isSatMember(e)?' class="cm-cell"':''}><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${wiTag}${noShowFlag(e)}${_dqMark(e)}</span></div><div class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</div>${_qCc(entryPhone(e),e)}${_adChips(e)}</td>
       ${_memberCell(e)}
       ${_qc.bike?_qTypeCell(e):''}
       ${_qc.grp?`<td>${_rgChip(e)}</td>`:''}
@@ -24102,7 +24123,7 @@ function renderQRow(e){
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
         ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}" data-id="${esc(primary.id)}">
+      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}${_cmRow(group)}" data-id="${esc(primary.id)}">
         <td class="rq-w52 rq-vm">
           <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group))}
@@ -24110,8 +24131,8 @@ function renderQRow(e){
           <div class="rq-nbk">${t('bikesN').replace('{0}',String(n))}</div>
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
-        <td class="rq-vm">
-          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${noShowFlag(primary)} ${_noShowChip(primary)}${_dqMark(group)}</div>
+        <td class="rq-vm${group.some(_isSatMember)?' cm-cell':''}">
+          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)} ${_noShowChip(primary)}${_dqMark(group)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           ${_qCc(primary.groupPhone||primary.phone,primary)}
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
@@ -24144,7 +24165,7 @@ function renderQRow(e){
         :'<span class="rq-mut">—</span>';
       const riderCell=`<div class="rq-rc">
         <span class="rq-num17">${i+1}</span>
-        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_dqMark(e)}</span>
+        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_dqMark(e)}</span>
       </div>${e.phone?`<div class="rider-sub rq-rsub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)}</bdi>${_dupMark(e)}</div>`:''}${_qCc(e.phone,e)}${_adChips(e)}`;
       const typeCell=_qTypeCell(e,'rq-vm');
       const groupLine=isFirst?'rq-gtop':'';
@@ -24154,7 +24175,7 @@ function renderQRow(e){
       const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ');
 
       if(isFirst){
-        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}" data-id="${esc(e.id)}">
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}" data-id="${esc(e.id)}">
           <td rowspan="${n}" class="rq-w52 rq-vm">
             <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
             ${_bookedAt(_bookedAtOf(group))}
@@ -24166,7 +24187,7 @@ function renderQRow(e){
             ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
             ${(primary.groupContact||primary.groupPhone)?`${primary.groupContact?`<div class="rq-gcont" title="${esc(primary.groupContact)}">${esc(primary.groupContact)}</div>`:''}${primary.groupPhone||entryPhone(primary)?`<div class="rq-mt3">${_contactCell(primary.groupPhone||entryPhone(primary),primary)}</div>`:''}`:''}
           </td>
-          <td class="rq-vm">${riderCell}</td>
+          <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?typeCell:''}
           ${_qc.grp?`<td class="rq-vm">${_rgChip(e)}</td>`:''}
@@ -24185,8 +24206,8 @@ function renderQRow(e){
           <td class="rq-vm"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
-        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}" data-id="${esc(e.id)}">
-          <td class="rq-vm">${riderCell}</td>
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}" data-id="${esc(e.id)}">
+          <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?typeCell:''}
           ${_qc.grp?`<td class="rq-vm">${_rgChip(e)}</td>`:''}
@@ -24230,7 +24251,7 @@ function renderQRow(e){
         <div class="rq-sb8">
           <div class="rq-cl">
             ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
-            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_dupMark(e)}${_dqMark(e)}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_snChip(e)}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
@@ -24247,7 +24268,7 @@ function renderQRow(e){
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
       const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}" data-id="${esc(primary.id)}">
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}${_cmRow(group)}" data-id="${esc(primary.id)}">
         <div class="rq-chw ${sessLabel?'rq-mb4':'rq-mb6'}">
           <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
@@ -24257,7 +24278,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div class="rq-sb8">
-          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_dqMark(group)}</div>
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_dqMark(group)}</div>
             <div class="rq-csub">${_partyCountsLine(group)}</div></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
@@ -24271,7 +24292,7 @@ function renderQRow(e){
         </div>
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}" data-id="${esc(primary.id)}">
+    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}${_cmRow(group)}" data-id="${esc(primary.id)}">
       <div class="rq-ch ${sessLabel?'rq-mb4':'rq-mb6'}">
         <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
         ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span class="rq-wnum2">W${primary.waitlistNum}</span>`:''}
@@ -25750,7 +25771,7 @@ function _prefMerge(srv){
 // never the sub-view (that is the address's) nor a search. Only what differs from the section's defaults is
 // kept, so "Reset filters" is the defaults back. A path with a dot is a field of a section's own object.
 // The Accounts and Members filters (_amDefs), here so the lists below can name them.
-const AM_FKEYS=['amSpent','amGender','amAge','amBday','amNat','amCountry','amCity','amHeight','amBike','amJoined','amRides','amComm','amLast','amActive','amUp','amNoShow','amCancel','amPay','amNews','amTags','amMember','amBadges','amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amFlag'];
+const AM_FKEYS=['amSpent','amGender','amAge','amBday','amNat','amCountry','amCity','amHeight','amBike','amJoined','amRides','amComm','amLast','amActive','amUp','amNoShow','amCancel','amPay','amNews','amTags','amMember','amBadges','amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amFlag','amSn'];
 const ST_KEYS={
   queue:['sfStatus','sfPay','sfSize','sfBike','sfSort','sfSortDir'],
   history:['histStatus','histPay','histRange','histSort','histSortDir','histType','histSize'],
@@ -30520,6 +30541,7 @@ const _ACC_COLS=[
   {k:'spent',    key:'acrColSpent'},
   {k:'pay',      key:'defaultPayLabel'},
   {k:'hidden',   key:'hiddenTypesLabel'},
+  {k:'sneeds',   key:'snLabel'}, // holds the special needs tag (2026-10-23)
 ];
 const _ACC_SECTIONS=[
   {k:'summary', key:'repOptSummary'},
@@ -30529,6 +30551,7 @@ const _ACC_SECTIONS=[
   {k:'tags',    key:'acrSectTags'},
   {k:'ig',      key:'igSectTotal'}, // every listed account's followers added up
   {k:'igAvg',   key:'igSectAvg'},   // and their average, beside the community's (2026-10-09)
+  {k:'sneeds',  key:'snLabel'},     // how many hold the special needs tag, and their share among customers and the community (2026-10-23)
 ];
 // How many nationalities the nationality breakdown names before the rest becomes one
 // "Other" slice. 0 is all of them. The other breakdowns keep the house default of seven.
@@ -30539,14 +30562,14 @@ const _ACC_NAT_IN=[['accounts','acrAmongAcc'],['community','acrAmongComm'],['bot
 // The account report's filters beyond its own: the accounts list's (_amDefs), picked by key, held as 'x_'+key.
 // Instagram first, the owner's ask (2026-10-10: "add me a lot of sorts and filters in the report builder ...
 // especially instagram related ones").
-const ACC_XKEYS=['amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amMember','amBadges','amBday','amHeight','amComm','amLast','amNoShow','amCancel','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf'];
+const ACC_XKEYS=['amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amMember','amBadges','amBday','amHeight','amComm','amLast','amNoShow','amCancel','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amSn'];
 // The list's sorts the report did not have, held as 'x_'+value.
 const ACC_XSORT_SKIP=['','az','rides','last','spentHi','spentLo'];
 function _accXDefs(){const ad=_amDefs(true);return ACC_XKEYS.map(k=>ad.find(d=>d[0]===k)).filter(Boolean);}
 function _accDefaults(){
   return {cols:{name:1,email:1,phone:1,rideNews:0,tags:1,tagSince:0,tagUntil:0,gender:1,age:1,birth:0,country:0,nationality:0,instagram:0,igFollowers:0,x:0,tiktok:0,linkedin:0,city:1,height:0,type:1,
-                joined:1,bookings:0,rides:1,commRides:0,upcoming:0,noshows:0,cancelled:0,lastRide:1,lastSeen:0,lastSignin:0,lastLogin:0,active14:1,active30:1,minutes:0,spent:0,pay:0,hidden:0},
-          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1,ig:0,igAvg:0},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
+                joined:1,bookings:0,rides:1,commRides:0,upcoming:0,noshows:0,cancelled:0,lastRide:1,lastSeen:0,lastSignin:0,lastLogin:0,active14:1,active30:1,minutes:0,spent:0,pay:0,hidden:0,sneeds:0},
+          sections:{summary:1,natCount:0,natMissing:0,natFew:0,tags:1,ig:0,igAvg:0,sneeds:1},sort:'name',natTop:20,natMissingIn:'both',natFewIn:'both',
           chartsOn:{tags:1,gender:1,age:1,city:0,country:0,nationality:0,type:1,joined:1,rides:1,active:0,active14:1,active30:1},
           charts:{tags:'donut',gender:'donut',age:'bar',city:'hbar',country:'hbar',nationality:'hbar',type:'bar',joined:'line',rides:'bar',active:'hbar',active14:'hbar',active30:'hbar'},
           fTag:'all',fGender:'all',fCountry:'all',fNationality:'all',fNatFew:'all',fCity:'all',fType:'all',fJoined:'all',fRides:'all',fActive:'all',fAge:'all',fPay:'all',fUpcoming:'all',fRideNews:'all',fSpent:'all',...Object.fromEntries(ACC_XKEYS.map(k=>['x_'+k,'all']))};
@@ -30617,6 +30640,24 @@ function _accStats(){
   return m;
 }
 // Distinct nationalities on a list of report rows. Blanks are not a nationality.
+// Special needs on the list (the owner, 2026-10-23: "i want use this info when printing reports to know the number and
+// percentage of special needs in our customer and community"): holders of the tag and their share of the list, then
+// of the community's members on it and of the other customers on it. A share is to one decimal; nothing to share is —.
+function _accSnParts(rows){
+  const cm=cid=>_isSatMember({customerId:cid}),sn=r=>_snCid(r.c.id),inC=rows.filter(r=>cm(r.c.id)),outC=rows.filter(r=>!cm(r.c.id));
+  const pc=(n,d)=>d?(Math.round(n/d*1000)/10)+'%':'—';
+  return{n:rows.filter(sn).length,pct:pc(rows.filter(sn).length,rows.length),
+    cm:[inC.filter(sn).length,inC.length,pc(inC.filter(sn).length,inC.length)],cu:[outC.filter(sn).length,outC.length,pc(outC.filter(sn).length,outC.length)]};
+}
+function _accSnHtml(rows){
+  const p=_accSnParts(rows),tile=(n,l,c)=>`<div class="total-item${c||''}"><span class="total-num">${n}</span><span class="total-lbl">${esc(l)}</span></div>`;
+  const f=(k,a)=>t(k).replace('{0}',String(a[0])).replace('{1}',String(a[1]));
+  return`<h2>${esc(t('snLabel'))}</h2><div class="totals">${tile(p.n,t('snLabel'),' dark')}${tile(p.pct,t('snShareAll'))}${tile(p.cm[2],f('snAmongComm',p.cm))}${tile(p.cu[2],f('snAmongCust',p.cu))}</div>`;
+}
+function _accSnCsv(rows){
+  const p=_accSnParts(rows),f=(k,a)=>t(k).replace('{0}',String(a[0])).replace('{1}',String(a[1]));
+  return[[],[t('snLabel'),'#',t('acrShare')],[t('snShareAll'),p.n,p.pct],[f('snAmongComm',p.cm),p.cm[0],p.cm[2]],[f('snAmongCust',p.cu),p.cu[0],p.cu[2]]];
+}
 function _accNatCount(rows){return new Set((rows||[]).map(r=>String(r.c.nationality||'').trim()).filter(Boolean)).size;}
 // Where riders come from that we have nobody from yet, or only one or two (the owner, 2026-10-06).
 // Both questions are about the whole rider base, so they count EVERY account whatever the report's
@@ -30712,6 +30753,7 @@ function _accCells(c,st,o){
     active30:st.active30?t('acrYes'):t('acrNo'),
     minutes:String(st.minutes),spent:String(Math.round(st.spent*100)/100),
     rideNews:c.ride_news===true?t('acrYes'):t('acrNo'),
+    sneeds:_snCid(c.id)?t('acrYes'):'',
     pay:_accPay(c),hidden:String(c.hidden_types||'').split(',').filter(Boolean).map(x=>typeLabel(x.trim())).join(', '),
   };
 }
@@ -31153,6 +31195,7 @@ function _accReportHtml(title){
   const html=`
     ${tiles.length?`<div class="totals">${tiles.map(([n,lbl,cls,pc])=>`<div class="total-item${cls}"><span class="total-num">${n}</span><span class="total-lbl">${esc(lbl)}</span>${pc?`<span class="total-pct">${esc(pc)}</span>`:''}</div>`).join('')}</div>`:''}
     ${filterLine?`<div class="rp-filter">${esc(filterLine)}</div>`:''}
+    ${o.sections.sneeds&&(S.tags||[]).some(x=>x.id===TAG_SN)?_accSnHtml(rows):''}
     ${_ACC_BREAKDOWNS.filter(k=>o.chartsOn[k]).map(k=>{const items=_accBreakdown(k,rows,o);return items.length?_accFigure(k,items,o.charts[k]):'';}).join('')}
     ${_accNatHtml(o)}
     <h2>${t('amCustomersTitle')} · ${rows.length}</h2>
@@ -31186,6 +31229,7 @@ async function exportAccountsCsv(){
   if(o.sections.natCount)blocks.push([],[t('acrStatNats'),_accNatCount(rows)]);
   blocks.push(..._igCsvRows(_igTotal(rows.map(r=>r.c.id)),o.sections));
   blocks.push(..._accNatCsv(o));
+  if(o.sections.sneeds&&(S.tags||[]).some(x=>x.id===TAG_SN))blocks.push(..._accSnCsv(rows));
   _downloadCsv(`accounts_${new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ})}.csv`,[cols.map(c=>t(c.key)),...rows.map(r=>cols.map(c=>r.cells[c.k])),...blocks],t('acrTitle'),rows.length);
 }
 
@@ -31423,7 +31467,7 @@ function printCommunityRoster(sess){
     const phone=e.phone||(e.customerId?((getCustomers().find(x=>x.id===e.customerId)||{}).phone||''):'')||'';
     return`<tr>
       <td class="rp-seq">${i+1}</td>
-      <td class="rp-name">${esc(e.name||'—')}${_ptnChip(e)}</td>
+      <td class="rp-name">${esc(e.name||'—')}${_ptnChip(e)}${_snChip(e)}</td>
       ${_showMem?`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`:''}
       ${_ptn?`<td>${e.partner?esc([_ptnLabel(e.partner),e.partnerCodeUsed,_ptnShirt(e)].filter(Boolean).join(' · ')):'—'}</td>`:''}
       <td>${phone?`<a href="tel:${esc(phone)}"><bdi>${esc(phone)}</bdi></a>`:'—'}</td>
@@ -31439,6 +31483,7 @@ function printCommunityRoster(sess){
       <div class="total-item"><span class="total-num rp-green">${nApproved}</span><span class="total-lbl">${t('apprApprovedChip')}</span></div>
       <div class="total-item"><span class="total-num rp-amber">${nPending}</span><span class="total-lbl">${t('apprPendingChip')}</span></div>
       <div class="total-item"><span class="total-num">${nWaitlist}</span><span class="total-lbl">${t('waitlistLabel')}</span></div>
+      ${_snTile(riders)}
     </div>
     ${_igTileHtml(_igTotal(riders.map(e=>e.customerId)),_repOpts().sections)}
     <table>
@@ -31514,7 +31559,7 @@ function printSessionReport(km){
   const _cell={
     seq:    (e,i)=>`<td class="rp-seq">${i+1}</td>`,
     qnum:   e=>`<td class="rp-b7">#${e.queueNum}</td>`, // "#" sets it apart from the row counter beside it
-    name:   e=>`<td class="rp-name">${esc(e.name)}${_ptnChip(e)}</td>`,
+    name:   e=>`<td class="rp-name">${esc(e.name)}${_ptnChip(e)}${_snChip(e)}</td>`,
     km:     e=>`<td>${_runKmOk(e.runKm)?esc(_runKmTxt(e.runKm)):'—'}</td>`,
     member: e=>`<td>${t(_isSatMember(e)?'memberYes':'memberNo')}</td>`,
     ptn:    e=>`<td>${e.partner?esc(_ptnLabel(e.partner)):'—'}</td>`,
@@ -31540,7 +31585,7 @@ function printSessionReport(km){
   // A free run takes no money: its tiles count the runners (and, on the full report, each distance).
   const _tile=(n,lbl)=>`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${lbl}</span></div>`;
   const _runTiles=()=>_tile(entries.length,t('repRunners'))+_tile(nCheckedIn,t('anFunnelCheckedIn'))+_tile(entries.filter(e=>e.status==='done').length,t('statusDone'))
-    +(_km==null?_repKmList(sessId).map(k=>_tile(_repKmRows(entries,_repKmArg(k)).length,esc(_repKmName(k)))).join(''):'');
+    +(_km==null?_repKmList(sessId).map(k=>_tile(_repKmRows(entries,_repKmArg(k)).length,esc(_repKmName(k)))).join(''):'')+_snTile(entries);
   const body=`
     ${_ro.sections.summary&&_run?`<div class="totals">${_runTiles()}</div>`:''}
     ${_ro.sections.summary&&!_run?`<div class="totals">
@@ -31549,6 +31594,7 @@ function printSessionReport(km){
       <div class="total-item dark"><span class="total-num">${_rpSar(paidSAR)}</span><span class="total-lbl">${t('printCollected')}</span></div>
       <div class="total-item"><span class="total-num">${_rpSar(cardSAR)}</span><span class="total-lbl">${t('cashCard')}</span></div>
       <div class="total-item"><span class="total-num">${_rpSar(cashSAR)}</span><span class="total-lbl">${t('cashCash')}</span></div>
+      ${_snTile(entries)}
     </div>`:''}
     ${_igTileHtml(_igTotal(entries.map(e=>e.customerId)),_ro.sections)}
     <table>
@@ -32904,6 +32950,7 @@ function _noteTail(e){return e&&e.deskNote?' · '+t('deskNoteTitle')+': '+e.desk
 function _scanTicket(entry,say,_bkOk){
   const nm=entry.name||'';
   if(entry.partner){const s0=say;say=(m,c)=>{s0(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.ptn-chip'))sp.insertAdjacentHTML('beforeend',_ptnChip(entry));};} // a partner's ticket says so on the banner
+  if(_snOf(entry)){const s1=say;say=(m,c)=>{s1(m,c);const sp=document.querySelector('#scan-banner .scan-bn-in>span');if(sp&&!sp.querySelector('.sn-mk'))sp.insertAdjacentHTML('beforeend',_snChip(entry));};} // and a rider with special needs (2026-10-23)
   const collecting=_scanMulti&&!S._ciId;
   // A blacklisted rider (a staff signal, never a server block) stops the scan: Stop, and Make an
   // exception carries on as the scan would have.
@@ -33056,9 +33103,9 @@ function renderHandover(){
   const rows=_hoRows(),sel=_hoSelected(),out=_hoOut();
   _hoRemember();
   const card=e=>{const sz=_entryFitText(e);const on=!!(sel&&sel.id===e.id);
-    return `<button type="button" class="ho-row${on?' sel':''}${_ptnRow(e)}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
+    return `<button type="button" class="ho-row${on?' sel':''}${_ptnRow(e)}${_cmRow(e)}" data-id="${esc(e.id)}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_hoPick",e.id)}">
       <span class="ho-num">#${esc(e.queueNum??'')}</span>
-      <span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
+      <span class="ho-name">${esc(e.name||'')}${_ptnChip(e)}${_snChip(e)}${e.groupName?`<small>${esc(e.groupName)}</small>`:''}</span>
       <span class="ho-spec">${esc(typeLabel(e.typePreference||'Any'))}${sz?' · '+esc(sz):''}</span>
       <span class="ho-since">${_hoSince(e)}</span></button>`;};
   host.innerHTML=`<h1 class="page-title">${t('hoTitle')}</h1><div class="page-sub">${t('hoSub')}</div>
@@ -33983,7 +34030,7 @@ function renderCheckinModal(){
     m.style.display='flex';
     m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div role="status" class="bkm-nsnote">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
@@ -34005,7 +34052,7 @@ function renderCheckinModal(){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
       ${_hBadge}
       ${_ciNoteHtml(e)}
       ${_stepsHtml}
@@ -34059,7 +34106,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
   m.style.display='flex';
   m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox ci-sat" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div class="form-group bkm-fg812"><label>${t('bikeTypeLabel')}</label>
@@ -45179,7 +45226,7 @@ async function saveTagGrant(){
 // The Petromin tag (2026-10-12) is the fifth: Petromin's own logo, in its colours, on a white chip
 // edged in Petromin's red (the owner: "change the petromin tag to include petromin logo instead"; it
 // was the word PETROMIN in white on red), for a rider who books the Petromin nights through Petromin Days.
-const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'}}; // vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
+const TAG_BRANDS={jcc:{cls:'jcc',color:'#0466AF'},saturday:{cls:'mm',color:'#0c7a3d'},blacklist:{cls:'mm',color:'#0b0b0b',ban:true},vip:{cls:'vip',color:'#a67c00'},petromin:{cls:'pm',color:'#d6202a',img:'/assets/petromin-logo.png',fill:'#fff'},vlap:{cls:'vl',color:'#0d0d0d',img:'/assets/victory-lap-white.webp',fill:'#0d0d0d'},special_needs:{cls:'sn',color:'#1f5fa8',svg:1}}; // special_needs: a figure in a wheelchair, white on blue (2026-10-23, _SN_SVG); vlap: the race's logo in white on black (the owner picked T1, 2026-10-17)
 const TAG_COMMUNITY='tag_saturday',TAG_BLACKLIST='tag_blacklist',TAG_VIP='tag_vip',TAG_PETROMIN='tag_petromin',TAG_VLAP='tag_vlap';
 // The Community tag and the Petromin tag never sit on one account (the owner, 2026-10-12: "when giving a
 // petromin tag to a community member show an error that asks that only one of them must be given per
@@ -45201,6 +45248,7 @@ function _tagBrand(tg){return (tg&&TAG_BRANDS[String(tg.slug||'').toLowerCase()]
 function _tagColor(tg){const b=_tagBrand(tg);return b?b.color:((tg&&tg.color)||'#00e585');}
 function _tagLogo(tg){
   const b=_tagBrand(tg);if(!b)return'';
+  if(b.svg)return `<span class="tag-svg tag-svg-${b.cls}" role="img" aria-label="${esc(tg.name)}">${_SN_SVG}</span>`;
   if(b.img)return `<img class="tag-img tag-img-${b.cls}" src="${esc(b.img)}" alt="${esc(tg.name)}" width="38" height="16" decoding="async">`;
   if(!b.ban)return `<span class="tag-logo tag-logo-${b.cls}" role="img" aria-label="${esc(tg.name)}"></span>`;
   // The mark with a no-entry ring struck through it.
@@ -45583,6 +45631,8 @@ function _amDefs(all){
     ['amTags',t('acrFilterTag'),[['any',t('acrTagAny')],['none',t('acrTagNone')]],(c,v)=>(_tagsForCust(c.id).length>0)===(v==='any')],
   ];
   if(all||_amScope()!=='members')defs.push(['amMember',t('amfMember'),[['yes',t('acrYes')],['no',t('acrNo')]],(c,v)=>_hasTagNow(c.id,TAG_COMMUNITY)===(v==='yes')]);
+  // The special needs tag (2026-10-23): held now or not; offered once the tag exists.
+  if((S.tags||[]).some(x=>x.id===TAG_SN))defs.push(['amSn',t('snLabel'),[['yes',t('acrYes')],['no',t('acrNo')]],(c,v)=>_snCid(c.id)===(v==='yes')]);
   if(_bdgOk())defs.push(['amBadges',t('mrBadgesTitle'),[['yes',t('amfHasBadge')],['no',t('amfNoBadge')]],(c,v)=>(_amBadgeN(c)>0)===(v==='yes')]);
   defs.push(
     ['amIg',t('socInstagram'),[['yes',t('apGiven')],['no',t('vndFbNoCount')]],(c,v)=>!!_igHandle(c)===(v==='yes')],

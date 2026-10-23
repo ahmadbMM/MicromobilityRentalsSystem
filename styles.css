@@ -9902,6 +9902,37 @@ html[dir="rtl"] body.view-staff .queue-table tbody tr.ptn-row-mark td:first-chil
 html[dir="rtl"] .q-card.ptn-row-mark,html[dir="rtl"] .ho-row.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0;}
 body.view-staff .queue-mobile-view .q-card.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 8px 0 0 var(--rs-edge,transparent);}
 html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -8px 0 0 var(--rs-edge,transparent);}
+/* ══ COMMUNITY MEMBERS ON THE ROSTER (the owner, 2026-10-23) ══════════════════════════════════════
+   A community member's booking, on any night: a community-green band down the start edge of the row or the phone
+   card (_cmRow), outside the status edge, which moves in by 6px; the community's mark after the name (_cmChip); the
+   name in the community's green. A partner's booking by a member wears the rose stripe, then the green band. */
+.cm-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:24px;height:18px;background:#0c7a3d;color:#fff;border-radius:2px;vertical-align:middle;}
+.cm-mk .tag-logo{width:15px;height:11px;vertical-align:0;}
+body.view-staff #tab-queue :is(tr,.q-card).cm-row-mark .rider-name{color:#0a5c2e;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue :is(tr,.q-card).cm-row-mark .rider-name{color:#6ee7a0;}
+.queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d;}
+html[dir="rtl"] .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d;}
+body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d,inset 10px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset -6px 0 0 #0c7a3d,inset -10px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 14px 0 0 var(--rs-edge,transparent),1px 0 0 var(--border);}
+html[dir="rtl"] body.view-staff .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -14px 0 0 var(--rs-edge,transparent),-1px 0 0 var(--border);}
+.q-card.cm-row-mark,.ho-row.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d;}
+html[dir="rtl"] .q-card.cm-row-mark,html[dir="rtl"] .ho-row.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d;}
+body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset 6px 0 0 #0c7a3d,inset 10px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark{box-shadow:inset -6px 0 0 #0c7a3d,inset -10px 0 0 var(--rs-edge,transparent);}
+body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset 4px 0 0 #D782A0,inset 10px 0 0 #0c7a3d,inset 14px 0 0 var(--rs-edge,transparent);}
+html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.cm-row-mark.ptn-row-mark{box-shadow:inset -4px 0 0 #D782A0,inset -10px 0 0 #0c7a3d,inset -14px 0 0 var(--rs-edge,transparent);}
+/* and the rider's cell (the whole phone card) carries the community's pattern, as on the community's ride cards,
+   fading into the state's colour so the state still reads */
+body.view-staff .queue-table tbody tr td.cm-cell,body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to right,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
+html[dir="rtl"] body.view-staff .queue-table tbody tr td.cm-cell,html[dir="rtl"] body.view-staff .queue-table tbody tr:hover td.cm-cell{background:linear-gradient(to left,var(--rs-bg,var(--s1)) 0 25%,color-mix(in srgb,var(--rs-bg,var(--s1)) 55%,transparent) 100%),url('assets/mm-pattern.svg') left -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
+body.view-staff .queue-mobile-view .q-card.cm-row-mark{background:linear-gradient(to bottom right,var(--rs-bg,var(--s1)) 0 35%,color-mix(in srgb,var(--rs-bg,var(--s1)) 60%,transparent) 100%),url('assets/mm-pattern.svg') right -10px top -8px/80px auto repeat var(--rs-bg,var(--s1));}
+/* The special needs tag (2026-10-23): a figure in a wheelchair, white on blue - on its tag chip (.tag-svg) and after
+   a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
+.sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#1f5fa8;color:#fff;border-radius:2px;vertical-align:middle;}
+.sn-ico{display:block;width:14px;height:14px;}
+.tag-svg{display:inline-flex;align-items:center;flex-shrink:0;}
+.tag-svg .sn-ico{width:16px;height:16px;}
 #tab-queue .ptn-panel{margin:0 0 12px;padding:10px 12px;border:1px solid var(--border);border-inline-start:3px solid #D782A0;background:var(--s1);border-radius:0;}
 #tab-queue .ptn-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px;}
 #tab-queue .ptn-card{padding:6px 0;border-top:1px solid var(--border);}
