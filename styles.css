@@ -8963,6 +8963,16 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 .vt-chip-have,.vt-chip-paid{background:#e8f5ee;border-color:rgba(0,113,63,.35);color:#06603b;}
 .vt-chip-paid{cursor:pointer;font:inherit;font-size:11.5px;font-weight:700;text-decoration:underline;}
 .vt-chip-buy{background:#fff4e0;border-color:rgba(138,83,0,.35);color:#8A5300;}
+/* a receipt still to check (2026-10-24): staff confirm each one */
+.vt-chip-sent{cursor:pointer;font:inherit;font-size:11.5px;font-weight:700;text-decoration:underline;background:#e8f0ff;border-color:rgba(37,84,186,.45);color:#1d3f8f;}
+.vt-tk-sent{display:flex;align-items:center;gap:8px;font-weight:600;}
+.vt-tk-sent span{flex:1 1 auto;min-width:0;}
+.vt-rc-st{margin:4px 0 0;font-size:13px;font-weight:700;color:#06603b;}
+.vt-rc-act{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:12px;}
+.vt-rc-act[hidden],.vt-rc-ask[hidden]{display:none;}
+.vt-rc-ask p{margin:12px 0 0;font-size:14px;font-weight:600;}
+#checkin-modal .ci-vt{display:flex;align-items:center;gap:6px;margin:6px 0;font-size:13px;}
+#checkin-modal .ci-vt span{flex:1;min-width:0;overflow-wrap:anywhere;}
 .vt-rc-box{max-width:560px;}
 .vt-rc-img{display:block;max-width:100%;max-height:70vh;margin:10px auto;object-fit:contain;border:1px solid var(--line);}
 .vt-rc-wait{padding:24px 0;text-align:center;color:var(--muted);}

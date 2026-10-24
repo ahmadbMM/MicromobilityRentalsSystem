@@ -157,7 +157,7 @@ test.describe('@customer:vlap Victory Lap', () => {
   }
   const PNG = Buffer.from(PNG_S, 'base64');
 
-  test('after booking: buying a ticket shows the bank details and the letter, and the receipt marks it paid', async ({ page }) => {
+  test('after booking: buying a ticket shows the bank details and the letter, and the receipt waits for staff to check it', async ({ page }) => {
     await custBoot(page, { 'rpc:customer_vl_ticket': true });
     const rows = await captureBookingRows(page);
     const calls: Record<string, unknown>[] = [];
@@ -181,7 +181,8 @@ test.describe('@customer:vlap Victory Lap', () => {
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({ p_id: 'c1', p_answer: 'buy' });
     expect(String(calls[0].p_img)).toMatch(/^data:image\/jpeg;base64,/);
-    await expect(page.locator('#tab-register')).toContainText('Receipt received. Your ticket is paid.');
+    await expect(page.locator('#tab-register')).toContainText('Receipt sent. Our team will check it and confirm your ticket.');
+    await expect(page.locator('#tab-register')).not.toContainText('Your ticket is paid');
   });
 
   test('after booking: "I already have a ticket" asks nothing more; an older place asks on its ticket only', async ({ page }) => {
@@ -198,6 +199,17 @@ test.describe('@customer:vlap Victory Lap', () => {
     // a place staff marked paid asks nothing
     const paid = await page.evaluate(`renderBookingTicket([entryFromDB(${JSON.stringify({ ...old, id: 'm4', paid: true })})],{actions:true})`);
     expect(paid).not.toContain('would you like to buy one');
+  });
+
+  // Staff confirm each receipt (the owner, 2026-10-24): sent, the ticket says it waits for them; confirmed, it is paid.
+  test('a receipt sent waits for staff on the ticket, and a confirmed one says the ticket is paid', async ({ page }) => {
+    const sent = row('m6', { race: 'ws', div: 'so', shirt: 'M' }, { customer_id: 'c1', name: 'Sara Haddad', vl_ticket: 'buy', vl_receipt_at: '2099-10-20T10:00:00Z' });
+    await custBoot(page, { 'rpc:customer_vl_ticket': true, queue_entries: [sent], 'rpc:my_bookings': [sent] });
+    const html = await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m6')],{actions:true})`);
+    expect(html).toContain('Receipt sent. Our team will check it and confirm your ticket.');
+    expect(html).not.toContain('Your ticket is paid');
+    const paid = await page.evaluate(`renderBookingTicket([entryFromDB(${JSON.stringify({ ...sent, id: 'm7', paid: true, pay_method: 'transfer' })})],{actions:true})`);
+    expect(paid).toContain('Receipt confirmed. Your ticket is paid.');
   });
 
   test('a database without the ticket question lets the athlete through: the pop-up steps aside', async ({ page }) => {
@@ -321,6 +333,48 @@ test.describe('@staff:bookings Victory Lap', () => {
     await page.evaluate(`_vtRcptOpen('q1')`);
     await expect(page.locator('#vl-staff-host img.vt-rc-img')).toBeVisible();
   });
+  // Staff confirm each receipt (the owner, 2026-10-24): the roster says a receipt is still to check, and its
+  // viewer confirms it or, asked a second time, sends it back (staff_vl_receipt).
+  test('a receipt waits for staff: Confirm marks it paid by transfer, Not valid asks again and sends it back', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await stubSupabase(page, { sessions: [vl, jcc], bikes: [], queue_entries: [
+      row('q4', { race: 'ws', div: 'so', shirt: 'M' }, { vl_ticket: 'buy', vl_receipt_at: '2099-10-20T10:00:00Z' }),
+      row('q5', { race: 'ms', div: 'op', shirt: 'L' }, { vl_ticket: 'buy', vl_receipt_at: '2099-10-20T11:00:00Z' }),
+    ] });
+    // the receipt viewer reads one picture by booking (the shared stub returns every row of a table)
+    await page.route(/\/rest\/v1\/vl_receipts/, (r) => {
+      const id = (new URL(r.request().url()).searchParams.get('entry_id') || '').replace(/^eq\./, '');
+      const pic = ['q4', 'q5'].includes(id) ? { img: 'data:image/png;base64,' + PNG_S } : null;
+      return r.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: JSON.stringify(pic) });
+    });
+    const calls: Record<string, unknown>[] = [];
+    let answer = 'confirmed';
+    await page.route(/\/rpc\/staff_vl_receipt/, async (r) => {
+      calls.push(r.request().postDataJSON());
+      return r.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: JSON.stringify(answer) });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${VL}';renderStaffQueue()`);
+    expect(await page.evaluate(`_vtStaffChip(getQueue().find(e=>e.id==='q4'))`)).toContain('Receipt to check');
+    const host = page.locator('#vl-staff-host');
+    await page.evaluate(`_vtRcptOpen('q4')`);
+    await host.getByRole('button', { name: 'Confirm receipt' }).click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toEqual({ p_entry_id: 'q4', p_ok: true });
+    await expect(page.locator('.toast').filter({ hasText: 'Receipt confirmed. The place is paid by transfer.' })).toBeAttached(); // staff success toasts are quiet
+    answer = 'returned';
+    await page.evaluate(`_vtRcptOpen('q5')`);
+    await host.getByRole('button', { name: 'Not valid' }).click();
+    await expect(host).toContainText('Send this receipt back?');
+    expect(calls).toHaveLength(1); // nothing sent until it is asked twice
+    await host.getByRole('button', { name: 'Send back' }).click();
+    await expect.poll(() => calls.length).toBe(2);
+    expect(calls[1]).toEqual({ p_entry_id: 'q5', p_ok: false });
+    await expect(page.locator('.toast').filter({ hasText: 'Receipt sent back. The athlete is asked to upload it again.' })).toBeAttached(); // staff success toasts are quiet
+  });
   // The report builder (the owner, 2026-10-23): columns, filters, sorts and groups, and whatever is picked a
   // Doubles team prints and exports as one unit - its partners together under the team, far apart as their
   // numbers are.
@@ -359,6 +413,7 @@ test.describe('@staff:bookings Victory Lap', () => {
     // the PDF: the team heading line, then its two partners
     const [pop] = await Promise.all([page.waitForEvent('popup'), m.locator('.rpt-acts .btn-primary').click()]);
     await pop.waitForLoadState();
+    await pop.locator('table tbody tr').first().waitFor(); // the report is written into the window after it opens
     const lines: string[] = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')]
       .map((r) => (r.classList.contains('rp-team') ? 'T:' : '') + [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
     const ix = (s: string) => lines.findIndex((l) => l.includes(s));

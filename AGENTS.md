@@ -987,8 +987,14 @@ staff manage everything.
   with no close. Have one: `vl_ticket 'have'`, nothing more asked. Buy one: the organiser's bank details (`VL_BANK`: Sports
   Fitness Unit Company, Riyad Bank, IBAN, account; amount = the session's price) and their bank letter
   (assets/victory-lap-bank-letter.pdf), then a receipt picture (resized to a JPEG data: URL, `_vtPick`) sent by
-  `customer_vl_ticket`, which stores it in `vl_receipts` (staff-read only, never synced) and marks the booking paid,
-  `pay_method 'transfer'`, no staff check (the owner's pick). "I'll send it later" leaves `vl_ticket 'buy'`; the ticket
+  `customer_vl_ticket`, which stores it in `vl_receipts` (staff-read only, never synced) and stamps `vl_receipt_at`.
+  **Staff confirm each receipt** (the owner, 2026-10-24, migration 20261024150000): the place is not paid until staff tap
+  Confirm in the receipt viewer (`_vtRcptAct` -> `staff_vl_receipt(id, true)`: paid, `pay_method 'transfer'`); Not valid,
+  asked twice, sends it back (`staff_vl_receipt(id, false)`: `vl_receipt_at` cleared, picture deleted, the athlete asked
+  again); a place paid at the desk is left alone ('desk'). The athlete's ticket reads Receipt sent (`_vtSent`) until then,
+  Receipt confirmed (`_vtPaid` = paid and a receipt) after; a new picture puts a confirmed transfer back to be checked.
+  Staff see `vtColSent` "Receipt to check" on the roster chip, the race report (`VRB_TK.sent`) and the check-in panel
+  (`_vtCiHtml`), which says to look at the receipt before taking any payment. "I'll send it later" leaves `vl_ticket 'buy'`; the ticket
   (`_vtTkHtml`) keeps the question, the upload or the answer. Places booked before it are asked on the ticket only; a place
   staff marked paid asks nothing; a database without the RPC makes the question step aside (`S._vtOff`). Staff: the
   roster's Race cell carries `_vtStaffChip` (Paid by transfer opens the receipt, `_vtRcptOpen`), Race details sets the
