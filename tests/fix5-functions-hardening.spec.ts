@@ -188,4 +188,15 @@ test.describe('@staff:security the wallet selftests', () => {
     expect(out.slice(0, 6)).toEqual(Array(6).fill([200, { ok: true }]));
     expect(out[6]).toEqual([429, { ok: false, error: 'rate limited' }]);
   });
+
+  // The app asks ?ready once per page before it offers Add to Google Wallet (2026-10-24).
+  test('Google: ?ready says whether a pass can be made, signs nothing and needs no limit', async () => {
+    const get = await load('functions/api/google-wallet.js', 'onRequestGet');
+    const off = await get({ request: new Request(SITE + '/api/google-wallet?ready'), env: {} });
+    expect([off.status, await off.json()]).toEqual([501, { ok: false, skipped: 'google wallet not configured' }]);
+    const env = { GOOGLE_WALLET_ISSUER_ID: '3388000000000000001', GOOGLE_WALLET_SA_EMAIL: 'wallet@mm-test.iam.gserviceaccount.com', GOOGLE_WALLET_SA_KEY_PEM: 'not a key: ?ready never signs' };
+    const answers: [number, unknown][] = [];
+    for (let i = 0; i < 8; i++) { const r = await get({ request: new Request(SITE + '/api/google-wallet?ready'), env }); answers.push([r.status, await r.json()]); }
+    expect(answers).toEqual(Array(8).fill([200, { ok: true }]));
+  });
 });

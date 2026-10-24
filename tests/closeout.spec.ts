@@ -80,3 +80,40 @@ test.describe('close-out reconciliation', () => {
     expect(Math.round((split.card + split.cash) * 100) / 100).toBe(split.collected);
   });
 });
+
+// A Victory Lap athlete who pays the race's organiser by bank transfer is marked paid with pay_method
+// 'transfer' (customer_vl_ticket, 2026-10-23). That money is the organiser's: it is in no total of ours,
+// neither card nor cash, and the close-out and the night's summary show it on a line of its own
+// ("Paid by transfer") (2026-10-24).
+test.describe('@staff:money a transfer to the organiser is never our money', () => {
+  const vqueue = [
+    qe('v1', 1, 'Card athlete', { status: 'done', paid: true, price: 150, pay_method: 'card' }),
+    qe('v2', 2, 'Transfer athlete', { status: 'waiting', paid: true, price: 150, pay_method: 'transfer' }),
+    qe('v3', 3, 'Transfer finisher', { status: 'done', paid: true, price: 150, pay_method: 'transfer' }),
+  ];
+  test.beforeEach(async ({ page }) => {
+    await stubSupabase(page, { sessions, queue_entries: vqueue });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length===3');
+  });
+
+  test('revenue, the drawer and the night summary leave it out, and name it apart', async ({ page }) => {
+    const got = await page.evaluate(`(() => {
+      const q = getQueue().filter((e) => e.sessionId === 's0');
+      const m = _eonModel('s0'), take = _tillTake(_tillCtx('s0'));
+      return { revenue: _revenueOf(q), card: m.card, cash: m.cash, toOrg: m.toOrg, drawerCash: take.cash, drawerCard: take.card };
+    })()`);
+    expect(got).toEqual({ revenue: 150, card: 150, cash: 0, toOrg: { n: 2, sum: 300 }, drawerCash: 0, drawerCard: 150 });
+    await page.evaluate(`_eonOpen('s0',{})`);
+    await expect(page.locator('#eon-modal [role="dialog"]')).toContainText('Paid by transfer');
+  });
+
+  test('the close-out prints it on its own line, outside what was collected', async ({ page }) => {
+    const html = await closeoutHtml(page);
+    expect(html).toContain('Paid by transfer');
+    expect(html).toContain('300.00'); // the two transfers, apart
+    expect(html).not.toContain('450.00'); // would mean they joined what we collected
+  });
+});

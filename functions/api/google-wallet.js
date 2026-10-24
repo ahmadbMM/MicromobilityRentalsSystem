@@ -5,6 +5,8 @@
 // and the pass is a signed "save to wallet" JWT (RS256, the issuer's service account key) that
 // carries the class and the object inline - Google creates both on save, so no REST call and no
 // pre-made class are needed. The QR carries the same MMC- reference the desk scanner reads.
+// GET /api/google-wallet?ready answers { ok } (200) or 501, signing nothing: the app asks it once per page
+// before it offers Add to Google Wallet (2026-10-24).
 // GET /api/google-wallet?selftest signs a fixed payload and answers { ok }, so a deploy is checked
 // without a booking; the issuer, the account and any setting that is missing go to the function's log,
 // not into the public answer (2026-10-05). Configuration (Pages env): GOOGLE_WALLET_ISSUER_ID, and the service account as
@@ -240,7 +242,9 @@ const SELFTEST_PER_MIN = 6;
 let _stWindow = 0, _stSpent = 0;
 export async function onRequestGet(context) {
   const { request, env } = context;
-  if (!new URL(request.url).searchParams.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
+  const q = new URL(request.url).searchParams;
+  if (q.has("ready")) return configured(env) ? json({ ok: true }) : json({ ok: false, skipped: "google wallet not configured" }, 501);
+  if (!q.has("selftest")) return json({ ok: false, error: "POST a booking" }, 405);
   if (!configured(env)) {
     console.warn("google-wallet: selftest - not configured, missing", missing(env).join("; "));
     return json({ ok: false, skipped: "google wallet not configured" }, 501);

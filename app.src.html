@@ -12606,7 +12606,7 @@ function renderRegister(){
           ${_meetsAt(_sess)?t('meetPointLbl'):t('ticketDirections')}
         </a>`}
       </div>
-      ${(!_wl&&_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(!_wl&&_hasGWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
+      ${(!_wl&&_hasWallet()&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",tkt.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(!_wl&&_hasGWallet()&&_gwReady!==false&&_walletOk(_sess,[tkt]))?`<div class="wallet-slot cu-tk-wallet"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",tkt.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
     </div>`;
   }
   const tickets=S.lastTickets||[];
@@ -14224,7 +14224,7 @@ function renderBookingTicket(entries,opts){
       ${_allWl?'':`<button class="btn-secondary cu-tk-cal" data-on-click="${_on("downloadBookingICS",primary.sessionId)}" aria-label="${t('addToCalendarBtn')}">${_cuIc('cal')}${t('addToCalendarBtn')}</button>`}
       ${_meetHeld(sess)?'':`<a href="${esc((_meetsAt(sess)&&_safeUrl(sess&&sess.meet_url))||DIRECTIONS_URL)}" target="_blank" rel="noopener" class="btn-secondary cu-tk-dir" aria-label="${_meetsAt(sess)?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}">${_cuIc('pin')}${_meetsAt(sess)?t('meetPointLbl'):t('ticketDirections')}</a>`}
     </div>`}
-    ${(_hasWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",primary.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",primary.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
+    ${(_hasWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",primary.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&_gwReady!==false&&isLive)?`<div class="wallet-slot cu-tk-wal"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",primary.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
     ${actionsHtml}
   </div>`;
 }
@@ -14392,6 +14392,20 @@ function _hasGWallet(){
     return !apple&&!!(c&&c.id&&c.session_token);
   }catch(e){return false;}
 }
+// The button waits for the function to say it can make a pass (2026-10-24): until the owner's Wallet
+// issuer and key are on Pages it answers 501, and every Android rider was offered a button that only
+// vanished when tapped. One GET ?ready per page, nothing signed; a slot drawn while it is out stays
+// hidden, and is shown on yes and removed on no. A request that fails asks again at the next drawing.
+let _gwReady=null; // null not asked, 0 asking, then true or false
+function _gwAsk(){
+  if(_gwReady!==null)return;
+  _gwReady=0;
+  fetch('/api/google-wallet?ready',{cache:'no-store'}).then(r=>{
+    _gwReady=r.ok;
+    document.querySelectorAll('[data-gw-wait]').forEach(el=>{if(r.ok){el.hidden=false;el.removeAttribute('data-gw-wait');}else el.remove();});
+  },()=>{_gwReady=null;});
+}
+function _gwWait(){_gwAsk();return _gwReady===true?'':' hidden data-gw-wait';}
 async function addBookingToGWallet(bookingId,btn){
   const c=S.loggedIn||getSession();if(!c||!c.session_token)return;
   const _old=btn?btn.innerHTML:'';if(btn){btn.disabled=true;btn.innerHTML=esc(t('walletAdding'));}
@@ -14400,7 +14414,7 @@ async function addBookingToGWallet(bookingId,btn){
     try{const all=(typeof getQueue==='function'?getQueue():[]).filter(e=>e.customerId===c.id);const bk=all.find(e=>e.id===bookingId);const sid=bk&&bk.sessionId;
       groupIds=all.filter(e=>e.sessionId===sid&&(e.status==='waiting'||e.status==='active'||e.status==='waitlist')).map(e=>e.id);}catch(_){}
     const res=await fetch('/api/google-wallet',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({customerId:c.id,token:c.session_token,bookingId,groupIds})});
-    if(res.status===501){if(btn){const w=btn.closest('.wallet-slot');if(w)w.remove();}return;}
+    if(res.status===501){_gwReady=false;if(btn){const w=btn.closest('.wallet-slot');if(w)w.remove();}return;}
     let d=null;try{d=await res.json();}catch(_){}
     if(!res.ok||!d||!d.ok||!d.url){toast(t('walletErr'),'error');return;}
     window.location.assign(d.url);
@@ -31450,7 +31464,8 @@ function printCloseout(){
   // COLLECTED counts every booking marked paid, whatever its status (money is in the drawer
   // the moment it's taken — check-in/completion not required). Cancelled/removed stay out.
   // PENDING keeps its meaning: unpaid riders who actually rode (active/done).
-  const rentPaid=getQueue().filter(e=>sessIds.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const rentPaid=getQueue().filter(e=>sessIds.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e));
+  const toOrgSAR=r2(getQueue().filter(e=>sessIds.has(e.sessionId)&&_paidToOrg(e)&&e.status!=='cancelled'&&e.status!=='removed').reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0)); // not in the drawer: shown apart
   const rentEntries=getQueue().filter(e=>sessIds.has(e.sessionId)&&(e.status==='active'||e.status==='done'));
   const rentCollected=r2(rentPaid.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0));
   const rentPending=r2(rentEntries.filter(e=>!e.paid).reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0));
@@ -31489,7 +31504,7 @@ function printCloseout(){
   const sold=st.cats.length||st.collected>0||st.pending>0||st.team>0||st.free>0||st.discount>0||st.refunded>0;
   const body=`
     <h2>${t('coRentals')}</h2>
-    ${row(t('printTotalRiders'),rentEntries.length,{count:1})}${row(t('printCollected'),rentCollected)}${rentCard>0?split(rentCard,rentCash):''}${row(t('printPending'),rentPending,{warn:1})}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected)+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,{warn:1}):''):''}
+    ${row(t('printTotalRiders'),rentEntries.length,{count:1})}${row(t('printCollected'),rentCollected)}${rentCard>0?split(rentCard,rentCash):''}${row(t('printPending'),rentPending,{warn:1})}${toOrgSAR>0?row(t('vtColPaid'),toOrgSAR):''}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected)+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,{warn:1}):''):''}
     <h2>${t('coSales')}</h2>
     ${sold?`${st.cats.length?`<table><thead><tr><th class="rp-ts">${t('invCategory')}</th><th class="rp-tc">${t('cashQtyCol')}</th><th class="rp-te">${t('repValueSar')}</th></tr></thead><tbody>${catRows}</tbody></table>`:''}
     <div class="rp-mt8">${row(t('printCollected'),st.collected)}${(coCard>0||coCash>0)?split(coCard,coCash):''}${st.pending>0?row(t('printPending'),st.pending,{warn:1}):''}${st.team>0?row(t('payTeam'),st.team):''}${st.free>0?row(t('onTheHouseLabel'),st.free):''}${st.discount>0?row(t('cashDiscount'),st.discount):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,{warn:1}):''}</div>`
@@ -31582,7 +31597,7 @@ function printSessionReport(km){
   const entries=_repKmRows(_repRows(sessId),_km);
   // Collected = every paid row except cancelled/removed (same basis as the close-out and
   // analytics): a rider who paid then no-showed left their money in the drawer.
-  const paidRows=(_qBySession().get(sessId)||[]).filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const paidRows=(_qBySession().get(sessId)||[]).filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e));
   const paidSAR=paidRows.reduce((s,e)=>s+(e.price??DEFAULT_PRICE),0);
   // Card / cash split of the collected amount: card rows count fully, split rows count
   // their card share; cash is the remainder (covers cash + anything method-less).
@@ -31615,6 +31630,7 @@ function printSessionReport(km){
     if(!e.paid)return`${_rpAmt(price)}<span class="rp-pm rp-amber">${t('pendingLabel')}</span>`;
     const m=e.pay_method==='card'?t('cashCard')
       :e.pay_method==='split'?`${t('splitWord')} (${e.card_amount||0} ${t('cashCard')})`
+      :e.pay_method==='transfer'?t('vtColPaid')
       :t('cashCash');
     return`${_rpAmt(price)}<span class="rp-pm">${m}</span>`;
   };
@@ -42719,7 +42735,13 @@ function _salesTotals(lines){
 // rounded to cents. Analytics (its tiles, trends, forecast and CSV), the bike passport, History and
 // the account history read it; the Dashboard's _moneyIn is the same sum plus the desk's sales.
 function _bookingAmount(e){return (e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e));}
-function _bookingRevenue(e){return e&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'?_bookingAmount(e):0;}
+// Paid to the organiser, not to us (2026-10-24): a Victory Lap athlete who uploads the receipt of a bank
+// transfer to the race's organiser is marked paid with pay_method 'transfer' (customer_vl_ticket). The
+// place is settled, but the money never reaches MicroMobility, so no total of ours counts it: revenue
+// here, the close-out, the session report, the drawer (_tillTake), the night's summary and Analytics'
+// card and cash mix. The server's _mt_core leaves it out the same way (20261024120000).
+function _paidToOrg(e){return !!e&&!!e.paid&&e.pay_method==='transfer';}
+function _bookingRevenue(e){return e&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e)?_bookingAmount(e):0;}
 function _revenueOf(rows){return Math.round((rows||[]).reduce((a,e)=>a+_bookingRevenue(e),0)*100)/100;}
 function _amountOf(rows){return Math.round((rows||[]).reduce((a,e)=>a+_bookingAmount(e),0)*100)/100;}
 // One rule for "money in" and "places taken" on a set of rides (2026-10-03): the Dashboard and the
@@ -44286,7 +44308,7 @@ function _tillTake(c){
   if(c.shop){const x=_salesCC(_shopSales(c.day));return{cash:x.cash,card:x.card,dep:0};}
   const daySessions=allSessions().filter(s=>(s.session_date||s.id)===c.day);
   const sessIds=new Set(daySessions.map(s=>s.id));
-  const rentPaid=getQueue().filter(e=>sessIds.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const rentPaid=getQueue().filter(e=>sessIds.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e));
   const rentAll=r2(rentPaid.reduce((s2,e)=>s2+(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e)),0));
   const _rcard=e=>{const p=(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e));if(e.card_amount!=null)return Math.min(Math.max(0,Number(e.card_amount)||0),p);return e.pay_method==='card'?p:0;};
   const rentCard=r2(rentPaid.reduce((s2,e)=>s2+_rcard(e),0));
@@ -44306,7 +44328,7 @@ function _tillDep(c,ids,list){
 // close-out report). Its own host, so the drawer count's prompt can open over it.
 function _eonModel(sid,x){
   const r2=n=>Math.round(n*100)/100,rows=_qBySession().get(sid)||[];
-  const paid=rows.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const paid=rows.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e)),toOrg=rows.filter(e=>_paidToOrg(e)&&e.status!=='cancelled'&&e.status!=='removed');
   const amt=e=>(e.price??DEFAULT_PRICE)+addonsCost(entryAddons(e));
   const cardOf=e=>{const p=amt(e);if(e.card_amount!=null)return Math.min(Math.max(0,Number(e.card_amount)||0),p);return e.pay_method==='card'?p:0;};
   const st=_salesTotals(_cashSessionLines(sid)),cc=_cashCardCash(sid);
@@ -44316,6 +44338,7 @@ function _eonModel(sid,x){
     done:rows.filter(e=>e.status==='done').length,noshow:rows.filter(e=>e.status==='noshow').length,
     card:r2(rentCard+cc.card),cash:r2(Math.max(0,rentIn-rentCard)+Math.max(0,st.collected-cc.card)),
     house:paid.filter(e=>(e.price??DEFAULT_PRICE)===0).length,houseSales:st.free,team:st.team,
+    toOrg:{n:toOrg.length,sum:r2(toOrg.reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0))}, // paid by transfer to the organiser: never card or cash
     owing:rows.filter(e=>(e.status==='done'||e.status==='active')&&_brOwes(e)),
     damaged:((x&&x.damaged)||[]).map(bike).filter(Boolean),missing:((x&&x.missing)||[]).map(bike).filter(Boolean),
     out:rows.filter(e=>e.status==='active').flatMap(e=>getAssignedBikes(e).map(b=>({e,b}))),
@@ -44339,7 +44362,7 @@ function _eonOpen(sid,x){
         <button data-on-click="${_on("_eonClose")}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
       <div class="chrome-dbody eon-body">
         <div class="eon-sec">${line('statCompleted',M.done)}${line('noShowBtn',M.noshow)}</div>
-        <div class="eon-sec"><div class="eon-h">${esc(t('eonMoney'))}</div>${line('cashCard',_money(M.card))}${line('cashCash',_money(M.cash))}${line('onTheHouseLabel',M.house+(M.houseSales>0?` · ${_money(M.houseSales)}`:''))}${M.team>0?line('payTeam',_money(M.team)):''}</div>
+        <div class="eon-sec"><div class="eon-h">${esc(t('eonMoney'))}</div>${line('cashCard',_money(M.card))}${line('cashCash',_money(M.cash))}${line('onTheHouseLabel',M.house+(M.houseSales>0?` · ${_money(M.houseSales)}`:''))}${M.team>0?line('payTeam',_money(M.team)):''}${M.toOrg.n?line('vtColPaid',`${M.toOrg.n} · ${_money(M.toOrg.sum)}`):''}</div>
         ${list('eonOwing',M.owing.map(e=>`<li>${who(e)} <b class="num">${_money(_brAmt(e))}</b></li>`))}
         ${list('eonDamaged',M.damaged.map(b=>`<li>${bk(b)}</li>`))}
         ${list('eonMissing',M.missing.map(b=>`<li>${bk(b)}</li>`))}
@@ -49349,7 +49372,7 @@ function _renderAnalyticsNow(){
   const _tcls=k=>Object.prototype.hasOwnProperty.call(TYPE_CLS,k)?TYPE_CLS[k]:'type-any';
   // Revenue counts a booking the moment it is marked PAID — no check-in or completion
   // needed. Cancelled/removed rows stay out (refunds/mistakes).
-  const _paidRows=arr=>arr.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed');
+  const _paidRows=arr=>arr.filter(e=>e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e)); // money rows: a transfer to the organiser is not ours
   const noshow=queue.filter(e=>e.status==='noshow');
   // Product sales for the in-range sessions (cashier sales + rental add-ons)
   const anSalesLines=_cashLinesOf(sessIds);

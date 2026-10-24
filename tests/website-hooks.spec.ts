@@ -119,6 +119,7 @@ test.describe('Google Wallet', () => {
     await loginCustomer(page, { id: 'c1' });
     const posts: Record<string, unknown>[] = [];
     await page.route('**/api/google-wallet', (r) => { try { posts.push(r.request().postDataJSON()); } catch { /* */ } return r.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: true, url: 'about:blank#saved' }) }); });
+    await page.route((u) => u.pathname === '/api/google-wallet' && u.searchParams.has('ready'), (r) => r.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) }));
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`setCustTab('myrides')`);
@@ -130,15 +131,32 @@ test.describe('Google Wallet', () => {
     await expect.poll(() => posts.length).toBe(1);
     expect(posts[0]).toMatchObject({ customerId: 'c1', token: 'tok-spec', bookingId: 'gw1', groupIds: ['gw1'] });
   });
-  test('while the function is not configured the button goes away', async ({ page }) => {
+  // 2026-10-24: the button waits for GET /api/google-wallet?ready; it was offered to every Android rider
+  // while the function answered 501, and only vanished when tapped.
+  test('while the function is not set up the button is never offered', async ({ page }) => {
+    const row = { id: 'gw1', session_id: 's0', session_day: 'Friday', session_date: today, queue_num: 4, name: 'Spec Rider', phone: '', customer_id: 'c1', status: 'waiting', paid: true, price: 30, registered_at: '2026-01-01T10:00:00Z' };
+    await stubSupabase(page, { sessions, queue_entries: [row], bikes: [], 'rpc:my_bookings': [row] });
+    await loginCustomer(page, { id: 'c1' });
+    await page.route((u) => u.pathname === '/api/google-wallet' && u.searchParams.has('ready'), (r) => r.fulfill({ status: 501, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: false, skipped: 'google wallet not configured' }) }));
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect.poll(() => page.evaluate(`_gwReady`)).toBe(false);
+    await expect(page.locator('.btn-wallet.gwallet')).toHaveCount(0);
+    await page.evaluate(`setCustTab('myrides')`); // drawn again, it still offers nothing
+    await expect(page.locator('.btn-wallet.gwallet')).toHaveCount(0);
+  });
+  test('a pass the function turns down after all takes the button away', async ({ page }) => {
     const row = { id: 'gw1', session_id: 's0', session_day: 'Friday', session_date: today, queue_num: 4, name: 'Spec Rider', phone: '', customer_id: 'c1', status: 'waiting', paid: true, price: 30, registered_at: '2026-01-01T10:00:00Z' };
     await stubSupabase(page, { sessions, queue_entries: [row], bikes: [], 'rpc:my_bookings': [row] });
     await loginCustomer(page, { id: 'c1' });
     await page.route('**/api/google-wallet', (r) => r.fulfill({ status: 501, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: false, skipped: 'google wallet not configured' }) }));
+    await page.route((u) => u.pathname === '/api/google-wallet' && u.searchParams.has('ready'), (r) => r.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) }));
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate(`setCustTab('myrides')`);
     await page.locator('.btn-wallet.gwallet').first().click();
     await expect(page.locator('.btn-wallet.gwallet')).toHaveCount(0);
+    expect(await page.evaluate(`_gwReady`)).toBe(false);
   });
 });
