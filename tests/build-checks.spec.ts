@@ -378,3 +378,56 @@ test('@build no selector makes one roster row restyle the rest', () => {
   expect(css).not.toMatch(/tbody:(?:last-of-type|nth-last-child|nth-last-of-type|nth-of-type)/);
   expect(css).not.toMatch(/:has\([^)]*data-ck/);
 });
+
+// Supabase stops granting new tables to the API roles on 2026-10-30 (github.com/orgs/supabase/discussions/45329):
+// a table a migration creates from then on is reachable from the app only through the grants the migration
+// gives it, and one that forgets them answers "permission denied" on its first read. So every migration that
+// creates a table in public says who may touch it (a grant, or a revoke that says nobody) and turns row level
+// security on. The loops older migrations use (foreach t in array['a','b'] loop execute format('alter table
+// public.%I enable row level security', t)) count when the table's name is in the list.
+const sqlCode = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/--[^\n]*/g, ' ');
+function tableGaps(sql: string): string[] {
+  const body = sqlCode(sql);
+  const made = new Set([...body.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?"?([a-z_][a-z0-9_]*)"?\s*\(/gi)].map((m) => m[1].toLowerCase()));
+  const inLoop = (t: string, verb: RegExp) => new RegExp(`array\\s*\\[[^\\]]*'${t}'`, 'i').test(body) && verb.test(body);
+  const gaps: string[] = [];
+  for (const t of made) {
+    const name = `(?:public\\.)?"?${t}"?(?![a-z0-9_])`;
+    const rls = new RegExp(`alter\\s+table\\s+(?:if\\s+exists\\s+)?(?:only\\s+)?${name}\\s+enable\\s+row\\s+level\\s+security`, 'i').test(body)
+      || inLoop(t, /format\s*\(\s*'alter\s+table\s+(?:public\.)?%I\s+enable\s+row\s+level\s+security/i);
+    // one statement may name several tables: grant ... on public.a, public.b to authenticated
+    const said = new RegExp(`\\b(?:grant|revoke)\\b[^;]*?\\bon\\s+(?:table\\s+)?(?:(?:public\\.)?"?[a-z_][a-z0-9_]*"?\\s*,\\s*)*${name}`, 'i').test(body)
+      || inLoop(t, /format\s*\(\s*'(?:grant|revoke)\b[^']*\bon\s+(?:table\s+)?(?:public\.)?%I/i);
+    if (!rls) gaps.push(`${t}: row level security is not turned on`);
+    if (!said) gaps.push(`${t}: no grant or revoke says who may use it`);
+  }
+  return gaps;
+}
+
+test.describe('@build every table a migration creates is granted and row-level secured', () => {
+  test('the check tells a granted, secured table from one that is not', () => {
+    expect(tableGaps(`create table public.a (id int); alter table public.a enable row level security;
+      revoke all on public.a from anon, authenticated; grant select on public.a to authenticated;`)).toEqual([]);
+    expect(tableGaps(`create table if not exists b (id int);
+      do $$ declare t text; begin foreach t in array array['b'] loop
+        execute format('alter table public.%I enable row level security', t);
+        execute format('revoke all on public.%I from anon, authenticated', t);
+      end loop; end $$;`)).toEqual([]);
+    expect(tableGaps(`create table public.f (id int); alter table public.f enable row level security;
+      revoke all on public.x, public.f from public, anon; grant select on public.x, public.f to authenticated;`)).toEqual([]);
+    expect(tableGaps(`create table public.c (id int); alter table public.c enable row level security;`))
+      .toEqual(['c: no grant or revoke says who may use it']);
+    expect(tableGaps(`create table public.d (id int); grant select on public.d to authenticated;`))
+      .toEqual(['d: row level security is not turned on']);
+    // a comment is not a statement, and a grant on another table or on a function does not count
+    expect(tableGaps(`create table public.e (id int); -- alter table public.e enable row level security;
+      /* grant select on public.e to anon */ grant select on public.ex to anon; revoke all on function public.e() from anon;`))
+      .toEqual(['e: row level security is not turned on', 'e: no grant or revoke says who may use it']);
+  });
+
+  test('every migration in supabase/migrations grants each table it creates and turns RLS on', () => {
+    const dir = resolve(ROOT, 'supabase/migrations');
+    const gaps = readdirSync(dir).filter((f) => f.endsWith('.sql')).flatMap((f) => tableGaps(readFileSync(resolve(dir, f), 'utf8')).map((g) => `${f}: ${g}`));
+    expect(gaps).toEqual([]);
+  });
+});
