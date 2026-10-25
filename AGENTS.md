@@ -1080,7 +1080,7 @@ tags and rules, form questions.
 - Per device (localStorage): `cq_ca_view` (sort, hidden card details: `CA_CARD_FIELDS`, `_caShow`), `cq_ca_views`
   (saved views: status, search, sort). `_caSortList` orders the community list (not Invited's own order).
 - Select pending cards (`S._caSel`), then Approve / Reject several (`_caBulk`; approval through `_caApproveQuiet`,
-  no ride, no message: the welcome is sent from each card after).
+  no ride). Since 2026-10-25 every bulk run ends on one sheet of messages (`_caBkMsgsOpen`), see below.
 - staff_options `community.app_rules` = {defaultTags:[...], rules:[{id,field,op,value,action:'reject'|'tag',tag}]}:
   `_caDefaultTags(a)` starts the approval dialog (Community is always kept as the approval's own); reject rules mark a
   card and "Apply rules" rejects the marked. Admins edit it in Applications > Customize.
@@ -1089,6 +1089,37 @@ tags and rules, form questions.
 - site_content `community.form` = {q:{<question>:{on,req,label:{lang:text}}}} (`CF_QS`, `_apFormSettings`): the website
   form (mm-platform forms/community) reads it as it opens; customer_community_apply reads it too (migration
   20261007230000, which patches the function by replace() and drops NOT NULL on four application columns).
+
+## Applications: what changed, checks, several at once; the form's status page (2026-10-25)
+
+The owner picked, of the ideas offered for the forms: applicant side save progress, track your application, one shared
+account step; staff side what's new on each card, bulk actions with one message preview, auto checks on arrival.
+- **What changed** (`_caNewHtml`, pending cards): migration 20261025210000 makes customer_community_apply write
+  `acct_before` (the account's community answers just before the application wrote over them, `_community_app_to_account`),
+  `flags_answered` (the staff flags, customers.fix_fields, it answered and cleared) and `acct_new` (an account made for it:
+  created in the last three hours, no booking yet). The card says "Changed on the account: X (was Y)", "New on the account:
+  ...", "Answered staff flags: ...", or that the account is new. `_caLoad` reads them, and loads without them before the
+  migration.
+- **Checks** (`_caChecks`, pending cards, in place of the old Looks off line): chips for the Looks off findings (`_caSx`),
+  the mobile / email / WhatsApp on another account (a tap opens it) or another application (`_caIndex`: the accounts and
+  applications indexed once per load, two maps, never letter-prefixed keys - the build reads a bare one-letter string
+  concatenation as naming every key that begins with it and moved ~200 strings into the desk core), the blacklist tag,
+  the Instagram check (`S.igRows` read with the list through `_igForReport(_caListPaint)`; only `#ca-list` is drawn
+  again), under 18, the account's rides / no-shows / cancellations (`_amStOf`), a profession or company that says
+  nothing (`CA_JUNK`), and flags the account still owes.
+- **Several at once**: beside Approve and Reject, Invite to ride (`_caBkOpen('invite')`: tags, one ride, its group, the
+  bike - "each one's answer on the form" is a choice staff make, nothing is preselected - `_caBkInviteOne` as `_caApGo`
+  does it) and Ask for changes (`_caBkOpen('fix')`: the fields every ticked application can be asked, one note;
+  `_caBkFixOne`). Runs one by one with progress; the sheet (`_caBkMsgsRender`) shows one message as it reads in a language
+  staff pick, then a row per applicant with WhatsApp / Email / Copy of their own message in their own language (a row
+  turns green once opened; an account an approval made also gets its password message row), and what failed with why.
+- **The website form** (mm-platform forms/community): answers kept on the device for 3 days (`MMAccount.draft`, never a
+  password or a session; Start over; a made account signs in again to finish), the status page
+  `/community/registration?track=<token>` (`community_track`, anon, throttled; track_token on every application, given by
+  customer_community_apply and customer_community_me), and the shared account step forms/shared/account.js (sign-in with
+  customer_pwd_state, the hand-over, which questions a signed-in account is asked) used by the community form, the Defe
+  page and the website's Learn to ride form. customer_learn_apply clears the flags its form answered, as the community
+  apply does.
 
 ## Bookings in colour (2026-10-05)
 

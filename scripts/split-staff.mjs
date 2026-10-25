@@ -1344,7 +1344,10 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 650 -> 655, core 288 -> 291 (2026-10-23, staff comments on bookings and applications: the thread, the roster's
 // mark, the menu row and the cards' line, in the desk core because the roster names them): staff 648.4 / core 287.0 here,
 // 650.3 / 288.1 on the runner (23094324 was refused); +5 / +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 655, core: 291 };
+// Staff 655 -> 661 (2026-10-25, Applications: what changed on each pending card, its checks, and Invite / Ask for changes
+// on several at once with one sheet of messages, in the community part with 36 strings): staff 657.0 here, so ~659 on the
+// runner; the core stays 289.0. +6 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 661, core: 291 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

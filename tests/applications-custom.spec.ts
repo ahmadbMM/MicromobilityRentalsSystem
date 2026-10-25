@@ -96,6 +96,12 @@ test('several approved at once, each with its default tags and rules', async ({ 
   await page.locator('#confirm-modal').getByRole('button', { name: 'Approve' }).click();
   await expect.poll(() => approved.sort()).toEqual(['a1', 'a3']);
   await expect(page.locator('.ca-row')).toHaveCount(1); // the approved leave the waiting list
+  // every applicant's message on one sheet (2026-10-25)
+  const sheet = page.locator('#confirm-modal .ca-bk-msgs');
+  await expect(sheet.locator('#ca-bk-m-title')).toHaveText('Messages for 2 applicants');
+  await expect(sheet.locator('.ca-bk-row')).toHaveCount(2);
+  await expect(sheet.locator('.ca-bk-pv')).toHaveValue(/Welcome to the MicroMobility community!/);
+  await sheet.locator('.ca-actions .btn-primary').click();
   // select all shown, then clear
   await page.locator('.ca-bulk .ca-fld input').check();
   await expect(page.locator('.ca-bulk')).toContainText('1 selected');

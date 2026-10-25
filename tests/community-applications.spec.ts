@@ -1068,3 +1068,135 @@ test('Invite again: a completed invitee goes on another ride and gets a new invi
   await expect(page.locator('#toast-container')).toContainText('Past Done invited again');
   expect(await page.evaluate(`_caFind('i2').invited_session`)).toBe(SAT2);
 });
+
+// What changed and the checks on each pending card (the owner, 2026-10-25): the account's answers before the
+// application wrote over them (acct_before), the staff flags it answered, a new account; and checks as chips - the
+// mobile and email on another account, another application, the blacklist tag, the Instagram check, under 18, the
+// account's history, an answer that says nothing, flags still owed.
+test('a pending card says what changed on the account and shows its checks', async ({ page }) => {
+  const others = [
+    ...customers,
+    { id: 'c2', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', height: 178, created_at: '2026-02-05T10:00:00Z', socials: { instagram: 'karim.rides' }, fix_fields: ['photo'] },
+    { id: 'c3', name: 'Karim M Two', email: 'karim2@gmail.com', phone: '+966552468013', height: 178, created_at: '2026-03-05T10:00:00Z' },
+  ];
+  const list = [
+    { ...apps[0], customer_id: 'c2', workplace: 'none', birth_date: '2010-05-05', acct_before: { instagram: 'karim.old', profession: 'Architect', nationality: 'Egypt', birth_date: '2010-05-05', linkedin: 'karim-mansour-arch', bike_type: 'Road', height: 178, gender: 'male' },
+      flags_answered: ['instagram'], acct_new: false },
+    { ...apps[1], customer_id: 'c1', acct_new: true },
+    { ...apps[2], id: 'a5', status: 'rejected', name: 'Karim Older', email: 'karim.mansour@gmail.com', phone: '+966559990001', customer_id: null },
+  ];
+  await applicationsTab(page, {
+    customers: others, community_applications: list, tags: TAGS,
+    customer_tags: [{ customer_id: 'c2', tag_id: 'tag_blacklist', added_at: 1, added_by: 'x' }],
+    queue_entries: [{ id: 'q1', session_id: SAT, session_date: SAT, customer_id: 'c2', status: 'noshow', name: 'Karim Mansour', queue_num: 1 },
+      { id: 'q2', session_id: '2099-02-01', session_date: '2099-02-01', customer_id: 'c2', status: 'done', name: 'Karim Mansour', queue_num: 1 }],
+    customer_ig_followers: [{ customer_id: 'c2', handle: 'karim.rides', followers: null, status: 'unavailable', source: 'auto', counted_at: null, tried_at: '2026-10-24T10:00:00Z' }],
+  });
+  const k = row(page, 'a1');
+  await expect(k.locator('.ca-new')).toContainText('What changed:');
+  await expect(k.locator('.ca-new')).toContainText('Changed on the account: Instagram (was @karim.old)');
+  await expect(k.locator('.ca-new')).toContainText('New on the account: Company');
+  await expect(k.locator('.ca-new')).toContainText('Answered staff flags: Instagram');
+  const chk = k.locator('.ca-chks');
+  await expect(chk).toContainText('Mobile also on other accounts: 1');
+  await expect(chk).toContainText('Also applied as Karim Older (Rejected)');
+  await expect(chk).toContainText('Blacklist tag on the account');
+  await expect(chk).toContainText('Instagram private or not found');
+  await expect(chk).toContainText(/Under 18 \(age \d+\)/);
+  await expect(chk).toContainText('Rides before: 1');
+  await expect(chk).toContainText('No-shows on the account: 1');
+  await expect(chk).toContainText('Company says nothing');
+  await expect(chk).toContainText('Account still flagged: Profile photo');
+  // the other account is a tap away
+  await chk.getByRole('button', { name: 'Mobile also on other accounts: 1' }).click();
+  await expect(page.locator('#customer-modal, .modal-box').first()).toBeVisible();
+  // a new account made on the form for it says so
+  await expect(row(page, 'a2').locator('.ca-new')).toContainText('a new account, made on the form for this application.');
+});
+
+// Several at once (the owner, 2026-10-25): Invite to a ride and Ask for changes beside Approve and Reject, each
+// asked once, run one by one, ending on one sheet of messages, each in the applicant's own language.
+test('several invited to a ride at once: one ride, group and bike, then one sheet with every invitation', async ({ page }) => {
+  let n = 0;
+  const approved: Record<string, unknown>[] = [];
+  await applicationsTab(page, { tags: TAGS, sessions: INV_RIDES, staff_options: [WA_ROW] }, async () => {
+    await page.route(/\/rest\/v1\/rpc\/staff_community_approve/, async (r) => {
+      const b = JSON.parse(r.request().postData() || '{}');
+      approved.push(b);
+      n++;
+      return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ ok: true, existing: true, customer_id: n === 1 ? 'cb1' : 'c1', name: n === 1 ? 'Karim Mansour' : 'Huda Al Saleh' }) });
+    });
+  });
+  const bookings = writes(page, 'queue_entries'), marks = patches(page, 'community_applications');
+  await row(page, 'a1').locator('.ca-sel input').check();
+  await row(page, 'a2').locator('.ca-sel input').check();
+  await page.locator('.ca-bulk .ca-bk-invite').click();
+  const dlg = page.locator('#confirm-modal .ca-bk-box');
+  await expect(dlg).toHaveAttribute('data-ca-bk', 'invite');
+  await expect(dlg.locator('#ca-bk-title')).toHaveText('Invite 2 applicants to a ride');
+  await expect(dlg.locator('.ca-bk-go')).toBeDisabled();
+  await dlg.locator(`[data-ca-ride="${SAT2}"]`).click();
+  await expect(dlg.locator('.ca-bk-go')).toBeDisabled(); // the group, then the bike
+  await dlg.locator('.rg-field [data-rg="int"]').click();
+  expect(await dlg.locator('[data-ca-ty]').evaluateAll((bs) => bs.map((b) => b.getAttribute('data-ca-ty')))).toEqual(['answer', 'Any', 'Road', 'Hybrid', 'Mountain', 'Kids', 'Own']);
+  await dlg.locator('[data-ca-ty="answer"]').click();
+  await expect(dlg.locator('.ca-bk-go')).toHaveText('Invite to ride (2)');
+  await dlg.locator('.ca-bk-go').click();
+
+  const sheet = page.locator('#confirm-modal .ca-bk-msgs');
+  await expect(sheet.locator('#ca-bk-m-title')).toHaveText('Messages for 2 applicants');
+  expect(approved).toEqual([{ p_id: 'a1', p_by: 'Spec Staff', p_community: false }, { p_id: 'a2', p_by: 'Spec Staff', p_community: false }]);
+  await expect.poll(() => marks.length).toBeGreaterThanOrEqual(2);
+  await expect.poll(() => bookings.length).toBe(2);
+  // each one's own answer: Road for Karim, Hybrid for Huda; both on the Intermediate group of that ride
+  expect(bookings.map((b) => [b.customer_id, b.session_id, b.type_preference, b.ride_group])).toEqual([['cb1', SAT2, 'Road', 'int'], ['c1', SAT2, 'Hybrid', 'int']]);
+  // one message as it reads (the first applicant's language), and each row's own in their own language
+  const pv = await sheet.locator('.ca-bk-pv').inputValue();
+  expect(pv).toContain('You’re invited to our Saturday Social Ride!');
+  expect(pv).toContain('Sunrise Loop');
+  const rows = sheet.locator('.ca-bk-row');
+  await expect(rows).toHaveCount(2);
+  const hrefOf = async (i: number) => decodeURIComponent((await rows.nth(i).locator('a', { hasText: 'WhatsApp' }).getAttribute('href'))!.split('text=')[1]);
+  expect(await hrefOf(0)).toContain('Hi Karim,');
+  expect(await hrefOf(1)).toContain('ندعوك إلى جولة السبت الاجتماعية'); // Huda applied in Arabic
+  // the group's link, when ticked, goes into every message
+  await sheet.locator('.ca-wa-opt input').check();
+  expect(await hrefOf(0)).toContain(WA_GROUP);
+  // a row opened turns green
+  await page.context().route('https://wa.me/**', (r) => r.fulfill({ status: 200, contentType: 'text/plain', body: 'ok' }));
+  const [pop] = await Promise.all([page.waitForEvent('popup'), rows.nth(0).locator('a', { hasText: 'WhatsApp' }).click()]);
+  await pop.close();
+  await expect(rows.nth(0)).toHaveClass(/sent/);
+  await sheet.locator('.ca-actions .btn-primary').click();
+  await expect(page.locator('.ca-row')).toHaveCount(0); // both left the waiting list
+});
+
+test('several asked for changes at once: the same fields and note, each its own link, one sheet', async ({ page }) => {
+  let n = 0;
+  const asked: Record<string, unknown>[] = [];
+  await applicationsTab(page, {}, async () => {
+    await page.route(/\/rest\/v1\/rpc\/staff_community_ask_changes/, async (r) => {
+      asked.push(JSON.parse(r.request().postData() || '{}'));
+      n++;
+      return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ ok: true, token: (n === 1 ? 'aa' : 'bb').repeat(18), fields: ['instagram', 'workplace'] }) });
+    });
+  });
+  await page.locator('.ca-bulk .ca-fld input').check(); // every pending one shown
+  await page.locator('.ca-bulk .ca-bk-fix').click();
+  const dlg = page.locator('#confirm-modal .ca-bk-box');
+  await expect(dlg.locator('#ca-bk-title')).toHaveText('Ask 2 applicants for changes');
+  await expect(dlg.locator('.ca-bk-go')).toBeDisabled();
+  await dlg.locator('[data-ca-fix="instagram"]').click();
+  await dlg.locator('[data-ca-fix="workplace"]').click();
+  await dlg.locator('#ca-bk-note').fill('Please check the handle');
+  await dlg.locator('.ca-bk-go').click();
+  const sheet = page.locator('#confirm-modal .ca-bk-msgs');
+  await expect(sheet.locator('#ca-bk-m-title')).toHaveText('Messages for 2 applicants');
+  expect(asked.map((x) => [x.p_id, x.p_fields, x.p_note])).toEqual([['a1', ['workplace', 'instagram'], 'Please check the handle'], ['a2', ['workplace', 'instagram'], 'Please check the handle']]);
+  const href = decodeURIComponent((await sheet.locator('.ca-bk-row').nth(0).locator('a', { hasText: 'WhatsApp' }).getAttribute('href'))!.split('text=')[1]);
+  expect(href).toContain('?appfix=' + 'aa'.repeat(18));
+  const href2 = decodeURIComponent((await sheet.locator('.ca-bk-row').nth(1).locator('a', { hasText: 'WhatsApp' }).getAttribute('href'))!.split('text=')[1]);
+  expect(href2).toContain('?appfix=' + 'bb'.repeat(18));
+});
