@@ -999,6 +999,18 @@ staff manage everything.
   staff marked paid asks nothing; a database without the RPC makes the question step aside (`S._vtOff`). Staff: the
   roster's Race cell carries `_vtStaffChip` (Paid by transfer opens the receipt, `_vtRcptOpen`), Race details sets the
   ticket answer. The default payment line (`vlPayLater`) now points at this question.
+- **Staff upload a receipt** (the owner, 2026-10-25, migration 20261025150000): the roster's ticket chip opens the receipt
+  viewer in every state; Upload receipt / Replace receipt (`_vtStaffPick`, resized like the athlete's by `_vtStaffImg`)
+  sends `staff_vl_receipt_put(id, img)`: the picture goes to `vl_receipts`, `vl_ticket 'buy'`, and the place is paid by
+  transfer at once ('confirmed', staff looked at it) unless the desk was paid already ('desk', the payment stays). Also
+  from Race details.
+- **PDF with receipts** (`printVlReceipts`, in the part; the roster bar and the report builder): the builder's filters,
+  sort, grouping and columns, one card per athlete with the details, payment, ticket answer and the receipt picture
+  (`vl_receipts` read 20 at a time); a Doubles team is one framed block headed "Doubles team <code>", partners side by side.
+- **Doubles read as one everywhere** (the owner, 2026-10-25): `_vlTeamOrder` (called from `buildQueueGroups` and Athletes
+  and teams) moves a partner's row under the first one's whatever the sort, and `_vlDblCls` frames and tints a team's rows
+  (`vl-dbl`, `-t`/`-b`, every other team `-alt`); the Race cell and the athletes table say "Doubles team" (`vlDblTeam`)
+  with the code; the report's team heading and the Excel athletes sheet (a Doubles team column) say it too.
 
 ## About this event and Details (2026-10-05)
 

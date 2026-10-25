@@ -205,3 +205,17 @@ section{break-inside:avoid}
 .sn-ico{display:block;width:11px;height:11px}
 /* the partner report's signature column: room to sign on paper */
 :root td.rp-sign{min-width:120px;height:26px}
+/* Victory Lap payments with receipts (2026-10-25) */
+.vrc-team{border:2px solid #5b3fd6;margin:12px 0;break-inside:avoid}
+.vrc-team-h{background:#5b3fd6;color:#fff;font-weight:700;font-size:12px;padding:6px 10px}
+.vrc-pair{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.vrc-pair .vrc-card+.vrc-card{border-inline-start:1px solid #c9c2ee}
+.vrc-solo{border:1px solid #d5dbd7;margin:12px 0;break-inside:avoid}
+.vrc-card{padding:10px;break-inside:avoid}
+.vrc-name{font-weight:700;font-size:14px;margin-bottom:6px}
+.vrc-dl{display:grid;grid-template-columns:max-content 1fr;gap:2px 10px;font-size:11px;margin:0 0 8px}
+.vrc-dl dt{color:#55615a}
+.vrc-dl dd{margin:0}
+.vrc-img{display:block;max-width:100%;max-height:520px;object-fit:contain;border:1px solid #d5dbd7}
+.vrc-none{font-size:12px;color:#a33b2e;font-weight:700;padding:8px 0}
+@media (max-width:700px){.vrc-pair{grid-template-columns:1fr}}

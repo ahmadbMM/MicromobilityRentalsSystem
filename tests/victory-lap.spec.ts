@@ -417,7 +417,7 @@ test.describe('@staff:bookings Victory Lap', () => {
     const lines: string[] = await pop.evaluate(() => [...[...document.querySelectorAll('table')].pop()!.querySelectorAll('tbody tr')]
       .map((r) => (r.classList.contains('rp-team') ? 'T:' : '') + [...r.querySelectorAll('td')].map((c) => (c.textContent || '').trim()).join('|')));
     const ix = (s: string) => lines.findIndex((l) => l.includes(s));
-    expect(lines[ix('VL-AAAA')]).toMatch(/^T:VL-AAAA · Mixed Doubles/);
+    expect(lines[ix('VL-AAAA')]).toMatch(/^T:Doubles team VL-AAAA · Mixed Doubles/);
     const num = (n: string) => lines.findIndex((l) => l.split('|')[1] === n); // a row reads "<No.>|#<number>|<status>|<name>|..."
     expect(num('#1')).toBe(ix('VL-AAAA') + 1);
     expect(num('#5')).toBe(ix('VL-AAAA') + 2);
@@ -434,5 +434,62 @@ test.describe('@staff:bookings Victory Lap', () => {
     expect(at('Athlete r2')).toBeLessThan(at('Athlete r1'));
     expect(at('Athlete r1')).toBeLessThan(at('Athlete r5'));
     expect(at('Athlete r5')).toBeLessThan(at('Athlete r4'));
+  });
+  // Doubles read as one everywhere (the owner, 2026-10-25): on the roster and in Athletes and teams the partners
+  // sit together under one frame whatever their numbers; staff upload a receipt; the receipts PDF carries it.
+  test('Doubles partners sit together with a Doubles team mark; staff upload a receipt; the receipts PDF prints it', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const q = [
+      row('r1', { race: 'xd', div: 'op', shirt: 'M', team: 'VL-AAAA' }),
+      row('r2', { race: 'ws', div: 'so', shirt: 'S' }, { vl_ticket: 'buy', vl_receipt_at: '2099-10-20T10:00:00Z', paid: true, pay_method: 'transfer' }),
+      row('r3', { race: 'xd', div: 'op', shirt: 'XL', team: 'VL-AAAA' }),
+    ];
+    const pic = 'data:image/png;base64,' + PNG_S;
+    await stubSupabase(page, { sessions: [vl, jcc], bikes: [], queue_entries: q, customers: q.map((r) => ({ id: r.customer_id, name: r.name, phone: r.phone })) });
+    await page.route(/\/rest\/v1\/vl_receipts/, (r) => {
+      const u = new URL(r.request().url()), one = u.searchParams.get('entry_id') || '';
+      const body = one.startsWith('in.') ? [{ entry_id: 'r2', img: pic }] : one === 'eq.r2' ? { img: pic } : null;
+      return r.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: JSON.stringify(body) });
+    });
+    const puts: Record<string, string>[] = [];
+    await page.route(/\/rpc\/staff_vl_receipt_put/, async (r) => {
+      puts.push(r.request().postDataJSON());
+      return r.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' }, body: '"confirmed"' });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${VL}';renderStaffQueue()`);
+    const tq = page.locator('#tab-queue');
+    await expect(tq.locator('.queue-table tbody tr[data-id]')).toHaveCount(3);
+    expect(await tq.locator('.queue-table tbody tr[data-id]').evaluateAll((rs) => rs.map((r) => r.getAttribute('data-id')))).toEqual(['r1', 'r3', 'r2']);
+    await expect(tq.locator('tr[data-id="r1"]')).toHaveClass(/vl-dbl-t/);
+    await expect(tq.locator('tr[data-id="r3"]')).toHaveClass(/vl-dbl-b/);
+    await expect(tq.locator('tr[data-id="r2"]')).not.toHaveClass(/vl-dbl/);
+    await expect(tq.locator('tr[data-id="r1"] .vl-dbl-chip')).toHaveText('Doubles team');
+    // Athletes and teams: the same order and mark
+    await page.evaluate(`_vlStaffOpen('${VL}')`);
+    const host = page.locator('#vl-staff-host');
+    expect(await host.locator('.vl-st-table tbody tr').evaluateAll((rs) => rs.map((r) => r.querySelector('td')!.textContent))).toEqual(['#1', '#3', '#2']);
+    await expect(host.locator('.vl-st-table tbody tr.vl-dbl')).toHaveCount(2);
+    // staff upload r1's receipt from the roster chip: the place is paid by transfer
+    await page.evaluate(`_vlClose();_vtRcptOpen('r1')`);
+    await host.locator('.vt-pick input[type=file]').setInputFiles({ name: 'r.png', mimeType: 'image/png', buffer: Buffer.from(PNG_S, 'base64') });
+    await expect.poll(() => puts.length).toBe(1);
+    expect(puts[0].p_entry_id).toBe('r1');
+    expect(puts[0].p_img).toMatch(/^data:image\/jpeg;base64,/);
+    await expect(page.locator('.toast').filter({ hasText: 'Receipt saved. The place is paid by transfer.' })).toBeAttached();
+    // the receipts PDF: a team block with both partners, r2's picture on its card
+    await page.evaluate(`_vlClose()`);
+    const [pop] = await Promise.all([page.waitForEvent('popup'), tq.locator('.vl-staff-bar .btn-sm', { hasText: 'PDF with receipts' }).click()]);
+    await pop.waitForLoadState();
+    await pop.locator('.vrc-card').first().waitFor();
+    await expect(pop.locator('.vrc-team')).toHaveCount(1);
+    await expect(pop.locator('.vrc-team-h')).toContainText('Doubles team VL-AAAA');
+    await expect(pop.locator('.vrc-team .vrc-card')).toHaveCount(2);
+    await expect(pop.locator('.vrc-solo .vrc-card img.vrc-img')).toHaveCount(1);
+    await expect(pop.locator('.vrc-solo')).toContainText('Athlete r2');
+    await pop.close();
   });
 });

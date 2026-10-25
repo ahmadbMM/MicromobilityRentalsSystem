@@ -10094,3 +10094,11 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
 #sc-sheet .sc-none{color:var(--muted);font-size:13px;}
 #sc-sheet .sc-lbl{font-size:13px;font-weight:700;margin-bottom:4px;}
 #sc-sheet textarea{width:100%;box-sizing:border-box;resize:vertical;font:inherit;padding:8px;}
+/* Victory Lap Doubles teams read as one (2026-10-25): the chip, and the team's rows framed and tinted together */
+.vl-dbl-chip{display:inline-block;padding:0 6px;font-size:11px;font-weight:800;background:#5b3fd6;color:#fff;}
+.queue-table tbody tr.vl-dbl td,.vl-st-table tr.vl-dbl td{background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}
+.queue-table tbody tr.vl-dbl-alt td,.vl-st-table tr.vl-dbl-alt td{background-image:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16));}
+.queue-table tbody tr.vl-dbl-t td,.vl-st-table tr.vl-dbl-t td{border-top:2px solid #5b3fd6;}
+.queue-table tbody tr.vl-dbl-b td,.vl-st-table tr.vl-dbl-b td{border-bottom:2px solid #5b3fd6;}
+.q-card.vl-dbl{outline:2px solid #5b3fd6;outline-offset:-2px;background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}
+.q-card.vl-dbl.vl-dbl-alt{background-image:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16));}
