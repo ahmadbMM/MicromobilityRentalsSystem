@@ -263,15 +263,33 @@ test('a completed complimentary ride counts as a ride, though nothing was paid',
   expect(await page.evaluate(`_mrTier(getQueue().filter(e=>e.customerId==='c1'&&_rideCompleted(e)).length).next.need`)).toBe(2);
 });
 
-// ── Community ticket: no number, published or not ─────────────────────────────
-test('a published community ticket still shows no queue number', async ({ page }) => {
+// ── Community ticket: the booking number once the list is published (the owner, 2026-10-25: "add a booking number
+// to saturday social rides bookings but only show them after publish"; saturday-booking-number.spec.ts has the rest) ──
+test('a published community ticket shows its booking number', async ({ page }) => {
   const pub = { ...satRide, id: '2099-03-06', session_date: '2099-03-06', hide_queue: false };
   await customer(page, { sessions: [pub], queue_entries: [booking({ session_id: pub.id, session_date: pub.session_date, queue_num: 7, approval: 'approved', price: 0 })] });
   await page.evaluate(`setCustTab('myrides')`);
   const card = page.locator('#tab-myrides .ticket-card');
   await expect(card).toHaveCount(1);
-  expect(await card.innerText()).not.toContain('#7');
+  expect(await card.innerText()).toContain('#7');
+  await expect(card).toContainText('Booking number');
   await expect(card.locator('.appr-ok')).toBeVisible();                      // the verdict is still said, loudly
+});
+
+test('an unpublished community ticket, and another ride staff approve, still show no number', async ({ page }) => {
+  const draft = { ...satRide, id: '2099-03-06', session_date: '2099-03-06', hide_queue: true };
+  const swim = { ...satRide, id: '2099-03-07', session_date: '2099-03-07', hide_queue: false, ride_kind: 'swim' };
+  await customer(page, { sessions: [draft, swim], queue_entries: [
+    booking({ id: 'u1', session_id: draft.id, session_date: draft.session_date, queue_num: 7, approval: 'approved', price: 0 }),
+    booking({ id: 'u2', session_id: swim.id, session_date: swim.session_date, queue_num: 9, approval: 'approved', price: 0 }),
+  ] });
+  await page.evaluate(`setCustTab('myrides')`);
+  const cards = page.locator('#tab-myrides .ticket-card');
+  await expect(cards).toHaveCount(2);
+  const txt = (await cards.allInnerTexts()).join('\n');
+  expect(txt).not.toContain('#7');
+  expect(txt).not.toContain('#9');
+  expect(txt).not.toContain('Booking number');
 });
 
 test('a booking on a session this device cannot see shows no queue number either', async ({ page }) => {
