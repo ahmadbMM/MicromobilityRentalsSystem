@@ -140,10 +140,14 @@ async function buildPkpass(b, cfg) {
   // bookingRef). Without the session to ask, a booking that carries an approval verdict is
   // taken to be one of those rides: hiding a number wrongly costs less than showing one.
   // onRequestPost has already decided (cfg.approvalRide, from _isApprovalRide) when it could.
-  const hideNum = cfg.approvalRide != null ? !!cfg.approvalRide : sess
+  const approvalNoNum = cfg.approvalRide != null ? !!cfg.approvalRide : sess
     ? sess.event_kind === "community" && sess.ride_kind !== "snd96" && sess.needs_approval !== false
     : b.approval != null && b.approval !== "";
-  const primaryNum = !hideNum && b.queue_num != null ? String(b.queue_num) : "";
+  // A Saturday Social Ride's list once it is published (the owner, 2026-10-25; the app's _satNumOk): a rider
+  // on it sees the booking number, as on the app's card. The code keeps carrying the ref alone, as bookingRef.
+  const satNum = approvalNoNum && ride === "saturday" && _commPublished(sess) && group.every((r) => r.approval === "approved" && !r.partner && r.status !== "waitlist");
+  const hideNum = approvalNoNum && !satNum;
+  const primaryNum = !approvalNoNum && b.queue_num != null ? String(b.queue_num) : "";
   const barcodeMsg = ["MMC", primaryNum, ref6].filter(Boolean).join("-");
   const nums = group.map((r) => r.queue_num != null ? Number(r.queue_num) : null).filter((n) => n != null).sort((a, c) => a - c);
   const when = `${b.session_day || ""} ${b.session_date || ""}`.trim();
@@ -157,7 +161,7 @@ async function buildPkpass(b, cfg) {
   const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
   const venue = ride === "event" ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
-  const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || `#${primaryNum}`;
+  const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || (b.queue_num != null ? `#${b.queue_num}` : rideName);
   const time = _sessClock(sess) || b.session_time || "";
   const dates = _sessionDates(b, clock);
   // A booking that is over, or was called off, must not read as a live ticket. Apple cannot
@@ -196,7 +200,7 @@ async function buildPkpass(b, cfg) {
   // the desk reads a number and a person off one line. The two clock times sit together below,
   // where collection followed by departure reads as one sequence rather than as two starts.
   const primary = [];
-  primary.push({ key: "queue", label: hideNum ? _whatLabel(ride) : isRun ? "RUNNER NO." : isRace ? "ATHLETE NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
+  primary.push({ key: "queue", label: hideNum ? _whatLabel(ride) : satNum ? (single ? "BOOKING NO." : "BOOKING NUMBERS") : isRun ? "RUNNER NO." : isRace ? "ATHLETE NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
   if (ridersValue) primary.push({ key: "riders", label: (single ? who.one : who.many).toUpperCase(), value: ridersValue });
   const secondary = [];
   // A ride that gathers has no bikes to collect: that time is when to turn up.

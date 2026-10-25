@@ -245,6 +245,19 @@ test.describe('the Apple Wallet pass', () => {
     expect(sat.json.eventTicket.secondaryFields.find((f: { key: string }) => f.key === 'start').label).toBe('RIDE STARTS');
   });
 
+  // The Saturday Social Ride's booking number (the owner, 2026-10-25): its list is out and the rider is on it,
+  // so the pass shows the number the app's card shows; the code keeps the ref alone. The pool shows none.
+  test('a published Saturday ride shows the booking number on the pass, its code still number-free', async () => {
+    const sat = { ...circuit, event_kind: 'community', ride_kind: 'saturday', needs_approval: true, hide_queue: false, bike_slots: JSON.stringify({ _time: '05:30 - 06:00' }) };
+    const b = { ...booking, approval: 'approved', queue_num: 12 };
+    const r = await pass(b, sat);
+    expect(r.status).toBe(200);
+    expect(r.json.eventTicket.primaryFields.find((f: { key: string }) => f.key === 'queue')).toMatchObject({ label: 'BOOKING NO.', value: '#12' });
+    expect(r.json.barcodes[0].message).not.toContain('-12-');
+    const swim = await pass(b, { ...sat, ride_kind: 'swim' });
+    expect(swim.json.eventTicket.primaryFields.find((f: { key: string }) => f.key === 'queue').value).not.toContain('#12');
+  });
+
   // The breakfast spot told at a time staff choose (2026-10-06): the meeting point shows at once (20261006170000);
   // a row that came without it while held (a database before that) must not read as the circuit on the pass.
   test('a ride whose breakfast spot is told later still gives its meeting point; without one it pins no place', async () => {
