@@ -71,6 +71,8 @@ with expected(fname, want_definer, note) as (values
   ('customer_community_apply', true, 'writes community_applications (staff-only) for the signed-in applicant; token-checked, _ip_gate-metered'),
   ('customer_community_me',  true,  'reads the caller''s own account, application and tags for the form; token-checked'),
   ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),
+  ('community_track',        true,  'reads one application''s status by its track token for the applicant; anon, _ip_gate-metered (20261025210000)'),
+  ('staff_vl_receipt_put',   true,  'writes vl_receipts (staff-only) and marks a Victory Lap place paid; is_staff()-gated (20261025150000)'),
   -- The 2026-10-03 review fixes (20261004100000); vendor_logout is listed with the vendor portal's
   ('customer_change_password',  true,  'writes customers.password_hash, login_throttle and customer_owner_pwd; token-checked'),
   ('customer_purchases',        true,  'reads the rider''s own cashier_sales, which customers cannot read; token-checked'),
