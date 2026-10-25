@@ -1273,6 +1273,11 @@
     .am-chip.tag-brand{color:#fff;gap:6px;padding:3px 10px;}
     /* The Petromin tag (2026-10-12): Petromin's logo in its own colours, on the white chip. */
     .tag-img{display:inline-block;flex-shrink:0;height:16px;width:auto;vertical-align:-4px;}
+    /* The Victory Lap tag's logo is white: on a tag button (picked or not) it sits on its own black plate,
+       or it vanished on the light theme; on dark the button's edge is lifted off the race's black. */
+    .am-pick .tag-img-vl{background:#0d0d0d;padding:2px 5px;box-sizing:content-box;}
+    html[data-staff-theme="dark"] body.view-staff .am-pick:has(.tag-img-vl){border-color:rgba(237,237,234,.55);color:#ededea;}
+    html[data-staff-theme="dark"] body.view-staff .am-pick.on:has(.tag-img-vl){border-color:#ededea;background:rgba(237,237,234,.12);}
     /* The blacklist tag (2026-09-27): black, the white mark struck through by a no-entry ring. */
     .tag-banned{position:relative;display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;vertical-align:-5px;}
     .tag-banned .tag-logo{width:12px;height:10px;vertical-align:0;}
