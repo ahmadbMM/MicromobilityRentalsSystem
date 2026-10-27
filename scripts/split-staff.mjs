@@ -1347,7 +1347,11 @@ export function formatFieldNames(r, limit = 20) {
 // Staff 655 -> 661 (2026-10-25, Applications: what changed on each pending card, its checks, and Invite / Ask for changes
 // on several at once with one sheet of messages, in the community part with 36 strings): staff 657.0 here, so ~659 on the
 // runner; the core stays 289.0. +6 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 661, core: 291 };
+// Staff 661 -> 665, core 291 -> 294 (2026-10-27, the staff panel tidy: one opening for every section, the Bookings figures
+// bar and the views under each view's title in the desk core, folded table columns with two sort buttons, Analytics' two
+// named rows, the waitlist's fixed slots, the Team report's date guard): staff 657.6 / core 289.3 here, ~659.8 / ~290.6 on
+// the runner, inside the 2.5 KB the runner can add; +4 / +3 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 665, core: 294 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
