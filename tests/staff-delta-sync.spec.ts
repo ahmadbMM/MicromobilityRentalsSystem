@@ -21,15 +21,27 @@ const T2 = '2099-03-05T12:10:00+00:00';
 const empty = (now: string) => ({ now, rows: [], deleted: [] });
 
 type Call = { p_table: string; p_since: string | null; p_cut: string | null };
-/** Answers staff_sync from the spec: `answer` gets each call and returns its body. */
+// A whole read (2026-10-27) asks staff_sync for its clock alone - what changed after the far future - and then reads
+// the bookings and the riders from their tables in pages of 1,000 by key; the tags stay one staff_sync call.
+const WHOLE = '2999-12-31T00:00:00Z';
+/** Answers staff_sync from the spec: `answer` gets each call and returns its body, the whole list for a whole read.
+ *  A whole read's rows are then what the table's pages answer (order=id.asc), and the clock call itself brings none. */
 async function syncServer(page: Page, answer: (c: Call, n: number) => unknown) {
   const calls: Call[] = [];
+  const table: Record<string, unknown[]> = {};
   await page.route('**/rest/v1/rpc/staff_sync', async (route: Route) => {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: cors });
     const c = route.request().postDataJSON() as Call;
     calls.push(c);
     const n = calls.filter((x) => x.p_table === c.p_table).length;
-    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(answer(c, n)) });
+    let body = answer(c, n) as { now?: string; rows?: unknown[]; deleted?: unknown[] } | null;
+    if (c.p_since === WHOLE && c.p_table !== 'customer_tags' && body && Array.isArray(body.rows)) { table[c.p_table] = body.rows; body = { ...body, rows: [], deleted: [] }; }
+    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  });
+  await page.route(/\/rest\/v1\/(queue_entries|customers)\?.*order=id\.asc/, async (route: Route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: cors });
+    const t = (/\/rest\/v1\/([a-z_]+)\?/.exec(route.request().url()) || [])[1] || '';
+    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(table[t] || []) });
   });
   return calls;
 }
@@ -50,7 +62,7 @@ async function bootStaff(page: Page, answer?: (c: Call, n: number) => unknown, f
   return calls;
 }
 
-test('a signed-in staff device reads the year through staff_sync, not the table', async ({ page }) => {
+test('a signed-in staff device reads the year whole once, in pages, on the server\'s clock', async ({ page }) => {
   const calls = await bootStaff(page, (c) => c.p_table === 'queue_entries'
     ? { now: T1, rows: [row('e1', 1, 'Ann'), row('e2', 2, 'Bo')], deleted: [] }
     : empty(T1));
@@ -61,9 +73,11 @@ test('a signed-in staff device reads the year through staff_sync, not the table'
   expect(await ids(page)).toBe('e1,e2'); // the whole list: the row read the old way is gone
   const q = qCalls(calls);
   expect(q).toHaveLength(1);
-  expect(q[0].p_since).toBeNull();
+  expect(q[0].p_since).toBe(WHOLE); // the clock alone: the rows come from the table's pages, no one document of a year
   expect(q[0].p_cut).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-  expect(reads).toEqual([]);
+  expect(reads).toHaveLength(1); // one page (fewer than 1,000 rows), by key, from the cut on
+  expect(reads[0]).toContain('order=id.asc');
+  expect(decodeURIComponent(reads[0])).toContain('session_date=gte.' + q[0].p_cut);
 });
 
 test('the next read asks from the server clock less five minutes; changed rows replace, deleted ones drop', async ({ page }) => {
@@ -121,7 +135,7 @@ test('the copy survives a reload, and signing out takes it away', async ({ page 
   await syncLoad(page);
   q = qCalls(calls);
   expect(q).toHaveLength(4);
-  expect(q[3].p_since).toBeNull(); // no copy left: read whole
+  expect(q[3].p_since).toBe(WHOLE); // no copy left: read whole
 });
 
 test('the riders and their tags come through the same sync, deleted tag links included', async ({ page }) => {

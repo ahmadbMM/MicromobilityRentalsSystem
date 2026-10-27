@@ -2919,8 +2919,11 @@ const SB_READ_MS=25000,SB_WRITE_MS=90000;
 let _sbWritesOut=0;
 // RPCs that only read (checked against the functions on 2026-10-04: no insert, update or delete in
 // them). They travel as a POST, which used to give them the 90 s write timeout and count them as
-// writes on the wire; they are reads: 25 s, and not a write that holds off a silent reload.
-const _READ_RPC=new Set(['staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check']);
+// writes on the wire; they are reads: 25 s, and not a write that holds off a silent reload. They also
+// wait in the request lane like any read (2026-10-27: the rider's page reads checked against their
+// migrations - customer_my_badges to petromin_member at the end - and the consents, the deletion request
+// and the last-seen stamp left out, which write).
+const _READ_RPC=new Set(['staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
   const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
@@ -2936,7 +2939,65 @@ function _fetchT(input,init){
   }
   return p.finally(done);
 }
-async function _sbFetch(input,init){
+// ── The request lane (2026-10-27) ──────────────────────────────────────────────────────────────
+// The database's web layer has ten connections on this project's plan, shared by every phone and tablet. A staff
+// page opened with 20-35 reads at once and a rider's page with about 25, and at the evening rush they waited at the
+// server until the slowest ran past its limits (8 s a statement, 10 s waiting for a connection), failed and were
+// asked again (2026-10-27, 19:50-20:05: a six-row price list took 10 s, the bikes 27 s, then the database restarted).
+// Each page now keeps a few reads on the wire and queues the rest here: what the first screen draws goes first (the
+// bookings, the nights, the bikes, the desk list, a rider's own rides), then the rest. Saves never wait in it. The
+// same read sent twice at the same moment is asked once. A server answering with its overload signs (a cancelled
+// statement, no connection to be had, a gateway timeout, a read our 25 s gave up on, an answer slower than 8 s)
+// narrows the lane to two and holds the background reloads (_sbCooling: 5 s, then 10, 20, 40, 60) instead of
+// piling more on; a fast clean answer eases it again.
+const SB_LANE=4,SB_LANE_TIGHT=2,SB_SLOW_MS=8000;
+const _SB_FIRST=new Set(['queue_entries','queue_public','sessions','bikes','desk_waitlist','staff','site_content','ride_prices','list_sessions','my_bookings','customer_profile','customer_token_ok','community_member']);
+let _sbLaneOut=0,_sbStrainN=0,_sbCoolUntil=0;
+const _sbLaneQ=[[],[]],_sbSame=new Map();
+function _sbCooling(){return Date.now()<_sbCoolUntil;}
+function _sbStrain(){_sbStrainN=Math.min(_sbStrainN+1,5);_sbCoolUntil=Date.now()+Math.min(60000,5000*Math.pow(2,_sbStrainN-1));}
+function _sbWatch(res,ms){
+  const st=res&&res.status;
+  if(st===502||st===503||st===504||(st>=520&&st<=524)||ms>SB_SLOW_MS){_sbStrain();return;}
+  if(st===500){res.clone().json().then(b=>{if(b&&/^(57014|PGRST00[0-3])$/.test(String(b.code||'')))_sbStrain();},()=>{});return;}
+  if(st<500&&ms<2000&&_sbStrainN&&!_sbCooling())_sbStrainN--;
+}
+function _sbLaneNext(){
+  const max=_sbCooling()?SB_LANE_TIGHT:SB_LANE;
+  while(_sbLaneOut<max){const go=_sbLaneQ[0].shift()||_sbLaneQ[1].shift();if(!go)return;_sbLaneOut++;go();}
+}
+function _sbLaneRun(pri,own,run){
+  return new Promise((res,rej)=>{
+    _sbLaneQ[pri].push(()=>{
+      const t0=Date.now();
+      let p;try{p=Promise.resolve(run());}catch(e){p=Promise.reject(e);}
+      p.then(r=>{_sbWatch(r,Date.now()-t0);res(r);},e=>{if(e&&e.name==='AbortError'&&!own)_sbStrain();rej(e);}) // own: the caller's signal stopped it, not the server
+        .finally(()=>{_sbLaneOut--;_sbLaneNext();});
+    });
+    _sbLaneNext();
+  });
+}
+function _sbFetch(input,init){
+  const url=String((input&&input.url)||input);
+  if(url.indexOf('/rest/v1/')<0)return _sbFetchOnce(input,init); // sign-in, files and functions go as before
+  const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
+  const rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(url);
+  if(m!=='GET'&&m!=='HEAD'&&!(rpc&&_READ_RPC.has(rpc[1]))){_sbSame.clear();return _sbFetchOnce(input,init);} // a save goes at once; a read sent before it is not shared after it
+  const name=rpc?rpc[1]:((/\/rest\/v1\/([^/?#]+)/.exec(url)||[])[1]||'');
+  let pri=_SB_FIRST.has(name)?0:1;
+  if(name==='staff_sync')pri=/"p_table"\s*:\s*"queue_entries"/.test(String((init&&init.body)||''))?0:1; // the bookings first, the riders and their tags after
+  const own=!!(init&&init.signal);
+  if(m==='POST'||own)return _sbLaneRun(pri,own,()=>_sbFetchOnce(input,init));
+  const h=new Headers((init&&init.headers)||undefined);
+  const key=m+' '+url+'\n'+['authorization','accept','prefer','range','accept-profile'].map(k=>h.get(k)||'').join('\n');
+  const was=_sbSame.get(key);
+  if(was&&Date.now()-was.at<1000)return was.p.then(r=>r.clone());
+  const p=_sbLaneRun(pri,false,()=>_sbFetchOnce(input,init));
+  const rec={p,at:Date.now()};_sbSame.set(key,rec);
+  p.then(()=>{},()=>{}).then(()=>{if(_sbSame.get(key)===rec)_sbSame.delete(key);});
+  return p.then(r=>r.clone());
+}
+async function _sbFetchOnce(input,init){
   const res=await _fetchT(input,init);
   if(res.status!==401)return res;
   try{
@@ -3619,6 +3680,29 @@ function _syncDrop(){
   _syncLegacyDrop(); // and any copy left in the first layout
   return _idbDo('readwrite',SYNC_STORES,(...ss)=>{let last=null;ss.forEach(x=>{last=x.clear();});return last;});
 }
+// A list read whole (a device holding no copy, or the fortnightly read) comes in pages of 1,000 rows from its table
+// (2026-10-27). staff_sync answered it as ONE document - a year of bookings is ~8,000 rows - which at the evening rush
+// ran past the database's 8 s limit, was cancelled, and was asked again a minute later by a device that therefore never
+// got its copy: the reads that held the connections everyone else waited for. The clock comes first, from staff_sync
+// asked for what changed after the far future (its `now` alone), so whatever changes while the pages come in is asked
+// for again by the next read. The pages go by key (a row deleted mid-read cannot shift another past a page's edge) and
+// the copy is sorted as always once whole. The riders' columns are staff_sync's own, by name (customers keeps column
+// grants: a new column the desk reads goes here, in CUST_REF_COLS and in the function). The tags stay one call: small rows.
+const SYNC_CUST_COLS='id,name,email,phone,height,type_preference,gender,birth_date,country,city,nationality,socials,created_at,default_pay,hidden_types,fix_fields,apple_email,ride_news_at,ride_news,deletion_requested_at,updated_at,merged_into,heard_from,profession,workplace,whatsapp_same,whatsapp';
+const SYNC_PAGED={
+  q:cut=>()=>{let s=sb.from('queue_entries').select('*');if(cut)s=s.gte('session_date',cut);return s.order('id');},
+  c:()=>()=>sb.from('customers').select(SYNC_CUST_COLS).order('id'),
+};
+const SYNC_CLOCK='2999-12-31T00:00:00Z'; // "changed after the far future": nothing, and the server's clock
+async function _syncWhole(kind,cut){
+  const w=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:SYNC_CLOCK,p_cut:cut||null});
+  if(w.error)return w;
+  const d=w.data;
+  if(!d||typeof d!=='object'||Array.isArray(d)||!d.now)return w; // not shaped like an answer: the caller turns the sync off
+  const pg=await _pagedAll(SYNC_PAGED[kind](cut),'id');
+  if(pg.error){console.warn('sync pages:',pg.error);return null;}
+  return{data:{now:d.now,rows:pg.data||[],deleted:[]},error:null};
+}
 // The list as this device now holds it ({data,error,whole}), or null when there is no sync to
 // be had and the caller reads the old way. One call per list at a time: a second waits for the
 // first, and then asks only for what changed after it. `changed` (the keys this answer brought,
@@ -3638,8 +3722,9 @@ async function _syncRun(kind,cut){
   const full=!st||!isFinite(wmMs)||(Date.now()-(st.fullAt||0))>SYNC_FULL_EVERY_MS;
   const since=full?null:new Date(wmMs-SYNC_MARGIN_MS).toISOString();
   let r;
-  try{r=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:since,p_cut:cut||null});}
+  try{r=full&&SYNC_PAGED[kind]?await _syncWhole(kind,cut):await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:since,p_cut:cut||null});}
   catch(e){return{data:null,error:e};}
+  if(!r)return null; // a page of the whole read failed: the old read stands in for this load, and the sync stays on
   if(r.error){
     if(_rpcAbsent(r.error)){_syncOff=true;return null;}
     // No answer (the network), or a staff session the server no longer accepts (STAFF_ONLY): the
@@ -39577,7 +39662,7 @@ async function _wsPoll(full){
     if(!error&&count>0)await _wsLoad();
   }catch(e){}
 }
-setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='workshop')return;_wsPoll(false);},30000); // every 30 s on the section itself; the five-minute tick of the main poll elsewhere (three head requests a device every 30 s, all night, were the smallest and most numerous rows in the edge logs)
+setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='workshop'||_sbCooling())return;_wsPoll(false);},30000); // every 30 s on the section itself; the five-minute tick of the main poll elsewhere (three head requests a device every 30 s, all night, were the smallest and most numerous rows in the edge logs)
 // The account the request belongs to: the one the website linked, else the only account on
 // file with the same mobile.
 function _wsAcct(j){
@@ -40098,7 +40183,7 @@ async function _smPoll(full){
     if(!error&&count>0)await _smLoad();
   }catch(e){}
 }
-setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='messages')return;_smPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
+setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='messages'||_sbCooling())return;_smPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
 // The account the message belongs to: the one the website linked, else the only account with
 // that mobile, else with that email.
 function _smAcct(m){
@@ -40385,7 +40470,7 @@ async function _ambPoll(full){
     if((!a.error&&a.count>0)||(!r.error&&r.count>0))await _ambLoad();
   }catch(e){}
 }
-setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='ambassadors')return;_ambPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
+setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='ambassadors'||_sbCooling())return;_ambPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
 function _ambAcct(a){
   const cs=S.customers||[];
   if(a.customer_id){const c=cs.find(x=>x.id===a.customer_id);if(c)return c;}
@@ -40683,7 +40768,7 @@ async function _vendorLatePoll(){
     if(r&&!r.error&&Array.isArray(r.data)){S._vendorLate=r.data.map(b=>({id:b.id,day:b.day,at:b.updated_at,name:(b.vendor_venues&&(S.lang==='ar'&&b.vendor_venues.name_ar||b.vendor_venues.name))||('#'+b.venue_id)}));_ntSync();}
   }catch(e){}
 }
-setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='vendors')return;_vendorPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
+setInterval(()=>{if(document.hidden||(typeof window!=='undefined'&&window.__noWiden)||S.staffTab!=='vendors'||_sbCooling())return;_vendorPoll(false);},30000); // on the section only; the main poll's five-minute tick elsewhere
 function _vendor(){if(!S._vendor)(S._vendor={tiers:null,venues:[],users:[],dates:[],series:[],bk:null,busy:false,err:false,missing:false,at:0,month:'',rf:'pending',rq:'',vf:'active',vq:'',td:{},fb:[],fbMissing:false,fbErr:false,fbv:'all',fbr:'all',fbq:'',sr:[],srMissing:false,rgx:{}});if(S._vendorRf){S._vendor.rf=S._vendorRf;S._vendorRf='';}return S._vendor;}
 function _vendorV(){return['requests','venues','tiers','feedback'].includes(S.vendorView)?S.vendorView:'calendar';}
 function _vendorIsMissing(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||(/vendor_/.test(m)&&/does not exist|schema cache/.test(m));}
@@ -51688,9 +51773,18 @@ function _bgRenderStaffTab(){
   if(!_bgT[tab])_bgT[tab]=setTimeout(()=>{_bgT[tab]=null;if(document.hidden&&S.view==='staff'&&S.staffTab===tab)_lastFp=null;if(S.view!=='staff'||S.staffTab!==tab||document.hidden)return;_bgAt[tab]=Date.now();_renderStaffTab(true);},wait);
 }
 // force: repaint even when the data did not change (a refresh the person asked for).
+// A strained server (_sbCooling) holds the background reloads: one runs when the strain eases (a full one if any of
+// those held was), a few seconds apart from device to device, rather than every device asking again into the overload.
+let _sbLaterT=null,_sbLaterFull=false;
+function _sbLater(full){
+  _sbLaterFull=_sbLaterFull||!!full;
+  if(_sbLaterT)return;
+  _sbLaterT=setTimeout(()=>{_sbLaterT=null;const f=_sbLaterFull;_sbLaterFull=false;_autoRefresh(f);},Math.max(500,_sbCoolUntil-Date.now())+Math.random()*4000);
+}
 async function _autoRefresh(full,force){
   if(typeof window!=='undefined'&&window.__noWiden)return; // tests pin state; no background reload may clobber it (poll / realtime / visibility)
   if(S.view!=='staff')return;
+  if(!force&&_sbCooling()){_sbLater(full);return;}
   try{
     const ok=await (full?loadData():loadDataLight());
     if(full)_secPolls(true); // the workshop, message, ambassador and vendor lists are not in loadData: a full refresh looks at them too
@@ -51824,6 +51918,8 @@ function _rtApply(){
   _rtDebounce=setTimeout(async()=>{
     if(document.hidden)return; // visibilitychange catches us up — keep _rtWantFull for it
     if(typeof window!=='undefined'&&window.__noWiden)return; // tests pin state; realtime must not reload over it
+    // A rider's page waits out a strained server too (the staff side waits in _autoRefresh), each a little apart
+    if(S.view!=='staff'&&_sbCooling()){_rtDebounce=setTimeout(_rtApply,_sbCoolUntil-Date.now()+Math.random()*5000);return;}
     const full=_rtWantFull;_rtWantFull=false;
     try{
       if(S.view==='staff'){await _autoRefresh(full);}
@@ -52103,16 +52199,24 @@ function _refLiveStop(){
 }
 // Probe once whether cashier_sales has customer_id (the card_amount probe went with the rental Split
 // option, 2026-10-04: rentals are card-only; old split rows are still read through card_amount).
+// Both columns found are remembered on the device for a week (2026-10-27): they have been in the database since
+// September and October, and asking on every page load was two of the reads every staff page opened with.
+const SCHEMA_SEEN_KEY='cq_schema_cs',SCHEMA_SEEN_MS=7*24*3600*1000;
 async function _probeSchema(){
   if(!sb||_custOnly())return; // a staff question (sales by rider); a device unlocked later keeps the default, which assumes present
+  try{const k=JSON.parse(localStorage.getItem(SCHEMA_SEEN_KEY)||'null');if(k&&k.cust&&k.seller&&Date.now()-k.at<SCHEMA_SEEN_MS)return;}catch(_){}
+  let cust=false,seller=false;
   try{ // does cashier_sales have customer_id? if not, sales record name-only so nothing ever fails to sync
     const{error}=await sb.from('cashier_sales').select('customer_id').limit(1);
     if(error){const m=((error.code||error.message)||'')+'';if(m.includes('42703')||/customer_id/i.test(m)||/does not exist/i.test(m))S.hasCsCust=false;}
+    else cust=true;
   }catch(_){}
   try{ // sold_by_name (20261009150000): a sale names the operator who rang it up once the column is there
     const{error}=await sb.from('cashier_sales').select('sold_by_name').limit(1);
     if(error&&/42703|PGRST204|sold_by_name|does not exist/i.test(String(error.code||'')+' '+String(error.message||'')))S.hasCsSeller=false;
+    else if(!error)seller=true;
   }catch(_){}
+  if(cust&&seller)try{localStorage.setItem(SCHEMA_SEEN_KEY,JSON.stringify({cust:1,seller:1,at:Date.now()}));}catch(_){}
 }
 _sbReady.then(()=>{try{_probeSchema();}catch(e){}});
 

@@ -174,14 +174,25 @@ const row = (id: string, qn: number, name: string, extra: Record<string, unknown
 const cors = { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' };
 const T1 = '2099-03-05T12:00:00+00:00', T2 = '2099-03-05T12:10:00+00:00';
 const empty = (now: string) => ({ now, rows: [], deleted: [] });
+// A whole read (2026-10-27) asks staff_sync for its clock alone and reads the bookings and the riders from their
+// tables in pages by key: the answer's rows for that call are what the pages bring (staff-delta-sync.spec has the same).
+const WHOLE = '2999-12-31T00:00:00Z';
 async function syncBoot(page: Page, answer: (table: string, n: number) => unknown) {
   await stubSupabase(page, { sessions: syncSessions, queue_entries: [] });
   const n: Record<string, number> = {};
+  const table: Record<string, unknown[]> = {};
   await page.route('**/rest/v1/rpc/staff_sync', async (route: Route) => {
     if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: cors });
-    const c = route.request().postDataJSON() as { p_table: string };
+    const c = route.request().postDataJSON() as { p_table: string; p_since: string | null };
     n[c.p_table] = (n[c.p_table] || 0) + 1;
-    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(answer(c.p_table, n[c.p_table])) });
+    let body = answer(c.p_table, n[c.p_table]) as { rows?: unknown[]; deleted?: unknown[] } | null;
+    if (c.p_since === WHOLE && body && Array.isArray(body.rows)) { table[c.p_table] = body.rows; body = { ...body, rows: [], deleted: [] }; }
+    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  });
+  await page.route(/\/rest\/v1\/(queue_entries|customers)\?.*order=id\.asc/, async (route: Route) => {
+    if (route.request().method() === 'OPTIONS') return route.fulfill({ status: 200, headers: cors });
+    const t = (/\/rest\/v1\/([a-z_]+)\?/.exec(route.request().url()) || [])[1] || '';
+    return route.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(table[t] || []) });
   });
   await unlockStaff(page);
   await page.goto('/');
@@ -225,7 +236,7 @@ test.describe('@staff:perf the delta sync keeps what did not change', () => {
     await waitForSb(page);
     await syncLoad(page);
     expect(calls.length).toBeGreaterThan(0);
-    expect(calls[calls.length - 1].p_since).toBeNull();
+    expect(calls[calls.length - 1].p_since).toBe(WHOLE); // read whole: the clock, then the table's pages
     expect(await page.evaluate(`getQueue().map(e=>e.id).sort().join()`)).toBe('e1,e2');
     await expect.poll(stored, { timeout: 10000 }).toBe(2);
     await expect.poll(() => page.evaluate(`indexedDB.databases().then(l=>l.some(d=>d.name==='mm-sync'))`), { timeout: 10000 }).toBe(false);

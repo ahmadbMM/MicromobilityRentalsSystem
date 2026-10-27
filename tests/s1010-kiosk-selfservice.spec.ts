@@ -99,12 +99,13 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     expect(row).toMatchObject({ customer_id: 'cu1', session_id: 'jcc1', status: 'waiting', via: 'kiosk', type_preference: 'Hybrid', walk_in: false });
     expect(String(row.waiver_version || '')).toMatch(/^2026-/);
     expect(row.waiver_at).toBeTruthy();
-    // staff see it: the row as the server keeps it (the stub's reload has no rows) carries the Kiosk badge and a bell line
-    const e = await page.evaluate(`(()=>{const x=entryFromDB(${JSON.stringify(row)});S.queue=[...getQueue().filter(q=>q.id!==x.id),x];return{st:x.status,tag:_kioskTag(x)};})()`) as { st: string; tag: string };
+    // staff see it: the row as the server keeps it (the stub's reload has no rows) carries the Kiosk badge and a bell line.
+    // Laid on and read in one go: the reload after the join comes back empty from the stub and can land in between
+    // (2026-10-27: reads wait their turn in the request lane now, so it often does).
+    const e = await page.evaluate(`(()=>{const x=entryFromDB(${JSON.stringify(row)});S.queue=[...getQueue().filter(q=>q.id!==x.id),x];return{st:x.status,tag:_kioskTag(x),kinds:_ntKindsNow().find(k=>k.k==='kiosk').items.map(i=>i.txt)};})()`) as { st: string; tag: string; kinds: string[] };
     expect(e && e.st).toBe('waiting');
     expect(e && e.tag).toContain('Kiosk');
-    const kinds = await page.evaluate(`_ntKindsNow().find(x=>x.k==='kiosk').items.map(i=>i.txt)`) as string[];
-    expect(kinds.join()).toContain('registered at the kiosk');
+    expect(e.kinds.join()).toContain('registered at the kiosk');
   });
 
   test('a new walk-in gives a name, phone, the emergency contact and nationality; customer_signup makes the account through the staff session', async ({ page }) => {

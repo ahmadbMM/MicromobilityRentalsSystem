@@ -1472,3 +1472,34 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
 - **Waitlist rows** hold every control in a fixed slot from the right (`_mwSlot` fills a slot a row has not got).
 - **The rail** fits 900px: 34px rows, "Keep sidebar open" at its foot. **Analytics** groups its views in two named rows
   (`.an-navgrp`: Business, People); on a phone they are equal cells and the bar scrolls with the page.
+
+## The request lane and the database's load (2026-10-27)
+
+"Why does it take so much time to load the database when entering the staff page." The database is small (bookings
+~7,900 rows); the server is the free plan's (shared CPU, ~0.5 GB, **ten** connections for the web layer, shared by
+every device). At the evening rush staff pages opened with 20-35 reads at once and riders' pages with ~25; reads
+waited at the server until the slowest passed its limits (8 s a statement, 10 s for a connection), failed and were
+asked again, and on 2026-10-27 at 20:05 Riyadh the database restarted. The rules now:
+
+- **Every read goes through the request lane** in `_sbFetch` (both halves of the app): at most `SB_LANE` (4) on the
+  wire per page, `_SB_FIRST` reads (the bookings, nights, bikes, desk list, a rider's own rides) ahead of the rest,
+  saves never queued. Identical GET/HEADs sent within a second share one answer; any save clears that (a read sent
+  before a save is never handed out after it). New reads need nothing; a read that the first screen draws goes in
+  `_SB_FIRST`.
+- **An RPC is a read only if its function only reads**: `_READ_RPC` gives it the lane and the 25 s timeout. Check the
+  function's latest migration (STABLE, no insert/update/delete) before adding a name; anything else counts as a save.
+- **Overload backs off**: 502/503/504, Cloudflare's 520-524, a 500 whose code is 57014 (statement timeout) or
+  PGRST000-003 (no connection / schema cache), a read our 25 s gave up on, or an answer slower than 8 s calls
+  `_sbStrain()`: the lane narrows to two and `_sbCooling()` holds the background reloads (`_autoRefresh` defers one to
+  the end of the strain via `_sbLater`, riders' realtime reloads wait too, the section pollers skip) for 5, 10, 20,
+  40, 60 s. A new automatic reload checks `_sbCooling()`.
+- **A list read whole comes in pages**: a device with no copy (or the fortnightly read) asks `staff_sync` for its
+  clock alone (`p_since` = `SYNC_CLOCK`, the far future) and reads `queue_entries` / `customers` in 1,000-row pages by
+  `id` (`SYNC_PAGED`, `_syncWhole`). One staff_sync document of a year of bookings ran past the 8 s limit at the rush
+  and was asked again every minute by devices that therefore never got their copy. `SYNC_CUST_COLS` is staff_sync's own
+  column list (customers keeps column grants): a new column the desk reads goes there, in `CUST_REF_COLS` and in the
+  function.
+- **Database changes are not applied during ride nights** (about 18:00-23:00 Riyadh): every DDL statement makes the
+  web layer reload its schema and reset its pool (1-2 s of stalled requests), on top of the ~30 resets a day that
+  Supabase's own realtime housekeeping causes. Hand migrations to the user for another time.
+- **Deploys go out after the evening's sessions** where possible: open pages reload for a new build.
