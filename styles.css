@@ -1458,6 +1458,7 @@
     #comm-add-modal .cmy-ca-tag{flex-shrink:0;font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--green);border:1px solid rgba(var(--green-rgb),.4);border-radius:2px;padding:1px 6px;text-transform:uppercase;letter-spacing:.4px;}
     #comm-add-modal .cmy-ca-empty{padding:14px;font-size:12.5px;}
     #comm-add-modal .cmy-o50{opacity:.5;}
+    #comm-add-modal .cmy-ca-sgno{opacity:.6;cursor:not-allowed;} /* the other gender on a men-only or women-only session (2026-10-27) */
     #jcc-group-modal .cmy-mw540,#group-edit-modal .cmy-mw540{max-width:540px;}
     #jcc-group-modal .cmy-fg-half,#group-edit-modal .cmy-fg-half{flex:1;margin-bottom:10px;}
     #jcc-group-modal .cmy-rider-row,#group-edit-modal .cmy-rider-row{display:flex;gap:6px;margin-bottom:6px;align-items:center;}
@@ -2775,6 +2776,7 @@
     .sess-lc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
     .sess-lc-date{font-size:15px;font-weight:700;letter-spacing:-.2px;}
     .sess-lc-meta{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .sess-lc-meta .sg-chip,.sess-chip-top .sg-chip{font-size:9px;font-weight:900;padding:1px 6px;text-transform:uppercase;letter-spacing:.4px;} /* who can book, the size of the event's own chip (2026-10-27) */
     .sess-lc-bar{height:4px;border-radius:2px;background:var(--border);overflow:hidden;margin-bottom:6px;}
     .sess-lc-bar>div{height:100%;border-radius:2px;transition:width .25s;}
     .sess-lc-count{font-size:11px;color:var(--muted-l);font-weight:700;}
@@ -2783,6 +2785,7 @@
     .sess-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;}
     .sess-detail-date{font-size:22px;font-weight:700;letter-spacing:-.4px;}
     .sess-detail-day{font-size:12px;color:var(--muted);font-weight:700;margin-top:3px;overflow:hidden;text-overflow:ellipsis;}
+    .sess-detail-sg{margin-top:6px;}
     .sess-detail-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
     .sess-detail-stats>div{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.06);border-radius:4px;padding:10px 14px;min-width:74px;}
     .sess-ds-num{font-size:20px;font-weight:700;line-height:1.1;}
@@ -8953,6 +8956,10 @@ body .landing-event-card.ev-vlap .vl-flag{flex:0 0 44px;background-color:var(--v
   .vl-sizes{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
 .vl-chip{display:inline-flex;align-items:center;padding:2px 9px;font-size:12px;font-weight:700;line-height:1.5;color:#fff;background:var(--vl-ink);white-space:normal;}
+/* Men only, women only or mixed (2026-10-27): the chip a session wears wherever it is shown (_sgChip). */
+.sg-chip{display:inline-flex;align-items:center;padding:2px 9px;font-size:12px;font-weight:700;line-height:1.5;color:#fff;background:#56616b;white-space:nowrap;vertical-align:middle;}
+.sg-chip.sg-male{background:#1f6fb8;}
+.sg-chip.sg-female{background:#c2185b;}
 .vl-rv-sub{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);}
 .vl-pay-note{margin-top:8px;}
 

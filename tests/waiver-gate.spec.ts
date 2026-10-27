@@ -84,7 +84,8 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     await expect.poll(() => open(page)).toBe(true);
     const m = page.locator('#waiver-gate');
     await expect(m.locator('#wg-title')).toHaveText('Swim waiver');
-    await expect(m.locator('.wg-ev')).toHaveText('Pool Night');
+    await expect(m.locator('.wg-ev')).toHaveText('Pool Night Mixed'); // a pool session says who may book it (2026-10-27)
+    await expect(m.locator('.wg-ev .sg-chip')).toHaveText('Mixed');
     await expect(m.locator('.wg-ln').nth(2)).toContainText('Jeddah Corniche Circuit'); // a named ride says where it is
     await m.locator('.wg-cb').check();
     await m.locator('.pg-btn').click();

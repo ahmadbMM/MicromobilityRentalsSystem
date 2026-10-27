@@ -267,6 +267,8 @@ with expected(fname, want_definer, note) as (values
   ('customer_set_emergency',    true,  'writes the caller''s own emergency contact; token-checked'),
   ('customer_set_emergency2',   true,  'writes the caller''s own second emergency contact (20261007150000); token-checked'),
   ('_run_entry_guard',          true,  'trigger: reads the session and the customer (RLS) to hold a runner''s row to the run''s rules'),
+  -- Men only, women only or mixed (20261027150000)
+  ('_gender_entry_guard',       true,  'trigger: reads the session and the customer (RLS) to hold a booking to a men-only or women-only session'),
   -- Fleet condition, maintenance and stock movements (20261009170000)
   ('staff_return',              true,  'frees the bikes, closes the assignment and stamps the booking in one go; staff only'),
   ('_return_check_all',         true,  'reads the business setting in staff_options for staff_return; internal only'),
