@@ -239,7 +239,11 @@ test.describe('@customer:vlap Victory Lap', () => {
     }, [st, VL]);
     expect(await on('active')).toMatchObject({ on: false });
     expect(await on('done')).toMatchObject({ on: true });
-    expect(await page.evaluate(`_bdgMedal('lapring','vlap')`)).toContain('bdg-sp');
+    const medal = await page.evaluate(`_bdgMedal('lapring','vlap')`) as string;
+    expect(medal).toContain('bdg-sp');
+    // black and white (the owner, 2026-10-27): grey into black, no purple left
+    for (const c of ['#bdbdbd', '#333333', '#000000']) expect(medal).toContain(c);
+    expect(medal).not.toMatch(/#b9a6ff|#5b3fd6|#1b1236|#140c2e/);
   });
 });
 
