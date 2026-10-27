@@ -85,14 +85,37 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
     await page.locator('#staff-tab-nav .tab-btn[data-stab="inventory"]').focus();
     await page.evaluate(`setStaffTab('inventory')`);
     await expect(page.locator('#tab-inventory .page-title').first()).toBeFocused();
-    // a section without a title: the focus stays on the rail and the section's name is said
+    // Sales opens with its title too since the staff panel tidy (2026-10-27; its heading was not a .page-title,
+    // so it was this test's section without one): from the rail, the focus goes to it as well
     await page.locator('#staff-tab-nav .tab-btn[data-stab="cashier"]').focus();
     await page.evaluate(`setStaffTab('cashier')`);
+    await expect(page.locator('#tab-cashier .page-title').first()).toBeFocused();
+    // a section with no title drawn yet (every section has one now; a part still on its way has drawn nothing):
+    // the focus stays on the rail and the section's name is said
+    await page.locator('#staff-tab-nav .tab-btn[data-stab="cashier"]').focus();
+    await page.evaluate(`document.getElementById('tab-cashier').innerHTML='';_stabFocus('cashier')`);
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="cashier"]')).toBeFocused();
     await expect(page.locator('#toast-live')).toContainText((await page.locator('#staff-tab-nav .tab-btn[data-stab="cashier"] .snav-lbl').textContent()) || 'Sales');
     // from code (a link, boot), not from the rail: the focus is not moved, the section is only said
     const moved = await page.evaluate(`(()=>{document.activeElement.blur();setStaffTab('analytics');return document.activeElement!==document.body;})()`);
     expect(moved).toBe(false);
+  });
+
+  // 2026-10-27: Workshop draws its whole section again when its list arrives; the title it replaced had the focus,
+  // which fell to the page. The new title takes it back.
+  test('a section that draws its title again when its list arrives keeps the focus on its new title', async ({ page }) => {
+    await boot(page);
+    await page.locator('#staff-tab-nav .tab-btn[data-stab="workshop"]').focus();
+    await page.evaluate(`setStaffTab('workshop')`);
+    const title = page.locator('#tab-workshop .page-title').first();
+    await expect(title).toBeFocused();
+    await page.evaluate(`renderWorkshop()`);
+    await expect(title).toBeFocused();
+    // a click elsewhere in the section is left alone: the focus goes where the person put it
+    await page.locator('#tab-workshop .page-sub').first().click();
+    await page.locator('#ws-search-input, #tab-workshop .srch-btn').first().focus();
+    await page.evaluate(`renderWorkshop(true)`);
+    await expect(title).not.toBeFocused();
   });
 
   // 2026-10-05: the strip's chips and the session forms' bike cards are real <button>s (their parts are spans:

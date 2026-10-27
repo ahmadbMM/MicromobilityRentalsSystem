@@ -5,7 +5,11 @@ const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' }
 const past = '2020-01-01';
 
 // When viewing ALL sessions, "Expected" must not count riders stuck 'waiting' on past sessions.
-test('Expected count ignores stale waiting riders from past sessions (all-sessions view)', async ({ page }) => {
+// Since the staff panel tidy (2026-10-27) the strip's Expected chip is gone: the same figure is the live
+// count's "Not arrived" (#q-live-count .q-lc-waiting), the bar that leads the night's figures.
+const notArrived = `document.querySelector('#tab-queue #q-live-count .q-lc-waiting .num')?.textContent`;
+
+test('@staff:bookings Expected count ignores stale waiting riders from past sessions (all-sessions view)', async ({ page }) => {
   await stubSupabase(page, {
     sessions: [
       { id: 'sT', day: 'Friday', session_date: today, capacity: 12, status: 'open', created_at: 2 },
@@ -22,11 +26,11 @@ test('Expected count ignores stale waiting riders from past sessions (all-sessio
   await waitForSb(page);
   await page.evaluate(`S.sfSession='all'; renderStaffQueue();`);
 
-  const expected = await page.evaluate(`[...document.querySelectorAll('#tab-queue .stat-chip')].find(c=>/expected/i.test(c.textContent))?.querySelector('b')?.textContent`);
+  const expected = await page.evaluate(notArrived);
   expect(expected).toBe('1'); // only today's waiting, not the 3 stale past ones
 
   // selecting the past session explicitly still shows its real count (3)
   await page.evaluate(`S.sfSession='sP'; renderStaffQueue();`);
-  const perSession = await page.evaluate(`[...document.querySelectorAll('#tab-queue .stat-chip')].find(c=>/expected/i.test(c.textContent))?.querySelector('b')?.textContent`);
+  const perSession = await page.evaluate(notArrived);
   expect(perSession).toBe('3');
 });

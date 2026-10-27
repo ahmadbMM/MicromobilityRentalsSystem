@@ -62,7 +62,7 @@ async function openRiders(page: P) {
 const rows = (page: P) => page.locator('#pm-host tbody tr');
 const pill = (page: P, label: string) => page.locator('#pm-host .filter-pill', { hasText: label });
 
-test('the Riders tab lists every registration with its number, company, phone and session', async ({ page }) => {
+test('@staff:bookings the Riders tab lists every registration with its number, company, phone and session', async ({ page }) => {
   const errs = watch(page);
   await openRiders(page);
 
@@ -79,7 +79,9 @@ test('the Riders tab lists every registration with its number, company, phone an
   await expect(r1).toContainText('Petrolube');
   await expect(r1).toContainText('Submitted 2 times');
   await expect(r2).toContainText('C-56');
-  await expect(page.locator('#pm-host select.filter-select[aria-label="Session"]')).toContainText('(3)');
+  // the page's own Session filter, in its filter bar: since the staff panel tidy (2026-10-27) the page draws the
+  // ride strip under its title too, inside #pm-host, and the strip's phone picker is labelled Session as well
+  await expect(page.locator('#pm-host .filter-bar select.filter-select[aria-label="Session"]')).toContainText('(3)');
 
   // Pill counts reflect the whole list, not the current filter.
   await expect(pill(page, 'All')).toContainText('3');

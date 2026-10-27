@@ -5,6 +5,8 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 // it shows two labelled times ("Gathering 5:45 AM · Start 6 AM") where every other session
 // shows a plain window — and its date line used to be nowrap with no overflow rule, so it
 // ran straight over the status badge sitting next to it.
+// Since the staff panel tidy (2026-10-27) the chips are one grid of equal cards, 220px at the least, so that
+// line wraps: it may take the lines it needs, but none of it may be cut off, sideways or under a clamped line.
 
 const sessions = [
   { id: '2026-09-05', session_date: '2026-09-05', day: 'Saturday', status: 'open', capacity: 130, created_at: 5,
@@ -54,13 +56,13 @@ for (const width of [1900, 1440, 1280, 1024, 820]) {
   });
 }
 
-test('the long Saturday line is shown in full when there is room', async ({ page }) => {
+test('@staff:bookings the long Saturday line is shown in full when there is room', async ({ page }) => {
   await strip(page, 1900);
   const date = page.locator('.sess-summary-chip', { hasText: 'SATURDAY' }).locator('.sess-chip-date');
   await expect(date).toContainText('Gathering');
   await expect(date).toContainText('Start');
-  // and it is not merely overflowing its box to manage it
-  const clipped = await date.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+  // and it is not merely overflowing its box to manage it, nor wrapped onto a line a clamp hides
+  const clipped = await date.evaluate((el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
   expect(clipped).toBe(false);
 });
 

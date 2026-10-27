@@ -105,9 +105,11 @@ test.describe('@staff:bookings Bookings in colour', () => {
     expect(await bg(page, `${tr('Paid Waiting')} .pay-toggle.paid`)).toBe('rgb(187, 247, 208)');
     expect(await bg(page, `${tr('Waiting Rider')} .pay-toggle.pending`)).toBe('rgb(253, 230, 138)');
     expect(await bg(page, `${tr('House Rider')} .pay-toggle.house`)).toBe('rgb(204, 251, 241)');
-    // the figures above the roster are the key
-    await expect(page.locator('#tab-queue .stat-chip.sc-waiting')).toHaveCount(1);
-    await expect(page.locator('#tab-queue .stat-chip.sc-active')).toHaveCount(1);
+    // the figures above the roster are the key: the live count's Not arrived and On bike (since 2026-10-27, when the
+    // strip's Expected and On Bike, the same numbers, went) and the strip's Completed
+    const mark = (sel: string) => page.evaluate(`getComputedStyle(document.querySelector('${sel}'),'::before').backgroundColor`);
+    expect(await mark('#q-live-count .q-lc-waiting')).toBe('rgb(255, 255, 255)');
+    expect(await mark('#q-live-count .q-lc-active')).toBe('rgb(212, 160, 23)');
     await expect(page.locator('#tab-queue .stat-chip.sc-done')).toHaveCount(1);
     // cancelled is red too, when the filter shows it
     await page.evaluate(`S.sfStatus='cancelled';renderStaffQueue()`);

@@ -65,7 +65,7 @@ for (const [name, width, height] of [['a phone', 390, 780], ['a tablet', 820, 11
   });
 }
 
-for (const [name, width, height] of [['a desktop', 1440, 900], ['a phone', 390, 780]] as const) {
+for (const [name, width, height] of [['a desktop', 1440, 900]] as const) {
   test(`on ${name} the analytics range bar sticks below the header, not under it`, async ({ page }) => {
     await staffAt(page, width, height);
     await page.evaluate(`setStaffTab('analytics')`);
@@ -80,10 +80,32 @@ for (const [name, width, height] of [['a desktop', 1440, 900], ['a phone', 390, 
   });
 }
 
-test('on a tablet the pinned booking number stays readable while the roster scrolls sideways', async ({ page }) => {
-  await staffAt(page, 780, 1100); // 780, not 820: since the roster fits a laptop (2026-10-03) it only just overflows at 820
+// On a phone the bar does not stick since the staff panel tidy (2026-10-27): Analytics' thirteen views became two
+// rows of equal cells there, half the screen if they stuck, so the range bar and the views scroll with the page.
+// Nothing of it is left to slide under the header: it starts below it and goes up with the page.
+test('@staff:analytics on a phone the analytics bar scrolls with the page, so it is never stuck under the header', async ({ page }) => {
+  await staffAt(page, 390, 780);
+  await page.evaluate(`setStaffTab('analytics')`);
+  const bar = page.locator('#tab-analytics .an-sticky');
+  await expect(bar).toBeVisible();
+  expect(await onTop(page, '#tab-analytics .an-sticky .an-range-bar')).toBe(true);
+  const header = (await page.locator('#topbar').boundingBox())!;
+  expect((await bar.boundingBox())!.y).toBeGreaterThanOrEqual(header.y + header.height - 1);
+  await tallPage(page, 'analytics');
+  await page.evaluate(() => window.scrollTo(0, 1800));
+  await page.waitForTimeout(150);
+  const after = (await bar.boundingBox())!;
+  expect(after.y + after.height).toBeLessThanOrEqual(0); // gone up with the page, all of it above the screen
+});
+
+test('@staff:bookings on a tablet the pinned booking number stays readable while the roster scrolls sideways', async ({ page }) => {
+  // 780, not 820: since the roster fits a laptop (2026-10-03) it only just overflows at 820. And the text one size up
+  // (Settings > This device): since the staff panel tidy (2026-10-27) the roster needs 783px at the usual size, 33 more
+  // than a 780 tablet gives it - too little for the next column to reach the middle of the pinned one, where onTop
+  // looks; one size up the roster is ~130px wider than its box.
+  await staffAt(page, 780, 1100);
   // sfShowFinished: the no-show row would otherwise be folded into the "finished" line
-  await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${S1}';S.sfShowFinished=true;renderStaffQueue()`);
+  await page.evaluate(`localStorage.setItem('cq_text_size','115');_uiApply();setStaffTab('queue');S.queueView='bookings';S.sfSession='${S1}';S.sfShowFinished=true;renderStaffQueue()`);
   const wrap = page.locator('#tab-queue .queue-table-desktop-wrap');
   await expect(wrap).toBeVisible();
   const overflow = await wrap.evaluate((w) => w.scrollWidth - w.clientWidth);

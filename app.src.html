@@ -323,9 +323,6 @@ window.mmLoading=(function(){
   </button>
   <div id="snav-scrim" data-on-click='["closeStaffNav"]' aria-hidden="true"></div>
   <nav class="tab-nav" id="staff-tab-nav" aria-label="Staff sections">
-    <button type="button" id="rail-pin" class="snav-pin" data-on-click='["toggleRailPin"]' aria-pressed="true">
-      <span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Keep sidebar open</span>
-    </button>
     <span class="snav-group" data-group="snavRides" role="heading" aria-level="2">Rides</span>
     <button class="tab-btn"        data-stab="dashboard" data-on-click='["setStaffTab","dashboard"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Dashboard</span></button>
     <button class="tab-btn active" data-stab="queue"     data-on-click='["setStaffTab","queue"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bookings</span></button>
@@ -348,6 +345,10 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="history"   data-on-click='["setStaffTab","history"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">History</span></button>
     <button class="tab-btn"        data-stab="team"      data-on-click='["setStaffTab","team"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Team</span></button>
     <button class="tab-btn"        data-stab="settings"  data-on-click='["setStaffTab","settings"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Settings</span></button>
+    <!-- at the rail's foot (2026-10-27): it sat above Dashboard and pushed Settings off a laptop's screen -->
+    <button type="button" id="rail-pin" class="snav-pin" data-on-click='["toggleRailPin"]' aria-pressed="true">
+      <span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Keep sidebar open</span>
+    </button>
   </nav>
   <div class="view-main" id="staff-main" tabindex="-1">
     <div id="ro-banner" class="ro-banner" role="status" hidden></div>
@@ -10601,10 +10602,24 @@ let _wakeInit=false,_wakeAsking=false;
 // reader names the new section and Tab starts inside it. A section opened any other way (boot, a link,
 // code) or while the focus is in the section itself (its search box) leaves the focus where it is and
 // only says the section's name.
+// A section that draws its title again when its list arrives (Workshop, Customers, Analytics...) replaced the focused
+// title and the focus fell to the page; for a few seconds the new title takes it back (2026-10-27).
+let _stabMo=null;
+function _stabHold(sec){
+  const until=Date.now()+5000;
+  _stabMo=new MutationObserver(()=>{
+    if(Date.now()>until){_stabMo.disconnect();_stabMo=null;return;}
+    const a=document.activeElement;if(a&&a!==document.body&&a!==document.documentElement)return; // focus is somewhere real
+    const h=sec.querySelector('.page-title');if(!h)return;
+    h.setAttribute('tabindex','-1');try{h.focus({preventScroll:true});}catch(e){}
+  });
+  _stabMo.observe(sec,{childList:true,subtree:true});
+}
 function _stabFocus(tab){
+  try{if(_stabMo)_stabMo.disconnect();}catch(e){}_stabMo=null;
   const a=document.activeElement,fromNav=!!(a&&a.closest&&a.closest('#staff-tab-nav,#snav-burger'));
   const sec=document.getElementById('tab-'+tab),h=sec&&sec.querySelector('.page-title');if(!sec)return;
-  if(fromNav&&h){h.setAttribute('tabindex','-1');try{h.focus({preventScroll:true});}catch(e){}return;}
+  if(fromNav&&h){h.setAttribute('tabindex','-1');try{h.focus({preventScroll:true});}catch(e){}_stabHold(sec);return;}
   if(a&&sec.contains(a))return; // typing in the section's own search box: nothing to say
   const nav=document.querySelector('#staff-tab-nav .tab-btn[data-stab="'+tab+'"] .snav-lbl');
   _srSay((h&&h.textContent)||(nav&&nav.textContent)||'');
@@ -11357,11 +11372,11 @@ function renderManagedWl(listOnly){
               ${_mwTypeCell(w,bk)}
             </div>
             <div class="rq-mwr">
-              ${bk?_bkPayCell(bk):payBtnMw(w)}${w.phone?_contactCell(w.phone,{status:'waiting'}):''}
+              ${bk?(_bkPayCell(bk)||_mwSlot('pay')+_mwSlot('pen')):payBtnMw(w)+_mwSlot('pen')}${w.phone?_contactCell(w.phone,{status:'waiting'}):_mwSlot('cc')}
               ${(_bkLive&&!_isApprovalRide(_sessGet(bk.sessionId))&&!_noGroupAdd(_sessGet(bk.sessionId)))
-                ?`<button class="btn-sm btn-muted" data-on-click="${_on("mwAddRider",bk.id)}" title="${esc(t('beAddRidersLabel'))}">+ ${t('beAddRiderBtn')}</button>`:''}
-              ${action}
-              ${w._virtual?'':`<button class="btn-sm btn-muted" data-on-click="${_on("resolveDeskWaitlist",w.id,"removed")}">${t('wlRemoveBtn')}</button>`}
+                ?`<button class="btn-sm btn-muted mw-add" data-on-click="${_on("mwAddRider",bk.id)}" title="${esc(t('beAddRidersLabel'))}">+ ${t('beAddRiderBtn')}</button>`:_mwSlot('add')}
+              ${action||_mwSlot('main')}${(w.booking_id&&_bkLive)?'':_mwSlot('more')}
+              ${w._virtual?_mwSlot('rm'):`<button class="btn-sm btn-muted mw-rm" data-on-click="${_on("resolveDeskWaitlist",w.id,"removed")}">${t('wlRemoveBtn')}</button>`}
             </div>
           </div>`;
         };
@@ -11391,6 +11406,7 @@ function renderManagedWl(listOnly){
         <div class="page-sub">${t('mwSub')}</div>
       </div>
     </div>
+    ${_qvPillsHtml()}
     <div class="rq-mwbar">
       <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span>
         <select id="mw-sess" class="filter-select" aria-label="${esc(t('colSession'))}"
@@ -11410,6 +11426,9 @@ function renderManagedWl(listOnly){
     <div id="mw-list" class="rq-mwlist">${listHtml}</div>`;
   _mwRenderSuggest(); // a background refresh rebuilds this host: put the open picker back
 }
+// An empty place in a waitlist row for a control that row has not got, so every row's Pending, call pair,
+// + Add rider, Check In, ⋯ and Remove stand in the same columns (2026-10-27; they slid about row by row).
+function _mwSlot(k){return`<span class="mw-slot mw-s-${k}" aria-hidden="true"></span>`;}
 function payBtnMw(w){const isHouse=w.paid&&_wlRowPrice(w)===0;return`<button class="pay-toggle ${isHouse?'house':w.paid?'paid':'pending'}" data-on-click="${_on("showWlPayMenu",w.id,_EV)}">${isHouse?' '+t('onTheHouseLabel'):w.paid?'\u2713 '+t('paidLabel'):' '+t('pendingLabel')}</button>`;}
 // How many of a type are free right now, as a chip. Shared by the Waitlist page and the Staff
 // List, which ask the same question next to the same decision.
@@ -17588,6 +17607,7 @@ function renderSessions(){
         <button class="btn-primary" data-on-click="${_on("_on_renderSessions_50",_EV,_EL)}">${t('newSession')}</button>
       </div>
     </div>
+    ${_sessEl.id==='sess-host'?_qvPillsHtml():''}
     ${addForm}
     ${editForm}
     <div class="filter-bar">
@@ -23793,13 +23813,17 @@ function _sessStripHtml(){
     // Every named ride says its name here — the label is how staff pick it out of a strip
     // of dates, and that is as true of the Petromin ride as of the Saturday one.
     const _cm=_evNamed(s); // a named ride wears its name and colour on the chip; only the circuit goes bare
+    // The time never breaks inside itself (each <bdi> is nowrap), but a ride staff approve shows two labelled
+    // times, "Gathering 5:45 AM · Start 6 AM": each is a piece of its own, so the line breaks between them on a
+    // narrow card instead of running out of it (2026-10-27: the cards are an equal grid, 220px at the least).
+    const _timeHtml=esc(sessionTime(s)).split(' · ').map(x=>`<bdi>${x}</bdi>`).join(' · ');
     // A real button (2026-10-05): its parts are spans (a button holds phrasing content only), drawn
     // as before by .sess-summary-chip's reset and the strip's own rules.
     return`<button type="button" class="sess-summary-chip th-${_sfTheme(s)}${isCurrent?' active-sess':''}${isToday?' today-sess':''}${_cm?' community '+_evClass(s):''}"
       aria-pressed="${isCurrent?'true':'false'}" data-on-click="${_on("setSfSession",s.id)}" title="${_cm?esc(_evName(s))+' · ':''}${esc(dayLabel(s.day))} ${esc(shortDate(s.session_date||s.id))} · ${esc(sessionTime(s))}">
       <span class="sess-chip-info">
         <span class="sess-chip-top">${_sfMark(s)}${_cm?`<span class="sess-chip-event ${_evClass(s)}">${esc(_evName(s))}</span>`:''}</span>
-        <span class="sess-chip-date">${esc(dayLabel(s.day))}, ${esc(shortDate(s.session_date||s.id))} &nbsp;·&nbsp; <bdi>${esc(sessionTime(s))}</bdi>${_wxChip(s.session_date||s.id)}</span>
+        <span class="sess-chip-date">${esc(dayLabel(s.day))}, ${esc(shortDate(s.session_date||s.id))} &nbsp;·&nbsp; ${_timeHtml}${_wxChip(s.session_date||s.id)}</span>
         ${_bfAt(s)?`<span class="sess-chip-bf">${_artIcon('cup',12)}<bdi>${esc(_bfAt(s))}</bdi></span>`:''}
         <span class="sess-chip-counts">
           <span class="rq-c-green">${sWait} ${t('waitingStat').toLowerCase()}</span>
@@ -24050,6 +24074,28 @@ function _qSel(k,lbl,opts){
   return`<select class="filter-select" data-on-change="${_on('_qSet',k,_P('value'))}" aria-label="${esc(lbl)}">${opts.map(([o,l])=>`<option value="${esc(o)}"${v===o?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
 }
 function _qSet(k,v){S[k]=v;S.sfLimit=150;if(k==='sfSort')S.sfSortDir=1;else if(k==='sfSortDir')S.sfSortDir=+v===-1?-1:1;renderStaffQueue();}
+// The table's sticky header stops under the night's figures bar, which sticks too (2026-10-27: both stuck at the
+// same line and the header covered the bar). The bar can wrap, so its height is read, not assumed.
+let _lcRo=null;
+function _lcStick(){
+  const tab=document.getElementById('tab-queue'),lc=document.getElementById('q-live-count');if(!tab)return;
+  const set=()=>{try{tab.style.setProperty('--q-lc-h',(lc&&lc.isConnected?lc.offsetHeight:0)+'px');}catch(e){}};
+  set();
+  try{if(_lcRo)_lcRo.disconnect();_lcRo=null;if(lc&&window.ResizeObserver){_lcRo=new ResizeObserver(set);_lcRo.observe(lc);}}catch(e){}
+}
+// The Bookings section's views (Bookings / Sessions / Waitlist / Hand-over) under each view's own title, the way
+// every other section puts its tabs under its title (2026-10-27; they used to sit above it). The roster puts its
+// live-location switch at the row's far end (tail).
+function _qvPillsHtml(tail){
+  const v=S.queueView||'bookings';
+  return`<div class="filter-row rq-mb12 q-views">
+    <button type="button" class="filter-pill${v==='bookings'?' active':''}" aria-pressed="${v==='bookings'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>
+    ${isAdmin()?`<button type="button" class="filter-pill${v==='sessions'?' active':''}" aria-pressed="${v==='sessions'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_2",_EV,_EL)}">${t('tabSessions')}</button>`:''}
+    <button type="button" class="filter-pill${v==='managed'?' active':''}" aria-pressed="${v==='managed'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_3",_EV,_EL)}">${t('wlTitle')}</button>
+    ${GIVE_BIKE_STEP?`<button type="button" class="filter-pill${v==='handover'?' active':''}" aria-pressed="${v==='handover'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_ho",_EV,_EL)}">${t('hoTitle')}${(()=>{const n=_hoRows().length;return n?` (${n})`:'';})()}</button>`:''}
+    ${_dqChipHtml()}${tail||''}
+  </div>`;
+}
 function renderStaffQueue(_resultsOnly){
   _scEnsure(); // staff comments, read at most once a minute (2026-10-23)
   _dqInit();_dqOverlay(); // the desk outbox: read at the first paint, its waiting changes over the rows (2026-10-10)
@@ -24081,16 +24127,10 @@ function renderStaffQueue(_resultsOnly){
   if(!_deskTabOk('queue')&&!_staffSections().some(_deskTabOk)){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=_emptyState(t('acctNoneOpen'));return;}
   if(!isAdmin()&&S.queueView==='sessions')S.queueView='bookings'; // Front Desk has no Sessions view
   if(!GIVE_BIKE_STEP&&S.queueView==='handover')S.queueView='bookings'; // no Hand-over page while the Give bike step is off
-  const _qvPills=`<div class="filter-row rq-mb12">
-    <button type="button" class="filter-pill${(S.queueView||'bookings')==='bookings'?' active':''}" aria-pressed="${((S.queueView||'bookings')==='bookings')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>
-    ${isAdmin()?`<button type="button" class="filter-pill${S.queueView==='sessions'?' active':''}" aria-pressed="${(S.queueView==='sessions')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_2",_EV,_EL)}">${t('tabSessions')}</button>`:''}
-    <button type="button" class="filter-pill${S.queueView==='managed'?' active':''}" aria-pressed="${(S.queueView==='managed')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_3",_EV,_EL)}">${t('wlTitle')}</button>
-    ${GIVE_BIKE_STEP?`<button type="button" class="filter-pill${S.queueView==='handover'?' active':''}" aria-pressed="${(S.queueView==='handover')?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_ho",_EV,_EL)}">${t('hoTitle')}${(()=>{const n=_hoRows().length;return n?` (${n})`:'';})()}</button>`:''}
-    ${_dqChipHtml()}
-  </div>`;
-  if(S.queueView==='sessions'){ // Sessions view lives inside the Bookings tab now
+  const _qvPills=_qvPillsHtml();
+  if(S.queueView==='sessions'){ // Sessions view lives inside the Bookings tab now; renderSessions puts the views under its title
     const _qh=document.getElementById('tab-queue');
-    if(_qh){_qh.innerHTML=_qvPills+'<div id="sess-host"></div>';renderSessions();_qBulkSync();}
+    if(_qh){_qh.innerHTML='<div id="sess-host"></div>';renderSessions();_qBulkSync();}
     return;
   }
   // The separate Waitlist page is gone; anything still pointing at it (a saved view, a device
@@ -24105,13 +24145,13 @@ function renderStaffQueue(_resultsOnly){
   }
   if(S.queueView==='petromin'){ // the Petromin form's registrations: their own page, under the chips
     const _qh=document.getElementById('tab-queue');
-    if(_qh){_qh.innerHTML=_qvPills+_sessStripHtml()+'<div id="pm-host"></div>';renderRiders();_qBulkSync();}
+    if(_qh){_qh.innerHTML='<div id="pm-host"></div>';renderRiders();_qBulkSync();} // renderRiders draws the views and the strip under its title
     return;
   }
   if(S.queueView==='managed'){ // Staff Managed Waitlist: its own section beside Waitlist
     const _qh=document.getElementById('tab-queue');
     if(_qh&&_mwTyping()){renderManagedWl(true);return;} // never rebuild the inputs staff are typing in
-    if(_qh){_qh.innerHTML=_qvPills+'<div id="mw-host"></div>';renderManagedWl();_qBulkSync();}
+    if(_qh){_qh.innerHTML='<div id="mw-host"></div>';renderManagedWl();_qBulkSync();} // the views go under its title
     return;
   }
   reconcileOrphanBikes();
@@ -24446,7 +24486,7 @@ function renderQRow(e){
         </div>
       </td>`:''}
       <td>${statusCellHtml(e)}</td>
-      <td><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${e.id}')`,act:()=>showEditQNumModal(e.id)}]})}</div></td>
+      <td><div class="actions-cell qa-pin">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${e.id}')`,act:()=>showEditQNumModal(e.id)}]})}</div></td>
     </tr>`;
   }
 
@@ -24524,7 +24564,7 @@ function renderQRow(e){
         ${_qc.money?`<td class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
         ${_qc.money?`<td class="rq-vm rq-pcnt">${_freeSessIds.has(primary.sessionId)?'<span class="rq-mut">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
         <td class="rq-vm rq-st">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
-        <td class="rq-vm"><div class="actions-cell">${_ciN>0?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
+        <td class="rq-vm"><div class="actions-cell qa-party">${_ciN>0?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
       </tr>`;
     }
     return group.map((e,i)=>{
@@ -24579,7 +24619,7 @@ function renderQRow(e){
             </div>
           </td>`:''}
           <td class="rq-vm">${statusCellHtml(e)}</td>
-          <td class="rq-vm"><div class="actions-cell">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
+          <td class="rq-vm"><div class="actions-cell qa-pin">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
         return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
@@ -24598,7 +24638,7 @@ function renderQRow(e){
             </div>
           </td>`:''}
           <td class="rq-vm">${statusCellHtml(e)}</td>
-          <td class="rq-vm"><div class="actions-cell">${_entryActions(e)}</div></td>
+          <td class="rq-vm"><div class="actions-cell qa-pin">${_entryActions(e)}</div></td>
         </tr>`;
       }
     }).join('');
@@ -24706,7 +24746,7 @@ function renderQRow(e){
   const _queueHeader=`
     <div class="section-header">
       <div>
-        <h1 class="page-title q-head-title">${t('staffQueueTitle')}</h1>
+        <h1 class="page-title q-head-title">${t('tabQueue')}</h1>
         <div class="refresh-indicator rq-mt3">
           <span class="refresh-dot"></span>
           <span>${t('liveLabel')} &nbsp;·&nbsp; </span>
@@ -24723,6 +24763,7 @@ function renderQRow(e){
         ${S.sfSession!=='all'&&_editOk('queue')&&_sessGet(S.sfSession)&&!_sessEnded(_sessGet(S.sfSession))?`<button type="button" class="btn-sm btn-muted rq-nw rem-open" aria-haspopup="dialog" data-on-click="${_on("openRemindSheet",S.sfSession)}">${_artIcon('bell',13)} ${t('remBtn')}</button>${(()=>{const f=_wlMode()!=='auto'?_wlFree(S.sfSession):0,n=f?_wlLine(S.sfSession).length:0;return f&&n?`<button type="button" class="btn-sm btn-green rq-nw wl-open" aria-haspopup="dialog" data-on-click="${_on("openWlOffers",S.sfSession)}">${_artIcon('promote',13)} ${esc(t('wlFreeBtn').replace('{0}',String(f)))}</button>`:'';})()}`:''}
         ${S.sfSession!=='all'?`<button data-on-click="${_on("showPrintReportOptions")}" class="rq-print" data-on-mouseover="${_on("_on_renderStaffQueue_10",_EV,_EL)}" data-on-mouseout="${_on("_on_renderStaffQueue_11",_EV,_EL)}">${ICON_PRINT} ${t('printReportBtn')}</button>`:`<button type="button" class="btn-sm btn-muted day-sheet-btn rq-nw" data-on-click="${_on("printDaySheet")}">${ICON_PRINT} ${t('daySheetBtn')}</button>`}
         <button type="button" class="btn-sm btn-muted my-shift-btn rq-nw" data-on-click="${_on("_myShiftOpen")}">${_artIcon('clock',12)} ${t('shiftTitle')}</button>
+        ${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="btn-sm btn-muted rq-nw co-head" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
         <div class="density-toggle hide-mobile">
           <button class="density-btn${S.queueDensity==='comfortable'?' active':''}" aria-pressed="${!!(S.queueDensity==='comfortable')}" data-on-click="${_on("setQueueDensity","comfortable")}" title="${t('comfortableTip')}">${_artIcon('grid',13)}</button>
           <button class="density-btn${S.queueDensity==='compact'?' active':''}" aria-pressed="${!!(S.queueDensity==='compact')}" data-on-click="${_on("setQueueDensity","compact")}" title="${t('compactTip')}">${_artIcon('rows',13)}</button>
@@ -24754,9 +24795,12 @@ function renderQRow(e){
   // about 100 booked): On bike, Booked (expected, on a bike or back) and Not arrived, from the rows the
   // live channel keeps merged. It stays at the top of the roster as it scrolls (never a bar at the foot),
   // and each figure is the stat chips' filter. Not on an approval ride, whose strip is the funnel.
+  // Since 2026-10-27 it is the one bar of the night's figures: these three lead it, the strip's other figures and
+  // the overdue line follow inside it (the shell, below), so they stick together. Its Not arrived and On bike were
+  // the strip's Expected and On Bike a second time; those two chips are gone and these wear their colours.
   const _lcHtml=(S.sfSession!=='all'&&_isApprovalRide(_sessGet(S.sfSession)))?'':(()=>{
     const nIn=base.filter(e=>e.status==='done'&&_isLive(e)).length;
-    return`<div class="q-live-count" id="q-live-count" role="group" aria-label="${esc(t('lcAria'))}">${[['active',nBike,'onBikeStat'],['all',nWait+nBike+nIn,'lcBooked'],['waiting',nWait,'lcNotArrived']].map(([f,n,k])=>{const on=f!=='all'&&S.sfStatus===f;
+    return`<div class="q-lc-nums">${[['active',nBike,'onBikeStat'],['all',nWait+nBike+nIn,'lcBooked'],['waiting',nWait,'lcNotArrived']].map(([f,n,k])=>{const on=f!=='all'&&S.sfStatus===f;
       return`<button type="button" class="q-lc-btn q-lc-${f}${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",f)}"><b class="num">${n}</b> ${esc(t(k))}</button>`;}).join('<span class="q-lc-sep" aria-hidden="true">·</span>')}</div>`;
   })();
 
@@ -24842,7 +24886,7 @@ function renderQRow(e){
     if(!filtered.length)list.push(_emptyPiece());
   }
   S._qOrder=_drawn;
-  const _shellHtml=_qvPills+_queueHeader+_lcHtml+(GIVE_BIKE_STEP?'':_liveHtml())+_sessSummaryBar+`${(()=>{
+  const _shellHtml=_queueHeader+_qvPillsHtml(GIVE_BIKE_STEP?'':_liveHtml())+_sessSummaryBar+`${(()=>{
     // Saturday Social Ride (a single community session selected): the JCC stats (Expected / On Bike /
     // Completed) don't apply — show the approval funnel instead: total riders, approved, pending, waitlist.
     const _commStats=S.sfSession!=='all'&&_isApprovalRide(_sessDisp(S.sfSession));
@@ -24859,13 +24903,18 @@ function renderQRow(e){
     // queue of them with nothing on screen to say so. The card only appears when there ARE
     // any — an empty "0 waitlisted" on every ordinary session is noise.
     const nWaitlisted=base.filter(e=>e.status==='waitlist'&&_isLive(e)).length;
-    return`<div class="stat-strip">
-      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${_statChip(nWait,t('statExpected'),'var(--green)',['setSfStatus','waiting'])}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(e=>_notHere(e,_liveDay,_nowMs)).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nBike,t('onBikeStat'),'var(--green)',['setSfStatus','active'])}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,_doneSettled),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}${(()=>{const _co=S.sfSession!=='all'?_coCount(S.sfSession):0;return _co?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("closeOutSession",S.sfSession)}" title="${esc(t('closeOutHint'))}">${t('closeOutBtn')} (${_co})</button>`:'';})()}
-    </div>${(()=>{
+    const _stats=`<div class="stat-strip">
+      ${_statChip(total,t('statNumRiders'),null,null,_dlt(total,()=>true),_prevWk&&_prevWk.tip)}${nWaitlisted?_statChip(nWaitlisted,t('waitlistLabel'),'var(--orange)',['setSfStatus','waitlist']):''}${(()=>{const n=base.filter(e=>_notHere(e,_liveDay,_nowMs)).length;return n?_statChip(n,t('notHereChip'),'var(--orange)',['setSfStatus','nothere']):'';})()}${_statChip(nDonePaid,t('statCompleted'),'var(--green)',['setSfStatus','done'],_dlt(nDonePaid,_doneSettled),_prevWk&&_prevWk.tip)}${S.sfStatus&&S.sfStatus!=='all'?`<button type="button" class="stat-chip stat-chip-clickable" data-on-click="${_on("setSfStatus","all")}">✕ ${t('clearFilterBtn')}</button>`:''}
+    </div>`;
+    const _od=(()=>{
       const od=base.filter(e=>e.status==='active'&&(_activeMinutes(e)||0)>=OVERDUE_RIDE_MIN).length;
       if(!od)return'';
       return`<div class="overdue-banner" role="status"><span>${_artIcon('warn',13)} ${od===1?t('overdueOne'):t('overdueMany').replace('{0}',String(od))}</span><button type="button" class="btn-sm btn-muted" data-on-click="${_on("_showOverdue")}">${t('foldShow')}</button></div>`;
-    })()}`;
+    })();
+    // the night's figures as one bar that stays in view (2026-10-27): the live three, the rest, the overdue line
+    // (a phone keeps the overdue line as its own row under the bar: inside it, it would be a swipe away)
+    const _ph=_qPhone();
+    return _lcHtml?`<div class="q-live-count" id="q-live-count" role="group" aria-label="${esc(t('lcAria'))}">${_lcHtml}${_stats}${_ph?'':_od}</div>${_ph?_od:''}`:_stats+_od;
   })()}
     ${(()=>{
       
@@ -24896,6 +24945,7 @@ function renderQRow(e){
           ${_artIcon('camera',14)}
           ${t('scanBtn')}
         </button>
+        ${_svBar('queue')}
       </div>
       ${_fPanel('q',`
         ${_fField(t('filterStatus'),`<select class="filter-select" data-on-change="${_on("setSfStatus",_P("value"))}" aria-label="${esc(t('filterStatus'))}">${qStatusOpts}</select>`)}
@@ -24922,7 +24972,6 @@ function renderQRow(e){
         ${_qc.km?_fField(t('runKmLabel'),`<select class="filter-select" data-on-change="${_on("setSfKm",_P("value"))}" aria-label="${esc(t('runKmLabel'))}">${[['all',t('filterAll')],...RUN_KMS.map(k=>[String(k),_runKmTxt(k)]),['none',t('runKmNone')]].map(([v,l])=>`<option value="${v}"${(S.sfKm||'all')===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`):''}`)}
       ${_qc.km?_runSplitHtml(base):''}
       ${_qc.vl?_vlSplitHtml(base):''}
-      ${_svBar('queue')}
       <div class="result-count" id="q-result-count">${filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:''}</div>
     </div>
     <div id="q-results"></div>
@@ -24980,7 +25029,7 @@ function renderQRow(e){
     }
   }
   const _tab=document.getElementById('tab-queue');
-  if(!_resultsOnly||!document.getElementById('q-results'))_qSyncShell(_tab,_shellHtml);
+  if(!_resultsOnly||!document.getElementById('q-results')){_qSyncShell(_tab,_shellHtml);_lcStick();}
   else{const _cnt=document.getElementById('q-result-count');if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';}
   _qWrite(document.getElementById('q-results'),_results);
   _qPosApply(document.getElementById('q-results'));
@@ -28262,6 +28311,14 @@ function _logRange(){
   return{from:'',to:''};
 }
 const _ksaStartIso=d=>new Date(d+'T00:00:00+03:00').toISOString();
+// A from / to pair read off two date boxes: a cleared or unreadable box takes its report's own default (2026-10-27: a
+// cleared box made toISOString throw "Invalid time value", and the report said Loading for good).
+function _rangeFix(o,backDays){
+  const ok=v=>/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))&&!isNaN(Date.parse(v+'T00:00:00+03:00'));
+  if(!ok(o.from))o.from=fmtDate(new Date(Date.now()-backDays*864e5));
+  if(!ok(o.to))o.to=todayStr();
+  return o;
+}
 const _ksaEndIso=d=>new Date(new Date(d+'T00:00:00+03:00').getTime()+864e5).toISOString();
 function _dbLogRow(r){return{id:r.id,at:r.at,ts:new Date(r.at).getTime()||0,label:r.action||'',by:r.who||'Staff',uid:r.user_id||null,m:(r.entity||r.kind)?{kind:r.kind||null,entity:r.entity||null,entity_id:r.entity_id||null,amount:r.amount==null?null:Number(r.amount)}:null};}
 async function _loadDbLogs(older){
@@ -28395,11 +28452,12 @@ function renderLogs(){
       </div>
       ${_fBtn('log',[S._logOp,S._logDay].filter(v=>v&&v!=='all').length)}
       <button class="btn-secondary lg-nowrap" data-on-click="${_on("exportLogsCSV")}">${t('logsExportBtn')}</button>
+      ${_svBar('logs')}
     </div>
     ${_fPanel('log',_fField(t('colDate'),`<select class="filter-select" aria-label="${esc(t('colDate'))}" data-on-change="${_on("_on_renderLogs_3",_EV,_EL)}">${[['all',t('filterAll')],['today',t('logToday')],['yesterday',t('logYesterday')],['7',t('histRange7')],['30',t('histRange30')],['custom',t('logRangeCustom')]].map(([v,l])=>`<option value="${v}"${(S._logDay||'all')===v?' selected':''}>${l}</option>`).join('')}</select>`)
       +(S._logDay==='custom'?_fField(t('logFrom'),`<input type="date" class="filter-select" aria-label="${esc(t('logFrom'))}" value="${esc(S._logFrom||'')}" max="${todayStr()}" data-on-change="${_on("_on_renderLogs_5",_EV,_EL,"_logFrom")}">`)+_fField(t('logTo'),`<input type="date" class="filter-select" aria-label="${esc(t('logTo'))}" value="${esc(S._logTo||'')}" max="${todayStr()}" data-on-change="${_on("_on_renderLogs_5",_EV,_EL,"_logTo")}">`):'')
       +(ops.length>1?_fField(t('logsOperator'),`<select class="filter-select" aria-label="${esc(t('logsOperator'))}" data-on-change="${_on("_on_renderLogs_4",_EV,_EL)}"><option value="all"${(S._logOp||'all')==='all'?' selected':''}>${t('filterAll')}</option>${ops.map(o=>`<option value="${esc(o)}"${S._logOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select>`):''))}
-    ${_svBar('logs')}`;
+    `;
   const dayKey=ts=>_ksaYmd(ts);
   const todayK=todayStr(),yestK=fmtDate(new Date(Date.now()-864e5));
   const catCls={pay:'lg-c-green',book:'lg-c-muted',bike:'lg-c-muted',inv:'lg-c-muted',auth:'lg-c-red',other:'lg-c-muted'}; // the chip's ink (styles.css)
@@ -36323,15 +36381,11 @@ function renderBikes(_resultsOnly){
     const rowBgCls=orphaned?' flt-bg-warn':b.status==='in-use'?' flt-bg-blue':isRetired?' flt-bg-out':'';
     return`<tr class="${rowBorderCls}${rowBgCls}${sel?' flt-bg-sel':''}">
       <td class="bk-cell-sel flt-tc"><input type="checkbox" aria-label="${esc(b.name)}" ${sel?'checked':''} data-on-click="${_on("_bkToggleSel",b.id)}"></td>
-      <td class="bk-cell-name"><div class="flt-ac10">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" class="flt-photo38">`:''}<button type="button" data-on-click="${_on("openBikeProfile",b.id)}" title="${esc(b.name)}" class="flt-namebtn"><span class="rider-name flt-ul">${esc(b.name)}</span></button></div></td>
-      <td data-label="${esc(t('bikeBrand'))}" class="flt-w7s13">${b.brand?esc(b.brand):`<span class="flt-mu">—</span>`}</td>
-      <td data-label="${esc(t('bikeModel'))}" class="flt-w7s13">${b.model?esc(b.model):`<span class="flt-mu">—</span>`}</td>
-      <td data-label="${esc(t('bikeGroupset'))}" class="flt-w7s13">${b.groupset?esc(b.groupset):`<span class="flt-mu">—</span>`}${_bkSpecsLine(b)?`<div class="flt-specs">${_bkSpecsLine(b)}</div>`:''}</td>
-      <td data-label="${esc(t('bikeSpeeds'))}" class="flt-w7s13c">${b.speeds?`${esc(b.speeds)}`:`<span class="flt-mu">—</span>`}</td>
-      <td data-label="${esc(t('bikeTypeLabel'))}">${typeBadge(b.type)}</td>
-      <td data-label="${esc(t('frameSizeLabel'))}" class="flt-w8">${esc(b.size)}</td>
+      <td class="bk-cell-name"><div class="flt-ac10">${b.photo?`<img loading="lazy" decoding="async" src="${esc(b.photo)}" alt="" class="flt-photo38">`:''}<button type="button" data-on-click="${_on("openBikeProfile",b.id)}" title="${esc(b.name)}" class="flt-namebtn"><span class="rider-name flt-ul">${esc(b.name)}</span></button></div><div class="flt-g4c flt-namesw">${colorSwatches}</div></td>
+      <td data-label="${esc(t('bikeBrand'))} · ${esc(t('bikeModel'))}" class="flt-w7s13">${b.brand?esc(b.brand):`<span class="flt-mu">—</span>`}${b.model?`<div class="flt-sub2">${esc(b.model)}</div>`:''}</td>
+      <td data-label="${esc(t('bikeGroupset'))} · ${esc(t('bikeSpeeds'))}" class="flt-w7s13">${b.groupset?esc(b.groupset):`<span class="flt-mu">—</span>`}${b.speeds?`<span class="flt-speeds"> · ${esc(b.speeds)}</span>`:''}${_bkSpecsLine(b)?`<div class="flt-specs">${_bkSpecsLine(b)}</div>`:''}</td>
+      <td data-label="${esc(t('bikeTypeLabel'))} · ${esc(t('frameSizeLabel'))}" class="flt-typesz">${typeBadge(b.type)}<span class="flt-size">${esc(b.size)}</span></td>
       <td data-label="${esc(t('bikeRentalPrice'))}" class="flt-w7nw">${b.rental_price!=null?`${_money(b.rental_price)}`:`<span class="flt-mu">—</span>`}</td>
-      <td data-label="${esc(t('colColor'))}"><div class="flt-g4c">${colorSwatches}</div></td>
       <td data-label="${esc(t('colStatus'))}">
         <div class="flt-ac6">
           <span class="avail-dot ${dot} flt-ib"></span>
@@ -36355,6 +36409,12 @@ function renderBikes(_resultsOnly){
   }
 
   function sortDir(col){return S.bkSortCol===col?S.bkSortDir:0;}
+  // Two orders in one header cell, for the columns folded together so the table fits (2026-10-27).
+  function sortHdr2(a,b){
+    const on=[a,b].find(([c])=>sortDir(c));const d=on?sortDir(on[0]):0;
+    const btn=([c,l])=>{const dd=sortDir(c),arr=dd===1?' ↑':dd===-1?' ↓':'';return`<button type="button" class="q-sort-btn" data-on-click="${_on("_on_renderBikes_13",_EV,_EL,c,c)}">${l}${arr?`<span aria-hidden="true">${arr}</span>`:''}</button>`;};
+    return`<th class="flt-sh${d?' flt-sh-on':''}"${d?` aria-sort="${d===1?'ascending':'descending'}"`:''}>${btn(a)}<span class="th-sep"> · </span>${btn(b)}</th>`;
+  }
   function sortHdr(col,label){
     const d=sortDir(col);
     const arrow=d===1?' ↑':d===-1?' ↓':'';
@@ -36460,20 +36520,16 @@ function renderBikes(_resultsOnly){
       :`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper flt-tw"><table class="queue-table bk-table flt-tmin"><caption class="sr-only">${t('bikesTitle')}</caption>
         <thead><tr>
           ${_selHdr}
-          ${sortHdr('name',t('bikeNameLabel'))}
-          ${sortHdr('brand',t('bikeBrand'))}
-          ${sortHdr('model',t('bikeModel'))}
-          ${sortHdr('groupset',t('bikeGroupset'))}
-          ${sortHdr('speeds',t('bikeSpeeds'))}
-          ${sortHdr('type',t('bikeTypeLabel'))}
-          ${sortHdr('size',t('frameSizeLabel'))}
+          ${sortHdr2(['name',t('bikeNameLabel')],['color',t('colorWord')])}
+          ${sortHdr2(['brand',t('bikeBrand')],['model',t('bikeModel')])}
+          ${sortHdr2(['groupset',t('bikeGroupset')],['speeds',t('bikeSpeeds')])}
+          ${sortHdr2(['type',t('bikeTypeLabel')],['size',t('frameSizeLabel')])}
           ${sortHdr('price',t('bikeRentalPrice'))}
-          ${sortHdr('color',t('colColor'))}
           ${sortHdr('status',t('colStatus'))}
           ${sortHdr('rider',t('colRider'))}
           <th>${t('colManageBike')}</th>
         </tr></thead>
-        <tbody>${typeBikes.length?typeBikes.map(renderBikeRow).join(''):`<tr><td colspan="13" class="flt-tnone">${emptyIllustration(ILLUS_BIKE_OK,t('noBikes'))}</td></tr>`}</tbody>
+        <tbody>${typeBikes.length?typeBikes.map(renderBikeRow).join(''):`<tr><td colspan="9" class="flt-tnone">${emptyIllustration(ILLUS_BIKE_OK,t('noBikes'))}</td></tr>`}</tbody>
       </table></div>`;
     return`<div class="flt-sec">
       <div class="flt-sechead">
@@ -36584,7 +36640,6 @@ function renderBikes(_resultsOnly){
         <h1 class="page-title">${t('bikesTitle')}</h1>
       </div>
       <div class="flt-headr">
-        ${_bkSvcEveryHtml()}
         <div class="view-toggle flt-f00">
           <button class="view-toggle-btn${S.bkView==='grid'?' active':''}" aria-pressed="${!!(S.bkView==='grid')}" data-on-click="${_on("_on_renderBikes_19",_EV,_EL)}" title="${t('gridViewBtn')}">${_artIcon('grid',13)}</button>
           <button class="view-toggle-btn${S.bkView==='table'?' active':''}" aria-pressed="${!!(S.bkView==='table')}" data-on-click="${_on("_on_renderBikes_20",_EV,_EL)}" title="${t('tableViewBtn')}">${_artIcon('rows',13)}</button>
@@ -36595,6 +36650,7 @@ function renderBikes(_resultsOnly){
         <button class="btn-secondary" data-on-click="${_on("_fleetReport")}">${t('fleetRepBtn')}</button>
       </div>
     </div>
+    ${(()=>{const sv=_bkSvcEveryHtml();return sv?`<div class="flt-svc-row">${sv}</div>`:'';})()}
     ${addForm}
     ${_bkAttnHtml(bikes)}
     <div class="stats-row flt-mb20">
@@ -39227,6 +39283,7 @@ function renderRiders(_resultsOnly){
         <button class="btn-sm btn-muted" data-on-click="${_on("openScanModal")}" title="${esc(t('scanTitle'))}">${_artIcon('camera',12)} ${t('ridersScan')}</button>
       </div>
     </div>
+    ${_qvPillsHtml()}${_sessStripHtml()}
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('riders',S.ridersSearch)}" data-srch="riders">${_artIcon('search',13)}
         <input id="riders-search-input" class="search-input" aria-label="${esc(t('ridersSearch'))}" placeholder="${esc(t('ridersSearch'))}" value="${esc(S.ridersSearch)}" data-on-input="${_on("setRidersSearch",_P("value"))}">
@@ -39471,20 +39528,21 @@ function renderWorkshop(listOnly){
   const el=document.getElementById('tab-workshop');if(!el)return;
   const W=_ws();_stLoad('workshop');
   if(listOnly&&W.jobs){const l=document.getElementById('ws-list');if(l){l.innerHTML=_wsListHtml();return;}}
-  const head=`<h2 class="form-title">${t('wsTitle')}</h2><div class="ca-sub">${t('wsSub')}</div>`;
+  // the section's own title above its card, as every section opens (2026-10-27; it was the card's heading)
+  const head=`<h1 class="page-title">${t('wsTitle')}</h1><div class="page-sub">${t('wsSub')}</div>`;
   if(!W.jobs){
     let body;
     if(W.missing)body=_emptyState(t('wsNotSetUp'),{cls:'ws-not-set-up'});
     else if(W.err&&!W.busy)body=_loadErr(t('wsLoadErr'),_on("_on_renderWorkshop_1",_EV,_EL),{btnCls:'ws-retry'});
     else{if(!W.busy)_wsLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
+    el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_wsLoad(); // a minute old: read again, the list stays meanwhile
   if(W.filter!=='all'&&!WS_GROUPS[W.filter])W.filter='new';
   const n=k=>k==='all'?W.jobs.length:W.jobs.filter(j=>WS_GROUPS[k].includes(j.status)).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" aria-pressed="${(W.filter===k)?'true':'false'}" data-ws-filter="${k}" data-on-click="${_on("_wsSetFilter",k)}">${label} (${n(k)})</button>`;
-  el.innerHTML=`<div class="form-section ws-mt0">${head}
+  el.innerHTML=`${head}<div class="form-section ws-mt0">
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('ws',W.q)}" data-srch="ws">${_artIcon('search',13)}
         <input id="ws-search-input" class="search-input" aria-label="${esc(t('wsSearch'))}" placeholder="${esc(t('wsSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_wsSearch",_P("value"))}">
@@ -39492,7 +39550,8 @@ function renderWorkshop(listOnly){
       </div>
       ${pill('new',t('wsFNew'))}${pill('booked',t('wsFBooked'))}${pill('shop',t('wsFShop'))}${pill('ready',t('wsFReady'))}${pill('done',t('wsFDone'))}${pill('all',t('filterAll'))}
       <button type="button" class="btn-secondary btn-sm ws-rep-btn" data-on-click="${_on("_wsReport")}">${t('wsRepBtn')}</button>
-    </div>${_svBar('workshop')}</div>
+      ${_svBar('workshop')}
+    </div></div>
     <div class="ca-list" id="ws-list">${_wsListHtml()}</div>
   </div>`;
 }
@@ -39969,13 +40028,13 @@ function renderMessages(listOnly){
   const el=document.getElementById('tab-messages');if(!el)return;
   const W=_sm();_stLoad('messages');
   if(listOnly&&W.rows){const l=document.getElementById('sm-list');if(l){l.innerHTML=_smListHtml();return;}}
-  const head=`<h2 class="form-title">${t('smTitle')}</h2><div class="ca-sub">${t('smSub')}</div>`;
+  const head=`<h1 class="page-title">${t('smTitle')}</h1><div class="page-sub">${t('smSub')}</div>`; // the section's title above its card (2026-10-27)
   if(!W.rows){
     let body;
     if(W.missing)body=_emptyState(t('smNotSetUp'),{cls:'sm-not-set-up'});
     else if(W.err&&!W.busy)body=_loadErr(t('smLoadErr'),_on("_on_renderMessages_1",_EV,_EL),{btnCls:'sm-retry'});
     else{if(!W.busy)_smLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
+    el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_smLoad(); // a minute old: read again, the list stays meanwhile
@@ -39983,7 +40042,7 @@ function renderMessages(listOnly){
   const n=k=>k==='all'?inKind.length:inKind.filter(m=>m.status===k).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" aria-pressed="${(W.filter===k)?'true':'false'}" data-sm-filter="${k}" data-on-click="${_on("_smSetFilter",k)}">${label} (${n(k)})</button>`;
   const kindSel=`<select aria-label="${esc(t('a11yMsgKind'))}" id="sm-kind" class="filter-select" data-on-change="${_on("_smSetKind",_P("value"))}">${[['all',t('filterAll')],...Object.entries(SM_KIND_KEY).map(([k,key])=>[k,t(key)])].map(([v,l])=>`<option value="${v}"${W.kind===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
-  el.innerHTML=`<div class="form-section ws-mt0">${head}
+  el.innerHTML=`${head}<div class="form-section ws-mt0">
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('sm',W.q)}" data-srch="sm">${_artIcon('search',13)}
         <input id="sm-search-input" class="search-input" aria-label="${esc(t('smSearch'))}" placeholder="${esc(t('smSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_smSearch",_P("value"))}">
@@ -39991,7 +40050,8 @@ function renderMessages(listOnly){
       </div>
       ${_fBtn('sm',W.kind!=='all'?1:0)}
       ${pill('new',t('smFNew'))}${pill('replied',t('smFReplied'))}${pill('closed',t('smFClosed'))}${pill('all',t('filterAll'))}
-    </div>${_fPanel('sm',_fField(t('smLblKind'),kindSel)+_fField(t('smAssignee'),_smWhoSel()))}${_svBar('messages')}</div>
+      ${_svBar('messages')}
+    </div>${_fPanel('sm',_fField(t('smLblKind'),kindSel)+_fField(t('smAssignee'),_smWhoSel()))}</div>
     <div class="ca-list" id="sm-list">${_smListHtml()}</div>
   </div>`;
 }
@@ -40254,19 +40314,19 @@ function renderAmbassadors(listOnly){
   const el=document.getElementById('tab-ambassadors');if(!el)return;
   const W=_amb();
   if(listOnly&&W.rows){const l=document.getElementById('amb-list');if(l){l.innerHTML=_ambListHtml();return;}}
-  const head=`<h2 class="form-title">${t('amTitle')}</h2><div class="ca-sub">${t('amSub')}</div>`;
+  const head=`<h1 class="page-title">${t('amTitle')}</h1><div class="page-sub">${t('amSub')}</div>`; // the section's title above its card (2026-10-27)
   if(!W.rows){
     let body;
     if(W.missing)body=_emptyState(t('amNotSetUp'),{cls:'amb-not-set-up'});
     else if(W.err&&!W.busy)body=_loadErr(t('amLoadErr'),_on("_on_renderAmbassadors_1",_EV,_EL),{btnCls:'amb-retry'});
     else{if(!W.busy)_ambLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
+    el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_ambLoad();
   const n=k=>k==='all'?W.rows.length:k==='rewards'?W.rows.filter(a=>_ambReds(a.id).some(r=>r.status==='requested')).length:W.rows.filter(a=>a.status===k).length;
   const pill=(k,label)=>`<button type="button" class="filter-pill${W.filter===k?' active':''}" aria-pressed="${(W.filter===k)?'true':'false'}" data-amb-filter="${k}" data-on-click="${_on("_ambSetFilter",k)}">${label} (${n(k)})</button>`;
-  el.innerHTML=`<div class="form-section ws-mt0">${head}
+  el.innerHTML=`${head}<div class="form-section ws-mt0">
     <div class="filter-bar"><div class="filter-row">
       <div class="${_srchCls('amb',W.q)}" data-srch="amb">${_artIcon('search',13)}
         <input id="amb-search-input" class="search-input" aria-label="${esc(t('amSearch'))}" placeholder="${esc(t('amSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_ambSearch",_P("value"))}">
@@ -41164,13 +41224,13 @@ function renderVendors(arg){
   const el=document.getElementById('tab-vendors');if(!el)return;
   const W=_vendor(),view=_vendorV();
   if(arg==='list'&&W.bk){const l=document.getElementById('vendor-list');if(l){l.innerHTML=view==='venues'?_vendorVenListHtml():view==='feedback'?_vendorFbListHtml():_vendorReqListHtml();return;}}
-  const head=`<h2 class="form-title">${t('vndTitle')}</h2><div class="ca-sub">${t('vndSub')}</div>`;
+  const head=`<h1 class="page-title">${t('vndTitle')}</h1><div class="page-sub">${t('vndSub')}</div>`; // the section's title above its card (2026-10-27)
   if(!W.bk){
     let body;
     if(W.missing)body=_emptyState(t('vndNotSetUp'),{cls:'vendor-not-set-up'});
     else if(W.err&&!W.busy)body=_loadErr(t('vndLoadErr'),_on('_on_renderVendors_1',_EV,_EL),{btnCls:'vendor-retry'});
     else{if(!W.busy)_vendorLoad();body=skeletonList();}
-    el.innerHTML=`<div class="form-section ws-mt0">${head}${body}</div>`;
+    el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
     return;
   }
   if(!W.busy&&Date.now()-(W.at||0)>60000)_vendorLoad();
@@ -41188,9 +41248,9 @@ function renderVendors(arg){
     body=!isAdmin()?_emptyState(t('adminOnlyMsg')):`<div class="ca-sub">${t('vndTiersSub')}</div>${(W.tiers||[]).map(x=>_vendorTierCard(_vendorTd(x.id))).join('')||_emptyState(t('vndNone'))}`;
   }else if(view==='feedback')body=_vendorFbBody(srch,pill);
   else body=_vendorCalHtml();
-  el.innerHTML=`<div class="form-section ws-mt0">${head}
+  el.innerHTML=`${head}
     <div class="filter-row cmy-nav">${nav('calendar','vndVCal')}${nav('requests','vndVReq',_vendorBadgeN())}${nav('venues','vndVVen')}${nav('tiers','vndVTier')}${nav('feedback','vndVFb')}</div>
-    <div class="vendor-body">${body}</div></div>`;
+    <div class="form-section ws-mt0"><div class="vendor-body">${body}</div></div>`;
 }
 
 // ── Website: what micromobility.sa shows ────────────────────────────────────
@@ -42328,7 +42388,7 @@ function renderHistory(_resultsOnly){
   _stLoad('history');
   _pushNav(); // the address follows the view (Rides / Log)
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='hist-search-input'&&document.getElementById('hist-results'))_resultsOnly=true;
-  const _hvPills=`<div class="filter-row hist-mb12">
+  const _hvPills=`<div class="filter-row hist-mb12 hist-tabs">
     <button type="button" class="filter-pill${(S.histView||'rides')==='rides'?' active':''}" aria-pressed="${((S.histView||'rides')==='rides')?'true':'false'}" data-on-click="${_on("_on_renderHistory_1",_EV,_EL)}">${t('histTabRides')}</button>
     <button type="button" class="filter-pill${S.histView==='log'?' active':''}" aria-pressed="${(S.histView==='log')?'true':'false'}" data-on-click="${_on("_on_renderHistory_2",_EV,_EL)}">${t('logsTitle')}</button>
     ${_histMoneyViews().map(([k,l])=>`<button type="button" class="filter-pill${S.histView===k?' active':''}" aria-pressed="${S.histView===k?'true':'false'}" data-on-click="${_on("_on_renderHistory_9",k)}">${l}</button>`).join('')}
@@ -42363,6 +42423,13 @@ function renderHistory(_resultsOnly){
     const arrow=active?(S.histSortDir===1?'↑':'↓'):'';
     return`<th class="an-sort-th an-sort-txt${active?' an-sort-active':''}${cls?' '+cls:''}"${active?` aria-sort="${S.histSortDir===1?'ascending':'descending'}"`:''}><button type="button" class="q-sort-btn" data-on-click="${_on("setHistSort",col)}">${label}${active?' <span aria-hidden="true">'+arrow+'</span>':''}</button></th>`;
   }
+  // Two orders in one header cell, for the columns folded together to fit a laptop (2026-10-27): each word
+  // its own sort button, the cell says which one the list follows.
+  function thHistSort2(a,b,cls=''){
+    const on=[a,b].find(([c])=>S.histSort===c);
+    const btn=([c,l])=>{const act=S.histSort===c,arr=act?(S.histSortDir===1?'↑':'↓'):'';return`<button type="button" class="q-sort-btn" data-on-click="${_on("setHistSort",c)}">${l}${act?' <span aria-hidden="true">'+arr+'</span>':''}</button>`;};
+    return`<th class="an-sort-th an-sort-txt${on?' an-sort-active':''}${cls?' '+cls:''}"${on?` aria-sort="${S.histSortDir===1?'ascending':'descending'}"`:''}>${btn(a)}<span class="th-sep"> · </span>${btn(b)}</th>`;
+  }
   const hStatusOpts=['all','done','noshow','cancelled','removed'].map(s=>{
     const l={all:t('filterAll'),done:t('filterDone'),noshow:t('filterNoshow'),cancelled:t('statusCancelled'),removed:t('removedLabel')||'Removed'}[s];
     return`<option value="${s}"${S.histStatus===s?' selected':''}>${l}</option>`;}).join('');
@@ -42392,20 +42459,16 @@ function renderHistory(_resultsOnly){
       </td>
       <td>
         <div class="rider-name hist-name" role="button" tabindex="0" data-on-click="${_on("openCustomerProfile",e.id)}" data-on-keydown="${_on("_on_renderHistory_3",_EV,_EL,e.id)}" title="${t('custProfileTitle')}">${esc(e.name)}${_ptnChip(e)}${wiTag}${noShowFlag(e)}</div>
-        <div class="rider-sub hist-mt3"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi></div>
+        <div class="rider-sub hist-mt3 hist-phone"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${e.phone?_contactCell(e.phone,e):''}</div>
         <div class="rider-sub">${hasEmail?esc(em):`<span class="hist-noemail">${t('noEmailLabel')}</span>`}</div>
       </td>
-      ${_hc.bike?`<td class="hist-ht">${e.height?e.height+' '+t('cmUnit'):'<span class="hist-c-muted">—</span>'}</td>`:''}
-      ${_hc.bike?`<td>${typeBadge(resolvedType(e))}</td>`:''}
+      ${_hc.bike?`<td>${typeBadge(resolvedType(e))}<div class="hist-ht">${e.height?e.height+' '+t('cmUnit'):'<span class="hist-c-muted">—</span>'}</div></td>`:''}
       <td class="hide-mobile">
         <div class="hist-day">${dayLabel(e.sessionDay)||''}</div>
         <div class="hist-sdate">${shortDate(e.sessionDate)}</div>
         <div class="hist-stime"><bdi>${_hTimeOf(e.sessionId)}</bdi></div>
       </td>
-      ${_hc.bike?`<td class="hist-bike">${bike?esc(bike.name):`<span class="hist-c-muted">—</span>`}</td>`:''}
-      ${_hc.bike?`<td><div class="hist-row4">
-        ${bike&&bike.colors&&bike.colors.length?bike.colors.map((c,ci)=>`<span class="hist-dot"${_swA(bike,ci)} data-cssv="${_cssv({'--hist-bg':c})}"></span>`).join(''):'<span class="hist-c-muted">—</span>'}
-      </div></td>`:''}
+      ${_hc.bike?`<td class="hist-bike">${bike?esc(bike.name):`<span class="hist-c-muted">—</span>`}${bike&&bike.colors&&bike.colors.length?`<div class="hist-row4 hist-dots">${bike.colors.map((c,ci)=>`<span class="hist-dot"${_swA(bike,ci)} data-cssv="${_cssv({'--hist-bg':c})}"></span>`).join('')}</div>`:''}</td>`:''}
       ${_hc.money?`<td class="hist-price ${e.paid?'hist-c-green':'hist-c-mutedl'}">${_money(e.price??DEFAULT_PRICE)}</td>`:''}
       ${_hc.money?`<td data-on-click="${_on("_on_renderHistory_4",_EV,_EL)}">
         <div class="hist-row4">
@@ -42419,8 +42482,7 @@ function renderHistory(_resultsOnly){
         ${e.checkedInAt?`<div class="hist-sub3">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
         ${e.checkedOutAt?`<div class="hist-sub">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
       </td>
-      <td>${_contactCell(e.phone,e)}</td>
-      <td><div class="actions-cell">
+      <td class="hist-act"><div class="actions-cell">
         ${e.status==='removed'
           ?`<button class="btn-sm btn-green" data-on-click="${_on("doRestoreEntry",e.id)}">${t('restoreEntryBtn')||'Restore'}</button>`
           :`<div class="hist-acts">
@@ -42430,7 +42492,7 @@ function renderHistory(_resultsOnly){
       </div></td>
     </tr>`;
   }).join('');
-  const emptyRow=filtered.length===0?`<tr><td colspan="${13-(_hc.bike?0:4)-(_hc.money?0:2)}"><div class="hist-p8">${emptyIllustration(ILLUS_HISTORY,t('noHistory'))}</div></td></tr>`:'';
+  const emptyRow=filtered.length===0?`<tr><td colspan="${10-(_hc.bike?0:2)-(_hc.money?0:2)}"><div class="hist-p8">${emptyIllustration(ILLUS_HISTORY,t('noHistory'))}</div></td></tr>`:'';
   if(!_resultsOnly)document.getElementById('tab-history').innerHTML=`
     <div class="section-header hist-mb8">
       <div>
@@ -42477,6 +42539,7 @@ function renderHistory(_resultsOnly){
         <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span>
           <select class="filter-select" data-on-change="${_on("setHistSess",_P("value"))}" aria-label="${esc(t('colSession'))}">${sessOpts}</select></label>
         ${_fBtn('hist',[S.histStatus,S.histPay,S.histType,S.histSize,S.histRange].filter(v=>v&&v!=='all').length)}
+        ${_svBar('history')}
       </div>
       ${_fPanel('hist',_fField(t('filterStatus'),`<select class="filter-select" data-on-change="${_on("setHistStatus",_P("value"))}" aria-label="${esc(t('filterStatus'))}">${hStatusOpts}</select>`)
         +_fField(t('filterPay'),`<select class="filter-select" data-on-change="${_on("setHistPay",_P("value"))}" aria-label="${esc(t('filterPay'))}">${hPayOpts}</select>`)
@@ -42485,7 +42548,6 @@ function renderHistory(_resultsOnly){
         +_fField(t('histRangeLabel'),`<select class="filter-select" data-on-change="${_on("setHistRange",_P("value"))}" aria-label="${esc(t('histRangeLabel'))}">${hRangeOpts}</select>`)
         +(S.histRange==='custom'?_fField(t('histFrom'),`<input type="date" id="hist-from" class="filter-select" value="${esc(S.histFrom||'')}" aria-label="${esc(t('histFrom'))}" data-on-change="${_on('setHistDates','histFrom',_P('value'))}">`)
           +_fField(t('histTo'),`<input type="date" id="hist-to" class="filter-select" value="${esc(S.histTo||'')}" aria-label="${esc(t('histTo'))}" data-on-change="${_on('setHistDates','histTo',_P('value'))}">`):''))}
-      ${_svBar('history')}
       ${filtered.length!==hist.length?`<div class="result-count">${filtered.length} ${t('resultOf')} ${hist.length} ${t('resultRecords')}</div>`:''}
     </div>
     <div id="hist-results"></div>`;
@@ -42494,18 +42556,15 @@ function renderHistory(_resultsOnly){
   const _histResults=`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper"><table class="queue-table t-cards"><caption class="sr-only">${t('historyTitle')}</caption>
       <thead><tr>
         ${thHistSort('num','#')}
-        ${thHistSort('name',t('colRider'))}
-        ${_hc.bike?thHistSort('height',t('colHeight')):''}
-        ${_hc.bike?thHistSort('type',t('bikeTypeLabel')):''}
+        ${thHistSort2(['name',t('colRider')],['phone',t('colContact')])}
+        ${_hc.bike?thHistSort2(['type',t('bikeTypeLabel')],['height',t('colHeight')]):''}
         ${thHistSort('session',t('colSession'),'hide-mobile')}
-        ${_hc.bike?thHistSort('bike',t('colBike')):''}
-        ${_hc.bike?thHistSort('color',t('colColor')):''}
+        ${_hc.bike?thHistSort2(['bike',t('colBike')],['color',t('colorWord')]):''}
         ${_hc.money?thHistSort('price',t('colPrice')||'Price'):''}
         ${_hc.money?thHistSort('amount',t('colPayment')):''}
         ${thHistSort('status',t('colStatus'))}
         ${thHistSort('dur',t('colDuration'))}
-        ${thHistSort('phone',t('colContact'))}
-        <th>${t('colManageRecord')}</th>
+        <th class="hist-act">${t('colManageRecord')}</th>
       </tr></thead>
       <tbody>${rows}${emptyRow}</tbody>
     </table></div>
@@ -44503,7 +44562,7 @@ function _paS(){return S._paS||(S._paS={who:'',cust:'',via:'',from:fmtDate(new D
 function _on_pa_set(event,el,k){const A=_paS();A[k]=String(el.value||'').trim();_paRun(true);}
 function _on_pa_more(event,el){el.disabled=true;_paRun(false,true);}
 async function _paRun(reset,more){
-  const A=_paS();if(!sb)return;
+  const A=_rangeFix(_paS(),29);if(!sb)return;
   if(reset){A.rows=[];A.end=false;A.err=null;}
   A.busy=true;_paDraw(true);
   const key=JSON.stringify([A.who,A.cust,A.via,A.from,A.to]);A.key=key;
@@ -44606,7 +44665,7 @@ function _moneyReasonText(s){
 function _exS(){return S._exS||(S._exS={from:fmtDate(new Date(Date.now()-6*864e5)),to:todayStr(),op:'',items:null,busy:false,err:null,key:''});}
 function _on_ex_op(event,el){_exS().op=el.value;_exDraw(true);}
 async function _exLoad(){
-  const E=_exS();const key=E.from+'~'+E.to;E.key=key;E.busy=true;E.err=null;_exDraw(true);
+  const E=_rangeFix(_exS(),6);const key=E.from+'~'+E.to;E.key=key;E.busy=true;E.err=null;_exDraw(true);
   const from=_ksaStartIso(E.from),to=_ksaEndIso(E.to);
   const cols='id,receipt_id,session_id,customer_name,name,category,qty,price,pay,created_at,team_name,voided_at,voided_by,void_reason,refunded_at,refunded_by,refund_reason'+(S.hasCsSeller===false?'':',sold_by_name');
   const salesQ=c=>sb.from('cashier_sales').select(c).gte('created_at',from).lt('created_at',to).or('voided_at.not.is.null,refunded_at.not.is.null,pay.eq.house,pay.eq.team,category.eq.__discount__').order('created_at',{ascending:false}).limit(3000);
@@ -44987,7 +45046,8 @@ async function _tillZ(id){
 // ── M5: the Team report (Analytics > Team, admins) ────────────────────────────────────────────────
 function _tmS(){return S._tmS||(S._tmS={from:fmtDate(new Date(Date.now()-29*864e5)),to:todayStr(),acts:null,hours:null,busy:false,err:null,key:'',noCols:false});}
 async function _tmLoadData(){
-  const M=_tmS(),key=M.from+'~'+M.to;M.key=key;M.busy=true;renderTeamReport(true);
+  const M=_rangeFix(_tmS(),29);
+  const key=M.from+'~'+M.to;M.key=key;M.busy=true;renderTeamReport(true);
   const from=_ksaStartIso(M.from),to=_ksaEndIso(M.to);
   const acts=[];let noCols=false;
   try{
@@ -45162,11 +45222,11 @@ function renderCashier(){
   const catRows=tot.cats.map(c=>`<div class="sl-cat"><span class="sl-muted">${esc(_invCatLabel(c.cat))} <span class="sl-o60">×${c.qty}</span></span><span class="sl-b700">${_money(c.value)}</span></div>`).join('');
   el.innerHTML=`<div class="sl-wrap">
     <div class="sl-head">
-      <div><h2 class="sl-h2">${t('cashierTitle')}</h2>
-        <div class="sl-sub">${t('cashTabSub')}</div>
+      <div><h1 class="page-title">${t('cashierTitle')}</h1>
+        <div class="page-sub">${t('cashTabSub')}</div>
         ${_outboxCount()?`<div role="button" tabindex="0" data-on-click="${_on("_outboxRetryOrClear")}" data-on-keydown="${_on("_on_renderCashier_3",_EV,_EL)}" title="${t('cashPendingSync').replace('{0}',_outboxCount())}" class="sl-sync">↻ ${t('cashPendingSync').replace('{0}',_outboxCount())}</div>`:''}</div>
       <div class="sl-head-r">
-        <div><label class="sl-lbl">${t('colSession')}</label><br><select aria-label="${esc(t('colSession'))}" data-on-change="${_on("_ctSet","_ctSession",_P("value"))}" class="sl-in sl-sess">${sessOpts}</select></div>
+        <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span><select aria-label="${esc(t('colSession'))}" data-on-change="${_on("_ctSet","_ctSession",_P("value"))}" class="filter-select sl-sess">${sessOpts}</select></label>
         ${shop?'':`<button class="btn-secondary sl-nowrap" data-on-click="${_on("printCloseout")}">${t('closeoutBtn')}</button>`}
         <button class="btn-secondary sl-nowrap" data-on-click="${_on("recordDrawerCount")}">${t('tillBtn')}</button>
       </div>
@@ -45485,7 +45545,7 @@ function renderInventory(){
   </div>`;
   const suppItems=items.filter(it=>_isSuppCat(it.category));
   const equipItems=items.filter(it=>!_isSuppCat(it.category));
-  const navbtn=(k,label)=>`<button class="inv-navbtn${sec===k?' active':''}" aria-current="${(sec===k)?'page':'false'}" data-on-click="${_on("setInvSection",k)}">${label}</button>`;
+  const navbtn=(k,label)=>`<button type="button" class="filter-pill inv-navbtn${sec===k?' active':''}" aria-current="${(sec===k)?'page':'false'}" data-on-click="${_on("setInvSection",k)}">${label}</button>`;
   const addBtn=`<button class="btn-primary" data-on-click="${_on("toggleAddInv")}">${t('invAddBtn')}</button>`;
   const secHead=(title,withAdd,withToggle)=>`<div class="iv-sechead"><h2 class="page-title iv-sectitle">${title}</h2><div class="iv-ac8">${withToggle?viewToggle:''}${withAdd?addBtn:''}</div></div>`;
   // Split a section's items into sub-sections by category (presets first, then any custom categories), each with its own heading.
@@ -45570,14 +45630,12 @@ function renderInventory(){
   el.innerHTML=`
     <h1 class="page-title">${t('invTitle')}</h1>
     <div class="page-sub">${t('invSub')}</div>
-    <div class="inv-layout">
-      <div class="inv-sidebar">
-        ${navbtn('bikes',' '+t('invSecBikes'))}
-        ${navbtn('equipment',' '+t('invSecEquipment'))}
-        ${navbtn('supplements',' '+t('invSecSupplements'))}
-      </div>
-      <div class="inv-content">${content}</div>
-    </div>`;
+    <div class="filter-row inv-tabs">
+      ${navbtn('bikes',t('invSecBikes'))}
+      ${navbtn('equipment',t('invSecEquipment'))}
+      ${navbtn('supplements',t('invSecSupplements'))}
+    </div>
+    <div class="inv-content">${content}</div>`;
   if(sec==='bikes')renderBikes();
   if(_invHadFocus){const inp=document.getElementById('inv-search');if(inp){inp.focus();const v=inp.value;inp.value='';inp.value=v;}}
 }
@@ -47173,9 +47231,9 @@ function _commAccounts(){
         ${_srchBtn()}
       </div>
       ${_fBtn('am',_amOnN())}
+      ${_svBar('accounts')}
     </div>
     ${_amPanel()}
-    ${_svBar('accounts')}
     ${S.amSel?`<div id="am-sel-bar" class="am-selbar" role="group" aria-label="${esc(t('amSelBtn'))}">${_amSelBarInner()}</div>`:''}
     <div class="am-list">
       <div class="am-head${S.amSel?' am-selmode':''}" aria-hidden="true">${S.amSel?'<span class="am-sel"></span>':''}
@@ -50431,7 +50489,14 @@ function _renderAnalyticsNow(){
     <div class="an-sticky">
       ${_rangeBar()}
       <div class="an-subnav">
-        ${[['overview',t('anNavOverview')],['revenue',t('anRevenue')],['ridership',t('anRidership')],['operations',t('anOperations')],['fleet',t('anFleetSection')],['ratings',t('anRatingsNav')],['customers',t('anNavCustomers')],['growth',t('anNavGrowth')],['leaderboard',t('commTabLeaderboard')],['community',t('anNavCommunity')],['months',t('anNavMonths')],['reports',t('anNavReports')],...(isAdmin()?[['team',t('anNavTeam')]]:[])].map(([v,l])=>`<button class="an-nav-btn${S.anView===v?' active':''}" aria-current="${(S.anView===v)?'page':'false'}" data-anview="${v}" data-on-click="${_on("setAnView",v)}">${l}</button>`).join('')}
+        ${(()=>{
+          // Thirteen views in two named rows (2026-10-27; they wrapped 10 + 3 on a laptop and ran off a phone's edge):
+          // the business's figures, then its people.
+          const b=([v,l])=>`<button class="an-nav-btn${S.anView===v?' active':''}" aria-current="${(S.anView===v)?'page':'false'}" data-anview="${v}" data-on-click="${_on("setAnView",v)}">${l}</button>`;
+          const grp=(g,items)=>`<div class="an-navgrp" role="group" aria-label="${esc(g)}"><span class="an-navgrp-lbl" aria-hidden="true">${esc(g)}</span>${items.map(b).join('')}</div>`;
+          return grp(t('setTabBusiness'),[['overview',t('anNavOverview')],['revenue',t('anRevenue')],['ridership',t('anRidership')],['operations',t('anOperations')],['fleet',t('anFleetSection')],['months',t('anNavMonths')],['reports',t('anNavReports')]])
+            +grp(t('snavPeople'),[['ratings',t('anRatingsNav')],['customers',t('anNavCustomers')],['growth',t('anNavGrowth')],['leaderboard',t('commTabLeaderboard')],['community',t('anNavCommunity')],...(isAdmin()?[['team',t('anNavTeam')]]:[])]);
+        })()}
       </div>
     </div>
 

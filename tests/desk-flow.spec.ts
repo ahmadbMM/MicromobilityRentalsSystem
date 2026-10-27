@@ -88,15 +88,17 @@ test('a checked-in rider without a bike reads "On Bike" and is returned, not giv
   await expect(rows.filter({ hasText: 'Paid Rider' }).first()).toContainText('On Bike');
 });
 
-test('the stat chips filter the roster and clear it; the night carries its Close out with what is still owed', async ({ page }) => {
+// The live count's Not arrived is the filter the Expected chip was (one bar of the night's figures, 2026-10-27);
+// Close out is a button in the header now, not a chip among the figures.
+test('the figures filter the roster and clear it; the night carries its Close out with what is still owed', async ({ page }) => {
   await queue(page);
-  await page.locator('#tab-queue .stat-chip-clickable', { hasText: 'Expected' }).first().click();
+  await page.locator('#q-live-count .q-lc-waiting').click();
   expect(await page.evaluate('S.sfStatus')).toBe('waiting');
   const clear = page.locator('#tab-queue .stat-chip-clickable', { hasText: 'Clear filter' });
   await expect(clear).toBeVisible();
   await clear.click();
   expect(await page.evaluate('S.sfStatus')).toBe('all');
-  const closeOut = page.locator('#tab-queue .stat-chip-clickable', { hasText: 'Close out' });
+  const closeOut = page.locator('#tab-queue .section-header .co-head');
   await expect(closeOut).toContainText('(4)');                              // three on bikes or bikeless, one expected
   await closeOut.click();
   const box = page.locator('#confirm-modal');

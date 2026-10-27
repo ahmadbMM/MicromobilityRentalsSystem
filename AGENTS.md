@@ -1420,3 +1420,40 @@ most once a minute (`_scEnsure`), indexed by `_scOf(kind,id)`; `_scOpen` is the 
 roster's mark (in `statusCellHtml`), `_scMenuItem` the ⋯ menu's row on every booking status, `_scCardHtml` the line on
 each application card. Until the table exists `S._scMissing` and the thread says "Waiting for the database update".
 `tests/staff-comments.spec.ts`.
+
+## Staff panel tidy (2026-10-27)
+
+"Make the staff panel more organized, it looks very cluttered and not aligned properly." A survey of all 16 sections at
+1280x900 and 390x844 found the Bookings list starting below a laptop's screen (y 917 under nine stacked blocks), one
+section layout per section, and 25 control heights. The rules now (CSS: "STAFF TIDY" at the end of styles.css):
+
+- **Every section opens the same way**: `<h1 class="page-title">` and its `.page-sub`, the section's buttons at the
+  row's end (`.section-header`, which keeps a gap and wraps), the section's tabs under the title, then the content.
+  Workshop, Ambassadors, Vendors and Messages carry their title above their card; Inventory's Bikes / Equipment /
+  Supplements are tabs (`.inv-tabs`, the buttons keep `.inv-navbtn`). A new section follows the same order.
+- **Bookings' views** (Bookings, Sessions, Waitlist, the Petromin page) sit under each view's own title: every view draws
+  them itself from `_qvPillsHtml(tail)` right after its header (renderSessions, renderManagedWl, renderRiders); the
+  roster passes the live-location switch as the row's tail. The roster's title is `tabQueue` ("Bookings").
+- **The night's figures are one sticky bar**, `#q-live-count`: the live three (`.q-lc-nums`, D16) then `.stat-strip`
+  (# of riders, Waitlist, Not here, Completed, Clear) and the overdue line. Expected and On Bike are not drawn a second
+  time; `.q-lc-active` / `.q-lc-waiting` wear the row colours, so the bar is the key. Close out is a header button
+  (`.co-head`). An approval ride has no live three and keeps its funnel strip alone. On a phone the bar is one
+  swipeable line and the overdue line is a row of its own under it. The table's sticky header stops under the bar
+  (`_lcStick` sets `--q-lc-h` from the bar's height).
+- **Manage booking tiles keep one place on every row** (the owner's equal-size grid, 2026-10-02): the select box and
+  the status tiles in column 1, the main action (`.btn-green`) and the envelope in column 2, ⋯ under the box
+  (`.actions-cell.qa-pin`; a party row's `.qa-party`: Check in, Return all under it, ⋯ in the corner).
+- **The ride cards** are one grid of equal compact cards (`.sess-bar-desktop`); date and time wrap onto the lines they
+  need and are never clipped (no line clamp: two lines cut a gathering ride's "Start 6 AM" off a 220px card). Each
+  time is a nowrap `<bdi>`, and a gathering ride's two labelled times are two, so the line breaks between them.
+- **Figures at the top of a section** (`.dash-kpis` and `.stats-row`) are cards in sentence case, one row on a laptop
+  (auto-fit, no figure left alone), three to a row on a phone.
+- **One control height**: buttons 38px on a desk and 44 on a phone (2026-10-02) and fields the same (their floor was
+  42px); filter rows wrap on a desk (they scrolled sideways out of sight); saved views (`_svBar`) end the search row.
+  On a phone, section tabs and status pills are equal cells three to a row.
+- **Wide tables**: History folds Contact into the rider's cell, Height under the bike type and the colour under the
+  bike, and pins Manage Record at the end (`.hist-act`); the fleet table pairs name / colour, brand / model, groupset /
+  speeds and type / size. A folded header keeps both orders as two sort buttons (`thHistSort2`, `sortHdr2`).
+- **Waitlist rows** hold every control in a fixed slot from the right (`_mwSlot` fills a slot a row has not got).
+- **The rail** fits 900px: 34px rows, "Keep sidebar open" at its foot. **Analytics** groups its views in two named rows
+  (`.an-navgrp`: Business, People); on a phone they are equal cells and the bar scrolls with the page.

@@ -593,13 +593,11 @@
     .addon-qty button:disabled{opacity:.4;cursor:default;}
     .addon-qty span{min-width:14px;text-align:center;font-weight:700;font-size:13.5px;}
     .myrides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;margin-top:14px;align-items:start;}
-    .inv-layout{display:flex;gap:16px;align-items:flex-start;margin-top:14px;}
-    .inv-sidebar{flex:0 0 168px;display:flex;flex-direction:column;gap:6px;}
     .inv-content{flex:1;min-width:0;max-width:100%;}
     .inv-navbtn{text-align:start;padding:12px 14px;border-radius:5px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .15s,box-shadow .15s,opacity .15s;display:flex;align-items:center;gap:8px;}
     .inv-navbtn:hover{border-color:rgba(var(--tint-rgb),.2);color:var(--text);}
     .inv-navbtn.active{background:rgba(var(--green-rgb),.1);border-color:rgba(var(--green-rgb),.4);color:var(--green);}
-    @media(max-width:640px){.inv-layout{flex-direction:column;}.inv-sidebar{flex:none;flex-direction:row;flex-wrap:wrap;}.inv-navbtn{flex:1;justify-content:center;}}
+    @media(max-width:640px){.inv-navbtn{flex:1;justify-content:center;}}
     /* ── Inventory without inline styles (2026-09-28, the inventory pass of moving style="..." into
        classes, so the policy can drop style-src 'unsafe-inline'): renderInventory's Equipment and
        Supplements sections - the item form with its _invSelHtml dropdowns and the nutrition facts,
@@ -1867,7 +1865,6 @@
     #tab-bikes .flt-ul{text-decoration:underline;text-decoration-color:rgba(var(--tint-rgb),.2);text-underline-offset:2px;}
     #tab-bikes .flt-w7s13{font-weight:700;font-size:13px;}
     #tab-bikes .flt-specs{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;margin-top:2px;}
-    #tab-bikes .flt-w7s13c{font-weight:700;font-size:13px;text-align:center;}
     #tab-bikes .flt-w8{font-weight:800;}
     #tab-bikes .flt-w7nw{font-weight:700;white-space:nowrap;}
     #tab-bikes .flt-g4c{display:flex;gap:4px;align-items:center;}
@@ -2151,8 +2148,6 @@
     #tab-cashier .sl-orange{color:var(--orange);}
     #tab-cashier .sl-blue{color:var(--blue);}
     #tab-cashier .sl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;}
-    #tab-cashier .sl-h2{font-size:20px;font-weight:900;}
-    #tab-cashier .sl-sub{font-size:13px;color:var(--muted);}
     #tab-cashier .sl-sync{cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-top:6px;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--orange);background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.4);border-radius:3px;padding:3px 9px;}
     #tab-cashier .sl-head-r{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;}
     #tab-cashier .sl-sess{max-width:240px;margin-top:3px;}
@@ -10123,3 +10118,408 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
 .queue-table tbody tr.vl-dbl-b td,.vl-st-table tr.vl-dbl-b td{border-bottom:2px solid #5b3fd6;}
 .q-card.vl-dbl{outline:2px solid #5b3fd6;outline-offset:-2px;background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}
 .q-card.vl-dbl.vl-dbl-alt{background-image:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16));}
+
+/* ══ STAFF TIDY (2026-10-27) ═══════════════════════════════════════════════════════════════════════════
+   The owner's engineer: "make the staff panel more organized, it looks very cluttered and not aligned
+   properly". One page pattern for every section (title and description, the actions at its end, the
+   section's tabs under it, then the content), one control height, and on Bookings the list where the
+   eye lands: at 1280×900 the first booking used to start below the screen, under nine stacked blocks. */
+
+/* ── Bookings: the view tabs under the title; the live-location switch at the row's end ── */
+body.view-staff #tab-queue .q-views{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+body.view-staff #tab-queue .q-views>.live-share{margin:0;margin-inline-start:auto;flex-wrap:nowrap;}
+body.view-staff #tab-queue .q-views>.live-share .filter-select{width:auto;min-width:0;}
+body.view-staff #tab-queue .q-views>.live-share .am-meta:empty{display:none;}
+
+/* ── Bookings: the night's figures as one bar that stays in view: the live three, then the rest and the
+   overdue line. Expected and On Bike were the same numbers twice; the live buttons wear their colours. ── */
+body.view-staff #tab-queue .q-live-count{flex-wrap:wrap;gap:6px 8px;padding:6px 8px;margin:0 0 12px;}
+body.view-staff #tab-queue .q-lc-nums{display:flex;align-items:center;gap:2px 4px;flex-wrap:nowrap;}
+body.view-staff #tab-queue .q-live-count .q-lc-btn{min-height:38px;padding:0 10px;border-radius:0;gap:7px;}
+body.view-staff #tab-queue .q-live-count .q-lc-active::before,
+body.view-staff #tab-queue .q-live-count .q-lc-waiting::before{content:'';width:9px;height:9px;border-radius:3px;flex-shrink:0;}
+body.view-staff #tab-queue .q-live-count .q-lc-active::before{background:#d4a017;}
+body.view-staff #tab-queue .q-live-count .q-lc-waiting::before{background:#fff;box-shadow:inset 0 0 0 1px #9aa29d;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .q-live-count .q-lc-active::before{background:#f2b43f;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .q-live-count .q-lc-waiting::before{background:#1b2027;box-shadow:inset 0 0 0 1px #7f8890;}
+body.view-staff #tab-queue .q-live-count .stat-strip{margin:0;flex-wrap:wrap;gap:6px;padding-inline-start:8px;border-inline-start:1px solid var(--sf-line);}
+body.view-staff #tab-queue .q-live-count .stat-chip{min-height:32px;padding:0 10px;border-radius:0;}
+body.view-staff #tab-queue .q-live-count .overdue-banner{margin:0;margin-inline-start:auto;padding:0 4px 0 10px;min-height:38px;gap:10px;border-radius:0;}
+body.view-staff #tab-queue .q-live-count .overdue-banner .btn-sm{min-height:30px;}
+/* an approval ride's funnel has no live three: it stands alone, the same height */
+body.view-staff #tab-queue>.stat-strip .stat-chip{min-height:32px;border-radius:0;}
+
+/* ── Bookings: the rides as one tidy grid of equal cards, each a few lines tall (they were up to 297px of
+   cards in three sizes; tonight's leads by its ring and type now, not by its size) ── */
+body.view-staff #tab-queue .sess-summary-bar.sess-bar-desktop{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin:0 0 12px;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-summary-chip{min-width:0;max-width:none;padding:8px 12px;gap:8px;align-items:flex-start;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-summary-chip.today-sess{padding:8px 12px;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-summary-chip.today-sess .sess-chip-date{font-size:13px;font-weight:800;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-date{font-size:12.5px;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-top{margin-bottom:2px;}
+body.view-staff #tab-queue .sess-bar-desktop .sf-mark{height:15px;max-width:96px;}
+body.view-staff #tab-queue .sess-bar-desktop .sf-mark-jcc{height:17px;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-bar{margin-top:4px;}
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-bf{margin-top:0;}
+
+/* ── Saved views sit in the search row, after its buttons, not on a row of their own (Bookings, History,
+   Workshop, Messages, the action log, Accounts) ── */
+body.view-staff .filter-row>.sv-bar,body.view-staff .lg-bar>.sv-bar{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin:0;}
+body.view-staff .lg-bar>.sv-bar .sv-lbl .filter-field-lbl,body.view-staff .filter-row>.sv-bar .sv-lbl .filter-field-lbl{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+body.view-staff .filter-row>.sv-bar .sv-pick,body.view-staff .lg-bar>.sv-bar .sv-pick{max-width:200px;}
+
+/* ── Bookings table: every cell starts at the top (a party's cells sat in the middle), the call and
+   WhatsApp pair beside the number, and each Manage booking tile in one place on every row: the select box
+   top left, the main action top right, ⋯ under the box and the envelope under the action. A row with no
+   box keeps its action on the right; it used to slide left into the box's place. ── */
+body.view-staff #tab-queue .queue-table td,
+body.view-staff #tab-queue .queue-table td.rq-vm{vertical-align:top;}
+body.view-staff #tab-queue .queue-table td .rider-sub{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-top:4px;}
+body.view-staff #tab-queue .queue-table td .rq-ccin{display:inline-flex;vertical-align:middle;margin:4px 0 0;margin-inline-start:8px;}
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.row-select,
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apok,
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip,
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip-rej,
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-nschip,
+body.view-staff #tab-queue .q-card .rq-flw6>.row-select,
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-apok,
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip,
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip-rej,
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-nschip{grid-column:1;}
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.btn-green,
+body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-msg,
+body.view-staff #tab-queue .q-card .rq-flw6>.btn-green,
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-msg{grid-column:2;}
+@media(max-width:767px){
+  /* the rider's name on its own line: the call, WhatsApp, status and payment cluster beside it left the
+     name 0-31px ("Omar Hassan" read "O..", a walk-in's name nothing at all) */
+  body.view-staff #tab-queue .q-card .rq-crow>.rq-sb8{flex-wrap:wrap;row-gap:8px;}
+  body.view-staff #tab-queue .q-card .rq-crow .rq-cl{flex:1 1 100%;}
+  body.view-staff #tab-queue .q-card .rq-crow .rq-cname{max-width:none;}
+  body.view-staff #tab-queue .q-card .rq-crow .rq-cr{flex:1 1 100%;}
+  body.view-staff #tab-queue .q-card .rq-crow .rq-cr .rq-end{margin-inline-start:auto;}
+  /* the header's actions as equal cells, three to a row (they ran off the screen's edge) */
+  body.view-staff #tab-queue .sf-head-actions{display:grid !important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;overflow:visible;width:100%;}
+  body.view-staff #tab-queue .sf-head-actions>*{width:100%;min-width:0;margin:0;}
+  body.view-staff #tab-queue .sf-head-actions>button{justify-content:center;padding-inline:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* the views as equal cells; the live-location switch on its own row */
+  body.view-staff #tab-queue .q-views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  body.view-staff #tab-queue .q-views>.filter-pill{width:100%;min-width:0;justify-content:center;}
+  body.view-staff #tab-queue .q-views>.live-share{grid-column:1/-1;margin:0;}
+  body.view-staff #tab-queue .q-views>.live-share .filter-select{flex:1 1 auto;}
+  /* the night's figures stay one line while they stick: the live three first, the rest a swipe away */
+  body.view-staff #tab-queue .q-live-count{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  body.view-staff #tab-queue .q-live-count::-webkit-scrollbar{display:none;}
+  body.view-staff #tab-queue .q-live-count .stat-strip{flex-wrap:nowrap;overflow:visible;padding-bottom:0;}
+  body.view-staff #tab-queue .q-live-count .q-lc-btn{min-height:44px;}
+  body.view-staff #tab-queue .q-live-count>*{flex:0 0 auto;}
+}
+/* a party's row: Check in top right like a rider's, Return all under it, ⋯ in the corner a rider's has it */
+body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.btn-green{grid-column:2;}
+body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.rq-more{grid-row:2;grid-column:1;}
+/* the table inside its box at 1280px (it overhung by 30px): tighter cells, a narrower price breakdown, and
+   the room given to the rider, whose call and WhatsApp pair now sits beside the number */
+body.view-staff #tab-queue .queue-table th,
+body.view-staff #tab-queue .queue-table td{padding-inline:6px;}
+body.view-staff #tab-queue .queue-table td>.rider-name{min-width:146px;}
+body.view-staff #tab-queue .queue-table .rq-bkat{max-width:5em;}
+body.view-staff #tab-queue .queue-table .rq-adline{max-width:7.5em;}
+/* a ride card's date and time wrap rather than lose the time to an ellipsis, onto the lines they need: a clamp at two
+   cut "Start 6 AM" off a gathering ride's two times on a 220px card (2026-10-27) */
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-date{white-space:normal;display:block;overflow:hidden;line-height:1.3;}
+/* an empty result count took a row's gap under the search row */
+body.view-staff .filter-bar>.result-count:empty{display:none;}
+body.view-staff #tab-queue .filter-bar{margin-bottom:12px;}
+body.view-staff #tab-queue .queue-table .rq-gname{max-width:5.4em;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;overflow-wrap:anywhere;}
+@media(min-width:1024px){
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th{top:calc(var(--staff-top) + var(--q-lc-h,0px));}
+}
+body.view-staff #tab-queue .sess-bar-desktop .sess-chip-date bdi{white-space:nowrap;}
+@media(max-width:767px){
+  /* the title back on a phone (2026-10-03 dropped it because the Bookings tab above named the page; the tabs
+     sit under the title in every view now, so they stay put when switching views) */
+  body.view-staff #tab-queue .q-head-title{display:block;}
+  body.view-staff #tab-queue>.overdue-banner{margin:0 0 12px;}
+}
+@media(max-width:767px){body.view-staff #tab-queue .sf-head-actions{padding-bottom:0;}}
+@media(max-width:767px){
+  /* in the phone's two-cell search rows (Customers, Community) the saved views take a row of their own */
+  #tab-community .filter-row>.sv-bar,#tab-customers .filter-row>.sv-bar{grid-column:1/-1;width:100%;}
+  #tab-community .filter-row>.sv-bar .sv-lbl,#tab-customers .filter-row>.sv-bar .sv-lbl{flex:1 1 auto;min-width:0;}
+  #tab-community .filter-row>.sv-bar .sv-pick,#tab-customers .filter-row>.sv-bar .sv-pick{max-width:none;width:100%;}
+}
+
+/* ── Inventory: its three parts are the section's tabs under its title, as everywhere (they were a second
+   sidebar inside the page, which took 180px from the fleet table) ── */
+body.view-staff #tab-inventory .inv-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 16px;}
+body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{display:inline-flex;justify-content:center;flex:0 0 auto;width:auto;padding-inline:14px;}
+body.view-staff #tab-inventory .inv-content{min-width:0;max-width:100%;}
+@media(max-width:767px){
+  body.view-staff #tab-inventory .inv-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{width:100%;min-width:0;padding-inline:6px;}
+}
+
+/* ── Sales opens like every section: its title where the others' sit (the 18px inset and the bottom-aligned
+   row put it lower), the session picker with its label beside it, the buttons the same height ── */
+body.view-staff #tab-cashier .sl-wrap{padding-top:0;}
+body.view-staff #tab-cashier .sl-head{align-items:flex-start;margin-bottom:16px;}
+body.view-staff #tab-cashier .sl-head .page-sub{margin-bottom:0;}
+body.view-staff #tab-cashier .sl-head-r{align-items:center;}
+body.view-staff #tab-cashier .sl-head-r .sl-sess{max-width:240px;margin:0;}
+
+/* ── Every section opens the same way: the title and its line, the section's buttons at the row's end with a
+   gap the words never run into (Bikes catalog's line ran up against its button), and both wrap rather than
+   squeeze ── */
+body.view-staff .section-header{gap:12px 20px;align-items:flex-start;flex-wrap:wrap;}
+@media(min-width:768px){body.view-staff .section-header>div:first-child{flex:1 1 320px;min-width:0;}}
+body.view-staff .section-header>div:first-child{min-width:0;}
+body.view-staff .section-header>div:first-child .page-sub{margin-bottom:0;}
+body.view-staff .section-header>div:last-child:not(:first-child){flex:0 1 auto;}
+/* the four sections whose title was their card's heading now open with it like the rest */
+body.view-staff :is(#tab-workshop,#tab-ambassadors,#tab-vendors,#tab-messages)>.page-sub{margin-bottom:16px;}
+body.view-staff #tab-vendors>.cmy-nav{margin:0 0 14px;}
+
+/* ── The figures at the top of a section: one look (cards, the words in sentence case, as Dashboard,
+   Customers and Community have them; History's and the fleet's were a joined strip in capitals), and on a
+   laptop one row with no figure left alone on a second (Customers read 7 + 2, Community 7 + 1) ── */
+body.view-staff .dash-kpis,
+body.view-staff .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px;margin:0 0 16px;}
+body.view-staff .stats-row{border:0;border-radius:0;background:none;overflow:visible;}
+body.view-staff .stats-row>.stat-card,
+body.view-staff .stats-row>.stat-card:not(:first-child){padding:12px 14px;border:1px solid var(--sf-line2);border-radius:0;background:var(--sf-card);min-width:0;}
+body.view-staff .stats-row .stat-num{font-size:22px;font-weight:800;letter-spacing:0;line-height:1.15;font-variant-numeric:tabular-nums;}
+body.view-staff .stats-row .stat-label{font-size:var(--staff-fs-sm);font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;margin-top:2px;}
+body.view-staff .dash-kpi{min-width:0;border-radius:0;}
+body.view-staff .dash-kpi span{line-height:1.3;}
+@media(max-width:767px){
+  body.view-staff .dash-kpis,
+  body.view-staff .stats-row{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px;}
+  body.view-staff .stats-row>.stat-card,
+  body.view-staff .stats-row>.stat-card:not(:first-child),
+  body.view-staff .dash-kpi{padding:8px 10px;}
+  body.view-staff .stats-row .stat-num,
+  body.view-staff .dash-kpi strong{font-size:18px;}
+}
+
+/* ── One control height in the sections: a field or a list box is as tall as the button beside it (fields
+   were 42px beside 38px buttons in Sales, Settings, Team and the website editor) ── */
+/* the staff fields' own floor was 42px since the reskin while every button is 38 (2026-10-02): the same floor
+   now, so a field and the button beside it line up; a field sized on purpose keeps its own rule */
+body.view-staff input[type="text"],body.view-staff input[type="tel"],body.view-staff input[type="number"],body.view-staff input[type="email"],body.view-staff input[type="date"],body.view-staff input[type="time"],body.view-staff input[type="url"],body.view-staff input[type="datetime-local"],body.view-staff input[type="password"],body.view-staff input[type="search"],body.view-staff select{min-height:38px;}
+@media(min-width:768px){
+  body.view-staff .view-toggle-btn{min-height:38px;}
+  body.view-staff .density-toggle .density-btn{min-height:38px;min-width:38px;}
+  body.view-staff #tab-queue .section-header .sf-icon-btn{width:38px;height:38px;min-height:38px;display:inline-flex;align-items:center;justify-content:center;}
+  body.view-staff #tab-settings .toggle-btn{min-height:38px;}
+}
+@media(max-width:767px){
+  body.view-staff #tab-queue .section-header .sf-icon-btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+  body.view-staff .view-toggle-btn{min-height:44px;}
+}
+body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{white-space:nowrap;min-height:38px;}
+@media(max-width:767px){
+  body.view-staff input[type="text"],body.view-staff input[type="tel"],body.view-staff input[type="number"],body.view-staff input[type="email"],body.view-staff input[type="date"],body.view-staff input[type="time"],body.view-staff input[type="url"],body.view-staff input[type="datetime-local"],body.view-staff input[type="password"],body.view-staff input[type="search"],body.view-staff select{min-height:44px;}
+  body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{min-height:44px;overflow:hidden;text-overflow:ellipsis;}
+  body.view-staff #tab-cashier .sl-step{min-height:44px;min-width:44px;}
+}
+/* a section's search and filter row wraps on a desk too: it used to scroll sideways with no scroll bar, so
+   what did not fit (Workshop's saved views, cut at "Choose a") looked missing; the saved views end the row */
+body.view-staff main .tab-panel .filter-row{flex-wrap:wrap;overflow-x:visible;padding-bottom:0;}
+body.view-staff main .tab-panel .filter-row>.sv-bar{margin-inline-start:auto;}
+/* ── The fleet: its buttons at the title's end, the service rule on a line of its own under it (they were one
+   ragged group that wrapped into two right-aligned rows) ── */
+body.view-staff #tab-bikes .flt-head{margin-bottom:10px;}
+body.view-staff #tab-bikes .flt-svc-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin:0 0 14px;}
+body.view-staff #tab-bikes .flt-svc-row .bk-svc-every input{height:32px;min-height:32px;}
+@media(max-width:767px){
+  /* three figures to a row on a phone, none stretched across it (the two-column rule's odd last tile) */
+  body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:auto;}
+  /* Inventory's longest part may take two lines rather than be cut at both ends */
+  body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{white-space:normal;line-height:1.15;text-align:center;overflow:visible;}
+  /* the section tabs and status pills as equal cells, three to a row, as Customers and Community have them
+     (the owner, 2026-10-11): Workshop, Ambassadors, Messages, Vendors, History, the fleet's search row */
+  body.view-staff #tab-workshop .filter-bar>.filter-row,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row,
+  body.view-staff #tab-messages .filter-bar>.filter-row,
+  body.view-staff #tab-vendors>.cmy-nav,
+  body.view-staff #tab-history .filter-row.hist-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  body.view-staff #tab-workshop .filter-bar>.filter-row>*,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row>*,
+  body.view-staff #tab-messages .filter-bar>.filter-row>*,
+  body.view-staff #tab-vendors>.cmy-nav>*,
+  body.view-staff #tab-history .filter-row.hist-tabs>*{width:100%;min-width:0;margin:0;min-height:44px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
+  body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar,
+  body.view-staff #tab-ambassadors .filter-bar>.filter-row>.search-wrap.open,
+  body.view-staff #tab-workshop .filter-bar>.filter-row>.search-wrap.open,
+  body.view-staff #tab-messages .filter-bar>.filter-row>.search-wrap.open,
+  body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar{grid-column:1/-1;}
+  body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-lbl,
+  body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar .sv-lbl{flex:1 1 auto;min-width:0;}
+  body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-pick,
+  body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar .sv-pick{max-width:none;width:100%;}
+}
+
+/* ── Wide tables keep their buttons in view (staff tidy, phase 3). Ride History: the call / WhatsApp pair
+   beside the rider's number, the height under the bike type and the bike's colours under its name, as the
+   Bookings roster has them (2026-10-03), so 13 columns are 10; the record's buttons stay pinned at the
+   table's end as the rest scrolls (Duration, Contact and Manage Record were off a 1280px screen). ── */
+body.view-staff #tab-history .hist-phone{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+body.view-staff #tab-history .hist-phone .rq-cc{display:inline-flex;gap:5px;}
+body.view-staff #tab-history td>.hist-ht{margin-top:4px;font-size:var(--staff-fs-sm);font-weight:700;color:var(--muted);white-space:nowrap;}
+body.view-staff #tab-history .hist-dots{margin-top:5px;}
+body.view-staff #tab-history .hist-stime bdi{white-space:nowrap;}
+/* ...and it fits a laptop outright: the folded headers may take two lines, the check-in and check-out times
+   wrap, the record's two buttons stack, the cells are a little tighter (it was 1247px in a 969px box) */
+body.view-staff #tab-history .queue-table th,body.view-staff #tab-history .queue-table td{padding-inline:8px;}
+body.view-staff #tab-history .queue-table thead th{white-space:normal;}
+body.view-staff #tab-history .queue-table thead th .q-sort-btn{white-space:nowrap;}
+body.view-staff #tab-history .hist-dur :is(.hist-sub,.hist-sub3){white-space:normal;}
+body.view-staff #tab-history .hist-act .hist-acts{display:flex;flex-direction:column;align-items:stretch;gap:6px;}
+body.view-staff #tab-history .hist-act .actions-cell{min-width:0;}
+@media (max-width:767px){
+  /* on a phone's card the duration's label keeps its word and the check-in and check-out times wrap under it */
+  body.view-staff #tab-history td.hist-dur{flex-wrap:wrap;}
+  body.view-staff #tab-history td.hist-dur::before{flex:0 0 auto;max-width:none;}
+}
+body.view-staff #tab-history .queue-table thead th .th-sep{color:var(--muted);}
+/* a phone's header pills are flex boxes, which drop the spaces round the dot ("RIDER·CONTACT") */
+body.view-staff table.t-cards thead th .th-sep{padding-inline:4px;}
+@media (min-width:768px){
+  body.view-staff #tab-history .queue-table .hist-act{position:sticky;inset-inline-end:0;z-index:2;background:var(--sf-card,var(--s1));box-shadow:-1px 0 0 var(--border);}
+  html[dir="rtl"] body.view-staff #tab-history .queue-table .hist-act{box-shadow:1px 0 0 var(--border);}
+  body.view-staff #tab-history .queue-table thead th.hist-act{background:var(--sf-head,var(--s1));z-index:3;}
+}
+
+/* ── The fleet table: the name with its colours, brand with model, groupset with speeds, the type with its
+   size (13 columns are 9; each pair keeps both sort orders in its header) ── */
+body.view-staff #tab-bikes .flt-namesw{margin-top:5px;gap:4px;}
+body.view-staff #tab-bikes .flt-namesw .flt-swname{display:none;}
+body.view-staff #tab-bikes .flt-sub2{margin-top:2px;font-size:var(--staff-fs-sm);color:var(--muted);font-weight:600;}
+body.view-staff #tab-bikes .flt-speeds{color:var(--muted);font-weight:600;white-space:nowrap;}
+body.view-staff #tab-bikes .flt-typesz{white-space:nowrap;}
+body.view-staff #tab-bikes .flt-typesz .flt-size{margin-inline-start:8px;font-weight:800;}
+body.view-staff #tab-bikes .bk-table thead th .th-sep{color:var(--muted);}
+/* the folded headers may take two lines and the cells are a little tighter, so the nine columns fit a laptop */
+@media (min-width:768px){
+  body.view-staff #tab-bikes .bk-table th,body.view-staff #tab-bikes .bk-table td{padding-inline:8px;}
+  body.view-staff #tab-bikes .bk-table thead th{white-space:normal;}
+  body.view-staff #tab-bikes .bk-table thead th .q-sort-btn{white-space:nowrap;}
+}
+
+/* ── The Petromin page's registrations fit a laptop too (1062px in a 969px box pushed Return bike, Undo and
+   Edit off it): tighter cells, and a row's buttons stack in their column instead of sitting in a line ── */
+@media (min-width:768px){
+  body.view-staff #pm-host .queue-table th,body.view-staff #pm-host .queue-table td{padding-inline:8px;}
+  body.view-staff #pm-host .queue-table tbody td:last-child{white-space:normal;min-width:118px;}
+  body.view-staff #pm-host .queue-table tbody td:last-child>.btn-sm{display:flex;width:100%;margin:0 0 6px;}
+}
+
+/* ── The sidebar fits a laptop's height (History, Team and Settings were under the bottom of a 900px screen):
+   shorter rows and headings, and "Keep sidebar open" at the foot rather than above Dashboard ── */
+@media (min-width:1024px){
+  body.view-staff #staff-tab-nav{padding:10px 10px 12px;}
+  body.view-staff #staff-tab-nav .tab-btn{min-height:34px;padding-block:7px;}
+  body.view-staff .snav-group{padding:10px 11px 4px;}
+  body.view-staff #staff-tab-nav .snav-pin{margin-top:auto;margin-bottom:0;padding-block:7px;}
+}
+
+/* ── Analytics: its thirteen views in two named rows, Business and People (they wrapped 10 + 3 on a laptop
+   and ran off a phone's edge); a phone sets each row as equal cells and lets the bar scroll with the page ── */
+body.view-staff #tab-analytics .an-subnav{display:flex;flex-direction:column;align-items:stretch;gap:6px;flex-wrap:nowrap;}
+body.view-staff #tab-analytics .an-navgrp{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+body.view-staff #tab-analytics .an-navgrp-lbl{flex:0 0 74px;font-size:var(--staff-fs-sm);font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+:is(html[lang="ar"],html[lang="ur"]) body.view-staff #tab-analytics .an-navgrp-lbl{letter-spacing:0;text-transform:none;}
+@media (max-width:767px){
+  body.view-staff #tab-analytics .an-sticky{position:static;}
+  body.view-staff #tab-analytics .an-subnav{margin:0;padding:0;overflow:visible;}
+  body.view-staff #tab-analytics .an-navgrp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));}
+  body.view-staff #tab-analytics .an-navgrp-lbl{grid-column:1/-1;}
+  body.view-staff #tab-analytics .an-navgrp>.an-nav-btn{width:100%;min-width:0;min-height:44px;padding-inline:6px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
+}
+
+/* ── Waitlist rows: every row's controls in the same columns, from the right: Remove, ⋯, Check In, + Add rider,
+   the call pair, the price pencil and Pending (they slid about with each row's name and buttons, and a long row
+   wrapped its buttons under the name). An empty slot holds the place of a control a row has not got. ── */
+@media (min-width:1024px){
+  body.view-staff #tab-queue .rq-mwrow{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:12px;}
+  body.view-staff #tab-queue .rq-mwr{flex-wrap:nowrap;justify-content:flex-end;gap:6px;}
+  body.view-staff #tab-queue .rq-mwr>.pay-toggle,body.view-staff #tab-queue .rq-mwr>.mw-s-pay{width:104px;flex:0 0 104px;justify-content:center;}
+  body.view-staff #tab-queue .rq-mwr>.rq-pen,body.view-staff #tab-queue .rq-mwr>.mw-s-pen{width:28px;flex:0 0 28px;min-width:28px;padding:0;}
+  body.view-staff #tab-queue .rq-mwr>.rq-cc,body.view-staff #tab-queue .rq-mwr>.mw-s-cc{width:57px;flex:0 0 57px;}
+  body.view-staff #tab-queue .rq-mwr>.mw-add,body.view-staff #tab-queue .rq-mwr>.mw-s-add{width:112px;flex:0 0 112px;}
+  body.view-staff #tab-queue .rq-mwr>.btn-green,body.view-staff #tab-queue .rq-mwr>.mw-s-main{width:104px;flex:0 0 104px;}
+  body.view-staff #tab-queue .rq-mwr>.rq-more,body.view-staff #tab-queue .rq-mwr>.mw-s-more{width:38px;flex:0 0 38px;min-width:38px;}
+  body.view-staff #tab-queue .rq-mwr>.mw-rm,body.view-staff #tab-queue .rq-mwr>.mw-s-rm{width:92px;flex:0 0 92px;}
+  body.view-staff #tab-queue .rq-mwr>.mw-slot{display:block;height:1px;}
+}
+@media (max-width:1023px){body.view-staff #tab-queue .rq-mwr>.mw-slot{display:none;}}
+
+/* ── STAFF TIDY: right-to-left, dark and tablet (2026-10-27) ── */
+/* The tidy was checked in English, light, at 1280x900 and 390x844; Arabic, the dark desk and the tablets
+   (1024x768 with the rail, 820x1180 with the menu) showed the following. */
+
+/* The overdue line inside the figures bar: its padding was written left/right, so in Arabic the text sat
+   4px from its edge and the button 10px from the other (the English start/end pair, mirrored). */
+body.view-staff #tab-queue .q-live-count .overdue-banner{padding-block:0;padding-inline:10px 4px;}
+
+/* The first cell clears the row's marks. The tidy's 6px start padding put "#1" and its date under the
+   community mark (6px green + 4px status = 10px), the Petromin mark (8px) and both (14px), in every
+   language and theme; a plain row's 4px status edge still clears the 6px. Only the body cells move: the
+   header sets the column's width, and at 1280px the roster has 9px to spare. */
+body.view-staff #tab-queue .queue-table tbody tr.ptn-row-mark td:first-child{padding-inline-start:12px;}
+body.view-staff #tab-queue .queue-table tbody tr.cm-row-mark td:first-child{padding-inline-start:14px;}
+body.view-staff #tab-queue .queue-table tbody tr.cm-row-mark.ptn-row-mark td:first-child{padding-inline-start:18px;}
+
+/* Dark: a header cell that stays put while the rest moves needs a solid fill. --sf-head is 5% white on
+   the dark desk, so the roster's sticky header showed the rows scrolling under it, Manage Record in
+   History read over Duration ("MANAGE RECODURATION") and the fleet's Manage bike over Rider. The same
+   5% is laid over the table's own colour as an image layer, so every header looks as it did. */
+html[data-staff-theme="dark"] body.view-staff .queue-table thead th,
+html[data-staff-theme="dark"] body.view-staff .queue-table-desktop-wrap .queue-table thead th:first-child,
+html[data-staff-theme="dark"] body.view-staff #tab-history .queue-table thead th.hist-act,
+html[data-staff-theme="dark"] body.view-staff #tab-inventory .bk-table thead th:last-child{background:linear-gradient(var(--sf-head),var(--sf-head)) var(--s1);}
+
+/* Right to left: the pinned action columns (History's Manage Record, the fleet's Manage bike) start their
+   buttons under their heading. An old rule (html[dir="rtl"] .actions-cell{flex-direction:row-reverse})
+   undoes the mirroring a right-to-left row already does, so in Arabic Delete sat 120px away at the far
+   left of the 200px pinned cell, under nothing, and Edit after its menu. */
+@media (min-width:768px){
+  html[dir="rtl"] body.view-staff #tab-history .queue-table td.hist-act>.actions-cell,
+  html[dir="rtl"] body.view-staff #tab-inventory .bk-table .actions-cell.flt-acts{flex-direction:row;}
+}
+
+/* Analytics: a row's name keeps one line. Arabic's "Business" (77px) wrapped in the 74px column; the
+   column now grows with its words, and in Arabic and Urdu both names take the same 84px so the two rows'
+   buttons still start in line. */
+body.view-staff #tab-analytics .an-navgrp-lbl{flex:0 0 auto;min-width:74px;white-space:nowrap;}
+:is(html[lang="ar"],html[lang="ur"]) body.view-staff #tab-analytics .an-navgrp-lbl{min-width:84px;}
+
+/* A laptop or tablet with the rail open (1024-1279px): the roster needs 960px and has 731 at 1024, so it
+   pushed the whole page sideways - in Arabic the rail went off the screen's edge. Between 1024 and 1279 it
+   scrolls inside its box as on a tablet, the booking number pinned at its start; the header no longer
+   sticks to the page there (a box that scrolls sideways cannot let it), the figures bar still does, and the
+   header row passes under the bar (z-index 5) with the tablet's layers: the headers 3, the "#" one 4. */
+@media (min-width:1024px) and (max-width:1279px){
+  body.view-staff #tab-queue .queue-table-desktop-wrap{overflow-x:auto;}
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th{top:0;z-index:3;}
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th:first-child{z-index:4;box-shadow:0 1px 0 var(--border),1px 0 0 var(--border);}
+  html[dir="rtl"] body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th:first-child{box-shadow:0 1px 0 var(--border),-1px 0 0 var(--border);}
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table td:first-child{z-index:3;}
+}
+/* Waitlist rows at 1024-1199px: the controls' fixed slots take 571px, which left the rider 115-190px, so the
+   number box, name, phone and bike type stood one under another. The controls keep their slots on a line
+   of their own under the rider, at the row's end, still in line from row to row. */
+@media (min-width:1024px) and (max-width:1199px){
+  body.view-staff #tab-queue .rq-mwrow{grid-template-columns:minmax(0,1fr);row-gap:8px;}
+  body.view-staff #tab-queue .rq-mwr{justify-self:end;}
+}
+
+@media (max-width:767px){
+  /* the header's action cells: a long label takes two lines (Arabic's "Approve all (1)" was cut at both
+     ends - centred text in a flex button gets no ellipsis) */
+  body.view-staff #tab-queue .sf-head-actions>button{white-space:normal;line-height:1.15;text-align:center;}
+  /* Sales: quantity and unit price share the row equally; at one third the stepper's 44px buttons left the
+     quantity field about 20px and its number out of sight (in every language and theme) */
+  body.view-staff #tab-cashier .sl-row9>.sl-f1,
+  body.view-staff #tab-cashier .sl-row9>.sl-f2{flex:1 1 0;min-width:0;}
+}

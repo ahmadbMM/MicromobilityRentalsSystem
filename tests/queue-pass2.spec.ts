@@ -112,10 +112,11 @@ test('a reserved rider shows the held bike under the status', async ({ page }) =
   await expect(cell).toContainText('R-11');
 });
 
-// Every queue action stays on screen: the header row scrolls sideways rather than folding
-// anything away. The night's two busiest actions — a walk-up and a scanned ticket — sit on the
-// page on a desktop and float within thumb reach on a phone (asked for 2026-09-22), where they
-// stay put as the roster scrolls, and each appears once, never twice.
+// Every queue action stays on screen. Since 2026-10-27 a phone sets them as equal cells, three to a row (the
+// owner's grids for the phone toolbars; the sideways strip left one cut at the screen's edge), and nothing
+// is folded away. The night's two busiest actions — a walk-up and a scanned ticket — sit on the page on a
+// desktop and float within thumb reach on a phone (asked for 2026-09-22), where they stay put as the roster
+// scrolls, and each appears once, never twice.
 test('the phone header keeps every queue action on screen', async ({ page }, info) => {
   await boot(page, [row('q1')]);
   const head = page.locator('#tab-queue .section-header');
@@ -132,8 +133,12 @@ test('the phone header keeps every queue action on screen', async ({ page }, inf
     // the floating pair says what it does without words
     await expect(page.locator('#tab-queue .scan-fab')).toHaveAttribute('aria-label', 'Scan ticket');
     await expect(page.locator('#tab-queue .walkin-fab')).toHaveAttribute('aria-label', 'Walk-in');
-    // what is left of the header fits or scrolls; it never stacks rows of buttons above the roster
+    // what is left of the header: equal cells inside the screen, two rows at most on a circuit night
     const strip = page.locator('.sf-head-actions');
+    const cells = await strip.evaluate((e) => [...e.children].filter((c) => (c as HTMLElement).offsetParent).map((c) => { const r = c.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.right)]; }));
+    const vw = await page.evaluate('innerWidth') as number;
+    expect(cells.every(([, right]) => right <= vw)).toBe(true);
+    expect(new Set(cells.map(([w]) => w)).size).toBe(1);
     expect(await strip.evaluate((e) => e.getBoundingClientRect().height < 96)).toBe(true);
   } else {
     await expect(head.locator('button', { hasText: '+ Walk-in' })).toBeVisible();

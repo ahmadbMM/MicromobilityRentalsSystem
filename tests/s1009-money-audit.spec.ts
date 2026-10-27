@@ -124,4 +124,20 @@ test.describe('@staff:history audit trail, action log, exceptions, team', () => 
     await expect(row.locator('td').nth(3)).toHaveText('2');
     await expect(row.locator('td').nth(7)).toHaveText('1');
   });
+
+  // A cleared From box made the load throw "Invalid time value" before it asked for anything, and the report
+  // said Loading for good (2026-10-27): a cleared or unreadable box falls back to the report's own range.
+  test('Analytics > Team: a cleared date box falls back to the report\'s own range', async ({ page }) => {
+    await boot(page, { cashier_sales: [{ ...house, pay: 'paid', id: 'p1' }] });
+    await page.evaluate(`setStaffTab('analytics');setAnView('team')`);
+    const host = page.locator('#an-team-host');
+    const row = host.locator('tr').filter({ hasText: 'Desk Person' });
+    await expect(row).toContainText('SAR 12');
+    const from = host.getByLabel('From', { exact: true });
+    const was = await from.inputValue();
+    await from.evaluate((el: HTMLInputElement) => { el.value = ''; el.dispatchEvent(new Event('change', { bubbles: true })); });
+    await expect(from).toHaveValue(was);
+    await expect(host).not.toContainText('Loading');
+    await expect(row).toContainText('SAR 12');
+  });
 });
