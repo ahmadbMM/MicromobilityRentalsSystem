@@ -45,6 +45,31 @@ test('the chooser stops five years back and greys out what is still to come in t
   await expect(page.locator('#acc-birth')).toHaveValue(FIVE);
 });
 
+// An iPhone on iOS 17.2 laid en-CA dates out as 10/27/2026: today read wrong, the year list came
+// out empty and every date comparison went astray (2026-10-27). The app now counts Riyadh's day
+// itself; this fakes that phone's layout for en-CA and sv-SE.
+test('a phone that lays out en-CA dates as 10/27/2026 still gets the years, today and the save', async ({ page }) => {
+  await page.addInitScript(() => {
+    const us = (l?: string | string[]) => (l === 'en-CA' || l === 'sv-SE' ? 'en-US' : l);
+    const Real = Intl.DateTimeFormat;
+    const Fake = function (l?: string | string[], o?: Intl.DateTimeFormatOptions) { return new Real(us(l), o); };
+    Object.assign(Fake, { supportedLocalesOf: Real.supportedLocalesOf, prototype: Real.prototype });
+    Intl.DateTimeFormat = Fake as unknown as typeof Intl.DateTimeFormat;
+    const day = Date.prototype.toLocaleDateString, full = Date.prototype.toLocaleString;
+    Date.prototype.toLocaleDateString = function (this: Date, l?: string | string[], o?: Intl.DateTimeFormatOptions) { return day.call(this, us(l), o); };
+    Date.prototype.toLocaleString = function (this: Date, l?: string | string[], o?: Intl.DateTimeFormatOptions) { return full.call(this, us(l), o); };
+  });
+  const saves = await account(page);
+  expect(await page.evaluate(`new Date(2026,9,27,12).toLocaleDateString('en-CA')`)).toBe('10/27/2026');
+  expect(await page.evaluate('todayStr()')).toBe(today());
+  expect(await page.evaluate(`fmtDate(new Date('2026-10-27T21:30:00Z'))`)).toBe('2026-10-28');
+  const years = await page.evaluate(`[...document.querySelectorAll('#acc-birth-y option')].map(o=>o.value).filter(Boolean).map(Number)`) as number[];
+  expect(Math.max(...years)).toBe(Y - 5);
+  await page.evaluate(`document.getElementById('acc-birth').value='${FIVE}';saveAccount()`);
+  await expect.poll(() => saves.length).toBe(1);
+  expect(saves[0].p_birth_date).toBe(FIVE);
+});
+
 test('moving to the last year clears a month that year has not reached', async ({ page }) => {
   test.skip(M === 12, 'in December every month of the last year is already past');
   await account(page);

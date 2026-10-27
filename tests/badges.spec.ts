@@ -10,7 +10,9 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } fr
 
 const EMOJI = /\p{Extended_Pictographic}/u;
 const day = (n: number) => new Date(Date.now() + n * 864e5).toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
-const P1 = day(-3), OLD = day(-60);
+// Three days back, but never the Defe ride's day: a done ride in session 2026-10-24 earns Rode with Defe
+// (DEFE_RIDE_IDS), and its pop-up came before the one these specs wait for (red on 2026-10-27 only).
+const P1 = day(-3) === '2026-10-24' ? day(-4) : day(-3), OLD = day(-60);
 const slots = JSON.stringify({ _time: '21:00 - 23:00', _total: 40 });
 const sessions = [
   { id: P1, day: 'Friday', session_date: P1, capacity: 40, status: 'closed', created_at: 0, bike_slots: slots },

@@ -3720,7 +3720,7 @@ async function _queueFetch(windowed,days){
   // the difference between comfortably inside the free egress allowance and over it.
   //
   // One day back, not today, so a session that runs past midnight is still there at 00:30.
-  const _pubCut=new Date(Date.now()-864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  const _pubCut=_ksaYmd(Date.now()-864e5);
   const [pub,mine]=await Promise.all([
     _pagedAll(()=>sb.from('queue_public').select('*').gte('session_date',_pubCut).order('session_id').order('queue_num').order('id')),
     (cust&&cust.session_token)?sb.rpc('my_bookings',{p_id:cust.id,p_token:cust.session_token}):Promise.resolve({data:[]}),
@@ -4668,7 +4668,7 @@ function _meetHeld(s){return _spotHeld(s)&&!_safeUrl(s.meet_url);}
 function _revealWhen(s){
   const r=_revealMs(s);if(!r)return'';
   let ds,wd,hm;
-  try{const d=new Date(r);ds=d.toLocaleDateString('en-CA',{timeZone:KSA_TZ});wd=d.toLocaleDateString('en-US',{weekday:'long',timeZone:KSA_TZ});
+  try{const d=new Date(r);ds=_ksaYmd(d);wd=d.toLocaleDateString('en-US',{weekday:'long',timeZone:KSA_TZ});
     hm=d.toLocaleTimeString('en-GB',{hourCycle:'h23',hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});}catch(_){return'';}
   return`${_dayWord(ds)||(dayLabel(wd)+' · '+shortDate(ds))} · ${fmt12h(hm)}`;
 }
@@ -4742,7 +4742,11 @@ function _entryFallbackPrice(entry){
 
 
 const KSA_TZ='Asia/Riyadh';
-function fmtDate(d){return d.toLocaleDateString('en-CA',{timeZone:KSA_TZ});} 
+// Riyadh's day as YYYY-MM-DD. Riyadh is UTC+3 all year, so it is plain arithmetic, not Intl's "en-CA"
+// layout: an iPhone on iOS 17.2 laid that out as 10/27/2026, which emptied the birth-year lists and
+// threw every date comparison (2026-10-27). An unreadable date gives 'Invalid Date', as Intl did.
+function _ksaYmd(at){const ms=+new Date(at);return isFinite(ms)?new Date(ms+108e5).toISOString().slice(0,10):'Invalid Date';}
+function fmtDate(d){return _ksaYmd(d);} 
 // Intl date formatting is slow and a roster asks for the same few dates hundreds of times a
 // render, so the answer is cached per language. The cache is small: a season has a few dates.
 const _shortDateCache=new Map();
@@ -4772,7 +4776,7 @@ function shortDate(ds){
   _shortDateCache.set(ck,out);
   return out;
 }
-function todayStr(){return new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ});}
+function todayStr(){return _ksaYmd(Date.now());}
 // Urdu's words for the part of the day by hour: night 0-3, morning 4-11, midday 12-15, afternoon 16-17,
 // evening 18-19, night 20-23 (Intl.DateTimeFormat('ur',{dayPeriod:'short'})), written out so a browser
 // without Urdu data says the same.
@@ -7327,11 +7331,11 @@ function _sessOrder(a,b){
 // places back - the landing strip then advertised last Sunday as available.
 function _sessPastDay(s){
   const d=String((s&&(s.session_date||s.id))||'').slice(0,10);if(!d)return false;
-  return d<new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  return d<todayStr();
 }
 function _sessEnded(s){
   const d=String((s&&(s.session_date||s.id))||'').slice(0,10);if(!d)return false;
-  const today=new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  const today=todayStr();
   if(d<today)return true;if(d>today)return false;
   const raw=String((parseSlots(s.bike_slots)||{})._time||'').trim()||'09:00 - 11:00';
   const hhmm=x=>/^\d{1,2}:\d{2}$/.test(x)?(x.length<5?'0'+x:x):'';
@@ -7342,7 +7346,7 @@ function _sessEnded(s){
   // Read from the clock alone this was wrong between midnight and that end (a 23:59 - 00:30
   // night still counted as running at 00:05), which is when the desk is packing up.
   if(end<start)return true;
-  let now='';try{now=new Intl.DateTimeFormat('en-GB',{timeZone:KSA_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).format(new Date());}catch(e){return false;}
+  const now=new Date(Date.now()+108e5).toISOString().slice(11,16); // Riyadh's HH:MM, as _ksaYmd
   return now>=end;
 }
 // The landing page's second card is an umbrella over the community rides, so 'community'
@@ -7514,7 +7518,7 @@ function _isSatMember(e){
 // ride meets and breakfasts as soon as staff set them, as before. Typing changes the line under it in
 // place: a repaint of the form would take the box from under the cursor.
 function _revealLocal(iso){const ms=iso?Date.parse(iso):NaN;if(!isFinite(ms))return'';
-  try{return new Date(ms).toLocaleString('sv-SE',{timeZone:KSA_TZ,hourCycle:'h23'}).replace(' ','T').slice(0,16);}catch(_){return'';}}
+  try{return new Date(ms+108e5).toISOString().slice(0,16);}catch(_){return'';}}
 function _revealIso(v){v=String(v||'').slice(0,16);if(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(v))return null;const ms=Date.parse(v+':00+03:00');return isFinite(ms)?new Date(ms).toISOString():null;}
 function _revealNoteTxt(v){const iso=_revealIso(v);if(!iso)return'';return Date.parse(iso)>Date.now()?t('revealHeldNote').replace('{0}',_revealWhen({reveal_at:iso})):t('revealPastNote');}
 function _revealFieldHtml(p){
@@ -15256,7 +15260,7 @@ function _bdgProfCheer(){
 function _bookingAhead(e){
   if(!e||!['waiting','waitlist','active'].includes(e.status))return false;
   const d=String(e.sessionDate||e.sessionId||'').slice(0,10);if(!d)return true;
-  return d>=(e.status==='active'?new Date(Date.now()-864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ}):todayStr());
+  return d>=(e.status==='active'?_ksaYmd(Date.now()-864e5):todayStr());
 }
 function _seasonDashboard(cust){
   const allEntries=getQueue().filter(e=>e.customerId===cust.id);
@@ -16919,7 +16923,7 @@ function renderDashboard(){
       <em>${n}/${_placesCap(x)}</em></button>`;}).join(''):`<div class="empty-state">${t('daySheetNone')}<div class="dash-empty-go"><button type="button" class="btn-secondary" data-on-click="${_on("_on_renderDashboard_2",_EV,_EL)}">${t('newSession')}</button></div></div>`;
   const alerts=_ntRows();
   const alertHtml=alerts.length?alerts.map(r=>`<button type="button" class="dash-row" data-on-click="${_on(...r.go)}"><span class="nt-dot-inline ${r.c}" aria-hidden="true"></span><span class="dash-row-main">${esc(r.txt)}</span></button>`).join(''):_emptyState(t('dashAllClear'));
-  const tz=ts=>{try{return new Date(ts).toLocaleDateString('en-CA',{timeZone:KSA_TZ});}catch(_){return'';}};
+  const tz=ts=>{try{return _ksaYmd(ts);}catch(_){return'';}};
   const seen=new Set(),feed=[...(S._dbLog||[]),...(S.fullLog||[])].filter(i=>i&&i.ts&&tz(i.ts)===today)
     .sort((a,b)=>b.ts-a.ts).filter(i=>{const k=`${i.label}|${i.by}|${Math.round(i.ts/1000)}`;if(seen.has(k))return false;seen.add(k);return true;}).slice(0,8);
   const hhmm=ts=>{try{return new Date(ts).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});}catch(_){return'';}};
@@ -17517,7 +17521,7 @@ function renderSessions(){
     // this button existed. The count is the roster's own (_coCount): never a night still ahead,
     // closed or not (2026-10-05: a closed future night offered it, and marked its riders no-show
     // days early), and on an approval ride only the riders selected.
-    const _today=new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+    const _today=todayStr();
     const _nightOver=s.status==='closed'||String(s.session_date||s.id)<_today;
     const _closeable=_coCount(s.id);
     const _closeoutBtn=_closeable?`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_40",_EV,_EL,s.id)}" title="${t('closeOutHint')}">${t('closeOutBtn')} (${_closeable})</button>`:'';
@@ -24139,7 +24143,7 @@ function renderStaffQueue(_resultsOnly){
   const _liveOnly=S.sfSession==='all',_liveDay=todayStr(),_nowMs=Date.now(); // today and now, once per paint (_notHere too)
   // Upper bound (~1 year out) so an absurd far-future date — e.g. stray test data dated 2099 —
   // can never inflate the live Expected/On Bike counts.
-  const _capDay=new Date(Date.now()+366*864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  const _capDay=_ksaYmd(Date.now()+366*864e5);
   const _isLive=e=>{if(!_liveOnly)return true;const d=String(e.sessionDate||e.sessionId||'').slice(0,10);return d>=_liveDay&&d<=_capDay;};
   // Completed = finished and settled. A free ride's riders and a bike owner with nothing to pay are never
   // marked paid (there is nothing to mark), so they count once done; a free night read "0 completed" with
@@ -28375,7 +28379,7 @@ function renderLogs(){
   if(S._logCat&&S._logCat!=='all')list=list.filter(i=>_logCatOf(i.label)===S._logCat);
   if(S._logOp&&S._logOp!=='all')list=list.filter(i=>i.by===S._logOp);
   {const rg=_logRange();if(rg.from||rg.to){
-    const _dayOf=ts=>new Date(ts).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+    const _dayOf=ts=>_ksaYmd(ts);
     list=list.filter(i=>{const d=_dayOf(i.ts||0);return(!rg.from||d>=rg.from)&&(!rg.to||d<=rg.to);});
   }}
   if(q)list=list.filter(i=>(i.label||'').toLowerCase().includes(q)||(i.by||'').toLowerCase().includes(q)||_personName(i.uid).toLowerCase().includes(q));
@@ -28396,7 +28400,7 @@ function renderLogs(){
       +(S._logDay==='custom'?_fField(t('logFrom'),`<input type="date" class="filter-select" aria-label="${esc(t('logFrom'))}" value="${esc(S._logFrom||'')}" max="${todayStr()}" data-on-change="${_on("_on_renderLogs_5",_EV,_EL,"_logFrom")}">`)+_fField(t('logTo'),`<input type="date" class="filter-select" aria-label="${esc(t('logTo'))}" value="${esc(S._logTo||'')}" max="${todayStr()}" data-on-change="${_on("_on_renderLogs_5",_EV,_EL,"_logTo")}">`):'')
       +(ops.length>1?_fField(t('logsOperator'),`<select class="filter-select" aria-label="${esc(t('logsOperator'))}" data-on-change="${_on("_on_renderLogs_4",_EV,_EL)}"><option value="all"${(S._logOp||'all')==='all'?' selected':''}>${t('filterAll')}</option>${ops.map(o=>`<option value="${esc(o)}"${S._logOp===o?' selected':''}>${esc(o)}</option>`).join('')}</select>`):''))}
     ${_svBar('logs')}`;
-  const dayKey=ts=>new Date(ts).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  const dayKey=ts=>_ksaYmd(ts);
   const todayK=todayStr(),yestK=fmtDate(new Date(Date.now()-864e5));
   const catCls={pay:'lg-c-green',book:'lg-c-muted',bike:'lg-c-muted',inv:'lg-c-muted',auth:'lg-c-red',other:'lg-c-muted'}; // the chip's ink (styles.css)
   const catChip=c=>{const k=_LOG_CATS.find(x=>x[0]===c);return`<span class="lg-chip ${catCls[c]||'lg-c-muted'}">${t(k?k[1]:'logCatOther')}</span>`;};
@@ -28553,7 +28557,7 @@ function renderCustActivity(){
   try{_cactLoad(false);}catch(_){}
   const list=_cactList();S._cactExport=list;
   const fmtT=at=>`<bdi>${fmt12h(new Date(at).toLocaleTimeString('en-GB',{timeZone:KSA_TZ,hour12:false,hour:'2-digit',minute:'2-digit'}))}</bdi>`; // 12-hour on screen (2026-10-09); the CSV keeps 24-hour
-  const dayKey=at=>new Date(at).toLocaleDateString('en-CA',{timeZone:KSA_TZ});
+  const dayKey=at=>_ksaYmd(at);
   const todayK=todayStr(),yestK=fmtDate(new Date(Date.now()-864e5));
   const catPill=(v,l)=>`<button class="filter-pill${(S._cactCat||'all')===v?' active':''}" aria-pressed="${!!((S._cactCat||'all')===v)}" data-on-click="${_on("_on_cact_cat",_EV,_EL,v)}">${l}</button>`;
   const days=[['all',t('filterAll')],['today',t('logToday')],['yesterday',t('logYesterday')],['7',t('histRange7')],['range',t('anDateRange')]];
@@ -30467,7 +30471,7 @@ function _reportShell(o){
   // the margins carry the title line and "Page 2 of 3".
   const ar=_isRtl();
   const now=new Date();
-  const refNo=o.refNo||('MM-RPT-'+now.toLocaleDateString('en-CA',{timeZone:KSA_TZ}).slice(2).replace(/-/g,''));
+  const refNo=o.refNo||('MM-RPT-'+_ksaYmd(now).slice(2).replace(/-/g,''));
   const op=_opName();
   // The title line says which ride and which day the sheet is for: without it a close-out found a
   // week later could not be placed (2026-10-01). A title that only repeats the banner's label is left out.
@@ -31675,7 +31679,7 @@ async function exportAccountsCsv(){
   blocks.push(..._igCsvRows(_igTotal(rows.map(r=>r.c.id)),o.sections));
   blocks.push(..._accNatCsv(o));
   if(o.sections.sneeds&&(S.tags||[]).some(x=>x.id===TAG_SN))blocks.push(..._accSnCsv(rows));
-  _downloadCsv(`accounts_${new Date().toLocaleDateString('en-CA',{timeZone:KSA_TZ})}.csv`,[cols.map(c=>t(c.key)),...rows.map(r=>cols.map(c=>r.cells[c.k])),...blocks],t('acrTitle'),rows.length);
+  _downloadCsv(`accounts_${todayStr()}.csv`,[cols.map(c=>t(c.key)),...rows.map(r=>cols.map(c=>r.cells[c.k])),...blocks],t('acrTitle'),rows.length);
 }
 
 // ── Default community report (owner, 2026-10-07) ───────────────────────────────
@@ -32914,7 +32918,7 @@ async function _prbLoad(sid,quiet){
       bday:e.registeredAt?_prbDay(e.registeredAt):''};
   })};
 }
-function _prbDay(iso){try{return new Date(iso).toLocaleDateString('sv-SE',{timeZone:KSA_TZ});}catch(_){return'';}}
+function _prbDay(iso){try{return _ksaYmd(iso);}catch(_){return'';}}
 function _prbOurs(ty){return ty!=='Own'&&ty!=='None';}
 function _prbOk(r,o){
   const e=r.e,c=r.c;
@@ -42380,7 +42384,7 @@ function renderHistory(_resultsOnly){
     const grad=bike&&bike.colors?bikeGradient(bike.colors):null;
     const em=_bookEmail(e),hasEmail=!!em;
     const wiTag=e.walkIn?`<span class="walk-in-badge">${t('addWalkin').replace(/^\+ /,'')}</span>`:'';
-    const regDate=e.registeredAt?new Date(e.registeredAt).toLocaleDateString('en-CA',{timeZone:KSA_TZ}):'';
+    const regDate=e.registeredAt?_ksaYmd(e.registeredAt):'';
     return`<tr>
       <td>
         <span class="queue-num-cell">#${e.queueNum}</span>
@@ -43177,7 +43181,7 @@ function _cashCardCash(sessId){return _salesCC(_salesOfSess(sessId));}
 // Sales with no ride (2026-10-09): the shop or the workshop on a day without a session. The Sales tab's
 // "No ride (shop)" picks them (S._ctSession '__shop__', session_id null), one KSA day at a time.
 const SHOP_CTX='__shop__';
-function _ksaDay(at){try{return new Date(at).toLocaleDateString('en-CA',{timeZone:KSA_TZ});}catch(_){return'';}}
+function _ksaDay(at){try{return _ksaYmd(at);}catch(_){return'';}}
 function _shopSales(day){day=day||todayStr();return(S.cashSales||[]).filter(r=>!r.session_id&&_ksaDay(r.created_at)===day);}
 function _shopLines(day){return _shopSales(day).map(r=>({name:r.name,cat:r.category,qty:Number(r.qty)||0,price:Number(r.price)||0,pay:r.pay,who:r.customer_name||t('cashWalkup'),src:'sale',id:r.id,item_id:r.item_id||null}));}
 function _salesCC(rows){
@@ -47685,7 +47689,7 @@ function _bdgHoldersHtml(b){
 }
 // The rides of the last 30 days and the accounts that rode each (checked in: on the bike or done).
 function _bdgRides(){
-  const today=todayStr(),from=new Date(Date.now()-30*864e5).toLocaleDateString('en-CA',{timeZone:KSA_TZ}),by={};
+  const today=todayStr(),from=_ksaYmd(Date.now()-30*864e5),by={};
   getQueue().forEach(e=>{if(e.customerId&&(e.status==='done'||e.status==='active')&&_custById(e.customerId))(by[e.sessionId]=by[e.sessionId]||new Set()).add(e.customerId);});
   const day=s=>String(s.session_date||s.id).slice(0,10);
   return allSessions().filter(s=>by[s.id]&&day(s)>=from&&day(s)<=today).sort((a,b)=>day(b).localeCompare(day(a))).map(s=>({s,ids:[...by[s.id]]}));
