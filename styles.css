@@ -722,7 +722,6 @@
     html[dir="rtl"] .topbar-logo{flex-direction:row-reverse;}
     html[dir="rtl"] .cust-topbar-name,html[dir="rtl"] .cust-topbar-email{direction:ltr;text-align:right;}
     html[dir="rtl"] .section-header{flex-direction:row;}
-    html[dir="rtl"] .actions-cell{flex-direction:row-reverse;}
     html[dir="rtl"] .stats-row{direction:rtl;}
     html[dir="rtl"] .modal-footer{flex-direction:row-reverse;}
     html[dir="rtl"] .filter-bar{direction:rtl;}
@@ -8780,17 +8779,6 @@ body.view-staff #tab-queue .queue-table .actions-cell{grid-template-columns:repe
 body.view-staff #tab-cashier .sl-wrap{padding-inline:0;}
 #tab-cashier .sl-tile-nm{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;line-height:1.25;overflow-wrap:anywhere;}
 
-/* ── Dashboard tiles without an orphan (2026-10-03): seven tiles at 150px left "Available bikes" alone on
-   a second row. One row of seven on a laptop, 4 + 3 on a tablet, pairs on a phone with the last tile
-   across both columns. ── */
-body.view-staff .dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr));}
-body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:1/-1;}
-@media (min-width:768px){
-  body.view-staff .dash-kpis{grid-template-columns:repeat(4,minmax(0,1fr));}
-  body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:auto;}
-}
-@media (min-width:1200px){body.view-staff .dash-kpis{grid-template-columns:repeat(7,minmax(0,1fr));}}
-
 /* ── Hand-over (2026-10-03): the bike-number box no longer spans the page; with nobody waiting for a bike
    it folds away, since there is no one to give one to. ── */
 body.view-staff .ho-give{max-width:640px;}
@@ -10339,22 +10327,24 @@ body.view-staff #tab-bikes .flt-head{margin-bottom:10px;}
 body.view-staff #tab-bikes .flt-svc-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 16px;margin:0 0 14px;}
 body.view-staff #tab-bikes .flt-svc-row .bk-svc-every input{height:32px;min-height:32px;}
 @media(max-width:767px){
-  /* three figures to a row on a phone, none stretched across it (the two-column rule's odd last tile) */
-  body.view-staff .dash-kpis>.dash-kpi:last-child:nth-child(odd){grid-column:auto;}
   /* Inventory's longest part may take two lines rather than be cut at both ends */
   body.view-staff #tab-inventory .inv-tabs>.inv-navbtn{white-space:normal;line-height:1.15;text-align:center;overflow:visible;}
   /* the section tabs and status pills as equal cells, three to a row, as Customers and Community have them
-     (the owner, 2026-10-11): Workshop, Ambassadors, Messages, Vendors, History, the fleet's search row */
+     (the owner, 2026-10-11): Workshop, Ambassadors, Messages, Vendors, History, the Petromin page, the fleet's
+     search row */
+  body.view-staff #pm-host .filter-bar>.filter-row,
   body.view-staff #tab-workshop .filter-bar>.filter-row,
   body.view-staff #tab-ambassadors .filter-bar>.filter-row,
   body.view-staff #tab-messages .filter-bar>.filter-row,
   body.view-staff #tab-vendors>.cmy-nav,
   body.view-staff #tab-history .filter-row.hist-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+  body.view-staff #pm-host .filter-bar>.filter-row>*,
   body.view-staff #tab-workshop .filter-bar>.filter-row>*,
   body.view-staff #tab-ambassadors .filter-bar>.filter-row>*,
   body.view-staff #tab-messages .filter-bar>.filter-row>*,
   body.view-staff #tab-vendors>.cmy-nav>*,
   body.view-staff #tab-history .filter-row.hist-tabs>*{width:100%;min-width:0;margin:0;min-height:44px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
+  body.view-staff #pm-host .filter-bar>.filter-row>:is(.search-wrap.open,.filter-sess),
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar,
   body.view-staff #tab-ambassadors .filter-bar>.filter-row>.search-wrap.open,
   body.view-staff #tab-workshop .filter-bar>.filter-row>.search-wrap.open,
@@ -10486,15 +10476,6 @@ html[data-staff-theme="dark"] body.view-staff .queue-table-desktop-wrap .queue-t
 html[data-staff-theme="dark"] body.view-staff #tab-history .queue-table thead th.hist-act,
 html[data-staff-theme="dark"] body.view-staff #tab-inventory .bk-table thead th:last-child{background:linear-gradient(var(--sf-head),var(--sf-head)) var(--s1);}
 
-/* Right to left: the pinned action columns (History's Manage Record, the fleet's Manage bike) start their
-   buttons under their heading. An old rule (html[dir="rtl"] .actions-cell{flex-direction:row-reverse})
-   undoes the mirroring a right-to-left row already does, so in Arabic Delete sat 120px away at the far
-   left of the 200px pinned cell, under nothing, and Edit after its menu. */
-@media (min-width:768px){
-  html[dir="rtl"] body.view-staff #tab-history .queue-table td.hist-act>.actions-cell,
-  html[dir="rtl"] body.view-staff #tab-inventory .bk-table .actions-cell.flt-acts{flex-direction:row;}
-}
-
 /* Analytics: a row's name keeps one line. Arabic's "Business" (77px) wrapped in the 74px column; the
    column now grows with its words, and in Arabic and Urdu both names take the same 84px so the two rows'
    buttons still start in line. */
@@ -10529,4 +10510,57 @@ body.view-staff #tab-analytics .an-navgrp-lbl{flex:0 0 auto;min-width:74px;white
      quantity field about 20px and its number out of sight (in every language and theme) */
   body.view-staff #tab-cashier .sl-row9>.sl-f1,
   body.view-staff #tab-cashier .sl-row9>.sl-f2{flex:1 1 0;min-width:0;}
+}
+
+/* ── STAFF TIDY: the five left over (2026-10-27, "fix them") ── */
+
+/* The figures at the top of a section never leave one alone on a row: _figFit measures each grid and sets
+   its columns (--fig-c) and how many of them a figure spans (--fig-s, or --fig-w for the slightly wider
+   ones in the last rows, where seven on a phone read 3 + 2 + 2). Without it the grid keeps the auto-fit
+   above. */
+body.view-staff :is(.dash-kpis,.stats-row).fig-fit{grid-template-columns:repeat(var(--fig-c),minmax(0,1fr));}
+body.view-staff :is(.dash-kpis,.stats-row).fig-fit>*{grid-column:span var(--fig-s);}
+body.view-staff :is(.dash-kpis,.stats-row).fig-fit>.fig-wide{grid-column:span var(--fig-w);}
+
+/* Bookings on a tablet or a laptop with the rail open (768-1279px): the roster scrolls in its box, and Manage
+   booking stays pinned at its end as the booking number is at its start, so Check In is on screen on every
+   row (it was 200-300px off the box's edge). A row's own colour fills it: every roster row has one. */
+@media (min-width:768px) and (max-width:1279px){
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table td.rq-mng{position:sticky;inset-inline-end:0;z-index:2;box-shadow:-1px 0 0 var(--border);}
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th.rq-mng{position:sticky;inset-inline-end:0;z-index:4;box-shadow:0 1px 0 var(--border),-1px 0 0 var(--border);}
+  html[dir="rtl"] body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table td.rq-mng{box-shadow:1px 0 0 var(--border);}
+  html[dir="rtl"] body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th.rq-mng{box-shadow:0 1px 0 var(--border),1px 0 0 var(--border);}
+  body.view-staff .queue-table td.rq-mng{background-color:var(--s1);}
+}
+
+/* A pinned cell takes its row's colour. It needs a solid fill to hide the columns sliding under it, and the
+   fills were the table's plain colour: History's Manage Record and the fleet's Manage bike stayed white on a
+   striped row and on the row under the pointer, and the fleet's state washes (in use, no rider, picked)
+   stopped at both pinned ends. The washes now sit on the cells as an image layer over whatever fills them;
+   the stripe and the pointer's colour reach the pinned cells. */
+@media (min-width:768px){
+  body.view-staff #tab-history .queue-table tbody tr:nth-child(odd) td.hist-act{background:var(--sf-zebra);}
+  body.view-staff #tab-history .queue-table tbody tr:hover td.hist-act{background:var(--sf-hover);}
+  body.view-staff #tab-inventory .bk-table tbody tr:nth-child(odd) td:last-child{background-color:var(--sf-zebra);}
+  body.view-staff #tab-inventory .bk-table tbody tr:hover td:last-child{background-color:var(--sf-hover);}
+  /* (a phone's fleet rows are cards, whose own background is the wash: they keep it) */
+  body.view-staff #tab-bikes .bk-table tbody tr:is(.flt-bg-warn,.flt-bg-blue,.flt-bg-out,.flt-bg-sel){background:none;}
+  body.view-staff #tab-bikes .bk-table tbody tr.flt-bg-warn>td{background-image:linear-gradient(rgba(var(--warn-rgb),.06),rgba(var(--warn-rgb),.06));}
+  body.view-staff #tab-bikes .bk-table tbody tr.flt-bg-blue>td{background-image:linear-gradient(rgba(var(--blue-rgb),.025),rgba(var(--blue-rgb),.025));}
+  body.view-staff #tab-bikes .bk-table tbody tr.flt-bg-out>td{background-image:linear-gradient(rgba(var(--red-rgb),.025),rgba(var(--red-rgb),.025));}
+  body.view-staff #tab-bikes .bk-table tbody tr.flt-bg-sel>td{background-image:linear-gradient(rgba(var(--green-rgb),.07),rgba(var(--green-rgb),.07));}
+}
+/* Dark: the stripe and the pointer's colour are see-through white (2% and 6%), so on a striped row the pinned
+   booking number showed the height and the date sliding under it. In the tables they are the same colours
+   made solid: the white mixed into the table's own. */
+html[data-staff-theme="dark"] body.view-staff .queue-table tbody{--sf-zebra:color-mix(in srgb,#fff 2%,var(--s1));--sf-hover:color-mix(in srgb,#fff 6%,var(--s1));}
+
+/* The Petromin page: a status pill's count kept no space from its word ("All3", "Not arrived1": a pill is a flex
+   box, which drops the space before the count's own element); on a phone the page's buttons are equal cells, as
+   the Bookings header's are, two to a row or the three in one (they sat in ragged rows at the screen's right). */
+body.view-staff #pm-host .filter-pill>.iv-o7{margin-inline-start:.35em;}
+@media (max-width:767px){
+  body.view-staff #pm-host .iv-pm-btns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:100%;}
+  body.view-staff #pm-host .iv-pm-btns.pm-n3{grid-template-columns:repeat(3,minmax(0,1fr));}
+  body.view-staff #pm-host .iv-pm-btns>.btn-sm{width:100%;min-width:0;margin:0;padding-inline:6px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
 }

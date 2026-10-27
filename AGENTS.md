@@ -1446,14 +1446,29 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
 - **The ride cards** are one grid of equal compact cards (`.sess-bar-desktop`); date and time wrap onto the lines they
   need and are never clipped (no line clamp: two lines cut a gathering ride's "Start 6 AM" off a 220px card). Each
   time is a nowrap `<bdi>`, and a gathering ride's two labelled times are two, so the line breaks between them.
-- **Figures at the top of a section** (`.dash-kpis` and `.stats-row`) are cards in sentence case, one row on a laptop
-  (auto-fit, no figure left alone), three to a row on a phone.
+- **Figures at the top of a section** (`.dash-kpis` and `.stats-row`) are cards in sentence case, never one alone on a
+  row: `_figFit(root)` measures each grid after its section draws (and again when its width changes) and sets
+  `.fig-fit` with `--fig-c` columns - one row when they fit at 96px, else as few rows as fit, split evenly (9 -> 5 + 4);
+  where equal columns cannot avoid a lone one (7 on a phone) the last rows hold one fewer, slightly wider (3 + 2 + 2,
+  `.fig-wide`). A renderer that draws a figure grid calls `_figFit` on its section after writing it.
 - **One control height**: buttons 38px on a desk and 44 on a phone (2026-10-02) and fields the same (their floor was
   42px); filter rows wrap on a desk (they scrolled sideways out of sight); saved views (`_svBar`) end the search row.
   On a phone, section tabs and status pills are equal cells three to a row.
 - **Wide tables**: History folds Contact into the rider's cell, Height under the bike type and the colour under the
   bike, and pins Manage Record at the end (`.hist-act`); the fleet table pairs name / colour, brand / model, groupset /
   speeds and type / size. A folded header keeps both orders as two sort buttons (`thHistSort2`, `sortHdr2`).
+  Bookings' roster pins Manage booking (`.rq-mng` on its header and cells, not `:last-child`, which the roster's
+  repaint budget forbids) wherever it scrolls in its box (768-1279px), as it pins the booking number.
+- **A pinned cell takes its row's colour** over a solid fill: the roster's state colours are solid already; the
+  stripe and the pointer's colour reach History's and the fleet's pinned cells, and the fleet's state washes are an
+  image layer on every cell (`tr.flt-bg-*>td`), not the row's background, which a pinned cell covers. On the dark desk
+  `--sf-zebra` / `--sf-hover` are made solid inside `.queue-table tbody` (they are see-through white elsewhere).
+- **Right to left mirrors on its own**: a flex row already runs right to left, so no `row-reverse` for a row of
+  buttons (`html[dir="rtl"] .actions-cell{row-reverse}` put them back in the English order, packed at the far side
+  of the cell; removed).
+- **One Session picker per view on a phone**: the ride strip's select. The roster's and the Petromin page's own
+  Session selects carry `.filter-sess-dup` and are hidden there; on the Petromin page the strip's select also lists
+  every night with registrations (`_pmNightIds`) and `pm:all`.
 - **Waitlist rows** hold every control in a fixed slot from the right (`_mwSlot` fills a slot a row has not got).
 - **The rail** fits 900px: 34px rows, "Keep sidebar open" at its foot. **Analytics** groups its views in two named rows
   (`.an-navgrp`: Business, People); on a phone they are equal cells and the bar scrolls with the page.
