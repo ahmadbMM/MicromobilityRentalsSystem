@@ -87,12 +87,12 @@ test('a second tap while a save is still on the wire writes nothing more', async
 
   await page.evaluate(`setStaffTab('queue');S.sfSession=${JSON.stringify(LIVE)};showWalkinModal()`);
   await page.fill('#wi-name', 'Tamer');
-  await page.evaluate(`Promise.all([saveWalkin(),saveWalkin()])`);
+  await page.evaluate(`_wiSetType('Road');Promise.all([saveWalkin(),saveWalkin()])`); // a type is picked (2026-10-28)
   await expect.poll(() => bookings.length).toBe(1);
 
   await page.evaluate(`showJccGroupModal()`);
   await page.fill('#jg-name', 'Falcons');
-  await page.evaluate(`Promise.all([saveJccGroup(),saveJccGroup()])`);
+  await page.evaluate(`document.getElementById('jg-r-type-0').value='Road';document.getElementById('jg-r-type-1').value='Hybrid';Promise.all([saveJccGroup(),saveJccGroup()])`); // each type picked (2026-10-28)
   await expect.poll(() => bookings.length).toBe(3);                      // one group of two, once
 
   await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='jcc';S.newSessMode='total';renderSessions()`);
@@ -265,7 +265,7 @@ test('the walk-in type goes with its rider, and picking an account keeps the typ
     customers: [{ id: 'c1', name: 'Tamer Hybrid', phone: '+966500000001', type_preference: 'Hybrid', created_at: '2026-01-01T00:00:00Z' }] });
   await page.waitForFunction('(S.customers||[]).length>0');
   await page.evaluate(`S.sfSession=${JSON.stringify(LIVE)};showWalkinModal();_wiSetType('Road');closeWalkinModal();showWalkinModal()`);
-  expect(await page.evaluate('S._wiType')).toBe('Any');
+  expect(await page.evaluate('S._wiType')).toBe(''); // the next walk-up starts with no type pressed (2026-10-28), not the last one's
 
   await page.evaluate(`_wiAddRider()`);
   await page.fill('#wi-r-name-0', 'Sara');

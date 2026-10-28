@@ -2350,6 +2350,8 @@
     #tab-queue .rq-b700{font-weight:700;}
     #tab-queue .rq-b800{font-weight:800;}
     #tab-queue .rq-p8{padding:8px;}
+    /* where a rider the search did not find is (the staff review, 2026-10-28, S03-core3-03): one line under the empty state */
+    #tab-queue .q-miss{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px 12px;margin:0 auto 12px;max-width:640px;font-size:13.5px;font-weight:600;color:var(--text);text-align:center;}
     #tab-queue .rq-mt2{margin-top:2px;}
     #tab-queue .rq-mt3{margin-top:3px;}
     #tab-queue .rq-mt4{margin-top:4px;}
@@ -7190,21 +7192,34 @@ html[dir="rtl"] #checkin-modal .modal-footer{direction:rtl;}
 
 /* ── The check-in modal's outcome row ──
    Check in, Waiting, No-show and Cancel booking are chosen like the payment is, and Confirm applies
-   the choice. Each wears its own colour — the colour the roster gives that state — outlined until
-   chosen and filled once it is, and all four share one width. */
+   the choice. Each wears its own colour — the colour the roster gives that state — and all four share
+   one width. The choice is drawn PRESSED, never filled (the staff review, 2026-10-28, S04-core4-01,
+   S13-open-items-02): a solid green "Check In" read as the action and was tapped instead of Confirm.
+   A quiet outline of its colour until chosen; chosen, the full colour as a thicker outline over a light
+   wash of it, sunk, with the tick. Confirm alone is a filled button. */
 #checkin-modal .ci-outcomes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:4px;}
 #checkin-modal .ci-out{
   --oc:var(--sf-green-ink,var(--green));
-  width:100%;min-width:0;min-height:44px;padding-inline:6px;white-space:normal;text-align:center;
-  background:var(--sf-card,#fff);color:var(--oc);border:1.5px solid var(--oc);font-weight:800;
+  width:100%;min-width:0;min-height:44px;padding-inline:6px;white-space:normal;text-align:center;gap:4px;
+  background:var(--sf-card,#fff);color:var(--oc);border:1.5px solid color-mix(in srgb,var(--oc) 45%,var(--sf-card,#fff));font-weight:800;
 }
 #checkin-modal .ci-out-waiting{--oc:var(--orange);}
 #checkin-modal .ci-out-noshow{--oc:var(--muted);}
 #checkin-modal .ci-out-cancel{--oc:var(--red);}
-#checkin-modal .ci-out.active,#checkin-modal .ci-out.active:hover{background:var(--oc);border-color:var(--oc);color:#fff;}
+#checkin-modal .ci-out.active,#checkin-modal .ci-out.active:hover{background:color-mix(in srgb,var(--oc) 13%,var(--sf-card,#fff));border:2.5px solid var(--oc);color:var(--oc);box-shadow:inset 0 2px 4px rgba(16,19,18,.16);}
 #checkin-modal .ci-out:hover{border-color:var(--oc);color:var(--oc);}
-html[data-staff-theme="dark"] #checkin-modal .ci-out.active{color:#0b0f0d;}
+#checkin-modal .ci-out .cu-ic{flex:none;}
+html[data-staff-theme="dark"] #checkin-modal .ci-out.active{background:color-mix(in srgb,var(--oc) 22%,var(--sf-card,#101318));box-shadow:inset 0 2px 5px rgba(0,0,0,.45);}
 @media (max-width:560px){#checkin-modal .ci-outcomes{grid-template-columns:repeat(2,minmax(0,1fr));}}
+/* Close and Confirm stay on screen (the staff review, 2026-10-28, S04-core4-01, S13-open-items-02): on a 360x740
+   phone Confirm sat below the panel's fold. The footer sticks to the foot of the scrolling panel - the phone's
+   centred box, a tablet's, the desk's side panel - on the card's own colour under a rule, so nothing scrolled under
+   it shows through; the Saturday ride's three buttons the same. It is the dialog's own footer, not a bar. The box
+   gives the footer its bottom padding, so the footer sits flush whether it sticks or simply ends the content. */
+#checkin-modal .bkm-cbox{--ci-px:28px;--ci-pb:28px;padding-bottom:0;}
+@media(min-width:768px) and (max-width:1023px){#checkin-modal .bkm-cbox{--ci-px:24px;--ci-pb:24px;}}
+@media(max-width:767px){#checkin-modal .bkm-cbox{--ci-px:16px;--ci-pb:20px;}}
+#checkin-modal .bkm-cbox>.modal-footer{position:sticky;bottom:0;z-index:2;margin:8px calc(-1*var(--ci-px)) 0;padding:10px var(--ci-px) var(--ci-pb);background:var(--sf-card,var(--s1));border-top:1px solid var(--sf-line2,var(--border));}
 
 /* ── The desk's dialogs without inline styles (2026-09-28) ─────────────────────────────────────
    What the check-in modal (#checkin-modal: renderCheckinModal, its Bike field and the bike's spec

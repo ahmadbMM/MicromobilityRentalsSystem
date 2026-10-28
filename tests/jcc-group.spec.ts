@@ -2,8 +2,9 @@ import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // JCC "Add group": walk-in style — free-text riders under ONE group name. Unnamed riders
-// become "<group name> 2/3…", a named rider matching a saved customer gets linked, and all
-// rows share a group_id + group_name in a single queue_entries insert.
+// become "Guest of <contact>" (names are letters and spaces; "Tamer Group 2" until 2026-10-28), each
+// rider's bike type is picked (none starts on Any), a named rider matching a saved customer gets
+// linked, and all rows share a group_id + group_name in a single queue_entries insert.
 test('JCC group modal books multiple walk-in riders under one group name', async ({ page }) => {
   const sessions = [{ id: 's0', day: 'Friday', session_date: '2099-02-10', capacity: 12, status: 'open', created_at: 1 }];
   const customers = [{ id: 'c9', name: 'Known Rider', email: 'k@x.com', phone: '0599999999', height: 175 }];
@@ -26,6 +27,7 @@ test('JCC group modal books multiple walk-in riders under one group name', async
   await modal.locator('#jg-r-h-1').fill('170'); // second rider: no name, just a height
   await modal.getByRole('button', { name: /\+ Add rider/ }).click(); // third rider: empty row still holds a bike
   await expect(modal.locator('#jg-r-name-2')).toBeVisible();
+  for (const [i, ty] of [[0, 'Road'], [1, 'Hybrid'], [2, 'Any']] as const) await modal.locator(`#jg-r-type-${i}`).selectOption(ty);
 
   const posts: Record<string, unknown>[][] = [];
   page.on('request', (r) => {
@@ -40,7 +42,8 @@ test('JCC group modal books multiple walk-in riders under one group name', async
   expect(posts).toHaveLength(1);
   const rows = posts[0];
   expect(rows).toHaveLength(3);
-  expect(rows.map((r) => r.name)).toEqual(['Known Rider', 'Tamer Group 2', 'Tamer Group 3']);
+  expect(rows.map((r) => r.name)).toEqual(['Known Rider', 'Guest of Tamer', 'Guest of Tamer']);
+  expect(rows.map((r) => r.type_preference)).toEqual(['Road', 'Hybrid', 'Any']);
   expect(new Set(rows.map((r) => r.group_id)).size).toBe(1); // one shared group
   expect(rows.every((r) => r.group_name === 'Tamer Group')).toBe(true);
   expect(rows.every((r) => r.session_id === 's0' && r.status === 'waiting')).toBe(true);

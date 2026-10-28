@@ -643,7 +643,7 @@ test.describe('growing a parked booking', () => {
       if (m && r.method() === 'POST') inserts.push({ table: m[1], body: r.postData() || '' });
     });
     await page.evaluate(`(async()=>{ showBookingEditModal('e-wait'); _beAddRider();
-      document.getElementById('be-nr-name-0').value='Second Rider'; await saveBookingEdit(); })()`);
+      document.getElementById('be-nr-name-0').value='Second Rider'; document.getElementById('be-nr-type-0').value='Road'; await saveBookingEdit(); })()`); // a type is picked (2026-10-28)
 
     // the rider joins the booking...
     await expect.poll(() => inserts.some((i) => i.table === 'queue_entries' && /Second Rider/.test(i.body))).toBe(true);
@@ -659,7 +659,7 @@ test.describe('growing a parked booking', () => {
     const inserts: string[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && r.url().includes('desk_waitlist')) inserts.push(r.url()); });
     await page.evaluate(`(async()=>{ showBookingEditModal('e-wait'); _beAddRider();
-      document.getElementById('be-nr-name-0').value='Second Rider'; await saveBookingEdit(); })()`);
+      document.getElementById('be-nr-name-0').value='Second Rider'; document.getElementById('be-nr-type-0').value='Road'; await saveBookingEdit(); })()`); // a type is picked (2026-10-28)
     await page.waitForTimeout(500);
     expect(inserts).toEqual([]);                 // adding riders does not park anyone by itself
   });

@@ -57,6 +57,7 @@ test.describe('@staff:bookings s1010 desk', () => {
     await page.evaluate('showWalkinModal()');
     const m = page.locator('#walkin-modal');
     await m.locator('#wi-name').fill('Tamer');
+    await m.locator('[data-wi-type="Any"]').click(); // the first rider's type is picked too (2026-10-28); Any only on purpose
     await m.getByRole('button', { name: /\+ Add rider/ }).click();
     await m.getByRole('button', { name: /\+ Add rider/ }).click();
     await expect(m.locator('#wi-r-type-0')).toHaveValue(''); // never Any unasked

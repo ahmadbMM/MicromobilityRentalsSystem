@@ -56,6 +56,7 @@ test('a rider added in the editor with Waitlist ticked is booked waitlisted, the
     document.getElementById('be-nr-name-0').value='Seated Rider';
     document.getElementById('be-nr-name-1').value='Parked Rider';
     document.getElementById('be-nr-wl-1').checked=true;
+    document.getElementById('be-nr-type-0').value='Road';document.getElementById('be-nr-type-1').value='Hybrid'; // each type picked (2026-10-28)
     await saveBookingEdit(); })()`);
   await expect.poll(() => sent.length).toBe(2);
   const seated = JSON.parse(sent.find((b) => /Seated Rider/.test(b))!);

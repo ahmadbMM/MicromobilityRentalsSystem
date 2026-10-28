@@ -22,6 +22,7 @@ async function walkIn(page: import('@playwright/test').Page, name: string, phone
   await modal.locator('#wi-name').fill(name);
   if (phone) await modal.locator('#wi-phone').fill(phone);
   await modal.locator('#wi-height').fill('175');
+  await modal.locator('[data-wi-type="Road"]').click(); // a type is picked (2026-10-28: none starts pressed)
   const posts: Record<string, unknown>[] = [];
   page.on('request', (r) => {
     if (r.method() === 'POST' && r.url().includes('/rest/v1/queue_entries')) {

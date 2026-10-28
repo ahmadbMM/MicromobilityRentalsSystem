@@ -610,7 +610,7 @@ test('at the desk, the walk-in menu offers an owner on this ride and not on the 
   await page.locator('#wi-name').fill('Desk Rider');
   await page.selectOption('#wi-sess', 's1');                 // the circuit: the menu follows
   await expect(page.locator('#walkin-modal [data-wi-type="Own"]')).toHaveCount(0);
-  expect(await page.evaluate(`S._wiType`)).toBe('Any');       // an owner carried there rents
+  expect(await page.evaluate(`S._wiType`)).toBe('');          // an owner carried there is asked a type again, never Any unasked (2026-10-28)
   await expect(page.locator('#wi-name')).toHaveValue('Desk Rider');
   await page.selectOption('#wi-sess', 'snd1');
   await expect(page.locator('#walkin-modal [data-wi-type="Own"]')).toHaveCount(1);

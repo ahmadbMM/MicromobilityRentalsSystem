@@ -117,7 +117,7 @@ test('the booking editor greys out a night the save would call full (finished ri
 
 // ── Walk-in: no Road Carbon where the ride has none ─────────────────────────────
 // (A workshop ride: the Saturday ride this was written for takes no walk-ins since 2026-10-07.)
-test('the walk-in offers no Road Carbon on a community ride, and a carried-over pick books as Any', async ({ page }) => {
+test('the walk-in offers no Road Carbon on a community ride, and a carried-over pick is dropped', async ({ page }) => {
   const sat = { id: '2099-02-07', day: 'Saturday', session_date: '2099-02-07', capacity: 20, spots: 20, status: 'open', created_at: 1,
     bike_slots: '{"_time":"06:00 - 08:00"}', event_kind: 'community', ride_kind: 'workshop', needs_approval: false };
   await staff(page, { sessions: [sat] });
@@ -125,7 +125,7 @@ test('the walk-in offers no Road Carbon on a community ride, and a carried-over 
   page.on('request', (r) => { if (r.method() === 'POST' && /queue_entries/.test(r.url())) { const b = JSON.parse(r.postData() || '[]'); posted.push(...(Array.isArray(b) ? b : [b])); } });
   await page.evaluate(`S._wiType='Road Carbon';setStaffTab('queue');showWalkinModal()`);
   await expect(page.locator('#walkin-modal [data-wi-type="Road Carbon"]')).toHaveCount(0);
-  expect(await page.evaluate('S._wiType')).toBe('Any');
+  expect(await page.evaluate('S._wiType')).toBe(''); // dropped, never Any unasked (2026-10-28)
   await page.evaluate(`_wiInsertRiders('2099-02-07',[{name:'Carbon Fan',height:180,type:'Road Carbon'}],'',null)`);
   await expect.poll(() => posted.length).toBe(1);
   expect(posted[0]).toMatchObject({ name: 'Carbon Fan' });

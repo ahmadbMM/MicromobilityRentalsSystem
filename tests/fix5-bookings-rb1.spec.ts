@@ -192,7 +192,7 @@ test.describe('@staff:bookings rb1 walk-in retry (2026-10-05)', () => {
       });
       await page.evaluate(`setStaffTab('queue');showWalkinModal()`);
       await page.locator('#walkin-modal #wi-name').fill('Tamer Walk');
-      await page.evaluate('saveWalkin()');
+      await page.evaluate(`_wiSetType('Road');saveWalkin()`); // a type is picked (2026-10-28: none starts pressed)
       await expect(page.locator('#err-bar-el')).toBeVisible();
       expect(posts).toBe(1);
       await page.locator('#err-bar-el button', { hasText: 'Try again' }).click();
@@ -211,11 +211,11 @@ test.describe('@staff:bookings rb1 walk-in retry (2026-10-05)', () => {
     });
     await page.evaluate(`setStaffTab('queue');showWalkinModal()`);
     await page.locator('#walkin-modal #wi-name').fill('Tamer Walk');
-    await page.evaluate('saveWalkin()');
+    await page.evaluate(`_wiSetType('Road');saveWalkin()`); // a type is picked (2026-10-28: none starts pressed)
     await expect(page.locator('#err-bar-el')).toBeVisible();
     await page.evaluate('closeErrorBar();closeWalkinModal();showWalkinModal()');
     await page.locator('#walkin-modal #wi-name').fill('Tamer Walk');
-    await page.evaluate('saveWalkin()');
+    await page.evaluate(`_wiSetType('Road');saveWalkin()`);
     await page.waitForFunction(`document.getElementById('walkin-modal').style.display==='none'`);
     expect(posts).toBe(2);
   });

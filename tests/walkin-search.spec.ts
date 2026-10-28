@@ -56,9 +56,9 @@ test('a name nobody has books as typed, with no account', async ({ page }) => {
   await page.locator('#wi-name').press('Enter');
   await expect(sug).toBeHidden();
   expect(await page.evaluate('S._wiCustId')).toBeNull();
-  await page.evaluate(`saveWalkin()`);
+  await page.evaluate(`_wiSetType('Road');saveWalkin()`); // no account to bring a type: one is picked (2026-10-28)
   await expect.poll(() => rows.length).toBe(1);
-  expect(rows[0]).toMatchObject({ name: 'Zed Newcomer', customer_id: null, walk_in: true });
+  expect(rows[0]).toMatchObject({ name: 'Zed Newcomer', customer_id: null, walk_in: true, type_preference: 'Road' });
 });
 
 test('phone digits find the account too, and typing again lets a picked account go', async ({ page }) => {
