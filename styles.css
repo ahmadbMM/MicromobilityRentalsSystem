@@ -5937,11 +5937,18 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #confirm-modal .co-out{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
 #confirm-modal .co-out-h{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text);}
 #confirm-modal .co-out-help{font-size:12px;color:var(--muted);font-weight:600;}
-#confirm-modal .co-bike{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--border);}
+#confirm-modal .co-bike,#confirm-modal .co-x-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:6px 0;border-top:1px solid var(--border);}
 #confirm-modal .co-bike-l{min-width:0;color:var(--text);}
 #confirm-modal .co-bike-b{display:flex;gap:4px;flex-wrap:wrap;}
 #confirm-modal .co-mk{min-height:44px;padding:6px 10px;font-size:12px;}
 #confirm-modal .co-mk-damaged.active,#confirm-modal .co-mk-missing.active{border-color:var(--orange);color:var(--orange);}
+/* Close out and the bulk No-show (the staff review, 2026-10-28): the body scrolls inside the dialog on a long night, a
+   session not ended yet is said in the warning colour, a paid rider kept No-show reads as a damaged bike does, and who
+   can undo it closes the body. */
+#confirm-modal .co-x-body{max-height:calc(100vh - 220px);overflow-y:auto;}
+#confirm-modal .co-x-early{margin-top:10px;padding:8px 10px;border-radius:6px;background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.45);color:var(--orange);font-weight:700;}
+#confirm-modal .co-x-ns.active{border-color:var(--orange);color:var(--orange);}
+#confirm-modal .co-x-undo{margin-top:10px;}
 /* The roster's live count: at the top as it scrolls, never at the foot. */
 #tab-queue .q-live-count{position:sticky;top:var(--topbar-h,56px);z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:0 0 10px;padding:6px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-md,6px);}
 /* staff: stick under the sections bar too (below 1024px it is 48px under the header, z 62, and hid the figures) (bug hunt 2026-10-28) */

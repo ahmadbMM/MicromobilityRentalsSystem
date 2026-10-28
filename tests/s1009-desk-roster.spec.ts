@@ -59,8 +59,15 @@ test.describe('@staff:bookings s1009 desk: no-show', () => {
     const ns = page.locator('#bulk-noshow');
     await expect(ns).toContainText(/No-show \(2\)/i);
     await ns.click();
+    // this ride (2099) has not started: asked first, the two named (the staff review, 2026-10-28: S03-core3-06);
+    // b1-a-closeout.spec.ts holds the one tap on a ride that has begun
+    const ask = page.locator('#confirm-modal .confirm-box');
+    await expect(ask).toContainText('Their session has not started yet.');
+    await expect(ask).toContainText('Rider A');
+    await expect(ask).toContainText('Rider B');
+    expect(p.filter((x) => x.body.status === 'noshow')).toHaveLength(0);
+    await ask.getByRole('button', { name: 'No-Show' }).click();
     await expect.poll(() => p.filter((x) => x.body.status === 'noshow').length).toBe(2);
-    await expect(page.locator('#confirm-modal .confirm-box').filter({ hasText: /No-show/i })).toHaveCount(0); // no question first
     await page.waitForFunction(`S.undoStack.some(u=>/No-show · 2/i.test(u.label))`);
     expect(await page.evaluate('S.sfSelected.join()')).toBe('c'); // the rider on a bike stays selected
   });
