@@ -1367,7 +1367,12 @@ export function formatFieldNames(r, limit = 20) {
 // with it into the desk core): customer 254.8 -> 252.8 KB here (0.8 below where it stood before the change), core 291.0 ->
 // 293.3 and staff 659.5 -> 661.7 here, ~294.6 / ~663.9 on the runner; a staff device downloads what it did. +3 / +3
 // restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 672, core: 300 };
+// Customer 256 -> 258, staff 672 -> 676, core 300 -> 305 (2026-10-28, the staff review's first batch: Close out's paid list,
+// early warning and Close's question, the bell's open-nights kind (its NT_KINDS entry and item hook ride in the customer
+// half), one card/cash/not-recorded split for every money screen, the Petromin billing period and its rides still out, the
+// sticky check-in footer, the search fold with its another-night line, and the walk-in's picked bike type): customer 253.9,
+// staff 668.9, core 301.2 here, about 255.3 / 671.0 / 302.5 on the runner; +2 / +4 / +5 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 258, staff: 676, core: 305 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
