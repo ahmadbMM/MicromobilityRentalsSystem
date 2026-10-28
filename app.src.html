@@ -6735,7 +6735,7 @@ async function doSignup(){
         p_type_preference:S.signupTypePref||'Any',p_gender:S.signupGender});
       if(error){if(_isNameCharsErr(error))authErr(t('errNameChars'));else if(_isNameShortErr(error))authErr(t('errNameShort'));else if(/RATE_LIMITED/.test(error.message||''))authErr(t('errTooManyTries'));else if(error.code==='23505'||/DUPLICATE/i.test(error.message||''))authErr(t('errEmailExists'));else _authFail('signup',error);return;}
       const tok=(data&&data[0]&&data[0].session_token)||null;
-      const safeCustomer={id:newId,name,email,phone:fullPhone,height,type_preference:S.signupTypePref||'Any',gender:S.signupGender||null,created_at:new Date().toISOString(),session_token:tok}; // the gender picks the men-only or women-only sessions shown (_sgVisible)
+      const safeCustomer={id:newId,name,email,phone:fullPhone,height,type_preference:S.signupTypePref||'Any',gender:S.signupGender||null,created_at:new Date().toISOString(),session_token:tok}; // the gender decides the men-only or women-only sessions it may book (_sgPick)
       // Both answers stored the moment the account exists: the confirmation it could not be
       // made without, and the ride-news box either way - so a new account is never asked again.
       if(tok){safeCustomer.ride_news=!!S.signupRideNews;safeCustomer.privacy_version=PRIVACY_VERSION;S._rnFetchedFor=newId;_consentsRpc(newId,tok,PRIVACY_VERSION,!!S.signupRideNews);}
@@ -6892,7 +6892,7 @@ function doLogout(silent){
   // belonged to the account that just left (a promo can be tied to one customer).
   S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.modifyEntryId=null;
   S.selEvent='jcc';
-  S.sessions=(S.sessions||[]).filter(s=>!_isCommunity(s)&&!_sessGender(s)); // drop private events (and men-only or women-only ones, 2026-10-27) from memory the moment they sign out
+  S.sessions=(S.sessions||[]).filter(s=>!_isCommunity(s)); // drop private events from memory the moment they sign out
   // Their own bookings arrived whole (name, email, phone, from my_bookings) and stayed in memory
   // and in the device's snapshot after they left. Only what anybody may see stays now. Not on a
   // staff device, whose queue is the desk's own full copy.
@@ -7310,10 +7310,12 @@ function _noWalkin(s){const k=s&&_rideKind(s);return k==='swim'||k==='saturday'|
 function _noAddRider(s){const k=s&&_rideKind(s);return k==='petromin'||k==='jcc';}
 // Men only, women only or mixed (the owner, 2026-10-27: "i want the triathlon pool sessions to be for male only or
 // female only or mixed and to be mentioned on the card and event everywhere and only allow the gender selected to
-// book it and make it visible only for the gender it is for"). sessions.gender_only is 'male', 'female' or null
-// (mixed). Staff choose it on the pool session's form (SG_KINDS); the server shows such a session only to accounts
-// of that gender (list_sessions and the table's read, 20261027150000) and refuses anyone else's booking with
-// GENDER_ONLY (detail: the gender it is for). The chip names the rule wherever the session is shown.
+// book it"). sessions.gender_only is 'male', 'female' or null (mixed). Staff choose it on the pool session's form
+// (SG_KINDS). Everyone sees such a session, signed in or not, of either gender (the owner, 2026-10-28: "make all
+// pool sessions visible to all genders but only male can book male sessions and female can book female sessions";
+// 20261028100000 took back the 2026-10-27 rule that showed it to that gender alone); the server refuses anyone
+// else's booking with GENDER_ONLY (detail: the gender it is for), and the page says so first (_sgPick). The chip
+// names the rule wherever the session is shown.
 const SG_KINDS=['swim'];
 function _sessGender(s){const g=s&&s.gender_only;return g==='male'||g==='female'?g:null;}
 // The rule in words ('Women only'), 'Mixed' for a mixed session of a kind that has the choice, else ''.
@@ -7373,7 +7375,7 @@ function _evChip(s){return _evNamed(s)?`<span class="ev-chip ${_evClass(s)}">${e
 const SOLE_SESSION_EVENTS=['snd96','runher','vlap'];
 function _soleSessionFor(ev){
   if(!SOLE_SESSION_EVENTS.includes(ev))return null;
-  const open=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev)&&_sgVisible(s));
+  const open=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev));
   return (open.length===1&&!_wasRejectedFor(open[0].id))?open[0]:null;
 }
 // What a rider is booking, shown in place of a picker when there is only one of it: the
@@ -7470,14 +7472,6 @@ function _evMatch(s,ev){
   if(ev==='petromin')return _rideKind(s)==='petromin'; // Petromin Days: the nights alone (2026-10-12)
   if(ev==='community')return _isCommunity(s)&&_rideKind(s)!=='workshop'&&_rideKind(s)!=='snd96'&&_rideKind(s)!=='event'&&_rideKind(s)!=='runher'&&_rideKind(s)!=='vlap';
   return !_isCommunity(s)&&_rideKind(s)!=='snd96'; // it has its own card, so not in the circuit list too
-}
-// Does a customer list show this session to whoever is on the page? (the owner, 2026-10-27: "make it visible only
-// for the gender it is for"). list_sessions hands a men-only or women-only session to that gender's accounts alone;
-// the customer lists ask again, of every copy the page holds (a snapshot, rows read before a sign-out): signed out,
-// never; signed in, to their own gender, or while they hold a booking on it. A gender not read yet trusts the server.
-function _sgVisible(s){
-  const g=_sessGender(s),c=S.loggedIn||getSession();
-  return !g||!!c&&(c.gender===undefined||c.gender===g||getQueue().some(e=>e.sessionId===s.id&&e.customerId===c.id&&['waiting','waitlist','active','done'].includes(e.status)));
 }
 // The event a session belongs to - _evMatch the other way round. Anything that opens the
 // Reserve flow on a given session must set this too: the flow drops a selected session that is
@@ -9002,7 +8996,7 @@ function _infoFacts(s,next){
 let _infoFrom=null;
 function showEventInfo(ev){if(!_infoShowEv(ev))return;S._info={ev};_infoFrom=document.activeElement;_infoLoad();_infoPaint();}
 function showSessInfo(id){const s=_sessGet(id);if(!_infoShowSess(s))return;S._info={sid:id};_infoFrom=document.activeElement;_infoLoad();_infoPaint();}
-function _infoNextOf(ev){return allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev)&&_sgVisible(s)).sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id)))[0]||null;}
+function _infoNextOf(ev){return allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,ev)).sort((a,b)=>String(a.session_date||a.id).localeCompare(String(b.session_date||b.id)))[0]||null;}
 const INFO_EV_TITLE={jcc:'landJccCardTitle',community:'landCommTitle',runher:'evRunHerName',vlap:'evVlapName',event:'landEventsCardTitle',snd96:'landSnd96CardTitle',petromin:'landPmDaysTitle'};
 function _infoPaint(){
   const I=S._info,m=document.getElementById('bike-info-modal');if(!I||!m)return;
@@ -9267,7 +9261,7 @@ async function _openEventLink(){
   await selectEvent(dl.ev);
   if(!dl.session||S.selEvent!==dl.ev||S.view!=='customer')return;
   const s=_sessDisp(dl.session);
-  if(s&&_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,dl.ev)&&_sgVisible(s))await selectSessCard(s.id);
+  if(s&&_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,dl.ev))await selectSessCard(s.id);
 }
 async function selectEvent(ev){
   if(await _profileGate(()=>selectEvent(ev)))return;
@@ -9297,8 +9291,8 @@ async function selectEvent(ev){
 // and an on-the-house perk (_regTypeHidden, _regHouseFor). The sign-in answers carry neither,
 // so the account's profile is asked once per session copy, as a booking starts, and the picker
 // is painted again with them.
-// The same answer carries the account's gender, which decides the men-only and women-only sessions it is shown
-// (_sgVisible): asked at sign-in too (_consentCheck, 2026-10-27).
+// The same answer carries the account's gender, which decides the men-only and women-only sessions it may book
+// (_sgPick): asked at sign-in too (_consentCheck, 2026-10-27).
 function _perksHydrate(){
   const cust=S.loggedIn||getSession();
   if(!sb||!cust||!cust.session_token||cust.default_pay!==undefined||S._perksAsked===cust.id)return;
@@ -12456,7 +12450,7 @@ function renderRegister(){
   // being changed keeps the types it was made with (its riders added here start with none).
   if(!S.modifyEntryId)S.regBikeTypes=S.regBikeTypes.map(ty=>_regTyBarred(ty,_selSessObj)?undefined:ty);
   if(S._bw===undefined)_bwLoad(); // the booking window, once; the list repaints when it lands
-  let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,_ev)&&_sgVisible(s)) // men or women only: that gender's alone (2026-10-27)
+  let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&_evMatch(s,_ev)) // men or women only too: everyone sees it, that gender alone books it (_sgPick, 2026-10-28)
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
   if(S.selSession&&!_bwOpen(_sessDisp(S.selSession)))S.selSession=null; // not open yet: nothing to book on
   ensureBikeSizes();

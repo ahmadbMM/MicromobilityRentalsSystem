@@ -3,7 +3,7 @@ import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/s
 
 // Men only, women only or mixed (the owner, 2026-10-27: "i want the triathlon pool sessions to be for male only
 // or female only or mixed and to be mentioned on the card and event everywhere and only allow the gender
-// selected to book it and make it visible only for the gender it is for"). The staff side: the pool session's
+// selected to book it"; shown to everyone since 2026-10-28, 20261028100000). The staff side: the pool session's
 // forms ask "Who can book", sessions.gender_only is written only when it is men or women only (or changed),
 // the chip names the rule on the staff screens, and the desk refuses an account of the other gender (the
 // server leaves staff's adds to staff). All Supabase traffic is stubbed.
