@@ -3498,9 +3498,9 @@ async function _refFetch(onCustomers){
       // The riders and their tags come from this device's own copy, topped up with what changed
       // (_syncFetch); the old whole reads stand in wherever there is no sync.
       res=await Promise.all([
-        _syncFetch('c').then(s=>s||_custListFetch()),
+        Promise.resolve(_syncFetch('c')).catch(()=>null).then(s=>s||_custListFetch()), // the sync lives in staff.js: its stand-in answers nothing until it is in
         sb.from('tags').select('*').then(x=>x,e=>({data:null,error:e})),
-        _syncFetch('ct').then(s=>s||_pagedAll(()=>sb.from('customer_tags').select('*').order('customer_id').order('tag_id'))).catch(e=>({data:null,error:e})),
+        Promise.resolve(_syncFetch('ct')).catch(()=>null).then(s=>s||_pagedAll(()=>sb.from('customer_tags').select('*').order('customer_id').order('tag_id'))).catch(e=>({data:null,error:e})),
         sb.from('breakfast_spots').select('*').then(x=>x,e=>({data:null,error:e})),
         sb.from('staff_options').select('*').then(x=>x,e=>({data:null,error:e})),
       ]);
@@ -3525,6 +3525,19 @@ async function _refFetch(onCustomers){
   _refInFlight=null;
   if(onCustomers&&out&&!out.error&&out.data)onCustomers(out);
   else if(onCustomers&&S.customers&&S.customers.length)onCustomers({data:S.customers,error:null});
+  if(out&&out.error&&S._staffAuthed&&!(S.customers||[]).length)_refRetry();
+}
+// A staff device holding no riders whose read of them failed for now (the network, the server's load) asks again in a
+// minute (2026-10-28), not at the next full load a quarter of an hour away; a whole read goes on where it stopped.
+let _refRetryT=null;
+function _refRetry(){
+  if(_refRetryT)return;
+  _refRetryT=setTimeout(()=>{
+    _refRetryT=null;
+    if(!S._staffAuthed||(S.customers||[]).length)return;
+    if(_sbCooling())return _refRetry();
+    _refFetch().then(()=>{try{if(S.view==='staff')_renderStaffTab(true);}catch(e){}},()=>{});
+  },60000);
 }
 // Inventory + promo codes are optional/error-tolerant (tables may not exist until migration
 // is run). Fetched IN PARALLEL - these used to run serially and added 4 round trips to boot.
@@ -3609,6 +3622,9 @@ const SYNC_ORDER={
 };
 const _syncKey=(kind,r)=>kind==='ct'?(r.customer_id+'|'+r.tag_id):String(r.id);
 let _sync={},_syncOff=false,_syncSaveT={},_syncChain={};
+// A whole read under way per list, the lists that showed the live nights meanwhile, the last fortnightly try, and the
+// sign-ins counted (a read begun before a sign-out writes nothing after it).
+let _syncFillP={},_syncLive={},_syncRefillAt={},_syncGen=0;
 // The copy on disk, one record per row (2026-10-04, performance): a change used to rewrite the
 // whole list, some 5,000 bookings, as one record. 'mm-sync-2' holds a 'meta' record per list
 // (SYNC_V, project, clock) and a store per list keyed by the row's key; a change puts and deletes
@@ -3659,7 +3675,7 @@ async function _syncLoad(kind){
   await _idbDo('readonly',['meta',kind],(m,r)=>{const a=m.get(kind);a.onsuccess=()=>{meta=a.result;};const b=r.getAll();b.onsuccess=()=>{list=b.result;};return b;});
   if(!meta||meta.v!==SYNC_V||meta.url!==SUPABASE_URL||!meta.wm||!Array.isArray(list))return null;
   const rows=new Map();list.forEach(r=>{if(r)rows.set(_syncKey(kind,r),r);});
-  return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false};
+  return{wm:meta.wm,fullAt:meta.fullAt||0,savedAt:Date.now(),rows,dirty:new Set(),gone:new Set(),all:false,fill:meta.fill||null}; // fill: a whole read cut short, resumed from its last key (_syncFillRun)
 }
 function _syncSave(kind){
   clearTimeout(_syncSaveT[kind]);
@@ -3676,6 +3692,7 @@ function _syncSave(kind){
 function _syncDrop(){
   S._piiOpen=null;S._piiLogged=null;S._piiVal=null; // personal data shown goes hidden again with the sign-out (2026-10-10)
   _sync={};Object.keys(_syncSaveT).forEach(k=>clearTimeout(_syncSaveT[k]));_syncSaveT={};
+  _syncGen++;_syncFillP={};_syncLive={}; // a whole read on the wire stops at its next page and writes nothing more
   try{localStorage.removeItem('cq_snapshot');}catch(e){} // the boot snapshot holds the same rows (names, phones): it goes with the copy
   _syncLegacyDrop(); // and any copy left in the first layout
   return _idbDo('readwrite',SYNC_STORES,(...ss)=>{let last=null;ss.forEach(x=>{last=x.clear();});return last;});
@@ -3690,18 +3707,142 @@ function _syncDrop(){
 // grants: a new column the desk reads goes here, in CUST_REF_COLS and in the function). The tags stay one call: small rows.
 const SYNC_CUST_COLS='id,name,email,phone,height,type_preference,gender,birth_date,country,city,nationality,socials,created_at,default_pay,hidden_types,fix_fields,apple_email,ride_news_at,ride_news,deletion_requested_at,updated_at,merged_into,heard_from,profession,workplace,whatsapp_same,whatsapp';
 const SYNC_PAGED={
-  q:cut=>()=>{let s=sb.from('queue_entries').select('*');if(cut)s=s.gte('session_date',cut);return s.order('id');},
-  c:()=>()=>sb.from('customers').select(SYNC_CUST_COLS).order('id'),
+  q:cut=>{let s=sb.from('queue_entries').select('*');if(cut)s=s.gte('session_date',cut);return s.order('id');},
+  c:()=>sb.from('customers').select(SYNC_CUST_COLS).order('id'),
 };
 const SYNC_CLOCK='2999-12-31T00:00:00Z'; // "changed after the far future": nothing, and the server's clock
-async function _syncWhole(kind,cut){
-  const w=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:SYNC_CLOCK,p_cut:cut||null});
-  if(w.error)return w;
-  const d=w.data;
-  if(!d||typeof d!=='object'||Array.isArray(d)||!d.now)return w; // not shaped like an answer: the caller turns the sync off
-  const pg=await _pagedAll(SYNC_PAGED[kind](cut),'id');
-  if(pg.error){console.warn('sync pages:',pg.error);return null;}
-  return{data:{now:d.now,rows:pg.data||[],deleted:[]},error:null};
+// Each page is kept on the device as it lands (2026-10-28). On the night of 2026-10-27 a staff phone with no copy read
+// the year four times over in four minutes: every reload, and every page lost as the phone went to the background,
+// began the year again, and a failed page set the old whole read going beside a new one. The copy's meta now carries
+// the read's clock and the last key read (meta.fill): a reload, a lost page or the next load goes on from there within
+// a day, and a page that fails (after supabase-js's own three tries) stops the read until the next load. The copy's rules are unchanged:
+// what changes while the pages come in is asked for by the first read after them, from the read's clock less five
+// minutes, deletions included (staff_sync keeps them 45 days).
+const SYNC_PAGE=1000,SYNC_FILL_KEEP_MS=24*3600*1000;
+// The bookings of a device with no copy wait this long for the year. A slower device (that phone took 37 s for it on a
+// weak signal) shows the nights from two days back on first, read on their own, and lays the year over them once it is in.
+const SYNC_FIRST_WAIT_MS=2500;
+const SYNC_REFILL_AGAIN_MS=10*60*1000; // the fortnightly read behind the screen is tried again after ten minutes, not on every load
+function _syncFill(kind,cut){
+  if(_syncFillP[kind])return _syncFillP[kind];
+  if(_sbCooling())return Promise.resolve({data:null,error:{message:'sync: the server is busy'},later:true}); // the lane's back-off: not now
+  const gen=_syncGen;
+  const p=_syncFillRun(kind,cut,gen).catch(e=>({data:null,error:e})).then(r=>{
+    if(_syncFillP[kind]===p)delete _syncFillP[kind];
+    if(r&&r.whole&&_syncLive[kind]&&gen===_syncGen){_syncLive[kind]=false;setTimeout(_syncFilled,0);}
+    return r;
+  });
+  return(_syncFillP[kind]=p);
+}
+async function _syncFillRun(kind,cut,gen){
+  let st=_sync[kind],fill=st&&st.fill&&(Date.now()-(st.fill.at||0))<SYNC_FILL_KEEP_MS?st.fill:null;
+  const gone=()=>gen!==_syncGen||_sync[kind]!==st||!S._staffAuthed; // signed out, or the copy dropped, meanwhile
+  if(!fill){
+    const w=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:SYNC_CLOCK,p_cut:cut||null});
+    if(w.error)return{data:null,error:w.error};
+    const d=w.data;
+    if(!d||typeof d!=='object'||Array.isArray(d)||!d.now)return{data:null,error:null,bad:true};
+    if(gone())return{data:null,error:{message:'sync: the copy was dropped mid-read'}};
+    fill={wm:d.now,after:null,at:Date.now()};
+    st=_sync[kind]={wm:d.now,fullAt:0,savedAt:0,rows:new Map(),list:null,all:false,dirty:new Set(),gone:new Set(),fill};
+    _syncFillPut(kind,st,null,gen); // the store emptied and the read's clock kept, before its first page
+  }
+  for(;;){
+    if(gone())return{data:null,error:{message:'sync: the copy was dropped mid-read'}};
+    let s=SYNC_PAGED[kind](cut);
+    if(fill.after!=null)s=s.gt('id',fill.after);
+    let r;
+    try{r=await s.limit(SYNC_PAGE);}catch(e){r={data:null,error:e};}
+    if(gone())return{data:null,error:{message:'sync: the copy was dropped mid-read'}};
+    // supabase-js has asked a page lost to the network three times more already (1, 2 and 4 s apart): one that still
+    // fails stops the read where it is, and the next load goes on from here.
+    if(r.error)return{data:null,error:r.error};
+    const rows=r.data||[];
+    rows.forEach(x=>{if(x)st.rows.set(_syncKey(kind,x),x);});
+    if(rows.length)fill.after=rows[rows.length-1].id;
+    fill.at=Date.now();
+    const done=rows.length<SYNC_PAGE;
+    if(done){
+      const list=[...st.rows.values()].sort(SYNC_ORDER[kind]),ordered=new Map();
+      list.forEach(x=>ordered.set(_syncKey(kind,x),x));
+      Object.assign(st,{rows:ordered,list,fill:null,fullAt:Date.now(),savedAt:Date.now()});
+    }
+    _syncFillPut(kind,st,rows,gen);
+    if(done)return{data:st.list.slice(),error:null,whole:true,changed:null};
+  }
+}
+// A page into the copy with the read's clock and where it stands, in one transaction, so the key kept is never ahead of
+// the rows kept. rows null: the read's start (the store emptied). The meta drops `fill` once the read is whole.
+function _syncFillPut(kind,st,rows,gen){
+  const fill=st.fill?{...st.fill}:null;
+  return _idbDo('readwrite',['meta',kind],(m,r)=>{
+    if(gen!==_syncGen)return null; // signed out meanwhile: none of it is written
+    if(!rows)r.clear();else rows.forEach(x=>{if(x)r.put(x,_syncKey(kind,x));});
+    return m.put(fill?{v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:0,fill}:{v:SYNC_V,url:SUPABASE_URL,wm:st.wm,fullAt:st.fullAt},kind);
+  }).then(()=>{if(!fill)_syncLegacyDrop();});
+}
+// No complete copy of a list here (a sign-in, a new device, a read cut short): it is read whole (_syncFill). The riders
+// wait for it. The bookings wait SYNC_FIRST_WAIT_MS, then answer with the live nights, the year read on behind them; a
+// read that failed for now does the same, and one refused (STAFF_ONLY) keeps what is held.
+async function _syncFirst(kind,cut){
+  const began=!_syncFillP[kind];
+  const f=_syncFill(kind,cut);
+  if(kind!=='q')return _syncFillGot(await f);
+  const r=await Promise.race([f,new Promise(res=>setTimeout(res,began?SYNC_FIRST_WAIT_MS:0,null))]);
+  if(r&&!r.later){const g=_syncFillGot(r);if(!g||!g.error||!_syncPasses(g.error))return g;}
+  _syncLive.q=true; // the year is laid over these once it is in (_syncFill)
+  return _syncLiveQ();
+}
+function _syncFillGot(r){
+  if(r.bad){_syncOff=true;return null;} // not shaped like an answer: the old reads, for the page's life
+  return r.error?_syncErr(r.error):r;
+}
+// The nights from two days back on, read on their own as a reload asks for them (_qSlice), laid over whatever older
+// bookings are held (`cut`).
+function _syncLiveQ(){
+  const cut=_qWindowCut(QUEUE_LIVE_DAYS);
+  return _pagedAll(()=>sb.from('queue_entries').select('*').gte('session_date',cut).order('id'),'id')
+    .then(r=>r.error?{data:null,error:r.error}:{data:(r.data||[]).sort(SYNC_ORDER.q),error:null,cut});
+}
+// The year is in on a device that showed the live nights meanwhile: a light reload lays it on and the screen draws it.
+function _syncFilled(){
+  if(typeof window!=='undefined'&&window.__noWiden)return; // tests pin state: no background reload
+  loadDataLight().then(()=>{try{_refreshView();}catch(e){}},()=>{});
+}
+// The fortnightly whole read of a device holding a complete copy: the screen is answered from the copy and what
+// changed, as on any day, and the list is read whole behind it and put in the copy's place between two sync calls (it
+// used to hold the load for the whole read). One at a time, never under the lane's back-off, again ten minutes after a try.
+function _syncRefill(kind,cut){
+  if(_syncFillP[kind]||_sbCooling()||(Date.now()-(_syncRefillAt[kind]||0))<SYNC_REFILL_AGAIN_MS)return;
+  _syncRefillAt[kind]=Date.now();
+  const gen=_syncGen;
+  const p=(async()=>{
+    const w=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:SYNC_CLOCK,p_cut:cut||null});
+    const d=w&&!w.error&&w.data;
+    if(!d||typeof d!=='object'||Array.isArray(d)||!d.now)return;
+    const pg=await _pagedAll(()=>SYNC_PAGED[kind](cut),'id');
+    if(pg.error||gen!==_syncGen)return;
+    await(_syncChain[kind]=(_syncChain[kind]||Promise.resolve()).then(()=>{
+      if(gen!==_syncGen||!S._staffAuthed||!_sync[kind])return;
+      const list=(pg.data||[]).sort(SYNC_ORDER[kind]),rows=new Map();
+      list.forEach(x=>rows.set(_syncKey(kind,x),x));
+      _sync[kind]={wm:d.now,fullAt:Date.now(),savedAt:0,rows,list,all:true,dirty:new Set(),gone:new Set()};
+      _syncSave(kind);
+    }).catch(()=>{}));
+  })().catch(()=>{}).finally(()=>{if(_syncFillP[kind]===p)delete _syncFillP[kind];});
+  _syncFillP[kind]=p;
+}
+// A failed sync call (2026-10-28). The function missing, or failing on its own (on 2026-09-25 a column grant it lacked
+// refused every call, and the desk opened with no riders at all), turns the sync off for the page's life: null, and the
+// old reads take over. Everything else keeps what the device holds ({error}) and the next load asks again: the network,
+// a read our 25 s gave up on, the database's limits under load (a cancelled statement, no connection to be had, a
+// restart - these turned the sync off too, and the old whole reads took over at the rush), and a staff session the
+// server no longer accepts (STAFF_ONLY: the old read would only bring RLS's empty list).
+function _syncPasses(e){return _isNetErr(e)||/^(57|53|08|40|PGRST00|20$)/.test(String((e&&e.code)||''));}
+function _syncErr(e){
+  if(_rpcAbsent(e)){_syncOff=true;return null;}
+  if(e&&e.code&&!/STAFF_ONLY/.test(String(e.message||''))&&!_syncPasses(e)){console.warn('sync off:',e);_syncOff=true;return null;}
+  return{data:null,error:e};
 }
 // The list as this device now holds it ({data,error,whole}), or null when there is no sync to
 // be had and the caller reads the old way. One call per list at a time: a second waits for the
@@ -3719,21 +3860,18 @@ async function _syncRun(kind,cut){
   if(_sync[kind]===undefined)_sync[kind]=await _syncLoad(kind); // null: this device holds no copy
   const st=_sync[kind];
   const wmMs=st?Date.parse(st.wm):NaN;
-  const full=!st||!isFinite(wmMs)||(Date.now()-(st.fullAt||0))>SYNC_FULL_EVERY_MS;
+  // The bookings and the riders with no complete copy here are read whole, page by page (_syncFirst); a complete copy
+  // a fortnight old answers as on any day and is read whole again behind the screen (_syncRefill). The tags are small:
+  // their whole read is still the one staff_sync call.
+  const paged=!!SYNC_PAGED[kind],stale=!!st&&(Date.now()-(st.fullAt||0))>SYNC_FULL_EVERY_MS;
+  if(paged&&(!st||st.fill||!isFinite(wmMs)))return _syncFirst(kind,cut);
+  if(paged&&stale)_syncRefill(kind,cut);
+  const full=!st||!isFinite(wmMs)||(stale&&!paged);
   const since=full?null:new Date(wmMs-SYNC_MARGIN_MS).toISOString();
   let r;
-  try{r=full&&SYNC_PAGED[kind]?await _syncWhole(kind,cut):await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:since,p_cut:cut||null});}
+  try{r=await sb.rpc('staff_sync',{p_table:SYNC_TABLES[kind],p_since:since,p_cut:cut||null});}
   catch(e){return{data:null,error:e};}
-  if(!r)return null; // a page of the whole read failed: the old read stands in for this load, and the sync stays on
-  if(r.error){
-    if(_rpcAbsent(r.error)){_syncOff=true;return null;}
-    // No answer (the network), or a staff session the server no longer accepts (STAFF_ONLY): the
-    // caller keeps what it holds - the old read would only bring RLS's empty list. Any other
-    // failure is the function's own (on 2026-09-25 a column grant it lacked refused every call,
-    // and the desk opened with no riders at all): the old reads take over for the page's life.
-    if(r.error.code&&!/STAFF_ONLY/.test(String(r.error.message||''))){console.warn('sync off:',r.error);_syncOff=true;return null;}
-    return{data:null,error:r.error};
-  }
+  if(r.error)return _syncErr(r.error);
   const d=r.data;
   if(!d||typeof d!=='object'||Array.isArray(d)||!Array.isArray(d.rows)||!d.now){_syncOff=true;return null;}
   if(_sync[kind]!==st||!S._staffAuthed)return{data:null,error:{message:'sync: the copy was dropped mid-read'}}; // signed out while the read was on the wire (a copy loaded after the drop is in the new _sync, so the session is asked too: its rows must not be saved back to the device)
@@ -3791,7 +3929,7 @@ async function _queueFetch(windowed,days){
   if(!wantSecure){
     // A signed-in staff device asks for what changed since its own copy (_syncFetch); the answer
     // is the whole year either way, flagged `whole` so the caller lays it over nothing.
-    const s=await _syncFetch('q',_qWindowCut(QUEUE_WINDOW_DAYS));
+    const s=await Promise.resolve(_syncFetch('q',_qWindowCut(QUEUE_WINDOW_DAYS))).catch(()=>null); // in staff.js (an entry point): no staff half, no sync
     if(s)return s;
     return _pagedAll(()=>{
       let sel=sb.from('queue_entries').select('*');
@@ -3949,8 +4087,8 @@ async function _loadDataInner(showLoader){
     const _keepPII=_rtStaffDevice();
     const _prevPII={};
     if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
-    S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs&&_qs.cut)); // a synced answer is the whole year: laid over nothing
-    _qWholeAt=q.whole?Date.now():(_qs?(_qs.whole?Date.now():_qWholeAt):0);
+    S.queue=_qMerge(_qEntries(q),q.whole?null:(q.cut||(_qs&&_qs.cut))); // a synced answer is the whole year: laid over nothing; the live nights of a device still reading it, over what it holds (q.cut)
+    _qWholeAt=q.whole?Date.now():q.cut?0:(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     if(_keepPII)S.queue.forEach(e=>_carryKnown(e,_prevPII[e.id]));
   }else if(_isNetErr(q.error))await _syncOfflineQ(); // offline: the bookings this device keeps (2026-10-10)
   try{_applyBookOutbox();}catch(_){}_bookOutboxFlush(); // surface + sync any bookings queued while offline
@@ -4013,7 +4151,7 @@ function _cacheSave(){try{
   // The bookings stay out of it on a device whose sync copy holds them (2026-10-09): they are in IndexedDB
   // already ('mm-sync-2', _syncLoad), and serialising two months of them into localStorage blocked the page
   // on every load. The boot reads them from there (qIdb).
-  const idb=!!(_sync.q&&_sync.q.rows&&_sync.q.rows.size&&!_syncOff);
+  const idb=!!(_sync.q&&!_sync.q.fill&&_sync.q.rows&&_sync.q.rows.size&&!_syncOff); // a copy still being read whole would paint a random part of tonight
   const put=(q,cs)=>localStorage.setItem('cq_snapshot',JSON.stringify(idb?{qIdb:1,ses:S.sessions,bk:strip(S.bikes),inv:strip(S.inventory),cs}:{q,ses:S.sessions,bk:strip(S.bikes),inv:strip(S.inventory),cs}));
   // The snapshot is the first paint, and the first paint shows the boot window: the nights of
   // the last two months and their sales. It used to hold the year (a megabyte and more,
@@ -4031,7 +4169,7 @@ function _cacheSave(){try{
 // The boot window's bookings from the sync copy, for a snapshot that left them there (staff half: a
 // staff device has it loaded before the boot paints; anywhere else the stand-in answers nothing).
 async function _snapQueue(){
-  const st=await _syncLoad('q');if(!st)return null;
+  const st=await _syncLoad('q');if(!st||st.fill)return null; // a read cut short holds pages in key order, not the nights
   const cut=_qWindowCut(QUEUE_BOOT_DAYS);
   return[...st.rows.values()].filter(r=>String(r.session_date||r.session_id||'')>=cut).sort(SYNC_ORDER.q).map(entryFromDB);
 }
@@ -13711,7 +13849,7 @@ async function _submitReg(){
   try{
     // Fresh queue numbers are all we need before inserting - one round trip instead of
     // the full reload (which also pulled bikes+photos, inventory, notes, promos, sales).
-    try{const _q=await _queueFetch(true);if(_q&&!_q.error&&_q.data)S.queue=_q.data.map(entryFromDB);}catch(e){}
+    try{const _q=await _queueFetch(true);if(_q&&!_q.error&&_q.data){const _qe=_q.data.map(entryFromDB);S.queue=_q.cut?_qMerge(_qe,_q.cut):_qe;}}catch(e){} // the live nights of a staff device still reading the year (_q.cut) go over what it holds
     // Duplicate RE-check on the just-fetched queue: the pre-submit check ran on stale local
     // data, so a second tab (or a lost-response retry) could book the same customer twice —
     // both passing the old check. Same banner as the early check.
@@ -13790,7 +13928,7 @@ async function _submitReg(){
             // Roll back any rows that DID insert before retrying or bailing
             await Promise.all(entries.map(e=>sb.from('queue_entries').delete().eq('id',e.id))).catch(()=>{}); // fire-and-forget: rollback of a failed insert
             if(_dup&&_try<3){
-              try{const _q2=await _queueFetch(true);if(_q2&&!_q2.error&&_q2.data)S.queue=_q2.data.map(entryFromDB);}catch(e){}
+              try{const _q2=await _queueFetch(true);if(_q2&&!_q2.error&&_q2.data){const _qe=_q2.data.map(entryFromDB);S.queue=_q2.cut?_qMerge(_qe,_q2.cut):_qe;}}catch(e){}
               const _base=nextQNum(S.selSession);entries.forEach((e,i)=>{e.queueNum=_base+i;}); // fresh numbers, then retry
               continue;
             }
@@ -51706,9 +51844,9 @@ async function _loadDataLightInner(){
     _qColsLearn(q.data);
     const _prevPII={};
     if(_keepPII)(S.queue||[]).forEach(e=>{if(e&&e.id&&((e.name||'').trim()||(e.phone||'').trim()))_prevPII[e.id]=e;});
-    S.queue=_qMerge(_qEntries(q),q.whole?null:(_qs?_qs.cut:_cut)); // a synced answer is the whole year: laid over nothing
+    S.queue=_qMerge(_qEntries(q),q.whole?null:(q.cut||(_qs?_qs.cut:_cut))); // a synced answer is the whole year: laid over nothing; the live nights of a device still reading it, over what it holds (q.cut)
     if(_keepPII)S.queue.forEach(e=>_carryKnown(e,_prevPII[e.id]));
-    _qWholeAt=q.whole?Date.now():(_qs?(_qs.whole?Date.now():_qWholeAt):0);
+    _qWholeAt=q.whole?Date.now():q.cut?0:(_qs?(_qs.whole?Date.now():_qWholeAt):0);
     try{_applyBookOutbox();}catch(_){}_bookOutboxFlush();
   }
   if(ses&&!ses.error){S.sessions=_sessMerge(ses.data||[],_recent);_revealArm();}

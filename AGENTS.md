@@ -1493,12 +1493,31 @@ asked again, and on 2026-10-27 at 20:05 Riyadh the database restarted. The rules
   `_sbStrain()`: the lane narrows to two and `_sbCooling()` holds the background reloads (`_autoRefresh` defers one to
   the end of the strain via `_sbLater`, riders' realtime reloads wait too, the section pollers skip) for 5, 10, 20,
   40, 60 s. A new automatic reload checks `_sbCooling()`.
-- **A list read whole comes in pages**: a device with no copy (or the fortnightly read) asks `staff_sync` for its
-  clock alone (`p_since` = `SYNC_CLOCK`, the far future) and reads `queue_entries` / `customers` in 1,000-row pages by
-  `id` (`SYNC_PAGED`, `_syncWhole`). One staff_sync document of a year of bookings ran past the 8 s limit at the rush
-  and was asked again every minute by devices that therefore never got their copy. `SYNC_CUST_COLS` is staff_sync's own
-  column list (customers keeps column grants): a new column the desk reads goes there, in `CUST_REF_COLS` and in the
-  function.
+- **A list read whole comes in pages**: a device with no copy asks `staff_sync` for its clock alone (`p_since` =
+  `SYNC_CLOCK`, the far future) and reads `queue_entries` / `customers` in 1,000-row pages by `id` (`SYNC_PAGED`,
+  `_syncFill`). One staff_sync document of a year of bookings ran past the 8 s limit at the rush and was asked again
+  every minute by devices that therefore never got their copy. `SYNC_CUST_COLS` is staff_sync's own column list
+  (customers keeps column grants): a new column the desk reads goes there, in `CUST_REF_COLS` and in the function.
+- **Each page is kept as it lands, and a read cut short goes on** (2026-10-28): the copy's meta carries the read's clock
+  and the last key read (`meta.fill`), written with the page in one transaction (`_syncFillPut`), so a reload, a page
+  lost to the network or the next load resumes within a day (`SYNC_FILL_KEEP_MS`). A page that still fails after
+  supabase-js's own retries (it asks a GET lost to the network, or a 503/520, three more times, 1/2/4 s apart) stops the
+  read; nothing starts the old whole read beside it. A copy with `fill` is not a copy: no deltas on it, no boot snapshot
+  from it (`_snapQueue`, `_cacheSave`). On 2026-10-27 a staff phone read the year four times in four minutes before this.
+- **A slow device shows the live nights first**: the bookings of a device with no copy wait `SYNC_FIRST_WAIT_MS` (2.5 s)
+  for the year, then answer with the nights from two days back on (`_syncLiveQ`, an answer with `cut` and no `whole`,
+  which `loadData` / `loadDataLight` / the booking flow lay over what is held with `_qMerge`); `_syncFilled` lays the year
+  on with a light reload once it is in. The riders wait for theirs (a partial rider list would hide real riders); a
+  device holding none whose read failed asks again after a minute (`_refRetry`).
+- **The fortnightly whole read runs behind the screen** (`_syncRefill`): a complete copy older than
+  `SYNC_FULL_EVERY_MS` answers from itself and its delta as on any day, and the list is read whole beside it and put in
+  the copy's place inside `_syncChain` (never across a sync call); not under `_sbCooling()`, again ten minutes after a try.
+- **The database's load never turns the sync off** (`_syncErr`, `_syncPasses`): the network, an abort, and SQLSTATE
+  classes 57/53/08/40 or PGRST000-003 keep what is held and the next load asks again. Only a missing function or one
+  failing on its own (a missing grant, a bad column) hands over to the old reads for the page's life.
+- **The sync lives in staff.js**: `_syncFetch` is a `STAFF_ENTRY` that answers a value (its stub's `undefined` reads as
+  "no sync"); callers wrap it in `Promise.resolve(...)` or `await` it. Keep new sync code reachable only from it, or it
+  lands back in the customer half (254.8 of 256 KB before the move).
 - **Database changes are not applied during ride nights** (about 18:00-23:00 Riyadh): every DDL statement makes the
   web layer reload its schema and reset its pool (1-2 s of stalled requests), on top of the ~30 resets a day that
   Supabase's own realtime housekeeping causes. Hand migrations to the user for another time.

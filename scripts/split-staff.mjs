@@ -59,6 +59,11 @@ export const STAFF_ENTRY = [
   '_vendorLatePoll', // the bell's late cancels by venues (2026-10-04): the vendor poll and the bell's opening fetch them
   '_bizFromOpts', // the business settings (2026-10-09): applied when the staff lists arrive, which customer-half code fetches
   '_snapQueue', // the boot snapshot's bookings from the sync copy (2026-10-09): awaited by the boot; a customer's page gets nothing
+  // A signed-in staff device's copy of the bookings and the riders (2026-10-28: the whole read kept page by page took the
+  // customer half to 254.8 of 256 KB). Its callers await what it answers: on a staff device staff.js is in before the
+  // first data load, and a customer's page never asks (its reads are the public ones); a stub's undefined reads as "no
+  // sync", and the old reads answer.
+  '_syncFetch',
 ];
 /** Entry points that fetch the staff half whatever the page's state: entering staff is the point. */
 const ALWAYS_LOAD = new Set(['goStaff', 'openPinModal', '_staffHostGate']);
@@ -1351,7 +1356,12 @@ export function formatFieldNames(r, limit = 20) {
 // bar and the views under each view's title in the desk core, folded table columns with two sort buttons, Analytics' two
 // named rows, the waitlist's fixed slots, the Team report's date guard): staff 657.6 / core 289.3 here, ~659.8 / ~290.6 on
 // the runner, inside the 2.5 KB the runner can add; +4 / +3 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 665, core: 294 };
+// Staff 665 -> 668, core 294 -> 297 (2026-10-28, a staff device's copy of the bookings and the riders moved out of the
+// customer half: _syncFetch became an entry point, and the copy - now read whole page by page and kept as it comes - went
+// with it into the desk core): customer 254.8 -> 252.8 KB here (0.8 below where it stood before the change), core 291.0 ->
+// 293.3 and staff 659.5 -> 661.7 here, ~294.6 / ~663.9 on the runner; a staff device downloads what it did. +3 / +3
+// restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 256, staff: 668, core: 297 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
