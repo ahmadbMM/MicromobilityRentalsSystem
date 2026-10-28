@@ -68,7 +68,7 @@ test('Mark serviced writes the stamp', async ({ page }) => {
 test('the drawer count records expected vs counted into the log', async ({ page }) => {
   await stubSupabase(page, { sessions, bikes: [], queue_entries: [
     ride(1, { pay_method: 'card' }),          // 75 by card — not in the drawer
-    ride(2),                                  // 75 cash
+    ride(2, { pay_method: 'cash' }),          // 75 cash (a paid row with no method is "Method not recorded", never drawer cash: 2026-10-28)
     ride(3, { paid: false, status: 'active' }) // pending — not collected
   ] });
   await unlockStaff(page);

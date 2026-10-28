@@ -2109,6 +2109,8 @@
     #rider-report-modal .rp-co-acts{display:flex;gap:6px;flex-shrink:0;}
     #rider-report-modal .rp-noco{margin-top:12px;padding:10px 12px;border:1px solid var(--orange);border-radius:6px;font-size:13px;}
     #rider-report-modal .rp-noco-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+    #rider-report-modal .rp-scope{display:flex;align-items:center;gap:8px;margin:6px 0 2px;font-size:13px;font-weight:700;color:var(--muted);} /* the period: a night, all, a month (2026-10-28) */
+    #rider-report-modal .rp-scope .filter-select{flex:1;min-width:0;}
     #upd-bar .rp-upd-t{font-size:13px;font-weight:700;}
     #upd-bar .rp-upd-b{background:var(--green,#03ff89);color:#000;border:none;border-radius:4px;padding:7px 14px;font-weight:900;font-size:12px;cursor:pointer;font-family:inherit;}
 
@@ -3119,6 +3121,7 @@
     #tab-analytics .rpi-line{display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--border);font-size:13px;}
     #tab-analytics .rpi-days-h{margin:14px 0 6px;font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
     #tab-analytics .rpi-days{font-variant-numeric:tabular-nums;}
+    #tab-analytics .rpi-warn{color:var(--orange);} /* fares with no method recorded (2026-10-28) */
     /* Chart hover targets get a pointer + subtle highlight so tooltips feel interactive */
     .an-hit{cursor:pointer;transition:opacity .12s ease,filter .12s ease;}
     svg:hover .an-hit{opacity:.45;}
@@ -5926,6 +5929,7 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #eon-modal .eon-sec{padding:10px 14px;background:var(--s3);border-radius:var(--r-md,6px);}
 #eon-modal .eon-h{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
 #eon-modal .eon-row{display:flex;justify-content:space-between;gap:12px;padding:4px 0;font-size:14px;font-weight:700;}
+#eon-modal .eon-warn{color:var(--orange);} /* Method not recorded (2026-10-28) */
 #eon-modal .eon-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;}
 #eon-modal .eon-list li{display:flex;justify-content:space-between;gap:10px;}
 #eon-modal .eon-act button{min-height:44px;}

@@ -87,7 +87,7 @@ test.describe('@staff:sales money controls at the desk', () => {
   });
 
   test('the till: open with a float, count, close with expected vs counted, and the Z-report', async ({ page }) => {
-    await boot(page, { till_sessions: [], till_counts: [], queue_entries: [row('c1', { paid: true, price: 75 })] });
+    await boot(page, { till_sessions: [], till_counts: [], queue_entries: [row('c1', { paid: true, price: 75, pay_method: 'cash' })] });
     const ts = posts(page, 'till_sessions');
     const tc = posts(page, 'till_counts');
     await page.evaluate(`setStaffTab('cashier');S._ctSession='s0';renderCashier()`);
@@ -98,7 +98,7 @@ test.describe('@staff:sales money controls at the desk', () => {
     await dlg.getByRole('button', { name: 'Open till' }).click();
     await expect.poll(() => ts.filter((x) => x.method === 'POST').length).toBe(1);
     expect(one(ts[0].body)).toMatchObject({ session_id: 's0', float: 100, day: TOMORROW, opened_by_name: 'Spec Staff' });
-    // expected cash: the float + the cash rental (75, no card) + the cash sale (10)
+    // expected cash: the float + the cash rental (75, recorded as cash; with no method it would be "Method not recorded", 2026-10-28) + the cash sale (10)
     await expect(dlg).toContainText('SAR 185');
     await dlg.locator('#mny-till-cash').fill('180');
     await dlg.getByRole('button', { name: 'Count the drawer' }).click();

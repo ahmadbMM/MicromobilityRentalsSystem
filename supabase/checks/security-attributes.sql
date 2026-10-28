@@ -103,6 +103,7 @@ with expected(fname, want_definer, note) as (values
   ('_employee_fare',         false, 'pure price table'),
   ('_booking_fare',          false, 'reads rider_registrations, but only ever runs inside the definer triggers; revoked from anon+authenticated'),
   ('_rider_link_reprice',    true,  'trigger: reprices the linked queue_entries row whoever made the link, anon form included'),
+  ('_rider_reg_follow_booking', true, 'trigger: stamps the linked Petromin registration (staff-only) when its booking is checked in or returned, whoever moved it; revoked (20261028140000)'),
   -- The website content store (20260924150000)
   ('_site_content_log',     true,  'writes site_content_history, which has no write policy for anyone'),
   ('_site_content_stamp',   false, 'sets updated_at/updated_by on NEW only'),
