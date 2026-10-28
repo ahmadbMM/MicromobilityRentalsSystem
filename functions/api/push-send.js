@@ -55,13 +55,16 @@ export async function onRequestPost(context) {
   const me = meRes.ok ? await meRes.json().catch(() => null) : null;
   const uid = me && typeof me.id === 'string' ? me.id : '';
   if (!/^[0-9a-f-]{36}$/i.test(uid)) return json({ ok: false, error: 'not staff' }, 403);
-  const since = new Date(Date.now() - PUSH_WINDOW_MIN * 60000).toISOString();
-  const countRes = await fetch(
-    `${SUPA}/rest/v1/staff_actions?user_id=eq.${uid}&action=like.${encodeURIComponent('push:*')}&at_server=gte.${encodeURIComponent(since)}&select=id`,
-    { method: 'HEAD', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, Prefer: 'count=exact' } },
-  );
-  const range = countRes.ok ? countRes.headers.get('content-range') || '' : '';
-  const used = Number((range.split('/')[1]) || 'NaN');
+  const countUsed = async () => {
+    const since = new Date(Date.now() - PUSH_WINDOW_MIN * 60000).toISOString();
+    const countRes = await fetch(
+      `${SUPA}/rest/v1/staff_actions?user_id=eq.${uid}&action=like.${encodeURIComponent('push:*')}&at_server=gte.${encodeURIComponent(since)}&select=id`,
+      { method: 'HEAD', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, Prefer: 'count=exact' } },
+    );
+    const range = countRes.ok ? countRes.headers.get('content-range') || '' : '';
+    return Number((range.split('/')[1]) || 'NaN');
+  };
+  const used = await countUsed();
   if (!Number.isFinite(used)) return json({ ok: false, error: 'rate check failed' }, 503); // refused rather than unmetered
   if (used >= PUSH_LIMIT) return json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429);
 
@@ -76,15 +79,25 @@ export async function onRequestPost(context) {
 
   const origin = new URL(request.url).origin;
   // The record first: a send that is not on record is not sent.
-  const logRes = await fetch(`${SUPA}/rest/v1/staff_actions`, {
+  const logRes = await fetch(`${SUPA}/rest/v1/staff_actions?select=id`, {
     method: 'POST',
-    headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+    headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
     body: JSON.stringify({
       at: new Date().toISOString(), user_id: uid, view: 'push',
       action: `push: ${String(title).slice(0, 120)} -> ${String(customerId).slice(0, 64)}`.slice(0, 300),
     }),
   });
   if (!logRes.ok) return json({ ok: false, error: 'audit failed' }, 502);
+  // Counted again with this send's own row in: the count above and the record are two steps, so parallel calls
+  // all read the same count and all sent, past PUSH_LIMIT (bug hunt 2026-10-28). Every call is on record before
+  // it counts, so only the first PUSH_LIMIT can see a count within it; the rest take their row back and stop.
+  const usedNow = await countUsed();
+  if (!Number.isFinite(usedNow) || usedNow > PUSH_LIMIT) {
+    const mine = await logRes.json().catch(() => null);
+    const id = Array.isArray(mine) && mine[0] && mine[0].id != null ? mine[0].id : null;
+    if (id != null) await fetch(`${SUPA}/rest/v1/staff_actions?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` } }).catch(() => {}); // fire-and-forget: a row left behind only counts against this account
+    return Number.isFinite(usedNow) ? json({ ok: false, error: 'rate limited', limit: PUSH_LIMIT, minutes: PUSH_WINDOW_MIN }, 429) : json({ ok: false, error: 'rate check failed' }, 503);
+  }
   const payload = JSON.stringify({
     title: String(title).slice(0, 120),
     body: String(message || '').slice(0, 300),

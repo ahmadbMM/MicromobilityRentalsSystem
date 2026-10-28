@@ -14,12 +14,13 @@ function rpcBodies(page: Page, fn: string) {
   page.on('request', (r) => { if (r.method() === 'POST' && new RegExp(`/rpc/${fn}(\\?|$)`).test(r.url())) out.push(r.postDataJSON()); });
   return out;
 }
-async function open(page: Page, socials: Record<string, string> | null) {
+async function open(page: Page, socials: Record<string, string> | null, member = true) {
   await stubSupabase(page, {
     sessions, queue_entries: [], 'rpc:my_bookings': [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', socials }],
     'rpc:customer_fix_fields': ['instagram'],
     'rpc:customer_fix_save': [],
+    'rpc:community_member': member, // the client asks who is a member (bug hunt 2026-10-28)
   });
   const sent = rpcBodies(page, 'customer_fix_save');
   await loginCustomer(page, { id: 'c1', phone: '0500000001' });
@@ -46,6 +47,14 @@ test.describe('@customer:fix a community member without an Instagram', () => {
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0].p_values).toEqual({ instagram: 'lina.rides' });
     await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
+  });
+
+  // Staff flagged the Instagram of an account that is not a member, with none on file: the server allows
+  // "I don't have one" there, and the check-up offers it in its general words (bug hunt 2026-10-28).
+  test('a non-member staff flagged with no handle may say "I don\'t have one"', async ({ page }) => {
+    await open(page, null, false);
+    await expect(page.locator('#fix-gate .fx-none')).toHaveCount(1);
+    await expect(page.locator('#fx-title')).not.toHaveText('Add your Instagram');
   });
 
   test('a handle staff flagged still offers "I don\'t have one"', async ({ page }) => {

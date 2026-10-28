@@ -1522,3 +1522,26 @@ asked again, and on 2026-10-27 at 20:05 Riyadh the database restarted. The rules
   web layer reload its schema and reset its pool (1-2 s of stalled requests), on top of the ~30 resets a day that
   Supabase's own realtime housekeeping causes. Hand migrations to the user for another time.
 - **Deploys go out after the evening's sessions** where possible: open pages reload for a new build.
+
+## Bug hunt fixes (2026-10-28)
+
+The line-by-line hunt of d0e27984 (the owner: "fix them all"). Behaviour that changed on purpose:
+- **`_mgr_ok` is null-safe** (migration 20261028120000): no `mgr_over`, a non-number, or 0 needs no manager; only a
+  kind ticked `true` in `mgr_for` needs one over the limit. A 'biz' row without `mgr_over` had refused every refund,
+  price change and on-the-house since 2026-10-25 20:42.
+- **A session's date move takes its partner places, part-timer shifts and tills along** (`_sessMoveRefs` returns false
+  when one is refused, and the old row is then kept): `session_partners` cascades on delete, the other two go NULL.
+- **The kiosk's confirm step asks what Find never shows**: the last 4 of the account's first emergency contact, else
+  its birth year, else (neither on file) the phone's last 4 as before. Tries count for the whole visit.
+- **A Saturday ride's check-in takes no premium-bike deposit** (`_ciSatRender` has no deposit field).
+- **A void asks what a refund asks**: the `can_refund` capability and the manager limit (client `_salesVoid`, server
+  `staff_void_receipt`, migration 20261028120200).
+- **`queue_public` holds rides from two days back on** (migration 20261028120100): the app reads it from yesterday
+  (`_pubCut`) and the website for upcoming rides only. A customer photo link is this project's photos bucket or a
+  Google picture; ambassador cards found by phone alone show points, not the code; staff_vendor_* writes need the
+  Vendors edit right and an admin or manager role.
+- **Reads that could pass 1,000 rows are paged** (`_pagedAll`, or `_pagedCap` with a "may be short" note): workshop,
+  messages, ambassadors, part-timers, the fleet report, the Exceptions and Team reports, `staff_last_seen`.
+- **A save sent while another is in flight waits for it** (workshop, messages, ambassadors: `W._wp` is resolved by
+  the save in flight); it used to be dropped after its dialog had closed. Write it as `res=await sb.from(...)` with a
+  separate done-promise, so the build's write check still sees it.

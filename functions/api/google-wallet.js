@@ -126,6 +126,11 @@ function passPayload(env, b, group, sess, approvalRide, origin) {
   const bikes = NO_BIKE[kind] ? "" : [...new Set(group.map((r) => clean(r.type_preference, 20)).filter((x) => x && x !== "None" && x !== "Any"))].join(", ");
   const text = (id, header, body) => ({ id, header, body });
   const modules = [text("ref", "Reference", ref), text("when", "When", [when, time].filter(Boolean).join(" · ") || "-")];
+  // A Saturday Social Ride's list once it is published shows the booking number, as the app's _satNumOk and the
+  // Apple pass (satNum) do; the Google pass never did. The ref keeps no number, as on Apple (bug hunt 2026-10-28).
+  const satNum = approvalRide && kind === "saturday" && isPublished(sess) && group.length > 0 && group.every((r) => r.approval === "approved" && !r.partner && r.status !== "waitlist" && r.status !== "cancelled");
+  const satNums = satNum ? group.map((r) => r.queue_num).filter((n) => n != null).map(Number).sort((a, c) => a - c).map((n) => `#${n}`).join(", ") : "";
+  if (satNums) modules.push(text("num", group.length > 1 ? "Booking numbers" : "Booking no.", satNums));
   if (riders) modules.push(text("riders", people(kind, group.length), riders));
   if (bikes) modules.push(text("bikes", "Bike", bikes));
   if (sess && sess.route_slug) modules.push(text("route", "Route", clean(sess.route_slug, 60)));
@@ -196,11 +201,20 @@ export async function onRequestPost(context) {
   const rpc = await fetch(`${SUPA}/rest/v1/rpc/my_bookings`, { method: "POST", headers: hdr, body: JSON.stringify({ p_id: customerId, p_token: token }) });
   if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
   const rows = await rpc.json();
-  const b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
+  let b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
   if (!b) return json({ ok: false, error: "not found" }, 404);
   const off = (r) => ["cancelled", "noshow", "removed"].includes(String(r.status || ""));
-  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || !off(r))) : [b];
+  // A waitlisted seat holds no place: it is left out of the party, and a waitlisted booking alone gets no pass
+  // (the app's !_wl gate); a party that holds a place is issued on that one (bug hunt 2026-10-28).
+  const wl = (r) => String(r.status || "") === "waitlist";
+  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || (!off(r) && !wl(r)))) : [b];
   if (!group.some((r) => r.id === b.id)) group = [b];
+  if (wl(b)) {
+    const held = group.find((r) => !wl(r));
+    if (!held) return json({ ok: false, error: "waitlisted" }, 409);
+    b = held;
+    group = group.filter((r) => !wl(r));
+  }
   let sess = null;
   if (b.session_id != null) {
     try {

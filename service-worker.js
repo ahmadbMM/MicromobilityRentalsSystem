@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-0d0ceee734';
+const CACHE = 'mmcq-11fc681fe4';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,19 +22,19 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=919955e35b';
+const STAFF_JS = './staff.js?v=c90012478d';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=2251b578ae","./staff-parts/community.js?v=ab26d7a7a9","./staff-parts/bikes.js?v=e9f3289494","./staff-parts/cashier.js?v=0f25165811","./staff-parts/catalog.js?v=cb264202c3","./staff-parts/inventory.js?v=a3bb7cdee4","./staff-parts/website.js?v=66758f582e","./staff-parts/history.js?v=223817cb65","./staff-parts/workshop.js?v=cca64f70a8","./staff-parts/ambassadors.js?v=d0c3ce0b75","./staff-parts/messages.js?v=88f66a8478","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=83fab08d5b","./staff-parts/imports.js?v=d60ca6892a","./staff-parts/team.js?v=b593dfecfc","./staff-parts/settings.js?v=7721120fea","./staff-parts/fleet.js?v=6f867e766c","./staff-parts/money.js?v=c7f12ef19d","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=8c079bb893","./staff-parts/kiosk.js?v=df76429b3c","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=c0a0ad2f88"];
-const APP_JS = './app.js?v=3bd49d6b44';
-const APP_CSS = './app.css?v=daf4358739';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=9ef47823bc","./staff-parts/community.js?v=0da981e2ee","./staff-parts/bikes.js?v=796cc0ddb5","./staff-parts/cashier.js?v=e7596c59fa","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=a3bb7cdee4","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=1595da51bd","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=defd7101f3","./staff-parts/messages.js?v=ef3959ad79","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=55ce8526c6","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=b593dfecfc","./staff-parts/settings.js?v=1ffd1104ce","./staff-parts/fleet.js?v=a85c4efcf2","./staff-parts/money.js?v=8fcdde98de","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=fd60a446ee","./staff-parts/kiosk.js?v=83e3c36c38","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=815114a4e2"];
+const APP_JS = './app.js?v=521b872371';
+const APP_CSS = './app.css?v=bb7dffceec';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=19394b511e']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=345840d47c']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
@@ -150,12 +150,30 @@ function navSafe(res) {
 // files this cache never held, and a deploy later the network would hand it NEWER ones than it was
 // built with. So the refresh stores the files the new page names alongside it, fetched while they
 // are still the ones it was built with.
+// On a staff device that holds the staff half too: the shell's styles.css, the staff.js its app.js names and
+// the parts staff.js names (STAFF_PARTS_V). Only app.js/app.css were kept, so a later deploy handed the stored
+// app.js NEWER staff code, and offline the staff half did not load (bug hunt 2026-10-28). A rider's phone,
+// which never loaded staff.js, is not made to download it.
 function pageFiles(cache, res) {
-  return res.text().then((html) => Promise.all(
-    [...new Set(html.match(/\/(?:app\.js|app\.css)\?v=[a-f0-9]{10}/g) || [])].map((u) => {
-      const req = new Request('.' + u);
-      return cache.match(req).then((hit) => hit || fetch(req).then((r) => (r.ok ? cache.put(req, r) : null)));
-    })
+  const keep = (u) => {
+    const req = new Request('.' + u);
+    return cache.match(req).then((hit) => hit || fetch(req).then((r) => (r.ok ? cache.put(req, r.clone()).then(() => r) : null)));
+  };
+  const parts = (r) => r.clone().text().then((sj) => {
+    const m = sj.match(/STAFF_PARTS_V=(\{[^}]*\})/);
+    let v = {};
+    try { v = m ? JSON.parse(m[1]) : {}; } catch (_) { v = {}; }
+    return Promise.all(Object.keys(v).filter((n) => /^[a-z-]+$/.test(n) && /^[a-f0-9]{10}$/.test(String(v[n]))).map((n) => keep(`/staff-parts/${n}.js?v=${v[n]}`)));
+  });
+  const staffJs = (r) => r.clone().text().then((js) => {
+    const m = js.match(/\/staff\.js\?v=[a-f0-9]{10}/);
+    return m ? keep(m[0]).then((sr) => (sr ? parts(sr) : null)) : null;
+  });
+  const staffDevice = /^staff\./i.test(self.location.hostname) ? Promise.resolve(true)
+    : cache.keys().then((ks) => ks.some((k) => /\/staff\.js\?v=/.test(k.url)), () => false);
+  return Promise.all([res.text(), staffDevice]).then(([html, staff]) => Promise.all(
+    [...new Set(html.match(staff ? /\/(?:app\.js|app\.css|styles\.css)\?v=[a-f0-9]{10}/g : /\/(?:app\.js|app\.css)\?v=[a-f0-9]{10}/g) || [])].map((u) =>
+      keep(u).then((r) => (staff && r && /^\/app\.js\?/.test(u) ? staffJs(r) : null)))
   )).catch(() => {});
 }
 
@@ -193,17 +211,18 @@ self.addEventListener('fetch', (e) => {
     e.respondWith(
       Promise.all([caches.match(SHELL_KEY), caches.match(HOLD_KEY)]).then(([cached, held]) => {
         let stored = Promise.resolve(); // the refresh's write to the cache, for waitUntil below
+        let mark = Promise.resolve(); // the hold mark's write or removal, kept alive the same way (bug hunt 2026-10-28)
         const refresh = fetch(new Request(SHELL_KEY, { cache: 'no-cache' })).then((res) => {
           const safe = navSafe(res); // never store redirect history under the shell key
           if (isHold(safe)) {
             // The site is on hold (functions/_middleware.js, MM_HOLD): remember it, so the next
             // navigation shows the hold page instead of the cached app, and tell open pages to
             // reload into it - an open app would otherwise go on writing to the database.
-            caches.open(CACHE).then((c) => c.put(HOLD_KEY, new Response('1'))).catch(() => {});
+            mark = caches.open(CACHE).then((c) => c.put(HOLD_KEY, new Response('1'))).catch(() => {});
             if (!held) self.clients.matchAll({ type: 'window' }).then((cs) => cs.forEach((c) => c.postMessage({ type: 'mm-hold' })));
             return safe;
           }
-          if (safe && safe.ok && held) caches.open(CACHE).then((c) => c.delete(HOLD_KEY)).catch(() => {});
+          if (safe && safe.ok && held) mark = caches.open(CACHE).then((c) => c.delete(HOLD_KEY)).catch(() => {});
           if (safe && safe.ok) {
             const copy = safe.clone();
             // If the shell actually changed (new deploy), tell open pages so they can refresh
@@ -222,12 +241,17 @@ self.addEventListener('fetch', (e) => {
         // nothing cached yet, the navigation waits on the network as any first visit does.
         // On hold, the network answers first: the hold page while it lasts, the app once it is over
         // (the hold page reloads itself every minute). Offline, the cached app is all there is.
-        if (held) return refresh.catch(() => (cached ? navSafe(cached) : Response.error()));
+        // A 5xx or a 522 while the mark is set (the hold lifted by a deploy that is still landing) is not the
+        // page: the cached app answers it, as it does a network failure (bug hunt 2026-10-28).
+        if (held) {
+          try { e.waitUntil(refresh.then(() => Promise.all([stored, mark])).catch(() => {})); } catch (_) { /* the refresh still runs */ }
+          return refresh.then((r) => (isHold(r) || (r && r.ok) || !cached ? r : navSafe(cached)), () => (cached ? navSafe(cached) : Response.error()));
+        }
         // The refresh outlives the answer, so the worker is kept alive until it is stored: once the
         // cached shell has answered, nothing else held the worker, and the browser may stop an idle
         // one before the new shell was written (2026-10-07).
         if (cached) {
-          const kept = refresh.then(() => stored).catch(() => {});
+          const kept = refresh.then(() => Promise.all([stored, mark])).catch(() => {});
           try { e.waitUntil(kept); } catch (_) { /* the event is over: the refresh still runs */ }
           return navSafe(cached);
         }

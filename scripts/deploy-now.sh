@@ -62,6 +62,15 @@ GENERATED="index.html app.js app.css lang staff-parts service-worker.js staff.js
 git diff --quiet -- $GENERATED || {
   [ "${1:-}" = "--dirty" ] || { echo "✗ the build changed generated files — commit them (or --dirty):" >&2; git diff --stat -- $GENERATED | tail -5 >&2; exit 1; }
 }
+# git diff never sees a file the build has just CREATED (a new staff part or part pack): the stray
+# check above ran before the build, so it went up from here while CI refused the same commit
+# (ci.yml's check of lang and staff-parts; bug hunt 2026-10-28).
+new=$(git ls-files --others --exclude-standard -- lang staff-parts)
+if [ -n "$new" ] && [ "${1:-}" != "--dirty" ]; then
+  echo "✗ the build wrote files git does not track — commit them (or --dirty):" >&2
+  echo "$new" | head -10 >&2
+  exit 1
+fi
 node scripts/assemble-dist.mjs >/dev/null
 
 # Fail fast and helpfully when nothing can authenticate — an unauthenticated wrangler

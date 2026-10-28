@@ -713,26 +713,24 @@
     html[dir="rtl"] .phone-row{flex-direction:row-reverse;}
     html[dir="rtl"] .auth-cc-row{flex-direction:row-reverse;}
     html[dir="rtl"] .height-row{flex-direction:row-reverse;}
-    html[dir="rtl"] .toggle-group{flex-direction:row-reverse;justify-content:flex-end;}
+    /* no row-reverse here: dir=rtl mirrors the row already, row-reverse put the options back in English order (bug hunt 2026-10-28) */
     html[dir="rtl"] .form-row{direction:rtl;}
     html[dir="rtl"] .tab-nav{direction:rtl;}
     html[dir="rtl"] .filter-row{direction:rtl;}
     html[dir="rtl"] input,html[dir="rtl"] select{text-align:right;}
     html[dir="rtl"] th,html[dir="rtl"] td{text-align:right;}
-    html[dir="rtl"] .topbar-logo{flex-direction:row-reverse;}
     html[dir="rtl"] .cust-topbar-name,html[dir="rtl"] .cust-topbar-email{direction:ltr;text-align:right;}
     html[dir="rtl"] .section-header{flex-direction:row;}
     html[dir="rtl"] .stats-row{direction:rtl;}
-    html[dir="rtl"] .modal-footer{flex-direction:row-reverse;}
+    /* .modal-footer, .topbar-logo, .topbar-right, .donut-wrap, .donut-legend-item: no row-reverse, the inherited
+       direction mirrors them; the extra flip laid them out in English order (bug hunt 2026-10-28) */
     html[dir="rtl"] .filter-bar{direction:rtl;}
     html[dir="rtl"] .section-header>div{text-align:right;}
     html[dir="rtl"] .inline-form{direction:rtl;}
     html[dir="rtl"] .form-section{direction:rtl;}
     html[dir="rtl"] .analytics-kpi-grid{direction:rtl;}
     html[dir="rtl"] .chart-grid-wide,html[dir="rtl"] .chart-grid-2,html[dir="rtl"] .chart-grid-3{direction:rtl;}
-    html[dir="rtl"] .donut-wrap{flex-direction:row-reverse;}
     html[dir="rtl"] .donut-legend{text-align:right;}
-    html[dir="rtl"] .donut-legend-item{flex-direction:row-reverse;}
     html[dir="rtl"] .chart-legend{direction:rtl;}
     html[dir="rtl"] .search-wrap svg{left:auto;right:10px;}
     html[dir="rtl"] .search-input{padding-left:12px;padding-right:32px;}
@@ -757,7 +755,6 @@
     html[dir="rtl"] .sess-card{direction:rtl;}
     html[dir="rtl"] .receipt-box{direction:ltr;text-align:left;}
     html[dir="rtl"] .color-slots{direction:ltr;}
-    html[dir="rtl"] .topbar-right{flex-direction:row-reverse;}
     html[dir="rtl"] .view-badge{letter-spacing:0;}
 
 
@@ -2404,6 +2401,8 @@
     #tab-queue .rq-el{font-size:var(--staff-fs-sm,12px);color:var(--green);font-weight:700;margin-top:3px;white-space:nowrap;}
     #tab-queue .rq-el-late{font-size:var(--staff-fs-sm,12px);color:var(--orange);font-weight:900;margin-top:3px;white-space:nowrap;}
     #tab-queue .rq-held{font-size:var(--staff-fs-sm,12px);color:#1d4ed8;font-weight:700;margin-top:3px;white-space:nowrap;}
+    /* the dark desk: fixed #1d4ed8 read about 2.7:1 on its near-black rows; its --blue is the readable one (bug hunt 2026-10-28) */
+    html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-held{color:var(--blue);}
     #tab-queue .rq-more{min-width:34px;font-weight:900;letter-spacing:1px;}
     #tab-queue .rq-nschip{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:2px 6px;white-space:nowrap;}
     #tab-queue .rq-apchip{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
@@ -3043,8 +3042,8 @@
     @media(max-width:767px){
       html[dir="rtl"] .section-header{flex-direction:column;align-items:stretch;}
       html[dir="rtl"] .section-header>div{text-align:start;}
-      /* The same trap for dialog buttons: html[dir="rtl"] .modal-footer{row-reverse} outranks
-         the phone rule that stacks them full width, so Arabic and Urdu kept a squeezed row. */
+      /* Dialog buttons stack on a phone in Arabic and Urdu too (the old RTL row-reverse outranked the
+         phone rule and kept a squeezed row; that rule is gone, this keeps the stacked order). */
       html[dir="rtl"] .modal-footer{flex-direction:column-reverse;}
     }
     /* Wide tables scroll inside their own wrapper instead of widening the whole page */
@@ -3653,6 +3652,8 @@
     /* 3. Native-feeling press feedback: buttons compress slightly under the finger */
     @media (prefers-reduced-motion: no-preference){
       button:not(:disabled):active{transform:scale(.97);}
+      /* the search x is centred by its transform: a bare scale dropped it 13px while pressed (bug hunt 2026-10-28) */
+      .search-clear:not(:disabled):active{transform:translateY(-50%) scale(.97);}
     }
     /* 6. Roomier action buttons on small phones - Check In / No-Show sit close together */
     @media(max-width:400px){
@@ -4959,6 +4960,8 @@
       text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
     body .ev-name{font-size:11px;font-weight:900;color:var(--ev);
       text-transform:uppercase;letter-spacing:.4px;}
+    /* the desk sets nothing under 12px (--staff-fs-sm); 9px uppercase was hard to read (bug hunt 2026-10-28) */
+    body.view-staff .ev-chip,body.view-staff .ev-name{font-size:var(--staff-fs-sm,12px);}
     body .sess-chip-event{color:var(--ev);}
     body .sess-summary-chip.community{border-color:rgba(var(--ev-rgb),.45);background:rgba(var(--ev-rgb),.06);}
     body .sess-summary-chip.community.active-sess{border-color:var(--ev);box-shadow:0 0 0 1px rgba(var(--ev-rgb),.35);}
@@ -5394,7 +5397,7 @@ body.fix-open{overflow:hidden;}
 .fx-ph{width:56px;height:56px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--line);box-sizing:border-box;}
 .fx-ph.new{border-color:var(--go);}
 .fx-ph-none{display:inline-flex;align-items:center;justify-content:center;background:var(--card-2);color:var(--ink-3);}
-.fx-upload{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line-2);background:var(--card);font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;}
+.fx-upload{position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border-radius:0;border:1px solid var(--line-2);background:var(--card);font-weight:700;font-size:14px;color:var(--ink);cursor:pointer;} /* a button: square, the owner 2026-10-11 (bug hunt 2026-10-28) */
 .pg-field .fx-upload input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;padding:0;border:none;}
 .fx-upload:focus-within{outline:2px solid var(--go);outline-offset:2px;}
 .fx-upload.dis{opacity:.55;pointer-events:none;}
@@ -5807,7 +5810,7 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #booking-edit-modal .dk-be-rrow:has(.dk-be-rwl){flex-wrap:wrap;}#booking-edit-modal .dk-be-rrow:has(.dk-be-rwl) .dk-f1-m0{flex-basis:100%;}
 #booking-edit-modal .dk-w100-mt8{width:100%;margin-top:8px;}
 /* calling off a night */
-#cancel-night-modal .dk-cn-box{max-width:520px;max-height:88vh;overflow-y:auto;}
+#cancel-night-modal .dk-cn-box{max-width:520px;max-height:88vh;max-height:88dvh;overflow-y:auto;}
 #cancel-night-modal .dk-c-red{color:var(--red);}
 #cancel-night-modal .dk-mb12{margin-bottom:12px;}
 #cancel-night-modal .dk-cn-acts{display:flex;gap:6px;margin-bottom:10px;}
@@ -5878,7 +5881,7 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #qnum-edit-modal .dk-mb20{margin-bottom:20px;}
 #qnum-edit-modal .dk-qn-in{width:100%;background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:4px;padding:12px 14px;font-size:20px;font-weight:700;color:var(--green);font-family:var(--font-body);outline:medium none;text-align:center;}
 /* the add-on picker: a card held, not held, or sold out and not held; the stock line plenty, low or out */
-#addon-picker-backdrop .dk-ap-box{max-width:440px;max-height:85vh;overflow-y:auto;}
+#addon-picker-backdrop .dk-ap-box{max-width:440px;max-height:85vh;max-height:85dvh;overflow-y:auto;}
 #addon-picker-backdrop .dk-ap-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:2px;}
 #addon-picker-backdrop .dk-m0{margin:0;}
 #addon-picker-backdrop .dk-ap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;}
@@ -5917,7 +5920,8 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #eon-modal .chrome-dt{font-size:18px;font-weight:900;}
 #eon-modal .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
 #eon-modal .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
-#eon-modal .eon-box{width:min(92vw,480px);max-height:calc(100vh - 40px);display:flex;flex-direction:column;}
+/* dvh after each vh: on iOS Safari vh is the toolbar-less height, so a tall box ran under the toolbars (bug hunt 2026-10-28) */
+#eon-modal .eon-box{width:min(92vw,480px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
 #eon-modal .eon-body{overflow-y:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:12px;}
 #eon-modal .eon-sec{padding:10px 14px;background:var(--s3);border-radius:var(--r-md,6px);}
 #eon-modal .eon-h{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;}
@@ -5936,6 +5940,8 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #confirm-modal .co-mk-damaged.active,#confirm-modal .co-mk-missing.active{border-color:var(--orange);color:var(--orange);}
 /* The roster's live count: at the top as it scrolls, never at the foot. */
 #tab-queue .q-live-count{position:sticky;top:var(--topbar-h,56px);z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:4px 6px;margin:0 0 10px;padding:6px 8px;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-md,6px);}
+/* staff: stick under the sections bar too (below 1024px it is 48px under the header, z 62, and hid the figures) (bug hunt 2026-10-28) */
+body.view-staff #tab-queue .q-live-count{top:var(--staff-stick);}
 /* The desk outbox (2026-10-10): the roster header's "N unsynced" chip, the mark beside a rider whose change waits or was refused, and its list */
 #tab-queue .dq-chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:4px 12px;margin-inline-start:auto;background:rgba(var(--warn-rgb),.12);border:1px solid rgba(var(--warn-rgb),.45);border-radius:999px;color:var(--orange);font:700 13px/1.2 var(--font-body);cursor:pointer;}
 #tab-queue .dq-chip.dq-bad{background:rgba(var(--red-rgb),.12);border-color:rgba(var(--red-rgb),.5);color:var(--red);}
@@ -6098,7 +6104,7 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
        a phone still opens its own picker. */
     #topbar .lang-wrap{
       position:relative;display:inline-flex;align-items:center;justify-content:center;
-      width:38px;height:34px;flex:none;border-radius:8px;
+      width:38px;height:34px;flex:none;border-radius:0; /* the globe is a button: square (bug hunt 2026-10-28) */
       border:1px solid rgba(var(--tint-rgb),.14);background:rgba(var(--tint-rgb),.04);
       color:var(--text);transition:border-color .15s,background .15s,color .15s;
     }
@@ -6661,7 +6667,8 @@ button.ca-chk{cursor:pointer;text-decoration:underline;text-underline-offset:2px
 .ca-link{background:none;border:0;padding:0;color:var(--green);font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .ca-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .ca-actions a{text-decoration:none;display:inline-flex;align-items:center}
-.ca-actions .ca-ic{justify-content:center;width:34px;height:34px;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);flex:none;transition:background .18s}
+/* call / WhatsApp links are buttons: square, the owner 2026-10-11 (bug hunt 2026-10-28) */
+.ca-actions .ca-ic{justify-content:center;width:34px;height:34px;border-radius:0;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);flex:none;transition:background .18s}
 .ca-actions .ca-ic:hover{background:rgba(var(--green-rgb),.22)}
 .cf-pwd-temp{margin-top:6px;font-size:12px;font-weight:700;line-height:1.45;color:rgb(var(--warn-rgb))}
 .cf-pwd-temp[hidden]{display:none}
@@ -6801,6 +6808,8 @@ body .ca-msg-box textarea.sm-reply{min-height:200px;height:200px}
 /* Vendors (renderVendors, 2026-10-03): the calendar, the competing requests, the venue and date
    dialogs and the tier editor. The cards are the Applications card (ca-*); these add the rest. */
 #tab-vendors .vendor-n{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 6px;border-radius:9px;background:var(--orange);color:#fff;font-size:var(--staff-fs-sm,12px);font-weight:800;box-sizing:border-box}
+/* the dark desk's --orange is a light amber: white on it read 1.85:1 (bug hunt 2026-10-28) */
+html[data-staff-theme="dark"] body.view-staff .apps-kind-n,html[data-staff-theme="dark"] body.view-staff #tab-vendors .vendor-n{color:#1a1200;}
 #tab-vendors .vendor-body{margin-top:14px}
 .vendor-cal-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
 .vendor-month{font-weight:800;font-size:15px;min-width:140px;text-align:center}
@@ -6930,7 +6939,7 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 #pwd-gate .pm-out{display:block;margin:14px auto 0;background:none;border:0;color:#4f565c;font-family:var(--font-body);font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer}
 /* Change password from My Account (_accPwdOpen, 2026-10-03): the forced change's box, centred, with a
    close button and show/hide on each password box. */
-#acc-pwd-modal .pg-box{position:relative;max-height:calc(100vh - 24px);overflow-y:auto;}
+#acc-pwd-modal .pg-box{position:relative;max-height:calc(100vh - 24px);max-height:calc(100dvh - 24px);overflow-y:auto;}
 #acc-pwd-modal .ap-x{position:absolute;top:10px;inset-inline-end:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent none;border:0;border-radius:999px;color:#4f565c;cursor:pointer;padding:0;}
 #acc-pwd-modal .pg-kicker{padding-inline-end:40px;}
 #acc-pwd-modal .pw-wrap{position:relative;}
@@ -7006,6 +7015,8 @@ body.view-staff th.th-sort[aria-sort="ascending"],body.view-staff th.th-sort[ari
   body.view-staff #tab-queue{padding-bottom:92px;}
 }
 body.has-modal .fab-row{display:none !important;}
+/* nor over the open sections menu: the pair covered its last rows and took their taps (bug hunt 2026-10-28) */
+body.snav-open .fab-row{display:none !important;}
 
 /* ── Community accounts: a list on a big screen, a card on a phone ──
    The row reads as one line per rider on an iPad or a laptop. On a phone that line squeezed the
@@ -7020,7 +7031,7 @@ body.has-modal .fab-row{display:none !important;}
 .am-seln{font-size:13px;font-weight:800;color:var(--orange);margin-inline-end:auto;white-space:nowrap;}
 .am-selgo{display:inline-flex;align-items:center;gap:6px;}
 /* 2026-10-09 (M16/M20): acting on a selection, and the employee-list import (both in #confirm-modal) */
-#confirm-modal .seg-dlg,#confirm-modal .rim-dlg{width:min(94vw,600px);max-height:88vh;overflow-y:auto;}
+#confirm-modal .seg-dlg,#confirm-modal .rim-dlg{width:min(94vw,600px);max-height:88vh;max-height:88dvh;overflow-y:auto;}
 #confirm-modal .seg-tabs,#confirm-modal .seg-kind{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;}
 #confirm-modal .seg-tabs .toggle-btn,#confirm-modal .seg-kind .toggle-btn{min-height:44px;flex:1 1 0;}
 #confirm-modal .seg-body{display:flex;flex-direction:column;gap:10px;}
@@ -7476,7 +7487,7 @@ body.view-staff .web-ed-list-foot{display:flex;gap:10px;align-items:center;margi
 @media(min-width:1024px){
   body.view-staff.view-staff #checkin-modal .modal-backdrop.ci-drawer-bg{justify-content:flex-end;align-items:stretch;padding:0;
     background:rgba(15,18,21,.12);backdrop-filter:none;-webkit-backdrop-filter:none;}
-  body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{max-width:none!important;width:min(480px,100vw);height:100vh;max-height:100vh;
+  body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{max-width:none!important;width:min(480px,100vw);height:100vh;max-height:100vh;height:100dvh;max-height:100dvh; /* dvh: on an iPad the toolbar covered the foot (bug hunt 2026-10-28) */
     margin:0;border-radius:0;border-width:0;border-inline-start:1px solid var(--sf-line2);animation:ciDrawerIn .22s cubic-bezier(.2,.8,.2,1) both;}
   html[dir="rtl"] body.view-staff #checkin-modal .ci-drawer-bg>.modal-box{animation-name:ciDrawerInRtl;}
 }
@@ -7883,7 +7894,7 @@ body.view-staff .bd-ms,body.view-staff .bd-ride{display:inline-block;margin-inli
 body.view-staff .bd-ms{background:rgba(74,168,255,.18);}
 body.view-staff .bd-ride{background:rgba(255,107,139,.18);}
 body.view-staff .bd-wish-cell{display:inline-flex;align-items:center;gap:6px;}
-body.view-staff .bd-wa{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;border-radius:50%;text-decoration:none;
+body.view-staff .bd-wa{display:inline-flex;align-items:center;justify-content:center;flex:none;width:32px;height:32px;border-radius:0;text-decoration:none; /* square: the owner's rectangular-buttons rule, 2026-10-11 (bug hunt 2026-10-28) */
   background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.3);color:var(--green);}
 body.view-staff .bd-wa.off{opacity:.4;cursor:not-allowed;background:var(--s2);border-color:var(--border);color:var(--muted);}
 body.view-staff .bd-wish{min-height:32px;padding:0 10px;border-radius:7px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;}
@@ -7998,7 +8009,7 @@ body.view-staff .ho-out-row{display:grid;grid-template-columns:auto 1fr auto aut
 body.view-staff .mg-group{border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:10px;background:var(--s1);}
 body.view-staff .mg-why{font-size:var(--staff-fs-sm);font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin-bottom:6px;}
 body.view-staff .mg-acct{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);}
-body.view-staff .mg-group .mg-acct:first-of-type{border-top:0;}
+body.view-staff .mg-group .mg-why+.mg-acct{border-top:0;} /* :first-of-type counted the .mg-why div, so it never matched (bug hunt 2026-10-28) */
 body.view-staff .mg-acct-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
 body.view-staff .mg-name{background:none;border:0;padding:0;color:var(--text);font-family:var(--font-body);font-weight:800;font-size:14px;text-align:start;cursor:pointer;}
 body.view-staff .mg-tag{font-size:var(--staff-fs-sm);font-weight:900;text-transform:uppercase;letter-spacing:.4px;color:var(--green);background:rgba(var(--green-rgb),.1);border-radius:4px;padding:3px 8px;white-space:nowrap;}
@@ -8330,7 +8341,7 @@ body:not(.view-staff) .land-today-t{font-size:var(--fs-26);font-weight:700;lette
 body:not(.view-staff) .land-today-n{color:var(--neon);margin-inline-start:6px;}
 body:not(.view-staff) .land-today-v{grid-column:1;font-size:var(--fs-13);color:var(--night-ink-2);}
 body:not(.view-staff) .land-today-go{grid-column:2;grid-row:2/4;align-self:center;display:inline-flex;align-items:center;gap:6px;
-  min-height:44px;padding:0 16px;border:1px solid var(--night-line);border-radius:999px;font-size:var(--fs-13);font-weight:700;}
+  min-height:44px;padding:0 16px;border:1px solid var(--night-line);border-radius:0;font-size:var(--fs-13);font-weight:700;} /* square, not a pill: rectangular buttons (bug hunt 2026-10-28) */
 body:not(.view-staff) .land-today:hover .land-today-go{border-color:var(--neon);}
 body:not(.view-staff) .land-today.wl{background:var(--card);color:var(--ink);border:1.5px dashed var(--amber-2);}
 body:not(.view-staff) .land-today.wl :is(.land-today-k,.land-today-n){color:var(--amber);}
@@ -9034,6 +9045,8 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 #vl-staff-host .vl-pr-list{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;max-height:46vh;overflow:auto;}
 #vl-staff-host .vl-pr-row{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;padding:10px 12px;text-align:start;background:#fff;border:1px solid var(--border,rgba(26,25,25,.18));cursor:pointer;font:inherit;color:inherit;}
 #vl-staff-host .vl-pr-row span{font-size:12px;color:var(--muted);}
+/* dark staff theme: the white row held light inherited text (bug hunt 2026-10-28) */
+html[data-staff-theme="dark"] #vl-staff-host .vl-pr-row{background:var(--s2);}
 #vl-staff-host .vl-pr-row.active{border:2px solid var(--vl-ink);padding:9px 11px;}
 #vl-staff-host .vl-cf-set{border:1px solid var(--border,rgba(26,25,25,.14));padding:10px 12px;margin:0 0 12px;display:flex;flex-wrap:wrap;gap:8px 16px;}
 #vl-staff-host .vl-cf-set legend{font-size:13px;font-weight:700;padding:0 4px;}
@@ -9133,9 +9146,9 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-ring:#7c3aed;border-color:rgba(124,58,237,.38);}
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event),
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{background:var(--sf-chip-bg);}
-body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{border-color:var(--sf-ring);}
-body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).active-sess,
-body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).selected{
+body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k):hover{border-color:var(--sf-ring);}
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).active-sess,
+body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).selected{
   border-color:var(--sf-ring);box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(15,18,21,.16);}
 body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event){border-inline-start-width:1px;}
 /* the ride's name: its own colour on the light cards, Run for Her's in its poster's letters */
@@ -9238,6 +9251,8 @@ body.view-staff #tab-queue .stat-chip.sc-done{--sc-edge:#16a34a;--sc-ink:#166534
 body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:700;color:#7a4d06;}
 body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf) svg{flex-shrink:0;}
 body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf) bdi{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* dark staff theme: the paper brown read about 2.6:1 on the dark chips (bug hunt 2026-10-28) */
+html[data-staff-theme="dark"] body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.sess-detail-bf){color:#fcd34d;}
 body.view-staff .sess-chip-bf{margin-top:2px;}
 body.view-staff .sess-lc-bf{margin:-4px 0 8px;}
 body.view-staff .sess-detail-bf{margin-top:4px;}
@@ -9255,6 +9270,7 @@ body.view-staff .sess-detail-bf{margin-top:4px;}
 body.view-staff :is(.sess-lc-rv,.sess-detail-rv){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:700;color:#5b21b6;}
 body.view-staff :is(.sess-lc-rv,.sess-detail-rv) svg{flex-shrink:0;}
 body.view-staff :is(.sess-lc-rv,.sess-detail-rv) bdi{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-lc-rv,.sess-detail-rv){color:#c4b5fd;} /* the paper violet read about 2:1 on the dark chips (bug hunt 2026-10-28) */
 body.view-staff .sess-lc-rv{margin:-4px 0 8px;}
 body.view-staff .sess-detail-rv{margin-top:4px;}
 #sess-host .ss-reveal-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -9611,8 +9627,8 @@ html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
   --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(124,58,237,.22) 100%) #101318;
   --sf-ring:#a78bfa;border-color:rgba(167,139,250,.4);color:var(--text);}
-html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).selected,
-html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).selected,
+html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-runher .sess-chip-event,
 html[data-staff-theme="dark"] body.view-staff #sess-host .sess-lc.th-runher .ev-chip{color:#f49ac1;border-color:rgba(244,154,193,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-chip-event,
@@ -9650,7 +9666,7 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-community,#tab-customers,
 #checkin-modal .ci-dnote{display:flex;align-items:center;gap:6px;margin:6px 0;padding:6px 10px;border-radius:var(--r-md,6px);background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:13px;font-weight:700;}
 #checkin-modal .ci-dnote span{flex:1;min-width:0;overflow-wrap:anywhere;}
 #checkin-modal .ci-ttag{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:999px;background:rgba(var(--warn-rgb),.16);color:var(--orange);font-size:12px;font-weight:800;vertical-align:middle;}
-#desk-sheet .dk-sheet{width:min(92vw,480px);max-height:calc(100vh - 40px);display:flex;flex-direction:column;}
+#desk-sheet .dk-sheet{width:min(92vw,480px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
 #desk-sheet .chrome-dh10{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 #desk-sheet .chrome-dt{font-size:18px;font-weight:900;margin:0;}
 #desk-sheet .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
@@ -9985,7 +10001,7 @@ html[dir="rtl"] .chart-card-title .sn-an-mk{margin:0 0 0 8px;}
 #tab-queue .ptn-title .ptn-rep,#tab-queue .ptn-title .ptn-rep-shirts{text-transform:none;letter-spacing:0;font-weight:700;}
 #tab-queue .ptn-reps{display:flex;gap:6px;flex-wrap:wrap;}
 #tab-queue .ptn-card{padding:6px 0;border-top:1px solid var(--border);}
-#tab-queue .ptn-card:first-of-type{border-top:0;}
+#tab-queue .ptn-title+.ptn-card{border-top:0;} /* the .ptn-title div is the first div, so :first-of-type never matched (bug hunt 2026-10-28) */
 #tab-queue .ptn-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;}
 #tab-queue .ptn-row .ptn-chip{margin:0;}
 #tab-queue .ptn-n{font-size:14px;}
@@ -10084,6 +10100,10 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
   --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--df-wash),.28) 0%,rgba(var(--df-wash),.1) 40%,rgba(255,255,255,0) 70%) #fff;
   --sf-ring:var(--df-berry);border-color:rgba(162,43,99,.4);color:var(--df-ink);background:var(--sf-chip-bg);}
+/* dark staff theme: the white card held the dark desk's light muted text and counts (bug hunt 2026-10-28) */
+html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
+  --sf-chip-bg:radial-gradient(120% 160% at 100% 100%,rgba(var(--df-wash),.24) 0%,rgba(var(--df-wash),.08) 40%,rgba(16,19,24,0) 70%) #101318;
+  --sf-ring:var(--df-rose);border-color:rgba(215,130,160,.4);color:var(--text);}
 .rr-chip{display:inline-block;padding:1px 6px;font-size:11px;font-weight:700;border:1px solid;white-space:nowrap;}
 .rr-chip.rr-yes{color:#0c6b3a;border-color:rgba(12,107,58,.4);background:rgba(12,107,58,.08);}
 .rr-chip.rr-no{color:var(--df-berry);border-color:rgba(162,43,99,.45);background:rgba(162,43,99,.08);}
@@ -10095,7 +10115,7 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
 .sc-card{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;}
 .sc-card-last{flex:1 1 220px;min-width:0;font-size:13px;overflow-wrap:anywhere;}
 .sc-meta{color:var(--muted);font-size:12px;font-weight:600;}
-#sc-sheet .sc-sheet{width:min(92vw,520px);max-height:calc(100vh - 40px);display:flex;flex-direction:column;}
+#sc-sheet .sc-sheet{width:min(92vw,520px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
 #sc-sheet .sc-hint{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:10px;}
 #sc-sheet .sc-list{list-style:none;margin:0 0 12px;padding:0;overflow-y:auto;min-height:40px;display:flex;flex-direction:column;gap:8px;}
 #sc-sheet .sc-item{border:1px solid var(--border);padding:8px 10px;}
@@ -10113,6 +10133,15 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-defe5k{
 .queue-table tbody tr.vl-dbl-b td,.vl-st-table tr.vl-dbl-b td{border-bottom:2px solid #5b3fd6;}
 .q-card.vl-dbl{outline:2px solid #5b3fd6;outline-offset:-2px;background-image:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08));}
 .q-card.vl-dbl.vl-dbl-alt{background-image:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16));}
+/* On Bookings every row and card also wears a row colour, whose background shorthand (0,3,4) wiped the team's tint
+   and whose faint border-bottom-color (dark 0,4,5) greyed the closing rule: lay the tint over the row colour and
+   outrank both (bug hunt 2026-10-28). Plain class selectors only (roster restyle budget); the comment mark's pattern cell
+   and card keep their own background, and the opaque fallback keeps the pinned cells solid. */
+:root body.view-staff .queue-table tbody tr.vl-dbl td:not(.cm-cell){background:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08)) var(--rs-bg,var(--s1));}
+:root body.view-staff .queue-table tbody tr.vl-dbl.vl-dbl-alt td:not(.cm-cell){background:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16)) var(--rs-bg,var(--s1));}
+:root body.view-staff .queue-table tbody tr.vl-dbl-b.vl-dbl-b td{border-bottom:2px solid #5b3fd6;}
+:root body.view-staff .queue-mobile-view .q-card.vl-dbl:not(.cm-row-mark){background:linear-gradient(rgba(91,63,214,.08),rgba(91,63,214,.08)) var(--rs-bg,var(--s1));}
+:root body.view-staff .queue-mobile-view .q-card.vl-dbl.vl-dbl-alt:not(.cm-row-mark){background:linear-gradient(rgba(91,63,214,.16),rgba(91,63,214,.16)) var(--rs-bg,var(--s1));}
 
 /* ══ STAFF TIDY (2026-10-27) ═══════════════════════════════════════════════════════════════════════════
    The owner's engineer: "make the staff panel more organized, it looks very cluttered and not aligned

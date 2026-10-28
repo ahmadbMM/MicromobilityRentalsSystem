@@ -1346,11 +1346,18 @@ async function onRequestPost(context) {
   });
   if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
   const rows = await rpc.json();
-  const b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
+  let b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
   if (!b) return json({ ok: false, error: "not found" }, 404);
   const _off = (r) => ["cancelled", "noshow", "removed"].includes(String(r.status || ""));
-  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || !_off(r))) : [b];
+  const _wl = (r) => String(r.status || "") === "waitlist";
+  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || !_off(r) && !_wl(r))) : [b];
   if (!group.some((r) => r.id === b.id)) group = [b];
+  if (_wl(b)) {
+    const held = group.find((r) => !_wl(r));
+    if (!held) return json({ ok: false, error: "waitlisted" }, 409);
+    b = held;
+    group = group.filter((r) => !_wl(r));
+  }
   let sess = null;
   if (b.session_id != null) {
     try {
@@ -1456,7 +1463,8 @@ async function buildPkpass(b, cfg) {
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String(sess && sess.meet_url || ""));
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
-  const place = meetHeld ? null : _meetPlace(sess, bikeRide);
+  const _away = _loc ? _loc.toUpperCase() !== "JCC" : ride === "runher";
+  const place = meetHeld ? null : _meetPlace(sess, bikeRide, _away);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -1529,7 +1537,9 @@ function _numsDisplay(nums) {
 }
 function _shortWhen(day, date) {
   const d = String(day || "").trim().slice(0, 3);
-  const dt = String(date || "").trim().replace(/\s*\d{4}\s*$/, "");
+  const iso = String(date || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dt = iso && MON[+iso[2] - 1] ? `${+iso[3]} ${MON[+iso[2] - 1]}` : String(date || "").trim().replace(/\s*\d{4}\s*$/, "");
   return `${d} ${dt}`.trim();
 }
 var _MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
@@ -1548,9 +1558,9 @@ function _revealAhead(sess) {
 }
 var CIRCUIT = { lat: 21.6266, lng: 39.1099, text: "Your ride is nearby - the Circuit is just ahead" };
 var CIRCUIT_ANY = { ...CIRCUIT, text: "The Circuit is just ahead" };
-function _meetPlace(sess, bikeRide = true) {
+function _meetPlace(sess, bikeRide = true, away = false) {
   const u = _meetUrl(sess);
-  if (u === DIRECTIONS) return bikeRide ? CIRCUIT : CIRCUIT_ANY;
+  if (u === DIRECTIONS) return away ? null : bikeRide ? CIRCUIT : CIRCUIT_ANY;
   let s = u;
   try {
     s = decodeURIComponent(u);

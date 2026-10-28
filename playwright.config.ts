@@ -14,6 +14,9 @@ export default defineConfig({
   // fastest for these browser-heavy specs (2026-09-27); local runs keep the default.
   workers: process.env.CI ? 3 : undefined,
   retries: process.env.CI ? 2 : 0,
+  // A stray test.only made every CI shard green after running only the focused test, and the deploy
+  // (needs build + test) shipped on it (bug hunt 2026-10-28).
+  forbidOnly: !!process.env.CI,
   // Every run also leaves a JSON record (gitignored): a test that failed and then passed on a retry
   // is "flaky" there, which the console reporters do not make visible. CI uploads the file per shard
   // and prints the flaky tests from it; locally it is the last run's ground truth.

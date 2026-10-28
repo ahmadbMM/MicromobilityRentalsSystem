@@ -63,14 +63,24 @@ export async function onRequestPost(context) {
   });
   if (!rpc.ok) return json({ ok: false, error: "lookup failed" }, 502);
   const rows = await rpc.json();
-  const b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
+  let b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
   if (!b) return json({ ok: false, error: "not found" }, 404);
   // The party is the rider's own bookings on THIS ride that are still live: the ids come from the
   // device, and a stale or edited list put another night's booking, or a cancelled one, on the
   // pass - in its rider count, its bike types and its price.
   const _off = (r) => ["cancelled", "noshow", "removed"].includes(String(r.status || ""));
-  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || !_off(r))) : [b];
+  // A waitlisted seat holds no place: it is not printed as one, in the count, the numbers or the TOTAL, and a
+  // waitlisted booking alone gets no pass (the app's !_wl gate). The card may name a waitlisted member as its
+  // first booking, so a party that holds a place is issued on that one instead (bug hunt 2026-10-28).
+  const _wl = (r) => String(r.status || "") === "waitlist";
+  let group = groupIds.length ? rows.filter((r) => groupIds.includes(r.id) && r.session_id === b.session_id && (r.id === b.id || (!_off(r) && !_wl(r)))) : [b];
   if (!group.some((r) => r.id === b.id)) group = [b];
+  if (_wl(b)) {
+    const held = group.find((r) => !_wl(r));
+    if (!held) return json({ ok: false, error: "waitlisted" }, 409);
+    b = held;
+    group = group.filter((r) => !_wl(r));
+  }
   // The booking rows carry no session times - queue_entries holds the date and the day, not
   // the clock - so the pass had none, and every pass expired at midnight. Read the session
   // itself, through the same door the rider's own app uses: list_sessions answers with what
@@ -228,7 +238,9 @@ async function buildPkpass(b, cfg) {
   // that) would read as the circuit here, so the pass then leaves the directions and the place out.
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String((sess && sess.meet_url) || ""));
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
-  const place = meetHeld ? null : _meetPlace(sess, bikeRide);
+  // where the session meets, read as the app's _sessLoc reads it (an unplaced Run for Her meets at the JYC)
+  const _away = _loc ? _loc.toUpperCase() !== "JCC" : ride === "runher";
+  const place = meetHeld ? null : _meetPlace(sess, bikeRide, _away);
   const pass = {
     formatVersion: 1,
     passTypeIdentifier: cfg.passTypeId,
@@ -302,7 +314,11 @@ function _numsDisplay(nums) {
 }
 function _shortWhen(day, date) {
   const d = String(day || "").trim().slice(0, 3);
-  const dt = String(date || "").trim().replace(/\s*\d{4}\s*$/, "");
+  // queue_entries stores ISO dates ("2026-10-31"), which the year strip below never touched: the header read
+  // "Sat 2026-10-31". It reads "Sat 31 Oct", from the parts alone, no Intl (bug hunt 2026-10-28).
+  const iso = String(date || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const dt = iso && MON[+iso[2] - 1] ? `${+iso[3]} ${MON[+iso[2] - 1]}` : String(date || "").trim().replace(/\s*\d{4}\s*$/, "");
   return `${d} ${dt}`.trim();
 }
 const _MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
@@ -326,9 +342,12 @@ const CIRCUIT_ANY = { ...CIRCUIT, text: "The Circuit is just ahead" };
 // link is the circuit's too). A link of its own is placed only when it spells out coordinates
 // (".../@21.5,39.1,17z", "?q=21.5,39.1", "?query=..." and the like); a short maps.app.goo.gl
 // link does not, and then there is no place rather than the wrong one.
-function _meetPlace(sess, bikeRide = true) {
+// A session staff placed elsewhere (sessions.location other than the circuit: an event at the Yacht Club, Run
+// for Her, a workshop at a branch) with no link of its own has no place either: its pin was the circuit's, with
+// "The Circuit is just ahead", while the pass named its own venue (bug hunt 2026-10-28).
+function _meetPlace(sess, bikeRide = true, away = false) {
   const u = _meetUrl(sess);
-  if (u === DIRECTIONS) return bikeRide ? CIRCUIT : CIRCUIT_ANY;
+  if (u === DIRECTIONS) return away ? null : bikeRide ? CIRCUIT : CIRCUIT_ANY;
   let s = u;
   try { s = decodeURIComponent(u); } catch (e) { /* keep the raw link */ }
   const m = s.match(/@(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/) || s.match(/[?&](?:q|query|ll|destination|daddr)=(?:loc:)?(-?\d{1,2}\.\d+),\s*(-?\d{1,3}\.\d+)/);

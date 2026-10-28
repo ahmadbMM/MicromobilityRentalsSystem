@@ -171,10 +171,16 @@ jobs:
           # middleware. It said nothing about it either; the giveaway is the absence of
           # "Compiled Worker successfully" in the output below.
           cd dist
+          # The output is kept for this deployment's own address (https://<hash>.micromobilityrentals.pages.dev),
+          # which the probe below asks: the production alias could still answer from the previous deployment
+          # and pass the probe for a deploy that dropped its Functions (bug hunt 2026-10-28).
+          set -o pipefail
           for attempt in 1 2; do
             echo "wrangler upload attempt $attempt"
             if timeout 300 npx --yes wrangler@4.128.0 pages deploy . \
-                 --project-name=micromobilityrentals --branch=main; then
+                 --project-name=micromobilityrentals --branch=main 2>&1 | tee "$RUNNER_TEMP/wrangler.log"; then
+              url=$(grep -Eo 'https://[0-9a-f]{8}\.micromobilityrentals\.pages\.dev' "$RUNNER_TEMP/wrangler.log" | tail -1 || true)
+              if [ -n "$url" ]; then echo "DEPLOY_URL=$url" >> "$GITHUB_ENV"; else echo "::warning::no deployment address in wrangler's output; the probe asks the production alias"; fi
               exit 0
             fi
             echo "::warning::attempt $attempt failed or timed out after 5 minutes"
@@ -194,13 +200,15 @@ jobs:
           # from outside the site (403/400), and every deploy would have gone red. So the proof
           # is the answer itself: our functions always reply with JSON carrying an "ok" field,
           # which neither the static server's 405 nor the middleware's plain-text 404 does.
+          # This deployment's own address when the deploy step found it (the alias may still be the old one).
+          base="${DEPLOY_URL:-https://micromobilityrentals.pages.dev}"
           probe="$RUNNER_TEMP/probe.json"
           for attempt in 1 2 3; do
             code=$(curl -s -o "$probe" -w '%{http_code}' --max-time 20 -X POST \
               -H 'Content-Type: application/json' -d '{}' \
-              https://micromobilityrentals.pages.dev/api/log-error) || true
+              "$base/api/log-error") || true
             body=$(head -c 200 "$probe" 2>/dev/null || true)
-            echo "attempt $attempt: /api/log-error -> $code $body"
+            echo "attempt $attempt: $base/api/log-error -> $code $body"
             if printf '%s' "$body" | grep -q '"ok":'; then echo "Pages Functions are live."; exit 0; fi
             case "$code" in
               405) echo "405 = the static file server answered; Functions are not live yet." ;;

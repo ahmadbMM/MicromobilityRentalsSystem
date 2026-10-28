@@ -60,7 +60,7 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     expect(await page.evaluate(`localStorage.getItem('cq_kiosk')`)).toBeNull();
   });
 
-  test('an account found by phone is masked, confirmed by its last four digits, and joins as Waiting with the kiosk mark and the waiver', async ({ page }) => {
+  test('an account found by phone is masked, confirmed by its emergency contact\'s last four digits, and joins as Waiting with the kiosk mark and the waiver', async ({ page }) => {
     const { sent } = await boot(page);
     await enterKiosk(page);
     await kiosk(page).getByRole('button', { name: 'I have an account' }).click();
@@ -71,10 +71,15 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     await expect(hit).toContainText('Sa');
     await expect(hit).not.toContainText('Sara'); // a stranger at the tablet never reads the whole name
     await hit.click();
+    // what Find never shows: the emergency contact's last four, not the phone's just typed (bug hunt 2026-10-28)
+    await expect(kiosk(page).locator('#ko-last4')).toHaveAttribute('aria-label', /emergency contact/);
     await kiosk(page).locator('#ko-last4').fill('9999');
     await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
     await expect(kiosk(page).locator('.ko-err')).toContainText('do not match');
-    await kiosk(page).locator('#ko-last4').fill('0123');
+    await kiosk(page).locator('#ko-last4').fill('0123'); // the phone's own last four confirm nothing now
+    await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
+    await expect(kiosk(page).locator('.ko-err')).toContainText('do not match');
+    await kiosk(page).locator('#ko-last4').fill('1111');
     await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
     // nothing is missing on this account: straight to tonight's rides, the Saturday ride and the pool are not offered
     await expect(kiosk(page).getByRole('heading', { name: "Tonight's rides" })).toBeVisible();
@@ -168,7 +173,7 @@ test.describe('@staff:bookings s1010 kiosk: self-service walk-ins', () => {
     await kiosk(page).locator('#ko-phone').fill('500000123');
     await kiosk(page).getByRole('button', { name: 'Find', exact: true }).click();
     await kiosk(page).locator('.ko-hit').click();
-    await kiosk(page).locator('#ko-last4').fill('0123');
+    await kiosk(page).locator('#ko-last4').fill('1111'); // the emergency contact's last four (bug hunt 2026-10-28)
     await kiosk(page).getByRole('button', { name: 'Confirm', exact: true }).click();
     await expect(kiosk(page).locator('.ko-empty')).toContainText('No ride takes walk-ins');
     await kiosk(page).locator('.ko-lang select').selectOption('ar');

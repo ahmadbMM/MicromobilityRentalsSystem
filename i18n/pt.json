@@ -5797,5 +5797,12 @@
   "prbOurs": "As nossas bicicletas",
   "prbGiven": "Dado",
   "prbNotGiven": "Ainda não",
-  "prbIgUnk": "Não contado"
+  "prbIgUnk": "Não contado",
+  "bh28KioskBirthYear": "O ano em que você nasceu (4 dígitos)",
+  "bh28KioskEmLast4": "Os últimos 4 dígitos do número do seu contato de emergência",
+  "bh28KioskRideFull": "Esse passeio acabou de lotar. Escolha outro.",
+  "bh28ReadCut": "Nem todos os registros puderam ser lidos, então estes números podem estar abaixo do real. Tente de novo ou escolha um período mais curto.",
+  "bh28ReceiptSignOff": "A equipa MicroMobility",
+  "bh28ResetManyAccounts": "Mais de uma conta usa este e-mail. Abra o ciclista em Clientes e defina a senha por lá.",
+  "bh28TeamNameTaken": "{0} já está na equipa. Escolha outro nome."
 }

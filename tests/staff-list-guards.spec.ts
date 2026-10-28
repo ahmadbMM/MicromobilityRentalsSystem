@@ -124,7 +124,7 @@ test('adding a walk-up empties the boxes for the next name', async ({ page }) =>
   await page.locator('#mw-phone').fill('0553334444');
   await page.locator('#mw-phone').press('Enter');
   await expect.poll(() => rows.length).toBe(1);
-  expect(rows[0].phone).toBe('0553334444');
+  expect(rows[0].phone).toBe('+966553334444'); // stored in the one form every phone is (bug hunt 2026-10-28)
   await expect(page.locator('#mw-name')).toHaveValue('');
   await expect(page.locator('#mw-phone')).toHaveValue('');
 });

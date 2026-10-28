@@ -48,9 +48,13 @@ Deno.serve(async (req) => {
 });
 
 async function run(token: string, igId: string) {
-  const last = await rest('customer_ig_followers?select=tried_at&tried_at=not.is.null&order=tried_at.desc&limit=1');
+  // A pass is told by how many accounts it tried inside the gap, not by the newest try alone: a staffer's
+  // "Check now" (at most 10 accounts) also stamps tried_at, and one check at 10:58 made the 11:17 pass skip the
+  // hour (bug hunt 2026-10-28). More than 10 tried in the gap is a pass.
+  const since = encodeURIComponent(new Date(Date.now() - STALE_GAP_MIN * 60e3).toISOString());
+  const last = await rest(`customer_ig_followers?select=tried_at&tried_at=gte.${since}&limit=11`);
   const lr = last.ok ? await last.json() : [];
-  if (lr[0] && Date.now() - Date.parse(lr[0].tried_at) < STALE_GAP_MIN * 60e3) return { checked: 0, reason: 'recent' };
+  if (Array.isArray(lr) && lr.length > 10) return { checked: 0, reason: 'recent' };
 
   const [custs, rows] = await Promise.all([
     pagedAll('customers?select=id,socials&socials->>instagram=not.is.null&order=id'),
@@ -107,7 +111,9 @@ async function lookup(token: string, igId: string, handle: string): Promise<Got>
   const e = data?.error || {};
   if ([4, 17, 32, 613].includes(e.code)) return { stop: 'rate' };
   if (e.code === 190 || e.code === 10 || e.code === 200) return { stop: 'token' };
-  if (e.code === 110 || e.code === 100 || e.error_subcode === 2207013) return { ok: false, status: 'unavailable' };
+  // A bare 100 is Graph's "invalid parameter" (subcode 33: a wrong IG_USER_ID, say), which says nothing about the
+  // account: it is an error retried in hours, not a month's park for every handle (bug hunt 2026-10-28).
+  if (e.code === 110 || e.error_subcode === 2207013) return { ok: false, status: 'unavailable' };
   return { ok: false, status: 'error' };
 }
 
