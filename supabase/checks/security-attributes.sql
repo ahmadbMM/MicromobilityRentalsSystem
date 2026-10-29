@@ -73,6 +73,14 @@ with expected(fname, want_definer, note) as (values
   ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),
   ('community_track',        true,  'reads one application''s status by its track token for the applicant; anon, _ip_gate-metered (20261025210000)'),
   ('staff_vl_receipt_put',   true,  'writes vl_receipts (staff-only) and marks a Victory Lap place paid; is_staff()-gated (20261025150000)'),
+  -- Victory Lap and the Arena Heros race (20261017210000, 20261028200000)
+  ('_vl_entry_guard',        true,  'trigger: reads the session, the customer and the team''s rows (RLS) to hold a race booking to its kind''s rules'),
+  ('_vl_code_new',           true,  'reads queue_entries across RLS for a free team code; internal only'),
+  ('_race_code_norm',        false, 'pure: a team code as typed, with its kind''s prefix'),
+  ('vl_team_peek',           true,  'reads the team a code names, other accounts'' rows; token-checked'),
+  ('customer_vl_teams',      true,  'reads the partner''s first name on each of the caller''s teams; token-checked'),
+  ('customer_vl_update',     true,  'writes the caller''s own race booking (division, details); token-checked'),
+  ('customer_accept_share',  true,  'stamps the caller''s own race and run bookings with the agreement to share; token-checked'),
   -- The 2026-10-03 review fixes (20261004100000); vendor_logout is listed with the vendor portal's
   ('customer_change_password',  true,  'writes customers.password_hash, login_throttle and customer_owner_pwd; token-checked'),
   ('customer_purchases',        true,  'reads the rider''s own cashier_sales, which customers cannot read; token-checked'),
