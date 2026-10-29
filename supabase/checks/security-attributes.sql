@@ -67,7 +67,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_learn_ask_changes', true, 'writes learn_applications (staff-only); is_staff()-gated'),
   ('learn_fix_get',          true,  'reads one learn-to-ride sign-up by its change token for the applicant; anon'),
   ('learn_fix_submit',       true,  'writes the asked fields of one learn-to-ride sign-up by its token; anon, _ip_gate-metered'),
-  ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd and a staff_actions line; admins and the roles that change Bookings (20261029150000)'),
+  ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd and a staff_actions line; admins, managers and front desk who change Bookings (20261029150000)'),
   ('customer_community_apply', true, 'writes community_applications (staff-only) for the signed-in applicant; token-checked, _ip_gate-metered'),
   ('customer_community_me',  true,  'reads the caller''s own account, application and tags for the form; token-checked'),
   ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),

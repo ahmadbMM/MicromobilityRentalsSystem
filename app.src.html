@@ -26753,9 +26753,10 @@ function setSfPay(v){S.sfPay=v;S.sfLimit=150;renderStaffQueue();}
 function setSfBike(v){S.sfBike=v;S.sfLimit=150;renderStaffQueue();}
 function setSfSize(v){S.sfSize=v;S.sfLimit=150;renderStaffQueue();}
 // A rider's temporary password is set only by the roles that change Bookings (the staff review, 2026-10-28,
-// S03-core3-13): an admin, or a manager, front desk or ride leader whose edit list holds Bookings; the Owner role only
-// looks. staff_set_customer_temp_password asks the same on the server (ROLE_REFUSED) and records the reset.
-function _scYPwdOk(){return isAdmin()||(['manager','frontdesk','leader'].includes(S.staffRole)&&_deskTabOk('queue')&&_editOk('queue'));}
+// S03-core3-13): an admin, or a manager or front desk account whose edit list holds Bookings - the roles that serve
+// riders at the desk; a ride leader and the Owner role do not. staff_set_customer_temp_password asks the same on the
+// server (ROLE_REFUSED) and records the reset.
+function _scYPwdOk(){return isAdmin()||(['manager','frontdesk'].includes(S.staffRole)&&_deskTabOk('queue')&&_editOk('queue'));}
 function toggleResetTool(){S.showResetTool=_scYPwdOk()&&!S.showResetTool;renderStaffQueue();}
 async function staffResetPassword(){
   if(!_scYPwdOk())return;

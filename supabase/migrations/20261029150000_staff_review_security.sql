@@ -48,8 +48,8 @@
 --
 -- 4. Customer temporary password (S03-core3-13). staff_set_customer_temp_password checked is_staff()
 --    alone: a cashier or mechanic token could set any rider's password and sign in as them. Rebuilt: an
---    admin, or a manager, front desk or ride leader whose edit list holds Bookings (_staff_mod('queue',
---    true); the Owner role only looks), else ROLE_REFUSED. A reset now writes a staff_actions line that
+--    admin, or a manager or front desk account whose edit list holds Bookings (_staff_mod('queue', true);
+--    the roles that serve riders at the desk: a ride leader and the Owner role do not), else ROLE_REFUSED. A reset now writes a staff_actions line that
 --    names the account (kind 'pwd', entity 'customer', its id) whatever page or call made it. The session
 --    token still rotates, so every device signed in to the account is signed out (it already did).
 --    staff_set_customer_password calls it, so it takes the same check.
@@ -78,7 +78,7 @@
 -- 2cc4ab2b81900778df998285b2a6e832, staff_set_default_pay e354cc85f2021820fab3daaf27f99eeb, _vip_tag_guard
 -- cba4f9300a963babd755c6c92cf0bc97, _tag_audit_row c5d5d970746ed0c9c5251b49bd0e9cff, _default_pay_insert_guard
 -- 823e6fbbed90def256129977dab219f7, _house_insert_guard 35f543d29b9c9d1b6502de2dda361cef,
--- staff_set_customer_temp_password 2c34b756c3ac7cc1f108309119205af3, _staff_reset_signout
+-- staff_set_customer_temp_password afcda19d733d8cf19d4ad436bad4c91c, _staff_reset_signout
 -- 5297dce3ca9d6b854cc5ab94988eed0b, _deposit_no_id ea3395f11df40875ab78782c7a08fff7, _customers_admin_cols
 -- 8de281a9e809dfc777ee2ddc1be76afa. Tried on a local PostgreSQL 17 with stand-ins for the tables and the
 -- functions above: every refusal and pass described here came out as written, a second run changes nothing,
@@ -362,7 +362,7 @@ begin
   if not is_staff() then return false; end if;
   if not (is_admin() or (_staff_mod('queue', true)
           and exists (select 1 from staff s where s.user_id = auth.uid() and s.disabled_at is null
-                        and s.role in ('manager', 'frontdesk', 'leader')))) then
+                        and s.role in ('manager', 'frontdesk')))) then
     raise exception 'ROLE_REFUSED' using errcode = '42501';
   end if;
   if length(coalesce(p_new_pwd, '')) < 8 or p_new_pwd !~ '[A-Z]' or p_new_pwd !~ '[0-9]' then return false; end if;
@@ -542,7 +542,7 @@ select 'bodies are this file''s',
                                               ('_tag_audit_row', 'c5d5d970746ed0c9c5251b49bd0e9cff'),
                                               ('_default_pay_insert_guard', '823e6fbbed90def256129977dab219f7'),
                                               ('_house_insert_guard', '35f543d29b9c9d1b6502de2dda361cef'),
-                                              ('staff_set_customer_temp_password', '2c34b756c3ac7cc1f108309119205af3'),
+                                              ('staff_set_customer_temp_password', 'afcda19d733d8cf19d4ad436bad4c91c'),
                                               ('_staff_reset_signout', '5297dce3ca9d6b854cc5ab94988eed0b'),
                                               ('_deposit_no_id', 'ea3395f11df40875ab78782c7a08fff7'),
                                               ('_customers_admin_cols', '8de281a9e809dfc777ee2ddc1be76afa')))

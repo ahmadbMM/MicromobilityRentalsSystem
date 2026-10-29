@@ -319,12 +319,14 @@ test.describe('@staff:bookings b2-d the customer password reset (P15)', () => {
     await expect(page.locator('#tab-queue .page-title').first()).toBeVisible();
   };
 
-  test('the key is there for an admin, a ride leader and front desk, not for the Owner role or an account that cannot change Bookings', async ({ page }) => {
+  test('the key is there for an admin and front desk, not for a ride leader, the Owner role or an account that cannot change Bookings', async ({ page }) => {
     await boot(page);
     await roster(page);
     await expect(keyBtn(page)).toHaveCount(1);
-    await roster(page, `setStaffRole('leader');`);
+    await roster(page, `setStaffRole('frontdesk');`);
     await expect(keyBtn(page)).toHaveCount(1);
+    await roster(page, `setStaffRole('leader');`);
+    await expect(keyBtn(page)).toHaveCount(0);
     await roster(page, `setStaffRole('owner');S._myEdit=[];`);
     await expect(keyBtn(page)).toHaveCount(0);
     await roster(page, `setStaffRole('frontdesk');S._myEdit=['cashier'];`);
