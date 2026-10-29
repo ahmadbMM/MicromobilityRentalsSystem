@@ -1067,8 +1067,15 @@ mark places paid); heat times come from the organiser.
   the roster's Race column and split, the report builder), Finished for return, the booking window exemption, no wallet pass.
   `RACE_KIND` / `_rk(s)` hold what differs: races (arena `wd`/`md`), divisions (`op`/`el`), the code prefix (`AH`), the default
   price; `_vlCfg(s)` defaults to them. `_vlDivKm(d,s)` says a division without Victory Lap's distance on the Arena race.
-- **Arena only** (`_isArena(s)`): the card `_arCardHtml` (black with red, the "ARENA HEROS Competition" wordmark in type - no logo
-  file yet; `.ar-mark` also fills the ticket's logo slot), `th-arena`; the members gate is the ordinary Community one
+- **Arena only** (`_isArena(s)`): the organisers' poster since 2026-10-29 ("add the image to the card", "put the whole theme of
+  the post on the event card and registration pages"): the card `_arCardHtml` (`AR_LOGO` = assets/arena-heros-logo.webp, cut
+  from the poster, over arena-heros-hall.webp; the name in Barlow Condensed 800 italic capitals, upright in ar/ur/hi/ne/bn;
+  `_arWhenHtml` = date | hours | venue, whose `.ar-mi` row clips the rule a wrapped line would start with - the rule sits on a
+  `<span>`, never the `<bdi>`, which takes its text's direction); the flow skin `body.ar-skin` (`_arOn` / `_syncArTheme`,
+  synced in showView, setCustTab and renderRegister: the race's date, the athlete step, the review, the booked page; it
+  re-points the customer system's tokens at a selector heavier than `body:not(.view-staff)`, darkens the header and the
+  sections bar) with the banner `_arHeadHtml` (arena-heros-partners.webp, the logo, the name, when and where); the ticket
+  `th-arena` (`TK_MARK.arena` = the logo, the hall's lamps across its top, a dark team box); the members gate is the ordinary Community one
   (`_commGate`, `_infoMembersOnlyEv`); the step `_arPanelHtml` / `_arStepNext` asks first / last name (the account's one `name`
   split by `_splitName3`), email, mobile with its country code, gender (prefilled; saved on the account with
   `customer_set_gender` when missing or changed; the race follows it: women `wd`, men `md`), Open or Elite with the organisers'
