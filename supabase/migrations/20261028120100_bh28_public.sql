@@ -212,7 +212,7 @@ begin
       customer_id, walk_in, group_id, approval, assigned_bike_id,
       waiver_at, waiver_version, ride_group, run_km,  -- Run for Her's distance (20261005230000)
       data_share_at,                                  -- and the runner's agreement to share (20261006180000)
-      vl                                              -- Victory Lap: race, division, team (20261017210000)
+      vl                                              -- Victory Lap and the Arena race: race, division, team (20261017210000, 20261028200000)
     ) values (
       coalesce(nullif(it->>'id',''), encode(gen_random_bytes(12),'hex')),
       left(btrim(regexp_replace(coalesce(it->>'name',''), '\s+', ' ', 'g')), 60),
@@ -240,9 +240,9 @@ begin
       _wv,
       case when it->>'ride_group' in ('beg','int') then it->>'ride_group' end,
       case when it->>'run_km' in ('3','5') then (it->>'run_km')::smallint end,
-      case when it->>'share_ok' = 'true' and coalesce(s.ride_kind, '') in ('runher', 'vlap')
+      case when it->>'share_ok' = 'true' and coalesce(s.ride_kind, '') in ('runher', 'vlap', 'arena')
            then to_char(now() at time zone 'utc','YYYY-MM-DD"T"HH24:MI:SS"Z"') end,
-      case when coalesce(s.ride_kind, '') = 'vlap' and jsonb_typeof(it->'vl') = 'object'
+      case when coalesce(s.ride_kind, '') in ('vlap', 'arena') and jsonb_typeof(it->'vl') = 'object'
            then it->'vl' end
     )
     returning queue_entries.id, queue_entries.queue_num, queue_entries.status,
