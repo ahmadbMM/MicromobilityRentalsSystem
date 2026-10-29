@@ -9830,6 +9830,19 @@ html[data-staff-theme="dark"] body.view-staff :is(#tab-community,#tab-customers,
 #checkin-modal .ci-dnote{display:flex;align-items:center;gap:6px;margin:6px 0;padding:6px 10px;border-radius:var(--r-md,6px);background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:13px;font-weight:700;}
 #checkin-modal .ci-dnote span{flex:1;min-width:0;overflow-wrap:anywhere;}
 #checkin-modal .ci-ttag{display:inline-block;margin-inline-start:6px;padding:1px 8px;border-radius:999px;background:rgba(var(--warn-rgb),.16);color:var(--orange);font-size:12px;font-weight:800;vertical-align:middle;}
+/* The staff review, 2026-10-28 (batch 2, desk): a booking with no waiver on the roster and in the check-in drawer, a party member
+   still to be approved in the drawer's steps, and the waiver the rider agrees to on the desk device (#confirm-modal, centred). */
+#tab-queue .rq-nowv{font-size:var(--staff-fs-sm,12px);color:var(--orange);font-weight:700;margin-top:3px;white-space:nowrap;}
+#checkin-modal .ci-nowv{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0;padding:6px 10px;border-radius:var(--r-md,6px);background:rgba(var(--warn-rgb),.12);color:var(--text);font-size:13px;font-weight:700;}
+#checkin-modal .ci-nowv span{flex:1;min-width:0;}
+#checkin-modal .bkm-stepna{opacity:.6;border-style:dashed;}
+#confirm-modal .dky-wv{width:min(94vw,560px);max-height:calc(100dvh - 32px);overflow-y:auto;}
+#confirm-modal .dky-wv-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:13px;font-weight:700;color:var(--muted-l);}
+#confirm-modal .dky-wv-top select{min-height:38px;}
+#confirm-modal .dky-wv-txt{max-height:min(46vh,420px);overflow-y:auto;white-space:pre-line;padding:12px 14px;border:1px solid rgba(var(--tint-rgb),.12);border-radius:6px;background:var(--s3);color:var(--text);font-size:15px;font-weight:500;line-height:1.55;}
+#confirm-modal .dky-wv-ok{display:flex;align-items:flex-start;gap:10px;margin:14px 0 8px;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;}
+#confirm-modal .dky-wv-ok input{-webkit-appearance:checkbox;appearance:checkbox;width:24px;height:24px;min-height:0;flex:0 0 24px;margin:0;accent-color:var(--green);}
+#confirm-modal .dky-wv-err{margin:4px 0 10px;color:var(--red);font-size:13px;font-weight:700;}
 #desk-sheet .dk-sheet{width:min(92vw,480px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
 #desk-sheet .chrome-dh10{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 #desk-sheet .chrome-dt{font-size:18px;font-weight:900;margin:0;}

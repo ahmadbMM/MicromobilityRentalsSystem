@@ -22,7 +22,8 @@ const row = (id: string, session_id: string, queue_num: number, extra: Record<st
   registered_at: today + 'T05:00:00Z', ...extra,
 });
 const queue_entries = [
-  row('f1', 'sat', 1), row('f2', 'sat', 2),
+  // selected for the ride (a request not approved yet has no box and stays out of the bar: the staff review, 2026-10-28)
+  row('f1', 'sat', 1, { approval: 'approved' }), row('f2', 'sat', 2, { approval: 'approved' }),
   row('f3', 'sat', 3, { status: 'active', assigned_bike_id: 'b1', checked_in_at: today + 'T06:00:00Z' }),
   row('p1', 'jcc', 1),
   row('p2', 'jcc', 2, { status: 'active', assigned_bike_id: 'b2', checked_in_at: today + 'T06:00:00Z' }),

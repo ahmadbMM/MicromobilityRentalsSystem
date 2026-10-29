@@ -62,7 +62,8 @@ test.describe('@staff:bookings fix5 ra1 fares', () => {
     // through the pay menu: on the house back to pending gives the seat its own price
     const sent = patches(page);
     await page.evaluate(`togglePayment('e1','pending')`);
-    await expect.poll(() => sent.find((p) => p.id === 'e1' && 'price' in p.body)?.body).toEqual({ paid: false, price: 30 });
+    // one write with the method (the staff review, 2026-10-28, S03-core3-10)
+    await expect.poll(() => sent.find((p) => p.id === 'e1' && 'price' in p.body)?.body).toEqual({ paid: false, price: 30, pay_method: null, card_amount: null });
   });
 
   test('taking the house terms away re-prices each row at its ride’s fare, each write guarded', async ({ page }) => {

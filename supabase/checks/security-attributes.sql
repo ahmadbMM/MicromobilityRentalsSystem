@@ -250,6 +250,7 @@ with expected(fname, want_definer, note) as (values
   ('_pin_ok_strict',         true,  'reads team_members.pin_hash through _pin_ok; internal only'),
   ('staff_purge_session',    true,  'deletes an empty deleted session past RLS; admins only, PIN-checked'),
   ('staff_checkin',          true,  'claims bikes, writes bike_assignments and the booking''s payment in one go; checks is_staff() itself'),
+  ('staff_record_waiver',    true,  'stamps the waiver a rider agreed to on the desk device and writes audit_log; checks is_staff() itself (20261029160000)'),
   ('_addons_price_snapshot', true,  'trigger: reads inventory prices and is_staff() for a booking any caller writes'),
   -- 20261004130000 (vendor portal hardening): sessions by hash, roles, password policy, the gate
   ('_vendor_auth',              true,  'reads vendor_sessions (no client grant) by token hash, writes last_seen; internal only'),

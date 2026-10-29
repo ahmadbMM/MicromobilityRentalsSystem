@@ -196,13 +196,19 @@ test.describe('@staff:bookings undo check-in, back to the waitlist', () => {
     expect(t.bikes[0].status).toBe('available');
   });
 
-  test('Express: its Undo puts a rider who came off the waitlist back onto it', async ({ page }) => {
+  test('Express hands a rider on the waitlist to the check-in, whose Undo puts them back onto it', async ({ page }) => {
+    // Express holds a waitlisted rider back for the check-in, which says Waitlist (the staff review, 2026-10-28, S04-core4-05).
     const t = tables([row('A', 1, 'waiting'), row('W1', 2, 'waitlist', { waitlist_num: 1, paid: true })]);
     const hits = await boot(page, t);
     await page.evaluate(`_expressCheckin(getQueue().find(x=>x.id==='W1'),()=>{})`);
+    await page.waitForFunction(`S._ciId==='W1'`);
+    await expect(page.locator('#checkin-modal .ci-ttag')).toHaveText('Waitlist');
+    expect(t.queue_entries[1].status).toBe('waitlist'); // the scan alone checked nobody in
+    await page.locator('#checkin-modal #ci-confirm').click();
     await expect.poll(() => t.queue_entries[1].status).toBe('active');
+    await page.waitForFunction('S.undoStack.length>0'); // the check-in's Undo is pushed once its write is back
     await page.evaluate('S.undoStack[S.undoStack.length-1].fn()');
-    expect(qPatch(hits, 'W1', 'waitlist')!.body).toEqual({ status: 'waitlist', assigned_bike_id: null, waitlist_num: 1 });
+    expect(qPatch(hits, 'W1', 'waitlist')!.body).toMatchObject({ status: 'waitlist', assigned_bike_id: null, waitlist_num: 1 });
     expect(t.queue_entries[1].status).toBe('waitlist');
   });
 
