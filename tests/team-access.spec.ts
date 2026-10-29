@@ -108,6 +108,7 @@ test('the Team page sets PINs and what another account can open and change, neve
   await expect(desk.locator('.tm-chip[data-sec^="edit:"]')).toHaveText(['Bookings', 'Workshop']);
   await desk.locator('.tm-chip[data-sec="edit:workshop"]').click();
   await desk.getByRole('button', { name: 'Save' }).click();
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Save' }).click(); // the confirm that says what changes (2026-10-28)
   await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'workshop'], p_edit: ['queue'] }]);
 });
 

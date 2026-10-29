@@ -277,6 +277,7 @@ test('an account with no gender can be given one from the Community row, and lis
   const patches: string[] = [];
   page.on('request', r => { if (r.method() === 'PATCH' && /customers/.test(r.url())) patches.push(r.postData() || ''); });
   await ask.getByRole('button', { name: 'Male', exact: true }).click();
+  await ask.getByRole('button', { name: 'Tap again to save Male' }).click(); // saved on the second tap (the staff review, 2026-10-28)
   await expect(page.locator('.am-gender')).toHaveCount(0);
   expect(patches.some(p => /"gender":"male"/.test(p))).toBe(true);
   expect(await page.evaluate(`getCustomers().find(c=>c.id==='c4').gender`)).toBe('male');

@@ -67,7 +67,7 @@ with expected(fname, want_definer, note) as (values
   ('staff_learn_ask_changes', true, 'writes learn_applications (staff-only); is_staff()-gated'),
   ('learn_fix_get',          true,  'reads one learn-to-ride sign-up by its change token for the applicant; anon'),
   ('learn_fix_submit',       true,  'writes the asked fields of one learn-to-ride sign-up by its token; anon, _ip_gate-metered'),
-  ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd; is_staff()-gated'),
+  ('staff_set_customer_temp_password', true, 'writes customers.password_hash + must_change_pwd and a staff_actions line; admins and the roles that change Bookings (20261029150000)'),
   ('customer_community_apply', true, 'writes community_applications (staff-only) for the signed-in applicant; token-checked, _ip_gate-metered'),
   ('customer_community_me',  true,  'reads the caller''s own account, application and tags for the form; token-checked'),
   ('customer_learn_apply',   true,  'the learn-to-ride sign-up from the signed-in account (learn_apply behind it); token-checked'),
@@ -288,7 +288,16 @@ with expected(fname, want_definer, note) as (values
   ('staff_inventory_extras',    true,  'reads inventory cost, supplier and expiry, which anon and authenticated cannot; staff only'),
   -- Last opened / last signed in (20261011130000)
   ('customer_seen',             true,  'writes customer_seen, which no client can touch; token-checked'),
-  ('staff_last_seen',           true,  'reads customer_seen and customer_activity; staff only')
+  ('staff_last_seen',           true,  'reads customer_seen and customer_activity; staff only'),
+  -- Free-ride doors and account security (20261029150000)
+  ('staff_set_vip',             true,  'gives or takes the VIP tag past the guard on customer_tags; is_staff()-checked, PIN and the manager rule'),
+  ('staff_set_default_pay',     true,  'writes customers.default_pay past customers_admin_cols; admins and managers, PIN and the manager rule'),
+  ('_vip_tag_guard',            true,  'trigger: refuses a desk account''s own write of the VIP tag (is_staff/is_admin read staff)'),
+  ('_tag_audit_row',            true,  'trigger: writes audit_log for every customer_tags change; audit_log has no write policy for anyone'),
+  ('_default_pay_insert_guard', true,  'trigger: refuses a desk account''s insert of an account already on the house'),
+  ('_house_insert_guard',       true,  'trigger: refuses a desk account''s insert of a ride on the house over the limit; calls _promo_valid and _fare_now, revoked'),
+  ('_staff_reset_signout',      true,  'trigger: deletes the account''s auth.sessions when staff_reset_password sets must_change_pwd'),
+  ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

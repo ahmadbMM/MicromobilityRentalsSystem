@@ -93,6 +93,7 @@ test.describe('@staff:history s1010 data access', () => {
     await expect(chip).toHaveAttribute('aria-pressed', 'true');
     await chip.click();
     await desk.getByRole('button', { name: 'Save' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Save' }).click(); // the confirm that says what changes (2026-10-28)
     await expect.poll(() => calls.filter((c) => c.name === 'staff_set_caps').length).toBe(1);
     expect((calls.find((c) => c.name === 'staff_set_caps')!.body.p_caps as Record<string, unknown>).can_see_pii_unmasked).toBeUndefined();
   });

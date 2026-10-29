@@ -78,7 +78,7 @@ test('giving VIP puts the live bookings in their name on the house at once; taki
   expect(await page.evaluate(`_isVip({id:'v1'})`)).toBe(true);
 
   ps.length = 0;
-  await page.evaluate(`toggleCustTag('v1','tag_vip')`);
+  await page.evaluate(`toggleCustTag('v1','tag_vip');toggleCustTag('v1','tag_vip')`); // a held tag comes off on the second tap (2026-10-28)
   await expect.poll(() => ps.length).toBe(1);
   expect(ps[0].url).toContain('id=eq.q1');
   expect(ps[0].body).toEqual({ paid: false, price: 75 });

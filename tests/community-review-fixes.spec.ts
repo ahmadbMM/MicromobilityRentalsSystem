@@ -92,6 +92,7 @@ test.describe('tag grants', () => {
     const pick = page.locator('.am-row[data-cust="c3"] .am-picker .am-pick');
     await expect(pick).toContainText('✓');
     await pick.click();
+    await pick.click(); // a held tag comes off on the second tap (the staff review, 2026-10-28)
     await expect.poll(() => page.evaluate(`S.customerTags.some(ct=>ct.customer_id==='c3')`)).toBe(false);
   });
 

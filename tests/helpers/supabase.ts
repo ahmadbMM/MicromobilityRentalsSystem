@@ -48,7 +48,10 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'staff_offer_spot', 'customer_claim_get', 'customer_claim_spot',
   // Partner places (20261017120000): without it every member may take one of our bikes, as before;
   // tests/partner-places.spec.ts stubs it by name.
-  'member_bikes_open']);
+  'member_bikes_open',
+  // VIP and a default payment on the house through the on-the-house approval (20261029150000): the page writes the
+  // tables as before without them; tests/b2-d-security.spec.ts stubs them by name.
+  'staff_set_vip', 'staff_set_default_pay']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt

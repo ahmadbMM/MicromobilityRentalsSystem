@@ -165,7 +165,8 @@ test.describe('@staff:bookings rb1 account editor (2026-10-05)', () => {
     await page.fill('#cf-email', 'huda.new@example.test');                  // a changed email: the duplicate check goes out first
     await page.evaluate('saveCustForm();closeCustFormModal()');
     await expect.poll(() => sent.length, { timeout: 5000 }).toBeGreaterThan(0);
-    expect(sent[0]).toMatchObject({ email: 'huda.new@example.test', default_pay: 'house', hidden_types: 'Kids', profession: 'Engineer', workplace: 'Aramco', heard_from: 'instagram' });
+    expect(sent[0]).toMatchObject({ email: 'huda.new@example.test', hidden_types: 'Kids', profession: 'Engineer', workplace: 'Aramco', heard_from: 'instagram' });
+    expect(sent[0]).not.toHaveProperty('default_pay'); // unchanged, so left as it is: only staff_set_default_pay changes it (2026-10-28)
   });
 });
 

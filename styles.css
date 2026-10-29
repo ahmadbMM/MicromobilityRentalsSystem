@@ -5332,6 +5332,13 @@ body.view-staff #view-staff .view-main{margin:0;width:auto;justify-self:stretch;
 /* Community row: gender prompt for accounts that never chose one */
 .am-gender{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px;font-size:var(--staff-fs-sm,12px);font-weight:700;color:var(--orange);}
 .am-gender .am-pick{--tc:var(--green);}
+/* A held tag or a gender armed by a first tap: red, saying what the second tap does (the staff review, 2026-10-28,
+   S07-community2-03/04). The colours are set, not --tc: the chip's own --tc is written on it through data-cssv. */
+.am-pick.scy-sure{opacity:1;border-style:solid;border-color:var(--red);color:var(--red);background:color-mix(in srgb,var(--red) 14%,transparent);}
+html[data-staff-theme="dark"] body.view-staff .am-pick.scy-sure:has(.tag-img-vl){border-color:var(--red);color:var(--red);background:color-mix(in srgb,var(--red) 14%,transparent);}
+.am-pick .scy-sure-t{margin-inline-start:4px;}
+/* Default payment that this role cannot change: why, under the select (S02-core2-02) */
+.scy-dp-hint{display:block;margin-top:4px;}
 /* ── Rider profile gate: the sign-in page's clean frame, the box from the design handoff ── */
 #profile-gate .auth-backdrop{background:var(--bg);backdrop-filter:none;-webkit-backdrop-filter:none;z-index:90;top:var(--topbar-h,56px);align-items:flex-start;padding:16px;overflow:auto;}
 @media (min-width:768px){#profile-gate .auth-backdrop{padding-top:88px;}}
