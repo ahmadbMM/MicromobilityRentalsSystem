@@ -1372,7 +1372,10 @@ export function formatFieldNames(r, limit = 20) {
 // half), one card/cash/not-recorded split for every money screen, the Petromin billing period and its rides still out, the
 // sticky check-in footer, the search fold with its another-night line, and the walk-in's picked bike type): customer 253.9,
 // staff 668.9, core 301.2 here, about 255.3 / 671.0 / 302.5 on the runner; +2 / +4 / +5 restores the margin.
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 258, staff: 676, core: 305 };
+// Customer 258 -> 261 (2026-10-28, the Arena Heros Hybrid Race: its card, its athlete step, its ticket lines and Change
+// details, its share-gate words, the privacy notice's rows and 27 strings, all on a rider's page): customer 253.9 -> 257.7 KB
+// here, about 259.1 on the runner; +3 restores the margin (staff 670.8, core 301.6 here, inside theirs).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 261, staff: 676, core: 305 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
