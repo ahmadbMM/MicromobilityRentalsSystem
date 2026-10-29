@@ -7219,6 +7219,7 @@ function showView(v){
   applyThemeIcon(); // topbar logo art follows the view's surface (white paper vs asphalt)
   _opGateCheck(); // staff view is unusable until the operator says who they are
   _syncSndTheme(); // the National Day skin belongs to the Reserve flow and nowhere else
+  _syncArTheme(); // so does the Arena Heros one
 }
 
 let _navRestoring=false;
@@ -8583,6 +8584,7 @@ function _isArena(s){return !!s&&_rideKind(s)==='arena';}
 function _isRace(s){const k=s&&_rideKind(s);return k==='vlap'||k==='arena';}
 const RACE_KIND={vlap:{races:VL_RACES,divs:VL_DIVS,pfx:'VL',price:150},arena:{races:['wd','md'],divs:['op','el'],pfx:'AH',price:140}};
 function _rk(s){return RACE_KIND[_isArena(s)?'arena':'vlap'];}
+const AR_LOGO='/assets/arena-heros-logo.webp'; // the organisers' gorilla logo, cut from their poster (2026-10-29): the card, the flow, the ticket
 const AR_MAP_URL='https://www.google.com/maps/search/?api=1&query=Gymnation%20Tahlia%20Street%20Jeddah';
 const AR_INFO_URL='https://www.instagram.com/p/Dd1Lc87CJrq/'; // the organisers' race details
 // A division with its distance (Victory Lap's); the Arena race has none to say.
@@ -8706,19 +8708,48 @@ function _vlCardHtml(){
   </button>`;
 }
 function _on_vlCard_1(event,el){el.remove()}
-// The Arena Heros card: black with red, the organisers' "ARENA HEROS Competition" as a wordmark (no logo file yet),
-// the date, the hours and the venue. Shown to every signed-in rider; the members gate answers the tap.
+// The Arena Heros card (the owner, 2026-10-29: "add the image to the card dont keep it plain"): the organisers' poster
+// on it - their gorilla logo where every card has its mark, the red-lit hall behind it (styles.css), the name in the
+// poster's heavy italic capitals - then the date, the hours and the venue, and what the race is. Shown to every
+// signed-in rider; the members gate answers the tap.
 function _arLive(){return !!_vlSoon('arena');}
-function _arCardHtml(){
-  const s=_vlSoon('arena');if(!s)return'';
+function _on_arImg_1(event,el){el.remove()}
+function _arLogoImg(cls){return`<img class="${cls}" src="${AR_LOGO}" alt="" width="452" height="371" decoding="async" data-on-error="${_on("_on_arImg_1",_EV,_EL)}">`;}
+// The date, the hours and the venue in one row with a rule between two of them; the row wraps (the venue takes a
+// line of its own on a narrow card) and .ar-mi clips the rule a line would otherwise start with.
+function _arWhenHtml(s){
   const ds=String(s.session_date||s.id).slice(0,10);
   let day=ds;try{day=new Date(ds+'T12:00:00+03:00').toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ});}catch(e){}
+  return`<span class="ar-mi">${[day,sessionTime(s),_venueName(s)].filter(Boolean).map(x=>`<span><bdi>${esc(x)}</bdi></span>`).join('')}</span>`; // the rule sits on the span, which reads in the page's direction (a <bdi> takes its text's: "Gymnation" made the venue's left-to-right)
+}
+function _arCardHtml(){
+  const s=_vlSoon('arena');if(!s)return'';
   return`<button class="landing-event-card lec2 ev-arena ar-card" data-on-click="${_on("selectEvent","arena")}">
-    <span class="ar-mark" aria-hidden="true"><b>ARENA HEROS</b><i>Competition</i></span>
+    <span class="lec2-logo ar-logo" aria-hidden="true">${_arLogoImg('ar-logo-img')}</span>
     <span class="lec2-copy"><span class="lec-title">${t('evArenaName')}</span>
-      <span class="lec-meta ar-meta">${[day,sessionTime(s),_venueName(s)].filter(Boolean).map(x=>`<bdi>${esc(x)}</bdi>`).join('<i aria-hidden="true"></i>')}</span>
+      <span class="lec-meta ar-meta">${_arWhenHtml(s)}</span>
       <span class="lec-meta ar-sub">${t('arCardSub')}</span></span>
   </button>`;
+}
+// The flow wears the poster too (the owner, 2026-10-29: "put the whole theme of the post on the event card and
+// registration pages"): one class on <body> while Reserve holds the race - its date, the athlete step, the review,
+// the booked page - as the National Day ride does (styles.css redefines the colours under it), and a banner over
+// every step: the partners' marks, the logo, the race's name, when and where.
+function _arOn(){
+  if(S.view!=='customer'||S.custTab!=='register')return false;
+  const tk=S.lastTickets||[];if(tk.length)return tk.every(x=>_isArena(_sessDisp(x.sessionId)));
+  const sel=_sessDisp(S.selSession);
+  return sel?_isArena(sel):(S.selEvent||'')==='arena';
+}
+function _syncArTheme(){try{document.body.classList.toggle('ar-skin',_arOn());}catch(e){}}
+function _arHeadHtml(){
+  const tk=(S.lastTickets||[])[0],s=_sessDisp(S.selSession)||(tk&&_sessDisp(tk.sessionId))||_vlSoon('arena');
+  return`<div class="ar-flow-head">
+    <img class="ar-flow-partners" src="/assets/arena-heros-partners.webp" alt="" width="413" height="52" decoding="async" data-on-error="${_on("_on_arImg_1",_EV,_EL)}">
+    <div class="ar-flow-main">${_arLogoImg('ar-flow-logo')}
+      <div class="ar-flow-copy"><div class="ar-flow-name">${esc(t('evArenaName'))}</div>${s?`<div class="ar-flow-meta">${_arWhenHtml(s)}</div>`:''}</div>
+    </div>
+  </div>`;
 }
 
 // ── The athlete step (step 2): the race, the team, the division, the T-shirt, the 5 km time, and what
@@ -11016,6 +11047,7 @@ function setCustTab(tab){
   S.custTab=tab;
   try{sessionStorage.setItem('cq_nav_ctab',tab);}catch(e){}
   _syncSndTheme(); // leaving Reserve by the tab bar has to take the National Day skin with it
+  _syncArTheme(); // and the Arena Heros one
   renderCustomerTabs();
   if(tab==='myrides')renderMyRides();
   else if(tab==='register')renderRegister();
@@ -13350,7 +13382,7 @@ function renderRegister(){
   // every step, and the confirm step repeats the full session/riders/total review anyway.
   // The National Day ride carries its own identity through every step of the wizard: the
   // skin is one class on <body> (styles.css owns the palette), the lockup one banner here.
-  _syncSndTheme();_syncDefeTheme();
+  _syncSndTheme();_syncDefeTheme();_syncArTheme();
   const _sndHead=_sndOn()?`<div class="snd-flow-head">
       <img src="/assets/snd96-logo.svg" class="snd-flow-logo" alt="${esc(t('evSnd96Name'))}" decoding="async" data-on-error="${_on("_on_renderRegister_6",_EV,_EL)}">
       <div class="snd-flow-name">${esc(t('evSnd96Name'))}</div>
@@ -13362,7 +13394,7 @@ function renderRegister(){
   const host=document.getElementById('tab-register'),fa=document.activeElement;
   let keep=null;
   if(host&&fa&&fa!==host&&fa.id&&host.contains(fa)){keep={id:fa.id,s:null};try{if(typeof fa.selectionStart==='number')keep.s=[fa.selectionStart,fa.selectionEnd];}catch(_){}}
-  host.innerHTML=_sndHead+(_defeOn()?_defeHeadHtml():'')+body;
+  host.innerHTML=_sndHead+(_defeOn()?_defeHeadHtml():'')+(_arOn()?_arHeadHtml():'')+body;
   if(keep)_regRefocus(keep);
 }
 // An add-on's last unit taken off removes its stepper (its tick stands in), a full one switches its
@@ -14436,7 +14468,6 @@ function _on_renderBookingTicket_2(event,el){if(event.key==='Enter'||event.key==
 // which has no code to push the column down; the owner, same day).
 function _tkLogo(sess){
   const th=_tkTheme(sess);
-  if(th==='arena')return`<span class="tk-logo tk-logo-ev ar-mark" aria-hidden="true"><b>ARENA HEROS</b><i>Competition</i></span>`; // no logo file yet: the wordmark
   if(th)return`<span class="tk-logo tk-logo-ev" aria-hidden="true"><img class="tk-logo-${th}" src="${TK_MARK[th]}" alt="" decoding="async"></span>`;
   return`<span class="tk-logo" aria-hidden="true"><img class="tk-logo-l" src="/logo-dark.webp" alt="" decoding="async"><img class="tk-logo-d" src="/logo.webp" alt="" decoding="async"></span>`;
 }
@@ -14450,7 +14481,7 @@ function _tkLogo(sess){
 // The owner, 2026-10-12: "change the petromin booking card to be petromin themed and the triathlon pool session
 // to be swimming themed": a Petromin night's ticket wears Petromin's red, its speed stripes and its logo; the pool
 // session's, pool blue and water.
-const TK_MARK={jcc:'/jcc-white.webp',comm:'/logo-dark.webp',runher:'/assets/runher-partners.webp',defe5k:'/assets/defe-logo.svg',vlap:'/assets/victory-lap-dark.webp',event:'/logo-dark.webp',petromin:'/assets/petromin-logo.png',swim:'/logo-dark.webp'};
+const TK_MARK={jcc:'/jcc-white.webp',comm:'/logo-dark.webp',runher:'/assets/runher-partners.webp',defe5k:'/assets/defe-logo.svg',vlap:'/assets/victory-lap-dark.webp',arena:AR_LOGO,event:'/logo-dark.webp',petromin:'/assets/petromin-logo.png',swim:'/logo-dark.webp'};
 function _tkTheme(s){if(!s)return'';const k=_rideKind(s);return k==='snd96'?'':k==='jcc'||k==='runher'||k==='event'||k==='petromin'||k==='swim'||k==='vlap'||k==='arena'||k==='defe5k'?k:'comm';}
 function _tkThemeCls(s){const th=_tkTheme(s);return th?` tk-th th-${th}`:'';}
 // ── The ticket through the night (the owner, 2026-10-01: "do 1 2 5 6 10") ─────────────────────

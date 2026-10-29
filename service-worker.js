@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-1a88d06100';
+const CACHE = 'mmcq-ae1620213d';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,13 +28,13 @@ const STAFF_JS = './staff.js?v=18c73215dd';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=87d8b19d5a","./staff-parts/community.js?v=ec8cc55e79","./staff-parts/bikes.js?v=796cc0ddb5","./staff-parts/cashier.js?v=c1ad19dc1a","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=a3bb7cdee4","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=1595da51bd","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=defd7101f3","./staff-parts/messages.js?v=ef3959ad79","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=308b29e425","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=b593dfecfc","./staff-parts/settings.js?v=f25596eb7c","./staff-parts/fleet.js?v=a85c4efcf2","./staff-parts/money.js?v=7199fa4f4c","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=fd60a446ee","./staff-parts/kiosk.js?v=83e3c36c38","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=815114a4e2"];
-const APP_JS = './app.js?v=cab666111f';
-const APP_CSS = './app.css?v=c7eab6c328';
+const APP_JS = './app.js?v=75067783fd';
+const APP_CSS = './app.css?v=23bb1f5f97';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=ee9b69f6a1']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=d290523f95']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
@@ -48,6 +48,8 @@ const SHELL = [
   './assets/runher-partners.webp', // the partners' marks on the Run for Her card - same screen
   './assets/victory-lap-dark.webp', // Victory Lap's logo on its card and tickets - same screen (2026-10-17)
   './assets/defe-logo.svg', // the Defe run's logo on its date card, flow and ticket (2026-10-18)
+  './assets/arena-heros-logo.webp', // the Arena Heros logo on its card, flow and ticket (2026-10-29)
+  './assets/arena-heros-hall.webp', // the hall behind it on the card - same screen
   './hero.webp',
   './icon-192.png',
   './icon-512.png',

@@ -60,11 +60,11 @@ async function captureRpc(page: Page, fn: string, answer: unknown) {
 }
 
 test.describe('@customer:arena Arena Heros Hybrid Race', () => {
-  test('a member sees the card (the wordmark, the day, the hours, Gymnation) and its Details: teams of two, Open or Elite, 140 per athlete', async ({ page }) => {
+  test('a member sees the card (the organisers’ logo over the hall, the day, the hours, Gymnation) and its Details: teams of two, Open or Elite, 140 per athlete', async ({ page }) => {
     await custBoot(page);
     const card = page.locator('#land-events .landing-event-card.ev-arena');
     await expect(card).toBeVisible();
-    await expect(card.locator('.ar-mark')).toContainText('ARENA HEROS');
+    await expect(card.locator('.ar-logo img')).toHaveAttribute('src', '/assets/arena-heros-logo.webp');
     await expect(card.locator('.lec-title')).toHaveText('Arena Heros Hybrid Race');
     await expect(card.locator('.ar-meta')).toContainText('6 AM - 8 PM');
     await expect(card.locator('.ar-meta')).toContainText('Gymnation, Tahlia Street');
@@ -73,6 +73,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     // About this event, for members
     const about = page.locator('.lec-about.ab-arena');
     await expect(about).toBeVisible();
+    expect(await about.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(255, 255, 255)'); // white on the black card (it was ink on black)
     await about.click();
     const sheet = page.locator('#bike-info-modal');
     await expect(sheet).toContainText('WeSportify, Mile and Gymnation');
@@ -88,6 +89,40 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     // it is never a ride: no bike words, booked outside the booking window, no wallet pass
     expect(await page.evaluate(`(()=>{const s=_sessGet('${AH}');return [_noCycle(s),_ncEntry({sessionId:'2099-11-06-ah'}),_bwOpensOn(s),_walletOk(s,[]),_isRace(s),_evSeatPrice(s)];})()`))
       .toEqual([true, true, null, false, true, 140]);
+  });
+
+  test('the flow wears the poster (2026-10-29): black and red on <body> from the date to the booked page, a banner on every step; it goes with Reserve', async ({ page }) => {
+    await custBoot(page);
+    const rows = await captureBookingRows(page);
+    const skin = () => page.evaluate('document.body.classList.contains("ar-skin")');
+    expect(await skin()).toBe(false);
+    await toStep2(page);
+    expect(await skin()).toBe(true);
+    const head = page.locator('#tab-register .ar-flow-head');
+    await expect(head).toHaveCount(1);
+    await expect(head.locator('.ar-flow-name')).toHaveText('Arena Heros Hybrid Race');
+    await expect(head.locator('.ar-flow-meta')).toContainText('Gymnation, Tahlia Street');
+    await expect(head.locator('.ar-flow-logo')).toHaveAttribute('src', '/assets/arena-heros-logo.webp');
+    // every rider screen's colours point at the poster's: black paper, white ink, red actions
+    expect(await page.evaluate(`(()=>{const c=getComputedStyle(document.body);return ['--paper','--ink','--go'].map(k=>c.getPropertyValue(k).trim());})()`))
+      .toEqual(['#08080a', '#ffffff', '#e3262f']);
+    await page.locator('#vl-div-wrap .vl-div').first().click();
+    await page.locator('#vl-next').click();
+    await agreeAndBook(page);
+    await expect.poll(() => rows.length).toBe(1);
+    // the booked page keeps it, the ticket carries the logo
+    await expect(page.locator('#tab-register .ticket-card.th-arena .tk-logo-arena')).toHaveCount(1);
+    await expect(head).toHaveCount(1);
+    expect(await skin()).toBe(true);
+    // My Bookings, the landing page and another event's list are paper again
+    await page.evaluate(`setCustTab('myrides')`);
+    expect(await skin()).toBe(false);
+    await page.evaluate('goLanding()');
+    expect(await skin()).toBe(false);
+    await page.locator('#land-events .landing-event-card.ev-jcc').click();
+    await expect.poll(() => page.evaluate('S.custTab')).toBe('register');
+    expect(await skin()).toBe(false);
+    await expect(page.locator('#tab-register .ar-flow-head')).toHaveCount(0);
   });
 
   test('a rider who is not a Community member gets the members popup, and no About link', async ({ page }) => {
@@ -221,7 +256,8 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await custBoot(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:customer_vl_teams': [] });
     const html = await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m1')],{actions:true})`) as string;
     expect(html).toContain('th-arena');
-    expect(html).toContain('ARENA HEROS');
+    expect(html).toContain('tk-logo-arena');
+    expect(html).toContain('/assets/arena-heros-logo.webp');
     expect(html).toContain('Athlete number');
     expect(html).toContain('AH-AB23');
     expect(html).toContain('Waiting for your partner');

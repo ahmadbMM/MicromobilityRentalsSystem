@@ -1000,6 +1000,10 @@
     /* The ticket's lines sit inside the card like its buttons, not against its edge. */
     #tab-register .ticket-card>.price-note{margin:0;padding:0 24px 10px;text-align:center;}
     #tab-register .ticket-card>.price-note:has(+.cu-tk-acts){padding-bottom:16px;}
+    /* So do a race's lines (Victory Lap, the Arena race: the division, the details sent, how to pay), centred like
+       the fields above them; they sat against the card's edge (2026-10-29). */
+    #tab-register .ticket-card>.vl-tk-wrap{margin:0;padding:0 24px 14px;text-align:center;}
+    #tab-register .ticket-card>.vl-tk-wrap .vl-tk-meta{justify-content:center;margin-top:0;}
     /* Five fields (a ride that hands out bikes) go three and two, never four and one left alone. */
     .ticket-cols:has(>.ticket-col:nth-child(5)){grid-template-columns:repeat(3,1fr);row-gap:16px;}
     @media(max-width:560px){
@@ -8946,6 +8950,7 @@ body .landing-event-card.ev-vlap .vl-flag{flex:0 0 44px;background-color:var(--v
   body .landing-event-card.ev-vlap .vl-flag{flex-basis:36px;}
 }
 .ev-name.ev-vlap{color:var(--vl-ink);}
+body .lec-wrap .lec-about.ab-vlap{inset-inline-start:25px;} /* under the words (the card's edge and .vl-card-main's padding), not 3-5px off them */
 .vl-no-flag{color:var(--vl-ink);}
 
 /* The athlete step: the races as large buttons (name, then on your own / with a partner), the team's three
@@ -9008,36 +9013,129 @@ html[dir="rtl"] body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-ca
 
 /* ════════════════════════════════════════════════════════════════════════
    ARENA HEROS HYBRID RACE (the owner, 2026-10-28) - by WeSportify, Mile and Gymnation. Black with red, as the
-   organisers' guide is; no logo file yet, so "ARENA HEROS Competition" is a wordmark in type (.ar-mark) on the
-   picker's card and in the ticket's logo slot. Every part stays inside the card at any width.
+   organisers' poster is, and since 2026-10-29 the poster itself ("add the image to the card dont keep it plain",
+   "put the whole theme of the post on the event card and registration pages"): their gorilla logo
+   (assets/arena-heros-logo.webp) over the red-lit hall (arena-heros-hall.webp, arena-heros-band.webp), the partners'
+   marks (arena-heros-partners.webp), names in the poster's heavy italic capitals (Barlow Condensed 800 italic;
+   Arabic, Urdu and the Indian scripts keep their own face, upright), red for every action and a neon red edge.
+   The card, the flow (body.ar-skin, _syncArTheme: the race's date, the athlete step, the review, the booked page)
+   and the ticket. Every part stays inside its box at any width, in both directions.
    ════════════════════════════════════════════════════════════════════════ */
-:root{--ar-ink:#0b0b0b;--ar-red:#e3262f;--ar-red-lt:#ff5a61;}
+:root{--ar-ink:#0b0b0b;--ar-red:#e3262f;--ar-red-lt:#ff5a61;--ar-glow:0 0 0 1px rgba(227,38,47,.22),0 0 22px rgba(227,38,47,.3);
+  --ar-face:'Barlow Condensed','Barlow',sans-serif;}
 .ev-arena{--ev:#e3262f;--ev-rgb:227,38,47;}
 body:not(.view-staff) .ev-arena:not(.landing-event-card){--ev:#c81e27;--ev-rgb:200,30,39;}
-body .landing-event-card.ev-arena{flex-direction:column;align-items:flex-start;gap:14px;padding:20px 22px;overflow:hidden;
-  background:var(--ar-ink);border:1px solid var(--ar-ink);border-inline-start:6px solid var(--ar-red);color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);}
-body .landing-event-card.ev-arena:hover{border-color:var(--ar-red);transform:none;box-shadow:0 8px 24px rgba(11,11,11,.3);}
+/* the card: the logo where every card has its mark, the hall behind it darkening down to the words */
+body .landing-event-card.ev-arena{flex-direction:column;align-items:flex-start;gap:12px;padding:20px 22px;overflow:hidden;color:#fff;
+  background:linear-gradient(180deg,rgba(8,8,10,.1) 0%,rgba(8,8,10,.5) 40%,rgba(8,8,10,.92) 76%),url(/assets/arena-heros-hall.webp) center 40%/cover no-repeat,var(--ar-ink);
+  border:1px solid rgba(255,90,97,.72);box-shadow:var(--ar-glow);}
+body .landing-event-card.ev-arena:hover{border-color:var(--ar-red-lt);transform:none;box-shadow:0 0 0 1px rgba(255,90,97,.5),0 0 30px rgba(227,38,47,.45);}
 body .landing-event-card.ev-arena::before{display:none;}
-.ar-mark{display:inline-flex;flex-direction:column;align-items:flex-start;line-height:1;max-width:100%;}
-.ar-mark b{font-size:26px;font-weight:900;font-style:italic;letter-spacing:.05em;color:#fff;overflow-wrap:anywhere;}
-.ar-mark i{margin-top:5px;font-size:11px;font-style:normal;font-weight:700;letter-spacing:.32em;text-transform:uppercase;color:var(--ar-red-lt);}
-body .landing-event-card.ev-arena .lec2-copy{min-width:0;max-width:100%;}
-body .landing-event-card.ev-arena .lec-title{font-size:16px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;color:#fff;overflow-wrap:anywhere;}
-body .landing-event-card.ev-arena .ar-meta{display:flex;flex-wrap:wrap;align-items:center;gap:4px 9px;margin-top:6px;font-size:13px;font-weight:600;color:rgba(255,255,255,.84);max-width:100%;}
-body .landing-event-card.ev-arena .ar-meta i{width:1px;height:12px;background:rgba(255,255,255,.35);display:inline-block;flex:none;}
-body .landing-event-card.ev-arena .ar-sub{display:block;margin-top:5px;font-size:13px;font-weight:700;color:var(--ar-red-lt);}
-@media (max-width:640px){.ar-mark b{font-size:22px;}}
+body .landing-event-card.ev-arena .ar-logo{height:84px;}
+body .landing-event-card.ev-arena .ar-logo img{object-position:0 50%;}
+html[dir="rtl"] body .landing-event-card.ev-arena .ar-logo img{object-position:100% 50%;}
+body .landing-event-card.ev-arena .lec2-copy{width:100%;min-width:0;max-width:100%;}
+body .landing-event-card.ev-arena .lec-title{font-family:var(--ar-face);font-size:27px;font-weight:800;font-style:italic;text-transform:uppercase;
+  letter-spacing:.3px;line-height:1;color:#fff;overflow-wrap:anywhere;text-shadow:0 2px 12px rgba(0,0,0,.6);}
+:is(html[lang="ar"],html[lang="ur"]) body .landing-event-card.ev-arena .lec-title{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:21px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;}
+:is(html[lang="hi"],html[lang="ne"],html[lang="bn"]) body .landing-event-card.ev-arena .lec-title{font-family:var(--font-body);font-size:20px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;}
+body .landing-event-card.ev-arena .ar-meta{display:block;margin-top:8px;overflow:hidden;font-size:13px;font-weight:600;color:rgba(255,255,255,.88);}
+body .landing-event-card.ev-arena .ar-sub{display:block;margin-top:6px;font-size:13px;font-weight:700;color:var(--ar-red-lt);}
+/* a row of items with a rule between two of them; a line never starts with a rule (the row reaches 10px past its
+   box at the start, where its overflow:hidden parent clips the rule each line's first item carries) */
+.ar-mi{display:flex;flex-wrap:wrap;align-items:center;row-gap:3px;margin-inline-start:-10px;}
+.ar-mi>span{position:relative;padding-inline-start:10px;margin-inline-end:9px;}
+.ar-mi>span::before{content:'';position:absolute;inset-inline-start:0;top:50%;width:1px;height:12px;margin-top:-6px;background:currentColor;opacity:.4;}
+body .lec-wrap .lec-about.ab-arena{color:#fff;inset-inline-start:23px;} /* under the words: the card's edge and its padding */
+@media (max-width:640px){body .landing-event-card.ev-arena .ar-logo{height:76px;}body .landing-event-card.ev-arena .lec-title{font-size:25px;}}
 .ev-name.ev-arena{color:#c81e27;}
-/* the ticket: black, a red edge at the start, the wordmark in the logo slot; the team's code box stays light */
+
+/* the flow: the page goes black with a red glow from the top; every token the rider screens are drawn with points at
+   the poster's palette (the customer system's names and the older ones that read them), so nothing in the steps has
+   to know the race has its own colours. Literal light surfaces in the race's own boxes are named after it. */
+html:has(> body.ar-skin:not(.view-staff)){--root-paper:#08080a;color-scheme:only dark;}
+body.ar-skin:not(.view-staff){
+  --paper:#08080a; --card:#131315; --card-2:#1b1b1e; --card-3:#242428;
+  --ink:#ffffff; --ink-2:rgba(255,255,255,.76); --ink-3:rgba(255,255,255,.58); --ink-4:rgba(255,255,255,.38);
+  --line:rgba(255,255,255,.14); --line-2:rgba(255,255,255,.3);
+  --go:#e3262f; --go-2:#c81e27; --go-wash:rgba(227,38,47,.14); --neon:#ff5a61;
+  --amber:#ffc46b; --amber-2:#ffc46b; --amber-wash:rgba(255,196,107,.12); --red:#ff8a8f; --red-line:rgba(255,138,143,.4);
+  --scrim:rgba(0,0,0,.72); --sh-float:0 24px 60px rgba(0,0,0,.6); --accent2:rgba(227,38,47,.45);
+  --green-rgb:227,38,47; --tint-rgb:255,255,255; --red-rgb:255,138,143; --orange-rgb:255,196,107; --warn-rgb:255,196,107;
+  --vl-ink:#ff5a61; --vl-purple:#ff5a61;
+  color-scheme:dark;
+  background:radial-gradient(130% 520px at 50% 0%,rgba(227,38,47,.24) 0%,rgba(227,38,47,.07) 45%,rgba(8,8,10,0) 75%) no-repeat,var(--paper);
+}
+/* the bars around the flow follow it: the header (it re-points its own colours at a heavier weight), the tabs, the sections bar */
+body.ar-skin:not(.view-staff) #topbar#topbar{background:#0b0b0d;border-bottom:1px solid rgba(227,38,47,.42);box-shadow:none;}
+body.ar-skin:not(.view-staff) #topbar#topbar,
+body.ar-skin:not(.view-staff) #topbar#topbar *{--text:#fff;--muted:rgba(255,255,255,.64);--muted-l:rgba(255,255,255,.5);--border:rgba(255,255,255,.16);--tint-rgb:255,255,255;--s1:#0b0b0d;--s2:#18181b;--s3:#18181b;}
+body.ar-skin:not(.view-staff) #topbar#topbar .cust-topbar-name{color:#fff;}
+body.ar-skin:not(.view-staff) #topbar#topbar :is(.cust-topbar-email,.staff-access-btn){color:rgba(255,255,255,.62);}
+body.ar-skin:not(.view-staff) #topbar#topbar :is(.topbar-btn,.lang-toggle){color:rgba(255,255,255,.86);}
+html body.ar-skin:not(.view-staff) #cust-bottom-nav{background:#0b0b0d;border-top:1px solid rgba(227,38,47,.42);}
+html body.ar-skin .cust-bnav-btn{color:rgba(255,255,255,.6);}
+html body.ar-skin .cust-bnav-btn.active{color:#fff;}
+html body.ar-skin .cust-bnav-btn.active::after{background:var(--ar-red-lt);}
+/* headings in the poster's face: the step's title, a panel's title, the athlete step's sections */
+body.ar-skin:not(.view-staff) :is(#cu,*).page-title{font-family:var(--ar-face);font-size:36px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.3px;line-height:1;}
+body.ar-skin:not(.view-staff) :is(#cu,*):is(.form-title,.run-h){font-family:var(--ar-face);font-size:21px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.3px;line-height:1.1;}
+:is(html[lang="ar"],html[lang="ur"],html[lang="hi"],html[lang="ne"],html[lang="bn"]) body.ar-skin:not(.view-staff) :is(#cu,*):is(.page-title,.form-title,.run-h){font-family:inherit;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;}
+:is(html[lang="ar"],html[lang="ur"],html[lang="hi"],html[lang="ne"],html[lang="bn"]) body.ar-skin:not(.view-staff) :is(#cu,*).page-title{font-size:var(--fs-26);font-weight:700;}
+:is(html[lang="ar"],html[lang="ur"],html[lang="hi"],html[lang="ne"],html[lang="bn"]) body.ar-skin:not(.view-staff) :is(#cu,*):is(.form-title,.run-h){font-size:var(--fs-17);font-weight:700;}
+/* actions: red with white words and the poster's glow; a picked chip the same; the stepper's steps in red */
+body.ar-skin:not(.view-staff) .btn-primary,body.ar-skin:not(.view-staff) .btn-primary:hover{color:#fff;}
+body.ar-skin:not(.view-staff) .btn-primary:not(:disabled){box-shadow:0 0 20px rgba(227,38,47,.38);}
+body.ar-skin:not(.view-staff) .toggle-btn.active{background:var(--ar-red);border-color:var(--ar-red-lt);color:#fff;box-shadow:0 0 16px rgba(227,38,47,.4);}
+body.ar-skin:not(.view-staff) .toggle-btn.active::before{background:#fff;}
+body.ar-skin:not(.view-staff) #tab-register .cu-step-on{background:var(--ar-red);color:#fff;box-shadow:0 0 12px rgba(227,38,47,.55);}
+body.ar-skin:not(.view-staff) #tab-register .cu-step-ln-on{background:var(--ar-red);}
+body.ar-skin:not(.view-staff) input[type="checkbox"]{accent-color:var(--ar-red);}
+body.ar-skin:not(.view-staff) select option{background:#131315;color:#fff;}
+/* panels: near black with the poster's red edge; links and "available" in inks that read on black */
+body.ar-skin:not(.view-staff) #tab-register :is(.form-section,.sess-solo){border-color:rgba(227,38,47,.4);box-shadow:0 0 0 1px rgba(227,38,47,.08),0 0 26px rgba(227,38,47,.1);}
+body.ar-skin:not(.view-staff) #tab-register .cu-sole-card{background:var(--card);border-inline-start-color:var(--ar-red);}
+body.ar-skin:not(.view-staff) #tab-register .cu-c-green{color:#86efac;}
+body.ar-skin:not(.view-staff) #tab-register a:not([class]){color:var(--ar-red-lt);}
+body.ar-skin:not(.view-staff) .vl-panel .run-adult{color:#fff;}
+/* Open or Elite: the race's own boxes are drawn in literals (white, Victory Lap's ink); here they go dark, the picked
+   one ringed in red, its level in red as the poster's table has it */
+body.ar-skin .vl-divs .vl-div{background:var(--card);border-color:var(--line-2);color:#fff;}
+body.ar-skin .vl-divs .vl-div:hover:not(:disabled){border-color:var(--ar-red-lt);}
+body.ar-skin .vl-divs .vl-div.active{background:rgba(227,38,47,.12);border-color:var(--ar-red);box-shadow:0 0 18px rgba(227,38,47,.32);}
+body.ar-skin .vl-divs .vl-div-h span{color:var(--ar-red-lt);}
+body.ar-skin .vl-div-w{color:var(--ink-2);}
+body.ar-skin .vl-locked{border-color:rgba(255,255,255,.3);}
+body.ar-skin .vl-peek{border-color:var(--line-2);}
+body.ar-skin .vl-peek-ok{background:rgba(134,239,172,.08);border-color:rgba(134,239,172,.4);color:#86efac;}
+body.ar-skin .vl-peek-bad{background:rgba(255,138,143,.08);border-color:rgba(255,138,143,.45);color:#ff8a8f;}
+body.ar-skin .vl-chip{background:var(--ar-red);}
+/* the banner over every step: the partners' marks across the top, the logo, the race's name, when and where */
+.ar-flow-head{position:relative;margin:0 0 18px;padding:14px 18px 16px;overflow:hidden;color:#fff;
+  background:linear-gradient(180deg,rgba(8,8,10,.2) 0%,rgba(8,8,10,.62) 55%,rgba(8,8,10,.9) 100%),url(/assets/arena-heros-band.webp) center 30%/cover no-repeat,var(--ar-ink);
+  border:1px solid rgba(255,90,97,.6);box-shadow:var(--ar-glow);}
+.ar-flow-partners{display:block;height:26px;width:auto;max-width:100%;margin:0 auto 10px;object-fit:contain;}
+.ar-flow-main{display:flex;align-items:center;gap:14px;min-width:0;}
+.ar-flow-logo{flex:none;height:86px;width:auto;display:block;}
+.ar-flow-copy{min-width:0;flex:1 1 auto;}
+body:not(.view-staff) :is(#cu,*).ar-flow-name{font-family:var(--ar-face);font-size:28px;font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.3px;line-height:1;overflow-wrap:anywhere;text-shadow:0 2px 12px rgba(0,0,0,.6);}
+:is(html[lang="ar"],html[lang="ur"]) body:not(.view-staff) :is(#cu,*).ar-flow-name{font-family:'IBM Plex Sans Arabic',sans-serif;font-size:21px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;}
+:is(html[lang="hi"],html[lang="ne"],html[lang="bn"]) body:not(.view-staff) :is(#cu,*).ar-flow-name{font-family:var(--font-body);font-size:20px;font-weight:700;font-style:normal;text-transform:none;letter-spacing:0;line-height:1.3;}
+.ar-flow-meta{margin-top:8px;overflow:hidden;font-size:13px;font-weight:600;color:rgba(255,255,255,.88);}
+@media (max-width:640px){.ar-flow-head{padding:12px 14px 14px;}.ar-flow-partners{height:22px;}.ar-flow-logo{height:72px;}body:not(.view-staff) :is(#cu,*).ar-flow-name{font-size:23px;}}
+/* the ticket: black with the hall's lamps across the top and the neon edge, the logo in the logo slot; the team's
+   code box goes dark with it (it was light, and its Send button was white on white) */
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-arena{
   --night:#0b0b0b;--night-2:rgba(255,255,255,.08);--night-ink:#fff;--night-ink-2:rgba(255,255,255,.74);--night-line:rgba(255,255,255,.18);--neon:#ff5a61;
   --night-amber:#ffc46b;--night-red:#ff8a8f;--night-red-line:rgba(255,138,143,.4);
-  background:var(--ar-ink);border:1px solid var(--ar-ink);border-inline-start:6px solid var(--ar-red);color:#fff;}
-.ticket-card .tk-logo-ev.ar-mark b{font-size:15px;}
-.ticket-card .tk-logo-ev.ar-mark i{font-size:8px;margin-top:3px;}
+  background:linear-gradient(180deg,rgba(11,11,11,.45) 0,rgba(11,11,11,.88) 150px,#0b0b0b 230px),url(/assets/arena-heros-band.webp) center top/auto 230px repeat-x,var(--ar-ink);
+  border:1px solid rgba(255,90,97,.6);box-shadow:var(--ar-glow);color:#fff;}
+.ticket-card .tk-logo-ev .tk-logo-arena{height:56px;}
 body:not(.view-staff) .ticket-card.th-arena :is(.vl-tk-meta,.vl-pay-note){color:var(--night-ink-2);}
 body:not(.view-staff) .ticket-card.th-arena .vl-chip{background:var(--ar-red);}
-body:not(.view-staff) .ticket-card.th-arena .vl-tk-team{color:#0b0b0b;}
+body:not(.view-staff) .ticket-card.th-arena .vl-tk-team{background:rgba(255,255,255,.05);border-color:rgba(255,90,97,.45);color:#fff;}
+body:not(.view-staff) .ticket-card.th-arena .vl-tk-code{color:var(--night-ink-2);}
+body:not(.view-staff) .ticket-card.th-arena .vl-tk-code strong{color:#fff;}
 .vt-tk{display:grid;gap:8px;margin-top:10px;padding:10px 12px;font-size:13px;line-height:1.45;background:#f5f0fe;border:1px solid rgba(91,63,214,.24);color:#2e1c80;}
 .vt-tk-q{font-size:14px;font-weight:700;}
 .vt-tk-btns{display:flex;flex-wrap:wrap;gap:8px;}
