@@ -1375,7 +1375,13 @@ export function formatFieldNames(r, limit = 20) {
 // Customer 258 -> 261 (2026-10-28, the Arena Heros Hybrid Race: its card, its athlete step, its ticket lines and Change
 // details, its share-gate words, the privacy notice's rows and 27 strings, all on a rider's page): customer 253.9 -> 257.7 KB
 // here, about 259.1 on the runner; +3 restores the margin (staff 670.8, core 301.6 here, inside theirs).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 261, staff: 676, core: 305 };
+// Staff 676 -> 683, core 305 -> 310 (2026-10-29, the staff review's second batch: VIP, default payment and the walk-up
+// house through the server's approval, the second tap on gender and tags, Team's PIN and the deposit's card slip; requests
+// not approved kept out of every bulk path, one-tap return, the picker's drawer check-in, emergency contact and No waiver
+// yet with the desk's waiver sheet, the places warning; Analytics' three targets, held sessions, billed to companies and
+// the Product filter): staff 678.7, core 305.9 here, about 680.8 / 308.0 on the runner; +7 / +5 restores the margin
+// (customer 257.7 here, inside its own).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 261, staff: 683, core: 310 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
