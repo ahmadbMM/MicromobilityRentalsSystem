@@ -37,7 +37,7 @@ test('a single-session focus from another range drops back to all sessions', asy
   });
   await page.evaluate("setAnRange('month')");
   expect(await page.evaluate('S.anSession')).toBe('all');
-  expect(await page.locator('#tab-analytics select.filter-select').inputValue()).toBe('all');
+  expect(await page.locator('#tab-analytics select.filter-select:not(.an-kind-sel)').inputValue()).toBe('all'); // the product picker sits beside it (2026-10-29)
   const done = await page.evaluate("document.querySelector('#tab-analytics .result-count').textContent");
   expect(done).toMatch(/·\s*1\s/); // this month's one ride, not the zero of a session out of range
 });
@@ -113,7 +113,7 @@ test('This Month arrows compare the month so far with the same days of last mont
     ],
     setup: "S.analyticsRange='month';S.anSession='all';S.anView='ridership';",
   });
-  const badge = page.locator('#tab-analytics .analytics-kpi-label', { hasText: 'Completed Rides' }).locator('.an-delta');
+  const badge = page.locator('#tab-analytics .analytics-kpi-label', { hasText: 'Number of Rides' }).locator('.an-delta'); // one ride tile since 2026-10-29 (S08-analytics-18)
   await expect(badge).toHaveText(/0%/);
 });
 

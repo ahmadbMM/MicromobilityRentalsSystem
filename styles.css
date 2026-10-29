@@ -3331,6 +3331,12 @@
     #tab-analytics .an-spark-lbl{font-size:var(--staff-fs-sm,12px);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
     #tab-analytics .an-spark-val{font-size:18px;font-weight:900;margin:2px 0 4px;}
     #tab-analytics .an-fc-note{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin:-4px 0 4px 2px;}
+    /* the staff review, 2026-10-28 (S08-analytics-04/-05): the sessions to come, the held note, the product table */
+    #tab-analytics .an-up-line,#tab-analytics .an-held-note,#tab-analytics .an-kind-note{margin:0 0 12px 2px;}
+    #tab-analytics .an-prod td{white-space:nowrap;}
+    #tab-analytics .an-prod th{white-space:normal;vertical-align:bottom;}
+    #tab-analytics .an-prod tr.an-prod-on td{font-weight:800;}
+    @media(min-width:1024px){#tab-analytics .analytics-kpi-grid:has(> .an-billed){grid-template-columns:repeat(5,1fr);}} /* Billed to companies beside Pending: five on one row */
     #tab-analytics .an-target-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
     #tab-analytics .an-btn-sm-fixed{font-size:12px;padding:6px 12px;flex-shrink:0;}
     #tab-analytics .an-target-nums{display:flex;justify-content:space-between;font-size:12px;font-weight:800;margin-bottom:4px;}
