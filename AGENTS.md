@@ -1052,6 +1052,44 @@ location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` communit
   ONE_PER_SESSION, badge row). Session: `supabase/checks/defe-run-session-2026-10-22.sql`, run after the app is live.
   Tests: `tests/defe-run.spec.ts`.
 
+## Arena Heros Hybrid Race (2026-10-28)
+The owner: "create a session for this event and make it exclusive for community members Arena Heros Hybrid Race": Fri 6 Nov
+2026, 06:00-20:00 with a prayer break, teams of two only (two men or two women), Gymnation on Tahlia Street, 140 SAR per athlete
+with the medals, 7 stations, Open or Elite; asked (prefilled from the account): first and last name, email, mobile, gender, Open
+or Elite, and the consent to share them with the organisers, WeSportify, Mile and Gymnation. Payment is announced later (staff
+mark places paid); heat times come from the organiser.
+- **The kind** `ride_kind 'arena'` (event_kind community, open_to_all false, paid_ride, price 140, no approval), id suffix `-ah`,
+  location `AR_LOC` ('Gymnation, Tahlia Street', named in every language through `VENUE_KEY` -> `venueGymnation`), meet_url the
+  Gymnation map (`_meetsAt`). `KIND_TRAITS.arena` = no bike, no breakfast, no gathering (times are a start-end window).
+- **Shares Victory Lap's machinery through `_isRace(s)`** (vlap | arena), as `_isRun` shares Run for Her's: the athlete step
+  (step 2), Doubles team codes (`vl_team_peek`, join / start / "Find me a partner"), the share gate, `queue_entries.vl`, the
+  ticket's team block and Change details, the staff part `vlap` (Athletes and teams, an athlete's race, pairing, Race settings,
+  the roster's Race column and split, the report builder), Finished for return, the booking window exemption, no wallet pass.
+  `RACE_KIND` / `_rk(s)` hold what differs: races (arena `wd`/`md`), divisions (`op`/`el`), the code prefix (`AH`), the default
+  price; `_vlCfg(s)` defaults to them. `_vlDivKm(d,s)` says a division without Victory Lap's distance on the Arena race.
+- **Arena only** (`_isArena(s)`): the card `_arCardHtml` (black with red, the "ARENA HEROS Competition" wordmark in type - no logo
+  file yet; `.ar-mark` also fills the ticket's logo slot), `th-arena`; the members gate is the ordinary Community one
+  (`_commGate`, `_infoMembersOnlyEv`); the step `_arPanelHtml` / `_arStepNext` asks first / last name (the account's one `name`
+  split by `_splitName3`), email, mobile with its country code, gender (prefilled; saved on the account with
+  `customer_set_gender` when missing or changed; the race follows it: women `wd`, men `md`), Open or Elite with the organisers'
+  guide (`arLvl_*`, `arGuide_*`, `arGuideNote`, the race details link `AR_INFO_URL`) and the team; the details go on the entry
+  as typed (`vl.first/last/email/phone`), never onto the account. The share gate lists `arShTeam` and names the three
+  organisers (`arShSub`, `arShAgree`). The ticket's payment line is `_vlPayLine` (staff's `sessions.vl.pay`, else `arPayLater`);
+  no ticket question, bank details or receipts (`_vtAsk`, `_vtTkHtml`, `_vtStaffChip` stay Victory Lap's). No 16+ rule, no
+  T-shirt, no 5 km time, no badge. Change details edits the details any time and the division while alone (`customer_vl_update`).
+- **Staff**: the new-session form's "Arena Heros Hybrid Race" kind (`_on_renderSessions_ah`: 140, 100 places, Gymnation's map);
+  clone and edit carry it (`_editSeats`). The report builder hides Victory Lap's columns, sets, filters and sorts on it
+  (`VRB_AR_OFF`, `_vrbAr`) and opens on "Report for the organisers" (`VRB_SETS.org`: first / last name, email and mobile as
+  entered, gender, race, division, team, partner, consent); the export dialog's race block prints that set
+  (`printKaminReport` / `exportKaminXlsx` pick it by kind); the Excel file is `arena-heros_<date>_<set>.xlsx`.
+- **The database** (migration `20261028200000_arena_race`, built on 20261028120100's customer_create_booking): `_race_code_norm`,
+  `_vl_code_new` by the session's kind, `_vl_entry_guard` with the Arena rules (wd/md by gender, op/el, the entry's details as
+  VL_DETAILS, VL_SHARE naming the organisers, one place per account), `vl_team_peek` / `customer_vl_teams` (both kinds; the
+  partner's entered first name), `customer_vl_update` (the details), `_fare_now`, `customer_create_booking`,
+  `customer_accept_share`, `_booking_window_guard`; it inserts the session `2026-11-06-ah` (apply once the app is live).
+  Privacy Notice 2026-10-28: the race's details row, the organisers' row and the consent bullet (en/ar); nobody asked again.
+  `tests/arena-race.spec.ts`.
+
 ## Customers and Community (2026-10-07)
 
 The owner: "make a separate customer management/dashboard page and a separate community management dashboard page ...
