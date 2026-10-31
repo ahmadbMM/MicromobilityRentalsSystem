@@ -19774,7 +19774,7 @@ function _flagShow(k,v){
   return `<bdi>${esc(_flagVal({[k]:v},k)||String(v))}</bdi>`;
 }
 function _flagRow(r,spOn){
-  const c=(S.customers||[]).find(x=>String(x.id)===String(r.customer_id))||{};
+  const c=_custById(r.customer_id)||{};
   const st=r.status==='answered'?{l:t('flgAnswered'),col:'var(--green)'}:r.status==='withdrawn'?{l:t('flgWithdrawn'),col:'var(--muted)'}:{l:t('flgPending'),col:'var(--orange)'};
   const ch=r.changes||{};
   const done=Object.keys(ch);
@@ -19933,7 +19933,9 @@ function _bdWaUrl(c){
   const lg=_bdLang(c);
   return`https://wa.me/${_waDigits(_waNum(c))}?text=${encodeURIComponent(_tplUse('bd_wish',lg,{first_name:first})??BD_MSG[lg].replace('{name}',first))}`;
 }
-function _bdDate(iso,opt){try{return new Date(iso+'T12:00:00Z').toLocaleDateString(_locale(),{timeZone:'UTC',...opt});}catch(e){return iso;}}
+// One formatter per language and shape (2026-10-31): a new one per row cost the birthday list ~20 ms a paint.
+const _bdDateF=new Map();
+function _bdDate(iso,opt){try{const L=_locale(),k=L+'|'+JSON.stringify(opt||{});let f=_bdDateF.get(k);if(!f){f=new Intl.DateTimeFormat(L,{timeZone:'UTC',...opt});_bdDateF.set(k,f);}return f.format(new Date(iso+'T12:00:00Z'));}catch(e){return iso;}}
 function _bdWhen(days){return days===0?t('bdToday'):days===1?t('bdTomorrow'):t('bdInDays').replace('{0}',days);}
 function _bdAgo(days){return days===1?t('bdYesterday'):t('bdDaysAgo').replace('{0}',days);}
 // The earliest ride each member has booked from today on, one pass over the queue.
@@ -20248,12 +20250,22 @@ function _caFind(id){return(S._caApps||[]).find(a=>a.id===id)||null;}
 // The account this application lands on, found the way staff_community_approve finds it: the
 // account it was sent from (the form makes it first since 2026-09-30), else the email (or Apple
 // relay email), then the phone's digits.
+// The accounts by email, Apple relay email and phone digits, the first account of each in list order (what the
+// scans found): every pending card scanned all the accounts up to four times on every paint (2026-10-31). Kept for a
+// second on the same list, as _spentMap: an account edited in place keeps the list and its length.
+let _caAiSrc=null,_caAiLen=-1,_caAiAt=0,_caAi=null;
+function _caAcctIdx(){
+  const cs=S.customers||[];
+  if(_caAi&&_caAiSrc===cs&&_caAiLen===cs.length&&Date.now()-_caAiAt<1000)return _caAi;
+  const em=new Map(),ap=new Map(),ph=new Map(),put=(m,k,c)=>{if(k&&!m.has(k))m.set(k,c);};
+  cs.forEach(c=>{put(em,String(c.email||'').trim().toLowerCase(),c);if(c.apple_email)put(ap,String(c.apple_email).trim().toLowerCase(),c);put(ph,String(c.phone||'').replace(/\D/g,''),c);});
+  _caAiSrc=cs;_caAiLen=cs.length;_caAiAt=Date.now();_caAi={em,ap,ph};return _caAi;
+}
 function _caAcct(a){
-  const cs=S.customers||[],em=String(a.email||'').trim().toLowerCase(),d=String(a.phone||'').replace(/\D/g,'');
-  const own=a.customer_id&&cs.find(c=>c.id===a.customer_id);if(own)return own;
-  return cs.find(c=>String(c.email||'').trim().toLowerCase()===em)
-    ||cs.find(c=>c.apple_email&&String(c.apple_email).trim().toLowerCase()===em)
-    ||(d?cs.find(c=>String(c.phone||'').replace(/\D/g,'')===d):null)||null;
+  const em=String(a.email||'').trim().toLowerCase(),d=String(a.phone||'').replace(/\D/g,'');
+  const own=a.customer_id&&_custById(a.customer_id);if(own)return own;
+  const ix=_caAcctIdx(); // an application without an email no longer lands on the first account without one
+  return(em&&(ix.em.get(em)||ix.ap.get(em)))||(d&&ix.ph.get(d))||null;
 }
 // The "Looks off" checks, run on what the rider typed. The form already refuses most of these;
 // what is left is worth a second look before approving.
@@ -20382,8 +20394,8 @@ function _caInvLine(a){
 const CA_INV_ST={invited:{k:'caInvited',col:'var(--blue)'},completed:{k:'caInvCompleted',col:'var(--green)'},noshow:{k:'caInvNoShow',col:'var(--red)'}};
 // The accounts an invitation's booking may sit on: the application's, then any it was merged into.
 function _caCids(a){
-  const cs=S.customers||[],out=[];let id=a&&a.customer_id;
-  for(let i=0;id&&i<6&&!out.includes(id);i++){out.push(id);const c=cs.find(x=>x.id===id);id=c&&c.merged_into;}
+  const out=[];let id=a&&a.customer_id;
+  for(let i=0;id&&i<6&&!out.includes(id);i++){out.push(id);const c=_custById(id);id=c&&c.merged_into;}
   return out;
 }
 function _caInvSess(a){return(a.invited_session&&_sessGet(a.invited_session))||null;} // by the index, not a copy of every session per card (2026-10-05)
@@ -20414,9 +20426,16 @@ function _caInvBkNote(a){
 }
 // An application whose invitation was revoked (back in Pending) says which ride it was: the booking
 // the revoke cancelled carries the reason 'invite_revoked'.
+// The bookings a revoke cancelled, picked out of the whole list once a second, not once per pending card (2026-10-31).
+let _caRvQ=null,_caRvLen=-1,_caRvAt=0,_caRv=null;
+function _caRevoked(){
+  const q=getQueue();
+  if(_caRv&&q===_caRvQ&&q.length===_caRvLen&&Date.now()-_caRvAt<1000)return _caRv;
+  _caRv=q.filter(e=>e.cancelReason==='invite_revoked');_caRvQ=q;_caRvLen=q.length;_caRvAt=Date.now();return _caRv;
+}
 function _caRevokedNote(a){
   const ids=_caCids(a);if(!ids.length)return'';
-  const b=getQueue().filter(e=>e.cancelReason==='invite_revoked'&&ids.includes(e.customerId)).sort((x,y)=>String(y.sessionDate||'').localeCompare(String(x.sessionDate||'')))[0];
+  const b=_caRevoked().filter(e=>ids.includes(e.customerId)).sort((x,y)=>String(y.sessionDate||'').localeCompare(String(x.sessionDate||'')))[0];
   if(!b)return'';
   const s=_sessGet(b.sessionId);
   return`<div class="ca-inv-bk">${esc(t('caRevokedNote').replace('{0}',s?dayLabel(s.day)+' '+shortDate(s.session_date||s.id):shortDate(b.sessionDate)))}</div>`;
@@ -20430,13 +20449,12 @@ function _caRow(a){
   if(a.submissions>1)when.push(t('caSentTimes').replace('{0}',a.submissions));
   if(a.decided_at&&a.status!=='pending')when.push((a.status==='approved'?t('caApprovedOn'):t('caRejectedOn')).replace('{0}',esc(fmtStamp(a.decided_at)))+(a.decided_by?' · '+t('flgBy').replace('{0}',esc(a.decided_by)):''));
   const lang=(LANGS.find(l=>l.code===a.lang)||{}).label||a.lang||'';
-  const acct=a.status==='pending'?_caAcct(a):(a.customer_id?(S.customers||[]).find(c=>c.id===a.customer_id)||null:null);
+  const acct=a.status==='pending'?_caAcct(a):(a.customer_id?_custById(a.customer_id)||null:null);
   const acctLink=acct?`<button type="button" class="ca-link" data-on-click="${_on("showEditCustomerModal",acct.id)}">${esc(acct.name||acct.email||acct.id)}</button>`:'';
   const note=a.status==='pending'
     ?(acct?`<div class="ca-acct">${t('caHasAccount').replace('{0}',acctLink)}</div>`:'')
     :a.status==='approved'?`<div class="ca-acct">${ds==='invited'?_caInvLine(a)+' · ':''}${_caGone(a)?t('caAcctGone'):(a.existing_account?t(acct&&!_hasTagNow(acct.id,TAG_COMMUNITY)?'laUsedExisting':'caUsedExisting'):t('caMadeNew'))}${acct?' · '+acctLink:''}</div>`:'';
   const id=a.id;
-  if(a.status==='pending'&&!S.igRows)_igForReport(_caListPaint);
   // A pending applicant can be reached before the decision (the owner, 2026-09-29): a call, or a
   // WhatsApp chat opened on their number.
   const dial=_waDigits(a.phone),waDial=_waDigits(_waNum(a)); // WhatsApp on the number they gave for it (20261007200000)
@@ -20475,7 +20493,7 @@ function _caRow(a){
       ${_caShow('prof')?kv(t('caLblProf'),esc(a.profession||'')):''}
       ${_caShow('work')?kv(t('caLblWork'),esc(a.workplace||'')):''}
       ${_caShow('heard')?kv(t('heardLabel'),esc(heardLabel(a.heard_from))):''}
-      ${_caShow('socials')?_caSocKv(a,_apAcct('ca',a)):''}
+      ${_caShow('socials')?_caSocKv(a,acct):''}
       ${_caShow('news')?kv(t('caLblNews'),_caNews(a.ride_news)):''}
       ${_caShow('lang')?kv(t('caLblLang'),esc(lang)):''}
     </div>
@@ -20534,7 +20552,9 @@ function _caViewDel(i){const v=_caViews();v.splice(i,1);_caViewsPut(v);renderCom
 // with the default tags (and the tags their rules add) or rejected. Their messages are sent from each card
 // afterwards (Welcome / Reply), as no message can go out to many people from here.
 // The ticks live in S._caAppSel: S._caSel is the Add rider dialog's one pick (a string), and sharing the key wiped the ticks or threw on .has (bug hunt 2026-10-28).
-function _caSelToggle(id){S._caAppSel=S._caAppSel||new Set();if(S._caAppSel.has(id))S._caAppSel.delete(id);else S._caAppSel.add(id);renderCommunity();}
+// A tick draws the bar that counts the ticks again, not all of Community (2026-10-31); the box ticks itself.
+function _caSelToggle(id){S._caAppSel=S._caAppSel||new Set();if(S._caAppSel.has(id))S._caAppSel.delete(id);else S._caAppSel.add(id);
+  const tb=document.getElementById('ca-tb');if(tb)tb.outerHTML=_caToolbar(S._caFilter||'pending');else renderCommunity();}
 function _caShownPending(){return _caSortList((S._caApps||[]).filter(a=>a.status==='pending'&&_appIn('ca',a)));}
 function _caSelAll(on){S._caAppSel=new Set(on?_caShownPending().map(a=>a.id):[]);renderCommunity();}
 async function _caBulk(kind,ids){
@@ -20579,7 +20599,7 @@ async function _caApproveQuiet(a,tags){
 // Reject. The dialog asks once what the single ones ask each time (the ride, its group and the bike, the tags; the
 // fields and the note), the run goes through the ticked applications one by one, and it ends on one sheet with
 // every applicant's message, each in their own language, a tap each (no message can go to many people at once).
-function _caBkIds(){const shown=_caShownPending();return[...(S._caAppSel||[])].filter(id=>shown.some(a=>a.id===id));}
+function _caBkIds(){const shown=new Set(_caShownPending().map(a=>a.id));return[...(S._caAppSel||[])].filter(id=>shown.has(id));}
 function _caBkOpen(kind){
   const ids=_caBkIds();if(!ids.length||S._caWorking||S._caBulkBusy)return;
   S._caBk={kind:kind==='fix'?'fix':'invite',ids,tags:[],ride:'',rg:null,ty:'',fields:[],note:'',done:0,busy:false};
@@ -20762,7 +20782,7 @@ function _caToolbar(f){
   const viewChips=`<div class="ca-views"><span class="ca-tb-k">${t('caViewsLbl')}</span>${views.map((x,i)=>`<span class="ca-view"><button type="button" class="filter-pill" data-on-click="${_on("_caViewUse",i)}">${esc(x.name)}</button><button type="button" class="ca-view-x" aria-label="${esc(t('deleteBtn'))} ${esc(x.name)}" data-on-click="${_on("_caViewDel",i)}">&times;</button></span>`).join('')}<input id="ca-view-name" class="ca-view-in" type="text" maxlength="40" placeholder="${esc(t('caViewNamePh'))}" aria-label="${esc(t('caViewNamePh'))}"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_caViewAdd")}">${t('caViewSave')}</button></div>`;
   let bulk='';
   if(f==='pending'){
-    const shown=_caShownPending(),sel=[...(S._caAppSel||[])].filter(id=>shown.some(a=>a.id===id)),all=shown.length>0&&sel.length===shown.length;
+    const shown=_caShownPending(),ids=new Set(shown.map(a=>a.id)),sel=[...(S._caAppSel||[])].filter(id=>ids.has(id)),all=shown.length>0&&sel.length===shown.length;
     const ruleRej=shown.filter(a=>_caRulesFor(a).some(r=>r.action==='reject'));
     bulk=`<div class="ca-bulk">
       <label class="ca-fld"><input type="checkbox"${all?' checked':''}${shown.length?'':' disabled'} data-on-change="${_on("_caSelAll",_P("checked"))}">${t('caSelAll').replace('{0}',String(shown.length))}</label>
@@ -20770,7 +20790,7 @@ function _caToolbar(f){
       ${ruleRej.length?`<button type="button" class="btn-sm btn-secondary ca-apply-rules" data-on-click="${_on("_caApplyRules")}">${t('caApplyRules').replace('{0}',String(ruleRej.length))}</button>`:''}
     </div>`;
   }
-  return`<div class="ca-tb"><div class="ca-tb-row">${sortSel}${fields}</div>${fieldsBox}${viewChips}${bulk}</div>`;
+  return`<div class="ca-tb" id="ca-tb"><div class="ca-tb-row">${sortSel}${fields}</div>${fieldsBox}${viewChips}${bulk}</div>`;
 }
 // Default tags and rules (staff_options 'community.app_rules', admins write): the tags an approval starts with,
 // and rules on an application's answers that add a tag on approval or mark it to be rejected.
@@ -21009,7 +21029,7 @@ function _apF(k){const f=S._apF=S._apF||{};return f[k]=f[k]||{};}
 function _apAge(a){try{return a.birth_date?_sxAgeAt(a.birth_date):null;}catch(e){return null;}}
 function _apAcct(k,a){
   if(k==='la')return a.customer_id?_laAcctOf(a):(a.status==='pending'?_caAcct(a):null);
-  return a.status==='pending'?_caAcct(a):(a.customer_id?(S.customers||[]).find(c=>c.id===a.customer_id)||null:null);
+  return a.status==='pending'?_caAcct(a):(a.customer_id?_custById(a.customer_id)||null:null);
 }
 function _apSpent(k,a){const c=_apAcct(k,a);return c?_spentOf(c.id):null;}
 function _apFix(a){return a.fix_done_at?'done':a.fix_token?'wait':'never';}
@@ -21156,8 +21176,17 @@ function _appList(k){
   // Asking again clears fix_done_at.
   if((S[k==='la'?'_laFilter':'_caFilter']||'pending')==='pending'&&!(k==='la'?(S._apSort||{}).la:_caView().sort))
     list.sort((x,y)=>(_apTm(y.fix_done_at)||0)-(_apTm(x.fix_done_at)||0));
-  return list.map(k==='la'?_laRow:_caRow).join('')||_emptyState(t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty'));
+  if(k==='ca'&&!S.igRows&&list.some(a=>a.status==='pending'))_igForReport(_caListPaint); // the checks' Instagram outcomes: asked once per paint, not once per card
+  const cap=_apCap(k),page=list.length>cap?list.slice(0,cap):list,rest=list.length-page.length;
+  const more=rest>0?`<div class="cmy-more"><button type="button" class="btn-secondary ap-more" data-on-click="${_on("_apMore",k)}">${t('amShowMore').replace('{0}',Math.min(rest,AP_PAGE))}</button><div class="am-meta cmy-mt6">${esc(t('amShowingOf').replace('{0}',page.length).replace('{1}',list.length))}</div></div>`:'';
+  return(page.map(k==='la'?_laRow:_caRow).join('')||_emptyState(t(_appQv(k).trim()?'gsNone':k==='la'?'laEmpty':'caEmpty')))+more;
 }
+// The cards a page at a time, as the accounts list (2026-10-31): 259 pending applications drew ~25,000 elements at
+// once, and every tick, filter and search drew them all again. Another list, search, filter or sort starts at the top.
+const AP_PAGE=40;
+function _apSig(k){return[S[k==='la'?'_laFilter':'_caFilter']||'pending',_appQv(k),JSON.stringify(_apF(k)),k==='ca'?_caView().sort+'|'+_caInvSub():(S._apSort||{})[k]||''].join('|');}
+function _apCap(k){const sh=S._apShow||(S._apShow={}),sig=_apSig(k);if(!sh[k]||sh[k].sig!==sig)sh[k]={sig,n:AP_PAGE};return sh[k].n;}
+function _apMore(k){const sh=S._apShow&&S._apShow[k];if(sh)sh.n+=AP_PAGE;const l=document.getElementById(k+'-list');if(l)l.innerHTML=_appList(k);}
 function _appSrch(k){
   const v=_appQv(k);
   return`<div class="${_srchCls(k+'q',v)} apps-srch" data-srch="${k}q">${_artIcon('search',13)}<input class="search-input" id="${k}-q" type="text" autocomplete="off" value="${esc(v)}" placeholder="${esc(t('amSearchPh'))}" aria-label="${esc(t('amSearchPh'))}" data-on-input="${_on("_appQ",k,_P("value"))}">${_srchBtn()}</div>`;
@@ -21904,8 +21933,8 @@ const LA_WHO_TAG={self:'laSelfTag',child:'laChildTag',other:'laOtherTag'};
 function _laWho(a){const L=_laLearners(a);return L.length===1&&L[0].who!=='self'&&L[0].name?L[0].name:a.name;}
 // The account a sign-up landed on, followed through a merge.
 function _laAcctOf(a){
-  const cs=S.customers||[];let c=a&&a.customer_id?cs.find(x=>x.id===a.customer_id)||null:null;
-  for(let i=0;c&&c.merged_into&&i<5;i++)c=cs.find(x=>x.id===c.merged_into)||null;
+  let c=a&&a.customer_id?_custById(a.customer_id)||null:null;
+  for(let i=0;c&&c.merged_into&&i<5;i++)c=_custById(c.merged_into)||null;
   return c;
 }
 // A sign-up that made an account which has since been deleted (the link is cleared with it).
@@ -31825,10 +31854,13 @@ function _igFetch(){
   return S._igP;
 }
 // For a builder: a read when the counts are older than five minutes (30 s after a failed one), then paint.
+// One paint per caller however often it asks while the read runs: the applications list asked once per pending
+// card, and 259 of them queued 259 repaints of the whole list (the page froze ~30 s on a desktop, a phone's tab died).
 function _igForReport(paint){
   if(!sb)return;
   if(!S._igBusy&&S._igAt&&Date.now()-S._igAt<(S._igErr?3e4:3e5))return;
-  _igFetch().then(paint,()=>{});
+  const P=S._igPaints||(S._igPaints=new Set());if(P.has(paint))return;P.add(paint);
+  _igFetch().then(()=>{P.delete(paint);paint();},()=>P.delete(paint));
 }
 // One account's count as a number, or null (no handle, not counted yet, counted for an older handle).
 function _igNum(cid){const c=cid&&_custById(cid),r=c&&_igRow(c);return r&&r.followers!=null?Number(r.followers)||0:null;}
@@ -39038,7 +39070,9 @@ async function _autoSaveBkOpts(brand,model,groupset){
 }
 
 
-function fmtStamp(iso){if(!iso)return'';try{return new Date(iso).toLocaleString(_locale(),{timeZone:KSA_TZ,day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}catch(_){return'';}}
+// One formatter per language: toLocaleString with options builds a new one on every call, and lists stamp every row.
+const _fmtStampF=new Map();
+function fmtStamp(iso){if(!iso)return'';try{const L=_locale();let f=_fmtStampF.get(L);if(!f){f=new Intl.DateTimeFormat(L,{timeZone:KSA_TZ,day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});_fmtStampF.set(L,f);}return f.format(new Date(iso));}catch(_){return'';}}
 // Minutes as "35 min" / "1 h 35 min" in the reader's language (the units were English in every
 // language). Rounded first: the averages handed in here are fractional.
 function fmtDur(min){min=Math.round(Number(min)||0);if(min<1)return'—';if(min<60)return`${min} ${t('unitMin')}`;return`${Math.floor(min/60)} ${t('unitHour')} ${min%60} ${t('unitMin')}`;}
@@ -47622,7 +47656,7 @@ function _tagRivalHeld(cid,tid){if(!cid)return null;return _tagRivals(tid).find(
 // The warning names the pair at stake: Community and Victory Lap say so; Community and Petromin keep their words.
 function _tagOneOfTwoKey(a,b){return (a===TAG_VLAP||b===TAG_VLAP)?'tagOneOfTwoVl':'tagOneOfTwo';}
 function _tagOneOfTwoWarn(cid,tid){return `<div class="tag-ban-warn tag-rival-warn" role="alert"><span>${esc(t(_tagOneOfTwoKey(tid,_tagRivalHeld(cid,tid))))}</span></div>`;}
-function _hasTagNow(cid,tid){return (S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id===tid&&_tagActive(ct));}
+function _hasTagNow(cid,tid){return _ctRowsFor(cid).some(ct=>ct.tag_id===tid&&_tagActive(ct));} // the account's rows, not all 4k (2026-10-31)
 function _isBlacklisted(cid){return _hasTagNow(cid,TAG_BLACKLIST);}
 function _tagBanWarn(){const tg=(S.tags||[]).find(x=>x.id===TAG_BLACKLIST);return `<div class="tag-ban-warn" role="alert">${tg?_tagLogo(tg):''}<span>${esc(t('tagBlacklistWarn'))}</span></div>`;}
 function _tagBrand(tg){return (tg&&TAG_BRANDS[String(tg.slug||'').toLowerCase()])||null;}

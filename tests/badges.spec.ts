@@ -403,7 +403,10 @@ test.describe('@customer:account badges', () => {
   });
 
   test('a ladder is one tile at its level reached, with the next level as the closest badge (the owner, 2026-10-09)', async ({ page }) => {
-    const ss = [1, 2, 3, 4, 5].map((n) => ({ ...sessions[0], id: day(-n * 7), session_date: day(-n * 7), created_at: n }));
+    // A week apart, but never the Defe ride's day (its Rode with Defe pop-up came first, red on 2026-10-31 only): that
+    // ride moves a day earlier, the Friday of the same Sunday-to-Saturday week (_bdgWk).
+    const wk = (n: number) => (day(-n * 7) === '2026-10-24' ? day(-n * 7 - 1) : day(-n * 7));
+    const ss = [1, 2, 3, 4, 5].map((n) => ({ ...sessions[0], id: wk(n), session_date: wk(n), created_at: n }));
     await stubSupabase(page, { sessions: ss, queue_entries: ss.map((x, i) => rated(row('r' + i, x.id, 2, 'Spec Rider', 'c1', 'done', true))) });
     await loginCustomer(page);
     await page.goto('/');

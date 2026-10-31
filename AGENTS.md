@@ -1159,6 +1159,25 @@ account step; staff side what's new on each card, bulk actions with one message 
   page and the website's Learn to ride form. customer_learn_apply clears the flags its form answered, as the community
   apply does.
 
+## Applications at production size (2026-10-31)
+
+The owner: "why is the applications page so laggy and crashes a lot". With 259 pending applications, 3,900 accounts and
+8,300 bookings the page froze for ~30 s on a desktop (a phone's tab died) each time the Instagram counts arrived:
+every pending card called `_igForReport(_caListPaint)` while the read ran, so each card queued one more repaint of
+the whole list. Every card also scanned all accounts up to four times (`_caAcct`) and all bookings once
+(`_caRevokedNote`). `tests/applications-speed.spec.ts`.
+- **Never start a read or queue a repaint from a row/card renderer.** Ask once per paint (`_appList` asks
+  `_igForReport` once), and `_igForReport` keeps one pending paint per caller (`S._igPaints`).
+- **Look up by index, never `.find` over S.customers / getQueue() / S.customerTags per row**: `_custById`,
+  `_qGet`, `_qBySession`, `_ctRowsFor` (`_hasTagNow` reads it now), `_caAcctIdx` (email, Apple email, phone digits;
+  an empty email matches nothing), `_caRevoked` (the few invite_revoked bookings).
+- **Applications draw 40 cards at a time** (`AP_PAGE`, `_apCap`, `_apMore`; "Show N more" / "Showing N of M" are the
+  accounts list's strings). Another list, search, filter or sort starts at the top again (`_apSig`). Pills, Select
+  all and the bulk actions still count the whole filtered list, not the cards drawn.
+- **A tick redraws `#ca-tb` only** (`_caSelToggle`), not all of Community.
+- `fmtStamp` and `_bdDate` keep one `Intl.DateTimeFormat` per language (and shape): `toLocaleString` with options
+  builds a new formatter on every call, which a list pays per row.
+
 ## Bookings in colour (2026-10-05)
 
 The owner: "make the session cards in the bookings page in staff website themed the same way they are themed in
