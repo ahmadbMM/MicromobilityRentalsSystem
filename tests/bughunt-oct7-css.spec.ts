@@ -62,6 +62,8 @@ test('the circuit’s navy ticket keeps every line readable: Waitlist, Ridden an
   await expect(page.locator('#tab-myrides .ticket-card')).toHaveCount(3);
   const navy = 'rgb(6, 52, 111)';
   expect(await contrast(page, '#tab-myrides .ticket-card.th-jcc.tk-wl .cu-tr-wl', navy)).toBeGreaterThanOrEqual(4.5);
+  expect(await contrast(page, '#tab-myrides .ticket-card.th-jcc.wl-card .wl-k', navy)).toBeGreaterThanOrEqual(4.5); // the past ride's strip in the stack (2026-10-31)
+  await page.locator('#tab-myrides .wl-card .wl-strip').click(); // out of the stack, whole
   expect(await contrast(page, '#tab-myrides .ticket-card.th-jcc.tk-past .tk-rt-done', navy)).toBeGreaterThanOrEqual(4.5);
   expect(await contrast(page, '#tab-myrides .ticket-card.th-jcc.tk-past .cu-tr-dur', navy)).toBeGreaterThanOrEqual(4.5);
 });

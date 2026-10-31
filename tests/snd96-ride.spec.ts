@@ -492,11 +492,13 @@ test('the booking card is readable on a paper page, in every state a rider can m
     ['on the bike', `S.queue[0].status='active';`],
     ['waitlisted', `S.queue[0].status='waitlist';S.queue[0].waitlistNum=3;`],
     ['paid', `S.queue[0].status='waiting';S.queue[0].paid=true;`],
-    ['finished', `S.queue[0].status='done';`],
+    // a finished ride waits in My Bookings' stack as its strip, and is read whole once taken out (2026-10-31)
+    ['finished, in the stack', `S.queue[0].status='done';S._wlOpen={cid:'c1',sid:''};`],
+    ['finished, taken out', `S.queue[0].status='done';S._wlOpen={cid:'c1',sid:'snd1'};`],
   ] as const) {
     await page.evaluate(`${setup}renderMyRides();`);
     const rows = await page.evaluate(CONTRAST) as Array<{ text: string; ratio: number; need: number }>;
-    expect(rows.length, state).toBeGreaterThan(5);
+    expect(rows.length, state).toBeGreaterThan(state === 'finished, in the stack' ? 1 : 5); // the strip: the ride's name and its date
     const failed = rows.filter((r) => r.ratio < r.need).map((r) => `"${r.text}" ${r.ratio}:1`);
     expect(failed, `${state}: unreadable text on the green field`).toEqual([]);
   }

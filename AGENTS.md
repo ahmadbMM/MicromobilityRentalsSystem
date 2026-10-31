@@ -627,14 +627,30 @@ price, payment, venue and the bike rule until after booking.
   collection time, "from" price and places left under four; the riders step shows the running total from
   the start (`_regPriceBox`), prices on the type pills, how it is paid and that the type is a preference
   (the post-booking Payment Info popup is gone; the National Day popup stays). Tickets name the venue
-  (`_venueName`: one name, the Jeddah Corniche Circuit) and what is owed. My Bookings runs soonest first;
-  on a ride day the landing opens with that ride (`_todayCardHtml`). On a wide screen the wizard's
+  (`_venueName`: one name, the Jeddah Corniche Circuit) and what is owed. My Bookings runs soonest first
+  (two on one day by their start) and keeps past rides as Apple Wallet keeps passes (see "My Bookings as a
+  Wallet" below); on a ride day the landing opens with that ride (`_todayCardHtml`). On a wide screen the wizard's
   later steps sit beside a sticky summary (`_regSideHtml`).
 - **The event tiles are out of the system.** The owner, 2026-09-30: "return the event cards to how they
   looked before this commit, no images". The tiles (`.landing-event-card`) are drawn by the older layers
   as they were: the system's all-element rules pass them by (`:not(:where(.landing-event-card, ...))`),
   the old token values are held on them, their subtitles are the hand-written ones, and they carry no
   photographs.
+
+## My Bookings as a Wallet (2026-10-31)
+
+The owner: "find an organised way to organize and sort the bookings in my bookings page, make the past bookings be
+sorted the same way apple pass sorts bookings and cards".
+- **Rides ahead** (`_myRideGroups`) run soonest first, two on one day by their start time, each a whole ticket. Dates
+  are compared as text (`YYYY-MM-DD HH:MM`), never through `new Date(sessionId)`: an id with a suffix is not a date.
+- **Rides done** are Wallet's stack (`_wlStackHtml`, `#mr-past`): the latest on top, each pass only its top strip
+  (`_wlStrip`: the ticket's mark, the ride's name and the date, what a pass shows in the phone's stack) in its event's
+  colours, its tail (where a theme draws chevrons or stripes) under the next pass. Tapping a strip takes that pass out
+  whole (`renderBookingTicket` with `toggle`: its header is the button that puts it back); one is out at a time, and
+  the choice is kept per account across repaints (`S._wlOpen`). A ride finished today is out by itself. `_wlToggle`
+  redraws the stack only, so today's ticket line does not start over. The section titles carry their counts.
+- The stack's CSS sits after "TICKETS IN THEIR EVENT'S COLOURS", whose cards set their own padding with the same
+  weight. The website lists no past rides (only tonight's), so it has no stack. `tests/my-bookings-stack.spec.ts`.
 
 ## Less like a template, second pass (2026-10-10)
 

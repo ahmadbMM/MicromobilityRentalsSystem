@@ -9512,6 +9512,28 @@ html[dir="rtl"] .ticket-card .tk-logo-ev img{object-position:right center;}
 .ticket-card .tk-logo-ev .tk-logo-runher{height:30px;}
 .ticket-card .tk-logo-ev .tk-logo-jcc{height:40px;}
 
+/* ── Past rides as Apple Wallet keeps passes (the owner, 2026-10-31: "make the past bookings be sorted the same way
+   apple pass sorts bookings and cards"; _wlStackHtml). The latest on top; each pass shows its top strip, its mark and
+   the date, and the rest of it (the tail, where a theme draws its chevrons or stripes) lies under the next pass, so
+   the last one shows whole. A tapped pass (.wl-open, the whole ticket) stands out of the stack with room on both
+   sides. After the event colours: their cards set their own padding with the same weight. */
+body:not(.view-staff) #tab-myrides .wl-stack{--wl-tail:36px;margin-top:14px;max-width:760px;}
+body:not(.view-staff) #tab-myrides .wl-stack .ticket-card.wl-card{padding:0 0 var(--wl-tail);margin-top:0;}
+body:not(.view-staff) #tab-myrides .wl-stack .wl-card+.wl-card{margin-top:calc(-1 * var(--wl-tail));}
+body:not(.view-staff) #tab-myrides .wl-stack .wl-card+.wl-open,
+body:not(.view-staff) #tab-myrides .wl-stack .wl-open+.wl-card{margin-top:16px;}
+body:not(.view-staff) #tab-myrides .wl-open{scroll-margin-top:calc(var(--topbar-h,64px) + 12px);}
+body:not(.view-staff) #tab-myrides .wl-strip{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;margin:0;padding:14px 18px;
+  border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer;}
+body:not(.view-staff) #tab-myrides .wl-strip .tk-logo{flex:none;line-height:0;}
+body:not(.view-staff) #tab-myrides .wl-strip .tk-logo img{height:32px;max-width:140px;}
+body:not(.view-staff) #tab-myrides .wl-hd{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:0;margin-inline-start:auto;text-align:end;}
+body:not(.view-staff) #tab-myrides .wl-k{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:500;opacity:.78;}
+body:not(.view-staff) #tab-myrides .wl-v{font-size:17px;font-weight:700;line-height:1.2;}
+body:not(.view-staff) #tab-myrides .wl-head{cursor:pointer;}
+body:not(.view-staff) #tab-myrides :is(.wl-strip,.wl-head):focus-visible{outline:2px solid currentColor;outline-offset:-4px;}
+body:not(.view-staff) #tab-myrides .mr-n{font-weight:500;color:var(--ink-3);}
+
 /* ══ CUSTOMERS AND COMMUNITY (2026-10-07) ══════════════════════════════════════════════════════════
    Two sections where Community was one: the overviews use the Dashboard's tiles (dash-kpi, dash-row); the
    Tags page lists each tag's holders under it, with one search to find a holder or someone to give it to. */

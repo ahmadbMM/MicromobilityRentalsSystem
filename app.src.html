@@ -14752,8 +14752,10 @@ function renderBookingTicket(entries,opts){
   // The National Day card keeps its own green skin in every state: the night and paper states are the house's.
   const _mod=_rideKind(sess)==='snd96'?'':past?' tk-past':_allWl?' tk-wl':_held?' tk-live'+(_today?' tk-today':''):'';
   const _dw=!past?_dayWord(primary.sessionDate):'';
-  return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}${_tkThemeCls(sess)}">
-    <div class="ticket-header">
+  // A past ride taken out of My Bookings' stack (opts.toggle, its session): its top puts it back (_wlToggle).
+  const _tg=opts.toggle;
+  return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_mod}${_tkThemeCls(sess)}${_tg?' wl-open':''}"${_tg?` id="wl-${esc(_tg)}"`:''}>
+    <div class="ticket-header${_tg?' wl-head':''}"${_tg?` role="button" tabindex="0" aria-expanded="true" data-on-click="${_on("_wlToggle",_tg)}" data-on-keydown="${_on("_keyClick",_EV,_EL)}"`:''}>
       <div class="ticket-num-block">
         ${_tkLogo(sess)}
         ${_noNum?'':_allWl
@@ -15882,38 +15884,81 @@ function _myrStats(all){
     <dl class="myr-f">${F.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
   </div>`;
 }
-function renderMyRides(){
-  const cust=S.loggedIn;
-  if(!cust){document.getElementById('tab-myrides').innerHTML='';return;}
-  const allEntries=getQueue().filter(e=>e.customerId===cust.id);
-  
+// The signed-in rider's bookings, one group per session: the rides ahead and the rides done.
+// Rides ahead run soonest first, two on one day by their start, so tonight's ticket is the first card
+// and the first code on the page is one the scanner will take (it refuses any ride not for today).
+// Rides done run the other way, the latest first, as Apple Wallet keeps passes (_wlStackHtml).
+function _myRideGroups(cust){
   const map={};
-  allEntries.forEach(e=>{const k=e.sessionId+(_vlOf(e)?'|'+_vlCat(e):'');(map[k]=map[k]||[]).push(e);}); // Victory Lap: Singles and Doubles are two tickets
-  if(allEntries.some(e=>_vlOf(e)&&_vlIsDbl(_vlOf(e).race)&&_bookingAhead(e)))_vlTeamsLoad(); // the partners' names
-  const currentGroups=[],pastGroups=[];
+  getQueue().forEach(e=>{if(e.customerId===cust.id){const k=_wlKey(e);(map[k]=map[k]||[]).push(e);}}); // Victory Lap: Singles and Doubles are two tickets
+  const current=[],past=[];
   Object.values(map).forEach(g=>{
     const upcoming=g.filter(_bookingAhead);
-    if(upcoming.length){currentGroups.push(upcoming);}
+    if(upcoming.length){current.push(upcoming);}
     else{
       // A night that is over and was never ridden (still waiting, or waitlisted to the end)
       // is neither: it is not ahead, and it is not a ride to rate or book again.
       const saved=g.filter(_rideCompleted);
-      if(saved.length)pastGroups.push(saved);
+      if(saved.length)past.push(saved);
     }
   });
-  // Upcoming rides run soonest first, so tonight's ticket is the first card and the first code on
-  // the page is one the scanner will take (it refuses any ride not for today). Past rides run the
-  // other way, the latest first.
-  const byDateDesc=(a,b)=>new Date(b[0].sessionDate||b[0].sessionId)-new Date(a[0].sessionDate||a[0].sessionId);
-  currentGroups.sort((a,b)=>byDateDesc(b,a));pastGroups.sort(byDateDesc);
+  // Compared as text ("2026-10-31 21:00"): a session id with a suffix ('2026-11-06-ah') is not a date
+  // to new Date(), and sorted as NaN.
+  const at=g=>{const e=g[0],s=_sessGet(e.sessionId),m=String((s&&(parseSlots(s.bike_slots)||{})._time)||'').match(/(\d{1,2}):(\d{2})/);
+    return String(e.sessionDate||e.sessionId||'').slice(0,10)+' '+(m?m[1].padStart(2,'0')+':'+m[2]:'00:00');};
+  const asc=(a,b)=>{const x=at(a),y=at(b);return x<y?-1:x>y?1:0;};
+  current.sort(asc);past.sort((a,b)=>asc(b,a));
+  return{current,past};
+}
+// Past rides as Apple Wallet keeps passes (the owner, 2026-10-31: "make the past bookings be sorted the
+// same way apple pass sorts bookings and cards"): the latest on top, each pass showing only its top strip
+// - its mark and the date, what a pass in the phone's stack shows (its headerFields) - with the rest of it
+// under the next one. A tapped pass comes out whole with its Rate and Book again, one at a time; tapping
+// its top puts it back. A ride finished today is out by itself: its stages and its time on the bike.
+function _wlKey(e){return e.sessionId+(_vlOf(e)?'|'+_vlCat(e):'');}
+function _wlOpenFor(cust,groups){
+  const o=S._wlOpen;
+  if(o&&o.cid===cust.id)return o.sid;
+  const td=todayStr(),g=groups.find(x=>String(x[0].sessionDate||x[0].sessionId||'').slice(0,10)===td);
+  return g?_wlKey(g[0]):'';
+}
+function _wlStrip(g){
+  const p=g[0],sid=p.sessionId,sess=_sessDisp(sid),k=_wlKey(p);
+  return`<div class="ticket-card ${_evClass(sess)} cu-mt0${_rideKind(sess)==='snd96'?'':' tk-past'}${_tkThemeCls(sess)} wl-card" id="wl-${esc(k)}">
+    <button type="button" class="wl-strip" aria-expanded="false" data-on-click="${_on("_wlToggle",k)}">${_tkLogo(sess)}<span class="wl-hd"><span class="wl-k">${esc(sess?_evName(sess):t('landCommTitle'))}</span><bdi class="wl-v">${esc(shortDate(p.sessionDate||sid))}</bdi></span></button>
+  </div>`;
+}
+function _wlStackHtml(groups,cust){
+  const open=_wlOpenFor(cust,groups);
+  return`<div class="wl-stack" id="mr-past">${groups.map(g=>_wlKey(g[0])===open?renderBookingTicket(g,{bookAgain:true,toggle:open}):_wlStrip(g)).join('')}</div>`;
+}
+// Only the stack is drawn again: a repaint of the page would start today's ticket line over.
+function _wlToggle(k){
+  const cust=S.loggedIn,host=document.getElementById('mr-past');
+  if(!cust||!host)return;
+  const was=document.getElementById('wl-'+k);
+  S._wlOpen={cid:cust.id,sid:(was&&was.classList.contains('wl-open'))?'':k};
+  host.outerHTML=_wlStackHtml(_myRideGroups(cust).past,cust);
+  const el=document.getElementById('wl-'+k);if(!el)return;
+  const f=el.querySelector('.wl-strip,.wl-head');
+  if(f)try{f.focus({preventScroll:true});}catch(e){}
+  // A pass that came out above the screen, or low on it, is brought up to be read.
+  if(S._wlOpen.sid){const r=el.getBoundingClientRect(),bar=document.getElementById('topbar');if(r.top<(bar?bar.offsetHeight:0)||r.top>window.innerHeight*.6)el.scrollIntoView({block:'start',behavior:_sb()});}
+}
+function renderMyRides(){
+  const cust=S.loggedIn;
+  if(!cust){document.getElementById('tab-myrides').innerHTML='';return;}
+  const allEntries=getQueue().filter(e=>e.customerId===cust.id);
+  if(allEntries.some(e=>_vlOf(e)&&_vlIsDbl(_vlOf(e).race)&&_bookingAhead(e)))_vlTeamsLoad(); // the partners' names
+  const {current:currentGroups,past:pastGroups}=_myRideGroups(cust);
   // The page's own words say booking, not ride, once the account holds a bike-free session (2026-10-18).
   const _anyNc=allEntries.some(_ncEntry);
   const currentCards=currentGroups.length
     ?currentGroups.map(g=>renderBookingTicket(g,{actions:true})).join('')
     :_emptyState(t('noCurrentRides'),{cls:'cu-span-all'});
   const pastCards=pastGroups.length
-    ?pastGroups.map(g=>renderBookingTicket(g,{bookAgain:true})).join('')
-    :_emptyState(t('noPastRides'),{cls:'cu-span-all'});
+    ?_wlStackHtml(pastGroups,cust)
+    :`<div class="myrides-grid">${_emptyState(t('noPastRides'),{cls:'cu-span-all'})}</div>`;
   // No rides at all: one quiet line and the next ride that can be booked, in place of two empty
   // sections (and of the big grey 0 it was until 2026-10-10).
   if(!currentGroups.length&&!pastGroups.length){
@@ -15936,10 +15981,10 @@ function renderMyRides(){
   document.getElementById('tab-myrides').innerHTML=`
     <h1 class="page-title">${t('myRidesTitle')}</h1>
     <div class="page-sub">${t(_anyNc?'myRidesSubAny':'myRidesSub')}</div>
-    <div class="analytics-section-title cu-mt24">${t('myCurrentRides')}</div>
+    <div class="analytics-section-title cu-mt24">${t('myCurrentRides')}${currentGroups.length?`<span class="mr-n">${currentGroups.length}</span>`:''}</div>
     <div class="myrides-grid">${currentCards}</div>
-    <div class="analytics-section-title cu-mt30">${t(_anyNc?'myPastAny':'myPastRides')}</div>
-    <div class="myrides-grid">${pastCards}</div>`;
+    <div class="analytics-section-title cu-mt30">${t(_anyNc?'myPastAny':'myPastRides')}${pastGroups.length?`<span class="mr-n">${pastGroups.length}</span>`:''}</div>
+    ${pastCards}`;
   try{_forceRatingPrompt();}catch(e){} // force the rating the moment a ride is marked completed (realtime fires this)
 }
 

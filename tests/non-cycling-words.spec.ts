@@ -55,6 +55,7 @@ test.describe('@customer:rating a bike-free session is rated as a session', () =
     await bootCustomer(page, [swim(d(-3))], [row('q1', d(-3), d(-3))], false);
     await page.evaluate(`goCustomer('myrides')`);
     const tab = page.locator('#tab-myrides');
+    await tab.locator('#mr-past .wl-strip').click(); // past tickets wait in the stack until tapped (2026-10-31)
     await expect(tab.locator('button', { hasText: 'Rate your session' })).toBeVisible();
     await expect(tab.locator('button', { hasText: 'Rate your ride' })).toHaveCount(0);
     await expect(tab.locator('.page-sub').first()).toHaveText('Your tickets for what’s ahead, and what you’ve done.');
