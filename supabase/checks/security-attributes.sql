@@ -298,7 +298,10 @@ with expected(fname, want_definer, note) as (values
   ('_default_pay_insert_guard', true,  'trigger: refuses a desk account''s insert of an account already on the house'),
   ('_house_insert_guard',       true,  'trigger: refuses a desk account''s insert of a ride on the house over the limit; calls _promo_valid and _fare_now, revoked'),
   ('_staff_reset_signout',      true,  'trigger: deletes the account''s auth.sessions when staff_reset_password sets must_change_pwd'),
-  ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing')
+  ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing'),
+  -- A question for one rider (20261101030000)
+  ('customer_questions',        true,  'reads the caller''s own open rider_questions, a staff-only table; token-checked'),
+  ('customer_question_answer',  true,  'writes the answer on the caller''s own open question; token-checked')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

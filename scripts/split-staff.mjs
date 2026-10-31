@@ -1381,7 +1381,10 @@ export function formatFieldNames(r, limit = 20) {
 // yet with the desk's waiver sheet, the places warning; Analytics' three targets, held sessions, billed to companies and
 // the Product filter): staff 678.7, core 305.9 here, about 680.8 / 308.0 on the runner; +7 / +5 restores the margin
 // (customer 257.7 here, inside its own).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 261, staff: 683, core: 310 };
+// Customer 261 -> 265 (2026-11-01, a question staff put on one rider's account: its pop-up with the answer box, Send and
+// Later, its place in the forced pop-ups' chain and seven strings, all on a rider's page): main read 260.6 on the runner
+// before it, customer 261.1 here with it, about 262.5 on the runner; +4 restores the margin.
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 265, staff: 683, core: 310 };
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */
