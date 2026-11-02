@@ -6001,5 +6001,10 @@
   "ttLogSaved": "Título guardado",
   "ttLogGiven": "Título dado",
   "ttLogTaken": "Título retirado",
-  "ttLogDeleted": "Título eliminado"
+  "ttLogDeleted": "Título eliminado",
+  "invBtn": "Invitar a un amigo",
+  "invHint": "Envía a tu amigo un mensaje pidiéndole que rellene el formulario. Nuestro equipo verá que lo invitaste.",
+  "invMsg": "¡Hola! Salgo a rodar con la comunidad MicroMobility en Yeda y me encantaría que te unieras. Rellena este formulario para solicitarlo: {0}",
+  "invErr": "No se pudo crear tu invitación. Inténtalo de nuevo.",
+  "caInvitedBy": "Invitado por"
 }

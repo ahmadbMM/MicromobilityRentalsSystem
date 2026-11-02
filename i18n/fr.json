@@ -6001,5 +6001,10 @@
   "ttLogSaved": "Titre enregistré",
   "ttLogGiven": "Titre donné",
   "ttLogTaken": "Titre repris",
-  "ttLogDeleted": "Titre supprimé"
+  "ttLogDeleted": "Titre supprimé",
+  "invBtn": "Inviter un ami",
+  "invHint": "Envoie à votre ami un message lui demandant de remplir le formulaire. Notre équipe verra que vous l’avez invité.",
+  "invMsg": "Salut ! Je roule avec la communauté MicroMobility à Djeddah et j’aimerais que tu nous rejoignes. Remplis ce formulaire pour postuler : {0}",
+  "invErr": "Impossible de créer votre invitation. Veuillez réessayer.",
+  "caInvitedBy": "Invité par"
 }

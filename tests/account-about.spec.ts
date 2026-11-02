@@ -102,6 +102,26 @@ test('before the database has customer_about the page keeps its old form', async
   await expect.poll(() => calls.length).toBe(1);
 });
 
+test('an application from a member\'s invitation says who invited them; others do not', async ({ page }) => {
+  const app = {
+    created_at: '2026-09-29T08:00:00Z', updated_at: '2026-09-29T08:00:00Z', submissions: 1, height: 178, birth_date: '1994-03-12',
+    gender: 'male', nationality: 'Egypt', bike_type: 'Road', lang: 'en', ride_news: true, decided_at: null, decided_by: null,
+    customer_id: null, existing_account: null, account_oauth: null, profession: 'Architect', workplace: 'Saudi Aramco',
+    id: 'a1', status: 'pending', name: 'Karim Mansour', email: 'karim.mansour@gmail.com', phone: '+966552468013', instagram: '', linkedin: '',
+    invited_by: 'c9', invited_by_name: 'Lina Haddad',
+  };
+  await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [], customers: [{ id: 'c9', name: 'Lina Haddad', email: 'o@example.com', created_at: '2026-01-01T00:00:00Z' }], tags: [], customer_tags: [],
+    community_applications: [app, { ...app, id: 'a2', email: 'x@example.com', name: 'Sami Noor', invited_by: null, invited_by_name: null }] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
+  await expect(page.locator('.ca-row[data-app-id="a1"]')).toContainText('Invited by');
+  await expect(page.locator('.ca-row[data-app-id="a1"]')).toContainText('Lina Haddad');
+  await expect(page.locator('.ca-row[data-app-id="a2"]')).not.toContainText('Invited by');
+});
+
 test('the application cards show the workplace', async ({ page }) => {
   const app = {
     created_at: '2026-09-29T08:00:00Z', updated_at: '2026-09-29T08:00:00Z', submissions: 1, height: 178, birth_date: '1994-03-12',

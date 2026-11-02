@@ -95,11 +95,41 @@ test.describe('@customer:account member titles', () => {
   });
 });
 
+test.describe('@customer:account friend invite', () => {
+  test('the invite shares a message asking the friend to fill in the form, with the member\'s link', async ({ page }) => {
+    await rider(page, { 'rpc:member_invite_code': { ok: true, code: 'abcdef0123456789' } });
+    await page.addInitScript(() => { (navigator as unknown as { share: unknown }).share = (d: unknown) => { (window as unknown as { _shared: unknown })._shared = d; return Promise.resolve(); }; });
+    await page.reload();
+    await waitForSb(page);
+    await account(page);
+    await page.waitForFunction('S._invCode&&S._invCode.code');
+    await page.locator('#tt-mine .tt-invite').click();
+    const text = await page.evaluate('window._shared.text') as string;
+    expect(text).toContain('fill in this form');
+    expect(text).toContain('https://micromobility.sa/community/registration?inv=abcdef0123456789&lang=en');
+  });
+
+  test('without a share sheet it opens WhatsApp; a refused code says so and opens nothing', async ({ page }) => {
+    await rider(page, { 'rpc:member_invite_code': { ok: true, code: 'abcdef0123456789' } });
+    await page.addInitScript(() => { Object.defineProperty(navigator, 'share', { value: undefined }); window.open = ((u: string) => { (window as unknown as { _opened: string })._opened = u; return null; }) as typeof window.open; });
+    await page.reload();
+    await waitForSb(page);
+    await account(page);
+    await page.waitForFunction('S._invCode&&S._invCode.code');
+    await page.locator('#tt-mine .tt-invite').click();
+    expect(await page.evaluate('window._opened')).toContain('https://wa.me/?text=');
+    await page.evaluate(`S._invCode=null;window._opened=null;sb.rpc=()=>Promise.resolve({data:{ok:false,error:'member'}})`);
+    await page.locator('#tt-mine .tt-invite').click();
+    await expect(page.locator('#toast-container')).toContainText('could not make your invitation');
+    expect(await page.evaluate('window._opened')).toBeNull();
+  });
+});
+
 test.describe('@customer:members members list', () => {
   test('the list opens from the account, searches by name, and a card shows title, rides and badges', async ({ page }) => {
     await rider(page);
     await account(page);
-    await page.locator('#tt-mine .tt-open').click();
+    await page.locator('#tt-mine .tt-open:not(.tt-invite)').click();
     await expect(page).toHaveURL(/\/members/);
     await expect(page.locator('#tab-members .mb-row')).toHaveCount(3);
     await expect(page.locator('#tab-members .mb-row').first()).toContainText('You');

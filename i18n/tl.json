@@ -6001,5 +6001,10 @@
   "ttLogSaved": "Na-save ang titulo",
   "ttLogGiven": "Naibigay ang titulo",
   "ttLogTaken": "Binawi ang titulo",
-  "ttLogDeleted": "Nabura ang titulo"
+  "ttLogDeleted": "Nabura ang titulo",
+  "invBtn": "Mag-imbita ng kaibigan",
+  "invHint": "Magpapadala ng mensahe sa kaibigan mo na punan ang application form. Makikita ng aming staff na inimbita mo sila.",
+  "invMsg": "Hi! Nagra-ride ako kasama ang MicroMobility community sa Jeddah at gusto kong sumali ka. Punan ang form na ito para mag-apply: {0}",
+  "invErr": "Hindi magawa ang imbitasyon mo. Pakisubukang muli.",
+  "caInvitedBy": "Inimbita ni"
 }

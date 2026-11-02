@@ -6001,5 +6001,10 @@
   "ttLogSaved": "Título guardado",
   "ttLogGiven": "Título dado",
   "ttLogTaken": "Título retirado",
-  "ttLogDeleted": "Título eliminado"
+  "ttLogDeleted": "Título eliminado",
+  "invBtn": "Convidar um amigo",
+  "invHint": "Envia ao seu amigo uma mensagem a pedir que preencha o formulário. A nossa equipa verá que o convidou.",
+  "invMsg": "Olá! Ando com a comunidade MicroMobility em Jeddah e adorava que te juntasses a nós. Preenche este formulário para te candidatares: {0}",
+  "invErr": "Não foi possível criar o convite. Tente novamente.",
+  "caInvitedBy": "Convidado por"
 }
