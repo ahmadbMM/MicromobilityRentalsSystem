@@ -67,7 +67,7 @@ test('Google or Apple with no account: an initial from the provider has to be wr
   expect(calls).toHaveLength(0);
 });
 
-test('My Account: a short name already on file saves as it is; a new one is refused', async ({ page }) => {
+test('Account: a short name already on file saves as it is; a new one is refused', async ({ page }) => {
   const saves: Record<string, unknown>[] = [];
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Sara M Khan', email: 'spec@example.com', phone: '0500000001' }] });

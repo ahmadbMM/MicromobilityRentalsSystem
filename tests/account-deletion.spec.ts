@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
-// A rider asks for their account to be deleted from My Account (Personal Data Protection Law,
+// A rider asks for their account to be deleted from Account (Personal Data Protection Law,
 // Art. 4). It is a request: staff see it on the Accounts list and answer within 30 days, by
 // deleting the account or clearing the request. The rider can withdraw it until then.
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
@@ -19,7 +19,7 @@ async function withRequestServer(page: Page) {
   return calls;
 }
 
-test('a rider asks for deletion from My Account, after confirming, and can withdraw it', async ({ page }) => {
+test('a rider asks for deletion from Account, after confirming, and can withdraw it', async ({ page }) => {
   await stubSupabase(page, {});
   const calls = await withRequestServer(page);
   await loginCustomer(page);

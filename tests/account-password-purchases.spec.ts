@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
-// The owner, 2026-10-03: a rider changes their password whenever they like from My Account
+// The owner, 2026-10-03: a rider changes their password whenever they like from Account
 // (customer_change_password), and sees their own desk purchases there (customer_purchases) -
 // customers cannot read cashier_sales, so the block used to show on a staff device only.
 const head = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };

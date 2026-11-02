@@ -149,7 +149,7 @@ test('Add rider onto a Saturday ride asks the group and books it', async ({ page
   expect(rows[0].ride_group).toBe('beg');
 });
 
-// The My Bookings card's Meeting point button opened the bookings page again: its href was written
+// The Bookings card's Meeting point button opened the bookings page again: its href was written
 // href=""${link}", an empty address with the link left outside it (2026-10-02).
 test('the booking card’s Meeting point opens the ride’s map link', async ({ page }) => {
   const MEET = 'https://maps.app.goo.gl/spec-meet';

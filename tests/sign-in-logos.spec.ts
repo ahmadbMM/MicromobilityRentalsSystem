@@ -80,7 +80,7 @@ test('a database without staff_sign_in_methods shows no marks and asks once', as
   expect(calls).toHaveLength(1);
 });
 
-test('a rider sees the mark beside their own email on My Account', async ({ page }) => {
+test('a rider sees the mark beside their own email on Account', async ({ page }) => {
   await stubSupabase(page, {
     sessions: [], queue_entries: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@gmail.com', phone: '0500000001', gender: 'male', nationality: null, socials: null }],
@@ -100,7 +100,7 @@ test('a rider sees the mark beside their own email on My Account', async ({ page
   await expect(page.locator('#tab-account .si-apple')).toHaveAttribute('aria-label', 'تسجيل الدخول عبر Apple');
 });
 
-test('a password account has no mark on My Account', async ({ page }) => {
+test('a password account has no mark on Account', async ({ page }) => {
   await stubSupabase(page, {
     sessions: [], queue_entries: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.org', phone: '0500000001', gender: 'male', nationality: null, socials: null }],

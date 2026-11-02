@@ -169,7 +169,7 @@ test('sign-up: the server refusing the name reads as the same message', async ({
   await expect(page.locator('#auth-err')).toContainText('Names can only contain letters, spaces and periods.');
 });
 
-test('My Account: an existing name is not re-judged, a new one is', async ({ page }) => {
+test('Account: an existing name is not re-judged, a new one is', async ({ page }) => {
   const saves: Record<string, unknown>[] = [];
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Malik 2 Anas', email: 'spec@example.com', phone: '0500000001' }] });

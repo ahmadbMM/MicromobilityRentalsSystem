@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
-// My Rides, My Account and the session editor: the booking ticket, the account save, and what
+// My Rides, Account and the session editor: the booking ticket, the account save, and what
 // a session edit (and its Undo) writes.
 
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
@@ -206,8 +206,8 @@ test('with another live booking on the account, the add-ons go back after the ca
   await expect.poll(() => calls.join(' ')).toBe('cancel stock:2');
 });
 
-// ── My Account saves over the account as it is now ───────────────────────────
-test('My Account keeps staff corrections and the nationality on file for boxes the rider left alone', async ({ page }) => {
+// ── Account saves over the account as it is now ───────────────────────────
+test('Account keeps staff corrections and the nationality on file for boxes the rider left alone', async ({ page }) => {
   const saves: Record<string, unknown>[] = [];
   let profileCalls = 0;
   await customer(page, { sessions: [], queue_entries: [] }, { name: 'Old Name', height: 170, country: 'Saudi Arabia', city: 'Jeddah' });
@@ -226,7 +226,7 @@ test('My Account keeps staff corrections and the nationality on file for boxes t
   expect(await page.evaluate('[S.loggedIn.name,S.loggedIn.nationality]')).toEqual(['Fixed By Staff', 'Egypt']);
 });
 
-test('My Account refuses to save when it cannot read the account first', async ({ page }) => {
+test('Account refuses to save when it cannot read the account first', async ({ page }) => {
   const saves: string[] = [];
   await customer(page, { sessions: [], queue_entries: [], 'rpc:customer_profile': { __rpcError: { status: 500, code: 'XX000', message: 'down' } } });
   page.on('request', (r) => { if (/rpc\/customer_update_profile/.test(r.url())) saves.push(r.url()); });

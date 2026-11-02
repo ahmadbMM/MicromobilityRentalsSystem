@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
-// A rider staff add must reach that rider's My Bookings, which shows only rows carrying the
+// A rider staff add must reach that rider's Bookings, which shows only rows carrying the
 // customer's id. The link used to be an exact name match and nothing else, so "Ahmed" typed
 // at the desk never met the account "Ahmed Saleh" and the booking stayed invisible to him.
 // Now the phone decides first, on its last nine digits, whatever the prefix.

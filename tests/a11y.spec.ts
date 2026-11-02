@@ -159,7 +159,7 @@ function staffFixtures() {
 test.describe('@customer:a11y every field on the rider pages has a name', () => {
   const named = (page: Page, sel: string, name: string | RegExp) => expect(page.locator(sel), sel).toHaveAccessibleName(name);
 
-  test('My Account names each field by its label', async ({ page }) => {
+  test('Account names each field by its label', async ({ page }) => {
     await loginCustomer(page, { id: 'c1', name: 'Test Rider Name', height: 170, type_preference: 'Road' });
     await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
     await page.goto('/');

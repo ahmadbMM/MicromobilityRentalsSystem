@@ -15,7 +15,7 @@ const FUTURE = "A birth date can't be in the future.";
 
 async function account(page: Page, birth_date: string | null = null) {
   const saves: Record<string, unknown>[] = [];
-  // The account as the server holds it: My Account reads it before painting and before saving.
+  // The account as the server holds it: Account reads it before painting and before saving.
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Lina Haddad', email: 'spec@example.com', phone: '0500000001', birth_date }] });
   await page.route(/\/rest\/v1\/rpc\/customer_update_profile/, async r => {
@@ -82,7 +82,7 @@ test('moving to the last year clears a month that year has not reached', async (
   await expect(page.locator('#acc-birth')).toHaveValue('');
 });
 
-test('My Account refuses a rider of four or a future date, and saves one of five', async ({ page }) => {
+test('Account refuses a rider of four or a future date, and saves one of five', async ({ page }) => {
   const saves = await account(page);
   await page.evaluate(`document.getElementById('acc-birth').value='${FOUR}';saveAccount()`);
   await expect(page.locator('#acc-err')).toHaveText(YOUNG);

@@ -144,9 +144,9 @@ test.describe('@staff:community WhatsApp number', () => {
   });
 });
 
-// The rest (the owner, 2026-10-07: "add them all"; 20261007223000): My Account changes it, Ask for changes on an
+// The rest (the owner, 2026-10-07: "add them all"; 20261007223000): Account changes it, Ask for changes on an
 // application offers it, and the learn-to-ride sign-up's card shows it.
-test.describe('@customer:account WhatsApp on My Account', () => {
+test.describe('@customer:account WhatsApp on Account', () => {
   async function account(page: Page, held: Record<string, unknown>) {
     await stubSupabase(page, {
       sessions, queue_entries: [], 'rpc:my_bookings': [], 'rpc:customer_fix_fields': [],

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// My Bookings in the order Apple Wallet keeps passes (the owner, 2026-10-31: "find an organised way to organize and
+// Bookings in the order Apple Wallet keeps passes (the owner, 2026-10-31: "find an organised way to organize and
 // sort the bookings in my bookings page, make the past bookings be sorted the same way apple pass sorts bookings and
 // cards"): the rides ahead soonest first, two on one day by their start; the rides done as Wallet's stack, the latest
 // on top, each showing its top strip (mark and date) until it is tapped, one out at a time.

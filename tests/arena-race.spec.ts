@@ -116,7 +116,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(page.locator('#tab-register .ticket-card.th-arena .tk-logo-arena')).toHaveCount(1);
     await expect(head).toHaveCount(1);
     expect(await skin()).toBe(true);
-    // My Bookings, the landing page and another event's list are paper again
+    // Bookings, the landing page and another event's list are paper again
     await page.evaluate(`setCustTab('myrides')`);
     expect(await skin()).toBe(false);
     await page.evaluate('goLanding()');
@@ -187,7 +187,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(booked.locator('.ticket-qr-wrap, canvas')).toHaveCount(0);
   });
 
-  test('the number and the QR code wait for the payment everywhere: My Bookings and the day’s card; a paid place shows them', async ({ page }) => {
+  test('the number and the QR code wait for the payment everywhere: Bookings and the day’s card; a paid place shows them', async ({ page }) => {
     const mine = (x: Record<string, unknown> = {}) => row('m7', { race: 'wd', div: 'el', team: 'AH-AB23', first: 'Sara', last: 'Haddad', email: 'sara@example.com', phone: '+966500000001' },
       { customer_id: 'c1', name: 'Sara Nabil Haddad', ...x });
     await custBoot(page, { queue_entries: [mine()], 'rpc:my_bookings': [mine()], 'rpc:customer_vl_teams': [] });

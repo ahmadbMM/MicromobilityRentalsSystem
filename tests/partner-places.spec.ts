@@ -37,7 +37,7 @@ test.describe('@customer:partner partner places', () => {
     expect(await page.evaluate(`_walletOk(_sessGet('${SAT}'),[{...getQueue().find(e=>e.id==='bk1'),partner:null}])`)).toBe(false);
   });
 
-  test('?signin= signs the rider in and opens My Bookings; the code leaves the address', async ({ page }) => {
+  test('?signin= signs the rider in and opens Bookings; the code leaves the address', async ({ page }) => {
     const code = 'a'.repeat(48);
     await stubSupabase(page, {
       sessions: [satur()], bikes: [], queue_entries: [row({ partner: 'defe', approval: 'approved' })],

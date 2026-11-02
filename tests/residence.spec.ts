@@ -22,7 +22,7 @@ test('every country but Israel has a city file, and each file is a list of names
   expect(sa.every(r => typeof r[0] === 'string' && r.length <= 2)).toBe(true);
 });
 
-test('My Account: every country, and the city waits for one', async ({ page }) => {
+test('Account: every country, and the city waits for one', async ({ page }) => {
   await stubSupabase(page, {
     sessions, queue_entries: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: null, gender: 'male' }],

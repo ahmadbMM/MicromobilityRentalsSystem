@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
 // Every ticket in its event's colours (the owner, 2026-10-06: "make all booking cards themed the same way the
-// event card is themed", the whole card): My Bookings' tickets wear their event-picker card's look and mark in
+// event card is themed", the whole card): Bookings' tickets wear their event-picker card's look and mark in
 // every state - the circuit's navy and chevrons, MicroMobility Experiences' white and pattern, Run for Her's
 // blush, events' violet - and National Day keeps the green skin it had.
 

@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
 // A second emergency contact, always optional (the owner, 2026-10-07: "add a second optional emergency contact field,
-// show it in the customer My Account, and allow the staff to flag it"). My Account offers it under the first, in the
+// show it in the customer Account, and allow the staff to flag it"). Account offers it under the first, in the
 // same card, once the database has it (customer_emergency answers the emergency2_* columns, 20261007150000) and there
 // is a first to back up; it is saved, changed and removed (saved blank) through customer_set_emergency2. On the
 // correction page a flagged second contact is answered like the first, "I don't have one" clears it, and the two
@@ -22,7 +22,7 @@ function rpcBodies(page: Page, fn: string) {
 }
 
 test.describe('@customer:account second emergency contact', () => {
-  test.describe('on My Account', () => {
+  test.describe('on Account', () => {
     async function account(page: Page, em: Record<string, unknown>[], fx: Record<string, unknown> = {}) {
       await stubSupabase(page, { sessions, queue_entries: [], 'rpc:my_bookings': [], 'rpc:customer_emergency': em, 'rpc:customer_set_emergency2': true, ...fx });
       await loginCustomer(page);

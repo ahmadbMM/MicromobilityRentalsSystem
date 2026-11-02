@@ -2,11 +2,11 @@ import { test, expect } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/supabase';
 
 // Nationality is an optional profile field. It is never asked at signup; the customer sets
-// it on My Account, staff set it on the account form, and the report lists it.
+// it on Account, staff set it on the account form, and the report lists it.
 
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 
-test('My Account fills nationality in from customer_profile and saves it through the RPC', async ({ page }) => {
+test('Account fills nationality in from customer_profile and saves it through the RPC', async ({ page }) => {
   await stubSupabase(page, {
     sessions, queue_entries: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: 'Egypt', gender: 'male' }],

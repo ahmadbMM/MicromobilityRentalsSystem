@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Ride reminders (2026-10-09, R7): a Reminders sheet on a ride's Bookings, one WhatsApp per rider in the
-// rider's language with a "Can't come?" link to My Bookings, the run of Next / Skip like the segment
+// rider's language with a "Can't come?" link to Bookings, the run of Next / Skip like the segment
 // messages, and the booking marked (queue_entries.reminded_at / reminded_kind, 20261009225000).
 const sessions = [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1, bike_slots: JSON.stringify({ _time: '19:00 - 21:00' }) }];
 const qe = (id: string, n: number, extra: Record<string, unknown> = {}) => ({

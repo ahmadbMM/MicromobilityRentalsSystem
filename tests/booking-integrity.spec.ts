@@ -234,7 +234,7 @@ test.describe('refusals from the server', () => {
   });
 });
 
-test('an already-booked rider on a bike is pointed to My Bookings, not round the loop', async ({ page }) => {
+test('an already-booked rider on a bike is pointed to Bookings, not round the loop', async ({ page }) => {
   // The banner offered "Modify", which loads no form for a booking already on a bike, so it
   // led back to the same banner for ever.
   await boot(page, {

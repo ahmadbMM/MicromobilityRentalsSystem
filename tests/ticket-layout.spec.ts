@@ -69,7 +69,7 @@ for (const lang of ['en', 'ar']) {
   });
 }
 
-// The owner, 2026-09-30: the logo lay over "Queue number" on older bookings. On My Bookings it heads
+// The owner, 2026-09-30: the logo lay over "Queue number" on older bookings. On Bookings it heads
 // the number's column in the flow; on the card after booking the top line starts below it. Past,
 // waitlist and live cards, in English and Arabic: the logo meets no text.
 for (const lang of ['en', 'ar']) {

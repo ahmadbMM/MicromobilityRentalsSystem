@@ -29,7 +29,7 @@ test('the account editor shows and saves profession, company and how they heard,
   expect(sent[0]).toMatchObject({ profession: 'Architect', workplace: 'NEOM', heard_from: 'friend', type_preference: 'Own' });
 });
 
-test('My Account offers Bike owner among the bike types, and never Any', async ({ page }) => {
+test('Account offers Bike owner among the bike types, and never Any', async ({ page }) => {
   await loginCustomer(page, { id: 'c1', name: 'Huda Saleh', height: 165, type_preference: 'Road' });
   await stubSupabase(page, { sessions: [], bikes: [], queue_entries: [] });
   await page.goto('/');

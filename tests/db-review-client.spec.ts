@@ -8,7 +8,7 @@ import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 //   · inventory is read by named columns (cost is staff-only), and staff get the costs from
 //     staff_inventory_costs();
 //   · photos upload with upsert:false - the bucket grants INSERT only;
-//   · My Account names a phone another account holds (customer_update_profile's phone_taken).
+//   · Account names a phone another account holds (customer_update_profile's phone_taken).
 
 const sessions = [{
   id: 's0', day: 'Sunday', session_date: '2099-02-08', capacity: 9,
@@ -112,7 +112,7 @@ test('a photo is uploaded without upsert (the bucket grants INSERT only)', async
   expect(String(out)).toContain('/photos/p/');
 });
 
-test('My Account says the phone is taken when the server refuses it', async ({ page }) => {
+test('Account says the phone is taken when the server refuses it', async ({ page }) => {
   // Save reads the account fresh first (it writes over the account as it is now), so the
   // profile is answered; the refusal comes from the write itself.
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [],

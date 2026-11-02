@@ -6,7 +6,7 @@ import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/s
 
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 
-test('My Account shows saved handles, cleans pasted URLs, and saves through the RPC', async ({ page }) => {
+test('Account shows saved handles, cleans pasted URLs, and saves through the RPC', async ({ page }) => {
   await stubSupabase(page, {
     sessions, queue_entries: [],
     'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: null, socials: { instagram: 'malik.r' } }],

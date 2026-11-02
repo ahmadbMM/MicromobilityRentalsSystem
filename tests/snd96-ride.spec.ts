@@ -438,7 +438,7 @@ test('the circuit still asks which night', async ({ page }) => {
 
 // ── The green field is a dark surface wherever it is met ─────────────────────
 // The card paints itself teal on any page, but its ink came from the page. Met on paper -
-// My Bookings, the confirmation, a staff screen - every var() inside it still resolved to
+// Bookings, the confirmation, a staff screen - every var() inside it still resolved to
 // the palette meant for white paper: the type chip wrote near-black on the field at 1.08:1,
 // the RIDERS/ADD-ONS/TOTAL labels and the date block sat at 2.15, "Pending" at 2.77, the
 // total in house green at 2.98, and the status badges, which are literals on both skins,
@@ -492,7 +492,7 @@ test('the booking card is readable on a paper page, in every state a rider can m
     ['on the bike', `S.queue[0].status='active';`],
     ['waitlisted', `S.queue[0].status='waitlist';S.queue[0].waitlistNum=3;`],
     ['paid', `S.queue[0].status='waiting';S.queue[0].paid=true;`],
-    // a finished ride waits in My Bookings' stack as its strip, and is read whole once taken out (2026-10-31)
+    // a finished ride waits in Bookings' stack as its strip, and is read whole once taken out (2026-10-31)
     ['finished, in the stack', `S.queue[0].status='done';S._wlOpen={cid:'c1',sid:''};`],
     ['finished, taken out', `S.queue[0].status='done';S._wlOpen={cid:'c1',sid:'snd1'};`],
   ] as const) {

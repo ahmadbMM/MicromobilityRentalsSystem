@@ -29,7 +29,7 @@ test.describe('@customer:claim waitlist place', () => {
     await box.getByRole('button', { name: 'Claim my place' }).click();
     await expect(box.locator('#wlc-title')).toHaveText('Your place is booked');
     expect(calls.find((c) => c.name === 'customer_claim_spot')!.body).toEqual({ p_token: token, p_decline: false });
-    await expect(box.getByRole('link', { name: 'My Bookings' })).toHaveAttribute('href', '/my-bookings');
+    await expect(box.getByRole('link', { name: 'Bookings' })).toHaveAttribute('href', '/my-bookings');
   });
 
   test("I can't come hands the place on", async ({ page }) => {

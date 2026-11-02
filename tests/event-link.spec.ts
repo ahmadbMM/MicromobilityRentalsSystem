@@ -57,8 +57,8 @@ test('a signed-out visitor keeps the link for after signing in', async ({ page }
 });
 
 // micromobility.sa/account's tickets send Reschedule and Cancel here with ?tab=bookings: the rider
-// lands on My Bookings, where those changes are made. Parked for after signing in, like an event.
-test('?tab=bookings opens My Bookings for a signed-in rider, and comes off the address', async ({ page }) => {
+// lands on Bookings, where those changes are made. Parked for after signing in, like an event.
+test('?tab=bookings opens Bookings for a signed-in rider, and comes off the address', async ({ page }) => {
   await stubSupabase(page, fixtures);
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
   await page.goto('/?lang=en&tab=bookings');

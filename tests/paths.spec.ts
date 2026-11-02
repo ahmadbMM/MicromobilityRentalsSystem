@@ -239,7 +239,7 @@ test.describe('staff', () => {
 });
 
 test.describe('customers', () => {
-  test('a signed-in rider opens My Bookings and My Account by their addresses', async ({ page }) => {
+  test('a signed-in rider opens Bookings and Account by their addresses', async ({ page }) => {
     await stubSupabase(page, base);
     await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
       await page.goto('/my-bookings');

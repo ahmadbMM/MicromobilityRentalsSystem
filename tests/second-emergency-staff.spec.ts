@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // The second emergency contact, staff side (the owner, 2026-10-07: "add a second optional emergency contact field, show
-// it in the customer My Account, and allow the staff to flag it"; customers.emergency2_*, migration 20261007150000).
+// it in the customer Account, and allow the staff to flag it"; customers.emergency2_*, migration 20261007150000).
 // The account editor reads and writes it beside the first (a second typed alone becomes the first, never the first's
 // number), the row menu's Emergency contact popup shows it with its own Call and WhatsApp, and the flag dialog offers
 // it once the database is known to have it: before the migration staff_flag_customer drops a name it does not know and

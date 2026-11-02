@@ -94,7 +94,7 @@ test('it opens by itself the moment the site opens signed in, on whatever page t
   await loginCustomer(page, { id: 'c1' });
   await page.goto('/');
   await waitForSb(page);
-  await expect.poll(() => open(page)).toBe(true); // no tab picked, no My Bookings drawn
+  await expect.poll(() => open(page)).toBe(true); // no tab picked, no Bookings drawn
 });
 
 test('it waits for the next visit: a ride from an earlier day is asked about', async ({ page }) => {

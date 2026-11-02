@@ -3,7 +3,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb, staffReady } from 
 
 // Selects are drawn without the native arrow (appearance:none), so the chevron is a
 // background image. Both skins re-painted selects with the `background` shorthand, which
-// clears background-image too: every dropdown on My Account and every staff select read as
+// clears background-image too: every dropdown on Account and every staff select read as
 // an empty text box. The chevron is back, with room at the end so the text never runs under it.
 
 /** The chevron image and the padding at the end the chevron sits in. */
@@ -12,7 +12,7 @@ const look = (el: Element) => {
   return { image: cs.backgroundImage, padEnd: parseFloat(cs.direction === 'rtl' ? cs.paddingLeft : cs.paddingRight) };
 };
 
-test('My Account: country, city and birth-date selects carry their chevron', async ({ page }) => {
+test('Account: country, city and birth-date selects carry their chevron', async ({ page }) => {
   await stubSupabase(page, { sessions: [], queue_entries: [], bikes: [] });
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
   await page.goto('/');

@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Blood type on the account (the owner, 2026-10-14: "create a field for the accounts ... and allow people to add
-// their blood type in my accounts section"): customers.blood_type, 20261014180000. My Account reads it through
+// their blood type in my accounts section"): customers.blood_type, 20261014180000. Account reads it through
 // customer_blood_type and saves it through customer_set_blood_type in its own card; the staff account editor reads
 // it with the row and saves it with the account, never when it could not read it. Everyone here is made up.
 

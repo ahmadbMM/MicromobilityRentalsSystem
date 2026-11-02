@@ -156,7 +156,7 @@ test.describe('@customer:runher Run for Her', () => {
     await expect(page.locator('#share-gate #sg-title')).toBeVisible();
   });
 
-  test('My Account keeps the emergency contact and saves a new one', async ({ page }) => {
+  test('Account keeps the emergency contact and saves a new one', async ({ page }) => {
     const sent: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (/rpc\/customer_set_emergency/.test(r.url())) sent.push(r.postDataJSON()); });
     await custBoot(page, { 'rpc:customer_emergency': contact, 'rpc:customer_set_emergency': true, 'rpc:customer_profile': profile() });

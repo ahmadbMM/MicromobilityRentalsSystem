@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// The signed-in avatar + first name in the header open My Account, from the landing page
+// The signed-in avatar + first name in the header open Account, from the landing page
 // and from any customer tab.
 const sessions = [{ id: '2099-01-01', session_date: '2099-01-01', day: 'Sunday', status: 'open', capacity: 20, created_at: 1 }];
 
-test('the avatar and name in the header open My Account', async ({ page }) => {
+test('the avatar and name in the header open Account', async ({ page }) => {
   await stubSupabase(page, { sessions, queue_entries: [] });
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
   await page.goto('/');

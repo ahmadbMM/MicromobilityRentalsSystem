@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb } from './helpers/supabase';
 
-// My Account carries every question the community form asks (the owner, 2026-09-29): besides the
+// Account carries every question the community form asks (the owner, 2026-09-29): besides the
 // name, contacts, height, birth date, nationality, handles and bike type it already had, the
 // gender, profession, workplace and how they heard of us. An approved application or a
 // learn-to-ride sign-up fills them on the server; customer_about reads them, customer_set_about
