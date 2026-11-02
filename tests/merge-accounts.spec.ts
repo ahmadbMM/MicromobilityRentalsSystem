@@ -155,3 +155,41 @@ test('typing in the manual merge search keeps the focus across the repaint', asy
   await expect(page.locator('#mg-qa')).toBeFocused();
   await expect(page.locator('#tab-customers .mg-matches button').first()).toContainText('Amal');
 });
+
+// A merged account keeps its email for sign-in, and the server takes it back when its keeper is
+// given the address (20261102180000): the editor's own check counts live accounts only, and a server
+// refusal (an address on a row merged into someone else) still says the address is taken.
+test('the editor lets the server decide on a merged account\'s email, and a refusal still says it is taken', async ({ page }) => {
+  const live = { id: 'c-keeper', name: 'Keeper Rider', email: 'keeper@x.sa', phone: '+966500000005', height: 170, gender: 'male', birth_date: '1990-01-01', type_preference: 'Road', created_at: '2026-01-01T10:00:00Z' };
+  await boot(page, { customers: [...customers, live] });
+  const checks: string[] = [];
+  let refuse = false;
+  await page.route(/\/rest\/v1\/customers/, (route) => {
+    const req = route.request();
+    const headers = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+    if (req.method() === 'GET' && req.url().includes('email=eq.')) {
+      checks.push(req.url());
+      const merged = /merged_into=is\.null/.test(req.url()) ? [] : [{ id: 'c-gone' }];
+      return route.fulfill({ status: 200, headers, body: JSON.stringify(merged) });
+    }
+    if (req.method() === 'PATCH' && refuse) {
+      return route.fulfill({ status: 409, headers, body: JSON.stringify({ code: '23505', message: 'duplicate key value violates unique constraint "customers_email_lower_uniq"', details: null, hint: null }) });
+    }
+    return route.fallback();
+  });
+  const sent: Record<string, unknown>[] = [];
+  page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/customers')) sent.push(r.postDataJSON()); });
+
+  await page.evaluate(`showEditCustomerModal('c-keeper')`);
+  await page.fill('#cf-email', 'gone@x.sa');
+  await page.evaluate(`saveCustForm()`);
+  await expect.poll(() => sent.length).toBeGreaterThan(0);
+  expect(sent[0]).toMatchObject({ email: 'gone@x.sa' });
+  expect(checks[0]).toContain('merged_into=is.null');
+
+  refuse = true;
+  await page.evaluate(`showEditCustomerModal('c-keeper')`);
+  await page.fill('#cf-email', 'someone.elses@x.sa');
+  await page.evaluate(`saveCustForm()`);
+  await expect(page.locator('.toast, #toast, [role="status"]').filter({ hasText: /already exists/i }).first()).toBeVisible();
+});

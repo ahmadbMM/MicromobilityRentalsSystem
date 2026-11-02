@@ -512,7 +512,10 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
 - **Duplicates.** Customers > Duplicates (`/customers/duplicates`, admins): `_dupGroups`
   (same phone, or same name + birth date), `_mgOpen`/`_mgRun` → `staff_merge_customers`,
   `_mgUndoWrite` → `staff_unmerge_customers` (30 days). A row with `merged_into` is off every list
-  (`_custLiveRows`); `customer_login`/`customer_oauth_login` follow it to the keeper.
+  (`_custLiveRows`); `customer_login`/`customer_oauth_login` follow it to the keeper. A merged row keeps
+  its email for that sign-in, until its keeper is given the address: `_customer_email_alias` then blanks
+  it on the merged row and, if the keeper's password is `oauth:*`, copies the merged row's hash
+  (20261102180000). An address on a row merged into another account stays refused (23505).
 - **Templates and the booking window.** A template keeps its id on re-save and `_nsTplPush`
   rewrites its future rides (`sessions.template_id`); `_nsSlots` is the form's capacity builder.
   `site_content booking.window` = {days, at}: `_bwOpensOn(s)`; a ride not open yet is greyed for

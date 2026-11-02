@@ -23433,7 +23433,8 @@ async function saveCustForm(){
       // Duplicate checks only when the value actually CHANGED: accounts legitimately share
       // phones (family members, walk-in-created rows), and an unchanged phone/email must
       // never block saving unrelated edits like bike type or the payment option.
-      if(email&&email!==(d.origEmail||'')){const{data:dup}=await sb.from('customers').select('id').eq('email',email).neq('id',d.id).limit(1);if(dup&&dup.length){toast(t('errEmailExists'),'error');return;}}
+      // A merged account's email is left to the server: the account it was merged into takes it back (20261102180000), any other gets 23505 below.
+      if(email&&email!==(d.origEmail||'')){const{data:dup}=await sb.from('customers').select('id').eq('email',email).neq('id',d.id).is('merged_into',null).limit(1);if(dup&&dup.length){toast(t('errEmailExists'),'error');return;}}
       if(fullPhone&&fullPhone!==(d.origPhone||'')){const{data:dup}=await sb.from('customers').select('id').eq('phone',fullPhone).neq('id',d.id).limit(1);if(dup&&dup.length&&!(await _cfPhShareOk(fullPhone))){toast(t('errPhoneExists'),'error');return;}}
       // A changed default payment goes through the on-the-house approval first (S02-core2-02): staff_set_default_pay
       // writes it, so the save below leaves the column alone; an older database takes an admin's plain write.
