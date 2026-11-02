@@ -140,6 +140,64 @@ test.describe('@staff:bookings scanner feedback', () => {
     await expect(banner(page)).toHaveClass(/scan-bn-warn/);
   });
 
+  test('Booking details: off by default; on, a rider already in shows bike type, height and size, and the next scan clears it', async ({ page }) => {
+    await boot(page);
+    await openScanner(page);
+    const details = page.locator('#scan-details');
+    await scan(page, 'MMC-5-eeee5555');
+    await expect(banner(page)).toContainText('already checked in');
+    await expect(details).toBeEmpty();
+    await page.locator('#scan-details-btn').click();
+    await expect(page.locator('#scan-details-btn')).toHaveAttribute('aria-pressed', 'true');
+    await page.evaluate('_scanLastTxt=""');
+    await scan(page, 'MMC-5-eeee5555');
+    await expect(details).toContainText('#5 Riding Eid');
+    await expect(details).toContainText('Hybrid');
+    await expect(details).toContainText('175 cm');
+    await expect(details.locator('.scan-dt-grid dd').nth(2)).toHaveText('M');
+    await scan(page, 'MMC-6-nothere');
+    await expect(details).toBeEmpty();
+    expect(await page.evaluate(`localStorage.getItem('cq_scan_details')`)).toBe('1');
+  });
+
+  test('Booking details: Express shows them as it checks in; a Petromin party lists its riders, an Any booking both charts', async ({ page }) => {
+    await boot(page);
+    await openScanner(page);
+    const details = page.locator('#scan-details');
+    await page.locator('#scan-details-btn').click();
+    await page.locator('#scan-express-btn').click();
+    await scan(page, 'MMC-1-aaaa1111');
+    await expect(banner(page)).toHaveClass(/scan-bn-ok/);
+    await expect(details).toContainText('#1 Paid Amal');
+    await expect(details).toContainText('175 cm');
+    await page.evaluate(`S.riders=[
+      {id:91,booking_no:'P-901',party_no:1,name:'Lead Rider',type_preference:'Road',height:165},
+      {id:92,booking_no:'P-901',party_no:2,name:'Guest Rider',type_preference:'Any',height:172}];
+      _scanDetailsPaint(_scanDetailsOfRider(S.riders[1]))`);
+    await expect(details.locator('.scan-dt')).toHaveCount(2);
+    await expect(details.locator('.scan-dt').first()).toContainText('Guest Rider');
+    await expect(details.locator('.scan-dt').first()).toContainText('Road S');
+    await expect(details.locator('.scan-dt').nth(1).locator('dd').nth(2)).toHaveText('S');
+    if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/scan-details-${test.info().project.name}.png` });
+    await page.locator('#scan-details-btn').click();
+    await expect(details).toBeEmpty();
+  });
+
+  test('Booking details: a big party on a small screen leaves the title and Cancel reachable', async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 600 });
+    await boot(page);
+    await openScanner(page);
+    await page.locator('#scan-details-btn').click();
+    await page.evaluate(`_scanDetailsPaint([1,2,3,4,5,6].map(i=>({no:'#'+i,name:'Rider '+i,type:'Road',height:170,fit:'S'})))`);
+    await page.locator('#scan-modal .pin-title').scrollIntoViewIfNeeded();
+    await expect(page.locator('#scan-modal .pin-title')).toBeInViewport({ ratio: 1 });
+    const cancel = page.locator('#scan-modal .pin-cancel').last();
+    await cancel.scrollIntoViewIfNeeded();
+    await expect(cancel).toBeInViewport({ ratio: 1 });
+    await cancel.click();
+    await expect(page.locator('#scan-modal')).toBeHidden();
+  });
+
   test('another night is Stop, with Make an exception still there', async ({ page }) => {
     await boot(page);
     await openScanner(page);

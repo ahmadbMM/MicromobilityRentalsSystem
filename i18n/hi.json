@@ -2878,6 +2878,7 @@
   "scanBnWarn": "जाँचें",
   "scanBnErr": "रुकें",
   "scanSoundBtn": "आवाज़",
+  "scanDetailsBtn": "बुकिंग का विवरण",
   "scanBlacklisted": "#{0} {1} ब्लैकलिस्ट में है। चेक-इन से पहले लीड से पूछें।",
   "scanAlreadyIn": "#{0} {1} पहले से चेक-इन है",
   "scanInAt": "{0} से",

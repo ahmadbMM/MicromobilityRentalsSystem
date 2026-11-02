@@ -2878,6 +2878,7 @@
   "scanBnWarn": "Attention",
   "scanBnErr": "Stop",
   "scanSoundBtn": "Son",
+  "scanDetailsBtn": "Détails de la réservation",
   "scanBlacklisted": "#{0} {1} est sur la liste noire. Demandez à un responsable avant de l’enregistrer.",
   "scanAlreadyIn": "#{0} {1} est déjà enregistré",
   "scanInAt": "depuis {0}",

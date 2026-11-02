@@ -2878,6 +2878,7 @@
   "scanBnWarn": "Verificar",
   "scanBnErr": "Parar",
   "scanSoundBtn": "Som",
+  "scanDetailsBtn": "Detalhes da reserva",
   "scanBlacklisted": "#{0} {1} está na lista negra. Pergunte a um responsável antes de fazer o check-in.",
   "scanAlreadyIn": "#{0} {1} já fez check-in",
   "scanInAt": "desde {0}",

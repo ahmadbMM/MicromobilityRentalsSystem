@@ -2878,6 +2878,7 @@
   "scanBnWarn": "دیکھیں",
   "scanBnErr": "رکیں",
   "scanSoundBtn": "آواز",
+  "scanDetailsBtn": "بکنگ کی تفصیلات",
   "scanBlacklisted": "#{0} {1} بلیک لسٹ میں ہے۔ چیک اِن سے پہلے لیڈ سے پوچھیں۔",
   "scanAlreadyIn": "#{0} {1} پہلے ہی چیک اِن ہے",
   "scanInAt": "{0} سے",

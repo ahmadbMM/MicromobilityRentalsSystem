@@ -7287,7 +7287,8 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{background:color-mix
 #checkin-modal .bkm-corange,#bike-modal .bkm-corange{color:var(--orange);}
 #checkin-modal .bkm-cgreen,#bike-modal .bkm-cgreen{color:var(--green);}
 #bike-modal .bkm-cred{color:var(--red);}
-#scan-modal .bkm-sbox{max-width:380px;width:92vw;}
+#scan-modal .scan-backdrop{overflow-y:auto;align-items:flex-start;}
+#scan-modal .bkm-sbox{max-width:380px;width:92vw;margin:auto;flex:none;}
 #scan-modal .bkm-svw{position:relative;width:100%;border-radius:7px;overflow:hidden;background:#000;aspect-ratio:1/1;}
 #scan-modal .bkm-svid{width:100%;height:100%;object-fit:cover;}
 #scan-modal .bkm-sframe{position:absolute;inset:14%;border:2px solid rgba(var(--green-rgb),.65);border-radius:8px;pointer-events:none;}
@@ -7310,6 +7311,13 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{background:color-mix
 #scan-modal .bkm-srow{display:flex;gap:6px;margin-top:4px;}
 #scan-modal .bkm-srow6{display:flex;gap:6px;margin-top:6px;}
 #scan-modal .bkm-stog{flex:1;min-width:0;white-space:normal;}
+#scan-modal .scan-dts:empty{display:none;}
+#scan-modal .scan-dts{margin-top:8px;max-height:34vh;overflow-y:auto;}
+#scan-modal .scan-dt{border:1px solid var(--border);border-radius:5px;padding:8px 10px;margin-bottom:6px;background:var(--s3);}
+#scan-modal .scan-dt-nm{font-weight:700;margin-bottom:6px;overflow-wrap:anywhere;}
+#scan-modal .scan-dt-grid{display:grid;grid-template-columns:auto auto minmax(0,1fr);gap:8px 14px;margin:0;}
+#scan-modal .scan-dt-grid dt{font-size:var(--staff-fs-sm,12px);color:var(--muted);font-weight:600;}
+#scan-modal .scan-dt-grid dd{margin:0;font-size:16px;font-weight:800;overflow-wrap:break-word;}
 #scan-modal .bkm-shint{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin-top:6px;text-align:center;font-weight:600;}
 #scan-modal .bkm-stally{min-height:16px;font-size:var(--staff-fs-sm,12px);color:var(--muted);margin-top:8px;text-align:center;font-weight:700;}
 #bike-modal .bkm-mbox{max-width:min(96vw,940px);}

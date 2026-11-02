@@ -2982,6 +2982,7 @@
   "scanBnWarn": "দেখুন",
   "scanBnErr": "থামুন",
   "scanSoundBtn": "শব্দ",
+  "scanDetailsBtn": "বুকিংয়ের বিবরণ",
   "scanBlacklisted": "#{0} {1} ব্ল্যাকলিস্টে আছেন। চেক-ইনের আগে লিডকে জিজ্ঞেস করুন।",
   "scanAlreadyIn": "#{0} {1} আগেই চেক-ইন করেছেন",
   "scanInAt": "{0} থেকে",
