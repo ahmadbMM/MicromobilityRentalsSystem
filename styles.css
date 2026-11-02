@@ -5487,15 +5487,6 @@ body.fix-open{overflow:hidden;}
 #race-gate .defe-reg-yn{margin-top:14px;}
 #race-gate .defe-reg-no{margin-top:12px;}
 #race-gate .pg-btn{margin-top:14px;}
-/* A question staff put on one rider's account (#rider-q, renderRiderQ, 2026-11-01): the race question's
-   centred layer, the question in the rider's ink, a box for the answer, Send, and Later under it. */
-#rider-q .auth-backdrop{overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
-.rdq-q{margin:14px 0 0;font-weight:700;font-size:17px;line-height:1.4;color:var(--ink);overflow-wrap:anywhere;white-space:pre-line;}
-.rdq-lbl{display:block;margin-top:16px;font-weight:600;font-size:13px;color:var(--ink-2);}
-.rdq-a{display:block;width:100%;box-sizing:border-box;margin-top:6px;border:1px solid var(--line-2);border-radius:8px;padding:10px 12px;font-family:var(--font-body);font-weight:500;font-size:16px;line-height:1.45;color:var(--ink);background:var(--card);resize:vertical;outline:none;}
-.rdq-a:focus{border-color:var(--go);}
-.rdq-a.err,.rdq-a.err:focus{border-color:var(--red);}
-.rdq-err{margin-top:6px;}
 /* Victory Lap: a ticket, or buy one (#vl-ticket-gate, renderVtGate, 2026-10-23): the question with both
    answers; buying shows the organiser's bank details, their letter and the receipt upload. */
 #vl-ticket-gate .auth-backdrop{overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
