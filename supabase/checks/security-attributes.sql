@@ -29,6 +29,8 @@ with expected(fname, want_definer, note) as (values
   ('staff_wallet_refund_booking', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('staff_wallet_refund_receipt', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('customer_wallet', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
+  ('customer_wallet_release', true, 'the wallet: reaches tables nobody can read (20261103140000)'),
+  ('_wallet_release', true, 'the wallet: reaches tables nobody can read (20261103140000)'),
   ('customer_wallet_pay', true, 'the wallet: reaches tables nobody can read (20261102210000)'),
   ('_enforce_booking_price', true,  'calls _promo_valid, which anon+authenticated cannot execute'),
   ('_group_ride_cap',        true,  'counts queue_entries rows the caller may not be able to see'),

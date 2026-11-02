@@ -5918,10 +5918,6 @@
   "cwTitle": "Monedero",
   "cwMineNote": "Aquí llegan los reembolsos y el dinero añadido en el puesto. Úsalo para pagar tus reservas.",
   "cwEmpty": "Aún no hay nada.",
-  "cwPayBtn": "Pagar {0} con mi monedero",
-  "cwPayAsk": "¿Pagar {0} con tu monedero? Quedarán {1}.",
-  "cwPayGo": "Pagar",
-  "cwShortNote": "Tu monedero tiene {0}: no alcanza para esta reserva.",
   "cwKTopup": "Dinero añadido",
   "cwKAdjust": "Ajuste",
   "cwKTakeout": "Dinero retirado",
@@ -6006,5 +6002,9 @@
   "invHint": "Envía a tu amigo un mensaje pidiéndole que rellene el formulario. Nuestro equipo verá que lo invitaste.",
   "invMsg": "¡Hola! Salgo a rodar con la comunidad MicroMobility en Yeda y me encantaría que te unieras. Rellena este formulario para solicitarlo: {0}",
   "invErr": "No se pudo crear tu invitación. Inténtalo de nuevo.",
-  "caInvitedBy": "Invitado por"
+  "caInvitedBy": "Invitado por",
+  "cwUseHave": "Tienes {0}. Actívalo para usarlo en esta reserva.",
+  "cwUseOn": "Se usan {0}. Quedan {1} por pagar en el puesto.",
+  "cwUseAll": "Se usan {0}. No queda nada por pagar.",
+  "cwUseFail": "Tu reserva está hecha, pero no se usó el monedero. Puedes activarlo desde tu entrada."
 }

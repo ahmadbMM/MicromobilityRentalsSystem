@@ -5918,10 +5918,6 @@
   "cwTitle": "Portefeuille",
   "cwMineNote": "Les remboursements et l’argent ajouté au stand arrivent ici. Utilisez-le pour payer vos réservations.",
   "cwEmpty": "Rien pour l’instant.",
-  "cwPayBtn": "Payer {0} avec mon portefeuille",
-  "cwPayAsk": "Payer {0} avec votre portefeuille ? Il restera {1}.",
-  "cwPayGo": "Payer",
-  "cwShortNote": "Votre portefeuille contient {0} : c’est insuffisant pour cette réservation.",
   "cwKTopup": "Argent ajouté",
   "cwKAdjust": "Ajustement",
   "cwKTakeout": "Argent retiré",
@@ -6006,5 +6002,9 @@
   "invHint": "Envoie à votre ami un message lui demandant de remplir le formulaire. Notre équipe verra que vous l’avez invité.",
   "invMsg": "Salut ! Je roule avec la communauté MicroMobility à Djeddah et j’aimerais que tu nous rejoignes. Remplis ce formulaire pour postuler : {0}",
   "invErr": "Impossible de créer votre invitation. Veuillez réessayer.",
-  "caInvitedBy": "Invité par"
+  "caInvitedBy": "Invité par",
+  "cwUseHave": "Vous avez {0}. Activez pour l’utiliser pour cette réservation.",
+  "cwUseOn": "{0} utilisés. {1} restent à payer au stand.",
+  "cwUseAll": "{0} utilisés. Plus rien à payer.",
+  "cwUseFail": "Votre réservation est faite, mais le portefeuille n’a pas été utilisé. Activez-le depuis votre billet."
 }

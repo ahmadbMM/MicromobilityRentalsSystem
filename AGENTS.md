@@ -1663,16 +1663,23 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
 - **Money lives in the database only.** `wallet_ledger` (never changed) and `wallet_balances` (one locked row per
   account, never below zero) cannot be reached through the API; `_wallet_post` is the only writer. No outbox and no
   optimistic balance: a change that cannot reach the server is refused, offline included.
+- **It pays what it can, and the rider chooses (2026-11-03, migration 20261103140000).** `queue_entries.wallet_paid` is how much
+  of a booking the wallet holds; only these functions move it. Covered whole, the booking is paid with `pay_method 'wallet'`;
+  in part, it stays unpaid and the desk takes the rest by any method. `_bookingAmount` stays what it costs; `_bookingDue` is
+  what is left, and `_walPaid` / `_mnySplit().wallet` the wallet's part. The rider's **Wallet switch** (`_cwSwitchHtml`) is on the
+  review (`_cwReviewSlot`, off by default, applied after the booking by `_cwAfterBook`) and on the ticket, where off gives the
+  money back (`customer_wallet_release`, while waiting and before the desk took money). `_mt_core`'s card, cash and pending
+  leave the wallet's part out.
 - **A booking paid from it is `paid` + `pay_method 'wallet'`, and `zz_wallet_follow`, the last BEFORE trigger on
   `queue_entries`, keeps the money with the row.** Un-paid, marked card, on the house, cancelled, removed or deleted: the
-  money goes back. A lower price gives back the difference; a higher one gives all of it back and leaves it to pay, so
-  nothing is taken unasked. A no-show keeps it. Writing `pay_method 'wallet'` directly charges, or is refused
-  `WALLET_SHORT`, so the desk's ordinary pay menu and Undo need no special case. All of a card's bookings or none.
+  money goes back. A lower price gives back the difference; a higher one keeps what was paid and leaves the rest to pay,
+  so nothing is taken unasked. A no-show paid in full keeps it; one not paid in full gets its part back. Writing `pay_method
+  'wallet'` directly charges, or is refused `WALLET_SHORT`, so the desk's ordinary pay menu and Undo need no special case.
 - **Staff.** Customers > Wallets (`/customers/wallets`, `_commWallets`), a button on every Accounts and Members row, a section
   in the account's editor and history; the pay menu's Pay from wallet and Refund to wallet (`_cwPayOpts`); the
   receipt refund's second button (`_salesRefundWallet`). Adding money is an admin's alone (the owner, 2026-11-03; migration 20261103120000, `ADMIN_ONLY`). Taking out and
   refunding ask what a refund asks: `can_refund`, the PIN, the manager limit (adding asks those too). Paying from it asks nothing: the ledger names who did it.
-- **The rider.** My Account's card (`#cw-mine`) and the button on a ticket (`_cwPaySlot`), whole bookings only. Refused by
+- **The rider.** My Account's card (`#cw-mine`) and the switch on a ticket (`_cwPaySlot`). Refused by
   the server: a waitlisted place, a past night, a Petromin night (the company's bill), a race (below). The website has
   the same (mm-platform WalletCard, WalletPay, /api/account/wallet-pay). The rider never sees a staff note.
 - **The books.** A top-up is in the drawer (`_cwTill` reads `staff_wallet_moves`; `session_id` says which till: that ride's, or

@@ -142,7 +142,7 @@ test.describe('@staff:customers wallet', () => {
     const open = `(id,word)=>{const b=document.createElement('button');document.body.appendChild(b);showPayMenu(id,{timeStamp:performance.now(),currentTarget:b,target:b,stopPropagation(){}});
       const o=[...document.querySelectorAll('.pay-menu-popup .pay-menu-opt')];if(word){o.find(x=>x.textContent.includes(word)).click();}return o.map(x=>x.textContent).join('|');}`;
     const menu = (id: string, word = '') => page.evaluate(`(${open})(${JSON.stringify(id)},${JSON.stringify(word)})`) as Promise<string>;
-    expect(await menu('q3')).not.toContain('Pay from wallet'); // 120 does not cover 500
+    expect(await menu('q3')).toContain('Pay from wallet · SAR 120'); // the balance pays what it can of 500
     expect(await menu('q4')).not.toContain('allet'); // no account
     expect(await menu('q1')).toContain('Pay from wallet · SAR 50');
     await menu('q1', 'Pay from wallet');
@@ -161,6 +161,8 @@ test.describe('@staff:customers wallet', () => {
     const r = await page.evaluate(`(()=>{const q=getQueue();return{split:_mnySplit(q.find(e=>e.id==='q1')),sum:_mnySum(q)}})()`) as { split: Record<string, number>; sum: Record<string, number> };
     expect(r.split).toEqual({ card: 0, cash: 0, unknown: 0, wallet: 50 });
     expect(r.sum).toEqual({ card: 50, cash: 0, unknown: 0, wallet: 50 });
+    const part = await page.evaluate(`(()=>{const e=getQueue()[0];const c={...e,walletPaid:50,price:80,paid:true,pay_method:'card'},w={...e,walletPaid:80,price:80,paid:true,pay_method:'wallet'};return{card:_mnySplit(c),whole:_mnySplit(w)}})()`);
+    expect(part).toEqual({ card: { card: 30, cash: 0, unknown: 0, wallet: 50 }, whole: { card: 0, cash: 0, unknown: 0, wallet: 80 } });
     const till = await page.evaluate(`(()=>{S._cwMoves=[
       {kind:'topup',amount:100,method:'cash',session_id:'s1',created_at:new Date().toISOString()},
       {kind:'takeout',amount:-20,method:'cash',session_id:'s1',created_at:new Date().toISOString()},
@@ -197,28 +199,67 @@ test.describe('@customer:account wallet', () => {
     await expect(page.locator('#cw-mine li')).toContainText('Refund');
   });
 
-  test('a booking it covers has the button; paying asks first, then the card reads paid', async ({ page }) => {
+  const sw = (page: Page) => page.locator('.cw-pay-slot .cw-sw').first();
+
+  test('the Wallet switch on a ticket is off until the rider turns it on, and pays what the balance can', async ({ page }) => {
     const seen = calls(page);
     await rider(page, {
-      queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': mine,
-      'rpc:customer_wallet_pay': { ok: true, paid: ['q1'], amount: 50, balance: 70 },
+      queue_entries: [bk('q1', 1, { price: 200 })], 'rpc:my_bookings': [bk('q1', 1, { price: 200 })], 'rpc:customer_wallet': mine,
+      'rpc:customer_wallet_pay': { ok: true, amount: 120, balance: 0, rows: [{ id: 'q1', paid: false, pay_method: null, wallet_paid: 120 }] },
     });
     await page.evaluate(`setCustTab('myrides')`);
-    const btn = page.locator('.cw-pay-btn').first();
-    await expect(btn).toContainText('from my wallet');
-    await btn.click();
-    await expect(page.getByRole('dialog')).toContainText('from your wallet?');
-    expect(seen.some((c) => c.name === 'customer_wallet_pay')).toBe(false);
-    await page.getByRole('dialog').getByRole('button', { name: 'Pay', exact: true }).click();
+    await expect(sw(page)).toContainText('Wallet');
+    await expect(sw(page)).toContainText('You have');
+    const box = sw(page).locator('input[role="switch"]');
+    await expect(box).not.toBeChecked();
+    expect(seen.some((c) => c.name === 'customer_wallet_pay')).toBe(false); // nothing unasked
+    await sw(page).click();
     await expect.poll(() => seen.find((c) => c.name === 'customer_wallet_pay')?.body).toMatchObject({ p_id: 'c1', p_token: 'tok', p_booking_ids: ['q1'] });
-    await expect(page.locator('.cw-pay-btn')).toHaveCount(0);
+    await expect(sw(page).locator('input[role="switch"]')).toBeChecked();
+    await expect(sw(page)).toContainText('left to pay at the booth');
+    await expect(page.locator('.tk-owe, .cu-tk-total')).not.toHaveCount(0);
   });
 
-  test('a wallet short of the amount says so; a free or unpaid-less card shows nothing', async ({ page }) => {
-    await rider(page, { queue_entries: [bk('q1', 1, { price: 500 })], 'rpc:my_bookings': [bk('q1', 1, { price: 500 })], 'rpc:customer_wallet': mine });
+  test('turning it off gives the money back', async ({ page }) => {
+    const seen = calls(page);
+    const held = bk('q1', 1, { price: 200, wallet_paid: 50 });
+    await rider(page, {
+      queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_wallet': { balance: 70, rows: [] },
+      'rpc:customer_wallet_release': { ok: true, amount: 50, balance: 120, rows: [{ id: 'q1', paid: false, pay_method: null, wallet_paid: 0 }] },
+    });
     await page.evaluate(`setCustTab('myrides')`);
-    await expect(page.locator('.cw-pay-slot').first()).toContainText('not enough for this booking');
-    await expect(page.locator('.cw-pay-btn')).toHaveCount(0);
+    await expect(sw(page).locator('input[role="switch"]')).toBeChecked();
+    await sw(page).click();
+    await expect.poll(() => seen.find((c) => c.name === 'customer_wallet_release')?.body.p_booking_ids).toEqual(['q1']);
+  });
+
+  test('no balance and nothing held: no switch', async ({ page }) => {
+    await rider(page, { queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': { balance: 0, rows: [] } });
+    await page.evaluate(`setCustTab('myrides')`);
+    await page.waitForFunction('S._cwMine&&S._cwMine.bal===0');
+    await expect(page.locator('.cw-pay-slot .cw-sw')).toHaveCount(0);
+  });
+
+  test('the review carries the switch: off by default, and it says what is left', async ({ page }) => {
+    await rider(page, { queue_entries: [], 'rpc:customer_wallet': mine });
+    await page.evaluate(`S._cwUse=false;(()=>{const h=document.createElement('div');h.id='cw-rv';h.innerHTML=_cwReviewSlot(_sessGet('s1'),'',false,200);document.body.appendChild(h);})()`);
+    const slot = page.locator('#cw-rv .cw-sw');
+    await expect(slot).toContainText('You have');
+    await expect(slot.locator('input')).not.toBeChecked();
+    await slot.click();
+    await expect(slot).toContainText('left to pay at the booth');
+    expect(await page.evaluate('S._cwUse')).toBe(true);
+    await page.evaluate(`document.querySelector('.cw-use-slot').dataset.total='100';_cwSwitchesPaint()`);
+    await expect(slot).toContainText('Nothing left to pay');
+    const free = await page.evaluate(`_cwReviewSlot(_sessGet('s1'),'',true,200)`);
+    expect(free).toBe('');
+  });
+
+  test('what is left is what the ticket and the money read', async ({ page }) => {
+    const held = bk('q1', 1, { price: 80, wallet_paid: 50 });
+    await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_wallet': { balance: 0, rows: [] } });
+    const r = await page.evaluate(`(()=>{const e=entryFromDB(${JSON.stringify(held)});return{due:_bookingDue(e),cost:_bookingAmount(e)}})()`);
+    expect(r).toEqual({ due: 30, cost: 80 });
   });
 
   test('a database without the wallet draws nothing', async ({ page }) => {

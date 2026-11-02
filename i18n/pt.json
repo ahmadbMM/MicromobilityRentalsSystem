@@ -5918,10 +5918,6 @@
   "cwTitle": "Carteira",
   "cwMineNote": "Os reembolsos e o dinheiro adicionado no balcão chegam aqui. Use-o para pagar as suas reservas.",
   "cwEmpty": "Ainda não há nada.",
-  "cwPayBtn": "Pagar {0} com a minha carteira",
-  "cwPayAsk": "Pagar {0} com a sua carteira? Restarão {1}.",
-  "cwPayGo": "Pagar",
-  "cwShortNote": "A sua carteira tem {0}: não chega para esta reserva.",
   "cwKTopup": "Dinheiro adicionado",
   "cwKAdjust": "Ajuste",
   "cwKTakeout": "Dinheiro retirado",
@@ -6006,5 +6002,9 @@
   "invHint": "Envia ao seu amigo uma mensagem a pedir que preencha o formulário. A nossa equipa verá que o convidou.",
   "invMsg": "Olá! Ando com a comunidade MicroMobility em Jeddah e adorava que te juntasses a nós. Preenche este formulário para te candidatares: {0}",
   "invErr": "Não foi possível criar o convite. Tente novamente.",
-  "caInvitedBy": "Convidado por"
+  "caInvitedBy": "Convidado por",
+  "cwUseHave": "Tem {0}. Ative para usar nesta reserva.",
+  "cwUseOn": "A usar {0}. Faltam {1} a pagar no balcão.",
+  "cwUseAll": "A usar {0}. Nada mais a pagar.",
+  "cwUseFail": "A sua reserva está feita, mas a carteira não foi usada. Pode ativá-la no seu bilhete."
 }

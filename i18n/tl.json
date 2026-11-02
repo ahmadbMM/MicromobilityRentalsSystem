@@ -5918,10 +5918,6 @@
   "cwTitle": "Wallet",
   "cwMineNote": "Dito napupunta ang mga refund at perang idinagdag sa booth. Gamitin ito para bayaran ang iyong mga booking.",
   "cwEmpty": "Wala pang laman dito.",
-  "cwPayBtn": "Bayaran ang {0} mula sa wallet ko",
-  "cwPayAsk": "Bayaran ang {0} mula sa wallet mo? Matitira ang {1}.",
-  "cwPayGo": "Bayaran",
-  "cwShortNote": "May {0} ang wallet mo: hindi sapat para sa booking na ito.",
   "cwKTopup": "Perang idinagdag",
   "cwKAdjust": "Pagsasaayos",
   "cwKTakeout": "Perang inilabas",
@@ -6006,5 +6002,9 @@
   "invHint": "Magpapadala ng mensahe sa kaibigan mo na punan ang application form. Makikita ng aming staff na inimbita mo sila.",
   "invMsg": "Hi! Nagra-ride ako kasama ang MicroMobility community sa Jeddah at gusto kong sumali ka. Punan ang form na ito para mag-apply: {0}",
   "invErr": "Hindi magawa ang imbitasyon mo. Pakisubukang muli.",
-  "caInvitedBy": "Inimbita ni"
+  "caInvitedBy": "Inimbita ni",
+  "cwUseHave": "May {0} ka. I-on para magamit sa booking na ito.",
+  "cwUseOn": "Ginagamit ang {0}. May {1} pang babayaran sa booth.",
+  "cwUseAll": "Ginagamit ang {0}. Wala nang babayaran.",
+  "cwUseFail": "Nagawa ang booking mo, pero hindi nagamit ang wallet. Maaari mo itong i-on sa ticket mo."
 }
