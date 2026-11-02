@@ -1486,6 +1486,22 @@
     .bdg-note{font-size:12px;font-style:italic;color:var(--text);overflow-wrap:anywhere;}
     .bdg-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
     #confirm-modal .bdg-dlg{width:min(94vw,520px);max-height:88vh;overflow-y:auto;}
+    .cw-in{color:var(--green,#077A4B);}
+    .cw-num{font-size:28px;font-weight:900;margin:2px 0 12px;font-variant-numeric:tabular-nums;}
+    .cw-seg{display:flex;gap:6px;margin-bottom:10px;}
+    .cw-seg .toggle-btn{flex:1;}
+    .cw-err{margin-top:8px;font-size:13px;}
+    .cw-lines{list-style:none;margin:14px 0 0;padding:0;border-top:1px solid var(--border);}
+    .cw-line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
+    .cw-line-m{display:flex;flex-direction:column;gap:2px;min-width:0;overflow-wrap:anywhere;}
+    .cw-line-n{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none;font-variant-numeric:tabular-nums;}
+    .cw-sec-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+    .cw-sec-num{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;}
+    .cw-find{max-width:440px;margin-bottom:12px;}
+    .cw-rows{display:flex;flex-direction:column;border:1px solid var(--border);}
+    .cw-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);}
+    .cw-row-m{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;overflow-wrap:anywhere;}
+    .cw-row-n{font-weight:800;font-variant-numeric:tabular-nums;flex:none;}
     #confirm-modal .ig-dlg{width:min(94vw,420px);max-height:88vh;overflow-y:auto;}
     .ig-now{margin:14px 0 4px;}
     .ig-num{font-size:22px;font-weight:900;}
@@ -5681,8 +5697,8 @@ body.view-staff .q-card.row-reserved{background:rgba(29,78,216,.04);border-color
 .br-pay-q{font-weight:800;font-size:13px;color:var(--text);}
 /* Bookings & history (staff): one account's current bookings over its past ones */
 .am-hist{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:50px;}
-.am-hist.on,body.view-staff .am-hist.on{color:var(--green);border-color:rgba(var(--green-rgb),.55);}
-body.view-staff .am-hist.on{color:var(--sf-green-ink,var(--green));}
+.am-hist.on,.am-cw-btn.on,body.view-staff .am-hist.on,body.view-staff .am-cw-btn.on{color:var(--green);border-color:rgba(var(--green-rgb),.55);}
+body.view-staff .am-hist.on,body.view-staff .am-cw-btn.on{color:var(--sf-green-ink,var(--green));}
 .am-hist-n{font-size:var(--staff-fs-sm,12px);font-weight:800;line-height:1;}
 .ah-box{max-width:620px;}
 .ah-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -8625,6 +8641,22 @@ body:not(.view-staff) .gate-out{min-height:44px;}
 body:not(.view-staff) .cr-err{margin:10px 0 0;}
 body:not(.view-staff) .cr-err:empty{display:none;}
 
+/* the wallet (2026-11-02): My Account's card, and the pay button on a booking */
+body:not(.view-staff) .cw-mine{background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;margin:0 0 16px;}
+body:not(.view-staff) .cw-mine[hidden]{display:none;}
+body:not(.view-staff) .cw-mine-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;}
+body:not(.view-staff) .cw-mine-t{font-size:var(--fs-17);font-weight:700;color:var(--ink);}
+body:not(.view-staff) .cw-mine-n{font-size:var(--fs-26);font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .cw-mine-note{font-size:var(--fs-13);color:var(--ink-3);margin:6px 0 0;}
+body:not(.view-staff) .cw-mine-rows{list-style:none;margin:12px 0 0;padding:0;}
+body:not(.view-staff) .cw-mine-rows li{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:var(--fs-13);color:var(--ink);}
+body:not(.view-staff) .cw-mine-rows small{display:block;font-size:var(--fs-12);color:var(--ink-3);}
+body:not(.view-staff) .cw-mine-rows strong{font-variant-numeric:tabular-nums;flex:none;}
+body:not(.view-staff) .cw-mine-rows .cw-in{color:var(--go);}
+body:not(.view-staff) .cw-pay-slot{margin-top:10px;}
+body:not(.view-staff) .cw-pay-slot:empty{display:none;}
+body:not(.view-staff) .cw-pay-btn{width:100%;min-height:44px;}
+
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -10015,8 +10047,8 @@ body.view-staff .pii-v:focus{outline:medium none;}
   /* the same six buttons, the same width on every row (and an empty slot of that width over them in the header) */
   body.view-staff .am-list .am-cust-actions{flex:none;width:316px;display:flex;justify-content:flex-end;align-items:center;gap:6px;}
   body.view-staff .am-list .am-cust-actions .btn-sm{height:36px;min-height:36px;padding:0;justify-content:center;}
-  body.view-staff .am-list .am-cust-actions .btn-sm:is(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:38px;}
-  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:68px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:is(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:32px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:60px;}
   body.view-staff .am-list .am-sel{width:36px;height:36px;flex:none;}
   /* the header: the columns' names in the staff tables' style */
   body.view-staff .am-list .am-head{min-height:40px;padding-block:0;background:var(--sf-head,var(--s2));}
@@ -10049,8 +10081,8 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list .am-c-sub:not(:has(>:not(.am-heard))){display:none;}
   body.view-staff .am-list :is(.am-c-email,.am-c-phone){font-size:12.5px;}
   body.view-staff .am-list .am-c-email{color:var(--muted);}
-  body.view-staff .am-list .am-cust-actions{width:268px;}
-  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:56px;}
+  body.view-staff .am-list .am-cust-actions{width:292px;}
+  body.view-staff .am-list .am-cust-actions .btn-sm:not(.am-flag,.am-hist,.am-vcard,.am-bdg-btn){width:48px;}
 }
 /* the social accounts cell, every width: the handle as text with the other networks as icons beside it, the
    follower count under it as text in the average's colour (2026-10-11, the owner: "cluttered and some info is

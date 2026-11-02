@@ -136,6 +136,8 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // list_sessions is how customers read sessions since tag-gated events: the real RPC
       // returns the sessions table (public rows + tagged ones), so default it to the
       // sessions fixture unless a spec overrides it explicitly.
+      // the wallet (20261102210000): off unless a spec gives it an answer, and no 404 in the console; tests/wallet.spec.ts
+      if (body === undefined && (rpc[1] === 'staff_wallet_balances' || rpc[1] === 'customer_wallet')) body = null;
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.

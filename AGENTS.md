@@ -1642,3 +1642,35 @@ The line-by-line hunt of d0e27984 (the owner: "fix them all"). Behaviour that ch
 - **A save sent while another is in flight waits for it** (workshop, messages, ambassadors: `W._wp` is resolved by
   the save in flight); it used to be dropped after its dialog had closed. Write it as `res=await sb.from(...)` with a
   separate done-promise, so the build's write check still sees it.
+
+## The wallet (2026-11-02, migration 20261102210000)
+
+The owner: "add a wallet section for all accounts that staff can add money to accounts or when refunding and allow
+customers to use it". In this codebase "wallet" alone also means the Apple and Google passes (`_hasWallet`,
+`WalletButton`); this one's code says `cw` (`_cwOpen`, `_cwPaySlot`, `.cw-*`), its tables and functions `wallet_*`.
+
+- **Money lives in the database only.** `wallet_ledger` (never changed) and `wallet_balances` (one locked row per
+  account, never below zero) cannot be reached through the API; `_wallet_post` is the only writer. No outbox and no
+  optimistic balance: a change that cannot reach the server is refused, offline included.
+- **A booking paid from it is `paid` + `pay_method 'wallet'`, and `zz_wallet_follow`, the last BEFORE trigger on
+  `queue_entries`, keeps the money with the row.** Un-paid, marked card, on the house, cancelled, removed or deleted: the
+  money goes back. A lower price gives back the difference; a higher one gives all of it back and leaves it to pay, so
+  nothing is taken unasked. A no-show keeps it. Writing `pay_method 'wallet'` directly charges, or is refused
+  `WALLET_SHORT`, so the desk's ordinary pay menu and Undo need no special case. All of a card's bookings or none.
+- **Staff.** Customers > Wallets (`/customers/wallets`, `_commWallets`), a button on every Accounts and Members row, a section
+  in the account's editor and history; the pay menu's Pay from wallet and Refund to wallet (`_cwPayOpts`); the
+  receipt refund's second button (`_salesRefundWallet`). Adding, taking out and refunding ask what a refund asks:
+  `can_refund`, the PIN, the manager limit. Paying from it asks nothing: the ledger names who did it.
+- **The rider.** My Account's card (`#cw-mine`) and the button on a ticket (`_cwPaySlot`), whole bookings only. Refused by
+  the server: a waitlisted place, a past night, a Petromin night (the company's bill), a race (below). The website has
+  the same (mm-platform WalletCard, WalletPay, /api/account/wallet-pay). The rider never sees a staff note.
+- **The books.** A top-up is in the drawer (`_cwTill` reads `staff_wallet_moves`; `session_id` says which till: that ride's, or
+  with none the shop's) and is not revenue. A booking paid from it is revenue when spent, and neither card nor cash
+  (`_mnySplit().wallet`; the close-out's reconciliation counts it). `_mt_core` is unchanged: it counts it in `rev_rides`
+  and not in `rev_card` or `rev_cash`, so the server's period reports show it in the remainder, which those reports then
+  label "Wallet, or method not recorded". A refund into a wallet the same day stays in that day's drawer, as its money
+  does. A race's money (`vlap`, `arena`) is the organiser's: neither paid from nor refunded into a wallet.
+- **Accounts.** A merge carries the balance to the keeper and an unmerge brings back what is left of it, by a trigger on
+  `customers.merged_into`; a return follows the keeper (`_wallet_owner`). An account holding money cannot be deleted.
+- Nothing is drawn until `staff_wallet_balances` / `customer_wallet` answer. `tests/wallet.spec.ts`; the stubs answer them
+  `null` (off, quietly) unless a spec gives them rows.

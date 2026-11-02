@@ -1,0 +1,203 @@
+import { test, expect, type Page } from '@playwright/test';
+import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
+
+// The wallet (the owner, 2026-11-02; migration 20261102210000). The rules on the money itself live in that
+// migration's functions and trigger; this is what the screens ask for and draw. All traffic stubbed; invented data.
+
+const ksaDay = (n = 0) => new Date(Date.now() + 3 * 3600e3 + n * 864e5).toISOString().slice(0, 10);
+const D1 = ksaDay(1);
+const sessions = [{ id: 's1', day: 'Friday', session_date: D1, capacity: 40, status: 'open', created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":40}' }];
+const customers = [
+  { id: 'c1', name: 'Rana Rider', email: 'rana@example.test', phone: '+966500000021', height: 170, gender: 'female', created_at: '2026-01-01T00:00:00Z' },
+  { id: 'c2', name: 'Omar Other', email: 'omar@example.test', phone: '+966500000022', height: 180, gender: 'male', created_at: '2026-01-02T00:00:00Z' },
+];
+const bk = (id: string, n: number, x: Record<string, unknown> = {}) => ({
+  id, session_id: 's1', session_day: 'Friday', session_date: D1, queue_num: n, name: 'Rana Rider', customer_id: 'c1', phone: '', email: '',
+  type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 50, registered_at: '2026-10-28T10:00:00Z', ...x,
+});
+const WALLET = { customer_id: 'c1', balance: 120, rows: [{ id: 2, amount: 120, balance_after: 120, kind: 'topup', method: 'card', note: 'Gift for the race', created_at: new Date().toISOString(), by_name: 'Sara' }] };
+
+function calls(page: Page) {
+  const seen: { name: string; body: Record<string, unknown> }[] = [];
+  page.on('request', (r) => {
+    const m = r.url().match(/\/rest\/v1\/rpc\/([^/?]+)/);
+    if (!m || r.method() !== 'POST') return;
+    let body = {}; try { body = r.postDataJSON() || {}; } catch { /* none */ }
+    seen.push({ name: m[1], body });
+  });
+  return seen;
+}
+async function staff(page: Page, fx: Fixtures = {}) {
+  const ops = [{ name: 'Spec Staff', has_pin: false }];
+  await stubSupabase(page, { sessions, customers, tags: [], customer_tags: [], queue_entries: [], bikes: [], staff_options: [], 'rpc:staff_operator_list': ops,
+    'rpc:staff_wallet_balances': [{ customer_id: 'c1', balance: 120 }], 'rpc:staff_wallet_moves': [], 'rpc:staff_wallet': WALLET, ...fx });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.waitForFunction('(S.customers||[]).length>0');
+  await page.evaluate(`S._opPins=${JSON.stringify(ops)};S._opPinsAt=Date.now();`);
+  await page.evaluate(`_cwLoad(true)`);
+  await page.waitForFunction('_cwOk()');
+}
+async function rider(page: Page, fx: Fixtures) {
+  await stubSupabase(page, { sessions, ...fx });
+  await page.addInitScript(() => {
+    localStorage.setItem('cq_session', JSON.stringify({ id: 'c1', name: 'Rana Rider', email: 'rana@example.test', phone: '+966500000021', height: 170, session_token: 'tok' }));
+  });
+  await page.goto('/');
+  await waitForSb(page);
+}
+
+test.describe('@staff:customers wallet', () => {
+  test('staff add money to an account: amount, how, then the server; a gift must say why', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { 'rpc:staff_wallet_change': { ok: true, customer_id: 'c1', balance: 170 } });
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    const row = page.locator('#am-cust-rows .am-row[data-cust="c1"]');
+    await expect(row.locator('.am-cw-btn.on')).toBeVisible();
+    await expect(page.locator('#am-cust-rows .am-row[data-cust="c2"] .am-cw-btn:not(.on)')).toBeVisible();
+    await row.locator('.am-cw-btn').click();
+    const dlg = page.getByRole('dialog', { name: /Wallet · Rana Rider/ });
+    await expect(dlg.locator('.cw-num')).toContainText('SAR 120');
+    await expect(dlg.locator('.cw-line')).toContainText('Money added');
+    await expect(dlg.locator('.cw-line')).toContainText('Gift for the race');
+
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect(dlg.locator('.cw-err')).toHaveText('Enter an amount.');
+    await dlg.locator('#cw-amt').fill('50');
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect(dlg.locator('.cw-err')).toHaveText('Choose how.');
+    await dlg.getByRole('button', { name: 'No money taken' }).click();
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect(dlg.locator('.cw-err')).toHaveText('Say why: no money moved.');
+    expect(seen.filter((c) => c.name === 'staff_wallet_change')).toHaveLength(0);
+
+    await dlg.getByRole('button', { name: 'Cash' }).click();
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_wallet_change').length).toBe(1);
+    const sent = seen.find((c) => c.name === 'staff_wallet_change')!.body;
+    expect(sent).toMatchObject({ p_customer: 'c1', p_amount: 50, p_method: 'cash' });
+    expect(sent.p_op_id).toBeTruthy();
+  });
+
+  test('taking money out sends a minus', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { 'rpc:staff_wallet_change': { ok: true, customer_id: 'c1', balance: 100 } });
+    await page.evaluate(`_cwOpen('c1')`);
+    const dlg = page.getByRole('dialog', { name: /Wallet · Rana Rider/ });
+    await expect(dlg.locator('.cw-num')).toContainText('SAR 120');
+    await dlg.locator('.cw-seg').getByRole('button', { name: 'Take money out' }).click();
+    await dlg.locator('#cw-amt').fill('20');
+    await dlg.getByRole('button', { name: 'Card' }).click();
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect.poll(() => seen.find((c) => c.name === 'staff_wallet_change')?.body.p_amount).toBe(-20);
+  });
+
+  test('Customers > Wallets: what is held and who holds it, and a search finds any account', async ({ page }) => {
+    await staff(page);
+    await page.evaluate(`setStaffTab('customers');setCustomersTab('wallets')`);
+    await expect(page).toHaveURL(/\/customers\/wallets$/);
+    await expect(page.locator('#tab-customers .dash-kpi').first()).toContainText('SAR 120');
+    await expect(page.locator('.cw-row')).toHaveCount(1);
+    await expect(page.locator('.cw-row')).toContainText('Rana Rider');
+    await page.locator('#cw-q').fill('omar');
+    await expect(page.locator('.cw-row')).toContainText('Omar Other');
+    await expect(page.locator('#cw-q')).toBeFocused();
+  });
+
+  test('the pay menu: from the wallet when it covers the ride; a paid ride refunds into it', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, {
+      queue_entries: [bk('q1', 1), bk('q2', 2, { paid: true, pay_method: 'card' }), bk('q3', 3, { price: 500 }), bk('q4', 4, { customer_id: null })],
+      'rpc:staff_wallet_pay_booking': { ok: true, paid: ['q1'], amount: 50, balance: 70 },
+      'rpc:staff_wallet_refund_booking': { ok: true, id: 'q2', amount: 50, balance: 170 },
+    });
+    const open = `(id,word)=>{const b=document.createElement('button');document.body.appendChild(b);showPayMenu(id,{timeStamp:performance.now(),currentTarget:b,target:b,stopPropagation(){}});
+      const o=[...document.querySelectorAll('.pay-menu-popup .pay-menu-opt')];if(word){o.find(x=>x.textContent.includes(word)).click();}return o.map(x=>x.textContent).join('|');}`;
+    const menu = (id: string, word = '') => page.evaluate(`(${open})(${JSON.stringify(id)},${JSON.stringify(word)})`) as Promise<string>;
+    expect(await menu('q3')).not.toContain('Pay from wallet'); // 120 does not cover 500
+    expect(await menu('q4')).not.toContain('allet'); // no account
+    expect(await menu('q1')).toContain('Pay from wallet · SAR 50');
+    await menu('q1', 'Pay from wallet');
+    await expect.poll(() => seen.find((c) => c.name === 'staff_wallet_pay_booking')?.body.p_booking_ids).toEqual(['q1']);
+
+    await menu('q2', 'Refund to wallet');
+    const ask = page.getByRole('dialog').filter({ hasText: 'Rana Rider' });
+    await ask.locator('.mny-chip').first().click();
+    await expect(ask.locator('#mny-mr-go')).toHaveCount(0); // into the wallet is the only way out of this one
+    await ask.locator('#mny-mr-wal').click();
+    await expect.poll(() => seen.find((c) => c.name === 'staff_wallet_refund_booking')?.body.p_booking_id).toBe('q2');
+  });
+
+  test('the close-out and the till: wallet money is neither card nor cash, and it balances', async ({ page }) => {
+    await staff(page, { queue_entries: [bk('q1', 1, { paid: true, pay_method: 'wallet' }), bk('q2', 2, { paid: true, pay_method: 'card' })] });
+    const r = await page.evaluate(`(()=>{const q=getQueue();return{split:_mnySplit(q.find(e=>e.id==='q1')),sum:_mnySum(q)}})()`) as { split: Record<string, number>; sum: Record<string, number> };
+    expect(r.split).toEqual({ card: 0, cash: 0, unknown: 0, wallet: 50 });
+    expect(r.sum).toEqual({ card: 50, cash: 0, unknown: 0, wallet: 50 });
+    const till = await page.evaluate(`(()=>{S._cwMoves=[
+      {kind:'topup',amount:100,method:'cash',session_id:'s1',created_at:new Date().toISOString()},
+      {kind:'takeout',amount:-20,method:'cash',session_id:'s1',created_at:new Date().toISOString()},
+      {kind:'topup',amount:70,method:'card',session_id:null,created_at:new Date().toISOString()},
+      {kind:'refund',amount:50,method:'card',card_part:50,session_id:'s1',created_at:new Date().toISOString()},
+      {kind:'refund',amount:9,method:null,card_part:null,session_id:'s1',created_at:new Date().toISOString()}];
+      return{ride:_cwTill({day:todayStr()},new Set(['s1'])),shop:_cwTill({day:todayStr(),shop:true})}})()`);
+    expect(till).toEqual({ ride: { cash: 80, card: 50 }, shop: { cash: 0, card: 70 } });
+  });
+
+  test('a database without the wallet: no button, no tab, no pay line, nothing refused', async ({ page }) => {
+    await stubSupabase(page, { sessions, customers, tags: [], customer_tags: [], queue_entries: [bk('q1', 1)], bikes: [], staff_options: [], 'rpc:staff_wallet_balances': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function in the schema cache' } } });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('(S.customers||[]).length>0');
+    await page.evaluate(`_cwLoad(true)`);
+    await page.waitForFunction('S._cwOff===true');
+    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await expect(page.locator('#am-cust-rows .am-row[data-cust="c1"]')).toBeVisible();
+    await expect(page.locator('.am-cw-btn')).toHaveCount(0);
+    await expect(page.locator('#tab-customers .cmy-nav')).not.toContainText('Wallets');
+  });
+});
+
+test.describe('@customer:account wallet', () => {
+  const mine = { balance: 120, rows: [{ id: 3, amount: 120, balance_after: 120, kind: 'refund', session_id: 's1', created_at: new Date().toISOString() }] };
+
+  test('My Account shows the balance and its lines, and never a staff note', async ({ page }) => {
+    await rider(page, { queue_entries: [], 'rpc:customer_wallet': mine });
+    await page.evaluate(`setCustTab('account')`);
+    await expect(page.locator('#cw-mine')).toBeVisible();
+    await expect(page.locator('#cw-mine .cw-mine-t')).toHaveText('Wallet');
+    await expect(page.locator('#cw-mine li')).toContainText('Refund');
+  });
+
+  test('a booking it covers has the button; paying asks first, then the card reads paid', async ({ page }) => {
+    const seen = calls(page);
+    await rider(page, {
+      queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': mine,
+      'rpc:customer_wallet_pay': { ok: true, paid: ['q1'], amount: 50, balance: 70 },
+    });
+    await page.evaluate(`setCustTab('myrides')`);
+    const btn = page.locator('.cw-pay-btn').first();
+    await expect(btn).toContainText('from my wallet');
+    await btn.click();
+    await expect(page.getByRole('dialog')).toContainText('from your wallet?');
+    expect(seen.some((c) => c.name === 'customer_wallet_pay')).toBe(false);
+    await page.getByRole('dialog').getByRole('button', { name: 'Pay', exact: true }).click();
+    await expect.poll(() => seen.find((c) => c.name === 'customer_wallet_pay')?.body).toMatchObject({ p_id: 'c1', p_token: 'tok', p_booking_ids: ['q1'] });
+    await expect(page.locator('.cw-pay-btn')).toHaveCount(0);
+  });
+
+  test('a wallet short of the amount says so; a free or unpaid-less card shows nothing', async ({ page }) => {
+    await rider(page, { queue_entries: [bk('q1', 1, { price: 500 })], 'rpc:my_bookings': [bk('q1', 1, { price: 500 })], 'rpc:customer_wallet': mine });
+    await page.evaluate(`setCustTab('myrides')`);
+    await expect(page.locator('.cw-pay-slot').first()).toContainText('not enough for this booking');
+    await expect(page.locator('.cw-pay-btn')).toHaveCount(0);
+  });
+
+  test('a database without the wallet draws nothing', async ({ page }) => {
+    await rider(page, { queue_entries: [bk('q1', 1)], 'rpc:my_bookings': [bk('q1', 1)], 'rpc:customer_wallet': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function in the schema cache' } } });
+    await page.evaluate(`setCustTab('account')`);
+    await page.waitForFunction('S._cwMineOff===true');
+    await expect(page.locator('#cw-mine')).toBeHidden();
+  });
+});

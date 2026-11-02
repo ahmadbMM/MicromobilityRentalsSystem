@@ -468,6 +468,7 @@ export function gateHover(css) {
 export const STAFF_PARTS = {
   analytics: ['renderAnalytics'], community: ['renderCommunity', 'renderCustomers', '_ahActShow', '_bdgStrips'], bikes: ['renderBikes'], cashier: ['renderCashier', '_eonOpen'],
   catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
+  wallet: ['_cwOpen', '_cwDeskPay', '_cwDeskRefund'], // 2026-11-02: an account's wallet, and the desk paying from it or refunding into it
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap

@@ -1171,6 +1171,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tkHelmetLine:'Helmets are required. One comes with every bike.',
   tkWhereLabel:'Where',
   tkPayAmount:'Pay {0} at the booth when you arrive.',
+  cwTitle:'Wallet',cwMineNote:'Refunds and money added at the booth land here. Use it to pay for your bookings.',cwEmpty:'Nothing here yet.',cwPayBtn:'Pay {0} from my wallet',cwPayAsk:'Pay {0} from your wallet? {1} will be left.',cwPayGo:'Pay',cwShortNote:'Your wallet holds {0}: not enough for this booking.',cwKTopup:'Money added',cwKAdjust:'Adjustment',cwKTakeout:'Money taken out',cwKRefund:'Refund',cwKSpend:'Booking paid',cwKReturn:'Back from a booking',cwKMerge:'Moved between accounts',cwErrShort:'Not enough in the wallet.',cwErrOpen:'This booking can’t be paid from the wallet.',cwAdd:'Add money',cwOut:'Take money out',cwAmount:'Amount (SAR)',cwHow:'How',cwTransfer:'Bank transfer',cwNoTaken:'No money taken',cwNoGiven:'No money given back',cwNote:'Note',cwNoteReq:'Why (required)',cwHeld:'Held in wallets',cwAccounts:'Accounts with money',cwSearch:'Find any account: name, phone or email',cwNone:'No account holds money. Search above to add some.',cwSearchNone:'No account matches.',cwTabWallets:'Wallets',cwRefundTo:'Refund to wallet',cwFromWallet:'Pay from wallet',cwRefundBody:'Back into {0}’s wallet. The booking goes back to unpaid.',cwErrAmount:'Enter an amount.',cwErrHow:'Choose how.',cwErrNote:'Say why: no money moved.',cwErrOffline:'Wallet changes need a connection.',cwErrNoAcc:'This has no account to hold the money.',cwErrRace:'That money goes to the race’s organiser.',cwErrMoney:'This account still has money in its wallet. Take it out first.',cwTillIncl:'Wallet money in these',cwMnyUnknown:'Wallet, or method not recorded',
   tkBookedTitle:'You’re booked',
   tkBookedSub:'Show this code at the booth. It’s in Bookings too.',
   tkReservedTitle:'Reservation received',
@@ -1764,6 +1765,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tkHelmetLine:'الخوذة إلزامية، وتأتي خوذة مع كل دراجة.',
   tkWhereLabel:'المكان',
   tkPayAmount:'ادفع {0} عند الكشك حين تصل.',
+  cwTitle:'المحفظة',cwMineNote:'هنا تصل المبالغ المستردة والمبالغ المضافة عند الكشك. استخدمها لدفع حجوزاتك.',cwEmpty:'لا يوجد شيء هنا بعد.',cwPayBtn:'ادفع {0} من محفظتي',cwPayAsk:'هل تدفع {0} من محفظتك؟ سيتبقى {1}.',cwPayGo:'ادفع',cwShortNote:'محفظتك فيها {0}: لا يكفي لهذا الحجز.',cwKTopup:'مبلغ مضاف',cwKAdjust:'تعديل',cwKTakeout:'مبلغ مسحوب',cwKRefund:'استرداد',cwKSpend:'دفع حجز',cwKReturn:'مبلغ عائد من حجز',cwKMerge:'نُقل بين الحسابات',cwErrShort:'الرصيد في المحفظة لا يكفي.',cwErrOpen:'لا يمكن دفع هذا الحجز من المحفظة.',cwAdd:'إضافة مبلغ',cwOut:'سحب مبلغ',cwAmount:'المبلغ (ريال)',cwHow:'الطريقة',cwTransfer:'تحويل بنكي',cwNoTaken:'بدون استلام مبلغ',cwNoGiven:'بدون إعادة مبلغ',cwNote:'ملاحظة',cwNoteReq:'السبب (مطلوب)',cwHeld:'الرصيد في المحافظ',cwAccounts:'حسابات لديها رصيد',cwSearch:'ابحث عن أي حساب: الاسم أو الجوال أو البريد',cwNone:'لا يوجد حساب لديه رصيد. ابحث أعلاه لإضافة مبلغ.',cwSearchNone:'لا يوجد حساب مطابق.',cwTabWallets:'المحافظ',cwRefundTo:'استرداد إلى المحفظة',cwFromWallet:'الدفع من المحفظة',cwRefundBody:'يعود المبلغ إلى محفظة {0}. يعود الحجز غير مدفوع.',cwErrAmount:'أدخل المبلغ.',cwErrHow:'اختر الطريقة.',cwErrNote:'اذكر السبب: لم يتحرك أي مبلغ.',cwErrOffline:'تحتاج تغييرات المحفظة إلى اتصال.',cwErrNoAcc:'لا يوجد حساب مرتبط لحفظ المبلغ.',cwErrRace:'هذا المبلغ يذهب إلى منظّم السباق.',cwErrMoney:'لا يزال في محفظة هذا الحساب رصيد. اسحبه أولاً.',cwTillIncl:'مبالغ المحفظة ضمن هذه',cwMnyUnknown:'محفظة أو طريقة غير مسجّلة',
   tkBookedTitle:'تم حجزك',
   tkBookedSub:'اعرض هذا الرمز عند الكشك. تجده أيضاً في الحجوزات.',
   tkReservedTitle:'استلمنا طلب حجزك',
@@ -7258,7 +7260,7 @@ const SUB_PATHS={
   // Customers and Community are two sections since 2026-10-07 (the owner: "make a separate customer management/dashboard
   // page and a separate community management dashboard page"); the leaderboard and statistics went to Analytics.
   // Community's accounts list is its members: /community/members.
-  customers:{overview:'',accounts:'accounts',flagged:'flagged',duplicates:'duplicates',activity:'activity'},
+  customers:{overview:'',accounts:'accounts',flagged:'flagged',wallets:'wallets',duplicates:'duplicates',activity:'activity'},
   community:{overview:'',accounts:'members',flagged:'flagged',tags:'tags',badges:'badges',applications:'applications',learning:'applications/learning',birthdays:'birthdays'},
   catalog:{models:'',categories:'categories',fields:'fields'},
   vendors:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
@@ -11032,6 +11034,7 @@ function goStaff(){
   _pushNav(); // History paints when its tab opens (setStaffTab), not here
   _wakeSync();
   if(_depOn())_depLoad().catch(()=>{}); // the deposits the desk holds (2026-10-09)
+  _cwLoad().catch(()=>{}); // who has money in a wallet, for the pay menu (2026-11-02)
   if(_kioskOn())_kioskOpen(); // a desk tablet left in kiosk mode comes back to it (2026-10-09)
   // The outbox and the synced copy live in this browser's storage: ask once that it is kept when the
   // device runs short of space (feature-detected; the browser may say no, which changes nothing).
@@ -13186,6 +13189,7 @@ function renderRegister(){
       </div>
       ${_vlOf(tkt)?`<div class="vl-tk-wrap">${_vlTkHtml([tkt],_sess,false)}</div>`:''}
       ${(_owe>0&&!_isRace(_sess))?`<div class="price-note tk-owe">${esc(t('tkPayAmount').replace('{0}',_sar(_owe)))}</div>`:''}
+      ${(_owe>0)?_cwPaySlot([tkt],_sess):''}
       ${(!_wl&&_needsBike(_sess))?`<div class="price-note">${t(_commT?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
       ${_spotHeld(_sess)?_revealNoteHtml(_sess):''}
       <div class="cu-tk-acts">
@@ -14826,6 +14830,7 @@ function renderBookingTicket(entries,opts){
         <span class="cu-tk-total-v"><bdi>${_comm?t('freeLabel'):esc(_sar(total+_due.reduce((s,e)=>s+addonsCost(entryAddons(e)),0)))}</bdi></span>
       </div>
       ${(!past&&!_comm&&!_allWl&&!_isRace(sess)&&g.some(e=>!e.paid&&(e.price??DEFAULT_PRICE)>0))?`<div class="price-note">${t('payAtBoothLine')}</div>`:''}
+      ${(!past&&!_comm&&!_allWl)?_cwPaySlot(g,sess):''}
       ${(!past&&!_allWl&&_needsBike(sess))?`<div class="price-note">${t(_comm?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
     </div>
     ${past?'':`<div class="cu-tk-btns">
@@ -15966,6 +15971,62 @@ function _wlToggle(k){
   // A pass that came out above the screen, or low on it, is brought up to be read.
   if(S._wlOpen.sid){const r=el.getBoundingClientRect(),bar=document.getElementById('topbar');if(r.top<(bar?bar.offsetHeight:0)||r.top>window.innerHeight*.6)el.scrollIntoView({block:'start',behavior:_sb()});}
 }
+// ── The wallet, rider side (2026-11-02). customer_wallet answers with the balance and the last lines; before the
+// migration (no such function) or for a bad token nothing is drawn. The My Bookings card and the ticket carry a
+// slot (_cwPaySlot) that is filled from the same answer; the server decides what may be paid (customer_wallet_pay).
+const CW_RIDER_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge'};
+function _cwMineLoad(cust,force){
+  if(!cust||!cust.session_token||!sb||S._cwMineOff)return;
+  if(S._cwMineBusy||(!force&&S._cwMineAt&&Date.now()-S._cwMineAt<6e4&&S._cwMine&&S._cwMine.id===cust.id)){_cwMinePaint();return;}
+  S._cwMineBusy=true;
+  Promise.resolve(sb.rpc('customer_wallet',{p_id:cust.id,p_token:cust.session_token})).then(({data,error})=>{
+    S._cwMineBusy=false;
+    if(error||!data||data.balance===undefined){if(error&&/function|schema cache|PGRST202/i.test(String(error.message||error.code||'')))S._cwMineOff=true;return;}
+    S._cwMineAt=Date.now();S._cwMine={id:cust.id,bal:Number(data.balance)||0,rows:Array.isArray(data.rows)?data.rows:[]};
+    _cwMinePaint();
+  },()=>{S._cwMineBusy=false;});
+}
+function _cwMinePaint(){
+  const w=S._cwMine,cur=S.loggedIn||getSession();
+  if(!w||!cur||w.id!==cur.id)return;
+  const h=document.getElementById('cw-mine');
+  if(h){
+    h.hidden=false;
+    const when=x=>shortDate(_ksaYmd(x.created_at));
+    h.innerHTML=`<div class="cw-mine-top"><span class="cw-mine-t">${t('cwTitle')}</span><span class="cw-mine-n"><bdi>${esc(_sar(w.bal))}</bdi></span></div>
+      <p class="cw-mine-note">${t('cwMineNote')}</p>
+      ${w.rows.length?`<ul class="cw-mine-rows">${w.rows.slice(0,10).map(x=>{const a=Number(x.amount)||0;return`<li><span>${esc(t(CW_RIDER_KIND[x.kind]||'cwKAdjust'))}<small>${esc(when(x))}</small></span><strong class="${a>0?'cw-in':''}"><bdi>${a>0?'+':'−'}${esc(_sar(Math.abs(a)))}</bdi></strong></li>`;}).join('')}</ul>`:`<p class="cw-mine-note">${t('cwEmpty')}</p>`}`;
+  }
+  document.querySelectorAll('.cw-pay-slot').forEach(el=>{
+    const amt=Number(el.dataset.amt)||0;
+    if(!(amt>0)||!(w.bal>0)){el.innerHTML='';return;}
+    el.innerHTML=w.bal>=amt?`<button type="button" class="btn-primary cw-pay-btn" data-on-click="${_on("_cwPay",el.dataset.ids,amt)}">${esc(t('cwPayBtn').replace('{0}',_sar(amt)))}</button>`
+      :`<div class="price-note">${esc(t('cwShortNote').replace('{0}',_sar(w.bal)))}</div>`;
+  });
+}
+// rows: the bookings on a card. What the rider still owes on them, as the card says it: seated, unpaid, not free.
+function _cwPaySlot(rows,sess){
+  const cur=S.loggedIn||getSession();
+  if(!cur||S._cwMineOff||!sess||_isRace(sess)||_rideKind(sess)==='petromin')return'';
+  const due=(rows||[]).filter(e=>!e.paid&&(e.status==='waiting'||e.status==='active')&&_bookingAmount(e)>0);
+  if(!due.length)return'';
+  setTimeout(()=>_cwMineLoad(cur),0);
+  return`<div class="cw-pay-slot" data-ids="${esc(due.map(e=>e.id).join(','))}" data-amt="${Math.round(due.reduce((a,e)=>a+_bookingAmount(e),0)*100)/100}"></div>`;
+}
+function _cwPay(ids,amt){
+  const w=S._cwMine,cur=S.loggedIn||getSession();if(!w||!cur)return;
+  confirmDialog({title:t('cwTitle'),body:esc(t('cwPayAsk').replace('{0}',_sar(amt)).replace('{1}',_sar(Math.round((w.bal-amt)*100)/100))),confirmLabel:t('cwPayGo'),confirmClass:'btn-primary',onConfirm:async()=>{
+    const list=String(ids).split(',').filter(Boolean);
+    let r;try{r=await sb.rpc('customer_wallet_pay',{p_id:cur.id,p_token:cur.session_token,p_booking_ids:list});}catch(e){r={error:e};}
+    if(r.error){toast(_cwRiderSay(r.error),'error');_cwMineLoad(cur,true);return;}
+    list.forEach(id=>{const e=_qGet(id);if(e){e.paid=true;e.pay_method='wallet';e.card_amount=null;}});
+    if(Array.isArray(S.queue))S.queue=S.queue.slice();
+    haptic();toast('✓ '+t('paidLabel'));
+    if(S.custTab==='myrides')renderMyRides();else setCustTab('myrides');
+    _cwMineLoad(cur,true);
+  }});
+}
+function _cwRiderSay(e){const m=String((e&&e.message)||'');return /WALLET_SHORT/.test(m)?t('cwErrShort'):/WALLET_|NOT_FOUND/.test(m)?t('cwErrOpen'):t('errConnection');}
 function renderMyRides(){
   const cust=S.loggedIn;
   if(!cust){document.getElementById('tab-myrides').innerHTML='';return;}
@@ -16013,6 +16074,7 @@ function renderMyRides(){
 function renderAccount(){
   const cust=S.loggedIn||getSession();
   if(!cust){document.getElementById('tab-account').innerHTML='';return;}
+  S._cwMineAt=0;_cwMineLoad(cust); // the wallet's card, painted into its place when the answer comes
   setTimeout(()=>{try{_ambMineEnsure(cust);}catch(_){}},0); // the ambassador's card, above the profile, once the form is painted
   _bdgMineLoad(cust); // the badges staff gave, painted into the badge row when they come
   setTimeout(()=>{_bdgCelebrate();_bdgProfCheer();},0); // one given since this device last showed one, from the copy in hand; Race Ready
@@ -16068,6 +16130,7 @@ function renderAccount(){
   document.getElementById('tab-account').innerHTML=`
     <h1 class="page-title">${t('accountTitle')}</h1>
     <div class="page-sub">${t('accountSub')}</div>
+    <div id="cw-mine" class="cw-mine" hidden></div>
     ${_seasonDashboard(cust)}
     ${(()=>{
       // What the profile still lacks, said in words (2026-10-10; it was a "56% complete" meter): nothing
@@ -17172,6 +17235,7 @@ const _ART={
   search:'<circle opacity=".35" cx="10.5" cy="10.5" r="6.5"/><path d="M10.5 6.5a4 4 0 0 1 4 4h-2a2 2 0 0 0-2-2v-2Zm5.6 8.1 5 5-1.5 1.5-5-5a7 7 0 0 0 1.5-1.5Z"/>',
   bike:'<circle opacity=".35" cx="5.5" cy="16.5" r="4"/><circle opacity=".35" cx="18.5" cy="16.5" r="4"/><path d="M9.8 7h4.6v1.6h-1.5l3.2 5.4a2.5 2.5 0 1 1-1.4.8l-1.1-1.9-3.2 3.9a2.5 2.5 0 1 1-1.2-1l3.6-4.4-1.5-2.5-1.5.1V7Z"/>',
   cart:'<path opacity=".35" d="M1.5 3h3.3l.7 3H21a1 1 0 0 1 1 1.2l-1.4 6A1.6 1.6 0 0 1 19 14.5H8.4L7 8 6.1 5H1.5V3Z"/><path d="M8.6 16.4h11v2h-11zM8 22.5a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6Zm10 0a1.8 1.8 0 1 1 0-3.6 1.8 1.8 0 0 1 0 3.6Z"/>',
+  wallet:'<path opacity=".35" d="M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 7.5C3 5.6 4.6 4 6.5 4H17v3H3zM16 12h5v4h-5a2 2 0 1 1 0-4z"/>',
   box:'<path opacity=".35" d="M3 7.6 12 3l9 4.6v8.8L12 21l-9-4.6V7.6Z"/><path d="m12 3 9 4.6-9 4.6-9-4.6L12 3Zm0 9.2 9-4.6v2.2l-9 4.6-9-4.6V7.6l9 4.6Z"/>',
   people:'<circle cx="9" cy="7.4" r="3.9"/><path opacity=".35" d="M9 12.8c4.3 0 7.1 2.3 7.1 6H1.9c0-3.7 2.8-6 7.1-6Zm8.4-6.9a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4Zm0 7.5c3.1 0 4.9 1.7 4.9 4.4h-4.2c0-1.8-.7-3.3-1.9-4.3l1.2-.1Z"/>',
   chart:'<path opacity=".35" d="M3 3h2v16.5h16.5v2H3V3Z"/><path d="M7.5 15.5h2.6V19H7.5zm4.4-5.5h2.6v9h-2.6zm4.4-4h2.6v13h-2.6z"/>',
@@ -23247,6 +23311,7 @@ function renderCustFormModal(){
           ${(()=>{const _tm=_tagsById();const myCT=(S.customerTags||[]).filter(ct=>ct.customer_id===d.id&&_tm[ct.tag_id]);return myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):`<span class="am-meta">${t('amNoTags')}</span>`;})()}
           <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_custJumpTags",d.id)}">${t('amEditTags')}</button>
         </div></div>`}
+      ${isCreate?'':_cwSecHtml(d.id)}
       ${isCreate?'':_bdgSecHtml(d.id)}
       <div class="modal-footer">
         ${(!isCreate&&isAdmin())?`<button class="btn-red cmy-mie-auto" data-on-click="${_on("deleteCustomerAccount",d.id)}">${t('naDelBtn')}</button>`:''}
@@ -26904,11 +26969,12 @@ function showPayMenu(id,evt){
     {label:`✓ ${t('paidLabel')}`,mode:'card',active:entry.paid&&!isHouse}, // card is the only way to pay; rows paid before by cash/split still read as paid
     {label:` ${t('onTheHouseLabel')} · SAR 0`,mode:'house',active:isHouse},
     {label:`✎ ${t('editPriceBtn')}…`,mode:'price',active:false}, // the pill is the whole control: price lives here too
+    ..._cwPayOpts(entry),
   ];
   const menu=document.createElement('div');
   menu.className='pay-menu-popup';
   menu.style.cssText='position:fixed;z-index:9001;background:var(--s2);border:1.5px solid var(--border);border-radius:4px;padding:5px;min-width:200px;box-shadow:0 6px 24px rgba(0,0,0,.6)';
-  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" aria-pressed="${!!(o.active)}"${o.mode==='price'?' data-act="1"':''} data-on-click="${_on("_on_showPayMenu_1",_EV,_EL,o.mode==='price'?['showEditPriceModal',id]:['togglePayment',id,o.mode])}">${o.label}</button>`).join('');
+  menu.innerHTML=opts.map(o=>`<button class="pay-menu-opt${o.active?' active':''}" aria-pressed="${!!(o.active)}"${o.mode==='price'?' data-act="1"':''} data-on-click="${_on("_on_showPayMenu_1",_EV,_EL,o.mode==='price'?['showEditPriceModal',id]:o.mode==='wpay'?['_cwDeskPay',id]:o.mode==='wrefund'?['_cwDeskRefund',id]:['togglePayment',id,o.mode])}">${o.label}</button>`).join('');
   _popMenu(menu,evt);
 }
 // On the house through the server (2026-10-09, migration 20261009205000): staff_set_house checks the
@@ -27180,7 +27246,7 @@ async function _gatedRpc(what,fn,opt){
 }
 // The codes the guardrail RPCs raise, in the desk's words; anything else is the sentence the
 // function wrote (_rpcMessage).
-const RPC_SAY={NOT_APPROVED:'qYNotAppr',HAS_BOOKINGS:'errHasBookings',HAS_SALES:'errHasSales',BIKE_IN_USE:'errBikeInUse',BIKE_ASSIGNED:'errBikeInUse',BIKE_HAS_HISTORY:'errBikeHasHistory',PRICE_RANGE:'errValidPrice',ADMIN_ONLY:'adminOnlyMsg',PIN_REQUIRED:'pinRequiredMsg',MANAGER_REQUIRED:'mgrNeededMsg',CAP_REFUND:'capNoRefund',LAST_ADMIN:'tmLastAdmin',NOT_YOURSELF:'tmNotYourself',EMAIL_TAKEN:'errEmailExists',BAD_EMAIL:'errEmailBad',STAFF_ONLY:'errWritePerm',NOT_FOUND:'errSomethingWrong'};
+const RPC_SAY={NOT_APPROVED:'qYNotAppr',HAS_BOOKINGS:'errHasBookings',HAS_SALES:'errHasSales',BIKE_IN_USE:'errBikeInUse',BIKE_ASSIGNED:'errBikeInUse',BIKE_HAS_HISTORY:'errBikeHasHistory',PRICE_RANGE:'errValidPrice',ADMIN_ONLY:'adminOnlyMsg',PIN_REQUIRED:'pinRequiredMsg',MANAGER_REQUIRED:'mgrNeededMsg',CAP_REFUND:'capNoRefund',WALLET_HAS_MONEY:'cwErrMoney',LAST_ADMIN:'tmLastAdmin',NOT_YOURSELF:'tmNotYourself',EMAIL_TAKEN:'errEmailExists',BAD_EMAIL:'errEmailBad',STAFF_ONLY:'errWritePerm',NOT_FOUND:'errSomethingWrong'};
 function _rpcSay(err){const m=String((err&&err.message)||'');const k=Object.keys(RPC_SAY).find(c=>m.indexOf(c)===0);return k?t(RPC_SAY[k]):_rpcMessage(err);}
 // No operator on the device: the gate opens first (2026-10-04 audit). The action goes ahead only
 // once a name is chosen there - its PIN, when it has one, is the approval - and is refused when the
@@ -33045,7 +33111,7 @@ function printCloseout(){
   // Card, cash and Method not recorded over the rider's WHOLE take (rental + add-ons), by _mnySplit (the
   // staff review, 2026-10-28, S10-money-01). Cash was "collected minus card", so a paid rider with no method
   // was counted into the drawer and the balance check below could never catch it.
-  const rs=_mnySum(rentPaid),rentCard=rs.card,rentCash=rs.cash,rentUnk=rs.unknown;
+  const rs=_mnySum(rentPaid),rentCard=rs.card,rentCash=rs.cash,rentUnk=rs.unknown,rentWal=rs.wallet;
   let salesLines=[];daySessions.forEach(s=>{salesLines=salesLines.concat(_cashSessionLines(s.id));});
   const st=_salesTotals(salesLines);
   const grandCollected=r2(rentCollected+st.collected+addonCollected),grandPending=r2(rentPending+st.pending+addonPending);
@@ -33057,25 +33123,25 @@ function printCloseout(){
   // (a rider or sale marked paid with no method - shown as Method not recorded, never cash - or a refund that did not
   // restock) before the drawer is counted.
   const grandCard=r2(rentCard+coCard),grandCash=r2(rentCash+coCash); // add-on money already sits inside rentCard/rentCash by pay method
-  const reconDelta=r2(grandCollected-(grandCard+grandCash));
+  const reconDelta=r2(grandCollected-(grandCard+grandCash+rentWal));
   // money rows print "SAR 1,310.00"; a count (the riders) prints the bare number - it read "SAR 45".
   // Figures are black (2026-10-01): blue card, green cash and an amber "Pending SAR 0" made a
   // balanced day look like a list of problems. Amber is kept for a pending sum above zero; card and
   // cash sit indented under what they split (rp-sub).
   const row=(label,val,o)=>{o=o||{};const cls=['rp-row',o.sub?'rp-sub':'',o.warn&&val>0?'rp-warn':''].filter(Boolean).join(' ');
     return`<div class="${cls}"><span>${label}</span><strong>${o.count?val:_rpSar(val)}</strong></div>`;};
-  const split=(card,cash,unk)=>row(t('cashCard'),card,{sub:1})+row(t('cashCash'),cash,{sub:1})+(unk>0?row(`<span class="rp-amber">${t('mnyUnknown')}</span>`,unk,{sub:1,warn:1}):'');
+  const split=(card,cash,unk,wal)=>row(t('cashCard'),card,{sub:1})+row(t('cashCash'),cash,{sub:1})+(wal>0?row(t('cwTitle'),wal,{sub:1}):'')+(unk>0?row(`<span class="rp-amber">${t('mnyUnknown')}</span>`,unk,{sub:1,warn:1}):'');
   const catRows=st.cats.map(c=>`<tr><td class="rp-name">${esc(_invCatLabel(c.cat))}</td><td class="rp-tc">${c.qty}</td><td class="rp-te">${_rpAmt(c.value)}</td></tr>`).join('');
   // Nothing sold: one quiet line, not a block of zeros.
   const sold=st.cats.length||st.collected>0||st.pending>0||st.team>0||st.free>0||st.discount>0||st.refunded>0;
   const body=`
     <h2>${t('coRentals')}</h2>
-    ${row(t('printTotalRiders'),rentEntries.length,{count:1})}${row(t('printCollected'),rentCollected)}${rentCard>0||rentUnk>0?split(rentCard,rentCash,rentUnk):''}${row(t('printPending'),rentPending,{warn:1})}${toOrgSAR>0?row(t('vtColPaid'),toOrgSAR):''}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected)+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,{warn:1}):''):''}
+    ${row(t('printTotalRiders'),rentEntries.length,{count:1})}${row(t('printCollected'),rentCollected)}${rentCard>0||rentUnk>0||rentWal>0?split(rentCard,rentCash,rentUnk,rentWal):''}${row(t('printPending'),rentPending,{warn:1})}${toOrgSAR>0?row(t('vtColPaid'),toOrgSAR):''}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected)+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,{warn:1}):''):''}
     <h2>${t('coSales')}</h2>
     ${sold?`${st.cats.length?`<table><thead><tr><th class="rp-ts">${t('invCategory')}</th><th class="rp-tc">${t('cashQtyCol')}</th><th class="rp-te">${t('repValueSar')}</th></tr></thead><tbody>${catRows}</tbody></table>`:''}
     <div class="rp-mt8">${row(t('printCollected'),st.collected)}${(coCard>0||coCash>0)?split(coCard,coCash):''}${st.pending>0?row(t('printPending'),st.pending,{warn:1}):''}${st.team>0?row(t('payTeam'),st.team):''}${st.free>0?row(t('onTheHouseLabel'),st.free):''}${st.discount>0?row(t('cashDiscount'),st.discount):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,{warn:1}):''}</div>`
     :`<div class="rp-none">${t('coNoSales')}</div>`}
-    <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected)}${grandCollected>0?split(grandCard,grandCash,rentUnk):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,{warn:1})}
+    <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected)}${grandCollected>0?split(grandCard,grandCash,rentUnk,rentWal):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,{warn:1})}
     ${Math.abs(reconDelta)>=0.01?`<div class="rp-recon-off"><span>${t('coReconOff')}</span><span>${_rpSar(reconDelta)}</span></div>`:`<div class="rp-recon-ok">${t('coReconOk')} &#x2713;</div>`}</div>`;
   const html=_reportShell({kind:t('closeoutTitle'),title:t('closeoutTitle'),subtitle:`${dayLabel(sel.day)} &middot; ${shortDate(date)}${_bfAt(sel)?` &middot; ${esc(_bfAt(sel))}`:''}`,body,maxWidth:'560px'});
   _openReport(html,620,800);
@@ -33194,6 +33260,7 @@ function printSessionReport(km){
     const m=e.pay_method==='card'?t('cashCard')
       :e.pay_method==='split'?`${t('splitWord')} (${e.card_amount||0} ${t('cashCard')})`
       :e.pay_method==='transfer'?t('vtColPaid')
+      :e.pay_method==='wallet'?t('cwTitle')
       :e.pay_method==='cash'?t('cashCash'):`<span class="rp-amber">${t('mnyUnknown')}</span>`; // no method is not cash
     return`${_rpAmt(price)}<span class="rp-pm">${m}</span>`;
   };
@@ -39257,6 +39324,7 @@ function _ahEditAccount(id){
 // of this rider's bookings actually changed, so a busy night does not keep rebuilding it.
 function _ahRefresh(){if(S._ah)_ahRender();}
 // The account's badges, in this window and the editor: the section only; the Community part draws them (_bdgStrips).
+function _cwSecHtml(cid){return _cwOk()?`<div class="bdg-strip-sec cw-sec"><div class="bdg-strip-h">${t('cwTitle')}</div><div class="cw-sec-row"><span class="cw-sec-num">${_money(_cwBal(cid))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_cwOpen",cid)}">${t(_can('refund')?'cwAdd':'cwTitle')}</button></div></div>`:'';}
 function _bdgSecHtml(cid){return`<div class="bdg-strip-sec"><div class="bdg-strip-h">${t('mrBadgesTitle')}</div><div class="bdg-strip-host" data-cid="${esc(cid)}"><span class="am-meta">${t('loadingLabel')}</span></div></div>`;}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ahRender_1(event,el){if(event.target===el)closeCustomerProfile()}
@@ -39359,6 +39427,7 @@ function _ahRender(force){
         ${kpi(`${_money(Math.round(spent*100)/100)}`,t('custTotalSpent'))}
       </div>
       ${facts?`<div class="ah-facts">${facts}</div>`:''}
+      ${c?_cwSecHtml(c.id):''}
       ${c?_bdgSecHtml(c.id):''}
       <div class="ah-sec">${t('ahCurrent')}${cur.length?` <span class="ah-n">${cur.length}</span>`:''}</div>
       ${cur.length?cur.map(card).join(''):`<div class="ah-empty">${t('ahNoCurrent')}</div>`}
@@ -44568,12 +44637,13 @@ function _paidToOrg(e){return !!e&&!!e.paid&&e.pay_method==='transfer';}
 // till and Analytics split by it; the caller picks the paid rows. The organiser's money (_paidToOrg) is
 // none of the three. _mnySum adds up rows, to the cent.
 function _mnySplit(e){
-  if(_paidToOrg(e))return{card:0,cash:0,unknown:0};
+  if(_paidToOrg(e))return{card:0,cash:0,unknown:0,wallet:0};
   const p=_bookingAmount(e);
+  if(e.pay_method==='wallet')return{card:0,cash:0,unknown:0,wallet:p}; // revenue when spent, and no money moved tonight (2026-11-02)
   if(e.card_amount!=null){const c=Math.min(Math.max(0,Number(e.card_amount)||0),p);return{card:c,cash:p-c,unknown:0};}
   return e.pay_method==='card'?{card:p,cash:0,unknown:0}:e.pay_method==='cash'?{card:0,cash:p,unknown:0}:{card:0,cash:0,unknown:p};
 }
-function _mnySum(rows){const o={card:0,cash:0,unknown:0};(rows||[]).forEach(e=>{const x=_mnySplit(e);o.card+=x.card;o.cash+=x.cash;o.unknown+=x.unknown;});for(const k in o)o[k]=Math.round(o[k]*100)/100;return o;}
+function _mnySum(rows){const o={card:0,cash:0,unknown:0,wallet:0};(rows||[]).forEach(e=>{const x=_mnySplit(e);o.card+=x.card;o.cash+=x.cash;o.unknown+=x.unknown;o.wallet+=x.wallet||0;});for(const k in o)o[k]=Math.round(o[k]*100)/100;return o;}
 // Sales rung up on bookings (the Cashier pop-up, src 'rental'): a paid line says how since 2026-10-28 (method
 // 'card' | 'cash', S05-core5-08); a line without one is cash, as they all were.
 function _mnyPurch(lines){const r=(lines||[]).filter(l=>l.src==='rental'),card=_salesTotals(r.filter(l=>l.method==='card')).collected;return{card,cash:Math.round((_salesTotals(r).collected-card)*100)/100};}
@@ -45225,6 +45295,21 @@ async function _salesRefund(key,rows,what,reason){
   if(r.error){S.cashSales=had;toast(_errMessage(r.error),'error');return false;}
   return{restock:_rcRestockOf('refund',r.data)};
 }
+// The receipt's money into the wallet of the account it was sold to (2026-11-02). Never queued: a balance is
+// only ever what the server says.
+async function _salesRefundWallet(key,rows,reason){
+  if(_roNow()){_roRefusal();return false;}
+  if(!_can('refund')){toast(t('capNoRefund'),'error');return false;}
+  if(_isOffline()){toast(t('cwErrOffline'),'error');return false;}
+  const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100;
+  const r=await _gatedRpc(t('cwRefundTo'),a=>_rpcOp('staff_wallet_refund_receipt',{p_receipt_id:key,p_reason:reason?String(reason).slice(0,300):null,...a,p_op_id:opId},true),{kind:'refund',amount:amt});
+  if(r===null)return false;
+  if(r.error){toast(_cwSay(r.error),'error');return false;}
+  const now=new Date().toISOString();
+  S.cashSales=(S.cashSales||[]).map(x=>(x.receipt_id||x.id)===key&&x.pay!=='refunded'?{...x,pay:'refunded',refunded_at:now}:x);
+  _cwLoad(true).catch(()=>{});
+  return{restock:_rcRestockOf('refund',r.data)};
+}
 // A sale the server holds as voided is not a sale: kept out of the ledger wherever it is read.
 const _saleLive=r=>!(r&&r.voided_at);
 // The outbox's ops laid over the ledger just read, so a sale, void or refund still waiting to be
@@ -45464,10 +45549,10 @@ async function _ctVoidReceipt(key){
 // Refund: keep the receipt in the ledger as an audit record (pay='refunded'), restock items
 async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
-  const why=await _askMoneyReason('refund',t('cashRefundConfirm'));
+  const why=await _askMoneyReason('refund',t('cashRefundConfirm'),_cwOk()&&(S.cashSales||[]).some(r=>(r.receipt_id||r.id)===key&&r.customer_id));
   if(!why)return;
   const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
-  const v=await _salesRefund(key,all,t('cashRefund'),why.v);
+  const v=why.toWallet?await _salesRefundWallet(key,all,why.v):await _salesRefund(key,all,t('cashRefund'),why.v);
   if(!v){renderCashier();return;} // not stored: not refunded, not restocked
   _rcLog(t('cashRefund'),all,` · ${why.txt}`,'refund',key); // the refund is stored: logged now, whatever the restock below does
   await _addonStockBatch(v.restock,1); // what the server refunded (_rcRestockOf), summed per item
@@ -45770,10 +45855,10 @@ function _mnyFrame(id,title,body,foot,wide){
 // "<code>" or "<code>: <note>", so a report reads it in its own language (_moneyReasonText). Resolves
 // {v: what is stored, txt: the same in this screen's language, for the log line}, or null.
 const MR_CODES={void:['mistake','wrong_item','wrong_amount','duplicate','changed_mind','test','other'],refund:['returned','faulty','overcharged','not_given','changed_mind','other']};
-function _askMoneyReason(kind,bodyHtml){
+function _askMoneyReason(kind,bodyHtml,toWallet,onlyWallet){
   return new Promise(res=>{
     if(S._mnyRes){const r=S._mnyRes;S._mnyRes=null;r(null);}
-    S._mr={kind:kind==='refund'?'refund':'void',code:'',note:'',body:bodyHtml||''};
+    S._mr={kind:kind==='refund'?'refund':'void',code:'',note:'',body:bodyHtml||'',toWallet:!!toWallet,onlyWallet:!!onlyWallet};
     _mrDraw();S._mnyRes=res;
   });
 }
@@ -45790,15 +45875,16 @@ function _mrDraw(){
      <label class="mny-lbl" for="mny-mr-note">${t(r.code==='other'?'mrNoteReq':'mrNote')}</label>
      <textarea id="mny-mr-note" class="mny-in" rows="2" maxlength="240" data-on-input="${_on("_mrNote",_P("value"))}">${esc(r.note)}</textarea>`,
     `<button type="button" class="btn-secondary" data-on-click="${_on("_mnyClose")}">${t('cancelBtn')}</button>
-     <button type="button" id="mny-mr-go" class="btn-red mny-go"${ok?'':' disabled'} data-on-click="${_on("_mrGo")}">${t(r.kind==='refund'?'cashRefund':'cashVoid')}</button>`),
+     ${r.toWallet?`<button type="button" id="mny-mr-wal" class="btn-primary mny-go"${ok?'':' disabled'} data-on-click="${_on("_mrGo",true)}">${t('cwRefundTo')}</button>`:''}
+     ${r.onlyWallet?'':`<button type="button" id="mny-mr-go" class="btn-red mny-go"${ok?'':' disabled'} data-on-click="${_on("_mrGo")}">${t(r.kind==='refund'?'cashRefund':'cashVoid')}</button>`}`),
     r.code?null:'.mny-chip');
 }
 function _mrPick(c){if(!S._mr)return;S._mr.code=c;_mrDraw();if(c==='other')setTimeout(()=>{const n=document.getElementById('mny-mr-note');if(n)n.focus();},50);}
-function _mrNote(v){if(!S._mr)return;S._mr.note=String(v||'');const b=document.getElementById('mny-mr-go');if(b)b.disabled=!(S._mr.code&&(S._mr.code!=='other'||S._mr.note.trim()));}
-function _mrGo(){
+function _mrNote(v){if(!S._mr)return;S._mr.note=String(v||'');['mny-mr-go','mny-mr-wal'].forEach(id=>{const b=document.getElementById(id);if(b)b.disabled=!(S._mr.code&&(S._mr.code!=='other'||S._mr.note.trim()));});}
+function _mrGo(toWallet){
   const r=S._mr;if(!r||!r.code||(r.code==='other'&&!r.note.trim()))return;
   const v=r.code+(r.note.trim()?': '+r.note.trim().slice(0,240):'');
-  const res=S._mnyRes;S._mnyRes=null;S._mr=null;_mnyClose();if(res)res({v,txt:_moneyReasonText(v)});
+  const res=S._mnyRes;S._mnyRes=null;S._mr=null;_mnyClose();if(res)res({v,txt:_moneyReasonText(v),toWallet:toWallet===true});
 }
 
 // ── M1: the audit trail ───────────────────────────────────────────────────────────────────────────
@@ -46200,13 +46286,27 @@ function _tillCtx(sid){
 // drawer (the staff review, 2026-10-28, S10-money-01).
 function _tillTake(c){
   const r2=n=>Math.round(n*100)/100;
-  if(c.shop){const x=_salesCC(_shopSales(c.day));return{cash:x.cash,card:x.card,dep:0,unk:0};}
+  if(c.shop){const x=_salesCC(_shopSales(c.day)),w=_cwTill(c);return{cash:r2(x.cash+w.cash),card:r2(x.card+w.card),dep:0,unk:0,walCash:w.cash,walCard:w.card};}
   const daySessions=allSessions().filter(s=>(s.session_date||s.id)===c.day);
   const sessIds=new Set(daySessions.map(s=>s.id));
   const rentPaid=getQueue().filter(e=>sessIds.has(e.sessionId)&&e.paid&&e.status!=='cancelled'&&e.status!=='removed'&&!_paidToOrg(e));
   const rs=_mnySum(rentPaid),pu=_mnyPurch(_cashLinesOf(sessIds));
   let coCash=0,coCard=0;daySessions.forEach(x=>{const cc=_cashCardCash(x.id);coCash+=cc.cash;coCard+=cc.card;});
-  return{cash:r2(rs.cash+coCash+pu.cash),card:r2(rs.card+coCard+pu.card),unk:rs.unknown,dep:_tillDep(c,sessIds)};
+  const w=_cwTill(c,sessIds);
+  return{cash:r2(rs.cash+coCash+pu.cash+w.cash),card:r2(rs.card+coCard+pu.card+w.card),unk:rs.unknown,dep:_tillDep(c,sessIds),walCash:w.cash,walCard:w.card};
+}
+// What wallets moved through this drawer on its day (2026-11-02): money added or taken out at this ride (at no ride:
+// the shop's drawer), by card or cash; and a refund into a wallet made the same day, whose money was taken
+// tonight and is still in the drawer although its booking or receipt no longer counts.
+function _cwTill(c,ids){
+  let cash=0,card=0;
+  (S._cwMoves||[]).forEach(m=>{
+    if(_ksaDay(m.created_at)!==c.day||!(c.shop?!m.session_id:ids&&ids.has(m.session_id)))return;
+    const a=Number(m.amount)||0;
+    if(m.kind==='refund'){if(!m.method)return;const k=Number(m.card_part)||0;card+=k;cash+=a-k;}
+    else if(m.method==='card')card+=a;else if(m.method==='cash')cash+=a;
+  });
+  return{cash:Math.round(cash*100)/100,card:Math.round(card*100)/100};
 }
 // Cash deposits in the drawer (2026-10-09): not takings, but the drawer holds them - a held one whole,
 // a returned one only the part kept.
@@ -46227,7 +46327,7 @@ function _eonModel(sid,x){
   const bike=id=>bikeById(id);
   return{
     done:rows.filter(e=>e.status==='done').length,noshow:rows.filter(e=>e.status==='noshow').length,
-    card:r2(rs.card+cc.card+pu.card),cash:r2(rs.cash+Math.max(0,st.collected-cc.card-pu.card)),unknown:rs.unknown,
+    card:r2(rs.card+cc.card+pu.card),cash:r2(rs.cash+Math.max(0,st.collected-cc.card-pu.card)),unknown:rs.unknown,wallet:rs.wallet,
     house:paid.filter(e=>(e.price??DEFAULT_PRICE)===0).length,houseSales:st.free,team:st.team,
     toOrg:{n:toOrg.length,sum:r2(toOrg.reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0))}, // paid by transfer to the organiser: never card or cash
     owing:rows.filter(e=>(e.status==='done'||e.status==='active')&&_brOwes(e)),
@@ -46253,7 +46353,7 @@ function _eonOpen(sid,x){
         <button data-on-click="${_on("_eonClose")}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
       <div class="chrome-dbody eon-body">
         <div class="eon-sec">${line('statCompleted',M.done)}${line('noShowBtn',M.noshow)}</div>
-        <div class="eon-sec"><div class="eon-h">${esc(t('eonMoney'))}</div>${line('cashCard',_money(M.card))}${line('cashCash',_money(M.cash))}${M.unknown>0?line('mnyUnknown',_money(M.unknown),'eon-warn'):''}${line('onTheHouseLabel',M.house+(M.houseSales>0?` · ${_money(M.houseSales)}`:''))}${M.team>0?line('payTeam',_money(M.team)):''}${M.toOrg.n?line('vtColPaid',`${M.toOrg.n} · ${_money(M.toOrg.sum)}`):''}</div>
+        <div class="eon-sec"><div class="eon-h">${esc(t('eonMoney'))}</div>${line('cashCard',_money(M.card))}${line('cashCash',_money(M.cash))}${M.wallet>0?line('cwTitle',_money(M.wallet)):''}${M.unknown>0?line('mnyUnknown',_money(M.unknown),'eon-warn'):''}${line('onTheHouseLabel',M.house+(M.houseSales>0?` · ${_money(M.houseSales)}`:''))}${M.team>0?line('payTeam',_money(M.team)):''}${M.toOrg.n?line('vtColPaid',`${M.toOrg.n} · ${_money(M.toOrg.sum)}`):''}</div>
         ${list('eonOwing',M.owing.map(e=>`<li>${who(e)} <b class="num">${_money(_brAmt(e))}</b></li>`))}
         ${list('eonDamaged',M.damaged.map(b=>`<li>${bk(b)}</li>`))}
         ${list('eonMissing',M.missing.map(b=>`<li>${bk(b)}</li>`))}
@@ -46295,6 +46395,7 @@ async function recordDrawerCount(sid){
   T.row=(r.data||[])[0]||null;
   if(T.row&&c.shop&&T.row.day&&T.row.day!==c.day)T.c={...c,day:T.row.day,label:`${t('tillShopCtx')} · ${shortDate(T.row.day)}`}; // an older shop till counts its own day's takings
   if(T.row){try{const k=await sb.from('till_counts').select('id,at,counted_by_name,counted_cash,expected_cash,note').eq('till_id',T.row.id).order('at');if(!k.error)T.counts=k.data||[];}catch(_){}}
+  await _cwLoad(true);
   if(S._till!==T)return; // closed, or another till opened, while the counts were read
   _tillDraw();
 }
@@ -46332,7 +46433,7 @@ function _tillDraw(){
   }else{
     const exp=Math.round(((Number(row.float)||0)+take.cash+(take.dep||0))*100)/100;
     body=`<div class="mny-sub">${t('tillOpenedBy').replace('{0}',`<bdi>${esc(row.opened_by_name||_personName(row.opened_by)||'—')}</bdi>`).replace('{1}',esc(fmtT(row.opened_at)))}</div>
-      <dl class="mny-dl"><dt>${t('tillFloat')}</dt><dd>${_money(row.float)}</dd><dt>${t('tillCashSales')}</dt><dd>${_money(take.cash)}</dd>${take.unk?`<dt class="mny-over">${t('mnyUnknown')}</dt><dd class="mny-over">${_money(take.unk)}</dd>`:''}${take.dep?`<dt>${t('depTillHeld')}</dt><dd>${_money(take.dep)}</dd>`:''}<dt>${t('drawerExpected')}</dt><dd><strong>${_money(exp)}</strong></dd><dt>${t('tillCardExp')}</dt><dd>${_money(take.card)}</dd></dl>
+      <dl class="mny-dl"><dt>${t('tillFloat')}</dt><dd>${_money(row.float)}</dd><dt>${t('tillCashSales')}</dt><dd>${_money(take.cash)}</dd>${take.walCash||take.walCard?`<dt>${t('cwTillIncl')}</dt><dd>${_money((take.walCash||0)+(take.walCard||0))}</dd>`:''}${take.unk?`<dt class="mny-over">${t('mnyUnknown')}</dt><dd class="mny-over">${_money(take.unk)}</dd>`:''}${take.dep?`<dt>${t('depTillHeld')}</dt><dd>${_money(take.dep)}</dd>`:''}<dt>${t('drawerExpected')}</dt><dd><strong>${_money(exp)}</strong></dd><dt>${t('tillCardExp')}</dt><dd>${_money(take.card)}</dd></dl>
       ${T.counts.length?`<div class="mny-lbl">${t('tillCounts')}</div><ul class="mny-counts">${T.counts.map(k=>`<li>${esc(fmtT(k.at))} · <bdi>${esc(k.counted_by_name||'')}</bdi> · ${_money(k.counted_cash)} · ${_tillVar((Number(k.counted_cash)||0)-(Number(k.expected_cash)||0))}${k.note?` · ${esc(k.note)}`:''}</li>`).join('')}</ul>`:''}
       ${can?`<div class="mny-grid2">
         <label class="mny-fld"><span>${t('drawerCounted')}</span><input id="mny-till-cash" class="mny-in" type="number" inputmode="decimal" min="0" step="0.5"></label>
@@ -46373,6 +46474,7 @@ async function _tillCountGo(){
 }
 async function _tillCloseGo(){
   const T=S._till;if(!T||!T.row||T.busy)return;
+  await _cwLoad(true); // another desk's wallet money is in this drawer too
   const cash=_tillNum('mny-till-cash',true);if(cash==null)return;
   const card=_tillNum('mny-till-card',false);if(card===null)return;
   const notes=String((document.getElementById('mny-till-notes')||{}).value||'').slice(0,500);
@@ -48670,6 +48772,7 @@ function _amRowInner(c){
         <button class="btn-sm btn-secondary am-flag${_flagFieldsOf(c).length?' on':''}" data-on-click="${_on("showFlagFieldsModal",c.id)}" title="${esc(t('fixFlagBtn'))}" aria-label="${esc(t('fixFlagBtn'))} · ${esc(c.name||'')}">${_artIcon('flag',14)}<span class="am-btn-lbl">${t('fixFlagBtn')}</span></button>
         ${(()=>{const n=_ahUpcoming(c.id);return `<button class="btn-sm btn-secondary am-hist${n?' on':''}" data-on-click="${_on("openAccountHistory",c.id)}" title="${esc(t('ahBtn'))}" aria-label="${esc(t('ahBtn'))} · ${esc(c.name||'')}${n?` · ${esc(t('ahUpcoming'))} ${n}`:''}">${_artIcon('clock',14)}<span class="am-btn-lbl">${t('ahBtn')}</span>${n?`<span class="am-hist-n">${n}</span>`:''}</button>`;})()}
         <button class="btn-sm btn-secondary am-vcard" data-on-click="${_on("saveCustomerContact",c.id)}" title="${esc(t('amSaveContact'))}" aria-label="${esc(t('amSaveContact'))}">${_artIcon('contact',14)}<span class="am-btn-lbl">${t('amSaveContact')}</span></button>
+        ${_cwOk()?`<button class="btn-sm btn-secondary am-bdg-btn am-cw-btn${_cwBal(c.id)>0?' on':''}" data-on-click="${_on("_cwOpen",c.id)}" title="${esc(t('cwTitle'))} · ${esc(_money(_cwBal(c.id),{isolate:false}))}" aria-label="${esc(t('cwTitle'))} · ${esc(c.name||'')} · ${esc(_money(_cwBal(c.id),{isolate:false}))}">${_artIcon('wallet',14)}<span class="am-btn-lbl">${t('cwTitle')}</span></button>`:''}
         ${_bdgOk()?`<button class="btn-sm btn-secondary am-bdg-btn" data-on-click="${_on("_bdgOpen",c.id)}" title="${esc(t('mrBadgesTitle'))}" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">${_artIcon('medal',14)}<span class="am-btn-lbl">${t('mrBadgesTitle')}</span></button>`:''}
         <button class="btn-sm btn-secondary" data-on-click="${_on("showEditCustomerModal",c.id)}">${t('editBtn')}</button>
         <button class="btn-sm ${picking?'btn-green':'btn-secondary'}" data-on-click="${_on("_amPickTags",c.id)}">${picking?t('doneBtn'):t('amEditTags')}</button>
@@ -49580,17 +49683,147 @@ function _pplGo(sec,sub,ff){
 }
 // the Filter panel's picks and the search go too, so the list matches the figure, counted over every customer (bug hunt 2026-10-28)
 function _amGo(k){AM_FKEYS.forEach(f=>{S[f]='';});S.amSearch='';S.amTagFilter='';S.amMissing=S.amFixing=S.amSuspect=S.amDelReq=false;S[k]=true;S.amShow=AM_PAGE;_pplGo('customers','accounts');}
+// ── The wallet, staff side (2026-11-02). Who holds what comes from staff_wallet_balances; nothing about the wallet
+// is drawn until it answers, so the page is safe live before migration 20261102210000. Every change goes through
+// the server and waits for its answer: no outbox and no optimistic balance, as this is money the rider can spend.
+const CW_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge'};
+let _cwAt=0;
+function _cwOk(){return !!S._cwB&&!S._cwOff;}
+function _cwBal(cid){return Number(S._cwB&&S._cwB.get(String(cid)))||0;}
+async function _cwLoad(force){
+  if(!sb||S._cwOff)return;
+  if(!force&&Date.now()-_cwAt<3e5)return;
+  _cwAt=Date.now();
+  let r;try{r=await sb.rpc('staff_wallet_balances');}catch(e){r={error:e};}
+  if(r&&r.error){if(_rpcAbsent(r.error))S._cwOff=true;return;}
+  if(!Array.isArray(r.data)){S._cwOff=true;return;} // it only ever answers a list
+  const first=!S._cwB,was=S._cwB;
+  S._cwB=new Map((Array.isArray(r.data)?r.data:[]).map(x=>[String(x.customer_id),Number(x.balance)||0]));
+  let m;try{m=await sb.rpc('staff_wallet_moves',{p_from:fmtDate(new Date(Date.now()-40*864e5))});}catch(e){m={error:e};}
+  if(m&&!m.error&&Array.isArray(m.data))S._cwMoves=m.data;
+  const same=was&&was.size===S._cwB.size&&[...S._cwB].every(([k,v])=>was.get(k)===v);
+  if((first||!same)&&S.view==='staff'&&_pplOpen())renderCommunity();
+}
+function _cwSay(e){const m=String((e&&e.message)||'');
+  if(/WALLET_SHORT/.test(m))return t('cwErrShort');
+  if(/WALLET_NO_ACCOUNT/.test(m))return t('cwErrNoAcc');
+  if(/WALLET_RACE/.test(m))return t('cwErrRace');
+  if(/WALLET_(NOT_OPEN|NOTHING_DUE|NOT_PAID)/.test(m))return t('cwErrOpen');
+  return (e&&e.said)||t('errConnection');}
+// The pay menu's lines. A party pays rider by rider here; the rider's own card pays the party in one.
+function _cwPayOpts(e){
+  if(!_cwOk()||!e.customerId||_isRace(_sessGet(e.sessionId)))return[];
+  const amt=_bookingAmount(e);if(!(amt>0))return[];
+  if(!e.paid)return _cwBal(e.customerId)>=amt?[{label:`${t('cwFromWallet')} · ${_money(amt,{isolate:false})}`,mode:'wpay',active:false}]:[];
+  return e.pay_method==='transfer'||!_can('refund')?[]:[{label:`${t('cwRefundTo')} · ${_money(amt,{isolate:false})}`,mode:'wrefund',active:false}];
+}
+async function _cwDeskPay(id){
+  const e=_qGet(id);if(!e)return;
+  if(_roNow()){_roRefusal();return;}
+  if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
+  let r;try{r=await sb.rpc('staff_wallet_pay_booking',{p_booking_ids:[id],p_op:_opName()||null});}catch(x){r={error:x};}
+  if(r.error){if(r.error.message&&!r.error.said)r.error.said=_rpcSay(r.error);toast(_cwSay(r.error),'error');return;}
+  haptic();toast('✓ '+t('paidLabel'));
+  logAction(`${t('cwFromWallet')}: #${e.queueNum} ${e.name}`,{k:'pay',e:'booking',id,amt:_bookingAmount(e)});
+  await _reloadRows([id]);renderStaffQueue();_cwLoad(true).catch(()=>{});
+  pushUndo(`${t('undoPayment')} #${e.queueNum} ${e.name}`,async()=>{
+    const u=await sb.from('queue_entries').update({paid:false,pay_method:null,card_amount:null}).eq('id',id); // the wallet follows (zz_wallet_follow)
+    if(_writeErr(u,'undo payment'))return false;
+    await _reloadRows([id]);renderStaffQueue();_cwLoad(true).catch(()=>{});
+  },{k:'pay',e:'booking',id,amt:_bookingAmount(e)});
+}
+async function _cwDeskRefund(id){
+  const e=_qGet(id);if(!e)return;
+  if(_roNow()){_roRefusal();return;}
+  if(!_can('refund')){toast(t('capNoRefund'),'error');return;}
+  if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
+  const amt=_bookingAmount(e);
+  const why=await _askMoneyReason('refund',`${esc(t('cwRefundBody').replace('{0}',e.name||''))} ${_money(amt)}`,true,true);
+  if(!why)return;
+  const r=await _gatedRpc(t('cwRefundTo'),a=>sb.rpc('staff_wallet_refund_booking',{p_booking_id:id,p_reason:why.v,...a}),{kind:'refund',amount:amt});
+  if(r===null)return;
+  if(r.error){toast(_cwSay(r.error),'error');return;}
+  haptic();toast(t('cwRefundTo'));
+  logAction(`${t('cwRefundTo')}: #${e.queueNum} ${e.name} · ${why.txt}`,{k:'refund',e:'booking',id,amt});
+  await _reloadRows([id]);renderStaffQueue();renderHistory();_cwLoad(true).catch(()=>{});
+}
+// One account's wallet: the balance, add or take out, and every movement.
+function _cwOpen(cid){S._cw={cid,mode:'add',how:'',amt:'',note:'',err:'',busy:false,data:null,opId:_opId()};_cwDraw();_cwRead();}
+async function _cwRead(){
+  const d=S._cw;if(!d)return;
+  let r;try{r=await sb.rpc('staff_wallet',{p_customer:d.cid});}catch(e){r={error:e};}
+  if(S._cw!==d)return;
+  if(r.error){d.err=t('errConnection');_cwDraw();return;}
+  d.data=r.data||{balance:0,rows:[]};
+  if(S._cwB){if(Number(d.data.balance)>0)S._cwB.set(String(d.data.customer_id||d.cid),Number(d.data.balance));else S._cwB.delete(String(d.data.customer_id||d.cid));}
+  _cwDraw();
+}
+function _cwDraw(){
+  const d=S._cw;if(!d)return;
+  const c=_custById(d.cid)||{},can=_can('refund')&&_editOk(S.staffTab),out=d.mode==='out',D=d.data;
+  const hows=[['card','cashCard'],['cash','cashCash'],['transfer','cwTransfer'],['none',out?'cwNoGiven':'cwNoTaken']];
+  const pick=(k,l)=>`<button type="button" class="mny-chip${d.how===k?' on':''}" aria-pressed="${d.how===k?'true':'false'}" data-on-click="${_on("_cwHow",k)}">${t(l)}</button>`;
+  const seg=(k,l)=>`<button type="button" class="toggle-btn${d.mode===k?' active':''}" aria-pressed="${d.mode===k?'true':'false'}" data-on-click="${_on("_cwMode",k)}">${t(l)}</button>`;
+  const line=x=>{const a=Number(x.amount)||0,by=x.by_name?` · ${esc(x.by_name)}`:'',when=_auWhen(x.created_at);
+    return`<li class="cw-line"><div class="cw-line-m"><span>${esc(t(CW_KIND[x.kind]||'cwKAdjust'))}</span><span class="am-meta">${esc(when)}${by}</span>${x.note?`<span class="am-meta">${esc(_moneyReasonText(x.note))}</span>`:''}</div><div class="cw-line-n"><strong class="${a>0?'cw-in':'cw-out'}"><bdi>${a>0?'+':'−'}${esc(_money(Math.abs(a),{isolate:false}))}</bdi></strong><span class="am-meta">${_money(x.balance_after)}</span></div></li>`;};
+  _mnyOpen(_mnyFrame('mny-cw-t',`${esc(t('cwTitle'))} · ${esc(c.name||'')}`,
+    `<div class="cw-num">${D?_money(D.balance):esc(t(d.err?'errConnection':'loadingLabel'))}</div>
+     ${can&&D?`<div class="cw-seg" role="group" aria-label="${esc(t('cwTitle'))}">${seg('add','cwAdd')}${seg('out','cwOut')}</div>
+     <label class="mny-lbl" for="cw-amt">${t('cwAmount')}</label><input id="cw-amt" class="mny-in" type="number" inputmode="decimal" min="0" step="0.5" dir="ltr" value="${esc(d.amt)}" data-on-input="${_on("_cwType",'amt',_P("value"))}">
+     <div class="mny-lbl">${t('cwHow')}</div><div class="mny-chips" role="group" aria-label="${esc(t('cwHow'))}">${hows.map(h=>pick(h[0],h[1])).join('')}</div>
+     <label class="mny-lbl" for="cw-note">${t(d.how==='none'?'cwNoteReq':'cwNote')}</label><textarea id="cw-note" class="mny-in" rows="2" maxlength="280" data-on-input="${_on("_cwType",'note',_P("value"))}">${esc(d.note)}</textarea>
+     ${d.err?`<div class="mny-over cw-err" role="alert">${esc(d.err)}</div>`:''}`:''}
+     ${D?(D.rows&&D.rows.length?`<ul class="cw-lines">${D.rows.map(line).join('')}</ul>`:`<div class="mny-empty">${t('cwEmpty')}</div>`):''}`,
+    `<button type="button" class="btn-secondary" data-on-click="${_on("_mnyClose")}">${t('closeBtn')}</button>${can&&D?`<button type="button" class="${out?'btn-red':'btn-primary'} mny-go"${d.busy?' disabled':''} data-on-click="${_on("_cwGo")}">${t(out?'cwOut':'cwAdd')}</button>`:''}`));
+}
+function _cwMode(k){const d=S._cw;if(!d)return;d.mode=k;d.err='';_cwDraw();}
+function _cwHow(k){const d=S._cw;if(!d)return;d.how=k;d.err='';_cwDraw();}
+function _cwType(k,v){const d=S._cw;if(d)d[k]=String(v==null?'':v);}
+async function _cwGo(){
+  const d=S._cw;if(!d||d.busy)return;
+  const amt=Math.round(Number(d.amt)*100)/100,note=d.note.trim();
+  d.err=!(amt>0)||amt>10000?t('cwErrAmount'):!d.how?t('cwErrHow'):d.how==='none'&&!note?t('cwErrNote'):_isOffline()?t('cwErrOffline'):'';
+  if(d.err){_cwDraw();return;}
+  if(_roNow()){_roRefusal();return;}
+  const sign=d.mode==='out'?-1:1,today=allSessions().find(s=>(s.session_date||s.id)===todayStr()&&s.status!=='closed'&&s.status!=='cancelled'&&s.status!=='deleted');
+  d.busy=true;_cwDraw();
+  const what=t(sign>0?'cwAdd':'cwOut');
+  const r=await _gatedRpc(what,a=>_rpcOp('staff_wallet_change',{p_customer:d.cid,p_amount:sign*amt,p_method:d.how,p_note:note,p_session:today?today.id:null,...a,p_op_id:d.opId},true),{kind:'refund',amount:amt});
+  if(S._cw!==d)return;
+  d.busy=false;
+  if(r===null){_cwDraw();return;}
+  if(r.error){d.err=_cwSay(r.error);_cwDraw();return;}
+  const c=_custById(d.cid)||{};
+  logAction(`${what}: ${c.name||d.cid} · ${_money(amt,{isolate:false})}${note?' · '+note:''}`,{k:'wallet',e:'customer',id:d.cid,amt:sign*amt});
+  haptic();toast(what);
+  Object.assign(d,{amt:'',how:'',note:'',err:'',opId:_opId()});
+  await _cwRead();_cwLoad(true).catch(()=>{});
+}
+// Customers > Wallets: what is held, who holds it, and any account by a search.
+function _cwSearch(v){S._cwQ=String(v||'');if(S.staffTab==='customers')renderCustomers();}
+function _commWallets(){
+  if(!_cwOk())return`<div class="mny-empty">${t('loadingLabel')}</div>`;
+  const q=String(S._cwQ||'').trim().toLowerCase(),cs=_custLiveRows(S.customers);
+  const hit=c=>[c.name,c.phone,c.email].some(x=>String(x||'').toLowerCase().includes(q));
+  const held=[...S._cwB.values()].reduce((a,b)=>a+b,0);
+  const list=(q?cs.filter(hit).sort((a,b)=>_cwBal(b.id)-_cwBal(a.id)):cs.filter(c=>_cwBal(c.id)>0).sort((a,b)=>_cwBal(b.id)-_cwBal(a.id))).slice(0,q?40:500);
+  const row=c=>`<div class="cw-row"><div class="cw-row-m"><strong>${esc(c.name||'—')}</strong><span class="am-meta"><bdi>${_piiTxt('phone',c.phone,c.id)||_piiTxt('email',c.email,c.id)||''}</bdi></span></div><span class="cw-row-n">${_money(_cwBal(c.id))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_cwOpen",c.id)}">${t('cwTitle')}</button></div>`;
+  return`<div class="dash-kpis cw-kpis">${_pplKpi(_money(held,{isolate:false}),t('cwHeld'))}${_pplKpi(S._cwB.size,t('cwAccounts'))}</div>
+    <div class="form-group cw-find"><label for="cw-q">${t('cwSearch')}</label><input id="cw-q" type="search" value="${esc(S._cwQ||'')}" autocomplete="off" data-on-input="${_on("_cwSearch",_P("value"))}"></div>
+    ${list.length?`<div class="cw-rows">${list.map(row).join('')}</div>`:`<div class="mny-empty">${t(q?'cwSearchNone':'cwNone')}</div>`}`;
+}
 function _renderPeople(sec){
   _stLoad('accounts');
   const cust=sec==='customers';
   const el=document.getElementById('tab-'+sec);if(!el)return;
   // The other section's markup goes: both draw the same lists, and their ids (am-search, am-cust-rows...) must be one.
   {const o=document.getElementById('tab-'+(cust?'community':'customers'));if(o&&o.firstChild)o.innerHTML='';}
-  const subs=cust?['overview','accounts','flagged','activity',...(isAdmin()?['duplicates']:[])]:['overview','accounts','flagged','tags','badges','applications','learning','birthdays'];
+  const subs=cust?['overview','accounts','flagged','wallets','activity',...(isAdmin()?['duplicates']:[])]:['overview','accounts','flagged','tags','badges','applications','learning','birthdays'];
   let sub=cust?S.customersTab:S.communityTab;if(!subs.includes(sub))sub='overview';
   if(cust)S.customersTab=sub;else S.communityTab=sub;
   _pushNav(); // the address follows the view (its tabs)
   if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy&&!S._mgErr)_mgLoad(); // the recent merges, once
+  if(sub==='accounts'||sub==='wallets')_cwLoad(sub==='wallets').catch(()=>{}); // who has money (2026-11-02)
   if(sub==='accounts'||sub==='badges'||(!cust&&sub==='overview'))_bdgLoad(); // the badges and who holds them, at most every five minutes
   if(sub==='accounts'||sub==='applications'||sub==='learning')_igLoad(); // the Instagram follower counts, likewise (the cards' chips too, 2026-10-09)
   if(sub==='overview'&&!S._flags&&!S._flagsBusy&&!S._flagsErr)_loadFlags(); // the requests waiting, for its figure
@@ -49601,16 +49834,16 @@ function _renderPeople(sec){
   // Applications opens on the list it was last on (community or learning to ride).
   const navBtn=(k,label)=>{const on=sub===k||(k==='applications'&&sub==='learning'),to=k==='applications'&&S._appsKind==='learning'?'learning':k;return`<button type="button" class="filter-pill${on?' active':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on(go,to)}">${label}</button>`;};
   let nav;
-  if(cust)nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabAccounts'))+navBtn('flagged',t('commTabFlagged'))+navBtn('activity',t('custTabActivity'))
+  if(cust)nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabAccounts'))+navBtn('flagged',t('commTabFlagged'))+(_cwOk()?navBtn('wallets',t('cwTabWallets')):'')+navBtn('activity',t('custTabActivity'))
     +(isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):'');
   else{
     const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length,apN=_caPendingN()+_laPendingN();
     nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabMembers'))+navBtn('flagged',t('commTabFlagged'))+navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle'))
       +navBtn('applications',t('commTabApplications')+(apN?` (${apN})`:''))+navBtn('birthdays',t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''));
   }
-  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='natnew-q')?_ae.id:''; // a search in use
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='natnew-q'||_ae.id==='cw-q')?_ae.id:''; // a search in use
   const body=sub==='overview'?(cust?_custOverview():_commOverview()):sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_commFlagged():sub==='tags'?_commTags()
-    :sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='badges'?_commBadges():_commAccounts();
+    :sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='wallets'?_commWallets():sub==='badges'?_commBadges():_commAccounts();
   el.innerHTML=`
     <h1 class="page-title">${t(cust?'tabCustomers':'commTitle')}</h1>
     <div class="page-sub">${t(cust?'custSub':'commSub')}</div>
@@ -50983,7 +51216,7 @@ function _mnyUnk(o,f,c,h){return Math.max(0,Math.round((_rpiN(o,f)-_rpiN(o,c)-_r
 function _rpiLines(x){
   const d=x.data||{},T=d.totals||{},n=k=>_rpiN(T,k),m=v=>_money(v,_NOISO),unk=_mnyUnk(T,'rev_rides','rev_card','rev_cash');
   const out=[[t('anTotalRides'),String(n('rides'))],[t('anRiders'),String(n('riders'))],[t('anCollected'),m(n('rev_rides')+n('rev_sales'))],
-    [t('repCash'),m(n('rev_cash')+n('sales_cash'))],[t('repCard'),m(n('rev_card')+n('sales_card'))],...(unk>0?[[t('mnyUnknown'),m(unk),1]]:[]),[t('pendingLabel'),m(n('pending'))],
+    [t('repCash'),m(n('rev_cash')+n('sales_cash'))],[t('repCard'),m(n('rev_card')+n('sales_card'))],...(unk>0?[[t(_cwOk()?'cwMnyUnknown':'mnyUnknown'),m(unk),1]]:[]),[t('pendingLabel'),m(n('pending'))],
     [t('statusNoshow'),String(n('noshows'))],[t('anCancellations'),String(n('cancellations'))]];
   if(x.kind==='weekly_kpi'){
     out.push([t('anAvgOccupancy'),_rpiN(d,'occupancy')+'%']);
