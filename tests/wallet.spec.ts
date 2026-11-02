@@ -36,7 +36,7 @@ async function staff(page: Page, fx: Fixtures = {}) {
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
   await page.evaluate(`S._opPins=${JSON.stringify(ops)};S._opPinsAt=Date.now();`);
-  await page.evaluate(`_cwLoad(true)`);
+  await page.evaluate(`S.staffRole='admin';_cwLoad(true)`);
   await page.waitForFunction('_cwOk()');
 }
 async function rider(page: Page, fx: Fixtures) {
@@ -91,6 +91,33 @@ test.describe('@staff:customers wallet', () => {
     await dlg.getByRole('button', { name: 'Card' }).click();
     await dlg.locator('.mny-foot .mny-go').click();
     await expect.poll(() => seen.find((c) => c.name === 'staff_wallet_change')?.body.p_amount).toBe(-20);
+  });
+
+  test('only an admin adds money: others are not offered it, and take out as before', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { 'rpc:staff_wallet_change': { ok: true, customer_id: 'c1', balance: 100 } });
+    await page.evaluate(`S.staffRole='frontdesk';_cwOpen('c1')`);
+    const dlg = page.getByRole('dialog', { name: /Wallet · Rana Rider/ });
+    await expect(dlg.locator('.cw-num')).toContainText('SAR 120');
+    await expect(dlg.getByRole('button', { name: 'Add money' })).toHaveCount(0);
+    await expect(dlg.locator('.mny-foot .mny-go')).toHaveText('Take money out');
+    await page.evaluate(`_cwMode('add');_cwDraw()`); // a stale or forced switch does not get through either
+    await expect(dlg.getByRole('button', { name: 'Add money' })).toHaveCount(0);
+    await dlg.locator('#cw-amt').fill('20');
+    await dlg.getByRole('button', { name: 'Card' }).click();
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect.poll(() => seen.find((c) => c.name === 'staff_wallet_change')?.body.p_amount).toBe(-20);
+  });
+
+  test('the server saying only an admin may is said in the dialog', async ({ page }) => {
+    await staff(page, { 'rpc:staff_wallet_change': { __rpcError: { status: 403, code: '42501', message: 'ADMIN_ONLY' } } });
+    await page.evaluate(`_cwOpen('c1')`); // the device still thinks it is an admin's
+    const dlg = page.getByRole('dialog', { name: /Wallet · Rana Rider/ });
+    await expect(dlg.locator('.cw-num')).toContainText('SAR 120');
+    await dlg.locator('#cw-amt').fill('20');
+    await dlg.getByRole('button', { name: 'Card' }).click();
+    await dlg.locator('.mny-foot .mny-go').click();
+    await expect(dlg.locator('.cw-err')).toContainText(/admin/i);
   });
 
   test('Customers > Wallets: what is held and who holds it, and a search finds any account', async ({ page }) => {

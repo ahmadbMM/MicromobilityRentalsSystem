@@ -39467,7 +39467,7 @@ function _ahEditAccount(id){
 // of this rider's bookings actually changed, so a busy night does not keep rebuilding it.
 function _ahRefresh(){if(S._ah)_ahRender();}
 // The account's badges, in this window and the editor: the section only; the Community part draws them (_bdgStrips).
-function _cwSecHtml(cid){return _cwOk()?`<div class="bdg-strip-sec cw-sec"><div class="bdg-strip-h">${t('cwTitle')}</div><div class="cw-sec-row"><span class="cw-sec-num">${_money(_cwBal(cid))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_cwOpen",cid)}">${t(_can('refund')?'cwAdd':'cwTitle')}</button></div></div>`:'';}
+function _cwSecHtml(cid){return _cwOk()?`<div class="bdg-strip-sec cw-sec"><div class="bdg-strip-h">${t('cwTitle')}</div><div class="cw-sec-row"><span class="cw-sec-num">${_money(_cwBal(cid))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_cwOpen",cid)}">${t(isAdmin()?'cwAdd':'cwTitle')}</button></div></div>`:'';}
 function _bdgSecHtml(cid){return`<div class="bdg-strip-sec"><div class="bdg-strip-h">${t('mrBadgesTitle')}</div><div class="bdg-strip-host" data-cid="${esc(cid)}"><span class="am-meta">${t('loadingLabel')}</span></div></div>`;}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ahRender_1(event,el){if(event.target===el)closeCustomerProfile()}
@@ -49891,7 +49891,7 @@ async function _cwDeskRefund(id){
   await _reloadRows([id]);renderStaffQueue();renderHistory();_cwLoad(true).catch(()=>{});
 }
 // One account's wallet: the balance, add or take out, and every movement.
-function _cwOpen(cid){S._cw={cid,mode:'add',how:'',amt:'',note:'',err:'',busy:false,data:null,opId:_opId()};_cwDraw();_cwRead();}
+function _cwOpen(cid){S._cw={cid,mode:isAdmin()?'add':'out',how:'',amt:'',note:'',err:'',busy:false,data:null,opId:_opId()};_cwDraw();_cwRead();}
 async function _cwRead(){
   const d=S._cw;if(!d)return;
   let r;try{r=await sb.rpc('staff_wallet',{p_customer:d.cid});}catch(e){r={error:e};}
@@ -49911,7 +49911,7 @@ function _cwDraw(){
     return`<li class="cw-line"><div class="cw-line-m"><span>${esc(t(CW_KIND[x.kind]||'cwKAdjust'))}</span><span class="am-meta">${esc(when)}${by}</span>${x.note?`<span class="am-meta">${esc(_moneyReasonText(x.note))}</span>`:''}</div><div class="cw-line-n"><strong class="${a>0?'cw-in':'cw-out'}"><bdi>${a>0?'+':'−'}${esc(_money(Math.abs(a),{isolate:false}))}</bdi></strong><span class="am-meta">${_money(x.balance_after)}</span></div></li>`;};
   _mnyOpen(_mnyFrame('mny-cw-t',`${esc(t('cwTitle'))} · ${esc(c.name||'')}`,
     `<div class="cw-num">${D?_money(D.balance):esc(t(d.err?'errConnection':'loadingLabel'))}</div>
-     ${can&&D?`<div class="cw-seg" role="group" aria-label="${esc(t('cwTitle'))}">${seg('add','cwAdd')}${seg('out','cwOut')}</div>
+     ${can&&D?`${isAdmin()?`<div class="cw-seg" role="group" aria-label="${esc(t('cwTitle'))}">${seg('add','cwAdd')}${seg('out','cwOut')}</div>`:''}
      <label class="mny-lbl" for="cw-amt">${t('cwAmount')}</label><input id="cw-amt" class="mny-in" type="number" inputmode="decimal" min="0" step="0.5" dir="ltr" value="${esc(d.amt)}" data-on-input="${_on("_cwType",'amt',_P("value"))}">
      <div class="mny-lbl">${t('cwHow')}</div><div class="mny-chips" role="group" aria-label="${esc(t('cwHow'))}">${hows.map(h=>pick(h[0],h[1])).join('')}</div>
      <label class="mny-lbl" for="cw-note">${t(d.how==='none'?'cwNoteReq':'cwNote')}</label><textarea id="cw-note" class="mny-in" rows="2" maxlength="280" data-on-input="${_on("_cwType",'note',_P("value"))}">${esc(d.note)}</textarea>
@@ -49919,13 +49919,14 @@ function _cwDraw(){
      ${D?(D.rows&&D.rows.length?`<ul class="cw-lines">${D.rows.map(line).join('')}</ul>`:`<div class="mny-empty">${t('cwEmpty')}</div>`):''}`,
     `<button type="button" class="btn-secondary" data-on-click="${_on("_mnyClose")}">${t('closeBtn')}</button>${can&&D?`<button type="button" class="${out?'btn-red':'btn-primary'} mny-go"${d.busy?' disabled':''} data-on-click="${_on("_cwGo")}">${t(out?'cwOut':'cwAdd')}</button>`:''}`));
 }
-function _cwMode(k){const d=S._cw;if(!d)return;d.mode=k;d.err='';_cwDraw();}
+function _cwMode(k){const d=S._cw;if(!d||(k==='add'&&!isAdmin()))return;d.mode=k;d.err='';_cwDraw();}
 function _cwHow(k){const d=S._cw;if(!d)return;d.how=k;d.err='';_cwDraw();}
 function _cwType(k,v){const d=S._cw;if(d)d[k]=String(v==null?'':v);}
 async function _cwGo(){
   const d=S._cw;if(!d||d.busy)return;
   const amt=Math.round(Number(d.amt)*100)/100,note=d.note.trim();
-  d.err=!(amt>0)||amt>10000?t('cwErrAmount'):!d.how?t('cwErrHow'):d.how==='none'&&!note?t('cwErrNote'):_isOffline()?t('cwErrOffline'):'';
+  // adding is an admin's alone (the owner, 2026-11-03); staff_wallet_change holds the same line
+  d.err=d.mode!=='out'&&!isAdmin()?t('adminOnlyMsg'):!(amt>0)||amt>10000?t('cwErrAmount'):!d.how?t('cwErrHow'):d.how==='none'&&!note?t('cwErrNote'):_isOffline()?t('cwErrOffline'):'';
   if(d.err){_cwDraw();return;}
   if(_roNow()){_roRefusal();return;}
   const sign=d.mode==='out'?-1:1,today=allSessions().find(s=>(s.session_date||s.id)===todayStr()&&s.status!=='closed'&&s.status!=='cancelled'&&s.status!=='deleted');

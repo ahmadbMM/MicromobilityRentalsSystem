@@ -1670,8 +1670,8 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
   `WALLET_SHORT`, so the desk's ordinary pay menu and Undo need no special case. All of a card's bookings or none.
 - **Staff.** Customers > Wallets (`/customers/wallets`, `_commWallets`), a button on every Accounts and Members row, a section
   in the account's editor and history; the pay menu's Pay from wallet and Refund to wallet (`_cwPayOpts`); the
-  receipt refund's second button (`_salesRefundWallet`). Adding, taking out and refunding ask what a refund asks:
-  `can_refund`, the PIN, the manager limit. Paying from it asks nothing: the ledger names who did it.
+  receipt refund's second button (`_salesRefundWallet`). Adding money is an admin's alone (the owner, 2026-11-03; migration 20261103120000, `ADMIN_ONLY`). Taking out and
+  refunding ask what a refund asks: `can_refund`, the PIN, the manager limit (adding asks those too). Paying from it asks nothing: the ledger names who did it.
 - **The rider.** My Account's card (`#cw-mine`) and the button on a ticket (`_cwPaySlot`), whole bookings only. Refused by
   the server: a waitlisted place, a past night, a Petromin night (the company's bill), a race (below). The website has
   the same (mm-platform WalletCard, WalletPay, /api/account/wallet-pay). The rider never sees a staff note.
