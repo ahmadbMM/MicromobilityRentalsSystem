@@ -45,12 +45,12 @@ test('Customers opens on its overview, with Accounts, Flagged, Activity and Dupl
   await expect(pills.first()).toHaveClass(/active/);
 });
 
-test('Community opens on its overview, with Members, Flagged, Tags, Badges, Applications and Birthdays; no leaderboard', async ({ page }) => {
+test('Community opens on its overview, with Members, Flagged, Tags, Badges, Titles, Applications and Birthdays; no leaderboard', async ({ page }) => {
   await staff(page);
   await page.evaluate(`setStaffTab('community')`);
   const tab = page.locator('#tab-community');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Members', 'Flagged', 'Tags', 'Badges', /^Applications/, /^Birthdays/]);
+  await expect(pills).toHaveText(['Overview', 'Members', 'Flagged', 'Tags', 'Badges', 'Titles', /^Applications/, /^Birthdays/]);
   await expect(tab).not.toContainText('Leaderboard');
   await expect(tab.locator('.dash-kpi', { hasText: 'Community members' })).toHaveCount(1);
   // Members lists the community's members only: neither fixture account holds the tag

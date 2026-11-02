@@ -492,6 +492,17 @@ bike, paid or not) on the `snd96` ride, shown only to those who rode it, drawn `
 greens, `BDG_SPECIAL`; `_bdgSpCls` gives a special chip `special sp-<colour>`, whose colours are CSS
 variables) and popped once (`BDG_CHEER`).
 
+## Titles and the Community page (2026-11-02)
+
+Migration 20261102200000. `titles` (admins' catalogue: English + Arabic name, a `BDG_COLORS` colour, `auto_rides`),
+`customer_titles` (staff give, optional `expires_on`) and `member_prefs` (the member's shown title and `hidden`, written only
+through `customer_title_prefs`). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
+counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`, and it alone leads to
+the Community page (`/members`, not `/community`, which is a staff address; `renderMembers`); a non-member is sent away.
+`member_directory` is the only read that names another person: members only, hidden and blacklisted accounts left out, no
+account id, so the card (`_mbOpen`) is drawn from the row in hand, and it carries staff-given badges only because ride-earned
+ones are worked out on the rider's own device. Anything added to it is new sharing: update the privacy notice's row too.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.

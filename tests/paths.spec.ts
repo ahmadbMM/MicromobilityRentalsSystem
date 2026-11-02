@@ -87,7 +87,7 @@ test.describe('the server', () => {
       expect(r.headers.get('location'), path).toBe('https://staff.micromobility.sa' + to);
     }
     // The customer's own pages stay where they are.
-    for (const path of ['/reserve', '/my-bookings', '/account', '/']) expect((await mw(live + path)).status, path).toBe(200);
+    for (const path of ['/reserve', '/my-bookings', '/account', '/members', '/']) expect((await mw(live + path)).status, path).toBe(200);
   });
 });
 

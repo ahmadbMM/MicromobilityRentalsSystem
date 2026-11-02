@@ -3730,6 +3730,7 @@
        the name on up to two lines, and on one not earned its progress in the corner. Every row is as
        tall as the tallest tile (grid-auto-rows:1fr), so the tiles match in any script's line height; the name
        keeps room for its two lines, so the earned and the to-earn grids (2026-09-30) match each other too. */
+    .tt-chip{display:inline-block;padding:2px 8px;border:1px solid var(--bc);border-inline-start-width:4px;color:inherit;font-size:12px;font-weight:700;line-height:1.5;}
     .mr-badges-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
     .mr-badges-n{font-family:var(--font-mono);font-size:11px;color:var(--muted);letter-spacing:1px;}
     .mr-badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));grid-auto-rows:1fr;gap:6px;margin-top:10px;}
@@ -8657,6 +8658,20 @@ body:not(.view-staff) .cw-pay-slot{margin-top:10px;}
 body:not(.view-staff) .cw-pay-slot:empty{display:none;}
 body:not(.view-staff) .cw-pay-btn{width:100%;min-height:44px;}
 
+body:not(.view-staff) .tt-picks{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+body:not(.view-staff) .tt-pick{background:transparent none;border:1px solid transparent;padding:4px;cursor:pointer;color:var(--ink);min-height:40px;}
+body:not(.view-staff) .tt-pick.on{border-color:var(--go);}
+body:not(.view-staff) .tt-hide{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:600;color:var(--ink);}
+body:not(.view-staff) .tt-open{margin-top:12px;width:100%;}
+body:not(.view-staff) .mb-q{width:100%;margin:8px 0 12px;}
+body:not(.view-staff) .mb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:10px 4px;background:transparent none;border:0;border-bottom:1px solid var(--line);color:var(--ink);text-align:start;cursor:pointer;}
+body:not(.view-staff) .mb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}
+body:not(.view-staff) .mb-t{display:block;width:100%;margin-bottom:6px;}
+body:not(.view-staff) .mb-who .mb-t{margin-bottom:0;}
+body:not(.view-staff) .mb-more,body:not(.view-staff) .mb-back{margin-top:12px;width:100%;}
+body:not(.view-staff) .mb-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px;}
+body:not(.view-staff) .mb-badge{display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--ink);}
+body:not(.view-staff) .mb-close{width:100%;margin-top:16px;}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).

@@ -1382,7 +1382,7 @@ export function formatFieldNames(r, limit = 20) {
 // yet with the desk's waiver sheet, the places warning; Analytics' three targets, held sessions, billed to companies and
 // the Product filter): staff 678.7, core 305.9 here, about 680.8 / 308.0 on the runner; +7 / +5 restores the margin
 // (customer 257.7 here, inside its own).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 263, staff: 687, core: 310 }; // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 266, staff: 691, core: 311 }; // customer 263 -> 266, staff 687 -> 691, core 310 -> 311 (the runner reads 1-2 KB over local): member titles and the Community page in ten languages (2026-11-02); // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

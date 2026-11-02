@@ -289,6 +289,7 @@ window.mmLoading=(function(){
     <div id="tab-register" class="tab-panel active"></div>
     <div id="tab-myrides"  class="tab-panel"></div>
     <div id="tab-account"  class="tab-panel"></div>
+    <div id="tab-members"  class="tab-panel"></div>
   </div>
 </div>
 
@@ -852,6 +853,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   sendReceipt:'Receipt',noHistory:'No riders match the current filters.',
   assignBikeTitle:'Assign Bike',assignedBikeLabel:'Assigned Bike',confirmCheckin:'Confirm & Check In',changeBikeTitle:'Change Assigned Bike',confirmBikeChange:'Confirm Change',
   tabAccount:'Account',
+  ttMineTitle:'Your title',ttMineSub:'Choose the one other community members see.',ttMineNone:'You do not have a title yet. Titles come from our staff and from your Saturday rides.',ttUntil:'Until {0}',ttHide:'Hide me from the members list',ttHideHint:'Other community members see your full name, your title, the badges our staff gave you and how many rides you have done. When hidden, you are left off the list.',ttSaveErr:'We could not save that. Please try again.',ttSaved:'Saved',mbTitle:'Community',mbSearch:'Search by name',mbNone:'No members match your search.',mbErr:'We could not load the members. Check your connection and try again.',mbRetry:'Try again',mbYou:'You',mbMore:'Show more',mbRides:'{0} rides',mbRide1:'1 ride',mbLoading:'Loading members...',mbBack:'Back to Account',mbClose:'Close',ttTab:'Titles',ttSub:'Titles members carry on their account and on the members list.',ttNew:'New title',ttGive:'Give title',ttAuto:'Automatic from this many Saturday rides',ttAutoHint:'Leave empty to give it by hand.',ttAutoMeta:'Automatic at {0} Saturday rides',ttHandMeta:'Given by staff',ttSearch:'Search members by name or phone',ttLastDay:'Last day (optional)',ttRetire:'Retire',ttRestore:'Restore',ttRetiredMeta:'Retired',ttNameReq:'Enter the name in English and in Arabic.',ttAutoBad:'Enter a whole number from 1 to 1000, or leave it empty.',ttEmpty:'No titles yet. Create the first one.',ttMissing:'Titles are not set up on the database yet.',ttLoadErr:'Titles could not be loaded.',ttNights:'{0} Saturday rides',ttSure:'Tap again to delete',ttLogSaved:'Title saved',ttLogGiven:'Title given',ttLogTaken:'Title taken back',ttLogDeleted:'Title deleted',
   accountTitle:'Account',accountSub:'Your season, your badges and your details.',
   saveAccountBtn:'Save changes',accountSaved:'Saved.',
   
@@ -1449,6 +1451,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   sendReceipt:'إيصال',noHistory:'لا يوجد راكبون يطابقون الفلتر الحالي.',
   assignBikeTitle:'تخصيص دراجة',assignedBikeLabel:'الدراجة المخصصة',confirmCheckin:'تأكيد وتسجيل الدخول',changeBikeTitle:'تغيير الدراجة المخصصة',confirmBikeChange:'تأكيد التغيير',
   tabAccount:'الحساب',
+  ttMineTitle:'لقبك',ttMineSub:'اختر اللقب الذي يراه أعضاء المجتمع الآخرون.',ttMineNone:'ليس لديك لقب بعد. تأتي الألقاب من فريقنا ومن رحلات السبت التي تشارك فيها.',ttUntil:'حتى {0}',ttHide:'إخفائي من قائمة الأعضاء',ttHideHint:'يرى أعضاء المجتمع الآخرون اسمك الكامل ولقبك والشارات التي منحك إياها فريقنا وعدد رحلاتك. عند الإخفاء لن تظهر في القائمة.',ttSaveErr:'تعذّر الحفظ. يرجى المحاولة مرة أخرى.',ttSaved:'تم الحفظ',mbTitle:'المجتمع',mbSearch:'البحث بالاسم',mbNone:'لا يوجد أعضاء يطابقون بحثك.',mbErr:'تعذّر تحميل الأعضاء. تحقق من اتصالك وحاول مرة أخرى.',mbRetry:'حاول مرة أخرى',mbYou:'أنت',mbMore:'عرض المزيد',mbRides:'{0} رحلة',mbRide1:'رحلة واحدة',mbLoading:'جارٍ تحميل الأعضاء...',mbBack:'العودة إلى الحساب',mbClose:'إغلاق',ttTab:'الألقاب',ttSub:'ألقاب يحملها الأعضاء في حساباتهم وفي قائمة الأعضاء.',ttNew:'لقب جديد',ttGive:'منح اللقب',ttAuto:'تلقائي عند بلوغ هذا العدد من رحلات السبت',ttAutoHint:'اتركه فارغًا لمنحه يدويًا.',ttAutoMeta:'تلقائي عند {0} رحلة سبت',ttHandMeta:'يمنحه الفريق',ttSearch:'ابحث عن الأعضاء بالاسم أو الجوال',ttLastDay:'آخر يوم (اختياري)',ttRetire:'إيقاف',ttRestore:'استعادة',ttRetiredMeta:'موقوف',ttNameReq:'أدخل الاسم بالإنجليزية والعربية.',ttAutoBad:'أدخل عددًا صحيحًا من 1 إلى 1000 أو اتركه فارغًا.',ttEmpty:'لا توجد ألقاب بعد. أنشئ أول لقب.',ttMissing:'لم يتم إعداد الألقاب في قاعدة البيانات بعد.',ttLoadErr:'تعذّر تحميل الألقاب.',ttNights:'{0} رحلة سبت',ttSure:'اضغط مرة أخرى للحذف',ttLogSaved:'تم حفظ اللقب',ttLogGiven:'تم منح اللقب',ttLogTaken:'تم سحب اللقب',ttLogDeleted:'تم حذف اللقب',
   accountTitle:'الحساب',accountSub:'موسمك وأوسمتك وبياناتك.',
   saveAccountBtn:'حفظ التغييرات',accountSaved:'تم الحفظ.',
   
@@ -2056,7 +2059,7 @@ function setLang(lang,_fromUrl){
   try{_syncRailPin();_syncStaffNavLabel();}catch(e){}
   }catch(e){try{_logError('tab-label render: '+((e&&e.message)||e),'render');}catch(_){}}
   renderTopbarRight();
-  if(S.view==='customer'){renderRegister();renderMyRides();if(S.custTab==='account')renderAccount();}
+  if(S.view==='customer'){renderRegister();renderMyRides();if(S.custTab==='account')renderAccount();else if(S.custTab==='members')renderMembers();}
   else if(S.view==='staff')_renderStaffTab();
   else if(S.view==='landing')renderLandingAvail();
   if(document.getElementById('auth-modal')?.style.display==='flex')renderAuthModal(); // open only (display flex, like every other check): a modal never opened has no display set, and was drawn here on every language change
@@ -2955,7 +2958,7 @@ let _sbWritesOut=0;
 // wait in the request lane like any read (2026-10-27: the rider's page reads checked against their
 // migrations - customer_my_badges to petromin_member at the end - and the consents, the deletion request
 // and the last-seen stamp left out, which write).
-const _READ_RPC=new Set(['staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member']);
+const _READ_RPC=new Set(['customer_my_titles','member_directory','staff_title_auto_holders','staff_sync','staff_people','list_sessions','my_bookings','customer_profile','customer_exists','customer_token_ok','customer_pwd_state','customer_fix_fields','community_member','promo_lookup','staff_resolve_bike','staff_phone_accounts','staff_email_for_phone','staff_inventory_costs','staff_inventory_extras','staff_ambassador_stats','staff_team_list','staff_team_more','staff_purge_preview','staff_operator_list','staff_sign_in_methods','staff_last_seen','staff_sign_in_lock','staff_undo_code_state','staff_audit_search','staff_invite_check','customer_my_badges','customer_emergency','customer_about','badge_catalog','badge_seasons','badge_weeks','customer_blood_type','customer_whatsapp','customer_purchases','ambassador_mine','petromin_member']);
 function _fetchT(input,init){
   const m=String((init&&init.method)||(input&&input.method)||'GET').toUpperCase();
   const _rpc=m==='POST'&&/\/rest\/v1\/rpc\/([^/?#]+)/.exec(String((input&&input.url)||input));
@@ -4583,6 +4586,7 @@ en:[
   {table:{head:['Who','What they receive, and why','Location'],rows:[
     ['Our staff','What they need to run rides','Saudi Arabia'],
     ['Petromin','The names of riders on rides we run for Petromin, and nothing else','Saudi Arabia'],
+    ['Other community members','If you are a community member: your full name, your title, the badges our staff gave you and how many rides you have done, so members can know each other. Switch on Hide me from the members list in Account and they see none of it.','Saudi Arabia'],
     ['Sela and Jeddah Yacht Club (JYC)','For Run for Her, and only if you agree: your full name, email address, birth date, the distance you chose and your emergency contact, so you can take part in the race. Nothing else about you.','Saudi Arabia'],
     ['Kamin Sports','For Victory Lap, and only if you agree: the details listed on the page where you agree (until Kamin Sports confirms its exact list: your full name, email address, mobile number, gender, birth date, the race, division and team you chose, your T-shirt size and your emergency contact), so you can take part in the race. Nothing else about you.','Saudi Arabia'],
     ['WeSportify, Mile and Gymnation','For the Arena Heros Hybrid Race, and only if you agree: the first and last name, email address and mobile number you entered for the race, your gender, your division and your team (its code and your partner), so you can take part in the race. Nothing else about you.','Saudi Arabia'],
@@ -4685,6 +4689,7 @@ ar:[
   {table:{head:['الجهة','ما تتلقاه ولماذا','الموقع'],rows:[
     ['موظفونا','ما يحتاجونه لتشغيل الرحلات','المملكة العربية السعودية'],
     ['بترومين','أسماء الراكبين في الرحلات التي ننظّمها لبترومين فقط، ولا شيء غير ذلك','المملكة العربية السعودية'],
+    ['أعضاء المجتمع الآخرون','إذا كنت عضوًا في المجتمع: اسمك الكامل ولقبك والشارات التي منحك إياها فريقنا وعدد رحلاتك، ليتعرّف الأعضاء بعضهم على بعض. فعّل خيار إخفائي من قائمة الأعضاء في الحساب ولن يروا شيئًا من ذلك.','المملكة العربية السعودية'],
     ['صلة ونادي جدة لليخوت (JYC)','لسباق نركض لأجلها، وفقط إذا وافقت: اسمك الكامل وبريدك الإلكتروني وتاريخ ميلادك والمسافة التي اخترتها وجهة اتصالك للطوارئ، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
     ['كامن سبورتس','لسباق فيكتوري لاب، وفقط إذا وافقت: البيانات المذكورة في الصفحة التي توافق فيها (وإلى أن تؤكد كامن سبورتس قائمتها الدقيقة: اسمك الكامل وبريدك الإلكتروني ورقم جوالك وجنسك وتاريخ ميلادك والسباق والفئة والفريق التي اخترتها ومقاس قميصك وجهة اتصالك للطوارئ)، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
     ['WeSportify وMile وGymnation','لسباق أرينا هيروز الهجين، وفقط إذا وافقت: الاسم الأول والأخير والبريد الإلكتروني ورقم الجوال التي أدخلتها للسباق، وجنسك، وفئتك، وفريقك (رمزه وشريكك)، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
@@ -7247,7 +7252,7 @@ let _navRestoring=false;
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
 const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',customers:'customers',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
-const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account'};
+const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
@@ -7261,7 +7266,7 @@ const SUB_PATHS={
   // page and a separate community management dashboard page"); the leaderboard and statistics went to Analytics.
   // Community's accounts list is its members: /community/members.
   customers:{overview:'',accounts:'accounts',flagged:'flagged',wallets:'wallets',duplicates:'duplicates',activity:'activity'},
-  community:{overview:'',accounts:'members',flagged:'flagged',tags:'tags',badges:'badges',applications:'applications',learning:'applications/learning',birthdays:'birthdays'},
+  community:{overview:'',accounts:'members',flagged:'flagged',tags:'tags',badges:'badges',titles:'titles',applications:'applications',learning:'applications/learning',birthdays:'birthdays'},
   catalog:{models:'',categories:'categories',fields:'fields'},
   vendors:{calendar:'',requests:'requests',venues:'venues',tiers:'tiers',feedback:'feedback'},
   // Analytics' views (the owner, 2026-10-05: "add a url path for ratings and all other clickable buttons"):
@@ -9640,7 +9645,7 @@ async function _openEventLink(){
     if(await _handoffToSite(who))return;
   }
   let tab=null;try{tab=sessionStorage.getItem(_TABLINK_KEY);}catch(e){}
-  if((tab==='myrides'||tab==='account')&&S.dataLoaded&&S.view==='landing'&&(S.loggedIn||getSession())){
+  if((tab==='myrides'||tab==='account'||tab==='members')&&S.dataLoaded&&S.view==='landing'&&(S.loggedIn||getSession())){
     try{sessionStorage.removeItem(_TABLINK_KEY);}catch(e){}
     setCustTab(tab);
     return;
@@ -10566,6 +10571,7 @@ function goCustomer(tab){
   renderRegister();
   renderMyRides();
   if(S.custTab==='account')renderAccount(); // the account tab is painted on demand, not on every visit
+  else if(S.custTab==='members')renderMembers();
   _pushNav();
 }
 
@@ -11075,6 +11081,7 @@ function setCustTab(tab){
   if(tab==='myrides')renderMyRides();
   else if(tab==='register')renderRegister();
   else if(tab==='account')renderAccount();
+  else if(tab==='members')renderMembers();
   _pushNav();
   if(tab!=='register'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   try{_forceRatingPrompt();}catch(e){} // a pending post-ride rating is mandatory on any customer tab
@@ -11157,7 +11164,7 @@ function _stabFocus(tab){
 function renderCustomerTabs(){
   // On the event picker no panel is open yet; the picker IS step one of Reserve, so
   // that's the section that reads as current.
-  const _act=S.view==='landing'?'register':S.custTab;
+  const _act=S.view==='landing'?'register':S.custTab==='members'?'account':S.custTab; // Members is reached from My Account
   document.querySelectorAll('#customer-tab-nav .tab-btn').forEach(b=>{
     const _on=b.dataset.ctab===_act;
     b.classList.toggle('active',_on);
@@ -11166,6 +11173,7 @@ function renderCustomerTabs(){
   document.getElementById('tab-register').classList.toggle('active',S.custTab==='register');
   document.getElementById('tab-myrides').classList.toggle('active',S.custTab==='myrides');
   document.getElementById('tab-account').classList.toggle('active',S.custTab==='account');
+  document.getElementById('tab-members').classList.toggle('active',S.custTab==='members');
   
   document.querySelectorAll('.cust-bnav-btn').forEach((btn,i)=>{
     const tabs=['register','myrides','account'];
@@ -15786,6 +15794,108 @@ function _mrBadgesMore(){S._bdgMore=!S._bdgMore;_mrBadgesPaint();const b=documen
 // tapped, or what the rider was on when a new one popped up (found again by its handler when the
 // badge row was drawn again meanwhile).
 let _bdgPopFrom=null;
+// Titles for community members, and the members list (the owner, 2026-11-02; migration 20261102200000).
+// A title's name is English + Arabic: the other languages show the English. member_directory is the one
+// read that names another person; it carries no account id, so a card is drawn from the row in hand.
+function _ttName(x){return String((x&&((S.lang==='ar'&&x.name_ar)||x.name))||'');}
+function _ttChip(x){return`<span class="tt-chip bdc-${BDG_COLORS.includes(x&&x.color)?x.color:'green'}"><bdi>${esc(_ttName(x))}</bdi></span>`;}
+async function _ttMineLoad(cust){
+  if(!cust||!cust.session_token||!sb)return;
+  const a=S._ttMine;
+  if(a&&a.forId===cust.id&&Date.now()-a.at<6e4){_ttMinePaint();return;} // the account page repaints often
+  if(S._ttMineBusy)return;S._ttMineBusy=true;
+  let r;try{r=await sb.rpc('customer_my_titles',{p_id:cust.id,p_token:cust.session_token});}catch(e){r={error:e};}
+  S._ttMineBusy=false;
+  const now=S.loggedIn||getSession();if(!now||now.id!==cust.id)return; // another account signed in while this was asked
+  const d=r&&!r.error&&r.data;
+  S._ttMine=d&&d.ok===true&&d.member===true?{forId:cust.id,at:Date.now(),hidden:!!d.hidden,shown:d.shown||null,titles:Array.isArray(d.titles)?d.titles:[]}:null; // not a member, or a database without it: no card
+  _ttMinePaint();
+}
+function _ttShownId(a){return a.titles.some(x=>x.id===a.shown)?a.shown:(a.titles[0]&&a.titles[0].id)||null;}
+function _ttMinePaint(){
+  const a=S._ttMine,host=document.getElementById('tab-account'),c=S.loggedIn||getSession(),old=document.getElementById('tt-mine');
+  if(old)old.remove();
+  if(!a||!host||!c||a.forId!==c.id||!host.firstChild)return;
+  const on=_ttShownId(a),cur=a.titles.find(x=>x.id===on);
+  const card=document.createElement('div');card.id='tt-mine';card.className='amb-mine tt-mine';
+  card.innerHTML=`<div class="amb-mine-title">${t('ttMineTitle')}</div>
+    ${a.titles.length?`${a.titles.length>1?`<div class="am-meta">${t('ttMineSub')}</div>`:''}
+      <div class="tt-picks">${a.titles.map(x=>`<button type="button" class="tt-pick${x.id===on?' on':''}" aria-pressed="${x.id===on}" data-on-click="${_on('_ttPick',x.id)}">${_ttChip(x)}</button>`).join('')}</div>
+      ${cur&&cur.expires_on?`<div class="am-meta">${esc(t('ttUntil').replace('{0}',shortDate(cur.expires_on)))}</div>`:''}`
+    :`<div class="am-meta">${t('ttMineNone')}</div>`}
+    <label class="tt-hide"><input type="checkbox" id="tt-hide"${a.hidden?' checked':''} data-on-change="${_on('_ttHide',_P('checked'))}"><span>${t('ttHide')}</span></label>
+    <div class="am-meta">${t('ttHideHint')}</div>
+    <button type="button" class="btn-secondary tt-open" data-on-click="${_on('setCustTab','members')}">${t('mbTitle')}</button>`;
+  host.insertAdjacentElement('afterbegin',card);
+}
+async function _ttSavePrefs(shown,hidden){
+  const a=S._ttMine,c=S.loggedIn||getSession();if(!a||!c||S._ttSaving)return;
+  const was={shown:a.shown,hidden:a.hidden};
+  a.shown=shown;a.hidden=hidden;S._ttSaving=true;_ttMinePaint();
+  let r;try{r=await sb.rpc('customer_title_prefs',{p_id:c.id,p_token:c.session_token,p_shown:a.titles.some(x=>x.id===shown)?shown:null,p_hidden:hidden});}catch(e){r={error:e};}
+  S._ttSaving=false;
+  if(!r||r.error||!r.data||r.data.ok!==true){Object.assign(a,was);_ttMinePaint();toast(t('ttSaveErr'),'error');return;}
+  S._mb=null; // the list changed for this member
+  toast(t('ttSaved'));
+}
+function _ttPick(id){const a=S._ttMine;if(a)_ttSavePrefs(id,a.hidden);}
+function _ttHide(v){const a=S._ttMine;if(a)_ttSavePrefs(a.shown,!!v);}
+// The members list: read once, then kept five minutes (400 members with their badges, and the project's egress is limited).
+async function _mbLoad(cust,force){
+  const m=S._mb;
+  if(S._mbBusy||(!force&&m&&m.forId===cust.id&&Date.now()-m.at<3e5))return;
+  S._mbBusy=true;
+  let r;try{r=await sb.rpc('member_directory',{p_id:cust.id,p_token:cust.session_token});}catch(e){r={error:e};}
+  S._mbBusy=false;
+  const d=r&&!r.error&&r.data,rows=d&&d.ok===true&&Array.isArray(d.members)?d.members:null;
+  S._mb={forId:cust.id,at:Date.now(),rows,denied:!!(d&&d.ok===false&&d.error==='member')};
+  if(S.custTab==='members')renderMembers();
+}
+function renderMembers(){
+  const host=document.getElementById('tab-members'),cust=S.loggedIn||getSession();if(!host)return;
+  if(!cust){host.innerHTML='';return;}
+  const m=S._mb&&S._mb.forId===cust.id?S._mb:null;
+  _mbLoad(cust);
+  const back=`<button type="button" class="btn-secondary mb-back" data-on-click="${_on('setCustTab','account')}">${t('mbBack')}</button>`;
+  const head=`<h1 class="page-title">${t('mbTitle')}</h1>`;
+  if(!m){host.innerHTML=head+`<div class="am-meta">${t('mbLoading')}</div>`;return;}
+  if(m.denied){host.innerHTML='';setCustTab('register');return;} // only members have this page: anyone else leaves its address too
+  if(!m.rows){host.innerHTML=head+`<div class="am-meta">${t('mbErr')}</div><button type="button" class="btn-primary mb-back" data-on-click="${_on('_mbRetry')}">${t('mbRetry')}</button>`;return;}
+  host.innerHTML=head+`<input id="mb-q" type="search" class="search-input mb-q" aria-label="${esc(t('mbSearch'))}" placeholder="${esc(t('mbSearch'))}" value="${esc(S._mbQ||'')}" data-on-input="${_on('_mbQInput',_P('value'))}">
+    <div id="mb-rows"></div>`+back;
+  _mbRowsPaint();
+}
+function _mbRetry(){const c=S.loggedIn||getSession();S._mb=null;renderMembers();if(c)_mbLoad(c,true);}
+function _mbRowsPaint(){
+  const h=document.getElementById('mb-rows'),m=S._mb;if(!h||!m||!m.rows)return;
+  const q=String(S._mbQ||'').trim().toLowerCase(),cap=S._mbShow||60;
+  const hits=m.rows.map((x,i)=>({x,i})).filter(o=>!q||String(o.x.name||'').toLowerCase().includes(q));
+  h.innerHTML=hits.slice(0,cap).map(({x,i})=>{const b=(x.badges||[])[0];return`<button type="button" class="mb-row" data-on-click="${_on('_mbOpen',i)}">
+      <span class="mb-who"><strong><bdi>${esc(x.name||'')}</bdi></strong>${x.me?` <small>${t('mbYou')}</small>`:''}${x.title?`<span class="mb-t">${_ttChip(x.title)}</span>`:''}</span>
+      ${b?_bdgMedal(b.icon,_bdgCol(b)):''}</button>`;}).join('')||`<div class="am-meta">${t('mbNone')}</div>`
+    +'';
+  if(hits.length>cap)h.insertAdjacentHTML('beforeend',`<button type="button" class="btn-secondary mb-more" data-on-click="${_on('_mbMore')}">${t('mbMore')}</button>`);
+}
+function _mbQInput(v){S._mbQ=v;S._mbShow=60;_mbRowsPaint();}
+function _mbMore(){S._mbShow=(S._mbShow||60)+60;_mbRowsPaint();}
+function _on__mbOpen_1(event,el){if(event.target===el)_bdgPopClose();}
+function _mbOpen(i){
+  const m=S._mb,x=m&&m.rows&&m.rows[i];if(!x)return;
+  const old=document.getElementById('badge-pop');
+  if(old)old.remove();else{const a=document.activeElement;_bdgPopFrom=a&&a!==document.body&&a.nodeType===1?a:null;}
+  const n=Number(x.rides)||0;
+  const el=document.createElement('div');el.id='badge-pop';el.className='badge-pop';
+  el.setAttribute('data-on-click',_on('_on__mbOpen_1',_EV,_EL));
+  el.innerHTML=`<div class="badge-pop-box mb-card" role="dialog" aria-modal="true" aria-label="${esc(x.name||'')}">
+    <div class="badge-pop-nm"><bdi>${esc(x.name||'')}</bdi></div>
+    ${x.title?`<div class="mb-t">${_ttChip(x.title)}</div>`:''}
+    <div class="am-meta">${esc(n===1?t('mbRide1'):t('mbRides').replace('{0}',n))}</div>
+    ${(x.badges||[]).length?`<div class="mb-badges">${x.badges.map(b=>`<span class="mb-badge">${_bdgMedal(b.icon,_bdgCol(b))}<small>${esc(_bdgName(b))}</small></span>`).join('')}</div>`:''}
+    <button type="button" class="btn-primary mb-close" data-on-click="${_on('_bdgPopClose')}">${t('mbClose')}</button>
+  </div>`;
+  document.body.appendChild(el);
+  const cb=el.querySelector('.mb-close');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
+}
 function _bdgPopClose(){
   const p=document.getElementById('badge-pop');if(p)p.remove();
   let b=_bdgPopFrom;_bdgPopFrom=null;
@@ -16077,6 +16187,7 @@ function renderAccount(){
   S._cwMineAt=0;_cwMineLoad(cust); // the wallet's card, painted into its place when the answer comes
   setTimeout(()=>{try{_ambMineEnsure(cust);}catch(_){}},0); // the ambassador's card, above the profile, once the form is painted
   _bdgMineLoad(cust); // the badges staff gave, painted into the badge row when they come
+  setTimeout(()=>{try{_ttMineLoad(cust);}catch(_){}},0); // a community member's titles card, once the form is painted
   setTimeout(()=>{_bdgCelebrate();_bdgProfCheer();},0); // one given since this device last showed one, from the copy in hand; Race Ready
   let accCC='+966',accPhone='';
   if(cust.phone){
@@ -49818,11 +49929,12 @@ function _renderPeople(sec){
   const el=document.getElementById('tab-'+sec);if(!el)return;
   // The other section's markup goes: both draw the same lists, and their ids (am-search, am-cust-rows...) must be one.
   {const o=document.getElementById('tab-'+(cust?'community':'customers'));if(o&&o.firstChild)o.innerHTML='';}
-  const subs=cust?['overview','accounts','flagged','wallets','activity',...(isAdmin()?['duplicates']:[])]:['overview','accounts','flagged','tags','badges','applications','learning','birthdays'];
+  const subs=cust?['overview','accounts','flagged','wallets','activity',...(isAdmin()?['duplicates']:[])]:['overview','accounts','flagged','tags','badges','titles','applications','learning','birthdays'];
   let sub=cust?S.customersTab:S.communityTab;if(!subs.includes(sub))sub='overview';
   if(cust)S.customersTab=sub;else S.communityTab=sub;
   _pushNav(); // the address follows the view (its tabs)
   if(sub==='duplicates'&&!S._mgRows&&!S._mgBusy&&!S._mgErr)_mgLoad(); // the recent merges, once
+  if(sub==='titles')_ttLoad();
   if(sub==='accounts'||sub==='wallets')_cwLoad(sub==='wallets').catch(()=>{}); // who has money (2026-11-02)
   if(sub==='accounts'||sub==='badges'||(!cust&&sub==='overview'))_bdgLoad(); // the badges and who holds them, at most every five minutes
   if(sub==='accounts'||sub==='applications'||sub==='learning')_igLoad(); // the Instagram follower counts, likewise (the cards' chips too, 2026-10-09)
@@ -49838,11 +49950,11 @@ function _renderPeople(sec){
     +(isAdmin()?navBtn('duplicates',`${t('commTabDuplicates')}${(()=>{const n=_dupGroups().length;return n?` (${n})`:'';})()}`):'');
   else{
     const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length,apN=_caPendingN()+_laPendingN();
-    nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabMembers'))+navBtn('flagged',t('commTabFlagged'))+navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle'))
+    nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabMembers'))+navBtn('flagged',t('commTabFlagged'))+navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle'))+navBtn('titles',t('ttTab'))
       +navBtn('applications',t('commTabApplications')+(apN?` (${apN})`:''))+navBtn('birthdays',t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''));
   }
-  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='natnew-q'||_ae.id==='cw-q')?_ae.id:''; // a search in use
-  const body=sub==='overview'?(cust?_custOverview():_commOverview()):sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_commFlagged():sub==='tags'?_commTags()
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='tt-q'||_ae.id==='natnew-q'||_ae.id==='cw-q')?_ae.id:''; // a search in use
+  const body=sub==='overview'?(cust?_custOverview():_commOverview()):sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_commFlagged():sub==='tags'?_commTags():sub==='titles'?_commTitles()
     :sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='wallets'?_commWallets():sub==='badges'?_commBadges():_commAccounts();
   el.innerHTML=`
     <h1 class="page-title">${t(cust?'tabCustomers':'commTitle')}</h1>
@@ -50078,6 +50190,136 @@ function _tgHoldersHtml(tg){
     ${holderRows||_emptyState(t('tgNoHolders'))}
     ${rows.length>cap?`<div class="cmy-more"><button type="button" class="btn-secondary" data-on-click="${_on("_tgMore")}">${t('amShowMore').replace('{0}',String(Math.min(rows.length-cap,100)))}</button></div>`:''}
   </div>`;
+}
+// Community > Titles (the owner, 2026-11-02): admins make titles, any staffer gives and takes them back,
+// as with badges. An automatic title is worked out by the database from Saturday nights, so it has no rows to give.
+function _ttMissingErr(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||(/titles/.test(m)&&/does not exist|schema cache/.test(m));}
+async function _ttLoad(force){
+  if(!sb||S._ttBusy||(!force&&S._ttAt&&Date.now()-S._ttAt<3e5))return;
+  S._ttBusy=true;S._ttAt=Date.now();let fail=null;
+  try{
+    const[a,b]=await Promise.all([sb.from('titles').select('*'),_pagedAll(()=>sb.from('customer_titles').select('*').order('customer_id').order('title_id'))]);
+    if(a&&!a.error&&Array.isArray(a.data)&&b&&!b.error&&Array.isArray(b.data)){S.titles=a.data;S.custTitles=b.data;}
+    else fail=(a&&a.error)||(b&&b.error)||{message:'no rows'};
+  }catch(e){fail=e||{message:'failed'};}finally{S._ttBusy=false;}
+  S._ttMissing=!!fail&&_ttMissingErr(fail);S._ttErr=!!fail&&!S._ttMissing;
+  if(S.view==='staff'&&_pplOn('titles'))renderCommunity();
+}
+function _ttLive(ct){return !ct.expires_on||String(ct.expires_on).slice(0,10)>=todayStr();}
+function _ttHolderN(x){return x.auto_rides?null:(S.custTitles||[]).filter(ct=>ct.title_id===x.id&&_ttLive(ct)).length;}
+function _commTitles(){
+  if(S._ttMissing)return _emptyState(t('ttMissing'));
+  if(S._ttErr)return _emptyState(t('ttLoadErr'));
+  if(!S.titles)return`<div class="am-meta">${t('mbLoading')}</div>`;
+  const adm=isAdmin(),list=S.titles.slice().sort((a,b)=>(a.retired?1:0)-(b.retired?1:0)||(a.sort-b.sort)||String(a.name).localeCompare(String(b.name)));
+  const rows=list.map(x=>{
+    const n=_ttHolderN(x),open=S._ttOpenId===x.id,anyRow=(S.custTitles||[]).some(ct=>ct.title_id===x.id);
+    const meta=[x.retired?t('ttRetiredMeta'):'',x.auto_rides?t('ttAutoMeta').replace('{0}',x.auto_rides):t('ttHandMeta'),n===null?'':t('amHolders').replace('{0}',n)].filter(Boolean).join(' · ');
+    return`<div class="am-tag-row" data-title="${esc(x.id)}">${_ttChip(x)}<span class="am-meta">${esc(meta)}</span>
+      <div class="cmy-am-tacts">
+        <button type="button" class="btn-sm ${open?'btn-primary':'btn-secondary'}" aria-expanded="${open}" data-on-click="${_on('_ttOpen',x.id)}">${t('tgHoldersBtn')}</button>
+        ${adm?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_ttEdit',x.id)}">${t('editBtn')}</button>
+        <button type="button" class="btn-sm btn-secondary" data-on-click="${_on('_ttRetire',x.id,!x.retired)}">${t(x.retired?'ttRestore':'ttRetire')}</button>
+        ${anyRow?'':`<button type="button" class="btn-sm btn-red" data-on-click="${_on('_ttDelete',x.id)}">${S._ttSure===x.id?t('ttSure'):t('deleteBtn')}</button>`}`:''}
+      </div></div>${open?_ttHoldersHtml(x):''}`;
+  }).join('')||_emptyState(t('ttEmpty'));
+  return`<div class="form-section cmy-mt0"><h2 class="form-title">${t('ttTab')}</h2><div class="cmy-am-sub">${t('ttSub')}</div>${rows}
+    ${!adm?'':S._ttEd?_ttEditForm():`<button type="button" class="btn-secondary cmy-mt12" data-on-click="${_on('_ttEdit','')}">+ ${t('ttNew')}</button>`}</div>`;
+}
+function _ttEditForm(){
+  const e=S._ttEd,f=(k,lbl,rtl)=>`<div class="form-group"><label for="tt-f-${k}">${t(lbl)}</label><input id="tt-f-${k}" type="text" maxlength="40" value="${esc(e[k]||'')}"${rtl?' dir="rtl"':''}></div>`;
+  return`<div class="inline-form bdg-form tt-form"><h2 class="form-title">${t(e.id?'editBtn':'ttNew')}</h2>
+    <div class="form-row">${f('name','bdgNameEn')}${f('name_ar','bdgNameAr',1)}</div>
+    <div class="form-group"><label>${t('amTagColor')}</label><div class="bdg-colors" role="group" aria-label="${esc(t('amTagColor'))}">${BDG_COLORS.map(c=>`<button type="button" class="bdg-sw bdc-${c}${(e.color||'green')===c?' on':''}" aria-label="${esc(c)}" aria-pressed="${(e.color||'green')===c}" data-on-click="${_on('_ttColor',c)}"></button>`).join('')}</div></div>
+    <div class="form-group"><label for="tt-f-auto">${t('ttAuto')}</label><input id="tt-f-auto" type="number" min="1" max="1000" step="1" value="${esc(e.auto_rides==null?'':String(e.auto_rides))}"><div class="am-meta">${t('ttAutoHint')}</div></div>
+    <div class="bdg-foot"><button type="button" class="btn-secondary" data-on-click="${_on('_ttEditClose')}">${t('cancelBtn')}</button><button type="button" class="btn-primary" data-on-click="${_on('_ttSave')}">${t('saveBtn')}</button></div></div>`;
+}
+function _ttPull(){const e=S._ttEd;if(!e)return;const g=id=>document.getElementById(id);if(g('tt-f-name'))e.name=g('tt-f-name').value;if(g('tt-f-name_ar'))e.name_ar=g('tt-f-name_ar').value;if(g('tt-f-auto'))e.auto_rides=g('tt-f-auto').value===''?null:g('tt-f-auto').value;}
+function _ttEdit(id){S._ttEd=id?{...(S.titles||[]).find(x=>x.id===id)}:{color:'green'};renderCommunity();}
+function _ttEditClose(){S._ttEd=null;renderCommunity();}
+function _ttColor(c){_ttPull();S._ttEd.color=c;renderCommunity();}
+async function _ttSave(){
+  const e=S._ttEd;if(!e||e.busy)return;_ttPull();
+  const name=String(e.name||'').trim(),name_ar=String(e.name_ar||'').trim();
+  if(!name||!name_ar){toast(t('ttNameReq'),'error');return;}
+  const au=e.auto_rides==null||e.auto_rides===''?null:Number(e.auto_rides);
+  if(au!==null&&!(Number.isInteger(au)&&au>=1&&au<=1000)){toast(t('ttAutoBad'),'error');return;}
+  const row={name,name_ar,color:BDG_COLORS.includes(e.color)?e.color:'green',auto_rides:au},id=e.id||('ttl_'+uid());
+  if(!e.id)Object.assign(row,{id,sort:500+(S.titles||[]).length});
+  e.busy=true;
+  const r=e.id?await sb.from('titles').update(row).eq('id',id):await sb.from('titles').insert(row);
+  e.busy=false;
+  if(_writeErr(r,'save title'))return;
+  S.titles=[...(S.titles||[]).filter(x=>x.id!==id),{retired:false,...((S.titles||[]).find(x=>x.id===id)||{}),...row,id}];
+  S._ttEd=null;S._ttAuto=null;const msg=`${t('ttLogSaved')}: ${name}`;toast(msg);logAction(msg);renderCommunity();
+}
+async function _ttRetire(id,on){
+  const x=(S.titles||[]).find(y=>y.id===id);if(!x)return;
+  const r=await sb.from('titles').update({retired:!!on}).eq('id',id);if(_writeErr(r,'retire title'))return;
+  x.retired=!!on;logAction(`${t(on?'ttRetiredMeta':'ttRestore')}: ${x.name}`);renderCommunity();
+}
+async function _ttDelete(id){
+  const x=(S.titles||[]).find(y=>y.id===id);if(!x)return;
+  if(S._ttSure!==id){S._ttSure=id;renderCommunity();return;}
+  S._ttSure=null;
+  const r=await sb.from('titles').delete().eq('id',id);if(_writeErr(r,'delete title')){renderCommunity();return;}
+  S.titles=S.titles.filter(y=>y.id!==id);const msg=`${t('ttLogDeleted')}: ${x.name}`;toast(msg);logAction(msg);renderCommunity();
+}
+function _ttOpen(id){
+  S._ttOpenId=S._ttOpenId===id?null:id;S._ttQ='';S._ttUntil='';
+  const x=(S.titles||[]).find(y=>y.id===id);
+  if(S._ttOpenId&&x&&x.auto_rides&&!x.retired)_ttAutoLoad(id);
+  renderCommunity();
+}
+async function _ttAutoLoad(id){
+  S._ttAuto=null;
+  let r;try{r=await sb.rpc('staff_title_auto_holders',{p_title:id});}catch(e){r={error:e};}
+  if(S._ttOpenId!==id)return;
+  S._ttAuto=r&&!r.error&&Array.isArray(r.data)?{id,rows:r.data}:{id,rows:null};
+  if(_pplOn('titles'))renderCommunity();
+}
+function _ttQInput(v){S._ttQ=v;_debRender('ttq',renderCommunity);}
+function _ttUntilInput(v){S._ttUntil=v;}
+function _ttIsMember(cid){return(S.customerTags||[]).some(ct=>ct.customer_id===cid&&ct.tag_id==='tag_saturday'&&_tagActive(ct));}
+function _ttHoldersHtml(x){
+  const byId=new Map((S.customers||[]).map(c=>[String(c.id),c]));
+  const who=(c,sub)=>`<span class="tg-who"><strong>${esc(c.name||'—')}</strong><small>${sub}</small></span>`;
+  if(x.auto_rides){
+    const a=S._ttAuto&&S._ttAuto.id===x.id?S._ttAuto:null;
+    if(x.retired)return`<div class="tg-holders">${_emptyState(t('ttRetiredMeta'))}</div>`;
+    if(!a)return`<div class="tg-holders"><div class="am-meta">${t('mbLoading')}</div></div>`;
+    if(!a.rows)return`<div class="tg-holders">${_emptyState(t('ttLoadErr'))}</div>`;
+    const rows=a.rows.map(r=>({r,c:byId.get(String(r.customer_id))})).filter(o=>o.c);
+    return`<div class="tg-holders"><div class="tg-sub">${t('amHolders').replace('{0}',String(rows.length))}</div>
+      ${rows.map(({r,c})=>`<div class="tg-row">${who(c,esc(t('ttNights').replace('{0}',r.nights)))}</div>`).join('')||_emptyState(t('tgNoHolders'))}</div>`;
+  }
+  const q=(S._ttQ||'').trim().toLowerCase();
+  const hit=c=>!q||String(c.name||'').toLowerCase().includes(q)||_phoneHit(c.phone,q);
+  const held=(S.custTitles||[]).filter(ct=>ct.title_id===x.id&&_ttLive(ct)).map(ct=>({ct,c:byId.get(String(ct.customer_id))})).filter(o=>o.c);
+  const ids=new Set(held.map(o=>String(o.c.id)));
+  const give=q.length>=2&&!x.retired?(S.customers||[]).filter(c=>!ids.has(String(c.id))&&_ttIsMember(c.id)&&hit(c)).slice(0,8).map(c=>`<div class="tg-row tg-give">${who(c,c.phone?_pii('phone',c.phone,c.id):_pii('email',c.email,c.id))}
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on('_ttGive',c.id,x.id)}">${t('ttGive')}</button></div>`).join(''):'';
+  return`<div class="tg-holders">
+    ${x.retired?'':`<div class="form-row"><div class="form-group"><label for="tt-q">${t('ttSearch')}</label><input id="tt-q" type="text" class="search-input" value="${esc(S._ttQ||'')}" data-on-input="${_on('_ttQInput',_P('value'))}"></div>
+    <div class="form-group"><label for="tt-until">${t('ttLastDay')}</label><input id="tt-until" type="date" value="${esc(S._ttUntil||'')}" data-on-input="${_on('_ttUntilInput',_P('value'))}"></div></div>`}
+    ${give?`<div class="tg-sub">${t('tgGiveTo')}</div>${give}`:''}
+    <div class="tg-sub">${t('amHolders').replace('{0}',String(held.length))}</div>
+    ${held.filter(o=>hit(o.c)).map(({ct,c})=>`<div class="tg-row">${who(c,ct.expires_on?esc(t('ttUntil').replace('{0}',shortDate(String(ct.expires_on).slice(0,10)))):esc(ct.given_by||''))}
+      <button type="button" class="btn-sm btn-red" data-on-click="${_on('_ttTake',c.id,x.id)}">${t('removeBtn')}</button></div>`).join('')||_emptyState(t('tgNoHolders'))}
+  </div>`;
+}
+async function _ttGive(cid,tid){
+  const row={customer_id:cid,title_id:tid,expires_on:/^\d{4}-\d\d-\d\d$/.test(S._ttUntil||'')?S._ttUntil:null,given_by:(_opName()||'Staff').slice(0,60),given_at:new Date().toISOString()};
+  const r=await sb.from('customer_titles').upsert(row,{onConflict:'customer_id,title_id'}); // an ended one is given again
+  if(_writeErr(r,'give title'))return;
+  S.custTitles=[...(S.custTitles||[]).filter(ct=>!(ct.customer_id===cid&&ct.title_id===tid)),row];
+  const x=(S.titles||[]).find(y=>y.id===tid);const msg=`${t('ttLogGiven')}: ${x?x.name:tid}`;toast(msg);logAction(msg);renderCommunity();
+}
+async function _ttTake(cid,tid){
+  const r=await sb.from('customer_titles').delete().eq('customer_id',cid).eq('title_id',tid);
+  if(_writeErr(r,'take title'))return;
+  S.custTitles=(S.custTitles||[]).filter(ct=>!(ct.customer_id===cid&&ct.title_id===tid));
+  const x=(S.titles||[]).find(y=>y.id===tid);const msg=`${t('ttLogTaken')}: ${x?x.name:tid}`;toast(msg);logAction(msg);renderCommunity();
 }
 function _commTags(){
   const tagRows=(S.tags||[]).slice().sort((a,b)=>(b.auto_grant?1:0)-(a.auto_grant?1:0)||String(a.name).localeCompare(String(b.name))).map(tg=>{
@@ -53201,7 +53443,7 @@ function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}
     if(_pathStaff)_openSessionParam();
   } else if(target==='customer'){
     const ctab=(nav&&nav.ctab)||sessionStorage.getItem('cq_nav_ctab');
-    goCustomer(ctab&&['register','myrides','account'].includes(ctab)?ctab:'register');
+    goCustomer(ctab&&['register','myrides','account','members'].includes(ctab)?ctab:'register');
   } else if(target==='pin'){
     showView('landing');
     if(!_isStaffHost())renderLandingAvail(); // the staff address shows the sign-in alone
