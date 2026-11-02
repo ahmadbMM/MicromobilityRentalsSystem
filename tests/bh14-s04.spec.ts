@@ -10,8 +10,8 @@ test.describe('bh14 s04 @bh14', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.evaluate('openAuthModal();switchAuthMode("forgot")');
-    await expect(page.locator('#auth-modal a[href^="https://wa.me/966579543977?"]')).toHaveCount(1);
-    await expect(page.locator('#auth-modal')).toContainText('+966 57 954 3977');
+    await expect(page.locator('#auth-modal a[href^="https://wa.me/966579543997?"]')).toHaveCount(1);
+    await expect(page.locator('#auth-modal')).toContainText('+966 57 954 3997');
     await expect(page.locator('#auth-modal')).not.toContainText('56 666 8818');
   });
 

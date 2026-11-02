@@ -514,7 +514,8 @@
     /* v2: Account settings as hairline rows */
     .acc-set-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
       padding:16px 4px;border:none;border-bottom:1px solid var(--border);background:none;
-      font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text);cursor:pointer;text-align:start;transition:background .15s;}
+      font-family:var(--font-body);font-size:14px;font-weight:600;color:var(--text);text-decoration:none;cursor:pointer;text-align:start;transition:background .15s;}
+    a.acc-set-row{font-weight:400;}
     .acc-set-row:hover{background:var(--s2);}
     .acc-set-val{font-size:13px;color:var(--muted);font-weight:600;}
     /* ── The account page (renderAccount, _seasonDashboard, _mrBadgesRow), drawn into #tab-account: without

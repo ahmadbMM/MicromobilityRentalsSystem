@@ -92,3 +92,22 @@ test('it is still there on a desk screen', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(page.locator('#app-footer')).toBeVisible();
 });
+
+test('the Tech support number is in the footer, in the language of the page', async ({ page }) => {
+  const link = page.locator('#app-footer a[href="https://wa.me/966579543997"]');
+  await expect(link).toBeVisible();
+  await expect(link).toContainText('Tech support');
+  await expect(link).toContainText('+(966) 57 954 3997');
+  await page.evaluate(`setLang('ar')`);
+  await expect(link).toContainText('الدعم الفني');
+  await expect(link).toContainText('+(966) 57 954 3997');
+});
+
+test('a phone has no footer, so the account page gives the Tech support number', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.evaluate(`setCustTab('account')`);
+  const link = page.locator('#tab-account a[href="https://wa.me/966579543997"]');
+  await expect(link).toBeVisible();
+  await expect(link).toContainText('Tech support');
+  await expect(link).toContainText('+(966) 57 954 3997');
+});
