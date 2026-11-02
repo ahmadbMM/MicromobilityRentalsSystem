@@ -17448,7 +17448,7 @@ async function _nsTplPush(tp,list){
     S.newSessAssignedIds=_liveFleetIds(Array.isArray(S.newSessAssignedIds)?S.newSessAssignedIds:[],true);
     const host=document.getElementById('sess-host')||document.getElementById('tab-sessions');if(host)host.innerHTML='';
     const timeVal=`${S.newSessStartTime||'09:00'} - ${S.newSessEndTime||'11:00'}`;
-    const sl=_nsSlots(timeVal,_nsTwoTimes()?'':(S.newSessCollect||'')); // the collection time is a bike ride's, not a gathering one's (2026-10-05: this was the wrong way round, so no pushed ride got it)
+    const sl=_nsSlots(timeVal,_nsTwoTimes()?'':_nsCollectVal(S.newSessStartTime||'09:00')); // the collection time is a bike ride's, not a gathering one's (2026-10-05: this was the wrong way round, so no pushed ride got it)
     if(sl){tplSlots=sl.slots;patch={capacity:sl.total,addons:(S.newSessAddons||[]).length?JSON.stringify(S.newSessAddons):null,...(_nsSeats()?{spots:sl.total}:{})};}
   }finally{NS_TPL_KEYS.forEach(k=>{S[k]=keep[k];});S.showAddSession=had;}
   if(!patch){renderSessions();return;}
@@ -17711,7 +17711,8 @@ function cloneSession(id){
   if(m){S.newSessStartTime=m[1];S.newSessEndTime=m[2];}
   // The bike collection time is a field of the form too; a clone used to fall back to 45
   // minutes before the start whatever the original said.
-  S.newSessCollect=slots._collect||'';
+  // A Petromin clone takes tonight's rule, not the time an older night was stored with (2026-11-02).
+  S.newSessCollect=S.newSessEvent==='petromin'?'':slots._collect||'';
   // Only bikes the picker can show come across. The fleet retired on 15 September was still on
   // every older session, and a clone put those bikes - invisible, so impossible to un-tick - into
   // the new night's capacity: places customers could book with no bike behind them.
@@ -17761,15 +17762,20 @@ function selectSessionDetail(id){
 // (newSessCollect / editSessCollect); untouched, the box shows the default for the start as it
 // stands (45 minutes before, as sessionCollectTime works it out for a ride with none), follows the
 // start while it is edited, and saves nothing. A typed time later than the start is refused.
-function _collectAuto(start){const m=_hhmmToMin(start);return m==null?'':_minToHhmm(Math.max(0,m-COLLECT_BEFORE_MIN));}
+// A Petromin night hands bikes out from 6:45 PM (the owner, 2026-11-02), whatever its start. A new
+// night stores it, so the card, ticket, Wallet pass and website all read it from the row; a time
+// staff type still wins, and a night starting before 6:45 keeps the usual default.
+const PETROMIN_COLLECT='18:45';
+function _collectAuto(start,pm){const m=_hhmmToMin(start);return m==null?'':pm&&!_collectLate(PETROMIN_COLLECT,start)?PETROMIN_COLLECT:_minToHhmm(Math.max(0,m-COLLECT_BEFORE_MIN));}
+function _nsCollectVal(start){return S.newSessCollect||(S.newSessEvent==='petromin'&&!_collectLate(PETROMIN_COLLECT,start)?PETROMIN_COLLECT:'');}
 function _collectLate(collect,start){const c=_hhmmToMin(collect),s=_hhmmToMin(start);return c!=null&&s!=null&&c>s;}
-function _collectFollow(id,start,typed){if(typed)return;const el=document.getElementById(id);if(el)el.value=_collectAuto(start);}
+function _collectFollow(id,start,typed,pm){if(typed)return;const el=document.getElementById(id);if(el)el.value=_collectAuto(start,pm);}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderSessions_1(event,el){S.newSessDate=el.value;_nsFillSync()}
 function _on_renderSessions_2(event,el){S.newSessRepeat=el.value;_nsFillSync()}
 function _on_renderSessions_3(event,el){S.newSessStartTime=el.value}
 function _on_renderSessions_4(event,el){S.newSessEndTime=el.value}
-function _on_renderSessions_5(event,el){S.newSessStartTime=el.value;_collectFollow('ns-collect',el.value,S.newSessCollect)}
+function _on_renderSessions_5(event,el){S.newSessStartTime=el.value;_collectFollow('ns-collect',el.value,S.newSessCollect,S.newSessEvent==='petromin')}
 function _on_renderSessions_6(event,el){S.newSessEndTime=el.value}
 function _on_renderSessions_7(event,el){S.newSessCollect=el.value}
 function _on_renderSessions_8(event,el){S.newSessEvent='jcc';renderSessions()}
@@ -17914,7 +17920,7 @@ function renderSessions(){
         </div>
         <div class="form-group">
           <label for="ns-collect">${t('sessCollectTime')} <span class="label-hint">${t('sessCollectHint')}</span></label>
-          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_collectAuto(S.newSessStartTime||'21:00'))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
+          <input type="time" id="ns-collect" value="${esc(S.newSessCollect||_collectAuto(S.newSessStartTime||'21:00',S.newSessEvent==='petromin'))}" data-on-input="${_on("_on_renderSessions_7",_EV,_EL)}" class="ss-collect">
         </div>`}
       </div>
       ${_nsDaysHtml()}
@@ -18919,7 +18925,7 @@ async function _addSession(){
   // A ride staff approve keeps its gathering time as the moment bikes go out; every other
   // bike ride carries its own, which is the time the rider's Wallet pass prints.
   const collectEl=document.getElementById('ns-collect');
-  const collectVal=collectEl?(S.newSessCollect||''):''; // only a time staff typed (_collectAuto, 2026-10-05)
+  const collectVal=collectEl?_nsCollectVal(startT):''; // a time staff typed, or a Petromin night's own (_collectAuto, 2026-10-05)
   if(collectVal&&!_nsTwoTimes()&&_collectLate(collectVal,startT)){_fieldErr(collectEl,t('errCollectLate'));collectEl.focus();return;}
   const isCommSess=_nsComm();
   // The National Day ride is shaped exactly like the Petromin one - real queue numbers,

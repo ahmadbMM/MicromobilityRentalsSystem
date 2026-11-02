@@ -42,6 +42,24 @@ test.describe('@staff:sessions fix5 sessions', () => {
     expect(JSON.parse(String(rows[0].bike_slots))._collect).toBeUndefined();
   });
 
+  test('a new Petromin night hands bikes out from 6:45 PM, unless staff type another time', async ({ page }) => {
+    await sessionsPage(page);
+    await addForm(page);
+    await page.evaluate(`S.newSessEvent='petromin';S.newSessStartTime='19:00';S.newSessEndTime='21:00';S.newSessSpots='35';renderSessions()`);
+    const rows = posts(page, 'POST');
+    await page.locator('#ns-date').fill('2099-03-04');
+    await expect(page.locator('#ns-collect')).toHaveValue('18:45');
+    await page.locator('#ns-start').fill('20:00');
+    await expect(page.locator('#ns-collect')).toHaveValue('18:45');
+    await page.locator('#ns-start').fill('18:00');
+    await expect(page.locator('#ns-collect')).toHaveValue('17:15');
+    await page.locator('#ns-start').fill('19:00');
+    await page.getByRole('button', { name: 'Create session' }).click();
+    await expect.poll(() => rows.length).toBe(1);
+    expect(JSON.parse(String(rows[0].bike_slots))._collect).toBe('18:45');
+    expect(await page.evaluate(`[_nsCollectVal('18:00'),(S.newSessEvent='petromin',S.newSessCollect='18:30',_nsCollectVal('19:00'))]`)).toEqual(['', '18:30']);
+  });
+
   test('a typed collection time is saved, and one after the start is refused', async ({ page }) => {
     await sessionsPage(page);
     await addForm(page);
