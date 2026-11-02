@@ -10806,3 +10806,13 @@ body.view-staff #pm-host .filter-pill>.iv-o7{margin-inline-start:.35em;}
   body.view-staff #pm-host .iv-pm-btns.pm-n3{grid-template-columns:repeat(3,minmax(0,1fr));}
   body.view-staff #pm-host .iv-pm-btns>.btn-sm{width:100%;min-width:0;margin:0;padding-inline:6px;white-space:normal;line-height:1.15;text-align:center;justify-content:center;}
 }
+/* The Arena Heros race: you must have a partner (the owner, 2026-11-02): said loud on the card, the athlete step and the review */
+.ar-must{margin:0 0 14px;padding:10px 12px;border:2px solid #e3262f;background:rgba(227,38,47,.14);font-size:14px;font-weight:800;line-height:1.4;color:#fff;}
+body.ar-skin:not(.view-staff) .vl-panel .run-adult.ar-must{color:#fff;}
+body .landing-event-card.ev-arena .ar-must{display:block;margin:8px 0 0;padding:6px 8px;font-size:13px;color:#fff;}
+/* its ticket is black: the transfer's box and the note where the code will be read on black, the button in the race's red */
+.ticket-card.th-arena .vt-tk{background:#1c1c1c;border-color:rgba(227,38,47,.55);color:#fff;}
+.ticket-card.th-arena .vt-tk-q,.ticket-card.th-arena .cu-tk-cue{color:#fff;}
+.ticket-card.th-arena .vt-tk .btn-primary{background:#e3262f;border-color:#e3262f;color:#fff;}
+.ticket-card.th-arena .qr-hold{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.3);}
+.ticket-card.th-arena .qr-hold span{color:#fff;}

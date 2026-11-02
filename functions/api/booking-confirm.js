@@ -29,6 +29,8 @@ export async function onRequestPost(context) {
   const rows = await rpc.json();
   const b = Array.isArray(rows) ? rows.find((r) => r.id === bookingId) : null;
   if (!b || !b.email) return json({ ok: false, error: 'not found' }, 404);
+  // An unpaid Arena Heros place has no number yet (the owner, 2026-11-02: nothing until they pay).
+  if (/-ah(-|$)/.test(String(b.session_id || '')) && !b.paid) return json({ ok: true, skipped: true });
 
   const when = `${b.session_day || ''} ${b.session_date || ''}`.trim();
   const send = await fetch('https://api.brevo.com/v3/smtp/email', {

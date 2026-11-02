@@ -1119,6 +1119,16 @@ mark places paid); heat times come from the organiser.
   `customer_accept_share`, `_booking_window_guard`; it inserts the session `2026-11-06-ah` (apply once the app is live).
   Privacy Notice 2026-10-28: the race's details row, the organisers' row and the consent bullet (en/ar); nobody asked again.
   `tests/arena-race.spec.ts`.
+- **Open to everyone, a partner required, paid by transfer** (the owner, 2026-11-02, migration `20261102190000_arena_open_and_pay`,
+  which supersedes "Community members" and "payment announced later" above): the session's `open_to_all` true (the gate in
+  `selectEvent` and `_infoMembersOnlyEv` follow it, so staff could close it again) and `vl.pair` false (no "Find me a partner";
+  Race settings' switch). `arMustPartner` / `arTeamsNote` in `.ar-must` on the card, the athlete step and the review;
+  `arTeamNewSub`, `arWaitPartner` on the step and the ticket. Payment is Victory Lap's: `_vtAsk` opens on the bank details
+  (`AR_BANK`, no bank letter, no question, no "I have a ticket"; `customer_vl_ticket` refuses 'have' here), the receipt waits
+  for staff (`staff_vl_receipt`), the roster chip, check-in note, report's Ticket column and receipts PDF work on it.
+  `_arHold(s,g)`: while unpaid the booked page, My Bookings, the day's card, the toast and the confirmation email show no
+  number and no QR code. Paid means staff confirmed (or took it at the desk); a receipt alone does not unlock. The team code
+  stays visible: the partner books with it. A new Arena session from the staff form is still members only until edited.
 
 ## Customers and Community (2026-10-07)
 

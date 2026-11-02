@@ -13,9 +13,9 @@ const AH = '2099-11-06-ah';
 const MAP = 'https://www.google.com/maps/search/?api=1&query=Gymnation%20Tahlia%20Street%20Jeddah';
 const ah = {
   id: AH, session_date: '2099-11-06', day: 'Friday', status: 'open', capacity: 100, created_at: 1,
-  event_kind: 'community', ride_kind: 'arena', needs_approval: false, hide_queue: true, spots: 100, open_to_all: false,
+  event_kind: 'community', ride_kind: 'arena', needs_approval: false, hide_queue: true, spots: 100, open_to_all: true,
   paid_ride: true, price: 140, location: 'Gymnation, Tahlia Street', meet_url: MAP, bike_slots: '{"_time":"06:00 - 20:00"}',
-  vl: { races: ['wd', 'md'], divs: ['op', 'el'], pair: true },
+  vl: { races: ['wd', 'md'], divs: ['op', 'el'], pair: false },
 };
 const jcc = { id: '2099-11-07', session_date: '2099-11-07', day: 'Saturday', status: 'open', capacity: 12, created_at: 1, location: 'JCC' };
 const profile = (x: Record<string, unknown> = {}) => [{ id: 'c1', name: 'Sara Nabil Haddad', email: 'sara@example.com', phone: '+966500000001', birth_date: '1995-05-05', height: 165, type_preference: 'Any', nationality: 'SA', gender: 'female', ...x }];
@@ -28,7 +28,7 @@ const row = (id: string, v: Record<string, unknown> | null, x: Record<string, un
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
 
 async function custBoot(page: Page, fx: Record<string, unknown> = {}, cust: Record<string, unknown> = {}) {
-  await stubSupabase(page, { sessions: [ah, jcc], queue_entries: [], 'rpc:community_member': true,
+  await stubSupabase(page, { sessions: [ah, jcc], queue_entries: [], 'rpc:community_member': true, 'rpc:customer_vl_ticket': true,
     'rpc:customer_profile': profile(), 'rpc:customer_emergency': contact, 'rpc:customer_set_gender': true, ...fx });
   await loginCustomer(page, { id: 'c1', name: 'Sara Nabil Haddad', birth_date: '1995-05-05', gender: 'female', ...cust });
   await page.goto('/');
@@ -60,7 +60,7 @@ async function captureRpc(page: Page, fn: string, answer: unknown) {
 }
 
 test.describe('@customer:arena Arena Heros Hybrid Race', () => {
-  test('a member sees the card (the organisers’ logo over the hall, the day, the hours, Gymnation) and its Details: teams of two, Open or Elite, 140 per athlete', async ({ page }) => {
+  test('everyone sees the card (the organisers’ logo over the hall, the day, the hours, Gymnation) and its Details: teams of two, Open or Elite, 140 per athlete', async ({ page }) => {
     await custBoot(page);
     const card = page.locator('#land-events .landing-event-card.ev-arena');
     await expect(card).toBeVisible();
@@ -69,8 +69,9 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(card.locator('.ar-meta')).toContainText('6 AM - 8 PM');
     await expect(card.locator('.ar-meta')).toContainText('Gymnation, Tahlia Street');
     await expect(card.locator('.ar-sub')).toContainText('Teams of 2');
+    await expect(card.locator('.ar-must')).toHaveText('You must have a partner to take part. There are no individual entries.');
     await expect(card).not.toContainText('140');
-    // About this event, for members
+    // About this event
     const about = page.locator('.lec-about.ab-arena');
     await expect(about).toBeVisible();
     expect(await about.evaluate((el) => getComputedStyle(el).color)).toBe('rgb(255, 255, 255)'); // white on the black card (it was ink on black)
@@ -80,7 +81,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(sheet).toContainText('Teams of two (two men or two women) · 7 stations · medals included');
     await expect(sheet.locator('a[href="https://www.instagram.com/p/Dd1Lc87CJrq/"]')).toHaveCount(1);
     const facts: string[] = await page.evaluate(`_infoFacts(_sessGet('${AH}')).map(r=>r[0]+'|'+r[1].replace(/<[^>]+>/g,''))`);
-    expect(facts.find((r) => r.startsWith('Who'))).toBe('Who|Community members, in teams of two');
+    expect(facts.find((r) => r.startsWith('Who'))).toBe('Who|Everyone, in teams of two. You must have a partner.');
     expect(facts.find((r) => r.startsWith('Price'))).toMatch(/140.*per athlete, medals included/);
     expect(facts.find((r) => r.startsWith('Divisions'))).toBe('Divisions|Open · Elite');
     expect(facts.find((r) => r.startsWith('Where'))).toContain('Gymnation, Tahlia Street');
@@ -110,7 +111,8 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await page.locator('#vl-next').click();
     await agreeAndBook(page);
     await expect.poll(() => rows.length).toBe(1);
-    // the booked page keeps it, the ticket carries the logo
+    // the transfer asks first; the booked page keeps the skin, the ticket carries the logo
+    await page.locator('#vl-ticket-gate .vt-link', { hasText: 'send it later' }).click();
     await expect(page.locator('#tab-register .ticket-card.th-arena .tk-logo-arena')).toHaveCount(1);
     await expect(head).toHaveCount(1);
     expect(await skin()).toBe(true);
@@ -125,14 +127,101 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(page.locator('#tab-register .ar-flow-head')).toHaveCount(0);
   });
 
-  test('a rider who is not a Community member gets the members popup, and no About link', async ({ page }) => {
+  test('open to everyone (2026-11-02): a rider who is not a Community member goes straight in; a session staff close to members holds them at the gate', async ({ page }) => {
     await custBoot(page, { 'rpc:community_member': false });
-    const card = page.locator('#land-events .landing-event-card.ev-arena');
-    await expect(card).toBeVisible();
-    await card.click();
+    await expect(page.locator('.lec-about.ab-arena')).toBeVisible();
+    await toStep2(page);
+    await expect(page.locator('#confirm-modal')).not.toContainText('Community members only');
+    await expect(page.locator('.vl-panel .run-adult.ar-must')).toContainText('You must have a partner to take part');
+    await expect(page.locator('#vl-team-wrap .toggle-btn')).toHaveText(['Start a team', 'Join with a code']);
+    await expect(page.locator('#vl-team-wrap .run-sub')).toContainText('or your team is not complete');
+    await page.evaluate(`(()=>{const s=_sessGet('${AH}');s.open_to_all=false;goLanding();})()`);
+    await page.locator('#land-events .landing-event-card.ev-arena').click();
     await expect(page.locator('#confirm-modal')).toContainText('Community members only');
-    expect(await page.evaluate('S.view')).toBe('landing');
-    await expect(page.locator('.lec-about.ab-arena')).toHaveCount(0);
+  });
+
+  test('paying (2026-11-02): straight to the bank details once booked, no "I have a ticket", no number or QR code until the place is paid', async ({ page }) => {
+    await custBoot(page);
+    const rows = await captureBookingRows(page);
+    const toasts: string[] = [];
+    await page.exposeFunction('__toast', (m: string) => { toasts.push(m); });
+    await page.evaluate(`(()=>{const o=toast;toast=function(m,k){window.__toast(String(m));return o(m,k);};})()`);
+    const sent = await captureRpc(page, 'customer_vl_ticket', true);
+    await toStep2(page);
+    await page.locator('#vl-div-wrap .vl-div').first().click();
+    await page.locator('#vl-next').click();
+    await page.locator('#share-gate .wg-cb').check();
+    await page.locator('#share-gate .pg-btn').click();
+    await expect(page.locator('#tab-register .ar-must')).toContainText('You must have a partner');
+    await page.locator('#reg-waiver-cb').check();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await expect.poll(() => rows.length).toBe(1);
+    const gate = page.locator('#vl-ticket-gate');
+    await expect(gate.locator('#vt-title')).toHaveText('Pay by bank transfer');
+    await expect(gate).toContainText('شركة قاف فاء لتقنية المعلومات');
+    await expect(gate).toContainText('Bank Albilad');
+    await expect(gate).toContainText('SA61 1500 0615 1288 1672 0008');
+    await expect(gate).toContainText('615128816720008');
+    await expect(gate).toContainText('140');
+    await expect(gate).toContainText('Each partner pays for their own place');
+    await expect(gate).not.toContainText('Riyad Bank');
+    await expect(gate.locator('.vt-pdf')).toHaveCount(0);
+    await expect(gate.locator('.chrome-x')).toHaveCount(0);
+    await expect(gate.locator('.vt-yn')).toHaveCount(0);
+    await expect(gate.locator('.vt-link', { hasText: 'Back' })).toHaveCount(0);
+    expect(toasts.join(' ')).not.toMatch(/#\d/);
+    await expect(gate.locator('.pg-btn')).toBeDisabled();
+    await gate.locator('input[type=file]').setInputFiles({ name: 'r.png', mimeType: 'image/png',
+      buffer: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEBgIApD5fRAAAAABJRU5ErkJggg==', 'base64') });
+    await expect(gate.locator('.vt-prev')).toBeVisible();
+    await gate.locator('.pg-btn').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ p_answer: 'buy' });
+    expect(String(sent[0].p_img)).toMatch(/^data:image\/jpeg;base64,/);
+    await expect(gate.locator('.vt-box')).toHaveCount(0);
+    // the booked page: the code to send, no number, no QR code
+    const booked = page.locator('#tab-register .ticket-card.th-arena');
+    await expect(booked).toContainText('Payment needed');
+    await expect(booked).toContainText('Your QR code and number appear here');
+    await expect(booked.locator('.ticket-num')).toHaveCount(0);
+    await expect(booked.locator('.ticket-qr-wrap, canvas')).toHaveCount(0);
+  });
+
+  test('the number and the QR code wait for the payment everywhere: My Bookings and the day’s card; a paid place shows them', async ({ page }) => {
+    const mine = (x: Record<string, unknown> = {}) => row('m7', { race: 'wd', div: 'el', team: 'AH-AB23', first: 'Sara', last: 'Haddad', email: 'sara@example.com', phone: '+966500000001' },
+      { customer_id: 'c1', name: 'Sara Nabil Haddad', ...x });
+    await custBoot(page, { queue_entries: [mine()], 'rpc:my_bookings': [mine()], 'rpc:customer_vl_teams': [] });
+    const tk = () => page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m7')],{actions:true})`) as Promise<string>;
+    let html = await tk();
+    expect(html).toContain('Payment needed');
+    expect(html).toContain('Your QR code and number appear here');
+    expect(html).not.toContain('#7');
+    expect(html).not.toContain('Athlete number');
+    expect(html).not.toContain('qr-lazy');
+    expect(html).toContain('AH-AB23');
+    expect(html).toContain('Your team is not complete');
+    expect(html).toContain('Transfer the amount and upload the receipt');
+    expect(html).not.toContain('Have one');
+    expect(await page.evaluate(`_arHold(_sessGet('${AH}'),getQueue().find(e=>e.id==='m7'))`)).toBe(true);
+    // a receipt sent is still not paid
+    await page.evaluate(`getQueue().find(e=>e.id==='m7').vlReceiptAt='2099-10-29T10:00:00Z'`);
+    html = await tk();
+    expect(html).toContain('Receipt sent');
+    expect(html).not.toContain('#7');
+    expect(html).not.toContain('qr-lazy');
+    // staff confirmed: the number and the code
+    await page.evaluate(`(()=>{const e=getQueue().find(e=>e.id==='m7');e.paid=true;e.pay_method='transfer';})()`);
+    html = await tk();
+    expect(html).toContain('Athlete number');
+    expect(html).toContain('#7');
+    expect(html).not.toContain('Payment needed');
+    expect(html).toContain('Receipt confirmed');
+    expect(await page.evaluate(`_arHold(_sessGet('${AH}'),getQueue().find(e=>e.id==='m7'))`)).toBe(false);
+    // paid at the desk with no receipt: nothing more asked
+    await page.evaluate(`(()=>{const e=getQueue().find(e=>e.id==='m7');e.vlReceiptAt=null;e.pay_method='cash';})()`);
+    html = await tk();
+    expect(html).toContain('#7');
+    expect(html).not.toContain('vt-tk');
   });
 
   test('the athlete step is prefilled from the account and editable; Open or Elite with the guide; a new team; the consent; the booking carries it all', async ({ page }) => {
@@ -151,7 +240,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(page.locator('#vl-race-wrap')).toHaveCount(0);
     await expect(page.locator('#vl-shirt-wrap')).toHaveCount(0);
     await expect(page.locator('.vl-t5')).toHaveCount(0);
-    await expect(page.locator('.vl-panel .run-adult')).toContainText('Teams of two only: two men or two women.');
+    await expect(page.locator('.vl-panel .run-adult')).toContainText('You must have a partner to take part: teams of two only, two men or two women');
     // Open or Elite, each with the organisers' guide, and the note with the race details
     const divs = page.locator('#vl-div-wrap .vl-div');
     await expect(divs).toHaveCount(2);
@@ -162,8 +251,8 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(divs.nth(1)).toContainText('Full prescribed loads, distances and volume');
     await expect(page.locator('#vl-div-wrap')).toContainText('Head Judge');
     await expect(page.locator('#vl-div-wrap a[href="https://www.instagram.com/p/Dd1Lc87CJrq/"]')).toHaveCount(1);
-    // the team: start one, join with a code, or find me a partner
-    await expect(page.locator('#vl-team-wrap .toggle-btn')).toHaveText(['Start a team', 'Join with a code', 'Find me a partner']);
+    // the team: start one or join with a code; a partner is required, so no "Find me a partner"
+    await expect(page.locator('#vl-team-wrap .toggle-btn')).toHaveText(['Start a team', 'Join with a code']);
     // a box left wrong is said where it is
     await page.fill('#ar-email', 'sara-at-example');
     await page.locator('#vl-next').click();
@@ -179,6 +268,7 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await expect(page.locator('#share-gate .sg-box')).toBeVisible();
     await agreeAndBook(page);
     await expect.poll(() => rows.length).toBe(1);
+    await expect(page.locator('#vl-ticket-gate #vt-title')).toHaveText('Pay by bank transfer');
     expect(rows[0]).toMatchObject({ session_id: AH, type_preference: 'None', price: 140, share_ok: true, name: 'Sara Nabil Haddad' });
     expect(rows[0].vl).toEqual({ race: 'wd', div: 'el', first: 'Sarah', last: 'Nabil Haddad', email: 'sara.h@example.com', phone: '+966512345678' });
   });
@@ -217,6 +307,8 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
     await page.locator('#vl-g-wrap .toggle-btn', { hasText: /^Male$/ }).click();
     await expect(page.locator('#vl-g-wrap .run-sub')).toHaveText('Men’s Doubles');
     await page.locator('#vl-div-wrap .vl-div').first().click();
+    // staff's Race settings can still offer a partner (off on the session since 2026-11-02)
+    await page.evaluate(`(()=>{const s=_sessGet('${AH}');s.vl={...s.vl,pair:true};renderRegister();})()`);
     await page.locator('#vl-team-wrap .toggle-btn', { hasText: 'Find me a partner' }).click();
     await expect(page.locator('#vl-team-wrap .run-sub')).toContainText('pair you');
     await page.locator('#vl-next').click();
@@ -250,27 +342,24 @@ test.describe('@customer:arena Arena Heros Hybrid Race', () => {
       .toEqual(['AH-4K7Q', 'AH-4K7Q', 'VL-4K7Q', 'Enter the code as your partner sent it, like AH-4K7Q.']);
   });
 
-  test('the ticket: the team code, the division, the details sent, how to pay; no ticket question; the details can be changed', async ({ page }) => {
+  test('the ticket: the team code, the division, the details sent, how to pay; no ticket question; the details can be changed; once paid, the athlete number', async ({ page }) => {
     const mine = row('m1', { race: 'wd', div: 'el', team: 'AH-AB23', first: 'Sara', last: 'Haddad', email: 'sara@example.com', phone: '+966500000001' },
       { customer_id: 'c1', name: 'Sara Nabil Haddad', data_share_at: '2099-10-29T10:00:00Z' });
     await custBoot(page, { queue_entries: [mine], 'rpc:my_bookings': [mine], 'rpc:customer_vl_teams': [] });
     const html = await page.evaluate(`renderBookingTicket([getQueue().find(e=>e.id==='m1')],{actions:true})`) as string;
+    const paid = await page.evaluate(`renderBookingTicket([{...getQueue().find(e=>e.id==='m1'),paid:true}],{actions:true})`) as string;
+    expect(paid).toContain('Athlete number');
     expect(html).toContain('th-arena');
     expect(html).toContain('tk-logo-arena');
     expect(html).toContain('/assets/arena-heros-logo.webp');
-    expect(html).toContain('Athlete number');
     expect(html).toContain('AH-AB23');
-    expect(html).toContain('Waiting for your partner');
+    expect(html).toContain('Your team is not complete');
     expect(html).toContain('Elite');
     expect(html).not.toContain('6.1 km');
-    expect(html).toContain('How to pay will be announced.');
+    expect(html).toContain('Transfer the amount and upload the receipt');
     expect(html).toContain('Change details');
-    expect(html).not.toContain('vt-tk');
     expect(html).not.toContain('buy one');
     expect(html).not.toContain('Pay at the booth');
-    // staff's own payment line wins once they set one
-    const said = await page.evaluate(`(()=>{const s=_sessGet('${AH}');s.vl={...s.vl,pay:{en:'Pay at Gymnation on race day.'}};return renderBookingTicket([getQueue().find(e=>e.id==='m1')],{actions:true});})()`) as string;
-    expect(said).toContain('Pay at Gymnation on race day.');
     // Change details: the name, email and mobile as entered, and the division while alone in the team
     const upd = await captureRpc(page, 'customer_vl_update', true);
     await page.evaluate(`_vlEditOpen('m1')`);
@@ -333,7 +422,7 @@ test.describe('@staff:bookings Arena Heros Hybrid Race', () => {
       meet_url: MAP, bike_slots: '{"_time":"06:00 - 20:00"}' });
   });
 
-  test('the roster’s Race column and split, Athletes and teams with the details sent, no ticket or receipt tools', async ({ page }) => {
+  test('the roster’s Race column and split, the receipt chip and tools (2026-11-02), Athletes and teams with the details sent', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await staffBoot(page, [
       row('r1', { race: 'wd', div: 'op', team: 'AH-AAAA', ...det('Sara', 'Haddad') }),
@@ -346,10 +435,10 @@ test.describe('@staff:bookings Arena Heros Hybrid Race', () => {
     await expect(tq.locator('tr[data-id="r1"]')).toContainText('Women’s Doubles · Open');
     await expect(tq.locator('tr[data-id="r1"]')).toContainText('AH-AAAA');
     await expect(tq.locator('tr[data-id="r1"]')).toContainText('Athlete r2');
-    await expect(tq.locator('tr[data-id="r1"] .vt-chip')).toHaveCount(0);
+    await expect(tq.locator('tr[data-id="r1"] .vt-chip')).toHaveCount(1);
     await expect(tq.locator('.vl-split .run-split-b')).toHaveText([/Women’s Doubles\s*2/, /Men’s Doubles\s*2/, /Wants a partner\s*1/, /Waiting for partner\s*1/]);
     const bar = tq.locator('.vl-staff-bar');
-    await expect(bar.locator('.btn-sm')).toHaveText([/Athletes and teams/, /Race settings/, /Report builder/]);
+    await expect(bar.locator('.btn-sm')).toHaveText([/Athletes and teams/, /Race settings/, /Report builder/, /receipts/i]);
     await bar.locator('.btn-sm', { hasText: 'Athletes and teams' }).click();
     const host = page.locator('#vl-staff-host');
     await expect(host.locator('.vl-st-table thead')).toContainText('Mobile number');
