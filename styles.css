@@ -8673,7 +8673,7 @@ body:not(.view-staff) .tt-pick{background:transparent none;border:1px solid tran
 body:not(.view-staff) .tt-pick.on{border-color:var(--go);}
 body:not(.view-staff) .tt-hide{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:600;color:var(--ink);}
 body:not(.view-staff) .tt-open{margin-top:12px;width:100%;}
-body:not(.view-staff) .mb-q{width:100%;margin:8px 0 12px;}
+body:not(.view-staff) #tab-members .mb-q{margin:8px 0 12px;}
 body:not(.view-staff) .mb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:10px 4px;background:transparent none;border:0;border-bottom:1px solid var(--line);color:var(--ink);text-align:start;cursor:pointer;}
 body:not(.view-staff) .mb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}
 body:not(.view-staff) .mb-t{display:block;width:100%;margin-bottom:6px;}
@@ -8682,6 +8682,31 @@ body:not(.view-staff) .mb-more,body:not(.view-staff) .mb-back{margin-top:12px;wi
 body:not(.view-staff) .mb-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:14px;}
 body:not(.view-staff) .mb-badge{display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;color:var(--ink);}
 body:not(.view-staff) .mb-close{width:100%;margin-top:16px;}
+body:not(.view-staff) .hub-nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0 14px;}
+body:not(.view-staff) .hub-tab{min-height:44px;padding:6px;background:transparent none;border:1px solid var(--line);color:var(--ink);cursor:pointer;font-weight:600;}
+body:not(.view-staff) .hub-tab.on{border-color:var(--go);box-shadow:inset 0 -3px 0 var(--go);}
+body:not(.view-staff) .hub-note{padding:10px 12px;margin-bottom:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);}
+body:not(.view-staff) .hub-big{font-weight:700;margin-bottom:12px;color:var(--ink);}
+body:not(.view-staff) .hub-h{font-size:var(--fs-20);margin:14px 0 8px;color:var(--ink);}
+body:not(.view-staff) .hub-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;padding:6px 4px;border-bottom:1px solid var(--line);color:var(--ink);}
+body:not(.view-staff) .hub-row.on{font-weight:700;}
+body:not(.view-staff) .hub-act{min-height:40px;flex:none;}
+body:not(.view-staff) .hub-act.on{border-color:var(--go);}
+body:not(.view-staff) .hub-given{flex:none;}
+body:not(.view-staff) .hub-card{background:var(--card);border:1px solid var(--line);padding:14px;margin-bottom:12px;color:var(--ink);}
+body:not(.view-staff) .hub-name{display:block;margin:4px 0 8px;}
+body:not(.view-staff) .hub-bar{height:10px;background:var(--line);margin:6px 0;overflow:hidden;}
+body:not(.view-staff) .hub-bar span{display:block;height:100%;width:var(--w,0);background:var(--go);}
+body:not(.view-staff) .hub-lbl{display:block;font-weight:600;margin:10px 0 4px;}
+body:not(.view-staff) #tab-members input.search-input{display:block;width:100%!important;max-width:none;min-height:44px;padding:8px 12px;font-size:16px;background:var(--card);border:1px solid var(--line);color:var(--ink);box-sizing:border-box;}
+body:not(.view-staff) .hub-wide{width:100%;margin-top:10px;min-height:44px;}
+body:not(.view-staff) .hub-photo{margin:0 0 14px;background:var(--card);border:1px solid var(--line);color:var(--ink);}
+body:not(.view-staff) .hub-photo img{display:block;width:100%;min-height:120px;height:auto;background:var(--line);}
+body:not(.view-staff) .hub-photo figcaption{padding:10px 12px;}
+body:not(.view-staff) .hub-photo-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;}
+body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
+body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -9607,6 +9632,8 @@ body.view-staff :is(#tab-customers,#tab-community) .dash-kpis{margin-top:4px;}
 body.view-staff #tab-community .tg-holders{margin:4px 0 14px;padding:12px 14px;border:1px solid var(--sf-line2,var(--border));border-radius:10px;background:var(--sf-card,var(--s1));}
 body.view-staff #tab-community .tg-srch{max-width:420px;margin-bottom:8px;}
 body.view-staff #tab-community .tg-sub{margin:12px 0 4px;font-size:var(--staff-fs-sm,12px);font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);}
+body.view-staff #tab-community .ac-img{width:96px;height:96px;object-fit:cover;flex:none;background:var(--s2);}
+body.view-staff #tab-community .ac-rep{color:var(--red,inherit);font-weight:700;}
 body.view-staff #tab-community .tg-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
 body.view-staff #tab-community .tg-row:last-child{border-bottom:0;}
 body.view-staff #tab-community .tg-who{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}

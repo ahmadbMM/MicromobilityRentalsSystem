@@ -503,6 +503,17 @@ the Community page (`/members`, not `/community`, which is a staff address; `ren
 account id, so the card (`_mbOpen`) is drawn from the row in hand, and it carries staff-given badges only because ride-earned
 ones are worked out on the rider's own device. Anything added to it is new sharing: update the privacy notice's row too.
 
+## Invitations and the Community page's activities (2026-11-03)
+
+Migrations 20261103100000 (invites) and 20261103120000 (activities). **`member-hub.js` is hand-written and not generated**: the members'
+activities (kudos, vote, challenges and goal, squads, photo wall, year) load from it on `/members` only (`_hubLoad`; `HUB_V` is stamped by
+the build), and it holds its own words for all ten languages (`HUB_T`, parity in tests/member-hub.spec.ts). The handler-name check does not
+read it. Staff run them in Community > Activities (`/community/activities`, `_commActivities`). Another member is named by `ref`
+(`_member_ref`, an md5 with the private `hub_secret`), never by account id. Wall photos are JPEG text in `hub_photos.img`, not the public
+`photos` bucket, because anyone with a bucket link could open one; each is read alone (`hub_photo_img`), a rejected one loses its picture and a
+take-down request hides it at once until staff decide. An invitation: `member_invite_code` gives the member's code, the form keeps `?inv=` on the
+device for 30 days and after the application calls `community_app_invited`, separately, so a failure there never touches the application.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
