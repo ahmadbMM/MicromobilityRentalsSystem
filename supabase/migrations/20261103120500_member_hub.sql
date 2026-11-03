@@ -562,7 +562,7 @@ revoke execute on function public.staff_goal_progress(text) from public, anon;
 grant  execute on function public.staff_goal_progress(text) to authenticated;
 
 insert into supabase_migrations.schema_migrations (version, name)
-values ('20261103120000', 'member_hub')
+values ('20261103120500', 'member_hub')
 on conflict (version) do nothing;
 
 commit;
@@ -580,4 +580,4 @@ select (select bool_and(relrowsecurity) from pg_class
        has_function_privilege('anon', 'public._member_ref(text)', 'execute') as ref_open_to_anon,
        has_table_privilege('anon', 'public.hub_secret', 'select') or has_table_privilege('authenticated', 'public.hub_secret', 'select') as secret_open,
        has_table_privilege('anon', 'public.hub_photos', 'select') as photos_open_to_anon,
-       (select version from supabase_migrations.schema_migrations where version = '20261103120000') as ledger;
+       (select version from supabase_migrations.schema_migrations where version = '20261103120500') as ledger;

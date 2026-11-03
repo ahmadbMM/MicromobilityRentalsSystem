@@ -1,4 +1,4 @@
-// The Community page's activities (the owner, 2026-11-03; migration 20261103120000): kudos, Rider of the
+// The Community page's activities (the owner, 2026-11-03; migration 20261103120500): kudos, Rider of the
 // Month, challenges and the community goal, squads, the photo wall and the year in review. A file of its
 // own, loaded when a member opens the page (_hubLoad in app.src.html), so no other rider carries it: it holds
 // its own words in all ten languages. Hand-written, not generated; the build stamps its address (HUB_V).

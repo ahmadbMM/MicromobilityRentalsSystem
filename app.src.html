@@ -50756,7 +50756,7 @@ async function _ttTake(cid,tid){
   S.custTitles=(S.custTitles||[]).filter(ct=>!(ct.customer_id===cid&&ct.title_id===tid));
   const x=(S.titles||[]).find(y=>y.id===tid);const msg=`${t('ttLogTaken')}: ${x?x.name:tid}`;toast(msg);logAction(msg);renderCommunity();
 }
-// Community > Activities (the owner, 2026-11-03; migration 20261103120000): what runs the members' Community page.
+// Community > Activities (the owner, 2026-11-03; migration 20261103120500): what runs the members' Community page.
 // Any staffer may run these. Photos come without their pictures; each is read when it is on show.
 const AC_PH_COLS='id,customer_id,caption,status,reported_at,report_reason,created_at';
 async function _acLoad(force){

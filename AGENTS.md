@@ -505,7 +505,7 @@ ones are worked out on the rider's own device. Anything added to it is new shari
 
 ## Invitations and the Community page's activities (2026-11-03)
 
-Migrations 20261103100000 (invites) and 20261103120000 (activities). **`member-hub.js` is hand-written and not generated**: the members'
+Migrations 20261103100000 (invites) and 20261103120500 (activities). **`member-hub.js` is hand-written and not generated**: the members'
 activities (kudos, vote, challenges and goal, squads, photo wall, year) load from it on `/members` only (`_hubLoad`; `HUB_V` is stamped by
 the build), and it holds its own words for all ten languages (`HUB_T`, parity in tests/member-hub.spec.ts). The handler-name check does not
 read it. Staff run them in Community > Activities (`/community/activities`, `_commActivities`). Another member is named by `ref`
