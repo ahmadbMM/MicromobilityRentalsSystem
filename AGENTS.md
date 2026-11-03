@@ -1688,11 +1688,17 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
   'wallet'` directly charges, or is refused `WALLET_SHORT`, so the desk's ordinary pay menu and Undo need no special case.
 - **Staff.** Customers > Wallets (`/customers/wallets`, `_commWallets`), a button on every Accounts and Members row, a section
   in the account's editor and history; the pay menu's Pay from wallet and Refund to wallet (`_cwPayOpts`); the
-  receipt refund's second button (`_salesRefundWallet`). Adding money is an admin's alone (the owner, 2026-11-03; migration 20261103120000, `ADMIN_ONLY`). Taking out and
-  refunding ask what a refund asks: `can_refund`, the PIN, the manager limit (adding asks those too). Paying from it asks nothing: the ledger names who did it.
+  receipt refund's second button (`_salesRefundWallet`). Adding, taking out and refunding into a wallet are an admin's alone (the owner, 2026-11-03; migration 20261103170000,
+  `ADMIN_ONLY`), with the PIN and the manager limit; a plain receipt refund stays `can_refund`. Paying from it asks nothing, and any staffer may undo that (`staff_wallet_undo_pay`): the ledger names who did it.
 - **The rider.** My Account's card (`#cw-mine`) and the switch on a ticket (`_cwPaySlot`). Refused by
   the server: a waitlisted place, a past night, a Petromin night (the company's bill), a race (below). The website has
   the same (mm-platform WalletCard, WalletPay, /api/account/wallet-pay). The rider never sees a staff note.
+- **At the Sales till (2026-11-03, migration 20261103170000).** On a sale linked to an account, a Wallet switch (`_ctWalletOn`) takes
+  what the balance can; the rest goes on as card or cash. `staff_wallet_pay_sale` runs first, before the lines, and writes
+  a qty-0 `__cardmeta__` line with pay `'wallet'` (id `wal-<receipt>`): every screen already leaves those out of what was sold,
+  `_salesCC` reads it apart, and only that function may write one (`wallet_sale_guard`). Refunding, voiding or deleting
+  the receipt gives the money back (`wallet_sale_follow`). A receipt with one cannot be edited: refund it and ring it up again.
+  Not on purchases rung up on a booking (the Cashier pop-up), which have no account switch.
 - **The books.** A top-up is in the drawer (`_cwTill` reads `staff_wallet_moves`; `session_id` says which till: that ride's, or
   with none the shop's) and is not revenue. A booking paid from it is revenue when spent, and neither card nor cash
   (`_mnySplit().wallet`; the close-out's reconciliation counts it). `_mt_core` is unchanged: it counts it in `rev_rides`

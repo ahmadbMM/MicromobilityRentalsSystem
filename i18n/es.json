@@ -6052,5 +6052,8 @@
   "acWaiting": "Esperando decisión",
   "acNewMembers": "Miembros de los últimos 30 días",
   "acBuddy": "Compañero de bienvenida",
-  "acNoBuddy": "Aún sin compañero"
+  "acNoBuddy": "Aún sin compañero",
+  "cwKSale": "Compra en la tienda",
+  "cwKSaleBack": "Devuelto de una compra",
+  "cwErrEdit": "Parte de este recibo se pagó con un monedero. Reembólsalo y vuelve a registrarlo."
 }

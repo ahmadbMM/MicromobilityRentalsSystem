@@ -6052,5 +6052,8 @@
   "acWaiting": "A aguardar decisão",
   "acNewMembers": "Membros dos últimos 30 dias",
   "acBuddy": "Companheiro de boas-vindas",
-  "acNoBuddy": "Ainda sem companheiro"
+  "acNoBuddy": "Ainda sem companheiro",
+  "cwKSale": "Compra na loja",
+  "cwKSaleBack": "Devolvido de uma compra",
+  "cwErrEdit": "Parte deste recibo foi paga com uma carteira. Reembolse-o e registe-o de novo."
 }

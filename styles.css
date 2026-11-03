@@ -1487,6 +1487,7 @@
     .bdg-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
     #confirm-modal .bdg-dlg{width:min(94vw,520px);max-height:88vh;overflow-y:auto;}
     .cw-in{color:var(--green,#077A4B);}
+    .sl-wal{display:flex;margin:8px 0;}
     .cw-num{font-size:28px;font-weight:900;margin:2px 0 12px;font-variant-numeric:tabular-nums;}
     .cw-seg{display:flex;gap:6px;margin-bottom:10px;}
     .cw-seg .toggle-btn{flex:1;}

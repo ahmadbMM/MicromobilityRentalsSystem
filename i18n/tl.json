@@ -6052,5 +6052,8 @@
   "acWaiting": "Naghihintay ng pasya",
   "acNewMembers": "Mga sumali sa nakalipas na 30 araw",
   "acBuddy": "Welcome buddy",
-  "acNoBuddy": "Wala pang buddy"
+  "acNoBuddy": "Wala pang buddy",
+  "cwKSale": "Binili sa shop",
+  "cwKSaleBack": "Ibinalik mula sa binili",
+  "cwErrEdit": "Bahagi ng resibong ito ay binayaran mula sa wallet. I-refund ito at i-ring up muli."
 }

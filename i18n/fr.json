@@ -6052,5 +6052,8 @@
   "acWaiting": "En attente de décision",
   "acNewMembers": "Membres arrivés ces 30 derniers jours",
   "acBuddy": "Parrain d’accueil",
-  "acNoBuddy": "Pas encore de parrain"
+  "acNoBuddy": "Pas encore de parrain",
+  "cwKSale": "Achat en boutique",
+  "cwKSaleBack": "Retour d’un achat",
+  "cwErrEdit": "Une partie de ce reçu a été payée avec un portefeuille. Remboursez-le puis saisissez-le à nouveau."
 }

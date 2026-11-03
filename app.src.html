@@ -1181,6 +1181,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tkWhereLabel:'Where',
   tkPayAmount:'Pay {0} at the booth when you arrive.',
   cwUseHave:'You have {0}. Turn it on to use it for this booking.',cwUseOn:'Using {0}. {1} left to pay at the booth.',cwUseAll:'Using {0}. Nothing left to pay.',cwUseFail:'Your booking is made, but the wallet was not used. You can turn it on from your ticket.',
+  cwKSale:'Shop purchase',cwKSaleBack:'Back from a purchase',cwErrEdit:'Part of this receipt was paid from a wallet. Refund it and ring it up again.',
   cwTitle:'Wallet',cwMineNote:'Refunds and money added at the booth land here. Use it to pay for your bookings.',cwEmpty:'Nothing here yet.',cwKTopup:'Money added',cwKAdjust:'Adjustment',cwKTakeout:'Money taken out',cwKRefund:'Refund',cwKSpend:'Booking paid',cwKReturn:'Back from a booking',cwKMerge:'Moved between accounts',cwErrShort:'Not enough in the wallet.',cwErrOpen:'This booking can’t be paid from the wallet.',cwAdd:'Add money',cwOut:'Take money out',cwAmount:'Amount (SAR)',cwHow:'How',cwTransfer:'Bank transfer',cwNoTaken:'No money taken',cwNoGiven:'No money given back',cwNote:'Note',cwNoteReq:'Why (required)',cwHeld:'Held in wallets',cwAccounts:'Accounts with money',cwSearch:'Find any account: name, phone or email',cwNone:'No account holds money. Search above to add some.',cwSearchNone:'No account matches.',cwTabWallets:'Wallets',cwRefundTo:'Refund to wallet',cwFromWallet:'Pay from wallet',cwRefundBody:'Back into {0}’s wallet. The booking goes back to unpaid.',cwErrAmount:'Enter an amount.',cwErrHow:'Choose how.',cwErrNote:'Say why: no money moved.',cwErrOffline:'Wallet changes need a connection.',cwErrNoAcc:'This has no account to hold the money.',cwErrRace:'That money goes to the race’s organiser.',cwErrMoney:'This account still has money in its wallet. Take it out first.',cwTillIncl:'Wallet money in these',cwMnyUnknown:'Wallet, or method not recorded',
   tkBookedTitle:'You’re booked',
   tkBookedSub:'Show this code at the booth. It’s in Bookings too.',
@@ -1779,6 +1780,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tkWhereLabel:'المكان',
   tkPayAmount:'ادفع {0} عند الكشك حين تصل.',
   cwUseHave:'لديك {0}. فعّلها لاستخدامها في هذا الحجز.',cwUseOn:'يُستخدم {0}. يتبقى {1} للدفع عند الكشك.',cwUseAll:'يُستخدم {0}. لا يتبقى شيء للدفع.',cwUseFail:'تم حجزك، لكن لم تُستخدم المحفظة. يمكنك تفعيلها من تذكرتك.',
+  cwKSale:'شراء من المتجر',cwKSaleBack:'مبلغ عائد من عملية شراء',cwErrEdit:'دُفع جزء من هذا الإيصال من محفظة. استرده وسجّله من جديد.',
   cwTitle:'المحفظة',cwMineNote:'هنا تصل المبالغ المستردة والمبالغ المضافة عند الكشك. استخدمها لدفع حجوزاتك.',cwEmpty:'لا يوجد شيء هنا بعد.',cwKTopup:'مبلغ مضاف',cwKAdjust:'تعديل',cwKTakeout:'مبلغ مسحوب',cwKRefund:'استرداد',cwKSpend:'دفع حجز',cwKReturn:'مبلغ عائد من حجز',cwKMerge:'نُقل بين الحسابات',cwErrShort:'الرصيد في المحفظة لا يكفي.',cwErrOpen:'لا يمكن دفع هذا الحجز من المحفظة.',cwAdd:'إضافة مبلغ',cwOut:'سحب مبلغ',cwAmount:'المبلغ (ريال)',cwHow:'الطريقة',cwTransfer:'تحويل بنكي',cwNoTaken:'بدون استلام مبلغ',cwNoGiven:'بدون إعادة مبلغ',cwNote:'ملاحظة',cwNoteReq:'السبب (مطلوب)',cwHeld:'الرصيد في المحافظ',cwAccounts:'حسابات لديها رصيد',cwSearch:'ابحث عن أي حساب: الاسم أو الجوال أو البريد',cwNone:'لا يوجد حساب لديه رصيد. ابحث أعلاه لإضافة مبلغ.',cwSearchNone:'لا يوجد حساب مطابق.',cwTabWallets:'المحافظ',cwRefundTo:'استرداد إلى المحفظة',cwFromWallet:'الدفع من المحفظة',cwRefundBody:'يعود المبلغ إلى محفظة {0}. يعود الحجز غير مدفوع.',cwErrAmount:'أدخل المبلغ.',cwErrHow:'اختر الطريقة.',cwErrNote:'اذكر السبب: لم يتحرك أي مبلغ.',cwErrOffline:'تحتاج تغييرات المحفظة إلى اتصال.',cwErrNoAcc:'لا يوجد حساب مرتبط لحفظ المبلغ.',cwErrRace:'هذا المبلغ يذهب إلى منظّم السباق.',cwErrMoney:'لا يزال في محفظة هذا الحساب رصيد. اسحبه أولاً.',cwTillIncl:'مبالغ المحفظة ضمن هذه',cwMnyUnknown:'محفظة أو طريقة غير مسجّلة',
   tkBookedTitle:'تم حجزك',
   tkBookedSub:'اعرض هذا الرمز عند الكشك. تجده أيضاً في الحجوزات.',
@@ -16154,7 +16156,7 @@ function _wlToggle(k){
 // ── The wallet, rider side (2026-11-02). customer_wallet answers with the balance and the last lines; before the
 // migration (no such function) or for a bad token nothing is drawn. The My Bookings card and the ticket carry a
 // slot (_cwPaySlot) that is filled from the same answer; the server decides what may be paid (customer_wallet_pay).
-const CW_RIDER_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge'};
+const CW_RIDER_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge',sale:'cwKSale',sale_back:'cwKSaleBack'};
 function _cwMineLoad(cust,force){
   if(!cust||!cust.session_token||!sb||S._cwMineOff)return;
   if(S._cwMineBusy||(!force&&S._cwMineAt&&Date.now()-S._cwMineAt<6e4&&S._cwMine&&S._cwMine.id===cust.id)){_cwMinePaint();return;}
@@ -33340,7 +33342,7 @@ function printCloseout(){
   let salesLines=[];daySessions.forEach(s=>{salesLines=salesLines.concat(_cashSessionLines(s.id));});
   const st=_salesTotals(salesLines);
   const grandCollected=r2(rentCollected+st.collected+addonCollected),grandPending=r2(rentPending+st.pending+addonPending);
-  let coCard=0,coCash=0;daySessions.forEach(s=>{const c=_cashCardCash(s.id);coCard+=c.card;coCash+=c.cash;});
+  let coCard=0,coCash=0,coWal=0;daySessions.forEach(s=>{const c=_cashCardCash(s.id);coCard+=c.card;coCash+=c.cash;coWal+=c.wallet;});
   // Purchases rung up ON a booking (entry.purchases) are in st.collected but not in the receipts' split: by the
   // method the Cashier pop-up recorded, cash without one (S05-core5-08).
   const pu=_mnyPurch(salesLines);coCard=r2(coCard+pu.card);coCash=r2(coCash+pu.cash);
@@ -33348,7 +33350,7 @@ function printCloseout(){
   // (a rider or sale marked paid with no method - shown as Method not recorded, never cash - or a refund that did not
   // restock) before the drawer is counted.
   const grandCard=r2(rentCard+coCard),grandCash=r2(rentCash+coCash); // add-on money already sits inside rentCard/rentCash by pay method
-  const reconDelta=r2(grandCollected-(grandCard+grandCash+rentWal));
+  const reconDelta=r2(grandCollected-(grandCard+grandCash+rentWal+coWal));
   // money rows print "SAR 1,310.00"; a count (the riders) prints the bare number - it read "SAR 45".
   // Figures are black (2026-10-01): blue card, green cash and an amber "Pending SAR 0" made a
   // balanced day look like a list of problems. Amber is kept for a pending sum above zero; card and
@@ -33364,9 +33366,9 @@ function printCloseout(){
     ${row(t('printTotalRiders'),rentEntries.length,{count:1})}${row(t('printCollected'),rentCollected)}${rentCard>0||rentUnk>0||rentWal>0?split(rentCard,rentCash,rentUnk,rentWal):''}${row(t('printPending'),rentPending,{warn:1})}${toOrgSAR>0?row(t('vtColPaid'),toOrgSAR):''}${(addonCollected>0||addonPending>0)?row(t('addonsLabel')+' &middot; '+t('printCollected'),addonCollected)+(addonPending>0?row(t('addonsLabel')+' &middot; '+t('printPending'),addonPending,{warn:1}):''):''}
     <h2>${t('coSales')}</h2>
     ${sold?`${st.cats.length?`<table><thead><tr><th class="rp-ts">${t('invCategory')}</th><th class="rp-tc">${t('cashQtyCol')}</th><th class="rp-te">${t('repValueSar')}</th></tr></thead><tbody>${catRows}</tbody></table>`:''}
-    <div class="rp-mt8">${row(t('printCollected'),st.collected)}${(coCard>0||coCash>0)?split(coCard,coCash):''}${st.pending>0?row(t('printPending'),st.pending,{warn:1}):''}${st.team>0?row(t('payTeam'),st.team):''}${st.free>0?row(t('onTheHouseLabel'),st.free):''}${st.discount>0?row(t('cashDiscount'),st.discount):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,{warn:1}):''}</div>`
+    <div class="rp-mt8">${row(t('printCollected'),st.collected)}${(coCard>0||coCash>0||coWal>0)?split(coCard,coCash,0,coWal):''}${st.pending>0?row(t('printPending'),st.pending,{warn:1}):''}${st.team>0?row(t('payTeam'),st.team):''}${st.free>0?row(t('onTheHouseLabel'),st.free):''}${st.discount>0?row(t('cashDiscount'),st.discount):''}${st.refunded>0?row(t('cashRefunds'),st.refunded,{warn:1}):''}</div>`
     :`<div class="rp-none">${t('coNoSales')}</div>`}
-    <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected)}${grandCollected>0?split(grandCard,grandCash,rentUnk,rentWal):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,{warn:1})}
+    <div class="rp-grand">${row('<strong>'+t('coGrand')+' &middot; '+t('printCollected')+'</strong>',grandCollected)}${grandCollected>0?split(grandCard,grandCash,rentUnk,r2(rentWal+coWal)):''}${row('<strong>'+t('coGrand')+' &middot; '+t('printPending')+'</strong>',grandPending,{warn:1})}
     ${Math.abs(reconDelta)>=0.01?`<div class="rp-recon-off"><span>${t('coReconOff')}</span><span>${_rpSar(reconDelta)}</span></div>`:`<div class="rp-recon-ok">${t('coReconOk')} &#x2713;</div>`}</div>`;
   const html=_reportShell({kind:t('closeoutTitle'),title:t('closeoutTitle'),subtitle:`${dayLabel(sel.day)} &middot; ${shortDate(date)}${_bfAt(sel)?` &middot; ${esc(_bfAt(sel))}`:''}`,body,maxWidth:'560px'});
   _openReport(html,620,800);
@@ -44930,14 +44932,14 @@ function _shopLines(day){return _shopSales(day).map(r=>({name:r.name,cat:r.categ
 function _salesCC(rows){
   const byR={};
   rows.forEach(r=>{
-    const k=r.receipt_id||r.id;byR[k]=byR[k]||{paid:0,card:0,refunded:false};
+    const k=r.receipt_id||r.id;byR[k]=byR[k]||{paid:0,card:0,wal:0,refunded:false};
     if(r.pay==='refunded'){byR[k].refunded=true;return;}
-    if(r.category==='__cardmeta__'){byR[k].card=Number(r.price)||0;return;}
+    if(r.category==='__cardmeta__'){if(r.pay==='wallet')byR[k].wal=Number(r.price)||0;else byR[k].card=Number(r.price)||0;return;} // a wallet's part: neither card nor cash (2026-11-03)
     if(r.pay==='paid')byR[k].paid+=(Number(r.qty)||0)*(Number(r.price)||0);
   });
-  let card=0,cash=0;
-  Object.values(byR).forEach(rc=>{if(rc.refunded)return;const c=Math.min(Math.max(0,rc.card),Math.max(0,rc.paid));card+=c;cash+=Math.max(0,rc.paid-c);});
-  return{card:Math.round(card*100)/100,cash:Math.round(cash*100)/100};
+  let card=0,cash=0,wallet=0;
+  Object.values(byR).forEach(rc=>{if(rc.refunded)return;const w=Math.min(Math.max(0,rc.wal),Math.max(0,rc.paid)),left=Math.max(0,rc.paid-w),c=Math.min(Math.max(0,rc.card),left);wallet+=w;card+=c;cash+=left-c;});
+  return{card:Math.round(card*100)/100,cash:Math.round(cash*100)/100,wallet:Math.round(wallet*100)/100};
 }
 // Units sold per inventory item (cashier sales + per-rental purchases + booking add-ons), for reorder suggestions
 function _itemSoldUnits(){
@@ -45528,7 +45530,7 @@ async function _salesRefund(key,rows,what,reason){
 // only ever what the server says.
 async function _salesRefundWallet(key,rows,reason){
   if(_roNow()){_roRefusal();return false;}
-  if(!_can('refund')){toast(t('capNoRefund'),'error');return false;}
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return false;}
   if(_isOffline()){toast(t('cwErrOffline'),'error');return false;}
   const opId=_opId(),amt=Math.round(rows.reduce((s2,x)=>s2+(x.pay==='refunded'?0:_lineCharge(x)),0)*100)/100;
   const r=await _gatedRpc(t('cwRefundTo'),a=>_rpcOp('staff_wallet_refund_receipt',{p_receipt_id:key,p_reason:reason?String(reason).slice(0,300):null,...a,p_op_id:opId},true),{kind:'refund',amount:amt});
@@ -45700,14 +45702,20 @@ function _ctCartTotals(cart){
   const tot=Math.round(cart.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house is in the cart at its price and takes nothing
   const paidNum=cart.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0);
   const disc=_ctDiscountSAR(_ctChargeableTotal(cart)),after=Math.round((tot-disc)*100)/100;
-  const paidAfter=Math.max(0,Math.round((paidNum-_ctDiscountSplit(cart,disc).onPaid)*100)/100),card=_ctCardSAR(paidAfter),cash=Math.max(0,Math.round((paidAfter-card)*100)/100);
-  return{tot,paidNum,disc,after,paidAfter,card,cash};
+  const paidAfter=Math.max(0,Math.round((paidNum-_ctDiscountSplit(cart,disc).onPaid)*100)/100),wallet=_ctWalletTake(paidAfter),card=_ctCardSAR(paidAfter-wallet),cash=Math.max(0,Math.round((paidAfter-wallet-card)*100)/100);
+  return{tot,paidNum,disc,after,paidAfter,wallet,card,cash};
 }
 // Live preview of discounted total + card/cash split without a full re-render (avoids swallowing the next click)
+// The Wallet switch at the till (the owner, 2026-11-03): on the account linked to the sale, off until turned on, taking
+// what the balance can; the rest goes on as card or cash. It belongs to that account: linking another turns it off.
+function _ctWalletOn(){return !!S._ctWallet&&S._ctWallet===S._ctCustId&&_cwOk();}
+function _ctWalletTake(paid){return _ctWalletOn()?Math.min(Math.max(0,paid),_cwBal(S._ctCustId)):0;}
+function _ctWalletSet(on){S._ctWallet=on?S._ctCustId:'';renderCashier();}
+function _ctSplitHtml(wallet,card,cash){return (wallet>0?`<span>${t('cwTitle')} ${_money(wallet)}</span>`:'')+(card>0?`<span>${t('cashCard')} ${_money(card)}</span>`:'')+(card>0||wallet>0?`<span>${t('cashCash')} ${_money(cash)}</span>`:'');}
 function _ctPreview(){
-  const{after,card,cash}=_ctCartTotals(S._ctCart);
+  const{after,wallet,card,cash}=_ctCartTotals(S._ctCart);
   const g=document.getElementById('ct-grand');if(g)g.textContent=_money(after,_NOISO);
-  const sp=document.getElementById('ct-split');if(sp)sp.innerHTML=card>0?`<span>${t('cashCard')} ${_money(card)}</span><span>${t('cashCash')} ${_money(cash)}</span>`:'';
+  const sp=document.getElementById('ct-split');if(sp)sp.innerHTML=_ctSplitHtml(wallet,card,cash);
 }
 function _ctCardSAR(paidTotal){const v=parseFloat(S._ctCard);if(isNaN(v)||v<=0)return 0;const c=S._ctCardPct?paidTotal*(v/100):v;return Math.min(Math.max(0,paidTotal),Math.round(c*100)/100);}
 async function _ctRecord(){
@@ -45730,7 +45738,17 @@ async function _ctRecord(){
   }
   // Card/cash split as a qty-0 metadata line (never affects sales totals)
   const paidTotal=rows.filter(r=>r.pay==='paid').reduce((s,r)=>s+r.qty*r.price,0);
-  const cardSAR=_ctCardSAR(paidTotal);
+  // The wallet's part first, and only on the server's word: if it refuses, nothing is recorded yet and the sale stays on screen.
+  let walTake=0,walRow=null;
+  if(_ctWalletOn()&&paidTotal>0){
+    if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
+    S._ctBusy=true;
+    let wr;try{wr=await _roFree(()=>sb.rpc('staff_wallet_pay_sale',{p_receipt_id:rid,p_customer:S._ctCustId,p_session:sessId,p_amount:Math.round(paidTotal*100)/100,p_name:cust,p_at:at,p_op:_opName()||null}));}catch(e){wr={error:e};}
+    S._ctBusy=false;
+    if(wr.error){if(!wr.error.said)wr.error.said=_rpcSay(wr.error);toast(_cwSay(wr.error),'error');_cwLoad(true).catch(()=>{});renderCashier();return;}
+    walTake=Number(wr.data&&wr.data.taken)||0;walRow=wr.data&&wr.data.row||null;
+  }
+  const cardSAR=_ctCardSAR(paidTotal-walTake);
   if(cardSAR>0)rows.push({id:uid(),receipt_id:rid,session_id:sessId,customer_name:cust,item_id:null,name:t('cashCard'),category:'__cardmeta__',qty:0,price:cardSAR,pay:'paid',team_name:null,created_at:at});
   // Link the receipt to the chosen account (column optional; boot detect clears the flag if missing).
   // Not an MM Team line, which is the team member's, nor the card/cash line, which is no purchase: both
@@ -45742,14 +45760,18 @@ async function _ctRecord(){
   // Queued for offline-safe sync. A row the device could not store reaches neither the server
   // nor a later flush, so it must not be reported as taken: the receipt stays on screen to be
   // re-entered once there is room.
-  if(!_salesApply(rows,[])){renderCashier();return;} // _lsSetCritical has already said why
+  if(!_salesApply(rows,[])){
+    if(walRow){try{await sb.rpc('staff_wallet_unpay_sale',{p_receipt_id:rid});}catch(_){}_cwLoad(true).catch(()=>{});} // nothing stored: the wallet's part goes back
+    renderCashier();return; // _lsSetCritical has already said why
+  }
+  if(walRow){S.cashSales=[...(S.cashSales||[]).filter(r=>r.id!==walRow.id),walRow];_cwLoad(true).catch(()=>{});}
   // The receipt is booked: its cart leaves the screen now, before the stock write, so a second tap
   // or a redraw meanwhile cannot record it again, and items added meanwhile start the next one.
   const nLines=S._ctCart.length;
   // The next receipt is the next customer's. The name and the linked account used to stay in the
   // box, so the following walk-up's purchase went onto the previous rider's account unless
   // someone remembered to clear it. Payment and team choice stay, as they do between items.
-  S._ctCart=[];S._ctDisc='';S._ctCard='';S._ctCust='';S._ctCustId='';
+  S._ctCart=[];S._ctDisc='';S._ctCard='';S._ctCust='';S._ctCustId='';S._ctWallet='';
   S._ctBusy=true;renderCashier();
   try{await _addonStockBatch(rows,-1);} // decrement stock for stocked items (summed per item — no concurrent-write race)
   finally{S._ctBusy=false;}
@@ -45771,6 +45793,7 @@ async function _ctVoidReceipt(key){
   const cur=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);if(!cur.length)return;
   const v=await _salesVoid(key,cur,t('cashVoid'),why.v);
   if(!v){renderCashier();return;} // not stored: nothing voided, nothing restocked
+  if(cur.some(r=>r.pay==='wallet'))_cwLoad(true).catch(()=>{}); // its wallet part came back
   _rcLog(t('cashVoid'),cur,` · ${why.txt}`,'void',key); // the void is stored: logged now, whatever the restock below does
   await _addonStockBatch(v.restock,1); // what the server voided, refunded lines left out (_rcRestockOf)
   toast(t('cashVoidedToast'));renderCashier();
@@ -45778,11 +45801,12 @@ async function _ctVoidReceipt(key){
 // Refund: keep the receipt in the ledger as an audit record (pay='refunded'), restock items
 async function _ctRefundReceipt(key){
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.pay!=='refunded'&&r.category!=='__cardmeta__');if(!rows.length)return;
-  const why=await _askMoneyReason('refund',t('cashRefundConfirm'),_cwOk()&&(S.cashSales||[]).some(r=>(r.receipt_id||r.id)===key&&r.customer_id));
+  const why=await _askMoneyReason('refund',t('cashRefundConfirm'),isAdmin()&&_cwOk()&&(S.cashSales||[]).some(r=>(r.receipt_id||r.id)===key&&r.customer_id));
   if(!why)return;
   const all=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key);
   const v=why.toWallet?await _salesRefundWallet(key,all,why.v):await _salesRefund(key,all,t('cashRefund'),why.v);
   if(!v){renderCashier();return;} // not stored: not refunded, not restocked
+  if(all.some(r=>r.pay==='wallet'))_cwLoad(true).catch(()=>{}); // its wallet part came back
   _rcLog(t('cashRefund'),all,` · ${why.txt}`,'refund',key); // the refund is stored: logged now, whatever the restock below does
   await _addonStockBatch(v.restock,1); // what the server refunded (_rcRestockOf), summed per item
   toast(t('cashRefundedToast'));renderCashier();
@@ -45801,6 +45825,7 @@ async function _ctMarkReceiptPaid(key){
 }
 // Edit a recorded receipt: change each line's payment / amount / team member
 function showReceiptEdit(key){
+  if((S.cashSales||[]).some(r=>(r.receipt_id||r.id)===key&&r.category==='__cardmeta__'&&r.pay==='wallet')){toast(t('cwErrEdit'),'info');return;}
   const rows=(S.cashSales||[]).filter(r=>(r.receipt_id||r.id)===key&&r.category!=='__cardmeta__'&&r.category!=='__discount__');if(!rows.length)return;
   S._reKey=key;
   S._reEdit=rows.map(r=>({id:r.id,item_id:r.item_id,name:r.name,qty:r.qty,price:r.price,pay:r.pay,team_name:r.team_name||''}));
@@ -46556,7 +46581,7 @@ function _eonModel(sid,x){
   const bike=id=>bikeById(id);
   return{
     done:rows.filter(e=>e.status==='done').length,noshow:rows.filter(e=>e.status==='noshow').length,
-    card:r2(rs.card+cc.card+pu.card),cash:r2(rs.cash+Math.max(0,st.collected-cc.card-pu.card)),unknown:rs.unknown,wallet:rs.wallet,
+    card:r2(rs.card+cc.card+pu.card),cash:r2(rs.cash+Math.max(0,st.collected-cc.card-(cc.wallet||0)-pu.card)),unknown:rs.unknown,wallet:r2(rs.wallet+(cc.wallet||0)),
     house:paid.filter(e=>(e.price??DEFAULT_PRICE)===0).length,houseSales:st.free,team:st.team,
     toOrg:{n:toOrg.length,sum:r2(toOrg.reduce((a,e)=>a+(e.price??DEFAULT_PRICE),0))}, // paid by transfer to the organiser: never card or cash
     owing:rows.filter(e=>(e.status==='done'||e.status==='active')&&_brOwes(e)),
@@ -46893,7 +46918,7 @@ function renderCashier(){
   const isCustom=S._ctItem==='__custom__';
   const ar=_isRtl();
   const cart=S._ctCart||[];
-  const{paidNum:cartPaidNum,after:cartAfterDisc,card:cartCardSAR,cash:cartCashSAR}=_ctCartTotals(cart); // the same figures _ctPreview shows and _ctRecord books
+  const{paidNum:cartPaidNum,after:cartAfterDisc,wallet:cartWalSAR,card:cartCardSAR,cash:cartCashSAR}=_ctCartTotals(cart); // the same figures _ctPreview shows and _ctRecord books
   // Category-first item picker for Sales: pick a category, then see the items inside it
   const _ctItemBtn=it=>{const sel=S._ctItem===it.id;const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;const lowB=(q<=0||(lo>0&&q<=lo));return`<button type="button" data-on-click="${_on("_ctTile",it.id)}" title="${esc(it.name)}" class="sl-tile${sel?' sl-tile-on':''}">${lowB?`<span title="${q<=0?t('invOutStock'):t('invLowStock')}" class="sl-stock ${ar?'sl-stock-l':'sl-stock-r'} ${q<=0?'sl-stock-out':'sl-stock-low'}">${q}</span>`:''}${it.photo?`<img loading="lazy" decoding="async" src="${esc(it.photo)}" alt="" class="sl-tile-img">`:`<div class="sl-tile-ph">${esc(_invCatLabel(it.category))}</div>`}<div class="sl-tile-b"><div class="sl-tile-nm">${esc(it.name)}</div><div class="sl-tile-pr">${_priceLabel(it.price)||'—'}</div></div></button>`;};
   const _ctCustomBtn=`<button type="button" data-on-click="${_on("_ctSet","_ctItem","__custom__")}" class="sl-cust${isCustom?' sl-cust-on':''}"><span class="sl-plus">+</span><span class="sl-cust-lb">${t('cashCustomOpt')}</span></button>`;
@@ -46951,11 +46976,11 @@ function renderCashier(){
   const receiptCards=receipts.map(rc=>{
     const refunded=rc.lines.some(l=>l.pay==='refunded');
     const disp=rc.lines.filter(_rcShown);
-    const cardMeta=rc.lines.find(l=>l.category==='__cardmeta__');
-    const cardAmt=cardMeta?Math.max(0,Number(cardMeta.price)||0):0;
+    const cardMeta=rc.lines.find(l=>l.category==='__cardmeta__'&&l.pay!=='wallet'),walMeta=rc.lines.find(l=>l.category==='__cardmeta__'&&l.pay==='wallet');
+    const cardAmt=cardMeta?Math.max(0,Number(cardMeta.price)||0):0,walAmt=walMeta?Math.max(0,Number(walMeta.price)||0):0;
     const rt=Math.round(disp.reduce((s,l)=>s+_lineCharge(l),0)*100)/100; // a line on the house shows its price, and takes nothing
     const paidNet=Math.round(disp.filter(l=>l.pay==='paid').reduce((s,l)=>s+(Number(l.qty)||0)*(Number(l.price)||0),0)*100)/100;
-    const cardShown=Math.min(cardAmt,paidNet),cashShown=Math.max(0,Math.round((paidNet-cardShown)*100)/100);
+    const cardShown=Math.min(cardAmt,Math.max(0,paidNet-walAmt)),cashShown=Math.max(0,Math.round((paidNet-walAmt-cardShown)*100)/100);
     return`<div class="sl-rc${refunded?' sl-o60':''}">
       <div class="sl-rc-head">
         <div class="sl-f11m">${esc(rc.cust||t('cashWalkup'))}${rc.at?` · ${new Date(rc.at).toLocaleTimeString(_locale(),{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ})}`:''}${refunded?` · <span class="sl-refd">${t('cashRefunded')}</span>`:''}</div>
@@ -46967,7 +46992,7 @@ function renderCashier(){
       </div>
       ${disp.map(l=>`<div class="sl-rc-line">${_itemThumb(l.item_id,22)}<span class="sl-f1m0">${esc(l.name)}${Number(l.qty)>1?` <span class="sl-muted">×${esc(l.qty)}</span>`:''}${l.category==='__discount__'?'':` <span class="sl-muted">· ${_cashPayBadge(l.pay,l.team_name)}</span>`}</span><bdi class="sl-amt">${_money(Math.round((Number(l.qty)||0)*(Number(l.price)||0)*100)/100,_NOISO)}</bdi></div>`).join('')}
       <div class="sl-rc-tot"><span>${t('repTotal')}</span>${_money(rt)}</div>
-      ${(cardAmt>0&&!refunded)?`<div class="sl-split"><span>${t('cashCard')} ${_money(cardShown)}</span><span>${t('cashCash')} ${_money(cashShown)}</span></div>`:''}
+      ${((cardAmt>0||walAmt>0)&&!refunded)?`<div class="sl-split">${walAmt>0?`<span>${t('cwTitle')} ${_money(walAmt)}</span>`:''}${cardAmt>0?`<span>${t('cashCard')} ${_money(cardShown)}</span>`:''}${cashShown>0||cardAmt>0?`<span>${t('cashCash')} ${_money(cashShown)}</span>`:''}</div>`:''}
     </div>`;}).join('');
   const rentalRows=rentalLines.map(p=>`<div class="sl-rent">
       ${_itemThumb(p.id,28)}<div class="sl-rent-b"><div class="sl-nm13">${esc(p.name)}${Number(p.qty)>1?` <span class="sl-muted">×${esc(p.qty)}</span>`:''}</div>
@@ -47034,6 +47059,7 @@ function renderCashier(){
               <input aria-label="${esc(t('cashDiscount'))}" type="number" min="0" step="0.5" value="${esc(S._ctDisc)}" data-on-input="${_on("_on_renderCashier_12",_EV,_EL)}" placeholder="0" class="sl-in sl-w88">
               <button type="button" data-on-click="${_on("_on_renderCashier_13",_EV,_EL)}" class="sl-tgl">${S._ctDiscPct?'%':'SAR'}</button>
             </div>
+            ${cartPaidNum>0&&S._ctCustId&&_cwOk()&&_cwBal(S._ctCustId)>0?`<label class="web-switch sl-wal"><input type="checkbox" class="web-toggle" role="switch"${_ctWalletOn()?' checked':''} data-on-change="${_on("_ctWalletSet",_P("checked"))}"><span>${t('cwTitle')} · ${_money(_cwBal(S._ctCustId))}</span></label>`:''}
             ${cartPaidNum>0?`<div class="sl-card7">
               <label class="sl-lbl sl-f1">${t('cashSplitLabel')}</label>
               <input aria-label="${esc(t('cashSplitLabel'))}" type="number" min="0" step="0.5" value="${esc(S._ctCard)}" data-on-input="${_on("_on_renderCashier_14",_EV,_EL)}" placeholder="0" class="sl-in sl-w88">
@@ -47041,7 +47067,7 @@ function renderCashier(){
             </div>`:''}
             <div class="mm-cart-foot">
             <div class="sl-grand"><span>${t('repTotal')}</span><bdi id="ct-grand" class="sl-green">${_money(cartAfterDisc,_NOISO)}</bdi></div>
-            <div id="ct-split" class="sl-split">${cartCardSAR>0?`<span>${t('cashCard')} ${_money(cartCardSAR)}</span><span>${t('cashCash')} ${_money(cartCashSAR)}</span>`:''}</div>
+            <div id="ct-split" class="sl-split">${_ctSplitHtml(cartWalSAR,cartCardSAR,cartCashSAR)}</div>
             <button class="btn-primary sl-full10" data-on-click="${_on("_ctRecord")}">${t('cashRecordReceiptBtn')}</button>
             </div>
           </div>`:''}
@@ -49915,7 +49941,7 @@ function _amGo(k){AM_FKEYS.forEach(f=>{S[f]='';});S.amSearch='';S.amTagFilter=''
 // ── The wallet, staff side (2026-11-02). Who holds what comes from staff_wallet_balances; nothing about the wallet
 // is drawn until it answers, so the page is safe live before migration 20261102210000. Every change goes through
 // the server and waits for its answer: no outbox and no optimistic balance, as this is money the rider can spend.
-const CW_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge'};
+const CW_KIND={topup:'cwKTopup',adjust:'cwKAdjust',takeout:'cwKTakeout',refund:'cwKRefund',spend:'cwKSpend',return:'cwKReturn',merge_in:'cwKMerge',merge_out:'cwKMerge',unmerge:'cwKMerge',sale:'cwKSale',sale_back:'cwKSaleBack'};
 let _cwAt=0;
 function _cwOk(){return !!S._cwB&&!S._cwOff;}
 function _cwBal(cid){return Number(S._cwB&&S._cwB.get(String(cid)))||0;}
@@ -49944,7 +49970,7 @@ function _cwPayOpts(e){
   if(!_cwOk()||!e.customerId||_isRace(_sessGet(e.sessionId)))return[];
   const w=_walPaid(e),due=_bookingDue(e);
   if(!(_bookingAmount(e)>0))return[];
-  const back=_can('refund')&&e.pay_method!=='transfer'&&(e.paid||w>0)?[{label:`${t('cwRefundTo')} · ${_money(e.paid?_bookingAmount(e):w,{isolate:false})}`,mode:'wrefund',active:false}]:[];
+  const back=isAdmin()&&e.pay_method!=='transfer'&&(e.paid||w>0)?[{label:`${t('cwRefundTo')} · ${_money(e.paid?_bookingAmount(e):w,{isolate:false})}`,mode:'wrefund',active:false}]:[];
   if(e.paid||!(due>0))return back;
   const take=Math.min(_cwBal(e.customerId),due); // what it can: the rest stays to pay (2026-11-03)
   return [...(take>0?[{label:`${t('cwFromWallet')} · ${_money(take,{isolate:false})}`,mode:'wpay',active:false}]:[]),...back];
@@ -49960,7 +49986,7 @@ async function _cwDeskPay(id){
   logAction(`${t('cwFromWallet')}: #${e.queueNum} ${e.name} · ${_money(_took,{isolate:false})}`,{k:'pay',e:'booking',id,amt:_took});
   await _reloadRows([id]);renderStaffQueue();_cwLoad(true).catch(()=>{});
   pushUndo(`${t('undoPayment')} #${e.queueNum} ${e.name}`,async()=>{
-    const u=await sb.rpc('staff_wallet_refund_booking',{p_booking_id:id,p_reason:t('undoPayment'),..._pinArgs()}); // back into the wallet, a part as well as a whole
+    const u=await sb.rpc('staff_wallet_undo_pay',{p_booking_id:id}); // back into the wallet, a part as well as a whole
     if(_writeErr(u,'undo payment'))return false;
     await _reloadRows([id]);renderStaffQueue();_cwLoad(true).catch(()=>{});
   },{k:'pay',e:'booking',id,amt:_took});
@@ -49968,7 +49994,7 @@ async function _cwDeskPay(id){
 async function _cwDeskRefund(id){
   const e=_qGet(id);if(!e)return;
   if(_roNow()){_roRefusal();return;}
-  if(!_can('refund')){toast(t('capNoRefund'),'error');return;}
+  if(!isAdmin()){toast(t('adminOnlyMsg'),'error');return;} // the owner, 2026-11-03; the server holds the same line
   if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
   const amt=e.paid?_bookingAmount(e):_walPaid(e);
   const why=await _askMoneyReason('refund',`${esc(t('cwRefundBody').replace('{0}',e.name||''))} ${_money(amt)}`,true,true);
@@ -49981,7 +50007,7 @@ async function _cwDeskRefund(id){
   await _reloadRows([id]);renderStaffQueue();renderHistory();_cwLoad(true).catch(()=>{});
 }
 // One account's wallet: the balance, add or take out, and every movement.
-function _cwOpen(cid){S._cw={cid,mode:isAdmin()?'add':'out',how:'',amt:'',note:'',err:'',busy:false,data:null,opId:_opId()};_cwDraw();_cwRead();}
+function _cwOpen(cid){S._cw={cid,mode:'add',how:'',amt:'',note:'',err:'',busy:false,data:null,opId:_opId()};_cwDraw();_cwRead();}
 async function _cwRead(){
   const d=S._cw;if(!d)return;
   let r;try{r=await sb.rpc('staff_wallet',{p_customer:d.cid});}catch(e){r={error:e};}
@@ -49993,7 +50019,7 @@ async function _cwRead(){
 }
 function _cwDraw(){
   const d=S._cw;if(!d)return;
-  const c=_custById(d.cid)||{},can=_can('refund')&&_editOk(S.staffTab),out=d.mode==='out',D=d.data;
+  const c=_custById(d.cid)||{},can=isAdmin()&&_editOk(S.staffTab),out=d.mode==='out',D=d.data; // adding and taking out are an admin's (the owner, 2026-11-03)
   const hows=[['card','cashCard'],['cash','cashCash'],['transfer','cwTransfer'],['none',out?'cwNoGiven':'cwNoTaken']];
   const pick=(k,l)=>`<button type="button" class="mny-chip${d.how===k?' on':''}" aria-pressed="${d.how===k?'true':'false'}" data-on-click="${_on("_cwHow",k)}">${t(l)}</button>`;
   const seg=(k,l)=>`<button type="button" class="toggle-btn${d.mode===k?' active':''}" aria-pressed="${d.mode===k?'true':'false'}" data-on-click="${_on("_cwMode",k)}">${t(l)}</button>`;
@@ -50001,7 +50027,7 @@ function _cwDraw(){
     return`<li class="cw-line"><div class="cw-line-m"><span>${esc(t(CW_KIND[x.kind]||'cwKAdjust'))}</span><span class="am-meta">${esc(when)}${by}</span>${x.note?`<span class="am-meta">${esc(_moneyReasonText(x.note))}</span>`:''}</div><div class="cw-line-n"><strong class="${a>0?'cw-in':'cw-out'}"><bdi>${a>0?'+':'−'}${esc(_money(Math.abs(a),{isolate:false}))}</bdi></strong><span class="am-meta">${_money(x.balance_after)}</span></div></li>`;};
   _mnyOpen(_mnyFrame('mny-cw-t',`${esc(t('cwTitle'))} · ${esc(c.name||'')}`,
     `<div class="cw-num">${D?_money(D.balance):esc(t(d.err?'errConnection':'loadingLabel'))}</div>
-     ${can&&D?`${isAdmin()?`<div class="cw-seg" role="group" aria-label="${esc(t('cwTitle'))}">${seg('add','cwAdd')}${seg('out','cwOut')}</div>`:''}
+     ${can&&D?`<div class="cw-seg" role="group" aria-label="${esc(t('cwTitle'))}">${seg('add','cwAdd')}${seg('out','cwOut')}</div>
      <label class="mny-lbl" for="cw-amt">${t('cwAmount')}</label><input id="cw-amt" class="mny-in" type="number" inputmode="decimal" min="0" step="0.5" dir="ltr" value="${esc(d.amt)}" data-on-input="${_on("_cwType",'amt',_P("value"))}">
      <div class="mny-lbl">${t('cwHow')}</div><div class="mny-chips" role="group" aria-label="${esc(t('cwHow'))}">${hows.map(h=>pick(h[0],h[1])).join('')}</div>
      <label class="mny-lbl" for="cw-note">${t(d.how==='none'?'cwNoteReq':'cwNote')}</label><textarea id="cw-note" class="mny-in" rows="2" maxlength="280" data-on-input="${_on("_cwType",'note',_P("value"))}">${esc(d.note)}</textarea>
@@ -50009,14 +50035,14 @@ function _cwDraw(){
      ${D?(D.rows&&D.rows.length?`<ul class="cw-lines">${D.rows.map(line).join('')}</ul>`:`<div class="mny-empty">${t('cwEmpty')}</div>`):''}`,
     `<button type="button" class="btn-secondary" data-on-click="${_on("_mnyClose")}">${t('closeBtn')}</button>${can&&D?`<button type="button" class="${out?'btn-red':'btn-primary'} mny-go"${d.busy?' disabled':''} data-on-click="${_on("_cwGo")}">${t(out?'cwOut':'cwAdd')}</button>`:''}`));
 }
-function _cwMode(k){const d=S._cw;if(!d||(k==='add'&&!isAdmin()))return;d.mode=k;d.err='';_cwDraw();}
+function _cwMode(k){const d=S._cw;if(!d||!isAdmin())return;d.mode=k;d.err='';_cwDraw();}
 function _cwHow(k){const d=S._cw;if(!d)return;d.how=k;d.err='';_cwDraw();}
 function _cwType(k,v){const d=S._cw;if(d)d[k]=String(v==null?'':v);}
 async function _cwGo(){
   const d=S._cw;if(!d||d.busy)return;
   const amt=Math.round(Number(d.amt)*100)/100,note=d.note.trim();
-  // adding is an admin's alone (the owner, 2026-11-03); staff_wallet_change holds the same line
-  d.err=d.mode!=='out'&&!isAdmin()?t('adminOnlyMsg'):!(amt>0)||amt>10000?t('cwErrAmount'):!d.how?t('cwErrHow'):d.how==='none'&&!note?t('cwErrNote'):_isOffline()?t('cwErrOffline'):'';
+  // an admin's alone (the owner, 2026-11-03); staff_wallet_change holds the same line
+  d.err=!isAdmin()?t('adminOnlyMsg'):!(amt>0)||amt>10000?t('cwErrAmount'):!d.how?t('cwErrHow'):d.how==='none'&&!note?t('cwErrNote'):_isOffline()?t('cwErrOffline'):'';
   if(d.err){_cwDraw();return;}
   if(_roNow()){_roRefusal();return;}
   const sign=d.mode==='out'?-1:1,today=allSessions().find(s=>(s.session_date||s.id)===todayStr()&&s.status!=='closed'&&s.status!=='cancelled'&&s.status!=='deleted');
