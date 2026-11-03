@@ -33,10 +33,9 @@ test.describe('@customer:rating a bike-free session is rated as a session', () =
     expect(await rateOpen(page)).toBe(true);
     const m = page.locator('#rate-modal');
     await expect(m.locator('#rate-title')).toHaveText('How was your session?');
-    expect(await qs(page)).toEqual(['service', 'experience']);
+    expect(await qs(page)).toEqual(['service']);
     await expect(m).not.toContainText(CYCLING);
     await m.locator('#rgq-service .rg-b[data-v="10"]').click();
-    await m.locator('#rgq-experience .rg-b[data-v="9"]').click();
     await m.locator('.pg-btn').click();
     await expect(page.locator('#toast, .toast').first()).toContainText('Thanks for rating your session.');
   });
@@ -46,7 +45,7 @@ test.describe('@customer:rating a bike-free session is rated as a session', () =
     await page.evaluate(`S.view='customer'; setCustTab('myrides')`);
     expect(await rateOpen(page)).toBe(true);
     const m = page.locator('#rate-modal');
-    expect(await qs(page)).toEqual(['service', 'experience']);
+    expect(await qs(page)).toEqual(['service']);
     await expect(m.locator('#rate-title')).toHaveText('How was your session?');
     await expect(m).not.toContainText(CYCLING);
   });

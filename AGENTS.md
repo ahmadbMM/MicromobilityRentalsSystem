@@ -545,11 +545,13 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
 - **Ratings.** The post-ride rating is an unskippable page (2026-10-03, `#rate-modal`,
   `renderRateModal`, state `S._rg`): `_forceRatingPrompt` opens it for the oldest `done` ride since
   `RATE_FROM` that has no rating (`_rgRated`), on any customer tab, after the profile / correction /
-  password pages close; Log out is the only way off. `RG_FORMS`: `rental` (service, bike, experience)
+  password pages close; Log out is the only way off. `RG_FORMS`: `rental` (service, bike; 2026-11-03, the
+  experience it lists is no longer asked, `_rgTree`, and stays for older ratings' display)
   for every kind but the Saturday ride, `social` (the ride + 4 parts, breakfast + 4 parts, overall).
   Scores 1-10, all required; `RG_LOW` (8) or under needs a reason. Saved whole in
   `queue_entries.rating_detail` ({form, s, why, skip_bf}, cleaned by customer_booking_update,
-  20261003150001) with `rating_bike` / `rating_exp` / `feedback` still written. Older ratings may carry
+  20261003150001) with `rating_bike` / `rating_exp` / `feedback` still written: `rating_exp` is the
+  ride's headline score, the overall on a Saturday and the service on a rental (`_rgHeadLabel`). Older ratings may carry
   `rating_tags` (the rider no longer picks them). Analytics > Ratings (`anView 'ratings'`,
   `bikeHealthSection`, `_anRgCatCard`, `_anRgDetail`); the bell's `lowrate` kind.
 - **Events.** `ride_kind 'event'` (community, seats, `sessions.description`, `sessions.price`,

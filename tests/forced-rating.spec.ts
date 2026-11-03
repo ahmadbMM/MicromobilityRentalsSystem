@@ -4,7 +4,7 @@ import { stubSupabase, loginCustomer, waitForSb, rateGateOn } from './helpers/su
 // After a ride is checked out or its bike returned (status done), the next time the rider opens the
 // site a rating page takes the screen and cannot be skipped, like a correction request (the owner,
 // 2026-10-03): no Cancel, no backdrop, no Escape, moving about keeps it, Log out is the only way off.
-// A circuit / Petromin ride asks service, bike and experience; a Saturday social ride asks the ride
+// A circuit / Petromin ride asks service and bike (2026-11-03); a Saturday social ride asks the ride
 // (check-in, staff, bike, route), the breakfast (restaurant, atmosphere, food, service) and overall.
 // Every score is required, and one of 8 or under needs a reason.
 const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Riyadh' });
@@ -27,10 +27,10 @@ async function boot(page: Page, sessions: unknown[], queue: unknown[]) {
   return calls;
 }
 
-test('a circuit ride: an unskippable page asks service, bike and experience, and why for 6 or under (the Saturday ride keeps 8)', async ({ page }) => {
+test('a circuit ride: an unskippable page asks service and bike, and why for 6 or under (the Saturday ride keeps 8)', async ({ page }) => {
   const calls = await boot(page, [sess(today)], [row('q1', today)]);
   expect(await open(page)).toBe(true);
-  expect(await qs(page)).toEqual(['service', 'bike', 'experience']);
+  expect(await qs(page)).toEqual(['service', 'bike']);
   const m = page.locator('#rate-modal');
   await expect(m.locator('.gate-out')).toHaveText('Log out'); // the only way off: no Cancel
   // Escape, a tab change and the backdrop leave it up
@@ -40,10 +40,9 @@ test('a circuit ride: an unskippable page asks service, bike and experience, and
   expect(await open(page)).toBe(true);
   // nothing picked: every question asks for a score
   await m.locator('.pg-btn').click();
-  await expect(m.locator('.rg-q.err')).toHaveCount(3);
+  await expect(m.locator('.rg-q.err')).toHaveCount(2);
   await m.locator('#rgq-service .rg-b[data-v="9"]').click();
   await m.locator('#rgq-bike .rg-b[data-v="7"]').click();
-  await m.locator('#rgq-experience .rg-b[data-v="10"]').click();
   await expect(m.locator('.rg-why')).toHaveCount(0); // a 7 is not asked why on a rental since 2026-10-11 (the page is shorter)
   await expect(m.locator('.pg-sub')).toHaveText('Score each from 1 to 10. For a 6 or under, tell us why.');
   await expect(m.locator('#rgq-bike .rg-ends')).toHaveText(/Poor\s*Great/); // which end is good
@@ -59,8 +58,8 @@ test('a circuit ride: an unskippable page asks service, bike and experience, and
   await m.locator('#rate-note').fill('Lovely night');
   await m.locator('.pg-btn').click();
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0].p_patch).toEqual({ rating_bike: 6, rating_exp: 10, feedback: 'Lovely night',
-    rating_detail: { form: 'rental', s: { service: 9, bike: 6, experience: 10 }, why: { bike: 'Gears slipped' } } });
+  expect(calls[0].p_patch).toEqual({ rating_bike: 6, rating_exp: 9, feedback: 'Lovely night', // rating_exp: the service, its headline score
+    rating_detail: { form: 'rental', s: { service: 9, bike: 6 }, why: { bike: 'Gears slipped' } } });
   await expect.poll(() => open(page)).toBe(false);
 });
 
@@ -112,10 +111,10 @@ test('not asked: a rated ride, a ride still out, a ride before the page went liv
   expect(await open(page)).toBe(false);
 });
 
-test('a quick score with tags (the old form) asks again, the bike and experience filled in', async ({ page }) => {
+test('a quick score with tags (the old form) asks again, the bike filled in', async ({ page }) => {
   await boot(page, [sess(today)], [row('q1', today, { rating_bike: 10, rating_exp: 9, rating_tags: ['route', 'fun'] })]);
   expect(await open(page)).toBe(true);
-  expect(await page.evaluate(`S._rg.s`)).toEqual({ bike: 10, experience: 9 });
+  expect(await page.evaluate(`S._rg.s`)).toEqual({ bike: 10 });
 });
 
 test('a ride still out does not ask', async ({ page }) => {
@@ -125,20 +124,19 @@ test('a ride still out does not ask', async ({ page }) => {
 
 // Run for Her is a run (the owner, 2026-10-17): no bike question and no "ride" on its page, even when
 // the run's session is not in the list (its id, '<date>-rh', says it is a run).
-for (const loaded of [true, false]) test(`Run for Her asks service and experience, no bike, and says run${loaded ? '' : ' (session not loaded)'}`, async ({ page }) => {
+for (const loaded of [true, false]) test(`Run for Her asks service only, no bike, and says run${loaded ? '' : ' (session not loaded)'}`, async ({ page }) => {
   const id = today + '-rh';
   const s = { ...sess(today, { day: 'Saturday', event_kind: 'community', ride_kind: 'runher', location: 'JYC' }), id };
   const calls = await boot(page, loaded ? [s] : [], [row('q1', today, { session_id: id, session_day: 'Saturday', paid: false, price: 0, run_km: 5 })]);
   expect(await open(page)).toBe(true);
-  expect(await qs(page)).toEqual(['service', 'experience']);
+  expect(await qs(page)).toEqual(['service']);
   const m = page.locator('#rate-modal');
   await expect(m.locator('#rate-title')).toHaveText('How was your run?');
   await expect(m).not.toContainText(/bike|ride/i);
   await m.locator('#rgq-service .rg-b[data-v="10"]').click();
-  await m.locator('#rgq-experience .rg-b[data-v="9"]').click();
   await m.locator('.pg-btn').click();
   await expect.poll(() => calls.length).toBe(1);
-  expect(calls[0].p_patch).toEqual({ rating_bike: null, rating_exp: 9, feedback: null,
-    rating_detail: { form: 'rental', s: { service: 10, experience: 9 }, why: {} } });
+  expect(calls[0].p_patch).toEqual({ rating_bike: null, rating_exp: 10, feedback: null,
+    rating_detail: { form: 'rental', s: { service: 10 }, why: {} } });
   await expect(page.locator('#toast, .toast').first()).toContainText('Thanks for rating your run.');
 });

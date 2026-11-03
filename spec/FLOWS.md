@@ -222,8 +222,9 @@ Same as A3 with:
    bike freed.
 2. **[AUTO]** On the rider's next visit to any customer tab, a **mandatory** rating modal appears
    for the unrated ride.
-3. Two 1–10 scales (bike, experience) plus optional free-text feedback →
-   `customer_booking_update` writes `rating_bike`, `rating_exp`, `feedback`.
+3. Two 1–10 scales (service, bike; the Saturday ride asks its own longer form) plus optional free-text
+   feedback → `customer_booking_update` writes `rating_detail`, `rating_bike`, `rating_exp` (the service
+   score, a Saturday's overall), `feedback`.
 4. Past rides offer **Book again**, which prefills the wizard.
 
 ---

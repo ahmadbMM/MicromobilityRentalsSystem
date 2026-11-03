@@ -36,6 +36,32 @@ test('a detailed rating (rating_detail) shows each question, its reason, and the
   await expect(tab.locator('.an-rg-why')).toHaveText('Gears slipped');
 });
 
+// A rental has asked service and bike only since 2026-11-03: rating_exp holds its service score, and says so.
+test('a rating with no experience shows its service as the headline; an older one keeps Experience, and every report reads both', async ({ page }) => {
+  const q = [
+    done('n1', 1, { rating_exp: 7, rating_bike: 6, rated_at: ago(0.1), rating_detail: { form: 'rental', s: { service: 7, bike: 6 }, why: {} } }),
+    done('n2', 1, { rating_exp: 9, rated_at: ago(0.2), rating_detail: { form: 'rental', s: { service: 9 }, why: {} } }), // own bike or no bike: service only
+    done('o1', 2, { rating_exp: 10, rating_bike: 8, rated_at: ago(0.3), rating_detail: { form: 'rental', s: { service: 5, bike: 8, experience: 10 }, why: {} } }),
+  ];
+  await stubSupabase(page, { sessions, queue_entries: q, bikes: [] });
+  await unlockStaff(page);
+  await page.goto('/');
+  await waitForSb(page);
+  await page.evaluate(`setStaffTab('analytics');setAnView('ratings')`);
+  const tab = page.locator('#tab-analytics'), scores = tab.locator('.an-rate-card .an-rate-scores');
+  await expect(scores.nth(0)).toContainText('Service');
+  await expect(scores.nth(0)).not.toContainText('Experience');
+  await expect(scores.nth(1)).toContainText('Service');
+  await expect(scores.nth(2)).toContainText('Experience');
+  await expect(tab.locator('.an-bysess-card thead')).toContainText('Avg rating');
+  await expect(tab.locator(`.an-bysess-card tbody tr[data-day="${day(1)}"]`)).toContainText('2/2');
+  await expect(tab.locator('.an-rgcat-card .analytics-bar-row[data-k="experience"]')).toHaveCount(1); // the older rating's still counts
+  await expect(tab.locator('.an-rgcat-card .analytics-bar-row[data-k="service"]')).toContainText('7.0');
+  // the reports' headline: the service where no overall or experience was asked
+  expect(await page.evaluate(`_rrRows().map(r=>[r.e.id,_rrHead(r)]).sort()`)).toEqual([['n1', 7], ['n2', 9], ['o1', 10]]);
+  expect(await page.evaluate(`_rrFormQs('rental')`)).toEqual(['service', 'bike', 'experience']); // the older ones stay reportable
+});
+
 test('every rating lists the time it was given, the most recent first; an older one shows its ride end, marked', async ({ page }) => {
   const q = [...queue, done('r6', 30, { rating_exp: 7, rated_at: ago(0.01) })]; // the oldest ride, rated a few minutes ago
   await stubSupabase(page, { sessions: [...sessions, { id: 's-30', day: 'Friday', session_date: day(30), capacity: 12, status: 'closed', created_at: 1 }], queue_entries: q, bikes: [] });

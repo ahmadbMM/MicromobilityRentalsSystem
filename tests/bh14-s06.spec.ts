@@ -57,7 +57,7 @@ test.describe('@bh14 s06 rating page', () => {
   test('a rating call that throws says so and lets the rider try again', async ({ page }) => {
     const done = { id: 'r1', customer_id: 'c1', session_id: JCC.id, session_date: JCC.session_date, day: JCC.day, status: 'done', queue_num: 2, name: 'Spec Rider', type_preference: 'Road', price: 75, paid: true };
     await rider(page, { queue_entries: [done], 'rpc:my_bookings': [done] });
-    const r = await page.evaluate(`(async()=>{openRateModal('r1',false);const g=S._rg;['service','bike','experience'].forEach(k=>g.s[k]=10);
+    const r = await page.evaluate(`(async()=>{openRateModal('r1',false);const g=S._rg;['service','bike'].forEach(k=>g.s[k]=10);
       window._ownEntryUpdate=async()=>{throw new Error('net');};await submitRating();return {saving:g.saving,net:g.net,open:S._rg===g};})()`);
     expect(r).toEqual({ saving: false, net: true, open: true });
   });
