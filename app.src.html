@@ -5313,6 +5313,7 @@ function _errMessage(err){
   if(err&&err.said)return err.said; // a guardrail RPC's code, already put in the desk's words (_gatedRpc)
   if(_mbRefused(err)){const c=S.view==='staff'?_mbCapNum():null;return c!=null?t('mbFullStaff').replace('{0}',String(c)):t('mbFullMsg');} // the member cap (20261017120000)
   if(_sgErrOf(err))return _sgErrOf(err); // men only or women only (GENDER_ONLY, 20261027150000): a move, a cancel taken back
+  if(/FIX_FIRST/.test(String((err&&err.message)||'')))return t('fixOwnSub'); // owed details, where the request itself could not be opened (_fixRefused)
   switch(_errKind(err)){
     case'perm':return t('errWritePerm');
     // A clash the database names, other than the booking-number index (a tag's name, an address,
@@ -10303,6 +10304,15 @@ async function _fixGate(next){
   renderFixGate();
   return true;
 }
+// The server holds details this rider still owes (customer_create_booking's FIX_FIRST: fields staff
+// asked them to correct, or the account's own check-up), which this device may not know of yet. Shows
+// what is asked, fresh, rather than a bare error; saving runs `next` after all. True when it took the screen.
+async function _fixRefused(err,next){
+  if(!/FIX_FIRST/.test(((err&&err.code)||'')+' '+((err&&err.message)||'')))return false;
+  const cust=S.loggedIn||getSession();if(!cust)return false;
+  await _fixLoad(cust,true);
+  return _fixGate(next);
+}
 // What is on file is shown above each box; the login row carries no nationality or gender.
 async function _fixProfile(cust){
   if(cust.session_token&&(cust.nationality===undefined||cust.gender===undefined)){
@@ -14542,13 +14552,7 @@ async function _submitReg(){
               const _base=nextQNum(S.selSession);entries.forEach((e,i)=>{e.queueNum=_base+i;}); // fresh numbers, then retry
               continue;
             }
-            // The server holds details this rider still owes (customer_create_booking's
-            // FIX_FIRST: fields staff asked them to correct, or the Apple check-up). Show them
-            // what is asked, fresh, rather than a bare error; saving books the ride after all.
-            if(/FIX_FIRST/.test(_msg+' '+((err&&err.message)||''))){
-              const _cu=S.loggedIn||getSession();
-              if(_cu){await _fixLoad(_cu,true);if(await _fixGate(()=>submitReg()))return;}
-            }
+            if(await _fixRefused(err,()=>submitReg()))return;
             // Any is staff's to give (20261002160000): a type left as Any goes back to be chosen
             if(/PICK_TYPE/.test(_msg+' '+((err&&err.message)||''))){
               S.regBikeTypes=S.regBikeTypes.map(ty=>ty==='Any'?undefined:ty);S.regStep=2;renderRegister();
@@ -14685,6 +14689,10 @@ async function submitModifyBooking(){
 
   const sess=_sessDisp(S.selSession)||{day:'',session_date:S.selSession};
   if(sess.status&&!_sessLive(sess)){toast(t('errSelectSession'),'error');return;} // session closed under them mid-edit
+  // Riders added here are new bookings, which the server refuses while the account owes details (FIX_FIRST), and the
+  // ticket's Edit comes here past the event pick's request: asked now, before anything is sent. An edit that adds
+  // nobody goes through customer_booking_update alone, which does not refuse for them, so it is not held up.
+  if(newQty>existing.length&&await _fixGate(()=>submitModifyBooking()))return;
   // Riders added here are new bookings and carry the waiver like any other (see submitReg).
   if(newQty>existing.length&&_needsWaiver(sess)&&!_waiverAgreed()){
     _waiverBack();return;
@@ -14776,7 +14784,13 @@ async function submitModifyBooking(){
     const fail=res.find(r=>r&&r.error);
     // Some of the writes may have landed (the added riders, say) before one was refused: reload,
     // so a second press of the button starts from the booking as it is and does not add them twice.
-    if(fail){_bookRefused(fail.error,sess);await loadDataLight();renderRegister();return;}
+    // Refused for owed details the device did not know of: the request opens, and saving it runs this edit
+    // again, so the button is free for that even if the reload here has not finished.
+    if(fail){
+      if(await _fixRefused(fail.error,()=>submitModifyBooking()))S.regSubmitting=false;
+      else _bookRefused(fail.error,sess);
+      await loadDataLight();renderRegister();return;
+    }
     // Added rows: the DB assigns the real number and may capacity-coerce to waitlist —
     // the toast below must follow what actually landed (same rule as submitReg).
     if(addedEntries.length&&_addedRes&&_addedRes.data){

@@ -1424,7 +1424,7 @@ customers and force them even add it in the sign up page and all forms currently
 - **The database** (migration 20261007235800, runs after 20261007150000): `_customer_asks` asks `'emergency'` of every
   account whose `emergency_phone` is blank. That one rule opens the check-up at sign-in (`customer_fix_fields` ->
   `_commAskCheck` -> `_fixGate`, Log out the only other way off) and makes `customer_create_booking` refuse the
-  account's bookings meanwhile (FIX_FIRST, which `submitReg` answers with the check-up). Staff adds and walk-ins are
+  account's bookings meanwhile (FIX_FIRST, which `submitReg` and, for riders added to a booking, `submitModifyBooking` answer with the check-up through `_fixRefused`). Staff adds and walk-ins are
   not refused. `customer_fix_save` no longer clears the first contact for "I don't have one"; `customer_set_emergency`
   refuses a blank save (detail `em_required`, `errEmRequired`) unless a second contact moves up into its place.
 - **Create account** (`_suEmHtml`, `_suEmBoxes`, `_suEm2Read`, styles `.auth-em*`): the first contact required, the

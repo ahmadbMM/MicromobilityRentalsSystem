@@ -128,6 +128,103 @@ test('a booking the server refuses for owed details (FIX_FIRST) opens the reques
   expect(await page.evaluate('S.regSubmitting')).toBe(false);                 // Confirm is usable again once it is answered
 });
 
+test.describe('riders added while editing a booking', () => {
+  // A rider added to a booking is a new booking to the server, so it can be refused for owed details. The ticket's
+  // Edit goes straight to the form, past the event pick's request, and the sign-in check has already run: an account
+  // comes to owe the nationality with its first booking, or staff flag it, with nothing on the device knowing yet.
+  const held = {
+    id: 'h1', session_id: S1, session_day: 'Sunday', session_date: S1, queue_num: 5, name: 'Spec Rider', phone: '0500000001',
+    customer_id: 'c1', type_preference: 'Road', height: 175, size: 'M', status: 'waiting', paid: false, price: 75, registered_at: '2099-01-01T10:00:00Z',
+  };
+  const refused = { __rpcError: { status: 400, code: 'P0001', message: 'FIX_FIRST' } };
+  const addRider = `S.regQty=2;ensureBikeSizes();S.regBikeTypes=['Road','Road'];S.regBikeHeights=['175','170'];S.regRiderNames=['Spec Rider','Friend Two'];S.waiverOk=true;S._waiverSess='${S1}';submitModifyBooking()`;
+
+  // Standing on the edit form, reached by the ticket's own Edit, the sign-in check passed. The returned fixtures are read
+  // on each request, so a spec changes what the server answers from here on by writing to them.
+  async function editing(page: Page, extra: Record<string, unknown> = {}) {
+    const fx: Record<string, unknown> = {
+      sessions, queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_fix_fields': [], 'rpc:customer_fix_save': [], 'rpc:customer_booking_update': true,
+      'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: 'Jordan', gender: 'male', birth_date: '1990-01-01' }],
+      ...extra,
+    };
+    await stubSupabase(page, fx);
+    await loginCustomer(page, { id: 'c1' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction(`S._commAskedFor==='c1'&&S.dataLoaded`);
+    await page.evaluate(`_on_renderBookingTicket_1(null,null,'jcc','${S1}')`);
+    await expect.poll(() => page.evaluate('S.modifyEntryId')).toBe('h1');
+    return fx;
+  }
+  function calls(page: Page, name: string) {
+    const bodies: Record<string, unknown>[] = [];
+    page.on('request', r => { if (r.method() === 'POST' && r.url().includes(`/rpc/${name}`)) bodies.push(JSON.parse(r.postData() || '{}')); });
+    return bodies;
+  }
+
+  test('refused for details staff asked (FIX_FIRST): the request opens, and saving it finishes the edit', async ({ page }) => {
+    const fx = await editing(page, { 'rpc:customer_create_booking': refused });
+    const creates = calls(page, 'customer_create_booking');
+    fx['rpc:customer_fix_fields'] = ['email']; // the device's cached answer still says nothing is owed
+    await page.evaluate(addRider);
+    await expect(page.locator('#fix-gate .fx-item[data-fx="email"]')).toBeVisible();
+    await expect(page.locator('.toast', { hasText: 'FIX_FIRST' })).toHaveCount(0);
+    await expect.poll(() => page.evaluate('S.regSubmitting')).toBe(false);
+    expect(await page.evaluate('[S.modifyEntryId,S.regQty,S.regRiderNames[1]]')).toEqual(['h1', 2, 'Friend Two']); // the rider they added is not lost
+
+    fx['rpc:customer_create_booking'] = [{ id: 'n1', queue_num: 6, status: 'waiting' }];
+    fx['rpc:customer_fix_fields'] = [];
+    await page.fill('#fx-email', 'new@example.com');
+    await page.click('#fx-save');
+    await expect(page.locator('#fix-gate .fx-box')).toBeHidden();
+    await expect(page.locator('.toast', { hasText: /updated/i })).toBeVisible();
+    expect(creates).toHaveLength(2);
+    expect(await page.evaluate('[S.modifyEntryId,S.regStep]')).toEqual([null, 1]);
+  });
+
+  test('refused for the nationality the first booking made due: the profile page opens instead of an error', async ({ page }) => {
+    const fx = await editing(page, {
+      'rpc:customer_create_booking': refused,
+      'rpc:customer_profile': [{ id: 'c1', name: 'Spec Rider', email: 'spec@example.com', phone: '0500000001', nationality: null, gender: 'male', birth_date: '1990-01-01' }],
+    });
+    fx['rpc:customer_fix_fields'] = ['nationality'];
+    await page.evaluate(addRider);
+    await expect(page.locator('#pg-nat')).toBeVisible();
+    await expect(page.locator('.toast', { hasText: 'FIX_FIRST' })).toHaveCount(0);
+    expect(await page.evaluate(`typeof S._pg.next`)).toBe('function');          // saving it carries the edit on
+  });
+
+  test('details known to be owed are asked before anything is sent, so nothing half-saves', async ({ page }) => {
+    const fx = await editing(page, { 'rpc:customer_create_booking': [{ id: 'n1', queue_num: 6, status: 'waiting' }] });
+    const creates = calls(page, 'customer_create_booking'), updates = calls(page, 'customer_booking_update');
+    fx['rpc:customer_fix_fields'] = ['email'];
+    await page.evaluate(`S._fixCache=null;S.regBikeHeights=['180'];${addRider.replace(`['175','170']`, `['180','170']`)}`);
+    await expect(page.locator('#fix-gate .fx-item[data-fx="email"]')).toBeVisible();
+    await expect.poll(() => page.evaluate('S.regSubmitting')).toBe(false);
+    expect(creates).toHaveLength(0);
+    expect(updates).toHaveLength(0);
+  });
+
+  test('an edit that adds nobody is not held up: the server does not refuse it', async ({ page }) => {
+    const fx = await editing(page);
+    const updates = calls(page, 'customer_booking_update');
+    fx['rpc:customer_fix_fields'] = ['email'];
+    await page.evaluate(`S._fixCache=null;S.regBikeHeights=['180'];submitModifyBooking()`);
+    await expect(page.locator('.toast', { hasText: /updated/i })).toBeVisible();
+    await expect(page.locator('#fix-gate .fx-box')).toHaveCount(0);
+    expect(updates).toHaveLength(1);
+  });
+
+  test('when the request cannot be read, the refusal is said in words, never the server\'s code', async ({ page }) => {
+    const fx = await editing(page, { 'rpc:customer_create_booking': refused });
+    fx['rpc:customer_fix_fields'] = { __rpcError: { status: 500, code: 'XX000', message: 'down' } };
+    await page.evaluate(addRider);
+    await expect(page.locator('.toast', { hasText: 'still needs a few details' })).toBeVisible();
+    await expect(page.locator('.toast', { hasText: 'FIX_FIRST' })).toHaveCount(0);
+    await expect.poll(() => page.evaluate('S.regSubmitting')).toBe(false);
+  });
+});
+
 test('an email already on another account is named under the email box', async ({ page }) => {
   await rider(page, ['email'], { 'rpc:customer_fix_save': { __rpcError: { status: 409, code: '23505', message: 'email_taken' } } });
   await page.evaluate(`selectEvent('jcc')`);
