@@ -45,7 +45,7 @@ test.describe('the Privacy Notice', () => {
     await expect(box).toContainText('Frankfurt, Germany');
     await expect(box).toContainText('We will reply within 30 days');
     // Nationality from the first booking, birth date from the fourth, and before any booking for community members
-    const nat = box.locator('tr', { hasText: 'Nationality' });
+    const nat = box.locator('tr', { hasText: 'Nationality' }).first();
     await expect(nat).toContainText('Community members: required before booking');
     await expect(nat).toContainText('Which nationality you give never decides who can book.');
     await expect(box.locator('tr', { hasText: 'Date of birth' })).toContainText('Optional for your first three bookings, then required.');

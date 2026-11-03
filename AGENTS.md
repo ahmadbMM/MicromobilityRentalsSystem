@@ -1097,6 +1097,33 @@ location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` communit
   ONE_PER_SESSION, badge row). Session: `supabase/checks/defe-run-session-2026-10-22.sql`, run after the app is live.
   Tests: `tests/defe-run.spec.ts`.
 
+## Blood Donation event (2026-11-03)
+MoD Health Services and the Ministry of Sport at the Jeddah Corniche Circuit, Thu 5 Nov 2026 17:00-23:00 (moved from 15 Oct), open to
+everyone, free, no bikes. `ride_kind 'blood'` (event_kind community, open_to_all true, no approval), session id suffix `-bd`, location JCC, capacity
+100000 (no real cap; the staff form's 500 limit exempts it). Names use `_bld` / `bld` / `bld-`: `_bd*` is taken by the birthday helpers.
+- **One look, the whole way**: `body.bld-skin` (`_bldOn`, `_syncBldTheme`) from the event's first step to the page after booking, and the waiver, agreement
+  and rating pop-ups wherever they open; My Bookings' ticket wears `th-blood`. Everything reads the `--bld-*` tokens at the top of the block at the end of styles.css.
+- **Logos**: `_bldPlateHtml`, one image on a white plate (`assets/blood-partners.webp`, `-rtl` in Arabic and Urdu, the hosts first as the page reads). The Ministry of
+  Sport's guide wants its colour logo on white, never on a dark, patterned or foreign-coloured ground, min 1.8 cm: never put a decoration under the plate.
+- **Poster**: the short rules (`_bldSumHtml`) on the card, details step and tickets; the whole poster, retyped from the hospital's PDF in Arabic and English, is
+  `assets/blood-info.json` (allow-listed in functions/_middleware.js, which refuses other .json; bump `BLD_INFO`'s ?v= with any edit), read when the pop-up opens
+  (`showBloodInfo`), which must be confirmed before booking. `assets/blood-donation-poster.pdf` is the original. Other languages read the English.
+- **Registration**: `_bldPanelHtml` / `_bldNext`: name, mobile, email, blood type, birth date, nationality, all required, filled in from the account, only changes saved.
+  Then the poster, then the share gate naming King Fahd Armed Forces Hospital, MoD Health Services and the Ministry of Sport (`data_share_at`). Under 18s stop at
+  `_bldAgeModal`. No ID or Iqama number, ever: donors show theirs in person. Donors register themselves: `_noWalkin` and `_noAddRider` hold for it, and its row has no Edit or Reschedule.
+- **Agreement, not a waiver**: its own kind in `_waiverKind`, `BLD_WAIVER_VERSION` `blood-2026-11-v1` (the owner, 2026-11-03: "there is no activity involved"). It releases MicroMobility and
+  its staff only, never "partners": the hosts' medical team does the donation. Bump the version with any edit to `bldWaiverBody`. `_waiver_outdated` never refuses a kind it does not
+  know, so a rewording that must refuse the old one adds `blood` there and to `_waiver_min`. The activity waiver's words must not come back here.
+- **No price, anywhere**: `_sessFromPrice`, the review, the side summary, both tickets, the report's Payment column and tiles, the phone card's add-ons and the row's till item all skip it.
+  "Free" appears only in the reward's own words.
+- **Staff**: Blood type and Donated columns on Bookings and the phone card (`_bldBtEnsure` reads the list's accounts together, never in the sync; `_bldBtCell`, `_pii('bt')`), Donor and Checked in
+  in place of Rider and On Bike (`_bldQ`), Finished in place of Return Bike.
+- **Free ride**: staff tap Mark donated on a checked-in row (`_bldCell`, `staff_blood_donated`), which sets `donated_at` and makes one personal promo code `BD-...` (`promo_codes.blood_entry_id`):
+  100% off, one use, one calendar month. The ticket shows it (`_bldTkHtml`, `customer_blood_rewards`). `_blood_code_guard` refuses it on Carbon and off circuit rides, except Petromin nights for
+  Community or Petromin accounts. Taking it back retires the code unless it was used. The ticket says to ride another day: the poster says no hard exercise for 5 hours after donating.
+- **The database**: migration `20261103180000_blood_donation` (`_blood_entry_guard`: BLOOD_DETAILS, BLOOD_AGE, BLOOD_SHARE, ONE_PER_SESSION). Session:
+  `supabase/checks/blood-donation-session-2026-11-05.sql`, the moment the event becomes visible: nothing names it before that row exists, the Privacy Notice's row included. Tests: `tests/blood-donation.spec.ts`.
+
 ## Arena Heros Hybrid Race (2026-10-28)
 The owner: "create a session for this event and make it exclusive for community members Arena Heros Hybrid Race": Fri 6 Nov
 2026, 06:00-20:00 with a prayer break, teams of two only (two men or two women), Gymnation on Tahlia Street, 140 SAR per athlete

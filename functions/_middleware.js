@@ -43,7 +43,7 @@ export async function onRequest(context) {
     // configs stay blocked; the PWA manifest, the translation packs, the city lists and the
     // phone-number rules the staff "Looks off" check reads are app assets. The rules file was
     // blocked with the configs, so production answered it 404 and every phone passed the check.
-    (/\.json$/.test(path) && path !== '/manifest.json' && path !== '/assets/phone-rules.json' &&
+    (/\.json$/.test(path) && path !== '/manifest.json' && path !== '/assets/phone-rules.json' && path !== '/assets/blood-info.json' &&
       !/^\/lang\/[a-z-]{2,24}\.json$/.test(path) && !/^\/cities\/[a-z]{2}\.json$/.test(path)) ||
     path === '/app.src' || /\/app\.src\.html$/.test(path) ||            // the readable app source
     path.startsWith('/tests/') ||
