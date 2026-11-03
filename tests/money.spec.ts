@@ -127,6 +127,6 @@ test.describe('close-out totals (pure logic)', () => {
       ];
       return _cashCardCash('s9');
     })()`);
-    expect(split).toEqual({ card: 20, cash: 25 });
+    expect(split).toEqual({ card: 20, cash: 25, wallet: 0 });
   });
 });
