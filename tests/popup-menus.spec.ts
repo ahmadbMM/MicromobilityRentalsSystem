@@ -68,7 +68,9 @@ test('a click outside closes it, a click on an item acts and closes it', async (
   await expect(menu).toHaveCount(0);
   await pill(page).click();
   await expect(menu).toBeVisible();
+  // what the item sends, not the row afterwards: the stub's reload answers the fixture's unpaid row and can overwrite the paint
+  const paid = page.waitForRequest((r) => r.method() === 'PATCH' && r.url().includes('/queue_entries') && (r.postDataJSON() || {}).paid === true);
   await menu.locator('[role="menuitemradio"]', { hasText: 'Paid' }).click();
   await expect(menu).toHaveCount(0);
-  await expect.poll(() => page.evaluate(`(getQueue().find(e=>e.id==='q1')||{}).paid`)).toBe(true);
+  await paid;
 });
