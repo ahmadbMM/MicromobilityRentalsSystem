@@ -3755,6 +3755,7 @@
   "tkReservedSub": "L’équipe confirme chaque participant. Votre code apparaît dans Réservations une fois votre place confirmée.",
   "tkWlSub": "Aucune place n’est encore réservée. Gardez ce code : si une place se libère, l’équipe vous enregistre avec.",
   "tkShowTicket": "Voir mon billet",
+  "wlCollectAt": "Liste d’attente : retrait des vélos à partir de {0}",
   "wlOnList": "Sur liste d’attente",
   "wlLinePos": "n° {0} dans la file",
   "wlRowPos": "File : {0}",

@@ -1188,7 +1188,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tkBookedSub:'Show this code at the booth. It’s in Bookings too.',
   tkReservedTitle:'Reservation received',
   tkReservedSub:'Staff confirm each rider. Your code appears in Bookings once your place is confirmed.',
-  tkWlSub:'No place is held yet. Keep this code: if one opens, staff check you in with it.',
+  tkWlSub:'No place is held yet. Keep this code: if one opens, staff check you in with it.',wlCollectAt:'Waitlisted riders collect bikes from {0}',
   tkShowTicket:'Show my ticket',
   wlOnList:'On the waitlist',
   wlLinePos:'number {0} in line',
@@ -1788,7 +1788,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tkBookedSub:'اعرض هذا الرمز عند الكشك. تجده أيضاً في الحجوزات.',
   tkReservedTitle:'استلمنا طلب حجزك',
   tkReservedSub:'يؤكد الفريق كل مشارك على حدة. يظهر رمزك في الحجوزات بعد تأكيد مقعدك.',
-  tkWlSub:'لم يُحجز لك مكان بعد. احتفظ بهذا الرمز: إذا توفر مكان يسجّل الفريق حضورك به.',
+  tkWlSub:'لم يُحجز لك مكان بعد. احتفظ بهذا الرمز: إذا توفر مكان يسجّل الفريق حضورك به.',wlCollectAt:'استلام الدراجات لقائمة الانتظار من {0}',
   tkShowTicket:'عرض تذكرتي',
   wlOnList:'على قائمة الانتظار',
   wlLinePos:'رقم {0} في الانتظار',
@@ -5116,6 +5116,15 @@ function sessionCollectTime(sess){
   const st=_hhmmToMin(parts[0]);
   return st==null?'':_minToHhmm(Math.max(0,st-COLLECT_BEFORE_MIN));
 }
+// A waitlisted rider on a circuit night collects after the riders holding a place: a quarter of an
+// hour after the start, 9:15 PM on a 9 PM night (the owner, 2026-11-03). '' on every other ride.
+const WL_COLLECT_AFTER_MIN=15;
+function _wlCollectTime(sess){
+  if(_rideKind(sess)!=='jcc')return'';
+  const st=_hhmmToMin(_timeText((parseSlots(sess&&sess.bike_slots)||{})._time).split('-')[0].trim());
+  return st==null?'':_minToHhmm(st+WL_COLLECT_AFTER_MIN);
+}
+function _wlCollectHtml(sess){const c=_wlCollectTime(sess);return c?`<div class="wl-collect"><bdi>${esc(t('wlCollectAt').replace('{0}',fmt12h(c)))}</bdi></div>`:'';}
 function sessionTime(sess){
   if(!sess)return fmt12h('09:00 - 11:00');
   const s=parseSlots(sess.bike_slots);
@@ -10816,7 +10825,7 @@ function _todayCardHtml(cust){
     <span class="land-today-k">${esc(on?t(_needsBike(sess)?'onBikeNow':'tkStIn'):wl?t('wlOnList'):t('mrToday'))}</span>
     <span class="land-today-t"><bdi>${sessionTime(sess)}</bdi>${num?` <bdi dir="ltr" class="land-today-n">${esc(num)}</bdi>`:''}</span>
     <span class="land-today-v">${esc(_venueName(sess))} ${_sgChip(sess)}</span>
-    ${(!on&&!wl)?_cdHtml(sess,td,'land-today-cd'):''}
+    ${(!on&&!wl)?_cdHtml(sess,td,'land-today-cd'):wl?_wlCollectHtml(sess):''}
     <span class="land-today-go">${t('tkShowTicket')}</span>
   </button>`;
 }
@@ -13443,7 +13452,8 @@ function renderRegister(){
     // one that gathers it is the gathering itself, and the label has to say which. It was on
     // the Wallet pass and nowhere else, so a rider without an iPhone had to be told.
     const _gth=_gathersTime(_sess);
-    const _collect=(_needsBike(_sess)||_gth)&&_rideKind(_sess)!=='vlap'?fmt12h(sessionCollectTime(_sess)):''; // Victory Lap's doors time is in its times already
+    const _wlc=tkt.status==='waitlist'?_wlCollectTime(_sess):''; // a circuit night's waitlist collects later
+    const _collect=_wlc?fmt12h(_wlc):(_needsBike(_sess)||_gth)&&_rideKind(_sess)!=='vlap'?fmt12h(sessionCollectTime(_sess)):''; // Victory Lap's doors time is in its times already
     const _collectLbl=_gth?t('sessGatherTime'):t('sessCollectTime');
     const label=total>1?`${t(_needsBike(_sess)?'bike':'seatLabel')} ${idx+1} / ${total}`:'';
     // The state classes as on renderBookingTicket, under the event's colours (_tkThemeCls). What is
@@ -13470,6 +13480,7 @@ function renderRegister(){
       </div>`:tkt.status==='waitlist'?`
       <div class="ticket-top">
         <div class="ticket-num-label wl-loud">${t('wlOnList')}${_rk?` · ${esc(t('wlLinePos').replace('{0}',_rk))}`:''}</div>
+        ${_wlc?_wlCollectHtml(_sess):''}
         <div class="ticket-num">#${tkt.queueNum}</div>
         <div class="wl-note">${_rk?t('wlPosMsg').replace('{0}',String(_rk)):t('wlPosNoNumMsg')}</div>
         <div class="ticket-qr-wrap">${qrHtml}</div>
@@ -15070,6 +15081,7 @@ function renderBookingTicket(entries,opts){
         ${_vlChipHtml(e)}
       </div>
       ${bikeLine}
+      ${(e.status==='waitlist'&&!_allWl&&!past)?_wlCollectHtml(sess):''}
       ${(e.status==='done'&&e.rideDuration)?`<div class="cu-tr-dur"> ${t('colDuration')}: ${fmtDur(e.rideDuration)}</div>`:''}
       ${(e.status==='done'&&e.checkedInAt)?`<div class="cu-tr-in">${t('histInLabel')}: ${fmtStamp(e.checkedInAt)}</div>`:''}
       ${(e.status==='done'&&e.checkedOutAt)?`<div class="cu-tr-out">${t('histOutLabel')}: ${fmtStamp(e.checkedOutAt)}</div>`:''}
@@ -15111,7 +15123,7 @@ function renderBookingTicket(entries,opts){
       <div class="ticket-num-block">
         ${_tkLogo(sess)}
         ${_arH&&!_allWl?`<div class="ticket-num-label">${t('arHoldTitle')}</div>`:_noNum?'':_allWl
-          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${_rkG?` \u00b7 ${esc(t('wlLinePos').replace('{0}',_rkG))}`:''}</div>`
+          ?`<div class="ticket-num-label wl-loud">${t('wlOnList')}${_rkG?` \u00b7 ${esc(t('wlLinePos').replace('{0}',_rkG))}`:''}</div>${past?'':_wlCollectHtml(sess)}`
           :`<div class="ticket-num-label">${n>1?esc(_nc?_nPeople(n):_nBikes(n)):t(_isBlood(sess)?'bldNumLabel':_isRun(sess)?'runNumLabel':_isRace(sess)?'vlNumLabel':_comm?'satNumLabel':'queueNumLabel')}</div>`}
         <div class="ticket-num ${numCls}">${numDisplay}</div>
         ${wlNote}
@@ -15119,7 +15131,7 @@ function renderBookingTicket(entries,opts){
       <div class="ticket-right">
         ${(stForBadge==='waiting'||stForBadge==='waitlist'||(_comm&&!_ptn&&!_commPublished(sess)))?'':(stForBadge==='cancelled'?statusBadgeFor(primary):statusBadge(stForBadge,_nc))}
         ${past?'':_qrReady?ticketQR(bookingRef(primary),132):`<div class="qr-hold cu-w132"><span>${t(_arH?'arHoldNote':'ticketQrHold')}</span></div>`}
-        <div class="cu-tk-when">${_dw?`<strong class="tk-dw">${esc(_dw)}</strong><br>`:''}${dayLabel(primary.sessionDay)}<br>${shortDate(primary.sessionDate)}<br><bdi>${sessTime}</bdi>${past?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<br><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${past?'':`<br><span class="tk-venue">${esc(_venueName(sess))}</span>`}${_sgChip(sess)?'<br>'+_sgChip(sess):''}</div>
+        <div class="cu-tk-when">${_dw?`<strong class="tk-dw">${esc(_dw)}</strong><br>`:''}${dayLabel(primary.sessionDay)}<br>${shortDate(primary.sessionDate)}<br><bdi>${sessTime}</bdi>${(past||(_allWl&&_wlCollectTime(sess)))?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<br><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${past?'':`<br><span class="tk-venue">${esc(_venueName(sess))}</span>`}${_sgChip(sess)?'<br>'+_sgChip(sess):''}</div>
       </div>
     </div>
     <div class="cu-tk-body">

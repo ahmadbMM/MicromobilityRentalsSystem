@@ -3755,6 +3755,7 @@
   "tkReservedSub": "El equipo confirma a cada participante. Tu código aparece en Reservas cuando se confirme tu plaza.",
   "tkWlSub": "Aún no tienes plaza. Guarda este código: si se libera una, el equipo te registra con él.",
   "tkShowTicket": "Ver mi entrada",
+  "wlCollectAt": "Lista de espera: recogida de bicicletas desde las {0}",
   "wlOnList": "En lista de espera",
   "wlLinePos": "n.º {0} en la fila",
   "wlRowPos": "En fila: {0}",

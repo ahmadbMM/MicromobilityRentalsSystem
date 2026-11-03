@@ -3755,6 +3755,7 @@
   "tkReservedSub": "Kinukumpirma ng staff ang bawat rider. Lalabas ang code mo sa Mga Booking kapag kumpirmado na ang puwesto mo.",
   "tkWlSub": "Wala pang nakalaang puwesto. Itago ang code na ito: kapag may nabakante, ito ang gagamitin ng staff sa pag-check in sa iyo.",
   "tkShowTicket": "Ipakita ang ticket ko",
+  "wlCollectAt": "Mga nasa waitlist: kunin ang bisikleta mula {0}",
   "wlOnList": "Nasa waitlist",
   "wlLinePos": "ika-{0} sa pila",
   "wlRowPos": "Sa pila: {0}",

@@ -1353,6 +1353,16 @@ staff chooses", then, the same day, "show the meeting point immediately only hid
   file) and reads signed-out visitors' rides through `list_sessions(null, null)` too, since the table hides the held
   row. `tests/spot-reveal.spec.ts`.
 
+## A circuit night's waitlist collects later (2026-11-03)
+
+The owner: "show jcc waitlisted bookings that they collect their bikes on 9:15 and make it clear that they are
+waitlisted". `_wlCollectTime(sess)` is the start plus `WL_COLLECT_AFTER_MIN` (15): 9:15 PM on a 9 PM night, and '' on
+every other ride, which keeps its one time. `sessionCollectTime` stays the time for riders with a place. A waitlisted
+ticket (My Bookings, the card after booking) says it in `.wl-collect` under a solid amber `.wl-loud` band, a mixed
+party on the waitlisted rider's own row, and the landing's card on the night says it too. A session card before
+booking still says the ordinary time. The website mirrors it (`wlCollectTime` in lib/tickets.ts, TicketCard.tsx).
+`tests/jcc-waitlist-collect.spec.ts`.
+
 ## Tickets and Wallet passes in their event's colours (2026-10-06)
 
 The owner: "make all booking cards themed the same way the event card is themed" (picked: My Bookings tickets in

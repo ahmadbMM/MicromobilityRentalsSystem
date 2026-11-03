@@ -9600,6 +9600,12 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-swim
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.tk-wl{border:1.5px dashed var(--amber-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th:is(.tk-wl,.tk-past) .ticket-num{color:var(--night-ink-2);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.tk-wl .wl-note{color:var(--night-amber);}
+/* A circuit night's waitlist says so in a solid band, its own collection time under it (the owner, 2026-11-03). */
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc.tk-wl .wl-loud{width:fit-content;padding:7px 12px;border-radius:6px;background:var(--night-amber);color:var(--night);font-weight:800;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-jcc.tk-wl .wl-loud::before{background:currentColor;}
+body:not(.view-staff) .wl-collect{margin-top:8px;font-size:var(--fs-15);font-weight:700;line-height:1.35;color:var(--amber);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th .wl-collect{color:var(--night-amber);}
+body:not(.view-staff) .cu-tr-row .wl-collect{margin-top:4px;font-size:var(--fs-13);}
 /* the event's own mark where the MicroMobility lockup was (TK_MARK) */
 .ticket-card .tk-logo-ev img{display:inline;max-width:100%;object-fit:contain;object-position:left center;}
 html[dir="rtl"] .ticket-card .tk-logo-ev img{object-position:right center;}
