@@ -251,6 +251,7 @@ window.mmLoading=(function(){
 <nav class="tab-nav" id="customer-tab-nav" aria-label="Customer sections">
   <button class="tab-btn active" data-ctab="register" data-on-click='["setCustTab","register"]'>Reserve</button>
   <button class="tab-btn"        data-ctab="myrides"  data-on-click='["setCustTab","myrides"]'>Bookings</button>
+  <button class="tab-btn"        data-ctab="members"  data-on-click='["setCustTab","members"]' hidden>Community</button>
   <button class="tab-btn"        data-ctab="account"  data-on-click='["setCustTab","account"]'>Account</button>
 </nav>
 <div id="view-landing">
@@ -306,6 +307,10 @@ window.mmLoading=(function(){
       <button class="cust-bnav-btn" data-on-click='["setCustTab","myrides"]'>
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 7.6A1.6 1.6 0 0 1 5.2 6h13.6a1.6 1.6 0 0 1 1.6 1.6V10a2 2 0 0 0 0 4v2.4a1.6 1.6 0 0 1-1.6 1.6H5.2a1.6 1.6 0 0 1-1.6-1.6V14a2 2 0 0 0 0-4z"/><path d="M14.4 6.6v1.6M14.4 11.2v1.6M14.4 15.8v1.6"/></svg>
         <span id="bnav-myrides-lbl">Bookings</span>
+      </button>
+      <button class="cust-bnav-btn" id="bnav-members" data-on-click='["setCustTab","members"]' hidden>
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.6" r="3.2"/><path d="M3.2 19.6c.7-3.1 2.9-4.9 5.8-4.9s5.1 1.8 5.8 4.9"/><path d="M15.3 5.7a3.2 3.2 0 0 1 0 5.8"/><path d="M17.2 15.1c2 .6 3.2 2.2 3.7 4.5"/></svg>
+        <span id="bnav-members-lbl">Community</span>
       </button>
       <button class="cust-bnav-btn" data-on-click='["setCustTab","account"]'>
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.2" r="3.7"/><path d="M4.9 20.2c.8-3.8 3.6-5.9 7.1-5.9s6.3 2.1 7.1 5.9"/></svg>
@@ -855,7 +860,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   tabAccount:'Account',
   invBtn:'Invite a friend',invHint:'Sends your friend a message asking them to fill in the application form. Our staff will see that you invited them.',invMsg:'Hi! I ride with the MicroMobility community in Jeddah and I would love you to join us. Please fill in this form to apply: {0}',invErr:'We could not make your invitation. Please try again.',caInvitedBy:'Invited by',
   mbNew:'New',mbKudos:'Kudos: {0}',acTab:'Activities',acSub:'What members see on their Community page: run the vote, set challenges, check photos, welcome new members.',acVote:'Rider of the Month',acGoals:'Challenges',acSquads:'Squads',acPhotos:'Photos',acWelcome:'Welcome',acMissing:'Activities are not set up on the database yet.',acLoadErr:'Activities could not be loaded.',acNewRound:'New vote',acLabelEn:'Name (English), e.g. Rider of November',acLabelAr:'Name (Arabic)',acOpens:'First day',acCloses:'Last day',acTitleGive:'Title the winner gets (optional)',acNoTitle:'No title',acNeedAll:'Fill in both names and valid dates.',acVotes:'Votes',acVotesN:'{0} votes',acCrown:'Make winner',acWinner:'Winner: {0}',acNoVotes:'No votes yet.',acNewGoal:'New challenge or goal',acKind:'Type',acKindCh:'Challenge: each member\'s own count',acKindGo:'Community goal: everyone\'s total',acCounts:'What counts',acScopeSat:'Saturday rides',acScopeAll:'All community sessions',acTarget:'Target',acRewardEn:'Reward in English (optional)',acRewardAr:'Reward in Arabic (optional)',acWho:'Who has counts',acCountOf:'{0} of {1}',acNone:'Nothing here yet.',acMembersN:'{0} members, code {1}',acSure:'Tap again to confirm',acApprove:'Approve',acReject:'Reject and delete',acReported:'A member asked to take this down',acOnWall:'On the wall',acWaiting:'Waiting for a decision',acNewMembers:'Members who joined in the last 30 days',acBuddy:'Welcome buddy',acNoBuddy:'No buddy yet',
-  ttMineTitle:'Your title',ttMineSub:'Choose the one other community members see.',ttMineNone:'You do not have a title yet. Titles come from our staff and from your Saturday rides.',ttUntil:'Until {0}',ttHide:'Hide me from the members list',ttHideHint:'Other community members see your full name, your title, the badges our staff gave you and how many rides you have done. When hidden, you are left off the list.',ttSaveErr:'We could not save that. Please try again.',ttSaved:'Saved',mbTitle:'Community',mbSearch:'Search by name',mbNone:'No members match your search.',mbErr:'We could not load the members. Check your connection and try again.',mbRetry:'Try again',mbYou:'You',mbMore:'Show more',mbRides:'{0} rides',mbRide1:'1 ride',mbLoading:'Loading members...',mbBack:'Back to Account',mbClose:'Close',ttTab:'Titles',ttSub:'Titles members carry on their account and on the members list.',ttNew:'New title',ttGive:'Give title',ttAuto:'Automatic from this many Saturday rides',ttAutoHint:'Leave empty to give it by hand.',ttAutoMeta:'Automatic at {0} Saturday rides',ttHandMeta:'Given by staff',ttSearch:'Search members by name or phone',ttLastDay:'Last day (optional)',ttRetire:'Retire',ttRestore:'Restore',ttRetiredMeta:'Retired',ttNameReq:'Enter the name in English and in Arabic.',ttAutoBad:'Enter a whole number from 1 to 1000, or leave it empty.',ttEmpty:'No titles yet. Create the first one.',ttMissing:'Titles are not set up on the database yet.',ttLoadErr:'Titles could not be loaded.',ttNights:'{0} Saturday rides',ttSure:'Tap again to delete',ttLogSaved:'Title saved',ttLogGiven:'Title given',ttLogTaken:'Title taken back',ttLogDeleted:'Title deleted',
+  ttMineTitle:'Your title',ttMineSub:'Choose the one other community members see.',ttMineNone:'You do not have a title yet. Titles come from our staff and from your Saturday rides.',ttUntil:'Until {0}',ttHide:'Hide me from the members list',ttHideHint:'Other community members see your full name, your title, the badges our staff gave you and how many rides you have done. When hidden, you are left off the list.',ttSaveErr:'We could not save that. Please try again.',ttSaved:'Saved',mbTitle:'Community',mbSearch:'Search by name',mbNone:'No members match your search.',mbErr:'We could not load the members. Check your connection and try again.',mbRetry:'Try again',mbYou:'You',mbMore:'Show more',mbRides:'{0} rides',mbRide1:'1 ride',mbLoading:'Loading members...',mbClose:'Close',ttTab:'Titles',ttSub:'Titles members carry on their account and on the members list.',ttNew:'New title',ttGive:'Give title',ttAuto:'Automatic from this many Saturday rides',ttAutoHint:'Leave empty to give it by hand.',ttAutoMeta:'Automatic at {0} Saturday rides',ttHandMeta:'Given by staff',ttSearch:'Search members by name or phone',ttLastDay:'Last day (optional)',ttRetire:'Retire',ttRestore:'Restore',ttRetiredMeta:'Retired',ttNameReq:'Enter the name in English and in Arabic.',ttAutoBad:'Enter a whole number from 1 to 1000, or leave it empty.',ttEmpty:'No titles yet. Create the first one.',ttMissing:'Titles are not set up on the database yet.',ttLoadErr:'Titles could not be loaded.',ttNights:'{0} Saturday rides',ttSure:'Tap again to delete',ttLogSaved:'Title saved',ttLogGiven:'Title given',ttLogTaken:'Title taken back',ttLogDeleted:'Title deleted',
   accountTitle:'Account',accountSub:'Your season, your badges and your details.',
   saveAccountBtn:'Save changes',accountSaved:'Saved.',
   
@@ -1456,7 +1461,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   tabAccount:'الحساب',
   invBtn:'ادعُ صديقًا',invHint:'يرسل إلى صديقك رسالة تطلب منه تعبئة نموذج الطلب. سيرى فريقنا أنك دعوته.',invMsg:'مرحبًا! أركب مع مجتمع مايكروموبيليتي في جدة ويسعدني أن تنضم إلينا. يرجى تعبئة هذا النموذج للتقديم: {0}',invErr:'تعذّر إنشاء دعوتك. يرجى المحاولة مرة أخرى.',caInvitedBy:'بدعوة من',
   mbNew:'جديد',mbKudos:'التقدير: {0}',acTab:'الأنشطة',acSub:'ما يراه الأعضاء في صفحة المجتمع: أدر التصويت وحدد التحديات وراجع الصور ورحّب بالأعضاء الجدد.',acVote:'راكب الشهر',acGoals:'التحديات',acSquads:'الفرق',acPhotos:'الصور',acWelcome:'الترحيب',acMissing:'لم يتم إعداد الأنشطة في قاعدة البيانات بعد.',acLoadErr:'تعذّر تحميل الأنشطة.',acNewRound:'تصويت جديد',acLabelEn:'الاسم (بالإنجليزية)',acLabelAr:'الاسم (بالعربية)',acOpens:'أول يوم',acCloses:'آخر يوم',acTitleGive:'اللقب الذي يناله الفائز (اختياري)',acNoTitle:'بلا لقب',acNeedAll:'أدخل الاسمين وتواريخ صحيحة.',acVotes:'الأصوات',acVotesN:'{0} صوت',acCrown:'اجعله الفائز',acWinner:'الفائز: {0}',acNoVotes:'لا توجد أصوات بعد.',acNewGoal:'تحدٍ أو هدف جديد',acKind:'النوع',acKindCh:'تحدٍ: عدد كل عضو',acKindGo:'هدف المجتمع: مجموع الجميع',acCounts:'ما يُحتسب',acScopeSat:'رحلات السبت',acScopeAll:'كل أنشطة المجتمع',acTarget:'الهدف',acRewardEn:'الجائزة بالإنجليزية (اختياري)',acRewardAr:'الجائزة بالعربية (اختياري)',acWho:'من لديهم عدد',acCountOf:'{0} من {1}',acNone:'لا يوجد شيء هنا بعد.',acMembersN:'{0} أعضاء، الرمز {1}',acSure:'اضغط مرة أخرى للتأكيد',acApprove:'اعتماد',acReject:'رفض وحذف',acReported:'طلب عضو إزالة هذه الصورة',acOnWall:'على الحائط',acWaiting:'بانتظار القرار',acNewMembers:'الأعضاء المنضمون في آخر 30 يومًا',acBuddy:'رفيق الترحيب',acNoBuddy:'لا يوجد رفيق بعد',
-  ttMineTitle:'لقبك',ttMineSub:'اختر اللقب الذي يراه أعضاء المجتمع الآخرون.',ttMineNone:'ليس لديك لقب بعد. تأتي الألقاب من فريقنا ومن رحلات السبت التي تشارك فيها.',ttUntil:'حتى {0}',ttHide:'إخفائي من قائمة الأعضاء',ttHideHint:'يرى أعضاء المجتمع الآخرون اسمك الكامل ولقبك والشارات التي منحك إياها فريقنا وعدد رحلاتك. عند الإخفاء لن تظهر في القائمة.',ttSaveErr:'تعذّر الحفظ. يرجى المحاولة مرة أخرى.',ttSaved:'تم الحفظ',mbTitle:'المجتمع',mbSearch:'البحث بالاسم',mbNone:'لا يوجد أعضاء يطابقون بحثك.',mbErr:'تعذّر تحميل الأعضاء. تحقق من اتصالك وحاول مرة أخرى.',mbRetry:'حاول مرة أخرى',mbYou:'أنت',mbMore:'عرض المزيد',mbRides:'{0} رحلة',mbRide1:'رحلة واحدة',mbLoading:'جارٍ تحميل الأعضاء...',mbBack:'العودة إلى الحساب',mbClose:'إغلاق',ttTab:'الألقاب',ttSub:'ألقاب يحملها الأعضاء في حساباتهم وفي قائمة الأعضاء.',ttNew:'لقب جديد',ttGive:'منح اللقب',ttAuto:'تلقائي عند بلوغ هذا العدد من رحلات السبت',ttAutoHint:'اتركه فارغًا لمنحه يدويًا.',ttAutoMeta:'تلقائي عند {0} رحلة سبت',ttHandMeta:'يمنحه الفريق',ttSearch:'ابحث عن الأعضاء بالاسم أو الجوال',ttLastDay:'آخر يوم (اختياري)',ttRetire:'إيقاف',ttRestore:'استعادة',ttRetiredMeta:'موقوف',ttNameReq:'أدخل الاسم بالإنجليزية والعربية.',ttAutoBad:'أدخل عددًا صحيحًا من 1 إلى 1000 أو اتركه فارغًا.',ttEmpty:'لا توجد ألقاب بعد. أنشئ أول لقب.',ttMissing:'لم يتم إعداد الألقاب في قاعدة البيانات بعد.',ttLoadErr:'تعذّر تحميل الألقاب.',ttNights:'{0} رحلة سبت',ttSure:'اضغط مرة أخرى للحذف',ttLogSaved:'تم حفظ اللقب',ttLogGiven:'تم منح اللقب',ttLogTaken:'تم سحب اللقب',ttLogDeleted:'تم حذف اللقب',
+  ttMineTitle:'لقبك',ttMineSub:'اختر اللقب الذي يراه أعضاء المجتمع الآخرون.',ttMineNone:'ليس لديك لقب بعد. تأتي الألقاب من فريقنا ومن رحلات السبت التي تشارك فيها.',ttUntil:'حتى {0}',ttHide:'إخفائي من قائمة الأعضاء',ttHideHint:'يرى أعضاء المجتمع الآخرون اسمك الكامل ولقبك والشارات التي منحك إياها فريقنا وعدد رحلاتك. عند الإخفاء لن تظهر في القائمة.',ttSaveErr:'تعذّر الحفظ. يرجى المحاولة مرة أخرى.',ttSaved:'تم الحفظ',mbTitle:'المجتمع',mbSearch:'البحث بالاسم',mbNone:'لا يوجد أعضاء يطابقون بحثك.',mbErr:'تعذّر تحميل الأعضاء. تحقق من اتصالك وحاول مرة أخرى.',mbRetry:'حاول مرة أخرى',mbYou:'أنت',mbMore:'عرض المزيد',mbRides:'{0} رحلة',mbRide1:'رحلة واحدة',mbLoading:'جارٍ تحميل الأعضاء...',mbClose:'إغلاق',ttTab:'الألقاب',ttSub:'ألقاب يحملها الأعضاء في حساباتهم وفي قائمة الأعضاء.',ttNew:'لقب جديد',ttGive:'منح اللقب',ttAuto:'تلقائي عند بلوغ هذا العدد من رحلات السبت',ttAutoHint:'اتركه فارغًا لمنحه يدويًا.',ttAutoMeta:'تلقائي عند {0} رحلة سبت',ttHandMeta:'يمنحه الفريق',ttSearch:'ابحث عن الأعضاء بالاسم أو الجوال',ttLastDay:'آخر يوم (اختياري)',ttRetire:'إيقاف',ttRestore:'استعادة',ttRetiredMeta:'موقوف',ttNameReq:'أدخل الاسم بالإنجليزية والعربية.',ttAutoBad:'أدخل عددًا صحيحًا من 1 إلى 1000 أو اتركه فارغًا.',ttEmpty:'لا توجد ألقاب بعد. أنشئ أول لقب.',ttMissing:'لم يتم إعداد الألقاب في قاعدة البيانات بعد.',ttLoadErr:'تعذّر تحميل الألقاب.',ttNights:'{0} رحلة سبت',ttSure:'اضغط مرة أخرى للحذف',ttLogSaved:'تم حفظ اللقب',ttLogGiven:'تم منح اللقب',ttLogTaken:'تم سحب اللقب',ttLogDeleted:'تم حذف اللقب',
   accountTitle:'الحساب',accountSub:'موسمك وأوسمتك وبياناتك.',
   saveAccountBtn:'حفظ التغييرات',accountSaved:'تم الحفظ.',
   
@@ -2038,6 +2043,7 @@ function setLang(lang,_fromUrl){
   document.querySelectorAll('#customer-tab-nav .tab-btn').forEach(b=>{
     if(b.dataset.ctab==='register')b.textContent=t('tabReserve');
     if(b.dataset.ctab==='myrides')b.textContent=t('tabMyRides');
+    if(b.dataset.ctab==='members')b.textContent=t('mbTitle');
     if(b.dataset.ctab==='account')b.textContent=t('tabAccount');
   });
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
@@ -9344,7 +9350,7 @@ function _infoMember(){
   Promise.resolve(commAccess()).then(a=>{cur.busy=false;cur.at=Date.now();if(S._infoMem!==cur)return;cur.ok=a===true;if(cur.ok)_infoRepaint();},()=>{cur.busy=false;});
   return false;
 }
-function _infoRepaint(){if(S.view==='landing')renderLandingAvail();else if(S.view==='customer'&&S.custTab==='register')renderRegister();}
+function _infoRepaint(){_commNavPaint();if(S.view==='landing')renderLandingAvail();else if(S.view==='customer'&&S.custTab==='register')renderRegister();}
 function _infoShowEv(ev){return _own(INFO_EV,ev)&&(!_infoMembersOnlyEv(ev)||(ev==='petromin'?_pmHeld():_infoMember()));} // Petromin Days: its holders (2026-10-12)
 function _infoShowSess(s){return !!s&&(!_infoMembersOnlySess(s)||_rideKind(s)==='vlap'||_infoMember()||(_rideKind(s)==='petromin'&&_pmHeld()));} // Victory Lap's card is everyone's, and so is its Details
 function _infoAboutBtn(ev){return _infoShowEv(ev)?`<button type="button" class="lec-about ab-${ev}" data-on-click="${_on('showEventInfo',ev)}">${t('infoAbout')}</button>`:'';}
@@ -11176,7 +11182,7 @@ function _stabFocus(tab){
 function renderCustomerTabs(){
   // On the event picker no panel is open yet; the picker IS step one of Reserve, so
   // that's the section that reads as current.
-  const _act=S.view==='landing'?'register':S.custTab==='members'?'account':S.custTab; // Members is reached from My Account
+  const _act=S.view==='landing'?'register':S.custTab;
   document.querySelectorAll('#customer-tab-nav .tab-btn').forEach(b=>{
     const _on=b.dataset.ctab===_act;
     b.classList.toggle('active',_on);
@@ -11188,7 +11194,7 @@ function renderCustomerTabs(){
   document.getElementById('tab-members').classList.toggle('active',S.custTab==='members');
   
   document.querySelectorAll('.cust-bnav-btn').forEach((btn,i)=>{
-    const tabs=['register','myrides','account'];
+    const tabs=['register','myrides','members','account'];
     const _on=tabs[i]===_act;
     btn.classList.toggle('active',_on);
     if(_on)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
@@ -11197,6 +11203,21 @@ function renderCustomerTabs(){
   const rl=document.getElementById('bnav-reserve-lbl');if(rl)rl.textContent=t('tabReserve');
   const ml=document.getElementById('bnav-myrides-lbl');if(ml)ml.textContent=t('tabMyRides');
   const al=document.getElementById('bnav-account-lbl');if(al)al.textContent=t('tabAccount');
+  const cl=document.getElementById('bnav-members-lbl');if(cl)cl.textContent=t('mbTitle');
+  _commNavPaint();
+}
+// The Community tab, beside Bookings and Account, for community members only (the owner, 2026-11-03): hidden until
+// the members gate says yes. The page itself sends anyone else away, and the database answers members only.
+function _commNavOn(){
+  const c=S.loggedIn||getSession();if(!c||!c.id)return false;
+  if(typeof sb==='undefined'||!sb){if(!S._commNavWait){S._commNavWait=setTimeout(()=>{S._commNavWait=null;_commNavPaint();},500);}return false;} // too early in boot: ask again
+  return _infoMember();
+}
+function _commNavPaint(){
+  const on=_commNavOn(),top=document.querySelector('#customer-tab-nav [data-ctab="members"]'),bot=document.getElementById('bnav-members'),grid=document.getElementById('cust-bnav-grid');
+  if(top)top.hidden=!on;
+  if(bot)bot.hidden=!on;
+  if(grid)grid.classList.toggle('with-comm',on);
 }
 
 const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
@@ -15863,7 +15884,6 @@ function _ttMinePaint(){
     :`<div class="am-meta">${t('ttMineNone')}</div>`}
     <label class="tt-hide"><input type="checkbox" id="tt-hide"${a.hidden?' checked':''} data-on-change="${_on('_ttHide',_P('checked'))}"><span>${t('ttHide')}</span></label>
     <div class="am-meta">${t('ttHideHint')}</div>
-    <button type="button" class="btn-secondary tt-open" data-on-click="${_on('setCustTab','members')}">${t('mbTitle')}</button>
     <button type="button" class="btn-primary tt-open tt-invite" data-on-click="${_on('_invShare')}">${t('invBtn')}</button>
     <div class="am-meta">${t('invHint')}</div>`;
   host.insertAdjacentElement('afterbegin',card);
@@ -15896,13 +15916,12 @@ function renderMembers(){
   if(!cust){host.innerHTML='';return;}
   const m=S._mb&&S._mb.forId===cust.id?S._mb:null;
   _mbLoad(cust);
-  const back=`<button type="button" class="btn-secondary mb-back" data-on-click="${_on('setCustTab','account')}">${t('mbBack')}</button>`;
   const head=`<h1 class="page-title">${t('mbTitle')}</h1>`;
   if(!m){host.innerHTML=head+`<div class="am-meta">${t('mbLoading')}</div>`;return;}
   if(m.denied){host.innerHTML='';setCustTab('register');return;} // only members have this page: anyone else leaves its address too
   if(!m.rows){host.innerHTML=head+`<div class="am-meta">${t('mbErr')}</div><button type="button" class="btn-primary mb-back" data-on-click="${_on('_mbRetry')}">${t('mbRetry')}</button>`;return;}
   host.innerHTML=head+`<div id="hub-nav" class="hub-nav"></div><div id="hub-top"></div><div id="mb-main"><input id="mb-q" type="search" class="search-input mb-q" aria-label="${esc(t('mbSearch'))}" placeholder="${esc(t('mbSearch'))}" value="${esc(S._mbQ||'')}" data-on-input="${_on('_mbQInput',_P('value'))}">
-    <div id="mb-rows"></div>`+back+`</div><div id="hub-body" hidden></div>`;
+    <div id="mb-rows"></div></div><div id="hub-body" hidden></div>`;
   _mbRowsPaint();
   _hubLoad();
 }

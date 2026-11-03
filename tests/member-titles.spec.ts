@@ -34,7 +34,7 @@ const rpcBodies = (page: Page, fn: string) => {
   return out;
 };
 async function rider(page: Page, fx: Fixtures = {}) {
-  await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:customer_my_titles': mine, 'rpc:member_directory': directory, 'rpc:customer_title_prefs': { ok: true }, ...fx });
+  await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:community_member': true, 'rpc:customer_my_titles': mine, 'rpc:member_directory': directory, 'rpc:customer_title_prefs': { ok: true }, ...fx });
   await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
   await page.goto('/');
   await waitForSb(page);
@@ -126,10 +126,42 @@ test.describe('@customer:account friend invite', () => {
 });
 
 test.describe('@customer:members members list', () => {
+  test('a member has the Community tab in the menus, between Bookings and Account, and it reads as current', async ({ page }) => {
+    await rider(page);
+    await page.evaluate(`setCustTab('account')`);
+    const tops = page.locator('#customer-tab-nav .tab-btn'), bot = page.locator('#bnav-members');
+    await page.waitForFunction('S._infoMem&&S._infoMem.ok');
+    await expect(tops.nth(2)).toHaveAttribute('data-ctab', 'members');
+    expect(await tops.nth(2).evaluate((e) => (e as HTMLElement).hidden)).toBe(false);
+    expect(await bot.evaluate((e) => (e as HTMLElement).hidden)).toBe(false);
+    await page.evaluate(`setCustTab('members')`);
+    await expect(tops.nth(2)).toHaveAttribute('aria-current', 'page');
+    await expect(bot).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator('#tab-members button', { hasText: 'Back to Account' })).toHaveCount(0);
+    await expect(page.locator('#customer-tab-nav [data-ctab="account"]')).not.toHaveAttribute('aria-current', 'page');
+  });
+
+  test('anyone else never sees the tab: not a member, signed out, or after signing out', async ({ page }) => {
+    await rider(page, { 'rpc:community_member': false });
+    await page.evaluate(`setCustTab('account')`);
+    await page.waitForFunction('S._infoMem&&!S._infoMem.busy');
+    for (const sel of ['#customer-tab-nav [data-ctab="members"]', '#bnav-members']) await expect(page.locator(sel)).toBeHidden();
+    await expect(page.locator('#cust-bnav-grid')).not.toHaveClass(/with-comm/);
+  });
+
+  test('a member signing out loses the tab', async ({ page }) => {
+    await rider(page);
+    await page.evaluate(`setCustTab('account')`);
+    await page.waitForFunction('S._infoMem&&S._infoMem.ok');
+    await page.evaluate(`doLogout(true);_commNavPaint()`);
+    expect(await page.locator('#bnav-members').evaluate((e) => (e as HTMLElement).hidden)).toBe(true);
+    expect(await page.locator('#customer-tab-nav [data-ctab="members"]').evaluate((e) => (e as HTMLElement).hidden)).toBe(true);
+  });
+
   test('the list opens from the account, searches by name, and a card shows title, rides and badges', async ({ page }) => {
     await rider(page);
-    await account(page);
-    await page.locator('#tt-mine .tt-open:not(.tt-invite)').click();
+    await page.waitForFunction('S._infoMem&&S._infoMem.ok');
+    await page.locator('#customer-tab-nav [data-ctab="members"], #bnav-members').locator('visible=true').first().click();
     await expect(page).toHaveURL(/\/members/);
     await expect(page.locator('#tab-members .mb-row')).toHaveCount(3);
     await expect(page.locator('#tab-members .mb-row').first()).toContainText('You');

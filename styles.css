@@ -1730,6 +1730,8 @@
       backdrop-filter:blur(14px);
       padding-bottom:env(safe-area-inset-bottom);display:none;}
     .cust-bnav-grid{display:grid;grid-template-columns:repeat(3,1fr);}
+    .cust-bnav-grid.with-comm{grid-template-columns:repeat(4,1fr);}
+    #customer-tab-nav .tab-btn[hidden],#cust-bottom-nav .cust-bnav-btn[hidden]{display:none!important;}
     .cust-bnav-btn{
       display:flex;flex-direction:column;align-items:center;justify-content:center;
       gap:4px;padding:10px 4px;background:none;border:none;cursor:pointer;

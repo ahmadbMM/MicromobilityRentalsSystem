@@ -497,8 +497,8 @@ variables) and popped once (`BDG_CHEER`).
 Migration 20261102200000. `titles` (admins' catalogue: English + Arabic name, a `BDG_COLORS` colour, `auto_rides`),
 `customer_titles` (staff give, optional `expires_on`) and `member_prefs` (the member's shown title and `hidden`, written only
 through `customer_title_prefs`). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
-counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`, and it alone leads to
-the Community page (`/members`, not `/community`, which is a staff address; `renderMembers`); a non-member is sent away.
+counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`. The Community page (`/members`, not `/community`, which is a staff
+address; `renderMembers`) has its own tab in both menus, shown only to members (`_commNavPaint`, on the members gate's `_infoMember`); a non-member opening the address is sent away.
 `member_directory` is the only read that names another person: members only, hidden and blacklisted accounts left out, no
 account id, so the card (`_mbOpen`) is drawn from the row in hand, and it carries staff-given badges only because ride-earned
 ones are worked out on the rider's own device. Anything added to it is new sharing: update the privacy notice's row too.
