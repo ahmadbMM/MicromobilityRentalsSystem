@@ -320,6 +320,7 @@ window.mmLoading=(function(){
 </nav>
 
 
+<div id="vol-page"></div>
 <div id="view-staff">
   <!-- Small screens: the rail is a menu behind this bar, not a strip that has to be scrolled
        sideways to reach Analytics and History. The bar is the burger icon alone; its name is
@@ -653,6 +654,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   
   
+  roleVolunteer:'Volunteer (blood donation only)',volTitle:'Blood donation check-in',volScanBtn:'Scan ticket',volSearchPh:'Mobile or booking number',volFindBtn:'Find',volSearchHint:'Type the whole mobile number or the booking number.',volNotFound:'No booking found for this event.',volClosed:'Volunteer access is not open right now.',volSlow:'Too many searches. Wait a few minutes, or scan the ticket.',volNotYours:'Another person made this mark. Ask a staff member.',volDonatedFirst:'Undo the donation first.',volStIn:'Checked in',volStOut:'Not checked in',volUndoDonated:'Undo donated',volNoWindow:'No blood donation session is set up for volunteers.',
   roleAdmin:'Admin',roleFrontDesk:'Front Desk',roleLeader:'Ride leader',roleMechanic:'Mechanic',roleCashier:'Cashier',roleOwner:'Owner (read-only)',pinApproveTitle:'Confirm with your PIN: {0}',pinWhatPrice:'Price change',adminOnlyMsg:'Admin only.',
   authBack:'Sign in to book a ride and see your tickets.',authSignupSub:'Book your rides and keep your tickets in one place.',oauthNoAccount:'No account is linked to this Google or Apple sign-in, and new accounts are no longer made with Google or Apple. Create your account below with your email and a password.',authNewTitle:'New to MicroMobility?',authHaveTitle:'Already have an account?',
   authLogin:'Sign in',authSignup:'Create account',authLoginBtn:'Sign in',authSignupBtn:'Create account',genderLabel:'Gender',genderMale:'Male',genderFemale:'Female',errSelectGender:'Choose your gender.',
@@ -1258,6 +1260,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   
   
+  roleVolunteer:'متطوع (التبرع بالدم فقط)',volTitle:'تسجيل حضور التبرع بالدم',volScanBtn:'مسح التذكرة',volSearchPh:'رقم الجوال أو رقم الحجز',volFindBtn:'بحث',volSearchHint:'اكتب رقم الجوال كاملًا أو رقم الحجز.',volNotFound:'لا يوجد حجز لهذه الفعالية.',volClosed:'صلاحية المتطوعين غير مفتوحة الآن.',volSlow:'عمليات بحث كثيرة. انتظر بضع دقائق أو امسح التذكرة.',volNotYours:'سجّل هذا شخص آخر. اطلب المساعدة من أحد الموظفين.',volDonatedFirst:'ألغِ تسجيل التبرع أولًا.',volStIn:'تم تسجيل الحضور',volStOut:'لم يسجل حضوره',volUndoDonated:'إلغاء تسجيل التبرع',volNoWindow:'لا توجد جلسة تبرع بالدم مهيأة للمتطوعين.',
   roleAdmin:'مدير',roleFrontDesk:'موظف استقبال',roleLeader:'قائد الجولة',roleMechanic:'ميكانيكي',roleCashier:'كاشير',roleOwner:'المالك (قراءة فقط)',pinApproveTitle:'أكّد برمزك السري: {0}',pinWhatPrice:'تغيير السعر',adminOnlyMsg:'للمدير فقط.',
   authBack:'سجّل الدخول لتحجز جولتك وتصل إلى تذاكرك.',authSignupSub:'احجز جولاتك واحتفظ بتذاكرك في مكان واحد.',oauthNoAccount:'لا يوجد حساب مرتبط بتسجيل الدخول هذا عبر Google أو Apple، ولم يعد إنشاء الحسابات الجديدة عبر Google أو Apple متاحًا. أنشئ حسابك أدناه ببريدك الإلكتروني وكلمة مرور.',authNewTitle:'جديد في مايكروموبيليتي؟',authHaveTitle:'لديك حساب بالفعل؟',
   authLogin:'تسجيل الدخول',authSignup:'إنشاء حساب',authLoginBtn:'تسجيل الدخول',authSignupBtn:'إنشاء حساب',genderLabel:'الجنس',genderMale:'ذكر',genderFemale:'أنثى',errSelectGender:'الرجاء اختيار جنسك.',
@@ -2100,15 +2103,15 @@ function setLang(lang,_fromUrl){
 // Six roles (2026-09-28): admin and front desk as before, and ride leader, mechanic, cashier and
 // owner (a read-only viewer). The database enforces admin alone (is_admin); a role's sections are
 // this page's, narrowed by the account's own lists. An unknown role reads as the smaller one asked.
-const STAFF_ROLES=['admin','manager','frontdesk','leader','mechanic','cashier','owner']; // manager: 2026-10-09 (Team's presets), sections below, no admin rights
+const STAFF_ROLES=['admin','manager','frontdesk','leader','mechanic','cashier','owner','volunteer']; // manager: 2026-10-09 (Team's presets), sections below, no admin rights
 function _roleNorm(v,dflt){return STAFF_ROLES.includes(v)?v:(dflt||'frontdesk');}
-function _roleLabel(r){return t({admin:'roleAdmin',manager:'roleManager',frontdesk:'roleFrontDesk',leader:'roleLeader',mechanic:'roleMechanic',cashier:'roleCashier',owner:'roleOwner'}[r]||'roleFrontDesk');}
+function _roleLabel(r){return t({admin:'roleAdmin',manager:'roleManager',frontdesk:'roleFrontDesk',leader:'roleLeader',mechanic:'roleMechanic',cashier:'roleCashier',owner:'roleOwner',volunteer:'roleVolunteer'}[r]||'roleFrontDesk');}
 function isAdmin(){return S.staffRole==='admin';}
 // Front Desk mode shows only the desk's own sections: Sales, Bookings and Riders (the partner
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={manager:['dashboard','queue','cashier','inventory','workshop','customers','community','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','customers','community','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','customers','community','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','customers','community','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
@@ -2131,10 +2134,12 @@ function _pref(k,fb){const v=_prefAll();return _own(v,k)&&v[k]!=null?v[k]:fb;}
 // The section a staffer chose to start on (Settings > Personal), when it is one they may open.
 function _startTab(){const p=_pref('start','');return p&&_deskTabOk(p)?p:'';}
 function setStaffRole(role){
+  const wasVol=S.staffRole==='volunteer';
   S.staffRole=_roleNorm(role,'admin');
   try{localStorage.setItem('cq_role',S.staffRole);}catch(e){}
   renderTopbarRight();
-  if(S.view==='staff')setStaffTab(S.staffTab);
+  if(S.view==='staff'&&(wasVol||S.staffRole==='volunteer'))goStaff(); // the volunteer's page and the panel are different ways in
+  else if(S.view==='staff')setStaffTab(S.staffTab);
 }
 // ── Staff Supabase Auth (SECURE_AUTH): the DB trusts the Auth session, not the client-side PIN ──
 // Normalize any phone entry to one canonical form (Saudi +966 default) so every format
@@ -4110,6 +4115,7 @@ function _coalesce(get,set,run){
 }
 async function loadData(showLoader=false){
   if(!sb){S.dataLoaded=true;return;}
+  if(S.staffRole==='volunteer'&&_rtStaffDevice()){S.dataLoaded=true;_lastLoadOk=true;_refsLoaded=true;return;} // the database gives this account none of it: each donor comes from staff_volunteer_find
   if(_loadInFlight){
     return _coalesce(()=>_loadQueued,v=>{_loadQueued=v;},
       ()=>_loadInFlight.catch(()=>{}).then(()=>loadData(showLoader)));
@@ -8753,6 +8759,83 @@ async function _bldMark(id,on){
   toast(on?t('bldToastOn').replace('{0}',r.data.code||''):t('bldToastOff'),'success');
   try{renderStaffQueue();}catch(_){}
 }
+// ── The Volunteer role (2026-11-05, migration 20261105090000) ──
+// A staff account the database does not call staff: is_staff() is false, so this page is all it has. A donor comes from
+// a ticket or a whole mobile or booking number, one search at a time, never from a list. The server decides everything:
+// which session, when, and which marks are this volunteer's to undo. The free-ride code never reaches this page.
+let _volRows=null,_volMsg='';
+function _volEnter(){
+  document.body.classList.add('vol-mode');
+  try{localStorage.setItem('cq_staff','1');}catch(e){}
+  showView('staff');
+  try{const m=document.getElementById('auth-modal');if(m){m.style.display='none';m.classList.remove('as-page');}document.body.classList.remove('auth-page');}catch(e){}
+  _volPaint();
+  if(window.mmLoading)window.mmLoading.hide(); // no data load to wait for
+  if(S._staffAuthed&&S._mustChangePwd)openStaffPwdModal(true);
+}
+function _volPaint(){
+  const el=document.getElementById('vol-page');if(!el)return;
+  const q=document.getElementById('vol-q'),keep=q?q.value:'';
+  el.innerHTML=`<div class="vol-wrap">
+    <div class="vol-head"><div class="vol-title">${esc(t('volTitle'))}</div>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("lockStaff")}">${esc(t('lockBtn'))}</button></div>
+    <button type="button" id="vol-scan" class="btn-primary vol-go" data-on-click="${_on("openScanModal")}">${esc(t('volScanBtn'))}</button>
+    <div class="vol-find">
+      <input id="vol-q" type="text" inputmode="tel" dir="ltr" maxlength="20" autocomplete="off" value="${esc(keep)}" placeholder="${esc(t('volSearchPh'))}" aria-label="${esc(t('volSearchPh'))}" data-on-keydown="${_on("_volKey",_EV)}">
+      <button type="button" id="vol-find" class="btn-sm btn-secondary" data-on-click="${_on("_volSearch")}">${esc(t('volFindBtn'))}</button>
+    </div>
+    <div id="vol-msg" class="vol-msg" role="status">${esc(_volMsg)}</div>
+    <div id="vol-rows">${(_volRows||[]).map(_volRow).join('')}</div>
+  </div>`;
+}
+function _volRow(r){
+  const b=(k,fn,on,cls)=>`<button type="button" class="btn-sm ${cls||'btn-secondary'}" data-on-click="${_on(fn,r.id,on)}">${esc(t(k))}</button>`;
+  const acts=!r.checked_in?b('checkInBtn','_volCheckin',true,'btn-primary')
+    :r.donated?(r.mine_donated?b('volUndoDonated','_volDonated',false):'')
+    :b('bldMark','_volDonated',true,'btn-primary')+(r.mine_in?b('undoCheckinBtn','_volCheckin',false):'');
+  return`<div class="vol-row" data-id="${esc(r.id)}">
+    <div class="vol-name">${esc(r.name||'')}${r.number!=null?` <span class="vol-num">#${esc(String(r.number))}</span>`:''}</div>
+    <div class="vol-chips"><span class="rr-chip ${r.checked_in?'rr-yes':'rr-no'}">${esc(t(r.checked_in?'volStIn':'volStOut'))}</span>${r.donated?` <span class="rr-chip rr-yes">${esc(t('bldColDonated'))}</span>`:''}</div>
+    <div class="vol-acts">${acts}</div>
+  </div>`;
+}
+function _volSay(err){
+  const m=String((err&&err.message)||'');
+  return t(/VOL_CLOSED/.test(m)?'volClosed':/VOL_SLOW/.test(m)?'volSlow':/VOL_BAD_SEARCH/.test(m)?'volSearchHint':/VOL_NOT_YOURS/.test(m)?'volNotYours':/VOL_DONATED_FIRST/.test(m)?'volDonatedFirst':/BOOKING_NOT_FOUND|BAD_BOOKING_STATE/.test(m)?'volNotFound':/BLOOD_CODE_USED/.test(m)?'bldErrUsed':/BLOOD_NOT_CHECKED_IN/.test(m)?'bldErrIn':/BLOOD_NO_ACCOUNT/.test(m)?'bldErrAcct':'errConnection');
+}
+async function _volFind(args){
+  let r;try{r=await sb.rpc('staff_volunteer_find',args);}catch(e){r={error:e};}
+  if(r.error){_volRows=null;_volMsg=_volSay(r.error);return false;}
+  _volRows=Array.isArray(r.data)?r.data:[];_volMsg=_volRows.length?'':t('volNotFound');
+  return _volRows.length>0;
+}
+function _volKey(ev){if(ev&&ev.key==='Enter'){ev.preventDefault();_volSearch();}}
+async function _volSearch(){
+  const i=document.getElementById('vol-q');
+  const v=String(i&&i.value||'').trim().replace(/[\u0660-\u0669]/g,d=>d.charCodeAt(0)-0x660).replace(/[\u06F0-\u06F9]/g,d=>d.charCodeAt(0)-0x6F0);
+  const ref=_bookingRefId(v),digits=v.replace(/[\s()+-]/g,'');
+  let args=null;
+  if(ref){const m=v.match(/^mmc-(\d+)-/i);args={p_ref:ref,p_ref_num:m?Number(m[1]):null};}
+  else if(/^\d{1,6}$/.test(digits))args={p_number:Number(digits)};
+  else if(/^\d{7,15}$/.test(digits))args={p_mobile:digits};
+  if(!args){_volRows=null;_volMsg=t('volSearchHint');_volPaint();return;}
+  await _volFind(args);_volPaint();
+}
+async function _volScanned(txt){
+  const m=txt.match(/^MMC-(?:(\d+)-)?([0-9a-zA-Z][0-9a-zA-Z-]{3,7})$/);
+  if(!m){_scanBanner('err',t('volNotFound'));return;}
+  const hit=await _volFind({p_ref:m[2].toLowerCase(),p_ref_num:m[1]==null?null:Number(m[1])});
+  if(!hit){_scanBanner('err',_volMsg);_volPaint();return;}
+  closeScanModal(false);_volPaint();
+}
+async function _volMark(fn,id,on,apply){
+  let r;try{r=await sb.rpc(fn,{p_entry_id:id,p_on:!!on});}catch(e){r={error:e};}
+  if(r.error||!r.data||!r.data.ok){_volMsg=_volSay(r.error);_volPaint();return;}
+  const row=(_volRows||[]).find(x=>x.id===id);if(row&&!r.data.noop)apply(row);
+  _volMsg='';_volPaint();
+}
+function _volCheckin(id,on){return _volMark('staff_volunteer_checkin',id,on,x=>{x.checked_in=!!on;x.mine_in=!!on;});}
+function _volDonated(id,on){return _volMark('staff_volunteer_donated',id,on,x=>{x.donated=!!on;x.mine_donated=!!on;});}
 // Every running event: Run for Her and the Defe run share the runner step, number and rating.
 function _isRun(s){const k=s&&_rideKind(s);return k==='runher'||k==='defe5k';}
 // ── A session with no bike says nothing about cycling (the owner, 2026-10-18) ──
@@ -11376,6 +11459,8 @@ async function _bikeArrived(code,src){
 // staff sign-in (PIN, or email+password under SECURE_AUTH) - same rule as the /staff URL.
 function staffAccessClick(){if(_isLiveCustomerHost()){location.href=STAFF_ORIGIN+'/';return;}let on=false;try{on=localStorage.getItem('cq_staff')==='1';}catch(e){}if(on)goStaff();else openPinModal();} // blocked site data throws: the tap still opens (bug hunt 2026-10-28)
 function goStaff(){
+  if(S.staffRole==='volunteer'){_volEnter();return;}
+  document.body.classList.remove('vol-mode');
   const _onQueue=S.view==='staff'&&S.staffTab==='queue'; // the queue is already open: not a new opening
   try{localStorage.setItem('cq_staff','1');}catch(e){} // blocked site data throws, and the panel never opened (bug hunt 2026-10-28)
   _staffTapCookie(true); // this phone's bike-tag taps come to the staff app, not the bike's page
@@ -11443,6 +11528,7 @@ function setCustTab(tab){
   try{_forceRatingPrompt();}catch(e){} // a pending post-ride rating is mandatory on any customer tab
 }
 function setStaffTab(tab){
+  if(S.staffRole==='volunteer')return; // a volunteer has one page and no sections
   if(tab==='sessions'){S.queueView='sessions';tab='queue';} // Sessions merged into the Bookings tab
   if(tab==='waitlist'){S.queueView='waitlist';tab='queue';} // Waitlist lives there too (third pill)
   if(tab==='handover'){S.queueView=GIVE_BIKE_STEP?'handover':'bookings';tab='queue';} // the bikes side of the desk: a fourth pill
@@ -29168,7 +29254,7 @@ async function _tmInvite(){
     if(!await _pinApprove(t('tmInvite')))return;
     try{r=await sb.rpc('staff_invite',{p_email:email,p_name:name,p_role:role,p_password:pwd});}catch(e){r={error:e};}
   }finally{T.invBusy=false;const g2=document.getElementById('tm-inv-go');if(g2)g2.disabled=false;}
-  if(r&&r.error){toast(_rpcAbsent(r.error)?t('dbPending'):_rpcSay(r.error),'error');return;}
+  if(r&&r.error){toast(_rpcAbsent(r.error)?t('dbPending'):/NO_VOLUNTEER_SESSION/.test(String(r.error.message||''))?t('volNoWindow'):_rpcSay(r.error),'error');return;}
   T.inv={email:'',name:'',role:'frontdesk'};
   logAction(t('tmInvitedLog').replace('{0}',email).replace('{1}',_roleLabel(role)));
   // staff_invite writes Auth's own tables (AGENTS.md): read back that the account can sign in before its
@@ -35827,6 +35913,7 @@ function _onScanPayload(raw){
   const now=Date.now();
   if(txt===_scanLastTxt&&now-_scanLastAt<2500)return;
   _scanLastTxt=txt;_scanLastAt=now;
+  if(S.staffRole==='volunteer'){_volScanned(txt);return;}
   const el=document.getElementById('scan-msg');
   const say=(msg,color)=>{if(el){el.textContent=msg;el.style.color=color||'var(--muted)';}_scanExcept=null;_scanExceptRender();_scanDetailsPaint();
     _scanBanner(color==='var(--green)'?'ok':color==='#ffb347'||color==='var(--muted-l)'?'warn':color==='var(--red)'?'err':'',msg);};

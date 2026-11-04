@@ -6139,5 +6139,20 @@
   "promoTellChip": "Sabihan",
   "promoNudgeManyMsg": "May puwesto na ang mga rider na ito. Padalhan ang bawat isa ng WhatsApp sa sarili nilang wika.",
   "bldTypesLine": "Iba-ibang uri. Iisang layunin.",
-  "bldYourType": "Iyong uri"
+  "bldYourType": "Iyong uri",
+  "roleVolunteer": "Volunteer (blood donation lang)",
+  "volTitle": "Check-in ng blood donation",
+  "volScanBtn": "I-scan ang ticket",
+  "volSearchPh": "Mobile o booking number",
+  "volFindBtn": "Hanapin",
+  "volSearchHint": "Ilagay ang buong mobile number o ang booking number.",
+  "volNotFound": "Walang booking para sa event na ito.",
+  "volClosed": "Hindi pa bukas ang access ng volunteer ngayon.",
+  "volSlow": "Masyadong maraming paghahanap. Maghintay ng ilang minuto o i-scan ang ticket.",
+  "volNotYours": "Ibang tao ang gumawa ng markang ito. Magtanong sa staff.",
+  "volDonatedFirst": "I-undo muna ang donation.",
+  "volStIn": "Naka-check in",
+  "volStOut": "Hindi pa naka-check in",
+  "volUndoDonated": "I-undo ang donation",
+  "volNoWindow": "Walang blood donation session na nakahanda para sa mga volunteer."
 }

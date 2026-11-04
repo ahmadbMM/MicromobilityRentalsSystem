@@ -6139,5 +6139,20 @@
   "promoTellChip": "Avisar",
   "promoNudgeManyMsg": "Estos ciclistas ya tienen plaza. Envía a cada uno un WhatsApp en su idioma.",
   "bldTypesLine": "Tipos diferentes. Un propósito.",
-  "bldYourType": "Tu tipo"
+  "bldYourType": "Tu tipo",
+  "roleVolunteer": "Voluntario (solo donación de sangre)",
+  "volTitle": "Registro de donación de sangre",
+  "volScanBtn": "Escanear entrada",
+  "volSearchPh": "Móvil o número de reserva",
+  "volFindBtn": "Buscar",
+  "volSearchHint": "Escribe el móvil completo o el número de reserva.",
+  "volNotFound": "No hay ninguna reserva para este evento.",
+  "volClosed": "El acceso de voluntarios no está abierto ahora.",
+  "volSlow": "Demasiadas búsquedas. Espera unos minutos o escanea la entrada.",
+  "volNotYours": "Otra persona hizo esta marca. Pregunta a un miembro del personal.",
+  "volDonatedFirst": "Primero deshaz la donación.",
+  "volStIn": "Registrado",
+  "volStOut": "Sin registrar",
+  "volUndoDonated": "Deshacer donación",
+  "volNoWindow": "No hay ninguna sesión de donación preparada para voluntarios."
 }

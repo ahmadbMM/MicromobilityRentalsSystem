@@ -11086,3 +11086,24 @@ body.view-staff .sess-summary-chip.th-blood.active-sess,body.view-staff .sess-lc
 .bld-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;}
 .bld-cl{white-space:nowrap;}
 .bld-head,body .landing-event-card.bld-card,#confirm-modal .bld-info-box,body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-blood{border-top:4px solid #03FE8A;}
+
+/* The Volunteer role (2026-11-05): one page, no panel behind it. */
+#vol-page{display:none;}
+body.vol-mode #vol-page{display:block;}
+body.vol-mode #view-staff{display:none!important;}
+body.vol-mode #topbar-right{visibility:hidden;}
+.vol-wrap{box-sizing:border-box;max-width:480px;margin:0 auto;padding:20px 16px 40px;}
+.vol-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;}
+.vol-title{font-size:20px;font-weight:700;}
+.vol-go{display:block;width:100%;min-height:52px;}
+.vol-find{display:flex;gap:8px;margin-top:12px;}
+.vol-find input{flex:1 1 auto;min-width:0;min-height:44px;}
+.vol-find .btn-sm{min-height:44px;}
+.vol-msg{min-height:20px;margin:12px 0;color:var(--muted);}
+.vol-row{padding:14px;margin-bottom:10px;background:var(--s1);border:1px solid var(--border);}
+.vol-name{font-size:17px;font-weight:700;overflow-wrap:anywhere;}
+.vol-num{color:var(--muted);font-weight:500;}
+.vol-chips{margin:8px 0 12px;}
+.vol-acts{display:grid;gap:8px;}
+.vol-acts .btn-sm{min-height:44px;width:100%;}
+body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vol-mode #scan-modal #scan-batch,body.vol-mode #scan-modal #scan-express-hint,body.vol-mode #scan-modal #scan-tally{display:none;}

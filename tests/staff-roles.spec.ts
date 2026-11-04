@@ -55,7 +55,7 @@ test.describe('roles', () => {
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="ambassadors"]')).toBeHidden();
   });
 
-  test('the Team page offers the seven roles, shows a role its own sections, and an owner starts read-only', async ({ page }) => {
+  test('the Team page offers the eight roles, shows a role its own sections, and an owner starts read-only', async ({ page }) => {
     await boot(page, {
       'rpc:staff_team_list': [
         { user_id: 'u-me', email: 'me@x.sa', role: 'admin', modules_view: null, modules_edit: null, is_me: true },
@@ -66,7 +66,7 @@ test.describe('roles', () => {
     await page.evaluate(`setStaffTab('team')`);
     const acct = page.locator('.tm-acct[data-acct="u-mech"]');
     await expect(acct).toBeVisible();
-    await expect(acct.locator('select.tm-role option')).toHaveCount(7); // Manager since 2026-10-09
+    await expect(acct.locator('select.tm-role option')).toHaveCount(8); // Manager since 2026-10-09, Volunteer since 2026-11-05
     await expect(acct.locator('select.tm-role option').nth(6)).toHaveText('Owner (read-only)');
     await expect(acct.locator('.tm-chip[data-sec^="view:"]')).toHaveCount(2); // inventory, workshop
     await expect(acct.locator('.tm-chip[data-sec="view:inventory"]')).toBeVisible();
