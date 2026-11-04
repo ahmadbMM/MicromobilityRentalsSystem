@@ -6111,5 +6111,8 @@
   "acNoBuddy": "Aún sin compañero",
   "cwKSale": "Compra en la tienda",
   "cwKSaleBack": "Devuelto de una compra",
-  "cwErrEdit": "Parte de este recibo se pagó con un monedero. Reembólsalo y vuelve a registrarlo."
+  "cwErrEdit": "Parte de este recibo se pagó con un monedero. Reembólsalo y vuelve a registrarlo.",
+  "rmSessBtn": "Mensajes de la salida",
+  "nsFilledFrom": "Rellenado desde {0}",
+  "sessPriceBookedNote": "Las reservas nuevas pagan el precio nuevo. {0} reservas sin pagar mantienen su precio."
 }

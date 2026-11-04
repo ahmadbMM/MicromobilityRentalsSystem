@@ -84,7 +84,7 @@ test.describe('@staff:sessions the run’s breakfast spot and announce time', ()
     await expect(page.locator('#es-reveal-note')).toContainText('Breakfast spot hidden until');
     await page.getByRole('button', { name: 'Save Changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
-    expect(patches.find((p) => 'reveal_at' in p)).toEqual({ reveal_at: '2099-10-16T17:00:00.000Z' });
+    expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-16T17:00:00.000Z' });
     expect(patches.some((p) => p.breakfast_name === 'Harbour Cafe' && p.location === 'JYC')).toBe(true);
   });
 });

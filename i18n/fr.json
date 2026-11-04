@@ -6111,5 +6111,8 @@
   "acNoBuddy": "Pas encore de parrain",
   "cwKSale": "Achat en boutique",
   "cwKSaleBack": "Retour d’un achat",
-  "cwErrEdit": "Une partie de ce reçu a été payée avec un portefeuille. Remboursez-le puis saisissez-le à nouveau."
+  "cwErrEdit": "Une partie de ce reçu a été payée avec un portefeuille. Remboursez-le puis saisissez-le à nouveau.",
+  "rmSessBtn": "Messages de la sortie",
+  "nsFilledFrom": "Rempli depuis {0}",
+  "sessPriceBookedNote": "Les nouvelles réservations paient le nouveau prix. {0} réservations non payées gardent leur prix."
 }

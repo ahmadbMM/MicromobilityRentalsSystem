@@ -6111,5 +6111,8 @@
   "acNoBuddy": "Ainda sem companheiro",
   "cwKSale": "Compra na loja",
   "cwKSaleBack": "Devolvido de uma compra",
-  "cwErrEdit": "Parte deste recibo foi paga com uma carteira. Reembolse-o e registe-o de novo."
+  "cwErrEdit": "Parte deste recibo foi paga com uma carteira. Reembolse-o e registe-o de novo.",
+  "rmSessBtn": "Mensagens do passeio",
+  "nsFilledFrom": "Preenchido a partir de {0}",
+  "sessPriceBookedNote": "As novas reservas pagam o novo preço. {0} reservas por pagar mantêm o preço."
 }

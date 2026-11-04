@@ -6111,5 +6111,8 @@
   "acNoBuddy": "Wala pang buddy",
   "cwKSale": "Binili sa shop",
   "cwKSaleBack": "Ibinalik mula sa binili",
-  "cwErrEdit": "Bahagi ng resibong ito ay binayaran mula sa wallet. I-refund ito at i-ring up muli."
+  "cwErrEdit": "Bahagi ng resibong ito ay binayaran mula sa wallet. I-refund ito at i-ring up muli.",
+  "rmSessBtn": "Mga mensahe ng ride",
+  "nsFilledFrom": "Pinunan mula sa {0}",
+  "sessPriceBookedNote": "Bagong presyo ang babayaran ng mga bagong booking. {0} booking na hindi pa bayad ang mananatili sa dati nilang presyo."
 }

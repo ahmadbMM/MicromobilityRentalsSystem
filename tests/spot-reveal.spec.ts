@@ -115,7 +115,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await waitForSb(page);
   }
 
-  test('the editor keeps a Riyadh time, says until when, and writes it alone', async ({ page }) => {
+  test('the editor keeps a Riyadh time and says until when', async ({ page }) => {
     await staff(page, [sat({ meet_url: MEET, breakfast_name: 'Harbour Cafe' })]);
     const patches = writes(page, 'PATCH');
     await page.evaluate(`setStaffTab('sessions');startEditSession('${SAT}')`);
@@ -127,8 +127,8 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await expect(page.locator('#es-reveal-clr')).toBeVisible();
     await page.getByRole('button', { name: 'Save Changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
-    // 20:00 in Riyadh is 17:00 UTC; the meeting point and breakfast are written where they always were
-    expect(patches.find((p) => 'reveal_at' in p)).toEqual({ reveal_at: '2099-10-23T17:00:00.000Z' });
+    // 20:00 in Riyadh is 17:00 UTC; the meeting point and breakfast go in the same write
+    expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-23T17:00:00.000Z' });
     expect(patches.some((p) => p.meet_url === MEET && p.breakfast_name === 'Harbour Cafe')).toBe(true);
   });
 
@@ -141,7 +141,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await page.locator('#es-reveal').fill('2099-10-24T07:00'); // the ride gathers at 6 that morning
     await page.getByRole('button', { name: 'Save Changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
-    expect(patches.find((p) => 'reveal_at' in p)).toEqual({ reveal_at: '2099-10-24T04:00:00.000Z' });
+    expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: '2099-10-24T04:00:00.000Z' });
     await expect(page.locator('#es-reveal')).toHaveCount(0); // the save has finished and closed the editor
     patches.length = 0;
     await page.evaluate(`S.sessions=S.sessions.map(s=>s.id==='${SAT}'?{...s,reveal_at:'2099-10-24T04:00:00.000Z'}:s);startEditSession('${SAT}')`);
@@ -150,7 +150,7 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
     await expect(page.locator('#es-reveal')).toHaveValue('');
     await page.getByRole('button', { name: 'Save Changes' }).click();
     await expect.poll(() => patches.filter((p) => 'reveal_at' in p).length).toBe(1);
-    expect(patches.find((p) => 'reveal_at' in p)).toEqual({ reveal_at: null });
+    expect(patches.find((p) => 'reveal_at' in p)).toMatchObject({ reveal_at: null });
   });
 
   test('a new Saturday ride carries the time, and each week of a repeat is told as long ahead of its day', async ({ page }) => {

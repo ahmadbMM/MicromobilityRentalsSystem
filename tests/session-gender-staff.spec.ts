@@ -111,7 +111,7 @@ test.describe('@staff:sessions pool gender', () => {
     await page.evaluate(`startEditSession('${SWIM_F}')`);
     await pick(page, form, 'Men only').click();
     await page.locator(`${form} .ss-form-acts .btn-primary`).click();
-    await expect.poll(() => patches.filter((p) => 'gender_only' in p)).toEqual([{ gender_only: 'male' }]);
+    await expect.poll(() => patches.filter((p) => 'gender_only' in p).map((p) => p.gender_only)).toEqual(['male']);
   });
 
   test('back to Mixed writes null; a mixed pool session can be made women only', async ({ page }) => {
@@ -120,13 +120,13 @@ test.describe('@staff:sessions pool gender', () => {
     await page.evaluate(`setStaffTab('sessions');startEditSession('${SWIM_F}')`);
     await pick(page, '#sess-edit-form', 'Mixed').click();
     await page.locator('#sess-edit-form .ss-form-acts .btn-primary').click();
-    await expect.poll(() => patches.filter((p) => 'gender_only' in p)).toEqual([{ gender_only: null }]);
+    await expect.poll(() => patches.filter((p) => 'gender_only' in p).map((p) => p.gender_only)).toEqual([null]);
     await expect.poll(() => page.evaluate('S.editSessionId')).toBeNull();
     await page.evaluate(`startEditSession('${SWIM_X}')`);
     await expect(pick(page, '#sess-edit-form', 'Mixed')).toHaveAttribute('aria-pressed', 'true');
     await pick(page, '#sess-edit-form', 'Women only').click();
     await page.locator('#sess-edit-form .ss-form-acts .btn-primary').click();
-    await expect.poll(() => patches.filter((p) => 'gender_only' in p)).toEqual([{ gender_only: null }, { gender_only: 'female' }]);
+    await expect.poll(() => patches.filter((p) => 'gender_only' in p).map((p) => p.gender_only)).toEqual([null, 'female']);
   });
 
   test('made women only with a man booked on it: staff are told, and his place stands', async ({ page }) => {
@@ -141,7 +141,7 @@ test.describe('@staff:sessions pool gender', () => {
     await page.evaluate(`setStaffTab('sessions');startEditSession('${SWIM_X}')`);
     await pick(page, '#sess-edit-form', 'Women only').click();
     await page.locator('#sess-edit-form .ss-form-acts .btn-primary').click();
-    await expect.poll(() => patches.filter((p) => 'gender_only' in p)).toEqual([{ gender_only: 'female' }]);
+    await expect.poll(() => patches.filter((p) => 'gender_only' in p).map((p) => p.gender_only)).toEqual(['female']);
     // one man; the woman and the account with no gender on file are not counted
     await expect(page.locator('.toast.warning').filter({ hasText: 'Booked already and of the other gender: 1.' })).toBeVisible();
     expect(bookings).toHaveLength(0); // nobody is moved or cancelled by the save
