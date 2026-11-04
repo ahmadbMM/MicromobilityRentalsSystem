@@ -19323,6 +19323,13 @@ async function _sessMoveRefs(from,to,ctx){
 // One write to a ride. A database without a newer column names it (42703, PGRST204): each field then goes by itself, so that
 // column costs the ride nothing else, as the separate writes did. A real refusal stands.
 function _sessWrite(id,patch){return sb.from('sessions').update(patch).eq('id',id);}
+// A move the server made, on what this device holds until the next read. The bookings come back with the reload.
+function _sessMoveLocal(from,to){
+  (S.cashSales||[]).forEach(r=>{if(r.session_id===from)r.session_id=to;});
+  (S.riders||[]).forEach(r=>{if(r.session_id===from)r.session_id=to;});
+  (S._caApps||[]).forEach(a=>{if(a.invited_session===from)a.invited_session=to;});
+  (S.custBadges||[]).forEach(x=>{if(x.session_id===from)x.session_id=to;});
+}
 async function _sessPatch(id,patch){
   const miss=e=>/42703|PGRST204/.test(String((e&&e.code)||'')+' '+String((e&&e.message)||''));
   const r=await _sessWrite(id,patch);
@@ -19404,7 +19411,15 @@ async function _saveSessionEdit(){
   const prevDate=sess.session_date||sess.id;const prevDay=sess.day;
 
   try{
+    // The move in one transaction on the server, every table naming the ride (the staff review, 2026-10-28, S02-core2-01; 20261104160000).
+    // A database before it takes the writes below.
+    let _onServer=false;
     if(newId!==oldId){
+      const _sm=await sb.rpc('staff_move_session',{p_from:oldId,p_to_id:newId,p_date:newDate,p_exact:false});
+      if(_sm&&_sm.error&&!_rpcAbsent(_sm.error)){_writeErr(_sm,'move session');return;}
+      if(_sm&&!_sm.error&&_sm.data&&_sm.data.ok===true){_onServer=true;newId=_sm.data.id||newId;_sessMoveLocal(oldId,newId);}
+    }
+    if(newId!==oldId&&!_onServer){
       // The date it is moving to may already hold a session; it takes the next number after
       // it rather than being refused. Each step gates the next: a silently-failed insert used
       // to be followed by moving every booking onto a session id that does not exist and then
@@ -19538,7 +19553,13 @@ async function _saveSessionEdit(){
       // What the edit wrote goes back from the snapshot, every column of it; the rest of the row
       // is taken as it is NOW, so a list published or a place taken since the edit stands.
       const _back=_sessEditCols(_snap);
-      if(newId!==oldId){
+      if(newId!==oldId&&_onServer){
+        // Back on its own id, or refused if that date has been re-used since. Then what the edit wrote, as for any edit.
+        const _um=await sb.rpc('staff_move_session',{p_from:currentId,p_to_id:oldId,p_date:String(prevDate).slice(0,10),p_exact:true});
+        if(_writeErr(_um,'undo date move')){await loadData();renderSessions();return false;}
+        _sessMoveLocal(currentId,oldId);
+        if(_writeErr(await _sessWrite(oldId,_back),'undo date move')){await loadData();renderSessions();return false;}
+      }else if(newId!==oldId){
         // The forward path was fixed for exactly this sequence and the suite guards it: if the
         // old date has been re-used since, the insert fails with a duplicate key. Unchecked,
         // the two writes behind it then moved every booking onto the OTHER session that now
@@ -32746,7 +32767,7 @@ function _igFetch(){
 // card, and 259 of them queued 259 repaints of the whole list (the page froze ~30 s on a desktop, a phone's tab died).
 function _igForReport(paint){
   if(!sb)return;
-  if(!S._igBusy&&S._igAt&&Date.now()-S._igAt<(S._igErr?3e4:3e5))return;
+  if(!S._igBusy&&S._igAt&&Date.now()-S._igAt<(S._igErr?3e4:_rrTtl()))return;
   const P=S._igPaints||(S._igPaints=new Set());if(P.has(paint))return;P.add(paint);
   _igFetch().then(()=>{P.delete(paint);paint();},()=>P.delete(paint));
 }
@@ -49914,9 +49935,12 @@ function _commBoard(){
 // database" and waited the five minutes). Not at once: the tab's repaint asks for the read again, and an
 // answer that fails at once would go round in a loop.
 const BDG_RETRY_MS=3e4;
+// The whole read of badges and Instagram counts, on every staff device and on a quota once exceeded: half an hour apart while the
+// live channel brings each change, five minutes apart when it is down (S07-community2-16). A rejoin reads them afresh.
+function _rrTtl(){return _refLive?18e5:3e5;}
 function _bdgMissing(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||(/badges/.test(m)&&/does not exist|schema cache/.test(m));}
 async function _bdgLoad(force){
-  if(!sb||S._bdgBusy||(!force&&S._bdgAt&&Date.now()-S._bdgAt<(S._bdgErr?BDG_RETRY_MS:3e5)))return;
+  if(!sb||S._bdgBusy||(!force&&S._bdgAt&&Date.now()-S._bdgAt<(S._bdgErr?BDG_RETRY_MS:_rrTtl())))return;
   S._bdgBusy=true;S._bdgAt=Date.now();
   const was=_bdgSig();let fail=null;
   try{
@@ -50288,7 +50312,7 @@ async function _bdgDelete(id){
 // without the table leaves S.igRows unset and nothing is drawn. A read that failed otherwise is
 // S._igErr, said in the dialog and tried again after BDG_RETRY_MS, as the badges (2026-10-05).
 async function _igLoad(force){
-  if(!sb||S._igBusy||(!force&&S._igAt&&Date.now()-S._igAt<(S._igErr?BDG_RETRY_MS:3e5)))return;
+  if(!sb||S._igBusy||(!force&&S._igAt&&Date.now()-S._igAt<(S._igErr?BDG_RETRY_MS:_rrTtl())))return;
   const was=_igSig();
   await _igFetch(); // the read itself is shared with the report builders
   if(S.view==='staff'&&(_pplOn('accounts')||_pplOn('applications')||_pplOn('learning'))&&_igSig()!==was)renderCommunity();
@@ -54977,6 +55001,15 @@ function _rtRefMerge(kind,p){
     else if(i>=0)tg[i]={...tg[i],...p.row};else tg.push(p.row);
     S.tags=tg;return true;
   }
+  // Badges and Instagram counts travel as tags do (the staff review, 2026-10-28, S07-community2-16; 20261104160000).
+  if(kind==='customer_badges'){
+    const was=[p.old,p.row].filter(Boolean);if(!was.length)return false;
+    _bdgDrop(was);if(!del&&p.row)_bdgMerge([p.row]);return true;
+  }
+  if(kind==='customer_ig_followers'){
+    const id=(p.row&&p.row.customer_id)||(p.old&&p.old.customer_id);if(!id||!S.igRows)return false;
+    if(del)S.igRows.delete(id);else if(p.row)S.igRows.set(id,p.row);return true;
+  }
   return false;
 }
 function setupRefRealtime(retry){
@@ -54985,7 +55018,7 @@ function setupRefRealtime(retry){
   try{if(_refCh){const c=_refCh;_refCh=null;sb.removeChannel(c);}}catch(_){}
   try{
     const ch=_refCh=sb.channel('staff-ref',{config:{private:true}});
-    ['customers','customer_tags','tags'].forEach(kind=>ch.on('broadcast',{event:kind},m=>{
+    ['customers','customer_tags','tags','customer_badges','customer_ig_followers'].forEach(kind=>ch.on('broadcast',{event:kind},m=>{
       let changed=false;try{changed=_rtRefMerge(kind,m&&m.payload);}catch(e){}
       if(m&&m.payload)_rtNote('ref',{kind,p:m.payload}); // replayed over a list fetch that was in flight (_refFetch)
       if(changed&&S.view==='staff'&&!(typeof window!=='undefined'&&window.__noWiden))_rtPaint();
@@ -54993,7 +55026,7 @@ function setupRefRealtime(retry){
     ch.subscribe(status=>{
       if(_refCh!==ch)return; // a removed channel reports CLOSED; it is not ours any more
       if(status==='SUBSCRIBED'){
-        if(_refWasLive)refDirty(); // a rejoin: whatever changed while it was down was missed
+        if(_refWasLive){refDirty();S._bdgAt=0;S._igAt=0;} // a rejoin: whatever changed while it was down was missed
         _refLive=true;_refWasLive=true;_refChRetry=0;
       }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
         _refLive=false;

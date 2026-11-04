@@ -1718,6 +1718,10 @@ The line-by-line hunt of d0e27984 (the owner: "fix them all"). Behaviour that ch
   price change and on-the-house since 2026-10-25 20:42.
 - **A session's date move takes its partner places, part-timer shifts and tills along** (`_sessMoveRefs` returns false
   when one is refused, and the old row is then kept): `session_partners` cascades on delete, the other two go NULL.
+  Since 2026-11-04 `staff_move_session` does the whole move in one transaction (also deposits, waitlist offers, wallet
+  ledger, kudos, live positions, Petromin counters); only `ok===true` counts as moved, and the old writes remain for a
+  database without the function. A new table naming a session belongs in that function. `customer_badges` and
+  `customer_ig_followers` are on the staff-ref broadcast, so `_rrTtl()` re-reads them every 30 minutes while it is joined.
 - **The kiosk's confirm step asks what Find never shows**: the last 4 of the account's first emergency contact, else
   its birth year, else (neither on file) the phone's last 4 as before. Tries count for the whole visit.
 - **A Saturday ride's check-in takes no premium-bike deposit** (`_ciSatRender` has no deposit field).
