@@ -140,6 +140,34 @@ test.describe('@customer:blood Blood Donation registration', () => {
     expect(sent).toEqual(['customer_set_blood_type']);
   });
 
+  test('the card is the picture: the words stay clear of the arm, and it is mirrored in Arabic', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 1000 });
+    await stubSupabase(page, custFx());
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    const pic = page.locator('.bld-card .bld-card-img');
+    await expect(pic).toHaveAttribute('src', '/assets/blood-card.webp');
+    await expect(pic).toHaveAttribute('alt', '');
+    await pic.scrollIntoViewIfNeeded();
+    await expect.poll(() => pic.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1200);
+    // the arm starts 40% down the picture
+    const room = () => page.evaluate(() => {
+      const i = document.querySelector('.bld-card .bld-card-img')!.getBoundingClientRect(), c = document.querySelector('.bld-card')!.getBoundingClientRect(), w = document.querySelector('.bld-card .bld-sum')!.getBoundingClientRect();
+      return { clear: Math.round(i.top + i.height * 0.4 - w.bottom), bleed: Math.round(c.bottom - i.bottom) };
+    });
+    let r = await room();
+    expect(r.clear).toBeGreaterThanOrEqual(0);
+    expect(r.bleed).toBeLessThanOrEqual(1);
+    await expect(pic).toHaveCSS('transform', 'none');
+    await page.evaluate(`setLang('ar')`);
+    await page.evaluate('goLanding()');
+    await expect(page.locator('.bld-card .bld-card-img')).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
+    r = await room();
+    expect(r.clear).toBeGreaterThanOrEqual(0);
+  });
+
   test('an account under 18 is told and cannot go on', async ({ page }) => {
     await stubSupabase(page, custFx({ 'rpc:customer_profile': profile({ birth_date: '2090-01-01' }) }));
     await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '2090-01-01' });

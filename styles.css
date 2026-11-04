@@ -10995,12 +10995,16 @@ body:not(.view-staff) .bld-head-name{font-family:var(--font-display);font-size:2
 /* the event card: the plate, the name, when and where, the rules; its height and About link line up with its neighbours */
 body .landing-event-card.bld-card{justify-content:flex-start;gap:12px;background:var(--bld-c-bg);border:1px solid var(--bld-c-line);border-radius:12px;color:var(--bld-c-ink);}
 body .landing-event-card.bld-card:hover{border-color:var(--bld-c-ac);}
-.bld-card .bld-plate{width:100%;border:1px solid var(--bld-c-plate);border-radius:calc(var(--bld-r) / 2);}
+.bld-card .bld-plate{position:relative;z-index:1;width:100%;border:1px solid var(--bld-c-plate);border-radius:calc(var(--bld-r) / 2);}
+/* the owner's picture of a donor's arm is the card (2026-11-04): white as the card is, it runs off the bottom and the far side, the words in its empty part, mirrored where the page reads from the right */
+body .lec-wrap .landing-event-card.bld-card{overflow:hidden;padding-bottom:47%;}
+.bld-card-img{position:absolute;inset-inline:0;bottom:0;z-index:0;width:100%;height:auto;pointer-events:none;}
+:is(html[lang="ar"],html[lang="ur"]) .bld-card-img{transform:scaleX(-1);}
 .bld-card .lec2-copy{position:relative;z-index:1;width:100%;}
 body .bld-card .lec-title{color:var(--bld-c-title);}
 body .bld-card .lec-meta{margin-top:6px;font-weight:600;line-height:1.45;color:var(--bld-c-ink2);}
 .bld-cause{position:relative;z-index:1;font-size:13px;font-weight:800;line-height:1.3;color:var(--bld-c-ac);}
-body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);}
+body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-bg);padding-inline:4px;margin-inline-start:-4px;} /* a long translation reaches the picture */
 /* the rules, the same everywhere */
 .bld-sum{position:relative;z-index:1;display:grid;gap:5px;margin:0;padding:0;list-style:none;font-size:13px;font-weight:500;line-height:1.35;}
 .bld-sum>*{display:flex;align-items:flex-start;gap:7px;min-width:0;}

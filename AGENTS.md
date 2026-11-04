@@ -1130,6 +1130,7 @@ everyone, free, no bikes. `ride_kind 'blood'` (event_kind community, open_to_all
 100000 (no real cap; the staff form's 500 limit exempts it). Names use `_bld` / `bld` / `bld-`: `_bd*` is taken by the birthday helpers.
 - **One look, the whole way**: `body.bld-skin` (`_bldOn`, `_syncBldTheme`) from the event's first step to the page after booking, and the waiver, agreement
   and rating pop-ups wherever they open; My Bookings' ticket wears `th-blood`. Everything reads the `--bld-*` tokens at the top of the block at the end of styles.css.
+- **Card**: the owner's picture of a donor's arm (`assets/blood-card.webp`, background levelled to pure white so it melts into the white card) fills the card's bottom and runs off its edges, mirrored in Arabic and Urdu; the words sit in its empty part. Plain `<img>`, not a CSS `url()`, and not in the service worker's list, so the file is named only while a session exists (the owner, 2026-11-04).
 - **Logos**: `_bldPlateHtml`, one image on a white plate (`assets/blood-partners.webp`, `-rtl` in Arabic and Urdu, the hosts first as the page reads). The Ministry of
   Sport's guide wants its colour logo on white, never on a dark, patterned or foreign-coloured ground, min 1.8 cm: never put a decoration under the plate.
 - **Poster**: the short rules (`_bldSumHtml`) on the card, details step and tickets; the whole poster, retyped from the hospital's PDF in Arabic and English, is

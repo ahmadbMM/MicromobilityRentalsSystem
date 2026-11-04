@@ -8510,6 +8510,7 @@ function _bldWhenTxt(s){
 function _bldCardWrap(){
   const s=_bldSess();if(!s)return'';
   return`<div class="lec-wrap has-about bld-wrap"><button class="landing-event-card lec2 ev-blood bld-card" data-on-click="${_on("selectEvent","blood")}">
+      <img class="bld-card-img" src="/assets/blood-card.webp" alt="" width="1200" height="862" loading="lazy" decoding="async">
       <span class="bld-plate">${_bldLogosImg()}</span>
       <span class="lec2-copy"><span class="lec-title">${esc(_evName(s))}</span><span class="lec-meta">${_bldWhenTxt(s)}</span></span>
       <span class="bld-cause">${esc(t('bldCause'))}</span>
