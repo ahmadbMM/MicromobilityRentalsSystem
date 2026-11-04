@@ -53,7 +53,7 @@ test('a bike change is one staff_swap_bike call, and its undo swaps back the sam
 test('a refused swap is said and changes nothing', async ({ page }) => {
   const reqs = await open(page, { 'rpc:staff_swap_bike': { __rpcError: { status: 400, code: 'P0001', message: 'BIKE_UNAVAILABLE: bike B is in-use' } } });
   await page.evaluate(`(async()=>{openModal('q1');S.modalBikes=['bB'];await confirmAssign();})()`);
-  await expect(page.locator('.toast').filter({ hasText: /BIKE_UNAVAILABLE|unavailable|in-use/i }).first()).toBeVisible();
+  await expect(page.locator('.toast').filter({ hasText: /no longer available/i }).first()).toBeVisible();
   expect(reqs.filter((r) => !/staff_swap_bike/.test(r.url))).toEqual([]);
 });
 

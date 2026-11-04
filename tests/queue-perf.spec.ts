@@ -29,7 +29,11 @@ test('the Bookings tab renders a large queue quickly with correct grouping & no-
     // @ts-expect-error app globals
     const e = (S.queue || []).find((x) => x.customerId === 'c0');
     // @ts-expect-error app globals
-    return { viaMap: customerNoShows(e), manual: (S.queue || []).filter((x) => x.customerId === 'c0' && x.status === 'noshow').length };
+    const past = (S.queue || []).filter((x) => x.customerId === 'c0' && x.id !== e.id && (x.status === 'done' || x.status === 'noshow'))
+      .sort((a: { registeredAt?: string }, b: { registeredAt?: string }) => String(b.registeredAt || '').localeCompare(String(a.registeredAt || ''))).slice(0, 5);
+    // @ts-expect-error app globals
+    return { chip: noShowFlag(e), ns: past.filter((x) => x.status === 'noshow').length, of: past.length };
   });
-  expect(check.viaMap).toBe(check.manual);
+  if (check.ns < 2) expect(check.chip).toBe('');
+  else expect(check.chip).toContain(`${check.ns}/${check.of} no-shows`);
 });

@@ -89,7 +89,7 @@ test.describe('@staff:checkin s1009 desk: Confirm', () => {
     await page.evaluate('closeCheckinModal()'); // the staffer moves on before the answer
     const bar = page.locator('#err-bar-el');
     await expect(bar).toContainText('#7 Rider Seven not checked in');
-    await expect(bar).toContainText('the bike is out');
+    await expect(bar).toContainText('Bike no longer available');
     // Retry opens that rider's check-in again
     await bar.getByRole('button', { name: 'Try again' }).click();
     await expect(modal.locator('#dlgt-checkin')).toContainText('Rider Seven');
@@ -98,7 +98,7 @@ test.describe('@staff:checkin s1009 desk: Confirm', () => {
   test('B5: a failure on the rider still open stays in that drawer', async ({ page }) => {
     const modal = await boot(page, { 'rpc:staff_checkin': { __rpcError: { status: 400, code: 'P0001', message: 'BIKE_UNAVAILABLE: the bike is out' } } });
     await modal.locator('#ci-confirm').click();
-    await expect(modal.locator('#ci-error')).toContainText('the bike is out');
+    await expect(modal.locator('#ci-error')).toContainText('Bike no longer available');
     await expect(page.locator('#err-bar-el')).toHaveCount(0);
     await expect(modal.locator('#ci-confirm')).not.toHaveText('Sending…');
   });

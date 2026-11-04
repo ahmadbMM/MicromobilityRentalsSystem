@@ -1877,7 +1877,6 @@
   "statNumRiders": "N.º de ciclistas",
   "statExpected": "Esperados",
   "statCompleted": "Completados",
-  "noShowFlagTip": "{0} no presentados anteriores",
   "cloneSessBtn": "Clonar",
   "cloneBtn": "Clonar",
   "kbNoWaiting": "No hay ciclistas en espera",

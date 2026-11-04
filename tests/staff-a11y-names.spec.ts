@@ -50,6 +50,8 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
     const after = await page.evaluate(async () => {
       const old = document.querySelector('#checkin-modal [role="dialog"]');
       // @ts-expect-error app global
+      _qGet('a1').height = 181; // what the popup shows changed, so the repaint writes it again
+      // @ts-expect-error app global
       renderStaffQueue(); // a roster repaint redraws the open check-in popup
       await null;
       await new Promise((r) => requestAnimationFrame(r));

@@ -94,7 +94,7 @@ test.describe('@staff:checkin s1010 offline desk', () => {
     await context.setOffline(false);
     await page.evaluate('_dqFlush()');
     await expect(chip(page)).toContainText('Needs attention');
-    await expect(page.locator('#tab-queue .dq-mark.dq-bad').first()).toContainText('bike 42 is in-use (with Other Rider)');
+    await expect(page.locator('#tab-queue .dq-mark.dq-bad').first()).toContainText('Bike no longer available. 42 · Other Rider');
     // never dropped: still listed, the row reads as the server has it
     expect(await page.evaluate('_DQ.length')).toBe(1);
     expect(await page.evaluate(`getQueue().find(e=>e.id==='e1').status`)).toBe('waiting');
@@ -105,7 +105,7 @@ test.describe('@staff:checkin s1010 offline desk', () => {
     const dlg = page.getByRole('dialog', { name: 'Unsynced changes' });
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('#7 Rider Seven');
-    await expect(dlg).toContainText('bike 42 is in-use');
+    await expect(dlg).toContainText('Bike no longer available. 42 · Other Rider');
     await dlg.getByRole('button', { name: 'Discard' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Discard' }).click(); // the question
     await expect(chip(page)).toHaveCount(0);

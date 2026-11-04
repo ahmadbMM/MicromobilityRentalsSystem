@@ -1000,7 +1000,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   sessOpened:'Session opened.',sessClosed:'Session closed.',sessDeleted:'Session deleted.',sessRestored:'Session restored.',sessPurgeBtn:'Delete permanently',sessPurgeAllBtn:'Delete all permanently',sessPurgeTitle:'Delete permanently?',sessPurgeBody:'The session is removed for good and cannot be restored.',sessPurgeAllBody:'All {0} deleted sessions are removed for good and cannot be restored.',sessPurged:'Session deleted permanently.',sessPurgedN:'Sessions deleted permanently: {0}.',sessPurgeKept:'Kept in Deleted Sessions: it has bookings, sales or registrations on record.',sessPurgeKeptN:'Kept in Deleted Sessions: {0} (they have bookings, sales or registrations on record).',
   totalStat:'Total',waitingStat:'Waiting',onBikeStat:'On Bike',doneStat:'Done',ridersStat:'Riders',
   statNumRiders:'# of Riders',statExpected:'Expected',statCompleted:'Completed',
-  noShowFlagTip:'{0} past no-shows',cloneSessBtn:'Clone',cloneBtn:'Clone',
+  cloneSessBtn:'Clone',cloneBtn:'Clone',
   kbNoWaiting:'No riders waiting',
   fixDupBtn:'Fix duplicate numbers',fixDupTitle:'Fix duplicate booking numbers',fixDupBody:'Found {0} duplicate booking number(s). Each duplicate will get a fresh unique number (the earliest booking keeps its number). Continue?',fixDupConfirm:'Renumber duplicates',fixDupNone:'No duplicate booking numbers found.',fixDupDone:'Renumbered {0} booking(s).',fixDupLog:'Fixed {0} duplicate booking number(s)',
   expTitle:'Export Report',expChoose:'Choose a format',repOptCols:'Columns',repOptSections:'Sections',repOptFilters:'Filters',repOptSummary:'Summary tiles',repOptReset:'Reset',repKmEach:'One report per distance',repKmEachHint:'Each distance prints on its own, numbered from 1, with the columns and filters above.',selaRepBtn:'Report for Sela',selaRepHint:'Every booking, the waitlist included, with what Sela asked for: full name, email, birth date, distance and emergency contact. The details are read fresh at each tap.',selaColRel:'Relationship',selaWlKey:'Shaded rows are on the waitlist, in waitlist order.',repRunners:'Runners',expPdf:'PDF / Print',expExcel:'Excel (CSV)',
@@ -1605,7 +1605,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   sessOpened:'تم فتح الجلسة.',sessClosed:'تم إغلاق الجلسة.',sessDeleted:'تم حذف الجلسة.',sessRestored:'تم استعادة الجلسة.',sessPurgeBtn:'حذف نهائي',sessPurgeAllBtn:'حذف الكل نهائياً',sessPurgeTitle:'حذف نهائي؟',sessPurgeBody:'ستُحذف الجلسة نهائياً ولا يمكن استعادتها.',sessPurgeAllBody:'ستُحذف كل الجلسات المحذوفة ({0}) نهائياً ولا يمكن استعادتها.',sessPurged:'تم حذف الجلسة نهائياً.',sessPurgedN:'الجلسات المحذوفة نهائياً: {0}.',sessPurgeKept:'بقيت في الجلسات المحذوفة: عليها حجوزات أو مبيعات أو تسجيلات مسجلة.',sessPurgeKeptN:'بقي في الجلسات المحذوفة: {0} (عليها حجوزات أو مبيعات أو تسجيلات مسجلة).',
   totalStat:'الكل',waitingStat:'بانتظار',onBikeStat:'على الدراجة',doneStat:'منتهٍ',ridersStat:'الراكبون',
   statNumRiders:'عدد الركّاب',statExpected:'متوقّع',statCompleted:'مكتمل',
-  noShowFlagTip:'{0} حالات عدم حضور سابقة',cloneSessBtn:'نسخ',cloneBtn:'نسخ',
+  cloneSessBtn:'نسخ',cloneBtn:'نسخ',
   kbNoWaiting:'لا يوجد ركاب في الانتظار',
   fixDupBtn:'إصلاح الأرقام المكررة',fixDupTitle:'إصلاح أرقام الحجوزات المكررة',fixDupBody:'تم العثور على {0} رقم حجز مكرر. سيحصل كل مكرر على رقم فريد جديد (يحتفظ الحجز الأقدم برقمه). متابعة؟',fixDupConfirm:'إعادة ترقيم المكررات',fixDupNone:'لا توجد أرقام حجوزات مكررة.',fixDupDone:'تمت إعادة ترقيم {0} حجز.',fixDupLog:'إصلاح {0} رقم حجز مكرر',
   repOptCols:'الأعمدة',repOptSections:'الأقسام',repOptFilters:'عوامل التصفية',repOptSummary:'بطاقات الملخص',repOptReset:'إعادة تعيين',repKmEach:'تقرير لكل مسافة',repKmEachHint:'تُطبع كل مسافة في تقرير مستقل مرقّم من 1، بالأعمدة وعوامل التصفية أعلاه.',selaRepBtn:'تقرير صلة',selaRepHint:'كل الحجوزات، ومعها قائمة الانتظار، بما طلبته صلة: الاسم الكامل والبريد الإلكتروني وتاريخ الميلاد والمسافة وجهة الاتصال للطوارئ. تُقرأ البيانات من جديد عند كل ضغطة.',selaColRel:'صلة القرابة',selaWlKey:'الصفوف المظللة في قائمة الانتظار، بترتيبها.',repRunners:'العدّاؤون',expTitle:'تصدير التقرير',expChoose:'اختر الصيغة',expPdf:'PDF / طباعة',expExcel:'إكسل (CSV)',
@@ -3191,20 +3191,28 @@ function _qPut(e){
   if(i>=0)q[i]=e;else q.push(e);
   S.queue=q;_qgMap.set(e.id,e);_qgRef=q;_qgLen=q.length;
 }
-// Decided bookings (done / no-show) per person, newest first, indexed once per load. The
+// Decided bookings (done / no-show) per person, newest first, indexed once per paint. The
 // roster's no-show chip used to scan and sort the whole queue for every row it drew.
 let _dbpRef=null,_dbpLen=0,_dbpMap=null;
 function _decidedByPerson(){
   const ql=S.queue||[];
   if(_dbpRef===S.queue&&_dbpLen===ql.length&&_dbpMap)return _dbpMap;
-  const m=new Map();
+  // A free ride closed with nobody checked in took no attendance: the close made every booking on it a no-show,
+  // which says nothing about the rider (the staff review, 2026-10-28, S01-core1-06).
+  const m=new Map(),took=new Set();
+  ql.forEach(x=>{if(x.status==='done'||x.status==='active'||x.checkedInAt)took.add(x.sessionId);});
   ql.forEach(x=>{
     if(x.status!=='done'&&x.status!=='noshow')return;
+    if(x.status==='noshow'&&!took.has(x.sessionId)&&_isFreeRide(_sessGet(x.sessionId)))return;
     const keys=[];if(x.customerId)keys.push('c:'+x.customerId);if(x.phone)keys.push('p:'+x.phone);
     keys.forEach(k=>{let a=m.get(k);if(!a){a=[];m.set(k,a);}a.push(x);});
   });
   m.forEach(a=>a.sort((a1,b1)=>String(b1.registeredAt||'').localeCompare(String(a1.registeredAt||''))));
-  _dbpRef=S.queue;_dbpLen=ql.length;_dbpMap=m;return m;
+  _dbpRef=S.queue;_dbpLen=ql.length;_dbpMap=m;
+  // Kept for the paint in progress only: a no-show marked (or undone) changes a row in place, the array and its
+  // length stay, and the chip kept the old count until the next reload.
+  queueMicrotask(()=>{_dbpMap=null;});
+  return m;
 }
 const getBikes=()=>S.bikes||[];
 // The bikes table is public-read, but its NFC / serial / condition columns are readable only
@@ -11286,9 +11294,16 @@ function _rpcAbsent(err){
 }
 const _rpcAbsentSeen=new Set();
 function _rpcAbsentNote(m){try{const k=m.slice(0,90);if(_rpcAbsentSeen.has(k))return;_rpcAbsentSeen.add(k);console.warn('RPC missing, older path taken:',m);_logError('rpc absent: '+m,'rpc',true);}catch(e){}}
-// The RPCs raise 'CODE: human sentence'; the sentence is what staff need to read. staff_checkin's refusal of a request not
-// approved yet is said in the desk's language (20261029160000, the staff review, 2026-10-28).
-function _rpcMessage(err){const m=String((err&&err.message)||err||'');return /^NOT_APPROVED\b/.test(m)?t('qYNotAppr'):m.replace(/^[A-Z_]+:\s*/,'')||t('errConnection');}
+// The RPCs raise 'CODE: English sentence'. The desk's own codes are said in the desk's language, since most booth staff read
+// Arabic and these come when two desks touch one rider or bike (the staff review, 2026-10-28, S01-core1-05); any other code's
+// sentence is what staff read. An error bar keeps the server's words in its small detail line.
+const RPC_DESK={NOT_APPROVED:'qYNotAppr',BAD_BOOKING_STATE:'errChangedElsewhere',BIKE_UNAVAILABLE:'errBikeUnavailable',BIKE_NOT_FOUND:'nfcUnknownBike',BIKE_NEEDS_CHECK:'chkBanner',BOOKING_NOT_FOUND:'vndErrNotLive'};
+function _rpcMessage(err){
+  const m=String((err&&err.message)||(typeof err==='string'?err:'')),k=RPC_DESK[(/^[A-Z_]+/.exec(m)||[])[0]];
+  if(!k)return m.replace(/^[A-Z_]+:\s*/,'')||t('errConnection');
+  const b=/^BIKE_UNAVAILABLE: bike (.+?) is \S+(?: \(with (.+)\))?$/.exec(m); // which bike, and who has it: names, whatever the language
+  return t(k).replace('{0}',(/no bike (.+)$/.exec(m)||[])[1]||'')+(b?' '+[b[1],b[2]].filter(Boolean).join(' · '):'');
+}
 async function _bikeArrived(code,src){
   if(S.view!=='staff')return; // never resolves a bike outside a staff session
   // At boot the tag fires the instant the panel opens, before the fleet and the queue are in:
@@ -11363,7 +11378,7 @@ function goStaff(){
 // lands (_sfDefaultToToday), unless the staffer has picked one in between.
 function _autoSelectSession(){
   if(!S._qvRestored){S._qvRestored=true;_restoreQueueView();} // once per load, before anything is saved over it
-  S.sfSession=_currentSessId();S.sfLimit=150;S._sfPicked=false;
+  S.sfSession=_currentSessId();_sfDayGuard(S.sfSession);S.sfLimit=150;S._sfPicked=false;
   S._sfDefaulted=!!S.dataLoaded&&!S._cacheOnly;
 }
 // Current = tonight's ride while it is open or full (of two, one not yet over first). No live
@@ -11934,17 +11949,6 @@ function _rowMenu(id,items,title){
     return`<button class="btn-sm btn-muted rq-more" aria-haspopup="menu" aria-label="${t('moreActionsLbl')}" title="${t('moreActionsLbl')}" data-on-click="${_on("_on__rowMenu_1",_EV,_EL,id)}">⋯</button>`;
   }
   // "2 no-shows in the last 5" — the history is all in the data, surfaced at the moment
-  // staff choose who gets a freed spot. Counted per PERSON (account id when linked, phone
-  // otherwise) over their last five decided bookings anywhere, not just this session. Shown
-  // from the second offence: one no-show is a flat tyre, two is a pattern.
-  function _noShowChip(e){
-    const k=e.customerId?'c:'+e.customerId:(e.phone?'p:'+e.phone:null);
-    if(!k)return'';
-    const past=(_decidedByPerson().get(k)||[]).filter(x=>x.id!==e.id).slice(0,5);
-    const ns=past.filter(x=>x.status==='noshow').length;
-    if(ns<2)return'';
-    return `<span title="${t('noShowHistTip')}" class="rq-nschip">${t('noShowHistChip').replace('{0}',String(ns)).replace('{1}',String(past.length))}</span>`;
-  }
   // An unlinked booking's account, by name. The roster asked this of every walk-in row on every
   // repaint by scanning all customers (thousands) - one map per customers array instead, rebuilt
   // only when that array is replaced or changes length. First match wins, as .find() did.
@@ -11974,7 +11978,7 @@ function _rowMenu(id,items,title){
       const _rej=_apprOf(e)==='rejected';
       const chip=`<span class="${_rej?'rq-apchip-rej':'rq-apchip'}">${_rej?t('filterRejected'):t('apprPendingChip')}</span>`;
       const wlBtn=e.status==='waiting'?`<button class="btn-sm btn-muted" data-on-click="${_on("commToWaitlist",e.id)}" title="${t('waitlistLabel')}">${_artIcon('clock',12)} ${t('waitlistLabel')}</button>`:'';
-      return`${chip}${_noShowChip(e)}<button class="btn-sm btn-green" data-on-click="${_on("approveEntry",e.id)}">✓ ${t('apprApproveBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("rejectEntry",e.id)}">${t('apprRejectBtn')}</button>${wlBtn}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+      return`${chip}<button class="btn-sm btn-green" data-on-click="${_on("approveEntry",e.id)}">✓ ${t('apprApproveBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("rejectEntry",e.id)}">${t('apprRejectBtn')}</button>${wlBtn}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
         {label:`${ICON_PENCIL} ${t('editBookingBtn')}`,run:`showBookingEditModal('${e.id}')`,act:()=>showBookingEditModal(e.id)},
         _custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null,_mCmt])}`;
     }
@@ -12001,7 +12005,7 @@ function _rowMenu(id,items,title){
     const _mEm=_emCid?{label:`${_artIcon('phone',12)} ${t('emTitle')}`,run:`_runEmShow('${_emCid}')`,act:()=>_runEmShow(_emCid)}:null;
     const _mVl=_vlr?{label:`${_artIcon('flag',12)} ${t('vlRaceDetails')}`,run:`_vlAthleteEdit('${e.id}')`,act:()=>_vlAthleteEdit(e.id)}:null;
     const _mVlPair=(_vlr&&['pair','noteam','wait'].includes(_vlStateOf(e)))?{label:`${_artIcon('people',12)} ${t('vlPairBtn')}`,run:`_vlPairOpen('${e.id}')`,act:()=>_vlPairOpen(e.id)}:null;
-    if(e.status==='waiting'||e.status==='waitlist')return`${_apprChip}${e.status==='waitlist'?_noShowChip(e):''}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("showCheckinModal",e.id)}">${t('checkInBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+    if(e.status==='waiting'||e.status==='waitlist')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("showCheckinModal",e.id)}">${t('checkInBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       {label:t('noShowBtn'),run:`confirmNoShow('${e.id}')`,act:()=>confirmNoShow(e.id)},
       _isReserved(e)?{label:t('menuReleaseBike'),run:`_releaseReserved('${e.id}')`,act:()=>_releaseReserved(e.id)}
         :(resolvedType(e)==='Own'?null:{label:t('menuReserveBike'),run:`_reserveFromMenu('${e.id}')`,act:()=>_reserveFromMenu(e.id)}),
@@ -17743,32 +17747,6 @@ function _epOpenAddons(id){S._epReturnId=id;closeEditPriceModal();showAddonPicke
 
 
 // One-click data backup (admin): downloads the whole dataset as JSON
-// Repeat no-show count for the rider behind an entry (by account, else name+phone)
-// No-show tallies, built once per queue and cached (rebuilds when the queue array/length changes).
-// noShowFlag() is rendered for every booking row, so scanning the whole queue per call made the
-// Bookings tab O(n²) and slow to load; this map makes each lookup O(1).
-let _nsRef=null,_nsLen=-1,_nsById=null,_nsByNP=null;
-function _noShowCounts(){
-  const ql=S.queue||[];
-  if(_nsRef===S.queue&&_nsLen===ql.length&&_nsById)return{byId:_nsById,byNP:_nsByNP};
-  const byId={},byNP={};
-  ql.forEach(x=>{if(x.status!=='noshow')return;if(x.customerId){byId[x.customerId]=(byId[x.customerId]||0)+1;}else{const nm=(x.name||'').trim(),ph=(x.phone||'').trim();if(nm||ph)byNP[nm+' '+ph]=(byNP[nm+' '+ph]||0)+1;}});
-  _nsRef=S.queue;_nsLen=ql.length;_nsById=byId;_nsByNP=byNP;
-  // Kept for the paint in progress only: a no-show marked (or undone) changes a row in place, the
-  // array and its length stay, and the flag kept the old count until the next reload.
-  queueMicrotask(()=>{_nsById=null;});
-  return{byId,byNP};
-}
-function customerNoShows(e){
-  if(!e)return 0;
-  const{byId,byNP}=_noShowCounts();
-  if(e.customerId)return byId[e.customerId]||0;
-  // No account: identify by name+phone. If both are missing (e.g. PII-free data), we can't
-  // tell riders apart — don't group them (that once made every anonymous row count as one).
-  const nm=(e.name||'').trim(),ph=(e.phone||'').trim();
-  if(!nm&&!ph)return 0;
-  return byNP[nm+' '+ph]||0;
-}
 // ── Generated clip-art icon set ─────────────────────────────────────────────
 // Two-tone filled illustrations (no strokes, no emoji): the main silhouette
 // rides currentColor, the secondary layer is currentColor at .35 opacity, so
@@ -17906,9 +17884,17 @@ function _snChip(e){if(!_snOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===T
 // The printed sheets' tile: how many riders on it hold the tag, and their share. Nothing when none do.
 function _snTile(list){const n=(list||[]).filter(_snOf).length,all=(list||[]).length;if(!n)return'';
   return`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${esc(t('snLabel'))} &middot; ${Math.round(n/all*100)}%</span></div>`;}
+// The rider's no-show record, in words, after the name on rows, cards and the check-in: staff choose by it who gets a
+// freed place and whom to call. A lone orange number used to say it, read as a party size and explained only by a tooltip
+// a phone never shows (the staff review, 2026-10-28, S01-core1-06). Per PERSON (account id when linked, phone otherwise)
+// over their last five decided bookings anywhere, from the second offence: one no-show is a flat tyre, two is a pattern.
 function noShowFlag(e){
-  const n=customerNoShows(e);
-  return n>=3?`<span title="${t('noShowFlagTip').replace('{0}',n)}" class="rq-nsflag">${n}</span>`:'';
+  const k=e.customerId?'c:'+e.customerId:(e.phone?'p:'+e.phone:null);
+  if(!k)return'';
+  const past=(_decidedByPerson().get(k)||[]).filter(x=>x.id!==e.id).slice(0,5);
+  const ns=past.filter(x=>x.status==='noshow').length;
+  if(ns<2)return'';
+  return`<span title="${t('noShowHistTip')}" class="rq-nsflag">${t('noShowHistChip').replace('{0}',String(ns)).replace('{1}',String(past.length))}</span>`;
 }
 // ── Routes on a ride (2026-09-28) ─────────────────────────────────────────────────────────────
 // The Routes page's list (site_content routes.routes.items, edited in Website) names the routes; a
@@ -25276,13 +25262,22 @@ function _keepScroll(){
 // The queue's view - Bookings / Sessions / Waitlist / the Petromin page (and its night), and
 // the status filter - is remembered for this tab, so a refresh comes back to it. The session is
 // not: opening the queue always lands on the current one (_autoSelectSession), a refresh included.
-function _saveQueueView(){try{sessionStorage.setItem('cq_queue_view',JSON.stringify({queueView:S.queueView,sfStatus:S.sfStatus,ridersSession:S.ridersSession}));}catch(e){}}
+function _saveQueueView(){try{sessionStorage.setItem('cq_queue_view',JSON.stringify({queueView:S.queueView,sfStatus:S.sfStatus,sfPay:S.sfPay,on:todayStr(),ridersSession:S.ridersSession}));}catch(e){}}
 function _restoreQueueView(){
   let st=null;try{st=JSON.parse(sessionStorage.getItem('cq_queue_view')||'null');}catch(e){}
   if(!st)return;
   if(['bookings','sessions','managed','petromin'].concat(GIVE_BIKE_STEP?['handover']:[]).includes(st.queueView))S.queueView=st.queueView;
   if(st.queueView==='petromin'&&typeof st.ridersSession==='string')S.ridersSession=st.ridersSession;
-  if(typeof st.sfStatus==='string')S.sfStatus=st.sfStatus;
+  // The filters only on the day they were left on: a tab open since yesterday starts on the whole of tonight's list.
+  if(st.on===todayStr()){if(typeof st.sfStatus==='string')S.sfStatus=st.sfStatus;if(typeof st.sfPay==='string')S.sfPay=st.sfPay;}
+}
+// The status and payment filters are for the work in hand, so they stay on one day's ride and do not follow the staffer: a
+// stale "Completed" or "Not arrived" opened tonight's ride on an empty or partial list, which looked complete, and that is how
+// riders get missed (the staff review, 2026-10-28, S03-core3-12; the sort, size and bike-type choices are layout, and stay).
+function _sfDayGuard(id){
+  const s=_sessGet(id),day=String((s&&s.session_date)||(id!=='all'?id:'')||'').slice(0,10);if(!day)return;
+  if(S._sfDay&&S._sfDay!==day){S.sfStatus='all';S.sfPay='all';}
+  S._sfDay=day;
 }
 // Every repaint asks; it acts once, on the first paint from real data - the opening session
 // picked before that (no data yet, or only the snapshot) is picked again, unless the staffer
@@ -26186,7 +26181,7 @@ function renderQRow(e){
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
         <td class="rq-vm${group.some(_isSatMember)?' cm-cell':''}">
-          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)} ${_noShowChip(primary)}${_dqMark(group)}</div>
+          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${_dqMark(group)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           ${_qCc(primary.groupPhone||primary.phone,primary)}
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
@@ -26308,7 +26303,7 @@ function renderQRow(e){
         <div class="rq-sb8">
           <div class="rq-cl">
             ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
-            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_snChip(e)}${_dupMark(e)}${_dqMark(e)}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_snChip(e)}${i===0?noShowFlag(e):''}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
@@ -26335,7 +26330,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div class="rq-sb8">
-          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${_dqMark(group)}</div>
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${_dqMark(group)}</div>
             <div class="rq-csub">${_partyCountsLine(group)}</div></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
@@ -27469,7 +27464,7 @@ function _showOverdue(){S.sfStatus='active';S.sfOverdueFirst=true;S.sfLimit=150;
 function setSfSession(v){
   if(String(v).startsWith('pm:')){openPetrominPage(String(v).slice(3));return;}
   if(S.queueView==='petromin')S.queueView='bookings';
-  S.sfSession=v;S.sfLimit=150;S._sfPicked=true;renderStaffQueue();
+  _sfDayGuard(v);S.sfSession=v;S.sfLimit=150;S._sfPicked=true;renderStaffQueue();
 }
 function setSfSort(col){
   if(S.sfSort===col) S.sfSortDir=-S.sfSortDir;
@@ -28010,7 +28005,7 @@ function _prefMerge(srv){
 // The Accounts and Members filters (_amDefs), here so the lists below can name them.
 const AM_FKEYS=['amSpent','amGender','amAge','amBday','amNat','amCountry','amCity','amHeight','amBike','amJoined','amRides','amComm','amLast','amActive','amUp','amNoShow','amCancel','amPay','amNews','amTags','amMember','amBadges','amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amFlag','amSn'];
 const ST_KEYS={
-  queue:['sfStatus','sfPay','sfSize','sfBike','sfSort','sfSortDir'],
+  queue:['sfSize','sfBike','sfSort','sfSortDir'], // not the status or payment filter: those are for the work in hand (_sfDayGuard)
   history:['histStatus','histPay','histRange','histSort','histSortDir','histType','histSize'],
   bikes:['bkStatus','bkSize','bkSortCol','bkSortDir','bkView','bkShowRetired','bkTypeFilter'],
   inventory:['invSort','invView'],
@@ -28025,7 +28020,7 @@ function _stPlain(x){return x==null||['string','number','boolean'].includes(type
 // Once per load, before the section first draws: its defaults are noted, then what was remembered is put back.
 function _stLoad(sec){
   const D=S._stDef||(S._stDef={});if(D[sec]||!ST_KEYS[sec])return;
-  const def=sec==='queue'?{sfStatus:'all',sfPay:'all',sfSize:'all',sfBike:'all',sfSort:'queue',sfSortDir:1}:{};
+  const def=sec==='queue'?{sfSize:'all',sfBike:'all',sfSort:'queue',sfSortDir:1}:{};
   if(sec!=='queue')ST_KEYS[sec].forEach(p=>{const r=_stRef(p);if(r.o&&_stPlain(r.o[r.k]))def[p]=r.o[r.k]===undefined?null:r.o[r.k];});
   if(!Object.keys(def).length)return;D[sec]=def;
   let own=false;if(sec==='queue')try{own=!!sessionStorage.getItem('cq_queue_view');}catch(_){}
@@ -28047,7 +28042,7 @@ function _prefBoot(){
 }
 // Reset filters: the section's defaults back (every section when none is named), and nothing remembered.
 function _stReset(sec){
-  (sec?[sec]:Object.keys(ST_KEYS)).forEach(s=>{const def=S._stDef&&S._stDef[s];if(def)Object.keys(def).forEach(p=>{const r=_stRef(p);if(r.o)r.o[r.k]=def[p];});_prefSet('state.'+s,null);});
+  (sec?[sec]:Object.keys(ST_KEYS)).forEach(s=>{const def=S._stDef&&S._stDef[s];if(def)Object.keys(def).forEach(p=>{const r=_stRef(p);if(r.o)r.o[r.k]=def[p];});if(s==='queue'){S.sfStatus='all';S.sfPay='all';}_prefSet('state.'+s,null);});
   if(S.view==='staff'&&S.staffTab!=='settings')_renderStaffTab();
 }
 // Text size and density on this device (Settings): the head of the staff layer reads them off <html>.
@@ -37003,6 +36998,7 @@ function _ciSpecHtml(){
   return `<div class="bkm-csline">${line}</div><div class="${ok?'bkm-cok':'bkm-cwarn'}">${esc(_ciBikeStatusText(S._ciBike))}</div>${fit}${dupName?`<div class="bkm-cwarn">${t('ciBikeAlsoFor').replace('{0}',()=>esc(dupName))}</div>`:''}${rsv?`<div class="bkm-cwarn">${esc(t('reservedChip'))} · ${esc(('#'+(rsv.queueNum||'')+' '+(rsv.name||'')).trim())}</div>`:''}`;
 }
 function _ciRenderBikeSpec(){
+  S._ciHtml=null;
   const el=document.getElementById('ci-bike-spec');if(el)el.innerHTML=_ciSpecHtml();
   const c=document.getElementById('ci-confirm');if(c)c.disabled=_ciConfirmBlocked()||_ciBusy.has(S._ciId);
   const er=document.getElementById('ci-error');if(er)er.textContent=S._ciErr||'';
@@ -37013,6 +37009,13 @@ function _on_renderCheckinModal_2(event,el,a0){S._ciType=a0;renderCheckinModal()
 function _on_renderCheckinModal_3(event,el,a0){S._ciPaid=a0;S._ciPayPicked=S._ciId;renderCheckinModal()} // tapped by the staffer: the one payment the bike picker may carry on
 function _on_renderCheckinModal_4(event,el){if(event.target===el)closeCheckinModal()}
 function _on_renderCheckinModal_5(event,el,a0){_ciCarryPay();closeCheckinModal(true);openModal(a0)}
+// Every roster repaint and realtime merge comes through the panel. Markup that did not change is left alone: rewriting it dropped
+// the focus and took the node from under a tap just started, the "pressed Confirm and nothing happened" (the staff review,
+// 2026-10-28, S03-core3-07). A rewrite gets its scroll and focus back from _popStill. A partial paint (_ciRenderBikeSpec) forgets the copy.
+function _ciPaint(m,html){
+  if(S._ciHtml===html&&m.firstChild)return;
+  m.innerHTML=html;S._ciHtml=html;
+}
 function renderCheckinModal(){
   const e=_qGet(S._ciId);const m=document.getElementById('checkin-modal');if(!m)return;
   // The booking is gone (deleted on another desk): close properly rather than leave the modal
@@ -37036,9 +37039,9 @@ function renderCheckinModal(){
   const _hBadge=(e.height||_ciTyLbl)?`<div class="ci-spec-row bkm-hrow">${e.height?`<span class="ci-height bkm-height"><bdi>${esc(String(e.height))} ${t('cmUnit')}${_entryFitText(e)?' · '+esc(_entryFitText(e)):''}</bdi></span>`:''}${_ciTyLbl?`<span class="ci-type">${typeBadge(_ciTyLbl)}</span>`:''}</div>`:'';
   if(e.status==='noshow'){
     m.style.display='flex';
-    m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
+    _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_1",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}</div>
       ${_hBadge}
       ${_stepsHtml}
       <div role="status" class="bkm-nsnote">${t('ciNoShowNote').replace('{0}',String(e.queueNum)).replace('{1}',esc(e.name))}</div>
@@ -37046,7 +37049,7 @@ function renderCheckinModal(){
         <button class="btn-secondary" data-on-click="${_on("closeCheckinModal")}">${t('closeBtn')}</button>
         <button id="ci-showed" class="btn-primary" data-on-click="${_on("_ciCustomerShowed")}">${t('customerShowedBtn')}</button>
       </div>
-    </div></div>`;
+    </div></div>`);
     return;
   }
   if(_hasRideGroups(_sessDisp(e.sessionId)))return _ciSatRender(e,m,_hBadge,_stepsHtml);
@@ -37058,9 +37061,9 @@ function renderCheckinModal(){
   const tyBtn=ty=>`<button type="button" class="toggle-btn${S._ciType===ty?' active':''}" aria-pressed="${(S._ciType===ty)?'true':'false'}" data-on-click="${_on("_on_renderCheckinModal_2",_EV,_EL,ty)}">${typeLabel(ty)}</button>`;
   const payBtn=(v,lbl)=>`<button type="button" class="toggle-btn bkm-flex1${S._ciPaid===v?' active':''}" aria-pressed="${(S._ciPaid===v)?'true':'false'}" data-on-click="${_on("_on_renderCheckinModal_3",_EV,_EL,v)}">${lbl}</button>`;
   m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
+  _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
-      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
+      <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · #${e.queueNum} ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${noShowFlag(e)}${_party.length>1?` <span class="bkm-stepof">· ${t('ciStepOf').replace('{0}',String(_idx+1)).replace('{1}',String(_party.length))}</span>`:''}${_ciTitleTag(e)}</div>
       ${_hBadge}
       ${_ciNoteHtml(e)}${_vtCiHtml(e)}${_dkYWvLine(e)}
       ${_stepsHtml}
@@ -37097,7 +37100,7 @@ function renderCheckinModal(){
         <button class="btn-secondary" data-on-click="${_on("closeCheckinModal")}">${t('closeBtn')}</button>
         <button id="ci-confirm" class="btn-primary" data-on-click="${_on("confirmCheckinOutcome")}"${(_ciConfirmBlocked()||_ciBusy.has(S._ciId))?' disabled':''}${_ciBusy.has(S._ciId)?' aria-busy="true"':''}>${_ciConfirmLabel()}</button>
       </div>
-    </div></div>`;
+    </div></div>`);
   // First paint only (the pay/type toggles re-render): Confirm when a bike came with the
   // modal, otherwise the Bike field, which is where the next thing to arrive goes. After the
   // dialog focus manager (_syncModalFocus, 40ms after the mutation) has had its turn.
@@ -37112,7 +37115,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
   const sess=_sessDisp(e.sessionId),busy=_ciBusy.has(S._ciId),noRg=!_rgOk(S._ciRg);
   const tyBtn=ty=>`<button type="button" class="toggle-btn${S._ciType===ty?' active':''}" aria-pressed="${(S._ciType===ty)?'true':'false'}" data-on-click="${_on("_on_renderCheckinModal_2",_EV,_EL,ty)}">${typeLabel(ty)}</button>`;
   m.style.display='flex';
-  m.innerHTML=`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
+  _ciPaint(m,`<div class="modal-backdrop ci-drawer-bg" data-on-click="${_on("_on_renderCheckinModal_4",_EV,_EL)}">
     <div class="modal-box bkm-cbox ci-sat" role="dialog" aria-modal="true" aria-labelledby="dlgt-checkin">
       <div class="modal-title" id="dlgt-checkin">${t('checkInBtn')} · ${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_dkYUnappr(e)?` <span class="ci-ttag">${esc(t('apprPendingChip'))}</span>`:''}</div>
       ${_hBadge}
@@ -37127,7 +37130,7 @@ function _ciSatRender(e,m,_hBadge,_stepsHtml){
         <button class="btn-secondary" id="ci-waiting" data-on-click="${_on("applyCheckinChanges")}"${(noRg||busy)?' disabled':''}>${t('ciOutLater')}</button>
         <button class="btn-primary" id="ci-confirm" data-on-click="${_on("confirmCheckinModal")}"${(busy||_ciConfirmBlocked())?' disabled':''}>${busy?t('ciSending'):t('checkInBtn')}</button>
       </div>
-    </div></div>`;
+    </div></div>`);
   if(S._ciFocusOnce){S._ciFocusOnce=false;setTimeout(()=>{const c=document.getElementById(noRg?'ci-cancel':'ci-confirm');if(c&&!c.disabled)c.focus();},120);}
 }
 function closeCheckinModal(_noResume,_fromBus){

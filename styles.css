@@ -2358,7 +2358,7 @@
     :is(#tab-queue,#tab-history) .rq-mut{color:var(--muted);}
     :is(#tab-queue,#tab-history) .rq-cc{display:flex;gap:5px;align-items:center;}
     :is(#tab-queue,#tab-history) .rq-ccl{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:rgba(var(--green-rgb),.1);border:1px solid rgba(var(--green-rgb),.25);color:var(--green);text-decoration:none;transition:background .18s,color .18s,border-color .18s,transform .18s,box-shadow .18s,opacity .18s;}
-    :is(#tab-queue,#tab-history) .rq-nsflag{margin-inline-start:5px;font-size:var(--staff-fs-sm,12px);color:var(--orange);font-weight:800;white-space:nowrap;border:1px solid var(--orange);border-radius:2px;padding:1px 5px;}
+    :is(#tab-queue,#tab-history,#checkin-modal) .rq-nsflag{margin-inline-start:5px;font-size:var(--staff-fs-sm,12px);color:var(--orange);font-weight:800;white-space:nowrap;border:1px solid var(--orange);border-radius:2px;padding:1px 5px;}
     :is(#tab-queue,#wl-add-modal) .rq-fs0{flex-shrink:0;}
     :is(#tab-queue,#wl-add-modal) .rq-mb10{margin-bottom:10px;}
     #tab-queue .rq-mut12{color:var(--muted);font-size:12px;}
@@ -2434,7 +2434,6 @@
     /* the dark desk: fixed #1d4ed8 read about 2.7:1 on its near-black rows; its --blue is the readable one (bug hunt 2026-10-28) */
     html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-held{color:var(--blue);}
     #tab-queue .rq-more{min-width:34px;font-weight:900;letter-spacing:1px;}
-    #tab-queue .rq-nschip{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:2px 6px;white-space:nowrap;}
     #tab-queue .rq-apchip{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--orange);border:1px solid rgba(var(--warn-rgb),.4);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
     #tab-queue .rq-apchip-rej{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--red);border:1px solid rgba(var(--red-rgb),.4);border-radius:2px;padding:2px 8px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
     #tab-queue .rq-apok{font-size:var(--staff-fs-sm,12px);font-weight:900;color:var(--green);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
@@ -8846,14 +8845,13 @@ body.view-staff #tab-queue .q-card .rq-flw6>*{
   border-radius:8px;font-size:12px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;
 }
 /* the status words, as tiles with their colour's border */
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>:is(.rq-apok,.rq-apchip,.rq-apchip-rej,.rq-nschip){
+body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>:is(.rq-apok,.rq-apchip,.rq-apchip-rej){
   font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:.3px;text-transform:uppercase;border:1px solid;
 }
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apok{color:var(--green);border-color:rgba(var(--green-rgb),.45);background:rgba(var(--green-rgb),.08);}
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>button.rq-apok:hover{background:rgba(var(--green-rgb),.16);}
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.08);}
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip-rej{color:var(--red);border-color:rgba(var(--red-rgb),.45);background:rgba(var(--red-rgb),.06);}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-nschip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);}
 /* the row's select box, as a tile like the rest */
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select{border:1px solid var(--border);cursor:pointer;}
 body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;accent-color:var(--green);}
@@ -10525,12 +10523,10 @@ body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.row-select,
 body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apok,
 body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip,
 body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip-rej,
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-nschip,
 body.view-staff #tab-queue .q-card .rq-flw6>.row-select,
 body.view-staff #tab-queue .q-card .rq-flw6>.rq-apok,
 body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip-rej,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-nschip{grid-column:1;}
+body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip-rej{grid-column:1;}
 body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.btn-green,
 body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-msg,
 body.view-staff #tab-queue .q-card .rq-flw6>.btn-green,

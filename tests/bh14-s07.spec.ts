@@ -35,15 +35,16 @@ test.describe('@bh14 s07: sessions, promo codes, no-show flag', () => {
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    const counts = await page.evaluate(`(async()=>{
+    const counts = await page.evaluate<string[]>(`(async()=>{
       const mk=(id,st)=>({id,customerId:'c1',name:'A',phone:'',status:st,sessionId:'2026-09-0'+id.slice(-1)});
       S.queue=[mk('q1','noshow'),mk('q2','noshow'),mk('q3','waiting'),mk('q4','waiting')];
-      const a=customerNoShows(S.queue[3]);
+      const a=noShowFlag(S.queue[3]);
       S.queue[2].status='noshow';
       await Promise.resolve();
-      const b=customerNoShows(S.queue[3]);
+      const b=noShowFlag(S.queue[3]);
       return [a,b];
     })()`);
-    expect(counts).toEqual([2, 3]);
+    expect(counts[0]).toContain('2/2 no-shows');
+    expect(counts[1]).toContain('3/3 no-shows');
   });
 });
