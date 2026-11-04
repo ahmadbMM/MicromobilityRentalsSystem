@@ -19310,13 +19310,14 @@ async function _sessMoveRefs(from,to,ctx){
 }
 // One write to a ride. A database without a newer column names it (42703, PGRST204): each field then goes by itself, so that
 // column costs the ride nothing else, as the separate writes did. A real refusal stands.
+function _sessWrite(id,patch){return sb.from('sessions').update(patch).eq('id',id);}
 async function _sessPatch(id,patch){
   const miss=e=>/42703|PGRST204/.test(String((e&&e.code)||'')+' '+String((e&&e.message)||''));
-  const r=await sb.from('sessions').update(patch).eq('id',id);
+  const r=await _sessWrite(id,patch);
   if(!r||!r.error||!miss(r.error))return r;
   let bad=null;
   for(const k of Object.keys(patch)){
-    const x=await sb.from('sessions').update({[k]:patch[k]}).eq('id',id);
+    const x=await _sessWrite(id,{[k]:patch[k]});
     if(x&&x.error&&!miss(x.error)&&!bad)bad=x;
   }
   return bad||{error:null};
