@@ -9993,6 +9993,9 @@ async function selectEvent(ev){
   const _one=_soleSessionFor(ev);
   if(_one)S.selSession=_one.id;
   goCustomer('register');
+  // At the top, whatever was scrolled to reach the card: the list opened at the picker's scroll, under its heading,
+  // cut at whichever date fell there, and that date read as the only one (2026-11-04). Not smooth: this is a new page.
+  window.scrollTo(0,0);
 }
 // Staff set two things on an account that shape its own booking picker: types hidden from it
 // and an on-the-house perk (_regTypeHidden, _regHouseFor). The sign-in answers carry neither,
