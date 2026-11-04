@@ -199,6 +199,7 @@ with expected(fname, want_definer, note) as (values
   -- The 2026-09-27 feature round (20260928120000 … 20260928170000)
   ('staff_merge_customers',  true,  'moves every row of one account onto another across twelve tables; admins only'),
   ('staff_unmerge_customers',true,  'puts a merge back within thirty days; admins only'),
+  ('_type_closed_guard',     false, 'trigger: reads sessions, which everyone may; is_staff() does its own privileged read'),
   ('_booking_window_guard',  false, 'trigger: reads site_content, which everyone may; is_staff() does its own privileged read'),
   ('staff_live_position',    true,  'writes live_positions, which no client can write; staff only'),
   ('staff_live_stop',        true,  'deletes from live_positions; staff only'),

@@ -1064,6 +1064,8 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   errLoginFirst:'Sign in first.',
   errSelectSession:'Choose a session above.',
   errSessionClosed:'That session is no longer open.',
+  typeClosedPill:'Closed',errTypeClosed:'That bike type is closed for this session. Please choose another.',rsTypeClosed:'Your bike type is closed on that date. Please choose another date.',
+  closeTypesBtn:'Close bike types',closeTypesSub:'Tap a type to close it. Riders cannot book a closed type on this session; bookings already made stay, and staff can still add riders.',closeTypesLast:'At least one type has to stay open. To stop all bookings, close the session.',typesClosedChip:'Bike types closed: {0}',undoTypesClosed:'Bike types closed',typesClosedSaved:'Bike types saved.',
   errValidHeightCm:'Enter a height between 100 and 250 cm.',
   errSelectTypeGeneric:'Choose a bike type.',
   errAlreadyBooked:'You already have a booking for this session.',
@@ -1664,6 +1666,8 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   errLoginFirst:'الرجاء تسجيل الدخول أولاً.',
   errSelectSession:'الرجاء اختيار جلسة من الأعلى.',
   errSessionClosed:'هذه الجلسة لم تعد مفتوحة.',
+  typeClosedPill:'مغلق',errTypeClosed:'هذا النوع من الدراجات مغلق في هذه الجلسة. يرجى اختيار نوع آخر.',rsTypeClosed:'نوع دراجتك مغلق في ذلك الموعد. يرجى اختيار موعد آخر.',
+  closeTypesBtn:'إغلاق أنواع الدراجات',closeTypesSub:'اضغط على النوع لإغلاقه. لا يمكن للركاب حجز نوع مغلق في هذه الجلسة؛ تبقى الحجوزات القائمة، ويظل بإمكان الموظفين إضافة ركاب.',closeTypesLast:'يجب أن يبقى نوع واحد مفتوحًا على الأقل. لإيقاف جميع الحجوزات، أغلق الجلسة.',typesClosedChip:'أنواع الدراجات المغلقة: {0}',undoTypesClosed:'أنواع الدراجات المغلقة',typesClosedSaved:'تم حفظ أنواع الدراجات.',
   errValidHeightCm:'أدخل طولاً بين 100 و250 سم.',
   errSelectTypeGeneric:'الرجاء اختيار نوع الدراجة.',
   errAlreadyBooked:'لديك حجز مسبق في هذه الجلسة.',
@@ -4942,7 +4946,7 @@ function _sessFromPrice(s){
   const seat=_evSeatPrice(s);
   if(seat!=null)return seat?_sar(seat):t('freeLabel');
   if(!_needsBike(s))return'';
-  const ps=bikeTypeOpts(false,_noCarbon(s)).filter(ty=>ty!=='Any').map(priceForType);
+  const ps=bikeTypeOpts(false,_noCarbon(s)).filter(ty=>ty!=='Any'&&!_typeClosed(s,ty)).map(priceForType); // the cheapest bike a rider can still book
   return ps.length?t('priceFrom').replace('{0}',_sar(Math.min(...ps))):'';
 }
 // Where a ride happens, by name. A night on the circuit is at the Jeddah Corniche Circuit (one
@@ -5541,6 +5545,21 @@ const CUST_TYPES=['Any','Road','Hybrid','Mountain','Kids','Road Carbon','Own'];
 // The database holds the same rule in _comm_no_carbon (20260921210000).
 function bikeTypeOpts(allowOwn,noCarbon){return CUST_TYPES.filter(ty=>(ty!=='Own'||allowOwn)&&(ty!=='Road Carbon'||!noCarbon));}
 function _noCarbon(s){return _isCommunity(s)&&_rideKind(s)!=='petromin';}
+// A bike type staff closed on this session (sessions.closed_types): the session stays open and riders book its other
+// types (the owner, 2026-11-03: "add an option to close a specific bike type for reservation instead of closing the
+// whole session"). The database holds the same rule in _type_closed_guard (20261103210000).
+function _typesClosed(s){const v=s&&s.closed_types;return Array.isArray(v)?v:[];}
+function _typeClosed(s,ty){return _typesClosed(s).includes(ty);}
+// What a bike costs before one is picked: Any's range, less what is closed on this ride. Road Carbon stays out of the
+// range, as it does of Any's, unless it is all that is left. A ride with nothing closed reads exactly as before.
+function _regRange(s,ty){
+  if(ty==='Any'&&_typesClosed(s).length){
+    const open=bikeTypeOpts(false,_noCarbon(s)).filter(x=>x!=='Any'&&!_typeClosed(s,x)),base=open.filter(x=>x!=='Road Carbon');
+    const ps=(base.length?base:open).map(priceForType);
+    if(ps.length)return[Math.min(...ps),Math.max(...ps)];
+  }
+  return[priceForType(ty),priceForTypeMax(ty)];
+}
 // The "i" beside a type pill (2026-09-27): a sheet with a picture of the bike and a short brief, so
 // a customer knows what they are choosing. The fleet is Alvas bikes. Each type's picture is
 // assets/bikes/<img>.webp - drop the file in and rebuild: the build stamps BIKE_IMG_V from the folder,
@@ -13138,6 +13157,15 @@ function _regTyBarred(ty,sess){
   return bikeTypeOpts(_ownOffered(sess),_noCarbon(sess)).some(x=>x!=='Any'&&!_regTypeHidden(x));
 }
 
+// A type closed on this ride (_typeClosed) is shut to a row of the form: never picked, never carried over. A rider
+// changing a booking keeps the type that row already holds, as the database does (_type_closed_guard).
+function _regTypeShut(s,ty,i){
+  if(!_typeClosed(s,ty))return false;
+  if(!S.modifyEntryId)return true;
+  const e=_modEntries(S.loggedIn||getSession(),s.id)[i];
+  return !e||e.typePreference!==ty;
+}
+
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderRegister_1(event,el,a0){S.regRiderNames[a0]=el.value}
 function _on_renderRegister_2(event,el){if(event.key==='Enter'||event.key===' '){event.preventDefault();_photoZoom(el);}}
@@ -13190,6 +13218,7 @@ function renderRegister(){
   // A type staff hid from this rider reads as not chosen yet too (_regTyBarred, 2026-10-05); a booking
   // being changed keeps the types it was made with (its riders added here start with none).
   if(!S.modifyEntryId)S.regBikeTypes=S.regBikeTypes.map(ty=>_regTyBarred(ty,_selSessObj)?undefined:ty);
+  S.regBikeTypes=S.regBikeTypes.map((ty,i)=>_regTypeShut(_selSessObj,ty,i)?undefined:ty); // so does a type closed on this ride
   if(S._bw===undefined)_bwLoad(); // the booking window, once; the list repaints when it lands
   let available=allSessions().filter(s=>_sessLive(s)&&!_sessPastDay(s)&&!_sessEnded(s)&&_evMatch(s,_ev)) // men or women only too: everyone sees it, that gender alone books it (_sgPick, 2026-10-28); a ride that ended earlier today is gone, as the server refuses it (bug hunt 2026-10-28)
     .sort((a,b)=>new Date(a.session_date||a.id)-new Date(b.session_date||b.id));
@@ -13357,7 +13386,7 @@ function renderRegister(){
     </div>`).join('');
   // Members' bikes all taken on this ride (member_cap, 20261017120000): asked once per ride (_mbAsk).
   if(_selSessObj&&_isCommunity(_selSessObj)&&_needsBike(_selSessObj)&&_selSessObj.member_cap!=null&&!isModifyMode)_mbAsk(_selSessObj.id);
-  const _mbOnlyOwn=!!_selSessObj&&!isModifyMode&&_ownOffered(_selSessObj)&&_mbFullFor(_selSessObj.id);
+  const _mbOnlyOwn=!!_selSessObj&&!isModifyMode&&_ownOffered(_selSessObj)&&_mbFullFor(_selSessObj.id)&&!_typeClosed(_selSessObj,'Own');
   const bikeSections=!_needsBike(_selSessObj)?seatSections:Array.from({length:S.regQty},(_,i)=>{
     const isFirst=i===0;
     const bikeH=S.regBikeHeights[i]||(isFirst&&cust?cust.height:'')||''; // rider 1 = the account holder: use the height saved on their account (they can still change it)
@@ -13382,10 +13411,13 @@ function renderRegister(){
     if(_mbOnlyOwn){if(!_tyOpts.includes('Own'))_tyOpts.push('Own');if(S.regBikeTypes[i]!=='Own'){S.regBikeTypes[i]='Own';}}
     // Every real bike carries an "i" beside its pill (_typePick): its picture and brief, with a Choose.
     // Each pill says what that bike costs, so Road Carbon's price is not a surprise at the total.
-    const _pp=ty=>(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':` <span class="tp-price">${esc(_sar(priceForType(ty)))}</span>`;
+    // A type closed on this ride stays on the list, greyed and saying so, so a rider is not left wondering where it
+    // went; its "i" still describes the bike, without a Choose.
+    const _shut=ty=>_regTypeShut(_selSessObj,ty,i);
+    const _pp=ty=>_shut(ty)?` <span class="tp-price">${t('typeClosedPill')}</span>`:(_freeSel||_evSeatPrice(_selSessObj)!=null||ty==='Any'||ty==='Own')?'':` <span class="tp-price">${esc(_sar(priceForType(ty)))}</span>`;
     const _selTy=_mbOnlyOwn?'Own':selTy;
     const typeBtns=_tyOpts.map(ty=>_typePick(
-      `<button class="toggle-btn${_selTy===ty?' active':''}" aria-pressed="${(_selTy===ty)?'true':'false'}" data-type-slot="${i}" data-type="${ty}"${(_mbOnlyOwn&&ty!=='Own')?' disabled aria-disabled="true"':''} data-on-click="${_on("setBikeType",i,ty)}"><span class="tp-txt">${typePillLabel(ty)}${_pp(ty)}</span></button>`,ty,i)
+      `<button class="toggle-btn${_selTy===ty?' active':''}${_shut(ty)?' tp-shut':''}" aria-pressed="${(_selTy===ty)?'true':'false'}" data-type-slot="${i}" data-type="${ty}"${((_mbOnlyOwn&&ty!=='Own')||_shut(ty))?' disabled aria-disabled="true"':''} data-on-click="${_on("setBikeType",i,ty)}"><span class="tp-txt">${typePillLabel(ty)}${_pp(ty)}</span></button>`,ty,_shut(ty)?null:i)
     ).join('');
 
     const divider=(S.regQty>1&&i<S.regQty-1)?`<div class="cu-divider"></div>`:'';
@@ -13999,6 +14031,7 @@ function validateRegInputs(){
   const _vSess=_sessDisp(S.selSession);
   for(let i=0;i<qty;i++){
     if(_regTyBarred(S.regBikeTypes[i],_vSess))S.regBikeTypes[i]=undefined; // hidden from this rider: asked again (2026-10-05)
+    if(_regTypeShut(_vSess,S.regBikeTypes[i],i))S.regBikeTypes[i]=undefined; // closed on this ride since it was picked: asked again
     if(S.regBikeTypes[i]==='Any'||S.regBikeTypes[i]==='None')S.regBikeTypes[i]=undefined; // Any is staff's to give: the rider picks a bike (2026-10-09); None is no bike, never one on a bike night (bug hunt 2026-10-28)
     if(!S.regBikeTypes[i]){
       const wrap=document.getElementById(`reg-type-wrap-${i}`);
@@ -14112,8 +14145,8 @@ function _regPriceBox(sess){
   if(_isFreeRide(sess))return`<div class="price-preview"><div class="price-preview-breakdown">${t('pricePerBike')}</div><div class="price-preview-total">${t('freeLabel')}</div></div>`;
   const q=S.regQty,ty=i=>S.regBikeTypes[i]||'Any';
   const hf=i=>i===0&&_regHouseSelf()&&_regHouseFor(ty(i));
-  let lo=0,hi=0;for(let i=0;i<q;i++){if(!hf(i)){lo+=priceForType(ty(i));hi+=priceForTypeMax(ty(i));}}
-  const brk=q>1?Array.from({length:q},(_,i)=>`${t('bike')} ${i+1}: <bdi>${esc(hf(i)?t('onTheHouseLabel'):priceDisplay(ty(i)))}</bdi>`).join(' &nbsp;&middot;&nbsp; '):t('pricePerBike');
+  let lo=0,hi=0;for(let i=0;i<q;i++){if(!hf(i)){const[a,b]=_regRange(sess,ty(i));lo+=a;hi+=b;}}
+  const brk=q>1?Array.from({length:q},(_,i)=>`${t('bike')} ${i+1}: <bdi>${esc(hf(i)?t('onTheHouseLabel'):_sarRange(..._regRange(sess,ty(i))))}</bdi>`).join(' &nbsp;&middot;&nbsp; '):t('pricePerBike');
   const own=S.regBikeTypes.slice(0,q).every(x=>x==='Own');
   return`<div class="price-preview">
     <div class="price-preview-breakdown">${brk}</div>
@@ -14129,7 +14162,7 @@ function _regGrandStr(sess){
   if(_isFreeRide(sess))return t('freeLabel');
   const q=S.regQty,ty=i=>S.regBikeTypes[i]||'Any',seat=_evSeatPrice(sess);
   const hf=i=>i===0&&_regHouseSelf()&&_regHouseFor(ty(i));
-  let lo=0,hi=0;for(let i=0;i<q;i++){if(hf(i))continue;lo+=seat!=null?seat:priceForType(ty(i));hi+=seat!=null?seat:priceForTypeMax(ty(i));}
+  let lo=0,hi=0;for(let i=0;i<q;i++){if(hf(i))continue;const[a,b]=_regRange(sess,ty(i));lo+=seat!=null?seat:a;hi+=seat!=null?seat:b;}
   const ad=addonsCost(S.regAddons),d=_regPromoDisc();
   return d>0?_sar(Math.max(0,lo-d)+ad):_sarRange(lo+ad,hi+ad);
 }
@@ -14152,6 +14185,7 @@ function _regSideHtml(sess){
 }
 function setBikeType(idx,type){
   if(type==='Any')return; // never a rider's choice (the owner, 2026-10-09: "make sure they can never choose any")
+  if(_regTypeShut(_sessDisp(S.selSession),type,idx))return; // nor a type closed on this ride
   S.regBikeTypes[idx]=type;
   document.querySelectorAll(`[data-type-slot="${idx}"]`).forEach(btn=>{
     btn.classList.toggle('active',btn.dataset.type===type);
@@ -14294,6 +14328,9 @@ function _bookRefused(err,sess){
   const m=((err&&err.code)||'')+' '+((err&&err.message)||'');
   if(/STALE_SESSION/.test(m)){doLogout(true);toast(t('errSessionStale'),'warning');return;}
   if(/SESSION_CLOSED/.test(m)){toast(t('errSessionClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}
+  // A type staff closed while this rider was on the form (TYPE_CLOSED, _type_closed_guard): the sessions are read again
+  // and the riders step, with that type greyed and no longer picked, asks for another.
+  if(/TYPE_CLOSED/.test(m)){toast(t('errTypeClosed'),'error');loadDataLight().then(()=>{if(S.view==='customer'){S.regStep=2;renderRegister();}}).catch(()=>{});return;}
   // A men-only or women-only session this account is not for (GENDER_ONLY, 20261027150000): said in words, and the
   // sessions read again, which no longer list it.
   {const sg=_sgErrOf(err);if(sg){toast(sg,'error');loadDataLight().then(()=>{if(S.view==='customer')renderRegister();}).catch(()=>{});return;}}
@@ -15261,7 +15298,7 @@ function bookMyUsual(){
   // must not tunnel past that); stale promo/add-ons from an abandoned run don't ride along.
   // ...nor one this night does not offer ("My own bike" is the Saturday ride's): seeded, it was cleared on the
   // review it jumped to, which then showed the rider "Any" and refused the Confirm with no picker on screen.
-  const _usualTy=(cust.type_preference&&cust.type_preference!=='Any'&&!_regTypeHidden(cust.type_preference)&&bikeTypeOpts(_ownOffered(pick),_noCarbon(pick)).includes(cust.type_preference))?cust.type_preference:null; // Any is staff's to give (2026-10-02)
+  const _usualTy=(cust.type_preference&&cust.type_preference!=='Any'&&!_regTypeHidden(cust.type_preference)&&!_typeClosed(pick,cust.type_preference)&&bikeTypeOpts(_ownOffered(pick),_noCarbon(pick)).includes(cust.type_preference))?cust.type_preference:null; // Any is staff's to give (2026-10-02)
   S.regBikeTypes=[_usualTy||undefined];
   S.regBikeHeights=[cust.height?String(cust.height):''];
   S.regRiderNames=[cust.name||''];
@@ -18850,11 +18887,13 @@ function renderSessions(){
     // Cancelling used to mean closing the session and every rider finding out at the gate.
     const _cnLive=(!_nightOver&&s.status!=='closed')?(_qBySession().get(s.id)||[]).filter(e=>['waiting','waitlist','active'].includes(e.status)).length:0;
     const _cancelNightBtn=_cnLive?`<button class="btn-sm btn-muted ss-c-red" data-on-click="${_on("_on_renderSessions_41",_EV,_EL,s.id)}">${t('cnBtn')} (${_cnLive})</button>`:'';
+    const _tcN=_typesClosed(s).length;
+    const _typesBtn=(_needsBike(s)&&!_nightOver)?`<button class="btn-sm btn-muted" data-on-click="${_on("showTypeClose",s.id)}">${t('closeTypesBtn')}${_tcN?` (${_tcN})`:''}</button>`:'';
     let badge,actions;
     if(s.status==='open'){badge=`<span class="badge-open">${t('statusOpen')}</span>`;actions=`<button class="btn-sm btn-muted" data-on-click="${_on("_on_renderSessions_42",_EV,_EL,s.id)}">${t('markFullBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_43",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
     else if(s.status==='full'){badge=`<span class="badge-full">${t('statusFull')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_44",_EV,_EL,s.id)}">${t('reopenBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("_on_renderSessions_45",_EV,_EL,s.id)}">${t('closeBtn')}</button>`;}
     else{badge=`<span class="badge-closed">${t('statusClosed')}</span>`;actions=`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderSessions_46",_EV,_EL,s.id)}">${t('openBtn')}</button>`;}
-    return{booked,cap,left,fleetInfo,badge,actions:actions+_closeoutBtn+_cancelNightBtn};
+    return{booked,cap,left,fleetInfo,badge,actions:actions+_typesBtn+_closeoutBtn+_cancelNightBtn};
   };
   // Nothing picked yet on a wide screen: the detail pane shows the next live ride rather than an empty
   // "Select a session" (2026-10-03). Not stored in S - on a phone the detail replaces the list, so a
@@ -18866,7 +18905,7 @@ function renderSessions(){
     return`<button class="sess-lc th-${_sfTheme(s)} ${_evClass(s)}${sel?' selected':''}" aria-current="${(sel)?'true':'false'}" data-on-click="${_on("selectSessionDetail",s.id)}" aria-label="${esc(shortDate(s.session_date||s.id)+_sgDot(s))}">
       <div class="sess-lc-top"><span class="sess-lc-date">${shortDate(s.session_date||s.id)}</span>${_cChip}${d.badge}</div>
       <div class="sess-lc-meta">${dayLabel(s.day)||''} · <bdi>${sessionTime(s)}</bdi>${_sgChip(s)?' '+_sgChip(s):''}</div>
-      ${_bfAt(s)?`<div class="sess-lc-bf">${_artIcon('cup',12)}<bdi>${esc(_bfAt(s))}</bdi></div>`:''}${_revealStaffHtml(s,'sess-lc-rv')}
+      ${_bfAt(s)?`<div class="sess-lc-bf">${_artIcon('cup',12)}<bdi>${esc(_bfAt(s))}</bdi></div>`:''}${_revealStaffHtml(s,'sess-lc-rv')}${_typesClosedLine(s,'sess-lc-tc')}
       <div class="sess-lc-bar"><div class="ss-fill ${pct>=100?'ss-fill-full':pct>80?'ss-fill-high':'ss-fill-ok'}" data-cssv="${_cssv({'--ss-w':pct+'%'})}"></div></div>
       <div class="sess-lc-count">${d.booked}/${d.cap} · ${d.left} ${t('spotsLeft')}</div>
     </button>`;};
@@ -18878,7 +18917,7 @@ function renderSessions(){
       return`<div class="sess-rider"><span class="sess-rider-q">#${e.queueNum}</span><div class="sess-rider-info"><div class="sess-rider-name">${esc(e.name)}</div>${bk?`<div class="sess-rider-bike">${bk}</div>`:''}</div>${statusBadge(e.status)}</div>`;
     }).join(''):_emptyState(t('sessNoRiders'),{cls:'ss-noriders'});
     return`<button class="sess-back-btn" data-on-click="${_on("selectSessionDetail",null)}">‹ ${t('sessBackList')}</button>
-      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}</div>${d.badge}</div>
+      <div class="sess-detail-head"><div class="ss-minw0"><div class="sess-detail-date">${shortDate(_selSess.session_date||_selSess.id)}</div><div class="sess-detail-day">${dayLabel(_selSess.day)||''} · <bdi>${sessionTime(_selSess)}</bdi></div>${_sgChip(_selSess)?`<div class="sess-detail-sg">${_sgChip(_selSess)}</div>`:''}${_bfAt(_selSess)?`<div class="sess-detail-bf">${_artIcon('cup',13)}<bdi>${esc(_bfAt(_selSess))}</bdi></div>`:''}${_revealStaffHtml(_selSess,'sess-detail-rv')}${_typesClosedLine(_selSess,'sess-detail-tc')}</div>${d.badge}</div>
       <div class="sess-detail-stats">
       ${(()=>{const _c=waitlistCap(_selSess);if(_c==null)return'';
         const _u=waitlistUsed(_selSess.id);
@@ -19673,6 +19712,68 @@ async function toggleSession(id,newStatus){
     // the staff review, 2026-10-28). The question settles nothing: only its Close out now opens Close out. Tonight's
     // ride closed before it starts (sign-ups stopped in the afternoon) has nobody to settle yet, so is not asked.
     if(newStatus==='closed'){const n=_coCount(id);if(n&&_coXStarted({sessionId:id}))_coXAsk(id,n);}
+  }catch(e){toast(t('errServerError'),'error');}
+}
+
+// Close one bike type instead of the whole session (the owner, 2026-11-03). Riders can no longer book it (_regTypeShut
+// on the form, _type_closed_guard in the database); the session, the bookings already made and staff's own adds are
+// left alone. The last open type cannot be closed here: a session with nothing to book is the session's own Close.
+// A clone and a template start with every type open, so a night's closure does not spread to other nights.
+function _typesClosedLine(s,cls){
+  const c=s.status==='closed'?[]:_typesClosed(s);
+  return c.length?`<div class="${cls}">${esc(t('typesClosedChip').replace('{0}',c.map(typeLabel).join(', ')))}</div>`:'';
+}
+function _tcTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any');}
+function showTypeClose(sid){
+  const s=_sessDisp(sid),m=document.getElementById('confirm-modal');
+  if(!s||!m||(m.style.display!=='none'&&m.innerHTML))return;
+  const closed=_typesClosed(s).slice(),when=`${dayLabel(s.day)||''} ${shortDate(s.session_date||sid)}`.trim();
+  S._tc={sid,closed};
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_confirmDialog_1",_EV,_EL)}">
+    <div class="confirm-box" id="tc-box" role="dialog" aria-modal="true" aria-labelledby="tc-title">
+      <div class="chrome-dh10"><div class="chrome-dt" id="tc-title">${esc(t('closeTypesBtn'))} · ${esc(when)}</div>
+        <button type="button" data-on-click="${_on("closeConfirm")}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt x-close">&times;</button></div>
+      <div class="chrome-dbody">${esc(t('closeTypesSub'))}</div>
+      <div class="tc-types">${_tcTypes(s).map(ty=>`<button type="button" class="toggle-btn${closed.includes(ty)?' active':''}" aria-pressed="${closed.includes(ty)}" data-on-click="${_on("_tcPick",_EL,ty)}">${esc(typeLabel(ty))}<span class="tc-state" aria-hidden="true">${esc(t('typeClosedPill'))}</span></button>`).join('')}</div>
+      <div id="tc-last" class="tc-last" role="status" hidden>${esc(t('closeTypesLast'))}</div>
+      <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on("closeConfirm")}">${esc(t('cancelBtn'))}</button>
+        <button type="button" id="tc-save" class="btn-primary chrome-mw100" data-on-click="${_on("saveTypeClose")}">${esc(t('saveBtn'))}</button></div>
+    </div></div>`;
+  _tcSync();
+}
+function _tcPick(el,ty){
+  const d=S._tc;if(!d)return;
+  d.closed=d.closed.includes(ty)?d.closed.filter(x=>x!==ty):[...d.closed,ty];
+  const on=d.closed.includes(ty);
+  el.classList.toggle('active',on);el.setAttribute('aria-pressed',String(on));
+  _tcSync();
+}
+function _tcSync(){
+  const d=S._tc,s=d&&_sessDisp(d.sid),save=document.getElementById('tc-save'),last=document.getElementById('tc-last');
+  if(!s||!save||!last)return;
+  const all=_tcTypes(s).every(ty=>d.closed.includes(ty));
+  save.disabled=all;last.hidden=!all;
+}
+async function saveTypeClose(){
+  const d=S._tc,s=d&&_sessDisp(d.sid);if(!s)return;
+  const types=_tcTypes(s),next=types.filter(ty=>d.closed.includes(ty));
+  if(next.length>=types.length)return;
+  S._tc=null;closeConfirm();
+  await _tcWrite(d.sid,next);
+}
+async function _tcWrite(id,next){
+  try{
+    const prevS=_sessDisp(id),prev=_typesClosed(prevS);
+    if(next.length===prev.length&&next.every(ty=>prev.includes(ty)))return;
+    if(_writeErr(await sb.from('sessions').update({closed_types:next}).eq('id',id),'closed bike types',()=>_tcWrite(id,next)))return;
+    await loadData();
+    toast(t('typesClosedSaved'));
+    pushUndo(`${t('undoTypesClosed')} ${shortDate(prevS?.session_date||id)} → ${next.length?next.map(typeLabel).join(', '):'-'}`,async()=>{
+      if(_writeErr(await sb.from('sessions').update({closed_types:prev}).eq('id',id),'undo closed bike types'))return false;
+      await loadData();renderSessions();
+    });
+    renderSessions();
   }catch(e){toast(t('errServerError'),'error');}
 }
 
@@ -24690,7 +24791,7 @@ function _koRide(sid){
   if(mine){K.res={qn:mine.queueNum,name:mine.name,sid,already:true};_koGo('done');return;}
   _koGo(_needsBike(s)?'bike':'waiver');
 }
-function _koTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any');}
+function _koTypes(s){return bikeTypeOpts(_ownOffered(s),_noCarbon(s)).filter(x=>x!=='Any'&&!_typeClosed(s,x));} // the kiosk's device is signed in as staff, whom the server lets through
 function _koType(ty){const K=S._kiosk;_koKeep();K.D.type=ty;_koRender();}
 function _koBikeNext(){
   const K=S._kiosk;_koKeep();const s=_sessGet(K.sid),h=parseInt(_koDigits(K.D.height),10);
@@ -29718,6 +29819,7 @@ function _rsRefused(err,sess){
   if(_rideRuleRefusal(err)==='MEMBERS_ONLY'){showCommMembersModal(_noCycle(sess));return true;}
   if(/NOT_OPEN_YET/.test(m)){toast(_bwOpensText(sess)||t('rsNotOpenYet'),'error');return true;}
   if(/PAID_MOVE/.test(m)){toast(t('rsPaidMove'),'error');return true;}
+  if(/TYPE_CLOSED/.test(m)){toast(t('rsTypeClosed'),'error');return true;}
   return false;
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
@@ -29765,6 +29867,9 @@ async function rescheduleBooking(fromSessionId,toSessionId){
   if(_rideKind(newSess)==='snd96'||_rideKind(_sessDisp(fromSessionId))==='snd96'){closeRescheduleModal();return;} // National Day: in or out, see showRescheduleModal
   // the same rule as the list (a list drawn a while ago may name a ride that has ended or is not one to move to)
   if(!_rsTarget(newSess,fromSessionId)){closeRescheduleModal();toast(!_bwOpen(newSess)?(_bwOpensText(newSess)||t('rsNotOpenYet')):t('errSessionClosed'),'error');return;}
+  // A type closed on that date is said before anything moves: the server refuses only the rider on it, which would
+  // leave a party split across two dates. The list stays open for another date.
+  if(moving.some(e=>_typeClosed(newSess,e.typePreference))){toast(t('rsTypeClosed'),'error');return;}
   // Same capacity yardstick as booking (spotsLeft): counting only waiting+active here let a
   // rescheduler land as 'waiting' ahead of riders already waitlisted in the target session.
   if(spotsLeft(toSessionId)<moving.length){toast(t('rescheduleFull'),'error');return;}

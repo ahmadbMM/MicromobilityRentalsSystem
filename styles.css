@@ -1111,6 +1111,8 @@
     .toggle-btn{padding:8px 18px;background:var(--s3);border:1px solid var(--border);border-radius:5px;color:var(--muted);font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;white-space:nowrap;}
     .toggle-btn:hover{border-color:rgba(var(--tint-rgb),.2);color:var(--text);}
     .toggle-btn.active{background:rgba(var(--green-rgb),.08);border-color:var(--green);color:var(--green);}
+    .toggle-btn.tp-shut{opacity:.55;cursor:not-allowed;background:rgba(var(--tint-rgb),.05);}
+    .toggle-btn.tp-shut .tp-price{opacity:1;}
     /* The "i" beside a bike-type pill (2026-09-27): the pair reads as one chip, the pill's end corners
        squared against the "i". The pill keeps its own hooks and styles. */
     .type-pick{display:inline-flex;align-items:stretch;}
@@ -9520,6 +9522,18 @@ html[data-staff-theme="dark"] body.view-staff :is(.sess-chip-bf,.sess-lc-bf,.ses
 body.view-staff .sess-chip-bf{margin-top:2px;}
 body.view-staff .sess-lc-bf{margin:-4px 0 8px;}
 body.view-staff .sess-detail-bf{margin-top:4px;}
+body.view-staff :is(.sess-lc-tc,.sess-detail-tc){font-size:12px;font-weight:700;color:#b42318;}
+html[data-staff-theme="dark"] body.view-staff :is(.sess-lc-tc,.sess-detail-tc){color:#fca5a5;}
+body.view-staff .sess-lc-tc{margin:-4px 0 8px;}
+body.view-staff #sess-host .sess-lc:is(.th-jcc,.th-snd96) .sess-lc-tc{color:#fecaca;}
+body.view-staff .sess-detail-tc{margin-top:4px;}
+#confirm-modal .tc-types{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+#confirm-modal .tc-types .toggle-btn.active{background:#b42318;border-color:#b42318;color:#fff;}
+#confirm-modal .tc-state{display:none;margin-inline-start:6px;font-weight:500;}
+#confirm-modal .toggle-btn.active .tc-state{display:inline;}
+#confirm-modal .tc-last{font-size:13px;font-weight:700;color:#b42318;margin-bottom:16px;}
+html[data-staff-theme="dark"] #confirm-modal .tc-last{color:#fca5a5;}
+#confirm-modal #tc-save:disabled{opacity:.45;cursor:not-allowed;}
 /* The correction page's new boxes (2026-10-06, every field can be flagged): a handle after its @, the emergency
    contact's three boxes, and "I don't have one", which sets a box aside */
 .fx-soc{display:flex;align-items:center;gap:6px;min-width:0;}

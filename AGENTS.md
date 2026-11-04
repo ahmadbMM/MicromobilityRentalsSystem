@@ -369,6 +369,30 @@ rider to its second step with a one-time code (`customer_handoff_create`). No ap
 (approve, reject, invite, changes) carries account details; a temporary password goes only in the
 password message (`CA_TP_MSG`: the password, where to sign in, and that it is changed at once).
 
+## Closing one bike type on a session (2026-11-03)
+
+`sessions.closed_types` (text[], default empty; migration `20261103210000`) lists the types riders can no longer book
+on that session; the session itself stays open. Staff set it with **Close bike types** on the session's detail
+(`showTypeClose`, beside Mark Full and Close; bike sessions that are not over only). The list and the detail name what
+is closed (`_typesClosedLine`). The last open type cannot be closed there: that is the session's own Close.
+
+- **The rule lives in the database.** `_type_closed_guard` (BEFORE INSERT OR UPDATE OF type_preference, session_id on
+  `queue_entries`) raises `TYPE_CLOSED` for a type the row's session has closed. Staff pass, as they do the booking
+  window. A row that keeps its type and session passes, so a rider's existing booking can still be edited and a
+  waitlisted rider can still be moved up. It is named `trg_` so it runs after the triggers that rewrite the type
+  (`queue_entries_comm_no_carbon`, `queue_entries_vip_no_carbon`; triggers fire by name).
+- **On the form.** A closed type stays on the list, disabled and labelled Closed (`typeClosedPill`), with no Choose on
+  its "i"; it is never seeded or carried over (`_regTypeShut`, in `renderRegister`, `setBikeType` and the validation).
+  A rider changing a booking keeps the type that row holds. `_sessFromPrice` and the range shown before a type is picked
+  (`_regRange`) skip closed types, and so does the kiosk (`_koTypes`), whose device is signed in as staff and so would
+  pass the server. `_bookRefused` says `TYPE_CLOSED`
+  and returns to the riders step; a reschedule refuses before moving anyone (`rescheduleBooking`), because the server
+  would refuse only the rider on that type and split the party.
+- **Staff pickers are not filtered**: the desk may still put a rider on a closed type on purpose.
+- **Not copied.** A clone and a template start with every type open; "apply to future nights" leaves each night's list alone.
+- **Website.** Experiences reads `closed_types` as an optional column group and leaves a closed type out of the "from"
+  price and the price list.
+
 ## The "i" beside a bike type (2026-09-27)
 
 Every real bike type on the booking form and the account page carries an "i" beside its pill
