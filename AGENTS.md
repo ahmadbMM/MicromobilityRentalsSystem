@@ -1127,6 +1127,7 @@ location JCC. It is a date INSIDE MicroMobility Experiences (`_evMatch` communit
   Tests: `tests/defe-run.spec.ts`.
 
 ## Blood Donation event (2026-11-03)
+- **Blood Donor badge (2026-11-05):** `blood_donor`, the drop on the red medal, earned from staff's Donated mark (`donatedAt`), so taking the mark back takes the badge; shown only once held. **Volunteer badge:** `volunteer`, the raised hand on its own blue special medal (`BDG_SPECIAL.volunteer`, `.sp-volunteer`), given by staff from Community > Badges. Catalogue rows: migration 20261105100000. Mirrored in the website's `lib/ride-record.ts`.
 MoD Health Services and the Ministry of Sport at the Jeddah Corniche Circuit, Thu 5 Nov 2026 17:00-23:00 (moved from 15 Oct), open to
 everyone, free, no bikes. `ride_kind 'blood'` (event_kind community, open_to_all true, no approval), session id suffix `-bd`, location JCC, capacity
 100000 (no real cap; the staff form's 500 limit exempts it). Names use `_bld` / `bld` / `bld-`: `_bd*` is taken by the birthday helpers.

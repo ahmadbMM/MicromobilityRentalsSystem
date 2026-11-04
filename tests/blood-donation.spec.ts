@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb, captureBookingRows } from './helpers/supabase';
 import { readFileSync } from 'node:fs';
 
@@ -256,6 +256,62 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(tk.getByRole('button', { name: /Cancel/ })).toHaveCount(1);
     // the page around it is My Bookings, not the event
     await expect(page.locator('body')).not.toHaveClass(/bld-skin/);
+  });
+});
+
+test.describe('@customer:blood The Blood Donor and Volunteer badges', () => {
+  const row = (donated: string | null) => ({ id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'done', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', donated_at: donated });
+  const catalog = [
+    { id: 'bd_blood_donor', slug: 'blood_donor', icon: 'drop', color: 'red', name: 'Blood Donor', system: true, auto: true, retired: false, sort: 91 },
+    { id: 'bd_volunteer', slug: 'volunteer', icon: 'hand', color: 'blue', name: 'Volunteer', system: true, auto: false, retired: false, sort: 81 },
+  ];
+  async function rider(page: Page, donated: string | null, x: Record<string, unknown> = {}) {
+    await stubSupabase(page, custFx({ queue_entries: [row(donated)], 'rpc:my_bookings': [row(donated)], 'rpc:badge_catalog': catalog, ...x }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+
+  test('marked Donated: the drop on the red medal, once with a pop-up, with no word of a ride', async ({ page }) => {
+    await rider(page, '2099-11-05T16:00:00Z');
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('New badge!');
+    await expect(pop).toContainText('Blood Donor');
+    await expect(pop).toContainText('Donate blood at one of our events.');
+    await expect(pop.locator('svg.bdg-m.bdc-red')).toHaveCount(1);
+    expect(await pop.innerText()).not.toMatch(/\bride\b|\bbike\b/i);
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donor' })).toHaveCount(1);
+  });
+
+  test('the mark taken back, or never given, shows no badge at all: not even to earn', async ({ page }) => {
+    await rider(page, null);
+    await expect(page.locator('#mr-badges-host')).toHaveCount(1);
+    await page.evaluate(`_mrBadgesMore()`);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: 'Blood Donor' })).toHaveCount(0);
+    await expect(page.locator('#badge-pop')).toHaveCount(0);
+  });
+
+  test('Volunteer: staff give it, on its own blue medal, the heart cut out of the raised hand', async ({ page }) => {
+    await rider(page, null, { 'rpc:customer_my_badges': [{ ...catalog[1], note: 'Blood Donation night', at: '2099-11-05T18:00:00Z' }] });
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('Volunteer');
+    await expect(pop).toContainText('Given by the MicroMobility team');
+    await expect(pop).toContainText('Blood Donation night');
+    await expect(pop.locator('svg.bdg-m.bdg-sp path[fill-rule="evenodd"]')).toHaveCount(1);
+    await expect(page.locator('#badge-pop .badge-pop-box.sp-volunteer')).toHaveCount(1);
+    expect(await page.evaluate(`[BDG_GIVEN_SYS.includes('volunteer'),BD_SYS.blood_donor[1],BD_SYS.volunteer[1],BDG_GIVEN_SYS.includes('blood_donor')]`)).toEqual([true, 'red', 'volunteer', false]);
+  });
+
+  test('every language has both badges, and the migration offers Volunteer to staff and earns Blood Donor', async () => {
+    for (const code of ['es', 'fr', 'hi', 'ur', 'bn', 'ne', 'pt', 'tl']) {
+      const pack = JSON.parse(readFileSync(`i18n/${code}.json`, 'utf8')) as Record<string, string>;
+      for (const k of ['bdgBloodDonor', 'bdgBloodDonorD', 'bdgBloodDonorA', 'bdgVolunteer', 'bdgVolunteerD', 'bdgVolunteerA']) expect(pack[k], `${code} ${k}`).toBeTruthy();
+    }
+    const sql = readFileSync('supabase/migrations/20261105100000_donor_volunteer_badges.sql', 'utf8');
+    expect(sql).toMatch(/'bd_blood_donor'.*true, true,\s+91\)/);
+    expect(sql).toMatch(/'bd_volunteer'.*true, false, 81\)/);
   });
 });
 
