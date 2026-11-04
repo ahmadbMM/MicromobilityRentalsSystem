@@ -127,6 +127,51 @@ test.describe('@staff:community activities', () => {
     await expect(page.locator('[data-round="rd1"]')).toContainText('Winner: Omar Saleh');
   });
 
+  test('a template fills the form and saves nothing until Save', async ({ page }) => {
+    await staff(page);
+    const w = writes(page, 'hub_goals');
+    await sub(page, /^Challenges/);
+    await expect(page.locator('#tab-community [data-tpl]')).toHaveCount(3);
+    await page.locator('#tab-community button', { hasText: 'Show all templates' }).click();
+    await page.locator('#tab-community [data-tpl="two"] button').last().click();
+    await expect(page.locator('#ac-g-en')).toHaveValue('Two Saturdays This Month');
+    await expect(page.locator('#ac-g-ar')).toHaveValue('رحلتا سبت هذا الشهر');
+    await expect(page.locator('#ac-g-kind')).toHaveValue('challenge');
+    await expect(page.locator('#ac-g-target')).toHaveValue('2');
+    await expect(page.locator('#ac-g-rw')).toHaveValue('');
+    expect(w).toHaveLength(0);
+    await page.locator('#tab-community .bdg-foot .btn-primary').click();
+    await expect.poll(() => w.length).toBe(1);
+    expect(w[0].body).toMatchObject({ kind: 'challenge', scope: 'saturday', target: 2, reward: null });
+    await expect.poll(() => page.evaluate(`_acTplList(todayStr()).now.map(f=>f.name)`)).not.toContain('Two Saturdays This Month');
+  });
+
+  test('template dates: months, yearly windows, and every target is what the database takes', async ({ page }) => {
+    await staff(page);
+    const at = (d: string) => page.evaluate(`Object.fromEntries(AC_TEMPLATES.map(x=>[x.id,_acTplFill(x,${JSON.stringify(d)})]))`) as Promise<Record<string, { from: string; to: string; target: number; name: string; name_ar: string } | null>>;
+    const a = await at('2026-11-04');
+    expect(a.two).toMatchObject({ from: '2026-11-04', to: '2026-11-30' });
+    expect(a.every!.target).toBe(4);
+    expect(a.cool).toMatchObject({ from: '2026-11-04', to: '2027-02-28', target: 8 });
+    expect(a.ramadan).toMatchObject({ from: '2027-02-08', to: '2027-03-09' });
+    expect(a.founding).toMatchObject({ from: '2027-02-01', target: 300, name: 'Founding Day: 300 Sessions' });
+    expect(a.bikeday).toMatchObject({ from: '2027-05-29', to: '2027-06-05' });
+    expect(a.national).toMatchObject({ from: '2027-09-18', target: 97, name: 'National Day 97: 97 Saturday Rides' });
+    const b = await at('2026-12-20');
+    expect(b.two).toMatchObject({ from: '2027-01-01', to: '2027-01-31' });
+    const c = await at('2027-01-15');
+    expect(c.cool).toMatchObject({ from: '2027-01-15', to: '2027-02-28' });
+    const later = await at('2030-01-01');
+    expect(later.ramadan).toBeNull();
+    for (const f of [...Object.values(a), ...Object.values(b), ...Object.values(c)]) {
+      if (!f) continue;
+      expect(f.name.length).toBeLessThanOrEqual(60);
+      expect(f.name_ar.length).toBeLessThanOrEqual(60);
+      expect(f.target).toBeGreaterThanOrEqual(1);
+      expect(f.to >= f.from).toBe(true);
+    }
+  });
+
   test('a challenge needs both names and dates, then saves', async ({ page }) => {
     await staff(page);
     const w = writes(page, 'hub_goals');

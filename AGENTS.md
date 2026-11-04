@@ -538,6 +538,8 @@ read it. Staff run them in Community > Activities (`/community/activities`, `_co
 take-down request hides it at once until staff decide. An invitation: `member_invite_code` gives the member's code, the form keeps `?inv=` on the
 device for 30 days and after the application calls `community_app_invited`, separately, so a failure there never touches the application.
 
+**Challenge templates (2026-11-04):** Community > Activities > Challenges lists `AC_TEMPLATES` (`_acTplHtml`), which only fill the form. A template may only ask for what `_hub_count` measures (finished sessions in a date range, never km). Rewards stay empty because a reward is a promise. `AC_RAMADAN` holds Umm al-Qura's expected dates and needs a new year added by 2028. The October 2026 numbers quoted in `acTplHint` and `acTw*` date as the community grows: re-measure them.
+
 ## The 2026-09-27 feature round (blocks 1-13)
 
 Built from the owner's answers on 2026-09-27/28; the source of each is in the commit messages.
