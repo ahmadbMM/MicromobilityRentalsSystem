@@ -5708,7 +5708,7 @@
   "piiHidBt": "Groupe sanguin masqué. Touchez pour l’afficher",
   "bldShKicker": "Avant de vous inscrire",
   "bldShTitle": "Partage de vos informations",
-  "evBloodName": "Don de sang Micromobility",
+  "evBloodName": "Micromobility Don de sang",
   "bldCause": "Donnez votre sang. Roulez gratuitement.",
   "bldPartnersAlt": "MicroMobility, Services de santé du ministère de la Défense, circuit de la Corniche de Djeddah, Saudi Motorsport Company, ministère des Sports",
   "bldSumAge": "18 ans ou plus",
@@ -6132,6 +6132,6 @@
   "sessPriceBookedNote": "Les nouvelles réservations paient le nouveau prix. {0} réservations non payées gardent leur prix.",
   "promoTellChip": "Prévenir",
   "promoNudgeManyMsg": "Ces cyclistes ont maintenant une place. Envoyez à chacun un WhatsApp dans sa langue.",
-  "bldTypesLine": "Des groupes différents. Un seul but.",
-  "bldYourType": "Votre groupe"
+  "bldTypesLine": "Types différents. Un seul but.",
+  "bldYourType": "Votre type"
 }

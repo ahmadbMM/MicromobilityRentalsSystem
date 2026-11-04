@@ -5708,7 +5708,7 @@
   "piiHidBt": "Grupo sanguíneo oculto. Toca para mostrarlo",
   "bldShKicker": "Antes de registrarte",
   "bldShTitle": "Compartir tus datos",
-  "evBloodName": "Donación de sangre Micromobility",
+  "evBloodName": "Micromobility Donación de sangre",
   "bldCause": "Dona sangre. Monta gratis.",
   "bldPartnersAlt": "MicroMobility, Servicios de Salud del Ministerio de Defensa, Circuito de la Corniche de Yeda, Saudi Motorsport Company, Ministerio del Deporte",
   "bldSumAge": "18 años o más",
@@ -6132,6 +6132,6 @@
   "sessPriceBookedNote": "Las reservas nuevas pagan el precio nuevo. {0} reservas sin pagar mantienen su precio.",
   "promoTellChip": "Avisar",
   "promoNudgeManyMsg": "Estos ciclistas ya tienen plaza. Envía a cada uno un WhatsApp en su idioma.",
-  "bldTypesLine": "Distintos tipos. Un solo propósito.",
+  "bldTypesLine": "Tipos diferentes. Un propósito.",
   "bldYourType": "Tu tipo"
 }

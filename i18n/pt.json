@@ -5708,7 +5708,7 @@
   "piiHidBt": "Tipo sanguíneo oculto. Toque para mostrar",
   "bldShKicker": "Antes de se inscrever",
   "bldShTitle": "Compartilhar seus dados",
-  "evBloodName": "Doação de sangue Micromobility",
+  "evBloodName": "Micromobility Doação de sangue",
   "bldCause": "Doe sangue. Pedale de graça.",
   "bldPartnersAlt": "MicroMobility, Serviços de Saúde do Ministério da Defesa, Circuito da Corniche de Jidá, Saudi Motorsport Company, Ministério do Esporte",
   "bldSumAge": "18 anos ou mais",
@@ -6132,6 +6132,6 @@
   "sessPriceBookedNote": "As novas reservas pagam o novo preço. {0} reservas por pagar mantêm o preço.",
   "promoTellChip": "Avisar",
   "promoNudgeManyMsg": "Estes ciclistas já têm lugar. Envie a cada um um WhatsApp no seu idioma.",
-  "bldTypesLine": "Tipos diferentes. Um só propósito.",
+  "bldTypesLine": "Tipos diferentes. Um propósito.",
   "bldYourType": "Seu tipo"
 }
