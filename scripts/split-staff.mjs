@@ -488,7 +488,8 @@ export const STAFF_PARTS = {
   // 2026-10-09: the self-service kiosk (a desk tablet in kiosk mode), and the deposit ledger's writes and settle dialog
   kiosk: ['_kioskOpen'], deposits: ['_depTake', '_depSettle', '_depSettleOpen'],
   // 2026-10-09 (R7): ride reminders on WhatsApp and who a freed waitlist place goes to (staff pick or a timed offer)
-  remind: ['openRemindSheet', 'openWlOffers'],
+  // 2026-11-04: and telling the riders a freed place went to (its list and row chip stay in the core; its words in all ten languages here)
+  remind: ['openRemindSheet', 'openWlOffers', '_ptOpen'],
 };
 function refsOf(code) {
   const ast = acorn.parse(code, { ecmaVersion: 'latest', sourceType: 'script' });
@@ -1382,7 +1383,7 @@ export function formatFieldNames(r, limit = 20) {
 // yet with the desk's waiver sheet, the places warning; Analytics' three targets, held sessions, billed to companies and
 // the Product filter): staff 678.7, core 305.9 here, about 680.8 / 308.0 on the runner; +7 / +5 restores the margin
 // (customer 257.7 here, inside its own).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 275, staff: 702, core: 316 }; // staff 698 -> 702, core 313 -> 316: the staff review's leftovers, built 2026-11-04 (694.3 and 311.1 locally before the sessions part; CI reads about 2.2 and 1.3 more). Before that, customer -> 275, core 311 -> 313: the Blood Donation event, its poster kept out in assets/blood-info.json (271.4 and 310.0 here, the runner read 273.0 and 311.6); staff 695 -> 698: the wallet at the Sales till (2026-11-03; 691.8 here, the runner reads about 3.4 more). Before: customer 266 -> 268, staff 691 -> 695: the Community page's activities, their staff screens and the runner's 1-2 KB over local (2026-11-03); // customer 263 -> 266, staff 687 -> 691, core 310 -> 311 (the runner reads 1-2 KB over local): member titles and the Community page in ten languages (2026-11-02); // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 275, staff: 706, core: 316 }; // staff 702 -> 706: the Challenges tips and telling every rider moved up (699.7 locally, CI reads about 2.2 more). Before that, staff 698 -> 702, core 313 -> 316: the staff review's leftovers, built 2026-11-04 (694.3 and 311.1 locally before the sessions part; CI reads about 2.2 and 1.3 more). Before that, customer -> 275, core 311 -> 313: the Blood Donation event, its poster kept out in assets/blood-info.json (271.4 and 310.0 here, the runner read 273.0 and 311.6); staff 695 -> 698: the wallet at the Sales till (2026-11-03; 691.8 here, the runner reads about 3.4 more). Before: customer 266 -> 268, staff 691 -> 695: the Community page's activities, their staff screens and the runner's 1-2 KB over local (2026-11-03); // customer 263 -> 266, staff 687 -> 691, core 310 -> 311 (the runner reads 1-2 KB over local): member titles and the Community page in ten languages (2026-11-02); // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

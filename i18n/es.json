@@ -6129,5 +6129,7 @@
   "cwErrEdit": "Parte de este recibo se pagó con un monedero. Reembólsalo y vuelve a registrarlo.",
   "rmSessBtn": "Mensajes de la salida",
   "nsFilledFrom": "Rellenado desde {0}",
-  "sessPriceBookedNote": "Las reservas nuevas pagan el precio nuevo. {0} reservas sin pagar mantienen su precio."
+  "sessPriceBookedNote": "Las reservas nuevas pagan el precio nuevo. {0} reservas sin pagar mantienen su precio.",
+  "promoTellChip": "Avisar",
+  "promoNudgeManyMsg": "Estos ciclistas ya tienen plaza. Envía a cada uno un WhatsApp en su idioma."
 }

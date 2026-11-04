@@ -6129,5 +6129,7 @@
   "cwErrEdit": "Une partie de ce reçu a été payée avec un portefeuille. Remboursez-le puis saisissez-le à nouveau.",
   "rmSessBtn": "Messages de la sortie",
   "nsFilledFrom": "Rempli depuis {0}",
-  "sessPriceBookedNote": "Les nouvelles réservations paient le nouveau prix. {0} réservations non payées gardent leur prix."
+  "sessPriceBookedNote": "Les nouvelles réservations paient le nouveau prix. {0} réservations non payées gardent leur prix.",
+  "promoTellChip": "Prévenir",
+  "promoNudgeManyMsg": "Ces cyclistes ont maintenant une place. Envoyez à chacun un WhatsApp dans sa langue."
 }

@@ -6129,5 +6129,7 @@
   "cwErrEdit": "Bahagi ng resibong ito ay binayaran mula sa wallet. I-refund ito at i-ring up muli.",
   "rmSessBtn": "Mga mensahe ng ride",
   "nsFilledFrom": "Pinunan mula sa {0}",
-  "sessPriceBookedNote": "Bagong presyo ang babayaran ng mga bagong booking. {0} booking na hindi pa bayad ang mananatili sa dati nilang presyo."
+  "sessPriceBookedNote": "Bagong presyo ang babayaran ng mga bagong booking. {0} booking na hindi pa bayad ang mananatili sa dati nilang presyo.",
+  "promoTellChip": "Sabihan",
+  "promoNudgeManyMsg": "May puwesto na ang mga rider na ito. Padalhan ang bawat isa ng WhatsApp sa sarili nilang wika."
 }

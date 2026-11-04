@@ -6129,5 +6129,7 @@
   "cwErrEdit": "Parte deste recibo foi paga com uma carteira. Reembolse-o e registe-o de novo.",
   "rmSessBtn": "Mensagens do passeio",
   "nsFilledFrom": "Preenchido a partir de {0}",
-  "sessPriceBookedNote": "As novas reservas pagam o novo preço. {0} reservas por pagar mantêm o preço."
+  "sessPriceBookedNote": "As novas reservas pagam o novo preço. {0} reservas por pagar mantêm o preço.",
+  "promoTellChip": "Avisar",
+  "promoNudgeManyMsg": "Estes ciclistas já têm lugar. Envie a cada um um WhatsApp no seu idioma."
 }
