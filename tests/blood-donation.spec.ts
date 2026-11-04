@@ -108,6 +108,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(sg).toContainText('King Fahd Armed Forces Hospital');
     await expect(sg).toContainText('Health Services at the Ministry of Defense');
     await expect(sg).toContainText('Ministry of Sport');
+    await expect(sg).toContainText('Saudi Motorsport Company (SMC)');
     await expect(sg).toContainText('Jeddah Corniche Circuit (JCC)');
     await expect(sg).toContainText('Blood type');
     await expect(sg).not.toContainText('race');
@@ -149,6 +150,11 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await page.evaluate('goLanding()');
     const pic = page.locator('.bld-card .bld-card-img');
     await expect(pic).toHaveAttribute('src', '/assets/blood-card.webp');
+    // all five logos, Saudi Motorsport among them, in the plate's alt text; the plate's image is the two-row one
+    const plate = page.locator('.bld-card .bld-plate img');
+    await expect(plate).toHaveAttribute('alt', /MicroMobility.*Saudi Motorsport Company.*Ministry of Sport/);
+    await expect(plate).toHaveAttribute('src', /blood-partners\.webp\?v=2$/);
+    await expect.poll(() => plate.evaluate((i: HTMLImageElement) => i.naturalHeight)).toBe(456);
     await expect(pic).toHaveAttribute('alt', '');
     await pic.scrollIntoViewIfNeeded();
     await expect.poll(() => pic.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1200);
@@ -294,6 +300,7 @@ test.describe('@staff:bookings Blood Donation', () => {
     await page.evaluate(`setLang('ar')`);
     await expect(sg).toContainText('حلبة كورنيش جدة (JCC)');
     await expect(sg).toContainText('شركاؤنا في هذه الفعالية');
+    await expect(sg).toContainText('(SMC)');
     await sg.locator('.wg-cb').check();
     await sg.locator('.pg-btn').click();
     await expect.poll(() => sent.length).toBe(1);
