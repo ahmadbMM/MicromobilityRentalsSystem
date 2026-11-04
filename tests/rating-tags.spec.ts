@@ -112,4 +112,25 @@ test.describe('staff', () => {
     await page.evaluate(`_on_goRatings()`);
     expect(await page.evaluate(`S.staffTab+'/'+S.anView`)).toBe('analytics/ratings');
   });
+
+  // A session's rating has no experience question since 2026-11-03: a low bike alone rings the bell (the owner, 2026-11-04).
+  test('a session rated low on its bike rings the bell with that score; an older rating and a Saturday ride read as before', async ({ page }) => {
+    const rental = (s: Record<string, number>) => ({ rating_exp: s.experience || s.service, rating_bike: s.bike || null, rating_detail: { form: 'rental', s, why: {} } });
+    const q = [
+      done('lowbike', 1, rental({ service: 9, bike: 3 })),
+      done('lowsvc', 1, rental({ service: 3, bike: 9 })),
+      done('fine', 1, rental({ service: 9, bike: 8 })),
+      done('svconly', 1, rental({ service: 9 })),
+      done('older', 1, rental({ service: 9, bike: 3, experience: 9 })), // asked its experience: it reads that, as it did
+      done('satride', 1, { rating_exp: 9, rating_bike: 2, rating_detail: { form: 'social', s: { overall: 9, ride_bike: 2 }, why: {} } }),
+    ];
+    await stubSupabase(page, { sessions, queue_entries: q, bikes: [] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    const items = await page.evaluate(`_ntKinds().find(k=>k.k==='lowrate').items.map(x=>[x.id,x.txt.replace(/^.*: /,'')])`) as string[][];
+    expect(items.sort()).toEqual([['lowbike', '3/10'], ['lowsvc', '3/10']]);
+    await page.evaluate(`setStaffTab('analytics');setAnView('ratings')`);
+    await expect(page.locator(`#tab-analytics .an-bysess-card tbody tr[data-day="${day(1)}"]`)).toContainText('▼2');
+  });
 });

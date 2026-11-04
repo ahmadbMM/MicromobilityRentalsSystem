@@ -12835,7 +12835,7 @@ function _ntKindsNow(){
     add('bday',_bdTodayOpen().map(r=>({id:r.c.id+'|'+r.y,txt:t('ntiBday').replace('{0}',nm(r.c))})),'ntBday','green',['_on_goCommunity','birthdays'],L.riders);
     add('msgs',_smNew().map(m=>({id:m.id,txt:t('ntiMsgs').replace('{0}',nm(m)),at:m.created_at})),'ntMsgs','green',['setStaffTab','messages'],S._sm&&S._sm.rows);
     add('attn',_bkAttnRows(getBikes()).map(r=>({id:r.b.id,txt:t('ntiAttn').replace('{0}',nm(r.b))})),'ntAttn','warn',['_on_goInventoryBikes'],L.year); // due for service counts the year's rides against service_every
-    add('lowrate',getQueue().filter(e=>e.status==='done'&&e.ratingExp>0&&e.ratingExp<=4&&Date.now()-_rodeAt(e)<7*864e5).map(e=>({id:e.id,txt:t('ntiLowRate').replace('{0}',nm(e)).replace('{1}',String(e.ratingExp)),at:e.checkedOutAt})),'ntLowRate','red',['_on_goRatings'],L.queue); // a rider's week-old 4/10 is worth a look
+    add('lowrate',getQueue().filter(e=>e.status==='done'&&_rgLowest(e)>0&&_rgLowest(e)<=4&&Date.now()-_rodeAt(e)<7*864e5).map(e=>({id:e.id,txt:t('ntiLowRate').replace('{0}',nm(e)).replace('{1}',String(_rgLowest(e))),at:e.checkedOutAt})),'ntLowRate','red',['_on_goRatings'],L.queue); // a rider's week-old 4/10 is worth a look
     // a venue cancelling a confirmed breakfast late (vendor_cancel, 20261004130000): the poll's 30-day list
     add('vlate',(S._vendorLate||[]).map(b=>({id:b.id,txt:t('ntiVendorLate').replace('{0}',b.name||'').replace('{1}',shortDate(b.day)),at:b.at})),'ntVendorLate','red',['_on_goVendorLate'],Array.isArray(S._vendorLate));
     add('natnew',_natNewRows().map(c=>({id:c.id,txt:t('ntiNatNew').replace('{0}',nm(c)).replace('{1}',nationalityLabel(String(c.nationality).trim())),at:c.created_at})),'ntNatNew','green',['_on_goCommunity','overview'],L.riders); // a nationality the community has nobody from
@@ -15471,6 +15471,9 @@ function _rgKeys(g){return _rgTree(g).flatMap(([k,sub])=>[k,...sub]);}
 // A ride from RATE_FROM on is rated only once the full form is in: a quick score with tags (the old
 // form, still sent by a phone on an older build or the website's old card) asks again (the owner, 2026-10-03).
 function _rgRated(e){if(!e)return false;if(e.ratingDetail)return true;return !!(e.ratingExp||e.ratingBike)&&String(e.sessionDate||e.sessionId||'').slice(0,10)<RATE_FROM;}
+// The score the low-ratings bell reads. A session's rating has had no experience question to catch a bad bike since
+// 2026-11-03, so a low bike alone rings it (the owner, 2026-11-04): the lower of the two. Any other rating, its headline score.
+function _rgLowest(e){const d=e.ratingDetail;return e.ratingBike&&d&&d.form==='rental'&&d.s&&d.s.experience==null?Math.min(e.ratingExp||e.ratingBike,e.ratingBike):e.ratingExp;}
 function _pendingRatingId(){
   // Tests: the suite's fixtures carry finished rides of every date, and from RATE_FROM on each unrated one
   // opened this page over whatever a spec was doing (2026-10-06). stubSupabase turns it off; the specs
@@ -51454,7 +51457,7 @@ function bikeHealthSection(rows){
       <div class="analytics-bar-value">${tagN[k]}</div></div>`).join('')}</div>`:'';
   const bySess=new Map();
   done.forEach(e=>{const k=String(e.sessionDate||e.sessionId||'').slice(0,10);if(!k)return;let r=bySess.get(k);if(!r)bySess.set(k,r={k,n:0,rated:0,exp:0,expN:0,bike:0,bikeN:0,low:0});r.n++;
-    if(e.ratingExp||e.ratingBike)r.rated++;if(e.ratingExp){r.exp+=e.ratingExp;r.expN++;if(e.ratingExp<=4)r.low++;}if(e.ratingBike){r.bike+=e.ratingBike;r.bikeN++;}});
+    if(e.ratingExp||e.ratingBike)r.rated++;if(e.ratingExp){r.exp+=e.ratingExp;r.expN++;if(_rgLowest(e)<=4)r.low++;}if(e.ratingBike){r.bike+=e.ratingBike;r.bikeN++;}});
   const sessRows=[...bySess.values()].filter(r=>r.rated).sort((a,b)=>b.k.localeCompare(a.k)).slice(0,40);
   const bySessCard=sessRows.length?`<div class="chart-card an-bysess-card an-mt14">
     <div class="chart-card-title">${t('anBySessionTitle')}</div><div class="chart-card-sub">${t('anBySessionSub')}</div>

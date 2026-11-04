@@ -577,7 +577,8 @@ Built from the owner's answers on 2026-09-27/28; the source of each is in the co
   20261003150001) with `rating_bike` / `rating_exp` / `feedback` still written: `rating_exp` is the
   ride's headline score, the overall on a Saturday and the service on a rental (`_rgHeadLabel`). Older ratings may carry
   `rating_tags` (the rider no longer picks them). Analytics > Ratings (`anView 'ratings'`,
-  `bikeHealthSection`, `_anRgCatCard`, `_anRgDetail`); the bell's `lowrate` kind.
+  `bikeHealthSection`, `_anRgCatCard`, `_anRgDetail`); the bell's `lowrate` kind (`_rgLowest`: a session's
+  lower of service and bike since 2026-11-04, any other rating its `rating_exp`).
 - **Events.** `ride_kind 'event'` (community, seats, `sessions.description`, `sessions.price`,
   `open_to_all` per event); `_evSeatPrice`, `_eventsLive`, the landing card, `?ev=event`.
 - **Routes, live, ambassador, Google Wallet.** `_routes()` reads `site_content routes.routes.items`
