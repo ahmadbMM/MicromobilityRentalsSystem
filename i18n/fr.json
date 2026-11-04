@@ -5708,7 +5708,7 @@
   "piiHidBt": "Groupe sanguin masqué. Touchez pour l’afficher",
   "bldShKicker": "Avant de vous inscrire",
   "bldShTitle": "Partage de vos informations",
-  "evBloodName": "Don de sang",
+  "evBloodName": "Don de sang Micromobility",
   "bldCause": "Donnez votre sang. Roulez gratuitement.",
   "bldPartnersAlt": "MicroMobility, Services de santé du ministère de la Défense, circuit de la Corniche de Djeddah, Saudi Motorsport Company, ministère des Sports",
   "bldSumAge": "18 ans ou plus",
@@ -5724,9 +5724,9 @@
   "bldIdNote": "Présentez votre pièce d’identité nationale ou Iqama sur place. Nous ne demandons ni ne conservons le numéro.",
   "bldAgeTitle": "18 ans ou plus uniquement",
   "bldAgeMsg": "Les donneurs doivent avoir au moins 18 ans le jour de l’événement.",
-  "bldShSub": "Pour vous inscrire, acceptez que nous partagions ces informations avec nos partenaires de l’événement et avec le circuit de la Corniche de Djeddah (JCC) :",
-  "bldShNote": "Nos partenaires pour cet événement : hôpital des forces armées Roi Fahd de Djeddah, Services de santé du ministère de la Défense, ministère des Sports et Saudi Motorsport Company (SMC).",
-  "bldShAgree": "J’accepte que MicroMobility partage mes informations avec ces partenaires et avec le circuit de la Corniche de Djeddah (JCC).",
+  "bldShSub": "Pour vous inscrire, acceptez que nous partagions ces informations avec nos partenaires de l’événement et des tiers :",
+  "bldShNote": "Nous les partageons uniquement avec nos partenaires et des tiers pour cet événement, et rien d’autre à votre sujet.",
+  "bldShAgree": "J’accepte que MicroMobility partage mes informations avec ses partenaires et des tiers pour cet événement.",
   "bldRewardNote": "Les donneurs enregistrés et confirmés par notre équipe reçoivent une sortie gratuite sur tout vélo sauf Carbon, valable un mois, sur les sessions du circuit (soirées Petromin pour les comptes Community et Petromin). Évitez tout effort intense pendant 5 heures après le don : roulez un autre jour.",
   "bldRewardTitle": "Votre sortie gratuite",
   "bldRewardTxt": "Merci pour votre don. Saisissez ce code lors de la réservation. Valable jusqu’au {0}.",
@@ -6131,5 +6131,7 @@
   "nsFilledFrom": "Rempli depuis {0}",
   "sessPriceBookedNote": "Les nouvelles réservations paient le nouveau prix. {0} réservations non payées gardent leur prix.",
   "promoTellChip": "Prévenir",
-  "promoNudgeManyMsg": "Ces cyclistes ont maintenant une place. Envoyez à chacun un WhatsApp dans sa langue."
+  "promoNudgeManyMsg": "Ces cyclistes ont maintenant une place. Envoyez à chacun un WhatsApp dans sa langue.",
+  "bldTypesLine": "Des groupes différents. Un seul but.",
+  "bldYourType": "Votre groupe"
 }

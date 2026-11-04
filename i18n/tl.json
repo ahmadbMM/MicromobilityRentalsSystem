@@ -5708,7 +5708,7 @@
   "piiHidBt": "Nakatagong blood type. I-tap para ipakita",
   "bldShKicker": "Bago magparehistro",
   "bldShTitle": "Pagbabahagi ng iyong mga detalye",
-  "evBloodName": "Pagbibigay ng dugo",
+  "evBloodName": "Micromobility Pagbibigay ng Dugo",
   "bldCause": "Magbigay ng dugo. Sumakay nang libre.",
   "bldPartnersAlt": "MicroMobility, Health Services ng Ministry of Defense, Jeddah Corniche Circuit, Saudi Motorsport Company, Ministry of Sport",
   "bldSumAge": "Edad 18 pataas",
@@ -5724,9 +5724,9 @@
   "bldIdNote": "Ipakita ang iyong national ID o Iqama sa event. Hindi namin hinihingi o itinatago ang numero.",
   "bldAgeTitle": "18 pataas lang",
   "bldAgeMsg": "Dapat hindi bababa sa 18 taong gulang ang donor sa araw ng event.",
-  "bldShSub": "Para magparehistro, sumang-ayon na ibahagi namin ang mga detalyeng ito sa aming mga partner sa event at sa Jeddah Corniche Circuit (JCC):",
-  "bldShNote": "Ang aming mga partner sa event na ito: King Fahd Armed Forces Hospital sa Jeddah, Health Services ng Ministry of Defense, Ministry of Sport at Saudi Motorsport Company (SMC).",
-  "bldShAgree": "Sumasang-ayon ako na ibahagi ng MicroMobility ang aking mga detalye sa mga partner na ito at sa Jeddah Corniche Circuit (JCC).",
+  "bldShSub": "Para magparehistro, sumang-ayon na ibahagi namin ang mga detalyeng ito sa aming mga partner sa event at sa mga third party:",
+  "bldShNote": "Ibinabahagi lang namin ang mga ito sa aming mga partner at mga third party para sa event na ito, at wala nang iba tungkol sa iyo.",
+  "bldShAgree": "Sumasang-ayon ako na ibahagi ng MicroMobility ang aking mga detalye sa mga partner nito at mga third party para sa event na ito.",
   "bldRewardNote": "Ang mga donor na naka-check in at kinumpirma ng aming team ay makakakuha ng isang libreng sakay sa anumang bike maliban sa Carbon, valid nang isang buwan, sa circuit rides (Petromin nights para sa Community at Petromin accounts). Iwasan ang mabigat na ehersisyo nang 5 oras pagkatapos mag-donate, kaya sumakay sa ibang araw.",
   "bldRewardTitle": "Iyong libreng sakay",
   "bldRewardTxt": "Salamat sa pag-donate. Ilagay ang code na ito kapag nag-book. Valid hanggang {0}.",
@@ -6131,5 +6131,7 @@
   "nsFilledFrom": "Pinunan mula sa {0}",
   "sessPriceBookedNote": "Bagong presyo ang babayaran ng mga bagong booking. {0} booking na hindi pa bayad ang mananatili sa dati nilang presyo.",
   "promoTellChip": "Sabihan",
-  "promoNudgeManyMsg": "May puwesto na ang mga rider na ito. Padalhan ang bawat isa ng WhatsApp sa sarili nilang wika."
+  "promoNudgeManyMsg": "May puwesto na ang mga rider na ito. Padalhan ang bawat isa ng WhatsApp sa sarili nilang wika.",
+  "bldTypesLine": "Iba-ibang uri. Iisang layunin.",
+  "bldYourType": "Iyong uri"
 }

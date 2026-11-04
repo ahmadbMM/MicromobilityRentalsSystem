@@ -27,7 +27,7 @@ test.describe('Blood Donation event', () => {
       const w = window as unknown as Record<string, (...a: unknown[]) => unknown>;
       return { kind: w._rideKind(s), bike: w._needsBike(s), name: w._evName(s), steps: w._regSteps(s), ev: w._evOf(s), community: w._evMatch(s, 'community') };
     }, blood);
-    expect(r).toEqual({ kind: 'blood', bike: false, name: 'Blood Donation', steps: [1, 2, 3], ev: 'blood', community: false });
+    expect(r).toEqual({ kind: 'blood', bike: false, name: 'Micromobility Blood Donation', steps: [1, 2, 3], ev: 'blood', community: false });
   });
 
   test('the pop-up shows the whole poster in English and Arabic, and must be confirmed', async ({ page }) => {
@@ -94,26 +94,26 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(page.locator('#bld-bt')).toHaveValue('O+');
     await expect(page.locator('#bld-nat')).toHaveValue('Saudi Arabia');
     // a blank blood type is refused
-    await page.locator('#bld-bt').selectOption('');
+    await page.evaluate("document.getElementById('bld-bt').value=''");
     await page.locator('#bld-next').click();
     await expect(page.locator('.bld-info-box')).toHaveCount(0);
     // the poster must be confirmed: no close button, and Back books nothing
-    await page.locator('#bld-bt').selectOption('A+');
+    await expect(page.locator('#bld-bt-g')).toHaveClass(/field-invalid/);
+    await page.locator('.bld-pick[data-bt="A+"]').click();
+    await expect(page.locator('.bld-pick[data-bt="A+"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.bld-pick.on')).toHaveCount(1);
     await page.locator('#bld-next').click();
     await expect(page.locator('.bld-info-box .bld-sec').first()).toBeVisible();
     await expect(page.locator('.bld-info-box .x-close')).toHaveCount(0);
     await page.locator('#bld-info-ok').click();
     // the hospital and the ministries, named; never "the race"
     const sg = page.locator('#share-gate .sg-box');
-    await expect(sg).toContainText('King Fahd Armed Forces Hospital');
-    await expect(sg).toContainText('Health Services at the Ministry of Defense');
-    await expect(sg).toContainText('Ministry of Sport');
-    await expect(sg).toContainText('Saudi Motorsport Company (SMC)');
-    await expect(sg).toContainText('Jeddah Corniche Circuit (JCC)');
+    // partners and third parties, and nobody named: no party, no logo, no venue
+    await expect(sg).toContainText('our event partners and third parties');
     await expect(sg).toContainText('Blood type');
     await expect(sg).not.toContainText('race');
-    // the logos beside the names, and no way on without the tick
-    await expect(sg.locator('.bld-plate img')).toBeVisible();
+    expect(await sg.innerText()).not.toMatch(/King Fahd|Ministry|Motorsport|SMC|JCC|Jeddah/);
+    await expect(sg.locator('.bld-plate')).toHaveCount(0);
     await expect(sg.locator('.pg-btn')).toBeDisabled();
     await sg.locator('.wg-cb').check();
     await sg.locator('.pg-btn').click();
@@ -150,12 +150,16 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await page.evaluate('goLanding()');
     const pic = page.locator('.bld-card .bld-card-img');
     await expect(pic).toHaveAttribute('src', '/assets/blood-card.webp');
-    // all five logos, Saudi Motorsport among them, in the plate's alt text; the plate's image is the two-row one
+    // all five logos, Saudi Motorsport among them, in the plate's alt text; MicroMobility above the four partners
     const plate = page.locator('.bld-card .bld-plate img');
     await expect(plate).toHaveAttribute('alt', /MicroMobility.*Saudi Motorsport Company.*Ministry of Sport/);
-    await expect(plate).toHaveAttribute('src', /blood-partners\.webp\?v=2$/);
-    await expect.poll(() => plate.evaluate((i: HTMLImageElement) => i.naturalHeight)).toBe(456);
+    await expect(plate).toHaveAttribute('src', /blood-partners\.webp\?v=3$/);
+    await expect.poll(() => plate.evaluate((i: HTMLImageElement) => i.naturalHeight)).toBe(433);
     await expect(pic).toHaveAttribute('alt', '');
+    // "Different types": all eight on the card
+    await expect(page.locator('.bld-card .bld-ti')).toHaveCount(8);
+    await expect(page.locator('.bld-card .bld-cause')).toContainText('Different types. One purpose.');
+    await expect(page.locator('.bld-card .lec-title')).toHaveText(/Micromobility Blood Donation/i);
     await pic.scrollIntoViewIfNeeded();
     await expect.poll(() => pic.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1200);
     // the arm starts 40% down the picture
@@ -213,6 +217,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await page.evaluate(`setCustTab('myrides')`);
     const tk = page.locator('#tab-myrides .ticket-card.th-blood');
     await expect(tk.locator('.bld-rw')).toContainText('BD-1A2B3C4D');
+    await expect(tk.locator('.bld-tk-type')).toContainText('O+');
     await expect(tk.locator('.bld-plate img')).toBeVisible();
     await expect(tk).toContainText('Donor number');
     await expect(tk).not.toContainText(NO_PRICE);
@@ -282,7 +287,7 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(card.locator('.rq-cad')).toHaveCount(0);
   });
 
-  test('someone on the list who never agreed to share is stopped until they do, partners and JCC named, in Arabic too', async ({ page }) => {
+  test('someone on the list who never agreed to share is stopped until they do, nobody named, in Arabic too', async ({ page }) => {
     const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_at: '2099-11-01T10:00:00Z', waiver_version: 'blood-2026-11-v1', data_share_at: null };
     const sent: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (/rpc\/customer_accept_share/.test(r.url())) sent.push(r.postDataJSON()); });
@@ -292,15 +297,13 @@ test.describe('@staff:bookings Blood Donation', () => {
     await waitForSb(page);
     const sg = page.locator('#share-gate .sg-box');
     await expect(sg).toBeVisible();
-    await expect(sg).toContainText('Jeddah Corniche Circuit (JCC)');
-    await expect(sg.locator('.wg-agree')).toContainText('I agree that MicroMobility shares my details with these partners');
-    await expect(sg.locator('.bld-plate img')).toBeVisible();
+    await expect(sg.locator('.wg-agree')).toContainText('I agree that MicroMobility shares my details with its partners and third parties');
+    expect(await sg.innerText()).not.toMatch(/JCC|Jeddah|King Fahd|Motorsport/);
     await expect(sg.locator('.pg-btn')).toBeDisabled();
     await expect(sg.locator('.x-close')).toHaveCount(0);
     await page.evaluate(`setLang('ar')`);
-    await expect(sg).toContainText('حلبة كورنيش جدة (JCC)');
-    await expect(sg).toContainText('شركاؤنا في هذه الفعالية');
-    await expect(sg).toContainText('(SMC)');
+    await expect(sg).toContainText('شركائنا وأطراف ثالثة');
+    expect(await sg.innerText()).not.toMatch(/JCC|كورنيش|SMC/);
     await sg.locator('.wg-cb').check();
     await sg.locator('.pg-btn').click();
     await expect.poll(() => sent.length).toBe(1);
@@ -345,8 +348,8 @@ test.describe('@customer:reserve Blood Donation before its session exists', () =
     const box = page.locator('#privacy-backdrop .pv-box');
     await expect(box).toContainText('a blood donation event');
     // who receives a donor's details is in the notice, by role: the page where they agree names them
-    await expect(box).toContainText('The hosts and partners of a blood donation event');
-    await expect(box).toContainText('To share a donor’s details with the hosts and partners of a blood donation event');
+    await expect(box).toContainText('Partners and third parties of a blood donation event');
+    await expect(box).toContainText('To share a donor’s details with the partners and third parties of a blood donation event');
     expect(await box.innerText()).not.toMatch(/King Fahd|Ministry of Sport|Ministry of Defense|free ride/i);
   });
 });

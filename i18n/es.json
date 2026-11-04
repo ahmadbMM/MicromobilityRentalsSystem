@@ -5708,7 +5708,7 @@
   "piiHidBt": "Grupo sanguíneo oculto. Toca para mostrarlo",
   "bldShKicker": "Antes de registrarte",
   "bldShTitle": "Compartir tus datos",
-  "evBloodName": "Donación de sangre",
+  "evBloodName": "Donación de sangre Micromobility",
   "bldCause": "Dona sangre. Monta gratis.",
   "bldPartnersAlt": "MicroMobility, Servicios de Salud del Ministerio de Defensa, Circuito de la Corniche de Yeda, Saudi Motorsport Company, Ministerio del Deporte",
   "bldSumAge": "18 años o más",
@@ -5724,9 +5724,9 @@
   "bldIdNote": "Muestra tu documento nacional o Iqama en el evento. No pedimos el número ni lo guardamos.",
   "bldAgeTitle": "Solo mayores de 18 años",
   "bldAgeMsg": "Los donantes deben tener al menos 18 años el día del evento.",
-  "bldShSub": "Para registrarte, acepta que compartamos estos datos con nuestros socios del evento y con el Circuito de la Corniche de Yeda (JCC):",
-  "bldShNote": "Nuestros socios en este evento: Hospital de las Fuerzas Armadas Rey Fahd de Yeda, Servicios de Salud del Ministerio de Defensa, Ministerio del Deporte y Saudi Motorsport Company (SMC).",
-  "bldShAgree": "Acepto que MicroMobility comparta mis datos con estos socios y con el Circuito de la Corniche de Yeda (JCC).",
+  "bldShSub": "Para registrarte, acepta que compartamos estos datos con nuestros socios del evento y con terceros:",
+  "bldShNote": "Los compartimos solo con nuestros socios y terceros para este evento, y nada más sobre ti.",
+  "bldShAgree": "Acepto que MicroMobility comparta mis datos con sus socios y terceros para este evento.",
   "bldRewardNote": "Los donantes registrados y confirmados por nuestro equipo reciben un paseo gratis en cualquier bici excepto Carbon, válido un mes, en sesiones del circuito (noches Petromin para cuentas Community y Petromin). Evita el ejercicio intenso durante 5 horas tras donar, así que monta otro día.",
   "bldRewardTitle": "Tu paseo gratis",
   "bldRewardTxt": "Gracias por donar. Introduce este código al reservar. Válido hasta el {0}.",
@@ -6131,5 +6131,7 @@
   "nsFilledFrom": "Rellenado desde {0}",
   "sessPriceBookedNote": "Las reservas nuevas pagan el precio nuevo. {0} reservas sin pagar mantienen su precio.",
   "promoTellChip": "Avisar",
-  "promoNudgeManyMsg": "Estos ciclistas ya tienen plaza. Envía a cada uno un WhatsApp en su idioma."
+  "promoNudgeManyMsg": "Estos ciclistas ya tienen plaza. Envía a cada uno un WhatsApp en su idioma.",
+  "bldTypesLine": "Distintos tipos. Un solo propósito.",
+  "bldYourType": "Tu tipo"
 }

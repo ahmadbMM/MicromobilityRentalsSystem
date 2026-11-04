@@ -10929,7 +10929,7 @@ body .landing-event-card.ev-arena .ar-must{display:block;margin:8px 0 0;padding:
    customer system's colours at the --bld-* tokens, the ticket wears them through th-blood. The hosts' marks stay on their
    white plate in every state: the Ministry of Sport's guide wants its colour logo on white, never on a dark, patterned or
    foreign-coloured ground. Nothing decorative runs under the plate. Buttons stay square. */
-:root{--bld-a:#B3122A;--bld-a2:#930E22;--bld-on:#fff;--bld-ac:#B3122A;--bld-wash:rgba(179,18,42,.06);--bld-a-rgb:179,18,42;--bld-paper:#FAF8F8;--bld-card:#fff;--bld-card2:#F7F2F3;--bld-card3:#EFE8E9;--bld-ink:#1C1718;--bld-ink2:rgba(28,23,24,.74);--bld-ink3:rgba(28,23,24,.62);--bld-ink4:rgba(28,23,24,.42);--bld-line:rgba(28,23,24,.12);--bld-line2:rgba(28,23,24,.28);--bld-tint-rgb:28,23,24;--bld-scheme:light;--bld-r:6px;--bld-bar:#fff;--bld-bar-line:rgba(179,18,42,.5);--bld-bar-ink:#1C1718;--bld-bar-ink2:rgba(28,23,24,.62);--bld-bar-soft:rgba(28,23,24,.14);--bld-bar-tint:28,23,24;--bld-bar-ac:#B3122A;--bld-head-bg:#fff;--bld-head-ink:#1C1718;--bld-head-ink2:rgba(28,23,24,.72);--bld-head-title:#B3122A;--bld-head-line:rgba(28,23,24,.14);--bld-c-bg:#fff;--bld-c-line:rgba(179,18,42,.4);--bld-c-ink:#1C1718;--bld-c-ink2:rgba(28,23,24,.72);--bld-c-title:#B3122A;--bld-c-ac:#B3122A;--bld-c-plate:rgba(28,23,24,.1);--bld-c-ac-staff:#B3122A;--bld-t-bg:#fff;--bld-t-2:#F7F2F3;--bld-t-ink:#1C1718;--bld-t-ink2:rgba(28,23,24,.68);--bld-t-line:rgba(28,23,24,.12);--bld-t-ac:#B3122A;--bld-t-edge:rgba(179,18,42,.4);--bld-t-red:#B3122A;}
+:root{--bld-a:#0B1F16;--bld-a2:#173A2A;--bld-on:#fff;--bld-ac:#08683F;--bld-wash:rgba(3,254,138,.14);--bld-a-rgb:11,31,22;--bld-paper:#EEF6F2;--bld-card:#fff;--bld-card2:#E6F2EC;--bld-card3:#D6E8DE;--bld-ink:#0B1F16;--bld-ink2:rgba(11,31,22,.76);--bld-ink3:rgba(11,31,22,.66);--bld-ink4:rgba(11,31,22,.42);--bld-line:rgba(11,31,22,.14);--bld-line2:rgba(11,31,22,.3);--bld-tint-rgb:11,31,22;--bld-scheme:light;--bld-r:0px;--bld-bar:#fff;--bld-bar-line:rgba(11,31,22,.3);--bld-bar-ink:#0B1F16;--bld-bar-ink2:rgba(11,31,22,.66);--bld-bar-soft:rgba(11,31,22,.14);--bld-bar-tint:11,31,22;--bld-bar-ac:#08683F;--bld-head-bg:#fff;--bld-head-ink:#0B1F16;--bld-head-ink2:rgba(11,31,22,.72);--bld-head-title:#0B1F16;--bld-head-line:rgba(11,31,22,.14);--bld-c-bg:#fff;--bld-c-line:#BFD4C9;--bld-c-ink:#0B1F16;--bld-c-ink2:rgba(11,31,22,.72);--bld-c-title:#0B1F16;--bld-c-ac:#08683F;--bld-c-plate:rgba(11,31,22,.1);--bld-c-ac-staff:#08683F;--bld-t-bg:#fff;--bld-t-2:#E6F2EC;--bld-t-ink:#0B1F16;--bld-t-ink2:rgba(11,31,22,.7);--bld-t-line:rgba(11,31,22,.14);--bld-t-ac:#0B1F16;--bld-t-edge:#BFD4C9;--bld-t-red:#B42318;}
 .ev-blood{--ev:var(--bld-ac);}
 html:has(> body.bld-skin:not(.view-staff)){--root-paper:var(--bld-paper);color-scheme:var(--bld-scheme);}
 body.bld-skin:not(.view-staff){
@@ -10992,9 +10992,9 @@ body:not(.view-staff) .bld-head-name{font-family:var(--font-display);font-size:2
 .bld-fields .form-group,.bld-fields .form-row{margin:0;}
 .bld-fields .form-row{gap:14px;}
 /* the event card: the plate, the name, when and where, the rules; its height and About link line up with its neighbours */
-body .landing-event-card.bld-card{justify-content:flex-start;gap:12px;background:var(--bld-c-bg);border:1px solid var(--bld-c-line);border-radius:12px;color:var(--bld-c-ink);}
+body .landing-event-card.bld-card{justify-content:flex-start;gap:12px;background:var(--bld-c-bg);border:1px solid var(--bld-c-line);border-radius:0;color:var(--bld-c-ink);}
 body .landing-event-card.bld-card:hover{border-color:var(--bld-c-ac);}
-.bld-card .bld-plate{position:relative;z-index:1;width:100%;border:1px solid var(--bld-c-plate);border-radius:calc(var(--bld-r) / 2);}
+.bld-card .bld-plate{position:relative;z-index:1;width:100%;padding:0;}
 /* the owner's picture of a donor's arm is the card (2026-11-04): white as the card is, it runs off the bottom and the far side, the words in its empty part, mirrored where the page reads from the right */
 body .lec-wrap .landing-event-card.bld-card{overflow:hidden;padding-bottom:47%;}
 .bld-card-img{position:absolute;inset-inline:0;bottom:0;z-index:0;width:100%;height:auto;pointer-events:none;}
@@ -11007,6 +11007,19 @@ body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-
 /* the rules, the same everywhere */
 .bld-sum{position:relative;z-index:1;display:grid;gap:5px;margin:0;padding:0;list-style:none;font-size:13px;font-weight:500;line-height:1.35;}
 .bld-sum>*{display:flex;align-items:flex-start;gap:7px;min-width:0;}
+.bld-card .bld-sum{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:12px;}
+/* "Different types": the eight blood types, on the card and as the donor step's picker; the neon is a fill, never text on white (the owner picked this look, 2026-11-04) */
+.bld-tiles{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:100%;direction:ltr;}
+.bld-ti{display:flex;align-items:center;justify-content:center;height:46px;font-size:18px;font-weight:700;background:var(--bld-card2);color:var(--bld-c-ink);}
+.bld-ti.on{background:#03FE8A;}
+.bld-bt-l{margin-bottom:6px;font-size:13px;font-weight:700;color:var(--bld-ink);}
+.bld-picks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;}
+.bld-pick{min-height:52px;padding:0 4px;border:1.5px solid var(--bld-line2);background:#fff;font:inherit;font-size:18px;font-weight:700;color:var(--bld-ink);cursor:pointer;}
+.bld-pick.on{background:#03FE8A;border-color:var(--bld-ink);}
+.bld-pick-u{width:100%;min-height:44px;margin-top:4px;font-size:14px;font-weight:600;}
+.bld-tk-type{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-14px 0 14px;padding:10px 20px;background:#03FE8A;color:#0B1F16;font-size:13px;font-weight:700;}
+.bld-tk-type[hidden]{display:none;}
+.bld-tk-type b{font-size:30px;font-weight:700;line-height:1;}
 .bld-sum .cu-ic{flex:none;margin-top:2px;color:var(--bld-tick,var(--bld-ac));}
 .bld-card .bld-sum .cu-ic{color:var(--bld-c-ac);}
 .bld-rules{margin:0 0 16px;padding:14px;background:var(--bld-wash);border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
@@ -11017,7 +11030,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-bloo
   --night:var(--bld-t-bg);--night-2:var(--bld-t-2);--night-ink:var(--bld-t-ink);--night-ink-2:var(--bld-t-ink2);--night-line:var(--bld-t-line);--neon:var(--bld-t-ac);
   --night-amber:#8A5300;--night-red:var(--bld-t-red);--night-red-line:var(--bld-t-line);color:var(--night-ink);
   background:var(--bld-t-bg);border:1px solid var(--bld-t-edge);border-radius:var(--bld-r);}
-.ticket-card.th-blood .bld-plate{margin:0 0 14px;border:0;border-bottom:1px solid var(--bld-t-line);border-radius:0;}
+.ticket-card.th-blood .bld-plate{margin:0 0 14px;padding:14px 20px;border:0;border-radius:0;}
 .ticket-card.th-blood .ticket-qr-wrap{position:relative;z-index:1;}
 .ticket-card.th-blood .bld-tk{position:relative;z-index:1;margin:14px 0 0;padding:12px 0 0;border-top:1px solid var(--night-line);}
 /* the ticket after booking has no padding of its own: this block lines up with the row of buttons under it */
@@ -11034,8 +11047,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-bloo
   --text:var(--bld-ink);--muted:var(--bld-ink2);background:var(--bld-card);border:1px solid var(--bld-line2);border-radius:var(--bld-r);color:var(--bld-ink);}
 #confirm-modal .bld-info-box .chrome-dt{color:var(--bld-ink);}
 #confirm-modal .bld-info-box .chrome-x{color:var(--bld-ink2);}
-#confirm-modal .bld-info-box .bld-plate{flex:none;margin:10px 0;border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
-#share-gate .sg-box .bld-plate{margin:12px 0 0;border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
+#confirm-modal .bld-info-box .bld-plate{flex:none;margin:10px 0;padding:0;}
 #confirm-modal .bld-info-box .pminv-sub{color:var(--bld-ink);}
 #confirm-modal .bld-lang{display:grid;flex:none;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px;}
 #confirm-modal .bld-lang .toggle-btn{background:transparent;color:var(--bld-ink);border:1px solid var(--bld-line2);}
@@ -11064,4 +11076,4 @@ body.view-staff .sess-summary-chip.th-blood.active-sess,body.view-staff .sess-lc
 .bld-bt{display:inline-block;min-width:2.6em;font-weight:800;white-space:nowrap;}
 .bld-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;}
 .bld-cl{white-space:nowrap;}
-.bld-head,body .landing-event-card.bld-card,#confirm-modal .bld-info-box,body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-blood{border-top:4px solid #B3122A;}
+.bld-head,body .landing-event-card.bld-card,#confirm-modal .bld-info-box,body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-blood{border-top:4px solid #03FE8A;}
