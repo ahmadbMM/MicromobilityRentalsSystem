@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type BrowserContext, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Personal customisation (2026-10-09, the staff research report section 4): a staffer's own choices kept on the
@@ -16,19 +16,23 @@ async function open(page: Page, x: Record<string, unknown> = {}, path = '/settin
   await page.goto(path);
   await waitForSb(page);
 }
+// The same browser opened again: its storage is shared with the page before it, its stubs are not.
+async function secondTab(context: BrowserContext, path: string) {
+  const p = await context.newPage();
+  await stubSupabase(p, { sessions: [], bikes: [], queue_entries: [] });
+  await p.goto(path);
+  await waitForSb(p);
+  return p;
+}
 
 test.describe('@staff:settings personal customisation', () => {
   test('Start on opens the chosen section when no address names one; an address still wins', async ({ page, context }) => {
     await open(page);
     await page.selectOption('#set-start', 'inventory');
     expect(await page.evaluate(`_pref('start')`)).toBe('inventory');
-    const p2 = await context.newPage();
-    await p2.goto('/');
-    await waitForSb(p2);
+    const p2 = await secondTab(context, '/');
     await expect.poll(() => p2.evaluate('S.staffTab')).toBe('inventory');
-    const p3 = await context.newPage();
-    await p3.goto('/history');
-    await waitForSb(p3);
+    const p3 = await secondTab(context, '/history');
     expect(await p3.evaluate('S.staffTab')).toBe('history');
     // a section the account may not open is not a start
     await p2.evaluate(`S._myView=['queue'];`);
@@ -58,9 +62,7 @@ test.describe('@staff:settings personal customisation', () => {
     await open(page, {}, '/history');
     await page.evaluate(`S.histStatus='noshow';S.histSort='name';setStaffTab('queue')`);
     expect(await page.evaluate(`_pref('state.history')`)).toEqual({ histStatus: 'noshow', histSort: 'name' });
-    const p2 = await context.newPage();
-    await p2.goto('/history');
-    await waitForSb(p2);
+    const p2 = await secondTab(context, '/history');
     await expect.poll(() => p2.evaluate('S.histStatus')).toBe('noshow');
     await p2.evaluate(`setStaffTab('settings')`);
     await p2.click('#set-st-reset');

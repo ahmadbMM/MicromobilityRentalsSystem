@@ -33,6 +33,11 @@ export default defineConfig({
     // eval inside the page. The suite therefore bypasses the policy in the browser; tests/csp.spec.ts
     // turns it back on for itself and drives the page with function-form calls only.
     bypassCSP: true,
+    // The stubs work a page at a time, so a tab, popup or context nobody stubbed read the real project: thousands of
+    // requests a day, and a spec that failed whenever production was slow (2026-11-03). Its host does not resolve in
+    // the browsers the suite starts. A stubbed request never reaches the network, so it does not notice
+    // (tests/no-production.spec.ts). A second tab needs its own stubSupabase.
+    launchOptions: { args: ['--host-resolver-rules=MAP *.supabase.co ~NOTFOUND'] },
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
