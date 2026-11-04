@@ -11032,6 +11032,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-bloo
 #confirm-modal .bld-info-box .chrome-dt{color:var(--bld-ink);}
 #confirm-modal .bld-info-box .chrome-x{color:var(--bld-ink2);}
 #confirm-modal .bld-info-box .bld-plate{flex:none;margin:10px 0;border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
+#share-gate .sg-box .bld-plate{margin:12px 0 0;border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
 #confirm-modal .bld-info-box .pminv-sub{color:var(--bld-ink);}
 #confirm-modal .bld-lang{display:grid;flex:none;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 10px;}
 #confirm-modal .bld-lang .toggle-btn{background:transparent;color:var(--bld-ink);border:1px solid var(--bld-line2);}

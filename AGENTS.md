@@ -1135,7 +1135,7 @@ everyone, free, no bikes. `ride_kind 'blood'` (event_kind community, open_to_all
   `assets/blood-info.json` (allow-listed in functions/_middleware.js, which refuses other .json; bump `BLD_INFO`'s ?v= with any edit), read when the pop-up opens
   (`showBloodInfo`), which must be confirmed before booking. `assets/blood-donation-poster.pdf` is the original. Other languages read the English.
 - **Registration**: `_bldPanelHtml` / `_bldNext`: name, mobile, email, blood type, birth date, nationality, all required, filled in from the account, only changes saved.
-  Then the poster, then the share gate naming King Fahd Armed Forces Hospital, MoD Health Services and the Ministry of Sport (`data_share_at`). Under 18s stop at
+  Then the poster, then the share gate, under the logo plate, naming our partners (King Fahd Armed Forces Hospital, MoD Health Services, the Ministry of Sport) and the JCC (`data_share_at`; the owner, 2026-11-04). The Privacy Notice says "hosts and partners" and names none of them while the event is unannounced. Under 18s stop at
   `_bldAgeModal`. No ID or Iqama number, ever: donors show theirs in person. Donors register themselves: `_noWalkin` and `_noAddRider` hold for it, and its row has no Edit or Reschedule.
 - **Agreement, not a waiver**: its own kind in `_waiverKind`, `BLD_WAIVER_VERSION` `blood-2026-11-v1` (the owner, 2026-11-03: "there is no activity involved"). It releases MicroMobility and
   its staff only, never "partners": the hosts' medical team does the donation. Bump the version with any edit to `bldWaiverBody`. `_waiver_outdated` never refuses a kind it does not

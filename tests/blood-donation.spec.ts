@@ -106,9 +106,14 @@ test.describe('@customer:blood Blood Donation registration', () => {
     // the hospital and the ministries, named; never "the race"
     const sg = page.locator('#share-gate .sg-box');
     await expect(sg).toContainText('King Fahd Armed Forces Hospital');
+    await expect(sg).toContainText('Health Services at the Ministry of Defense');
     await expect(sg).toContainText('Ministry of Sport');
+    await expect(sg).toContainText('Jeddah Corniche Circuit (JCC)');
     await expect(sg).toContainText('Blood type');
     await expect(sg).not.toContainText('race');
+    // the logos beside the names, and no way on without the tick
+    await expect(sg.locator('.bld-plate img')).toBeVisible();
+    await expect(sg.locator('.pg-btn')).toBeDisabled();
     await sg.locator('.wg-cb').check();
     await sg.locator('.pg-btn').click();
     // its own agreement: a medical procedure by the hosts' team, not an activity; one person, no "on behalf of"; the partners not released
@@ -243,6 +248,31 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(card.locator('.rq-cad')).toHaveCount(0);
   });
 
+  test('someone on the list who never agreed to share is stopped until they do, partners and JCC named, in Arabic too', async ({ page }) => {
+    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_at: '2099-11-01T10:00:00Z', waiver_version: 'blood-2026-11-v1', data_share_at: null };
+    const sent: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (/rpc\/customer_accept_share/.test(r.url())) sent.push(r.postDataJSON()); });
+    await stubSupabase(page, custFx({ queue_entries: [row], 'rpc:customer_queue': [row], 'rpc:customer_entries': [row], 'rpc:customer_accept_share': 1 }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    const sg = page.locator('#share-gate .sg-box');
+    await expect(sg).toBeVisible();
+    await expect(sg).toContainText('Jeddah Corniche Circuit (JCC)');
+    await expect(sg.locator('.wg-agree')).toContainText('I agree that MicroMobility shares my details with these partners');
+    await expect(sg.locator('.bld-plate img')).toBeVisible();
+    await expect(sg.locator('.pg-btn')).toBeDisabled();
+    await expect(sg.locator('.x-close')).toHaveCount(0);
+    await page.evaluate(`setLang('ar')`);
+    await expect(sg).toContainText('حلبة كورنيش جدة (JCC)');
+    await expect(sg).toContainText('شركاؤنا في هذه الفعالية');
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ p_session_id: BD });
+    await expect(sg).toHaveCount(0);
+  });
+
   test('someone booked without the agreement is asked for it in the same words, and the desk reads the same text', async ({ page }) => {
     const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_at: null, waiver_version: null };
     const sent: Record<string, unknown>[] = [];
@@ -279,6 +309,9 @@ test.describe('@customer:reserve Blood Donation before its session exists', () =
     await page.evaluate('showPrivacyNotice()');
     const box = page.locator('#privacy-backdrop .pv-box');
     await expect(box).toContainText('a blood donation event');
+    // who receives a donor's details is in the notice, by role: the page where they agree names them
+    await expect(box).toContainText('The hosts and partners of a blood donation event');
+    await expect(box).toContainText('To share a donor’s details with the hosts and partners of a blood donation event');
     expect(await box.innerText()).not.toMatch(/King Fahd|Ministry of Sport|Ministry of Defense|free ride/i);
   });
 });
