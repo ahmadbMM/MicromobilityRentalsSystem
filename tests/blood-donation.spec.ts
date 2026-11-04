@@ -354,6 +354,74 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tq.locator('tbody .rr-chip.rr-yes')).toHaveCount(2);
   });
 
+  test('every sort and filter: blood type, donated, free ride code and the Accounts list, no money, and the report', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const row = (n: number, status: string, donated: string | null, inAt: string | null = null) => ({
+      id: 'r' + n, session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: n, name: 'Donor ' + n, phone: '055000000' + n,
+      type_preference: 'None', size: '', status, paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c' + n, donated_at: donated, checked_in_at: inAt,
+    });
+    const acct = (n: number, x: Record<string, unknown>) => ({ id: 'c' + n, name: 'Donor ' + n, phone: '055000000' + n, email: `d${n}@example.com`, ...x });
+    await stubSupabase(page, {
+      sessions: [blood], bikes: [],
+      queue_entries: [row(1, 'waiting', null), row(2, 'active', null, '2099-11-05T14:00:00Z'), row(3, 'active', '2099-11-05T15:00:00Z', '2099-11-05T14:30:00Z'), row(4, 'done', '2099-11-05T16:00:00Z', '2099-11-05T14:45:00Z')],
+      customers: [acct(1, { blood_type: 'O+', city: 'Jeddah', workplace: 'Acme' }), acct(2, { blood_type: 'AB-', city: 'Riyadh' }), acct(3, { blood_type: 'unknown', city: 'Jeddah' }), acct(4, { blood_type: null, city: 'Makkah' })],
+      promo_codes: [{ id: 'p3', code: 'BD-3', blood_entry_id: 'r3', uses: 1, active: true }, { id: 'p4', code: 'BD-4', blood_entry_id: 'r4', uses: 0, active: true }],
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${BD}';renderStaffQueue()`);
+    const tab = page.locator('#tab-queue');
+    await expect(tab.locator('.queue-table tbody .bld-bt')).toHaveText(['O+', 'AB\u2212', 'Not known']);
+    await page.waitForFunction('!!S._bq');
+    await page.waitForFunction('S.promoCodes&&S.promoCodes.length>0');
+    const shown = () => page.evaluate<string>(`[...document.querySelectorAll('#q-results .queue-table tbody tr')].map(r=>(r.innerText.match(/Donor \\d/)||[''])[0]).filter(Boolean).join()`);
+    const set = (js: string) => page.evaluate(`${js};renderStaffQueue()`);
+    // closed, the long panel is not drawn; opened, it holds the night's own filters, the Accounts list's, and never money
+    await expect(tab.locator('select[aria-label="City of residence"]')).toHaveCount(0);
+    await set(`S._fOpen=Object.assign(S._fOpen||{},{q:true})`);
+    await expect(tab.locator('select[aria-label="Blood type"] option')).toHaveCount(11);
+    await expect(tab.locator('select[aria-label="City of residence"] option')).toHaveText(['All', 'Not set', 'Jeddah', 'Makkah', 'Riyadh']);
+    expect(await tab.locator('#fm-q select').count()).toBeGreaterThan(35);
+    expect(await tab.locator('#fm-q').innerText()).not.toMatch(/\bPaid\b|Payment|Spent|⃁|\bSAR\b/);
+    // the filters
+    await set(`S.sfBt='O+'`); expect(await shown()).toBe('Donor 1');
+    await set(`S.sfBt='unknown'`); expect(await shown()).toBe('Donor 3');
+    await set(`S.sfBt='unset'`); expect(await shown()).toBe('Donor 4');
+    await set(`S.sfBt='all';S.sfDon='yes'`); expect(await shown()).toBe('Donor 3,Donor 4');
+    await set(`S.sfDon='wait'`); expect(await shown()).toBe('Donor 2');
+    await set(`S.sfDon='no'`); expect(await shown()).toBe('Donor 1,Donor 2');
+    await set(`S.sfDon='all';S.sfRw='used'`); expect(await shown()).toBe('Donor 3');
+    await set(`S.sfRw='open'`); expect(await shown()).toBe('Donor 4');
+    await set(`S.sfRw='none'`); expect(await shown()).toBe('Donor 1,Donor 2');
+    await set(`S.sfRw='all';_bqAm('amCity','Jeddah')`); expect(await shown()).toBe('Donor 1,Donor 3');
+    await expect(tab.locator('select[aria-label="City of residence"]')).toHaveValue('Jeddah');
+    expect(await page.evaluate('_svGet("queue").sfAm.amCity')).toBe('Jeddah');
+    expect(await page.evaluate(`S.amCity||''`)).toBe(''); // the Accounts page keeps its own picks
+    await set(`_dkXClearFilters()`); expect(await shown()).toBe('Donor 1,Donor 2,Donor 3'); // nothing picked: finished donors fold again
+    // the sorts, those with no value last in either order
+    await expect(tab.locator('select.q-sort-pick option', { hasText: /^Blood type$/ })).toHaveCount(1);
+    await expect(tab.locator('select.q-sort-pick option', { hasText: /Spent|spent/ })).toHaveCount(0);
+    await set(`S.sfSort='bq:bt';S.sfSortDir=1`); expect(await shown()).toBe('Donor 2,Donor 1,Donor 3,Donor 4');
+    await expect(tab.locator('select.q-sort-pick')).toHaveValue('bq:bt');
+    await set(`S.sfSortDir=-1`); expect(await shown()).toBe('Donor 3,Donor 1,Donor 2,Donor 4');
+    await set(`S.sfSort='bq:don';S.sfSortDir=1`); expect(await shown()).toBe('Donor 4,Donor 3,Donor 1,Donor 2');
+    await set(`S.sfSort='bq:in'`); expect(await shown()).toBe('Donor 4,Donor 3,Donor 2,Donor 1');
+    await set(`S.sfSort='bq:acity'`); expect(await shown()).toBe('Donor 1,Donor 3,Donor 4,Donor 2');
+    await set(`S.sfSort='queue'`);
+    // the report's dialog: no payment filter, its own two, and a payment filter left from another night does nothing
+    await page.evaluate(`_repOpts().fPay='paid';showPrintReportOptions()`);
+    const dlg = page.locator('#print-opts-modal');
+    await expect(dlg.locator('select[aria-label="Payment"], select[aria-label="Filter Payment"]')).toHaveCount(0);
+    await expect(dlg.locator('select[aria-label="Donated"]')).toHaveCount(1);
+    await expect(dlg.locator('select[aria-label="Blood type"]')).toHaveCount(1);
+    const inReport = (js: string) => page.evaluate<string>(`(()=>{${js};return _repFilter(getQueue().filter(e=>e.sessionId==='${BD}')).map(e=>e.name).join()})()`);
+    expect(await inReport('')).toBe('Donor 1,Donor 2,Donor 3,Donor 4');
+    expect(await inReport(`_repOpts().fDon='yes'`)).toBe('Donor 3,Donor 4');
+    expect(await inReport(`_repOpts().fDon='all';_repOpts().fBt='AB-'`)).toBe('Donor 2');
+  });
+
   test('the phone card says the same: blood type and Donated, no bike line, no add-ons', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     const row = { id: 'r2', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 2, name: 'Donor r2', phone: '0550000002', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'cr2', donated_at: null };
