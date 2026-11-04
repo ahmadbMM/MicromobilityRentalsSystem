@@ -215,14 +215,14 @@ test.describe('@staff:community titles', () => {
     await expect(page.locator('#tab-community [data-title="ttl_leg"]')).toContainText('Automatic at 50 Saturday rides');
   });
 
-  test('an admin makes a title; both names are required and the count must be whole', async ({ page }) => {
+  test('an admin makes a title; a name is required and the count must be whole', async ({ page }) => {
     await staff(page);
     const posts: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.method() === 'POST' && new URL(r.url()).pathname.endsWith('/rest/v1/titles')) posts.push(r.postDataJSON()); });
     await page.locator('#tab-community button', { hasText: 'New title' }).click();
-    await page.locator('#tt-f-name').fill('Pace Setter');
     await page.locator('#tab-community .tt-form .btn-primary').click();
-    await expect(page.locator('#toast-container')).toContainText('English and in Arabic');
+    await expect(page.locator('#toast-container')).toContainText('English or in Arabic');
+    await page.locator('#tt-f-name').fill('Pace Setter');
     await page.locator('#tt-f-name_ar').fill('ضابط الإيقاع');
     await page.locator('#tt-f-auto').fill('2.5');
     await page.locator('#tab-community .tt-form .btn-primary').click();
@@ -233,6 +233,42 @@ test.describe('@staff:community titles', () => {
     await expect.poll(() => posts.length).toBe(1);
     expect(posts[0]).toMatchObject({ name: 'Pace Setter', name_ar: 'ضابط الإيقاع', color: 'green', auto_rides: null });
     await expect(page.locator('#tab-community .am-tag-row', { hasText: 'Pace Setter' })).toBeVisible();
+  });
+
+  for (const [box, words] of [['#tt-f-name', 'Pace Setter'], ['#tt-f-name_ar', 'ضابط الإيقاع']]) {
+    test(`a title can be written in one language: ${words} goes in both names`, async ({ page }) => {
+      await staff(page);
+      const posts: Record<string, unknown>[] = [];
+      page.on('request', (r) => { if (r.method() === 'POST' && new URL(r.url()).pathname.endsWith('/rest/v1/titles')) posts.push(r.postDataJSON()); });
+      await page.locator('#tab-community button', { hasText: 'New title' }).click();
+      await page.locator(box).fill(words);
+      await page.locator('#tab-community .tt-form .btn-primary').click();
+      await expect.poll(() => posts.length).toBe(1);
+      expect(posts[0]).toMatchObject({ name: words, name_ar: words });
+      await expect(page.locator('#tab-community .am-tag-row', { hasText: words })).toBeVisible();
+    });
+  }
+
+  test('a title written in one language reopens with that box filled, and a correction reaches both names', async ({ page }) => {
+    const once = { ...captain, id: 'ttl_en', name: 'Pace Setter', name_ar: 'Pace Setter' };
+    const onceAr = { ...captain, id: 'ttl_ar', name: 'ضابط الإيقاع', name_ar: 'ضابط الإيقاع' };
+    await staff(page, { titles: [captain, once, onceAr] });
+    const patches: Record<string, unknown>[] = [];
+    page.on('request', (r) => { if (r.method() === 'PATCH' && new URL(r.url()).pathname.endsWith('/rest/v1/titles')) patches.push(r.postDataJSON()); });
+    const edit = (id: string) => page.locator(`#tab-community [data-title="${id}"] button`, { hasText: 'Edit' }).click();
+    await edit('ttl_cap');
+    await expect(page.locator('#tt-f-name')).toHaveValue('Ride Captain');
+    await expect(page.locator('#tt-f-name_ar')).toHaveValue('قائد الرحلة');
+    await edit('ttl_ar');
+    await expect(page.locator('#tt-f-name')).toHaveValue('');
+    await expect(page.locator('#tt-f-name_ar')).toHaveValue('ضابط الإيقاع');
+    await edit('ttl_en');
+    await expect(page.locator('#tt-f-name')).toHaveValue('Pace Setter');
+    await expect(page.locator('#tt-f-name_ar')).toHaveValue('');
+    await page.locator('#tt-f-name').fill('Pace Maker');
+    await page.locator('#tab-community .tt-form .btn-primary').click();
+    await expect.poll(() => patches.length).toBe(1);
+    expect(patches[0]).toMatchObject({ name: 'Pace Maker', name_ar: 'Pace Maker' });
   });
 
   test('a staffer who is not an admin gives titles but cannot edit the list', async ({ page }) => {

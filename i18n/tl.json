@@ -6043,7 +6043,7 @@
   "ttRetire": "Iretiro",
   "ttRestore": "Ibalik",
   "ttRetiredMeta": "Retirado",
-  "ttNameReq": "Ilagay ang pangalan sa Ingles at Arabic.",
+  "ttNameReq": "Ilagay ang pangalan sa Ingles o Arabic.",
   "ttAutoBad": "Maglagay ng buong numero mula 1 hanggang 1000, o iwanang blangko.",
   "ttEmpty": "Wala pang titulo. Gawin ang una.",
   "ttMissing": "Hindi pa naka-set up ang mga titulo sa database.",

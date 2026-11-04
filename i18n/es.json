@@ -6043,7 +6043,7 @@
   "ttRetire": "Retirar",
   "ttRestore": "Restaurar",
   "ttRetiredMeta": "Retirado",
-  "ttNameReq": "Escribe el nombre en inglés y en árabe.",
+  "ttNameReq": "Escribe el nombre en inglés o en árabe.",
   "ttAutoBad": "Escribe un número entero del 1 al 1000 o déjalo vacío.",
   "ttEmpty": "Aún no hay títulos. Crea el primero.",
   "ttMissing": "Los títulos aún no están configurados en la base de datos.",

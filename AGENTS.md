@@ -518,7 +518,7 @@ variables) and popped once (`BDG_CHEER`).
 
 ## Titles and the Community page (2026-11-02)
 
-Migration 20261102200000. `titles` (admins' catalogue: English + Arabic name, a `BDG_COLORS` colour, `auto_rides`),
+Migration 20261102200000. `titles` (admins' catalogue: English and/or Arabic name, a `BDG_COLORS` colour, `auto_rides`; both columns stay NOT NULL, so `_ttSave` stores a name typed in one language in both and `_ttEdit` opens it with only that box filled),
 `customer_titles` (staff give, optional `expires_on`) and `member_prefs` (the member's shown title and `hidden`, written only
 through `customer_title_prefs`). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
 counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`. The Community page (`/members`, not `/community`, which is a staff

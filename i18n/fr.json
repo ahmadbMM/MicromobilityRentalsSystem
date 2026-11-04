@@ -6043,7 +6043,7 @@
   "ttRetire": "Retirer",
   "ttRestore": "Rétablir",
   "ttRetiredMeta": "Retiré",
-  "ttNameReq": "Saisissez le nom en anglais et en arabe.",
+  "ttNameReq": "Saisissez le nom en anglais ou en arabe.",
   "ttAutoBad": "Saisissez un nombre entier de 1 à 1000, ou laissez vide.",
   "ttEmpty": "Aucun titre pour l’instant. Créez le premier.",
   "ttMissing": "Les titres ne sont pas encore configurés dans la base de données.",
