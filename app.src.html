@@ -8531,7 +8531,7 @@ function _bldTkTypeInner(){const b=S._bt,v=b&&!b.busy&&!b.err?b.v:'';return v?`<
 function _bldTkType(){const c=S.loggedIn||getSession();if(c)_btLoad(c);const h=_bldTkTypeInner();return`<div class="bld-tk-type" data-bld-type${h?'':' hidden'}>${h}</div>`;}
 function _bldTkTypePaint(){const h=_bldTkTypeInner();document.querySelectorAll('[data-bld-type]').forEach(el=>{el.innerHTML=h;el.hidden=!h;});}
 // inBtn: inside the event card, a button, which may only hold phrasing content.
-function _bldSumHtml(inBtn){const a=inBtn?'span':'ul',b=inBtn?'span':'li';return`<${a} class="bld-sum">${['bldSumAge','bldSumWeight','bldSumId','bldSumTips'].map(k=>`<${b}>${_cuIc('tick',14)}<span>${esc(t(k))}</span></${b}>`).join('')}</${a}>`;}
+function _bldSumHtml(){return`<ul class="bld-sum">${['bldSumAge','bldSumWeight','bldSumId','bldSumTips'].map(k=>`<li>${_cuIc('tick',14)}<span>${esc(t(k))}</span></li>`).join('')}</ul>`;}
 function _bldWhenTxt(s){
   const ds=String(s.session_date||s.id).slice(0,10);
   let day=ds;try{day=new Date(ds+'T12:00:00+03:00').toLocaleDateString(_locale(),{weekday:'short',day:'numeric',month:'short',timeZone:KSA_TZ});}catch(e){}
@@ -8545,7 +8545,6 @@ function _bldCardWrap(){
       <span class="lec2-copy"><span class="lec-title">${esc(_evName(s))}</span><span class="lec-meta">${_bldWhenTxt(s)}</span></span>
       <span class="bld-tiles" aria-hidden="true">${BLOOD_TYPES.map((x,i)=>`<span class="bld-ti${(i+(i>3?1:0))%2===0?' on':''}">${esc(_btLabel(x))}</span>`).join('')}</span>
       <span class="bld-cause">${esc(t('bldTypesLine'))} ${esc(t('bldCause'))}</span>
-      ${_bldSumHtml(true)}
     </button><button type="button" class="lec-about ab-blood" data-on-click="${_on("_bldInfoView")}">${t('infoAbout')}</button></div>`;
 }
 // The skin: from the event's first step to its ticket on the page after booking, and the pop-ups a booking of this

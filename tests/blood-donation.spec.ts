@@ -82,7 +82,8 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await waitForSb(page);
     await page.evaluate('goLanding()');
     await expect(page.locator('.bld-wrap .bld-plate img')).toBeVisible();
-    await expect(page.locator('.bld-wrap .bld-sum > *')).toHaveCount(4);
+    // the card is a teaser: the rules wait on About, the donor step and the ticket
+    await expect(page.locator('.bld-wrap .bld-sum')).toHaveCount(0);
     await expect(page.locator('body')).not.toHaveClass(/bld-skin/);
     await page.locator('.bld-card').click();
     // one look from the first step, under the hosts' plate
@@ -164,7 +165,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect.poll(() => pic.evaluate((i: HTMLImageElement) => i.complete && i.naturalWidth)).toBe(1200);
     // the arm starts 40% down the picture
     const room = () => page.evaluate(() => {
-      const i = document.querySelector('.bld-card .bld-card-img')!.getBoundingClientRect(), c = document.querySelector('.bld-card')!.getBoundingClientRect(), w = document.querySelector('.bld-card .bld-sum')!.getBoundingClientRect();
+      const i = document.querySelector('.bld-card .bld-card-img')!.getBoundingClientRect(), c = document.querySelector('.bld-card')!.getBoundingClientRect(), w = document.querySelector('.bld-card .bld-tiles')!.getBoundingClientRect();
       return { clear: Math.round(i.top + i.height * 0.4 - w.bottom), bleed: Math.round(c.bottom - i.bottom) };
     });
     let r = await room();
@@ -176,6 +177,33 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(page.locator('.bld-card .bld-card-img')).toHaveCSS('transform', 'matrix(-1, 0, 0, 1, 0, 0)');
     r = await room();
     expect(r.clear).toBeGreaterThanOrEqual(0);
+  });
+
+  test('every card sits at its own height: the event card leaves its neighbours alone', async ({ page }) => {
+    const jcc = { id: '2099-11-08', session_date: '2099-11-08', day: 'Sunday', status: 'open', capacity: 50, created_at: 2, event_kind: 'jcc', spots: 50, bike_slots: '{"_time":"21:00 - 23:00"}' };
+    const sizes = () => page.evaluate(() => [...document.querySelectorAll('.landing-events-grid > *')].map((c) => { const b = c.getBoundingClientRect(); return { blood: c.classList.contains('bld-wrap'), w: Math.round(b.width), h: Math.round(b.height), top: Math.round(b.top) }; }));
+    await page.setViewportSize({ width: 390, height: 844 });
+    await stubSupabase(page, custFx({ sessions: [blood, jcc] }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    await expect(page.locator('.bld-wrap')).toBeVisible();
+    let cards = await sizes();
+    expect(cards.length).toBeGreaterThan(1);
+    // a phone shows the event card and the start of the next one on one screen
+    expect(cards[0].blood).toBe(true);
+    expect(cards[0].h).toBeLessThan(440);
+    for (const c of cards.filter((x) => !x.blood)) expect(c.h).toBeLessThan(260);
+    // a wide screen gives it the row, and the row below keeps its own height
+    await page.setViewportSize({ width: 1280, height: 844 });
+    await page.evaluate('goLanding()');
+    await expect(page.locator('.bld-wrap')).toBeVisible();
+    cards = await sizes();
+    const grid = await page.locator('.landing-events-grid').boundingBox();
+    expect(cards[0].w).toBe(Math.round(grid!.width));
+    expect(cards[0].h).toBeLessThan(400);
+    for (const c of cards.filter((x) => !x.blood)) { expect(c.top).toBeGreaterThan(cards[0].top); expect(c.h).toBeLessThan(260); }
   });
 
   test('an account under 18 is told and cannot go on', async ({ page }) => {

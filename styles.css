@@ -167,7 +167,7 @@
     .landing-events-title{font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin:44px 0 14px;}
     /* grid-auto-rows:1fr — every card is the height of the tallest, whether three sit in a
        row, two and one wrap, or they stack on a phone. */
-    .landing-events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));grid-auto-rows:1fr;gap:14px;}
+    .landing-events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
     .landing-event-card{position:relative;text-align:start;background:var(--s1);border:1px solid var(--line2);border-radius:8px;padding:20px 22px 18px;cursor:pointer;font-family:var(--font-body);color:var(--text);transition:border-color .2s,transform .15s,box-shadow .2s;overflow:hidden;}
     .landing-event-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--green);}
     .landing-event-card.community::before{background:#4aa8f8;}
@@ -10994,24 +10994,33 @@ body:not(.view-staff) .bld-head-name{font-family:var(--font-display);font-size:2
 /* the event card: the plate, the name, when and where, the rules; its height and About link line up with its neighbours */
 body .landing-event-card.bld-card{justify-content:flex-start;gap:12px;background:var(--bld-c-bg);border:1px solid var(--bld-c-line);border-radius:0;color:var(--bld-c-ink);}
 body .landing-event-card.bld-card:hover{border-color:var(--bld-c-ac);}
-.bld-card .bld-plate{position:relative;z-index:1;width:100%;padding:0;}
+.bld-card .bld-plate{position:relative;z-index:1;width:100%;max-width:280px;padding:0;}
 /* the owner's picture of a donor's arm is the card (2026-11-04): white as the card is, it runs off the bottom and the far side, the words in its empty part, mirrored where the page reads from the right */
-body .lec-wrap .landing-event-card.bld-card{overflow:hidden;padding-bottom:47%;}
-.bld-card-img{position:absolute;inset-inline:0;bottom:0;z-index:0;width:100%;height:auto;pointer-events:none;}
+body .lec-wrap .landing-event-card.bld-card{overflow:hidden;}
+.bld-card-img{position:absolute;inset-inline-end:0;bottom:0;z-index:0;width:74%;max-width:280px;height:auto;pointer-events:none;}
 :is(html[lang="ar"],html[lang="ur"]) .bld-card-img{transform:scaleX(-1);}
 .bld-card .lec2-copy{position:relative;z-index:1;width:100%;}
 body .bld-card .lec-title{color:var(--bld-c-title);}
 body .bld-card .lec-meta{margin-top:6px;font-weight:600;line-height:1.45;color:var(--bld-c-ink2);}
-.bld-cause{position:relative;z-index:1;font-size:13px;font-weight:800;line-height:1.3;color:var(--bld-c-ac);}
+.bld-cause{position:relative;z-index:1;max-width:54%;min-height:72px;font-size:13px;font-weight:800;line-height:1.3;color:var(--bld-c-ac);}
 body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-bg);padding-inline:4px;margin-inline-start:-4px;} /* a long translation reaches the picture */
 /* the rules, the same everywhere */
 .bld-sum{position:relative;z-index:1;display:grid;gap:5px;margin:0;padding:0;list-style:none;font-size:13px;font-weight:500;line-height:1.35;}
 .bld-sum>*{display:flex;align-items:flex-start;gap:7px;min-width:0;}
-.bld-card .bld-sum{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;font-size:12px;}
 /* "Different types": the eight blood types, on the card and as the donor step's picker; the neon is a fill, never text on white (the owner picked this look, 2026-11-04) */
-.bld-tiles{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;width:100%;direction:ltr;}
-.bld-ti{display:flex;align-items:center;justify-content:center;height:46px;font-size:18px;font-weight:700;background:var(--bld-card2);color:var(--bld-c-ink);}
+.bld-tiles{position:relative;z-index:1;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:3px;width:100%;max-width:420px;direction:ltr;}
+.bld-ti{display:flex;align-items:center;justify-content:center;height:36px;font-size:13px;font-weight:700;letter-spacing:-.02em;background:var(--bld-card2);color:var(--bld-c-ink);}
 .bld-ti.on{background:#03FE8A;}
+/* a card is a short teaser with the details one tap away (the rules are on About, the donor step and the ticket), so it sits on the page at its own height; on a wide screen it takes the row, words beside the picture (the owner, 2026-11-04) */
+@media (min-width:600px){
+  .landing-events-grid:has(>.bld-wrap){display:flex;flex-wrap:wrap;}
+  .landing-events-grid:has(>.bld-wrap)>*{flex:1 1 260px;}
+  .landing-events-grid>.bld-wrap{flex:1 1 100%;}
+  body .lec-wrap .landing-event-card.bld-card{padding-inline-end:48%;}
+  .bld-card .bld-plate{max-width:340px;}
+  .bld-card-img{width:46%;max-width:none;}
+  .bld-cause{max-width:none;min-height:0;}
+}
 .bld-bt-l{margin-bottom:6px;font-size:13px;font-weight:700;color:var(--bld-ink);}
 .bld-picks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;}
 .bld-pick{min-height:52px;padding:0 4px;border:1.5px solid var(--bld-line2);background:#fff;font:inherit;font-size:18px;font-weight:700;color:var(--bld-ink);cursor:pointer;}
@@ -11021,7 +11030,6 @@ body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-
 .bld-tk-type[hidden]{display:none;}
 .bld-tk-type b{font-size:30px;font-weight:700;line-height:1;}
 .bld-sum .cu-ic{flex:none;margin-top:2px;color:var(--bld-tick,var(--bld-ac));}
-.bld-card .bld-sum .cu-ic{color:var(--bld-c-ac);}
 .bld-rules{margin:0 0 16px;padding:14px;background:var(--bld-wash);border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
 .bld-more{display:block;width:100%;margin:12px 0 0;}
 .bld-note{margin:10px 0 0;font-size:12.5px;line-height:1.45;color:var(--bld-ink2);}
