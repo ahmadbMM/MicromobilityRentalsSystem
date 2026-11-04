@@ -21,12 +21,7 @@ const mine = { ok: true, member: true, hidden: false, shown: 'ttl_leg', titles: 
   { id: 'ttl_cap', name: 'Ride Captain', name_ar: 'قائد الرحلة', color: 'gold', auto: false, expires_on: '2099-01-31' },
   { id: 'ttl_leg', name: 'Legend', name_ar: 'أسطورة', color: 'purple', auto: true, expires_on: null },
 ] };
-const directory = { ok: true, members: [
-  { name: 'Lina Haddad', me: true, title: { name: 'Legend', name_ar: 'أسطورة', color: 'purple' }, rides: 51, badges: [] },
-  { name: 'Omar Saleh', me: false, title: { name: 'Ride Captain', name_ar: 'قائد الرحلة', color: 'gold' }, rides: 1,
-    badges: [{ slug: 'bd_c1', icon: 'moon', color: 'purple', name: 'Night Owl', name_ar: 'بومة الليل', system: false }] },
-  { name: 'Sara Nabil', me: false, title: null, rides: 7, badges: [] },
-] };
+const directory = { ok: true, members: [] };
 
 const rpcBodies = (page: Page, fn: string) => {
   const out: Record<string, unknown>[] = [];
@@ -50,7 +45,7 @@ async function staff(page: Page, fx: Fixtures = {}) {
 }
 
 test.describe('@customer:account member titles', () => {
-  test('a member picks the title others see, and the choice is sent', async ({ page }) => {
+  test('a member picks the title their account shows, and the choice is sent', async ({ page }) => {
     await rider(page);
     const sent = rpcBodies(page, 'customer_title_prefs');
     await account(page);
@@ -62,12 +57,13 @@ test.describe('@customer:account member titles', () => {
     expect(sent[0]).toMatchObject({ p_id: 'c1', p_token: 'tok-spec', p_shown: 'ttl_cap', p_hidden: false });
   });
 
-  test('hiding is sent, and a refusal puts the switch back and says so', async ({ page }) => {
+  test('a refused choice puts the pick back and says so; there is no switch for a list that is gone', async ({ page }) => {
     await rider(page, { 'rpc:customer_title_prefs': { ok: false, error: 'member' } });
     await account(page);
-    await page.locator('#tt-hide').click();
+    await expect(page.locator('#tt-hide')).toHaveCount(0);
+    await page.locator('#tt-mine .tt-pick', { hasText: 'Ride Captain' }).click();
     await expect(page.locator('#toast-container')).toContainText('We could not save that');
-    await expect(page.locator('#tt-hide')).not.toBeChecked();
+    await expect(page.locator('#tt-mine .tt-pick.on')).toContainText('Legend');
   });
 
   test('an account that is not a member gets no card', async ({ page }) => {
@@ -125,7 +121,7 @@ test.describe('@customer:account friend invite', () => {
   });
 });
 
-test.describe('@customer:members members list', () => {
+test.describe('@customer:members the Community page', () => {
   test('a member has the Community tab in the menus, between Bookings and Account, and it reads as current', async ({ page }) => {
     await rider(page);
     await page.evaluate(`setCustTab('account')`);
@@ -158,26 +154,13 @@ test.describe('@customer:members members list', () => {
     expect(await page.locator('#customer-tab-nav [data-ctab="members"]').evaluate((e) => (e as HTMLElement).hidden)).toBe(true);
   });
 
-  test('the list opens from the account, searches by name, and a card shows title, rides and badges', async ({ page }) => {
+  test('it opens from the menu and names nobody', async ({ page }) => {
     await rider(page);
     await page.waitForFunction('S._infoMem&&S._infoMem.ok');
     await page.locator('#customer-tab-nav [data-ctab="members"], #bnav-members').locator('visible=true').first().click();
     await expect(page).toHaveURL(/\/members/);
-    await expect(page.locator('#tab-members .mb-row')).toHaveCount(3);
-    await expect(page.locator('#tab-members .mb-row').first()).toContainText('You');
-    await page.locator('#mb-q').fill('omar');
-    await expect(page.locator('#tab-members .mb-row')).toHaveCount(1);
-    await expect(page.locator('#mb-q')).toBeFocused();
-    await page.locator('#tab-members .mb-row').click();
-    const card = page.locator('#badge-pop .mb-card');
-    await expect(card).toContainText('Omar Saleh');
-    await expect(card).toContainText('Ride Captain');
-    await expect(card).toContainText('1 ride');
-    await expect(card).toContainText('Night Owl');
-    await card.locator('.mb-close').click();
-    await expect(page.locator('#badge-pop')).toHaveCount(0);
-    await page.locator('#mb-q').fill('nobody');
-    await expect(page.locator('#tab-members')).toContainText('No members match');
+    await expect(page.locator('#hub-nav')).toBeAttached();
+    await expect(page.locator('#tab-members .mb-row, #mb-q')).toHaveCount(0);
   });
 
   test('a non-member asking for the page leaves it and sees nobody', async ({ page }) => {
@@ -188,13 +171,13 @@ test.describe('@customer:members members list', () => {
     await expect(page.locator('#tab-members')).not.toHaveClass(/active/);
   });
 
-  test('a failed read offers to try again, and the retry paints the list', async ({ page }) => {
+  test('a failed read offers to try again, and the retry opens the page', async ({ page }) => {
     await rider(page, { 'rpc:member_directory': { __rpcError: { status: 500, code: 'XX000', message: 'boom' } } });
     await page.evaluate(`setCustTab('members')`);
     await expect(page.locator('#tab-members')).toContainText('We could not load the members');
     await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], 'rpc:member_directory': directory });
     await page.locator('#tab-members button', { hasText: 'Try again' }).click();
-    await expect(page.locator('#tab-members .mb-row')).toHaveCount(3);
+    await expect(page.locator('#hub-nav')).toBeAttached();
   });
 
   test('a directly opened /members address lands on the page', async ({ page }) => {
@@ -202,7 +185,7 @@ test.describe('@customer:members members list', () => {
     await loginCustomer(page, { id: 'c1', name: 'Lina Haddad' });
     await page.goto('/members');
     await waitForSb(page);
-    await expect(page.locator('#tab-members .mb-row')).toHaveCount(3);
+    await expect(page.locator('#hub-nav')).toBeAttached();
     await expect(page).toHaveURL(/\/members/);
   });
 });

@@ -519,15 +519,15 @@ variables) and popped once (`BDG_CHEER`).
 ## Titles and the Community page (2026-11-02)
 
 Migration 20261102200000. `titles` (admins' catalogue: English and/or Arabic name, a `BDG_COLORS` colour, `auto_rides`; both columns stay NOT NULL, so `_ttSave` stores a name typed in one language in both and `_ttEdit` opens it with only that box filled),
-`customer_titles` (staff give, optional `expires_on`) and `member_prefs` (the member's shown title and `hidden`, written only
-through `customer_title_prefs`). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
+`customer_titles` (staff give, optional `expires_on`) and `member_prefs` (the title the member's account shows, written only
+through `customer_title_prefs`; `hidden` is no longer read). Staff work in Community > Titles (`/community/titles`, `_commTitles`). An automatic title
 counts Saturday nights when read and stores nothing. The member's card on Account is `_ttMinePaint`. The Community page (`/members`, not `/community`, which is a staff
 address; `renderMembers`) has its own tab in both menus, shown only to members (`_commNavPaint`, on the members gate's `_infoMember`); a non-member opening the address is sent away.
-`member_directory` is the only read that names another person: members only, hidden and blacklisted accounts left out, no
-account id, so the card (`_mbOpen`) is drawn from the row in hand, and it carries staff-given badges only because ride-earned
-ones are worked out on the rider's own device. Anything added to it is new sharing: update the privacy notice's row too.
+**Members see nothing about each other (2026-11-04, migration 20261104120000):** no customer-facing read may return another member's name, title, badges, rides, kudos, squad, photo or buddy. `member_directory` stays only as the page's "is this a member" gate and returns an empty list. Anything that would break this rule also needs a row in the privacy notice.
 
 ## Invitations and the Community page's activities (2026-11-03)
+
+**Since 2026-11-04 only challenges, the community goal and the year reach members; kudos, the vote, squads, the photo wall and the welcome buddy left the page (see above). Their tables and the staff screens remain, members' reads of them are closed, and what follows describes the original build.**
 
 Migrations 20261103100000 (invites) and 20261103120500 (activities). **`member-hub.js` is hand-written and not generated**: the members'
 activities (kudos, vote, challenges and goal, squads, photo wall, year) load from it on `/members` only (`_hubLoad`; `HUB_V` is stamped by
