@@ -78,7 +78,7 @@ test('"Looks fine" is shared through staff_options and does not reload the custo
   let customerReads = 0;
   page.on('request', r => {
     if (/rest\/v1\/staff_options/.test(r.url()) && r.method() === 'POST') writes.push({ url: r.url(), body: r.postDataJSON() });
-    if (/rest\/v1\/customers/.test(r.url()) && r.method() === 'GET') customerReads++;
+    if (/rest\/v1\/customers/.test(r.url()) && r.method() === 'GET' && !/photo=like/.test(r.url())) customerReads++; // the rows' photos are their own read
   });
   await line(page, 'typo').locator('.am-fine').click();
   await expect(page.locator('.am-row[data-cust="typo"]')).toHaveCount(0);

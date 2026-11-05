@@ -35,6 +35,7 @@ import { readFile } from 'node:fs/promises';
 /** Functions the customer half calls into staff through. Add here when the build says so. */
 export const STAFF_ENTRY = [
   'goStaff', 'openPinModal', '_staffHostGate', // the way in: these always fetch the staff half
+  'renderVolunteers', '_vsfMount', '_vsfSave', '_cfVolMount', // 2026-11-05: the Volunteers section, and the two forms that ask for its block
   'setStaffTab', 'renderStaffTabs', '_renderStaffTab', '_bgRenderStaffTab',
   'renderStaffQueue', 'renderSessions', 'renderBikes', 'renderHistory', 'renderAnalytics', 'setAnView', 'renderInventory',
   'renderCashier', 'renderCommunity', 'renderCustomers', 'renderWebsite', 'renderCatalog', 'renderWorkshop', 'renderMessages',
@@ -470,6 +471,7 @@ export const STAFF_PARTS = {
   catalog: ['renderCatalog'], inventory: ['renderInventory', '_invMove', '_invSetCount'], website: ['renderWebsite'], history: ['renderHistory'],
   wallet: ['_cwOpen', '_cwDeskPay', '_cwDeskRefund'], // 2026-11-02: an account's wallet, and the desk paying from it or refunding into it
   workshop: ['renderWorkshop'], ambassadors: ['renderAmbassadors'], messages: ['renderMessages'],
+  volunteers: ['renderVolunteers', '_vsfMount', '_vsfSave', '_cfVolMount'], // 2026-11-05: the section, the switch in the session form, the hours in the account editor
   vendors: ['renderVendors'], // 2026-10-03: Vendors, admins only
   sela: ['printSelaReport', 'exportSelaXlsx'], // 2026-10-08: Run for Her's report for Sela (print + .xlsx), read at each tap
   vlap: ['_vlStaffOpen', '_vlAthleteEdit', '_vlPairOpen', '_vlCfgOpen', 'printKaminReport', 'exportKaminXlsx', '_vrbOpen', '_prbOpen', 'printVlReceipts'], // 2026-10-17: Victory Lap - athletes and teams, an athlete's race, pairing, the race's settings, the report for Kamin Sports; 2026-10-23: the report builder, and the partner (Defe) report builder beside it, which shares its workbook writer
@@ -1384,7 +1386,8 @@ export function formatFieldNames(r, limit = 20) {
 // the Product filter): staff 678.7, core 305.9 here, about 680.8 / 308.0 on the runner; +7 / +5 restores the margin
 // (customer 257.7 here, inside its own).
 // Staff 706 -> 708, core 316 -> 318: a blood night's filters and sorts (703.3 / 314.7 here; CI reads about 2.2 / 1.6 more).
-export const SIZE_BUDGET_DEFAULT_KB = { customer: 275, staff: 708, core: 318 }; // staff 702 -> 706: the Challenges tips and telling every rider moved up (699.7 locally, CI reads about 2.2 more). Before that, staff 698 -> 702, core 313 -> 316: the staff review's leftovers, built 2026-11-04 (694.3 and 311.1 locally before the sessions part; CI reads about 2.2 and 1.3 more). Before that, customer -> 275, core 311 -> 313: the Blood Donation event, its poster kept out in assets/blood-info.json (271.4 and 310.0 here, the runner read 273.0 and 311.6); staff 695 -> 698: the wallet at the Sales till (2026-11-03; 691.8 here, the runner reads about 3.4 more). Before: customer 266 -> 268, staff 691 -> 695: the Community page's activities, their staff screens and the runner's 1-2 KB over local (2026-11-03); // customer 263 -> 266, staff 687 -> 691, core 310 -> 311 (the runner reads 1-2 KB over local): member titles and the Community page in ten languages (2026-11-02); // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
+// 2026-11-05: the Volunteers section, a part of its own, which only its accounts fetch: staff 708 -> 726; customer 275 -> 277 for My Account's volunteering card and the notice's two rows (CI reads about 2.2 / 1.6 more).
+export const SIZE_BUDGET_DEFAULT_KB = { customer: 277, staff: 726, core: 318 }; // staff 702 -> 706: the Challenges tips and telling every rider moved up (699.7 locally, CI reads about 2.2 more). Before that, staff 698 -> 702, core 313 -> 316: the staff review's leftovers, built 2026-11-04 (694.3 and 311.1 locally before the sessions part; CI reads about 2.2 and 1.3 more). Before that, customer -> 275, core 311 -> 313: the Blood Donation event, its poster kept out in assets/blood-info.json (271.4 and 310.0 here, the runner read 273.0 and 311.6); staff 695 -> 698: the wallet at the Sales till (2026-11-03; 691.8 here, the runner reads about 3.4 more). Before: customer 266 -> 268, staff 691 -> 695: the Community page's activities, their staff screens and the runner's 1-2 KB over local (2026-11-03); // customer 263 -> 266, staff 687 -> 691, core 310 -> 311 (the runner reads 1-2 KB over local): member titles and the Community page in ten languages (2026-11-02); // customer 261 -> 263: the Arena race's transfer and its nine languages (2026-11-02; 259.8 local, ~261.1 on the runner); staff 683 -> 687: the Arena race's receipts on the staff side measured 683.3 on the runner (679.8 local)
 export const SIZE_BUDGET_ENV = { customer: 'SIZE_BUDGET_CUSTOMER_KB', staff: 'SIZE_BUDGET_STAFF_KB', core: 'SIZE_BUDGET_CORE_KB' };
 
 /** Bytes of the gzipped text, as zlib compresses it at its default level. */

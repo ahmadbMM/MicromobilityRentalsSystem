@@ -142,7 +142,7 @@
        ?staff / ?bike, a staff section's path) is given the whole styles.css here instead, at once, the
        one stylesheet it needs: it used to block its first paint on app.css and then parse styles.css,
        every rule of app.css again, on top. The test is _staffWanted's, which the staff loader repeats. -->
-  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|ambassadors|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
+  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
   <noscript><link rel="stylesheet" href="/app.css?v=0"></noscript>
 <script>try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');(function(){var st=localStorage.getItem('cq_staff_theme')||(localStorage.getItem('cq_booth')==='1'?'booth':''),de=document.documentElement,mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'),sys=function(){try{if(localStorage.getItem('cq_staff_theme')!=='system')return;if(mq.matches)de.setAttribute('data-staff-theme','dark');else de.removeAttribute('data-staff-theme');}catch(e){}};if(st==='system'&&mq)sys();else if(st==='dark'||st==='booth')de.setAttribute('data-staff-theme',st);if(mq&&mq.addEventListener)mq.addEventListener('change',sys);})();if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
@@ -341,6 +341,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="customers" data-on-click='["setStaffTab","customers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Customers</span></button>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Community</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
+    <button class="tab-btn"        data-stab="volunteers" data-on-click='["setStaffTab","volunteers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Volunteers</span></button>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
     <span class="snav-group" data-group="snavWebsite" role="heading" aria-level="2">Website</span>
     <button class="tab-btn"        data-stab="website"   data-on-click='["setStaffTab","website"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">micromobility.sa</span></button>
@@ -371,6 +372,7 @@ window.mmLoading=(function(){
     <div id="tab-workshop"  class="tab-panel"></div>
     <div id="tab-messages"  class="tab-panel"></div>
     <div id="tab-ambassadors" class="tab-panel"></div>
+    <div id="tab-volunteers" class="tab-panel"></div>
     <div id="tab-vendors"       class="tab-panel"></div>
     <div id="tab-team"      class="tab-panel"></div>
     <div id="tab-settings"  class="tab-panel"></div>
@@ -779,7 +781,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   qMissOn:'Booked on {0}: {1}',qMissOpen:'Open that ride',qMissFilters:'Matches with the filters off: {0}',qMissClear:'Clear filters',
   qYNotAppr:'Not approved for this session yet. Approve the request on the list first.',qYScanNotAppr:'#{0} {1} is not approved for this session yet.',qYExHeld:'{0} held back: waitlist, approval or deposit',qYRetNote:'Return with a note',qYNoWv:'No waiver yet',qYWvAsk:'Agree on this device',qYWvDone:'Waiver agreed at the desk',qYPayElsewhere:'Changed on another device: now {0}',qYCapTitle:'Fewer places than people booked',qYCapLine:'{0}: {1} booked, {2} places',qYCapGo:'Save anyway',
   fAdvanced:'Advanced',bqDonWait:'Checked in, not marked yet',bqRw:'Free ride code',bqRwOpen:'Not used yet',bqRwUsed:'Used',bqRwNone:'No code',bldWaiverTitle:'Donor agreement',bldWaiverBody:'You cannot register for this event until you have read and agreed to this. Giving blood is voluntary, and I can withdraw at any time without giving a reason. The donation is a medical procedure carried out by the event’s medical team, not by MicroMobility. Only the medical team decides whether I can donate, so registering does not guarantee that I will. I will answer their health questions truthfully and follow their instructions and the venue’s, including resting after I donate and avoiding hard exercise for 5 hours. MicroMobility’s part is only to register me and to give confirmed donors their free ride. I am responsible for my personal belongings. To the fullest extent permitted by law, MicroMobility and its staff are not responsible for the medical procedure or its effects, or for any injury, illness, loss, theft or damage at the event.',bldWaiverAgree:'I have read this and I agree',bldWgKicker:'Agreement needed',bldWgSub:'You’re registered for this event. Read this agreement and agree to it to continue.',bldWvTick:'Tick the agreement to confirm your registration.',bldNumLabel:'Donor number',bldTkSub:'Show this code at the registration desk. It’s in Bookings too.',bldFinishBtn:'Finished',bldStatDonors:'Donors',bldColDonor:'Donor',bldBtNotKnown:'Not known',piiHidBt:'Hidden blood type. Tap to show',bldShKicker:'Before you register',bldShTitle:'Sharing your details',evBloodName:'Micromobility Blood Donation',bldCause:'Give blood. Ride free.',bldTypesLine:'Different types. One purpose.',bldYourType:'Your type',bldPartnersAlt:'MicroMobility, Health Services at the Ministry of Defense, Jeddah Corniche Circuit, Saudi Motorsport Company, Ministry of Sport',bldSumAge:'Age 18 or over',bldSumWeight:'Weight 50 kg or more',bldSumId:'Bring your national ID or Iqama',bldSumTips:'Sleep well and eat a healthy meal two hours before',bldReadMore:'Read more',bldInfoTitle:'Before you donate',bldInfoOk:'I’ve read this',bldInfoPdf:'Download the poster (PDF)',bldStepTitle:'Your details',bldStepMsg:'All required. Filled in from your account, and any change is saved to it.',bldIdNote:'Show your national ID or Iqama at the event. We don’t ask for the number or keep it.',bldAgeTitle:'18 or over only',bldAgeMsg:'Blood donors must be at least 18 on the day of the event.',bldShSub:'To register, agree that we share these details with our event partners and third parties:',bldShNote:'We share them only with our partners and third parties for this event, and nothing else about you.',bldShAgree:'I agree that MicroMobility shares my details with its partners and third parties for this event.',bldRewardNote:'Checked-in donors confirmed by our team get one free ride on any bike except Carbon, valid for one month, on circuit rides (Petromin nights for Community and Petromin accounts). Avoid hard exercise for 5 hours after donating, so ride another day.',bldRewardTitle:'Your free ride',bldRewardTxt:'Thank you for donating. Enter this code when you book. Valid until {0}.',bldRewardUsed:'Your free ride has been used. Thank you for donating.',errBloodDetails:'Please fill in all your details.',errBloodCodeCarbon:'This free ride isn’t valid on a Carbon bike.',errBloodCodeSession:'This free ride isn’t valid on this session.',bldColDonated:'Donated',bldMark:'Mark donated',bldErrUsed:'Their free ride is already used, so this can’t be undone.',bldErrIn:'Check them in first.',bldErrAcct:'This booking has no account to give the free ride to.',bldToastOn:'Marked as donated. Free ride code {0} is on their ticket.',bldToastOff:'Donation taken back and the code retired.',
-  evRunHerName:'Run for Her',evDefeName:'DEFE 5KM Run',defeLogoAlt:'DEFE',defeCause:'Breast cancer awareness run',defeKitLabel:'Kit collection',defeKitTxt:'Jeddah Park · Wed 21 Oct · 4–10 PM',defeRaceLabel:'Race',defeRaceTxt:'Jeddah Corniche Circuit · Thu 22 Oct · 7 PM',defeStepMsg:'Check your details. Change anything that is wrong and fill in what is missing.',defeYouSub:'From your account. Change anything that needs it.',defeRegQ:'Have you registered for the race?',defeRegSub:'Your place with MicroMobility is booked. The race itself is entered on Defe’s registration page.',defeRegNoNote:'Register through Defe to take part in the race.',defeRegCode:'Use discount code {0} for 50% off, for the first 50 members.',defeRegLink:'Register for the race',defeRegYesNote:'You told us you are registered for the race through Defe website.',defeRegLabel:'Race registration',defeRegLinkShort:'Defe registration',defeRegCol:'Registered for the race',defeRegColYes:'Registered',defeRegColNo:'Not registered',infoDtDefe:'Run 5 km with Defe for breast cancer awareness, together with the MicroMobility community, at the Jeddah Corniche Circuit. Collect your race kit at Jeddah Park on 21 October, 4–10 PM. The race starts on 22 October at 7 PM.',sessEventDefeHint:'Defe’s 5 km breast cancer awareness run, for community members. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Runners are asked whether they registered for the race through Defe.',bdgDefe5k:'DEFE 5K',bdgDefe5kD:'Finish the DEFE 5KM Run.',bdgDefe5kA:'Defe’s ribbon, for everyone who ran the DEFE 5KM Run for breast cancer awareness with the MicroMobility community.',landPmDaysTitle:'Petromin Days',landPmDaysNext:'Next ride {0}',landPmDaysMeta:'Petromin\'s evening rides',pmDaysNo:'Petromin Days are for Petromin\'s team.',infoWhoPetromin:'Community members and Petromin\'s team',infoEvPetro:'Petromin\'s evening rides at the Jeddah Corniche Circuit, for Petromin\'s team. Pick a night, pick your bike, and ride with your colleagues.',tagOneOfTwo:'An account takes the Community tag or the Petromin tag, never both. Remove the other one first.',tagOneOfTwoN:'{0} of these accounts hold the {1} tag. An account takes the Community tag or the Petromin tag, never both.',runNumLabel:'Runner number',landRunHerKm:'3 or 5 km',runPartnersAlt:'Partners: Jeddah Yacht Club and Dr. Samir Abbas Hospital',venueJyc:'Jeddah Yacht Club',runKm:'{0} km',runKmLabel:'Distance',runKmNone:'No distance',runAdultsNote:'For community members aged 18 and over on race day.',runYouLabel:'Your details',runStepTitle:'Runner details',runStepMsg:'Pick your distance. We only ask for what your account is missing.',runAgeTitle:'For runners 18 and over',runAgeMsg:'Run for Her is open to community members aged 18 and over on race day. The birth date on your account says you are under 18.',runDobReq:'Enter your birth date.',runFinishBtn:'Finished',runEmNone:'No emergency contact on this account yet.',emTitle:'Emergency contact',emSub:'Someone we can call if you need help during the run. It is saved on your account, so you only give it once.',emSubAcc:'Someone we can call if you need help at an event.',emName:'Contact’s name',emPhone:'Contact’s mobile number',emRelation:'Relationship to you',emPick:'Choose',emChange:'Change',emRel_spouse:'Spouse',emRel_parent:'Parent',emRel_sibling:'Brother or sister',emRel_child:'Son or daughter',emRel_relative:'Relative',emRel_friend:'Friend',emRel_colleague:'Colleague',emRel_other:'Other',errRunKm:'Pick 3 km or 5 km.',errRunDetails:'Some runner details are missing. Check them and continue.',errEmName:'Enter your contact’s name.',errEmPhone:'Enter your contact’s mobile number.',errEmRelation:'Choose how they are related to you.',errEmSelf:'Your contact’s number can’t be your own.',em2Title:'Second emergency contact',emReqTitle:'Add your emergency contact',emReqSub:'We now ask every rider for someone we can call if you need help at a ride or event. Add them once and you can book.',igReqTitle:'Add your Instagram',igReqSub:'We ask every community member for their Instagram account. Add it once and you can book.',errEmRequired:'Your account needs an emergency contact. Change it instead of removing it.',em2Sub:'Someone else we can call if we can’t reach your first contact.',em2Add:'Add a second contact',btTitle:'Blood type',btSub:'Helps us at blood donation events. Only you and our team can see it.',btPick:'Choose your blood type',btUnknown:'I don\'t know my blood type',errBloodType:'Choose a blood type from the list.',errEmSame:'The two emergency contacts can’t have the same number.',sessEventRunHint:'A running event for community members aged 18 and over. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Each runner picks 3 km or 5 km.',bdgBloodDonor:'Blood Donor',bdgBloodDonorD:'Donate blood at one of our events.',bdgBloodDonorA:'For giving blood at a MicroMobility event. Our team confirms it on the night.',bdgVolunteer:'Volunteer',bdgVolunteerD:'Volunteer at one of our events.',bdgVolunteerA:'For giving your time to help run a MicroMobility event. Given by our team.',bdgRunForHer:'Run for Her',bdgRunForHerD:'Finish the Run for Her.',bdgRunForHerA:'The pink ribbon, for everyone who ran and finished the Run for Her with the MicroMobility community.',rshKicker:'Before the race',rshTitle:'Sharing your details for the race',rshSub:'To take part in the race, we will share these details about you with Sela and Jeddah Yacht Club (JYC):',rshName:'Full name',rshKm:'Distance chosen',rshNote:'Nothing else about you is shared, and only for this race.',rshAgree:'I agree to MicroMobility sharing these details with Sela and Jeddah Yacht Club (JYC) so I can take part in the race.',errRunShare:'Agree to share your details for the race to book your place.',rshCol:'Agreed to share',rshNotYet:'Not yet',waLabel:'WhatsApp number',waAsk:'Is {0} your WhatsApp number too?',waYes:'Yes',waNo:'No',waSame:'Same as mobile',errWaPhone:'Enter your WhatsApp number.',waSubAcc:'The number our team messages you on about your rides.',
+  evRunHerName:'Run for Her',evDefeName:'DEFE 5KM Run',defeLogoAlt:'DEFE',defeCause:'Breast cancer awareness run',defeKitLabel:'Kit collection',defeKitTxt:'Jeddah Park · Wed 21 Oct · 4–10 PM',defeRaceLabel:'Race',defeRaceTxt:'Jeddah Corniche Circuit · Thu 22 Oct · 7 PM',defeStepMsg:'Check your details. Change anything that is wrong and fill in what is missing.',defeYouSub:'From your account. Change anything that needs it.',defeRegQ:'Have you registered for the race?',defeRegSub:'Your place with MicroMobility is booked. The race itself is entered on Defe’s registration page.',defeRegNoNote:'Register through Defe to take part in the race.',defeRegCode:'Use discount code {0} for 50% off, for the first 50 members.',defeRegLink:'Register for the race',defeRegYesNote:'You told us you are registered for the race through Defe website.',defeRegLabel:'Race registration',defeRegLinkShort:'Defe registration',defeRegCol:'Registered for the race',defeRegColYes:'Registered',defeRegColNo:'Not registered',infoDtDefe:'Run 5 km with Defe for breast cancer awareness, together with the MicroMobility community, at the Jeddah Corniche Circuit. Collect your race kit at Jeddah Park on 21 October, 4–10 PM. The race starts on 22 October at 7 PM.',sessEventDefeHint:'Defe’s 5 km breast cancer awareness run, for community members. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Runners are asked whether they registered for the race through Defe.',bdgDefe5k:'DEFE 5K',bdgDefe5kD:'Finish the DEFE 5KM Run.',bdgDefe5kA:'Defe’s ribbon, for everyone who ran the DEFE 5KM Run for breast cancer awareness with the MicroMobility community.',landPmDaysTitle:'Petromin Days',landPmDaysNext:'Next ride {0}',landPmDaysMeta:'Petromin\'s evening rides',pmDaysNo:'Petromin Days are for Petromin\'s team.',infoWhoPetromin:'Community members and Petromin\'s team',infoEvPetro:'Petromin\'s evening rides at the Jeddah Corniche Circuit, for Petromin\'s team. Pick a night, pick your bike, and ride with your colleagues.',tagOneOfTwo:'An account takes the Community tag or the Petromin tag, never both. Remove the other one first.',tagOneOfTwoN:'{0} of these accounts hold the {1} tag. An account takes the Community tag or the Petromin tag, never both.',runNumLabel:'Runner number',landRunHerKm:'3 or 5 km',runPartnersAlt:'Partners: Jeddah Yacht Club and Dr. Samir Abbas Hospital',venueJyc:'Jeddah Yacht Club',runKm:'{0} km',runKmLabel:'Distance',runKmNone:'No distance',runAdultsNote:'For community members aged 18 and over on race day.',runYouLabel:'Your details',runStepTitle:'Runner details',runStepMsg:'Pick your distance. We only ask for what your account is missing.',runAgeTitle:'For runners 18 and over',runAgeMsg:'Run for Her is open to community members aged 18 and over on race day. The birth date on your account says you are under 18.',runDobReq:'Enter your birth date.',runFinishBtn:'Finished',runEmNone:'No emergency contact on this account yet.',emTitle:'Emergency contact',emSub:'Someone we can call if you need help during the run. It is saved on your account, so you only give it once.',emSubAcc:'Someone we can call if you need help at an event.',emName:'Contact’s name',emPhone:'Contact’s mobile number',emRelation:'Relationship to you',emPick:'Choose',emChange:'Change',emRel_spouse:'Spouse',emRel_parent:'Parent',emRel_sibling:'Brother or sister',emRel_child:'Son or daughter',emRel_relative:'Relative',emRel_friend:'Friend',emRel_colleague:'Colleague',emRel_other:'Other',errRunKm:'Pick 3 km or 5 km.',errRunDetails:'Some runner details are missing. Check them and continue.',errEmName:'Enter your contact’s name.',errEmPhone:'Enter your contact’s mobile number.',errEmRelation:'Choose how they are related to you.',errEmSelf:'Your contact’s number can’t be your own.',em2Title:'Second emergency contact',emReqTitle:'Add your emergency contact',emReqSub:'We now ask every rider for someone we can call if you need help at a ride or event. Add them once and you can book.',igReqTitle:'Add your Instagram',igReqSub:'We ask every community member for their Instagram account. Add it once and you can book.',errEmRequired:'Your account needs an emergency contact. Change it instead of removing it.',em2Sub:'Someone else we can call if we can’t reach your first contact.',em2Add:'Add a second contact',btTitle:'Blood type',btSub:'Helps us at blood donation events. Only you and our team can see it.',btPick:'Choose your blood type',btUnknown:'I don\'t know my blood type',errBloodType:'Choose a blood type from the list.',errEmSame:'The two emergency contacts can’t have the same number.',sessEventRunHint:'A running event for community members aged 18 and over. Free, one place per account, first come first served; once the places are taken, runners go on the waitlist. Each runner picks 3 km or 5 km.',bdgBloodDonor:'Blood Donor',bdgBloodDonorD:'Donate blood at one of our events.',bdgBloodDonorA:'For giving blood at a MicroMobility event. Our team confirms it on the night.',bdgVolunteer:'Volunteer',bdgVolunteerD:'Volunteer at one of our events.',bdgVolunteerA:'For giving your time to help run a MicroMobility event. Given by our team.',tabVolunteers:'Volunteers',accVolTitle:'Volunteering',accVolHours:'Your volunteering hours: {0}',accVolDesk:'Open the volunteer portal',accVolJoinHint:'Help at our events and earn volunteering hours.',accVolRec:'Recent hours',amfVolHours:'Volunteering hours',amfVolNone:'No hours',amfVolAny:'Any hours',amfVol10:'10 hours or more',amfVol50:'50 hours or more',amSortVol:'Most volunteering hours',zvErrNegative:'That would take the account below zero hours.',zvErrHours:'Enter the hours as a number, not zero, up to 500. A session award is up to 24.',zvErrFuture:'The date cannot be in the future.',zfNeedCut:'Choose the time volunteers can no longer enter.',zfCutBeforeOpen:'The time they stop must be after the time they start.',zvErrAlreadyIn:'They have already clocked in, so they cannot be taken off.',zvErrNotVol:'This account is not a volunteer yet.',zvErrTimes:'The finish time must be after the arrival time.',zvErrForbidden:'Your account cannot change this.',zvStApplied:'Applied',zvStActive:'Active',zvStPaused:'Paused',zvStRemoved:'Removed',zvWaDefault:'Hello {name}, thank you for volunteering with MicroMobility. {session} on {date} is open to volunteers until {until}. See it here: {link}',zvTabRoster:'Volunteers',zvTabInterested:'Interested',zvTabSessions:'Opportunities',zvTabHours:'Hours',zvTabActivity:'Activity',zvTabSettings:'Settings',zvSub:'Who volunteers, who has registered interest, which sessions are open to them, and their hours.',zvNotSetUp:'The Volunteers section needs its database update first.',zvLoadErr:'Volunteers could not be loaded.',zvNone:'No volunteers match.',zvAutoShort:'Accepted automatically',zvNoAgreement:'Agreement not accepted',zvExpired:'Access ended',zvHoursUnit:'Hours',zvMilestone:'{0} hour milestone',zvSessionsUnit:'Sessions',zvAddHours:'Add hours',zvManage:'Manage',zvFigActive:'Active volunteers',zvFigOnDuty:'On duty now',zvFigHours:'Total hours',zvFigMonth:'Hours this month',zvFigInterested:'Interested, waiting',zvFigNoAgree:'Agreement not accepted',zvSearch:'Search',zvFStatus:'Status',zvFTag:'Tag',zvFTagAny:'Any tag',zvFHours:'Hours',zvFHoursAny:'Any hours',zvBand0:'No hours',zvBand1:'Under 10 hours',zvBand10:'10 to 49 hours',zvBand50:'50 hours or more',zvFAgree:'Agreement',zvFAgreeAny:'Any agreement',zvAgreeYes:'Accepted',zvAgreeNo:'Not accepted',zvFSort:'Sort',zvSortName:'Name',zvSortHours:'Most hours',zvSortHoursLo:'Fewest hours',zvSortSessions:'Most sessions',zvSortLast:'Last active',zvSortNewest:'Newest',zvSortExpiry:'Access ending soonest',zvAdd:'Add a volunteer',zvAddMany:'Add several',zvExport:'Export',zvCopyNums:'Copy numbers',zvSelected:'{0} selected',zvSelAll:'Select all',zvDoActivate:'Make active',zvDoPause:'Pause',zvDoRemove:'Remove',zvTagName:'Tag',zvTagAdd:'Add tag',zvTagRemove:'Remove tag',zvSaved:'Saved.',zvExpiry:'Access ends on',zvShirt:'T-shirt size',zvCopied:'Numbers copied.',zvAddSearch:'Name, mobile or email',zvAddBtn:'Add',zvAddNone:'No account found.',zvAdded:'Volunteer added.',zvManyHint:'Paste mobile numbers, one on each line. Each must already have an account.',zvManyDone:'Added: {0}. Not found: {1}.',zvHoursOn:'Date',zvHoursSession:'Session',zvHoursNoSession:'No session',zvHoursNote:'Note',zvHoursHint:'Use a minus number to take hours off.',zvHoursAdded:'Hours saved.',zvSomeFailed:'{0} could not be saved.',zvVoided:'Entry cancelled.',zvTags:'Tags, separated by commas',zvNotes:'Staff notes',zvAutoAccept:'Accept automatically',zvAutoAcceptHint:'When this person registers interest in an opportunity, they are accepted without waiting for staff.',zvAgreedOn:'Agreement accepted on {0}',zvDecidedBy:'Last status set by {0}',zvCert:'Certificate',zvNextMilestone:'Next milestone: {0}',zvNoHours:'No hours yet.',zvNoSessions:'No sessions yet.',zvVoidedBy:'Cancelled by {0}',zvVoid:'Cancel',zvShInterested:'Interested',zvShAccepted:'Accepted',zvShDeclined:'Cannot make it',zvShWithdrawn:'Withdrew',zvShBlocked:'Not allowed',zvShNoShow:'Did not come',zvShDone:'Done',zvSessNext:'Upcoming',zvSessOn:'Open to volunteers',zvSessPast:'Past',zvSwOff:'Off',zvSwEnded:'Ended',zvSwOpen:'Open until {0}',zvSwSoon:'Opens {0}',zvTeamUnit:'Team',zvAskedN:'{0} interested',zvDutyNow:'{0} on duty now',zvSessEdit:'Volunteer settings',zvSessOnBtn:'Open to volunteers',zvTeam:'Team and hours',zvCopyLink:'Copy link',zvNoSess:'No sessions here.',zvLinkCopied:'Link copied.',zfSwitch:'Open to volunteers',zfSwitchHint:'This session becomes an opportunity on the volunteer portal. People register interest there, and those you accept work from there.',zfCut:'Volunteers cannot register or work after',zfCutHint:'Required. From this time they can no longer register for this session or do anything on it. Saudi time.',zfOpens:'Accepted volunteers can start from',zfOpensHint:"Optional. Empty means from the start of the session's day.",zfNeeded:'Volunteers needed',zfMinAge:'Minimum age',zfHours:'Hours for this session',zfHoursClock:'From their arrival and finish times',zfHoursFixed:'The same hours for everyone',zfHoursNone:'No hours',zfFixed:'Hours each',zfRoles:'Roles, separated by commas',zfAbout:'What volunteers will do',zfAboutHint:'Shown to everyone on the volunteer portal.',zfBriefing:'Briefing for accepted volunteers',zfCan:'Volunteers can',zfCanCheckin:'Check people in',zfCanUndo:'Undo their own marks',zfCanDonated:'Mark people as donated',zfCanList:'See the list of names',zfCanCounts:'See how many have arrived',zfSignup:'Take new interest',zvRole:'Role',zvAcceptAll:'Accept all ({0})',zvAddToTeam:'Add someone to the team',zvAddAll:'Accept every active volunteer',zvPrefRole:'Would like',zvClockIn:'Arrived',zvClockOut:'Finished',zvAwarded:'Hours given',zvNoTeam:'Nobody on the team yet.',zvAward:'Give these hours',zvAwardHint:'Each person gets hours once per session. The numbers are worked out from their times, and you can change them first.',zvSkipped:'{0} left out: paused or removed.',zvAwardNone:'Enter hours for at least one person.',zvAwardDone:'Hours given to {0}.',zvFigPeople:'People',zvFigEntries:'Entries',zvFrom:'From',zvTo:'To',zvSource:'Source',zvSourceAny:'Any source',zvSourceSession:'From a session',zvSourceStaff:'Added by staff',zvPick:'Choose',zvAddedBy:'Added by',zvAccept:'Accept',zvDecline:'Decline',zvNoInterest:'Nobody is waiting for an answer.',zvActEnter:'Entered a session',zvActScan:'Scanned a ticket',zvActSearch:'Searched',zvActList:'Opened the list',zvActCheckin:'Checked in',zvActUncheckin:'Undid a check-in',zvActDonated:'Marked donated',zvActUndonated:'Undid donated',zvActClockIn:'Started',zvActClockOut:'Finished',zvActAgree:'Accepted the agreement',zvActInterest:'Registered interest',zvActWithdraw:'Withdrew',zvFAction:'Action',zvFActionAny:'Any action',zvFSessAny:'Any session',zvRefresh:'Refresh',zvNoLog:'Nothing recorded yet.',zvBooking:'Booking',zvWhen:'When',zvCfgPortal:'The volunteer portal',zvPromote:'Show the portal on every account page',zvPromoteHint:'When on, riders see the volunteer portal on My Account while an opportunity is open.',zvCfgAgree:'The agreement',zvCfgAgreeStat:'{0} of {1} active volunteers have accepted it.',zvCfgAgreeAgain:'Ask everyone to accept it again',zvCfgDefaults:'For new volunteer sessions',zvCfgDefaultsHint:'These fill the session\'s settings when you switch volunteers on. You can change them on each session.',zvCfgCutAfter:'Stop this many minutes after the session ends',zvCfgLists:'Lists',zvCfgMilestones:'Hour milestones, separated by commas',zvCfgSigner:'Name on certificates',zvCfgSignerTitle:'Title on certificates',zvCfgWaHint:'{name}, {session}, {date}, {until} and {link} are filled in for you.',zvCfgWa:'WhatsApp message',zvCfgAgreeAgainQ:'Every volunteer must accept the agreement again before they can enter a session. Continue?',zvAcctTitle:'Volunteering hours',zvMakeVolunteer:'Make a volunteer',bdgRunForHer:'Run for Her',bdgRunForHerD:'Finish the Run for Her.',bdgRunForHerA:'The pink ribbon, for everyone who ran and finished the Run for Her with the MicroMobility community.',rshKicker:'Before the race',rshTitle:'Sharing your details for the race',rshSub:'To take part in the race, we will share these details about you with Sela and Jeddah Yacht Club (JYC):',rshName:'Full name',rshKm:'Distance chosen',rshNote:'Nothing else about you is shared, and only for this race.',rshAgree:'I agree to MicroMobility sharing these details with Sela and Jeddah Yacht Club (JYC) so I can take part in the race.',errRunShare:'Agree to share your details for the race to book your place.',rshCol:'Agreed to share',rshNotYet:'Not yet',waLabel:'WhatsApp number',waAsk:'Is {0} your WhatsApp number too?',waYes:'Yes',waNo:'No',waSame:'Same as mobile',errWaPhone:'Enter your WhatsApp number.',waSubAcc:'The number our team messages you on about your rides.',
   evVlapName:'Victory Lap',evArenaName:'Arena Heros Hybrid Race',venueGymnation:'Gymnation, Tahlia Street',arCardSub:'Teams of 2 · Open or Elite · 7 stations',arMustPartner:'You must have a partner to take part. There are no individual entries.',infoWhoArenaAll:'Everyone, in teams of two. You must have a partner.',arHoldTitle:'Payment needed',arHoldNote:'Your QR code and number appear here once your payment is confirmed.',arBuyTitle:'Pay by bank transfer',arBuySub:'Transfer the amount below to the organiser’s account, then upload a picture of the receipt. Each partner pays for their own place. Your QR code and number appear once our team confirms your payment.',arNeedPay:'Transfer the amount and upload the receipt to confirm your place. Each partner pays for their own place.',arBookedToast:'Booked. Pay by bank transfer to get your QR code and number.',arTeamNewSub:'You get a team code. Send it to your partner: they must book from their own account with it, or your team is not complete.',arWaitPartner:'Your team is not complete. You cannot take part without a partner: send them this code.',infoEvArena:'The Arena Heros Hybrid Race by WeSportify, Mile and Gymnation: a hybrid fitness race over 7 stations for teams of two, two men or two women, in the Open or Elite division. Open to everyone, medals included. You must have a partner to take part.',infoDtAr:'The race runs from {start} to {end}, with a break for prayer. The organisers give each team its heat time before race day.',infoWhoArena:'Community members, in teams of two',arPerAthlete:'per athlete, medals included',arPriceNote:'Price per athlete, medals included.',arFormatLbl:'Format',arFormatTxt:'Teams of two (two men or two women) · 7 stations · medals included',arRulesLbl:'Race details',arRulesLink:'The workout and standards, from the organisers',arStepMsg:'Your details for the organisers, your division and your team.',arTeamsNote:'You must have a partner to take part: teams of two only, two men or two women, no individual entries. Each partner books and pays for their own place from their own account.',arGenderWhy:'Teams are two women or two men, so your race follows your gender. It is saved on your account.',arLvl_op:'Intermediate',arLvl_el:'Advanced',arGuide_op:'Reduced loads, distances or volume. For athletes with a solid base in functional fitness who are not yet ready for Elite loads or volume: the same competitive spirit, with more accessible distances, repetitions and loads.',arGuide_el:'Full prescribed loads, distances and volume. For highly trained athletes who regularly do high-intensity functional and hybrid training, with strong movement quality under fatigue and a competitive pace, with little or no scaling.',arGuideNote:'Review the full workout and movement standards before you register. The organisers and the Head Judge have the final say on standards, valid repetitions, penalties and scores.',arCodeBad:'Enter the code as your partner sent it, like AH-4K7Q.',arErrOneEach:'You already have a place in the Arena Heros Hybrid Race.',arPayLater:'Pay by bank transfer after booking and upload the receipt. Your QR code and number appear once your payment is confirmed.',arShareMsg:'Join my team for the Arena Heros Hybrid Race ({1}): open MicroMobility, pick the Arena Heros Hybrid Race, choose Join with a code and enter {0}.',arShSub:'To take part in the Arena Heros Hybrid Race, we will share these details about you with its organisers, WeSportify, Mile and Gymnation:',arShAgree:'I agree to MicroMobility sharing these details with WeSportify, Mile and Gymnation so I can take part in the Arena Heros Hybrid Race.',arShTeam:'Your team and its code',sessEventArHint:'The Arena Heros Hybrid Race by WeSportify, Mile and Gymnation, for Community members. Teams of two (two men or two women), Open or Elite, a price per athlete; each partner books their own place with a team code. First come, first served; past the places, athletes go on the waitlist.',vrbSetOrg:'Report for the organisers',arOrgHint:'Every athlete with what the organisers asked for: first and last name, email, mobile, gender, division and team, Doubles partners together. Read fresh at each tap.',arCfShare:'What is shared with the organisers (one item a line)',arCfShareHint:'Leave it empty to show our list: first and last name, email, mobile, gender, division and team.',vlDoorsShort:'Doors open',vlHeatShort:'First heat',tagOneOfTwoVl:'An account takes the Community tag or the Victory Lap tag, never both. Remove the other one first.',tagOneOfTwoVlN:'{0} of these accounts hold the {1} tag. An account takes the Community tag or the Victory Lap tag, never both.',vlLogoAlt:'Victory Lap by Fitness Empire',vlCardTitle:'Hybrid fitness race · 16+',vlCardWhere:'JCC',infoEvVlap:'Victory Lap by Fitness Empire: a hybrid fitness race at the Jeddah Corniche Circuit. Run 4 km with three exercise stations (Sprint) or the full 6.1 km with five, on your own or with a partner. Run by Kamin Sports, for Community members and Victory Lap athletes aged 16 and over.',infoDtVl:'Doors open at {gather} and the first heat starts at {start}. Arrive at least 30 minutes before your heat to collect your race bib.',infoWhoVlap:'Community members and Victory Lap athletes, 16 and over',sessEventVlHint:'Victory Lap by Fitness Empire, run by Kamin Sports. For Community members and Victory Lap tag holders aged 16 and over. Five races, four divisions and a price per athlete; Doubles partners each book their own place with a team code. First come, first served; past the places, athletes go on the waitlist.',bdgVictoryLap:'Victory Lap',bdgVictoryLapD:'Finish Victory Lap by Fitness Empire.',bdgVictoryLapA:'The lap ring, for everyone who raced and finished Victory Lap by Fitness Empire with the MicroMobility community.',bdgDefeRide:'Rode with Defe',bdgDefeRideD:'Ride the Saturday social ride with Defe on 24 October 2026.',bdgDefeRideA:'The ribbon wheel, for everyone who rode with Defe and the MicroMobility community to spread breast-cancer awareness.',vlAgeNote:'For Community members and Victory Lap athletes aged 16 and over on race day.',vlAgeTitle:'For athletes 16 and over',vlAgeMsg:'Victory Lap is open to athletes aged 16 and over on race day. The birth date on your account says you are under 16.',vlNoTitle:'Victory Lap is for our community',vlNoMsg:'Places are for MicroMobility Community members and athletes our team has given the Victory Lap tag. Apply to join the community, or ask our team.',vlStepTitle:'Your race',vlStepMsg:'Pick your race and division. We only ask for what your account is missing.',vlGenderWhy:'Races are split into women’s, men’s and mixed, so we ask once. It is saved on your account.',vlRaceLabel:'Race',vlRacesLabel:'Races',vlDivsLabel:'Divisions',vlRace_ws:'Women’s Singles',vlRace_ms:'Men’s Singles',vlRace_wd:'Women’s Doubles',vlRace_md:'Men’s Doubles',vlRace_xd:'Mixed Doubles',vlRaceSolo:'On your own',vlRaceTeam:'With a partner',vlRaceHeld:'You already have this kind of place',vlNoRaces:'No race is open to book right now.',vlTeamLabel:'Your team',vlTeamNew:'Start a team',vlTeamJoin:'Join with a code',vlTeamPair:'Find me a partner',vlTeamNewSub:'You get a team code to send your partner. They book from their own account with it.',vlTeamJoinSub:'Enter the code your partner sent you. You race in their team’s race and division.',vlTeamPairSub:'Our team will pair you with another athlete in the same race and tell you who.',vlTeamCode:'Team code',vlCheckBtn:'Check',vlCodeBad:'Enter the code as your partner sent it, like VL-4K7Q.',vlErrJoin:'Check your partner’s team code first.',vlErrNoTeam:'No team has this code in this race. Check it with your partner.',vlErrTeamFull:'This team already has two athletes.',vlErrTeamSelf:'That is your own team. Send the code to your partner.',vlNeedWoman:'This team needs a woman to join it.',vlNeedMan:'This team needs a man to join it.',vlWithPartner:'With {0}',vlDivLabel:'Division',vlDivTeamHint:'(one for the team)',vlDivFromTeam:'You race in your team’s division.',vlDiv_so:'Sprint Open',vlDiv_se:'Sprint Elite',vlDiv_op:'Open',vlDiv_el:'Elite',vlSt_ski:'SkiErg',vlSt_wb:'Wall Balls',vlSt_bbj:'Burpee Broad Jumps',vlSt_carry:'Ball Carry',vlSt_row:'Rowing',vlMeters:'{0} m',vlReps:'{0} reps',vlKg:'{0} kg',vlWomen:'women',vlMen:'men',vlShirtLabel:'T-shirt size',vlT5Label:'Your 5 km run time',vlT5Short:'5 km time',vlOptional:'(optional, helps set the heats)',vlT5_u20:'Under 20 min',vlT5_m2030:'20 to 30 min',vlT5_o30:'Over 30 min',vlEmSub:'Someone we can call if you need help during the race. It is saved on your account, so you only give it once.',vlErrGender:'Choose your gender.',vlErrRace:'Pick a race.',vlErrDiv:'Pick a division.',vlErrShirt:'Pick a T-shirt size.',vlErrGenderRace:'This race is for another gender. Pick another race.',vlErrDetails:'Some athlete details are missing. Check them and continue.',vlErrOneEach:'You already have this kind of place in Victory Lap. You can hold one Singles and one Doubles place.',vlRvNew:'New team: your code comes with your booking',vlRvJoin:'Joining team {0}',vlRvPair:'Our team will find you a partner',vlPriceNote:'Price per athlete, VAT included.',vtTitle:'Your race ticket',vtQ:'Do you already have a ticket, or would you like to buy one?',vtHave:'I already have a ticket',vtBuy:'I\'d like to buy one',vtBuyTitle:'Buy your ticket by bank transfer',vtBuySub:'Transfer the amount below to the organiser\'s account, then upload a picture of the transfer receipt. Your booking card comes next.',vtAmount:'Amount',vtBenef:'Account name',vtBank:'Bank',vtIban:'IBAN',vtAcct:'Account number',vtCopy:'Copy',vtCopied:'Copied',vtLetter:'Download the bank letter (PDF)',vtRcptLabel:'Transfer receipt',vtRcptPick:'Upload a picture of the receipt',vtRcptChange:'Choose another picture',vtRcptBad:'That file isn\'t a picture. Upload a photo or screenshot of the receipt.',vtSend:'Send receipt',vtLater:'I\'ll send it later',vtBack:'Back',vtHaveNote:'You have a ticket for the race.',vtPaidNote:'Receipt confirmed. Your ticket is paid.',vtSentNote:'Receipt sent. Our team will check it and confirm your ticket.',vtNeedRcpt:'Transfer the ticket price and upload the receipt to complete your ticket.',vtUpload:'Upload receipt',vtColTicket:'Ticket',vtColHave:'Has a ticket',vtColPaid:'Paid by transfer',vtColSent:'Receipt to check',vtRcptOk:'Confirm receipt',vtRcptNo:'Not valid',vtRcptNoAsk:'Send this receipt back? The athlete will be asked to upload it again.',vtRcptNoYes:'Send back',vtRcptOkDone:'Receipt confirmed. The place is paid by transfer.',vtRcptNoDone:'Receipt sent back. The athlete is asked to upload it again.',vtUpStaff:'Upload receipt',vtUpReplace:'Replace receipt',vtUpHint:'A receipt the athlete sent you another way (WhatsApp, at the desk). Saving it marks the place paid by transfer.',vtUpDone:'Receipt saved. The place is paid by transfer.',vtUpDesk:'Receipt saved. The place was already paid at the desk, so that payment stays.',vlDblTeam:'Doubles team',vrbRcBtn:'PDF with receipts',vrbRcTitle:'Payments and receipts',vrbRcNone:'No receipt',vrbRcHint:'One card per athlete with the ticked details, the payment and the receipt picture; a Doubles team’s partners side by side under their team. Uses the filters, sort and grouping above.',vtRcptDesk:'Already paid at the desk, so the receipt was not used.',vtCiCheck:'Look at the receipt before taking any payment.',vtColBuy:'Buying, no receipt',vtColNone:'Not answered',vtViewRcpt:'View receipt',vtRcptSave:'Save picture',vtRcptNone:'No receipt was found.',vlPayLater:'Once booked, tell us whether you already have a ticket or buy one by bank transfer.',vlPerAthlete:'per athlete, VAT included',vlNumLabel:'Athlete number',satNumLabel:'Booking number',vlWaitPartner:'Waiting for your partner. Send them the code.',vlNoPartner:'No partner joined.',vlPairWait:'Looking for a partner: our team will pair you and let you know.',vlShareCode:'Send the code',vlShareMsg:'Join my team for Victory Lap ({1}): open MicroMobility, pick Victory Lap, choose Join with a code and enter {0}.',vlCodeCopied:'Copied. Send it to your partner.',vlEdBtn:'Change details',vlEdTitle:'Change your race details',vlDivLocked:'Your partner has joined, so the division is set. Ask our team to change it.',vlEdSaved:'Saved.',vlShSub:'To take part in Victory Lap, we will share these details about you with Kamin Sports, who run the race:',vlShNoteTbc:'Kamin Sports will confirm exactly which details they need. We will show you the final list before the race, and nothing else about you is shared.',vlShNoteSet:'Nothing else about you is shared, and only for this race.',vlShAgree:'I agree to MicroMobility sharing these details with Kamin Sports so I can take part in Victory Lap.',vlShPhone:'Mobile number',vlShRace:'Race, division and team',vlRaceDetails:'Race details',vlPairBtn:'Pair',vlStaffBtn:'Athletes and teams',vlCfgBtn:'Race settings',vlKaminBtn:'Report for Kamin Sports',vlKaminHint:'Every athlete with what Kamin Sports may ask for, Doubles partners together under their team. Read fresh at each tap.',vrbBtn:'Report builder',prbTitle:'{0} report',prbSub:'Pick who goes on it (each code, and our members if you want them), the columns, the filters, the sort and the grouping. Read fresh at each tap.',prbHint:'This ride’s partner bookings: pick the codes, the columns, the filters and the sort.',prbGroups:'Who is on the report',prbNoCode:'No code',prbMembers:'MicroMobility members',prbNone:'This ride has no partner bookings.',prbColWho:'Booked as',prbColAge:'Age',prbColWa:'WhatsApp',prbColIg:'Instagram',prbColIgN:'Followers',prbColWork:'Company',prbColShirtGot:'Has a shirt',prbColShirt:'Shirt to give',prbColBikeNo:'Bike given',prbColRg:'Ride group',prbColEm2:'Second emergency contact',prbColNote:'Desk note',prbColSign:'Signature',prbSetFull:'Everything',prbSetSignin:'Sign-in sheet',prbSetShirtReq:'Shirt requests',prbSetBikes:'Bikes',prbSecCodes:'Bookings per code',prbSecShirts:'Shirts by code',prbSecList:'Rider list',prbSortIn:'Checked in earliest first',prbSortIg:'Most followers first',prbFShirt:'Shirt',prbFBooked:'Booked on',prbGive:'To give: {0}',prbShirtGiveAll:'Shirts to give',prbShirtHas:'Has one',prbShirtNone:'Not asked',prbStLive:'Every booking (not cancelled)',prbStAll:'Every booking, cancelled too',prbStCame:'Came (checked in or finished)',prbSaudi:'Saudi',prbNonSaudi:'Not Saudi',prbOurs:'Our bikes',prbGiven:'Given',prbNotGiven:'Not yet',prbIgUnk:'Not counted',vrbTitle:'Victory Lap report',vrbSub:'Pick the columns, filters, sort and grouping. Doubles partners always sit together under their team, in the PDF and in Excel.',vrbStartFrom:'Start from',vrbSetStart:'Start list',vrbSetShirts:'T-shirts',vrbSetContacts:'Contacts',vrbSetPay:'Payments',vrbColBooked:'Booked at',vrbColIn:'Checked in at',vrbSecMatrix:'Races by division',vrbSecShirts:'T-shirt sizes by race',vrbSecTeams:'Teams, one line each',vrbSecPairs:'Still need a partner',vrbSecList:'Athlete list',vrbNotSet:'Not given',vrbStBooked:'Booked (no waitlist)',vrbStNotIn:'Not checked in',vrbStDone:'Finished',vrbAllSingles:'Every Singles race',vrbAllDoubles:'Every Doubles race',vrbDoubles:'Doubles',vrbSprint:'Sprint divisions (4 km)',vrbFull:'Full divisions (6.1 km)',vrbFTeam:'Team',vrbUnpaid:'Not paid',vrbFMiss:'Missing details',vrbMissAny:'Anything missing',vrbSortName:'Name, A to Z',vrbSortNameZ:'Name, Z to A',vrbSortYoung:'Youngest first',vrbSortOld:'Oldest first',vrbSortEarly:'Booked earliest first',vrbSortLate:'Booked latest first',vrbGroup:'Group by',vrbGNone:'No groups',vrbGRaceDiv:'Race and division',vrbGKind:'Singles or Doubles',vrbGList:'Booked or waitlist',vrbWithMate:'Bring the partner along when a filter keeps only one of a team',vrbTeamsNote:'Teams stay together whatever the sort: the sort orders the teams, and a team’s partners follow each other.',vrbCountLbl:'On the report',vrbAth1:'Athlete 1',vrbAth2:'Athlete 2',vrbSheetSum:'Summary',vrbNoRows:'Nothing matches these filters.',vlStNoRace:'No race yet',vlStPair:'Wants a partner',vlStWait:'Waiting for partner',vlStSolo:'Singles',vlStTeam:'Team complete',vlTabAthletes:'Athletes',vlTabTeams:'Teams',vlTabPair:'Partner requests',vlPartnerLbl:'Partner',vlNoAthletes:'No athletes here.',vlNoTeams:'No teams yet.',vlNoPairs:'Nobody is waiting for a partner.',vlPairHint:'Athletes who asked us for a partner, and teams still waiting for one. Pair puts two of them in one team with one code.',vlPairTitle:'Pair with a partner',vlPairDiv:'Division for the team',vlPairNone:'No athlete in this race is free to pair right now.',vlPaired:'Paired: team {0}.',vlAeKeep:'Keep {0}',vlAeNone:'No team (wants a partner)',vlAeBoth:'Give {0} the same race and division',vlCfRaces:'Races open to book',vlCfDivs:'Divisions open to book',vlCfPair:'Athletes may ask us to find them a partner',vlCfPay:'How to pay (shown on tickets)',vlCfShare:'What is shared with Kamin Sports (one item a line)',vlCfShareHint:'Leave the list empty until Kamin Sports confirms it: athletes then see our list of what the booking holds and are told the exact one is coming.',vlCfNeedOne:'Keep at least one race and one division open.',vlAgeCol:'Age on race day',
   reviewPartLabel:'Participants',
   acrTitle:'Account report',acrPrintDefault:'Print default',acrDefaultTitle:'Community report',acrSaveDefault:'Save as the default community report',acrDefaultHint:'Print default, beside Account report, prints these choices for community members only.',acrDefaultSaved:'Default community report saved',acrEditDefault:'Edit default',acrEditDefTitle:'Edit the default community report',acrEditDefSub:'Print default prints these choices for community members only. Changes here do not touch your own report choices.',acrSaveDefBtn:'Save default',acrSub:'Every account, with the columns and filters you pick. Choices are remembered on this device.',acrColTags:'Tags',acrColTagSince:'Tag since',acrColTagUntil:'Tag until',acrColAge:'Age',acrColJoined:'Joined',acrColBookings:'Bookings',acrColRides:'Rides completed',acrColCommRides:'Community rides',acrColLastRide:'Last ride',acrColLastLogin:'Last login',acrColActive14:'Active (14 days)',acrBdActive14:'Active in the last 14 days',acrActive14Yes:'Booking in the last 14 days',acrActive14No:'No booking in the last 14 days',acrStatActive14:'Active last 14 days',acrColActive30:'Active (30 days)',acrBdActive30:'Active in the last 30 days',acrActive30Yes:'Booking in the last 30 days',acrActive30No:'No booking in the last 30 days',acrStatActive30:'Active last 30 days',acrYes:'Yes',acrNo:'No',acrColSpent:'Spent (SAR)',acrColPending:'Upcoming',
@@ -1385,7 +1387,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   qMissOn:'محجوز في جولة {0}: {1}',qMissOpen:'افتح تلك الجولة',qMissFilters:'المطابقون دون الفلاتر: {0}',qMissClear:'مسح الفلاتر',
   qYNotAppr:'لم تتم الموافقة على هذا الطلب في هذه الجلسة بعد. وافق عليه من القائمة أولاً.',qYScanNotAppr:'لم تتم الموافقة على #{0} {1} في هذه الجلسة بعد.',qYExHeld:'{0} بانتظار التسجيل يدوياً: قائمة الانتظار أو الموافقة أو التأمين',qYRetNote:'إرجاع مع ملاحظة',qYNoWv:'لا يوجد إقرار بعد',qYWvAsk:'الموافقة على الإقرار هنا',qYWvDone:'تمت الموافقة على الإقرار عند المكتب',qYPayElsewhere:'تم التعديل من جهاز آخر: الآن {0}',qYCapTitle:'أماكن أقل من عدد المحجوزين',qYCapLine:'{0}: {1} محجوز، {2} أماكن',qYCapGo:'احفظ على أي حال',
   fAdvanced:'متقدم',bqDonWait:'حضر ولم يُسجَّل تبرعه بعد',bqRw:'رمز الركوب المجاني',bqRwOpen:'لم يُستخدم بعد',bqRwUsed:'مستخدم',bqRwNone:'بلا رمز',bldWaiverTitle:'إقرار المتبرع',bldWaiverBody:'لا يمكنك التسجيل في هذه الفعالية إلا بعد قراءة هذا الإقرار والموافقة عليه. التبرع بالدم عمل تطوعي، ويمكنني الانسحاب في أي وقت دون إبداء أي سبب. والتبرع إجراء طبي يقوم به الفريق الطبي للفعالية، وليس مايكروموبيليتي. والفريق الطبي وحده هو من يقرر ما إذا كان بإمكاني التبرع، ولذلك فإن التسجيل لا يضمن قبول تبرعي. وأتعهد بالإجابة بصدق عن أسئلته الصحية وباتباع تعليماته وتعليمات إدارة الموقع، بما في ذلك أخذ قسط من الراحة بعد التبرع وتجنب النشاط البدني الشاق لمدة 5 ساعات. ويقتصر دور مايكروموبيليتي على تسجيلي ومنح المتبرعين المؤكَّدين ركوبتهم المجانية. وأنا مسؤول عن ممتلكاتي الشخصية. وإلى أقصى حد يسمح به النظام، لا تتحمل مايكروموبيليتي ولا موظفوها أي مسؤولية عن الإجراء الطبي أو آثاره، أو عن أي إصابة أو مرض أو فقدان أو سرقة أو تلف في الفعالية.',bldWaiverAgree:'قرأت هذا الإقرار وأوافق عليه',bldWgKicker:'إقرار مطلوب',bldWgSub:'أنت مسجّل في هذه الفعالية. اقرأ هذا الإقرار ووافق عليه للمتابعة.',bldWvTick:'ضع علامة على الإقرار لتأكيد تسجيلك.',bldNumLabel:'رقم المتبرع',bldTkSub:'اعرض هذا الرمز عند مكتب التسجيل. تجده أيضاً في الحجوزات.',bldFinishBtn:'انتهى',bldStatDonors:'المتبرعون',bldColDonor:'المتبرع',bldBtNotKnown:'غير معروفة',piiHidBt:'فصيلة دم مخفية. اضغط لإظهارها',bldShKicker:'قبل التسجيل',bldShTitle:'مشاركة بياناتك',evBloodName:'مايكروموبيليتي التبرع بالدم',bldCause:'تبرّع بدمك واركب مجانًا.',bldTypesLine:'فصائل مختلفة. هدف واحد.',bldYourType:'فصيلتك',bldPartnersAlt:'مايكروموبيليتي، الخدمات الصحية بوزارة الدفاع، حلبة كورنيش جدة، شركة رياضة المحركات السعودية، وزارة الرياضة',bldSumAge:'العمر 18 سنة فأكثر',bldSumWeight:'الوزن 50 كجم فأكثر',bldSumId:'أحضر الهوية الوطنية أو الإقامة',bldSumTips:'نم جيدًا وتناول وجبة صحية قبل التبرع بساعتين',bldReadMore:'اقرأ المزيد',bldInfoTitle:'قبل التبرع',bldInfoOk:'قرأت هذه المعلومات',bldInfoPdf:'تنزيل الملصق (PDF)',bldStepTitle:'بياناتك',bldStepMsg:'جميعها مطلوبة. معبأة من حسابك، وأي تغيير يُحفظ فيه.',bldIdNote:'أظهر هويتك الوطنية أو إقامتك في الفعالية. لا نطلب الرقم ولا نحتفظ به.',bldAgeTitle:'18 سنة فأكثر فقط',bldAgeMsg:'يجب ألا يقل عمر المتبرع بالدم عن 18 سنة في يوم الفعالية.',bldShSub:'للتسجيل، وافق على مشاركة هذه البيانات مع شركائنا في الفعالية وأطراف ثالثة:',bldShNote:'نشاركها فقط مع شركائنا وأطراف ثالثة لهذه الفعالية، ولا نشارك أي شيء آخر عنك.',bldShAgree:'أوافق على أن تشارك مايكروموبيليتي بياناتي مع شركائها وأطراف ثالثة لهذه الفعالية.',bldRewardNote:'يحصل المتبرعون الذين سجلوا حضورهم وأكد فريقنا تبرعهم على ركوبة مجانية واحدة بأي دراجة عدا الكربون، صالحة لمدة شهر، في جلسات الحلبة (وليالي بترومين لحسابات المجتمع وبترومين). تجنب النشاط الشاق لمدة 5 ساعات بعد التبرع، فاركب في يوم آخر.',bldRewardTitle:'ركوبتك المجانية',bldRewardTxt:'شكرًا لتبرعك. أدخل هذا الرمز عند الحجز. صالح حتى {0}.',bldRewardUsed:'تم استخدام ركوبتك المجانية. شكرًا لتبرعك.',errBloodDetails:'يرجى تعبئة جميع بياناتك.',errBloodCodeCarbon:'هذه الركوبة المجانية غير صالحة لدراجة الكربون.',errBloodCodeSession:'هذه الركوبة المجانية غير صالحة لهذه الجلسة.',bldColDonated:'تبرّع',bldMark:'تأكيد التبرع',bldErrUsed:'استُخدمت ركوبته المجانية، فلا يمكن التراجع.',bldErrIn:'سجّل حضوره أولًا.',bldErrAcct:'لا يوجد حساب لهذا الحجز لمنحه الركوبة المجانية.',bldToastOn:'تم تأكيد التبرع. رمز الركوبة المجانية {0} على تذكرته.',bldToastOff:'أُلغي تأكيد التبرع وأُوقف الرمز.',
-  evRunHerName:'نركض لأجلها',evDefeName:'سباق دفء 5 كم',defeLogoAlt:'دفء',defeCause:'جري للتوعية بسرطان الثدي',defeKitLabel:'استلام عُدّة السباق',defeKitTxt:'جدة بارك · الأربعاء 21 أكتوبر · 4–10 م',defeRaceLabel:'السباق',defeRaceTxt:'حلبة كورنيش جدة · الخميس 22 أكتوبر · 7 م',defeStepMsg:'راجع بياناتك. غيّر ما يلزم وأكمل ما ينقص.',defeYouSub:'من حسابك. غيّر ما يحتاج إلى تغيير.',defeRegQ:'هل سجّلت في السباق؟',defeRegSub:'تم حجز مكانك مع مايكروموبيليتي. أما التسجيل في السباق نفسه فيكون عبر صفحة تسجيل دفء.',defeRegNoNote:'سجّل عبر دفء لتشارك في السباق.',defeRegCode:'استخدم كود الخصم {0} لخصم 50%، لأول 50 عضوًا.',defeRegLink:'سجّل في السباق',defeRegYesNote:'أخبرتنا أنك مسجّل في السباق عبر موقع دفء.',defeRegLabel:'التسجيل في السباق',defeRegLinkShort:'تسجيل دفء',defeRegCol:'مسجّل في السباق',defeRegColYes:'مسجّل',defeRegColNo:'غير مسجّل',infoDtDefe:'اركض 5 كم مع دفء للتوعية بسرطان الثدي، مع مجتمع مايكروموبيليتي على حلبة كورنيش جدة. استلم عُدّة السباق من جدة بارك يوم 21 أكتوبر من 4 إلى 10 مساءً. ينطلق السباق يوم 22 أكتوبر الساعة 7 مساءً.',sessEventDefeHint:'سباق دفء 5 كم للتوعية بسرطان الثدي، لأعضاء المجتمع. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يُسأل العدّاؤون إن كانوا قد سجّلوا في السباق عبر دفء.',bdgDefe5k:'دفء 5 كم',bdgDefe5kD:'أكمل سباق دفء 5 كم.',bdgDefe5kA:'شريط دفء، لكل من ركض سباق دفء 5 كم للتوعية بسرطان الثدي مع مجتمع مايكروموبيليتي.',landPmDaysTitle:'أيام بترومين',landPmDaysNext:'الجولة القادمة {0}',landPmDaysMeta:'جولات بترومين المسائية',pmDaysNo:'أيام بترومين لفريق بترومين.',infoWhoPetromin:'أعضاء المجتمع وفريق بترومين',infoEvPetro:'جولات بترومين المسائية على حلبة كورنيش جدة، لفريق بترومين. اختر الليلة والدراجة، وانطلق مع زملائك.',tagOneOfTwo:'يأخذ الحساب وسم المجتمع أو وسم بترومين، لا الاثنين معاً. أزل الآخر أولاً.',tagOneOfTwoN:'{0} من هذه الحسابات تحمل وسم {1}. يأخذ الحساب وسم المجتمع أو وسم بترومين، لا الاثنين معاً.',runNumLabel:'رقم العدّاء',landRunHerKm:'3 أو 5 كم',runPartnersAlt:'الشركاء: نادي جدة لليخوت ومستشفى الدكتور سمير عباس',venueJyc:'نادي جدة لليخوت',runKm:'{0} كم',runKmLabel:'المسافة',runKmNone:'بلا مسافة',runAdultsNote:'لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق.',runYouLabel:'بياناتك',runStepTitle:'بيانات العدّاء',runStepMsg:'اختر مسافتك. لا نطلب إلا ما ينقص حسابك.',runAgeTitle:'للعدّائين من 18 عامًا فأكثر',runAgeMsg:'سباق نركض لأجلها متاح لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق. تاريخ الميلاد في حسابك يُظهر أن عمرك أقل من 18 عامًا.',runDobReq:'أدخل تاريخ ميلادك.',runFinishBtn:'أنهى السباق',runEmNone:'لا توجد جهة اتصال للطوارئ في هذا الحساب بعد.',emTitle:'جهة اتصال للطوارئ',emSub:'شخص نتصل به إن احتجت إلى مساعدة أثناء السباق. تُحفظ في حسابك فلا تُطلب منك مرة أخرى.',emSubAcc:'شخص نتصل به إن احتجت إلى مساعدة في إحدى الفعاليات.',emName:'اسم جهة الاتصال',emPhone:'رقم جوال جهة الاتصال',emRelation:'صلة القرابة بك',emPick:'اختر',emChange:'تغيير',emRel_spouse:'الزوج أو الزوجة',emRel_parent:'الأب أو الأم',emRel_sibling:'الأخ أو الأخت',emRel_child:'الابن أو الابنة',emRel_relative:'قريب',emRel_friend:'صديق',emRel_colleague:'زميل عمل',emRel_other:'أخرى',errRunKm:'اختر 3 كم أو 5 كم.',errRunDetails:'بعض بيانات العدّاء ناقصة. راجعها ثم تابع.',errEmName:'أدخل اسم جهة الاتصال.',errEmPhone:'أدخل رقم جوال جهة الاتصال.',errEmRelation:'اختر صلة القرابة.',errEmSelf:'لا يمكن أن يكون رقم جهة الاتصال هو رقمك.',em2Title:'جهة اتصال ثانية للطوارئ',emReqTitle:'أضف جهة اتصال للطوارئ',emReqSub:'نطلب الآن من كل راكب شخصًا نتصل به إن احتجت إلى مساعدة في جولة أو فعالية. أضفه مرة واحدة وتستطيع الحجز.',igReqTitle:'أضف حسابك على إنستغرام',igReqSub:'نطلب من كل عضو في المجتمع حسابه على إنستغرام. أضفه مرة واحدة وتستطيع الحجز.',errEmRequired:'يحتاج حسابك إلى جهة اتصال للطوارئ. غيّرها بدلًا من حذفها.',em2Sub:'شخص آخر نتصل به إن تعذّر علينا الوصول إلى جهة الاتصال الأولى.',em2Add:'إضافة جهة اتصال ثانية',btTitle:'فصيلة الدم',btSub:'تساعدنا في فعاليات التبرع بالدم. لا يراها إلا أنت وفريقنا.',btPick:'اختر فصيلة دمك',btUnknown:'لا أعرف فصيلة دمي',errBloodType:'اختر فصيلة دم من القائمة.',errEmSame:'لا يمكن أن يكون لجهتَي اتصال الطوارئ الرقم نفسه.',sessEventRunHint:'سباق جري لأعضاء المجتمع ممن أتموا 18 عامًا. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يختار كل عدّاء 3 كم أو 5 كم.',bdgBloodDonor:'متبرع بالدم',bdgBloodDonorD:'تبرّع بالدم في إحدى فعالياتنا.',bdgBloodDonorA:'لمن تبرّع بالدم في فعالية من فعاليات مايكروموبيليتي. يؤكده فريقنا في الليلة نفسها.',bdgVolunteer:'متطوع',bdgVolunteerD:'تطوّع في إحدى فعالياتنا.',bdgVolunteerA:'لمن منح وقته للمساعدة في تنظيم فعالية من فعاليات مايكروموبيليتي. يمنحه فريقنا.',bdgRunForHer:'نركض لأجلها',bdgRunForHerD:'أكمل سباق نركض لأجلها.',bdgRunForHerA:'الشريط الوردي، لكل من ركض وأكمل سباق نركض لأجلها مع مجتمع مايكروموبيليتي.',rshKicker:'قبل السباق',rshTitle:'مشاركة بياناتك للسباق',rshSub:'للمشاركة في السباق، سنشارك بياناتك التالية مع صلة ونادي جدة لليخوت (JYC):',rshName:'الاسم الكامل',rshKm:'المسافة المختارة',rshNote:'لا نشارك أي شيء آخر عنك، وللسباق فقط.',rshAgree:'أوافق على أن تشارك مايكروموبيليتي هذه البيانات مع صلة ونادي جدة لليخوت (JYC) لأتمكن من المشاركة في السباق.',errRunShare:'وافق على مشاركة بياناتك للسباق لتحجز مكانك.',rshCol:'وافق على المشاركة',rshNotYet:'ليس بعد',waLabel:'رقم WhatsApp',waAsk:'هل {0} هو رقمك على WhatsApp أيضًا؟',waYes:'نعم',waNo:'لا',waSame:'نفس رقم الجوال',errWaPhone:'أدخل رقمك على WhatsApp.',waSubAcc:'الرقم الذي يراسلك عليه فريقنا بخصوص جولاتك.',
+  evRunHerName:'نركض لأجلها',evDefeName:'سباق دفء 5 كم',defeLogoAlt:'دفء',defeCause:'جري للتوعية بسرطان الثدي',defeKitLabel:'استلام عُدّة السباق',defeKitTxt:'جدة بارك · الأربعاء 21 أكتوبر · 4–10 م',defeRaceLabel:'السباق',defeRaceTxt:'حلبة كورنيش جدة · الخميس 22 أكتوبر · 7 م',defeStepMsg:'راجع بياناتك. غيّر ما يلزم وأكمل ما ينقص.',defeYouSub:'من حسابك. غيّر ما يحتاج إلى تغيير.',defeRegQ:'هل سجّلت في السباق؟',defeRegSub:'تم حجز مكانك مع مايكروموبيليتي. أما التسجيل في السباق نفسه فيكون عبر صفحة تسجيل دفء.',defeRegNoNote:'سجّل عبر دفء لتشارك في السباق.',defeRegCode:'استخدم كود الخصم {0} لخصم 50%، لأول 50 عضوًا.',defeRegLink:'سجّل في السباق',defeRegYesNote:'أخبرتنا أنك مسجّل في السباق عبر موقع دفء.',defeRegLabel:'التسجيل في السباق',defeRegLinkShort:'تسجيل دفء',defeRegCol:'مسجّل في السباق',defeRegColYes:'مسجّل',defeRegColNo:'غير مسجّل',infoDtDefe:'اركض 5 كم مع دفء للتوعية بسرطان الثدي، مع مجتمع مايكروموبيليتي على حلبة كورنيش جدة. استلم عُدّة السباق من جدة بارك يوم 21 أكتوبر من 4 إلى 10 مساءً. ينطلق السباق يوم 22 أكتوبر الساعة 7 مساءً.',sessEventDefeHint:'سباق دفء 5 كم للتوعية بسرطان الثدي، لأعضاء المجتمع. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يُسأل العدّاؤون إن كانوا قد سجّلوا في السباق عبر دفء.',bdgDefe5k:'دفء 5 كم',bdgDefe5kD:'أكمل سباق دفء 5 كم.',bdgDefe5kA:'شريط دفء، لكل من ركض سباق دفء 5 كم للتوعية بسرطان الثدي مع مجتمع مايكروموبيليتي.',landPmDaysTitle:'أيام بترومين',landPmDaysNext:'الجولة القادمة {0}',landPmDaysMeta:'جولات بترومين المسائية',pmDaysNo:'أيام بترومين لفريق بترومين.',infoWhoPetromin:'أعضاء المجتمع وفريق بترومين',infoEvPetro:'جولات بترومين المسائية على حلبة كورنيش جدة، لفريق بترومين. اختر الليلة والدراجة، وانطلق مع زملائك.',tagOneOfTwo:'يأخذ الحساب وسم المجتمع أو وسم بترومين، لا الاثنين معاً. أزل الآخر أولاً.',tagOneOfTwoN:'{0} من هذه الحسابات تحمل وسم {1}. يأخذ الحساب وسم المجتمع أو وسم بترومين، لا الاثنين معاً.',runNumLabel:'رقم العدّاء',landRunHerKm:'3 أو 5 كم',runPartnersAlt:'الشركاء: نادي جدة لليخوت ومستشفى الدكتور سمير عباس',venueJyc:'نادي جدة لليخوت',runKm:'{0} كم',runKmLabel:'المسافة',runKmNone:'بلا مسافة',runAdultsNote:'لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق.',runYouLabel:'بياناتك',runStepTitle:'بيانات العدّاء',runStepMsg:'اختر مسافتك. لا نطلب إلا ما ينقص حسابك.',runAgeTitle:'للعدّائين من 18 عامًا فأكثر',runAgeMsg:'سباق نركض لأجلها متاح لأعضاء المجتمع ممن أتموا 18 عامًا يوم السباق. تاريخ الميلاد في حسابك يُظهر أن عمرك أقل من 18 عامًا.',runDobReq:'أدخل تاريخ ميلادك.',runFinishBtn:'أنهى السباق',runEmNone:'لا توجد جهة اتصال للطوارئ في هذا الحساب بعد.',emTitle:'جهة اتصال للطوارئ',emSub:'شخص نتصل به إن احتجت إلى مساعدة أثناء السباق. تُحفظ في حسابك فلا تُطلب منك مرة أخرى.',emSubAcc:'شخص نتصل به إن احتجت إلى مساعدة في إحدى الفعاليات.',emName:'اسم جهة الاتصال',emPhone:'رقم جوال جهة الاتصال',emRelation:'صلة القرابة بك',emPick:'اختر',emChange:'تغيير',emRel_spouse:'الزوج أو الزوجة',emRel_parent:'الأب أو الأم',emRel_sibling:'الأخ أو الأخت',emRel_child:'الابن أو الابنة',emRel_relative:'قريب',emRel_friend:'صديق',emRel_colleague:'زميل عمل',emRel_other:'أخرى',errRunKm:'اختر 3 كم أو 5 كم.',errRunDetails:'بعض بيانات العدّاء ناقصة. راجعها ثم تابع.',errEmName:'أدخل اسم جهة الاتصال.',errEmPhone:'أدخل رقم جوال جهة الاتصال.',errEmRelation:'اختر صلة القرابة.',errEmSelf:'لا يمكن أن يكون رقم جهة الاتصال هو رقمك.',em2Title:'جهة اتصال ثانية للطوارئ',emReqTitle:'أضف جهة اتصال للطوارئ',emReqSub:'نطلب الآن من كل راكب شخصًا نتصل به إن احتجت إلى مساعدة في جولة أو فعالية. أضفه مرة واحدة وتستطيع الحجز.',igReqTitle:'أضف حسابك على إنستغرام',igReqSub:'نطلب من كل عضو في المجتمع حسابه على إنستغرام. أضفه مرة واحدة وتستطيع الحجز.',errEmRequired:'يحتاج حسابك إلى جهة اتصال للطوارئ. غيّرها بدلًا من حذفها.',em2Sub:'شخص آخر نتصل به إن تعذّر علينا الوصول إلى جهة الاتصال الأولى.',em2Add:'إضافة جهة اتصال ثانية',btTitle:'فصيلة الدم',btSub:'تساعدنا في فعاليات التبرع بالدم. لا يراها إلا أنت وفريقنا.',btPick:'اختر فصيلة دمك',btUnknown:'لا أعرف فصيلة دمي',errBloodType:'اختر فصيلة دم من القائمة.',errEmSame:'لا يمكن أن يكون لجهتَي اتصال الطوارئ الرقم نفسه.',sessEventRunHint:'سباق جري لأعضاء المجتمع ممن أتموا 18 عامًا. مجاني، ومكان واحد لكل حساب، والأولوية لمن يسجّل أولًا؛ وبعد امتلاء الأماكن ينتقل العدّاؤون إلى قائمة الانتظار. يختار كل عدّاء 3 كم أو 5 كم.',bdgBloodDonor:'متبرع بالدم',bdgBloodDonorD:'تبرّع بالدم في إحدى فعالياتنا.',bdgBloodDonorA:'لمن تبرّع بالدم في فعالية من فعاليات مايكروموبيليتي. يؤكده فريقنا في الليلة نفسها.',bdgVolunteer:'متطوع',bdgVolunteerD:'تطوّع في إحدى فعالياتنا.',bdgVolunteerA:'لمن منح وقته للمساعدة في تنظيم فعالية من فعاليات مايكروموبيليتي. يمنحه فريقنا.',tabVolunteers:'المتطوعون',accVolTitle:'التطوع',accVolHours:'ساعات تطوعك: {0}',accVolDesk:'افتح بوابة المتطوعين',accVolJoinHint:'ساعد في فعالياتنا واكسب ساعات تطوع.',accVolRec:'الساعات الأخيرة',amfVolHours:'ساعات التطوع',amfVolNone:'بلا ساعات',amfVolAny:'أي ساعات',amfVol10:'10 ساعات أو أكثر',amfVol50:'50 ساعة أو أكثر',amSortVol:'الأكثر ساعات تطوع',zvErrNegative:'هذا سيجعل رصيد الحساب أقل من صفر ساعة.',zvErrHours:'أدخل الساعات كرقم، غير الصفر، حتى 500. مكافأة الجلسة حتى 24.',zvErrFuture:'لا يمكن أن يكون التاريخ في المستقبل.',zfNeedCut:'اختر الوقت الذي لا يمكن للمتطوعين الدخول بعده.',zfCutBeforeOpen:'يجب أن يكون وقت التوقف بعد وقت البدء.',zvErrAlreadyIn:'لقد سجل حضوره بالفعل، لذلك لا يمكن إزالته.',zvErrNotVol:'هذا الحساب ليس متطوعًا بعد.',zvErrTimes:'يجب أن يكون وقت الانتهاء بعد وقت الوصول.',zvErrForbidden:'حسابك لا يستطيع تغيير هذا.',zvStApplied:'قدّم طلبًا',zvStActive:'نشط',zvStPaused:'موقوف',zvStRemoved:'محذوف',zvWaDefault:'مرحبًا {name}، شكرًا لتطوعك مع مايكروموبيليتي. {session} بتاريخ {date} مفتوحة للمتطوعين حتى {until}. شاهدها هنا: {link}',zvTabRoster:'المتطوعون',zvTabInterested:'المهتمون',zvTabSessions:'الفرص التطوعية',zvTabHours:'الساعات',zvTabActivity:'النشاط',zvTabSettings:'الإعدادات',zvSub:'من يتطوع، ومن سجّل اهتمامه، وأي جلسات مفتوحة لهم، وساعاتهم.',zvNotSetUp:'قسم المتطوعين يحتاج أولًا إلى تحديث قاعدة البيانات.',zvLoadErr:'تعذر تحميل المتطوعين.',zvNone:'لا يوجد متطوعون مطابقون.',zvAutoShort:'قُبل تلقائيًا',zvNoAgreement:'لم يوافق على التعهد',zvExpired:'انتهت الصلاحية',zvHoursUnit:'ساعات',zvMilestone:'مرحلة {0} ساعة',zvSessionsUnit:'جلسات',zvAddHours:'إضافة ساعات',zvManage:'إدارة',zvFigActive:'المتطوعون النشطون',zvFigOnDuty:'في الخدمة الآن',zvFigHours:'إجمالي الساعات',zvFigMonth:'ساعات هذا الشهر',zvFigInterested:'مهتمون، بانتظار الرد',zvFigNoAgree:'لم يوافقوا على التعهد',zvSearch:'بحث',zvFStatus:'الحالة',zvFTag:'الوسم',zvFTagAny:'أي وسم',zvFHours:'الساعات',zvFHoursAny:'أي ساعات',zvBand0:'بلا ساعات',zvBand1:'أقل من 10 ساعات',zvBand10:'من 10 إلى 49 ساعة',zvBand50:'50 ساعة أو أكثر',zvFAgree:'التعهد',zvFAgreeAny:'أي تعهد',zvAgreeYes:'تمت الموافقة',zvAgreeNo:'لم تتم الموافقة',zvFSort:'الترتيب',zvSortName:'الاسم',zvSortHours:'الأكثر ساعات',zvSortHoursLo:'الأقل ساعات',zvSortSessions:'الأكثر جلسات',zvSortLast:'آخر نشاط',zvSortNewest:'الأحدث',zvSortExpiry:'الأقرب انتهاءً للصلاحية',zvAdd:'إضافة متطوع',zvAddMany:'إضافة عدة',zvExport:'تصدير',zvCopyNums:'نسخ الأرقام',zvSelected:'تم تحديد {0}',zvSelAll:'تحديد الكل',zvDoActivate:'تفعيل',zvDoPause:'إيقاف',zvDoRemove:'حذف',zvTagName:'الوسم',zvTagAdd:'إضافة وسم',zvTagRemove:'إزالة وسم',zvSaved:'تم الحفظ.',zvExpiry:'تنتهي الصلاحية في',zvShirt:'مقاس القميص',zvCopied:'تم نسخ الأرقام.',zvAddSearch:'الاسم أو الجوال أو البريد الإلكتروني',zvAddBtn:'إضافة',zvAddNone:'لم يتم العثور على حساب.',zvAdded:'تمت إضافة المتطوع.',zvManyHint:'الصق أرقام الجوال، رقمًا في كل سطر. يجب أن يكون لكل رقم حساب بالفعل.',zvManyDone:'تمت إضافة: {0}. لم يتم العثور على: {1}.',zvHoursOn:'التاريخ',zvHoursSession:'الجلسة',zvHoursNoSession:'بلا جلسة',zvHoursNote:'ملاحظة',zvHoursHint:'استخدم رقمًا سالبًا لخصم ساعات.',zvHoursAdded:'تم حفظ الساعات.',zvSomeFailed:'تعذر حفظ {0}.',zvVoided:'تم إلغاء السجل.',zvTags:'الوسوم، تفصل بينها فواصل',zvNotes:'ملاحظات الموظفين',zvAutoAccept:'القبول تلقائيًا',zvAutoAcceptHint:'عندما يسجل هذا الشخص اهتمامه بفرصة، يُقبل دون انتظار الموظفين.',zvAgreedOn:'تمت الموافقة على التعهد في {0}',zvDecidedBy:'آخر حالة عيّنها {0}',zvCert:'الشهادة',zvNextMilestone:'المرحلة التالية: {0}',zvNoHours:'لا توجد ساعات بعد.',zvNoSessions:'لا توجد جلسات بعد.',zvVoidedBy:'ألغاه {0}',zvVoid:'إلغاء',zvShInterested:'مهتم',zvShAccepted:'مقبول',zvShDeclined:'لا يستطيع الحضور',zvShWithdrawn:'انسحب',zvShBlocked:'غير مسموح',zvShNoShow:'لم يحضر',zvShDone:'تم',zvSessNext:'القادمة',zvSessOn:'مفتوحة للمتطوعين',zvSessPast:'السابقة',zvSwOff:'متوقف',zvSwEnded:'انتهى',zvSwOpen:'مفتوح حتى {0}',zvSwSoon:'يفتح {0}',zvTeamUnit:'الفريق',zvAskedN:'{0} مهتم',zvDutyNow:'{0} في الخدمة الآن',zvSessEdit:'إعدادات المتطوعين',zvSessOnBtn:'مفتوحة للمتطوعين',zvTeam:'الفريق والساعات',zvCopyLink:'نسخ الرابط',zvNoSess:'لا توجد جلسات هنا.',zvLinkCopied:'تم نسخ الرابط.',zfSwitch:'مفتوحة للمتطوعين',zfSwitchHint:'تصبح هذه الجلسة فرصة تطوعية في بوابة المتطوعين. يسجل الناس اهتمامهم هناك، ومن تقبلهم يعملون من هناك.',zfCut:'لا يمكن للمتطوعين التسجيل أو العمل بعد',zfCutHint:'مطلوب. من هذا الوقت لا يمكنهم التسجيل في هذه الجلسة ولا فعل أي شيء فيها. بتوقيت السعودية.',zfOpens:'يمكن للمتطوعين المقبولين البدء من',zfOpensHint:'اختياري. الفارغ يعني من بداية يوم الجلسة.',zfNeeded:'عدد المتطوعين المطلوب',zfMinAge:'الحد الأدنى للعمر',zfHours:'ساعات هذه الجلسة',zfHoursClock:'من وقت وصولهم وانتهائهم',zfHoursFixed:'نفس الساعات للجميع',zfHoursNone:'بلا ساعات',zfFixed:'الساعات لكل متطوع',zfRoles:'الأدوار، تفصل بينها فواصل',zfAbout:'ما سيفعله المتطوعون',zfAboutHint:'يظهر للجميع في بوابة المتطوعين.',zfBriefing:'التوجيهات للمتطوعين المقبولين',zfCan:'يمكن للمتطوعين',zfCanCheckin:'تسجيل حضور الأشخاص',zfCanUndo:'التراجع عن تسجيلاتهم هم',zfCanDonated:'تسجيل الأشخاص كمتبرعين',zfCanList:'رؤية قائمة الأسماء',zfCanCounts:'رؤية عدد من وصلوا',zfSignup:'استقبال اهتمام جديد',zvRole:'الدور',zvAcceptAll:'قبول الكل ({0})',zvAddToTeam:'إضافة شخص إلى الفريق',zvAddAll:'قبول كل متطوع نشط',zvPrefRole:'يفضّل',zvClockIn:'وصل',zvClockOut:'انتهى',zvAwarded:'الساعات الممنوحة',zvNoTeam:'لا أحد في الفريق بعد.',zvAward:'امنح هذه الساعات',zvAwardHint:'يحصل كل شخص على ساعات مرة واحدة لكل جلسة. تُحسب الأرقام من أوقاتهم، ويمكنك تعديلها أولًا.',zvSkipped:'تم استبعاد {0}: موقوفون أو محذوفون.',zvAwardNone:'أدخل ساعات لشخص واحد على الأقل.',zvAwardDone:'تم منح الساعات لـ {0}.',zvFigPeople:'الأشخاص',zvFigEntries:'السجلات',zvFrom:'من',zvTo:'إلى',zvSource:'المصدر',zvSourceAny:'أي مصدر',zvSourceSession:'من جلسة',zvSourceStaff:'أضافها الموظفون',zvPick:'اختر',zvAddedBy:'أضافها',zvAccept:'قبول',zvDecline:'رفض',zvNoInterest:'لا أحد ينتظر ردًا.',zvActEnter:'دخل جلسة',zvActScan:'مسح تذكرة',zvActSearch:'بحث',zvActList:'فتح القائمة',zvActCheckin:'سجّل الحضور',zvActUncheckin:'تراجع عن تسجيل حضور',zvActDonated:'سجّل تبرعًا',zvActUndonated:'ألغى تسجيل تبرع',zvActClockIn:'بدأ',zvActClockOut:'انتهى',zvActAgree:'وافق على التعهد',zvActInterest:'سجّل اهتمامه',zvActWithdraw:'انسحب',zvFAction:'الإجراء',zvFActionAny:'أي إجراء',zvFSessAny:'أي جلسة',zvRefresh:'تحديث',zvNoLog:'لم يتم تسجيل شيء بعد.',zvBooking:'الحجز',zvWhen:'الوقت',zvCfgPortal:'بوابة المتطوعين',zvPromote:'إظهار البوابة في كل صفحة حساب',zvPromoteHint:'عند التفعيل، يرى الراكبون بوابة المتطوعين في صفحة حسابي ما دامت هناك فرصة مفتوحة.',zvCfgAgree:'التعهد',zvCfgAgreeStat:'وافق عليه {0} من {1} متطوعين نشطين.',zvCfgAgreeAgain:'اطلب من الجميع الموافقة عليه مرة أخرى',zvCfgDefaults:'للجلسات الجديدة للمتطوعين',zvCfgDefaultsHint:'تملأ هذه إعدادات الجلسة عند تشغيل المتطوعين. يمكنك تغييرها في كل جلسة.',zvCfgCutAfter:'التوقف بعد انتهاء الجلسة بهذا العدد من الدقائق',zvCfgLists:'القوائم',zvCfgMilestones:'مراحل الساعات، تفصل بينها فواصل',zvCfgSigner:'الاسم على الشهادات',zvCfgSignerTitle:'المسمى على الشهادات',zvCfgWaHint:'يتم ملء {name} و{session} و{date} و{until} و{link} تلقائيًا.',zvCfgWa:'رسالة واتساب',zvCfgAgreeAgainQ:'يجب على كل متطوع الموافقة على التعهد مرة أخرى قبل أن يتمكن من دخول جلسة. هل تريد المتابعة؟',zvAcctTitle:'ساعات التطوع',zvMakeVolunteer:'تعيين كمتطوع',bdgRunForHer:'نركض لأجلها',bdgRunForHerD:'أكمل سباق نركض لأجلها.',bdgRunForHerA:'الشريط الوردي، لكل من ركض وأكمل سباق نركض لأجلها مع مجتمع مايكروموبيليتي.',rshKicker:'قبل السباق',rshTitle:'مشاركة بياناتك للسباق',rshSub:'للمشاركة في السباق، سنشارك بياناتك التالية مع صلة ونادي جدة لليخوت (JYC):',rshName:'الاسم الكامل',rshKm:'المسافة المختارة',rshNote:'لا نشارك أي شيء آخر عنك، وللسباق فقط.',rshAgree:'أوافق على أن تشارك مايكروموبيليتي هذه البيانات مع صلة ونادي جدة لليخوت (JYC) لأتمكن من المشاركة في السباق.',errRunShare:'وافق على مشاركة بياناتك للسباق لتحجز مكانك.',rshCol:'وافق على المشاركة',rshNotYet:'ليس بعد',waLabel:'رقم WhatsApp',waAsk:'هل {0} هو رقمك على WhatsApp أيضًا؟',waYes:'نعم',waNo:'لا',waSame:'نفس رقم الجوال',errWaPhone:'أدخل رقمك على WhatsApp.',waSubAcc:'الرقم الذي يراسلك عليه فريقنا بخصوص جولاتك.',
   evVlapName:'فيكتوري لاب',evArenaName:'سباق أرينا هيروز الهجين',venueGymnation:'Gymnation، شارع التحلية',arCardSub:'فرق من شخصين · مفتوح أو النخبة · 7 محطات',arMustPartner:'يجب أن يكون لديك شريك للمشاركة. لا يوجد تسجيل فردي.',infoWhoArenaAll:'الجميع، في فرق من شخصين. يجب أن يكون لديك شريك.',arHoldTitle:'الدفع مطلوب',arHoldNote:'يظهر رمز QR ورقمك هنا بعد تأكيد الدفع.',arBuyTitle:'ادفع بتحويل بنكي',arBuySub:'حوّل المبلغ أدناه إلى حساب المنظم، ثم ارفع صورة إيصال التحويل. يدفع كل شريك عن مكانه. يظهر رمز QR ورقمك بعد أن يؤكد فريقنا الدفع.',arNeedPay:'حوّل المبلغ وارفع الإيصال لتأكيد مكانك. يدفع كل شريك عن مكانه.',arBookedToast:'تم الحجز. ادفع بتحويل بنكي لتحصل على رمز QR ورقمك.',arTeamNewSub:'ستحصل على رمز فريق. أرسله إلى شريكك: يجب أن يحجز به من حسابه، وإلا فلن يكتمل فريقك.',arWaitPartner:'فريقك غير مكتمل. لا يمكنك المشاركة بدون شريك: أرسل له هذا الرمز.',infoEvArena:'سباق أرينا هيروز الهجين من WeSportify وMile وGymnation: سباق لياقة هجين من 7 محطات لفرق من شخصين، رجلين أو امرأتين، في فئة مفتوح أو النخبة. مفتوح للجميع، والميداليات مشمولة. يجب أن يكون لديك شريك للمشاركة.',infoDtAr:'يُقام السباق من {start} إلى {end}، مع استراحة للصلاة. ويُبلغ المنظمون كل فريق بموعد دفعته قبل يوم السباق.',infoWhoArena:'أعضاء المجتمع، في فرق من شخصين',arPerAthlete:'لكل رياضي، شاملًا الميدالية',arPriceNote:'السعر لكل رياضي، شاملًا الميدالية.',arFormatLbl:'النظام',arFormatTxt:'فرق من شخصين (رجلان أو امرأتان) · 7 محطات · الميداليات مشمولة',arRulesLbl:'تفاصيل السباق',arRulesLink:'التمارين والمعايير من المنظمين',arStepMsg:'بياناتك للمنظمين، وفئتك، وفريقك.',arTeamsNote:'يجب أن يكون لديك شريك للمشاركة: فرق من شخصين فقط، رجلان أو امرأتان، ولا يوجد تسجيل فردي. يحجز كل شريك مكانه من حسابه ويدفع عنه.',arGenderWhy:'الفرق من امرأتين أو رجلين، لذا يتبع سباقك جنسك. ويُحفظ في حسابك.',arLvl_op:'متوسط',arLvl_el:'متقدم',arGuide_op:'أوزان أو مسافات أو أحجام تمرين مخففة. للرياضيين الذين يملكون أساسًا جيدًا في اللياقة الوظيفية ولم يصلوا بعد إلى أوزان النخبة أو حجمها: الروح التنافسية نفسها، بمسافات وتكرارات وأوزان أيسر.',arGuide_el:'الأوزان والمسافات وأحجام التمرين المقررة كاملة. للرياضيين المتمرسين الذين يمارسون التدريب الوظيفي والهجين عالي الشدة بانتظام، مع جودة حركة عالية تحت الإجهاد وإيقاع تنافسي، بلا تخفيف أو بقليل منه.',arGuideNote:'راجع التمرين كاملًا ومعايير الحركات قبل التسجيل. وللمنظمين وكبير الحكام القرار الأخير في المعايير والتكرارات الصحيحة والعقوبات والنتائج.',arCodeBad:'أدخل الرمز كما أرسله شريكك، مثل AH-4K7Q.',arErrOneEach:'لديك مكان بالفعل في سباق أرينا هيروز الهجين.',arPayLater:'ادفع بتحويل بنكي بعد الحجز وارفع الإيصال. يظهر رمز QR ورقمك بعد تأكيد الدفع.',arShareMsg:'انضم إلى فريقي في سباق أرينا هيروز الهجين ({1}): افتح مايكروموبيليتي، واختر سباق أرينا هيروز الهجين، ثم «انضم برمز» وأدخل {0}.',arShSub:'للمشاركة في سباق أرينا هيروز الهجين، سنشارك بياناتك التالية مع منظميه، WeSportify وMile وGymnation:',arShAgree:'أوافق على أن تشارك مايكروموبيليتي هذه البيانات مع WeSportify وMile وGymnation لأتمكن من المشاركة في سباق أرينا هيروز الهجين.',arShTeam:'فريقك ورمزه',sessEventArHint:'سباق أرينا هيروز الهجين من WeSportify وMile وGymnation، لأعضاء المجتمع. فرق من شخصين (رجلان أو امرأتان)، مفتوح أو النخبة، وسعر لكل رياضي؛ ويحجز كل شريك مكانه بنفسه برمز الفريق. الأولوية لمن يحجز أولًا؛ وبعد امتلاء الأماكن ينتقل الرياضيون إلى قائمة الانتظار.',vrbSetOrg:'تقرير المنظمين',arOrgHint:'كل الرياضيين مع ما طلبه المنظمون: الاسم الأول والأخير والبريد الإلكتروني والجوال والجنس والفئة والفريق، وشريكا الزوجي معًا. تُقرأ من جديد عند كل نقرة.',arCfShare:'ما يُشارك مع المنظمين (بند في كل سطر)',arCfShareHint:'اتركها فارغة لعرض قائمتنا: الاسم الأول والأخير والبريد الإلكتروني والجوال والجنس والفئة والفريق.',vlDoorsShort:'فتح الأبواب',vlHeatShort:'أول دفعة',tagOneOfTwoVl:'يأخذ الحساب وسم المجتمع أو وسم فيكتوري لاب، لا الاثنين معاً. أزل الآخر أولاً.',tagOneOfTwoVlN:'{0} من هذه الحسابات تحمل وسم {1}. يأخذ الحساب وسم المجتمع أو وسم فيكتوري لاب، لا الاثنين معاً.',vlLogoAlt:'فيكتوري لاب من فيتنس إمباير',vlCardTitle:'سباق لياقة هجين · من 16 عامًا',vlCardWhere:'حلبة الكورنيش',infoEvVlap:'فيكتوري لاب من فيتنس إمباير: سباق لياقة هجين على حلبة كورنيش جدة. اركض 4 كم مع ثلاث محطات تمارين (سبرنت) أو المسار الكامل 6.1 كم مع خمس محطات، وحدك أو مع شريك. تنظّمه كامن سبورتس، لأعضاء المجتمع ورياضيي فيكتوري لاب ممن أتموا 16 عامًا فأكثر.',infoDtVl:'تُفتح الأبواب الساعة {gather} وتنطلق أول دفعة الساعة {start}. احضر قبل دفعتك بثلاثين دقيقة على الأقل لاستلام رقم السباق.',infoWhoVlap:'أعضاء المجتمع ورياضيو فيكتوري لاب، من 16 عامًا فأكثر',sessEventVlHint:'فيكتوري لاب من فيتنس إمباير، تنظّمه كامن سبورتس. لأعضاء المجتمع وحاملي وسم فيكتوري لاب ممن أتموا 16 عامًا فأكثر. خمسة سباقات وأربع فئات وسعر لكل رياضي؛ ويحجز كل شريك في الزوجي مكانه بنفسه برمز الفريق. الأولوية لمن يحجز أولًا؛ وبعد امتلاء الأماكن ينتقل الرياضيون إلى قائمة الانتظار.',bdgVictoryLap:'فيكتوري لاب',bdgVictoryLapD:'أكمل سباق فيكتوري لاب من فيتنس إمباير.',bdgVictoryLapA:'حلقة اللفة، لكل من شارك وأكمل سباق فيكتوري لاب من فيتنس إمباير مع مجتمع مايكروموبيليتي.',bdgDefeRide:'ركبت مع دفء',bdgDefeRideD:'شارك في جولة السبت الاجتماعية مع دفء يوم 24 أكتوبر 2026.',bdgDefeRideA:'عجلة الشريط، لكل من ركب مع دفء ومجتمع مايكروموبيليتي لنشر الوعي بسرطان الثدي.',vlAgeNote:'لأعضاء المجتمع ورياضيي فيكتوري لاب ممن أتموا 16 عامًا يوم السباق.',vlAgeTitle:'للرياضيين من 16 عامًا فأكثر',vlAgeMsg:'سباق فيكتوري لاب متاح لمن أتمّ 16 عامًا يوم السباق. تاريخ الميلاد في حسابك يُظهر أن عمرك أقل من 16 عامًا.',vlNoTitle:'فيكتوري لاب لمجتمعنا',vlNoMsg:'الأماكن لأعضاء مجتمع مايكروموبيليتي وللرياضيين الذين منحهم فريقنا وسم فيكتوري لاب. قدّم طلب الانضمام إلى المجتمع، أو تواصل مع فريقنا.',vlStepTitle:'سباقك',vlStepMsg:'اختر سباقك وفئتك. لا نطلب إلا ما ينقص حسابك.',vlGenderWhy:'السباقات مقسّمة إلى سيدات ورجال ومختلط، لذا نسأل مرة واحدة. يُحفظ في حسابك.',vlRaceLabel:'السباق',vlRacesLabel:'السباقات',vlDivsLabel:'الفئات',vlRace_ws:'فردي السيدات',vlRace_ms:'فردي الرجال',vlRace_wd:'زوجي السيدات',vlRace_md:'زوجي الرجال',vlRace_xd:'زوجي مختلط',vlRaceSolo:'وحدك',vlRaceTeam:'مع شريك',vlRaceHeld:'لديك مكان من هذا النوع',vlNoRaces:'لا يوجد سباق متاح للحجز حاليًا.',vlTeamLabel:'فريقك',vlTeamNew:'أنشئ فريقًا',vlTeamJoin:'انضم برمز',vlTeamPair:'اعثروا لي على شريك',vlTeamNewSub:'تحصل على رمز فريق ترسله إلى شريكك، ويحجز به من حسابه.',vlTeamJoinSub:'أدخل الرمز الذي أرسله شريكك. تشارك في سباق فريقه وفئته.',vlTeamPairSub:'سيجمعك فريقنا برياضي آخر في السباق نفسه ويخبرك به.',vlTeamCode:'رمز الفريق',vlCheckBtn:'تحقّق',vlCodeBad:'أدخل الرمز كما أرسله شريكك، مثل VL-4K7Q.',vlErrJoin:'تحقّق أولًا من رمز فريق شريكك.',vlErrNoTeam:'لا يوجد فريق بهذا الرمز في هذا السباق. تأكّد منه مع شريكك.',vlErrTeamFull:'في هذا الفريق رياضيان بالفعل.',vlErrTeamSelf:'هذا فريقك أنت. أرسل الرمز إلى شريكك.',vlNeedWoman:'يحتاج هذا الفريق إلى سيدة تنضم إليه.',vlNeedMan:'يحتاج هذا الفريق إلى رجل ينضم إليه.',vlWithPartner:'مع {0}',vlDivLabel:'الفئة',vlDivTeamHint:'(فئة واحدة للفريق)',vlDivFromTeam:'تشارك في فئة فريقك.',vlDiv_so:'سبرنت مفتوح',vlDiv_se:'سبرنت النخبة',vlDiv_op:'مفتوح',vlDiv_el:'النخبة',vlSt_ski:'سكي إرج',vlSt_wb:'رمي الكرة على الحائط',vlSt_bbj:'بيربي مع وثب طويل',vlSt_carry:'حمل الكرة',vlSt_row:'التجديف',vlMeters:'{0} م',vlReps:'{0} تكرار',vlKg:'{0} كغ',vlWomen:'سيدات',vlMen:'رجال',vlShirtLabel:'مقاس القميص',vlT5Label:'زمنك في جري 5 كم',vlT5Short:'زمن 5 كم',vlOptional:'(اختياري، يساعد في تحديد الدفعات)',vlT5_u20:'أقل من 20 دقيقة',vlT5_m2030:'من 20 إلى 30 دقيقة',vlT5_o30:'أكثر من 30 دقيقة',vlEmSub:'شخص نتصل به إن احتجت إلى مساعدة أثناء السباق. تُحفظ في حسابك فلا تُطلب منك مرة أخرى.',vlErrGender:'اختر جنسك.',vlErrRace:'اختر سباقًا.',vlErrDiv:'اختر فئة.',vlErrShirt:'اختر مقاس القميص.',vlErrGenderRace:'هذا السباق للجنس الآخر. اختر سباقًا آخر.',vlErrDetails:'بعض بيانات الرياضي ناقصة. راجعها ثم تابع.',vlErrOneEach:'لديك مكان من هذا النوع في فيكتوري لاب. يمكنك حجز مكان واحد في الفردي ومكان واحد في الزوجي.',vlRvNew:'فريق جديد: يصلك رمزك مع حجزك',vlRvJoin:'الانضمام إلى الفريق {0}',vlRvPair:'سيجد لك فريقنا شريكًا',vlPriceNote:'السعر لكل رياضي، شاملًا ضريبة القيمة المضافة.',vtTitle:'تذكرة السباق',vtQ:'هل لديك تذكرة بالفعل، أم تودّ شراء واحدة؟',vtHave:'لديّ تذكرة بالفعل',vtBuy:'أريد شراء تذكرة',vtBuyTitle:'اشترِ تذكرتك بتحويل بنكي',vtBuySub:'حوّل المبلغ أدناه إلى حساب الجهة المنظِّمة، ثم ارفع صورة إيصال التحويل. بعدها تظهر بطاقة حجزك.',vtAmount:'المبلغ',vtBenef:'اسم الحساب',vtBank:'البنك',vtIban:'الآيبان',vtAcct:'رقم الحساب',vtCopy:'نسخ',vtCopied:'تم النسخ',vtLetter:'تحميل خطاب البنك (PDF)',vtRcptLabel:'إيصال التحويل',vtRcptPick:'ارفع صورة الإيصال',vtRcptChange:'اختر صورة أخرى',vtRcptBad:'هذا الملف ليس صورة. ارفع صورة أو لقطة شاشة للإيصال.',vtSend:'إرسال الإيصال',vtLater:'سأرسله لاحقًا',vtBack:'رجوع',vtHaveNote:'لديك تذكرة للسباق.',vtPaidNote:'تأكّدنا من الإيصال. تذكرتك مدفوعة.',vtSentNote:'أُرسل الإيصال. سيتحقق منه فريقنا ويؤكّد تذكرتك.',vtNeedRcpt:'حوّل سعر التذكرة وارفع الإيصال لإكمال تذكرتك.',vtUpload:'رفع الإيصال',vtColTicket:'التذكرة',vtColHave:'لديه تذكرة',vtColPaid:'دفع بتحويل',vtColSent:'إيصال للتحقق',vtRcptOk:'تأكيد الإيصال',vtRcptNo:'غير صالح',vtRcptNoAsk:'إعادة هذا الإيصال؟ سيُطلب من الرياضي رفعه من جديد.',vtRcptNoYes:'إعادة الإيصال',vtRcptOkDone:'تم تأكيد الإيصال. المكان مدفوع بتحويل.',vtRcptNoDone:'أُعيد الإيصال. سيُطلب من الرياضي رفعه من جديد.',vtUpStaff:'رفع الإيصال',vtUpReplace:'استبدال الإيصال',vtUpHint:'إيصال أرسله الرياضي بطريقة أخرى (واتساب، عند المكتب). حفظه يجعل المكان مدفوعًا بتحويل.',vtUpDone:'حُفظ الإيصال. المكان مدفوع بتحويل.',vtUpDesk:'حُفظ الإيصال. المكان مدفوع عند المكتب من قبل، فيبقى ذلك الدفع.',vlDblTeam:'فريق زوجي',vrbRcBtn:'PDF مع الإيصالات',vrbRcTitle:'المدفوعات والإيصالات',vrbRcNone:'لا يوجد إيصال',vrbRcHint:'بطاقة لكل رياضي فيها التفاصيل المختارة والدفع وصورة الإيصال؛ شريكا الفريق الزوجي جنبًا إلى جنب تحت فريقهما. يستخدم الفلاتر والترتيب والتجميع أعلاه.',vtRcptDesk:'مدفوع مسبقاً في المكتب، فلم يُستخدم الإيصال.',vtCiCheck:'اطّلع على الإيصال قبل أخذ أي دفعة.',vtColBuy:'يشتري، بلا إيصال',vtColNone:'لم يُجب',vtViewRcpt:'عرض الإيصال',vtRcptSave:'حفظ الصورة',vtRcptNone:'لم يُعثر على إيصال.',vlPayLater:'بعد الحجز، أخبرنا إن كانت لديك تذكرة بالفعل أو اشترِ واحدة بتحويل بنكي.',vlPerAthlete:'لكل رياضي، شاملًا ضريبة القيمة المضافة',vlNumLabel:'رقم الرياضي',satNumLabel:'رقم الحجز',vlWaitPartner:'بانتظار شريكك. أرسل له الرمز.',vlNoPartner:'لم ينضم شريك.',vlPairWait:'تبحث عن شريك: سيجمعك فريقنا بشريك ويخبرك.',vlShareCode:'أرسل الرمز',vlShareMsg:'انضم إلى فريقي في فيكتوري لاب ({1}): افتح مايكروموبيليتي، واختر فيكتوري لاب، ثم «انضم برمز» وأدخل {0}.',vlCodeCopied:'تم النسخ. أرسله إلى شريكك.',vlEdBtn:'تغيير التفاصيل',vlEdTitle:'تغيير تفاصيل سباقك',vlDivLocked:'انضم شريكك، فثُبّتت الفئة. اطلب من فريقنا تغييرها.',vlEdSaved:'تم الحفظ.',vlShSub:'للمشاركة في فيكتوري لاب، سنشارك بياناتك التالية مع كامن سبورتس، منظّمة السباق:',vlShNoteTbc:'ستؤكد كامن سبورتس البيانات التي تحتاجها بالضبط. سنعرض عليك القائمة النهائية قبل السباق، ولا نشارك أي شيء آخر عنك.',vlShNoteSet:'لا نشارك أي شيء آخر عنك، وللسباق فقط.',vlShAgree:'أوافق على أن تشارك مايكروموبيليتي هذه البيانات مع كامن سبورتس لأتمكن من المشاركة في فيكتوري لاب.',vlShPhone:'رقم الجوال',vlShRace:'السباق والفئة والفريق',vlRaceDetails:'تفاصيل السباق',vlPairBtn:'اجمع',vlStaffBtn:'الرياضيون والفرق',vlCfgBtn:'إعدادات السباق',vlKaminBtn:'تقرير كامن سبورتس',vlKaminHint:'كل الرياضيين مع ما قد تطلبه كامن سبورتس، وشريكا الزوجي معًا تحت فريقهما. تُقرأ من جديد عند كل نقرة.',vrbBtn:'منشئ التقارير',prbTitle:'تقرير {0}',prbSub:'اختر من يظهر فيه (كل رمز، وأعضاؤنا إن أردت)، والأعمدة والتصفية والترتيب والتجميع. يُقرأ من جديد عند كل ضغطة.',prbHint:'حجوزات الشريك في هذه الرحلة: اختر الرموز والأعمدة والتصفية والترتيب.',prbGroups:'من يظهر في التقرير',prbNoCode:'بلا رمز',prbMembers:'أعضاء مايكروموبيليتي',prbNone:'لا توجد حجوزات شريك في هذه الرحلة.',prbColWho:'حجز بصفة',prbColAge:'العمر',prbColWa:'واتساب',prbColIg:'إنستغرام',prbColIgN:'المتابعون',prbColWork:'الجهة',prbColShirtGot:'لديه قميص',prbColShirt:'قميص يُسلَّم',prbColBikeNo:'الدراجة المسلَّمة',prbColRg:'مجموعة الرحلة',prbColEm2:'جهة الطوارئ الثانية',prbColNote:'ملاحظة المكتب',prbColSign:'التوقيع',prbSetFull:'كل شيء',prbSetSignin:'ورقة الحضور',prbSetShirtReq:'طلبات القمصان',prbSetBikes:'الدراجات',prbSecCodes:'الحجوزات لكل رمز',prbSecShirts:'القمصان حسب الرمز',prbSecList:'قائمة الدرّاجين',prbSortIn:'الأسبق حضورًا أولًا',prbSortIg:'الأكثر متابعين أولًا',prbFShirt:'القميص',prbFBooked:'تاريخ الحجز',prbGive:'يُسلَّم: {0}',prbShirtGiveAll:'قمصان تُسلَّم',prbShirtHas:'لديه واحد',prbShirtNone:'لم يُسأل',prbStLive:'كل الحجوزات (غير الملغاة)',prbStAll:'كل الحجوزات مع الملغاة',prbStCame:'حضر (سجّل حضوره أو أنهى)',prbSaudi:'سعودي',prbNonSaudi:'غير سعودي',prbOurs:'دراجاتنا',prbGiven:'مُعطى',prbNotGiven:'ليس بعد',prbIgUnk:'غير محسوب',vrbTitle:'تقرير فيكتوري لاب',vrbSub:'اختر الأعمدة والتصفية والترتيب والتجميع. يظهر شريكا الزوجي دائمًا معًا تحت فريقهما، في PDF وفي إكسل.',vrbStartFrom:'ابدأ من',vrbSetStart:'قائمة الانطلاق',vrbSetShirts:'القمصان',vrbSetContacts:'جهات الاتصال',vrbSetPay:'المدفوعات',vrbColBooked:'وقت الحجز',vrbColIn:'وقت الحضور',vrbSecMatrix:'السباقات حسب الفئة',vrbSecShirts:'مقاسات القمصان حسب السباق',vrbSecTeams:'الفرق، سطر لكل فريق',vrbSecPairs:'لا يزالون بحاجة إلى شريك',vrbSecList:'قائمة الرياضيين',vrbNotSet:'غير محدد',vrbStBooked:'محجوز (دون قائمة الانتظار)',vrbStNotIn:'لم يسجّل حضوره',vrbStDone:'أنهى السباق',vrbAllSingles:'كل سباقات الفردي',vrbAllDoubles:'كل سباقات الزوجي',vrbDoubles:'الزوجي',vrbSprint:'فئات السبرنت (4 كم)',vrbFull:'الفئات الكاملة (6.1 كم)',vrbFTeam:'الفريق',vrbUnpaid:'غير مدفوع',vrbFMiss:'بيانات ناقصة',vrbMissAny:'أي نقص',vrbSortName:'الاسم، من أ إلى ي',vrbSortNameZ:'الاسم، من ي إلى أ',vrbSortYoung:'الأصغر أولًا',vrbSortOld:'الأكبر أولًا',vrbSortEarly:'الأقدم حجزًا أولًا',vrbSortLate:'الأحدث حجزًا أولًا',vrbGroup:'التجميع حسب',vrbGNone:'بلا تجميع',vrbGRaceDiv:'السباق والفئة',vrbGKind:'فردي أو زوجي',vrbGList:'محجوز أو قائمة الانتظار',vrbWithMate:'أحضر الشريك حين تُبقي التصفية أحد أفراد الفريق فقط',vrbTeamsNote:'تبقى الفرق معًا مهما كان الترتيب: الترتيب يرتّب الفرق، ويتتابع شريكا كل فريق.',vrbCountLbl:'في التقرير',vrbAth1:'الرياضي 1',vrbAth2:'الرياضي 2',vrbSheetSum:'الملخص',vrbNoRows:'لا شيء يطابق هذه التصفية.',vlStNoRace:'لا سباق بعد',vlStPair:'يريد شريكًا',vlStWait:'بانتظار الشريك',vlStSolo:'فردي',vlStTeam:'الفريق مكتمل',vlTabAthletes:'الرياضيون',vlTabTeams:'الفرق',vlTabPair:'طلبات الشريك',vlPartnerLbl:'الشريك',vlNoAthletes:'لا يوجد رياضيون هنا.',vlNoTeams:'لا توجد فرق بعد.',vlNoPairs:'لا أحد ينتظر شريكًا.',vlPairHint:'الرياضيون الذين طلبوا منا شريكًا، والفرق التي ما زالت تنتظر شريكًا. «اجمع» يضع اثنين منهم في فريق واحد برمز واحد.',vlPairTitle:'اجمعه بشريك',vlPairDiv:'فئة الفريق',vlPairNone:'لا يوجد رياضي متاح للجمع في هذا السباق حاليًا.',vlPaired:'تم الجمع: الفريق {0}.',vlAeKeep:'إبقاء {0}',vlAeNone:'بلا فريق (يريد شريكًا)',vlAeBoth:'امنح {0} السباق والفئة نفسيهما',vlCfRaces:'السباقات المتاحة للحجز',vlCfDivs:'الفئات المتاحة للحجز',vlCfPair:'يمكن للرياضيين أن يطلبوا منا إيجاد شريك',vlCfPay:'طريقة الدفع (تظهر على التذاكر)',vlCfShare:'ما يُشارك مع كامن سبورتس (بند في كل سطر)',vlCfShareHint:'اترك القائمة فارغة حتى تؤكدها كامن سبورتس: يرى الرياضيون عندها قائمتنا بما يحمله الحجز ويُخبرون بأن القائمة الدقيقة قادمة.',vlCfNeedOne:'أبقِ سباقًا واحدًا وفئة واحدة على الأقل متاحين.',vlAgeCol:'العمر يوم السباق',
   reviewPartLabel:'المشاركون',
   acrTitle:'تقرير الحسابات',acrPrintDefault:'طباعة الافتراضي',acrDefaultTitle:'تقرير المجتمع',acrSaveDefault:'حفظ كتقرير المجتمع الافتراضي',acrDefaultHint:'زر «طباعة الافتراضي» بجانب تقرير الحسابات يطبع هذه الاختيارات لأعضاء المجتمع فقط.',acrDefaultSaved:'تم حفظ تقرير المجتمع الافتراضي',acrEditDefault:'تعديل الافتراضي',acrEditDefTitle:'تعديل تقرير المجتمع الافتراضي',acrEditDefSub:'زر «طباعة الافتراضي» يطبع هذه الاختيارات لأعضاء المجتمع فقط. التعديل هنا لا يغيّر اختياراتك الخاصة للتقرير.',acrSaveDefBtn:'حفظ الافتراضي',acrSub:'كل الحسابات، بالأعمدة والفلاتر التي تختارها. تُحفظ اختياراتك على هذا الجهاز.',acrColTags:'الأوسمة',acrColTagSince:'الوسم منذ',acrColTagUntil:'الوسم حتى',acrColAge:'العمر',acrColJoined:'تاريخ الانضمام',acrColBookings:'الحجوزات',acrColRides:'الجولات المكتملة',acrColCommRides:'جولات المجتمع',acrColLastRide:'آخر جولة',acrColLastLogin:'آخر دخول',acrColActive14:'نشط (14 يومًا)',acrBdActive14:'النشاط في آخر 14 يومًا',acrActive14Yes:'حجز في آخر 14 يومًا',acrActive14No:'لا حجز في آخر 14 يومًا',acrStatActive14:'نشطون في آخر 14 يومًا',acrColActive30:'نشط (30 يومًا)',acrBdActive30:'النشاط في آخر 30 يومًا',acrActive30Yes:'حجز في آخر 30 يومًا',acrActive30No:'لا حجز في آخر 30 يومًا',acrStatActive30:'نشطون في آخر 30 يومًا',acrYes:'نعم',acrNo:'لا',acrColSpent:'المدفوع (ر.س)',acrColPending:'حجوزات قادمة',
@@ -2111,14 +2113,14 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','customers','community','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','customers','community','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','customers','community','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','customers','community','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back.
-const STAFF_PART_TABS={analytics:['analytics'],community:['community','customers'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
+const STAFF_PART_TABS={volunteers:['volunteers'],analytics:['analytics'],community:['community','customers'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -4566,7 +4568,7 @@ function _waiverCopy(s){const k=_waiverKind(s);return k==='blood'?{title:t('bldW
 // Arabic carry the full text; every other language shows the English one under a line that
 // says so. Bump PRIVACY_VERSION with any change to the text - it is the date on the notice -
 // and PRIVACY_ASK_FROM with it when riders must confirm the change.
-const PRIVACY_VERSION='2026-11-04';
+const PRIVACY_VERSION='2026-11-05';
 // The last version riders must confirm. A change the owner decides needs no fresh confirmation
 // (2026-10-03: the breakfast-venue row; the same day, Instagram follower counts; 2026-10-05: the
 // emergency contact, said again where it is asked; 2026-10-06: Run for Her runners' details to Sela
@@ -4577,7 +4579,8 @@ const PRIVACY_VERSION='2026-11-04';
 // given in My Account or for a blood donation event; 2026-10-17: Victory Lap's race details and Kamin Sports, which
 // each athlete agrees to on its own page; 2026-10-23: the ID or Iqama number row gone, we no longer keep it; 2026-10-28: the
 // Arena Heros Hybrid Race's details and its organisers, WeSportify, Mile and Gymnation, which each athlete agrees to on its
-// own page; 2026-11-04: a blood donation event's partners and third parties, which each donor agrees to on its own page) moves PRIVACY_VERSION,
+// own page; 2026-11-04: a blood donation event's partners and third parties, which each donor agrees to on its own page;
+// 2026-11-05: volunteering, only for those who volunteer, and the volunteers who check people in) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -4605,6 +4608,7 @@ en:[
     ['Emergency contacts: the name, mobile number and relationship to you of someone we can call, and of a second person if you add one','One is required on every account: asked when you create your account, or before your next booking if your account has none. A second is always optional. Seen only by our staff, and the first also by the hosts of an event you agree to share it with. Please tell each person you gave us their details.','Calling someone for you if you need help during an event, and the second person if we cannot reach the first. We never contact them for anything else. We share only your first contact’s details, and only with the hosts of an event you agree to share them with.'],
     ['Blood type, if you give it (or that you don’t know it)','Always optional: given in Account, or when you sign up for a blood donation event. Seen only by you, our staff, and the partners and third parties of a blood donation event you agree to share your details with; you can change or clear it in Account at any time.','Letting our team plan a blood donation event. We share it only with the partners and third parties of a blood donation event you agree to share your details with, and use it for nothing else.'],
     ['A blood donation event’s registration: your name, mobile number, email address, blood type, birth date and nationality, and whether you donated','Asked only when you register for a blood donation event. Seen by you, our staff and that event’s partners and third parties once you agree to share them. We never ask for or keep your ID or Iqama number.','Registering you as a donor, and giving confirmed donors any reward the event offers'],
+    ['Volunteering: the opportunities you register for, your message and preferred role, whether you are accepted, your role, when you start and finish, your volunteering hours, that you accepted the volunteer agreement, what you do on the volunteer portal, and notes our team keeps','Only if you register to volunteer, or our team adds volunteering hours to your account. Seen by you and our staff, except our team’s notes.','Running volunteering at our events, your record of hours and your certificate'],
     ['Victory Lap race details: the race, division and team you choose, your T-shirt size and, if you give it, your 5 km run time','Asked only when you book Victory Lap. Seen by you, our staff and Kamin Sports; your team partner sees your first name.','Placing you in your race and heat, your race T-shirt, and making up Doubles teams'],
     ['Arena Heros Hybrid Race details: the first and last name, email address and mobile number you enter for the race, your division and your team','Asked only when you book the Arena Heros Hybrid Race. Seen by you, our staff and the race’s organisers (WeSportify, Mile and Gymnation); your team partner sees your first name.','Entering you and your team in the race, and making up teams'],
     ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
@@ -4653,6 +4657,7 @@ en:[
     ['Kamin Sports','For Victory Lap, and only if you agree: the details listed on the page where you agree (until Kamin Sports confirms its exact list: your full name, email address, mobile number, gender, birth date, the race, division and team you chose, your T-shirt size and your emergency contact), so you can take part in the race. Nothing else about you.','Saudi Arabia'],
     ['WeSportify, Mile and Gymnation','For the Arena Heros Hybrid Race, and only if you agree: the first and last name, email address and mobile number you entered for the race, your gender, your division and your team (its code and your partner), so you can take part in the race. Nothing else about you.','Saudi Arabia'],
     ['Partners and third parties of a blood donation event','Only if you agree: the details listed on the page where you agree, so you can register as a donor. Nothing else about you.','Saudi Arabia'],
+    ['Volunteers working at one of our events, under our direction','To check you in at that event: your name, your booking number and whether you have checked in. Never your contact details or payments. They agree to keep it confidential, and every search and mark is recorded.','Saudi Arabia'],
     ['The restaurant or café hosting a Saturday ride breakfast','Your breakfast ratings and the reasons you gave for them, only when our staff choose to share them, and never your name or anything else about you','Saudi Arabia'],
     ['Supabase','Hosts our database','Frankfurt, Germany (European Union)'],
     ['Cloudflare','Hosts the website and counts visits','Worldwide network'],
@@ -4712,6 +4717,7 @@ ar:[
     ['جهات اتصال الطوارئ: اسم شخص يمكننا الاتصال به ورقم جواله وصلة قرابته بك، وكذلك لشخص ثانٍ إن أضفته','جهة واحدة مطلوبة في كل حساب: تُطلب عند إنشاء حسابك، أو قبل حجزك التالي إن لم تكن في حسابك. والجهة الثانية اختيارية دائمًا. لا يراهما إلا موظفونا، والجهات المنظِّمة لفعالية توافق على مشاركة الأولى معها. يُرجى إبلاغ كل شخص منهما بأنك أعطيتنا بياناته.','الاتصال بشخص نيابةً عنك إن احتجت إلى مساعدة أثناء إحدى الفعاليات، وبالشخص الثاني إن تعذّر الوصول إلى الأول. لا نتواصل معهما لأي غرض آخر، ولا نشارك إلا بيانات جهة الاتصال الأولى، ومع الجهات المنظِّمة لفعالية توافق على مشاركتها معها فقط.'],
     ['فصيلة الدم إن أعطيتنا إياها (أو أنك لا تعرفها)','اختيارية دائمًا: تُعطى في الحساب، أو عند التسجيل في فعالية للتبرع بالدم. لا يراها إلا أنت وموظفونا والشركاء والأطراف الثالثة لفعالية تبرع بالدم توافق على مشاركة بياناتك معها، ويمكنك تغييرها أو حذفها من الحساب في أي وقت.','مساعدة فريقنا في التخطيط لفعالية التبرع بالدم. لا نشاركها إلا مع الشركاء والأطراف الثالثة لفعالية تبرع بالدم توافق على مشاركة بياناتك معها، ولا نستخدمها لأي غرض آخر.'],
     ['التسجيل في فعالية للتبرع بالدم: اسمك ورقم جوالك وبريدك الإلكتروني وفصيلة دمك وتاريخ ميلادك وجنسيتك، وما إذا كنت قد تبرعت','تُطلب فقط عند التسجيل في فعالية للتبرع بالدم. يطّلع عليها أنت وموظفونا والشركاء والأطراف الثالثة لتلك الفعالية بعد موافقتك على مشاركتها. لا نطلب رقم هويتك أو إقامتك ولا نحتفظ به.','تسجيلك متبرعًا، ومنح المتبرعين المؤكَّدين أي مكافأة تقدمها الفعالية'],
+    ['التطوع: الفرص التي تسجل فيها، ورسالتك ودورك المفضل، وقبولك من عدمه، ودورك، ووقت بدئك وانتهائك، وساعات تطوعك، وموافقتك على إقرار المتطوع، وما تقوم به في بوابة المتطوعين، وملاحظات يحتفظ بها فريقنا','فقط إذا سجلت للتطوع، أو أضاف فريقنا ساعات تطوع إلى حسابك. يراها أنت وموظفونا، باستثناء ملاحظات فريقنا.','إدارة التطوع في فعالياتنا، وسجل ساعاتك وشهادتك'],
     ['تفاصيل سباق فيكتوري لاب: السباق والفئة والفريق التي تختارها، ومقاس قميصك، وزمنك في جري 5 كم إن أعطيتنا إياه','تُطلب فقط عند حجز فيكتوري لاب. لا يراها إلا أنت وموظفونا وكامن سبورتس؛ ويرى شريكك في الفريق اسمك الأول.','وضعك في سباقك ودفعتك، وقميص السباق، وتكوين فرق الزوجي'],
     ['تفاصيل سباق أرينا هيروز الهجين: الاسم الأول والأخير والبريد الإلكتروني ورقم الجوال التي تُدخلها للسباق، وفئتك، وفريقك','تُطلب فقط عند حجز سباق أرينا هيروز الهجين. لا يراها إلا أنت وموظفونا ومنظمو السباق (WeSportify وMile وGymnation)؛ ويرى شريكك في الفريق اسمك الأول.','تسجيلك أنت وفريقك في السباق، وتكوين الفرق'],
     ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
@@ -4760,6 +4766,7 @@ ar:[
     ['كامن سبورتس','لسباق فيكتوري لاب، وفقط إذا وافقت: البيانات المذكورة في الصفحة التي توافق فيها (وإلى أن تؤكد كامن سبورتس قائمتها الدقيقة: اسمك الكامل وبريدك الإلكتروني ورقم جوالك وجنسك وتاريخ ميلادك والسباق والفئة والفريق التي اخترتها ومقاس قميصك وجهة اتصالك للطوارئ)، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
     ['WeSportify وMile وGymnation','لسباق أرينا هيروز الهجين، وفقط إذا وافقت: الاسم الأول والأخير والبريد الإلكتروني ورقم الجوال التي أدخلتها للسباق، وجنسك، وفئتك، وفريقك (رمزه وشريكك)، لتتمكن من المشاركة في السباق. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
     ['الشركاء والأطراف الثالثة لفعالية تبرع بالدم','فقط إذا وافقت: البيانات المذكورة في الصفحة التي توافق فيها، لتتمكن من التسجيل متبرعًا. ولا شيء غير ذلك عنك.','المملكة العربية السعودية'],
+    ['المتطوعون الذين يعملون في إحدى فعالياتنا تحت إشرافنا','لتسجيل حضورك في تلك الفعالية: اسمك ورقم حجزك وما إذا كنت قد سجلت حضورك. ولا يطلعون أبدًا على بيانات التواصل معك أو مدفوعاتك. ويوافقون على الحفاظ على سريتها، وتُسجَّل كل عملية بحث وتأشير.','المملكة العربية السعودية'],
     ['المطعم أو المقهى الذي يستضيف إفطار جولة السبت','تقييماتك للإفطار والأسباب التي ذكرتها لها، فقط عندما يختار موظفونا مشاركتها، ودون اسمك أو أي شيء آخر عنك','المملكة العربية السعودية'],
     ['Supabase','استضافة قاعدة بياناتنا','فرانكفورت، ألمانيا (الاتحاد الأوروبي)'],
     ['Cloudflare','استضافة الموقع وإحصاء الزيارات','شبكة عالمية'],
@@ -7355,7 +7362,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',customers:'customers',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',customers:'customers',community:'community',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
@@ -7378,6 +7385,7 @@ const SUB_PATHS={
   analytics:{overview:'',revenue:'revenue',ridership:'ridership',operations:'operations',fleet:'fleet',ratings:'ratings',customers:'customers',growth:'growth',leaderboard:'leaderboard',community:'community',months:'months',reports:'reports',team:'team'},
   // Team's two pages (2026-10-07): the accounts and operators at /team, part-timers' hours at /team/part-timers.
   team:{access:'',parttimers:'part-timers'},
+  volunteers:{roster:'',interested:'interested',sessions:'opportunities',hours:'hours',activity:'activity',settings:'settings'},
   // Settings' pages (2026-10-09): the account's own at /settings, the business's at /settings/business and /settings/pricing.
   settings:{account:'',business:'business',pricing:'pricing'},
 };
@@ -7389,7 +7397,7 @@ function _subOf(tab){
   const m=SUB_PATHS[tab];
   if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
   if(tab==='queue'&&(S.queueView||'bookings')==='sessions'&&S.sessView==='cal')return SESS_CAL_PATH;
-  const v=tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='customers'?(S.customersTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):((S.cat&&S.cat.view)||'models');
+  const v=tab==='volunteers'?(S.volView||'roster'):tab==='queue'?(S.queueView||'bookings'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='customers'?(S.customersTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):((S.cat&&S.cat.view)||'models');
   return m[v]||'';
 }
 // Opens the sub-view a segment names; a segment that names none opens the section's own page.
@@ -7415,6 +7423,7 @@ function _setSub(tab,seg){
   else if(tab==='analytics')S.anView=key;
   else if(tab==='team')S.teamView=key;
   else if(tab==='settings')S.setView=key;
+  else if(tab==='volunteers')S.volView=key;
 }
 function _pathFor(st){
   if(st.view==='staff'){const b=STAFF_PATHS[st.stab]||'bookings';return'/'+b+(st.sub?'/'+st.sub:'');}
@@ -8846,6 +8855,603 @@ async function _volMark(fn,id,on,apply){
 }
 function _volCheckin(id,on){return _volMark('staff_volunteer_checkin',id,on,x=>{x.checked_in=!!on;x.mine_in=!!on;});}
 function _volDonated(id,on){return _volMark('staff_volunteer_donated',id,on,x=>{x.donated=!!on;x.mine_donated=!!on;});}
+// ── Volunteers: the staff section (2026-11-05, migration 20261105120000) ──
+// Who volunteers, who has registered interest on the portal (volunteer.micromobility.sa, mm-platform apps/volunteers), the
+// switch on each session, the hours. Reads come from the tables through their staff policies, writes through
+// staff_volunteer_*. The people's names and numbers come from the accounts the desk already holds (S.customers).
+function _vmHm(at){return at?_tkHm(at):'';}
+function _vmWhen(at){return at?`${_bdgDay(at)} ${_tkHm(at)}`:'';}
+const VM_DEF={promote:false,cut_after_min:60,caps:{checkin:true,undo:true,donated:true,list:false,counts:true},hours_mode:'clock',fixed_hours:null,milestones:[10,25,50,100,250,500],roles:[],tags:[],cert_signer:'',cert_title:'',wa_tpl:'',needed:null};
+function _vm(){return S.vm||(S.vm={rows:null,sess:[],shifts:[],hours:[],cfg:{},log:null,busy:false,missing:false,err:false,at:0,sel:null,f:{status:'active',tag:'',band:'',agree:'',sort:'name',q:''},hf:{q:'',from:'',to:'',src:''},lf:{q:'',act:'',sess:''},sv:'next'});}
+function _vmCfg(){const W=_vm();return{...VM_DEF,...(W.cfg||{}),caps:{...VM_DEF.caps,...((W.cfg||{}).caps||{})}};}
+function _vmMissing(e){const c=String(e&&e.code||''),m=String(e&&e.message||'');return c==='PGRST205'||c==='42P01'||/volunteer/.test(m)&&/does not exist|schema cache/.test(m);}
+async function _vmLoad(force){
+  const W=_vm();if(W.busy)return W.p;if(!force&&W.rows&&Date.now()-W.at<30000)return;
+  W.busy=true;W.err=false;
+  W.p=_vmRead(W);return W.p;
+}
+async function _vmRead(W){
+  const get=q=>Promise.resolve(q).catch(e=>({error:e}));
+  const[a,b,c,d,e]=await Promise.all([get(sb.from('volunteers').select('*')),get(sb.from('volunteer_sessions').select('*')),get(sb.from('volunteer_shifts').select('*')),
+    get(sb.from('volunteer_hours').select('*').order('worked_on',{ascending:false}).order('id',{ascending:false}).limit(5000)),get(sb.from('volunteer_settings').select('data').maybeSingle())]);
+  W.busy=false;
+  const bad=[a,b,c,d,e].find(r=>r.error);
+  if(bad){if(_vmMissing(bad.error))W.missing=true;else W.err=true;}
+  else{W.missing=false;W.rows=a.data||[];W.sess=b.data||[];W.shifts=c.data||[];W.hours=d.data||[];W.cfg=(e.data&&e.data.data)||{};W.at=Date.now();}
+  if(S.view==='staff'&&S.staffTab==='volunteers')renderVolunteers();
+}
+async function _vmLogLoad(){
+  const W=_vm();
+  const r=await Promise.resolve(sb.from('volunteer_log').select('*').order('at',{ascending:false}).order('id',{ascending:false}).limit(1000)).catch(e=>({error:e}));
+  W.log=r.error?[]:(r.data||[]);
+  if(S.staffTab==='volunteers'&&S.volView==='activity')renderVolunteers();
+}
+// One write: a refusal is said, a success reloads. Answers the data, or null.
+async function _vmRpc(fn,args,okKey){
+  let r;try{r=await sb.rpc(fn,args);}catch(e){r={error:e};}
+  if(r.error){
+    const m=String(r.error.message||'');
+    const k=[[/VOL_HOURS_NEGATIVE/,'zvErrNegative'],[/BAD_HOURS/,'zvErrHours'],[/BAD_DATE/,'zvErrFuture'],[/VOL_CUTOFF_REQUIRED/,'zfNeedCut'],[/VOL_CUTOFF_BEFORE_OPEN/,'zfCutBeforeOpen'],[/VOL_ALREADY_IN/,'zvErrAlreadyIn'],[/VOL_NOT_VOLUNTEER/,'zvErrNotVol'],[/BAD_TIMES/,'zvErrTimes'],[/FORBIDDEN/,'zvErrForbidden']].find(x=>x[0].test(m));
+    toast(t(k?k[1]:'errConnection'),'error');
+    try{_logError(fn+': '+m,'volunteers',true);}catch(_){}
+    return null;
+  }
+  if(okKey)toast(t(okKey));
+  await _vmLoad(true);
+  return r.data||{};
+}
+function _vmCust(id){return _custById(id)||{id,name:''};}
+function _vmName(id){return _vmCust(id).name||String(id);}
+function _vmSess(id){return(S.sessions||[]).find(s=>s.id===id)||null;}
+function _vmSessLabel(id){const s=_vmSess(id);return s?`${_evName(s)} · ${shortDate(s.session_date||s.id)}`:String(id||'');}
+function _vmH(n){const v=Math.round((+n||0)*100)/100;return String(v);}
+function _vmHoursOf(id){return(_vm().hours||[]).filter(h=>h.customer_id===id&&!h.voided_at).reduce((a,h)=>a+(+h.hours||0),0);}
+function _vmShiftsOf(id){return(_vm().shifts||[]).filter(s=>s.customer_id===id);}
+function _vmLast(id){
+  const d=[..._vmShiftsOf(id).filter(s=>s.clock_in||s.status==='done').map(s=>_vmSess(s.session_id)?.session_date||''),...(_vm().hours||[]).filter(h=>h.customer_id===id&&!h.voided_at).map(h=>h.worked_on||'')].filter(Boolean).sort();
+  return d.length?d[d.length-1]:'';
+}
+function _vmAgreed(v){return v.agreed_version&&v.agreed_version===(_vmCfg().agreement_v||'2026-11-05');}
+function _vmSwitchOn(w){return !!w&&w.enabled&&+new Date(w.closes_at)>Date.now();}
+function _vmOpenNow(w){return _vmSwitchOn(w)&&(!w.opens_at||+new Date(w.opens_at)<=Date.now());}
+function _vmOnDuty(){return(_vm().shifts||[]).filter(s=>s.clock_in&&!s.clock_out&&_vmOpenNow((_vm().sess||[]).find(w=>w.session_id===s.session_id)));}
+function _vmStatusLabel(st){return t({applied:'zvStApplied',active:'zvStActive',paused:'zvStPaused',removed:'zvStRemoved'}[st]||'zvStActive');}
+function _vmStatusChip(st){return`<span class="rr-chip ${st==='active'?'rr-yes':'rr-no'}">${esc(_vmStatusLabel(st))}</span>`;}
+function _vmMilestone(h){const L=(_vmCfg().milestones||[]).map(Number).filter(n=>n>0).sort((a,b)=>a-b);let top=0;L.forEach(n=>{if(h>=n)top=n;});return{top,next:L.find(n=>n>h)||0};}
+function _vmWa(id,sessId){
+  const c=_vmCust(id),num=String(c.whatsapp||c.phone||'').replace(/\D/g,'');if(!num)return'';
+  const tpl=_vmCfg().wa_tpl||t('zvWaDefault'),s=sessId?_vmSess(sessId):null,w=sessId?(_vm().sess||[]).find(x=>x.session_id===sessId):null;
+  const msg=tpl.replace(/\{name\}/g,c.name||'').replace(/\{session\}/g,s?_evName(s):'').replace(/\{date\}/g,s?shortDate(s.session_date||s.id):'').replace(/\{until\}/g,w?_vmWhen(w.closes_at):'').replace(/\{link\}/g,VOL_PORTAL+(sessId?'/#o/'+encodeURIComponent(sessId):''));
+  return`https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+}
+function _vmInterested(){const W=_vm();return(W.shifts||[]).filter(x=>x.status==='interested'&&_vmSwitchOn((W.sess||[]).find(w=>w.session_id===x.session_id)));}
+function _vmTabs(){
+  const v=S.volView||'roster',waiting=_vmInterested().length;
+  const b=(k,lbl)=>`<button type="button" class="inv-navbtn${v===k?' active':''}" aria-pressed="${v===k}" data-on-click="${_on("_vmView",k)}">${esc(lbl)}</button>`;
+  return`<div class="filter-row inv-tabs">${b('roster',t('zvTabRoster'))}${b('interested',t('zvTabInterested')+(waiting?` (${waiting})`:''))}${b('sessions',t('zvTabSessions'))}${b('hours',t('zvTabHours'))}${b('activity',t('zvTabActivity'))}${b('settings',t('zvTabSettings'))}</div>`;
+}
+function _vmView(k){S.volView=k;_pushNav();renderVolunteers();}
+function renderVolunteers(listOnly){
+  const el=document.getElementById('tab-volunteers');if(!el)return;
+  const W=_vm();
+  if(listOnly&&W.rows&&(S.volView||'roster')==='roster'){const l=document.getElementById('vm-list');if(l){l.innerHTML=_vmRosterRows();_vmSelPaint();return;}}
+  const head=`<h1 class="page-title">${esc(t('tabVolunteers'))}</h1><div class="page-sub">${esc(t('zvSub'))}</div>`;
+  if(!W.rows){
+    let body;
+    if(W.missing)body=_emptyState(t('zvNotSetUp'));
+    else if(W.err&&!W.busy)body=_loadErr(t('zvLoadErr'),_on("_vmRetry"));
+    else{if(!W.busy)_vmLoad();body=skeletonList();}
+    el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
+    return;
+  }
+  if(!W.busy&&Date.now()-W.at>60000)_vmLoad();
+  const v=S.volView||'roster';
+  const body=v==='sessions'?_vmSessionsHtml():v==='hours'?_vmHoursHtml():v==='interested'?_vmInterestHtml():v==='activity'?_vmActivityHtml():v==='settings'?_vmSettingsHtml():_vmRosterHtml();
+  el.innerHTML=`${head}${_vmTabs()}<div class="vm-body">${body}</div>`;
+  try{_figFit(el);}catch(_){}
+  _vmSelPaint();
+}
+function _vmRetry(){_vm().err=false;_vmLoad(true);renderVolunteers();}
+// ─ the roster ─
+function _vmRosterRowsData(){
+  const W=_vm(),f=W.f,q=f.q.trim().toLowerCase();
+  const band=h=>f.band==='0'?h===0:f.band==='1'?h>0&&h<10:f.band==='10'?h>=10&&h<50:f.band==='50'?h>=50:true;
+  const rows=(W.rows||[]).filter(v=>{
+    if(f.status&&v.status!==f.status&&!(f.status==='all'))return false;
+    if(f.tag&&!(v.tags||[]).includes(f.tag))return false;
+    if(f.agree==='yes'&&!_vmAgreed(v))return false;
+    if(f.agree==='no'&&_vmAgreed(v))return false;
+    if(!band(_vmHoursOf(v.customer_id)))return false;
+    if(q){const c=_vmCust(v.customer_id);if(![c.name,c.email,c.phone,...(v.tags||[])].some(x=>String(x||'').toLowerCase().includes(q)))return false;}
+    return true;
+  });
+  const s=f.sort,by={hours:v=>-_vmHoursOf(v.customer_id),hoursLo:v=>_vmHoursOf(v.customer_id),sessions:v=>-_vmShiftsOf(v.customer_id).filter(x=>x.clock_in||x.status==='done').length,newest:v=>-(+new Date(v.created_at)||0)}[s];
+  const name=v=>_vmName(v.customer_id).toLowerCase();
+  if(s==='last')return rows.sort((a,b)=>_vmLast(b.customer_id).localeCompare(_vmLast(a.customer_id))||name(a).localeCompare(name(b)));
+  if(s==='expiry')return rows.sort((a,b)=>String(a.expires_on||'9').localeCompare(String(b.expires_on||'9'))||name(a).localeCompare(name(b)));
+  if(by)return rows.sort((a,b)=>by(a)-by(b)||name(a).localeCompare(name(b)));
+  return rows.sort((a,b)=>name(a).localeCompare(name(b)));
+}
+function _vmRosterRows(){
+  const rows=_vmRosterRowsData(),W=_vm();
+  if(!rows.length)return _emptyState(t('zvNone'));
+  return rows.map(v=>{
+    const id=v.customer_id,c=_vmCust(id),h=_vmHoursOf(id),ms=_vmMilestone(h),n=_vmShiftsOf(id).filter(x=>x.clock_in||x.status==='done').length,last=_vmLast(id),wa=_vmWa(id),on=W.sel&&W.sel.has(id);
+    const exp=v.expires_on&&v.expires_on<_ksaYmd(Date.now());
+    return`<div class="vm-row" data-cust="${esc(id)}">
+      ${W.sel?`<button type="button" class="am-sel" aria-pressed="${on?'true':'false'}" aria-label="${esc(t('amSelBtn'))} · ${esc(c.name||'')}" data-on-click="${_on("_vmSelToggle",id)}">${on?'&#10003;':''}</button>`:''}
+      <div class="vm-who"><b>${esc(c.name||id)}</b><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,id):''}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div></div>
+      <div class="vm-st">${_vmStatusChip(v.status)}${v.auto_accept?` <span class="rr-chip rr-yes">${esc(t('zvAutoShort'))}</span>`:''}${v.status==='active'&&!_vmAgreed(v)?` <span class="rr-chip rr-no">${esc(t('zvNoAgreement'))}</span>`:''}${exp?` <span class="rr-chip rr-no">${esc(t('zvExpired'))}</span>`:''}</div>
+      <div class="vm-tags">${(v.tags||[]).map(x=>`<span class="tt-chip vm-tag">${esc(x)}</span>`).join('')}</div>
+      <div class="vm-num"><b>${esc(_vmH(h))}</b> ${esc(t('zvHoursUnit'))}${ms.top?`<div class="am-meta">${esc(t('zvMilestone').replace('{0}',String(ms.top)))}</div>`:''}</div>
+      <div class="vm-num"><b>${n}</b> ${esc(t('zvSessionsUnit'))}<div class="am-meta">${last?esc(shortDate(last)):''}</div></div>
+      <div class="vm-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursOpen",id)}">${esc(t('zvAddHours'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmOpen",id)}">${esc(t('zvManage'))}</button></div>
+    </div>`;}).join('');
+}
+function _vmFig(n,l){return`<div class="stat-card"><div class="stat-num">${esc(String(n))}</div><div class="stat-label">${esc(l)}</div></div>`;}
+function _vmRosterHtml(){
+  const W=_vm(),f=W.f,cfg=_vmCfg(),act=(W.rows||[]).filter(v=>v.status==='active');
+  const ym=_ksaYmd(Date.now()).slice(0,7),live=(W.hours||[]).filter(h=>!h.voided_at),tot=live.reduce((a,h)=>a+(+h.hours||0),0),mon=live.filter(h=>String(h.worked_on).slice(0,7)===ym).reduce((a,h)=>a+(+h.hours||0),0);
+  const tags=[...new Set([...(cfg.tags||[]),...(W.rows||[]).flatMap(v=>v.tags||[])])].sort();
+  const sel=(k,lbl,opts)=>`<select class="filter-select" aria-label="${esc(lbl)}" data-on-change="${_on("_vmFilter",k,_P("value"))}">${opts.map(([v,l])=>`<option value="${esc(v)}"${String(f[k])===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
+  return`<div class="stats-row flt-mb20">${_vmFig(act.length,t('zvFigActive'))}${_vmFig(_vmOnDuty().length,t('zvFigOnDuty'))}${_vmFig(_vmH(tot),t('zvFigHours'))}${_vmFig(_vmH(mon),t('zvFigMonth'))}${_vmFig(_vmInterested().length,t('zvFigInterested'))}${_vmFig(act.filter(v=>!_vmAgreed(v)).length,t('zvFigNoAgree'))}</div>
+  <div class="form-section ws-mt0">
+    <div class="filter-bar"><div class="filter-row">
+      <div class="${_srchCls('vm',f.q)}" data-srch="vm">${_artIcon('search',13)}<input id="vm-q" class="search-input" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(f.q)}" data-on-input="${_on("_vmSearch",_P("value"))}">${_srchBtn()}</div>
+      ${sel('status',t('zvFStatus'),[['all',t('filterAll')],['active',t('zvStActive')],['applied',t('zvStApplied')],['paused',t('zvStPaused')],['removed',t('zvStRemoved')]])}
+      ${tags.length?sel('tag',t('zvFTag'),[['',t('zvFTagAny')],...tags.map(x=>[x,x])]):''}
+      ${sel('band',t('zvFHours'),[['',t('zvFHoursAny')],['0',t('zvBand0')],['1',t('zvBand1')],['10',t('zvBand10')],['50',t('zvBand50')]])}
+      ${sel('agree',t('zvFAgree'),[['',t('zvFAgreeAny')],['yes',t('zvAgreeYes')],['no',t('zvAgreeNo')]])}
+      ${sel('sort',t('zvFSort'),[['name',t('zvSortName')],['hours',t('zvSortHours')],['hoursLo',t('zvSortHoursLo')],['sessions',t('zvSortSessions')],['last',t('zvSortLast')],['newest',t('zvSortNewest')],['expiry',t('zvSortExpiry')]])}
+    </div>
+    <div class="filter-row">
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vmAddOpen")}">${esc(t('zvAdd'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmManyOpen")}">${esc(t('zvAddMany'))}</button>
+      <button type="button" class="btn-sm btn-secondary" aria-pressed="${W.sel?'true':'false'}" data-on-click="${_on("_vmSelMode")}">${esc(t('amSelBtn'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmExport")}">${esc(t('zvExport'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmCopyNums")}">${esc(t('zvCopyNums'))}</button>
+    </div></div>
+    <div id="vm-sel-bar"></div>
+    <div class="vm-list" id="vm-list">${_vmRosterRows()}</div>
+  </div>`;
+}
+function _vmFilter(k,v){_vm().f[k]=v;renderVolunteers();}
+function _vmSearch(v){_vm().f.q=String(v||'');renderVolunteers(true);}
+function _vmSelMode(){const W=_vm();W.sel=W.sel?null:new Set();renderVolunteers();}
+function _vmSelToggle(id){const W=_vm();if(!W.sel)return;if(W.sel.has(id))W.sel.delete(id);else W.sel.add(id);renderVolunteers(true);}
+function _vmSelPaint(){
+  const h=document.getElementById('vm-sel-bar'),W=_vm();if(!h)return;
+  if(!W.sel){h.innerHTML='';return;}
+  const n=W.sel.size,b=(k,args)=>`<button type="button" class="btn-sm btn-secondary"${n?'':' disabled'} data-on-click="${_on("_vmBulk",...args)}">${esc(t(k))}</button>`;
+  h.innerHTML=`<div class="filter-row vm-bulk"><span class="am-meta">${esc(t('zvSelected').replace('{0}',String(n)))}</span>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmSelAll")}">${esc(t('zvSelAll'))}</button>
+    ${b('zvDoActivate',['active'])}${b('zvDoPause',['paused'])}${b('zvDoRemove',['removed'])}
+    <input id="vm-bulk-tag" class="vm-in-tag" type="text" maxlength="30" aria-label="${esc(t('zvTagName'))}" placeholder="${esc(t('zvTagName'))}">
+    <button type="button" class="btn-sm btn-secondary"${n?'':' disabled'} data-on-click="${_on("_vmBulkTag",true)}">${esc(t('zvTagAdd'))}</button>
+    <button type="button" class="btn-sm btn-secondary"${n?'':' disabled'} data-on-click="${_on("_vmBulkTag",false)}">${esc(t('zvTagRemove'))}</button>
+    <button type="button" class="btn-sm btn-secondary"${n?'':' disabled'} data-on-click="${_on("_vmHoursManyOpen")}">${esc(t('zvAddHours'))}</button></div>`;
+}
+function _vmSelAll(){const W=_vm();W.sel=new Set(_vmRosterRowsData().map(v=>v.customer_id));renderVolunteers(true);}
+async function _vmBulk(st){const W=_vm(),ids=[...(W.sel||[])];if(!ids.length)return;if(await _vmRpc('staff_volunteers_bulk',{p_ids:ids,p_status:st},'zvSaved')){W.sel=new Set();renderVolunteers();}}
+async function _vmBulkTag(add){
+  const W=_vm(),ids=[...(W.sel||[])],v=String(document.getElementById('vm-bulk-tag')?.value||'').trim();if(!ids.length||!v)return;
+  if(await _vmRpc('staff_volunteers_bulk',add?{p_ids:ids,p_add_tag:v}:{p_ids:ids,p_remove_tag:v},'zvSaved'))renderVolunteers();
+}
+function _vmExport(){
+  const rows=_vmRosterRowsData();
+  _downloadCsv('volunteers.csv',[[t('nameLabel'),t('phoneNum'),t('emailAddr'),t('zvFStatus'),t('zvFTag'),t('zvHoursUnit'),t('zvSessionsUnit'),t('zvSortLast'),t('zvExpiry'),t('zvShirt'),t('zvFAgree')],
+    ...rows.map(v=>{const c=_vmCust(v.customer_id);return[c.name||'',c.phone||'',c.email||'',v.status,(v.tags||[]).join(' | '),_vmHoursOf(v.customer_id),_vmShiftsOf(v.customer_id).filter(x=>x.clock_in||x.status==='done').length,_vmLast(v.customer_id),v.expires_on||'',v.shirt||'',_vmAgreed(v)?t('zvAgreeYes'):t('zvAgreeNo')];})],'volunteers',rows.length);
+}
+function _vmCopyNums(){
+  const nums=_vmRosterRowsData().map(v=>_vmCust(v.customer_id).phone).filter(Boolean).join(', ');
+  try{navigator.clipboard.writeText(nums).then(()=>toast(t('zvCopied')),()=>toast(t('errConnection'),'error'));}catch(e){toast(t('errConnection'),'error');}
+}
+// ─ dialogs ─
+function _vmDlg(title,body,wide){
+  const m=document.getElementById('confirm-modal');if(!m)return;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_vmDlgBack",_EV,_EL)}"><div class="confirm-box vm-dlg${wide?' vm-dlg-w':''}" role="dialog" aria-modal="true" aria-labelledby="vm-dlg-t">
+    <div class="cmy-rej-head"><div class="cmy-minw0"><div id="vm-dlg-t" class="chrome-dt">${esc(title)}</div></div><button type="button" data-on-click="${_on("closeConfirm")}" aria-label="${esc(t('closeBtn'))}" class="chrome-x x-close">&times;</button></div>
+    <div class="vm-dlg-b">${body}</div></div></div>`;
+}
+function _vmDlgBack(event,el){if(event.target===el)closeConfirm();}
+// Add one: any account, found by name, mobile or email.
+function _vmAddOpen(){_vmDlg(t('zvAdd'),`<input id="vm-add-q" class="vm-in" type="text" autocomplete="off" aria-label="${esc(t('zvAddSearch'))}" placeholder="${esc(t('zvAddSearch'))}" data-on-input="${_on("_vmAddSearch",_P("value"))}"><div id="vm-add-res" class="vm-res"></div>`);setTimeout(()=>document.getElementById('vm-add-q')?.focus(),40);}
+function _vmFindCusts(q){
+  q=String(q||'').trim().toLowerCase();if(q.length<2)return[];
+  const d=q.replace(/\D/g,'');
+  return(S.customers||[]).filter(c=>!c.merged_into&&(String(c.name||'').toLowerCase().includes(q)||String(c.email||'').toLowerCase().includes(q)||(d.length>=4&&String(c.phone||'').replace(/\D/g,'').includes(d)))).slice(0,20);
+}
+function _vmAddSearch(q){
+  const h=document.getElementById('vm-add-res');if(!h)return;const W=_vm(),rows=_vmFindCusts(q);
+  h.innerHTML=rows.length?rows.map(c=>{const had=(W.rows||[]).find(v=>v.customer_id===c.id);return`<div class="vm-res-row"><span class="vm-who"><b>${esc(c.name||'')}</b><span class="am-meta"> <bdi>${esc(c.phone||c.email||'')}</bdi></span></span>${had&&had.status==='active'?`<span class="am-meta">${esc(t('zvStActive'))}</span>`:`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vmAddOne",c.id)}">${esc(t('zvAddBtn'))}</button>`}</div>`;}).join(''):String(q||'').trim().length>=2?`<div class="am-meta">${esc(t('zvAddNone'))}</div>`:'';
+}
+async function _vmAddOne(id){if(await _vmRpc('staff_volunteer_save',{p_customer:id,p_status:'active'},'zvAdded')){closeConfirm();renderVolunteers();}}
+// Add many: a pasted list of mobiles.
+function _vmManyOpen(){_vmDlg(t('zvAddMany'),`<p class="am-meta">${esc(t('zvManyHint'))}</p><textarea id="vm-many" class="vm-in" rows="7" aria-label="${esc(t('zvAddMany'))}"></textarea><div class="ss-form-acts"><button type="button" class="btn-primary" data-on-click="${_on("_vmManySave")}">${esc(t('zvAddBtn'))}</button></div><div id="vm-many-res" class="am-meta"></div>`);}
+async function _vmManySave(){
+  const norm=p=>String(p||'').replace(/\D/g,'').replace(/^(00)?(966)?/,'').replace(/^0+/,'');
+  const nums=String(document.getElementById('vm-many')?.value||'').split(/[\s,;]+/).map(norm).filter(n=>n.length>=7);
+  const byNum=new Map((S.customers||[]).filter(c=>!c.merged_into&&c.phone).map(c=>[norm(c.phone),c.id]));
+  const found=[],missed=[];nums.forEach(n=>{const id=byNum.get(n);if(id)found.push(id);else missed.push(n);});
+  let ok=0;for(const id of[...new Set(found)]){let r;try{r=await sb.rpc('staff_volunteer_save',{p_customer:id,p_status:'active'});}catch(e){r={error:e};}if(!r.error)ok++;}
+  await _vmLoad(true);renderVolunteers();
+  const h=document.getElementById('vm-many-res');if(h)h.textContent=t('zvManyDone').replace('{0}',String(ok)).replace('{1}',missed.length?missed.join(', '):'0');
+}
+// Hours for one account, or for everyone selected.
+function _vmHoursForm(fn,args){
+  const today=_ksaYmd(Date.now());
+  const sess=(S.sessions||[]).filter(s=>String(s.session_date||'')<=today).slice().sort((a,b)=>String(b.session_date).localeCompare(String(a.session_date))).slice(0,60);
+  return`<div class="vm-form">
+    <label>${esc(t('zvHoursUnit'))}<input id="vm-h" type="number" step="0.25" min="-500" max="500" inputmode="decimal"></label>
+    <label>${esc(t('zvHoursOn'))}<input id="vm-h-on" type="date" value="${esc(today)}" max="${esc(today)}"></label>
+    <label class="vm-full">${esc(t('zvHoursSession'))}<select id="vm-h-s"><option value="">${esc(t('zvHoursNoSession'))}</option>${sess.map(s=>`<option value="${esc(s.id)}">${esc(_vmSessLabel(s.id))}</option>`).join('')}</select></label>
+    <label class="vm-full">${esc(t('zvHoursNote'))}<input id="vm-h-n" type="text" maxlength="300"></label>
+  </div><p class="am-meta">${esc(t('zvHoursHint'))}</p>
+  <div class="ss-form-acts"><button type="button" class="btn-primary" data-on-click="${_on(fn,...args)}">${esc(t('zvAddHours'))}</button></div>`;
+}
+function _vmHoursVals(){return{p_hours:Number(document.getElementById('vm-h')?.value||0),p_on:document.getElementById('vm-h-on')?.value||null,p_session:document.getElementById('vm-h-s')?.value||null,p_note:document.getElementById('vm-h-n')?.value||null};}
+function _vmHoursOpen(id){_vmDlg(`${t('zvAddHours')} · ${_vmName(id)}`,_vmHoursForm('_vmHoursSave',[id]));setTimeout(()=>document.getElementById('vm-h')?.focus(),40);}
+async function _vmHoursSave(id){if(await _vmRpc('staff_volunteer_hours_add',{p_customer:id,..._vmHoursVals()},'zvHoursAdded')){closeConfirm();try{_cfVolPaint(id,true);}catch(_){}if(S.staffTab==='volunteers')renderVolunteers();}}
+function _vmHoursManyOpen(){const n=(_vm().sel||new Set()).size;_vmDlg(`${t('zvAddHours')} · ${t('zvSelected').replace('{0}',String(n))}`,_vmHoursForm('_vmHoursManySave',[]));}
+async function _vmHoursManySave(){
+  const ids=[...(_vm().sel||[])],vals=_vmHoursVals();let bad=0;
+  for(const id of ids){let r;try{r=await sb.rpc('staff_volunteer_hours_add',{p_customer:id,...vals});}catch(e){r={error:e};}if(r.error)bad++;}
+  await _vmLoad(true);closeConfirm();renderVolunteers();
+  if(bad)toast(t('zvSomeFailed').replace('{0}',String(bad)),'error');else toast(t('zvHoursAdded'));
+}
+async function _vmHoursVoid(hid,cid){if(await _vmRpc('staff_volunteer_hours_void',{p_id:hid},'zvVoided')){if(cid)_vmOpen(cid);else renderVolunteers();}}
+// One volunteer: everything staff can change, and their record.
+function _vmOpen(id){
+  const W=_vm(),v=(W.rows||[]).find(x=>x.customer_id===id)||{customer_id:id,status:'active',tags:[]},c=_vmCust(id),cfg=_vmCfg(),h=_vmHoursOf(id),ms=_vmMilestone(h);
+  const led=(W.hours||[]).filter(x=>x.customer_id===id),sh=_vmShiftsOf(id).slice().sort((a,b)=>String(_vmSess(b.session_id)?.session_date||'').localeCompare(String(_vmSess(a.session_id)?.session_date||''))),wa=_vmWa(id);
+  const shirt=['','XS','S','M','L','XL','XXL'].map(x=>`<option value="${x}"${(v.shirt||'')===x?' selected':''}>${x||'—'}</option>`).join('');
+  const st=['active','paused','removed','applied'].map(x=>`<option value="${x}"${v.status===x?' selected':''}>${esc(_vmStatusLabel(x))}</option>`).join('');
+  _vmDlg(c.name||String(id),`<div class="am-meta"><bdi>${esc(c.phone||'')}</bdi>${c.email?` · <bdi>${esc(c.email)}</bdi>`:''}${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}</div>
+    <div class="vm-form">
+      <label>${esc(t('zvFStatus'))}<select id="vm-st">${st}</select></label>
+      <label>${esc(t('zvExpiry'))}<input id="vm-exp" type="date" value="${esc(v.expires_on||'')}"></label>
+      <label>${esc(t('zvShirt'))}<select id="vm-shirt">${shirt}</select></label>
+      <label class="vm-full">${esc(t('zvTags'))}<input id="vm-tags" type="text" list="vm-tag-list" value="${esc((v.tags||[]).join(', '))}"><datalist id="vm-tag-list">${(cfg.tags||[]).map(x=>`<option value="${esc(x)}"></option>`).join('')}</datalist></label>
+      <label class="vm-full">${esc(t('zvNotes'))}<textarea id="vm-notes" rows="3" maxlength="2000">${esc(v.notes||'')}</textarea></label>
+    </div>
+    <label class="vm-switch"><input type="checkbox" class="web-toggle" id="vm-auto"${v.auto_accept?' checked':''}><span><b>${esc(t('zvAutoAccept'))}</b><span class="am-meta vm-block">${esc(t('zvAutoAcceptHint'))}</span></span></label>
+    <p class="am-meta vm-mb">${esc(_vmAgreed(v)?t('zvAgreedOn').replace('{0}',_bdgDay(v.agreed_at)):t('zvNoAgreement'))}${v.decided_by?` · ${esc(t('zvDecidedBy').replace('{0}',v.decided_by))}`:''}</p>
+    <div class="ss-form-acts">
+      <button type="button" class="btn-primary" data-on-click="${_on("_vmSave",id)}">${esc(t('saveBtn'))}</button>
+      <button type="button" class="btn-secondary" data-on-click="${_on("_vmCert",id)}">${esc(t('zvCert'))}</button>
+    </div>
+    <h3 class="vm-h">${esc(t('zvHoursUnit'))}: ${esc(_vmH(h))}${ms.next?` <span class="am-meta">${esc(t('zvNextMilestone').replace('{0}',String(ms.next)))}</span>`:''}</h3>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursOpen",id)}">${esc(t('zvAddHours'))}</button>
+    <div class="vm-led">${led.map(x=>_vmLedRow(x,id)).join('')||`<div class="am-meta">${esc(t('zvNoHours'))}</div>`}</div>
+    <h3 class="vm-h">${esc(t('zvTabSessions'))}</h3>
+    <div class="vm-led">${sh.map(x=>`<div class="vm-res-row"><span>${esc(_vmSessLabel(x.session_id))}${x.role?` · ${esc(x.role)}`:''}</span><span class="am-meta">${esc(_vmShiftLabel(x.status))}${x.clock_in?` · ${esc(_vmHm(x.clock_in))}${x.clock_out?`–${esc(_vmHm(x.clock_out))}`:''}`:''}</span></div>`).join('')||`<div class="am-meta">${esc(t('zvNoSessions'))}</div>`}</div>`,true);
+}
+function _vmLedRow(x,cid){
+  const off=!!x.voided_at;
+  return`<div class="vm-res-row${off?' vm-off':''}"><span><b dir="ltr">${(+x.hours>0?'+':'')+esc(_vmH(x.hours))}</b> · ${esc(shortDate(x.worked_on))}${x.session_id?` · ${esc(_vmSessLabel(x.session_id))}`:''}${x.note?` · <bdi>${esc(x.note)}</bdi>`:''}<span class="am-meta">${x.added_by?` · ${esc(x.added_by)}`:''}${off?` · ${esc(t('zvVoidedBy').replace('{0}',x.voided_by||''))}`:''}</span></span>${off?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursVoid",x.id,cid||'')}">${esc(t('zvVoid'))}</button>`}</div>`;
+}
+function _vmShiftLabel(st){return t({interested:'zvShInterested',accepted:'zvShAccepted',declined:'zvShDeclined',withdrawn:'zvShWithdrawn',blocked:'zvShBlocked',no_show:'zvShNoShow',done:'zvShDone'}[st]||'zvShInterested');}
+async function _vmSave(id){
+  const g=x=>document.getElementById(x)?.value||'';
+  const exp=g('vm-exp');
+  const ok=await _vmRpc('staff_volunteer_save',{p_customer:id,p_status:g('vm-st'),p_tags:g('vm-tags').split(',').map(x=>x.trim()).filter(Boolean),p_notes:g('vm-notes'),p_shirt:g('vm-shirt'),p_expires:exp||null,p_clear_expiry:!exp,p_auto_accept:!!document.getElementById('vm-auto')?.checked},'zvSaved');
+  if(ok){closeConfirm();renderVolunteers();}
+}
+// The certificate: both languages on one page, as the hours stand today.
+function _vmCert(id){
+  const c=_vmCust(id),cfg=_vmCfg(),rows=(_vm().hours||[]).filter(h=>h.customer_id===id&&!h.voided_at),h=_vmH(_vmHoursOf(id)),d=rows.map(x=>x.worked_on).filter(Boolean).sort();
+  const n=new Set(rows.map(x=>x.session_id).filter(Boolean)).size,today=_ksaYmd(Date.now());
+  const en={t:'Certificate of Volunteering',b:`MicroMobility thanks ${c.name||''} for giving ${h} hours as a volunteer`,p:d.length?`between ${d[0]} and ${d[d.length-1]}`:'',s:n?`across ${n} ${n===1?'session':'sessions'}.`:'.'};
+  const ar={t:'شهادة تطوع',b:`تشكر مايكروموبيليتي ${c.name||''} على التطوع لمدة ${h} ساعة`,p:d.length?`في الفترة من ${d[0]} إلى ${d[d.length-1]}`:'',s:n?`في ${n} من الفعاليات.`:'.'};
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>${esc(en.t)}</title><link href="${location.origin}/report.css?v=${REPORT_CSS_V}" rel="stylesheet"></head><body class="vc-page">
+    <button class="rep-print vc-print">${esc(t('repPrintNow'))}</button>
+    <div class="vc-sheet">
+      <div class="vc-brand">MicroMobility</div>
+      <div class="vc-cols">
+        <section dir="ltr"><h1>${esc(en.t)}</h1><p>${esc(en.b)} ${esc(en.p)} ${esc(en.s)}</p></section>
+        <section dir="rtl" lang="ar"><h1>${esc(ar.t)}</h1><p>${esc(ar.b)} ${esc(ar.p)} ${esc(ar.s)}</p></section>
+      </div>
+      <div class="vc-hours"><b>${esc(h)}</b><span>Hours · ساعة</span></div>
+      <div class="vc-foot"><span>${esc(today)}</span><span class="vc-sign">${esc(cfg.cert_signer||'')}${cfg.cert_title?`<br>${esc(cfg.cert_title)}`:''}</span></div>
+    </div></body></html>`;
+  if(!_openReport(html,820,640))toast(t('errConnection'),'error');
+}
+// ─ sessions ─
+function _vmSessRows(){
+  const W=_vm(),today=_ksaYmd(Date.now()),map=new Map((W.sess||[]).map(w=>[w.session_id,w]));
+  const all=(S.sessions||[]).filter(s=>!s.cancelled_at);
+  const next=all.filter(s=>String(s.session_date||'')>=today).sort((a,b)=>String(a.session_date).localeCompare(String(b.session_date)));
+  const past=all.filter(s=>String(s.session_date||'')<today&&map.has(s.id)).sort((a,b)=>String(b.session_date).localeCompare(String(a.session_date)));
+  const on=all.filter(s=>_vmSwitchOn(map.get(s.id))).sort((a,b)=>String(a.session_date).localeCompare(String(b.session_date)));
+  return{map,rows:W.sv==='on'?on:W.sv==='past'?past:next};
+}
+function _vmSessionsHtml(){
+  const W=_vm(),{map,rows}=_vmSessRows();
+  const pill=(k,l)=>`<button type="button" class="filter-pill${W.sv===k?' active':''}" aria-pressed="${W.sv===k}" data-on-click="${_on("_vmSessView",k)}">${esc(l)}</button>`;
+  return`<div class="form-section ws-mt0"><div class="filter-bar"><div class="filter-row">${pill('next',t('zvSessNext'))}${pill('on',t('zvSessOn'))}${pill('past',t('zvSessPast'))}</div></div>
+    <div class="vm-list">${rows.length?rows.map(s=>{
+      const w=map.get(s.id),on=_vmSwitchOn(w),shifts=(W.shifts||[]).filter(x=>x.session_id===s.id),team=shifts.filter(x=>x.status==='accepted'||x.status==='done').length,asked=shifts.filter(x=>x.status==='interested').length,duty=shifts.filter(x=>x.clock_in&&!x.clock_out).length;
+      const st=!w||!w.enabled?t('zvSwOff'):!on?t('zvSwEnded'):_vmOpenNow(w)?t('zvSwOpen').replace('{0}',_vmWhen(w.closes_at)):t('zvSwSoon').replace('{0}',_vmWhen(w.opens_at));
+      return`<div class="vm-row vm-row-s" data-sess="${esc(s.id)}">
+        <div class="vm-who"><b>${esc(_evName(s))}</b><div class="am-meta">${esc(shortDate(s.session_date||s.id))}</div></div>
+        <div class="vm-st"><span class="rr-chip ${on?'rr-yes':'rr-no'}">${esc(st)}</span></div>
+        <div class="vm-num"><b>${team}${w&&w.needed?` / ${w.needed}`:''}</b> ${esc(t('zvTeamUnit'))}${asked?`<div class="am-meta">${esc(t('zvAskedN').replace('{0}',String(asked)))}</div>`:''}${duty?`<div class="am-meta">${esc(t('zvDutyNow').replace('{0}',String(duty)))}</div>`:''}</div>
+        <div class="vm-acts"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vsOpen",s.id)}">${esc(t(w&&w.enabled?'zvSessEdit':'zvSessOnBtn'))}</button>${w?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrOpen",s.id)}">${esc(t('zvTeam'))}</button>`:''}${on?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmCopyLink",s.id)}">${esc(t('zvCopyLink'))}</button>`:''}</div>
+      </div>`;}).join(''):_emptyState(t('zvNoSess'))}</div></div>`;
+}
+function _vmCopyLink(id){
+  const url=VOL_PORTAL+(id?'/#o/'+encodeURIComponent(id):'');
+  try{navigator.clipboard.writeText(url).then(()=>toast(t('zvLinkCopied')),()=>toast(url));}catch(e){toast(url);}
+}
+function _vmSessView(k){_vm().sv=k;renderVolunteers();}
+// The switch and everything under it: the same block in the session form (_vsfMount) and here.
+function _vsfLocal(at){return at?new Date(+new Date(at)+108e5).toISOString().slice(0,16):'';}
+function _vsfIso(v){return v?v+':00+03:00':null;}
+function _vsfBlank(){const c=_vmCfg();return{sid:'',on:false,had:false,dirty:false,closes:'',opens:'',needed:c.needed||'',about:'',signup_open:true,caps:{...c.caps},hours_mode:c.hours_mode||'clock',fixed_hours:c.fixed_hours||'',roles:(c.roles||[]).join(', '),min_age:'',briefing:'',loaded:false};}
+function _vsfFromRow(w){const c=_vsfBlank();return w?{...c,on:!!w.enabled,had:true,closes:_vsfLocal(w.closes_at),opens:_vsfLocal(w.opens_at),needed:w.needed||'',about:w.about||'',signup_open:w.signup_open!==false,caps:{...c.caps,...(w.caps||{})},hours_mode:w.hours_mode||'clock',fixed_hours:w.fixed_hours||'',roles:(w.roles||[]).join(', '),min_age:w.min_age||'',briefing:w.briefing||''}:c;}
+// When a session ends, for the default cut-off: the date and end time as they stand in the form, else the row.
+function _vsfDefaultCut(F){
+  const form=F.form==='new'?[S.newSessDate,S.newSessEndTime]:F.form==='edit'?[S.editSessDate,S.editSessEndTime]:null;
+  const s=F.sid?_vmSess(F.sid):null,date=(form&&form[0])||(s&&s.session_date)||_ksaYmd(Date.now());
+  const raw=(form&&form[1])||String(((s&&parseSlots(s.bike_slots))||{})._time||'').split(/\s*[-–]\s*/)[1]||'';
+  const hm=/^\d\d:\d\d$/.test(raw)?raw:'23:00';
+  const ms=Date.parse(`${String(date).slice(0,10)}T${hm}:00+03:00`)+(Number(_vmCfg().cut_after_min)||0)*6e4;
+  return isFinite(ms)?_vsfLocal(ms):'';
+}
+function _vsfHtml(F){
+  const blood=F.sid?_isBlood(_vmSess(F.sid)):F.form==='new'&&S.newSessEvent==='blood';
+  const tick=(k,lbl)=>`<label class="vm-tick"><input type="checkbox"${F.caps[k]?' checked':''} data-on-change="${_on("_vsfCap",k,_P("checked"))}"><span>${esc(lbl)}</span></label>`;
+  return`<label class="vm-switch"><input type="checkbox" class="web-toggle" id="vsf-on"${F.on?' checked':''} data-on-change="${_on("_vsfOn",_P("checked"))}"><span><b>${esc(t('zfSwitch'))}</b><span class="am-meta vm-block">${esc(t('zfSwitchHint'))}</span></span></label>
+  ${F.on?`<div class="vm-form">
+    <label class="vm-full">${esc(t('zfCut'))}<input id="vsf-closes" type="datetime-local" required value="${esc(F.closes)}" data-on-input="${_on("_vsfSet","closes",_P("value"))}"><span class="am-meta">${esc(t('zfCutHint'))}</span></label>
+    <label>${esc(t('zfOpens'))}<input id="vsf-opens" type="datetime-local" value="${esc(F.opens)}" data-on-input="${_on("_vsfSet","opens",_P("value"))}"><span class="am-meta">${esc(t('zfOpensHint'))}</span></label>
+    <label>${esc(t('zfNeeded'))}<input id="vsf-needed" type="number" min="1" max="1000" value="${esc(String(F.needed))}" data-on-input="${_on("_vsfSet","needed",_P("value"))}"></label>
+    <label>${esc(t('zfMinAge'))}<input id="vsf-age" type="number" min="1" max="99" value="${esc(String(F.min_age))}" data-on-input="${_on("_vsfSet","min_age",_P("value"))}"></label>
+    <label>${esc(t('zfHours'))}<select id="vsf-hours" data-on-change="${_on("_vsfHoursMode",_P("value"))}"><option value="clock"${F.hours_mode==='clock'?' selected':''}>${esc(t('zfHoursClock'))}</option><option value="fixed"${F.hours_mode==='fixed'?' selected':''}>${esc(t('zfHoursFixed'))}</option><option value="none"${F.hours_mode==='none'?' selected':''}>${esc(t('zfHoursNone'))}</option></select></label>
+    ${F.hours_mode==='fixed'?`<label>${esc(t('zfFixed'))}<input id="vsf-fixed" type="number" step="0.25" min="0.25" max="24" value="${esc(String(F.fixed_hours))}" data-on-input="${_on("_vsfSet","fixed_hours",_P("value"))}"></label>`:''}
+    <label class="vm-full">${esc(t('zfRoles'))}<input id="vsf-roles" type="text" maxlength="400" value="${esc(F.roles)}" data-on-input="${_on("_vsfSet","roles",_P("value"))}"></label>
+    <label class="vm-full">${esc(t('zfAbout'))}<textarea id="vsf-about" rows="3" maxlength="2000" data-on-input="${_on("_vsfSet","about",_P("value"))}">${esc(F.about)}</textarea><span class="am-meta">${esc(t('zfAboutHint'))}</span></label>
+    <label class="vm-full">${esc(t('zfBriefing'))}<textarea id="vsf-brief" rows="3" maxlength="2000" data-on-input="${_on("_vsfSet","briefing",_P("value"))}">${esc(F.briefing)}</textarea></label>
+  </div>
+  <div class="vm-ticks"><span class="vm-ticks-h">${esc(t('zfCan'))}</span>
+    ${tick('checkin',t('zfCanCheckin'))}${tick('undo',t('zfCanUndo'))}${blood?tick('donated',t('zfCanDonated')):''}${tick('list',t('zfCanList'))}${tick('counts',t('zfCanCounts'))}
+    <label class="vm-tick"><input type="checkbox"${F.signup_open?' checked':''} data-on-change="${_on("_vsfSignup",_P("checked"))}"><span>${esc(t('zfSignup'))}</span></label>
+  </div>`:''}`;
+}
+function _vsfPaint(){const h=document.getElementById('vsf-host'),F=S._vsf;if(h&&F)h.innerHTML=_vsfHtml(F);}
+function _vsfSet(k,v){const F=S._vsf;if(!F)return;F[k]=v;F.dirty=true;}
+function _vsfCap(k,v){const F=S._vsf;if(!F)return;F.caps[k]=!!v;F.dirty=true;}
+function _vsfSignup(v){const F=S._vsf;if(!F)return;F.signup_open=!!v;F.dirty=true;}
+function _vsfOn(v){const F=S._vsf;if(!F)return;F.on=!!v;F.dirty=true;if(F.on&&!F.closes)F.closes=_vsfDefaultCut(F);_vsfPaint();}
+function _vsfHoursMode(v){const F=S._vsf;if(!F)return;F.hours_mode=v;F.dirty=true;_vsfPaint();}
+// The session forms ask for this block once they have drawn: an empty #vsf-host, filled from here. The form's other
+// repaints keep what was typed (S._vsf). sid '' is a new session.
+async function _vsfMount(sid,form){
+  const W=_vm();
+  if(!W.rows&&!W.missing)await _vmLoad();
+  if(W.missing){S._vsf=null;return;}
+  if(!S._vsf||S._vsf.sid!==(sid||'')||S._vsf.form!==form){
+    const w=sid?(W.sess||[]).find(x=>x.session_id===sid):null;
+    S._vsf={..._vsfFromRow(w),sid:sid||'',form};
+  }
+  _vsfPaint();
+}
+function _vsfForget(){S._vsf=null;}
+// Saved after the session itself: the session id may be new, and a repeat makes several, each cut-off moved by its date.
+async function _vsfSave(sid,form){
+  const F=S._vsf;if(!F||F.form!==form||!F.dirty||(!F.on&&!F.had))return true;
+  const base=form==='new'?String(S._vsfBase||S.newSessDate||''):'',d=form==='new'&&base?(Date.parse(String(_vmSess(sid)?.session_date||sid).slice(0,10))-Date.parse(base.slice(0,10))):0;
+  const shift=v=>v?new Date(Date.parse(v+':00+03:00')+(d||0)).toISOString():null;
+  const num=v=>v===''||v==null?null:Number(v);
+  const r=await _vmRpc('staff_volunteer_session_save',{p_session:sid,p_enabled:F.on,p_closes:shift(F.closes),p_opens:shift(F.opens),p_needed:num(F.needed),p_about:F.about||null,p_briefing:F.briefing||null,p_signup_open:!!F.signup_open,p_caps:F.caps,p_hours_mode:F.hours_mode,p_fixed_hours:F.hours_mode==='fixed'?num(F.fixed_hours):null,p_roles:String(F.roles||'').split(',').map(x=>x.trim()).filter(Boolean),p_min_age:num(F.min_age)});
+  return !!r;
+}
+function _vsOpen(sid){
+  const W=_vm(),w=(W.sess||[]).find(x=>x.session_id===sid);
+  S._vsf={..._vsfFromRow(w),sid,form:'dlg'};
+  if(!w){S._vsf.on=true;S._vsf.dirty=true;S._vsf.closes=_vsfDefaultCut(S._vsf);}
+  _vmDlg(_vmSessLabel(sid),`<div id="vsf-host">${_vsfHtml(S._vsf)}</div><div class="ss-form-acts"><button type="button" class="btn-primary" data-on-click="${_on("_vsDlgSave",sid)}">${esc(t('saveBtn'))}</button></div>`,true);
+}
+async function _vsDlgSave(sid){
+  const F=S._vsf;if(F&&F.on&&!F.closes){toast(t('zfNeedCut'),'error');return;}
+  if(F&&F.on&&F.opens&&F.opens>=F.closes){toast(t('zfCutBeforeOpen'),'error');return;}
+  if(await _vsfSave(sid,'dlg')){toast(t('zvSaved'));S._vsf=null;closeConfirm();renderVolunteers();}
+}
+// A session's team: who, in what role, the clock, and their hours.
+function _vrSuggest(w,x){
+  if(!w||!['accepted','done'].includes(x.status))return'';
+  if(w.hours_mode==='none')return'';
+  if(w.hours_mode==='fixed')return w.fixed_hours?String(w.fixed_hours):'';
+  if(!x.clock_in)return'';
+  const end=Math.min(x.clock_out?+new Date(x.clock_out):Date.now(),+new Date(w.closes_at)); // still on shift: until now
+  const h=(end-+new Date(x.clock_in))/36e5;
+  return h>0?String(Math.max(.25,Math.round(h*4)/4)):'';
+}
+function _vrOpen(sid){
+  const W=_vm(),w=(W.sess||[]).find(x=>x.session_id===sid),rows=(W.shifts||[]).filter(x=>x.session_id===sid).sort((a,b)=>_vmName(a.customer_id).localeCompare(_vmName(b.customer_id)));
+  const awarded=new Set((W.hours||[]).filter(h=>h.session_id===sid&&h.source==='session'&&!h.voided_at).map(h=>h.customer_id));
+  const avail=(W.rows||[]).filter(v=>v.status==='active'&&!rows.some(x=>x.customer_id===v.customer_id)).sort((a,b)=>_vmName(a.customer_id).localeCompare(_vmName(b.customer_id)));
+  const roles=(w&&w.roles)||[],asked=rows.filter(x=>x.status==='interested').length;
+  const stSel=x=>`<select class="filter-select" aria-label="${esc(t('zvFStatus'))} · ${esc(_vmName(x.customer_id))}" data-on-change="${_on("_vrStatus",sid,x.customer_id,_P("value"))}">${['interested','accepted','declined','withdrawn','no_show','done','blocked'].map(s=>`<option value="${s}"${x.status===s?' selected':''}>${esc(_vmShiftLabel(s))}</option>`).join('')}</select>`;
+  const roleEl=x=>roles.length?`<select class="filter-select" aria-label="${esc(t('zvRole'))} · ${esc(_vmName(x.customer_id))}" data-on-change="${_on("_vrRole",sid,x.customer_id,_P("value"))}"><option value="">${esc(t('zvRole'))}</option>${roles.map(r=>`<option value="${esc(r)}"${x.role===r?' selected':''}>${esc(r)}</option>`).join('')}</select>`:'';
+  _vmDlg(_vmSessLabel(sid),`<div class="filter-row vm-bulk">
+      ${asked?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vrAcceptAll",sid)}">${esc(t('zvAcceptAll').replace('{0}',String(asked)))}</button>`:''}
+      <select id="vr-add" class="filter-select" aria-label="${esc(t('zvAddToTeam'))}"><option value="">${esc(t('zvAddToTeam'))}</option>${avail.map(v=>`<option value="${esc(v.customer_id)}">${esc(_vmName(v.customer_id))}</option>`).join('')}</select>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrAdd",sid)}">${esc(t('zvAddBtn'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrAddAll",sid)}">${esc(t('zvAddAll'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmCopyLink",sid)}">${esc(t('zvCopyLink'))}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vrExport",sid)}">${esc(t('zvExport'))}</button>
+    </div>
+    <div class="vr-list">${rows.length?rows.map(x=>{const wa=_vmWa(x.customer_id,sid),got=awarded.has(x.customer_id);return`<div class="vr-row" data-cust="${esc(x.customer_id)}">
+      <div class="vm-who"><b>${esc(_vmName(x.customer_id))}</b>${wa?` <a class="am-meta" href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''}${x.pref_role?`<div class="am-meta">${esc(t('zvPrefRole'))}: ${esc(x.pref_role)}</div>`:''}${x.message?`<div class="am-meta"><bdi>${esc(x.message)}</bdi></div>`:''}</div>
+      <div class="vr-sel">${stSel(x)}${roleEl(x)}</div>
+      <div class="vr-clock"><label>${esc(t('zvClockIn'))}<input type="datetime-local" value="${esc(_vsfLocal(x.clock_in))}" data-on-change="${_on("_vrClock",sid,x.customer_id,'in',_P("value"))}"></label><label>${esc(t('zvClockOut'))}<input type="datetime-local" value="${esc(_vsfLocal(x.clock_out))}" data-on-change="${_on("_vrClock",sid,x.customer_id,'out',_P("value"))}"></label></div>
+      <div class="vr-h">${got?`<span class="rr-chip rr-yes">${esc(t('zvAwarded'))}</span>`:['accepted','done'].includes(x.status)?`<label>${esc(t('zvHoursUnit'))}<input class="vr-hours" type="number" step="0.25" min="0" max="24" value="${esc(_vrSuggest(w,x))}" data-cust="${esc(x.customer_id)}"></label>`:''}</div>
+    </div>`;}).join(''):_emptyState(t('zvNoTeam'))}</div>
+    ${rows.length?`<div class="ss-form-acts"><button type="button" class="btn-primary" data-on-click="${_on("_vrAward",sid)}">${esc(t('zvAward'))}</button></div><p class="am-meta">${esc(t('zvAwardHint'))}</p>`:''}`,true);
+}
+async function _vrDecide(sid,ids,st,done){
+  const r=await _vmRpc('staff_volunteer_decide',{p_session:sid,p_customers:ids,p_status:st});
+  if(r&&r.skipped)toast(t('zvSkipped').replace('{0}',String(r.skipped)),'error');
+  if(r)done();
+}
+async function _vrStatus(sid,cid,st){
+  if(st==='accepted'||st==='declined'){await _vrDecide(sid,[cid],st,()=>_vrOpen(sid));return;}
+  if(await _vmRpc('staff_volunteer_shift_save',{p_session:sid,p_customer:cid,p_status:st}))_vrOpen(sid);
+}
+function _vrAcceptAll(sid){const ids=(_vm().shifts||[]).filter(x=>x.session_id===sid&&x.status==='interested').map(x=>x.customer_id);if(ids.length)_vrDecide(sid,ids,'accepted',()=>S.volView==='interested'?(closeConfirm(),renderVolunteers()):_vrOpen(sid));}
+async function _vrRole(sid,cid,role){const x=(_vm().shifts||[]).find(s=>s.session_id===sid&&s.customer_id===cid);if(await _vmRpc('staff_volunteer_shift_save',{p_session:sid,p_customer:cid,p_status:(x&&x.status)||'accepted',p_role:role||''}))_vrOpen(sid);}
+async function _vrClock(sid,cid,which,v){
+  const x=(_vm().shifts||[]).find(s=>s.session_id===sid&&s.customer_id===cid);if(!x)return;
+  const iso=_vsfIso(v),a=which==='in'?iso:x.clock_in,b=which==='out'?iso:x.clock_out;
+  await _vmRpc('staff_volunteer_shift_times',{p_session:sid,p_customer:cid,p_in:a,p_out:b});_vrOpen(sid);
+}
+function _vrAdd(sid){const v=document.getElementById('vr-add')?.value;if(v)_vrDecide(sid,[v],'accepted',()=>_vrOpen(sid));}
+function _vrAddAll(sid){
+  const W=_vm(),ids=(W.rows||[]).filter(v=>v.status==='active'&&!(W.shifts||[]).some(x=>x.session_id===sid&&x.customer_id===v.customer_id)).map(v=>v.customer_id);
+  if(ids.length)_vrDecide(sid,ids,'accepted',()=>_vrOpen(sid));
+}
+async function _vrAward(sid){
+  const rows=[...document.querySelectorAll('#confirm-modal .vr-hours')].map(i=>({customer_id:i.dataset.cust,hours:Number(i.value)})).filter(x=>x.hours>0);
+  if(!rows.length){toast(t('zvAwardNone'),'error');return;}
+  const r=await _vmRpc('staff_volunteer_award',{p_session:sid,p_rows:rows});
+  if(r){toast(t('zvAwardDone').replace('{0}',String(r.added||0)));_vrOpen(sid);}
+}
+function _vrExport(sid){
+  const W=_vm(),rows=(W.shifts||[]).filter(x=>x.session_id===sid);
+  _downloadCsv('volunteer-team.csv',[[t('nameLabel'),t('phoneNum'),t('zvFStatus'),t('zvRole'),t('zvClockIn'),t('zvClockOut')],...rows.map(x=>{const c=_vmCust(x.customer_id);return[c.name||'',c.phone||'',_vmShiftLabel(x.status),x.role||'',_vsfLocal(x.clock_in).replace('T',' '),_vsfLocal(x.clock_out).replace('T',' ')];})],'volunteer team',rows.length);
+}
+// ─ hours ─
+function _vmHoursRows(){
+  const W=_vm(),f=W.hf,q=f.q.trim().toLowerCase();
+  return(W.hours||[]).filter(h=>{
+    if(f.from&&String(h.worked_on)<f.from)return false;
+    if(f.to&&String(h.worked_on)>f.to)return false;
+    if(f.src&&h.source!==f.src)return false;
+    if(q&&!_vmName(h.customer_id).toLowerCase().includes(q)&&!_vmSessLabel(h.session_id).toLowerCase().includes(q)&&!String(h.note||'').toLowerCase().includes(q))return false;
+    return true;
+  });
+}
+function _vmHoursHtml(){
+  const W=_vm(),f=W.hf,rows=_vmHoursRows(),live=rows.filter(h=>!h.voided_at),tot=live.reduce((a,h)=>a+(+h.hours||0),0);
+  return`<div class="stats-row flt-mb20">${_vmFig(_vmH(tot),t('zvFigHours'))}${_vmFig(new Set(live.map(h=>h.customer_id)).size,t('zvFigPeople'))}${_vmFig(live.length,t('zvFigEntries'))}</div>
+  <div class="form-section ws-mt0"><div class="filter-bar"><div class="filter-row">
+    <div class="${_srchCls('vmh',f.q)}" data-srch="vmh">${_artIcon('search',13)}<input class="search-input" id="vmh-q" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(f.q)}" data-on-change="${_on("_vmHF","q",_P("value"))}">${_srchBtn()}</div>
+    <label class="vm-inl">${esc(t('zvFrom'))}<input type="date" value="${esc(f.from)}" data-on-change="${_on("_vmHF","from",_P("value"))}"></label>
+    <label class="vm-inl">${esc(t('zvTo'))}<input type="date" value="${esc(f.to)}" data-on-change="${_on("_vmHF","to",_P("value"))}"></label>
+    <select class="filter-select" aria-label="${esc(t('zvSource'))}" data-on-change="${_on("_vmHF","src",_P("value"))}"><option value="">${esc(t('zvSourceAny'))}</option><option value="session"${f.src==='session'?' selected':''}>${esc(t('zvSourceSession'))}</option><option value="staff"${f.src==='staff'?' selected':''}>${esc(t('zvSourceStaff'))}</option></select>
+    <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vmHoursPick")}">${esc(t('zvAddHours'))}</button>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursExport")}">${esc(t('zvExport'))}</button>
+  </div></div>
+  <div class="vm-led">${rows.slice(0,300).map(x=>`<div class="vm-hline"><b>${esc(_vmName(x.customer_id))}</b>${_vmLedRow(x,'')}</div>`).join('')||_emptyState(t('zvNoHours'))}</div></div>`;
+}
+function _vmHF(k,v){_vm().hf[k]=String(v||'');renderVolunteers();}
+function _vmHoursPick(){_vmDlg(t('zvAddHours'),`<input id="vmp-q" class="vm-in" type="text" autocomplete="off" aria-label="${esc(t('zvAddSearch'))}" placeholder="${esc(t('zvAddSearch'))}" data-on-input="${_on("_vmHoursPickQ",_P("value"))}"><div id="vmp-res" class="vm-res"></div>`);setTimeout(()=>document.getElementById('vmp-q')?.focus(),40);}
+function _vmHoursPickQ(q){const h=document.getElementById('vmp-res');if(!h)return;const rows=_vmFindCusts(q);h.innerHTML=rows.map(c=>`<div class="vm-res-row"><span class="vm-who"><b>${esc(c.name||'')}</b><span class="am-meta"> <bdi>${esc(c.phone||c.email||'')}</bdi></span></span><button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vmHoursOpen",c.id)}">${esc(t('zvPick'))}</button></div>`).join('')||(String(q||'').trim().length>=2?`<div class="am-meta">${esc(t('zvAddNone'))}</div>`:'');}
+function _vmHoursExport(){
+  const rows=_vmHoursRows();
+  _downloadCsv('volunteer-hours.csv',[[t('nameLabel'),t('phoneNum'),t('zvHoursUnit'),t('zvHoursOn'),t('zvHoursSession'),t('zvHoursNote'),t('zvSource'),t('zvAddedBy'),t('zvVoid')],...rows.map(h=>{const c=_vmCust(h.customer_id);return[c.name||'',c.phone||'',+h.hours,h.worked_on,h.session_id?_vmSessLabel(h.session_id):'',h.note||'',h.source,h.added_by||'',h.voided_at?(h.voided_by||'x'):''];})],'volunteer hours',rows.length);
+}
+// ─ who has registered interest, by opportunity ─
+function _vmInterestHtml(){
+  const by=new Map();_vmInterested().forEach(x=>{if(!by.has(x.session_id))by.set(x.session_id,[]);by.get(x.session_id).push(x);});
+  const ss=[...by.keys()].sort((a,b)=>String(_vmSess(a)?.session_date||a).localeCompare(String(_vmSess(b)?.session_date||b)));
+  return`<div class="form-section ws-mt0">${ss.length?ss.map(id=>{
+    const L=by.get(id).slice().sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at))),w=(_vm().sess||[]).find(x=>x.session_id===id),team=(_vm().shifts||[]).filter(x=>x.session_id===id&&(x.status==='accepted'||x.status==='done')).length;
+    return`<section class="vm-group" data-sess="${esc(id)}"><div class="vm-group-h"><h3 class="vm-h">${esc(_vmSessLabel(id))} <span class="am-meta">${esc(t('zvTeamUnit'))}: ${team}${w&&w.needed?` / ${w.needed}`:''}</span></h3>
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vrAcceptAll",id)}">${esc(t('zvAcceptAll').replace('{0}',String(L.length)))}</button></div>
+      ${L.map(x=>{const c=_vmCust(x.customer_id),wa=_vmWa(x.customer_id,id);return`<div class="vm-row vm-row-a" data-cust="${esc(x.customer_id)}"><div class="vm-who"><b>${esc(c.name||x.customer_id)}</b><div class="am-meta"><bdi>${c.phone?_pii('phone',c.phone,x.customer_id):''}</bdi>${wa?` · <a href="${esc(wa)}" target="_blank" rel="noopener noreferrer">WhatsApp</a>`:''} · ${esc(_bdgDay(x.created_at))}</div>${x.pref_role?`<div class="am-meta">${esc(t('zvPrefRole'))}: ${esc(x.pref_role)}</div>`:''}${x.message?`<div class="am-meta"><bdi>${esc(x.message)}</bdi></div>`:''}</div>
+        <div class="vm-acts"><button type="button" class="btn-sm btn-primary" data-on-click="${_on("_vmDecide",id,x.customer_id,'accepted')}">${esc(t('zvAccept'))}</button><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmDecide",id,x.customer_id,'declined')}">${esc(t('zvDecline'))}</button></div></div>`;}).join('')}</section>`;}).join(''):_emptyState(t('zvNoInterest'))}</div>`;
+}
+function _vmDecide(sid,cid,st){_vrDecide(sid,[cid],st,()=>renderVolunteers());}
+// ─ activity ─
+const VM_ACTS=['interest','withdraw','agree','enter','scan','search','list','checkin','uncheckin','donated','undonated','clock_in','clock_out'];
+function _vmActLabel(a){return t({enter:'zvActEnter',scan:'zvActScan',search:'zvActSearch',list:'zvActList',checkin:'zvActCheckin',uncheckin:'zvActUncheckin',donated:'zvActDonated',undonated:'zvActUndonated',clock_in:'zvActClockIn',clock_out:'zvActClockOut',agree:'zvActAgree',interest:'zvActInterest',withdraw:'zvActWithdraw'}[a]||'zvActEnter');}
+function _vmLogRows(){
+  const W=_vm(),f=W.lf,q=f.q.trim().toLowerCase();
+  return(W.log||[]).filter(l=>(!f.act||l.action===f.act)&&(!f.sess||l.session_id===f.sess)&&(!q||_vmName(l.customer_id).toLowerCase().includes(q)));
+}
+function _vmEntryName(id){if(!id)return'';try{const e=_qGet(id);return e?(e.name||''):'';}catch(_){return'';}}
+function _vmActivityHtml(){
+  const W=_vm(),f=W.lf;
+  if(!W.log){_vmLogLoad();return`<div class="form-section ws-mt0">${skeletonList()}</div>`;}
+  const rows=_vmLogRows(),ss=[...new Set((W.log||[]).map(l=>l.session_id).filter(Boolean))];
+  return`<div class="form-section ws-mt0"><div class="filter-bar"><div class="filter-row">
+    <div class="${_srchCls('vml',f.q)}" data-srch="vml">${_artIcon('search',13)}<input class="search-input" id="vml-q" aria-label="${esc(t('zvSearch'))}" placeholder="${esc(t('zvSearch'))}" value="${esc(f.q)}" data-on-change="${_on("_vmLF","q",_P("value"))}">${_srchBtn()}</div>
+    <select class="filter-select" aria-label="${esc(t('zvFAction'))}" data-on-change="${_on("_vmLF","act",_P("value"))}"><option value="">${esc(t('zvFActionAny'))}</option>${VM_ACTS.map(a=>`<option value="${a}"${f.act===a?' selected':''}>${esc(_vmActLabel(a))}</option>`).join('')}</select>
+    <select class="filter-select" aria-label="${esc(t('zvHoursSession'))}" data-on-change="${_on("_vmLF","sess",_P("value"))}"><option value="">${esc(t('zvFSessAny'))}</option>${ss.map(s=>`<option value="${esc(s)}"${f.sess===s?' selected':''}>${esc(_vmSessLabel(s))}</option>`).join('')}</select>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmLogRefresh")}">${esc(t('zvRefresh'))}</button>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmLogExport")}">${esc(t('zvExport'))}</button>
+  </div></div>
+  <div class="vm-led">${rows.slice(0,400).map(l=>`<div class="vm-res-row"><span><b>${esc(_vmName(l.customer_id))}</b> · ${esc(_vmActLabel(l.action))}${l.entry_id&&_vmEntryName(l.entry_id)?` · ${esc(_vmEntryName(l.entry_id))}`:''}${l.session_id?`<span class="am-meta"> · ${esc(_vmSessLabel(l.session_id))}</span>`:''}</span><span class="am-meta">${esc(_vmWhen(l.at))}</span></div>`).join('')||_emptyState(t('zvNoLog'))}</div></div>`;
+}
+function _vmLF(k,v){_vm().lf[k]=String(v||'');renderVolunteers();}
+function _vmLogRefresh(){_vm().log=null;renderVolunteers();}
+function _vmLogExport(){
+  const rows=_vmLogRows();
+  _downloadCsv('volunteer-activity.csv',[[t('nameLabel'),t('zvFAction'),t('zvHoursSession'),t('zvBooking'),t('zvWhen')],...rows.map(l=>[_vmName(l.customer_id),_vmActLabel(l.action),l.session_id?_vmSessLabel(l.session_id):'',_vmEntryName(l.entry_id),_vsfLocal(l.at).replace('T',' ')])],'volunteer activity',rows.length);
+}
+// ─ settings ─
+function _vmSettingsHtml(){
+  const c=_vmCfg(),W=_vm(),agreed=(W.rows||[]).filter(v=>v.status==='active'&&_vmAgreed(v)).length,act=(W.rows||[]).filter(v=>v.status==='active').length;
+  const tick=(k,lbl)=>`<label class="vm-tick"><input type="checkbox"${c.caps[k]?' checked':''} data-on-change="${_on("_vmCfgCap",k,_P("checked"))}"><span>${esc(lbl)}</span></label>`;
+  const inp=(k,lbl,type,val,extra)=>`<label>${esc(lbl)}<input type="${type}" value="${esc(String(val==null?'':val))}"${extra||''} data-on-change="${_on("_vmCfgSet",k,_P("value"))}"></label>`;
+  return`<div class="form-section ws-mt0">
+    <h3 class="vm-h">${esc(t('zvCfgPortal'))}</h3>
+    <p class="am-meta vm-mb"><bdi>${esc(VOL_PORTAL)}</bdi></p>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmCopyLink",'')}">${esc(t('zvCopyLink'))}</button>
+    <label class="vm-switch"><input type="checkbox" class="web-toggle"${c.promote?' checked':''} data-on-change="${_on("_vmCfgSet","promote",_P("checked"))}"><span><b>${esc(t('zvPromote'))}</b><span class="am-meta vm-block">${esc(t('zvPromoteHint'))}</span></span></label>
+    <h3 class="vm-h">${esc(t('zvCfgAgree'))}</h3>
+    <p class="am-meta vm-mb">${esc(t('zvCfgAgreeStat').replace('{0}',String(agreed)).replace('{1}',String(act)))}</p>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmAskAgain")}">${esc(t('zvCfgAgreeAgain'))}</button>
+    <h3 class="vm-h">${esc(t('zvCfgDefaults'))}</h3><p class="am-meta">${esc(t('zvCfgDefaultsHint'))}</p>
+    <div class="vm-form">
+      ${inp('cut_after_min',t('zvCfgCutAfter'),'number',c.cut_after_min,' min="0" max="1440"')}
+      ${inp('needed',t('zfNeeded'),'number',c.needed,' min="1" max="1000"')}
+      <label>${esc(t('zfHours'))}<select data-on-change="${_on("_vmCfgSet","hours_mode",_P("value"))}"><option value="clock"${c.hours_mode==='clock'?' selected':''}>${esc(t('zfHoursClock'))}</option><option value="fixed"${c.hours_mode==='fixed'?' selected':''}>${esc(t('zfHoursFixed'))}</option><option value="none"${c.hours_mode==='none'?' selected':''}>${esc(t('zfHoursNone'))}</option></select></label>
+      ${inp('fixed_hours',t('zfFixed'),'number',c.fixed_hours,' step="0.25" min="0.25" max="24"')}
+    </div>
+    <div class="vm-ticks"><span class="vm-ticks-h">${esc(t('zfCan'))}</span>${tick('checkin',t('zfCanCheckin'))}${tick('undo',t('zfCanUndo'))}${tick('donated',t('zfCanDonated'))}${tick('list',t('zfCanList'))}${tick('counts',t('zfCanCounts'))}</div>
+    <h3 class="vm-h">${esc(t('zvCfgLists'))}</h3>
+    <div class="vm-form">
+      <label class="vm-full">${esc(t('zfRoles'))}<input type="text" maxlength="400" value="${esc((c.roles||[]).join(', '))}" data-on-change="${_on("_vmCfgList","roles",_P("value"))}"></label>
+      <label class="vm-full">${esc(t('zvTags'))}<input type="text" maxlength="400" value="${esc((c.tags||[]).join(', '))}" data-on-change="${_on("_vmCfgList","tags",_P("value"))}"></label>
+      <label class="vm-full">${esc(t('zvCfgMilestones'))}<input type="text" maxlength="80" value="${esc((c.milestones||[]).join(', '))}" data-on-change="${_on("_vmCfgList","milestones",_P("value"))}"></label>
+    </div>
+    <h3 class="vm-h">${esc(t('zvCert'))}</h3>
+    <div class="vm-form">
+      <label>${esc(t('zvCfgSigner'))}<input type="text" maxlength="60" value="${esc(c.cert_signer||'')}" data-on-change="${_on("_vmCfgSet","cert_signer",_P("value"))}"></label>
+      <label>${esc(t('zvCfgSignerTitle'))}<input type="text" maxlength="60" value="${esc(c.cert_title||'')}" data-on-change="${_on("_vmCfgSet","cert_title",_P("value"))}"></label>
+    </div>
+    <h3 class="vm-h">WhatsApp</h3><p class="am-meta">${esc(t('zvCfgWaHint'))}</p>
+    <div class="vm-form"><label class="vm-full">${esc(t('zvCfgWa'))}<textarea rows="4" maxlength="600" data-on-change="${_on("_vmCfgSet","wa_tpl",_P("value"))}">${esc(c.wa_tpl||t('zvWaDefault'))}</textarea></label></div>
+  </div>`;
+}
+async function _vmCfgSave(patch){const W=_vm();W.cfg={...(W.cfg||{}),...patch};if(await _vmRpc('staff_volunteer_settings_save',{p_data:patch},'zvSaved'))renderVolunteers();}
+function _vmCfgSet(k,v){
+  const num=['cut_after_min','needed','fixed_hours'].includes(k);
+  return _vmCfgSave({[k]:num?(v===''?null:Number(v)):v});
+}
+function _vmCfgCap(k,v){return _vmCfgSave({caps:{..._vmCfg().caps,[k]:!!v}});}
+function _vmCfgList(k,v){const L=String(v||'').split(',').map(x=>x.trim()).filter(Boolean);return _vmCfgSave({[k]:k==='milestones'?L.map(Number).filter(n=>n>0):L});}
+function _vmAskAgain(){confirmDialog({title:t('zvCfgAgreeAgain'),body:t('zvCfgAgreeAgainQ'),confirmLabel:t('zvCfgAgreeAgain'),onConfirm:()=>_vmCfgSave({agreement_v:_ksaYmd(Date.now())+'-'+Date.now().toString(36)})});}
+// ─ the account editor: an account's hours, whichever section it was opened from ─
+function _cfVolMount(id){const h=document.getElementById('cf-vol-host');if(h)_cfVolPaint(id);}
+async function _cfVolPaint(id,force){
+  const h=document.getElementById('cf-vol-host');if(!h)return;
+  const W=_vm();if(!W.rows&&!W.missing)await _vmLoad();
+  if(W.err||W.missing){h.innerHTML='';return;}
+  if(force)await _vmLoad(true);
+  const hh=document.getElementById('cf-vol-host');if(!hh)return;
+  const v=(W.rows||[]).find(x=>x.customer_id===id);
+  hh.innerHTML=`<div class="form-group cmy-mt8"><label>${esc(t('zvAcctTitle'))}</label><div class="vm-acct"><span><b>${esc(_vmH(_vmHoursOf(id)))}</b> ${esc(t('zvHoursUnit'))}${v?` · ${_vmStatusChip(v.status)}`:''}</span>
+    <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmHoursInline",id)}">${esc(t('zvAddHours'))}</button>
+    ${v?'':`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_vmAcctAdd",id)}">${esc(t('zvMakeVolunteer'))}</button>`}</div><div id="cf-vol-form"></div></div>`;
+}
+function _vmHoursInline(id){const h=document.getElementById('cf-vol-form');if(h)h.innerHTML=_vmHoursForm('_vmHoursInlineSave',[id]);}
+async function _vmHoursInlineSave(id){if(await _vmRpc('staff_volunteer_hours_add',{p_customer:id,..._vmHoursVals()},'zvHoursAdded'))_cfVolPaint(id);}
+async function _vmAcctAdd(id){if(await _vmRpc('staff_volunteer_save',{p_customer:id,p_status:'active'},'zvAdded'))_cfVolPaint(id);}
 // Every running event: Run for Her and the Defe run share the runner step, number and rating.
 function _isRun(s){const k=s&&_rideKind(s);return k==='runher'||k==='defe5k';}
 // ── A session with no bike says nothing about cycling (the owner, 2026-10-18) ──
@@ -9995,7 +10601,7 @@ function _readEventLink(){
   try{
     const q=new URLSearchParams(location.search),was=q.toString();
     const _ho=q.get('handoff');
-    if(_ho==='site'||_ho==='community'||_ho==='learn'||_ho==='defe'){
+    if(_ho==='site'||_ho==='community'||_ho==='learn'||_ho==='defe'||_ho==='volunteer'){
       sessionStorage.setItem(_HANDOFF_KEY,_ho==='site'?'1':_ho);
       const mode=q.get('auth');if(mode==='signup'||mode==='forgot')S.authMode=mode;
       q.delete('handoff');q.delete('auth');
@@ -10068,6 +10674,7 @@ async function _openEventLink(){
     if(back==='community'){await _commApply();return;}
     if(back==='learn'){await _formHandoff(who,'/experiences/learn');return;}
     if(back==='defe'){await _formHandoff(who,'/defe');return;} // the Defe page's Sign in (the owner, 2026-10-17)
+    if(back==='volunteer'){await _volHandoff(who);return;} // the volunteer portal's Create account, Forgot password, Google or Apple (2026-11-05)
     if(await _handoffToSite(who))return;
   }
   let tab=null;try{tab=sessionStorage.getItem(_TABLINK_KEY);}catch(e){}
@@ -11564,6 +12171,7 @@ function setStaffTab(tab){
   else if(tab==='workshop')renderWorkshop();
   else if(tab==='messages')renderMessages();
   else if(tab==='ambassadors')renderAmbassadors();
+  else if(tab==='volunteers')renderVolunteers();
   else if(tab==='vendors')renderVendors();
   else if(tab==='team')renderTeam();
   else if(tab==='settings')renderSettings();
@@ -11654,7 +12262,7 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
@@ -11732,6 +12340,7 @@ function renderStaffTabs(){
   document.getElementById('tab-workshop')  .classList.toggle('active',S.staffTab==='workshop');
   document.getElementById('tab-messages')  .classList.toggle('active',S.staffTab==='messages');
   document.getElementById('tab-ambassadors').classList.toggle('active',S.staffTab==='ambassadors');
+  document.getElementById('tab-volunteers').classList.toggle('active',S.staffTab==='volunteers');
   document.getElementById('tab-vendors').classList.toggle('active',S.staffTab==='vendors');
   document.getElementById('tab-team').classList.toggle('active',S.staffTab==='team');
   document.getElementById('tab-settings').classList.toggle('active',S.staffTab==='settings');
@@ -14399,6 +15008,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='workshop'){const a=document.activeElement;renderWorkshop(!!(a&&a.id==='ws-search-input'));} // typing in its search: the list only
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
   else if(tab==='ambassadors'){const a=document.activeElement;renderAmbassadors(!!(a&&a.id==='amb-search-input'));}
+  else if(tab==='volunteers'){const a=document.activeElement;renderVolunteers(!!(a&&a.id==='vm-q'));}
   else if(tab==='vendors'){} // its own loader: nothing of the desk's data is on it
   else if(tab==='website'){} // its own loader and its own drafts: a repaint of the queue data has nothing for it
   else if(tab==='catalog'){} // the same: the catalogue loads itself
@@ -16877,6 +17487,7 @@ function renderAccount(){
     <div id="acc-wa-host">${_accWaHtml(cust)}</div>
     <div id="acc-em-host">${_accEmHtml(cust)}</div>
     <div id="acc-bt-host">${_accBtHtml(cust)}</div>
+    <div id="acc-vol-host">${_accVolHtml(cust)}</div>
     ${(()=>{
       // Ride news: the rider's own yes or no (_consentCheck reads it once per page life). Not shown
       // until the server answers - a switch must never show a state that is not stored - and
@@ -17261,6 +17872,35 @@ function _btLoad(cust,force){
     _accBtPaint();_bldTkTypePaint();
   },()=>{cur.busy=false;cur.err=true;cur.at=Date.now();if(S._bt===cur)_accBtPaint();});
 }
+// Volunteering on My Account (2026-11-05, migration 20261105120000): the hours every account can have, and the way to the
+// volunteer portal, handed over signed in with a one-time code. Shown only when there is something to say.
+const VOL_PORTAL='https://volunteer.micromobility.sa';
+async function _volHandoff(c,tail){
+  let code=null;try{const r=await sb.rpc('customer_handoff_create',{p_id:c.id,p_token:c.session_token});code=r&&!r.error&&typeof r.data==='string'&&/^[0-9a-f]{48}$/.test(r.data)?r.data:null;}catch(e){}
+  location.replace(VOL_PORTAL+'/'+(code?'?signin='+code:'')+(tail||''));
+}
+function _accVolLoad(cust,force){
+  const m=S._accVol;
+  if(!sb||(!force&&m&&m.id===cust.id&&(m.busy||Date.now()-(m.at||0)<60000)))return;
+  S._accVol={id:cust.id,busy:true,at:Date.now(),v:m&&m.id===cust.id?m.v:null};
+  Promise.resolve(sb.rpc('volunteer_me',{p_id:cust.id,p_token:cust.session_token})).then(({data,error})=>{
+    S._accVol={id:cust.id,busy:false,at:Date.now(),v:error?null:data};_accVolPaint();
+  },()=>{S._accVol={id:cust.id,busy:false,at:Date.now(),v:null};});
+}
+function _accVolPaint(){if(S.view!=='customer'||S.custTab!=='account')return;const h=document.getElementById('acc-vol-host'),c=S.loggedIn||getSession();if(h&&c)h.innerHTML=_accVolHtml(c);}
+function _accVolHtml(cust){
+  if(!cust||!cust.id||!cust.session_token)return'';
+  _accVolLoad(cust);
+  const m=S._accVol,v=m&&m.id===cust.id?m.v:null;if(!v)return'';
+  const h=+v.hours||0,rec=(v.record||[]).slice(0,5),join=!v.status&&v.promote&&v.open_count>0;
+  if(!h&&!v.status&&!join)return'';
+  return`<div class="form-section cu-card640" id="acc-vol"><h2 class="form-title cu-mb6">${t('accVolTitle')}</h2>
+    ${h?`<div class="cu-card-sub6"><b>${esc(t('accVolHours').replace('{0}',String(h)))}</b></div>`:join?`<div class="cu-card-sub6">${esc(t('accVolJoinHint'))}</div>`:''}
+    <button type="button" class="btn-primary" data-on-click="${_on("_accVolOpen")}">${esc(t('accVolDesk'))}</button>
+    ${rec.length?`<div class="cu-card-sub6">${esc(t('accVolRec'))}</div><ul class="acc-vol-rec">${rec.map(r=>`<li><bdi>${esc(String(r.hours))}</bdi> · ${esc(shortDate(r.on))}${r.session_id?` · ${esc(_evName(r))}`:''}</li>`).join('')}</ul>`:''}
+  </div>`;
+}
+function _accVolOpen(){const c=S.loggedIn||getSession();if(c)_volHandoff(c);}
 function _accBtHtml(cust){
   if(!cust||!cust.id||!cust.session_token)return'';
   _btLoad(cust);
@@ -17867,6 +18507,7 @@ const _ART={
   flag:'<path opacity=".35" d="M4 2.5h2.2V22H4z"/><path d="M6.2 3.5H19l-2.7 4.6L19 12.7H6.2V3.5Z"/>',
   close:'<path d="m6 4.6 6 6 6-6L19.4 6l-6 6 6 6-1.4 1.4-6-6-6 6L4.6 18l6-6-6-6L6 4.6Z"/>',
   star:'<path d="m12 2.5 2.9 5.9 6.6 1-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-1L12 2.5Z"/>',
+  hand:'<path fill-rule="evenodd" transform="translate(-11.89 -11.32) scale(1.1325)" d="M15.1 13.6a1.5 1.5 0 0 1 3 0v6.3h.8v-8.3a1.5 1.5 0 0 1 3 0v8.3h.8v-7a1.5 1.5 0 0 1 3 0v8.6l.1.1 1.1-2.2a1.55 1.55 0 0 1 2.8 1.3l-2.6 6.2a7.1 7.1 0 0 1-6.6 4.4h-.9a6.5 6.5 0 0 1-6.5-6.5v-7.8a1.5 1.5 0 0 1 3 0v3.3h.8zM20 28.73C18.51 27.18 16.28 26.25 16.28 24.33C16.28 23.15 17.21 22.28 18.26 22.28C19.01 22.28 19.63 22.66 20 23.34C20.37 22.66 20.99 22.28 21.74 22.28C22.79 22.28 23.72 23.15 23.72 24.33C23.72 26.25 21.49 27.18 20 28.73z"/>',
   share:'<path opacity=".35" d="M4 8h6v2.4H6.4v11.2h11.2V16H20v6a1.6 1.6 0 0 1-1.6 1.6H5.6A1.6 1.6 0 0 1 4 22V8Z"/><path d="M13 2h9v9h-2.4V6.1l-8.2 8.2-1.7-1.7 8.2-8.2H13V2Z"/>',
   grid:'<rect x="3" y="3" width="8" height="8" rx="1.6"/><rect opacity=".35" x="13" y="3" width="8" height="8" rx="1.6"/><rect opacity=".35" x="3" y="13" width="8" height="8" rx="1.6"/><rect x="13" y="13" width="8" height="8" rx="1.6"/>',
   rows:'<rect x="3" y="4" width="18" height="4.4" rx="1.4"/><rect opacity=".35" x="3" y="10" width="18" height="4.4" rx="1.4"/><rect x="3" y="16" width="18" height="4.4" rx="1.4"/>',
@@ -18575,7 +19216,7 @@ function _on_renderSessions_18(event,el){S.newSessMode='counts';renderSessions()
 function _on_renderSessions_19(event,el){S.newSessMode='fleet';renderSessions()}
 function _on_renderSessions_20(event,el,a0,a1){S.newSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_21(event,el){S.newSessTotal=el.value}
-function _on_renderSessions_22(event,el){S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
+function _on_renderSessions_22(event,el){S._vsf=null;S.showAddSession=false;S._nsTplId=null;S.newSessAssignedIds=[];S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_23(event,el){const was=S.editSessDate;S.editSessDate=el.value;_esRevealFollow(was)}
 function _on_renderSessions_24(event,el,a0){S.editSessStatus=a0;renderSessions()}
 function _on_renderSessions_25(event,el){S.editSessStartTime=el.value}
@@ -18593,7 +19234,7 @@ function _on_renderSessions_34(event,el){S.editSessMode='counts';renderSessions(
 function _on_renderSessions_35(event,el){S.editSessMode='fleet';renderSessions()}
 function _on_renderSessions_36(event,el,a0,a1){S.editSessTypeSizes[a0][a1]=Math.max(0,parseInt(el.value)||0);_debRender('sess',renderSessions)}
 function _on_renderSessions_37(event,el){S.editSessTotal=el.value}
-function _on_renderSessions_38(event,el){S.editSessionId=null;S.editSessGender=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
+function _on_renderSessions_38(event,el){S._vsf=null;S.editSessionId=null;S.editSessGender=null;S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};renderSessions()}
 function _on_renderSessions_40(event,el,a0){event.stopPropagation();closeOutSession(a0)}
 function _on_renderSessions_41(event,el,a0){event.stopPropagation();showCancelNight(a0)}
 function _on_renderSessions_42(event,el,a0){event.stopPropagation();toggleSession(a0,'full')}
@@ -18795,6 +19436,7 @@ function renderSessions(){
           <div class="ss-mt6">${_sessAddonGroups(items,S.newSessAddons,'_toggleNewSessAddon')}</div>
         </div>`;
       })()}
+      <div class="form-group ss-mt18" id="vsf-host"></div>
       <div class="ss-form-acts">
         <button class="btn-primary" data-on-click="${_on("addSession")}">${t('createSession')}</button>
         <button class="btn-secondary" data-on-click="${_on("_on_renderSessions_22",_EV,_EL)}">${t('cancelBtn')}</button>
@@ -18964,6 +19606,7 @@ function renderSessions(){
           <div class="ss-mt6">${_sessAddonGroups(items,S.editSessAddons,'_toggleEditSessAddon')}</div>
         </div>`;
       })()}
+      <div class="form-group ss-mt18" id="vsf-host"></div>
       <div class="ss-form-acts">
         <button class="btn-primary" data-on-click="${_on("saveSessionEdit")}">${t('saveSessionBtn')}</button>
         <button class="btn-secondary" data-on-click="${_on("_on_renderSessions_38",_EV,_EL)}">${t('cancelBtn')}</button>
@@ -19127,6 +19770,7 @@ function renderSessions(){
     })()}
     ${isAdmin()?_bwCardHtml():''}
     ${renderPromoManager()}`;
+  if(document.getElementById('vsf-host'))_vsfMount(S.editSessionId||'',S.editSessionId?'edit':'new'); // the volunteer switch, drawn by its part
   if(_sessEl.nodeType)_cssvApply(_sessEl); // the bikes' colour dots and the bars' widths (data-cssv)
 }
 
@@ -19444,6 +20088,7 @@ async function _sessPatch(id,patch){
   return bad||{error:null};
 }
 async function _saveSessionEdit(){
+  if(S._vsf&&S._vsf.on&&!S._vsf.closes){toast(t('zfNeedCut'),'error');return;}
   const oldId=S.editSessionId;
   const sess=_sessDisp(oldId);if(!sess)return;
   // The whole row as it was, for the date move and for Undo. Both used to re-insert or restore a
@@ -19687,6 +20332,8 @@ async function _saveSessionEdit(){
       }
       await(newId!==oldId?loadData():_sessReload([oldId]));renderSessions();renderStaffQueue();
     });
+    if(S._vsf&&S._vsf.form==='edit')await _vsfSave(newId,'edit'); // the switch lives in its own table, under the id the session ended on
+    S._vsf=null;
     S.editSessionId=null;S.editSessGender=null;S.editSessTitle='';S.editSessSpots='';S.editSessKm={};S.editSessInv='';S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     renderSessions();renderStaffQueue();
   }catch(e){toast(t('errServerError'),'error');console.error(e);}
@@ -19743,6 +20390,7 @@ function _nsSlots(timeVal,collectVal){
 }
 function addSession(){return _busyRun('addSession',_addSession);}
 async function _addSession(){
+  if(S._vsf&&S._vsf.on&&!S._vsf.closes){toast(t('zfNeedCut'),'error');return;}
   const date=document.getElementById('ns-date')?.value;
   if(!date){toast(t('errPickDate'),'error');return;}
   const startEl=document.getElementById('ns-start');const endEl=document.getElementById('ns-end');
@@ -19853,6 +20501,8 @@ async function _addSession(){
     }
     if(refused&&!created)return; // nothing made: the form stays as it is
     await _sessReload(createdIds);
+    if(S._vsf&&S._vsf.form==='new'){S._vsfBase=date;for(const id of createdIds)await _vsfSave(id,'new');}
+    S._vsf=null;
     S.showAddSession=false;S._nsTplId=null;S._nsAuto=null;S._nsFilledFrom=null;S.newSessKm={};S.newSessInv='';S.newSessRoute='';S.newSessDesc='';S.newSessPrice='';S.newSessOpenAll=true;S.newSessGender='';S.newSessDate='';S.newSessAssignedIds=[];S.newSessStartTime='21:00';S.newSessEndTime='23:00';S.newSessCollect='';S.newSessRepeat='1';S.newSessDays=[];S.newSessAddons=[];S.newSessEvent='jcc';S.newSessSpots='';S.newSessTitle='';S.newSessMapUrl='';S.newSessBfSel='';S.newSessBfName='';S.newSessBfUrl='';S.newSessReveal='';
     S.newSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
     if(created>1)toast(t('toastRecurringCreated').replace('{0}',created));
@@ -24111,7 +24761,7 @@ function renderCustFormModal(){
       <div class="form-group cmy-mt8"><label>${t('socialsLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>${_socFieldsHtml('cf',d.socials,true)}</div>
       ${d.mode==='edit'?`<div class="form-group cmy-mt8"><label>${t('rideNewsTitle')}</label><div id="cf-rn" class="cmy-cf-rn">${_cfRideNewsHtml(d)}</div></div>`:''}
       ${d.mode==='edit'?`<div id="cf-em-host">${_cfEmHtml(d)}</div>`:''}
-      ${d.mode==='edit'?`<div id="cf-bt-host">${_cfBtHtml(d)}</div>`:''}
+      ${d.mode==='edit'?`<div id="cf-bt-host">${_cfBtHtml(d)}</div><div id="cf-vol-host"></div>`:''}
       <div class="form-group cmy-mt8"><label>${t('bikeTypePref')}</label><div class="cmy-row6w">${bikeTypeOpts(true).map(tBtn).join('')}</div></div>
       <div class="form-group cmy-mt8"><label for="cf-defpay">${t('defaultPayLabel')}</label>
         <select id="cf-defpay"${_scYDefPayOk()?'':' disabled aria-describedby="cf-defpay-hint"'} data-on-change="${_on("_on_renderCustFormModal_3",_EV,_EL)}"><option value=""${d.defpay?'':' selected'}>${t('defPayNormal')}</option><option value="house"${d.defpay==='house'?' selected':''}> ${t('onTheHouseLabel')}</option></select>
@@ -24139,6 +24789,7 @@ function renderCustFormModal(){
   if(d.defpay!=='house'){const _r=document.getElementById('cf-defpay-types');if(_r)_r.style.display='none';}
   if(!isCreate){_cfSlLoad(d);_bdgStrips();}
   if(d.ph===undefined)_cfPhCheck();
+  if(S._cf&&S._cf.mode==='edit'&&S._cf.id)_cfVolMount(S._cf.id);
 }
 // ── Delete a customer account ────────────────────────────────────────────────
 // What goes: the login and everything personal attached to it — the customers row, tags,
@@ -28145,8 +28796,8 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','customers','community','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabCustomers',community:'tabCommunity',ambassadors:'tabAmbassadors',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','dashboard','cashier','inventory','workshop','customers','community','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabCustomers',community:'tabCommunity',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // The accounts were Community's until Customers became a section (2026-10-07): a list naming Community names it too.
@@ -28199,7 +28850,7 @@ function _prefMerge(srv){
 // never the sub-view (that is the address's) nor a search. Only what differs from the section's defaults is
 // kept, so "Reset filters" is the defaults back. A path with a dot is a field of a section's own object.
 // The Accounts and Members filters (_amDefs), here so the lists below can name them.
-const AM_FKEYS=['amSpent','amGender','amAge','amBday','amNat','amCountry','amCity','amHeight','amBike','amJoined','amRides','amComm','amLast','amActive','amUp','amNoShow','amCancel','amPay','amNews','amTags','amMember','amBadges','amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amFlag','amSn'];
+const AM_FKEYS=['amVolH','amSpent','amGender','amAge','amBday','amNat','amCountry','amCity','amHeight','amBike','amJoined','amRides','amComm','amLast','amActive','amUp','amNoShow','amCancel','amPay','amNews','amTags','amMember','amBadges','amIg','amIgN','amIgAvg','amIgRank','amIgFresh','amIgSrc','amIgStatus','amIgBad','amSoc','amSignIn','amSeen','amSignedIn','amEmail','amPhone','amHeard','amWork','amProf','amFlag','amSn'];
 const ST_KEYS={
   queue:['sfSize','sfBike','sfSort','sfSortDir'], // not the status or payment filter: those are for the work in hand (_sfDayGuard)
   history:['histStatus','histPay','histRange','histSort','histSortDir','histType','histSize'],
@@ -49147,6 +49798,15 @@ function _igRankOf(cid){
 // the previous levels badges when a bigger or advanced level is earned"): Chief Marshal given is three badges.
 function _amBadgeN(c){if(!_bdgOk())return 0;const o=new Set();_bdgHeld(c.id).forEach(x=>{const b=_bdgById(x.badge_id);if(b)o.add(b.system?b.slug:'#'+b.id);});return _bdgClimb(o).size;}
 // The filters every account list offers; Members leaves out "Community member" (they all are).
+// Volunteering hours on the Accounts and Members lists (2026-11-05): read once, only the accounts that have any.
+function _amVolOf(id){return(S._amVolH&&S._amVolH.get(String(id)))||0;}
+function _amVolLoad(){
+  if(S._amVolH||S._amVolBusy||!sb)return;S._amVolBusy=true;
+  Promise.resolve(sb.from('customers').select('id,volunteer_hours').gt('volunteer_hours',0).limit(5000)).then(({data,error})=>{
+    S._amVolBusy=false;S._amVolH=new Map(error?[]:(data||[]).map(r=>[String(r.id),+r.volunteer_hours||0]));
+    if(!error&&(data||[]).length&&(S.amVolH||/^volH/.test(S.amSort||''))){const w=document.getElementById('am-cust-rows');if(w)w.innerHTML=_amCustRows();}
+  },()=>{S._amVolBusy=false;S._amVolH=new Map();});
+}
 function _amDefs(all){
   const un=['unset',t('acrGenderUnset')],today=_ksaDaysAgo(0),days=n=>[String(n),t('acrLastDays').replace('{0}',String(n))];
   const cm=n=>n+' '+t('cmUnit'),ig=n=>_igFmt(n);
@@ -49156,7 +49816,9 @@ function _amDefs(all){
   const age=c=>{const a=_accAge(c);return a==null?'unset':a<18?'u18':a<30?'18-29':a<45?'30-44':'45';};
   const ht=c=>{const h=Number(c.height)||0;return !h?'unset':h<150?'u150':h<165?'150':h<180?'165':'180';};
   const mon=d=>d.slice(0,7),nextMon=(()=>{const[y,m]=today.split('-').map(Number);return m===12?`${y+1}-01`:`${y}-${String(m+1).padStart(2,'0')}`;})();
+  if(S.amVolH||/^volH/.test(S.amSort||''))_amVolLoad(); // only once asked for: opening Accounts reads no customers
   const defs=[
+    ['amVolH',t('amfVolHours'),[['none',t('amfVolNone')],['any',t('amfVolAny')],['10',t('amfVol10')],['50',t('amfVol50')]],(c,v)=>{const h=_amVolOf(c.id);return v==='none'?h<=0:v==='any'?h>0:h>=Number(v);}],
     ['amSpent',t('spLbl'),_spOpts(),(c,v)=>_spIn(v,_spentOf(c.id))],
     ['amGender',t('genderLabel'),[['male',t('genderMale')],['female',t('genderFemale')],un],(c,v)=>v==='unset'?!c.gender:c.gender===v],
     ['amAge',t('acrFilterAge'),[['u18',t('acrAgeU18')],['18-29',t('acrAge1829')],['30-44',t('acrAge3044')],['45',t('acrAge45')],un],(c,v)=>age(c)===v],
@@ -49308,6 +49970,7 @@ function _amSorts(){
   return[
     ['',t('acrSortJoined'),c=>c.created_at||null,-1],
     ['old',t('apSortOld'),c=>c.created_at||null,1,[t('acrColJoined'),v=>shortDate(_ksaDayOf(v))]],
+    ['volH',t('amSortVol'),c=>_amVolOf(c.id)||null,-1,[t('amfVolHours'),v=>String(v)]],
     ['az',t('apSortAZ'),c=>_amTv(c.name)||null,1],
     ['za',t('apSortZA'),c=>_amTv(c.name)||null,-1],
     ['spentHi',t('spMost'),c=>_spentOf(c.id),-1],
@@ -54394,7 +55057,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','cashier','inventory','customers','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','sessions','cashier','inventory','customers','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer

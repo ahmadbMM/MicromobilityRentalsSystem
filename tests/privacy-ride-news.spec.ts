@@ -9,7 +9,7 @@ import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/s
 // Staff can switch ride news OFF (a rider's STOP), never on.
 
 const JSON_HDR = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
-const VERSION = '2026-11-04'; // a blood donation event's hosts and partners; nobody is asked again
+const VERSION = '2026-11-05'; // volunteering, and the volunteers who check people in; nobody is asked again
 
 /** Answers an RPC and records every body sent to it. */
 async function captureRpc(page: Page, fn: string, answer: (body: Record<string, unknown>) => unknown) {
