@@ -676,7 +676,8 @@ test.describe('@staff:bookings Blood Donation', () => {
     const shown = () => page.evaluate<string>(`[...document.querySelectorAll('#q-results .queue-table tbody tr')].map(r=>(r.innerText.match(/Donor \\d/)||[''])[0]).filter(Boolean).join()`);
     const set = (js: string) => page.evaluate(`${js};renderStaffQueue()`);
     // blood type and Donated in plain view; the long list is drawn only once Advanced opens, and never holds money
-    await expect(tab.locator('select[aria-label="Blood type"] option')).toHaveCount(11);
+    await expect(tab.locator('select[aria-label="Blood type"] option')).toHaveCount(12);
+    await expect(tab.locator('select[aria-label="Blood type"] option', { hasText: /^O$/ })).toHaveCount(1);
     await expect(tab.locator('select[aria-label="City of residence"]')).toHaveCount(0);
     await tab.locator('.filter-toggle').click();
     await expect(tab.locator('select[aria-label="City of residence"] option')).toHaveText(['All', 'Not set', 'Jeddah', 'Makkah', 'Riyadh']);
@@ -684,6 +685,10 @@ test.describe('@staff:bookings Blood Donation', () => {
     expect(await tab.locator('#fm-q').innerText()).not.toMatch(/\bPaid\b|Payment|Spent|⃁|\bSAR\b/);
     // the filters
     await set(`S.sfBt='O+'`); expect(await shown()).toBe('Donor 1');
+    await set(`S.sfBt='O'`); expect(await shown()).toBe('Donor 1');
+    await set(`S._bldBt.set('c2','O-')`); expect(await shown()).toBe('Donor 1,Donor 2');
+    await set(`S.sfBt='O-'`); expect(await shown()).toBe('Donor 2');
+    await set(`S._bldBt.set('c2','AB-')`); expect(await shown()).toBe('');
     await set(`S.sfBt='unknown'`); expect(await shown()).toBe('Donor 3');
     await set(`S.sfBt='unset'`); expect(await shown()).toBe('Donor 4');
     await set(`S.sfBt='all';S.sfDon='yes'`); expect(await shown()).toBe('Donor 3,Donor 4');
@@ -702,6 +707,21 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tab.locator('select.q-sort-pick option', { hasText: /Spent|spent/ })).toHaveCount(0);
     await set(`S.sfSort='bq:bt';S.sfSortDir=1`); expect(await shown()).toBe('Donor 2,Donor 1,Donor 3,Donor 4');
     await expect(tab.locator('select.q-sort-pick')).toHaveValue('bq:bt');
+    // every column sorts from its header, like any other session
+    const th = (name: string) => tab.locator('.queue-table thead th', { has: page.getByRole('button', { name, exact: true }) });
+    await set(`S.sfSort='queue';S.sfSortDir=1;S.sfBt='all';S.sfDon='all';S.sfRw='all';S.sfClub='all'`);
+    for (const col of ['Booking #', 'Name', 'Donor or visitor', 'Club or community', 'Blood type', 'Donated', 'Status']) {
+      const head = th(col);
+      if (!(await head.count())) throw new Error('no sort button on ' + col);
+      await head.getByRole('button').click();
+      await expect(th(col)).toHaveAttribute('aria-sort', /ascending|descending/);
+    }
+    await th('Blood type').getByRole('button').click();
+    await expect(th('Blood type')).toHaveAttribute('aria-sort', 'ascending');
+    expect(await shown()).toBe('Donor 2,Donor 1,Donor 3,Donor 4'); // AB-, O+, not known, not set
+    await th('Blood type').getByRole('button').click();
+    await expect(th('Blood type')).toHaveAttribute('aria-sort', 'descending');
+    expect((await shown()).startsWith('Donor 3,Donor 1,Donor 2')).toBe(true); // the blank stays last
     await set(`S.sfSortDir=-1`); expect(await shown()).toBe('Donor 3,Donor 1,Donor 2,Donor 4');
     await set(`S.sfSort='bq:don';S.sfSortDir=1`); expect(await shown()).toBe('Donor 4,Donor 3,Donor 1,Donor 2');
     await set(`S.sfSort='bq:in'`); expect(await shown()).toBe('Donor 4,Donor 3,Donor 2,Donor 1');

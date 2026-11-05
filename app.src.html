@@ -8298,6 +8298,9 @@ function _runAgeModal(){
 // Blood types an account can hold (customers.blood_type, 20261014180000), and how one reads; 'unknown' = the
 // rider said they don't know it. Shared by My Account and the staff account editor.
 const BLOOD_TYPES=['A+','A-','B+','B-','AB+','AB-','O+','O-'];
+// The filters' choices: plain O takes in O+ and O- (the owner, 2026-11-05).
+function _btFilterOpts(){return BLOOD_TYPES.flatMap(x=>x==='O+'?['O',x]:[x]).map(x=>[x,_btLabel(x)]);}
+function _btIs(b,f){return f==='O'?b==='O+'||b==='O-':b===f;}
 function _btLabel(v){return v==='unknown'?t('btUnknown'):v?String(v).replace('-','\u2212'):'';}
 const EM_RELS=['spouse','parent','sibling','child','relative','friend','colleague','other'];
 function _emLoad(cust,force){
@@ -27725,7 +27728,7 @@ function renderQRow(e){
         ${_qc.km?thQSort('km',t('runKmLabel')):''}
         ${_qc.vl?thQSort('vl',t('vlRaceLabel')):''}
         ${_qc.rr?`<th>${t('defeRegCol')}</th>`:''}
-        ${_qc.bld?`<th>${t('bldColRole')}</th><th>${t('bldClubCol')}</th><th>${t('btTitle')}</th><th>${t('bldColDonated')}</th>`:''}
+        ${_qc.bld?(_bq?thQSort('bq:role',t('bldColRole'))+thQSort('bq:club',t('bldClubCol'))+thQSort('bq:bt',t('btTitle'))+thQSort('bq:don',t('bldColDonated')):`<th>${t('bldColRole')}</th><th>${t('bldClubCol')}</th><th>${t('btTitle')}</th><th>${t('bldColDonated')}</th>`):''}
         ${S.sfSession==='all'?thQSort('session',t('colSession'),'hide-mobile'):'<th class="hide-mobile rq-none"></th>'}
         ${_qc.bike?thQSort('bike',t('colBike')):''}
         ${_qc.money?thQSort('price',t('colPrice')||'Price'):''}
@@ -33720,7 +33723,7 @@ function _repFilter(list){
     if(!_bl&&o.fPay==='pending'&&e.paid)return false;
     if(_bl&&o.fRole&&o.fRole!=='all'&&_bldVis(e)!==(o.fRole==='visitor'))return false;
     if(_bl&&o.fDon&&o.fDon!=='all'&&!!e.donatedAt!==(o.fDon==='yes'))return false;
-    if(_bl&&o.fBt&&o.fBt!=='all'){if(_bldVis(e))return false;const b=S._bldBt&&S._bldBt.get(e.customerId);if(b!==undefined&&(o.fBt==='unset'?!!b:b!==o.fBt))return false;}
+    if(_bl&&o.fBt&&o.fBt!=='all'){if(_bldVis(e))return false;const b=S._bldBt&&S._bldBt.get(e.customerId);if(b!==undefined&&(o.fBt==='unset'?!!b:!_btIs(b,o.fBt)))return false;}
     if(o.fMember==='member'&&!_isSatMember(e))return false;
     if(o.fMember==='nonmember'&&_isSatMember(e))return false;
     return true;
@@ -33928,7 +33931,7 @@ function showPrintReportOptions(){
         <label class="rpt-fld">${t('bldColDonated')}
           ${sel('rep-f-don',o.fDon||'all',[['all',t('filterAll')],['yes',t('repYes')],['no',t('repNo')]],['_repSetFilter','fDon',_P('value')],t('bldColDonated'))}</label>
         <label class="rpt-fld">${t('btTitle')}
-          ${sel('rep-f-bt',o.fBt||'all',[['all',t('filterAll')],...BLOOD_TYPES.map(x=>[x,_btLabel(x)]),['unknown',t('bldBtNotKnown')],['unset',t('acrGenderUnset')]],['_repSetFilter','fBt',_P('value')],t('btTitle'))}</label>`:`<label class="rpt-fld">${t('filterPay')}
+          ${sel('rep-f-bt',o.fBt||'all',[['all',t('filterAll')],..._btFilterOpts(),['unknown',t('bldBtNotKnown')],['unset',t('acrGenderUnset')]],['_repSetFilter','fBt',_P('value')],t('btTitle'))}</label>`:`<label class="rpt-fld">${t('filterPay')}
           ${sel('rep-f-pay',o.fPay,[['all',t('filterAll')],['paid',t('filterPaid')],['pending',t('pendingLabel')]],['_repSetFilter','fPay',_P('value')],t('filterPay'))}</label>`}
         <label class="rpt-fld">${t('colMember')}
           ${sel('rep-f-member',o.fMember,[['all',t('filterAll')],['member',t('memberYes')],['nonmember',t('memberNo')]],['_repSetFilter','fMember',_P('value')],t('colMember'))}</label>
@@ -50167,7 +50170,7 @@ function _bqData(){
 function _bqFilter(rows){
   _bqData();
   let r=rows;
-  if((S.sfBt||'all')!=='all')r=r.filter(e=>{if(_bldVis(e))return false;const b=_bqBt(e);return b===undefined||(S.sfBt==='unset'?!b:b===S.sfBt);});
+  if((S.sfBt||'all')!=='all')r=r.filter(e=>{if(_bldVis(e))return false;const b=_bqBt(e);return b===undefined||(S.sfBt==='unset'?!b:_btIs(b,S.sfBt));});
   if((S.sfDon||'all')!=='all')r=r.filter(e=>S.sfDon==='yes'?!!e.donatedAt:S.sfDon==='no'?!e.donatedAt:!e.donatedAt&&(e.status==='active'||e.status==='done'));
   if((S.sfRw||'all')!=='all')r=r.filter(e=>_bqRw(e)===S.sfRw);
   if((S.sfClub||'all')!=='all')r=r.filter(e=>{const v=e.bloodClub;return S.sfClub==='none'?v==='':S.sfClub==='wait'?v==null:'c:'+String(v||'').trim().toLowerCase()===S.sfClub;});
@@ -50208,7 +50211,7 @@ function _bqMain(){
   const clubs=[...new Map(getQueue().filter(e=>e.sessionId===S.sfSession&&e.bloodClub).map(e=>{const n=String(e.bloodClub).trim();return['c:'+n.toLowerCase(),n];})).entries()].sort((a,b)=>a[1].localeCompare(b[1]));
   return _fField(t('bldColRole'),_qSel('sfRole',t('bldColRole'),[...all,['donor',t('bldRoleDonor')],['visitor',t('bldColVisitor')]]))
     +_fField(t('bldClubCol'),_qSel('sfClub',t('bldClubCol'),[...all,['none',t('bldClubNoneVal')],['wait',t('bldClubWait')],...clubs]))
-    +_fField(t('btTitle'),_qSel('sfBt',t('btTitle'),[...all,...BLOOD_TYPES.map(x=>[x,_btLabel(x)]),['unknown',t('bldBtNotKnown')],['unset',t('acrGenderUnset')]]))
+    +_fField(t('btTitle'),_qSel('sfBt',t('btTitle'),[...all,..._btFilterOpts(),['unknown',t('bldBtNotKnown')],['unset',t('acrGenderUnset')]]))
     +_fField(t('bldColDonated'),_qSel('sfDon',t('bldColDonated'),[...all,['yes',t('acrYes')],['wait',t('bqDonWait')],['no',t('acrNo')]]));
 }
 function _bqPanel(){
