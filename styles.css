@@ -11036,6 +11036,33 @@ body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-
 .bld-tk-type{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:-14px 0 14px;padding:10px 20px;background:#03FE8A;color:#0B1F16;font-size:13px;font-weight:700;}
 .bld-tk-type[hidden]{display:none;}
 .bld-tk-type b{font-size:30px;font-weight:700;line-height:1;}
+/* Donor or visitor (the owner, 2026-11-05): a visitor's stripe sits where a donor's blood type sits, ink and white against the
+   donor's neon, so the two read apart at arm's length. The question on the donor step and the staff's chips wear the same two. */
+.bld-tk-type.bld-tk-vis{justify-content:center;background:#0B1F16;color:#fff;}
+.bld-role-g{margin:0 0 16px;}
+.bld-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;}
+.bld-role{display:grid;align-content:start;gap:3px;min-height:84px;padding:12px;border:1.5px solid var(--bld-line2);background:#fff;font:inherit;text-align:start;color:var(--bld-ink);cursor:pointer;}
+.bld-role b{font-size:18px;font-weight:700;line-height:1.2;}
+.bld-role span{font-size:12.5px;font-weight:500;line-height:1.35;}
+.bld-role.on{background:#03FE8A;border-color:var(--bld-ink);color:#0B1F16;}
+.bld-role.on[data-role="visitor"]{background:#0B1F16;border-color:#0B1F16;color:#fff;}
+#bld-after[hidden],#bld-bt-g[hidden],#bld-email-g[hidden],#bld-gender-g[hidden]{display:none;}
+#bld-club-none{margin-top:4px;}
+.bld-tk-club{margin:0 0 10px;font-size:13px;line-height:1.4;}
+.bld-club{font-weight:700;overflow-wrap:anywhere;}
+.bld-club-l{flex:1 1 100%;min-width:0;}
+#club-gate .auth-backdrop{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain;padding:20px 14px;z-index:199;}
+#club-gate .cg-box:focus,#club-gate .cg-box:focus-visible{outline:none;}
+#club-gate .sg-sub{margin-top:16px;}
+.cg-in{display:block;width:100%;min-height:48px;margin-top:12px;padding:0 12px;border:1.5px solid var(--bld-line2,#9db5a8);background:#fff;color:var(--bld-ink,#0B1F16);font:inherit;font-size:16px;}
+.cg-none{min-height:48px;margin-top:8px;}
+.bld-sum-host{display:contents;}
+.bld-chip{display:inline-block;padding:2px 8px;font-size:12px;font-weight:800;line-height:1.5;white-space:nowrap;}
+.bld-chip-d{background:#03FE8A;color:#0B1F16;}
+.bld-chip-v{background:#0B1F16;color:#fff;}
+html[data-staff-theme="dark"] body.view-staff .bld-chip-v{background:#fff;color:#0B1F16;}
+.bld-role-cell{display:inline-flex;align-items:center;flex-wrap:wrap;gap:6px;}
+.bld-sw{padding:2px 6px;border:1px solid currentColor;background:transparent;color:inherit;font:inherit;font-size:11.5px;line-height:1.4;white-space:nowrap;cursor:pointer;}
 .bld-sum .cu-ic{flex:none;margin-top:2px;color:var(--bld-tick,var(--bld-ac));}
 .bld-rules{margin:0 0 16px;padding:14px;background:var(--bld-wash);border:1px solid var(--bld-line);border-radius:calc(var(--bld-r) / 2);}
 .bld-more{display:block;width:100%;margin:12px 0 0;}
@@ -11089,7 +11116,7 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-blood{--sf-chip-bg:#fff;--sf
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-blood{--sf-chip-bg:#101318;color:var(--text);}
 body.view-staff .sess-summary-chip.th-blood.active-sess,body.view-staff .sess-lc.th-blood.selected{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(26,25,25,.14);}
 .bld-bt{display:inline-block;min-width:2.6em;font-weight:800;white-space:nowrap;}
-.bld-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;}
+.bld-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0;}
 .bld-cl{white-space:nowrap;}
 .bld-head,body .landing-event-card.bld-card,#confirm-modal .bld-info-box,body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-blood{border-top:4px solid #03FE8A;}
 

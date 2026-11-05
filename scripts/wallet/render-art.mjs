@@ -32,6 +32,10 @@ const STRIPS = {
   event: `<div class="s" style="background:linear-gradient(to right,#fff 0 40%,rgba(124,58,237,.10) 100%) #fff"></div>`,
   // the Triathlon Pool Session (2026-10-12, its ticket's look): pool blue, the water's lines across the foot
   swim: `<div class="s" style="background:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='26' viewBox='0 0 80 26'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M0 6c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5' stroke='%2338B6E6' stroke-width='2' opacity='.55'/%3E%3Cpath d='M-10 18c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5 10-5 20-5' stroke='%230B6FA4' stroke-width='2' opacity='.35'/%3E%3C/g%3E%3C/svg%3E&quot;) left 0 bottom 8px/80px 26px repeat-x,linear-gradient(to bottom,#fff 0 30%,rgba(56,182,230,.16) 100%) #fff"></div>`,
+  // The Blood Donation event (2026-11-05): the word at the strip's end, on the same colours as the booking card's stripe; the
+  // number sits over the plain start, and the name is below the strip, so nothing runs over the word.
+  blood: `<div class="s" style="background:#0B1F16"><div style="position:absolute;inset:0 0 0 auto;width:178px;display:grid;place-items:center;background:#03FE8A;color:#0B1F16;font:800 30px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.04em">DONOR</div></div>`,
+  blood_visitor: `<div class="s" style="background:#fff"><div style="position:absolute;inset:0 0 0 auto;width:178px;display:grid;place-items:center;background:#0B1F16;color:#fff;font:800 30px/1 'Helvetica Neue',Arial,sans-serif;letter-spacing:.04em">VISITOR</div></div>`,
 };
 // The logo: at most 160 x 50 points, the mark each event card wears.
 const LOGOS = { jcc: ['jcc-white.webp', 330, 166], comm: ['logo-dark.webp', 241, 256], runher: ['assets/runher-partners.webp', 653, 120] };

@@ -90,6 +90,19 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(page.locator('body')).toHaveClass(/bld-skin/);
     await expect(page.locator('#tab-register .bld-head .bld-plate img')).toBeVisible();
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    // the first question: donor or visitor, and the rest waits for the answer
+    await expect(page.locator('#bld-after')).toBeHidden();
+    await page.locator('#bld-next').click();
+    await expect(page.locator('#bld-role-g')).toHaveClass(/field-invalid/);
+    await page.locator('.bld-role[data-role="donor"]').click();
+    await expect(page.locator('.bld-role[data-role="donor"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#bld-role-g')).not.toHaveClass(/field-invalid/);
+    await expect(page.locator('#bld-after')).toBeVisible();
+    // then the club or community: a name, or I don't have one
+    await page.locator('#bld-next').click();
+    await expect(page.locator('#bld-club-g')).toHaveClass(/field-invalid/);
+    await page.locator('#bld-club').fill('Jeddah Riders');
+    await expect(page.locator('#bld-club-g')).not.toHaveClass(/field-invalid/);
     await expect(page.locator('#run-first')).toHaveValue('Sara');
     await expect(page.locator('#bld-phone')).toHaveValue('+966500000001');
     await expect(page.locator('#bld-bt')).toHaveValue('O+');
@@ -138,7 +151,9 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(tk.locator('.bld-sum > *')).toHaveCount(4);
     await expect(page.locator('#tab-register')).not.toContainText(NO_PRICE);
     await expect(page.locator('#tab-register')).toContainText('registration desk');
-    expect(rows[0]).toMatchObject({ session_id: BD, type_preference: 'None', price: 0, share_ok: true, waiver_version: 'blood-2026-11-v1' });
+    await expect(tk.locator('.bld-tk-vis')).toHaveCount(0);
+    await expect(tk.locator('.bld-tk-club')).toContainText('Jeddah Riders');
+    expect(rows[0]).toMatchObject({ session_id: BD, type_preference: 'None', price: 0, share_ok: true, waiver_version: 'blood-2026-11-v1', blood_role: 'donor', blood_club: 'Jeddah Riders' });
     expect(sent).toEqual(['customer_set_blood_type']);
   });
 
@@ -256,6 +271,178 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(tk.getByRole('button', { name: /Cancel/ })).toHaveCount(1);
     // the page around it is My Bookings, not the event
     await expect(page.locator('body')).not.toHaveClass(/bld-skin/);
+  });
+
+  test('a visitor gives name, mobile, gender, birth date and nationality, saved to the account, and the ticket has a stripe saying Visitor', async ({ page }) => {
+    const sent: string[] = [];
+    page.on('request', (r) => { const m = /rpc\/(customer_update_profile|customer_set_blood_type|customer_set_gender)/.exec(r.url()); if (m) sent.push(m[1]); });
+    await stubSupabase(page, custFx({ 'rpc:customer_blood_type': null, 'rpc:customer_set_gender': true, 'rpc:customer_profile': profile({ gender: null }) }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    const rows = await captureBookingRows(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    await page.locator('.bld-card').click();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await page.locator('.bld-role[data-role="visitor"]').click();
+    // no blood type, and only the rules that are a visitor's; the rest of the step is the donor's
+    await expect(page.locator('#bld-bt-g')).toBeHidden();
+    await expect(page.locator('#bld-after .bld-sum > *')).toHaveCount(2);
+    await expect(page.locator('#run-first')).toHaveValue('Sara');
+    await expect(page.locator('#bld-phone')).toBeVisible();
+    await expect(page.locator('#bld-nat')).toBeVisible();
+    await expect(page.locator('#run-dob-d')).toBeVisible();
+    // no email; gender in its place
+    await expect(page.locator('#bld-email-g')).toBeHidden();
+    await expect(page.locator('#bld-gender-g')).toBeVisible();
+    // I don't have one answers the club question and empties the field
+    await page.locator('#bld-club').fill('Typed then changed');
+    await page.locator('#bld-club-none').click();
+    await expect(page.locator('#bld-club-none')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#bld-club')).toBeDisabled();
+    await expect(page.locator('#bld-club')).toHaveValue('');
+    // gender is required, and goes to the account
+    await page.locator('#bld-next').click();
+    await expect(page.locator('#bld-gender-g')).toHaveClass(/field-invalid/);
+    await page.locator('#bld-gender-g [data-gender="female"]').click();
+    await expect(page.locator('#bld-gender-g')).not.toHaveClass(/field-invalid/);
+    await page.locator('#bld-next').click();
+    // no poster to confirm; sharing still asked, with what a visitor gave on its list
+    await expect(page.locator('.bld-info-box')).toHaveCount(0);
+    const sg = page.locator('#share-gate .sg-box');
+    await expect(sg).toContainText('our event partners and third parties');
+    await expect(sg).toContainText('Birth date');
+    await expect(sg).toContainText('Gender');
+    await expect(sg).not.toContainText('Blood type');
+    await expect(sg).not.toContainText('Email');
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
+    // the same agreement, and the review says Visitor
+    await expect(page.locator('#reg-waiver')).toContainText('Donor agreement');
+    await page.locator('#reg-waiver-cb').check();
+    await expect(page.locator('#tab-register .cu-rv-sec')).toContainText('Visitor');
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await expect.poll(() => rows.length).toBe(1);
+    expect(rows[0]).toMatchObject({ session_id: BD, share_ok: true, waiver_version: 'blood-2026-11-v1', blood_role: 'visitor', blood_club: '' });
+    const tk = page.locator('#tab-register .ticket-card.th-blood');
+    await expect(tk.locator('.bld-tk-type.bld-tk-vis')).toHaveText(/visitor/i);
+    await expect(tk).toContainText('Visitor number');
+    await expect(tk).not.toContainText('Donor number');
+    await expect(tk).not.toContainText('Your type');
+    await expect(tk.locator('.bld-sum > *')).toHaveCount(2);
+    await expect(tk).toContainText('Checked-in visitors get one free ride');
+    await expect(tk).not.toContainText('Checked-in donors');
+    // the gender went to the account, the rest already matched it, and no blood type was asked for
+    expect(sent).toEqual(['customer_set_gender']);
+  });
+
+  test('My Bookings: a visitor sees the stripe where a donor sees the blood type', async ({ page }) => {
+    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_version: 'blood-2026-11-v1', waiver_at: '2099-11-01T10:00:00Z', data_share_at: '2099-11-01T10:00:00Z', blood_role: 'visitor', blood_club: 'Jeddah Riders' };
+    await stubSupabase(page, custFx({ queue_entries: [row], 'rpc:customer_queue': [row], 'rpc:customer_entries': [row] }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    const tk = page.locator('#tab-myrides .ticket-card.th-blood');
+    await expect(tk.locator('.bld-tk-type.bld-tk-vis')).toHaveText(/visitor/i);
+    await expect(tk).not.toContainText('O+');
+    await expect(tk).toContainText('Visitor number');
+    await expect(tk.locator('.bld-tk-club')).toContainText('Jeddah Riders');
+    await expect(tk).not.toContainText('Checked-in donors');
+    await expect(page.locator('#club-gate .cg-box')).toHaveCount(0);
+  });
+
+  test('a checked-in visitor sees their free ride in a visitor\'s words', async ({ page }) => {
+    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_version: 'blood-2026-11-v1', waiver_at: '2099-11-01T10:00:00Z', data_share_at: '2099-11-01T10:00:00Z', blood_role: 'visitor', blood_club: '' };
+    await stubSupabase(page, custFx({ queue_entries: [row], 'rpc:customer_queue': [row], 'rpc:customer_entries': [row], 'rpc:customer_blood_rewards': [{ entry_id: 'q1', code: 'BD-1A2B3C4D', expires_at: '2099-12-05', used: false }] }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    const tk = page.locator('#tab-myrides .ticket-card.th-blood');
+    await expect(tk.locator('.bld-rw')).toContainText('BD-1A2B3C4D');
+    await expect(tk.locator('.bld-rw')).toContainText('Thank you for coming');
+    await expect(tk.locator('.bld-rw')).not.toContainText('donating');
+  });
+
+  test('the visitor\'s form fills in what the account has and saves what changed, leaving the account\'s email alone', async ({ page }) => {
+    const updates: Record<string, unknown>[] = [];
+    await stubSupabase(page, custFx({ 'rpc:customer_set_gender': true, 'rpc:customer_profile': profile({ gender: 'female' }) }));
+    await page.route(/\/rest\/v1\/rpc\/customer_update_profile/, (route) => {
+      updates.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: 'true' });
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    await page.locator('.bld-card').click();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await page.locator('.bld-role[data-role="visitor"]').click();
+    await expect(page.locator('#run-first')).toHaveValue('Sara');
+    await expect(page.locator('#bld-phone')).toHaveValue('+966500000001');
+    await expect(page.locator('#bld-nat')).toHaveValue('Saudi Arabia');
+    await expect(page.locator('#bld-gender-g [data-gender="female"]')).toHaveAttribute('aria-pressed', 'true');
+    await page.locator('#bld-club').fill('Jeddah Riders');
+    await page.locator('#bld-phone').fill('+966500000009');
+    await page.locator('#bld-next').click();
+    await expect.poll(() => updates.length).toBe(1);
+    expect(updates[0]).toMatchObject({ p_id: 'c1', p_phone: '+966500000009', p_email: 'sara@example.com', p_name: 'Sara Haddad', p_nationality: 'Saudi Arabia', p_birth_date: '1995-05-05' });
+    await expect(page.locator('#share-gate .sg-box')).toBeVisible();
+  });
+
+  const preRow = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_version: 'blood-2026-11-v1', waiver_at: '2099-11-01T10:00:00Z', data_share_at: '2099-11-01T10:00:00Z', blood_role: null, blood_club: null };
+  const clubCalls = async (page: Page) => {
+    const calls: Record<string, unknown>[] = [];
+    await page.route(/\/rest\/v1\/rpc\/customer_set_blood_club/, (route) => {
+      calls.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '1' });
+    });
+    return calls;
+  };
+
+  test('everyone registered before the question gets a forced pop-up: a name goes through, a blank does not', async ({ page }) => {
+    await stubSupabase(page, custFx({ queue_entries: [preRow], 'rpc:customer_queue': [preRow], 'rpc:customer_entries': [preRow] }));
+    const calls = await clubCalls(page);
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    const g = page.locator('#club-gate .cg-box');
+    await expect(g).toBeVisible();
+    await expect(g).toContainText('Which club or community are you from?');
+    // nothing closes it but an answer, or Log out
+    await expect(g.locator('.x-close')).toHaveCount(0);
+    await expect(g.getByRole('button', { name: 'Log out' })).toBeVisible();
+    await g.locator('#cg-save').click();
+    await expect(g).toContainText('Enter your club or community');
+    expect(calls).toEqual([]);
+    await g.locator('#cg-club').fill('  Jeddah   Riders ');
+    await g.locator('#cg-save').click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toMatchObject({ p_id: 'c1', p_session_id: BD, p_club: 'Jeddah Riders' });
+    await expect(page.locator('#club-gate .cg-box')).toHaveCount(0);
+    await expect(page.locator('#tab-myrides .ticket-card.th-blood .bld-tk-club')).toContainText('Jeddah Riders');
+    // answered: it does not come back, and a donor stays a donor
+    await page.evaluate('_forceRatingPrompt()');
+    await expect(page.locator('#club-gate .cg-box')).toHaveCount(0);
+    await expect(page.locator('#tab-myrides .ticket-card.th-blood')).toContainText('Donor number');
+  });
+
+  test('the forced pop-up takes I don\'t have one, and asks nobody who has answered or whose row did not carry the column', async ({ page }) => {
+    await stubSupabase(page, custFx({ queue_entries: [preRow], 'rpc:customer_queue': [preRow], 'rpc:customer_entries': [preRow] }));
+    const calls = await clubCalls(page);
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    const g = page.locator('#club-gate .cg-box');
+    await g.locator('#cg-none').click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toMatchObject({ p_session_id: BD, p_club: '' });
+    await expect(g).toHaveCount(0);
+    const asks = await page.evaluate(`(()=>{const q=getQueue(),o={};for(const[k,v]of [['none',''],['named','Club'],['unread',undefined],['unanswered',null]]){q[0].bloodClub=v;o[k]=!!_pendingClub();}return o;})()`);
+    expect(asks).toEqual({ none: false, named: false, unread: false, unanswered: true });
   });
 });
 
@@ -422,6 +609,67 @@ test.describe('@staff:bookings Blood Donation', () => {
     expect(await inReport(`_repOpts().fDon='all';_repOpts().fBt='AB-'`)).toBe('Donor 2');
   });
 
+  test('donors and visitors read apart: chips, figures that filter, no Mark donated for a visitor, one tap to switch, the club', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const row = (id: string, status: string, role: string | null, club: string | null, donated: string | null = null) => ({
+      id, session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: Number(id.slice(1)), name: 'Person ' + id,
+      phone: '055000000' + id.slice(1), type_preference: 'None', size: '', status, paid: false, price: 0,
+      registered_at: '2099-11-01T10:00:00Z', customer_id: 'c' + id, donated_at: donated, blood_role: role, blood_club: club,
+    });
+    const calls: Record<string, unknown>[] = [];
+    await stubSupabase(page, { sessions: [blood], bikes: [], queue_entries: [row('r1', 'waiting', null, 'Jeddah Riders'), row('r2', 'active', 'visitor', ''), row('r3', 'active', 'donor', null, '2099-11-05T15:00:00Z'), row('r4', 'waiting', 'visitor', null)], customers: [{ id: 'cr1', blood_type: 'O+' }, { id: 'cr2', blood_type: 'AB-' }, { id: 'cr3', blood_type: 'A+' }, { id: 'cr4', blood_type: null }] });
+    await page.route(/\/rest\/v1\/rpc\/staff_blood_role/, (route) => {
+      calls.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${BD}';renderStaffQueue()`);
+    const tq = page.locator('#tab-queue .queue-table');
+    await expect(tq.locator('thead')).toContainText('Donor or visitor');
+    await expect(tq.locator('thead')).toContainText('Club or community');
+    await expect(tq.locator('tbody .bld-chip-v')).toHaveCount(2);
+    await expect(tq.locator('tbody .bld-chip-d')).toHaveCount(2);
+    // a null is a donor; a visitor's blood type is never shown, even with one on the account
+    await expect(tq.locator('tbody .bld-bt')).toHaveText(['O+', 'A+']);
+    // nothing to mark on a visitor: check-in gives them the free ride
+    await expect(tq.getByRole('button', { name: 'Mark donated' })).toHaveCount(0);
+    await expect(tq.locator('tbody tr', { hasText: 'Person r2' }).first().locator('.rr-chip.rr-yes')).toHaveText('Free ride');
+    await expect(tq.locator('tbody tr', { hasText: 'Person r4' }).first().locator('.rr-chip.rr-yes')).toHaveCount(0);
+    // the club: a name, None, or not answered yet
+    await expect(tq.locator('tbody .bld-club')).toHaveText(['Jeddah Riders']);
+    const body = await tq.innerText();
+    expect(body).toContain('None');
+    expect(body).toContain('Not answered yet');
+    // the figures say how many of each, and filter
+    const donors = page.locator('#tab-queue .stat-chip', { hasText: 'Donors' }), visitors = page.locator('#tab-queue .stat-chip', { hasText: 'Visitors' });
+    await expect(donors.locator('b')).toHaveText('2');
+    await expect(visitors.locator('b')).toHaveText('2');
+    await visitors.click();
+    await expect(tq.locator('tbody .bld-chip-d')).toHaveCount(0);
+    await expect(tq.locator('tbody .bld-chip-v')).toHaveCount(2);
+    await page.locator('#tab-queue .stat-chip', { hasText: 'Visitors' }).click();
+    await expect(tq.locator('tbody .bld-chip-d')).toHaveCount(2);
+    // one tap: the checked-in visitor becomes a donor and can now be marked; the marked donor has no switch at all
+    const r2 = tq.locator('tbody tr', { hasText: 'Person r2' }).first();
+    await r2.getByRole('button', { name: 'Make donor' }).click();
+    await expect.poll(() => calls.length).toBe(1);
+    expect(calls[0]).toEqual({ p_entry_id: 'r2', p_role: 'donor' });
+    await expect(tq.locator('tbody tr', { hasText: 'Person r2' }).first().getByRole('button', { name: 'Mark donated' })).toBeVisible();
+    await expect(tq.locator('tbody tr', { hasText: 'Person r3' }).first().locator('.bld-sw')).toHaveCount(0);
+    await tq.locator('tbody tr', { hasText: 'Person r1' }).first().getByRole('button', { name: 'Make visitor' }).click();
+    await expect.poll(() => calls.length).toBe(2);
+    expect(calls[1]).toEqual({ p_entry_id: 'r1', p_role: 'visitor' });
+    // the report knows both
+    const rep = await page.evaluate((s) => {
+      const w = window as unknown as Record<string, (...a: unknown[]) => unknown>;
+      return { role: w._repColFits(s, 'brole'), club: w._repColFits(s, 'bclub'), other: w._repColFits({ id: 'x', event_kind: 'rental' }, 'brole') };
+    }, blood);
+    expect(rep).toEqual({ role: true, club: true, other: false });
+  });
+
   test('the phone card says the same: blood type and Donated, no bike line, no add-ons', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     const row = { id: 'r2', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 2, name: 'Donor r2', phone: '0550000002', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'cr2', donated_at: null };
@@ -437,6 +685,9 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(card.getByRole('button', { name: 'Mark donated' })).toBeVisible();
     await expect(card).not.toContainText('No bike');
     await expect(card.locator('.rq-cad')).toHaveCount(0);
+    await expect(card.locator('.bld-chip-d')).toHaveText('Donor');
+    await expect(card.getByRole('button', { name: 'Make visitor' })).toBeVisible();
+    await expect(card).toContainText('Club or community');
   });
 
   test('someone on the list who never agreed to share is stopped until they do, nobody named, in Arabic too', async ({ page }) => {

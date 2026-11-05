@@ -162,6 +162,7 @@ test.describe('the Apple Wallet pass', () => {
       const url = String(u);
       if (url.includes('/rpc/my_bookings')) return new Response(JSON.stringify([b, ...(party.rows || [])]));
       if (url.includes('/rpc/list_sessions')) { sessionUrls.push(url); return new Response(JSON.stringify(sess ? [sess] : [])); }
+      if (url.includes('/rpc/customer_blood_type')) return new Response(JSON.stringify('O+'));
       if (url.includes('apple.com')) return new Response(wwdrDer);
       return new Response('', { status: 404 });
     }) as typeof fetch;
@@ -349,6 +350,40 @@ test.describe('the Apple Wallet pass', () => {
     const blind = await run(new Response('', { status: 500 }));
     expect(blind.eventTicket.backFields.find((f: { key: string }) => f.key === 'addons')).toBeUndefined();
     expect(blind.eventTicket.auxiliaryFields.find((f: { key: string }) => f.key === 'total')).toBeUndefined();
+  });
+
+  // The owner, 2026-11-05: "in apple pass card make sure to differentiate too". Until then this event fell through to a
+  // Saturday ride's pass, RIDER and BIKE COLLECTION on it.
+  test('the Blood Donation pass: a donor is dark green with their type, a visitor is white and says so, neither talks of a ride', async () => {
+    const bd = { id: '2099-11-05-bd', event_kind: 'community', ride_kind: 'blood', bike_slots: JSON.stringify({ _time: '17:00 - 23:00' }), meet_url: 'https://maps.app.goo.gl/U77D5RvQPagN8Yke8', needs_approval: false, hide_queue: true, location: 'JCC', title: null };
+    const base = { ...booking, id: 'abcdefbd', session_id: bd.id, session_date: '2099-11-05', session_day: 'Thursday', price: 0, name: 'Sara Haddad', type_preference: 'None', blood_club: 'Jeddah Club' };
+    const donor = await pass({ ...base, blood_role: null } as unknown as typeof booking, bd);
+    const visitor = await pass({ ...base, blood_role: 'visitor', blood_club: '' } as unknown as typeof booking, bd);
+    const f = (j: Record<string, Record<string, { key: string; label: string; value: string }[]>>, sect: string, k: string) => j.eventTicket[sect].find((x) => x.key === k);
+    // the two differ at a glance, even collapsed: the colours, the strip, and the header
+    expect(donor.json.backgroundColor).toBe('rgb(11,31,22)');
+    expect(visitor.json.backgroundColor).toBe('rgb(255,255,255)');
+    expect(f(donor.json, 'headerFields', 'role')!.value).toBe('DONOR');
+    expect(f(visitor.json, 'headerFields', 'role')!.value).toBe('VISITOR');
+    expect(strFromU8(donor.files!['strip.png'])).not.toBe(strFromU8(visitor.files!['strip.png']));
+    expect(strFromU8(donor.files!['logo.png'])).not.toBe(strFromU8(visitor.files!['logo.png']));
+    expect(f(donor.json, 'primaryFields', 'queue')!.label).toBe('DONOR NO.');
+    expect(f(visitor.json, 'primaryFields', 'queue')!.label).toBe('VISITOR NO.');
+    // only the number on the strip, so the name never runs over the word at its end
+    expect(donor.json.eventTicket.primaryFields).toHaveLength(1);
+    expect(f(donor.json, 'secondaryFields', 'riders')!.value).toBe('Sara Haddad');
+    // a donor's blood type, never a visitor's
+    expect(f(donor.json, 'auxiliaryFields', 'blood_type')!.value).toBe('O+');
+    expect(f(visitor.json, 'auxiliaryFields', 'blood_type')).toBeUndefined();
+    expect(f(donor.json, 'auxiliaryFields', 'hours')!.value).toBe('5:00 PM - 11:00 PM');
+    expect(f(donor.json, 'backFields', 'club')!.value).toBe('Jeddah Club');
+    expect(f(visitor.json, 'backFields', 'club')).toBeUndefined();
+    expect(f(donor.json, 'backFields', 'venue')!.value).toBe('Jeddah Corniche Circuit');
+    for (const p of [donor, visitor]) {
+      const said = ['headerFields', 'primaryFields', 'secondaryFields', 'auxiliaryFields', 'backFields'].flatMap((k) => p.json.eventTicket[k].flatMap((y: { label: string; value: string }) => [y.label, y.value])).join(' | ');
+      expect(said).not.toMatch(/\b(ride|rider|riders|bike|bikes)\b/i);
+      expect(p.json.description).toContain('Micromobility Blood Donation');
+    }
   });
 
   test('a signing failure tells the rider nothing about the certificate', async () => {

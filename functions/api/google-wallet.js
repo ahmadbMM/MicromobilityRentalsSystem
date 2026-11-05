@@ -16,11 +16,11 @@
 // Without them the function answers 501 and the app hides its button.
 const SUPA_DEFAULT = "https://qpffkzmsfyilicwcsszz.supabase.co";
 const SAVE_URL = "https://pay.google.com/gp/v/save/";
-const KIND_NAMES = { jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
+const KIND_NAMES = { blood: "Micromobility Blood Donation", jcc: "Jeddah Corniche Circuit ride", saturday: "Saturday Social Ride", petromin: "Petromin ride", swim: "Swim session", workshop: "T100 Triathlon Prep", snd96: "Saudi National Day 96 Ride", runher: "Run for Her", event: "Event", vlap: "Victory Lap", defe5k: "DEFE 5KM Run" };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false): their pass names no bike and no
 // riders (the owner, 2026-10-18: "make sure all non-cycling related sessions dont include anything about
 // cycling anywhere").
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true };
 function people(kind, n) {
   const [one, many] = kind === "runher" || kind === "defe5k" ? ["Runner", "Runners"] : kind === "vlap" ? ["Athlete", "Athletes"] : NO_BIKE[kind] ? ["Participant", "Participants"] : ["Rider", "Riders"];
   return n > 1 ? `${many} (${n})` : one;
@@ -72,7 +72,7 @@ function rideKind(sess) {
   if (!sess || sess.event_kind !== "community") return "jcc";
   // runher as the app's _rideKind and the Apple pass read it: an untitled Run for Her was named
   // "Saturday Social Ride" here (2026-10-07).
-  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k"].includes(k) ? k : "saturday";
+  return ["petromin", "swim", "workshop", "runher", "event", "vlap", "defe5k", "blood"].includes(k) ? k : "saturday";
 }
 // The app's own tests (_isCommunity, _isApprovalRide, _commPublished), as the Apple pass reads them:
 // the National Day ride left the community umbrella, and a ride staff approve is one whose
@@ -132,6 +132,7 @@ function passPayload(env, b, group, sess, approvalRide, origin) {
   const satNums = satNum ? group.map((r) => r.queue_num).filter((n) => n != null).map(Number).sort((a, c) => a - c).map((n) => `#${n}`).join(", ") : "";
   if (satNums) modules.push(text("num", group.length > 1 ? "Booking numbers" : "Booking no.", satNums));
   if (riders) modules.push(text("riders", people(kind, group.length), riders));
+  if (kind === "blood") modules.push(text("role", "Role", b.blood_role === "visitor" ? "Visitor" : "Donor")); // donor or visitor (20261105140000)
   if (bikes) modules.push(text("bikes", "Bike", bikes));
   if (sess && sess.route_slug) modules.push(text("route", "Route", clean(sess.route_slug, 60)));
   return {

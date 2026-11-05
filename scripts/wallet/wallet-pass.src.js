@@ -102,6 +102,18 @@ export async function onRequestPost(context) {
       }
     } catch (e) { /* the pass is still worth issuing without it */ }
   }
+  // A donor's pass names their blood type, as their booking card does; a visitor's names none (blood_role, 20261105140000).
+  let bloodType = "";
+  if (_rideOf(sess) === "blood" && b.blood_role !== "visitor") {
+    try {
+      const tr = await fetch(`${SUPA}/rest/v1/rpc/customer_blood_type`, {
+        method: "POST",
+        headers: { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ p_id: customerId, p_token: token })
+      });
+      if (tr.ok) { const v = await tr.json(); if (typeof v === "string") bloodType = v; }
+    } catch (e) { /* the pass is still worth issuing without it */ }
+  }
   // A ride staff approve: the app offers the pass only once the rider is approved AND the list
   // is published (_walletOk), and its QR carries no queue number (bookingRef). The server has to
   // hold the same line, or a rider asking here directly gets a signed ticket - queue number and
@@ -121,7 +133,7 @@ export async function onRequestPost(context) {
   // wrong one.
   const { addons, known: addonsKnown } = await _serverAddons(SUPA, ANON, group);
   try {
-    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, addonsKnown, group, sess, approvalRide });
+    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, addonsKnown, group, sess, approvalRide, bloodType });
     return new Response(pkpass, {
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
@@ -143,7 +155,8 @@ async function buildPkpass(b, cfg) {
   const ref6 = b.id ? String(b.id).slice(0, 6) : "";
   const sess = cfg.sess || null;
   const ride = _rideOf(sess);
-  const skin = RIDES[ride] || RIDES.jcc;
+  const isBlood = ride === "blood", bloodVis = isBlood && b.blood_role === "visitor";
+  const skin = (bloodVis ? RIDES.blood_visitor : RIDES[ride]) || RIDES.jcc;
   // A ride staff approve never shows a rider their place in the order - not on the app's card,
   // not in its QR code - and the pass is the same ticket. It names the ride where the number
   // goes, and its code carries the ref alone (the desk scanner reads both forms, like the app's
@@ -169,7 +182,7 @@ async function buildPkpass(b, cfg) {
   // (the Victory Lap and the DEFE run too, when staff gave one: they are races, not rides)
   const _loc = String((sess && sess.location) || "").trim();
   const _locName = { JCC: "Jeddah Corniche Circuit", JYC: "Jeddah Yacht Club" }[_loc] || _loc;
-  const venue = ride === "event" ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k") && _locName ? _locName : skin.venue;
+  const venue = ride === "event" || isBlood ? _locName || "Jeddah Corniche Circuit" : (ride === "vlap" || ride === "defe5k") && _locName ? _locName : skin.venue;
   const rideName = (sess && sess.title) || skin.venue;
   const numsDisplay = hideNum ? rideName : _numsDisplay(nums) || (b.queue_num != null ? `#${b.queue_num}` : rideName);
   const time = _sessClock(sess) || b.session_time || "";
@@ -210,17 +223,20 @@ async function buildPkpass(b, cfg) {
   // the desk reads a number and a person off one line. The two clock times sit together below,
   // where collection followed by departure reads as one sequence rather than as two starts.
   const primary = [];
-  primary.push({ key: "queue", label: hideNum ? _whatLabel(ride) : satNum ? (single ? "BOOKING NO." : "BOOKING NUMBERS") : isRun ? "RUNNER NO." : isRace ? "ATHLETE NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
-  if (ridersValue) primary.push({ key: "riders", label: (single ? who.one : who.many).toUpperCase(), value: ridersValue });
+  primary.push({ key: "queue", label: isBlood ? (bloodVis ? "VISITOR NO." : "DONOR NO.") : hideNum ? _whatLabel(ride) : satNum ? (single ? "BOOKING NO." : "BOOKING NUMBERS") : isRun ? "RUNNER NO." : isRace ? "ATHLETE NO." : single ? "QUEUE" : "QUEUE NUMBERS", value: numsDisplay });
+  if (ridersValue && !isBlood) primary.push({ key: "riders", label: (single ? who.one : who.many).toUpperCase(), value: ridersValue });
   const secondary = [];
+  if (ridersValue && isBlood) secondary.push({ key: "riders", label: "NAME", value: ridersValue });
   // A ride that gathers has no bikes to collect: that time is when to turn up.
   if (collectStr) secondary.push({
     key: "collect",
     label: _gathersTime(sess) ? "GATHERING TIME" : bikeRide ? "BIKE COLLECTION" : "ARRIVE BY",
     value: collectStr,
   });
-  if (startStr) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
+  if (startStr && !isBlood) secondary.push({ key: "start", label: isRun ? "RUN STARTS" : isRace ? "RACE STARTS" : bikeRide ? "RIDE STARTS" : "STARTS", value: startStr });
   const auxiliary = [];
+  if (isBlood && startStr) auxiliary.push({ key: "hours", label: "HOURS", value: clock && clock.endMin != null ? `${startStr} - ${_hhmm(clock.endMin)}` : startStr });
+  if (isBlood && !bloodVis && cfg.bloodType) auxiliary.push({ key: "blood_type", label: "BLOOD TYPE", value: cfg.bloodType === "unknown" ? "Not known" : cfg.bloodType });
   if (bikeType) auxiliary.push({ key: "bike", label: "BIKE", value: bikeType });
   if (isRun && (b.run_km === 3 || b.run_km === 5)) auxiliary.push({ key: "distance", label: "DISTANCE", value: `${b.run_km} km` });
   if (priceStr) auxiliary.push({ key: "total", label: "TOTAL", value: priceStr });
@@ -247,7 +263,7 @@ async function buildPkpass(b, cfg) {
     teamIdentifier: cfg.teamId,
     serialNumber: String(b.id),
     organizationName: "MicroMobility Rentals",
-    description: hideNum ? `Booking - ${rideName}` : `Booking ${numsDisplay} - ${rideName}`,
+    description: isBlood ? `${bloodVis ? "Visitor" : "Donor"} ${numsDisplay} - ${rideName}` : hideNum ? `Booking - ${rideName}` : `Booking ${numsDisplay} - ${rideName}`,
     foregroundColor: skin.fg || "rgb(242,245,242)",
     backgroundColor: skin.bg,
     labelColor: skin.label,
@@ -274,7 +290,7 @@ async function buildPkpass(b, cfg) {
     eventTicket: {
       // Header is the ONLY field visible when the pass is collapsed in the stack — put the
       // most useful glance value (the date) here so a rider can find this pass among others.
-      headerFields: [{ key: "date", label: "SESSION", value: shortWhen || "Circuit" }],
+      headerFields: [...isBlood ? [{ key: "role", label: "ROLE", value: bloodVis ? "VISITOR" : "DONOR" }] : [], { key: "date", label: "SESSION", value: shortWhen || "Circuit" }],
       primaryFields: primary,
       secondaryFields: secondary,
       auxiliaryFields: auxiliary,
@@ -286,9 +302,11 @@ async function buildPkpass(b, cfg) {
         // Wallet reads link markup only in attributedValue; in value it printed the raw <a> tag.
         ...meetHeld ? [] : [{ key: "directions", label: "Directions", value: meetUrl, attributedValue: `<a href="${_attr(meetUrl)}">Open in Maps</a>` }],
         ...ridersBack,
+        // and the club or community they answered (blood_club, 20261105150000)
+        ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
         ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
-        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : "Show this pass on arrival." },
+        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
     }
@@ -296,7 +314,7 @@ async function buildPkpass(b, cfg) {
   const files = {};
   files["pass.json"] = strBytes(JSON.stringify(pass));
   // A ride with art of its own replaces only the files it names; the icon stays MicroMobility.
-  const art = { ...PASS_IMAGES, ...(RIDE_IMAGES[ride] || {}) };
+  const art = { ...PASS_IMAGES, ...(RIDE_IMAGES[bloodVis ? "blood_visitor" : ride] || {}) };
   for (const [name, b64] of Object.entries(art)) files[name] = b64Bytes(b64);
   const manifest = {};
   for (const [name, bytes] of Object.entries(files)) manifest[name] = await sha1hex(bytes);
@@ -519,7 +537,7 @@ function _sessClock(sess) {
 // The Victory Lap gathers (doors open, then the first heat); the DEFE run does not.
 const GATHERS = { saturday: true, snd96: true, runher: true, vlap: true, petromin: false, swim: false, workshop: false, jcc: false, defe5k: false };
 // The kinds that hand out no bike (the app's KIND_TRAITS bike:false).
-const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true };
+const NO_BIKE = { swim: true, workshop: true, event: true, runher: true, vlap: true, defe5k: true, blood: true };
 // Who a booking is for, by kind: riders only where there is a bike.
 function _people(ride) {
   if (ride === "runher" || ride === "defe5k") return { one: "Runner", many: "Runners" };
@@ -569,6 +587,11 @@ const RIDES = {
   // the tickets' own inks (styles.css th-vlap, th-defe5k)
   vlap:     { bg: "rgb(255,255,255)", fg: "rgb(13,13,13)", label: "rgb(91,63,214)", venue: "Victory Lap" },
   defe5k:   { bg: "rgb(255,255,255)", fg: "rgb(59,19,40)", label: "rgb(162,43,99)", venue: "DEFE 5KM Run" },
+  // The Blood Donation event: a donor's pass the campaign's deep green with its neon, a visitor's white with the same ink
+  // (the owner, 2026-11-05: "in apple pass card make sure to differentiate too"; picked "black stripe, white pass"), so
+  // the two differ even collapsed in the stack. Neon clears 13:1 on the green; the label green 6.4:1 on white.
+  blood:    { bg: "rgb(11,31,22)", fg: "rgb(255,255,255)", label: "rgb(3,254,138)", venue: "Micromobility Blood Donation" },
+  blood_visitor: { bg: "rgb(255,255,255)", fg: "rgb(11,31,22)", label: "rgb(8,104,63)", venue: "Micromobility Blood Donation" },
   // The circuit's own card colours: the navy field it is drawn on, white type, and the pale cyan its
   // meta line uses. Both clear AA.
   jcc:      { bg: "rgb(6,52,111)", fg: "rgb(255,255,255)", label: "rgb(159,213,238)", venue: "Jeddah Corniche Circuit" }
@@ -582,7 +605,7 @@ function _rideOf(sess) {
   if (sess.ride_kind === "snd96") return "snd96";
   if (sess.event_kind !== "community") return "jcc";
   const k = sess.ride_kind;
-  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" ? k : "saturday";
+  return k === "petromin" || k === "swim" || k === "workshop" || k === "runher" || k === "event" || k === "vlap" || k === "defe5k" || k === "blood" ? k : "saturday";
 }
 function _hhmm(min) {
   if (min == null) return "";
