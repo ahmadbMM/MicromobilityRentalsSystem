@@ -26789,7 +26789,7 @@ function renderStaffQueue(_resultsOnly){
     if(S.sfSort==='name')   return _sfd*_coll.compare(String(a.name??''),String(b.name??''));
     // A sort held over from another session must not survive on a screen that no longer shows
     // the column: the rows would come back in an order nothing on the page explains.
-    if(S.sfSort==='type'&&_qc.bike)   return _sfd*resolvedType(a).localeCompare(resolvedType(b));
+    if(S.sfSort==='type'&&_qc.bike)   return _sfd*String(resolvedType(a)||'').localeCompare(String(resolvedType(b)||'')); // a booking with no bike type has none to compare
     if(S.sfSort==='grp'&&_qc.grp)     return _sfd*String(a.rideGroup||'~').localeCompare(String(b.rideGroup||'~'));
     if(S.sfSort==='km'&&_qc.km)       return _sfd*((Number(a.runKm)||99)-(Number(b.runKm)||99));
     if(S.sfSort==='vl'&&_qc.vl){const o=e=>{const v=_vlOf(e)||{};return (VL_RACES.indexOf(v.race)+1||9)*10+(VL_DIVS.indexOf(v.div)+1||9);};return _sfd*(o(a)-o(b));}

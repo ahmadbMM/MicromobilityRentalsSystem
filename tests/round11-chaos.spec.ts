@@ -45,7 +45,7 @@ const MONKEY = (clicks: number, seed: number) => `(async()=>{
 for (const lang of ['en', 'ar']) {
   test(`monkey(${lang}): 120 chaotic customer-side actions, zero page errors`, async ({ page }) => {
     const errs: string[] = [];
-    page.on('pageerror', (e) => errs.push(String(e).slice(0, 300)));
+    page.on('pageerror', (e) => errs.push(String(e.stack || e).slice(0, 600))); // where it broke: only a slow machine may reach it
     await stubSupabase(page, fixtures);
     await loginCustomer(page, { id: 'c1' });
     await noAutoReload(page);
@@ -60,7 +60,7 @@ for (const lang of ['en', 'ar']) {
 
   test(`monkey(${lang}): 120 chaotic staff-panel actions incl. inputs, zero page errors`, async ({ page }) => {
     const errs: string[] = [];
-    page.on('pageerror', (e) => errs.push(String(e).slice(0, 300)));
+    page.on('pageerror', (e) => errs.push(String(e.stack || e).slice(0, 600))); // where it broke: only a slow machine may reach it
     await stubSupabase(page, fixtures);
     await unlockStaff(page);
     await noAutoReload(page);
@@ -100,5 +100,20 @@ test('Arabic end-to-end: full booking flow in RTL', async ({ page }) => {
   await page.locator('#reg-waiver-cb').check();                             // the ride waiver, on the review
   await page.locator('button', { hasText: 'تأكيد الحجز' }).click();          // Confirm booking (submitReg)
   await expect(page.locator('#tab-register')).toContainText('Spec Rider');
+  expect(errs, errs.join('\n')).toEqual([]);
+});
+
+// Found by the monkey on a slow machine: Bookings sorted by bike type read .localeCompare off a booking with no type.
+test('Bookings sort by bike type when a booking has none', async ({ page }) => {
+  const errs: string[] = [];
+  page.on('pageerror', (e) => errs.push(String(e.stack || e).slice(0, 600)));
+  await stubSupabase(page, { sessions: fixtures.sessions, bikes: fixtures.bikes, queue_entries: fixtures.queue_entries });
+  await unlockStaff(page);
+  await noAutoReload(page);
+  await page.goto('/?staff');
+  await waitForSb(page);
+  await page.waitForFunction('getQueue().length>1');
+  await page.evaluate(`setStaffTab('queue');_qSet('sfSort','type')`);
+  await expect(page.locator('#tab-queue')).toContainText('Spec Rider');
   expect(errs, errs.join('\n')).toEqual([]);
 });
