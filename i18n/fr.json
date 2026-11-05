@@ -6413,5 +6413,7 @@
   "bldClubSub": "Vous êtes inscrit à cet événement. Nous avons juste besoin de savoir ceci.",
   "bldRewardTxtVis": "Merci d’être venu. Saisissez ce code lors de la réservation. Valable jusqu’au {0}.",
   "bldRewardUsedVis": "Votre sortie gratuite a été utilisée. Merci d’être venu.",
-  "bldFreeRide": "Sortie gratuite"
+  "bldFreeRide": "Sortie gratuite",
+  "bldVisWaiverTitle": "Accord du visiteur",
+  "bldVisWaiverBody": "Vous ne pouvez pas vous inscrire à cet événement avant d’avoir lu et accepté cet accord. Je viens à cet événement en tant que visiteur et je ne donnerai pas mon sang. Je suivrai les consignes de l’équipe de l’événement et celles du site. Si je décide de donner pendant l’événement, j’en informerai d’abord l’équipe : le don est alors un acte médical réalisé par l’équipe médicale de l’événement, et non par MicroMobility, et seule cette équipe décide si je peux donner. Le rôle de MicroMobility se limite à m’inscrire et à offrir leur sortie gratuite aux visiteurs enregistrés. Je suis responsable de mes effets personnels. Dans toute la mesure permise par la loi, MicroMobility et son personnel ne sont responsables d’aucun acte médical ni de ses effets, ni d’aucune blessure, maladie, perte, vol ou dommage pendant l’événement."
 }

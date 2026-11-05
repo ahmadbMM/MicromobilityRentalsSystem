@@ -379,6 +379,9 @@ test.describe('the Apple Wallet pass', () => {
     expect(f(donor.json, 'backFields', 'club')!.value).toBe('Jeddah Club');
     expect(f(visitor.json, 'backFields', 'club')).toBeUndefined();
     expect(f(donor.json, 'backFields', 'venue')!.value).toBe('Jeddah Corniche Circuit');
+    // a donor shows their ID at the desk; a visitor brings none
+    expect(f(donor.json, 'backFields', 'help')!.value).toContain('Iqama');
+    expect(f(visitor.json, 'backFields', 'help')!.value).not.toContain('Iqama');
     for (const p of [donor, visitor]) {
       const said = ['headerFields', 'primaryFields', 'secondaryFields', 'auxiliaryFields', 'backFields'].flatMap((k) => p.json.eventTicket[k].flatMap((y: { label: string; value: string }) => [y.label, y.value])).join(' | ');
       expect(said).not.toMatch(/\b(ride|rider|riders|bike|bikes)\b/i);

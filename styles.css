@@ -11046,7 +11046,7 @@ body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-
 .bld-role span{font-size:12.5px;font-weight:500;line-height:1.35;}
 .bld-role.on{background:#03FE8A;border-color:var(--bld-ink);color:#0B1F16;}
 .bld-role.on[data-role="visitor"]{background:#0B1F16;border-color:#0B1F16;color:#fff;}
-#bld-after[hidden],#bld-bt-g[hidden],#bld-email-g[hidden],#bld-gender-g[hidden]{display:none;}
+#bld-after[hidden],#bld-bt-g[hidden],#bld-email-g[hidden],#bld-gender-g[hidden],#bld-id-note[hidden]{display:none;}
 #bld-club-none{margin-top:4px;}
 .bld-tk-club{margin:0 0 10px;font-size:13px;line-height:1.4;}
 .bld-club{font-weight:700;overflow-wrap:anywhere;}

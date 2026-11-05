@@ -287,7 +287,10 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await page.locator('.bld-role[data-role="visitor"]').click();
     // no blood type, and only the rules that are a visitor's; the rest of the step is the donor's
     await expect(page.locator('#bld-bt-g')).toBeHidden();
-    await expect(page.locator('#bld-after .bld-sum > *')).toHaveCount(2);
+    // only the age rule: a visitor brings no ID or Iqama
+    await expect(page.locator('#bld-after .bld-sum > *')).toHaveCount(1);
+    await expect(page.locator('#bld-id-note')).toBeHidden();
+    expect(await page.locator('#bld-after').innerText()).not.toContain('Iqama');
     await expect(page.locator('#run-first')).toHaveValue('Sara');
     await expect(page.locator('#bld-phone')).toBeVisible();
     await expect(page.locator('#bld-nat')).toBeVisible();
@@ -317,23 +320,81 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(sg).not.toContainText('Email');
     await sg.locator('.wg-cb').check();
     await sg.locator('.pg-btn').click();
-    // the same agreement, and the review says Visitor
-    await expect(page.locator('#reg-waiver')).toContainText('Donor agreement');
+    // their own agreement, and the review says Visitor
+    const wv = page.locator('#reg-waiver');
+    await expect(wv).toContainText('Visitor agreement');
+    await expect(wv).toContainText('as a visitor and will not give blood');
+    await expect(wv).toContainText('checked-in visitors their free ride');
+    await expect(wv).not.toContainText('Donor agreement');
+    expect(await wv.innerText()).not.toMatch(/resting after I donate|health questions|Iqama|partners/i);
     await page.locator('#reg-waiver-cb').check();
     await expect(page.locator('#tab-register .cu-rv-sec')).toContainText('Visitor');
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
     await expect.poll(() => rows.length).toBe(1);
-    expect(rows[0]).toMatchObject({ session_id: BD, share_ok: true, waiver_version: 'blood-2026-11-v1', blood_role: 'visitor', blood_club: '' });
+    expect(rows[0]).toMatchObject({ session_id: BD, share_ok: true, waiver_version: 'blood-2026-11-v2', blood_role: 'visitor', blood_club: '' });
     const tk = page.locator('#tab-register .ticket-card.th-blood');
     await expect(tk.locator('.bld-tk-type.bld-tk-vis')).toHaveText(/visitor/i);
     await expect(tk).toContainText('Visitor number');
     await expect(tk).not.toContainText('Donor number');
     await expect(tk).not.toContainText('Your type');
-    await expect(tk.locator('.bld-sum > *')).toHaveCount(2);
+    await expect(tk.locator('.bld-sum > *')).toHaveCount(1);
+    await expect(tk).not.toContainText('Iqama');
     await expect(tk).toContainText('Checked-in visitors get one free ride');
     await expect(tk).not.toContainText('Checked-in donors');
     // the gender went to the account, the rest already matched it, and no blood type was asked for
     expect(sent).toEqual(['customer_set_gender']);
+  });
+
+  test('changing the answer asks the sharing and the agreement again: a visitor\'s yes never covers a donor\'s blood type', async ({ page }) => {
+    await stubSupabase(page, custFx({ 'rpc:customer_set_gender': true, 'rpc:customer_profile': profile({ gender: 'female' }) }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate('goLanding()');
+    await page.locator('.bld-card').click();
+    await page.locator('#tab-register .mm-reg-foot .btn-primary').click();
+    await page.locator('.bld-role[data-role="visitor"]').click();
+    await page.locator('#bld-club').fill('Jeddah Riders');
+    await page.locator('#bld-next').click();
+    const sg = page.locator('#share-gate .sg-box');
+    await expect(sg).not.toContainText('Blood type');
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
+    await page.locator('#reg-waiver-cb').check();
+    await expect(page.locator('#reg-waiver')).toContainText('Visitor agreement');
+    await page.evaluate('S.regStep=2;renderRegister()');
+    await page.locator('.bld-role[data-role="donor"]').click();
+    await expect(page.locator('#bld-id-note')).toBeVisible();
+    await expect(page.locator('#bld-after .bld-sum > *')).toHaveCount(4);
+    await page.locator('#bld-next').click();
+    await page.locator('#bld-info-ok').click();
+    // asked again, now with the blood type on the list, and the agreement is the donor's, unticked
+    await expect(sg).toContainText('Blood type');
+    await sg.locator('.wg-cb').check();
+    await sg.locator('.pg-btn').click();
+    await expect(page.locator('#reg-waiver')).toContainText('Donor agreement');
+    await expect(page.locator('#reg-waiver-cb')).not.toBeChecked();
+  });
+
+  test('someone on the list as a visitor with no agreement is asked for a visitor\'s, and it is recorded as that', async ({ page }) => {
+    const row = { id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', waiver_version: null, waiver_at: null, data_share_at: '2099-11-01T10:00:00Z', blood_role: 'visitor', blood_club: '' };
+    const sent: Record<string, unknown>[] = [];
+    await stubSupabase(page, custFx({ queue_entries: [row], 'rpc:customer_queue': [row], 'rpc:customer_entries': [row] }));
+    await page.route(/\/rest\/v1\/rpc\/customer_accept_waiver/, (route) => {
+      sent.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '1' });
+    });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('myrides')`);
+    const g = page.locator('#waiver-gate .wg-box');
+    await expect(g).toContainText('as a visitor and will not give blood');
+    await expect(g.locator('.wg-sec')).toHaveText('Visitor');
+    await g.locator('.wg-cb').check();
+    await g.locator('.pg-btn').click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ p_session_id: BD, p_version: 'blood-2026-11-v2' });
   });
 
   test('My Bookings: a visitor sees the stripe where a donor sees the blood type', async ({ page }) => {

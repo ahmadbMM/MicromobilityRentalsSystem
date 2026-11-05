@@ -1543,7 +1543,7 @@ async function buildPkpass(b, cfg) {
         ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
         ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
-        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : "Show this pass on arrival." },
+        { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : bloodVis ? "Show this pass at the registration desk." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
       ]
     }
