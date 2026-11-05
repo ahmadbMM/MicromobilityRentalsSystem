@@ -225,6 +225,23 @@ test.describe('The way back to the portal', () => {
   });
 });
 
+test('the panel migration: phones and details start off on open sessions, and an older staff page cannot drop them', () => {
+  const sql = readFileSync('supabase/migrations/20261105180000_volunteer_panel.sql', 'utf8');
+  expect(sql).toContain(`w := _vol_gate(p_id, p_token, p_session, 'list')`);
+  expect(sql).toContain(`'{"phone":false,"details":false}'::jsonb || caps`);
+  expect(sql).toContain(`when _phone then`);
+  expect(sql).toContain(`when _details then`);
+  expect(sql).toMatch(/\(select \(x\.caps ->> 'phone'\)::boolean from volunteer_sessions x/);
+  expect(sql).not.toMatch(/'email'|'price'|'birth_date'/);
+});
+
+test('the privacy notice names what a volunteer can see, in both languages', () => {
+  const src = readFileSync('app.src.html', 'utf8');
+  expect(src).toContain('also your mobile number and your booking details');
+  expect(src).toContain('أيضًا رقم جوالك وتفاصيل حجزك');
+  expect(src).not.toContain('Never your contact details or payments');
+});
+
 test('the migration keeps its promises', () => {
   const sql = readFileSync('supabase/migrations/20261105120000_volunteers.sql', 'utf8');
   for (const t of ['volunteers', 'volunteer_hours', 'volunteer_shifts', 'volunteer_settings']) expect(sql, t).toContain(`alter table public.${t} enable row level security`);

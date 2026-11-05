@@ -6319,6 +6319,8 @@
   "zfCanDonated": "Markahan ang mga tao bilang nag-donate",
   "zfCanList": "Makita ang listahan ng mga pangalan",
   "zfCanCounts": "Makita kung ilan na ang dumating",
+  "zfCanPhone": "Makita ang mga mobile number sa listahan",
+  "zfCanDetails": "Makita ang detalye ng booking sa listahan (bisikleta, taas, sukat, blood type, club)",
   "zfSignup": "Tumanggap ng bagong interes",
   "zvRole": "Tungkulin",
   "zvAcceptAll": "Tanggapin lahat ({0})",

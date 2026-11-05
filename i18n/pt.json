@@ -6319,6 +6319,8 @@
   "zfCanDonated": "Marcar pessoas como doadoras",
   "zfCanList": "Ver a lista de nomes",
   "zfCanCounts": "Ver quantos já chegaram",
+  "zfCanPhone": "Ver os números de telemóvel na lista",
+  "zfCanDetails": "Ver os detalhes da reserva na lista (bicicleta, altura, tamanho, tipo sanguíneo, clube)",
   "zfSignup": "Receber novos interessados",
   "zvRole": "Função",
   "zvAcceptAll": "Aceitar todos ({0})",
