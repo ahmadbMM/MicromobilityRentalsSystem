@@ -78,6 +78,7 @@ test.describe('@staff:community account report filters and sorts, Instagram firs
       await expect(dlg.getByLabel(lbl, { exact: true }), lbl).toHaveCount(1);
     }
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_igHi"]')).toHaveCount(1);
+    await dlg.locator('[aria-controls="fa-acr"]').click();
     await dlg.getByLabel('Against the community average', { exact: true }).selectOption('x2');
     await expect(page.locator('#acr-count')).toContainText('1 / 5');
   });
@@ -85,7 +86,7 @@ test.describe('@staff:community account report filters and sorts, Instagram firs
   test('Accounts list: the same Instagram filters behind the Filter button', async ({ page }) => {
     await staff(page);
     await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
-    await page.locator('[aria-controls="fm-am"]').click();
+    await page.locator('[aria-controls="fa-am"]').click();
     await page.locator('#fm-am').getByLabel('Against the community average', { exact: true }).selectOption('half');
     expect(await page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')))).toEqual(['m1']);
   });

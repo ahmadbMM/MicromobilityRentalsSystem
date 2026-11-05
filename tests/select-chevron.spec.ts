@@ -34,7 +34,6 @@ test('staff: filter selects and plain selects carry their chevron', async ({ pag
   await waitForSb(page);
   await staffReady(page);
   await page.evaluate(`setStaffTab('queue')`);
-  await page.locator('#tab-queue .filter-toggle').click(); // the dropdowns open under the Filter button
   const filter = page.locator('#tab-queue select.filter-select').filter({ visible: true }).first();
   await expect(filter).toBeVisible();
   const f = await filter.evaluate(look);

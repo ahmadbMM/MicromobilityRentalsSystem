@@ -33,17 +33,21 @@ test('History: the dropdowns open under the Filter button, named, and the button
   await boot(page);
   await page.evaluate(`setStaffTab('history')`);
   const panel = page.locator('#fm-hist');
-  await expect(panel).toBeHidden();
+  // the main filters in plain view, the detailed ones under Advanced and its arrow
+  await expect(panel).toBeVisible();
+  await expect(panel.locator('.filter-field-lbl').filter({ visible: true })).toHaveText(['Status', 'Pay', 'Range']);
   const btn = page.locator('#tab-history .filter-toggle');
+  await expect(btn).toContainText('Advanced');
+  await expect(btn.locator('.f-arrow')).toBeVisible();
   await expect(btn).toHaveAttribute('aria-expanded', 'false');
   await btn.click();
-  await expect(panel).toBeVisible();
-  await expect(panel.locator('.filter-field-lbl')).toHaveText(['Status', 'Pay', 'Type', 'Size', 'Range']);
+  await expect(btn).toHaveAttribute('aria-expanded', 'true');
+  await expect(panel.locator('.filter-field-lbl').filter({ visible: true })).toHaveText(['Status', 'Pay', 'Range', 'Type', 'Size']);
   // the session picker is the view's context: it stands in the bar, never behind the button
   await expect(page.locator('#tab-history .filter-sess select')).toBeVisible();
-  await panel.locator('select').first().selectOption('done');
-  // the re-render keeps the panel open and the button now says one filter is on
-  await expect(page.locator('#fm-hist')).toBeVisible();
+  await panel.locator('select[aria-label="Type"]').selectOption({ index: 1 });
+  // the re-render keeps it extended and the button now says one detailed filter is on
+  await expect(panel.locator('select[aria-label="Size"]')).toBeVisible();
   await expect(page.locator('#tab-history .filter-toggle')).toContainText('(1)');
 });
 

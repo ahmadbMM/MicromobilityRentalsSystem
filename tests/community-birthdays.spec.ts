@@ -214,12 +214,8 @@ test.describe('Community > Birthdays', () => {
     await staff(page, { tags: [...tags, jcc], customer_tags: [...customer_tags, { customer_id: 'n1', tag_id: 'tag_jcc', added_at: 1 }] });
     await page.evaluate(`setCommTab('birthdays')`);
     await expect(names(page)).toHaveCount(5);                                               // the Community, as before
-    const filter = page.locator('#tab-community .filter-toggle');
-    await expect(filter).not.toContainText('(1)');
-    await filter.click();
     await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');
     await expect(names(page)).toHaveText(['Not Member']);
-    await expect(filter).toContainText('(1)');
     await expect(page.locator('#tab-community')).toContainText('Birthdays, soonest first.');  // no longer "Community members'"
     await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('all');
     await expect(names(page)).toHaveCount(7);                                               // everyone with a date, a lapsed tag too
@@ -232,7 +228,6 @@ test.describe('Community > Birthdays', () => {
     await staff(page, { tags: [jcc], customer_tags: [...customer_tags, { customer_id: 'n1', tag_id: 'tag_jcc', added_at: 1 }] });
     await page.evaluate(`setCommTab('birthdays')`);
     await expect(names(page)).toHaveCount(5);
-    await page.locator('#tab-community .filter-toggle').click();
     await expect(page.locator('#fm-bd select[aria-label="Tag"]')).toHaveValue('tag_saturday');
     await expect(page.locator('#fm-bd select[aria-label="Tag"] option:checked')).toHaveText('Community');
     await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');                            // the first tag can be picked

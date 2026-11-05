@@ -517,6 +517,7 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     await expect(missingIn.locator('option')).toHaveText(['Customers', 'Community members', 'Both']);
     await fewIn.selectOption('community');
     expect(await page.evaluate(`_accOpts().natFewIn`)).toBe('community');
+    await m.locator('[aria-controls="fa-acr"]').click();
     const filter = m.locator('select[aria-label="Only 1 or 2 of their nationality"]');
     await filter.selectOption('accounts');
     await expect(m.locator('#acr-count')).toContainText('4 / 11');

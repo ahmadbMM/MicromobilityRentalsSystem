@@ -26,7 +26,7 @@ async function open(page: Page, sec: 'customers' | 'community') {
   await page.evaluate(sec === 'customers'
     ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()`
     : `setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
-  await page.locator('[aria-controls="fm-am"]').click();
+  await page.locator('[aria-controls="fa-am"]').click();
 }
 const rows = (page: Page) => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')));
 
@@ -44,7 +44,7 @@ test.describe('@staff:flagged filter', () => {
       await box('photo').check();
       expect(await rows(page)).toEqual(['c2', 'c1']);
       await expect(fold.locator('summary')).toHaveText('Phone Number, Profile photo');
-      await expect(page.locator('[aria-controls="fm-am"]')).toContainText('(1)');
+      await expect(page.locator('[aria-controls="fa-am"]')).toContainText('(1)');
       await box('phone').uncheck();
       expect(await rows(page)).toEqual(['c2']);
       await box('photo').uncheck();

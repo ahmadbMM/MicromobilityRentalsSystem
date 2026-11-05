@@ -140,7 +140,6 @@ test('notes are saved, and admins can delete spam', async ({ page }) => {
 test('the From filter and search narrow the list', async ({ page }) => {
   await open(page, { site_messages: [msg({}), msg({ id: 8, kind: 'help', topic: 'faq', name: 'Sara Ali', company: null, email: 'sara@example.test', phone: null, message: 'Where are you?' })] });
   await expect(panel(page).locator('.sm-row')).toHaveCount(2);
-  await panel(page).locator('.filter-toggle').click();
   await page.locator('#sm-kind').selectOption('help');
   await expect(panel(page).locator('.sm-row')).toHaveCount(1);
   await expect(card(page, 8)).toBeVisible();
@@ -164,7 +163,6 @@ test('job applications from About arrive as their own kind, with the role', asyn
   await expect(card(page, 10)).toContainText('Job application');
   await expect(card(page, 10)).toContainText('Ride captain');
   await expect(card(page, 11)).toContainText('Any role');
-  await panel(page).locator('.filter-toggle').click();
   await page.locator('#sm-kind').selectOption('jobs');
   await expect(panel(page).locator('.sm-row')).toHaveCount(2);
   await expect(card(page, 7)).toHaveCount(0);

@@ -378,10 +378,10 @@ test.describe('@staff:bookings Blood Donation', () => {
     await page.waitForFunction('S.promoCodes&&S.promoCodes.length>0');
     const shown = () => page.evaluate<string>(`[...document.querySelectorAll('#q-results .queue-table tbody tr')].map(r=>(r.innerText.match(/Donor \\d/)||[''])[0]).filter(Boolean).join()`);
     const set = (js: string) => page.evaluate(`${js};renderStaffQueue()`);
-    // closed, the long panel is not drawn; opened, it holds the night's own filters, the Accounts list's, and never money
-    await expect(tab.locator('select[aria-label="City of residence"]')).toHaveCount(0);
-    await set(`S._fOpen=Object.assign(S._fOpen||{},{q:true})`);
+    // blood type and Donated in plain view; the long list is drawn only once Advanced opens, and never holds money
     await expect(tab.locator('select[aria-label="Blood type"] option')).toHaveCount(11);
+    await expect(tab.locator('select[aria-label="City of residence"]')).toHaveCount(0);
+    await tab.locator('.filter-toggle').click();
     await expect(tab.locator('select[aria-label="City of residence"] option')).toHaveText(['All', 'Not set', 'Jeddah', 'Makkah', 'Riyadh']);
     expect(await tab.locator('#fm-q select').count()).toBeGreaterThan(35);
     expect(await tab.locator('#fm-q').innerText()).not.toMatch(/\bPaid\b|Payment|Spent|⃁|\bSAR\b/);

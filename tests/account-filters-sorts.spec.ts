@@ -35,7 +35,7 @@ async function open(page: Page, sec: 'customers' | 'community') {
   await page.evaluate(sec === 'customers'
     ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()`
     : `setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
-  await page.locator('[aria-controls="fm-am"]').click();
+  await page.locator('[aria-controls="fa-am"]').click();
 }
 const rows = (page: Page) => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')));
 
@@ -69,10 +69,10 @@ test.describe('@staff:accounts and members filters and sorts', () => {
       expect(await rows(page), `${lbl} = ${v}`).toEqual(want);
       await panel.locator(`select[aria-label="${lbl}"]`).selectOption('');
     }
-    // two at once: the button counts both, Reset takes both off
+    // two at once: Advanced counts the detailed one, Reset takes both off
     await panel.locator(`select[aria-label="Gender"]`).selectOption('male');
     await panel.locator(`select[aria-label="Upcoming booking"]`).selectOption('no');
-    await expect(page.locator('[aria-controls="fm-am"]')).toContainText('(2)');
+    await expect(page.locator('[aria-controls="fa-am"]')).toContainText('(1)');
     expect(await rows(page)).toEqual(['c2']);
     await panel.locator('.am-reset').click();
     expect(await rows(page)).toEqual(['c3', 'c2', 'c1']);
