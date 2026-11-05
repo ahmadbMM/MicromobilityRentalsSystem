@@ -11049,6 +11049,14 @@ body .lec-wrap .lec-about.ab-blood{color:var(--bld-c-ac);background:var(--bld-c-
 #bld-after[hidden],#bld-bt-g[hidden],#bld-email-g[hidden],#bld-gender-g[hidden],#bld-id-note[hidden]{display:none;}
 #bed-bt-g[hidden]{display:none;}
 .bld-edit{max-height:calc(100dvh - 32px);overflow-y:auto;}
+.bld-add-who{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;}
+.bld-add-res{display:grid;gap:4px;margin-top:6px;}
+.bld-add-hit{padding:8px 10px;border:1px solid rgba(var(--tint-rgb),.2);background:transparent;color:inherit;font:inherit;font-size:13px;text-align:start;cursor:pointer;}
+.bld-edit .bld-edit-none{text-transform:none;letter-spacing:normal;color:inherit;}
+.bld-edit .bld-edit-none input[type=checkbox]{-webkit-appearance:checkbox;appearance:auto;display:block;position:static;flex:none;width:18px;height:18px;margin:0;padding:0;opacity:1;}
+.bld-add-terms{margin:8px 0;font-size:13px;}
+.bld-add-terms summary{font-weight:600;cursor:pointer;}
+.bld-add-terms p{white-space:pre-wrap;}
 .bld-edit-none{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:600;cursor:pointer;}
 #bld-club-none{margin-top:4px;}
 .bld-tk-club{margin:0 0 10px;font-size:13px;line-height:1.4;}

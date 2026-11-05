@@ -610,6 +610,76 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tq.locator('tbody .rr-chip.rr-yes')).toHaveCount(2);
   });
 
+  test('staff add a donor or a visitor by hand: a new account or a found one, the rules asked, and the agreement only when ticked', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const signups: Record<string, unknown>[] = [], rows: Record<string, unknown>[] = [], patches: Record<string, unknown>[] = [];
+    const known = { id: 'c9', name: 'Omar Saleh', email: 'omar@example.com', phone: '+966500000009', gender: 'male', birth_date: '1990-01-01', nationality: 'Egypt', blood_type: 'A+', created_at: '2026-01-01' };
+    await stubSupabase(page, { sessions: [blood], bikes: [], queue_entries: [], customers: [known] });
+    const headers = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+    await page.route(/\/rest\/v1\/rpc\/customer_signup/, (route) => { signups.push(route.request().postDataJSON()); return route.fulfill({ status: 200, headers, body: '{"ok":true}' }); });
+    await page.route(/\/rest\/v1\/queue_entries/, (route) => {
+      if (route.request().method() === 'GET') return route.fulfill({ status: 200, headers, body: JSON.stringify(rows) });
+      if (route.request().method() !== 'POST') return route.fallback();
+      rows.push(route.request().postDataJSON());
+      return route.fulfill({ status: 201, headers, body: '[]' });
+    });
+    await page.route(/\/rest\/v1\/customers/, (route) => {
+      if (route.request().method() === 'GET' && /email=eq\./.test(route.request().url())) return route.fulfill({ status: 200, headers, body: '[]' });
+      if (route.request().method() !== 'PATCH') return route.fallback();
+      patches.push(route.request().postDataJSON());
+      return route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' }, body: '' });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('allSessions().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${BD}';renderStaffQueue()`);
+    const dlg = page.locator('#booking-edit-modal');
+    await page.getByRole('button', { name: '+ Donor or visitor' }).click();
+    await expect(dlg).toContainText('Add a donor or visitor');
+
+    // A new donor: the details are asked for, and nothing is made until they are given.
+    await dlg.locator('#bed-first').fill('Lina');
+    await dlg.locator('#bed-last').fill('Hassan');
+    await dlg.locator('#bed-phone').fill('0500000123');
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect.poll(() => page.locator('.toast, [role="alert"], [role="status"]').allInnerTexts().then((x) => x.join(' '))).toMatch(/email/i);
+    expect(signups).toEqual([]);
+    await dlg.locator('#bed-email').fill('lina@example.com');
+    await page.evaluate(`document.getElementById('bed-dob').value='1995-05-05'`);
+    await dlg.locator('#bed-nat').selectOption({ index: 1 });
+    await dlg.locator('#bed-bt').selectOption('O+');
+    await dlg.locator('#bed-club').fill('Runners');
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect.poll(() => rows.length).toBe(1);
+    expect(signups[0]).toMatchObject({ p_name: 'Lina Hassan', p_email: 'lina@example.com', p_phone: '+966500000123' });
+    expect(rows[0]).toMatchObject({ customer_id: signups[0].p_id, blood_role: 'donor', blood_club: 'Runners', status: 'waiting', data_share_at: null, waiver_at: null, waiver_version: null });
+    expect(patches[0]).toMatchObject({ birth_date: '1995-05-05', blood_type: 'O+' });
+    await expect(page.locator('#tab-queue .queue-table tbody')).toContainText('Lina Hassan');
+
+    // A found account as a visitor, agreeing here: no blood type asked, and the agreement is stamped.
+    await page.getByRole('button', { name: '+ Donor or visitor' }).click();
+    await dlg.locator('#bed-role').selectOption('visitor');
+    await expect(dlg.locator('#bed-bt-g')).toBeHidden();
+    await dlg.locator('#bed-q').fill('Omar');
+    await dlg.locator('.bld-add-hit').click();
+    await expect(dlg.locator('#bed-first')).toHaveValue('Omar');
+    await expect(dlg.locator('#bed-role')).toHaveValue('visitor');
+    await dlg.locator('#bed-agree').check();
+    await dlg.getByRole('button', { name: 'Add', exact: true }).click();
+    await expect.poll(() => rows.length).toBe(2);
+    expect(signups.length).toBe(1);
+    expect(rows[1]).toMatchObject({ customer_id: 'c9', blood_role: 'visitor', waiver_version: 'blood-2026-11-v2' });
+    expect(rows[1].data_share_at).toBeTruthy();
+
+    // They cannot be added twice.
+    await page.getByRole('button', { name: '+ Donor or visitor' }).click();
+    await dlg.locator('#bed-q').fill('Omar');
+    await dlg.locator('.bld-add-hit').click();
+    await expect(dlg.locator('#bed-first')).toHaveValue('');
+    expect(rows.length).toBe(2);
+  });
+
   test('a marked donation has its own Undo donated, which asks first and says when the free ride is already used', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     const row = { id: 'r3', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 3, name: 'Donor r3', phone: '0550000003', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'cr3', donated_at: '2099-11-05T15:00:00Z' };
