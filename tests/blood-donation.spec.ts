@@ -602,6 +602,47 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tq.locator('tbody .rr-chip.rr-yes')).toHaveCount(2);
   });
 
+  test('a marked donation has its own Undo donated, which asks first and says when the free ride is already used', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const row = { id: 'r3', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 3, name: 'Donor r3', phone: '0550000003', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'cr3', donated_at: '2099-11-05T15:00:00Z' };
+    const calls: Record<string, unknown>[] = [];
+    let used = true;
+    await stubSupabase(page, { sessions: [blood], bikes: [], queue_entries: [row], customers: [] });
+    await page.route(/\/rest\/v1\/rpc\/staff_blood_donated/, (route) => {
+      calls.push(route.request().postDataJSON());
+      const headers = { 'access-control-allow-origin': '*', 'content-type': 'application/json' };
+      if (used) return route.fulfill({ status: 400, headers, body: JSON.stringify({ message: 'BLOOD_CODE_USED', code: 'P0001' }) });
+      return route.fulfill({ status: 200, headers, body: JSON.stringify({ ok: true, donated: false }) });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${BD}';renderStaffQueue()`);
+    const tq = page.locator('#tab-queue .queue-table');
+    const undo = tq.getByRole('button', { name: 'Undo donated' });
+    const dlg = page.locator('#confirm-modal');
+    // The chip itself no longer takes it back.
+    await tq.locator('tbody .rr-chip.rr-yes').click();
+    await undo.click();
+    await expect(dlg).toContainText('free ride code');
+    expect(calls).toEqual([]);
+    await dlg.getByRole('button', { name: 'Cancel' }).click();
+    expect(calls).toEqual([]);
+    // Already used: refused, and it stays marked.
+    await undo.click();
+    await dlg.getByRole('button', { name: 'Undo donated' }).click();
+    await expect(page.getByText('already used')).toBeVisible();
+    await expect(undo).toHaveCount(1);
+    // Otherwise it goes back to Mark donated.
+    used = false;
+    await undo.click();
+    await dlg.getByRole('button', { name: 'Undo donated' }).click();
+    await expect(tq.getByRole('button', { name: 'Mark donated' })).toHaveCount(1);
+    await expect(undo).toHaveCount(0);
+    expect(calls[calls.length - 1]).toEqual({ p_entry_id: 'r3', p_on: false });
+  });
+
   test('every sort and filter: blood type, donated, free ride code and the Accounts list, no money, and the report', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     const row = (n: number, status: string, donated: string | null, inAt: string | null = null) => ({

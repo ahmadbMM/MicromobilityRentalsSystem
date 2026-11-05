@@ -5747,6 +5747,8 @@
   "bqRwNone": "Walang code",
   "bldMark": "Markahang nag-donate",
   "bldErrUsed": "Nagamit na ang libreng sakay, kaya hindi na ito mababawi.",
+  "bldUndoQ": "I-undo ang donasyong ito?",
+  "bldUndoBody": "Babawiin ang marka ng donasyon, ang Blood Donor badge at ang code ng libreng ride.",
   "bldErrIn": "I-check in muna sila.",
   "bldErrAcct": "Walang account ang booking na ito na mabibigyan ng libreng sakay.",
   "bldToastOn": "Namarkahang nag-donate. Nasa ticket nila ang code na {0}.",
