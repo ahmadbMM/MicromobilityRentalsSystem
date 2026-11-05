@@ -5749,6 +5749,8 @@
   "bldErrUsed": "Su paseo gratis ya se usó, así que no se puede deshacer.",
   "bldUndoQ": "¿Deshacer esta donación?",
   "bldUndoBody": "Se retiran la marca de donación, la insignia de donante de sangre y el código de paseo gratis.",
+  "bldMarkQ": "¿{0} ya ha donado?",
+  "bldMarkBody": "Márcalo solo cuando haya donado. Así recibe el código de paseo gratis y la insignia de donante de sangre.",
   "bldErrIn": "Regístrale primero.",
   "bldErrAcct": "Esta reserva no tiene una cuenta a la que dar el paseo gratis.",
   "bldToastOn": "Donación marcada. El código {0} está en su ticket.",

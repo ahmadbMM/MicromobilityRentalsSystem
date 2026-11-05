@@ -50,9 +50,27 @@ test.describe('Volunteer role', () => {
     await expect(page.locator('.vol-chips')).toContainText('Checked in');
     await expect(page.locator('.vol-acts button')).toHaveCount(2);
     await page.click('.vol-acts .btn-primary');
+    await expect(page.locator('#confirm-modal')).toContainText('Has Sara Donor donated?');
+    await expect(page.locator('.vol-chips .rr-yes')).toHaveCount(1); // only asked, nothing marked yet
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Mark donated' }).click();
     await expect(page.locator('.vol-chips .rr-yes')).toHaveCount(2);
     await expect(page.locator('.vol-acts button')).toHaveCount(1);
     await expect(page.locator('.vol-acts button')).toHaveText('Undo donated');
+  });
+
+  test('a double tap on Check in checks in and marks nothing: the next step only asks', async ({ page }) => {
+    const donated: unknown[] = [];
+    await page.route(/\/rest\/v1\/rpc\/staff_volunteer_donated/, (route) => { donated.push(1); return route.fulfill({ json: { ok: true } }); });
+    await page.fill('#vol-q', '12');
+    await page.click('#vol-find');
+    await page.locator('.vol-acts .btn-primary').click();
+    await expect(page.locator('.vol-chips')).toContainText('Checked in');
+    await page.locator('.vol-acts .btn-primary').click(); // the second tap lands on Mark donated, now in the same place
+    await expect(page.locator('#confirm-modal')).toContainText('Has Sara Donor donated?');
+    expect(donated).toEqual([]);
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.locator('.vol-chips .rr-yes')).toHaveCount(1);
+    expect(donated).toEqual([]);
   });
 
   test('a donor someone else marked offers no undo', async ({ page }) => {

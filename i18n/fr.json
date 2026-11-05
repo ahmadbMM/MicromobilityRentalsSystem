@@ -5749,6 +5749,8 @@
   "bldErrUsed": "Sa sortie gratuite a déjà été utilisée : impossible d’annuler.",
   "bldUndoQ": "Annuler ce don ?",
   "bldUndoBody": "La mention du don, le badge de donneur de sang et le code de balade gratuite sont retirés.",
+  "bldMarkQ": "Le don de {0} est-il fait ?",
+  "bldMarkBody": "Marquez-le seulement une fois le don fait. La personne reçoit alors le code de balade gratuite et le badge de donneur de sang.",
   "bldErrIn": "Enregistrez d’abord son arrivée.",
   "bldErrAcct": "Cette réservation n’a pas de compte pour recevoir la sortie gratuite.",
   "bldToastOn": "Don enregistré. Le code {0} figure sur son billet.",

@@ -5749,6 +5749,8 @@
   "bldErrUsed": "O passeio grátis já foi usado, então não é possível desfazer.",
   "bldUndoQ": "Anular esta doação?",
   "bldUndoBody": "A marca de doação, o crachá de dador de sangue e o código de passeio grátis são retirados.",
+  "bldMarkQ": "{0} já doou?",
+  "bldMarkBody": "Marque apenas depois da doação. A pessoa recebe o código de passeio grátis e o selo de doador de sangue.",
   "bldErrIn": "Registre a presença primeiro.",
   "bldErrAcct": "Esta reserva não tem conta para receber o passeio grátis.",
   "bldToastOn": "Doação marcada. O código {0} está no bilhete.",

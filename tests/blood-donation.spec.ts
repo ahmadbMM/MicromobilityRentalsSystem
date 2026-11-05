@@ -596,7 +596,15 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(page.locator('.walkin-head')).toHaveCount(0);
     await expect(tq.getByRole('button', { name: 'Mark donated' })).toHaveCount(1);
     await expect(tq.locator('tbody .rr-chip.rr-yes')).toHaveText(['Donated']);
+    // Checking in and donating are two steps: the tap only asks, naming the person, and Cancel marks nothing.
+    const ask = page.locator('#confirm-modal');
     await tq.getByRole('button', { name: 'Mark donated' }).click();
+    await expect(ask).toContainText('Has Donor r2 donated?');
+    await ask.getByRole('button', { name: 'Cancel' }).click();
+    await page.waitForTimeout(100);
+    expect(calls).toEqual([]);
+    await tq.getByRole('button', { name: 'Mark donated' }).click();
+    await ask.getByRole('button', { name: 'Mark donated' }).click();
     await expect.poll(() => calls.length).toBe(1);
     expect(calls[0]).toEqual({ p_entry_id: 'r2', p_on: true });
     await expect(tq.locator('tbody .rr-chip.rr-yes')).toHaveCount(2);
@@ -738,7 +746,8 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tq.locator('tbody .bld-bt')).toHaveText(['O+', 'A+']);
     // nothing to mark on a visitor: check-in gives them the free ride
     await expect(tq.getByRole('button', { name: 'Mark donated' })).toHaveCount(0);
-    await expect(tq.locator('tbody tr', { hasText: 'Person r2' }).first().locator('.rr-chip.rr-yes')).toHaveText('Free ride');
+    await expect(tq.locator('tbody tr', { hasText: 'Person r2' }).first().locator('.rr-chip')).toContainText('Free ride');
+    await expect(tq.locator('tbody tr', { hasText: 'Person r2' }).first().locator('.rr-chip.rr-yes')).toHaveCount(0); // not green: it is not a donation
     await expect(tq.locator('tbody tr', { hasText: 'Person r4' }).first().locator('.rr-chip.rr-yes')).toHaveCount(0);
     // the club: a name, None, or not answered yet
     await expect(tq.locator('tbody .bld-club')).toHaveText(['Jeddah Riders']);
