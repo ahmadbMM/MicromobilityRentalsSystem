@@ -731,6 +731,77 @@ test.describe('@staff:bookings Blood Donation', () => {
     expect(rep).toEqual({ role: true, club: true, other: false });
   });
 
+  test('staff edit a registration: filled in from the account, saved to the account, the booking follows', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const row = { id: 'r1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 1, name: 'Sara Haddad', phone: '+966500000001', email: 'sara@example.com', type_preference: 'None', size: '', status: 'waiting', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', donated_at: null, blood_role: 'visitor', blood_club: null };
+    const acct = { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', phone: '+966500000001', gender: 'female', birth_date: '1995-05-05', nationality: 'Saudi Arabia', blood_type: 'O+', created_at: '2026-01-01' };
+    const patches: { url: string; body: Record<string, unknown> }[] = [], roles: Record<string, unknown>[] = [];
+    await stubSupabase(page, { sessions: [blood], bikes: [], queue_entries: [row], customers: [acct], 'rpc:staff_phone_accounts': [] });
+    await page.route(/\/rest\/v1\/(customers|queue_entries)\?/, (route) => {
+      if (route.request().method() !== 'PATCH') return route.fallback();
+      patches.push({ url: route.request().url(), body: route.request().postDataJSON() });
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '[]' });
+    });
+    await page.route(/\/rest\/v1\/rpc\/staff_blood_role/, (route) => {
+      roles.push(route.request().postDataJSON());
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) });
+    });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('getQueue().length>0');
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${BD}';renderStaffQueue()`);
+    await page.locator('#tab-queue .queue-table').waitFor();
+    await page.evaluate(`_bldEditOpen('r1')`);
+    const d = page.locator('#booking-edit-modal .bld-edit');
+    await expect(d).toBeVisible();
+    await expect(d).toContainText('saved to their account too');
+    // filled in from the account; a visitor shows no blood type
+    await expect(d.locator('#bed-first')).toHaveValue('Sara');
+    await expect(d.locator('#bed-last')).toHaveValue('Haddad');
+    await expect(d.locator('#bed-phone')).toHaveValue('+966500000001');
+    await expect(d.locator('#bed-email')).toHaveValue('sara@example.com');
+    await expect(d.locator('#bed-gender')).toHaveValue('female');
+    await expect(d.locator('#bed-nat')).toHaveValue('Saudi Arabia');
+    await expect(d.locator('#bed-role')).toHaveValue('visitor');
+    await expect(d.locator('#bed-bt-g')).toBeHidden();
+    // nothing changed: nothing written
+    await d.locator('#bed-save').click();
+    await expect(d).toHaveCount(0);
+    expect(patches).toEqual([]);
+    // the name, the mobile, the club, and donor with a blood type
+    await page.evaluate(`_bldEditOpen('r1')`);
+    await d.locator('#bed-first').fill('Sarah');
+    await d.locator('#bed-phone').fill('0500000009');
+    await d.locator('#bed-club').fill('Jeddah   Riders');
+    await d.locator('#bed-role').selectOption('donor');
+    await expect(d.locator('#bed-bt-g')).toBeVisible();
+    await d.locator('#bed-bt').selectOption('A+');
+    await d.locator('#bed-save').click();
+    await expect.poll(() => roles.length).toBe(1);
+    const toAcct = patches.find((p) => p.url.includes('/customers?'))!, toRow = patches.find((p) => p.url.includes('/queue_entries?'))!;
+    expect(toAcct.url).toContain('id=eq.c1');
+    expect(toAcct.body).toEqual({ name: 'Sarah Haddad', phone: '+966500000009', blood_type: 'A+' });
+    expect(toRow.url).toContain('id=eq.r1');
+    expect(toRow.body).toEqual({ name: 'Sarah Haddad', phone: '+966500000009', blood_club: 'Jeddah Riders' });
+    expect(roles[0]).toEqual({ p_entry_id: 'r1', p_role: 'donor' });
+    await expect(d).toHaveCount(0);
+    // the list says so at once
+    const tq = page.locator('#tab-queue .queue-table');
+    await expect(tq.locator('tbody .bld-chip-d')).toHaveCount(1);
+    await expect(tq.locator('tbody .bld-club')).toHaveText(['Jeddah Riders']);
+    await expect(tq).toContainText('Sarah Haddad');
+    // I don't have one answers the club for them; a marked donation holds the role
+    await page.evaluate(`_bldEditOpen('r1')`);
+    await d.locator('#bed-club-none').check();
+    await expect(d.locator('#bed-club')).toBeDisabled();
+    await d.locator('#bed-save').click();
+    await expect.poll(() => patches.filter((p) => p.url.includes('/queue_entries?')).length).toBe(2);
+    expect(patches.filter((p) => p.url.includes('/queue_entries?'))[1].body).toMatchObject({ blood_club: '' });
+    await page.evaluate(`getQueue()[0].donatedAt='2099-11-05T15:00:00Z';_bldEditOpen('r1')`);
+    await expect(d.locator('#bed-role')).toBeDisabled();
+  });
+
   test('the phone card says the same: blood type and Donated, no bike line, no add-ons', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 900 });
     const row = { id: 'r2', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 2, name: 'Donor r2', phone: '0550000002', type_preference: 'None', size: '', status: 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'cr2', donated_at: null };

@@ -6415,5 +6415,9 @@
   "bldRewardUsedVis": "Seu passeio grátis já foi usado. Obrigado por vir.",
   "bldFreeRide": "Passeio grátis",
   "bldVisWaiverTitle": "Termo do visitante",
-  "bldVisWaiverBody": "Você não pode se inscrever neste evento antes de ler e aceitar este termo. Venho a este evento como visitante e não vou doar sangue. Seguirei as instruções da equipe do evento e do local. Se eu decidir doar no evento, avisarei a equipe primeiro: a doação passa a ser um procedimento médico realizado pela equipe médica do evento, não pela MicroMobility, e somente essa equipe decide se posso doar. O papel da MicroMobility é apenas me inscrever e dar aos visitantes com presença registrada o passeio grátis. Sou responsável pelos meus pertences pessoais. Na máxima extensão permitida por lei, a MicroMobility e sua equipe não são responsáveis por qualquer procedimento médico nem por seus efeitos, nem por qualquer lesão, doença, perda, roubo ou dano durante o evento."
+  "bldVisWaiverBody": "Você não pode se inscrever neste evento antes de ler e aceitar este termo. Venho a este evento como visitante e não vou doar sangue. Seguirei as instruções da equipe do evento e do local. Se eu decidir doar no evento, avisarei a equipe primeiro: a doação passa a ser um procedimento médico realizado pela equipe médica do evento, não pela MicroMobility, e somente essa equipe decide se posso doar. O papel da MicroMobility é apenas me inscrever e dar aos visitantes com presença registrada o passeio grátis. Sou responsável pelos meus pertences pessoais. Na máxima extensão permitida por lei, a MicroMobility e sua equipe não são responsáveis por qualquer procedimento médico nem por seus efeitos, nem por qualquer lesão, doença, perda, roubo ou dano durante o evento.",
+  "bldEditTitle": "Editar inscrição",
+  "bldEditSub": "As alterações nos dados também são salvas na conta da pessoa.",
+  "bldEditSaved": "Salvo na reserva e na conta.",
+  "bldEditLog": "Inscrição editada: {0}"
 }
