@@ -139,7 +139,7 @@ test('rides older than the device holds come in one small read, for this rider o
   const reads: string[] = [];
   await staff(page);
   let customerReads = 0;
-  page.on('request', r => { if (r.method() === 'GET' && /rest\/v1\/customers/.test(r.url()) && !/photo=like/.test(r.url())) customerReads++; }); // the rows' photos are their own read
+  page.on('request', r => { if (r.method() === 'GET' && /rest\/v1\/customers/.test(r.url()) && !/photo=like/.test(r.url()) && !/emergency_name/.test(r.url())) customerReads++; }); // the rows' photos are their own read, and so is the window's one-row read of the emergency contacts (2026-11-06)
   await page.route(/rest\/v1\/queue_entries\?.*customer_id=eq\./, route => {
     reads.push(decodeURIComponent(route.request().url()));
     const old = { ...row('o1', { id: OLD, day: 'Friday', session_date: OLD }, 11, 'Lina Haddad', 'c1', 'done', { paid: true }) };

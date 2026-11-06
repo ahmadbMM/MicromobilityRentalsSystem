@@ -1256,6 +1256,27 @@ management dashboard page"); on 2026-11-06 the user asked to merge them and make
 - Leaderboard and Statistics stay Analytics views `leaderboard` / `community` (`_anBoardPaint`); from People they
   repaint through `renderAnalytics()`, so `_commBoard` stays in the analytics part.
 
+### People review (2026-11-06, migration 20261107120000)
+- **Saved views start clean**: `_svPick` puts every key of the section back to its default first (`_n6pSvZero`: the
+  noted `_stLoad` defaults, else the value at load, AM_FKEYS to ''), then lays the view on; Bookings keeps its ride.
+- **The whole riding record** comes from `staff_customer_stats` (staff only, read-only, in `_READ_RPC`): one array of
+  arrays, read at most every ten minutes while Accounts, Flagged, People's overview or Analytics is open
+  (`_n6pCsEnsure`), laid over the device's counts in `_accStats` (`_n6pCsLay`, the larger wins) and in the window.
+- **The account window is the profile**: an action bar (`_n6pAhBar`: call, WhatsApp, tags, wallet, badges, merge,
+  new booking, copy link), read-only details (`_n6pDetails`; emergency contacts and blood type in one small read,
+  `_n6pEmLoad`), staff notes on the person (`staff_comments` kind `customer`), the stage (`_n6pStage`) and the
+  community side, which reads the applications itself. Its repaint signature (`_n6pAhSig`) carries the wallet, tags,
+  badges, notes and applications; `renderCommunity`, `_amRepaintRow`, `_cwLoad` and `_bdgDlgPaint` call `_ahRefresh`.
+  `/people/a/<id>` opens it (`_setSub` -> `S._n6pOpenAcct`, opened by `_renderPeople` once the list holds it).
+- **Bookings shows the account's newest note** through one hook, `_n6pNote(e)`: in `statusCellHtml` and in the
+  check-in drawer's `_hBadge`.
+- **Stages** (New, First rides, Regular, Lapsing, Lapsed, Never rode, No-show risk): the `amStage` filter, the `stage`
+  sort, a chip on each row and tiles on the overview, with two ready views for members who take ride news.
+- **Duplicates** also match folded emails (Gmail dots and +tags, the Apple email), Instagram, WhatsApp and names folded
+  across Arabic and Latin with the same last seven digits; each group says why. "Not the same person" keeps the group's
+  ids in `staff_options` `dup_ok`. The merge dialog says what the kept account takes. Undoing a merge asks and takes the PIN.
+- `tests/people-review.spec.ts`.
+
 ## Applications, made the admins' own (2026-10-07)
 
 The owner: "add more customization in it" (Applications); picked: views and bulk actions, message templates, default

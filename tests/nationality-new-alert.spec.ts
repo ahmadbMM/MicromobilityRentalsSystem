@@ -39,11 +39,15 @@ test('the community section opens on a big box naming them, newest first', async
   await expect(box).toContainText('Ghazi Jordan');
   await expect(box).not.toContainText('Badr Saudi');
   await expect(box).not.toContainText('Hana Blank');
-  // on People's other views too
+  // on the overview only since the People review (2026-11-06, PP05): it headed every view
   await page.evaluate(`setCommTab('tags')`);
-  await expect(page.locator('#tab-community .natnew-box')).toBeVisible();
+  await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
   await page.evaluate(`setCommTab('accounts')`);
-  await expect(page.locator('#tab-community .natnew-box')).toBeVisible();
+  await expect(page.locator('#tab-community .natnew-box')).toHaveCount(0);
+  // its rows open the account window, not the editor
+  await page.evaluate(`setCommTab('overview')`);
+  await page.locator('#tab-community .natnew-row').first().click();
+  await expect(page.locator('#cust-modal #ah-title')).toHaveText('Farah India');
 });
 
 test('Got it folds the box to a bar until another such customer appears', async ({ page }) => {
@@ -72,7 +76,7 @@ test('after Got it, Show list opens everyone again and Hide list folds it', asyn
   await expect(box.getByRole('button', { name: 'Got it' })).toHaveCount(0);
   await box.locator('#natnew-q').fill('jordan');
   await expect(box.locator('.natnew-row')).toHaveCount(1);
-  await page.evaluate(`setCommTab('tags')`); // stays open across Community views
+  await page.evaluate(`setCommTab('tags');setCommTab('overview')`); // stays open across People views (it shows on the overview)
   await expect(page.locator('#tab-community .natnew-row')).toHaveCount(1);
   await page.locator('#tab-community .natnew-box').getByRole('button', { name: 'Hide list' }).click();
   await expect(page.locator('#tab-community .natnew-box.natnew-min')).toBeVisible();

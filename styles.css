@@ -11417,3 +11417,34 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 .n6c-ft-who{min-width:0;}
 .n6c-ft-acts{display:flex;gap:6px;flex:none;}
 @media (max-width:600px){.n6c-ft-row{flex-direction:column;align-items:stretch;}.n6c-st-set .n6c-st-row{grid-template-columns:1fr;}}
+/* ── People review (2026-11-06): the account window as a profile, stages, notes, duplicates ── */
+.n6p-bar{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.n6p-bar .n6p-act{display:inline-flex;align-items:center;gap:6px;border-radius:0;text-decoration:none;}
+.n6p-bar .n6p-act.on{border-color:var(--green);color:var(--green);}
+.n6p-tags{margin-top:6px;}
+.n6p-dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:4px 16px;margin:0;}
+.n6p-dr{display:flex;gap:8px;min-width:0;font-size:var(--staff-fs-sm,13px);}
+.n6p-dr dt{color:var(--muted);flex:0 0 auto;}
+.n6p-dr dt::after{content:':';}
+.n6p-dr dd{margin:0;min-width:0;overflow-wrap:anywhere;}
+.n6p-notes .sc-card-last{margin-bottom:6px;}
+.n6p-note-btn{border-radius:0;}
+.n6p-stage-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0;}
+.n6p-stage{display:inline-block;padding:1px 7px;border:1px solid currentColor;font-size:var(--staff-fs-sm,12px);font-weight:700;line-height:1.5;color:var(--muted);}
+.n6p-st-new{color:var(--blue,#2f6fde);}
+.n6p-st-first{color:var(--teal,#0f8a8a);}
+.n6p-st-regular{color:var(--green);}
+.n6p-st-lapsing{color:var(--orange);}
+.n6p-st-lapsed,.n6p-st-risk{color:var(--red);}
+.n6p-st-never{color:var(--muted);}
+.n6p-st-h{margin-top:14px;}
+.n6p-st-views{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px;}
+.n6p-st-views .btn-secondary{border-radius:0;}
+.n6p-pin{display:flex;align-items:center;gap:4px;margin-top:3px;max-width:26ch;padding:1px 6px;border:1px solid var(--orange);background:transparent none;color:var(--orange);font:inherit;font-size:var(--staff-fs-sm,12px);font-weight:700;cursor:pointer;border-radius:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:start;}
+.ci-drawer-bg .n6p-pin{max-width:none;white-space:normal;margin:6px 0;}
+#tab-community .n6p-name{display:block;max-width:100%;padding:0;border:0;background:transparent none;color:inherit;font:inherit;font-weight:700;text-align:start;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#tab-community .n6p-name:hover{text-decoration:underline;}
+#tab-community .mg-why{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+#tab-community .n6p-notsame{margin-inline-start:auto;border-radius:0;}
+.n6p-mgp{margin-top:10px;padding:8px;border:1px solid var(--border);}
+.n6p-mgp-l{margin:4px 0;padding-inline-start:18px;font-size:var(--staff-fs-sm,13px);}
