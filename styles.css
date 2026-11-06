@@ -10295,6 +10295,16 @@ html[dir="rtl"] body.view-staff .queue-mobile-view .q-card.ptn-row-mark{box-shad
    name in the community's green. A partner's booking by a member wears the rose stripe, then the green band. */
 .cm-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:24px;height:18px;background:#0c7a3d;color:#fff;border-radius:2px;vertical-align:middle;}
 .cm-mk .tag-logo{width:15px;height:11px;vertical-align:0;}
+/* ══ BLOOD DONATION FREE RIDES ON THE ROSTER (the owner, 2026-11-06) ═════════════════════════════════
+   A booking made with a Blood Donation free ride code (BD-): a red tint over the row colour, the name in red and a red
+   drop after it (_bdfRow, _bdfChip). Plain class selectors only (roster restyle budget); the community mark's
+   pattern cell keeps its own background. */
+.bdf-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#c8102e;color:#fff;border-radius:2px;vertical-align:middle;}
+.bdf-mk svg{display:block;width:12px;height:12px;}
+:root body.view-staff .queue-table tbody tr.bdf-row td:not(.cm-cell){background:linear-gradient(rgba(200,16,46,.10),rgba(200,16,46,.10)) var(--rs-bg,var(--s1));}
+:root body.view-staff .queue-mobile-view .q-card.bdf-row:not(.cm-row-mark){background:linear-gradient(rgba(200,16,46,.10),rgba(200,16,46,.10)) var(--rs-bg,var(--s1));}
+:root body.view-staff #tab-queue .bdf-row .rider-name{color:#a50d26;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .bdf-row .rider-name{color:#ff8a9a;}
 body.view-staff #tab-queue :is(tr,.q-card).cm-row-mark .rider-name{color:#0a5c2e;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue :is(tr,.q-card).cm-row-mark .rider-name{color:#6ee7a0;}
 .queue-table tbody tr.cm-row-mark td:first-child{box-shadow:inset 6px 0 0 #0c7a3d;}

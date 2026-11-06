@@ -18994,6 +18994,11 @@ const _SN_SVG='<svg class="sn-ico" viewBox="0 0 24 24" aria-hidden="true"><circl
 function _snCid(cid){return !!cid&&_ctRowsFor(cid).some(ct=>ct.tag_id===TAG_SN&&_tagActive(ct));}
 function _snOf(e){return !!e&&_snCid(e.customerId);}
 function _snChip(e){if(!_snOf(e))return'';const tg=(S.tags||[]).find(x=>x.id===TAG_SN),w=esc((tg&&tg.name)||t('snLabel'));return`<span class="sn-mk" role="img" title="${w}" aria-label="${w}">${_SN_SVG}</span>`;}
+// Bookings made with a Blood Donation free ride code (the BD- code a donor or visitor gets at check-in) wear the event's
+// red on the Bookings table and phone cards: a red tint and name (_bdfRow) and a red drop after the name (_bdfChip).
+function _bdfOf(e){return !!e&&/^BD-/i.test(String(e.promoCode||''));}
+function _bdfRow(x){return(Array.isArray(x)?x.some(_bdfOf):_bdfOf(x))?' bdf-row':'';}
+function _bdfChip(e){if(!_bdfOf(e))return'';const w=esc(t('bqRw')+' · '+e.promoCode);return`<span class="bdf-mk" role="img" title="${w}" aria-label="${w}"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .7S3.7 9.2 3.7 15a8.3 8.3 0 0 0 16.6 0C20.3 9.2 12 .7 12 .7z"/></svg></span>`;}
 // The printed sheets' tile: how many riders on it hold the tag, and their share. Nothing when none do.
 function _snTile(list){const n=(list||[]).filter(_snOf).length,all=(list||[]).length;if(!n)return'';
   return`<div class="total-item"><span class="total-num">${n}</span><span class="total-lbl">${esc(t('snLabel'))} &middot; ${Math.round(n/all*100)}%</span></div>`;}
@@ -27335,7 +27340,7 @@ function renderQRow(e){
       ?`<div class="pos-badge rq-pos" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
       :`<span class="rq-mut12">—</span>`;
     const _flashCls=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:''
-    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}${_cmRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
+    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
       <td class="rq-w52">
         ${(_apprSessIds.has(e.sessionId)&&!e.partner&&!_commPublished(_rowSess(e)))?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}`:`
         <span class="queue-num-cell ${e.status!=='waiting'?'rq-fs18':'rq-fs22'}">#${e.queueNum}</span>
@@ -27344,7 +27349,7 @@ function renderQRow(e){
         ${e.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
 `}
       </td>
-      <td${_isSatMember(e)?' class="cm-cell"':''}><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</span></div><div class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</div>${_qCc(entryPhone(e),e)}${_adChips(e)}</td>
+      <td${_isSatMember(e)?' class="cm-cell"':''}><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</span></div><div class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</div>${_qCc(entryPhone(e),e)}${_adChips(e)}</td>
       ${_memberCell(e)}
       ${_qc.bike?_qTypeCell(e):''}
       ${_qc.grp?`<td>${_rgChip(e)}</td>`:''}
@@ -27419,7 +27424,7 @@ function renderQRow(e){
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
         ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}${_cmRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
         <td class="rq-w52 rq-vm">
           <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group))}
@@ -27428,7 +27433,7 @@ function renderQRow(e){
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
         <td class="rq-vm${group.some(_isSatMember)?' cm-cell':''}">
-          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
+          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           ${_qCc(primary.groupPhone||primary.phone,primary)}
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
@@ -27462,7 +27467,7 @@ function renderQRow(e){
         :'<span class="rq-mut">—</span>';
       const riderCell=`<div class="rq-rc">
         <span class="rq-num17">${i+1}</span>
-        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_snChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
+        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
       </div>${e.phone?`<div class="rider-sub rq-rsub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)}</bdi>${_dupMark(e)}</div>`:''}${_qCc(e.phone,e)}${_adChips(e)}`;
       const typeCell=_qTypeCell(e,'rq-vm');
       const groupLine=isFirst?'rq-gtop':'';
@@ -27472,7 +27477,7 @@ function renderQRow(e){
       const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ');
 
       if(isFirst){
-        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
           <td rowspan="${n}" class="rq-w52 rq-vm">
             <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
             ${_bookedAt(_bookedAtOf(group))}
@@ -27504,7 +27509,7 @@ function renderQRow(e){
           <td class="rq-vm rq-mng"><div class="actions-cell qa-pin">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
         </tr>`;
       }else{
-        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
+        return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
           <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?typeCell:''}
@@ -27550,7 +27555,7 @@ function renderQRow(e){
         <div class="rq-sb8">
           <div class="rq-cl">
             ${n>1?`<span class="rq-num16">${i+1}</span>`:''}
-            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_snChip(e)}${i===0?noShowFlag(e):''}${_ptChip(e)}${_dupMark(e)}${_dqMark(e)}
+            <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${i===0?noShowFlag(e):''}${_ptChip(e)}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
           <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
@@ -27567,7 +27572,7 @@ function renderQRow(e){
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
       const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}${_cmRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
         <div class="rq-chw ${sessLabel?'rq-mb4':'rq-mb6'}">
           <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
@@ -27577,7 +27582,7 @@ function renderQRow(e){
         </div>
         ${sessLabel}
         <div class="rq-sb8">
-          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
+          <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
             <div class="rq-csub">${_partyCountsLine(group)}</div></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
@@ -27591,7 +27596,7 @@ function renderQRow(e){
         </div>
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}${_cmRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
       <div class="rq-ch ${sessLabel?'rq-mb4':'rq-mb6'}">
         <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
         ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span class="rq-wnum2">W${primary.waitlistNum}</span>`:''}
