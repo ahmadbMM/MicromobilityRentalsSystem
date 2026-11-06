@@ -138,14 +138,14 @@ test.describe('@staff:bookings n6 bookings review', () => {
   });
 
   test('BK07: the live bar says who owes and how much; a tap lists them', async ({ page }) => {
-    await boot(page);
+    await boot(page, { queue_entries: [E1(), row('e2bbbb22', 8, 'Rider Eight', { status: 'done' }), E3(), row('e4dddd44', 10, 'Rider Ten', { status: 'done', paid: true, price: 0 })] });
     const chip = page.locator('#tab-queue .q-lc-owing');
-    await expect(chip).toContainText('1');
+    await expect(chip).toContainText('2'); // on a bike and back, unpaid; the paid and the free left out
     await expect(chip).toContainText('Owing');
-    await expect(chip).toContainText('57.5');
+    await expect(chip).toContainText('115');
     await chip.click();
     expect(await page.evaluate('S.sfStatus')).toBe('owing');
-    await expect(page.locator('#tab-queue').locator('.queue-table tbody tr, .q-card')).toContainText(['Rider Nine']);
+    await expect(page.locator('#tab-queue').locator('.queue-table tbody tr, .q-card')).toHaveCount(2);
   });
 
   test('BK08: a rider another staff member has open says so on the row and in the drawer', async ({ page }) => {

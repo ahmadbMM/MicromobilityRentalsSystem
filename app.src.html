@@ -27725,7 +27725,7 @@ function renderStaffQueue(_resultsOnly){
   }else if(S.sfStatus==='nothere'){
     filtered=filtered.filter(e=>_notHere(e,_liveDay,_nowMs)); // expected tonight, the ride has started, not checked in
   }else if(S.sfStatus==='owing'){
-    filtered=filtered.filter(_n6bOwing); // the live bar's Owing chip (BK07): on a bike or back, still to pay
+    filtered=filtered.filter(e=>_n6bOwing(e,_isLive)); // the live bar's Owing chip (BK07): on a bike or back, still to pay
   }else if(S.sfStatus==='donepaid'){
     filtered=filtered.filter(_doneSettled); // the Completed chip opens what it counts: done and settled (bug hunt 2026-10-28)
   }else if(S.sfStatus==='nowaiver'){
@@ -28303,7 +28303,7 @@ function renderQRow(e){
   const _lcHtml=(S.sfSession!=='all'&&_isApprovalRide(_sessGet(S.sfSession)))?'':(()=>{
     const nIn=base.filter(e=>e.status==='done'&&_isLive(e)).length;
     return`<div class="q-lc-nums">${[['active',nBike,_bldQ()?'tkStIn':'onBikeStat'],['all',nWait+nBike+nIn,'lcBooked'],['waiting',nWait,'lcNotArrived']].map(([f,n,k])=>{const on=f!=='all'&&S.sfStatus===f;
-      return`<button type="button" class="q-lc-btn q-lc-${f}${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",f)}"><b class="num">${n}</b> ${esc(t(k))}</button>`;}).join('<span class="q-lc-sep" aria-hidden="true">·</span>')}${_n6bOwingChip(base)}</div>`;
+      return`<button type="button" class="q-lc-btn q-lc-${f}${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",f)}"><b class="num">${n}</b> ${esc(t(k))}</button>`;}).join('<span class="q-lc-sep" aria-hidden="true">·</span>')}${_n6bOwingChip(base,_isLive)}</div>`;
   })();
 
   
@@ -29357,9 +29357,9 @@ function _notHere(e,today,now){
 }
 // Owing, live (the staff review, 2026-11-06, BK07): riders on a bike or back tonight who have not paid, and the SAR they owe,
 // worked out from the rows in hand. Free rides owe nothing (_brOwes). Tap: the roster lists them; again: everyone.
-function _n6bOwing(e){return(e.status==='active'||(e.status==='done'&&_isLive(e)))&&_brOwes(e);}
-function _n6bOwingChip(base){
-  const o=base.filter(_n6bOwing);if(!o.length&&S.sfStatus!=='owing')return'';
+function _n6bOwing(e,live){return(e.status==='active'||(e.status==='done'&&(!live||live(e))))&&_brOwes(e);}
+function _n6bOwingChip(base,live){
+  const o=base.filter(e=>_n6bOwing(e,live));if(!o.length&&S.sfStatus!=='owing')return'';
   const sar=Math.round(o.reduce((s,e)=>s+_brAmt(e),0)*100)/100,on=S.sfStatus==='owing';
   return`<span class="q-lc-sep" aria-hidden="true">·</span><button type="button" class="q-lc-btn q-lc-owing${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",on?'all':'owing')}"><b class="num">${o.length}</b> ${esc(t('n6bOwing'))} <span class="num">${_money(sar)}</span></button>`;
 }
@@ -39344,7 +39344,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   // layered on the type-follows pricing. Protections: promo prices survive; a paid row's recorded
   // amount is never rewritten (except an explicit Pending/House choice); riders whose
   // default payment covers the chosen type ride free automatically.
-  let _method;S._ciHsOk=null;
+  let _method,_n6bLater=false;S._ciHsOk=null;
   if(!comm){
     // A retyped Petromin employee is repriced on their own fare table, which needs the
     // registrations; showCheckinModal starts loading them, and a Confirm quicker than that load
@@ -39363,9 +39363,9 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
     // Given only once the check-in has landed (the staff review, 2026-11-06, BK03): asked first, a grant could land on a
     // rider another desk had checked in meanwhile and the check-in then refused. A Confirm that only saves asks first, as before.
     if(mode==='house'&&ty!=='Own'&&!houseForTy&&!isHouseNow){
-      if(_applyOnly){_hs=await _houseSet(e.id,Number(typePrice())||0);if(!_hs)return;}
+      if(_applyOnly||S._houseNoDb){_hs=await _houseSet(e.id,Number(typePrice())||0);if(!_hs)return;} // a database without staff_set_house: the house rides in the check-in itself, as before
       else if(_isOffline()){toast(t('errConnection'),'error');return;}
-      else{_hs='later';_n6bHouseAmt=Number(typePrice())||0;}
+      else{_hs='later';_n6bLater=true;_n6bHouseAmt=Number(typePrice())||0;}
     }
     if(S._ciId!==e.id)return; // the modal moved on while the keypad was open
     if(_hs==='later')_method=undefined;
@@ -39450,7 +39450,7 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   if(_gotBikes.length===1)e.assignedBikeId=_gotBikes[0];else if(!_gotBikes.length)e.assignedBikeId=null;
   Object.assign(e,{status:'active',typePreference:ty},patch.paid!==undefined?{paid:patch.paid}:{},patch.price!==undefined?{price:patch.price}:{}); // Pending too: the row read Paid until the re-sync (2026-10-07)
   S._flashId=e.id;S._flashColor='green';renderStaffQueue(); // the row moves now; the re-sync below confirms it
-  if(_hs==='later')await _n6bHouseAfter(e); // on the house, now that the rider is in (BK03)
+  if(_n6bLater)await _n6bHouseAfter(e); // on the house, now that the rider is in (BK03)
   await _ciLeaveWl(e,_wasWl); // the add-ons' stock and the Staff List row, kept for an Undo check-in
   if(_gotBikes.length)await _dropOtherReservations(_gotBikes,e.id);
   // Undoable like Express, bulk and Hand-over (2026-10-09, D5): the topbar's Undo / History > Log
