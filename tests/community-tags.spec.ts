@@ -33,7 +33,7 @@ async function boot(page: Page) {
 
 test('the Tags page lists every tag; Holders shows who holds one, newest first, and finds someone to give it to', async ({ page }) => {
   await boot(page);
-  expect(await page.evaluate('location.pathname')).toBe('/community/tags');
+  expect(await page.evaluate('location.pathname')).toBe('/people/tags');
   const comm = page.locator('.am-tag-row', { hasText: '2 holders' });
   await expect(comm).toHaveCount(1);
   await expect(page.locator('.am-tag-row', { hasText: '0 holders' })).toHaveCount(1);
@@ -74,9 +74,7 @@ test('the overviews count from the same data and open their lists', async ({ pag
   await tab.locator('.dash-kpi', { hasText: 'Community members' }).click();
   await expect(tab.locator('#am-cust-rows')).toContainText('Mona Member');
   await expect(tab.locator('#am-cust-rows')).not.toContainText('Omar Outside'); // Members: the community's only
-  await page.evaluate(`setStaffTab('customers')`);
-  const cu = page.locator('#tab-customers');
-  await expect(cu.locator('.dash-kpi', { hasText: /^3/ }).first()).toContainText('Accounts');
-  await expect(cu.locator('.dash-kpi', { hasText: 'Community members' }).locator('strong')).toHaveText('2');
-  await expect(tab).toBeEmpty(); // one section's lists on the page at a time
+  await page.evaluate(`setCustomersTab('overview')`); // the old Customers' overview is People's
+  await expect(tab.locator('.dash-kpi', { hasText: /^3/ }).first()).toContainText('Accounts');
+  await expect(tab.locator('.dash-kpi', { hasText: 'Community members' }).locator('strong')).toHaveText('2');
 });

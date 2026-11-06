@@ -59,7 +59,7 @@ test('photos beside the names, initials where there is none or the link is broke
   // a repaint (another tab and back) keeps the photos and reads nothing again
   const n0 = asked.length;
   await page.keyboard.press('Escape');
-  await page.evaluate(`setCustomersTab('members');setCustomersTab('accounts')`);
+  await page.evaluate(`setCustomersTab('overview');setCustomersTab('accounts')`);
   await expect(av(page, 'c2')).toHaveAttribute('src', INLINE);
   expect(asked.length).toBe(n0);
 });

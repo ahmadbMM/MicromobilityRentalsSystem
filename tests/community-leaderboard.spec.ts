@@ -26,12 +26,14 @@ async function staff(page: Page) {
   await waitForSb(page);
 }
 
-test('Customers opens on its overview, with Accounts, Flagged, Activity and Duplicates after it', async ({ page }) => {
+test('People (the old Customers address too) opens on its overview, every tab of both old sections in one row', async ({ page }) => {
   await staff(page);
   await page.evaluate(`setStaffTab('customers')`);
-  const tab = page.locator('#tab-customers');
+  expect(await page.evaluate('S.staffTab')).toBe('community');
+  const tab = page.locator('#tab-community');
+  await expect(tab.locator('.page-title')).toHaveText('People');
   const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Accounts', 'Flagged', 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs
+  await expect(pills).toHaveText(['Overview', 'Accounts', /^Applications/, /^Flagged/, 'Tags', 'Badges', 'Titles', 'Activities', /^Birthdays/, 'Activity', /^Duplicates/]); // Duplicates (admins) carries the likely pairs
   await expect(pills.first()).toHaveClass(/active/);
   await expect(tab.locator('.dash-kpi', { hasText: 'Accounts' }).locator('strong')).toHaveText('2');
   await expect(tab.locator('.dash-row', { hasText: 'Badr Next' })).toHaveCount(1); // the newest accounts
@@ -39,24 +41,23 @@ test('Customers opens on its overview, with Accounts, Flagged, Activity and Dupl
   await tab.locator('.dash-kpi', { hasText: 'Accounts' }).click();
   await expect(pills.nth(1)).toHaveClass(/active/);
   await expect(tab.locator('#am-cust-rows')).toContainText('Amal Top');
-  expect(await page.evaluate('location.pathname')).toBe('/customers/accounts');
+  expect(await page.evaluate('location.pathname')).toBe('/people/accounts');
   // a tab this device never heard of lands on the overview
-  await page.evaluate(`S.customersTab='nope';renderCustomers()`);
+  await page.evaluate(`S.communityTab='nope';renderCustomers()`);
   await expect(pills.first()).toHaveClass(/active/);
 });
 
-test('Community opens on its overview, with Members, Flagged, Tags, Badges, Titles, Activities, Applications and Birthdays; no leaderboard', async ({ page }) => {
+test('Members is a switch on Accounts, not a page; no leaderboard', async ({ page }) => {
   await staff(page);
   await page.evaluate(`setStaffTab('community')`);
   const tab = page.locator('#tab-community');
-  const pills = tab.locator('.filter-row').first().locator('.filter-pill');
-  await expect(pills).toHaveText(['Overview', 'Members', 'Flagged', 'Tags', 'Badges', 'Titles', 'Activities', /^Applications/, /^Birthdays/]);
   await expect(tab).not.toContainText('Leaderboard');
   await expect(tab.locator('.dash-kpi', { hasText: 'Community members' })).toHaveCount(1);
   // Members lists the community's members only: neither fixture account holds the tag
-  await pills.nth(1).click();
+  await tab.locator('.dash-kpi', { hasText: 'Community members' }).click();
+  await expect(tab.locator('.ppl-scope .toggle-btn.active')).toHaveText('Members');
   await expect(tab.locator('#am-cust-rows')).not.toContainText('Amal Top');
-  expect(await page.evaluate('location.pathname')).toBe('/community/members');
+  expect(await page.evaluate('location.pathname')).toBe('/people/members');
 });
 
 test('the leaderboard and the statistics are Analytics views, and their controls repaint there', async ({ page }) => {
@@ -76,7 +77,7 @@ test('the leaderboard and the statistics are Analytics views, and their controls
 });
 
 test('old addresses land where their page is now', async ({ page }) => {
-  for (const [from, to] of [['/community/stats', '/analytics/community'], ['/community/accounts', '/customers/accounts'], ['/community/duplicates', '/customers/duplicates'], ['/history/customers', '/customers/activity']]) {
+  for (const [from, to] of [['/community/stats', '/analytics/community'], ['/community/accounts', '/people/accounts'], ['/community/duplicates', '/people/duplicates'], ['/history/customers', '/people/activity'], ['/customers/flagged', '/people/flagged'], ['/community/members', '/people/members'], ['/community/applications/learning', '/people/applications/learning']]) {
     await stubSupabase(page, { sessions, queue_entries, customers });
     await unlockStaff(page);
     await page.goto(from);

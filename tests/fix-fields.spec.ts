@@ -269,7 +269,7 @@ async function accounts(page: Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   return gets;
 }
 // A flag is written by staff_flag_customer now (it keeps the history row in step), so read what

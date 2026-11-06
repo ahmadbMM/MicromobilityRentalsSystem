@@ -33,13 +33,14 @@ test.describe('the three lists of addresses agree', () => {
     const staffPaths = [...app.match(/const STAFF_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z/-]+)'/g)].map((m) => m[1].split('/')[0]);
     const custPaths = [...app.match(/const CUST_PATHS=\{([^}]+)\}/)![1].matchAll(/:'([a-z-]+)'/g)].map((m) => m[1]);
     const signupPath = app.match(/const SIGNUP_PATH='([a-z-]+)'/)![1]; // Create account, a signed-out visitor's second page
-    const router = [...new Set([...staffPaths, ...custPaths, signupPath])].sort();
+    const legacy = ['community', 'customers']; // People's addresses before 2026-11-06, still served and still opening it
+    const router = [...new Set([...staffPaths, ...legacy, ...custPaths, signupPath])].sort();
     const mw = names(read('functions/_middleware.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     const sw = names(read('service-worker.js'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/);
     expect(mw).toEqual(router);
     expect(sw).toEqual(router);
     expect(names(read('scripts/serve.mjs'), /const APP_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/)).toEqual(router);
-    const staffOnly = [...new Set(staffPaths)].sort();
+    const staffOnly = [...new Set([...staffPaths, ...legacy])].sort();
     expect(names(read('functions/_middleware.js'), /const STAFF_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/)).toEqual(staffOnly);
     expect(names(read('service-worker.js'), /const STAFF_ROUTE = \/\^\\\/\(\?:([a-z|-]+)\)/)).toEqual(staffOnly);
   });
@@ -102,7 +103,7 @@ test.describe('staff', () => {
     await page.evaluate(`S.queueView='sessions';renderStaffQueue()`);
     expect(at(page)).toBe('/bookings/sessions');
     await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
-    expect(at(page)).toBe('/community/applications');
+    expect(at(page)).toBe('/people/applications');
     await page.evaluate(`setStaffTab('catalog');_cat().view='fields';renderCatalog()`);
     expect(at(page)).toBe('/website/bikes/fields');
     await page.evaluate(`setStaffTab('history');S.histView='log';renderHistory()`);

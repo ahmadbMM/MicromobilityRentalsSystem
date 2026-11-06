@@ -52,7 +52,7 @@ test.describe('@staff:customers wallet', () => {
   test('staff add money to an account: amount, how, then the server; a gift must say why', async ({ page }) => {
     const seen = calls(page);
     await staff(page, { 'rpc:staff_wallet_change': { ok: true, customer_id: 'c1', balance: 170 } });
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     const row = page.locator('#am-cust-rows .am-row[data-cust="c1"]');
     await expect(row.locator('.am-cw-btn.on')).toBeVisible();
     await expect(page.locator('#am-cust-rows .am-row[data-cust="c2"] .am-cw-btn:not(.on)')).toBeVisible();
@@ -167,8 +167,8 @@ test.describe('@staff:customers wallet', () => {
   test('Customers > Wallets: what is held and who holds it, and a search finds any account', async ({ page }) => {
     await staff(page);
     await page.evaluate(`setStaffTab('customers');setCustomersTab('wallets')`);
-    await expect(page).toHaveURL(/\/customers\/wallets$/);
-    await expect(page.locator('#tab-customers .dash-kpi').first()).toContainText('SAR 120');
+    await expect(page).toHaveURL(/\/people\/wallets$/);
+    await expect(page.locator('#tab-community .dash-kpi').first()).toContainText('SAR 120');
     await expect(page.locator('.cw-row')).toHaveCount(1);
     await expect(page.locator('.cw-row')).toContainText('Rana Rider');
     await page.locator('#cw-q').fill('omar');
@@ -225,10 +225,10 @@ test.describe('@staff:customers wallet', () => {
     await page.waitForFunction('(S.customers||[]).length>0');
     await page.evaluate(`_cwLoad(true)`);
     await page.waitForFunction('S._cwOff===true');
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     await expect(page.locator('#am-cust-rows .am-row[data-cust="c1"]')).toBeVisible();
     await expect(page.locator('.am-cw-btn')).toHaveCount(0);
-    await expect(page.locator('#tab-customers .cmy-nav')).not.toContainText('Wallets');
+    await expect(page.locator('#tab-community .cmy-nav')).not.toContainText('Wallets');
   });
 });
 

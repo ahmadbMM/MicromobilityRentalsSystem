@@ -70,7 +70,7 @@ const figureRows = (page: Page) => page.evaluate(() => [...document.querySelecto
     return { rows, inside };
   }));
 
-for (const [tab, width] of [['customers', 820], ['community', 820], ['customers', 1180], ['dashboard', 1024], ['dashboard', 390], ['inventory', 390]] as const) {
+for (const [tab, width] of [['community', 820], ['community', 1180], ['dashboard', 1024], ['dashboard', 390], ['inventory', 390]] as const) {
   test(`@staff the ${tab} figures leave none alone on a row at ${width}px`, async ({ page }) => {
     await staffAt(page, width, 900);
     await page.evaluate(`setStaffTab(${JSON.stringify(tab)})`);
@@ -88,10 +88,11 @@ for (const [tab, width] of [['customers', 820], ['community', 820], ['customers'
 test('@staff the figures lay out again when the room changes', async ({ page }) => {
   await staffAt(page, 1280, 900);
   await page.evaluate(`setStaffTab('customers')`);
-  await expect(page.locator('#tab-customers .dash-kpis.fig-fit')).toBeVisible();
-  expect((await figureRows(page))[0].rows).toHaveLength(1); // nine in one row on a laptop
+  await expect(page.locator('#tab-community .dash-kpis.fig-fit')).toBeVisible();
+  const wide = (await figureRows(page))[0].rows.length; // People's fifteen figures: two rows on a laptop
+  expect((await figureRows(page))[0].rows).not.toContain(1);
   await page.setViewportSize({ width: 820, height: 900 });
-  await expect.poll(async () => (await figureRows(page))[0].rows.length).toBe(2);
+  await expect.poll(async () => (await figureRows(page))[0].rows.length).toBeGreaterThan(wide);
   expect((await figureRows(page))[0].rows).not.toContain(1);
 });
 

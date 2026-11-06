@@ -64,7 +64,7 @@ test('staff see the icons on the Community row, edit them on the form, and repor
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 
   // the first handle is the link's text; the other networks are icons beside it, the handle in the tooltip
   const row = page.locator('.am-cust').filter({ hasText: 'Amal Member' });

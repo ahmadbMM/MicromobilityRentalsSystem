@@ -53,7 +53,7 @@ async function staff(page: Page, tab: string, sec = 'community') {
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0&&(S.queue||[]).length>0');
   await page.evaluate(sec === 'customers'
-    ? `setStaffTab('customers');S.customersTab=${JSON.stringify(tab)};renderCustomers()`
+    ? `setStaffTab('customers');S.communityTab=${JSON.stringify(tab)};renderCustomers()`
     : `setStaffTab('community');S.communityTab=${JSON.stringify(tab)};renderCommunity()`);
 }
 const ids = (page: Page, sel: string, attr: string) => page.locator(sel).evaluateAll((els, a) => els.map((e) => e.getAttribute(a as string)), attr);
@@ -218,7 +218,8 @@ test.describe('@staff:community list filters and money spent', () => {
       S._bdSpent='';return out;})()`);
     expect(bd).toEqual({ most: ['c2', 'c1', 'c3'], over: [] });
 
-    await page.evaluate(`S._flags=[{id:'f1',customer_id:'c1',status:'pending',fields:['email'],flagged_at:'2026-10-01T10:00:00Z'},{id:'f2',customer_id:'c2',status:'pending',fields:['email'],flagged_at:'2026-09-01T10:00:00Z'}];S._flagsAt=Date.now();S._flagsSig=_flagsSig();S.customersTab='flagged';renderCustomers()`);
+    await page.waitForFunction('Array.isArray(S._flags)'); // People reads the requests for its counts: let that read land first
+    await page.evaluate(`S._flags=[{id:'f1',customer_id:'c1',status:'pending',fields:['email'],flagged_at:'2026-10-01T10:00:00Z'},{id:'f2',customer_id:'c2',status:'pending',fields:['email'],flagged_at:'2026-09-01T10:00:00Z'}];S._flagsAt=Date.now();S._flagsSig=_flagsSig();S.communityTab='flagged';renderCustomers()`);
     expect(await ids(page, '.flg-row', 'data-flag-id')).toEqual(['f1', 'f2']);
     await page.locator('#fm-flg').getByLabel('Sort by').selectOption('spentHi');
     expect(await ids(page, '.flg-row', 'data-flag-id')).toEqual(['f2', 'f1']);

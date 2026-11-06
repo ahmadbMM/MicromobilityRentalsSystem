@@ -109,7 +109,7 @@ const sub = (page: Page, name: RegExp) => page.locator('#tab-community .filter-p
 test.describe('@staff:community activities', () => {
   test('the section has its address, and the Photos pill counts what waits', async ({ page }) => {
     await staff(page);
-    await expect(page).toHaveURL(/\/community\/activities/);
+    await expect(page).toHaveURL(/\/people\/activities/);
     await expect(page.locator('#tab-community .filter-pill', { hasText: /^Photos/ })).toContainText('(1)');
   });
 

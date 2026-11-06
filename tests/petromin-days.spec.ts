@@ -124,7 +124,7 @@ async function staffBoot(page: Page) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 }
 const modal = (page: Page) => page.locator('#confirm-modal');
 

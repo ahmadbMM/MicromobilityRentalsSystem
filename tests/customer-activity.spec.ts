@@ -51,8 +51,8 @@ test.describe('@staff:customers customer activity', () => {
     await staff(page);
     await serverFilters(page);
     await page.evaluate(`setStaffTab('customers')`);
-    await page.locator('#tab-customers .filter-pill', { hasText: 'Activity' }).click();
-    expect(at(page)).toBe('/customers/activity');
+    await page.locator('#tab-community .filter-pill', { hasText: 'Activity' }).click();
+    expect(at(page)).toBe('/people/activity');
     await expect(rows(page)).toHaveCount(5);
     // Newest first, read as sentences with what they touched.
     await expect(rows(page).nth(0)).toContainText('Cancelled a booking');
@@ -99,8 +99,8 @@ test.describe('@staff:customers customer activity', () => {
 
   test('its address opens the view, the old History address follows it, and History keeps the Action Log', async ({ page }) => {
     await staff(page, '/history/customers');
-    await page.waitForFunction(`S.staffTab==='customers'&&S.customersTab==='activity'`);
-    expect(at(page)).toBe('/customers/activity');
+    await page.waitForFunction(`S.staffTab==='community'&&S.communityTab==='activity'`);
+    expect(at(page)).toBe('/people/activity');
     await expect(rows(page)).toHaveCount(5);
     await page.evaluate(`setStaffTab('history')`);
     await expect(page.locator('#tab-history .filter-pill', { hasText: 'Customer activity' })).toHaveCount(0);

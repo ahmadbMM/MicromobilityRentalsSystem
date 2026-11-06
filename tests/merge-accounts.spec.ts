@@ -54,16 +54,16 @@ test('a family on one number is not a pair; the same first name on it, however s
   await page.evaluate(`S.customers.push({id:'c-hoda',name:'Hoda Saleh',email:'hoda@y.sa',phone:'${FAM}',created_at:'2026-05-01T10:00:00Z',birth_date:null})`);
   expect(await page.evaluate(`_dupGroups().filter(g=>g.why==='phone').map(g=>g.accts.map(c=>c.id).sort().join(','))`)).toEqual(['c-amal-1,c-amal-2', 'c-hoda,c-huda']);
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
-  await expect(page.locator('#tab-customers .filter-pill.active')).toContainText('Duplicates (3)');
-  await expect(page.locator('#tab-customers .mg-group', { hasText: 'Sara Al Saleh' })).toHaveCount(0);
+  await expect(page.locator('#tab-community .filter-pill.active')).toContainText('Duplicates (3)');
+  await expect(page.locator('#tab-community .mg-group', { hasText: 'Sara Al Saleh' })).toHaveCount(0);
 });
 
 test('the tab has its own address, lists the pairs, opens the merge dialog with the keeper chosen, lets the admin keep the other, and calls the function', async ({ page }) => {
   await boot(page, { 'rpc:staff_merge_customers': { ok: true, id: 8, keep_name: 'Amal Saleh', drop_name: 'Amal Saleh' } });
   const calls = rpcs(page, 'staff_merge_customers');
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
-  expect(await page.evaluate(`location.pathname`)).toBe('/customers/duplicates');
-  const tab = page.locator('#tab-customers');
+  expect(await page.evaluate(`location.pathname`)).toBe('/people/duplicates');
+  const tab = page.locator('#tab-community');
   await expect(tab.locator('.filter-pill.active')).toContainText('Duplicates (2)');
   await expect(tab.locator('.mg-group')).toHaveCount(2);
   await expect(tab.locator('.mg-group').first()).toContainText('Same phone');
@@ -87,7 +87,7 @@ test('the tab has its own address, lists the pairs, opens the merge dialog with 
 test('the manual picker finds accounts by name or phone, and refuses the same account twice', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
-  const tab = page.locator('#tab-customers');
+  const tab = page.locator('#tab-community');
   const a = tab.locator('.mg-pick').first().locator('input');
   await a.fill('0500000003');
   await expect(tab.locator('.mg-pick').first().locator('.mg-matches button')).toHaveCount(1);
@@ -106,7 +106,7 @@ test('Undo on a recent merge calls the function; a database without it says so',
   await boot(page, { 'rpc:staff_unmerge_customers': { ok: true, id: 7, keep_name: 'Solo Rider', drop_name: 'Gone Rider' } });
   const calls = rpcs(page, 'staff_unmerge_customers');
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
-  await page.locator('#tab-customers .mg-row button', { hasText: 'Undo merge' }).click();
+  await page.locator('#tab-community .mg-row button', { hasText: 'Undo merge' }).click();
   await expect.poll(() => calls.length).toBe(1);
   expect(calls[0]).toEqual({ p_id: 7 });
 });
@@ -122,10 +122,10 @@ test('before the database update the merge says so instead of failing', async ({
 test('Front Desk has no Duplicates tab', async ({ page }) => {
   await boot(page);
   await page.evaluate(`setStaffRole('admin');setStaffTab('customers');setCustomersTab('duplicates')`);
-  await expect(page.locator('#tab-customers .filter-pill', { hasText: 'Duplicates' })).toHaveCount(1);
-  await page.evaluate(`S.staffRole='frontdesk';S.customersTab='duplicates';renderCustomers()`);
-  await expect(page.locator('#tab-customers .filter-pill', { hasText: 'Duplicates' })).toHaveCount(0);
-  await expect(page.locator('#tab-customers .mg-group')).toHaveCount(0);
+  await expect(page.locator('#tab-community .filter-pill', { hasText: 'Duplicates' })).toHaveCount(1);
+  await page.evaluate(`S.staffRole='frontdesk';S.communityTab='duplicates';renderCustomers()`);
+  await expect(page.locator('#tab-community .filter-pill', { hasText: 'Duplicates' })).toHaveCount(0);
+  await expect(page.locator('#tab-community .mg-group')).toHaveCount(0);
 });
 
 // A failed read of the recent merges (network, timeout, lapsed sign-in) used to repaint the tab,
@@ -135,7 +135,7 @@ test('a failed read of the recent merges is said once, not retried in a loop; op
   let n = 0;
   await page.route(/\/rest\/v1\/customer_merges/, (r) => { n++; return r.fulfill({ status: 500, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: '57014', message: 'canceling statement due to statement timeout' }) }); });
   await page.evaluate(`S._mgRows=null;setStaffTab('customers');setCustomersTab('duplicates')`);
-  await expect(page.locator('#tab-customers .tm-note')).toContainText(/connection|connect/i);
+  await expect(page.locator('#tab-community .tm-note')).toContainText(/connection|connect/i);
   await page.waitForTimeout(600);
   expect(n).toBe(1);
   await page.evaluate(`setCustomersTab('duplicates')`);
@@ -153,7 +153,7 @@ test('typing in the manual merge search keeps the focus across the repaint', asy
   await page.keyboard.type('al');
   await expect(page.locator('#mg-qa')).toHaveValue('Amal');
   await expect(page.locator('#mg-qa')).toBeFocused();
-  await expect(page.locator('#tab-customers .mg-matches button').first()).toContainText('Amal');
+  await expect(page.locator('#tab-community .mg-matches button').first()).toContainText('Amal');
 });
 
 // A merged account keeps its email for sign-in, and the server takes it back when its keeper is

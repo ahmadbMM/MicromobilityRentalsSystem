@@ -11267,3 +11267,22 @@ html[dir="rtl"] .vd-arr{transform:scaleX(-1);}
   .vd-act .btn-sm{flex:1 1 0;}
 }
 body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vol-mode #scan-modal #scan-batch,body.vol-mode #scan-modal #scan-express-hint,body.vol-mode #scan-modal #scan-tally{display:none;}
+
+/* ── People (2026-11-06): Customers and Community in one section. The find box over every view, and the
+   Everyone / Members / Not members switch above Accounts and Flagged. Square, as every button (rectangular-buttons). */
+#tab-community .ppl-find{position:relative;max-width:520px;margin:12px 0 4px;}
+#tab-community .ppl-find .search-input{width:100%!important;max-width:none;box-sizing:border-box;} /* the narrow phone width of .search-input is for toolbars */
+#tab-community .ppl-res{position:absolute;inset-inline:0;top:100%;z-index:30;background:var(--s1);border:1px solid var(--border);box-shadow:var(--sh-1);max-height:360px;overflow-y:auto;}
+#tab-community .ppl-res:empty{display:none;}
+#tab-community .ppl-hit{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;border-bottom:1px solid var(--border);background:none;text-align:start;cursor:pointer;color:var(--text);border-radius:0;}
+#tab-community .ppl-hit:hover,#tab-community .ppl-hit:focus-visible{background:var(--s2,rgba(127,127,127,.08));}
+#tab-community .ppl-hit .am-meta{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#tab-community .ppl-mem{font-size:12px;padding:2px 6px;border:1px solid var(--border);}
+#tab-community .ppl-none{padding:10px 12px;}
+#tab-community .ppl-scope{display:inline-flex;gap:0;margin:0 0 12px;}
+#tab-community .ppl-scope .toggle-btn{border-radius:0;}
+@media (max-width:640px){
+  #tab-community .ppl-find{max-width:none;}
+  #tab-community .ppl-scope{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;}
+  #tab-community .ppl-scope .toggle-btn{width:100%;min-height:40px;justify-content:center;}
+}

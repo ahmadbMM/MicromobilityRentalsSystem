@@ -46,7 +46,7 @@ async function staff(page: import('@playwright/test').Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getCustomers().length===4`);
-  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 }
 
 test('the Accounts panel offers the report builder, with columns, summaries, filters and both formats', async ({ page }) => {
@@ -267,7 +267,7 @@ test('an account with no gender can be given one from the Community row, and lis
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getCustomers().length>0');
-  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 
   expect(await page.evaluate(`(()=>{const o=_accOpts();o.fGender='unset';const ids=_accRows().map(r=>r.c.id);o.fGender='all';return ids;})()`)).toEqual(['c4']);
 
@@ -310,7 +310,7 @@ test.describe('the nationality breakdown', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.waitForFunction(`getCustomers().length===${many.length}`);
-    await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   }
 
   test('names the top twenty and folds the rest into one Other', async ({ page }) => {
@@ -412,7 +412,7 @@ test.describe('nationalities missing and the 1 or 2s', () => {
     await page.goto('/');
     await waitForSb(page);
     await page.waitForFunction(`getCustomers().length===${people.length}`);
-    await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`localStorage.removeItem('cq_acc_rep_opts');S._accOpts=null;setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   }
   const csvOf = (page: import('@playwright/test').Page) => page.evaluate(`(async()=>{let out='';const _B=window.Blob;window.Blob=function(p){out=p.join('');return new _B(p,{type:'text/plain'});};
       const _a=document.createElement.bind(document);document.createElement=(t)=>{const el=_a(t);if(t==='a')el.click=()=>{};return el;};

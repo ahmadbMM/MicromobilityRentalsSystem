@@ -52,7 +52,7 @@ async function boot(page: Page, fx: Fixtures = {}, ops: Record<string, unknown>[
   await page.evaluate(`S._opPins=${JSON.stringify(ops)};S._opPinsAt=Date.now();`);
 }
 async function accounts(page: Page) {
-  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   await expect(page.locator('#am-cust-rows .am-row[data-cust="v1"]')).toBeVisible();
 }
 

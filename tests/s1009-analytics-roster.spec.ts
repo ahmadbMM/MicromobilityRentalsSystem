@@ -89,7 +89,7 @@ test.describe('@staff:customers activity in the profile', () => {
     await page.evaluate(`_ahRender(true)`);
     await expect(page.locator('#ah-act .ca-row')).toHaveCount(2);
     await page.locator('#ah-act button', { hasText: 'See all in Customer activity' }).click();
-    await page.waitForFunction(`S.staffTab==='customers'&&S.customersTab==='activity'`);
+    await page.waitForFunction(`S.staffTab==='community'&&S.communityTab==='activity'`);
     await expect.poll(() => asked.some((x) => decodeURIComponent(x).includes('customer_id=in.(c1)'))).toBe(true);
   });
 

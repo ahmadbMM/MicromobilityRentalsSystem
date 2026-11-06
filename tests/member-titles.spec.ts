@@ -193,7 +193,7 @@ test.describe('@customer:members the Community page', () => {
 test.describe('@staff:community titles', () => {
   test('the section has its own address and lists hand-given and automatic titles', async ({ page }) => {
     await staff(page);
-    await expect(page).toHaveURL(/\/community\/titles/);
+    await expect(page).toHaveURL(/\/people\/titles/);
     await expect(page.locator('#tab-community [data-title="ttl_cap"]')).toContainText('Given by staff');
     await expect(page.locator('#tab-community [data-title="ttl_leg"]')).toContainText('Automatic at 50 Saturday rides');
   });

@@ -51,7 +51,7 @@ test.describe('@staff:community instagram followers against the community averag
 
   test('Customers: every counted account is coloured, with the gap in words; none uncounted', async ({ page }) => {
     await staff(page);
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     await expect(chip(page, 'm1')).toHaveClass(/ig-tone/);
     expect(await hue(page, 'm1')).toBe('0');
     await expect(chip(page, 'm1')).toHaveAttribute('title', '60% below the community average (2,500)');
@@ -63,7 +63,7 @@ test.describe('@staff:community instagram followers against the community averag
 
   test('Community members: the same colours; a typed count moves the average and repaints every chip', async ({ page }) => {
     await staff(page);
-    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    await page.evaluate(`setStaffTab('community');S.communityTab='accounts';S.amMember='yes';renderCommunity()`);
     await expect(chip(page, 'm2')).toHaveClass(/ig-tone/);
     expect(Number(await hue(page, 'm2'))).toBeGreaterThan(50);
     await chip(page, 'm3').click();

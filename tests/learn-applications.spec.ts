@@ -53,7 +53,7 @@ test.describe('@staff:community learn to ride', () => {
     await expect(page.locator('.filter-pill', { hasText: /^Applications( \(\d+\))?$/ })).toHaveClass(/active/);
     await expect(page.locator('.apps-kind[data-apps-kind="learning"]')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('.apps-kind[data-apps-kind="learning"] .apps-kind-n')).toHaveText('2');
-    expect(new URL(page.url()).pathname).toBe('/community/applications/learning');
+    expect(new URL(page.url()).pathname).toBe('/people/applications/learning');
     await expect(page.locator('.filter-pill[data-la-filter="pending"]')).toHaveText('New (2)');
     await expect(page.locator('.filter-pill[data-la-filter="scheduled"]')).toHaveText('Scheduled (1)');
     await expect(page.locator('.filter-pill[data-la-filter="cancelled"]')).toHaveText('Cancelled (1)');
@@ -80,7 +80,7 @@ test.describe('@staff:community learn to ride', () => {
     await expect(row(page, 'l3').locator('.la-lesson')).toContainText('JCC');
     await expect(row(page, 'l3')).toContainText('by Desk A');
     await page.locator('.apps-kind[data-apps-kind="applications"]').click();
-    expect(new URL(page.url()).pathname).toBe('/community/applications');
+    expect(new URL(page.url()).pathname).toBe('/people/applications');
     await expect(page.locator('.la-row')).toHaveCount(0);
     await page.locator('.apps-kind[data-apps-kind="learning"]').click();
     await expect(page.locator('.la-row')).toHaveCount(1);

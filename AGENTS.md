@@ -1231,26 +1231,29 @@ mark places paid); heat times come from the organiser.
   number and no QR code. Paid means staff confirmed (or took it at the desk); a receipt alone does not unlock. The team code
   stays visible: the partner books with it. A new Arena session from the staff form is still members only until edited.
 
-## Customers and Community (2026-10-07)
+## People: Customers and Community in one section (2026-11-06)
 
-The owner: "make a separate customer management/dashboard page and a separate community management dashboard page ...
-i dont want the leaderboard and statistics to be with the community page"; "i want the community management to include
-a tag management page, customer info and flagging management page, badges and giving them to customers page,
-applications management".
-- **Customers** (`/customers`, `S.customersTab`, `setCustomersTab`; NOT `setCustTab`, which is the rider app's): Overview
-  (`_custOverview`), Accounts (every account), Flagged, Activity (from History), Duplicates (admins).
-- **Community** (`/community`, `S.communityTab`): Overview (`_commOverview`), Members (`/community/members`, sub key
-  `accounts`: the same list, `_amScope()==='members'` keeps holders of TAG_COMMUNITY), Flagged (members' requests),
-  Tags (`_commTags`: the tag list and editor, moved off the accounts page, plus each tag's holders, give / take back),
-  Badges, Applications, Birthdays.
-- One renderer, `_renderPeople(sec)`; `renderCommunity()` stays the repaint every write calls and draws whichever is
-  open (`_pplOpen`, `_pplOn(sub)`). It empties the other section's panel, because both draw the same element ids.
-  Both are the `community` staff part (`STAFF_PARTS.community: ['renderCommunity','renderCustomers']`).
-- Leaderboard and Statistics are Analytics views `leaderboard` / `community`, drawn fresh into `#an-lb-host` /
-  `#an-cs-host` by `_anBoardPaint` (outside the kept markup). From Community they repaint through `renderAnalytics()`,
-  not `_anBoardPaint`, so `_commBoard` stays in the analytics part instead of the desk's core.
-- Old addresses go to the new ones in `_parsePath` (/community/stats, /community/accounts, /community/duplicates,
-  /history/customers). An account's section list naming `community` also grants `customers` (`_modIds`).
+The owner had them split on 2026-10-07 ("a separate customer management/dashboard page and a separate community
+management dashboard page"); on 2026-11-06 the user asked to merge them and make them easy to get around.
+- **One section, id `community`**, shown as **People** (`tabPeople`) at `/people`. `customers` is an alias only:
+  `setStaffTab('customers')` opens People, `_parsePath` reads `/customers/*` and `/community/*` as People's pages
+  (`/community/stats` still goes to Analytics, `/history/customers` to Activity), `_modIds` turns a section list's
+  `customers` into `community`, `_tbMine` likewise for a saved tab bar. There is no `#tab-customers` any more.
+- **Tabs** (`S.communityTab`, `setCommTab`; `setCustomersTab` calls it): Overview (`_pplOverview`, both old overviews'
+  figures and lists), Accounts, Applications (+ Learning), Flagged, Tags, Badges, Titles, Activities, Birthdays,
+  Wallets, Activity, Duplicates (admins). Flagged, Birthdays and Duplicates carry their counts, Applications none
+  (the owner, 2026-11-06); the sidebar's People carries the pending requests (`_pplTabLabel`, synced on every People paint).
+- **Members is a scope, not a page**: Everyone / Members / Not members (`_pplScopeBar`) above Accounts and Flagged is
+  the accounts Member filter (`S.amMember` '' / 'yes' / 'no'), so saved views keep it and `_amScope()` reads it.
+  The address names it: `/people/accounts`, `/people/members`, `/people/non-members` (`_subOf`/`_setSub`).
+  `_pplGo(sec,sub)` ignores `sec` (old callers); its `'members'` opens Accounts with members only.
+- **Find box** (`#ppl-q`, `_pplFind`) over every view: up to 8 accounts by `_dkXAcctHit` (name, phone, email,
+  WhatsApp, Instagram); a pick opens the account window (`openAccountHistory`), which now also says the community
+  side (`_ahCommHtml`: member since, an application waiting, or not a member).
+- One renderer, `_renderPeople()`; `renderCommunity()` stays the repaint every write calls (`renderCustomers` is
+  kept as its alias for the staff-part entry). The part is still `community` (`STAFF_PARTS.community`).
+- Leaderboard and Statistics stay Analytics views `leaderboard` / `community` (`_anBoardPaint`); from People they
+  repaint through `renderAnalytics()`, so `_commBoard` stays in the analytics part.
 
 ## Applications, made the admins' own (2026-10-07)
 

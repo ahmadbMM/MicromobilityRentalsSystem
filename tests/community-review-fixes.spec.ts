@@ -27,7 +27,7 @@ test.describe('ids in the staff panel', () => {
     await boot(page, { customers, tags: [{ id: 'tag_vip', name: 'VIP', slug: 'vip', color: '#e5a100' }],
       sessions: [{ id: 's1', day: 'Friday', session_date: '2099-01-09', capacity: 12, status: 'open', created_at: 1 }] });
     await page.waitForFunction('(S.customers||[]).length>1');
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     const row = page.locator('.am-row', { hasText: 'Evil Name' });
     await expect(row).toBeVisible();
     await page.waitForTimeout(200);
@@ -58,7 +58,7 @@ test.describe('tag grants', () => {
   const open = async (page: Page, fail?: FailWrite) => {
     await boot(page, { tags, customers, customer_tags }, fail);
     await page.waitForFunction('(S.customerTags||[]).length===3');
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   };
 
   test('the tag filter lists exactly the riders its count says hold the tag now', async ({ page }) => {

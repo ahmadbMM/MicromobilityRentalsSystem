@@ -56,7 +56,7 @@ async function staff(page: Page, fx: Fixtures = {}) {
 }
 // Accounts are the Customers section's since 2026-10-07; Badges stay in Community.
 const community = async (page: Page, tab: string) => {
-  await page.evaluate(tab === 'accounts' ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()` : `setStaffTab('community');S.communityTab='${tab}';renderCommunity()`);
+  await page.evaluate(tab === 'accounts' ? `setStaffTab('customers');S.communityTab='accounts';renderCustomers()` : `setStaffTab('community');S.communityTab='${tab}';renderCommunity()`);
   await page.waitForFunction('S._bdgAt>0&&!S._bdgBusy');
 };
 const writes = (page: Page, table: string) => {

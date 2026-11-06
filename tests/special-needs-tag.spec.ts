@@ -42,7 +42,7 @@ const tr = (page: Page, id: string) => page.locator(`#tab-queue .queue-table tbo
 test.describe('@staff:tags The special needs tag', () => {
   test('its chip is the drawn wheelchair, white on orange, named by its title', async ({ page }) => {
     await boot(page);
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
     const chip = page.locator('#am-cust-rows .am-chip.tag-brand', { has: page.locator('.tag-svg-sn') }).first();
     await expect(chip).toBeVisible();
     await expect(chip).toHaveCSS('background-color', 'rgb(232, 89, 12)');

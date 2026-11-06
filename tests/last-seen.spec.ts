@@ -65,7 +65,7 @@ test.describe('@staff:community last opened and last signed in', () => {
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_signinOld"]')).toHaveCount(1);
     await expect(dlg.getByLabel('Sort by', { exact: true }).locator('option[value="x_login"]')).toHaveText('Last login, most recent');
     await page.evaluate(`closeModal&&document.querySelectorAll('.modal-overlay').forEach(m=>m.remove())`).catch(() => {});
-    await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';S.amSort='seen';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';S.amSort='seen';renderCustomers()`);
     expect(await page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')))).toEqual(['a1', 'a2', 'a3']);
     await expect(page.locator('#am-cust-rows .am-row[data-cust="a1"] .am-sortline')).toContainText('Last opened the app or website');
     // Each account row carries its Last login with the time (the owner, 2026-10-23); none when never seen.

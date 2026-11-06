@@ -24,8 +24,8 @@ async function open(page: Page, sec: 'customers' | 'community') {
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0&&(S.queue||[]).length>0');
   await page.evaluate(sec === 'customers'
-    ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()`
-    : `setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    ? `setStaffTab('customers');S.communityTab='accounts';renderCustomers()`
+    : `setStaffTab('community');S.communityTab='accounts';S.amMember='yes';renderCommunity()`);
   await page.locator('[aria-controls="fa-am"]').click();
 }
 const rows = (page: Page) => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')));

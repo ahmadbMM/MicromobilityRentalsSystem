@@ -33,8 +33,8 @@ async function open(page: Page, sec: 'customers' | 'community') {
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0&&(S.queue||[]).length>0');
   await page.evaluate(sec === 'customers'
-    ? `setStaffTab('customers');S.customersTab='accounts';renderCustomers()`
-    : `setStaffTab('community');S.communityTab='accounts';renderCommunity()`);
+    ? `setStaffTab('customers');S.communityTab='accounts';renderCustomers()`
+    : `setStaffTab('community');S.communityTab='accounts';S.amMember='yes';renderCommunity()`);
   await page.locator('[aria-controls="fa-am"]').click();
 }
 const rows = (page: Page) => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')));
@@ -54,8 +54,6 @@ test.describe('@staff:accounts and members filters and sorts', () => {
       ['Age', 'unset', ['c3']],
       ['City of residence', 'Jeddah', ['c1']],
       ['Bike type preference', 'Road', ['c2']],
-      ['Community member', 'yes', ['c1']],
-      ['Community member', 'no', ['c3', 'c2']],
       ['Social accounts', 'x', ['c2']],
       ['Social accounts', 'none', ['c3']],
       ['Instagram', 'yes', ['c1']],
@@ -69,6 +67,14 @@ test.describe('@staff:accounts and members filters and sorts', () => {
       expect(await rows(page), `${lbl} = ${v}`).toEqual(want);
       await panel.locator(`select[aria-label="${lbl}"]`).selectOption('');
     }
+    // Community member is People's Everyone / Members / Not members switch, not a select in the panel (2026-11-06)
+    const scope = page.locator('#tab-community .ppl-scope');
+    await scope.getByRole('button', { name: 'Members', exact: true }).click();
+    expect(await rows(page)).toEqual(['c1']);
+    await scope.getByRole('button', { name: 'Not members', exact: true }).click();
+    expect(await rows(page)).toEqual(['c3', 'c2']);
+    await scope.getByRole('button', { name: 'Everyone', exact: true }).click();
+    expect(await rows(page)).toEqual(['c3', 'c2', 'c1']);
     // two at once: Advanced counts the detailed one, Reset takes both off
     await panel.locator(`select[aria-label="Gender"]`).selectOption('male');
     await panel.locator(`select[aria-label="Upcoming booking"]`).selectOption('no');
@@ -99,7 +105,7 @@ test.describe('@staff:accounts and members filters and sorts', () => {
     await expect(page.locator('.am-row[data-cust="c2"] .am-sortline')).toHaveText('Rides completed: 2');
   });
 
-  test('members: the same panel, scoped to the members, without the Community member filter', async ({ page }) => {
+  test('members: the same panel, scoped to the members by the People switch, without a Community member filter of its own', async ({ page }) => {
     await open(page, 'community');
     expect(await rows(page)).toEqual(['c1']);
     await expect(page.locator('#fm-am').getByLabel('Community member', { exact: true })).toHaveCount(0);

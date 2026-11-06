@@ -131,7 +131,7 @@ test.describe('@staff:community WhatsApp number', () => {
     expect(calls[0]).toMatchObject({ p_customer_id: 'c1', p_fields: ['whatsapp'] });
     await page.evaluate(`closeConfirm&&closeConfirm()`).catch(() => {});
 
-    await page.evaluate(`setStaffTab('customers');S.customersTab='flagged';renderCustomers()`);
+    await page.evaluate(`setStaffTab('customers');S.communityTab='flagged';renderCustomers()`);
     const ch = page.locator('.flg-row[data-flag-id="f1"] .flg-change[data-field="whatsapp"]');
     await expect(ch).toContainText('+966500000002 · Same as mobile');
     await expect(ch).toContainText('+966551234567');

@@ -39,11 +39,11 @@ test('the community section opens on a big box naming them, newest first', async
   await expect(box).toContainText('Ghazi Jordan');
   await expect(box).not.toContainText('Badr Saudi');
   await expect(box).not.toContainText('Hana Blank');
-  // on the other Community views too, and never on Customers
+  // on People's other views too
   await page.evaluate(`setCommTab('tags')`);
   await expect(page.locator('#tab-community .natnew-box')).toBeVisible();
-  await page.evaluate(`setStaffTab('customers')`);
-  await expect(page.locator('.natnew-box')).toHaveCount(0);
+  await page.evaluate(`setCommTab('accounts')`);
+  await expect(page.locator('#tab-community .natnew-box')).toBeVisible();
 });
 
 test('Got it folds the box to a bar until another such customer appears', async ({ page }) => {

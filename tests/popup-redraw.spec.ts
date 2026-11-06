@@ -31,7 +31,7 @@ async function boot(page: Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.evaluate(`S.staffRole='admin'`);
-  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   await page.waitForFunction('S._bdgAt>0&&!S._bdgBusy');
 }
 /** The entry animations running on a popup's shell, as name:state. */

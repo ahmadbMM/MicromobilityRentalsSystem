@@ -16,7 +16,7 @@ async function open(page: Page) {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('(S.customers||[]).length>0');
-  await page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+  await page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
   await page.waitForFunction('typeof _amDefs==="function"&&typeof _igParse==="function"');
 }
 

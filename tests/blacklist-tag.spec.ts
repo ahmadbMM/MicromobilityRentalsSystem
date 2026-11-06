@@ -33,7 +33,7 @@ async function boot(page: Page, fx: Fixtures = {}) {
   await page.goto('/');
   await waitForSb(page);
 }
-const accounts = (page: Page) => page.evaluate(`setStaffTab('customers');S.customersTab='accounts';renderCustomers()`);
+const accounts = (page: Page) => page.evaluate(`setStaffTab('customers');S.communityTab='accounts';renderCustomers()`);
 const applications = (page: Page) => page.evaluate(`setStaffTab('community');S.communityTab='applications';renderCommunity()`);
 const modal = (page: Page) => page.locator('#confirm-modal');
 
