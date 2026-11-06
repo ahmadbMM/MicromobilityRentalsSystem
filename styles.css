@@ -11250,6 +11250,10 @@ html[dir="rtl"] .vd-arr{transform:scaleX(-1);}
 .vd-head{padding:6px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
 .vd-who{min-width:0;overflow-wrap:anywhere;}
 .vd-st{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+/* the staff review 2026-11-06 (VL12/VL13): what staff need to know, under the state */
+.vd-chips{display:flex;flex-wrap:wrap;gap:4px;flex-basis:100%;}
+.vd-chips .rr-chip{font-size:11px;}
+.vm-avail{margin-top:2px;}
 .vd-times{font-size:12px;white-space:nowrap;}
 .vd-hrs{font-size:13px;white-space:nowrap;}
 .vd-act{display:flex;gap:6px;justify-content:flex-end;}

@@ -52,7 +52,11 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
   'member_bikes_open',
   // VIP and a default payment on the house through the on-the-house approval (20261029150000): the page writes the
   // tables as before without them; tests/b2-d-security.spec.ts stubs them by name.
-  'staff_set_vip', 'staff_set_default_pay']);
+  'staff_set_vip', 'staff_set_default_pay',
+  // Volunteers, the staff review part 2 (20261107131000): without them bulk goes one by one, reminders stay on the device and
+  // the certificate prints as before; tests/volunteers-review2.spec.ts stubs them by name.
+  'staff_volunteer_shift_times_many', 'staff_volunteer_hours_add_many', 'staff_volunteer_reminded', 'staff_volunteer_profile_save',
+  'staff_volunteer_cert_issue', 'staff_volunteer_cert_revoke', 'volunteer_cert_check']);
 // (staff_pii_reveal and staff_access_reviewed, 20261009220000, are NOT listed: every look at personal data calls the
 // first, so the generic [] answers it; tests/s1010-pii-*.spec.ts give the missing function's answer by name.)
 /** Tables a migration adds that production may not have yet (20261009150000: the till and the receipt
@@ -60,7 +64,7 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
 const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals',
   'session_partners', 'session_partner_codes',
-  'customer_contacts']); // last contacted (20261107121000): tests/people-review2.spec.ts gives it rows // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
+  'customer_contacts', 'volunteer_certs']); // last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
