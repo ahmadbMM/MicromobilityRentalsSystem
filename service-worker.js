@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-2c93b87808';
+const CACHE = 'mmcq-9b408dbf90';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,13 +28,13 @@ const STAFF_JS = './staff.js?v=ab22f1daae';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=20995ad7c1","./staff-parts/community.js?v=6f50b3a8ab","./staff-parts/bikes.js?v=243a6f91d7","./staff-parts/cashier.js?v=6ca5a5f70c","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=17f0e32380","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=ef900b9139","./staff-parts/wallet.js?v=c1c153b3f8","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=defd7101f3","./staff-parts/messages.js?v=6098162aea","./staff-parts/volunteers.js?v=b82a0d9933","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sessions.js?v=b0327b989a","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=6f51b16608","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=aeabba2e87","./staff-parts/settings.js?v=52cf0c1ac0","./staff-parts/fleet.js?v=564e8c7bcc","./staff-parts/money.js?v=273d72b822","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=9b4757a0df","./staff-parts/kiosk.js?v=74df77e014","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=95919c328d"];
-const APP_JS = './app.js?v=b6b9dd7f01';
+const APP_JS = './app.js?v=8d93014f1a';
 const APP_CSS = './app.css?v=cc06be0515';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=ba45531b9a']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=736367cc86']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
