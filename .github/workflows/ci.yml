@@ -35,10 +35,13 @@ on:
   # Cloudflare's Git integration stopped building and there was nothing to push.
   workflow_dispatch:
 
-# One live run per ref: a new push supersedes the previous run entirely.
+# One live run per ref, and a new push waits for it instead of cancelling it: with
+# several sessions pushing to main minutes apart, cancelling kept every run from
+# reaching deploy (2026-11-06: seven in a row). GitHub keeps only the newest
+# waiting run, so the one after a finished run is always the latest main.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
