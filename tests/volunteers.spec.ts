@@ -143,7 +143,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(2);
     await expect(row(page, 'c2')).toContainText('I speak Arabic');
     await page.locator('#tab-volunteers .filter-pill', { hasText: 'All' }).click();
-    if (!(await page.locator('#vd-q').isVisible())) await page.locator('[data-srch="vd"] button').click(); // folded on a phone
+    if (!(await page.locator('#vd-q').isVisible())) await page.locator('[data-srch="vd"] .srch-btn').click(); // folded on a phone
     await page.locator('#vd-q').fill('nora');
     await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(1);
   });

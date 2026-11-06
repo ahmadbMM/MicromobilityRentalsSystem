@@ -238,4 +238,7 @@ section{break-inside:avoid}
 .vc-hours span{font-size:13px;color:#55615a;margin-top:4px}
 .vc-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;font-size:13px;color:#55615a}
 .vc-sign{text-align:end;font-weight:600;color:#1a1919}
+.vc-sess{list-style:none;margin:0 0 22px;padding:0;font-size:13px;color:#1a1919}
+.vc-sess li{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid #e3e7e4}
+.vc-check{margin-top:18px;font-size:12px;color:#55615a;word-break:break-all}
 @media (max-width:600px){.vc-cols{grid-template-columns:1fr}}
