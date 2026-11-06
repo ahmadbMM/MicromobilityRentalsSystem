@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-2a4212eee2';
+const CACHE = 'mmcq-f4cc523e83';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,13 +28,13 @@ const STAFF_JS = './staff.js?v=d7204ade17';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=20995ad7c1","./staff-parts/community.js?v=6a33143dc3","./staff-parts/bikes.js?v=243a6f91d7","./staff-parts/cashier.js?v=c210efd271","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=17f0e32380","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=ef900b9139","./staff-parts/wallet.js?v=c1c153b3f8","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=defd7101f3","./staff-parts/messages.js?v=6098162aea","./staff-parts/volunteers.js?v=1865b748dc","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=6f51b16608","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=c544758fba","./staff-parts/settings.js?v=52cf0c1ac0","./staff-parts/fleet.js?v=564e8c7bcc","./staff-parts/money.js?v=273d72b822","./staff-parts/desk.js?v=0d9911ac8e","./staff-parts/deskq.js?v=9b4757a0df","./staff-parts/kiosk.js?v=74df77e014","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=95919c328d"];
-const APP_JS = './app.js?v=07de1103d5';
+const APP_JS = './app.js?v=ef4e6ad71d';
 const APP_CSS = './app.css?v=e25ea42a95';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=dfe65ea897']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=d511968412']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

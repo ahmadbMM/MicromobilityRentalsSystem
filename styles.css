@@ -4762,19 +4762,21 @@
       body.view-staff.rail-hover #staff-tab-nav{
         width:64px;z-index:61;transition:width .16s ease;overflow-y:auto;overflow-x:hidden;
       }
-      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){width:232px;box-shadow:8px 0 28px rgba(0,0,0,.4);}
-      html[dir="rtl"] body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){box-shadow:-8px 0 28px rgba(0,0,0,.4);}
+      /* :focus-visible, not :focus-within: Edge and Chrome on Windows focus a clicked button, so the
+         rail stayed open after a mouse click (the pin itself) until something else was clicked */
+      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)){width:232px;box-shadow:8px 0 28px rgba(0,0,0,.4);}
+      html[dir="rtl"] body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)){box-shadow:-8px 0 28px rgba(0,0,0,.4);}
       /* collapsed: art only. Labels and suite headings return under the pointer. */
       body.view-staff.rail-hover #staff-tab-nav .snav-lbl,
       body.view-staff.rail-hover #staff-tab-nav .snav-group{opacity:0;transition:opacity .12s ease;}
-      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within) .snav-lbl,
-      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within) .snav-group{opacity:1;}
+      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)) .snav-lbl,
+      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)) .snav-group{opacity:1;}
       body.view-staff.rail-hover #staff-tab-nav .snav-group{height:0;padding-top:6px;padding-bottom:0;overflow:hidden;}
-      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within) .snav-group{height:auto;padding-top:14px;padding-bottom:5px;}
+      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)) .snav-group{height:auto;padding-top:14px;padding-bottom:5px;}
       /* the low-stock badge would clip in the narrow rail — pin it to the icon */
       body.view-staff.rail-hover #staff-tab-nav .tab-btn .tab-badge{position:absolute;top:4px;inset-inline-end:6px;}
       /* opened under the pointer, the label is back, and its count sits beside it as on the pinned rail */
-      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within) .tab-btn .tab-badge{position:static;}
+      body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)) .tab-btn .tab-badge{position:static;}
       body.view-staff.rail-hover #staff-tab-nav .tab-btn{position:relative;}
     }
     /* tablets/phones use the horizontal strip: no collapsing, no pin button */
@@ -4800,8 +4802,8 @@
     html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn .tab-badge{background:#f2f2ec;color:#0f1215;}
     html:not([data-staff-theme="dark"]) body.view-staff .snav-pin{color:#5d666b;}
     @media(min-width:1024px){
-      html:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){box-shadow:8px 0 28px rgba(0,0,0,.12);}
-      html[dir="rtl"]:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:focus-within){box-shadow:-8px 0 28px rgba(0,0,0,.12);}
+      html:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)){box-shadow:8px 0 28px rgba(0,0,0,.12);}
+      html[dir="rtl"]:not([data-staff-theme="dark"]) body.view-staff.rail-hover #staff-tab-nav:is(:hover,:has(:focus-visible)){box-shadow:-8px 0 28px rgba(0,0,0,.12);}
     }
     @media(max-width:1023px){
       html:not([data-staff-theme="dark"]) body.view-staff .snav-burger{background:#fff;color:#0f1215;border-bottom-color:#e3e3dc;}
