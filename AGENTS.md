@@ -1830,3 +1830,27 @@ come with that part's language packs, so a spec that switches language and acts 
   never settles riders (Close is not close-out). The detail adds waitlist / checked in / completed / no-shows / money in,
   Open in Bookings (`_ssToBookings`), Copy link (`/bookings?session=`) and the riders' CSV.
 - `tests/sessions-section.spec.ts`.
+
+## Bookings from the 2026-11-06 staff review (BK01-BK09, migration 20261107100000)
+
+- **The desk's own time** (BK01): the outbox sends a check-in or a return with `p_at` = the time the change was made
+  (`op.at`, `_dqSend`); `staff_checkin` / `staff_return` clamp it with `_desk_at` (not after now, not more than 12 hours ago,
+  not before the ride's day, a return not before its check-in). `_rpcOp` asks again without `p_at` on a database without it.
+- **Who** (BK09): `queue_entries.checked_in_by` / `checked_out_by` (`checkedInBy` / `checkedOutBy`) are stamped by those two
+  functions from `staff.display_name`; the status cell's `.rq-by` line and the scan banner say them (`_n6bByLine`).
+- **Guarded saves** (BK02): the edit form remembers the state it opened with (`S._beFrom`) and its update is `.eq('status',…)`;
+  nothing matched is `_lostRace()`. (BK05) bulk Paid goes through the desk outbox as a single payment does, guarded.
+- **Check-in drawer** (BK03): a rider checked in (or back) on another desk while the drawer is open reads "Checked in on another
+  desk at 21:04 by Sara" with Close / Open booking / Record payment (`_n6bCiElsewhere`; not while this drawer's own Confirm is
+  out, `_ciBusy`). On the house chosen in the check-in is given only after the check-in landed (`_n6bHouseAfter`).
+- **Close out** (BK04) is refused while this device holds unsent changes for the session (`_n6bCoPending`: Send now, or the list);
+  a queued check-in refused because the rider was made a no-show offers "Bring back and check in" in the list (`_n6bDqBack`).
+- **Return from the scan and from Enter** (BK06): a scanned rider on a bike gets Return in the scanner's exception slot; Enter in
+  the roster search on a rider on a bike (ticket, number, or a name leaving one) returns them (`_n6bEnterReturn`).
+- **Owing** (BK07): the live bar's last chip, riders on a bike or back tonight still owing and the SAR (`_n6bOwing`); its filter
+  is `S.sfStatus='owing'`.
+- **Who has a rider open** (BK08): presence on the private topic `staff-desk` (policies on realtime.messages, is_staff() only),
+  joined beside staff-ref (`_n6bPresStart` from `setupRefRealtime`, stopped with `_refLiveStop`). Each tab tracks the booking
+  its check-in / edit form / return sheet has open (`_n6bPresSet`); others show `.n6b-pres` on the row and in the drawer
+  (`_ciPaint`). No table, no reads. Before the migration the join is refused and retried slowly. Specs set `S._n6bPres`.
+- `tests/n6-bookings-review.spec.ts`.

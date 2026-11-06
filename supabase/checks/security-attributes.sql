@@ -365,7 +365,10 @@ with expected(fname, want_definer, note) as (values
   ('_default_pay_insert_guard', true,  'trigger: refuses a desk account''s insert of an account already on the house'),
   ('_house_insert_guard',       true,  'trigger: refuses a desk account''s insert of a ride on the house over the limit; calls _promo_valid and _fare_now, revoked'),
   ('_staff_reset_signout',      true,  'trigger: deletes the account''s auth.sessions when staff_reset_password sets must_change_pwd'),
-  ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing')
+  ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing'),
+  -- Bookings review (20261107100000)
+  ('_desk_at',                  false, 'clamps the desk''s time for staff_checkin / staff_return; reads no table'),
+  ('_desk_by_guard',            false, 'trigger: keeps checked_in_by / checked_out_by from a rider''s own write; reads is_staff() only')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

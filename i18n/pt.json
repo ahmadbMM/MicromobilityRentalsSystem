@@ -6610,5 +6610,21 @@
   "ssRev": "Inverter ordem",
   "ssSearchPh": "Buscar sessões: nome, data, local, local do café da manhã",
   "ssNone": "Nenhuma sessão corresponde. Limpe a busca ou os filtros.",
-  "ssClear": "Limpar filtros"
+  "ssClear": "Limpar filtros",
+  "n6bInBy": "entrou {0}, {1}",
+  "n6bOutBy": "devolveu {0}, {1}",
+  "n6bCiElse": "Registrado em outro balcão às {0}",
+  "n6bCiElseBy": "Registrado em outro balcão às {0} por {1}",
+  "n6bOpenBooking": "Abrir reserva",
+  "n6bRecordPay": "Registrar pagamento",
+  "n6bHouseNot": "{0} está registrado. A cortesia não foi dada: ainda deve pagar.",
+  "n6bCoUnsent": "{0} alterações desta sessão ainda não foram enviadas deste aparelho.",
+  "n6bCoAttn": "{0} precisam de atenção.",
+  "n6bCoSee": "Ver alterações",
+  "n6bSendNow": "Enviar agora",
+  "n6bDqBack": "Trazer de volta e registrar",
+  "n6bOwing": "A pagar",
+  "n6bSomeone": "Outro membro da equipe",
+  "n6bHasOpen": "{0} está com este ciclista aberto",
+  "n6bHaveOpen": "{0} estão com este ciclista aberto"
 }

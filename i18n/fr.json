@@ -6610,5 +6610,21 @@
   "ssRev": "Inverser l'ordre",
   "ssSearchPh": "Rechercher des sessions : nom, date, lieu, lieu du petit-déjeuner",
   "ssNone": "Aucune session ne correspond. Effacez la recherche ou les filtres.",
-  "ssClear": "Effacer les filtres"
+  "ssClear": "Effacer les filtres",
+  "n6bInBy": "arrivé {0}, {1}",
+  "n6bOutBy": "rendu {0}, {1}",
+  "n6bCiElse": "Enregistré à un autre poste à {0}",
+  "n6bCiElseBy": "Enregistré à un autre poste à {0} par {1}",
+  "n6bOpenBooking": "Ouvrir la réservation",
+  "n6bRecordPay": "Enregistrer le paiement",
+  "n6bHouseNot": "{0} est enregistré. L'offert n'a pas été accordé : il doit encore payer.",
+  "n6bCoUnsent": "{0} modifications de cette session ne sont pas encore envoyées depuis cet appareil.",
+  "n6bCoAttn": "{0} demandent votre attention.",
+  "n6bCoSee": "Voir les modifications",
+  "n6bSendNow": "Envoyer maintenant",
+  "n6bDqBack": "Rétablir et enregistrer",
+  "n6bOwing": "À payer",
+  "n6bSomeone": "Un autre membre de l'équipe",
+  "n6bHasOpen": "{0} a ce cycliste ouvert",
+  "n6bHaveOpen": "{0} ont ce cycliste ouvert"
 }
