@@ -201,7 +201,7 @@ test('phones and tablets get a bottom bar with the most used sections and More',
   await staff(page);
   const bar = page.locator('#staff-tabbar');
   await expect(bar).toBeVisible();
-  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'People', 'Sales', 'Inventory', 'More']); // Community (People since 2026-11-06) beside Bookings, Workshop under More (2026-10-02)
+  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Sessions', 'People', 'Sales', 'More']); // an admin's bar has Sessions beside Bookings (2026-11-06); People beside them, Inventory and Workshop under More
   await bar.locator('.tb-btn', { hasText: 'Sales' }).click();
   expect(await page.evaluate('S.staffTab')).toBe('cashier');
   await expect(bar.locator('.tb-btn.active')).toHaveText('Sales');
