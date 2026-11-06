@@ -132,7 +132,9 @@ test.describe('bike type info', () => {
     await toRiderStep(page);
     await page.locator('[data-type-slot="0"][data-type="Road Carbon"]').click();
     for (const lang of ['en', 'pt']) {
-      if (lang !== 'en') await page.evaluate(`setLang('${lang}')`);
+      // setLang paints in English and paints again when the pack lands: measured in between, under load, the grid was
+      // the detached first one, whose computed radii read '' ("two shapes" on every pill). Measure after the pack.
+      if (lang !== 'en') { await page.evaluate(`setLang('${lang}')`); await page.waitForFunction(`_langLoaded('${lang}')`); }
       for (const width of [320, 390, 1024]) {
         await page.setViewportSize({ width, height: 900 });
         const bad: string[] = await page.locator('#reg-type-wrap-0 .type-grid').evaluate((g) => {
