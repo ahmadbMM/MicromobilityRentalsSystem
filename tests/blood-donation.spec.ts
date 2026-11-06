@@ -548,7 +548,9 @@ test.describe('@customer:blood The Blood Donor and Volunteer badges', () => {
     await expect(pop).toContainText('Volunteer');
     await expect(pop).toContainText('Given by the MicroMobility team');
     await expect(pop).toContainText('Blood Donation night');
-    await expect(pop.locator('svg.bdg-m.bdg-sp path[fill-rule="evenodd"]')).toHaveCount(1);
+    // The medal, and again as the first level of its hours ladder (Volunteer > 10 > 25 > 50 > 100, the 2026-11-06 review)
+    await expect(pop.locator('svg.bdg-m.bdg-sp path[fill-rule="evenodd"]')).toHaveCount(2);
+    expect(await page.evaluate(`BDG_LADDER_OF.get('volunteer_25')[1]`)).toBe(2);
     await expect(page.locator('#badge-pop .badge-pop-box.sp-volunteer')).toHaveCount(1);
     expect(await page.evaluate(`[BDG_GIVEN_SYS.includes('volunteer'),BD_SYS.blood_donor[1],BD_SYS.volunteer[1],BDG_GIVEN_SYS.includes('blood_donor')]`)).toEqual([true, 'red', 'volunteer', false]);
   });
