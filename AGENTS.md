@@ -1830,3 +1830,14 @@ come with that part's language packs, so a spec that switches language and acts 
   never settles riders (Close is not close-out). The detail adds waitlist / checked in / completed / no-shows / money in,
   Open in Bookings (`_ssToBookings`), Copy link (`/bookings?session=`) and the riders' CSV.
 - `tests/sessions-section.spec.ts`.
+- **The review of 2026-11-07 (SS01-SS10, migration `20261107110000`, helpers `_n6s*`).** The server's `mm-sessions-tick`
+  (pg_cron, every 5 minutes, `_sessions_tick`) closes an open or full session two hours after its window ends (status
+  only, never a booking) and opens one whose `opens_at` has come; the page's "Past, still open" figure closes what it
+  has not reached, and bulk Open skips past dates. New sessions are a Draft (`sessions.draft`), Open now, or Open at
+  (`opens_at`); `_session_published` clears both when a session opens. A Repeat links its nights by `series_id`
+  (every 1 or 2 weeks, until a date, `N6S_MAX_NIGHTS`); the detail's "Select series" and the editor's "apply to the
+  following nights" use it. Making, copying (selection bar: Copy to another week) and moving a session go through
+  `_n6sClashGate` (same kind that date; overlapping times where both name a place; shared picked bikes), which asks
+  Skip those dates / Create anyway: a spec that makes a second night of a kind on a date clicks "Go ahead anyway".
+  The selection bar's Edit (`_n6sEditOpen`) writes only filled fields, one write a session, one Undo. Every new column
+  is read off the rows (`_n6sCol`), so the page works before the migration. `tests/sessions-review.spec.ts`.

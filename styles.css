@@ -11325,6 +11325,22 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 #confirm-modal .ss-tog{display:flex;align-items:center;gap:8px;min-height:36px;font-size:13.5px;font-weight:600;cursor:pointer;text-transform:none;letter-spacing:0;margin:0;}
 #confirm-modal .ss-tog input{-webkit-appearance:checkbox;appearance:checkbox;width:18px;height:18px;min-height:0;padding:0;margin:0;flex:none;accent-color:var(--green);} /* inputs are appearance:none site-wide: ask for the native box */
 #confirm-modal .ss-cust-grp{margin-top:8px;}
+/* The Sessions review (2026-11-07): bulk edit, copy a week, clashes, draft and timed badges, the series checkbox */
+#confirm-modal .n6s-edit{max-width:640px;width:calc(100% - 32px);max-height:calc(100dvh - 48px);overflow-y:auto;}
+#confirm-modal .n6s-edit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px 12px;margin:0 0 12px;}
+#confirm-modal .n6s-edit .filter-field{display:flex;flex-direction:column;gap:4px;margin:0 0 12px;}
+#confirm-modal .n6s-edit-grid .filter-field{margin:0;}
+#confirm-modal .n6s-edit textarea{width:100%;}
+#confirm-modal .n6s-edit .modal-footer{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;}
+#confirm-modal .n6s-copy-btns{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;}
+#confirm-modal .n6s-copy-wk{display:flex;flex-direction:column;gap:4px;}
+#confirm-modal .n6s-clash{margin:0;padding-inline-start:18px;font-size:13.5px;line-height:1.5;}
+#confirm-modal .n6s-clash-box .chrome-dact{flex-wrap:wrap;}
+#tab-sessions .n6s-badge-draft{border-style:dashed;}
+#tab-sessions .n6s-badge-timed{color:var(--green);}
+#tab-sessions .n6s-follow{display:flex;align-items:center;gap:8px;min-height:38px;font-size:13.5px;font-weight:600;cursor:pointer;margin:6px 0 0;}
+#tab-sessions .n6s-follow input{-webkit-appearance:checkbox;appearance:checkbox;width:18px;height:18px;min-height:0;padding:0;margin:0;flex:none;accent-color:var(--green);}
+@media(max-width:767px){#tab-sessions .n6s-follow{min-height:44px;}}
 @media(max-width:767px){
   #tab-sessions .ss-head-btns{width:100%;justify-content:flex-start;}
   #tab-sessions .ss-range{flex-wrap:nowrap;overflow-x:auto;}
