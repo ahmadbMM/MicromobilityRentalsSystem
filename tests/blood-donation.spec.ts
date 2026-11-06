@@ -1030,3 +1030,44 @@ test.describe('@customer:reserve Blood Donation before its session exists', () =
     expect(await box.innerText()).not.toMatch(/King Fahd|Ministry of Sport|Ministry of Defense|free ride/i);
   });
 });
+
+test.describe('@customer:blood The Blood Donation Visitor badge', () => {
+  const row = (x: Record<string, unknown>) => ({ id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'done', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', donated_at: null, blood_role: 'visitor', ...x });
+  async function rider(page: Page, x: Record<string, unknown>) {
+    const r = row(x);
+    await stubSupabase(page, custFx({ queue_entries: [r], 'rpc:my_bookings': [r] }));
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    await page.evaluate(`setCustTab('account')`);
+  }
+
+  test('a visitor checked out: the drop outline on the teal medal, once with a pop-up', async ({ page }) => {
+    await rider(page, {});
+    const pop = page.locator('#badge-pop');
+    await expect(pop).toContainText('Blood Donation Visitor');
+    await expect(pop).toContainText('Visit one of our blood donation events.');
+    await expect(pop.locator('svg.bdg-m.bdc-teal')).toHaveCount(1);
+    await expect(pop).not.toContainText('Blood Donor');
+    await pop.getByRole('button', { name: 'Close' }).click();
+    await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donation Visitor' })).toHaveCount(1);
+  });
+
+  for (const [what, x] of [['a visitor still checked in', { status: 'active' }], ['a visitor who never came', { status: 'waiting' }], ['a donor checked out', { blood_role: 'donor' }]] as const) {
+    test(`${what} does not get it, not even to earn`, async ({ page }) => {
+      await rider(page, x);
+      await expect(page.locator('#mr-badges-host')).toHaveCount(1);
+      await page.evaluate(`_mrBadgesMore()`);
+      await expect(page.locator('#tab-account .mr-badge', { hasText: 'Blood Donation Visitor' })).toHaveCount(0);
+    });
+  }
+
+  test('every language has it, and the migration earns it on the teal medal', async () => {
+    for (const code of ['es', 'fr', 'hi', 'ur', 'bn', 'ne', 'pt', 'tl']) {
+      const pack = JSON.parse(readFileSync(`i18n/${code}.json`, 'utf8')) as Record<string, string>;
+      for (const k of ['bdgBloodVisitor', 'bdgBloodVisitorD', 'bdgBloodVisitorA']) expect(pack[k], `${code} ${k}`).toBeTruthy();
+    }
+    const sql = readFileSync('supabase/migrations/20261106100000_blood_visitor_badge.sql', 'utf8');
+    expect(sql).toMatch(/'bd_blood_visitor', 'blood_visitor', 'dropo', 'teal'.*true, true, 92\)/);
+  });
+});
