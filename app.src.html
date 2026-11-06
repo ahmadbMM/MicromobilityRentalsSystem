@@ -21622,6 +21622,7 @@ function showEditCustomerModal(id){
     defpay:_housePayTypes(c)?'house':'',defpayTypes:(h=>h&&h!=='all'?h:bikeTypeOpts(false))(_housePayTypes(c)),origDefPay:c.default_pay||null,hiddenTypes:_hiddenTypes(c),
     rideNews:c.ride_news===true,rideNewsAt:c.ride_news_at||null,prof:c.profession||'',work:c.workplace||'',aboutIn:('profession' in c)&&('workplace' in c),
     origPhone:c.phone||'',origEmail:(c.email||'').toLowerCase()};
+  _cfWaSet(S._cf,c);
   // Editing shows the account's personal data: recorded as an edit, and the account reads unmasked from here on.
   if(_piiOn()){(S._piiOpen||(S._piiOpen=new Set())).add('c:'+c.id);_piiLog(c.id,'',[c.phone&&'phone',c.whatsapp&&'whatsapp',c.email&&'email',c.birth_date&&'birth_date','emergency','emergency2'],'edit');}
   renderCustFormModal();
@@ -21630,8 +21631,9 @@ function showEditCustomerModal(id){
   // The emergency contact (20261005230000) is not in the sync: read with the editor, and written by
   // the save only once it has been read (a database without the columns never gets them). The second
   // contact (20261007150000) likewise: offered (em2In) only when the read brought its columns.
-  if(sb)_emFetch('',cols=>sb.from('customers').select(cols).eq('id',c.id).maybeSingle()).then(({data,error,two})=>{
+  if(sb)_emFetch(S._cf.waIn?'':'whatsapp_same,whatsapp',cols=>sb.from('customers').select(cols).eq('id',c.id).maybeSingle()).then(({data,error,two})=>{
     const d=S._cf;if(error||!data||!d||d.id!==c.id)return;
+    if(!d.waIn&&('whatsapp_same' in data)){_cfWaSet(d,data);const w=document.getElementById('cf-wa-host');if(w)w.innerHTML=_cfWaHtml(d);}
     const sp=_emSplitPhone(data.emergency_phone),sp2=_emSplitPhone(data.emergency2_phone);
     Object.assign(d,{emIn:true,emName:data.emergency_name||'',emCc:sp.cc,emPhone:sp.local,emRel:data.emergency_relation||'',
       em2In:two,em2Name:data.emergency2_name||'',em2Cc:sp2.cc,em2Phone:sp2.local,em2Rel:data.emergency2_relation||''});
@@ -25113,6 +25115,7 @@ function renderCustFormModal(){
       <div class="form-group cmy-mt8"><label for="cf-phone">${t('phoneNum')}</label>
         <div class="cmy-flex6"><select aria-label="${esc(t('a11yDialCode'))}" id="cf-cc" class="cmy-w92" data-on-change="${_on("_cfPhCheck")}">${ccOpts}</select><input id="cf-phone" type="tel" value="${esc(d.phone)}" class="cmy-f1" autocomplete="off" data-on-input="${_on("_cfPhCheck")}"></div>
         <div id="cf-ph-share" class="cf-ph-share" role="status">${_cfPhHtml(d)}</div></div>
+      ${d.mode==='edit'?`<div id="cf-wa-host">${_cfWaHtml(d)}</div>`:''}
       <div class="cmy-cf-row8">
         ${isCreate||_scYPwdOk()?`<div class="form-group cmy-f1"><label for="cf-pwd">${t('authPassword')}${isCreate?'':` <span class="label-hint">(${t('naPwdKeepHint')})</span>`}</label><div class="cmy-flex6"><input id="cf-pwd" class="cmy-f1" type="text" data-on-input="${_on("_cfPwdTyped",_P("value"))}" value="${esc(d.pwd)}" placeholder="${isCreate?esc(t('authPasswordHint')):esc(t('naPwdKeepHint'))}" autocomplete="off">${isCreate?'':`<button type="button" class="btn-secondary btn-sm cf-pwd-gen" data-on-click="${_on("_cfPwdGen")}" title="${esc(t('pwdGenHint'))}">${t('pwdGenBtn')}</button>`}</div>
           ${isCreate?'':`<div id="cf-pwd-temp" class="cf-pwd-temp"${d.pwd?'':' hidden'}>${t('pwdGenHint')}</div>`}</div>`:''}
@@ -25217,6 +25220,30 @@ async function deleteCustomerAccount(id){
       }finally{S._cfBusy=false;}
     },
   });
+}
+// The account's WhatsApp number, typed in by staff (the owner, 2026-11-06). Empty = the mobile is their WhatsApp.
+// Offered once the row's whatsapp_same/whatsapp are in hand (the sync carries them; an older copy reads them with
+// the emergency contacts). The save writes only a change: an unanswered account stays unanswered when left empty.
+function _cfWaSet(d,c){
+  if(!('whatsapp_same' in c))return;
+  const sp=_emSplitPhone(c.whatsapp_same===false?c.whatsapp:'');
+  Object.assign(d,{waIn:true,waSame:c.whatsapp_same??null,waCc:sp.cc,waPhone:sp.local});
+}
+function _cfWaHtml(d){
+  if(!d||!d.waIn)return'';
+  return`<div class="form-group cmy-mt8"><label for="cf-wa-phone">${t('waLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label>
+    <div class="cmy-flex6"><select aria-label="${esc(t('a11yDialCode'))}" id="cf-wa-cc" class="cmy-w92">${_ccOpts(d.waCc||'+966')}</select><input id="cf-wa-phone" type="tel" inputmode="tel" value="${esc(d.waPhone||'')}" class="cmy-f1" autocomplete="off" placeholder="${esc(t('waSame'))}"></div></div>`;
+}
+// What the save writes: {} for no change, the two columns, or {err}. A number equal to the mobile is "same".
+function _cfWaVal(d,mobile){
+  if(!d||!d.waIn||!document.getElementById('cf-wa-phone'))return{};
+  const raw=_asciiDigits(String(document.getElementById('cf-wa-phone').value||'')).replace(/\D/g,'');
+  if(!raw)return d.waSame===false?{row:{whatsapp_same:true,whatsapp:null}}:{};
+  const n=_normPhone(raw,String((document.getElementById('cf-wa-cc')||{}).value||'+966'));
+  if(raw.length<7||!/^\+?[0-9]{8,15}$/.test(n))return{err:t('errWaPhone')};
+  const m=String(mobile||'').replace(/\D/g,'');
+  if(m.length>=8&&n.replace(/\D/g,'').slice(-9)===m.slice(-9))return d.waSame===true?{}:{row:{whatsapp_same:true,whatsapp:null}};
+  return{row:{whatsapp_same:false,whatsapp:n}};
 }
 // The emergency contacts on the account, read from the table when staff ask for them (the sync carries none):
 // both (customers.emergency2_*, 20261007150000; the owner, 2026-10-07: "add a second optional emergency contact
@@ -25332,6 +25359,7 @@ async function saveCustForm(){
   const pwdTyped=val('cf-pwd');
   const _bt=(d.btIn&&document.getElementById('cf-bt'))?{blood_type:(v=>v==='unknown'||BLOOD_TYPES.includes(v)?v:null)(_v('cf-bt'))}:{}; // not read = not sent
   const _em=_cfEmVal(d);if(_em&&_em.err){toast(_em.err,'error');document.getElementById(_em.at||'cf-em-name')?.focus();return;}
+  const _wa=d.mode==='edit'?_cfWaVal(d,fullPhone):{};if(_wa.err){toast(_wa.err,'error');document.getElementById('cf-wa-phone')?.focus();return;}
   if(d.mode==='create'){
     if(!email){toast(t('errValidEmail'),'error');return;}
     if(!fullPhone){toast(t('errPhoneRequired'),'error');return;}
@@ -25388,7 +25416,7 @@ async function saveCustForm(){
         const{data:pwok,error:pwerr}=await sb.rpc('staff_set_customer_temp_password',{p_customer_id:d.id,p_new_pwd:newPwd});
         if(pwerr||pwok!==true){toast(pwerr?_scYSay(pwerr):t('errConnection'),'error');return;} // e.g. RPC not deployed → run sql/staff-set-password.sql
       }
-      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol,hidden_types:_ht,...(d.gender?{gender:d.gender}:{}),..._about,..._bt,...((_em&&_em.row)||{})}).eq('id',d.id);
+      const res=await sb.from('customers').update({name,email,phone:fullPhone,height,type_preference:type,birth_date:birth,country,city,nationality,socials:soc.val,..._dpCol,hidden_types:_ht,...(d.gender?{gender:d.gender}:{}),..._about,..._bt,...((_em&&_em.row)||{}),...(_wa.row||{})}).eq('id',d.id);
       if(res.error&&res.error.code==='23505'){toast(t('errEmailExists'),'error');return;} // the unique key an edit can hit: another account's email
       if(_writeErr(res,'save account'))return;
       // Sync the corrected CONTACT info onto the account holder's OWN live bookings only. One account
