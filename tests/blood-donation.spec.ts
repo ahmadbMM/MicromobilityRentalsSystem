@@ -645,7 +645,9 @@ test.describe('@staff:bookings Blood Donation', () => {
     await dlg.getByRole('button', { name: 'Add', exact: true }).click();
     await expect.poll(() => page.locator('.toast, [role="alert"], [role="status"]').allInnerTexts().then((x) => x.join(' '))).toMatch(/email/i);
     expect(signups).toEqual([]);
-    // On a phone the message sits over the dialog's buttons until it goes.
+    // On a phone the message sits over the dialog's buttons until it goes; it stays while the pointer is on it,
+    // and the pointer is still where Add was pressed, so move it off first.
+    await page.mouse.move(0, 0);
     await expect(page.locator('#toast-container .toast')).toHaveCount(0, { timeout: 15000 });
     await dlg.locator('#bed-email').fill('lina@example.com');
     await page.evaluate(`document.getElementById('bed-dob').value='1995-05-05'`);
