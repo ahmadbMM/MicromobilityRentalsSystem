@@ -11381,3 +11381,31 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
   #tab-sessions .ss-links .btn-sm{flex:1 1 calc(50% - 4px);min-height:44px;}
   #confirm-modal .ss-tog{min-height:44px;}
 }
+
+/* ══ THE DESK, SECOND ROUND (2026-11-07: BK10 pace line, BK14 places left, OT04 bike prep, OT06 first ride, OT08 check-in states) ══ */
+.sess-summary-chip .n6c-left{display:block;font-size:12px;font-weight:700;color:var(--text-2,#555);margin-top:2px;}
+.sess-summary-chip .n6c-left.n6c-full{color:var(--red,#c92a2a);}
+.n6c-pace{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--text-2,#555);padding:4px 0 2px;}
+.n6c-first{display:inline-flex;align-items:center;margin-inline-start:6px;padding:1px 6px;font-size:11px;font-weight:700;line-height:16px;background:#e67700;color:#fff;border-radius:2px;vertical-align:middle;white-space:nowrap;}
+.n6c-st{display:inline-block;margin-top:3px;padding:1px 6px;font-size:11px;font-weight:700;line-height:16px;border-radius:2px;color:#fff;white-space:nowrap;}
+.n6c-st-amber{background:#b35c00;}.n6c-st-blue{background:#1864ab;}.n6c-st-violet{background:#6741d9;}
+.n6c-st-teal{background:#087f5b;}.n6c-st-pink{background:#c2255c;}.n6c-st-grey{background:#495057;}
+.n6c-st-pick{display:grid;grid-template-columns:1fr;gap:8px;margin-top:10px;}
+.n6c-st-opt{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:44px;padding:8px 12px;border:2px solid transparent;border-radius:2px;color:#fff;cursor:pointer;text-align:start;font:inherit;}
+.n6c-st-opt small{font-size:12px;opacity:.9;}
+.n6c-st-opt.active{border-color:var(--text,#111);box-shadow:0 0 0 2px #fff inset;}
+.n6c-st-set .n6c-st-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1.3fr);gap:6px;margin-top:6px;}
+.n6c-co-list,.n6c-ft-list{list-style:none;margin:6px 0 0;padding:0;}
+.n6c-co-list li{padding:4px 0;border-top:1px solid var(--border,#ddd);}
+.n6c-co-late{font-size:12px;color:var(--text-2,#555);}
+.n6c-dlg{max-width:640px;width:calc(100vw - 32px);}
+.n6c-prep-wrap{overflow-x:auto;margin-top:10px;}
+.n6c-prep{border-collapse:collapse;width:100%;font-size:14px;}
+.n6c-prep th,.n6c-prep td{padding:6px 8px;border-bottom:1px solid var(--border,#ddd);text-align:start;}
+.n6c-prep .num{text-align:end;font-variant-numeric:tabular-nums;}
+.n6c-prep .n6c-0{color:var(--text-3,#999);}
+.n6c-prep .n6c-short{background:rgba(201,42,42,.12);color:var(--red,#c92a2a);}
+.n6c-ft-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border,#ddd);}
+.n6c-ft-who{min-width:0;}
+.n6c-ft-acts{display:flex;gap:6px;flex:none;}
+@media (max-width:600px){.n6c-ft-row{flex-direction:column;align-items:stretch;}.n6c-st-set .n6c-st-row{grid-template-columns:1fr;}}
