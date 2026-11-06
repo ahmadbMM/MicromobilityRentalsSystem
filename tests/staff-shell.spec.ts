@@ -50,7 +50,7 @@ test('the staff bar searches bookings, accounts, bikes and items, phones in any 
   await page.keyboard.press('Control+k');
   const box = page.locator('#gs-panel .gs-box');
   await expect(box).toBeVisible();
-  await expect(box).toContainText('Type two or more letters or digits.');
+  await expect(box).toContainText('Actions and sections'); // empty, the bar lists the actions and sections (ST06, 2026-11-06)
   await page.locator('#gs-input').fill('+966 55 123 4567');
   await expect(box.locator('.gs-item')).toHaveCount(2);
   await expect(box.locator('.gs-item').nth(0)).toContainText('Booking');
@@ -62,11 +62,12 @@ test('the staff bar searches bookings, accounts, bikes and items, phones in any 
   await expect(box.locator('.gs-item')).toHaveText([/Item\s*Medium helmet/]);
   await page.locator('#gs-input').fill('zzzz');
   await expect(box).toContainText('Nothing found.');
-  // Enter opens the booking where it lives: the roster, on its night, found by name
+  // Enter opens the booking where it lives: the roster, on its night, found by its number (ST04, 2026-11-06)
   await page.locator('#gs-input').fill('dana');
   await page.locator('#gs-input').press('Enter');
   await expect(page.locator('#gs-panel .gs-box')).toHaveCount(0);
-  expect(await page.evaluate(`({tab:S.staffTab,sess:S.sfSession,q:S.sfSearch})`)).toEqual({ tab: 'queue', sess: TODAY, q: 'Dana Faisal' });
+  const danaNo = await page.evaluate(`String(getQueue().find(e=>e.name==='Dana Faisal').queueNum)`);
+  expect(await page.evaluate(`({tab:S.staffTab,sess:S.sfSession,q:S.sfSearch})`)).toEqual({ tab: 'queue', sess: TODAY, q: danaNo });
   // a bike opens its profile
   await page.locator('#topbar .gs-btn').click();
   await page.locator('#gs-input').fill('9001');
@@ -89,7 +90,7 @@ test('the × in the search bar empties it, then closes the search', async ({ pag
   await x.click();
   await expect(input).toHaveValue('');
   await expect(input).toBeFocused();
-  await expect(page.locator('#gs-panel .gs-box')).toContainText('Type two or more letters or digits.');
+  await expect(page.locator('#gs-panel .gs-box')).toContainText('Actions and sections');
   expect(await page.evaluate(`S._gsQ`)).toBe('');
   await expect(x).toHaveAttribute('aria-label', 'Close');
   await x.click();

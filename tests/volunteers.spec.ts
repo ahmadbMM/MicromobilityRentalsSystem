@@ -252,7 +252,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await staff(page);
     await tile(page).getByRole('button', { name: 'Opportunities' }).click();
     await page.locator(`.vm-row-s[data-sess="${SID}"]`).getByRole('button', { name: 'Team and hours' }).click();
-    await expect(page).toHaveURL(/\/volunteers$/);
+    await expect(page).toHaveURL(new RegExp(`/volunteers\\?session=${SID}$`)); // the address names the session (2026-11-06)
     await expect(page.locator('#tab-volunteers .vd-sel')).toHaveValue(SID);
   });
 
