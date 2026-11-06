@@ -11115,6 +11115,14 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card.tk-th.th-bloo
 .bld-rw{margin-top:12px;padding:12px;border:1px solid var(--neon);border-radius:calc(var(--bld-r) / 2);font-size:13px;line-height:1.4;}
 .bld-rw-t{font-weight:800;color:var(--neon);}
 .bld-rw-c{margin:4px 0;font-size:20px;font-weight:800;letter-spacing:.04em;text-align:start;-webkit-user-select:all;user-select:all;}
+/* the free ride code on the event picker and the redeem box on the bike step (2026-11-06) */
+.fr-card{display:flex;align-items:center;gap:12px;margin:0 0 12px;padding:12px 14px;background:var(--s1);border:1px solid var(--green);border-radius:var(--r-md);color:var(--text);font-size:13px;line-height:1.4;text-align:start;}
+.fr-redeem{margin:14px 0 0;}
+.fr-copy{flex:1;min-width:0;}
+.fr-t{font-weight:800;color:var(--green);}
+.fr-c{margin:2px 0;font-size:20px;font-weight:800;letter-spacing:.04em;text-align:start;-webkit-user-select:all;user-select:all;}
+.fr-x{color:var(--muted);}
+.fr-go{flex-shrink:0;}
 /* the poster, which opens on any screen, so it carries the colours itself */
 #confirm-modal .bld-info-box{display:flex;flex-direction:column;width:min(92vw,560px);max-height:calc(100dvh - 40px);overflow:hidden;box-sizing:border-box;
   --text:var(--bld-ink);--muted:var(--bld-ink2);background:var(--bld-card);border:1px solid var(--bld-line2);border-radius:var(--bld-r);color:var(--bld-ink);}
