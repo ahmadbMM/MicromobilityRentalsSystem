@@ -54,6 +54,7 @@ test('the sessions calendar lays the month out by day, opens a session, and star
   await staff(page);
   await page.evaluate(`setStaffTab('sessions')`);
   await page.getByRole('button', { name: 'Calendar', exact: true }).click();
+  await page.evaluate(`S._n6rCalMode='month';renderSessions()`); // a phone opens on the week (2026-11-06)
   const cal = page.locator('.sess-cal');
   await expect(cal.locator(`.cal-cell[data-day="${TODAY}"] .cal-sess`)).toContainText('21:00');
   await expect(cal.locator(`.cal-cell[data-day="${TODAY}"] .cal-sess em`)).toHaveText('3/40');
@@ -63,7 +64,8 @@ test('the sessions calendar lays the month out by day, opens a session, and star
   // a free day starts a new session on that date
   await page.locator(`.sess-cal .cal-cell[data-day="${NEXT}-11"] .cal-add`).click();
   await expect(page.locator('#ns-date')).toHaveValue(`${NEXT}-11`);
-  // a session opens in the list with its detail
+  // a session opens in a pop-up over the month (2026-11-06), and from there in the list with its detail
   await page.locator(`.sess-cal .cal-cell[data-day="${NEXT}-10"] .cal-sess`).click();
+  await page.locator('#confirm-modal').getByRole('button', { name: 'Open', exact: true }).click();
   expect(await page.evaluate(`({view:S.sessView,sel:S.selSessionDetail})`)).toEqual({ view: 'list', sel: `${NEXT}-10` });
 });
