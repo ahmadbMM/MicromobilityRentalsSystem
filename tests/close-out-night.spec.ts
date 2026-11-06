@@ -23,7 +23,7 @@ async function boot(page: import('@playwright/test').Page, queue_entries: Record
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions')`);
   await page.waitForTimeout(250);
 }
 
@@ -65,10 +65,10 @@ test('the button appears only when the night is over AND rows are live', async (
   // actions live in the detail pane, so look at each session's detail in turn
   await page.evaluate(`selectSessionDetail('${OLD}')`);
   await page.waitForTimeout(200);
-  await expect(page.locator('#tab-queue')).toContainText('Close out');
+  await expect(page.locator('#tab-sessions')).toContainText('Close out');
   await page.evaluate(`selectSessionDetail('2099-09-09')`);
   await page.waitForTimeout(200);
-  const txt = await page.evaluate(`document.getElementById('tab-queue').innerText`) as string;
+  const txt = await page.evaluate(`document.getElementById('tab-sessions').innerText`) as string;
   expect(txt).not.toContain('Close out');     // the future session offers nothing
 });
 
@@ -76,7 +76,7 @@ test('a fully closed-out night offers nothing', async ({ page }) => {
   await boot(page, [e('a', OLD, 'done'), e('b', OLD, 'noshow', { queue_num: 2 })]);
   await page.evaluate(`selectSessionDetail('${OLD}')`);
   await page.waitForTimeout(200);
-  const txt = await page.evaluate(`document.getElementById('tab-queue').innerText`) as string;
+  const txt = await page.evaluate(`document.getElementById('tab-sessions').innerText`) as string;
   expect(txt).not.toContain('Close out');
 });
 
@@ -90,7 +90,7 @@ test('tonight\'s session offers Close out too', async ({ page }) => {
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue();selectSessionDetail('${today}')`);
+  await page.evaluate(`setStaffTab('sessions');selectSessionDetail('${today}')`);
   await page.waitForTimeout(250);
-  await expect(page.locator('#tab-queue')).toContainText('Close out (2)');
+  await expect(page.locator('#tab-sessions')).toContainText('Close out (2)');
 });

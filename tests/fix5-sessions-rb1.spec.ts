@@ -111,15 +111,15 @@ async function sessionsView(page: Page, queue_entries: Record<string, unknown>[]
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction('getQueue().length>0');
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions')`);
 }
 
 test.describe('@staff:sessions rb1 close out (2026-10-05)', () => {
   test('a closed night still ahead offers no Close out, and closing it out does nothing', async ({ page }) => {
     await sessionsView(page, [q('f1', FUT, 1, { session_day: 'Tuesday' }), q('f2', FUT, 2, { session_day: 'Tuesday', status: 'active' })]);
     await page.evaluate(`selectSessionDetail('${FUT}')`);
-    await expect(page.locator('#tab-queue .sess-detail-actions')).toBeVisible();
-    await expect(page.locator('#tab-queue .sess-detail-actions')).not.toContainText('Close out');
+    await expect(page.locator('#tab-sessions .sess-detail-actions')).toBeVisible();
+    await expect(page.locator('#tab-sessions .sess-detail-actions')).not.toContainText('Close out');
     expect(await page.evaluate(`_coCount('${FUT}')`)).toBe(0);
     const p: string[] = [];
     page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) p.push(r.url()); });
@@ -137,7 +137,7 @@ test.describe('@staff:sessions rb1 close out (2026-10-05)', () => {
       q('in', OLD, 4, { approval: 'approved', checked_in_at: '2020-02-01T06:10:00Z' }),
     ]);
     await page.evaluate(`selectSessionDetail('${OLD}')`);
-    await expect(page.locator('#tab-queue .sess-detail-actions')).toContainText('Close out (2)');
+    await expect(page.locator('#tab-sessions .sess-detail-actions')).toContainText('Close out (2)');
     expect(await page.evaluate(`_coCount('${OLD}')`)).toBe(2);
     const p: { url: string; body: string }[] = [];
     page.on('request', (r) => { if (r.method() === 'PATCH' && r.url().includes('/rest/v1/queue_entries')) p.push({ url: decodeURIComponent(r.url()), body: r.postData() || '' }); });
@@ -203,6 +203,7 @@ test.describe('@staff:sessions rb1 promo codes (2026-10-05)', () => {
       ? r.fulfill({ status: 400, headers: head, body: JSON.stringify({ code: 'PGRST204', message: "Could not find the 'applies_to' column of 'promo_codes' in the schema cache" }) })
       : r.fallback()));
     await page.evaluate(`setLang('ar')`);
+    await page.waitForFunction(`t('promoTypeMissing')!==LANG.en.promoTypeMissing`); // its words come with the Sessions part's pack (2026-11-06)
     await page.evaluate(`S._pcCode='NEW5';S._pcValue='5';S._pcType='Road';addPromo()`);
     await expect(page.locator('#toast-container .toast').filter({ hasText: 'عمود النوع غير موجود' })).toBeVisible();
   });

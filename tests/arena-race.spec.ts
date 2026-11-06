@@ -405,9 +405,9 @@ test.describe('@staff:bookings Arena Heros Hybrid Race', () => {
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;renderSessions()`);
     const posts: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.url().includes('/rest/v1/sessions') && r.method() === 'POST') { try { posts.push(r.postDataJSON()); } catch { /* */ } } });
-    await page.locator('#sess-host .ev-pick.ev-arena').click();
-    await expect(page.locator('#sess-host .ev-pick.ev-arena')).toHaveText('Arena Heros Hybrid Race');
-    await expect(page.locator('#sess-host .ss-hint', { hasText: 'Arena' })).toContainText('WeSportify, Mile and Gymnation');
+    await page.locator('#tab-sessions .ev-pick.ev-arena').click();
+    await expect(page.locator('#tab-sessions .ev-pick.ev-arena')).toHaveText('Arena Heros Hybrid Race');
+    await expect(page.locator('#tab-sessions .ss-hint', { hasText: 'Arena' })).toContainText('WeSportify, Mile and Gymnation');
     await expect(page.locator('#ns-title')).toHaveValue('Arena Heros Hybrid Race');
     await expect(page.locator('#ns-price')).toHaveValue('140');
     await expect(page.locator('#ns-spots')).toHaveValue('100');

@@ -177,8 +177,8 @@ test.describe('@staff:sessions the announce time on the session forms', () => {
   test('the Sessions card and its detail say the spot is hidden until when', async ({ page }) => {
     await staff(page, [sat({ meet_url: MEET, reveal_at: AHEAD }), { ...sat({ meet_url: MEET }), id: '2099-10-31', session_date: '2099-10-31' }]);
     await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.selSessionDetail='${SAT}';renderStaffQueue()`);
-    await expect(page.locator('#sess-host .sess-lc .sess-lc-rv')).toHaveCount(1);
-    await expect(page.locator('#sess-host .sess-lc .sess-lc-rv')).toContainText('Breakfast spot hidden until');
-    await expect(page.locator('#sess-host .sess-detail-rv')).toContainText('Breakfast spot hidden until');
+    await expect(page.locator('#tab-sessions .sess-lc .sess-lc-rv')).toHaveCount(1);
+    await expect(page.locator('#tab-sessions .sess-lc .sess-lc-rv')).toContainText('Breakfast spot hidden until');
+    await expect(page.locator('#tab-sessions .sess-detail-rv')).toContainText('Breakfast spot hidden until');
   });
 });

@@ -33,7 +33,7 @@ async function boot(page: Page, fx: Record<string, Record<string, unknown>[]>) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showDeletedSess=true;renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions');S.showDeletedSess=true;renderSessions()`);
   return deletes;
 }
 const confirm = (page: Page, label: string) => page.locator('#confirm-modal button', { hasText: label }).click();
@@ -41,8 +41,8 @@ const confirm = (page: Page, label: string) => page.locator('#confirm-modal butt
 test('a deleted session with nothing on record is deleted for good', async ({ page }) => {
   const fx = { sessions: [LIVE, del('2026-10-01')], queue_entries: [] as Record<string, unknown>[] };
   const deletes = await boot(page, fx);
-  const row = page.locator('#tab-queue tr', { hasText: 'Oct' });
-  await expect(page.locator('#tab-queue')).not.toContainText('Delete all permanently'); // one session: the row's own button
+  const row = page.locator('#tab-sessions tr', { hasText: 'Oct' });
+  await expect(page.locator('#tab-sessions')).not.toContainText('Delete all permanently'); // one session: the row's own button
   await row.getByRole('button', { name: 'Delete permanently' }).click();
   await expect(page.locator('#confirm-modal')).toContainText('cannot be restored');
   await confirm(page, 'Delete permanently');
@@ -51,17 +51,17 @@ test('a deleted session with nothing on record is deleted for good', async ({ pa
   expect(deletes[0]).toContain('id=eq.2026-10-01');
   expect(deletes[0]).toContain('status=eq.deleted'); // a session restored meanwhile is left alone (the server checks)
   expect(deletes[0]).toContain('op=Spec Staff'); // the operator's approval travels with it
-  await expect(page.locator('#tab-queue')).not.toContainText('Deleted Sessions');
+  await expect(page.locator('#tab-sessions')).not.toContainText('Deleted Sessions');
 });
 
 test('a session with a cancelled booking on record stays in Deleted Sessions', async ({ page }) => {
   const fx = { sessions: [LIVE, del('2026-10-08')], queue_entries: [{ id: 'q1', session_id: '2026-10-08', session_date: '2026-10-08', queue_num: 1, name: 'R', status: 'cancelled', price: 75 }] };
   const deletes = await boot(page, fx);
-  await page.locator('#tab-queue tr', { hasText: 'Oct' }).getByRole('button', { name: 'Delete permanently' }).click();
+  await page.locator('#tab-sessions tr', { hasText: 'Oct' }).getByRole('button', { name: 'Delete permanently' }).click();
   await confirm(page, 'Delete permanently');
   await expect(page.locator('#toast-container')).toContainText('Kept in Deleted Sessions');
   expect(deletes).toHaveLength(0);
-  await expect(page.locator('#tab-queue')).toContainText('Deleted Sessions (1)');
+  await expect(page.locator('#tab-sessions')).toContainText('Deleted Sessions (1)');
 });
 
 test('Delete all removes every clean one and keeps the one with a sale', async ({ page }) => {
@@ -77,5 +77,5 @@ test('Delete all removes every clean one and keeps the one with a sale', async (
   await expect(page.locator('#toast-container')).toContainText('Sessions deleted permanently: 2.');
   await expect(page.locator('#toast-container')).toContainText('Kept in Deleted Sessions: 1');
   expect(deletes.map((q) => new URLSearchParams(q).get('id'))).toEqual(['eq.2026-10-01', 'eq.2026-10-08']);
-  await expect(page.locator('#tab-queue')).toContainText('Deleted Sessions (1)');
+  await expect(page.locator('#tab-sessions')).toContainText('Deleted Sessions (1)');
 });

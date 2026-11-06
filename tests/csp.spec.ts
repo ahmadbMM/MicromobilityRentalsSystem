@@ -102,7 +102,7 @@ test('a staffer trips nothing: every section and sub-view by its address, the ro
   await watch(page);
   await stubSupabase(page, { sessions, bikes, queue_entries });
   await unlockStaff(page);
-  const paths = ['/bookings', '/bookings/sessions', '/bookings/waitlist', '/bookings/riders', '/dashboard', '/sales', '/inventory', '/inventory/supplements', '/inventory/equipment',
+  const paths = ['/bookings', '/sessions', '/sessions/table', '/bookings/sessions', '/bookings/waitlist', '/bookings/riders', '/dashboard', '/sales', '/inventory', '/inventory/supplements', '/inventory/equipment',
     '/workshop', '/community', '/community/stats', '/community/accounts', '/community/flagged', '/community/applications', '/community/birthdays', '/ambassadors', '/vendors', '/vendors/requests', '/vendors/venues', '/vendors/tiers', '/vendors/feedback',
     '/website', '/website/bikes', '/website/bikes/categories', '/website/bikes/fields', '/messages', '/analytics', '/history', '/history/log', '/history/customers', '/team', '/settings'];
   for (const path of paths) {

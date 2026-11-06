@@ -100,8 +100,8 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/sales');
     await page.evaluate(`setStaffTab('waitlist')`);
     expect(at(page)).toBe('/bookings/waitlist');
-    await page.evaluate(`S.queueView='sessions';renderStaffQueue()`);
-    expect(at(page)).toBe('/bookings/sessions');
+    await page.evaluate(`setStaffTab('sessions')`);
+    expect(at(page)).toBe('/sessions');
     await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
     expect(at(page)).toBe('/people/applications');
     await page.evaluate(`setStaffTab('catalog');_cat().view='fields';renderCatalog()`);
@@ -153,7 +153,7 @@ test.describe('staff', () => {
     // the section's id until 2026-10-03, as a saved tab or an account's section list may still hold it
     await page.evaluate(`setStaffTab('dashboard');setStaffTab('fnb')`);
     expect(await page.evaluate('S.staffTab')).toBe('vendors');
-    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors"]');
+    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors","sessions"]'); // a list naming Bookings names Sessions too (a view of it until 2026-11-06)
   });
 
   test('Analytics: /analytics is the overview, each view is a second segment (2026-10-05)', async ({ page }) => {
@@ -182,20 +182,31 @@ test.describe('staff', () => {
     expect(at(page)).toBe('/analytics');
   });
 
-  test('Bookings > Sessions: the calendar is /bookings/sessions/calendar (2026-10-05)', async ({ page }) => {
-    await staff(page, '/bookings/sessions/calendar');
-    await page.waitForFunction(`S.staffTab==='queue'&&S.queueView==='sessions'`);
+  test('Sessions: its layouts are /sessions, /sessions/table and /sessions/calendar (2026-11-06)', async ({ page }) => {
+    await staff(page, '/sessions/calendar');
+    await page.waitForFunction(`S.staffTab==='sessions'`);
     expect(await page.evaluate('S.sessView')).toBe('cal');
-    expect(at(page)).toBe('/bookings/sessions/calendar');
+    expect(at(page)).toBe('/sessions/calendar');
     const toggle = page.locator('.sess-view-toggle .view-toggle-btn');
-    await toggle.nth(0).click(); // List
+    await toggle.nth(0).click(); // Cards
     expect(await page.evaluate('S.sessView')).toBe('list');
-    expect(at(page)).toBe('/bookings/sessions');
-    await toggle.nth(1).click(); // Calendar
-    expect(at(page)).toBe('/bookings/sessions/calendar');
+    expect(at(page)).toBe('/sessions');
+    await toggle.nth(1).click(); // Table
+    expect(at(page)).toBe('/sessions/table');
+    await toggle.nth(2).click(); // Calendar
+    expect(at(page)).toBe('/sessions/calendar');
     await page.goBack();
-    await page.waitForFunction(`S.sessView==='list'`);
-    expect(at(page)).toBe('/bookings/sessions');
+    await page.waitForFunction(`S.sessView==='table'`);
+    expect(at(page)).toBe('/sessions/table');
+  });
+
+  test('the old Bookings > Sessions addresses open the Sessions section (2026-11-06)', async ({ page }) => {
+    await staff(page, '/bookings/sessions/calendar');
+    await page.waitForFunction(`S.staffTab==='sessions'&&S.sessView==='cal'`);
+    expect(at(page)).toBe('/sessions/calendar');
+    await staff(page, '/bookings/sessions');
+    await page.waitForFunction(`S.staffTab==='sessions'&&S.sessView==='list'`);
+    expect(at(page)).toBe('/sessions');
   });
 
   test('/bookings/riders opens the Petromin page; an unknown sub-view opens the section itself', async ({ page }) => {

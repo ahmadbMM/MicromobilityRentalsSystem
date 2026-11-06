@@ -28,7 +28,7 @@ test.describe('roles', () => {
       setStaffRole('admin');
       return out;})()`) as Record<string, { role: string; admin: boolean; tabs: string[] }>;
     expect(r.admin.admin).toBe(true);
-    expect(r.admin.tabs.length).toBe(15); // Vendors since 2026-10-03, Volunteers since 2026-11-05; Customers 2026-10-07 to 2026-11-06 (now People's)
+    expect(r.admin.tabs.length).toBe(16); // Vendors since 2026-10-03, Volunteers since 2026-11-05, Sessions since 2026-11-06; Customers 2026-10-07 to 2026-11-06 (now People's)
     expect(r.frontdesk).toEqual({ role: 'frontdesk', admin: false, tabs: ['queue', 'cashier', 'workshop'] });
     expect(r.leader).toEqual({ role: 'leader', admin: false, tabs: ['queue'] });
     expect(r.mechanic).toEqual({ role: 'mechanic', admin: false, tabs: ['inventory', 'workshop'] });

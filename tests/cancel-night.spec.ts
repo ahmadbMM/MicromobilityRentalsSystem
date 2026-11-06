@@ -20,13 +20,13 @@ async function boot(page: import('@playwright/test').Page, rows: Record<string, 
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue();selectSessionDetail('${FUT}')`);
+  await page.evaluate(`setStaffTab('sessions');selectSessionDetail('${FUT}')`);
   await page.waitForTimeout(250);
 }
 
 test('the button offers on a live future night, with the count', async ({ page }) => {
   await boot(page, [e('a', 'waiting'), e('b', 'waitlist', { queue_num: 2, waitlist_num: 1 }), e('c', 'done', { queue_num: 3 })]);
-  await expect(page.locator('#tab-queue')).toContainText('Cancel the night (2)');   // done is already history
+  await expect(page.locator('#tab-sessions')).toContainText('Cancel the night (2)');   // done is already history
 });
 
 test('the modal carries the message, the links and the roll', async ({ page }) => {
@@ -70,9 +70,9 @@ test('a night already over offers Close out, not Cancel the night', async ({ pag
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`getQueue().length>0`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue();selectSessionDetail('${OLD}')`);
+  await page.evaluate(`setStaffTab('sessions');selectSessionDetail('${OLD}')`);
   await page.waitForTimeout(250);
-  const txt = await page.evaluate(`document.getElementById('tab-queue').innerText`) as string;
+  const txt = await page.evaluate(`document.getElementById('tab-sessions').innerText`) as string;
   expect(txt).toContain('Close out');
   expect(txt).not.toContain('Cancel the night');
 });

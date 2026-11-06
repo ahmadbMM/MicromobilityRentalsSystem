@@ -90,8 +90,8 @@ test.describe('@staff:bookings the breakfast venue on the staff side', () => {
     await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","${SAT}"'] .sess-chip-bf`)).toHaveText('Breakfast at Harbour Cafe');
     await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","2099-10-31"'] .sess-chip-bf`)).toHaveCount(0);
     await page.evaluate(`S.queueView='sessions';S.selSessionDetail='${SAT}';renderStaffQueue()`);
-    await expect(page.locator('#sess-host .sess-lc .sess-lc-bf')).toHaveText('Breakfast at Harbour Cafe');
-    await expect(page.locator('#sess-host .sess-detail-bf')).toHaveText('Breakfast at Harbour Cafe');
+    await expect(page.locator('#tab-sessions .sess-lc .sess-lc-bf')).toHaveText('Breakfast at Harbour Cafe');
+    await expect(page.locator('#tab-sessions .sess-detail-bf')).toHaveText('Breakfast at Harbour Cafe');
   });
 
   test('the reports name the venue: riders, session, close-out and the day sheet', async ({ page }) => {

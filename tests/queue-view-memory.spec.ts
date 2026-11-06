@@ -23,11 +23,11 @@ async function openStaff(page: Page, fixture: Record<string, unknown>[]) {
 test('a refresh comes back to the current session, keeping the view and status filter', async ({ page }) => {
   await openStaff(page, sessions);
   expect(await page.evaluate('S.sfSession')).toBe(today);                       // tonight by default
-  await page.evaluate(`setSfSession('${S2}');S.queueView='sessions';renderStaffQueue();setSfStatus('waiting')`);
+  await page.evaluate(`setSfSession('${S2}');S.queueView='managed';renderStaffQueue();setSfStatus('waiting')`);
   await page.reload();
   await waitForSb(page);
   await page.evaluate(`setStaffTab('queue');renderStaffQueue()`);
-  expect(await page.evaluate('[S.sfSession, S.queueView, S.sfStatus]')).toEqual([today, 'sessions', 'waiting']);
+  expect(await page.evaluate('[S.sfSession, S.queueView, S.sfStatus]')).toEqual([today, 'managed', 'waiting']);
 });
 
 test('a session saved by an older build is ignored', async ({ page }) => {

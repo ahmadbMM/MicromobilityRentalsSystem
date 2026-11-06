@@ -71,9 +71,9 @@ test.describe('@staff:bookings Bookings in colour', () => {
     expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(0, 38, 40)');
     // the Sessions view's cards too
     await page.evaluate(`S.queueView='sessions';renderStaffQueue()`);
-    await expect(page.locator(`#sess-host .sess-lc.th-jcc`)).toHaveCount(1);
-    await expect(page.locator(`#sess-host .sess-lc.th-comm`)).toHaveCount(2);
-    await expect(page.locator(`#sess-host .sess-lc.th-runher, #sess-host .sess-lc.th-snd96, #sess-host .sess-lc.th-event`)).toHaveCount(3);
+    await expect(page.locator(`#tab-sessions .sess-lc.th-jcc`)).toHaveCount(1);
+    await expect(page.locator(`#tab-sessions .sess-lc.th-comm`)).toHaveCount(2);
+    await expect(page.locator(`#tab-sessions .sess-lc.th-runher, #tab-sessions .sess-lc.th-snd96, #tab-sessions .sess-lc.th-event`)).toHaveCount(3);
   });
 
   test('every booking state colours its row, its edge and its badge; money has its own colours', async ({ page }) => {

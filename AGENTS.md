@@ -240,10 +240,10 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   a new section is added in all four, then in `tests/paths.spec.ts` if it has sub-views.
 - A sub-view needs a branch in `_subOf` (its last `else` reads the catalogue's view) and in `_setSub`, and
   whatever switches it calls `_pushNav()`, itself or through a renderer that does. Since 2026-10-05 Analytics' views
-  are `/analytics/<view>` (`SUB_PATHS.analytics`, `S.anView`, `setAnView`) and Bookings > Sessions' month
-  calendar is `/bookings/sessions/calendar` (`SESS_CAL_PATH`, `S.sessView`); a third segment like that one
-  is special-cased in `_subOf`/`_setSub`. Filters, sorts, layouts that keep the same page, form modes and
-  popups have no address.
+  are `/analytics/<view>` (`SUB_PATHS.analytics`, `S.anView`, `setAnView`). Sessions' three layouts are its
+  sub-views since it became a section (2026-11-06): `/sessions` (cards), `/sessions/table`, `/sessions/calendar`
+  (`SUB_PATHS.sessions`, `S.sessView`); the old `/bookings/sessions[/calendar]` open them (`_parsePath`). Filters,
+  sorts, layouts that keep the same page, form modes and popups have no address.
 - Asset addresses in the app are root-relative (`/styles.css`, `/vendor/…`, `/lang/…`): a page
   at `/bookings/waitlist` must still find them. Never write `./x` in the source.
 - The suite runs on `node scripts/serve.mjs` (Cloudflare Pages + the middleware, stood in for),
@@ -1642,7 +1642,7 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
   row's end (`.section-header`, which keeps a gap and wraps), the section's tabs under the title, then the content.
   Workshop, Ambassadors, Vendors and Messages carry their title above their card; Inventory's Bikes / Equipment /
   Supplements are tabs (`.inv-tabs`, the buttons keep `.inv-navbtn`). A new section follows the same order.
-- **Bookings' views** (Bookings, Sessions, Waitlist, the Petromin page) sit under each view's own title: every view draws
+- **Bookings' views** (Bookings, Waitlist, the Petromin page; Sessions was one until 2026-11-06) sit under each view's own title: every view draws
   them itself from `_qvPillsHtml(tail)` right after its header (renderSessions, renderManagedWl, renderRiders); the
   roster passes the live-location switch as the row's tail. The roster's title is `tabQueue` ("Bookings").
 - **The night's figures are one sticky bar**, `#q-live-count`: the live three (`.q-lc-nums`, D16) then `.stat-strip`
@@ -1805,3 +1805,28 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
   `customers.merged_into`; a return follows the keeper (`_wallet_owner`). An account holding money cannot be deleted.
 - Nothing is drawn until `staff_wallet_balances` / `customer_wallet` answer. `tests/wallet.spec.ts`; the stubs answer them
   `null` (off, quietly) unless a spec gives them rows.
+
+## Sessions is a section of its own (2026-11-06)
+
+The owner: "separate the bookings and sessions pages, make them in separate clickable sections and add more features to
+the sessions page and customizability as much as possible". Sessions has its rail entry under Bookings (`data-stab=
+"sessions"`, `#tab-sessions`, `/sessions`), admins only as before; an account section list naming `queue` names
+`sessions` too (`_modIds`). `setStaffTab('sessions')` opens it; `S.queueView='sessions'` (an old link, a stored view,
+older specs) is sent there by `renderStaffQueue`. `renderSessions` draws only while the section is open and lives in
+its own staff part (`STAFF_PARTS.sessions`), which took ~33 KB off the desk core; its strings (promo codes included)
+come with that part's language packs, so a spec that switches language and acts at once waits for them.
+
+- **What the page has** (the helpers are `_ss*`, beside `renderSessions`): figures for the sessions from today on
+  (`_ssFigsHtml`; each list figure applies its filter), time range pills (`S.sessRange`), a search (`S.sessQ`, every
+  word must match `_ssHay`), Status / Kind / Sort / Reverse / Group by in view and Fill, Location, Day of the week,
+  Who can book (when any session has a rule) and Needs attention under Advanced, a result count, Clear filters and
+  Export CSV. Layouts: the cards with the detail pane, the table (`_ssTableHtml`: sortable headers, tick boxes, the
+  selection bar `_ssBulkHtml`) and the month. Group by (`_ssGroups`) keeps the list's order.
+- **Customize** (`_ssCustOpen`, in `#confirm-modal`): the table's columns (`S.sessCols`, `SS_COLS`), the card's lines
+  (`S.sessCard` lists the hidden ones, `SS_CARD`), the page's blocks (`S.sessHide`: figures, booking window, promo
+  codes), compact rows and group by. Each tick applies at once and is saved with the filters in `state.sessions`
+  (`ST_KEYS.sessions`); saved views are `SV_SECS.sessions`.
+- **Bulk status** (`_ssBulk`): one `update ... in(id)` after a confirm, one Undo that puts each session back. Closing
+  never settles riders (Close is not close-out). The detail adds waitlist / checked in / completed / no-shows / money in,
+  Open in Bookings (`_ssToBookings`), Copy link (`/bookings?session=`) and the riders' CSV.
+- `tests/sessions-section.spec.ts`.

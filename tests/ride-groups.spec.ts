@@ -187,7 +187,7 @@ test('the new-session form keeps the distances staff give, and only those', asyn
   const none = await page.evaluate(`(()=>{S.newSessKm={};return _nsSlots('05:45 - 06:15','').slots;})()`);
   expect(none).toEqual({ _time: '05:45 - 06:15' });
   // the form asks them on a Saturday ride, with the usual distances as placeholders
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showAddSession=true;S.newSessEvent='community';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='community';renderSessions()`);
   await expect(page.locator('#newSessKm-beg')).toHaveAttribute('placeholder', '20');
   await expect(page.locator('#newSessKm-int')).toHaveAttribute('placeholder', '40');
   await expect(page.locator('#newSessKm-all')).toHaveCount(0);
@@ -201,11 +201,11 @@ test('a circuit or Petromin session takes one ride distance, a run none', async 
   expect(slots).toEqual({ _time: '17:00 - 19:00', _total: 10, _km: { all: 45 } });
   const none = await page.evaluate(`(()=>{S.newSessKm={all:''};return _nsSlots('17:00 - 19:00','').slots;})()`);
   expect(none).toEqual({ _time: '17:00 - 19:00', _total: 10 });
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';S.showAddSession=true;S.newSessEvent='';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='';renderSessions()`);
   await expect(page.locator('#newSessKm-all')).toBeVisible();
-  await page.evaluate(`S.newSessEvent='petromin';renderStaffQueue()`);
+  await page.evaluate(`S.newSessEvent='petromin';renderSessions()`);
   await expect(page.locator('#newSessKm-all')).toBeVisible();
-  await page.evaluate(`S.newSessEvent='runher';renderStaffQueue()`);
+  await page.evaluate(`S.newSessEvent='runher';renderSessions()`);
   await expect(page.locator('#newSessKm-all')).toHaveCount(0);
 });
 

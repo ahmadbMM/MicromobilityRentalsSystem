@@ -25,7 +25,7 @@ async function staff(page: Page, fixtures: Record<string, unknown> = {}) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.evaluate(`setStaffTab('queue');S.queueView='sessions';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('sessions')`);
   await page.waitForFunction('S.dataLoaded');
   return fx;
 }
@@ -244,7 +244,7 @@ test.describe('@staff:sessions the new form fills from the last of its kind', ()
 test.describe('@staff:bookings the Saturday ride messages, once per ride', () => {
   test('the button on the ride opens the three messages, with a WhatsApp link that names nobody', async ({ page }) => {
     await staff(page);
-    await page.evaluate(`S.queueView='bookings';S.sfSession='${D1}-s';S._sfPicked=true;renderStaffQueue()`);
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${D1}-s';S._sfPicked=true;renderStaffQueue()`);
     await page.locator('.rm-open').first().click();
     const dlg = page.getByRole('dialog', { name: 'Ride messages' });
     await expect(dlg).toBeVisible();

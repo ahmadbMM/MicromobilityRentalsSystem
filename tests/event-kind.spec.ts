@@ -41,7 +41,7 @@ test.describe('staff', () => {
     await boot(page);
     const posts: Record<string, unknown>[] = [], patches: Record<string, unknown>[] = [];
     page.on('request', (r) => { if (r.url().includes('/rest/v1/sessions')) { if (r.method() === 'POST') { try { posts.push(r.postDataJSON()); } catch { /* */ } } if (r.method() === 'PATCH') { try { patches.push(r.postDataJSON()); } catch { /* */ } } } });
-    await page.locator('#sess-host .ev-pick.ev-event').click();
+    await page.locator('#tab-sessions .ev-pick.ev-event').click();
     await expect(page.locator('#ns-desc')).toBeVisible();
     await expect(page.locator('#ns-price')).toBeVisible();
     await expect(page.locator('#ns-title')).toHaveValue('Event');
@@ -49,7 +49,7 @@ test.describe('staff', () => {
     await page.locator('#ns-desc').fill('Fix a flat in five minutes.');
     await page.locator('#ns-price').fill('35');
     await page.locator('#ns-spots').fill('25');
-    await page.locator('#sess-host button', { hasText: 'Community members' }).click();
+    await page.locator('#tab-sessions button', { hasText: 'Community members' }).click();
     await page.locator('#ns-date').fill(d(9));
     await page.locator('#ns-start').fill('19:00');
     await page.locator('#ns-end').fill('21:00');
