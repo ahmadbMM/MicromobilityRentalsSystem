@@ -14709,7 +14709,7 @@ function _n6tCmd(key,arg){
   else if(key==='next')_kbCheckInNext();
   else if(key==='walkin')showWalkinModal();
   else if(key==='scan')openScanModal();
-  else if(key==='newsess'){if(S.staffTab!=='sessions')setStaffTab('sessions');_n6rNsOpen(todayStr());}
+  else if(key==='newsess'){if(S.staffTab!=='sessions')setStaffTab('sessions');const f=globalThis['_n6r'+'NsOpen'];if(typeof f==='function')f(todayStr());else{S.showAddSession=true;S.editSessionId=null;S._nsTplId=null;S.newSessDate=todayStr();renderSessions();}} // by name: the form's reset lives in the sessions part
   else if(key==='closeout'){S.queueView='bookings';_n6tToRide(arg);closeOutSession(arg);}
 }
 // A kept line is offered again only while this account may still open what it points at.
@@ -43720,6 +43720,8 @@ function _n6pNotesHtml(cid){
     ${last?`<div class="sc-card-last"><span class="sc-meta">${esc(last.author_name||t('scStaff'))} · ${esc(fmtStamp(last.created_at))}</span> ${esc(last.body)}</div>`:`<div class="am-meta">${esc(t('n6pNoNotes'))}</div>`}
     <button type="button" class="btn-sm btn-secondary n6p-note-btn" data-on-click="${_on('_scOpen','customer',String(cid))}">${_artIcon('note',12)} ${esc(l.length?t('scBtnN').replace('{0}',l.length):t('n6pNoteAdd'))}</button></div>`;
 }
+// A People-part entry: the account window's pieces below ride in the People part, fetched through this function's stand-in.
+function _n6pAhLoad(){return[_n6pAhBar,_n6pAhStage,_n6pDetails,_n6pNotesHtml,_n6pAhSig,_n6qAhExtra,_n6qAhFacts,_n6qTlHost].length;}
 // The hook Bookings calls (one call in statusCellHtml and one in the check-in drawer): the rider's account's newest note.
 function _n6pNote(e){
   const cid=e&&e.customerId;if(!cid||!S._scMap)return'';
@@ -43761,13 +43763,21 @@ function _cwSecHtml(cid){return _cwOk()?`<div class="bdg-strip-sec cw-sec"><div 
 function _bdgSecHtml(cid){return`<div class="bdg-strip-sec"><div class="bdg-strip-h">${t('mrBadgesTitle')}</div><div class="bdg-strip-host" data-cid="${esc(cid)}"><span class="am-meta">${t('loadingLabel')}</span></div></div>`;}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ahRender_1(event,el){if(event.target===el)closeCustomerProfile()}
+// The account window lives in the desk core, but its profile pieces (People review, 2026-11-06) are People code: they
+// are called by a built name so the core does not carry the whole account list with them, and the first window opened
+// before the People part has arrived fetches it (_n6pAhLoad's stand-in) and draws itself again.
+function _n6pW(n,...a){
+  const f=globalThis[n];if(typeof f==='function')return f(...a);
+  if(!S._n6pWLoad){S._n6pWLoad=1;try{Promise.resolve(_n6pAhLoad()).then(()=>{try{_ahRefresh();}catch(_){}}).catch(()=>{S._n6pWLoad=0;});}catch(_){S._n6pWLoad=0;}}
+  return'';
+}
 function _ahRender(force){
   const a=S._ah,m=document.getElementById('cust-modal');if(!a||!m)return;
   const c=a.custId?_custById(a.custId):null;
   const rows=_ahRows();
   const purch=a.custId?(S.cashSales||[]).filter(r=>String(r.customer_id)===a.custId&&r.pay!=='refunded'&&r.category!=='__cardmeta__'):[];
   const sig=[S.lang,todayStr(),rows.map(x=>[x.id,x.status,x.sessionId,x.queueNum,x.paid?1:0,x.price,x.assignedBikeId,x.name,x.typePreference,x.approval,x.ratingExp,x.ratingBike].join('~')).join('|'),
-    purch.length,c?[c.name,c.phone,c.email,(_flagFieldsOf(c)||[]).join(',')].join('~'):'',c?_n6pAhSig(c):''].join('#');
+    purch.length,c?[c.name,c.phone,c.email,(_flagFieldsOf(c)||[]).join(',')].join('~'):'',c?_n6pW('_n6p'+'AhSig',c):''].join('#');
   if(!force&&sig===a.sig&&m.style.display!=='none')return;
   a.sig=sig;
   const box=m.querySelector('.modal-box'),keepTop=box?box.scrollTop:0;
@@ -43804,7 +43814,7 @@ function _ahRender(force){
     lastRide?`${t('acrColLastRide')}: ${shortDate(lastRide)}`:'',
     favType?`${t('custFavType')}: ${typeLabel(favType)}`:'',
     avgRating?`${t('custAvgRating')}: ${avgRating}/10`:'',
-    ..._n6qAhFacts(rows,a), // no-show rate, own rides and rides for others (PP19)
+    ...(_n6pW('_n6q'+'AhFacts',rows,a)||[]), // no-show rate, own rides and rides for others (PP19)
   ].filter(Boolean).map(f=>`<span>${esc(f)}</span>`).join('');
   const other=x=>String(x.name||'').trim().toLowerCase()!==String(a.name||'').trim().toLowerCase(); // booked for someone else
   const card=b=>{
@@ -43855,7 +43865,7 @@ function _ahRender(force){
         <button type="button" class="ah-close x-close" data-on-click="${_on("closeCustomerProfile")}" aria-label="${esc(t('closeBtn'))}">&times;</button>
       </div>
       ${head?`<div class="ah-actions">${head}</div>`:''}
-      ${c?_n6pAhBar(c):''}
+      ${c?_n6pW('_n6p'+'AhBar',c):''}
       <div class="ah-kpis">
         ${kpi(Math.max(done.length,srv?srv.r:0),t('custTotalRides'))}
         ${kpi(noshows,t('statusNoshow'),noshows?'warn':'')}
@@ -43863,11 +43873,11 @@ function _ahRender(force){
         ${kpi(`${_money(Math.round(spent*100)/100)}`,t('custTotalSpent'))}
       </div>
       ${facts?`<div class="ah-facts">${facts}</div>`:''}
-      ${c?_n6pAhStage(c):''}
-      ${c?_n6pDetails(c):''}
-      ${c?_n6pNotesHtml(c.id):''}
+      ${c?_n6pW('_n6p'+'AhStage',c):''}
+      ${c?_n6pW('_n6p'+'Details',c):''}
+      ${c?_n6pW('_n6p'+'NotesHtml',c.id):''}
       ${c?_ahCommHtml(c):''}
-      ${_n6qAhExtra(c)}
+      ${_n6pW('_n6q'+'AhExtra',c)}
       ${c?_cwSecHtml(c.id):''}
       ${c?_bdgSecHtml(c.id):''}
       <div class="ah-sec">${t('ahCurrent')}${cur.length?` <span class="ah-n">${cur.length}</span>`:''}</div>
@@ -43882,7 +43892,7 @@ function _ahRender(force){
         <span class="ah-muted">${r.created_at?shortDate(String(r.created_at)):''}</span>
         <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
-      ${a.custId?_n6qTlHost(a.custId):''}
+      ${a.custId?_n6pW('_n6q'+'TlHost',a.custId):''}
       ${a.custId?`<div class="ah-sec">${t('cactTitle')}</div><div id="ah-act"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_ahActShow",a.custId)}">${t('ahActShow')}</button></div>`:''}
     </div>
   </div>`;
