@@ -96,7 +96,7 @@ test.describe('@staff:shell the staff shell (2026-11-06)', () => {
     await staff(page);
     await page.evaluate(VM);
     const kinds = await page.evaluate(`Object.fromEntries(_ntKinds().filter(x=>['coopen','sfull','vsign','vopen'].includes(x.k)).map(x=>[x.k,x.ids]))`);
-    expect(kinds).toEqual({ coopen: [PAST], sfull: [TODAY + '|' + TODAY], vsign: ['ac1', 's2'], vopen: ['3'] });
+    expect(kinds).toEqual({ coopen: [PAST], sfull: [TODAY + '|' + TODAY], vsign: ['ap:c1', 'sh:2'], vopen: ['3'] });
     await page.evaluate('_ntSync()');
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="sessions"] .tab-badge')).toHaveText('2');
     await expect(page.locator('#staff-tab-nav .tab-btn[data-stab="volunteers"] .tab-badge')).toHaveText('3');
