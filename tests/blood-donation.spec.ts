@@ -508,7 +508,8 @@ test.describe('@customer:blood Blood Donation registration', () => {
 });
 
 test.describe('@customer:blood The Blood Donor and Volunteer badges', () => {
-  const row = (donated: string | null) => ({ id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: 'done', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', donated_at: donated });
+  // Not checked out unless marked Donated: a checked-out donor also earns the Blood Donation Visitor badge, whose pop-up would come first
+  const row = (donated: string | null) => ({ id: 'q1', session_id: BD, session_day: 'Thursday', session_date: '2099-11-05', queue_num: 7, name: 'Sara Haddad', phone: '+966500000001', type_preference: 'None', size: '', status: donated ? 'done' : 'active', paid: false, price: 0, registered_at: '2099-11-01T10:00:00Z', customer_id: 'c1', donated_at: donated });
   const catalog = [
     { id: 'bd_blood_donor', slug: 'blood_donor', icon: 'drop', color: 'red', name: 'Blood Donor', system: true, auto: true, retired: false, sort: 91 },
     { id: 'bd_volunteer', slug: 'volunteer', icon: 'hand', color: 'blue', name: 'Volunteer', system: true, auto: false, retired: false, sort: 81 },
@@ -1055,7 +1056,24 @@ test.describe('@customer:blood The Blood Donation Visitor badge', () => {
     await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donation Visitor' })).toHaveCount(1);
   });
 
-  for (const [what, x] of [['a visitor still checked in', { status: 'active' }], ['a visitor who never came', { status: 'waiting' }], ['a donor checked out', { blood_role: 'donor' }]] as const) {
+  for (const [what, x] of [['a donor checked out', { blood_role: 'donor' }], ['a donor marked Donated, still checked in', { blood_role: 'donor', status: 'active', donated_at: '2099-11-05T18:00:00Z' }]] as const) {
+    test(`${what} gets it too (donors and visitors alike)`, async ({ page }) => {
+      await rider(page, x);
+      await expect(page.locator('#badge-pop')).toHaveCount(1);
+      await page.evaluate(`_mrBadgesMore()`);
+      await expect(page.locator('#tab-account .mr-badges .mr-badge', { hasText: 'Blood Donation Visitor' })).toHaveCount(1);
+    });
+  }
+
+  test('a donor checked out without the Donated mark does not get Blood Donor', async ({ page }) => {
+    await rider(page, { blood_role: 'donor' });
+    await expect(page.locator('#badge-pop')).toContainText('Blood Donation Visitor');
+    await page.locator('#badge-pop').getByRole('button', { name: 'Close' }).click();
+    await page.evaluate(`_mrBadgesMore()`);
+    await expect(page.locator('#tab-account .mr-badge', { hasText: /^Blood Donor/ })).toHaveCount(0);
+  });
+
+  for (const [what, x] of [['a visitor still checked in', { status: 'active' }], ['a visitor who never came', { status: 'waiting' }], ['a donor who never came', { blood_role: 'donor', status: 'waiting' }]] as const) {
     test(`${what} does not get it, not even to earn`, async ({ page }) => {
       await rider(page, x);
       await expect(page.locator('#mr-badges-host')).toHaveCount(1);
