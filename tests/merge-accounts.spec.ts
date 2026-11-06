@@ -107,6 +107,9 @@ test('Undo on a recent merge calls the function; a database without it says so',
   const calls = rpcs(page, 'staff_unmerge_customers');
   await page.evaluate(`setStaffTab('customers');setCustomersTab('duplicates')`);
   await page.locator('#tab-community .mg-row button', { hasText: 'Undo merge' }).click();
+  // asked first since the People review (2026-11-06, PP05): it was one tap
+  expect(calls.length).toBe(0);
+  await page.locator('.chrome-dact button.chrome-mw100').last().click();
   await expect.poll(() => calls.length).toBe(1);
   expect(calls[0]).toEqual({ p_id: 7 });
 });

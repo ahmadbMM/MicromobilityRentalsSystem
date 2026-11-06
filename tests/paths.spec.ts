@@ -67,7 +67,7 @@ test.describe('the server', () => {
     return mod.onRequest(ctx) as Promise<Response>;
   };
   test('answers a deep address with the app when Pages has no file for it', async () => {
-    for (const path of ['/bookings', '/bookings/waitlist', '/community/applications', '/website/bikes/fields', '/my-bookings', '/sales/']) {
+    for (const path of ['/bookings', '/bookings/waitlist', '/community/applications', '/website/bikes/fields', '/my-bookings', '/sales/', '/people/a/3f2c9a1e-0b6f-4c1d-9e2a-5d7b8c9a0f12']) {
       const r = await mw('https://staff.micromobility.sa' + path, { status: 404 });
       expect(r.status, path).toBe(200);
       expect(await r.text(), path).toBe('shell /'); // the root, never /index.html (a 308 on Pages)
