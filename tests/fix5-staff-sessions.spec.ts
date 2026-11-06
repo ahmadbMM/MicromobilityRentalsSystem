@@ -105,7 +105,7 @@ test.describe('@staff:sessions fix5 sessions', () => {
     const r = ride('2099-03-10');
     const qe = (id: string, n: number, status: string) => ({ id, session_id: r.id, session_day: 'Tuesday', session_date: r.id, queue_num: n, name: 'R' + n, status, type_preference: 'Road', paid: false, price: 75, registered_at: '2099-01-01T09:00:00Z' });
     await sessionsPage(page, { sessions: [r], queue_entries: [qe('a', 1, 'waiting'), qe('b', 2, 'waiting'), qe('c', 3, 'active')] });
-    await page.evaluate(`setStaffTab('sessions');S.sessView='cal';S._calYm='2099-03';renderSessions()`);
+    await page.evaluate(`setStaffTab('sessions');S.sessView='cal';S._n6rCalMode='month';S._calYm='2099-03';renderSessions()`);
     await expect(page.locator('.cal-sess em').first()).toHaveText('2/2'); // three riders on two places: full, never 3/2
   });
 });
