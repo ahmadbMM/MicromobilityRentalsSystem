@@ -6440,5 +6440,14 @@
   "bldEditTitle": "Editar inscrição",
   "bldEditSub": "As alterações nos dados também são salvas na conta da pessoa.",
   "bldEditSaved": "Salvo na reserva e na conta.",
-  "bldEditLog": "Inscrição editada: {0}"
+  "bldEditLog": "Inscrição editada: {0}",
+  "leadMenuOn": "Marcar como líder do passeio",
+  "leadMenuOff": "Não é o líder do passeio",
+  "leadAskQ": "{0} está a liderar este passeio?",
+  "leadAskBody": "Depois do check-in, conta na conta dele: passeios liderados e os emblemas Marshal.",
+  "leadUndoQ": "Retirar a liderança do passeio a {0}?",
+  "leadToastOn": "Marcado como líder do passeio",
+  "leadToastOff": "Liderança do passeio retirada",
+  "leadChip": "Líder do passeio",
+  "mrLed": "Passeios liderados: {0}"
 }

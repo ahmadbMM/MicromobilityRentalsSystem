@@ -6440,5 +6440,14 @@
   "bldEditTitle": "Modifier l’inscription",
   "bldEditSub": "Les changements de ses informations sont aussi enregistrés sur son compte.",
   "bldEditSaved": "Enregistré sur la réservation et le compte.",
-  "bldEditLog": "Inscription modifiée : {0}"
+  "bldEditLog": "Inscription modifiée : {0}",
+  "leadMenuOn": "Désigner comme chef de sortie",
+  "leadMenuOff": "Pas le chef de sortie",
+  "leadAskQ": "{0} mène-t-il cette sortie ?",
+  "leadAskBody": "Une fois enregistré, cela compte sur son compte : sorties menées et badges Marshal.",
+  "leadUndoQ": "Retirer le rôle de chef de sortie à {0} ?",
+  "leadToastOn": "Désigné chef de sortie",
+  "leadToastOff": "Rôle de chef de sortie retiré",
+  "leadChip": "Chef de sortie",
+  "mrLed": "Sorties menées : {0}"
 }

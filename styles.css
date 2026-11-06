@@ -10333,6 +10333,8 @@ body.view-staff .queue-mobile-view .q-card.cm-row-mark{background:linear-gradien
 /* The special needs tag (2026-10-23): a figure in a wheelchair, white on orange (the owner, 2026-10-23; it was blue) - on its tag chip (.tag-svg) and after
    a holder's name wherever staff meet the booking (.sn-mk, _snChip). */
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;}
+/* Ride lead (2026-11-06): the booking staff marked as the ride's lead (_leadChip). */
+.lead-mk{display:inline-flex;align-items:center;justify-content:center;flex:none;margin-inline-start:6px;width:20px;height:18px;background:#1971c2;color:#fff;border-radius:2px;vertical-align:middle;}
 .sn-ico{display:block;width:14px;height:14px;}
 .tag-svg{display:inline-flex;align-items:center;flex-shrink:0;}
 .tag-svg .sn-ico{width:16px;height:16px;}

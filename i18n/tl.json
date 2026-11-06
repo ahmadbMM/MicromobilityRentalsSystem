@@ -6440,5 +6440,14 @@
   "bldEditTitle": "I-edit ang rehistro",
   "bldEditSub": "Nase-save din sa kanyang account ang mga pagbabago sa detalye.",
   "bldEditSaved": "Na-save sa booking at sa account.",
-  "bldEditLog": "In-edit ang rehistro: {0}"
+  "bldEditLog": "In-edit ang rehistro: {0}",
+  "leadMenuOn": "Gawing ride lead",
+  "leadMenuOff": "Hindi ang ride lead",
+  "leadAskQ": "Si {0} ba ang nangunguna sa ride na ito?",
+  "leadAskBody": "Kapag naka-check in na, bibilangin ito sa account nila: mga ride na pinangunahan at ang mga Marshal badge.",
+  "leadUndoQ": "Bawiin ang ride lead kay {0}?",
+  "leadToastOn": "Ginawang ride lead",
+  "leadToastOff": "Binawi ang ride lead",
+  "leadChip": "Ride lead",
+  "mrLed": "Mga ride na pinangunahan: {0}"
 }

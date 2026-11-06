@@ -6440,5 +6440,14 @@
   "bldEditTitle": "Editar registro",
   "bldEditSub": "Los cambios en sus datos también se guardan en su cuenta.",
   "bldEditSaved": "Guardado en la reserva y en la cuenta.",
-  "bldEditLog": "Registro editado: {0}"
+  "bldEditLog": "Registro editado: {0}",
+  "leadMenuOn": "Marcar como líder de la salida",
+  "leadMenuOff": "No es el líder de la salida",
+  "leadAskQ": "¿{0} lidera esta salida?",
+  "leadAskBody": "Una vez registrado, cuenta en su cuenta: salidas lideradas y las insignias Marshal.",
+  "leadUndoQ": "¿Quitar el liderazgo de la salida a {0}?",
+  "leadToastOn": "Marcado como líder de la salida",
+  "leadToastOff": "Liderazgo de la salida retirado",
+  "leadChip": "Líder de la salida",
+  "mrLed": "Salidas lideradas: {0}"
 }
