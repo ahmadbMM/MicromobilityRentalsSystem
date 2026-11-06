@@ -3,7 +3,7 @@ import { stubSupabase, unlockStaff, waitForSb } from './helpers/supabase';
 
 // Blood Donation free rides on Bookings (the owner, 2026-11-06: "in the staff bookings table show the bookings that
 // are because of the free ride code used make it themed in red for the blood donation event"). A booking made with a
-// BD- code wears a red tint, a red name and a red drop after the name, on the table and the phone cards; any other
+// BD- code wears a red band down its start edge, a red tint, a red name and a red drop after the name, on the table and the phone cards; any other
 // code, or none, does not. All Supabase traffic is stubbed.
 
 const LIVE = '2099-03-01';
@@ -42,7 +42,10 @@ test.describe('@staff Blood Donation free rides on Bookings', () => {
     await expect(tr(page, 'q3').locator('.bdf-mk')).toHaveCount(0);
     await expect(tr(page, 'q1').locator('.rider-name').first()).toHaveCSS('color', 'rgb(165, 13, 38)');
     const bg = await tr(page, 'q1').locator('td').nth(1).evaluate((el) => getComputedStyle(el).backgroundImage);
-    expect(bg).toContain('rgba(200, 16, 46, 0.1)');
+    expect(bg).toContain('rgba(200, 16, 46, 0.2)');
+    // the red band down the start edge
+    const sh = await tr(page, 'q1').locator('td').first().evaluate((el) => getComputedStyle(el).boxShadow);
+    expect(sh).toContain('rgb(200, 16, 46)');
     if (process.env.SHOT_DIR) await page.locator('#tab-queue .queue-table').screenshot({ path: `${process.env.SHOT_DIR}/bdf-roster.png` });
     await page.setViewportSize({ width: 390, height: 900 });
     await page.evaluate(`renderStaffQueue()`);
