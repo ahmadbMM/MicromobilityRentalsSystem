@@ -77,7 +77,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Shards take 6-12 minutes and a slow runner passes 15: on 2026-11-06 three runs in a row lost a shard to the
+    # limit while it was still finishing tests, so main did not deploy.
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
