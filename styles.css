@@ -11279,6 +11279,28 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 #tab-community .ppl-hit .am-meta{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #tab-community .ppl-mem{font-size:12px;padding:2px 6px;border:1px solid var(--border);}
 #tab-community .ppl-none{padding:10px 12px;}
+/* People, second review (2026-11-06): the find box's keys and richer hits, Needs you today, member facts on Members;
+   the account window's timeline, last messaged, completeness, strikes and fees; the duplicate line while making an account. */
+#tab-community .ppl-hit{flex-wrap:wrap;}
+#tab-community .ppl-hit.n6q-on{background:var(--s2,rgba(127,127,127,.12));box-shadow:inset 3px 0 0 var(--green,#00e585);}
+#tab-community .ppl-hit .n6q-tag{font-size:11px;padding:1px 6px;border:1px solid var(--tc,var(--border));color:var(--text);white-space:nowrap;}
+#tab-community .ppl-hit .n6q-bk{flex-basis:100%;font-size:12px;font-weight:700;color:var(--muted);}
+#tab-community .n6q-mem{display:flex;flex-direction:column;gap:2px;min-width:0;}
+#tab-community .n6q-mem .am-meta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#tab-community .n6q-needs .dash-row em{white-space:nowrap;}
+#cust-modal .n6q-sec{display:flex;align-items:center;gap:8px;font-size:var(--staff-fs-sm,12px);font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;}
+#cust-modal #n6q-tl .ah-act-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+#cust-modal .n6q-tl-row.n6q-k-bad .ca-lbl{color:var(--red,#e5484d);}
+#cust-modal .n6q-tl-row.n6q-k-pay .ca-lbl{color:var(--green,#00a86b);}
+#cust-modal .n6q-ahx .cw-sec-row{margin:4px 0;flex-wrap:wrap;}
+#cust-modal .n6q-ahx .n6q-ct{justify-content:flex-start;gap:6px;}
+#cust-modal .n6q-strk.n6q-hot{color:var(--orange,#e8890c);font-weight:700;}
+#cust-modal .n6q-chip{font-size:11px;padding:2px 8px;border:1px solid currentColor;}
+#cust-modal .n6q-fee{margin:6px 0;flex-wrap:wrap;}
+#new-acct-modal .n6q-dup:empty{display:none;}
+#new-acct-modal .n6q-dup{margin:8px 0 0;padding:8px 10px;border:1px solid var(--orange,#e8890c);display:flex;flex-direction:column;gap:6px;}
+#new-acct-modal .n6q-dup-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;}
+#confirm-modal .seg-dlg .n6q-ct,#tab-community .n6q-ct{margin-top:4px;}
 #tab-community .ppl-scope{display:inline-flex;gap:0;margin:0 0 12px;}
 #tab-community .ppl-scope .toggle-btn{border-radius:0;}
 @media (max-width:640px){
