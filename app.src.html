@@ -17229,7 +17229,8 @@ function _mrBadgeList(cust){
 // ladder - the highest level reached, how many of its levels, the next one's progress - and its popup lists every
 // level. A level reached brings every level under it, given by staff or earned by riding ("getting the t100
 // automatically gives the ones before"). The catalogue and customer_badges keep one row per level, so staff
-// still give, take back and count each level; nothing is stored for a level that comes with a higher one.
+// still give, take back and count each level. A level staff give stores the levels under it too (_bdgWithLower);
+// one earned by riding, or given before 2026-11-06, brings them without a row.
 // The badges staff give have levels too (the owner, 2026-10-12: "put levels and multiple badges in each one"), five
 // each at 1 / 10 / 25 / 50 / 100 (Champion and Front Row 1 / 5 / 10 / 25 / 50: "1 5 10 are too low even if you need to
 // increase the number of levels"), each level's line saying how often it was done; Bike Owner climbs from any bike bought from us
@@ -50718,10 +50719,10 @@ async function _segBadge(){
   const at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(g.note||'').trim().slice(0,140)||null;
   let done=0;
   for(let i=0;i<todo.length;i+=200){
-    const rows=todo.slice(i,i+200).map(cid=>({customer_id:cid,badge_id:b.id,note,awarded_by:by,awarded_at:at}));
+    const rows=_bdgWithLower(todo.slice(i,i+200).map(cid=>({customer_id:cid,badge_id:b.id,note,awarded_by:by,awarded_at:at})));
     const r=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
     if(_writeErr(r,'give badge'))break;
-    const went=_bdgWentIn(rows,r);_bdgMerge(went);done+=went.length;
+    const went=_bdgWentIn(rows,r);_bdgMerge(went);done+=went.filter(x=>x.badge_id===b.id).length;
   }
   g.busy=false;g.badge=null;g.note='';
   if(done){const msg=t('segBadgeGiven').replace('{0}',_bdgName(b)).replace('{1}',done);logAction(msg);toast(msg,'success');}
@@ -51253,6 +51254,17 @@ function _bdgDrop(rows){const k=new Set(rows.map(_bdgKey));S.custBadges=(S.custB
 // badge another desk gave meanwhile keeps its note and its giver (a single give used to overwrite both,
 // and its Undo then deleted the other desk's badge). An answer with no rows to compare keeps them all.
 function _bdgWentIn(rows,r){const got=r&&Array.isArray(r.data)?new Set(r.data.map(_bdgKey)):null;return got?rows.filter(x=>got.has(_bdgKey(x))):rows;}
+// Giving a ladder level gives every level under it with it (the owner, 2026-11-06: "giving a higher level badge
+// of a series gives the lower badges with it automatically"): each lower level the rider was not given yet goes
+// in as a row of its own, same note, giver and ride, and stays when the higher one is taken back. The Undo of
+// the give takes them all back.
+function _bdgWithLower(rows){const got=new Set((S.custBadges||[]).map(_bdgKey)),out=[];
+  rows.forEach(r=>{out.push(r);got.add(_bdgKey(r));const b=_bdgById(r.badge_id),l=b&&b.system&&BDG_LADDER_OF.get(b.slug);if(!l)return;
+    l[0].slice(0,l[1]).forEach(s=>{const x=(S.badges||[]).find(y=>y.system&&y.slug===s&&!y.retired);if(!x)return;const n={...r,badge_id:x.id};if(!got.has(_bdgKey(n))){got.add(_bdgKey(n));out.push(n);}});});
+  return out;}
+async function _bdgUngive(rows,ctx){const by=new Map();rows.forEach(x=>{if(!by.has(x.badge_id))by.set(x.badge_id,[]);by.get(x.badge_id).push(x.customer_id);});
+  for(const[bid,ids]of by)for(let i=0;i<ids.length;i+=200){const x=await sb.from('customer_badges').delete().eq('badge_id',bid).in('customer_id',ids.slice(i,i+200));if(_writeErr(x,ctx))return false;}
+  return true;}
 // The ride badges this account has earned already, from the bookings this device holds, and Race
 // Ready from the account's own profile (it read as never earned here before 2026-10-02).
 function _bdgRideOn(cid){const all=getQueue().filter(e=>e.customerId===cid);return new Set(_mrBadges(all,all.filter(_bdgRode),(S.badges||[]).filter(b=>b.rule&&!b.retired),_bdgStaffRow(_custById(cid))).filter(r=>r.on).map(r=>r.s));}
@@ -51333,16 +51345,17 @@ async function _bdgGive(){
   const d=S._bdgDlg;if(!d||!d.pick||d.busy)return;
   const b=_bdgById(d.pick),c=_custById(d.cid)||{};if(!_bdgCanGive(b))return;
   const row={customer_id:d.cid,badge_id:b.id,note:String(d.note||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
+  const rows=_bdgWithLower([row]);
   d.busy=true;
-  const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
+  const r=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
   d.busy=false;
   if(_writeErr(r,'give badge'))return;
   d.pick=null;d.note='';
-  if(!_bdgWentIn([row],r).length){_bdgAfter(row.customer_id);_bdgLoad(true);return;} // given meanwhile from another desk: theirs stands, read it
-  _bdgMerge([row]);
+  const went=_bdgWentIn(rows,r);_bdgMerge(went);
+  if(!went.includes(row)){_bdgAfter(row.customer_id);_bdgLoad(true);return;} // given meanwhile from another desk: theirs stands, read it
   const msg=t('bdgGiven').replace('{0}',_bdgName(b)).replace('{1}',c.name||'');
   toast(msg);
-  pushUndo(msg,async()=>{const x=await sb.from('customer_badges').delete().eq('customer_id',row.customer_id).eq('badge_id',row.badge_id);if(_writeErr(x,'undo badge'))return false;_bdgDrop([row]);_bdgAfter(row.customer_id);});
+  pushUndo(msg,async()=>{if(!await _bdgUngive(went,'undo badge'))return false;_bdgDrop(went);_bdgAfter(row.customer_id);});
   _bdgAfter(row.customer_id);
 }
 async function _bdgTake(cid,bid){
@@ -51479,22 +51492,23 @@ function _bdgRiderHtml(b){
 async function _bdgGiveRider(bid,cid){
   const b=_bdgById(bid),c=_custById(cid);if(!_bdgCanGive(b)||!c||S._bdgRiderBusy||_bdgAllHolders(b).has(cid))return;
   const row={customer_id:cid,badge_id:bid,note:String(S._bdgRiderNote||'').trim().slice(0,140)||null,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()};
+  const rows=_bdgWithLower([row]);
   S._bdgRiderBusy=true;
-  const r=await sb.from('customer_badges').upsert(row,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
+  const r=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
   S._bdgRiderBusy=false;
   if(_writeErr(r,'give badge to a rider'))return;
   S._bdgRiderNote='';
-  if(!_bdgWentIn([row],r).length){_bdgAfter(cid);_bdgLoad(true);return;} // given meanwhile from another desk: theirs stands, read it
-  _bdgMerge([row]);
+  const went=_bdgWentIn(rows,r);_bdgMerge(went);
+  if(!went.includes(row)){_bdgAfter(cid);_bdgLoad(true);return;} // given meanwhile from another desk: theirs stands, read it
   const msg=t('bdgGiven').replace('{0}',_bdgName(b)).replace('{1}',c.name||'');
   toast(msg);
-  pushUndo(msg,async()=>{const x=await sb.from('customer_badges').delete().eq('customer_id',cid).eq('badge_id',bid);if(_writeErr(x,'undo badge'))return false;_bdgDrop([row]);_bdgAfter(cid);});
+  pushUndo(msg,async()=>{if(!await _bdgUngive(went,'undo badge'))return false;_bdgDrop(went);_bdgAfter(cid);});
   _bdgAfter(cid);
 }
 async function _bdgGiveRide(bid,sid){
   const b=_bdgById(bid),r=_bdgRides().find(x=>x.s.id===sid);if(!_bdgCanGive(b)||!r||S._bdgRideBusy)return;
   const has=_bdgAllHolders(b),at=new Date().toISOString(),by=(_opName()||'Staff').slice(0,60),note=String(S._bdgRideNote||'').trim().slice(0,140)||null;
-  const rows=r.ids.filter(id=>!has.has(id)).map(id=>({customer_id:id,badge_id:bid,note,session_id:sid,awarded_by:by,awarded_at:at}));
+  const rows=_bdgWithLower(r.ids.filter(id=>!has.has(id)).map(id=>({customer_id:id,badge_id:bid,note,session_id:sid,awarded_by:by,awarded_at:at})));
   if(!rows.length)return;
   S._bdgRideBusy=true;
   const w=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
@@ -51502,14 +51516,15 @@ async function _bdgGiveRide(bid,sid){
   if(_writeErr(w,'give badge to a ride'))return;
   // Only the riders it went to: one given meanwhile from another desk keeps theirs, and the Undo
   // takes back these alone (it deleted every rider of the ride, the other desk's gifts too).
-  const ins=_bdgWentIn(rows,w);
+  const ins=_bdgWentIn(rows,w),got=ins.filter(x=>x.badge_id===bid).length;
   S._bdgRideId=null;S._bdgRideNote='';
   if(ins.length<rows.length)_bdgLoad(true); // read the ones the other desk gave
   if(!ins.length){_bdgAfter();return;}
   _bdgMerge(ins);
-  const msg=t('bdgRideDone').replace('{0}',_bdgName(b)).replace('{1}',ins.length).replace('{2}',_scanSessLabel(r.s));
+  if(!got){_bdgAfter();return;}
+  const msg=t('bdgRideDone').replace('{0}',_bdgName(b)).replace('{1}',got).replace('{2}',_scanSessLabel(r.s));
   toast(msg);
-  pushUndo(msg,async()=>{const x=await sb.from('customer_badges').delete().eq('badge_id',bid).eq('session_id',sid).in('customer_id',ins.map(y=>y.customer_id));if(_writeErr(x,'undo badge'))return false;_bdgDrop(ins);_bdgAfter();});
+  pushUndo(msg,async()=>{if(!await _bdgUngive(ins,'undo badge'))return false;_bdgDrop(ins);_bdgAfter();});
   _bdgAfter();
 }
 // An admin's badge: a drawn icon, one of the eight colours, and its words in English and Arabic

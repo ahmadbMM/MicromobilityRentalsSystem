@@ -96,7 +96,7 @@ test.describe('@staff:community badges', () => {
     await modal(page).locator('#bdg-note').fill('Swept the Friday ride');
     await modal(page).getByRole('button', { name: 'Give badge' }).click();
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept the Friday ride', awarded_by: 'Spec Staff' });
+    expect(sent[0].postDataJSON()).toMatchObject([{ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept the Friday ride', awarded_by: 'Spec Staff' }]);
     await expect(modal(page).locator('.bdg-list')).toContainText('Swept the Friday ride');
     await expect(modal(page).locator('.bdg-pick', { hasText: 'Marshal' })).toHaveCount(0);
     await expect(lina.locator('.am-c-tags .bdg-m')).toHaveCount(0); // the tags column shows tags only (2026-10-11)
@@ -218,6 +218,29 @@ test.describe('@staff:community badges', () => {
     expect(await page.evaluate(`[..._bdgAllHolders(_bdgById('bd_t50'))]`)).toEqual(['c1']);
   });
 
+  test('giving a ladder level gives the levels under it too, and its Undo takes them all back (the owner, 2026-11-06)', async ({ page }) => {
+    const race = ['t100', 't50', 't25'].map((k, i) => ({ id: 'bd_' + k, slug: k, icon: k, color: 'gold', name: k.toUpperCase() + ' Finisher', system: true, auto: false, retired: false, sort: 75 + i }));
+    await staff(page, { badges: [...badges, ...race], customer_badges: [...customer_badges, { customer_id: 'c1', badge_id: 'bd_t25', note: null, session_id: null, awarded_by: 'Malik', awarded_at: '2026-10-08T18:00:00Z' }] });
+    await community(page, 'accounts');
+    const sent = writes(page, 'customer_badges');
+    await page.locator('#am-cust-rows .am-row[data-cust="c1"] .am-bdg-btn').click();
+    await modal(page).locator('.bdg-pick', { hasText: 'T100 Finisher' }).click();
+    await modal(page).locator('#bdg-note').fill('Jeddah');
+    await modal(page).getByRole('button', { name: 'Give badge' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    // T50 goes in with it, as a row of its own; T25 she was given already.
+    const rows = sent[0].postDataJSON() as Record<string, unknown>[];
+    expect(rows.map((r) => r.badge_id)).toEqual(['bd_t100', 'bd_t50']);
+    expect(rows[1]).toMatchObject({ customer_id: 'c1', note: 'Jeddah', awarded_by: 'Spec Staff' });
+    const t50 = modal(page).locator('.bdg-list .bdg-item', { hasText: 'T50 Finisher' });
+    await expect(t50).not.toContainText('Comes with a higher level');
+    await expect(t50.getByRole('button', { name: 'Take back' })).toHaveCount(1); // stored now: it stays if T100 is taken back
+    await page.evaluate('S.undoStack.at(-1).fn()');
+    await expect.poll(() => sent.length).toBe(3);
+    expect(sent.slice(1).map((r) => [r.method(), new URL(r.url()).searchParams.get('badge_id')])).toEqual([['DELETE', 'eq.bd_t100'], ['DELETE', 'eq.bd_t50']]);
+    await expect.poll(() => page.evaluate(`S.custBadges.filter(x=>x.customer_id==='c1').map(x=>x.badge_id)`)).toEqual(['bd_t25']);
+  });
+
   test('an unpaid returned ride earns nothing in the dialog', async ({ page }) => {
     await staff(page, { queue_entries: queue_entries.map((q) => (q.id === 'q1' ? { ...q, paid: false } : q)) });
     await community(page, 'accounts');
@@ -240,7 +263,7 @@ test.describe('@staff:community badges', () => {
     await row.getByLabel('Note for the rider', { exact: false }).fill('Swept Friday');
     await row.locator('#bdg-rider-res .bdg-hold[data-cust="c1"]').getByRole('button', { name: 'Give badge' }).click();
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept Friday' });
+    expect(sent[0].postDataJSON()).toMatchObject([{ customer_id: 'c1', badge_id: 'bd_marshal', note: 'Swept Friday' }]);
     await expect.poll(() => page.evaluate(`(S.custBadges||[]).some(x=>x.customer_id==='c1'&&x.badge_id==='bd_marshal')`)).toBe(true);
     // Champion is Omar's already: he is listed as holding it, with nothing to press.
     await page.locator('.bdg-row[data-badge="bd_champion"]').getByRole('button', { name: 'Give to a rider' }).click();
@@ -292,7 +315,7 @@ test.describe('@staff:community badges', () => {
     await fl.getByLabel('Find a rider').fill('nora');
     await fl.locator('#bdg-rider-res .bdg-hold[data-cust="c4"]').getByRole('button', { name: 'Give badge' }).click();
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0].postDataJSON()).toMatchObject({ customer_id: 'c4', badge_id: 'bd_first_lap' });
+    expect(sent[0].postDataJSON()).toMatchObject([{ customer_id: 'c4', badge_id: 'bd_first_lap' }]);
     // Lina earned it by riding: she reads Has it.
     await fl.getByLabel('Find a rider').fill('lina');
     await expect(fl.locator('#bdg-rider-res')).toContainText('Has it');
