@@ -11212,19 +11212,50 @@ body.vol-mode #topbar-right{visibility:hidden;}
 .vm-hline{padding-top:8px;}
 .vm-inl{display:inline-flex;align-items:center;gap:6px;font-size:13px;}
 .vm-acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
-.vr-list{display:flex;flex-direction:column;margin-top:8px;}
-.vr-row{display:grid;grid-template-columns:minmax(120px,1fr) minmax(130px,1fr) minmax(190px,1.2fr) 86px;gap:10px;align-items:start;padding:10px 0;border-bottom:1px solid var(--border);}
-.vr-sel{display:flex;flex-wrap:wrap;gap:4px;}
-.vr-clock{display:grid;gap:4px;font-size:12px;}
-.vr-clock label{display:flex;flex-direction:column;gap:2px;}
-.vr-clock input{min-height:34px;width:100%;box-sizing:border-box;}
-.vr-h label{display:flex;flex-direction:column;gap:2px;font-size:12px;}
 .vr-hours{width:100%;box-sizing:border-box;min-height:36px;}
+/* Volunteers > Shifts: one session's team, run like the Bookings roster (2026-11-06). Fixed widths keep the columns in line with the header. */
+.vd-pick{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
+.vd-sel{flex:1 1 auto;min-width:0;max-width:560px;}
+.btn-sm.vd-arr{flex:none;min-width:44px;font-size:18px;line-height:1;}
+html[dir="rtl"] .vd-arr{transform:scaleX(-1);}
+.vd-state{margin:8px 0 12px;}
+.vd-acts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+/* One grid for the whole list, each row a subgrid of it: the buttons' column is as wide as the widest row's, so every column lines up under the header. */
+.vd-list{display:grid;grid-template-columns:auto minmax(150px,1.6fr) minmax(110px,1fr) auto auto auto;margin-top:10px;}
+.vd-list>.empty-state{grid-column:1/-1;}
+.vd-row{display:grid;grid-column:1/-1;grid-template-columns:subgrid;column-gap:10px;align-items:center;padding:10px 8px;border-bottom:1px solid var(--border);border-inline-start:3px solid transparent;}
+.vd-head{padding:6px 8px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);}
+.vd-who{min-width:0;overflow-wrap:anywhere;}
+.vd-st{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+.vd-times{font-size:12px;white-space:nowrap;}
+.vd-hrs{font-size:13px;white-space:nowrap;}
+.vd-act{display:flex;gap:6px;justify-content:flex-end;}
+.vd-main{min-width:104px;}
+.vd-chip{--bc:var(--border);border-color:var(--border);color:var(--muted);}
+.vd-in{border-inline-start-color:var(--green);background:rgba(var(--green-rgb),.06);}
+.vd-in .vd-chip{color:var(--green);border-color:var(--green);}
+.vd-wait{border-inline-start-color:var(--orange);}
+.vd-wait .vd-chip{color:var(--orange);border-color:var(--orange);}
+.vd-out{border-inline-start-color:var(--blue);}
+.vd-out .vd-chip{color:var(--blue);border-color:var(--blue);}
+.vd-asked{border-inline-start-color:var(--purple);}
+.vd-asked .vd-chip{color:var(--purple);border-color:var(--purple);}
+.vd-off{opacity:.6;}
+.vd-compact .vd-row{padding-top:4px;padding-bottom:4px;}
+.vd-res-acts{display:flex;flex-wrap:wrap;gap:6px;}
 @media (max-width:760px){
   .vm-row,.vm-row:has(>.am-sel),.vm-row-s,.vm-row-a{grid-template-columns:minmax(0,1fr) auto;}
   .vm-row>.am-sel{grid-column:1/-1;}
   .vm-st,.vm-tags,.vm-acts{grid-column:1/-1;justify-content:flex-start;}
   .vm-form{grid-template-columns:minmax(0,1fr);}
-  .vr-row{grid-template-columns:minmax(0,1fr);}
+  .vd-head{display:none;}
+  .vd-list{display:flex;flex-direction:column;}
+  .vd-row{display:flex;flex-wrap:wrap;gap:8px 10px;}
+  .vd-selc:empty,.vd-times:empty,.vd-hrs:empty{display:none;}
+  .vd-who{flex:1 1 55%;}
+  .vd-st{flex:1 1 35%;}
+  .vd-times,.vd-hrs{flex:1 1 40%;}
+  .vd-act{flex:1 1 100%;flex-wrap:wrap;justify-content:stretch;}
+  .vd-act .btn-sm{flex:1 1 0;}
 }
 body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vol-mode #scan-modal #scan-batch,body.vol-mode #scan-modal #scan-express-hint,body.vol-mode #scan-modal #scan-tally{display:none;}

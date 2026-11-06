@@ -42,12 +42,16 @@ function rpcs(page: Page, name: string): Record<string, unknown>[] {
   return sent;
 }
 const tile = (page: Page) => page.locator('#tab-volunteers .inv-tabs');
+const roster = (page: Page) => tile(page).getByRole('button', { name: 'Volunteers', exact: true }).click();
+const row = (page: Page, id: string) => page.locator(`#vd-list .vd-row[data-cust="${id}"]`);
 
 test.describe('@staff:volunteers The Volunteers section', () => {
   test('has its address, its tabs and its figures', async ({ page }) => {
     await staff(page);
     await expect(page).toHaveURL(/\/volunteers$/);
-    await expect(tile(page).getByRole('button')).toHaveText(['Volunteers', 'Interested (2)', 'Opportunities', 'Hours', 'Activity', 'Settings']);
+    await expect(tile(page).getByRole('button')).toHaveText(['Shifts', 'Volunteers', 'Interested (2)', 'Opportunities', 'Hours', 'Activity', 'Settings']);
+    await roster(page);
+    await expect(page).toHaveURL(/\/volunteers\/people$/);
     await expect(page.locator('#tab-volunteers .stat-card')).toHaveCount(6);
     await expect(page.locator('#vm-list .vm-row')).toHaveCount(1); // the active ones first
     await expect(page.locator('#vm-list .vm-row').first()).toContainText('Sara Haddad');
@@ -89,6 +93,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
   test('a trusted volunteer can be accepted automatically', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_save');
     await staff(page, { 'rpc:staff_volunteer_save': { ok: true } });
+    await roster(page);
     await page.locator('#vm-list .vm-row').first().getByRole('button', { name: 'Manage' }).click();
     await page.getByRole('checkbox', { name: /Accept automatically/ }).check();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Save', exact: true }).click();
@@ -99,6 +104,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
   test('hours: added to anyone, on any list, and refused when it would go below zero', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_hours_add');
     await staff(page, { 'rpc:staff_volunteer_hours_add': { __rpcError: { status: 400, code: 'P0001', message: 'VOL_HOURS_NEGATIVE' } } });
+    await roster(page);
     await page.locator('#vm-list .vm-row').first().getByRole('button', { name: 'Add hours' }).click();
     await page.locator('#vm-h').fill('-9');
     await page.locator('#confirm-modal').getByRole('button', { name: 'Add hours' }).click();
@@ -126,19 +132,133 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     expect(new Date(sent[0].p_closes as string).toISOString()).toBe('2099-11-05T20:30:00.000Z'); // Saudi time
   });
 
-  test('a session\'s team: accept all, hours worked out from the clock, one award', async ({ page }) => {
+  test('Shifts opens on the coming session, like Bookings: its figures, its team, and the interested', async ({ page }) => {
+    await staff(page);
+    await expect(page.locator('#tab-volunteers .vd-sel')).toHaveValue(SID);
+    await expect(page.locator('#tab-volunteers .stat-card')).toHaveCount(6);
+    await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(1); // the team: Sara
+    await expect(row(page, 'c1')).toContainText('Not here yet');
+    await expect(row(page, 'c1')).toContainText('Check-in'); // her role
+    await page.locator('#tab-volunteers .filter-pill', { hasText: 'Interested' }).click();
+    await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(2);
+    await expect(row(page, 'c2')).toContainText('I speak Arabic');
+    await page.locator('#tab-volunteers .filter-pill', { hasText: 'All' }).click();
+    if (!(await page.locator('#vd-q').isVisible())) await page.locator('[data-srch="vd"] button').click(); // folded on a phone
+    await page.locator('#vd-q').fill('nora');
+    await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(1);
+  });
+
+  test('check in and check out from the row, each one tap', async ({ page }) => {
+    const times = rpcs(page, 'staff_volunteer_shift_times');
+    await staff(page, { 'rpc:staff_volunteer_shift_times': { ok: true } });
+    await row(page, 'c1').getByRole('button', { name: 'Check in' }).click();
+    await expect.poll(() => times.length).toBe(1);
+    expect(times[0]).toMatchObject({ p_session: SID, p_customer: 'c1', p_out: null });
+    expect(Date.now() - +new Date(times[0].p_in as string)).toBeLessThan(60000);
+    await expect(row(page, 'c1')).toContainText('On duty');
+    await row(page, 'c1').getByRole('button', { name: 'Check out' }).click();
+    await expect.poll(() => times.length).toBe(2);
+    expect(times[1]).toMatchObject({ p_customer: 'c1', p_in: times[0].p_in });
+    expect(times[1].p_out).toBeTruthy();
+    await expect(row(page, 'c1')).toContainText('Finished');
+  });
+
+  test('anyone can be added by hand and checked in at once; someone interested is accepted first', async ({ page }) => {
+    const decide = rpcs(page, 'staff_volunteer_decide');
+    const times = rpcs(page, 'staff_volunteer_shift_times');
+    await staff(page, { 'rpc:staff_volunteer_decide': { ok: true, n: 1, skipped: 0 }, 'rpc:staff_volunteer_shift_times': { ok: true } });
+    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'Add a volunteer' }).click();
+    await page.locator('#vd-add-q').fill('Nora');
+    await page.locator('#vd-add-res').getByRole('button', { name: 'Add and check in' }).click();
+    await expect.poll(() => times.length).toBe(1);
+    expect(decide[0]).toMatchObject({ p_session: SID, p_customers: ['c3'], p_status: 'accepted' });
+    expect(times[0]).toMatchObject({ p_customer: 'c3', p_out: null });
+  });
+
+  test('hours: worked out from the clock and given to the finished, or set the same for everyone', async ({ page }) => {
     const award = rpcs(page, 'staff_volunteer_award');
     const clocked = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, clock_in: '2099-11-05T14:00:00+00:00', clock_out: '2099-11-05T16:30:00+00:00' } : x));
     await staff(page, { volunteer_shifts: clocked, 'rpc:staff_volunteer_award': { ok: true, added: 1, skipped: 0 } });
-    await tile(page).getByRole('button', { name: 'Opportunities' }).click();
-    await page.locator(`.vm-row-s[data-sess="${SID}"]`).getByRole('button', { name: 'Team and hours' }).click();
+    await expect(row(page, 'c1')).toContainText('2.5 h to give');
+    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'Give hours (1)' }).click();
     const box = page.locator('#confirm-modal');
-    await expect(box.getByRole('button', { name: 'Accept all (2)' })).toBeVisible();
-    await expect(box.locator('.vr-row[data-cust="c1"] .vr-hours')).toHaveValue('2.5');
-    await expect(box.locator('.vr-row[data-cust="c2"] .vr-hours')).toHaveCount(0); // not accepted
+    await expect(box.locator('.vd-give-h[data-cust="c1"]')).toHaveValue('2.5');
+    await box.locator('#vd-give-all').fill('3');
+    await box.getByRole('button', { name: 'Apply' }).click();
     await box.getByRole('button', { name: 'Give these hours' }).click();
     await expect.poll(() => award.length).toBe(1);
-    expect(award[0]).toEqual({ p_session: SID, p_rows: [{ customer_id: 'c1', hours: 2.5 }] });
+    expect(award[0]).toEqual({ p_session: SID, p_rows: [{ customer_id: 'c1', hours: 3 }] });
+  });
+
+  test('manage one person: times put right by hand, a note, hours for this session, taken off', async ({ page }) => {
+    const times = rpcs(page, 'staff_volunteer_shift_times');
+    const save = rpcs(page, 'staff_volunteer_shift_save');
+    const hrs = rpcs(page, 'staff_volunteer_hours_add');
+    await staff(page, { 'rpc:staff_volunteer_shift_times': { ok: true }, 'rpc:staff_volunteer_shift_save': { ok: true }, 'rpc:staff_volunteer_hours_add': { ok: true, id: 2, total: 5 } });
+    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    const box = page.locator('#confirm-modal');
+    await box.locator('#vd-in').fill('2099-11-05T17:00');
+    await box.locator('#vd-out').fill('2099-11-05T16:00');
+    await box.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.locator('.toast, #toast-container').first()).toContainText('finish time must be after');
+    await box.locator('#vd-out').fill('2099-11-05T21:30');
+    await box.locator('#vd-note').fill('Gate 3');
+    await box.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect.poll(() => times.length).toBe(1);
+    expect(new Date(times[0].p_in as string).toISOString()).toBe('2099-11-05T14:00:00.000Z'); // Saudi time
+    expect(new Date(times[0].p_out as string).toISOString()).toBe('2099-11-05T18:30:00.000Z');
+    expect(save[0]).toMatchObject({ p_session: SID, p_customer: 'c1', p_status: 'accepted', p_note: 'Gate 3' });
+    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    await box.locator('#vd-h').fill('1.5');
+    await box.getByRole('button', { name: 'Add hours' }).click();
+    await expect.poll(() => hrs.length).toBe(1);
+    expect(hrs[0]).toMatchObject({ p_customer: 'c1', p_hours: 1.5, p_session: SID });
+    await box.getByRole('button', { name: 'Take off this session' }).click();
+    await expect.poll(() => save.length).toBe(2);
+    expect(save[1]).toMatchObject({ p_customer: 'c1', p_status: null });
+  });
+
+  test('many at once: select, check in', async ({ page }) => {
+    const times = rpcs(page, 'staff_volunteer_shift_times');
+    await staff(page, { 'rpc:staff_volunteer_shift_times': { ok: true } });
+    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'Select' }).click();
+    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Select all' }).click();
+    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Check in' }).click();
+    await expect.poll(() => times.length).toBe(1);
+    expect(times[0]).toMatchObject({ p_customer: 'c1', p_out: null });
+  });
+
+  test('the view is set per device: columns off, hours given at check-out, kept after a reload', async ({ page }) => {
+    const award = rpcs(page, 'staff_volunteer_award');
+    const fixed = { ...switched, hours_mode: 'fixed', fixed_hours: 6 };
+    const inNow = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, clock_in: new Date(Date.now() - 36e5).toISOString() } : x));
+    await staff(page, { volunteer_sessions: [fixed], volunteer_shifts: inNow, 'rpc:staff_volunteer_shift_times': { ok: true }, 'rpc:staff_volunteer_award': { ok: true, added: 1, skipped: 0 } });
+    await expect(row(page, 'c1')).toContainText('+966500000001');
+    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'View' }).click();
+    await page.getByRole('checkbox', { name: 'Mobile number and WhatsApp' }).uncheck();
+    await page.getByRole('checkbox', { name: 'Give the hours at check-out' }).check();
+    await page.locator('#confirm-modal .x-close').click();
+    await expect(row(page, 'c1')).not.toContainText('+966500000001');
+    await row(page, 'c1').getByRole('button', { name: 'Check out' }).click();
+    await expect.poll(() => award.length).toBe(1);
+    expect(award[0]).toEqual({ p_session: SID, p_rows: [{ customer_id: 'c1', hours: 6 }] });
+    await page.reload();
+    await waitForSb(page);
+    await expect(row(page, 'c1')).toBeVisible();
+    await expect(row(page, 'c1')).not.toContainText('+966500000001');
+  });
+
+  test('the Opportunities list leads to a session\'s shifts; a session without volunteers can be opened from there', async ({ page }) => {
+    await staff(page);
+    await tile(page).getByRole('button', { name: 'Opportunities' }).click();
+    await page.locator(`.vm-row-s[data-sess="${SID}"]`).getByRole('button', { name: 'Team and hours' }).click();
+    await expect(page).toHaveURL(/\/volunteers$/);
+    await expect(page.locator('#tab-volunteers .vd-sel')).toHaveValue(SID);
+  });
+
+  test('no session with volunteers: Shifts says so', async ({ page }) => {
+    await staff(page, { volunteer_sessions: [] });
+    await expect(page.locator('#tab-volunteers')).toContainText('No session is open to volunteers yet');
   });
 
   test('the switch in the session form: nothing is sent unless it was touched', async ({ page }) => {
