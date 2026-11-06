@@ -303,7 +303,9 @@ test('a second session on the same date is numbered, not refused', async ({ page
   });
   const writes = sessionWrites(page);
   await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='snd96';S.newSessMode='total';S.newSessTotal='12';renderSessions()`);
-  await page.evaluate(`document.getElementById('ns-date').value='2099-01-14';addSession()`);
+  await page.evaluate(`document.getElementById('ns-date').value='2099-01-14';addSession();void 0`);
+  // the same kind on that date is asked about first (SS06, 2026-11-07); made anyway it still takes the next number
+  await page.getByRole('dialog', { name: 'These dates clash with sessions already there' }).getByRole('button', { name: 'Go ahead anyway' }).click();
 
   await expect.poll(() => writes.filter((w) => w.id).length).toBe(2);
   expect(writes.filter((w) => w.id).map((w) => w.id)).toEqual(['2099-01-14-nd', '2099-01-14-nd-2']);

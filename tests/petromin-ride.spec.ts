@@ -309,7 +309,9 @@ test.describe('staff side', () => {
     });
     // Built from bikes, exactly like a circuit session: capacity is the composition's sum.
     await page.evaluate(`setStaffTab('sessions');S.showAddSession=true;S.newSessEvent='petromin';S.newSessTitle='Petromin Wednesday Ride';S.newSessMode='total';S.newSessTotal='10';renderSessions()`);
-    await page.evaluate(`document.getElementById('ns-total').value='10';document.getElementById('ns-date').value='2099-01-13';addSession()`);
+    await page.evaluate(`document.getElementById('ns-total').value='10';document.getElementById('ns-date').value='2099-01-13';addSession();void 0`);
+    // the fixtures already hold a Petromin night on that date: asked first (SS06, 2026-11-07), then made anyway
+    await page.getByRole('dialog', { name: 'These dates clash with sessions already there' }).getByRole('button', { name: 'Go ahead anyway' }).click();
 
     await expect.poll(() => writes.length).toBe(1);
     const created = writes.find((w) => w.id);
