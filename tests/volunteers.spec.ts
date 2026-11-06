@@ -383,6 +383,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const first = page.locator('#tab-volunteers .vm-led .vm-res-row').first();
     await expect(first).toContainText("Given the session's hours");
     await expect(first).toContainText('by Admin One');
+    await page.locator('#tab-volunteers select[aria-label="Show"]').selectOption('all'); // Activity opens on changes only (VL19); the portal's own entries need everything
     await page.locator('#tab-volunteers select[aria-label="Done by"]').selectOption('vol');
     await expect(page.locator('#tab-volunteers .vm-led .vm-res-row')).toHaveCount(1);
   });

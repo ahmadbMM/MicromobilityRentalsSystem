@@ -42,6 +42,7 @@ const fixtures = {
   customer_tags: [{ customer_id: 'c1', tag_id: 'tag_saturday', starts_at: null, expires_at: null }],
   team_members: [{ id: 't1', name: 'Staffer', active: true }],
   'rpc:staff_inventory_extras': [], // Inventory asks for it on render (20261009 fleet); a database without it answers 404, which the console reports
+  'rpc:staff_customer_stats': [], 'rpc:staff_wallet_fees': [], customer_contacts: [], // the 2026-11-06 staff review's reads (20261107120000 / 121000), answered as a database that has them
 };
 
 // Each entry: the call to open it, and what it needs set up first.

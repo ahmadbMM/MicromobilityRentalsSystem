@@ -21018,7 +21018,7 @@ function _n6sSelSeries(sid){
   const ids=_n6sSeriesOf(_sessGet(sid)).map(x=>x.id);if(!ids.length)return;
   _ssClearF();S.sessSel=ids;S.sessView='table';renderSessions();_pushNav();
 }
-function _n6sNewSeries(){return's'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function _n6sNewSeries(){return's-'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
 function _on__n6sFollow(event,el){S.editSessFollow=!!el.checked}
 function _n6sFollowHtml(s){
   const n=_n6sSeriesOf(s,true).length;if(!n)return'';
@@ -30420,8 +30420,8 @@ function _n6uBell(add,L){
   const sl=id=>{const s=_sessGet(id);return s?`${_evName(s)} · ${shortDate(s.session_date||s.id)}`:String(id||'');};
   const on=w=>!!w&&w.enabled&&+new Date(w.closes_at)>now;
   const over=sid=>{const w=ws.get(sid),s=_sessGet(sid);return(!!w&&!!w.closes_at&&+new Date(w.closes_at)<=now)||(!!s&&String(s.session_date||s.id).slice(0,10)<td);};
-  add('vsign',[...(W.rows||[]).filter(v=>v.status==='applied').map(v=>({id:'a'+v.customer_id,txt:t('ntiVApplied').replace('{0}',nm(v.customer_id)),at:v.applied_at||v.created_at,go:['_n6uGoVol','roster']})),
-    ...W.shifts.filter(x=>x.status==='interested'&&on(ws.get(x.session_id))).map(x=>({id:'s'+x.id,txt:t('ntiVSign').replace('{0}',nm(x.customer_id)).replace('{1}',sl(x.session_id)),at:x.created_at,go:['_n6uGoVol','interested']}))],
+  add('vsign',[...(W.rows||[]).filter(v=>v.status==='applied').map(v=>({id:'ap:'+v.customer_id,txt:t('ntiVApplied').replace('{0}',nm(v.customer_id)),at:v.applied_at||v.created_at,go:['_n6uGoVol','roster']})),
+    ...W.shifts.filter(x=>x.status==='interested'&&on(ws.get(x.session_id))).map(x=>({id:'sh:'+x.id,txt:t('ntiVSign').replace('{0}',nm(x.customer_id)).replace('{1}',sl(x.session_id)),at:x.created_at,go:['_n6uGoVol','interested']}))],
     'ntVSign','green',['_n6uGoVol','interested'],true);
   add('vopen',W.shifts.filter(x=>x.clock_in&&!x.clock_out&&over(x.session_id)).map(x=>({id:String(x.id),txt:t('ntiVOpen').replace('{0}',nm(x.customer_id)).replace('{1}',sl(x.session_id)),at:x.clock_in,go:['_n6uToVol',x.session_id]})),
     'ntVOpen','warn',['_n6uGoVol','shift'],true);
@@ -54857,7 +54857,7 @@ async function _n6qSegWallet(){
   if(!(amt>0)||amt>10000){toast(t('cwErrAmount'),'error');return;}
   if(!why){toast(t('cwErrNote'),'error');return;}
   if(_isOffline()){toast(t('cwErrOffline'),'error');return;}
-  const k='w'+amt+':'+g.ids.length;if(g.sure!==k){g.sure=k;g.sureTxt=t('n6qSegWalQ').replace('{0}',_money(amt,{isolate:false})).replace('{1}',g.ids.length);_segPaint();return;}
+  const k='w:'+amt+':'+g.ids.length;if(g.sure!==k){g.sure=k;g.sureTxt=t('n6qSegWalQ').replace('{0}',_money(amt,{isolate:false})).replace('{1}',g.ids.length);_segPaint();return;}
   g.sure=null;g.busy=true;_segPaint();
   let done=0,failed=0,stop=false;
   for(const id of g.ids){
@@ -54891,7 +54891,7 @@ const N6Q_SAT_LADDER=[1,5,10,25,50,100];
 function _n6qMemCell(c){
   const ct=_ctRowsFor(c.id).find(x=>x.tag_id===TAG_COMMUNITY&&_tagActive(x)),since=ct&&Number(ct.added_at)?shortDate(_ksaDayOf(Number(ct.added_at))):'—';
   const comm=_amStOf(c).commRides,lvl=N6Q_SAT_LADDER.filter(n=>comm>=n).length,ig=_igNum(c.id);
-  return`<div class="n6q-mem"><span class="am-meta">${esc(t('n6qMemSince').replace('{0}',since))}</span><span class="am-meta">${esc(t('n6qCommRides').replace('{0}',String(comm)))}</span><span class="am-meta">${esc(t('n6qSatLvl').replace('{0}',String(lvl)).replace('{1}',String(N6Q_SAT_LADDER.length)))}</span>${ig!=null?`<span class="am-meta">${esc(t('igTitle'))}: ${esc(_igFmt(ig))}</span>`:''}</div>`;
+  return`<div class="n6q-mem"><span class="am-meta">${esc(t('n6qMemSince').replace('{0}',since))}</span><span class="am-meta">${esc(t('n6qCommRides').replace('{0}',String(comm)))}</span><span class="am-meta">${esc(t('n6qSatLvl').replace('{0}',String(lvl)).replace('{1}',String(N6Q_SAT_LADDER.length)))}</span>${_igChipHtml(c)}</div>`; // the coloured followers chip, as on every account row (against the community average)
 }
 
 // PP19: clearer figures in the account window: the no-show rate over the last rides and rides booked for others apart.
@@ -59700,7 +59700,7 @@ function _n6cStRead(fid){
   for(let i=0;i<6;i++){
     const label=val(`${fid}-l${i}`).slice(0,40);if(!label)continue;
     let id=prev[i]&&prev[i].id;
-    if(!id||used.has(id))id='s'+Date.now().toString(36).slice(-6)+i;
+    if(!id||used.has(id))id='s_'+Date.now().toString(36).slice(-6)+i;
     used.add(id);
     const color=val(`${fid}-c${i}`),counts=val(`${fid}-k${i}`);
     out.push({id,label,color:N6C_ST_COLORS.includes(color)?color:'grey',counts:counts==='noshow'?'noshow':'in'});

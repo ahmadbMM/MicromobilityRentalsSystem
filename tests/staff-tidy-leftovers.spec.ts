@@ -88,7 +88,7 @@ for (const [tab, width] of [['community', 820], ['community', 1180], ['dashboard
 test('@staff the figures lay out again when the room changes', async ({ page }) => {
   await staffAt(page, 1280, 900);
   await page.evaluate(`setStaffTab('customers')`);
-  await expect(page.locator('#tab-community .dash-kpis.fig-fit')).toBeVisible();
+  await expect(page.locator('#tab-community .dash-kpis.fig-fit').first()).toBeVisible(); // the overview's figures; the stage tiles below them are a second row (2026-11-06, PP08)
   const wide = (await figureRows(page))[0].rows.length; // People's fifteen figures: two rows on a laptop
   expect((await figureRows(page))[0].rows).not.toContain(1);
   await page.setViewportSize({ width: 820, height: 900 });
