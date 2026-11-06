@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-22eda06ea3';
+const CACHE = 'mmcq-f8b0c15416';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -22,19 +22,19 @@ const shellPage = (p) => p === '/' || p === '/index.html' || (APP_ROUTE.test(p) 
 // The staff half of the app rides in the shell on every host but the live customer one, so the
 // desk opens offline and after a deploy the new file is already on the device; its own hash is in
 // the name (the build stamps it), so a new build is a new entry and the old one just ages out.
-const STAFF_JS = './staff.js?v=c21784f491';
+const STAFF_JS = './staff.js?v=00a36dbf25';
 // The page's own script and stylesheet (2026-10-01: out of the page into files named by their hash).
 // The shell cannot open offline without them. styles.css is the whole stylesheet the staff loader
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
-const STAFF_PARTS = ["./staff-parts/analytics.js?v=3cf85dc88f","./staff-parts/community.js?v=becdddca3f","./staff-parts/bikes.js?v=243a6f91d7","./staff-parts/cashier.js?v=c210efd271","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=17f0e32380","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=6ccd55af17","./staff-parts/wallet.js?v=af22c1357b","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=ba0d27efc1","./staff-parts/messages.js?v=c91a354b8a","./staff-parts/volunteers.js?v=a60d223451","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sessions.js?v=1101eff346","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=6f51b16608","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=bafe6ab22b","./staff-parts/settings.js?v=3044eed30f","./staff-parts/fleet.js?v=564e8c7bcc","./staff-parts/money.js?v=106a5ef477","./staff-parts/desk.js?v=6495ced2c4","./staff-parts/deskq.js?v=7793c8438b","./staff-parts/kiosk.js?v=74df77e014","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=b802519a42"];
-const APP_JS = './app.js?v=cce9f55323';
-const APP_CSS = './app.css?v=945f92999e';
+const STAFF_PARTS = ["./staff-parts/analytics.js?v=3cf85dc88f","./staff-parts/community.js?v=becdddca3f","./staff-parts/bikes.js?v=243a6f91d7","./staff-parts/cashier.js?v=6ca5a5f70c","./staff-parts/catalog.js?v=4509fe079a","./staff-parts/inventory.js?v=17f0e32380","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=6ccd55af17","./staff-parts/wallet.js?v=af22c1357b","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=ba0d27efc1","./staff-parts/messages.js?v=c91a354b8a","./staff-parts/volunteers.js?v=a60d223451","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sessions.js?v=1101eff346","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=6f51b16608","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=bafe6ab22b","./staff-parts/settings.js?v=3044eed30f","./staff-parts/fleet.js?v=564e8c7bcc","./staff-parts/money.js?v=106a5ef477","./staff-parts/desk.js?v=6495ced2c4","./staff-parts/deskq.js?v=7793c8438b","./staff-parts/kiosk.js?v=74df77e014","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=b802519a42"];
+const APP_JS = './app.js?v=d8b7b1ddaa';
+const APP_CSS = './app.css?v=e41f44d22f';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=10f6edc97b']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=4d28c64922']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',
@@ -58,7 +58,7 @@ const SHELL = [
   // and the faces a ticket is set in. A rider offline at the Corniche after a deploy had none of them.
   './vendor/supabase-js-2.117.2.min.js',
   './vendor/qrcode-generator-2.0.4.js',
-  './fonts/fonts.css?v=4c46a0e230',
+  './fonts/fonts.css?v=e314b11f42',
   './fonts/SpaceGrotesk-var-latin.woff2',
   './fonts/ChakraPetch-700-latin.woff2',
   './fonts/Riyal-400.woff2',
