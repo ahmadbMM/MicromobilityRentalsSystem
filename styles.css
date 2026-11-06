@@ -3888,9 +3888,9 @@
       --green-rgb:7,122,75; --tint-rgb:26,25,25; --red-rgb:163,59,46; --warn-rgb:138,92,20; --purple-rgb:122,70,194; --blue-rgb:47,99,173;
       --r-xs:4px; --r-sm:6px; --r-md:6px; --r-lg:8px; --r-xl:10px;
       --sh-1:none; --sh-2:0 1px 3px rgba(26,25,25,.06); --sh-3:0 12px 32px rgba(26,25,25,.10);
-      --font-body:'Space Grotesk','IBM Plex Sans Arabic',sans-serif;
-      --font-display:'Space Grotesk','IBM Plex Sans Arabic',sans-serif;
-      --font-mono:'Space Grotesk','IBM Plex Sans Arabic',sans-serif;
+      --font-body:'Rubik','IBM Plex Sans Arabic',sans-serif;
+      --font-display:'Rubik','IBM Plex Sans Arabic',sans-serif;
+      --font-mono:'Rubik','IBM Plex Sans Arabic',sans-serif;
       color-scheme:light;
       background-color:var(--bg);
       background-image:none; /* paper is flat — no radial green tint */
@@ -3941,11 +3941,15 @@
     body .landing-event-card:hover{transform:none;border-color:rgba(26,25,25,.25);box-shadow:0 1px 3px rgba(26,25,25,.06);}
     /* Event-card titles: Space Grotesk has no italic — upright 700, uppercase stays */
     body .lec-title{font-style:normal;font-weight:700;letter-spacing:.4px;}
-    /* Arabic type rules: taller lines, no letter-spacing, Plex first */
+    /* Arabic type rules: taller lines, no letter-spacing. Arabic is set in Rubik's Arabic; Urdu in
+       IBM Plex Sans Arabic, as Rubik lacks eight Urdu letters (soft redesign, 2026-11-07) */
     :is(html[lang="ar"],html[lang="ur"]) body{
-      --font-body:'IBM Plex Sans Arabic','Space Grotesk',sans-serif;
-      --font-display:'IBM Plex Sans Arabic','Space Grotesk',sans-serif;
+      --font-body:'Rubik','IBM Plex Sans Arabic',sans-serif;
+      --font-display:'Rubik','IBM Plex Sans Arabic',sans-serif;
       line-height:1.7;}
+    html[lang="ur"] body{
+      --font-body:'IBM Plex Sans Arabic','Rubik',sans-serif;
+      --font-display:'IBM Plex Sans Arabic','Rubik',sans-serif;}
     :is(html[lang="ar"],html[lang="ur"]) body .lec-title{letter-spacing:0;}
     /* Ticket + auth + modal surfaces ride the token remap; hairline them explicitly */
     body .ticket-card,body .auth-box,body .modal-box{
@@ -6053,9 +6057,9 @@ body.view-staff #tab-queue .q-live-count{top:var(--staff-stick);}
     select.lang-toggle{appearance:none;-webkit-appearance:none;padding-inline-end:24px!important;padding-top:0!important;padding-bottom:0!important;line-height:1.5;max-width:160px;overflow:hidden;text-overflow:ellipsis;} /* line-height 1 clipped Devanagari vowel marks */
     select.lang-toggle option{color:#111;background:#fff;font-weight:500;}
     :is(html[lang="hi"],html[lang="ne"]) body{
-      --font-body:'Space Grotesk','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
-      --font-display:'Space Grotesk','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
-      --font-mono:'Space Grotesk','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
+      --font-body:'Rubik','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
+      --font-display:'Rubik','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
+      --font-mono:'Rubik','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
     }
     :is(html[lang="hi"],html[lang="ne"]) body.view-staff{
       --font-body:'Barlow','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
@@ -6063,9 +6067,9 @@ body.view-staff #tab-queue .q-live-count{top:var(--staff-stick);}
       --font-mono:'Barlow','Noto Sans Devanagari','IBM Plex Sans Arabic',sans-serif;
     }
     html[lang="bn"] body{
-      --font-body:'Space Grotesk','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
-      --font-display:'Space Grotesk','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
-      --font-mono:'Space Grotesk','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
+      --font-body:'Rubik','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
+      --font-display:'Rubik','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
+      --font-mono:'Rubik','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
     }
     html[lang="bn"] body.view-staff{
       --font-body:'Barlow','Noto Sans Bengali','IBM Plex Sans Arabic',sans-serif;
@@ -8169,9 +8173,13 @@ body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wr
        brand tokens say ("dark surfaces + fills only, never small text on light")
      · type: one family per script, one scale (12 · 13 · 15 · 17 · 20 · 26 · 34), sentence case,
        no letter-spacing on labels, fixed-width figures wherever numbers line up
-     · shape: 10px on controls, 14px on cards, 18px on sheets; a pill is the primary action or a chip
-     · depth: declared once - cards are a hairline, only what floats (a sheet) casts a shadow
-     · motion: none on arrival; one designed moment, on today's ticket
+     · shape (Liquid, 2026-11-07): 14px on controls, 26px on cards, 32px on sheets, 36px on the ticket, the
+       today card and the event tiles; a pill is the primary action, a chip or the tab bar
+     · depth: cards float on a soft warm shadow instead of a hairline; glass only on the chrome that
+       content scrolls under (top bar, tab bar, Continue bar) and a still blur behind dialogs, never on
+       a ticket, a QR code, a price or a form; the glass tint never drops under 78% (88% for ar/ur/hi/ne/bn)
+     · motion: what the rider touches answers (a press, a dialog, the tab pill) on one gentle spring;
+       nothing arrives by itself; one designed moment, on today's ticket
    Values live in the tokens; the build checks refuse a raw colour between these two banners
    (scripts/split-staff.mjs, customerSystemCheck).
    ════════════════════════════════════════════════════════════════════════════════════════════════ */
@@ -8184,10 +8192,20 @@ body:not(.view-staff){
   --night-ink-2:rgba(251,249,244,.66); --night-line:rgba(251,249,244,.16);
   --amber:#8A5C14; --amber-2:#B98A1A; --amber-wash:rgba(185,138,26,.10); --red:#A33B2E; --red-line:rgba(163,59,46,.4);
   --night-amber:#F2C66D; --night-red:#FF9A8C; --night-red-line:rgba(255,154,140,.4);
-  --wallet:#000000; --wallet-ink:#FFFFFF; --scrim:rgba(26,25,25,.5);
+  --wallet:#000000; --wallet-ink:#FFFFFF; --scrim:rgba(26,25,25,.36);
   --fs-12:12px; --fs-13:13px; --fs-15:15px; --fs-17:17px; --fs-20:20px; --fs-26:26px; --fs-34:34px;
-  --r-ctl:10px; --r-card:14px; --r-sheet:18px;
-  --sh-float:0 24px 60px rgba(26,25,25,.18);
+  --r-ctl:14px; --r-card:26px; --r-sheet:32px; --r-hero:36px; --r-chip:8px;
+  /* soft depth: warm-hued layers, offset down only (so RTL needs no mirroring) */
+  --lq-1:0 1px 2px rgba(64,52,44,.06),0 2px 6px rgba(64,52,44,.05);
+  --lq-2:0 1px 2px rgba(64,52,44,.05),0 4px 10px rgba(64,52,44,.06),0 12px 28px rgba(64,52,44,.07);
+  --lq-3:0 2px 4px rgba(64,52,44,.05),0 8px 16px rgba(64,52,44,.06),0 16px 32px rgba(64,52,44,.07),0 32px 64px rgba(64,52,44,.09);
+  --lq-press:inset 0 1px 2px rgba(64,52,44,.10);
+  --sh-float:var(--lq-3);
+  /* glass: solid first; the tint is the floor that keeps ink-2 at 4.5:1 over a black photo */
+  --glass-solid:#FBF9F4; --glass:rgba(251,249,244,.78); --glass-hi:rgba(251,249,244,.88);
+  --glass-rim:rgba(255,255,255,.7); --glass-rim-2:rgba(255,255,255,.35); --glass-edge:rgba(26,25,25,.08);
+  --glass-fx:blur(20px) saturate(170%); --scrim-fx:blur(6px); --tab-pill:rgba(7,122,75,.11);
+  --ease-out:cubic-bezier(.2,.8,.2,1); --ease-spring:cubic-bezier(.2,.8,.2,1);
   /* the older layers read these names: point them at the system */
   --bg:var(--paper); --s1:var(--card); --s2:var(--card-2); --s3:var(--card-3); --in-bg:var(--card);
   --text:var(--ink); --muted:var(--ink-2); --muted-l:var(--ink-3); --border:var(--line); --line2:var(--line-2);
@@ -8243,14 +8261,15 @@ body:not(.view-staff) .section-label,
 body:not(.view-staff) .landing-events-title{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
 :is(html[lang="ar"],html[lang="ur"]) body:not(.view-staff) .page-title{letter-spacing:0;line-height:1.35;}
 
-/* ── Surfaces: a hairline, never a float shadow; nothing frosted ─────────────────────────────────── */
+/* ── Surfaces: cards float on a soft shadow; glass only on the chrome (see LIQUID below) ─────────── */
 body:not(.view-staff) :is(.form-section,.sess-card,.q-card,.reg-summary-panel,.acc-settings){
-  background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);box-shadow:none;}
-body:not(.view-staff) .ticket-card{border-radius:var(--r-card);box-shadow:none;animation:none;}
-body:not(.view-staff) .ticket-card:not(.ev-snd96){background:var(--card);border:1px solid var(--line);}
+  background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--lq-1);}
+body:not(.view-staff) .ticket-card{border-radius:var(--r-hero);box-shadow:var(--lq-2);animation:none;}
+body:not(.view-staff) .ticket-card:not(.ev-snd96){background:var(--card);border:1px solid transparent;}
 body:not(.view-staff) .ticket-card::before{display:none;}
-body:not(.view-staff) :is(.modal-box,.auth-box){border:1px solid var(--line);box-shadow:var(--sh-float);}
-body:not(.view-staff) :is(.modal-backdrop,.pin-backdrop,.auth-backdrop,.badge-pop){backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--scrim);}
+body:not(.view-staff) :is(.modal-box,.auth-box){border:1px solid transparent;border-radius:var(--r-sheet);box-shadow:var(--sh-float);}
+/* the page behind a dialog holds still, so its blur is paid once, not on every frame */
+body:not(.view-staff) :is(.modal-backdrop,.pin-backdrop,.auth-backdrop,.badge-pop){backdrop-filter:var(--scrim-fx);-webkit-backdrop-filter:var(--scrim-fx);background:var(--scrim);}
 body:not(.view-staff) #auth-modal.as-page .auth-backdrop{background:var(--paper);}
 body:not(.view-staff) #cust-bottom-nav{background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none;border-top:1px solid var(--line);box-shadow:none;}
 body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none;border-top:1px solid var(--line);}
@@ -8320,7 +8339,7 @@ body:not(.view-staff) #tab-register .cu-step-ln-on{background:var(--ink);}
 body:not(.view-staff) :is(#cu,*).cu-k10{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
 body:not(.view-staff) .reg-foot-why{flex-basis:100%;margin:0 0 8px;font-size:var(--fs-13);color:var(--ink-3);text-align:center;}
 body:not(.view-staff) .mm-reg-foot.cu-foot{flex-wrap:wrap;}
-body:not(.view-staff) .price-preview{background:var(--card-2);border:0;border-radius:12px;padding:14px 16px;}
+body:not(.view-staff) .price-preview{background:var(--card-2);border:0;border-radius:var(--r-ctl);padding:14px 16px;}
 body:not(.view-staff) .price-preview-breakdown{font-size:var(--fs-13);color:var(--ink-2);font-weight:500;}
 body:not(.view-staff) .price-preview-total{font-size:var(--fs-20);font-weight:700;color:var(--ink);}
 body:not(.view-staff) .price-note{margin-top:8px;font-size:var(--fs-13);line-height:1.5;color:var(--ink-3);}
@@ -8329,7 +8348,7 @@ body:not(.view-staff) #tab-myrides .cu-tk-body>.price-note:last-child{margin-bot
 /* ── Session cards: the time is the headline; today says so ──────────────────────────────────────── */
 body:not(.view-staff) .sess-card{padding:14px 16px;padding-inline-start:calc(16px + var(--sc-gut));gap:4px;border-inline-start:1px solid var(--line);}
 body:not(.view-staff) .sess-card:hover{background:var(--card-2);}
-body:not(.view-staff) .sess-card.sess-selected{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);background:var(--card);}
+body:not(.view-staff) .sess-card.sess-selected{border-color:transparent;box-shadow:0 0 0 2px var(--go),var(--lq-2);background:var(--card);}
 body:not(.view-staff) .sess-card-dot{border-color:var(--ink-4);}
 body:not(.view-staff) .sess-card-dot.on{background:var(--ink);border-color:var(--ink);box-shadow:none;}
 body:not(.view-staff) .sess-card-date{font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
@@ -8419,13 +8438,13 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
 
 /* ── Landing: the day's ride first ─────────────────────────────────────────────────────────────── */
 body:not(.view-staff) .land-today{display:grid;grid-template-columns:1fr auto;align-items:end;gap:4px 16px;width:100%;text-align:start;
-  margin:6px 0 22px;padding:18px 20px;border:0;border-radius:var(--r-card);background:var(--night);color:var(--night-ink);cursor:pointer;}
+  margin:6px 0 22px;padding:20px 22px;border:0;border-radius:var(--r-hero);background:var(--night);color:var(--night-ink);cursor:pointer;box-shadow:var(--lq-2);}
 body:not(.view-staff) .land-today-k{grid-column:1/-1;font-size:var(--fs-13);font-weight:700;color:var(--neon);}
 body:not(.view-staff) .land-today-t{font-size:var(--fs-26);font-weight:700;letter-spacing:-.4px;}
 body:not(.view-staff) .land-today-n{color:var(--neon);margin-inline-start:6px;}
 body:not(.view-staff) .land-today-v{grid-column:1;font-size:var(--fs-13);color:var(--night-ink-2);}
 body:not(.view-staff) .land-today-go{grid-column:2;grid-row:2/4;align-self:center;display:inline-flex;align-items:center;gap:6px;
-  min-height:44px;padding:0 16px;border:1px solid var(--night-line);border-radius:0;font-size:var(--fs-13);font-weight:700;} /* square, not a pill: rectangular buttons (bug hunt 2026-10-28) */
+  min-height:44px;padding:0 18px;border:1px solid var(--night-line);border-radius:999px;font-size:var(--fs-13);font-weight:600;}
 body:not(.view-staff) .land-today:hover .land-today-go{border-color:var(--neon);}
 body:not(.view-staff) .land-today.wl{background:var(--card);color:var(--ink);border:1.5px dashed var(--amber-2);}
 body:not(.view-staff) .land-today.wl :is(.land-today-k,.land-today-n){color:var(--amber);}
@@ -8440,7 +8459,7 @@ body:not(.view-staff) .landing-event-card{
   --muted:#4f565c; --muted-l:#6f6d63; --border:rgba(26,25,25,.14); --line2:rgba(26,25,25,.16);
 }
 /* ── Account: the season in sentences ───────────────────────────────────────────────────────────── */
-body:not(.view-staff) .mr-season{display:grid;gap:10px;margin:18px 0 8px;padding:18px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
+body:not(.view-staff) .mr-season{display:grid;gap:10px;margin:18px 0 8px;padding:20px 22px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--lq-1);}
 body:not(.view-staff) .mr-season-rides{display:flex;align-items:baseline;gap:8px;}
 body:not(.view-staff) .mr-season-n{font-size:var(--fs-20);font-weight:700;line-height:1.2;}
 body:not(.view-staff) .mr-season-w{font-size:var(--fs-15);color:var(--ink-2);}
@@ -8525,7 +8544,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-rt-a,.tk-rt-done){color:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map path{stroke:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
-body:not(.view-staff) .myr{margin:0 0 8px;padding:16px 20px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-card);}
+body:not(.view-staff) .myr{margin:0 0 8px;padding:18px 22px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--lq-1);}
 body:not(.view-staff) .myr-h{font-size:var(--fs-15);font-weight:700;color:var(--ink);margin-bottom:10px;}
 body:not(.view-staff) .myr-weeks{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:3px;}
 body:not(.view-staff) .myr-weeks i{display:block;aspect-ratio:1;max-height:14px;border-radius:3px;background:var(--card-3);}
@@ -8537,7 +8556,7 @@ body:not(.view-staff) .myr-f dt{font-size:var(--fs-15);color:var(--ink-2);}
 body:not(.view-staff) .myr-f dd{margin:0;font-size:var(--fs-15);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:end;}
 body:not(.view-staff) .bd-next{display:grid;gap:8px;margin:10px 0 12px;}
 body:not(.view-staff) .bd-next-h{font-size:var(--fs-13);color:var(--ink-3);}
-body:not(.view-staff) .bd-next-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-ctl);text-align:start;color:var(--ink);cursor:pointer;}
+body:not(.view-staff) .bd-next-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--lq-1);text-align:start;color:var(--ink);cursor:pointer;}
 body:not(.view-staff) .bd-next-row:hover{border-color:var(--line-2);}
 body:not(.view-staff) .bd-next-row .bdg-m.bd-next-ic{width:34px;height:34px;}
 body:not(.view-staff) .bd-next-t{flex:1;min-width:0;display:grid;gap:2px;}
@@ -8586,8 +8605,9 @@ body:not(.view-staff) .fx-em .form-row{grid-template-columns:1fr;gap:0;}
 #wl-claim .wlc-ends b{color:var(--go);font-variant-numeric:tabular-nums;font-size:var(--fs-20);}
 #wl-claim .wlc-mine{display:flex;align-items:center;justify-content:center;text-decoration:none;margin-top:14px;}
 #wl-claim .fx-kicker{color:var(--go);}
-/* ── Nothing arrives with a flourish (2026-10-10): no fade-and-rise on a tab, a dialog or the badge sheet,
-   no pulsing dot. The one designed motion stays today's ticket line (and the QR's live line). ───────── */
+/* ── Nothing arrives by itself (2026-10-10): no fade-and-rise on a tab, no pulsing dot. What the rider
+   touches answers instead (Liquid, 2026-11-07): a dialog they opened settles in on the spring (scale only,
+   so its contrast is right from the first frame), see LIQUID below. Today's ticket line stays. ───── */
 body:not(.view-staff) :is(.tab-panel.active,.modal-backdrop,.modal-box,.confirm-box,.badge-pop,.badge-pop-box,
   .photo-lightbox,.photo-lightbox img,.pay-menu-popup,.dot-green,.refresh-dot){animation:none;}
 
@@ -8608,7 +8628,7 @@ body:not(.view-staff) .sess-day-list{display:grid;grid-auto-rows:1fr;background:
 body:not(.view-staff) .sess-day-list .sess-card{border:0;border-radius:0;border-top:1px solid var(--line);}
 body:not(.view-staff) .sess-day-list>.sess-wrap:first-child>.sess-card{border-top:0;}
 body:not(.view-staff) .sess-day-list .sess-card:focus-visible{outline-offset:-3px;}
-body:not(.view-staff) .sess-day-list .sess-card.sess-selected{box-shadow:inset 0 0 0 2px var(--ink);}
+body:not(.view-staff) .sess-day-list .sess-card.sess-selected{box-shadow:inset 0 0 0 2px var(--go);background:var(--go-wash);}
 body:not(.view-staff) .sess-card-head .sess-card-time{flex:1;min-width:0;}
 body:not(.view-staff) .sess-card-sub{display:flex;align-items:baseline;gap:12px;min-width:0;}
 body:not(.view-staff) .sess-card-sub .sess-card-meta{flex:1;min-width:0;}
@@ -8722,6 +8742,103 @@ body:not(.view-staff) .hub-photo-acts{display:grid;grid-template-columns:1fr 1fr
 body:not(.view-staff) .hub-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
 body:not(.view-staff) .hub-stat strong{display:block;font-size:var(--fs-20);}
 body:not(.view-staff) .mb-new{color:var(--go);font-weight:700;}
+/* ════════════════════════════════════════════════════════════════════════════════════════════════
+   LIQUID (2026-11-07, the soft redesign: the user picked "Liquid" for riders). Glass is a material for the
+   chrome that content scrolls under - the top bar, the floating tab bar, the Continue bar - and a still
+   blur behind a dialog. Every glass surface is solid paper first and turns to glass only where the
+   browser blurs (@supports), and solid again when the rider asks for less transparency or more contrast,
+   or the phone is short of memory (html.lite, set by the head script). Never more than three blurred
+   surfaces on a screen, never inside a scroller, never glass on glass, never an animated blur.
+   ════════════════════════════════════════════════════════════════════════════════════════════════ */
+@supports (transition-timing-function:linear(0,1)){
+  /* a damped spring, about 4% over: calmer than iOS, still alive */
+  body:not(.view-staff){--ease-spring:linear(0,.095,.295,.513,.703,.847,.944,1.001,1.029,1.038,1.036,1.029,1.021,1.013,1.007,1.003,1);}
+}
+:is(html[lang="ar"],html[lang="ur"],html[lang="hi"],html[lang="ne"],html[lang="bn"]) body:not(.view-staff){--glass:var(--glass-hi);}
+
+/* the three glass bars, solid until the browser can blur */
+body:not(.view-staff) #topbar#topbar{background:var(--glass-solid);border-bottom:0;box-shadow:0 1px 0 var(--glass-edge);}
+body:not(.view-staff) #cust-bottom-nav{background:var(--glass-solid);border-top:0;box-shadow:0 0 0 1px var(--glass-edge),var(--lq-3);}
+body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--glass-solid);border-top:0;box-shadow:0 0 0 1px var(--glass-edge),var(--lq-2);border-radius:var(--r-sheet);}
+@supports ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  body:not(.view-staff) #topbar#topbar{background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
+    box-shadow:inset 0 -1px 0 var(--glass-edge);}
+  body:not(.view-staff) #cust-bottom-nav{background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
+    box-shadow:inset 0 1px 0 var(--glass-rim),inset 0 -1px 0 var(--glass-rim-2),0 0 0 1px var(--glass-edge),var(--lq-3);}
+  body:not(.view-staff) :is(.mm-reg-foot,.mm-cart-foot){background:var(--glass);-webkit-backdrop-filter:var(--glass-fx);backdrop-filter:var(--glass-fx);
+    box-shadow:inset 0 1px 0 var(--glass-rim),0 0 0 1px var(--glass-edge),var(--lq-2);}
+}
+@media (prefers-reduced-transparency:reduce),(prefers-contrast:more){
+  body:not(.view-staff){--glass:var(--glass-solid);--glass-fx:none;--scrim-fx:none;}
+}
+html.lite body:not(.view-staff){--glass:var(--glass-solid);--glass-fx:none;--scrim-fx:none;}
+@media (forced-colors:active){
+  body:not(.view-staff) :is(#topbar,#cust-bottom-nav,.mm-reg-foot,.mm-cart-foot){border:1px solid CanvasText;}
+}
+
+/* the tab bar: a capsule floating over the page on phones; labels in ink-2 (they sit on glass) */
+body:not(.view-staff) .cust-bnav-btn{color:var(--ink-2);font-weight:500;}
+body:not(.view-staff) .cust-bnav-btn.active{color:var(--go);font-weight:600;}
+body:not(.view-staff) .cust-bnav-btn.active::after{content:none;}
+body:not(.view-staff) .cust-bnav-btn :is(svg,span){position:relative;z-index:1;}
+@media(max-width:767px){
+  body:not(.view-staff) #cust-bottom-nav{left:max(12px,env(safe-area-inset-left));right:max(12px,env(safe-area-inset-right));
+    bottom:max(10px,env(safe-area-inset-bottom));padding:6px;border-radius:999px;}
+  body:not(.view-staff) .cust-bnav-grid{position:relative;--n:3;--i:0;}
+  body:not(.view-staff) .cust-bnav-grid.with-comm{--n:4;}
+  body:not(.view-staff) .cust-bnav-btn{min-height:58px;padding:6px 4px;border-radius:999px;}
+  /* the picked tab wears a tinted pill; where :has() works, one pill glides between the tabs */
+  body:not(.view-staff) .cust-bnav-btn.active{background:var(--tab-pill);}
+  @supports selector(:has(*)){
+    body:not(.view-staff) .cust-bnav-btn.active{background:none;}
+    body:not(.view-staff) .cust-bnav-grid::before{content:'';position:absolute;inset-block:0;inset-inline-start:0;width:calc(100% / var(--n));
+      border-radius:999px;background:var(--tab-pill);box-shadow:inset 0 1px 0 var(--glass-rim);
+      transform:translateX(calc(var(--i) * 100%));transition:transform .42s var(--ease-spring);}
+    html[dir="rtl"] body:not(.view-staff) .cust-bnav-grid::before{transform:translateX(calc(var(--i) * -100%));}
+    body:not(.view-staff) .cust-bnav-grid:not(:has(>.cust-bnav-btn.active))::before{opacity:0;}
+    body:not(.view-staff) .cust-bnav-grid:has(>.cust-bnav-btn:nth-child(2).active){--i:1;}
+    body:not(.view-staff) .cust-bnav-grid:has(>.cust-bnav-btn:nth-child(3).active){--i:2;}
+    body:not(.view-staff) .cust-bnav-grid:has(>.cust-bnav-btn:nth-child(4).active){--i:2;}
+    body:not(.view-staff) .cust-bnav-grid.with-comm:has(>.cust-bnav-btn:nth-child(4).active){--i:3;}
+  }
+  /* the page clears the floating bar: 58 + 12 padding + 10 off the edge, and a little air */
+  body:not(.view-staff) #view-customer .view-main{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  body:not(.view-staff).view-picker #landing-body{padding-bottom:calc(96px + env(safe-area-inset-bottom));}
+  body:not(.view-staff):is(.view-customer,.view-picker) #app-footer{padding-bottom:calc(104px + env(safe-area-inset-bottom));}
+}
+@media(max-width:720px){
+  /* the Continue bar floats just above the tab bar: 10 + 70 + 8 */
+  body:not(.view-staff).view-customer .mm-reg-foot{bottom:calc(88px + env(safe-area-inset-bottom));padding:10px 14px;}
+}
+
+/* today's card on a phone: the time has the full width, the button sits under it */
+@media(max-width:480px){
+  body:not(.view-staff) .land-today{grid-template-columns:1fr;}
+  body:not(.view-staff) .land-today-go{grid-column:1;grid-row:auto;justify-content:center;margin-top:12px;}
+}
+/* the big surfaces: the ticket, today's card and the event tiles share the hero corner */
+body:not(.view-staff) .landing-event-card{border-radius:var(--r-hero);box-shadow:var(--lq-1);}
+body:not(.view-staff) .landing-event-card:hover{box-shadow:var(--lq-2);}
+body:not(.view-staff) .sess-day-list{border-radius:var(--r-card);border-color:transparent;box-shadow:var(--lq-1);overflow:hidden;}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th){box-shadow:var(--lq-3);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.ticket-qr-wrap,.ticket-right) :is(svg,canvas){border-radius:var(--r-ctl);}
+body:not(.view-staff) .btn-wallet{border-radius:999px;}
+@supports (corner-shape:squircle){
+  body:not(.view-staff) :is(.ticket-card,.land-today,.landing-event-card,.modal-box,.auth-box,.form-section,.mr-season,.sess-day-list){corner-shape:squircle;}
+}
+
+/* motion that answers a touch: a press gives a little; an opened dialog settles in */
+body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-wallet,.land-today,.landing-event-card,.toggle-btn,.cust-bnav-btn){
+  transition:transform .32s var(--ease-spring),background-color .2s var(--ease-out),box-shadow .2s var(--ease-out);}
+body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-wallet,.land-today,.landing-event-card,.toggle-btn):active{transform:scale(.98);}
+body:not(.view-staff) :is(.modal-box,.auth-backdrop:not(.as-page) .auth-box,.badge-pop-box){animation:lqSettle .38s var(--ease-spring) both;}
+@keyframes lqSettle{from{transform:scale(.96);}to{transform:none;}}
+@media (prefers-reduced-motion:reduce){
+  body:not(.view-staff) :is(.modal-box,.auth-box,.badge-pop-box){animation:none;}
+  body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-wallet,.land-today,.landing-event-card,.toggle-btn,.cust-bnav-btn,.cust-bnav-grid){transition:none;}
+  body:not(.view-staff) .cust-bnav-grid::before{transition:none;}
+  body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-wallet,.land-today,.landing-event-card,.toggle-btn):active{transform:none;}
+}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).
@@ -10219,15 +10336,6 @@ body.view-staff #am-cust-rows .am-av-none{display:flex;align-items:center;justif
   body.view-staff .am-list .am-chips{margin-top:8px;}
   body.view-staff .am-list .am-extras{margin-top:10px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
 }
-
-/* ── Rectangular buttons (the owner, 2026-10-11: "change all the buttons of the website and staff page to be
-   rectangular not curvy corners or pills"). Every button, button-like link, pill, sort or filter select and search
-   box has square corners, in the customer app and on the staff side. What is not a button keeps its shape: avatars,
-   count badges, status chips, switches, radio dots. Last in the file and !important, as the button recipes above
-   set their own radius in some four hundred places. */
-:is(button:not([role="switch"]),[role="button"],input[type="button"],input[type="submit"],input[type="reset"],select,
-  .filter-select,.search-input,.search-wrap,.srch-btn,.ca-view-in,.filter-pill,.am-pick,.apps-kinds,.apps-kind,.btn,
-  [class^="btn-"]:not([role="switch"]),[class*=" btn-"]:not([role="switch"])){border-radius:0!important;}
 
 /* ── Customers and Community on a phone (the owner, 2026-10-11: "i dont want unaligned and unorganized buttons
    align them and make them all have the same size"). Every toolbar is a grid of equal cells: the section tabs three

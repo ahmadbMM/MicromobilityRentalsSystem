@@ -37,10 +37,10 @@
        request whose SRI metadata matches, so a bare preload was thrown away and the 200 KB
        file fetched twice. -->
   <link rel="preload" as="script" href="/vendor/supabase-js-2.117.2.min.js" integrity="sha384-WgXwGL6fUsYJWNaKJgVbrJKGRQwc1vieh2oy4kw9nXqpNDz3tdSsqEYUgeHD/NuF">
-  <!-- Preload the face the first screen is set in - the customer pages' Space Grotesk, one variable
+  <!-- Preload the face the first screen is set in - the customer pages' Rubik, one variable
        file - so first paint has it without a text-swap flash. The staff panel's Barlow used to be
        preloaded instead: 32 KB fetched early by every visitor for a page most never see. -->
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/SpaceGrotesk-var-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/Rubik-var-latin.woff2" crossorigin>
   <link href="/fonts/fonts.css?v=7" rel="stylesheet">
   <!-- The tab wears the mark alone, square, the same 1 KB file every MicroMobility site
        carries. logo.png is the wordmark lockup: 241x256, so a tab squashed it, and the
@@ -144,7 +144,7 @@
        every rule of app.css again, on top. The test is _staffWanted's, which the staff loader repeats. -->
   <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|people|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
   <noscript><link rel="stylesheet" href="/app.css?v=0"></noscript>
-<script>try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');(function(){var st=localStorage.getItem('cq_staff_theme')||(localStorage.getItem('cq_booth')==='1'?'booth':''),de=document.documentElement,mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'),sys=function(){try{if(localStorage.getItem('cq_staff_theme')!=='system')return;if(mq.matches)de.setAttribute('data-staff-theme','dark');else de.removeAttribute('data-staff-theme');}catch(e){}};if(st==='system'&&mq)sys();else if(st==='dark'||st==='booth')de.setAttribute('data-staff-theme',st);if(mq&&mq.addEventListener)mq.addEventListener('change',sys);})();if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
+<script>try{var _dm=navigator.deviceMemory;if(_dm&&_dm<=4)document.documentElement.classList.add('lite');}catch(e){}try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');(function(){var st=localStorage.getItem('cq_staff_theme')||(localStorage.getItem('cq_booth')==='1'?'booth':''),de=document.documentElement,mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'),sys=function(){try{if(localStorage.getItem('cq_staff_theme')!=='system')return;if(mq.matches)de.setAttribute('data-staff-theme','dark');else de.removeAttribute('data-staff-theme');}catch(e){}};if(st==='system'&&mq)sys();else if(st==='dark'||st==='booth')de.setAttribute('data-staff-theme',st);if(mq&&mq.addEventListener)mq.addEventListener('change',sys);})();if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
 <body>
 <button type="button" id="skip-main" class="skip-link" data-on-click='["_skipToMain"]'>Skip to content</button>
