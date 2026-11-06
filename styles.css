@@ -719,7 +719,9 @@
     html[dir="rtl"] .tab-nav{direction:rtl;}
     html[dir="rtl"] .filter-row{direction:rtl;}
     html[dir="rtl"] input,html[dir="rtl"] select{text-align:right;}
-    html[dir="rtl"] th,html[dir="rtl"] td{text-align:right;}
+    /* Right to left: cells start on the right, but a column a table centres or ends keeps it (2026-11-06, ST17): this rule
+       outweighed every table's own, so centred and number columns sat right under headings drawn elsewhere. */
+    :where(html[dir="rtl"]) :where(th,td){text-align:start;}
     html[dir="rtl"] .cust-topbar-name,html[dir="rtl"] .cust-topbar-email{direction:ltr;text-align:right;}
     html[dir="rtl"] .section-header{flex-direction:row;}
     html[dir="rtl"] .stats-row{direction:rtl;}
@@ -1067,7 +1069,7 @@
     .spots-green{color:var(--green-d);}
     .spots-red{color:var(--red);}
     .sess-admin-table{width:100%;border-collapse:collapse;background:var(--s1);}
-    .sess-admin-table th,.sess-admin-table td{padding:12px 16px;text-align:left;border-bottom:1px solid rgba(var(--tint-rgb),.04);font-size:13px;}
+    .sess-admin-table th,.sess-admin-table td{padding:12px 16px;text-align:start;border-bottom:1px solid rgba(var(--tint-rgb),.04);font-size:13px;}
     .sess-admin-table th{font-weight:700;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.7px;background:none;border-bottom:1px solid var(--line2);}
     .sess-admin-table th.an-sort-th{cursor:pointer;user-select:none;transition:color .15s;white-space:nowrap;}
     .sess-admin-table th.an-sort-th:hover{color:rgba(var(--tint-rgb),.8);}
@@ -1584,7 +1586,7 @@
          header 64px down INSIDE the box, on top of the first rows */
       .queue-table-desktop-wrap .queue-table th{position:sticky;top:var(--topbar-h,64px);z-index:5;background:var(--s1);}
     }
-    .queue-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;text-align:left;padding:12px 16px;border-bottom:1px solid var(--line2);white-space:nowrap;background:none;}
+    .queue-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;text-align:start;padding:12px 16px;border-bottom:1px solid var(--line2);white-space:nowrap;background:none;}
     .queue-table td{padding:14px 16px;border-bottom:1px solid rgba(var(--tint-rgb),.04);vertical-align:top;}
     /* :last-child, not :last-of-type (2026-10-01): each party is its own <tbody>, and Chrome counts
        :last-of-type as a backward positional rule - one party repainted by a realtime event restyled
@@ -3097,7 +3099,7 @@
     .analytics-bar-fill{height:100%;border-radius:4px;transition:width .25s cubic-bezier(.2,.8,.2,1);box-shadow:inset 0 1px 0 rgba(255,255,255,.3);}
     .analytics-bar-value{font-size:12px;font-weight:700;min-width:44px;text-align:end;color:var(--text);}
     .analytics-trend-table{width:100%;border-collapse:collapse;}
-    .analytics-trend-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;text-align:left;padding:10px 14px;border-bottom:1px solid var(--line2);white-space:nowrap;background:none;}
+    .analytics-trend-table th{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;text-align:start;padding:10px 14px;border-bottom:1px solid var(--line2);white-space:nowrap;background:none;}
     .analytics-trend-table td{padding:12px 14px;border-bottom:1px solid rgba(var(--tint-rgb),.04);font-size:13px;vertical-align:middle;}
     .analytics-trend-table tbody tr:hover td{background:rgba(var(--tint-rgb),.018);}
     .analytics-occ-bar{display:flex;align-items:center;gap:8px;}
@@ -8953,11 +8955,20 @@ body.view-staff #tab-inventory .actions-cell.flt-acts>.rq-more{flex:0 0 auto;min
   body.view-staff #tab-inventory .bk-table thead th:last-child{background:var(--sf-head,var(--s1));z-index:3;}
 }
 body.view-staff .dash-empty-go{margin-top:10px;}
+/* The Today page's ways on from each session and its added cards (2026-11-06, ST10) */
+body.view-staff .dash-row:has(+.dash-jumps){border-bottom:0;padding-bottom:4px;}
+body.view-staff .dash-jumps{display:flex;flex-wrap:wrap;gap:6px;padding:0 4px 10px;padding-inline-start:22px;border-bottom:1px solid var(--sf-line2);}
+body.view-staff .dash-jumps:last-child{border-bottom:0;}
+body.view-staff .dash-more{padding:8px 4px 0;color:var(--muted);font-size:var(--staff-fs-sm);}
+/* Team: what an account can do, in words (2026-11-06, ST12) */
+body.view-staff .tm-can{display:flex;flex-direction:column;gap:2px;padding:8px 10px;border-inline-start:3px solid var(--sf-line2);background:var(--sf-head);font-size:13px;}
+body.view-staff .tm-can-k{font-weight:700;color:var(--muted);}
 
 /* ── The keyboard shortcuts list ("?", 2026-10-03) ── */
 .kb-list{display:flex;flex-direction:column;gap:2px;}
 .kb-row{display:flex;align-items:center;gap:12px;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px;}
 .kb-row:last-child{border-bottom:0;}
+.kb-row.kb-sub{padding-top:14px;font-weight:700;color:var(--muted);font-size:13px;}
 .kb-keys{flex:0 0 92px;display:inline-flex;gap:4px;}
 .kb-row kbd{display:inline-block;min-width:22px;padding:2px 6px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px;background:var(--s2,#f6f6f2);font:700 12px/1.4 ui-monospace,Menlo,monospace;text-align:center;color:var(--text);}
 #bike-modal .bkm-tr:focus-visible{outline-offset:-2px;}

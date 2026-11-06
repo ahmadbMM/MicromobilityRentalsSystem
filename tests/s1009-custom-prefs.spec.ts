@@ -44,7 +44,7 @@ test.describe('@staff:settings personal customisation', () => {
     await open(page);
     const box = (k: string) => page.locator(`#tab-settings input[data-set-tb="${k}"]`);
     await expect(box('queue')).toBeChecked();
-    await box('inventory').uncheck();
+    await box('sessions').uncheck(); // an admin's usual four: Bookings, Sessions, People, Sales (2026-11-06)
     await box('history').check();
     await expect(page.locator('#staff-tabbar .tb-btn[data-tb]')).toHaveCount(4);
     expect(await page.locator('#staff-tabbar .tb-btn[data-tb]').evaluateAll((b) => b.map((x) => (x as HTMLElement).dataset.tb)))
@@ -55,7 +55,7 @@ test.describe('@staff:settings personal customisation', () => {
     await page.click('#set-tb-reset');
     expect(await page.evaluate(`_pref('tabbar',null)`)).toBeNull();
     await expect(page.locator('#staff-tabbar .tb-btn[data-tb]')).toHaveCount(4);
-    await expect(page.locator('#staff-tabbar .tb-btn[data-tb="inventory"]')).toBeAttached();
+    await expect(page.locator('#staff-tabbar .tb-btn[data-tb="sessions"]')).toBeAttached();
   });
 
   test('filters are kept per section across a reload, and Reset filters puts them back', async ({ page, context }) => {
