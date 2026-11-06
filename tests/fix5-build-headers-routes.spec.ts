@@ -15,7 +15,7 @@ test.describe('@build _headers', () => {
     const h = read('_headers');
     const block = h.match(/^\/\n {2}Link: ([^\n]*)\n/m);
     expect(block, 'the / rule with its Link header').not.toBeNull();
-    expect(block![1]).toContain('</fonts/SpaceGrotesk-var-latin.woff2>; rel=preload; as=font');
+    expect(block![1]).toContain('</fonts/Rubik-var-latin.woff2>; rel=preload; as=font');
     expect(block![1]).not.toMatch(/\?v=/);
     expect(block![1]).not.toMatch(/app\.(js|css)/);
   });

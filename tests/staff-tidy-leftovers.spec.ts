@@ -137,7 +137,8 @@ test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the s
   for (const r of fleet) {
     expect(r.lastPos).toBe('sticky');
     if (r.inUse) { expect(r.lastImg).toContain('linear-gradient'); expect(r.firstImg).toContain('linear-gradient'); }
-    if (r.odd) expect(r.last).toBe(r.mid); // the stripe
+    // Soft Solid (2026-11-06): rows are divided by lines, not zebra stripes; the pinned cell stays a solid card
+    if (!r.inUse) expect(r.last).toBe('rgb(255, 255, 255)');
   }
   await page.evaluate(`setStaffTab('history')`);
   await expect(page.locator('#tab-history tbody td.hist-act').first()).toBeVisible();
@@ -146,7 +147,7 @@ test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the s
     return [getComputedStyle(act).backgroundColor, getComputedStyle(mid).backgroundColor];
   }));
   expect(hist.length).toBeGreaterThan(1);
-  expect(hist[0][0]).toBe(hist[0][1]); // a striped row: Manage Record striped too
+  expect(hist[0][0]).toBe('rgb(255, 255, 255)'); // Manage Record pinned on a solid card (no zebra since Soft Solid)
 });
 
 test('@staff on the dark desk a pinned booking number is solid on a striped row, so nothing shows through it', async ({ page }) => {

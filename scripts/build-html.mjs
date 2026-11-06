@@ -530,7 +530,7 @@ if (!/^  Reporting-Endpoints: /m.test(headers)) headers = headers.replace(/^(  C
 // script were named here too, by their ?v= hash, but Cloudflare replays the hints it saw on an earlier
 // answer: after a deploy a phone fetched the old app.css and app.js from the hint, then the new ones
 // the page asks for. The page's own <link rel=preload> tags still start those early.
-const EARLY_FONT = '/fonts/SpaceGrotesk-var-latin.woff2';
+const EARLY_FONT = '/fonts/Rubik-var-latin.woff2';
 if (!out.includes(`href="${EARLY_FONT}"`)) throw new Error(`build: the page no longer preloads ${EARLY_FONT} - update the Early Hints list`);
 const early = `# The root page's Early Hints, written by scripts/build-html.mjs: only addresses that never change (a hashed one is replayed by Cloudflare after a deploy).\n/\n  Link: <${EARLY_FONT}>; rel=preload; as=font; type="font/woff2"; crossorigin\n`;
 if (/\?v=/.test(early)) throw new Error('build: an Early Hints address carries a ?v= hash - Cloudflare replays hints from an earlier deploy, so only stable addresses belong there');

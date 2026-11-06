@@ -60,7 +60,7 @@ test.describe('@staff:a11y the desk by keyboard and screen reader (2026-10-09)',
     // the roster's rows take the dark washes, not the paper colours
     await page.evaluate(`setStaffTab('queue');S.sfSession='${DAY}';renderStaffQueue()`);
     const bg = await page.locator('.queue-table tbody tr.row-waiting td, .q-card.row-waiting').first().evaluate((el) => getComputedStyle(el).backgroundColor);
-    expect(bg).toBe('rgb(16, 19, 24)');
+    expect(bg).toBe('rgb(21, 24, 28)'); // the dark card (#15181c since Soft Solid, 2026-11-06)
   });
 
   test('Follow this device follows the device', async ({ page }) => {

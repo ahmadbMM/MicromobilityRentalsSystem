@@ -61,7 +61,7 @@ test.describe('@customer:offline a ticket with no signal', () => {
             qr: await has('/vendor/qrcode-generator-2.0.4.js'),
             db: await has('/vendor/supabase-js-2.117.2.min.js'),
             riyal: await has('/fonts/Riyal-400.woff2'),
-            face: await has('/fonts/SpaceGrotesk-var-latin.woff2'),
+            face: await has('/fonts/Rubik-var-latin.woff2'),
             pack: await has('/lang/ar.json?v=abcdef0123'),
             scanner: await has('/vendor/jsqr-1.4.0.min.js'),
             img: await has('/not-versioned.png'),
