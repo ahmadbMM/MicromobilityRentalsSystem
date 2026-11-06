@@ -63,23 +63,30 @@ test.describe('@staff:bookings on the house through the server', () => {
     expect(await page.evaluate(`getQueue().find(e=>e.id==='e1').paid`)).toBe(false);
   });
 
-  test('the check-in set to House goes through staff_set_house first and the check-in carries no payment', async ({ page }) => {
+  // Since 2026-11-06 (BK03) the house is given once the check-in has landed: asked first, it could land on a rider another
+  // desk had checked in meanwhile, and the check-in was then refused.
+  test('the check-in set to House checks in first, then goes through staff_set_house; the check-in carries no payment', async ({ page }) => {
     await boot(page, { 'rpc:staff_set_house': { ok: true, id: 'e2', amount: 60 } });
     const calls = watch(page);
     await page.evaluate(`showCheckinModal('e2');S._ciPaid='house';confirmCheckinModal()`);
-    await expect.poll(() => calls.filter((c) => c.name === 'staff_checkin').length).toBe(1);
+    await expect.poll(() => calls.filter((c) => c.name === 'staff_set_house').length).toBe(1);
     const order = calls.filter((c) => c.name === 'staff_set_house' || c.name === 'staff_checkin').map((c) => c.name);
-    expect(order).toEqual(['staff_set_house', 'staff_checkin']);
+    expect(order).toEqual(['staff_checkin', 'staff_set_house']);
     const ci = calls.find((c) => c.name === 'staff_checkin')!.body as Record<string, unknown>;
     expect(ci.p_paid).toBeUndefined();
     expect(ci.p_price).toBeUndefined();
   });
 
-  test('without the function the check-in carries the house as before', async ({ page }) => {
+  test('without the function the house is written after the check-in; once known missing, the check-in carries it as before', async ({ page }) => {
     await boot(page);
     const calls = watch(page);
     await page.evaluate(`showCheckinModal('e2');S._ciPaid='house';confirmCheckinModal()`);
-    await expect.poll(() => calls.filter((c) => c.name === 'staff_checkin').length).toBe(1);
-    expect(calls.find((c) => c.name === 'staff_checkin')!.body).toMatchObject({ p_paid: true, p_price: 0 });
+    await expect.poll(() => housePatches(calls).length).toBe(1);
+    expect(housePatches(calls)[0].body).toMatchObject({ paid: true, price: 0 });
+    expect(calls.find((c) => c.name === 'staff_checkin')!.body).not.toHaveProperty('p_paid');
+    expect(await page.evaluate('S._houseNoDb')).toBe(true);
+    await page.evaluate(`showCheckinModal('e1');S._ciPaid='house';confirmCheckinModal()`);
+    await expect.poll(() => calls.filter((c) => c.name === 'staff_checkin').length).toBe(2);
+    expect(calls.filter((c) => c.name === 'staff_checkin')[1].body).toMatchObject({ p_booking_id: 'e1', p_paid: true, p_price: 0 });
   });
 });

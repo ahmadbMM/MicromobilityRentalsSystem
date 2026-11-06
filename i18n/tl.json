@@ -7101,5 +7101,21 @@
   "n6pNotSameQ": "Hindi na ipapakita ang mga account na ito bilang doble.",
   "n6pKeeperTakes": "Kukunin ng itinatagong account",
   "n6pTakesNone": "Walang detalye: mayroon na ang itinatagong account.",
-  "n6pMoves": "Kasamang lilipat"
+  "n6pMoves": "Kasamang lilipat",
+  "n6bInBy": "pasok {0}, {1}",
+  "n6bOutBy": "balik {0}, {1}",
+  "n6bCiElse": "Na-check in sa ibang desk nang {0}",
+  "n6bCiElseBy": "Na-check in sa ibang desk nang {0} ni {1}",
+  "n6bOpenBooking": "Buksan ang booking",
+  "n6bRecordPay": "Itala ang bayad",
+  "n6bHouseNot": "Naka-check in na si {0}. Hindi naibigay ang libre: may utang pa siya.",
+  "n6bCoUnsent": "{0} pagbabago sa session na ito ang hindi pa naipapadala mula sa device na ito.",
+  "n6bCoAttn": "{0} sa mga ito ang kailangang tingnan.",
+  "n6bCoSee": "Tingnan ang mga pagbabago",
+  "n6bSendNow": "Ipadala ngayon",
+  "n6bDqBack": "Ibalik at i-check in",
+  "n6bOwing": "May utang",
+  "n6bSomeone": "Ibang staff",
+  "n6bHasOpen": "Bukas kay {0} ang rider na ito",
+  "n6bHaveOpen": "Bukas kina {0} ang rider na ito"
 }

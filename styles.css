@@ -2433,6 +2433,7 @@
     #tab-queue .rq-el{font-size:var(--staff-fs-sm,12px);color:var(--green);font-weight:700;margin-top:3px;white-space:nowrap;}
     #tab-queue .rq-el-late{font-size:var(--staff-fs-sm,12px);color:var(--orange);font-weight:900;margin-top:3px;white-space:nowrap;}
     #tab-queue .rq-held{font-size:var(--staff-fs-sm,12px);color:#1d4ed8;font-weight:700;margin-top:3px;white-space:nowrap;}
+    #tab-queue .rq-by{font-size:var(--staff-fs-sm,12px);color:var(--muted);margin-top:3px;white-space:nowrap;}
     /* the dark desk: fixed #1d4ed8 read about 2.7:1 on its near-black rows; its --blue is the readable one (bug hunt 2026-10-28) */
     html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-held{color:var(--blue);}
     #tab-queue .rq-more{min-width:34px;font-weight:900;letter-spacing:1px;}
@@ -6022,6 +6023,9 @@ body.view-staff #tab-queue .q-live-count{top:var(--staff-stick);}
 #tab-queue .q-lc-btn b{font-size:16px;color:var(--text);}
 #tab-queue .q-lc-active b{color:var(--green);}
 #tab-queue .q-lc-waiting b{color:var(--orange);}
+#tab-queue .q-lc-owing b{color:var(--red);}
+#tab-queue .n6b-pres{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;padding:1px 6px;border:1px solid var(--orange);color:var(--orange);font-size:11px;font-weight:700;white-space:nowrap;vertical-align:middle;}
+.n6b-pres-dlg{display:block;margin-top:6px;padding:6px 8px;border:1px solid var(--orange);color:var(--orange);font-size:13px;font-weight:700;}
 #tab-queue .q-lc-btn.active{border-color:var(--green);color:var(--text);}
 #tab-queue .q-lc-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 #tab-queue .q-lc-sep{color:var(--muted);}
