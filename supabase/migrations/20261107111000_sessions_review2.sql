@@ -249,7 +249,7 @@ create policy session_rota_del on public.session_rota for delete using ((select 
 revoke all on public.session_rota from anon;
 grant select, insert, update, delete on public.session_rota to authenticated;
 
--- staff_move_session as 20261104160000, and the rota follows the ride (the one added line is marked).
+-- staff_move_session as live (20261104160000 + the volunteers block of 20261105120000), and the rota follows the ride (the one added line is marked).
 create or replace function public.staff_move_session(p_from text, p_to_id text, p_date text, p_exact boolean default false)
  returns jsonb
  language plpgsql
@@ -305,6 +305,16 @@ begin
     and not exists (select 1 from live_positions x where x.session_id = v_to and x.role = l.role);
   update rider_night_counters c set session_key = v_to where c.session_key = p_from
     and not exists (select 1 from rider_night_counters x where x.session_key = v_to and x.source = c.source);
+
+  -- Volunteers (20261105120000).
+  update volunteer_sessions w set session_id = v_to,
+         opens_at = w.opens_at + make_interval(days => d - s.session_date::date),
+         closes_at = w.closes_at + make_interval(days => d - s.session_date::date)
+   where w.session_id = p_from and not exists (select 1 from volunteer_sessions x where x.session_id = v_to);
+  update volunteer_shifts h set session_id = v_to where h.session_id = p_from
+    and not exists (select 1 from volunteer_shifts x where x.session_id = v_to and x.customer_id = h.customer_id);
+  update volunteer_hours set session_id = v_to where session_id = p_from;
+  update volunteer_log set session_id = v_to where session_id = p_from;
 
   delete from sessions where id = p_from;
   return jsonb_build_object('ok', true, 'id', v_to, 'day', v_day);
