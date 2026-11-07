@@ -21286,7 +21286,7 @@ function _n6rLinksHtml(s){
 }
 function _n6rDetailHtml(s){
   const v=_n6rS(s),e=_n6rExp(s),bits=[];
-  if(v.owed)bits.push([_money(v.owed),'n6rCOwed']);
+  if(v.owed)bits.push([_money(v.owed,_NOISO),'n6rCOwed']); // plain text: the tiles below escape each figure into a bdi of their own (an isolated amount showed its markup as words)
   if(v.show!=null)bits.push([v.show+'%','n6rCShow']);
   if(v.rate!=null)bits.push([v.rate+'/10','n6rCRate']);
   if(v.first)bits.push([String(v.first),'n6rCFirst']);

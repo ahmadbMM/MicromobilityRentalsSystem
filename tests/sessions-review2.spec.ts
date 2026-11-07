@@ -50,6 +50,17 @@ test.describe('@staff:sessions the Sessions section, second round', () => {
     await expect(page.locator('#tab-sessions .ss-tbl tbody tr.ss-tr').nth(await at('2099-03-03')).locator('td.ss-td-owed')).toContainText('100');
   });
 
+  test('the detail\'s Owed figure reads the amount, not its markup', async ({ page }) => {
+    await open(page);
+    await page.evaluate(`selectSessionDetail('2099-03-03')`);
+    const stats = page.locator('#tab-sessions .n6r-stats');
+    await expect(stats).toBeVisible();
+    // an isolated amount was escaped into the tile's own bdi and read "<bdi>SAR 100</bdi>" (2026-11-08)
+    await expect(stats.locator('> div').filter({ hasText: 'Owed' }).locator('.sess-ds-num')).toHaveText('SAR 100');
+    await expect(stats).not.toContainText('<bdi>');
+    await expect(stats.locator('bdi bdi')).toHaveCount(0);
+  });
+
   test('Announce gives English and Arabic words with the booking link', async ({ page }) => {
     await open(page);
     await page.evaluate(`selectSessionDetail('2099-03-03')`);

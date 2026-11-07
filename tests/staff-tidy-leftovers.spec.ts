@@ -109,18 +109,67 @@ for (const lang of ['en', 'ar']) {
         const w = document.querySelector('#tab-queue .queue-table-desktop-wrap') as HTMLElement, wr = w.getBoundingClientRect();
         return [...w.querySelectorAll('tbody td.rq-mng .btn-green')].slice(0, 8).map((b) => {
           const r = b.getBoundingClientRect();
-          return { x: Math.round(r.left), inside: r.left >= wr.left - 1 && r.right <= wr.right + 1 };
+          return { x: r.left, inside: r.left >= wr.left - 1 && r.right <= wr.right + 1 };
         });
       });
       const before = await seen();
       expect(before.length).toBeGreaterThan(5);
       for (const b of before) expect(b.inside).toBe(true);
-      // scrolled to the far end, the buttons stay where they were
+      // scrolled to the far end, the buttons stay where they were, to within a pixel: under the larger text the scroll
+      // offset is fractional (82.6px at 820), so the pinned edge can land a fraction of a pixel away (0.3px)
       await wrap.evaluate((w) => { const d = w.scrollWidth - w.clientWidth; w.scrollLeft = getComputedStyle(w).direction === 'rtl' ? -d : d; });
       await page.waitForTimeout(50);
-      expect((await seen()).map((b) => b.x)).toEqual(before.map((b) => b.x));
+      const after = await seen();
+      expect(after.length).toBe(before.length);
+      after.forEach((b, i) => expect(Math.abs(b.x - before[i].x), `row ${i}: ${before[i].x} -> ${b.x}`).toBeLessThan(1));
     });
   }
+
+  // From 1280px the roster's box does not scroll (its header sticks to the page), so a table wider than the box hangs out
+  // of it: 30px in light and dark, 54px in booth, where Return Bike went off the screen and the page scrolled sideways
+  // (2026-11-08, after the Soft Solid look's wider IBM Plex Sans). Booth is the widest: bigger status words, 2px rings.
+  // The night holds what sets the columns' widths: a party still paying (Mark paid), a bike to reserve, the waitlist,
+  // an owner's bike and a ride on the house.
+  test(`@staff:bookings at 1280px in booth (${lang}) the roster stays inside its box and the page does not scroll sideways`, async ({ page }) => {
+    const G = { group_id: 'g1', group_name: 'Tamer Group of Friends', group_contact: 'Tamer Aziz', group_phone: '0551112222' };
+    const night = [
+      q(1, { status: 'active', paid: true, assigned_bike_id: 'b1', checked_in_at: '2026-09-24T16:30:00Z' }),
+      q(2, { walk_in: true, to_reserve: true, type_preference: 'Road' }),
+      q(3, { status: 'waitlist', waitlist_num: 1 }),
+      q(4, { ...G, status: 'active', paid: true, assigned_bike_id: 'b4', type_preference: 'Mountain', checked_in_at: '2026-09-24T17:00:00Z' }),
+      q(5, { ...G, paid: true, type_preference: 'Road' }),
+      q(6, { ...G, type_preference: 'Kids', size: 'XS', height: 120, price: 40 }),
+      q(7, { type_preference: 'Own', price: 0 }),
+      q(8, { paid: true, price: 0 }),
+      q(9, {}),
+    ];
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.clock.setFixedTime(NOW);
+    await stubSupabase(page, { sessions, queue_entries: night, bikes });
+    await unlockStaff(page);
+    await page.addInitScript((l) => {
+      localStorage.setItem('cq_lang', l); localStorage.setItem('cq_lang_pick', '1'); localStorage.setItem('cq_staff_theme', 'booth');
+    }, lang);
+    await page.goto('/');
+    await waitForSb(page);
+    await staffReady(page);
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
+    const wrap = page.locator('#tab-queue .queue-table-desktop-wrap');
+    await expect(wrap.locator('.rq-gpaid')).toHaveCount(1);
+    await expect(wrap.locator('.status-badge.st-toreserve')).toHaveCount(1);
+    const fit = await wrap.evaluate((w) => {
+      const wr = w.getBoundingClientRect(), tr = (w.querySelector('table') as HTMLElement).getBoundingClientRect();
+      const acts = [...w.querySelectorAll('td.rq-mng :is(button,label)')].map((b) => b.getBoundingClientRect());
+      return { scrolls: getComputedStyle(w).overflowX, start: tr.left - wr.left, end: wr.right - tr.right, page: document.documentElement.scrollWidth - innerWidth,
+        actsOut: acts.filter((r) => r.left < wr.left - 1 || r.right > wr.right + 1).length, acts: acts.length };
+    });
+    expect(fit.scrolls).toBe('visible'); // the header still sticks to the page here
+    expect(fit.acts).toBeGreaterThan(5);
+    expect(fit, JSON.stringify(fit)).toMatchObject({ actsOut: 0 });
+    expect(fit.start).toBeGreaterThanOrEqual(-1);
+    expect(fit.end).toBeGreaterThanOrEqual(-1);
+    expect(fit.page).toBeLessThanOrEqual(0);
+  });
 }
 
 test('@staff a pinned cell takes its row\'s colour: the fleet\'s state and the stripe reach Manage bike and Manage Record', async ({ page }) => {

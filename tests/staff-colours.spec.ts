@@ -76,6 +76,28 @@ test.describe('@staff:bookings Bookings in colour', () => {
     await expect(page.locator(`#tab-sessions .sess-lc.th-runher, #tab-sessions .sess-lc.th-snd96, #tab-sessions .sess-lc.th-event`)).toHaveCount(3);
   });
 
+  // The places-left line under each chip's counts (BK14) was var(--text-2,#555), and --text-2 is defined nowhere: 1.7:1 on
+  // the circuit's navy and 2.4:1 on every dark-theme card (2026-11-08). Read against the chip's own solid colour.
+  for (const theme of ['light', 'dark', 'booth']) {
+    test(`the places left read at 4.5:1 or better on every ride chip (${theme})`, async ({ page }) => {
+      if (theme !== 'light') await page.addInitScript((th) => localStorage.setItem('cq_staff_theme', th), theme);
+      await bookings(page);
+      const lines = page.locator('#sess-strip .sess-summary-chip .n6c-left');
+      await expect(lines.first()).toBeVisible();
+      const got = await lines.evaluateAll((els) => els.map((el) => {
+        const chip = el.closest('.sess-summary-chip') as HTMLElement;
+        const lum = (css: string) => {
+          const [r, g, b] = (css.match(/[\d.]+/g) || []).slice(0, 3).map((v) => { const c = Number(v) / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+          return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const a = lum(getComputedStyle(el).color), b = lum(getComputedStyle(chip).backgroundColor);
+        return { th: [...chip.classList].find((k) => k.startsWith('th-')) || '', ratio: (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) };
+      }));
+      expect(got.map((x) => x.th)).toEqual(expect.arrayContaining(['th-jcc', 'th-snd96', 'th-comm', 'th-runher', 'th-event']));
+      for (const x of got) expect(x.ratio, x.th).toBeGreaterThanOrEqual(4.5);
+    });
+  }
+
   test('every booking state colours its row, its edge and its badge; money has its own colours', async ({ page }) => {
     await bookings(page);
     const tr = (name: string) => `#tab-queue .queue-table-desktop-wrap tbody tr:has-text("${name}")`;

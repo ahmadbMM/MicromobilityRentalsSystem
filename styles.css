@@ -10804,10 +10804,20 @@ body.view-staff #tab-queue .q-card .rq-flw6>.rq-msg{grid-column:2;}
 body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.btn-green{grid-column:2;}
 body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.rq-more{grid-row:2;grid-column:1;}
 /* the table inside its box at 1280px (it overhung by 30px): tighter cells, a narrower price breakdown, and
-   the room given to the rider, whose call and WhatsApp pair now sits beside the number */
+   the room given to the rider, whose call and WhatsApp pair now sits beside the number.
+   2026-11-08: it hung out again, 30px in light and dark, 54px in booth (Return Bike off the screen) and 22px in
+   Arabic. Each column is as wide as its widest one-line item (a party's Mark paid, To be reserved, On the house,
+   Bike owner, the sort headers), and from 1280 the box (969px inside) does not scroll, so the header can stick to
+   the page. Those items already summed 17px past it on a busy night; the Soft Solid look's IBM Plex Sans set each
+   3-5px wider. Cells keep 4px a side; Mark paid, the pay buttons and the bike type badges take the Manage booking
+   tiles' 8px (Mark paid had the 38px buttons' 14px); the rider keeps 140px. At 1280: 36px to spare in light and
+   dark, 12 in booth, 42 in Arabic. */
 body.view-staff #tab-queue .queue-table th,
-body.view-staff #tab-queue .queue-table td{padding-inline:6px;}
-body.view-staff #tab-queue .queue-table td>.rider-name{min-width:146px;}
+body.view-staff #tab-queue .queue-table td{padding-inline:4px;}
+body.view-staff #tab-queue .queue-table td>.rider-name{min-width:140px;}
+body.view-staff #tab-queue .queue-table .rq-gpaid,
+body.view-staff #tab-queue .queue-table .pay-toggle,
+body.view-staff #tab-queue .queue-table .q-type-cell .type-badge{padding-inline:8px;}
 body.view-staff #tab-queue .queue-table .rq-bkat{max-width:5em;}
 body.view-staff #tab-queue .queue-table .rq-adline{max-width:7.5em;}
 /* a ride card's date and time wrap rather than lose the time to an ellipsis, onto the lines they need: a clamp at two
@@ -11595,9 +11605,16 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 }
 
 /* ══ THE DESK, SECOND ROUND (2026-11-07: BK10 pace line, BK14 places left, OT04 bike prep, OT06 first ride, OT08 check-in states) ══ */
-.sess-summary-chip .n6c-left{display:block;font-size:12px;font-weight:700;color:var(--text-2,#555);margin-top:2px;}
+/* the muted words are the staff's --muted (--text-2 is defined nowhere, so its #555 fallback won: 2.4:1 on the
+   dark theme's cards and bar, 1.7-1.9:1 on the circuit's navy and the National Day green) */
+.sess-summary-chip .n6c-left{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-top:2px;}
 .sess-summary-chip .n6c-left.n6c-full{color:var(--red,#c92a2a);}
-.n6c-pace{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--text-2,#555);padding:4px 0 2px;}
+/* on the dark cards (the circuit, the National Day ride), in every staff theme, the places left wear the light
+   words of the lines above them, and a light red when the night is full */
+body.view-staff .sess-summary-chip.th-jcc .n6c-left{color:var(--jcc-cyan-lt);}
+body.view-staff .sess-summary-chip.th-snd96 .n6c-left{color:var(--snd-mut);}
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .n6c-left.n6c-full{color:#fca5a5;}
+.n6c-pace{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:13px;color:var(--muted);padding:4px 0 2px;}
 .n6c-first{display:inline-flex;align-items:center;margin-inline-start:6px;padding:1px 6px;font-size:11px;font-weight:700;line-height:16px;background:#b35c00;color:#fff;border-radius:2px;vertical-align:middle;white-space:nowrap;}
 .n6c-st{display:inline-block;margin-top:3px;padding:1px 6px;font-size:11px;font-weight:700;line-height:16px;border-radius:2px;color:#fff;white-space:nowrap;}
 .n6c-st-amber{background:#b35c00;}.n6c-st-blue{background:#1864ab;}.n6c-st-violet{background:#6741d9;}
@@ -11609,7 +11626,7 @@ body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vo
 .n6c-st-set .n6c-st-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1.3fr);gap:6px;margin-top:6px;}
 .n6c-co-list,.n6c-ft-list{list-style:none;margin:6px 0 0;padding:0;}
 .n6c-co-list li{padding:4px 0;border-top:1px solid var(--border,#ddd);}
-.n6c-co-late{font-size:12px;color:var(--text-2,#555);}
+.n6c-co-late{font-size:12px;color:var(--muted);}
 .n6c-dlg{max-width:640px;width:calc(100vw - 32px);}
 .n6c-prep-wrap{overflow-x:auto;margin-top:10px;}
 .n6c-prep{border-collapse:collapse;width:100%;font-size:14px;}
