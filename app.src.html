@@ -2779,7 +2779,7 @@ function _vcardFor(c){
 }
 function _custTagNames(c){
   const mine=(S.customerTags||[]).filter(ct=>ct.customer_id===c.id&&_tagActive(ct));
-  return mine.map(ct=>{const tg=(S.tags||[]).find(x=>x.id===ct.tag_id);return tg&&tg.name;}).filter(Boolean);
+  return mine.map(ct=>{const tg=(S.tags||[]).find(x=>x.id===ct.tag_id);return tg&&!_tagHidden(tg)&&tg.name;}).filter(Boolean);
 }
 // iPhone, iPod and iPad. iPadOS asks for the desktop site and says "Macintosh", so a Mac that
 // reports a touch screen is an iPad: no Mac has one.
@@ -24131,7 +24131,7 @@ function _commBirthdays(){
   const rng=S._bdRange||'all';
   const pill=(k,l)=>`<button type="button" class="filter-pill${rng===k?' active':''}" aria-pressed="${(rng===k)?'true':'false'}" data-on-click="${_on("_bdSetRange",k)}">${l}</button>`;
   // The Tag filter: every tag by name, then anyone holding a tag, then every account.
-  const tagOpts=[...(S.tags||[])].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''))).map(x=>[x.id,x.name||x.id]).concat([['any',t('acrTagAny')],['all',t('filterAll')]]);
+  const tagOpts=_tagsShown().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''))).map(x=>[x.id,x.name||x.id]).concat([['any',t('acrTagAny')],['all',t('filterAll')]]);
   // The list in use is always one of the options. Without the Community tag in S.tags (the tags
   // not loaded, or the tag removed) none was selected, and the browser showed the first tag.
   if(!tagOpts.some(([v])=>v===B.tag))tagOpts.unshift([B.tag,t('commTitle')]);
@@ -24718,7 +24718,7 @@ function _caBkRender(){
   const inv=b.kind==='invite',n=b.ids.length;
   let body='',wait=false;
   if(inv){
-    const tags=(S.tags||[]).filter(tg=>tg.id!==TAG_BLACKLIST);
+    const tags=_tagsShown().filter(tg=>tg.id!==TAG_BLACKLIST);
     const chips=tags.map(tg=>{const on=b.tags.includes(tg.id);return`<button type="button" class="am-pick${on?' on':''}" aria-pressed="${on?'true':'false'}" data-ca-tag="${esc(tg.id)}" data-on-click="${_on("_caBkTog","tags",tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('');
     const rides=_caRides();if(b.ride&&!rides.some(s=>s.id===b.ride))b.ride='';
     const opt=s=>{const pick=b.ride===s.id,left=spotsLeft(s.id);
@@ -24913,7 +24913,7 @@ function _caRulesFor(a){return _caCfg().rules.filter(r=>_caRuleHit(r,a));}
 function _caDefaultTags(a){
   const ts=[..._caCfg().defaultTags];
   if(a)_caRulesFor(a).forEach(r=>{if(r.action==='tag'&&r.tag&&!ts.includes(r.tag))ts.push(r.tag);});
-  return ts.filter(tid=>tid!==TAG_BLACKLIST&&(tid===TAG_COMMUNITY||(S.tags||[]).some(tg=>tg.id===tid))); // Community is the approval's own, loaded tags or not
+  return ts.filter(tid=>tid!==TAG_BLACKLIST&&(tid===TAG_COMMUNITY||_tagsShown().some(tg=>tg.id===tid))); // Community is the approval's own, loaded tags or not; a hidden tag is no longer given
 }
 function _caRuleValLabel(r){
   if(r.field==='gender')return _caGender(r.value);
@@ -24958,7 +24958,7 @@ function _apSettings(){
   let body='';
   if(tab==='rules'){
     const c=_caCfg(),d={field:'age',op:'lt',value:'',action:'reject',tag:'',...(S._caRd||{})};
-    const defChips=(S.tags||[]).filter(tg=>tg.id!==TAG_BLACKLIST).map(tg=>{const on=c.defaultTags.includes(tg.id);return`<button type="button" class="am-pick${on?' on':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_caDefTagToggle",tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('');
+    const defChips=_tagsShown().filter(tg=>tg.id!==TAG_BLACKLIST).map(tg=>{const on=c.defaultTags.includes(tg.id);return`<button type="button" class="am-pick${on?' on':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on("_caDefTagToggle",tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;}).join('');
     const opSel=d.field==='age'?[['lt','caRuleUnder'],['gte','caRuleAtLeast']]:[['is','caRuleIs'],['contains','caRuleContains']];
     const sel=(opts)=>`<select id="ca-rd-val" class="filter-select" aria-label="${esc(t('caRuleValue'))}" data-on-change="${_on("_caRdVal",_P("value"))}">${opts.map(([v,l])=>`<option value="${esc(v)}"${d.value===v?' selected':''}>${esc(l)}</option>`).join('')}</select>`;
     const valIn=d.field==='gender'?sel([['male',_caGender('male')],['female',_caGender('female')]])
@@ -24974,7 +24974,7 @@ function _apSettings(){
         <select class="filter-select" aria-label="${esc(t('caRuleOp'))}" data-on-change="${_on("_caRuleDraft","op",_P("value"))}">${opSel.map(([k,l])=>`<option value="${k}"${d.op===k?' selected':''}>${esc(t(l))}</option>`).join('')}</select>
         ${valIn}
         <select class="filter-select" aria-label="${esc(t('caRuleThen'))}" data-on-change="${_on("_caRuleDraft","action",_P("value"))}"><option value="reject"${d.action==='reject'?' selected':''}>${esc(t('caRuleReject'))}</option><option value="tag"${d.action==='tag'?' selected':''}>${esc(t('caRuleAddTag'))}</option></select>
-        ${d.action==='tag'?`<select class="filter-select" aria-label="${esc(t('amTagsTitle'))}" data-on-change="${_on("_caRuleDraft","tag",_P("value"))}"><option value="">—</option>${(S.tags||[]).filter(tg=>tg.id!==TAG_BLACKLIST).map(tg=>`<option value="${esc(tg.id)}"${d.tag===tg.id?' selected':''}>${esc(tg.name)}</option>`).join('')}</select>`:''}
+        ${d.action==='tag'?`<select class="filter-select" aria-label="${esc(t('amTagsTitle'))}" data-on-change="${_on("_caRuleDraft","tag",_P("value"))}"><option value="">—</option>${_tagsShown().filter(tg=>tg.id!==TAG_BLACKLIST).map(tg=>`<option value="${esc(tg.id)}"${d.tag===tg.id?' selected':''}>${esc(tg.name)}</option>`).join('')}</select>`:''}
         <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_caRuleAdd")}">${t('caRuleAddBtn')}</button>
       </div>`;
   }else if(tab==='messages'){
@@ -25382,7 +25382,7 @@ function _caApRender(){
   const rej=st.kind==='reject',re=st.kind==='reinvite',inv=st.kind==='invite'||re;
   const acct=_caAcct(a),cid=acct&&acct.id;
   const banned=!rej&&!!acct&&_isBlacklisted(acct.id); // the account carries the blacklist tag: say so, and Approve turns red
-  const tags=(S.tags||[]).filter(tg=>tg.id!==(rej?TAG_COMMUNITY:TAG_BLACKLIST));
+  const tags=_tagsShown().filter(tg=>tg.id!==(rej?TAG_COMMUNITY:TAG_BLACKLIST));
   const chips=tags.map(tg=>{
     const fixed=_caTagHeld(cid,tg.id),on=fixed||st.tags.includes(tg.id);
     return `<button type="button" class="am-pick${on?' on':''}" data-ca-tag="${esc(tg.id)}" aria-pressed="${on?'true':'false'}"${fixed?' disabled':` data-on-click="${_on("_caApTag",tg.id)}"`} data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}</button>`;
@@ -37021,7 +37021,7 @@ function _accFilterDefs(){
   const distinct=k=>[...new Set(getCustomers().map(c=>String(c[k]||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
   const all=['all',t('filterAll')],days=n=>[String(n),t('acrLastDays').replace('{0}',String(n))];
   return [
-    ['fTag',t('acrFilterTag'),[all,['any',t('acrTagAny')],['none',t('acrTagNone')],...(S.tags||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>[tg.id,tg.name])]],
+    ['fTag',t('acrFilterTag'),[all,['any',t('acrTagAny')],['none',t('acrTagNone')],..._tagsShown().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>[tg.id,tg.name])]],
     ['fGender',t('genderLabel'),[all,['male',t('genderMale')],['female',t('genderFemale')],['unset',t('acrGenderUnset')]]],
     ['fAge',t('acrFilterAge'),[all,['u18',t('acrAgeU18')],['18-29',t('acrAge1829')],['30-44',t('acrAge3044')],['45',t('acrAge45')]]],
     ['fCountry',t('countryLabel'),[all,..._saTwice(distinct('country')).map(x=>[x,nationalityLabel(x)])]],
@@ -37197,7 +37197,7 @@ function _accReportHtml(title){
     ||`<tr><td colspan="${cols.length}" class="rp-empty">—</td></tr>`;
   // Tag breakdown: holders overall, and how many of them are on this list.
   const onList=new Set(rows.map(r=>r.c.id));
-  const tagRows=(S.tags||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
+  const tagRows=_tagsShown().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
     const live=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct));
     return `<tr><td class="rp-name">${esc(tg.name)}</td><td>${live.length}</td><td>${live.filter(ct=>onList.has(ct.customer_id)).length}</td></tr>`;
   }).join('');
@@ -43792,7 +43792,7 @@ function _n6pAhBar(c){
     b(false,'',t('ssCopyLink'),`data-on-click="${_on('_n6pCopyLink',id)}"`),
   ].filter(Boolean).join('');
   const myT=_ctRowsFor(id).filter(ct=>!_tagLapsed(ct)).map(ct=>ct.tag_id);
-  const picker=S._n6pAhTags?`<div class="am-picker n6p-tags">${(S.tags||[]).map(tg=>{const on=myT.includes(tg.id),sure=on&&S._scYTagSure===id+'|'+tg.id;return`<button type="button" class="am-pick${on?' on':''}${sure?' scy-sure':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on('_n6pAhTag',id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}${sure?` <span class="scy-sure-t">${esc(t('scYTapRemove'))}</span>`:''}</button>`;}).join('')}</div>`:'';
+  const picker=S._n6pAhTags?`<div class="am-picker n6p-tags">${_tagsPickable(id).map(tg=>{const on=myT.includes(tg.id),sure=on&&S._scYTagSure===id+'|'+tg.id;return`<button type="button" class="am-pick${on?' on':''}${sure?' scy-sure':''}" aria-pressed="${on?'true':'false'}" data-on-click="${_on('_n6pAhTag',id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}${sure?` <span class="scy-sure-t">${esc(t('scYTapRemove'))}</span>`:''}</button>`;}).join('')}</div>`:'';
   return`<div class="n6p-bar" role="group" aria-label="${esc(t('n6pActions'))}">${acts}</div>${picker}`;
 }
 function _n6pAhTagsTog(){S._n6pAhTags=!S._n6pAhTags;_ahRender(true);}
@@ -52236,8 +52236,17 @@ function _lbStreak(weeks){
 function _riderTier(n){const tiers=[[50,'tierLegend'],[25,'tierElite'],[10,'tierPro'],[3,'tierRegular']];for(const[th,k]of tiers)if(n>=th)return t(k);return t('tierNewcomer');}
 
 // ── Tag system (staff-only; customers never see any of this) ─────────────────
-function _tagsById(){const m={};(S.tags||[]).forEach(tg=>m[tg.id]=tg);return m;}
+// A hidden tag (2026-11-08, the owner: "hide it not delete it", for Victory Lap once its race was over): every account
+// keeps it and every rule the database keys on it works as before, but no chip, picker, filter or report shows it.
+// The Tags page lists it under Hidden. tags.hidden_at / hidden_by (20261108100000).
+function _tagHidden(tg){return !!(tg&&tg.hidden_at);}
+function _tagsShown(){return (S.tags||[]).filter(tg=>!_tagHidden(tg));}
+// all: a hidden tag too (a history line still names it)
+function _tagsById(all){const m={};(S.tags||[]).forEach(tg=>{if(all||!_tagHidden(tg))m[tg.id]=tg;});return m;}
 function _tagsForCust(cid){const m=_tagsById();return _ctRowsFor(cid).filter(ct=>!_tagLapsed(ct)).map(ct=>m[ct.tag_id]).filter(Boolean);} // held or starting later; a lapsed grant is not held
+// An account's tag picker: the shown tags, and a hidden one only while the account holds it, so it can still come off
+// (Community and Victory Lap are one of two: the account must lose one to take the other).
+function _tagsPickable(cid){const held=new Set(_ctRowsFor(cid).filter(ct=>!_tagLapsed(ct)).map(ct=>ct.tag_id));return (S.tags||[]).filter(tg=>!_tagHidden(tg)||held.has(tg.id));}
 function setCustomersTab(k){setCommTab(k);} // Customers' pages are People's (2026-11-06)
 function setCommTab(k){if(k==='members'){k='accounts';S.amMember='yes';}S.communityTab=k;if(k==='duplicates')S._mgErr=false;if(k==='applications'||k==='learning')S._appsKind=k;S.tagEdit=null;S.tagCustId=null;if(S.staffTab!=='community'&&S.view==='staff')setStaffTab('community');else renderCommunity();}
 function openTagEdit(id){S.tagEdit=id?((S.tags||[]).find(x=>x.id===id)||{}):{};renderCommunity();}
@@ -53155,7 +53164,7 @@ function _amFiltered(){
   // Tag filter: only customers holding the selected tag NOW - the same test as the count on its
   // pill (and the DB's gate). It used to list expired and not-yet-started grants too, so the pill
   // said 120 and the list showed 135. Through the index, not a scan.
-  if(S.amTagFilter)shown=shown.filter(c=>_ctRowsFor(c.id).some(ct=>ct.tag_id===S.amTagFilter&&_tagActive(ct)));
+  if(S.amTagFilter&&!_tagHidden((S.tags||[]).find(x=>x.id===S.amTagFilter)))shown=shown.filter(c=>_ctRowsFor(c.id).some(ct=>ct.tag_id===S.amTagFilter&&_tagActive(ct))); // a saved filter on a tag hidden since has no pill: it stands down
   if(S.amMissing)shown=shown.filter(c=>_amMissingOf(c).length);
   if(S.amFixing)shown=shown.filter(c=>_flagFieldsOf(c).length);
   if(S.amSuspect)shown=shown.filter(c=>_sxOf(c));
@@ -53262,7 +53271,7 @@ function openSegmentActions(ids){
   const have=new Set((S.customers||[]).map(c=>String(c.id)));
   ids=[...new Set((ids||[]).map(String))].filter(id=>have.has(id));
   if(!ids.length){toast(t('toastNoExport'),'warning');return;}
-  S._seg={ids,tab:'tags',tag:(S.tags||[])[0]?(S.tags||[])[0].id:'',badge:null,note:'',kind:'ops',texts:{},edLang:null,busy:false,run:null};
+  S._seg={ids,tab:'tags',tag:_tagsShown()[0]?_tagsShown()[0].id:'',badge:null,note:'',kind:'ops',texts:{},edLang:null,busy:false,run:null};
   _bdgLoad();_tplLoad();
   if(!S._caApps&&!S._caBusy&&isAdmin()&&typeof _caLoad==='function')_caLoad().then(()=>{if(S._seg&&S._seg.tab==='msg'&&!S._seg.run)_segPaint();},()=>{}); // the riders' languages
   _segPaint();
@@ -53304,7 +53313,7 @@ function _segPaint(){
       <div class="am-meta">${esc(t('segMsgDone').replace('{0}',R.sent).replace('{1}',R.skipped))}</div></div>`
       :`<div class="seg-prog" aria-live="polite"><b>${esc(t('segMsgFinished'))}</b><div class="am-meta">${esc(t('segMsgDone').replace('{0}',R.sent).replace('{1}',R.skipped))}</div></div>`;
   }else if(g.tab==='tags'){
-    body=`<label class="rpt-fld">${t('segTagLbl')}<select class="filter-select rpt-w100" aria-label="${esc(t('segTagLbl'))}" data-on-change="${_on("_segSet","tag",_P("value"))}">${(S.tags||[]).map(tg=>`<option value="${esc(tg.id)}"${g.tag===tg.id?' selected':''}>${esc(tg.name)}</option>`).join('')}</select></label>
+    body=`<label class="rpt-fld">${t('segTagLbl')}<select class="filter-select rpt-w100" aria-label="${esc(t('segTagLbl'))}" data-on-change="${_on("_segSet","tag",_P("value"))}">${_tagsShown().map(tg=>`<option value="${esc(tg.id)}"${g.tag===tg.id?' selected':''}>${esc(tg.name)}</option>`).join('')}</select></label>
       <div class="seg-acts"><button type="button" class="btn-primary" data-on-click="${_on("_segTag",true)}"${g.busy||!g.tag?' disabled':''}>${esc(t('segTagAdd').replace('{0}',n))}</button><button type="button" class="btn-secondary" data-on-click="${_on("_segTag",false)}"${g.busy||!g.tag?' disabled':''}>${esc(t('segTagTake').replace('{0}',n))}</button></div>`;
   }else if(g.tab==='badge'){
     const give=_bdgOk()?_bdgSorted().filter(_bdgCanGive):[];
@@ -53506,13 +53515,13 @@ function _amPicPaint(){
 }
 function _amRowInner(c){
   {
-    const myTags=_tagsForCust(c.id);
+    const myHeld=new Set(_ctRowsFor(c.id).filter(ct=>!_tagLapsed(ct)).map(ct=>ct.tag_id)); // a hidden tag too: the picker offers it while held
     const _tm=_tagsById();
     const myCT=_ctRowsFor(c.id).filter(ct=>_tm[ct.tag_id]);
     const chips=myCT.length?myCT.map(ct=>_tagChip(_tm[ct.tag_id],ct)).join(''):'<span class="am-none">—</span>';
     const picking=S.tagCustId===c.id;
     // a held chip tapped once is armed: red, saying a second tap takes it off (_scYTagArm)
-    const picker=picking?`<div class="am-picker">${(S.tags||[]).map(tg=>{const on=myTags.some(x=>x.id===tg.id),sure=on&&S._scYTagSure===c.id+'|'+tg.id;return `<button class="am-pick${on?' on':''}${sure?' scy-sure':''}" aria-pressed="${!!(on)}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}${sure?` <span class="scy-sure-t">${esc(t('scYTapRemove'))}</span>`:''}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
+    const picker=picking?`<div class="am-picker">${_tagsPickable(c.id).map(tg=>{const on=myHeld.has(tg.id),sure=on&&S._scYTagSure===c.id+'|'+tg.id;return `<button class="am-pick${on?' on':''}${sure?' scy-sure':''}" aria-pressed="${!!(on)}" data-on-click="${_on("toggleCustTag",c.id,tg.id)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}">${on?'✓ ':'+ '}${_tagFace(tg)}${sure?` <span class="scy-sure-t">${esc(t('scYTapRemove'))}</span>`:''}</button>`;}).join('')||`<span class="am-meta">${t('amNoTags')}</span>`}</div>`:'';
     // One line per account, in columns that line up down the list (2026-10-10, the owner: "make the accounts and
     // members pages look like a list ... very aligned and organized and equally space"): the name (with the sorted-on
     // value or the money spent under it), the email with its sign-in marks, the phone, the social accounts, the tags
@@ -53578,8 +53587,8 @@ function _commAccounts(){
   const delReqPill=(_nDelReq||S.amDelReq)?`<button class="am-pick${S.amDelReq?' on':''} cmy-tc-red" aria-pressed="${S.amDelReq?'true':'false'}" data-on-click="${_on("_on__commAccounts_3",_EV,_EL)}">${t('amDelReqFilter')} (${_nDelReq})</button>`:'';
   const fixingPill=(_nFixing||S.amFixing)?`<button class="am-pick${S.amFixing?' on':''} cmy-tc-orange" aria-pressed="${S.amFixing?'true':'false'}" data-on-click="${_on("_on__commAccounts_4",_EV,_EL)}">${t('fixFilterBtn')} (${_nFixing})</button>`:'';
   const filterPills=`<div class="cmy-am-pills">
-    ${(S.tags||[]).length?`<button class="am-pick${S.amTagFilter?'':' on'} cmy-tc-green" aria-pressed="${S.amTagFilter?'false':'true'}" data-on-click="${_on("_amFilter","amTagFilter","")}">${t('amFilterAll')}</button>`:''}
-    ${(S.tags||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
+    ${_tagsShown().length?`<button class="am-pick${S.amTagFilter?'':' on'} cmy-tc-green" aria-pressed="${S.amTagFilter?'false':'true'}" data-on-click="${_on("_amFilter","amTagFilter","")}">${t('amFilterAll')}</button>`:''}
+    ${_tagsShown().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(tg=>{
       const cnt=_n6.tags.get(tg.id)||0;
       const on=S.amTagFilter===tg.id;
       return `<button class="am-pick${on?' on':''}" aria-pressed="${!!(on)}" data-cssv="${_cssv({'--tc':_tagColor(tg)})}" title="${esc(tg.name)}" data-on-click="${_on("_amFilter","amTagFilter",on?'':tg.id)}">${_tagFace(tg)} (${cnt})</button>`;
@@ -54702,7 +54711,7 @@ function _n6qTlItems(cid){
     if(e.ratedAt)add(e.ratedAt,'in',t('n6qTlRated'),`${what} · ${e.ratingExp||e.ratingBike||''}/10`);
   });
   (S._n6qTl&&S._n6qTl.cid===cid&&S._n6qTl.wal||[]).forEach(x=>{const a=Number(x.amount)||0;add(x.created_at,'pay',t(CW_KIND[x.kind]||'cwKAdjust'),`${a>0?'+':'−'}${_money(Math.abs(a),{isolate:false})}${x.by_name?' · '+x.by_name:''}`);});
-  const tm=_tagsById();_ctRowsFor(cid).forEach(ct=>{const tg=tm[ct.tag_id];if(tg)add(Number(ct.added_at)||0,'tag',t('n6qTlTag'),tg.name+(ct.added_by?' · '+ct.added_by:''));});
+  const tm=_tagsById(true);_ctRowsFor(cid).forEach(ct=>{const tg=tm[ct.tag_id];if(tg)add(Number(ct.added_at)||0,'tag',t('n6qTlTag'),tg.name+(ct.added_by?' · '+ct.added_by:''));});
   if(typeof _bdgHeld==='function')_bdgHeld(cid).forEach(x=>{const b=_bdgById(x.badge_id);if(b)add(x.awarded_at,'tag',t('n6qTlBadge'),_bdgName(b)+(x.awarded_by?' · '+x.awarded_by:''));});
   (S._caApps||[]).filter(a=>a&&String(a.customer_id||'')===cid).forEach(a=>add(a.created_at,'app',t('n6qTlApplied'),a.status||''));
   (S._laApps||[]).filter(a=>a&&String(a.customer_id||'')===cid).forEach(a=>add(a.created_at,'app',t('n6qTlLearn'),a.status||''));
@@ -55184,7 +55193,7 @@ function _pplOverview(){
     _pplKpi(cs.filter(c=>_amMissingOf(c).length).length,t('amMissingBtn'),['_amGo','amMissing']),
     _pplKpi(cs.filter(c=>_sxOf(c)).length,t('sxFilterBtn'),['_amGo','amSuspect']),
     isAdmin()?_pplKpi(_dupGroups().length,t('commTabDuplicates'),['_pplGo','community','duplicates']):'',
-    _pplKpi((S.tags||[]).length,t('amTagsTitle'),['_pplGo','community','tags']),
+    _pplKpi(_tagsShown().length,t('amTagsTitle'),['_pplGo','community','tags']),
     _pplKpi((S.badges||[]).filter(b=>!b.retired).length,t('mrBadgesTitle'),['_pplGo','community','badges']),
   ].join('');
   const nm=x=>String((x&&(x.name||x.email))||'—');
@@ -55737,23 +55746,52 @@ async function _acBuddySet(cid,bid){
   const r=await sb.from('member_welcome').upsert(row,{onConflict:'customer_id'});if(_writeErr(r,'set buddy'))return;
   S._ac.welcome=[...S._ac.welcome.filter(w=>w.customer_id!==cid),row];
 }
+// Hide / Unhide a tag (2026-11-08): it moves to Hidden with every holder kept, and back. A plain staff update, as its
+// name; until the database has the column (20261108100000) the button says so.
+function _tagHideOk(){const ts=S.tags||[];return !ts.length||ts.some(tg=>'hidden_at' in tg);}
+async function _tagHidePut(id,on){
+  const tg=(S.tags||[]).find(x=>x.id===id);if(!tg)return false;
+  const upd=on?{hidden_at:new Date().toISOString(),hidden_by:_opName().slice(0,120)||null}:{hidden_at:null,hidden_by:null},prev={hidden_at:tg.hidden_at||null,hidden_by:tg.hidden_by||null};
+  const put=v=>{S.tags=(S.tags||[]).map(x=>x.id===id?{...x,...v}:x);};
+  put(upd);renderCommunity(); // paint first
+  if(await _wr(sb.from('tags').update(upd).eq('id',id),'tag hide')){put(prev);renderCommunity();return false;}
+  return true;
+}
+async function _tagHide(id,on){
+  const tg=(S.tags||[]).find(x=>x.id===id);if(!tg||_tagHidden(tg)===!!on)return;
+  if(!_tagHideOk()){toast(t('auNoDb'),'warning');return;}
+  if(on&&S.amTagFilter===id)S.amTagFilter='';
+  if(!(await _tagHidePut(id,on)))return;
+  const msg=t(on?'apHiddenToast':'apUnhiddenToast').replace('{0}',()=>tg.name||'');
+  pushUndo(msg,async()=>{if(!(await _tagHidePut(id,!on)))return false;});
+  toast(msg,'success');
+}
+function _tgHidOpen(){S._tgHidOpen=!S._tgHidOpen;renderCommunity();}
 function _commTags(){
-  const tagRows=(S.tags||[]).slice().sort((a,b)=>(b.auto_grant?1:0)-(a.auto_grant?1:0)||String(a.name).localeCompare(String(b.name))).map(tg=>{
-    const cnt=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct)).length;
+  const ord=(a,b)=>(b.auto_grant?1:0)-(a.auto_grant?1:0)||String(a.name).localeCompare(String(b.name));
+  const tagRow=tg=>{
+    const cnt=(S.customerTags||[]).filter(ct=>ct.tag_id===tg.id&&_tagActive(ct)).length,hid=_tagHidden(tg);
+    const hidLine=hid?t('apHiddenOn').replace('{0}',()=>esc(fmtStamp(tg.hidden_at)))+(tg.hidden_by?' · '+t('flgBy').replace('{0}',()=>esc(tg.hidden_by)):'')+' · ':'';
     return `<div class="am-tag-row">
       ${_tagChip(tg)}
-      <span class="am-meta">${tg.auto_grant?t('amAutoTag')+' · ':''}${t('amHolders').replace('{0}',cnt)}</span>
+      <span class="am-meta">${tg.auto_grant?t('amAutoTag')+' · ':''}${hidLine}${t('amHolders').replace('{0}',cnt)}</span>
       <div class="cmy-am-tacts">
         <button class="btn-sm ${S._tgOpenId===tg.id?'btn-primary':'btn-secondary'}" aria-expanded="${S._tgOpenId===tg.id?'true':'false'}" data-on-click="${_on("_tgOpen",tg.id)}">${t('tgHoldersBtn')}</button>
-        <button class="btn-sm btn-secondary" data-on-click="${_on("openTagEdit",tg.id)}">${t('editBtn')}</button>
+        ${hid?'':`<button class="btn-sm btn-secondary" data-on-click="${_on("openTagEdit",tg.id)}">${t('editBtn')}</button>`}
+        <button class="btn-sm btn-secondary" data-on-click="${_on("_tagHide",tg.id,!hid)}">${t(hid?'apUnhideBtn':'apHideBtn')}</button>
         ${tg.locked?'':`<button class="btn-sm btn-red" data-on-click="${_on("deleteTag",tg.id)}">${t('deleteBtn')}</button>`}
       </div>
     </div>${S._tgOpenId===tg.id?_tgHoldersHtml(tg):''}`;
-  }).join('')||_emptyState(t('amNoTags'));
+  };
+  const tagRows=_tagsShown().sort(ord).map(tagRow).join('')||_emptyState(t('amNoTags'));
+  // The hidden ones under a button of their own, closed until asked for.
+  const hidden=(S.tags||[]).filter(_tagHidden).sort(ord);
+  const hidRows=hidden.length?`<button type="button" class="btn-sm ${S._tgHidOpen?'btn-primary':'btn-secondary'} cmy-mt12" aria-expanded="${S._tgHidOpen?'true':'false'}" data-on-click="${_on("_tgHidOpen")}">${t('apHidden')} (${hidden.length})</button>${S._tgHidOpen?hidden.map(tagRow).join(''):''}`:'';
   const tagPanel=`<div class="form-section cmy-mt0">
     <h2 class="form-title">${t('amTagsTitle')}</h2>
     <div class="cmy-am-sub">${t('amTagsSub')}</div>
     ${tagRows}
+    ${hidRows}
     ${S.tagEdit!==null?_tagEditForm():`<button class="btn-secondary cmy-mt12" data-on-click="${_on("openTagEdit","")}">+ ${t('amNewTag')}</button>`}
   </div>`;
   return tagPanel;
