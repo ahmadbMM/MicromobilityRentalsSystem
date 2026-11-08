@@ -6015,6 +6015,31 @@ body.view-staff .q-card.row-toreserve{background:rgba(109,40,217,.04);border-col
 #eon-modal .eon-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;}
 #eon-modal .eon-list li{display:flex;justify-content:space-between;gap:10px;}
 #eon-modal .eon-act button{min-height:44px;}
+/* The part-timers' hours at a JCC or Petromin close-out (2026-11-08): over the night's summary, under the confirm
+   dialog; one line per part-timer (who, kind of work, hours, remove), who on a line of its own on a phone. */
+#ptc-modal .modal-backdrop{z-index:250;}
+#ptc-modal .ptc-box{width:min(92vw,560px);max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);display:flex;flex-direction:column;}
+#ptc-modal .chrome-dh10{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+#ptc-modal .chrome-dt{font-size:18px;font-weight:600;}
+#ptc-modal .chrome-xt{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:22px;line-height:1;padding:0 4px;min-width:44px;min-height:44px;}
+#ptc-modal .chrome-dact{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+#ptc-modal .chrome-dact button{min-height:44px;}
+#ptc-modal .chrome-mw100{min-width:100px;}
+#ptc-modal .ptc-body{overflow-y:auto;margin-bottom:16px;display:flex;flex-direction:column;gap:10px;}
+#ptc-modal .ptc-sub{font-size:13px;color:var(--muted);font-weight:600;line-height:1.5;}
+#ptc-modal .ptc-sub b{color:var(--text);}
+#ptc-modal .ptc-had{padding:10px 14px;background:var(--s3);border-radius:var(--r-md,6px);font-size:13px;font-weight:600;}
+#ptc-modal .ptc-had-h{font-size:12px;color:var(--muted);margin-bottom:6px;}
+#ptc-modal .ptc-had ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;}
+#ptc-modal .ptc-rows{display:flex;flex-direction:column;gap:8px;}
+#ptc-modal .ptc-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) 80px 44px;gap:6px;align-items:start;}
+#ptc-modal .ptc-f{min-width:0;}
+#ptc-modal .ptc-row select,#ptc-modal .ptc-row input{width:100%;min-height:44px;}
+#ptc-modal .ptc-del{min-width:44px;min-height:44px;background:transparent;border:1px solid var(--border);border-radius:var(--r-md,6px);color:var(--muted);font-size:20px;line-height:1;cursor:pointer;}
+#ptc-modal .ptc-total{font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);}
+#ptc-modal .ptc-total:empty{display:none;}
+#ptc-modal .ptc-dup{color:var(--orange);font-weight:600;font-size:13px;}
+@media (max-width:520px){#ptc-modal .ptc-row{grid-template-columns:minmax(0,1fr) 80px 44px;padding:8px;background:var(--s3);border-radius:var(--r-md,6px);}#ptc-modal .ptc-row .ptc-who{grid-column:1 / -1;}}
 /* Close out: each bike still out, ticked back, damaged or missing. */
 #confirm-modal .co-out{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
 #confirm-modal .co-out-h{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text);}

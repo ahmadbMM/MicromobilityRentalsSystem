@@ -117,7 +117,8 @@ test.describe('@staff:bookings b1-a close out settles the night correctly', () =
     // the log names who was completed on staff's word
     await expect.poll(() => page.evaluate(`S.fullLog.map(l=>l.label).join('|')`)).toContain('They rode: #3 Rider C');
     // and the admin's Undo puts the night back as it was
-    expect(await page.evaluate(`S.undoStack[S.undoStack.length-1].label`)).toContain('Close out the night');
+    // the undo is pushed after the reload that follows that log line: waited for (read at once, it failed under load)
+    await expect.poll(() => page.evaluate(`(S.undoStack[S.undoStack.length-1]||{}).label||''`)).toContain('Close out the night');
     await page.evaluate('doUndo()');
     await expect.poll(() => q.map((r) => r.status).join()).toBe('active,waiting,waiting,waiting,waiting');
   });
