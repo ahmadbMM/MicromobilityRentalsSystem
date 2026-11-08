@@ -2022,6 +2022,56 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
   - *People > Referrals* (`/people/referrals`, `_refRpHtml` / `_refRpLoad`): six figures, the referrals to check, six months
     (joined, rode, free rides given and used), money (what referred riders paid for done rides after joining against the fares
     of the free rides used, `priceForType`) and the top ten referrers (Ambassador candidate from five friends who rode).
+- **The friend's half (the owner, 2026-11-08; migration 20261108200000).** "The person who uses the referral code for the
+  first time gets a 50% discount for his booking (for one bike)"; the owner's answers: new riders only, the friend's own
+  bike, JCC rides and Petromin nights, never Carbon - for every referral code.
+  - *The code.* A linked friend with no finished paid ride gets one personal code (`_ref_welcome`): `RW-` + the
+    referrer's code + three characters, `ref_pct` percent (Settings, 5-100, default 50; `_ref_pct`), one use, valid
+    `ref_days`, `promo_codes.referral_welcome_of` = the friend. Made by `customer_set_referrer` (answers `welcome`),
+    `staff_set_referrer` and `staff_referral_review` (allow); a held or removed referral puts an unused one away
+    (`_ref_welcome_off`), allowing or linking again brings it back, renamed for a new referrer. Linked friends who had not
+    ridden got theirs when the migration ran. `customer_referral` answers `pct` and `welcome` ({code, expires_at, used,
+    pct}); `rewards` say `bonus` (any_bike is gone).
+  - *One bike.* The app puts it on rider 1 (`S.promoApplied.one`, `_bldCodeOf` knows it); the server counts a use on
+    each row that carries a code and `customer_create_booking` inserts row by row, so a second row with it is priced in
+    full and the code dropped; a cancel gives the use back (`_promo_count`).
+  - *Where.* `_ref_code_guard` (now also on `session_id`) holds RW-, RF- and RB- codes to a JCC ride or a Petromin night:
+    a new booking elsewhere goes without the code (no use counted), a move or a code put on elsewhere is refused
+    (REF_CODE_SESSION; dropping it then would keep its use, as `_promo_count` follows an update only when it names
+    promo_code or status), Carbon is refused (REF_CODE_CARBON) - the bonus too since this migration. Their `ride_kind` is
+    null (old RF/RB codes cleared), so the scope guard leaves them to it. The referrer's free ride now follows the friend's
+    first paid, finished JCC ride or Petromin night (`_ref_ride_done`, both staff functions). `_refCodeSessOk` mirrors it.
+  - *On the page.* The event picker's card (`.fr-welcome`, first in `_frLandInner`), the Invite card's line (`.ref-w`),
+    a pop-up once a device (`_refCelebrate`). On the bike step `_refWAuto` puts it on by itself (`S.promoApplied.auto`)
+    once rider 1 has a bike that is not Carbon, an own bike or one on the house, and takes it off when that stops being
+    so; called from `renderRegister` before the sums, `setBikeType` for rider 1 and `_refLoad`. Remove keeps it off on
+    that ride (`S._rwOff`), and the Redeem box offers it (`_bldRedeemInner`, which says no to Carbon). A friend's code
+    typed in the promo box (six characters of the code alphabet, after `promo_lookup` says invalid) links the account
+    (`_refPromoTry`, via 'code') and puts the code on. Staff see it on the account window (`.ref-ah-w`), in People >
+    Referrals (a seventh figure, and the discounts' sum) and set the percent in Settings > Business > Referrals.
+  - `tests/referrals.spec.ts` (the friend's half), SQL tried on a local Postgres with stubs of the price trigger.
+
+## The code a booking used (2026-11-08)
+
+The owner: "when a code is used show it besides the booking and what type of code it is with a logo". The answer: staff
+Bookings rows, the booking and check-in windows, reports and their files, and the rider's ticket.
+- **Kinds.** `_codeKindOf(code)`: `rw` the friend's referral discount, `rf` the referrer's free ride, `rb` the bonus,
+  `bd` the blood donation free ride, `promo` any code staff made - read off the promo_codes row a staff device holds,
+  else the prefix; `sat` a Saturday ride code (`ride_code`). `CODE_KINDS` names them (`sat` is `satcF`, "Ride code");
+  `_CODE_IC` draws each mark in the rider icons' monoline, `.code-k-<kind>` gives its colour (lighter on dark screens
+  and the dark live ticket). `_codeOne(code)`: rw/rf/rb/bd pay for rider 1 alone, on a staff device's booking too.
+- **Showing.** `_entryCodes(es)` lists a booking's or a party's codes; `_codeTag(x, full)` is the chip: the mark and the
+  code with the kind in its title, or (full) the kind's name too. Staff: `_bkCodes` gives a Saturday code its name,
+  `_codeChips(e)` rides in `_ptnChip` (so every place that shows a partner shows the codes: phone cards, the booking and
+  check-in windows, the waitlist, History, the hand-over), `_codeCell` is the Bookings table's column (`_listCols.rc`;
+  "Ride code" with names alone while every code in view is a Saturday ride's, `rcSat`, else "Code" with each kind
+  named), `_codeTxt` the words for a file. The session report has a `code` column (on by default, left out of a sheet
+  with no code; the name cell then drops its chips), the roster CSV and History's CSV a Code column. The rider's ticket:
+  `_codeRowHtml(e)` on the row that used it, with what it took off the fare.
+- **The split trap.** `_entryCodes` keeps two sets: a key built as `'p'+code` read to `scripts/split-staff.mjs` as a
+  translation-key prefix (any short literal before a `+`), and kept 847 staff keys starting with p or s in the customer
+  half (+14 KB). Build a lookup key without a short literal before `+`.
+- `tests/booking-codes.spec.ts`; `tests/saturday-codes.spec.ts` keeps the Saturday case.
 
 ## Staff round two outside the roster (2026-11-08)
 

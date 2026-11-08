@@ -82,7 +82,7 @@ test.describe('@customer:account referrals', () => {
     await account(page);
     await page.locator('#ref-in').fill('K7MQ2X');
     await page.locator('#ref-mine').getByRole('button', { name: 'Apply' }).click();
-    await expect(page.locator('#toast-container')).toContainText('Your friend gets a free ride');
+    await expect(page.locator('#toast-container')).toContainText('your friend gets a free ride');
     await expect.poll(() => calls.filter((c) => c.name === 'customer_referral').length).toBeGreaterThan(1);
   });
 });
@@ -235,17 +235,18 @@ test.describe('@staff:settings the Referrals card', () => {
     await expect(c.locator('#biz-ref_on')).toBeChecked();
     await expect(c.locator('#biz-ref_days')).toHaveAttribute('placeholder', '60');
     await expect(c.locator('#biz-ref_cap')).toHaveAttribute('placeholder', '10');
+    await expect(c.locator('#biz-ref_pct')).toHaveAttribute('placeholder', '50'); // the friend's discount (20261108200000)
     await c.locator('#biz-ref_on').uncheck();
     await c.locator('#biz-save-referral').click();
     await expect.poll(() => calls.filter((x) => x.name === 'staff_set_biz').length).toBe(1);
-    expect(calls.find((x) => x.name === 'staff_set_biz')!.body).toEqual({ p_patch: { ref_on: false, ref_days: null, ref_cap: null } });
+    expect(calls.find((x) => x.name === 'staff_set_biz')!.body).toEqual({ p_patch: { ref_on: false, ref_pct: null, ref_days: null, ref_cap: null } });
   });
 });
 
 // The extras (the owner, 2026-11-08: "in more ideas do 2 3 6 8", migration 20261108180000): the free ride said once on the
 // device and its last days on the card, the Recruiter badge and the fifth friend's bonus on any bike, the device check
 // with its held referrals for staff, and the People > Referrals report.
-const RB = { code: 'RB-9F8E7D6C', expires_at: '2099-12-05', used: false, any_bike: true };
+const RB = { code: 'RB-9F8E7D6C', expires_at: '2099-12-05', used: false, bonus: true };
 const inDays = (n: number) => new Date(Date.now() + 3 * 36e5 + n * 864e5).toISOString().slice(0, 10);
 
 test.describe('@customer:account referral extras', () => {
@@ -267,7 +268,7 @@ test.describe('@customer:account referral extras', () => {
     await expect(page.locator('#land-free-rides .fr-soon')).toHaveText('Ends in 3 days');
   });
 
-  test('the bonus of the fifth friend is kept for Carbon and offered there', async ({ page }) => {
+  test('the bonus of the fifth friend is not offered for Carbon either (20261108200000: no referral code pays for Carbon)', async ({ page }) => {
     await rider(page, { 'rpc:customer_referral': card({ rewards: [RF, RB] }), 'rpc:customer_blood_rewards': [] });
     await page.evaluate('showView("landing");renderLandingAvail()');
     await expect.poll(() => page.evaluate('_refRewards().length')).toBe(2);
@@ -276,8 +277,9 @@ test.describe('@customer:account referral extras', () => {
     await expect(page.locator('#bld-redeem .fr-card')).toContainText('RF-1A2B3C4D');
     await page.evaluate(`S.regBikeTypes=['Road Carbon'];renderRegister()`);
     const box = page.locator('#bld-redeem .fr-card');
-    await expect(box).toContainText('RB-9F8E7D6C');
-    await expect(box.locator('.fr-go')).toHaveCount(1);
+    await expect(box).toContainText('Carbon');
+    await expect(box).not.toContainText('RB-9F8E7D6C');
+    await expect(box.locator('.fr-go')).toHaveCount(0);
   });
 
   test('the Recruiter badge counts the friends who rode, as levels at 1, 3, 5 and 10', async ({ page }) => {
@@ -300,7 +302,7 @@ test.describe('@customer:account referral extras', () => {
     await account(page);
     await page.locator('#ref-in').fill('K7MQ2X');
     await page.locator('#ref-mine').getByRole('button', { name: 'Apply' }).click();
-    await expect(page.locator('#toast-container')).toContainText('Your friend gets a free ride');
+    await expect(page.locator('#toast-container')).toContainText('your friend gets a free ride');
     expect(sent).toHaveLength(2);
     expect(String(sent[0].p_device)).toMatch(/^[0-9a-f]{24}$/);
     expect('p_device' in sent[1]).toBe(false);
@@ -334,7 +336,7 @@ test.describe('@staff:people referral extras', () => {
     await page.evaluate(`setStaffTab('community');setCommTab('referrals')`);
     expect(new URL(page.url()).pathname).toBe('/people/referrals');
     const tab = page.locator('#tab-community');
-    await expect(tab.locator('.rp-kpis .dash-kpi')).toHaveCount(6);
+    await expect(tab.locator('.rp-kpis .dash-kpi')).toHaveCount(7);
     await expect(tab.locator('.rp-check')).toContainText('Maya Nasser');
     await expect(tab.locator('.rp-check')).toContainText('2 accounts with this code in a day');
     await expect(tab.locator('.rp-table').last()).toContainText('Omar Saleh');
@@ -354,5 +356,142 @@ test.describe('@staff:people referral extras', () => {
     const sec = page.locator('#cust-modal .ref-ah');
     await expect(sec.locator('.ref-ah-held')).toContainText('Waiting for a staff check');
     await expect(sec.getByRole('button', { name: 'Allow' })).toBeVisible();
+  });
+});
+
+// The friend's half (the owner, 2026-11-08: "the person who uses the referral code for the first time gets a 50% discount
+// for his booking (for one bike)", migration 20261108200000): a new account linked to a referrer holds its own code (RW-),
+// pct off the account holder's own bike, on a JCC ride or a Petromin night, never Carbon. It comes off by itself on the
+// bike step; a friend's code typed in the promo box links the account and puts it on.
+const W = { code: 'RW-K7MQ2X-4FZ', expires_at: '2099-12-05', used: false, pct: 50 };
+const pm = { id: 's2', day: 'Wednesday', session_date: '2099-02-11', capacity: 9, status: 'open', created_at: 1, event_kind: 'community', ride_kind: 'petromin', paid_ride: true, location: 'JCC' };
+async function friend(page: Page, fx: Record<string, unknown> = {}) {
+  // the pop-ups seen (the friend's code is said once on a device, tested on its own below)
+  await page.addInitScript(() => { try { localStorage.setItem('cq_ref_seen_c1', JSON.stringify(['RF-1A2B3C4D', 'RW-K7MQ2X-4FZ'])); ['rec1', 'rec3', 'rec5', 'rec10'].forEach((k) => localStorage.setItem('cq_bdg_' + k + '_c1', '1')); } catch { /* none */ } });
+  await rider(page, { sessions: [jcc, sat, pm], 'rpc:customer_referral': card({ referred: true, joined: 0, rode: 0, earned: 0, welcome: W }), 'rpc:customer_blood_rewards': [], ...fx }, '/', false);
+  await page.evaluate('showView("landing");renderLandingAvail()');
+  await expect.poll(() => page.evaluate('!!_refWOpen()')).toBe(true);
+}
+const step2 = (page: Page, sid: string, types: string[]) => page.evaluate(`showView('customer');setCustTab('register');S.selSession=${JSON.stringify(sid)};S.selEvent=_evOf(_sessDisp(S.selSession));S.regStep=2;S.regQty=${types.length};S.regBikeTypes=${JSON.stringify(types)};renderRegister()`);
+
+test.describe('@customer:reserve the friend\'s referral discount', () => {
+  test('on the event picker and the Invite card, then on rider 1\'s bike by itself: half off, a second rider pays in full', async ({ page }) => {
+    await friend(page);
+    const land = page.locator('#land-free-rides .fr-welcome');
+    await expect(land).toContainText('A friend’s invite: 50% off');
+    await expect(land).toContainText('RW-K7MQ2X-4FZ');
+    await account(page);
+    await expect(page.locator('#ref-mine .ref-w')).toContainText('50% off your own bike');
+    await step2(page, 's0', ['Hybrid', 'Hybrid']);
+    expect(await page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.one,S.promoApplied.auto,S.promoApplied.value]')).toEqual(['RW-K7MQ2X-4FZ', true, true, 50]);
+    const fare = await page.evaluate(`priceForType('Hybrid')`) as number;
+    await expect(page.locator('#reg-promo-disc-step2')).toContainText(String(fare / 2));
+    // what is booked: rider 1 at half, carrying the code; rider 2 at the full fare, without it (one use, one bike)
+    const rows = await page.evaluate(`(()=>{const es=[{price:${fare},typePreference:'Hybrid'},{price:${fare},typePreference:'Hybrid'}];_applyPromoToEntries(es);return es.map(e=>[e.price,e.promoCode||null]);})()`);
+    expect(rows).toEqual([[fare / 2, 'RW-K7MQ2X-4FZ'], [fare, null]]);
+  });
+
+  test('never on Carbon; taken off it stays off on this ride, and Redeem puts it back', async ({ page }) => {
+    await friend(page, { 'rpc:promo_lookup': { ok: true, code: 'RW-K7MQ2X-4FZ', kind: 'percent', value: 50, applies_to: null, session_id: null, ride_kind: null } });
+    await step2(page, 's0', ['Road Carbon']);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+    await expect(page.locator('#bld-redeem .fr-card')).toContainText('isn’t valid on a Carbon bike');
+    await page.evaluate(`setBikeType(0,'Hybrid')`);
+    await expect.poll(() => page.evaluate('S.promoApplied&&S.promoApplied.auto')).toBe(true);
+    await page.evaluate('removePromo()');
+    expect(await page.evaluate('[S.promoApplied,S._rwOff]')).toEqual([null, 's0']);
+    await page.evaluate(`setBikeType(0,'Road')`);
+    expect(await page.evaluate('S.promoApplied')).toBeNull(); // still off
+    const box = page.locator('#bld-redeem .fr-card');
+    await expect(box).toContainText('RW-K7MQ2X-4FZ');
+    await box.locator('.fr-go').click();
+    await expect.poll(() => page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.one]')).toEqual(['RW-K7MQ2X-4FZ', true]);
+  });
+
+  test('a Petromin night takes it; a Saturday ride and an edit do not', async ({ page }) => {
+    await friend(page);
+    expect(await page.evaluate(`[_refCodeSessOk(_sessDisp('s0')),_refCodeSessOk(_sessDisp('s2')),_refCodeSessOk(_sessDisp('s1'))]`)).toEqual([true, true, false]);
+    await step2(page, 's2', ['Hybrid']);
+    await expect.poll(() => page.evaluate('S.promoApplied&&S.promoApplied.code')).toBe('RW-K7MQ2X-4FZ');
+    await page.evaluate(`S.promoApplied=null;S.selEvent='community';S.selSession='s1';renderRegister()`);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+    expect(await page.evaluate(`S.selEvent='jcc';S.selSession='s0';S.modifyEntryId='q9';[_refWAuto(),S.promoApplied]`)).toEqual([false, null]);
+  });
+
+  test('used on a booking: not offered again', async ({ page }) => {
+    await rider(page, { sessions: [jcc, sat, pm], 'rpc:customer_referral': card({ referred: true, welcome: { ...W, used: true } }), 'rpc:customer_blood_rewards': [] });
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    await expect.poll(() => page.evaluate('!!(S._refMine&&S._refMine.welcome)')).toBe(true);
+    await expect(page.locator('#land-free-rides .fr-welcome')).toHaveCount(0);
+    await step2(page, 's0', ['Hybrid']);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+  });
+
+  test('a friend\'s code typed in the promo box links the account and puts the discount on', async ({ page }) => {
+    const calls = rpcs(page);
+    let linked = false;
+    await rider(page, { sessions: [jcc, sat, pm], 'rpc:customer_blood_rewards': [], 'rpc:promo_lookup': { ok: false, reason: 'invalid' } }, '/', false);
+    const json = (b: unknown) => ({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify(b) });
+    await page.route(/\/rest\/v1\/rpc\/customer_referral/, (r) => r.fulfill(json(card({ can_enter: !linked, referred: linked, joined: 0, rode: 0, earned: 0, welcome: linked ? W : null }))));
+    await page.route(/\/rest\/v1\/rpc\/customer_set_referrer/, (r) => { linked = true; return r.fulfill(json({ ok: true, held: false, welcome: W.code })); });
+    await step2(page, 's0', ['Hybrid']);
+    expect(await page.evaluate('S.promoApplied')).toBeNull();
+    await page.locator('#reg-promo-step2').fill('k7mq2x');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect.poll(() => page.evaluate('S.promoApplied&&[S.promoApplied.code,S.promoApplied.one]')).toEqual(['RW-K7MQ2X-4FZ', true]);
+    expect(calls.find((c) => c.name === 'customer_set_referrer')!.body).toMatchObject({ p_id: 'c1', p_code: 'k7mq2x', p_via: 'code' });
+    await expect(page.locator('#toast-container')).toContainText('You get 50% off your own bike');
+  });
+
+  test('a typed friend\'s code the server refuses says why in the promo box', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ can_enter: false }), 'rpc:customer_blood_rewards': [], 'rpc:promo_lookup': { ok: false, reason: 'invalid' }, 'rpc:customer_set_referrer': { ok: false, reason: 'not_new' } });
+    await step2(page, 's0', ['Hybrid']);
+    await page.locator('#reg-promo-step2').fill('K7MQ2X');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect(page.locator('.cu-promo-err')).toContainText('only on a new account');
+    // a code that is not shaped like a friend's is only "invalid", without asking
+    await page.locator('#reg-promo-step2').fill('SUMMER10');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect(page.locator('.cu-promo-err')).toContainText('Invalid or inactive code');
+  });
+
+  test('the friend hears of their code once on this device', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ referred: true, welcome: W }), 'rpc:customer_blood_rewards': [] }, '/', false);
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    const pop = page.locator('#confirm-modal');
+    await expect(pop).toContainText('A friend’s invite: 50% off');
+    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_ref_seen_c1'))`)).toEqual(['RW-K7MQ2X-4FZ']);
+  });
+
+  test('the server\'s refusals are said in the rider\'s words', async ({ page }) => {
+    await rider(page, { 'rpc:customer_blood_rewards': [] });
+    for (const [d, k] of [['REF_CODE_CARBON', 'errRefCodeCarbon'], ['REF_CODE_SESSION', 'errRefCodeSession']]) {
+      await page.evaluate(`document.getElementById('toast-container').innerHTML='';_bookRefused({message:'x',details:${JSON.stringify(d)}},_sessDisp('s0'))`);
+      await expect(page.locator('#toast-container')).toContainText(await page.evaluate(`t(${JSON.stringify(k)})`) as string);
+    }
+  });
+});
+
+test.describe('@staff:people the friend\'s code on the account window', () => {
+  test('its percent, the code and whether it was used', async ({ page }) => {
+    const customers = [
+      { id: 'c2', name: 'Omar Saleh', email: 'omar.saleh@gmail.com', phone: '+966551876216', created_at: '2026-06-11T09:00:00Z' },
+      { id: 'c3', name: 'Maya Nasser', email: 'maya.nasser@gmail.com', phone: '+966551876217', created_at: '2026-11-02T09:00:00Z' },
+    ];
+    await stubSupabase(page, { sessions: [jcc], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], staff_options: [],
+      referrals: [{ friend_id: 'c3', referrer_id: 'c2', code: 'K7MQ2X', via: 'code', created_at: '2026-11-04T10:00:00Z', rode_at: null, reward_code: null, capped: false, held: false }],
+      referral_codes: [{ customer_id: 'c2', code: 'K7MQ2X' }],
+      promo_codes: [
+        { id: 'rf-x', code: 'RF-1A2B3C4D', kind: 'percent', value: 100, active: true, uses: 0, customer_id: 'c2', referral_friend_id: 'cx' },
+        { id: 'rw-c3', code: 'RW-K7MQ2X-4FZ', kind: 'percent', value: 50, active: true, uses: 0, max_uses: 1, expires_at: '2099-12-05', customer_id: 'c3', referral_welcome_of: 'c3' },
+      ] });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('(S.customers||[]).length===2');
+    await page.evaluate(`openAccountHistory('c3')`);
+    const line = page.locator('#cust-modal .ref-ah .ref-ah-w');
+    await expect(line).toContainText('Their 50% off: RW-K7MQ2X-4FZ');
+    await expect(line).toContainText('not used yet');
   });
 });

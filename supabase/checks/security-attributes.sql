@@ -392,6 +392,10 @@ with expected(fname, want_definer, note) as (values
   ('staff_referral_review',     true,  'referrals: staff allow or remove a held referral; _staff_mod(customers, edit)'),
   ('_ref_expiry_tick',          true,  'pg_cron: queues a free ride''s last-week notification and drops stale ones in push_outbox'),
   ('_push_drain_call',          true,  'pg_cron: reads push_outbox and asks /api/push-send to send it (pg_net)'),
+  -- Referrals, the friend's half (20261108200000)
+  ('_ref_pct',                  true,  'referrals: reads staff_options, which riders cannot'),
+  ('_ref_welcome',              true,  'referrals: writes promo_codes, the friend''s own code'),
+  ('_ref_welcome_off',          true,  'referrals: puts a friend''s unused code away in promo_codes'),
   -- Badge requests (20261108210000)
   ('customer_badge_request',     true,  'badge requests: writes badge_requests, which riders cannot; token-checked'),
   ('customer_my_badge_requests', true,  'badge requests: reads the caller''s own badge_requests (staff-only); token-checked'),

@@ -10816,6 +10816,44 @@ html[data-staff-theme="dark"] body.view-staff #tab-queue .ptn-code-label{color:#
 html[dir="rtl"] #tab-queue .satc-fold[aria-expanded="false"] .satc-arr svg{transform:rotate(90deg);}
 #tab-queue .satc-panel.folded .ptn-title{margin:0;}
 .satc-sw{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;}
+/* The code a booking used, its kind and its mark (2026-11-08, _codeTag): beside a name the mark and the code; in the
+   Bookings table's Code column, the reports and the rider's ticket the kind's name too. The mark wears its kind's
+   colour (--code-k), lighter on dark screens and on the dark live ticket. */
+.code-tag{display:inline-flex;align-items:center;gap:4px;max-width:100%;margin-inline-start:6px;padding:1px 6px;font-size:11px;font-weight:600;line-height:1.5;color:var(--text);background:var(--sf-chip,var(--s2));border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-xs,4px);white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;}
+.code-tag.satc-chip{display:inline-flex;}
+.code-ic{flex:none;color:var(--code-k,currentColor);}
+.code-c{min-width:0;overflow:hidden;text-overflow:ellipsis;direction:ltr;unicode-bidi:isolate;}
+.code-k-rw{--code-k:#0a7a4b;}
+.code-k-rf{--code-k:#0f766e;}
+.code-k-rb{--code-k:#a16207;}
+.code-k-bd{--code-k:#c8102e;}
+.code-k-promo{--code-k:#8c3b6e;}
+.code-k-sat{--code-k:#1d4ed8;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-rw,html[data-staff-theme="dark"] body.view-staff .code-k-rw,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rw{--code-k:#6ee7b7;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-rf,html[data-staff-theme="dark"] body.view-staff .code-k-rf,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rf{--code-k:#5eead4;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-rb,html[data-staff-theme="dark"] body.view-staff .code-k-rb,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rb{--code-k:#fcd34d;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-bd,html[data-staff-theme="dark"] body.view-staff .code-k-bd,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-bd{--code-k:#ff8a9a;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-promo,html[data-staff-theme="dark"] body.view-staff .code-k-promo,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-promo{--code-k:#f0abd6;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme="dark"] body.view-staff .code-k-sat,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-sat{--code-k:#93c5fd;}
+.code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
+.code-full .code-ic{grid-row:1;grid-column:1;}
+.code-full .code-c{grid-row:1;grid-column:2;font-weight:700;}
+.code-full .code-kn{grid-row:2;grid-column:2;min-width:0;overflow:hidden;text-overflow:ellipsis;font-size:10px;font-weight:600;color:var(--muted);}
+#tab-queue .code-cell .code-tag{margin:0;max-width:14em;}
+#tab-queue .code-cell .code-tag+.code-tag{margin-top:4px;}
+#tab-queue .code-cell{white-space:normal;}
+/* the rider's ticket: the kind's name, then the code, then what it took off */
+.cu-tr-code{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
+.cu-tr-code .code-tag{margin:0;}
+.cu-tr-code .code-full{display:inline-flex;gap:5px;padding:2px 8px;font-size:12px;}
+.cu-tr-code .code-full .code-kn{font-size:12px;font-weight:600;color:var(--muted);}
+.code-off{font-size:12px;font-weight:800;color:var(--green);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .code-tag{background:transparent;color:var(--night-ink);border-color:var(--night-line);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .code-full .code-kn{color:var(--night-ink-2);}
+body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .code-off{color:var(--neon);}
+/* the friend's referral discount on the event picker, the Invite card and the account window */
+.fr-t .code-ic,.ref-w .code-ic,.ref-ah-w .code-ic,.cu-promo-disc .code-ic{vertical-align:-2px;}
+.rp-code .code-tag{margin:0;}
 #confirm-modal .satc-dlg .satc-tabs{display:inline-flex;gap:4px;padding:3px;margin:0 0 10px;background:var(--sf-sunken,var(--s2));border-radius:var(--sf-r-ctl,8px);}
 #confirm-modal .satc-dlg .satc-tab{min-height:32px;padding:0 14px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;border-radius:var(--sf-r-xs,4px);cursor:pointer;}
 #confirm-modal .satc-dlg .satc-tab.active{background:var(--sf-card,var(--s1));color:var(--text);box-shadow:var(--sf-sh-1,none);}

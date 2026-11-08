@@ -207,6 +207,16 @@ section{break-inside:avoid}
 .ptn-shirt-need{padding:0 5px;border:1px dashed #A22B63;border-radius:2px}
 /* A Saturday ride code's name after the rider's (2026-11-08), which printed glued to it ("Sara AhmedIMC staff") */
 .satc-chip{display:inline-block;margin-inline-start:6px;padding:0 5px;border:1px solid #5a635c;border-radius:2px;color:#1a1919;font-size:9.5px;font-weight:700;white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+/* the code a booking used, its kind and its mark (2026-11-08): beside a name the mark and the code, in the Code column the kind's name under it */
+.code-tag{display:inline-flex;align-items:center;gap:3px;margin-inline-start:6px;padding:0 5px;border:1px solid #5a635c;border-radius:2px;color:#1a1919;font-size:9.5px;font-weight:700;white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.code-ic{flex:none;width:10px;height:10px;color:var(--code-k,#1a1919)}
+.code-c{direction:ltr;unicode-bidi:isolate}
+.code-full{display:inline-grid;grid-template-columns:auto 1fr;column-gap:3px}
+.code-full .code-ic{grid-row:1;grid-column:1}
+.code-full .code-c{grid-row:1;grid-column:2}
+.code-full .code-kn{grid-row:2;grid-column:2;font-size:8.5px;font-weight:600;color:#5a635c}
+.rp-code .code-tag{margin:0}
+.code-k-rw{--code-k:#0a7a4b}.code-k-rf{--code-k:#0f766e}.code-k-rb{--code-k:#a16207}.code-k-bd{--code-k:#c8102e}.code-k-promo{--code-k:#8c3b6e}.code-k-sat{--code-k:#1d4ed8}
 /* Victory Lap reports (2026-10-23): a Doubles team's heading line, lighter than a group's, and its partners' rows marked down the start edge so the pair reads as one */
 :root tr.rp-grp.rp-team td,table.rp-live tbody tr.rp-grp.rp-team td{background:#f4f7f5;font-size:11px;border-top:2px solid #16191d}
 :root tr.rp-mate td:first-child{border-inline-start:3px solid #16191d}
