@@ -391,7 +391,11 @@ with expected(fname, want_definer, note) as (values
   ('_push_queue',               true,  'writes push_outbox, which nobody reads or writes directly'),
   ('staff_referral_review',     true,  'referrals: staff allow or remove a held referral; _staff_mod(customers, edit)'),
   ('_ref_expiry_tick',          true,  'pg_cron: queues a free ride''s last-week notification and drops stale ones in push_outbox'),
-  ('_push_drain_call',          true,  'pg_cron: reads push_outbox and asks /api/push-send to send it (pg_net)')
+  ('_push_drain_call',          true,  'pg_cron: reads push_outbox and asks /api/push-send to send it (pg_net)'),
+  -- Badge requests (20261108210000)
+  ('customer_badge_request',     true,  'badge requests: writes badge_requests, which riders cannot; token-checked'),
+  ('customer_my_badge_requests', true,  'badge requests: reads the caller''s own badge_requests (staff-only); token-checked'),
+  ('_badge_proof_purge',         true,  'pg_cron: clears a proof in badge_requests 30 days after the answer')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
