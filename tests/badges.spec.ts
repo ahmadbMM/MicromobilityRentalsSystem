@@ -174,6 +174,7 @@ test.describe('@staff:community badges', () => {
     await community(page, 'accounts');
     // Omar: Champion given, First Lap earned by riding.
     await page.evaluate(`openAccountHistory('c2')`);
+    await page.locator('#cust-modal .ah-tabs button', { hasText: 'Badges' }).click(); // the window opens on the account and its wallet
     const hist = page.locator('#cust-modal .bdg-strip');
     await expect(hist.locator('.bdg-chip')).toHaveText(['Champion · Level 1 of 5', 'First Lap · Level 1 of 4']); // a ladder: its top level held
     await expect(hist.locator('.bdg-chip svg.bdg-m')).toHaveCount(2);
@@ -200,6 +201,7 @@ test.describe('@staff:community badges', () => {
     await page.evaluate(`openAccountHistory('c1')`);
     // The strip shows the ladder once, at its top level; First Lap is a ladder of four.
     await expect(page.locator('#cust-modal .bdg-strip .bdg-chip')).toHaveText([/T100 Finisher · Level 3 of 3$/, 'First Lap · Level 1 of 4']); // the medal's own T100 text comes first
+    await page.locator('#cust-modal .ah-tabs button', { hasText: 'Badges' }).click();
     await page.locator('#cust-modal .bdg-strip .bdg-chip').first().click();
     const list = modal(page).locator('.bdg-list');
     await expect(list.locator('.bdg-item', { hasText: 'T50 Finisher' })).toContainText('Comes with a higher level');

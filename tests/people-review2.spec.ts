@@ -82,6 +82,7 @@ test('the account window: labels, timeline, last messaged, completeness, strikes
   await expect(m.locator('.n6q-pct')).toContainText('Profile 100% complete');
   await expect(m.locator('.n6q-strk')).toContainText('No-shows: 1 of 1 in the last 90 days');
   await expect(m.locator('.n6q-strk')).toContainText('Limit reached');
+  await m.locator('.ah-tabs button', { hasText: 'Stats' }).click(); // the timeline is with the rides
   await m.getByRole('button', { name: 'Show the timeline' }).click();
   await expect(m.locator('#n6q-tl .n6q-tl-row').first()).toBeVisible();
   await expect(m.locator('#n6q-tl')).toContainText('Booked');

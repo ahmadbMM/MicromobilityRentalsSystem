@@ -2000,6 +2000,8 @@
   "ahCurrent": "Réservations en cours",
   "ahFuture": "Réservations à venir",
   "ahHistory": "Historique",
+  "ahTabAccount": "Compte et portefeuille",
+  "ahTabStats": "Statistiques",
   "ahNoCurrent": "Aucune réservation aujourd’hui.",
   "ahNoFuture": "Aucune réservation à venir.",
   "ahNoHistory": "Pas encore d’historique.",

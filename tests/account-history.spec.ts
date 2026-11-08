@@ -184,3 +184,44 @@ test('at production size, the row counts come from one index built once', async 
   await page.evaluate(`openAccountHistory('k0')`);
   await expect(modal(page).locator('.ah-sec').nth(1)).toHaveText('Future bookings 1');
 });
+
+// The window is in three parts (2026-11-08): the account and its wallet, its badges, its figures and rides. All three are
+// drawn, the two not picked hidden; a repaint keeps the one picked. A walk-in has only the figures and rides.
+test('@staff:people the account window is in three parts, and Bookings & history opens it on the rides', async ({ page }) => {
+  await staff(page);
+  const tabs = modal(page).locator('.ah-tabs button');
+  const pane = (k: string) => modal(page).locator(`#ah-pane-${k}`);
+  await page.evaluate(`openAccountHistory('c1')`);
+  await expect(tabs).toHaveText(['Account & wallet', 'Badges', 'Stats']);
+  await expect(tabs.nth(0)).toHaveAttribute('aria-pressed', 'true');
+  await expect(pane('acct')).toBeVisible();
+  await expect(pane('acct').locator('.n6p-det')).toBeVisible();
+  await expect(pane('badges')).toBeHidden();
+  await expect(pane('stats')).toBeHidden();
+  await expect(modal(page).locator('.n6p-bar')).toBeVisible();   // the actions stay above the parts
+  await tabs.nth(1).click();
+  await expect(pane('badges').locator('.bdg-strip-host')).toBeVisible();
+  await expect(pane('acct')).toBeHidden();
+  await tabs.nth(2).click();
+  await expect(tabs.nth(2)).toHaveAttribute('aria-pressed', 'true');
+  await expect(tabs.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(pane('stats').locator('.ah-kpis')).toBeVisible();
+  await expect(cards(page).first()).toBeVisible();
+  await page.evaluate(`_ahRender(true)`);
+  await expect(pane('stats')).toBeVisible();
+  await expect(pane('acct')).toBeHidden();
+  await modal(page).locator('.ah-close').click();
+  // Opened again by name: the account first.
+  await page.evaluate(`openAccountHistory('c1')`);
+  await expect(pane('acct')).toBeVisible();
+  await modal(page).locator('.ah-close').click();
+  // The row's Bookings & history: the rides first.
+  await page.locator('.am-row[data-cust="c1"] .am-hist').click();
+  await expect(pane('stats')).toBeVisible();
+  await expect(modal(page).locator('.ah-edit').first()).toBeVisible();
+  await modal(page).locator('.ah-close').click();
+  // A walk-in: no parts to pick.
+  await page.evaluate(`openCustomerProfile('w1')`);
+  await expect(tabs).toHaveCount(0);
+  await expect(modal(page).locator('.ah-kpis')).toBeVisible();
+});

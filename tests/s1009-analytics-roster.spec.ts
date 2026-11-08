@@ -79,6 +79,7 @@ test.describe('@staff:customers activity in the profile', () => {
     page.on('request', (r) => { if (r.method() === 'GET' && r.url().includes('/rest/v1/customer_activity')) asked.push(r.url()); });
     await boot(page, { customers, customer_activity, tags: [], customer_tags: [] });
     await page.evaluate(`openAccountHistory('c1')`);
+    await page.locator('#cust-modal .ah-tabs button', { hasText: 'Stats' }).click(); // the activity is with the rides
     await page.locator('#cust-modal button', { hasText: 'Show their activity' }).click();
     await expect(page.locator('#ah-act .ca-row')).toHaveCount(2);
     await expect(page.locator('#ah-act')).toContainText('Signed in');

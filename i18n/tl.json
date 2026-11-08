@@ -2000,6 +2000,8 @@
   "ahCurrent": "Kasalukuyang booking",
   "ahFuture": "Mga susunod na booking",
   "ahHistory": "Kasaysayan",
+  "ahTabAccount": "Account at wallet",
+  "ahTabStats": "Stats",
   "ahNoCurrent": "Walang booking para ngayong araw.",
   "ahNoFuture": "Walang susunod na booking.",
   "ahNoHistory": "Wala pang kasaysayan.",

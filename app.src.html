@@ -1031,7 +1031,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   undoEditSession:'Edit session',undoSessionStatus:'Session',undoPayment:'Payment',undoCancelBooking:'Cancel booking',undoStaffCancel:'Staff cancel',undoNoShow:'No-show',undoUndoNoShow:'Undo no-show',undoEditPrice:'Edit price',undoRenumber:'Renumber',undoReturn:'Return',undoUndoCheckin:'Undo check-in',undoReopen:'Re-open',undoChangeBike:'Change bike',undoCheckin:'Check-in',undoAddBike:'Add bike',undoEditBike:'Edit bike',undoRetire:'Retire',undoRestoreBike:'Restore',undoRelease:'Release',undoDeleteBike:'Delete bike',histRemoved:'Removed',histRestored:'Restored',sizeWord:'Size',clearWord:'Clear',cmUnit:'cm',
   rescheduleBtn:'Reschedule',rescheduleTitle:'Move your booking',rescheduleSub:'Pick another session to move all your riders to.',rescheduleNoSessions:'No other open sessions available.',rescheduleFull:'Not enough room in that session.',toastRescheduled:'Booking moved to the new session ✓',
   
-  ahBtn:'Bookings & history',ahCurrent:'Current bookings',ahFuture:'Future bookings',ahHistory:'History',ahNoCurrent:'Nothing booked for today.',ahNoFuture:'No future bookings.',ahNoHistory:'Nothing in the history yet.',ahUpcoming:'Upcoming',
+  ahBtn:'Bookings & history',ahCurrent:'Current bookings',ahFuture:'Future bookings',ahHistory:'History',ahTabAccount:'Account & wallet',ahTabStats:'Stats',ahNoCurrent:'Nothing booked for today.',ahNoFuture:'No future bookings.',ahNoHistory:'Nothing in the history yet.',ahUpcoming:'Upcoming',
   custProfileTitle:'Customer profile',custTotalRides:'Completed rides',custTotalSpent:'Total spent',custFavType:'Favorite type',custAvgRating:'Avg rating',custMemberSince:'First seen',custWalkIn:'Walk-in (no account)',
   addToCalendarBtn:'Add to calendar',autoLabel:'auto',bikeCategoryLabel:'Category',bikeWheelSize:'Wheel size',bikeBrakes:'Brakes',bikeWeight:'Weight (kg)',bikeNumberEditHint:'suggested — change it if you need to',bikeNumberTaken:'Already used by {0}',
   youreNext:'You’re next',onBikeNow:'On the bike now',inQueueMsg:'You\'re in the queue',
@@ -1649,7 +1649,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   undoEditSession:'تعديل الجلسة',undoSessionStatus:'الجلسة',undoPayment:'الدفع',undoCancelBooking:'إلغاء الحجز',undoStaffCancel:'إلغاء بواسطة الموظف',undoNoShow:'عدم حضور',undoUndoNoShow:'تراجع عن عدم الحضور',undoEditPrice:'تعديل السعر',undoRenumber:'إعادة ترقيم',undoReturn:'إرجاع',undoUndoCheckin:'تراجع عن تسجيل الدخول',undoReopen:'إعادة فتح',undoChangeBike:'تغيير الدراجة',undoCheckin:'تسجيل دخول',undoAddBike:'إضافة دراجة',undoEditBike:'تعديل دراجة',undoRetire:'سحب',undoRestoreBike:'استعادة',undoRelease:'تحرير',undoDeleteBike:'حذف دراجة',histRemoved:'محذوف',histRestored:'مستعاد',sizeWord:'المقاس',clearWord:'مسح',cmUnit:'سم',
   rescheduleBtn:'إعادة جدولة',rescheduleTitle:'نقل حجزك',rescheduleSub:'اختر جلسة أخرى لنقل جميع ركابك إليها.',rescheduleNoSessions:'لا توجد جلسات مفتوحة أخرى متاحة.',rescheduleFull:'لا توجد مساحة كافية في تلك الجلسة.',toastRescheduled:'تم نقل الحجز إلى الجلسة الجديدة ✓',
   
-  ahBtn:'الحجوزات والسجل',ahCurrent:'الحجوزات الحالية',ahFuture:'الحجوزات القادمة',ahHistory:'السجل',ahNoCurrent:'لا توجد حجوزات اليوم.',ahNoFuture:'لا توجد حجوزات قادمة.',ahNoHistory:'لا يوجد سجل بعد.',ahUpcoming:'القادمة',
+  ahBtn:'الحجوزات والسجل',ahCurrent:'الحجوزات الحالية',ahFuture:'الحجوزات القادمة',ahHistory:'السجل',ahTabAccount:'الحساب والمحفظة',ahTabStats:'الإحصاءات',ahNoCurrent:'لا توجد حجوزات اليوم.',ahNoFuture:'لا توجد حجوزات قادمة.',ahNoHistory:'لا يوجد سجل بعد.',ahUpcoming:'القادمة',
   custProfileTitle:'ملف العميل',custTotalRides:'الجولات المكتملة',custTotalSpent:'إجمالي الإنفاق',custFavType:'النوع المفضل',custAvgRating:'متوسط التقييم',custMemberSince:'أول ظهور',custWalkIn:'زائر (بدون حساب)',
   addToCalendarBtn:'أضف إلى التقويم',autoLabel:'تلقائي',bikeCategoryLabel:'الفئة',bikeWheelSize:'مقاس العجلة',bikeBrakes:'الفرامل',bikeWeight:'الوزن (كجم)',bikeNumberEditHint:'مقترح — غيّره إن لزم',bikeNumberTaken:'مستخدم بالفعل لـ {0}',
   youreNext:'دورك التالي',onBikeNow:'على الدراجة الآن',inQueueMsg:'أنت في الطابور',
@@ -27952,7 +27952,7 @@ function renderCustFormModal(){
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on_renderCustFormModal_1",_EV,_EL)}">
     <div class="modal-box cmy-cf-box" role="dialog" aria-modal="true" aria-labelledby="dlgt-naTitle">
       ${isCreate?`<div class="modal-title" id="dlgt-naTitle">${t('naTitle')}</div>`:(()=>{const c=(S.customers||[]).find(x=>String(x.id)===String(d.id))||{id:d.id};
-        return `<div class="modal-title fl-cf-head" id="dlgt-naTitle"><span>${t('naEditTitle')}</span><span class="cf-head-btns"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("openAccountHistory",c.id,true)}">${_artIcon('clock',13)} ${t('ahBtn')}</button><span id="cf-flag-wrap">${_cfFlagHtml(c)}</span></span></div><div id="cf-fix-line">${_fixPendingLine(c)}</div>`;})()}
+        return `<div class="modal-title fl-cf-head" id="dlgt-naTitle"><span>${t('naEditTitle')}</span><span class="cf-head-btns"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("openAccountHistory",c.id,true,'stats')}">${_artIcon('clock',13)} ${t('ahBtn')}</button><span id="cf-flag-wrap">${_cfFlagHtml(c)}</span></span></div><div id="cf-fix-line">${_fixPendingLine(c)}</div>`;})()}
       <div class="cmy-cf-names">
         <div class="form-group cmy-f1"><label for="cf-first">${t('firstName')}</label><input id="cf-first" data-on-input="${_on("_nameInput",_EL)}" data-on-change="${_on("_n6qDupCheck")}" type="text" value="${esc(d.first)}" autocomplete="off"></div>
         <div class="form-group cmy-f1"><label for="cf-middle">${t('middleName')}</label><input id="cf-middle" data-on-input="${_on("_nameInput",_EL)}" type="text" value="${esc(d.middle)}" autocomplete="off"></div>
@@ -44865,11 +44865,12 @@ async function _ahFetchOlder(custId){
     if(S._ah&&String(S._ah.custId)===String(custId))_ahRender();
   }catch(_){}
 }
-function openAccountHistory(custId,fromEditor){
+// tab: the part it opens on (_ahTab); the "Bookings & history" buttons open it on the rides.
+function openAccountHistory(custId,fromEditor,tab){
   if(!custId)return;
   const c=_custById(custId);
   const any=(_ahByCust().get(String(custId))||[])[0];
-  S._ah={custId:String(custId),name:(c&&c.name)||(any&&any.name)||'',phone:(c&&c.phone)||(any&&any.phone)||'',sig:null};
+  S._ah={custId:String(custId),name:(c&&c.name)||(any&&any.name)||'',phone:(c&&c.phone)||(any&&any.phone)||'',sig:null,tab:tab==='stats'||tab==='badges'?tab:'acct'};
   // The editor sits above this window, so it steps aside while the history is open and comes
   // back when it closes, with whatever was typed into it still there.
   const ed=document.getElementById('new-acct-modal');
@@ -45175,6 +45176,16 @@ function _ahToApps(){closeCustomerProfile();_pplGo('community','applications');}
 // The account's badges, in this window and the editor: the section only; the Community part draws them (_bdgStrips).
 function _cwSecHtml(cid){return _cwOk()?`<div class="bdg-strip-sec cw-sec"><div class="bdg-strip-h">${t('cwTitle')}</div><div class="cw-sec-row"><span class="cw-sec-num">${_money(_cwBal(cid))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_cwOpen",cid)}">${t(isAdmin()?'cwAdd':'cwTitle')}</button></div></div>`:'';}
 function _bdgSecHtml(cid){return`<div class="bdg-strip-sec"><div class="bdg-strip-h">${t('mrBadgesTitle')}</div><div class="bdg-strip-host" data-cid="${esc(cid)}"><span class="am-meta">${t('loadingLabel')}</span></div></div>`;}
+// The account window's three parts (2026-11-08): the account and its wallet, its badges, its figures and rides. All
+// three are drawn and the others hidden, so switching draws nothing and a repaint keeps the part picked.
+function _ahTab(k){
+  const a=S._ah,m=document.getElementById('cust-modal');if(!a||!m)return;
+  a.tab=k;
+  m.querySelectorAll('[data-ah-tab]').forEach(b=>{const on=b.dataset.ahTab===k;b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});
+  m.querySelectorAll('[data-ah-pane]').forEach(p=>{p.hidden=p.dataset.ahPane!==k;});
+  const box=m.querySelector('.modal-box'),bar=m.querySelector('.ah-tabs');
+  if(box&&bar){const d=bar.getBoundingClientRect().top-box.getBoundingClientRect().top;if(d<0)box.scrollTop+=d;} // scrolled past the tabs: the part starts under them
+}
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__ahRender_1(event,el){if(event.target===el)closeCustomerProfile()}
 // The account window lives in the desk core, but its profile pieces (People review, 2026-11-06) are People code: they
@@ -45268,6 +45279,10 @@ function _ahRender(force){
   const chips=c?(()=>{const tm=_tagsById();return _ctRowsFor(c.id).filter(ct=>tm[ct.tag_id]).map(ct=>_tagChip(tm[ct.tag_id],ct)).join('');})():'';
   const contact=(c?[_pii('phone',c.phone,c.id),_pii('email',c.email,c.id)]:(a.custId?[_pii('phone',a.phone,a.custId)]:[])).filter(Boolean);
   const ptot=Math.round(purch.reduce((sum,r)=>sum+_lineCharge(r),0)*100)/100; // a line on the house takes nothing
+  // An account's window is in three parts (_ahTab); a walk-in has no account, so only its figures and rides.
+  const tab=c?a.tab||'acct':'stats';
+  const tabBtn=(k,l)=>`<button type="button" class="filter-pill${tab===k?' active':''}" aria-pressed="${tab===k?'true':'false'}" aria-controls="ah-pane-${k}" data-ah-tab="${k}" data-on-click="${_on("_ahTab",k)}">${esc(l)}</button>`;
+  const pane=(k,html)=>`<div class="ah-pane" id="ah-pane-${k}" data-ah-pane="${k}"${tab===k?'':' hidden'}>${html}</div>`;
   m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on("_on__ahRender_1",_EV,_EL)}">
     <div class="modal-box ah-box" role="dialog" aria-modal="true" aria-labelledby="ah-title">
       <div class="ah-head">
@@ -45280,7 +45295,15 @@ function _ahRender(force){
       </div>
       ${head?`<div class="ah-actions">${head}</div>`:''}
       ${c?_n6pW('_n6p'+'AhBar',c):''}
-      <div class="ah-kpis">
+      ${c?`<div class="filter-row ah-tabs">${tabBtn('acct',t('ahTabAccount'))}${tabBtn('badges',t('mrBadgesTitle'))}${tabBtn('stats',t('ahTabStats'))}</div>
+      ${pane('acct',`${_n6pW('_n6p'+'Details',c)}
+        ${_n6pW('_n6p'+'NotesHtml',c.id)}
+        ${_ahCommHtml(c)}
+        ${_n6pW('_n6q'+'AhExtra',c)}
+        ${_cwSecHtml(c.id)}
+        ${_n6pW('_ref'+'AhSec',c.id)}`)}
+      ${pane('badges',_bdgSecHtml(c.id))}`:''}
+      ${pane('stats',`<div class="ah-kpis">
         ${kpi(Math.max(done.length,srv?srv.r:0),t('custTotalRides'))}
         ${kpi(noshows,t('statusNoshow'),noshows?'warn':'')}
         ${kpi(cancelled,t('statusCancelled'))}
@@ -45288,13 +45311,6 @@ function _ahRender(force){
       </div>
       ${facts?`<div class="ah-facts">${facts}</div>`:''}
       ${c?_n6pW('_n6p'+'AhStage',c):''}
-      ${c?_n6pW('_n6p'+'Details',c):''}
-      ${c?_n6pW('_n6p'+'NotesHtml',c.id):''}
-      ${c?_ahCommHtml(c):''}
-      ${_n6pW('_n6q'+'AhExtra',c)}
-      ${c?_cwSecHtml(c.id):''}
-      ${c?_n6pW('_ref'+'AhSec',c.id):''}
-      ${c?_bdgSecHtml(c.id):''}
       <div class="ah-sec">${t('ahCurrent')}${cur.length?` <span class="ah-n">${cur.length}</span>`:''}</div>
       ${cur.length?cur.map(card).join(''):`<div class="ah-empty">${t('ahNoCurrent')}</div>`}
       <div class="ah-sec">${t('ahFuture')}${fut.length?` <span class="ah-n">${fut.length}</span>`:''}</div>
@@ -45308,7 +45324,7 @@ function _ahRender(force){
         <bdi class="ah-price">${_money(Math.round(_lineCharge(r)*100)/100,_NOISO)}</bdi>
       </div>`).join('')}</div>`:''}
       ${a.custId?_n6pW('_n6q'+'TlHost',a.custId):''}
-      ${a.custId?`<div class="ah-sec">${t('cactTitle')}</div><div id="ah-act"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_ahActShow",a.custId)}">${t('ahActShow')}</button></div>`:''}
+      ${a.custId?`<div class="ah-sec">${t('cactTitle')}</div><div id="ah-act"><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_ahActShow",a.custId)}">${t('ahActShow')}</button></div>`:''}`)}
     </div>
   </div>`;
   m.style.display='flex';
@@ -54847,7 +54863,7 @@ function _amRowInner(c){
       </div>
       <div class="am-cust-actions">
         <button class="btn-sm btn-secondary am-flag${_flagFieldsOf(c).length?' on':''}" data-on-click="${_on("showFlagFieldsModal",c.id)}" title="${esc(t('fixFlagBtn'))}" aria-label="${esc(t('fixFlagBtn'))} · ${esc(c.name||'')}">${_artIcon('flag',14)}<span class="am-btn-lbl">${t('fixFlagBtn')}</span></button>
-        ${(()=>{const n=_ahUpcoming(c.id);return `<button class="btn-sm btn-secondary am-hist${n?' on':''}" data-on-click="${_on("openAccountHistory",c.id)}" title="${esc(t('ahBtn'))}" aria-label="${esc(t('ahBtn'))} · ${esc(c.name||'')}${n?` · ${esc(t('ahUpcoming'))} ${n}`:''}">${_artIcon('clock',14)}<span class="am-btn-lbl">${t('ahBtn')}</span>${n?`<span class="am-hist-n">${n}</span>`:''}</button>`;})()}
+        ${(()=>{const n=_ahUpcoming(c.id);return `<button class="btn-sm btn-secondary am-hist${n?' on':''}" data-on-click="${_on("openAccountHistory",c.id,false,'stats')}" title="${esc(t('ahBtn'))}" aria-label="${esc(t('ahBtn'))} · ${esc(c.name||'')}${n?` · ${esc(t('ahUpcoming'))} ${n}`:''}">${_artIcon('clock',14)}<span class="am-btn-lbl">${t('ahBtn')}</span>${n?`<span class="am-hist-n">${n}</span>`:''}</button>`;})()}
         <button class="btn-sm btn-secondary am-vcard" data-on-click="${_on("saveCustomerContact",c.id)}" title="${esc(t('amSaveContact'))}" aria-label="${esc(t('amSaveContact'))}">${_artIcon('contact',14)}<span class="am-btn-lbl">${t('amSaveContact')}</span></button>
         ${_cwOk()?`<button class="btn-sm btn-secondary am-bdg-btn am-cw-btn${_cwBal(c.id)>0?' on':''}" data-on-click="${_on("_cwOpen",c.id)}" title="${esc(t('cwTitle'))} · ${esc(_money(_cwBal(c.id),{isolate:false}))}" aria-label="${esc(t('cwTitle'))} · ${esc(c.name||'')} · ${esc(_money(_cwBal(c.id),{isolate:false}))}">${_artIcon('wallet',14)}<span class="am-btn-lbl">${t('cwTitle')}</span></button>`:''}
         ${_bdgOk()?`<button class="btn-sm btn-secondary am-bdg-btn" data-on-click="${_on("_bdgOpen",c.id)}" title="${esc(t('mrBadgesTitle'))}" aria-label="${esc(t('mrBadgesTitle'))} · ${esc(c.name||'')}">${_artIcon('medal',14)}<span class="am-btn-lbl">${t('mrBadgesTitle')}</span></button>`:''}

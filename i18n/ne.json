@@ -2000,6 +2000,8 @@
   "ahCurrent": "हालका बुकिङ",
   "ahFuture": "आगामी बुकिङ",
   "ahHistory": "इतिहास",
+  "ahTabAccount": "खाता र वालेट",
+  "ahTabStats": "तथ्याङ्क",
   "ahNoCurrent": "आजका लागि कुनै बुकिङ छैन।",
   "ahNoFuture": "कुनै आगामी बुकिङ छैन।",
   "ahNoHistory": "अहिलेसम्म कुनै इतिहास छैन।",

@@ -2092,6 +2092,8 @@
   "ahCurrent": "বর্তমান বুকিং",
   "ahFuture": "আগামী বুকিং",
   "ahHistory": "ইতিহাস",
+  "ahTabAccount": "অ্যাকাউন্ট ও ওয়ালেট",
+  "ahTabStats": "পরিসংখ্যান",
   "ahNoCurrent": "আজকের জন্য কোনো বুকিং নেই।",
   "ahNoFuture": "কোনো আগামী বুকিং নেই।",
   "ahNoHistory": "এখনও কোনো ইতিহাস নেই।",
