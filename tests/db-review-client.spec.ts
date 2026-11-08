@@ -123,6 +123,10 @@ test('Account says the phone is taken when the server refuses it', async ({ page
   await waitForSb(page);
   await page.evaluate(`setCustTab('account')`);
   await expect(page.locator('#acc-err')).toBeAttached();
+  // The tab reads the profile when it opens and draws itself again with the answer (an untouched form): saved before that
+  // answer, the redraw wiped the message under test whenever another request on the tab (the wallet, the Invite friends
+  // card) made it land late.
+  await page.waitForFunction(`!!(S._profFresh&&S._profFresh.id==='c1')`);
   await page.evaluate(`saveAccount()`);
   await expect(page.locator('#acc-err')).toHaveText(await page.evaluate(`t('errPhoneExists')`) as string);
 });

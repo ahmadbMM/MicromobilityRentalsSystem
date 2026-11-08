@@ -368,7 +368,18 @@ with expected(fname, want_definer, note) as (values
   ('_deposit_no_id',            false, 'trigger: refuses method id_document on NEW, reads nothing'),
   -- Bookings review (20261107100000)
   ('_desk_at',                  false, 'clamps the desk''s time for staff_checkin / staff_return; reads no table'),
-  ('_desk_by_guard',            false, 'trigger: keeps checked_in_by / checked_out_by from a rider''s own write; reads is_staff() only')
+  ('_desk_by_guard',            false, 'trigger: keeps checked_in_by / checked_out_by from a rider''s own write; reads is_staff() only'),
+  -- Referrals (20261108160000)
+  ('_ref_conf',                 true,  'referrals: reads staff_options, which riders cannot'),
+  ('_ref_norm',                 false, 'referrals: tidies a typed code; reads no table'),
+  ('_ref_new',                  true,  'referrals: reads customers and queue_entries for an account that may be referred'),
+  ('_ref_make_code',            true,  'referrals: writes referral_codes, which nobody writes directly'),
+  ('_ref_reward',               true,  'referrals: writes referrals and promo_codes for the free ride'),
+  ('_ref_ride_done',            true,  'trigger: reads referrals and gives the free ride when a referred friend''s paid JCC ride is done'),
+  ('_ref_code_guard',           true,  'trigger: reads promo_codes (staff-only) to refuse a referral free ride on Carbon'),
+  ('customer_referral',         true,  'referrals: the rider''s own code, counts and free rides; token-checked'),
+  ('customer_set_referrer',     true,  'referrals: links a new account to a code''s owner; token-checked, rate-limited'),
+  ('staff_set_referrer',        true,  'referrals: staff link or unlink a referred account; _staff_mod(customers, edit)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
