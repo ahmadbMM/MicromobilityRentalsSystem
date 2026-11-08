@@ -121,7 +121,7 @@ test('a number already kept for another rider asks first, then moves to this one
   const modal = page.locator('#bike-modal');
   await modal.locator('#modal-bikeno-input').fill('12');
   await modal.getByRole('button', { name: 'Reserve bike' }).click();
-  await page.getByRole('button', { name: 'Confirm', exact: true }).click();
+  await page.getByRole('button', { name: 'Assign anyway', exact: true }).click(); // the button names its action (round two)
   await expect.poll(() => patches.length).toBe(2);
   expect(patches[0].url).toContain('id=eq.q1');
   expect(patches[0].body).toEqual({ assigned_bike_id: null, reserved: true, reserved_bike_no: 12 });

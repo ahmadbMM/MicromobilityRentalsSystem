@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "पूर्ववत नहीं हो सका। डेटा बदल गया हो सकता है।",
   "toastNothingUndo": "पूर्ववत करने के लिए कुछ नहीं",
   "confirmUndoTitle": "एक्शन पूर्ववत करें?",
-  "confirmUndoYes": "हाँ, पूर्ववत करें",
   "cancelBookingLabel": "बुकिंग रद्द करें",
   "cancelEntryBody": "इससे सौंपी गई साइकिल मुक्त हो जाएगी और प्रविष्टि रद्द चिह्नित हो जाएगी।",
   "undoRevBody": "इससे एक्शन उलट जाएगा। अगर डेटा बाद में बदला है तो कुछ कार्रवाइयाँ पूरी तरह उलट नहीं हो सकतीं।",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "बकाया",
   "n6bSomeone": "कोई दूसरा स्टाफ सदस्य",
   "n6bHasOpen": "{0} ने यह राइडर खोला हुआ है",
-  "n6bHaveOpen": "{0} ने यह राइडर खोला हुआ है"
+  "n6bHaveOpen": "{0} ने यह राइडर खोला हुआ है",
+  "dashOfPlaces": "{0} जगहों में से",
+  "dashPlacesFree": "खाली जगहें",
+  "dashLastWeek": "पिछले हफ़्ते इसी दिन: {0}",
+  "dashOfFleet": "बेड़े की {0} में से",
+  "dashNextAt": "अगला: {0}",
+  "rsvAssignAnyway": "फिर भी दें",
+  "leaveNoSaveBtn": "सेव किए बिना निकलें",
+  "delSessionBtn": "सेशन हटाएँ",
+  "delSessionsBtn": "सेशन हटाएँ"
 }

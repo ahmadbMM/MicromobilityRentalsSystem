@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "फिर्ता लिन सकिएन। डाटा बदलिएको हुन सक्छ।",
   "toastNothingUndo": "फिर्ता लिने केही छैन",
   "confirmUndoTitle": "कार्य फिर्ता लिने?",
-  "confirmUndoYes": "हो, फिर्ता लिनुहोस्",
   "cancelBookingLabel": "बुकिङ रद्द गर्नुहोस्",
   "cancelEntryBody": "यसले तोकिएको साइकल छोड्नेछ र प्रविष्टिलाई रद्द चिन्ह लगाउनेछ।",
   "undoRevBody": "यसले कार्य उल्टाउनेछ। डाटा त्यसपछि बदलिएको भए केही कार्य पूरै उल्टिन नसक्लान्।",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "बाँकी",
   "n6bSomeone": "अर्को कर्मचारी",
   "n6bHasOpen": "{0} ले यो राइडर खोल्नुभएको छ",
-  "n6bHaveOpen": "{0} ले यो राइडर खोल्नुभएको छ"
+  "n6bHaveOpen": "{0} ले यो राइडर खोल्नुभएको छ",
+  "dashOfPlaces": "{0} ठाउँमध्ये",
+  "dashPlacesFree": "खाली ठाउँ",
+  "dashLastWeek": "गत हप्ता यही दिन: {0}",
+  "dashOfFleet": "फ्लिटका {0} मध्ये",
+  "dashNextAt": "अर्को: {0}",
+  "rsvAssignAnyway": "जे भए पनि दिनुहोस्",
+  "leaveNoSaveBtn": "सेभ नगरी निस्कनुहोस्",
+  "delSessionBtn": "सत्र हटाउनुहोस्",
+  "delSessionsBtn": "सत्रहरू हटाउनुहोस्"
 }

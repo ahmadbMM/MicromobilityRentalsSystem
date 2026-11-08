@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "واپس نہیں لیا جا سکا۔ ڈیٹا بدل چکا ہو سکتا ہے۔",
   "toastNothingUndo": "واپس لینے کے لیے کچھ نہیں",
   "confirmUndoTitle": "ایکشن واپس لیں؟",
-  "confirmUndoYes": "ہاں، واپس لیں",
   "cancelBookingLabel": "بکنگ منسوخ کریں",
   "cancelEntryBody": "اس سے تفویض شدہ سائیکل آزاد ہو جائے گی اور اندراج منسوخ نشان زد ہو جائے گا۔",
   "undoRevBody": "اس سے ایکشن واپس ہو جائے گا۔ اگر ڈیٹا اس کے بعد بدلا ہے تو کچھ کارروائیاں مکمل طور پر واپس نہ ہو سکیں۔",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "واجب الادا",
   "n6bSomeone": "عملے کا کوئی اور رکن",
   "n6bHasOpen": "{0} نے یہ رائیڈر کھولا ہوا ہے",
-  "n6bHaveOpen": "{0} نے یہ رائیڈر کھولا ہوا ہے"
+  "n6bHaveOpen": "{0} نے یہ رائیڈر کھولا ہوا ہے",
+  "dashOfPlaces": "{0} میں سے",
+  "dashPlacesFree": "خالی جگہیں",
+  "dashLastWeek": "پچھلے ہفتے اسی دن: {0}",
+  "dashOfFleet": "بیڑے کی {0} میں سے",
+  "dashNextAt": "اگلا: {0}",
+  "rsvAssignAnyway": "پھر بھی دیں",
+  "leaveNoSaveBtn": "محفوظ کیے بغیر نکلیں",
+  "delSessionBtn": "سیشن حذف کریں",
+  "delSessionsBtn": "سیشنز حذف کریں"
 }

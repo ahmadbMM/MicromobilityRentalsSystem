@@ -53,7 +53,7 @@ test.describe('@staff:undo admin undo', () => {
     await page.locator('#confirm-modal').getByRole('button', { name: 'Cancel' }).click();
     expect(await runs(page)).toBe(0);
     await logUndo.click();
-    await page.locator('#confirm-modal').getByRole('button', { name: 'Yes, undo it' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Undo', exact: true }).click(); // named for what it does, not Yes (round two)
     await expect.poll(() => runs(page)).toBe(1);
     await expect(logUndo).toHaveCount(0);
   });

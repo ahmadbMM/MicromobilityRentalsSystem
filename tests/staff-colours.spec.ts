@@ -103,7 +103,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
     const tr = (name: string) => `#tab-queue .queue-table-desktop-wrap tbody tr:has-text("${name}")`;
     const want: [string, string, string, string][] = [
       ['Waiting Rider', 'row-waiting', 'rgb(255, 255, 255)', 'st-waiting'],
-      ['Bike Held', 'row-reserved', 'rgb(246, 243, 255)', 'st-reserved'],
+      ['Bike Held', 'row-reserved', 'rgb(251, 245, 249)', 'st-reserved'], // the brand's plum wash since round two (was the framework violet's)
       ['To Hold', 'row-toreserve', 'rgb(252, 244, 255)', 'st-toreserve'],
       ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 246, 235)', 'st-waitlist'],
       ['On The Bike', 'row-active', 'rgb(255, 250, 235)', 'st-active'],

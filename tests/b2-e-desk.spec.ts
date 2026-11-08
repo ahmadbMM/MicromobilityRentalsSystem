@@ -406,9 +406,12 @@ test.describe('@staff:bookings b2-e emergency contact and the waiver at the desk
     await sheet.locator('select').selectOption('en');
     await expect(sheet.locator('#dky-wv-t')).toHaveText('Ride waiver');
     const go = sheet.locator('#dky-wv-go');
-    await expect(go).toBeDisabled();
+    await expect(go).toBeEnabled(); // never greyed out in advance (round two): tapped unticked, it says why
+    await go.click();
+    await expect(sheet.locator('.dky-wv-err')).toHaveText('Tick the waiver to continue.');
+    expect(calls.some((c) => c.name === 'staff_record_waiver')).toBe(false);
     await sheet.locator('.dky-wv-ok input').check();
-    await expect(go).toBeEnabled();
+    await expect(sheet.locator('.dky-wv-err')).toHaveCount(0);
     await expect(go).toHaveText('Agree and continue');
     await go.click();
     await expect(sheet).toHaveCount(0);

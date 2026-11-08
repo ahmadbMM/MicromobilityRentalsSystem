@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "Hindi na-undo. Maaaring nagbago na ang data.",
   "toastNothingUndo": "Walang ia-undo",
   "confirmUndoTitle": "I-undo ang aksyon?",
-  "confirmUndoYes": "Oo, i-undo",
   "cancelBookingLabel": "Kanselahin ang booking",
   "cancelEntryBody": "Ire-release nito ang anumang naka-assign na bisikleta at mamarkahang kinansela ang entry.",
   "undoRevBody": "Babaliktarin nito ang aksyon. Maaaring hindi ganap na maibalik ang ilang operasyon kung nagbago na ang data.",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "May utang",
   "n6bSomeone": "Ibang staff",
   "n6bHasOpen": "Bukas kay {0} ang rider na ito",
-  "n6bHaveOpen": "Bukas kina {0} ang rider na ito"
+  "n6bHaveOpen": "Bukas kina {0} ang rider na ito",
+  "dashOfPlaces": "sa {0} na puwesto",
+  "dashPlacesFree": "Bakanteng puwesto",
+  "dashLastWeek": "Parehong araw noong nakaraang linggo: {0}",
+  "dashOfFleet": "sa {0} sa fleet",
+  "dashNextAt": "Susunod: {0}",
+  "rsvAssignAnyway": "Ibigay pa rin",
+  "leaveNoSaveBtn": "Umalis nang hindi nagse-save",
+  "delSessionBtn": "Burahin ang session",
+  "delSessionsBtn": "Burahin ang mga session"
 }

@@ -39,13 +39,16 @@ test.describe('@staff:sales money controls at the desk', () => {
     const dlg = page.getByRole('dialog', { name: /Why is this sale voided/ });
     await expect(dlg).toBeVisible();
     const go = dlg.getByRole('button', { name: 'Void', exact: true });
-    await expect(go).toBeDisabled();
+    await expect(go).toBeEnabled(); // never greyed out in advance (round two, 2026-11-08): tapped short, it says what is missing
+    await go.click();
+    await expect(dlg.locator('.mny-err')).toHaveText('Choose a reason above.');
     await dlg.getByRole('button', { name: 'Other' }).click();
     await expect(dlg.getByRole('button', { name: 'Other' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(go).toBeDisabled(); // Other needs words
+    await go.click(); // Other needs words
+    await expect(dlg.locator('.mny-err')).toHaveText('Write the reason in the box above.');
+    expect(calls.filter((c) => c.name === 'staff_void_receipt')).toEqual([]);
     await dlg.locator('textarea').fill('Card machine charged twice');
-    await expect(go).toBeEnabled();
-    await go.click();
+    await go.click(); // straight from the note: the tap is not lost to the note being left
     await expect.poll(() => calls.filter((c) => c.name === 'staff_void_receipt').length).toBe(1);
     expect(calls.find((c) => c.name === 'staff_void_receipt')!.body).toMatchObject({ p_receipt_id: 'r1', p_reason: 'other: Card machine charged twice' });
     await expect.poll(() => page.evaluate(`((S.fullLog||[]).slice(-1)[0]||{}).label||''`)).toContain('Card machine charged twice'); // logged once the answer is in

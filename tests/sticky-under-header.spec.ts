@@ -44,7 +44,7 @@ async function tallPage(page: import('@playwright/test').Page, tab: string) {
 }
 
 for (const [name, width, height] of [['a phone', 390, 780], ['a tablet', 820, 1100]] as const) {
-  test(`on ${name} the sections burger stays below the header while the page scrolls`, async ({ page }) => {
+  test(`on ${name} the sections burger stays in the header while the page scrolls`, async ({ page }) => {
     await staffAt(page, width, height);
     await page.evaluate(`setStaffTab('queue')`);
     await tallPage(page, 'queue');
@@ -53,7 +53,10 @@ for (const [name, width, height] of [['a phone', 390, 780], ['a tablet', 820, 11
 
     const header = (await page.locator('#topbar').boundingBox())!;
     const burger = (await page.locator('#snav-burger').boundingBox())!;
-    expect(burger.y).toBeGreaterThanOrEqual(header.y + header.height - 1); // under the bar, not behind it
+    // in the bar's start slot since round two (M10): no band of its own, and painted above the bar, not behind it
+    expect(burger.y).toBeGreaterThanOrEqual(header.y - 1);
+    expect(burger.y + burger.height).toBeLessThanOrEqual(header.y + header.height + 1);
+    expect(burger.width).toBeGreaterThanOrEqual(44);
     expect(await onTop(page, '#snav-burger')).toBe(true);
 
     await page.locator('#snav-burger').click();

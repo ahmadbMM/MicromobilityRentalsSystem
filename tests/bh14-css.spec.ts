@@ -41,11 +41,11 @@ test.describe('@bh14 stylesheet', () => {
     expect(cs).toEqual({ r: '2px', l: '0px', pr: '10px', pl: '0px' });
   });
 
-  test('the report’s and the receipt’s buttons and boxes are square-cornered', async ({ page }) => {
+  test('the report’s and the receipt’s buttons and boxes take the staff radius (round two, after the square rule went)', async ({ page }) => {
     await reportPage(page, 'ltr', '<button class="rep-print">Print</button><input class="rp-q"><select class="rp-in"></select>');
-    for (const sel of ['.rep-print', '.rp-q', '.rp-in']) expect(await page.locator(sel).evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('0px');
+    for (const sel of ['.rep-print', '.rp-q', '.rp-in']) expect(await page.locator(sel).evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('8px');
     await page.setContent('<!doctype html><html><head><link rel="stylesheet" href="/receipt.css"></head><body><button class="rp-rbtn">Print</button></body></html>');
-    await expect.poll(() => page.locator('.rp-rbtn').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('0px');
+    await expect.poll(() => page.locator('.rp-rbtn').evaluate((el) => getComputedStyle(el).borderTopLeftRadius)).toBe('8px');
   });
 
   test('staff paper: the Instagram triangle keeps its paper ink and the roster’s ⋯ tile its card fill', async ({ page }) => {

@@ -2002,3 +2002,34 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
   - *People > Referrals* (`/people/referrals`, `_refRpHtml` / `_refRpLoad`): six figures, the referrals to check, six months
     (joined, rode, free rides given and used), money (what referred riders paid for done rides after joining against the fares
     of the free rides used, `priceForType`) and the top ten referrers (Ambassador candidate from five friends who rode).
+
+## Staff round two outside the roster (2026-11-08)
+
+The user's picks on the round-two mockup (the sidebar of s_bookings, s_dash, the dialog half of s_dialog_speed, s_fixes).
+CSS: "ROUND TWO SHELL" near the end of styles.css, staff-scoped, so app.css does not change. Spec: tests/round2-shell.spec.ts.
+
+- **Plum, not violet.** The brand's plum #8C3B6E replaced the framework violet (#7c3aed and its washes) on staff screens:
+  `--sf-plum` (edge, ring, event ink), `--sf-plum-ink` (words on a wash), `--sf-plum-wash` (pill), `--sf-plum-row` (row),
+  `--sf-plum-line`, `--sf-plum-rgb`, each with dark and booth values (text 7:1 and up). The roster's reserved row and pill,
+  the event chips and dots and the roster's event mark read these tokens; never write the violet again. The rider side has
+  its own plum (`.ev-event` under `body:not(.view-staff)`); the unscoped `.ev-event` violet is the landing tiles' and stays.
+- **The sidebar is quieter than the page** (it replaces the owner's white rail of 2026-10-11, at the user's pick): `--sf-side`
+  #EDEDE8 (booth #F2F2F2, dark #0B0D10, a step darker than the content), icons at 62%, the current section the one white card
+  with `--sf-sh-1` (a 2px ring in booth), ink words and a green icon. Group headings stay sentence case.
+- **The phone shell**: the sections button sits in the top bar's start slot (`position:fixed`, 44px wide), so `--staff-stick`
+  no longer adds 48px under 1024px; the bottom bar follows the light and booth themes; only More is lit while the menu is open
+  (`_tbRender`: the current tab keeps `aria-current`, not the pill).
+- **The Dashboard** leads with one figure (`.dash-hero`: riders today of today's places, a bar of on bikes / done / waiting in
+  the roster's status colours through `data-cssv --w`, and its key) and three in a `.dash-kpis` grid (`_figFit` lays it out):
+  Collected (the same weekday a week ago only when that session's bookings are on the device, else tonight's Owing), Available
+  bikes of the fleet (retired bikes out), Open sessions with the next start. Alerts are `.dash-alert` rows: an `_artIcon` by
+  bell kind (`DASH_AL_IC`), the bell's words without their ": {0}", and a `.dash-n` count in the kind's tone.
+- **Dialogs name their action.** `confirmDialog` / `askConfirm` take `cancelLabel` for the way out where "Cancel" would read as
+  the action (Keep booking); a new dialog's buttons say what they do, never OK, Confirm or Yes. A Submit is never greyed out in
+  advance: tapped short it says what is missing (the void and refund reason, the desk waiver), and a field is judged when it is
+  left (`data-on-blur`), not per key. Widths: `--sf-dlg-s/m/l` (320 / 480 / 640); a new dialog takes one of them.
+- **Printed reports** (report.css, receipt.css) wear the Soft Solid look: IBM Plex Sans and Plex Arabic, sentence case without
+  tracking, light table heads, a #16191D banner, 8px screen controls. The report-look rules stand: the title line, `_rpSar`,
+  the page-1 zero-margin trick and the light print style.
+- **"#n" in a title** is `<bdi dir="ltr">#n</bdi>` (check-in, Return, Edit Booking), or wrapped in FSI/PDI where the title is
+  plain text (`confirmDialog` escapes it): in Arabic it read "2#".

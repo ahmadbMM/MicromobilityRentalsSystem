@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "Falha ao desfazer. Os dados podem ter mudado.",
   "toastNothingUndo": "Nada para desfazer",
   "confirmUndoTitle": "Desfazer ação?",
-  "confirmUndoYes": "Sim, desfazer",
   "cancelBookingLabel": "Cancelar reserva",
   "cancelEntryBody": "Isso liberará qualquer bicicleta atribuída e marcará a entrada como cancelada.",
   "undoRevBody": "Isso reverterá a ação. Algumas operações podem não ser totalmente reversíveis se os dados mudaram desde então.",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "A pagar",
   "n6bSomeone": "Outro membro da equipe",
   "n6bHasOpen": "{0} está com este ciclista aberto",
-  "n6bHaveOpen": "{0} estão com este ciclista aberto"
+  "n6bHaveOpen": "{0} estão com este ciclista aberto",
+  "dashOfPlaces": "de {0} lugares",
+  "dashPlacesFree": "Lugares livres",
+  "dashLastWeek": "Mesmo dia na semana passada: {0}",
+  "dashOfFleet": "de {0} na frota",
+  "dashNextAt": "Próxima: {0}",
+  "rsvAssignAnyway": "Atribuir mesmo assim",
+  "leaveNoSaveBtn": "Sair sem guardar",
+  "delSessionBtn": "Eliminar sessão",
+  "delSessionsBtn": "Eliminar sessões"
 }

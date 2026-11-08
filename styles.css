@@ -3266,8 +3266,6 @@
     #tab-analytics .an-title-btns{display:flex;flex-wrap:wrap;gap:8px;min-width:0;} /* wraps: on a 360px phone the third button ran off the screen */
     #tab-analytics .an-btn-sm{font-size:12px;padding:6px 12px;}
     #tab-analytics .rr-launch{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
-    #tab-analytics .an-range-txt{font-size:12px;font-weight:600;color:var(--muted);}
-    #tab-analytics .an-range-txt-ml{font-size:12px;font-weight:600;color:var(--muted);margin-inline-start:8px;}
     #tab-analytics .an-date{background:var(--s3);border:1px solid rgba(var(--tint-rgb),.15);border-radius:3px;color:var(--text);font-family:var(--font-body);font-size:12px;font-weight:600;padding:4px 8px;cursor:pointer;}
     /* Charts, legends and empty states */
     #tab-analytics .an-area-svg{width:100%;display:block;overflow:visible;}
@@ -5828,7 +5826,7 @@ body.view-staff .am-hist.on,body.view-staff .am-cw-btn.on{color:var(--sf-green-i
 .cf-apple{margin-top:5px;font-size:var(--staff-fs-sm,12px);line-height:1.45;color:var(--muted);overflow-wrap:anywhere;}
 /* To be reserved: marked for a bike to be held, none chosen yet */
 .badge-toreserve{color:#6d28d9;}
-body.view-staff .badge-toreserve{color:#5b21b6;}
+body.view-staff .badge-toreserve{color:var(--sf-plum-ink);}
 .queue-table tbody tr.row-toreserve{background:rgba(109,40,217,.05);}
 body.view-staff .queue-table tbody tr.row-toreserve{background:rgba(109,40,217,.05);}
 .q-card.row-toreserve{background:rgba(109,40,217,.04);border-color:rgba(109,40,217,.3);}
@@ -8221,7 +8219,7 @@ body.view-staff .mg-row{display:flex;align-items:center;justify-content:space-be
 .ev-event{--ev:#7c3aed;--ev-rgb:124,58,237;}
 body .landing-event-card.ev-event::before{background:var(--ev);}
 body .landing-event-card.ev-event:hover{border-color:rgba(var(--ev-rgb),.5);}
-body.view-staff .dash-dot.ev-event,body.view-staff .cal-sess.ev-event{--ev:#7c3aed;}
+body.view-staff .dash-dot.ev-event,body.view-staff .cal-sess.ev-event{--ev:var(--sf-plum);}
 
 /* Hand-over: the ride leader's live location switch (2026-09-28) */
 body.view-staff .live-share{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px;}
@@ -9822,8 +9820,8 @@ body.view-staff :is(.sess-summary-chip,.sess-lc).th-snd96{
   --sf-chip-bg:var(--snd-weave) 0 0/28px 28px,var(--snd-bg);
   --sf-ring:var(--snd-lime-lt);border-color:rgba(0,137,74,.6);color:#fff;}
 body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
-  --sf-chip-bg:linear-gradient(to bottom right,#fff 0 55%,rgba(124,58,237,.07) 100%) #fff;
-  --sf-ring:#7c3aed;border-color:rgba(124,58,237,.38);}
+  --sf-chip-bg:linear-gradient(to bottom right,#fff 0 55%,rgba(var(--sf-plum-rgb),.08) 100%) #fff;
+  --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.38);}
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event),
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event):hover{background:var(--sf-chip-bg);}
 body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k):hover{border-color:var(--sf-ring);}
@@ -9834,7 +9832,7 @@ body.view-staff .sess-lc:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event){bor
 /* the ride's name: its own colour on the light cards, Run for Her's in its poster's letters */
 body.view-staff .sess-summary-chip.th-runher .sess-chip-event{font-family:'Marcellus',Georgia,serif;font-weight:400;font-size:12px;letter-spacing:.9px;color:var(--rf-pink-dk);}
 :is(html[lang="ar"],html[lang="ur"]) body.view-staff .sess-summary-chip.th-runher .sess-chip-event{font-family:'IBM Plex Sans Arabic',sans-serif;font-weight:800;letter-spacing:0;}
-body.view-staff .sess-summary-chip.th-event .sess-chip-event{color:#7c3aed;}
+body.view-staff .sess-summary-chip.th-event .sess-chip-event{color:var(--sf-plum);}
 /* the community rides keep their own name colour (Saturday green, Petromin red, the pool teal, T100 orange):
    the staff layer painted every name green */
 body.view-staff .sess-summary-chip.th-comm .sess-chip-event{color:var(--ev);}
@@ -9872,7 +9870,7 @@ body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#fff;--rs-edge:#c9cfcb;--rs-
 /* Soft Solid (2026-11-06): the same hues, a step softer on the row; the edge carries the colour */
 body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#fff6eb;--rs-edge:#ea580c;--rs-line:#fdc99a;}
 body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#fcf4ff;--rs-edge:#c026d3;--rs-line:#f3c2fd;}
-body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#f6f3ff;--rs-edge:#7c3aed;--rs-line:#d3c8fd;}
+body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:var(--sf-plum-row);--rs-edge:var(--sf-plum);--rs-line:var(--sf-plum-line);}
 body.view-staff :is(tr,.q-card).row-active{--rs-bg:#fffaeb;--rs-edge:#d4a017;--rs-line:#f4e0a6;}
 body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#eefcf3;--rs-edge:#16a34a;--rs-line:#a7f3c0;}
 body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#fef2f2;--rs-edge:#dc2626;--rs-line:#fbbcbc;}
@@ -9899,7 +9897,7 @@ body.view-staff .status-badge.badge-waitlist{font-weight:700;}
 body.view-staff .status-badge.st-waiting{background:#fff;color:#3d4540;box-shadow:inset 0 0 0 1px rgba(17,21,18,.2);}
 body.view-staff .status-badge.st-waitlist{background:#ffedd5;color:#9a3412;box-shadow:inset 0 0 0 1px rgba(234,88,12,.3);}
 body.view-staff .status-badge.st-toreserve{background:#fae8ff;color:#86198f;box-shadow:inset 0 0 0 1px rgba(192,38,211,.28);}
-body.view-staff .status-badge.st-reserved{background:#ede9fe;color:#5b21b6;box-shadow:inset 0 0 0 1px rgba(124,58,237,.28);}
+body.view-staff .status-badge.st-reserved{background:var(--sf-plum-wash);color:var(--sf-plum-ink);box-shadow:inset 0 0 0 1px rgba(var(--sf-plum-rgb),.3);}
 body.view-staff .status-badge:is(.st-active,.st-needsbike){background:#fdf1cc;color:#7a4d06;box-shadow:inset 0 0 0 1px rgba(212,160,23,.42);}
 body.view-staff .status-badge.st-done{background:#dcfce7;color:#166534;box-shadow:inset 0 0 0 1px rgba(22,163,74,.3);}
 body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){background:#fee2e2;color:#991b1b;box-shadow:inset 0 0 0 1px rgba(220,38,38,.28);}
@@ -9916,7 +9914,7 @@ body.view-staff .pay-toggle.house:hover{background:#ccfbf1;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-waiting{color:#1f2622;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-waitlist{color:#6b1d06;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-toreserve{color:#5f0f66;}
-html[data-staff-theme="booth"] body.view-staff .status-badge.st-reserved{color:#3b1386;}
+html[data-staff-theme="booth"] body.view-staff .status-badge.st-reserved{color:var(--sf-plum-ink);}
 html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-active,.st-needsbike){color:#4a3000;}
 html[data-staff-theme="booth"] body.view-staff .status-badge.st-done{color:#05522a;}
 html[data-staff-theme="booth"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){color:#7d1d12;}
@@ -9963,10 +9961,10 @@ html[data-staff-theme="dark"] #confirm-modal .tc-last{color:#fca5a5;}
 .fx-none:focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:4px;}
 .fx-none.on{color:var(--go,#077a4b);}
 /* the Saturday ride's meeting point and breakfast spot held from riders until staff's time (2026-10-06) */
-body.view-staff :is(.sess-lc-rv,.sess-detail-rv){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:600;color:#5b21b6;}
+body.view-staff :is(.sess-lc-rv,.sess-detail-rv){display:flex;align-items:center;gap:6px;min-width:0;font-size:12px;font-weight:600;color:var(--sf-plum-ink);}
 body.view-staff :is(.sess-lc-rv,.sess-detail-rv) svg{flex-shrink:0;}
 body.view-staff :is(.sess-lc-rv,.sess-detail-rv) bdi{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-html[data-staff-theme="dark"] body.view-staff :is(.sess-lc-rv,.sess-detail-rv){color:#c4b5fd;} /* the paper violet read about 2:1 on the dark chips (bug hunt 2026-10-28) */
+html[data-staff-theme="dark"] body.view-staff :is(.sess-lc-rv,.sess-detail-rv){color:var(--sf-plum-ink);} /* the paper violet read about 2:1 on the dark chips (bug hunt 2026-10-28) */
 body.view-staff .sess-lc-rv{margin:-4px 0 8px;}
 body.view-staff .sess-detail-rv{margin-top:4px;}
 #tab-sessions .ss-reveal-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -10102,7 +10100,7 @@ body.view-staff #tab-community .ca-sel input{width:18px;height:18px;}
 body.view-staff #tab-community .ca-rules{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 body.view-staff #tab-community .ca-rule{font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--sf-r-pill);}
 body.view-staff #tab-community .ca-rule-rej{background:#fee2e2;color:#991b1b;}
-body.view-staff #tab-community .ca-rule-tag{background:#ede9fe;color:#5b21b6;}
+body.view-staff #tab-community .ca-rule-tag{background:var(--sf-plum-wash);color:var(--sf-plum-ink);}
 body.view-staff #tab-community .ap-set{margin:0 0 14px;}
 body.view-staff #tab-community .ap-k{margin:14px 0 2px;font-size:var(--staff-fs-sm,12px);font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);}
 body.view-staff #tab-community .ap-sub{font-size:13px;color:var(--muted);margin-bottom:8px;max-width:760px;}
@@ -10308,7 +10306,7 @@ body.view-staff .x-close:is(#_x,*):focus-visible{outline:2px solid var(--sf-gree
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#15181c;--rs-edge:#5b646b;--rs-line:#2a3038;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#241a11;--rs-edge:#f97316;--rs-line:#7c3a12;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#231729;--rs-edge:#e879f9;--rs-line:#6b2172;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#1d1a2f;--rs-edge:#a78bfa;--rs-line:#4c3a8a;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:var(--sf-plum-row);--rs-edge:var(--sf-plum);--rs-line:var(--sf-plum-line);}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-active{--rs-bg:#242013;--rs-edge:#f2b43f;--rs-line:#6b5414;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#13251b;--rs-edge:#25d184;--rs-line:#1d5a3a;}
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#281818;--rs-edge:#ff6f66;--rs-line:#6b2424;}
@@ -10325,7 +10323,7 @@ html[data-staff-theme="dark"] body.view-staff .pay-toggle.house:hover{background
 html[data-staff-theme="dark"] body.view-staff .status-badge.st-waiting{background:#1b2027;color:#d6dbde;box-shadow:inset 0 0 0 1px #4a535b;}
 html[data-staff-theme="dark"] body.view-staff .status-badge.st-waitlist{background:#3a2210;color:#fdba74;}
 html[data-staff-theme="dark"] body.view-staff .status-badge.st-toreserve{background:#3a1640;color:#f0abfc;}
-html[data-staff-theme="dark"] body.view-staff .status-badge.st-reserved{background:#2a2150;color:#c4b5fd;}
+html[data-staff-theme="dark"] body.view-staff .status-badge.st-reserved{background:var(--sf-plum-wash);color:var(--sf-plum-ink);}
 html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-active,.st-needsbike){background:#3a2f0c;color:#fcd34d;}
 html[data-staff-theme="dark"] body.view-staff .status-badge.st-done{background:#12371f;color:#86efac;}
 html[data-staff-theme="dark"] body.view-staff .status-badge:is(.st-noshow,.st-cancelled,.st-removed){background:#3d1717;color:#fca5a5;}
@@ -10352,14 +10350,14 @@ html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).t
 html[dir="rtl"][data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-runher{
   --sf-chip-bg:radial-gradient(120% 160% at 0% 100%,rgba(var(--rf-wash),.24) 0%,rgba(var(--rf-wash),.08) 40%,rgba(16,19,24,0) 70%) #101318;}
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc).th-event{
-  --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(124,58,237,.22) 100%) #101318;
-  --sf-ring:#a78bfa;border-color:rgba(167,139,250,.4);color:var(--text);}
+  --sf-chip-bg:linear-gradient(to bottom right,#101318 0 55%,rgba(var(--sf-plum-rgb),.2) 100%) #101318;
+  --sf-ring:var(--sf-plum);border-color:rgba(var(--sf-plum-rgb),.4);color:var(--text);}
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).selected,
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip:is(.th-jcc,.th-comm,.th-runher,.th-snd96,.th-event,.th-defe5k).active-sess{box-shadow:0 0 0 2px var(--sf-ring),0 6px 16px rgba(0,0,0,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-runher .sess-chip-event,
 html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-runher .ev-chip{color:#f49ac1;border-color:rgba(244,154,193,.5);}
 html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-chip-event,
-html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-event .ev-chip{color:#c4b5fd;border-color:rgba(196,181,253,.5);}
+html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-event .ev-chip{color:var(--sf-plum-ink);border-color:rgba(var(--sf-plum-rgb),.5);}
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-comm,.th-runher,.th-event) :is(.sess-chip-bar,.sess-lc-bar){background:rgba(255,255,255,.14);}
 /* Run for Her's partner marks are navy on the poster: white on the dark chip, as the circuit's mark is */
 html[data-staff-theme="dark"] body.view-staff .sf-mark-runher{filter:brightness(0) invert(1);opacity:.9;}
@@ -10368,7 +10366,7 @@ html[data-staff-theme="dark"] body.view-staff .sf-mark-runher{filter:brightness(
 html[data-staff-theme="dark"] body.view-staff .ev-jcc{--ev:#6ea8ff;--ev-rgb:110,168,255;}
 html[data-staff-theme="dark"] body.view-staff .ev-swim{--ev:#2cc5d8;--ev-rgb:44,197,216;}
 html[data-staff-theme="dark"] body.view-staff .ev-workshop{--ev:#fb8c4a;--ev-rgb:251,140,74;}
-html[data-staff-theme="dark"] body.view-staff .ev-event{--ev:#a78bfa;--ev-rgb:167,139,250;}
+html[data-staff-theme="dark"] body.view-staff .ev-event{--ev:var(--sf-plum);--ev-rgb:var(--sf-plum-rgb);}
 html[data-staff-theme="dark"] body.view-staff .ev-runher{--ev:#f2789f;--ev-rgb:242,120,159;}
 html[data-staff-theme="dark"] body.view-staff .ev-snd96{--ev:#3ddc84;--ev-rgb:61,220,132;}
 /* Victory Lap's race black (#0d0d0d) vanished on dark: its name on the session card, its calendar bar */
@@ -10378,7 +10376,7 @@ html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-commun
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-workshop{--ev:#6ea8ff;}
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-snd96{--ev:#3ddc84;}
 html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-jcc{--ev:#e0a84a;}
-html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-event{--ev:#a78bfa;}
+html[data-staff-theme="dark"] body.view-staff :is(.dash-dot,.cal-sess).ev-event{--ev:var(--sf-plum);}
 /* a tag's chip writes its name in the tag's own colour; on dark that colour is lifted toward white so
    a deep violet or navy tag still reads (its tint and edge stay the tag's own) */
 html[data-staff-theme="dark"] body.view-staff :is(#tab-community,#tab-customers,#tab-analytics,#new-acct-modal,#confirm-modal,#cust-modal) .cmy-tcf{color:color-mix(in srgb,var(--cmy-tfg,currentColor) 55%,#fff);}
@@ -11879,14 +11877,14 @@ body.view-staff #tab-queue .rq-ev{display:inline-block;flex:none;width:6px;heigh
 body.view-staff #tab-queue .rq-ev-jcc{--rq-ev:#06346f;}
 body.view-staff #tab-queue .rq-ev-comm{--rq-ev:#0c7a3d;}
 body.view-staff #tab-queue .rq-ev-runher{--rq-ev:#c2416e;}
-body.view-staff #tab-queue .rq-ev-event{--rq-ev:#7c3aed;}
+body.view-staff #tab-queue .rq-ev-event{--rq-ev:var(--sf-plum);}
 body.view-staff #tab-queue .rq-ev-snd96{--rq-ev:#00894a;}
 body.view-staff #tab-queue .rq-ev-defe5k{--rq-ev:#a22b63;}
 body.view-staff #tab-queue .rq-ev-blood{--rq-ev:#b42318;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-jcc{--rq-ev:#5aa9e6;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-comm{--rq-ev:#25d184;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-runher{--rq-ev:#f48fb1;}
-html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-event{--rq-ev:#a78bfa;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-event{--rq-ev:var(--sf-plum);}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-snd96{--rq-ev:#07a62d;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-defe5k{--rq-ev:#e879b9;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-blood{--rq-ev:#ff6f66;}
@@ -11983,3 +11981,164 @@ body.view-staff #tab-queue .q-card .rq-st2{max-width:100%;}
   body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table .rq-numc{position:sticky;inset-inline-start:36px;z-index:3;box-shadow:1px 0 0 var(--border);}
 }
 
+
+/* ══ ROUND TWO SHELL (2026-11-08, the user's picks: s_bookings' sidebar, s_dash, s_dialog_speed's dialogs, s_fixes'
+   staff side). Staff only: every rule is scoped to body.view-staff, so app.css is unchanged. No rule here can match a
+   roster row (tests/roster-repaint-budget.spec.ts). ══ */
+body.view-staff{
+  /* plum, the brand's own, in place of the framework violet #7c3aed: the events' colour and the reserved state.
+     On white the plum is 7.1:1 and its ink 9.7:1 (8.4:1 on the wash); the roster reads these through --rs-* */
+  --sf-plum:#8c3b6e;--sf-plum-ink:#6e2c56;--sf-plum-wash:#f6ebf2;--sf-plum-row:#fbf5f9;--sf-plum-line:#e3c2d6;--sf-plum-rgb:140,59,110;
+  /* the sidebar, a tinted surface quieter than the page: labels 6.9:1, headings 5.0:1 on it */
+  --sf-side:#ededE8;--sf-side-ink:#4a524c;--sf-side-grp:#5d666b;--sf-side-hover:rgba(255,255,255,.6);
+  /* dialogs: small, the default, wide */
+  --sf-dlg-s:320px;--sf-dlg-m:480px;--sf-dlg-l:640px;
+  /* the Dashboard's bar: the roster's own status colours (on a bike, done, waiting) */
+  --db-on:#d4a017;--db-done:#16a34a;--db-wait:#9aa29c;
+}
+/* dark: the plum lifted (7.1:1 on the cards, its ink 8.5:1 on its wash); the sidebar a step darker than the page */
+html[data-staff-theme="dark"] body.view-staff{
+  --sf-plum:#d98bbb;--sf-plum-ink:#e8a6cf;--sf-plum-wash:#2b1a26;--sf-plum-row:#221a20;--sf-plum-line:#6a3458;--sf-plum-rgb:217,139,187;
+  --sf-side:#0b0d10;--sf-side-ink:#c9ced3;--sf-side-grp:#98a2a9;--sf-side-hover:rgba(255,255,255,.05);
+  --db-on:#f2b43f;--db-done:#25d184;--db-wait:#5b646b;
+}
+/* booth: opaque, 7:1 and better */
+html[data-staff-theme="booth"] body.view-staff{
+  --sf-plum-ink:#5a2147;--sf-plum-line:#8c3b6e;
+  --sf-side:#f2f2f2;--sf-side-ink:#111111;--sf-side-grp:#333333;--sf-side-hover:#ffffff;
+  --db-on:#a16207;--db-done:#15803d;--db-wait:#4d4d4d;
+}
+body.view-staff .ev-event{--ev:var(--sf-plum);--ev-rgb:var(--sf-plum-rgb);}
+
+/* ── The sidebar, quieter than the page (it replaces the owner's white rail of 2026-10-11, at the user's pick): the
+   section you are on is the one white card on it, a hairline ring (2px in booth), ink words and the green note on its
+   icon; every other icon at 62%. Group headings stay sentence case. ── */
+html:not([data-staff-theme="dark"]) body.view-staff #view-staff.active::before,
+html[data-staff-theme="dark"] body.view-staff #view-staff.active::before{background:var(--sf-side);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav{background:var(--sf-side);scrollbar-color:var(--sf-ctl) var(--sf-side);}
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav{border-inline-end-color:rgba(255,255,255,.08);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn{color:var(--sf-side-ink);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn .snav-ico,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn .snav-ico{color:var(--sf-side-ink);opacity:.62;}
+html:not([data-staff-theme="dark"]) body.view-staff .snav-group,html[data-staff-theme="dark"] body.view-staff .snav-group,
+html:not([data-staff-theme="dark"]) body.view-staff .snav-pin,html[data-staff-theme="dark"] body.view-staff .snav-pin{color:var(--sf-side-grp);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn:hover,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn:hover,
+html:not([data-staff-theme="dark"]) body.view-staff .snav-pin:hover,
+html[data-staff-theme="dark"] body.view-staff .snav-pin:hover{background:var(--sf-side-hover);color:var(--text);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn:hover .snav-ico,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn:hover .snav-ico{color:var(--text);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn.active,
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn.active:hover{background:var(--sf-card);color:var(--text);box-shadow:var(--sf-sh-1);}
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn.active,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn.active:hover{background:#1c2026;color:var(--text);box-shadow:0 0 0 1px rgba(255,255,255,.07);}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn.active .snav-ico,
+html[data-staff-theme="dark"] body.view-staff #staff-tab-nav .tab-btn.active .snav-ico{color:var(--sf-green-ink);opacity:1;}
+html:not([data-staff-theme="dark"]) body.view-staff #staff-tab-nav .tab-btn .tab-badge{background:var(--sf-card);color:var(--text);box-shadow:0 0 0 1px var(--sf-line);}
+
+/* ── Phones and tablets (M9, M10): the sections button sits in the top bar's start slot, so no band holds it alone,
+   and the bottom bar follows the light and booth themes (dark keeps its dark bar). ── */
+@media(max-width:1023px){
+  body.view-staff{--staff-stick:var(--staff-top);}
+  body.view-staff .snav-burger,
+  html:not([data-staff-theme="dark"]) body.view-staff .snav-burger{position:fixed;top:var(--staff-safe-top);inset-inline-start:4px;z-index:101;
+    width:44px;height:var(--staff-bar-h);min-height:0;padding:0;justify-content:center;border:0;background:transparent;}
+  body.view-staff #topbar#topbar{padding-inline-start:52px;}
+  html:not([data-staff-theme="dark"]) body.view-staff .staff-tabbar{background:var(--sf-card);border-top:1px solid var(--sf-line);}
+  html[data-staff-theme="booth"] body.view-staff .staff-tabbar{border-top-width:2px;}
+  html:not([data-staff-theme="dark"]) body.view-staff .staff-tabbar .tb-btn{color:var(--muted);}
+  html:not([data-staff-theme="dark"]) body.view-staff .staff-tabbar .tb-btn.active{background:var(--sf-select);color:var(--sf-green-ink);}
+}
+
+/* ── Sessions (M13, M14, L12): the layout switch in the staff face, the ride chips in sentence case on a pill ── */
+body.view-staff .view-toggle-btn{font-family:var(--font-body);font-weight:500;}
+body.view-staff .ev-chip,body.view-staff .ev-name{text-transform:none;letter-spacing:0;font-weight:600;}
+body.view-staff .ev-chip{border-radius:var(--sf-r-pill);padding:1px 8px;}
+body.view-staff .sess-lc-date,body.view-staff .sess-detail-date{font-weight:600;}
+
+/* ── Analytics (M16, M17): labels untracked, no bar before a section's title, each field under its own label ── */
+body.view-staff .stat-label,body.view-staff .rides-stat-label,body.view-staff .ticket-num-label,body.view-staff .view-badge,
+body.view-staff .analytics-kpi-label,body.view-staff .an-range-label,body.view-staff .hl-label,body.view-staff .chart-card-title,
+body.view-staff .analytics-section-title{letter-spacing:0;}
+body.view-staff .analytics-section-title::before{display:none;}
+body.view-staff .an-range-fields{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 12px;flex-basis:100%;margin-top:4px;}
+body.view-staff .an-fld{display:flex;flex-direction:column;gap:4px;font-size:var(--staff-fs-sm);font-weight:600;color:var(--muted);}
+body.view-staff #tab-analytics .an-fld .an-date{width:180px;border-radius:var(--sf-r-ctl);}
+body.view-staff #tab-analytics .an-fld .filter-select{min-width:200px;}
+body.view-staff #tab-analytics .an-range-fields .result-count{align-self:center;margin-top:18px;}
+@media(max-width:600px){body.view-staff .an-fld{flex:1 1 140px;}body.view-staff #tab-analytics .an-fld :is(.an-date,.filter-select){width:100%;min-width:0;}}
+
+/* ── The Dashboard (s_dash): one main figure, three that support it, alerts with marks and counts ── */
+body.view-staff .dash-top{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0 0 16px;}
+@media(min-width:1100px){body.view-staff .dash-top{grid-template-columns:minmax(0,1.5fr) minmax(0,3fr);}}
+body.view-staff .dash-top>.dash-kpis{margin:0;}
+body.view-staff .dash-hero{display:flex;flex-direction:column;align-items:stretch;gap:9px;min-width:0;padding:16px 18px;border:1px solid var(--sf-line2);
+  border-radius:var(--sf-r-card);background:var(--sf-card);color:var(--text);font:inherit;text-align:start;cursor:pointer;box-shadow:var(--sf-sh-lift);}
+body.view-staff .dash-hero[disabled]{cursor:default;}
+body.view-staff .dash-hero-k{font-size:13px;font-weight:600;color:var(--muted);}
+body.view-staff .dash-hero-n{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px;}
+body.view-staff .dash-hero-n strong{font-size:40px;line-height:1;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+body.view-staff .dash-hero-n span{font-size:14px;color:var(--muted);}
+body.view-staff .dash-bar{display:flex;height:8px;border-radius:var(--sf-r-pill);overflow:hidden;background:var(--sf-sunken);box-shadow:inset 0 0 0 1px var(--sf-line);}
+body.view-staff .dash-bar i{display:block;height:100%;width:var(--w,0);}
+body.view-staff .dash-leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--muted);}
+body.view-staff .dash-leg>span{white-space:nowrap;}
+body.view-staff .dash-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-inline-end:6px;vertical-align:1px;}
+body.view-staff .dash-leg b{font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+body.view-staff .db-on{background:var(--db-on);}
+body.view-staff .db-done{background:var(--db-done);}
+body.view-staff .db-wait{background:var(--db-wait);}
+body.view-staff .db-free{background:var(--sf-sunken);box-shadow:inset 0 0 0 1px var(--sf-ctl);}
+body.view-staff .dash-k2{justify-content:flex-start;gap:4px;padding:14px 16px;}
+body.view-staff .dash-k2 span{font-size:13px;font-weight:500;color:var(--muted);line-height:1.3;}
+body.view-staff .dash-k2 strong{font-size:26px;line-height:1.15;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff .dash-k2 em{font-style:normal;font-size:12px;line-height:1.35;color:var(--muted);}
+@media(max-width:767px){body.view-staff .dash-hero-n strong{font-size:32px;}body.view-staff .dash-k2{padding:10px 12px;}body.view-staff .dash-k2 strong{font-size:19px;}}
+html[data-staff-theme="booth"] body.view-staff .dash-hero,html[data-staff-theme="booth"] body.view-staff .dash-k2{border:2px solid #4d4d4d;}
+html[data-staff-theme="booth"] body.view-staff .dash-bar{box-shadow:inset 0 0 0 2px #4d4d4d;height:10px;}
+body.view-staff .dash-alert .art-ic{flex:none;color:var(--muted);}
+body.view-staff .dash-n{flex:none;min-width:24px;height:22px;padding:0 8px;box-sizing:border-box;border-radius:var(--sf-r-pill);display:inline-grid;place-items:center;
+  font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;background:var(--sf-chip);color:var(--text);}
+body.view-staff .dash-n.warn{background:#fef3c7;color:#713f12;}
+body.view-staff .dash-n.red{background:#fee2e2;color:#991b1b;}
+body.view-staff .dash-n.green{background:#dcfce7;color:#14532d;}
+html[data-staff-theme="dark"] body.view-staff .dash-n.warn{background:rgba(242,180,63,.16);color:#fcd34d;}
+html[data-staff-theme="dark"] body.view-staff .dash-n.red{background:rgba(255,111,102,.16);color:#ffb4ae;}
+html[data-staff-theme="dark"] body.view-staff .dash-n.green{background:rgba(37,209,132,.14);color:#86efac;}
+html[data-staff-theme="booth"] body.view-staff .dash-n{box-shadow:inset 0 0 0 2px currentColor;color:#000;}
+/* L15: a card with nothing in it says so in one line, a link row ends in a chevron, an odd last card takes the row */
+body.view-staff #tab-dashboard .dash-card .empty-state{padding:10px 4px;text-align:start;font-size:13px;font-weight:500;}
+body.view-staff #tab-dashboard .dash-wide{grid-column:1/-1;}
+body.view-staff .dash-go{flex:none;color:var(--muted);font-size:18px;line-height:1;}
+
+/* ── Dialogs (s_dialog_speed): three widths, centred at every size (the owner's rule); the money reason's message ── */
+body.view-staff.view-staff .confirm-box{width:min(var(--sf-dlg-m),calc(100vw - 32px));max-width:none;}
+body.view-staff.view-staff .modal-box{max-width:min(var(--sf-dlg-l),calc(100vw - 32px));}
+body.view-staff.view-staff .modal-box.bike-info-box,
+body.view-staff #walkin-modal .dk-mw420,body.view-staff #booking-edit-modal .dk-mw420,body.view-staff #return-modal .dk-mw420,
+body.view-staff #edit-price-modal .dk-mw380,body.view-staff #rider-modal .iv-mw440,body.view-staff #rider-walkin-modal .iv-mw460,
+body.view-staff #cashier-modal .sl-w440,body.view-staff #receipt-edit-modal .sl-w460,body.view-staff #wl-add-modal .rq-wlbox,
+body.view-staff #team-mgr-modal .tm-w400,body.view-staff #comm-add-modal .cmy-mw460,body.view-staff #new-acct-modal .cmy-cf-box,
+body.view-staff #optlist-modal .flt-obox,body.view-staff #rider-report-modal .rp-box,body.view-staff #addon-picker-backdrop .dk-ap-box,
+body.view-staff #dep-modal .dep-box,body.view-staff #return-pay-modal .dk-rp-box,body.view-staff .sv-box,body.view-staff .tm-pwd-box,
+body.view-staff .ws-dlg,body.view-staff .cm-box{max-width:min(var(--sf-dlg-m),calc(100vw - 32px));}
+body.view-staff #bike-profile-modal .flt-pbox,body.view-staff #print-opts-modal .rpt-w520,body.view-staff #receipt-modal .hist-rc-box,
+body.view-staff .rs-dlg,body.view-staff .br-box,body.view-staff .ah-box,body.view-staff .fl-box,body.view-staff #cancel-night-modal .dk-cn-box,
+body.view-staff #dq-modal .dq-box,body.view-staff .ca-msg-box,body.view-staff #confirm-modal .n6r-dlg,body.view-staff .vt-rc-box,
+body.view-staff #jcc-group-modal .cmy-mw540,body.view-staff #group-edit-modal .cmy-mw540,
+body.view-staff .vendor-dlg.vendor-ven-dlg,body.view-staff .vendor-dlg.vendor-day-dlg{max-width:min(var(--sf-dlg-l),calc(100vw - 32px));}
+body.view-staff #qnum-edit-modal .dk-mw320{max-width:min(var(--sf-dlg-s),calc(100vw - 32px));}
+body.view-staff #mny-modal .mny-err{margin:8px 0 0;color:var(--red);font-size:13px;font-weight:600;}
+/* L15: the check-in's four outcomes two to a row, so "Save, check in later" never wraps; the walk-in's tag a pill */
+body.view-staff #checkin-modal .ci-outcomes{grid-template-columns:repeat(2,minmax(0,1fr));}
+body.view-staff .mw-sug-tag{border-radius:var(--sf-r-pill);}
+/* L15: on a phone the Sessions date pills scroll on one line (11779); the last one fades at the edge, so the line
+   reads as going on rather than cut off (a mask, not a blur), at the left in Arabic and Urdu */
+@media(max-width:767px){
+  body.view-staff #tab-sessions .ss-range{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent);padding-inline-end:24px;}
+  html[dir="rtl"] body.view-staff #tab-sessions .ss-range{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 32px),transparent);}
+}
+/* L15: People's find box draws no magnifier, so it keeps no room for one */
+body.view-staff #tab-community .ppl-find .search-input{padding-inline-start:12px;}

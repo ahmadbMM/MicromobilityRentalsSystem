@@ -64,7 +64,7 @@ test('a click outside closes it, a click on an item acts and closes it', async (
   await pill(page).click();
   const menu = page.locator('.pay-menu-popup[role="menu"]');
   await expect(menu).toBeVisible();
-  await page.mouse.click(5, 5);
+  await page.locator('#tab-queue .page-title').first().click(); // outside the menu (the top-left corner is the sections button on a phone since round two)
   await expect(menu).toHaveCount(0);
   await pill(page).click();
   await expect(menu).toBeVisible();

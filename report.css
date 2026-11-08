@@ -1,8 +1,10 @@
 /* The printed reports' stylesheet: "Report Template B - Green banner", the one visual family of
    every document _openReport writes (the session report, the Saturday roster, the close-out, the day
-   sheet, the account report, the billing report, the heights report). Dark #123019 banner with the
-   white wordmark, neon doc-type label, gradient rule, stat tiles (dark "Collected" variant via
-   .total-item.dark), dark table heads with zebra rows, optional total chip and signature row.
+   sheet, the account report, the billing report, the heights report). Since round two (2026-11-08) it
+   wears the staff site's Soft Solid look: IBM Plex Sans (Plex Arabic right to left), sentence case with
+   no tracking, a #16191d banner with the white wordmark and the neon doc-type label, the gradient rule,
+   stat tiles (dark "Collected" variant via .total-item.dark), light table heads over zebra rows, an
+   optional total chip and the signature row, rounded controls on screen. Paper stays light (@media print).
 
    It was the <style> block of _reportShell, and the rp- rules below were the style attributes of the
    report bodies (moved 2026-09-29): a report window is about:blank written by the page, so it runs
@@ -21,37 +23,37 @@
    --rp-pg on <html>, which the page context inherits (_reportShell, 2026-10-01). A browser without
    page margin boxes keeps the margin and prints nothing in it. */
 @page{margin:9mm 0;
-  @top-center{content:var(--rp-run);font:600 8pt 'Barlow','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}
-  @bottom-center{content:var(--rp-pg);font:600 8pt 'Barlow','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}}
+  @top-center{content:var(--rp-run);font:600 8pt 'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}
+  @bottom-center{content:var(--rp-pg);font:600 8pt 'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif;color:#5a635c}}
 @page :first{margin:0;@top-center{content:none}@bottom-center{content:none}} /* page 1 has the banner and title line itself */
-body{font-family:'Barlow',system-ui,sans-serif;color:#111512;font-size:13px;padding:26px 30px;max-width:var(--rp-mw);margin:0 auto}
-[dir="rtl"] body{font-family:'IBM Plex Sans Arabic','Barlow',system-ui,sans-serif} /* Arabic and Urdu */
-.mm-banner{background:#123019;color:#e9f4ec;border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;break-inside:avoid}
+body{font-family:'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif;color:#111512;font-size:13px;padding:26px 30px;max-width:var(--rp-mw);margin:0 auto}
+[dir="rtl"] body{font-family:'IBM Plex Sans Arabic','IBM Plex Sans',system-ui,sans-serif} /* Arabic and Urdu */
+.mm-banner{background:#16191d;color:#e9edee;border-radius:14px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;break-inside:avoid}
 .mm-banner img{height:52px;width:auto}
 .mm-logo-on-light{display:none}
 .mm-co{display:flex;align-items:center;gap:14px}
-.mm-co strong{font-size:15px;font-weight:800;display:block}
-.mm-co small{font-size:10px;color:#9fc4ab}
+.mm-co strong{font-size:15px;font-weight:600;display:block}
+.mm-co small{font-size:10px;color:#9aa39d}
 .mm-doc{text-align:end}
-.mm-doc strong{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#03ff89;display:block}
-.mm-doc span{font-size:10.5px;color:#9fc4ab}
-.mm-rule{height:4px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:10px 0 14px}
+.mm-doc strong{font-size:13px;font-weight:600;color:#03ff89;display:block}
+.mm-doc span{font-size:10.5px;color:#9aa39d}
+.mm-rule{height:3px;background:linear-gradient(90deg,#03ff89,#0c7a3d);border-radius:2px;margin:10px 0 14px}
 /* which ride, which day: the first thing read under the banner */
 .mm-title{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 14px;font-size:15px;break-after:avoid}
-.mm-title strong{font-weight:800}
+.mm-title strong{font-weight:600}
 .mm-title span{font-size:13px;font-weight:600;color:#5a635c}
 .totals{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;break-inside:avoid}
-.total-item{flex:1;min-width:96px;display:flex;flex-direction:column;background:#f2f6f2;border-radius:10px;padding:12px 14px}
-.total-num{font-size:19px;font-weight:800;color:#111512;font-variant-numeric:tabular-nums;white-space:nowrap} /* "SAR" never on a line of its own */
-.total-lbl{font-size:9.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#5a635c;margin-top:2px}
-.total-item.dark{background:#123019}
+.total-item{flex:1;min-width:96px;display:flex;flex-direction:column;background:#f4f4f0;border-radius:12px;padding:12px 14px}
+.total-num{font-size:20px;font-weight:600;color:#111512;font-variant-numeric:tabular-nums;white-space:nowrap} /* "SAR" never on a line of its own */
+.total-lbl{font-size:12px;font-weight:500;color:#5a635c;margin-top:2px}
+.total-item.dark{background:#16191d}
 .total-item.dark .total-num{color:#03ff89}
-.total-item.dark .total-lbl{color:#9fc4ab}
+.total-item.dark .total-lbl{color:#9aa39d}
 .total-pct{font-size:10px;font-weight:600;color:#5a635c;margin-top:3px;font-variant-numeric:tabular-nums} /* the tile's share of every customer or community member */
-.total-item.dark .total-pct{color:#9fc4ab}
-h2{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;margin:22px 0 7px;padding-inline-start:8px;border-inline-start:4px solid #0c7a3d}
+.total-item.dark .total-pct{color:#9aa39d}
+h2{font-size:15px;font-weight:600;margin:22px 0 8px}
 table{width:100%;border-collapse:collapse;font-size:11px;font-variant-numeric:tabular-nums}
-th{background:#123019;color:#e9f4ec;padding:8px 10px;text-align:start;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;font-weight:700}
+th{background:#f4f4f0;color:#3d4540;padding:9px 10px;text-align:start;font-size:11.5px;font-weight:600;border-bottom:1px solid #d9dcd5}
 [dir="rtl"] :is(.mm-doc strong,h2,th,.total-lbl){letter-spacing:0} /* Arabic and Urdu letters join: spaced, they fall apart */
 td{padding:8px 10px;text-align:start;font-size:11px;font-weight:500}
 /* The rider's name and the money carry the weight; the rest is medium. Every cell was bold, so
@@ -68,24 +70,24 @@ table.rp-live tbody tr:nth-child(odd) td{background:none}
 table.rp-live tbody tr.rp-odd td{background:#fafcfa}
 :root tr.rp-hide{display:none}
 .rp-sbtn{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:4px}
-.rp-sbtn:focus-visible{outline:2px solid #03ff89;outline-offset:2px}
-th[aria-sort] .rp-sbtn::after{content:"\25B2";font-size:8px;color:#03ff89}
+.rp-sbtn:focus-visible{outline:2px solid #0c7a3d;outline-offset:2px;border-radius:4px}
+th[aria-sort] .rp-sbtn::after{content:"\25B2";font-size:8px;color:#0c7a3d}
 th[aria-sort="descending"] .rp-sbtn::after{content:"\25BC"}
 .rp-tools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 8px}
-.rp-q,.rp-in{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #b9c1ba;border-radius:0;background:#fff;color:#111512}
+.rp-q,.rp-in{font:inherit;font-size:12px;padding:6px 10px;border:1px solid #b9c1ba;border-radius:8px;background:#fff;color:#111512}
 .rp-q{flex:1;min-width:160px}
 .rp-cnt{font-size:11px;color:#5a635c}
 .rp-fnote{display:none;font-size:10.5px;color:#5a635c;margin:0 0 6px}
 a{color:inherit;text-decoration:none}
 section{break-inside:avoid}
 .mm-chip-row{display:flex;justify-content:flex-end;margin-top:12px;break-inside:avoid}
-.mm-chip{background:#123019;color:#fff;border-radius:10px;padding:10px 18px;font-size:11px}
+.mm-chip{background:#16191d;color:#fff;border-radius:12px;padding:10px 18px;font-size:11px}
 .mm-chip strong{color:#03ff89;font-size:13.5px}
 .mm-note{text-align:end;margin-top:10px;font-size:11px;color:#5a635c;break-inside:avoid}
 .mm-note strong{color:#111512}
 .mm-sign{display:flex;gap:40px;margin-top:32px;font-size:10.5px;color:#5a635c}
 .mm-sign span{flex:1;border-top:1px solid #b9c1ba;padding-top:6px}
-.rep-print{display:block;margin:22px auto 0;padding:9px 26px;background:#0c7a3d;color:#fff;border:none;border-radius:0;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit}
+.rep-print{display:block;margin:22px auto 0;padding:10px 28px;background:#0c7a3d;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;font-family:inherit}
 /* clone: the inset repeats on every page; a sliced body padded only the first page's top and the last
    one's bottom, and a long roster ran into the paper edge from page 2 on. Pages 2 on add the 9mm
    @page margin above, where their running title and page number sit. */
@@ -93,7 +95,7 @@ section{break-inside:avoid}
   .rp-tools{display:none}.rp-fnote:not([hidden]){display:block}th[aria-sort] .rp-sbtn::after{color:inherit}
   /* On paper the dark fills go: a white banner ruled in the dark green, outlined tiles, pale table
      heads. The screen keeps Template B as it is; a printed page spends far less ink (2026-10-01). */
-  .mm-banner{background:#fff;color:#111512;border:1.5px solid #123019}
+  .mm-banner{background:#fff;color:#111512;border:1.5px solid #16191d}
   .mm-logo-on-dark{display:none}
   .mm-logo-on-light{display:inline}
   .mm-co small,.mm-doc span{color:#5a635c}
@@ -102,11 +104,11 @@ section{break-inside:avoid}
   .totals{gap:8px}
   .total-item{background:#fff;border:1px solid #cfd8d1;padding:10px 12px}
   .total-num{font-size:16px}
-  .total-item.dark{background:#fff;border:1.5px solid #123019}
+  .total-item.dark{background:#fff;border:1.5px solid #16191d}
   .total-item.dark .total-num{color:#0c7a3d}
   .total-item.dark .total-lbl{color:#5a635c}
-  th{background:#e7f0e9;color:#123019;border-bottom:1.5px solid #123019}
-  .mm-chip{background:#fff;color:#111512;border:1.5px solid #123019}
+  th{background:#f2f2ed;color:#111512;border-bottom:1.5px solid #16191d}
+  .mm-chip{background:#fff;color:#111512;border:1.5px solid #16191d}
   .mm-chip strong{color:#0c7a3d}}
 
 /* ── The report bodies (rp-) ── */
@@ -114,7 +116,7 @@ section{break-inside:avoid}
 :root .rp-green{color:#16a34a}
 :root .rp-amber{color:#b45309}
 :root .rp-blue{color:#2563eb}
-:root .rp-violet{color:#7c3aed}
+:root .rp-violet{color:#8c3b6e} /* the brand's plum, not the framework violet (round two) */
 :root .rp-grey{color:#666}
 :root .rp-ts{text-align:start}
 :root .rp-tc{text-align:center}
@@ -158,7 +160,7 @@ section{break-inside:avoid}
 :root .rp-axt{font-family:inherit;font-size:18px;font-weight:800;fill:#111512}
 /* the account report's nationality sections (_accNatHtml, 2026-10-06): a list's heading with its count at the
    end, the note on what was counted, and the names in columns - 150 of them as table rows ran to four pages */
-:root .rp-nath{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#3d4540;margin:14px 0 5px;break-after:avoid}
+:root .rp-nath{font-size:12px;font-weight:600;color:#3d4540;margin:14px 0 5px;break-after:avoid}
 [dir="rtl"] .rp-nath{letter-spacing:0}
 :root[dir="rtl"] :is(.rp-h3,.rp-h4,tr.rp-grp td){letter-spacing:0} /* the headings and group rows too: (0,3,2) outranks their :root rules (bug hunt 2026-10-28) */
 :root .rp-natnote{font-size:11px;color:#5a635c;margin:0 0 6px}
@@ -175,8 +177,8 @@ section{break-inside:avoid}
 :root .rp-hrow{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
 :root .rp-hmain{flex:2 1 320px}
 :root .rp-hside{flex:1 1 190px}
-:root .rp-h3{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:#666;margin:0 0 5px}
-:root .rp-h4{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#888;margin:0 0 3px}
+:root .rp-h3{font-size:12px;font-weight:600;color:#5a635c;margin:0 0 5px}
+:root .rp-h4{font-size:11px;font-weight:600;color:#5a635c;margin:0 0 3px}
 :root .rp-hsum{font-size:12px;margin:0 0 8px;color:#333}
 :root .rp-hrange{max-width:260px;margin-bottom:10px}
 :root .rp-c888{color:#888}
@@ -189,7 +191,7 @@ section{break-inside:avoid}
 :root .rp-said-v{flex:0 0 5ch;font-weight:800;font-variant-numeric:tabular-nums}
 :root .rp-said-t{flex:1 1 auto;white-space:pre-wrap;overflow-wrap:anywhere}
 /* the ratings reports (showRatingsReport, 2026-10-05): a form's heading row in a table, and a reason's day and rider under its question */
-:root tr.rp-grp td,table.rp-live tbody tr.rp-grp td{background:#eef3ef;font-weight:800;color:#123019;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+:root tr.rp-grp td,table.rp-live tbody tr.rp-grp td{background:#eef3ef;font-weight:600;color:#16191d;font-size:11px}
 :root .rp-said-wide .rp-said-k{flex-basis:20ch}
 :root .rp-said-m{display:block;margin-top:1px;font-weight:500;font-size:10.5px;color:#5a635c}
 :root th.rp-thsub{font-weight:600;opacity:.85}
@@ -204,8 +206,8 @@ section{break-inside:avoid}
 .ptn-codetag{padding:0 5px;border:1px solid #A22B63;border-radius:2px;direction:ltr;unicode-bidi:isolate}
 .ptn-shirt-need{padding:0 5px;border:1px dashed #A22B63;border-radius:2px}
 /* Victory Lap reports (2026-10-23): a Doubles team's heading line, lighter than a group's, and its partners' rows marked down the start edge so the pair reads as one */
-:root tr.rp-grp.rp-team td,table.rp-live tbody tr.rp-grp.rp-team td{background:#f4f7f5;text-transform:none;letter-spacing:0;font-size:11px;border-top:2px solid #123019}
-:root tr.rp-mate td:first-child{border-inline-start:3px solid #123019}
+:root tr.rp-grp.rp-team td,table.rp-live tbody tr.rp-grp.rp-team td{background:#f4f7f5;font-size:11px;border-top:2px solid #16191d}
+:root tr.rp-mate td:first-child{border-inline-start:3px solid #16191d}
 .sn-mk{display:inline-flex;align-items:center;justify-content:center;margin-inline-start:6px;width:15px;height:14px;background:#e8590c;color:#fff;border-radius:2px;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .sn-ico{display:block;width:11px;height:11px}
 /* the partner report's signature column: room to sign on paper */
@@ -225,7 +227,7 @@ section{break-inside:avoid}
 .vrc-none{font-size:12px;color:#a33b2e;font-weight:700;padding:8px 0}
 @media (max-width:700px){.vrc-pair{grid-template-columns:1fr}}
 /* The volunteer certificate (_vmCert, 2026-11-05): one page, English and Arabic side by side. */
-.vc-page{margin:0;padding:24px;background:#fff;color:#1a1919;font-family:'Barlow',Arial,sans-serif}
+.vc-page{margin:0;padding:24px;background:#fff;color:#1a1919;font-family:'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif}
 .vc-print{display:block;margin:0 auto 16px}
 @media print{.vc-print{display:none}.vc-page{padding:0}}
 .vc-sheet{max-width:720px;margin:0 auto;padding:36px;border:3px solid #123019}

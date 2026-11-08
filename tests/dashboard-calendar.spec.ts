@@ -31,11 +31,13 @@ test('the Dashboard shows today: numbers, sessions, what needs attention and qui
   await page.evaluate(`setStaffTab('dashboard')`);
   const tab = page.locator('#tab-dashboard');
   await expect(tab.locator('.page-title')).toHaveText('Dashboard');
+  // round two (2026-11-08): one main figure with its parts in a key, then three supporting figures
   const kpi = (label: string) => tab.locator('.dash-kpi', { hasText: label }).locator('strong');
-  await expect(kpi('Riders today')).toHaveText('3');
-  await expect(kpi('Waiting')).toHaveText('1');
-  await expect(kpi('On bikes now')).toHaveText('1');
-  await expect(kpi('Rides done today')).toHaveText('1');
+  await expect(tab.locator('.dash-hero strong')).toHaveText('3');
+  const leg = tab.locator('.dash-hero .dash-leg');
+  await expect(leg.locator('span', { hasText: 'Waiting' }).locator('b')).toHaveText('1');
+  await expect(leg.locator('span', { hasText: 'On bikes now' }).locator('b')).toHaveText('1');
+  await expect(leg.locator('span', { hasText: 'Rides done today' }).locator('b')).toHaveText('1');
   await expect(kpi('Collected today')).toHaveText('SAR 150');
   await expect(kpi('Available bikes')).toHaveText('1');
   await expect(tab.locator('.dash-card', { hasText: 'Quick actions' }).getByRole('button')).toHaveCount(4);

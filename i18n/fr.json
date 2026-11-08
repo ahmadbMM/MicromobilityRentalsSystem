@@ -1946,7 +1946,6 @@
   "toastUndoFailedData": "Échec de l'annulation. Les données ont peut-être changé.",
   "toastNothingUndo": "Rien à annuler",
   "confirmUndoTitle": "Annuler l'action ?",
-  "confirmUndoYes": "Oui, annuler",
   "cancelBookingLabel": "Annuler la réservation",
   "cancelEntryBody": "Cela libérera tout vélo attribué et marquera l'entrée comme annulée.",
   "undoRevBody": "Cela annulera l'action. Certaines opérations peuvent ne pas être entièrement réversibles si les données ont changé depuis.",
@@ -7241,5 +7240,14 @@
   "n6bOwing": "À payer",
   "n6bSomeone": "Un autre membre de l'équipe",
   "n6bHasOpen": "{0} a ce cycliste ouvert",
-  "n6bHaveOpen": "{0} ont ce cycliste ouvert"
+  "n6bHaveOpen": "{0} ont ce cycliste ouvert",
+  "dashOfPlaces": "sur {0} places",
+  "dashPlacesFree": "Places libres",
+  "dashLastWeek": "Même jour la semaine dernière : {0}",
+  "dashOfFleet": "sur {0} dans la flotte",
+  "dashNextAt": "Prochaine : {0}",
+  "rsvAssignAnyway": "Attribuer quand même",
+  "leaveNoSaveBtn": "Quitter sans enregistrer",
+  "delSessionBtn": "Supprimer la session",
+  "delSessionsBtn": "Supprimer les sessions"
 }
