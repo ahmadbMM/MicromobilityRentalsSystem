@@ -205,6 +205,8 @@ section{break-inside:avoid}
 .ptn-codetag,.ptn-shirt{display:inline-block;margin-inline-start:6px;color:#A22B63;font-size:9.5px;font-weight:700;white-space:nowrap;vertical-align:middle;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .ptn-codetag{padding:0 5px;border:1px solid #A22B63;border-radius:2px;direction:ltr;unicode-bidi:isolate}
 .ptn-shirt-need{padding:0 5px;border:1px dashed #A22B63;border-radius:2px}
+/* A Saturday ride code's name after the rider's (2026-11-08), which printed glued to it ("Sara AhmedIMC staff") */
+.satc-chip{display:inline-block;margin-inline-start:6px;padding:0 5px;border:1px solid #5a635c;border-radius:2px;color:#1a1919;font-size:9.5px;font-weight:700;white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 /* Victory Lap reports (2026-10-23): a Doubles team's heading line, lighter than a group's, and its partners' rows marked down the start edge so the pair reads as one */
 :root tr.rp-grp.rp-team td,table.rp-live tbody tr.rp-grp.rp-team td{background:#f4f7f5;font-size:11px;border-top:2px solid #16191d}
 :root tr.rp-mate td:first-child{border-inline-start:3px solid #16191d}

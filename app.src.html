@@ -7951,7 +7951,8 @@ function _listCols(rows){
           km:r.some(e=>_isRun(_rowSess(e))), // Run for Her's 3 km / 5 km (2026-10-05), the Defe run's 5 km
           rr:r.some(e=>_isDefe(_rowSess(e))), // the Defe run: registered for the race (2026-10-18)
           bld:r.some(e=>_isBlood(_rowSess(e))), // the Blood Donation event: confirmed donors (2026-11-03)
-          vl:r.some(e=>_isRace(_rowSess(e)))}; // Victory Lap's race, division and team (2026-10-17)
+          vl:r.some(e=>_isRace(_rowSess(e))), // Victory Lap's race, division and team (2026-10-17)
+          rc:r.some(e=>!!e.rideCode)}; // a Saturday ride code's name (2026-11-08), in a column of its own (_satcCell)
 }
 // Approval state of a community reservation. Rows created before the approval workflow
 // (or through paths that never stamped it - old bookings, imports) carry approval null;
@@ -20358,8 +20359,9 @@ const _PTN_RIBBON='<svg class="ptn-rb" aria-hidden="true" width="12" height="12"
 // Beside the chip, the name staff gave the code the booking came with (_ptnCodeName; the owner, 2026-10-23), the
 // code itself while unnamed and in the tag's title.
 function _ptnShirt(e){const a=e&&e.partnerAsk;if(!a||typeof a.shirt_got!=='boolean')return'';return a.shirt_got?t('ptnShirtHas'):t('ptnShirtNeed').replace('{0}',String(a.shirt||'?'));}
-// The Saturday ride code's name rides along (_satcChip, 20261108120000): wherever staff see a partner, they see the code.
-function _ptnChip(e){if(!e)return'';const sc=_satcChip(e);if(!e.partner)return sc;const l=_ptnLabel(e.partner),w=esc(t('ptnWith').replace('{0}',l)+(e.partnerCodeUsed?' · '+e.partnerCodeUsed:'')),sh=_ptnShirt(e);return`<span class="ptn-chip" role="img" title="${w}" aria-label="${w}">${_PTN_RIBBON}<span aria-hidden="true">${esc(l.toUpperCase())}</span></span>${e.partnerCodeUsed?`<span class="ptn-codetag" title="${esc(t('ptnCodeTagT')+': '+e.partnerCodeUsed)}">${esc(_ptnCodeName(e))}</span>`:''}${sh?`<span class="ptn-shirt${e.partnerAsk.shirt_got?'':' ptn-shirt-need'}">${esc(sh)}</span>`:''}${sc}`;}
+// The Saturday ride code's name rides along (_satcChip, 20261108120000): wherever staff see a partner, they see the code;
+// noRc in the Bookings table, which gives the code a column of its own (_satcCell).
+function _ptnChip(e,noRc){if(!e)return'';const sc=noRc?'':_satcChip(e);if(!e.partner)return sc;const l=_ptnLabel(e.partner),w=esc(t('ptnWith').replace('{0}',l)+(e.partnerCodeUsed?' · '+e.partnerCodeUsed:'')),sh=_ptnShirt(e);return`<span class="ptn-chip" role="img" title="${w}" aria-label="${w}">${_PTN_RIBBON}<span aria-hidden="true">${esc(l.toUpperCase())}</span></span>${e.partnerCodeUsed?`<span class="ptn-codetag" title="${esc(t('ptnCodeTagT')+': '+e.partnerCodeUsed)}">${esc(_ptnCodeName(e))}</span>`:''}${sh?`<span class="ptn-shirt${e.partnerAsk.shirt_got?'':' ptn-shirt-need'}">${esc(sh)}</span>`:''}${sc}`;}
 function _ptnRow(x){return(Array.isArray(x)?x.some(e=>e&&e.partner):!!(x&&x.partner))?' ptn-row-mark':'';}
 // The name staff gave the code a partner booking came with (session_partner_codes.name, 20261023220000; the owner, 2026-10-23:
 // "make staff able to name each code a name and put that name besides each bookings"); the code itself while it has none.
@@ -29906,8 +29908,9 @@ function renderQRow(e){
     return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_rowPendCls(e.id)}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
       <td class="rq-sel">${_bulkChk(e)}</td>
       <td class="rq-w52 rq-numc"><div class="rq-n1">${_evMark(e)}${_noNum?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>`:`<span class="queue-num-cell">#${e.queueNum}</span>`}</div>${_noNum?'':_bookedAt(e.registeredAt)}</td>
-      <td class="rq-rider${_isSatMember(e)?' cm-cell':''}"><div class="rider-name rq-rn"><span class="rq-nm" title="${esc(e.name)}">${esc(e.name)}</span>${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</div><div class="rq-r2"><span class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</span>${_qCc(entryPhone(e),e)}${_rmBtn(e)}</div></td>
+      <td class="rq-rider${_isSatMember(e)?' cm-cell':''}"><div class="rider-name rq-rn"><span class="rq-nm" title="${esc(e.name)}">${esc(e.name)}</span>${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</div><div class="rq-r2"><span class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</span>${_qCc(entryPhone(e),e)}${_rmBtn(e)}</div></td>
       ${_memberCell(e)}
+      ${_qc.rc?_satcCell(e):''}
       ${_qc.bike?_qTypeCell(e):''}
       ${_qc.grp?`<td>${_rgChip(e)}</td>`:''}
       ${_qc.km?`<td>${_runKmCell(e)}</td>`:''}
@@ -30002,12 +30005,13 @@ function renderQRow(e){
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
         <td class="rq-vm${group.some(_isSatMember)?' cm-cell':''}">
-          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
+          <div class="rider-name">${esc(primary.name)}${_ptnChip(primary,1)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
           <div class="rider-sub">${_partyCountsLine(group)}</div>
           ${_qCc(primary.groupPhone||primary.phone,primary)}
           <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
         </td>
         ${_memberCell(primary,' class="rq-vm"')}
+        ${_qc.rc?_satcCell(group,'rq-vm'):''}
         ${_qc.bike?`<td class="q-type-cell rq-vm"><div class="rq-types">${types.map(ty=>typeBadge(ty)).join('')}</div>${(()=>{const hs=[...new Set(group.map(x=>x.height).filter(Boolean))];return hs.length?`<div class="q-fit">${hs.map(h=>`<span class="q-height"><bdi>${esc(String(h))} ${t('cmUnit')}</bdi></span>`).join('<br>')}</div>`:'';})()}</td>`:''}
         ${_qc.grp?`<td class="rq-vm"><div class="rq-types">${[...new Set(group.map(x=>x.rideGroup||''))].map(g=>_rgChip({rideGroup:g,sessionId:primary.sessionId})).join('')}</div></td>`:''}
         ${_qc.km?`<td class="rq-vm"><div class="rq-types">${[...new Set(group.map(x=>x.runKm||''))].map(k=>_runKmCell({runKm:k})).join('')}</div></td>`:''}
@@ -30036,7 +30040,7 @@ function renderQRow(e){
         :'<span class="rq-mut">—</span>';
       const riderCell=`<div class="rq-rc">
         <span class="rq-num17">${i+1}</span>
-        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
+        <span class="rider-name ${isFirst?'rq-rn900':'rq-rn600'}">${esc(e.name)}${_ptnChip(e,1)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${_kioskTag(e)}${isFirst?noShowFlag(e):''}${_ptChip(e)}${_dqMark(e)}</span>
       </div>${e.phone?`<div class="rider-sub rq-rsub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)}</bdi>${_dupMark(e)}</div>`:''}${_qCc(e.phone,e)}${_adChips(e)}`;
       const typeCell=_qTypeCell(e,'rq-vm');
       const groupLine=isFirst?'rq-gtop':'';
@@ -30060,6 +30064,7 @@ function renderQRow(e){
           </td>
           <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
+          ${_qc.rc?_satcCell(e,'rq-vm'):''}
           ${_qc.bike?typeCell:''}
           ${_qc.grp?`<td class="rq-vm">${_rgChip(e)}</td>`:''}
           ${_qc.km?`<td class="rq-vm">${_runKmCell(e)}</td>`:''}
@@ -30082,6 +30087,7 @@ function renderQRow(e){
           <td class="rq-sel">${_bulkChk(e)}</td>
           <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
+          ${_qc.rc?_satcCell(e,'rq-vm'):''}
           ${_qc.bike?typeCell:''}
           ${_qc.grp?`<td class="rq-vm">${_rgChip(e)}</td>`:''}
           ${_qc.km?`<td class="rq-vm">${_runKmCell(e)}</td>`:''}
@@ -30492,6 +30498,7 @@ function renderQRow(e){
         ${thQSort('queue',t('colBookingNum'),'rq-numc')}
         ${thQSort('name',t(_bldQ()?'nameLabel':'colRider'))}
         ${_memv?thQSort('member',t('colMember')):''}
+        ${_qc.rc?(_qx.rc?thQSort('rc',t('satcF')):`<th>${t('satcF')}</th>`):''}
         ${_qc.bike?thQSort('type',t('bikeTypeLabel')):''}
         ${_qc.grp?thQSort('grp',t('colGroup')):''}
         ${_qc.km?thQSort('km',t('runKmLabel')):''}
@@ -31273,7 +31280,14 @@ function _satcLabel(code){const n=_satcName(code);return n!==code?n+' · '+code:
 function _satcChip(e){
   if(!e||!e.rideCode)return'';
   if(S._satc===undefined)_satcLoad(); // the names, the first time a booking with a code is drawn
-  return`<span class="satc-chip" title="${esc(t('satcF')+': '+e.rideCode)}">${esc(_satcName(e.rideCode))}</span>`;
+  return`<span class="satc-chip" title="${esc(t('satcF')+': '+_satcLabel(e.rideCode))}">${esc(_satcName(e.rideCode))}</span>`;
+}
+// The Bookings table's Ride code column (2026-11-08: "labeled with the name of the code"): the code's name in a column of
+// its own, as beside the rider's name in the one-line Rider cell a long one cut that name to "O."; a party's codes
+// together, a dash for a booking made without one.
+function _satcCell(es,cls){
+  const cs=[...new Set([].concat(es).map(x=>x&&x.rideCode).filter(Boolean))];
+  return`<td class="satc-cell${cls?' '+cls:''}" data-label="${esc(t('satcF'))}">${cs.length?cs.map(c=>_satcChip({rideCode:c})).join(''):'<span class="rq-mut">—</span>'}</td>`;
 }
 function _satcPanelHtml(sid){
   if(!sid||sid==='all')return'';

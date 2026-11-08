@@ -154,6 +154,29 @@ test.describe('@staff:bookings Saturday ride codes', () => {
     expect(byName['Member One']).toBe('');
   });
 
+  test('the Bookings table gives each booking\'s code its name in a Ride code column of its own', async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'the desktop roster table, which a phone does not show (its cards keep the name beside the rider\'s)');
+    await boot(page);
+    // beside the rider's name in the one-line Rider cell, a long code name cut the rider's name to "O." (2026-11-08): the
+    // column lines up under its header, a dash where no code was used, and the Rider cell keeps the whole name
+    const table = page.locator('#q-results .queue-table');
+    await expect(table.locator('tbody tr[data-id="r1"]')).toBeVisible();
+    const heads = await table.locator('thead th').allInnerTexts();
+    const rcCol = heads.findIndex((h) => /Ride code/.test(h));
+    expect(rcCol).toBeGreaterThan(heads.findIndex((h) => /Rider/.test(h)));
+    for (const id of ['r1', 'r3', 'm1']) expect(await table.locator(`tbody tr[data-id="${id}"] > td`).count()).toBe(heads.length);
+    const cell = (id: string) => table.locator(`tbody tr[data-id="${id}"] > td`).nth(rcCol);
+    await expect(cell('r1')).toHaveText('IMC staff');
+    await expect(cell('r1').locator('.satc-chip')).toHaveAttribute('title', 'Ride code: IMC staff · IMC');
+    await expect(cell('r3')).toHaveText('CLUB');
+    await expect(cell('m1')).toHaveText('—');
+    await expect(table.locator('tbody tr[data-id="r1"] .rq-rider .satc-chip')).toHaveCount(0); // not twice
+    for (const id of ['r1', 'r3']) expect(await table.locator(`tbody tr[data-id="${id}"] .rq-nm`).evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+    // its header sorts by the code's name
+    await table.locator('thead th').nth(rcCol).locator('button').click();
+    await expect.poll(() => page.evaluate('S.sfSort')).toBe('rc');
+  });
+
   test('the Ride code filter and sort', async ({ page }) => {
     await boot(page);
     await page.evaluate(`S.sfRc='IMC';renderStaffQueue()`);
@@ -303,5 +326,8 @@ test.describe('@staff:bookings Saturday ride codes', () => {
     await expect.poll(() => page.evaluate('S._satc')).toBe(null);
     await expect(page.locator('#tab-queue .satc-panel')).toHaveCount(0);
     expect(await names(page)).toContain('Member One');
+    // and no Ride code column, with no booking made with a code
+    expect((await page.locator('#q-results .queue-table thead th').allInnerTexts()).join('|')).not.toContain('Ride code');
+    await expect(page.locator('#q-results .satc-cell')).toHaveCount(0);
   });
 });

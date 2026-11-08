@@ -10776,6 +10776,9 @@ html[data-staff-theme="dark"] body.view-staff #tab-queue .ptn-code-label{color:#
 #tab-queue .ptn-code .ptn-sub{line-height:32px;}
 /* Saturday ride codes (2026-11-08): a booking's code by name, the Saturday ride's summary on Bookings, the Edit codes dialog */
 .satc-chip{display:inline-block;margin-inline-start:6px;padding:1px 6px;font-size:11px;font-weight:600;line-height:1.5;color:var(--text);background:var(--sf-chip,var(--s2));border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-xs,4px);white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;}
+/* the Bookings table's Ride code column: the chip starts its cell, a long name ends in an ellipsis (the title has it whole) */
+#tab-queue .satc-cell .satc-chip{margin-inline-start:0;max-width:14em;overflow:hidden;text-overflow:ellipsis;}
+#tab-queue .satc-cell .satc-chip+.satc-chip{margin-inline-start:4px;}
 #tab-queue .satc-panel{border-inline-start-color:var(--green);}
 #tab-queue .satc-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;}
 #tab-queue .satc-li{font-size:13px;}
