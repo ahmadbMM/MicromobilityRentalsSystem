@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{doc_title}}</title>
+<!--
+  SOURCE. `npm run build:cert` writes the served assets/certificate.html from this file,
+  replacing {{ASSET:…}} with the data URI of certificate/assets/<name>; the volunteer portal
+  gets the same generated file through its own `npm run sync:cert`. Edit here, never the
+  generated copy, and read certificate/SPEC.md first: the design is signed off, and
+  certificate/reference/ is what it must still look like.
+
+  MicroMobility volunteer certificate, A4 landscape (297 x 210 mm = 1123 x 794 CSS px at 96 dpi).
+  Filled by a Mustache subset - {{key}} is escaped, {{#key}}…{{/key}} is kept when key is truthy:
+    {{css}}               the certificate stylesheet on the filling app's own origin
+    {{fonts}}             a stylesheet of that origin's that carries Space Grotesk and IBM Plex Sans Arabic
+    {{doc_title}}         the window's title
+    {{print_label}}       the Print button, in the staffer's or volunteer's language
+    {{volunteer_name}}    English name (required)
+    {{volunteer_name_ar}} Arabic name (optional; the line below is removed when it is empty)
+    {{lead}}              the line above the name
+    {{recognition}}       the line above the green box; it names the gender in English
+    {{arabic_line}}       the Arabic thank-you line; it names the gender too (see SPEC.md)
+    {{initiative_name}}   the event, or the period a certificate for a period covers
+    {{event_date}}        display date, e.g. "8 November 2026"
+    {{hours}}             hours volunteered, when they are known
+    {{certificate_no}}    e.g. "MMV-2026-00012"
+    {{check_code}}        the code anyone may check the certificate with (optional)
+
+  There is no script here and no style attribute: the window inherits the app's
+  Content-Security-Policy, which allows neither. Whoever opens the window fits the name to
+  one line and scales the sheet on a narrow screen, through the CSSOM (SPEC.md, "Name size").
+-->
+<link rel="stylesheet" href="{{fonts}}">
+<link rel="stylesheet" href="{{css}}">
+</head>
+<body>
+<button type="button" class="rep-print">{{print_label}}</button>
+<div class="sheet">
+<div class="page">
+  <img class="supergraphic" src="{{ASSET:icon-green.svg}}" alt="" aria-hidden="true">
+
+  <div class="content">
+    <div class="header">
+      <img class="logo" src="{{ASSET:logo-light.svg}}" alt="micromobility">
+      <div class="title">
+        <div class="title-ar ar" dir="rtl" lang="ar">شهادة تطوع</div>
+        <div class="title-en">Certificate of Volunteering</div>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="lead">{{lead}}</div>
+      <div class="name">{{volunteer_name}}</div>
+      {{#volunteer_name_ar}}
+      <div class="name-ar ar" dir="rtl" lang="ar">{{volunteer_name_ar}}</div>
+      {{/volunteer_name_ar}}
+      <div class="divider"></div>
+      <div class="recognition">{{recognition}}</div>
+      <div class="initiative">{{initiative_name}}</div>
+      <div class="thanks-ar ar" dir="rtl" lang="ar">{{arabic_line}}</div>
+    </div>
+
+    <div class="footer">
+      <div class="signature-block">
+        <img class="signature" src="{{ASSET:signature-ahmad.svg}}" alt="Signature of Ahmad Babalghoum">
+        <div class="signer-name">Ahmad Babalghoum</div>
+        <div class="signer-role"><span>Founder, MicroMobility</span><span class="ar" dir="rtl" lang="ar">المؤسس</span></div>
+      </div>
+      <div class="meta">
+        <div class="meta-item">
+          <span class="meta-label">Date <span class="ar" lang="ar">· التاريخ</span></span>
+          <span class="meta-value">{{event_date}}</span>
+          {{#hours}}<span class="meta-sub">{{hours}} hours <span class="ar" lang="ar">· ساعة</span></span>{{/hours}}
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">No. <span class="ar" lang="ar">· رقم الشهادة</span></span>
+          <span class="meta-value" dir="ltr">{{certificate_no}}</span>
+          {{#check_code}}<span class="meta-sub" dir="ltr">{{check_code}}</span>{{/check_code}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</body>
+</html>

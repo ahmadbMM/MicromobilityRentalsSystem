@@ -1251,6 +1251,85 @@ Volunteers use their customer accounts on a portal of their own, `volunteer.micr
 - Tests: `tests/volunteers.spec.ts` here; `apps/volunteers/test` and `e2e/volunteers` in mm-platform.
 - **The staff review's second part (2026-11-06, migration 20261107131000, functions `_n6w*`)**: Message team (WhatsApp one by one, `volunteer_shifts.reminded_at` through `staff_volunteer_reminded`, else kept on the device; there is no server push sender, so no automatic reminder), Invite (`volunteers.days`, weekday 0 = Sunday), the Applied pill, `volunteers.skills` / `whatsapp` (the portal's "Become a volunteer", `volunteer_apply`; `_vmWa` prefers that number), `briefed_at` (portal tick `volunteer_brief_ack`; a trigger clears it when the briefing changes), certificates in `volunteer_certs` (serial MMV-YYYY-NNNNN, a 12-character code; `volunteer_cert_check` is the one call the portal answers signed out, at `#check/<code>`), the bulk calls `staff_volunteer_shift_times_many` / `staff_volunteer_hours_add_many` (each row through the one-person function), a check-in or check-out that the network lost goes to the desk outbox as kind `vtimes` (bid `vol:<session>:<customer>`, not a booking: `_dqRun` does not re-read it as one), the Shifts view and roster filters in `ST_KEYS.volunteers` / `SV_SECS.volunteers` (`S.vdv`, `S.vmf` = the roster's `W.f`), and the Analytics view `volunteers` (`_n6wAnPaint`, its own narrow reads). Specs: `tests/volunteers-review2.spec.ts`.
 
+## The volunteer certificate is one design, in `certificate/` (2026-11-08, migration 20261108220000)
+
+The certificate volunteers are given is drawn in **`certificate/`** and nowhere else: `template.html`,
+`certificate.css`, the brand vectors, the slogan's font, `SPEC.md` (the approved design, signed off
+2026-11-08) and `reference/` (what it must still look like). `npm run build:cert`, which
+`npm run build:html` runs first, writes the two served files - **`certificate.css`** at the root and
+**`assets/certificate.html`** - with the vectors and the slogan's font inlined. Both are committed and
+CI refuses them stale, like index.html. `certificate/README.md` has the rest; read `SPEC.md` before
+moving anything on the page.
+
+- **The booking app and the volunteer portal print the same file.** `_vcPrint` fetches
+  `assets/certificate.html`, fills it with a Mustache subset and opens it; mm-platform
+  `apps/volunteers` has its own committed copy, which its `npm run sync:cert` takes from here.
+  **A change to the design is not live on the portal until that sync is run and deployed there.**
+- **No script and no style in the page.** The window runs under this page's policy (the reason
+  report.css exists), so the stylesheet is a file, and the name is fitted from the opener once the
+  window's fonts are in: `_vcFit`, passed to `_openReport` as its last argument and run by
+  `_printWhenReady` just before printing. The same pass sets `--fit`, which scales the sheet on a
+  window narrower than the page - a volunteer printing from a phone.
+- **The owner took three things off the signed-off design on 2026-11-08**: the slogan "Power your
+  path", the address beside it and the line saying where a code is answered (the whole tagline row),
+  and the green tick above the logo. Sacramento went with the slogan, so the page is Space Grotesk
+  and IBM Plex Sans Arabic alone. `certificate/reference/` still shows the render as approved;
+  `certificate/README.md` says what has gone since, and SPEC.md governs the rest unchanged.
+- **A certificate is for a period or for one event** (`volunteer_certs.kind`). A period one puts the
+  period where an event's name goes and the issue date as its date; an event one names the session
+  and carries the day it was held. Asking twice for the same person and event gives back the one
+  they already have rather than a second (`again` in the answer, and a unique index behind it), so
+  "make one for the whole team" is safe to press twice. The hours and the check code are second lines under Date and No.
+  in the footer: a third meta item of their own pushed text under the corner graphic, which the
+  design does not allow. The row's gap is 28px, not the kit's 36px, because the twelve-character
+  code under the number left the No. column touching that graphic.
+- **The signatory is the design's** - the founder's signature, name and title - so the Volunteers
+  settings no longer ask for a signer (`cert_signer` / `cert_title` are gone from the form; an old
+  value left in the settings row is simply unread).
+- **The wording is a field, said by gender, and stored on the row.** The line above the name, the
+  line above the green box and the Arabic thank-you are `{{lead}}`, `{{recognition}}` and
+  `{{arabic_line}}`: his / her in English, the male or female form in Arabic, and a wording that
+  names neither when the gender is not known. `_vol_cert_words()` in the migration stamps them onto
+  `volunteer_certs.words` when a certificate is issued, and that is what a reprint uses - never what
+  the app says today. The same three sets are also `VC_WORDS` in app.src.html (it prefills the form
+  and prints rows from before the column) and `CERT_WORDS` in the portal;
+  `tests/certificate-template.spec.ts` holds the first two together, and the portal's is on you.
+- **Staff can write a certificate themselves** (`staff_volunteer_cert_issue_custom`, kind `custom`,
+  `_n6wCertCustom`): a typed name, with or without an account - it is the one kind `volunteer_certs`
+  allows no `customer_id` on - their own line in the green box, an optional date and hours, and any
+  of the three lines rewritten. Started from Volunteers > Write a certificate, or from a person's
+  Certificate dialog with their details filled in. Picking a gender refills the two lines that name
+  one, unless staff have already written their own. One made for nobody belongs to no person's
+  dialog, so the form itself lists those (`_n6wCertListNoAccount`, `customer_id is null`) to print
+  again or revoke - that list is the only way back to them.
+- **A certificate for a period covers a stretch of days or just one** (the owner, 2026-11-08): the
+  "One day" choice asks for one date and sends it as both ends, and `_vcPeriod` then prints that day
+  once instead of twice. Both apps have the choice. Hide the From field with `style.display`, not
+  the `hidden` attribute - the label rules are the more specific ones and win over it.
+- **A gender is asked only when the account has none** (the owner, 2026-11-08). `p_gender` rides
+  with every staff issue call and goes on that certificate, never back onto the account.
+- **`customers.name_ar`** is the volunteer's name in Arabic, which nothing stored before. They type
+  it on the portal (`volunteer_name_ar_save`); a certificate takes a copy when it is made, as it does
+  of the name and the gender, so what it says cannot change afterwards. Blank is normal, and the
+  design drops the line rather than leaving a gap.
+- The founder's e-signature travels inside `assets/certificate.html`, which is public on both
+  origins (the owner's call, 2026-11-08). SPEC.md would rather it were not; it is still only to be
+  put on certificates MicroMobility issues itself.
+- **`certificate/reference/` is generated too**: `npm run build:cert:reference` renders one PNG per
+  record in `certificate/sample-data.json` from the built template, through Playwright and the files
+  on disk (no server). It also writes `reference/rendered-from.json`, the hashes of the template,
+  the stylesheet and the samples; `tests/certificate-template.spec.ts` fails when any of them has
+  moved on. So a design change cannot ship with stale pictures - re-render and commit. The hashes
+  are checked rather than the pixels because two machines draw the same page differently enough to
+  fail a pixel comparison.
+- **`certificate/SPEC.md` keeps its signed-off text**, with an **Amendments** section at its foot
+  for everything that changed after: the owner's removals, the `MMV-YYYY-NNNNN` serial, the
+  gendered recognition line, the three lines being stored fields, and the footer's two extra values.
+  Where the two disagree the amendments win. Add to that section rather than editing the body.
+- Tests: `tests/certificate-template.spec.ts` (the build is fresh, and the three samples in
+  `certificate/sample-data.json` against SPEC.md's acceptance checklist) and the certificate tests in
+  `tests/volunteers-review2.spec.ts`.
+
 ## Arena Heros Hybrid Race (2026-10-28)
 The owner: "create a session for this event and make it exclusive for community members Arena Heros Hybrid Race": Fri 6 Nov
 2026, 06:00-20:00 with a prayer break, teams of two only (two men or two women), Gymnation on Tahlia Street, 140 SAR per athlete

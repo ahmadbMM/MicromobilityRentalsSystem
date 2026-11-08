@@ -19,6 +19,7 @@ const dist = join(root, 'dist');
 export const FILES = [
   'index.html', 'app.js', 'member-hub.js', 'app.css', 'styles.css', 'staff.js', 'service-worker.js', 'manifest.json', '404.html', // app.js, app.css: the customer half and its stylesheet, written minified by build-html
   'report.css', 'receipt.css', // the print windows' stylesheets (_reportShell, _ctPrintReceipt)
+  'certificate.css', // the volunteer certificate's; its markup is assets/certificate.html (certificate/README.md)
   '404.css', // the 404 page's
   '_headers', '_redirects',
   'robots.txt', 'sitemap.xml',
