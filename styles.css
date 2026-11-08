@@ -7412,6 +7412,10 @@ html[data-staff-theme="dark"] #checkin-modal .ci-out.active{background:color-mix
 #scan-modal .bkm-dim{opacity:.6;}
 #scan-modal .bkm-chipx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:2px 6px;}
 #scan-modal .bkm-sgo{width:100%;margin-bottom:8px;}
+#scan-modal .bkm-sfind{margin-top:8px;}
+#scan-modal .bkm-sfind input{width:100%;}
+#scan-modal .bkm-sfind .mw-suggest{max-width:none;max-height:220px;}
+#scan-modal .bkm-sfind .mw-suggest:empty{display:none;}
 #scan-modal .bkm-srow{display:flex;gap:6px;margin-top:4px;}
 #scan-modal .bkm-srow6{display:flex;gap:6px;margin-top:6px;}
 #scan-modal .bkm-stog{flex:1;min-width:0;white-space:normal;}

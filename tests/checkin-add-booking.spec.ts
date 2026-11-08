@@ -140,6 +140,49 @@ test('Add a booking opens the scanner on this check-in: each ticket joins the ru
   expect(await page.evaluate('_scanAddTo')).toBeNull();
 });
 
+test('Add a booking also takes a booking by its number or name, typed under the camera', async ({ page }) => {
+  await boot(page);
+  const { patches } = watchWrites(page);
+  await openCheckin(page, A1);
+  const modal = page.locator('#checkin-modal [role="dialog"]');
+  await modal.getByRole('button', { name: /Add a booking/ }).click();
+  const scanner = page.locator('#scan-modal [role="dialog"]');
+  await cameraSettled(page);
+  const box = scanner.getByRole('searchbox', { name: 'Add a booking' });
+  const list = scanner.locator('#scan-add-list');
+  await expect(box).toBeVisible();
+  await expect(list.getByRole('button')).toHaveCount(0); // nothing typed, nothing listed: the camera stays the page
+
+  await box.fill('2'); // the number typed in full comes first, Enter takes it
+  await expect(list.getByRole('button').first()).toContainText('#2');
+  await box.press('Enter');
+  await expect(page.locator('#scan-msg')).toHaveText('Added #2 Solo Badr.');
+  await expect(box).toHaveValue('');
+  const chips = scanner.getByRole('list', { name: 'Riders checking in together' }).getByRole('listitem');
+  await expect(chips).toHaveCount(2);
+
+  await box.fill('dina'); // a party member's name: one line for the party, which comes along
+  await expect(list.getByRole('button')).toHaveCount(1);
+  await expect(list.getByRole('button')).toContainText('Party Dina');
+  await expect(list.getByRole('button')).toContainText('+1');
+  await list.getByRole('button').click();
+  await expect(chips).toHaveCount(4);
+
+  await box.fill('badr'); // already on the run: not offered again
+  await expect(list).toContainText('Nobody left to add matches that.');
+  await box.fill('');
+  await scanner.getByRole('button', { name: 'Done' }).click();
+  await expect(modal).toContainText('Rider 1 of 4');
+  expect(patches.some((w) => 'group_id' in w.body)).toBe(false); // a list in this tab, as a scan makes it
+});
+
+test('the number-or-name box is only on the Add a booking camera page', async ({ page }) => {
+  await boot(page);
+  await page.evaluate('openScanModal()');
+  await expect(page.locator('#scan-modal [role="dialog"]')).toBeVisible();
+  await expect(page.locator('#scan-add-q')).toHaveCount(0);
+});
+
 test('a bike sticker scanned there still goes to this check-in, and the camera comes down', async ({ page }) => {
   await boot(page);
   await openCheckin(page, A1);

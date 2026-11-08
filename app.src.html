@@ -40534,6 +40534,7 @@ function openScanModal(){
       <div id="scan-details" class="scan-dts"></div>
       <div id="scan-except"></div>
       <div id="scan-batch">${_scanAddTo?_ciAddRunHtml():_scanBatchHtml()}</div>
+      ${_scanAddTo?_ciAddFindHtml():''}
       ${_scanAddTo?'':`<div class="bkm-srow">
         <button type="button" id="scan-cont-btn" class="toggle-btn bkm-stog${_scanCont?' active':''}" aria-pressed="${_scanCont?'true':'false'}"
           data-on-click="${_on("toggleScanCont")}">${t('scanContBtn')}</button>
@@ -40707,15 +40708,19 @@ function _scanTwinNote(e){return t('scanTwinUsed').replace('{0}',_scanSessLabel(
 // search (2026-10-09, D9): a bike's sticker or tag URL (its number or id at [1]), a Petromin registration.
 function _scanBikeUrl(txt){return txt.match(/[?&]bike=([0-9A-Za-z-]{1,40})/)||txt.match(/^https?:\/\/(?:www\.)?micromobility\.sa\/(?:bikes|b)\/(\d{1,6})\/?(?:[?#]|$)/i);}
 function _scanPmNo(txt){return txt.match(/^MMP-([A-Za-z]-\d{3,6})$/i);}
+// What the scanner says about a code: the line under the camera and the banner over it.
+function _scanSayer(){
+  const el=document.getElementById('scan-msg');
+  return (msg,color)=>{if(el){el.textContent=msg;el.style.color=color||'var(--muted)';}_scanExcept=null;_scanExceptRender();_scanDetailsPaint();
+    _scanBanner(color==='var(--green)'?'ok':color==='#ffb347'||color==='var(--muted-l)'?'warn':color==='var(--red)'?'err':'',msg);};
+}
 function _onScanPayload(raw){
   const txt=String(raw||'').trim();
   const now=Date.now();
   if(txt===_scanLastTxt&&now-_scanLastAt<2500)return;
   _scanLastTxt=txt;_scanLastAt=now;
   if(S.staffRole==='volunteer'){_volScanned(txt);return;}
-  const el=document.getElementById('scan-msg');
-  const say=(msg,color)=>{if(el){el.textContent=msg;el.style.color=color||'var(--muted)';}_scanExcept=null;_scanExceptRender();_scanDetailsPaint();
-    _scanBanner(color==='var(--green)'?'ok':color==='#ffb347'||color==='var(--muted-l)'?'warn':color==='var(--red)'?'err':'',msg);};
+  const say=_scanSayer();
   // Scan several collects tickets. Not while a check-in is open: the camera is then there for
   // that rider's bike sticker. Once the list has someone on it, a sticker or a registration
   // (which close the camera) is refused rather than silently dropping the list.
@@ -41525,6 +41530,43 @@ function _ciAddRunHtml(){
   const e=_qGet(_scanAddTo);if(!e)return'';
   const run=_ciPartyAll(e);if(run.length<2)return'';
   return `<ul aria-label="${esc(t('ciBatchLabel'))}" class="bkm-chips">${run.map(m=>`<li class="bkm-chipr${_dkYCan(m)?'':' bkm-dim'}"><bdi>#${m.queueNum} ${esc(String(m.name||'').split(' ')[0])}</bdi></li>`).join('')}</ul>`;
+}
+// Or by its number or name (the owner, 2026-11-09: "return the option to add a booking by its number
+// or name"): a box under the run, the queue's own search rule, the number typed in full first, Enter
+// takes the first match. It lists the bookings still expected on this ride and not in the run, a party
+// as one line with its +N, and only once something is typed: the camera stays the page. A pick goes
+// through _scanTicket, so it gets what a scan of that ticket would (blacklist, approval, the banner).
+function _ciAddFindHtml(){
+  return `<div class="bkm-sfind"><input id="scan-add-q" type="search" autocomplete="off" spellcheck="false" aria-label="${esc(t('ciAddBooking'))}" placeholder="${esc(t('mwSearchPh'))}" data-on-input="${_on("_ciAddTyping",_P("value"))}" data-on-keydown="${_on("_ciAddKey",_EV)}"><div id="scan-add-list" class="mw-suggest"></div></div>`;
+}
+function _ciAddLines(e,q){
+  const run=new Set(_ciPartyAll(e).map(m=>m.id)),seen=new Set(),out=[];
+  getQueue().filter(x=>x.sessionId===e.sessionId&&_ciExpected(x)&&!run.has(x.id))
+    .sort((a,b)=>(a.queueNum||0)-(b.queueNum||0))
+    .forEach(x=>{
+      const k=_partyKey(x)||x.id;if(seen.has(k))return;
+      const g=_partyOf(x);if(g.some(m=>run.has(m.id)))return; // covered by a ticket already in the run
+      seen.add(k);
+      const lead=g.find(m=>_ciExpected(m)&&_searchHit(m,q));if(!lead)return;
+      out.push({x:lead,more:g.filter(m=>m.id!==lead.id&&_ciExpected(m)).length,exact:g.some(m=>_searchExact(m,q))});
+    });
+  return out.sort((a,b)=>(b.exact?1:0)-(a.exact?1:0));
+}
+function _ciAddListHtml(v){
+  const e=_qGet(_scanAddTo),q=String(v||'').trim();if(!e||!q)return'';
+  const lines=_ciAddLines(e,q);
+  if(!lines.length)return `<div class="mw-sug-empty">${t('mwNoMatches')}</div>`;
+  return lines.slice(0,8).map(({x,more})=>{
+    const wl=x.status==='waitlist',tag=wl?'W'+(x.waitlistNum||''):'#'+x.queueNum;
+    return `<button type="button" class="mw-sug" data-on-click="${_on("_ciAddPick",x.id)}"><span class="mw-sug-tag${wl?' wl':''}">${esc(tag)}</span><span class="mw-sug-name">${esc(x.name||'')}${more?` <span class="bkm-cmuted">+${more}</span>`:''}</span><span class="mw-sug-meta">${esc(typeLabel(resolvedType(x)))}</span></button>`;
+  }).join('');
+}
+function _ciAddTyping(v){const host=document.getElementById('scan-add-list');if(host)host.innerHTML=_ciAddListHtml(v);}
+function _ciAddKey(event){if(event.key==='Enter'){event.preventDefault();const first=document.querySelector('#scan-add-list .mw-sug');if(first)first.click();}}
+function _ciAddPick(id){
+  const x=_qGet(id);if(!x||!_scanAddTo||S._ciId!==_scanAddTo)return;
+  const i=document.getElementById('scan-add-q');if(i)i.value='';_ciAddTyping('');
+  _scanTicket(x,_scanSayer());
 }
 function _ciAddToRun(x){
   const e=_qGet(S._ciId);if(!e||!x)return false;
