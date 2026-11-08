@@ -1,9 +1,9 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb, captureBookingRows } from './helpers/supabase';
 
-// Round two of the rider app (the owner's picks, 2026-11-08): the day switch on Choose a ride, the tab bar that
-// steps aside while a booking is made (d_smallbars), the booked moment with its polite announcement and one short
-// buzz (d_buzz), and the cancel dialog's reasons as a real radio list with nothing picked in advance.
+// Round two of the rider app (the owner's picks, 2026-11-08): Choose a ride as one list (its day switch was removed
+// the same day), the tab bar that steps aside while a booking is made (d_smallbars), the booked moment with its polite
+// announcement and one short buzz (d_buzz), and the cancel dialog's reasons as a real radio list with nothing picked.
 
 const NOW = Date.parse('2026-09-24T17:30:00Z'); // Thursday 24 September 2026, 20:30 in Riyadh
 const DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -22,61 +22,37 @@ async function rider(page: Page, sessions: Record<string, unknown>[], extra: Rec
   await waitForSb(page);
   await page.waitForFunction(`S.dataLoaded===true`);
 }
-const shown = (page: Page) => page.locator('#tab-register .reg-day-pane:not([hidden]) .sess-card');
-
-test.describe('@customer:round-two the day switch', () => {
-  test('Today, Tomorrow and Later each show their own rides; the first day with rides opens', async ({ page }) => {
+test.describe('@customer:round-two choose a ride', () => {
+  // The Today / Tomorrow / Later switch is gone (the user, 2026-11-08: "remove the tomorrow and later filters"):
+  // every ride is in one list, a heading a day, and the heading says Today or Tomorrow in words.
+  test('every ride in one list with no day switch; the headings say Today and Tomorrow', async ({ page }) => {
     await rider(page, days);
     await page.evaluate(`S.selEvent='jcc';setCustTab('register')`);
-    const sw = page.locator('#tab-register .reg-days');
-    await expect(sw.locator('.reg-day')).toHaveText(['Today', 'Tomorrow', 'Later']);
-    await expect(sw).toHaveAttribute('role', 'group');
-    await expect(sw.locator('.reg-day').first()).toHaveAttribute('aria-pressed', 'true');
-    await expect(shown(page)).toHaveCount(1);
-    await expect(page.locator('#tab-register .reg-day-pane:not([hidden]) .sess-day-h')).not.toContainText('Today'); // the switch says it
-    await sw.locator('.reg-day', { hasText: 'Later' }).click();
-    await expect(sw).toHaveAttribute('data-i', '2');
-    await expect(sw.locator('.reg-day', { hasText: 'Later' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(shown(page)).toHaveCount(2);
-    await expect(page.locator('#tab-register .reg-day-pane:not([hidden]) .sess-day-h')).toHaveCount(2); // one list per day
-    await sw.locator('.reg-day', { hasText: 'Tomorrow' }).click();
-    await expect(shown(page)).toHaveCount(1);
-    await expect(shown(page).first()).toHaveAttribute('data-on-click', new RegExp(TOMORROW));
+    await expect(page.locator('#tab-register .sess-card')).toHaveCount(4);
+    await expect(page.locator('#tab-register .reg-days, #tab-register .reg-day, #tab-register .reg-day-pane')).toHaveCount(0);
+    const heads = page.locator('#tab-register .sess-day-h');
+    await expect(heads).toHaveCount(4); // one heading a day
+    await expect(heads.nth(0)).toContainText('Today');
+    await expect(heads.nth(1)).toContainText('Tomorrow');
+    await expect(heads.nth(2)).toContainText('Sunday');
   });
 
-  test('the switch opens on the picked ride\'s day, and the Continue bar keeps naming it on another day', async ({ page }) => {
+  test('the Continue bar names the picked ride', async ({ page }) => {
     await rider(page, days);
     await page.evaluate(`S.selEvent='jcc';S.selSession='2026-09-27';setCustTab('register')`);
-    const sw = page.locator('#tab-register .reg-days');
-    await expect(sw.locator('.reg-day', { hasText: 'Later' })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#tab-register .reg-day-pane:not([hidden]) .sess-selected')).toHaveCount(1);
-    await sw.locator('.reg-day', { hasText: 'Today' }).click();
-    await expect(page.locator('#tab-register .reg-day-pane:not([hidden]) .sess-selected')).toHaveCount(0);
+    await expect(page.locator('#tab-register .sess-selected')).toHaveCount(1);
     await expect(page.locator('#tab-register .mm-reg-foot .reg-foot-sum')).toContainText('Sunday');
     await expect(page.locator('#tab-register .mm-reg-foot .reg-foot-sum')).toContainText('27 Sept');
-    // a repaint (a refresh) stays on the day the rider switched to
-    await page.evaluate(`renderRegister()`);
-    await expect(sw.locator('.reg-day', { hasText: 'Today' })).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('a list on one day has no switch; the picked ride wears the tick', async ({ page }) => {
+  test('a list on one day; the picked ride wears the tick', async ({ page }) => {
     await rider(page, [sess('2026-09-28'), sess('2026-09-28-b', { session_date: '2026-09-28', bike_slots: JSON.stringify({ _time: '18:00 - 20:00', _total: 12 }) })]);
     await page.evaluate(`S.selEvent='jcc';setCustTab('register')`);
     await expect(page.locator('#tab-register .sess-card')).toHaveCount(2);
-    await expect(page.locator('#tab-register .reg-days')).toHaveCount(0);
     await expect(page.locator('#tab-register .sess-day-list')).toHaveCount(1); // the day's rides in one list
     await page.locator('#tab-register .sess-card').first().click();
     await expect(page.locator('#tab-register .sess-card.sess-selected .sess-tick')).toBeVisible();
     await expect(page.locator('#tab-register .sess-card.sess-selected')).toHaveAttribute('aria-pressed', 'true');
-  });
-
-  test('in Arabic the marker slides the other way', async ({ page }) => {
-    await rider(page, days);
-    await page.evaluate(`setLang('ar')`);
-    await page.waitForFunction(`document.documentElement.dir==='rtl'&&_langLoaded('ar')`);
-    await page.evaluate(`S.selEvent='jcc';setCustTab('register');_regDaySet(2)`);
-    const tx = () => page.locator('#tab-register .reg-days').evaluate((el) => new DOMMatrix(getComputedStyle(el, '::before').transform).m41);
-    await expect.poll(tx).toBeLessThan(-100); // it glides there: polled, not read mid-way
   });
 });
 

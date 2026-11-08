@@ -1217,7 +1217,6 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   cancelPartyNote:'This cancels the booking for all {0} riders.',
   keepBookingBtn:'Keep booking',
   cancelAllBtn:'Cancel the booking for all {0}',
-  regDayLater:'Later',
   greetMorning:'Good morning, {0}',
   greetAfternoon:'Good afternoon, {0}',
   greetEvening:'Good evening, {0}',
@@ -1837,7 +1836,6 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   cancelPartyNote:'سيُلغى الحجز لجميع المشاركين ({0}).',
   keepBookingBtn:'إبقاء الحجز',
   cancelAllBtn:'إلغاء الحجز للجميع ({0})',
-  regDayLater:'لاحقاً',
   greetMorning:'صباح الخير يا {0}',
   greetAfternoon:'مساء الخير يا {0}',
   greetEvening:'مساء الخير يا {0}',
@@ -4477,13 +4475,14 @@ function _qrBox(payload,px){
   // on every card, while the svg's own fills are kept - so the tile reads white on every card,
   // whatever the browser does to the page around it (owner, 2026-09-27).
   // A line runs round the tile without stopping, so staff can tell a live ticket from a screenshot
-  // at a glance (owner, 2026-10-04): a picture of the code cannot move. It is the svg's own stroke
+  // at a glance (owner, 2026-10-04): a picture of the code cannot move. It is the action green, #077a4b
+  // (2026-11-08; it was a third green, #00b467, the app shows nowhere else). It is the svg's own stroke
   // for the same reason as the tile, it sits in the code's white margin, never over the code, and
   // it keeps moving even where the rider asked for less motion (styles.css, .qr-live).
   // The code is also drawn on a canvas (QR.paint, _qrPaint), which takes the svg's place once it is
   // painted: a browser's dark mode leaves a canvas alone (owner, 2026-10-05). The svg stays as the
   // fallback, and is what shows until the canvas is painted.
-  return `<div class="cu-qr-box" data-qr="${esc(String(payload))}" data-px="${px}">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<canvas class="qr-cv" role="img" aria-label="${esc(t('ticketQrLabel'))}"></canvas><svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#00b467" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
+  return `<div class="cu-qr-box" data-qr="${esc(String(payload))}" data-px="${px}">${QR.svg(payload,{size:px,margin:4,logo:false,pad:6})}<canvas class="qr-cv" role="img" aria-label="${esc(t('ticketQrLabel'))}"></canvas><svg class="qr-live" aria-hidden="true" focusable="false" viewBox="0 0 100 100"><path d="M8 2H92A6 6 0 0 1 98 8V92A6 6 0 0 1 92 98H8A6 6 0 0 1 2 92V8A6 6 0 0 1 8 2Z" pathLength="100" fill="none" stroke="#077a4b" stroke-width="2.4" stroke-linecap="round"/></svg></div>`;
 }
 // Fill any QR placeholders left by ticketQR once the library is available.
 function _fillLazyQR(){
@@ -12024,7 +12023,7 @@ async function selectEvent(ev){
   {const vs=ev==='vlap'?_soleSessionFor('vlap'):null;if(vs&&_vlUnder16(S.loggedIn||getSession(),vs)){_vlAgeModal();return;}}
   if(ev==='runher'&&_runUnder18(S.loggedIn||getSession(),_soleSessionFor('runher'))){_runAgeModal();return;}
   if(ev==='blood'&&_runUnder18(S.loggedIn||getSession(),_soleSessionFor('blood'))){_bldAgeModal();return;}
-  S.selEvent=ev;S.selSession=null;S.regDay=null; // the day switch opens on the first day with rides
+  S.selEvent=ev;S.selSession=null;
   S.promoApplied=null;S._promoMsg=''; // a code applied on another event's ride does not follow the rider here (see selectSessCard)
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
@@ -15549,25 +15548,14 @@ function _on_renderRegister_6(event,el){el.remove()}
 // The session picker is a list of days, not a stack of identical cards (2026-10-10): each day is said
 // once, as a heading (Today / Tomorrow in words), and its sessions are rows under it that lead with
 // the time. A row says its status only when it is news: a few places left, the waitlist, not open yet.
-function _sessDays(list,row,noWord){
+function _sessDays(list,row){
   const days=[];
   list.forEach(s=>{const d=String(s.session_date||s.id).slice(0,10),g=days[days.length-1];if(g&&g.d===d)g.l.push(s);else days.push({d,s,l:[s]});});
-  return days.map(g=>{const dw=noWord?'':_dayWord(g.d); // the day switch already says Today or Tomorrow
+  return days.map(g=>{const dw=_dayWord(g.d);
     return`<section class="sess-day"><h3 class="sess-day-h">${dw?`<strong class="sess-card-dw">${esc(dw)}</strong> &middot; `:''}${esc(dayLabel(g.s.day))} &middot; ${esc(shortDate(g.d))}</h3>
       <div class="sess-day-list">${g.l.map(row).join('')}</div></section>`;}).join('');
 }
-// The day switch (round two, 2026-11-08): Today, Tomorrow and Later each show their own rides, in one list per day.
-// 0 today, 1 tomorrow, 2 later, on the KSA calendar.
-function _regDayOf(s){const d=String(s.session_date||s.id).slice(0,10),td=todayStr();if(d<=td)return 0;const tm=new Date(td+'T12:00:00Z');tm.setUTCDate(tm.getUTCDate()+1);return d===tm.toISOString().slice(0,10)?1:2;}
-// A day picked on the switch shows its rides at once (the tab rule: instant); only the marker glides. The pick is
-// kept for this event, so a repaint (a ride picked, a refresh) stays on it.
-function _regDaySet(b){
-  S.regDay={ev:S.selEvent||'jcc',b};
-  const w=document.querySelector('#tab-register .reg-days');if(!w)return;
-  w.querySelectorAll('.reg-day').forEach((x,i)=>{const on=+x.dataset.b===b;x.setAttribute('aria-pressed',String(on));if(on)w.dataset.i=i;});
-  document.querySelectorAll('#tab-register .reg-day-pane').forEach(p=>{p.hidden=+p.dataset.b!==b;});
-}
-// What the step-1 Continue bar says about the ride picked, so a day switched away from never hides it.
+// What the step-1 Continue bar says about the ride picked, so a ride scrolled out of view is still named.
 function _regFootSum(s){
   const d=String(s.session_date||s.id).slice(0,10);let dm='';
   try{dm=new Date(d+'T12:00:00+03:00').toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ});}catch(e){}
@@ -15665,12 +15653,8 @@ function renderRegister(){
           ${_spotHeld(s)?`<span class="sess-card-bf sess-card-reveal">${_cuIc('clock',13)}<bdi>${esc(_revealLine(s))}</bdi></span>`:_bfAt(s)?`<span class="sess-card-bf">${_cuIc('cup',13)}<bdi>${esc(_bfAt(s))}</bdi></span>`:''}
         </button>${_dt}</div>`;
       };
-  // The day switch: shown when the rides fall on more than one of Today, Tomorrow and Later; it opens on the day
-  // the rider last picked here, else the picked ride's day, else the first day with rides.
-  const _bk=[0,1,2].filter(b=>available.some(s=>_regDayOf(s)===b)),_selS=S.selSession&&available.find(s=>s.id===S.selSession);
-  const _cb=S.regDay&&S.regDay.ev===_ev&&_bk.includes(S.regDay.b)?S.regDay.b:_selS?_regDayOf(_selS):_bk[0];
   const sessCards=available.length
-    ? (_bk.length>1?`<div class="reg-days" role="group" aria-label="${esc(t('infoWhen'))}" data-n="${_bk.length}" data-i="${_bk.indexOf(_cb)}">${_bk.map(b=>`<button type="button" class="reg-day" data-b="${b}" aria-pressed="${b===_cb}" data-on-click="${_on('_regDaySet',b)}">${t(['mrToday','mrTomorrow','regDayLater'][b])}</button>`).join('')}</div>${_bk.map(b=>`<div class="reg-day-pane" data-b="${b}"${b===_cb?'':' hidden'}>${_sessDays(available.filter(s=>_regDayOf(s)===b),_row,b<2)}</div>`).join('')}`:_sessDays(available,_row))
+    ? _sessDays(available,_row)
     : _sessLoadFailed()
     ? _loadErr(t('errConnection'),_on("_sessRetry"),{cls:'sess-load-err'})
     : `<div class="cu-empty">
@@ -16255,7 +16239,7 @@ function regNextToReview(){
   if(validateRegInputs()){S.regStep=_regNextStep(_sessDisp(S.selSession),2);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();}
 }
 function regBookAnother(){
-  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;S.regDay=null;
+  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
   renderRegister();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
 }
@@ -17102,7 +17086,7 @@ async function _submitReg(){
     _sendBookingEmail(entries[0]); // confirmation email (no-op unless Brevo is configured server-side)
     S.lastTickets=entries.map(e=>_qGet(e.id)||e);
     S._rHeight='';S._rDate='';S.selSession=null;S.regType=null;
-    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.regDay=null;
+    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
     S.waiverOk=false;S._waiverSess=null; // agreed for THIS booking; the next one asks again
     S._okPlay=true;setTimeout(()=>{S._okPlay=false;},0); // the booked moment plays on this booking's paints only
     const _qn=entries.map(e=>e.queueNum);

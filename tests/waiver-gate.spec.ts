@@ -156,7 +156,7 @@ test.describe('@customer:waiver desk-added booking waiver', () => {
     const line = page.locator('#tab-myrides .cu-qr-box .qr-live path').first();
     await expect(line).toBeVisible();
     const a = await line.evaluate((el) => { const cs = getComputedStyle(el); return { name: cs.animationName, dur: cs.animationDuration, n: cs.animationIterationCount, stroke: cs.stroke }; });
-    expect(a).toEqual({ name: 'qrLive', dur: '2.4s', n: 'infinite', stroke: 'rgb(0, 180, 103)' });
+    expect(a).toEqual({ name: 'qrLive', dur: '2.4s', n: 'infinite', stroke: 'rgb(7, 122, 75)' }); // the action green, #077a4b
     // It moves: the dash offset changes from one moment to the next.
     const off = () => line.evaluate((el) => getComputedStyle(el).strokeDashoffset);
     const first = await off();

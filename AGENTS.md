@@ -761,11 +761,10 @@ The owner's picks on the round-two page; the rules sit in the `ROUND TWO` part a
 - **Placeholders wait 300ms.** Until `S.dataLoaded`, the landing's tiles and My Bookings draw `_skelHtml`, which is
   invisible for 300ms (a CSS animation delay, no timer), so a quick load never flashes grey.
 - **Choose a ride.** The stepper is a progress bar (`.reg-stepper.cu-prog`: the step's name, "Step 1 of 3" and a
-  bar; the step names stay in an sr-only list with `aria-current="step"`). The day switch (`.reg-days`, `_regDayOf`,
-  `_regDaySet`, `S.regDay` per event) shows Today, Tomorrow and Later as panes (`.reg-day-pane[hidden]`), opens on
-  the day picked here, else the picked ride's day, else the first with rides, and is left out when the rides fall on
-  one of them. The marker glides (`--i`, mirrored in RTL); the panes switch at once. The picked ride's tick settles
-  in on the tap only (`S._tickFor`); step 1's Continue bar names the ride picked (`_regFootSum`).
+  bar; the step names stay in an sr-only list with `aria-current="step"`). Every ride is in one list, a heading a day
+  (`_sessDays`): the Today / Tomorrow / Later switch round two added was removed the same day (the user, 2026-11-08:
+  "remove the tomorrow and later filters"). The picked ride's tick settles in on the tap only (`S._tickFor`); step
+  1's Continue bar names the ride picked (`_regFootSum`).
 - **The tab bar steps aside** on a phone while `#tab-register.active` holds a `.mm-reg-foot` (d_smallbars, a `:has()`
   rule), and the Continue bar floats alone at `max(12px, safe area)`. Over a dark ticket, Wallet strip or event tile
   it turns to night glass (`#cust-bottom-nav.lq-night`, `_lqNightWatch`: an IntersectionObserver whose root is a band

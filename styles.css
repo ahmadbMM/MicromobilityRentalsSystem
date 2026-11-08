@@ -6384,7 +6384,8 @@ html[dir="rtl"] .dob-row select{background-position:left 8px center;}
     body.snd96:not(.view-staff) #topbar#topbar .cust-topbar-email{color:var(--snd-mut);}
     body.snd96:not(.view-staff) #topbar#topbar .staff-access-btn{color:var(--snd-mut);}
     body.snd96:not(.view-staff) #topbar#topbar .topbar-btn,
-    body.snd96:not(.view-staff) #topbar#topbar .lang-toggle{color:#DCEFE4;}
+    body.snd96:not(.view-staff) #topbar#topbar .lang-toggle,
+    body.snd96:not(.view-staff) #topbar#topbar .lang-wrap{color:#DCEFE4;}
     body.snd96:not(.view-staff) #topbar#topbar .topbar-btn:hover,
     body.snd96:not(.view-staff) #topbar#topbar .lang-toggle:hover{
       background:rgba(140,220,70,.16);color:#FFFFFF;}
@@ -8449,6 +8450,9 @@ body:not(.view-staff) .mm-reg-foot.cu-foot{flex-wrap:wrap;}
 body:not(.view-staff) .price-preview{background:var(--card-2);border:0;border-radius:var(--r-ctl);padding:14px 16px;}
 body:not(.view-staff) .price-preview-breakdown{font-size:var(--fs-13);color:var(--ink-2);font-weight:500;}
 body:not(.view-staff) .price-preview-total{font-size:var(--fs-20);font-weight:700;color:var(--ink);}
+/* money reads in ink on every light step: the review's rider prices and total were the action green (2026-11-08) */
+body:not(.view-staff) #tab-register .cu-rv-price{font-weight:700;color:var(--ink);}
+body:not(.view-staff) #tab-register .cu-sum-total{font-size:var(--fs-20);font-weight:700;color:var(--ink);}
 body:not(.view-staff) .price-note{margin-top:8px;font-size:var(--fs-13);line-height:1.5;color:var(--ink-2);}
 body:not(.view-staff) #tab-myrides .cu-tk-body>.price-note:last-child{margin-bottom:14px;}
 
@@ -8903,6 +8907,15 @@ html.lite body:not(.view-staff){--glass:var(--glass-solid);--glass-fx:none;--scr
   body:not(.view-staff) :is(#topbar,#cust-bottom-nav,.mm-reg-foot,.mm-cart-foot){border:1px solid CanvasText;}
 }
 
+/* the top bar's words and icons in the system's inks (2026-11-08: the white-header layer under this one still
+   gave the icons and the globe an olive grey, #565c50, a third green, #0b6b41, under the pointer, and the name and
+   email its own greys); the home band and the event skins keep theirs at their heavier weight */
+body:not(.view-staff) #topbar#topbar :is(.topbar-btn,.lang-toggle,.lang-wrap),
+body:not(.view-staff) #topbar#topbar .topbar-btn.danger{color:var(--ink-2);}
+body:not(.view-staff) #topbar#topbar :is(.topbar-btn,.lang-toggle,.lang-wrap):hover{background:var(--tab-pill);color:var(--go);}
+body:not(.view-staff) #topbar#topbar .cust-topbar-name{color:var(--ink);}
+body:not(.view-staff) #topbar#topbar :is(.cust-topbar-email,.staff-access-btn){color:var(--ink-3);}
+
 /* the tab bar: a capsule floating over the page on phones; labels in ink-2 (they sit on glass) */
 body:not(.view-staff) .cust-bnav-btn{color:var(--ink-2);font-weight:500;}
 body:not(.view-staff) .cust-bnav-btn.active{color:var(--go);font-weight:600;}
@@ -9023,20 +9036,7 @@ body:not(.view-staff) .lq-skel-tk i{height:300px;}
 @keyframes lqSkIn{to{opacity:1;}}
 @keyframes lqSkPulse{to{opacity:.55;}}
 
-/* ── Choose a ride: the day switch, one list per day, the picked ride's tick ── */
-body:not(.view-staff) .reg-days{--n:3;--i:0;position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;padding:4px;border-radius:999px;background:var(--card-3);}
-body:not(.view-staff) .reg-days[data-n="2"]{--n:2;}
-body:not(.view-staff) .reg-days[data-i="1"]{--i:1;}
-body:not(.view-staff) .reg-days[data-i="2"]{--i:2;}
-body:not(.view-staff) .reg-days::before{content:'';position:absolute;inset-block:4px;inset-inline-start:4px;width:calc((100% - 8px) / var(--n));border-radius:999px;
-  background:var(--card);box-shadow:var(--pl-1);transform:translateX(calc(var(--i) * 100%));transition:transform .38s var(--ease-calm);}
-html[dir="rtl"] body:not(.view-staff) .reg-days::before{transform:translateX(calc(var(--i) * -100%));}
-body:not(.view-staff) .reg-day{position:relative;z-index:1;min-width:0;min-height:44px;padding:0 10px;border:0;border-radius:999px;background:transparent none;
-  color:var(--ink-2);font-size:var(--fs-15);font-weight:500;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-body:not(.view-staff) .reg-day[aria-pressed="true"]{color:var(--ink);font-weight:600;}
-body:not(.view-staff) .reg-day:focus-visible{outline-offset:-3px;}
-body:not(.view-staff) .reg-day-pane{display:grid;gap:20px;}
-body:not(.view-staff) .reg-day-pane[hidden]{display:none;}
+/* ── Choose a ride: the picked ride's tick ── */
 body:not(.view-staff) .sess-card{--sc-gut:0px;}
 body:not(.view-staff) .sess-wrap .sess-about{inset-inline-start:16px;}
 body:not(.view-staff) .sess-tick{flex:none;width:24px;height:24px;margin-inline-start:auto;display:grid;place-items:center;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line-3);}
@@ -9045,9 +9045,9 @@ body:not(.view-staff) .sess-selected .sess-tick{background:var(--go);box-shadow:
 body:not(.view-staff) .sess-selected .sess-tick svg{opacity:1;}
 body:not(.view-staff) .sess-just .sess-tick{animation:lqTick .42s var(--ease-spring) both;}
 @keyframes lqTick{from{transform:scale(.6);}to{transform:none;}}
-@media (prefers-reduced-motion:reduce){body:not(.view-staff) .sess-just .sess-tick{animation:none;}body:not(.view-staff) .reg-days::before{transition:none;}}
+@media (prefers-reduced-motion:reduce){body:not(.view-staff) .sess-just .sess-tick{animation:none;}}
 body:not(.view-staff) .sess-day-list .sess-card.sess-selected{background:var(--go-wash);box-shadow:none;}
-/* step 1's Continue bar names the ride picked, so a day switched away from never hides it */
+/* step 1's Continue bar names the ride picked, so a ride scrolled out of view is still named */
 body:not(.view-staff) .mm-reg-foot.has-sum{display:flex;align-items:center;gap:12px;}
 body:not(.view-staff) .reg-foot-sum{flex:1;min-width:0;display:grid;line-height:1.3;font-size:var(--fs-13);color:var(--ink-2);}
 body:not(.view-staff) .reg-foot-sum>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -9593,7 +9593,7 @@ body.ar-skin:not(.view-staff) #topbar#topbar,
 body.ar-skin:not(.view-staff) #topbar#topbar *{--text:#fff;--muted:rgba(255,255,255,.64);--muted-l:rgba(255,255,255,.5);--border:rgba(255,255,255,.16);--tint-rgb:255,255,255;--s1:#0b0b0d;--s2:#18181b;--s3:#18181b;}
 body.ar-skin:not(.view-staff) #topbar#topbar .cust-topbar-name{color:#fff;}
 body.ar-skin:not(.view-staff) #topbar#topbar :is(.cust-topbar-email,.staff-access-btn){color:rgba(255,255,255,.62);}
-body.ar-skin:not(.view-staff) #topbar#topbar :is(.topbar-btn,.lang-toggle){color:rgba(255,255,255,.86);}
+body.ar-skin:not(.view-staff) #topbar#topbar :is(.topbar-btn,.lang-toggle,.lang-wrap){color:rgba(255,255,255,.86);} /* the globe too: it was left olive grey on the black bar */
 html body.ar-skin:not(.view-staff) #cust-bottom-nav{background:#0b0b0d;border-top:1px solid rgba(227,38,47,.42);}
 html body.ar-skin .cust-bnav-btn{color:rgba(255,255,255,.6);}
 html body.ar-skin .cust-bnav-btn.active{color:#fff;}

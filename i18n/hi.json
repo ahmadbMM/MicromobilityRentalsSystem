@@ -3882,7 +3882,6 @@
   "cancelPartyNote": "इससे सभी {0} राइडर्स की बुकिंग रद्द हो जाएगी।",
   "keepBookingBtn": "बुकिंग रखें",
   "cancelAllBtn": "सभी {0} की बुकिंग रद्द करें",
-  "regDayLater": "बाद में",
   "greetMorning": "सुप्रभात, {0}",
   "greetAfternoon": "शुभ दोपहर, {0}",
   "greetEvening": "शुभ संध्या, {0}",
