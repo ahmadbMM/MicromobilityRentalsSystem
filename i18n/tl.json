@@ -5885,7 +5885,7 @@
   "frRedeemBtn": "Gamitin",
   "frCarbonNote": "Hindi valid ang libreng sakay mo sa Carbon bike. Pumili ng ibang bike para magamit ito.",
   "refTitle": "Mag-imbita ng kaibigan, libre ang sakay mo",
-  "refHow": "Ibahagi ang iyong link. Ang kaibigang gagawa ng account gamit ito ay makakakuha ng {0}% diskwento sa sarili niyang bike sa una niyang sakay. Kapag nabayaran at natapos ang sakay na iyon, sa Jeddah Corniche Circuit o sa isang Petromin night, may libreng sakay ka.",
+  "refHow": "Ibahagi ang iyong link. Ang kaibigang gagawa ng account gamit ito ay makakakuha ng {0}% diskwento sa sarili niyang bike sa una niyang sakay. Kapag nabayaran at natapos ang sakay na iyon, sa Jeddah Corniche Circuit o sa isang Petromin night, may libreng sakay ka na magagamit sa loob ng {1} araw.",
   "refYourCode": "Iyong code",
   "refShare": "Ibahagi ang link ko",
   "refCopy": "Kopyahin ang link",

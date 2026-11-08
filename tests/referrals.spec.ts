@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, unlockStaff, waitForSb } from './helpers/supabase';
 
@@ -47,6 +48,19 @@ test.describe('@customer:account referrals', () => {
     expect(new URL(link).pathname).toBe('/signup');
     expect(new URL(link).searchParams.get('ref')).toBe('K7MQ2X');
     expect(await page.evaluate(`t('refMsg')`)).toContain('{0}');
+  });
+
+  test('the card says how long the free ride lasts, as the database sets it (the user, 2026-11-08: 30 days)', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ days: 30 }) });
+    await account(page);
+    const note = page.locator('#ref-mine .ref-note');
+    await expect(note).toContainText('you get a free ride to use within 30 days.');
+    await page.evaluate(`S._refMine={...S._refMine,days:45};_refPaint()`);
+    await expect(note).toContainText('within 45 days.');
+    for (const l of ['ar', 'fr', 'es', 'pt', 'ur', 'hi', 'tl', 'ne', 'bn']) {
+      const how = JSON.parse(readFileSync(`lang/${l}.json`, 'utf8')).refHow as string;
+      expect(how, l).toContain('{0}'); expect(how, l).toContain('{1}');
+    }
   });
 
   test('no card while referrals are off, or before the database has them', async ({ page }) => {

@@ -5885,7 +5885,7 @@
   "frRedeemBtn": "Canjear",
   "frCarbonNote": "Tu paseo gratis no es válido en una bici Carbon. Elige otra bici para usarlo.",
   "refTitle": "Invita a tus amigos y rueda gratis",
-  "refHow": "Comparte tu enlace. Un amigo que cree una cuenta con él recibe un {0} % de descuento en su propia bici en su primer paseo. Cuando ese paseo esté pagado y terminado, en el Circuito de la Corniche de Yeda o en una noche Petromin, recibes un paseo gratis.",
+  "refHow": "Comparte tu enlace. Un amigo que cree una cuenta con él recibe un {0} % de descuento en su propia bici en su primer paseo. Cuando ese paseo esté pagado y terminado, en el Circuito de la Corniche de Yeda o en una noche Petromin, recibes un paseo gratis para usar en {1} días.",
   "refYourCode": "Tu código",
   "refShare": "Compartir mi enlace",
   "refCopy": "Copiar enlace",

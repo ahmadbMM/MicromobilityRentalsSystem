@@ -5885,7 +5885,7 @@
   "frRedeemBtn": "Resgatar",
   "frCarbonNote": "Seu passeio grátis não é válido em bicicleta Carbon. Escolha outra bicicleta para usá-lo.",
   "refTitle": "Convide amigos e pedale de graça",
-  "refHow": "Compartilhe seu link. Um amigo que criar uma conta com ele ganha {0}% de desconto na própria bicicleta no primeiro passeio. Quando esse passeio estiver pago e terminado, no Circuito da Corniche de Jeddah ou numa noite Petromin, você ganha um passeio grátis.",
+  "refHow": "Compartilhe seu link. Um amigo que criar uma conta com ele ganha {0}% de desconto na própria bicicleta no primeiro passeio. Quando esse passeio estiver pago e terminado, no Circuito da Corniche de Jeddah ou numa noite Petromin, você ganha um passeio grátis para usar em até {1} dias.",
   "refYourCode": "Seu código",
   "refShare": "Compartilhar meu link",
   "refCopy": "Copiar link",

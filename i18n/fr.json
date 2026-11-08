@@ -5885,7 +5885,7 @@
   "frRedeemBtn": "Utiliser",
   "frCarbonNote": "Votre sortie gratuite n’est pas valable sur un vélo Carbon. Choisissez un autre vélo pour l’utiliser.",
   "refTitle": "Invitez des amis, roulez gratuitement",
-  "refHow": "Partagez votre lien. Un ami qui crée un compte avec bénéficie de {0} % de réduction sur son propre vélo lors de sa première sortie. Quand cette sortie est payée et terminée, au Circuit de la Corniche de Djeddah ou lors d’une soirée Petromin, vous recevez une sortie gratuite.",
+  "refHow": "Partagez votre lien. Un ami qui crée un compte avec bénéficie de {0} % de réduction sur son propre vélo lors de sa première sortie. Quand cette sortie est payée et terminée, au Circuit de la Corniche de Djeddah ou lors d’une soirée Petromin, vous recevez une sortie gratuite, à utiliser dans les {1} jours.",
   "refYourCode": "Votre code",
   "refShare": "Partager mon lien",
   "refCopy": "Copier le lien",
