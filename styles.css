@@ -10366,12 +10366,17 @@ body.view-staff .pii-v:focus{outline:medium none;}
   body.view-staff .am-list #am-cust-rows .am-row:last-child>.am-cust:last-child{border-bottom:0;}
   body.view-staff .am-list #am-cust-rows .am-cust:hover{background:rgba(var(--tint-rgb),.025);}
   body.view-staff .am-list :is(.am-cust,.am-head) .am-cust-main{flex:1;min-width:0;display:grid;align-items:center;gap:0 16px;
-    grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) 124px minmax(0,1.6fr) minmax(0,1.3fr);}
+    grid-template-columns:minmax(150px,1.25fr) minmax(0,1.1fr) 124px minmax(0,1.3fr) minmax(0,1.1fr);}
   body.view-staff .am-list .am-cust-contact{display:contents;}
   body.view-staff .am-list .am-cust-main>*,body.view-staff .am-list .am-cust-contact>*{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
   body.view-staff .am-list .am-cust-name{font-size:14px;font-weight:600;line-height:20px;}
-  body.view-staff .am-list .am-c-sub{display:flex;gap:10px;overflow:hidden;line-height:18px;}
-  body.view-staff .am-list .am-c-sub .am-meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;margin:0;}
+  /* under the name: the stage pill whole, then where they heard of us and the sorted-on value, each onto a line of
+     its own when the column is narrow (2026-11-08: on a laptop the pill was squeezed to "Ne" and "No-s" with the
+     next item pressed against it), the same as the tags (the owner, 2026-10-11: "no clipped pills") */
+  body.view-staff .am-list .am-c-sub{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;line-height:18px;}
+  body.view-staff .am-list .am-c-sub>:empty{display:none;}
+  body.view-staff .am-list .am-c-sub .am-meta{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;margin:0;}
+  body.view-staff .am-list .am-c-sub .n6p-stage{display:block;max-width:100%;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;}
   body.view-staff .am-list :is(.am-c-email,.am-c-phone){font-size:13px;color:var(--text);line-height:20px;}
   body.view-staff .am-list .am-c-phone{font-variant-numeric:tabular-nums;}
   /* every tag and badge shows (2026-10-11, the owner: "i want all the tags to be visible dont show +1 +2"): they wrap
