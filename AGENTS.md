@@ -516,6 +516,27 @@ bike, paid or not) on the `snd96` ride, shown only to those who rode it, drawn `
 greens, `BDG_SPECIAL`; `_bdgSpCls` gives a special chip `special sp-<colour>`, whose colours are CSS
 variables) and popped once (`BDG_CHEER`).
 
+## Badge requests (2026-11-08, migration 20261108210000)
+
+The owner: "add a button on badges for customers to request a badge and adding a proof either a pdf or an image as optional
+and a comment too optional". A rider asks for a badge the catalogue says staff give (`!auto`; Marshal counts, though rides led
+earn it too), every ladder level not reached yet (`_bdrChoices`, `_bdrAsk`), from **Request a badge** under the badges
+(`_bdrMineHtml`) or **Request this badge** in a badge's popup (`_bdrPopHtml`, the ladder's next level). The dialog (`_bdrPaint`,
+in `#confirm-modal`) takes the badge, an optional comment (500) and an optional proof: a picture made small as a Victory Lap
+receipt is, or a PDF of 2 MB at most whose bytes start `%PDF` (`_bdrFile`), sent as a data: URL through
+`customer_badge_request` (token-checked; refuses `auto`, retired, held, or an eleventh request waiting; one request waits per
+badge and sending again replaces it). `customer_my_badge_requests` gives the rider theirs (waiting, or answered in 60 days): a
+tile waiting shows a clock, its popup says when it was asked, a declined one shows staff's note and Ask again. Without the
+functions (`S._bdrOff`) nothing offers a request; without the catalogue neither.
+Staff: `badge_requests` (staff-only RLS) heads People > Badges once it has rows (`_bdrHtml`), its waiting number on the Badges
+pill; read without the proof (`BDR_COLS`), each proof read alone when opened (`_bdrProof`: a picture shown, a PDF opened in a
+tab through a blob: link, since the CSP frames none). **Give** claims the request first (`_bdrAnswer`: `status=eq.pending`, so
+two desks never both answer; an empty claim says another desk did) and then writes the badge with the levels under it
+(`_bdgWithLower`); one already held only closes the request. **Decline** asks on a second tap. Both send the note the rider
+reads and both undo (`_bdrReopen`). A proof is deleted 30 days after the answer by pg_cron `mm-badge-proofs`
+(`_badge_proof_purge`); the Privacy Notice says so. `tests/badge-requests.spec.ts`; the stub lists the table and both
+functions as not yet in the database.
+
 ## Titles and the Community page (2026-11-02)
 
 Migration 20261102200000. `titles` (admins' catalogue: English and/or Arabic name, a `BDG_COLORS` colour, `auto_rides`; both columns stay NOT NULL, so `_ttSave` stores a name typed in one language in both and `_ttEdit` opens it with only that box filled),

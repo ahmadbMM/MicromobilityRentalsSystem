@@ -12194,3 +12194,56 @@ body.view-staff #tab-community .ppl-find .search-input{padding-inline-start:12px
     font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;
   }
 }
+/* ── Badge requests (2026-11-08, migration 20261108210000) ────────────────────────────────────────
+   The rider's: the button under the badges, the request line in a badge's popup, the request dialog.
+   Staff's: the requests heading People > Badges, each with its proof, a note and Give / Decline. ── */
+.mr-bdr{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:14px;}
+.mr-bdr-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;}
+.mr-bdr-hint{margin:0;font-size:13px;line-height:1.45;color:var(--muted);}
+.badge-pop-reqst{display:flex;align-items:flex-start;justify-content:center;gap:8px;margin-top:14px;font-size:13px;font-weight:400;line-height:1.45;color:var(--text);text-align:start;}
+.badge-pop-reqst b{font-weight:600;}
+.badge-pop-reqst .cu-ic{flex:none;margin-top:1px;}
+.bdr-box{width:min(92vw,440px);max-height:calc(100dvh - 48px);overflow-y:auto;}
+.bdr-box select,.bdr-box textarea{width:100%;}
+.bdr-box .form-group{margin-bottom:18px;}
+.bdr-box textarea{resize:vertical;min-height:76px;}
+.bdr-pick{display:flex;align-items:center;gap:12px;margin:-4px 0 14px;padding:10px 12px;border:1px solid var(--border);border-radius:6px;}
+.bdr-pick .bdg-m{width:40px;height:40px;}
+.bdr-pick-t{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.bdr-pick-t b{font-size:14px;font-weight:700;}
+.bdr-pick-t small{font-size:12.5px;line-height:1.4;color:var(--muted);}
+.bdr-was{margin:-6px 0 14px;font-size:13px;line-height:1.45;color:var(--muted);}
+.bdr-hint{margin:2px 0 10px;font-size:12.5px;line-height:1.45;color:var(--muted);}
+.bdr-file{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:8px 10px;border:1px solid var(--border);border-radius:6px;}
+.bdr-thumb{width:44px;height:44px;object-fit:cover;border-radius:4px;flex:none;}
+.bdr-doc{display:flex;align-items:center;justify-content:center;width:44px;height:44px;flex:none;color:var(--green);}
+.bdr-fname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;}
+body:not(.view-staff) .mr-bdr-hint,body:not(.view-staff) .badge-pop-reqst{font-size:var(--fs-13);color:var(--ink-2);}
+body:not(.view-staff) :is(.bdr-pick,.bdr-file){border-color:var(--line);border-radius:var(--r-ctl);background:var(--card-2);}
+body:not(.view-staff) :is(.bdr-pick-t small,.bdr-was,.bdr-hint){color:var(--ink-2);}
+body:not(.view-staff) .bdr-doc{color:var(--go);}
+:is(#tab-community,#tab-customers) .bdr-st{margin:0 0 18px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;display:flex;flex-direction:column;gap:8px;}
+:is(#tab-community,#tab-customers) .bdr-st-h{display:flex;align-items:center;gap:8px;margin:0;}
+:is(#tab-community,#tab-customers) .bdr-st-n{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;}
+:is(#tab-community,#tab-customers) .bdr-st-list{display:flex;flex-direction:column;}
+:is(#tab-community,#tab-customers) .bdr-row{padding:12px 0;border-top:1px solid var(--border);}
+:is(#tab-community,#tab-customers) .bdr-row.done>.bdg-item>:is(.bdg-m,.bdg-txt){opacity:.7;}
+:is(#tab-community,#tab-customers) .bdr-who{padding:0;border:0;background:none;color:var(--text);font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
+:is(#tab-community,#tab-customers) .bdr-cmt{margin-top:2px;font-size:13px;line-height:1.45;color:var(--text);white-space:pre-line;overflow-wrap:anywhere;}
+:is(#tab-community,#tab-customers) .bdr-held{color:var(--orange);font-weight:600;}
+:is(#tab-community,#tab-customers) .bdr-chip{font-weight:600;}
+:is(#tab-community,#tab-customers) .bdr-chip.bdr-given{color:var(--green);}
+:is(#tab-community,#tab-customers) .bdr-chip.bdr-declined{color:var(--red);}
+:is(#tab-community,#tab-customers) .bdr-pfb{display:inline-flex;align-items:center;gap:6px;flex:none;align-self:flex-start;}
+:is(#tab-community,#tab-customers) .bdr-nopf{flex:none;align-self:flex-start;}
+:is(#tab-community,#tab-customers) .bdr-dec{margin-top:10px;margin-inline-start:46px;display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+:is(#tab-community,#tab-customers) .bdr-dec .form-group{flex:1 1 240px;margin:0;}
+:is(#tab-community,#tab-customers) .bdr-acts{display:flex;gap:6px;flex-wrap:wrap;}
+:is(#tab-community,#tab-customers) .bdr-acts .btn-sm{min-height:36px;}
+:is(#tab-community,#tab-customers) .bdr-st-more{align-self:flex-start;margin-top:4px;}
+:is(#tab-community,#tab-customers) .bdr-st-none{padding:4px 0;}
+.bdr-pf-doc{display:flex;flex-direction:column;align-items:center;gap:8px;margin:18px 0 6px;color:var(--green);font-size:13px;font-weight:600;overflow-wrap:anywhere;text-align:center;}
+.bdr-pf-doc bdi{color:var(--text);}
+@media(max-width:767px){
+  :is(#tab-community,#tab-customers) .bdr-dec{margin-inline-start:0;}
+}
