@@ -40,8 +40,10 @@ test('the step action buttons are in a sticky footer bar', async ({ page }) => {
 
 // On a phone the sticky Continue bar used to stick to the very bottom of the screen, which is
 // where the fixed bottom bar sits, and the bottom bar is painted above it: the button was out
-// of sight until the rider scrolled to the end of a long session list.
-test('on a phone the sticky Continue bar sits above the bottom bar, not under it', async ({ page }) => {
+// of sight until the rider scrolled to the end of a long session list. Since round two (the owner's
+// pick d_smallbars, 2026-11-08) the tab bar steps aside on the booking steps and the Continue bar
+// floats alone near the bottom, so nothing is painted over it and it holds no room for a second bar.
+test('on a phone the sticky Continue bar floats alone near the bottom, the tab bar stepped aside', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 700 });
   const many = Array.from({ length: 10 }, (_, i) => ({
     id: `2099-02-${String(i + 1).padStart(2, '0')}`, day: 'Friday', session_date: `2099-02-${String(i + 1).padStart(2, '0')}`,
@@ -56,11 +58,11 @@ test('on a phone the sticky Continue bar sits above the bottom bar, not under it
   await page.evaluate(() => window.scrollTo(0, 250));
   await page.waitForTimeout(100);
 
-  const nav = (await page.locator('#cust-bottom-nav').boundingBox())!;
+  await expect(page.locator('#cust-bottom-nav')).toBeHidden();      // the tab bar steps aside
   const btn = page.locator('#tab-register .mm-reg-foot button', { hasText: 'Continue' });
   const box = (await btn.boundingBox())!;
-  expect(nav.y).toBeLessThan(700);                          // the bottom bar is on screen
-  expect(box.y + box.height).toBeLessThanOrEqual(nav.y + 1); // and the button sits on top of it
+  expect(box.y + box.height).toBeLessThanOrEqual(700);              // the button is on screen
+  expect(700 - (box.y + box.height)).toBeLessThan(40);              // near the bottom, not lifted over a gone bar
   const onTop = await btn.evaluate((el) => {
     const r = el.getBoundingClientRect();
     const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);

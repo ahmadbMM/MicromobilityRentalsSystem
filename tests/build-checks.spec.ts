@@ -209,6 +209,20 @@ test.describe('@build build checks', () => {
     expect(bad.offenders.map((o) => o.prop)).toEqual(['color', 'box-shadow']);
     expect(bad.offenders.every((o) => o.line === 3)).toBe(true);
     expect(checkCustomerColors('.no-block{color:#fff}').found).toBe(false);
+    // round two (2026-11-08): the wider colour functions are raw colours too; a token may hold them, color-mix() of tokens is fine
+    const wide = checkCustomerColors([
+      '/* CUSTOMER SYSTEM (2026-09-30) */',
+      'body:not(.view-staff){--a:oklch(70% .1 150);--b:color(display-p3 0 1 .5);}',
+      'body:not(.view-staff) .a{color:oklch(70% .1 150);}',
+      'body:not(.view-staff) .b{background:oklab(.7 -.1 .1);}',
+      'body:not(.view-staff) .c{border-color:lab(50% 20 30);}',
+      'body:not(.view-staff) .d{outline-color:lch(50% 20 30);}',
+      'body:not(.view-staff) .e{fill:hwb(150 10% 20%);}',
+      'body:not(.view-staff) .f{stroke:color(display-p3 0 1 .5);}',
+      'body:not(.view-staff) .g{color:color-mix(in oklab,var(--a),var(--b));background:var(--a);}',
+      '/* END CUSTOMER SYSTEM */',
+    ].join('\n'));
+    expect(wide.offenders.map((o) => o.prop)).toEqual(['color', 'background', 'border-color', 'outline-color', 'fill', 'stroke']);
   });
 
   test('no emoji anywhere in the source: icons are drawn', async () => {

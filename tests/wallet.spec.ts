@@ -286,7 +286,8 @@ test.describe('@customer:account wallet', () => {
 
   test('the review carries the switch: off by default, and it says what is left', async ({ page }) => {
     await rider(page, { queue_entries: [], 'rpc:customer_wallet': mine });
-    await page.evaluate(`S._cwUse=false;(()=>{const h=document.createElement('div');h.id='cw-rv';h.innerHTML=_cwReviewSlot(_sessGet('s1'),'',false,200);document.body.appendChild(h);})()`);
+    // at the top of the page: appended under the footer, a short landing (round two's band) left it under the floating tab bar
+    await page.evaluate(`S._cwUse=false;(()=>{const h=document.createElement('div');h.id='cw-rv';h.innerHTML=_cwReviewSlot(_sessGet('s1'),'',false,200);document.body.prepend(h);})()`);
     const slot = page.locator('#cw-rv .cw-sw');
     await expect(slot).toContainText('You have');
     await expect(slot.locator('input')).not.toBeChecked();

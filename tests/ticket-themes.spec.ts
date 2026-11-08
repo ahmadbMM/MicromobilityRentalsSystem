@@ -59,11 +59,11 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     // a Petromin night: Petromin's speed stripes and its logo (2026-10-12)
     expect(by.petromin).toMatchObject({ th: 'petromin', bg: 'rgb(255, 255, 255)', mark: '/assets/petromin-logo.png' });
     expect(by.petromin.img).toContain('d6202a');
-    // Run for Her: blush, the partners' marks; events: the violet wash
+    // Run for Her: blush, the partners' marks; events: the plum wash (round two, 2026-11-08: the rider side's own hue, not a framework violet)
     expect(by.runher).toMatchObject({ th: 'runher', bg: 'rgb(255, 255, 255)', mark: '/assets/runher-partners.webp' });
     expect(by.runher.img).toContain('radial-gradient');
     expect(by.event).toMatchObject({ th: 'event', mark: '/logo-dark.webp' });
-    expect(by.event.img).toContain('124, 58, 237');
+    expect(by.event.img).toContain('140, 59, 110');
   });
 
   test('the number wears the event’s accent and the text stays readable on each card', async ({ page }) => {
@@ -74,7 +74,7 @@ test.describe('@customer:tickets every ticket in its event’s colours', () => {
     })));
     expect(ink.jcc.num).toBe('rgb(159, 213, 238)');
     expect(ink.runher.num).toBe('rgb(194, 65, 110)');
-    expect(ink.event.num).toBe('rgb(109, 40, 217)');
+    expect(ink.event.num).toBe('rgb(140, 59, 110)');
     expect(ink.comm.num).toBe('rgb(7, 122, 75)');
     // labels: white-ish on the navy, ink on the white cards (never the night ticket's pale ink on white)
     expect(ink.jcc.label).toMatch(/^rgba\(255, 255, 255/);

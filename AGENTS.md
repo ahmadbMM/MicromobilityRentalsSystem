@@ -655,7 +655,8 @@ price, payment, venue and the bike rule until after booking.
 - **One layer, last in the file.** Everything a rider sees answers to the `CUSTOMER SYSTEM (2026-09-30)`
   block at the end of `styles.css`, scoped to `body:not(.view-staff)` (staff screens never match it; their
   styling is unchanged, though English strings the two sides share read in sentence case there too). Its token list is the mm-platform tokens: paper, ink, one action green (`--go`), neon
-  only on the night surface. Outside the token list the block says `var(--name)`: **the build refuses a
+  on the night surface and, since round two (2026-11-08), as a fill with ink type on light (never neon text on
+  light). Outside the token list the block says `var(--name)`: **the build refuses a
   raw #hex, rgb() or hsl() between its banners** (`checkCustomerColors`, scripts/split-staff.mjs,
   tests/build-checks.spec.ts). Sentence case and no tracking on every label (`:is(#cu,*)` weighs as an id
   so it outranks the older id-scoped rules); 10px controls, 14px cards, 18px sheets; the primary action
@@ -746,6 +747,43 @@ brought the template look back. Fixed, and guarded so it stays fixed:
   old saved `regStep` 2.5 opens the review.
 - **Copy**: no "Please" at the start of rider messages, no "successfully", no "it only takes a minute".
   Write "Enter your email.", "Saved.", "You’re signed out."
+
+## Rider round two (2026-11-08)
+
+The owner's picks on the round-two page; the rules sit in the `ROUND TWO` part at the end of the customer system
+(styles.css), `tests/round-two-rider.spec.ts` holds the behaviour.
+- **Home.** `_lqBandHtml`: the brand green band with the Corniche route (inline SVG paths, no `data:` URL) under a
+  greeting in Riyadh's time of day (`greetMorning|Afternoon|Evening`, the first name in a `<bdi>`) and a season line in
+  the account page's own words (`mrRidesU`, `mrStreak`, `mrToNext`). On a phone it runs under the top bar, which is
+  clear while the band is under it (`body.lq-on-band`, set by `_lqBandWatch`, an IntersectionObserver on the band whose
+  root starts under the bar; no scroll handler). Today's card overlaps its foot; its button is a neon fill with ink
+  type (d_neon: neon fills on light are allowed, never neon text). "Pick your event" carries the tile count.
+- **Placeholders wait 300ms.** Until `S.dataLoaded`, the landing's tiles and My Bookings draw `_skelHtml`, which is
+  invisible for 300ms (a CSS animation delay, no timer), so a quick load never flashes grey.
+- **Choose a ride.** The stepper is a progress bar (`.reg-stepper.cu-prog`: the step's name, "Step 1 of 3" and a
+  bar; the step names stay in an sr-only list with `aria-current="step"`). The day switch (`.reg-days`, `_regDayOf`,
+  `_regDaySet`, `S.regDay` per event) shows Today, Tomorrow and Later as panes (`.reg-day-pane[hidden]`), opens on
+  the day picked here, else the picked ride's day, else the first with rides, and is left out when the rides fall on
+  one of them. The marker glides (`--i`, mirrored in RTL); the panes switch at once. The picked ride's tick settles
+  in on the tap only (`S._tickFor`); step 1's Continue bar names the ride picked (`_regFootSum`).
+- **The tab bar steps aside** on a phone while `#tab-register.active` holds a `.mm-reg-foot` (d_smallbars, a `:has()`
+  rule), and the Continue bar floats alone at `max(12px, safe area)`. Over a dark ticket, Wallet strip or event tile
+  it turns to night glass (`#cust-bottom-nav.lq-night`, `_lqNightWatch`: an IntersectionObserver whose root is a band
+  across the bar, rebuilt when a rider screen is drawn). A new dark ticket theme joins `_LQ_DARK`.
+- **Busy buttons.** Continue (the async steps) and Confirm carry `aria-busy="true"` and a spinner drawn as the
+  button's `::after`, the label kept (`_regBusyBtn`; Confirm reads `S.regSubmitting`).
+- **The booked moment** (`_bkOkHtml`): a tick drawn by `stroke-dashoffset` in a disc that settles, the ride and time,
+  the number large in tabular figures, Show my ticket (`_bkOkShow`) and the Wallet button. It plays once, on the
+  booking (`S._okPlay`, cleared on the next tick); the booking's quiet toast is the polite announcement;
+  `haptic(30)` buzzes once on Android and not under reduced motion. `haptic()` has no iOS branch any more (iOS
+  stopped web haptics in 26.5).
+- **The cancel dialog** is a radio group (`.cr-opts[role=radiogroup]`, native radios in `.cancel-reason-opt` labels,
+  nothing checked, `_crPick`), the answers stacked with the cancel first (`cancelAllBtn`: "Cancel the booking for
+  all {0}").
+- **Reduced motion.** clean-css minified the global kill switch's `.01ms` to `NaNs`, so app.css never had it: it is
+  written `1e-5s` now. Round two's motion also has its own reduced rules; the Wallet stack's expand checks `_sb()`.
+- **The colour check** also refuses raw `oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()` and `color()` in the customer
+  system (tokens may hold them; `color-mix()` of tokens is fine).
 
 ## Accounts and Members as a list (2026-10-10)
 

@@ -1215,7 +1215,11 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   
   cancelPartyNote:'This cancels the booking for all {0} riders.',
   keepBookingBtn:'Keep booking',
-  cancelAllBtn:'Cancel for all {0}',
+  cancelAllBtn:'Cancel the booking for all {0}',
+  regDayLater:'Later',
+  greetMorning:'Good morning, {0}',
+  greetAfternoon:'Good afternoon, {0}',
+  greetEvening:'Good evening, {0}',
   mrRidesU_zero:'rides',
   mrRidesU_one:'ride',
   mrRidesU_two:'rides',
@@ -1830,7 +1834,11 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   
   cancelPartyNote:'سيُلغى الحجز لجميع المشاركين ({0}).',
   keepBookingBtn:'إبقاء الحجز',
-  cancelAllBtn:'إلغاء للجميع ({0})',
+  cancelAllBtn:'إلغاء الحجز للجميع ({0})',
+  regDayLater:'لاحقاً',
+  greetMorning:'صباح الخير يا {0}',
+  greetAfternoon:'مساء الخير يا {0}',
+  greetEvening:'مساء الخير يا {0}',
   mrRidesU_zero:'جولة',
   mrRidesU_one:'جولة',
   mrRidesU_two:'جولة',
@@ -5760,18 +5768,11 @@ function _rgPills(cur,fn,slot,sess){
 }
 // Single venue: tickets link straight to the circuit pin (locations/branches removed from the UI).
 const DIRECTIONS_URL='https://maps.app.goo.gl/zJLjmiaJgfJDKQwY7';
-// Haptic tap on key confirmations. iOS Safari has no Vibration API; since 17.4 a hidden
-// checkbox[switch] label click fires the Taptic Engine (patched on some newer builds -
-// this silently does nothing there). Android uses navigator.vibrate.
-function haptic(){
-  try{if(navigator.vibrate){navigator.vibrate(10);return;}}catch(e){}
-  try{
-    const l=document.createElement('label');l.style.cssText='position:fixed;left:-999px;top:-999px';
-    const i=document.createElement('input');i.type='checkbox';i.setAttribute('switch','');
-    l.appendChild(i);document.body.appendChild(l);l.click();
-    requestAnimationFrame(()=>l.remove());
-  }catch(e){}
-}
+// A short buzz on key confirmations: navigator.vibrate, which Android's Chromium browsers have. iOS has
+// no web haptics since 26.5 (the hidden switch this used to click there does nothing), so that branch
+// is gone (round two, 2026-11-08). ms names a designed buzz - the booking's 30ms - which also stays
+// still for a rider who asks for reduced motion (the owner's pick, d_buzz).
+function haptic(ms){try{if(navigator.vibrate&&!(ms&&_sb()==='auto'))navigator.vibrate(ms||10);}catch(e){}}
 // While the on-screen keyboard is open (visual viewport shrinks by >150px), unstick the
 // sticky footer bars so they never float over the field being typed in (iOS Safari quirk).
 // The keyboard only opens for a focused field, so while none has focus the viewport's height
@@ -11846,7 +11847,7 @@ async function selectSessCard(id){
   S._qtyCapNote=false;
   if(_isCommunity(s)&&_needsBike(s)&&s.member_cap!=null)_mbAsk(id,true); // the members' bikes may be all taken (member_cap)
   if(_rideKind(s)==='saturday'&&S._satLink===true){_satLinkModal();return;} // the answer came while the gates were asked
-  S.selSession=id;renderRegister();
+  S.selSession=id;S._tickFor=id;renderRegister();S._tickFor=null; // the tick settles in on this repaint only
 }
 // ── A link that opens an event, and a date ────────────────────────────────────
 // micromobility.sa/experiences hands a rider over with ?ev=<event>&session=<id> - the event and
@@ -11981,7 +11982,7 @@ async function selectEvent(ev){
   {const vs=ev==='vlap'?_soleSessionFor('vlap'):null;if(vs&&_vlUnder16(S.loggedIn||getSession(),vs)){_vlAgeModal();return;}}
   if(ev==='runher'&&_runUnder18(S.loggedIn||getSession(),_soleSessionFor('runher'))){_runAgeModal();return;}
   if(ev==='blood'&&_runUnder18(S.loggedIn||getSession(),_soleSessionFor('blood'))){_bldAgeModal();return;}
-  S.selEvent=ev;S.selSession=null;
+  S.selEvent=ev;S.selSession=null;S.regDay=null; // the day switch opens on the first day with rides
   S.promoApplied=null;S._promoMsg=''; // a code applied on another event's ride does not follow the rider here (see selectSessCard)
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
@@ -12777,42 +12778,46 @@ function renderLandingAvail(){
   if(ev){
     if(!cust){ev.innerHTML='';}
     else{
-      ev.innerHTML=`${_todayCardHtml(cust)}${_frLandHtml(cust)}
-        <div class="landing-events-title">${t('landChooseEvent')}</div>
-        <div class="landing-events-grid">
-          ${_pmMember()?_lecWrap('petromin',_pmCardHtml()):''}
-          ${_bldLive()?_bldCardWrap():''}
-          ${_vlLive()?_lecWrap('vlap',_vlCardHtml()):''}
-          ${_arLive()?_lecWrap('arena',_arCardHtml()):''}
-          ${_runHerLive()?_lecWrap('runher',_runCardHtml()):''}
-          ${_showSnd96()?_lecWrap('snd96',`<button class="landing-event-card lec2 ev-snd96 snd96-card" data-on-click="${_on("selectEvent","snd96")}">
+      // Round two (2026-11-08): the brand band and its greeting lead; the heading says how many events there are. Until
+      // the first load lands, tile-shaped placeholders that only show after 300ms (styles.css, .lq-skel).
+      const tiles=[
+          _pmMember()?_lecWrap('petromin',_pmCardHtml()):'',
+          _bldLive()?_bldCardWrap():'',
+          _vlLive()?_lecWrap('vlap',_vlCardHtml()):'',
+          _arLive()?_lecWrap('arena',_arCardHtml()):'',
+          _runHerLive()?_lecWrap('runher',_runCardHtml()):'',
+          _showSnd96()?_lecWrap('snd96',`<button class="landing-event-card lec2 ev-snd96 snd96-card" data-on-click="${_on("selectEvent","snd96")}">
             <span class="lec2-copy">
               <span class="lec-title">${t('landSnd96CardTitle')}</span>
               <span class="lec-meta">${t('landSnd96Meta')}</span>
             </span>
             <span class="lec2-logo"><img src="/assets/snd96-logo.svg" alt="${esc(t('evSnd96Name'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_1",_EV,_EL)}"></span>
-          </button>`):''}
-          ${_eventsLive()?_lecWrap('event',`<button class="landing-event-card lec2 ev-event" data-on-click="${_on("selectEvent","event")}">
+          </button>`):'',
+          _eventsLive()?_lecWrap('event',`<button class="landing-event-card lec2 ev-event" data-on-click="${_on("selectEvent","event")}">
             <span class="lec2-copy">
               <span class="lec-title">${t('landEventsCardTitle')}</span>
               <span class="lec-meta">${t('landEventsMeta')}</span>
             </span>
-          </button>`):''}
-          ${_lecWrap('jcc',`<button class="landing-event-card lec2 ev-jcc" data-on-click="${_on("selectEvent","jcc")}">
+          </button>`):'',
+          _lecWrap('jcc',`<button class="landing-event-card lec2 ev-jcc" data-on-click="${_on("selectEvent","jcc")}">
             <span class="lec2-copy">
               <span class="lec-title">${t('landJccCardTitle')}</span>
               <span class="lec-meta">${t('landJccMeta')}</span>
             </span>
             <span class="lec2-logo"><img src="/jcc.webp" class="mm-on-light" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_2",_EV,_EL)}"><img src="/jcc-white.webp" class="mm-on-dark" alt="${esc(t('landJccTitle'))}" loading="lazy" decoding="async" data-on-error="${_on("_on_renderLandingAvail_3",_EV,_EL)}"></span>
-          </button>`)}
-          ${_lecWrap('community',`<button class="landing-event-card community lec2 ev-community" data-on-click="${_on("selectEvent","community")}">
+          </button>`),
+          _lecWrap('community',`<button class="landing-event-card community lec2 ev-community" data-on-click="${_on("selectEvent","community")}">
             <span class="lec2-copy">
               <span class="lec-title">${t('landCommTitle')}</span>
             </span>
             <span class="lec2-logo" aria-hidden="true"><img src="/logo-dark.webp" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="/logo.webp" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
-          </button>`)}
-        </div>`;
+          </button>`)].filter(Boolean);
+      const today=S.dataLoaded?_todayCardHtml(cust):'';
+      ev.innerHTML=`${_lqBandHtml(cust,!!today)}${S.dataLoaded?`${today}${_frLandHtml(cust)}
+        <h2 class="landing-events-title">${t('landChooseEvent')}<span class="lec-n">${tiles.length}</span></h2>
+        <div class="landing-events-grid">${tiles.join('')}</div>`:_skelHtml(3,'lq-skel-lec')}`;
     }
+    _lqBandWatch();_lqNightWatch();
   }
   if(cust){strip.innerHTML='';_openEventLink();return;} // signed-in landing shows no availability strip; a parked event link opens now
   const open=openSessions().filter(s=>_evMatch(s,'jcc')&&!_sessPastDay(s)); // strip = public JCC availability only, today onwards; every row opens the circuit list, so it lists what that list holds
@@ -12867,6 +12872,46 @@ function _todayCardHtml(cust){
     <span class="land-today-go">${t('tkShowTicket')}</span>
   </button>`;
 }
+// ── Round two (2026-11-08): the home band, placeholders that wait, and two bars that read what is under them ──
+// The band: the brand green under a greeting in Jeddah's time of day with the rider's first name, and a line from
+// their season in the account page's own words (rides, then the week streak or what the next tier takes). The
+// Corniche route is drawn over it as inline SVG; today's card overlaps its foot (styles.css, .lq-band).
+const _LQ_RT='M-20 206C60 182 120 214 200 190S330 150 412 160';
+function _lqBandHtml(cust,today){
+  const h=new Date(Date.now()+108e5).getUTCHours(),fn=String(cust.name||'').trim().split(/\s+/)[0];
+  let g=esc(t(h>=4&&h<12?'greetMorning':h>=12&&h<17?'greetAfternoon':'greetEvening')),sub='';
+  g=fn?g.replace('{0}',`<bdi>${esc(fn)}</bdi>`):g.replace(/[,،]?\s*(يا\s*)?\{0\}/,'');
+  if(S.dataLoaded){
+    const done=getQueue().filter(e=>e.customerId===cust.id&&_rideCompleted(e)&&!_ncEntry(e)),n=done.length,tr=_mrTier(n),st=_mrStreak(done);
+    sub=[n?n+' '+_tn('mrRidesU',n):tr.name,st>=2?_tn('mrStreak',st):tr.next?_tn('mrToNext',tr.next.need).replace('{1}',tr.next.name):n?tr.name:''].filter(Boolean).join(' · ');
+  }
+  return`<section class="lq-band${today?' has-today':''}" aria-labelledby="lq-greet"><svg class="lq-route" viewBox="0 0 390 220" preserveAspectRatio="none" aria-hidden="true"><path class="lq-rt-w" d="${_LQ_RT}"/><path class="lq-rt-d" d="${_LQ_RT}"/><path class="lq-rt-o" d="M305 162h0"/></svg><h1 class="lq-greet" id="lq-greet">${g}</h1>${sub?`<p class="lq-greet-sub">${esc(sub)}</p>`:''}</section>`;
+}
+// A placeholder that shows only when a load takes over 300ms (a CSS animation delay, no timer): a quick load never
+// flashes grey.
+function _skelHtml(n,cls){return`<div class="lq-skel ${cls}" role="status" aria-busy="true" aria-label="${esc(t('loadingLabel'))}">${'<i></i>'.repeat(n)}</div>`;}
+// The top bar is clear while the band is under it and turns to glass once content is (phones, .lq-on-band): an
+// IntersectionObserver on the band with the root drawn in under the bar, so no scroll handler reads layout.
+let _lqBandIo=null,_lqNightIo=null;
+function _lqBandWatch(){
+  if(_lqBandIo)_lqBandIo.disconnect();_lqBandIo=null;
+  const b=document.querySelector('#land-events .lq-band'),tb=document.getElementById('topbar');
+  if(!b||!tb||!window.IntersectionObserver){document.body.classList.remove('lq-on-band');return;}
+  _lqBandIo=new IntersectionObserver(es=>document.body.classList.toggle('lq-on-band',es[es.length-1].isIntersecting),{rootMargin:-tb.offsetHeight+'px 0px 0px 0px'});
+  _lqBandIo.observe(b);
+}
+// The floating tab bar turns to night glass while a dark ticket, Wallet strip or event tile is under it (.lq-night):
+// the root is a band across the bar, observed again whenever a rider screen is drawn. A new dark theme joins _LQ_DARK.
+const _LQ_DARK='.ticket-card:is(.th-jcc,.th-arena,.ev-snd96),.ticket-card.tk-live:not(.tk-th),.landing-event-card:is(.ev-jcc,.ev-snd96)';
+function _lqNightWatch(){
+  if(_lqNightIo)_lqNightIo.disconnect();_lqNightIo=null;
+  const nav=document.getElementById('cust-bottom-nav'),on=new Set(),els=document.querySelectorAll(_LQ_DARK);if(!nav)return;
+  const r=nav.getBoundingClientRect();
+  if(!r.height||!els.length||!window.IntersectionObserver){nav.classList.remove('lq-night');return;} // no floating bar (a wide screen, the booking steps), or nothing dark
+  _lqNightIo=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?on.add(e.target):on.delete(e.target));nav.classList.toggle('lq-night',on.size>0);},{rootMargin:`${Math.round(-r.top-8)}px 0px ${Math.round(r.bottom-8-innerHeight)}px 0px`});
+  els.forEach(el=>_lqNightIo.observe(el));
+}
+{let _rz=0;window.addEventListener('resize',()=>{clearTimeout(_rz);_rz=setTimeout(()=>{_lqBandWatch();_lqNightWatch();},250);},{passive:true});}
 // Customer page Back: step back inside the Reserve wizard first, otherwise return to
 // the landing event picker - the same path the browser Back button now walks.
 function custBack(){
@@ -13417,6 +13462,7 @@ function setCustTab(tab){
   _pushNav();
   if(tab!=='register'&&S._sg&&!S._sg.gate){S._sg=null;renderShareGate();} // the booking's ask stays with the booking
   try{_forceRatingPrompt();}catch(e){} // a pending post-ride rating is mandatory on any customer tab
+  _lqNightWatch(); // the tab bar is back (or gone, on the booking steps): what is under it now
 }
 // o.sid (2026-11-06, ST08): Bookings opens on that ride in one paint; opening it and then picking the ride drew the roster twice.
 function setStaffTab(tab,o){
@@ -15378,12 +15424,29 @@ function _on_renderRegister_6(event,el){el.remove()}
 // The session picker is a list of days, not a stack of identical cards (2026-10-10): each day is said
 // once, as a heading (Today / Tomorrow in words), and its sessions are rows under it that lead with
 // the time. A row says its status only when it is news: a few places left, the waitlist, not open yet.
-function _sessDays(list,row){
+function _sessDays(list,row,noWord){
   const days=[];
   list.forEach(s=>{const d=String(s.session_date||s.id).slice(0,10),g=days[days.length-1];if(g&&g.d===d)g.l.push(s);else days.push({d,s,l:[s]});});
-  return days.map(g=>{const dw=_dayWord(g.d);
+  return days.map(g=>{const dw=noWord?'':_dayWord(g.d); // the day switch already says Today or Tomorrow
     return`<section class="sess-day"><h3 class="sess-day-h">${dw?`<strong class="sess-card-dw">${esc(dw)}</strong> &middot; `:''}${esc(dayLabel(g.s.day))} &middot; ${esc(shortDate(g.d))}</h3>
       <div class="sess-day-list">${g.l.map(row).join('')}</div></section>`;}).join('');
+}
+// The day switch (round two, 2026-11-08): Today, Tomorrow and Later each show their own rides, in one list per day.
+// 0 today, 1 tomorrow, 2 later, on the KSA calendar.
+function _regDayOf(s){const d=String(s.session_date||s.id).slice(0,10),td=todayStr();if(d<=td)return 0;const tm=new Date(td+'T12:00:00Z');tm.setUTCDate(tm.getUTCDate()+1);return d===tm.toISOString().slice(0,10)?1:2;}
+// A day picked on the switch shows its rides at once (the tab rule: instant); only the marker glides. The pick is
+// kept for this event, so a repaint (a ride picked, a refresh) stays on it.
+function _regDaySet(b){
+  S.regDay={ev:S.selEvent||'jcc',b};
+  const w=document.querySelector('#tab-register .reg-days');if(!w)return;
+  w.querySelectorAll('.reg-day').forEach((x,i)=>{const on=+x.dataset.b===b;x.setAttribute('aria-pressed',String(on));if(on)w.dataset.i=i;});
+  document.querySelectorAll('#tab-register .reg-day-pane').forEach(p=>{p.hidden=+p.dataset.b!==b;});
+}
+// What the step-1 Continue bar says about the ride picked, so a day switched away from never hides it.
+function _regFootSum(s){
+  const d=String(s.session_date||s.id).slice(0,10);let dm='';
+  try{dm=new Date(d+'T12:00:00+03:00').toLocaleDateString(_locale(),{day:'numeric',month:'short',timeZone:KSA_TZ});}catch(e){}
+  return`<span class="reg-foot-sum"><span>${esc(_dayWord(d)||dayLabel(s.day))}${dm?' · '+esc(dm):''}</span><bdi>${sessionTime(s)}</bdi></span>`;
 }
 // The soonest circuit night a rider can book now (open, not full, its booking window open): what an
 // empty My Bookings offers. The circuit is the ride anyone can join; the member rides have their cards.
@@ -15432,13 +15495,12 @@ function renderRegister(){
   // Branch is not shown to customers (staff-only); no branch filter or labels here.
   const branchFilter='';
 
-  const sessCards=available.length
-    ? _sessDays(available,s=>{
+  const _row=s=>{
         const _soon=_bwOpensText(s);
         const _dt=_infoDetailsBtn(s);
         if(_soon)return`<div class="sess-wrap${_dt?' has-about':''}"><div class="sess-card sess-card-soon ${_evClass(s)}" aria-disabled="true" data-session="${esc(s.id)}">
           ${_evNamed(s)?`<span class="sess-card-kicker"><span class="sess-comm-chip has-ic ${_evClass(s)}">${_kindIc(s)}${esc(_evName(s))}</span>${_sgChip(s)}</span>`:''}
-          <span class="sess-card-head"><span class="sess-card-dot"></span>
+          <span class="sess-card-head">
             <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span></span>
           <span class="sess-card-sub"><span class="sess-card-meta"></span><span class="sess-card-spots spots-soon">${esc(_soon)}</span></span></div>${_dt}</div>`;
         const sel=S.selSession===s.id;
@@ -15465,16 +15527,25 @@ function renderRegister(){
         const _dw=_dayWord(s.session_date||s.id),_pr=_sessFromPrice(s);
         const _coll=_needsBike(s)&&!_gathersTime(s)?fmt12h(sessionCollectTime(s)):'';
         const _meta=[_coll?t('ticketCollectAt').replace('{0}',_coll):'',_pr].filter(Boolean);
-        return`<div class="sess-wrap${_dt?' has-about':''}"><button type="button" class="sess-card ${_evClass(s)}${sel?' sess-selected':''}${_c?' sess-card-comm':''}${_rej?' sess-card-rej':''}${_dw?' sess-card-near':''}" aria-pressed="${sel?'true':'false'}" data-on-click="${_on("selectSessCard",s.id)}">
-          ${_c?`<span class="sess-card-kicker"><span class="sess-comm-chip has-ic ${_evClass(s)}">${_kindIc(s)}${esc(_evName(s))}</span>${_sgChip(s)}${_partnerHtml(s,'sess-partner')}</span>`:''}
+        // The picked ride wears the green wash and a tick at the end of its first line (a named ride's kicker, else its
+        // time, which then keeps its whole width); the tick settles in on the tap that picked it (S._tickFor), not on
+        // every repaint (round two, 2026-11-08).
+        const _tk='<span class="sess-tick" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M2.5 6.2l2.3 2.3 4.7-5"/></svg></span>';
+        return`<div class="sess-wrap${_dt?' has-about':''}"><button type="button" class="sess-card ${_evClass(s)}${sel?' sess-selected':''}${_c?' sess-card-comm':''}${_rej?' sess-card-rej':''}${_dw?' sess-card-near':''}${S._tickFor===s.id?' sess-just':''}" aria-pressed="${sel?'true':'false'}" data-on-click="${_on("selectSessCard",s.id)}">
+          ${_c?`<span class="sess-card-kicker"><span class="sess-comm-chip has-ic ${_evClass(s)}">${_kindIc(s)}${esc(_evName(s))}</span>${_sgChip(s)}${_partnerHtml(s,'sess-partner')}${_tk}</span>`:''}
           <span class="sess-card-head">
-            <span class="sess-card-dot${sel?' on':''}"></span>
-            <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span>
+            <span class="sess-card-time"><bdi>${sessionTime(s)}</bdi></span>${_c?'':_tk}
           </span>
           ${_meta.length||_rej||isFull||_low?`<span class="sess-card-sub"><span class="sess-card-meta">${_meta.map(x=>`<bdi>${esc(x)}</bdi>`).join(' &middot; ')}</span>${_rej||isFull||_low?`<span class="sess-card-spots ${_rej?'spots-rej':isFull?'spots-red':'spots-low'}">${_rej?t('rejCardNote'):isFull?t('waitlistLabel'):spotsLeftLabel(_n)}</span>`:''}</span>`:''}
           ${_spotHeld(s)?`<span class="sess-card-bf sess-card-reveal">${_cuIc('clock',13)}<bdi>${esc(_revealLine(s))}</bdi></span>`:_bfAt(s)?`<span class="sess-card-bf">${_cuIc('cup',13)}<bdi>${esc(_bfAt(s))}</bdi></span>`:''}
         </button>${_dt}</div>`;
-      })
+      };
+  // The day switch: shown when the rides fall on more than one of Today, Tomorrow and Later; it opens on the day
+  // the rider last picked here, else the picked ride's day, else the first day with rides.
+  const _bk=[0,1,2].filter(b=>available.some(s=>_regDayOf(s)===b)),_selS=S.selSession&&available.find(s=>s.id===S.selSession);
+  const _cb=S.regDay&&S.regDay.ev===_ev&&_bk.includes(S.regDay.b)?S.regDay.b:_selS?_regDayOf(_selS):_bk[0];
+  const sessCards=available.length
+    ? (_bk.length>1?`<div class="reg-days" role="group" aria-label="${esc(t('infoWhen'))}" data-n="${_bk.length}" data-i="${_bk.indexOf(_cb)}">${_bk.map(b=>`<button type="button" class="reg-day" data-b="${b}" aria-pressed="${b===_cb}" data-on-click="${_on('_regDaySet',b)}">${t(['mrToday','mrTomorrow','regDayLater'][b])}</button>`).join('')}</div>${_bk.map(b=>`<div class="reg-day-pane" data-b="${b}"${b===_cb?'':' hidden'}>${_sessDays(available.filter(s=>_regDayOf(s)===b),_row,b<2)}</div>`).join('')}`:_sessDays(available,_row))
     : _sessLoadFailed()
     ? _loadErr(t('errConnection'),_on("_sessRetry"),{cls:'sess-load-err'})
     : `<div class="cu-empty">
@@ -15759,14 +15830,13 @@ function renderRegister(){
   if(!S.selSession&&!hasTickets&&S.regStep>1)S.regStep=1;
   if(S.regStep===2.5)S.regStep=3; // the old waiver step, from an address or a saved state
   const curStep=hasTickets?4:(S.regStep||1);
-  // Progress stepper: every step the ride has, the waiver included (it used to hide inside
-  // "Riders", and a two-step ride drew a line to nowhere). Only the current step names itself;
-  // done steps carry a drawn tick. RTL-aware: the row mirrors with the page.
+  // Progress: every step the ride has, the waiver included (it used to hide inside "Riders"). Since round two
+  // (2026-11-08) a bar, not circles: the step's name and "Step 1 of 3" over a bar that fills a share per step. A
+  // screen reader reads every step's name from the list, the current one marked.
   const _steps=_regSteps(_selSessObj);
   const _stepLbl=v=>v===1?t(_ncSel?'sessWord':'regProg1'):v===2?(_isBlood(_selSessObj)?t('bldStepTitle'):_isRun(_selSessObj)?t('runStepTitle'):_isRace(_selSessObj)?t('vlStepTitle'):t(_ncSel?'reviewPartLabel':'regProg2')):t('regProg3');
-  const stepper=cur=>{const ci=Math.max(0,_steps.indexOf(Number(cur)||1)),n=_steps.length;
-    return `<div class="reg-stepper cu-stepper" role="group" aria-label="${esc(t('regStepOf').replace('{0}',ci+1).replace('{1}',n))}">${_steps.map((v,i)=>{const done=i<ci,on=i===ci;
-      return `<div class="cu-step"><span aria-current="${on?'step':'false'}" class="cu-step-c ${done||on?'cu-step-on':'cu-step-off'}">${done?ICON_TICK:i+1}</span>${on?`<span class="cu-step-lbl">${_stepLbl(v)}</span>`:''}</div>${i<n-1?`<span aria-hidden="true" class="cu-step-ln${done?' cu-step-ln-on':''}"></span>`:''}`;}).join('')}</div>`;};
+  const stepper=cur=>{const ci=Math.max(0,_steps.indexOf(Number(cur)||1)),n=_steps.length,of=esc(t('regStepOf').replace('{0}',ci+1).replace('{1}',n));
+    return `<div class="reg-stepper cu-prog" role="group" aria-label="${of}"><div class="cu-prog-l" aria-hidden="true"><span class="cu-step-lbl">${_stepLbl(_steps[ci])}</span><span class="cu-prog-n">${of}</span></div><span class="cu-prog-b" aria-hidden="true"><i data-cssv="${_cssv({'--p':((ci+1)/n*100).toFixed(1)+'%'})}"></i></span><ol class="sr-only">${_steps.map((v,i)=>`<li${i===ci?' aria-current="step"':''}>${_stepLbl(v)}</li>`).join('')}</ol></div>`;};
   const stepHeader=(title,msg)=>`<div class="cu-mb18">
     ${stepper(S.regStep)}
     <h1 class="page-title cu-mb4" tabindex="-1">${title}</h1>
@@ -15795,7 +15865,7 @@ function renderRegister(){
         </div>`;
       })()}
     </div>
-    ${available.length?`<div class="mm-reg-foot">${S.selSession?'':`<p class="reg-foot-why" id="rf-why">${_soleSess&&_bwOpensText(_soleSess)?esc(_bwOpensText(_soleSess)):t(_ncSel?'pickSessFirst':'pickRideFirst')}</p>`}<button class="btn-primary cu-w100${S.selSession?'':' cu-off'}" ${S.selSession?'':'disabled aria-describedby="rf-why"'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
+    ${available.length?`<div class="mm-reg-foot${S.selSession&&!_soleSess?' has-sum':''}">${S.selSession?(_soleSess?'':_regFootSum(_sessDisp(S.selSession))):`<p class="reg-foot-why" id="rf-why">${_soleSess&&_bwOpensText(_soleSess)?esc(_bwOpensText(_soleSess)):t(_ncSel?'pickSessFirst':'pickRideFirst')}</p>`}<button class="btn-primary ${S.selSession&&!_soleSess?'reg-foot-go':'cu-w100'}${S.selSession?'':' cu-off'}" ${S.selSession?'':'disabled aria-describedby="rf-why"'} data-on-click="${_on("regNextFromSession")}">${t('regContinueBtn')}</button></div>`:''}`;
 
   
   if((_runSel||_vlSel||_bldSel)&&curStep===2)_runAccLoad();
@@ -15886,7 +15956,7 @@ function renderRegister(){
     <div class="mm-reg-foot cu-foot">
       ${_wvWait?`<p class="reg-foot-why" id="wv-why">${t(_isBlood(_selSessObj)?'bldWvTick':'tickWaiverFirst')}</p>`:''}
       <button class="btn-secondary" data-on-click="${_on("regGoStep",_regPrevStep(_selSessObj,3))}" ${S.regSubmitting?'disabled':''}>${t('regBackBtn')}</button>
-      <button class="btn-primary cu-f1${_wvWait?' cu-dim':''}" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting||_wvWait?'disabled':''}${_wvWait?' aria-describedby="wv-why"':''}>${S.regSubmitting?' ...':(isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn'))}</button>
+      <button class="btn-primary cu-f1${_wvWait?' cu-dim':''}" data-on-click="${_on(isModifyMode?'submitModifyBooking':'submitReg')}" ${S.regSubmitting||_wvWait?'disabled':''}${S.regSubmitting?' aria-busy="true"':''}${_wvWait?' aria-describedby="wv-why"':''}>${isModifyMode?t('modifyBookingBtn'):t('regConfirmBtn')}</button>
     </div>`;
   const detailsCard=`<div class="form-section">
       <div class="cu-rv-head">
@@ -15964,10 +16034,7 @@ function renderRegister(){
   const _tktNc=hasTickets&&tickets.every(_ncEntry); // nothing booked has a bike (2026-10-18)
   const panelDone=hasTickets?`
     <div class="cu-card640-0">
-      <div class="cu-done-head">
-        <h1 class="page-title cu-mb4" tabindex="-1">${_tktAllWl?t('toastWaitlisted'):_tktAppr?t('tkReservedTitle'):t('tkBookedTitle')}</h1>
-        ${(_tktAppr&&_tktAllWl)?'':`<div class="page-sub cu-mb0">${_tktAppr?t(_tktNc?'tkReservedSubSess':'tkReservedSub'):_tktAllWl?t('tkWlSub'):t((S.lastTickets||[]).some(x=>_isBlood(_sessDisp(x.sessionId)))?'bldTkSub':'tkBookedSub')}</div>`}
-      </div>
+      ${_bkOkHtml(tickets,_tktAllWl,_tktAppr,_tktNc)}
       ${tickets.map(_defeRegHtml).join('')}
       ${tickets.map((tkt,i)=>renderOneTicket(tkt,i,tickets.length)).join('')}
       <button class="btn-primary cu-w100-mt18" data-on-click="${_on("regBookAnother")}">${t(_tktNc?'regBookAnotherSess':'regBookAnotherBtn')}</button>
@@ -15996,7 +16063,27 @@ function renderRegister(){
   if(host&&fa&&fa!==host&&fa.id&&host.contains(fa)){keep={id:fa.id,s:null};try{if(typeof fa.selectionStart==='number')keep.s=[fa.selectionStart,fa.selectionEnd];}catch(_){}}
   host.innerHTML=_sndHead+(_defeOn()?_defeHeadHtml():'')+(_arOn()?_arHeadHtml():'')+(_bldOn()&&!(S.lastTickets||[]).length?_bldHeadHtml():'')+body; // the ticket after booking opens with the hosts' plate itself
   if(keep)_regRefocus(keep);
+  if(hasTickets)_lqNightWatch(); // the new tickets, under the tab bar that is back
 }
+// The booked moment (round two, 2026-11-08): a tick that draws itself in a soft green disc that settles, what was
+// booked and when, the number large, and the way to the ticket and the Wallet. It plays on the booking only
+// (S._okPlay); a repaint shows it still. The booking's quiet toast says it to a screen reader; nothing else moves.
+function _bkOkHtml(tks,wl,appr,nc){
+  const p=tks[0],s=_sessDisp(p.sessionId),seat=tks.filter(x=>x.status!=='waitlist'),q=seat.map(x=>x.queueNum).sort((a,b)=>a-b),d=String(p.sessionDate||p.sessionId||'').slice(0,10),w=seat[0];
+  const num=wl||appr||!s||_arHold(s,tks)||!q.length?'':q.length===1?'#'+q[0]:q.every((v,i)=>!i||v===q[i-1]+1)?`#${q[0]} – #${q[q.length-1]}`:q.map(v=>'#'+v).join(', ');
+  const wal=!w||!s||!_walletOk(s,[w])?'':_hasWallet()?`<button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",w.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button>`
+    :_hasGWallet()&&_gwReady!==false?`<span class="wallet-slot"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",w.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></span>`:'';
+  const sub=appr&&wl?'':appr?t(nc?'tkReservedSubSess':'tkReservedSub'):wl?t('tkWlSub'):t(tks.some(x=>_isBlood(_sessDisp(x.sessionId)))?'bldTkSub':'tkBookedSub');
+  return`<section class="bk-ok${S._okPlay?' play':''}" aria-labelledby="bk-ok-t">
+    <span class="bk-ok-disc" aria-hidden="true"><svg viewBox="0 0 56 56"><circle cx="28" cy="28" r="28"/><path pathLength="1" d="M16 29l8 8 16-17"/></svg></span>
+    <h1 class="page-title bk-ok-t" id="bk-ok-t" tabindex="-1">${wl?t('toastWaitlisted'):appr?t('tkReservedTitle'):t('tkBookedTitle')}</h1>
+    <p class="bk-ok-s">${s?`<bdi>${esc(_evName(s))}</bdi><br>`:''}${esc(_dayWord(d)||dayLabel(p.sessionDay))} · ${esc(shortDate(d))}${s?` · <bdi>${sessionTime(s)}</bdi>`:''}</p>
+    ${num?`<div class="bk-ok-q"><span>${t(_isBlood(s)?(_bldVis(p)?'bldVisNumLabel':'bldNumLabel'):_isRun(s)?'runNumLabel':_isRace(s)?'vlNumLabel':'queueNumLabel')}</span><b dir="ltr">${esc(num)}</b></div>`:''}
+    ${sub?`<p class="bk-ok-sub">${sub}</p>`:''}
+    <div class="bk-ok-btns"><button type="button" class="btn-primary" data-on-click="${_on('_bkOkShow')}">${t('tkShowTicket')}</button>${wal}</div>
+  </section>`;
+}
+function _bkOkShow(){const k=document.querySelector('#tab-register .ticket-card');if(!k)return;k.setAttribute('tabindex','-1');k.scrollIntoView({block:'start',behavior:_sb()});try{k.focus({preventScroll:true});}catch(e){}}
 // An add-on's last unit taken off removes its stepper (its tick stands in), a full one switches its
 // "+" off (the "−" stands in), and an applied code switches the promo box off (its button stands in).
 function _regRefocus(k){
@@ -16032,15 +16119,18 @@ function regNextFromSession(){
   const _s=_sessDisp(S.selSession);
   S.regStep=_regNextStep(_s,1);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();
 }
+// The tapped Continue or Confirm spins inside itself, its label kept (styles.css, [aria-busy]), from the tap until the
+// next step is drawn or the server answers (round two, 2026-11-08). A step drawn at once never shows it.
+function _regBusyBtn(on){const b=document.querySelector('#tab-register .mm-reg-foot .btn-primary');if(b){if(on)b.setAttribute('aria-busy','true');else b.removeAttribute('aria-busy');}}
 function regNextToReview(){
-  const _rs=_sessDisp(S.selSession);
-  if(_isBlood(_rs)){_bldNext(_rs);return;}
-  if(_isRun(_rs)){_runNext(_rs);return;}
-  if(_isRace(_rs)){(_isArena(_rs)?_arStepNext:_vlStepNext)(_rs);return;}
+  const _rs=_sessDisp(S.selSession),_go=f=>{_regBusyBtn(true);Promise.resolve(f(_rs)).finally(()=>_regBusyBtn(false));};
+  if(_isBlood(_rs)){_go(_bldNext);return;}
+  if(_isRun(_rs)){_go(_runNext);return;}
+  if(_isRace(_rs)){_go(_isArena(_rs)?_arStepNext:_vlStepNext);return;}
   if(validateRegInputs()){S.regStep=_regNextStep(_sessDisp(S.selSession),2);renderRegister();_pushNav();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}_regFocus();}
 }
 function regBookAnother(){
-  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;
+  S.lastTickets=[];S.selSession=null;S.regStep=1;S.regQty=1;S.regDay=null;
   S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S.modifyEntryId=null;S._alreadyBookedSession=null;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
   renderRegister();try{window.scrollTo({top:0,behavior:_sb()});}catch(e){}
 }
@@ -16887,15 +16977,16 @@ async function _submitReg(){
     _sendBookingEmail(entries[0]); // confirmation email (no-op unless Brevo is configured server-side)
     S.lastTickets=entries.map(e=>_qGet(e.id)||e);
     S._rHeight='';S._rDate='';S.selSession=null;S.regType=null;
-    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];
+    S.regQty=1;S.regBikeSizes=[];S.regBikeHeights=[];S.regBikeTypes=[];S.regRideGroup=null;S.regRunKm=null;S.regVl=null;S.regShare=null;S.regBldRole=null;S.regBldClub=null;S.regBldClubNone=false;S.regRiderNames=[];S._alreadyBookedSession=null;S.regStep=1;S.promoApplied=null;S._promoMsg='';S.regAddons=[];S.regDay=null;
     S.waiverOk=false;S._waiverSess=null; // agreed for THIS booking; the next one asks again
+    S._okPlay=true;setTimeout(()=>{S._okPlay=false;},0); // the booked moment plays on this booking's paints only
     const _qn=entries.map(e=>e.queueNum);
     const numStr=qty>1?`#${_qn[0]} – #${_qn[_qn.length-1]}`:`#${_qn[0]}`;
     // The capacity trigger works row by row: in a race for the last places it can seat part of a
     // party and waitlist the rest. The seated riders hold places and are told so (bug hunt 2026-10-28).
     const _seatE=entries.filter(e=>e.status!=='waitlist'),_mixWl=bookingStatus==='waitlist'&&_seatE.length>0;
     logAction(`${bookingStatus==='waitlist'&&!_mixWl?t('logWaitlistedWord'):t('logBookedWord')} ${numStr} (${(S.loggedIn&&S.loggedIn.name)||'rider'})`);
-    haptic();
+    haptic(30); // one short buzz on Android, none under reduced motion (d_buzz)
     // Community bookings: no queue numbers shown to the customer, no pay-at-booth popup (free).
     if(_isCommBooking)toast(bookingStatus==='waitlist'&&!_mixWl?t('commCueWaitlist'):t('commCuePending'));
     else if(_isArena(sess))toast(bookingStatus==='waitlist'&&!_mixWl?t('toastWaitlisted'):t('arBookedToast')); // no number until it is paid
@@ -16935,6 +17026,7 @@ async function submitModifyBooking(){
   if(!cust){toast(t('errLoginFirst'),'error');return;}
   if(!S.selSession){toast(t('errSelectSession'),'error');return;}
   if(S.regSubmitting)return;S.regSubmitting=true; // double-tap would insert added riders twice
+  _regBusyBtn(true);
   try{
 
   // The same rows, in the same order, that the form was filled from (_modEntries): form row i
@@ -17399,6 +17491,7 @@ function renderBookingTicket(entries,opts){
         <div class="cu-tk-when">${_dw?`<strong class="tk-dw">${esc(_dw)}</strong><br>`:''}${dayLabel(primary.sessionDay)}<br>${shortDate(primary.sessionDate)}<br><bdi>${sessTime}</bdi>${(past||(_allWl&&_wlCollectTime(sess)))?'':(()=>{const g=_gathersTime(sess);const c=(_needsBike(sess)||g)&&_rideKind(sess)!=='vlap'?fmt12h(sessionCollectTime(sess)):'';return c?`<br><span class="cu-c-green tk-collect"><bdi>${esc((g?t('ticketGatherAt'):t('ticketCollectAt')).replace('{0}',c))}</bdi></span>`:'';})()}${past?'':`<br><span class="tk-venue">${esc(_venueName(sess))}</span>`}${_sgChip(sess)?'<br>'+_sgChip(sess):''}</div>
       </div>
     </div>
+    ${_tg?'<div class="wl-x"><div>':''}
     <div class="cu-tk-body">
       ${(_held&&_today&&stForBadge==='waiting')?_cdHtml(sess,primary.sessionDate||primary.sessionId):''}
       ${cueHtml}
@@ -17443,7 +17536,7 @@ function renderBookingTicket(entries,opts){
       ${_meetHeld(sess)?'':`<a href="${esc((_meetsAt(sess)&&_safeUrl(sess&&sess.meet_url))||DIRECTIONS_URL)}" target="_blank" rel="noopener" class="btn-secondary cu-tk-dir" aria-label="${_meetsAt(sess)?t('meetPointLbl'):t('ticketDirections')}${t('opensNewTab')}">${_cuIc('pin')}${_meetsAt(sess)?t('meetPointLbl'):t('ticketDirections')}</a>`}
     </div>`}
     ${(_hasWallet()&&isLive)?`<div class="wallet-slot cu-tk-wal"><button type="button" class="btn-wallet" data-on-click="${_on("addBookingToWallet",primary.id,_EL)}" aria-label="${t('addToWallet')}">${WALLET_GLYPH} ${t('addToWallet')}</button></div>`:''}${(_hasGWallet()&&_gwReady!==false&&isLive)?`<div class="wallet-slot cu-tk-wal"${_gwWait()}><button type="button" class="btn-wallet gwallet" data-on-click="${_on("addBookingToGWallet",primary.id,_EL)}" aria-label="${t('addToGWallet')}">${t('addToGWallet')}</button></div>`:''}
-    ${actionsHtml}
+    ${actionsHtml}${_tg?'</div></div>':''}
   </div>`;
 }
 // Build & download a .ics calendar file for a session (fully client-side, no service)
@@ -18756,7 +18849,10 @@ function _wlToggle(k){
   const was=document.getElementById('wl-'+k);
   S._wlOpen={cid:cust.id,sid:(was&&was.classList.contains('wl-open'))?'':k};
   host.outerHTML=_wlStackHtml(_myRideGroups(cust).past,cust);
+  _lqNightWatch();
   const el=document.getElementById('wl-'+k);if(!el)return;
+  // A pass taken out opens in place: its details grow from its top (grid rows, styles.css .wl-anim, round two).
+  if(S._wlOpen.sid&&_sb()!=='auto'){el.classList.add('wl-anim');el.addEventListener('animationend',()=>el.classList.remove('wl-anim'),{once:true});}
   const f=el.querySelector('.wl-strip,.wl-head');
   if(f)try{f.focus({preventScroll:true});}catch(e){}
   // A pass that came out above the screen, or low on it, is brought up to be read.
@@ -18863,6 +18959,8 @@ function _cwRiderSay(e){const m=String((e&&e.message)||'');return /WALLET_SHORT/
 function renderMyRides(){
   const cust=S.loggedIn;
   if(!cust){document.getElementById('tab-myrides').innerHTML='';return;}
+  // Before the first load lands: ticket-shaped placeholders that show only after 300ms, not "nothing booked".
+  if(!S.dataLoaded){document.getElementById('tab-myrides').innerHTML=`<h1 class="page-title">${t('myRidesTitle')}</h1>${_skelHtml(2,'lq-skel-tk')}`;return;}
   const allEntries=getQueue().filter(e=>e.customerId===cust.id);
   if(allEntries.some(e=>_vlOf(e)&&_vlIsDbl(_vlOf(e).race)&&_bookingAhead(e)))_vlTeamsLoad(); // the partners' names
   const {current:currentGroups,past:pastGroups}=_myRideGroups(cust);
@@ -18900,6 +18998,7 @@ function renderMyRides(){
     <div class="myrides-grid">${currentCards}</div>
     <div class="analytics-section-title cu-mt30">${t(_anyNc?'myPastAny':'myPastRides')}${pastGroups.length?`<span class="mr-n">${pastGroups.length}</span>`:''}</div>
     ${pastCards}`;
+  _lqNightWatch();
   try{_forceRatingPrompt();}catch(e){} // force the rating the moment a ride is marked completed (realtime fires this)
 }
 
@@ -33658,9 +33757,15 @@ function _cancelReasonText(e){
 }
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_showCancelReasonModal_1(event,el){if(event.target===el)closeCancelReasonModal()}
-function _on_showCancelReasonModal_2(event,el){if(!el.classList.contains('active'))el.style.borderColor='rgba(var(--green-rgb),.4)'}
-function _on_showCancelReasonModal_3(event,el){if(!el.classList.contains('active'))el.style.borderColor='rgba(var(--tint-rgb),.1)'}
 function _on_showCancelReasonModal_4(event,el){window._cancelCustomReason=el.value}
+// The reasons are one list of real radios (round two, 2026-11-08): rows of 48px with a line between them, nothing
+// picked until the rider picks, and the two answers stacked at full width, the cancel first, so neither wraps.
+function _crPick(i){
+  window._cancelReason=i;
+  const w=document.getElementById('cancel-other-wrap');if(w)w.style.display=i===_CANCEL_OTHER?'block':'none';
+  if(i!==_CANCEL_OTHER)window._cancelCustomReason='';
+  _crErr('');
+}
 function showCancelReasonModal(id){
   const reasons=CANCEL_REASON_KEYS.map(k=>t(k));
   // cancelBooking takes every rider of the booking, so the dialog says how many; and the button
@@ -33673,35 +33778,21 @@ function showCancelReasonModal(id){
     <div class="modal-box dk-mw380" role="dialog" aria-modal="true" aria-labelledby="cr-title">
       <div class="modal-title" id="cr-title">${t('cancelReasonTitle')}</div>
       ${_n>1?`<div class="modal-sub">${esc(t(_ncEntry(_e)?'cancelPartyNoteSess':'cancelPartyNote').replace('{0}',_n))}</div>`:''}
-      <div class="dk-cr-list" role="group" aria-labelledby="cr-title">
-        ${reasons.map((r,i)=>`
-          <button type="button" class="cancel-reason-opt dk-cr-opt" data-idx="${i}" aria-pressed="false"
-            data-on-mouseover="${_on("_on_showCancelReasonModal_2",_EV,_EL)}" data-on-mouseout="${_on("_on_showCancelReasonModal_3",_EV,_EL)}">${esc(r)}</button>`).join('')}
-        <div id="cancel-other-wrap" class="dk-cr-other">
-          <textarea id="cancel-other-text" aria-label="${esc(t('cancelOtherPlaceholder'))}" placeholder="${t('cancelOtherPlaceholder')||'Please describe your reason...'}"
-            class="dk-cr-ta"
-            data-on-input="${_on("_on_showCancelReasonModal_4",_EV,_EL)}"></textarea>
-        </div>
+      <div class="cr-opts" role="radiogroup" aria-labelledby="cr-title">
+        ${reasons.map((r,i)=>`<label class="cancel-reason-opt cr-opt"><input type="radio" name="cr-reason" value="${i}" data-on-change="${_on("_crPick",i)}"><span class="cr-dot" aria-hidden="true"></span><span class="cr-txt">${esc(r)}</span></label>`).join('')}
+      </div>
+      <div id="cancel-other-wrap" class="dk-cr-other">
+        <textarea id="cancel-other-text" aria-label="${esc(t('cancelOtherPlaceholder'))}" placeholder="${t('cancelOtherPlaceholder')||'Please describe your reason...'}"
+          class="dk-cr-ta"
+          data-on-input="${_on("_on_showCancelReasonModal_4",_EV,_EL)}"></textarea>
       </div>
       <div id="cr-err" class="pg-msg cr-err" role="alert"></div>
-      <div class="dk-flex8">
-        <button class="btn-secondary dk-f1" data-on-click="${_on("closeCancelReasonModal")}">${t('keepBookingBtn')}</button>
+      <div class="cr-acts">
         <button class="btn-primary dk-cr-go" data-on-click="${_on("confirmCancelWithReason",id)}">${esc(_n>1?t('cancelAllBtn').replace('{0}',_n):t('cancelConfirmBtn'))}</button>
+        <button class="btn-secondary" data-on-click="${_on("closeCancelReasonModal")}">${t('keepBookingBtn')}</button>
       </div>
     </div>
   </div>`;
-  m.querySelectorAll('.cancel-reason-opt').forEach(b=>{
-    b.addEventListener('click',()=>{
-      m.querySelectorAll('.cancel-reason-opt').forEach(x=>{x.style.borderColor='rgba(var(--tint-rgb),.1)';x.style.background='rgba(var(--tint-rgb),.04)';x.style.color='var(--text)';x.classList.remove('active');x.setAttribute('aria-pressed','false');});
-      b.style.borderColor='var(--green)';b.style.background='rgba(var(--green-rgb),.08)';b.style.color='var(--green)';b.classList.add('active');b.setAttribute('aria-pressed','true');
-      const idx=parseInt(b.dataset.idx);
-      window._cancelReason=idx;
-      const wrap=document.getElementById('cancel-other-wrap');
-      if(wrap)wrap.style.display=idx===_CANCEL_OTHER?'block':'none';
-      if(idx!==_CANCEL_OTHER)window._cancelCustomReason='';
-      _crErr('');
-    });
-  });
   window._cancelReason=null;window._cancelCustomReason='';
 }
 // What is missing is said in the dialog, by the buttons, not in a bar that goes (2026-10-11).
