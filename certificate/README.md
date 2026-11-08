@@ -95,4 +95,9 @@ no inline `<script>` and no inline `<style>`. So:
   from the name's length, then shrinks 1px at a time to 32px until it is on one line (SPEC.md,
   "Name size"). `_vcFit` in the booking app, `fitCert` in the portal. The same pass scales the whole
   sheet down on a phone, which the stylesheet reads as `--fit`.
+- **Every script is taken out of the template before it is written.** Cloudflare adds its Web
+  Analytics beacon to HTML it serves, and in production `assets/certificate.html` comes back with
+  one before `</body>` — a third-party script that would load beside a volunteer's name and report
+  every print. `_vcNoScripts` in the booking app and `stripScripts` in the portal remove any script,
+  whoever added it. Keep the template itself script-free; the stripping is for what the host adds.
 

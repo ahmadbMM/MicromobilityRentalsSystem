@@ -9932,11 +9932,19 @@ async function _vmSave(id){
 // certificate/, never here - certificate/SPEC.md says what may move and what may not.
 const CERT_HTML_V='';
 let _vcTpl=null;
+// Cloudflare Pages adds its Web Analytics beacon to every HTML file it serves, this one included:
+// a script tag before the body closes (seen in production, 2026-11-08). The certificate has no
+// script of its own, and its window should run none - a third-party one would load beside a
+// volunteer's name and report every print. So every script comes out, whoever put it there. The
+// pattern is built from pieces because this source sits inside a script element itself, where
+// the tags written out in full would end it.
+const _VC_SCRIPT_RE=new RegExp('<scr'+'ipt\\b[\\s\\S]*?</scr'+'ipt\\s*>','gi');
+function _vcNoScripts(html){return String(html||'').replace(_VC_SCRIPT_RE,'');}
 async function _vcTemplate(){
   if(_vcTpl)return _vcTpl;
   const r=await fetch(location.origin+'/assets/certificate.html'+(CERT_HTML_V?'?v='+CERT_HTML_V:''));
   if(!r.ok)throw new Error('certificate template '+r.status);
-  _vcTpl=await r.text();
+  _vcTpl=_vcNoScripts(await r.text());
   return _vcTpl;
 }
 // The template's Mustache subset: {{key}} escaped, {{#key}}…{{/key}} kept while key is truthy.

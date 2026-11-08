@@ -1270,6 +1270,12 @@ moving anything on the page.
   window's fonts are in: `_vcFit`, passed to `_openReport` as its last argument and run by
   `_printWhenReady` just before printing. The same pass sets `--fit`, which scales the sheet on a
   window narrower than the page - a volunteer printing from a phone.
+- **What production serves is not quite the file.** Cloudflare Pages adds its Web Analytics beacon
+  (a script before `</body>`) to every HTML response, `assets/certificate.html` included, and
+  redirects `.html` addresses to the bare name with a 308 (fetch follows it; the `?v=` survives).
+  `_vcTemplate` therefore runs the text through `_vcNoScripts` before anything is written, so no
+  third-party script loads beside a volunteer's name. Its pattern is built from string pieces on
+  purpose: app.src.html's code sits inside a script element, where the tags spelled out would end it.
 - **The owner took three things off the signed-off design on 2026-11-08**: the slogan "Power your
   path", the address beside it and the line saying where a code is answered (the whole tagline row),
   and the green tick above the logo. Sacramento went with the slogan, so the page is Space Grotesk

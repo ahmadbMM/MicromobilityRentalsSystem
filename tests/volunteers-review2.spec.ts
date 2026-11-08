@@ -188,6 +188,30 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     expect(html).not.toContain('{{');
   });
 
+  test('a script the host adds to the template never reaches the certificate window', async ({ page }) => {
+    // What Cloudflare Pages put into the template in production (2026-11-08), byte for byte but the token.
+    const beacon = `<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "test"}'></script><!-- Cloudflare Pages Analytics -->`;
+    await staff(page);
+    let injected = 0;
+    await page.route('**/assets/certificate.html*', async (route) => {
+      const res = await route.fetch();
+      const body = (await res.text()).replace('</body>', `${beacon}</body>`);
+      if (body.includes('cloudflareinsights')) injected++;
+      await route.fulfill({ response: res, body });
+    });
+    await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
+    await tab(page, 'Volunteers').click();
+    await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
+    await expect.poll(() => page.evaluate('window.__rep||""')).toContain('Sara Haddad');
+    const html = await page.evaluate('window.__rep') as string;
+    expect(injected, 'the beacon was never put into the template, so this proves nothing').toBeGreaterThan(0);
+    expect(html).not.toMatch(/<script/i);
+    expect(html).not.toContain('cloudflareinsights');
+    expect(html).toContain('</body>'); // the rest of the page is untouched
+  });
+
   test('before the database has certificates, Make prints the certificate as before', async ({ page }) => {
     await staff(page);
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
