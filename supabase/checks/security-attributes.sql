@@ -386,7 +386,12 @@ with expected(fname, want_definer, note) as (values
   ('_ref_code_guard',           true,  'trigger: reads promo_codes (staff-only) to refuse a referral free ride on Carbon'),
   ('customer_referral',         true,  'referrals: the rider''s own code, counts and free rides; token-checked'),
   ('customer_set_referrer',     true,  'referrals: links a new account to a code''s owner; token-checked, rate-limited'),
-  ('staff_set_referrer',        true,  'referrals: staff link or unlink a referred account; _staff_mod(customers, edit)')
+  ('staff_set_referrer',        true,  'referrals: staff link or unlink a referred account; _staff_mod(customers, edit)'),
+  -- Referrals, the extras (20261108180000)
+  ('_push_queue',               true,  'writes push_outbox, which nobody reads or writes directly'),
+  ('staff_referral_review',     true,  'referrals: staff allow or remove a held referral; _staff_mod(customers, edit)'),
+  ('_ref_expiry_tick',          true,  'pg_cron: queues a free ride''s last-week notification and drops stale ones in push_outbox'),
+  ('_push_drain_call',          true,  'pg_cron: reads push_outbox and asks /api/push-send to send it (pg_net)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

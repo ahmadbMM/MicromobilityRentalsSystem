@@ -733,6 +733,46 @@ test.describe('@staff:security the push sender', () => {
     expect(hits).toEqual([]);
   });
 
+  test('{drain: true} sends what the database queued, once, and drops what waited three days', async () => {
+    const vapid = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign']);
+    const priv = Buffer.from(await crypto.subtle.exportKey('pkcs8', vapid.privateKey)).toString('base64url');
+    const pub = Buffer.from(await crypto.subtle.exportKey('raw', vapid.publicKey)).toString('base64url');
+    const sub = await crypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
+    const p256dh = Buffer.from(await crypto.subtle.exportKey('raw', sub.publicKey)).toString('base64url');
+    const auth = Buffer.from(crypto.getRandomValues(new Uint8Array(16))).toString('base64url');
+    const outbox = [
+      { id: 1, customer_id: 'c1', tag: 'ref-c9', title: 'MicroMobility', body: 'Your free ride is ready.', url: '/', created_at: new Date().toISOString() },
+      { id: 2, customer_id: 'c2', tag: 'ref-exp-rf-1', title: 'MicroMobility', body: 'Old', url: '/', created_at: new Date(Date.now() - 4 * 864e5).toISOString() },
+      { id: 3, customer_id: 'c3', tag: 'ref-bonus', title: 'MicroMobility', body: 'Taken by another drain', url: '/', created_at: new Date().toISOString() },
+    ];
+    const patches: { id: string; body: Record<string, unknown> }[] = [];
+    const pushed: string[] = [];
+    globalThis.fetch = (async (u: string | URL | Request, init?: RequestInit) => {
+      const url = String(u);
+      if (url.includes('/rest/v1/push_outbox') && (!init || !init.method || init.method === 'GET')) return new Response(JSON.stringify(outbox));
+      if (url.includes('/rest/v1/push_outbox') && init?.method === 'PATCH') {
+        const id = new URL(url).searchParams.get('id')!.replace('eq.', '');
+        patches.push({ id, body: JSON.parse(String(init.body)) });
+        return new Response(JSON.stringify(id === '3' ? [] : [{ id }]), { status: 200 });
+      }
+      if (url.includes('/rest/v1/push_subscriptions')) return new Response(JSON.stringify([{ endpoint: 'https://fcm.googleapis.com/fcm/send/abc', p256dh, auth }]));
+      if (url.includes('/rpc/is_staff') || url.includes('/auth/v1/user') || url.includes('staff_actions')) throw new Error('no staff check on a drain');
+      pushed.push(url);
+      return new Response('', { status: 201 });
+    }) as typeof fetch;
+    const post = await load('functions/api/push-send.js', 'onRequestPost');
+    const res = await post({
+      request: new Request('https://site.test/api/push-send', { method: 'POST', body: JSON.stringify({ drain: true }) }),
+      env: { VAPID_PUBLIC_KEY: pub, VAPID_PRIVATE_KEY: priv, SUPABASE_SERVICE_KEY: 'svc', SUPABASE_ANON_KEY: 'anon', SUPABASE_URL: 'https://db.test' },
+    });
+    expect(await res.json()).toMatchObject({ ok: true, drained: 3, sent: 1 });
+    expect(pushed).toEqual(['https://fcm.googleapis.com/fcm/send/abc']); // the fresh one only; the old one and the one claimed elsewhere are not sent
+    expect(patches.filter((p) => p.body.result !== 'sending')).toEqual([{ id: '1', body: { result: 'sent 1/1' } }, { id: '2', body: { result: 'stale' } }]);
+    // not configured: nothing is read or sent
+    const off = await post({ request: new Request('https://site.test/api/push-send', { method: 'POST', body: JSON.stringify({ drain: true }) }), env: {} });
+    expect(await off.json()).toMatchObject({ ok: false, skipped: 'not configured' });
+  });
+
   test('a notification leads only to a page on this site, sent as its path', async () => {
     const src = readFileSync(resolve(__dirname, '../functions/api/push-send.js'), 'utf8');
     const body = src.slice(src.indexOf('function safeUrl('), src.indexOf('// The push services browsers subscribe with.'));

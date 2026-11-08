@@ -1981,3 +1981,24 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
 - A merged referrer is followed to the account it went into. The Privacy Notice names referrals (2026-11-08, nobody asked
   again). The website's /account carries the same card (mm-platform ReferralCard, POST /api/account/referrer).
   `tests/referrals.spec.ts`.
+- **The extras (the owner, 2026-11-08: ideas 2, 3, 6, 8; migration 20261108180000).**
+  - *Telling the referrer:* a free ride this device has not shown pops up once (`_refCelebrate`, localStorage
+    `cq_ref_seen_<id>`), and a code in its last seven days says so on the event picker (`_frSoon`). The database also
+    queues a browser notification (`push_outbox` via `_push_queue`: the free ride, the bonus, and `_ref_expiry_tick`'s
+    last-week reminder, pg_cron `mm-ref-expiry` 06:00 UTC); pg_cron `mm-push-drain` (every two minutes, only while
+    something waits, `_push_drain_call` over pg_net) posts `{drain:true}` to `/api/push-send`, which sends the queue with the
+    service key, claims each row first and marks one older than three days stale. Push stays off until the app has
+    `VAPID_PUBLIC_KEY` and Pages its secrets: nothing is sent before that.
+  - *Recruiter:* badges `recruiter`, `recruiter_3`, `recruiter_5`, `recruiter_10` (auto) are one ladder (`BDG_LADDERS`),
+    counted on the rider's own device from `customer_referral`'s `rode` (`_refFriendsRode`; `_mrBadgeList` asks for it),
+    each level cheered once (`BDG_CHEER`). The fifth friend who rode gives one bonus code `RB-…`
+    (`promo_codes.referral_bonus_of`, once per account, over the yearly limit too) that pays for any bike: the card lists it
+    with `any_bike`, and the Redeem box keeps it for a Carbon rider 1 (`_bldRedeemInner`).
+  - *Device check:* the app sends `p_device` (`_refDev`, localStorage `cq_dev`; asked again without it when the function
+    is older); the database keeps only a sha256. A third account linked to one code from one device in 24 hours holds that
+    device's referrals for the code (`referrals.held`): `_ref_reward` waits, the bell's `refheld` kind (People staff, read on
+    the five-minute poll by `_refHeldPoll`) and People > Referrals list them, and `staff_referral_review(friend, allow)`
+    allows (the ride already done then counts) or removes. The account window says so too (`.ref-ah-held`).
+  - *People > Referrals* (`/people/referrals`, `_refRpHtml` / `_refRpLoad`): six figures, the referrals to check, six months
+    (joined, rode, free rides given and used), money (what referred riders paid for done rides after joining against the fares
+    of the free rides used, `priceForType`) and the top ten referrers (Ambassador candidate from five friends who rode).

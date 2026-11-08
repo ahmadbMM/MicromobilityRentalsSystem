@@ -30,6 +30,9 @@ export async function onRequestPost(context) {
 
   let body;
   try { body = await request.json(); } catch { return json({ ok: false, error: 'bad body' }, 400); }
+  // The database's own notifications (push_outbox, rentals 20261108180000: a referral's free ride and its last week),
+  // asked for by its pg_cron job. No token: a caller can only make what is already queued go out sooner.
+  if (body && body.drain === true) return drain(request, env, PUB, PRIV, SERVICE);
   const { staffToken, customerId, title, message, url, tag } = body || {};
   if (!staffToken || !customerId || !title) return json({ ok: false, error: 'missing fields' }, 400);
 
@@ -119,6 +122,49 @@ export async function onRequestPost(context) {
   }
 
   return json({ ok: true, sent, total: subs.length, removed: dead.length });
+}
+
+// Sends what push_outbox holds, oldest first, a batch per call. Each row is claimed (sent_at set while still empty)
+// before it goes, so two drains at once send it once; one older than three days is marked stale and not sent; the
+// outcome is written back. Gone endpoints are dropped as in a staff send.
+const DRAIN_MAX = 40;
+const STALE_MS = 3 * 864e5;
+async function drain(request, env, PUB, PRIV, SERVICE) {
+  const SUPA = env.SUPABASE_URL || 'https://qpffkzmsfyilicwcsszz.supabase.co';
+  const H = { apikey: SERVICE, Authorization: `Bearer ${SERVICE}` };
+  const listRes = await fetch(`${SUPA}/rest/v1/push_outbox?sent_at=is.null&order=id.asc&limit=${DRAIN_MAX}&select=id,customer_id,tag,title,body,url,created_at`, { headers: H });
+  if (!listRes.ok) return json({ ok: false, error: 'lookup failed' }, 502);
+  const rows = await listRes.json().catch(() => []);
+  const origin = new URL(request.url).origin;
+  const mark = (id, patch, only) => fetch(`${SUPA}/rest/v1/push_outbox?id=eq.${encodeURIComponent(id)}${only ? '&sent_at=is.null' : ''}`, {
+    method: 'PATCH', headers: { ...H, 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify(patch),
+  });
+  let sent = 0;
+  for (const m of Array.isArray(rows) ? rows : []) {
+    const claim = await mark(m.id, { sent_at: new Date().toISOString(), result: 'sending' }, true).catch(() => null);
+    const got = claim && claim.ok ? await claim.json().catch(() => []) : [];
+    if (!Array.isArray(got) || !got.length) continue; // another drain has it
+    let result = 'stale';
+    if (Date.now() - Date.parse(m.created_at) <= STALE_MS) {
+      const subsRes = await fetch(`${SUPA}/rest/v1/push_subscriptions?customer_id=eq.${encodeURIComponent(m.customer_id)}&select=*`, { headers: H });
+      const subs = subsRes.ok ? await subsRes.json().catch(() => []) : [];
+      if (!Array.isArray(subs) || !subs.length) result = 'no subscriptions';
+      else {
+        const payload = JSON.stringify({
+          title: String(m.title || '').slice(0, 120), body: String(m.body || '').slice(0, 300), url: safeUrl(m.url, origin),
+          tag: String(m.tag || 'mm-general').replace(/[^\w.:-]/g, '').slice(0, 64) || 'mm-general',
+        });
+        const results = await Promise.all(subs.map((s) => sendOne(s, payload, PUB, PRIV, env)));
+        const ok = results.filter((r) => r.ok).length;
+        sent += ok;
+        result = `sent ${ok}/${subs.length}`;
+        const dead = results.filter((r) => r.gone).map((r) => r.endpoint);
+        await Promise.all(dead.map((ep) => fetch(`${SUPA}/rest/v1/push_subscriptions?endpoint=eq.${encodeURIComponent(ep)}`, { method: 'DELETE', headers: H }).catch(() => {})));
+      }
+    }
+    await mark(m.id, { result }).catch(() => {});
+  }
+  return json({ ok: true, drained: Array.isArray(rows) ? rows.length : 0, sent });
 }
 
 // Where a notification may lead: an address on this site only, at most 500 characters - the

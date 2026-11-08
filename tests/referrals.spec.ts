@@ -17,7 +17,10 @@ const sat = { id: 's1', day: 'Saturday', session_date: '2099-02-07', capacity: 9
 const RF = { code: 'RF-1A2B3C4D', expires_at: '2099-12-05', used: false };
 const card = (x: Record<string, unknown> = {}) => ({ ok: true, on: true, code: 'K7MQ2X', days: 60, cap: 10, joined: 3, rode: 1, earned: 1, referred: false, can_enter: false, rewards: [], ...x });
 
-async function rider(page: Page, fx: Record<string, unknown> = {}, path = '/') {
+async function rider(page: Page, fx: Record<string, unknown> = {}, path = '/', seen = true) {
+  // the free-ride pop-up shows a code once per device: the specs not about it have seen RF-1A2B3C4D already
+  // and the Recruiter badge's own pop-up (BDG_CHEER) has been seen at every level
+  if (seen) await page.addInitScript(() => { try { localStorage.setItem('cq_ref_seen_c1', JSON.stringify(['RF-1A2B3C4D'])); ['rec1', 'rec3', 'rec5', 'rec10'].forEach((k) => localStorage.setItem('cq_bdg_' + k + '_c1', '1')); } catch { /* none */ } });
   await stubSupabase(page, { sessions: [jcc, sat], ...fx });
   await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
   await page.goto(path);
@@ -68,7 +71,9 @@ test.describe('@customer:account referrals', () => {
     await box.locator('#ref-in').fill('k7mq2x');
     await box.getByRole('button', { name: 'Apply' }).click();
     await expect(box.locator('#ref-in-msg')).toContainText('your own');
-    expect(calls.find((c) => c.name === 'customer_set_referrer')!.body).toEqual({ p_id: 'c1', p_token: expect.any(String), p_code: 'k7mq2x', p_via: 'code' });
+    const body = calls.find((c) => c.name === 'customer_set_referrer')!.body;
+    expect(body).toMatchObject({ p_id: 'c1', p_token: expect.any(String), p_code: 'k7mq2x', p_via: 'code' });
+    expect(String(body.p_device)).toMatch(/^[0-9a-f]{24}$/); // this browser's id, for the device check
   });
 
   test('a code that takes: thanked, and the card asked again', async ({ page }) => {
@@ -234,5 +239,120 @@ test.describe('@staff:settings the Referrals card', () => {
     await c.locator('#biz-save-referral').click();
     await expect.poll(() => calls.filter((x) => x.name === 'staff_set_biz').length).toBe(1);
     expect(calls.find((x) => x.name === 'staff_set_biz')!.body).toEqual({ p_patch: { ref_on: false, ref_days: null, ref_cap: null } });
+  });
+});
+
+// The extras (the owner, 2026-11-08: "in more ideas do 2 3 6 8", migration 20261108180000): the free ride said once on the
+// device and its last days on the card, the Recruiter badge and the fifth friend's bonus on any bike, the device check
+// with its held referrals for staff, and the People > Referrals report.
+const RB = { code: 'RB-9F8E7D6C', expires_at: '2099-12-05', used: false, any_bike: true };
+const inDays = (n: number) => new Date(Date.now() + 3 * 36e5 + n * 864e5).toISOString().slice(0, 10);
+
+test.describe('@customer:account referral extras', () => {
+  test('a free ride this device has not shown pops up once, then never again', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ rewards: [RF] }), 'rpc:customer_blood_rewards': [] }, '/', false);
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    const pop = page.locator('#confirm-modal');
+    await expect(pop).toContainText('You earned a free ride');
+    await expect(pop).toContainText('RF-1A2B3C4D');
+    expect(await page.evaluate(`JSON.parse(localStorage.getItem('cq_ref_seen_c1'))`)).toEqual(['RF-1A2B3C4D']);
+    await page.evaluate(`document.getElementById('confirm-modal').style.display='none';document.getElementById('confirm-modal').innerHTML='';S._refMine=null;_refLoad(S.loggedIn||getSession(),false,true)`);
+    await expect.poll(() => page.evaluate('!!S._refMine')).toBe(true);
+    await expect(page.locator('#confirm-modal .modal-backdrop')).toHaveCount(0);
+  });
+
+  test('a free ride in its last seven days says so on the event picker', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ rewards: [{ ...RF, expires_at: inDays(3) }] }), 'rpc:customer_blood_rewards': [] });
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    await expect(page.locator('#land-free-rides .fr-soon')).toHaveText('Ends in 3 days');
+  });
+
+  test('the bonus of the fifth friend is kept for Carbon and offered there', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ rewards: [RF, RB] }), 'rpc:customer_blood_rewards': [] });
+    await page.evaluate('showView("landing");renderLandingAvail()');
+    await expect.poll(() => page.evaluate('_refRewards().length')).toBe(2);
+    await page.evaluate(`localStorage.setItem('cq_ref_seen_c1',JSON.stringify(['RF-1A2B3C4D','RB-9F8E7D6C']));document.getElementById('confirm-modal').style.display='none';document.getElementById('confirm-modal').innerHTML=''`);
+    await page.evaluate(`showView('customer');setCustTab('register');S.selEvent='jcc';S.selSession='s0';S.regStep=2;S.regQty=1;S.regBikeTypes=['Hybrid'];renderRegister()`);
+    await expect(page.locator('#bld-redeem .fr-card')).toContainText('RF-1A2B3C4D');
+    await page.evaluate(`S.regBikeTypes=['Road Carbon'];renderRegister()`);
+    const box = page.locator('#bld-redeem .fr-card');
+    await expect(box).toContainText('RB-9F8E7D6C');
+    await expect(box.locator('.fr-go')).toHaveCount(1);
+  });
+
+  test('the Recruiter badge counts the friends who rode, as levels at 1, 3, 5 and 10', async ({ page }) => {
+    await rider(page, { 'rpc:customer_referral': card({ rode: 3 }), 'rpc:customer_blood_rewards': [] });
+    await account(page);
+    await expect.poll(() => page.evaluate('S._refMine&&S._refMine.rode')).toBe(3);
+    const x = await page.evaluate(`(()=>{const L=_mrBadgeList(S.loggedIn||getSession());const y=L.find(z=>z.lv&&z.lv.some(w=>w.b.slug==='recruiter'));return y?[y.lvN,y.nx&&y.nx.b.slug,y.lv.length]:null;})()`);
+    expect(x).toEqual([2, 'recruiter_5', 4]);
+  });
+
+  test('a friend\'s code goes with this browser\'s id; a database without it is asked again without the id', async ({ page }) => {
+    const sent: Record<string, unknown>[] = [];
+    await rider(page, { 'rpc:customer_referral': card({ can_enter: true }) });
+    await page.route(/\/rest\/v1\/rpc\/customer_set_referrer/, async (route) => {
+      const b = route.request().postDataJSON() as Record<string, unknown>;
+      sent.push(b);
+      if ('p_device' in b) return route.fulfill({ status: 404, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ code: 'PGRST202', message: 'Could not find the function public.customer_set_referrer(p_code, p_device, p_id, p_token, p_via)' }) });
+      return route.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: JSON.stringify({ ok: true }) });
+    });
+    await account(page);
+    await page.locator('#ref-in').fill('K7MQ2X');
+    await page.locator('#ref-mine').getByRole('button', { name: 'Apply' }).click();
+    await expect(page.locator('#toast-container')).toContainText('Your friend gets a free ride');
+    expect(sent).toHaveLength(2);
+    expect(String(sent[0].p_device)).toMatch(/^[0-9a-f]{24}$/);
+    expect('p_device' in sent[1]).toBe(false);
+  });
+});
+
+test.describe('@staff:people referral extras', () => {
+  const customers = [
+    { id: 'c1', name: 'Lina Haddad', email: 'lina.haddad@gmail.com', phone: '+966551876215', created_at: '2026-11-01T09:00:00Z' },
+    { id: 'c2', name: 'Omar Saleh', email: 'omar.saleh@gmail.com', phone: '+966551876216', created_at: '2026-06-11T09:00:00Z' },
+    { id: 'c3', name: 'Maya Nasser', email: 'maya.nasser@gmail.com', phone: '+966551876217', created_at: '2026-11-02T09:00:00Z' },
+  ];
+  const now = new Date().toISOString();
+  const referrals = [
+    { friend_id: 'c1', referrer_id: 'c2', code: 'K7MQ2X', via: 'link', created_at: now, rode_at: now, reward_code: 'RF-1A2B3C4D', rewarded_at: now, capped: false, held: false, device: 'd1' },
+    { friend_id: 'c3', referrer_id: 'c2', code: 'K7MQ2X', via: 'link', created_at: now, rode_at: null, reward_code: null, rewarded_at: null, capped: false, held: true, device: 'd1' },
+  ];
+  async function staff(page: Page, fx: Record<string, unknown> = {}) {
+    await stubSupabase(page, { sessions: [jcc], queue_entries: [], bikes: [], customers, tags: [], customer_tags: [], staff_options: [],
+      promo_codes: [{ id: 'rf-c1', code: 'RF-1A2B3C4D', kind: 'percent', value: 100, active: true, uses: 1, max_uses: 1, customer_id: 'c2', referral_friend_id: 'c1', ride_kind: 'jcc' }],
+      referrals, referral_codes: [{ customer_id: 'c2', code: 'K7MQ2X' }], ...fx });
+    await unlockStaff(page);
+    await page.goto('/');
+    await waitForSb(page);
+    await page.waitForFunction('(S.customers||[]).length===3');
+  }
+
+  test('People > Referrals: the figures, the referral to check with Allow, and the top referrer', async ({ page }) => {
+    const calls = rpcs(page);
+    await staff(page, { 'rpc:staff_referral_review': { ok: true, rewarded: false } });
+    await page.evaluate(`setStaffTab('community');setCommTab('referrals')`);
+    expect(new URL(page.url()).pathname).toBe('/people/referrals');
+    const tab = page.locator('#tab-community');
+    await expect(tab.locator('.rp-kpis .dash-kpi')).toHaveCount(6);
+    await expect(tab.locator('.rp-check')).toContainText('Maya Nasser');
+    await expect(tab.locator('.rp-check')).toContainText('2 accounts with this code in a day');
+    await expect(tab.locator('.rp-table').last()).toContainText('Omar Saleh');
+    await tab.locator('.rp-check').getByRole('button', { name: 'Allow' }).click();
+    await expect.poll(() => calls.filter((c) => c.name === 'staff_referral_review').length).toBe(1);
+    expect(calls.find((c) => c.name === 'staff_referral_review')!.body).toEqual({ p_friend: 'c3', p_allow: true });
+  });
+
+  test('the bell lists the referrals to check, and the account window says one waits', async ({ page }) => {
+    await staff(page);
+    await page.evaluate(`S._refHeld=[{friend_id:'c3',referrer_id:'c2',created_at:new Date().toISOString()}]`);
+    const k = await page.evaluate(`(()=>{const x=_ntKindsNow().find(y=>y.k==='refheld');return x?[x.ids,x.items[0].txt]:null;})()`) as [string[], string];
+    expect(k[0]).toEqual(['c3']);
+    expect(k[1]).toContain('Maya Nasser');
+    expect(await page.evaluate(`NT_KINDS.some(r=>r[0]==='refheld')`)).toBe(true);
+    await page.evaluate(`openAccountHistory('c3')`);
+    const sec = page.locator('#cust-modal .ref-ah');
+    await expect(sec.locator('.ref-ah-held')).toContainText('Waiting for a staff check');
+    await expect(sec.getByRole('button', { name: 'Allow' })).toBeVisible();
   });
 });
