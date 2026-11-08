@@ -33,10 +33,17 @@ test('History: the dropdowns open under the Filter button, named, and the button
   await boot(page);
   await page.evaluate(`setStaffTab('history')`);
   const panel = page.locator('#fm-hist');
-  // the main filters in plain view, the detailed ones under Advanced and its arrow
+  // every filter behind the Filter button (2026-11-08), closed until opened
+  const show = page.locator('[aria-controls="fm-hist"]');
+  await expect(panel).toBeHidden();
+  await expect(show).toHaveText('Filters');
+  await expect(show).toHaveAttribute('aria-expanded', 'false');
+  await show.click();
+  await expect(show).toHaveAttribute('aria-expanded', 'true');
+  // inside, the main filters, the detailed ones under Advanced and its arrow
   await expect(panel).toBeVisible();
   await expect(panel.locator('.filter-field-lbl').filter({ visible: true })).toHaveText(['Status', 'Pay', 'Range']);
-  const btn = page.locator('#tab-history .filter-toggle');
+  const btn = page.locator('[aria-controls="fa-hist"]');
   await expect(btn).toContainText('Advanced');
   await expect(btn.locator('.f-arrow')).toBeVisible();
   await expect(btn).toHaveAttribute('aria-expanded', 'false');
@@ -48,7 +55,16 @@ test('History: the dropdowns open under the Filter button, named, and the button
   await panel.locator('select[aria-label="Type"]').selectOption({ index: 1 });
   // the re-render keeps it extended and the button now says one detailed filter is on
   await expect(panel.locator('select[aria-label="Size"]')).toBeVisible();
-  await expect(page.locator('#tab-history .filter-toggle')).toContainText('(1)');
+  await expect(btn).toContainText('(1)');
+  // the Filter button counts it too, and a second one in the main filters
+  await expect(show).toContainText('(1)');
+  await panel.locator('select[aria-label="Pay"]').selectOption({ index: 1 });
+  await expect(show).toContainText('(2)');
+  await expect(btn).toContainText('(1)');
+  // closed again, the panel takes no room and the count stays on the button
+  await show.click();
+  await expect(panel).toBeHidden();
+  await expect(show).toContainText('(2)');
 });
 
 test('every search finds a phone typed as 05x, 5x or +966 5x, and a name search never matches digits', async ({ page }) => {

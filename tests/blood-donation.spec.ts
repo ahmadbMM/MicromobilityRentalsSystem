@@ -756,7 +756,8 @@ test.describe('@staff:bookings Blood Donation', () => {
     await expect(tab.locator('select[aria-label="Blood type"] option')).toHaveCount(12);
     await expect(tab.locator('select[aria-label="Blood type"] option', { hasText: /^O$/ })).toHaveCount(1);
     await expect(tab.locator('select[aria-label="City of residence"]')).toHaveCount(0);
-    await tab.locator('.filter-toggle').click();
+    await tab.locator('[aria-controls="fm-q"]').click(); // the Filter button, then Advanced inside it
+    await tab.locator('[aria-controls="fa-q"]').click();
     await expect(tab.locator('select[aria-label="City of residence"] option')).toHaveText(['All', 'Not set', 'Jeddah', 'Makkah', 'Riyadh']);
     expect(await tab.locator('#fm-q select').count()).toBeGreaterThan(35);
     expect(await tab.locator('#fm-q').innerText()).not.toMatch(/\bPaid\b|Payment|Spent|⃁|\bSAR\b/);

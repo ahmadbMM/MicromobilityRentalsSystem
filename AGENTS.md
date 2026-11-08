@@ -934,7 +934,7 @@ offer in the rider's language (`vndRiderOffer`).
 
 ## Applications filters and sorts; money spent on every account list (2026-10-07)
 
-- **Applications** (both lists) have main filters and an Advanced button (`_fPanel(k+'ap',main,adv)`, panel `_apPanel(k)`): a Sort by
+- **Applications** (both lists) have a Filter button holding the main filters and an Advanced button (`_fPanel(k+'ap',main,adv)`, panel `_apPanel(k)`): a Sort by
   (`_apSorts(k)`, `S._apSort[k]`; "Suggested order" = the list's own order) and one dropdown per field the cards show
   (`_apDefs(k)`: `[key, label, options, test]`, picks in `S._apF[k]`). Filters narrow the list AND every status
   pill's count (`_apTests` → `_appN`/`_caInvN`/`_appIn`), like the search. A sort puts cards without the value last.

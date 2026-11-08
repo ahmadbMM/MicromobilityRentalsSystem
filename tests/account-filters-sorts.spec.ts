@@ -35,6 +35,7 @@ async function open(page: Page, sec: 'customers' | 'community') {
   await page.evaluate(sec === 'customers'
     ? `setStaffTab('customers');S.communityTab='accounts';renderCustomers()`
     : `setStaffTab('community');S.communityTab='accounts';S.amMember='yes';renderCommunity()`);
+  await page.locator('[aria-controls="fm-am"]').click(); // the filters sit behind the Filter button
   await page.locator('[aria-controls="fa-am"]').click();
 }
 const rows = (page: Page) => page.locator('#am-cust-rows .am-row').evaluateAll((els) => els.map((e) => e.getAttribute('data-cust')));
@@ -79,6 +80,7 @@ test.describe('@staff:accounts and members filters and sorts', () => {
     await panel.locator(`select[aria-label="Gender"]`).selectOption('male');
     await panel.locator(`select[aria-label="Upcoming booking"]`).selectOption('no');
     await expect(page.locator('[aria-controls="fa-am"]')).toContainText('(1)');
+    await expect(page.locator('[aria-controls="fm-am"]')).toContainText('(2)'); // the Filter button counts both
     expect(await rows(page)).toEqual(['c2']);
     await panel.locator('.am-reset').click();
     expect(await rows(page)).toEqual(['c3', 'c2', 'c1']);

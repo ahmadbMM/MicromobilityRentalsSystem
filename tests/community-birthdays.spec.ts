@@ -214,6 +214,7 @@ test.describe('Community > Birthdays', () => {
     await staff(page, { tags: [...tags, jcc], customer_tags: [...customer_tags, { customer_id: 'n1', tag_id: 'tag_jcc', added_at: 1 }] });
     await page.evaluate(`setCommTab('birthdays')`);
     await expect(names(page)).toHaveCount(5);                                               // the Community, as before
+    await page.locator('[aria-controls="fm-bd"]').click();                                 // the filters sit behind the Filter button
     await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');
     await expect(names(page)).toHaveText(['Not Member']);
     await expect(page.locator('#tab-community')).toContainText('Birthdays, soonest first.');  // no longer "Community members'"
@@ -230,6 +231,7 @@ test.describe('Community > Birthdays', () => {
     await expect(names(page)).toHaveCount(5);
     await expect(page.locator('#fm-bd select[aria-label="Tag"]')).toHaveValue('tag_saturday');
     await expect(page.locator('#fm-bd select[aria-label="Tag"] option:checked')).toHaveText('Community');
+    await page.locator('[aria-controls="fm-bd"]').click();
     await page.locator('#fm-bd select[aria-label="Tag"]').selectOption('tag_jcc');                            // the first tag can be picked
     await expect(names(page)).toHaveText(['Not Member']);
     // 700 more riders with a birth date: every account, 300 at a time

@@ -63,6 +63,9 @@ test.describe('@staff:community list filters and money spent', () => {
     await staff(page, 'applications');
     await expect(page.locator('.ca-row')).toHaveCount(3);
     const panel = page.locator('#fm-caap');
+    await expect(panel).toBeHidden(); // behind the Filter button until it is opened
+    await page.locator('[aria-controls="fm-caap"]').click();
+    await expect(panel).toBeVisible();
     await expect(page.locator('#fa-caap')).not.toHaveClass(/open/);
     await page.locator('[aria-controls="fa-caap"]').click();
     await expect(page.locator('#fa-caap')).toHaveClass(/open/);
@@ -71,6 +74,7 @@ test.describe('@staff:community list filters and money spent', () => {
     await panel.getByLabel('Gender', { exact: true }).selectOption('female');
     await expect(page.locator('.ca-row')).toHaveCount(1);
     await expect(page.locator('.filter-pill[data-ca-filter="pending"]')).toHaveText('Pending (1)');
+    await expect(page.locator('[aria-controls="fm-caap"]')).toContainText('(1)'); // the Filter button counts it
     await page.locator('#fm-caap .ap-reset').click();
     await expect(page.locator('.ca-row')).toHaveCount(3);
 
@@ -111,6 +115,7 @@ test.describe('@staff:community list filters and money spent', () => {
   test('learn to ride: priority, learners and their level filter; priority and learners sort', async ({ page }) => {
     await staff(page, 'learning');
     await expect(page.locator('.la-row')).toHaveCount(2);
+    await page.locator('[aria-controls="fm-laap"]').click();
     await page.locator('[aria-controls="fa-laap"]').click();
     const panel = page.locator('#fm-laap');
     await panel.getByLabel('Priority', { exact: true }).selectOption('low');
@@ -135,6 +140,7 @@ test.describe('@staff:community list filters and money spent', () => {
 
   test('accounts: money spent sorts and filters the list, and shows on each row', async ({ page }) => {
     await staff(page, 'accounts', 'customers');
+    await page.locator('[aria-controls="fm-am"]').click();
     await page.locator('[aria-controls="fa-am"]').click();
     await page.locator('#fm-am').getByLabel('Sort by').selectOption('spentHi');
     expect(await ids(page, '#am-cust-rows .am-row', 'data-cust')).toEqual(['c2', 'c1', 'c3']);
@@ -221,6 +227,7 @@ test.describe('@staff:community list filters and money spent', () => {
     await page.waitForFunction('Array.isArray(S._flags)'); // People reads the requests for its counts: let that read land first
     await page.evaluate(`S._flags=[{id:'f1',customer_id:'c1',status:'pending',fields:['email'],flagged_at:'2026-10-01T10:00:00Z'},{id:'f2',customer_id:'c2',status:'pending',fields:['email'],flagged_at:'2026-09-01T10:00:00Z'}];S._flagsAt=Date.now();S._flagsSig=_flagsSig();S.communityTab='flagged';renderCustomers()`);
     expect(await ids(page, '.flg-row', 'data-flag-id')).toEqual(['f1', 'f2']);
+    await page.locator('[aria-controls="fm-flg"]').click();
     await page.locator('#fm-flg').getByLabel('Sort by').selectOption('spentHi');
     expect(await ids(page, '.flg-row', 'data-flag-id')).toEqual(['f2', 'f1']);
     await expect(page.locator('.flg-row[data-flag-id="f2"] .sp-line')).toContainText('SAR 600');

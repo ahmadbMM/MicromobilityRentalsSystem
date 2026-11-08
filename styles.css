@@ -7048,13 +7048,15 @@ body .vendor-dlg textarea.vendor-pw-msg{width:100%;min-height:170px;box-sizing:b
 #acc-pwd-modal .ap-done .cu-ic{flex:none;margin-top:2px;color:#008f52;}
 
 /* ── Filter button and folded search, 2026-09-22 ──
-   A view's filter dropdowns open under its Filter button (_fBtn/_fPanel), each with its name
-   above it. On phones a page's search bar is a search button until tapped (_srchCls/_srchBtn). */
-.filter-more{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;margin:0 0 10px;padding:12px;
+   A view's filter dropdowns open under its Filter button (_fPanel), each with its name above it; the
+   button sits in the list's toolbar row and the panel takes a line of its own under that row, only while
+   open (2026-11-08). On phones a page's search bar is a search button until tapped (_srchCls/_srchBtn). */
+.filter-more{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;flex:0 0 100%;grid-column:1/-1;margin:0;padding:12px;text-align:start;
   border:1px solid var(--border);border-radius:var(--sf-r-ctl,8px);background:var(--s1);}
 body.view-staff .filter-more{border-color:var(--sf-ctl);background:var(--sf-card);}
 .filter-adv{display:none;flex:0 0 100%;width:100%;margin-bottom:10px;}
 .filter-more>.filter-adv{margin-bottom:0;}
+.filter-more:not(.open){display:none;}
 .filter-adv.open{display:block;}
 .filter-adv-in{display:flex;flex-wrap:wrap;gap:10px 12px;align-items:flex-end;}
 .filter-toggle[aria-expanded="true"] .f-arrow{transform:rotate(180deg);}
@@ -11143,7 +11145,9 @@ body.view-staff #tab-bikes .flt-svc-row .bk-svc-every input{height:32px;min-heig
   body.view-staff #tab-ambassadors .filter-bar>.filter-row>.search-wrap.open,
   body.view-staff #tab-workshop .filter-bar>.filter-row>.search-wrap.open,
   body.view-staff #tab-messages .filter-bar>.filter-row>.search-wrap.open,
-  body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar{grid-column:1/-1;}
+  body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar,
+  body.view-staff #tab-messages .filter-bar>.filter-row>.filter-more{grid-column:1/-1;}
+  body.view-staff #tab-messages .filter-bar>.filter-row>.filter-more{text-align:start;justify-content:stretch;}
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-lbl,
   body.view-staff #tab-messages .filter-bar>.filter-row>.sv-bar .sv-lbl{flex:1 1 auto;min-width:0;}
   body.view-staff #tab-workshop .filter-bar>.filter-row>.sv-bar .sv-pick,
