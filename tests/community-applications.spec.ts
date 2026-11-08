@@ -62,7 +62,9 @@ test('the Applications tab shows every answer, the handles as links, and an acco
   await expect(row(page, 'a3')).toContainText('by Desk B');
   await expect(row(page, 'a3').locator('.ca-grid')).toContainText('Mountain');
   await expect(row(page, 'a3').locator('.ca-reopen')).toBeVisible();
-  await expect(row(page, 'a3').locator('a.ca-call, a.ca-chat')).toHaveCount(0); // decided: the reply carries its own WhatsApp
+  // and a decided one too (the owner, 2026-11-08: a call and WhatsApp on every application)
+  await expect(row(page, 'a3').locator('a.ca-call')).toHaveAttribute('href', 'tel:+966553579024');
+  await expect(row(page, 'a3').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966553579024');
 });
 
 // How they heard of us: the community form asks it since 2026-09-28 (the booking app's sign-up no

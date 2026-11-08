@@ -24655,17 +24655,12 @@ function _caRow(a){
     ?(acct?`<div class="ca-acct">${t('caHasAccount').replace('{0}',acctLink)}</div>`:'')
     :a.status==='approved'?`<div class="ca-acct">${ds==='invited'?_caInvLine(a)+' · ':''}${_caGone(a)?t('caAcctGone'):(a.existing_account?t(acct&&!_hasTagNow(acct.id,TAG_COMMUNITY)?'laUsedExisting':'caUsedExisting'):t('caMadeNew'))}${acct?' · '+acctLink:''}</div>`:'';
   const id=a.id;
-  // A pending applicant can be reached before the decision (the owner, 2026-09-29): a call, or a
-  // WhatsApp chat opened on their number.
-  const dial=_waDigits(a.phone),waDial=_waDigits(_waNum(a)); // WhatsApp on the number they gave for it (20261007200000)
-  // Icons, as the Bookings table's contact cell (the owner, 2026-09-29); the words are their labels.
-  const contact=dial?`<a class="ca-ic ca-call" href="tel:+${esc(dial)}" title="${esc(t('callLabel'))}" aria-label="${esc(t('callLabel'))}"${_piiAttrs('call',a.customer_id,'app:'+a.id)}>${_artIcon('phone',16)}</a><a class="ca-ic ca-chat" href="https://wa.me/${esc(waDial||dial)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp"${_piiAttrs('whatsapp',a.customer_id,'app:'+a.id,'whatsapp')}>${_artIcon('whatsapp',16)}</a>`:'';
   // Ask for changes, and its message again while unanswered, on every list: pending, invited,
   // completed, didn't show, rejected (the owner, 2026-10-11; 20261011120000).
   const fixWait=!!a.fix_token&&!a.fix_done_at;
   const fixBtns=`<button type="button" class="btn-secondary btn-sm ca-fix-btn" data-on-click="${_on("_caFxOpen",id)}">${t('caFixBtn')}</button>${fixWait?`<button type="button" class="btn-secondary btn-sm ca-fix-msg" data-on-click="${_on("_caMsgOpen",id,"fix")}">${t('caFixMsgBtn')}</button>`:''}`;
   const actions=a.status==='pending'
-    ?`<button type="button" class="btn-primary btn-sm ca-approve" data-on-click="${_on("_caApprove",id)}">${t('caApproveBtn')}</button><button type="button" class="btn-secondary btn-sm ca-invite" data-on-click="${_on("_caInvite",id)}">${t('caInviteBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reject" data-on-click="${_on("_caReject",id)}">${t('caRejectBtn')}</button>${fixBtns}${contact}`
+    ?`<button type="button" class="btn-primary btn-sm ca-approve" data-on-click="${_on("_caApprove",id)}">${t('caApproveBtn')}</button><button type="button" class="btn-secondary btn-sm ca-invite" data-on-click="${_on("_caInvite",id)}">${t('caInviteBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reject" data-on-click="${_on("_caReject",id)}">${t('caRejectBtn')}</button>${fixBtns}`
     :a.status==='rejected'
       ?`<button type="button" class="btn-secondary btn-sm ca-reply" data-on-click="${_on("_caMsgOpen",id,"reject")}">${t('caReplyBtn')}</button><button type="button" class="btn-secondary btn-sm ca-reopen" data-on-click="${_on("_caReopen",id)}">${t('caReopenBtn')}</button>`
       :_caGone(a)
@@ -24707,7 +24702,7 @@ function _caRow(a){
     ${_caChecks(a,acct,age)}
     ${a.status==='pending'?_caRuleChips(a):''}
     ${_scCardHtml('community_app',a.id)}
-    <div class="ca-actions">${actions}${a.status==='pending'?'':fixBtns}${_apHideBtn('ca',a)}</div>
+    <div class="ca-actions">${actions}${a.status==='pending'?'':fixBtns}${_apContact(a)}${_apHideBtn('ca',a)}</div>
   </div>`;
 }
 // ── Applications, made the admins' own (the owner, 2026-10-07: "add more customization in it": views and bulk
@@ -25360,6 +25355,14 @@ function _appQv(k){return S[k==='la'?'_laQ':'_caQ']||'';}
 // update as priority; until the database has them the button says so.
 function _apSt(k,a){return a.hidden_at?'hidden':k==='la'?a.status:_caSt(a);}
 function _apPillLbl(k,st){return t(st==='hidden'?'apHidden':(k==='la'?LA_STATUS:CA_STATUS)[st].k);}
+// A call, or a WhatsApp chat on the number they gave for it (20261007200000), on every application, community
+// and learn, whatever its status (the owner, 2026-11-08; pending community cards only since 2026-09-29).
+// Icons, as the Bookings table's contact cell; the words are their labels.
+function _apContact(a){
+  const dial=_waDigits(a.phone),waDial=_waDigits(_waNum(a));
+  return(dial?`<a class="ca-ic ca-call" href="tel:+${esc(dial)}" title="${esc(t('callLabel'))}" aria-label="${esc(t('callLabel'))}"${_piiAttrs('call',a.customer_id,'app:'+a.id)}>${_artIcon('phone',16)}</a>`:'')
+    +(waDial?`<a class="ca-ic ca-chat" href="https://wa.me/${esc(waDial)}" target="_blank" rel="noopener noreferrer" title="WhatsApp" aria-label="WhatsApp"${_piiAttrs('whatsapp',a.customer_id,'app:'+a.id,'whatsapp')}>${_artIcon('whatsapp',16)}</a>`:'');
+}
 function _apHideBtn(k,a){return`<button type="button" class="btn-secondary btn-sm ap-hide" data-on-click="${_on("_apHide",k,a.id,!a.hidden_at)}">${t(a.hidden_at?'apUnhideBtn':'apHideBtn')}</button>`;}
 function _apHideLine(a){return a.hidden_at?[t('apHiddenOn').replace('{0}',esc(fmtStamp(a.hidden_at)))+(a.hidden_by?' · '+t('flgBy').replace('{0}',esc(a.hidden_by)):'')]:[];}
 async function _apHidePut(k,a,on){
@@ -26266,7 +26269,7 @@ function _laRow(a){
     ${acct&&_apSpOn('la')?_spLine(acct.id):''}
     ${sx.length?`<div class="ca-sx">${esc(t('sxFilterBtn'))}: ${sx.map(s=>esc(_sxText(s))).join(' · ')}</div>`:''}
     ${_scCardHtml('learn_app',a.id)}
-    <div class="ca-actions">${actions}${open?'':fix}${_apHideBtn('la',a)}</div>
+    <div class="ca-actions">${actions}${open?'':fix}${_apContact(a)}${_apHideBtn('la',a)}</div>
   </div>`;
 }
 // Handlers of the markup below.

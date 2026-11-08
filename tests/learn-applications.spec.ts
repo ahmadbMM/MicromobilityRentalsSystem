@@ -47,6 +47,22 @@ const rpcCalls = (page: Page, name: string) => {
 };
 
 test.describe('@staff:community learn to ride', () => {
+  // A call and a WhatsApp chat on every sign-up, whatever its status (the owner, 2026-11-08), WhatsApp
+  // on the number they gave for it when it is not their mobile.
+  test('every learn-to-ride card has Call and WhatsApp', async ({ page }) => {
+    await learnTab(page, { learn_applications: learners.map((a) => (a.id === 'l1' ? { ...a, whatsapp_same: false, whatsapp: '+201001234567' } : a)) });
+    await expect(row(page, 'l1').locator('a.ca-call')).toHaveAttribute('href', 'tel:+966552220001');
+    await expect(row(page, 'l1').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/201001234567');
+    await expect(row(page, 'l1').locator('a.ca-chat')).toHaveAttribute('target', '_blank');
+    await expect(row(page, 'l2').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966551239876');
+    await page.locator('.filter-pill[data-la-filter="scheduled"]').click();
+    await expect(row(page, 'l3').locator('a.ca-call')).toHaveAttribute('href', 'tel:+966553330002');
+    await expect(row(page, 'l3').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966553330002');
+    await page.locator('.filter-pill[data-la-filter="cancelled"]').click();
+    await expect(row(page, 'l4').locator('a.ca-call')).toHaveAttribute('aria-label', 'Call');
+    await expect(row(page, 'l4').locator('a.ca-chat')).toHaveAttribute('href', 'https://wa.me/966554440003');
+  });
+
   test('Applications holds two lists; the learn-to-ride one shows who is learning and what they asked for', async ({ page }) => {
     await learnTab(page);
     // one pill for both lists, the pending ones of both counted; its own address
