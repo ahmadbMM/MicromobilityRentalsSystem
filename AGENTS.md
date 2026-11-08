@@ -1980,9 +1980,9 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
   off, draws no card. The event picker reads the same answer without making a code.
 - **The friend's side.** `_readEventLink` parks `?ref=` in localStorage `cq_ref` for 30 days and takes it off the address;
   Create account says a friend invited them (`refSignupNote`). `doSignup` sends it once the account exists; `_refLoad` sends it
-  for a signed-in account the server still lets be referred (`can_enter`) and drops it otherwise. A new account can also type
+  for a signed-in account the server still lets be referred (`can_enter`) and drops it otherwise. An account can also type
   a code on the card (`p_via 'code'`). `customer_set_referrer` answers `{ok}` or a reason: off, invalid, self (own code, the
-  same mobile, or back to a friend one referred), already, not_new (made more than 30 days ago, or a completed paid ride).
+  same mobile, or back to a friend one referred), already, not_new (a completed paid ride; an account of any age counts until then, 20261108235000).
 - **The free ride.** Trigger `queue_entries_ref_reward` (AFTER UPDATE OF status, paid, price; WHEN done, paid, price > 0)
   calls `_ref_reward` for the friend's first such JCC booking (`_session_kind = 'jcc'`): a promo code `RF-xxxxxxxx` (id
   `rf-<friend>`, 100%, one use, `ride_kind 'jcc'`, `customer_id` the referrer, `referral_friend_id` the friend) valid
@@ -1991,7 +1991,7 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
   shown as errBloodCodeCarbon). The page lists it with the blood codes: `_bldOpenCodes()` (each `ref: true`), `_bldCodeOf`,
   and `_bldRedeemInner` offers a ref code only on a JCC session (`_refCodeSessOk`); rider 1 only, as the blood codes.
 - **Settings > Business > Referrals** (`BIZ_CARDS` 'referral'): `ref_on` (`boolOn`: unset = on; off stops new links and new
-  free rides, codes already given stay good), `ref_days` (7-365, 60), `ref_cap` (1-100, 10). The database reads them from
+  free rides, codes already given stay good), `ref_days` (7-365, 30; 60 before 20261108235000), `ref_cap` (1-100, 10). The database reads them from
   `staff_options` 'biz' (`_ref_conf`); `_bizApplyStaff` registers the defaults as the boxes' placeholders.
 - **Staff.** The account window's Referral section (`_refAhSec`, People part, called by name through `_n6pW`) reads
   `referrals` and `referral_codes` under RLS (`_staff_mod` customers or community) and links a referrer by code or mobile

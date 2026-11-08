@@ -233,7 +233,7 @@ test.describe('@staff:settings the Referrals card', () => {
     await page.evaluate(`S._staffAuthed=true;setStaffTab('settings');setSettingsView('business')`);
     const c = page.locator('[data-biz-card="referral"]');
     await expect(c.locator('#biz-ref_on')).toBeChecked();
-    await expect(c.locator('#biz-ref_days')).toHaveAttribute('placeholder', '60');
+    await expect(c.locator('#biz-ref_days')).toHaveAttribute('placeholder', '30');
     await expect(c.locator('#biz-ref_cap')).toHaveAttribute('placeholder', '10');
     await expect(c.locator('#biz-ref_pct')).toHaveAttribute('placeholder', '50'); // the friend's discount (20261108200000)
     await c.locator('#biz-ref_on').uncheck();

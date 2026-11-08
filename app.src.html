@@ -32630,7 +32630,7 @@ function _bizApplyStaff(){
   IDLE_LOCK_MIN=_bizN('idle_lock_min',IDLE_LOCK_MIN,5,1440);
   PIN_HOLD_MS=_bizN('pin_hold_s',PIN_HOLD_MS/1000,30,270)*1000; // the server's approval lasts five minutes
   KIDS_MAX_CM=_bizN('kids_max_cm',KIDS_MAX_CM,80,200);
-  _bizN('ref_days',60,7,365);_bizN('ref_cap',10,1,100);_bizN('ref_pct',50,5,100); // referrals: the database's own defaults, the boxes' placeholders
+  _bizN('ref_days',30,7,365);_bizN('ref_cap',10,1,100);_bizN('ref_pct',50,5,100); // referrals: the database's own defaults, the boxes' placeholders
   _bizSizeChart();
   _bizArr(RIDER_COMPANIES,'rider_companies',v=>_bizStrs(v)&&v.includes('Petromin')); // Petromin's own pages name it
   _bizArr(EQUIP_CATS,'equip_cats',v=>_bizStrs(v)&&v.includes('Helmet'));
