@@ -2408,7 +2408,6 @@
     #tab-queue .rq-cxx{background:transparent none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0;margin-inline-start:auto;flex-shrink:0;}
     #tab-queue .rq-dup{color:var(--orange);font-weight:600;cursor:help;}
     #tab-queue .rq-bkat{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);white-space:nowrap;}
-    #tab-queue .rq-adw{margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
     #tab-queue .rq-adchip{font-size:var(--staff-fs-sm,12px);font-weight:600;background:rgba(var(--green-rgb),.08);border:1px solid rgba(var(--green-rgb),.2);border-radius:2px;padding:1px 6px;white-space:nowrap;}
     #tab-queue .rq-adbtn{background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:inherit;font-size:var(--staff-fs-sm,12px);font-weight:600;padding:5px 9px;border-radius:2px;cursor:pointer;line-height:1.4;min-height:24px;}
     #tab-queue .rq-sw{display:inline-block;width:13px;height:13px;border-radius:50%;background:var(--rq-bg);border:1.5px solid rgba(0,0,0,.3);flex-shrink:0;}
@@ -2419,8 +2418,6 @@
     #tab-queue .rq-flash-orange{animation:rowFlash_orange .75s ease forwards;}
     #tab-queue .rq-w52{min-width:52px;}
     #tab-queue .rq-wnum{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--orange);margin-top:2px;white-space:nowrap;}
-    #tab-queue .rq-wnum2{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--orange);white-space:nowrap;}
-    #tab-queue .rq-fs18{font-size:18px;}
     #tab-queue .rq-fs22{font-size:22px;}
     #tab-queue .rq-qn15{font-size:15px;line-height:1.25;}
     #tab-queue .rq-rn{display:flex;align-items:baseline;gap:6px;min-width:0;}
@@ -2454,7 +2451,6 @@
     #tab-queue .rq-gpaid{margin-top:6px;white-space:nowrap;font-size:var(--staff-fs-sm,12px);padding:4px 9px;}
     #tab-queue .rq-pcnt{font-size:12px;font-weight:600;white-space:nowrap;}
     #tab-queue .rq-st{font-size:12px;font-weight:600;}
-    #tab-queue .rq-ci4{margin-top:4px;white-space:nowrap;}
     #tab-queue .rq-rc{display:flex;align-items:baseline;gap:5px;}
     #tab-queue .rq-num17{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:var(--green);color:#000;font-size:var(--staff-fs-sm,12px);font-weight:600;flex-shrink:0;}
     #tab-queue .rq-rn900{margin:0;font-weight:600;}
@@ -2495,7 +2491,6 @@
     #tab-queue .rq-cacts{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
     #tab-queue .rq-shdr{font-size:var(--staff-fs-sm,12px);font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;padding:6px 0 4px;border-bottom:1px solid rgba(var(--tint-rgb),.06);margin-bottom:8px;}
     #tab-queue .rq-showmore{margin:10px 0;text-align:center;}
-    #tab-queue#tab-queue .rq-bulk{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:350;display:flex;align-items:center;gap:10px;background:var(--s1);border:1px solid var(--border);border-radius:var(--sf-r-card,12px);padding:10px 14px;box-shadow:var(--sf-sh-3,0 10px 40px rgba(0,0,0,.5));}
     #tab-queue .rq-bulkn{font-size:13px;font-weight:600;color:var(--green);white-space:nowrap;}
 
     /* Staff-list picker: the add field doubles as a search over the queue, the waitlist
@@ -6061,7 +6056,6 @@ body.view-staff #tab-queue .q-live-count{top:var(--staff-stick);}
 #tab-queue .q-lc-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 #tab-queue .q-lc-sep{color:var(--muted);}
 #tab-queue .kb-cur>td,#tab-queue .q-card.kb-cur{box-shadow:inset 0 0 0 2px var(--green);}
-#tab-queue#tab-queue .rq-bulk{flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);}
 /* Check-in: a bike of another type or size, and the type the field changes, said before Confirm. */
 #checkin-modal .ci-fitwarn,#checkin-modal .ci-tychg{margin-top:2px;}
 /* Petromin riders: the bike handed over, and the field that changes it. */
@@ -7739,7 +7733,6 @@ body.view-staff .staff-tabbar{display:none;}
 body.view-staff #tab-queue [data-ck="bulk"]{z-index:150!important;}
 @media(max-width:767px){
   body.view-staff:has(#toast-container .undo-bar) .fab-row{bottom:calc(140px + env(safe-area-inset-bottom));}
-  body.view-staff.q-bulk #tab-queue .fab-row{bottom:calc(212px + env(safe-area-inset-bottom));} /* q-bulk: _qBulkSync, not :has() - see there */
 }
 @media(max-width:1023px){
   body.view-staff #tab-queue [data-ck="bulk"]{
@@ -7748,7 +7741,6 @@ body.view-staff #tab-queue [data-ck="bulk"]{z-index:150!important;}
     flex-wrap:wrap;justify-content:center;row-gap:6px;
   }
   body.view-staff #tab-queue [data-ck="bulk"] .btn-sm{flex:0 1 auto;}
-  body.view-staff.q-bulk #toast-container{bottom:calc(212px + env(safe-area-inset-bottom));}
 }
 
 /* ── Read-only sections, the operator chip and PIN keypad, and the Team page (Claude Design #7–#9) ── */
@@ -9270,42 +9262,6 @@ html[data-staff-fs="130"] body.view-staff{zoom:1.3;}
 .tpl-fills{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px;}
 .tpl-fill{border:1px solid var(--border);background:var(--s3);color:var(--text);border-radius:6px;padding:3px 8px;font:inherit;font-size:12px;font-family:ui-monospace,Menlo,monospace;cursor:pointer;}
 
-/* ── Manage booking (the owner, 2026-10-02: "fix the approved button ... to have a bordered button like the
-   other buttons ... make them all have the same size and to be aligned perfectly"): every item in a
-   booking's action cell, the status words included, is one equal bordered tile on a three-column grid,
-   in the table and on the phone's cards alike. ── */
-body.view-staff #tab-queue .queue-table .actions-cell,
-body.view-staff #tab-queue .q-card .rq-flw6{
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch;justify-items:stretch;
-}
-body.view-staff #tab-queue .queue-table .actions-cell{grid-template-columns:repeat(2,minmax(104px,1fr));min-width:220px;}
-body.view-staff #tab-queue .queue-table .actions-cell>*,
-body.view-staff #tab-queue .q-card .rq-flw6>*{
-  width:100%;min-width:0;height:36px;min-height:36px;box-sizing:border-box;margin:0;padding:0 8px;
-  display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  border-radius:var(--sf-r-ctl);font-size:12px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none;
-}
-/* the status words, as tiles with their colour's border */
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>:is(.rq-apok,.rq-apchip,.rq-apchip-rej){
-  font-size:var(--staff-fs-sm,12px);font-weight:600;letter-spacing:0;text-transform:none;border:1px solid;
-}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apok{color:var(--green);border-color:rgba(var(--green-rgb),.45);background:rgba(var(--green-rgb),.08);}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>button.rq-apok:hover{background:rgba(var(--green-rgb),.16);}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.08);}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-apchip-rej{color:var(--red);border-color:rgba(var(--red-rgb),.45);background:rgba(var(--red-rgb),.06);}
-/* the row's select box, as a tile like the rest */
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select{border:1px solid var(--border);cursor:pointer;}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.row-select input{-webkit-appearance:checkbox;appearance:checkbox;width:16px;height:16px;min-height:0;margin:0;accent-color:var(--green);}
-/* the ⋯ menu is a tile like the envelope beside it (it was a bare glyph) */
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{border:1px solid var(--border);background:var(--s1,#fff);color:var(--text);}
-html[data-staff-theme="dark"] body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{background:transparent;} /* the staff dark theme (data-theme="dark" is on every page) */
-/* On the phone's cards (the owner, 2026-10-02: "align the buttons properly and make them all have the same
-   size ... put the approval and check in buttons on top and 3 dots and envelope button on the bottom"):
-   two equal columns; the decisions first (the status tile, Approve / Reject / Waitlist, Check In or
-   Return Bike), then the ⋯ menu and the envelope side by side on a row of their own. */
-body.view-staff #tab-queue .q-card .rq-flw6{grid-template-columns:repeat(2,minmax(0,1fr));}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-more{order:98;grid-column-start:1;}
-body.view-staff #tab-queue :is(.queue-table .actions-cell,.q-card .rq-flw6)>.rq-msg{order:99;}
 
 /* ── One button size across the staff site (the owner, 2026-10-02: "align all buttons in staff website to be
    the same size and aligned properly"). Every button is 38px high on a desk and 44px on a phone, with one
@@ -9354,7 +9310,6 @@ body.view-staff .ca-actions>:is(.btn-primary,.btn-secondary,.btn-sm,.btn-muted,.
    ring only for the keyboard. */
 #tab-queue .queue-table thead th .q-sort-btn{display:inline;margin:0;padding:0;border:0;border-radius:3px;background:transparent none;color:inherit;font:inherit;letter-spacing:inherit;text-transform:inherit;text-align:inherit;white-space:nowrap;cursor:pointer;min-height:0;}
 #tab-queue .queue-table thead th .q-sort-btn:focus-visible{outline:2px solid var(--sf-green-ink,var(--green));outline-offset:2px;}
-body.view-staff #tab-queue .queue-table .actions-cell{grid-template-columns:repeat(2,minmax(92px,1fr));min-width:190px;}
 /* Phone (2026-10-03): the ride strip's select is the one ride picker (it lists past nights too), and the
    page title is dropped - the Bookings pill above already names the page - so the first rider moves up. */
 @media (max-width:767px){
@@ -9904,12 +9859,12 @@ body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-jcc,.th-snd96) .badge-cl
    pinned first cell has to mask the columns scrolling under it. ── */
 body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#fff;--rs-edge:#c9cfcb;--rs-line:#e1e5e2;}
 /* Soft Solid (2026-11-06): the same hues, a step softer on the row; the edge carries the colour */
-body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#fff2e1;--rs-edge:#ea580c;--rs-line:#fdc99a;}
-body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#fbeeff;--rs-edge:#c026d3;--rs-line:#f3c2fd;}
-body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#f1eefe;--rs-edge:#7c3aed;--rs-line:#d3c8fd;}
-body.view-staff :is(tr,.q-card).row-active{--rs-bg:#fef8e4;--rs-edge:#d4a017;--rs-line:#f4e0a6;}
-body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#e6fced;--rs-edge:#16a34a;--rs-line:#a7f3c0;}
-body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#feeaea;--rs-edge:#dc2626;--rs-line:#fbbcbc;}
+body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#fff6eb;--rs-edge:#ea580c;--rs-line:#fdc99a;}
+body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#fcf4ff;--rs-edge:#c026d3;--rs-line:#f3c2fd;}
+body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#f6f3ff;--rs-edge:#7c3aed;--rs-line:#d3c8fd;}
+body.view-staff :is(tr,.q-card).row-active{--rs-bg:#fffaeb;--rs-edge:#d4a017;--rs-line:#f4e0a6;}
+body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#eefcf3;--rs-edge:#16a34a;--rs-line:#a7f3c0;}
+body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#fef2f2;--rs-edge:#dc2626;--rs-line:#fbbcbc;}
 body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){background:none;opacity:1;}
 /* the lighter grey (#8a938c) is 2.8:1 on these colours; inside a coloured row or card it reads 5:1 */
 body.view-staff :is(.queue-table tbody tr,.queue-mobile-view .q-card):is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){--muted-l:#5f6862;}
@@ -10340,12 +10295,12 @@ body.view-staff .x-close:is(#_x,*):focus-visible{outline:2px solid var(--sf-gree
    pills, the status pills and the figures above the roster (2026-10-11, the owner: "make sure the dark
    theme is perfected": the light pills were the brightest thing on a dark page). ── */
 html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waiting{--rs-bg:#15181c;--rs-edge:#5b646b;--rs-line:#2a3038;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#2a1a0c;--rs-edge:#f97316;--rs-line:#7c3a12;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#2a1230;--rs-edge:#e879f9;--rs-line:#6b2172;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#1f1838;--rs-edge:#a78bfa;--rs-line:#4c3a8a;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-active{--rs-bg:#29220c;--rs-edge:#f2b43f;--rs-line:#6b5414;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#0f2a1b;--rs-edge:#25d184;--rs-line:#1d5a3a;}
-html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#2e1414;--rs-edge:#ff6f66;--rs-line:#6b2424;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-waitlist{--rs-bg:#241a11;--rs-edge:#f97316;--rs-line:#7c3a12;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-toreserve{--rs-bg:#231729;--rs-edge:#e879f9;--rs-line:#6b2172;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-reserved{--rs-bg:#1d1a2f;--rs-edge:#a78bfa;--rs-line:#4c3a8a;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-active{--rs-bg:#242013;--rs-edge:#f2b43f;--rs-line:#6b5414;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card):is(.row-done,.row-done-paid){--rs-bg:#13251b;--rs-edge:#25d184;--rs-line:#1d5a3a;}
+html[data-staff-theme="dark"] body.view-staff :is(tr,.q-card).row-noshow-cancel{--rs-bg:#281818;--rs-edge:#ff6f66;--rs-line:#6b2424;}
 html[data-staff-theme="dark"] body.view-staff :is(.queue-table tbody tr,.queue-mobile-view .q-card):is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel){--muted-l:#a8b0b6;}
 html[data-staff-theme="dark"] body.view-staff .queue-table tbody tr:is(.row-waiting,.row-waitlist,.row-toreserve,.row-reserved,.row-active,.row-done,.row-done-paid,.row-noshow-cancel) td{border-bottom-color:rgba(255,255,255,.07);}
 /* the money: a deep wash of its colour, its words bright (paid green, pending amber, on the house teal) */
@@ -11005,18 +10960,6 @@ body.view-staff #tab-queue .queue-table td,
 body.view-staff #tab-queue .queue-table td.rq-vm{vertical-align:top;}
 body.view-staff #tab-queue .queue-table td .rider-sub{display:inline-flex;align-items:center;gap:4px;vertical-align:middle;margin-top:4px;}
 body.view-staff #tab-queue .queue-table td .rq-ccin{display:inline-flex;vertical-align:middle;margin:4px 0 0;margin-inline-start:8px;}
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.row-select,
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apok,
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip,
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-apchip-rej,
-body.view-staff #tab-queue .q-card .rq-flw6>.row-select,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-apok,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-apchip-rej{grid-column:1;}
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.btn-green,
-body.view-staff #tab-queue .queue-table .actions-cell.qa-pin>.rq-msg,
-body.view-staff #tab-queue .q-card .rq-flw6>.btn-green,
-body.view-staff #tab-queue .q-card .rq-flw6>.rq-msg{grid-column:2;}
 @media(max-width:767px){
   /* the rider's name on its own line: the call, WhatsApp, status and payment cluster beside it left the
      name 0-31px ("Omar Hassan" read "O..", a walk-in's name nothing at all) */
@@ -11041,9 +10984,6 @@ body.view-staff #tab-queue .q-card .rq-flw6>.rq-msg{grid-column:2;}
   body.view-staff #tab-queue .q-live-count .q-lc-btn{min-height:44px;}
   body.view-staff #tab-queue .q-live-count>*{flex:0 0 auto;}
 }
-/* a party's row: Check in top right like a rider's, Return all under it, ⋯ in the corner a rider's has it */
-body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.btn-green{grid-column:2;}
-body.view-staff #tab-queue .queue-table .actions-cell.qa-party>.rq-more{grid-row:2;grid-column:1;}
 /* the table inside its box at 1280px (it overhung by 30px): tighter cells, a narrower price breakdown, and
    the room given to the rider, whose call and WhatsApp pair now sits beside the number.
    2026-11-08: it hung out again, 30px in light and dark, 54px in booth (Return Bike off the screen) and 22px in
@@ -11069,7 +11009,7 @@ body.view-staff .filter-bar>.result-count:empty{display:none;}
 body.view-staff :is(#tab-queue,#tab-sessions) .filter-bar{margin-bottom:12px;}
 body.view-staff #tab-queue .queue-table .rq-gname{max-width:5.4em;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.25;overflow-wrap:anywhere;}
 @media(min-width:1024px){
-  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th{top:calc(var(--staff-top) + var(--q-lc-h,0px));}
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table th{top:calc(var(--staff-top) + var(--q-lc-h,0px) + var(--q-bk-h,0px));} /* under the selection's actions too (round two, _lcStick) */
 }
 body.view-staff #tab-queue .sess-bar-desktop .sess-chip-date bdi{white-space:nowrap;}
 @media(max-width:767px){
@@ -11909,3 +11849,126 @@ body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .n6c-left.n6c-full{colo
 #tab-community .n6p-notsame{margin-inline-start:auto;border-radius:0;}
 .n6p-mgp{margin-top:10px;padding:8px;border:1px solid var(--border);}
 .n6p-mgp-l{margin:4px 0;padding-inline-start:18px;font-size:var(--staff-fs-sm,13px);}
+
+/* ══ ROUND TWO ROSTER (2026-11-08, the user's picks s_bookings, s_dialog_speed, d_bulk = in place, d_undo = row) ══
+   One action per row and a ⋯ menu (the owner's 2x2 Manage booking tiles are gone), the select box in a column of its
+   own, two lines a booking, the event's mark beside the number, the price at the end of its cell in tabular figures,
+   the number the desk acts on first in the figures bar, the selection's actions in the filter row's place (no bar at
+   the foot), the row's own Undo for 10 s, and a row that reads pending while its write is out and says a refusal on
+   itself. Every selector ends in a class or an id; none is positional, :is() or :has() (roster-repaint-budget). */
+body.view-staff #tab-queue .queue-table .rq-sel{width:36px;min-width:36px;max-width:36px;padding-inline:6px 2px;text-align:center;vertical-align:middle;}
+body.view-staff #tab-queue .rq-chk{display:inline-flex;align-items:center;justify-content:center;min-width:30px;min-height:30px;margin:0;padding:0;border:0;background:transparent;cursor:pointer;}
+body.view-staff #tab-queue .rq-chki,body.view-staff #tab-queue .rq-selall{-webkit-appearance:checkbox;appearance:checkbox;width:18px;height:18px;min-height:0;margin:0;accent-color:var(--green);cursor:pointer;}
+/* the number: the event's mark, the number, and when it was booked on one line under it, all at the cell's end */
+body.view-staff #tab-queue .queue-table .rq-numc{text-align:end;white-space:nowrap;}
+body.view-staff #tab-queue .rq-n1{display:flex;align-items:center;justify-content:flex-end;gap:6px;}
+body.view-staff #tab-queue .queue-table .rq-numc .queue-num-cell{font-size:15px;font-weight:600;line-height:20px;font-variant-numeric:tabular-nums;}
+body.view-staff #tab-queue .queue-table .rq-numc .rq-bkat{display:block;max-width:none;margin-top:2px;white-space:nowrap;font-size:11.5px;font-weight:500;line-height:16px;}
+body.view-staff #tab-queue .rq-ev{display:inline-block;flex:none;width:6px;height:16px;border-radius:3px;background:var(--rq-ev,#9aa29d);vertical-align:middle;}
+body.view-staff #tab-queue .rq-ev-jcc{--rq-ev:#06346f;}
+body.view-staff #tab-queue .rq-ev-comm{--rq-ev:#0c7a3d;}
+body.view-staff #tab-queue .rq-ev-runher{--rq-ev:#c2416e;}
+body.view-staff #tab-queue .rq-ev-event{--rq-ev:#7c3aed;}
+body.view-staff #tab-queue .rq-ev-snd96{--rq-ev:#00894a;}
+body.view-staff #tab-queue .rq-ev-defe5k{--rq-ev:#a22b63;}
+body.view-staff #tab-queue .rq-ev-blood{--rq-ev:#b42318;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-jcc{--rq-ev:#5aa9e6;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-comm{--rq-ev:#25d184;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-runher{--rq-ev:#f48fb1;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-event{--rq-ev:#a78bfa;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-snd96{--rq-ev:#07a62d;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-defe5k{--rq-ev:#e879b9;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-blood{--rq-ev:#ff6f66;}
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-ev{width:8px;height:18px;box-shadow:0 0 0 2px #000;}
+/* the rider: the name and its marks on one line (the name gives way, never the row), the number, the call and
+   WhatsApp pair, the Saturday envelope and the add-ons on the other */
+body.view-staff #tab-queue .queue-table .rq-rider .rq-rn{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;min-width:0;white-space:nowrap;}
+body.view-staff #tab-queue .rq-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff #tab-queue .queue-table .rq-rider{max-width:12.5em;}
+body.view-staff #tab-queue .queue-table .rq-r2{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;min-width:0;margin-top:4px;overflow:hidden;white-space:nowrap;}
+body.view-staff #tab-queue .queue-table .rq-r2 .rq-ccl{width:24px;height:24px;}
+body.view-staff #tab-queue .queue-table .rq-r2 .rider-sub{display:inline-flex;align-items:center;gap:4px;margin:0;}
+body.view-staff #tab-queue .queue-table .rq-r2 .rq-ccin{display:inline-flex;margin:0;}
+body.view-staff #tab-queue .rq-r2 .rq-msg{width:28px;min-width:28px;height:28px;min-height:28px;padding:0;}
+body.view-staff #tab-queue .walk-in-badge{white-space:nowrap;}
+body.view-staff #tab-queue .queue-table .rq-price .rq-adbtn,body.view-staff #tab-queue .queue-table .rq-price .rq-adchip{display:flex;width:fit-content;margin-top:3px;margin-inline-start:auto;}
+body.view-staff #tab-queue .rq-wal{display:inline-flex;margin-inline-start:4px;vertical-align:-1px;color:var(--muted);}
+body.view-staff #tab-queue .rq-adbtn{position:relative;display:inline-flex;align-items:center;min-height:24px;padding:1px 8px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-pill,999px);background:var(--sf-card,var(--s1));color:var(--text);font:600 11.5px/1.2 var(--font-body);white-space:nowrap;cursor:pointer;}
+body.view-staff #tab-queue .rq-adbtn::after{content:'';position:absolute;inset:-6px -2px;} /* a 38px target on a 26px pill */
+body.view-staff #tab-queue .rq-adon{border-color:rgba(var(--green-rgb),.45);background:rgba(var(--green-rgb),.08);color:var(--sf-green-ink,var(--green));}
+body.view-staff #tab-queue .rq-adchip{white-space:nowrap;}
+/* the bike type over the height and size, two lines */
+body.view-staff #tab-queue .queue-table .q-type-cell .type-badge{padding:0;border:0;background:transparent;box-shadow:none;font-size:13px;font-weight:600;}
+body.view-staff #tab-queue .queue-table .q-type-cell .q-fit{margin-top:2px;line-height:1.2;}
+body.view-staff #tab-queue .queue-table .q-type-cell .q-height{font-size:16px;}
+body.view-staff #tab-queue .queue-table .q-type-cell .q-size{font-size:13px;}
+/* the price at the end of its cell in tabular figures; what it is made of on one line under it */
+body.view-staff #tab-queue .queue-table .rq-num{text-align:end;font-variant-numeric:tabular-nums;}
+body.view-staff #tab-queue .queue-table .rq-price .rq-adline,body.view-staff #tab-queue .queue-table .rq-price .rq-due,body.view-staff #tab-queue .queue-table .rq-price .rq-due-ok{max-width:7.5em;margin-inline-start:auto;white-space:normal;}
+body.view-staff #tab-queue .queue-table .rq-bkname{white-space:nowrap;}
+/* the status: the pill and its marks, then one line of words that ends in an ellipsis rather than wrap */
+body.view-staff #tab-queue .rq-st1{display:flex;align-items:center;flex-wrap:nowrap;gap:4px;white-space:nowrap;}
+body.view-staff #tab-queue .rq-st2{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11.5px;line-height:16px;color:var(--muted);}
+body.view-staff #tab-queue .queue-table .rq-st2{max-width:128px;}
+body.view-staff #tab-queue .rq-st2 .rq-el,body.view-staff #tab-queue .rq-st2 .rq-el-late,body.view-staff #tab-queue .rq-st2 .rq-held,body.view-staff #tab-queue .rq-st2 .rq-by,
+body.view-staff #tab-queue .rq-st2 .cx-why,body.view-staff #tab-queue .rq-st2 .rq-dnote,body.view-staff #tab-queue .rq-st2 .rq-wnum,body.view-staff #tab-queue .rq-st2 .n6p-pin{display:inline;margin:0;padding:0;white-space:nowrap;}
+body.view-staff #tab-queue .rq-st2 .pos-badge{display:inline;margin:0;padding:0;border:0;background:transparent;font:inherit;font-weight:600;color:var(--text);}
+body.view-staff #tab-queue .rq-st2 .rq-wnum{font-weight:600;color:var(--orange);}
+body.view-staff #tab-queue .rq-dot{margin-inline:4px;color:var(--muted-l);}
+body.view-staff #tab-queue .rq-st1 .rq-nowv{white-space:nowrap;font-size:11.5px;}
+body.view-staff #tab-queue .rq-apok,body.view-staff #tab-queue .rq-apchip,body.view-staff #tab-queue .rq-apchip-rej{display:inline-flex;align-items:center;min-height:24px;padding:1px 8px;border:1px solid;border-radius:var(--sf-r-pill,999px);font-size:11.5px;font-weight:600;white-space:nowrap;}
+body.view-staff #tab-queue .rq-apok{position:relative;color:var(--sf-green-ink,var(--green));border-color:rgba(var(--green-rgb),.45);background:rgba(var(--green-rgb),.08);cursor:pointer;}
+body.view-staff #tab-queue .rq-apok::after{content:'';position:absolute;inset:-7px -2px;}
+body.view-staff #tab-queue .rq-apchip{color:var(--orange);border-color:rgba(var(--warn-rgb),.45);background:rgba(var(--warn-rgb),.08);}
+body.view-staff #tab-queue .rq-apchip-rej{color:var(--red);border-color:rgba(var(--red-rgb),.45);background:rgba(var(--red-rgb),.06);}
+/* the action slot: the one action, then ⋯; the same width on every row */
+body.view-staff #tab-queue .queue-table .rq-mng{white-space:nowrap;vertical-align:middle;}
+body.view-staff #tab-queue .actions-cell.rq-acts{display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:6px;min-width:0;max-width:none;}
+body.view-staff #tab-queue .rq-acts .rq-act{flex:0 0 auto;min-width:96px;padding-inline:10px;white-space:nowrap;}
+body.view-staff #tab-queue .rq-acts .rq-more{flex:0 0 32px;width:32px;min-width:32px;padding:0;border:1px solid var(--sf-line,var(--border));background:var(--sf-card,var(--s1));color:var(--text);font-size:16px;letter-spacing:0;}
+body.view-staff #tab-queue .rq-acts .rq-undo{border:1px solid var(--sf-line2,var(--border));background:var(--sf-card,var(--s1));color:var(--text);}
+body.view-staff #tab-queue .rq-pact{white-space:nowrap;}
+@media (pointer:coarse){
+  body.view-staff #tab-queue .rq-acts .rq-more{flex-basis:44px;width:44px;min-width:44px;}
+  body.view-staff #tab-queue .rq-chk{min-width:44px;min-height:44px;}
+  body.view-staff #tab-queue .rq-chki,body.view-staff #tab-queue .rq-selall{width:22px;height:22px;}
+}
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-acts .rq-more,
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-acts .rq-undo{border:2px solid #000;}
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-acts .rq-act{min-width:112px;}
+/* a write still out: a dashed edge on the status pill; a refusal: why, on the row, under its action */
+body.view-staff #tab-queue .rq-pend .status-badge{outline:1px dashed currentColor;outline-offset:2px;}
+body.view-staff #tab-queue .rq-pend .rq-act{cursor:progress;}
+body.view-staff #tab-queue .rq-err{display:block;max-width:230px;margin-top:4px;margin-inline-start:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:end;font-size:12px;font-weight:600;line-height:16px;color:var(--red);}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-err{color:#ff8a80;}
+/* the selection's actions, in the filter row's place and sticky under the night's figures */
+body.view-staff #tab-queue .rq-bulkrow{position:sticky;top:calc(var(--staff-stick,var(--topbar-h,56px)) + var(--q-lc-h,0px));z-index:6;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;padding:8px 10px;background:var(--sf-card,var(--s1));border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-card,12px);box-shadow:var(--sf-sh-2,0 4px 12px rgba(0,0,0,.08));}
+body.view-staff #tab-queue .rq-bulkn{display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:var(--sf-r-pill,999px);background:var(--green);color:#fff;font-size:13px;font-weight:600;white-space:nowrap;}
+body.view-staff #tab-queue .rq-bulkx{margin-inline-start:auto;}
+html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-bulkn{color:#0e1013;}
+@media (max-width:767px){
+  /* a phone: the count and Clear on top, the actions two to a row under them */
+  body.view-staff #tab-queue .rq-bulkrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:8px;}
+  body.view-staff #tab-queue .rq-bulkn{grid-row:1;grid-column:1;justify-self:start;min-height:44px;}
+  body.view-staff #tab-queue .rq-bulkx{grid-row:1;grid-column:2;justify-self:end;margin:0;}
+  body.view-staff #tab-queue .rq-bulkrow .btn-sm{width:100%;min-width:0;padding-inline:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  body.view-staff #tab-queue .rq-bulkrow .rq-bulkx{width:auto;}
+}
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-bulkrow{border:2px solid #000;box-shadow:none;}
+html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-bulkn{background:#06602f;}
+/* the night's figures: the number the desk acts on first and larger, the others after it smaller */
+body.view-staff #tab-queue .q-lc-btn .num{font-size:15px;}
+body.view-staff #tab-queue .q-lc-btn.q-lc-big{color:var(--text);}
+body.view-staff #tab-queue .q-lc-btn.q-lc-big .num{font-size:24px;line-height:1;}
+/* phone cards: the select box in the card's corner, the one action and ⋯ on one row */
+body.view-staff #tab-queue .rq-cchk{margin-inline-start:auto;}
+body.view-staff #tab-queue .rq-cactn{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+body.view-staff #tab-queue .rq-cactw{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.view-staff #tab-queue .q-card .rq-acts{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;}
+body.view-staff #tab-queue .q-card .rq-acts .rq-act{flex:1 1 auto;min-width:0;}
+body.view-staff #tab-queue .q-card .rq-st2{max-width:100%;}
+/* tablets: the number stays pinned beside the select box as the table scrolls in its box */
+@media (min-width:768px) and (max-width:1023px){
+  body.view-staff #tab-queue .queue-table-desktop-wrap .queue-table .rq-numc{position:sticky;inset-inline-start:36px;z-index:3;box-shadow:1px 0 0 var(--border);}
+}
+

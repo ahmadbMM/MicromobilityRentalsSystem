@@ -60,11 +60,17 @@ const patches = (page: Page) => {
   return out;
 };
 const vis = (page: Page, sel: string) => page.locator(sel).filter({ visible: true });
+// Round two (2026-11-08): a party's row holds ONE action, the next thing to do for it - here Check in (1), Party Three
+// still being expected - and Return all (N) is in its ⋯ menu.
+async function returnAll(page: Page, n: number) {
+  await vis(page, '#tab-queue :is(tr.party-row, .party-card) .rq-more').first().click();
+  await page.locator('.row-sheet .pay-menu-opt', { hasText: `Return all (${n})` }).click();
+}
 
 test('a closed party returns everyone on a bike through one screen', async ({ page }) => {
   await queue(page);
   const calls = returns(page), writes = patches(page);
-  await vis(page, '#tab-queue .party-return').first().click();
+  await returnAll(page, 2);
   const m = page.locator('#return-modal');
   await expect(m.locator('#br-title')).toHaveText('Return bikes (2)');
   await expect(m.locator('.br-row')).toHaveCount(2);                     // the waiting rider is not in it
@@ -88,7 +94,7 @@ test('a closed party returns everyone on a bike through one screen', async ({ pa
 test('return without payment leaves the unpaid rider unpaid', async ({ page }) => {
   await queue(page);
   const calls = returns(page), writes = patches(page);
-  await vis(page, '#tab-queue .party-return').first().click();
+  await returnAll(page, 2);
   await page.locator('#return-modal .toggle-btn', { hasText: 'Return without payment' }).click();
   await page.locator('#br-go').click();
   await expect.poll(() => calls.length).toBe(2);

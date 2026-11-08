@@ -155,7 +155,9 @@ for (const lang of ['en', 'ar']) {
     await staffReady(page);
     await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
     const wrap = page.locator('#tab-queue .queue-table-desktop-wrap');
-    await expect(wrap.locator('.rq-gpaid')).toHaveCount(1);
+    // the party still paying: its row's one action is Check in (2) since round two (2026-11-08), Mark paid in its ⋯ menu
+    await expect(wrap.locator('tr.party-row td.rq-mng .rq-act')).toHaveText(/\(2\)$/);
+    expect(await page.evaluate(`Object.entries(S._rowMenus).some(([k,v])=>k.startsWith('party:')&&v.some(i=>/^groupMarkPaid/.test(i.run)))`)).toBe(true);
     await expect(wrap.locator('.status-badge.st-toreserve')).toHaveCount(1);
     const fit = await wrap.evaluate((w) => {
       const wr = w.getBoundingClientRect(), tr = (w.querySelector('table') as HTMLElement).getBoundingClientRect();

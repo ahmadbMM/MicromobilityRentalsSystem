@@ -1705,15 +1705,37 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
 - **Bookings' views** (Bookings, Waitlist, the Petromin page; Sessions was one until 2026-11-06) sit under each view's own title: every view draws
   them itself from `_qvPillsHtml(tail)` right after its header (renderSessions, renderManagedWl, renderRiders); the
   roster passes the live-location switch as the row's tail. The roster's title is `tabQueue` ("Bookings").
-- **The night's figures are one sticky bar**, `#q-live-count`: the live three (`.q-lc-nums`, D16) then `.stat-strip`
+- **The night's figures are one sticky bar**, `#q-live-count`: the live three (`.q-lc-nums`, D16; Not arrived first
+  and larger, `.q-lc-big`, round two) then `.stat-strip`
   (# of riders, Waitlist, Not here, Completed, Clear) and the overdue line. Expected and On Bike are not drawn a second
   time; `.q-lc-active` / `.q-lc-waiting` wear the row colours, so the bar is the key. Close out is a header button
   (`.co-head`). An approval ride has no live three and keeps its funnel strip alone. On a phone the bar is one
   swipeable line and the overdue line is a row of its own under it. The table's sticky header stops under the bar
   (`_lcStick` sets `--q-lc-h` from the bar's height).
-- **Manage booking tiles keep one place on every row** (the owner's equal-size grid, 2026-10-02): the select box and
-  the status tiles in column 1, the main action (`.btn-green`) and the envelope in column 2, ⋯ under the box
-  (`.actions-cell.qa-pin`; a party row's `.qa-party`: Check in, Return all under it, ⋯ in the corner).
+- **One action per row** (round two, the user's pick s_bookings, 2026-11-08; it SUPERSEDES the owner's 2x2 Manage
+  booking tiles of 2026-10-02 and their `.qa-pin` / `.qa-party` slots): the action slot (`.actions-cell.rq-acts`) holds
+  one `.rq-act` for the booking's state - waiting Check In, a bike held for them Give bike (the check-in that hands it
+  over), on a bike Return Bike, back Re-open, no-show Customer Showed, cancelled Restore, a request not approved yet
+  Approve; a party the next thing to do for it, Check in (N), else Return all (N), else Mark paid (`_partyMenuExtra`
+  puts the others in its menu) - and ⋯ (`_rowMenu`) with every other action. Each is named with its booking
+  (`_rowWho`: "Check In · #12 Sara Ali", "More actions · #12 Sara Ali"). The select box is the row's first column
+  (`td.rq-sel`, Select all shown in the header; on a phone in the card's top corner); the Saturday envelope sits with
+  the call / WhatsApp pair; Pending / Rejected / Approved (still the button that takes the approval back) are in the
+  Status cell (`_apprStatusHtml`). A single booking is two lines at 1280: number and booked-at, name and phone, type
+  and height, price and the add-ons control, status pill and one ellipsed line of words (`statusCellHtml(e,pre)`,
+  `.rq-st1` / `.rq-st2`). The event's colour is a small mark beside the number (`_evMark`, `_sfTheme`), not a band.
+  Nothing new may be added to the slot: a new action goes in the menu.
+- **Ticked rows** put their actions in the filter row's place (`#q-bulk`, d_bulk): N selected, Check in, Mark paid,
+  Return, No-show, Select all, Clear, sticky under the figures bar (`--q-bk-h`). No bar at the foot (`.rq-bulk` and
+  `body.q-bulk` are gone).
+- **The row answers at once** (s_dialog_speed): Check in (the drawer's Confirm, the selection's), Return, Mark paid
+  and No-show paint the row first and mark it `.rq-pend` (a dashed edge on its pill) until the server answers; a
+  refusal puts it back and says why ON the row for about 12 s (`_rowFail` / `_rowSay`, `.rq-err`; a table write goes
+  through `_writeErr` with `S._wrRow` set just before), never on a bar - off the roster the error bar still says it.
+  After a check-in made on this device the slot reads Undo for 10 s (`_ruMap`, `RU_MS`, `_ruRun`, d_undo), for every
+  staff member: it reverts what the check-in did (status and W number, bike, arrival and who, the payment, type and
+  ride group it recorded: `_undoCheckinWrite` with `_ciPrevPay`), spends the check-in's line in the Log and puts a
+  redo there. `tests/round2-roster.spec.ts`.
 - **The ride cards** are one grid of equal compact cards (`.sess-bar-desktop`); date and time wrap onto the lines they
   need and are never clipped (no line clamp: two lines cut a gathering ride's "Start 6 AM" off a 220px card). Each
   time is a nowrap `<bdi>`, and a gathering ride's two labelled times are two, so the line breaks between them.
@@ -1729,7 +1751,8 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
   bike, and pins Manage Record at the end (`.hist-act`); the fleet table pairs name / colour, brand / model, groupset /
   speeds and type / size. A folded header keeps both orders as two sort buttons (`thHistSort2`, `sortHdr2`).
   Bookings' roster pins Manage booking (`.rq-mng` on its header and cells, not `:last-child`, which the roster's
-  repaint budget forbids) wherever it scrolls in its box (768-1279px), as it pins the booking number.
+  repaint budget forbids) wherever it scrolls in its box (768-1279px), as it pins the select box and the booking
+  number (`.rq-numc`, 36px in, below 1024).
 - **A pinned cell takes its row's colour** over a solid fill: the roster's state colours are solid already; the
   stripe and the pointer's colour reach History's and the fleet's pinned cells, and the fleet's state washes are an
   image layer on every cell (`tr.flt-bg-*>td`), not the row's background, which a pinned cell covers. On the dark desk

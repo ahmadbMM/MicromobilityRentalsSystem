@@ -48,7 +48,7 @@ const select = (page: Page, session: string, ids: string[]) =>
 test.describe('@staff:bookings free rides have no Mark paid', () => {
   test('the bar for selected riders offers Check in on a free ride, Mark paid only where a ride charges', async ({ page }) => {
     await boot(page);
-    const bar = page.locator('#tab-queue .rq-bulk');
+    const bar = page.locator('#tab-queue #q-bulk'); // in the filter row's place since round two (2026-11-08; it was a bar at the foot)
     await select(page, 'sat', ['f1', 'f2']);
     await expect(bar).toContainText('2 selected');
     await expect(bar.getByRole('button', { name: 'Check in' })).toBeVisible();

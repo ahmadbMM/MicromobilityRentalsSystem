@@ -77,7 +77,7 @@ test.describe('@staff:checkin s1009 desk: the Bike field', () => {
 });
 
 test.describe('@staff:checkin s1009 desk: Confirm', () => {
-  test('B5: "Sending" while the write is out; a failure after the drawer moved on goes to the error bar by name', async ({ page }) => {
+  test('B5: "Sending" while the write is out; a failure after the drawer moved on is said on the rider\'s row by name', async ({ page }) => {
     const modal = await boot(page);
     await page.route(/\/rest\/v1\/rpc\/staff_checkin/, async (route) => {
       await new Promise((r) => setTimeout(r, 1500));
@@ -87,11 +87,13 @@ test.describe('@staff:checkin s1009 desk: Confirm', () => {
     await expect(modal.locator('#ci-confirm')).toHaveText('Sending…');
     await expect(modal.locator('#ci-confirm')).toHaveAttribute('aria-busy', 'true');
     await page.evaluate('closeCheckinModal()'); // the staffer moves on before the answer
-    const bar = page.locator('#err-bar-el');
-    await expect(bar).toContainText('#7 Rider Seven not checked in');
-    await expect(bar).toContainText('Bike no longer available');
-    // Retry opens that rider's check-in again
-    await bar.getByRole('button', { name: 'Try again' }).click();
+    // round two (2026-11-08): the row read checked in at once and goes back, saying why on itself, not on a bar
+    const err = page.locator('#q-results [data-id="e1"] .rq-err');
+    await expect(err).toContainText('#7 Rider Seven not checked in');
+    await expect(err).toContainText('Bike no longer available');
+    await expect(page.locator('#err-bar-el')).toBeHidden();
+    // the row's own Check In opens that rider's check-in again
+    await page.locator('#q-results [data-id="e1"] .rq-act').filter({ visible: true }).first().click();
     await expect(modal.locator('#dlgt-checkin')).toContainText('Rider Seven');
   });
 

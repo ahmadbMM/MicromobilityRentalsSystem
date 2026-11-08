@@ -103,13 +103,13 @@ test.describe('@staff:bookings Bookings in colour', () => {
     const tr = (name: string) => `#tab-queue .queue-table-desktop-wrap tbody tr:has-text("${name}")`;
     const want: [string, string, string, string][] = [
       ['Waiting Rider', 'row-waiting', 'rgb(255, 255, 255)', 'st-waiting'],
-      ['Bike Held', 'row-reserved', 'rgb(241, 238, 254)', 'st-reserved'],
-      ['To Hold', 'row-toreserve', 'rgb(251, 238, 255)', 'st-toreserve'],
-      ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 242, 225)', 'st-waitlist'],
-      ['On The Bike', 'row-active', 'rgb(254, 248, 228)', 'st-active'],
-      ['Done Paid', 'row-done-paid', 'rgb(230, 252, 237)', 'st-done'],
-      ['Done Unpaid', 'row-done', 'rgb(230, 252, 237)', 'st-done'],
-      ['No Show Rider', 'row-noshow-cancel', 'rgb(254, 234, 234)', 'st-noshow'],
+      ['Bike Held', 'row-reserved', 'rgb(246, 243, 255)', 'st-reserved'],
+      ['To Hold', 'row-toreserve', 'rgb(252, 244, 255)', 'st-toreserve'],
+      ['Waitlisted Rider', 'row-waitlist', 'rgb(255, 246, 235)', 'st-waitlist'],
+      ['On The Bike', 'row-active', 'rgb(255, 250, 235)', 'st-active'],
+      ['Done Paid', 'row-done-paid', 'rgb(238, 252, 243)', 'st-done'],
+      ['Done Unpaid', 'row-done', 'rgb(238, 252, 243)', 'st-done'],
+      ['No Show Rider', 'row-noshow-cancel', 'rgb(254, 242, 242)', 'st-noshow'],
     ];
     for (const [name, cls, colour, badge] of want) {
       await expect(page.locator(tr(name)), name).toHaveClass(new RegExp(`\\b${cls}\\b`));
@@ -136,7 +136,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
     // cancelled is red too, when the filter shows it
     await page.evaluate(`S.sfStatus='cancelled';renderStaffQueue()`);
     await expect(page.locator(tr('Cancelled Rider'))).toHaveClass(/\brow-noshow-cancel\b/);
-    expect(await bg(page, `${tr('Cancelled Rider')} td:nth-child(2)`)).toBe('rgb(254, 234, 234)');
+    expect(await bg(page, `${tr('Cancelled Rider')} td:nth-child(2)`)).toBe('rgb(254, 242, 242)');
     await expect(page.locator(`${tr('Cancelled Rider')} .status-badge.st-cancelled`)).toHaveCount(1);
   });
 
@@ -156,7 +156,7 @@ test.describe('@staff:bookings Bookings in colour', () => {
   test('on a phone the cards take the same colours and edge', async ({ page }) => {
     await bookings(page, 390);
     const card = (name: string) => `#tab-queue .queue-mobile-view .q-card:has-text("${name}")`;
-    for (const [name, colour] of [['Waiting Rider', 'rgb(255, 255, 255)'], ['On The Bike', 'rgb(254, 248, 228)'], ['Done Paid', 'rgb(230, 252, 237)'], ['No Show Rider', 'rgb(254, 234, 234)']]) {
+    for (const [name, colour] of [['Waiting Rider', 'rgb(255, 255, 255)'], ['On The Bike', 'rgb(255, 250, 235)'], ['Done Paid', 'rgb(238, 252, 243)'], ['No Show Rider', 'rgb(254, 242, 242)']]) {
       expect(await bg(page, card(name)), name).toBe(colour);
       expect(await page.locator(card(name)).first().evaluate((el) => getComputedStyle(el).boxShadow), name).toContain('inset');
     }

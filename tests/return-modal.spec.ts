@@ -67,7 +67,9 @@ test('a database without the RPC: the return is refused and said, and nothing is
   const m = page.locator('#return-modal');
   await m.getByRole('button', { name: 'Damaged' }).click();
   await m.locator('#ret-confirm').click();
-  await expect(page.locator('#err-bar-el')).toContainText(/staff_return|function/i); // said on the error bar, with its retry
+  // said on the rider's row since round two (2026-11-08: no bar after a desk tap; Return bike there tries again), or on
+  // the error bar when the roster is not what is on screen
+  await expect(page.locator('#q-results [data-id="e1"] .rq-err, #err-bar-el').first()).toContainText(/staff_return|function/i);
   expect(patches).toEqual([]);
   await expect.poll(() => page.evaluate(`getQueue().find(e=>e.id==='e1').status`)).toBe('active'); // put back
 });

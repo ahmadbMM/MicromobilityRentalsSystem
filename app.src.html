@@ -5432,6 +5432,7 @@ function _errMessage(err){
 }
 /** Returns true when the batch failed. Pass `retry` to offer a Try again button. */
 function _writeErr(res,ctx,retry){
+  const row=S._wrRow;S._wrRow=null; // a roster row says the refusal instead of the bar (round two: set by the staff caller just before)
   const bad=[].concat(res).find(r=>r&&r.error);
   if(!bad)return false;
   if(bad.error.code==='READONLY')return true; // the read-only notice has said why
@@ -5439,6 +5440,7 @@ function _writeErr(res,ctx,retry){
   const kind=_errKind(bad.error);
   if(kind==='net')S._netDown=true,_updateConnUI();
   else _writeLog(bad.error,ctx,kind); // the connection is not news for the log; a refusal is
+  if(row){row(_errMessage(bad.error));return true;}
   errorBar(_errMessage(bad.error),retry,bad.error.message||'');
   return true;
 }
@@ -14002,12 +14004,13 @@ async function mwPickCustomer(custId){
   // buttons carried.
   // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on__rowMenu_1(event,el,a0){event.stopPropagation();showRowMenu(a0,event)}
-function _rowMenu(id,items,title){
+function _rowMenu(id,items,title,who){
     const live=items.filter(Boolean);
     if(!live.length)return'';
     if(title)live._title=String(title); // the sheet's heading when the menu is not a booking's (a bike's)
     (S._rowMenus=S._rowMenus||{})[id]=live;
-    return`<button class="btn-sm btn-muted rq-more" aria-haspopup="menu" aria-label="${t('moreActionsLbl')}" title="${t('moreActionsLbl')}" data-on-click="${_on("_on__rowMenu_1",_EV,_EL,id)}">⋯</button>`;
+    // who: the booking it is for, in its name (round two, 2026-11-08: one ⋯ per row, so "More actions" alone named nothing)
+    return`<button class="btn-sm btn-muted rq-more" aria-haspopup="menu" aria-label="${esc(t('moreActionsLbl')+(who?' · '+who:''))}" title="${t('moreActionsLbl')}" data-on-click="${_on("_on__rowMenu_1",_EV,_EL,id)}">⋯</button>`;
   }
   // "2 no-shows in the last 5" — the history is all in the data, surfaced at the moment
   // An unlinked booking's account, by name. The roster asked this of every walk-in row on every
@@ -14022,8 +14025,87 @@ function _rowMenu(id,items,title){
     }
     return _cnMap.get(String(name||'').trim().toLowerCase());
   }
-  // A Saturday ride's booking carries its messages' envelope in plain sight, whatever its status (_rmBtn).
-  function _entryActions(e,_opt){return _rmBtn(e)+_entryActions0(e,_opt);}
+  // ── One action per row (round two, the user's pick, 2026-11-08; it replaces the owner's 2x2 Manage booking tiles of
+  // 2026-10-02) ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+  // A booking's slot holds ONE button for its state (waiting: Check in; a bike held for them: Give bike, the check-in that
+  // hands it over; on a bike: Return bike; back: Re-open; no-show: Customer showed; cancelled: Restore; a request not
+  // approved yet: Approve) and the ⋯ menu with every other action. The select box has a column of its own (_bulkChk), the
+  // Saturday ride's envelope sits with the call and WhatsApp pair (_rmBtn), the approval words in the Status cell
+  // (_apprStatusHtml). Each button is named with its booking (_rowWho), so a screen reader's list of buttons says whose.
+  function _rowWho(e){return`#${e&&e.queueNum!=null?e.queueNum:''} ${(e&&e.name)||''}`.trim();}
+  function _rowBtn(e,fn,label,cls){return`<button type="button" class="btn-sm ${cls&&/\bbtn-muted\b/.test(cls)?'':'btn-green '}rq-act${cls?' '+cls:''}" aria-label="${esc(String(label).replace(/^[✓\s]+/,'')+' · '+_rowWho(e))}" data-on-click="${_on(fn,e.id)}">${label}</button>`;}
+  // The rows answer at once (round two, s_dialog_speed): a desk tap paints its row and marks it pending (_rowPend, a dashed
+  // edge on the status pill) until the server answers; a refusal puts the row back as it was and says why ON the row for
+  // about 12 s (_rowErrs; the quiet toast says it to a screen reader), never on a bar. A check-in made on this device leaves
+  // Undo in the row's slot for 10 s, for every staff member (_ruMap, _ruRun).
+  const _rowPend=new Set(),_rowErrs=new Map(),_ruMap=new Map(),RU_MS=10000,ROW_ERR_MS=12000;
+  let _rowTm=0;
+  function _rowTimer(){
+    clearTimeout(_rowTm);
+    const now=Date.now();let next=Infinity,gone=false;
+    for(const m of [_rowErrs,_ruMap])for(const [k,v] of m){if(v.until<=now){m.delete(k);gone=true;}else next=Math.min(next,v.until);}
+    if(gone&&S.view==='staff'&&S.staffTab==='queue')renderStaffQueue();
+    if(next<Infinity)_rowTm=setTimeout(_rowTimer,Math.max(50,next-now+30));
+  }
+  function _rowPending(ids,on){[].concat(ids).forEach(id=>{const k=String(id);if(on){_rowPend.add(k);_rowErrs.delete(k);}else _rowPend.delete(k);});}
+  // err: the refusal ({message,code}), an RPC's (rpc true: the desk's words for a known code), or the words themselves
+  function _rowFail(id,err,rpc){
+    const msg=typeof err==='string'?err:rpc?_rpcSay(err):_errMessage(err);
+    if(err&&typeof err==='object'){const k=_errKind(err);if(k==='net'){S._netDown=true;_updateConnUI();}else _writeLog(err,'row',k);}
+    _rowSay(id,msg);
+  }
+  // A table write's refusal goes through _writeErr (logged there): S._wrRow=m=>_rowSay(ids,m) right before it.
+  function _rowSay(id,msg){
+    if(!(S.view==='staff'&&S.staffTab==='queue'&&(S.queueView||'bookings')==='bookings')){[].concat(id).forEach(x=>_rowPend.delete(String(x)));errorBar(msg);return;} // no row on screen to say it on
+    [].concat(id).forEach(x=>{const k=String(x);_rowPend.delete(k);_rowErrs.set(k,{msg,until:Date.now()+ROW_ERR_MS});});
+    toast(msg); // quiet: said to a screen reader, drawn as nothing; the row says it on screen
+    _rowTimer();
+  }
+  function _rowErrHtml(id){const r=_rowErrs.get(String(id));return r?`<div class="rq-err" title="${esc(r.msg)}">${_artIcon('warn',11)} ${esc(r.msg)}</div>`:'';}
+  function _rowPendCls(id){return _rowPend.has(String(id))?' rq-pend':'';}
+  // fn: the check-in's own reversal as pushUndo holds it, so the topbar's Undo and the Log no longer offer it once the row's has run
+  function _ruMark(id,fn){_ruMap.set(String(id),{until:Date.now()+RU_MS,fn:fn||null});_rowTimer();}
+  function _ruOn(e){const r=e&&_ruMap.get(String(e.id));return !!r&&r.until>Date.now()&&e.status==='active';}
+  function _ruBtn(e){return`<button type="button" class="btn-sm btn-muted rq-act rq-undo" aria-label="${esc(t('undoCheckinBtn')+' · '+_rowWho(e))}" data-on-click="${_on('_ruRun',e.id)}">${_artIcon('undo',13)} ${t('undoBtn')}</button>`;}
+  // The row's Undo: what this device's check-in did, taken back (the status it left, the bike, the arrival and who, the
+  // payment and type the check-in recorded: _undoCheckinWrite with _ciPrevPay), the row painted at once and the record
+  // kept in the Log (the redo goes on the topbar's Undo for whoever may undo, as the menu's Undo check-in does).
+  async function _ruRun(id){
+    const k=String(id),r=_ruMap.get(k);_ruMap.delete(k);
+    const e=_qGet(id);if(!r||!e||e.status!=='active'){renderStaffQueue();return;}
+    const before={status:e.status,assignedBikeId:e.assignedBikeId,checkedInAt:e.checkedInAt,waitlistNum:e.waitlistNum};
+    const fromWl=(await _ciCameFromWl([e])).has(id),extra=_ciPrevPay.get(id)||null;
+    const cur=_ciPayCols(e),after=extra?Object.fromEntries(Object.keys(extra).map(x=>[x,cur[x]])):null;
+    _ciUndoLocal(id,{to:fromWl?'waitlist':'waiting',wn:fromWl?_ciWlNum(e):null});_rowPending(id,true);renderStaffQueue(); // the row answers now
+    const w=await _undoCheckinWrite(Object.assign({},e,before),fromWl?'waitlist':'waiting',extra,true);
+    _rowPending(id,false);
+    if(!w||w.lost||w.err){Object.assign(e,before);_rowFail(id,w&&w.err?w.err:t('errChangedElsewhere'));renderStaffQueue();await _reloadRows([id]);renderStaffQueue();return false;}
+    _ciPrevPay.delete(id);_ciUndoLocal(id,w);
+    if(r.fn){const l=(S.actionLog||[]).find(x=>x.fn===r.fn);if(l)l.undone=true;S.undoStack=(S.undoStack||[]).filter(x=>x.fn!==r.fn);}
+    renderStaffQueue();
+    await _reloadRows([id]);
+    toast(w.to==='waitlist'?t('toastUndoCheckinWl'):t('toastUndoCheckin'));
+    pushUndo(`${t('undoUndoCheckin')} #${e.queueNum} ${e.name}`,async()=>{
+      const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt,w.to,w.by);
+      if(ok&&after){_ciPrevPay.set(id,extra);await _wr(sb.from('queue_entries').update(after).eq('id',id).eq('status','active'),'undo');}
+      await _reloadRows([id]);renderStaffQueue();
+      if(!ok)return false;
+    });
+    renderStaffQueue();
+  }
+  // The approval's word, in the Status cell: Pending or Rejected, and Approved as the button that takes it back (the owner,
+  // 2026-10-02: "clicking on the approved button undos approval"). It sat in the Manage booking tiles until round two.
+  function _apprStatusHtml(e){
+    if(!e||!_apprSessIds.has(e.sessionId))return'';
+    const a=_apprOf(e);
+    if((a==='pending'||a==='rejected')&&(e.status==='waiting'||e.status==='waitlist'))return`<span class="${a==='rejected'?'rq-apchip-rej':'rq-apchip'}">${a==='rejected'?t('filterRejected'):t('apprPendingChip')}</span>`;
+    if(e.approval==='approved'&&['waiting','waitlist','active'].includes(e.status))return`<button type="button" class="rq-apok" title="${t('apprUndoBtn')}" aria-label="${esc(t('apprApprovedChip'))} · ${esc(t('apprUndoBtn'))} · ${esc(_rowWho(e))}" data-on-click="${_on("unapproveEntry",e.id)}">✓ ${t('apprApprovedChip')}</button>`;
+    return'';
+  }
+  // The session's event colour beside the booking number (round two): a small mark, not a band, in the colours the
+  // ride chips wear (_sfTheme). Most use on the All sessions view, where nights of several events share the list.
+  function _evMark(e){const s=_rowSess(e);if(!s)return'';const nm=_evName(s);return`<i class="rq-ev rq-ev-${_sfTheme(s)}" title="${esc(nm||'')}" aria-hidden="true"></i>`;}
+  function _entryActions(e,_opt){return _entryActions0(e,_opt);}
   function _entryActions0(e,_opt){
     // Jump to the ACCOUNT behind the booking (full editor incl. tags/default payment):
     // linked customer, or a name match for walk-ins that were typed in without linking.
@@ -14035,17 +14117,16 @@ function _rowMenu(id,items,title){
     // LIVE rows still marked 'rejected' (a rejected booking restored from Cancelled)
     // get the same controls with a red Rejected chip — never a dead end on the roster.
     const _comm=_apprSessIds.has(e.sessionId);
+    const _who=_rowWho(e);
+    // A request not approved yet: Approve; Waitlist and Reject (last, the sheet's dangerous one) in the menu. The Pending /
+    // Rejected word is in the Status cell (_apprStatusHtml).
     if(_comm&&['pending','rejected'].includes(_apprOf(e))&&(e.status==='waiting'||e.status==='waitlist')){
-      const _rej=_apprOf(e)==='rejected';
-      const chip=`<span class="${_rej?'rq-apchip-rej':'rq-apchip'}">${_rej?t('filterRejected'):t('apprPendingChip')}</span>`;
-      const wlBtn=e.status==='waiting'?`<button class="btn-sm btn-muted" data-on-click="${_on("commToWaitlist",e.id)}" title="${t('waitlistLabel')}">${_artIcon('clock',12)} ${t('waitlistLabel')}</button>`:'';
-      return`${chip}<button class="btn-sm btn-green" data-on-click="${_on("approveEntry",e.id)}">✓ ${t('apprApproveBtn')}</button><button class="btn-sm btn-red" data-on-click="${_on("rejectEntry",e.id)}">${t('apprRejectBtn')}</button>${wlBtn}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+      return`${_rowBtn(e,'approveEntry','✓ '+t('apprApproveBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+        e.status==='waiting'?{label:`${_artIcon('clock',12)} ${t('waitlistLabel')}`,run:`commToWaitlist('${e.id}')`,act:()=>commToWaitlist(e.id)}:null,
         {label:`${ICON_PENCIL} ${t('editBookingBtn')}`,run:`showBookingEditModal('${e.id}')`,act:()=>showBookingEditModal(e.id)},
-        _custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null,_mCmt])}`;
+        _custId?{label:`${_artIcon('person',12)} ${t('custBtn')}`,run:`showEditCustomerModal('${_custId}')`,act:()=>showEditCustomerModal(_custId)}:null,_mCmt,
+        {label:t('apprRejectBtn'),run:`rejectEntry('${e.id}')`,act:()=>rejectEntry(e.id),danger:true}],null,_who)}`;
     }
-    // The Approved tile is itself the undo (the owner, 2026-10-02: "dont add a separate button for undo
-    // approval, clicking on the approved button undos approval").
-    const _apprChip=(_comm&&e.approval==='approved')?`<button type="button" class="rq-apok" title="${t('apprUndoBtn')}" aria-label="${esc(t('apprApprovedChip'))} · ${esc(t('apprUndoBtn'))}" data-on-click="${_on("unapproveEntry",e.id)}">✓ ${t('apprApprovedChip')}</button>`:'';
     // Waitlisted and waiting rows carry the SAME controls. A waitlisted rider is a rider
     // whose place is not held yet, not a different kind of booking: staff check them in, mark
     // them no-show, edit, note and cancel them exactly the same way. What says they are
@@ -14068,7 +14149,8 @@ function _rowMenu(id,items,title){
     const _mEm=_emCid?{label:`${_artIcon('phone',12)} ${t('emTitle')}`,run:`_runEmShow('${_emCid}')`,act:()=>_runEmShow(_emCid)}:null;
     const _mVl=_vlr?{label:`${_artIcon('flag',12)} ${t('vlRaceDetails')}`,run:`_vlAthleteEdit('${e.id}')`,act:()=>_vlAthleteEdit(e.id)}:null;
     const _mVlPair=(_vlr&&['pair','noteam','wait'].includes(_vlStateOf(e)))?{label:`${_artIcon('people',12)} ${t('vlPairBtn')}`,run:`_vlPairOpen('${e.id}')`,act:()=>_vlPairOpen(e.id)}:null;
-    if(e.status==='waiting'||e.status==='waitlist')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}<button class="btn-sm btn-green" data-on-click="${_on("showCheckinModal",e.id)}">${t('checkInBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+    // a bike held for them: Give bike, the check-in that hands it over (the bike it holds is claimed by staff_checkin)
+    if(e.status==='waiting'||e.status==='waitlist')return`${_isReserved(e)?_rowBtn(e,'showCheckinModal',t('giveBikeBtn'),'rq-give'):_rowBtn(e,'showCheckinModal',t('checkInBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       {label:t('noShowBtn'),run:`confirmNoShow('${e.id}')`,act:()=>confirmNoShow(e.id)},
       _isReserved(e)?{label:t('menuReleaseBike'),run:`_releaseReserved('${e.id}')`,act:()=>_releaseReserved(e.id)}
         :(resolvedType(e)==='Own'?null:{label:t('menuReserveBike'),run:`_reserveFromMenu('${e.id}')`,act:()=>_reserveFromMenu(e.id)}),
@@ -14077,20 +14159,21 @@ function _rowMenu(id,items,title){
       e.status==='waiting'?{label:`${_artIcon('clock',12)} ${t('menuToWaitlist')}`,run:`staffToWaitlist('${e.id}')`,act:()=>staffToWaitlist(e.id)}
         :{label:`${_artIcon('promote',12)} ${t('menuToMainList')}`,run:`staffFromWaitlist('${e.id}')`,act:()=>staffFromWaitlist(e.id)},
       _mVl,_mVlPair,_mEdit,_mResched,_mNote,_mLead,_n6cStMenu(e),_mCmt,..._mParty,_mCust,_mEm,
-      {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
+      {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}],null,_who)}`;
     // In without a bike yet: the main button gives one (2026-10-09, D3); Return moves to the menu.
     const _nb=!_run&&!_vlr&&_awaitsBike(e);
-    if(e.status==='active')return`${_apprChip}${(_opt&&_opt.noBulk)?'':_bulkChk(e)}${_nb?`<button class="btn-sm btn-green give-bike-btn" data-on-click="${_on("_giveBike",e.id)}">${t('giveBikeBtn')}</button>`:`<button class="btn-sm btn-green" data-on-click="${_on("doReturn",e.id)}">${t(_isBlood(_sessGet(e.sessionId))?'bldFinishBtn':(_run||_vlr)?'runFinishBtn':'returnBikeBtn')}</button>`}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
+    // just checked in on this device: Undo for 10 s (_ruOn), then the state's own action again
+    if(e.status==='active')return`${_ruOn(e)?_ruBtn(e):_nb?_rowBtn(e,'_giveBike',t('giveBikeBtn'),'give-bike-btn'):_rowBtn(e,'doReturn',t(_isBlood(_sessGet(e.sessionId))?'bldFinishBtn':(_run||_vlr)?'runFinishBtn':'returnBikeBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),
       _nb?{label:t('returnBikeBtn'),run:`doReturn('${e.id}')`,act:()=>doReturn(e.id)}:null,
       (!_run&&!_vlr&&!_nb&&_needsBike(_sessGet(e.sessionId))&&_dkYNoFleet(e))?{label:t('qYRetNote'),run:`_dkYRetNote('${e.id}')`,act:()=>_dkYRetNote(e.id)}:null, // Return skips the sheet then (S04-core4-02)
       (_run||_vlr)?null:{label:t('changeBikeBtn'),run:`openModal('${e.id}')`,act:()=>openModal(e.id)},
       _isBlood(_sessGet(e.sessionId))?null:{label:t('cashierAddBtn'),run:`showCashierModal('${e.id}')`,act:()=>showCashierModal(e.id)},
       _mVl,_mEdit,_mResched,_mNote,_mLead,_n6cStMenu(e),_mCmt,..._mParty,_mCust,_mEm,
       {label:t('undoCheckinBtn'),run:`doUndoCheckin('${e.id}')`,act:()=>doUndoCheckin(e.id)},
-      {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}])}`;
-    if(e.status==='done')return`<button class="btn-sm btn-green" data-on-click="${_on("doReopen",e.id)}">${t('reopenBookingBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mVl,_mLead,_mCmt,_mCust,_mEm,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}])}`;
-    if(e.status==='noshow')return`<button class="btn-sm btn-green" data-on-click="${_on("doUndoNoShow",e.id)}">${t('customerShowedBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mCmt,_mCust,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}])}`;
-    if(e.status==='cancelled')return`<button class="btn-sm btn-green" data-on-click="${_on("doRestoreCancelled",e.id)}">${t('restoreBookingBtn')}</button>${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mCmt,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}])}`;
+      {label:t('cancelBtn'),run:`staffCancelEntry('${e.id}')`,act:()=>staffCancelEntry(e.id),danger:true}],null,_who)}`;
+    if(e.status==='done')return`${_rowBtn(e,'doReopen',t('reopenBookingBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mVl,_mLead,_mCmt,_mCust,_mEm,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}],null,_who)}`;
+    if(e.status==='noshow')return`${_rowBtn(e,'doUndoNoShow',t('customerShowedBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mCmt,_mCust,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}],null,_who)}`;
+    if(e.status==='cancelled')return`${_rowBtn(e,'doRestoreCancelled',t('restoreBookingBtn'))}${_rowMenu(e.id,[...((_opt&&_opt.extraMenu)||[]),_mCmt,{label:t('removeBtn'),run:`confirmRemove('${e.id}')`,act:()=>confirmRemove(e.id),danger:true}],null,_who)}`;
     return`<button class="btn-sm btn-muted" data-on-click="${_on("confirmRemove",e.id)}" aria-label="${esc(t('removeRiderAria').replace('{0}',e.name||('#'+e.queueNum)))}">${t('removeBtn')}</button>`;
   }
 
@@ -14131,7 +14214,7 @@ function _rowMenu(id,items,title){
     // None on the Saturday Social Ride (the owner, 2026-10-02: "remove the multi select button from the saturday social ride").
     if(_rideKind(_sessGet(e.sessionId))==='saturday')return'';
     const on=S.sfSelected.includes(e.id);
-    return`<label class="row-select" title="${t('selectRowTip')}"><input type="checkbox"${on?' checked':''} aria-label="${esc(t('selectBookingAria'))} #${e.queueNum}" data-on-change="${_on("toggleSfSelect",e.id)}"></label>`;
+    return`<label class="row-select rq-chk" title="${t('selectRowTip')}"><input type="checkbox" class="rq-chki"${on?' checked':''} aria-label="${esc(t('selectBookingAria')+' '+_rowWho(e))}" data-on-change="${_on("toggleSfSelect",e.id)}"></label>`;
   }
 
 // The queue's payment pair (toggle + edit price) for a booking shown outside the roster.
@@ -23933,14 +24016,17 @@ async function groupMarkPaid(entryId){
   const prev=members.map(m=>({id:m.id,paid:!!m.paid,price:m.price??DEFAULT_PRICE,pay_method:m.pay_method||null}));
   // Only rows still unpaid in the database: a payment taken meanwhile on another device (cash, a
   // split) must not be relabelled card by this screen's stale copy, as bulkSfPaid guards too.
-  const res=await Promise.all(members.map(m=>{
-    const price=(m.price===0&&!m.promoCode)?_entryFallbackPrice(m):(m.price??DEFAULT_PRICE);
-    return sb.from('queue_entries').update({paid:true,price,pay_method:'card'}).eq('id',m.id).eq('paid',false).select('id');
-  }));
-  if(_writeErr(res,'payment')){await loadDataLight();renderStaffQueue();return;}
+  const pats=members.map(m=>({paid:true,price:(m.price===0&&!m.promoCode)?_entryFallbackPrice(m):(m.price??DEFAULT_PRICE),pay_method:'card'}));
+  // the party reads paid at once, pending while the writes are out (round two); a refusal puts it back and says why on it
+  members.forEach((m,i)=>Object.assign(m,pats[i]));_rowPending(members.map(m=>m.id),true);renderStaffQueue();
+  const res=await Promise.all(members.map((m,i)=>sb.from('queue_entries').update(pats[i]).eq('id',m.id).eq('paid',false).select('id')));
+  _rowPending(members.map(m=>m.id),false);
+  members.forEach((m,i)=>{if(!(res[i]&&!res[i].error&&res[i].data&&res[i].data.length)){const p=prev[i];Object.assign(m,{paid:p.paid,price:p.price,pay_method:p.pay_method});}});
+  S._wrRow=m=>_rowSay([entryId,...members.map(x=>x.id)],m);
+  if(_writeErr(res,'payment')){renderStaffQueue();await loadDataLight();renderStaffQueue();return;}
   const changed=new Set(members.filter((m,i)=>res[i]&&res[i].data&&res[i].data.length).map(m=>m.id)),nPaid=changed.size;
   await loadDataLight();renderStaffQueue();renderHistory();renderMyRides();
-  if(!nPaid){toast(t('errChangedElsewhere'),'warning');return;} // every one was paid on another device meanwhile: nothing to say paid, nothing to undo
+  if(!nPaid){_rowFail(entryId,t('errChangedElsewhere'));renderStaffQueue();return;} // every one was paid on another device meanwhile: nothing to say paid, nothing to undo
   haptic();
   logAction(t('logBulkPaid').replace('{0}',nPaid),{k:'pay',e:'booking',id:[...changed].join(',')});
   toast(`${nPaid} ✓ ${t('paidLabel')}`);
@@ -29374,11 +29460,12 @@ function _qSet(k,v){S[k]=v;S.sfLimit=150;if(k==='sfSort')S.sfSortDir=1;else if(k
 // The table's sticky header stops under the night's figures bar, which sticks too (2026-10-27: both stuck at the
 // same line and the header covered the bar). The bar can wrap, so its height is read, not assumed.
 let _lcRo=null;
+// The selection's actions stick under the bar while rows are ticked (round two), and the header under both (--q-bk-h).
 function _lcStick(){
-  const tab=document.getElementById('tab-queue'),lc=document.getElementById('q-live-count');if(!tab)return;
-  const set=()=>{try{tab.style.setProperty('--q-lc-h',(lc&&lc.isConnected?lc.offsetHeight:0)+'px');}catch(e){}};
+  const tab=document.getElementById('tab-queue'),lc=document.getElementById('q-live-count'),bk=document.getElementById('q-bulk');if(!tab)return;
+  const set=()=>{try{tab.style.setProperty('--q-lc-h',(lc&&lc.isConnected?lc.offsetHeight:0)+'px');tab.style.setProperty('--q-bk-h',(bk&&bk.isConnected?bk.offsetHeight:0)+'px');}catch(e){}};
   set();
-  try{if(_lcRo)_lcRo.disconnect();_lcRo=null;if(lc&&window.ResizeObserver){_lcRo=new ResizeObserver(set);_lcRo.observe(lc);}}catch(e){}
+  try{if(_lcRo)_lcRo.disconnect();_lcRo=null;if((lc||bk)&&window.ResizeObserver){_lcRo=new ResizeObserver(set);if(lc)_lcRo.observe(lc);if(bk)_lcRo.observe(bk);}}catch(e){}
 }
 // The Bookings section's views (Bookings / Sessions / Waitlist / Hand-over) under each view's own title, the way
 // every other section puts its tabs under its title (2026-10-27; they used to sit above it). The roster puts its
@@ -29731,16 +29818,20 @@ function renderStaffQueue(_resultsOnly){
   // style. A party shows when its booking was made: the earliest of its riders.
   const _bookedAtOf=g=>g.map(e=>e.registeredAt).filter(Boolean).sort((a,b)=>new Date(a)-new Date(b))[0]||null;
   const _bookedAt=(ra,tag='div')=>`<${tag} class="q-booked-at rq-bkat${tag==='div'?' rq-mt2':''}" title="${t('reservedAtLabel')}">${_resTimeShort({registeredAt:ra})}</${tag}>`;
+  // The add-ons as one compact control on the rider's second line (round two, 2026-11-08: a chip per add-on and the button
+  // under them grew a row to five lines): "+ Add-ons" when there are none, "Add-ons 3" when there are, each named in its tip.
   const _adChips=e=>{
     if(_freeSessIds.has(e.sessionId))return''; // free community rides have no add-ons
     const ad=addonLineItems(entryAddons(e));
     const canEdit=['waiting','active','waitlist'].includes(e.status);
     if(!ad.length&&!canEdit)return'';
-    return`<div class="rq-adw">
-      ${ad.map(a=>`<span class="rq-adchip">${esc(a.name)}${a.qty>1?` ×${a.qty}`:''} · ${_money(a.lineTotal)}</span>`).join('')}
-      ${canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${t('addonEditTitle')}" class="rq-adbtn">+ ${t('addonAddBtn')}</button>`:''}
-    </div>`;
+    const list=ad.map(a=>`${a.name}${a.qty>1?` ×${a.qty}`:''} · ${_money(a.lineTotal,_NOISO)}`).join(', '),n=ad.reduce((s,a)=>s+(a.qty||1),0);
+    const lbl=ad.length?`${t('addonsLabel')} ${n}`:`+ ${t('addonAddBtn')}`;
+    return canEdit?`<button type="button" data-on-click="${_on("_on_renderStaffQueue_4",_EV,_EL,e.id)}" title="${esc(ad.length?list:t('addonEditTitle'))}" aria-label="${esc((ad.length?t('addonsLabel')+': '+list:t('addonEditTitle'))+' · '+_rowWho(e))}" class="rq-adbtn${ad.length?' rq-adon':''}">${lbl}</button>`
+      :`<span class="rq-adchip" title="${esc(list)}">${lbl}</span>`;
   };
+  // The Status cell's second line for the place in line ("3 / 11", filled after the pieces are placed, _qPosApply) or the W number.
+  const _qPosBit=(e,lp,totalW)=>e.status==='waiting'&&lp?`<span class="pos-badge rq-pos" dir="ltr" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</span>`:e.status==='waitlist'&&e.waitlistNum?`<span class="rq-wnum">W${e.waitlistNum}</span>`:'';
   function _commQueueView(){return _cqv;}
 function _memberCell(e,extra){
   if(!_memv)return '';
@@ -29755,20 +29846,14 @@ function renderQRow(e){
     const colorSwatches=allColors.length?assignedBikes.flatMap(b=>(b.colors||[]).map((c,ci)=>`<span class="rq-sw"${_swA(b,ci)} data-cssv="${_cssv({'--rq-bg':c})}"></span>`)).join(''):'<span class="rq-mut">—</span>';
     const lp=livePosMap[e.id];
     const totalW=sessWaitCount[e.sessionId]||0;
-    const posCell=e.status==='waiting'&&lp
-      ?`<div class="pos-badge rq-pos" data-pos="${esc(e.id)}">${_qPos(e.id,`${lp} / ${totalW}`)}</div>`
-      :`<span class="rq-mut12">—</span>`;
+    // Two lines a booking (round two, 2026-11-08): the # cell holds the event's mark, the number and when it was booked;
+    // the place in line and the W number are the Status cell's second line (_qPosBit).
+    const _noNum=_apprSessIds.has(e.sessionId)&&!e.partner&&!_commPublished(_rowSess(e));
     const _flashCls=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:''
-    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
-      <td class="rq-w52">
-        ${(_apprSessIds.has(e.sessionId)&&!e.partner&&!_commPublished(_rowSess(e)))?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}`:`
-        <span class="queue-num-cell ${e.status!=='waiting'?'rq-fs18':'rq-fs22'}">#${e.queueNum}</span>
-        ${_bookedAt(e.registeredAt)}
-        ${e.status==='waitlist'&&e.waitlistNum?`<div class="rq-wnum">W${e.waitlistNum}</div>`:''}
-        ${e.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
-`}
-      </td>
-      <td${_isSatMember(e)?' class="cm-cell"':''}><div class="rider-name rq-rn"><span class="rq-mw0">${esc(e.name)}${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</span></div><div class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</div>${_qCc(entryPhone(e),e)}${_adChips(e)}</td>
+    return`<tr class="${[rowCls,_flashCls].filter(Boolean).join(' ')}${_rowPendCls(e.id)}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
+      <td class="rq-sel">${_bulkChk(e)}</td>
+      <td class="rq-w52 rq-numc"><div class="rq-n1">${_evMark(e)}${_noNum?`<span class="rq-bkat" title="${t('reservedAtLabel')}">${_resTimeShort(e)}</span>`:`<span class="queue-num-cell">#${e.queueNum}</span>`}</div>${_noNum?'':_bookedAt(e.registeredAt)}</td>
+      <td class="rq-rider${_isSatMember(e)?' cm-cell':''}"><div class="rider-name rq-rn"><span class="rq-nm" title="${esc(e.name)}">${esc(e.name)}</span>${_ptnChip(e)}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${wiTag}${noShowFlag(e)}${_ptChip(e)}${_dqMark(e)}</div><div class="rq-r2"><span class="rider-sub"><bdi>${_pii('phone',fmtPhone(e.phone),e.customerId,e.id)||'—'}</bdi>${_dupMark(e)}</span>${_qCc(entryPhone(e),e)}${_rmBtn(e)}</div></td>
       ${_memberCell(e)}
       ${_qc.bike?_qTypeCell(e):''}
       ${_qc.grp?`<td>${_rgChip(e)}</td>`:''}
@@ -29783,14 +29868,18 @@ function renderQRow(e){
             <span class="rq-bkname">${esc(b.name)}</span>
           </div>`).join('')
         :'<span class="rq-mut">—</span>'}${assignedBikes.some(b=>b.colors&&b.colors.length)?`<div class="rq-swrow">${colorSwatches}</div>`:''}</td>`:''}
-      ${_qc.money?`<td class="rq-price">${_freeSessIds.has(e.sessionId)?`<span class="rq-mut">—</span>`:_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));const _w=_walPaid(e);return (_a>0?`${_money(Math.round((_p+_a)*100)/100)}<div class="rq-adline">${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}</div>`:`${_money(_p)}`)+(_w>0?`<div class="rq-adline">${t('cwTitle')} ${_money(_w)}</div>`:'');})()}</td>
+      ${_qc.money?`<td class="rq-price rq-num">${_freeSessIds.has(e.sessionId)?`<span class="rq-mut">—</span>`:(()=>{const _p=e.price??DEFAULT_PRICE,_a=addonsCost(entryAddons(e));const _w=_walPaid(e);
+        // the total, then the add-ons as the one control under it (round two: it was the rental + add-ons line, the
+        // wallet's line and the add-on chips and button in the rider's cell); the rental and the wallet in its tip
+        const tip=[_a>0?`${t('reviewRentalLabel')} ${_p} + ${t('addonsLabel')} ${_a}`:'',_w>0?`${t('cwTitle')} ${_money(_w,_NOISO)}`:''].filter(Boolean).join(' · ');
+        return`${_ownFree(e)?`<span class="own-free">${t('invFree')}</span>`:`<span class="rq-tot"${tip?` title="${esc(tip)}"`:''}>${_money(_a>0?Math.round((_p+_a)*100)/100:_p)}</span>${_w>0?`<span class="rq-wal" title="${esc(t('cwTitle')+' '+_money(_w,_NOISO))}" aria-label="${esc(t('cwTitle')+' '+_money(_w,_NOISO))}">${_artIcon('wallet',12)}</span>`:''}`}${_adChips(e)}`;})()}</td>
       <td data-on-click="${_on("_on_renderStaffQueue_5",_EV,_EL)}">
         <div class="rq-payw">
           ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
         </div>
       </td>`:''}
-      <td>${statusCellHtml(e)}</td>
-      <td class="rq-mng"><div class="actions-cell qa-pin">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${e.id}')`,act:()=>showEditQNumModal(e.id)}]})}</div></td>
+      <td class="rq-stc">${statusCellHtml(e,_qPosBit(e,lp,totalW))}</td>
+      <td class="rq-mng"><div class="actions-cell rq-acts">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${e.id}')`,act:()=>showEditQNumModal(e.id)}]})}</div>${_rowErrHtml(e.id)}</td>
     </tr>`;
   }
 
@@ -29815,7 +29904,7 @@ function renderQRow(e){
     const lp=livePosMap[primary.id];
     const totalW=sessWaitCount[primary.sessionId]||0;
     const posCell=primary.status==='waiting'&&lp
-      ?`<div class="pos-badge rq-pos" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp} / ${totalW}`)}</div>`
+      ?`<span class="pos-badge rq-pos" dir="ltr" data-pos="${esc(primary.id)}">${_qPos(primary.id,`${lp} / ${totalW}`)}</span>`
       :`<span class="rq-mut12">—</span>`;
     const activeGroup=group.filter(e=>!['cancelled','noshow'].includes(e.status));
     const _r2g=n=>Math.round(n*100)/100;
@@ -29833,21 +29922,29 @@ function renderQRow(e){
       ${adTotal>0?`<div class="rq-adline">${t('addonsLabel')}: ${_money(adTotal)}</div>`:''}
       <div class="${remaining>0?'rq-due':'rq-due-ok'}">${paidCount}/${activeGroup.length} ${t('paidLabel')}${houseAmt>0?` · ${houseAmt} ${t('onTheHouseLabel')}`:''} · ${remaining>0?`${_money(remaining)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</div>`;
 
+    // The party's one action (round two, 2026-11-08): the next thing to do for it - Check in (N) while riders are
+    // expected, then Return all (N) while any is out, then Mark paid while money is due; the rest in its ⋯ menu.
+    const _pNext=_ciN>0?'checkin':group.some(e=>e.status==='active')?'return':(!_freeSessIds.has(primary.sessionId)&&remaining>0)?'paid':'';
+    const _pWho=_rowWho(primary);
+    const _pBtn=_pNext==='checkin'?`<button type="button" class="btn-sm btn-green rq-act rq-nw" aria-label="${esc(t('bulkCheckinBtn')+' ('+_ciN+') · '+_pWho)}" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`
+      :_pNext==='return'?_partyReturnBtn(group,false,_pWho)
+      :_pNext==='paid'?`<button type="button" class="btn-sm btn-green rq-act rq-gpaid" aria-label="${esc(t('bulkPaidBtn')+' · '+_pWho)}" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:'';
     if(!_open){
       // One row for the whole party: the holder, the shape of the party, the money, the
-      // party's own actions. Members come out on Show riders.
+      // party's own action. Members come out on Show riders.
       const types=[...new Set(group.map(e=>resolvedType(e)))];
       const bikesHeld=group.flatMap(e=>getAssignedBikes(e).map(b=>b.name));
       const partyMenu=_rowMenu('party:'+primary.id,[
         {label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},
         {label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},
         {label:t('partyShowRiders'),run:`_togglePartyOpen('${_pk}')`,act:()=>_togglePartyOpen(_pk)},
-        ..._partyMenuExtra(group)]);
-      return`<tr class="${groupCls} party-row rq-gleft${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
-        <td class="rq-w52 rq-vm">
-          <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+        ..._partyMenuExtra(group,_pNext,remaining>0&&!_freeSessIds.has(primary.sessionId))],null,_pWho);
+      const _pErr=group.map(x=>_rowErrHtml(x.id)).find(Boolean)||'';
+      return`<tr class="${groupCls} party-row rq-gleft${group.some(x=>_rowPend.has(String(x.id)))?' rq-pend':''}${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+        <td class="rq-sel"></td>
+        <td class="rq-w52 rq-vm rq-numc">
+          <div class="rq-n1">${_evMark(primary)}<span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span></div>
           ${_bookedAt(_bookedAtOf(group))}
-          ${primary.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
           <div class="rq-nbk">${t('bikesN').replace('{0}',String(n))}</div>
           ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
         </td>
@@ -29866,10 +29963,10 @@ function renderQRow(e){
         ${_qc.bld?`<td class="rq-vm">${group.map(_bldRoleCell).join(' ')}</td><td class="rq-vm">${group.map(_bldClubCell).join(' ')}</td><td class="rq-vm">${group.map(_bldBtCell).join(' ')}</td><td class="rq-vm">${group.map(_bldCell).join(' ')}</td>`:''}
         ${S.sfSession==='all'?`<td class="hide-mobile rq-vm">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile rq-none"></td>'}
         ${_qc.bike?`<td class="rq-vm">${bikesHeld.length?bikesHeld.map(b=>`<span class="rq-bkname">${esc(b)}</span>`).join('<br>'):'<span class="rq-mut">—</span>'}</td>`:''}
-        ${_qc.money?`<td class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
+        ${_qc.money?`<td class="rq-vm rq-price rq-num">${priceSpan}</td>`:''}
         ${_qc.money?`<td class="rq-vm rq-pcnt">${_freeSessIds.has(primary.sessionId)?'<span class="rq-mut">—</span>':`${paidCount}/${activeGroup.length} ${t('paidLabel')}`}</td>`:''}
-        <td class="rq-vm rq-st">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</td>
-        <td class="rq-vm rq-mng"><div class="actions-cell qa-party">${_ciN>0?`<button class="btn-sm btn-green rq-nw" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}${_partyReturnBtn(group)}${partyMenu}</div></td>
+        <td class="rq-vm rq-st rq-stc"><div class="rq-st1">${group.some(e=>e.status==='active')?statusBadge('active'):group.some(_isReserved)?`<span class="status-badge st-reserved badge-reserved">${t('statusReserved')}</span>`:group.some(e=>e.status==='waiting'||e.status==='waitlist')?statusBadge(group.some(e=>e.status==='waiting')?'waiting':'waitlist'):statusBadgeFor(primary)}</div>${primary.status==='waiting'&&lp?`<div class="rq-st2">${posCell}</div>`:''}</td>
+        <td class="rq-vm rq-mng"><div class="actions-cell rq-acts">${_pBtn}${partyMenu}</div>${_pErr}</td>
       </tr>`;
     }
     return group.map((e,i)=>{
@@ -29893,17 +29990,17 @@ function renderQRow(e){
       const bottomLine=isLast?'rq-gbot':'';
       const leftLine='rq-gleft';
       const flashAnim=S._flashId===e.id?`rq-flash-${S._flashColor||'green'}`:'';
-      const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ');
+      const trCls=[groupLine,bottomLine,leftLine,flashAnim].filter(Boolean).join(' ')+_rowPendCls(e.id);
 
       if(isFirst){
         return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
-          <td rowspan="${n}" class="rq-w52 rq-vm">
-            <span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+          <td class="rq-sel">${_bulkChk(e)}</td>
+          <td rowspan="${n}" class="rq-w52 rq-vm rq-numc">
+            <div class="rq-n1">${_evMark(primary)}<span class="queue-num-cell rq-qn15">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span></div>
             ${_bookedAt(_bookedAtOf(group))}
             ${primary.status==='waiting'&&lp?`<div class="rq-mt4">${posCell}</div>`:''}
             <div class="rq-nbk">${t('bikesN').replace('{0}',String(n))}</div>
-            ${(n>1&&_ciN>0)?`<button class="btn-sm btn-green rq-ci4" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:''}
-            ${n>1?`<div class="rq-mt4">${_partyReturnBtn(group)}</div>`:''}
+            ${n>1&&_pBtn&&_pNext!=='paid'?`<div class="rq-mt4 rq-pact">${_pBtn}</div>`:''}
             ${(n>1&&!S._partyExpandAll)?`<button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyHideRiders')} ▴</button>`:''}
             ${primary.groupName?`<div class="rq-gname" title="${esc(primary.groupName)}">${esc(primary.groupName)}</div>`:''}
             ${(primary.groupContact||primary.groupPhone)?`${primary.groupContact?`<div class="rq-gcont" title="${esc(primary.groupContact)}">${esc(primary.groupContact)}</div>`:''}${primary.groupPhone||entryPhone(primary)?`<div class="rq-mt3">${_contactCell(primary.groupPhone||entryPhone(primary),primary)}</div>`:''}`:''}
@@ -29918,17 +30015,18 @@ function renderQRow(e){
           ${_qc.bld?`<td class="rq-vm">${_bldRoleCell(e)}</td><td class="rq-vm">${_bldClubCell(e)}</td><td class="rq-vm">${_bldBtCell(e)}</td><td class="rq-vm">${_bldCell(e)}</td>`:''}
           ${S.sfSession==='all'?`<td class="hide-mobile rq-vm" rowspan="${n}">${esc(dayLabel(primary.sessionDay)||'')} ${esc(shortDate(primary.sessionDate))}</td>`:'<td class="hide-mobile rq-none"></td>'}
           ${_qc.bike?`<td class="rq-vm"><div class="rq-bkrow">${bikeNames}${allColors.length?colorSwatches:''}</div></td>`:''}
-          ${_qc.money?`<td rowspan="${n}" class="rq-vm">${priceSpan}${(!_freeSessIds.has(primary.sessionId)&&remaining>0)?`<button class="btn-sm btn-green rq-gpaid" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}</td>`:''}
+          ${_qc.money?`<td rowspan="${n}" class="rq-vm rq-price rq-num">${priceSpan}</td>`:''}
           ${_qc.money?`<td class="rq-vm" data-on-click="${_on("_on_renderStaffQueue_6",_EV,_EL)}">
             <div class="rq-payw">
               ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
             </div>
           </td>`:''}
-          <td class="rq-vm">${statusCellHtml(e)}</td>
-          <td class="rq-vm rq-mng"><div class="actions-cell qa-pin">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]})}</div></td>
+          <td class="rq-vm rq-stc">${statusCellHtml(e)}</td>
+          <td class="rq-vm rq-mng"><div class="actions-cell rq-acts">${_entryActions(e,{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group,_pNext==='paid'?'':_pNext,remaining>0&&!_freeSessIds.has(primary.sessionId)):[])]})}</div>${_rowErrHtml(e.id)}</td>
         </tr>`;
       }else{
         return`<tr class="${rowCls} ${trCls}${_ptnRow(e)}${_cmRow(e)}${_bdfRow(e)}${_vlDblCls(e)}" data-id="${esc(e.id)}">
+          <td class="rq-sel">${_bulkChk(e)}</td>
           <td class="rq-vm${_isSatMember(e)?' cm-cell':''}">${riderCell}</td>
           ${_memberCell(e,' class="rq-vm"')}
           ${_qc.bike?typeCell:''}
@@ -29944,8 +30042,8 @@ function renderQRow(e){
               ${(_freeSessIds.has(e.sessionId)||_ownFree(e))?`<span class="rq-mut">—</span>`:`<button class="pay-toggle ${e.paid&&(e.price??DEFAULT_PRICE)===0?'house':e.paid?'paid':'pending'}" data-on-click="${_on("showPayMenu",e.id,_EV)}">${e.paid&&(e.price??DEFAULT_PRICE)===0?' '+t('onTheHouseLabel'):e.paid?'✓ '+t('paidLabel'):' '+t('pendingLabel')}</button>`}
             </div>
           </td>`:''}
-          <td class="rq-vm">${statusCellHtml(e)}</td>
-          <td class="rq-vm rq-mng"><div class="actions-cell qa-pin">${_entryActions(e)}</div></td>
+          <td class="rq-vm rq-stc">${statusCellHtml(e)}</td>
+          <td class="rq-vm rq-mng"><div class="actions-cell rq-acts">${_entryActions(e)}</div>${_rowErrHtml(e.id)}</td>
         </tr>`;
       }
     }).join('');
@@ -29977,23 +30075,31 @@ function renderQRow(e){
             <span class="rider-name rq-cname">${esc(e.name)}</span>${n>1?_ptnChip(e):''}${_cmChip(e)}${_bdfChip(e)}${_snChip(e)}${_leadChip(e)}${_n6cFirstChip(e)}${i===0?noShowFlag(e):''}${_ptChip(e)}${_dupMark(e)}${_dqMark(e)}
             ${e.height?`<span class="q-height rq-fs0"><bdi>${e.height} ${t('cmUnit')}</bdi></span>`:''}
           </div>
-          <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}<span class="rq-end">${statusCellHtml(e)}</span>${payBtn}</div>
+          <div class="rq-cr">${e.phone?_contactCell(e.phone,e):''}${_rmBtn(e)}<span class="rq-end">${statusCellHtml(e,n===1?_qPosBit(e,lp,totalW):'')}</span>${payBtn}</div>
         </div>
         <div class="rq-csub${indent}">
           ${_hasRideGroups(_rowSess(e))?_rgChip(e)+' ':''}${_isBlood(_rowSess(e))?`<span class="bld-row">${_bldRoleCell(e)}${_bldVis(e)?'':`<span class="bld-cl">${t('btTitle')}: ${_bldBtCell(e)}</span>`}${_bldCell(e)}<span class="bld-club-l">${t('bldClubCol')}: ${_bldClubCell(e)}</span></span>`:_rideKind(_rowSess(e))==='runher'?_runKmCell(e)+' ':_isDefe(_rowSess(e))?_runKmCell(e)+' ':_isRace(_rowSess(e))?_vlCell(e)+' ':esc(typeLabel(e.typePreference))}${e.height&&_entryFitText(e)?` <span class="q-size">${esc(_entryFitText(e))}</span>`:''}${bikeInfo?` &middot; <span class="rq-ml">${esc(bikeInfo)}</span>`:''}${_freeSessIds.has(e.sessionId)?'':_ownFree(e)?` &middot; <span class="own-free">${t('invFree')}</span>`:` &middot; <bdi class="rq-cprice">${_money(e.price??DEFAULT_PRICE,_NOISO)}</bdi>`}
         </div>
       </div>`;
     }).join('');
+    // The party's one action (round two): the next thing to do for it, as on the desk's row; the rest in a ⋯ menu.
+    const _cpm=_partyMoney(group),_cciN=n>1?_partyCheckinRows(group).length:0,_cdue=n>1&&!_freeSessIds.has(primary.sessionId)&&_cpm.due>0;
+    const _cNext=n<2?'':_cciN>0?'checkin':group.some(e=>e.status==='active')?'return':_cdue?'paid':'';
+    const _cWho=_rowWho(primary);
+    const _cBtn=_cNext==='checkin'?`<button type="button" class="btn-sm btn-green rq-act" aria-label="${esc(t('bulkCheckinBtn')+' ('+_cciN+') · '+_cWho)}" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_cciN})</button>`
+      :_cNext==='return'?_partyReturnBtn(group,false,_cWho)
+      :_cNext==='paid'?`<button type="button" class="btn-sm btn-green rq-act rq-gpaid" aria-label="${esc(t('bulkPaidBtn')+' · '+_cWho)}" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:'';
+    // each rider's one action and ⋯ on one row (1fr auto), the select box beside their name, or in the card's corner for one rider
     const actionsHtml=group.map((e,i)=>`<div${n>1&&i>0?' class="rq-cact"':''}>
-      ${n>1?`<div class="rq-cactn">${esc(e.name)}</div>`:''}
-      <div class="rq-flw6">${_entryActions(e,i===0?{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group):[])]}:undefined)}</div>
+      ${n>1?`<div class="rq-cactn"><span class="rq-cactw">${esc(e.name)}</span>${_bulkChk(e)}</div>`:''}
+      <div class="rq-flw6 rq-acts">${_entryActions(e,i===0?{extraMenu:[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},n>1?{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)}:null,...(n>1?_partyMenuExtra(group,_cNext,_cdue):[])]}:undefined)}</div>${_rowErrHtml(e.id)}
     </div>`).join('');
     const _pk=_partyKey(primary)||primary.id;
     if(n>1&&!_partyIsOpen(_pk)&&!_apprSessIds.has(primary.sessionId)){
-      const pm=_partyMoney(group);
-      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+      const pm=_cpm;
+      return`<div class="q-card party-card${groupCls?' '+groupCls:''} rq-cleft${group.some(x=>_rowPend.has(String(x.id)))?' rq-pend':''}${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
         <div class="rq-chw ${sessLabel?'rq-mb4':'rq-mb6'}">
-          <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
+          ${_evMark(primary)}<span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
           ${_bookedAt(_bookedAtOf(group),'span')}
           <span class="rq-nbk2">${t('bikesN').replace('{0}',String(n))}</span>
           ${primary.groupName?`<span class="rq-gname2" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
@@ -30002,31 +30108,27 @@ function renderQRow(e){
         ${sessLabel}
         <div class="rq-sb8">
           <div class="rq-mw0"><div class="rider-name rq-cname2">${esc(primary.name)}${_ptnChip(primary)}${_cmChip(primary)}${_bdfChip(group.find(_bdfOf))}${group.some(_snOf)?_snChip(group.find(_snOf)):''}${noShowFlag(primary)}${group.map(x=>_ptChip(x)).join('')}${_dqMark(group)}</div>
-            <div class="rq-csub">${_partyCountsLine(group)}</div></div>
+            <div class="rq-csub">${_partyCountsLine(group)}</div>
+            <button type="button" class="party-toggle" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button></div>
           <div class="rq-cr">${_contactCell(primary.groupPhone||primary.phone,primary)}</div>
         </div>
         ${_freeSessIds.has(primary.sessionId)?'':`<div class="rq-cmoney"><span>${_money(pm.total)} · ${pm.paidCount}/${pm.count} ${t('paidLabel')}</span><span class="${pm.due>0?'rq-c-orange':'rq-c-green'}">${pm.due>0?`${_money(pm.due)} ${t('dueWord')}`:`✓ ${t('settledLabel')}`}</span></div>`}
-        <div class="rq-pbtns">
-          ${(()=>{const _ciN=_partyCheckinRows(group).length;return _ciN?`<button class="btn-sm btn-green" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
-          ${_partyReturnBtn(group)}
-          ${(!_freeSessIds.has(primary.sessionId)&&pm.due>0)?`<button class="btn-sm btn-green" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
-          <button type="button" class="btn-sm btn-muted" aria-expanded="false" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyShowRiders')} ▾</button>
-          ${_rowMenu('partycard:'+primary.id,[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},..._partyMenuExtra(group)])}
-        </div>
+        <div class="rq-pbtns rq-acts">
+          ${_cBtn}
+          ${_rowMenu('partycard:'+primary.id,[{label:t('menuBookingNum'),run:`showEditQNumModal('${primary.id}')`,act:()=>showEditQNumModal(primary.id)},{label:t('menuPartyDetails'),run:`showGroupEditModal('${primary.id}')`,act:()=>showGroupEditModal(primary.id)},..._partyMenuExtra(group,_cNext,_cdue)],null,_cWho)}
+        </div>${group.map(x=>_rowErrHtml(x.id)).find(Boolean)||''}
       </div>`;
     }
-    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
+    return`<div class="q-card${groupCls?' '+groupCls:''}${n>1?' rq-cleft':''}${group.some(x=>_rowPend.has(String(x.id)))?' rq-pend':''}${_ptnRow(group)}${_cmRow(group)}${_bdfRow(group)}${_vlDblCls(group)}" data-id="${esc(primary.id)}">
       <div class="rq-ch ${sessLabel?'rq-mb4':'rq-mb6'}">
-        <span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
-        ${n===1&&primary.status==='waitlist'&&primary.waitlistNum?`<span class="rq-wnum2">W${primary.waitlistNum}</span>`:''}
+        ${_evMark(primary)}<span class="queue-num-cell rq-fs22">${(_apprSessIds.has(primary.sessionId)&&!primary.partner&&!_commPublished(_rowSess(primary)))?'—':qNumDisplay}</span>
         ${_bookedAt(_bookedAtOf(group),'span')}
         ${n>1?`<span class="rq-nbk2">${t('bikesN').replace('{0}',String(n))}</span>`:''}
         ${primary.groupName?`<span class="rq-gname2" title="${esc(primary.groupName)}">${esc(primary.groupName)}</span>`:''}
-        ${posTag}${n===1?_kioskTag(primary)+_ptnChip(primary):''}
-        ${(()=>{const _ciN=n>1?_partyCheckinRows(group).length:0;return _ciN?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupCheckin",primary.id)}">${t('bulkCheckinBtn')} (${_ciN})</button>`:'';})()}
-        ${n>1?_partyReturnBtn(group,true):''}
+        ${n>1?posTag:''}${n===1?_kioskTag(primary)+_ptnChip(primary):''}
+        ${n>1&&_cNext!=='paid'?_cBtn.replace('class="btn-sm btn-green rq-act','class="btn-sm btn-green rq-act rq-sbtn'):''}
         ${(n>1&&!S._partyExpandAll)?`<button type="button" class="party-toggle" aria-expanded="true" data-on-click="${_on("_togglePartyOpen",_pk)}">${t('partyHideRiders')} ▴</button>`:''}
-        ${(n>1&&!_freeSessIds.has(primary.sessionId)&&_partyMoney(group).due>0)?`<button class="btn-sm btn-green rq-sbtn" data-on-click="${_on("groupMarkPaid",primary.id)}">✓ ${t('bulkPaidBtn')}</button>`:''}
+        ${n===1&&_bulkChk(primary)?`<span class="rq-cchk">${_bulkChk(primary)}</span>`:''}
       </div>
       ${sessLabel}
       <div>${riderRows}</div>
@@ -30109,8 +30211,10 @@ function renderQRow(e){
   // the strip's Expected and On Bike a second time; those two chips are gone and these wear their colours.
   const _lcHtml=(S.sfSession!=='all'&&_isApprovalRide(_sessGet(S.sfSession)))?'':(()=>{
     const nIn=base.filter(e=>e.status==='done'&&_isLive(e)).length;
-    return`<div class="q-lc-nums">${[['active',nBike,_bldQ()?'tkStIn':'onBikeStat'],['all',nWait+nBike+nIn,'lcBooked'],['waiting',nWait,'lcNotArrived']].map(([f,n,k])=>{const on=f!=='all'&&S.sfStatus===f;
-      return`<button type="button" class="q-lc-btn q-lc-${f}${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",f)}"><b class="num">${n}</b> ${esc(t(k))}</button>`;}).join('<span class="q-lc-sep" aria-hidden="true">·</span>')}${_n6bOwingChip(base,_isLive)}</div>`;
+    // The number the desk acts on leads, larger (round two, the user's pick, 2026-11-08): Not arrived, then On bike and
+    // Booked, smaller. It was On bike first.
+    return`<div class="q-lc-nums">${[['waiting',nWait,'lcNotArrived'],['active',nBike,_bldQ()?'tkStIn':'onBikeStat'],['all',nWait+nBike+nIn,'lcBooked']].map(([f,n,k],i)=>{const on=f!=='all'&&S.sfStatus===f;
+      return`<button type="button" class="q-lc-btn q-lc-${f}${i===0?' q-lc-big':''}${on?' active':''}" aria-pressed="${on}" data-on-click="${_on("setSfStatus",f)}"><b class="num">${n}</b> ${esc(t(k))}</button>`;}).join('<span class="q-lc-sep" aria-hidden="true">·</span>')}${_n6bOwingChip(base,_isLive)}</div>`;
   })();
 
   
@@ -30148,7 +30252,7 @@ function renderQRow(e){
   const _qfN=[S.sfStatus!=='all',S.sfPay&&S.sfPay!=='all',S.sfBike&&S.sfBike!=='all',S.sfSize&&S.sfSize!=='all',_memv&&S.sfMember&&S.sfMember!=='all',_ptnv&&S.sfPtn&&S.sfPtn!=='all',_qc.km&&S.sfKm&&S.sfKm!=='all',_qc.vl&&S.sfVl&&S.sfVl!=='all',_qx.code&&_qf('sfCode'),_qx.rc&&_qf('sfRc'),_qx.shirt&&_qf('sfShirt'),_qc.grp&&_qf('sfGrp'),_qx.who&&_qf('sfGen'),_qx.who&&_qf('sfAge'),_qx.who&&_qf('sfNat'),_qx.sn&&_qf('sfSn'),_bldQ()&&_qf('sfRole')].filter(Boolean).length+(_bq?_bq.n():0); // the filters on (the Filter button's count)
   const _missHtml=!filtered.length&&S.sfSearch.trim()?_dkXMiss(S.sfSearch.trim(),base,_qfN,e=>(_fd&&_apprSessIds.has(e.sessionId))||_pmBooked.has(e.id)):'';
   const _emptyHtml=`<div class="rq-p8">${emptyIllustration(ILLUS_PEOPLE,t('noHistory'))}${_missHtml}</div>`;
-  const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="14">${_emptyHtml}</td></tr>`);
+  const _emptyPiece=()=>_phoneQ?_cd('empty',_emptyHtml):_tb('empty',`<tr><td colspan="20">${_emptyHtml}</td></tr>`);
   const rowChunks=[],cardChunks=[],list=_phoneQ?cardChunks:rowChunks;
   // The check-in panel's Previous / Next and "Open the next rider" walk the roster as it is drawn:
   // party by party, each party's riders together, in the order the pieces go on the page
@@ -30167,7 +30271,7 @@ function renderQRow(e){
         const nW=sessFiltered.filter(e=>e.status==='waiting').length;
         const nA=sessFiltered.filter(e=>e.status==='active').length;
         const nD=sessFiltered.filter(e=>e.status==='done').length;
-        rowChunks.push(_tb('h:'+sess.id,`<tr class="sess-group-hdr"><td colspan="14">
+        rowChunks.push(_tb('h:'+sess.id,`<tr class="sess-group-hdr"><td colspan="20">
         ${esc(dayLabel(sess.day))} &nbsp;${esc(shortDate(sess.session_date||sess.id))} &nbsp;&middot;&nbsp; <bdi>${esc(sessionTime(sess))}</bdi>${_sgChip(sess)?' '+_sgChip(sess):''}
         &nbsp;&nbsp;
         <span class="rq-c-green">${nW} ${t('waitingStat').toLowerCase()}</span>
@@ -30192,12 +30296,36 @@ function renderQRow(e){
     const _foldBtn=cls=>`<button type="button" class="fold-btn${cls}" aria-expanded="${S.sfShowFinished?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_12",_EV,_EL)}">${S.sfShowFinished?`${t('foldHide')} ▴`:`${_foldLbl} — ${t('foldShow')} ▾`}</button>`;
     for(const g of _fg)list.push(piece(g));
     if(_foldable){
-      list.push(_phoneQ?_cd('fold',_foldBtn(' fold-card')):_tb('fold',`<tr class="fold-row"><td colspan="14">${_foldBtn('')}</td></tr>`));
+      list.push(_phoneQ?_cd('fold',_foldBtn(' fold-card')):_tb('fold',`<tr class="fold-row"><td colspan="20">${_foldBtn('')}</td></tr>`));
       if(S.sfShowFinished)for(const g of _fgFin)list.push(piece(g));
     }
     if(!filtered.length)list.push(_emptyPiece());
   }
   S._qOrder=_drawn;
+  // The selection's actions take the filter row's place while rows are ticked (round two, the user's pick d_bulk, 2026-11-08):
+  // "N selected", Check in, Mark paid, Return, No-show, Select all, Clear, sticky under the night's figures so they stay in
+  // reach down the list. No bar at the foot of the screen any more (it was fixed at the bottom; the owner's rule
+  // against bars after actions).
+  const _sel=S.sfSelected.filter(id=>_dkYSelOk(_qGet(id)));
+  if(_sel.length!==S.sfSelected.length)S.sfSelected=_sel;
+  const _nSelAll=_sfSelectable().length,_nBoxes=_sfSelectable().filter(id=>{const e=_qGet(id);return e&&_rideKind(_sessGet(e.sessionId))!=='saturday';}).length; // the header's box only where rows show theirs (none on the Saturday ride, _bulkChk)
+  const _bulkHtml=_sel.length?(()=>{
+    const es=_sel.map(id=>_qGet(id)).filter(Boolean);
+    const nCi=es.filter(e=>e.status==='waiting').length,act=es.filter(e=>e.status==='active');
+    // A free ride (the Saturday social ride, Run for Her, any community ride that is not a paid one) has nothing to collect:
+    // its riders get Check in, never Mark paid (the owner, 2026-10-06: "remove the mark paid button from free sessions only keep check in status").
+    const canPay=es.some(e=>!_freeSessIds.has(e.sessionId));
+    const lbl=`${_sel.length} ${t('bulkSelectedLabel')}`;
+    return`<div class="rq-bulkrow" id="q-bulk" role="toolbar" aria-label="${esc(lbl)}">
+      <span class="rq-bulkn" role="status">${esc(lbl)}</span>
+      ${nCi?`<button type="button" class="btn-sm btn-green" data-on-click="${_on("bulkSfCheckin")}">${t('bulkCheckinBtn')}</button>`:''}
+      ${canPay?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("bulkSfPaid")}">✓ ${t('bulkPaidBtn')}</button>`:''}
+      ${act.length?`<button type="button" class="btn-sm ${nCi?'btn-muted':'btn-green'}" data-on-click="${_on("_on_renderStaffQueue_17",_EV,_EL)}">${t('bulkReturnBtn')} (${act.length})</button>`:''}
+      ${nCi?`<button type="button" class="btn-sm btn-muted" id="bulk-noshow" data-on-click="${_on("bulkSfNoShow")}">${t('noShowBtn')} (${nCi})</button>`:''}
+      ${_nSelAll>_sel.length?`<button type="button" class="btn-sm btn-muted" id="bulk-selall" data-on-click="${_on("sfSelectAllShown")}">${t('bulkSelectAll')} (${_nSelAll})</button>`:''}
+      <button type="button" class="btn-sm btn-muted rq-bulkx" data-on-click="${_on("clearSfSelect")}">${t('bulkClearSel')}</button>
+    </div>`;
+  })():'';
   const _shellHtml=_queueHeader+_qvPillsHtml(GIVE_BIKE_STEP?'':_liveHtml())+_sessSummaryBar+`${(()=>{
     // Saturday Social Ride (a single community session selected): the JCC stats (Expected / On Bike /
     // Completed) don't apply — show the approval funnel instead: total riders, approved, pending, waitlist.
@@ -30243,7 +30371,7 @@ function renderQRow(e){
         </div>`;}).join('')}
       </div>`;
     })()}
-    <div class="filter-bar">
+    ${_bulkHtml||`<div class="filter-bar">
       <div class="filter-row">
         <div class="${_srchCls('q',S.sfSearch)}" data-srch="q">
           ${_artIcon('search',13)}
@@ -30289,7 +30417,7 @@ function renderQRow(e){
       ${_qc.km?_runSplitHtml(base):''}
       ${_qc.vl?_vlSplitHtml(base):''}
       <div class="result-count" id="q-result-count">${filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:''}</div>
-    </div>
+    </div>`}
     <div id="q-results"></div>
     <!-- The night's two busiest actions stay within thumb reach on a phone while the roster
          scrolls, instead of riding away with the filter bar and the header (2026-09-22).
@@ -30307,7 +30435,8 @@ function renderQRow(e){
   if(filtered.length>_qShown.length)_results.push(_qLeaf('more',`<div class="rq-showmore"><button class="btn-secondary" data-on-click="${_on("_on_renderStaffQueue_16",_EV,_EL)}">${t('sessShowMore').replace('{0}',filtered.length-_qShown.length)}</button></div>`));
   _results.push(_qBox('cards','<div class="queue-mobile-view">','</div>',cardChunks));
   _results.push(_qBox('table',`<div tabindex="0" role="group" aria-label="${esc(t('tblScrollLabel'))}" class="table-wrapper queue-table-desktop-wrap"><table class="queue-table${S.queueDensity==='compact'?' compact':''}" data-nosort aria-label="${esc(t('staffQueueTitle'))}">`,'</table></div>',[_qLeaf('head',`<tr>
-        ${thQSort('queue',t('colBookingNum'))}
+        <th class="rq-sel">${_nBoxes?`<label class="row-select rq-chk" title="${esc(t('bulkSelectAll'))}"><input type="checkbox" class="rq-selall"${_sel.length&&_sel.length>=_nSelAll?' checked':''} aria-label="${esc(t('bulkSelectAll')+' ('+_nSelAll+')')}" data-on-change="${_on('_qSelAllTog')}"></label>`:''}</th>
+        ${thQSort('queue',t('colBookingNum'),'rq-numc')}
         ${thQSort('name',t(_bldQ()?'nameLabel':'colRider'))}
         ${_memv?thQSort('member',t('colMember')):''}
         ${_qc.bike?thQSort('type',t('bikeTypeLabel')):''}
@@ -30318,38 +30447,17 @@ function renderQRow(e){
         ${_qc.bld?(_bq?thQSort('bq:role',t('bldColRole'))+thQSort('bq:club',t('bldClubCol'))+thQSort('bq:bt',t('btTitle'))+thQSort('bq:don',t('bldColDonated')):`<th>${t('bldColRole')}</th><th>${t('bldClubCol')}</th><th>${t('btTitle')}</th><th>${t('bldColDonated')}</th>`):''}
         ${S.sfSession==='all'?thQSort('session',t('colSession'),'hide-mobile'):'<th class="hide-mobile rq-none"></th>'}
         ${_qc.bike?thQSort('bike',t('colBike')):''}
-        ${_qc.money?thQSort('price',t('colPrice')||'Price'):''}
+        ${_qc.money?thQSort('price',t('colPrice')||'Price','rq-num'):''}
         ${_qc.money?thQSort('paid',t('colPayment')):''}
         ${thQSort('status',t('colStatus'))}
         <th class="rq-mng">${t('colManageBooking')}</th>
       </tr>`,'thead'),...rowChunks],'table'));
-  {
-    const sel=S.sfSelected.filter(id=>_dkYSelOk(_qGet(id)));
-    if(sel.length!==S.sfSelected.length)S.sfSelected=sel;
-    if(sel.length){
-      const anyWaiting=sel.some(id=>{const e=_qGet(id);return e&&e.status==='waiting';});
-      const act=sel.filter(id=>{const e=_qGet(id);return e&&e.status==='active';});
-      // A free ride (the Saturday social ride, Run for Her, any community ride that is not a paid one) has
-      // nothing to collect: its riders get Check in, never Mark paid (the owner, 2026-10-06: "remove the mark
-      // paid button from free sessions only keep check in status").
-      const canPay=sel.some(id=>{const e=_qGet(id);return e&&!_freeSessIds.has(e.sessionId);});
-      const nNs=sel.filter(id=>{const e=_qGet(id);return e&&e.status==='waiting';}).length,nAll=_sfSelectable().length; // No-show and Select all shown (2026-10-09, D6)
-      _results.push(_qLeaf('bulk',`<div class="rq-bulk">
-        <span class="rq-bulkn">${sel.length} ${t('bulkSelectedLabel')}</span>
-        ${canPay?`<button class="btn-sm btn-green" data-on-click="${_on("bulkSfPaid")}">✓ ${t('bulkPaidBtn')}</button>`:''}
-        ${anyWaiting?`<button class="btn-sm btn-green" data-on-click="${_on("bulkSfCheckin")}">${t('bulkCheckinBtn')}</button>`:''}
-        ${act.length?`<button class="btn-sm btn-green" data-on-click="${_on("_on_renderStaffQueue_17",_EV,_EL)}">${t('bulkReturnBtn')} (${act.length})</button>`:''}
-        ${nNs?`<button class="btn-sm btn-muted" id="bulk-noshow" data-on-click="${_on("bulkSfNoShow")}">${t('noShowBtn')} (${nNs})</button>`:''}
-        ${nAll>sel.length?`<button class="btn-sm btn-muted" id="bulk-selall" data-on-click="${_on("sfSelectAllShown")}">${t('bulkSelectAll')} (${nAll})</button>`:''}
-        <button class="btn-sm btn-muted" data-on-click="${_on("clearSfSelect")}">${t('bulkClearSel')}</button>
-      </div>`));
-    }
-  }
   const _tab=document.getElementById('tab-queue');
   if(!_resultsOnly||!document.getElementById('q-results')){_qSyncShell(_tab,_shellHtml);_lcStick();}
   else{const _cnt=document.getElementById('q-result-count');if(_cnt)_cnt.innerHTML=filtered.length!==base.length?`${filtered.length} ${t('resultOf')} ${base.length} ${t('resultRiders')}`:'';}
   _qWrite(document.getElementById('q-results'),_results);
   _qPosApply(document.getElementById('q-results'));
+  {const sa=document.querySelector('#q-results .rq-selall');if(sa)sa.indeterminate=_sel.length>0&&_sel.length<_nSelAll;}
   _qBulkSync();
   if(!_resultsOnly)_qKeepScroll();
 }
@@ -30359,12 +30467,8 @@ function renderQRow(e){
 // realtime event replaced sent Chrome back over the page to check those two. On a phone-sized
 // roster of 250 bookings, style work across a run of check-in repaints fell by about a quarter
 // without them (2026-10-01, CPU slowed 4x).
-function _qBulkSync(){
-  try{
-    const on=S.view==='staff'&&S.staffTab==='queue'&&!!document.querySelector('#tab-queue [data-ck="bulk"]');
-    if(document.body.classList.contains('q-bulk')!==on)document.body.classList.toggle('q-bulk',on);
-  }catch(_){}
-}
+// Round two (2026-11-08): the bar is gone, its actions take the filter row's place; a body.q-bulk left by an older paint goes.
+function _qBulkSync(){try{document.body.classList.remove('q-bulk');}catch(_){}}
 function _qKeepScroll(){const y=S._qScrollY;if(y==null)return;if(Math.abs(window.scrollY-y)>1)try{window.scrollTo({top:y,behavior:'auto'});}catch(_){window.scrollTo(0,y);}}
 // ── The roster as keyed pieces ──────────────────────────────────────────────────────────────
 // The roster is a list of pieces under keys - one tbody per party in the table, one card per
@@ -31278,6 +31382,8 @@ function toggleSfSelect(id){
   renderStaffQueue();
 }
 function clearSfSelect(){S.sfSelected=[];renderStaffQueue();}
+// The header's box (round two): every rider shown that a selection can act on, or none once they all are.
+function _qSelAllTog(){const all=_sfSelectable();if(all.length&&all.every(id=>S.sfSelected.includes(id)))clearSfSelect();else sfSelectAllShown();}
 // The riders the roster shows that a selection can act on (expected or on a bike), in its order. A request not approved yet
 // has no box, and Select all takes it no more (the staff review, 2026-10-28, S03-core3-05).
 function _dkYSelOk(e){return !!e&&(e.status==='active'||(e.status==='waiting'&&!_dkYUnappr(e)));}
@@ -31306,9 +31412,12 @@ async function bulkSfPaid(){
   const rows=ids.map(id=>_qGet(id)).filter(e=>e&&!e.paid&&!_freeSessIds.has(e.sessionId)&&!_ownFree(e)); // a free ride's rider has nothing to pay (2026-10-06), nor an own-bike rider with no add-ons (marked paid at 0 they read On the house)
   // Offline, behind a change still waiting for the rider, or dropped by the network: kept in the desk outbox as a single
   // payment is, guarded on the row still being unpaid as it was (the staff review, 2026-11-06, BK05).
-  const kept=[];
+  const kept=[],was=new Map(rows.map(e=>[e.id,{paid:e.paid,price:e.price,pay_method:e.pay_method,card_amount:e.card_amount}]));
+  // the rows read paid at once, pending while the writes are out (round two); a refusal puts each back, said on it
+  rows.forEach(e=>{e.paid=true;e.pay_method='card';if(e.price===0&&!e.promoCode)e.price=_entryFallbackPrice(e);});_rowPending(rows.map(e=>e.id),true);renderStaffQueue();
   const res=await Promise.all(rows.map(async e=>{
-    const p={paid:true,pay_method:'card'};if(e.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);
+    const w0=was.get(e.id),p={paid:true,pay_method:'card'};if(w0.price===0&&!e.promoCode)p.price=_entryFallbackPrice(e);
+    e=Object.assign({},e,w0); // the row as it was, for the outbox's guard and its prev
     const keep=async()=>{const pa={paid:true,price:p.price!==undefined?p.price:(e.price??null),pay_method:'card',card_amount:null};
       if(!await _dqEnqueue({kind:'pay',bid:e.id,args:pa,label:_dqLabel(e),sid:e.sessionId,local:{...pa},prev:{paid:false,price:e.price??null,pay_method:e.pay_method||null,card_amount:e.card_amount??null},guard:true}))return false;
       Object.assign(e,{paid:true,price:pa.price,pay_method:'card',card_amount:null});kept.push(e.id);return true;};
@@ -31317,17 +31426,19 @@ async function bulkSfPaid(){
     if(r&&r.error&&_errKind(r.error)==='net'&&await keep())return{kept:true};
     return r;
   }));
+  _rowPending(rows.map(e=>e.id),false);
   if(kept.length)toast(t('dqSavedToast')+' · '+kept.length);
   const n=res.filter(r=>r&&!r.error&&r.data&&r.data.length).length;
   const fail=res.find(r=>r&&r.error);
-  const done=rows.filter((e,i)=>res[i]&&!res[i].error&&res[i].data&&res[i].data.length).map(e=>({id:e.id,price:e.price,pay_method:e.pay_method||null}));
+  rows.forEach((e,i)=>{const r=res[i];if(r&&(r.kept||(!r.error&&r.data&&r.data.length)))return;Object.assign(e,was.get(e.id));if(r&&r.error)_rowFail(e.id,r.error);});
+  const done=rows.filter((e,i)=>res[i]&&!res[i].error&&res[i].data&&res[i].data.length).map(e=>({id:e.id,price:was.get(e.id).price,pay_method:was.get(e.id).pay_method||null}));
   // Only the rows this touched are read again (2026-10-05): a payment moves no other booking, and the
   // whole-window reload made every bulk tap a full download.
   S.sfSelected=[];await _reloadRows(rows.map(e=>e.id));
   // A refusal part-way still leaves the rows that did flip paid: they are logged and undoable
   // like any other, and the refusal is said after.
   if(n){logAction(t('logBulkPaid').replace('{0}',n),{k:'pay',e:'booking',id:done.map(d=>d.id).join(',')});if(!fail)toast(`${n} ${t('paidLabel')}`);}
-  _writeErr(res,'bulk paid');
+  // a refusal is said on its row (above), not on a bar
   // The rows this device flipped, and only those, go back to unpaid as they were.
   if(done.length)pushUndo(`${t('undoPayment')} · ${done.length}`,async()=>{
     const r=await Promise.all(done.map(d=>sb.from('queue_entries').update({paid:false,price:d.price,pay_method:d.pay_method}).eq('id',d.id).eq('paid',true)));
@@ -31345,26 +31456,38 @@ async function _checkinMany(idList){
   if(!ids.length)return [];
   const wasWl=new Map(ids.map(id=>[id,(_qGet(id)||{}).status==='waitlist']));
   const landed=[],queued=[]; // ids this desk actually checked in; ids kept in the desk outbox (offline, 2026-10-10)
+  // The rows answer at once (round two, 2026-11-08): each reads checked in, pending, before its call leaves (what the
+  // outbox would lay over it, _dqCiLocal, worked out first); a refusal puts it back and says why on the row, not a bar.
+  const was=new Map(),locs=new Map();
+  ids.forEach(id=>{const e=_qGet(id);if(!e)return;was.set(id,{status:e.status,assignedBikeId:e.assignedBikeId,checkedInAt:e.checkedInAt});locs.set(id,_dqCiLocal(e,null,null));});
+  const bikesOf=new Map(ids.map(id=>{const e=_qGet(id);return[id,e?_dqCiBikes(e,null,locs.get(id)):null];}));
+  ids.forEach(id=>{const e=_qGet(id);if(e)Object.assign(e,locs.get(id));});_rowPending(ids,true);renderStaffQueue();
   // One staff_checkin per rider (20261004120000): the reserved bike claimed (or the stale link
   // dropped), the status and the arrival stamp in one transaction. A row another device moved
   // first answers BAD_BOOKING_STATE (or a no-op) and is simply not one of ours.
   const res=await Promise.all(ids.map(async id=>{
     const e=_qGet(id);
-    const args={p_booking_id:id,p_bike_id:null,p_op_id:_opId()},loc=e?_dqCiLocal(e,null,null):{status:'active'};
-    const q=await _dqTry(id,()=>_rpcOp('staff_checkin',args),{kind:'checkin',args,label:e?_dqLabel(e):'',sid:e&&e.sessionId,wasWl:!!wasWl.get(id),local:loc,bikes:e?_dqCiBikes(e,null,loc):null});
+    const args={p_booking_id:id,p_bike_id:null,p_op_id:_opId()},loc=locs.get(id)||{status:'active'};
+    const q=await _dqTry(id,()=>_rpcOp('staff_checkin',args),{kind:'checkin',args,label:e?_dqLabel(e):'',sid:e&&e.sessionId,wasWl:!!wasWl.get(id),local:loc,bikes:bikesOf.get(id)||null});
     if(q.queued){queued.push(id);return{};}
     const r=q.r;
-    if(r&&r.error&&/^BAD_BOOKING_STATE/.test(String(r.error.message||'')))return{};
+    if(r&&r.error&&/^BAD_BOOKING_STATE/.test(String(r.error.message||'')))return{lost:true};
     if(!(r&&r.error)&&r&&r.data&&r.data.ok===true&&r.data.noop!==true){
       landed.push(id);
       await _ciLeaveWl(e||{id},!!wasWl.get(id)); // the add-ons' stock, the Staff List row, and what Undo check-in reads
     }
     return r||{};
   }));
+  _rowPending(ids,false);
   const fail=res.find(r=>r&&r.error);
-  landed.forEach(id=>{const e=_qGet(id);if(e)e.status='active';});renderStaffQueue(); // paint first, reconcile after
+  ids.forEach((id,i)=>{
+    if(landed.includes(id)||queued.includes(id))return;
+    const e=_qGet(id),w=was.get(id),r=res[i];if(e&&w)Object.assign(e,w); // not checked in by this tap: as it was, until the re-read says otherwise
+    if(r&&r.error)_rowFail(id,r.error,true);else if(r&&r.lost)_rowFail(id,t('errChangedElsewhere'));
+  });
+  landed.forEach(id=>{const e=_qGet(id);if(e)e.status='active';_ruMark(id);});renderStaffQueue(); // paint first, reconcile after; each row's Undo for 10 s
   await (fail?loadDataLight():_reloadRows(ids));
-  if(fail){toast(_rpcSay(fail.error),'error');renderStaffQueue();return landed;} // the desk's words for a known code, not the raw database sentence
+  if(fail){renderStaffQueue();return landed;} // said on each refused row, in the desk's words for a known code
   // The count is the riders this desk actually checked in: a row another device got to first
   // is not one of them, and the log is the record staff reconcile the night against.
   if(landed.length)logAction(t('logBulkCheckin').replace('{0}',landed.length));
@@ -31610,6 +31733,7 @@ async function togglePayment(id,mode){
   if(mode==='card'||mode==='cash'||mode==='paid'||mode===true)newMethod='card';else if(mode==='house'||mode==='pending'||mode===false||(newPaid&&newPrice===0))newMethod=null; // every paid rental is a card payment now
   const prevPaid=entry.paid,prevPrice=entry.price,prevMethod=entry.pay_method||null,prevCard=entry.card_amount??null;
   entry.paid=newPaid;entry.price=newPrice;entry.pay_method=newMethod;entry.card_amount=null; // cash/card/house/pending clear any prior split
+  if(_hs!=='ok')_rowPending(id,true);
   renderStaffQueue();renderHistory();
   const stateLabel=newPaid&&newPrice===0?' '+t('onTheHouseLabel'):newPaid?'✓ '+t('paidLabel'):t('pendingLabel');
   haptic();
@@ -31620,13 +31744,18 @@ async function togglePayment(id,mode){
     const _pa={paid:newPaid,price:newPrice,pay_method:newMethod,card_amount:null};
     // The outbox keeps what the change replaced (prev) and replays it guarded on it (guard), as a no-show is on its status: a
     // payment another desk recorded meanwhile is not written over (the staff review, 2026-10-28, S12-team-settings-02).
-    const _keep=async()=>{if(await _dqEnqueue({kind:'pay',bid:id,args:_pa,label:_dqLabel(entry),sid:entry.sessionId,local:{..._pa},prev:{paid:prevPaid,price:prevPrice??null,pay_method:prevMethod,card_amount:prevCard},guard:true})){renderStaffQueue();return true;}return false;};
+    const _keep=async()=>{if(await _dqEnqueue({kind:'pay',bid:id,args:_pa,label:_dqLabel(entry),sid:entry.sessionId,local:{..._pa},prev:{paid:prevPaid,price:prevPrice??null,pay_method:prevMethod,card_amount:prevCard},guard:true})){_rowPending(id,false);renderStaffQueue();return true;}return false;}; // kept: the outbox's mark says it waits, not the pending edge
     if((_isOffline()||_dqHas(id))&&await _keep())return;
     // paid, price and the method in one write (the staff review, 2026-10-28, S03-core3-10): a second write lost on the way left
     // the row paid with no method, which every money screen then counted wrong
     const _pr=await sb.from('queue_entries').update(_pa).eq('id',id);
+    _rowPending(id,false);
     if(_pr&&_pr.error&&_errKind(_pr.error)==='net'&&await _keep())return;
-    if(_writeErr(_pr,'payment')){await loadDataLight();renderStaffQueue();renderHistory();return;} // surface failure and revert the optimistic toggle
+    S._wrRow=m=>_rowSay(id,m);
+    if(_writeErr(_pr,'payment')){ // the row back as it was, and why, on it (the error bar off the roster)
+      Object.assign(entry,{paid:prevPaid,price:prevPrice,pay_method:prevMethod,card_amount:prevCard});
+      renderStaffQueue();renderHistory();await loadDataLight();renderStaffQueue();renderHistory();return;
+    }
   }
   await _reloadRows([id]);renderHistory(); // only this row moved
   pushUndo(`${t('undoPayment')} #${entry.queueNum} ${entry.name}`,async()=>{
@@ -35374,10 +35503,14 @@ async function doNoShow(id){
     S._flashId=id;S._flashColor='orange';renderStaffQueue();toast(`${t('toastNoShow')} · ${t('dqSavedToast')}`);setTimeout(()=>{S._flashId=null;},800);return true;
   };
   if((_isOffline()||_dqHas(id))&&await _keep())return;
+  // the row answers at once (round two, 2026-11-08): no-show, pending, while the write is out; a refusal puts it back
+  entry.status='noshow';_rowPending(id,true);renderStaffQueue();
   const _ns=await sb.from('queue_entries').update({status:'noshow'}).eq('id',id).eq('status',was).select('id');
+  _rowPending(id,false);
   if(_ns&&_ns.error&&_errKind(_ns.error)==='net'&&await _keep())return;
-  if(_writeErr(_ns,'no-show')){await loadDataLight();renderStaffQueue();return;}
-  if(!_landed(_ns))return _lostRace();
+  S._wrRow=m=>_rowSay(id,m);
+  if(_writeErr(_ns,'no-show')){entry.status=was;renderStaffQueue();await loadDataLight();renderStaffQueue();return;}
+  if(!_landed(_ns)){entry.status=was;_rowFail(id,t('errChangedElsewhere'));renderStaffQueue();await loadDataLight();renderStaffQueue();return;}
   entry.status='noshow';S._flashId=id;S._flashColor='orange';renderStaffQueue(); // paint first, reconcile after
   // A no-show releases its place — the rider never took a bike out — so it goes to whoever has
   // waited longest, exactly as a cancellation does. A waitlisted rider held no place and no
@@ -35890,14 +36023,16 @@ async function _finishReturn(id,markPaid,cond,notes,photo){
   const wp=_returnWrite(id,markPaid,cond,notes,photo);
   const _prev={status:entry.status,paid:entry.paid,pay_method:entry.pay_method};
   entry.status='done';if(markPaid){entry.paid=true;entry.pay_method='card';}
-  S._flashId=id;S._flashColor='blue';renderStaffQueue();
+  S._flashId=id;S._flashColor='blue';_rowPending(id,true);renderStaffQueue();
   const w=await wp;
+  _rowPending(id,false);
   if(!w.ok){
     if(w.handled)return;
     Object.assign(entry,_prev);
-    if(w.rpcError)errorBar(_rpcMessage(w.rpcError),()=>_finishReturn(id,markPaid,cond,notes,photo),(w.rpcError&&w.rpcError.message)||'');
-    else if(w.writes)_writeErr(w.writes,'return bike');
-    await loadData();renderStaffQueue();return;
+    // said on the row, which is back as it was (round two: it was the error bar; Return bike on the row tries again)
+    if(w.rpcError)_rowFail(id,w.rpcError,true);
+    else if(w.writes){const b=[].concat(w.writes).find(r=>r&&r.error);_rowFail(id,b?b.error:t('errSomethingWrong'));}
+    renderStaffQueue();await loadData();renderStaffQueue();return;
   }
   S._flashId=id;S._flashColor='blue';renderStaffQueue(); // paint first, reconcile after
   if(w.queued){toast(`${_dqLabel(entry)} · ${t('dqSavedToast')}`);setTimeout(()=>{S._flashId=null;},800);return;} // in the desk outbox: nothing on the server to undo yet
@@ -35982,7 +36117,14 @@ async function _brGo(){
   await _bulkReturnRun(plan);
 }
 async function _bulkReturnRun(plan){
-  const res=await Promise.all(plan.map(p=>_returnWrite(p.id,p.paid,p.cond,p.notes).then(w=>({p,w}))));
+  // the rows answer at once (round two): each reads returned, pending, while its write is out; a refusal puts it back
+  const was=new Map(plan.map(p=>{const e=_qGet(p.id);return[p.id,e?{status:e.status,paid:e.paid,pay_method:e.pay_method}:null];}));
+  const wps=plan.map(p=>_returnWrite(p.id,p.paid,p.cond,p.notes).then(w=>({p,w}))); // each write reads its row's bikes before the paint below
+  plan.forEach(p=>{const e=_qGet(p.id);if(e){e.status='done';if(p.paid){e.paid=true;e.pay_method='card';}}});
+  _rowPending(plan.map(p=>p.id),true);renderStaffQueue();
+  const res=await Promise.all(wps);
+  _rowPending(plan.map(p=>p.id),false);
+  res.forEach(x=>{if(x.w.ok||x.w.handled)return;const e=_qGet(x.p.id),w=was.get(x.p.id);if(e&&w)Object.assign(e,w);});
   const done=res.filter(x=>x.w.ok),bad=res.filter(x=>!x.w.ok&&(x.w.rpcError||x.w.writes));
   if(done.length){
     const sent=done.filter(x=>!x.w.queued); // returns kept in the desk outbox (offline) have nothing on the server to undo
@@ -35999,10 +36141,9 @@ async function _bulkReturnRun(plan){
     });
   }
   if(bad.length){
-    const first=bad[0].w;
-    const retry=()=>_bulkReturnRun(bad.map(x=>x.p));
-    if(first.rpcError)errorBar(_rpcMessage(first.rpcError),retry,(first.rpcError&&first.rpcError.message)||'');
-    else _writeErr(first.writes,'return bike',retry);
+    // each refused row says why on itself (round two: one error bar for them all)
+    bad.forEach(x=>{if(x.w.rpcError)_rowFail(x.p.id,x.w.rpcError,true);else{const b=[].concat(x.w.writes).find(r=>r&&r.error);_rowFail(x.p.id,b?b.error:t('errSomethingWrong'));}});
+    renderStaffQueue();
     await loadData();
   }
   renderStaffQueue();
@@ -36018,13 +36159,15 @@ async function _bulkReturnRun(plan){
 // Anything else - and a caller that names nothing, like the booking editor taking a rider off their
 // bike to move them - goes back to waiting, as it always did. extra: more of the row put back in the
 // same write (the bike picker's fare).
-async function _undoCheckinWrite(entry,from,extra){
+async function _undoCheckinWrite(entry,from,extra,quiet){
   // The row as this device holds it now, not as it was at check-in (2026-10-05): Express and the
   // bike picker hand their undo the entry of that moment, and a bike changed since (12 swapped for
   // 14, then 12 given to another rider) was freed from under its new rider. The write is guarded on
   // the bike link read here as well, so a copy that is behind loses the race instead of guessing.
-  const cur=_qGet(entry.id)||entry;
-  const id=cur.id,bikeIds=getAssignedBikeIds(cur),checkedInAt=cur.checkedInAt||null;
+  // quiet (the roster's row Undo, round two): entry is the row as it was before the row painted the undo, and a
+  // refusal comes back as {err} for the row to say, not on the error bar.
+  const cur=quiet?entry:(_qGet(entry.id)||entry);
+  const id=cur.id,bikeIds=getAssignedBikeIds(cur),checkedInAt=cur.checkedInAt||null,by=cur.checkedInBy||null;
   const to=from==='waitlist'?'waitlist':'waiting',wn=to==='waitlist'?_ciWlNum(cur):null;
   // The rider first, guarded on still being on the bike, and only then the bike: freeing it in
   // the same breath let a desk whose copy was behind (the rider already returned, the bike out
@@ -36032,17 +36175,18 @@ async function _undoCheckinWrite(entry,from,extra){
   let _uq=sb.from('queue_entries').update({status:to,assigned_bike_id:null,...(wn?{waitlist_num:wn}:{}),...(extra||{})}).eq('id',id).eq('status','active');
   _uq=cur.assignedBikeId==null?_uq.is('assigned_bike_id',null):_uq.eq('assigned_bike_id',cur.assignedBikeId);
   const _ur=await _uq.select('id');
+  if(quiet&&_ur&&_ur.error)return{err:_ur.error};
   if(_writeErr(_ur,'undo check-in'))return null;
   if(!_landed(_ur))return{lost:true};
   if(bikeIds.length)await _releaseBikes(bikeIds,'undo check-in',true); // only while still in use: one sent to maintenance meanwhile stays out
-  await _wr(sb.from('queue_entries').update({checked_in_at:null}).eq('id',id),'undo check-in');
+  await _wr(sb.from('queue_entries').update({checked_in_at:null,...(by?{checked_in_by:null}:{})}).eq('id',id),'undo check-in'); // who checked them in goes with the arrival (BK09)
   try{localStorage.removeItem('cq_ct_'+id);}catch(e){}
   const mw=_ciLeftWl.get(id);_ciLeftWl.delete(id);
   if(to==='waitlist'){
     await _restockAddonsOnExit(cur); // a waitlisted booking holds no add-on stock
     if(mw&&mw.length)await _mwReviveLinked(mw);
   }
-  return{bikeIds,checkedInAt,to,wn};
+  return{bikeIds,checkedInAt,to,wn,by};
 }
 // The W number a rider going back onto the waitlist takes: the one the row kept through the check-in,
 // unless a rider on the waitlist holds it now, then the next one - the database's own rule for a staff
@@ -36078,13 +36222,14 @@ function _ciUndoLocal(id,w){
 // checkedInAt: the arrival the undo cleared, written back with the redo (2026-10-05) - without it
 // the ride's minutes, the two-hour flag and the analytics lost their start. from: where the undo left
 // the rider ('waiting' unless named); one it put back on the waitlist leaves it again, as a check-in does.
-async function _redoCheckinWrite(id,bikeIds,checkedInAt,from){
+async function _redoCheckinWrite(id,bikeIds,checkedInAt,from,by){
   // The freed bike may have been assigned to someone else since — reclaim atomically.
   const claimed=await _reclaimBikes(bikeIds);
   if(claimed.length<bikeIds.length)toast(t('errBikeUnavailable'),'warning');
   const assignedVal=claimed.length===0?null:claimed.length===1?claimed[0]:JSON.stringify(claimed);
   const patch={status:'active',assigned_bike_id:assignedVal};
   if(checkedInAt)patch.checked_in_at=checkedInAt;
+  if(by)patch.checked_in_by=by;
   const wl=from==='waitlist';
   const _u=await sb.from('queue_entries').update(patch).eq('id',id).eq('status',wl?'waitlist':'waiting').select('id');
   if(_writeErr(_u,'undo')||!_landed(_u)){await _releaseBikes(claimed,'undo');return false;}
@@ -36108,7 +36253,7 @@ async function doUndoCheckin(id){
   await _reloadRows([id]);
   toast(w.to==='waitlist'?t('toastUndoCheckinWl'):t('toastUndoCheckin'));
   pushUndo(`${t('undoUndoCheckin')} #${entry.queueNum} ${entry.name}`,async()=>{
-    const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt,w.to);
+    const ok=await _redoCheckinWrite(id,w.bikeIds,w.checkedInAt,w.to,w.by);
     if(ok&&after){_ciPrevPay.set(id,extra);await _wr(sb.from('queue_entries').update(after).eq('id',id).eq('status','active'),'undo');}
     await _reloadRows([id]);renderStaffQueue();
     if(!ok)return false;
@@ -36122,13 +36267,17 @@ async function doUndoCheckin(id){
 // Undo takes the whole party back.
 function _idsArg(ids){return '['+ids.map(_ja).join(',')+']';} // the menu items' run strings (read by specs) still spell the call out
 function _liveOf(ids,st){return(ids||[]).map(id=>_qGet(id)).filter(e=>e&&e.status===st);}
-function _partyReturnBtn(group,small){
+function _partyReturnBtn(group,small,who){
   const ids=group.filter(e=>e.status==='active').map(e=>e.id);
-  return ids.length?`<button class="btn-sm btn-green party-return${small?' rq-sbtn':''}" data-on-click="${_on("showBulkReturn",ids)}">${t('returnAllBtn')} (${ids.length})</button>`:'';
+  return ids.length?`<button type="button" class="btn-sm btn-green rq-act party-return${small?' rq-sbtn':''}"${who?` aria-label="${esc(t('returnAllBtn')+' ('+ids.length+') · '+who)}"`:''} data-on-click="${_on("showBulkReturn",ids)}">${t('returnAllBtn')} (${ids.length})</button>`:'';
 }
-function _partyMenuExtra(group){
-  const a=group.filter(e=>e.status==='active').map(e=>e.id),w=group.filter(e=>e.status==='waiting').map(e=>e.id);
+// own: the party's one action on its row (round two: 'checkin' / 'return' / 'paid'), left out here; due: money still owed.
+// Return all and Mark paid join the menu whenever they are not that action.
+function _partyMenuExtra(group,own,due){
+  const a=group.filter(e=>e.status==='active').map(e=>e.id),w=group.filter(e=>e.status==='waiting').map(e=>e.id),p=group[0];
   return[
+    own!=null&&own!=='return'&&a.length?{label:`${t('returnAllBtn')} (${a.length})`,run:`showBulkReturn(${_idsArg(a)})`,act:()=>showBulkReturn(a)}:null,
+    own!=null&&own!=='paid'&&due&&p?{label:`✓ ${t('bulkPaidBtn')}`,run:`groupMarkPaid('${p.id}')`,act:()=>groupMarkPaid(p.id)}:null,
     a.length?{label:`${t('undoCheckinBtn')} (${a.length})`,run:`confirmPartyUndoCheckin(${_idsArg(a)})`,act:()=>confirmPartyUndoCheckin(a)}:null,
     w.length?{label:`${t('noShowBtn')} (${w.length})`,run:`confirmPartyNoShow(${_idsArg(w)})`,act:()=>confirmPartyNoShow(w)}:null,
   ];
@@ -36152,7 +36301,7 @@ async function _undoCheckinMany(ids){
   for(const e of es){
     const extra=_ciPrevPay.get(e.id)||null,cur=_ciPayCols(e),after=extra?Object.fromEntries(Object.keys(extra).map(k=>[k,cur[k]])):null;
     const w=await _undoCheckinWrite(e,wl.has(e.id)?'waitlist':'waiting',extra);if(!w)break;if(w.lost)continue; // a rider another desk moved first is theirs, not ours to undo
-    _ciPrevPay.delete(e.id);_ciUndoLocal(e.id,w);done.push({id:e.id,bikeIds:w.bikeIds,at:w.checkedInAt,to:w.to,extra,after});
+    _ciPrevPay.delete(e.id);_ciUndoLocal(e.id,w);done.push({id:e.id,bikeIds:w.bikeIds,at:w.checkedInAt,to:w.to,by:w.by,extra,after});
   }
   if(done.length)renderStaffQueue(); // paint first, reconcile after
   await loadData();
@@ -36161,7 +36310,7 @@ async function _undoCheckinMany(ids){
     pushUndo(`${t('undoUndoCheckin')} · ${done.length}`,async()=>{
       let ok=true;
       for(const d of done){
-        if(!(await _redoCheckinWrite(d.id,d.bikeIds,d.at,d.to))){ok=false;continue;}
+        if(!(await _redoCheckinWrite(d.id,d.bikeIds,d.at,d.to,d.by))){ok=false;continue;}
         if(d.after){_ciPrevPay.set(d.id,d.extra);if(await _wr(sb.from('queue_entries').update(d.after).eq('id',d.id).eq('status','active'),'undo'))ok=false;}
       }
       await loadData();renderStaffQueue();
@@ -36173,25 +36322,31 @@ async function _undoCheckinMany(ids){
 async function _noShowMany(ids){
   const es=_liveOf(ids,'waiting');if(!es.length)return;
   const done=[];let lost=0;
-  for(const e of es){
+  // the rows answer at once (round two, 2026-11-08): no-show, pending, before the writes go; each refusal puts its row back
+  const held=new Map(es.map(e=>[e.id,_holdsSpot(e,_sessDisp(e.sessionId))])); // before the status changes below
+  es.forEach(e=>{e.status='noshow';});_rowPending(es.map(e=>e.id),true);renderStaffQueue();
+  for(let i=0;i<es.length;i++){
+    const e=es[i];
     // Guarded on the status seen here and counted only when the row really changed, like one
     // no-show: a rider another desk already checked in is not ours to mark, and promoting for
     // a place that never freed puts one rider too many on the night.
     const r=await sb.from('queue_entries').update({status:'noshow'}).eq('id',e.id).eq('status','waiting').select('id');
-    if(_writeErr(r,'no-show'))break;
-    if(!_landed(r)){lost++;continue;}
-    done.push({e,qn:e.queueNum,promoted:null,held:_holdsSpot(e,_sessDisp(e.sessionId))});e.status='noshow';
+    _rowPending(e.id,false);
+    const rest=es.slice(i);S._wrRow=m=>_rowSay(rest.map(x=>x.id),m);
+    if(_writeErr(r,'no-show')){rest.forEach(x=>{x.status='waiting';});break;}
+    if(!_landed(r)){lost++;e.status='waiting';_rowFail(e.id,t('errChangedElsewhere'));continue;}
+    done.push({e,qn:e.queueNum,promoted:null,held:held.get(e.id)});
   }
+  _rowPending(es.map(e=>e.id),false);
   renderStaffQueue(); // paint first, reconcile after
-  if(!done.length){await loadDataLight();renderStaffQueue();if(lost)toast(t('errChangedElsewhere'),'warning');return;}
+  if(!done.length){await loadDataLight();renderStaffQueue();return;}
   // Each place a no-show frees goes to whoever has waited longest, as one no-show does.
   for(const d of done)d.promoted=d.held?(await _autoPromoteOldestWaitlist(d.e.sessionId)||null):null;
   const promoted=done.map(d=>d.promoted).filter(Boolean);
   await loadDataLight();
   for(const d of done)await _restockAddonsOnExit(d.e);
   logAction(t('logBulkNoShow').replace('{0}',done.length));
-  toast(t('partyNoShowToast').replace('{0}',done.length)+(promoted.length?` · ${t('toastPromoted')}`:''));
-  if(lost)toast(t('errChangedElsewhere'),'warning');
+  toast(t('partyNoShowToast').replace('{0}',done.length)+(promoted.length?` · ${t('toastPromoted')}`:'')); // a rider another desk moved first says so on its row
   _promoNudge(promoted);
   pushUndo(`${t('undoNoShow')} · ${done.length}`,async()=>{
     // Each rider back to their place, taken back from whoever their no-show promoted, or onto
@@ -36372,16 +36527,19 @@ function _n6bHm(iso){
   try{const l=_locale();if(!_n6bHmF||_n6bHmL!==l){_n6bHmF=new Intl.DateTimeFormat(l,{hour:'2-digit',minute:'2-digit',timeZone:KSA_TZ});_n6bHmL=l;}return _n6bHmF.format(ms);}catch(_){return'';}
 }
 function _n6bByLine(e){
-  if(e.status==='active'&&e.checkedInBy)return`<div class="rq-by">${esc(t('n6bInBy').replace('{0}',_n6bHm(e.checkedInAt)).replace('{1}',e.checkedInBy))}</div>`;
+  if(e.status==='active'&&e.checkedInBy){const w=t('n6bInBy').replace('{0}',_n6bHm(e.checkedInAt)).replace('{1}',e.checkedInBy);return`<span class="rq-by" title="${esc(w)}">${esc(w)}</span>`;}
   if(e.status==='done'&&(e.checkedOutBy||e.checkedInBy)){
     const a=e.checkedInBy?t('n6bInBy').replace('{0}',_n6bHm(e.checkedInAt)).replace('{1}',e.checkedInBy):'';
     const b=e.checkedOutBy?t('n6bOutBy').replace('{0}',_n6bHm(e.checkedOutAt)).replace('{1}',e.checkedOutBy):'';
-    return`<div class="rq-by">${esc([a,b].filter(Boolean).join(' · '))}</div>`;
+    const w=[a,b].filter(Boolean).join(' · ');return`<span class="rq-by" title="${esc(w)}">${esc(w)}</span>`;
   }
   return'';
 }
-function statusCellHtml(e){
-  const badge=statusBadgeFor(e)+(e.status==='cancelled'&&e.cancelReason?`<div class="cx-why" title="${esc(t('cancelReasonTitle'))}">${esc(_cancelReasonText(e))}</div>`:'');
+// Two lines whatever the booking carries (round two, 2026-11-08): the status pill with the small marks beside it (the
+// approval's word, the check-in state, who has it open, no waiver yet, staff comments), then ONE line of words that ends
+// in an ellipsis rather than wrap (the place in line or W number, the ride's time, the bike held, who checked in, why
+// cancelled, the desk note, the staff note), each whole in its own tip. pre: the place in line or W number (the roster's).
+function statusCellHtml(e,pre){
   const min=e.status==='active'?_activeMinutes(e):null;
   const el=e.status==='active'?(min!=null?_rideMinLabel(min):rideElapsed(e.id)):null;
   // Past two hours the little green timer turns amber and says so: that is how a missing
@@ -36389,13 +36547,17 @@ function statusCellHtml(e){
   // found still "active" weeks after their sessions ended.)
   const late=min!=null&&min>=OVERDUE_RIDE_MIN;
   const held=_isReserved(e)?_reservedWhat(e):'';
-  return badge+_n6cStBadge(e)+(el?`<div class="${late?'rq-el-late':'rq-el'}" ${late?`title="${t('overdueRideTip')}"`:''}>${late?_artIcon('warn',11)+' ':''}${el}</div>`:'')
-    +(held?`<div class="rq-held">${esc(held)}</div>`:'')
-    +_n6bByLine(e)+_n6bPresChip(e.id)
-    +(e.deskNote?`<div class="rq-dnote" title="${esc(t('deskNoteTitle'))}">${_artIcon('note',11)} ${esc(e.deskNote)}</div>`:'')
-    +(_dkYNoWv(e)?`<div class="rq-nowv">${_artIcon('warn',11)} ${esc(t('qYNoWv'))}</div>`:'') // no waiver on record yet (the staff review, 2026-10-28)
-    +_scChip('booking',e.id) // staff comments (2026-10-23)
-    +_n6pNote(e); // the account's newest staff note (People, 2026-11-06)
+  const l1=statusBadgeFor(e)+_apprStatusHtml(e)+_n6cStBadge(e)+_n6bPresChip(e.id)
+    +(_dkYNoWv(e)?`<span class="rq-nowv" title="${esc(t('qYNoWv'))}">${_artIcon('warn',11)} ${esc(t('qYNoWv'))}</span>`:'') // no waiver on record yet (the staff review, 2026-10-28)
+    +_scChip('booking',e.id); // staff comments (2026-10-23)
+  const l2=[pre||'',
+    el?`<span class="${late?'rq-el-late':'rq-el'}" ${late?`title="${t('overdueRideTip')}"`:''}>${late?_artIcon('warn',11)+' ':''}${el}</span>`:'',
+    held?`<span class="rq-held" title="${esc(held)}">${esc(held)}</span>`:'',
+    _n6bByLine(e),
+    e.status==='cancelled'&&e.cancelReason?`<span class="cx-why" title="${esc(t('cancelReasonTitle')+': '+_cancelReasonText(e))}">${esc(_cancelReasonText(e))}</span>`:'',
+    e.deskNote?`<span class="rq-dnote" title="${esc(t('deskNoteTitle')+': '+e.deskNote)}">${_artIcon('note',11)} ${esc(e.deskNote)}</span>`:'',
+    _n6pNote(e)].filter(Boolean); // the account's newest staff note (People, 2026-11-06)
+  return`<div class="rq-st1">${l1}</div>${l2.length?`<div class="rq-st2">${l2.join('<span class="rq-dot" aria-hidden="true">·</span>')}</div>`:''}`;
 }
 
 
@@ -41466,10 +41628,10 @@ async function applyCheckinChanges(){return _ciRun(()=>_confirmCheckinRun(null,t
 // (as they were before it): what an Undo of that check-in writes back with the status and the bike.
 // Kept per booking on this device, so the row's own Undo check-in puts the payment back too.
 const _ciPrevPay=new Map();
-function _ciPayCols(e){return{paid:!!e.paid,price:e.price??null,pay_method:e.pay_method??null,card_amount:e.card_amount??null,type_preference:e.typePreference||'Any'};}
+function _ciPayCols(e){return{paid:!!e.paid,price:e.price??null,pay_method:e.pay_method??null,card_amount:e.card_amount??null,type_preference:e.typePreference||'Any',ride_group:e.rideGroup??null};}
 function _ciPayChanged(prev,patch){
   const out={};
-  ['paid','price','type_preference'].forEach(k=>{if(patch[k]!==undefined&&patch[k]!==prev[k])out[k]=prev[k];});
+  ['paid','price','type_preference','ride_group'].forEach(k=>{if(patch[k]!==undefined&&patch[k]!==prev[k])out[k]=prev[k];}); // the Saturday group the check-in set goes back too (round two)
   if(patch.pay_method!==undefined&&((patch.pay_method||null)!==prev.pay_method||(patch.card_amount??null)!==prev.card_amount)){out.pay_method=prev.pay_method;out.card_amount=prev.card_amount;}
   return Object.keys(out).length?out:null;
 }
@@ -41576,18 +41738,24 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   // Offline, or a call the network dropped: kept in the desk outbox with its op id (2026-10-10).
   _ciArgs.p_op_id=_opId();
   const _dqL=_dqCiLocal(e,_bikeId,patch);
+  // The row answers at once (round two, 2026-11-08): it reads checked in, pending, while the drawer says Sending; a
+  // refusal puts it back below.
+  const _was={status:e.status,assignedBikeId:e.assignedBikeId,checkedInAt:e.checkedInAt,typePreference:e.typePreference,rideGroup:e.rideGroup,paid:e.paid,price:e.price,pay_method:e.pay_method,card_amount:e.card_amount},_rsvWas=getAssignedBikeIds(e);
+  Object.assign(e,_dqL);_rowPending(e.id,true);renderStaffQueue();
   const _q=await _dqTry(e.id,()=>_rpcOp('staff_checkin',_ciArgs),{kind:'checkin',args:_ciArgs,label:_dqLabel(e),sid:e.sessionId,wasWl:_wasWl,local:_dqL,bikes:_dqCiBikes(e,_bikeId,_dqL),dep:_depV||null});
+  _rowPending(e.id,false);
   if(_q.queued){_ciQueuedDone(e);return;}
   const r=_q.r;
   const _ciD=r&&!r.error?r.data:null;
   if(!_ciD||_ciD.ok!==true){
-    // Said where it can be seen (2026-10-09, B5): on this rider's check-in while it is still open,
-    // else on the error bar, by name, until it is dealt with. It went to S._ciErr alone, which then
-    // showed in the next rider's drawer, or nowhere once the drawer was closed.
+    // Said where it can be seen (2026-10-09, B5): on this rider's check-in while it is still open, else on the row
+    // itself, by name (round two: it was the error bar; the user's pick, no bar after a desk tap). It went to S._ciErr
+    // alone once, which then showed in the next rider's drawer, or nowhere once the drawer was closed.
+    Object.assign(e,_was);
     const _msg=r&&r.error?_rpcMessage(r.error):t('errSomethingWrong');
-    if(S._ciId===e.id){S._ciErr=_msg;_ciRenderBikeSpec();}
-    else errorBar(t('ciNotCheckedIn').replace('{0}',String(e.queueNum??'')).replace('{1}',e.name||''),()=>showCheckinModal(e.id),_msg);
-    await loadDataLight().catch(()=>{});return;
+    if(S._ciId===e.id){S._ciErr=_msg;_ciRenderBikeSpec();renderStaffQueue();}
+    else{_rowFail(e.id,t('ciNotCheckedIn').replace('{0}',String(e.queueNum??'')).replace('{1}',e.name||'')+': '+_msg);renderStaffQueue();}
+    await loadDataLight().catch(()=>{});renderStaffQueue();return;
   }
   // A no-op means this booking was already checked in (on this bike) - by the tab iOS opened
   // for the tag, or a Confirm that got past the guard. That check-in did the rest (payment,
@@ -41610,15 +41778,19 @@ async function _confirmCheckinRun(_bikeId,_applyOnly){
   if(_gotBikes.length)await _dropOtherReservations(_gotBikes,e.id);
   // Undoable like Express, bulk and Hand-over (2026-10-09, D5): the topbar's Undo / History > Log
   // put back the status, the bike and the payment this check-in recorded. pushUndo logs the line.
-  const _undoPay=_ciPayChanged(_prevPay,S._ciHsOk===e.id?{...patch,paid:true,price:0,pay_method:null,card_amount:null}:patch);S._ciHsOk=null; // a house set through staff_set_house goes back with an Undo too
+  let _undoPay=_ciPayChanged(_prevPay,S._ciHsOk===e.id?{...patch,paid:true,price:0,pay_method:null,card_amount:null}:patch);S._ciHsOk=null; // a house set through staff_set_house goes back with an Undo too
+  // the rider's own held bike, which the check-in claimed, is held for them again by an Undo (round two: it went back to no bike)
+  if(!_bikeId&&_rsvWas.length&&_gotBikes.length&&_gotBikes.every(b=>_rsvWas.includes(b)))_undoPay={...(_undoPay||{}),assigned_bike_id:_was.assignedBikeId??null};
   if(_undoPay)_ciPrevPay.set(e.id,_undoPay);else _ciPrevPay.delete(e.id);
-  pushUndo(`${t('checkInBtn')}: #${e.queueNum} ${e.name}`,async()=>{
+  const _ciUndoFn=async()=>{
     const cur=_qGet(e.id);if(!cur||cur.status!=='active')return false;
     const w=await _undoCheckinWrite(cur,_wasWl?'waitlist':'waiting',_ciPrevPay.get(e.id));
     if(!w||w.lost){await _reloadRows([e.id]);renderStaffQueue();return false;}
     _ciPrevPay.delete(e.id);_ciUndoLocal(e.id,w);renderStaffQueue();
     await _reloadRows([e.id]);renderStaffQueue();
-  },{k:'checkin',e:'booking',id:e.id,amt:e.paid?_bookingAmount(e):null});
+  };
+  pushUndo(`${t('checkInBtn')}: #${e.queueNum} ${e.name}`,_ciUndoFn,{k:'checkin',e:'booking',id:e.id,amt:e.paid?_bookingAmount(e):null});
+  _ruMark(e.id,_ciUndoFn); // the row's own Undo for 10 s, for whoever is at the desk
   if(_depV)_depTake(e,_gotBikes[0]||null,_depV); // the deposit into the ledger (deposits part)
   _ciDropDraft(e.id);
   await _reloadRows([e.id]);

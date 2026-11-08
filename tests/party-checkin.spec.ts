@@ -29,7 +29,7 @@ test('a party row gets a one-tap Check in that activates every expected member',
   });
 
   // Exactly one party button, counting only the two members still expected.
-  const partyBtn = page.locator('#tab-queue').getByRole('button', { name: /^Check in \(2\)$/ }).filter({ visible: true });
+  const partyBtn = page.locator('#tab-queue').getByRole('button', { name: /^Check in \(2\)( · |$)/ }).filter({ visible: true }); // named with its booking since round two
   await expect(partyBtn).toHaveCount(1);
 
   const patched: Array<{ id: string; status?: string }> = [];
