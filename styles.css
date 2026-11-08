@@ -10619,6 +10619,23 @@ html[dir="rtl"] .chart-card-title .sn-an-mk{margin:0 0 0 8px;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .ptn-code-label{color:#F6C3D6;}
 #tab-queue .ptn-code-name{min-width:120px;font-family:var(--mono,ui-monospace,monospace);line-height:32px;}
 #tab-queue .ptn-code .ptn-sub{line-height:32px;}
+/* Saturday ride codes (2026-11-08): a booking's code by name, the Saturday ride's summary on Bookings, the Edit codes dialog */
+.satc-chip{display:inline-block;margin-inline-start:6px;padding:1px 6px;font-size:11px;font-weight:600;line-height:1.5;color:var(--text);background:var(--sf-chip,var(--s2));border:1px solid var(--sf-line2,var(--border));border-radius:var(--sf-r-xs,4px);white-space:nowrap;vertical-align:middle;unicode-bidi:isolate;}
+#tab-queue .satc-panel{border-inline-start-color:var(--green);}
+#tab-queue .satc-list{list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 16px;}
+#tab-queue .satc-li{font-size:13px;}
+.satc-sw{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;}
+#confirm-modal .satc-dlg .satc-tabs{display:inline-flex;gap:4px;padding:3px;margin:0 0 10px;background:var(--sf-sunken,var(--s2));border-radius:var(--sf-r-ctl,8px);}
+#confirm-modal .satc-dlg .satc-tab{min-height:32px;padding:0 14px;border:0;background:transparent;color:var(--muted);font:inherit;font-size:13px;font-weight:600;border-radius:var(--sf-r-xs,4px);cursor:pointer;}
+#confirm-modal .satc-dlg .satc-tab.active{background:var(--sf-card,var(--s1));color:var(--text);box-shadow:var(--sf-sh-1,none);}
+#confirm-modal .satc-dlg .satc-rows{display:flex;flex-direction:column;margin:6px 0 10px;}
+#confirm-modal .satc-dlg .satc-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 12px;padding:10px 0;border-top:1px solid var(--sf-line,var(--border));}
+#confirm-modal .satc-dlg .satc-row:first-child{border-top:0;}
+#confirm-modal .satc-dlg .satc-who{flex:1 1 100%;font-size:14px;}
+#confirm-modal .satc-dlg .satc-row label:not(.satc-sw){display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:600;color:var(--muted);}
+#confirm-modal .satc-dlg .satc-row input[type=text],#confirm-modal .satc-dlg .satc-row input[type=number]{width:140px;max-width:100%;height:var(--sf-ctl-size,38px);padding:0 8px;}
+#confirm-modal .satc-dlg .satc-row select,#confirm-modal .satc-dlg .satc-row .satc-sw,#confirm-modal .satc-dlg .satc-del{height:var(--sf-ctl-size,38px);}
+#confirm-modal .satc-dlg .satc-code-in{font-family:var(--mono,ui-monospace,monospace);}
 #tab-queue .ptn-code-del,#tab-queue .ptn-code-add{height:32px;border-radius:0;}
 
 /* ════════════════════════════════════════════════════════════════════════

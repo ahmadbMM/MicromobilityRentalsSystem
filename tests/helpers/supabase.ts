@@ -64,7 +64,8 @@ const NOT_YET_IN_DB = new Set(['customer_set_height', 'customer_set_birth_nat',
  *  gives a fixture for it (an empty array is enough), so the rest of the suite runs the page's fallback. */
 const TABLES_NOT_YET_IN_DB = new Set(['till_sessions', 'till_counts', 'receipt_numbers', 'deposits', 'waitlist_offers', 'pii_reveals',
   'session_partners', 'session_partner_codes',
-  'customer_contacts', 'volunteer_certs']); // last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
+  'customer_contacts', 'volunteer_certs',
+  'saturday_codes', 'saturday_code_rides', 'saturday_settings']); // the Saturday ride codes (20261108120000): tests/saturday-codes.spec.ts gives them rows; last contacted (20261107121000): tests/people-review2.spec.ts gives it rows; volunteer_certs (20261107131000): tests/volunteers-review2.spec.ts // partner places (20261017120000) and codes (20261023120000): tests/partner-places.spec.ts gives them rows
 
 // Intercepts every request to *.supabase.co so tests never touch the real
 // database. GETs return the fixture rows for the table (default: empty),
@@ -144,6 +145,8 @@ export async function stubSupabase(page: Page, fixtures: Fixtures = {}, failWrit
       // sessions fixture unless a spec overrides it explicitly.
       // the wallet (20261102210000): off unless a spec gives it an answer, and no 404 in the console; tests/wallet.spec.ts
       if (body === undefined && (rpc[1] === 'staff_wallet_balances' || rpc[1] === 'customer_wallet')) body = null;
+      // the Saturday ride switch (20261108120000): off unless a spec gives it an answer, and no 404 in the console (the landing asks it); tests/saturday-codes.spec.ts
+      if (body === undefined && rpc[1] === 'saturday_link_only') body = false;
       if (body === undefined && rpc[1] === 'list_sessions') body = fixtures['sessions'] || [];
       // The desk's one-call functions (production since 2026-09; the page no longer carries the
       // multi-write fallbacks, 2026-10-04): answered as the server would, from the fixtures.
