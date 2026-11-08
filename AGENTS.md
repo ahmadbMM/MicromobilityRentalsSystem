@@ -516,26 +516,42 @@ bike, paid or not) on the `snd96` ride, shown only to those who rode it, drawn `
 greens, `BDG_SPECIAL`; `_bdgSpCls` gives a special chip `special sp-<colour>`, whose colours are CSS
 variables) and popped once (`BDG_CHEER`).
 
-## Badge requests (2026-11-08, migration 20261108210000)
+## Badge requests (2026-11-08, migrations 20261108210000 and 20261108230000)
 
 The owner: "add a button on badges for customers to request a badge and adding a proof either a pdf or an image as optional
-and a comment too optional". A rider asks for a badge the catalogue says staff give (`!auto`; Marshal counts, though rides led
-earn it too), every ladder level not reached yet (`_bdrChoices`, `_bdrAsk`), from **Request a badge** under the badges
-(`_bdrMineHtml`) or **Request this badge** in a badge's popup (`_bdrPopHtml`, the ladder's next level). The dialog (`_bdrPaint`,
-in `#confirm-modal`) takes the badge, an optional comment (500) and an optional proof: a picture made small as a Victory Lap
-receipt is, or a PDF of 2 MB at most whose bytes start `%PDF` (`_bdrFile`), sent as a data: URL through
-`customer_badge_request` (token-checked; refuses `auto`, retired, held, or an eleventh request waiting; one request waits per
-badge and sending again replaces it). `customer_my_badge_requests` gives the rider theirs (waiting, or answered in 60 days): a
-tile waiting shows a clock, its popup says when it was asked, a declined one shows staff's note and Ask again. Without the
-functions (`S._bdrOff`) nothing offers a request; without the catalogue neither.
-Staff: `badge_requests` (staff-only RLS) heads People > Badges once it has rows (`_bdrHtml`), its waiting number on the Badges
-pill; read without the proof (`BDR_COLS`), each proof read alone when opened (`_bdrProof`: a picture shown, a PDF opened in a
-tab through a blob: link, since the CSP frames none). **Give** claims the request first (`_bdrAnswer`: `status=eq.pending`, so
-two desks never both answer; an empty claim says another desk did) and then writes the badge with the levels under it
-(`_bdgWithLower`); one already held only closes the request. **Decline** asks on a second tap. Both send the note the rider
-reads and both undo (`_bdrReopen`). A proof is deleted 30 days after the answer by pg_cron `mm-badge-proofs`
-(`_badge_proof_purge`); the Privacy Notice says so. `tests/badge-requests.spec.ts`; the stub lists the table and both
-functions as not yet in the database.
+and a comment too optional", and the same day: "i want the images or pdfs attached in request a badge to be deleted after the
+approval or request of staff, i want each badge when clicking on it to have its details and request button if the customer
+didnt have it, make a dedicated section for it in staff website".
+
+Riders: any badge the account does not hold, earned by riding or given by staff (until the second round, only `!auto` ones),
+every ladder level not reached yet (`_bdrChoices`, `_bdrAsk`: in the catalogue and not on; a badge hidden until held is never in
+the list, so never offered), from **Request a badge** under the badges (`_bdrMineHtml`) or **Request this badge** in a badge's
+popup (`_bdrPopHtml`, the ladder's next level), under the badge's details. The dialog (`_bdrPaint`, in `#confirm-modal`) takes
+the badge, an optional comment (500) and an optional proof: a picture made small as a Victory Lap receipt is, or a PDF of 2 MB
+at most whose bytes start `%PDF` (`_bdrFile`), sent as a data: URL through `customer_badge_request` (token-checked; refuses a
+retired badge, one held, or an eleventh request waiting; one request waits per badge and sending again replaces it).
+`customer_my_badge_requests` gives the rider theirs (waiting, or answered in 60 days): a tile waiting shows a clock, its popup
+says when it was asked, a declined one shows staff's note and Ask again. Without the functions (`S._bdrOff`) nothing offers a
+request; without the catalogue neither. The website's My Account follows (mm-platform `lib/badge-request.ts` `canAsk`).
+
+Staff: **Badge requests is a section of its own** (`data-stab="badgereq"`, `#tab-badgereq`, `/badge-requests`, G then R; under
+People on the rail, with the waiting number), drawn by `renderBadgeRequests` in the community staff part (it shares the badge
+code) and a staff entry point (`_secPolls`, which the customer half holds, reloads `_bdrLoad` for the rail's count). Roles and
+account lists that open People open it (`ROLE_TABS` manager and owner, `_modIds`); People > Badges no longer carries requests.
+Waiting / Given / Declined / All pills, a search (name, phone, email, badge, comment, note, who answered), and Filters: badge,
+proof, order (`_bdrV`, `_bdrShown`); 40 rows at a time. `badge_requests` (staff-only RLS) is read without the proof (`BDR_COLS`,
+the newest 1,000), each proof read alone when opened (`_bdrProof`: a picture shown, a PDF opened in a tab through a blob: link,
+since the CSP frames none). **Give** claims the request first (`_bdrAnswer`: `status=eq.pending`, so two desks never both
+answer; an empty claim says another desk did) and then writes the badge with the levels under it (`_bdgWithLower`); one
+already held only closes the request. **Decline** asks on a second tap. Both send the note the rider reads and both undo
+(`_bdrReopen`).
+
+**The answer deletes the proof**: `_bdrAnswer` sends `proof: null` with the answer, and the database clears it whatever answers
+(`badge_requests_drop_proof`, a before-insert-or-update trigger: a row not pending holds no proof); `_badge_proof_purge`
+(pg_cron `mm-badge-proofs`, daily) is the net. `proof_kind` and `proof_name` stay, so an answered row says "Proof deleted" and
+offers nothing to open; an Undo reopens the request without it (opening it says so). The Privacy Notice says the proof is
+deleted as soon as our team answers. `tests/badge-requests.spec.ts`; the stub answers the table and both functions as an
+empty database that has them.
 
 ## Titles and the Community page (2026-11-02)
 

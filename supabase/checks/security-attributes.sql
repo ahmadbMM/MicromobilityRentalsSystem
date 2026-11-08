@@ -399,7 +399,8 @@ with expected(fname, want_definer, note) as (values
   -- Badge requests (20261108210000)
   ('customer_badge_request',     true,  'badge requests: writes badge_requests, which riders cannot; token-checked'),
   ('customer_my_badge_requests', true,  'badge requests: reads the caller''s own badge_requests (staff-only); token-checked'),
-  ('_badge_proof_purge',         true,  'pg_cron: clears a proof in badge_requests 30 days after the answer')
+  ('_badge_proof_purge',         true,  'pg_cron: clears the proof of any answered badge request (20261108230000)'),
+  ('_badge_req_drop_proof',      false, 'badge requests: a trigger that only clears NEW.proof once the request is answered (20261108230000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

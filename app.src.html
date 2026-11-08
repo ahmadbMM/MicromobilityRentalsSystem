@@ -142,7 +142,7 @@
        ?staff / ?bike, a staff section's path) is given the whole styles.css here instead, at once, the
        one stylesheet it needs: it used to block its first paint on app.css and then parse styles.css,
        every rule of app.css again, on top. The test is _staffWanted's, which the staff loader repeats. -->
-  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|people|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
+  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
   <noscript><link rel="stylesheet" href="/app.css?v=0"></noscript>
 <script>try{var _dm=navigator.deviceMemory;if(_dm&&_dm<=4)document.documentElement.classList.add('lite');}catch(e){}try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');(function(){var st=localStorage.getItem('cq_staff_theme')||(localStorage.getItem('cq_booth')==='1'?'booth':''),de=document.documentElement,mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'),sys=function(){try{if(localStorage.getItem('cq_staff_theme')!=='system')return;if(mq.matches)de.setAttribute('data-staff-theme','dark');else de.removeAttribute('data-staff-theme');}catch(e){}};if(st==='system'&&mq)sys();else if(st==='dark'||st==='booth')de.setAttribute('data-staff-theme',st);if(mq&&mq.addEventListener)mq.addEventListener('change',sys);})();if(localStorage.getItem('cq_phone_simple')==='1')document.documentElement.setAttribute('data-staff-simple','');if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
@@ -340,6 +340,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="workshop"  data-on-click='["setStaffTab","workshop"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Workshop</span></button>
     <span class="snav-group" data-group="snavPeople" role="heading" aria-level="2">People</span>
     <button class="tab-btn"        data-stab="community" data-on-click='["setStaffTab","community"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">People</span></button>
+    <button class="tab-btn"        data-stab="badgereq"  data-on-click='["setStaffTab","badgereq"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Badge requests</span></button>
     <button class="tab-btn"        data-stab="ambassadors" data-on-click='["setStaffTab","ambassadors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Ambassadors</span></button>
     <button class="tab-btn"        data-stab="volunteers" data-on-click='["setStaffTab","volunteers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Volunteers</span></button>
     <button class="tab-btn"        data-stab="vendors"       data-on-click='["setStaffTab","vendors"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Vendors</span></button>
@@ -365,6 +366,7 @@ window.mmLoading=(function(){
     <div id="tab-inventory"  class="tab-panel"></div>
     <div id="tab-cashier"   class="tab-panel"></div>
     <div id="tab-community"  class="tab-panel"></div>
+    <div id="tab-badgereq"  class="tab-panel"></div>
     <div id="tab-analytics"  class="tab-panel"></div>
     <div id="tab-history"   class="tab-panel"></div>
     <div id="tab-website"   class="tab-panel"></div>
@@ -890,7 +892,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   bdFuel:'Fuel Stop',bdFuelD:'Paid for extras on a booking',
   bd25:'Corniche 25',bd25D:'25 rides on the corniche',
   bdgNew:'New badge!',bdgGivenBy:'Given by the MicroMobility team · {0}',
-  bdrBtn:'Request a badge',bdrHint:'Earned one of our badges where we could not see it, like at a race or an event? Ask our team for it, with a proof if you have one.',bdrWaitN:'Requests waiting for our team: {0}',bdrAsked:'Requested',bdrPending:'You asked for it on {0}. Our team will look at your request.',bdrDeclined:'Our team did not give it this time.',bdrChange:'Change your request',bdrAgain:'Ask again',bdrThis:'Request this badge',bdrTitle:'Request a badge',bdrBadge:'Badge',bdrPickPh:'Choose a badge',bdrAgainNote:'You asked for this badge on {0}. Sending again replaces that request.',bdrComment:'Comment',bdrCommentPh:'When and where you earned it',bdrProof:'Proof',bdrProofHint:'A picture or a PDF, like a certificate, a race result or a photo. A PDF can be up to 2 MB.',bdrProofPick:'Add a picture or PDF',bdrProofChange:'Choose another file',bdrProofDrop:'Remove',bdrProofBad:'This file can’t be sent. Choose a picture, or a PDF of 2 MB at most.',bdrSend:'Send request',bdrSent:'Request sent. Our team will look at it.',bdrErrHeld:'You already hold this badge.',bdrErrLimit:'You have 10 requests waiting. Our team needs to answer them first.',bdrErrBadge:'This badge can’t be requested.',bdrStTitle:'Badge requests',bdrStSub:'Riders ask for a badge from their account page, with a comment and a proof if they have one. Give it, or decline it; they read your note either way.',bdrStNone:'No requests waiting.',bdrStDone:'Answered in the last 30 days',bdrStAsked:'Asked {0}',bdrStDeclinedLine:'Declined {0} by {1}',bdrStHolds:'Already holds this badge',bdrStPdf:'View PDF',bdrStPic:'View picture',bdrStNoProof:'No proof',bdrStNotePh:'They read it with the badge, or why it was declined',bdrStClose:'Close as given',bdrStDecline:'Decline',bdrStDeclineSure:'Decline it?',bdrStElsewhere:'Another staff member already answered this request.',bdrStDeclined:'Request declined: {0} for {1}',bdrStProofT:'Proof',bdrStSave:'Save file',bdrStGone:'This proof is no longer kept: proofs are deleted 30 days after the answer.',bdrStOpenPdf:'Open PDF',
+  bdrBtn:'Request a badge',bdrHint:'Earned one of our badges where we could not see it, like at a race or an event? Ask our team for it, with a proof if you have one.',bdrWaitN:'Requests waiting for our team: {0}',bdrAsked:'Requested',bdrPending:'You asked for it on {0}. Our team will look at your request.',bdrDeclined:'Our team did not give it this time.',bdrChange:'Change your request',bdrAgain:'Ask again',bdrThis:'Request this badge',bdrTitle:'Request a badge',bdrBadge:'Badge',bdrPickPh:'Choose a badge',bdrAgainNote:'You asked for this badge on {0}. Sending again replaces that request.',bdrComment:'Comment',bdrCommentPh:'When and where you earned it',bdrProof:'Proof',bdrProofHint:'A picture or a PDF, like a certificate, a race result or a photo. A PDF can be up to 2 MB.',bdrProofPick:'Add a picture or PDF',bdrProofChange:'Choose another file',bdrProofDrop:'Remove',bdrProofBad:'This file can’t be sent. Choose a picture, or a PDF of 2 MB at most.',bdrSend:'Send request',bdrSent:'Request sent. Our team will look at it.',bdrErrHeld:'You already hold this badge.',bdrErrLimit:'You have 10 requests waiting. Our team needs to answer them first.',bdrErrBadge:'This badge can’t be requested.',bdrStTitle:'Badge requests',bdrStSub:'Riders ask for a badge from their account page, with a comment and a proof if they have one. Give it, or decline it; they read your note either way. The proof is deleted as soon as you answer.',bdrStNone:'No requests waiting.',bdrStAsked:'Asked {0}',bdrStDeclinedLine:'Declined {0} by {1}',bdrStHolds:'Already holds this badge',bdrStPdf:'View PDF',bdrStPic:'View picture',bdrStNoProof:'No proof',bdrStNotePh:'They read it with the badge, or why it was declined',bdrStClose:'Close as given',bdrStDecline:'Decline',bdrStDeclineSure:'Decline it?',bdrStElsewhere:'Another staff member already answered this request.',bdrStDeclined:'Request declined: {0} for {1}',bdrStProofT:'Proof',bdrStSave:'Save file',bdrStGone:'This proof was deleted when the request was answered.',bdrStOpenPdf:'Open PDF',bdrStWaitN:'Requests waiting: {0}',bdrStNoMatch:'No requests match.',bdrStNoneHere:'No requests here.',bdrStShown:'{0} of {1}',bdrStNoDb:'Badge requests are not set up on the database yet.',bdrStSearch:'Search a name, badge or comment',bdrStWithPf:'With a proof',bdrStFWait:'Waiting',bdrStFGiven:'Given',bdrStFNo:'Declined',bdrStPfGone:'Proof deleted',
   bdgMarshal:'Marshal',bdgMarshalD:'Led or swept a group ride, or helped run an event',
   bdgPitCrew:'Pit Crew',bdgPitCrewD:'Helped another rider out on a ride',
   bdgGreenFlag:'Green Flag',bdgGreenFlagD:'Rode with care for the people around you',
@@ -1508,7 +1510,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   bdSquad:'قائد المجموعة',bdSquadD:'أحضرت 3 رُكّاب أو أكثر إلى جولة واحدة، كلهم سجّلوا حضورهم ودفعوا',
   bdFuel:'محطة تزوّد',bdFuelD:'دفعت ثمن إضافات في حجزك',
   bd25:'كورنيش 25',bd25D:'25 جولة على الكورنيش',
-  bdgNew:'وسام جديد!',bdgGivenBy:'مُنح من فريق مايكروموبيليتي · {0}',bdrBtn:'اطلب وسامًا',bdrHint:'حصلت على أحد أوسمتنا في مكان لم نره، مثل سباق أو فعالية؟ اطلبه من فريقنا، مع إثبات إن كان لديك.',bdrWaitN:'طلبات بانتظار ردّ فريقنا: {0}',bdrAsked:'تم طلبه',bdrPending:'طلبته في {0}. سيراجع فريقنا طلبك.',bdrDeclined:'لم يمنحه فريقنا هذه المرة.',bdrChange:'عدّل طلبك',bdrAgain:'اطلبه مرة أخرى',bdrThis:'اطلب هذا الوسام',bdrTitle:'طلب وسام',bdrBadge:'الوسام',bdrPickPh:'اختر وسامًا',bdrAgainNote:'طلبت هذا الوسام في {0}. إرساله مرة أخرى يستبدل ذلك الطلب.',bdrComment:'تعليق',bdrCommentPh:'متى وأين حصلت عليه',bdrProof:'الإثبات',bdrProofHint:'صورة أو ملف PDF، مثل شهادة أو نتيجة سباق أو صورة. حجم ملف PDF حتى 2 ميغابايت.',bdrProofPick:'أضف صورة أو ملف PDF',bdrProofChange:'اختر ملفًا آخر',bdrProofDrop:'إزالة',bdrProofBad:'لا يمكن إرسال هذا الملف. اختر صورة، أو ملف PDF لا يتجاوز 2 ميغابايت.',bdrSend:'أرسل الطلب',bdrSent:'أُرسل طلبك. سيراجعه فريقنا.',bdrErrHeld:'لديك هذا الوسام بالفعل.',bdrErrLimit:'لديك 10 طلبات بانتظار الرد. يجب أن يردّ فريقنا عليها أولًا.',bdrErrBadge:'لا يمكن طلب هذا الوسام.',bdrStTitle:'طلبات الأوسمة',bdrStSub:'يطلب الراكبون وسامًا من صفحة حساباتهم، مع تعليق وإثبات إن وُجد. امنحه أو ارفضه؛ يقرأ الراكب ملاحظتك في الحالتين.',bdrStNone:'لا طلبات بانتظار الرد.',bdrStDone:'تم الرد عليها في آخر 30 يومًا',bdrStAsked:'طُلب في {0}',bdrStDeclinedLine:'رُفض في {0} بواسطة {1}',bdrStHolds:'لديه هذا الوسام بالفعل',bdrStPdf:'عرض ملف PDF',bdrStPic:'عرض الصورة',bdrStNoProof:'بلا إثبات',bdrStNotePh:'يقرؤها مع الوسام، أو سبب الرفض',bdrStClose:'أغلقه كممنوح',bdrStDecline:'رفض',bdrStDeclineSure:'رفضه؟',bdrStElsewhere:'ردّ موظف آخر على هذا الطلب بالفعل.',bdrStDeclined:'رُفض الطلب: {0} لـ {1}',bdrStProofT:'الإثبات',bdrStSave:'حفظ الملف',bdrStGone:'لم يعد هذا الإثبات محفوظًا: تُحذف الإثباتات بعد 30 يومًا من الرد.',bdrStOpenPdf:'فتح ملف PDF',
+  bdgNew:'وسام جديد!',bdgGivenBy:'مُنح من فريق مايكروموبيليتي · {0}',bdrBtn:'اطلب وسامًا',bdrHint:'حصلت على أحد أوسمتنا في مكان لم نره، مثل سباق أو فعالية؟ اطلبه من فريقنا، مع إثبات إن كان لديك.',bdrWaitN:'طلبات بانتظار ردّ فريقنا: {0}',bdrAsked:'تم طلبه',bdrPending:'طلبته في {0}. سيراجع فريقنا طلبك.',bdrDeclined:'لم يمنحه فريقنا هذه المرة.',bdrChange:'عدّل طلبك',bdrAgain:'اطلبه مرة أخرى',bdrThis:'اطلب هذا الوسام',bdrTitle:'طلب وسام',bdrBadge:'الوسام',bdrPickPh:'اختر وسامًا',bdrAgainNote:'طلبت هذا الوسام في {0}. إرساله مرة أخرى يستبدل ذلك الطلب.',bdrComment:'تعليق',bdrCommentPh:'متى وأين حصلت عليه',bdrProof:'الإثبات',bdrProofHint:'صورة أو ملف PDF، مثل شهادة أو نتيجة سباق أو صورة. حجم ملف PDF حتى 2 ميغابايت.',bdrProofPick:'أضف صورة أو ملف PDF',bdrProofChange:'اختر ملفًا آخر',bdrProofDrop:'إزالة',bdrProofBad:'لا يمكن إرسال هذا الملف. اختر صورة، أو ملف PDF لا يتجاوز 2 ميغابايت.',bdrSend:'أرسل الطلب',bdrSent:'أُرسل طلبك. سيراجعه فريقنا.',bdrErrHeld:'لديك هذا الوسام بالفعل.',bdrErrLimit:'لديك 10 طلبات بانتظار الرد. يجب أن يردّ فريقنا عليها أولًا.',bdrErrBadge:'لا يمكن طلب هذا الوسام.',bdrStTitle:'طلبات الأوسمة',bdrStSub:'يطلب الراكبون وسامًا من صفحة حساباتهم، مع تعليق وإثبات إن وُجد. امنحه أو ارفضه؛ يقرأ الراكب ملاحظتك في الحالتين. يُحذف الإثبات فور ردّك.',bdrStNone:'لا طلبات بانتظار الرد.',bdrStAsked:'طُلب في {0}',bdrStDeclinedLine:'رُفض في {0} بواسطة {1}',bdrStHolds:'لديه هذا الوسام بالفعل',bdrStPdf:'عرض ملف PDF',bdrStPic:'عرض الصورة',bdrStNoProof:'بلا إثبات',bdrStNotePh:'يقرؤها مع الوسام، أو سبب الرفض',bdrStClose:'أغلقه كممنوح',bdrStDecline:'رفض',bdrStDeclineSure:'رفضه؟',bdrStElsewhere:'ردّ موظف آخر على هذا الطلب بالفعل.',bdrStDeclined:'رُفض الطلب: {0} لـ {1}',bdrStProofT:'الإثبات',bdrStSave:'حفظ الملف',bdrStGone:'حُذف هذا الإثبات عند الرد على الطلب.',bdrStOpenPdf:'فتح ملف PDF',bdrStWaitN:'طلبات بانتظار الرد: {0}',bdrStNoMatch:'لا طلبات مطابقة.',bdrStNoneHere:'لا طلبات هنا.',bdrStShown:'{0} من {1}',bdrStNoDb:'طلبات الأوسمة غير مُعدّة في قاعدة البيانات بعد.',bdrStSearch:'ابحث باسم أو وسام أو تعليق',bdrStWithPf:'مع إثبات',bdrStFWait:'بانتظار الرد',bdrStFGiven:'مُنحت',bdrStFNo:'مرفوضة',bdrStPfGone:'حُذف الإثبات',
   bdgMarshal:'المنظّم',bdgMarshalD:'قدت جولة جماعية أو تابعت مؤخرتها، أو ساعدت في تنظيم فعالية',
   bdgPitCrew:'طاقم الصيانة',bdgPitCrewD:'ساعدت راكباً آخر خلال جولة',
   bdgGreenFlag:'الراية الخضراء',bdgGreenFlagD:'قدت بعناية واهتمام بمن حولك',
@@ -2094,6 +2096,7 @@ function setLang(lang,_fromUrl){
     if(b.dataset.stab==='cashier')_l.textContent=t('tabCashier');
     if(b.dataset.stab==='inventory'){const _lo=(S.inventory||[]).filter(it=>{const q=Number(it.qty)||0,lo=Number(it.low_threshold)||0;return q<=0||(lo>0&&q<=lo);}).length;_l.innerHTML=esc(t('tabInventory'))+(_lo?` <span class="tab-badge" title="${esc(t('invLowAlert').replace('{0}',_lo))}" aria-label="${esc(t('invLowAlert').replace('{0}',_lo))}">${_lo}</span>`:'');}
     if(b.dataset.stab==='community')_l.innerHTML=_pplTabLabel(); // People, with what waits on staff
+    if(b.dataset.stab==='badgereq')_l.innerHTML=_bdrTabLabel(); // with the requests waiting
     if(b.dataset.stab==='website')_l.textContent='micromobility.sa'; // the address is the name, in every language
     if(b.dataset.stab==='workshop')_l.innerHTML=_wsTabLabel(); // with the count of new requests
     if(b.dataset.stab==='messages')_l.innerHTML=_smTabLabel(); // with the count of new messages
@@ -2137,14 +2140,14 @@ function isAdmin(){return S.staffRole==='admin';}
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
 const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','community','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','community','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back.
-const STAFF_PART_TABS={sessions:['sessions'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
+const STAFF_PART_TABS={sessions:['sessions'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -4614,7 +4617,8 @@ const PRIVACY_VERSION='2026-11-08';
 // Arena Heros Hybrid Race's details and its organisers, WeSportify, Mile and Gymnation, which each athlete agrees to on its
 // own page; 2026-11-04: a blood donation event's partners and third parties, which each donor agrees to on its own page;
 // 2026-11-05: volunteering, only for those who volunteer, and the volunteers who check people in; 2026-11-08: referrals,
-// who referred an account, its own code and the rewards referrals earn; the same day, badge requests and their proof) moves PRIVACY_VERSION,
+// who referred an account, its own code and the rewards referrals earn; the same day, badge requests and their proof, deleted
+// with the answer since the owner's second round that day) moves PRIVACY_VERSION,
 // the date shown, but not this one;
 // an account that confirmed this version or any later one is not asked again.
 const PRIVACY_ASK_FROM='2026-10-02';
@@ -4646,7 +4650,7 @@ en:[
     ['Victory Lap race details: the race, division and team you choose, your T-shirt size and, if you give it, your 5 km run time','Asked only when you book Victory Lap. Seen by you, our staff and Kamin Sports; your team partner sees your first name.','Placing you in your race and heat, your race T-shirt, and making up Doubles teams'],
     ['Arena Heros Hybrid Race details: the first and last name, email address and mobile number you enter for the race, your division and your team','Asked only when you book the Arena Heros Hybrid Race. Seen by you, our staff and the race’s organisers (WeSportify, Mile and Gymnation); your team partner sees your first name.','Entering you and your team in the race, and making up teams'],
     ['Referrals: who referred you (if you make your account with a friend’s link or code), your own referral code, the rewards referrals earn you, and a scrambled code for the browser a friend’s code was used in','Only if you use a friend’s link or code, or share your own. Our staff see who referred whom; a friend who referred you sees only how many friends joined and rode, never your name. The browser code cannot be turned back into anything about you.','Giving the reward a referral earns, and stopping misuse (one phone making many accounts)'],
-    ['Badge requests: the badge you ask for, your comment and the proof you attach (a picture or a PDF), and our team’s answer','Always optional: only if you ask for a badge from your account page. Seen by you (except the proof, once sent) and our staff.','Deciding whether to give you the badge. The proof is deleted 30 days after our team answers.'],
+    ['Badge requests: the badge you ask for, your comment and the proof you attach (a picture or a PDF), and our team’s answer','Always optional: only if you ask for a badge from your account page. Seen by you (except the proof, once sent) and our staff.','Deciding whether to give you the badge. The proof is deleted as soon as our team answers.'],
     ['Bookings and rides: rides booked, when you booked, your party, check-in and return times, bike used, payments, add-ons, waiver agreement, ratings','Created as you use the service','Running your rides, safety, payments and records'],
     ['Your choice about ride news, and when you made it','Recorded when you choose','Knowing whether we may send you ride news'],
   ]}},
@@ -4712,7 +4716,7 @@ en:[
     '<strong>Account and profile:</strong> kept while you have an account, and destroyed within 30 days of your request to close it.',
     '<strong>Booking and payment records:</strong> kept for 10 years, because the law requires financial records. Then destroyed.',
     '<strong>Technical error reports:</strong> deleted after 90 days.',
-    '<strong>The proof you attach to a badge request:</strong> deleted 30 days after our team answers the request.',
+    '<strong>The proof you attach to a badge request:</strong> deleted as soon as our team answers the request.',
   ]},
   {p:'To destroy data, we either delete it permanently from our database or remove everything that identifies you, so it can only be used in anonymous totals. Deleted data leaves our backups within 7 days.'},
   {h:'Your rights'},
@@ -4759,7 +4763,7 @@ ar:[
     ['تفاصيل سباق فيكتوري لاب: السباق والفئة والفريق التي تختارها، ومقاس قميصك، وزمنك في جري 5 كم إن أعطيتنا إياه','تُطلب فقط عند حجز فيكتوري لاب. لا يراها إلا أنت وموظفونا وكامن سبورتس؛ ويرى شريكك في الفريق اسمك الأول.','وضعك في سباقك ودفعتك، وقميص السباق، وتكوين فرق الزوجي'],
     ['تفاصيل سباق أرينا هيروز الهجين: الاسم الأول والأخير والبريد الإلكتروني ورقم الجوال التي تُدخلها للسباق، وفئتك، وفريقك','تُطلب فقط عند حجز سباق أرينا هيروز الهجين. لا يراها إلا أنت وموظفونا ومنظمو السباق (WeSportify وMile وGymnation)؛ ويرى شريكك في الفريق اسمك الأول.','تسجيلك أنت وفريقك في السباق، وتكوين الفرق'],
     ['الإحالات: من أحالك (إذا أنشأت حسابك عبر رابط صديق أو رمزه)، ورمز الإحالة الخاص بك، والمكافآت التي تكسبها الإحالات، ورمز مشفّر للمتصفح الذي استُخدم فيه رمز الصديق','فقط إذا استخدمت رابط صديق أو رمزه، أو شاركت رمزك. يرى موظفونا من أحال من؛ ولا يرى الصديق الذي أحالك إلا عدد الأصدقاء الذين انضموا وركبوا، ولا يرى اسمك أبدًا. ولا يمكن تحويل رمز المتصفح إلى أي معلومة عنك.','منح المكافأة التي تكسبها الإحالة، ومنع إساءة الاستخدام (هاتف واحد ينشئ حسابات كثيرة)'],
-    ['طلبات الأوسمة: الوسام الذي تطلبه، وتعليقك، والإثبات الذي ترفقه (صورة أو ملف PDF)، وردّ فريقنا','اختيارية دائمًا: فقط إذا طلبت وسامًا من صفحة حسابك. يراها أنت (عدا الإثبات بعد إرساله) وموظفونا.','تحديد ما إذا كنا سنمنحك الوسام. ويُحذف الإثبات بعد 30 يومًا من ردّ فريقنا.'],
+    ['طلبات الأوسمة: الوسام الذي تطلبه، وتعليقك، والإثبات الذي ترفقه (صورة أو ملف PDF)، وردّ فريقنا','اختيارية دائمًا: فقط إذا طلبت وسامًا من صفحة حسابك. يراها أنت (عدا الإثبات بعد إرساله) وموظفونا.','تحديد ما إذا كنا سنمنحك الوسام. ويُحذف الإثبات فور ردّ فريقنا.'],
     ['الحجوزات والرحلات: الرحلات المحجوزة، ووقت الحجز، ومرافقوك، وأوقات تسجيل الوصول والإرجاع، والدراجة المستخدمة، والمدفوعات، والإضافات، والموافقة على الإقرار، والتقييمات','تُسجَّل أثناء استخدامك للخدمة','تشغيل رحلاتك، والسلامة، والمدفوعات، والسجلات'],
     ['اختيارك بشأن أخبار الرحلات ووقت اختيارك','يُسجَّل عند اختيارك','معرفة ما إذا كان يحق لنا إرسال أخبار الرحلات إليك'],
   ]}},
@@ -4825,7 +4829,7 @@ ar:[
     '<strong>الحساب والملف الشخصي:</strong> نحتفظ بهما ما دام حسابك قائمًا، ونتلفهما خلال 30 يومًا من طلبك إغلاق الحساب.',
     '<strong>سجلات الحجز والدفع:</strong> نحتفظ بها 10 سنوات لأن النظام يُلزم بحفظ السجلات المالية، ثم نتلفها.',
     '<strong>تقارير الأخطاء التقنية:</strong> تُحذف بعد 90 يومًا.',
-    '<strong>الإثبات الذي ترفقه بطلب وسام:</strong> يُحذف بعد 30 يومًا من ردّ فريقنا على الطلب.',
+    '<strong>الإثبات الذي ترفقه بطلب وسام:</strong> يُحذف فور ردّ فريقنا على الطلب.',
   ]},
   {p:'لإتلاف البيانات، إما أن نحذفها نهائيًا من قاعدة بياناتنا، أو نزيل كل ما يحدد هويتك بحيث لا تُستخدم إلا في إحصاءات مجهولة الهوية. وتُزال البيانات المحذوفة من نسخنا الاحتياطية خلال 7 أيام.'},
   {h:'حقوقك'},
@@ -7435,7 +7439,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',sessions:'sessions',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',sessions:'sessions',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
@@ -13661,6 +13665,7 @@ function setStaffTab(tab,o){
   else if(tab==='inventory')renderInventory();
   else if(tab==='cashier')renderCashier();
   else if(tab==='community')renderCommunity();
+  else if(tab==='badgereq')renderBadgeRequests();
   else if(tab==='website')renderWebsite();
   else if(tab==='catalog')renderCatalog();
   else if(tab==='workshop')renderWorkshop();
@@ -13757,7 +13762,7 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.calendar)_ART.calendar='<rect opacity=".35" x="3" y="5" width="18" height="16" rx="2"/><path d="M5 5h14a2 2 0 0 1 2 2v2.5H3V7a2 2 0 0 1 2-2ZM7 2.5h2v5H7zm8 0h2v5h-2zM7 13h3v3H7zm7 0h3v3h-3z"/>'; // the Sessions section's mark (2026-11-06), kept here: in _ART it rode on every customer's page
@@ -13837,6 +13842,8 @@ function renderStaffTabs(){
   document.getElementById('tab-inventory') .classList.toggle('active',S.staffTab==='inventory');
   document.getElementById('tab-cashier')   .classList.toggle('active',S.staffTab==='cashier');
   document.getElementById('tab-community') .classList.toggle('active',S.staffTab==='community');
+  document.getElementById('tab-badgereq')  .classList.toggle('active',S.staffTab==='badgereq');
+  if(!S._bdrAt&&S._staffAuthed&&_deskTabOk('badgereq'))_bdrLoad(); // the rail's count, from the first paint on (then _secPolls)
   document.getElementById('tab-history')   .classList.toggle('active',S.staffTab==='history');
   document.getElementById('tab-analytics') .classList.toggle('active',S.staffTab==='analytics');
   document.getElementById('tab-website')   .classList.toggle('active',S.staffTab==='website');
@@ -16827,6 +16834,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='analytics')renderAnalytics();
   else if(tab==='inventory')renderInventory();
   else if(tab==='community')renderCommunity();
+  else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
   else if(tab==='cashier')renderCashier();
   else if(tab==='workshop'){const a=document.activeElement;renderWorkshop(!!(a&&a.id==='ws-search-input'));} // typing in its search: the list only
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
@@ -18973,11 +18981,13 @@ function _mrBadgeInfo(i,fresh){
   const cb=el.querySelector('.badge-pop-box > button');if(cb)try{cb.focus({preventScroll:true});}catch(_){}
 }
 // Badge requests (the owner, 2026-11-08: "add a button on badges for customers to request a badge and adding a proof
-// either a pdf or an image as optional and a comment too optional"). A rider asks for one of the badges staff give (one
-// earned by riding the app works out itself), with an optional comment and an optional proof: a picture, made small as
-// a receipt is, or a PDF of 2 MB at most, sent as a data: URL (customer_badge_request, 20261108210000). Staff answer in
-// People > Badges. One request waits per badge: sending again replaces it. A database without it shows no button
-// (S._bdrOff); a declined one says so in the badge's popup, with staff's note, for 60 days.
+// either a pdf or an image as optional and a comment too optional"). A rider asks for any badge they do not hold (the
+// owner, the same day: "each badge when clicking on it to have its details and request button if the customer didnt
+// have it"; the ones staff give only until then), with an optional comment and an optional proof: a picture, made small
+// as a receipt is, or a PDF of 2 MB at most, sent as a data: URL (customer_badge_request, 20261108210000, 20261108230000).
+// Staff answer in the Badge requests section, and the answer deletes the proof. One request waits per badge: sending
+// again replaces it. A database without it shows no button (S._bdrOff); a declined one says so in the badge's popup,
+// with staff's note, for 60 days.
 const BDR_PDF_MAX=2e6;
 function _bdrMineLoad(cust){
   if(S._bdrOff)return;
@@ -18994,13 +19004,13 @@ function _bdrMineLoad(cust){
 function _bdrMine(cust){const m=S._bdrMine;return cust&&m&&m.id===cust.id&&Array.isArray(m.list)?m.list:[];}
 // The latest request for a badge (the list comes newest first).
 function _bdrOf(slug){return _bdrMine(S.loggedIn).find(r=>r&&r.slug===slug)||null;}
-// The badges a rider may ask for, from the account's badge list: each one the catalogue says staff give (not earned
-// by riding alone: Marshal also comes with rides led), every level of a ladder not reached yet. Only with the
-// catalogue, which is what the database checks a request against.
-let _bdrCatOf=null,_bdrCatMap=null;
+// The badges a rider may ask for, from the account's badge list: every one shown and not held, earned by riding or
+// given by staff, every level of a ladder not reached yet. Only those in the catalogue, which is what the database
+// checks a request against (a badge hidden until held is not in the list, so it is never offered).
+let _bdrCatOf=null,_bdrCatSet=null;
 function _bdrAsk(y){
-  if(_bdrCatOf!==S._bdgCat){_bdrCatOf=S._bdgCat;_bdrCatMap=new Map((S._bdgCat||[]).map(b=>[b.slug,b]));}
-  const c=y&&!y.on&&_bdrCatMap.get(y.b.slug);return !!c&&!c.auto;
+  if(_bdrCatOf!==S._bdgCat){_bdrCatOf=S._bdgCat;_bdrCatSet=new Set((S._bdgCat||[]).map(b=>b.slug));}
+  return !!y&&!y.on&&_bdrCatSet.has(y.b.slug);
 }
 function _bdrChoices(L){
   if(S._bdrOff||!Array.isArray(S._bdgCat)||!S._bdgCat.length)return[];
@@ -32422,12 +32432,12 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','sessions','dashboard','cashier','inventory','workshop','community','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',sessions:'tabSessions',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','sessions','dashboard','cashier','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',sessions:'tabSessions',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08)
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
 // sections an edit list names, so an account with a list (the Owner's is empty) could open its
@@ -55312,6 +55322,7 @@ async function _bdgLoad(force){
   // The Badges tab leaves its Loading line; Accounts is repainted only when what its rows show has
   // changed (2,600 rows, and a staffer may be in the middle of one).
   if(S.view==='staff'&&(_pplOn('badges')||(_pplOn('accounts')&&_bdgSig()!==was)))renderCommunity();
+  if(S.view==='staff'&&S.staffTab==='badgereq'&&_bdgSig()!==was)renderBadgeRequests(); // Give and "Already holds" read them
   if(S._bdgDlg)_bdgDlgPaint();
   _bdgStrips();
 }
@@ -55355,7 +55366,7 @@ function _bdgStaffRow(c){return c&&c.photo===undefined?{...c,photo:true}:c;}
 function _bdgRuleLine(r){return r&&Array.isArray(r.windows)?r.windows.map(w=>w.from+' – '+w.to).join(', ')+' · '+t('bdgRuleRides')+' '+r.rides:'';}
 function _bdgLine(x){return t('bdgGivenLine').replace('{0}',_bdgDay(x.awarded_at)).replace('{1}',x.awarded_by||'—');}
 // After a change: the open dialog, the rider's row in Accounts, the Badges tab.
-function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();_bdgStrips();if(S.view!=='staff'||!_pplOpen())return;if(_pplOn('badges')||_pplOn('overview'))renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
+function _bdgAfter(cid){if(S._bdgDlg)_bdgDlgPaint();_bdgStrips();_bdrRepaint();if(S.view!=='staff'||!_pplOpen())return;if(_pplOn('badges')||_pplOn('overview'))renderCommunity();else if(cid&&!_amRepaintRow(cid))renderCommunity();}
 // A take-back or a delete asks once more on the same button: the second tap does it.
 function _bdgArm(k){if(S._bdgSure===k)return true;S._bdgSure=k;return false;}
 function _bdgTakeBtn(cid,bid){const on=S._bdgSure===cid+'|'+bid;return`<button type="button" class="btn-sm ${on?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdgTake",cid,bid)}">${t(on?'bdgTakeSure':'bdgTake')}</button>`;}
@@ -55508,72 +55519,118 @@ function _commBadges(){
       ${hold?_bdgHoldersHtml(b):''}${ride?_bdgRideHtml(b):''}${rider?_bdgRiderHtml(b):''}${ed&&ed.id===b.id?_bdgEditForm():''}
     </div>`;
   }).join('');
-  return head+_bdrHtml()+(adm?`<div class="bdg-top"><button type="button" class="btn-primary btn-sm" data-on-click="${_on("_bdgEditOpen","")}">+ ${t('bdgNewBtn')}</button></div>`:'')
+  return head+(adm?`<div class="bdg-top"><button type="button" class="btn-primary btn-sm" data-on-click="${_on("_bdgEditOpen","")}">+ ${t('bdgNewBtn')}</button></div>`:'')
     +(ed&&!ed.id?_bdgEditForm():'')+`<div class="bdg-rows">${rows}</div>`;
 }
-// Badge requests (20261108210000): what riders asked for from their account page, read without the proofs, each
-// read alone when staff open it (badge_requests is staff only). The waiting ones head Badges, their number on its
-// pill; those answered in the last 30 days fold under them. Give writes the badge (with the levels under it, as every
-// give does) once the request is claimed, so two desks never answer one twice; Decline asks on a second tap. Both
-// take the note, which the rider reads, and both undo. A proof is deleted 30 days after the answer (the database).
+// The Badge requests section (the owner, 2026-11-08: "make a dedicated section for it in staff website"; the requests
+// headed People > Badges until then): what riders asked for from their account page (20261108210000), read without the
+// proofs (badge_requests is staff only), each proof read alone when staff open it. Waiting, Given, Declined and All, with
+// the waiting ones' number on the rail; a search and, behind Filters, the badge, whether a proof came and the order.
+// Give writes the badge (with the levels under it, as every give does) once the request is claimed, so two desks never
+// answer one twice; Decline asks on a second tap. Both take the note, which the rider reads, and both undo. The answer
+// deletes the proof (the owner, the same day: "i want the images or pdfs attached in request a badge to be deleted after
+// the approval or request of staff"): the update clears it, and so does the database whatever answers it
+// (badge_requests_drop_proof, 20261108230000). An answered row says so; an Undo reopens the request without it.
 const BDR_COLS='id,customer_id,badge_id,comment,proof_kind,proof_name,status,created_at,decided_at,decided_by,reply';
 const BDR_OPEN={status:'pending',decided_at:null,decided_by:null,reply:null};
+// Every request, newest first, at most every two minutes: the rail's count reads them, on any section (_secPolls).
 async function _bdrLoad(force){
   if(!sb||S._bdrBusy||S._bdrGone||(!force&&S._bdrAt&&Date.now()-S._bdrAt<(S._bdrErr?BDG_RETRY_MS:12e4)))return;
   S._bdrBusy=true;S._bdrAt=Date.now();
-  const was=JSON.stringify(S._bdrRows||null),wasN=_bdrWaitN();
-  let r;try{r=await sb.from('badge_requests').select(BDR_COLS).or('status.eq.pending,decided_at.gt.'+new Date(Date.now()-30*864e5).toISOString()).order('created_at',{ascending:false}).limit(500);}catch(e){r={error:e};}
+  const was=JSON.stringify(S._bdrRows||null);
+  let r;try{r=await sb.from('badge_requests').select(BDR_COLS).order('created_at',{ascending:false}).limit(1000);}catch(e){r={error:e};}
   S._bdrBusy=false;
   if(r&&!r.error&&Array.isArray(r.data)){S._bdrRows=r.data;S._bdrErr=false;}
-  else if(r&&r.error&&_bdgMissing(r.error))S._bdrGone=true; // a database from before them: nothing shows
+  else if(r&&r.error&&_bdgMissing(r.error))S._bdrGone=true; // a database from before them: the section says so
   else S._bdrErr=true;
-  // Badges shows the requests themselves; every other People view shows only how many wait (Badges' pill), so it is drawn
-  // again only when that number moves: the first answer redrew Accounts wholesale, under a tag picker opened meanwhile.
-  if(S.view==='staff'&&_pplOpen()&&(_pplOn('badges')?(JSON.stringify(S._bdrRows||null)!==was||S._bdrErr):_bdrWaitN()!==wasN))renderCommunity();
+  _bdrTabLabelSync();
+  if(S.view==='staff'&&S.staffTab==='badgereq'&&(force||S._bdrErr||S._bdrGone||JSON.stringify(S._bdrRows||null)!==was))renderBadgeRequests();
 }
 function _bdrWaitN(){return(S._bdrRows||[]).filter(r=>r.status==='pending').length;}
+function _bdrTabLabel(){const n=_bdrWaitN();return esc(t('bdrStTitle'))+(n?` <span class="tab-badge" title="${esc(t('bdrStWaitN').replace('{0}',n))}">${n}</span>`:'');}
+function _bdrTabLabelSync(){const l=document.querySelector('#staff-tab-nav .tab-btn[data-stab="badgereq"] .snav-lbl');if(l)l.innerHTML=_bdrTabLabel();}
 function _bdrRow(id){return(S._bdrRows||[]).find(r=>String(r.id)===String(id))||null;}
 function _bdrPut(id,o){S._bdrRows=(S._bdrRows||[]).map(r=>String(r.id)===String(id)?{...r,...o}:r);}
 function _bdrNoteOf(id){return String((S._bdrNote||{})[id]||'').trim().slice(0,140)||null;}
 function _bdrNoteIn(id,el){(S._bdrNote=S._bdrNote||{})[id]=el.value;}
-function _bdrDoneTog(){S._bdrDone=!S._bdrDone;renderCommunity();}
-function _bdrHtml(){
-  if(S._bdrGone)return'';
-  const rows=S._bdrRows;
-  if(rows&&!rows.length)return''; // nothing asked lately: the block shows once a request comes
-  if(!rows)return S._bdrErr?`<div class="bdr-st"><div class="am-meta">${t('errConnection')}</div></div>`:'';
-  const wait=rows.filter(r=>r.status==='pending'),done=rows.filter(r=>r.status!=='pending'),open=!!S._bdrDone;
-  return`<section class="bdr-st" aria-labelledby="bdr-st-h">
-    <h2 class="form-title bdr-st-h" id="bdr-st-h">${t('bdrStTitle')}${wait.length?` <span class="bdr-st-n">${wait.length}</span>`:''}</h2>
-    <div class="am-meta">${t('bdrStSub')}</div>
-    ${wait.length?`<div class="bdr-st-list">${wait.map(_bdrStRow).join('')}</div>`:`<div class="am-meta bdr-st-none">${t('bdrStNone')}</div>`}
-    ${done.length?`<button type="button" class="filter-pill bdr-st-more" aria-expanded="${open}" data-on-click="${_on("_bdrDoneTog")}">${t('bdrStDone')} (${done.length})</button>${open?`<div class="bdr-st-list">${done.map(_bdrStRow).join('')}</div>`:''}`:''}
-  </section>`;
+// The section's view: status pill, search, badge, proof, order, how many rows are drawn.
+function _bdrV(){return S._bdrV||(S._bdrV={f:'pending',q:'',badge:'',pf:'',sort:'new',n:40});}
+function _bdrStSet(k,v){const W=_bdrV();W[k]=String(v||'');W.n=40;renderBadgeRequests();}
+function _bdrQ(v){const W=_bdrV();W.q=String(v||'');W.n=40;_bdrListPaint();}
+function _bdrMore(){_bdrV().n+=40;_bdrListPaint();}
+function _bdrRepaint(){_bdrTabLabelSync();if(S.view==='staff'&&S.staffTab==='badgereq')renderBadgeRequests();}
+function _bdrLvl(b){const l=b&&b.system&&BDG_LADDER_OF.get(b.slug);return l?' · '+t('bdLevelOf').replace('{0}',l[1]+1).replace('{1}',l[0].length):'';}
+function _bdrHay(r){const b=_bdgById(r.badge_id),c=_custById(r.customer_id);return[c&&c.name,c&&c.phone,c&&c.email,b&&_bdgName(b),r.comment,r.reply,r.decided_by].filter(Boolean).join(' ').toLowerCase();}
+function _bdrShown(){
+  const W=_bdrV(),ws=W.q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const L=(S._bdrRows||[]).filter(r=>(W.f==='all'||r.status===W.f)&&(!W.badge||String(r.badge_id)===W.badge)&&(!W.pf||(W.pf==='yes')===!!r.proof_kind)
+    &&(!ws.length||(h=>ws.every(w=>h.includes(w)))(_bdrHay(r))));
+  return W.sort==='old'?L.reverse():L; // they come newest first
+}
+function _bdrListHtml(){
+  const W=_bdrV(),L=_bdrShown(),filt=!!(W.q.trim()||W.badge||W.pf);
+  if(!L.length)return`<div class="am-meta bdr-st-none">${t(filt?'bdrStNoMatch':W.f==='pending'?'bdrStNone':'bdrStNoneHere')}</div>`;
+  return`<div class="am-meta bdr-st-count">${esc(t('bdrStShown').replace('{0}',Math.min(W.n,L.length)).replace('{1}',L.length))}</div>
+    <div class="bdr-st-list">${L.slice(0,W.n).map(_bdrStRow).join('')}</div>
+    ${L.length>W.n?`<button type="button" class="btn-secondary btn-sm bdr-st-more" data-on-click="${_on("_bdrMore")}">${esc(t('amShowMore').replace('{0}',Math.min(40,L.length-W.n)))}</button>`:''}`;
+}
+function _bdrListPaint(){const h=document.getElementById('bdr-list');if(h)h.innerHTML=_bdrListHtml();else renderBadgeRequests();}
+function renderBadgeRequests(){
+  const el=document.getElementById('tab-badgereq');if(!el)return;
+  _bdrLoad();_bdgLoad(); // the badges and who holds them: Give, and "Already holds this badge"
+  const W=_bdrV(),rows=S._bdrRows;
+  const a=document.activeElement,fid=a&&a.id&&el.contains(a)&&/^(bdr-q|bdr-n-\d+)$/.test(a.id)?a.id:'',pos=fid?a.selectionStart:null; // a search or a note in use
+  const head=`<h1 class="page-title">${t('bdrStTitle')}</h1><div class="page-sub">${t('bdrStSub')}</div>`;
+  let body;
+  if(S._bdrGone)body=_emptyState(t('bdrStNoDb'));
+  else if(!rows)body=S._bdrErr?_loadErr(t('errConnection'),_on("_bdrLoad",true)):skeletonList();
+  else{
+    const n=k=>k==='all'?rows.length:rows.filter(r=>r.status===k).length;
+    const pill=(k,label)=>`<button type="button" class="filter-pill${W.f===k?' active':''}" aria-pressed="${W.f===k}" data-on-click="${_on("_bdrStSet","f",k)}">${label} (${n(k)})</button>`;
+    const bs=[...new Set(rows.map(r=>r.badge_id))].map(_bdgById).filter(Boolean).sort((x,y)=>_bdgName(x).localeCompare(_bdgName(y))||(x.sort||0)-(y.sort||0));
+    const opt=(v,label,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(label)}</option>`;
+    const main=_fField(t('bdrBadge'),`<select aria-label="${esc(t('bdrBadge'))}" data-on-change="${_on("_bdrStSet","badge",_P("value"))}">${opt('',t('filterAll'),!W.badge)}${bs.map(b=>opt(String(b.id),_bdgName(b)+_bdrLvl(b),String(b.id)===W.badge)).join('')}</select>`)
+      +_fField(t('bdrStProofT'),`<select aria-label="${esc(t('bdrStProofT'))}" data-on-change="${_on("_bdrStSet","pf",_P("value"))}">${opt('',t('filterAll'),!W.pf)}${opt('yes',t('bdrStWithPf'),W.pf==='yes')}${opt('no',t('bdrStNoProof'),W.pf==='no')}</select>`)
+      +_fField(t('sortBy'),`<select class="bdr-sort" aria-label="${esc(t('sortBy'))}" data-on-change="${_on("_bdrStSet","sort",_P("value"))}">${opt('new',t('caSortNew'),W.sort!=='old')}${opt('old',t('caSortOld'),W.sort==='old')}</select>`);
+    body=`<div class="filter-bar"><div class="filter-row">
+        <div class="${_srchCls('bdr',W.q)}" data-srch="bdr">${_artIcon('search',13)}
+          <input id="bdr-q" class="search-input" aria-label="${esc(t('bdrStSearch'))}" placeholder="${esc(t('bdrStSearch'))}" value="${esc(W.q)}" data-on-input="${_on("_bdrQ",_P("value"))}">
+          ${_srchBtn()}
+        </div>
+        ${pill('pending',t('bdrStFWait'))}${pill('given',t('bdrStFGiven'))}${pill('declined',t('bdrStFNo'))}${pill('all',t('filterAll'))}
+        ${_fPanel('bdr',main,'')}
+      </div></div>
+      <div id="bdr-list">${_bdrListHtml()}</div>`;
+  }
+  el.innerHTML=`${head}<div class="form-section ws-mt0">${body}</div>`;
+  const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
 }
 function _bdrStRow(r){
   const b=_bdgById(r.badge_id),c=_custById(r.customer_id),p=r.status==='pending';if(!b)return'';
-  const l=b.system&&BDG_LADDER_OF.get(b.slug),lv=l?' · '+t('bdLevelOf').replace('{0}',l[1]+1).replace('{1}',l[0].length):'';
   const held=p&&!!c&&_bdgAllHolders(b).has(c.id),sure=S._bdgSure==='bdr|'+r.id;
   const when=p?t('bdrStAsked').replace('{0}',_bdgDay(r.created_at)):t(r.status==='given'?'bdgGivenLine':'bdrStDeclinedLine').replace('{0}',_bdgDay(r.decided_at)).replace('{1}',r.decided_by||'—');
+  const pf=!r.proof_kind?`<span class="am-meta bdr-nopf">${t('bdrStNoProof')}</span>`
+    :p?`<button type="button" class="btn-sm btn-secondary bdr-pfb" data-on-click="${_on("_bdrProof",r.id)}">${_cuIc(r.proof_kind==='pdf'?'doc':'eye',14)}<span>${t(r.proof_kind==='pdf'?'bdrStPdf':'bdrStPic')}</span></button>`
+    :`<span class="am-meta bdr-nopf">${t('bdrStPfGone')}</span>`; // deleted with the answer
   return`<div class="bdr-row${p?'':' done'}" data-req="${esc(String(r.id))}">
     <div class="bdg-item">${_bdgMedal(b.icon,_bdgCol(b))}<div class="bdg-txt">
-      <b>${esc(_bdgName(b)+lv)}</b>
+      <b>${esc(_bdgName(b)+_bdrLvl(b))}</b>
       <span class="am-meta">${c?`<button type="button" class="bdr-who" data-on-click="${_on("openAccountHistory",c.id)}">${esc(c.name||'—')}</button>`:'—'} · ${p?esc(when):`<span class="bdr-chip bdr-${r.status==='given'?'given':'declined'}">${esc(when)}</span>`}</span>
       ${r.comment?`<span class="bdr-cmt"><bdi>${esc(r.comment)}</bdi></span>`:''}
       ${!p&&r.reply?`<span class="am-meta">${t('bdgNoteLabel')}: <bdi>${esc(r.reply)}</bdi></span>`:''}
       ${held?`<span class="am-meta bdr-held">${t('bdrStHolds')}</span>`:''}
     </div>
-    ${r.proof_kind?`<button type="button" class="btn-sm btn-secondary bdr-pfb" data-on-click="${_on("_bdrProof",r.id)}">${_cuIc(r.proof_kind==='pdf'?'doc':'eye',14)}<span>${t(r.proof_kind==='pdf'?'bdrStPdf':'bdrStPic')}</span></button>`:`<span class="am-meta bdr-nopf">${t('bdrStNoProof')}</span>`}</div>
+    ${pf}</div>
     ${p?`<div class="bdr-dec">
       <div class="form-group"><label for="bdr-n-${esc(String(r.id))}">${t('bdgNoteLabel')} <span class="label-hint">(${t('optionalLabel')})</span></label><input id="bdr-n-${esc(String(r.id))}" type="text" maxlength="140" value="${esc((S._bdrNote||{})[r.id]||'')}" placeholder="${esc(t('bdrStNotePh'))}" data-on-input="${_on("_bdrNoteIn",r.id,_EL)}"></div>
       <div class="bdr-acts">${_bdgCanGive(b)?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_bdrGive",r.id)}">${t(held?'bdrStClose':'bdgGiveBtn')}</button>`:''}<button type="button" class="btn-sm ${sure?'btn-red':'btn-secondary'}" data-on-click="${_on("_bdrDecline",r.id)}">${t(sure?'bdrStDeclineSure':'bdrStDecline')}</button></div>
     </div>`:''}
   </div>`;
 }
-// The answer claims the request (still waiting, or another desk answered it: read them again).
+// The answer claims the request (still waiting, or another desk answered it: read them again) and deletes its proof.
 async function _bdrAnswer(r,status){
   const o={status,decided_at:new Date().toISOString(),decided_by:(_opName()||'Staff').slice(0,60),reply:_bdrNoteOf(r.id)};
-  const w=await sb.from('badge_requests').update(o).eq('id',r.id).eq('status','pending').select('id');
+  const w=await sb.from('badge_requests').update({...o,proof:null}).eq('id',r.id).eq('status','pending').select('id');
   if(_writeErr(w,'answer badge request'))return null;
   if(Array.isArray(w.data)&&!w.data.length){toast(t('bdrStElsewhere'),'info');_bdrLoad(true);return null;}
   _bdrPut(r.id,o);if(S._bdrNote)delete S._bdrNote[r.id];
@@ -55586,12 +55643,12 @@ async function _bdrGive(id){
   S._bdgSure=null;S._bdrWr=true;
   try{
     const note=_bdrNoteOf(id),held=!!c&&_bdgAllHolders(b).has(c.id);
-    if(!await _bdrAnswer(r,'given')){renderCommunity();return;}
+    if(!await _bdrAnswer(r,'given')){_bdrRepaint();return;}
     let went=[];
     if(!held){ // one already held (given meanwhile, or earned) closes the request alone
       const rows=_bdgWithLower([{customer_id:r.customer_id,badge_id:b.id,note,awarded_by:(_opName()||'Staff').slice(0,60),awarded_at:new Date().toISOString()}]);
       const x=await sb.from('customer_badges').upsert(rows,{onConflict:'customer_id,badge_id',ignoreDuplicates:true}).select('customer_id,badge_id');
-      if(_writeErr(x,'give requested badge')){await _bdrReopen(id);renderCommunity();return;}
+      if(_writeErr(x,'give requested badge')){await _bdrReopen(id);_bdrRepaint();return;}
       went=_bdgWentIn(rows,x);_bdgMerge(went);
     }
     const msg=t('bdgGiven').replace('{0}',_bdgName(b)).replace('{1}',(c&&c.name)||'');
@@ -55603,14 +55660,14 @@ async function _bdrGive(id){
 async function _bdrDecline(id){
   const r=_bdrRow(id),b=r&&_bdgById(r.badge_id),c=r&&_custById(r.customer_id);
   if(!r||r.status!=='pending'||S._bdrWr)return;
-  if(!_bdgArm('bdr|'+id)){renderCommunity();return;}
+  if(!_bdgArm('bdr|'+id)){_bdrRepaint();return;}
   S._bdgSure=null;S._bdrWr=true;
   try{
-    if(!await _bdrAnswer(r,'declined')){renderCommunity();return;}
+    if(!await _bdrAnswer(r,'declined')){_bdrRepaint();return;}
     const msg=t('bdrStDeclined').replace('{0}',b?_bdgName(b):'').replace('{1}',(c&&c.name)||'');
     toast(msg);
-    pushUndo(msg,async()=>{if(!await _bdrReopen(id))return false;renderCommunity();});
-    renderCommunity();
+    pushUndo(msg,async()=>{if(!await _bdrReopen(id))return false;_bdrRepaint();});
+    _bdrRepaint();
   }finally{S._bdrWr=false;}
 }
 // A proof, read when staff open it: a picture shown here, a PDF opened in a tab of its own (the page may not frame
@@ -56582,7 +56639,6 @@ function _renderPeople(){
   if(sub==='accounts'||sub==='wallets')_cwLoad(sub==='wallets').catch(()=>{}); // who has money (2026-11-02)
   if(sub==='referrals')_refRpLoad(); // the referrals report (2026-11-08), at most every two minutes
   if(sub==='accounts'||sub==='badges'||sub==='overview')_bdgLoad();
-  _bdrLoad(); // the badge requests, at most every two minutes: their number is on Badges' pill
   if(sub==='accounts'||sub==='overview')_n6qCtLoad(); // who was messaged when (PP14) // the badges and who holds them, at most every five minutes
   if(sub==='accounts'||sub==='applications'||sub==='learning')_igLoad(); // the Instagram follower counts, likewise (the cards' chips too, 2026-10-09)
   // what waits on staff, for the overview's figures and the pills' counts: the requests and both lists of applications
@@ -56594,11 +56650,11 @@ function _renderPeople(){
   const n=x=>x?` (${x})`:''; // Applications carries no count (the owner, 2026-11-06)
   const bdN=_bdRows(BD_TAG).rows.filter(r=>r.days===0).length,flN=Array.isArray(S._flags)?S._flags.filter(r=>r.status==='pending').length:0;
   const nav=navBtn('overview',t('commTabOverview'))+navBtn('accounts',t('commTabAccounts'))+navBtn('applications',t('commTabApplications'))+navBtn('flagged',t('commTabFlagged')+n(flN))
-    +navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle')+n(_bdrWaitN()))+navBtn('titles',t('ttTab'))+navBtn('activities',t('acTab'))
+    +navBtn('tags',t('amTagsTitle'))+navBtn('badges',t('mrBadgesTitle'))+navBtn('titles',t('ttTab'))+navBtn('activities',t('acTab'))
     +navBtn('birthdays',t('commTabBirthdays')+(bdN?` <span class="bd-tab-n">${_artIcon('cake',14)}${bdN}</span>`:''))
     +(_cwOk()?navBtn('wallets',t('cwTabWallets')):'')+(S._refAhOff?'':navBtn('referrals',t('commTabReferrals')+n((S._refHeld||[]).length)))+navBtn('activity',t('custTabActivity'))
     +(isAdmin()?navBtn('duplicates',t('commTabDuplicates')+n(_dupGroups().length)):'');
-  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='tt-q'||_ae.id==='natnew-q'||_ae.id==='cw-q'||_ae.id==='ppl-q'||/^bdr-n-/.test(_ae.id))?_ae.id:''; // a search in use, or a badge request's note
+  const _ae=document.activeElement,_appF=_ae&&(_ae.id==='ca-q'||_ae.id==='la-q'||_ae.id==='mg-qa'||_ae.id==='mg-qb'||_ae.id==='tg-q'||_ae.id==='tt-q'||_ae.id==='natnew-q'||_ae.id==='cw-q'||_ae.id==='ppl-q')?_ae.id:''; // a search in use
   const body=simple?'':sub==='overview'?_pplOverview():sub==='activity'?'<div id="cact-host"></div>':sub==='flagged'?_pplScopeBar()+_commFlagged():sub==='tags'?_commTags():sub==='titles'?_commTitles():sub==='activities'?_commActivities()
     :sub==='applications'?_appsKinds(sub)+_commApplications():sub==='learning'?_appsKinds(sub)+_learnApplications():sub==='birthdays'?_commBirthdays():sub==='duplicates'?_commDuplicates():sub==='wallets'?_commWallets():sub==='referrals'?_refRpHtml():sub==='badges'?_commBadges():_pplScopeBar()+_commAccounts();
   el.innerHTML=`
@@ -60158,7 +60214,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','cashier','inventory','customers','community','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','sessions','cashier','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -60631,6 +60687,7 @@ let _secFullN=0;
 function _secPolls(full){
   const whole=!!full&&(++_secFullN%4===0);
   if(_deskTabOk('community'))_refHeldPoll(); // referrals one phone made in a day, waiting for a check (2026-11-08)
+  if(_deskTabOk('badgereq'))_bdrLoad(); // the badge requests waiting, counted on the rail (2026-11-08)
   if(_deskTabOk('workshop'))_wsPoll(whole);
   if(_deskTabOk('messages'))_smPoll(whole);
   if(_deskTabOk('ambassadors'))_ambPoll(whole);
@@ -61378,7 +61435,7 @@ function _kbKey(e){
 // G then a letter opens a section (2026-11-06, ST16), on any layout (_kbKey reads an Arabic or Urdu key by its place).
 // The second key must come within a second and a half; a section this account cannot open says so (setStaffTab).
 // The rail's buttons carry the pair as aria-keyshortcuts and in their tooltip, and "?" lists them.
-const N6U_GO={d:'dashboard',b:'queue',s:'sessions',c:'cashier',i:'inventory',w:'workshop',p:'community',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
+const N6U_GO={d:'dashboard',b:'queue',s:'sessions',c:'cashier',i:'inventory',w:'workshop',p:'community',r:'badgereq',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
 let _n6uGAt=0;
 function _n6uChord(k,e){
   if(_n6uGAt&&Date.now()-_n6uGAt<1500){

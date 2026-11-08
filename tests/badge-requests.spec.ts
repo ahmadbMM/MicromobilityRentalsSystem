@@ -2,9 +2,12 @@ import { test, expect, type Page, type Request } from '@playwright/test';
 import { stubSupabase, unlockStaff, loginCustomer, waitForSb, type Fixtures } from './helpers/supabase';
 
 // Badge requests (the owner, 2026-11-08: "add a button on badges for customers to request a badge and adding a proof
-// either a pdf or an image as optional and a comment too optional"; migration 20261108210000). A rider asks for one of
-// the badges staff give, from the Badges section or a badge's popup, with an optional comment and an optional picture
-// or PDF; staff give or decline it in People > Badges. All Supabase traffic is stubbed. The stub answers the new table and
+// either a pdf or an image as optional and a comment too optional"; migration 20261108210000). A rider asks for any
+// badge they do not hold (the owner's second round the same day: "each badge when clicking on it to have its details and
+// request button if the customer didnt have it"; 20261108230000), from the Badges section or a badge's popup, with an
+// optional comment and an optional picture or PDF; staff give or decline it in the Badge requests section ("make a
+// dedicated section for it in staff website"), and the answer deletes the proof ("i want the images or pdfs attached in
+// request a badge to be deleted after the approval or request of staff"). All Supabase traffic is stubbed. The stub answers the new table and
 // functions as an empty database that has them (the rest of the suite sees nothing: no catalogue, no rows); the specs
 // below about a database without them answer 404 themselves.
 
@@ -19,7 +22,8 @@ const ride = { id: 'q1', session_id: P1, session_day: 'Friday', session_date: P1
 const sys = (slug: string, sort: number, auto = false) => ({ slug, icon: 'flag', color: 'green', name: slug, system: true, auto, sort });
 const catalog = [
   sys('marshal', 10), sys('senior_marshal', 11), sys('chief_marshal', 12),
-  sys('first_lap', 90, true),
+  sys('first_lap', 90, true), sys('streak', 91, true), sys('safety_car', 92, true),
+  sys('national_day_96', 95, true), // hidden until held: never offered
   sys('t25', 200), sys('t50', 201), sys('t100', 202),
   { slug: 'bd_cnight', icon: 'moon', color: 'purple', name: 'Night Owl', description: 'Rode a late ride', system: false, auto: false, sort: 500 },
 ];
@@ -52,8 +56,10 @@ test.describe('@customer:account badge requests', () => {
     await expect(host.locator('.mr-bdr-hint')).toContainText('Ask our team for it, with a proof if you have one.');
     await host.getByRole('button', { name: 'Request a badge' }).click();
     await expect(dlg(page)).toHaveAttribute('aria-labelledby', 'bdr-title');
-    // Only the badges staff give, every level not reached, and nothing picked until the rider picks.
-    await expect(dlg(page).locator('#bdr-badge option')).toHaveText(['Choose a badge', 'Marshal · Level 1 of 5', 'Senior Marshal · Level 2 of 5',
+    // Every badge not held, earned by riding (First Lap is, by the one ride) or given by staff, every level not reached,
+    // none hidden until held, and nothing picked until the rider picks.
+    await expect(dlg(page).locator('#bdr-badge option')).toHaveText(['Choose a badge', 'Hot Streak · Level 1 of 3', 'Safety Car · Level 2 of 3',
+      'Marshal · Level 1 of 5', 'Senior Marshal · Level 2 of 5',
       'Chief Marshal · Level 3 of 5', 'T25 Finisher · Level 1 of 3', 'T50 Finisher · Level 2 of 3', 'T100 Finisher · Level 3 of 3', 'Night Owl']);
     await expect(dlg(page).getByRole('button', { name: 'Send request' })).toBeDisabled();
     await dlg(page).getByLabel('Badge', { exact: true }).selectOption('senior_marshal');
@@ -87,6 +93,28 @@ test.describe('@customer:account badge requests', () => {
     await expect(dlg(page).locator('.bdr-was')).toContainText('Sending again replaces that request.');
     await dlg(page).getByRole('button', { name: 'Cancel' }).click();
     await expect(dlg(page)).toHaveCount(0);
+  });
+
+  test('a badge earned by riding, not held, shows its details and Request this badge; one held does not', async ({ page }) => {
+    await rider(page);
+    const sent = calls(page, /\/rpc\/customer_badge_request$/);
+    const host = page.locator('#mr-badges-host');
+    await host.locator('.mr-badge', { hasText: 'First Lap' }).click(); // earned by the one ride
+    await expect(page.locator('#badge-pop .badge-pop-earned')).toBeVisible();
+    await expect(page.locator('#badge-pop .badge-pop-req')).toHaveCount(0);
+    await page.locator('#badge-pop').getByRole('button', { name: 'Close' }).click();
+    await page.locator('#mr-badges-more').click();
+    await host.locator('.mr-badge', { hasText: 'Hot Streak' }).click();
+    const pop = page.locator('#badge-pop');
+    await expect(pop.locator('.badge-pop-nm')).toHaveText('Hot Streak');
+    await expect(pop.locator('.badge-lvl')).toHaveCount(2); // its details: the levels in the catalogue and what each asks
+    await expect(pop.locator('.badge-lvl').first()).toContainText('Hot Streak');
+    await pop.getByRole('button', { name: 'Request this badge' }).click();
+    await expect(dlg(page).locator('#bdr-badge')).toHaveValue('streak');
+    await dlg(page).getByRole('button', { name: 'Send request' }).click();
+    await expect(dlg(page)).toHaveCount(0);
+    expect(sent[0].postDataJSON()).toMatchObject({ p_badge: 'streak', p_comment: null, p_proof: null });
+    await expect(host.locator('.mr-badge', { hasText: 'Hot Streak' })).toHaveAttribute('aria-label', /\(Requested\)$/);
   });
 
   test('a PDF goes as it is; a file that is not one, or one over 2 MB, is refused', async ({ page }) => {
@@ -163,12 +191,14 @@ test.describe('@staff:community badge requests', () => {
     { id: 'bd_marshal', slug: 'marshal', icon: 'shield', color: 'orange', name: 'Marshal', system: true, auto: false, retired: false, sort: 10 },
     { id: 'bd_senior_marshal', slug: 'senior_marshal', icon: 'shield', color: 'orange', name: 'Senior Marshal', system: true, auto: false, retired: false, sort: 11 },
     { id: 'bd_t100', slug: 't100', icon: 'medal', color: 'gold', name: 'T100 Finisher', system: true, auto: false, retired: false, sort: 202 },
+    { id: 'bd_streak', slug: 'streak', icon: 'flame', color: 'orange', name: 'Hot Streak', system: true, auto: true, retired: false, sort: 91 },
   ];
   const ago = (h: number) => new Date(Date.now() - h * 36e5).toISOString();
   const requests = [
     { id: 1, customer_id: 'c1', badge_id: 'bd_senior_marshal', comment: 'Swept 12 rides', proof_kind: 'image', proof_name: 'race.png', status: 'pending', created_at: ago(2), decided_at: null, decided_by: null, reply: null },
     { id: 2, customer_id: 'c2', badge_id: 'bd_t100', comment: null, proof_kind: 'pdf', proof_name: 'cert.pdf', status: 'pending', created_at: ago(5), decided_at: null, decided_by: null, reply: null },
     { id: 3, customer_id: 'c2', badge_id: 'bd_marshal', comment: null, proof_kind: null, proof_name: null, status: 'declined', created_at: ago(90), decided_at: ago(80), decided_by: 'Malik', reply: 'Not yet' },
+    { id: 4, customer_id: 'c1', badge_id: 'bd_streak', comment: 'Rode every week in October', proof_kind: 'image', proof_name: 'strava.png', status: 'given', created_at: ago(900), decided_at: ago(890), decided_by: 'Malik', reply: null },
   ];
   async function staff(page: Page, fx: Fixtures = {}, gone = false) {
     await stubSupabase(page, { sessions, customers, queue_entries: [], bikes: [], tags: [], customer_tags: [], staff_options: [], badges, customer_badges: [], badge_requests: requests, ...fx });
@@ -185,17 +215,26 @@ test.describe('@staff:community badge requests', () => {
     await unlockStaff(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setStaffTab('community');S.communityTab='badges';renderCommunity()`);
+    await page.evaluate(`setStaffTab('badgereq')`);
     await page.waitForFunction('(Array.isArray(S._bdrRows)||S._bdrGone)&&S._bdgAt>0&&!S._bdgBusy');
   }
-  const box = (page: Page) => page.locator('#tab-community .bdr-st');
-  const row = (page: Page, id: number) => box(page).locator(`.bdr-row[data-req="${id}"]`);
+  const sec = (page: Page) => page.locator('#tab-badgereq');
+  const row = (page: Page, id: number) => sec(page).locator(`.bdr-row[data-req="${id}"]`);
+  const rail = (page: Page) => page.locator('#staff-tab-nav .tab-btn[data-stab="badgereq"]');
+  const pill = (page: Page, name: RegExp) => sec(page).locator('.filter-pill', { hasText: name });
 
-  test('the requests head Badges with their number; each proof opens; Give writes the badge with the levels under it', async ({ page }) => {
+  test('a section of its own at /badge-requests, its number on the rail; each proof opens; Give writes the badge and deletes the proof', async ({ page }) => {
     await staff(page);
-    await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges (2)');
-    await expect(box(page).locator('#bdr-st-h')).toContainText('Badge requests');
-    await expect(box(page).locator('.bdr-st-list').first().locator('.bdr-row')).toHaveCount(2);
+    expect(new URL(page.url()).pathname).toBe('/badge-requests');
+    await expect(rail(page)).toHaveAttribute('aria-current', 'page'); // a phone keeps the rail behind its menu
+    await expect(rail(page).locator('.snav-lbl')).toContainText('Badge requests');
+    await expect(rail(page).locator('.tab-badge')).toHaveText('2');
+    await expect(sec(page).locator('h1')).toHaveText('Badge requests');
+    await expect(pill(page, /^Waiting/)).toHaveText('Waiting (2)');
+    await expect(pill(page, /^Waiting/)).toHaveAttribute('aria-pressed', 'true');
+    await expect(pill(page, /^Given/)).toHaveText('Given (1)');
+    await expect(pill(page, /^Declined/)).toHaveText('Declined (1)');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(2);
     await expect(row(page, 1)).toContainText('Senior Marshal · Level 2 of 5');
     await expect(row(page, 1)).toContainText('Lina Haddad');
     await expect(row(page, 1).locator('.bdr-cmt')).toHaveText('Swept 12 rides');
@@ -215,30 +254,41 @@ test.describe('@staff:community badge requests', () => {
     await row(page, 1).getByLabel('Note for the rider').fill('Thanks for sweeping');
     await row(page, 1).getByRole('button', { name: 'Give badge' }).click();
     await expect(page.locator('.toast').last()).toContainText('Badge given: Senior Marshal to Lina Haddad');
-    // Claimed first (still waiting), then given: the level and the one under it, the note with both.
+    // Claimed first (still waiting) with the proof cleared, then given: the level and the one under it, the note with both.
     expect(answered).toHaveLength(1);
     const q = new URL(answered[0].url()).searchParams;
     expect([q.get('id'), q.get('status')]).toEqual(['eq.1', 'eq.pending']);
-    expect(answered[0].postDataJSON()).toMatchObject({ status: 'given', reply: 'Thanks for sweeping', decided_by: 'Spec Staff' });
+    expect(answered[0].postDataJSON()).toMatchObject({ status: 'given', reply: 'Thanks for sweeping', decided_by: 'Spec Staff', proof: null });
     expect(given).toHaveLength(1);
     const rows = given[0].postDataJSON();
     expect(rows.map((x: { badge_id: string }) => x.badge_id)).toEqual(['bd_senior_marshal', 'bd_marshal']);
     expect(rows[0]).toMatchObject({ customer_id: 'c1', note: 'Thanks for sweeping' });
-    await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges (1)');
-    await expect(row(page, 1)).toHaveCount(0); // folded with the answered ones
-    await box(page).getByRole('button', { name: 'Answered in the last 30 days (2)' }).click();
+    await expect(rail(page).locator('.tab-badge')).toHaveText('1');
+    await expect(row(page, 1)).toHaveCount(0); // no longer waiting
+    await pill(page, /^Given/).click();
+    await expect(pill(page, /^Given/)).toHaveText('Given (2)');
     await expect(row(page, 1).locator('.bdr-chip.bdr-given')).toHaveText(/^Given .+ by Spec Staff$/);
+    // An answered request's proof is gone: it says so, and nothing offers to open it.
+    await expect(row(page, 1)).toContainText('Proof deleted');
+    await expect(row(page, 1).getByRole('button', { name: 'View picture' })).toHaveCount(0);
+    await expect(row(page, 4)).toContainText('Proof deleted');
+    await pill(page, /^Declined/).click();
     await expect(row(page, 3).locator('.bdr-chip.bdr-declined')).toHaveText(/^Declined .+ by Malik$/);
     await expect(row(page, 3)).toContainText('Not yet');
 
-    // Undo takes the badges back and the request waits again.
+    // Undo takes the badges back and the request waits again (its proof stays gone).
     await page.evaluate('doUndo()');
     await expect.poll(() => answered.length).toBe(2);
     expect(answered[1].postDataJSON()).toEqual({ status: 'pending', decided_at: null, decided_by: null, reply: null });
-    await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges (2)');
+    await expect(rail(page).locator('.tab-badge')).toHaveText('2');
+    await pill(page, /^Waiting/).click();
+    await page.route(/\/rest\/v1\/badge_requests\?select=proof/, (r) => r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' },
+      body: JSON.stringify([{ proof: null, proof_name: 'race.png' }]) })); // the database cleared it with the answer
+    await row(page, 1).getByRole('button', { name: 'View picture' }).click();
+    await expect(page.locator('#confirm-modal .bdr-pf .vt-rc-wait')).toHaveText('This proof was deleted when the request was answered.');
   });
 
-  test('Decline asks on a second tap; a request another desk answered is left alone', async ({ page }) => {
+  test('Decline asks on a second tap and deletes the proof; a request another desk answered is left alone', async ({ page }) => {
     await staff(page);
     const answered = calls(page, /\/rest\/v1\/badge_requests$/);
     await row(page, 2).getByLabel('Note for the rider').fill('Send the official result');
@@ -246,7 +296,7 @@ test.describe('@staff:community badge requests', () => {
     expect(answered).toHaveLength(0);
     await row(page, 2).getByRole('button', { name: 'Decline it?' }).click();
     await expect(page.locator('.toast').last()).toContainText('Request declined: T100 Finisher for Omar Saleh');
-    expect(answered[0].postDataJSON()).toMatchObject({ status: 'declined', reply: 'Send the official result' });
+    expect(answered[0].postDataJSON()).toMatchObject({ status: 'declined', reply: 'Send the official result', proof: null });
 
     // Another desk answered the first one meanwhile: the claim comes back empty, nothing is given.
     await page.route(/\/rest\/v1\/badge_requests\?id=eq\.1/, (r) => r.request().method() === 'PATCH'
@@ -257,10 +307,61 @@ test.describe('@staff:community badge requests', () => {
     expect(given).toHaveLength(0);
   });
 
-  test('without the table, Badges shows no requests and no number', async ({ page }) => {
+  test('a search, the badge, the proof and the order narrow the list; a badge earned by riding can be given', async ({ page }) => {
+    await staff(page);
+    await pill(page, /^All/).click();
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(4);
+    if (!(await sec(page).locator('#bdr-q').isVisible())) await sec(page).locator('[data-srch="bdr"] .srch-btn').click(); // a phone folds the search into a button
+    await sec(page).locator('#bdr-q').fill('omar');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(2);
+    await expect(sec(page).locator('#bdr-q')).toBeFocused();
+    await sec(page).locator('#bdr-q').fill('october');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(1);
+    await expect(row(page, 4)).toContainText('Hot Streak');
+    await sec(page).locator('#bdr-q').fill('');
+    await sec(page).locator('[aria-controls="fm-bdr"]').click();
+    await sec(page).getByLabel('Proof', { exact: true }).selectOption('no');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(1);
+    await expect(row(page, 3)).toBeVisible();
+    await expect(sec(page).locator('[aria-controls="fm-bdr"]')).toContainText('(1)');
+    await sec(page).getByLabel('Proof', { exact: true }).selectOption('');
+    await sec(page).getByLabel('Badge', { exact: true }).selectOption('bd_t100');
+    await expect(sec(page).locator('.bdr-row')).toHaveCount(1);
+    await expect(row(page, 2)).toBeVisible();
+    await sec(page).getByLabel('Badge', { exact: true }).selectOption('');
+    await expect(sec(page).locator('.bdr-row').first()).toHaveAttribute('data-req', '1');
+    await sec(page).getByLabel('Sort by').selectOption('old');
+    await expect(sec(page).locator('.bdr-row').first()).toHaveAttribute('data-req', '4');
+    await pill(page, /^Declined/).click();
+    await sec(page).getByLabel('Badge', { exact: true }).selectOption('bd_t100');
+    await expect(sec(page).locator('.bdr-st-none')).toHaveText('No requests match.');
+
+    // A request for a badge earned by riding: staff give it as any other.
+    const given = calls(page, /\/rest\/v1\/customer_badges$/);
+    await page.evaluate(`S._bdrRows=S._bdrRows.map(r=>r.id===4?{...r,status:'pending',decided_at:null,decided_by:null}:r);_bdrV().f='pending';_bdrV().badge='';renderBadgeRequests()`);
+    await row(page, 4).getByRole('button', { name: 'Give badge' }).click();
+    await expect(page.locator('.toast').last()).toContainText('Badge given: Hot Streak to Lina Haddad');
+    expect(given[0].postDataJSON().map((x: { badge_id: string }) => x.badge_id)).toEqual(['bd_streak']);
+  });
+
+  test('People > Badges no longer carries the requests; a list naming People names Badge requests', async ({ page }) => {
+    await staff(page);
+    await page.evaluate(`setStaffTab('community');S.communityTab='badges';renderCommunity()`);
+    await expect(page.locator('#tab-community .bdg-row').first()).toBeVisible();
+    await expect(page.locator('#tab-community .bdr-row')).toHaveCount(0);
+    await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges');
+    expect(await page.evaluate(`JSON.stringify(_modIds(['community']))`)).toBe('["community","badgereq"]');
+    expect(await page.evaluate(`ROLE_TABS.manager.includes('badgereq')&&ROLE_TABS.owner.includes('badgereq')&&!DESK_TABS.includes('badgereq')`)).toBe(true);
+    // G then R opens it
+    await page.locator('body').press('g');
+    await page.locator('body').press('r');
+    await page.waitForFunction(`S.staffTab==='badgereq'`);
+  });
+
+  test('without the table the section says so and the rail carries no number', async ({ page }) => {
     await staff(page, {}, true);
     await page.waitForFunction('S._bdrGone===true');
-    await expect(box(page)).toHaveCount(0);
-    await expect(page.locator('#tab-community .cmy-nav .filter-pill', { hasText: 'Badges' })).toHaveText('Badges');
+    await expect(sec(page).locator('.empty-state')).toHaveText('Badge requests are not set up on the database yet.');
+    await expect(rail(page).locator('.tab-badge')).toHaveCount(0);
   });
 });
