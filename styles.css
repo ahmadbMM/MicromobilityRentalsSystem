@@ -9138,7 +9138,7 @@ body:not(.view-staff) #cancel-reason-modal .cr-opt input:focus-visible+.cr-dot{o
 body:not(.view-staff) #cancel-reason-modal .dk-cr-other{margin:0 0 10px;}
 body:not(.view-staff) #cancel-reason-modal .dk-cr-ta{border:1px solid var(--line-3);border-radius:var(--r-ctl);background:var(--card);font-size:16px;font-weight:400;}
 body:not(.view-staff) #cancel-reason-modal .cr-acts{display:grid;gap:8px;margin-top:6px;}
-body:not(.view-staff) #cancel-reason-modal .cr-acts>*{width:100%;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body:not(.view-staff) #cancel-reason-modal .cr-acts>*{width:100%;min-width:0;padding-inline:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(14px,4.2vw,15px);}
 body:not(.view-staff) #cancel-reason-modal .dk-cr-go{background:var(--red);border-color:var(--red);color:var(--paper);}
 
 /* ── Leftovers of the sharp look ── */
