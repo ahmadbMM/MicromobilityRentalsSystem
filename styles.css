@@ -12156,3 +12156,41 @@ body.view-staff .mw-sug-tag{border-radius:var(--sf-r-pill);}
 }
 /* L15: People's find box draws no magnifier, so it keeps no room for one */
 body.view-staff #tab-community .ppl-find .search-input{padding-inline-start:12px;}
+
+/* ══ SIMPLE PHONE VIEW (the user, 2026-11-08: "add a new view of the staff page on phone screens that simplifies the
+   page so much for it to be used on the phone ... remove a lot of buttons and simplify and minimize as much as you
+   think the staff using a phone won't need"). Settings > This device > Simple view on a phone, kept on the device
+   (cq_phone_simple -> html[data-staff-simple], set by the head script; off, the full look, by default). On a phone held
+   upright the desk keeps what a night needs: the session, the figures bar (its numbers filter the list), search, the
+   ride leader's location, one action and ⋯ per rider, the scan and walk-in buttons, and the bar at the thumb. The
+   office's tools go: descriptions, figure walls, saved views, filter panels, header buttons and the select boxes. The
+   script leaves the office's sections out of the menu and the bar (SIMPLE_TABS), shows Sessions as cards and People as
+   its find box. No rule here may reach across the roster's rows (tests/roster-repaint-budget.spec.ts). ══ */
+#snav-full{display:none;}
+@media(max-width:767px){
+  /* the bar: the menu is More at the thumb; the language and the password are on Settings */
+  html[data-staff-simple] body.view-staff :is(#snav-burger,#topbar .lang-wrap,#topbar .tb-pwd){display:none!important;}
+  html[data-staff-simple] body.view-staff #topbar#topbar{padding-inline-start:14px;} /* the logo takes the burger's slot */
+  /* every section: no description, saved views, Filters button or filter panel (one left open in the full view too), and
+     no figure wall (the Dashboard and Analytics, opened from their address, are their figures) */
+  html[data-staff-simple] body.view-staff #view-staff .tab-panel :is(.page-sub,.sv-bar,.filter-toggle,.filter-more),
+  html[data-staff-simple] body.view-staff #view-staff .tab-panel:not(#tab-dashboard,#tab-analytics) :is(.dash-kpis,.stats-row){display:none!important;}
+  /* Bookings: no header buttons, view pills, pace line, second figures line or filter panel; a card without its
+     booked-at time and select box (its actions are the one button and ⋯) */
+  html[data-staff-simple] body.view-staff #tab-queue :is(.rq-hacts,.q-views>.filter-pill,.n6c-pace,.stat-strip,#fm-q,.q-booked-at,.rq-cchk){display:none!important;}
+  /* Sessions: the date pills, search and the cards (no layouts, Customize, New Session, filters, booking window or codes);
+     a session's page keeps its numbers, Open in Bookings, open / full / close and its riders (the script) */
+  html[data-staff-simple] body.view-staff #tab-sessions :is(.ss-head-btns,.filter-bar,.bw-card,.pc-wrap,.sess-ds-fleet){display:none!important;}
+  /* Sales: selling, without the close-out print and the till count */
+  html[data-staff-simple] body.view-staff #tab-cashier .sl-head-r .sl-nowrap{display:none!important;}
+  /* Workshop: no reports */
+  html[data-staff-simple] body.view-staff #tab-workshop .ws-rep-btn{display:none!important;}
+  /* Settings: the account page alone (Business and Pricing are the office's) */
+  html[data-staff-simple] body.view-staff #tab-settings .set-views{display:none!important;}
+  /* the menu's foot: back to the full view */
+  html[data-staff-simple] body.view-staff #snav-full{
+    display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:10px;box-sizing:border-box;
+    background:var(--sf-card);color:var(--text);border:1px solid var(--sf-ctl);border-radius:var(--sf-r-ctl);
+    font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;
+  }
+}

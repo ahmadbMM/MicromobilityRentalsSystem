@@ -2032,3 +2032,33 @@ CSS: "ROUND TWO SHELL" near the end of styles.css, staff-scoped, so app.css does
   the page-1 zero-margin trick and the light print style.
 - **"#n" in a title** is `<bdi dir="ltr">#n</bdi>` (check-in, Return, Edit Booking), or wrapped in FSI/PDI where the title is
   plain text (`confirmDialog` escapes it): in Arabic it read "2#".
+
+## The simple phone view (2026-11-08)
+
+The user: "add a new view of the staff page on phone screens that simplifies the page so much for it to be used on the
+phone, make it as a switch in the settings and make the default the full look", then "remove a lot of buttons and
+simplify and minimize as much as you think the staff using a phone won't need". `tests/phone-simple.spec.ts`.
+- **The switch** is Settings > This device > Simple view on a phone (`#set-simple`, `_setSimple`), first in the card. It is
+  kept on the device (`cq_phone_simple` '1', removed when off: the full look is the default) and drawn as
+  `html[data-staff-simple]` by `_uiApply` and, before the first paint, by the head script. It applies only at the roster's
+  phone width (`_simpleOn()` = the attribute and `_qPhone()`, 767px); a wider screen keeps the full look with it on.
+  `_prefBoot` repaints when the width crosses 767px with the switch on (`_simpleRepaint`).
+- **Sections**: the menu and the bar keep `SIMPLE_TABS` (Bookings, Sessions, People, Sales, Workshop, Volunteers,
+  Settings) through `_simpleTabOk` in `renderStaffTabs`, `_tbRender` (topped up to four from that list) and `_firstTab`.
+  The others still open from their address. The menu ends with "Show the full view" (`#snav-full`, `_simpleOff`).
+- **What goes** (styles.css, SIMPLE PHONE VIEW, all under 767px): the burger (More is the menu), the language select and
+  the password key (both on Settings), every `.page-sub`, `.sv-bar`, `.filter-toggle` (the Filters and Advanced buttons) and
+  `.filter-more` (the panel), figure walls (`.dash-kpis`,
+  `.stats-row`) outside the Dashboard and Analytics; on Bookings the header buttons (`.rq-hacts`), the view pills, the pace
+  line, the second figures line, the filter panel (`#fm-q`), a card's select box and booked-at time; on Sessions the layouts,
+  Customize, New Session, filters, booking window and promo codes; Sales' Close-out and Till; Workshop's Reports; Settings'
+  Business / Pricing tabs and the message templates.
+- **What the script changes**: Bookings shows the roster (no Waitlist view) and a card's add-ons row only lists add-ons
+  already there (no "+ Add-ons"; the pay pill's Edit price still adds them); Sessions is the cards layout, and a session's
+  page keeps its figures, Open in Bookings and open / full / close (`d.stat`) and its riders; People is its find box alone
+  (`S.communityTab` is left as it was for the full view); Volunteers is Shifts with no tabs.
+- **What stays**: the session picker, the figures bar (its numbers filter), search, the ride leader's location sharing,
+  one action and ⋯ per rider, the call / WhatsApp pair, the scan and walk-in buttons, the top bar's search, bell, Settings
+  chip and lock. A new staff control that a phone at the ride does not need gets a rule in that block.
+- `staffReady` (tests/helpers) waits for the burger or the rail; neither shows on a simple phone, so a spec of this view
+  waits for `#staff-tabbar` instead.
