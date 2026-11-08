@@ -55521,13 +55521,15 @@ const BDR_OPEN={status:'pending',decided_at:null,decided_by:null,reply:null};
 async function _bdrLoad(force){
   if(!sb||S._bdrBusy||S._bdrGone||(!force&&S._bdrAt&&Date.now()-S._bdrAt<(S._bdrErr?BDG_RETRY_MS:12e4)))return;
   S._bdrBusy=true;S._bdrAt=Date.now();
-  const was=JSON.stringify(S._bdrRows||null);
+  const was=JSON.stringify(S._bdrRows||null),wasN=_bdrWaitN();
   let r;try{r=await sb.from('badge_requests').select(BDR_COLS).or('status.eq.pending,decided_at.gt.'+new Date(Date.now()-30*864e5).toISOString()).order('created_at',{ascending:false}).limit(500);}catch(e){r={error:e};}
   S._bdrBusy=false;
   if(r&&!r.error&&Array.isArray(r.data)){S._bdrRows=r.data;S._bdrErr=false;}
   else if(r&&r.error&&_bdgMissing(r.error))S._bdrGone=true; // a database from before them: nothing shows
   else S._bdrErr=true;
-  if(S.view==='staff'&&_pplOpen()&&(JSON.stringify(S._bdrRows||null)!==was||(_pplOn('badges')&&S._bdrErr)))renderCommunity();
+  // Badges shows the requests themselves; every other People view shows only how many wait (Badges' pill), so it is drawn
+  // again only when that number moves: the first answer redrew Accounts wholesale, under a tag picker opened meanwhile.
+  if(S.view==='staff'&&_pplOpen()&&(_pplOn('badges')?(JSON.stringify(S._bdrRows||null)!==was||S._bdrErr):_bdrWaitN()!==wasN))renderCommunity();
 }
 function _bdrWaitN(){return(S._bdrRows||[]).filter(r=>r.status==='pending').length;}
 function _bdrRow(id){return(S._bdrRows||[]).find(r=>String(r.id)===String(id))||null;}
