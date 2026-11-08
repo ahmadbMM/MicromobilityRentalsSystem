@@ -92,6 +92,35 @@ test.describe('@staff:bookings round two roster', () => {
     expect(await row(page, 'w1').locator('td.rq-price').evaluate((td) => [getComputedStyle(td).textAlign, getComputedStyle(td).fontVariantNumeric])).toEqual(['end', 'tabular-nums']);
   });
 
+  test('a long name shows whole beside a member\'s mark and "3/5 no-shows", and the table still fits a 1280 laptop', async ({ page }) => {
+    // the name gave way to its marks and the cell's 15em cap held the column narrow: "Firyal K…" (the user, 2026-11-08)
+    const PAST = '2026-09-17';
+    const past = (id: string, status: string) => q(id, 1, { session_id: PAST, session_day: dayOf(PAST), session_date: PAST, customer_id: 'cf', status });
+    for (const width of [1280, 1440]) {
+      await open(page, { width, rpc: {
+        sessions: [...sessions, sess(PAST)],
+        queue_entries: [...queue_entries, q('f1', 11, { name: 'Firyal Kamal Al Harbi Abdulrahman', customer_id: 'cf' }),
+          past('h1', 'noshow'), past('h2', 'noshow'), past('h3', 'noshow'), past('h4', 'done'), past('h5', 'done')],
+        tags: [{ id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#4aa8f8', locked: true, auto_grant: false }],
+        customer_tags: [{ customer_id: 'cf', tag_id: 'tag_saturday', added_by: 'staff', added_at: 1 }],
+      } });
+      const f1 = row(page, 'f1');
+      await expect(f1.locator('.rq-rider .cm-mk')).toBeVisible();
+      await expect(f1.locator('.rq-rider .rq-nsflag')).toHaveText('3/5 no-shows');
+      const m = await f1.evaluate((tr) => {
+        const nm = tr.querySelector('.rq-nm') as HTMLElement, td = nm.closest('td') as HTMLElement, w = tr.closest('.queue-table-desktop-wrap') as HTMLElement;
+        const marks = [...td.querySelectorAll('.rq-rn > :not(.rq-nm)')].map((x) => x.getBoundingClientRect());
+        return { cut: nm.scrollWidth - nm.clientWidth, inCell: marks.every((r) => r.right <= td.getBoundingClientRect().right + 0.5),
+          oneLine: marks.every((r) => Math.abs(r.top - marks[0].top) < 2 && Math.abs(r.top - nm.getBoundingClientRect().top) < 8),
+          over: (w.querySelector('table') as HTMLElement).getBoundingClientRect().width - w.clientWidth };
+      });
+      expect(m.cut, `${width}: the name is cut`).toBe(0);
+      expect(m.inCell, `${width}: a mark spills out of the Rider cell`).toBe(true);
+      expect(m.over, `${width}: the table is wider than its box`).toBeLessThanOrEqual(1);
+      if (width === 1440) expect(m.oneLine, 'room for the name and its marks on one line').toBe(true); // at 1280 they may step under it
+    }
+  });
+
   test('the number the desk acts on leads the figures bar, larger', async ({ page }) => {
     await open(page);
     const first = page.locator('#q-live-count .q-lc-btn').first();

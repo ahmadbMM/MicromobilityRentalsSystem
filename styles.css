@@ -11902,11 +11902,15 @@ html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-snd96{--rq-ev:#0
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-defe5k{--rq-ev:#e879b9;}
 html[data-staff-theme="dark"] body.view-staff #tab-queue .rq-ev-blood{--rq-ev:#ff6f66;}
 html[data-staff-theme="booth"] body.view-staff #tab-queue .rq-ev{width:8px;height:18px;box-shadow:0 0 0 2px #000;}
-/* the rider: the name and its marks on one line (the name gives way, never the row), the number, the call and
-   WhatsApp pair, the Saturday envelope and the add-ons on the other */
-body.view-staff #tab-queue .queue-table .rq-rider .rq-rn{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;min-width:0;white-space:nowrap;}
-body.view-staff #tab-queue .rq-nm{min-width:0;overflow:hidden;text-overflow:ellipsis;}
-body.view-staff #tab-queue .queue-table .rq-rider{max-width:12.5em;}
+/* the rider: the name and its marks on one line, the number, the call and WhatsApp pair, the Saturday envelope and
+   the add-ons on the other. The name keeps its width and the table widens the Rider column for it: a name that gave
+   way to its marks was cut to "Firyal K…" beside the member's mark and "3/5 no-shows" (the user, 2026-11-08). Only a
+   name longer than 20em ends in "…", its whole self in the tooltip. The laptop pass's 15em cap on the cell (made for
+   names that wrapped) is lifted here: on one line it only held the column narrow and pushed the marks into Bike Type.
+   Where the table has no room for the name and all its marks (a 1280 laptop), the marks step under the name. */
+body.view-staff #tab-queue .queue-table .rq-rider .rq-rn{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-width:0;white-space:nowrap;}
+body.view-staff #tab-queue .rq-nm{flex-shrink:0;max-width:20em;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff #tab-queue .queue-table td.rq-rider{max-width:none;}
 body.view-staff #tab-queue .queue-table .rq-r2{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;min-width:0;margin-top:4px;overflow:hidden;white-space:nowrap;}
 body.view-staff #tab-queue .queue-table .rq-r2 .rq-ccl{width:24px;height:24px;}
 body.view-staff #tab-queue .queue-table .rq-r2 .rider-sub{display:inline-flex;align-items:center;gap:4px;margin:0;}
