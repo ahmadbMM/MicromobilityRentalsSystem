@@ -154,6 +154,29 @@ test.describe('@staff:bookings Saturday ride codes', () => {
     expect(byName['Member One']).toBe('');
   });
 
+  test('the arrow on the panel\'s title folds it to one line and opens it again, and the device keeps it folded', async ({ page }) => {
+    await boot(page);
+    const panel = page.locator('#tab-queue .satc-panel');
+    const arrow = panel.locator('.satc-fold');
+    await expect(arrow).toHaveAttribute('aria-expanded', 'true');
+    await expect(panel.locator('.satc-li').first()).toBeVisible();
+    await arrow.click();
+    await expect(arrow).toHaveAttribute('aria-expanded', 'false');
+    await expect(panel.locator('#satc-body')).toBeHidden();
+    await expect(panel.locator('.satc-copy')).toBeVisible(); // Copy link and Edit codes stay on the title line
+    await expect(panel.locator('.satc-edit')).toBeVisible();
+    await page.evaluate(`renderStaffQueue()`); // a repaint keeps it folded
+    await expect(page.locator('#tab-queue #satc-body')).toBeHidden();
+    await page.reload();
+    await waitForSb(page);
+    await page.waitForFunction(`getQueue().length>0`);
+    await page.evaluate(`S.staffRole='admin';setStaffTab('queue');S.queueView='bookings';S.sfSession='${SAT}';renderStaffQueue()`);
+    await expect(page.locator('#tab-queue .satc-fold')).toHaveAttribute('aria-expanded', 'false'); // and so does the next visit
+    await page.locator('#tab-queue .satc-fold').click();
+    await expect(page.locator('#tab-queue .satc-fold')).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.locator('#tab-queue .satc-li')).toHaveCount(3);
+  });
+
   test('the Bookings table gives each booking\'s code its name in a Ride code column of its own', async ({ page }) => {
     test.skip(test.info().project.name === 'mobile', 'the desktop roster table, which a phone does not show (its cards keep the name beside the rider\'s)');
     await boot(page);

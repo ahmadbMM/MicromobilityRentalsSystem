@@ -31319,12 +31319,28 @@ function _satcPanelHtml(sid){
     const n=_satcLive(sid,x.code);
     return`<li class="satc-li"><b>${esc(_satcName(x.code))}</b> <span class="ptn-sub"><bdi>${esc(x.code)}</bdi> · ${esc((s.pl==null?t('satcBookedN'):t('satcBookedOf')).replace('{0}',String(n)).replace('{1}',String(s.pl)))}</span></li>`;
   }).join('');
-  return`<section class="ptn-panel satc-panel" aria-label="${esc(t('satcTitle'))}">
-    <div class="ptn-title">${esc(t('satcTitle'))}<span class="ptn-reps"><button type="button" class="btn-sm btn-secondary satc-copy" data-on-click="${_on('_satcCopy')}">${t('ssCopyLink')}</button>${ed?`<button type="button" class="btn-sm btn-secondary satc-edit" aria-haspopup="dialog" data-on-click="${_on('_satcOpen',sid)}">${t('satcEdit')}</button>`:''}</span></div>
+  const f=_satcFolded();
+  return`<section class="ptn-panel satc-panel${f?' folded':''}" aria-label="${esc(t('satcTitle'))}">
+    <div class="ptn-title"><button type="button" class="satc-fold" aria-expanded="${!f}" aria-controls="satc-body" title="${esc(t(f?'foldShow':'attnHide'))}" data-on-click="${_on('_satcFold',_EL)}"><span class="satc-arr"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span>${esc(t('satcTitle'))}</button><span class="ptn-reps"><button type="button" class="btn-sm btn-secondary satc-copy" data-on-click="${_on('_satcCopy')}">${t('ssCopyLink')}</button>${ed?`<button type="button" class="btn-sm btn-secondary satc-edit" aria-haspopup="dialog" data-on-click="${_on('_satcOpen',sid)}">${t('satcEdit')}</button>`:''}</span></div>
+    <div id="satc-body" class="satc-body"${f?' hidden':''}>
     <div class="ptn-row">${ed?`<label class="satc-sw" for="satc-link"><input type="checkbox" role="switch" id="satc-link"${c.link?' checked':''} data-on-change="${_on('_satcLinkSet',_P('checked'))}"><span>${t('satcSwitch')}</span></label>`:`<strong>${esc(t('satcSwitch'))}: ${t(c.link?'amCodeOn':'amCodeOff')}</strong>`}<span class="ptn-sub">${esc(t(c.link?'satcLinkOn':'satcLinkOff'))}</span></div>
     ${rows?`<ul class="satc-list">${rows}</ul>`:`<div class="ptn-sub">${esc(t(codes.length?'satcNoneOn':'ptnNoCodes'))}</div>`}
+    </div>
     ${c.err?`<div class="ptn-sub" role="alert">${t('errConnection')}</div>`:''}
   </section>`;
+}
+// The arrow on the panel's title folds it to that one line (the user, 2026-11-08: "make the ride codes hideable with an
+// arrow button"); Copy link and Edit codes stay on it. Kept on this device, so the panel stays folded on every ride.
+function _satcFolded(){
+  if(S._satcFold===undefined){try{S._satcFold=localStorage.getItem('cq_satc_fold')==='1';}catch(e){S._satcFold=false;}}
+  return S._satcFold;
+}
+function _satcFold(btn){
+  const f=S._satcFold=!_satcFolded();
+  try{localStorage.setItem('cq_satc_fold',f?'1':'0');}catch(e){}
+  btn.setAttribute('aria-expanded',String(!f));btn.title=t(f?'foldShow':'attnHide');
+  const p=btn.closest('.satc-panel');if(p)p.classList.toggle('folded',f);
+  const b=document.getElementById('satc-body');if(b)b.hidden=f;
 }
 function _satcCopy(){const u=SITE_URL+'/saturday';try{navigator.clipboard.writeText(u).then(()=>toast(t('ssLinkCopied')),()=>toast(u));}catch(e){toast(u);}}
 // The switch. On asks first (the panel shows the saved state while it asks); off is at once. The roster's repaint keeps
