@@ -400,7 +400,30 @@ with expected(fname, want_definer, note) as (values
   ('customer_badge_request',     true,  'badge requests: writes badge_requests, which riders cannot; token-checked'),
   ('customer_my_badge_requests', true,  'badge requests: reads the caller''s own badge_requests (staff-only); token-checked'),
   ('_badge_proof_purge',         true,  'pg_cron: clears the proof of any answered badge request (20261108230000)'),
-  ('_badge_req_drop_proof',      false, 'badge requests: a trigger that only clears NEW.proof once the request is answered (20261108230000)')
+  ('_badge_req_drop_proof',      false, 'badge requests: a trigger that only clears NEW.proof once the request is answered (20261108230000)'),
+  -- Volunteer certificates (20261107131000, 20261108220000)
+  ('_vol_cert_make',            true,  'writes volunteer_certs, which no client can insert; reads customers and the hours ledger'),
+  ('_vol_cert_make_session',    true,  'same, for one session; reads volunteer_shifts too'),
+  ('_vol_cert_words',           false, 'pure: the three lines the page prints, by gender'),
+  ('_vol_gender',               false, 'pure: male, female or null'),
+  ('staff_volunteer_cert_issue',             true, 'issues a certificate for a period; the section is checked'),
+  ('staff_volunteer_cert_issue_session',     true, 'issues one for a session; the section is checked'),
+  ('staff_volunteer_cert_issue_session_many',true, 'a whole team in one call; the section is checked'),
+  ('staff_volunteer_cert_issue_custom',      true, 'one staff wrote themselves, for anyone; the section is checked'),
+  ('staff_volunteer_cert_revoke',            true, 'revokes one; the section is checked'),
+  ('volunteer_cert_issue',         true,  'the volunteer''s own, from the portal: a customer has no staff row; token-checked'),
+  ('volunteer_cert_issue_session', true,  'same, for a session they worked; token-checked'),
+  ('volunteer_cert_check',         true,  'reads volunteer_certs for anyone holding the code; answers only what the certificate says'),
+  ('volunteer_name_ar_save',       true,  'writes the caller''s own customers.name_ar; token-checked'),
+  ('volunteer_profile',            true,  'reads the caller''s own volunteers row and name/gender; token-checked'),
+  ('volunteer_brief_ack',          true,  'stamps the caller''s own shift as briefed; token-checked'),
+  ('volunteer_apply',              true,  'writes the caller''s own volunteers row; token-checked'),
+  ('staff_volunteer_profile_save', true,  'writes a volunteer''s availability and skills; the section is checked'),
+  ('staff_volunteer_reminded',     true,  'stamps a shift as reminded; the section is checked'),
+  ('staff_volunteer_shift_times_many', true, 'many shifts in one call; the section is checked'),
+  ('staff_volunteer_hours_add_many',   true, 'many hour awards in one call; the section is checked'),
+  ('_vol_brief_reset',             true,  'trigger: clears every "I have read it" when the briefing changes'),
+  ('_vol_today',                   false, 'pure: today in Riyadh')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'

@@ -1,0 +1,97 @@
+/* ===========================================================================
+   MicroMobility volunteer certificate — the approved design's styles.
+   SOURCE. `npm run build:cert` writes the served `certificate.css` from this
+   file; the volunteer portal gets the same file through its own `npm run sync:cert`.
+   Edit here, never the generated copy, and read certificate/SPEC.md before you
+   change a colour, a font, a size or the corner graphic: the design is signed
+   off, and certificate/README.md lists what the owner has changed since.
+
+   The rules are the kit's own, with no @font-face among them: each app links its
+   own font sheet ({{fonts}} in the template), and both carry the two families the
+   page uses, Space Grotesk and IBM Plex Sans Arabic.
+
+   The page is its own document, opened from the app and printed. It inherits
+   the app's Content-Security-Policy, which allows no inline <style> and no
+   style attribute, so every rule lives here and the one run-time value (the
+   name's font size) is set through the CSSOM by whoever opened the window.
+   =========================================================================== */
+
+@page { size: 297mm 210mm; margin: 0; }
+
+:root {
+  --mm-green: #03FF89;   /* Pantone 3395 C */
+  --mm-black: #1A1919;   /* Pantone Black C */
+  --mm-offwhite: #FBF9F4;/* Pantone Cool Gray 1 C */
+}
+
+html, body { margin: 0; padding: 0; background: var(--mm-offwhite); }
+* { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+.page {
+  width: 1123px; height: 794px; box-sizing: border-box; position: relative; overflow: hidden;
+  background: var(--mm-offwhite); color: var(--mm-black); font-family: 'Space Grotesk', sans-serif;
+}
+.ar { font-family: 'IBM Plex Sans Arabic', sans-serif; }
+
+/* Brand supergraphic: the logo icon, flush to the bottom-right corner */
+.supergraphic { position: absolute; right: -3px; bottom: -3px; width: 420px; height: auto; display: block; }
+
+.content { position: absolute; inset: 0; box-sizing: border-box; padding: 64px 72px 52px; display: flex; flex-direction: column; }
+
+.header { display: flex; justify-content: space-between; align-items: flex-start; }
+.logo { width: 88px; height: auto; }
+.title { display: flex; flex-direction: column; align-items: flex-end; }
+.title-ar { font-weight: 700; font-size: 26px; line-height: 1.3; }
+.title-en { font-size: 13px; font-weight: 500; letter-spacing: 4px; text-transform: uppercase; }
+
+.body { margin-top: 34px; display: flex; flex-direction: column; max-width: 640px; }
+.lead { font-size: 17px; font-weight: 300; }
+/* The name may extend past the 640px body column, up to the full content width (979px),
+   which stays clear of the corner graphic. The fit routine shrinks it to one line. */
+.name { margin-top: 10px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px;
+        align-self: flex-start; width: max-content; max-width: 979px; white-space: nowrap; font-size: 66px; }
+.name.wrap { white-space: normal; width: auto; }
+.name-ar { margin-top: 6px; font-size: 26px; font-weight: 500; text-align: left; }
+.divider { margin-top: 22px; width: 64px; height: 3px; background: var(--mm-black); }
+.recognition { margin-top: 20px; font-size: 17px; font-weight: 300; line-height: 1.55; }
+.initiative { margin-top: 10px; align-self: flex-start; font-size: 28px; font-weight: 700; background: var(--mm-green); padding: 5px 16px; }
+.thanks-ar { margin-top: 12px; font-size: 17px; font-weight: 400; line-height: 1.7; text-align: left; }
+
+.footer { margin-top: auto; display: flex; gap: 48px; align-items: flex-end; }
+/* 270px in the kit. The signature is 250px wide and hangs 8px left, so the block never needed more
+   than 252; the 18px that frees goes to the meta columns, which were ending 8px short of the corner
+   graphic on this machine and under it on CI, where the Arabic in the labels measures differently. */
+.signature-block { width: 252px; display: flex; flex-direction: column; }
+.signature { width: 250px; height: auto; margin-left: -8px; margin-bottom: 6px; }
+.signer-name { border-top: 1.5px solid var(--mm-black); padding-top: 8px; font-size: 16px; font-weight: 700; }
+.signer-role { display: flex; justify-content: space-between; font-size: 13px; margin-top: 2px; }
+/* 36px in the kit. The check code under the number is twelve characters wide, which pushed the
+   No. column to exactly where the corner graphic begins - no overlap, but nothing to spare. */
+.meta { display: flex; gap: 28px; padding-bottom: 2px; }
+.meta-item { display: flex; flex-direction: column; gap: 4px; }
+.meta-label { font-size: 12px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; }
+.meta-label .ar { letter-spacing: 0; }
+.meta-value { font-size: 16px; font-weight: 700; }
+
+/* ── additions (SPEC.md: "put it in the footer area without moving existing elements") ──
+   The hours and the check code are a second line under Date and under No., never meta items
+   of their own: the two the design has already end 30px short of the corner graphic, and a
+   third pushed text under it. A second line grows the footer upwards, where there is room. */
+.meta-sub { font-size: 11px; font-weight: 500; letter-spacing: .5px; }
+
+/* The Print button belongs to the window, not to the certificate: it is the only thing
+   on the page that is not printed. Its look is report.css's .rep-print. */
+.rep-print { display: block; margin: 22px auto; padding: 9px 26px; background: #0c7a3d; color: #fff; border: none;
+             border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: 'Space Grotesk', sans-serif; }
+
+/* On screen the sheet keeps its 1123 x 794 px, and a window narrower than that (a phone, where
+   the portal opens it) shrinks the whole page to fit: --fit is set through the CSSOM by whoever
+   opened the window, because the policy allows no style attribute. The wrapper takes the scaled
+   size so nothing scrolls sideways. Printing ignores all of it: the sheet is a page. */
+.sheet { width: calc(1123px * var(--fit, 1)); height: calc(794px * var(--fit, 1)); margin: 0 auto; }
+.page { transform: scale(var(--fit, 1)); transform-origin: top left; }
+@media print {
+  .rep-print { display: none; }
+  .sheet { width: auto; height: auto; margin: 0; }
+  .page { transform: none; }
+}

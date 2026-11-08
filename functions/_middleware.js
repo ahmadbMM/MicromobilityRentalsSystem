@@ -54,6 +54,10 @@ export async function onRequest(context) {
     // real staff mobile number (replaced with invented ones 2026-10-05). It is a .html prototype,
     // so the extension allow-list let it through — block the whole directory by path instead.
     path.startsWith('/design_handoff_erp_reskin/') ||
+    // The volunteer certificate's design source: its template, stylesheet, brand vectors and the
+    // approved render. What the apps serve is built from it (assets/certificate.html and
+    // certificate.css); the folder itself is internal, and .svg would otherwise pass.
+    path.startsWith('/certificate/') ||
     path.startsWith('/.github/') ||
     path.startsWith('/.claude/') ||
     path.startsWith('/.wrangler/') ||

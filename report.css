@@ -238,21 +238,6 @@ section{break-inside:avoid}
 .vrc-img{display:block;max-width:100%;max-height:520px;object-fit:contain;border:1px solid #d5dbd7}
 .vrc-none{font-size:12px;color:#a33b2e;font-weight:700;padding:8px 0}
 @media (max-width:700px){.vrc-pair{grid-template-columns:1fr}}
-/* The volunteer certificate (_vmCert, 2026-11-05): one page, English and Arabic side by side. */
-.vc-page{margin:0;padding:24px;background:#fff;color:#1a1919;font-family:'IBM Plex Sans','IBM Plex Sans Arabic',system-ui,sans-serif}
-.vc-print{display:block;margin:0 auto 16px}
-@media print{.vc-print{display:none}.vc-page{padding:0}}
-.vc-sheet{max-width:720px;margin:0 auto;padding:36px;border:3px solid #123019}
-.vc-brand{font-size:20px;font-weight:800;color:#123019;letter-spacing:.5px;margin-bottom:22px}
-.vc-cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-.vc-cols h1{margin:0 0 10px;font-size:22px;color:#123019}
-.vc-cols p{margin:0;font-size:15px;line-height:1.6}
-.vc-hours{display:flex;flex-direction:column;align-items:center;margin:26px 0}
-.vc-hours b{font-size:52px;line-height:1;color:#123019}
-.vc-hours span{font-size:13px;color:#55615a;margin-top:4px}
-.vc-foot{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;font-size:13px;color:#55615a}
-.vc-sign{text-align:end;font-weight:600;color:#1a1919}
-.vc-sess{list-style:none;margin:0 0 22px;padding:0;font-size:13px;color:#1a1919}
-.vc-sess li{display:flex;justify-content:space-between;gap:12px;padding:4px 0;border-bottom:1px solid #e3e7e4}
-.vc-check{margin-top:18px;font-size:12px;color:#55615a;word-break:break-all}
-@media (max-width:600px){.vc-cols{grid-template-columns:1fr}}
+/* The volunteer certificate was a sheet here (.vc-*) until 2026-11-08. It is its own
+   design now: certificate/ in this repo, served as certificate.css + assets/certificate.html,
+   and the volunteer portal prints the same file. */

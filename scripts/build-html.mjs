@@ -135,11 +135,22 @@ src = src.replace("const BIKE_IMG_V=''", `const BIKE_IMG_V='${bikeFiles.length ?
 // policy - no <style> there once style-src drops 'unsafe-inline'. They are asked for with their own
 // content hash, so _headers can keep them a year and a change is a new URL. Stamped here, before
 // the split, so whichever half a link lands in carries it (the receipt is in staff.js).
-for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'RECEIPT_CSS_V']]) {
+for (const [file, name] of [['report.css', 'REPORT_CSS_V'], ['receipt.css', 'RECEIPT_CSS_V'], ['certificate.css', 'CERT_CSS_V']]) {
   const ph = `const ${name}=''`;
   if (!src.includes(ph)) throw new Error(`build: ${name} placeholder missing`);
   if (!DIST_FILES.includes(file)) throw new Error(`build: ${file} is linked by the print windows but scripts/assemble-dist.mjs does not ship it`);
   src = src.replace(ph, `const ${name}='${createHash('sha256').update(await readFile(new URL(`../${file}`, import.meta.url))).digest('hex').slice(0, 10)}'`);
+}
+
+// The certificate's markup is fetched, not built into the page: one file, assets/certificate.html,
+// that the volunteer portal fills from its own copy too (certificate/README.md). Same deal as the
+// stylesheets above - its own content hash, so _headers may keep it and a change is a new URL.
+// npm run build:cert writes it, and npm run build:html runs that first, so the hash is of the file
+// this build is shipping.
+{
+  const ph = "const CERT_HTML_V=''";
+  if (!src.includes(ph)) throw new Error('build: CERT_HTML_V placeholder missing');
+  src = src.replace(ph, `const CERT_HTML_V='${createHash('sha256').update(await readFile(new URL('../assets/certificate.html', import.meta.url))).digest('hex').slice(0, 10)}'`);
 }
 
 // The public origin (site.config.json), read before the split: every half that ships carries it.

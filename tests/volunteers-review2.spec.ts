@@ -13,7 +13,7 @@ const customers = [
   { id: 'c1', name: 'Sara Haddad', phone: '+966500000001', email: 'sara@example.com', created_at: '2026-01-01', birth_date: '1990-01-01' },
   { id: 'c2', name: 'Omar Saleh', phone: '+966500000002', email: 'omar@example.com', created_at: '2026-01-02', birth_date: '2090-01-01' },
   { id: 'c3', name: 'Nora Ali', phone: '+966500000003', email: 'nora@example.com', created_at: '2026-01-03' },
-  { id: 'c4', name: 'Huda Fares', phone: '+966500000004', email: 'huda@example.com', created_at: '2026-01-04' },
+  { id: 'c4', name: 'Huda Fares', phone: '+966500000004', email: 'huda@example.com', created_at: '2026-01-04', gender: 'female' },
 ];
 const AG = { agreed_version: '2026-11-05', agreed_at: '2026-11-01T10:00:00Z' };
 const volunteers = [
@@ -131,7 +131,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     expect(sent[0]).toEqual({ p_customer: 'c1', p_days: [4, 6], p_skills: 'Photos', p_whatsapp: '' });
   });
 
-  test('a certificate for a period, with its serial and check link; before the database, the old one prints', async ({ page }) => {
+  test('a certificate for a period, with its serial and check code; before the database, the old one prints', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_cert_issue');
     const cert = { ok: true, id: 1, serial: 'MMV-2026-00001', code: 'ABCDEF123456', name: 'Sara Haddad', from: '2026-10-01', to: '2026-10-31', hours: 3.5, sessions: [{ title: 'Blood Donation', date: '2026-10-20', hours: 3.5 }], issued_at: '2026-11-06T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
@@ -142,13 +142,50 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     await expect(page.locator('#n6w-cf')).toHaveValue('2026-10-20'); // from the first hours
     await page.locator('#n6w-cf').fill('2026-10-01');
     await page.locator('#n6w-ct').fill('2026-10-31');
-    await page.locator('#confirm-modal').getByRole('button', { name: 'Make the certificate' }).click();
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
     await expect.poll(() => sent.length).toBe(1);
-    expect(sent[0]).toEqual({ p_customer: 'c1', p_from: '2026-10-01', p_to: '2026-10-31' });
+    // p_gender rides along, empty here: c1's account says nothing and staff left the choice alone.
+    expect(sent[0]).toEqual({ p_customer: 'c1', p_from: '2026-10-01', p_to: '2026-10-31', p_gender: null });
     await expect.poll(() => page.evaluate('window.__rep||""')).toContain('MMV-2026-00001');
     const html = await page.evaluate('window.__rep') as string;
-    expect(html).toContain('volunteer.micromobility.sa/#check/ABCDEF123456');
+    // The design (certificate/SPEC.md, and certificate/README.md for what the owner has changed):
+    // the code is a second line under the certificate's number, and the period stands where an
+    // event's name goes. Nothing says where the code is answered any more.
+    expect(html).toContain('ABCDEF123456');
+    expect(html).toContain('1 October 2026 – 31 October 2026');
+    expect(html).toContain('Sara Haddad');
+    expect(html).toContain('Ahmad Babalghoum');
+    expect(html).not.toContain('Power your path');
+    expect(html).not.toContain('micromobility.com.sa');
+    expect(html).not.toContain('{{'); // every placeholder filled
+  });
+
+  test('a certificate for one event: the session is named on it, and its own day is the date', async ({ page }) => {
+    const sent = rpcs(page, 'staff_volunteer_cert_issue_session');
+    const cert = { ok: true, id: 2, kind: 'session', serial: 'MMV-2026-00002', code: 'ZZZZ11112222', name: 'Sara Haddad', name_ar: 'سارة حداد',
+      gender: 'female', session_id: '2026-10-20-bd', initiative: 'Blood Donation', event_date: '2026-10-20', from: '2026-10-20', to: '2026-10-20',
+      hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
+    await staff(page, { 'rpc:staff_volunteer_cert_issue_session': cert, volunteer_certs: [] });
+    await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
+    await tab(page, 'Volunteers').click();
+    await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
+    // The sessions this volunteer has hours on, one Make each.
+    const row = page.locator('#n6w-cert-sess .vm-res-row').first();
+    await expect(row).toContainText('3.5'); // the hours the ledger holds for that session
+    await row.getByRole('button', { name: 'Make the certificate' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].p_customer).toBe('c1');
+    expect(sent[0].p_session).toBe('2026-10-20-bd');
+    expect(String(sent[0].p_initiative || '')).not.toBe(''); // the session as the app names it on screen
+    // _vcPrint reads the template before it opens the window, so the sheet lands a tick after the call.
+    await expect.poll(() => page.evaluate('window.__rep||""')).toContain('MMV-2026-00002');
+    const html = await page.evaluate('window.__rep') as string;
     expect(html).toContain('Blood Donation');
+    expect(html).toContain('20 October 2026');
+    expect(html).toContain('سارة حداد');
+    expect(html).toContain('تقديرًا لعطائها ومشاركتها التطوعية في المبادرة'); // she, not he
+    expect(html).not.toContain('{{');
   });
 
   test('before the database has certificates, Make prints the certificate as before', async ({ page }) => {
@@ -157,8 +194,101 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     await tab(page, 'Volunteers').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
-    await page.locator('#confirm-modal').getByRole('button', { name: 'Make the certificate' }).click();
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
     await expect.poll(() => page.evaluate('window.__rep||""')).toContain('Certificate of Volunteering');
+    const html = await page.evaluate('window.__rep') as string;
+    expect(html).toContain('Sara Haddad');
+    expect(html).not.toContain('MMV-'); // no row was made, so there is no serial and nothing to check
+  });
+
+  test('the gender is asked only when the account has none, and both languages follow it', async ({ page }) => {
+    const sent = rpcs(page, 'staff_volunteer_cert_issue');
+    const cert = { ok: true, id: 3, kind: 'period', serial: 'MMV-2026-00003', code: 'GGGG11112222', name: 'Sara Haddad', gender: 'female',
+      words: { lead: 'This certificate is proudly presented to', recognition: 'in recognition of her time, energy and commitment as a volunteer in',
+               arabic_line: 'تقديرًا لعطائها ومشاركتها التطوعية في المبادرة' },
+      from: '2026-10-01', to: '2026-10-31', hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
+    await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
+    await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
+    await tab(page, 'Volunteers').click();
+    // c4 has a gender on the account: nothing to ask.
+    await page.locator('#vm-list .vm-row[data-cust="c4"]').getByRole('button', { name: 'Manage' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
+    await expect(page.locator('#n6w-cg')).toHaveCount(0);
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Close' }).first().click().catch(() => page.keyboard.press('Escape'));
+    // c1 has none, so staff say who it is for, and what they say goes with the certificate.
+    await tab(page, 'Volunteers').click();
+    await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
+    await expect(page.locator('#n6w-cg')).toBeVisible();
+    await page.locator('#n6w-cg').selectOption('female');
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0].p_gender).toBe('female');
+    await expect.poll(() => page.evaluate('window.__rep||""')).toContain('MMV-2026-00003');
+    const html = await page.evaluate('window.__rep') as string;
+    expect(html).toContain('in recognition of her time, energy and commitment as a volunteer in');
+    expect(html).toContain('تقديرًا لعطائها ومشاركتها التطوعية في المبادرة');
+    expect(html).not.toContain('their time');
+  });
+
+  test('one day instead of a period: one date is asked for, and the day is what it says', async ({ page }) => {
+    const sent = rpcs(page, 'staff_volunteer_cert_issue');
+    const cert = { ok: true, id: 5, kind: 'period', serial: 'MMV-2026-00005', code: 'DDDD11112222', name: 'Sara Haddad',
+      from: '2026-10-20', to: '2026-10-20', hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
+    await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
+    await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
+    await tab(page, 'Volunteers').click();
+    await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
+    await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
+    await expect(page.locator('#n6w-cf')).toBeVisible();
+    await page.locator('#n6w-cm').selectOption('day');
+    await expect(page.locator('#n6w-cf')).toBeHidden(); // one date is all it asks for
+    await expect(page.locator('#n6w-ct-t')).toHaveText('Day');
+    await page.locator('#n6w-ct').fill('2026-10-20');
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ p_customer: 'c1', p_from: '2026-10-20', p_to: '2026-10-20' });
+    await expect.poll(() => page.evaluate('window.__rep||""')).toContain('MMV-2026-00005');
+    const html = await page.evaluate('window.__rep') as string;
+    // The green box says the day once, not "20 October 2026 - 20 October 2026".
+    expect(html).toContain('20 October 2026');
+    expect(html).not.toContain('20 October 2026 – 20 October 2026');
+  });
+
+  test('a certificate staff write themselves: their wording, and no account needed', async ({ page }) => {
+    const sent = rpcs(page, 'staff_volunteer_cert_issue_custom');
+    const cert = { ok: true, id: 4, kind: 'custom', serial: 'MMV-2026-00004', code: 'CUST11112222', name: 'Fahad Al-Harbi', name_ar: 'فهد الحربي',
+      gender: 'male', initiative: 'Ride marshal training', event_date: '2026-11-08', from: '2026-11-08', to: '2026-11-08', hours: null, sessions: [],
+      words: { lead: 'With our thanks', recognition: 'in recognition of his time, energy and commitment as a volunteer in',
+               arabic_line: 'تقديرًا لعطائه ومشاركته التطوعية في المبادرة' },
+      issued_at: '2026-11-08T10:00:00Z' };
+    await staff(page, { 'rpc:staff_volunteer_cert_issue_custom': cert, volunteer_certs: [] });
+    await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
+    await tab(page, 'Volunteers').click();
+    // From the roster itself, for somebody who has no account here at all.
+    await page.getByRole('button', { name: 'Write a certificate' }).click();
+    await page.locator('#n6w-xn').fill('Fahad Al-Harbi');
+    await page.locator('#n6w-xa').fill('فهد الحربي');
+    await page.locator('#n6w-xi').fill('Ride marshal training');
+    // The lines are prefilled for the gender chosen, and picking one rewrites the two that name it.
+    await expect(page.locator('#n6w-xr')).toHaveValue(/their time/);
+    await page.locator('#n6w-xg').selectOption('male');
+    await expect(page.locator('#n6w-xr')).toHaveValue(/his time/);
+    await page.locator('#n6w-xl').fill('With our thanks'); // and any of them may be rewritten
+    await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
+    await expect.poll(() => sent.length).toBe(1);
+    expect(sent[0]).toMatchObject({ p_name: 'Fahad Al-Harbi', p_name_ar: 'فهد الحربي', p_initiative: 'Ride marshal training',
+      p_gender: 'male', p_lead: 'With our thanks', p_customer: null });
+    expect(String(sent[0].p_recognition)).toContain('his time');
+    await expect.poll(() => page.evaluate('window.__rep||""')).toContain('MMV-2026-00004');
+    const html = await page.evaluate('window.__rep') as string;
+    expect(html).toContain('With our thanks');
+    expect(html).toContain('Ride marshal training');
+    expect(html).toContain('فهد الحربي');
+    expect(html).toContain('Ahmad Babalghoum'); // the signatory is still the design's
+    expect(html).not.toContain('{{');
+    // It belongs to nobody, so the form that made it is where it can be found again.
+    await expect(page.locator('#n6w-xcerts')).toBeVisible();
   });
 
   test('many at once: one call for the check-in, one for the hours', async ({ page }) => {
