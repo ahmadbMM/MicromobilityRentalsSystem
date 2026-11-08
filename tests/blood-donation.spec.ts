@@ -138,7 +138,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(wv).toContainText('I can withdraw at any time');
     await expect(wv).toContainText('I have read this and I agree');
     expect(await wv.innerText()).not.toMatch(/waiver|activity|take part|own risk|fracture|on behalf|partners|\bride waiver\b/i);
-    await expect(page.locator('#wv-why')).toContainText('Tick the agreement');
+    await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
     await page.locator('#reg-waiver-cb').check();
     // no price, no total, nothing to pay: the review
     await expect(page.locator('#tab-register')).not.toContainText(NO_PRICE);

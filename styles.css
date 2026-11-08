@@ -910,7 +910,6 @@
     #tab-register .cu-ad-name{font-weight:600;font-size:14px;line-height:1.25;}
     #tab-register .cu-ad-nutri{margin-top:2px;background:transparent none;border:none;padding:0;color:var(--green-d);font-family:inherit;font-size:11px;font-weight:700;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}
     #tab-register .cu-ad-price{font-weight:700;color:var(--green-d);font-size:13.5px;white-space:nowrap;}
-    #tab-register .cu-ad-sub{font-size:12px;color:var(--muted);margin-bottom:12px;}
     #tab-register .cu-already{margin-top:16px;padding:16px 18px;}
     #tab-register .cu-already-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
     #tab-register .cu-already-title{font-size:14px;font-weight:800;color:var(--orange);}

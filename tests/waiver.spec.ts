@@ -54,7 +54,7 @@ test('confirm is refused until the box is ticked', async ({ page }) => {
 
   const confirm = page.locator('#tab-register .mm-reg-foot .btn-primary');
   await expect(confirm).toBeDisabled();
-  await expect(page.locator('#wv-why')).toBeVisible();
+  await expect(page.locator('#wv-why')).toHaveCount(0); // no "tick the waiver" line under it (the owner, 2026-11-08)
 
   // even called directly, nothing is booked: the rider is shown the waiver
   await page.evaluate(`submitReg()`);

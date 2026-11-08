@@ -215,15 +215,14 @@ test('the staff form asks for start and end, not gathering', async ({ page }) =>
   await expect(form).toContainText('Gathering time');
 });
 
-// Ride words on a session that has no bike. The Experiences list can hold a Saturday ride and
-// a pool session at the same time, so its subtitle has to cover both; the circuit keeps "ride".
+// Ride words on a session that has no bike. The step's "pick the day" subtitle is gone (the owner,
+// 2026-11-08: "remove all unnecessary and additional info"), and nothing else there says ride.
 test('the session step does not tell a swimmer to pick a day to ride', async ({ page }) => {
   await asMember(page);
   const panel = page.locator('#tab-register');
-  await expect(panel).toContainText('Pick the day you would like to join.');
+  await expect(panel.locator('.page-title').first()).toBeVisible();
   await expect(panel).not.toContainText('want to ride');
-  await page.evaluate(`S.selEvent='jcc';renderRegister()`);
-  await expect(panel).toContainText('want to ride');   // the circuit is still a ride
+  await expect(panel.locator('.page-sub')).toHaveCount(0);
 });
 
 test('the staff form calls it a session name, not a ride name', async ({ page }) => {

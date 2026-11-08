@@ -1,5 +1,5 @@
 
-const CACHE = 'mmcq-0612f4d4e7';
+const CACHE = 'mmcq-d70fdfd9d3';
 
 // The one key the app shell lives under. './index.html' is deliberately NOT precached and
 // never used as a key: Cloudflare Pages answers /index.html with a 308 to /, so caching it
@@ -28,13 +28,13 @@ const STAFF_JS = './staff.js?v=2c5188aecc';
 // adds over app.css, so it rides with staff.js.
 // The staff half's parts (staff-parts/, 2026-10-01): the build stamps the list, each by its hash.
 const STAFF_PARTS = ["./staff-parts/analytics.js?v=c972544ff7","./staff-parts/community.js?v=f24942281c","./staff-parts/bikes.js?v=d7c6195649","./staff-parts/cashier.js?v=2ab2eb796e","./staff-parts/catalog.js?v=b2571517b7","./staff-parts/inventory.js?v=f046425258","./staff-parts/website.js?v=db399fc2b9","./staff-parts/history.js?v=dacf4c30a2","./staff-parts/wallet.js?v=af22c1357b","./staff-parts/workshop.js?v=a7f6eff88c","./staff-parts/ambassadors.js?v=f5dc8b63b9","./staff-parts/messages.js?v=2b33a26108","./staff-parts/volunteers.js?v=b32edbf377","./staff-parts/vendors.js?v=5b0c5bcf3f","./staff-parts/sessions.js?v=0986d0ca69","./staff-parts/sela.js?v=618b38d741","./staff-parts/vlap.js?v=6f51b16608","./staff-parts/imports.js?v=db96f3cce4","./staff-parts/team.js?v=bafe6ab22b","./staff-parts/settings.js?v=1960592824","./staff-parts/fleet.js?v=564e8c7bcc","./staff-parts/money.js?v=22b63305ec","./staff-parts/desk.js?v=6495ced2c4","./staff-parts/deskq.js?v=7793c8438b","./staff-parts/kiosk.js?v=74df77e014","./staff-parts/deposits.js?v=d1b3508fed","./staff-parts/remind.js?v=b802519a42"];
-const APP_JS = './app.js?v=8bfabb4fd7';
-const APP_CSS = './app.css?v=6dbfdc988a';
+const APP_JS = './app.js?v=af24141404';
+const APP_CSS = './app.css?v=282c90a795';
 const SHELL = [
   SHELL_KEY,
   APP_JS,
   APP_CSS,
-  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=16f0b798f6']),
+  ...(LIVE_CUSTOMER_HOST ? [] : [STAFF_JS, ...STAFF_PARTS, './styles.css?v=bcdac20a77']),
   './manifest.json',
   './logo.webp', // the page's logos are lossless WebP since 2026-10-01 (the PNGs still ship, for links from elsewhere)
   './logo-dark.webp',

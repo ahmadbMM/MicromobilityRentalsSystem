@@ -37,7 +37,7 @@ test.describe('@bh14 s06 booking wizard', () => {
     await page.evaluate(`S._bw={days:3,at:null};S.selEvent='snd96';S.selSession=null;S.regStep=1;goCustomer('register');renderRegister()`);
     expect(await page.evaluate('S.selSession')).toBe(null);
     await expect(page.locator('#rf-why')).toBeVisible();
-    expect(await page.locator('#rf-why').textContent()).not.toBe(await page.evaluate(`t('pickRideFirst')`));
+    expect(await page.locator('#rf-why').textContent()).toBe(await page.evaluate(`_bwOpensText(_sessDisp('${ND.id}'))`));
     await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
   });
 
