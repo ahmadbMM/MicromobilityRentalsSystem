@@ -2941,6 +2941,12 @@
     #tab-sessions .ss-tf-lbl{padding:8px 10px;font-size:12px;color:var(--muted);font-weight:600;}
     #tab-sessions .ss-tf-tot{padding:8px 10px;text-align:center;font-size:20px;font-weight:600;color:var(--green);}
     /* the add-ons (_sessAddonGroups) */
+    #tab-sessions .ss-ad-tog{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--sf-ctl-size,38px);margin:0;padding:8px 12px;border:1px solid var(--border);border-radius:var(--sf-r-ctl,8px);background:var(--s2);color:var(--text);font:inherit;font-size:13px;font-weight:600;text-align:start;cursor:pointer;}
+    #tab-sessions .ss-ad-tog>span:first-child{flex:1;min-width:0;}
+    #tab-sessions .ss-ad-n{min-width:22px;padding:1px 8px;border-radius:999px;background:rgba(var(--green-rgb),.12);color:var(--green-d);font-size:12px;font-weight:600;text-align:center;}
+    #tab-sessions .ss-ad-tog .cu-ic{flex:none;color:var(--muted);transform:rotate(90deg);transition:transform .2s;}
+    #tab-sessions .ss-ad-tog[aria-expanded="true"] .cu-ic{transform:rotate(-90deg);}
+    @media (prefers-reduced-motion:reduce){#tab-sessions .ss-ad-tog .cu-ic{transition:none;}}
     #tab-sessions .ss-ad-all{font-size:11px;margin-bottom:10px;}
     #tab-sessions .ss-ad-cat{font-size:10px;font-weight:600;text-transform:none;letter-spacing:0;color:var(--muted);margin-bottom:6px;}
     #tab-sessions .ss-ad-list{display:flex;flex-wrap:wrap;gap:8px;}

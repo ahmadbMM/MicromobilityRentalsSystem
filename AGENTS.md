@@ -1687,6 +1687,28 @@ party on the waitlisted rider's own row, and the landing's card on the night say
 booking still says the ordinary time. The website mirrors it (`wlCollectTime` in lib/tickets.ts, TicketCard.tsx).
 `tests/jcc-waitlist-collect.spec.ts`.
 
+**Staff set it per session (2026-11-10).** The owner: "add the bike collection time for waitlist as a field staff can
+change from session's settings". The add and edit forms carry "Waitlist bike collection" (`#ns-wlcollect`,
+`#es-wlcollect`) beside the bike collection time, on the rides that have one (the circuit and Petromin, not
+`_twoTimesSess`). It is stored as `bike_slots._wlCollect`: absent = the default (a circuit night's start + 15, else
+none), `''` = a box staff emptied (no time of its own), `HH:MM` = typed. State is `S.newSessWlCollect` /
+`S.editSessWlCollect`, null while untouched so the box follows the start (`_wlCollectFollow`, like `_collectFollow`);
+`_wlCollectSlot` decides what is written and `_wlCollectEarly` refuses a time before the bike collection time
+(`errWlCollectEarly`). Templates (`NS_TPL_KEYS`), a clone (`_nsCopy`) and the form's fill from the last ride carry it.
+The website reads it too (`wlCollectSlot` in lib/rides.ts, `TicketSession.wlCollect`). `tests/wl-collect-setting.spec.ts`.
+
+**Never the place in line (2026-11-10).** The owner: "don't tell customers how much is their number in line in waiting
+list or anywhere else". A waitlisted ticket says "On the waitlist" and `wlPosNoNumMsg` ("in line for a place"), never
+"number N in line"; the party row says "Waitlist". The rank (`customer_waitlist_ranks`, `_wlRanksLoad`) is no longer
+asked for, and `wlPosMsg` / `wlLinePos` / `wlRowPos` are gone. The website printed the W serial as the place; it no
+longer does. The booking number on the ticket stays (staff quote it at the desk).
+
+**Add-ons folded on the session forms (2026-11-10).** The owner: "hide add on on sessions addition or modification of a
+session and clickable makes it open and show the add ons so it doesn't take space". `_sessAddonsFoldHtml` draws one
+`.ss-ad-tog` button ("Add-ons offered", how many are offered, a chevron) over `#ns-ad-body` / `#es-ad-body`, hidden
+until clicked; `_sessAddonsFold` flips `S.nsAddonsOpen` / `S.editSessAddonsOpen` without a repaint. Opening either
+form folds it again.
+
 ## Tickets and Wallet passes in their event's colours (2026-10-06)
 
 The owner: "make all booking cards themed the same way the event card is themed" (picked: My Bookings tickets in

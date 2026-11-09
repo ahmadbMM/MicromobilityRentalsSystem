@@ -1,8 +1,8 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 
-// Tickets and the account, 2026-10-05 fixes: a waitlisted rider's place is the server's live rank
-// (never the W serial), an own-bike ride on a paid night counts as ridden, the badge popup behaves as
+// Tickets and the account, 2026-10-05 fixes: a waitlisted rider is never told their place in line (the
+// owner, 2026-11-10; it was the server's live rank, never the W serial, from 2026-10-05), an own-bike ride on a paid night counts as ridden, the badge popup behaves as
 // a dialog, and the calendar file speaks the rider's language and the ride's kind.
 
 const PW = {
@@ -26,11 +26,14 @@ async function myRides(page: Page, fx: Record<string, unknown>) {
 }
 
 test.describe('@customer:bookings fix5 tickets', () => {
-  test("a waitlisted rider's place is the server's rank, not the W serial", async ({ page }) => {
+  test("a waitlisted rider is never told their place in line, and it is not asked for", async ({ page }) => {
+    const asked: string[] = [];
+    page.on('request', (r) => { if (r.url().includes('customer_waitlist_ranks')) asked.push(r.url()); });
     await myRides(page, { 'rpc:customer_waitlist_ranks': [{ entry_id: 'c', rank: 2 }] });
-    await expect(page.locator('#tab-myrides .wl-note').first()).toContainText('number 2 in line');
-    await expect(page.locator('#tab-myrides .ticket-num-label.wl-loud').first()).toContainText('number 2 in line');
-    await expect(page.locator('#tab-myrides')).not.toContainText('number 7');
+    await expect(page.locator('#tab-myrides .wl-note').first()).toContainText('in line for a place');
+    await expect(page.locator('#tab-myrides .ticket-num-label.wl-loud').first()).toHaveText('On the waitlist');
+    await expect(page.locator('#tab-myrides')).not.toContainText(/number 2|number 7|in line:/i);
+    expect(asked).toEqual([]);
   });
 
   test('with no rank from the server the ticket says only that the rider is in line', async ({ page }) => {

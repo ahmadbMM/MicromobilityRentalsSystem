@@ -24,7 +24,7 @@ const queue_entries = [
 
 test.describe('a rider on the waitlist', () => {
   test('keeps their booking number, and is told loudly that they are waitlisted', async ({ page }) => {
-    // the place in line is the server's (customer_waitlist_ranks), never the W serial (2026-10-05)
+    // never their place in line (the owner, 2026-11-10), even with a server that would say it
     await stubSupabase(page, { sessions: [sess], bikes: [], queue_entries, 'rpc:community_member': true, 'rpc:customer_waitlist_ranks': [{ entry_id: 'c', rank: 1 }] });
     await loginCustomer(page, { id: 'c1', name: 'Rider 3' });
     await page.goto('/');
@@ -36,11 +36,12 @@ test.describe('a rider on the waitlist', () => {
     await expect(page.locator('.ticket-num-label.wl-loud').first()).toContainText(/waitlist/i);
     // the label says it (a status badge beside it only repeated the word, 2026-09-30) ...
     await expect(page.locator('#tab-myrides .badge-waitlist')).toHaveCount(0);
-    // ... and they are told what it means, their place in words (not the internal "W1"), and
-    // that nothing is held yet
-    await expect(page.locator('.ticket-num-label.wl-loud').first()).toContainText('number 1 in line');
-    await expect(page.locator('.wl-note').first()).toContainText(/number 1 in line/i);
+    // ... and they are told what it means and that nothing is held yet, never which number in the line
+    // they are (the owner, 2026-11-10: "don't tell customers how much is their number in line")
+    await expect(page.locator('.ticket-num-label.wl-loud').first()).toHaveText('On the waitlist');
+    await expect(page.locator('.wl-note').first()).toContainText('in line for a place');
     await expect(page.locator('.wl-note').first()).toContainText('Nothing is held for you yet');
+    await expect(page.locator('#tab-myrides')).not.toContainText(/number 1|in line:/i);
   });
 });
 
