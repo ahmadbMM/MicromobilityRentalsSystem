@@ -576,6 +576,8 @@ language sql stable security definer set search_path = public as $$
     'vat', round(o.total * 15 / 115, 2),
     'courier', o.courier, 'tracking_no', o.tracking_no, 'expires_at', o.expires_at, 'paid_at', o.paid_at,
     'created_at', o.created_at, 'cancel_reason', o.cancel_reason, 'payment_id', o.payment_id,
+    -- the order's invoice number (paid by card or wholly from the wallet: 'ord-<no>' either way)
+    'receipt_no', (select r.no from receipt_numbers r where r.receipt_id = 'ord-' || o.no),
     'payment', (select _pay_json(p) from payments p where p.id = o.payment_id),
     'items', coalesce((select jsonb_agg(jsonb_build_object('name', i.name, 'variant', i.variant, 'qty', i.qty,
                          'unit_price', i.unit_price, 'product_id', i.product_id, 'variant_id', i.variant_id,
