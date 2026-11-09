@@ -1269,7 +1269,7 @@ everyone, free, no bikes. `ride_kind 'blood'` (event_kind community, open_to_all
 
 ## Volunteers and their portal (2026-11-05, migration 20261105120000)
 
-Volunteers use their customer accounts on a portal of their own, `volunteer.micromobility.sa` (mm-platform `apps/volunteers`, the Vendors pattern: a Worker, a static client, the token in an HttpOnly host-only cookie, an allowlist of RPCs; it deploys when the repo variable `MM_VOLUNTEERS` is `on`). Anyone with an account can register interest; staff accept one at a time or everyone at once, or tick "accept automatically" on a volunteer. An opportunity is a session whose volunteer switch is on. Staff run it from the section `volunteers` at `/volunteers`, `/volunteers/interested`, `/volunteers/opportunities`, `/volunteers/hours`, `/volunteers/activity`, `/volunteers/settings` (part `staff-parts/volunteers.js`).
+Volunteers use their customer accounts on a portal of their own, `volunteer.micromobility.sa` (mm-platform `apps/volunteers`, the Vendors pattern: a Worker, a static client, the token in an HttpOnly host-only cookie, an allowlist of RPCs; it deploys when the repo variable `MM_VOLUNTEERS` is `on`). Anyone with an account can register interest; staff accept one at a time or everyone at once, or tick "accept automatically" on a volunteer. An opportunity is a session whose volunteer switch is on. Staff run it from the section `volunteers` at `/volunteers` (Shifts), `/volunteers/applications`, `/volunteers/people`, `/volunteers/opportunities`, `/volunteers/hours`, `/volunteers/activity`, `/volunteers/settings` (part `staff-parts/volunteers.js`); `/volunteers/interested`, the page that joined Shifts on 2026-11-09, opens Shifts.
 - **Who can do what is in the database, never only the page.** A volunteer has no Auth user, so `is_staff()` is false and only the `volunteer_*` SECURITY DEFINER functions reach anything. Every working call passes `_vol_gate` (token, active volunteer, agreement accepted, accepted on this session, the session's window and cut-off, and the capability `caps`). Refusals are `VOL_*` codes, and the portal has words for each. `_vol_desk_reason` sends anything about money (add-ons count, and the reason reads only `desk`, never that money is due), bikes, approval, sharing, waivers or the waitlist back to the desk, `VOL_OWN_BOOKING` refuses their own booking, and every search and mark goes in `volunteer_log`. A volunteer can undo only their own latest mark: the log keeps the mark's stamp (`mark_at`) and the status it replaced (`prev_status`), and once the desk has given a bike the undo is the desk's. Withdrawing cannot wipe a decline or a no-show. They see a name, a booking number and a check-in state, never contact details or payments.
 - **The cut-off**: `volunteer_sessions.closes_at` is required once a session is switched on. After it, volunteers cannot register or work on that session. `enabled` defaults to false, so nothing appears on the portal until staff switch it on. A blank `opens_at` means midnight of the session's day in Saudi time (`_vol_starts`), so accepting someone early does not open the session early.
 - **Hours**: `customers.volunteer_hours` is a sum the trigger `volunteer_hours_sum` keeps from the ledger `volunteer_hours`; never write it directly. A void is a mark on the ledger row, and a session gives each person one award. Merging accounts moves hours, shifts and the volunteer row, and unmerging moves them back through the merge's record.
@@ -1280,6 +1280,25 @@ Volunteers use their customer accounts on a portal of their own, `volunteer.micr
 - **Word keys**: staff keys here start with `zv` or `zf`, not `v`. The desk core has `'v'+Date.now()`, so `langKeyParts` treats the prefix `v` as buildable and every key starting with `v` stays in the core words.
 - **The older Volunteer role** above (a staff row, `staff_volunteer_find` and friends) stays only until after the 5 Nov event, then a later migration retires it. Note the new staff functions share the `staff_volunteer_` prefix but are different names.
 - Tests: `tests/volunteers.spec.ts` here; `apps/volunteers/test` and `e2e/volunteers` in mm-platform.
+- **The section rebuilt (2026-11-09, the owner: "redesign the whole staff Volunteers section"; migration 20261109120000)** in Soft
+  Solid on Bookings' patterns: the pages are one segmented row (`_vmTabs`, `VM_TABS`, counts on Shifts and Applications), a
+  figures bar whose numbers filter (`_vxFigs`), a toolbar row with search, Select, saved views and `_fPanel` (selecting puts the
+  bulk actions in its place: `#vd-sel-bar`, `#vm-sel-bar`, `#va-sel-bar`), and table cards whose rows are subgrids of one grid
+  (`.vx-tbl`, `.vx-row` / `.vd-row`) with a 3px state edge, a pill, one action and the shared ⋯ menu (`_rowMenu`; specs open
+  `.rq-more`, then the `menuitem`). CSS: "VOLUNTEERS, REBUILT" in styles.css (`--vx-*` tokens, dark and booth values).
+  **Shifts** leads with the offers waiting for an answer (`_vdPendHtml`, Accept all; the picker and `_vdOtherPend` name other
+  opportunities that have some), then the team: the lead (`_vdLead` -> `staff_volunteer_lead`, one per opportunity, the
+  two-tone `_vxLeadIc`, kept in the part because `_ART` rides on every customer's page), "by the lead" on times
+  (`clock_in_by` / `clock_out_by`), Undo for 10 s on the row after a check-in or check-out made here (`_vdRuMark`), and what
+  the event gave once hours are given (`_n6vRwChips`: the VL- code from `promo_codes.volunteer_session_id` with used or its
+  last day, the certificate's serial from `volunteer_certs`; read with the section, `W.codes` / `W.certs`, and again for the
+  session after an award or a cancel, `_n6vRwRead`). Status `ended` is "Ended without an answer", under Not coming.
+  **Applications** (`_vaHtml`): `status = 'applied'` with `profile_at` (a row without one is listed after, "no profile yet");
+  Approve, Approve and trust (`p_auto_accept`), Decline (`removed`), and many at once. **People** shows the profile, events
+  worked (`_vmEventsN`) and the hours level; a person's window lists their rewards (`_vmRwPerson`). **Hours and rewards** adds
+  a Rewards view (`_vmRwHtml`: every VL- code and certificate, print and withdraw). **Activity** names `team`, `lead_*` (the
+  teammate, by the shift in `entry_id`), `staff_lead`, `reward`, `ended` ("automatically" for actor `auto`). Spec:
+  `tests/volunteers-rework.spec.ts`.
 - **The staff review's second part (2026-11-06, migration 20261107131000, functions `_n6w*`)**: Message team (WhatsApp one by one, `volunteer_shifts.reminded_at` through `staff_volunteer_reminded`, else kept on the device; there is no server push sender, so no automatic reminder), Invite (`volunteers.days`, weekday 0 = Sunday), the Applied pill, `volunteers.skills` / `whatsapp` (the portal's "Become a volunteer", `volunteer_apply`; `_vmWa` prefers that number), `briefed_at` (portal tick `volunteer_brief_ack`; a trigger clears it when the briefing changes), certificates in `volunteer_certs` (serial MMV-YYYY-NNNNN, a 12-character code; `volunteer_cert_check` is the one call the portal answers signed out, at `#check/<code>`), the bulk calls `staff_volunteer_shift_times_many` / `staff_volunteer_hours_add_many` (each row through the one-person function), a check-in or check-out that the network lost goes to the desk outbox as kind `vtimes` (bid `vol:<session>:<customer>`, not a booking: `_dqRun` does not re-read it as one), the Shifts view and roster filters in `ST_KEYS.volunteers` / `SV_SECS.volunteers` (`S.vdv`, `S.vmf` = the roster's `W.f`), and the Analytics view `volunteers` (`_n6wAnPaint`, its own narrow reads). Specs: `tests/volunteers-review2.spec.ts`.
 
 ## The volunteer certificate is one design, in `certificate/` (2026-11-08, migration 20261108220000)
@@ -2233,10 +2252,12 @@ The owner: "referring a friend that completes a paid ride gets a free ride".
 The owner: "when a code is used show it besides the booking and what type of code it is with a logo". The answer: staff
 Bookings rows, the booking and check-in windows, reports and their files, and the rider's ticket.
 - **Kinds.** `_codeKindOf(code)`: `rw` the friend's referral discount, `rf` the referrer's free ride, `rb` the bonus,
-  `bd` the blood donation free ride, `promo` any code staff made - read off the promo_codes row a staff device holds,
+  `bd` the blood donation free ride, `vl` a volunteer's free ride for an event worked (2026-11-09: `volunteer_session_id` on a
+  staff device, the `VL-` prefix on a rider's; the Volunteer badge's raised hand and blue; the free ride cards say it is the
+  volunteer's, `_frVl`), `promo` any code staff made - read off the promo_codes row a staff device holds,
   else the prefix; `sat` a Saturday ride code (`ride_code`). `CODE_KINDS` names them (`sat` is `satcF`, "Ride code");
   `_CODE_IC` draws each mark in the rider icons' monoline, `.code-k-<kind>` gives its colour (lighter on dark screens
-  and the dark live ticket). `_codeOne(code)`: rw/rf/rb/bd pay for rider 1 alone, on a staff device's booking too.
+  and the dark live ticket). `_codeOne(code)`: rw/rf/rb/bd/vl pay for rider 1 alone, on a staff device's booking too.
 - **Showing.** `_entryCodes(es)` lists a booking's or a party's codes; `_codeTag(x, full)` is the chip: the mark and the
   code with the kind in its title, or (full) the kind's name too. Staff: `_bkCodes` gives a Saturday code its name,
   `_codeChips(e)` rides in `_ptnChip` (so every place that shows a partner shows the codes: phone cards, the booking and

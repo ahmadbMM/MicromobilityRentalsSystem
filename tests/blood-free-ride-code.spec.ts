@@ -80,3 +80,42 @@ test.describe('Blood Donation free ride code', () => {
     expect(await page.evaluate('S.promoApplied')).toBeNull();
   });
 });
+
+// A volunteer's free ride for an event worked (VL-, migration 20261109120000): customer_blood_rewards lists it beside the blood
+// codes (entry 'vl-<session>'), on the same rules; the cards say it is the volunteer's, with the Volunteer badge's raised hand.
+test.describe('@customer:reserve the volunteer free ride code', () => {
+  const VL = { entry_id: 'vl-2026-11-05-bd', code: 'VL-7F3A92C1', expires_at: '2099-12-05', used: false };
+  const vlOk = { 'rpc:promo_lookup': { ok: true, code: 'VL-7F3A92C1', kind: 'percent', value: 100, applies_to: null } };
+
+  test('the event picker says it is the volunteer free ride, with its mark; Redeem pays for rider 1 alone', async ({ page }) => {
+    await boot(page, [VL], vlOk);
+    const card = page.locator('#land-free-rides .fr-card');
+    await expect(card).toHaveCount(1);
+    await expect(card.locator('.fr-t')).toHaveText('Your volunteer free ride');
+    await expect(card.locator('.fr-t .code-k-vl svg.code-ic')).toHaveCount(1);
+    await expect(card).toContainText('VL-7F3A92C1');
+    await expect.poll(() => page.evaluate('(S._bldR||[]).length')).toBe(1);
+    await step2(page, 2, ['Hybrid', 'Hybrid']);
+    const box = page.locator('#bld-redeem .fr-card');
+    await expect(box.locator('.fr-t')).toHaveText('You have a volunteer free ride');
+    await box.locator('.fr-go').click();
+    await expect.poll(() => page.evaluate('S.promoApplied&&S.promoApplied.one')).toBe(true);
+    await expect(page.locator('.cu-promo-disc .code-k-vl, .cu-promo-disc .code-ic').first()).toBeAttached();
+    expect(await page.evaluate(`[_codeKindOf('VL-7F3A92C1'),_codeOne('vl-7f3a92c1'),_codeKindOf('BD-1A2B3C4D'),_frVl({entry_id:'q1',code:'BD-1A2B3C4D'})]`)).toEqual(['vl', true, 'bd', false]);
+  });
+
+  test('the blood codes\' rules: Carbon says why, a Saturday ride does not offer it', async ({ page }) => {
+    await boot(page, [VL], vlOk);
+    await expect.poll(() => page.evaluate('(S._bldR||[]).length')).toBe(1);
+    await step2(page, 1, ['Road Carbon']);
+    const box = page.locator('#bld-redeem .fr-card');
+    await expect(box.locator('.fr-t')).toHaveText('You have a volunteer free ride');
+    await expect(box).toContainText('Carbon');
+    await expect(box.locator('.fr-go')).toHaveCount(0);
+    await page.locator('#reg-promo-step2').fill('VL-7F3A92C1');
+    await page.locator('#reg-promo-btn-step2').click();
+    await expect.poll(() => page.evaluate('S._promoMsg')).toContain('Carbon');
+    // the session rule is the blood codes' (_bldCodeSessOk): a JCC ride takes it, the Saturday ride does not
+    expect(await page.evaluate(`[_bldOpenCodes().filter(y=>!y.ref&&_bldCodeSessOk(_sessDisp('s0'))).length,_bldOpenCodes().filter(y=>!y.ref&&_bldCodeSessOk(_sessDisp('s1'))).length]`)).toEqual([1, 0]);
+  });
+});

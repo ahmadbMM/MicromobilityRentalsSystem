@@ -41,33 +41,47 @@ function rpcs(page: Page, name: string): Record<string, unknown>[] {
   page.on('request', (r) => { if (new RegExp(`/rpc/${name}$`).test(r.url().split('?')[0])) sent.push(r.postDataJSON()); });
   return sent;
 }
-const tile = (page: Page) => page.locator('#tab-volunteers .inv-tabs');
-const roster = (page: Page) => tile(page).getByRole('button', { name: 'Volunteers', exact: true }).click();
+const tile = (page: Page) => page.locator('#tab-volunteers .vx-tabs');
+const roster = (page: Page) => tile(page).getByRole('button', { name: 'People', exact: true }).click();
 const row = (page: Page, id: string) => page.locator(`#vd-list .vd-row[data-cust="${id}"]`);
+const pend = (page: Page, id: string) => page.locator(`#vd-list .vx-pend .vd-row[data-cust="${id}"]`);
+const figs = (page: Page) => page.locator('#tab-volunteers .vx-figs');
+// A row's ⋯ menu (the rest of its actions since the rebuild of 2026-11-09), then the item.
+async function menu(page: Page, host: ReturnType<Page['locator']>, item: string) {
+  await host.locator('.rq-more').first().click();
+  await page.getByRole('menuitem', { name: item, exact: true }).click();
+}
 
 test.describe('@staff:volunteers The Volunteers section', () => {
   test('has its address, its tabs and its figures', async ({ page }) => {
     await staff(page);
     await expect(page).toHaveURL(/\/volunteers$/);
-    await expect(tile(page).getByRole('button')).toHaveText(['Shifts', 'Volunteers', 'Interested (2)', 'Opportunities', 'Hours', 'Activity', 'Settings']);
+    // the offers waiting for an answer count on Shifts, the profiles waiting for staff's yes on Applications (2026-11-09)
+    await expect(tile(page).getByRole('button')).toHaveText(['Shifts 2', 'Applications 2', 'People', 'Opportunities', 'Hours and rewards', 'Activity', 'Settings']);
+    await expect(tile(page).getByRole('button', { name: /Shifts/ })).toHaveAttribute('aria-pressed', 'true');
     await roster(page);
     await expect(page).toHaveURL(/\/volunteers\/people$/);
-    await expect(page.locator('#tab-volunteers .stat-card')).toHaveCount(6);
+    await expect(figs(page).locator('.vx-fig')).toHaveCount(6);
     await expect(page.locator('#vm-list .vm-row')).toHaveCount(1); // the active ones first
     await expect(page.locator('#vm-list .vm-row').first()).toContainText('Sara Haddad');
     await expect(page.locator('#vm-list .vm-row').first()).toContainText('3.5');
-    await tile(page).getByRole('button', { name: /Interested/ }).click();
-    await expect(page).toHaveURL(/\/volunteers\/interested$/);
+    await tile(page).getByRole('button', { name: /Applications/ }).click();
+    await expect(page).toHaveURL(/\/volunteers\/applications$/);
     await page.reload();
     await waitForSb(page);
-    await expect(page.locator('#tab-volunteers .vm-group')).toHaveCount(1);
+    await expect(page.locator('#tab-volunteers .vx-app')).toHaveCount(2);
+    // the old Interested page's address opens Shifts, where its list now leads
+    await page.goto('/volunteers/interested');
+    await waitForSb(page);
+    await expect(tile(page).getByRole('button', { name: /Shifts/ })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#vd-list .vx-pend .vd-row')).toHaveCount(2);
   });
 
   test('anyone interested can be accepted one at a time, or all at once', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_decide');
     await staff(page, { 'rpc:staff_volunteer_decide': { ok: true, n: 1, skipped: 0 } });
-    await tile(page).getByRole('button', { name: /Interested/ }).click();
-    const one = page.locator('#tab-volunteers .vm-row[data-cust="c2"]');
+    // Shifts opens with them first (the Interested page joined it, 2026-11-09)
+    const one = pend(page, 'c2');
     await expect(one).toContainText('Omar Saleh');
     await expect(one).toContainText('Would like: Guide');
     await expect(one).toContainText('I speak Arabic');
@@ -75,13 +89,14 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toMatchObject({ p_session: SID, p_customers: ['c2'], p_status: 'accepted', p_role: 'Guide' }); // the role they asked for, the session has it
     await expect(one).toHaveCount(0); // answered here at once, nothing read again (2026-11-06 review)
-    await page.locator('#tab-volunteers .vm-row[data-cust="c3"]').getByRole('button', { name: 'Decline' }).click();
+    await expect(row(page, 'c2')).toContainText('Not here yet'); // on the team now
+    await pend(page, 'c3').getByRole('button', { name: 'Decline' }).click();
     await expect.poll(() => sent.length).toBe(2);
     expect(sent[1]).toMatchObject({ p_customers: ['c3'], p_status: 'declined' });
-    await expect(page.locator('#tab-volunteers .vm-group')).toHaveCount(0);
+    await expect(page.locator('#vd-list .vx-pend')).toHaveCount(0);
     await page.reload();
     await waitForSb(page);
-    await page.locator('#tab-volunteers .vm-group').getByRole('button', { name: 'Accept all (2)' }).click();
+    await page.locator('#vd-list .vx-pend').getByRole('button', { name: 'Accept all (2)' }).click();
     await expect.poll(() => sent.length).toBe(3);
     expect(sent[2]).toMatchObject({ p_session: SID, p_status: 'accepted' });
     expect((sent[2].p_customers as string[]).sort()).toEqual(['c2', 'c3']);
@@ -89,8 +104,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
 
   test('a refused accept is said, and someone left out is counted', async ({ page }) => {
     await staff(page, { 'rpc:staff_volunteer_decide': { ok: true, n: 0, skipped: 2 } });
-    await tile(page).getByRole('button', { name: /Interested/ }).click();
-    await page.locator('#tab-volunteers .vm-group').getByRole('button', { name: 'Accept all (2)' }).click();
+    await page.locator('#vd-list .vx-pend').getByRole('button', { name: 'Accept all (2)' }).click();
     await expect(page.locator('.toast, #toast-container').first()).toContainText('2 left out');
   });
 
@@ -109,7 +123,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const sent = rpcs(page, 'staff_volunteer_hours_add');
     await staff(page, { 'rpc:staff_volunteer_hours_add': { __rpcError: { status: 400, code: 'P0001', message: 'VOL_HOURS_NEGATIVE' } } });
     await roster(page);
-    await page.locator('#vm-list .vm-row').first().getByRole('button', { name: 'Add hours' }).click();
+    await menu(page, page.locator('#vm-list .vm-row').first(), 'Add hours');
     await page.locator('#vm-h').fill('-9');
     await page.locator('#confirm-modal').getByRole('button', { name: 'Add hours' }).click();
     await expect.poll(() => sent.length).toBe(1);
@@ -139,14 +153,15 @@ test.describe('@staff:volunteers The Volunteers section', () => {
   test('Shifts opens on the coming session, like Bookings: its figures, its team, and the interested', async ({ page }) => {
     await staff(page);
     await expect(page.locator('#tab-volunteers .vd-sel')).toHaveValue(SID);
-    await expect(page.locator('#tab-volunteers .stat-card')).toHaveCount(6);
-    await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(1); // the team: Sara
+    await expect(figs(page).locator('button.vx-fig')).toHaveCount(7); // the team, each state, everyone: each figure filters
+    await expect(page.locator('#vd-list .vd-tbl .vd-row:not(.vd-head)')).toHaveCount(3); // the two waiting for an answer, then the team: Sara
+    await expect(page.locator('#vd-list .vx-pend .vd-row')).toHaveCount(2);
     await expect(row(page, 'c1')).toContainText('Not here yet');
     await expect(row(page, 'c1')).toContainText('Check-in'); // her role
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'Interested' }).click();
+    await figs(page).getByRole('button', { name: /Interested/ }).click();
     await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(2);
     await expect(row(page, 'c2')).toContainText('I speak Arabic');
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'All' }).click();
+    await figs(page).getByRole('button', { name: /All/ }).click();
     if (!(await page.locator('#vd-q').isVisible())) await page.locator('[data-srch="vd"] .srch-btn').click(); // folded on a phone
     await page.locator('#vd-q').fill('nora');
     await expect(page.locator('#vd-list .vd-row:not(.vd-head)')).toHaveCount(1);
@@ -160,6 +175,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     expect(times[0]).toMatchObject({ p_session: SID, p_customer: 'c1', p_out: null });
     expect(Date.now() - +new Date(times[0].p_in as string)).toBeLessThan(60000);
     await expect(row(page, 'c1')).toContainText('On duty');
+    await expect(row(page, 'c1').getByRole('button', { name: /Undo check-in/ })).toBeVisible(); // on its row for 10 s, beside the next action
     await row(page, 'c1').getByRole('button', { name: 'Check out' }).click();
     await expect.poll(() => times.length).toBe(2);
     expect(times[1]).toMatchObject({ p_customer: 'c1', p_in: times[0].p_in });
@@ -199,7 +215,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const save = rpcs(page, 'staff_volunteer_shift_save');
     const hrs = rpcs(page, 'staff_volunteer_hours_add');
     await staff(page, { volunteer_hours: [], 'rpc:staff_volunteer_shift_times': { ok: true }, 'rpc:staff_volunteer_shift_save': { ok: true }, 'rpc:staff_volunteer_hours_add': { ok: true, id: 2, total: 5 } });
-    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    await menu(page, row(page, 'c1'), 'Manage');
     const box = page.locator('#confirm-modal');
     await box.locator('#vd-in').fill('2099-11-05T17:00');
     await box.locator('#vd-out').fill('2099-11-05T16:00');
@@ -212,7 +228,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     expect(new Date(times[0].p_in as string).toISOString()).toBe('2099-11-05T14:00:00.000Z'); // Saudi time
     expect(new Date(times[0].p_out as string).toISOString()).toBe('2099-11-05T18:30:00.000Z');
     expect(save[0]).toMatchObject({ p_session: SID, p_customer: 'c1', p_status: 'accepted', p_note: 'Gate 3' });
-    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    await menu(page, row(page, 'c1'), 'Manage');
     await box.locator('#vd-h').fill('1.5');
     await box.getByRole('button', { name: 'Add hours' }).click();
     await expect.poll(() => hrs.length).toBe(1);
@@ -220,7 +236,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     await expect(box.getByRole('button', { name: 'Take off this session' })).toHaveCount(0); // clocked in now (kept here, not read back): no taking off
     await page.reload(); // the stub's row again: not clocked, no hours
     await waitForSb(page);
-    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    await menu(page, row(page, 'c1'), 'Manage');
     await box.getByRole('button', { name: 'Take off this session' }).click();
     await expect.poll(() => save.length).toBe(2);
     expect(save[1]).toMatchObject({ p_customer: 'c1', p_status: null });
@@ -229,8 +245,9 @@ test.describe('@staff:volunteers The Volunteers section', () => {
   test('many at once: select, check in', async ({ page }) => {
     const times = rpcs(page, 'staff_volunteer_shift_times');
     await staff(page, { 'rpc:staff_volunteer_shift_times': { ok: true } });
-    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'Select' }).click();
-    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Select all' }).click();
+    await page.locator('#vd-bar').getByRole('button', { name: 'Select' }).click();
+    await page.locator('#vd-sel-bar').getByRole('button', { name: 'Select all' }).click(); // the team; the offers keep their Accept all
+    await expect(page.locator('#vd-sel-bar')).toContainText('1 selected');
     await page.locator('#vd-sel-bar').getByRole('button', { name: 'Check in' }).click();
     await expect.poll(() => times.length).toBe(1);
     expect(times[0]).toMatchObject({ p_customer: 'c1', p_out: null });
@@ -242,7 +259,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const inNow = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, clock_in: new Date(Date.now() - 36e5).toISOString() } : x));
     await staff(page, { volunteer_sessions: [fixed], volunteer_shifts: inNow, 'rpc:staff_volunteer_shift_times': { ok: true }, 'rpc:staff_volunteer_award': { ok: true, added: 1, skipped: 0 } });
     await expect(row(page, 'c1')).toContainText('+966500000001');
-    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'View' }).click();
+    await menu(page, page.locator('#tab-volunteers .vd-acts'), 'View');
     await page.getByRole('checkbox', { name: 'Mobile number and WhatsApp' }).uncheck();
     await page.getByRole('checkbox', { name: 'Give the hours at check-out' }).check();
     await page.locator('#confirm-modal .x-close').click();
@@ -274,7 +291,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
       'rpc:staff_volunteer_decide': { ok: true, n: 1, skipped: 0, expired: 0, unagreed: 0 },
     };
     await staff(page, more);
-    await page.locator('#tab-volunteers .vd-acts').getByRole('button', { name: 'Accept every active volunteer' }).click();
+    await menu(page, page.locator('#tab-volunteers .vd-acts'), 'Accept every active volunteer');
     const box = page.locator('#confirm-modal');
     await expect(box.locator('#vd-all-n')).toContainText('1 volunteers will be put on this session. 1 left out');
     expect(decide).toHaveLength(0); // nothing until pressed
@@ -286,7 +303,6 @@ test.describe('@staff:volunteers The Volunteers section', () => {
 
   test('an accept says who was left out because their access ended, and who has not accepted the agreement', async ({ page }) => {
     await staff(page, { 'rpc:staff_volunteer_decide': { ok: true, n: 1, skipped: 1, expired: 1, unagreed: 1 } });
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'Interested' }).click();
     await expect(row(page, 'c2')).toContainText('Agreement not accepted');
     await row(page, 'c2').getByRole('button', { name: 'Accept' }).click();
     await expect(page.getByText('1 left out: their access has ended.')).toBeVisible();
@@ -314,7 +330,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const sh = shifts.map((x) => (x.customer_id === 'c1' ? { ...x, status: 'done', clock_in: '2099-11-05T14:00:00+00:00', clock_out: '2099-11-05T16:00:00+00:00' } : x));
     const award = [{ id: 11, customer_id: 'c1', session_id: SID, hours: 2, worked_on: '2026-11-05', source: 'session', added_by: 'Admin One' }];
     await staff(page, { volunteer_shifts: sh, volunteer_hours: award, 'rpc:staff_volunteer_hours_void': { ok: true, total: 0 }, 'rpc:staff_volunteer_shift_times': { ok: true } });
-    await row(page, 'c1').getByRole('button', { name: 'Manage' }).click();
+    await menu(page, row(page, 'c1'), 'Manage');
     const box = page.locator('#confirm-modal');
     await expect(box.getByRole('button', { name: 'Undo check-out' })).toBeVisible();
     await expect(box.getByRole('button', { name: 'Take off this session' })).toHaveCount(0);
@@ -367,10 +383,11 @@ test.describe('@staff:volunteers The Volunteers section', () => {
 
   test('hours by person for a period, and the twelve months held said', async ({ page }) => {
     await staff(page);
-    await tile(page).getByRole('button', { name: 'Hours' }).click();
+    await tile(page).getByRole('button', { name: 'Hours and rewards' }).click();
     await expect(page.locator('#tab-volunteers')).toContainText('Showing the last twelve months.');
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'By person' }).click();
+    await page.locator('#tab-volunteers .vx-seg').getByRole('button', { name: 'By person' }).click();
     await expect(page.locator('#vmh-people .vm-res-row[data-cust="c1"]')).toContainText('3.5 hours · 1 sessions · did not come 0');
+    await page.locator('[aria-controls="fm-vmh"]').click(); // the period sits behind the list's Filters button
     await page.locator('#vmh-per').selectOption('month');
     await expect(page.locator('#vmh-per')).toHaveValue('month');
   });
@@ -383,6 +400,7 @@ test.describe('@staff:volunteers The Volunteers section', () => {
     const first = page.locator('#tab-volunteers .vm-led .vm-res-row').first();
     await expect(first).toContainText("Given the session's hours");
     await expect(first).toContainText('by Admin One');
+    await page.locator('[aria-controls="fm-vml"]').click(); // the list's filters sit behind its Filters button
     await page.locator('#tab-volunteers select[aria-label="Show"]').selectOption('all'); // Activity opens on changes only (VL19); the portal's own entries need everything
     await page.locator('#tab-volunteers select[aria-label="Done by"]').selectOption('vol');
     await expect(page.locator('#tab-volunteers .vm-led .vm-res-row')).toHaveCount(1);

@@ -23,6 +23,8 @@ const entry = (id: string, extra: Record<string, unknown>) => ({
 });
 const fixtures = {
   sessions, bikes,
+  // the Volunteers section's read, which the customer editor shares, takes the certificates too (20261109120000)
+  volunteer_certs: [],
   queue_entries: [
     entry('q1', {}),
     entry('q2', { status: 'active', assigned_bike_id: 'b2', queue_num: 2, paid: true }),

@@ -19,6 +19,7 @@ const queue_entries = [
   row(4, 'Bea Bonus', { promo_code: 'RB-9F8E7D6C', price: 0 }),
   row(5, 'Dana Donor', { promo_code: 'BD-1A2B3C4D', price: 0 }),
   row(6, 'Nora Nobody'),
+  row(7, 'Vic Volunteer', { promo_code: 'VL-7F3A92C1', price: 0 }),
 ];
 const promo_codes = [
   { id: 'p1', code: 'SUMMER10', kind: 'percent', value: 10, active: true, uses: 1 },
@@ -26,6 +27,8 @@ const promo_codes = [
   { id: 'rf-c8', code: 'RF-1A2B3C4D', kind: 'percent', value: 100, active: true, uses: 1, max_uses: 1, customer_id: 'c7', referral_friend_id: 'c8' },
   { id: 'rb-c7', code: 'RB-9F8E7D6C', kind: 'percent', value: 100, active: true, uses: 1, max_uses: 1, customer_id: 'c7', referral_bonus_of: 'c7' },
   { id: 'bd-1', code: 'BD-1A2B3C4D', kind: 'percent', value: 100, active: true, uses: 1, max_uses: 1, customer_id: 'c6', blood_entry_id: 'x1' },
+  // a volunteer's free ride for an event worked (VL-, 20261109120000): staff read its kind off volunteer_session_id
+  { id: 'vl-1', code: 'VL-7F3A92C1', kind: 'percent', value: 100, active: true, uses: 1, max_uses: 1, customer_id: 'c5', volunteer_session_id: '2099-02-01' },
 ];
 
 async function boot(page: Page, width = 1440) {
@@ -34,7 +37,7 @@ async function boot(page: Page, width = 1440) {
   await unlockStaff(page);
   await page.goto('/');
   await waitForSb(page);
-  await page.waitForFunction('(S.promoCodes||[]).length===5');
+  await page.waitForFunction('(S.promoCodes||[]).length===6');
   await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${LIVE}';S.sfShowFinished=true;renderStaffQueue()`);
 }
 const tr = (page: Page, id: string) => page.locator(`#tab-queue .queue-table tbody tr[data-id="${id}"]`);
@@ -55,6 +58,7 @@ test.describe('@staff:bookings the code each booking used', () => {
       ['q3', 'rf', 'Referral free ride', 'RF-1A2B3C4D'],
       ['q4', 'rb', 'Referral bonus ride', 'RB-9F8E7D6C'],
       ['q5', 'bd', 'Blood donation free ride', 'BD-1A2B3C4D'],
+      ['q7', 'vl', 'Volunteer free ride', 'VL-7F3A92C1'],
     ];
     for (const [id, k, kind, code] of want) {
       const tag = cell(id).locator(`.code-tag.code-k-${k}`);
@@ -66,8 +70,8 @@ test.describe('@staff:bookings the code each booking used', () => {
     }
     await expect(cell('q6')).toHaveText('—');
     // the marks differ by kind, in colour too
-    const inks = await Promise.all(['q1', 'q2', 'q5'].map((id) => cell(id).locator('svg.code-ic').evaluate((el) => getComputedStyle(el).color)));
-    expect(new Set(inks).size).toBe(3);
+    const inks = await Promise.all(['q1', 'q2', 'q5', 'q7'].map((id) => cell(id).locator('svg.code-ic').evaluate((el) => getComputedStyle(el).color)));
+    expect(new Set(inks).size).toBe(4);
     // not beside the name as well
     await expect(tr(page, 'q1').locator('.rq-rider .code-tag')).toHaveCount(0);
   });
@@ -119,5 +123,19 @@ test.describe('@customer:account the code on the rider\'s ticket', () => {
     await expect(line.locator('.code-c')).toHaveText('RW-K7MQ2X-4FZ');
     await expect(line.locator('.code-off')).toContainText(String(fare / 2));
     await expect(rows.nth(1).locator('.cu-tr-code')).toHaveCount(0); // the guest's seat used no code
+  });
+
+  test('a volunteer free ride on the ticket: its kind read off the VL- prefix, rider 1 only', async ({ page }) => {
+    const jcc = { id: 's0', day: 'Sunday', session_date: '2099-02-08', capacity: 9, status: 'open', created_at: 1, bike_slots: null, location: 'JCC', addons: null };
+    await stubSupabase(page, { sessions: [jcc] });
+    await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
+    await page.goto('/');
+    await waitForSb(page);
+    const html = await page.evaluate(`renderBookingTicket([{id:'t1',queueNum:3,name:'Sara Haddad',sessionId:'s0',sessionDay:'Sunday',sessionDate:'2099-02-08',status:'waiting',price:0,paid:false,typePreference:'Hybrid',promoCode:'VL-7F3A92C1',customerId:'c1',registeredAt:'2026-11-08T10:00:00Z'}])`) as string;
+    await page.evaluate((h) => { const d = document.createElement('div'); d.id = 'tk-probe'; d.innerHTML = h; document.body.appendChild(d); }, html);
+    const tag = page.locator('#tk-probe .cu-tr-code .code-tag.code-k-vl');
+    await expect(tag.locator('.code-kn')).toHaveText('Volunteer free ride');
+    await expect(tag.locator('.code-c')).toHaveText('VL-7F3A92C1');
+    expect(await page.evaluate(`_codeOne('VL-7F3A92C1')`)).toBe(true);
   });
 });

@@ -51,7 +51,12 @@ function rpcs(page: Page, name: string): Record<string, unknown>[] {
 const row = (page: Page, id: string) => page.locator(`#vd-list .vd-row[data-cust="${id}"]`);
 const acts = (page: Page) => page.locator('#tab-volunteers .vd-acts');
 const dlg = (page: Page) => page.locator('#confirm-modal .vm-dlg');
-const tab = (page: Page, name: string | RegExp) => page.locator('#tab-volunteers .inv-tabs').getByRole('button', { name, exact: typeof name === 'string' });
+const tab = (page: Page, name: string | RegExp) => page.locator('#tab-volunteers .vx-tabs').getByRole('button', { name, exact: typeof name === 'string' });
+// A row's ⋯ menu (the rest of its actions since the rebuild of 2026-11-09), then the item.
+async function menu(page: Page, host: ReturnType<Page['locator']>, item: string) {
+  await host.locator('.rq-more').first().click();
+  await page.getByRole('menuitem', { name: item, exact: true }).click();
+}
 
 test.describe('@staff:volunteers Volunteers, review part 2', () => {
   test('a shift row says what staff need to know: no agreement, under age, first time, briefed', async ({ page }) => {
@@ -107,14 +112,13 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     await expect(dlg(page).locator('.vm-res-row[data-cust="c3"]')).toHaveCount(0); // applied, not active
   });
 
-  test('applications: an Applied pill on the roster, with Accept and Decline', async ({ page }) => {
+  test('applications: their own page, with Approve', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_save');
     await staff(page, { 'rpc:staff_volunteer_save': { ok: true } });
-    await tab(page, 'Volunteers').click();
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'Applied (1)' }).click();
-    const r = page.locator('#vm-list .vm-row[data-cust="c3"]');
+    await tab(page, /Applications/).click();
+    const r = page.locator('#va-list .vx-app[data-cust="c3"]');
     await expect(r).toContainText('First aid');
-    await r.getByRole('button', { name: 'Accept' }).click();
+    await r.getByRole('button', { name: /^Approve ·/ }).click();
     await expect.poll(() => sent.length).toBe(1);
     expect(sent[0]).toEqual({ p_customer: 'c3', p_status: 'active' });
   });
@@ -122,7 +126,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
   test('availability: weekdays, skills and WhatsApp are edited in the volunteer\'s dialog', async ({ page }) => {
     const sent = rpcs(page, 'staff_volunteer_profile_save');
     await staff(page, { 'rpc:staff_volunteer_profile_save': { ok: true } });
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal .n6w-day[value="6"]').check();
     await page.locator('#n6w-skills').fill('Photos');
@@ -136,7 +140,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     const cert = { ok: true, id: 1, serial: 'MMV-2026-00001', code: 'ABCDEF123456', name: 'Sara Haddad', from: '2026-10-01', to: '2026-10-31', hours: 3.5, sessions: [{ title: 'Blood Donation', date: '2026-10-20', hours: 3.5 }], issued_at: '2026-11-06T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await expect(page.locator('#n6w-cf')).toHaveValue('2026-10-20'); // from the first hours
@@ -167,7 +171,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
       hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue_session': cert, volunteer_certs: [] });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     // The sessions this volunteer has hours on, one Make each.
@@ -200,7 +204,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
       await route.fulfill({ response: res, body });
     });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
@@ -215,7 +219,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
   test('before the database has certificates, Make prints the certificate as before', async ({ page }) => {
     await staff(page);
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await page.locator('#confirm-modal .ss-form-acts').getByRole('button', { name: 'Make the certificate' }).click();
@@ -233,14 +237,14 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
       from: '2026-10-01', to: '2026-10-31', hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     // c4 has a gender on the account: nothing to ask.
     await page.locator('#vm-list .vm-row[data-cust="c4"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await expect(page.locator('#n6w-cg')).toHaveCount(0);
     await page.locator('#confirm-modal').getByRole('button', { name: 'Close' }).first().click().catch(() => page.keyboard.press('Escape'));
     // c1 has none, so staff say who it is for, and what they say goes with the certificate.
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await expect(page.locator('#n6w-cg')).toBeVisible();
@@ -261,7 +265,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
       from: '2026-10-20', to: '2026-10-20', hours: 3.5, sessions: [], issued_at: '2026-11-08T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue': cert, volunteer_certs: [] });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#vm-list .vm-row[data-cust="c1"]').getByRole('button', { name: 'Manage' }).click();
     await page.locator('#confirm-modal').getByRole('button', { name: 'Certificate' }).click();
     await expect(page.locator('#n6w-cf')).toBeVisible();
@@ -288,7 +292,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
       issued_at: '2026-11-08T10:00:00Z' };
     await staff(page, { 'rpc:staff_volunteer_cert_issue_custom': cert, volunteer_certs: [] });
     await page.evaluate(`window._openReport=(h)=>{window.__rep=h;return {};}`);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     // From the roster itself, for somebody who has no account here at all.
     await page.getByRole('button', { name: 'Write a certificate' }).click();
     await page.locator('#n6w-xn').fill('Fahad Al-Harbi');
@@ -319,13 +323,13 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     const many = rpcs(page, 'staff_volunteer_shift_times_many'), one = rpcs(page, 'staff_volunteer_shift_times');
     const hrs = rpcs(page, 'staff_volunteer_hours_add_many'), hr1 = rpcs(page, 'staff_volunteer_hours_add');
     await staff(page, { 'rpc:staff_volunteer_shift_times_many': { ok: true, n: 2, failed: [] }, 'rpc:staff_volunteer_hours_add_many': { ok: true, n: 2, failed: [] } });
-    await acts(page).getByRole('button', { name: 'Select' }).click();
+    await page.locator('#vd-bar').getByRole('button', { name: 'Select' }).click();
     await page.locator('#vd-sel-bar').getByRole('button', { name: 'Select all' }).click();
     await page.locator('#vd-sel-bar').getByRole('button', { name: 'Check in' }).click();
     await expect.poll(() => many.length).toBe(1);
     expect((many[0].p_rows as { customer_id: string }[]).map((r) => r.customer_id).sort()).toEqual(['c1', 'c2']);
     expect(one.length).toBe(0);
-    await tab(page, 'Volunteers').click();
+    await tab(page, 'People').click();
     await page.locator('#tab-volunteers .vm-acts, #tab-volunteers .filter-row').getByRole('button', { name: 'Select', exact: true }).first().click();
     await page.locator('#vm-sel-bar').getByRole('button', { name: 'Select all' }).click();
     await page.locator('#vm-sel-bar').getByRole('button', { name: 'Add hours' }).click();
@@ -355,7 +359,7 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
   test('the view goes with the account and into saved views', async ({ page }) => {
     await staff(page);
     await expect(page.locator('#tab-volunteers .sv-bar[data-sv="volunteers"]').first()).toBeAttached();
-    await acts(page).getByRole('button', { name: 'View' }).click();
+    await menu(page, acts(page), 'View');
     await page.getByRole('checkbox', { name: 'Mobile number and WhatsApp' }).uncheck();
     expect(await page.evaluate(`_pref('state.volunteers',null)`)).toEqual({ 'vdv.phone': false });
     expect(await page.evaluate(`_svGet('volunteers').vdv.phone`)).toBe(false);
@@ -368,12 +372,13 @@ test.describe('@staff:volunteers Volunteers, review part 2', () => {
     ];
     await staff(page, { volunteer_log: log });
     await tab(page, 'Opportunities').click();
-    await page.locator('#tab-volunteers .filter-pill', { hasText: 'Past' }).click();
+    await page.locator('#tab-volunteers .vx-seg').getByRole('button', { name: 'Past' }).click();
     const p = page.locator(`.vm-row-s[data-sess="${past.id}"]`);
     await expect(p).toContainText('3.5 hours given');
     await expect(p).toContainText('1 no-shows');
     await tab(page, 'Activity').click();
     await expect(page.locator('#tab-volunteers .vm-led .vm-res-row')).toHaveCount(1);
+    await page.locator('[aria-controls="fm-vml"]').click(); // the list's filters sit behind its Filters button
     await page.getByRole('combobox', { name: 'Show' }).selectOption('all');
     await expect(page.locator('#tab-volunteers .vm-led .vm-res-row')).toHaveCount(2);
   });

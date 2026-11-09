@@ -10845,12 +10845,14 @@ html[dir="rtl"] #tab-queue .satc-fold[aria-expanded="false"] .satc-arr svg{trans
 .code-k-rf{--code-k:#0f766e;}
 .code-k-rb{--code-k:#a16207;}
 .code-k-bd{--code-k:#c8102e;}
+.code-k-vl{--code-k:#1f7ae0;} /* the Volunteer badge's blue (2026-11-09) */
 .code-k-promo{--code-k:#8c3b6e;}
 .code-k-sat{--code-k:#1d4ed8;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-rw,html[data-staff-theme="dark"] body.view-staff .code-k-rw,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rw{--code-k:#6ee7b7;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-rf,html[data-staff-theme="dark"] body.view-staff .code-k-rf,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rf{--code-k:#5eead4;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-rb,html[data-staff-theme="dark"] body.view-staff .code-k-rb,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-rb{--code-k:#fcd34d;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-bd,html[data-staff-theme="dark"] body.view-staff .code-k-bd,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-bd{--code-k:#ff8a9a;}
+html[data-theme="dark"] body:not(.view-staff) .code-k-vl,html[data-staff-theme="dark"] body.view-staff .code-k-vl,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-vl{--code-k:#8fd0ff;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-promo,html[data-staff-theme="dark"] body.view-staff .code-k-promo,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-promo{--code-k:#f0abd6;}
 html[data-theme="dark"] body:not(.view-staff) .code-k-sat,html[data-staff-theme="dark"] body.view-staff .code-k-sat,body:not(.view-staff) .ticket-card:is(.tk-live,.tk-th) .code-k-sat{--code-k:#93c5fd;}
 .code-full{display:inline-grid;grid-template-columns:auto minmax(0,1fr);column-gap:5px;align-items:center;padding:3px 8px;}
@@ -11686,22 +11688,187 @@ body.vol-mode #topbar-right{visibility:hidden;}
 .vol-chips{margin:8px 0 12px;}
 .vol-acts{display:grid;gap:8px;}
 .vol-acts .btn-sm{min-height:44px;width:100%;}
-.vm-body{margin-top:14px;}
-.vm-list{display:flex;flex-direction:column;margin-top:10px;}
-.vm-row{display:grid;grid-template-columns:minmax(170px,1.5fr) minmax(120px,1fr) minmax(90px,1fr) 96px 96px auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
-.vm-row-s{grid-template-columns:minmax(170px,1.5fr) minmax(170px,1.5fr) 110px auto;}
-.vm-row-a{grid-template-columns:minmax(170px,1fr) auto;}
-.vm-row:has(>.am-sel){grid-template-columns:32px minmax(170px,1.5fr) minmax(120px,1fr) minmax(90px,1fr) 96px 96px auto;}
-.vm-who{min-width:0;overflow-wrap:anywhere;}
-.vm-st,.vm-tags{display:flex;flex-wrap:wrap;gap:4px;min-width:0;}
-.vm-tag{font-size:11px;--bc:var(--border);}
-.vm-num{font-size:13px;}
-.vm-acts{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
-.vm-bulk{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;}
-.vm-group{margin-bottom:18px;}
-.vm-group-h{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;}
+/* ══ VOLUNTEERS, REBUILT (2026-11-09, the owner: "redesign the whole staff Volunteers section") ══════════════════════
+   Soft Solid and the Bookings page's patterns: the pages as one segmented row, one figures bar whose numbers filter, a
+   toolbar row (search, Select, saved views, the Filters button), and a table card whose rows carry a 3px status edge, a
+   status pill, one action and a ⋯ menu; on a phone each row is a card. The states keep the roster's colours: not here yet
+   white, on duty yellow, finished green, waiting for an answer orange, did not come red. Staff screens only. ── */
+body.view-staff{
+  --vx-e-wait:#c9cfcb;--vx-e-in:#d4a017;--vx-e-out:#16a34a;--vx-e-ask:#ea580c;--vx-e-ns:#dc2626;--vx-e-off:#d6dad7;
+  --vx-b-in:#fffaeb;--vx-b-out:#eefcf3;--vx-b-ask:#fff6eb;--vx-b-ns:#fef2f2;
+  --vx-n-ink:#3d4540;--vx-n-bg:#fff;--vx-n-ring:rgba(17,21,18,.2);
+  --vx-y-ink:#7a4d06;--vx-y-bg:#fdf1cc;--vx-y-ring:rgba(212,160,23,.42);
+  --vx-g-ink:#166534;--vx-g-bg:#dcfce7;--vx-g-ring:rgba(22,163,74,.3);
+  --vx-o-ink:#9a3412;--vx-o-bg:#ffedd5;--vx-o-ring:rgba(234,88,12,.3);
+  --vx-r-ink:#991b1b;--vx-r-bg:#fee2e2;--vx-r-ring:rgba(220,38,38,.28);
+  --vx-lead-ink:#0b4f9e;--vx-lead-bg:#e3f0ff;
+}
+html[data-staff-theme="dark"] body.view-staff{
+  --vx-e-wait:#5b646b;--vx-e-in:#f2b43f;--vx-e-out:#25d184;--vx-e-ask:#f97316;--vx-e-ns:#ff6f66;--vx-e-off:#3a4148;
+  --vx-b-in:#242013;--vx-b-out:#13251b;--vx-b-ask:#241a11;--vx-b-ns:#281818;
+  --vx-n-ink:#d6dbde;--vx-n-bg:#1b2027;--vx-n-ring:#4a535b;
+  --vx-y-ink:#fcd34d;--vx-y-bg:#3a2f0c;--vx-y-ring:rgba(242,180,63,.4);
+  --vx-g-ink:#86efac;--vx-g-bg:#12371f;--vx-g-ring:rgba(37,209,132,.35);
+  --vx-o-ink:#fdba74;--vx-o-bg:#3a2210;--vx-o-ring:rgba(249,115,22,.4);
+  --vx-r-ink:#fca5a5;--vx-r-bg:#3d1717;--vx-r-ring:rgba(255,111,102,.4);
+  --vx-lead-ink:#9ccbff;--vx-lead-bg:#122a46;
+}
+html[data-staff-theme="booth"] body.view-staff{--vx-n-ink:#1f2622;--vx-y-ink:#4a3000;--vx-g-ink:#05522a;--vx-o-ink:#6b1d06;--vx-r-ink:#7d1d12;--vx-lead-ink:#062f63;}
+#tab-volunteers .vx-body{margin-top:4px;}
+/* the pages: one segmented row (a phone scrolls it sideways) */
+#tab-volunteers .vx-tabs{display:flex;gap:2px;max-width:100%;width:max-content;margin:12px 0 16px;padding:3px;overflow-x:auto;scrollbar-width:none;background:var(--sf-sunken,#efefea);border-radius:var(--sf-r-pill,999px);box-shadow:inset 0 0 0 1px var(--sf-line);}
+#tab-volunteers .vx-tabs::-webkit-scrollbar{display:none;}
+#tab-volunteers .vx-tab{display:inline-flex;align-items:center;gap:6px;flex:none;min-height:var(--sf-ctl-size,38px);padding:0 14px;border:0;border-radius:var(--sf-r-pill,999px);background:transparent;color:var(--muted);font:500 14px/1 var(--sf-font);white-space:nowrap;cursor:pointer;}
+#tab-volunteers .vx-tab:hover{color:var(--text);}
+#tab-volunteers .vx-tab[aria-pressed="true"]{background:var(--sf-card);color:var(--text);font-weight:600;box-shadow:var(--sf-sh-1);}
+#tab-volunteers .vx-tab:focus-visible,#tab-volunteers .vx-seg-b:focus-visible,#tab-volunteers .vx-fig:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.vx-tab-n,.vx-n{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;box-sizing:border-box;border-radius:var(--sf-r-pill,999px);font-size:12px;font-weight:600;line-height:1;}
+.vx-tab-n{background:var(--green);color:#fff;}
+.vx-n{background:var(--sf-chip);color:var(--text);}
+/* the same look for a row of views inside a page */
+#tab-volunteers .vx-seg{display:inline-flex;gap:2px;padding:3px;background:var(--sf-sunken,#efefea);border-radius:var(--sf-r-pill,999px);box-shadow:inset 0 0 0 1px var(--sf-line);}
+#tab-volunteers .vx-seg-b{min-height:34px;padding:0 12px;border:0;border-radius:var(--sf-r-pill,999px);background:transparent;color:var(--muted);font:500 13px/1 var(--sf-font);white-space:nowrap;cursor:pointer;}
+#tab-volunteers .vx-seg-b[aria-pressed="true"]{background:var(--sf-card);color:var(--text);font-weight:600;box-shadow:var(--sf-sh-1);}
+/* the page's header actions, as Bookings' */
+#tab-volunteers .vx-hacts{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;}
+#tab-volunteers .vx-hacts .btn-sm,#tab-volunteers .vx-sess-links .btn-sm{display:inline-flex;align-items:center;gap:6px;}
+/* the opportunity on Shifts: its picker, its name and state, its links */
+#tab-volunteers .vd-pick{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;margin-bottom:4px;}
+#tab-volunteers .vd-sel{flex:1 1 auto;min-width:0;max-width:560px;}
+#tab-volunteers .btn-sm.vd-arr{flex:none;min-width:44px;font-size:18px;line-height:1;}
+html[dir="rtl"] #tab-volunteers .vd-arr{transform:scaleX(-1);}
+#tab-volunteers .vx-sess{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 16px;margin:12px 0;}
+#tab-volunteers .vx-sess-main{min-width:0;}
+#tab-volunteers .vx-sess-t{margin:0;font-size:20px;font-weight:600;line-height:1.3;color:var(--text);}
+#tab-volunteers .vx-sess-d{font-size:14px;font-weight:500;color:var(--muted);}
+#tab-volunteers .vx-sess-meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;}
+#tab-volunteers .vx-sess-links{display:flex;flex-wrap:wrap;gap:8px;}
+#tab-volunteers .vx-other{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 12px;}
+#tab-volunteers .vx-other-t{font-size:13px;color:var(--muted);}
+/* the figures bar: one card; each figure with a key is the list's filter, the first larger, its state's colour as a dot */
+#tab-volunteers .vx-figs{display:flex;align-items:center;flex-wrap:wrap;gap:2px 4px;margin:0 0 12px;padding:6px 8px;background:var(--sf-card);border-radius:var(--sf-r-card,12px);box-shadow:var(--sf-sh-1);}
+#tab-volunteers .vx-fig{display:inline-flex;align-items:center;gap:7px;min-height:var(--sf-ctl-size,38px);padding:0 10px;border:1px solid transparent;border-radius:var(--sf-r-ctl,8px);background:none;color:var(--muted);font:500 13px/1.2 var(--sf-font);white-space:nowrap;}
+#tab-volunteers button.vx-fig{cursor:pointer;}
+#tab-volunteers button.vx-fig:hover{background:var(--sf-hover);}
+#tab-volunteers .vx-fig.active{border-color:var(--green);color:var(--text);}
+#tab-volunteers .vx-fig .num{font-size:15px;font-weight:600;color:var(--text);}
+#tab-volunteers .vx-fig-big{color:var(--text);}
+#tab-volunteers .vx-fig-big .num{font-size:24px;line-height:1;}
+#tab-volunteers .vx-sep{color:var(--muted-l);}
+#tab-volunteers .vx-fig:is(.vx-k-team,.vx-k-wait,.vx-k-in,.vx-k-out,.vx-k-ask,.vx-k-off)::before{content:'';flex:none;width:8px;height:8px;border-radius:50%;background:var(--vx-k);}
+#tab-volunteers .vx-k-team{--vx-k:var(--green);}
+#tab-volunteers .vx-k-wait{--vx-k:var(--vx-n-bg);}
+#tab-volunteers .vx-k-wait::before{box-shadow:inset 0 0 0 1px #9aa29d;}
+#tab-volunteers .vx-k-in{--vx-k:var(--vx-e-in);}
+#tab-volunteers .vx-k-out{--vx-k:var(--vx-e-out);}
+#tab-volunteers .vx-k-ask{--vx-k:var(--vx-e-ask);}
+#tab-volunteers .vx-k-off{--vx-k:var(--vx-e-off);}
+/* cards and the list's toolbar row */
+.vx-card{background:var(--sf-card);border-radius:var(--sf-r-card,12px);box-shadow:var(--sf-sh-1);}
+.vx-pad{padding:16px;}
+#tab-volunteers .vx-list-card{margin-bottom:16px;}
+#tab-volunteers .vx-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0;padding:12px 16px;box-shadow:var(--sf-row-div);}
+#tab-volunteers .vx-bar .sv-bar{margin-inline-start:auto;}
+#tab-volunteers .vx-bar .search-wrap{flex:0 1 280px;}
+#tab-volunteers .vx-bulk{background:var(--sf-select,rgba(12,122,61,.08));}
+#tab-volunteers .vx-bulk-n{font-size:13px;font-weight:600;margin-inline-end:4px;}
+#tab-volunteers .vx-note{margin:0;padding:8px 16px;box-shadow:var(--sf-row-div);}
+#tab-volunteers .vx-h{display:flex;align-items:center;gap:8px;margin:0;font-size:14px;font-weight:600;color:var(--text);}
+#tab-volunteers .vx-h-sub{padding:16px 16px 6px;color:var(--muted);}
+#tab-volunteers .vm-list,#tab-volunteers .vm-led{margin:0;}
+#tab-volunteers .vx-list-card .empty-state{margin:0;padding:24px 16px;}
+/* the tables: one grid each, every row a subgrid of it, so the columns line up under the head */
+.vx-tbl{display:grid;}
+.vx-tbl>:is(.vx-row,.vd-row){display:grid;grid-column:1/-1;grid-template-columns:subgrid;column-gap:12px;align-items:center;min-height:var(--sf-row-h,40px);padding:8px 16px;box-sizing:border-box;box-shadow:inset 3px 0 0 var(--vx-edge,transparent),var(--sf-row-div);background:var(--vx-bg,transparent);font-size:13px;}
+html[dir="rtl"] .vx-tbl>:is(.vx-row,.vd-row){box-shadow:inset -3px 0 0 var(--vx-edge,transparent),var(--sf-row-div);}
+.vx-tbl>:is(.vx-th,.vd-head){min-height:0;padding:8px 16px;background:var(--sf-head);font-size:12px;font-weight:600;color:var(--muted);}
+.vx-tbl>.vx-row:not(.vx-th):hover,.vx-tbl>.vd-row:not(.vd-head):hover{background:linear-gradient(var(--sf-hover2,rgba(15,18,21,.03)),var(--sf-hover2,rgba(15,18,21,.03))) var(--vx-bg,transparent);}
+.vd-tbl{grid-template-columns:minmax(180px,1.6fr) minmax(150px,1.1fr) minmax(96px,auto) minmax(120px,1fr) auto;}
+.vm-tbl{grid-template-columns:minmax(180px,1.5fr) minmax(130px,1fr) minmax(130px,1fr) minmax(110px,.8fr) minmax(110px,.8fr) auto;}
+.vs-tbl{grid-template-columns:minmax(180px,1.4fr) minmax(190px,1.1fr) minmax(130px,1fr) minmax(140px,1fr) auto;}
+.vh-tbl{grid-template-columns:minmax(140px,1.2fr) minmax(56px,auto) minmax(96px,auto) minmax(140px,1.2fr) minmax(90px,1fr) minmax(90px,1fr) auto;}
+.vr-tbl{grid-template-columns:minmax(140px,1.2fr) minmax(130px,auto) minmax(140px,1.2fr) minmax(96px,auto) minmax(110px,auto) auto;}
+.vl-tbl{grid-template-columns:minmax(120px,auto) minmax(120px,1fr) minmax(170px,1.6fr) minmax(140px,1.2fr) minmax(90px,.8fr);}
+.vp-tbl{grid-template-columns:minmax(160px,1fr) minmax(200px,2fr);}
+.vx-tbl .vm-res-row{flex-wrap:nowrap;justify-content:normal;padding:8px 16px;border:0;}
+.vx-tbl :is(.vm-who,.vd-who){min-width:0;overflow-wrap:anywhere;}
+.vx-tbl :is(.vm-st,.vd-st){display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;min-width:0;}
+.vx-tbl :is(.vm-acts,.vd-act,.vx-act){display:flex;flex-wrap:nowrap;align-items:center;justify-content:flex-end;gap:6px;}
+.vx-tbl .vm-num{font-size:13px;}
+.vx-tbl .vm-st .vx-pill{white-space:normal;}
+.vx-tbl .vd-times{font-size:12px;white-space:nowrap;}
+.vx-tbl .vd-hrs{font-size:13px;min-width:0;}
+.vx-tbl .vd-main{min-width:104px;}
+#tab-volunteers .vd-compact .vx-tbl>.vd-row{min-height:0;padding-top:4px;padding-bottom:4px;}
+.vx-name{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0;}
+.vx-name .am-sel{flex:none;}
+/* each state's edge and wash, as the roster's */
+.vd-row.vd-wait{--vx-edge:var(--vx-e-wait);}
+.vd-row.vd-in{--vx-edge:var(--vx-e-in);--vx-bg:var(--vx-b-in);}
+.vd-row.vd-out{--vx-edge:var(--vx-e-out);--vx-bg:var(--vx-b-out);}
+.vd-row.vd-asked{--vx-edge:var(--vx-e-ask);}
+.vd-row.vd-off{--vx-edge:var(--vx-e-off);color:var(--muted);}
+.vd-row.vd-ns{--vx-edge:var(--vx-e-ns);--vx-bg:var(--vx-b-ns);color:var(--text);}
+.vx-row.vs-open{--vx-edge:var(--vx-e-out);}
+.vx-row.vs-soon{--vx-edge:var(--vx-e-ask);}
+/* the offers waiting for an answer, above the team */
+#tab-volunteers .vx-pend{box-shadow:var(--sf-row-div);}
+#tab-volunteers .vx-pend-h{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px 8px;}
+#tab-volunteers .vx-pend .vd-row{--vx-bg:var(--vx-b-ask);}
+.vx-msg{margin-top:4px;padding:6px 10px;border-radius:var(--sf-r-ctl,8px);background:var(--sf-sunken,#efefea);font-size:13px;color:var(--text);}
+/* pills (a state, with its dot), chips (a fact), the lead's mark, the rewards */
+.vx-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:var(--sf-r-pill,999px);font-size:12px;font-weight:600;line-height:1.25;white-space:nowrap;color:var(--vx-n-ink);background:var(--vx-n-bg);box-shadow:inset 0 0 0 1px var(--vx-n-ring);}
+.vx-pill::before{content:'';flex:none;width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.85;}
+.vx-pill:is(.vx-p-in,.vx-r-used){color:var(--vx-y-ink);background:var(--vx-y-bg);box-shadow:inset 0 0 0 1px var(--vx-y-ring);}
+.vx-pill:is(.vx-p-out,.vx-s-active,.vx-o-open,.vx-r-live,.vx-r-auto){color:var(--vx-g-ink);background:var(--vx-g-bg);box-shadow:inset 0 0 0 1px var(--vx-g-ring);}
+.vx-pill:is(.vx-p-asked,.vx-s-applied,.vx-o-soon){color:var(--vx-o-ink);background:var(--vx-o-bg);box-shadow:inset 0 0 0 1px var(--vx-o-ring);}
+.vx-pill:is(.vx-p-ns,.vx-s-removed,.vx-r-expired){color:var(--vx-r-ink);background:var(--vx-r-bg);box-shadow:inset 0 0 0 1px var(--vx-r-ring);}
+.vx-pill:is(.vx-p-off,.vx-s-paused,.vx-o-off,.vx-o-ended,.vx-r-off){color:var(--muted);background:var(--sf-chip);box-shadow:none;}
+html[data-staff-theme="booth"] body.view-staff .vx-pill{box-shadow:inset 0 0 0 2px currentColor;}
+.vx-chip{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:var(--sf-r-xs,4px);font-size:12px;font-weight:500;line-height:1.5;color:var(--text);background:var(--sf-chip);box-shadow:inset 0 0 0 1px var(--sf-line2);white-space:nowrap;}
+.vx-chip.vx-c-yes{color:var(--vx-g-ink);background:var(--vx-g-bg);box-shadow:none;}
+.vx-chip.vx-c-no{color:var(--vx-r-ink);background:var(--vx-r-bg);box-shadow:none;}
+.vx-chip.vx-c-ask{color:var(--vx-o-ink);background:var(--vx-o-bg);box-shadow:none;}
+button.vx-chip-btn{min-height:32px;padding:0 10px;border:0;cursor:pointer;font:inherit;font-size:12px;font-weight:600;}
+.vx-chips,.vx-tags,.vd-chips{display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
+.vd-chips{flex-basis:100%;}
+.vx-tags{margin-top:4px;}
+.vx-role{font-size:12px;font-weight:500;color:var(--muted);}
+.vx-by{font-size:12px;color:var(--muted);}
+.vx-lead{display:inline-flex;align-items:center;gap:4px;padding:1px 8px 1px 6px;border-radius:var(--sf-r-pill,999px);font-size:12px;font-weight:600;line-height:1.5;color:var(--vx-lead-ink);background:var(--vx-lead-bg);white-space:nowrap;}
+.vx-lvl,.vx-cert{display:inline-flex;align-items:center;gap:4px;padding:1px 7px;border-radius:var(--sf-r-xs,4px);font-size:12px;font-weight:600;line-height:1.5;color:var(--text);background:var(--sf-chip);box-shadow:inset 0 0 0 1px var(--sf-line2);white-space:nowrap;}
+.vx-lvl .art-ic,.vx-cert .art-ic{color:#b07d00;}
+html[data-staff-theme="dark"] body.view-staff :is(.vx-lvl,.vx-cert) .art-ic{color:#fcd34d;}
+.vx-rws{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:4px;}
+.vx-rw{display:inline-flex;align-items:center;gap:4px;}
+.vx-rws .code-tag,.vm-res-row .code-tag,.vr-row .code-tag{margin-inline-start:0;}
+.vx-rw-st{font-size:12px;font-weight:500;}
+.vx-rw-st.vx-r-used{color:var(--vx-y-ink);}
+.vx-rw-st.vx-r-expired{color:var(--vx-r-ink);}
+.vx-rw-st.vx-r-live{color:var(--vx-g-ink);}
+.vx-undo{white-space:nowrap;}
+/* the row's ⋯ menu, boxed as on Bookings' rows */
+#tab-volunteers .rq-more{flex:0 0 auto;min-width:var(--sf-ctl-size,38px);padding:0 8px;border:1px solid var(--sf-line2,var(--border));background:var(--sf-card,var(--s1));color:var(--text);font-size:16px;font-weight:600;letter-spacing:0;}
+#tab-volunteers .rq-more:hover{background:var(--sf-hover);}
+html[data-staff-theme="booth"] body.view-staff #tab-volunteers .rq-more{border-width:2px;border-color:currentColor;}
+/* Applications: a card row each, the facts in small columns */
+#tab-volunteers .vx-app{display:grid;grid-template-columns:minmax(180px,1fr) minmax(260px,2fr) auto;gap:10px 16px;align-items:center;padding:12px 16px;box-shadow:var(--sf-row-div);}
+#tab-volunteers .vx-app-later{background:var(--sf-head);}
+#tab-volunteers .vx-app-who{min-width:0;overflow-wrap:anywhere;}
+#tab-volunteers .vx-facts{display:flex;flex-wrap:wrap;gap:8px 20px;min-width:0;}
+#tab-volunteers .vx-fact{display:flex;flex-direction:column;gap:2px;min-width:56px;}
+#tab-volunteers .vx-fact-k{font-size:12px;color:var(--muted);}
+#tab-volunteers .vx-fact-v{font-size:14px;font-weight:500;color:var(--text);overflow-wrap:anywhere;}
+#tab-volunteers .vx-app-acts{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;}
+/* Settings: one card a part */
+#tab-volunteers .vx-set{display:grid;gap:12px;margin-bottom:16px;}
+#tab-volunteers .vx-set .vx-h{margin-bottom:8px;}
+#tab-volunteers .vx-set-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;}
+#tab-volunteers .vx-url{font-size:13px;color:var(--muted);}
+/* dialogs and forms (unchanged in kind) */
 .vm-in-tag{max-width:140px;min-height:36px;}
 .vm-in{width:100%;box-sizing:border-box;min-height:44px;}
+.vm-bulk{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0;}
 .vm-dlg{width:min(94vw,520px);max-height:88vh;overflow-y:auto;}
 .vm-dlg-w{width:min(96vw,860px);}
 .vm-dlg-b{margin-top:10px;}
@@ -11725,61 +11892,32 @@ body.vol-mode #topbar-right{visibility:hidden;}
 .vm-h{margin:18px 0 6px;font-size:14px;font-weight:600;}
 .vm-led{margin-top:6px;}
 .vm-off{opacity:.55;text-decoration:line-through;}
-.vm-hline{padding-top:8px;}
 .vm-inl{display:inline-flex;align-items:center;gap:6px;font-size:13px;}
 .vm-acct{display:flex;flex-wrap:wrap;align-items:center;gap:8px;}
 .vr-hours{width:100%;box-sizing:border-box;min-height:36px;}
-/* Volunteers > Shifts: one session's team, run like the Bookings roster (2026-11-06). Fixed widths keep the columns in line with the header. */
-.vd-pick{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;}
-/* Volunteers' shifts: the session's name and its links to Bookings and Sessions (2026-11-06) */
-#tab-volunteers .n6t-vdl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0;}
-#tab-volunteers .n6t-vdn{font-weight:700;}
-.vd-sel{flex:1 1 auto;min-width:0;max-width:560px;}
-.btn-sm.vd-arr{flex:none;min-width:44px;font-size:18px;line-height:1;}
-html[dir="rtl"] .vd-arr{transform:scaleX(-1);}
-.vd-state{margin:8px 0 12px;}
-.vd-acts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
-/* One grid for the whole list, each row a subgrid of it: the buttons' column is as wide as the widest row's, so every column lines up under the header. */
-.vd-list{display:grid;grid-template-columns:auto minmax(150px,1.6fr) minmax(110px,1fr) auto auto auto;margin-top:10px;}
-.vd-list>.empty-state{grid-column:1/-1;}
-.vd-row{display:grid;grid-column:1/-1;grid-template-columns:subgrid;column-gap:10px;align-items:center;padding:10px 8px;border-bottom:1px solid var(--border);border-inline-start:3px solid transparent;}
-.vd-head{padding:6px 8px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--muted);}
-.vd-who{min-width:0;overflow-wrap:anywhere;}
-.vd-st{min-width:0;display:flex;flex-wrap:wrap;align-items:center;gap:4px;}
-/* the staff review 2026-11-06 (VL12/VL13): what staff need to know, under the state */
-.vd-chips{display:flex;flex-wrap:wrap;gap:4px;flex-basis:100%;}
-.vd-chips .rr-chip{font-size:11px;}
-.vm-avail{margin-top:2px;}
-.vd-times{font-size:12px;white-space:nowrap;}
-.vd-hrs{font-size:13px;white-space:nowrap;}
-.vd-act{display:flex;gap:6px;justify-content:flex-end;}
-.vd-main{min-width:104px;}
-.vd-chip{--bc:var(--border);border-color:var(--border);color:var(--muted);}
-.vd-in{border-inline-start-color:var(--green);background:rgba(var(--green-rgb),.06);}
-.vd-in .vd-chip{color:var(--green);border-color:var(--green);}
-.vd-wait{border-inline-start-color:var(--orange);}
-.vd-wait .vd-chip{color:var(--orange);border-color:var(--orange);}
-.vd-out{border-inline-start-color:var(--blue);}
-.vd-out .vd-chip{color:var(--blue);border-color:var(--blue);}
-.vd-asked{border-inline-start-color:var(--purple);}
-.vd-asked .vd-chip{color:var(--purple);border-color:var(--purple);}
-.vd-off{opacity:.6;}
-.vd-compact .vd-row{padding-top:4px;padding-bottom:4px;}
 .vd-res-acts{display:flex;flex-wrap:wrap;gap:6px;}
-@media (max-width:760px){
-  .vm-row,.vm-row:has(>.am-sel),.vm-row-s,.vm-row-a{grid-template-columns:minmax(0,1fr) auto;}
-  .vm-row>.am-sel{grid-column:1/-1;}
-  .vm-st,.vm-tags,.vm-acts{grid-column:1/-1;justify-content:flex-start;}
+/* a phone: the figures scroll sideways, each row is a card */
+@media (max-width:767px){
+  #tab-volunteers .vx-figs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;}
+  #tab-volunteers .vx-figs::-webkit-scrollbar{display:none;}
+  #tab-volunteers .vx-sess-t{font-size:18px;}
+  #tab-volunteers .vx-bar{padding:10px 12px;}
+  #tab-volunteers .vx-bar .sv-bar{margin-inline-start:0;}
+  .vx-tbl{display:block;}
+  .vx-tbl>:is(.vx-row,.vd-row){display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px 12px;padding:12px;}
+  .vx-tbl>:is(.vx-row,.vd-row):is(.vx-th,.vd-head){display:none;}
+  .vx-tbl>:is(.vx-row,.vd-row)>:empty{display:none;}
+  .vx-tbl :is(.vm-who,.vd-who){flex:1 1 60%;}
+  .vx-tbl :is(.vm-st,.vd-st){flex:1 1 100%;}
+  .vx-tbl :is(.vd-times,.vd-hrs,.vm-num,.vm-prof){flex:1 1 40%;}
+  .vx-tbl :is(.vm-acts,.vd-act,.vx-act){flex:1 1 100%;justify-content:flex-end;}
+  .vx-tbl :is(.vm-acts,.vd-act,.vx-act)>.btn-sm:not(.rq-more){flex:1 1 0;}
+  .vx-tbl .vd-main{min-width:0;}
+  .vx-tbl .vm-res-row{flex-wrap:wrap;}
+  #tab-volunteers .vx-app{grid-template-columns:minmax(0,1fr);padding:12px;}
+  #tab-volunteers .vx-app-acts{justify-content:stretch;}
+  #tab-volunteers .vx-app-acts .btn-sm{flex:1 1 0;}
   .vm-form{grid-template-columns:minmax(0,1fr);}
-  .vd-head{display:none;}
-  .vd-list{display:flex;flex-direction:column;}
-  .vd-row{display:flex;flex-wrap:wrap;gap:8px 10px;}
-  .vd-selc:empty,.vd-times:empty,.vd-hrs:empty{display:none;}
-  .vd-who{flex:1 1 55%;}
-  .vd-st{flex:1 1 35%;}
-  .vd-times,.vd-hrs{flex:1 1 40%;}
-  .vd-act{flex:1 1 100%;flex-wrap:wrap;justify-content:stretch;}
-  .vd-act .btn-sm{flex:1 1 0;}
 }
 body.vol-mode #scan-modal .bkm-srow,body.vol-mode #scan-modal .bkm-srow6,body.vol-mode #scan-modal #scan-batch,body.vol-mode #scan-modal #scan-express-hint,body.vol-mode #scan-modal #scan-tally{display:none;}
 
