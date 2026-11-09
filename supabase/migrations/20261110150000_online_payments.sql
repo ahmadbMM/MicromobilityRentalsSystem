@@ -1127,6 +1127,24 @@ revoke execute on function public._pay_cancel_follow() from public, anon, authen
 drop trigger if exists queue_entries_pay_cancel on public.queue_entries;
 create trigger queue_entries_pay_cancel after update on public.queue_entries for each row execute function _pay_cancel_follow();
 
+-- A locker paid online that is let go before its key was given (the rider's Remove, staff's Cancel) owes the
+-- rider its money back: a refund row 'due' for staff, as a booking's (a key handed back keeps the fee).
+create or replace function public._pay_locker_follow() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.pay = 'card' and new.payment_id is not null and coalesce(new.receipt_id, '') like 'pay-%'
+     and new.status = 'cancelled' and old.status is distinct from 'cancelled' and coalesce(new.cancel_reason, '') <> 'unpaid'
+     and not exists (select 1 from payment_refunds r where r.payment_id = new.payment_id and r.reason = 'locker ' || new.id::text) then
+    insert into payment_refunds (payment_id, provider_id, amount, status, reason)
+    select new.payment_id, p.provider_id, new.price, 'due', 'locker ' || new.id::text
+      from payments p where p.id = new.payment_id and p.status in ('paid', 'partly_refunded');
+  end if;
+  return null;
+end $$;
+revoke execute on function public._pay_locker_follow() from public, anon, authenticated;
+drop trigger if exists locker_rentals_pay_cancel on public.locker_rentals;
+create trigger locker_rentals_pay_cancel after update on public.locker_rentals for each row execute function _pay_locker_follow();
+
 -- The rider cancels their own bookings from the website. One paid online is refunded when cancelled at
 -- least pay.refundDays before the ride day: into the wallet at once (p_dest 'wallet') or back to the card
 -- (p_dest 'card': written pending for the server to send). Later than that, nothing is refunded (the
@@ -1243,6 +1261,33 @@ begin
     outv := outv || jsonb_build_array(jsonb_build_object('id', rid, 'code', c, 'name', nm));
   end loop;
   return jsonb_build_object('ok', true, 'rentals', outv, 'left', _lk_left(p_day));
+end $function$;
+
+-- ── The workshop tracker says whether a job is paid (for its Pay button) ─────────────────────────
+-- workshop_track rebuilt from its live definition with one key added: 'paid'.
+CREATE OR REPLACE FUNCTION public.workshop_track(p_ref text, p_phone text)
+ RETURNS jsonb
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  v_id bigint;
+  v_digits text := right(regexp_replace(coalesce(p_phone,''), '\D', '', 'g'), 9);
+  j workshop_jobs%rowtype;
+begin
+  if not _ip_gate('wstrack', 30, interval '10 minutes') then
+    return jsonb_build_object('ok', false, 'error', 'throttled');
+  end if;
+  if coalesce(p_ref,'') !~* '^\s*W-?0*([0-9]{1,9})\s*$' or length(v_digits) < 9 then
+    return jsonb_build_object('ok', false, 'error', 'not_found');
+  end if;
+  v_id := (regexp_match(p_ref, '([0-9]{1,9})'))[1]::bigint;
+  select * into j from workshop_jobs where id = v_id and right(regexp_replace(phone, '\D', '', 'g'), 9) = v_digits;
+  if j.id is null then return jsonb_build_object('ok', false, 'error', 'not_found'); end if;
+  return jsonb_build_object('ok', true, 'ref', 'W-' || lpad(j.id::text, 4, '0'), 'status', j.status,
+    'service', j.service_label, 'preferred_date', j.preferred_date, 'preferred_time', j.preferred_time,
+    'scheduled_for', j.scheduled_for, 'lane', j.lane, 'price', j.price_final, 'paid', j.paid_at is not null);
 end $function$;
 
 -- ── Staff: the store and the money ────────────────────────────────────────────────────────────────
