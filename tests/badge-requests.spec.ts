@@ -44,7 +44,7 @@ test.describe('@customer:account badge requests', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
     await page.waitForFunction('S._bdgCat&&S._bdgCat.length>0&&S._bdrMine&&!S._bdrMine.busy');
   }
   const dlg = (page: Page) => page.locator('#confirm-modal .bdr-box');

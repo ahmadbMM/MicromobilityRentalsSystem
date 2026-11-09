@@ -23,7 +23,7 @@ test.describe('@customer:account Ride lead', () => {
     await loginCustomer(page, { id: 'c1', name: 'Sara Haddad', email: 'sara@example.com', birth_date: '1995-05-05' });
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','stats')`); // the season is the account's Stats part (2026-11-09)
   }
 
   test('nights led and checked in count: Rides led and the Marshal badge; not checked in, or not led, do not', async ({ page }) => {

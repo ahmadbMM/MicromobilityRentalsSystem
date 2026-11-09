@@ -228,7 +228,8 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
 ## Addresses: every section and sub-view has its own path (2026-09-27)
 - The router lives beside `_pushNav` in `app.src.html`: `STAFF_PATHS` (staff tab → first
   segment: `/bookings`, `/sales`, `/inventory`, `/website/bikes`…), `CUST_PATHS` (`/reserve`,
-  `/my-bookings`, `/account`; the event picker is `/`) and `SUB_PATHS` (a sub-view's second
+  `/my-bookings`, `/account` with its parts `/account/stats` and `/account/badges`, `ACC_VIEWS`; the event picker is
+  `/`) and `SUB_PATHS` (a sub-view's second
   segment: `/bookings/waitlist`, `/community/applications`, `/history/log`). `_pathFor`,
   `_parsePath` and `_setSub` are the only places that know the mapping; state ↔ address goes
   through them. Bookings stays date-less; a picked ride travels as `?session=<id>`.
@@ -876,9 +877,29 @@ The owner, 2026-10-01: "do 1 2 5 6 10" (from an engagement list). All read data 
   routes.routes.items`, loaded on demand); a bike ride at the circuit with none is the circuit, drawn from
   OpenStreetMap (`JCC_TRACK`, ODbL, so the card credits "© OpenStreetMap contributors" - keep it). Rides that
   meet elsewhere without a route, and rides with no bike, show nothing.
-- **Your rides / closest badges.** `_myrStats` on Account (26-week strip, rides this year, favourite type, timed
+- **Your rides / closest badges.** `_myrStats` on the account's Stats part (26-week strip, rides this year, favourite type, timed
   minutes, first ride; counted in ride nights, never distance). `_mrBadgesRow` leads with the two begun badges
   with least left (`bd-next`). `tests/ride-night.spec.ts`.
+
+## The account page in three parts (2026-11-09)
+
+The owner: "divide the customer my account page into 3 separate pages account stats badges"; picked a switch at
+the top, Account first, the money cards on Account, and more stats.
+
+- `renderAccount` draws the switch (`_accViewsHtml`, `.acc-views`) and all three parts, `#acc-pane-account|stats|badges`
+  (`data-acc-pane`), hiding the unpicked ones; `_accSetView(k)` toggles without redrawing (the form keeps what was
+  typed) and pushes the address. The pick is `S.accView` (`_accView()`); `setCustTab('account')` (the tab bars) resets
+  it to Account, `setCustTab('account', part)` opens a part, and a link to `/account/badges` is parked like
+  `/my-bookings` (`_TABLINK_KEY` holds `account/badges`). Back between parts only switches (`_applyNav`).
+- **Account:** wallet, Invite friends, the ambassador's card (`_ambMinePaint`, at its top), the profile form,
+  contacts, blood type, volunteer, ride news, notifications, purchases, delete, the settings rows. **Stats:** the
+  season (`_seasonDashboard`), Your rides, then `_myrMore`: rides by month (the last twelve KSA months as columns,
+  one value on the highest), rides by bike type, completed sessions by event (`_evKindName`; bike-free kinds count
+  here, never as rides; a session the device does not hold is skipped) and Badges earned, which opens Badges.
+  **Badges:** `_mrBadgesRow`, then the member's titles card (`_ttMinePaint`, at its end).
+- A new account card goes into one of the three parts. A spec that clicks or checks visibility in Stats or Badges
+  opens it first (`setCustTab('account','badges')`): hidden parts are not clickable. `tests/account-parts.spec.ts`.
+- The website's /account mirrors it (mm-platform).
 
 ## Vendors (F&B, 2026-10-03; first named "F&B Partners", every internal name renamed to vendor(s) the same day)
 

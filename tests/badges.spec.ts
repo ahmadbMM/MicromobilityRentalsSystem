@@ -343,7 +343,7 @@ test.describe('@customer:account badges', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
   }
 
   test('the badges staff gave come first among the earned, drawn, and the newest pops up once', async ({ page }) => {
@@ -436,7 +436,7 @@ test.describe('@customer:account badges', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
     // Five rides: First Lap and Grid Regular, one tile showing Grid Regular, two of four marks filled.
     const tile = page.locator('#tab-account .mr-badges .mr-badge.ladder', { hasText: 'Grid Regular' });
     await expect(tile).not.toHaveClass(/locked/);
@@ -685,7 +685,7 @@ test.describe('@customer:account ride badges from the research', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
     await page.locator('#mr-badges-more').click();
     const chip = page.locator('#tab-account .mr-badge', { hasText: 'Late Loop' });
     await expect(chip).toContainText('1/2');
@@ -749,7 +749,7 @@ test.describe('@customer:account Race Ready and the about lines', () => {
     await loginCustomer(page, cust);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
   }
 
   test('a whole profile earns Race Ready: drawn special, and it pops up once', async ({ page }) => {
@@ -794,7 +794,7 @@ test.describe('@customer:account National Day 96', () => {
     await loginCustomer(page);
     await page.goto('/');
     await waitForSb(page);
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`); // the badges are the account's Badges part (2026-11-09)
   }
   test('a rider checked in on the National Day ride gets it, drawn in the greens, and it pops up once', async ({ page }) => {
     await rider(page, 'done'); // unpaid: it is attendance

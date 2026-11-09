@@ -84,7 +84,7 @@ test.describe('@customer:account your rides and the closest badges', () => {
     const past = ['2099-01-04', '2099-01-11', '2099-01-25'];
     const s = past.map((d) => jcc(d, d, { status: 'closed' }));
     await open(page, past.map((d, i) => bk({ id: 'p' + i, session_id: d, session_date: d, status: 'done', ride_duration: 50, rating_exp: 9, rating_detail: { form: 'rental', s: { experience: 9 }, why: {} } })), 'en', s); // rated: an unrated ride would hold the forced rating page over the account
-    await page.evaluate("goCustomer('account')");
+    await page.evaluate("setCustTab('account','stats')"); // Your rides is on Stats, the closest badges on Badges (2026-11-09)
     const myr = page.locator('#tab-account .myr');
     await expect(myr.locator('.myr-weeks')).toHaveCount(0); // said in words, not drawn as 26 marks (2026-10-10)
     await expect(myr.locator('.myr-wl')).toHaveText('3 of the last 26 weeks with a ride');
@@ -92,6 +92,7 @@ test.describe('@customer:account your rides and the closest badges', () => {
     await expect(myr.locator('dd').nth(0)).toHaveText('3');
     await expect(myr.locator('dd').nth(1)).toHaveText('Hybrid');
     await expect(myr.locator('dd').nth(2)).toHaveText('2 h 30 min');
+    await page.locator('#tab-account [data-acc-view="badges"]').click();
     const next = page.locator('#tab-account .bd-next-row');
     await expect(next).toHaveCount(2);
     // two to go on both, the nearer share first: Grid Regular (3 of 5 rides) leads Hot Streak (1 of 3 weeks in a
@@ -105,7 +106,7 @@ test.describe('@customer:account your rides and the closest badges', () => {
 
   test('no rides: no strip and no closest badges', async ({ page }) => {
     await open(page, []);
-    await page.evaluate("goCustomer('account')");
+    await page.evaluate("setCustTab('account','stats')");
     await expect(page.locator('#tab-account .mr-season')).toBeVisible();
     await expect(page.locator('#tab-account .myr')).toHaveCount(0);
     await expect(page.locator('#tab-account .bd-next')).toHaveCount(0);

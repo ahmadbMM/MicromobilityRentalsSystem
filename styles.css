@@ -8686,7 +8686,7 @@ body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) :is(.tk-rt-a,.tk-rt-done){color:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map path{stroke:var(--neon);}
 body:not(.view-staff) :is(#tab-myrides,#tab-register) .ticket-card:is(.tk-live,.tk-th) .tk-rt-map circle{fill:var(--night);stroke:var(--night-ink);}
-body:not(.view-staff) .myr{margin:0 0 8px;padding:18px 22px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);}
+body:not(.view-staff) :is(.myr,.myr-c){margin:0 0 8px;padding:18px 22px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);}
 body:not(.view-staff) .myr-h{font-size:var(--fs-15);font-weight:700;color:var(--ink);margin-bottom:10px;}
 body:not(.view-staff) .myr-weeks{display:grid;grid-template-columns:repeat(26,minmax(0,1fr));gap:3px;}
 body:not(.view-staff) .myr-weeks i{display:block;aspect-ratio:1;max-height:14px;border-radius:3px;background:var(--card-3);}
@@ -8696,6 +8696,30 @@ body:not(.view-staff) .myr-f{display:grid;margin:12px 0 0;}
 body:not(.view-staff) .myr-f>div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-top:1px solid var(--line);}
 body:not(.view-staff) .myr-f dt{font-size:var(--fs-15);color:var(--ink-2);}
 body:not(.view-staff) .myr-f dd{margin:0;font-size:var(--fs-15);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:end;}
+/* Stats' more of the record (2026-11-09, _myrMore): rides by month as twelve thin columns on one baseline, the value
+   on the highest one's cap; the lists under it; Badges earned, a row that opens Badges. */
+body:not(.view-staff) .myr-f.myr-f0{margin-top:0;}
+body:not(.view-staff) .myr-mo-c{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:2px;margin:6px 0 0;padding:0;list-style:none;}
+body:not(.view-staff) .myr-mo-c li{min-width:0;}
+body:not(.view-staff) .myr-mo-a{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:96px;border-bottom:1px solid var(--line);}
+body:not(.view-staff) .myr-mo-b{display:block;width:min(16px,80%);height:var(--h,0);min-height:2px;border-radius:4px 4px 0 0;background:var(--go);}
+body:not(.view-staff) .myr-mo-b.z{display:none;}
+body:not(.view-staff) .myr-mo-v{margin-bottom:4px;font-size:var(--fs-13);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .myr-mo-l{display:flex;justify-content:center;min-height:16px;margin-top:6px;font-size:var(--fs-12);color:var(--ink-2);white-space:nowrap;}
+body:not(.view-staff) .myr-bd{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;font:inherit;color:var(--ink);text-align:start;cursor:pointer;}
+body:not(.view-staff) .myr-bd-t{flex:1;font-size:var(--fs-15);font-weight:700;}
+body:not(.view-staff) .myr-bd-n{font-size:var(--fs-15);font-weight:600;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) .myr-bd .cu-ic{color:var(--ink-2);}
+/* The account page's switch (2026-11-09): Account, Stats, Badges, a soft segmented control like the wide screen's
+   section strip; on a phone it spans the page and the three share it. */
+body:not(.view-staff) #tab-account .acc-views{display:flex;gap:2px;width:fit-content;max-width:100%;margin:14px 0 4px;padding:4px;border-radius:999px;background:var(--card-3);}
+body:not(.view-staff) #tab-account .acc-view{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border:0;border-radius:999px;background:transparent;color:var(--ink-2);font:inherit;font-size:var(--fs-15);font-weight:500;cursor:pointer;}
+body:not(.view-staff) #tab-account .acc-view:hover{color:var(--ink);}
+body:not(.view-staff) #tab-account .acc-view.active{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--pl-1);}
+@media(max-width:767px){
+  body:not(.view-staff) #tab-account .acc-views{width:100%;}
+  body:not(.view-staff) #tab-account .acc-view{flex:1 1 0;min-width:0;padding:0 8px;}
+}
 body:not(.view-staff) .bd-next{display:grid;gap:8px;margin:10px 0 12px;}
 body:not(.view-staff) .bd-next-h{font-size:var(--fs-13);color:var(--ink-2);}
 body:not(.view-staff) .bd-next-row{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);text-align:start;color:var(--ink);cursor:pointer;}

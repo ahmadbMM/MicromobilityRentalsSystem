@@ -34,7 +34,8 @@ async function rider(page: Page, fx: Fixtures = {}) {
   await page.goto('/');
   await waitForSb(page);
 }
-const account = async (page: Page) => { await page.evaluate(`setCustTab('account')`); await expect(page.locator('#tt-mine')).toBeVisible(); };
+// Titles sit under the badges, on the account's Badges part (2026-11-09).
+const account = async (page: Page) => { await page.evaluate(`setCustTab('account','badges')`); await expect(page.locator('#tt-mine')).toBeVisible(); };
 async function staff(page: Page, fx: Fixtures = {}) {
   await stubSupabase(page, { sessions: [], customers, queue_entries: [], bikes: [], tags, customer_tags, staff_options: [], titles: [captain, legend], customer_titles: [], ...fx });
   await unlockStaff(page);
@@ -68,14 +69,14 @@ test.describe('@customer:account member titles', () => {
 
   test('an account that is not a member gets no card', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_titles': { ok: true, member: false } });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`);
     await page.waitForFunction(`!S._ttMineBusy&&document.querySelector('#tab-account').children.length>0`);
     await expect(page.locator('#tt-mine')).toHaveCount(0);
   });
 
   test('a database without the function shows no card and no error', async ({ page }) => {
     await rider(page, { 'rpc:customer_my_titles': { __rpcError: { status: 404, code: 'PGRST202', message: 'Could not find the function' } } });
-    await page.evaluate(`setCustTab('account')`);
+    await page.evaluate(`setCustTab('account','badges')`);
     await page.waitForFunction(`!S._ttMineBusy&&document.querySelector('#tab-account').children.length>0`);
     await expect(page.locator('#tt-mine')).toHaveCount(0);
     await expect(page.locator('#toast-container .toast:not(.quiet)')).toHaveCount(0);
