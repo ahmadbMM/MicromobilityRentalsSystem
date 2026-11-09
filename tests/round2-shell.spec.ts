@@ -143,10 +143,9 @@ test.describe('@staff:shell round two outside the roster', () => {
     expect(await css(page, `${held} .status-badge.st-reserved`, 'background-color')).toBe('rgb(246, 235, 242)');
     expect(await css(page, `${held} .status-badge.st-reserved`, 'color')).toBe('rgb(110, 44, 86)');
     await page.evaluate(`setStaffTab('sessions');S.sessView='list';renderSessions()`);
-    const ev = `#tab-sessions .sess-lc.th-event`;
+    const ev = `#tab-sessions .sess-lc.ev-event`;
     await expect(page.locator(ev)).toHaveCount(1);
-    expect(await css(page, ev, '--sf-ring')).toBe('#8c3b6e');
-    expect(await css(page, `${ev} .ev-chip`, 'color')).toBe('rgb(140, 59, 110)');
+    expect(await css(page, `${ev} .smk`, 'color')).toBe('rgb(140, 59, 110)'); // the event's mark (2026-11-10: the list is an agenda)
     // no staff rule paints the violet any more; the printed reports' violet ink is the plum too
     const staffViolet = readFileSync('styles.css', 'utf8').split('\n').filter((l) => /view-staff/.test(l) && /#7c3aed|124,\s*58,\s*237|#a78bfa|#c4b5fd|#5b21b6|#ede9fe|#6d28d9/i.test(l));
     expect(staffViolet).toEqual([]);
@@ -198,15 +197,16 @@ test.describe('@staff:shell round two outside the roster', () => {
     await staff(page);
     await page.evaluate(`setStaffTab('sessions');S.sessView='list';renderSessions()`);
     expect(await css(page, '#tab-sessions .view-toggle-btn', 'font-family')).toContain('IBM Plex Sans');
-    expect(await css(page, '#tab-sessions .ev-chip', 'text-transform')).toBe('none');
-    expect(await css(page, '#tab-sessions .ev-chip', 'border-top-left-radius')).toBe('999px');
+    // the agenda's day headings (2026-11-10, in place of the cards' event chips): sentence case, untracked
+    expect(await css(page, '#tab-sessions .ss-day-h', 'text-transform')).toBe('none');
+    expect(await css(page, '#tab-sessions .ss-day-h', 'letter-spacing')).toBe('normal');
     await page.evaluate(`setStaffTab('analytics');setAnRange('daterange')`);
     const t = page.locator('#tab-analytics');
     await expect(t.locator('.an-range-label').first()).toBeVisible();
     expect(await css(page, '#tab-analytics .an-range-label', 'letter-spacing')).toBe('normal');
     const flds = t.locator('.an-range-bar label.an-fld');
     await expect(flds).toHaveCount(4);
-    await expect(flds.locator('> span')).toHaveText(['From', 'To', 'Session', 'Product']);
+    await expect(flds.locator('> span:not(.spk)')).toHaveText(['From', 'To', 'Session', 'Product']); // .spk: the session picker
     const tops = await t.locator('.an-range-bar .an-date').evaluateAll((els) => els.map((e) => Math.round(e.getBoundingClientRect().top)));
     expect(tops[0]).toBe(tops[1]); // From and To on one line
   });

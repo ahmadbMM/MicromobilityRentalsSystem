@@ -51,7 +51,7 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   // Front Desk: no Sessions pill, no Saturday rows, no Saturday option in the filter,
   // no community Add-rider button — JCC data only; the Waitlist is a section of its own on the desk's rail (2026-11-09).
   await page.evaluate('renderStaffQueue()');
-  await expect(panel.getByRole('button', { name: 'Sessions' })).toHaveCount(0);
+  await expect(panel.getByRole('button', { name: 'Sessions', exact: true })).toHaveCount(0); // the pill, not the session picker's "All sessions"
   await expect(panel.getByRole('button', { name: 'Waitlist' })).toHaveCount(0);
   expect(await page.evaluate(`document.querySelector('#staff-tab-nav .tab-btn[data-stab="waitlist"]').style.display`)).toBe('');
   await expect(panel.locator('tr, .q-card').filter({ hasText: 'Sat Rider' }).filter({ visible: true })).toHaveCount(0);

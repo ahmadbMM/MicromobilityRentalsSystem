@@ -60,7 +60,7 @@ test.describe('@staff:bookings part-timers at close-out', () => {
     await closeOut(page, JCC);
     await expect(dlg(page)).toBeVisible();
     await expect(dlg(page)).toContainText('Part-timers’ hours');
-    await expect(dlg(page)).toContainText('19:00');
+    await expect(dlg(page)).toContainText('7 PM'); // the night's one-line label (2026-11-10): its start in the reader's clock
     // the active part-timers only, and every active kind of work
     await expect(page.locator('#ptc-who-0 option')).toHaveText(['Choose a part-timer', 'Joud Part', 'Anmar Part']);
     await expect(page.locator('#ptc-kind-0 option')).toHaveText(['Choose the kind of work', 'Customers check-in', 'Bikes handling']);

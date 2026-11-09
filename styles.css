@@ -9849,9 +9849,6 @@ body .sess-about:focus-visible{outline:2px solid currentColor;outline-offset:3px
 body.view-staff .sess-chip-top{display:flex;align-items:center;gap:8px;min-width:0;margin-bottom:4px;}
 body.view-staff .sess-chip-top:empty{display:none;}
 body.view-staff .sess-chip-top .sess-chip-event{margin-bottom:0;min-width:0;}
-body.view-staff .sf-mark{display:block;flex-shrink:0;width:auto;height:18px;max-width:112px;object-fit:contain;}
-body.view-staff .sf-mark-jcc{height:22px;}
-body.view-staff .sf-mark-comm{height:20px;}
 body.view-staff :is(.sess-summary-chip,.sess-lc).th-jcc{
   --sf-chip-bg:var(--jcc-chev) right 12px bottom 8px/46px 12px no-repeat,linear-gradient(112deg,var(--jcc-deep) 0%,var(--jcc-navy) 44%,var(--jcc-blue) 100%) #06346F;
   --sf-ring:#0E97D5;border-color:rgba(14,151,213,.45);color:#fff;}
@@ -10411,7 +10408,6 @@ html[data-staff-theme="dark"] body.view-staff .sess-summary-chip.th-event .sess-
 html[data-staff-theme="dark"] body.view-staff #tab-sessions .sess-lc.th-event .ev-chip{color:var(--sf-plum-ink);border-color:rgba(var(--sf-plum-rgb),.5);}
 html[data-staff-theme="dark"] body.view-staff :is(.sess-summary-chip,.sess-lc):is(.th-comm,.th-runher,.th-event) :is(.sess-chip-bar,.sess-lc-bar){background:rgba(255,255,255,.14);}
 /* Run for Her's partner marks are navy on the poster: white on the dark chip, as the circuit's mark is */
-html[data-staff-theme="dark"] body.view-staff .sf-mark-runher{filter:brightness(0) invert(1);opacity:.9;}
 /* each ride's own colour, as words on dark: the paper inks (circuit blue #2f63ad, the pool's teal, the
    workshop's orange, the events' violet, Run for Her's pink, National Day green) were 2-3.5:1 here */
 html[data-staff-theme="dark"] body.view-staff .ev-jcc{--ev:#6ea8ff;--ev-rgb:110,168,255;}
@@ -11056,8 +11052,6 @@ body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-ch
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-summary-chip.today-sess .sess-chip-date{font-size:13px;font-weight:800;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-date{font-size:12.5px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-top{margin-bottom:2px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sf-mark{height:15px;max-width:96px;}
-body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sf-mark-jcc{height:17px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-bar{margin-top:4px;}
 body.view-staff :is(#tab-queue,#tab-waitlist) .sess-bar-desktop .sess-chip-bf{margin-top:0;}
 
@@ -12600,3 +12594,73 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
   #tab-lockers .lk-res-st{min-width:0;}
   #tab-lockers .lk-rent-btn{margin-inline-start:0;}
 }
+
+/* ══ TELLING SESSIONS APART (2026-11-10, the user's picks on the decision page): one mark, one name and one line of
+   words for a session on every staff screen, the session picker that stands in for every session dropdown, and the
+   Sessions list as an agenda. Staff only. ══ */
+/* the mark: what you do on it (a bike, a wave, a runner, a drop), in the kind's own colour (ev-* sets --ev) on a wash of it */
+body.view-staff .smk{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:6px;background:color-mix(in srgb,var(--ev,var(--muted)) 14%,transparent);color:var(--ev,var(--muted));}
+body.view-staff .smk .cu-ic{display:block;}
+/* the dark Bookings cards (the circuit's navy, the National Day weave): a light mark and a white name */
+body.view-staff .sess-summary-chip:is(.th-jcc,.th-snd96) .smk{background:rgba(255,255,255,.16);color:#fff;}
+body.view-staff .sess-summary-chip.th-jcc .sess-chip-event{color:#fff;}
+body.view-staff .sess-chip-top .sess-chip-event{font-size:12px;line-height:1.25;white-space:normal;overflow-wrap:anywhere;} /* a long name takes a second line rather than being cut */
+/* the picker's button, where the dropdown was; the dropdown stays for its handler, out of sight and reach */
+body.view-staff .spk{position:relative;display:block;min-width:0;max-width:100%;}
+body.view-staff select[data-spk]{position:absolute!important;inset-inline-start:0;bottom:0;width:1px!important;height:1px!important;min-width:0!important;min-height:0!important;padding:0!important;margin:0!important;border:0!important;opacity:0!important;pointer-events:none!important;}
+body.view-staff .spk-btn{display:flex;align-items:center;gap:8px;width:100%;min-height:var(--sf-ctl-size,38px);padding:4px 10px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:400 14px/1.3 var(--sf-font,inherit);text-align:start;cursor:pointer;}
+body.view-staff .spk-btn:hover{border-color:var(--sf-ctl-h,var(--border));}
+body.view-staff .spk-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+body.view-staff .spk-btn:disabled{opacity:.55;cursor:not-allowed;}
+body.view-staff .spk-txt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+body.view-staff .spk-chev{flex:none;display:inline-flex;color:var(--muted);transform:rotate(90deg);}
+body.view-staff :is(.filter-field,.filter-sess,.rpt-fld,.vm-full) .spk{width:100%;}
+/* the picker: centred, a heading for each day, one row per session */
+#spk-pop .modal-backdrop{z-index:320;}
+#spk-pop .spk-box{width:min(480px,calc(100vw - 32px));max-width:none;max-height:min(640px,calc(100dvh - 48px));display:flex;flex-direction:column;gap:10px;padding:16px;overflow:hidden;}
+#spk-pop .spk-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#spk-pop .spk-head .modal-title{margin:0;font-size:16px;font-weight:600;}
+#spk-pop .spk-q{-webkit-appearance:none;appearance:none;width:100%;box-sizing:border-box;min-height:var(--sf-ctl-size,38px);padding:0 12px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);font:400 14px/1.3 var(--sf-font,inherit);}
+#spk-pop .spk-q:focus-visible{outline:2px solid var(--green);outline-offset:1px;border-color:transparent;}
+#spk-pop .spk-list{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px;}
+#spk-pop .spk-gh{position:sticky;top:0;z-index:1;padding:8px 4px 4px;background:var(--sf-card,var(--s1));font-size:12px;font-weight:600;color:var(--muted);}
+#spk-pop .spk-gh-past{margin-top:6px;padding-top:10px;border-top:1px solid var(--sf-line,var(--border));color:var(--text);}
+#spk-pop .spk-row{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:6px 8px;border:0;border-radius:var(--sf-r-ctl,8px);background:none;color:var(--text);font:inherit;text-align:start;cursor:pointer;}
+#spk-pop .spk-row:hover{background:var(--sf-hover,var(--s2));}
+#spk-pop .spk-row:focus-visible{background:var(--sf-hover,var(--s2));outline:2px solid var(--green);outline-offset:-2px;}
+#spk-pop .spk-row.on{background:var(--sf-select,var(--s2));}
+#spk-pop .spk-row:disabled{opacity:.5;cursor:not-allowed;}
+#spk-pop .spk-r-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+#spk-pop .spk-r-nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#spk-pop .spk-r-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;font-size:12px;color:var(--muted);}
+#spk-pop .spk-r-sub .sg-chip{font-size:11px;padding:0 6px;}
+#spk-pop .spk-r-left{flex:none;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+#spk-pop .spk-r-tick{flex:none;display:inline-flex;color:var(--sf-green-ink,var(--green));}
+#spk-pop .spk-none{padding:20px 8px;text-align:center;color:var(--muted);}
+/* the Sessions list as an agenda: a heading for each day (Today and Tomorrow in words), one line per session */
+body.view-staff #tab-sessions .ss-day-h{display:flex;align-items:center;gap:8px;margin:14px 2px 6px;font-size:13px;font-weight:600;color:var(--muted);}
+body.view-staff #tab-sessions .sess-list-scroll>.ss-day-h:first-child{margin-top:2px;}
+body.view-staff #tab-sessions .ss-day-h.ss-day-today{color:var(--sf-green-ink,var(--green));}
+body.view-staff #tab-sessions .sess-lc.sess-ag{display:grid;grid-template-columns:minmax(58px,auto) minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:48px;margin:0 0 4px;padding:8px 12px;border:1px solid var(--sf-line,var(--border));border-radius:var(--sf-r-ctl,8px);background:var(--sf-card,var(--s1));color:var(--text);text-align:start;}
+body.view-staff #tab-sessions .sess-lc.sess-ag:hover{border-color:var(--sf-ctl-h,var(--border));}
+body.view-staff #tab-sessions .sess-lc.sess-ag.selected{border-color:var(--sf-green-ink);background:var(--sf-select);box-shadow:0 0 0 2px var(--sf-accent-wash);}
+body.view-staff #tab-sessions .sess-ag-t{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;}
+body.view-staff #tab-sessions .sess-ag-main{display:flex;flex-direction:column;gap:3px;min-width:0;}
+body.view-staff #tab-sessions .sess-ag-who{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;}
+body.view-staff #tab-sessions .sess-ag-nm{min-width:6em;flex:1 1 0;font-weight:600;line-height:1.3;overflow-wrap:anywhere;} /* the name wraps in the narrow list pane rather than being cut */
+body.view-staff #tab-sessions .sess-ag-who .sg-chip{flex:none;font-size:11px;padding:0 6px;}
+body.view-staff #tab-sessions .sess-ag-more{display:flex;flex-direction:column;gap:2px;min-width:0;padding-inline-start:30px;}
+body.view-staff #tab-sessions .sess-ag-more :is(.sess-lc-bf,.sess-lc-rv,.sess-lc-tc){margin:0;}
+body.view-staff #tab-sessions .sess-ag-end{display:flex;align-items:center;gap:8px;justify-content:flex-end;}
+body.view-staff #tab-sessions .sess-ag-end .sess-lc-bar{width:44px;margin:0;}
+body.view-staff #tab-sessions .sess-ag-end .ss-fill{display:block;height:100%;}
+body.view-staff #tab-sessions .sess-ag-end .sess-lc-count{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+#tab-sessions .ss-dense .sess-lc.sess-ag{min-height:40px;padding:5px 10px;}
+@media(max-width:520px){
+  body.view-staff #tab-sessions .sess-lc.sess-ag{grid-template-columns:minmax(52px,auto) minmax(0,1fr);}
+  body.view-staff #tab-sessions .sess-ag-end{grid-column:2;justify-content:flex-start;}
+}
+/* the Sessions detail pane and the table's Kind column carry the mark too */
+body.view-staff .sess-detail-nm{display:flex;align-items:center;gap:8px;min-width:0;margin-bottom:2px;font-size:13px;font-weight:600;color:var(--text);}
+body.view-staff .sess-detail-nm>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body.view-staff #tab-sessions .ss-kind-c{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}

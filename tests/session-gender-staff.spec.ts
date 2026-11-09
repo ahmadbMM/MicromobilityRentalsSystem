@@ -194,7 +194,8 @@ test.describe('@staff:sessions pool gender', () => {
     const chip = page.locator(`.sess-summary-chip[data-on-click*='"${SWIM_F}"']`);
     await expect(chip.locator('.sg-chip')).toHaveText('Women only');
     await expect(chip).toHaveAttribute('title', /Women only/);
-    await expect(page.locator(`.sess-bar-mobile option[value="${SWIM_F}"]`)).toContainText('Women only');
+    // the one-line label (2026-11-10): the short name, men or women, the day and the start
+    await expect(page.locator(`.sess-bar-mobile option[value="${SWIM_F}"]`)).toContainText('Pool, women · Thu 5 Mar 2099 · 6 PM');
     // the roster's heading for that session when every session is listed
     await expect(page.locator('tr.sess-group-hdr .sg-chip.sg-female')).toHaveCount(1);
   });
@@ -204,7 +205,8 @@ test.describe('@staff:sessions pool gender', () => {
     const rows = sent(page, 'queue_entries', 'POST');
     await page.evaluate(`setStaffTab('queue');S.sfSession='${SWIM_F}';showCommAddModal()`);
     const dlg = page.locator('#comm-add-modal');
-    await expect(dlg.locator('select')).toContainText('Women only');
+    await expect(dlg.locator('select')).toContainText('Pool, women');
+    await expect(dlg.locator('.spk-btn')).toContainText('Pool, women'); // the picker's button names the pick
     const man = dlg.locator('.cmy-ca-row', { hasText: 'Omar Man' });
     await expect(man).toBeDisabled();
     await expect(man).toContainText('This session is for women only.');
@@ -235,7 +237,7 @@ test.describe('@staff:sessions pool gender', () => {
     });
     const moves = sent(page, 'queue_entries', 'PATCH');
     await page.evaluate(`setStaffTab('queue');showBookingEditModal('q1')`);
-    await expect(page.locator(`#be-sess option[value="${JCC_F}"]`)).toContainText('Women only');
+    await expect(page.locator(`#be-sess option[value="${JCC_F}"]`)).toContainText('Circuit, women');
     await page.locator('#be-sess').selectOption(JCC_F);
     await page.evaluate(`saveBookingEdit()`);
     await expect(page.locator('.toast.error').filter({ hasText: 'Omar Man: This session is for women only.' })).toBeVisible();

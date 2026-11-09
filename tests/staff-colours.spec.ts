@@ -49,7 +49,11 @@ test.describe('@staff:bookings Bookings in colour', () => {
     const chip = (id: string) => `#sess-strip .sess-summary-chip[data-on-click*='"setSfSession","${id}"']`;
     await expect(page.locator(chip(J))).toHaveClass(/\bth-jcc\b/);
     expect(await bg(page, chip(J))).toBe('rgb(6, 52, 111)'); // the circuit's navy
-    await expect(page.locator(`${chip(J)} img.sf-mark`)).toHaveAttribute('src', '/jcc-white.webp');
+    // every card leads with the kind's mark and its name, the circuit's too (2026-11-10), white on the navy
+    await expect(page.locator(`${chip(J)} .smk.ev-jcc`)).toHaveCount(1);
+    await expect(page.locator(`${chip(J)} .sess-chip-event`)).toHaveText('Jeddah Corniche Circuit');
+    expect(await page.locator(`${chip(J)} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(255, 255, 255)');
+    await expect(page.locator(`#sess-strip img.sf-mark`)).toHaveCount(0);
     for (const id of ['2099-10-24', '2099-10-22-pm']) {
       await expect(page.locator(chip(id))).toHaveClass(/\bth-comm\b/);
       expect(await img(page, chip(id))).toContain('mm-pattern');
@@ -60,20 +64,20 @@ test.describe('@staff:bookings Bookings in colour', () => {
     expect(await page.locator(`${chip('2099-10-22-pm')} .sess-chip-event`).evaluate((el) => getComputedStyle(el).color)).toBe('rgb(163, 59, 46)');
     await expect(page.locator(chip('2099-10-17-rh'))).toHaveClass(/\bth-runher\b/);
     expect(await img(page, chip('2099-10-17-rh'))).toContain('radial-gradient');
-    await expect(page.locator(`${chip('2099-10-17-rh')} img.sf-mark`)).toHaveAttribute('src', '/assets/runher-partners.webp');
+    await expect(page.locator(`${chip('2099-10-17-rh')} .smk.ev-runher`)).toHaveCount(1);
     await expect(page.locator(chip('2099-09-23-nd'))).toHaveClass(/\bth-snd96\b/);
     expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(0, 38, 40)');
     await expect(page.locator(chip('2099-10-28-ev'))).toHaveClass(/\bth-event\b/);
-    await expect(page.locator(`${chip('2099-10-28-ev')} img.sf-mark`)).toHaveCount(0);
+    await expect(page.locator(`${chip('2099-10-28-ev')} .smk.ev-event`)).toHaveCount(1);
     // the picked ride is ringed in its own accent, and hovering keeps the look
     expect(await page.locator(chip(J)).evaluate((el) => getComputedStyle(el).boxShadow)).toContain('rgb(14, 151, 213)');
     await page.locator(chip('2099-09-23-nd')).hover();
     expect(await bg(page, chip('2099-09-23-nd'))).toBe('rgb(0, 38, 40)');
-    // the Sessions view's cards too
+    // the Sessions view is an agenda (2026-11-10): plain rows, each with its kind's mark, no card themes
     await page.evaluate(`S.queueView='sessions';renderStaffQueue()`);
-    await expect(page.locator(`#tab-sessions .sess-lc.th-jcc`)).toHaveCount(1);
-    await expect(page.locator(`#tab-sessions .sess-lc.th-comm`)).toHaveCount(2);
-    await expect(page.locator(`#tab-sessions .sess-lc.th-runher, #tab-sessions .sess-lc.th-snd96, #tab-sessions .sess-lc.th-event`)).toHaveCount(3);
+    await expect(page.locator(`#tab-sessions .sess-lc.sess-ag`)).toHaveCount(6);
+    await expect(page.locator(`#tab-sessions .sess-lc[class*="th-"]`)).toHaveCount(0);
+    for (const k of ['jcc', 'saturday', 'petromin', 'runher', 'snd96', 'event']) await expect(page.locator(`#tab-sessions .sess-lc .smk.ev-${k}`)).toHaveCount(1);
   });
 
   // The places-left line under each chip's counts (BK14) was var(--text-2,#555), and --text-2 is defined nowhere: 1.7:1 on
