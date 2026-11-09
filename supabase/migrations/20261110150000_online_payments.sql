@@ -1007,7 +1007,7 @@ grant execute on function public.pay_refund_done(text, uuid, boolean, int, text)
 
 -- For the server's reconcile run (every few minutes): payments not yet paid that Moyasar may hold money
 -- for (it lists every Moyasar payment carrying our id in its metadata), and card refunds that never
--- reached Moyasar. pay_checked stamps the ones asked about, so each is asked again only minutes later.
+-- reached Moyasar (to confirm, never to resend). pay_checked stamps the ones asked about, so each is asked again only minutes later.
 create or replace function public.pay_reconcile_list(p_key text) returns jsonb
 language plpgsql stable security definer set search_path = public as $$
 begin
@@ -1019,9 +1019,13 @@ begin
                       and p.created_at < now() - interval '2 minutes'
                       and coalesce(p.checked_at, p.created_at) < now() - case when p.status = 'initiated' then interval '3 minutes' else interval '30 minutes' end
                     order by coalesce(p.checked_at, p.created_at) limit 20) x), '[]'::jsonb),
-    'refunds', coalesce((select jsonb_agg(jsonb_build_object('id', r.id, 'provider_id', r.provider_id, 'amount', r.amount))
+    -- a card refund still pending minutes later: confirmed against Moyasar's refunded total ('already' = what this
+    -- database counted for that Moyasar payment before it), never sent twice
+    'refunds', coalesce((select jsonb_agg(jsonb_build_object('id', r.id, 'provider_id', r.provider_id, 'amount', r.amount,
+                                                             'already', case when r.provider_id = p.provider_id then p.refunded else 0 end))
                            from (select * from payment_refunds where status = 'pending' and dest = 'card'
-                                   and created_at < now() - interval '2 minutes' order by created_at limit 10) r), '[]'::jsonb));
+                                   and created_at < now() - interval '2 minutes' order by created_at limit 10) r
+                           join payments p on p.id = r.payment_id), '[]'::jsonb));
 end $$;
 revoke execute on function public.pay_reconcile_list(text) from public;
 grant execute on function public.pay_reconcile_list(text) to anon, authenticated;
