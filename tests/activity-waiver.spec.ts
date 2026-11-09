@@ -56,8 +56,13 @@ test.describe('@customer:reserve activity waiver', () => {
       await expect(panel).toContainText('Activity waiver');
       await expect(panel).not.toContainText('Ride waiver');
       await expect(panel).not.toContainText('Swim waiver');
-      await expect(panel).toContainText('Every activity we run carries some risk.');
-      await expect(panel).toContainText('I agree to follow the team’s and the venue’s instructions.');
+      // its words open in a pop-up from the title row (the user, 2026-11-09)
+      await panel.locator('#reg-waiver .cu-wv-open').click();
+      const dlg = page.locator('.wv-dlg');
+      await expect(dlg).toContainText('Every activity we run carries some risk.');
+      await expect(dlg).toContainText('I agree to follow the team’s and the venue’s instructions.');
+      await dlg.locator('.btn-secondary').click();
+      await expect(dlg).toHaveCount(0);
       await expect(panel).toContainText('I have read the waiver and agree on behalf of everyone on this booking');
       await expect(panel.locator('.reg-stepper')).toHaveAttribute('aria-label', ev === 'event' ? 'Step 3 of 3' : 'Step 2 of 2');
       // unticked: Confirm is off, and a submit called directly posts no acceptance nobody gave
@@ -78,7 +83,8 @@ test.describe('@customer:reserve activity waiver', () => {
     await toWaiver(page, 'community', SWIM);
     const panel = page.locator('#tab-register');
     await expect(panel).toContainText('Swim waiver');
-    await expect(panel).toContainText('I confirm that I can swim unaided');
+    await panel.locator('#reg-waiver .cu-wv-open').click();
+    await expect(page.locator('.wv-dlg')).toContainText('I confirm that I can swim unaided');
     await expect(panel).not.toContainText('Activity waiver');
     await page.evaluate(`toggleWaiver(true);submitReg()`);
     await expect.poll(() => posts.length, { timeout: 6000 }).toBeGreaterThan(0);
@@ -91,7 +97,8 @@ test.describe('@customer:reserve activity waiver', () => {
     await toWaiver(page, 'workshop', WS);
     const panel = page.locator('#tab-register');
     await expect(panel).toContainText('إقرار المشاركة');
-    await expect(panel).toContainText('كل نشاط ننظّمه ينطوي على قدر من المخاطر');
+    await panel.locator('#reg-waiver .cu-wv-open').click();
+    await expect(page.locator('.wv-dlg')).toContainText('كل نشاط ننظّمه ينطوي على قدر من المخاطر');
   });
 
   test('a booking the database refuses for its waiver (WAIVER_REQUIRED) goes back to the waiver, unticked', async ({ page }) => {

@@ -783,6 +783,15 @@ brought the template look back. Fixed, and guarded so it stays fixed:
   (`#wv-why` says why). A change that adds no riders asks nothing. `_waiverBack` (the submit's guard, the
   database's WAIVER_REQUIRED, a refused outbox row) lands on the review with the tick focused (`_wvFocus`). An
   old saved `regStep` 2.5 opens the review.
+- **The review keeps its long parts one tap away** (the user, 2026-11-09): the waiver's words open in a centred
+  pop-up from its title row (`showWaiverText` / `closeWaiverText`, `.wv-dlg`, drawn in `#bike-info-modal`); the tick
+  stays on the review. The add-ons fold behind their title row until the rider taps its arrow (`_regAddonsTog`,
+  `S.regAddonsOpen` holds the session it is open for; the row counts what is picked). Specs that read the waiver
+  open the pop-up first (`#reg-waiver .cu-wv-open`); `tests/review-fold.spec.ts` covers the fold.
+- **No helper lines on rider screens** (the owner 2026-11-08, the user 2026-11-09): no subtitle under Sign in,
+  Create account, Bookings or Account; no wallet explainer; no "New to cycling?" under the bike types; no "Show
+  this code" under You're booked; no instruction line on the rating form. Kept on purpose: the pay-at-booth amount,
+  the helmet line and the cancel dialog's "This cancels the booking for all N riders".
 - **Copy**: no "Please" at the start of rider messages, no "successfully", no "it only takes a minute".
   Write "Enter your email.", "Saved.", "You’re signed out."
 

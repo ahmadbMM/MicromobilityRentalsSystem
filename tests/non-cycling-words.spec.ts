@@ -57,7 +57,7 @@ test.describe('@customer:rating a bike-free session is rated as a session', () =
     await tab.locator('#mr-past .wl-strip').click(); // past tickets wait in the stack until tapped (2026-10-31)
     await expect(tab.locator('button', { hasText: 'Rate your session' })).toBeVisible();
     await expect(tab.locator('button', { hasText: 'Rate your ride' })).toHaveCount(0);
-    await expect(tab.locator('.page-sub').first()).toHaveText('Your tickets for what’s ahead, and what you’ve done.');
+    await expect(tab.locator('.page-sub')).toHaveCount(0); // no line under the title (the user, 2026-11-09)
     const counted = await page.evaluate(`(()=>{const all=getQueue().filter(e=>e.customerId==='c1');const b=_mrBadges(all,all.filter(_bdgRode),[],null);return{first:b.find(x=>x.s==='first_lap').on,stats:_myrStats(all.filter(e=>!_ncEntry(e)))};})()`);
     expect(counted).toEqual({ first: false, stats: '' });
   });
@@ -88,8 +88,12 @@ test.describe('@customer:waiver the waiver of a bike-free session', () => {
     await bootCustomer(page, [e], [], false);
     await page.evaluate(`S.selEvent='event';S.selSession=${JSON.stringify(e.id)};S.regStep=3;goCustomer('register')`);
     const wv = page.locator('#reg-waiver');
-    await expect(wv).toContainText('You cannot book any activity with MicroMobility until you have read and agreed to this waiver.');
     await expect(wv).not.toContainText(CYCLING);
+    await wv.locator('.cu-wv-open').click(); // its words open in a pop-up (2026-11-09)
+    const dlg = page.locator('.wv-dlg');
+    await expect(dlg).toContainText('You cannot book any activity with MicroMobility until you have read and agreed to this waiver.');
+    await expect(dlg).not.toContainText(CYCLING);
+    await dlg.locator('.btn-secondary').click();
     expect(await page.evaluate(`_waiverVersionFor(_sessGet(${JSON.stringify(e.id)}))`)).toBe('activity-2026-10-v3');
     await page.evaluate(`S._wg={sid:${JSON.stringify(e.id)}};renderWaiverGate()`);
     const gate = page.locator('#waiver-gate');

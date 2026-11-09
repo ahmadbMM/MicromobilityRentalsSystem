@@ -44,7 +44,7 @@ test('a circuit ride: an unskippable page asks service and bike, and why for 6 o
   await m.locator('#rgq-service .rg-b[data-v="9"]').click();
   await m.locator('#rgq-bike .rg-b[data-v="7"]').click();
   await expect(m.locator('.rg-why')).toHaveCount(0); // a 7 is not asked why on a rental since 2026-10-11 (the page is shorter)
-  await expect(m.locator('.pg-sub')).toHaveText('Score each from 1 to 10. For a 6 or under, tell us why.');
+  await expect(m.locator('.pg-sub')).toHaveCount(0); // no instruction line (the user, 2026-11-09)
   await expect(m.locator('#rgq-bike .rg-ends')).toHaveText(/Poor\s*Great/); // which end is good
   await expect(m.locator('.rg-kicker')).toHaveCount(0);
   await m.locator('#rgq-bike .rg-b[data-v="6"]').click();

@@ -134,10 +134,13 @@ test.describe('@customer:blood Blood Donation registration', () => {
     // its own agreement: a medical procedure by the hosts' team, not an activity; one person, no "on behalf of"; the partners not released
     const wv = page.locator('#reg-waiver');
     await expect(wv).toContainText('Donor agreement');
-    await expect(wv).toContainText('medical procedure carried out by the event’s medical team');
-    await expect(wv).toContainText('I can withdraw at any time');
     await expect(wv).toContainText('I have read this and I agree');
-    expect(await wv.innerText()).not.toMatch(/waiver|activity|take part|own risk|fracture|on behalf|partners|\bride waiver\b/i);
+    await wv.locator('.cu-wv-open').click(); // its words open in a pop-up (2026-11-09)
+    const dlg = page.locator('.wv-dlg');
+    await expect(dlg).toContainText('medical procedure carried out by the event’s medical team');
+    await expect(dlg).toContainText('I can withdraw at any time');
+    for (const el of [wv, dlg]) expect(await el.innerText()).not.toMatch(/waiver|activity|take part|own risk|fracture|on behalf|partners|\bride waiver\b/i);
+    await dlg.locator('.btn-secondary').click();
     await expect(page.locator('#tab-register .mm-reg-foot .btn-primary')).toBeDisabled();
     await page.locator('#reg-waiver-cb').check();
     // no price, no total, nothing to pay: the review
@@ -150,7 +153,7 @@ test.describe('@customer:blood Blood Donation registration', () => {
     await expect(tk).toContainText('Donor number');
     await expect(tk.locator('.bld-sum > *')).toHaveCount(4);
     await expect(page.locator('#tab-register')).not.toContainText(NO_PRICE);
-    await expect(page.locator('#tab-register')).toContainText('registration desk');
+    await expect(page.locator('#tab-register .bk-ok-sub')).toHaveCount(0); // no "show this code" line (the user, 2026-11-09)
     await expect(tk.locator('.bld-tk-vis')).toHaveCount(0);
     await expect(tk.locator('.bld-tk-club')).toContainText('Jeddah Riders');
     expect(rows[0]).toMatchObject({ session_id: BD, type_preference: 'None', price: 0, share_ok: true, waiver_version: 'blood-2026-11-v1', blood_role: 'donor', blood_club: 'Jeddah Riders' });
@@ -323,10 +326,13 @@ test.describe('@customer:blood Blood Donation registration', () => {
     // their own agreement, and the review says Visitor
     const wv = page.locator('#reg-waiver');
     await expect(wv).toContainText('Visitor agreement');
-    await expect(wv).toContainText('as a visitor and will not give blood');
-    await expect(wv).toContainText('checked-in visitors their free ride');
     await expect(wv).not.toContainText('Donor agreement');
-    expect(await wv.innerText()).not.toMatch(/resting after I donate|health questions|Iqama|partners/i);
+    await wv.locator('.cu-wv-open').click();
+    const dlg = page.locator('.wv-dlg');
+    await expect(dlg).toContainText('as a visitor and will not give blood');
+    await expect(dlg).toContainText('checked-in visitors their free ride');
+    for (const el of [wv, dlg]) expect(await el.innerText()).not.toMatch(/resting after I donate|health questions|Iqama|partners/i);
+    await dlg.locator('.btn-secondary').click();
     await page.locator('#reg-waiver-cb').check();
     await expect(page.locator('#tab-register .cu-rv-sec')).toContainText('Visitor');
     await page.locator('#tab-register .mm-reg-foot .btn-primary').click();

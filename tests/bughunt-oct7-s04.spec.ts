@@ -82,7 +82,7 @@ test.describe('@customer:reserve the booking form', () => {
     await boot(page);
     await page.evaluate(`S.inventory=[{id:'inv1',name:'Water',qty:50,price:5,category:'Beverages'}];
       S.selEvent='jcc';goCustomer('register');S.selSession='${S1}';S.regQty=1;S.regBikeHeights=['175'];S.regBikeTypes=['Road'];
-      S.regRiderNames=[undefined];S.regAddons=[{id:'inv1',qty:19}];S.regStep=3;renderRegister()`);
+      S.regRiderNames=[undefined];S.regAddons=[{id:'inv1',qty:19}];S.regAddonsOpen='${S1}';S.regStep=3;renderRegister()`);
     await expect(page.locator('#reg-ad-inc-inv1')).toBeEnabled();
     await page.evaluate(`_setRegAddonQty('inv1',1)`);
     await expect(page.locator('#reg-ad-inc-inv1')).toBeDisabled();

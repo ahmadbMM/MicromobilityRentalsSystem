@@ -1013,7 +1013,6 @@
     #tab-register .cu-waiver{display:flex;align-items:center;gap:12px;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:15px 18px;margin-top:12px;cursor:pointer;min-height:52px;box-sizing:border-box;}
     #tab-register .cu-waiver-cb{width:20px;height:20px;flex:none;}
     #tab-register .cu-waiver-lbl{font-size:13.5px;font-weight:600;}
-    #tab-register .cu-waiver-text{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 20px;max-height:260px;overflow-y:auto;font-size:13.5px;line-height:1.65;color:var(--muted);}
     #tab-register .cu-wrap8{display:flex;gap:8px;flex-wrap:wrap;}
     #tab-register .cu-waiver-ok{border-color:var(--green);}
 
@@ -1822,7 +1821,6 @@
     .bike-info-for b{color:var(--text);}
     .bike-info-level{display:inline-block;font-size:11px;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--s3);color:var(--muted);margin:6px 0 2px;}
     .bike-info-level.easy{background:rgba(var(--green-rgb),.12);color:var(--green);}
-    .bike-info-hint{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px;}
     :is(html[lang="ar"],html[lang="ur"]) .bike-info-kicker{text-transform:none;letter-spacing:0;font-size:12.5px;}
     .receipt-box{background:#111;border-radius:6px;padding:20px;font-family:monospace;font-size:12px;line-height:1.8;white-space:pre-wrap;margin-bottom:20px;color:rgba(var(--green-rgb),.85);border:1px solid rgba(var(--green-rgb),.12);box-shadow:0 0 20px rgba(var(--green-rgb),.05) inset;}
 
@@ -9182,6 +9180,16 @@ body:not(.view-staff) .addon-check{border-color:var(--line-3);}
   body:not(.view-staff) #customer-tab-nav .tab-btn:hover{color:var(--ink);}
   body:not(.view-staff) #customer-tab-nav .tab-btn.active{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--pl-1);}
 }
+/* ── The review's add-ons fold behind their title row and the waiver's words open from theirs (2026-11-09) ── */
+body:not(.view-staff) #tab-register .cu-fold-h{margin-bottom:0;}
+body:not(.view-staff) #tab-register :is(.cu-ad-tog,.cu-wv-open){display:flex;align-items:center;gap:10px;width:100%;min-height:44px;margin:0;padding:0;border:0;background:none;color:inherit;font:inherit;text-align:start;cursor:pointer;}
+body:not(.view-staff) #tab-register :is(.cu-ad-tog,.cu-wv-open)>span:first-child{flex:1;min-width:0;}
+body:not(.view-staff) #tab-register :is(.cu-ad-tog,.cu-wv-open) .cu-ic{flex:none;color:var(--ink-2);}
+body:not(.view-staff) #tab-register .cu-ad-tog .cu-ic{transform:rotate(90deg);transition:transform .2s var(--ease-spring);}
+body:not(.view-staff) #tab-register .cu-ad-tog[aria-expanded="true"] .cu-ic{transform:rotate(-90deg);}
+body:not(.view-staff) #tab-register .cu-ad-n{min-width:24px;padding:2px 8px;border-radius:999px;background:var(--go-wash);font-size:var(--fs-13);font-weight:600;text-align:center;font-variant-numeric:tabular-nums;}
+body:not(.view-staff) #tab-register #reg-ad-body{margin-top:12px;}
+body:not(.view-staff) .wv-dlg-text{max-height:min(56vh,480px);overflow-y:auto;overscroll-behavior:contain;margin:12px 0 4px;font-size:var(--fs-15);line-height:1.6;color:var(--ink-2);}
 /* ═══════════════════════════════════ END CUSTOMER SYSTEM ═══════════════════════════════════════ */
 
 /* The MicroMobility logo in the booking card's top start corner (the owner, 2026-09-30; _tkLogo).

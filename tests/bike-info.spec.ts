@@ -28,8 +28,8 @@ test.describe('bike type info', () => {
     await expect(page.locator('#reg-type-wrap-0 .type-info-btn')).toHaveCount(types.filter((t) => t !== 'Any' && t !== 'Own').length);
     expect(await page.locator('.type-info-btn[data-type-slot]').count()).toBe(0);
     await expect(page.locator('#reg-type-wrap-0 .type-info-btn').first()).toHaveAttribute('aria-label', 'About Road bikes');
-    // The form says which type is the easy choice.
-    await expect(page.locator('#reg-type-wrap-0 .bike-info-hint')).toContainText('Hybrid is the easiest choice');
+    // No hint line under the types (the user, 2026-11-09): the "i" tells each one.
+    await expect(page.locator('#reg-type-wrap-0 .bike-info-hint')).toHaveCount(0);
     // The picker is an even grid: every cell the same width and height, in two or three columns.
     const boxes: number[][] = await page.locator('#reg-type-wrap-0 .type-grid > *').evaluateAll((els) =>
       els.map((e) => { const r = e.getBoundingClientRect(); return [r.width, r.height, Math.round(r.left)]; }));

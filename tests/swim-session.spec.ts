@@ -66,9 +66,12 @@ test('the swimmer agrees to a swim waiver, not a cycling one', async ({ page }) 
   await asMember(page);
   await page.evaluate(`S.selSession='${SWIM}';regNextFromSession()`);
   const panel = page.locator('#tab-register');
-  await expect(panel).toContainText('Swimming carries risk');
-  await expect(panel).not.toContainText('wear a helmet');
-  await expect(panel).not.toContainText('rented bike');
+  await panel.locator('#reg-waiver .cu-wv-open').click(); // its words open in a pop-up (2026-11-09)
+  const dlg = page.locator('.wv-dlg');
+  await expect(dlg).toContainText('Swimming carries risk');
+  await expect(dlg).not.toContainText('wear a helmet');
+  await expect(dlg).not.toContainText('rented bike');
+  await dlg.locator('.btn-secondary').click();
   // the wrapper has to name the activity too, or the record says a swimmer accepted a
   // "Ride waiver" on behalf of every "rider" — consent to the wrong thing
   await expect(panel).toContainText('Swim waiver');

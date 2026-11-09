@@ -41,9 +41,22 @@ test('the riders step leads to the review, and the waiver is on it', async ({ pa
   await expect(page.locator('#reg-waiver')).toContainText('Ride waiver');
   // The owner's terms (2026-10-03): no booking without agreeing, and the rider alone answers for
   // themselves and their belongings, injuries, fractures, loss and theft included.
-  await expect(page.locator('#tab-register')).toContainText('You cannot book any ride or activity with MicroMobility until you have read and agreed to this waiver');
-  await expect(page.locator('#tab-register')).toContainText('I alone am responsible for myself, my safety and my personal belongings');
-  await expect(page.locator('#tab-register')).toContainText('including any injury, fracture, illness, loss, theft or damage');
+  // Its words open in a centred pop-up from the title row (the user, 2026-11-09), so the tick sits near the top.
+  await expect(page.locator('#reg-waiver .cu-waiver-text')).toHaveCount(0);
+  await page.locator('#reg-waiver .cu-wv-open').click();
+  const dlg = page.locator('.wv-dlg');
+  await expect(dlg).toHaveAttribute('role', 'dialog');
+  await expect(dlg.locator('#wv-dlg-t')).toHaveText('Ride waiver');
+  await expect(dlg).toContainText('You cannot book any ride or activity with MicroMobility until you have read and agreed to this waiver');
+  await expect(dlg).toContainText('I alone am responsible for myself, my safety and my personal belongings');
+  await expect(dlg).toContainText('including any injury, fracture, illness, loss, theft or damage');
+  // Close (or Escape) puts it away and leaves the tick as it was
+  await dlg.locator('.btn-secondary').click();
+  await expect(dlg).toHaveCount(0);
+  await expect(page.locator('#reg-waiver-cb')).not.toBeChecked();
+  await page.locator('#reg-waiver .cu-wv-open').click();
+  await page.keyboard.press('Escape');
+  await expect(dlg).toHaveCount(0);
 });
 
 test('confirm is refused until the box is ticked', async ({ page }) => {
@@ -139,6 +152,8 @@ test('the waiver names who is covered, in both languages', async ({ page }) => {
   await page.evaluate(`setLang('ar')`);
   await page.waitForTimeout(600);
   await expect(page.locator('#tab-register')).toContainText('نيابةً عن كل راكب في هذا الحجز');
-  await expect(page.locator('#tab-register')).toContainText('لا يمكنك حجز أي رحلة أو نشاط لدى مايكروموبيليتي إلا بعد قراءة هذا الإقرار والموافقة عليه');
-  await expect(page.locator('#tab-register')).toContainText('بما في ذلك أي إصابة أو كسر أو مرض أو فقدان أو سرقة أو تلف');
+  await page.locator('#reg-waiver .cu-wv-open').click();
+  const dlg = page.locator('.wv-dlg');
+  await expect(dlg).toContainText('لا يمكنك حجز أي رحلة أو نشاط لدى مايكروموبيليتي إلا بعد قراءة هذا الإقرار والموافقة عليه');
+  await expect(dlg).toContainText('بما في ذلك أي إصابة أو كسر أو مرض أو فقدان أو سرقة أو تلف');
 });
