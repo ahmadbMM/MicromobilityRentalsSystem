@@ -1699,6 +1699,34 @@
       .row-sheet{width:100%;height:auto;max-height:85svh;border-radius:16px;border:1px solid var(--border);animation-name:rowSheetUp;}
       .row-sheet .pay-menu-opt.danger{margin-top:0;}
     }
+    /* A booking's ⋯ menu as grouped tiles (2026-11-10): the booking at a glance under its name, the actions as
+       tiles of three under their headings, the rare ones folded under More, the dangerous one alone at the foot.
+       The head stays put and the tiles scroll; the bikes' and volunteers' menus keep the list above. */
+    .row-sheet.rmt-tiles{overflow:hidden;}
+    .row-sheet.rmt-tiles .row-sheet-head{flex-shrink:0;}
+    .rmt-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px;}
+    .rmt-chip{display:inline-flex;align-items:center;min-height:22px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;line-height:1.2;color:var(--muted);box-shadow:inset 0 0 0 1px var(--border);white-space:nowrap;}
+    .rmt-chip.rmt-paid{color:var(--green-d);box-shadow:inset 0 0 0 1px rgba(var(--green-rgb),.4);}
+    .rmt-chip.rmt-pending{color:var(--orange);box-shadow:inset 0 0 0 1px rgba(var(--warn-rgb),.5);}
+    .rmt-chip.rmt-house{color:var(--purple);box-shadow:inset 0 0 0 1px rgba(var(--purple-rgb),.4);}
+    .row-sheet .rmt-body{display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:4px 14px 14px;}
+    .rmt-grp-h{font-size:12px;font-weight:600;color:var(--muted);margin:10px 2px 5px;}
+    .rmt-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;}
+    .rmt-grid[hidden]{display:none;}
+    .row-sheet .rmt-grid .rmt-tile{flex-direction:column;justify-content:center;align-items:center;gap:5px;min-height:62px;padding:8px 5px;border:1px solid var(--border);border-radius:10px;background:var(--s1);text-align:center;font-size:12.5px;line-height:1.2;overflow-wrap:anywhere;}
+    .row-sheet .rmt-grid .rmt-tile:hover{background:var(--s2);}
+    .row-sheet .rmt-tile:focus-visible{outline:2px solid var(--green);outline-offset:1px;}
+    .row-sheet .rmt-tile .art-ic{flex-shrink:0;color:var(--green-d);}
+    .rmt-more{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin-top:12px;padding:8px 4px;background:none;border:none;border-top:1px solid var(--border);color:var(--text);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:start;}
+    .rmt-more-n{min-width:20px;padding:1px 6px;border-radius:999px;background:var(--s2);color:var(--muted);font-size:12px;text-align:center;}
+    .rmt-chev{width:7px;height:7px;margin-inline-start:auto;margin-inline-end:6px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);transition:transform .15s;}
+    .rmt-more[aria-expanded="true"] .rmt-chev{transform:rotate(-135deg);}
+    .rmt-foot{margin-top:auto;padding-top:14px;}
+    .rmt-foot::before{content:"";display:block;margin-bottom:12px;border-top:1px solid var(--border);}
+    .row-sheet .rmt-foot .rmt-tile.danger{justify-content:center;min-height:46px;margin:0;border:1px solid rgba(var(--red-rgb),.35);border-radius:10px;color:var(--red);}
+    .row-sheet .rmt-foot .rmt-tile.danger+.rmt-tile.danger{margin-top:6px;}
+    .row-sheet .rmt-foot .rmt-tile.danger:hover{background:rgba(var(--red-rgb),.07);}
+    @media(prefers-reduced-motion:reduce){.rmt-chev{transition:none;}}
     @keyframes rowSheetUp{from{transform:translateY(24px);opacity:.6}to{transform:none;opacity:1}}
     @media(prefers-reduced-motion:reduce){.row-sheet,.modal-backdrop.row-sheet-bg{animation:none;}}
 
