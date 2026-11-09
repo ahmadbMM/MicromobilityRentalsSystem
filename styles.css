@@ -8333,8 +8333,7 @@ body:not(.view-staff){
   --pl-1:0 0 0 1px rgba(26,25,25,.06),0 1px 2px rgba(64,52,44,.08),0 8px 20px -8px rgba(64,52,44,.16);
   --pl-2:0 0 0 1px rgba(26,25,25,.06),0 2px 4px rgba(64,52,44,.08),0 18px 36px -12px rgba(64,52,44,.22);
   --line-3:rgba(26,25,25,.48); /* a field whose border is its only cue: about 3:1 on paper */
-  --go-ring:rgba(7,122,75,.18); --band-ink-2:rgba(251,249,244,.92); --band-chip:rgba(251,249,244,.16); --band-chip-line:rgba(251,249,244,.32);
-  --band-route:rgba(255,255,255,.13); --band-dash:rgba(3,255,137,.55); --spin-track:rgba(251,249,244,.35);
+  --go-ring:rgba(7,122,75,.18); --spin-track:rgba(251,249,244,.35);
   --glass-night:rgba(26,25,25,.74); --glass-night-rim:rgba(255,255,255,.12); --glass-night-edge:rgba(0,0,0,.2); --tab-pill-night:rgba(3,255,137,.14);
   --ease-calm:cubic-bezier(.2,.8,.2,1);
   /* glass: solid first; the tint is the floor that keeps ink-2 at 4.5:1 over a black photo */
@@ -9013,50 +9012,24 @@ body:not(.view-staff) :is(.modal-box,#auth-modal:not(.as-page) .auth-box,.badge-
   body:not(.view-staff) :is(.btn-primary,.btn-secondary,.btn-wallet,.land-today,.landing-event-card,.toggle-btn):active{transform:none;}
 }
 /* ════════════════════════════════════════════════════════════════════════════════════════════════
-   ROUND TWO (2026-11-08, the owner's picks on the round-two page). The brand green gets a surface (the home
-   band, with the Corniche route drawn over it), cards the crisp edge (--pl-1/2), the booking steps a progress
-   bar, a day switch and one list per day, and the booked moment one drawn tick. On a phone the tab bar steps
-   aside while a booking is made (d_smallbars) and turns to night glass over a dark ticket; the top bar is clear
-   over the band. The reason dialogs are real radio lists. Motion is transform and opacity (the Wallet stack's
-   rows and the tick's stroke excepted, both small and once), none of it arrives by itself, and it rests under
-   reduced motion. No timers: a placeholder waits on a CSS delay, the bars read what is under them through an
-   IntersectionObserver (app.src.html, _lqBandWatch / _lqNightWatch).
+   ROUND TWO (2026-11-08, the owner's picks on the round-two page). Cards get the crisp edge (--pl-1/2), the
+   booking steps a progress bar, a day switch and one list per day, and the booked moment one drawn tick. On a
+   phone the tab bar steps aside while a booking is made (d_smallbars) and turns to night glass over a dark
+   ticket. The home band (brand green, the Corniche route) went 2026-11-09 for a plain greeting. The reason
+   dialogs are real radio lists. Motion is transform and opacity (the Wallet stack's rows and the tick's stroke
+   excepted, both small and once), none of it arrives by itself, and it rests under reduced motion. No timers: a
+   placeholder waits on a CSS delay, the tab bar reads what is under it through an IntersectionObserver
+   (app.src.html, _lqNightWatch).
    ════════════════════════════════════════════════════════════════════════════════════════════════ */
-/* ── Home: the band, its greeting, today's card over its foot ── */
-body:not(.view-staff) .lq-band{position:relative;isolation:isolate;overflow:hidden;margin:0 0 26px;padding:30px 28px 32px;border-radius:var(--r-hero);
-  background:var(--go);color:var(--night-ink);text-align:start;}
-body:not(.view-staff) .lq-band.has-today{padding-bottom:96px;margin-bottom:0;}
-body:not(.view-staff) .lq-route{position:absolute;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none;}
-body:not(.view-staff) .lq-route path{fill:none;stroke-linecap:round;vector-effect:non-scaling-stroke;}
-html[dir="rtl"] body:not(.view-staff) .lq-route{transform:scaleX(-1);}
-body:not(.view-staff) .lq-rt-w{stroke:var(--band-route);stroke-width:14px;}
-body:not(.view-staff) .lq-rt-d{stroke:var(--band-dash);stroke-width:1.6px;stroke-dasharray:2 9;}
-body:not(.view-staff) .lq-rt-o{stroke:var(--neon);stroke-width:8px;}
-body:not(.view-staff) .lq-greet{margin:0;font-size:var(--fs-26);font-weight:700;line-height:1.2;letter-spacing:-.4px;color:inherit;overflow-wrap:anywhere;}
-body:not(.view-staff) .lq-greet-sub{margin:6px 0 0;font-size:var(--fs-15);line-height:1.4;color:var(--band-ink-2);font-variant-numeric:tabular-nums;}
+/* ── Home: the greeting, a plain heading on the page (the user, 2026-11-09: not a card) ── */
+body:not(.view-staff) .lq-greet{margin:0 0 20px;font-size:var(--fs-26);font-weight:700;line-height:1.2;letter-spacing:-.4px;color:var(--ink);text-align:start;overflow-wrap:anywhere;}
 :is(html[lang="ar"],html[lang="ur"]) body:not(.view-staff) .lq-greet{letter-spacing:0;line-height:1.45;}
-body:not(.view-staff) .lq-band.has-today+.land-today{position:relative;z-index:1;margin:-66px 24px 4px;width:calc(100% - 48px);box-shadow:var(--pl-2);}
 /* today's way to its ticket: a neon fill with ink type (d_neon) */
 body:not(.view-staff) .land-today-go,
 body:not(.view-staff) .land-today.wl .land-today-go{background:var(--neon);border-color:var(--neon);color:var(--ink);font-weight:700;}
 /* the heading on the start side at 20px, its count at the end */
 body:not(.view-staff) #landing-body .landing-events-title{display:flex;align-items:center;gap:12px;margin:30px 0 14px;font-size:var(--fs-20);font-weight:600;line-height:1.25;color:var(--ink);text-align:start;}
 body:not(.view-staff) .lec-n{margin-inline-start:auto;min-width:28px;height:28px;padding:0 9px;display:inline-grid;place-items:center;border-radius:999px;background:var(--card-3);font-size:var(--fs-13);font-weight:600;color:var(--ink-2);}
-@media(max-width:767px){
-  body:not(.view-staff){--lq-tb:52px;}
-  /* the band runs under the clear top bar, edge to edge */
-  body:not(.view-staff) #landing-body.events-only{overflow:visible;}
-  body:not(.view-staff) .lq-band{margin:calc(-28px - var(--lq-tb)) -16px 24px;padding:calc(var(--lq-tb) + 22px) 20px 30px;border-radius:0;}
-  body:not(.view-staff) .lq-band.has-today{padding-bottom:86px;margin-bottom:0;}
-  body:not(.view-staff) .lq-band.has-today+.land-today{margin:-58px 0 4px;width:100%;}
-  body:not(.view-staff).view-picker.lq-on-band #topbar#topbar{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none;}
-  body:not(.view-staff).view-picker.lq-on-band #topbar#topbar :is(.lang-wrap,.topbar-btn){background:transparent;color:var(--night-ink);}
-  body:not(.view-staff).view-picker.lq-on-band #topbar#topbar :is(.lang-wrap,.topbar-btn):hover{background:var(--band-chip);color:var(--night-ink);}
-  body:not(.view-staff).view-picker.lq-on-band #topbar .chrome-av{background:var(--band-chip);border-color:var(--band-chip-line);color:var(--night-ink);}
-  body:not(.view-staff).view-picker.lq-on-band #topbar :focus-visible,
-  body:not(.view-staff).view-picker.lq-on-band #topbar .lang-wrap:focus-within{outline-color:var(--night-ink);}
-}
-@media all and (display-mode:standalone) and (max-width:767px){body:not(.view-staff){--lq-tb:calc(52px + env(safe-area-inset-top));}}
 /* placeholders that show only when a load takes over 300ms; a still block under reduced motion */
 body:not(.view-staff) .lq-skel{display:grid;gap:14px;opacity:0;animation:lqSkIn 1ms .3s forwards;}
 body:not(.view-staff) .lq-skel i{display:block;border-radius:var(--r-hero);background:var(--card-3);}

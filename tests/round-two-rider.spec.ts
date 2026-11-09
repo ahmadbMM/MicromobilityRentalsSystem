@@ -22,6 +22,18 @@ async function rider(page: Page, sessions: Record<string, unknown>[], extra: Rec
   await waitForSb(page);
   await page.waitForFunction(`S.dataLoaded===true`);
 }
+test.describe('@customer:round-two home', () => {
+  // The greeting is a plain heading on the page (the user, 2026-11-09: "i dont want it to look like a card and remove
+  // this 7 rides · 3 weeks in a row"): no green band, no route drawn, no season line, and the top bar stays as it is.
+  test('the greeting is a plain heading with the first name, no band and no line under it', async ({ page }) => {
+    await rider(page, days);
+    const h = page.locator('#land-events > h1.lq-greet');
+    await expect(h).toHaveText('Good evening, Spec');
+    await expect(page.locator('#land-events :is(.lq-band, .lq-route, .lq-greet-sub)')).toHaveCount(0);
+    await expect(h).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(page.locator('body.lq-on-band')).toHaveCount(0);
+  });
+});
 test.describe('@customer:round-two choose a ride', () => {
   // The Today / Tomorrow / Later switch is gone (the user, 2026-11-08: "remove the tomorrow and later filters"):
   // every ride is in one list, a heading a day, and the heading says Today or Tomorrow in words.

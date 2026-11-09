@@ -789,12 +789,12 @@ brought the template look back. Fixed, and guarded so it stays fixed:
 
 The owner's picks on the round-two page; the rules sit in the `ROUND TWO` part at the end of the customer system
 (styles.css), `tests/round-two-rider.spec.ts` holds the behaviour.
-- **Home.** `_lqBandHtml`: the brand green band with the Corniche route (inline SVG paths, no `data:` URL) under a
-  greeting in Riyadh's time of day (`greetMorning|Afternoon|Evening`, the first name in a `<bdi>`) and a season line in
-  the account page's own words (`mrRidesU`, `mrStreak`, `mrToNext`). On a phone it runs under the top bar, which is
-  clear while the band is under it (`body.lq-on-band`, set by `_lqBandWatch`, an IntersectionObserver on the band whose
-  root starts under the bar; no scroll handler). Today's card overlaps its foot; its button is a neon fill with ink
-  type (d_neon: neon fills on light are allowed, never neon text). "Pick your event" carries the tile count.
+- **Home.** `_lqGreetHtml`: a plain `<h1>` greeting on the page in Riyadh's time of day
+  (`greetMorning|Afternoon|Evening`, the first name in a `<bdi>`). The green band with the Corniche route, the season
+  line under it (rides, week streak) and the clear top bar over it on phones were removed 2026-11-09 (the user: "i dont
+  want it to look like a card and remove this 7 rides · 3 weeks in a row"); don't bring them back. Today's card follows
+  the greeting; its button is a neon fill with ink type (d_neon: neon fills on light are allowed, never neon text).
+  "Pick your event" carries the tile count.
 - **Placeholders wait 300ms.** Until `S.dataLoaded`, the landing's tiles and My Bookings draw `_skelHtml`, which is
   invisible for 300ms (a CSS animation delay, no timer), so a quick load never flashes grey.
 - **Choose a ride.** The stepper is a progress bar (`.reg-stepper.cu-prog`: the step's name, "Step 1 of 3" and a

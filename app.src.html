@@ -13139,7 +13139,7 @@ function renderLandingAvail(){
   if(ev){
     if(!cust){ev.innerHTML='';}
     else{
-      // Round two (2026-11-08): the brand band and its greeting lead; the heading says how many events there are. Until
+      // Round two (2026-11-08): the greeting leads; the heading says how many events there are. Until
       // the first load lands, tile-shaped placeholders that only show after 300ms (styles.css, .lq-skel).
       const tiles=[
           _pmMember()?_lecWrap('petromin',_pmCardHtml()):'',
@@ -13174,11 +13174,11 @@ function renderLandingAvail(){
             <span class="lec2-logo" aria-hidden="true"><img src="/logo-dark.webp" class="mm-on-light" alt="" loading="lazy" decoding="async"><img src="/logo.webp" class="mm-on-dark" alt="" loading="lazy" decoding="async"></span>
           </button>`)].filter(Boolean);
       const today=S.dataLoaded?_todayCardHtml(cust):'';
-      ev.innerHTML=`${_lqBandHtml(cust,!!today)}${S.dataLoaded?`${today}${_frLandHtml(cust)}
+      ev.innerHTML=`${_lqGreetHtml(cust)}${S.dataLoaded?`${today}${_frLandHtml(cust)}
         <h2 class="landing-events-title">${t('landChooseEvent')}<span class="lec-n">${tiles.length}</span></h2>
         <div class="landing-events-grid">${tiles.join('')}</div>`:_skelHtml(3,'lq-skel-lec')}`;
     }
-    _lqBandWatch();_lqNightWatch();
+    _lqNightWatch();
   }
   if(cust){strip.innerHTML='';_openEventLink();return;} // signed-in landing shows no availability strip; a parked event link opens now
   const open=openSessions().filter(s=>_evMatch(s,'jcc')&&!_sessPastDay(s)); // strip = public JCC availability only, today onwards; every row opens the circuit list, so it lists what that list holds
@@ -13233,34 +13233,20 @@ function _todayCardHtml(cust){
     <span class="land-today-go">${t('tkShowTicket')}</span>
   </button>`;
 }
-// ── Round two (2026-11-08): the home band, placeholders that wait, and two bars that read what is under them ──
-// The band: the brand green under a greeting in Jeddah's time of day with the rider's first name, and a line from
-// their season in the account page's own words (rides, then the week streak or what the next tier takes). The
-// Corniche route is drawn over it as inline SVG; today's card overlaps its foot (styles.css, .lq-band).
-const _LQ_RT='M-20 206C60 182 120 214 200 190S330 150 412 160';
-function _lqBandHtml(cust,today){
+// ── Round two (2026-11-08): the home greeting, placeholders that wait, and the bar that reads what is under it ──
+// The greeting: a plain page heading in Jeddah's time of day with the rider's first name. No green band, route or
+// line under it (the user, 2026-11-09: "i dont want it to look like a card and remove this 7 rides · 3 weeks in a
+// row"); the season lives on the account page.
+function _lqGreetHtml(cust){
   const h=new Date(Date.now()+108e5).getUTCHours(),fn=String(cust.name||'').trim().split(/\s+/)[0];
-  let g=esc(t(h>=4&&h<12?'greetMorning':h>=12&&h<17?'greetAfternoon':'greetEvening')),sub='';
+  let g=esc(t(h>=4&&h<12?'greetMorning':h>=12&&h<17?'greetAfternoon':'greetEvening'));
   g=fn?g.replace('{0}',`<bdi>${esc(fn)}</bdi>`):g.replace(/[,،]?\s*(يا\s*)?\{0\}/,'');
-  if(S.dataLoaded){
-    const done=getQueue().filter(e=>e.customerId===cust.id&&_rideCompleted(e)&&!_ncEntry(e)),n=done.length,tr=_mrTier(n),st=_mrStreak(done);
-    sub=[n?n+' '+_tn('mrRidesU',n):tr.name,st>=2?_tn('mrStreak',st):tr.next?_tn('mrToNext',tr.next.need).replace('{1}',tr.next.name):n?tr.name:''].filter(Boolean).join(' · ');
-  }
-  return`<section class="lq-band${today?' has-today':''}" aria-labelledby="lq-greet"><svg class="lq-route" viewBox="0 0 390 220" preserveAspectRatio="none" aria-hidden="true"><path class="lq-rt-w" d="${_LQ_RT}"/><path class="lq-rt-d" d="${_LQ_RT}"/><path class="lq-rt-o" d="M305 162h0"/></svg><h1 class="lq-greet" id="lq-greet">${g}</h1>${sub?`<p class="lq-greet-sub">${esc(sub)}</p>`:''}</section>`;
+  return`<h1 class="lq-greet" id="lq-greet">${g}</h1>`;
 }
 // A placeholder that shows only when a load takes over 300ms (a CSS animation delay, no timer): a quick load never
 // flashes grey.
 function _skelHtml(n,cls){return`<div class="lq-skel ${cls}" role="status" aria-busy="true" aria-label="${esc(t('loadingLabel'))}">${'<i></i>'.repeat(n)}</div>`;}
-// The top bar is clear while the band is under it and turns to glass once content is (phones, .lq-on-band): an
-// IntersectionObserver on the band with the root drawn in under the bar, so no scroll handler reads layout.
-let _lqBandIo=null,_lqNightIo=null;
-function _lqBandWatch(){
-  if(_lqBandIo)_lqBandIo.disconnect();_lqBandIo=null;
-  const b=document.querySelector('#land-events .lq-band'),tb=document.getElementById('topbar');
-  if(!b||!tb||!window.IntersectionObserver){document.body.classList.remove('lq-on-band');return;}
-  _lqBandIo=new IntersectionObserver(es=>document.body.classList.toggle('lq-on-band',es[es.length-1].isIntersecting),{rootMargin:-tb.offsetHeight+'px 0px 0px 0px'});
-  _lqBandIo.observe(b);
-}
+let _lqNightIo=null;
 // The floating tab bar turns to night glass while a dark ticket, Wallet strip or event tile is under it (.lq-night):
 // the root is a band across the bar, observed again whenever a rider screen is drawn. A new dark theme joins _LQ_DARK.
 const _LQ_DARK='.ticket-card:is(.th-jcc,.th-arena,.ev-snd96),.ticket-card.tk-live:not(.tk-th),.landing-event-card:is(.ev-jcc,.ev-snd96)';
@@ -13272,7 +13258,7 @@ function _lqNightWatch(){
   _lqNightIo=new IntersectionObserver(es=>{es.forEach(e=>e.isIntersecting?on.add(e.target):on.delete(e.target));nav.classList.toggle('lq-night',on.size>0);},{rootMargin:`${Math.round(-r.top-8)}px 0px ${Math.round(r.bottom-8-innerHeight)}px 0px`});
   els.forEach(el=>_lqNightIo.observe(el));
 }
-{let _rz=0;window.addEventListener('resize',()=>{clearTimeout(_rz);_rz=setTimeout(()=>{_lqBandWatch();_lqNightWatch();},250);},{passive:true});}
+{let _rz=0;window.addEventListener('resize',()=>{clearTimeout(_rz);_rz=setTimeout(_lqNightWatch,250);},{passive:true});}
 // Customer page Back: step back inside the Reserve wizard first, otherwise return to
 // the landing event picker - the same path the browser Back button now walks.
 function custBack(){
