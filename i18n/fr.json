@@ -7424,6 +7424,7 @@
   "lkBizOne": "Un créneau (SAR)",
   "lkBizBoth": "Les deux créneaux (SAR)",
   "lkPickDoor": "Choisissez votre casier",
+  "lkPickGone": "Le casier {0} vient d’être pris. Choisissez-en un autre.",
   "lkErrJustTaken": "Votre réservation est faite, mais ce casier vient d’être pris. Demandez à l’accueil.",
   "lkMine": "Vos casiers",
   "lkPaidWallet": "Payé avec votre portefeuille",

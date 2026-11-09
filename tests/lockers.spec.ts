@@ -76,7 +76,7 @@ test.describe('@staff:lockers the Lockers section', () => {
     await expect(sec.locator('.lk-stat').nth(0)).toContainText('1'); // free: 2 (1 in use, 3 out)
     await expect(sec.locator('.lk-stat').nth(1)).toContainText('1'); // reserved (here, waiting for a number)
     await expect(sec.locator('.lk-stat').nth(2)).toContainText('1'); // in use
-    await expect(sec.locator('.lk-tile.lk-t-use')).toContainText('Rana Rider');
+    await expect(sec.locator('.lk-tile', { hasText: 'Rana Rider' })).toHaveClass(/lk-t-(use|over)/); // in use, or overdue once tonight's 9-11 PM is over (after 23:00 KSA)
     await expect(sec.locator('.lk-tile.lk-t-out')).toContainText('Out of service');
 
     await sec.locator('.lk-tile', { hasText: 'Free' }).click();
@@ -300,6 +300,19 @@ test.describe('@customer:reserve lockers', () => {
     expect(await page.evaluate(`JSON.stringify(S.regLockerCodes)`)).toBe('["8"]');
     await page.evaluate(`S.regLocker='both';S.regLockerCodes=['4','8'];` + drawReview); // 4 is taken 9-11 PM: dropped
     expect(await page.evaluate(`JSON.stringify(S.regLockerCodes)`)).toBe('["8"]');
+  });
+
+  test('a picked door reserved by someone else meanwhile is dropped and said, and the booking waits at the cabinet', async ({ page }) => {
+    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
+    await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
+    await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
+    await page.evaluate(`S.regLocker='early';S.regLockerCodes=['7','8'];`);
+    expect(await page.evaluate(`_lkPicksFresh(_sessGet('s1'))`)).toBe(true); // nothing changed: the booking goes on
+    // someone reserves 7 for 6-8 PM: the next read takes it out of the picks, and the booking stops
+    await page.route('**/rest/v1/rpc/locker_board*', (r) => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ...board, taken: { e: ['3', '7'], l: ['4'] } }) }));
+    expect(await page.evaluate(`_lkPicksFresh(_sessGet('s1'))`)).toBe(false);
+    expect(await page.evaluate(`JSON.stringify(S.regLockerCodes)`)).toBe('["8"]');
+    await expect(page.locator('.toast', { hasText: 'Locker 7 was just taken. Pick another.' })).toBeVisible();
   });
 
   test('a Petromin night offers its one period; a free ride offers none', async ({ page }) => {

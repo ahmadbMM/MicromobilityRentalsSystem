@@ -2165,6 +2165,12 @@ tables `lockers` and `locker_rentals`.
   `locker_board`), one door per rider at most; `customer_locker_reserve(..., p_codes)` holds those lockers on the riders' rows
   (`reserved` with the locker, key at the desk). A page cached before it still calls with four arguments and reserves a
   locker with no number. `_lkNorm`, `_lk_code`: 7, 07, L7 and "l 7" all read 7, so tags written before the letter went still work.
+- **A reserved locker is nobody else's** (the owner, 2026-11-09), per time: a locker reserved 6-8 PM is still free 9-11 PM the
+  same evening (the owner's answer). Every way in refuses an overlapping holder under the evening's lock; a booking moved
+  to another evening takes its locker along only when it is free there (`_lk_booking_follow`, migration 20261109230000),
+  else the rental stays reserved with no number. The review reads the cabinet again every 15 s, when a door is picked on
+  an older read, and right before booking (`_lkPicksFresh`): a pick someone took meanwhile is dropped and said
+  (`lkPickGone`) and the booking waits at the cabinet. The website page reads it every 15 s and on Continue.
 
 ## Sessions is a section of its own (2026-11-06)
 

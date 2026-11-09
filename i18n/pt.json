@@ -7424,6 +7424,7 @@
   "lkBizOne": "Um horário (SAR)",
   "lkBizBoth": "Os dois horários (SAR)",
   "lkPickDoor": "Escolha o seu cacifo",
+  "lkPickGone": "O cacifo {0} acabou de ser ocupado. Escolha outro.",
   "lkErrJustTaken": "A sua reserva está feita, mas esse cacifo acabou de ser ocupado. Pergunte no balcão.",
   "lkMine": "Os seus cacifos",
   "lkPaidWallet": "Pago com a sua carteira",

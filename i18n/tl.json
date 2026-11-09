@@ -7424,6 +7424,7 @@
   "lkBizOne": "Isang oras (SAR)",
   "lkBizBoth": "Parehong oras (SAR)",
   "lkPickDoor": "Piliin ang iyong locker",
+  "lkPickGone": "May kumuha na sa locker {0}. Pumili ng iba.",
   "lkErrJustTaken": "Nagawa na ang booking mo, pero may kumuha na sa locker na iyon. Magtanong sa desk.",
   "lkMine": "Iyong mga locker",
   "lkPaidWallet": "Bayad mula sa iyong wallet",

@@ -7424,6 +7424,7 @@
   "lkBizOne": "Un horario (SAR)",
   "lkBizBoth": "Ambos horarios (SAR)",
   "lkPickDoor": "Elige tu taquilla",
+  "lkPickGone": "La taquilla {0} acaba de ocuparse. Elige otra.",
   "lkErrJustTaken": "Tu reserva está hecha, pero esa taquilla acaba de ocuparse. Pregunta en el mostrador.",
   "lkMine": "Tus taquillas",
   "lkPaidWallet": "Pagada con tu monedero",
