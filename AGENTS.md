@@ -2434,3 +2434,51 @@ simplify and minimize as much as you think the staff using a phone won't need". 
   chip and lock. A new staff control that a phone at the ride does not need gets a rule in that block.
 - `staffReady` (tests/helpers) waits for the burger or the rail; neither shows on a simple phone, so a spec of this view
   waits for `#staff-tabbar` instead.
+
+## Online payments and the store (staff side, 2026-11-10)
+
+Migration `20261110150000_online_payments.sql` (staging first). The website takes the money (Moyasar) and runs the shop;
+the staff page fulfils, edits and refunds. Both sections live in the staff part `store` (`renderStore`, `renderPayments`,
+`_payRfOpen`; helpers `_sto*` / `_pay*`); the core keeps the probe, the rail's numbers and the desk's pay pills.
+`tests/store-payments.spec.ts`.
+
+- **Shown only where the database has them.** `staff_store_ready()` is asked once a page (`_stoProbe`, from
+  `renderStaffTabs`); only `true` sets `S._storeReady`, and `_roleTabs` leaves `store` / `payments` out otherwise, so
+  production (no such function: a 404) never shows them on the rail or among the Team page's sections. An address asked
+  for before the answer (`/store` at boot) opens once it is yes (`S._stoWant`). The stubs answer the probe `null`.
+- **Sections and addresses.** Store: `/store` (orders; `/store/orders` opens them too), `/store/products` (admins);
+  Payments: `/payments`, `/payments/refunds`, `/payments/settings` (admins). Both come with Sales: `_modIds` adds them to a
+  list naming `cashier` and `_modSend` strips them again (`_MOD_PARENT`), since `staff_set_access` knows only its own ids.
+  Roles: manager and owner both, the cashier the Store, admins everything. The rail counts the orders to prepare (status
+  `paid`) and the refunds owed (`due`/`failed`) with two counted reads (`_stoCounts`, a STAFF_ENTRY because `_secPolls`
+  sits in the customer half); a count the answer does not carry leaves the lists' own numbers.
+- **Orders** come whole from `staff_store_orders(null, 500)` (pending ones apart, on their filter); every
+  `staff_store_order_*` answers the whole order, which `_stoPut` lays over the list. The sheet (`#sto-modal`): items, sums
+  with VAT, contact, address with the national short address, courier and tracking, payment (brand, last four, receipt
+  number), refunds, timeline, the staff note; Preparing, Ready for pickup / Shipped (asks the courier and tracking
+  number), Collected / Delivered, Cancel (reason + PIN through `_gatedRpc`; what the card paid becomes a refund `due`),
+  Refund. What is missing is said inside the sheet, not in a toast over its buttons.
+- **Products** (`#sto-pe`): `store_products` / `store_variants` written under RLS (admins), photos uploaded to bucket
+  `site` under `store/<product id>/` with `.w640` / `.w1280` WebP copies by the catalogue's own `_catUploadImage` (a
+  `catalog` part entry, as `_catStorageRemove` and `_catUploadToast` are: the store part calls their stand-ins, so they
+  stay out of the core); photos are shown from `PAY_WEB + /media/...`. Stock moves only by `staff_store_stock` (a delta).
+- **Refunds** never call `staff_pay_refund_begin` from the page: `_payRefundCall` POSTs `PAY_WEB/api/pay/refund` with the
+  staff session's access token and `{payment|refund, amount, dest, reason, op, approval}`; `op`/`approval` are the PIN and
+  manager approval of `_gatedRpc`, exactly as the wallet refund; the answer's error codes (PAY_TOO_MUCH, ...) are said in
+  the dialog (`_payRfSay`). `PAY_WEB` is `https://micromobility.sa`, or `https://staging.micromobility.sa` when
+  `SUPABASE_URL` is the staging project's; the build reads that line and names the origin in the policy's `connect-src`
+  and `frame-src`. Declining a refund owed is `staff_pay_refund_decline`. A locker paid online and cancelled before its
+  key is given owes one too (reason `locker <rental>`).
+- **Payments > Settings** edits the `pay.*` and `store.*` keys of `site_content` (incl. `store.discountLicence`: was
+  prices show only while it is set) through the Website editor's `_webRestore` / `_webLoad` (website part entries), so
+  `site_content_history` keeps each change; an Undo puts the old values back.
+- **The desk.** `pay_method 'online'` reads "Paid online" (`_payPillTxt`, every pay pill, the check-in drawer, the
+  booking window); its pay menu is the card (`_payCardTxt`, one read of `payments`) and Refund only (`_payOnlMenu`,
+  `_payBkRefund`); `togglePayment` refuses it and `PAID_ONLINE` from the database is said (`_errMessage`, `RPC_SAY`). An
+  unpaid booking with `pay_hold_until` ahead reads "Paying now" (`_payHeld`). Lockers with `pay 'card'` read Paid online
+  once `receipt_id` is set, else Awaiting card payment. Money: `_mnySplit` / `_mnySum` have an `online` channel, never card
+  or cash (the close-out, the session report, the night's summary and Analytics show it apart; the drawer never holds it).
+- **The staging copy** of the whole app: `scripts/staging-build.mjs` and the CI job `staging` (gated on the repository
+  variable `STAFF_STAGING == 'on'`), deploying to the Pages project `micromobility-staff-staging`; see STAGING.md
+  section 2. A copy whose `STAFF_ORIGIN` is its own address sends nothing on to it (`LIVE_HOSTS` in the app, the guard in
+  the middleware).

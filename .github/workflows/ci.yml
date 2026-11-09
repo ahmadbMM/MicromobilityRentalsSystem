@@ -227,3 +227,54 @@ jobs:
           done
           echo "::error::no Pages Function answered after 8 attempts (last status: $code)"
           exit 1
+
+  # The staging copy of the booking and staff app (2026-11-10, STAGING.md section 2): after main has deployed, the same
+  # commit is rebuilt against the staging database (scripts/staging-build.mjs: the staging project and its anon key, the
+  # staging website for refunds, its own address, noindex) and uploaded to a SEPARATE Pages project,
+  # micromobility-staff-staging (https://micromobility-staff-staging.pages.dev). Off until the repository variable
+  # STAFF_STAGING is 'on' (Settings > Secrets and variables > Actions > Variables), with STAGING_SUPABASE_ANON_KEY beside it.
+  staging:
+    needs: [deploy]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.STAFF_STAGING == 'on'
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - id: secrets
+        name: Check for Cloudflare credentials
+        run: echo "present=${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}" >> "$GITHUB_OUTPUT"
+      - if: steps.secrets.outputs.present != 'true'
+        name: Skip (no Cloudflare token — nothing deploys)
+        run: echo "CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID not set; skipping the staging deploy."
+      - if: steps.secrets.outputs.present == 'true'
+        uses: actions/checkout@v7
+      - if: steps.secrets.outputs.present == 'true'
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.secrets.outputs.present == 'true'
+        run: npm ci
+      - if: steps.secrets.outputs.present == 'true'
+        name: Build the staging copy (no production name may be left in it)
+        env:
+          STAGING_SUPABASE_ANON_KEY: ${{ vars.STAGING_SUPABASE_ANON_KEY }}
+        run: node scripts/staging-build.mjs --out dist-staging
+      - if: steps.secrets.outputs.present == 'true'
+        name: Deploy to the micromobility-staff-staging Pages project (bounded, two attempts)
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          # From inside the folder, as the main deploy does: wrangler finds functions/ beside the working directory.
+          cd dist-staging
+          set -o pipefail
+          for attempt in 1 2; do
+            echo "wrangler upload attempt $attempt"
+            if timeout 300 npx --yes wrangler@4.128.0 pages deploy . \
+                 --project-name=micromobility-staff-staging --branch=main 2>&1 | tee "$RUNNER_TEMP/wrangler-staging.log"; then
+              exit 0
+            fi
+            echo "::warning::attempt $attempt failed or timed out after 5 minutes"
+          done
+          echo "::error::both staging upload attempts failed — Cloudflare side; re-run this job"
+          exit 1

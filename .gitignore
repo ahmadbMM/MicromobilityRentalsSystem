@@ -8,3 +8,4 @@ micromobility.db
 supabase/.temp/
 tests/.results/
 .wrangler/
+dist-staging/

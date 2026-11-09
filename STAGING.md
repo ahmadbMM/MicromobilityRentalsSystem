@@ -23,16 +23,51 @@ STAGING.md.
 
 A free project pauses after a week without use; restore it from the dashboard.
 
-## 2. The booking app on staging
+## 2. The booking and staff app on staging
 
-**Not set up yet** (2026-10-03): only the website has a staging copy. What it would take:
+**Built, waiting for the one-time steps below** (2026-11-10). `scripts/staging-build.mjs` copies the tree to a temporary
+folder, points the copy at the staging database and website, builds it with the ordinary build and checks that no
+production name is left in it:
 
-Cloudflare's Git integration is off (CI is the only deployer), so this needs a CI job of its own. Point a preview (or a second
-Pages project) at staging with its environment variables: `SUPABASE_URL`, `SUPABASE_ANON_KEY` (the
-functions read them), and the app's own client config - `app.src.html` reads the project from
-`site.config.json`/its constants, so a staging build sets them there or the deploy sets
-`localStorage.cq_secure_auth` for tests. Wallet passes: `APPLE_PASS_*` and `GOOGLE_WALLET_*` may stay
-unset; the app hides both buttons on a 501.
+- `SUPABASE_URL`, the preconnect link and every other mention of `qpffkzmsfyilicwcsszz` (the Pages Functions' fallbacks
+  too) name `jkfhiszcnuvoftvkzaye`; `SUPABASE_KEY` is the staging anon key (`STAGING_SUPABASE_ANON_KEY`; a production or
+  service key is refused);
+- `site.config.json` `origin` is the staging address (`https://micromobility-staff-staging.pages.dev`, or `--origin`),
+  with no former addresses; `STAFF_ORIGIN` (the app and `functions/_middleware.js`) is the same address, so staff paths
+  stay on it;
+- `https://micromobility.sa` is `https://staging.micromobility.sa` everywhere: the website editor, the links, and
+  `PAY_WEB`, the website whose server sends a card refund (`/api/pay/refund`), which the build names in the policy's
+  `connect-src` and `frame-src`;
+- every title starts "[Staging]", every answer is `noindex`, robots.txt shuts every crawler out.
+
+Locally: `STAGING_SUPABASE_ANON_KEY=<anon key> node scripts/staging-build.mjs --out dist-staging` (dist-staging/ is
+ignored). In CI the `staging` job runs it after the production deploy has succeeded and uploads the result with wrangler
+to its own Pages project. It does nothing until the steps below are done.
+
+**One-time steps (the user):**
+
+1. **Cloudflare:** Workers & Pages > Create > Pages > Direct Upload, project name **`micromobility-staff-staging`** (no Git
+   connection; CI uploads to it with the same `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` secrets as production, so
+   the token must cover this account's Pages). Its address is https://micromobility-staff-staging.pages.dev. Optional, in
+   its Settings > Variables: `SUPABASE_URL=https://jkfhiszcnuvoftvkzaye.supabase.co` and the staging service key under the
+   same names the production project uses, for the Functions that need one (push, error log); without them those answer as
+   "not configured", which is fine for testing the store.
+2. **GitHub:** the repository's Settings > Secrets and variables > Actions > **Variables**: `STAGING_SUPABASE_ANON_KEY` =
+   the staging project's anon key (Supabase > staging project > Project Settings > API keys; it is public, a variable is
+   enough), then `STAFF_STAGING` = `on`. The next push to main deploys the copy; to deploy at once, re-run CI from the
+   Actions tab (workflow_dispatch) on main.
+3. **Supabase (staging project only):** Authentication > URL Configuration: add
+   `https://micromobility-staff-staging.pages.dev` and `https://micromobility-staff-staging.pages.dev/**` to the Redirect
+   URLs (the Site URL stays the staging website's).
+4. **Staff logins on staging:** as in section 1 (an Auth user with a password, then the `insert into public.staff ...`
+   line), in the staging project. Production accounts do not exist there.
+5. **The website on staging** (mm-platform `staging` branch) must answer `POST /api/pay/refund` from this address: its CORS
+   must allow the origin `https://micromobility-staff-staging.pages.dev` with the `authorization` and `content-type`
+   headers (production's `/api/pay/refund` the same for `https://staff.micromobility.sa`).
+
+The copy serves both halves (riders and staff) on one address; staff open it at `/?staff` or any staff address
+(`/bookings`, `/store`, `/payments`). Links to the volunteer and vendor portals still lead to production's portals, which
+have no staging copy.
 
 ## 3. The website on staging
 
