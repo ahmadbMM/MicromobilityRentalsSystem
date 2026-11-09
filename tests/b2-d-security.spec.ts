@@ -406,7 +406,7 @@ test.describe('@staff:team b2-d a change of access asks a confirm, then the PIN 
     const desk = page.locator(`.tm-acct[data-acct="${DESK}"]`);
     await desk.locator('.tm-chip[data-sec="view:cashier"]').click();
     await desk.getByRole('button', { name: 'Save' }).click();
-    await expect(page.locator('#confirm-modal')).toContainText('Can open: Bookings, Workshop');
+    await expect(page.locator('#confirm-modal')).toContainText('Can open: Bookings, Lockers, Workshop'); // Lockers since 2026-11-09
     await page.locator('#confirm-modal').getByRole('button', { name: 'Cancel' }).click();
     await page.waitForTimeout(300);
     expect(named(calls, 'staff_set_access')).toHaveLength(0);

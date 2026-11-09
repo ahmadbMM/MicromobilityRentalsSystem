@@ -30,7 +30,7 @@ async function captureJoins(page: Page) {
 }
 const live = (joins: { topic: string; tables: string[] }[]) => joins.filter((j) => j.topic === 'realtime:mmcq-live').pop();
 
-test("a customer's page joins the two tables its screens draw from; a staff device all seven", async ({ page, browser }) => {
+test("a customer's page joins the two tables its screens draw from; a staff device all nine", async ({ page, browser }) => {
   await stubSupabase(page, { sessions });
   const joins = await captureJoins(page);
   await page.goto('/');
@@ -45,7 +45,7 @@ test("a customer's page joins the two tables its screens draw from; a staff devi
   await staff.goto('/');
   await waitForSb(staff);
   await expect.poll(() => live(sj)?.tables.join())
-    .toBe('bikes,cashier_sales,desk_waitlist,inventory,queue_entries,rider_registrations,sessions');
+    .toBe('bikes,cashier_sales,desk_waitlist,inventory,locker_rentals,lockers,queue_entries,rider_registrations,sessions'); // the lockers' two since 2026-11-09
   await ctx.close();
 });
 
@@ -56,7 +56,7 @@ test('a customer device unlocked for staff rejoins with the staff tables', async
   await waitForSb(page);
   await expect.poll(() => live(joins)?.tables.join()).toBe('bikes,sessions');
   await page.evaluate(`goStaff()`);
-  await expect.poll(() => live(joins)?.tables.length).toBe(7);
+  await expect.poll(() => live(joins)?.tables.length).toBe(9); // the lockers' two since 2026-11-09
 });
 
 test("a burst of events reloads a customer's page once, and leaves one reload for later", async ({ page }) => {

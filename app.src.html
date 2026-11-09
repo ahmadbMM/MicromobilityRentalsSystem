@@ -142,7 +142,7 @@
        ?staff / ?bike, a staff section's path) is given the whole styles.css here instead, at once, the
        one stylesheet it needs: it used to block its first paint on app.css and then parse styles.css,
        every rule of app.css again, on top. The test is _staffWanted's, which the staff loader repeats. -->
-  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
+  <script>var _stw=false;try{_stw=localStorage.getItem('cq_staff')==='1'||sessionStorage.getItem('cq_staff_entry')==='1'||/^staff\./i.test(location.hostname)||/[?&](?:staff|bike|locker)(?:[=&]|$)/.test(location.search)||/^\/(?:bookings|dashboard|sales|inventory|workshop|customers|community|people|badge-requests|lockers|ambassadors|volunteers|vendors|website|messages|analytics|history|team|settings)(?:\/|$)/.test(location.pathname);}catch(e){}document.write(_stw?'<link rel="stylesheet" href="/styles.css?v=0" data-staff-css>':'<link rel="stylesheet" href="/app.css?v=0">');</script>
   <noscript><link rel="stylesheet" href="/app.css?v=0"></noscript>
 <script>try{var _dm=navigator.deviceMemory;if(_dm&&_dm<=4)document.documentElement.classList.add('lite');}catch(e){}try{document.documentElement.setAttribute('data-theme','dark');localStorage.removeItem('cq_theme');(function(){var st=localStorage.getItem('cq_staff_theme')||(localStorage.getItem('cq_booth')==='1'?'booth':''),de=document.documentElement,mq=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)'),sys=function(){try{if(localStorage.getItem('cq_staff_theme')!=='system')return;if(mq.matches)de.setAttribute('data-staff-theme','dark');else de.removeAttribute('data-staff-theme');}catch(e){}};if(st==='system'&&mq)sys();else if(st==='dark'||st==='booth')de.setAttribute('data-staff-theme',st);if(mq&&mq.addEventListener)mq.addEventListener('change',sys);})();if(localStorage.getItem('cq_phone_simple')==='1')document.documentElement.setAttribute('data-staff-simple','');if(localStorage.getItem('cq_rail')==='hover')document.addEventListener('DOMContentLoaded',function(){document.body.classList.add('rail-hover');});}catch(e){}</script>
 </head>
@@ -334,6 +334,7 @@ window.mmLoading=(function(){
     <button class="tab-btn"        data-stab="dashboard" data-on-click='["setStaffTab","dashboard"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Dashboard</span></button>
     <button class="tab-btn active" data-stab="queue"     data-on-click='["setStaffTab","queue"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bookings</span></button>
     <button class="tab-btn"        data-stab="sessions"  data-on-click='["setStaffTab","sessions"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sessions</span></button>
+    <button class="tab-btn"        data-stab="lockers"   data-on-click='["setStaffTab","lockers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Lockers</span></button>
     <span class="snav-group" data-group="snavCommerce" role="heading" aria-level="2">Commerce</span>
     <button class="tab-btn"        data-stab="cashier"   data-on-click='["setStaffTab","cashier"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sales</span></button>
     <button class="tab-btn"        data-stab="inventory" data-on-click='["setStaffTab","inventory"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Inventory</span></button>
@@ -363,6 +364,7 @@ window.mmLoading=(function(){
     <div id="ro-banner" class="ro-banner" role="status" hidden></div>
     <div id="tab-queue"     class="tab-panel active"></div>
     <div id="tab-sessions"  class="tab-panel"></div>
+    <div id="tab-lockers"   class="tab-panel"></div>
     <div id="tab-inventory"  class="tab-panel"></div>
     <div id="tab-cashier"   class="tab-panel"></div>
     <div id="tab-community"  class="tab-panel"></div>
@@ -1150,6 +1152,7 @@ en:{landMainTitleHtml:'Reserve Your <span>Bicycle Now!</span>',spotsFull:'Full',
   receiptSeeYou:'We hope to see you at the Corniche Circuit again soon!',
   typeRoad:'Road',typeHybrid:'Hybrid',typeMountain:'Mountain',typeGravel:'Gravel',typeKids:'Kids',typeAny:'Any',typeRoadCarbon:'Road Carbon',typeOwn:'Bike owner',typeNone:'No bike',ridersNoBikeFree:'checked in without a bike - none free that fits',typeOwnPref:'I have my own bike',
   n6pAppHidden:'Application hidden by staff',n6pAppRejected:'Application not accepted',n6pLearnLine:'Learn to ride: {0}',n6pActions:'Account actions',n6pNewBooking:'New booking',n6pLinkCopied:'Link copied',n6pAccSince:'Account since',n6pAge:'Age',n6pDetails:'Details',n6pNotes:'Staff notes',n6pNoNotes:'No notes on this person yet. Staff only.',n6pNoteAdd:'Add a note',n6pStNew:'New',n6pStFirst:'First rides',n6pStRegular:'Regular',n6pStLapsing:'Lapsing',n6pStLapsed:'Lapsed',n6pStNever:'Never rode',n6pStRisk:'No-show risk',n6pFirstRide:'First ride',n6pStage:'Stage',n6pSortStage:'Stage',n6pStages:'Where people are',n6pLapsedNews:'Lapsed members who take ride news',n6pLapsingNews:'Lapsing members who take ride news',n6pNoAcct:'That account is not on this device\'s list.',n6pUnmergeQ:'Split {0} from {1} again? Their bookings, wallet and tags go back.',n6pWhyEmail:'Same email',n6pWhyIg:'Same Instagram',n6pWhyWa:'Same WhatsApp number',n6pWhyFold:'Same name in Arabic or Latin letters, same last 7 digits',n6pNotSame:'Not the same person',n6pNotSameQ:'These accounts will no longer be shown as duplicates.',n6pKeeperTakes:'The kept account takes',n6pTakesNone:'No details: the kept account already has them.',n6pMoves:'Moves with it', // People review (2026-11-06)
+  tabLockers:'Lockers',lkTitle:'Locker',lkFull:'Full',lkFewer:'One locker fewer',lkMore:'One more locker',lkErrFull:'The lockers for that time are all taken.',lkErrNotOpen:'A locker can\'t be added to this booking.',lkErrOffline:'Your booking is made, but the locker was not added. Ask at the desk.',lkRemove:'Remove',lkRemoveQ:'Remove the locker from this booking?',lkRemoved:'Locker removed',lkScanFound:'Locker {0}',lkNoDb:'Lockers are waiting for the database update',lkErrTaken:'That locker is taken ({0})',lkErrUnknown:'No locker {0}',lkErrOut:'Locker {0} is out of service',lkErrHeld:'This booking already has a locker',lkErrName:'Pick an account or type a name',lkErrNotOpenDesk:'A locker can\'t be added here: {0}',lkGivenLine:'Locker {0} given',lkHandedBack:'Locker {0} handed back',lkHandBack:'Hand back',lkCancelQ:'Cancel this locker?',lkCancelBody:'Its fee comes off the booking.',lkCancel:'Cancel locker',lkCancelledToast:'Locker cancelled',lkAdded:'Locker added to the booking',lkAddedTill:'Locker added. Its fee is in the Sales cart.',lkAtTill:'paid at Sales',lkOnBill:'on the booking',lkAddOne:'Add a locker',lkReturned:'Handed back',lkNumPh:'Locker number, e.g. P7',lkMove:'Move',lkGive:'Give',lkTapOrType:'Tap the locker\'s tag or type its number',lkWaitlistMark:'waitlist',lkWalkup:'walk-up',lkOverdue:'Overdue',lkOutSvc:'Out of service',lkFree:'Free',lkGiveTo:'Give it to',lkNobodyWaiting:'Nobody is waiting for a locker',lkRent:'Rent a locker',lkSheetTitle:'Locker {0}',lkMoveTo:'Move to locker',lkAddThis:'Add {0}',lkUnitsAdded:'{0} lockers added',lkAddUnits:'Add lockers',lkWho:'Account or name',lkChange:'Change',lkWhoPh:'Search a name, phone or email, or type a name',lkPeriod:'Time',lkNumber:'Locker number',lkRentGo:'Rent and charge at Sales',lkPickPeriod:'Pick a time',lkRented:'Locker rented to {0}',lkViewBoard:'Tonight',lkViewRes:'Reservations',lkViewUnits:'Lockers',lkViewHist:'History',lkDay:'Evening',lkInUse:'In use',lkWaiting:'Waiting for a number',lkNone:'No lockers yet. Add them under Lockers.',lkOpenF:'Open',lkCancelled:'Cancelled',lkNoneHere:'Nothing here',lkUndone:'Back in use',lkPrefix:'Letter',lkFrom:'From',lkTo:'To',lkAddGo:'Add',lkInSvc:'In service',lkRetired:'Retired',lkCopyLink:'Copy link',lkQr:'QR label',lkTakeOut:'Take out of service',lkBackInSvc:'Back in service',lkRetire:'Retire',lkUnitsCount:'{0} lockers',lkAllQr:'All labels',lkAddBad:'Type a letter and the numbers from and to (200 at most at once)',lkAddNone:'Those lockers are already there',lkRetireQ:'Retire locker {0}?',lkLinkCopied:'Link copied',lkHistEmpty:'No locker rentals in the last 60 days',lkSearch:'Search a name or locker',lkSessOffer:'Lockers offered',lkBizCard:'Lockers',lkBizCardSub:'What a locker costs for an evening. The database charges the same.',lkBizOne:'One time slot (SAR)',lkBizBoth:'Both time slots (SAR)',
   liveLabel:'Live',savedCopyLabel:'Saved copy',bpSvcSince:'Rides since service',bpMarkServiced:'Mark serviced',bpLastServiced:'Last serviced',attnTitle:'Bikes needing attention',attnInMaint:'In maintenance',attnDue:'Service due · {0} rides',attnNever:'Never serviced',attnLow:'Low rating {0}/10',attnHide:'Hide',sendWorkshop:'Send to workshop',svcRecent:'Recent service log',svcKindService:'Serviced',svcKindWorkshop:'Sent to workshop',svcEveryN:'Service every {0} rides',gsOpenBtn:'Search',gsPh:'Search bookings, accounts, bikes…',gsNone:'Nothing found.',gsMin:'Type two or more letters or digits.',gsKindBooking:'Booking',gsKindAccount:'Account',gsKindBike:'Bike',gsKindItem:'Item',gsKindSession:'Session',gsKindWorkshop:'Workshop',gsKindAction:'Action',gsKindGo:'Go to',gsRecent:'Recent',gsCommands:'Actions and sections',gsCmdCloseOut:'Close out tonight',gsKindVolunteer:'Volunteer',gsKindApp:'Application',gsKindLearn:'Learn to ride',n6tSessSettings:'Session settings',n6tVolForSess:'Volunteers for this session',ntOpen:'Notifications',ntMarkRead:'Mark all read',ntLong:'Rides past 2 hours: {0}',ntApps:'Membership applications waiting: {0}',ntMsgs:'New website messages: {0}',ntWs:'New workshop requests: {0}',ntAttn:'Bikes needing attention: {0}',ntStock:'Items low on stock: {0}',ntLowRate:'Low ratings this week: {0}',syncNowBtn:'Sync now',syncingLbl:'Syncing…',syncDone:'Up to date',errWriteExists:'That already exists. Reload to see it, or change it and try again.',syncLeft:'Changes still waiting to sync: {0}',tbMore:'More',daySheetBtn:'Print day sheet',daySheetTitle:'Day sheet',daySheetNone:'No session today.',daySheetRiders:'Riders',daySheetWs:'Workshop today',repPageOf:'Page {0} of {1}',coNoSales:'Nothing sold',logPrintedDaySheet:'Printed the day sheet',tabTeam:'Team',tabCatalog:'Bikes catalog',catSub:'What micromobility.sa/bikes shows: the categories, their sub-types, and every model with its specifications, colours and photos. A model shows on the site once it is published.',catOpenSite:'Open /bikes',catViewModels:'Models',catViewCats:'Categories',catViewFields:'Specification fields',catAddModel:'+ Add model',catAddCat:'+ Add category',catAddSub:'+ Add sub-type',catAddField:'+ Add field',catSearchPh:'Search brand or model',catNoMatch:'Nothing matches.',catColModel:'Model',catColCategory:'Category',catColRide:'Rides as',catColPhotos:'Photos',catColPublished:'On the site',catColUpdated:'Updated',catEmptyModels:'No models yet. Add the first one.',catNoCats:'Add a category first: every model belongs to one.',catBrand:'Brand',catName:'Model name',catSlug:'Address',catSlugHint:'The model’s address on the site: {0}. Lowercase letters, digits and hyphens.',catCategory:'Category',catSubtype:'Sub-type',catNoSubtype:'None',catYear:'Model year',catRideType:'Rides as',catRideTypeHint:'The rental bike type it counts as; it sets the ride price shown beside Book a ride. Leave it empty for a bike that is not rented.',catRideNone:'Not rented',catTagline:'Tagline',catDescription:'Description',catDescHint:'Plain text. A blank line starts a new paragraph.',catSpecs:'Specifications',catSpecsHint:'An empty field is not shown. The Arabic box may stay empty: the site then shows the English.',catColours:'Colours',catColourName:'Colour name',catColourHex:'Swatch',catAddColour:'+ Add colour',catPhotos:'Photos',catPhotosHint:'The cover is the photo shown in lists. A photo given a colour is shown when a visitor picks that colour; the others show for every colour.',catUploadPhotos:'Upload photos',catPhotoColour:'Colour',catAnyColour:'Every colour',catCover:'Cover',catAlt:'Description for screen readers',catSheet:'Spec sheet (PDF)',catUploadSheet:'Upload PDF',catPublished:'Published on the site',catPublishedShort:'Published',catDraft:'Draft',catHidden:'Hidden',catDeleteModelTitle:'Delete this model?',catDeleteModelBody:'Its photos, colours and specifications go with it, and the site stops showing it at once.',catDeleteCatTitle:'Delete this category?',catDeleteCatBody:'Only an empty one can go: its models and sub-types must be moved or deleted first.',catDeleteFieldTitle:'Delete this field?',catDeleteFieldBody:'Models keep the value they had; the site simply stops showing it.',catSaved:'Saved',catDeleted:'Deleted',catSaveErr:'Could not save. Try again.',catLoadErr:'Could not load the catalogue. Check your connection and try again.',catUploading:'Uploading…',catUploaded:'Uploaded',catUploadErr:'The upload failed. Try again.',catUploadType:'Photos only: JPEG, PNG, WebP or AVIF.',catUploadPdfType:'A PDF file only.',catUploadBig:'That file is too big: 10 MB at most.',catErrName:'Give the model a name.',catErrCategory:'Pick a category.',catErrSlug:'The address may only have lowercase letters, digits and hyphens, and it starts with a letter.',catErrSlugTaken:'Another model already uses this address.',catErrColour:'Every colour needs a name.',catCatName:'Name',catCatSlug:'Address',catCatBlurb:'Short description',catCatCover:'Cover photo',catCatPublished:'Shown on the site',catCatModels:'{0} models',catCatSubs:'{0} sub-types',catCatEmpty:'No categories yet.',catCatsSub:'Categories are the first level under /bikes; each can hold sub-types. A model belongs to one category and, if you like, one of its sub-types.',catErrCatName:'Give it a name.',catErrCatTaken:'Another one at this level already uses this address.',catCatInUse:'It still has models or sub-types. Move or delete them first.',catFieldKey:'Key',catFieldKeyHint:'How the value is stored: lowercase letters, digits and underscores. It cannot change later.',catFieldLabel:'Label',catFieldGroup:'Group',catFieldUnit:'Unit',catFieldSort:'Order',catFieldUsed:'Used by',catFieldsSub:'The specifications a model can carry, with their labels in English and Arabic. Every model offers these boxes; the site shows the ones that are filled in, grouped and in this order.',catErrFieldKey:'The key may only have lowercase letters, digits and underscores, and it starts with a letter.',catErrFieldLabel:'Give the field a label.',catErrFieldTaken:'A field with this key already exists.',catFieldsEmpty:'No fields yet.',catPreview:'View on the site',catUnsaved:'You have unsaved changes. Leave without saving?',teamPageSub:'Who works the desk: operator PINs, and what each sign-in account can open and change.',opsTitle:'Operators',opsSub:'The names at the operator gate. A name with a PIN asks for it.',opsPinSet:'PIN set',opsPinNone:'No PIN',opsSetPin:'Set PIN',opsClearPin:'Clear PIN',opsPinPrompt:'New 4-digit PIN for {0}',opsPinBad:'A PIN is 4 digits.',opsPinSaved:'PIN saved for {0}',opsPinCleared:'PIN cleared for {0}',opsAdd:'Add name',opsAddPh:'Name',acctTitle:'Sign-in accounts',acctSub:'Each account\'s role, and the sections it can open and change. Nobody changes their own.',acctYou:'You',acctView:'Can open',acctEdit:'Can change',acctSaved:'Access saved for {0}',logCsvExport:'Exported {0} as CSV ({1} rows)',unsentTitle:'{0} changes not sent yet',unsentBody:'These sales or bookings are still only on this device. Signing out deletes them for good. Cancel, reconnect and wait for them to send.',unsentDropBtn:'Sign out anyway',dbPending:'Waiting for the database update.',xTypePick:'Bike type…',guestOfName:'Guest of {0}',bkSuggLabel:'Suggested',giveBikeBtn:'Give bike',ciOutLater:'Save, check in later',deskNoteTitle:'Desk note',scTitle:'Staff comments',scChipTip:'{0} staff comments',scBtnN:'Comments ({0})',scAddBtn:'Add comment',scStaff:'Staff',scHint:'Only staff see these comments. The customer never does.',scNone:'No comments yet.',scNewLbl:'New comment',scPh:'Write a comment for the team',scDeleteBtn:'Delete',scDeleteQ:'Delete this comment?',scAdded:'Comment added',scDeleted:'Comment deleted',deskNoteHint:'For the desk only, up to 200 characters. Riders never see it.',deskNotePh:'Left ID, pays on return…',shiftTitle:'My shift',shiftMine:'My actions today',shiftNone:'Nothing yet today.',shiftLate:'Out too long',partyJoinBtn:'Join a party',partyJoinHint:'Pick who this rider came with. They ride, pay and check in together.',partyJoinNone:'No other bookings on this ride.',partyLeaveBtn:'Leave the party',partyJoined:'{0} joined {1}',partyLeft:'{0} left the party',nfcSentTitle:'Sent to your open tab',nfcSentBody:'Bike {0} went to the staff tab that is already open. Switch back to it.',nfcSentHere:'Open it here instead',tmAccess:'Accounts and operators',ptTab:'Part-timers',ptKinds:'Kinds of work',ptKindsSub:'The front-desk jobs part-timers are paid for, each with its rate per hour: welcoming and checking in riders, taking payment, handing out bikes.',ptKind:'Kind of work',ptPickKind:'Choose the kind of work',ptKindNone:'No kinds of work yet. Add one under Kinds of work, with its rate per hour.',ptKindAdd:'Add kind of work',ptKindPh:'e.g. Welcome and check-in',ptKindAdded:'Kind of work added: {0}',ptKindSaved:'Kind of work saved: {0}',ptKindDup:'There is already a kind of work named {0}.',ptErrKind:'Choose the kind of work.',ptUnpaid:'Unpaid',ptPaid:'Paid',ptPaidOn:'Paid {0}',ptMarkPaid:'Mark as paid ({0})',ptPayTitle:'Mark as paid',ptPayBody:'{0} · {1} · Entries: {2} · Part-timers: {3}',ptPayDay:'Paid on',ptPayHow:'Paid by',ptTransfer:'Bank transfer',ptPayDone:'Marked as paid: {0}',ptPayments:'Payments',ptPaymentsNone:'No payments yet.',ptSlip:'Pay slip',ptStatement:'Statement',ptUndoPay:'Undo payment',ptUndoAsk:'Its hours become unpaid again.',ptUndone:'Payment undone',ptReceived:'Received by',ptPerKind:'Per kind of work',ptSlipPaid:'Paid on {0} · {1}',ptPageSub:'Log the hours part-timers work and see what we owe them.',ptPeople:'Part-timers',ptPeopleSub:'Staff accounts that work at the front desk and are paid by the hour.',ptOne:'Part-timer',ptRate:'Rate per hour (SAR)',ptPerHour:'per hour',ptNoAccount:'No staff account',ptDeactivate:'Deactivate',ptActivate:'Activate',ptPickAcct:'Choose a staff account',ptAdd:'Add part-timer',ptAllAdded:'Every staff account is already a part-timer.',ptNone:'No part-timers yet. Choose a staff account below.',ptAdded:'Part-timer added: {0}',ptSaved:'Part-timer saved: {0}',ptErrRate:'Enter a rate of 0 or more.',ptLog:'Log hours',ptEditEntry:'Edit entry',ptWho:'Part-timer',ptPickWho:'Choose a part-timer',ptRide:'Ride',ptNoRide:'No ride (pick a date)',ptHours:'Hours worked',ptNote:'Note (optional)',ptAmountIs:'{0} h × {1} = {2}',ptSaveHours:'Save hours',ptErrWho:'Choose a part-timer.',ptErrHours:'Hours must be more than 0 and no more than 24.',ptDupShift:'{0} already has {1} h on this ride. Log these hours as well?',ptLogAgain:'Log as well',ptcTitle:'Part-timers’ hours',ptcSub:'Who worked this session? Add each part-timer, the kind of work they did and their hours.',ptcHrs:'Hours',ptcHad:'Already logged for this session',ptcSkip:'Skip',ptcSaved:'Hours saved for {0}',ptcDup:'{0} already has hours on this session. Log these hours as well?',ptUpdated:'Entry updated: {0} h for {1}',ptLogged:'{0} h logged for {1}',ptDelAsk:'Delete this entry?',ptDeleted:'Entry deleted',ptHoursN:'{0} h',ptNoHours:'no hours',ptNoRidesMonth:'No rides this month.',ptOwe:'What we owe',ptByRange:'Date range',ptByRides:'Pick rides',ptAll:'All part-timers',ptLastMonth:'Last month',ptPicked:'Rides picked: {0}',ptPickHint:'Tap rides on the calendar or tick them in the list.',ptPickMonth:'Pick all this month',ptTotHours:'Hours',ptTotRides:'Rides',ptTotOwed:'We owe',ptPerPerson:'Per part-timer',ptNoRideShort:'No ride',ptEntries:'Entries',ptColRate:'Rate',ptColAmount:'Amount',ptNoEntries:'No hours logged for this choice.',ptTotal:'Total',opChange:'Change in Settings',opSwitch:'Switch operator',opPinTitle:'PIN for {0}',opPinWrong:'Wrong PIN. {0} tries left.',opPinWrongPlain:'Wrong PIN.',opPinLocked:'Too many tries. Wait {0} seconds.',roMode:'Read-only mode: no changes allowed',dashActivity:'Recent activity',dashQuick:'Quick actions',dashNoActivity:'Nothing logged yet today.',dashCollected:'Collected today',dashBookedToday:'Riders today',dashOfPlaces:'of {0} places',dashPlacesFree:'Places free',dashLastWeek:'Same day last week: {0}',dashOfFleet:'of {0} in the fleet',dashNextAt:'Next: {0}',rsvAssignAnyway:'Assign anyway',leaveNoSaveBtn:'Leave without saving',delSessionBtn:'Delete session',delSessionsBtn:'Delete sessions',dashDoneToday:'Rides done today',dashSessionsToday:'Today\'s sessions',dashCheckinNext:'Check in next',kbTitle:'Keyboard shortcuts',kbFindQueue:'Search the bookings',kbThisList:'Show this list',calViewList:'List',calViewCal:'Calendar',calPrev:'Previous month',calNext:'Next month',calToday:'Today',calWs:'{0} workshop',calNewOn:'New session on {0}',errAddonsNotSaved:'Your booking is made, but the add-ons were not saved. Add them from Bookings.',bkExportedToast:'{0} bike(s) exported',errTooManyTries:'Too many tries from this network. Wait a few minutes and try again.',errPaidTypeDesk:'This booking is already paid. To change to a bike that costs more, ask at the booth.',addonHandedOver:'Add-ons already handed over cannot be removed here. Ask at the booth.',teamPinKept:'Only an admin can remove a name that has a PIN: {0}',acctOneSection:'Pick at least one section this account can open.',acctNoneOpen:'This account has no sections to open. Ask an admin to give it access on the Team page.',anPieces:'{0} pcs',drawerCountBtn:'Count the drawer',drawerCountTitle:'Drawer count',drawerCountBody:'Expected cash for this day: SAR {0}. Enter what the drawer actually holds:',drawerExpected:'expected',drawerCounted:'counted',drawerExactToast:'Drawer matches — recorded',drawerDiffToast:'Recorded — drawer is off by {0}',cnBtn:'Cancel the night',cnTitle:'Cancel the night',cnSub:'{0} live booking(s). Tell the riders first — then cancel. To MOVE the whole night, edit the session\u2019s date instead: bookings follow it.',cnMsgLabel:'Message to riders',cnMsgDefault:'Salam! Tonight\u2019s MicroMobility session ({0}) is cancelled — sorry for the short notice. Your booking is cancelled automatically; we hope to see you at the next one.',cnCopyNumbers:'Copy all numbers',cnCopiedToast:'Numbers copied',cnCopyByHand:'Could not copy. Copy the numbers from the box.',cnConfirmBtn:'Cancel {0} booking(s)',cnDoneToast:'Night cancelled — {0} booking(s) cancelled, riders keep their history',wxTip:'Forecast: {0}\u00b0C high, wind up to {1} km/h',noShowHistChip:'{0}/{1} no-shows',noShowHistTip:'No-shows across this rider\u2019s last five decided bookings',bulkApproveBtn:'Approve all ({0})',bulkApproveTitle:'Approve every pending request',bulkApproveBody:'{0} pending request(s) will be approved. Waitlisted requests are left for you to pick individually. Riders see nothing until you publish.',bulkApprovedToast:'{0} request(s) approved',ciPrev:'Previous',ciNext:'Next',scanBnOk:'OK',scanBnWarn:'Check',scanBnErr:'Stop',scanSoundBtn:'Sound',scanDetailsBtn:'Booking details',scanAlreadyIn:'#{0} {1} is already checked in',scanInAt:'since {0}',scanOwes:'owes SAR {0}',scanCheckedIn:'#{0} {1} checked in',notHereChip:'Not here yet',cxHideAria:'Hide the cancellation of {0}',syncUnsent:'{0} unsent',setDevice:'This device',setDeviceSub:'Kept on this phone or computer only.',setPersonal:'Personal',setPersonalSub:'Your own choices. They follow your account to every device.',setStartOn:'Start on',setStartUsual:'The usual first section',setLanguage:'Language',setTabBar:'Phone tab bar',setTabBarHint:'Pick up to four sections for the bar at the bottom of a phone screen.',setTabBarReset:'Use the usual sections',setFilters:'Remembered filters',setFiltersHint:'Each section keeps its last filters, sorts and layout. Reset puts them all back to the start.',setFiltersReset:'Reset filters',setFiltersDone:'Filters reset',setDisplay:'Display',setTextSize:'Text size',setDensity:'Density',setComfortable:'Comfortable',setCompact:'Compact',setDensityHint:'Compact fits more rows in tables and lists on a laptop. Phones keep full-size buttons.',setPhoneSimple:'Simple view on a phone',setPhoneHint:'Only what the desk needs: the bookings, check-in and return, the scanner, walk-ins and finding a person. Off, the phone shows the full look with every section and tool.',setPhoneFullBtn:'Show the full view',setWake:'Keep screen on at the desk',setBooth:'Booth mode (high contrast for sunlight)',ciChainLabel:'Riders to check in',ciStepOf:'Rider {0} of {1}',ciPartyLabel:'Riders in this party',dupPhoneTip:'This phone number is on another live booking in this session',overdueRideTip:'On the bike for over two hours',wiStockHint:'{0} {1} free on the rack',wiNoStockHint:'No {0} left on the rack — riders on the waitlist may be counting on returns.',moreActionsLbl:'More actions',vndTempPwd:'Temporary password',vndTempExpires:'Temporary password — expires {0}',vndTempExpired:'Temporary password expired — reset it',a11yDialCode:'Country code',a11yMsgKind:'Message type',a11yAmount:'Amount',a11yUnit:'Unit',closeOutBtn:'Close out',closeOutHint:'Finish the night: checked-in riders become Completed, no-arrivals become No-show.',closeOutTitle:'Close out the night',closeOutBody:'{0} checked-in rider(s) will be marked Completed and {1} who never arrived will be marked No-show. Waitlisted riders are not touched.',closeOutDoneToast:'Night closed out — {0} completed, {1} no-shows',bookSyncPending:'Your booking hasn’t reached the booth yet. The app keeps trying while it’s open.',bookSyncRefused:'Your booking could not be sent. Show this phone at the booth.',updateReadyToast:'A new version is ready. Refresh the page to update.',justNow:'just now',secondsAgo:'s ago',minutesAgo:'m ago',offlineLabel:'Offline',offlineBanner:'You’re offline. Changes are saved and will sync when you’re back online.',unreachableBanner:'Connected to wifi, but the server can’t be reached. You may need to sign in to this network.',retryBtn:'Try again',errWritePerm:'That did not save - your staff session may have expired. Unlock again and retry.',errWriteDup:'That booking number was just taken by another device. Reload and try again.',
   remBtn:'Reminders',remTitle:'Reminders · {0}',remKindLbl:'Which reminder',remKind24:'The day before',remKind2:'2 hours before',remSummary:'{0} riders booked · {1} to remind · {2} with no number',remLocalOnly:'Waiting for the database update: who was reminded is kept on this device only.',remSendAll:'Send to the {0} not reminded',remRemindedAt:'Reminded {0} ({1})',remNotYet:'Not reminded yet',remNoNumber:'no number',remLangLbl:'Message language for {0}',remSend:'Send',remNone:'No rider holds a place on this ride yet.',remBackToList:'Back to the list',remLog:'Ride reminders ({0}): {1} sent for {2}',ntRemind:'Rides with riders not reminded: {0}',ntiRemind:'{0}: {1} riders not reminded yet',ntkRemind:'Tomorrow\'s riders not reminded yet',ntWlFree:'Rides with a free place and riders waiting: {0}',ntiWlFree:'{0}: {1} free, {2} waiting',ntkWlFree:'A free place with riders waiting',wlFreeBtn:'{0} free: who gets it',wloTitle:'A place is free · {0}',wloSummary:'{0} free · {1} waiting',wloHintStaff:'Choose who gets the place. Nobody moves up until you do.',wloHintClaim:'Offer: the rider gets a link and {0} minutes to claim the place; after that it goes to the next in line by itself. Give: the place is theirs now.',wloOpenOffers:'Offers waiting for an answer',wloClaimBy:'Claim by {0}',wloSent:'sent',wloSend:'Send on WhatsApp',wloSendAgain:'Send again',wloWithdraw:'Withdraw',wloNextUp:'Next in line',wloWaitingSince:'Waiting since {0}',wloOffered:'offered',wloOffer:'Offer',wloGive:'Give the place',wloGiven:'Has the place now',wloMore:'{0} more on the waitlist',wloNobody:'Nobody on the waitlist can take this place.',wloFull:'The ride has no free place now.',wloOfferLog:'Waitlist place offered: {0}',wloPushTitle:'A place is free for you',wloPushBody:'Claim it within {0} minutes.',tplgRemind:'Ride reminders and waitlist offers',tplRemind24:'Reminder the day before',tplRemind2:'Reminder 2 hours before',tplWlOffer:'A waitlist place to claim',bizCardWaitlist:'The waitlist',bizCardWaitlistSub:'Who gets a place that frees up when a rider cancels or does not come. Approval rides stay hand-picked.',bizWlMode:'When a place frees up',bizWlModeAuto:'The next in line gets it at once',bizWlModeStaff:'Staff choose who gets it',bizWlModeClaim:'The next in line gets a link to claim it',bizWlClaim:'Minutes to claim an offered place',bizWlClaimLater:'The claim link becomes a choice once the database update is applied.',wlcKicker:'Waitlist',wlcTitle:'A place is free for you',wlcEnds:'It is yours if you claim it within',wlcClaim:'Claim my place',wlcDecline:'I can\'t come',wlcDoneTitle:'Your place is booked',wlcDoneSub:'See you on the ride. Your ticket is in Bookings.',wlcLateTitle:'This offer has ended',wlcLateSub:'The time to claim it ran out, so the place went to the next rider. You are still on the waitlist.',wlcFullSub:'The place was taken before you claimed it. You are still on the waitlist.',wlcGoneSub:'This link no longer holds an offer. Your bookings are in Bookings.',wlcNoTitle:'Thank you for telling us',wlcNoSub:'The place goes to the next rider. You are still on the waitlist.',
   undoBtn:'Undo',undoneMsg:'Undone.',undoFailed:'Undo failed.',errStorageFull:'Device storage is full — free some space; unsynced sales/bookings may not be saved.',errStockWrite:'Stock for {0} was not saved — the count on screen has been put back.',
@@ -1764,6 +1767,7 @@ ar:{landMainTitleHtml:'احجز <span>دراجتك الآن!</span>',spotsFull:'
   receiptSeeYou:'نأمل رؤيتك في حلبة الكورنيش مجدداً!',
   typeRoad:'طريق',typeHybrid:'هجين',typeMountain:'جبلي',typeGravel:'حصى',typeKids:'أطفال',typeAny:'أي نوع',typeRoadCarbon:'طريق كربون',typeOwn:'صاحب دراجة',typeNone:'بدون دراجة',ridersNoBikeFree:'سُجّل وصوله بدون دراجة - لا توجد دراجة مناسبة متاحة',typeOwnPref:'لدي دراجتي الخاصة',
   n6pAppHidden:'طلب الانضمام أخفاه الفريق',n6pAppRejected:'لم يُقبل طلب الانضمام',n6pLearnLine:'تعلّم ركوب الدراجة: {0}',n6pActions:'إجراءات الحساب',n6pNewBooking:'حجز جديد',n6pLinkCopied:'تم نسخ الرابط',n6pAccSince:'الحساب منذ',n6pAge:'العمر',n6pDetails:'التفاصيل',n6pNotes:'ملاحظات الفريق',n6pNoNotes:'لا ملاحظات على هذا الشخص بعد. للفريق فقط.',n6pNoteAdd:'أضف ملاحظة',n6pStNew:'جديد',n6pStFirst:'الجولات الأولى',n6pStRegular:'منتظم',n6pStLapsing:'بدأ يغيب',n6pStLapsed:'غائب',n6pStNever:'لم يركب أبداً',n6pStRisk:'احتمال عدم الحضور',n6pFirstRide:'أول جولة',n6pStage:'المرحلة',n6pSortStage:'المرحلة',n6pStages:'أين وصل الناس',n6pLapsedNews:'أعضاء غائبون يقبلون أخبار الجولات',n6pLapsingNews:'أعضاء بدؤوا يغيبون ويقبلون أخبار الجولات',n6pNoAcct:'هذا الحساب غير موجود في قائمة هذا الجهاز.',n6pUnmergeQ:'فصل {0} عن {1} مجدداً؟ تعود إليه حجوزاته ومحفظته ووسومه.',n6pWhyEmail:'البريد نفسه',n6pWhyIg:'إنستغرام نفسه',n6pWhyWa:'رقم واتساب نفسه',n6pWhyFold:'الاسم نفسه بالعربية أو اللاتينية وآخر 7 أرقام نفسها',n6pNotSame:'ليسا الشخص نفسه',n6pNotSameQ:'لن تظهر هذه الحسابات كحسابات مكررة بعد الآن.',n6pKeeperTakes:'يأخذ الحساب المُبقى',n6pTakesNone:'لا تفاصيل: الحساب المُبقى لديه بالفعل.',n6pMoves:'ينتقل معه', // People review (2026-11-06)
+  tabLockers:'الخزائن',lkTitle:'خزانة',lkFull:'ممتلئة',lkFewer:'خزانة أقل',lkMore:'خزانة أخرى',lkErrFull:'خزائن هذا الوقت محجوزة كلها.',lkErrNotOpen:'لا يمكن إضافة خزانة إلى هذا الحجز.',lkErrOffline:'تم الحجز، لكن لم تُضف الخزانة. اسأل في المكتب.',lkRemove:'إزالة',lkRemoveQ:'إزالة الخزانة من هذا الحجز؟',lkRemoved:'أُزيلت الخزانة',lkScanFound:'الخزانة {0}',lkNoDb:'الخزائن بانتظار تحديث قاعدة البيانات',lkErrTaken:'هذه الخزانة مشغولة ({0})',lkErrUnknown:'لا توجد خزانة {0}',lkErrOut:'الخزانة {0} خارج الخدمة',lkErrHeld:'لهذا الحجز خزانة بالفعل',lkErrName:'اختر حساباً أو اكتب اسماً',lkErrNotOpenDesk:'لا يمكن إضافة خزانة هنا: {0}',lkGivenLine:'سُلّمت الخزانة {0}',lkHandedBack:'أُعيدت الخزانة {0}',lkHandBack:'إعادة',lkCancelQ:'إلغاء هذه الخزانة؟',lkCancelBody:'تُحذف رسومها من الحجز.',lkCancel:'إلغاء الخزانة',lkCancelledToast:'أُلغيت الخزانة',lkAdded:'أُضيفت الخزانة إلى الحجز',lkAddedTill:'أُضيفت الخزانة. رسومها في سلة المبيعات.',lkAtTill:'تُدفع في المبيعات',lkOnBill:'على الحجز',lkAddOne:'إضافة خزانة',lkReturned:'أُعيدت',lkNumPh:'رقم الخزانة، مثل P7',lkMove:'نقل',lkGive:'تسليم',lkTapOrType:'المس شريحة الخزانة أو اكتب رقمها',lkWaitlistMark:'قائمة الانتظار',lkWalkup:'بدون حجز',lkOverdue:'متأخرة',lkOutSvc:'خارج الخدمة',lkFree:'متاحة',lkGiveTo:'سلّمها إلى',lkNobodyWaiting:'لا أحد ينتظر خزانة',lkRent:'استئجار خزانة',lkSheetTitle:'الخزانة {0}',lkMoveTo:'النقل إلى خزانة',lkAddThis:'إضافة {0}',lkUnitsAdded:'أُضيفت {0} خزائن',lkAddUnits:'إضافة خزائن',lkWho:'حساب أو اسم',lkChange:'تغيير',lkWhoPh:'ابحث باسم أو هاتف أو بريد، أو اكتب اسماً',lkPeriod:'الوقت',lkNumber:'رقم الخزانة',lkRentGo:'استئجار والدفع في المبيعات',lkPickPeriod:'اختر وقتاً',lkRented:'استُؤجرت خزانة لـ {0}',lkViewBoard:'الليلة',lkViewRes:'الحجوزات',lkViewUnits:'الخزائن',lkViewHist:'السجل',lkDay:'المساء',lkInUse:'مستخدمة',lkWaiting:'بانتظار رقم',lkNone:'لا توجد خزائن بعد. أضفها في الخزائن.',lkOpenF:'مفتوحة',lkCancelled:'ملغاة',lkNoneHere:'لا شيء هنا',lkUndone:'عادت مستخدمة',lkPrefix:'الحرف',lkFrom:'من',lkTo:'إلى',lkAddGo:'إضافة',lkInSvc:'في الخدمة',lkRetired:'متقاعدة',lkCopyLink:'نسخ الرابط',lkQr:'ملصق QR',lkTakeOut:'إخراج من الخدمة',lkBackInSvc:'إعادة إلى الخدمة',lkRetire:'إيقاف نهائي',lkUnitsCount:'{0} خزائن',lkAllQr:'كل الملصقات',lkAddBad:'اكتب حرفاً والأرقام من وإلى (200 على الأكثر دفعة واحدة)',lkAddNone:'هذه الخزائن موجودة بالفعل',lkRetireQ:'إيقاف الخزانة {0} نهائياً؟',lkLinkCopied:'نُسخ الرابط',lkHistEmpty:'لا توجد خزائن مستأجرة في آخر 60 يوماً',lkSearch:'ابحث باسم أو خزانة',lkSessOffer:'تتوفر خزائن',lkBizCard:'الخزائن',lkBizCardSub:'تكلفة الخزانة لأمسية واحدة. قاعدة البيانات تحتسب المبلغ نفسه.',lkBizOne:'فترة واحدة (ر.س)',lkBizBoth:'الفترتان (ر.س)',
   liveLabel:'مباشر',savedCopyLabel:'نسخة محفوظة',bpSvcSince:'جولات منذ الصيانة',bpMarkServiced:'تسجيل صيانة',bpLastServiced:'آخر صيانة',attnTitle:'دراجات تحتاج انتباهاً',attnInMaint:'في الصيانة',attnDue:'موعد الصيانة · {0} جولة',attnNever:'لم تُصان بعد',attnLow:'تقييم منخفض {0}/10',attnHide:'إخفاء',sendWorkshop:'إلى الورشة',svcRecent:'آخر سجلات الصيانة',svcKindService:'صيانة',svcKindWorkshop:'أُرسلت للورشة',svcEveryN:'صيانة كل {0} جولة',gsOpenBtn:'بحث',gsPh:'ابحث في الحجوزات والحسابات والدراجات…',gsNone:'لا نتائج.',gsMin:'اكتب حرفين أو رقمين على الأقل.',gsKindBooking:'حجز',gsKindAccount:'حساب',gsKindBike:'دراجة',gsKindItem:'صنف',gsKindSession:'جلسة',gsKindWorkshop:'الورشة',gsKindAction:'إجراء',gsKindGo:'انتقال إلى',gsRecent:'الأخيرة',gsCommands:'الإجراءات والأقسام',gsCmdCloseOut:'إنهاء الليلة',gsKindVolunteer:'متطوع',gsKindApp:'طلب عضوية',gsKindLearn:'تعلّم القيادة',n6tSessSettings:'إعدادات الجلسة',n6tVolForSess:'متطوعو هذه الجلسة',ntOpen:'الإشعارات',ntMarkRead:'تعليم الكل كمقروء',ntLong:'جولات تجاوزت ساعتين: {0}',ntApps:'طلبات عضوية بانتظار الرد: {0}',ntMsgs:'رسائل جديدة من الموقع: {0}',ntWs:'طلبات ورشة جديدة: {0}',ntAttn:'دراجات تحتاج انتباهاً: {0}',ntStock:'أصناف منخفضة المخزون: {0}',ntLowRate:'تقييمات منخفضة هذا الأسبوع: {0}',syncNowBtn:'زامن الآن',syncingLbl:'جارٍ المزامنة…',syncDone:'كل شيء محدّث',errWriteExists:'هذا موجود بالفعل. أعد التحميل لتراه، أو غيّره ثم حاول مجددًا.',syncLeft:'تغييرات بانتظار المزامنة: {0}',tbMore:'المزيد',daySheetBtn:'طباعة كشف اليوم',daySheetTitle:'كشف اليوم',daySheetNone:'لا جلسة اليوم.',daySheetRiders:'الراكبون',daySheetWs:'الورشة اليوم',repPageOf:'صفحة {0} من {1}',coNoSales:'لم يُبع شيء',logPrintedDaySheet:'طُبع كشف اليوم',tabTeam:'الفريق',tabCatalog:'كتالوج الدراجات',catSub:'ما يعرضه micromobility.sa/bikes: الفئات وأنواعها الفرعية، وكل موديل بمواصفاته وألوانه وصوره. يظهر الموديل على الموقع بعد نشره.',catOpenSite:'افتح /bikes',catViewModels:'الموديلات',catViewCats:'الفئات',catViewFields:'حقول المواصفات',catAddModel:'+ إضافة موديل',catAddCat:'+ إضافة فئة',catAddSub:'+ إضافة نوع فرعي',catAddField:'+ إضافة حقل',catSearchPh:'ابحث بالعلامة أو الموديل',catNoMatch:'لا توجد نتائج مطابقة.',catColModel:'الموديل',catColCategory:'الفئة',catColRide:'يُستأجر كـ',catColPhotos:'الصور',catColPublished:'على الموقع',catColUpdated:'آخر تعديل',catEmptyModels:'لا موديلات بعد. أضف الأول.',catNoCats:'أضف فئة أولاً: كل موديل ينتمي إلى فئة.',catBrand:'العلامة التجارية',catName:'اسم الموديل',catSlug:'العنوان',catSlugHint:'عنوان الموديل على الموقع: {0}. أحرف لاتينية صغيرة وأرقام وشرطات.',catCategory:'الفئة',catSubtype:'النوع الفرعي',catNoSubtype:'بدون',catYear:'سنة الموديل',catRideType:'يُستأجر كـ',catRideTypeHint:'نوع دراجة التأجير الذي يُحسب عليه؛ يحدد سعر الجولة الظاهر بجانب زر احجز جولة. اتركه فارغاً لدراجة لا تُستأجر.',catRideNone:'لا تُستأجر',catTagline:'العبارة التعريفية',catDescription:'الوصف',catDescHint:'نص عادي. السطر الفارغ يبدأ فقرة جديدة.',catSpecs:'المواصفات',catSpecsHint:'الحقل الفارغ لا يُعرض. يمكن ترك خانة العربية فارغة فيعرض الموقع الإنجليزية.',catColours:'الألوان',catColourName:'اسم اللون',catColourHex:'عيّنة اللون',catAddColour:'+ إضافة لون',catPhotos:'الصور',catPhotosHint:'صورة الغلاف هي التي تظهر في القوائم. الصورة المرتبطة بلون تظهر عند اختيار الزائر ذلك اللون؛ وبقية الصور تظهر مع كل لون.',catUploadPhotos:'رفع صور',catPhotoColour:'اللون',catAnyColour:'كل الألوان',catCover:'الغلاف',catAlt:'وصف لقارئات الشاشة',catSheet:'ورقة المواصفات (PDF)',catUploadSheet:'رفع PDF',catPublished:'منشور على الموقع',catPublishedShort:'منشور',catDraft:'مسودة',catHidden:'مخفي',catDeleteModelTitle:'حذف هذا الموديل؟',catDeleteModelBody:'تُحذف معه صوره وألوانه ومواصفاته، ويتوقف الموقع عن عرضه فوراً.',catDeleteCatTitle:'حذف هذه الفئة؟',catDeleteCatBody:'لا تُحذف إلا الفئة الفارغة: يجب نقل موديلاتها وأنواعها الفرعية أو حذفها أولاً.',catDeleteFieldTitle:'حذف هذا الحقل؟',catDeleteFieldBody:'تحتفظ الموديلات بالقيمة التي كانت لديها؛ ويتوقف الموقع عن عرضها فقط.',catSaved:'تم الحفظ',catDeleted:'تم الحذف',catSaveErr:'لم يتم الحفظ. حاول مرة أخرى.',catLoadErr:'لم يتم تحميل الكتالوج. تحقق من الاتصال وحاول مرة أخرى.',catUploading:'جارٍ الرفع…',catUploaded:'تم الرفع',catUploadErr:'فشل الرفع. حاول مرة أخرى.',catUploadType:'صور فقط: JPEG أو PNG أو WebP أو AVIF.',catUploadPdfType:'ملف PDF فقط.',catUploadBig:'الملف كبير جداً: 10 ميغابايت على الأكثر.',catErrName:'أدخل اسم الموديل.',catErrCategory:'اختر فئة.',catErrSlug:'العنوان يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات، ويبدأ بحرف.',catErrSlugTaken:'موديل آخر يستخدم هذا العنوان.',catErrColour:'كل لون يحتاج إلى اسم.',catCatName:'الاسم',catCatSlug:'العنوان',catCatBlurb:'وصف قصير',catCatCover:'صورة الغلاف',catCatPublished:'يظهر على الموقع',catCatModels:'{0} موديلات',catCatSubs:'{0} أنواع فرعية',catCatEmpty:'لا فئات بعد.',catCatsSub:'الفئات هي المستوى الأول تحت /bikes، ولكل فئة أنواع فرعية إن شئت. ينتمي الموديل إلى فئة واحدة، وإلى أحد أنواعها الفرعية إن أردت.',catErrCatName:'أدخل اسماً.',catErrCatTaken:'عنصر آخر في هذا المستوى يستخدم هذا العنوان.',catCatInUse:'ما زالت تحتوي على موديلات أو أنواع فرعية. انقلها أو احذفها أولاً.',catFieldKey:'المفتاح',catFieldKeyHint:'كيف تُخزَّن القيمة: أحرف لاتينية صغيرة وأرقام وشرطات سفلية. لا يمكن تغييره لاحقاً.',catFieldLabel:'التسمية',catFieldGroup:'المجموعة',catFieldUnit:'الوحدة',catFieldSort:'الترتيب',catFieldUsed:'مستخدم في',catFieldsSub:'المواصفات التي يمكن أن يحملها الموديل، بتسمياتها بالإنجليزية والعربية. تظهر هذه الخانات لكل موديل؛ ويعرض الموقع المملوءة منها مجمّعة وبهذا الترتيب.',catErrFieldKey:'المفتاح يحتوي فقط على أحرف لاتينية صغيرة وأرقام وشرطات سفلية، ويبدأ بحرف.',catErrFieldLabel:'أدخل تسمية للحقل.',catErrFieldTaken:'يوجد حقل بهذا المفتاح.',catFieldsEmpty:'لا حقول بعد.',catPreview:'عرض على الموقع',catUnsaved:'لديك تغييرات غير محفوظة. الخروج دون حفظ؟',teamPageSub:'من يعمل على المكتب: الأرقام السرية للمشغّلين، وما يستطيع كل حساب فتحه وتعديله.',opsTitle:'المشغّلون',opsSub:'الأسماء في شاشة المشغّل. الاسم الذي له رقم سري يطلبه.',opsPinSet:'له رقم سري',opsPinNone:'بلا رقم سري',opsSetPin:'تعيين الرقم السري',opsClearPin:'حذف الرقم السري',opsPinPrompt:'رقم سري جديد من 4 أرقام لـ {0}',opsPinBad:'الرقم السري 4 أرقام.',opsPinSaved:'حُفظ الرقم السري لـ {0}',opsPinCleared:'حُذف الرقم السري لـ {0}',opsAdd:'إضافة اسم',opsAddPh:'الاسم',acctTitle:'حسابات الدخول',acctSub:'دور كل حساب، والأقسام التي يستطيع فتحها وتعديلها. لا أحد يغيّر حسابه بنفسه.',acctYou:'أنت',acctView:'يستطيع فتح',acctEdit:'يستطيع تعديل',acctSaved:'حُفظت الصلاحيات لـ {0}',logCsvExport:'تم تصدير {0} بصيغة CSV ({1} صف)',unsentTitle:'{0} تغييرات لم تُرسل بعد',unsentBody:'هذه المبيعات أو الحجوزات لا تزال على هذا الجهاز فقط. تسجيل الخروج يحذفها نهائيًا. ألغِ، وأعد الاتصال وانتظر حتى تُرسل.',unsentDropBtn:'تسجيل الخروج على أي حال',dbPending:'بانتظار تحديث قاعدة البيانات.',xTypePick:'نوع الدراجة…',guestOfName:'ضيف {0}',bkSuggLabel:'مقترحة',giveBikeBtn:'سلّم دراجة',ciOutLater:'احفظ، والتسجيل لاحقًا',deskNoteTitle:'ملاحظة المكتب',scTitle:'تعليقات الموظفين',scChipTip:'{0} تعليقات للموظفين',scBtnN:'التعليقات ({0})',scAddBtn:'إضافة تعليق',scStaff:'موظف',scHint:'هذه التعليقات يراها الموظفون فقط، ولا يراها العميل أبداً.',scNone:'لا توجد تعليقات بعد.',scNewLbl:'تعليق جديد',scPh:'اكتب تعليقاً للفريق',scDeleteBtn:'حذف',scDeleteQ:'حذف هذا التعليق؟',scAdded:'تمت إضافة التعليق',scDeleted:'تم حذف التعليق',deskNoteHint:'للمكتب فقط، حتى 200 حرف. لا يراها العميل.',deskNotePh:'ترك الهوية، يدفع عند الإرجاع…',shiftTitle:'ورديتي',shiftMine:'ما قمت به اليوم',shiftNone:'لا شيء بعد اليوم.',shiftLate:'خارج لفترة طويلة',partyJoinBtn:'ضمّه إلى مجموعة',partyJoinHint:'اختر من جاء معه هذا العميل. يركبون ويدفعون ويسجلون معًا.',partyJoinNone:'لا توجد حجوزات أخرى في هذه الجولة.',partyLeaveBtn:'أخرجه من المجموعة',partyJoined:'انضم {0} إلى {1}',partyLeft:'خرج {0} من المجموعة',nfcSentTitle:'أُرسلت إلى الصفحة المفتوحة',nfcSentBody:'ذهبت الدراجة {0} إلى صفحة الموظفين المفتوحة. ارجع إليها.',nfcSentHere:'افتحها هنا بدلًا من ذلك',tmAccess:'الحسابات والمشغّلون',ptTab:'الموظفون بدوام جزئي',ptKinds:'أنواع العمل',ptKindsSub:'مهام الاستقبال التي يُدفع للموظفين بدوام جزئي مقابلها، ولكل منها سعر للساعة: استقبال الدراجين وتسجيل حضورهم، واستلام الدفع، وتسليم الدراجات.',ptKind:'نوع العمل',ptPickKind:'اختر نوع العمل',ptKindNone:'لا توجد أنواع عمل بعد. أضف نوعًا في أنواع العمل مع سعر الساعة.',ptKindAdd:'إضافة نوع عمل',ptKindPh:'مثال: الاستقبال وتسجيل الحضور',ptKindAdded:'تمت إضافة نوع العمل: {0}',ptKindSaved:'تم حفظ نوع العمل: {0}',ptKindDup:'يوجد نوع عمل باسم {0}.',ptErrKind:'اختر نوع العمل.',ptUnpaid:'غير مدفوع',ptPaid:'مدفوع',ptPaidOn:'دُفع {0}',ptMarkPaid:'تسجيل كمدفوع ({0})',ptPayTitle:'تسجيل كمدفوع',ptPayBody:'{0} · {1} · {2} تسجيلات · {3} موظفين',ptPayDay:'تاريخ الدفع',ptPayHow:'طريقة الدفع',ptTransfer:'تحويل بنكي',ptPayDone:'تم التسجيل كمدفوع: {0}',ptPayments:'المدفوعات',ptPaymentsNone:'لا توجد مدفوعات بعد.',ptSlip:'قسيمة الراتب',ptStatement:'كشف حساب',ptUndoPay:'إلغاء الدفع',ptUndoAsk:'ستعود ساعاته غير مدفوعة.',ptUndone:'تم إلغاء الدفع',ptReceived:'استلمه',ptPerKind:'لكل نوع عمل',ptSlipPaid:'دُفع في {0} · {1}',ptPageSub:'سجّل ساعات عمل الموظفين بدوام جزئي واعرف المبلغ المستحق لهم.',ptPeople:'الموظفون بدوام جزئي',ptPeopleSub:'حسابات موظفين يعملون في الاستقبال ويُدفع لهم بالساعة.',ptOne:'دوام جزئي',ptRate:'سعر الساعة (SAR)',ptPerHour:'للساعة',ptNoAccount:'لا يوجد حساب موظف',ptDeactivate:'إيقاف',ptActivate:'تفعيل',ptPickAcct:'اختر حساب موظف',ptAdd:'إضافة موظف بدوام جزئي',ptAllAdded:'كل حسابات الموظفين مضافة بدوام جزئي.',ptNone:'لا يوجد موظفون بدوام جزئي بعد. اختر حساب موظف بالأسفل.',ptAdded:'تمت إضافة موظف بدوام جزئي: {0}',ptSaved:'تم حفظ الموظف بدوام جزئي: {0}',ptErrRate:'أدخل سعرًا يساوي 0 أو أكثر.',ptLog:'تسجيل ساعات',ptEditEntry:'تعديل التسجيل',ptWho:'الموظف',ptPickWho:'اختر الموظف',ptRide:'الجولة',ptNoRide:'بدون جولة (اختر تاريخًا)',ptHours:'عدد الساعات',ptNote:'ملاحظة (اختياري)',ptAmountIs:'{0} س × {1} = {2}',ptSaveHours:'حفظ الساعات',ptErrWho:'اختر الموظف.',ptErrHours:'يجب أن تكون الساعات أكثر من 0 ولا تزيد على 24.',ptDupShift:'لدى {0} مسبقًا {1} س في هذه الجولة. هل تسجّل هذه الساعات أيضًا؟',ptLogAgain:'سجّل أيضًا',ptcTitle:'ساعات الموظفين بدوام جزئي',ptcSub:'من عمل في هذه الجلسة؟ أضف كل موظف بدوام جزئي ونوع العمل الذي قام به وعدد ساعاته.',ptcHrs:'الساعات',ptcHad:'مسجّل مسبقًا لهذه الجلسة',ptcSkip:'تخطي',ptcSaved:'حُفظت الساعات لـ {0}',ptcDup:'لدى {0} ساعات مسجّلة مسبقًا في هذه الجلسة. هل تسجّل هذه الساعات أيضًا؟',ptUpdated:'تم تعديل التسجيل: {0} س لـ {1}',ptLogged:'تم تسجيل {0} س لـ {1}',ptDelAsk:'حذف هذا التسجيل؟',ptDeleted:'تم حذف التسجيل',ptHoursN:'{0} س',ptNoHours:'لا ساعات',ptNoRidesMonth:'لا توجد جولات هذا الشهر.',ptOwe:'المبلغ المستحق',ptByRange:'فترة زمنية',ptByRides:'اختيار جولات',ptAll:'كل الموظفين',ptLastMonth:'الشهر الماضي',ptPicked:'الجولات المختارة: {0}',ptPickHint:'اضغط على الجولات في التقويم أو حدّدها في القائمة.',ptPickMonth:'اختيار كل جولات الشهر',ptTotHours:'الساعات',ptTotRides:'الجولات',ptTotOwed:'المستحق',ptPerPerson:'لكل موظف',ptNoRideShort:'بدون جولة',ptEntries:'التسجيلات',ptColRate:'السعر',ptColAmount:'المبلغ',ptNoEntries:'لا توجد ساعات مسجّلة لهذا الاختيار.',ptTotal:'المجموع',opChange:'غيّره من الإعدادات',opSwitch:'تبديل المشغّل',opPinTitle:'الرقم السري لـ {0}',opPinWrong:'رقم سري خاطئ. تبقّت {0} محاولات.',opPinWrongPlain:'رقم سري خاطئ.',opPinLocked:'محاولات كثيرة. انتظر {0} ثانية.',roMode:'وضع القراءة فقط: لا يمكن التعديل',dashActivity:'آخر النشاطات',dashQuick:'إجراءات سريعة',dashNoActivity:'لا شيء مسجل اليوم بعد.',dashCollected:'المُحصّل اليوم',dashBookedToday:'راكبو اليوم',dashOfPlaces:'من أصل {0}',dashPlacesFree:'أماكن شاغرة',dashLastWeek:'اليوم نفسه الأسبوع الماضي: {0}',dashOfFleet:'من أصل {0} في الأسطول',dashNextAt:'التالية: {0}',rsvAssignAnyway:'تعيين على أي حال',leaveNoSaveBtn:'الخروج دون حفظ',delSessionBtn:'حذف الجلسة',delSessionsBtn:'حذف الجلسات',dashDoneToday:'جولات منتهية اليوم',dashSessionsToday:'جلسات اليوم',dashCheckinNext:'تسجيل دخول التالي',kbTitle:'اختصارات لوحة المفاتيح',kbFindQueue:'البحث في الحجوزات',kbThisList:'عرض هذه القائمة',calViewList:'قائمة',calViewCal:'تقويم',calPrev:'الشهر السابق',calNext:'الشهر التالي',calToday:'اليوم',calWs:'{0} ورشة',calNewOn:'جلسة جديدة في {0}',errAddonsNotSaved:'تم الحجز، لكن الإضافات لم تُحفظ. أضفها من الحجوزات.',bkExportedToast:'تم تصدير {0} دراجة',errTooManyTries:'محاولات كثيرة من هذه الشبكة. انتظر بضع دقائق ثم حاول مجدداً.',errPaidTypeDesk:'هذا الحجز مدفوع. لتغييره إلى دراجة أغلى، اسأل عند الكشك.',addonHandedOver:'لا يمكن حذف الإضافات التي سُلّمت من هنا. اسأل عند الكشك.',teamPinKept:'لا يحذف الاسم الذي له رقم سري إلا المدير: {0}',acctOneSection:'اختر قسماً واحداً على الأقل يستطيع هذا الحساب فتحه.',acctNoneOpen:'لا توجد أقسام يستطيع هذا الحساب فتحها. اطلب من المدير منحه الصلاحية من صفحة الفريق.',anPieces:'{0} قطع',drawerCountBtn:'جرد الدرج',drawerCountTitle:'جرد الدرج',drawerCountBody:'النقد المتوقع لهذا اليوم: SAR {0}. أدخل ما في الدرج فعلياً:',drawerExpected:'المتوقع',drawerCounted:'المعدود',drawerExactToast:'الدرج مطابق — تم التسجيل',drawerDiffToast:'تم التسجيل — فرق الدرج {0}',cnBtn:'إلغاء الليلة',cnTitle:'إلغاء الليلة',cnSub:'{0} حجز قائم. أبلغ المشاركين أولاً ثم ألغِ. لنقل الليلة كاملة عدّل تاريخ الجلسة بدلاً من ذلك — الحجوزات تتبعه.',cnMsgLabel:'رسالة للمشاركين',cnMsgDefault:'سلام! جلسة مايكروموبيليتي لهذه الليلة ({0}) أُلغيت — نعتذر عن قصر المهلة. أُلغي حجزك تلقائياً، ونأمل رؤيتك في الجلسة القادمة.',cnCopyNumbers:'نسخ جميع الأرقام',cnCopiedToast:'تم نسخ الأرقام',cnCopyByHand:'تعذّر النسخ. انسخ الأرقام من المربع.',cnConfirmBtn:'إلغاء {0} حجز',cnDoneToast:'أُلغيت الليلة — {0} حجز أُلغي مع بقاء السجل',wxTip:'التوقعات: {0} درجة عظمى، رياح حتى {1} كم/س',noShowHistChip:'{0}/{1} غياب',noShowHistTip:'مرات الغياب في آخر خمسة حجوزات محسومة لهذا الراكب',bulkApproveBtn:'الموافقة على الكل ({0})',bulkApproveTitle:'الموافقة على جميع الطلبات المعلقة',bulkApproveBody:'سيتم قبول {0} من الطلبات المعلقة. تُترك طلبات قائمة الانتظار لتختارها بنفسك. لن يرى المشاركون شيئاً حتى تنشر النتائج.',bulkApprovedToast:'تمت الموافقة على {0} من الطلبات',ciPrev:'السابق',ciNext:'التالي',scanBnOk:'تم',scanBnWarn:'انتبه',scanBnErr:'توقف',scanSoundBtn:'الصوت',scanDetailsBtn:'تفاصيل الحجز',scanAlreadyIn:'#{0} {1} مسجّل دخوله بالفعل',scanInAt:'منذ {0}',scanOwes:'عليه SAR {0}',scanCheckedIn:'تم تسجيل دخول #{0} {1}',notHereChip:'لم يصل بعد',cxHideAria:'إخفاء إلغاء {0}',syncUnsent:'{0} غير مُرسلة',setDevice:'هذا الجهاز',setDeviceSub:'تُحفظ على هذا الهاتف أو الحاسوب فقط.',setPersonal:'تفضيلاتي',setPersonalSub:'اختياراتك الخاصة، وتنتقل مع حسابك إلى كل جهاز.',setStartOn:'البدء من',setStartUsual:'القسم الأول المعتاد',setLanguage:'اللغة',setTabBar:'شريط الأقسام في الجوال',setTabBarHint:'اختر حتى أربعة أقسام للشريط أسفل شاشة الجوال.',setTabBarReset:'استخدم الأقسام المعتادة',setFilters:'الفلاتر المحفوظة',setFiltersHint:'يحتفظ كل قسم بآخر فلاتر وترتيب وطريقة عرض استخدمتها، وزر الإعادة يرجعها كلها إلى البداية.',setFiltersReset:'إعادة ضبط الفلاتر',setFiltersDone:'تمت إعادة ضبط الفلاتر',setDisplay:'العرض',setTextSize:'حجم النص',setDensity:'كثافة العرض',setComfortable:'مريح',setCompact:'مضغوط',setDensityHint:'العرض المضغوط يُظهر صفوفاً أكثر في الجداول والقوائم على الحاسوب، وتبقى الأزرار بحجمها الكامل على الجوال.',setPhoneSimple:'عرض مبسّط على الجوال',setPhoneHint:'ما يحتاجه المكتب فقط: الحجوزات وتسجيل الدخول والإرجاع والماسح والزيارات المباشرة والبحث عن شخص. عند إيقافه يعرض الجوال الواجهة الكاملة بكل أقسامها وأدواتها.',setPhoneFullBtn:'إظهار العرض الكامل',setWake:'إبقاء الشاشة مضاءة في الكشك',setBooth:'وضع الإضاءة القوية (تباين عالٍ لضوء الشمس)',ciChainLabel:'الراكبون بانتظار تسجيل الحضور',ciStepOf:'الراكب {0} من {1}',ciPartyLabel:'ركّاب هذه المجموعة',dupPhoneTip:'رقم الجوال هذا موجود في حجز آخر قائم في هذه الجلسة',overdueRideTip:'على الدراجة منذ أكثر من ساعتين',wiStockHint:'{0} {1} متاحة على الرف',wiNoStockHint:'لا يوجد {0} متبقٍ على الرف — قد يعتمد منتظرو القائمة على المرتجعات.',moreActionsLbl:'مزيد من الإجراءات',vndTempPwd:'كلمة مرور مؤقتة',vndTempExpires:'كلمة مرور مؤقتة — تنتهي {0}',vndTempExpired:'انتهت صلاحية كلمة المرور المؤقتة — أعد تعيينها',a11yDialCode:'رمز الدولة',a11yMsgKind:'نوع الرسالة',a11yAmount:'الكمية',a11yUnit:'الوحدة',closeOutBtn:'إنهاء الليلة',closeOutHint:'إنهاء الليلة: من سجّل حضوره يُعتبر مكتملاً، ومن لم يحضر يُسجّل كغياب.',closeOutTitle:'إنهاء الليلة',closeOutBody:'سيتم تسجيل {0} من الحاضرين كمكتملين و{1} ممن لم يحضروا كغياب. لن يتم المساس بقائمة الانتظار.',closeOutDoneToast:'تم إنهاء الليلة — {0} مكتمل، {1} غياب',bookSyncPending:'لم يصل حجزك إلى الكشك بعد — سيستمر بالمحاولة ما دام التطبيق مفتوحاً.',bookSyncRefused:'تعذّر إرسال حجزك. يرجى إظهار هذا الهاتف عند الكشك.',updateReadyToast:'يتوفر إصدار جديد — حدّث الصفحة للتحديث.',justNow:'الآن',secondsAgo:' ث مضت',minutesAgo:' د مضت',offlineLabel:'غير متصل',offlineBanner:'أنت غير متصل - يتم حفظ التغييرات وستتم المزامنة عند عودة الاتصال.',unreachableBanner:'متصل بالشبكة لكن تعذّر الوصول إلى الخادم - قد تحتاج إلى تسجيل الدخول إلى هذه الشبكة.',retryBtn:'إعادة المحاولة',errWritePerm:'لم يتم الحفظ - ربما انتهت جلسة الموظف. أعد فتح القفل ثم حاول مجددًا.',errWriteDup:'تم أخذ رقم الحجز للتو من جهاز آخر. أعد التحميل وحاول مجددًا.',
   remBtn:'التذكيرات',remTitle:'التذكيرات · {0}',remKindLbl:'أي تذكير',remKind24:'قبل يوم',remKind2:'قبل ساعتين',remSummary:'{0} راكب محجوز · {1} للتذكير · {2} بلا رقم',remLocalOnly:'بانتظار تحديث قاعدة البيانات: تُحفظ أسماء من تم تذكيرهم على هذا الجهاز فقط.',remSendAll:'أرسل إلى {0} لم يتم تذكيرهم',remRemindedAt:'تم التذكير {0} ({1})',remNotYet:'لم يتم التذكير بعد',remNoNumber:'لا يوجد رقم',remLangLbl:'لغة الرسالة إلى {0}',remSend:'إرسال',remNone:'لا يوجد راكب محجوز في هذه الجولة بعد.',remBackToList:'العودة إلى القائمة',remLog:'تذكيرات الجولة ({0}): أُرسل {1} لـ {2}',ntRemind:'جولات فيها ركاب لم يتم تذكيرهم: {0}',ntiRemind:'{0}: {1} راكب لم يتم تذكيرهم بعد',ntkRemind:'ركاب الغد الذين لم يتم تذكيرهم',ntWlFree:'جولات فيها مكان شاغر وركاب ينتظرون: {0}',ntiWlFree:'{0}: {1} شاغر، {2} في الانتظار',ntkWlFree:'مكان شاغر وركاب في الانتظار',wlFreeBtn:'{0} شاغر: لمن يذهب',wloTitle:'مكان شاغر · {0}',wloSummary:'{0} شاغر · {1} في الانتظار',wloHintStaff:'اختر من يحصل على المكان. لن يتقدّم أحد حتى تختار.',wloHintClaim:'عرض: يصل الراكب رابط ولديه {0} دقيقة لتأكيد المكان، وبعدها ينتقل تلقائياً إلى التالي. منح: يصبح المكان له الآن.',wloOpenOffers:'عروض بانتظار الرد',wloClaimBy:'التأكيد قبل {0}',wloSent:'أُرسل',wloSend:'أرسل عبر واتساب',wloSendAgain:'أرسل مرة أخرى',wloWithdraw:'سحب العرض',wloNextUp:'التالي في الدور',wloWaitingSince:'ينتظر منذ {0}',wloOffered:'عُرض عليه',wloOffer:'اعرض',wloGive:'امنح المكان',wloGiven:'حصل على المكان',wloMore:'{0} آخرون في قائمة الانتظار',wloNobody:'لا أحد في قائمة الانتظار يمكنه أخذ هذا المكان.',wloFull:'لا يوجد مكان شاغر في الجولة الآن.',wloOfferLog:'عُرض مكان من قائمة الانتظار: {0}',wloPushTitle:'يوجد مكان شاغر لك',wloPushBody:'أكّده خلال {0} دقيقة.',tplgRemind:'تذكيرات الجولات وعروض قائمة الانتظار',tplRemind24:'تذكير قبل يوم',tplRemind2:'تذكير قبل ساعتين',tplWlOffer:'مكان من قائمة الانتظار للتأكيد',bizCardWaitlist:'قائمة الانتظار',bizCardWaitlistSub:'من يحصل على المكان الذي يتفرّغ عند إلغاء راكب أو عدم حضوره. جولات الموافقة تبقى باختيار الموظفين.',bizWlMode:'عند تفرّغ مكان',bizWlModeAuto:'يحصل عليه التالي في الدور فوراً',bizWlModeStaff:'يختار الموظفون من يحصل عليه',bizWlModeClaim:'يصل التالي في الدور رابط لتأكيده',bizWlClaim:'دقائق تأكيد المكان المعروض',bizWlClaimLater:'يصبح رابط التأكيد خياراً بعد تطبيق تحديث قاعدة البيانات.',wlcKicker:'قائمة الانتظار',wlcTitle:'يوجد مكان شاغر لك',wlcEnds:'المكان لك إذا أكّدته خلال',wlcClaim:'أكّد مكاني',wlcDecline:'لا أستطيع الحضور',wlcDoneTitle:'تم حجز مكانك',wlcDoneSub:'نراك في الجولة. تذكرتك في «الحجوزات».',wlcLateTitle:'انتهت مهلة تأكيد المكان',wlcLateSub:'انتهى وقت التأكيد فانتقل المكان إلى الراكب التالي. ما زلت في قائمة الانتظار.',wlcFullSub:'تم شغل المكان قبل أن تؤكّده. ما زلت في قائمة الانتظار.',wlcGoneSub:'لم يعد هذا الرابط يحمل عرضاً. حجوزاتك في «الحجوزات».',wlcNoTitle:'شكراً لإبلاغنا',wlcNoSub:'ينتقل المكان إلى الراكب التالي. ما زلت في قائمة الانتظار.',
   undoBtn:'تراجع',undoneMsg:'تم التراجع.',undoFailed:'فشل التراجع.',errStorageFull:'ذاكرة الجهاز ممتلئة — أفرغ بعض المساحة؛ قد لا تُحفظ المبيعات/الحجوزات غير المتزامنة.',errStockWrite:'لم يتم حفظ مخزون {0} — تمت إعادة العدد الظاهر على الشاشة.',
@@ -2137,15 +2141,15 @@ function isAdmin(){return S.staffRole==='admin';}
 // Front Desk mode shows only the desk's own sections: Sales, Bookings and Riders (the partner
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
-const DESK_TABS=['queue','cashier','workshop']; // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],manager:['dashboard','queue','cashier','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','cashier','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const DESK_TABS=['queue','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
+const ROLE_TABS={volunteer:[],manager:['dashboard','queue','lockers','cashier','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','lockers','cashier','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back.
-const STAFF_PART_TABS={sessions:['sessions'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
+const STAFF_PART_TABS={sessions:['sessions'],lockers:['lockers'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -7437,7 +7441,7 @@ let _navRestoring=false;
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',sessions:'sessions',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
@@ -7451,6 +7455,8 @@ const SUB_PATHS={
   // Sessions is a section of its own since 2026-11-06 (the owner: "separate the bookings and sessions pages"); its
   // three layouts are its sub-views: the cards at /sessions, the table at /sessions/table, the month at /sessions/calendar.
   sessions:{list:'',table:'table',cal:'calendar'},
+  // Lockers (2026-11-09): tonight's board at /lockers, then /lockers/reservations, /lockers/units, /lockers/history.
+  lockers:{board:'',reservations:'reservations',units:'units',history:'history'},
   history:{rides:'',log:'log',audit:'audit',exceptions:'exceptions',till:'till',access:'data-access'}, // audit trail, money exceptions, till sessions (2026-10-09); who saw personal data (2026-10-10)
   inventory:{bikes:'',supplements:'supplements',equipment:'equipment'},
   // Customers and Community are two sections since 2026-10-07 (the owner: "make a separate customer management/dashboard
@@ -7473,7 +7479,7 @@ function _subOf(tab){
   const m=SUB_PATHS[tab];
   if(!m){if(tab==='website'){const pg=S.web&&S.web.ed&&S.web.ed.page;return pg&&pg!=='home'&&_WEB_PAGE.test(pg)?'pages/'+pg:'';}return'';}
   if(tab==='community'&&S.communityTab==='accounts'&&S.amMember)return S.amMember==='yes'?'members':'non-members'; // the scope is in the address
-  const v=tab==='volunteers'?(S.volView||'shift'):tab==='queue'?(S.queueView||'bookings'):tab==='sessions'?(S.sessView||'list'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):((S.cat&&S.cat.view)||'models');
+  const v=tab==='volunteers'?(S.volView||'shift'):tab==='queue'?(S.queueView||'bookings'):tab==='sessions'?(S.sessView||'list'):tab==='history'?(S.histView||'rides'):tab==='inventory'?(S.invSection||'bikes'):tab==='community'?(S.communityTab||'overview'):tab==='vendors'?(S.vendorView||'calendar'):tab==='analytics'?(S.anView||'overview'):tab==='team'?(S.teamView||'access'):tab==='settings'?(S.setView||'account'):tab==='lockers'?(S.lkView||'board'):((S.cat&&S.cat.view)||'models');
   return m[v]||'';
 }
 // Opens the sub-view a segment names; a segment that names none opens the section's own page.
@@ -7500,6 +7506,7 @@ function _setSub(tab,seg){
   else if(tab==='analytics')S.anView=key;
   else if(tab==='team')S.teamView=key;
   else if(tab==='settings')S.setView=key;
+  else if(tab==='lockers')S.lkView=key;
   else if(tab==='volunteers')S.volView=key;
 }
 function _pathFor(st){
@@ -12205,7 +12212,7 @@ async function selectSessCard(id){
   // Add-ons are per-session offerings: a switch must drop picks the new session may not sell. The
   // promo code goes too - applied for one ride, it rode along onto the next, including onto a free
   // ride whose box is hidden, where it could not be removed and still spent a use of the code.
-  if(S.selSession!==id){S.regAddons=[];S.promoApplied=null;S._promoMsg='';}
+  if(S.selSession!==id){S.regAddons=[];S.promoApplied=null;S._promoMsg='';_lkRegReset();}
   S._qtyCapNote=false;
   if(_isCommunity(s)&&_needsBike(s)&&s.member_cap!=null)_mbAsk(id,true); // the members' bikes may be all taken (member_cap)
   if(_rideKind(s)==='saturday'&&S._satLink===true){_satLinkModal();return;} // the answer came while the gates were asked
@@ -12350,7 +12357,7 @@ async function selectEvent(ev){
   // A new event starts at its first step. The tickets of the ride just booked kept the page on
   // them, and a one-date event (opened straight on its ride, below) inherited the step, the
   // add-ons and the booking being changed from the last one.
-  S.lastTickets=[];S.regStep=1;S.regAddons=[];S.regAddonsOpen=null;S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;
+  S.lastTickets=[];S.regStep=1;S.regAddons=[];_lkRegReset();S.regAddonsOpen=null;S.modifyEntryId=null;S._modKey=null;S._alreadyBookedSession=null;
   if(S.regRiderNames&&S.regRiderNames.length)S.regRiderNames[0]=undefined; // rider 1 is the account holder again (2026-10-05)
   _perksHydrate();
   // A one-date event has nothing to choose between. The National Day ride is a single night,
@@ -13634,6 +13641,7 @@ function _bikeTapHeard(msg){
   if(!staff||S.view!=='staff')return;
   const me=_busTab||(_busTab=Math.random().toString(36).slice(2));
   if(msg.type==='bike_tap')_staffBusPost({type:'bike_tap_here',nonce:msg.nonce,tab:me});
+  else if(msg.tab===me&&msg.kind==='locker'&&/^[0-9A-Za-z-]{1,12}$/.test(String(msg.code||'')))_lockerArrived(String(msg.code)).catch(e=>{try{_logError('locker: '+((e&&e.message)||e),'nfc');}catch(_){}});
   else if(msg.tab===me&&/^[0-9A-Za-z-]{1,40}$/.test(String(msg.code||'')))_bikeArrived(String(msg.code),'nfc').catch(e=>{try{_logError('nfc: '+((e&&e.message)||e),'nfc');}catch(_){}});
 }
 // A PostgREST answer that means "this function is not on the database yet" — the one case
@@ -13756,6 +13764,7 @@ function goStaff(){
   try{const m=document.getElementById('auth-modal');if(m){m.style.display='none';m.classList.remove('as-page');}document.body.classList.remove('auth-page');}catch(e){}
   renderStaffTabs();
   _bikeResume(); // a tag tapped before sign-in completes now that the panel is open
+  _lockerResume(); // and a locker's tag the same way (2026-11-09)
   _staffBusListen(); // an open staff tab takes the bikes tapped on this phone (D15)
 
   if(!_onQueue)_autoSelectSession();
@@ -13839,6 +13848,7 @@ function setStaffTab(tab,o){
   else if(tab==='cashier')renderCashier();
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq')renderBadgeRequests();
+  else if(tab==='lockers')renderLockers();
   else if(tab==='website')renderWebsite();
   else if(tab==='catalog')renderCatalog();
   else if(tab==='workshop')renderWorkshop();
@@ -13935,7 +13945,7 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={lockers:'lock',badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.calendar)_ART.calendar='<rect opacity=".35" x="3" y="5" width="18" height="16" rx="2"/><path d="M5 5h14a2 2 0 0 1 2 2v2.5H3V7a2 2 0 0 1 2-2ZM7 2.5h2v5H7zm8 0h2v5h-2zM7 13h3v3H7zm7 0h3v3h-3z"/>'; // the Sessions section's mark (2026-11-06), kept here: in _ART it rode on every customer's page
@@ -14012,6 +14022,7 @@ function renderStaffTabs(){
   try{_n6uKbTips();}catch(_){}
   document.getElementById('tab-queue')     .classList.toggle('active',S.staffTab==='queue');
   document.getElementById('tab-sessions')  .classList.toggle('active',S.staffTab==='sessions');
+  document.getElementById('tab-lockers')   .classList.toggle('active',S.staffTab==='lockers');
   document.getElementById('tab-inventory') .classList.toggle('active',S.staffTab==='inventory');
   document.getElementById('tab-cashier')   .classList.toggle('active',S.staffTab==='cashier');
   document.getElementById('tab-community') .classList.toggle('active',S.staffTab==='community');
@@ -15632,8 +15643,8 @@ function _syncPaint(){document.querySelectorAll('.sync-now').forEach(b=>{b.disab
 // menu with the rest; Front Desk's three sections all fit, so its bar has no More. Community sits
 // beside Bookings in Workshop's place (the owner, 2026-10-02: "exchange workshop with community and
 // put community besides bookings"); Workshop stays only for a role without Community (Front Desk).
-const TB_TABS=['queue','community','cashier','inventory','workshop'];
-const TB_KEY={queue:'tabQueue',community:'tabPeople',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop'};
+const TB_TABS=['queue','lockers','community','cashier','inventory','workshop']; // Lockers beside Bookings for the desk (2026-11-09): Front Desk's four still fit without More
+const TB_KEY={queue:'tabQueue',lockers:'tabLockers',community:'tabPeople',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop'};
 // The bar's usual four by role (2026-11-06, ST17): an admin's has Sessions beside Bookings, a manager's and an owner's
 // open on the Dashboard; every other role keeps TB_TABS. Whatever the account cannot open drops out, as before.
 const N6U_TB={admin:['queue','sessions','community','cashier'],manager:['dashboard','queue','community','cashier'],owner:['dashboard','queue','community','analytics']};
@@ -16163,14 +16174,15 @@ function renderRegister(){
   const hasRange=S.regBikeTypes.slice(0,S.regQty).some((ty,i)=>ty==='Any'&&!_hFree(i));
   const totalDisplay=_freeSel?t('freeLabel'):hasRange?_sarRange(totalMin,totalMax):_sar(totalMin);
   const addonTotal=addonsCost(S.regAddons);
+  const _lkFee=isModifyMode?0:_lkRegFee(_selSessObj),_xtra=addonTotal+_lkFee; // a locker picked on the review (2026-11-09)
   // An edit's code discounts only the riders it adds, and the total says so (it used to drop the
   // discount altogether on an edit while the added rows were stored discounted).
   _refWAuto(); // the friend's referral discount on rider 1's bike, before the sums read the code
   const _promoDisc=_freeSel?0:_regPromoDisc();
   const _promoAf=_promoDisc>0?Math.max(0,Math.round((totalMin-_promoDisc)*100)/100):null;
   const grandTotalStr=_freeSel?t('freeLabel'):_promoAf!=null
-    ?_sar(_promoAf+addonTotal)
-    :(hasRange?_sarRange(totalMin+addonTotal,totalMax+addonTotal):_sar(totalMin+addonTotal));
+    ?_sar(_promoAf+_xtra)
+    :(hasRange?_sarRange(totalMin+_xtra,totalMax+_xtra):_sar(totalMin+_xtra));
   const pricePreview=_regPriceBox(_selSessObj);
 
   const selSess=_sessDisp(S.selSession);
@@ -16440,17 +16452,19 @@ function renderRegister(){
         <div id="reg-ad-body"${_aOpen?'':' hidden'}>${_aGrouped}</div>
       </div>`;
     })()}
+    ${isModifyMode?'':_lkReviewHtml(_selSessObj)}
     ${detailsCard}
     ${_isBlood(_selSessObj)?'':`<div class="form-section cu-mt16">${(()=>{
       const rentalStr=_promoAf!=null?_sar(_promoAf):totalDisplay;
       const grandStr=grandTotalStr;
-      return`${addonTotal>0?`<div class="cu-sum-row"><span class="cu-c-muted">${t(_ncSel?'sessWord':'reviewRentalLabel')}</span><span class="cu-fw700"><bdi>${esc(rentalStr)}</bdi></span></div>
-      <div class="cu-sum-row"><span class="cu-c-muted">${t('addonsLabel')}</span><span class="cu-fw700"><bdi>${esc(_sar(addonTotal))}</bdi></span></div>`:''}
-      <div class="cu-sum-tot${addonTotal>0?' cu-sum-sep':''}">
+      return`${_xtra>0?`<div class="cu-sum-row"><span class="cu-c-muted">${t(_ncSel?'sessWord':'reviewRentalLabel')}</span><span class="cu-fw700"><bdi>${esc(rentalStr)}</bdi></span></div>
+      ${addonTotal>0?`<div class="cu-sum-row"><span class="cu-c-muted">${t('addonsLabel')}</span><span class="cu-fw700"><bdi>${esc(_sar(addonTotal))}</bdi></span></div>`:''}
+      ${_lkFee>0?`<div class="cu-sum-row"><span class="cu-c-muted">${t('lkTitle')}</span><span class="cu-fw700"><bdi>${esc(_sar(_lkFee))}</bdi></span></div>`:''}`:''}
+      <div class="cu-sum-tot${_xtra>0?' cu-sum-sep':''}">
         <div class="cu-sum-lbl">${t('reviewTotalLabel')}</div>
         <div class="cu-sum-total"><bdi>${esc(grandStr)}</bdi></div>
       </div>
-      ${_cwReviewSlot(_selSessObj,grandStr,_freeSel,_promoAf!=null?_promoAf+addonTotal:totalMax+addonTotal)}
+      ${_cwReviewSlot(_selSessObj,grandStr,_freeSel,_promoAf!=null?_promoAf+_xtra:totalMax+_xtra)}
       ${_isRace(_selSessObj)?`<div class="price-note vl-pay-note">${t(_isArena(_selSessObj)?'arPriceNote':'vlPriceNote')} ${esc(_vlPayLine(_selSessObj))}</div>`:''}`;
     })()}</div>`}
     ${waiverCard}
@@ -17034,6 +17048,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   else if(tab==='inventory')renderInventory();
   else if(tab==='community')renderCommunity();
   else if(tab==='badgereq'){if(!bg)renderBadgeRequests();} // its own loader: the desk's data has nothing for it
+  else if(tab==='lockers')renderLockers(); // names and booking numbers come from the desk's rows
   else if(tab==='cashier')renderCashier();
   else if(tab==='workshop'){const a=document.activeElement;renderWorkshop(!!(a&&a.id==='ws-search-input'));} // typing in its search: the list only
   else if(tab==='messages'){const a=document.activeElement;renderMessages(!!(a&&a.id==='sm-search-input'));}
@@ -17436,6 +17451,7 @@ async function _submitReg(){
     // Only on the riders the code actually discounted: the server counts a use per row carrying it.
     if(S.promoApplied&&S.promoApplied.code){const _pc=String(S.promoApplied.code);try{await Promise.all(entries.filter(e=>e.promoCode).map(e=>_ownEntryUpdate(e.id,{promo_code:_pc})));}catch(e){}}
 
+    await _lkAfterBook(entries,_sessDisp(S.selSession),_queued); // the locker picked on the review, before the wallet so it can pay that too (2026-11-09)
     if(!_queued)await _cwAfterBook(entries);else S._cwUse=false; // the Wallet switch, once the add-ons are on the row (2026-11-03)
     await loadDataLight(); // slim parallel refresh - the ticket needs the queue, not photos/inventory
     if(entries.some(e=>e.promoCode&&_bldCodeOf(e.promoCode)))_bldRwLoad(true); // a free ride spent: off the event picker
@@ -17977,7 +17993,7 @@ function renderBookingTicket(entries,opts){
         // Add-ons are chosen during booking and changed at the booth, not from the ticket:
         // the card lists what the rider already has, so with none there is no section at all.
         return g.map(e=>{
-          const ad=addonLineItems(entryAddons(e));
+          const ad=addonLineItems(entryAddons(e).filter(a=>a.id!==LK_LINE)); // the locker has its own lines (_lkTkHtml)
           if(!ad.length)return'';
           return`<div class="cu-tk-addons">
             <span class="cu-k10">${g.length>1?esc(e.name)+' · ':''}${t('addonsLabel')}</span>
@@ -17989,9 +18005,10 @@ function renderBookingTicket(entries,opts){
           </div>`;
         }).join('');
       })()}
+      ${_lkTkHtml(g,sess,past)}
       ${_isBlood(sess)?'':`<div class="cu-tk-total">
         <span class="cu-tk-total-k">${t('reviewTotalLabel')}</span>
-        <span class="cu-tk-total-v"><bdi>${_comm?t('freeLabel'):esc(_sar(total+_due.reduce((s,e)=>s+addonsCost(entryAddons(e)),0)))}</bdi></span>
+        <span class="cu-tk-total-v"><bdi>${_comm?(g.reduce((n,e)=>n+_lkFeeOf(e),0)>0?esc(_sar(g.reduce((n,e)=>n+_lkFeeOf(e),0))):t('freeLabel')):esc(_sar(total+_due.reduce((s,e)=>s+addonsCost(entryAddons(e)),0)))}</bdi></span>
       </div>`}
       ${(!past&&!_comm&&!_allWl&&!_isBlood(sess))?_cwPaySlot(g,sess):''}
       ${(!past&&!_allWl&&_needsBike(sess))?`<div class="price-note">${t(_comm?'tkHelmetFree':'tkHelmetLine')}</div>`:''}
@@ -19578,6 +19595,612 @@ async function _cwAfterBook(entries){
   _cwMineLoad(cur,true);
 }
 function _cwRiderSay(e){const m=String((e&&e.message)||'');return /WALLET_SHORT/.test(m)?t('cwErrShort'):/WALLET_|NOT_FOUND/.test(m)?t('cwErrOpen'):t('errConnection');}
+// ── Lockers (the owner, 2026-11-09; migration 20261109120000) ────────────────────────────────────
+// One set of lockers, P1, P2..., carried between JCC and Petromin. Each has an NFC tag holding
+// micromobility.sa/lockers/<code> (the website sends a staff phone on to staff.micromobility.sa/?locker=<code>)
+// and a key that stays with staff. A locker is rented for an evening's period: early (18-20, the Open
+// Sports Day run) or late (21-23, the ride) or both on a JCC night, pm (19-21) on a Petromin night.
+// Riders add one on the review (never through the Petromin form); staff give the number at the desk.
+// The fee is an add-on line the database writes on the booking ({id:'locker'}, zy_locker_line), so
+// Due, the wallet and every report count it: the page reads that line and never writes it.
+const LK_LINE='locker';
+const LK_TIMES={early:'18:00 - 20:00',late:'21:00 - 23:00',pm:'19:00 - 21:00'};
+const LK_ENDS={early:'20:00',late:'23:00',both:'23:00',pm:'21:00'};
+const _LK_SLOTS={early:['e'],late:['l'],both:['e','l'],pm:['e','l']};
+function _lkPeriodTxt(p){return p==='both'?fmt12h(LK_TIMES.early)+' + '+fmt12h(LK_TIMES.late):fmt12h(LK_TIMES[p]||'');}
+// The periods a session offers riders: pm on a Petromin night, the three on any other ride with the switch on; none on a free ride.
+function _lkKind(s){if(!s||s.lockers!==true||_isFreeRide(s))return'';const k=_rideKind(s);return k==='petromin'?'pm':k==='jcc'?'jcc':'';}
+function _lkPeriodsOf(k){return k==='pm'?['pm']:k==='jcc'?['early','late','both']:[];}
+function _lkFeeOf(e){const a=entryAddons(e).find(x=>x.id===LK_LINE);return a&&typeof a.p==='number'?Math.round(a.p*(a.qty||1)*100)/100:0;}
+function _lkDayOf(e){const s=e&&_sessGet(e.sessionId);return String((s&&s.session_date)||(e&&e.sessionDate)||(e&&e.sessionId)||'').slice(0,10);}
+// P7, p07, "p 7" and a bare 7 (the one unit numbered 7) all read P7.
+function _lkNorm(code){
+  let c=String(code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').replace(/^([A-Z]{1,3})0+/,'$1');
+  if(/^\d{1,4}$/.test(c)){const n=String(Number(c)),hit=((S._lk&&S._lk.lockers)||[]).filter(l=>l.status!=='retired'&&String(l.code).replace(/^[A-Z]+/,'')===n);c=hit.length===1?hit[0].code:'P'+n;}
+  return /^[A-Z]{1,3}[1-9]\d{0,3}$/.test(c)?c:'';
+}
+
+// ── The rider's side ──
+// What a session offers, from customer_locker_offer: {kind, one, both, left:{early,late,both,pm}}. Nothing is
+// drawn until it answers, and never on a database without it (the answer is then no object).
+function _lkOffer(sid){const o=S._lkOffers&&S._lkOffers[sid];const v=o&&o.v;return v&&typeof v==='object'&&!Array.isArray(v)&&v.kind?v:null;}
+async function _lkOfferLoad(sid,force){
+  if(!sid||!sb)return;S._lkOffers=S._lkOffers||{};
+  const c=S._lkOffers[sid];if(c&&(c.busy||(!force&&Date.now()-c.at<60000)))return;
+  S._lkOffers[sid]={v:c&&c.v,at:Date.now(),busy:true};
+  let r;try{r=await sb.rpc('customer_locker_offer',{p_session:sid});}catch(e){r={error:e};}
+  S._lkOffers[sid]={v:r&&!r.error?r.data:(c&&c.v)||null,at:Date.now(),busy:false};
+  if(S.selSession===sid&&S.regStep===3&&_lkOffer(sid))renderRegister();
+}
+function _lkRegN(){return Math.min(Math.max(1,S.regLockerN||1),Math.max(1,S.regQty||1));}
+// The review's Locker block: the periods with their prices, one picked (tap again to drop it), and how many for a party.
+function _lkReviewHtml(sess){
+  const k=_lkKind(sess);if(!k)return'';
+  const o=_lkOffer(sess.id);
+  if(!o){setTimeout(()=>_lkOfferLoad(sess.id),0);return'';}
+  if(o.kind!==k)return'';
+  const ps=_lkPeriodsOf(k);if(!ps.includes(S.regLocker))S.regLocker='';
+  const qty=Math.max(1,S.regQty||1),n=_lkRegN();
+  const row=p=>{
+    const left=Math.max(0,Number(o.left&&o.left[p])||0),on=S.regLocker===p,full=!on&&left<1;
+    return`<div class="addon-row lk-rv-row${on?' sel':''}${full?' lk-full':''}">
+      <button type="button" id="reg-lk-${p}" class="addon-check${on?' on':''}" role="radio" aria-checked="${on}"${full?' disabled':''} data-on-click="${_on("_lkRegPick",on?'':p)}" aria-label="${esc(_lkPeriodTxt(p))}">${on?_cuIc('tick',14):''}</button>
+      <div class="cu-f1-min0"><div class="cu-ad-name"><bdi>${esc(_lkPeriodTxt(p))}</bdi>${full?` <span class="lk-rv-full">${t('lkFull')}</span>`:''}</div></div>
+      ${on&&qty>1?`<span class="addon-qty">
+        <button type="button" id="reg-lk-dec" data-on-click="${_on("_lkRegStep",-1)}"${n<=1?' disabled':''} aria-label="${esc(t('lkFewer'))}">−</button>
+        <span>${n}</span>
+        <button type="button" id="reg-lk-inc" data-on-click="${_on("_lkRegStep",1)}"${n>=Math.min(qty,left)?' disabled':''} aria-label="${esc(t('lkMore'))}">+</button>
+      </span>`:''}
+      <bdi class="cu-ad-price">${esc(_sar(p==='both'?o.both:o.one))}</bdi>
+    </div>`;};
+  return`<div class="form-section cu-mt16" id="reg-lk">
+    <h2 class="form-title" id="reg-lk-t">${t('lkTitle')}</h2>
+    <div class="cu-ad-list" role="radiogroup" aria-labelledby="reg-lk-t">${ps.map(row).join('')}</div>
+  </div>`;
+}
+function _lkRegPick(p){S.regLocker=p||'';if(!p)S.regLockerN=1;renderRegister();try{const b=document.getElementById('reg-lk-'+(p||'early'))||document.getElementById('reg-lk-pm');if(b)b.focus({preventScroll:true});}catch(_){}}
+function _lkRegStep(d){S.regLockerN=Math.max(1,_lkRegN()+d);renderRegister();try{const b=document.getElementById(d>0?'reg-lk-inc':'reg-lk-dec');if(b&&!b.disabled)b.focus({preventScroll:true});}catch(_){}}
+// What the picked locker adds to the review's total.
+function _lkRegFee(sess){
+  const k=_lkKind(sess),o=k&&_lkOffer(sess.id),p=S.regLocker;
+  if(!o||o.kind!==k||!_lkPeriodsOf(k).includes(p))return 0;
+  return Math.round((p==='both'?o.both:o.one)*_lkRegN()*100)/100;
+}
+function _lkRegReset(){S.regLocker='';S.regLockerN=1;}
+// After the booking: a locker on the first riders' rows. The places are held whatever this answers.
+async function _lkAfterBook(entries,sess,queued){
+  const p=S.regLocker,fee=_lkRegFee(sess),n=_lkRegN();_lkRegReset();
+  if(!p||!(fee>0))return;
+  if(queued){toast(t('lkErrOffline'),'error');return;}
+  const cur=S.loggedIn||getSession();if(!cur||!cur.session_token)return;
+  const ids=(entries||[]).filter(e=>e.status==='waiting'||e.status==='waitlist').slice(0,n).map(e=>e.id);
+  if(!ids.length)return;
+  let r;try{r=await sb.rpc('customer_locker_reserve',{p_id:cur.id,p_token:cur.session_token,p_booking_ids:ids,p_period:p});}catch(e){r={error:e};}
+  if(sess&&S._lkOffers)delete S._lkOffers[sess.id];
+  if(r.error){toast(_lkRiderSay(r.error),'error');return;}
+  _lkRowsApply(r.data&&r.data.rows);
+  _lkMineLoad(cur,true);
+}
+function _lkRiderSay(e){const m=String((e&&e.message)||'');return /LOCKERS_FULL/.test(m)?t('lkErrFull'):/LOCKER_/.test(m)?t('lkErrNotOpen'):t('errConnection');}
+// The server's rows laid over the bookings held here: the fee line it wrote, and what the wallet holds.
+function _lkRowsApply(rows){
+  (Array.isArray(rows)?rows:[]).forEach(x=>{const e=_qGet(x.id);if(!e)return;e.addons=x.addons==null?null:x.addons;if('paid' in x){e.paid=!!x.paid;e.pay_method=x.pay_method||null;e.walletPaid=Number(x.wallet_paid)||0;}});
+  if(Array.isArray(S.queue))S.queue=S.queue.slice();
+}
+// The rider's own rentals (customer_lockers): the period and, once given, the number.
+function _lkMine(){return Array.isArray(S._lkMine)?S._lkMine:[];}
+async function _lkMineLoad(cur,force){
+  cur=cur||S.loggedIn||getSession();if(!cur||!cur.session_token||!sb)return;
+  if(S._lkMineBusy||(!force&&S._lkMineAt&&Date.now()-S._lkMineAt<60000))return;
+  S._lkMineBusy=true;S._lkMineAt=Date.now();
+  let r;try{r=await sb.rpc('customer_lockers',{p_id:cur.id,p_token:cur.session_token});}catch(e){r={error:e};}
+  S._lkMineBusy=false;
+  if(!r||r.error||!Array.isArray(r.data))return;
+  const was=JSON.stringify(_lkMine());S._lkMine=r.data;
+  if(JSON.stringify(r.data)!==was&&S.custTab==='myrides')renderMyRides();
+}
+// A ticket's Locker lines: each rider's period, the number once staff gave it, the fee; Remove before a number is given.
+function _lkTkHtml(g,sess,past){
+  const rows=(g||[]).map(e=>({e,r:_lkMine().find(x=>x.booking_id===e.id&&x.status!=='cancelled'),fee:_lkFeeOf(e)})).filter(x=>x.r||x.fee>0);
+  if(!rows.length)return'';
+  if(!past)setTimeout(()=>_lkMineLoad(),0);
+  return`<div class="cu-tk-addons lk-tk">
+    <span class="cu-k10">${t('lkTitle')}</span>
+    ${rows.map(({e,r,fee})=>{
+      const code=r&&r.code?String(r.code):'',can=!past&&r&&r.status==='reserved'&&!code&&!e.paid;
+      return`<div class="cu-tk-ad">
+        <span class="cu-tk-ad-name">${g.length>1?esc(e.name)+' · ':''}${r?`<bdi>${esc(_lkPeriodTxt(r.period))}</bdi>`:''}${code?` · <b class="lk-code"><bdi>${esc(code)}</bdi></b>`:''}</span>
+        ${can?`<button type="button" class="btn-sm btn-muted lk-tk-x" data-on-click="${_on("_lkTkRemove",e.id)}">${t('lkRemove')}</button>`:''}
+        <bdi class="cu-fw800-13">${esc(_sar(fee||(r&&r.price)||0))}</bdi>
+      </div>`;}).join('')}
+  </div>`;
+}
+function _lkTkRemove(id){
+  confirmDialog({title:t('lkRemoveQ'),body:'',confirmLabel:t('lkRemove'),confirmClass:'btn-red',onConfirm:()=>_lkTkRemoveGo(id)});
+}
+async function _lkTkRemoveGo(id){
+  const cur=S.loggedIn||getSession();if(!cur||!cur.session_token)return;
+  let r;try{r=await sb.rpc('customer_locker_cancel',{p_id:cur.id,p_token:cur.session_token,p_booking_ids:[id]});}catch(e){r={error:e};}
+  if(r.error){toast(_lkRiderSay(r.error),'error');return;}
+  haptic();_lkRowsApply(r.data&&r.data.rows);toast(t('lkRemoved'));
+  await _lkMineLoad(cur,true);
+  if(S.custTab==='myrides')renderMyRides();
+}
+
+// ── The desk ──
+// The units and the evenings' rentals, read straight from the tables (staff only, under RLS). Every write goes
+// through a staff_locker_* function, which locks the evening, so two phones cannot give one locker twice.
+const LK_COLS='id,day,period,booking_id,session_id,customer_id,name,locker_id,price,on_bill,status,created_at,created_by,assigned_at,assigned_by,returned_at,returned_by,cancelled_at,cancelled_by,cancel_reason';
+function _lkState(){return S._lk||(S._lk={lockers:null,days:{},at:{},busy:{},gone:false,err:false});}
+function _lkGone(err){const c=String((err&&err.code)||''),m=String((err&&err.message)||'');return c==='PGRST205'||c==='42P01'||(/locker/i.test(m)&&/does not exist|schema cache/.test(m));}
+async function _lkLoad(force,day){
+  const L=_lkState();day=day||todayStr();
+  if(L.busy[day]||(!force&&L.at[day]&&Date.now()-L.at[day]<(L.days[day]&&L.lockers?20000:8000)))return; // a failed read is tried again after a pause, never on every paint
+  L.busy[day]=true;
+  let a,b;try{[a,b]=await Promise.all([sb.from('lockers').select('id,code,status,note,created_at'),sb.from('locker_rentals').select(LK_COLS).eq('day',day).order('created_at')]);}catch(e){a={error:e};}
+  L.busy[day]=false;L.at[day]=Date.now();
+  const er=(a&&a.error)||(b&&b.error);
+  if(er){L.gone=_lkGone(er);L.err=!L.gone;_lkRepaint();return;}
+  L.gone=false;L.err=false;L.lockers=_lkSort(a.data||[]);L.days[day]=b.data||[];
+  _lkRepaint();
+}
+function _lkSort(l){const pre=c=>String(c).replace(/\d+$/,''),num=c=>parseInt(String(c).replace(/^\D+/,''),10)||0;return(l||[]).slice().sort((x,y)=>pre(x.code).localeCompare(pre(y.code))||num(x.code)-num(y.code));}
+function _lkRepaint(){
+  if(S.view!=='staff')return;
+  if(S.staffTab==='lockers')renderLockers();
+  _lkCiPaint();
+  if(S._lkSheet)_lkSheetDraw();
+}
+let _lkRtT=null;
+function _lkRt(){if(_lkRtT)return;_lkRtT=setTimeout(()=>{_lkRtT=null;const L=_lkState();Object.keys(L.days).forEach(d=>_lkLoad(true,d));if(!Object.keys(L.days).length&&S.staffTab==='lockers')_lkLoad(true);},400);}
+function _lkRows(day){return _lkState().days[day||todayStr()]||[];}
+function _lkById(id){return(_lkState().lockers||[]).find(l=>l.id===id)||null;}
+function _lkByCode(c){return(_lkState().lockers||[]).find(l=>l.code===c&&l.status!=='retired')||null;}
+function _lkLive(r){return !!r&&(r.status==='reserved'||r.status==='in_use');}
+function _lkOverlap(a,b){return(_LK_SLOTS[a]||[]).some(s=>(_LK_SLOTS[b]||[]).includes(s));}
+function _lkOfBooking(e){return _lkRows(_lkDayOf(e)).find(r=>r.booking_id===e.id&&r.status!=='cancelled')||null;}
+// Who holds a unit this evening for a period (a live rental on it whose period overlaps).
+function _lkHolders(lockerId,day,period){return _lkRows(day).filter(r=>_lkLive(r)&&r.locker_id===lockerId&&(!period||_lkOverlap(r.period,period)));}
+function _lkCodeOf(r){const l=r&&r.locker_id&&_lkById(r.locker_id);return l?l.code:'';}
+// A rental past its period's end and not handed back.
+function _lkOverdue(r){if(!r||r.status!=='in_use')return false;const d=String(r.day||''),now=todayStr();if(d<now)return true;if(d>now)return false;const hm=_ksaHm(Date.now());return hm>(LK_ENDS[r.period]||'23:59');}
+function _ksaHm(at){return new Date(+new Date(at)+108e5).toISOString().slice(11,16);}
+function _lkSay(e){
+  if(_rpcAbsent(e)||_lkGone(e))return t('lkNoDb');
+  const m=String((e&&e.message)||''),k=(/^[A-Z_]+/.exec(m)||[])[0],arg=(m.split(':').slice(1).join(':')||'').trim();
+  const map={LOCKERS_FULL:'lkErrFull',LOCKER_TAKEN:'lkErrTaken',LOCKER_UNKNOWN:'lkErrUnknown',LOCKER_OUT:'lkErrOut',LOCKER_HELD:'lkErrHeld',LOCKER_NO_NAME:'lkErrName',LOCKER_NOT_OPEN:'lkErrNotOpenDesk'};
+  return map[k]?t(map[k]).replace('{0}',arg):_rpcMessage(e);
+}
+// One staff_locker_* call: refused, it is said and nothing moves; done, the evening is read again.
+async function _lkCall(fn,args,day){
+  if(_roNow()){_roRefusal();return null;}
+  let r;try{r=await sb.rpc(fn,args);}catch(e){r={error:e};}
+  if(r.error){toast(_lkSay(r.error),'error');_lkLoad(true,day);return null;}
+  const d=r.data&&typeof r.data==='object'?r.data:{};
+  if(d.booking_id&&'addons' in d)_lkRowsApply([{id:d.booking_id,addons:d.addons}]);
+  await _lkLoad(true,day);
+  return d;
+}
+async function _lkGive(rentalId,code,day){
+  const c=_lkNorm(code);if(!c){toast(t('lkErrUnknown').replace('{0}',String(code||'').trim()),'error');return false;}
+  const d=await _lkCall('staff_locker_assign',{p_rental:rentalId,p_code:c},day);if(!d)return false;
+  haptic();toast(t('lkGivenLine').replace('{0}',d.code||c));
+  const r=_lkRows(day).find(x=>x.id===rentalId);
+  logAction(`${t('lkTitle')} ${d.code||c}: ${(r&&r.name)||''}`,{k:'locker',e:'locker_rental',id:rentalId});
+  return true;
+}
+async function _lkHandBack(rentalId,day){
+  const r=_lkRows(day).find(x=>x.id===rentalId),code=_lkCodeOf(r);
+  if(!await _lkCall('staff_locker_return',{p_rental:rentalId},day))return;
+  haptic();toast(t('lkHandedBack').replace('{0}',code||''));
+  logAction(`${t('lkHandBack')} ${code}: ${(r&&r.name)||''}`,{k:'locker',e:'locker_rental',id:rentalId});
+}
+function _lkCancelAsk(rentalId,day){
+  const r=_lkRows(day).find(x=>x.id===rentalId);
+  confirmDialog({title:t('lkCancelQ'),body:r&&r.on_bill?t('lkCancelBody'):'',confirmLabel:t('lkCancel'),confirmClass:'btn-red',onConfirm:async()=>{
+    if(!await _lkCall('staff_locker_cancel',{p_rental:rentalId,p_reason:'staff',p_undo:false},day))return;
+    toast(t('lkCancelledToast'));logAction(`${t('lkCancel')}: ${(r&&r.name)||''}`,{k:'locker',e:'locker_rental',id:rentalId});
+  }});
+}
+// A locker for a booking: on its bill while it is not paid, else rung up at Sales.
+async function _lkAddTo(e,p){
+  const day=_lkDayOf(e),bill=!e.paid;
+  const d=await _lkCall('staff_locker_reserve',{p_booking_id:e.id,p_period:p,p_on_bill:bill},day);if(!d)return null;
+  haptic();toast(bill?t('lkAdded'):t('lkAddedTill'));
+  logAction(`${t('lkTitle')} ${_lkPeriodTxt(p)}: #${e.queueNum??''} ${e.name||''}`,{k:'locker',e:'booking',id:e.id});
+  if(!bill)_lkTill(e.customerId||null,e.name||'',[{p,code:''}],false); // the check-in stays open: the fee waits in the Sales cart
+  return d;
+}
+// A walk-up's locker goes onto the Sales till, linked to the account, for staff to take the money there.
+function _lkTill(custId,name,items,go){
+  const o=_lkOfferPrices();
+  S._ctCart=[...(S._ctCart||[]),...items.map(x=>({item_id:null,name:`${t('lkTitle')}${x.code?' '+x.code:''} · ${_lkPeriodTxt(x.p)}`,cat:'Other',qty:1,price:x.p==='both'?o.both:o.one,pay:S._ctPay||'paid',team:''}))];
+  if(custId){S._ctCustId=custId;S._ctCust=name||'';}else if(name){S._ctCust=name;S._ctCustId='';}
+  if(go)setStaffTab('cashier');
+}
+// The prices Settings has (the server charges the same: _lk_price).
+function _lkOfferPrices(){const n=(k,d)=>{const v=Number(_biz(k,d));return isFinite(v)&&v>=1&&v<=1000?v:d;};return{one:n('lk_price_one',10),both:n('lk_price_both',15)};}
+
+// The check-in's Locker line: the booking's locker, its period and number, a box to give one (or a tag
+// tapped on this phone), and the periods to add one when the night offers lockers.
+function _lkCiHtml(e){
+  const L=_lkState();if(L.gone||!e)return'';
+  const day=_lkDayOf(e);
+  if(!L.days[day]||!L.lockers)setTimeout(()=>_lkLoad(false,day),0);
+  return`<div class="form-group lk-ci" id="lk-ci">${_lkCiInner(e,_lkOfBooking(e),_lkKind(_sessDisp(e.sessionId)))}</div>`;
+}
+function _lkCiInner(e,r,k){
+  if(!r){
+    if(!k||!_lkState().days[_lkDayOf(e)])return'';
+    return`<div class="lk-ci-lbl" id="lk-ci-add-l">${t('lkAddOne')}</div>
+      <div class="ci-opts lk-ci-add" role="group" aria-labelledby="lk-ci-add-l">${_lkPeriodsOf(k).map(p=>`<button type="button" class="toggle-btn" data-on-click="${_on("_lkCiAdd",e.id,p)}"><bdi>${esc(_lkPeriodTxt(p))}</bdi></button>`).join('')}</div>`;
+  }
+  const code=_lkCodeOf(r),done=r.status==='returned';
+  return`<label for="lk-ci-in">${t('lkTitle')} · <bdi>${esc(_lkPeriodTxt(r.period))}</bdi>${r.on_bill?'':' · '+esc(t('lkAtTill'))}</label>
+    ${done?`<div class="bkm-cmuted">${esc(t('lkReturned'))}${code?' · '+esc(code):''}</div>`:`<div class="bkm-cbrow">
+      <input id="lk-ci-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${esc(t('lkNumPh'))}" value="${esc(code)}" class="bkm-cbin" data-on-keydown="${_on("_lkCiKey",_EV,_EL)}">
+      <button type="button" class="btn-secondary bkm-nowrap" data-on-click="${_on("_lkCiGive",r.id)}">${t(code?'lkMove':'lkGive')}</button>
+    </div>
+    <div class="bkm-cmuted lk-ci-st" role="status">${code?esc(t('lkGivenLine').replace('{0}',code)):esc(t('lkTapOrType'))}</div>`}`;
+}
+function _lkCiPaint(){
+  const box=document.getElementById('lk-ci'),e=S._ciId&&_qGet(S._ciId);if(!box||!e)return;
+  const a=document.activeElement;if(a&&a.id==='lk-ci-in'&&a.value)return; // a number being typed stays as it is
+  box.innerHTML=_lkCiInner(e,_lkOfBooking(e),_lkKind(_sessDisp(e.sessionId)));
+}
+function _lkCiKey(ev,el){if(ev.key!=='Enter')return;ev.preventDefault();const e=S._ciId&&_qGet(S._ciId),r=e&&_lkOfBooking(e);if(r)_lkCiGive(r.id,el.value);}
+async function _lkCiGive(rentalId,v){
+  const e=S._ciId&&_qGet(S._ciId);if(!e)return;
+  const i=document.getElementById('lk-ci-in'),code=v!=null?v:(i?i.value:'');
+  if(i)i.blur();
+  await _lkGive(rentalId,code,_lkDayOf(e));
+  _lkCiPaint();
+}
+async function _lkCiAdd(id,p){const e=_qGet(id);if(!e)return;await _lkAddTo(e,p);_lkCiPaint();try{renderCheckinModal();}catch(_){}}
+
+// ── A tag tapped, a QR scanned, a number typed: the locker arrives ──
+// /?locker=P7 is read once at boot, off the address bar, and parked until a staff session is confirmed (as ?bike= is).
+function _readLockerParam(){
+  let code='';
+  try{
+    const u=new URL(window.location.href);
+    if(!u.searchParams.has('locker'))return '';
+    code=String(u.searchParams.get('locker')||'').trim().slice(0,12);
+    u.searchParams.delete('locker');
+    history.replaceState(history.state,'',u.pathname+(u.search||'')+u.hash);
+  }catch(e){return '';}
+  if(!/^[0-9A-Za-z-]{1,12}$/.test(code))return '';
+  try{sessionStorage.setItem('cq_pending_locker',code);}catch(e){}
+  return code;
+}
+function _lockerResume(){
+  let code='';
+  try{code=sessionStorage.getItem('cq_pending_locker')||'';if(code)sessionStorage.removeItem('cq_pending_locker');}catch(e){}
+  if(code)setTimeout(()=>{_lockerArrived(code).catch(e=>{try{_logError('locker: '+((e&&e.message)||e),'nfc');}catch(_){}});},0);
+}
+function _scanLockerUrl(txt){return txt.match(/[?&]locker=([0-9A-Za-z-]{1,12})/)||txt.match(/^https?:\/\/(?:www\.)?micromobility\.sa\/lockers\/([0-9A-Za-z-]{1,12})\/?(?:[?#]|$)/i);}
+// Into the open check-in when its rider has a locker waiting for a number (or is moving to this one); else the locker's sheet.
+async function _lockerArrived(code){
+  if(S.view!=='staff')return;
+  const L=_lkState(),day=todayStr();
+  await _lkLoad(!L.lockers,day);
+  if(L.gone){toast(t('lkNoDb'),'warning');return;}
+  const c=_lkNorm(code);if(!c||!_lkByCode(c)){toast(t('lkErrUnknown').replace('{0}',c||code),'error');_lkSheetOpen(c||String(code||'').toUpperCase());return;}
+  const e=S._ciId&&_qGet(S._ciId),r=e&&_lkOfBooking(e);
+  if(r&&_lkLive(r)&&_lkCodeOf(r)!==c){if(await _lkGive(r.id,c,_lkDayOf(e)))_lkCiPaint();return;}
+  _lkSheetOpen(c);
+}
+
+// ── A locker's sheet: who has it this evening, and what can be done ──
+function _lkSheetOpen(code,day){
+  S._lkSheet={code:String(code||''),day:day||todayStr(),move:'',ret:document.activeElement};
+  if(!_lkState().days[S._lkSheet.day])_lkLoad(false,S._lkSheet.day);
+  _lkSheetDraw();
+}
+function _lkSheetClose(){const P=S._lkSheet;S._lkSheet=null;_lkSheetDraw();if(P&&P.ret&&P.ret.focus)try{P.ret.focus();}catch(_){}}
+function _on__lkSheetBg(event,el){if(event.target===el)_lkSheetClose();}
+function _lkSheetDraw(){
+  const P=S._lkSheet;let m=document.getElementById('lk-modal');
+  if(!P){if(m){m.style.display='none';m.innerHTML='';}return;}
+  if(!m){m=document.createElement('div');m.id='lk-modal';document.body.appendChild(m);}
+  const l=_lkByCode(P.code),day=P.day,rows=l?_lkRows(day).filter(r=>r.locker_id===l.id&&r.status!=='cancelled'):[];
+  const live=rows.filter(_lkLive);
+  const who=r=>{const e=r.booking_id&&_qGet(r.booking_id);return`${esc(r.name||'')}${e?` <span class="lk-muted">#${esc(String(e.queueNum??''))}${e.status==='waitlist'?' · '+esc(t('lkWaitlistMark')):''}</span>`:r.booking_id?'':` <span class="lk-muted">${esc(t('lkWalkup'))}</span>`}`;};
+  const holder=r=>`<div class="lk-sh-row${_lkOverdue(r)?' lk-over':''}">
+      <div class="lk-sh-who"><b>${who(r)}</b><div class="lk-muted"><bdi>${esc(_lkPeriodTxt(r.period))}</bdi>${_lkOverdue(r)?' · '+esc(t('lkOverdue')):''}</div></div>
+      ${P.move===r.id?`<div class="lk-sh-acts lk-mv"><input id="lk-mv-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${esc(t('lkMoveTo'))}" placeholder="${esc(t('lkNumPh'))}" data-on-keydown="${_on("_lkMoveKey",_EV,_EL)}">
+        <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkMoveGo")}">${t('lkMove')}</button></div>`:`<div class="lk-sh-acts">
+        <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkSheetBack",r.id)}">${t('lkHandBack')}</button>
+        <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkSheetMove",r.id)}">${t('lkMove')}</button>
+      </div>`}</div>`;
+  // Riders waiting for a number whose period this unit has free.
+  const waiting=l&&l.status==='available'?_lkRows(day).filter(r=>r.status==='reserved'&&!r.locker_id&&!_lkHolders(l.id,day,r.period).length):[];
+  let body;
+  if(_lkState().gone)body=`<p>${esc(t('lkNoDb'))}</p>`;
+  else if(!_lkState().lockers)body=skeletonList();
+  else if(!l)body=`<p>${esc(t('lkErrUnknown').replace('{0}',P.code))}</p>${/^[A-Z]{1,3}[1-9]\d{0,3}$/.test(P.code)?`<button type="button" class="btn-secondary" data-on-click="${_on("_lkSheetAddUnit")}">${esc(t('lkAddThis').replace('{0}',P.code))}</button>`:''}`;
+  else body=`${l.status==='out'?`<div class="lk-sh-out" role="status">${esc(t('lkOutSvc'))}${l.note?' · '+esc(l.note):''}</div>`:''}
+    ${live.length?live.map(holder).join(''):`<div class="lk-sh-free">${esc(t('lkFree'))}</div>`}
+    ${l.status==='available'?`<div class="lk-sh-h">${esc(t('lkGiveTo'))}</div>
+      ${waiting.length?`<div class="lk-sh-list">${waiting.map(r=>`<button type="button" class="lk-sh-pick" data-on-click="${_on("_lkSheetGive",r.id)}"><b>${who(r)}</b> <span class="lk-muted"><bdi>${esc(_lkPeriodTxt(r.period))}</bdi></span></button>`).join('')}</div>`:`<div class="lk-muted">${esc(t('lkNobodyWaiting'))}</div>`}
+      <button type="button" class="btn-secondary lk-sh-rent" data-on-click="${_on("_lkRentOpen",l.code,day)}">${esc(t('lkRent'))}</button>`:''}`;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__lkSheetBg',_EV,_EL)}"><div class="confirm-box lk-box" role="dialog" aria-modal="true" aria-labelledby="lk-sh-t">
+    <div class="chrome-dh10"><div class="chrome-dt" id="lk-sh-t">${esc(t('lkSheetTitle').replace('{0}',P.code))}${day!==todayStr()?` · ${esc(shortDate(day))}`:''}</div>
+      <button type="button" data-on-click="${_on('_lkSheetClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
+    <div class="chrome-dbody lk-sh-body">${body}</div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_lkSheetClose')}">${t('closeBtn')}</button></div>
+  </div></div>`;
+}
+async function _lkSheetGive(rentalId){const P=S._lkSheet;if(!P)return;await _lkGive(rentalId,P.code,P.day);}
+async function _lkSheetBack(rentalId){const P=S._lkSheet;if(!P)return;await _lkHandBack(rentalId,P.day);}
+// Move: a box for the new number in place of the buttons; the sheet then follows the rider to it.
+function _lkSheetMove(rentalId){const P=S._lkSheet;if(!P)return;P.move=P.move===rentalId?'':rentalId;_lkSheetDraw();setTimeout(()=>{const i=document.getElementById('lk-mv-in');if(i)i.focus();},60);}
+function _lkMoveKey(ev,el){if(ev.key==='Enter'){ev.preventDefault();_lkMoveGo(el.value);}else if(ev.key==='Escape'){ev.preventDefault();ev.stopPropagation();_lkSheetMove('');}}
+async function _lkMoveGo(v){
+  const P=S._lkSheet;if(!P||!P.move)return;
+  if(v==null){const i=document.getElementById('lk-mv-in');v=i?i.value:'';}
+  if(!String(v||'').trim())return;
+  if(await _lkGive(P.move,v,P.day)&&S._lkSheet){const c=_lkNorm(v);S._lkSheet.move='';if(c)S._lkSheet.code=c;_lkSheetDraw();}
+}
+async function _lkSheetAddUnit(){
+  const P=S._lkSheet;if(!P)return;
+  if(_roNow()){_roRefusal();return;}
+  if(await _wr(sb.from('lockers').insert({code:P.code}),'add locker'))return; // _wr answers true when refused
+  toast(t('lkUnitsAdded').replace('{0}','1'));logAction(`${t('lkAddUnits')}: ${P.code}`,{k:'locker',e:'locker',id:P.code});
+  await _lkLoad(true,P.day);
+}
+// Rent to someone with no booking that evening (a runner at the Open Sports Day, say): an account or a typed
+// name, the period, and the locker when it is known. The fee then goes onto the Sales till, for the money.
+function _lkRentOpen(code,day){
+  S._lkRent={code:code||'',day:day||todayStr(),q:'',custId:'',name:'',p:'',busy:false,ret:document.activeElement};
+  _lkRentDraw();setTimeout(()=>{const i=document.getElementById('lk-rent-q');if(i)i.focus();},60);
+}
+function _lkRentClose(){const P=S._lkRent;S._lkRent=null;_lkRentDraw();if(P&&P.ret&&P.ret.focus)try{P.ret.focus();}catch(_){}}
+function _on__lkRentBg(event,el){if(event.target===el)_lkRentClose();}
+function _lkRentSugHtml(){
+  const P=S._lkRent;if(!P||P.custId)return'';
+  const q=P.q.trim().toLowerCase();if(q.length<2)return'';
+  const hits=(S.customers||[]).filter(c=>(c.name||'').toLowerCase().includes(q)||_phoneHit(c.phone,q)||(c.email||'').toLowerCase().includes(q)).slice(0,6);
+  return hits.length?`<div class="sl-sug">${hits.map(c=>`<button type="button" class="sl-sug-b" data-on-click="${_on("_lkRentPick",c.id)}"><div class="sl-sug-nm">${esc(c.name||'')}</div><div class="sl-f11m">${esc([c.phone,c.email].filter(Boolean).join(' · '))}</div></button>`).join('')}</div>`:'';
+}
+function _lkRentDraw(){
+  const P=S._lkRent;let m=document.getElementById('lk-rent');
+  if(!P){if(m){m.style.display='none';m.innerHTML='';}return;}
+  if(!m){m=document.createElement('div');m.id='lk-rent';document.body.appendChild(m);}
+  const o=_lkOfferPrices();
+  const pb=p=>`<button type="button" class="toggle-btn${P.p===p?' active':''}" aria-pressed="${P.p===p}" data-on-click="${_on("_lkRentP",p)}"><bdi>${esc(_lkPeriodTxt(p))}</bdi> · ${esc(_money(p==='both'?o.both:o.one,_NOISO))}</button>`;
+  m.style.display='block';
+  m.innerHTML=`<div class="modal-backdrop" data-on-click="${_on('_on__lkRentBg',_EV,_EL)}"><div class="confirm-box lk-box" role="dialog" aria-modal="true" aria-labelledby="lk-rent-t">
+    <div class="chrome-dh10"><div class="chrome-dt" id="lk-rent-t">${esc(t('lkRent'))}${P.day!==todayStr()?' · '+esc(shortDate(P.day)):''}</div>
+      <button type="button" data-on-click="${_on('_lkRentClose')}" aria-label="${esc(t('closeBtn'))}" class="chrome-xt">&times;</button></div>
+    <div class="chrome-dbody">
+      <div class="form-group">${P.custId?`<div class="lk-ci-lbl">${t('lkWho')}</div><div class="lk-rent-picked"><b>${esc(P.name)}</b> <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkRentPick",'')}">${t('lkChange')}</button></div>`
+        :`<label for="lk-rent-q">${t('lkWho')}</label><input id="lk-rent-q" type="text" autocomplete="off" value="${esc(P.q)}" placeholder="${esc(t('lkWhoPh'))}" data-on-input="${_on("_lkRentQ",_P("value"))}"><div id="lk-rent-sug">${_lkRentSugHtml()}</div>`}</div>
+      <div class="form-group"><div class="lk-ci-lbl" id="lk-rent-pl">${t('lkPeriod')}</div><div class="ci-opts lk-rent-ps" role="group" aria-labelledby="lk-rent-pl">${['early','late','both','pm'].map(pb).join('')}</div></div>
+      <div class="form-group"><label for="lk-rent-code">${t('lkNumber')}</label><input id="lk-rent-code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(P.code)}" placeholder="${esc(t('lkNumPh'))}" data-on-input="${_on("_lkRentCode",_P("value"))}"></div>
+    </div>
+    <div class="chrome-dact"><button type="button" class="btn-secondary" data-on-click="${_on('_lkRentClose')}">${t('cancelBtn')}</button>
+      <button type="button" class="btn-primary" id="lk-rent-go" data-on-click="${_on('_lkRentGo')}"${P.busy?' disabled aria-busy="true"':''}>${t('lkRentGo')}</button></div>
+  </div></div>`;
+}
+function _lkRentQ(v){const P=S._lkRent;if(!P)return;P.q=String(v||'');const b=document.getElementById('lk-rent-sug');if(b)b.innerHTML=_lkRentSugHtml();}
+function _lkRentPick(id){
+  const P=S._lkRent;if(!P)return;
+  const c=id&&(S.customers||[]).find(x=>x.id===id);
+  P.custId=c?c.id:'';P.name=c?(c.name||''):'';if(!c)P.q='';
+  _lkRentDraw();setTimeout(()=>{const i=document.getElementById(c?'lk-rent-go':'lk-rent-q');if(i)i.focus();},60);
+}
+function _lkRentP(p){const P=S._lkRent;if(!P)return;P.p=p;_lkRentDraw();}
+function _lkRentCode(v){const P=S._lkRent;if(P)P.code=String(v||'');}
+async function _lkRentGo(){
+  const P=S._lkRent;if(!P||P.busy)return;
+  const name=P.custId?P.name:P.q.trim();
+  if(!name){toast(t('lkErrName'),'error');return;}
+  if(!P.p){toast(t('lkPickPeriod'),'error');return;}
+  const code=P.code.trim()?_lkNorm(P.code):'';
+  if(P.code.trim()&&!code){toast(t('lkErrUnknown').replace('{0}',P.code.trim()),'error');return;}
+  P.busy=true;_lkRentDraw();
+  const d=await _lkCall('staff_locker_walkup',{p_customer:P.custId||null,p_name:name,p_period:P.p,p_day:P.day},P.day);
+  if(!d||!S._lkRent){if(S._lkRent){S._lkRent.busy=false;_lkRentDraw();}return;}
+  logAction(`${t('lkRent')}: ${name} · ${_lkPeriodTxt(P.p)}`,{k:'locker',e:'locker_rental',id:d.id||null});
+  let given='';
+  if(code&&d.id&&await _lkGive(d.id,code,P.day))given=code;
+  if(!given)toast(t('lkRented').replace('{0}',name));
+  const cust=P.custId,per=P.p;S._lkRent=null;_lkRentDraw();
+  if(S._lkSheet)_lkSheetClose();
+  _lkTill(cust||null,name,[{p:per,code:given}],true);
+}
+
+// ── The Lockers section (/lockers; the owner, 2026-11-09: "a dedicated section for it on the staff website") ──
+// Tonight's board (a tile per unit), the evening's reservations, the units (with each tag's link and QR) and
+// the history. Any evening can be looked at; tonight is where it opens.
+const LK_VIEWS=['board','reservations','units','history'];
+function renderLockers(){
+  const el=document.getElementById('tab-lockers');if(!el)return;
+  const L=_lkState(),day=S.lkDay||todayStr(),v=LK_VIEWS.includes(S.lkView)?S.lkView:'board';
+  if(v==='history')_lkHistLoad();else _lkLoad(false,day);
+  const a=document.activeElement,fid=a&&a.id&&el.contains(a)&&/^lk-(hq|give-in)$/.test(a.id)?a.id:'',pos=fid?a.selectionStart:null;
+  const tab=(k,l)=>`<button type="button" class="filter-pill${v===k?' active':''}" aria-pressed="${v===k}" data-on-click="${_on("_lkView",k)}">${t(l)}</button>`;
+  let body;
+  if(L.gone)body=_emptyState(t('lkNoDb'));
+  else if(v==='history')body=_lkHistHtml();
+  else if(!L.lockers||!L.days[day])body=L.err?_loadErr(t('errConnection'),_on("_lkReload")):skeletonList();
+  else body=v==='units'?_lkUnitsHtml():v==='reservations'?_lkResHtml(day):_lkBoardHtml(day);
+  const dayPick=v==='units'||v==='history'?'':`<label class="filter-field lk-day"><span class="filter-field-lbl">${t('lkDay')}</span><input type="date" id="lk-day" value="${esc(day)}" data-on-change="${_on("_lkSetDay",_P("value"))}"></label>`;
+  el.innerHTML=`<h1 class="page-title">${t('tabLockers')}</h1>
+    <div class="filter-bar"><div class="filter-row">${tab('board','lkViewBoard')}${tab('reservations','lkViewRes')}${tab('units','lkViewUnits')}${tab('history','lkViewHist')}${dayPick}
+      ${v==='units'||L.gone?'':`<button type="button" class="btn-primary btn-sm lk-rent-btn" data-on-click="${_on("_lkRentOpen",'',day)}">${t('lkRent')}</button>`}</div></div>
+    <div class="form-section ws-mt0">${body}</div>`;
+  const f=fid&&document.getElementById(fid);if(f){try{f.focus({preventScroll:true});if(pos!=null)f.setSelectionRange(pos,pos);}catch(_){}}
+}
+function _lkReload(){const day=S.lkDay||todayStr();_lkLoad(true,day);}
+function _lkView(v){S.lkView=LK_VIEWS.includes(v)?v:'board';_pushNav();renderLockers();}
+function _lkSetDay(v){S.lkDay=/^\d{4}-\d{2}-\d{2}$/.test(String(v||''))?v:todayStr();renderLockers();}
+function _lkWho(r){const e=r.booking_id&&_qGet(r.booking_id);return`<b>${esc(r.name||'')}</b>${e?` <span class="lk-muted">#${esc(String(e.queueNum??''))}${e.status==='waitlist'?' · '+esc(t('lkWaitlistMark')):''}</span>`:r.booking_id?'':` <span class="lk-muted">${esc(t('lkWalkup'))}</span>`}`;}
+function _lkBoardHtml(day){
+  const units=(_lkState().lockers||[]).filter(l=>l.status!=='retired');
+  if(!units.length)return _emptyState(t('lkNone'));
+  const rows=_lkRows(day),live=rows.filter(r=>_lkLive(r)&&r.locker_id),waiting=rows.filter(r=>r.status==='reserved'&&!r.locker_id);
+  const over=live.filter(_lkOverdue).length,free=units.filter(l=>l.status==='available'&&!live.some(r=>r.locker_id===l.id)).length;
+  const stat=(n,k,cls)=>`<div class="lk-stat${cls?' '+cls:''}"><b>${n}</b><span>${esc(t(k))}</span></div>`;
+  const tile=l=>{
+    const hs=live.filter(r=>r.locker_id===l.id),od=hs.some(_lkOverdue),out=l.status!=='available';
+    const cls=out?'lk-t-out':od?'lk-t-over':hs.length?'lk-t-use':'lk-t-free';
+    const sub=out?t('lkOutSvc'):hs.length?hs.map(r=>`${r.name||''} · ${_lkPeriodTxt(r.period)}`).join(' / '):t('lkFree');
+    return`<button type="button" class="lk-tile ${cls}" data-on-click="${_on("_lkSheetOpen",l.code,day)}"><span class="lk-t-code">${esc(l.code)}</span><span class="lk-t-sub">${esc(sub)}</span>${od?`<span class="lk-t-flag">${esc(t('lkOverdue'))}</span>`:''}</button>`;};
+  return`<div class="lk-stats">${stat(free,'lkFree')}${stat(live.length,'lkInUse')}${stat(waiting.length,'lkWaiting',waiting.length?'lk-st-warn':'')}${stat(over,'lkOverdue',over?'lk-st-bad':'')}</div>
+    <div class="lk-grid">${units.map(tile).join('')}</div>`;
+}
+function _lkResIn(r,k){return k==='open'?_lkLive(r):k==='waiting'?(r.status==='reserved'&&!r.locker_id):k==='in_use'?(r.status==='in_use'):r.status===k;}
+function _lkResSet(k){S._lkResF=k;renderLockers();}
+function _lkResHtml(day){
+  const W=S._lkResF||'open',rows=_lkRows(day);
+  const pill=(k,l)=>`<button type="button" class="filter-pill${W===k?' active':''}" aria-pressed="${W===k}" data-on-click="${_on("_lkResSet",k)}">${t(l)} (${rows.filter(r=>_lkResIn(r,k)).length})</button>`;
+  const list=rows.filter(r=>_lkResIn(r,W)).sort((a,b)=>(a.locker_id?1:0)-(b.locker_id?1:0)||String(a.created_at).localeCompare(String(b.created_at)));
+  return`<div class="filter-row lk-res-f">${pill('open','lkOpenF')}${pill('waiting','lkWaiting')}${pill('in_use','lkInUse')}${pill('returned','lkReturned')}${pill('cancelled','lkCancelled')}</div>
+    ${list.length?`<div class="lk-res">${list.map(r=>_lkResRow(r,day)).join('')}</div>`:_emptyState(t('lkNoneHere'))}`;
+}
+function _lkResRow(r,day){
+  const code=_lkCodeOf(r),od=_lkOverdue(r),giving=S._lkGiveRow===r.id;
+  const st=r.status==='cancelled'?t('lkCancelled'):r.status==='returned'?t('lkReturned'):od?t('lkOverdue'):code?t('lkInUse'):t('lkWaiting');
+  const acts=giving?`<input id="lk-give-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="${esc(t('lkNumPh'))}" placeholder="${esc(t('lkNumPh'))}" data-on-keydown="${_on("_lkGiveKey",_EV,_EL)}">
+      <button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkGiveGo")}">${t(code?'lkMove':'lkGive')}</button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkResGive",'')}">${t('cancelBtn')}</button>`
+    :_lkLive(r)?`${code?`<button type="button" class="btn-sm btn-primary" data-on-click="${_on("_lkHandBack",r.id,day)}">${t('lkHandBack')}</button>`:''}
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkResGive",r.id)}">${t(code?'lkMove':'lkGive')}</button>
+      <button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkCancelAsk",r.id,day)}">${t('lkCancel')}</button>`
+    :r.status==='returned'&&r.locker_id?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkUndoBack",r.id,day)}">${t('undoBtn')}</button>`:'';
+  return`<div class="lk-res-row${od?' lk-over':''}">
+    <div class="lk-res-code">${code?esc(code):'—'}</div>
+    <div class="lk-res-who">${_lkWho(r)}<div class="lk-muted"><bdi>${esc(_lkPeriodTxt(r.period))}</bdi> · ${esc(_money(r.price,_NOISO))} · ${esc(t(r.on_bill?'lkOnBill':'lkAtTill'))}</div></div>
+    <div class="lk-res-st">${esc(st)}</div>
+    <div class="lk-res-acts">${acts}</div>
+  </div>`;
+}
+function _lkResGive(id){S._lkGiveRow=id||null;renderLockers();if(id)setTimeout(()=>{const i=document.getElementById('lk-give-in');if(i)i.focus();},40);}
+function _lkGiveKey(ev,el){if(ev.key==='Enter'){ev.preventDefault();_lkGiveGo(el.value);}else if(ev.key==='Escape'){ev.preventDefault();_lkResGive('');}}
+async function _lkGiveGo(v){
+  const id=S._lkGiveRow;if(!id)return;
+  if(v==null){const i=document.getElementById('lk-give-in');v=i?i.value:'';}
+  if(!String(v||'').trim())return;
+  if(await _lkGive(id,v,S.lkDay||todayStr())){S._lkGiveRow=null;renderLockers();}
+}
+async function _lkUndoBack(id,day){
+  if(!await _lkCall('staff_locker_cancel',{p_rental:id,p_reason:'',p_undo:true},day))return;
+  toast(t('lkUndone'));
+}
+function _lkUrl(code){return SITE_URL+'/lockers/'+encodeURIComponent(code);}
+function _lkUnitsHtml(){
+  const units=_lkState().lockers||[],F=S._lkAdd||{pre:'P',from:'',to:''};
+  const add=`<div class="lk-add" role="group" aria-labelledby="lk-add-l"><div class="lk-ci-lbl" id="lk-add-l">${t('lkAddUnits')}</div>
+    <label class="filter-field"><span class="filter-field-lbl">${t('lkPrefix')}</span><input id="lk-add-pre" type="text" maxlength="3" autocapitalize="characters" value="${esc(F.pre)}" class="lk-in-s"></label>
+    <label class="filter-field"><span class="filter-field-lbl">${t('lkFrom')}</span><input id="lk-add-from" type="number" min="1" max="9999" inputmode="numeric" value="${esc(F.from)}" class="lk-in-s"></label>
+    <label class="filter-field"><span class="filter-field-lbl">${t('lkTo')}</span><input id="lk-add-to" type="number" min="1" max="9999" inputmode="numeric" value="${esc(F.to)}" class="lk-in-s"></label>
+    <button type="button" class="btn-primary btn-sm" data-on-click="${_on("_lkAddUnits")}">${t('lkAddGo')}</button></div>`;
+  const row=l=>`<div class="lk-res-row${l.status==='retired'?' lk-ret':''}">
+    <div class="lk-res-code">${esc(l.code)}</div>
+    <div class="lk-res-who">${esc(t(l.status==='available'?'lkInSvc':l.status==='out'?'lkOutSvc':'lkRetired'))}<div class="lk-muted lk-url"><bdi>${esc(_lkUrl(l.code))}</bdi></div></div>
+    <div class="lk-res-acts">
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkCopy",l.code)}">${t('lkCopyLink')}</button>
+      <button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkQr",l.code)}">${t('lkQr')}</button>
+      ${l.status==='available'?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkUnitSet",l.id,'out')}">${t('lkTakeOut')}</button>`:l.status==='out'?`<button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkUnitSet",l.id,'available')}">${t('lkBackInSvc')}</button>`:''}
+      ${l.status!=='retired'?`<button type="button" class="btn-sm btn-muted" data-on-click="${_on("_lkUnitSet",l.id,'retired')}">${t('lkRetire')}</button>`:''}
+    </div></div>`;
+  const live=units.filter(l=>l.status!=='retired'),ret=units.filter(l=>l.status==='retired');
+  return`${add}
+    ${live.length?`<div class="lk-units-h"><span>${esc(t('lkUnitsCount').replace('{0}',String(live.length)))}</span><button type="button" class="btn-sm btn-secondary" data-on-click="${_on("_lkQrAll")}">${t('lkAllQr')}</button></div><div class="lk-res">${live.map(row).join('')}</div>`:_emptyState(t('lkNone'))}
+    ${ret.length?`<details class="lk-ret-d"><summary>${t('lkRetired')} (${ret.length})</summary><div class="lk-res">${ret.map(row).join('')}</div></details>`:''}`;
+}
+async function _lkAddUnits(){
+  if(_roNow()){_roRefusal();return;}
+  const val=id=>String((document.getElementById(id)||{}).value||'');
+  const pre=val('lk-add-pre').toUpperCase().replace(/[^A-Z]/g,'').slice(0,3),a=parseInt(val('lk-add-from'),10),b=parseInt(val('lk-add-to')||val('lk-add-from'),10);
+  S._lkAdd={pre,from:isFinite(a)?String(a):'',to:isFinite(b)?String(b):''};
+  if(!pre||!(a>=1)||!(b>=a)||b>9999||b-a>199){toast(t('lkAddBad'),'error');renderLockers();return;}
+  const have=new Set((_lkState().lockers||[]).filter(l=>l.status!=='retired').map(l=>l.code)),rows=[];
+  for(let i=a;i<=b;i++){const c=pre+i;if(!have.has(c))rows.push({code:c});}
+  if(!rows.length){toast(t('lkAddNone'));renderLockers();return;}
+  if(await _wr(sb.from('lockers').insert(rows),'add lockers'))return;
+  toast(t('lkUnitsAdded').replace('{0}',String(rows.length)));
+  logAction(`${t('lkAddUnits')}: ${rows[0].code}${rows.length>1?'–'+rows[rows.length-1].code:''}`,{k:'locker',e:'locker',id:rows[0].code});
+  S._lkAdd={pre,from:'',to:''};
+  await _lkLoad(true,S.lkDay||todayStr());
+}
+function _lkUnitSet(id,st){
+  const l=_lkById(id);if(!l)return;
+  const go=async()=>{
+    if(_roNow()){_roRefusal();return;}
+    if(await _wr(sb.from('lockers').update({status:st}).eq('id',id),'locker status'))return;
+    logAction(`${l.code}: ${t(st==='available'?'lkInSvc':st==='out'?'lkOutSvc':'lkRetired')}`,{k:'locker',e:'locker',id});
+    await _lkLoad(true,S.lkDay||todayStr());
+  };
+  if(st==='retired')confirmDialog({title:t('lkRetireQ').replace('{0}',l.code),body:'',confirmLabel:t('lkRetire'),confirmClass:'btn-red',onConfirm:go});else go();
+}
+async function _lkCopy(code){const u=_lkUrl(code);try{await navigator.clipboard.writeText(u);toast(t('lkLinkCopied'),'success');}catch(e){toast(u,'info');}}
+// A label to print: the code its tag holds, as a QR, with the number under it.
+function _lkLabelSvg(code,W){return`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${W+Math.round(W*0.16)}" viewBox="0 0 ${W} ${W+Math.round(W*0.16)}"><rect width="100%" height="100%" fill="#fff"/>${QR.svg(_lkUrl(code),{size:W,margin:4,logo:false,pad:Math.round(W/20),label:code})}<text x="${W/2}" y="${W+Math.round(W*0.11)}" text-anchor="middle" font-family="Arial, sans-serif" font-weight="700" font-size="${Math.round(W*0.11)}" fill="#0b2018">${esc(code)}</text></svg>`;}
+function _lkDl(svg,name){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);}
+async function _lkQr(code){
+  await _loadQrcode();if(!window.qrcode){toast(t('errSomethingWrong'),'error');return;}
+  _lkDl(_lkLabelSvg(code,512),`locker-${code}.svg`);
+}
+// Every unit's label on one sheet, four to a row.
+async function _lkQrAll(){
+  await _loadQrcode();if(!window.qrcode){toast(t('errSomethingWrong'),'error');return;}
+  const units=(_lkState().lockers||[]).filter(l=>l.status!=='retired');if(!units.length)return;
+  const W=256,H=W+Math.round(W*0.16),G=24,cols=4,n=Math.ceil(units.length/cols);
+  const cells=units.map((l,i)=>`<g transform="translate(${(i%cols)*(W+G)},${Math.floor(i/cols)*(H+G)})">${_lkLabelSvg(l.code,W)}</g>`).join('');
+  const w=cols*(W+G)-G,h=n*(H+G)-G;
+  _lkDl(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><rect width="100%" height="100%" fill="#fff"/>${cells}</svg>`,'locker-labels.svg');
+}
+// The history: the last sixty days of rentals, newest first.
+async function _lkHistLoad(force){
+  const H=S._lkH||(S._lkH={rows:null,at:0,busy:false,err:false});
+  if(H.busy||(!force&&H.at&&Date.now()-H.at<30000))return;
+  H.busy=true;
+  let r;try{r=await sb.from('locker_rentals').select(LK_COLS).gte('day',_ksaYmd(Date.now()-60*864e5)).order('day',{ascending:false}).order('created_at',{ascending:false}).limit(1000);}catch(e){r={error:e};}
+  H.busy=false;H.at=Date.now();
+  if(r.error){H.err=true;if(_lkGone(r.error))_lkState().gone=true;}else{H.err=false;H.rows=r.data||[];}
+  if(!_lkState().lockers)await _lkLoad(false);
+  if(S.view==='staff'&&S.staffTab==='lockers'&&S.lkView==='history')renderLockers();
+}
+function _lkHistQ(v){S._lkHq=String(v||'');const b=document.getElementById('lk-hist');if(b)b.innerHTML=_lkHistList();}
+function _lkHistSet(k,v){S['_lkH'+k]=v;renderLockers();}
+function _lkHistList(){
+  const H=S._lkH,q=(S._lkHq||'').trim().toLowerCase(),st=S._lkHst||'',pd=S._lkHpd||'';
+  const list=((H&&H.rows)||[]).filter(r=>(!st||r.status===st)&&(!pd||r.period===pd)&&(!q||String(r.name||'').toLowerCase().includes(q)||_lkCodeOf(r).toLowerCase().includes(q)));
+  if(!list.length)return _emptyState(t('lkHistEmpty'));
+  const stTxt=r=>t(r.status==='cancelled'?'lkCancelled':r.status==='returned'?'lkReturned':r.status==='in_use'?'lkInUse':'lkWaiting');
+  return`<div class="lk-res">${list.slice(0,300).map(r=>`<div class="lk-res-row">
+    <div class="lk-res-code">${esc(_lkCodeOf(r)||'—')}</div>
+    <div class="lk-res-who">${_lkWho(r)}<div class="lk-muted">${esc(shortDate(String(r.day)))} · <bdi>${esc(_lkPeriodTxt(r.period))}</bdi> · ${esc(_money(r.price,_NOISO))} · ${esc(t(r.on_bill?'lkOnBill':'lkAtTill'))}</div></div>
+    <div class="lk-res-st">${esc(stTxt(r))}<div class="lk-muted">${esc(r.returned_by||r.cancelled_by||r.assigned_by||r.created_by||'')}</div></div>
+  </div>`).join('')}</div>`;
+}
+function _lkHistHtml(){
+  const H=S._lkH;
+  if(!H||!H.rows)return H&&H.err?_loadErr(t('errConnection'),_on("_lkHistLoad",true)):skeletonList();
+  const opt=(v,l,on)=>`<option value="${esc(v)}"${on?' selected':''}>${esc(l)}</option>`;
+  const st=S._lkHst||'',pd=S._lkHpd||'';
+  const main=_fField(t('colStatus'),`<select aria-label="${esc(t('colStatus'))}" data-on-change="${_on("_lkHistSet","st",_P("value"))}">${opt('',t('filterAll'),!st)}${[['in_use','lkInUse'],['returned','lkReturned'],['reserved','lkWaiting'],['cancelled','lkCancelled']].map(([v,k])=>opt(v,t(k),st===v)).join('')}</select>`)
+    +_fField(t('lkPeriod'),`<select aria-label="${esc(t('lkPeriod'))}" data-on-change="${_on("_lkHistSet","pd",_P("value"))}">${opt('',t('filterAll'),!pd)}${['early','late','both','pm'].map(p=>opt(p,_lkPeriodTxt(p),pd===p)).join('')}</select>`);
+  return`<div class="filter-bar"><div class="filter-row">
+      <div class="${_srchCls('lkh',S._lkHq)}" data-srch="lkh">${_artIcon('search',13)}
+        <input id="lk-hq" class="search-input" aria-label="${esc(t('lkSearch'))}" placeholder="${esc(t('lkSearch'))}" value="${esc(S._lkHq||'')}" data-on-input="${_on("_lkHistQ",_P("value"))}">
+        ${_srchBtn()}
+      </div>
+      ${_fPanel('lkh',main,'')}
+    </div></div>
+    <div id="lk-hist">${_lkHistList()}</div>`;
+}
+// The session form's switch: does this ride offer lockers (a JCC ride or a Petromin night).
+function _lkSessSwitch(which,ok){
+  if(!ok)return'';
+  const on=!!S[which==='edit'?'editSessLockers':'newSessLockers'],id=which==='edit'?'es-lockers':'ns-lockers';
+  return`<div class="form-group ss-mt18 lk-sess"><label for="${id}" class="lk-sess-l"><input type="checkbox" id="${id}"${on?' checked':''} data-on-change="${_on("_lkSessSet",which,_P("checked"))}"> <span>${t('lkSessOffer')}</span></label></div>`;
+}
+function _lkSessSet(which,v){S[which==='edit'?'editSessLockers':'newSessLockers']=!!v;}
 // More of the record on Stats (the owner, 2026-11-09, "add more stats"): rides by month over the last twelve months,
 // rides by bike type, sessions by event (bike-free ones too: a pool session counts there, never as a ride) and the
 // badges earned, which opens Badges. Counted in nights, as Your rides is. Each list shows only what was ridden.
@@ -20448,6 +21071,7 @@ function startEditSession(id){
     S.editSessTypeSizes={Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()};
   }
   S.editSessAddons=(()=>{try{return sess.addons?(Array.isArray(sess.addons)?sess.addons:JSON.parse(sess.addons)):[];}catch(_){return[];}})();
+  S.editSessLockers=sess.lockers===true;
   renderSessions();
   setTimeout(()=>document.getElementById('sess-edit-form')?.scrollIntoView({behavior:_sb(),block:'start'}),80);
 }
@@ -20562,7 +21186,7 @@ function addonLineItems(arr){
     // the price stored on the line (what it was sold at) first, else today's inventory price (older rows)
     const sold=(a&&typeof a==='object'&&typeof a.p==='number'&&isFinite(a.p))?a.p:null;
     const price=sold!=null?sold:it.price!=null?Number(it.price):0;
-    return{id,qty,name:it.name||id,brand:it.brand||'',photo:it.photo||'',price,lineTotal:Math.round(price*qty*100)/100};
+    return{id,qty,name:it.name||(id===LK_LINE?t('lkTitle'):id),brand:it.brand||'',photo:it.photo||'',price,lineTotal:Math.round(price*qty*100)/100};
   }).filter(a=>a.id);
 }
 // Total SAR cost of a set of add-ons
@@ -20590,7 +21214,7 @@ function addonSalesFromGroups(groups){
 // Adjust inventory stock for a set of add-on ids by delta (-1 when a booking consumes them, +1 on cancel/no-show). Clamped at 0; tolerant of a missing qty column.
 async function _addonStock(ids,delta){
   if(!ids||!ids.length||!sb)return;
-  await Promise.all((ids||[]).map(id=>_invApplyDelta(id,delta)));
+  await Promise.all((ids||[]).filter(id=>id!==LK_LINE).map(id=>_invApplyDelta(id,delta))); // the locker line is no stock
 }
 // ── One stock movement, applied as a DELTA rather than an absolute quantity ──────────────
 // The write used to send "what this device last saw, plus the movement", which threw away
@@ -20668,7 +21292,7 @@ async function _addonStockBatch(lines,sign){
 }
 // Qty-aware stock adjustment for a booking's add-ons [{id,qty}] (sign -1 consume, +1 restock)
 async function _addonStockQ(arr,sign){
-  const norm=(arr||[]).map(a=>(a&&typeof a==='object')?{id:a.id,qty:Math.max(1,Number(a.qty)||1)}:{id:a,qty:1}).filter(a=>a.id);
+  const norm=(arr||[]).map(a=>(a&&typeof a==='object')?{id:a.id,qty:Math.max(1,Number(a.qty)||1)}:{id:a,qty:1}).filter(a=>a.id&&a.id!==LK_LINE); // the locker line is no stock
   if(!norm.length||!sb)return;
   if(_asCustomer()){
     // The customer path applies the change locally first, because the RPC answers only true
@@ -21130,7 +21754,7 @@ function _nsFillSync(){const el=document.getElementById('ns-fill');if(el)el.text
 function _nsToggleDay(i){const d=new Set(S.newSessDays||[]);if(d.has(i))d.delete(i);else d.add(i);S.newSessDays=[...d].sort((a,b)=>a-b);renderSessions();}
 // A template is the whole form but its date and repeat, saved by name and shared by every
 // device (staff_options session_templates). Tapping one fills the form.
-const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender'];
+const NS_TPL_KEYS=['newSessEvent','newSessRoute','newSessTitle','newSessSpots','newSessStartTime','newSessEndTime','newSessCollect','newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds','newSessAddons','newSessWlMode','newSessWlVal','newSessMapUrl','newSessBfSel','newSessBfName','newSessBfUrl','newSessDays','newSessDesc','newSessPrice','newSessOpenAll','newSessKm','newSessGender','newSessLockers'];
 // What a template that predates a key (or never had it) leaves behind: these are cleared, not kept
 // from whatever form was open before, so a 50 SAR members-only event does not become free and open,
 // and a pool session from an older template is mixed, not men or women only as the last form was (2026-10-27).
@@ -21523,6 +22147,7 @@ function _nsCopy(s,T){
   {const _sp=s.breakfast_name&&(S.breakfastSpots||[]).find(x=>String(x.name||'').trim().toLowerCase()===String(s.breakfast_name).trim().toLowerCase());
   T.newSessBfSel=_sp?_sp.id:(s.breakfast_name?'__new':'');}
   try{const ad=typeof s.addons==='string'?JSON.parse(s.addons||'[]'):(s.addons||[]);T.newSessAddons=Array.isArray(ad)?ad.slice():[];}catch(e){T.newSessAddons=[];}
+  T.newSessLockers=s.lockers===true;
   if(slots._wl&&typeof slots._wl==='object'){T.newSessWlMode=slots._wl.m==='pct'?'pct':'count';T.newSessWlVal=slots._wl.v!=null?String(slots._wl.v):'';}
   else{T.newSessWlMode='count';T.newSessWlVal='';}
   const m=String((slots._time)||'09:00 - 11:00').match(/(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})/);
@@ -21561,7 +22186,7 @@ function cloneSession(id){
 // used to start as "gather 21:00, start 23:00". Not typed = still what the form opened with or what the last pick put there. The
 // bikes go as one: their mode and counts mean nothing apart. A template's form, or a clone's, has been filled already.
 const NS_FILL_BIKES=['newSessMode','newSessTotal','newSessTypeSizes','newSessAssignedIds'];
-function _nsFillBlank(){return{newSessStartTime:'21:00',newSessEndTime:'23:00',newSessSpots:'',newSessMapUrl:'',newSessBfName:'',newSessBfUrl:'',newSessBfSel:'',newSessRoute:'',newSessGender:'',newSessCollect:'',newSessWlMode:'count',newSessWlVal:'',newSessAddons:[],
+function _nsFillBlank(){return{newSessLockers:true,newSessStartTime:'21:00',newSessEndTime:'23:00',newSessSpots:'',newSessMapUrl:'',newSessBfName:'',newSessBfUrl:'',newSessBfSel:'',newSessRoute:'',newSessGender:'',newSessCollect:'',newSessWlMode:'count',newSessWlVal:'',newSessAddons:[],
   newSessMode:'counts',newSessTotal:S._nsTotal0,newSessTypeSizes:{Road:_emptySizes(),Hybrid:_emptySizes(),Mountain:_emptySizes(),Kids:_emptySizes()},newSessAssignedIds:[]};}
 function _nsFill(){
   if(S._nsTplId)return;
@@ -22349,7 +22974,7 @@ async function _n6rMoveDo(id,iso){
 
 // ── SS16 the new-session form opens clean every way in, then takes what it can from the last ride of its kind ──
 function _n6rNsOpen(date){
-  _n6sFormReset();Object.assign(S,{showAddSession:true,editSessionId:null,_nsTplId:null,_vsf:null,newSessEvent:'jcc',newSessDate:date||'',newSessRepeat:'1',newSessDays:[],
+  _n6sFormReset();Object.assign(S,{showAddSession:true,editSessionId:null,_nsTplId:null,_vsf:null,newSessEvent:'jcc',newSessLockers:true,newSessDate:date||'',newSessRepeat:'1',newSessDays:[],
     newSessTitle:'',newSessDesc:'',newSessPrice:'',newSessOpenAll:true,newSessReveal:'',newSessKm:{},newSessInv:'',newSessLocation:'',_nsAuto:null,_nsFilledFrom:null},_nsFillBlank());
   _nsFill();renderSessions();
 }
@@ -22797,6 +23422,7 @@ function renderSessions(){
           <div class="ss-mt6">${_sessAddonGroups(items,S.newSessAddons,'_toggleNewSessAddon')}</div>
         </div>`;
       })()}
+      ${_lkSessSwitch('new',S.newSessEvent==='jcc'||S.newSessEvent==='petromin')}
       <div class="form-group ss-mt18" id="vsf-host"></div>
       <div class="ss-form-acts">
         <button class="btn-primary" data-on-click="${_on("addSession")}">${t('createSession')}</button>
@@ -22971,6 +23597,7 @@ function renderSessions(){
           <div class="ss-mt6">${_sessAddonGroups(items,S.editSessAddons,'_toggleEditSessAddon')}</div>
         </div>`;
       })()}
+      ${_lkSessSwitch('edit',!_isFreeRide(editSess)&&['jcc','petromin'].includes(_rideKind(editSess)))}
       <div class="form-group ss-mt18" id="vsf-host"></div>
       ${_n6sFollowHtml(editSess)}
       <div class="ss-form-acts">
@@ -23647,6 +24274,7 @@ async function _saveSessionEdit(){
     // left the ride half saved (new places, the old breakfast spot) with an error bar for each, and sent every other desk a row
     // event for each. Offered add-ons go always, so removals stick. What is said about a change is said once it has landed.
     const _patch={day:newDay,session_date:newDate,capacity:total,status:newStatus,bike_slots:JSON.stringify(slots),addons:JSON.stringify(S.editSessAddons||[])},_after=[];
+    if(!!S.editSessLockers!==(sess.lockers===true))_patch.lockers=!!S.editSessLockers; // Lockers offered (2026-11-09), sent only when it changed
     // The date's own words (an event's description; a line in any other date's Details), as the box says them
     {const _d=String(document.getElementById('es-desc')?.value??S.editSessDesc??'').trim().slice(0,2000)||null;
     if(_d!==((sess.description||'').trim()||null))_patch.description=_d;}
@@ -23871,6 +24499,7 @@ async function _addSession(){
   // without paid_ride came back complimentary). Every column exists in production.
   const extra={};
   if((S.newSessAddons||[]).length)extra.addons=JSON.stringify(S.newSessAddons);
+  if(S.newSessLockers&&(S.newSessEvent==='jcc'||S.newSessEvent==='petromin'))extra.lockers=true; // Lockers offered (2026-11-09)
   if(S._nsTplId&&_nsTpls().some(x=>x.id===S._nsTplId))extra.template_id=S._nsTplId; // made from a template: its later edits reach this ride
   if(S.newSessRoute&&_routes().some(r=>r.slug===S.newSessRoute))extra.route_slug=S.newSessRoute; // the route the ride follows, any kind (20260928170000)
   if(isCommSess){
@@ -32688,12 +33317,12 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','sessions','dashboard','cashier','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',sessions:'tabSessions',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','sessions','lockers','dashboard','cashier','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08)
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
 // sections an edit list names, so an account with a list (the Owner's is empty) could open its
@@ -33315,6 +33944,8 @@ const BIZ_CARDS=[
   ['fees','n6qCardFees','n6qCardFeesSub',[['late_fee_on','n6qFeeOnL','bool'],['late_fee_hours','n6qFeeHoursL','int',[1,72]],['late_fee_cancel','n6qFeeCancelL','int',[0,1000]],['late_fee_noshow','n6qFeeNoshowL','int',[0,1000]]]],
   // Referrals (the owner, 2026-11-08; read by the database, 20261108160000): on unless an admin turns them off, how long a
   // free ride lasts and how many one account can earn in a year.
+  // Lockers (the owner, 2026-11-09; read by the database, _lk_price): one period, both periods.
+  ['lockers','lkBizCard','lkBizCardSub',[['lk_price_one','lkBizOne','int',[1,1000]],['lk_price_both','lkBizBoth','int',[1,1000]]]],
   ['referral','refBizCard','refBizCardSub',[['ref_on','refBizOn','boolOn'],['ref_pct','refBizPct','int',[5,100]],['ref_days','refBizDays','int',[7,365]],['ref_cap','refBizCap','int',[1,100]]]],
 ];
 const DEP_TYPES=['Road Carbon','Road','Hybrid','Mountain','Kids'];
@@ -40808,6 +41439,10 @@ function _onScanPayload(raw){
   // A bike's QR sticker holds the same URL as its NFC tag - its page, micromobility.sa/bikes/42
   // (the QR its edit form gives), or an older sticker's /b/42 or /?bike=042: into the open
   // check-in if there is one, else the return of the rider who has it, else the bike's card.
+  // A locker's tag or QR (micromobility.sa/lockers/P7, or /?locker=P7): into the open check-in, else the locker's sheet (2026-11-09).
+  const lm=_scanLockerUrl(txt);
+  if(lm&&listed){say(t('scanBatchOnlyTickets'),'#ffb347');return;}
+  if(lm){say(t('lkScanFound').replace('{0}',lm[1].toUpperCase()));closeScanModal(false);_lockerArrived(lm[1]).catch(()=>{});return;}
   const bm=_scanBikeUrl(txt)||txt.match(/^(\d{1,4})$/); // the URL, or a sticker that holds only the number
   if(bm&&listed){say(t('scanBatchOnlyTickets'),'#ffb347');return;}
   if(bm&&_scanToRider&&S._riderModalId===_scanToRider){const id=_scanToRider,i=document.getElementById('rider-bike-in');_scanToRider=null;closeScanModal(false);if(i)i.value=bm[1];_riderBikeChange(id);return;} // the Petromin pop-up's Change bike
@@ -42251,6 +42886,7 @@ function renderCheckinModal(){
       ${_ciNfcReceiptHtml(e)}
       ${_bikeless?'':_ciBikeFieldHtml(e)}
       ${_bikeless?'':`<button type="button" class="bkm-alink" data-on-click="${_on("_on_renderCheckinModal_5",_EV,_EL,e.id)}">${t('assignBikeTitle')}…</button>`}
+      ${_lkCiHtml(e)}
       ${free?'':ownFree?`<div id="ci-money" class="bkm-money0"><span class="own-free">${t('invFree')}</span></div>`:(()=>{
         // every rider as the modal would confirm them: the picked type's price, the picked payment
         const _pend=_ciAsConfirmed(e);
@@ -60517,14 +61153,14 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','cashier','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','sessions','lockers','cashier','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
 // within 0.7 s (no tab, or Safari has frozen it) and the boot carries on as before. "Open here" reloads
 // with a mark that skips the hand-off once.
 async function _bikeHandoff(){
-  let code='';try{code=String(new URL(location.href).searchParams.get('bike')||'').trim();}catch(_){}
+  let code='',kind='bike';try{const sp=new URL(location.href).searchParams;code=String(sp.get('bike')||'').trim();if(!code&&sp.has('locker')){code=String(sp.get('locker')||'').trim();kind='locker';}}catch(_){} // a locker's tag goes the same way (2026-11-09)
   if(!/^[0-9A-Za-z-]{1,40}$/.test(code)||typeof BroadcastChannel==='undefined')return false;
   try{if(localStorage.getItem('cq_staff')!=='1')return false;if(sessionStorage.getItem('cq_bike_here')==='1'){sessionStorage.removeItem('cq_bike_here');return false;}}catch(_){return false;}
   let ch;try{ch=new BroadcastChannel('mm-staff');}catch(_){return false;}
@@ -60532,20 +61168,20 @@ async function _bikeHandoff(){
   const tab=await new Promise(res=>{const tm=setTimeout(()=>res(null),700);
     ch.onmessage=ev=>{const m=ev&&ev.data;if(m&&m.type==='bike_tap_here'&&m.nonce===nonce){clearTimeout(tm);res(m.tab);}};
     ch.postMessage({type:'bike_tap',nonce});});
-  if(tab)ch.postMessage({type:'bike_tap_go',nonce,tab,code});
+  if(tab)ch.postMessage({type:'bike_tap_go',nonce,tab,code,kind});
   try{ch.close();}catch(_){}
   if(!tab)return false;
-  _readBikeParam();try{sessionStorage.removeItem('cq_pending_bike');}catch(_){}
+  if(kind==='locker'){_readLockerParam();try{sessionStorage.removeItem('cq_pending_locker');}catch(_){}}else{_readBikeParam();try{sessionStorage.removeItem('cq_pending_bike');}catch(_){}}
   const L=_savedLang()||_browserLang()||'en';
   if(L!=='en'&&!_langLoaded(L))await Promise.race([loadLangPack(L).catch(()=>{}),new Promise(r=>setTimeout(r,1500))]);
   S.lang=L;document.documentElement.lang=L;document.documentElement.dir=_isRtl()?'rtl':'ltr';
   if(window.mmLoading)window.mmLoading.hide();
   const d=document.createElement('main');d.id='nfc-sent';d.className='nfc-sent';
-  d.innerHTML=`<div class="nfc-sent-box" role="status"><h1 class="nfc-sent-t">${esc(t('nfcSentTitle'))}</h1><p>${esc(t('nfcSentBody').replace('{0}',code))}</p><button type="button" class="btn-secondary" id="nfc-sent-here" data-on-click="${_on("_bikeHereInstead",code)}">${esc(t('nfcSentHere'))}</button></div>`;
+  d.innerHTML=`<div class="nfc-sent-box" role="status"><h1 class="nfc-sent-t">${esc(t('nfcSentTitle'))}</h1><p>${esc(t('nfcSentBody').replace('{0}',code))}</p><button type="button" class="btn-secondary" id="nfc-sent-here" data-on-click="${_on("_bikeHereInstead",code,kind)}">${esc(t('nfcSentHere'))}</button></div>`;
   document.body.appendChild(d);
   return true;
 }
-function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}catch(_){}location.replace('/?bike='+encodeURIComponent(code));}
+function _bikeHereInstead(code,kind){try{sessionStorage.setItem('cq_bike_here','1');}catch(_){}location.replace('/?'+(kind==='locker'?'locker':'bike')+'='+encodeURIComponent(code));}
 (async()=>{
   S.loggedIn=getSession();
   if(await _bikeHandoff())return; // the bike went to the staff tab already open (D15)
@@ -60655,9 +61291,10 @@ function _bikeHereInstead(code){try{sessionStorage.setItem('cq_bike_here','1');}
   // view draws, is parked for goStaff() to consume once a staff session is confirmed, and a
   // device without one lands on the PIN screen with no bike on it anywhere.
   const _bikeCode=_readBikeParam();
+  const _lockerCode=_readLockerParam(); // /?locker=P7: a locker's tag, the same way (2026-11-09)
   const _afxTok=_readAppFixParam(); // /?appfix= or /?learnfix=: an applicant asked to change their application or sign-up
   const _wlcTok=_readClaimParam(); // /?claim=: a freed waitlist place offered to this rider (2026-10-09)
-  const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||_isStaffHost()||_pathStaff;
+  const _isStaffUrl=new URLSearchParams(window.location.search).has('staff')||_staffEntry||!!_bikeCode||!!_lockerCode||_isStaffHost()||_pathStaff;
   if(!_isStaffUrl)_readEventLink(); // ?ev=&session= from micromobility.sa/experiences
   if(!_isStaffUrl&&_pathNav&&_pathNav.signup)S.authMode='signup'; // /signup opens Create account
   // The sign-in page may already be drawn by now; a mode the address or a link asked for redraws it.
@@ -61189,6 +61826,7 @@ function _rtMergeRow(payload){
 }
 function _onRt(payload){
   if(!payload)return _rtApply();
+  if(payload.table==='locker_rentals'||payload.table==='lockers'){if(S.view==='staff')_lkRt();return;} // the evenings shown are read again (2026-11-09)
   // A bike's status is drawn on a customer's device only in My Rides (their own bike at the
   // venue); anywhere else a check-in or a return at the desk changes nothing on their screen.
   // (A staff device keeps every event, whichever view it happens to show.)
@@ -61221,7 +61859,7 @@ function _rtScheduleRetry(){
 // every open customer page reload. A device unlocked for staff rebuilds the channel (goStaff).
 let _rtStaffMode=null;
 function _rtStaffDevice(){try{return localStorage.getItem('cq_staff')==='1';}catch(e){return false;}}
-function _rtTables(staff){return staff?['queue_entries','desk_waitlist','sessions','bikes','inventory','cashier_sales','rider_registrations']:['sessions','bikes'];}
+function _rtTables(staff){return staff?['queue_entries','desk_waitlist','sessions','bikes','inventory','cashier_sales','rider_registrations','locker_rentals','lockers']:['sessions','bikes'];}
 function _rtEnsureMode(){if(_rtStaffMode!==null&&_rtStaffMode!==_rtStaffDevice())setupRealtime();}
 // ── Bookings the moment they are made (the owner, 2026-10-04: "i want the bookings to appear as
 // soon as theyre booked, realtime") ──
@@ -61738,7 +62376,7 @@ function _kbKey(e){
 // G then a letter opens a section (2026-11-06, ST16), on any layout (_kbKey reads an Arabic or Urdu key by its place).
 // The second key must come within a second and a half; a section this account cannot open says so (setStaffTab).
 // The rail's buttons carry the pair as aria-keyshortcuts and in their tooltip, and "?" lists them.
-const N6U_GO={d:'dashboard',b:'queue',s:'sessions',c:'cashier',i:'inventory',w:'workshop',p:'community',r:'badgereq',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
+const N6U_GO={d:'dashboard',b:'queue',s:'sessions',l:'lockers',c:'cashier',i:'inventory',w:'workshop',p:'community',r:'badgereq',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
 let _n6uGAt=0;
 function _n6uChord(k,e){
   if(_n6uGAt&&Date.now()-_n6uGAt<1500){

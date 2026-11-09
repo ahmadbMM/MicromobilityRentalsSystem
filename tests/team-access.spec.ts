@@ -103,13 +103,13 @@ test('the Team page sets PINs and what another account can open and change, neve
   await expect(mine.getByRole('button', { name: 'Save' })).toHaveCount(0);
   // the front desk account: its role's sections only; take Sales off what it can open
   const desk = tab.locator(`.tm-acct[data-acct="${DESK}"]`);
-  await expect(desk.locator('.tm-chip[data-sec^="view:"]')).toHaveText(['Bookings', 'Sales', 'Workshop']);
+  await expect(desk.locator('.tm-chip[data-sec^="view:"]')).toHaveText(['Bookings', 'Lockers', 'Sales', 'Workshop']); // Lockers since 2026-11-09
   await desk.locator('.tm-chip[data-sec="view:cashier"]').click();
-  await expect(desk.locator('.tm-chip[data-sec^="edit:"]')).toHaveText(['Bookings', 'Workshop']);
+  await expect(desk.locator('.tm-chip[data-sec^="edit:"]')).toHaveText(['Bookings', 'Lockers', 'Workshop']);
   await desk.locator('.tm-chip[data-sec="edit:workshop"]').click();
   await desk.getByRole('button', { name: 'Save' }).click();
   await page.locator('#confirm-modal').getByRole('button', { name: 'Save' }).click(); // the confirm that says what changes (2026-10-28)
-  await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'workshop'], p_edit: ['queue'] }]);
+  await expect.poll(() => accessCalls).toEqual([{ p_user: DESK, p_role: 'frontdesk', p_view: ['queue', 'lockers', 'workshop'], p_edit: ['queue', 'lockers'] }]);
 });
 
 test('an account sees only its sections, and a section it may not change is read-only', async ({ page }) => {
@@ -117,7 +117,7 @@ test('an account sees only its sections, and a section it may not change is read
   await page.evaluate(`_accessSet({modules_view:['queue','cashier','community'],modules_edit:['cashier']},'u1')`);
   // the sections the rail offers (on a phone the rail sits behind the menu, so not "visible")
   const offered = () => page.evaluate(`[...document.querySelectorAll('#staff-tab-nav .tab-btn')].filter(b=>b.style.display!=='none').map(b=>b.querySelector('.snav-lbl').textContent.trim())`);
-  await expect.poll(offered).toEqual(['Bookings', 'Sessions', 'Sales', 'People', 'Badge requests', 'Settings']); // a list naming Bookings names Sessions (a view of it until 2026-11-06); Customers and Community are People (2026-11-06), and a list naming People names Badge requests (a part of it until 2026-11-08); Settings is every account's own page (2026-10-02)
+  await expect.poll(offered).toEqual(['Bookings', 'Sessions', 'Lockers', 'Sales', 'People', 'Badge requests', 'Settings']); // a list naming Bookings names Sessions (a view of it until 2026-11-06); Customers and Community are People (2026-11-06), and a list naming People names Badge requests (a part of it until 2026-11-08); Settings is every account's own page (2026-10-02)
   await page.evaluate(`setStaffTab('queue')`);
   await expect(page.locator('#ro-banner')).toHaveText('Read-only mode: no changes allowed');
   const refused = await page.evaluate(`sb.from('queue_entries').update({paid:true}).eq('id','x').select().then(r=>r.error&&r.error.code)`);

@@ -2040,6 +2040,51 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
 - Nothing is drawn until `staff_wallet_balances` / `customer_wallet` answer. `tests/wallet.spec.ts`; the stubs answer them
   `null` (off, quietly) unless a spec gives them rows.
 
+## Lockers (2026-11-09, migration 20261109120000)
+
+The owner: a locker renting system linked to accounts from the staff page, by scanning the locker's NFC or typing its
+number. One set of lockers (P1, P2...) travels between JCC and Petromin; each carries a label with its number, a QR
+and an on-metal NFC chip holding `micromobility.sa/lockers/<code>`. The key stays with staff. Code prefix `lk`,
+tables `lockers` and `locker_rentals`.
+
+- **A locker is rented for an evening's period, never longer.** `early` 18-20 (the Open Sports Day run) and `late`
+  21-23 (the ride), or `both`, on a JCC night; `pm` 19-21 on a Petromin night (`LK_TIMES`, `_lk_slots`: `pm` and `both`
+  take the whole evening). One period costs `lk_price_one` (10 SAR), both `lk_price_both` (15): Settings > Business >
+  Lockers, read by the database (`_lk_price`). A session offers lockers when its `lockers` switch is on (the session
+  form's "Lockers offered", on by default for a JCC ride and a Petromin night; the migration turned it on for the open
+  Sunday/Tuesday rides and Petromin nights) and it is not a free ride (`_lkKind`, `_lk_kind`).
+- **The fee is on the booking's bill as an add-on line the database writes**: `{"id":"locker","qty":1,"p":<fee>}`
+  (`LK_LINE`), by `zy_locker_line` (BEFORE INSERT OR UPDATE on queue_entries, after `queue_entries_addons_price`
+  strips any price a rider's page wrote and before `zz_wallet_follow` reads the amount). It sums the booking's
+  rentals that are `on_bill` and reserved, in use or handed back; a rental that changes touches its booking
+  (`locker_rentals_follow*`). So Due, the wallet, `_mt_core`, the close-out and every report count it with nothing
+  else changed. The page reads the line (`_lkFeeOf`) and never writes it; the stock paths leave it alone.
+  `addonLineItems` names it Locker; a ticket lists it in its own lines (`_lkTkHtml`), not with the add-ons.
+- **Riders** pick a period (and, for a party, how many, at most one per rider) on the review (`_lkReviewHtml`,
+  from `customer_locker_offer`: the kind, the prices, what is left per period). After the booking,
+  `_lkAfterBook` reserves them on the first riders' rows through `customer_locker_reserve` (the rider's own,
+  waiting or waitlisted, not paid, not a Petromin form registration - `rider_registrations.matched_entry_id`),
+  before the Wallet switch so the wallet can pay it too. The ticket says the period and, once staff gave one, the
+  number (`customer_lockers`), with Remove until a number is given (`customer_locker_cancel`).
+- **Capacity**: the units in service less the live rentals (reserved or in use) taking each slot (`_lk_left`).
+  Waitlisted bookings hold a locker too (the owner). Every write locks the evening (`_lk_lock`), so two phones
+  cannot give one locker twice; `staff_locker_assign` refuses a unit taken for an overlapping slot or out of service.
+- **The booking leads** (`queue_entries_lockers`): cancelled, removed or an unpaid no-show frees a reserved locker
+  (the fee comes off); a paid no-show keeps the fee (handed back). A locker in use is never freed by itself: things
+  are inside and the key is with staff, so it shows Overdue past its period until staff tap Hand back.
+- **Staff**: Lockers is a section of its own (`/lockers`, `renderLockers` in the `lockers` part): tonight's board
+  (a tile per unit), `/lockers/reservations`, `/lockers/units` (add P1-Pn, out of service, retire, each tag's link and
+  QR label, all labels on one sheet) and `/lockers/history` (60 days). Any evening can be looked at. The check-in has
+  a Locker line (`_lkCiHtml`): the number typed or a tag tapped gives it, and a booking with none can be given one
+  (on its bill while unpaid, else into the Sales cart). A locker's sheet (`_lkSheetOpen`: a tag, a QR, a tile) says who
+  has it and gives it to a rider waiting for a number, hands it back or moves it. A walk-up (no booking that night)
+  rents from the sheet or the section (`_lkRentOpen`, `staff_locker_walkup`) and pays at the Sales till: the line goes
+  into the cart with the account linked. Front desk, managers, owners and leaders have the section.
+- **Tags**: `/?locker=P7` is read at boot like `?bike=` (`_readLockerParam`, parked until goStaff, `_lockerResume`),
+  goes to an open staff tab over the same channel (`_bikeHandoff` with `kind`), and the scanner reads the QR
+  (`_scanLockerUrl`). The website (mm-platform `proxy.ts`) sends a staff phone's tap to
+  `staff.micromobility.sa/?locker=<code>` and a rider's to `/account`. `tests/lockers.spec.ts`.
+
 ## Sessions is a section of its own (2026-11-06)
 
 The owner: "separate the bookings and sessions pages, make them in separate clickable sections and add more features to

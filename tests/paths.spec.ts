@@ -153,7 +153,7 @@ test.describe('staff', () => {
     // the section's id until 2026-10-03, as a saved tab or an account's section list may still hold it
     await page.evaluate(`setStaffTab('dashboard');setStaffTab('fnb')`);
     expect(await page.evaluate('S.staffTab')).toBe('vendors');
-    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors","sessions"]'); // a list naming Bookings names Sessions too (a view of it until 2026-11-06)
+    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors","sessions","lockers"]'); // a list naming Bookings names Sessions too (a view of it until 2026-11-06), and Lockers (2026-11-09)
   });
 
   test('Analytics: /analytics is the overview, each view is a second segment (2026-10-05)', async ({ page }) => {
