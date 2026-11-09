@@ -12537,6 +12537,34 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-lockers .lk-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:620px;}
 #tab-lockers .lk-t-res{background:rgba(var(--warn-rgb),.08);border-color:rgba(var(--warn-rgb),.55);}
 #tab-lockers .lk-units-h .lk-sh-acts{margin-inline-start:auto;}
+/* Round two (2026-11-09): the rider's show-at-desk card and the terms line; the desk's arrivals, end of night, hand-keys
+   dialog, items left, report and the maintenance history. */
+.lk-own-ev{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:22px;background:var(--s2);}
+.lk-own-h{font-weight:700;color:var(--text);}
+.lk-own-acts{display:flex;gap:6px;flex-wrap:wrap;margin-inline-start:auto;}
+.lk-own-qr{display:flex;flex-direction:column;align-items:center;gap:6px;padding-top:4px;}
+.lk-terms{margin-top:10px;font-size:13px;color:var(--muted);}
+.lk-terms-a{padding:0;border:0;background:none;font:inherit;color:var(--green);font-weight:600;text-decoration:underline;cursor:pointer;}
+.lk-terms-ul{margin:0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;color:var(--text);line-height:1.5;}
+.lk-tk .lk-tk-x+.lk-tk-x{margin-inline-start:6px;}
+.lk-hd-code{flex:none;min-width:40px;font-size:20px;font-weight:700;color:var(--text);}
+.lk-hd-in{width:110px;}
+.lk-co .co-out-h{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.lk-it-img{display:block;max-width:100%;max-height:240px;margin-bottom:8px;border-radius:var(--sf-r-card,10px);object-fit:contain;background:var(--s2);}
+.lk-it-pick{position:relative;cursor:pointer;display:inline-flex;}
+.lk-it-wa{align-self:flex-start;text-decoration:none;}
+#tab-lockers .lk-sweep{display:flex;justify-content:flex-end;margin:-4px 0 10px;}
+#tab-lockers .lk-arr{margin-bottom:16px;}
+#tab-lockers .lk-ev-wrap{flex-basis:100%;padding:4px 0 0 64px;}
+#tab-lockers .lk-ev{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--text);}
+#tab-lockers .lk-rp-wrap{overflow-x:auto;}
+#tab-lockers .lk-rp{width:100%;border-collapse:collapse;font-size:14px;}
+#tab-lockers .lk-rp th,#tab-lockers .lk-rp td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:end;white-space:nowrap;}
+#tab-lockers .lk-rp th[scope=row],#tab-lockers .lk-rp thead th:first-child{text-align:start;}
+#tab-lockers .lk-rp thead th{font-weight:600;color:var(--muted);font-size:12px;}
+#tab-lockers .lk-rp-tot{font-weight:600;background:var(--s2);}
+#tab-lockers .lk-rp-csv{margin-inline-start:auto;}
+@media(max-width:600px){#tab-lockers .lk-ev-wrap{padding-inline-start:0;}}
 #tab-lockers .lk-ret-d summary{cursor:pointer;font-weight:600;color:var(--muted);}
 .lk-sess-l{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;}
 @media(max-width:767px){

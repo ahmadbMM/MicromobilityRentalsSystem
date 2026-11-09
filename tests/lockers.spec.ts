@@ -390,3 +390,160 @@ test.describe('@customer:reserve lockers', () => {
     expect(page.url()).toBe(`https://micromobility.sa/lockers?lang=ar&code=${code}`);
   });
 });
+
+// Round two (the owner, 2026-11-09; migration 20261109233000): the desk's side.
+function writes(page: Page, table: string) {
+  const seen: { method: string; body: unknown; url: string }[] = [];
+  page.on('request', (r) => {
+    if (!r.url().includes(`/rest/v1/${table}`) || r.method() === 'GET' || r.method() === 'OPTIONS') return;
+    let body: unknown = null; try { body = r.postDataJSON(); } catch { /* none */ }
+    seen.push({ method: r.method(), body, url: r.url() });
+  });
+  return seen;
+}
+const RID = '0b6f2a8e-1c3d-4e5f-8a9b-0c1d2e3f4a5b', RID2 = '1c7a3b9f-2d4e-4f6a-9b0c-1d2e3f4a5b6c';
+const pageRentals = [
+  rent(RID, { customer_id: 'c2', name: 'Omar Other', locker_id: 'L2', period: 'early', on_bill: false, created_by: 'page', pay: 'desk' }),
+  rent(RID2, { customer_id: 'c2', name: 'Omar Son', locker_id: 'L1', period: 'early', on_bill: false, created_by: 'page', pay: 'desk' }),
+];
+
+test.describe('@staff:lockers round two', () => {
+  test('a rider\'s show-at-desk QR: the scanner reads it, the dialog lists their lockers, Give all keys, then the till opens with the fees', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { locker_rentals: [rentals[1], ...pageRentals], 'rpc:staff_locker_assign': { ok: true, code: '2' } });
+    expect(await page.evaluate(`JSON.stringify(_scanLockerUrl('https://micromobility.sa/lockers/r/${RID}'))`)).toBe(JSON.stringify(['', 'r:' + RID]));
+    await page.evaluate(`_lockerArrived('r:${RID}')`);
+    const dlg = page.getByRole('dialog', { name: /Hand the keys · Omar Other/ });
+    await expect(dlg.locator('.lk-sh-row')).toHaveCount(3); // the two picked on the page, and his booking's locker waiting for a number
+    await expect(dlg.locator('.lk-hd-in')).toHaveCount(1);
+    await dlg.getByRole('button', { name: 'Give all keys' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(2);
+    expect(seen.filter((c) => c.name === 'staff_locker_assign').map((c) => c.body.p_rental).sort()).toEqual([RID, RID2].sort());
+    await dlg.getByRole('button', { name: 'Close' }).first().click(); // one still waits for a number: the till opens as the dialog closes
+    await page.waitForFunction(`S.staffTab==='cashier'`);
+    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(2);
+    expect(await page.evaluate('S._ctCustId')).toBe('c2');
+  });
+
+  test('a tag param ?lkr= on a staff phone opens the same dialog', async ({ page }) => {
+    await staff(page, { locker_rentals: pageRentals }, `/?lkr=${RID}`);
+    await expect(page.getByRole('dialog', { name: /Hand the keys/ })).toBeVisible();
+    expect(page.url()).not.toContain('lkr=');
+  });
+
+  test('tonight\'s arrivals on the board, and the end of the night frees the never collected', async ({ page }) => {
+    const seen = calls(page);
+    await staff(page, { locker_rentals: [rentals[0], ...pageRentals], 'rpc:staff_locker_sweep': { ok: true, freed: 2, out: ['1'] } });
+    await page.evaluate(`setStaffTab('lockers')`);
+    const sec = page.locator('#tab-lockers');
+    await expect(sec.locator('.lk-arr')).toContainText('Waiting for their key (2)');
+    await expect(sec.locator('.lk-arr .lk-res-row')).toHaveCount(2);
+    await sec.getByRole('button', { name: 'End of night' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Free the lockers never collected?' });
+    await expect(dlg).toContainText('2 reserved and never collected will be freed');
+    await dlg.getByRole('button', { name: 'End of night' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_sweep').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_locker_sweep')!.body).toEqual({ p_day: TODAY });
+    await expect(page.locator('.toast', { hasText: '2 lockers freed' })).toBeVisible();
+    // the close-out names them too
+    expect(await page.evaluate(`_lkCoHtml('s1')`)).toContain('End of night');
+  });
+
+  test('the report: per evening, rentals, lockers used, how full, the money and the not collected; a CSV', async ({ page }) => {
+    const past = [
+      rent('P1', { day: ksaDay(-1), status: 'returned', locker_id: 'L1', price: 10 }),
+      rent('P2', { day: ksaDay(-1), status: 'returned', locker_id: 'L2', price: 15, period: 'both' }),
+      rent('P3', { day: ksaDay(-1), status: 'cancelled', cancel_reason: 'not collected', price: 10 }),
+    ];
+    await staff(page, { locker_rentals: past });
+    await page.evaluate(`setStaffTab('lockers');_lkView('report')`);
+    await expect.poll(() => new URL(page.url()).pathname).toBe('/lockers/report');
+    const row = page.locator('#tab-lockers .lk-rp tbody tr').nth(1);
+    await expect(row.locator('td').nth(0)).toHaveText('2'); // rentals (the cancelled one not counted)
+    await expect(row.locator('td').nth(1)).toHaveText('2'); // lockers used
+    await expect(row.locator('td').nth(2)).toHaveText('67%'); // 2 of 3 units
+    await expect(row.locator('td').nth(3)).toContainText('25');
+    await expect(row.locator('td').nth(4)).toHaveText('1'); // not collected
+    await expect(page.getByRole('button', { name: 'Export CSV' })).toBeEnabled();
+  });
+
+  test('items left behind: a note, the state, kept until 14 days after; WhatsApp to the rider; saved to locker_items', async ({ page }) => {
+    const w = writes(page, 'locker_items');
+    await staff(page, { locker_items: [] });
+    await page.evaluate(`setStaffTab('lockers');_lkView('reservations')`);
+    const row = page.locator('#tab-lockers .lk-res-row', { hasText: 'Rana Rider' });
+    await row.getByRole('button', { name: 'Items left' }).click();
+    const dlg = page.getByRole('dialog', { name: /Items left · Locker 1/ });
+    await expect(dlg).toContainText(`Kept until`);
+    await expect(dlg.locator('.lk-it-wa')).toHaveAttribute('href', /^https:\/\/wa\.me\/966500000021\?text=MicroMobility/);
+    await dlg.locator('#lk-it-note').fill('Blue backpack');
+    await dlg.getByRole('button', { name: 'Collected' }).click();
+    await dlg.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => w.length).toBe(1);
+    expect(w[0].body).toEqual({ rental_id: 'R1', note: 'Blue backpack', state: 'collected' }); // no photo sent when none was taken
+  });
+
+  test('taking a locker out of service asks why; its history lists the log', async ({ page }) => {
+    const w = writes(page, 'lockers');
+    await staff(page, { locker_events: [{ at: '2026-11-09T18:00:00Z', by_name: 'Spec Staff', kind: 'out', reason: 'Broken lock' }] });
+    await page.evaluate(`setStaffTab('lockers');_lkView('units')`);
+    const row = page.locator('#tab-lockers .lk-res-row').filter({ has: page.locator('.lk-res-code', { hasText: /^2$/ }) });
+    await row.getByRole('button', { name: 'Take out of service' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Why is locker 2 out of service?' });
+    await dlg.getByRole('button', { name: 'Take out of service' }).click();
+    await expect(page.locator('.toast', { hasText: 'Pick or type a reason' })).toBeVisible();
+    await dlg.getByRole('button', { name: 'Broken lock' }).click();
+    await dlg.getByRole('button', { name: 'Take out of service' }).click();
+    await expect.poll(() => w.length).toBe(1);
+    expect(w[0].body).toEqual({ status: 'out', note: 'Broken lock' });
+    await row.getByRole('button', { name: 'History' }).click();
+    await expect(page.locator('#tab-lockers .lk-ev')).toContainText('Broken lock');
+  });
+});
+
+test.describe('@customer:reserve lockers round two', () => {
+  test('My bookings: a card per evening with the show-at-desk QR; Change opens the lockers page signed in', async ({ page }) => {
+    const code = 'cd56'.repeat(12);
+    const mine = [
+      { id: RID, booking_id: null, day: TODAY, period: 'early', status: 'reserved', price: 10, on_bill: false, pay: 'desk', paid: false, code: '7', name: 'Rana Rider' },
+      { id: RID2, booking_id: null, day: TODAY, period: 'early', status: 'reserved', price: 10, on_bill: false, pay: 'desk', paid: false, code: '8', name: 'Lina Rider' },
+    ];
+    await rider(page, { queue_entries: [], 'rpc:customer_lockers': mine, 'rpc:customer_handoff_create': code });
+    await page.route('https://micromobility.sa/lockers**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>lockers</title>' }));
+    await page.evaluate(`_lkMineLoad(null,true)`);
+    await page.waitForFunction(`_lkMine().length===2`);
+    await page.evaluate(`setCustTab('myrides')`);
+    const ev = page.locator('#tab-myrides .lk-own-ev');
+    await expect(ev).toHaveCount(1);
+    await expect(ev).toContainText('Show this at the desk');
+    await expect(ev.locator('[data-qr]').first()).toHaveAttribute('data-qr', `https://micromobility.sa/lockers/r/${RID}`);
+    await expect(ev.locator('.lk-own-row').nth(1)).toContainText('Lina Rider'); // someone else's locker says whose
+    await expect(ev.locator('.lk-own-row').nth(0)).not.toContainText('Rana Rider');
+    await ev.locator('.lk-own-row').first().getByRole('button', { name: 'Change' }).click();
+    await page.waitForURL('https://micromobility.sa/lockers**');
+    expect(page.url()).toBe(`https://micromobility.sa/lockers?change=${RID}&lang=en&code=${code}`);
+  });
+
+  test('a ride\'s ticket names the rider\'s own locker that evening; the review links the locker terms', async ({ page }) => {
+    const held = bk('q1', 1);
+    await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held], 'rpc:customer_locker_offer': { kind: 'jcc', one: 10, both: 15, left: { total: 6, early: 4, late: 4, both: 4, pm: 0 } },
+      'rpc:locker_board': { day: TODAY, kind: 'jcc', one: 10, both: 15, left: {}, ended: {}, units: [{ code: '7', out: false }], taken: { e: [], l: [] } },
+      'rpc:customer_lockers': [{ id: RID, booking_id: null, day: TODAY, period: 'late', status: 'reserved', price: 10, pay: 'wallet', paid: true, code: '7' }] });
+    await page.evaluate(`_lkMineLoad(null,true)`);
+    await page.waitForFunction(`_lkMine().length===1`);
+    const html = await page.evaluate(`_lkTkHtml([entryFromDB(${JSON.stringify(held)})],_sessGet('s1'),false)`);
+    expect(html).toContain('<bdi>7</bdi>');
+    expect(html).toContain('Paid from your wallet');
+    await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
+    await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
+    const rv = await page.evaluate(`(()=>{S.regLocker='late';return _lkReviewHtml(_sessGet('s1'))})()`);
+    expect(rv).toContain('By reserving you accept the <button type="button" class="lk-terms-a"');
+    // the website's Terms page is not open yet: the locker terms open here, in a pop-up
+    await page.evaluate(`_lkTermsOpen()`);
+    const dlg = page.getByRole('dialog', { name: 'Locker terms' });
+    await expect(dlg).toContainText('kept for 14 days');
+    await expect(dlg).toContainText('Do not put food or open drinks');
+    await dlg.getByRole('button', { name: 'Close' }).last().click();
+    await expect(dlg).toBeHidden();
+  });
+});

@@ -110,7 +110,24 @@ function passState(b) {
 const clean = (s, n) => String(s == null ? "" : s).replace(/\p{Cc}/gu, " ").trim().slice(0, n);
 const idOk = (s) => /^[A-Za-z0-9._-]{1,64}$/.test(String(s || ""));
 
-function passPayload(env, b, group, sess, approvalRide, origin) {
+// The rider's lockers that night (customer_lockers, token-checked, 2026-11-09): on these bookings, or the rider's own
+// with no booking that evening. Read here like the add-ons, never taken from the device; none read, none printed.
+const LOCKER_SPANS = { early: "6 PM - 8 PM", late: "9 PM - 11 PM", both: "6 PM - 11 PM", pm: "7 PM - 9 PM" };
+const _lockerLine = (l) => [l.code ? `Locker ${l.code}` : "Locker", LOCKER_SPANS[l.period] || ""].filter(Boolean).join(" · ");
+async function _serverLockers(SUPA, hdr, customerId, token, group, day) {
+  try {
+    const r = await fetch(`${SUPA}/rest/v1/rpc/customer_lockers`, { method: "POST", headers: hdr, body: JSON.stringify({ p_id: customerId, p_token: token }) });
+    if (!r.ok) return [];
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return [];
+    const ids = new Set(group.map((x) => x.id));
+    return rows.filter((x) => x && (x.status === "reserved" || x.status === "in_use") && ((x.booking_id && ids.has(x.booking_id)) || (!x.booking_id && day && String(x.day) === day)))
+      .slice(0, 6).map((x) => ({ code: x.code ? String(x.code).replace(/[^A-Za-z0-9]/g, "").slice(0, 8) : "", period: String(x.period || "") }));
+  } catch {
+    return [];
+  }
+}
+function passPayload(env, b, group, sess, approvalRide, origin, lockers = []) {
   const issuer = env.GOOGLE_WALLET_ISSUER_ID;
   const classId = `${issuer}.mm_ride`;
   const objectId = `${issuer}.mm_${String(b.id).replace(/[^A-Za-z0-9._-]/g, "")}`;
@@ -135,6 +152,7 @@ function passPayload(env, b, group, sess, approvalRide, origin) {
   if (kind === "blood") modules.push(text("role", "Role", b.blood_role === "visitor" ? "Visitor" : "Donor")); // donor or visitor (20261105140000)
   if (bikes) modules.push(text("bikes", "Bike", bikes));
   if (sess && sess.route_slug) modules.push(text("route", "Route", clean(sess.route_slug, 60)));
+  if (lockers.length) modules.push(text("lockers", lockers.length > 1 ? "Lockers" : "Locker", lockers.map(_lockerLine).join("\n")));
   return {
     genericClasses: [{ id: classId, classTemplateInfo: { cardTemplateOverride: { cardRowTemplateInfos: [
       { twoItems: { startItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['when']" }] } }, endItem: { firstValue: { fields: [{ fieldPath: "object.textModulesData['ref']" }] } } } },
@@ -237,7 +255,8 @@ export async function onRequestPost(context) {
   const origin = new URL(request.url).origin;
   try {
     const now = Math.floor(Date.now() / 1000);
-    const payload = passPayload(env, b, group, sess, approvalRide, origin);
+    const lockers = await _serverLockers(SUPA, hdr, customerId, token, group, String(b.session_date || "").slice(0, 10));
+    const payload = passPayload(env, b, group, sess, approvalRide, origin, lockers);
     const jwt = await signJwt(env, { iss: account(env).email, aud: "google", typ: "savetowallet", iat: now, origins: [origin], payload });
     // A save link creates the object only when it does not exist yet: a pass saved before, then
     // saved again after the time, the party or the booking's state moved, kept its first content.

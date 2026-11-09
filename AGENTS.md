@@ -2193,6 +2193,20 @@ tables `lockers` and `locker_rentals`.
   else the rental stays reserved with no number. The review reads the cabinet again every 15 s, when a door is picked on
   an older read, and right before booking (`_lkPicksFresh`): a pick someone took meanwhile is dropped and said
   (`lkPickGone`) and the booking waits at the cabinet. The website page reads it every 15 s and on Continue.
+- **Round two (the owner, 2026-11-09; migration 20261109233000).** Rider: My bookings' Your lockers is a card per evening
+  with the show-at-desk QR (`micromobility.sa/lockers/r/<rental id>`, `_lkOwnHtml`), Change (on the lockers page, signed in
+  by `_formHandoff('/lockers?change=<id>')`; `customer_locker_change` moves the locker or the time before the key, a wallet
+  payment re-taken at the new fee) and Remove; a ride's ticket names the rider's own lockers that evening (`_lkTkHtml`, the
+  website's TicketCard `ownLockers`, both Wallet passes via `customer_lockers`); a name per locker on the page
+  (`customer_locker_book` `p_names`); the locker terms open in a pop-up (`LK_TERMS`, `_lkTermsOpen`; the website's
+  Terms page is off, its Lockers clause waits there). Staff: the QR (scanner, or `/?lkr=` from the website's proxy) opens
+  Hand the keys (`_lkHandOpen`): that account's lockers that evening, Give key / Give all keys, desk payments into the
+  Sales cart and the till opened once the keys are given; the board lists Waiting for their key (`_lkArrivalsHtml`) and
+  End of night (`staff_locker_sweep`: never-collected page lockers freed, wallet refunded, the ones still out named; also
+  on the session close-out, `_lkCoHtml`); Lockers > Items left (`locker_items`: note, photo as a data URL read only when
+  opened, kept 14 days after the evening by trigger, Kept / Collected / Donated or disposed of, a WhatsApp message in
+  English and Arabic) and Lockers > Report (per evening: rentals, lockers used, occupancy, revenue, not collected; CSV);
+  Take out of service asks why and Units > History lists `locker_events` (a trigger on lockers).
 
 ## Sessions is a section of its own (2026-11-06)
 

@@ -1405,8 +1405,9 @@ async function onRequestPost(context) {
     group = group.filter((r) => r.approval === "approved");
   }
   const { addons, known: addonsKnown } = await _serverAddons(SUPA, ANON, group);
+  const lockers = await _serverLockers(SUPA, { apikey: ANON, Authorization: `Bearer ${ANON}`, "Content-Type": "application/json" }, customerId, token, group, String(b.session_date || "").slice(0, 10));
   try {
-    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, addonsKnown, group, sess, approvalRide, bloodType });
+    const pkpass = await buildPkpass(b, { signer: await getSigner(env), passTypeId, teamId, addons, addonsKnown, group, sess, approvalRide, bloodType, lockers });
     return new Response(pkpass, {
       headers: {
         "Content-Type": "application/vnd.apple.pkpass",
@@ -1489,6 +1490,10 @@ async function buildPkpass(b, cfg) {
       return `${hideNum || r.queue_num == null ? "" : `#${r.queue_num} `}${r.name || ""}${bike && bike !== "None" && bike !== "Any" ? " - " + bike : ""}`.trim();
     }).join("\n")
   }];
+  const lockers = Array.isArray(cfg.lockers) ? cfg.lockers : [];
+  const lockerCodes = lockers.map((l) => l.code).filter(Boolean);
+  if (lockerCodes.length && auxiliary.length < 4) auxiliary.push({ key: "locker", label: lockerCodes.length > 1 ? "LOCKERS" : "LOCKER", value: lockerCodes.join(", ") });
+  const lockersBack = lockers.length ? [{ key: "lockers", label: lockers.length > 1 ? "Lockers" : "Locker", value: lockers.map(_lockerLine).join("\n") }] : [];
   const addonsBack = addons.length ? [{ key: "addons", label: "Add-ons", value: addons.map((a) => `${a.n}${a.q > 1 ? " x" + a.q : ""} - SAR ${a.p}`).join("\n") }] : [];
   const meetHeld = !!_revealAhead(sess) && !/^https:\/\//.test(String(sess && sess.meet_url || ""));
   const meetUrl = meetHeld ? "" : _meetUrl(sess);
@@ -1542,6 +1547,7 @@ async function buildPkpass(b, cfg) {
         // and the club or community they answered (blood_club, 20261105150000)
         ...isBlood && b.blood_club ? [{ key: "club", label: "Club or community", value: String(b.blood_club) }] : [],
         ...addonsBack,
+        ...lockersBack,
         ...owes ? [{ key: "pay", label: "Payment", value: "Pay at the booth \u2014 cash, mada or STC Pay." }] : [],
         { key: "help", label: "Good to know", value: bikeRide ? "Show this pass on arrival. Bikes are assigned first come, first served, so arrive a little early to get the type you picked." : bloodVis ? "Show this pass at the registration desk." : isBlood ? "Show this pass at the registration desk, with your national ID or Iqama." : "Show this pass on arrival." },
         { key: "ref", label: "Reference", value: barcodeMsg }
@@ -1654,6 +1660,20 @@ function _sessionDates(b, clock) {
     return { collect: null, start: at(startMin), end: at(endMin) };
   } catch (e) {
     return null;
+  }
+}
+var LOCKER_SPANS = { early: "6 PM - 8 PM", late: "9 PM - 11 PM", both: "6 PM - 11 PM", pm: "7 PM - 9 PM" };
+var _lockerLine = (l) => [l.code ? `Locker ${l.code}` : "Locker", LOCKER_SPANS[l.period] || ""].filter(Boolean).join(" \xB7 ");
+async function _serverLockers(SUPA, hdr, customerId, token, group, day) {
+  try {
+    const r = await fetch(`${SUPA}/rest/v1/rpc/customer_lockers`, { method: "POST", headers: hdr, body: JSON.stringify({ p_id: customerId, p_token: token }) });
+    if (!r.ok) return [];
+    const rows = await r.json();
+    if (!Array.isArray(rows)) return [];
+    const ids = new Set(group.map((x) => x.id));
+    return rows.filter((x) => x && (x.status === "reserved" || x.status === "in_use") && (x.booking_id && ids.has(x.booking_id) || !x.booking_id && day && String(x.day) === day)).slice(0, 6).map((x) => ({ code: x.code ? String(x.code).replace(/[^A-Za-z0-9]/g, "").slice(0, 8) : "", period: String(x.period || "") }));
+  } catch {
+    return [];
   }
 }
 function _entryAddons(raw) {
