@@ -3,8 +3,8 @@ import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/s
 
 // The roster row's ⋯ menu is a side sheet: from the end edge on a desk, in the middle of the screen on a phone,
 // headed by the rider and their number. Since 2026-11-10 a booking's actions are tiles under headings (Status,
-// Booking, Account, Party), the booking summed up in chips under its name, the rare actions folded under More and
-// the dangerous one alone at the foot. It used to be a popup anchored on
+// Booking, Account, Party), the booking summed up in chips under its name, the rare actions last under their heading
+// (no More fold since the user's 2026-11-10 ask) and the dangerous one alone at the foot. It used to be a popup anchored on
 // evt.currentTarget, which under the delegated dispatcher is the document, so it opened at the
 // page's top-left, far from the row. All Supabase traffic is stubbed.
 
@@ -76,7 +76,7 @@ test('a row runs its action and the sheet closes; the backdrop and the × close 
   await expect(page.locator('.pay-menu-popup')).toHaveCount(0);
 });
 
-test('the actions sit under headings, the rare ones fold under More, and chips sum the booking up', async ({ page }) => {
+test('the actions sit under headings, the rare ones last in theirs with no More fold, and chips sum the booking up', async ({ page }) => {
   await roster(page);
   await more(page).click();
   const s = sheet(page);
@@ -86,25 +86,15 @@ test('the actions sit under headings, the rare ones fold under More, and chips s
   await expect(s.locator('.rmt-chips')).toContainText('Road');
   await expect(s.locator('.rmt-chips .rmt-pending')).toHaveText('Pending');
   // headings in their order, each action under its own
-  await expect(s.locator('.rmt-grp-h')).toHaveText(['Status', 'Booking']);
+  await expect(s.locator('.rmt-grp-h')).toHaveText(['Status', 'Booking', 'Party']);
   await expect(s.getByRole('group', { name: 'Status' }).getByRole('menuitem', { name: 'No-Show' })).toBeVisible();
   await expect(s.getByRole('group', { name: 'Booking' }).getByRole('menuitem', { name: 'Edit' })).toBeVisible();
-  // the rare ones are folded: To staff list is there only once More is opened
-  const toStaff = s.getByRole('menuitem', { name: 'To staff list' });
-  await expect(toStaff).toBeHidden();
-  const fold = s.locator('.rmt-more');
-  await expect(fold).toHaveAttribute('aria-expanded', 'false');
-  await expect(fold).toContainText('More');
-  await fold.click();
-  await expect(fold).toHaveAttribute('aria-expanded', 'true');
-  await expect(toStaff).toBeVisible();
+  // no More fold (the user, 2026-11-10): a rarely used action shows under its own heading, after the everyday ones
+  await expect(s.locator('.rmt-more')).toHaveCount(0);
+  await expect(s.getByRole('group', { name: 'Status' }).getByRole('menuitem', { name: 'To staff list' })).toBeVisible();
   // the dangerous one alone at the foot
   await expect(s.locator('.rmt-foot [role="menuitem"]')).toHaveText(['Cancel']);
-  // the registry is stored in the order shown: the folded actions after the shown ones, the dangerous one last
-  const reg = await page.evaluate(`S._rowMenus['q1'].map(i=>(i.danger?'d':i.rare?'r':'s'))`) as string[];
-  expect(reg.join('')).toMatch(/^s+r+d$/);
-  // More stays open for the next menu
-  await page.keyboard.press('Escape');
-  await more(page).click();
-  await expect(sheet(page).locator('.rmt-more')).toHaveAttribute('aria-expanded', 'true');
+  // the registry is stored in the order shown: group by group, the rare ones last in theirs, the dangerous one last
+  const reg = await page.evaluate(`S._rowMenus['q1'].map(i=>(i.danger?'d':i.g+(i.rare?'r':'s')))`) as string[];
+  expect(reg.join(' ')).toMatch(/^(sts )+(str )+(bks )+(ptr )+d$/);
 });
