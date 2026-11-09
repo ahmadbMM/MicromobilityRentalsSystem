@@ -55719,7 +55719,7 @@ function _amSorts(){
   const n=v=>String(v),d=v=>shortDate(v),cnt=v=>String(v);
   return[
     ['',t('acrSortJoined'),c=>c.created_at||null,-1],
-    ['old',t('apSortOld'),c=>c.created_at||null,1,[t('acrColJoined'),v=>shortDate(_ksaDayOf(v))]],
+    ['old',t('apSortOld'),c=>c.created_at||null,1], // every row shows its Joined day (.am-joined), so no sort line
     ['volH',t('amSortVol'),c=>_amVolOf(c.id)||null,-1,[t('amfVolHours'),v=>String(v)]],
     ['az',t('apSortAZ'),c=>_amTv(c.name)||null,1],
     ['stage',t('n6pSortStage'),c=>N6P_STAGES.findIndex(x=>x[0]===_n6pStage(c)),1,[t('n6pStage'),v=>_n6pStageLbl((N6P_STAGES[v]||[])[0])]],
@@ -56178,7 +56178,10 @@ function _amRowInner(c){
     // look-off check, no gender) is a strip under the row, the full width, so the rows stay one height.
     const email=c.email?`<bdi>${_pii('email',c.email,c.id)}</bdi>${_siSlot(c.id)}`:'<span class="am-none">—</span>';
     const phone=c.phone?`<bdi>${_pii('phone',c.phone,c.id)}</bdi>`:'<span class="am-none">—</span>';
-    const sub=[`<div class="am-meta">${_n6pStageChip(c)}</div>`,c.heard_from?`<div class="am-meta am-heard">${esc(heardLabel(c.heard_from))}</div>`:'',S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):'',_amSortLine(c),_lsSlot(c.id)].filter(Boolean).join('');
+    // when the account was made, on every row (2026-11-09, the user: "show on customers when did they create their
+    // accounts"): the Riyadh day, the time on hover
+    const joined=c.created_at&&_ksaDayOf(c.created_at)?`<div class="am-meta am-joined" title="${esc(fmtStamp(c.created_at))}">${esc(t('acrColJoined'))}: ${esc(shortDate(_ksaDayOf(c.created_at)))}</div>`:'';
+    const sub=[`<div class="am-meta">${_n6pStageChip(c)}</div>`,joined,c.heard_from?`<div class="am-meta am-heard">${esc(heardLabel(c.heard_from))}</div>`:'',S.amSpent||/^spent/.test(S.amSort||'')?_spLine(c.id):'',_amSortLine(c),_lsSlot(c.id)].filter(Boolean).join('');
     // Accounts made before signup asked for a gender have none; offer it on the row, saved on a second tap (_scYGenTap).
     const gBtn=(g,l)=>{const sure=S._scYGen===c.id+'|'+g;return`<button type="button" class="am-pick${sure?' scy-sure':''}" data-on-click="${_on("_scYGenTap",c.id,g)}">${sure?esc(t('scYTapSave').replace('{0}',l)):l}</button>`;};
     const genderAsk=c.gender?'':`<div class="am-gender" role="group" aria-label="${esc(t('genderLabel'))} · ${esc(c.name||'')}"><span>${t('amGenderAsk')}:</span>${gBtn('male',t('genderMale'))}${gBtn('female',t('genderFemale'))}</div>`;

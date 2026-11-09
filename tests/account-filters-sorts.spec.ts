@@ -107,6 +107,20 @@ test.describe('@staff:accounts and members filters and sorts', () => {
     await expect(page.locator('.am-row[data-cust="c2"] .am-sortline')).toHaveText('Rides completed: 2');
   });
 
+  // 2026-11-09, the user: "show on customers when did they create their accounts"
+  test('accounts: every row says when the account was made, whatever the sort', async ({ page }) => {
+    await open(page, 'customers');
+    const day = (d: string) => page.evaluate((x) => (window as unknown as { shortDate: (v: string) => string }).shortDate(x), d);
+    for (const [id, d] of [['c1', '2026-01-05'], ['c2', '2026-02-05'], ['c3', '2026-09-05']] as const) {
+      await expect(page.locator(`.am-row[data-cust="${id}"] .am-joined`)).toHaveText(`Joined: ${await day(d)}`);
+    }
+    await expect(page.locator('.am-row[data-cust="c1"] .am-joined')).toHaveAttribute('title', /2026/); // the time on hover
+    // Oldest first no longer repeats it in a sort line
+    await page.locator('#fm-am').getByLabel('Sort by').selectOption('old');
+    await expect(page.locator('.am-row[data-cust="c1"] .am-joined')).toHaveCount(1);
+    await expect(page.locator('.am-row[data-cust="c1"] .am-sortline')).toHaveCount(0);
+  });
+
   test('members: the same panel, scoped to the members by the People switch, without a Community member filter of its own', async ({ page }) => {
     await open(page, 'community');
     expect(await rows(page)).toEqual(['c1']);
