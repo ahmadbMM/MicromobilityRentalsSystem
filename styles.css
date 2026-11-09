@@ -8865,7 +8865,7 @@ body:not(.view-staff) .cw-sw-txt{display:flex;flex-direction:column;gap:2px;min-
 body:not(.view-staff) .cw-sw-txt b{font-size:var(--fs-15);font-weight:700;}
 body:not(.view-staff) .cw-sw-txt small{font-size:var(--fs-13);color:var(--ink-2);}
 /* Invite friends (referrals, 2026-11-08): the wallet card's shape, the code large enough to read out */
-body:not(.view-staff) .ref-mine{background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);padding:16px;margin:0 0 16px;}
+body:not(.view-staff) :is(.ref-mine,.inv-mine){background:var(--card);border:1px solid transparent;border-radius:var(--r-card);box-shadow:var(--pl-1);padding:16px;margin:0 0 16px;}
 body:not(.view-staff) .ref-mine[hidden]{display:none;}
 body:not(.view-staff) .ref-t{font-size:var(--fs-17);font-weight:700;color:var(--ink);}
 body:not(.view-staff) .ref-note{font-size:var(--fs-13);color:var(--ink-2);margin:6px 0 0;}
@@ -8891,6 +8891,8 @@ body:not(.view-staff) .tt-pick{background:transparent none;border:1px solid tran
 body:not(.view-staff) .tt-pick.on{border-color:var(--go);}
 body:not(.view-staff) .tt-hide{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:600;color:var(--ink);}
 body:not(.view-staff) .tt-open{margin-top:12px;width:100%;}
+body:not(.view-staff) .inv-mine .tt-open{margin-top:0;}
+body:not(.view-staff) .inv-mine .am-meta{margin-top:8px;}
 body:not(.view-staff) #tab-members .mb-q{margin:8px 0 12px;}
 body:not(.view-staff) .mb-row{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:56px;padding:10px 4px;background:transparent none;border:0;border-bottom:1px solid var(--line);color:var(--ink);text-align:start;cursor:pointer;}
 body:not(.view-staff) .mb-who{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-width:0;}

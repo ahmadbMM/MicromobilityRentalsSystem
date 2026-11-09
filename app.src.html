@@ -19081,6 +19081,7 @@ async function _invShare(){
 }
 function _ttShownId(a){return a.titles.some(x=>x.id===a.shown)?a.shown:(a.titles[0]&&a.titles[0].id)||null;}
 function _ttMinePaint(){
+  _invMinePaint();
   const a=S._ttMine,host=document.getElementById('acc-pane-badges'),c=S.loggedIn||getSession(),old=document.getElementById('tt-mine');
   if(old)old.remove();
   if(!a||!host||!c||a.forId!==c.id||!host.firstChild)return;
@@ -19090,10 +19091,20 @@ function _ttMinePaint(){
     ${a.titles.length?`${a.titles.length>1?`<div class="am-meta">${t('ttMineSub')}</div>`:''}
       <div class="tt-picks">${a.titles.map(x=>`<button type="button" class="tt-pick${x.id===on?' on':''}" aria-pressed="${x.id===on}" data-on-click="${_on('_ttPick',x.id)}">${_ttChip(x)}</button>`).join('')}</div>
       ${cur&&cur.expires_on?`<div class="am-meta">${esc(t('ttUntil').replace('{0}',shortDate(cur.expires_on)))}</div>`:''}`
-    :`<div class="am-meta">${t('ttMineNone')}</div>`}
-    <button type="button" class="btn-primary tt-open tt-invite" data-on-click="${_on('_invShare')}">${t('invBtn')}</button>
-    <div class="am-meta">${t('invHint')}</div>`;
+    :`<div class="am-meta">${t('ttMineNone')}</div>`}`;
   host.insertAdjacentElement('beforeend',card); // under the badges, on the Badges part
+}
+// A member's "Invite a friend" sits on the Account part, under Invite friends, ride free (the user, 2026-11-09:
+// it was in the titles card on the Badges part).
+function _invMinePaint(){
+  const a=S._ttMine,host=document.getElementById('acc-pane-account'),c=S.loggedIn||getSession(),old=document.getElementById('inv-mine');
+  if(old)old.remove();
+  if(!a||!host||!c||a.forId!==c.id)return;
+  const card=document.createElement('div');card.id='inv-mine';card.className='inv-mine';
+  card.innerHTML=`<button type="button" class="btn-primary tt-open tt-invite" data-on-click="${_on('_invShare')}">${t('invBtn')}</button>
+    <div class="am-meta">${t('invHint')}</div>`;
+  const ref=document.getElementById('ref-mine');
+  if(ref&&ref.parentNode===host)ref.insertAdjacentElement('afterend',card);else host.insertAdjacentElement('afterbegin',card);
 }
 async function _ttSavePrefs(shown,hidden){
   const a=S._ttMine,c=S.loggedIn||getSession();if(!a||!c||S._ttSaving)return;
