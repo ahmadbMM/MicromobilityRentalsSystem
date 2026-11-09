@@ -68,7 +68,7 @@ test.describe('@staff:shell round two outside the roster', () => {
     await expect(k2('Collected today').locator('em')).toHaveText('Same day last week: SAR 90');
     await expect(k2('Available bikes').locator('strong')).toHaveText('1');
     await expect(k2('Available bikes').locator('em')).toHaveText('of 2 in the fleet'); // the retired bike is out of the fleet
-    await expect(k2('Open sessions').locator('em')).toHaveText('Next: 21:00');
+    await expect(k2('Open sessions').locator('em')).toHaveText('Next: Circuit · Today · 9 PM'); // the one-line label (2026-11-10)
     // alerts: a mark, the words without the count, the count in a badge; the way on is kept
     const long = tab.locator('.dash-alert', { hasText: 'Rides past 2 hours' });
     await expect(long.locator('svg.art-ic')).toHaveCount(1);

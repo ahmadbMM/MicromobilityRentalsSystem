@@ -153,6 +153,8 @@ test('a party moves only where spotsLeft has room, and never while a member is o
 
 // ── the All view shows tonight ───────────────────────────────────────────────
 test('All sessions puts tonight first under the cap, not a year-old night', async ({ page }) => {
+  // tonight is LIVE's date: the sessions run from today on, then the past latest first (2026-11-10), so the 2098 nights are the past
+  await page.clock.setFixedTime(new Date(`${LIVE}T12:00:00+03:00`));
   const old = Array.from({ length: 20 }, (_, i) => `2098-01-${String(i + 1).padStart(2, '0')}`);
   const oldRows = old.flatMap((d) => Array.from({ length: 10 }, (_, n) => row(`${d}-${n}`, {
     session_id: d, session_date: d, queue_num: n + 1, status: 'done', paid: true, name: 'Old ' + d + ' ' + n })));

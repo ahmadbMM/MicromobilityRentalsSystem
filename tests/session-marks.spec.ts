@@ -140,3 +140,94 @@ test.describe('@staff:sessions telling sessions apart', () => {
     await expect(chip('2099-03-05').locator('.sess-chip-date')).toContainText('Thu 5 Mar');
   });
 });
+
+// The order every staff list keeps (the user, 2026-11-10): today and the coming sessions first, open and closed
+// alike, soonest at the top; then the past, the most recent first; open in green and closed in grey. And the five
+// extras each session row carries, and the places that named a session their own way until then.
+const ORDER = ['2099-03-03', '2099-03-04', '2099-03-05-pw', '2099-03-01', '2099-02-28-pw', '2099-02-24'];
+const ordered = [
+  night('2099-02-24', { status: 'closed' }),
+  night('2099-02-28-pw', { day: 'Saturday', ...pw, status: 'closed' }),
+  night('2099-03-01', { day: 'Sunday' }), // left open in the past
+  night(TODAY, { location: 'JCC', series_id: 's1' }),
+  night('2099-03-04', { day: 'Wednesday', status: 'closed', series_id: 's1' }),
+  night('2099-03-05-pw', { day: 'Thursday', ...pw }),
+];
+const q = (id: string, sid: string, status: string) => ({ id, session_id: sid, session_day: 'Tuesday', session_date: sid.slice(0, 10), queue_num: 1,
+  name: 'Rider ' + id, type_preference: 'Road', size: 'M', status, paid: false, price: 50, registered_at: '2099-01-01T10:00:00Z' });
+
+test.describe('@staff:sessions sessions in order and in colour', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await boot(page, { sessions: ordered, queue_entries: [q('w1', '2099-03-05-pw', 'waitlist'), q('o1', '2099-03-01', 'waiting'), q('t1', TODAY, 'waiting')] });
+  });
+
+  test('today on in date order, open and closed alike, then the past latest first', async ({ page }) => {
+    expect(await page.evaluate(`allSessions().sort(_sessOrder).map(s=>s.id)`)).toEqual(ORDER);
+    await page.evaluate(`setStaffTab('sessions');S.sessView='list';S.sessGroup='none';renderSessions()`);
+    const rows = page.locator('#tab-sessions .sess-lc.sess-ag');
+    expect(await rows.evaluateAll((els) => els.map((e) => (e.getAttribute('data-on-click') || '').match(/"(2099[^"]+)"/)?.[1]))).toEqual(ORDER);
+    // the past has a heading of its own, right before its first day
+    await expect(page.locator('#tab-sessions .ss-past-h')).toHaveText('Past');
+    // open green, closed grey: the row's edge and its badge
+    await expect(rows.nth(0)).toHaveClass(/\bst-open\b/);
+    await expect(rows.nth(1)).toHaveClass(/\bst-closed\b/);
+    const edge = (i: number) => rows.nth(i).evaluate((e) => getComputedStyle(e).borderInlineStartColor);
+    expect(await edge(0)).not.toBe(await edge(1));
+    await expect(rows.nth(0).locator('.badge-open')).toHaveCount(1);
+    await expect(rows.nth(1).locator('.badge-closed')).toHaveCount(1);
+  });
+
+  test('the picker keeps the same order, says where the past begins and shows each status', async ({ page }) => {
+    await page.evaluate(`setStaffTab('queue');S.sfSession='all';showWalkinModal()`);
+    // with every session on the desk, the walk-in starts on the first one still taking bookings: tonight
+    await expect(page.locator('#wi-sess')).toHaveValue(TODAY);
+    await page.locator('#wi-sess-spk').click();
+    const dlg = page.locator('#spk-pop [role="dialog"]');
+    expect(await dlg.locator('.spk-row').evaluateAll((els) => els.map((e) => (e.getAttribute('data-on-click') || '').match(/"(2099[^"]+)"/)?.[1]))).toEqual(ORDER);
+    await expect(dlg.locator('.spk-gh-past')).toHaveText('Past');
+    await expect(dlg.locator('.spk-row').nth(0).locator('.badge-open')).toHaveCount(1);
+    await expect(dlg.locator('.spk-row').nth(1).locator('.badge-closed')).toHaveCount(1);
+    // the code finds a session
+    await dlg.locator('#spk-q').fill('PM-0305');
+    await expect(dlg.locator('.spk-row')).toHaveCount(1);
+    await expect(dlg.locator('.spk-row')).toContainText('Petromin night');
+  });
+
+  test('each row carries the places left, the waitlist, the meeting place, its place in a series and its code', async ({ page }) => {
+    await page.evaluate(`setStaffTab('sessions');S.sessView='list';S.sessGroup='none';renderSessions()`);
+    const row = (id: string) => page.locator(`#tab-sessions .sess-lc[data-on-click*='"${id}"']`);
+    await expect(row(TODAY).locator('.ssx-code')).toHaveText('JC-0303');
+    await expect(row(TODAY).locator('.ssx-place')).toHaveText('JCC');
+    await expect(row(TODAY).locator('.ssx-ser')).toHaveText('1 of 2');
+    await expect(row('2099-03-04').locator('.ssx-ser')).toHaveText('2 of 2');
+    await expect(row(TODAY).locator('.ssx-left')).toHaveText('19 left');
+    await expect(row('2099-03-05-pw').locator('.ssx-wl')).toHaveText('1 on waitlist');
+    await expect(row('2099-02-24').locator('.ssx-left')).toHaveCount(0); // a past night has no places to offer
+    // the Sessions search finds a session by its code
+    await page.evaluate(`S.sessQ='jc-0304';renderSessions()`);
+    await expect(page.locator('#tab-sessions .sess-lc.sess-ag')).toHaveCount(1);
+    // the Bookings cards carry them too
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${TODAY}';renderStaffQueue()`);
+    await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"2099-03-05-pw"'] .ssx-wl`)).toHaveText('1 on waitlist');
+    await expect(page.locator(`#sess-strip .sess-summary-chip[data-on-click*='"${TODAY}"'] .ssx-code`)).toHaveText('JC-0303');
+  });
+
+  test('the roster with every session, the Dashboard and the scanner name a session the same way', async ({ page }) => {
+    // Bookings with every session listed: each session's heading has its mark and its name
+    await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='all';S.sfShowFinished=true;renderStaffQueue()`);
+    const hdr = page.locator(`tr.sess-group-hdr`, { hasText: 'Today' });
+    await expect(hdr).toContainText('Jeddah Corniche Circuit');
+    await expect(hdr.locator('.smk.ev-jcc')).toHaveCount(1);
+    // the Dashboard: today's sessions with their mark and status in green, the next one by its label, the night to close out by name
+    await page.evaluate(`setStaffTab('dashboard')`);
+    const today = page.locator('#tab-dashboard .dash-row', { hasText: 'Jeddah Corniche Circuit' }).first();
+    await expect(today.locator('.smk.ev-jcc')).toHaveCount(1);
+    await expect(today.locator('.dash-st.st-open')).toHaveCount(1);
+    await expect(page.locator('#tab-dashboard')).toContainText('Next: Circuit · Today · 9 PM');
+    await expect(page.locator('#tab-dashboard .dash-row', { hasText: /Sun 1 Mar|1 Mar/ })).toContainText('Jeddah Corniche Circuit');
+    // the scanner's "this ticket is for another day" names the session by its short name, its date and its times
+    // (the message says how far off it is itself)
+    expect(await page.evaluate(`_scanSessLabel(_sessDisp('2099-03-04'))`)).toMatch(/^Circuit · Wed 4 Mar( 2099)? · 9 PM - 11 PM$/);
+  });
+});

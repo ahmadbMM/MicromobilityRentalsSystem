@@ -339,11 +339,21 @@ test.describe('@customer:move a phone with the old app cached', () => {
       // and past them shows its Refresh bar, as to a rider already using it, who taps it.
       await page.goto(`${old.url}my-bookings?x=1`, { waitUntil: 'commit' });
       const tap = page.locator('#upd-bar button').click({ timeout: 60000 }).catch(() => {});
-      await page.waitForURL(`${NEW}/**`, { timeout: 60000 });
+      // Polled, not waitForURL: the reload the app starts by itself and the tapped Refresh can both run, and the second
+      // cuts the first short - waitForURL then failed with net::ERR_ABORTED although the page went on to the new address.
+      await expect.poll(() => page.url().startsWith(`${NEW}/`), { timeout: 60000 }).toBe(true);
       await tap;
       const u = new URL(page.url());
-      expect(u.origin + u.pathname + u.search).toBe(`${NEW}/my-bookings?x=1`);
       const carried = JSON.parse(Buffer.from(new URLSearchParams(u.hash.slice(1)).get('mm-move')!, 'base64url').toString('utf8'));
+      // The visit's own page arrives in the path when the reload comes before the old app parks /my-bookings (it shows /
+      // until the rider is signed in and the sessions are in); when it comes after, it arrives as that parked tab, which
+      // the hand-over carries and the app on the new address opens from. Either way the rider lands on My bookings. On
+      // CI the reload came after in most runs of 2026-11-09/10, and this asked for the path alone.
+      const at = u.origin + u.pathname + u.search;
+      if (at !== `${NEW}/my-bookings?x=1`) {
+        expect(at).toBe(`${NEW}/?x=1`);
+        expect(carried['s:cq_open_tab']).toBe('myrides');
+      }
       expect(JSON.parse(carried['l:cq_session']).id).toBe('c1');
       expect(carried['l:cq_lang']).toBe('ar');
 
