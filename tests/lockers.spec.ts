@@ -21,9 +21,9 @@ const bk = (id: string, n: number, x: Record<string, unknown> = {}) => ({
   type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 50, registered_at: '2026-11-09T10:00:00Z', ...x,
 });
 const lockers = [
-  { id: 'L1', code: 'P1', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
-  { id: 'L2', code: 'P2', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
-  { id: 'L3', code: 'P3', status: 'out', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L1', code: 'L1', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L2', code: 'L2', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L3', code: 'L3', status: 'out', note: '', created_at: '2026-11-09T09:00:00Z' },
 ];
 const rent = (id: string, x: Record<string, unknown>) => ({
   id, day: TODAY, period: 'late', booking_id: null, session_id: 's1', customer_id: null, name: '', locker_id: null, price: 10, on_bill: true,
@@ -67,24 +67,24 @@ async function rider(page: Page, fx: Fixtures) {
 test.describe('@staff:lockers the Lockers section', () => {
   test('its own address and rail entry; tonight\'s board counts and draws each unit; a free unit gives to the rider waiting', async ({ page }) => {
     const seen = calls(page);
-    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'P2' } });
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
     await page.evaluate(`setStaffTab('lockers')`);
     await expect.poll(() => new URL(page.url()).pathname).toBe('/lockers');
     expect(await page.evaluate(`document.querySelector('#staff-tab-nav .tab-btn[data-stab="lockers"]').style.display`)).not.toBe('none'); // on a phone the rail sits behind the menu
     const sec = page.locator('#tab-lockers');
     await expect(sec.locator('.lk-tile')).toHaveCount(3);
-    await expect(sec.locator('.lk-stat').nth(0)).toContainText('1'); // free: P2 (P1 in use, P3 out)
+    await expect(sec.locator('.lk-stat').nth(0)).toContainText('1'); // free: L2 (L1 in use, L3 out)
     await expect(sec.locator('.lk-stat').nth(1)).toContainText('1'); // in use
     await expect(sec.locator('.lk-stat').nth(2)).toContainText('1'); // waiting for a number
     await expect(sec.locator('.lk-tile.lk-t-use')).toContainText('Rana Rider');
     await expect(sec.locator('.lk-tile.lk-t-out')).toContainText('Out of service');
 
-    await sec.locator('.lk-tile', { hasText: 'P2' }).click();
-    const dlg = page.getByRole('dialog', { name: /Locker P2/ });
+    await sec.locator('.lk-tile', { hasText: 'L2' }).click();
+    const dlg = page.getByRole('dialog', { name: /Locker L2/ });
     await expect(dlg).toContainText('Free');
     await dlg.locator('.lk-sh-pick', { hasText: 'Omar Other' }).click();
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
-    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'P2' });
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
   });
 
   test('reservations and the units have their own addresses; a unit gives its tag link', async ({ page }) => {
@@ -96,20 +96,23 @@ test.describe('@staff:lockers the Lockers section', () => {
     await expect(sec.locator('.lk-res-row').first()).toContainText('Waiting for a number'); // no number yet comes first
     await page.evaluate(`_lkView('units')`);
     await expect.poll(() => new URL(page.url()).pathname).toBe('/lockers/units');
-    await expect(sec.locator('.lk-url').first()).toHaveText('https://micromobility.sa/lockers/P1');
+    await expect(sec.locator('.lk-url').first()).toHaveText('https://micromobility.sa/lockers/L1');
+    // the lockers are L1, L2, L3... (the owner, 2026-11-09): the form starts there, and a bare number reads as one
+    await expect(sec.locator('#lk-add-pre')).toHaveValue('L');
+    expect(await page.evaluate(`JSON.stringify([_lkNorm('2'),_lkNorm('l 02'),_lkNorm('9'),_lkNorm('x')])`)).toBe('["L2","L2","L9",""]');
   });
 
-  test('the check-in shows the booking\'s locker; a number typed (any spelling) gives it', async ({ page }) => {
+  test('the check-in shows the booking\'s locker; a number typed (any spelling, or the bare number) gives it', async ({ page }) => {
     const seen = calls(page);
-    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'P2' } });
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
     await page.evaluate(`setStaffTab('queue');showCheckinModal('q2')`);
     const box = page.locator('#lk-ci');
     await expect(box).toContainText('Locker');
     await expect(box).toContainText('6 PM - 8 PM');
-    await box.locator('#lk-ci-in').fill('p02');
+    await box.locator('#lk-ci-in').fill('l02');
     await box.locator('#lk-ci-in').press('Enter');
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
-    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'P2' });
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
   });
 
   test('a booking with no locker on a night that offers them: the periods to add one, on its bill', async ({ page }) => {
@@ -125,8 +128,8 @@ test.describe('@staff:lockers the Lockers section', () => {
   });
 
   test('a locker\'s tag on a staff phone: off the address bar, its sheet opens', async ({ page }) => {
-    await staff(page, {}, '/?locker=p1');
-    const dlg = page.getByRole('dialog', { name: /Locker P1/ });
+    await staff(page, {}, '/?locker=l1');
+    const dlg = page.getByRole('dialog', { name: /Locker L1/ });
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('Rana Rider');
     await expect(dlg.getByRole('button', { name: 'Hand back' })).toBeVisible();
@@ -202,11 +205,11 @@ test.describe('@customer:reserve lockers', () => {
   test('the ticket says the period and the number once given; the line reads Locker', async ({ page }) => {
     const held = bk('q1', 1, { addons: '[{"id":"locker","qty":1,"p":10}]' });
     await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held],
-      'rpc:customer_lockers': [{ booking_id: 'q1', period: 'late', status: 'in_use', price: 10, on_bill: true, code: 'P7' }] });
+      'rpc:customer_lockers': [{ booking_id: 'q1', period: 'late', status: 'in_use', price: 10, on_bill: true, code: 'L7' }] });
     await page.evaluate(`_lkMineLoad(null,true)`);
     await page.waitForFunction(`_lkMine().length===1`);
     const html = await page.evaluate(`_lkTkHtml([entryFromDB(${JSON.stringify(held)})],_sessGet('s1'),false)`);
-    expect(html).toContain('P7');
+    expect(html).toContain('L7');
     expect(html).toContain('9 PM - 11 PM');
     expect(html).not.toContain('lkTkRemove'); // a number was given: no Remove
     expect(await page.evaluate(`addonLineItems([{id:'locker',qty:1,p:10}])[0].name`)).toBe('Locker');

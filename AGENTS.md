@@ -2043,7 +2043,7 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
 ## Lockers (2026-11-09, migration 20261109120000)
 
 The owner: a locker renting system linked to accounts from the staff page, by scanning the locker's NFC or typing its
-number. One set of lockers (P1, P2...) travels between JCC and Petromin; each carries a label with its number, a QR
+number. One set of lockers (L1, L2...; the owner, 2026-11-09) travels between JCC and Petromin; each carries a label with its number, a QR
 and an on-metal NFC chip holding `micromobility.sa/lockers/<code>`. The key stays with staff. Code prefix `lk`,
 tables `lockers` and `locker_rentals`.
 
@@ -2073,14 +2073,14 @@ tables `lockers` and `locker_rentals`.
   (the fee comes off); a paid no-show keeps the fee (handed back). A locker in use is never freed by itself: things
   are inside and the key is with staff, so it shows Overdue past its period until staff tap Hand back.
 - **Staff**: Lockers is a section of its own (`/lockers`, `renderLockers` in the `lockers` part): tonight's board
-  (a tile per unit), `/lockers/reservations`, `/lockers/units` (add P1-Pn, out of service, retire, each tag's link and
+  (a tile per unit), `/lockers/reservations`, `/lockers/units` (add L1-Ln, out of service, retire, each tag's link and
   QR label, all labels on one sheet) and `/lockers/history` (60 days). Any evening can be looked at. The check-in has
   a Locker line (`_lkCiHtml`): the number typed or a tag tapped gives it, and a booking with none can be given one
   (on its bill while unpaid, else into the Sales cart). A locker's sheet (`_lkSheetOpen`: a tag, a QR, a tile) says who
   has it and gives it to a rider waiting for a number, hands it back or moves it. A walk-up (no booking that night)
   rents from the sheet or the section (`_lkRentOpen`, `staff_locker_walkup`) and pays at the Sales till: the line goes
   into the cart with the account linked. Front desk, managers, owners and leaders have the section.
-- **Tags**: `/?locker=P7` is read at boot like `?bike=` (`_readLockerParam`, parked until goStaff, `_lockerResume`),
+- **Tags**: `/?locker=L7` is read at boot like `?bike=` (`_readLockerParam`, parked until goStaff, `_lockerResume`),
   goes to an open staff tab over the same channel (`_bikeHandoff` with `kind`), and the scanner reads the QR
   (`_scanLockerUrl`). The website (mm-platform `proxy.ts`) sends a staff phone's tap to
   `staff.micromobility.sa/?locker=<code>` and a rider's to `/account`. `tests/lockers.spec.ts`.
