@@ -343,6 +343,7 @@ window.mmLoading=(function(){
     <span class="snav-group" data-group="snavRides" role="heading" aria-level="2">Rides</span>
     <button class="tab-btn"        data-stab="dashboard" data-on-click='["setStaffTab","dashboard"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Dashboard</span></button>
     <button class="tab-btn active" data-stab="queue"     data-on-click='["setStaffTab","queue"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Bookings</span></button>
+    <button class="tab-btn"        data-stab="waitlist"  data-on-click='["setStaffTab","waitlist"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Waitlist</span></button>
     <button class="tab-btn"        data-stab="sessions"  data-on-click='["setStaffTab","sessions"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Sessions</span></button>
     <button class="tab-btn"        data-stab="lockers"   data-on-click='["setStaffTab","lockers"]'><span class="snav-ico" aria-hidden="true"></span><span class="snav-lbl">Lockers</span></button>
     <span class="snav-group" data-group="snavCommerce" role="heading" aria-level="2">Commerce</span>
@@ -373,6 +374,7 @@ window.mmLoading=(function(){
   <div class="view-main" id="staff-main" tabindex="-1">
     <div id="ro-banner" class="ro-banner" role="status" hidden></div>
     <div id="tab-queue"     class="tab-panel active"></div>
+    <div id="tab-waitlist"  class="tab-panel"></div>
     <div id="tab-sessions"  class="tab-panel"></div>
     <div id="tab-lockers"   class="tab-panel"></div>
     <div id="tab-inventory"  class="tab-panel"></div>
@@ -2101,6 +2103,7 @@ function setLang(lang,_fromUrl){
   document.querySelectorAll('#staff-tab-nav .tab-btn').forEach(b=>{
     const _l=b.querySelector('.snav-lbl')||b; // the button also holds an icon span
     if(b.dataset.stab==='queue')_l.textContent=t('tabQueue');
+    if(b.dataset.stab==='waitlist')_l.textContent=t('wlTitle');
     if(b.dataset.stab==='sessions')_l.textContent=t('tabSessions');
     if(b.dataset.stab==='bikes')_l.textContent=t('tabBikes');
     if(b.dataset.stab==='history')_l.textContent=t('tabHistory');
@@ -2151,15 +2154,15 @@ function isAdmin(){return S.staffRole==='admin';}
 // Front Desk mode shows only the desk's own sections: Sales, Bookings and Riders (the partner
 // form's registrations, which the same desk checks in). Any other section bounces to Bookings.
 // Inside Riders the summary report stays admin-only (renderRiders).
-const DESK_TABS=['queue','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
-const ROLE_TABS={volunteer:[],manager:['dashboard','queue','lockers','cashier','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','lockers','cashier','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
+const DESK_TABS=['queue','waitlist','lockers','cashier','workshop']; // Lockers (2026-11-09): the desk gives them // the Waitlist (2026-11-09): a section of its own, opened by whoever opens Bookings // the Petromin registrations are a page inside Queue; workshop bikes come in at the desk
+const ROLE_TABS={volunteer:[],manager:['dashboard','queue','waitlist','lockers','cashier','inventory','workshop','community','badgereq','volunteers','messages','vendors','analytics','history'],frontdesk:DESK_TABS,leader:['queue','waitlist','lockers'],mechanic:['inventory','workshop'],cashier:['cashier','inventory'],owner:['dashboard','queue','waitlist','lockers','cashier','inventory','workshop','community','badgereq','volunteers','analytics','history','messages','vendors','website','team']}; // the owner also reads Messages, Vendors, the website and Team (2026-10-09); an owner's edit list is empty
 function _roleTabs(role){return role==='admin'?_staffSections():(ROLE_TABS[role]||DESK_TABS);}
 function _deskTabOk(tab){return tab==='settings'||(_roleTabs(S.staffRole).includes(tab)&&_viewOk(tab));} // Settings is every account's own page // the role's sections, then the account's own list (#8)
 // Which staff parts (scripts/split-staff.mjs, STAFF_PARTS) the desk fetches once it has painted
 // (2026-10-09): the ones whose sections this account can open, and the ones the desk's own actions
 // call into (a return's fleet check, a void's reason, the night summary). Every other part comes the first time something asks for it (its stand-in fetches it).
 // Before the role is known nothing is held back.
-const STAFF_PART_TABS={sessions:['sessions'],lockers:['lockers'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue']};
+const STAFF_PART_TABS={sessions:['sessions'],lockers:['lockers'],volunteers:['volunteers'],analytics:['analytics'],community:['community','customers','badgereq'],bikes:['bikes','inventory','workshop'],cashier:['cashier','queue'],catalog:['catalog'],inventory:['inventory'],website:['website'],history:['history'],workshop:['workshop'],ambassadors:['ambassadors'],messages:['messages'],vendors:['vendors'],team:['team'],settings:['settings'],fleet:['queue','inventory','workshop'],money:['cashier','history','team'],sela:[],imports:[],desk:['queue'],deskq:['queue'],kiosk:[],deposits:['queue','cashier'],remind:['queue','waitlist']};
 function _staffPartWanted(n){const tabs=STAFF_PART_TABS[n];if(!tabs||!S.staffRole)return true;return tabs.some(_deskTabOk);}
 // A staff account's own preferences (2026-10-09): staff.prefs through staff_my_prefs, with this
 // device's copy (cq_prefs, kept per account) read at once so a reload starts as the person left it.
@@ -7360,23 +7363,23 @@ let _navRestoring=false;
 // link can be shared and a reload comes back to the same place. The staff sections are the words
 // on the rail - /bookings, /dashboard, /sales, /inventory, /workshop, /community, /ambassadors, /partners,
 // /website, /messages, /analytics, /history, /team - with a sub-view as a second segment
-// (/bookings/waitlist, /community/applications, /website/bikes for the catalogue); the customer
+// (/community/applications, /website/bikes for the catalogue); the customer
 // pages are /reserve, /my-bookings and /account (its parts /account/stats and /account/badges), and the event picker is /. The server
 // (functions/_middleware.js) answers these addresses with the app and the service worker serves
 // them its cached shell; both carry the same list, and tests/paths.spec.ts checks the three agree.
 // Bookings stays date-less (the 2026-09-22 rule: it opens on tonight's ride): a ride picked on the
 // page adds ?session=<id>, so that link can be shared, and a plain /bookings still lands on tonight.
-const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
+const STAFF_PATHS={volunteers:'volunteers',queue:'bookings',waitlist:'waitlist',sessions:'sessions',lockers:'lockers',dashboard:'dashboard',cashier:'sales',inventory:'inventory',workshop:'workshop',community:'people',badgereq:'badge-requests',ambassadors:'ambassadors',vendors:'vendors',website:'website',catalog:'website/bikes',messages:'messages',analytics:'analytics',history:'history',team:'team',settings:'settings'};
 const CUST_PATHS={register:'reserve',myrides:'my-bookings',account:'account',members:'members'};
 // The account page's three parts (the owner, 2026-11-09): Account at /account, then /account/stats and /account/badges.
 const ACC_VIEWS=['account','stats','badges'];
 // A signed-out visitor's two pages: Sign in at /, Create account at /signup (the owner, 2026-09-28),
 // so a link can open the sign-up itself. Signed in, /signup is just /.
 const SIGNUP_PATH='signup';
-// A section's sub-views and their segments; '' is the section's own page. 'waitlist' is the old
-// name of the queue's 'managed' view (setStaffTab still takes it), so both read as /bookings/waitlist.
+// A section's sub-views and their segments; '' is the section's own page. The Waitlist was Bookings' view
+// /bookings/waitlist until 2026-11-09 and is a section of its own at /waitlist now (_parsePath takes the old address there).
 const SUB_PATHS={
-  queue:{bookings:'',managed:'waitlist',waitlist:'waitlist',petromin:'riders',handover:'handover'},
+  queue:{bookings:'',petromin:'riders',handover:'handover'},
   // Sessions is a section of its own since 2026-11-06 (the owner: "separate the bookings and sessions pages"); its
   // three layouts are its sub-views: the cards at /sessions, the table at /sessions/table, the month at /sessions/calendar.
   sessions:{list:'',table:'table',cal:'calendar'},
@@ -7415,7 +7418,7 @@ function _setSub(tab,seg){
   // /people/a/<id>: one account's window, a link to send to a colleague (PP06); it opens over Accounts once the list is in.
   if(tab==='community'&&/^a\/[a-z0-9-]{1,64}$/.test(seg)){S.communityTab='accounts';S._n6pOpenAcct=seg.slice(2);return;}
   if(tab==='community'&&(seg==='accounts'||seg==='members'||seg==='non-members')){S.communityTab='accounts';S.amMember=seg==='members'?'yes':seg==='non-members'?'no':'';return;}
-  const key=Object.keys(m).find(k=>k!=='waitlist'&&m[k]===seg)||Object.keys(m).find(k=>m[k]==='');
+  const key=Object.keys(m).find(k=>m[k]===seg)||Object.keys(m).find(k=>m[k]==='');
   if(tab==='queue'){
     // This tab's memory of the queue (its status filter, the Petromin night) still applies; the
     // address decides the view itself.
@@ -7456,6 +7459,9 @@ function _parsePath(pathname){
   if(stab==='history'&&sub==='customers')return{view:'staff',stab:'community',sub:'activity'};
   // Sessions was a view of Bookings until 2026-11-06: /bookings/sessions and its calendar open the section.
   if(stab==='queue'&&(sub==='sessions'||sub==='sessions/calendar'))return{view:'staff',stab:'sessions',sub:sub==='sessions'?'':'calendar'};
+  // The Waitlist was a view of Bookings until 2026-11-09 (the owner: "make the waitlist as a separate section not under the
+  // bookings page"): /bookings/waitlist opens the section.
+  if(stab==='queue'&&sub==='waitlist')return{view:'staff',stab:'waitlist',sub:''};
   return{view:'staff',stab,sub};
 }
 function _pathState(pathname){const pn=_parsePath(pathname);return pn&&!pn.root?pn:null;}
@@ -14066,7 +14072,6 @@ function setCustTab(tab,part){
 // o.sid (2026-11-06, ST08): Bookings opens on that ride in one paint; opening it and then picking the ride drew the roster twice.
 function setStaffTab(tab,o){
   if(S.staffRole==='volunteer')return; // a volunteer has one page and no sections
-  if(tab==='waitlist'){S.queueView='waitlist';tab='queue';} // Waitlist lives there too (third pill)
   if(tab==='handover'){S.queueView=GIVE_BIKE_STEP?'handover':'bookings';tab='queue';} // the bikes side of the desk: a fourth pill
   if(tab==='fnb')tab='vendors'; // the section's id until 2026-10-03 (a saved address or tab)
   if(tab==='customers')tab='community'; // Customers is part of People since 2026-11-06
@@ -14081,6 +14086,7 @@ function setStaffTab(tab,o){
   _opGateCheck(); // re-arm if the name was cleared (new device, wiped storage)
   renderStaffTabs();
   if(tab==='queue')renderStaffQueue();
+  else if(tab==='waitlist')renderWaitlist();
   else if(tab==='sessions')renderSessions();
   else if(tab==='history')renderHistory();
   else if(tab==='analytics')renderAnalytics();
@@ -14185,7 +14191,7 @@ function _commNavPaint(){
   if(grid)grid.classList.toggle('with-comm',on);
 }
 
-const _SNAV_ICON={lockers:'lock',badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
+const _SNAV_ICON={waitlist:'promote',lockers:'lock',badgereq:'medal',sessions:'calendar',dashboard:'sun',team:'person',settings:'cog',website:'globe',catalog:'rows',workshop:'wrench',messages:'contact',ambassadors:'star',volunteers:'hand',vendors:'cup',queue:'bike',cashier:'cart',inventory:'box',community:'people',customers:'person',riders:'person',analytics:'chart',history:'clock',notes:'note'};
 // Icons make the collapsed hover-rail usable (64px shows art only, labels appear on hover).
 function _fillNavIcons(){
   if(!_ART.calendar)_ART.calendar='<rect opacity=".35" x="3" y="5" width="18" height="16" rx="2"/><path d="M5 5h14a2 2 0 0 1 2 2v2.5H3V7a2 2 0 0 1 2-2ZM7 2.5h2v5H7zm8 0h2v5h-2zM7 13h3v3H7zm7 0h3v3h-3z"/>'; // the Sessions section's mark (2026-11-06), kept here: in _ART it rode on every customer's page
@@ -14261,6 +14267,7 @@ function renderStaffTabs(){
   _syncStaffNavLabel();_simpleNavFoot();
   try{_n6uKbTips();}catch(_){}
   document.getElementById('tab-queue')     .classList.toggle('active',S.staffTab==='queue');
+  document.getElementById('tab-waitlist')  .classList.toggle('active',S.staffTab==='waitlist');
   document.getElementById('tab-sessions')  .classList.toggle('active',S.staffTab==='sessions');
   document.getElementById('tab-lockers')   .classList.toggle('active',S.staffTab==='lockers');
   document.getElementById('tab-inventory') .classList.toggle('active',S.staffTab==='inventory');
@@ -15036,7 +15043,6 @@ function renderManagedWl(listOnly){
         <div class="page-sub">${t('mwSub')}</div>
       </div>
     </div>
-    ${_qvPillsHtml()}
     <div class="rq-mwbar">
       <label class="filter-sess"><span class="filter-field-lbl">${t('colSession')}</span>
         <select id="mw-sess" class="filter-select" aria-label="${esc(t('colSession'))}"
@@ -15260,7 +15266,7 @@ async function _giveDeskBike(id){
   // The Staff List has its own session picker; when it is aimed at a ride, a walk-up handed a
   // bike from there belongs to THAT ride. Falling through to "the first open session" put the
   // rider on tonight's circuit while staff were working Wednesday's.
-  const _aimedMw=(S.queueView==='managed'&&S._mwSess&&S._mwSess!=='all')?S._mwSess:null;
+  const _aimedMw=(S.staffTab==='waitlist'&&S._mwSess&&S._mwSess!=='all')?S._mwSess:null;
   // ...and when that ride cannot take a walk-up (closed since, or one staff approve rider by
   // rider), the rider is not quietly booked onto some other night instead: staff are told, and
   // pick the ride themselves.
@@ -17287,6 +17293,7 @@ function _renderStaffTab(bg){ // bg: a repaint for data that arrived, not for so
   const tab=S.staffTab;
   if(bg&&['cashier','inventory','community','customers','bikes'].includes(tab)&&_deferWhileTyping(tab)){try{_ahRefresh();}catch(_){}try{_ntSync();}catch(_){}return;}
   if(tab==='queue')renderStaffQueue();
+  else if(tab==='waitlist')renderWaitlist(); // the desk's rows and its list
   else if(tab==='sessions'){if(!_nsFormBusy())renderSessions();} // never under a staffer typing in the session form
   else if(tab==='bikes')renderBikes();
   else if(tab==='history')renderHistory();
@@ -30606,14 +30613,14 @@ function _keepScroll(){
   };
   requestAnimationFrame(restore);
 }
-// The queue's view - Bookings / Sessions / Waitlist / the Petromin page (and its night), and
+// The queue's view - Bookings / the Petromin page (and its night), and
 // the status filter - is remembered for this tab, so a refresh comes back to it. The session is
 // not: opening the queue always lands on the current one (_autoSelectSession), a refresh included.
 function _saveQueueView(){try{sessionStorage.setItem('cq_queue_view',JSON.stringify({queueView:S.queueView,sfStatus:S.sfStatus,sfPay:S.sfPay,on:todayStr(),ridersSession:S.ridersSession}));}catch(e){}}
 function _restoreQueueView(){
   let st=null;try{st=JSON.parse(sessionStorage.getItem('cq_queue_view')||'null');}catch(e){}
   if(!st)return;
-  if(['bookings','managed','petromin'].concat(GIVE_BIKE_STEP?['handover']:[]).includes(st.queueView))S.queueView=st.queueView;
+  if(['bookings','petromin'].concat(GIVE_BIKE_STEP?['handover']:[]).includes(st.queueView))S.queueView=st.queueView; // 'managed' (the Waitlist) is a section since 2026-11-09
   if(st.queueView==='petromin'&&typeof st.ridersSession==='string')S.ridersSession=st.ridersSession;
   // The filters only on the day they were left on: a tab open since yesterday starts on the whole of tonight's list.
   if(st.on===todayStr()){if(typeof st.sfStatus==='string')S.sfStatus=st.sfStatus;if(typeof st.sfPay==='string')S.sfPay=st.sfPay;}
@@ -30835,7 +30842,6 @@ function _qPhone(){try{return matchMedia('(max-width:767px)').matches;}catch(e){
 try{matchMedia('(max-width:767px)').addEventListener('change',()=>{if(S.view==='staff'&&S.staffTab==='queue'&&!document.documentElement.hasAttribute('data-staff-simple'))renderStaffQueue();});}catch(e){} // the simple phone view repaints for itself (_prefBoot)
 // Handlers of the markup below (moved out of the inline attributes for the CSP, 2026-09-27).
 function _on_renderStaffQueue_1(event,el){S.queueView='bookings';renderStaffQueue()}
-function _on_renderStaffQueue_3(event,el){S.queueView='managed';renderStaffQueue()}
 function _on_renderStaffQueue_ho(event,el){S.queueView='handover';renderStaffQueue()}
 function _on_renderStaffQueue_4(event,el,a0){event.stopPropagation();showAddonPicker(a0)}
 function _on_renderStaffQueue_5(event,el){event.stopPropagation()}
@@ -31062,17 +31068,30 @@ function _lcStick(){
   set();
   try{if(_lcRo)_lcRo.disconnect();_lcRo=null;if((lc||bk)&&window.ResizeObserver){_lcRo=new ResizeObserver(set);if(lc)_lcRo.observe(lc);if(bk)_lcRo.observe(bk);}}catch(e){}
 }
-// The Bookings section's views (Bookings / Sessions / Waitlist / Hand-over) under each view's own title, the way
+// The Bookings section's views (Bookings / Hand-over, and the Petromin page) under each view's own title, the way
 // every other section puts its tabs under its title (2026-10-27; they used to sit above it). The roster puts its
-// live-location switch at the row's far end (tail).
+// live-location switch at the row's far end (tail). Sessions (2026-11-06) and the Waitlist (2026-11-09) are sections of
+// their own; with no other view to switch to, the roster draws no Bookings pill (the Petromin page keeps it, as its way back).
 function _qvPillsHtml(tail){
   const v=S.queueView||'bookings';
   return`<div class="filter-row rq-mb12 q-views">
-    <button type="button" class="filter-pill${v==='bookings'?' active':''}" aria-pressed="${v==='bookings'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>
-    <button type="button" class="filter-pill${v==='managed'?' active':''}" aria-pressed="${v==='managed'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_3",_EV,_EL)}">${t('wlTitle')}</button>
+    ${GIVE_BIKE_STEP||v!=='bookings'?`<button type="button" class="filter-pill${v==='bookings'?' active':''}" aria-pressed="${v==='bookings'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_1",_EV,_EL)}">${t('tabQueue')}</button>`:''}
     ${GIVE_BIKE_STEP?`<button type="button" class="filter-pill${v==='handover'?' active':''}" aria-pressed="${v==='handover'?'true':'false'}" data-on-click="${_on("_on_renderStaffQueue_ho",_EV,_EL)}">${t('hoTitle')}${(()=>{const n=_hoRows().length;return n?` (${n})`:'';})()}</button>`:''}
     ${_dqChipHtml()}${tail||''}
   </div>`;
+}
+// The Waitlist, a section of its own (2026-11-09, the owner: "make the waitlist as a separate section not under the bookings
+// page"): /waitlist on the rail under Bookings, opened by whoever opens Bookings (DESK_TABS, ROLE_TABS, _modIds). It was
+// Bookings' 'managed' view, and its list still works on the desk's rows: the actions on it (check in, pay, move, the
+// position boxes) repaint through renderStaffQueue, which draws this section while it is the one open, after the
+// work every repaint does there (the open check-in window, the address, the outbox's overlay).
+function renderWaitlist(){renderStaffQueue();}
+function _wlSecPaint(){
+  const el=document.getElementById('tab-waitlist');if(!el)return;
+  if(!S.dataLoaded){el.innerHTML=skeletonList(7);return;}
+  if(!_simpleTabOk('waitlist')){setStaffTab('queue');return;} // the simple phone view keeps the roster alone
+  if(_mwTyping()){renderManagedWl(true);return;} // never rebuild the inputs staff are typing in
+  el.innerHTML='<div id="mw-host"></div>';renderManagedWl();_qBulkSync();
 }
 function renderStaffQueue(_resultsOnly){
   _scEnsure(); // staff comments, read at most once a minute (2026-10-23)
@@ -31101,15 +31120,15 @@ function renderStaffQueue(_resultsOnly){
   // closes the phone keyboard, and focus() can't reopen it without a user gesture.
   if(!_resultsOnly&&document.activeElement&&document.activeElement.id==='sf-search-input'&&document.getElementById('q-results'))_resultsOnly=true;
   _keepScroll(); // keep scroll position across the in-place rebuild
+  if(S.view==='staff'&&S.staffTab==='waitlist'){_wlSecPaint();return;} // the Waitlist section (below): every desk action's repaint reaches it
   if(!S.dataLoaded){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=skeletonList(7);return;}
   if(!_deskTabOk('queue')&&!_staffSections().some(_deskTabOk)){const _el=document.getElementById('tab-queue');if(_el)_el.innerHTML=_emptyState(t('acctNoneOpen'));return;}
   if(S.queueView==='sessions'){S.queueView='bookings';if(_deskTabOk('sessions')){setStaffTab('sessions');return;}} // a section of its own since 2026-11-06: an old link or saved state goes there
+  // The Waitlist too, since 2026-11-09 ('managed' was its view here, 'waitlist' the page before that); the simple phone view
+  // keeps the roster alone, as before.
+  if(S.queueView==='managed'||S.queueView==='waitlist'){S.queueView='bookings';if(_deskTabOk('waitlist')&&_simpleTabOk('waitlist')){setStaffTab('waitlist');return;}}
   if(!GIVE_BIKE_STEP&&S.queueView==='handover')S.queueView='bookings'; // no Hand-over page while the Give bike step is off
   const _qvPills=_qvPillsHtml();
-  // The separate Waitlist page is gone; anything still pointing at it (a saved view, a device
-  // that has not reloaded) lands on the list that replaced it rather than on a blank tab.
-  if(S.queueView==='waitlist')S.queueView='managed';
-  if(S.queueView==='managed'&&_simpleOn())S.queueView='bookings'; // the simple phone view: the roster alone (no view pills)
   if(S.queueView!=='handover')_hoForget(); // leaving Hand-over: a tag tapped now opens the bike's card, not a hand-over
   if(S.queueView==='handover'){ // the bikes side of the desk: who is checked in and still without a bike
     const _qh=document.getElementById('tab-queue');
@@ -31120,12 +31139,6 @@ function renderStaffQueue(_resultsOnly){
   if(S.queueView==='petromin'){ // the Petromin form's registrations: their own page, under the chips
     const _qh=document.getElementById('tab-queue');
     if(_qh){_qh.innerHTML='<div id="pm-host"></div>';renderRiders();_qBulkSync();} // renderRiders draws the views and the strip under its title
-    return;
-  }
-  if(S.queueView==='managed'){ // Staff Managed Waitlist: its own section beside Waitlist
-    const _qh=document.getElementById('tab-queue');
-    if(_qh&&_mwTyping()){renderManagedWl(true);return;} // never rebuild the inputs staff are typing in
-    if(_qh){_qh.innerHTML='<div id="mw-host"></div>';renderManagedWl();_qBulkSync();} // the views go under its title
     return;
   }
   reconcileOrphanBikes();
@@ -33667,12 +33680,18 @@ async function _pinApprove(what,opt){
 // only some of those (staff.modules_edit); null is everything its role allows. The role itself
 // (admin or front desk) is still what the database enforces; section rights are this page's.
 // a function, not a const: the first tab can be asked for during boot, before this line has run
-function _staffSections(){return['queue','sessions','lockers','dashboard','cashier','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
-const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
+function _staffSections(){return['queue','waitlist','sessions','lockers','dashboard','cashier','inventory','workshop','community','badgereq','volunteers','ambassadors','vendors','website','catalog','messages','analytics','history','team'];}
+const SECTION_KEY={dashboard:'tabDashboard',queue:'tabQueue',waitlist:'wlTitle',sessions:'tabSessions',lockers:'tabLockers',cashier:'tabCashier',inventory:'tabInventory',workshop:'tabWorkshop',customers:'tabPeople',community:'tabPeople',badgereq:'bdrStTitle',ambassadors:'tabAmbassadors',volunteers:'tabVolunteers',vendors:'tabVendors',catalog:'tabCatalog',messages:'tabMessages',analytics:'tabAnalytics',history:'tabHistory',team:'tabTeam'};
 function _sectionName(k){return k==='website'?'micromobility.sa':t(SECTION_KEY[k]||k);}
 // An account's section lists, with the Vendors section's id before 2026-10-03 ('fnb') read as today's.
 // Customers and Community are one section, People, since 2026-11-06 (id 'community'): a list naming either names it.
-function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08)
+function _modIds(a){if(!Array.isArray(a))return null;const l=a.map(x=>x==='fnb'?'vendors':x==='customers'?'community':x);if(l.includes('queue')&&!l.includes('sessions'))l.push('sessions');if(l.includes('queue')&&!l.includes('lockers'))l.push('lockers');if(l.includes('queue')&&!l.includes('waitlist'))l.push('waitlist');if(l.includes('community')&&!l.includes('badgereq'))l.push('badgereq');return l.filter((x,i)=>l.indexOf(x)===i);} // a list naming Bookings names Sessions (a view of it until 2026-11-06); one naming People names Badge requests (a part of it until 2026-11-08); one naming Bookings names the Waitlist (a view of it until 2026-11-09)
+// What _modIds adds back to a list that names the section's parent (Sessions, Lockers and the Waitlist with Bookings, Badge
+// requests with People). The database's staff_set_access knows only its own list of sections (none of these four on
+// 2026-11-09), so the Team page sends them only without their parent, where the database's refusal says so; with it they
+// would cost nothing to drop, since they come back on every read.
+const _MOD_PARENT={sessions:'queue',lockers:'queue',waitlist:'queue',badgereq:'community'};
+function _modSend(a){return Array.isArray(a)?a.filter(x=>!(_own(_MOD_PARENT,x)&&a.includes(_MOD_PARENT[x]))):a;}
 function _viewOk(tab){return !Array.isArray(S._myView)||S._myView.includes(tab);}
 // Settings is every account's own page (_deskTabOk opens it to all) and is never one of the
 // sections an edit list names, so an account with a list (the Owner's is empty) could open its
@@ -35506,7 +35525,7 @@ async function _tmSave(uid){
   const what=t('scYAccWhat').replace('{0}',a.email||'');
   if(!await askConfirm({title:what,body:_scYAccBody(a,d),confirmLabel:t('saveBtn'),confirmClass:d.role==='admin'&&a.role!=='admin'?'btn-red':'btn-primary'}))return;
   if(!await _pinApprove(what))return;
-  const r=await sb.rpc('staff_set_access',{p_user:uid,p_role:d.role,p_view:d.view,p_edit:d.edit});
+  const r=await sb.rpc('staff_set_access',{p_user:uid,p_role:d.role,p_view:_modSend(d.view),p_edit:_modSend(d.edit)}); // the sections _modIds derives stay off the wire
   if(_writeErr(r,'staff access'))return;
   if(d.caps&&!T.moreMissing&&JSON.stringify(d.caps)!==JSON.stringify(_tmCapsOf(uid))){ // what the account may do besides its sections (2026-10-09)
     const pc={...d.caps};if(!pc.can_see_pii_unmasked)delete pc.can_see_pii_unmasked; // off is the default; a database before 20261009220000 refuses the name
@@ -61506,7 +61525,7 @@ function _bootStaffTab(nav){
   let st='';try{st=(nav&&nav.stab)||sessionStorage.getItem('cq_nav_stab')||'';}catch(e){}
   if(st==='logs'){S.histView='log';st='history';}
   if(st==='fnb')st='vendors'; // the section's id until 2026-10-03
-  return['queue','sessions','lockers','cashier','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
+  return['queue','waitlist','sessions','lockers','cashier','inventory','customers','community','badgereq','riders','analytics','history','bikes','website','catalog','workshop','messages','ambassadors','volunteers','vendors','dashboard','team','settings'].includes(st)?st:'';
 }
 // The tab iOS opens for a bike tag (2026-10-09, D15): when a staff tab is already open on this device, the
 // bike goes to it over the 'mm-staff' channel and this tab only says so - nothing is loaded. No answer
@@ -62722,7 +62741,7 @@ function _kbKey(e){
 // G then a letter opens a section (2026-11-06, ST16), on any layout (_kbKey reads an Arabic or Urdu key by its place).
 // The second key must come within a second and a half; a section this account cannot open says so (setStaffTab).
 // The rail's buttons carry the pair as aria-keyshortcuts and in their tooltip, and "?" lists them.
-const N6U_GO={d:'dashboard',b:'queue',s:'sessions',l:'lockers',c:'cashier',i:'inventory',w:'workshop',p:'community',r:'badgereq',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
+const N6U_GO={d:'dashboard',b:'queue',q:'waitlist',s:'sessions',l:'lockers',c:'cashier',i:'inventory',w:'workshop',p:'community',r:'badgereq',o:'ambassadors',v:'volunteers',f:'vendors',e:'website',k:'catalog',m:'messages',a:'analytics',h:'history',t:'team',u:'settings'};
 let _n6uGAt=0;
 function _n6uChord(k,e){
   if(_n6uGAt&&Date.now()-_n6uGAt<1500){

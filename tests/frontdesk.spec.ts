@@ -34,7 +34,7 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   // Switch to Front Desk -> only Sales (cashier), Bookings (queue) and the Workshop, whose
   // bikes come in at the desk; the Petromin registrations are a page inside Queue, not a tab
   await page.evaluate('setStaffRole("frontdesk")');
-  expect((await vis()).sort()).toEqual(['cashier', 'lockers', 'queue', 'settings', 'workshop']); // Lockers since 2026-11-09 // Settings is every account's own page (2026-10-02)
+  expect((await vis()).sort()).toEqual(['cashier', 'lockers', 'queue', 'settings', 'waitlist', 'workshop']); // Lockers and the Waitlist (a section since then) since 2026-11-09 // Settings is every account's own page (2026-10-02)
 
   // Trying to open a hidden tab bounces back to queue
   await page.evaluate('setStaffTab("analytics")');
@@ -49,10 +49,11 @@ test('front desk mode limits the staff tabs to Sales, Bookings & Riders, and the
   await page.evaluate('S.queueView="bookings";setStaffTab("queue")');
 
   // Front Desk: no Sessions pill, no Saturday rows, no Saturday option in the filter,
-  // no community Add-rider button — Queue + Waitlist pills and JCC data only.
+  // no community Add-rider button — JCC data only; the Waitlist is a section of its own on the desk's rail (2026-11-09).
   await page.evaluate('renderStaffQueue()');
   await expect(panel.getByRole('button', { name: 'Sessions' })).toHaveCount(0);
-  await expect(panel.getByRole('button', { name: 'Waitlist' })).toBeVisible();
+  await expect(panel.getByRole('button', { name: 'Waitlist' })).toHaveCount(0);
+  expect(await page.evaluate(`document.querySelector('#staff-tab-nav .tab-btn[data-stab="waitlist"]').style.display`)).toBe('');
   await expect(panel.locator('tr, .q-card').filter({ hasText: 'Sat Rider' }).filter({ visible: true })).toHaveCount(0);
   await expect(panel.locator('tr, .q-card').filter({ hasText: 'Jcc Rider' }).filter({ visible: true })).toHaveCount(1);
   expect(await panel.locator('.filter-select').first().textContent()).not.toContain('14');

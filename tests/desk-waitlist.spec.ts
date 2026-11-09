@@ -30,7 +30,7 @@ async function openWaitlist(page: import('@playwright/test').Page, fixtures: Rec
   await page.goto('/');
   await waitForSb(page);
   await page.waitForFunction(`S.dataLoaded===true`);
-  await page.evaluate(`setStaffTab('queue');S.queueView='managed';renderStaffQueue()`);
+  await page.evaluate(`setStaffTab('waitlist')`);
 }
 
 test('a walk-up and a hand-picked rider now share one list', async ({ page }) => {
@@ -47,20 +47,40 @@ test('a walk-up and a hand-picked rider now share one list', async ({ page }) =>
   await expect(host).not.toContainText('Already Served'); // resolved rows are history, not a queue
 });
 
-test('the section is called Waitlist, and the old page is gone', async ({ page }) => {
+// The owner, 2026-11-09: "make the waitlist as a separate section not under the bookings page".
+test('the Waitlist is a section of its own on the rail, at /waitlist, and Bookings no longer carries it', async ({ page }) => {
   await openWaitlist(page, { desk_waitlist: [walkup('w1', 'Walk Up')] });
+  expect(await page.evaluate('S.staffTab')).toBe('waitlist');
+  expect(new URL(page.url()).pathname).toBe('/waitlist');
+  await expect(page.locator('#tab-waitlist')).toBeVisible();
+  await expect(page.locator('#tab-waitlist .page-title')).toHaveText('Waitlist');
+  await expect(page.locator('#tab-waitlist #mw-host')).toContainText('Walk Up');
+  await expect(page.locator('#tab-waitlist .q-views')).toHaveCount(0); // no Bookings view pills on it
+  const rail = page.locator('#staff-tab-nav .tab-btn[data-stab="waitlist"]'); // a phone's rail is behind More
+  expect(await rail.evaluate((b) => (b as HTMLElement).style.display)).toBe('');
+  await expect(rail).toHaveClass(/active/);
+  await expect(rail).toHaveAttribute('aria-current', 'page');
+  await rail.evaluate((b) => b.previousElementSibling && (b.previousElementSibling as HTMLElement).dataset.stab).then((prev) => expect(prev).toBe('queue')); // under Bookings
+  await page.evaluate(`setStaffTab('queue')`);
+  await expect(page.locator('#tab-waitlist')).toBeHidden();
   const pills = await page.evaluate(`Array.from(document.querySelectorAll('#tab-queue .filter-pill')).map(b=>b.textContent.trim())`) as string[];
-  expect(pills).toContain('Waitlist');
-  expect(pills.filter((p) => p === 'Waitlist')).toHaveLength(1); // not two views with one name
+  expect(pills).not.toContain('Waitlist');
   expect(pills).not.toContain('Staff List');
-  await expect(page.locator('#tab-queue .page-title')).toContainText('Waitlist');
+  await expect(page.locator('#tab-queue #mw-host')).toHaveCount(0);
 });
 
-test('a device still pointing at the removed view lands on the list, not a blank tab', async ({ page }) => {
+test('a device or link still pointing at the old Bookings view opens the section, not a blank tab', async ({ page }) => {
   await openWaitlist(page, { desk_waitlist: [walkup('w1', 'Walk Up')] });
-  await page.evaluate(`S.queueView='waitlist';renderStaffQueue()`);
-  expect(await page.evaluate('S.queueView')).toBe('managed');
-  await expect(page.locator('#mw-host')).toContainText('Walk Up');
+  for (const old of ['waitlist', 'managed']) {
+    await page.evaluate(`setStaffTab('queue');S.queueView='${old}';renderStaffQueue()`);
+    expect(await page.evaluate('[S.staffTab, S.queueView]')).toEqual(['waitlist', 'bookings']);
+    await expect(page.locator('#tab-waitlist #mw-host')).toContainText('Walk Up');
+  }
+  await page.goto('/bookings/waitlist');
+  await waitForSb(page);
+  await page.waitForFunction(`S.dataLoaded===true&&S.staffTab==='waitlist'`);
+  await expect(page.locator('#tab-waitlist #mw-host')).toContainText('Walk Up');
+  expect(new URL(page.url()).pathname).toBe('/waitlist');
 });
 
 test('the multi-rider add still puts a party on the list', async ({ page }) => {
@@ -72,7 +92,7 @@ test('the multi-rider add still puts a party on the list', async ({ page }) => {
       (Array.isArray(b) ? b : [b]).forEach((x: Record<string, unknown>) => rows.push(x));
     }
   });
-  await page.locator('#tab-queue').getByRole('button', { name: /Add to waitlist/i }).click();
+  await page.locator('#tab-waitlist').getByRole('button', { name: /Add to waitlist/i }).click();
   await page.locator('#wl-name').fill('Family Head');
   await page.locator('#wl-phone').fill('0551234567');   // required: a walk-up needs a contact
   await page.evaluate(`_wlxAdd()`);                     // re-renders, keeping what was typed

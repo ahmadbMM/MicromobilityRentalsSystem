@@ -231,7 +231,7 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   segment: `/bookings`, `/sales`, `/inventory`, `/website/bikes`…), `CUST_PATHS` (`/reserve`,
   `/my-bookings`, `/account` with its parts `/account/stats` and `/account/badges`, `ACC_VIEWS`; the event picker is
   `/`) and `SUB_PATHS` (a sub-view's second
-  segment: `/bookings/waitlist`, `/community/applications`, `/history/log`). `_pathFor`,
+  segment: `/bookings/riders`, `/community/applications`, `/history/log`). `_pathFor`,
   `_parsePath` and `_setSub` are the only places that know the mapping; state ↔ address goes
   through them. Bookings stays date-less; a picked ride travels as `?session=<id>`.
 - The same list is repeated, deliberately, in `functions/_middleware.js` (`APP_ROUTE`: a 404 for
@@ -247,7 +247,7 @@ characters, no overlapping `/x/*`) and runs every excluded file through the midd
   (`SUB_PATHS.sessions`, `S.sessView`); the old `/bookings/sessions[/calendar]` open them (`_parsePath`). Filters,
   sorts, layouts that keep the same page, form modes and popups have no address.
 - Asset addresses in the app are root-relative (`/styles.css`, `/vendor/…`, `/lang/…`): a page
-  at `/bookings/waitlist` must still find them. Never write `./x` in the source.
+  at `/bookings/riders` must still find them. Never write `./x` in the source.
 - The suite runs on `node scripts/serve.mjs` (Cloudflare Pages + the middleware, stood in for),
   not Python's http.server, which 404s a reload on `/bookings`. `npm run serve` is the same.
 
@@ -1659,6 +1659,24 @@ staff chooses", then, the same day, "show the meeting point immediately only hid
   file) and reads signed-out visitors' rides through `list_sessions(null, null)` too, since the table hides the held
   row. `tests/spot-reveal.spec.ts`.
 
+## The Waitlist is a section of its own (2026-11-09)
+
+The owner: "make the waitlist as a separate section not under the bookings page". The staff list that was Bookings'
+`managed` view (`renderManagedWl`, the desk's `desk_waitlist` rows and the waitlisted bookings) is the section
+`waitlist`: `data-stab="waitlist"` on the rail under Bookings, `#tab-waitlist`, `/waitlist` (STAFF_PATHS, and the
+route lists in functions/_middleware.js, service-worker.js, scripts/serve.mjs), G then Q, the `promote` mark.
+- **Who opens it**: whoever opens Bookings - `DESK_TABS`, `ROLE_TABS` (manager, leader, owner), admins through
+  `_staffSections()`, and `_modIds` adds it to an account list that names `queue` (view and edit), so an older list
+  keeps it. The simple phone view leaves it off (`SIMPLE_TABS`), as it left the view off.
+- **Drawing**: `renderWaitlist()` calls `renderStaffQueue()`, which draws the section (`_wlSecPaint`) while it is the
+  one open, after the work every queue repaint does (the open check-in window, the address, the outbox's overlay), so
+  every desk action that repaints the queue repaints the list. The list's title has no Bookings pills under it; the
+  roster's pills lost the Waitlist one.
+- **Old ways in**: `/bookings/waitlist` opens the section (`_parsePath`), a `queueView` of `managed` or `waitlist` (a
+  device that has not reloaded, a spec) sends `renderStaffQueue` there, and `_restoreQueueView` no longer restores it.
+  A walk-up handed a bike from the list goes to the list's picked ride while the section is open (`_aimedMw`).
+- `tests/desk-waitlist.spec.ts`, `tests/paths.spec.ts`, `tests/queue-view-memory.spec.ts`.
+
 ## A circuit night's waitlist collects later (2026-11-03)
 
 The owner: "show jcc waitlisted bookings that they collect their bikes on 9:15 and make it clear that they are
@@ -1895,9 +1913,9 @@ section layout per section, and 25 control heights. The rules now (CSS: "STAFF T
   row's end (`.section-header`, which keeps a gap and wraps), the section's tabs under the title, then the content.
   Workshop, Ambassadors, Vendors and Messages carry their title above their card; Inventory's Bikes / Equipment /
   Supplements are tabs (`.inv-tabs`, the buttons keep `.inv-navbtn`). A new section follows the same order.
-- **Bookings' views** (Bookings, Waitlist, the Petromin page; Sessions was one until 2026-11-06) sit under each view's own title: every view draws
-  them itself from `_qvPillsHtml(tail)` right after its header (renderSessions, renderManagedWl, renderRiders); the
-  roster passes the live-location switch as the row's tail. The roster's title is `tabQueue` ("Bookings").
+- **Bookings' views** (Bookings, the Petromin page, Hand-over while `GIVE_BIKE_STEP`; Sessions was one until 2026-11-06, the Waitlist until 2026-11-09) sit under each view's own title: every view draws
+  them itself from `_qvPillsHtml(tail)` right after its header (the roster, renderRiders); the
+  roster passes the live-location switch as the row's tail, and draws no lone Bookings pill when it has no other view. The roster's title is `tabQueue` ("Bookings").
 - **The night's figures are one sticky bar**, `#q-live-count`: the live three (`.q-lc-nums`, D16; Not arrived first
   and larger, `.q-lc-big`, round two) then `.stat-strip`
   (# of riders, Waitlist, Not here, Completed, Clear) and the overdue line. Expected and On Bike are not drawn a second
@@ -2346,7 +2364,7 @@ simplify and minimize as much as you think the staff using a phone won't need". 
   line, the second figures line, the filter panel (`#fm-q`), a card's select box and booked-at time; on Sessions the layouts,
   Customize, New Session, filters, booking window and promo codes; Sales' Close-out and Till; Workshop's Reports; Settings'
   Business / Pricing tabs and the message templates.
-- **What the script changes**: Bookings shows the roster (no Waitlist view) and a card's add-ons row only lists add-ons
+- **What the script changes**: Bookings shows the roster (the Waitlist section is not on the simple view's rail: `SIMPLE_TABS`) and a card's add-ons row only lists add-ons
   already there (no "+ Add-ons"; the pay pill's Edit price still adds them); Sessions is the cards layout, and a session's
   page keeps its figures, Open in Bookings and open / full / close (`d.stat`) and its riders; People is its find box alone
   (`S.communityTab` is left as it was for the full view); Volunteers is Shifts with no tabs.

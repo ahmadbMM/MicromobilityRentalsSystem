@@ -23,11 +23,17 @@ async function openStaff(page: Page, fixture: Record<string, unknown>[]) {
 test('a refresh comes back to the current session, keeping the view and status filter', async ({ page }) => {
   await openStaff(page, sessions);
   expect(await page.evaluate('S.sfSession')).toBe(today);                       // tonight by default
-  await page.evaluate(`setSfSession('${S2}');S.queueView='managed';renderStaffQueue();setSfStatus('waiting')`);
+  await page.evaluate(`setSfSession('${S2}');setSfStatus('waiting')`);
   await page.reload();
   await waitForSb(page);
   await page.evaluate(`setStaffTab('queue');renderStaffQueue()`);
-  expect(await page.evaluate('[S.sfSession, S.queueView, S.sfStatus]')).toEqual([today, 'managed', 'waiting']);
+  expect(await page.evaluate('[S.sfSession, S.queueView, S.sfStatus]')).toEqual([today, 'bookings', 'waiting']);
+});
+
+test('a Waitlist view saved by an older build opens Bookings (the Waitlist is a section since 2026-11-09)', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('cq_queue_view', JSON.stringify({ queueView: 'managed', sfStatus: 'all' })));
+  await openStaff(page, sessions);
+  expect(await page.evaluate(`[S.staffTab, S.queueView||'bookings']`)).toEqual(['queue', 'bookings']);
 });
 
 test('a session saved by an older build is ignored', async ({ page }) => {

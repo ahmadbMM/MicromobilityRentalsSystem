@@ -67,7 +67,7 @@ test.describe('the server', () => {
     return mod.onRequest(ctx) as Promise<Response>;
   };
   test('answers a deep address with the app when Pages has no file for it', async () => {
-    for (const path of ['/bookings', '/bookings/waitlist', '/community/applications', '/website/bikes/fields', '/my-bookings', '/sales/', '/people/a/3f2c9a1e-0b6f-4c1d-9e2a-5d7b8c9a0f12']) {
+    for (const path of ['/bookings', '/waitlist', '/bookings/waitlist', '/community/applications', '/website/bikes/fields', '/my-bookings', '/sales/', '/people/a/3f2c9a1e-0b6f-4c1d-9e2a-5d7b8c9a0f12']) {
       const r = await mw('https://staff.micromobility.sa' + path, { status: 404 });
       expect(r.status, path).toBe(200);
       expect(await r.text(), path).toBe('shell /'); // the root, never /index.html (a 308 on Pages)
@@ -82,7 +82,7 @@ test.describe('the server', () => {
   });
   test('sends a staff address on the live customer host to the staff address, path and query kept', async () => {
     const live = 'https://experiences.micromobility.sa';
-    for (const [path, to] of [['/sales', '/sales'], ['/bookings/waitlist?lang=ar', '/bookings/waitlist?lang=ar'], ['/website/bikes/', '/website/bikes'], ['/team', '/team']]) {
+    for (const [path, to] of [['/sales', '/sales'], ['/bookings/waitlist?lang=ar', '/bookings/waitlist?lang=ar'], ['/waitlist', '/waitlist'], ['/website/bikes/', '/website/bikes'], ['/team', '/team']]) {
       const r = await mw(live + path);
       expect(r.status, path).toBe(302);
       expect(r.headers.get('location'), path).toBe('https://staff.micromobility.sa' + to);
@@ -99,7 +99,7 @@ test.describe('staff', () => {
     await page.evaluate(`setStaffTab('cashier')`);
     expect(at(page)).toBe('/sales');
     await page.evaluate(`setStaffTab('waitlist')`);
-    expect(at(page)).toBe('/bookings/waitlist');
+    expect(at(page)).toBe('/waitlist'); // a section of its own since 2026-11-09
     await page.evaluate(`setStaffTab('sessions')`);
     expect(at(page)).toBe('/sessions');
     await page.evaluate(`setStaffTab('community');setCommTab('applications')`);
@@ -131,6 +131,15 @@ test.describe('staff', () => {
     }
   });
 
+  test('/bookings/waitlist, the Waitlist\'s address while it was a view of Bookings, opens its section at /waitlist', async ({ page }) => {
+    await staff(page, '/bookings/waitlist');
+    await page.waitForFunction(`S.staffTab==='waitlist'`);
+    expect(at(page)).toBe('/waitlist');
+    await staff(page, '/waitlist');
+    await page.waitForFunction(`S.staffTab==='waitlist'`);
+    expect(at(page)).toBe('/waitlist');
+  });
+
   test('a deep link opens on that section and sub-view', async ({ page }) => {
     await staff(page, '/website/bikes/categories');
     expect(await page.evaluate('S.staffTab')).toBe('catalog');
@@ -153,7 +162,7 @@ test.describe('staff', () => {
     // the section's id until 2026-10-03, as a saved tab or an account's section list may still hold it
     await page.evaluate(`setStaffTab('dashboard');setStaffTab('fnb')`);
     expect(await page.evaluate('S.staffTab')).toBe('vendors');
-    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors","sessions","lockers"]'); // a list naming Bookings names Sessions too (a view of it until 2026-11-06), and Lockers (2026-11-09)
+    expect(await page.evaluate(`JSON.stringify(_modIds(['queue','fnb']))`)).toBe('["queue","vendors","sessions","lockers","waitlist"]'); // a list naming Bookings names Sessions too (a view of it until 2026-11-06), Lockers (2026-11-09) and the Waitlist (a view of it until 2026-11-09)
   });
 
   test('Analytics: /analytics is the overview, each view is a second segment (2026-10-05)', async ({ page }) => {

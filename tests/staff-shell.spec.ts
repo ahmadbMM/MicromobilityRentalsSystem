@@ -211,7 +211,7 @@ test('phones and tablets get a bottom bar with the most used sections and More',
   await bar.locator('.tb-more').click();
   await expect(page.locator('body')).toHaveClass(/snav-open/);
   await page.evaluate(`setStaffRole('frontdesk')`);
-  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Lockers', 'Sales', 'Workshop']); // Lockers beside Bookings (2026-11-09)
+  await expect(bar.locator('.tb-btn')).toHaveText(['Bookings', 'Lockers', 'Sales', 'Workshop', 'More']); // Lockers beside Bookings (2026-11-09); the Waitlist, a fifth section since then, is under More
 });
 
 test('the desktop keeps the rail and has no bottom bar', async ({ page }) => {

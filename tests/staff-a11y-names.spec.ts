@@ -135,10 +135,9 @@ test.describe('@staff:a11y names, focus and keyboard', () => {
     await expect.poll(() => page.evaluate('S.sfSession')).toBe(S2);
     await expect(page.locator(`#tab-queue button.sess-summary-chip[data-on-click*="${S2}"]`).first()).toHaveAttribute('aria-pressed', 'true');
     expect(await page.evaluate(`document.querySelectorAll('#tab-queue button.sess-summary-chip :is(div,p,ul,ol,table,section)').length`)).toBe(0);
-    // every toggle pill says whether it is on
-    const pills = page.locator('#tab-queue .filter-pill');
-    expect(await pills.count()).toBeGreaterThan(1);
-    for (const p of await pills.all()) await expect(p).toHaveAttribute('aria-pressed', /^(true|false)$/);
+    // every toggle pill says whether it is on (the roster draws no view pills since the Waitlist became a section,
+    // 2026-11-09: there is no other view to switch to while the Give bike step is off)
+    for (const p of await page.locator('#tab-queue .filter-pill').all()) await expect(p).toHaveAttribute('aria-pressed', /^(true|false)$/);
     // the new-session form's bike cards: a button to pick, Space as well as a tap
     await page.evaluate(`S.queueView='sessions';renderStaffQueue();S.showAddSession=true;S.editSessionId=null;S.newSessMode='fleet';S.newSessAssignedIds=[];renderSessions()`);
     const card = page.locator('#sess-add-form button.bike-assign-card').first();
