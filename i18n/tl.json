@@ -2896,7 +2896,6 @@
   "scanBnErr": "Hinto",
   "scanSoundBtn": "Tunog",
   "scanDetailsBtn": "Detalye ng booking",
-  "scanBlacklisted": "Nasa blacklist si #{0} {1}. Magtanong sa lead bago siya i-check in.",
   "scanAlreadyIn": "Naka-check in na si #{0} {1}",
   "scanInAt": "mula {0}",
   "scanOwes": "may utang na {0} SAR",

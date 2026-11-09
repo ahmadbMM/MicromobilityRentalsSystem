@@ -3,7 +3,8 @@ import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/s
 
 // The blacklist tag: black, the white mark struck through, on an account that is not fit to be in
 // the community. The Community grant and an application's approval point it out, and granting it to
-// a member offers to take the Community tag away. All Supabase traffic is stubbed.
+// a member offers to take the Community tag away. It never stops a booking: its holder's bookings carry
+// its mark after the name for staff (the owner, 2026-11-09). All Supabase traffic is stubbed.
 
 const tags = [
   { id: 'tag_saturday', slug: 'saturday', name: 'Community', color: '#4aa8f8', locked: true, auto_grant: false },
@@ -105,4 +106,31 @@ test('approving an application from a blacklisted account says so and turns Appr
   await expect(modal(page)).toContainText('Approve Fresh Face?');
   await expect(modal(page).locator('.tag-ban-warn')).toHaveCount(0);
   await expect(modal(page).locator('button.btn-primary', { hasText: 'Approve' })).toHaveCount(1);
+});
+
+test('a holder books like anyone; their bookings carry the mark after the name on Bookings and the phone cards', async ({ page }) => {
+  const LIVE = '2099-03-01';
+  const sessions = [{ id: LIVE, day: 'Sunday', session_date: LIVE, status: 'open', capacity: 20, created_at: 1, bike_slots: '{"_time":"21:00 - 23:00","_total":20}' }];
+  const row = (n: number, cid: string, name: string) => ({
+    id: 'q' + n, session_id: LIVE, session_day: 'Sunday', session_date: LIVE, queue_num: n, name, customer_id: cid, phone: '', email: '',
+    type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 75, registered_at: '2026-10-20T10:00:00Z',
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await boot(page, { sessions, queue_entries: [row(1, 'c-ban', 'Banned Rider'), row(2, 'c-mem', 'Member Rider')] });
+  await page.waitForFunction('(S.customerTags||[]).length>0');
+  await page.evaluate(`setStaffTab('queue');S.queueView='bookings';S.sfSession='${LIVE}';renderStaffQueue()`);
+  const tr = (id: string) => page.locator(`#tab-queue .queue-table tbody tr[data-id="${id}"]`);
+  const mk = tr('q1').locator('.rider-name .blk-mk');
+  await expect(mk).toBeVisible();
+  await expect(mk).toHaveAttribute('title', 'Blacklist');
+  await expect(mk).toHaveCSS('background-color', 'rgb(11, 11, 11)');
+  await expect(mk.locator('.tag-banned .tag-logo-mm')).toHaveCount(1);
+  await expect(tr('q2').locator('.blk-mk')).toHaveCount(0);
+  if (process.env.SHOT_DIR) await page.locator('#tab-queue .queue-table').screenshot({ path: `${process.env.SHOT_DIR}/blk-roster.png` });
+  // the row is not held back: Check in is there as on any other booking
+  await expect(tr('q1').locator('button', { hasText: 'Check in' })).toHaveCount(await tr('q2').locator('button', { hasText: 'Check in' }).count());
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.evaluate(`renderStaffQueue()`);
+  await expect(page.locator('#tab-queue .queue-mobile-view .q-card[data-id="q1"] .blk-mk')).toHaveCount(1);
+  await expect(page.locator('#tab-queue .queue-mobile-view .q-card[data-id="q2"] .blk-mk')).toHaveCount(0);
 });

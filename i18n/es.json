@@ -2896,7 +2896,6 @@
   "scanBnErr": "Alto",
   "scanSoundBtn": "Sonido",
   "scanDetailsBtn": "Detalles de la reserva",
-  "scanBlacklisted": "#{0} {1} está en la lista negra. Pregunta a un responsable antes de registrarlo.",
   "scanAlreadyIn": "#{0} {1} ya está registrado",
   "scanInAt": "desde {0}",
   "scanOwes": "debe {0} SAR",

@@ -2896,7 +2896,6 @@
   "scanBnErr": "रोक्नुहोस्",
   "scanSoundBtn": "आवाज",
   "scanDetailsBtn": "बुकिङ विवरण",
-  "scanBlacklisted": "#{0} {1} ब्ल्याकलिस्टमा छन्। चेक-इन गर्नुअघि लिडलाई सोध्नुहोस्।",
   "scanAlreadyIn": "#{0} {1} पहिले नै चेक-इन भइसके",
   "scanInAt": "{0} देखि",
   "scanOwes": "{0} SAR बाँकी",

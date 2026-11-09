@@ -4,7 +4,7 @@ import { stubSupabase, unlockStaff, waitForSb, goStaffTab } from './helpers/supa
 // Desk speed (2026-10-04), the booth's check-in and bike handling:
 //  - the scanner says what each scan did in a full-width banner, in a word and a mark as well as a
 //    colour (OK / Check / Stop), with a WebAudio tone (muted by the Sound switch) and a buzz; OK
-//    clears itself, Check and Stop stay; a blacklisted rider is a Stop with Make an exception;
+//    clears itself, Check and Stop stay; a blacklisted rider is never stopped, only marked (2026-11-09);
 //  - a single Confirm closes the panel: the next rider is not opened by itself (2026-10-11);
 //  - Not here yet: a stat chip on Bookings for riders still expected after the ride's start;
 //  - the screen stays on at the desk (Wake Lock) and Booth mode is a high-contrast look, both in
@@ -207,16 +207,14 @@ test.describe('@staff:bookings scanner feedback', () => {
     await expect(page.locator('#scan-exception-btn')).toBeVisible();
   });
 
-  test('a blacklisted rider is Stop; Make an exception carries on to the check-in', async ({ page }) => {
+  test('a blacklisted rider goes straight to the check-in, the blacklist mark beside the name (2026-11-09)', async ({ page }) => {
     await boot(page);
     await openScanner(page);
     await page.evaluate(`S.customerTags=[{customer_id:'c-ban',tag_id:TAG_BLACKLIST,added_by:'staff',added_at:1}]`);
     await scan(page, 'MMC-2-bbbb2222');
-    await expect(banner(page)).toHaveClass(/scan-bn-err/);
-    await expect(banner(page)).toContainText('blacklist');
-    expect(await page.evaluate('S._ciId')).toBeFalsy();
-    await page.locator('#scan-exception-btn').click();
     await expect.poll(() => page.evaluate('S._ciId')).toBe(B);
+    await expect(page.locator('#dlgt-checkin .blk-mk')).toBeVisible();
+    await expect(page.locator('#scan-exception-btn')).toHaveCount(0);
   });
 
   test('the Sound switch silences the tone and is kept on the device', async ({ page }) => {
