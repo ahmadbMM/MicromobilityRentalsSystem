@@ -208,7 +208,10 @@ jobs:
           # This deployment's own address when the deploy step found it (the alias may still be the old one).
           base="${DEPLOY_URL:-https://experiences.micromobility.sa}"
           probe="$RUNNER_TEMP/probe.json"
-          for attempt in 1 2 3; do
+          # Eight tries, 15 s apart (about two minutes): since 2026-11-09 a new deployment's own address has
+          # answered Cloudflare's 404 page for more than the old 40 s after "Deployment complete!", and two
+          # deploys that had landed (live served their build) went red here.
+          for attempt in 1 2 3 4 5 6 7 8; do
             code=$(curl -s -o "$probe" -w '%{http_code}' --max-time 20 -X POST \
               -H 'Content-Type: application/json' -d '{}' \
               "$base/api/log-error") || true
@@ -220,7 +223,7 @@ jobs:
               000) echo "no answer (timeout / DNS / TLS)." ;;
               *)   echo "no function answer in the body." ;;
             esac
-            [ "$attempt" = 3 ] || sleep 20
+            [ "$attempt" = 8 ] || sleep 15
           done
-          echo "::error::no Pages Function answered after 3 attempts (last status: $code)"
+          echo "::error::no Pages Function answered after 8 attempts (last status: $code)"
           exit 1
