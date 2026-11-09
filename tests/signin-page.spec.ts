@@ -17,7 +17,7 @@ async function open(page: Page, path = '/') {
   await expect(page.locator('#auth-modal.as-page .auth-title')).toBeVisible();
 }
 
-test('Sign in is the first page: its title, and the line above Google and Apple that leads to Create account', async ({ page }) => {
+test('Sign in is the first page: its title, and the line above the form that leads to Create account', async ({ page }) => {
   await open(page);
   await expect(page.locator('.auth-title')).toHaveText('Sign in');
   await expect(page.locator('.auth-sub')).toHaveCount(0); // no line under the title (the user, 2026-11-09)
@@ -25,8 +25,8 @@ test('Sign in is the first page: its title, and the line above Google and Apple 
   await expect(bar(page)).toHaveText('New to MicroMobility? Create account');
   await expect(bar(page).locator('button')).toHaveText('Create account');
   await expect(page.locator('.auth-submit')).toHaveText('Sign in');
-  // the line sits right on top of the Google and Apple buttons, plain text: no border, no background
-  expect(await page.evaluate(`document.querySelector('#auth-modal .auth-switch').nextElementSibling.classList.contains('btn-google')`)).toBe(true);
+  // the line sits right on top of the form (Google and Apple are gone, 2026-11-09), plain text: no border, no background
+  expect(await page.evaluate(`!!document.querySelector('#auth-modal .auth-switch').nextElementSibling.querySelector('#a-identifier')`)).toBe(true);
   expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.borderTopWidth, c.backgroundColor]; })).toEqual(['0px', 'rgba(0, 0, 0, 0)']);
   // the whole sentence is green (the link's own ink), 16px and centred
   expect(await bar(page).evaluate((el) => { const c = getComputedStyle(el); return [c.color === getComputedStyle(el.querySelector('button')!).color, c.fontSize, c.textAlign]; })).toEqual([true, '16px', 'center']);

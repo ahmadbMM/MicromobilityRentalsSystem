@@ -189,13 +189,3 @@ test('Account: an existing name is not re-judged, a new one is', async ({ page }
   expect(saves).toHaveLength(1);
 });
 
-test('a name from Google or Apple arrives with its dashes turned into spaces', async ({ page }) => {
-  await stubSupabase(page, {});
-  await page.goto('/');
-  await waitForSb(page);
-  // (no account for it: Create account opens with the provider's name, 2026-09-30)
-  await page.evaluate(`openAuthModal();S._pendingGoogle={email:'k@x.com',name:'Kerry-Ann Al–Stander'};_oauthNoAccount()`);
-  const both = await page.evaluate(`[document.getElementById('a-first').value, document.getElementById('a-last').value].join(' ')`) as string;
-  expect(both).not.toMatch(/[-–—]/);
-  expect(both.replace(/\s+/g, ' ')).toBe('Kerry Ann Al Stander');
-});

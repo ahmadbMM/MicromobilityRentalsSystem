@@ -80,7 +80,7 @@ test('monkey: 40 random staff-panel clicks produce zero page errors', async ({ p
   await page.goto('/?staff');
   await waitForSb(page);
   page.on('dialog', (d) => d.dismiss().catch(() => {}));
-  await page.evaluate(`window.open=()=>null; window.print=()=>{}; lockStaff=async()=>{}; doLogout=()=>{}; signInGoogle=()=>{}; signInApple=()=>{};`); // no popups/print/navigation (incl. the OAuth redirects on the auth-first landing)
+  await page.evaluate(`window.open=()=>null; window.print=()=>{}; lockStaff=async()=>{}; doLogout=()=>{}; `); // no popups/print/navigation (incl. the OAuth redirects on the auth-first landing)
   // Deterministic pseudo-random clicker (mulberry32 seed) over visible buttons
   await page.evaluate(`(async()=>{
     let t=1337; const rnd=()=>{t|=0;t=t+0x6D2B79F5|0;let r=Math.imul(t^t>>>15,1|t);r=r+Math.imul(r^r>>>7,61|r)^r;return((r^r>>>14)>>>0)/4294967296;};

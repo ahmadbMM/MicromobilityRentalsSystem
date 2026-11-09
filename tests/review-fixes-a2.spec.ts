@@ -93,20 +93,6 @@ test('Back to login on the second reset step opens Sign in', async ({ page }) =>
   await expect(page.locator('#a-identifier')).toBeVisible();
 });
 
-test('a Google photo the server refused is not kept on the device', async ({ page }) => {
-  await boot(page, {
-    'rpc:customer_oauth_login': [{ id: 'c9', name: 'Gee Rider', email: 'g@example.com', session_token: 'tk', photo: null }],
-    'rpc:customer_set_photo': { __rpcError: { status: 400, code: 'P0001', message: 'refused' } },
-  });
-  const r = await page.evaluate(`(async()=>{
-    sb.auth.getSession=async()=>({data:{session:{user:{email:'g@example.com',user_metadata:{avatar_url:'https://lh3.example.com/p.jpg'}}}}});
-    const v=await handleGoogleReturn();
-    return {v,photo:S.loggedIn&&S.loggedIn.photo};
-  })()`) as { v: string; photo: unknown };
-  expect(r.v).toBe('loggedin');
-  expect(r.photo).toBeFalsy();
-});
-
 test('a customer session without a name still draws the top bar', async ({ page }) => {
   await boot(page);
   const html = await page.evaluate(`(()=>{

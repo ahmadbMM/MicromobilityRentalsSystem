@@ -39,11 +39,12 @@ test('an Apple relay account is asked for its everyday email and a password, the
   await expect(box.locator('.fx-kicker')).toHaveText('Account check-up');
   await expect(box.locator('.pg-title')).toHaveText('Add your everyday email');
   await expect(box.locator('.pg-sub')).toContainText('chose to keep your email private');
-  await expect(box.locator('.pg-sub')).toContainText('Google and Apple sign-in are going away');
+  await expect(box.locator('.pg-sub')).toContainText('Google and Apple sign-in have ended');
   await expect(box.locator('.pg-note')).toHaveText('From now on you sign in with your email or mobile number and this password. You can book as soon as this is saved.');
   expect(await page.locator('#fix-gate .fx-item').evaluateAll(els => els.map(e => (e as HTMLElement).dataset.fx))).toEqual(['email', 'password']);
   await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .fx-was')).toHaveText(`On your account: ${RELAY}`);
-  await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .fx-hint')).toContainText('Your private Apple address stays linked');
+  // Only what the box is for: "Continue with Apple still works" went with Apple sign-in (2026-11-09).
+  await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .fx-hint')).toHaveText('This becomes the email on your account and bookings.');
   expect(await page.evaluate('S.selEvent')).toBe('none');
 
   // The relay address itself is not an answer.
@@ -76,11 +77,11 @@ test('an account that already has its real email is asked only for a password', 
   await page.evaluate(`selectEvent('jcc')`);
   const box = page.locator('#fix-gate .fx-box');
   await expect(box.locator('.pg-title')).toHaveText('Create a password');
-  await expect(box.locator('.pg-sub')).toHaveText('Google and Apple sign-in are going away. Create a password so you can keep signing in with sara@example.com or your mobile number.');
+  await expect(box.locator('.pg-sub')).toHaveText('Google and Apple sign-in have ended. Create a password so you can keep signing in with sara@example.com or your mobile number.');
   await expect(page.locator('#fix-gate .fx-item')).toHaveCount(1);
 });
 
-// Google and Apple sign-in are going away (the owner, 2026-09-30: "force them to add a password if there
+// Google and Apple sign-in were going away (the owner, 2026-09-30: "force them to add a password if there
 // wasn't one already linked"): an account with no password meets the check-up as soon as the site
 // opens on it, not only at its next event pick, and saving it is the way on.
 test('an account with no password meets the check-up when the site opens, before any event pick', async ({ page }) => {
@@ -116,7 +117,7 @@ test('a password and a missing birth date read as the account’s own check-up, 
   const box = page.locator('#fix-gate .fx-box');
   await expect(box.locator('.fx-kicker')).toHaveText('Account check-up');
   await expect(box.locator('.pg-title')).toHaveText('A few details for your account');
-  await expect(box.locator('.pg-sub')).toHaveText('Google and Apple sign-in are going away, so your account needs a password, and a few more details. Add them once and you can book.');
+  await expect(box.locator('.pg-sub')).toHaveText('Google and Apple sign-in have ended, so your account needs a password, and a few more details. Add them once and you can book.');
   await expect(box.locator('.pg-note')).toHaveText('From now on you sign in with your email or mobile number and this password. You can book as soon as this is saved.');
   await expect(box).not.toContainText('Our team asked you');
   expect(await page.locator('#fix-gate .fx-item').evaluateAll(els => els.map(e => (e as HTMLElement).dataset.fx))).toEqual(['birth_date', 'password']);
@@ -153,21 +154,6 @@ test('an email already on another account is named, and nothing else is lost', a
   await expect(page.locator('#fix-gate .fx-item[data-fx="email"] .pg-msg')).toHaveText('An account with this email already exists.');
   await expect(page.locator('#fx-email')).toHaveValue('taken@example.com');
   expect(await page.evaluate('S.loggedIn.email')).toBe(RELAY);
-});
-
-// ── Signing up with Apple and a hidden email ─────────────────────────────────
-// Apple no longer makes accounts (2026-09-30): an Apple sign-in with no account lands on Create
-// account, and the hidden address is not offered as the email (tests/auth-page.spec.ts).
-test('an Apple sign-in with a hidden email and no account makes nothing; Create account asks for a real email', async ({ page }) => {
-  await stubSupabase(page, { 'rpc:customer_exists': false });
-  const made: unknown[] = [];
-  await page.route(/\/rest\/v1\/rpc\/customer_oauth_signup/, async r => { made.push(1); await r.fulfill({ status: 200, headers: { 'access-control-allow-origin': '*', 'content-type': 'application/json' }, body: '[]' }); });
-  await page.goto('/');
-  await waitForSb(page);
-  await page.evaluate(`openAuthModal();S._pendingGoogle={email:"n1@privaterelay.appleid.com",name:"New Rider"};_oauthNoAccount()`);
-  await expect(page.locator('#a-email')).toHaveValue('');
-  await expect(page.locator('#a-pwd')).toBeVisible();
-  expect(made).toHaveLength(0);
 });
 
 // ── Staff ─────────────────────────────────────────────────────────────────────

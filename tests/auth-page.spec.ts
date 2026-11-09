@@ -151,67 +151,19 @@ test.describe('forgot password', () => {
   });
 });
 
-// Google and Apple no longer make accounts (the owner, 2026-09-30): Create account has neither
-// button, and a Google or Apple sign-in that finds no account lands on Create account instead of a
-// Google-only profile form.
-test.describe('Google and Apple: sign-in only', () => {
-  test('Create account has no Google or Apple button; Sign in keeps both', async ({ page }) => {
+// No Google or Apple sign-in (the owner, 2026-11-09: "i don't want to have any google or apple sign in
+// anymore"): neither page offers them, and what drove them is gone.
+test.describe('No Google or Apple sign-in', () => {
+  test('neither Sign in nor Create account offers Google or Apple', async ({ page }) => {
     await boot(page);
-    await expect(page.locator('#auth-modal .btn-google:not(.btn-apple)')).toHaveCount(1);
-    await expect(page.locator('#auth-modal .btn-apple')).toHaveCount(1);
-    await page.evaluate('switchAuthMode("signup")');
-    await expect(page.locator('#a-email')).toBeVisible();
-    await expect(page.locator('#auth-modal .btn-google')).toHaveCount(0);
-    await expect(page.locator('#auth-modal .btn-apple')).toHaveCount(0);
-    await expect(page.locator('#auth-modal .auth-or')).toHaveCount(0);
-    await expect(page.locator('#auth-modal')).not.toContainText(/Continue with (Google|Apple)/);
-  });
-
-  test('a sign-in with no account lands on Create account with its name and email, says why, and makes nothing', async ({ page }) => {
-    await boot(page);
-    const made = await captureRpc(page, 'customer_oauth_signup', [{ session_token: 'gtok' }]);
-    const signup = await captureRpc(page, 'customer_signup', [{ id: 'n1', session_token: 'ntok' }]);
-    await page.evaluate('S._pendingGoogle={email:"gee.user@gmail.com",name:"Gee User",photo:""};_oauthNoAccount()');
-    await expect(page.locator('.auth-title')).toHaveText('Create account');
-    await expect(page.locator('#auth-modal .auth-note')).toHaveText('No account is linked to this Google or Apple sign-in, and new accounts are no longer made with Google or Apple. Create your account below with your email and a password.');
-    await expect(page.locator('#a-first')).toHaveValue('Gee');
-    await expect(page.locator('#a-last')).toHaveValue('User');
-    await expect(page.locator('#a-email')).toHaveValue('gee.user@gmail.com');
-    await expect(page.locator('#a-pwd')).toBeVisible();
-    expect(await page.evaluate('S._pendingGoogle')).toBeNull();
-    // the sign-up is the ordinary one, with a password
-    await page.evaluate('setSignupGender("female")');
-    await page.fill('#a-phone', '0508727012');
-    await page.fill('#a-pwd', 'Ride2Work');
-    await page.fill('#a-pwd2', 'Ride2Work');
-    await page.fill('#a-height', '156');
-    await page.fill('#su-em-name', 'Sara Ahmed'); await page.fill('#su-em-phone', '511122233'); await page.selectOption('#su-em-rel', 'sibling'); // the required emergency contact
-    await page.evaluate('S.signupAck=true;doSignup()');
-    await page.waitForFunction('document.getElementById("auth-modal").style.display==="none"');
-    expect(made).toEqual([]);
-    expect(signup).toHaveLength(1);
-    expect(signup[0]).toMatchObject({ p_email: 'gee.user@gmail.com', p_name: 'Gee User', p_pwd: 'Ride2Work', p_phone: '+966508727012' });
-    expect(await page.evaluate('S._oauthMiss')).toBeNull();
-  });
-
-  test('the details show even when Create account is already open', async ({ page }) => {
-    await boot(page);
-    await page.evaluate('switchAuthMode("signup")');
-    await page.evaluate('S._pendingGoogle={email:"gee.user@gmail.com",name:"Gee User"};_oauthNoAccount()');
-    await expect(page.locator('#a-first')).toHaveValue('Gee');
-    await expect(page.locator('#a-email')).toHaveValue('gee.user@gmail.com');
-  });
-
-  test('a hidden Apple address is not put in the email box; going to Sign in forgets the details', async ({ page }) => {
-    await boot(page);
-    await page.evaluate('S._pendingGoogle={email:"abc123@privaterelay.appleid.com",name:"Apple Rider"};_oauthNoAccount()');
-    await expect(page.locator('#auth-modal .auth-note')).toBeVisible();
-    await expect(page.locator('#a-email')).toHaveValue('');
-    await expect(page.locator('#a-first')).toHaveValue('Apple');
-    await page.evaluate('switchAuthMode("login")');
-    await page.evaluate('switchAuthMode("signup")');
-    await expect(page.locator('#auth-modal .auth-note')).toHaveCount(0);
-    await expect(page.locator('#a-first')).toHaveValue('');
+    await expect(page.locator('#a-identifier')).toBeVisible();
+    for (const mode of ['login', 'signup']) {
+      await page.evaluate(`switchAuthMode(${JSON.stringify(mode)})`);
+      await expect(page.locator('#auth-modal')).not.toContainText(/Continue with|Google or Apple|Google and Apple/);
+      await expect(page.locator('#auth-modal .auth-or, #auth-modal .cu-iab-note, #auth-modal svg[viewBox="0 0 18 18"]')).toHaveCount(0);
+    }
+    expect(await page.evaluate('[typeof signInGoogle, typeof signInApple, typeof handleGoogleReturn, typeof _oauthNoAccount]'))
+      .toEqual(['undefined', 'undefined', 'undefined', 'undefined']);
   });
 });
 
@@ -228,7 +180,7 @@ test('the auth modal renders every mode in Arabic with zero console errors', asy
     switchAuthMode('signup');
     switchAuthMode('forgot');
     S.forgotStep=2; renderAuthModal();
-    S._pendingGoogle={email:'g@x.com',name:'Gee'}; _oauthNoAccount(); S.signupAck=true; renderAuthModal();
+    switchAuthMode('signup'); S.signupAck=true; renderAuthModal();
   `);
   expect(errs, errs.join('\n')).toEqual([]);
 });
@@ -236,10 +188,10 @@ test('the auth modal renders every mode in Arabic with zero console errors', asy
 test.describe('in-app browsers (Instagram/WhatsApp webviews)', () => {
   test.use({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Instagram 300.0.0.0' });
 
-  test('the Google button is replaced with guidance (Google blocks these webviews)', async ({ page }) => {
+  test('the sign-in page is the ordinary one: no Google guidance to open a browser', async ({ page }) => {
     await boot(page);
-    await expect(page.locator('#auth-modal .btn-google')).toHaveCount(0);
-    await expect(page.locator('#auth-modal')).toContainText(/Open in browser|الفتح في المتصفح/);
+    await expect(page.locator('#a-identifier')).toBeVisible();
+    await expect(page.locator('#auth-modal')).not.toContainText(/Open in browser|الفتح في المتصفح/);
     // email signup stays fully available
     await page.evaluate('switchAuthMode("signup")');
     await expect(page.locator('#a-email')).toBeVisible();
@@ -444,18 +396,4 @@ test('the auth page is a clean page under the header', async ({ page }) => {
   const box = await page.locator('#auth-modal .auth-box').boundingBox();
   expect(box!.y).toBeGreaterThanOrEqual(topbar!.y + topbar!.height - 1);
   await expect(page.locator('#topbar')).toBeVisible();
-});
-
-// Sign in with Apple is a black button on the white box. A "dark theme" variant painted it
-// white with a white border, and it always won because the head script sets data-theme="dark"
-// on every load: the button was an outline-less white box with a line of text in it.
-test('the Apple button is black on the white sign-in box', async ({ page }) => {
-  await boot(page);
-  const apple = page.locator('#auth-modal .btn-apple');
-  await expect(apple).toBeVisible();
-  const look = await apple.evaluate((el) => {
-    const cs = getComputedStyle(el);
-    return { bg: cs.backgroundColor, ink: cs.color };
-  });
-  expect(look).toEqual({ bg: 'rgb(0, 0, 0)', ink: 'rgb(255, 255, 255)' });
 });

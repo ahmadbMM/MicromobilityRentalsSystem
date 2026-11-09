@@ -20,18 +20,26 @@ test('Safari\'s "Load failed" at login is a connection problem, not a wrong pass
   await expect(page.locator('#auth-err')).toHaveText(/Connection error|offline/);
 });
 
-test('a Google return whose account lookup fails does not open the new-account form', async ({ page }) => {
-  await boot(page, { 'rpc:customer_oauth_login': { __rpcError: { status: 503, code: '', message: 'upstream unavailable' } } });
-  await page.evaluate(`sb.auth.getSession=async()=>({data:{session:{user:{email:'g@example.com',app_metadata:{provider:'google'},user_metadata:{full_name:'Gee Rider'}}}}})`);
-  expect(await page.evaluate('handleGoogleReturn()')).toBe(false);
-  expect(await page.evaluate('S._pendingGoogle')).toBeNull();
-  await expect(page.locator('.toast').last()).toContainText(/Connection error|offline/);
+// Google and Apple sign-in are gone (the owner, 2026-11-09). A session one of them left in supabase-js on a rider's
+// phone is ended at boot, on that device only, so its token is never sent again; a password session is left alone.
+const SB_KEY = 'sb-qpffkzmsfyilicwcsszz-auth-token';
+const leftover = (provider: string) => JSON.stringify({
+  access_token: 'at', refresh_token: 'rt', token_type: 'bearer', expires_in: 3600, expires_at: 4102444800,
+  user: { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'g@example.com', app_metadata: { provider }, user_metadata: {} },
 });
-
-test('a Google return with no account still goes to the new-account form', async ({ page }) => {
-  await boot(page, { 'rpc:customer_oauth_login': [] });
-  await page.evaluate(`sb.auth.getSession=async()=>({data:{session:{user:{email:'g@example.com',app_metadata:{provider:'google'},user_metadata:{full_name:'Gee Rider'}}}}})`);
-  expect(await page.evaluate('handleGoogleReturn()')).toBe('complete');
-  expect(await page.evaluate('S._pendingGoogle && S._pendingGoogle.email')).toBe('g@example.com');
+const seed = (page: Page, provider: string) => page.addInitScript(([k, v]) => {
+  if (!sessionStorage.getItem('seeded')) { localStorage.setItem(k, v); sessionStorage.setItem('seeded', '1'); }
+}, [SB_KEY, leftover(provider)]);
+for (const provider of ['google', 'apple']) {
+  test(`a ${provider} session left on the phone is ended at boot`, async ({ page }) => {
+    await seed(page, provider);
+    await boot(page);
+    await expect.poll(() => page.evaluate((k) => localStorage.getItem(k), SB_KEY)).toBeNull();
+  });
+}
+test('an email and password session is not touched', async ({ page }) => {
+  await seed(page, 'email');
+  await boot(page);
+  await page.waitForTimeout(500);
+  expect(await page.evaluate((k) => localStorage.getItem(k), SB_KEY)).not.toBeNull();
 });
-

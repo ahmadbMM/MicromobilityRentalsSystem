@@ -442,12 +442,6 @@
        .auth-box prefix outranks the later global input[type=...] recipe. */
     .auth-box .auth-field input{background:none;border:none;border-bottom:1px solid var(--line2);border-radius:0;padding:10px 2px;color:var(--text);font-family:var(--font-body);font-size:14.5px;font-weight:600;outline:none;transition:border-color .2s;width:100%;box-shadow:none;}
     .auth-box .auth-field input:focus{border-bottom-color:var(--green);box-shadow:none;}
-    .btn-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:4px;border:1px solid var(--border);background:rgba(var(--tint-rgb),.04);color:var(--text);font-family:var(--font-body);font-size:14px;font-weight:700;cursor:pointer;transition:background .2s,color .2s,border-color .2s,transform .2s,box-shadow .2s,opacity .2s;}
-    .btn-google:hover{background:rgba(var(--tint-rgb),.08);border-color:rgba(var(--tint-rgb),.25);}
-    .btn-google svg{flex-shrink:0;}
-    .auth-or{text-align:center;color:var(--muted);font-size:12px;font-weight:700;margin:10px 0;position:relative;}
-    .auth-or::before,.auth-or::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
-    .auth-or::before{left:0;}.auth-or::after{right:0;}
     .auth-submit{width:100%;margin-top:6px;}
     /* Create account's emergency contacts (2026-10-07): a titled group under the account's own boxes;
        the relationship list as wide as the boxes, the second contact behind its button. */
@@ -486,7 +480,6 @@
     #auth-modal .cu-g-female{background:rgba(255,126,182,.18);border-color:#ff7eb6;color:#ff7eb6;}
     #auth-modal .cu-g-male{background:rgba(var(--blue-rgb),.18);border-color:#4aa8f8;color:#4aa8f8;}
     #auth-modal .cu-gender-row{display:flex;gap:8px;margin-top:4px;}
-    #auth-modal .cu-iab-note{background:rgba(var(--warn-rgb),.08);border:1px solid rgba(var(--warn-rgb),.35);border-radius:4px;padding:10px 14px;font-size:12px;font-weight:600;line-height:1.6;color:var(--text);}
     #auth-modal .cu-lbl13{font-size:13px;font-weight:600;}
     #rn-ask .cu-mw420{max-width:420px;}
     #auth-modal .cu-pwd-lbl{display:flex;justify-content:space-between;align-items:center;}
@@ -3850,11 +3843,6 @@
       .addon-thumb:hover{transform:none;}
     }
 
-    /* Sign in with Apple: black button per Apple's HIG. The white "dark theme" variant is gone:
-       the head script sets data-theme="dark" on every load, so that variant always won and
-       painted a white, white-bordered button on the white sign-in box. */
-    .btn-apple{background:#000;color:#fff;border-color:#000;margin-top:8px;}
-    .btn-apple:hover{background:#1a1a1a;color:#fff;}
 
     /* Add to Apple Wallet: a mini "pass" - matte-black card, hairline green edge,
        matching the black/green pass it generates. Same look in both themes. */
@@ -4003,7 +3991,6 @@
     body .auth-box .auth-field input{
       background:#ffffff;border:1px solid rgba(26,25,25,.16);border-radius:8px;padding:12px 14px;min-height:46px;font-size:16px;}
     body .auth-box .auth-field input:focus{border-color:#077a4b;box-shadow:inset 0 0 0 1px #077a4b;}
-    body .btn-google{border-radius:6px;background:#ffffff;min-height:48px;}
     /* ── Customer side is LIGHT-ONLY: no theme toggle, and theme-swapped image pairs
        always resolve to their on-light art regardless of the html data-theme attr
        (a staff device toggled dark must not leak white-wordmark art onto paper). ── */
@@ -5070,18 +5057,6 @@
     body .landing-event-card.ev-petromin::before{background:#d6202a;}
     body .landing-event-card.ev-petromin:hover{border-color:rgba(214,32,42,.55);}
     .lec2-logo.pmd-logo{height:40px;}
-
-    /* ── The Apple button had gone white-on-white ─────────────────────────────
-       It is a .btn-google too (same shape, same layout), and the customer reskin
-       repaints every .btn-google with a white fill at a higher specificity than
-       .btn-apple's black one. The label and the glyph stayed white, so the button
-       rendered as an empty outlined box.
-
-       Black fill in BOTH themes, deliberately: the customer side is light-only (the reskin
-       paints its surfaces white whatever data-theme says), so the old dark inversion would
-       have put a white button on a white page — the same invisibility, one theme over. */
-    body .btn-google.btn-apple{background:#000;color:#fff;border-color:#000;}
-    body .btn-google.btn-apple:hover{background:#1a1a1a;color:#fff;}
 
     /* ── Waitlisted reads as waitlisted ───────────────────────────────────────
        A waitlisted booking used to share the "waiting" badge, so on a busy roster
@@ -9176,7 +9151,6 @@ body:not(.view-staff) #cancel-reason-modal .cr-acts>*{width:100%;min-width:0;pad
 body:not(.view-staff) #cancel-reason-modal .dk-cr-go{background:var(--red);border-color:var(--red);color:var(--paper);}
 
 /* ── Leftovers of the sharp look ── */
-body:not(.view-staff) .btn-google{border-radius:var(--r-ctl);}
 body:not(.view-staff) .pv-t td:not(:first-child)::before{font-size:var(--fs-12);font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink-2);}
 body:not(.view-staff) .addon-check{border-color:var(--line-3);}
 /* the wide screen's section strip: a soft segmented control, not flat tabs on a hairline */

@@ -351,17 +351,22 @@ writes (the reports, the receipt) runs under the same policy: its look lives in 
 `0` (clean-css): write `background:transparent none` and `outline:medium none`. A refused style on
 a real screen lands in error_log as `CSP style-src-attr: <the style> at <element> in #<host>`.
 
-## Google and Apple sign accounts in; they no longer make them (2026-09-30)
+## No Google or Apple sign-in (2026-11-09)
 
-The owner: "remove the apple sign up and google sign up ... only keep them in the sign in page". Create
-account has no Google or Apple button, and `customer_oauth_signup` is not callable by visitors
-(migration 20260930160000). A Google or Apple sign-in that finds no account lands on Create account
-with the provider's name and email (never a hidden Apple address) and says why (`_oauthNoAccount`,
-`S._oauthMiss`). Every account without a password (`password_hash` 'oauth:google' / 'oauth:apple') is
-asked for one by the check-up (`_customer_asks`), which opens at sign-in and at the next event pick
-(`_commAskCheck`, `_fixGate`), and `customer_create_booking` refuses its bookings until it is saved.
-A password chosen there is the owner's (`customer_owner_pwd`): `customer_oauth_login` keeps it; a
-password account that signs in with Google for the first time still has its password ended.
+The owner: "i don't want to have any google or apple sign in anymore" (Create account lost them on
+2026-09-30). Neither page offers them, and the app has no code that starts or finishes one. At boot a
+rider's phone ends a Google or Apple session supabase-js still holds (local scope only; a staff device and
+email-and-password sessions are left alone), so its token is never sent again. Supabase's Google and
+Apple providers go off in the dashboard (Authentication > Sign In / Providers), after this deploy. `customer_oauth_login` / `customer_oauth_signup` stay in
+the database, unreachable without a provider's token.
+
+An account that only ever signed in with Google or Apple has no password (`password_hash` 'oauth:google' /
+'oauth:apple'). Still signed in on a phone, it meets the check-up (`_customer_asks`), which opens at once
+and cannot be closed (`_commAskCheck`, `_fixGate`) and is refused bookings until a password is saved
+(`customer_create_booking`). Signed out, it takes Forgot password (WhatsApp to tech support): staff send a
+temporary password and the rider chooses their own at sign-in (`_pwdMustCheck`). The approval messages say
+so for such an account (`CA_MSG.oauth`). Staff screens keep the Google and Apple marks beside an email
+(`_siHtml`): they tell staff which accounts have no password of their own (the owner, 2026-11-09).
 
 The community application (micromobility.sa/community/registration, mm-platform forms/community) makes
 the account first with the same sign-up, then sends the community questions from it

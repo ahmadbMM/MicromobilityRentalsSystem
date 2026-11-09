@@ -6,6 +6,9 @@ import { stubSupabase, loginCustomer, waitForSb } from './helpers/supabase';
 // and a phone running slow kept sending the sign-in the server had already expired, without
 // ever renewing it. Public reads went down with it, list_sessions included, and the booking
 // list said no sessions were available while the week's rides were open.
+// Google and Apple sign-in are gone (2026-11-09) and a session either left is dropped before the client
+// reads it (_sbDropOauth), so the scenario is played with an email and password session, which staff
+// still have and which the renewal protects the same way.
 
 const fixtures = {
   sessions: [{ id: 's1', day: 'Sunday', session_date: '2099-01-04', capacity: 12, status: 'open', created_at: 1, location: 'JCC' }],
@@ -13,14 +16,14 @@ const fixtures = {
   queue_entries: [],
 };
 
-const googleUser = { id: 'u-rider-1', aud: 'authenticated', role: 'authenticated', email: 'spec@example.com', app_metadata: { provider: 'google' } };
+const signedIn = { id: 'u-rider-1', aud: 'authenticated', role: 'authenticated', email: 'spec@example.com', app_metadata: { provider: 'email' } };
 
 test('a sign-in token the server refuses is renewed once and the sessions load', async ({ page }) => {
   await stubSupabase(page, {
     ...fixtures,
     'auth:token': {
       access_token: 'fresh-jwt', token_type: 'bearer', expires_in: 3600,
-      expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r2', user: googleUser,
+      expires_at: Math.floor(Date.now() / 1000) + 3600, refresh_token: 'r2', user: signedIn,
     },
   });
   // The server has expired this token; the phone's clock says it has hours left, so
@@ -43,7 +46,7 @@ test('a sign-in token the server refuses is renewed once and the sessions load',
       access_token: 'stale-jwt', token_type: 'bearer', expires_in: 3600,
       expires_at: Math.floor(Date.now() / 1000) + 3 * 3600, refresh_token: 'r1', user: u,
     }));
-  }, googleUser);
+  }, signedIn);
   await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
   await page.goto('/');
   await waitForSb(page);
