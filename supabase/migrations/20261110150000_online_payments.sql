@@ -42,7 +42,8 @@ insert into public.site_content (key, value) values
   ('pay.topupMax', '1000'::jsonb),
   ('store.open', 'false'::jsonb),
   ('store.orderMinutes', '30'::jsonb),         -- stock held for an unpaid order
-  ('store.delivery', '{"pickup":{"on":true,"fee":0},"jeddah":{"on":true,"fee":30,"days":"1-2"},"ksa":{"on":true,"fee":45,"days":"4-7"},"freeOver":500}'::jsonb)
+  -- delivery as the store states it today (free to every region, pickup in Jeddah); days are placeholders the owner sets
+  ('store.delivery', '{"pickup":{"on":true,"fee":0},"jeddah":{"on":true,"fee":0,"days":"1-2"},"ksa":{"on":true,"fee":0,"days":"4-7"},"freeOver":null}'::jsonb)
 on conflict (key) do nothing;
 
 create or replace function public._pay_setting(p_key text) returns jsonb
