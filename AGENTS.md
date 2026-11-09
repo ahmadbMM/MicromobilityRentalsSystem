@@ -1609,6 +1609,17 @@ contact as {name, phone, relation}). FIX_OPTIONAL can be answered "I don't have 
 `staff_flag_customer`'s list, `customer_fix_save`'s rules = the account page's own: customer_set_about,
 customer_set_socials, customer_set_emergency with the own-number refusal). Apply the SQL before the app ships:
 the old staff_flag_customer silently drops names it does not know. `tests/flag-every-field.spec.ts`.
+
+**The same answer is no answer (2026-11-09).** The owner: "don't allow a flagged account field to type in the same
+info in the field again". The correction page refuses, per field, an answer equal to what the account holds
+(`_fixSame`, message `fixErrSame`), and the database keeps a staff flag asked when its field came back unchanged:
+`_fix_changed(c, p_id, keys, keep)` (migration 20261109200000, invoker, no client execute) compares the row before
+with the row now, and `customer_fix_save`, `customer_set_whatsapp`, `customer_community_apply` (its `flags_answered`
+too) and `customer_learn_apply` call it (patched in place from their live definitions by anchors). Both sides use one
+rule: words with their spaces tidied, an email or a handle in any case, a number by its last nine digits, an
+emergency contact by name + number + relation, the rest exactly. "I don't have one" and the server's own asks are
+never compared; the two website forms save the emergency contact by its own call first, so there it counts as
+answered. A new flaggable field needs a branch in both `_fixSame` and `_fix_changed`.
 ## The breakfast spot, told at a time staff choose (2026-10-06)
 
 The owner: "add an option for saturday social ride to announce/make the spot and location visible at the time the

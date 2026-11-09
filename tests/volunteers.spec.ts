@@ -473,6 +473,8 @@ test.describe('@customer:account Volunteering on My Account', () => {
     await page.route('https://volunteer.micromobility.sa/**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>portal</title>' }));
     await rider(page, me({ hours: 12.5, status: 'active', record: [{ id: 1, hours: 12.5, on: '2026-10-20', session_id: SID, ride_kind: 'blood', event_kind: 'community' }] }));
     await expect(page.locator('#acc-vol')).toContainText('Your volunteering hours: 12.5');
+    // the event, its day, then the hours with their word: a bare number first was confusing (the owner, 2026-11-09)
+    await expect(page.locator('#acc-vol .acc-vol-rec li')).toHaveText(/ · 20 Oct 2026 · 12\.5 hours$/);
     await page.locator('#acc-vol').getByRole('button', { name: 'Open the volunteer portal' }).click();
     await page.waitForURL(/volunteer\.micromobility\.sa/);
     expect(page.url()).toBe(`https://volunteer.micromobility.sa/?signin=${'a'.repeat(48)}`);

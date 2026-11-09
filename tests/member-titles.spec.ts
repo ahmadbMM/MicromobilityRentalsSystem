@@ -101,7 +101,7 @@ test.describe('@customer:account friend invite', () => {
     await expect(page.locator('#acc-pane-badges #inv-mine')).toHaveCount(0);
     await page.evaluate(`setCustTab('account','account')`);
     await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toBeVisible();
-    await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toHaveText('Invite a friend');
+    await expect(page.locator('#acc-pane-account #inv-mine .tt-invite')).toHaveText('Invite a friend to a Saturday social ride');
     expect(await page.evaluate(`document.getElementById('ref-mine').nextElementSibling.id`)).toBe('inv-mine');
   });
 

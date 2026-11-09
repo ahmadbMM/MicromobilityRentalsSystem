@@ -61,6 +61,29 @@ test('a flagged account meets one message at the event pick, answers it, then th
   expect(await page.evaluate(`document.body.classList.contains('fix-open')`)).toBe(false);
 });
 
+// The owner, 2026-11-09: "don't allow a flagged account field to type in the same info in the field again".
+// customer_fix_save keeps such a field asked as well (20261109200000); here the page refuses it before sending.
+test('@customer:account a flagged field answered with what the account holds is refused, and nothing is sent', async ({ page }) => {
+  await rider(page, ['email', 'phone', 'nationality']);
+  const sent = saves(page);
+  await page.evaluate(`S.selEvent='none';selectEvent('jcc')`);
+  await expect(page.locator('#fix-gate .fx-box')).toBeVisible();
+  await page.fill('#fx-email', ' SPEC@example.com');   // the same address, in another case
+  await page.fill('#fx-phone', '500000001');           // the same mobile, written without its 0
+  await page.selectOption('#fx-nat', 'Jordan');        // the same nationality picked again
+  await page.click('#fx-save');
+  const same = 'This is the same as what is on your account. Please correct it.';
+  for (const k of ['email', 'phone', 'nationality']) await expect(page.locator(`#fix-gate .fx-item[data-fx="${k}"] .pg-msg`)).toHaveText(same);
+  expect(sent).toHaveLength(0);
+  await page.fill('#fx-email', 'other@example.com');
+  await page.fill('#fx-phone', '500000002');
+  await page.selectOption('#fx-nat', 'Egypt');
+  await page.click('#fx-save');
+  await expect(page.locator('#fix-gate .fx-box')).toBeHidden();
+  expect(sent).toHaveLength(1);
+  expect(sent[0].p_values).toEqual({ email: 'other@example.com', phone: '+966500000002', nationality: 'Egypt' });
+});
+
 test('nothing flagged: the event opens straight away', async ({ page }) => {
   await rider(page, []);
   await page.evaluate(`selectEvent('jcc')`);

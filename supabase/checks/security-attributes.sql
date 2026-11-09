@@ -436,7 +436,9 @@ with expected(fname, want_definer, note) as (values
   ('staff_volunteer_shift_times_many', true, 'many shifts in one call; the section is checked'),
   ('staff_volunteer_hours_add_many',   true, 'many hour awards in one call; the section is checked'),
   ('_vol_brief_reset',             true,  'trigger: clears every "I have read it" when the briefing changes'),
-  ('_vol_today',                   false, 'pure: today in Riyadh')
+  ('_vol_today',                   false, 'pure: today in Riyadh'),
+  ('customer_set_whatsapp',        true,  'writes the caller''s own WhatsApp answer, clears its flag; token-checked'),
+  ('_fix_changed',                 false, 'reads one customers row; called only from definer functions, no client execute (20261109200000)')
 )
 select e.fname,
        case when p.oid is null then 'MISSING FROM DATABASE'
