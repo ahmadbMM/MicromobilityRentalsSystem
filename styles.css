@@ -12508,6 +12508,29 @@ body:not(.view-staff) .bdr-doc{color:var(--go);}
 #tab-lockers .lk-in-s{width:90px;}
 #tab-lockers .lk-units-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:6px 0;font-weight:600;color:var(--text);}
 #tab-lockers .lk-ret-d{margin-top:14px;}
+/* The cabinet (the owner, 2026-11-09): three across, numbered across the rows, as the real one stands. The review's
+   picker (.lk-cab), the rider's own lockers in My bookings (.lk-own), and the staff board laid out the same way. */
+.lk-cab-h{margin-top:14px;}
+.lk-cab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;max-width:300px;padding:8px;border-radius:14px;background:var(--s2);box-shadow:inset 0 0 0 1px var(--border);}
+.lk-door{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;aspect-ratio:5/4;min-height:44px;padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--s1);color:var(--text);font:inherit;cursor:pointer;}
+.lk-door b{font-size:18px;font-weight:700;line-height:1;}
+.lk-door::before{content:"";position:absolute;inset-inline:22% 22%;top:34%;height:10px;background:repeating-linear-gradient(to bottom,var(--border) 0 2px,transparent 2px 4px);border-radius:1px;}
+.lk-door::after{content:"";position:absolute;inset-inline-end:8px;top:50%;width:4px;height:16px;margin-top:-8px;border-radius:2px;background:var(--muted-l);}
+.lk-door.on{background:var(--ac-fill);border-color:var(--green);color:var(--acink);}
+.lk-door.on::after{background:var(--acink);}
+.lk-door.on::before{background:repeating-linear-gradient(to bottom,rgba(var(--tint-rgb),.25) 0 2px,transparent 2px 4px);}
+.lk-door.lk-d-no{background:var(--s3);color:var(--muted-l);cursor:not-allowed;}
+.lk-door.lk-d-no::after{opacity:.35;}
+.lk-door:disabled:not(.lk-d-no){cursor:not-allowed;opacity:.55;}
+.lk-door.lk-d-gap{visibility:hidden;}
+.lk-door:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.lk-own{display:flex;flex-direction:column;gap:8px;margin-bottom:6px;}
+.lk-own-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:18px;background:var(--s1);box-shadow:inset 0 0 0 1px var(--border);}
+.lk-own-n{flex:none;min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--acsoft);color:var(--green);font-size:20px;font-weight:700;}
+.lk-own-t{flex:1;min-width:0;font-weight:600;color:var(--text);}
+#tab-lockers .lk-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-width:620px;}
+#tab-lockers .lk-t-res{background:rgba(var(--warn-rgb),.08);border-color:rgba(var(--warn-rgb),.55);}
+#tab-lockers .lk-units-h .lk-sh-acts{margin-inline-start:auto;}
 #tab-lockers .lk-ret-d summary{cursor:pointer;font-weight:600;color:var(--muted);}
 .lk-sess-l{display:flex;align-items:center;gap:8px;font-weight:600;cursor:pointer;}
 @media(max-width:767px){

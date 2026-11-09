@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
-// Lockers (the owner, 2026-11-09; migration 20261109120000). The capacity, the price and the fee line on the
+// Lockers (the owner, 2026-11-09; migrations 20261109120000 and 20261109220000, the lockers page: plain numbers, a picked locker). The capacity, the price and the fee line on the
 // booking are the database's (customer_locker_reserve, staff_locker_*, zy_locker_line); this is what the screens
 // ask for and draw. All traffic stubbed; invented data.
 
@@ -21,9 +21,9 @@ const bk = (id: string, n: number, x: Record<string, unknown> = {}) => ({
   type_preference: 'Road', size: 'M', status: 'waiting', paid: false, price: 50, registered_at: '2026-11-09T10:00:00Z', ...x,
 });
 const lockers = [
-  { id: 'L1', code: 'L1', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
-  { id: 'L2', code: 'L2', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
-  { id: 'L3', code: 'L3', status: 'out', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L1', code: '1', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L2', code: '2', status: 'available', note: '', created_at: '2026-11-09T09:00:00Z' },
+  { id: 'L3', code: '3', status: 'out', note: '', created_at: '2026-11-09T09:00:00Z' },
 ];
 const rent = (id: string, x: Record<string, unknown>) => ({
   id, day: TODAY, period: 'late', booking_id: null, session_id: 's1', customer_id: null, name: '', locker_id: null, price: 10, on_bill: true,
@@ -67,24 +67,24 @@ async function rider(page: Page, fx: Fixtures) {
 test.describe('@staff:lockers the Lockers section', () => {
   test('its own address and rail entry; tonight\'s board counts and draws each unit; a free unit gives to the rider waiting', async ({ page }) => {
     const seen = calls(page);
-    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: '2' } });
     await page.evaluate(`setStaffTab('lockers')`);
     await expect.poll(() => new URL(page.url()).pathname).toBe('/lockers');
     expect(await page.evaluate(`document.querySelector('#staff-tab-nav .tab-btn[data-stab="lockers"]').style.display`)).not.toBe('none'); // on a phone the rail sits behind the menu
     const sec = page.locator('#tab-lockers');
     await expect(sec.locator('.lk-tile')).toHaveCount(3);
-    await expect(sec.locator('.lk-stat').nth(0)).toContainText('1'); // free: L2 (L1 in use, L3 out)
-    await expect(sec.locator('.lk-stat').nth(1)).toContainText('1'); // in use
-    await expect(sec.locator('.lk-stat').nth(2)).toContainText('1'); // waiting for a number
+    await expect(sec.locator('.lk-stat').nth(0)).toContainText('1'); // free: 2 (1 in use, 3 out)
+    await expect(sec.locator('.lk-stat').nth(1)).toContainText('1'); // reserved (here, waiting for a number)
+    await expect(sec.locator('.lk-stat').nth(2)).toContainText('1'); // in use
     await expect(sec.locator('.lk-tile.lk-t-use')).toContainText('Rana Rider');
     await expect(sec.locator('.lk-tile.lk-t-out')).toContainText('Out of service');
 
-    await sec.locator('.lk-tile', { hasText: 'L2' }).click();
-    const dlg = page.getByRole('dialog', { name: /Locker L2/ });
+    await sec.locator('.lk-tile', { hasText: 'Free' }).click();
+    const dlg = page.getByRole('dialog', { name: /Locker 2/ });
     await expect(dlg).toContainText('Free');
     await dlg.locator('.lk-sh-pick', { hasText: 'Omar Other' }).click();
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
-    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: '2' });
   });
 
   test('reservations and the units have their own addresses; a unit gives its tag link', async ({ page }) => {
@@ -96,15 +96,16 @@ test.describe('@staff:lockers the Lockers section', () => {
     await expect(sec.locator('.lk-res-row').first()).toContainText('Waiting for a number'); // no number yet comes first
     await page.evaluate(`_lkView('units')`);
     await expect.poll(() => new URL(page.url()).pathname).toBe('/lockers/units');
-    await expect(sec.locator('.lk-url').first()).toHaveText('https://micromobility.sa/lockers/L1');
-    // the lockers are L1, L2, L3... (the owner, 2026-11-09): the form starts there, and a bare number reads as one
-    await expect(sec.locator('#lk-add-pre')).toHaveValue('L');
-    expect(await page.evaluate(`JSON.stringify([_lkNorm('2'),_lkNorm('l 02'),_lkNorm('9'),_lkNorm('x')])`)).toBe('["L2","L2","L9",""]');
+    await expect(sec.locator('.lk-url').first()).toHaveText('https://micromobility.sa/lockers/1');
+    // the lockers are plain numbers (the owner, 2026-11-09): no letter to type, and a tag written as L2 still reads 2
+    await expect(sec.locator('#lk-add-pre')).toHaveCount(0);
+    expect(await page.evaluate(`JSON.stringify([_lkNorm('2'),_lkNorm('l 02'),_lkNorm('L9'),_lkNorm('09'),_lkNorm('x')])`)).toBe('["2","2","9","9",""]');
+    await expect(sec.getByRole('button', { name: 'Page QR' })).toBeVisible(); // the poster for micromobility.sa/lockers
   });
 
   test('the check-in shows the booking\'s locker; a number typed (any spelling, or the bare number) gives it', async ({ page }) => {
     const seen = calls(page);
-    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: '2' } });
     await page.evaluate(`setStaffTab('queue');showCheckinModal('q2')`);
     const box = page.locator('#lk-ci');
     await expect(box).toContainText('Locker');
@@ -112,7 +113,7 @@ test.describe('@staff:lockers the Lockers section', () => {
     await box.locator('#lk-ci-in').fill('l02');
     await box.locator('#lk-ci-in').press('Enter');
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
-    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: '2' });
   });
 
   test('a booking with no locker on a night that offers them: the periods to add one, on its bill', async ({ page }) => {
@@ -129,7 +130,7 @@ test.describe('@staff:lockers the Lockers section', () => {
 
   test('Assign a locker is on every booking\'s menu; it gives the booking\'s locker its number', async ({ page }) => {
     const seen = calls(page);
-    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: 'L2' } });
+    await staff(page, { 'rpc:staff_locker_assign': { ok: true, code: '2' } });
     await page.evaluate(`setStaffTab('queue');renderStaffQueue()`);
     await page.waitForFunction(`(S._rowMenus||{}).q2&&S._rowMenus.q1`);
     expect(await page.evaluate(`['q1','q2'].every(id=>S._rowMenus[id].some(i=>/Assign a locker/.test(i.label)))`)).toBe(true);
@@ -139,7 +140,7 @@ test.describe('@staff:lockers the Lockers section', () => {
     await dlg.locator('#lk-as-in').fill('l2');
     await dlg.locator('#lk-as-in').press('Enter');
     await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
-    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: 'L2' });
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R2', p_code: '2' });
   });
 
   test('Assign a locker on a booking whose night offers none: rented for its account that evening, the fee into the Sales cart', async ({ page }) => {
@@ -158,8 +159,8 @@ test.describe('@staff:lockers the Lockers section', () => {
   });
 
   test('a locker\'s tag on a staff phone: off the address bar, its sheet opens', async ({ page }) => {
-    await staff(page, {}, '/?locker=l1');
-    const dlg = page.getByRole('dialog', { name: /Locker L1/ });
+    await staff(page, {}, '/?locker=l1'); // a tag written before the letter went
+    const dlg = page.getByRole('dialog', { name: /Locker 1/ });
     await expect(dlg).toBeVisible();
     await expect(dlg).toContainText('Rana Rider');
     await expect(dlg.getByRole('button', { name: 'Hand back' })).toBeVisible();
@@ -181,6 +182,48 @@ test.describe('@staff:lockers the Lockers section', () => {
     expect(await page.evaluate(`JSON.stringify({id:S._ctCustId,cart:S._ctCart.map(l=>[l.name,l.price])})`)).toBe(JSON.stringify({ id: 'c1', cart: [['Locker · 6 PM - 8 PM', 10]] }));
   });
 
+  test('a locker picked on micromobility.sa/lockers: held, its key not given; Give key hands it and a desk fee goes into the Sales cart', async ({ page }) => {
+    const seen = calls(page);
+    const page1 = rent('R4', { customer_id: 'c2', name: 'Omar Other', locker_id: 'L2', period: 'early', on_bill: false, created_by: 'page', pay: 'desk' });
+    await staff(page, { locker_rentals: [rentals[0], page1], 'rpc:staff_locker_assign': { ok: true, code: '2' } });
+    await page.evaluate(`setStaffTab('lockers')`);
+    const sec = page.locator('#tab-lockers');
+    await expect(sec.locator('.lk-tile.lk-t-res')).toContainText('Key not given');
+    await expect(sec.locator('.lk-stat').nth(1)).toContainText('1'); // reserved
+    await page.evaluate(`_lkView('reservations')`);
+    const row = sec.locator('.lk-res-row', { hasText: 'Omar Other' });
+    await expect(row).toContainText('Key not given');
+    await expect(row).toContainText('paid at Sales');
+    await row.getByRole('button', { name: 'Give key' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R4', p_code: '2' });
+    await expect.poll(() => page.evaluate(`JSON.stringify({id:S._ctCustId,cart:(S._ctCart||[]).map(l=>[l.name,l.price])})`)).toBe(JSON.stringify({ id: 'c2', cart: [['Locker 2 · 6 PM - 8 PM', 10]] }));
+  });
+
+  test('a locker paid from the wallet on the page says so, and cancelling it says the money goes back', async ({ page }) => {
+    const paid = rent('R6', { customer_id: 'c2', name: 'Omar Other', locker_id: 'L2', period: 'late', on_bill: false, created_by: 'page', pay: 'wallet', receipt_id: 'lk-r6' });
+    await staff(page, { locker_rentals: [paid] });
+    await page.evaluate(`setStaffTab('lockers');_lkView('reservations')`);
+    const row = page.locator('#tab-lockers .lk-res-row', { hasText: 'Omar Other' });
+    await expect(row).toContainText('paid from wallet');
+    await row.getByRole('button', { name: 'Cancel locker' }).click();
+    await expect(page.getByRole('dialog', { name: 'Cancel this locker?' })).toContainText('The money goes back to their wallet.');
+  });
+
+  test('the check-in finds the rider\'s page locker and a tag tapped hands its key', async ({ page }) => {
+    const seen = calls(page);
+    const page1 = rent('R4', { customer_id: 'c2', name: 'Omar Other', locker_id: 'L2', period: 'early', on_bill: false, created_by: 'page', pay: 'wallet', receipt_id: 'lk-r4' });
+    await staff(page, { locker_rentals: [rentals[0], page1], 'rpc:staff_locker_assign': { ok: true, code: '2' } });
+    await page.evaluate(`setStaffTab('queue');showCheckinModal('q2')`);
+    const box = page.locator('#lk-ci');
+    await expect(box).toContainText('Locker 2 picked, key not given yet');
+    await expect(box.getByRole('button', { name: 'Give key' })).toBeVisible();
+    await page.evaluate(`_lockerArrived('2')`);
+    await expect.poll(() => seen.filter((c) => c.name === 'staff_locker_assign').length).toBe(1);
+    expect(seen.find((c) => c.name === 'staff_locker_assign')!.body).toEqual({ p_rental: 'R4', p_code: '2' });
+    expect(await page.evaluate(`(S._ctCart||[]).length`)).toBe(0); // paid from the wallet: nothing to ring up
+  });
+
   test('the session form offers the switch on a JCC ride and a Petromin night only', async ({ page }) => {
     await staff(page);
     const on = await page.evaluate(`(()=>{S.newSessLockers=true;return _lkSessSwitch('new',true)})()`);
@@ -192,25 +235,65 @@ test.describe('@staff:lockers the Lockers section', () => {
 test.describe('@customer:reserve lockers', () => {
   const offer = { kind: 'jcc', one: 10, both: 15, left: { total: 6, early: 4, late: 0, both: 0, pm: 0 } };
 
+  // The evening's cabinet: 18 doors, 5 out of service, 3 taken 6-8 PM, 4 taken 9-11 PM.
+  const board = { day: TODAY, kind: 'jcc', one: 10, both: 15, left: { total: 17, early: 15, late: 16, both: 15, pm: 15 },
+    ended: { early: false, late: false, both: false, pm: false },
+    units: Array.from({ length: 18 }, (_, i) => ({ code: String(i + 1), out: i + 1 === 5 })), taken: { e: ['3'], l: ['4'] } };
+  const drawReview = `(()=>{let h=document.getElementById('lk-t');if(!h){h=document.createElement('div');h.id='lk-t';document.body.prepend(h);}h.innerHTML=_lkReviewHtml(_sessGet('s1'));})()`;
+
   test('the review offers the night\'s periods with their prices; a full one cannot be picked; the fee joins the total', async ({ page }) => {
-    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer });
+    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
     await page.evaluate(`_lkOfferLoad('s1',true)`);
     await page.waitForFunction(`!!_lkOffer('s1')`);
-    await page.evaluate(`S.regQty=2;(()=>{const h=document.createElement('div');h.id='lk-t';h.innerHTML=_lkReviewHtml(_sessGet('s1'));document.body.prepend(h);})()`);
+    await page.evaluate(`S.regQty=2;S.regStep=0;` + drawReview);
     const box = page.locator('#lk-t #reg-lk');
     await expect(box.locator('.lk-rv-row')).toHaveCount(3);
     await expect(box.locator('#reg-lk-early')).toBeEnabled();
     await expect(box.locator('#reg-lk-late')).toBeDisabled();
     await expect(box.locator('.lk-rv-row').nth(1)).toContainText('Full');
     await expect(box.locator('.lk-rv-row').nth(2)).toContainText('15');
-    expect(await page.evaluate(`(()=>{S.regLocker='early';S.regLockerN=1;return _lkRegFee(_sessGet('s1'))})()`)).toBe(10);
-    expect(await page.evaluate(`(()=>{S.regLockerN=2;return _lkRegFee(_sessGet('s1'))})()`)).toBe(20);
-    expect(await page.evaluate(`(()=>{S.regLockerN=5;return _lkRegFee(_sessGet('s1'))})()`)).toBe(20); // never more than the riders booked
-    // the summary card beside the review says the same total, and names the locker (2026-11-09: the two totals differed)
-    const sums = await page.evaluate(`(()=>{const s=_sessGet('s1');S.regQty=1;S.regBikeTypes=['Road'];S.regLockerN=1;S.regLocker='';const a=_regGrandStr(s);S.regLocker='both';const b=_regGrandStr(s),side=_regSideHtml(s);return{a,b,side};})()`) as { a: string; b: string; side: string };
+    await expect(box.locator('.lk-cab')).toHaveCount(0); // no cabinet before a time is picked
+    // a time picked: the cabinet, as it stands; the fee counts the doors picked
+    await page.evaluate(`S.regLocker='early';_lkBoardLoad('${TODAY}',true)`);
+    await page.waitForFunction(`!!_lkBoard('${TODAY}')`);
+    await page.evaluate(drawReview);
+    expect(await page.evaluate(`_lkRegFee(_sessGet('s1'))`)).toBe(0);
+    await page.evaluate(`S.regLockerCodes=['7','8'];`);
+    expect(await page.evaluate(`_lkRegFee(_sessGet('s1'))`)).toBe(20);
+    // the summary card beside the review says the same total, and names the time and the lockers
+    const sums = await page.evaluate(`(()=>{const s=_sessGet('s1');S.regQty=1;S.regBikeTypes=['Road'];S.regLockerCodes=['7'];S.regLocker='';const a=_regGrandStr(s);S.regLocker='both';S.regLockerCodes=['7'];const b=_regGrandStr(s),side=_regSideHtml(s);return{a,b,side};})()`) as { a: string; b: string; side: string };
     const num = (x: string) => Number((x.match(/[\d.]+/g) || []).pop());
     expect(num(sums.b) - num(sums.a)).toBe(15);
     expect(sums.side).toContain('6 PM - 11 PM');
+    expect(sums.side).toContain('<bdi>7</bdi>');
+  });
+
+  test('the cabinet: three across, numbered across the rows; taken and out-of-service doors cannot be picked; one per rider', async ({ page }) => {
+    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board });
+    await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
+    await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
+    await page.evaluate(`S.regQty=2;S.regStep=0;S.regLocker='early';S.regLockerCodes=[];` + drawReview);
+    const cab = page.locator('#lk-t .lk-cab');
+    await expect(cab.locator('.lk-door')).toHaveCount(18);
+    const at = (n: string) => cab.locator(`#lk-d-${n}`).boundingBox();
+    const [b1, b2, b3, b4, b16] = await Promise.all(['1', '2', '3', '4', '16'].map(at));
+    expect(Math.round(b2!.y)).toBe(Math.round(b1!.y)); // 1 2 3 on the top row
+    expect(Math.round(b3!.y)).toBe(Math.round(b1!.y));
+    expect(b2!.x).not.toBe(b1!.x);
+    expect(Math.round(b4!.x)).toBe(Math.round(b1!.x)); // 4 under 1
+    expect(b4!.y).toBeGreaterThan(b1!.y);
+    expect(Math.round(b16!.x)).toBe(Math.round(b1!.x)); // 16 at the bottom, under 1
+    await expect(cab.locator('#lk-d-3')).toBeDisabled(); // taken 6-8 PM
+    await expect(cab.locator('#lk-d-5')).toBeDisabled(); // out of service
+    await expect(cab.locator('#lk-d-4')).toBeEnabled(); // taken only 9-11 PM
+    await page.evaluate(`_lkRegDoor('7');_lkRegDoor('8');` + drawReview);
+    await expect(cab.locator('#lk-d-7')).toHaveAttribute('aria-pressed', 'true');
+    await expect(cab.locator('#lk-d-9')).toBeDisabled(); // two riders, two lockers
+    await page.evaluate(`_lkRegDoor('7');` + drawReview); // tapped again: dropped
+    await expect(cab.locator('#lk-d-9')).toBeEnabled();
+    expect(await page.evaluate(`JSON.stringify(S.regLockerCodes)`)).toBe('["8"]');
+    await page.evaluate(`S.regLocker='both';S.regLockerCodes=['4','8'];` + drawReview); // 4 is taken 9-11 PM: dropped
+    expect(await page.evaluate(`JSON.stringify(S.regLockerCodes)`)).toBe('["8"]');
   });
 
   test('a Petromin night offers its one period; a free ride offers none', async ({ page }) => {
@@ -221,13 +304,14 @@ test.describe('@customer:reserve lockers', () => {
 
   test('after the booking the locker goes on the first riders\' rows; a database without lockers draws nothing', async ({ page }) => {
     const seen = calls(page);
-    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:customer_locker_reserve': { ok: true, rows: [] } });
-    await page.evaluate(`_lkOfferLoad('s1',true)`);
-    await page.waitForFunction(`!!_lkOffer('s1')`);
-    await page.evaluate(`(async()=>{S.regQty=3;S.regLocker='late';S.regLockerN=2;await _lkAfterBook([{id:'q1',status:'waiting'},{id:'q2',status:'waitlist'},{id:'q3',status:'waiting'}],_sessGet('s1'),false);})()`);
+    await rider(page, { queue_entries: [], 'rpc:customer_locker_offer': offer, 'rpc:locker_board': board, 'rpc:customer_locker_reserve': { ok: true, rows: [] } });
+    await page.evaluate(`_lkOfferLoad('s1',true);_lkBoardLoad('${TODAY}',true)`);
+    await page.waitForFunction(`!!_lkOffer('s1')&&!!_lkBoard('${TODAY}')`);
+    await page.evaluate(`(async()=>{S.regQty=3;S.regLocker='late';S.regLockerCodes=['9','12'];await _lkAfterBook([{id:'q1',status:'waiting'},{id:'q2',status:'waitlist'},{id:'q3',status:'waiting'}],_sessGet('s1'),false);})()`);
     await expect.poll(() => seen.filter((c) => c.name === 'customer_locker_reserve').length).toBe(1);
-    expect(seen.find((c) => c.name === 'customer_locker_reserve')!.body).toEqual({ p_id: 'c1', p_token: 'tok', p_booking_ids: ['q1', 'q2'], p_period: 'late' });
+    expect(seen.find((c) => c.name === 'customer_locker_reserve')!.body).toEqual({ p_id: 'c1', p_token: 'tok', p_booking_ids: ['q1', 'q2'], p_period: 'late', p_codes: ['9', '12'] });
     expect(await page.evaluate('S.regLocker')).toBe('');
+    expect(await page.evaluate('JSON.stringify(S.regLockerCodes)')).toBe('[]');
   });
 
   test('a database without lockers: the review offers none', async ({ page }) => {
@@ -240,13 +324,40 @@ test.describe('@customer:reserve lockers', () => {
   test('the ticket says the period and the number once given; the line reads Locker', async ({ page }) => {
     const held = bk('q1', 1, { addons: '[{"id":"locker","qty":1,"p":10}]' });
     await rider(page, { queue_entries: [held], 'rpc:my_bookings': [held],
-      'rpc:customer_lockers': [{ booking_id: 'q1', period: 'late', status: 'in_use', price: 10, on_bill: true, code: 'L7' }] });
+      'rpc:customer_lockers': [{ booking_id: 'q1', period: 'late', status: 'in_use', price: 10, on_bill: true, code: '7' }] });
     await page.evaluate(`_lkMineLoad(null,true)`);
     await page.waitForFunction(`_lkMine().length===1`);
     const html = await page.evaluate(`_lkTkHtml([entryFromDB(${JSON.stringify(held)})],_sessGet('s1'),false)`);
-    expect(html).toContain('L7');
+    expect(html).toContain('<bdi>7</bdi>');
     expect(html).toContain('9 PM - 11 PM');
-    expect(html).not.toContain('lkTkRemove'); // a number was given: no Remove
+    expect(html).not.toContain('lkTkRemove'); // its key was given: no Remove
     expect(await page.evaluate(`addonLineItems([{id:'locker',qty:1,p:10}])[0].name`)).toBe('Locker');
+    // picked on the review but its key not handed yet: the number shows and it can still be removed
+    await page.evaluate(`S._lkMine=[{booking_id:'q1',period:'late',status:'reserved',price:10,on_bill:true,code:'7'}]`);
+    const held2 = await page.evaluate(`_lkTkHtml([entryFromDB(${JSON.stringify(held)})],_sessGet('s1'),false)`);
+    expect(held2).toContain('lkTkRemove');
+  });
+
+  test('My bookings lists the lockers reserved with no booking, today on; Remove gives a wallet payment back', async ({ page }) => {
+    const seen = calls(page);
+    const mine = [
+      { id: 'r1', booking_id: null, day: TODAY, period: 'early', status: 'reserved', price: 10, on_bill: false, pay: 'wallet', paid: true, code: '7' },
+      { id: 'r2', booking_id: null, day: ksaDay(1), period: 'late', status: 'reserved', price: 10, on_bill: false, pay: 'desk', paid: false, code: '12' },
+      { id: 'r3', booking_id: null, day: ksaDay(-1), period: 'late', status: 'returned', price: 10, on_bill: false, pay: 'desk', paid: false, code: '1' },
+    ];
+    await rider(page, { queue_entries: [], 'rpc:customer_lockers': mine, 'rpc:customer_locker_drop': { ok: true } });
+    await page.evaluate(`_lkMineLoad(null,true)`);
+    await page.waitForFunction(`_lkMine().length===3`);
+    await page.evaluate(`setCustTab('myrides')`);
+    const own = page.locator('#tab-myrides .lk-own');
+    await expect(own.locator('.lk-own-row')).toHaveCount(2); // yesterday's is gone
+    await expect(own.locator('.lk-own-row').first()).toContainText('Paid from your wallet');
+    await expect(own.locator('.lk-own-row').nth(1)).toContainText('Pay at the desk');
+    await own.locator('.lk-own-row').first().getByRole('button', { name: 'Remove' }).click();
+    const dlg = page.getByRole('dialog', { name: 'Remove this locker?' });
+    await expect(dlg).toContainText('The money goes back to your wallet.');
+    await dlg.getByRole('button', { name: 'Remove' }).click();
+    await expect.poll(() => seen.filter((c) => c.name === 'customer_locker_drop').length).toBe(1);
+    expect(seen.find((c) => c.name === 'customer_locker_drop')!.body).toEqual({ p_id: 'c1', p_token: 'tok', p_rental: 'r1' });
   });
 });

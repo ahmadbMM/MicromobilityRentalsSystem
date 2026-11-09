@@ -2103,7 +2103,7 @@ customers to use it". In this codebase "wallet" alone also means the Apple and G
 ## Lockers (2026-11-09, migration 20261109120000)
 
 The owner: a locker renting system linked to accounts from the staff page, by scanning the locker's NFC or typing its
-number. One set of lockers (L1, L2...; the owner, 2026-11-09) travels between JCC and Petromin; each carries a label with its number, a QR
+number. One set of lockers (1 to 18, plain numbers; the owner, 2026-11-09, who first said L1, L2... the same day) travels between JCC and Petromin; each carries a label with its number, a QR
 and an on-metal NFC chip holding `micromobility.sa/lockers/<code>`. The key stays with staff. Code prefix `lk`,
 tables `lockers` and `locker_rentals`.
 
@@ -2145,7 +2145,26 @@ tables `lockers` and `locker_rentals`.
 - **Tags**: `/?locker=L7` is read at boot like `?bike=` (`_readLockerParam`, parked until goStaff, `_lockerResume`),
   goes to an open staff tab over the same channel (`_bikeHandoff` with `kind`), and the scanner reads the QR
   (`_scanLockerUrl`). The website (mm-platform `proxy.ts`) sends a staff phone's tap to
-  `staff.micromobility.sa/?locker=<code>` and a rider's to `/account`. `tests/lockers.spec.ts`.
+  `staff.micromobility.sa/?locker=<code>` and a rider's to `/lockers?locker=<code>` (the page below, that locker picked). `tests/lockers.spec.ts`.
+- **The lockers page, micromobility.sa/lockers (the owner, 2026-11-09 evening; migration 20261109220000).** A QR on the cabinet
+  opens it; anyone signs up there (the website's account step) and reserves with no booking. The cabinet is drawn as it
+  stands: **three across, numbered across the rows** (1-2-3 on top, 16-17-18 at the bottom), a door per number, free, taken
+  for the period's slots, out of service, picked. Tonight and the next 30 days that offer lockers (`locker_evenings`, anon; a
+  Petromin night only to a signed-in rider booked on it); one evening's cabinet is `locker_board(day)` (anon: units and the
+  codes taken per slot, never who). `customer_locker_book(id, token, day, period, codes, pay)`: **up to 3 per account per
+  period**, `pay` `'wallet'` (the whole fee now; never on a Petromin night) or `'desk'` (rung up at the Sales till when the key
+  is handed: `_lkGive` puts it in the cart). A wallet payment is an ordinary Sales receipt (`lk-<rental>`, a `paid` locker
+  line and the qty-0 `wallet` line, `_lk_wallet_sale`), so reports and refunds need nothing new; cancelling the rental (the
+  rider before the key, `customer_locker_drop`, or staff) voids it and `wallet_sale_follow` gives the money back; Hand back
+  keeps it. **A reservation never collected stays held until staff free it** (Cancel gives the money back, Hand back keeps
+  it). Rentals carry `pay` and `receipt_id`; such a rental holds its locker while `reserved` (`_lkKeyDue`: "Key not given"),
+  and `staff_locker_assign` on that number (Give key, or its tag tapped at the check-in) makes it `in_use`. The check-in and
+  Assign a locker find a rider's locker with no booking that evening (`_lkAsRental`). My bookings lists the rider's lockers
+  with no booking from today on (`_lkOwnHtml`, Remove while the key is not given). Units > Page QR downloads the poster.
+- **The review picks the exact locker too** (the owner, 2026-11-09): after a time, the same cabinet (`_lkCabHtml` from
+  `locker_board`), one door per rider at most; `customer_locker_reserve(..., p_codes)` holds those lockers on the riders' rows
+  (`reserved` with the locker, key at the desk). A page cached before it still calls with four arguments and reserves a
+  locker with no number. `_lkNorm`, `_lk_code`: 7, 07, L7 and "l 7" all read 7, so tags written before the letter went still work.
 
 ## Sessions is a section of its own (2026-11-06)
 
