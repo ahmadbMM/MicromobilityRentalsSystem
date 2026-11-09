@@ -12464,7 +12464,7 @@ function _readEventLink(){
   try{
     const q=new URLSearchParams(location.search),was=q.toString();
     const _ho=q.get('handoff');
-    if(_ho==='site'||_ho==='community'||_ho==='learn'||_ho==='defe'||_ho==='saturday'||_ho==='volunteer'){
+    if(_ho==='site'||_ho==='community'||_ho==='learn'||_ho==='defe'||_ho==='saturday'||_ho==='lockers'||_ho==='volunteer'){
       sessionStorage.setItem(_HANDOFF_KEY,_ho==='site'?'1':_ho);
       const mode=q.get('auth');if(mode==='signup'||mode==='forgot')S.authMode=mode;
       q.delete('handoff');q.delete('auth');
@@ -12540,6 +12540,7 @@ async function _openEventLink(){
     if(back==='learn'){await _formHandoff(who,'/experiences/learn');return;}
     if(back==='defe'){await _formHandoff(who,'/defe');return;} // the Defe page's Sign in (the owner, 2026-10-17)
     if(back==='saturday'){await _formHandoff(who,'/saturday');return;} // micromobility.sa/saturday's Google, Apple, Forgot password (2026-11-08)
+    if(back==='lockers'){await _formHandoff(who,'/lockers');return;} // micromobility.sa/lockers' Forgot password and temporary password (2026-11-09)
     if(back==='volunteer'){await _volHandoff(who);return;} // the volunteer portal's Create account and Forgot password (2026-11-05)
     if(await _handoffToSite(who))return;
   }
@@ -19921,7 +19922,7 @@ async function _lkBoardLoad(day,force){
   if(S.regStep===3&&S.regLocker)renderRegister();
 }
 function _lkTakenFor(b,p){const tk=(b&&b.taken)||{};return new Set((_LK_SLOTS[p]||[]).flatMap(x=>Array.isArray(tk[x])?tk[x]:[]));}
-// The cabinet as it stands (the owner, 2026-11-09): three across, numbered across the rows, a door per number; a gap where a
+// The cabinet as it stands (the owner, 2026-11-09): three across, numbered across the rows (never mirrored right to left), a door per number; a gap where a
 // number is missing. Free, taken or out of service, picked; at most max picked.
 function _lkCabHtml(b,p,picked,max,fn,lbl){
   const units=(b.units||[]).filter(u=>/^[1-9]\d{0,3}$/.test(u.code)),tk=_lkTakenFor(b,p),by={};units.forEach(u=>by[u.code]=u);
@@ -19929,9 +19930,9 @@ function _lkCabHtml(b,p,picked,max,fn,lbl){
   for(let n=1;n<=hi;n++){
     const u=by[n];if(!u){h+='<span class="lk-door lk-d-gap" aria-hidden="true"></span>';continue;}
     const on=picked.includes(u.code),no=u.out||tk.has(u.code);
-    h+=`<button type="button" class="lk-door${on?' on':''}${no?' lk-d-no':''}" id="lk-d-${u.code}" aria-pressed="${on}"${!on&&(no||picked.length>=max)?' disabled':''} data-on-click="${_on(fn,u.code)}" aria-label="${esc(t('lkSheetTitle').replace('{0}',u.code))}"><b>${esc(u.code)}</b></button>`;
+    h+=`<button type="button" class="lk-door${on?' on':''}${no?' lk-d-no':''}" id="lk-d-${u.code}" aria-pressed="${on}"${!on&&(no||picked.length>=max)?' disabled':''} data-on-click="${_on(fn,u.code)}" aria-label="${esc(t('lkSheetTitle').replace('{0}',u.code)+(no?' · '+t(u.out?'lkOutSvc':'lkFull'):''))}"><b>${esc(u.code)}</b></button>`;
   }
-  return`<div class="lk-cab" role="group" aria-label="${esc(lbl)}">${h}</div>`;
+  return`<div class="lk-cab" dir="ltr" role="group" aria-label="${esc(lbl)}">${h}</div>`; // left to right in Arabic and Urdu too: 1 stays top left, as on the cabinet
 }
 // The review's Locker block: the periods with their prices (tap again to drop it), then the cabinet to pick the doors, one per rider.
 function _lkReviewHtml(sess){
@@ -20176,7 +20177,7 @@ function _lkCiInner(e,r,k){
   const code=_lkCodeOf(r),done=r.status==='returned',due=_lkKeyDue(r);
   return`<label for="lk-ci-in">${t('lkTitle')} · <bdi>${esc(_lkPeriodTxt(r.period))}</bdi>${r.on_bill?'':' · '+esc(_lkPayTxt(r))}</label>
     ${done?`<div class="bkm-cmuted">${esc(t('lkReturned'))}${code?' · '+esc(code):''}</div>`:`<div class="bkm-cbrow">
-      <input id="lk-ci-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${esc(t('lkNumPh'))}" value="${esc(code)}" class="bkm-cbin" data-on-keydown="${_on("_lkCiKey",_EV,_EL)}">
+      <input id="lk-ci-in" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${esc(t('lkNumPh'))}" value="${esc(_lkCiDraftOf(r.id)??code)}" class="bkm-cbin" data-on-input="${_on("_lkCiDraft",r.id,_P("value"))}" data-on-keydown="${_on("_lkCiKey",_EV,_EL)}">
       <button type="button" class="btn-secondary bkm-nowrap" data-on-click="${_on("_lkCiGive",r.id)}">${t(due?'lkGiveKey':code?'lkMove':'lkGive')}</button>
     </div>
     <div class="bkm-cmuted lk-ci-st" role="status">${due?esc(t('lkPicked').replace('{0}',code)):code?esc(t('lkGivenLine').replace('{0}',code)):esc(t('lkTapOrType'))}</div>`}`;
@@ -20253,15 +20254,20 @@ async function _lkAssignGo(){
 }
 function _lkCiPaint(){
   const box=document.getElementById('lk-ci'),e=S._ciId&&_qGet(S._ciId);if(!box||!e)return;
-  const a=document.activeElement;if(a&&a.id==='lk-ci-in'&&a.value)return; // a number being typed stays as it is
+  const a=document.activeElement,had=!!a&&a.id==='lk-ci-in';if(had&&a.value)return; // a number being typed stays as it is
   box.innerHTML=_lkCiInner(e,_lkAsRental(e,_lkDayOf(e)),_lkKind(_sessDisp(e.sessionId)));
+  if(had){const i=document.getElementById('lk-ci-in');if(i)try{i.focus({preventScroll:true});}catch(_){}}
 }
+// What was typed in the check-in's locker box, kept for that check-in: a redraw of the box or the whole check-in
+// (a read landing while staff type) put back an empty box, and Enter then gave "No locker".
+function _lkCiDraft(id,v){S._lkCiD={id,ci:S._ciId,v:String(v||'')};}
+function _lkCiDraftOf(id){const d=S._lkCiD;return d&&d.id===id&&d.ci===S._ciId?d.v:null;}
 function _lkCiKey(ev,el){if(ev.key!=='Enter')return;ev.preventDefault();const e=S._ciId&&_qGet(S._ciId),r=e&&_lkAsRental(e,_lkDayOf(e));if(r)_lkCiGive(r.id,el.value);}
 async function _lkCiGive(rentalId,v){
   const e=S._ciId&&_qGet(S._ciId);if(!e)return;
   const i=document.getElementById('lk-ci-in'),code=v!=null?v:(i?i.value:'');
   if(i)i.blur();
-  await _lkGive(rentalId,code,_lkDayOf(e));
+  if(await _lkGive(rentalId,code,_lkDayOf(e)))S._lkCiD=null;
   _lkCiPaint();
 }
 async function _lkCiAdd(id,p){const e=_qGet(id);if(!e)return;await _lkAddTo(e,p);_lkCiPaint();try{renderCheckinModal();}catch(_){}}
@@ -20457,9 +20463,9 @@ function _lkBoardHtml(day){
     const hs=live.filter(r=>r.locker_id===l.id),od=hs.some(_lkOverdue),out=l.status!=='available';
     const cls=out?'lk-t-out':od?'lk-t-over':hs.some(r=>r.status==='in_use')?'lk-t-use':hs.length?'lk-t-res':'lk-t-free';
     const sub=out?t('lkOutSvc'):hs.length?hs.map(r=>`${r.name||''} · ${_lkPeriodTxt(r.period)}${_lkKeyDue(r)?' · '+t('lkKeyNot'):''}`).join(' / '):t('lkFree');
-    return`<button type="button" class="lk-tile ${cls}" data-on-click="${_on("_lkSheetOpen",l.code,day)}"><span class="lk-t-code">${esc(l.code)}</span><span class="lk-t-sub">${esc(sub)}</span>${od?`<span class="lk-t-flag">${esc(t('lkOverdue'))}</span>`:''}</button>`;};
+    return`<button type="button" class="lk-tile ${cls}" dir="auto" data-on-click="${_on("_lkSheetOpen",l.code,day)}"><span class="lk-t-code">${esc(l.code)}</span><span class="lk-t-sub" dir="auto">${esc(sub)}</span>${od?`<span class="lk-t-flag">${esc(t('lkOverdue'))}</span>`:''}</button>`;};
   return`<div class="lk-stats">${stat(free,'lkFree')}${stat(waiting.length,'lkReservedS',waiting.length?'lk-st-warn':'')}${stat(inUse,'lkInUse')}${stat(over,'lkOverdue',over?'lk-st-bad':'')}</div>
-    <div class="lk-grid">${units.map(tile).join('')}</div>`;
+    <div class="lk-grid" dir="ltr">${units.map(tile).join('')}</div>`; // as the cabinet stands, in Arabic and Urdu too
 }
 function _lkResIn(r,k){return k==='open'?_lkLive(r):k==='waiting'?r.status==='reserved':k==='in_use'?(r.status==='in_use'):r.status===k;}
 function _lkResSet(k){S._lkResF=k;renderLockers();}

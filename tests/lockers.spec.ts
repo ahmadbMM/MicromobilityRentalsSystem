@@ -1,5 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
-import { stubSupabase, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
+import { stubSupabase, loginCustomer, unlockStaff, waitForSb, type Fixtures } from './helpers/supabase';
 
 // Lockers (the owner, 2026-11-09; migrations 20261109120000 and 20261109220000, the lockers page: plain numbers, a picked locker). The capacity, the price and the fee line on the
 // booking are the database's (customer_locker_reserve, staff_locker_*, zy_locker_line); this is what the screens
@@ -279,11 +279,17 @@ test.describe('@customer:reserve lockers', () => {
     const [b1, b2, b3, b4, b16] = await Promise.all(['1', '2', '3', '4', '16'].map(at));
     expect(Math.round(b2!.y)).toBe(Math.round(b1!.y)); // 1 2 3 on the top row
     expect(Math.round(b3!.y)).toBe(Math.round(b1!.y));
-    expect(b2!.x).not.toBe(b1!.x);
+    expect(b2!.x).toBeGreaterThan(b1!.x);
     expect(Math.round(b4!.x)).toBe(Math.round(b1!.x)); // 4 under 1
     expect(b4!.y).toBeGreaterThan(b1!.y);
     expect(Math.round(b16!.x)).toBe(Math.round(b1!.x)); // 16 at the bottom, under 1
+    // never mirrored: in Arabic (right to left) 1 still stands left of 2, as on the cabinet
+    await page.evaluate(`document.documentElement.dir='rtl';document.documentElement.lang='ar';` + drawReview);
+    const [r1, r2] = await Promise.all(['1', '2'].map(at));
+    expect(r2!.x).toBeGreaterThan(r1!.x);
+    await page.evaluate(`document.documentElement.dir='ltr';document.documentElement.lang='en';`);
     await expect(cab.locator('#lk-d-3')).toBeDisabled(); // taken 6-8 PM
+    await expect(cab.locator('#lk-d-3')).toHaveAttribute('aria-label', 'Locker 3 · Full'); // said, not only greyed
     await expect(cab.locator('#lk-d-5')).toBeDisabled(); // out of service
     await expect(cab.locator('#lk-d-4')).toBeEnabled(); // taken only 9-11 PM
     await page.evaluate(`_lkRegDoor('7');_lkRegDoor('8');` + drawReview);
@@ -359,5 +365,15 @@ test.describe('@customer:reserve lockers', () => {
     await dlg.getByRole('button', { name: 'Remove' }).click();
     await expect.poll(() => seen.filter((c) => c.name === 'customer_locker_drop').length).toBe(1);
     expect(seen.find((c) => c.name === 'customer_locker_drop')!.body).toEqual({ p_id: 'c1', p_token: 'tok', p_rental: 'r1' });
+  });
+
+  test('?handoff=lockers sends a signed-in rider back to micromobility.sa/lockers, signed in there (its Forgot password)', async ({ page }) => {
+    const code = 'ab12'.repeat(12);
+    await stubSupabase(page, { sessions, bikes: [], queue_entries: [], 'rpc:customer_handoff_create': code });
+    await page.route('https://micromobility.sa/lockers**', (r) => r.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>lockers</title>' }));
+    await loginCustomer(page, { id: 'c1', name: 'Spec Rider' });
+    await page.goto('/?handoff=lockers&lang=ar');
+    await page.waitForURL('https://micromobility.sa/lockers**');
+    expect(page.url()).toBe(`https://micromobility.sa/lockers?lang=ar&code=${code}`);
   });
 });
